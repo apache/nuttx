@@ -433,7 +433,12 @@ LDMODULEFLAGS = -r -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/modlib/gnu-elf.ld)
 CELFFLAGS = $(CFLAGS) -fvisibility=hidden
 CXXELFFLAGS = $(CXXFLAGS) -fvisibility=hidden
 
-LDELFFLAGS = -r -e main
+LDELFFLAGS = -e main
+
+ifeq ($(CONFIG_BINFMT_ELF_RELOCATABLE),y)
+  LDELFFLAGS += -r
+endif
+
 ifeq ($(CONFIG_ARCH_RV32),y)
   LDELFFLAGS += --oformat elf32-littleriscv
 else
