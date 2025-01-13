@@ -597,6 +597,7 @@ static void eth_input(FAR struct net_driver_s *dev)
       ninfo("INFO: Dropped, Unknown type: %04x\n", eth_hdr->type);
       NETDEV_RXDROPPED(dev);
       dev->d_len = 0;
+      netdev_iob_release(dev);
     }
 
   /* If the above function invocation resulted in data
