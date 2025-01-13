@@ -97,22 +97,12 @@
 #endif
 
 /****************************************************************************
- * Private Types
- ****************************************************************************/
-
-#ifdef CONFIG_SMP
-static noreturn_function int pause_cpu_handler(FAR void *arg);
-#endif
-
-/****************************************************************************
  * Private Data
  ****************************************************************************/
 
-#ifdef CONFIG_SMP
+#if defined(CONFIG_SMP) && defined(CONFIG_DEBUG_ALERT)
 static bool g_cpu_paused[CONFIG_SMP_NCPUS];
 #endif
-
-static spinlock_t g_assert_lock = SP_UNLOCKED;
 
 static uintptr_t g_last_regs[CONFIG_SMP_NCPUS][XCPTCONTEXT_REGS]
                  aligned_data(XCPTCONTEXT_ALIGN);
@@ -130,11 +120,6 @@ static FAR const char * const g_ttypenames[4] =
   "Kthread",
   "Invalid"
 };
-#endif
-
-#ifdef CONFIG_SMP
-static struct smp_call_data_s g_call_data =
-SMP_CALL_INITIALIZER(pause_cpu_handler, NULL);
 #endif
 
 /****************************************************************************
@@ -599,50 +584,6 @@ static void dump_deadlock(void)
 }
 #endif
 
-#ifdef CONFIG_SMP
-
-/****************************************************************************
- * Name: pause_cpu_handler
- ****************************************************************************/
-
-static noreturn_function int pause_cpu_handler(FAR void *arg)
-{
-  memcpy(g_last_regs[this_cpu()], running_regs(), sizeof(g_last_regs[0]));
-  g_cpu_paused[this_cpu()] = true;
-  up_flush_dcache_all();
-  while (1);
-}
-
-/****************************************************************************
- * Name: pause_all_cpu
- ****************************************************************************/
-
-static void pause_all_cpu(void)
-{
-  cpu_set_t cpus = (1 << CONFIG_SMP_NCPUS) - 1;
-  int delay = CONFIG_ASSERT_PAUSE_CPU_TIMEOUT;
-
-  CPU_CLR(this_cpu(), &cpus);
-  nxsched_smp_call_async(cpus, &g_call_data);
-  g_cpu_paused[this_cpu()] = true;
-
-  /* Check if all CPUs paused with timeout */
-
-  cpus = 0;
-  while (delay-- > 0 && cpus < CONFIG_SMP_NCPUS)
-    {
-      if (g_cpu_paused[cpus])
-        {
-          cpus++;
-        }
-      else
-        {
-          up_mdelay(1);
-        }
-    }
-}
-#endif
-
 #ifdef CONFIG_DEBUG_ALERT
 /****************************************************************************
  * Name: dump_running_task
@@ -827,7 +768,7 @@ void _assert(FAR const char *filename, int linenum,
   const bool os_ready = OSINIT_OS_READY();
   FAR struct tcb_s *rtcb = running_task();
   struct panic_notifier_s notifier_data;
-  irqstate_t flags;
+  irqstate_t flags = 0;
 
   if (g_nx_initstate == OSINIT_PANIC)
     {
@@ -836,12 +777,15 @@ void _assert(FAR const char *filename, int linenum,
       reset_board(); /* Should not return. */
     }
 
-  flags = 0; /* suppress GCC warning */
   if (os_ready)
     {
-      flags = spin_lock_irqsave(&g_assert_lock);
+      flags = enter_critical_section();
       sched_lock();
     }
+
+#ifdef CONFIG_SMP
+  up_flush_dcache_all();
+#endif
 
 #if CONFIG_BOARD_RESET_ON_ASSERT < 2
   if (up_interrupt_context() ||
@@ -855,13 +799,6 @@ void _assert(FAR const char *filename, int linenum,
       /* Disable KASAN to avoid false positive */
 
       kasan_stop();
-
-#ifdef CONFIG_SMP
-      if (os_ready)
-        {
-          pause_all_cpu();
-        }
-#endif
     }
 
   /* try to save current context if regs is null */
@@ -913,7 +850,7 @@ void _assert(FAR const char *filename, int linenum,
 
   if (os_ready)
     {
-      spin_unlock_irqrestore(&g_assert_lock, flags);
+      leave_critical_section(flags);
       sched_unlock();
     }
 }
