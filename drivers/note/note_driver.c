@@ -1396,7 +1396,9 @@ void sched_note_wdog(uint8_t event, FAR void *handler, FAR const void *arg)
   struct note_wdog_s note;
   bool formatted = false;
   FAR struct tcb_s *tcb = this_task();
+  irqstate_t flags;
 
+  flags = enter_critical_section_wo_note();
   for (driver = g_note_drivers; *driver; driver++)
     {
       if (note_wdog(*driver, event, handler, arg))
@@ -1421,6 +1423,8 @@ void sched_note_wdog(uint8_t event, FAR void *handler, FAR const void *arg)
 
       note_add(*driver, &note, sizeof(note));
     }
+
+  leave_critical_section_wo_note(flags);
 }
 #endif
 
