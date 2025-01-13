@@ -34,6 +34,8 @@
  * Public Data
  ****************************************************************************/
 
+spinlock_t g_wdspinlock = SP_UNLOCKED;
+
 /* The g_wdactivelist data structure is a singly linked list ordered by
  * watchdog expiration time. When watchdog timers expire,the functions on
  * this linked list are removed and the function is called.
