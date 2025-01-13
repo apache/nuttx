@@ -103,7 +103,7 @@ if(CONFIG_SIM_ASAN)
   add_compile_options(-fsanitize=pointer-compare)
   add_compile_options(-fsanitize=pointer-subtract)
   add_link_options(-fsanitize=address)
-elseif(CONFIG_MM_KASAN_ALL)
+elseif(CONFIG_MM_KASAN_INSTRUMENT_ALL)
   add_compile_options(-fsanitize=kernel-address)
 endif()
 

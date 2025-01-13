@@ -11,6 +11,9 @@ config MM_KASAN
 		bugs in native code. After turn on this option, Please
 		add -fsanitize=kernel-address to CFLAGS/CXXFLAGS too.
 
+config MM_KASAN_INSTRUMENT
+    bool
+
 if MM_KASAN
 
 choice
@@ -24,20 +27,23 @@ config MM_KASAN_NONE
 
 config MM_KASAN_GENERIC
 	bool "KAsan generic mode"
+	select MM_KASAN_INSTRUMENT
 	---help---
 		KASan generic mode that does not require hardware support at all
 
 config MM_KASAN_SW_TAGS
 	bool "KAsan SW tags"
 	select ARM64_TBI
+	select MM_KASAN_INSTRUMENT
 	depends on ARCH_ARM64
 	---help---
 		KAsan based on software tags
 
 endchoice
 
-config MM_KASAN_ALL
+config MM_KASAN_INSTRUMENT_ALL
 	bool "Enable KASan for the entire image"
+	depends on MM_KASAN_INSTRUMENT
 	default y
 	---help---
 		This option activates address sanitizer for the entire image.
@@ -99,7 +105,7 @@ config MM_KASAN_SKIP_ZERO_TAGS
 
 config MM_KASAN_GLOBAL
 	bool "Enable global data check"
-	depends on MM_KASAN_ALL
+	depends on MM_KASAN_INSTRUMENT_ALL
 	default n
 	---help---
 		This option enables KASan global data check.
