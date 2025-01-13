@@ -204,7 +204,7 @@ static struct imx9_edmatcd_s *imx9_tcd_alloc(void)
   tcd = (struct imx9_edmatcd_s *)sq_remfirst(&g_tcd_free);
   DEBUGASSERT(tcd != NULL);
 
-  spin_lock_irqsave(&g_edma.lock, flags);
+  spin_unlock_irqrestore(&g_edma.lock, flags);
   return tcd;
 }
 #endif
