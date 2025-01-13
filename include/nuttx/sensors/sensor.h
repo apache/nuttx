@@ -479,6 +479,25 @@ struct sensor_ops_s
                        FAR struct sensor_device_info_s *info);
 
   /**************************************************************************
+   * Name: set_nonwakeup
+   *
+   * With this method, the user can disable wakeup capacity for the sensor
+   * when data or fifo ready to avoid wakeup cpu, and save power.
+   *
+   * Input Parameters:
+   *   lower      - The instance of lower half sensor driver.
+   *   filep      - The pointer of file, represents each user using sensor.
+   *   nonwakeup  - true(nonwakeup) and false(wakeup)
+   *
+   * Returned Value:
+   *   Zero (OK) on success; a negated errno value on failure.
+   *
+   **************************************************************************/
+
+  CODE int (*set_nonwakeup)(FAR struct sensor_lowerhalf_s *lower,
+                            FAR struct file *filep, bool nonwakeup);
+
+  /**************************************************************************
    * Name: control
    *
    * With this method, the user can set some special config for the sensor,

@@ -435,27 +435,27 @@
  * Argument:     Heater configuration.
  */
 
-#define SNIOC_HEAT             _SNIOC(0x009B)
+#define SNIOC_HEAT                    _SNIOC(0x009B)
 
 /* Command:      SNIOC_GET_INFO
  * Description:  Get device information.
  * Argument:     This is the device info pointer.
  */
 
-#define SNIOC_GET_INFO                _SNIOC(0x009B)
+#define SNIOC_GET_INFO                _SNIOC(0x009C)
 
 /* Command:      SNIOC_FLUSH
  * Description:  Flush sensor hardware fifo buffer.
  */
 
-#define SNIOC_FLUSH                   _SNIOC(0x009C)
+#define SNIOC_FLUSH                   _SNIOC(0x009D)
 
 /* Command:      SNIOC_GET_EVENTS
  * Description:  Get events of the sensor device.
  * Argument:     The events pointer, (unsigned int *)
  */
 
-#define SNIOC_GET_EVENTS              _SNIOC(0x009D)
+#define SNIOC_GET_EVENTS              _SNIOC(0x009E)
 
 /* Command:      SNIOC_SET_THERMO
  * Description:  Set the thermocouple type.
@@ -501,6 +501,13 @@
 #define SNIOC_WARM_START              _SNIOC(0X00A6)
 #define SNIOC_COLD_START              _SNIOC(0X00A7)
 #define SNIOC_FULL_COLD_START         _SNIOC(0X00A8)
+
+/* Command:      SNIOC_SET_NONWAKEUP
+ * Description:  Set non-wakeup flag for user.
+ * Argument:     True is non-wakeup, false is wakeup.
+ */
+
+#define SNIOC_SET_NONWAKEUP           _SNIOC(0x00A9)
 
 /****************************************************************************
  * Public types

@@ -103,6 +103,7 @@ static const struct sensor_ops_s g_sensor_ops =
   NULL,               /* set_calibvalue */
   ltr308_calibrate,   /* calibrate */
   NULL,               /* get_info */
+  NULL,               /* set_nonwakeup */
   NULL                /* control */
 };
 

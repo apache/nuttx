@@ -440,6 +440,42 @@ update:
   return ret;
 }
 
+static void sensor_update_nonwakeup(FAR struct file *filep,
+                                    FAR struct sensor_upperhalf_s *upper,
+                                    FAR struct sensor_user_s *user,
+                                    bool nonwakeup)
+{
+  FAR struct sensor_lowerhalf_s *lower = upper->lower;
+
+  if (nonwakeup == user->state.nonwakeup)
+    {
+      return;
+    }
+
+  user->state.nonwakeup = nonwakeup;
+  nxrmutex_lock(&upper->lock);
+  list_for_every_entry(&upper->userlist, user, struct sensor_user_s,
+                       node)
+    {
+      if (!user->state.nonwakeup)
+        {
+          nonwakeup = false;
+          break;
+        }
+    }
+
+  if (nonwakeup != upper->state.nonwakeup)
+    {
+      upper->state.nonwakeup = nonwakeup;
+      if (lower->ops->set_nonwakeup)
+        {
+          lower->ops->set_nonwakeup(lower, filep, nonwakeup);
+        }
+    }
+
+  nxrmutex_unlock(&upper->lock);
+}
+
 static void sensor_generate_timing(FAR struct sensor_upperhalf_s *upper,
                                    unsigned long nums)
 {
@@ -716,6 +752,7 @@ static int sensor_open(FAR struct file *filep)
   user->state.esize = upper->state.esize;
   nxsem_init(&user->buffersem, 0, 0);
   list_add_tail(&upper->userlist, &user->node);
+  sensor_update_nonwakeup(filep, upper, user, false);
 
   /* The new user generation, notify to other users */
 
@@ -745,15 +782,15 @@ static int sensor_close(FAR struct file *filep)
   FAR struct sensor_user_s *user = filep->f_priv;
   int ret = 0;
 
+  sensor_update_interval(filep, upper, user, UINT32_MAX);
+  sensor_update_latency(filep, upper, user, UINT32_MAX);
+  sensor_update_nonwakeup(filep, upper, user, false);
+
   nxrmutex_lock(&upper->lock);
+
   if ((filep->f_oflags & O_DIRECT) == 0 && lower->ops->close)
     {
-      ret = lower->ops->close(lower, filep);
-      if (ret < 0)
-        {
-          nxrmutex_unlock(&upper->lock);
-          return ret;
-        }
+      lower->ops->close(lower, filep);
     }
 
   /* Using the O_DIRECT flag will prevent cross-core operations,
@@ -781,9 +818,6 @@ static int sensor_close(FAR struct file *filep)
 
   sensor_pollnotify(upper, POLLPRI, SENSOR_ROLE_WR);
   nxrmutex_unlock(&upper->lock);
-
-  sensor_update_latency(filep, upper, user, UINT32_MAX);
-  sensor_update_interval(filep, upper, user, UINT32_MAX);
 
   kmm_free(user);
   return ret;
@@ -957,6 +991,12 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           nxrmutex_lock(&upper->lock);
           upper->state.priv = (uint64_t)arg;
           nxrmutex_unlock(&upper->lock);
+        }
+        break;
+
+      case SNIOC_SET_NONWAKEUP:
+        {
+          sensor_update_nonwakeup(filep, upper, user, (bool)arg);
         }
         break;
 
