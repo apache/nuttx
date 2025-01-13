@@ -1086,10 +1086,10 @@ static int stm32l4_reset(struct qe_lowerhalf_s *lower)
    * Interrupts are disabled to make this atomic (if possible)
    */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
   stm32l4_putreg32(priv, STM32L4_GTIM_CNT_OFFSET, 0);
   priv->position = 0;
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 #else
   sninfo("Resetting position to zero\n");
   DEBUGASSERT(lower && priv->inuse);
