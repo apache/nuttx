@@ -218,6 +218,27 @@ static inline void rp23xx_clrpend(int irq)
 }
 
 /****************************************************************************
+ * Name: rp23xx_prioritize_syscall
+ *
+ * Description:
+ *   Set the priority of an exception.  This function may be needed
+ *   internally even if support for prioritized interrupts is not enabled.
+ *
+ ****************************************************************************/
+
+static inline_function void rp23xx_prioritize_syscall(int priority)
+{
+  uint32_t regval;
+
+  /* SVCALL is system handler 11 */
+
+  regval  = getreg32(NVIC_SYSH8_11_PRIORITY);
+  regval &= ~NVIC_SYSH_PRIORITY_PR11_MASK;
+  regval |= (priority << NVIC_SYSH_PRIORITY_PR11_SHIFT);
+  putreg32(regval, NVIC_SYSH8_11_PRIORITY);
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -275,6 +296,10 @@ void up_irqinitialize(void)
 
   irq_attach(RP23XX_IRQ_SVCALL, arm_svcall, NULL);
   irq_attach(RP23XX_IRQ_HARDFAULT, arm_hardfault, NULL);
+
+  /* Set the priority of the SVCall interrupt */
+
+  rp23xx_prioritize_syscall(NVIC_SYSH_SVCALL_PRIORITY);
 
   /* Attach all other processor exceptions (except reset and sys tick) */
 
