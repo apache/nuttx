@@ -37,6 +37,7 @@
 #include <nuttx/queue.h>
 #include <nuttx/wdog.h>
 #include <nuttx/list.h>
+#include <nuttx/spinlock_type.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -64,6 +65,7 @@ extern "C"
  */
 
 extern struct list_node g_wdactivelist;
+extern spinlock_t g_wdspinlock;
 
 /****************************************************************************
  * Public Function Prototypes
