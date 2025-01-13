@@ -175,7 +175,7 @@ static inline uintptr_t sys_call6(unsigned int nbr, uintptr_t parm1,
 
   __asm__ volatile
   (
-    "movq %1, %%rax\n"
+    "movl %1, %%eax\n"
     "movq %2, %%rdi\n"
     "movq %3, %%rsi\n"
     "movq %4, %%rdx\n"
