@@ -381,6 +381,7 @@ static const struct sensor_ops_s g_mpu9250_ops =
   NULL,                 /* set_calibvalue */
   NULL,                 /* calibrate */
   NULL,                 /* get_info */
+  NULL,                 /* set_nonwakeup */
   mpu9250_control       /* control */
 };
 

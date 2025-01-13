@@ -113,6 +113,7 @@ static const struct sensor_ops_s g_bh1749nuc_sensor_ops =
   NULL,                 /* set_calibvalue */
   NULL,                 /* calibrate */
   NULL,                 /* get_info */
+  NULL,                 /* set_nonwakeup */
   bh1749nuc_control
 };
 

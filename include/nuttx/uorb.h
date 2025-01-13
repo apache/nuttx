@@ -475,6 +475,7 @@
 /* GNSS Geofence */
 
 #define SENSOR_TYPE_GNSS_GEOFENCE                   52
+
 /* Velocity Sensor
  * A sensor of this type measures the velocity as it is moving.
  * The default unit velocity is meter by seconds m/s (SI).
@@ -1207,6 +1208,7 @@ struct sensor_state_s
   uint32_t nsubscribers;       /* The number of subscribers */
   uint32_t nadvertisers;       /* The number of advertisers */
   uint32_t generation;         /* The recent generation of circular buffer */
+  uint32_t nonwakeup;          /* The non wakeup state of sensor device */
   uint64_t priv;               /* The pointer to private data of userspace user */
 };
 
@@ -1217,7 +1219,8 @@ struct sensor_ustate_s
   uint32_t esize;              /* The element size of circular buffer */
   uint32_t latency;            /* The batch latency for user, in us */
   uint32_t interval;           /* The subscription interval for user, in us */
-  uint64_t generation;         /* The recent generation of circular buffer */
+  uint32_t nonwakeup;          /* The non wakeup state of sensor user */
+  uint32_t generation;         /* The recent generation of circular buffer */
 };
 
 /* This structure describes the context custom ioctl for device */
