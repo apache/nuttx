@@ -94,4 +94,5 @@ void up_dump_register(void *dumpregs)
   _alert("SP_EL0:    0x%-16"PRIx64"\n", regs[REG_SP_EL0]);
   _alert("SP_ELX:    0x%-16"PRIx64"\n", regs[REG_SP_ELX]);
   _alert("EXE_DEPTH: 0x%-16"PRIx64"\n", regs[REG_EXE_DEPTH]);
+  _alert("SCTLR_EL1: 0x%-16"PRIx64"\n", regs[REG_SCTLR_EL1]);
 }
