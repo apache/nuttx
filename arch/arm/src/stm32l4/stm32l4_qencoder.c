@@ -1043,7 +1043,7 @@ static int stm32l4_position(struct qe_lowerhalf_s *lower,
 
   /* Loop until we are certain that no interrupt occurred between samples */
 
-  spin_lock_irqsave(&priv->lock);
+  flags = spin_lock_irqsave(&priv->lock);
   do
     {
       position = priv->position;
