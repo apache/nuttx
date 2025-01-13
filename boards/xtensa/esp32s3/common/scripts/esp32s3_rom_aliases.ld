@@ -37,3 +37,5 @@ PROVIDE( cache_set_idrom_mmu_size = Cache_Set_IDROM_MMU_Size );
 PROVIDE( cache_suspend_dcache = Cache_Suspend_DCache );
 PROVIDE( cache_suspend_icache = Cache_Suspend_ICache );
 PROVIDE( cache_writeback_all = Cache_WriteBack_All );
+PROVIDE( cache_writeback_items = Cache_WriteBack_Items );
+PROVIDE( cache_writeback_addr = Cache_WriteBack_Addr );

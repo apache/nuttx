@@ -42,6 +42,7 @@
 #include "hardware/esp32s3_soc.h"
 #include "hardware/esp32s3_cache_memory.h"
 #include "hardware/esp32s3_iomux.h"
+#include "hal/cache_hal.h"
 
 #include "soc/extmem_reg.h"
 
@@ -695,6 +696,27 @@ size_t esp_spiram_get_size(void)
 void IRAM_ATTR esp_spiram_writeback_cache(void)
 {
   cache_writeback_all();
+}
+
+/****************************************************************************
+ * Name: esp_spiram_writeback_range
+ *
+ * Description:
+ *   Writeback the Cache items (also clean the dirty bit) in the region from
+ *   DCache. If the region is not in DCache addr room, nothing will be done.
+ *
+ * Input Parameters:
+ *   addr - writeback region start address
+ *   size - writeback region size
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void esp_spiram_writeback_range(uint32_t addr, uint32_t size)
+{
+  cache_hal_writeback_addr(addr, size);
 }
 
 /* If SPI RAM(PSRAM) has been initialized
