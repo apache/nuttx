@@ -85,9 +85,16 @@ endif()
 
 find_program(KCONFIGLIB olddefconfig)
 if(NOT KCONFIGLIB)
+  # cmake-format: off
   message(
     FATAL_ERROR "Kconfig environment depends on kconfiglib, Please install:
-  $ sudo pip3 install kconfiglib")
+  (APT source)
+    $ sudo apt install python3-kconfiglib
+  or (pip source)
+    $ pip install kconfiglib
+  or (After Ubuntu 24.04)
+    $ pip install kconfiglib --break-system-packages")
+  # cmake-format: on
 endif()
 
 # BOARD CONFIG can be set to directory path, or <board-name>[/:]<config-name>
