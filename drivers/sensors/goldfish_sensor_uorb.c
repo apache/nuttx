@@ -729,7 +729,7 @@ static int goldfish_sensor_get_info(FAR struct sensor_lowerhalf_s *lower,
   handle = goldfish_get_priv(lower, &priv);
   if (handle < 0)
     {
-      return -EINVAL;
+      return -handle;
     }
 
   for (i = 0; i < sizeof(g_goldfish_sensor_info); i++)
