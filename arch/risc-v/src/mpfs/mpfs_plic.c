@@ -213,7 +213,7 @@ void mpfs_plic_init_hart(uintptr_t hartid)
 
 uintptr_t mpfs_plic_get_iebase(void)
 {
-  return get_iebase(riscv_mhartid());
+  return get_iebase(up_cpu_index());
 }
 
 /****************************************************************************
@@ -229,7 +229,7 @@ uintptr_t mpfs_plic_get_iebase(void)
 
 uintptr_t mpfs_plic_get_claimbase(void)
 {
-  return get_claimbase(riscv_mhartid());
+  return get_claimbase(up_cpu_index());
 }
 
 /****************************************************************************
@@ -245,5 +245,5 @@ uintptr_t mpfs_plic_get_claimbase(void)
 
 uintptr_t mpfs_plic_get_thresholdbase(void)
 {
-  return get_thresholdbase(riscv_mhartid());
+  return get_thresholdbase(up_cpu_index());
 }

@@ -66,7 +66,7 @@ void up_timer_initialize(void)
 {
   /* what is our timecmp address for this hart */
 
-  uintptr_t hart_id = riscv_mhartid();
+  uintptr_t hart_id = up_cpu_index();
 
   struct oneshot_lowerhalf_s *lower = riscv_mtimer_initialize(
     MPFS_CLINT_MTIME, MPFS_CLINT_MTIMECMP0 + hart_id * sizeof(uintptr_t),

@@ -56,7 +56,7 @@ void up_irqinitialize(void)
 
   /* Initialize PLIC for current hart */
 
-  mpfs_plic_init_hart(riscv_mhartid());
+  mpfs_plic_init_hart(up_cpu_index());
 
   /* Colorize the interrupt stack for debug purposes */
 

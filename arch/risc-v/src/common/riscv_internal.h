@@ -356,35 +356,6 @@ void riscv_cpu_boot(int cpu);
 int riscv_smp_call_handler(int irq, void *c, void *arg);
 #endif
 
-/****************************************************************************
- * Name: riscv_mhartid
- *
- * Description:
- *   Context aware way to query hart id (physical core ID)
- *
- *   The function riscv_mhartid is designed to retrieve the hardware thread
- *   ID (hartid) in different execution modes of RISC-V. Its behavior depends
- *   on the configuration and execution mode:
- *
- *   - In machine mode, riscv_mhartid reads directly from the CSR mhartid.
- *   - In supervisor mode, the hartid is stored in the percpu structure
- *     during boot because supervisor mode does not have access to CSR
- *     `shartid`. The SBI (Supervisor Binary Interface) provides the hartid
- *     in the a0 register (as per SBI ABI requirements), and it is the
- *     responsibility of the payload OS to store this value internally.
- *     We use the percpu scratch register for this purpose, as it is the only
- *     location that is unique for each CPU and non-volatile.
- *
- *   Note: In flat (machine) mode, you could still read the hartid from CSR
- *   mhartid even if CONFIG_RISCV_PERCPU_SCRATCH is enabled.
- *
- * Returned Value:
- *   Hart id
- *
- ****************************************************************************/
-
-uintptr_t riscv_mhartid(void);
-
 #ifdef CONFIG_ARCH_RV_CPUID_MAP
 /****************************************************************************
  * Name: riscv_hartid_to_cpuid / riscv_cpuid_to_hartid

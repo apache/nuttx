@@ -22,7 +22,7 @@
 
 set(SRCS)
 
-list(APPEND SRCS riscv_exception_common.S riscv_mhartid.S riscv_vectors.S)
+list(APPEND SRCS riscv_exception_common.S riscv_vectors.S)
 list(APPEND SRCS riscv_saveusercontext.S)
 list(APPEND SRCS riscv_allocateheap.c riscv_cpuidlestack.c)
 list(APPEND SRCS riscv_cpuinfo.c riscv_createstack.c riscv_doirq.c

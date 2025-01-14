@@ -25,7 +25,7 @@ STARTUP_OBJS = crt0$(OBJEXT)
 endif
 
 # Specify our general Assembly files
-CMN_ASRCS += riscv_vectors.S riscv_exception_common.S riscv_mhartid.S
+CMN_ASRCS += riscv_vectors.S riscv_exception_common.S
 CMN_ASRCS += riscv_saveusercontext.S
 
 # Specify C code within the common directory to be included
