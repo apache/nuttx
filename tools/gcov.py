@@ -87,13 +87,16 @@ def correct_content_path(file, newpath):
             f.write(new_content)
 
 
-def copy_file_endswith(endswith, source_dir, target_dir):
+def copy_file_endswith(endswith, source_dir, target_dir, skip_dir):
     print(f"Collect {endswith} files {source_dir} -> {target_dir}")
 
     if not os.path.exists(target_dir):
         os.makedirs(target_dir)
 
     for root, _, files in os.walk(source_dir):
+        if skip_dir in root:
+            continue
+
         for file in files:
             if file.endswith(endswith):
                 source_file = os.path.join(root, file)
@@ -176,8 +179,8 @@ def main():
         gcov_data_dir.append(dir)
         os.makedirs(dir)
 
-        copy_file_endswith(".gcno", gcno_dir, dir)
-        copy_file_endswith(".gcda", i, dir)
+        copy_file_endswith(".gcno", gcno_dir, dir, gcov_dir)
+        copy_file_endswith(".gcda", i, dir, gcov_dir)
 
     # Only copy files
     if args.only_copy:
