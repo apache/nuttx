@@ -162,7 +162,7 @@ struct sock_intf_s
   CODE int        (*si_poll)(FAR struct socket *psock,
                     FAR struct pollfd *fds, bool setup);
   CODE ssize_t    (*si_sendmsg)(FAR struct socket *psock,
-                    FAR struct msghdr *msg, int flags);
+                    FAR const struct msghdr *msg, int flags);
   CODE ssize_t    (*si_recvmsg)(FAR struct socket *psock,
                     FAR struct msghdr *msg, int flags);
   CODE int        (*si_close)(FAR struct socket *psock);
@@ -880,7 +880,7 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
  *
  ****************************************************************************/
 
-ssize_t psock_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
+ssize_t psock_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
                       int flags);
 
 /****************************************************************************

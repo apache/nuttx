@@ -166,7 +166,7 @@ end_wait:
  *
  ****************************************************************************/
 
-ssize_t can_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
+ssize_t can_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
                     int flags)
 {
   FAR struct net_driver_s *dev;

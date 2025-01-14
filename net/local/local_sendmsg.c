@@ -71,7 +71,7 @@ static void local_freectl(FAR struct local_conn_s *conn, int count)
 }
 
 static int local_sendctl(FAR struct local_conn_s *conn,
-                         FAR struct msghdr *msg)
+                         FAR const struct msghdr *msg)
 {
   FAR struct local_conn_s *peer;
   FAR struct file *filep;
@@ -410,7 +410,7 @@ errout_with_lock:
  *
  ****************************************************************************/
 
-ssize_t local_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
+ssize_t local_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
                       int flags)
 {
   FAR const struct sockaddr *to = msg->msg_name;

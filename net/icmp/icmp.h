@@ -315,7 +315,7 @@ void icmp_poll(FAR struct net_driver_s *dev, FAR struct icmp_conn_s *conn);
  ****************************************************************************/
 
 #ifdef CONFIG_NET_ICMP_SOCKET
-ssize_t icmp_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
+ssize_t icmp_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
                      int flags);
 #endif
 
