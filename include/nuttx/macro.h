@@ -25,6 +25,16 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Stringify the arguments */
+
+#define STRINGIFY_(x) #x
+#define STRINGIFY(x)  STRINGIFY_(x)
+
+/* Concatenate the arguments */
+
+#define CONCATENATE_(a, b) a##b
+#define CONCATENATE(a, b) CONCATENATE_(a,b)
+
 #define GET_ARG_VALUE(_00, _01, _02, _03, _04, _05, _06, _07, \
                       _08, _09, _10, _11, _12, _13, _14, _15, \
                       _16, _17, _18, _19, _20, _21, _22, _23, \
@@ -39,12 +49,12 @@
         19, 18, 17, 16, 15, 14, 13, 12, 11, 10, \
         9,  8,  7,  6,  5,  4,  3,  2,  1,  0)
 
-/* Reverse the arguments */
+/* Expand the arguments */
 
-#define _EXPAND(x...) x
-#define EXPAND(x...) _EXPAND(x)
-#define _PASTE(a,b) a##b
-#define PASTE(a,b) _PASTE(a,b)
+#define EXPAND_(x...) x
+#define EXPAND(x...) EXPAND_(x)
+
+/* Reverse the arguments */
 
 #define REVERSE_00()
 #define REVERSE_01(a)     a
@@ -138,14 +148,5 @@
 
 #define FOREACH_ARG(action, param, ...) \
         FOREACH_ARG_(action, GET_ARG_COUNT(__VA_ARGS__), param, ##__VA_ARGS__)
-
-/* Stringify the arguments */
-
-#define STRINGIFY_(x) #x
-#define STRINGIFY(x)  STRINGIFY_(x)
-
-/* Concatenate the arguments */
-
-#define CONCATENATE(a, b) a##b
 
 #endif /* __INCLUDE_NUTTX_MACRO_H */
