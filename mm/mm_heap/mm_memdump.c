@@ -86,9 +86,9 @@ static void memdump_allocnode(FAR struct mm_allocnode_s *node)
 
   syslog(LOG_INFO, "%6d%12zu%9zu"
 #  ifdef CONFIG_MM_BACKTRACE_SEQNO
-         "%12lu%"
+         "%12lu"
 #  endif
-         "*p %s\n",
+         "%*p %s\n",
          node->pid, nodesize, overhead,
 #  ifdef CONFIG_MM_BACKTRACE_SEQNO
          node->seqno,
