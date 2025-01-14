@@ -182,15 +182,8 @@ static void netpkt_put(FAR struct net_driver_s *dev, FAR netpkt_t *pkt,
 
   DEBUGASSERT(dev && pkt);
 
-  /* TODO: Using netdev_iob_release instead of netdev_iob_replace now,
-   *       because netdev_iob_replace sets d_len = L3_LEN and d_buf,
-   *       but we don't want these changes.
-   */
-
   atomic_fetch_add(&upper->lower->quota[type], 1);
-  netdev_iob_release(dev);
-  dev->d_iob = pkt;
-  dev->d_len = netpkt_getdatalen(upper->lower, pkt);
+  netdev_iob_replace_l2(dev, pkt);
 }
 
 /****************************************************************************
@@ -344,7 +337,7 @@ static int netdev_upper_tx(FAR struct net_driver_s *dev)
     {
       /* Put the packet back to the device */
 
-      netdev_iob_replace(dev, iob_remove_queue(&upper->txq));
+      netdev_iob_replace_l2(dev, iob_remove_queue(&upper->txq));
       return netdev_upper_txpoll(dev);
     }
 #endif
