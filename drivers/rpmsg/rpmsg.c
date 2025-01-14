@@ -32,7 +32,6 @@
 #include <nuttx/rwsem.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/rpmsg/rpmsg.h>
-#include <rpmsg/rpmsg_internal.h>
 
 #include "rpmsg_ping.h"
 #include "rpmsg_router.h"

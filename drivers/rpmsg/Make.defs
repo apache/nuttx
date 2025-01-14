@@ -40,7 +40,6 @@ endif
 
 ifeq ($(CONFIG_RPMSG_PORT),y)
 CSRCS += rpmsg_port.c
-CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)openamp$(DELIM)open-amp$(DELIM)lib
 endif
 
 ifeq ($(CONFIG_RPMSG_PORT_SPI),y)
@@ -61,7 +60,6 @@ endif
 
 ifeq ($(CONFIG_RPMSG_VIRTIO_LITE),y)
 CSRCS += rpmsg_virtio_lite.c
-CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)openamp$(DELIM)open-amp$(DELIM)lib
 endif
 
 ifeq ($(CONFIG_RPMSG_VIRTIO_IVSHMEM),y)

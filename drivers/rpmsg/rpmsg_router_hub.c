@@ -36,7 +36,6 @@
 #include <nuttx/mutex.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/wqueue.h>
-#include <rpmsg/rpmsg_internal.h>
 
 #include "rpmsg_router.h"
 
