@@ -41,18 +41,18 @@ void up_memtag_bypass(bool bypass);
 
 /* Set memory tags for a given memory range */
 
-void up_memtag_set_tag(const void *addr, size_t size);
+void up_memtag_set_tag(FAR const void *addr, size_t size);
 
 /* Get a random label based on the address through the mte register */
 
-uint8_t up_memtag_get_random_tag(const void *addr);
+uint8_t up_memtag_get_random_tag(FAR const void *addr);
 
 /* Get the address without label */
 
-FAR void *up_memtag_get_untagged_addr(const void *addr);
+FAR void *up_memtag_get_untagged_addr(FAR const void *addr);
 
 /* Get the address with label */
 
-FAR void *up_memtag_get_tagged_addr(const void *addr, uint8_t tag);
+FAR void *up_memtag_get_tagged_addr(FAR const void *addr, uint8_t tag);
 
 #endif /* ___ARCH_ARM64_INCLUDE_MEMTAG_H */

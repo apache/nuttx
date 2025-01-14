@@ -59,7 +59,7 @@ static int mte_is_support(void)
   return supported != 0;
 }
 
-static inline uint8_t mte_get_ptr_tag(const void *ptr)
+static inline uint8_t mte_get_ptr_tag(FAR const void *ptr)
 {
   return 0xf0 | (uint8_t)(((uint64_t)(ptr)) >> MTE_TAG_SHIFT);
 }
@@ -68,20 +68,20 @@ static inline uint8_t mte_get_ptr_tag(const void *ptr)
  * Public Functions
  ****************************************************************************/
 
-uint8_t up_memtag_get_random_tag(const void *addr)
+uint8_t up_memtag_get_random_tag(FAR const void *addr)
 {
   asm("irg %0, %0" : "=r" (addr));
 
   return mte_get_ptr_tag(addr);
 }
 
-FAR void *up_memtag_get_untagged_addr(const void *addr)
+FAR void *up_memtag_get_untagged_addr(FAR const void *addr)
 {
   return (FAR void *)
          (((uint64_t)(addr)) & ~((uint64_t)0xff << MTE_TAG_SHIFT));
 }
 
-FAR void *up_memtag_get_tagged_addr(const void *addr, uint8_t tag)
+FAR void *up_memtag_get_tagged_addr(FAR const void *addr, uint8_t tag)
 {
   return (FAR void *)
          (((uint64_t)(addr)) | ((uint64_t)tag << MTE_TAG_SHIFT));
@@ -116,7 +116,7 @@ void up_memtag_bypass(bool bypass)
 
 /* Set memory tags for a given memory range */
 
-void up_memtag_set_tag(const void *addr, size_t size)
+void up_memtag_set_tag(FAR const void *addr, size_t size)
 {
   size_t i;
 
