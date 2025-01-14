@@ -127,7 +127,8 @@ void netdev_iob_prepare_dynamic(FAR struct net_driver_s *dev, uint16_t size)
  * Name: netdev_iob_replace
  *
  * Description:
- *   Replace buffer resources for a given NIC
+ *   Replace buffer resources for a given NIC, used by net stack for L3/L4
+ * and set d_buf to l2 (for legacy drivers using d_buf).
  *
  * Assumptions:
  *   The caller has locked the network and new iob is prepared with
@@ -146,6 +147,32 @@ void netdev_iob_replace(FAR struct net_driver_s *dev, FAR struct iob_s *iob)
   dev->d_iob = iob;
   dev->d_buf = NETLLBUF;
   dev->d_len = iob->io_pktlen;
+}
+
+/****************************************************************************
+ * Name: netdev_iob_replace_l2
+ *
+ * Description:
+ *   Replace buffer resources for a given NIC, used by L2 (net drivers) and
+ * set d_len to l2, keep d_buf as NULL.
+ *
+ * Assumptions:
+ *   The caller has locked the network and new iob is prepared with
+ *   l2 gruard size as offset.
+ *
+ ****************************************************************************/
+
+void netdev_iob_replace_l2(FAR struct net_driver_s *dev,
+                           FAR struct iob_s *iob)
+{
+  /* Release previous buffer */
+
+  netdev_iob_release(dev);
+
+  /* Set new buffer */
+
+  dev->d_iob = iob;
+  dev->d_len = iob->io_pktlen + NET_LL_HDRLEN(dev);
 }
 
 /****************************************************************************
