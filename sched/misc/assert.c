@@ -100,11 +100,7 @@
  * Private Data
  ****************************************************************************/
 
-#if defined(CONFIG_SMP) && defined(CONFIG_DEBUG_ALERT)
-static bool g_cpu_paused[CONFIG_SMP_NCPUS];
-#endif
-
-static uintptr_t g_last_regs[CONFIG_SMP_NCPUS][XCPTCONTEXT_REGS]
+static uintptr_t g_last_regs[XCPTCONTEXT_REGS]
                  aligned_data(XCPTCONTEXT_ALIGN);
 
 #ifdef CONFIG_DEBUG_ALERT
@@ -667,28 +663,6 @@ static void dump_fatal_info(FAR struct tcb_s *rtcb,
                             FAR const char *filename, int linenum,
                             FAR const char *msg, FAR void *regs)
 {
-#if defined(CONFIG_SMP) && defined(CONFIG_DEBUG_ALERT)
-  int cpu;
-
-  /* Dump other CPUs registers, running task stack and backtrace. */
-
-  for (cpu = 0; cpu < CONFIG_SMP_NCPUS; cpu++)
-    {
-      if (cpu == this_cpu())
-        {
-          continue;
-        }
-
-      _alert("Dump CPU%d: %s\n", cpu,
-             g_cpu_paused[cpu] ? "PAUSED" : "RUNNING");
-
-      if (g_cpu_paused[cpu])
-        {
-          dump_running_task(g_running_tasks[cpu], g_last_regs[cpu]);
-        }
-    }
-#endif
-
   /* Dump backtrace of other tasks. */
 
   dump_tasks();
@@ -805,12 +779,12 @@ void _assert(FAR const char *filename, int linenum,
 
   if (regs == NULL)
     {
-      up_saveusercontext(g_last_regs[this_cpu()]);
-      regs = g_last_regs[this_cpu()];
+      up_saveusercontext(g_last_regs);
+      regs = g_last_regs;
     }
   else
     {
-      memcpy(g_last_regs[this_cpu()], regs, sizeof(g_last_regs[0]));
+      memcpy(g_last_regs, regs, sizeof(g_last_regs));
     }
 
   notifier_data.rtcb = rtcb;
