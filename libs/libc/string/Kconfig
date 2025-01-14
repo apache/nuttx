@@ -36,13 +36,6 @@ config LIBC_STRERROR_ERRNUM
 		for unknown errors like "Unknown error 101". Default enabled when
 		LIBC_STRERROR is not selected.
 
-config LIBC_STRING_OPTIMIZE
-	bool "optimized string function"
-	depends on ALLOW_BSD_COMPONENTS
-	default y
-	---help---
-		Use optimized string function implementation based on newlib.
-
 config LIBC_PERROR_STDOUT
 	bool "perror() to stdout"
 	default n
@@ -55,51 +48,58 @@ endmenu # errno Decode Support
 
 menu "memcpy/memset Options"
 
-config MEMCPY_VIK
+config LIBC_NEWLIB_OPTSPEED
+	bool "newlib optimized function"
+	depends on ALLOW_BSD_COMPONENTS
+	default !DEFAULT_SMALL
+	---help---
+		Use optimized string function implementation based on newlib.
+
+config LIBC_MEMCPY_VIK
 	bool "Vik memcpy()"
 	default n
-	depends on !LIBC_ARCH_MEMCPY
+	depends on !LIBC_NEWLIB_OPTSPEED && !LIBC_ARCH_MEMCPY
 	---help---
 		Select this option to use the optimized memcpy() function by Daniel Vik.
 		Select this option for improved performance at the expense of increased
 		size. See licensing information in the top-level LICENSE file.
 
-if MEMCPY_VIK
+if LIBC_MEMCPY_VIK
 
-config MEMCPY_PRE_INC_PTRS
+config LIBC_MEMCPY_PRE_INC_PTRS
 	bool "Pre-increment pointers"
 	default n
 	---help---
 		Use pre-increment of pointers. Default is post increment of pointers.
 
-config MEMCPY_INDEXED_COPY
+config LIBC_MEMCPY_INDEXED_COPY
 	bool "Array indexing"
 	default y
 	---help---
 		Copying data using array indexing. Using this option, disables the
-		MEMCPY_PRE_INC_PTRS option.
+		LIBC_MEMCPY_PRE_INC_PTRS option.
 
-config MEMCPY_64BIT
+config LIBC_MEMCPY_64BIT
 	bool "64-bit memcpy()"
 	default n
 	---help---
 		Compiles memcpy() for architectures that support 64-bit operations
 		efficiently.
 
-endif # MEMCPY_VIK
+endif # LIBC_MEMCPY_VIK
 
-config MEMSET_OPTSPEED
+config LIBC_MEMSET_OPTSPEED
 	bool "Optimize memset() for speed"
 	default n
-	depends on !LIBC_ARCH_MEMSET
+	depends on !LIBC_NEWLIB_OPTSPEED && !LIBC_ARCH_MEMSET
 	---help---
 		Select this option to use a version of memcpy() optimized for speed.
 		Default: memcpy() is optimized for size.
 
-config MEMSET_64BIT
+config LIBC_MEMSET_64BIT
 	bool "64-bit memset()"
 	default n
-	depends on MEMSET_OPTSPEED
+	depends on LIBC_MEMSET_OPTSPEED
 	---help---
 		Compiles memset() for architectures that support 64-bit operations
 		efficiently.
