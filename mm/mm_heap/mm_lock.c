@@ -32,6 +32,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/mm/kasan.h>
 #include <nuttx/mm/mm.h>
 
 #include "mm_heap/mm.h"
@@ -59,7 +60,11 @@
 
 int mm_lock(FAR struct mm_heap_s *heap)
 {
+  kasan_bypass(false);
+
 #if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+  int ret;
+
   /* Check current environment */
 
   if (up_interrupt_context())
@@ -69,12 +74,19 @@ int mm_lock(FAR struct mm_heap_s *heap)
        * Or, touch the heap internal data directly.
        */
 
-      return nxmutex_is_locked(&heap->mm_lock) ? -EAGAIN : 0;
+      ret = nxmutex_is_locked(&heap->mm_lock) ? -EAGAIN : 0;
 #  else
       /* Can't take mutex in SMP interrupt handler */
 
-      return -EAGAIN;
+      ret = -EAGAIN;
 #  endif
+
+      if (ret < 0)
+        {
+          kasan_bypass(true);
+        }
+
+      return ret;
     }
 #endif
 
@@ -90,6 +102,7 @@ int mm_lock(FAR struct mm_heap_s *heap)
 
   if (_SCHED_GETTID() < 0)
     {
+      kasan_bypass(true);
       return -ESRCH;
     }
   else
@@ -111,11 +124,13 @@ void mm_unlock(FAR struct mm_heap_s *heap)
 #if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
   if (up_interrupt_context())
     {
+      kasan_bypass(true);
       return;
     }
 #endif
 
   DEBUGVERIFY(nxmutex_unlock(&heap->mm_lock));
+  kasan_bypass(true);
 }
 
 /****************************************************************************
@@ -129,6 +144,7 @@ void mm_unlock(FAR struct mm_heap_s *heap)
 irqstate_t mm_lock_irq(FAR struct mm_heap_s *heap)
 {
   UNUSED(heap);
+  kasan_bypass(false);
   return up_irq_save();
 }
 
@@ -143,5 +159,6 @@ irqstate_t mm_lock_irq(FAR struct mm_heap_s *heap)
 void mm_unlock_irq(FAR struct mm_heap_s *heap, irqstate_t state)
 {
   UNUSED(heap);
+  kasan_bypass(true);
   up_irq_restore(state);
 }
