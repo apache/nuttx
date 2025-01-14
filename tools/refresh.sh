@@ -116,50 +116,50 @@ fi
 
 if [ "X${CONFIGS}" == "Xall" ]; then
   echo "Normalizing all boards!"
-  CONFIGS=`find boards -name defconfig | cut -d'/' -f4,6`
+  CONFIGS=(`find boards -name defconfig | cut -d'/' -f4,6`)
 else
   if [[ "X${CONFIGS}" == "Xarch:"* ]]; then
     IFS=: read -r atype archname <<< "${CONFIGS}"
     ARCH=$archname
     echo "Normalizing all boards in arch: ${ARCH} !"
-    CONFIGS=`find boards/${ARCH} -name defconfig | cut -d'/' -f4,6`
+    CONFIGS=(`find boards/${ARCH} -name defconfig | cut -d'/' -f4,6`)
   else
     if [[ "X${CONFIGS}" == "Xchip:"* ]]; then
       IFS=: read -r atype chipname <<< "${CONFIGS}"
       CHIP=$chipname
       echo "Normalizing all boards in chip: ${CHIP} !"
-      CONFIGS=`find boards/*/${CHIP} -name defconfig | cut -d'/' -f4,6`
+      CONFIGS=(`find boards/*/${CHIP} -name defconfig | cut -d'/' -f4,6`)
     fi
   fi
 fi
 
-for CONFIG in ${CONFIGS}; do
-  echo "  Normalize ${CONFIG}"
+for i in ${!CONFIGS[@]}; do
+  echo "  [$((${i} + 1))/${#CONFIGS[@]}] Normalize ${CONFIGS[$i]}"
 
   # Set up the environment
 
-  CONFIGSUBDIR=`echo ${CONFIG} | cut -s -d':' -f2`
+  CONFIGSUBDIR=`echo ${CONFIGS[$i]} | cut -s -d':' -f2`
   if [ -z "${CONFIGSUBDIR}" ]; then
-    CONFIGSUBDIR=`echo ${CONFIG} | cut -s -d'/' -f2`
+    CONFIGSUBDIR=`echo ${CONFIGS[$i]} | cut -s -d'/' -f2`
     if [ -z "${CONFIGSUBDIR}" ]; then
-      echo "ERROR: Malformed configuration: ${CONFIG}"
+      echo "ERROR: Malformed configuration: ${CONFIGS[$i]}"
       echo $USAGE
       echo $ADVICE
       exit 1
     else
-      BOARDSUBDIR=`echo ${CONFIG} | cut -d'/' -f1`
+      BOARDSUBDIR=`echo ${CONFIGS[$i]} | cut -d'/' -f1`
     fi
   else
-    BOARDSUBDIR=`echo ${CONFIG} | cut -d':' -f1`
+    BOARDSUBDIR=`echo ${CONFIGS[$i]} | cut -d':' -f1`
   fi
 
-  BOARDDIR=${CONFIG}
+  BOARDDIR=${CONFIGS[$i]}
   if [ ! -d $BOARDDIR ]; then
     BOARDDIR="${CWD}/${BOARDDIR}"
   fi
 
   if [ -d $BOARDDIR ]; then
-    CONFIGSUBDIR=`basename ${CONFIG}`
+    CONFIGSUBDIR=`basename ${CONFIGS[$i]}`
     BOARDDIR=$(dirname `dirname ${BOARDDIR}`)
   else
     BOARDDIR=boards/*/*/$BOARDSUBDIR
