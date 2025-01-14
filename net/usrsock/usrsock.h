@@ -495,8 +495,8 @@ int usrsock_poll(FAR struct socket *psock, FAR struct pollfd *fds,
  *
  ****************************************************************************/
 
-ssize_t usrsock_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
-                        int flags);
+ssize_t usrsock_sendmsg(FAR struct socket *psock,
+                        FAR const struct msghdr *msg, int flags);
 
 /****************************************************************************
  * Name: usrsock_recvmsg

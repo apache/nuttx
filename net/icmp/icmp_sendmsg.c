@@ -265,7 +265,7 @@ end_wait:
  *
  ****************************************************************************/
 
-ssize_t icmp_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
+ssize_t icmp_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
                      int flags)
 {
   FAR const void *buf = msg->msg_iov->iov_base;

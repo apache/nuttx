@@ -663,8 +663,8 @@ int icmpv6_foreach(icmpv6_callback_t callback, FAR void *arg);
  ****************************************************************************/
 
 #ifdef CONFIG_NET_ICMPv6_SOCKET
-ssize_t icmpv6_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
-                       int flags);
+ssize_t icmpv6_sendmsg(FAR struct socket *psock,
+                       FAR const struct msghdr *msg, int flags);
 #endif
 
 /****************************************************************************

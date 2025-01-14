@@ -549,8 +549,8 @@ static ssize_t bluetooth_send(FAR struct socket *psock, FAR const void *buf,
  *
  ****************************************************************************/
 
-ssize_t bluetooth_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
-                          int flags)
+ssize_t bluetooth_sendmsg(FAR struct socket *psock,
+                          FAR const struct msghdr *msg, int flags)
 {
   FAR const void *buf = msg->msg_iov->iov_base;
   size_t len = msg->msg_iov->iov_len;
