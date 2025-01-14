@@ -33,7 +33,6 @@
 #include <stdbool.h>
 
 #include <nuttx/kmalloc.h>
-#include <rpmsg/rpmsg_internal.h>
 
 #include "rpmsg_router.h"
 

@@ -32,8 +32,6 @@
 #include <metal/mutex.h>
 #include <metal/sys.h>
 
-#include <rpmsg/rpmsg_internal.h>
-
 #include "rpmsg_port.h"
 
 /****************************************************************************

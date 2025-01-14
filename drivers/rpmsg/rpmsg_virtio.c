@@ -36,7 +36,6 @@
 #include <nuttx/virtio/virtio-config.h>
 #include <metal/utilities.h>
 #include <openamp/rpmsg_virtio.h>
-#include <rpmsg/rpmsg_internal.h>
 
 /****************************************************************************
  * Pre-processor Definitions

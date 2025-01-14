@@ -35,6 +35,7 @@
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/rpmsg/rpmsg_ping.h>
 #include <openamp/rpmsg.h>
+#include <openamp/rpmsg_internal.h>
 
 /****************************************************************************
  * Pre-processor Definitions
