@@ -34,8 +34,10 @@
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
+#include <sched.h>
 
 #include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/usb/usb.h>
@@ -252,6 +254,10 @@ struct avr_usbdev_s
   /* The endpoint list */
 
   struct avr_ep_s eplist[AVR_NENDPOINTS];
+
+  /* Spinlock */
+
+  spinlock_t lock;
 };
 
 /****************************************************************************
@@ -2294,14 +2300,16 @@ static int avr_epdisable(FAR struct usbdev_ep_s *ep)
 
   usbtrace(TRACE_EPDISABLE, privep->ep.eplog);
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_usbdev.lock);
+  sched_lock();
 
   /* Disable the endpoint */
 
   avr_epreset(privep, -ESHUTDOWN);
   g_usbdev.stalled = true;
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_usbdev.lock, flags);
+  sched_unlock();
   return OK;
 }
 
@@ -2447,7 +2455,8 @@ static int avr_epsubmit(FAR struct usbdev_ep_s *ep,
 
   /* Disable Interrupts */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_usbdev.lock);
+  sched_lock();
 
   /* If we are stalled, then drop all requests on the floor */
 
@@ -2508,7 +2517,8 @@ static int avr_epsubmit(FAR struct usbdev_ep_s *ep,
         }
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_usbdev.lock, flags);
+  sched_unlock();
   return ret;
 }
 
@@ -2542,9 +2552,11 @@ static int avr_epcancel(FAR struct usbdev_ep_s *ep,
    * all requests ...
    */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_usbdev.lock);
+  sched_lock();
   avr_cancelrequests(privep, -ESHUTDOWN);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_usbdev.lock, flags);
+  sched_unlock();
   return OK;
 }
 
@@ -2562,7 +2574,7 @@ static int avr_epstall(FAR struct usbdev_ep_s *ep, bool resume)
 
   /* STALL or RESUME the endpoint */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_usbdev.lock);
   if (resume)
     {
       /* Clear stall and reset the data toggle */
@@ -2579,7 +2591,7 @@ static int avr_epstall(FAR struct usbdev_ep_s *ep, bool resume)
       g_usbdev.stalled = true;
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_usbdev.lock, flags);
   return OK;
 }
 
@@ -2650,7 +2662,7 @@ static FAR struct usbdev_ep_s *avr_allocep(FAR struct usbdev_s *dev,
     {
       /* Yes.. now see if any of the request endpoints are available */
 
-      flags = enter_critical_section();
+      flags = spin_lock_irqsave(&g_usbdev.lock);
 
       /* Select the lowest bit in the set of matching, available endpoints */
 
@@ -2684,14 +2696,14 @@ static FAR struct usbdev_ep_s *avr_allocep(FAR struct usbdev_s *dev,
 
               /* And return the pointer to the standard endpoint structure */
 
-              leave_critical_section(flags);
+              spin_unlock_irqrestore(&g_usbdev.lock, flags);
               return &privep->ep;
             }
         }
 
       /* Shouldn't get here */
 
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(&g_usbdev.lock, flags);
     }
 
   usbtrace(TRACE_DEVERROR(AVR_TRACEERR_NOEP), (uint16_t) epno);
@@ -2716,12 +2728,12 @@ static void avr_freeep(FAR struct usbdev_s *dev, FAR struct usbdev_ep_s *ep)
 
   /* Mark the endpoint as available */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_usbdev.lock);
   epmask = (1 << privep->ep.eplog);
   g_usbdev.epavail  |= epmask;
   g_usbdev.epinset  &= ~epmask;
   g_usbdev.epoutset &= ~epmask;
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_usbdev.lock, flags);
 }
 
 /****************************************************************************
@@ -2754,9 +2766,11 @@ static int avr_wakeup(struct usbdev_s *dev)
 
   usbtrace(TRACE_DEVWAKEUP, 0);
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_usbdev.lock);
+  sched_lock();
   avr_genwakeup();
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_usbdev.lock, flags);
+  sched_unlock();
   return OK;
 }
 
@@ -2820,6 +2834,10 @@ static int avr_pullup(struct usbdev_s *dev, bool enable)
 void avr_usbinitialize(void)
 {
   usbtrace(TRACE_DEVINIT, 0);
+
+  /* Initialize driver lock */
+
+  spin_lock_init(&g_usbdev.lock);
 
   /* Initialize the device state structure */
 
@@ -2891,7 +2909,8 @@ void avr_usbuninitialize(void)
 
   /* Disconnect device */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_usbdev.lock);
+  sched_lock();
   avr_pullup(&g_usbdev.usbdev, false);
   g_usbdev.usbdev.speed = USB_SPEED_UNKNOWN;
 
@@ -2903,7 +2922,8 @@ void avr_usbuninitialize(void)
   /* Shutdown the USB controller hardware */
 
   avr_usbshutdown();
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_usbdev.lock, flags);
+  sched_unlock();
 }
 
 /****************************************************************************
@@ -3018,8 +3038,10 @@ void avr_pollvbus(void)
 {
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_usbdev.lock);
+  sched_lock();
   avr_genvbus();
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_usbdev.lock, flags);
+  sched_unlock();
 }
 #endif
