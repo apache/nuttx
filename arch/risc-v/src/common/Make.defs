@@ -52,8 +52,14 @@ ifeq ($(CONFIG_SMP),y)
 CMN_CSRCS += riscv_smpcall.c riscv_cpustart.c
 endif
 
-ifeq ($(CONFIG_ARCH_RV_CPUID_MAP),y)
+ifeq ($(CONFIG_ARCH_HAVE_MULTICPU),y)
+ifeq ($(CONFIG_ARCH_USE_S_MODE),y)
 CMN_CSRCS += riscv_cpuindex.c
+endif
+endif
+
+ifeq ($(CONFIG_ARCH_RV_CPUID_MAP),y)
+CMN_CSRCS += riscv_cpuidmap.c
 endif
 
 ifeq ($(CONFIG_RISCV_MISALIGNED_HANDLER),y)

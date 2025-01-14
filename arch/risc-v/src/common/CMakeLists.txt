@@ -49,8 +49,14 @@ if(CONFIG_SMP)
   list(APPEND SRCS riscv_smpcall.c riscv_cpustart.c)
 endif()
 
+if(CONFIG_ARCH_HAVE_MULTICPU)
+  if(CONFIG_ARCH_USE_S_MODE)
+    list(APPEND SRCS riscv_cpuindex.c)
+  endif()
+endif()
+
 if(CONFIG_ARCH_RV_CPUID_MAP)
-  list(APPEND SRCS riscv_cpuindex.c)
+  list(APPEND SRCS riscv_cpuidmap.c)
 endif()
 
 if(CONFIG_RISCV_MISALIGNED_HANDLER)
