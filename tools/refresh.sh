@@ -210,7 +210,7 @@ for CONFIG in ${CONFIGS}; do
   # skip refresh if defconfig contains `#include`
   if grep -q "#include" $DEFCONFIG; then
     echo "Note: skipping refresh for debug defconfig."
-    exit 0
+    continue
   fi
 
   # Copy the .config and Make.defs to the toplevel directory
