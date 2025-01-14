@@ -28,8 +28,10 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
+#include <arch/csr.h>
 
 #include "riscv_internal.h"
+#include "riscv_percpu.h"
 
 /****************************************************************************
  * Public Functions
@@ -45,5 +47,5 @@
 
 int up_cpu_index(void)
 {
-  return (int)riscv_mhartid();
+  return riscv_percpu_get_hartid();
 }

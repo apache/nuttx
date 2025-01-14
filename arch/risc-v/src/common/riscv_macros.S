@@ -348,17 +348,10 @@
 #endif /* CONFIG_ARCH_INTERRUPTSTACK > 15 */
 
 /****************************************************************************
- * Name: riscv_mhartid
- *
- * Description:
- *   Context aware way to query hart id (physical core ID)
- *
- * Returned Value:
- *   Hart id
- *
+ * Name: up_cpu_index
  ****************************************************************************/
 
-.macro  riscv_mhartid out
+.macro  up_cpu_index out
 #ifdef CONFIG_RISCV_PERCPU_SCRATCH
   csrr    \out, CSR_SCRATCH
   REGLOAD \out, RISCV_PERCPU_HARTID(\out)
