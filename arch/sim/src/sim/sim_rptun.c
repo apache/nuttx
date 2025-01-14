@@ -140,7 +140,7 @@ sim_rptun_get_resource(struct rptun_dev_s *dev)
   if (priv->master)
     {
       struct sim_rptun_rsc_s *rsc = &priv->shmem->rsc;
-      memset(priv->shmem, 0, sizeof(*priv->shmem));
+      memset(rsc, 0, sizeof(struct sim_rptun_rsc_s));
 
       rsc->hdr.ver                    = 1;
       rsc->hdr.num                    = SIM_RPTUN_RSC_NUM;
