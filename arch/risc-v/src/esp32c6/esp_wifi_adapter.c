@@ -2530,6 +2530,13 @@ static void esp_evt_work_cb(void *arg)
           break;
         }
 
+      /* Some of the following logic (eg. esp_wlan_sta_set_linkstatus)
+       * can take net_lock(). To maintain the consistent locking order,
+       * we take net_lock() here before taking esp_wifi_lock. Note that
+       * net_lock() is a recursive lock.
+       */
+
+      net_lock();
       esp_wifi_lock(true);
 
       switch (evt_adpt->id)
@@ -2651,6 +2658,7 @@ static void esp_evt_work_cb(void *arg)
         }
 
       esp_wifi_lock(false);
+      net_unlock();
 
       kmm_free(evt_adpt);
     }
