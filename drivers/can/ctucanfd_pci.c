@@ -626,7 +626,7 @@ static int ctucanfd_chrdev_send(FAR struct can_dev_s *dev,
 
   fmt.s.rtr = msg->cm_hdr.ch_rtr;
 
-#ifdef CONFIG_NET_CAN_EXTID
+#ifdef CONFIG_CAN_EXTID
   if (msg->cm_hdr.ch_extid)
     {
       fmt.s.ide   = 1;
@@ -638,6 +638,15 @@ static int ctucanfd_chrdev_send(FAR struct can_dev_s *dev,
       fmt.s.ide = 0;
       id.s.id   = msg->cm_hdr.ch_id;
     }
+
+#ifdef CONFIG_CAN_FD
+
+  /* Set CAN FD specific flags */
+
+  fmt.s.brs     = msg->cm_hdr.ch_brs;
+  fmt.s.esi_rsv = msg->cm_hdr.ch_esi;
+  fmt.s.fdf = msg->cm_hdr.ch_edl;
+#endif
 
   /* Write frame */
 
@@ -800,7 +809,7 @@ static void ctucanfd_chardev_receive(FAR struct ctucanfd_can_s *priv)
 
 #ifdef CONFIG_CAN_FD
       hdr.ch_esi = frame.fmt.esi_rsv;
-      hdr.ch_edl = 0;
+      hdr.ch_edl = frame.fmt.fdf;
       hdr.ch_brs = frame.fmt.brs;
 #else
       if (frame.fmt.fdf)
@@ -1808,6 +1817,7 @@ static int ctucanfd_probe(FAR struct pci_device_s *dev)
   if (!priv->bar0_base)
     {
       pcierr("Not found BAR0\n");
+      ret = -ENODEV;
       goto errout;
     }
 
@@ -1823,6 +1833,7 @@ static int ctucanfd_probe(FAR struct pci_device_s *dev)
   if (!priv->canfd_base)
     {
       pcierr("Not found CANFD bar\n");
+      ret = -ENODEV;
       goto errout;
     }
 
@@ -1922,11 +1933,11 @@ errout:
     {
       if (priv->devs[i].pcidev)
         {
-#ifdef CONFIG_CAN_KVASER_SOCKET
+#ifdef CONFIG_CAN_CTUCANFD_SOCKET
           netdev_unregister(&priv->devs[i].dev);
 #endif
 
-#ifdef CONFIG_CAN_KVASER_CHARDEV
+#ifdef CONFIG_CAN_CTUCANFD_CHARDEV
           unregister_driver(devpath);
 #endif
         }
