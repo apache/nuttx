@@ -36,6 +36,7 @@
 #  include <nuttx/page.h>
 #endif
 
+#include <arch/memtag.h>
 #include <arch/chip/chip.h>
 
 #ifdef CONFIG_SMP
@@ -161,7 +162,9 @@ void arm64_chip_boot(void)
 
   arm64_mmu_init(true);
 
-  arm64_enable_mte();
+#ifdef CONFIG_ARM64_MTE
+  up_memtag_init();
+#endif
 
 #ifdef CONFIG_DEVICE_TREE
   fdt_register((const char *)0x40000000);
