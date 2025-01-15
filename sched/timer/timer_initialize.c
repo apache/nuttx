@@ -136,7 +136,7 @@ void timer_deleteall(pid_t pid)
   FAR struct posix_timer_s *next;
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_locktimers);
   for (timer = (FAR struct posix_timer_s *)g_alloctimers.head;
        timer != NULL;
        timer = next)
@@ -144,11 +144,13 @@ void timer_deleteall(pid_t pid)
       next = timer->flink;
       if (timer->pt_owner == pid)
         {
+          spin_unlock_irqrestore(&g_locktimers, flags);
           timer_delete((timer_t)timer);
+          flags = spin_lock_irqsave(&g_locktimers);
         }
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_locktimers, flags);
 }
 
 /****************************************************************************
