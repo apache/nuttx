@@ -38,6 +38,7 @@ following section.
   rptun.rst
   rwbuffer.rst
   sensors.rst
+  sensors_uorb.rst
   segger.rst
   spi.rst
   syslog.rst
