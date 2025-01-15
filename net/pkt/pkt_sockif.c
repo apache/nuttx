@@ -113,6 +113,10 @@ static int pkt_sockif_alloc(FAR struct socket *psock)
   DEBUGASSERT(conn->crefs == 0);
   conn->crefs = 1;
 
+  /* Save the protocol in the connection structure */
+
+  conn->type = psock->s_proto;
+
   /* Save the pre-allocated connection in the socket structure */
 
   psock->s_conn = conn;
@@ -225,8 +229,6 @@ static void pkt_addref(FAR struct socket *psock)
 static int pkt_bind(FAR struct socket *psock,
                     FAR const struct sockaddr *addr, socklen_t addrlen)
 {
-  int ifindex;
-
   /* Verify that a valid address has been provided */
 
   if (addr->sa_family != AF_PACKET || addrlen < sizeof(struct sockaddr_ll))
@@ -245,7 +247,8 @@ static int pkt_bind(FAR struct socket *psock,
 
       /* Look at the addr and identify the network interface */
 
-      ifindex = ((FAR struct sockaddr_ll *)addr)->sll_ifindex;
+      int ifindex = ((FAR struct sockaddr_ll *)addr)->sll_ifindex;
+      int protocol = ((FAR struct sockaddr_ll *)addr)->sll_protocol;
 
       /* Check if we have that interface */
 
@@ -258,6 +261,10 @@ static int pkt_bind(FAR struct socket *psock,
       /* Put ifindex into connection */
 
       conn->ifindex = ifindex;
+      if (protocol != 0)
+        {
+          conn->type = protocol;
+        }
 
       return OK;
     }

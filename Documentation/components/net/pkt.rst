@@ -29,6 +29,7 @@ Usage
 
   addr.sll_family = AF_PACKET;
   addr.sll_ifindex = if_nametoindex("eth0");
+  addr.sll_protocol = htons(ETH_P_ALL);
   bind(sd, (FAR struct sockaddr *)&addr, sizeof(addr)); /* Bind to device */
 
   recv(sd, buffer, sizeof(buffer), 0); /* read(sd, buffer, sizeof(buffer)); */

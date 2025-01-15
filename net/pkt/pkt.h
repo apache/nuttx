@@ -74,6 +74,7 @@ struct pkt_conn_s
 
   uint8_t    ifindex;
   uint8_t    crefs;    /* Reference counts on this instance */
+  uint16_t   type;     /* The Ethernet type of the packet */
 
   /* Read-ahead buffering.
    *

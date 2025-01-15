@@ -247,7 +247,7 @@ struct socket
 {
   uint8_t       s_domain;    /* IP domain */
   uint8_t       s_type;      /* Protocol type */
-  uint8_t       s_proto;     /* Socket Protocol */
+  uint16_t      s_proto;     /* Socket Protocol */
   FAR void     *s_conn;      /* Connection inherits from struct socket_conn_s */
 
   /* Socket interface */
