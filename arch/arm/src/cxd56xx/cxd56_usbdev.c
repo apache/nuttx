@@ -40,6 +40,7 @@
 #include <debug.h>
 #include <fcntl.h>
 #include <stdio.h>
+#include <sched.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
@@ -49,6 +50,7 @@
 #include <nuttx/fs/procfs.h>
 
 #include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/signal.h>
 #include <arch/chip/usbdev.h>
 #include <arch/chip/pm.h>
@@ -383,6 +385,10 @@ struct cxd56_usbdev_s
 
   int signo;
   pid_t pid;
+
+  /* spinlock */
+
+  spinlock_t lock;
 };
 
 /* For maintaining tables of endpoint info */
@@ -784,17 +790,15 @@ static inline void cxd56_abortrequest(struct cxd56_ep_s *privep,
  *
  ****************************************************************************/
 
-static void cxd56_reqcomplete(struct cxd56_ep_s *privep, int16_t result)
+static void cxd56_reqcomplete_nolock(struct cxd56_ep_s *privep,
+                                     int16_t result)
 {
   struct cxd56_req_s *privreq;
   int stalled = privep->stalled;
-  irqstate_t flags;
 
   /* Remove the completed request at the head of the endpoint request list */
 
-  flags   = enter_critical_section();
   privreq = cxd56_rqdequeue(privep);
-  leave_critical_section(flags);
 
   if (privreq)
     {
@@ -820,6 +824,17 @@ static void cxd56_reqcomplete(struct cxd56_ep_s *privep, int16_t result)
 
       privep->stalled = stalled;
     }
+}
+
+static void cxd56_reqcomplete(struct cxd56_ep_s *privep, int16_t result)
+{
+  irqstate_t flags = spin_lock_irqsave(&privep->dev->lock);
+
+  /* Remove the completed request at the head of the endpoint request list */
+
+  cxd56_reqcomplete_nolock(privep, result);
+
+  spin_unlock_irqrestore(&privep->dev->lock, flags);
 }
 
 /****************************************************************************
@@ -1085,7 +1100,7 @@ static void cxd56_stopoutep(struct cxd56_ep_s *privep)
  *
  ****************************************************************************/
 
-static void cxd56_cancelrequests(struct cxd56_ep_s *privep)
+static void cxd56_cancelrequests_nolock(struct cxd56_ep_s *privep)
 {
   if (privep->epphy > 0)
     {
@@ -1103,7 +1118,7 @@ static void cxd56_cancelrequests(struct cxd56_ep_s *privep)
     {
       usbtrace(TRACE_COMPLETE(privep->epphy),
               (cxd56_rqpeek(privep))->req.xfrd);
-      cxd56_reqcomplete(privep, -ESHUTDOWN);
+      cxd56_reqcomplete_nolock(privep, -ESHUTDOWN);
     }
 
   if (privep->epphy > 0)
@@ -1117,6 +1132,17 @@ static void cxd56_cancelrequests(struct cxd56_ep_s *privep)
           putreg32(0, CXD56_USB_OUT_EP_DATADESC(privep->epphy));
         }
     }
+}
+
+static void cxd56_cancelrequests(struct cxd56_ep_s *privep)
+{
+  irqstate_t flags = spin_lock_irqsave(&privep->dev->lock);
+  sched_lock();
+
+  cxd56_cancelrequests_nolock(privep);
+
+  spin_unlock_irqrestore(&privep->dev->lock, flags);
+  sched_unlock();
 }
 
 /****************************************************************************
@@ -2269,10 +2295,12 @@ static int cxd56_epdisable(struct usbdev_ep_s *ep)
 
   /* Cancel any ongoing activity and reset the endpoint */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&privep->dev->lock);
+  sched_lock();
   cxd56_epstall(&privep->ep, false);
-  cxd56_cancelrequests(privep);
-  leave_critical_section(flags);
+  cxd56_cancelrequests_nolock(privep);
+  spin_unlock_irqrestore(&privep->dev->lock, flags);
+  sched_unlock();
   return OK;
 }
 
@@ -2411,7 +2439,8 @@ static int cxd56_epsubmit(struct usbdev_ep_s *ep,
 
   req->result = -EINPROGRESS;
   req->xfrd   = 0;
-  flags       = enter_critical_section();
+  flags       = spin_lock_irqsave(&priv->lock);
+  sched_lock();
 
   /* If we are stalled, then drop all requests on the floor, except OUT */
 
@@ -2442,7 +2471,7 @@ static int cxd56_epsubmit(struct usbdev_ep_s *ep,
            */
 
           usbtrace(TRACE_COMPLETE(privep->epphy), privreq->req.xfrd);
-          cxd56_reqcomplete(privep, OK);
+          cxd56_reqcomplete_nolock(privep, OK);
         }
 
       if (priv->ctrl.req == USB_REQ_SETCONFIGURATION)
@@ -2515,7 +2544,8 @@ static int cxd56_epsubmit(struct usbdev_ep_s *ep,
       ret = cxd56_rdrequest(privep);
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
+  sched_unlock();
   return ret;
 }
 
@@ -2543,9 +2573,11 @@ static int cxd56_epcancel(struct usbdev_ep_s *ep,
 
   usbtrace(TRACE_EPCANCEL, privep->epphy);
 
-  flags = enter_critical_section();
-  cxd56_cancelrequests(privep);
-  leave_critical_section(flags);
+  flags = spin_lock_irqsave(&privep->dev->lock);
+  sched_lock();
+  cxd56_cancelrequests_nolock(privep);
+  spin_unlock_irqrestore(&privep->dev->lock, flags);
+  sched_unlock();
   return OK;
 }
 
@@ -2725,12 +2757,12 @@ static struct usbdev_ep_s *cxd56_allocep(struct usbdev_s *dev,
               continue;
             }
 
-          flags = enter_critical_section();
+          flags = spin_lock_irqsave(&priv->lock);
           priv->avail &= ~(1 << ndx);
           mask = getreg32(CXD56_USB_DEV_EP_INTR_MASK);
           mask &= ~(1 << ndx << (in ? 0 : 16));
           putreg32(mask, CXD56_USB_DEV_EP_INTR_MASK);
-          leave_critical_section(flags);
+          spin_unlock_irqrestore(&priv->lock, flags);
           return &priv->eplist[ndx].ep;
         }
     }
@@ -2758,9 +2790,9 @@ static void cxd56_freeep(struct usbdev_s *dev,
 
   cxd56_freeepbuffer(privep);
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&privep->dev->lock);
   pdev->avail |= 1 << privep->epphy;
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&privep->dev->lock, flags);
 }
 
 /****************************************************************************
@@ -2773,6 +2805,7 @@ static void cxd56_freeep(struct usbdev_s *dev,
 
 static int cxd56_getframe(struct usbdev_s *dev)
 {
+  struct cxd56_usbdev_s *priv = (struct cxd56_usbdev_s *)dev;
   irqstate_t flags;
   int ret = 0;
 
@@ -2790,9 +2823,9 @@ static int cxd56_getframe(struct usbdev_s *dev)
    * because the operation is not atomic.
    */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
   ret   = getreg32(CXD56_USB_DEV_STATUS) >> 18;
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
   return ret;
 }
 
@@ -2806,13 +2839,14 @@ static int cxd56_getframe(struct usbdev_s *dev)
 
 static int cxd56_wakeup(struct usbdev_s *dev)
 {
+  struct cxd56_usbdev_s *priv = (struct cxd56_usbdev_s *)dev;
   irqstate_t flags;
 
   usbtrace(TRACE_DEVWAKEUP, 0);
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
   putreg32(getreg32(CXD56_USB_DEV_CONTROL) | 1, CXD56_USB_DEV_CONTROL);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
   return OK;
 }
 
@@ -3076,6 +3110,10 @@ void arm_usbinitialize(void)
 
   cxd56_usb_clock_enable();
 
+  /* Initialize driver lock */
+
+  spin_lock_init(&g_usbdev.lock);
+
   if (irq_attach(CXD56_IRQ_USB_SYS, cxd56_sysinterrupt, &g_usbdev) != 0)
     {
       usbtrace(TRACE_DEVERROR(CXD56_TRACEERR_ATTACHIRQREG), 0);
@@ -3135,7 +3173,8 @@ void arm_usbuninitialize(void)
       usbdev_unregister(priv->driver);
     }
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
+  sched_lock();
   cxd56_pullup(&priv->usbdev, false);
   priv->usbdev.speed = USB_SPEED_UNKNOWN;
 
@@ -3152,7 +3191,8 @@ void arm_usbuninitialize(void)
   irq_detach(CXD56_IRQ_USB_VBUSN);
 
   cxd56_usb_clock_disable();
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
+  sched_unlock();
 
   /* Clear signal */
 
@@ -3246,7 +3286,8 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
 
   CLASS_UNBIND(driver, &g_usbdev.usbdev);
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
+  sched_lock();
 
   /* Disable IRQs */
 
@@ -3266,7 +3307,8 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
 
   cxd56_usbhwuninit();
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
+  sched_unlock();
 
   up_pm_release_freqlock(&g_hv_lock);
   up_pm_release_wakelock(&g_wake_lock);
