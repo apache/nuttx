@@ -96,7 +96,6 @@ static struct syslog_intbuffer_s g_syslog_intbuffer =
 
 static void syslog_flush_internal(bool force, size_t buflen)
 {
-  irqstate_t flags;
   FAR char *buffer;
   size_t size;
 
