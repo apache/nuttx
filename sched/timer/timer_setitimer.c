@@ -35,6 +35,12 @@
 #ifndef CONFIG_DISABLE_POSIX_TIMERS
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static mutex_t g_setitimer_mutex = NXMUTEX_INITIALIZER;
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -92,7 +98,6 @@ int setitimer(int which, FAR const struct itimerval *value,
   FAR struct tcb_s *rtcb;
   struct itimerspec spec;
   struct itimerspec ospec;
-  irqstate_t flags;
   int ret = OK;
 
   if (which != ITIMER_REAL || !value)
@@ -103,14 +108,14 @@ int setitimer(int which, FAR const struct itimerval *value,
 
   rtcb = this_task();
 
-  flags = enter_critical_section();
+  nxmutex_lock(&g_setitimer_mutex);
 
   if (!rtcb->group->itimer)
     {
       ret = timer_create(CLOCK_REALTIME, NULL, &rtcb->group->itimer);
     }
 
-  leave_critical_section(flags);
+  nxmutex_unlock(&g_setitimer_mutex);
 
   if (ret != OK)
     {
