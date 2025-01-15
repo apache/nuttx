@@ -158,6 +158,8 @@ static void ctucanfd_txint(FAR struct ctucanfd_can_s *priv, bool enable);
 
 /* CAN character device methods */
 
+static void ctucanfd_chrdev_enable(FAR struct ctucanfd_can_s *priv);
+static int  ctucanfd_chrdev_txclear(FAR struct ctucanfd_can_s *priv);
 static void ctucanfd_chrdev_reset(FAR struct can_dev_s *dev);
 static int  ctucanfd_chrdev_setup(FAR struct can_dev_s *dev);
 static void ctucanfd_chrdev_shutdown(FAR struct can_dev_s *dev);
@@ -180,6 +182,11 @@ static bool ctucanfd_chrdev_cancel(FAR struct can_dev_s *dev,
                                    FAR struct can_msg_s *msg);
 static void ctucanfd_chardev_receive(FAR struct ctucanfd_can_s *priv);
 static void ctucanfd_chardev_interrupt(FAR struct ctucanfd_driver_s *priv);
+
+static int  ctucanfd_chrdev_getstate(FAR struct can_dev_s *dev,
+                                     FAR unsigned long *state);
+static int  ctucanfd_chrdev_setstate(FAR struct can_dev_s *dev,
+                                     unsigned long state);
 #endif
 
 #ifdef CONFIG_CAN_CTUCANFD_SOCKET
@@ -429,6 +436,144 @@ static void ctucanfd_txint(FAR struct ctucanfd_can_s *priv, bool enable)
 
 #ifdef CONFIG_CAN_CTUCANFD_CHARDEV
 /*****************************************************************************
+ * Name: ctucanfd_chrdev_enable
+ *****************************************************************************/
+
+static void ctucanfd_chrdev_enable(FAR struct ctucanfd_can_s *priv)
+{
+  ctucanfd_modreg(priv, CTUCANFD_SET_MODE,
+                  CTUCANFD_SET_ENA << CTUCANFD_SET_SHFIT,
+                  CTUCANFD_SET_ENA << CTUCANFD_SET_SHFIT);
+}
+
+/*****************************************************************************
+ * Name: ctucanfd_chrdev_txclear
+ *****************************************************************************/
+
+static int ctucanfd_chrdev_txclear(FAR struct ctucanfd_can_s *priv)
+{
+  uint32_t regval;
+  uint32_t setval;
+  int i;
+
+  regval = ctucanfd_getreg(priv, CTUCANFD_TXSTAT);
+
+  for (i = 0; i < CTUCANFD_TXBUF_CNT; i++)
+    {
+      if (CTUCANFD_TXSTAT_GET(regval, i) < CTUCANFD_TXSTAT_TOK)
+        {
+          /* Set abort */
+
+          setval = (CTUCANFD_TXCMD_TXCA +
+                    (1 << (CTUCANFD_TXCMD_TXB_SHIFT + i)));
+          ctucanfd_putreg(priv, CTUCANFD_TXINFOCMD, setval);
+        }
+
+#ifdef CONFIG_CAN_TXCONFIRM
+      memset(&priv->tx_idbuf[i], 0, sizeof(struct can_hdr_s));
+#endif
+    }
+
+  /* Check tx buffer state */
+
+  do
+    {
+      regval = ctucanfd_getreg(priv, CTUCANFD_TXSTAT);
+
+      for (i = 0; i < CTUCANFD_TXBUF_CNT; i++)
+        {
+          /* Check tx buffer state, wait for abort is done */
+
+          if (CTUCANFD_TXSTAT_GET(regval, i) < CTUCANFD_TXSTAT_TOK)
+            {
+              break;
+            }
+        }
+    }
+  while (i < CTUCANFD_TXBUF_CNT);
+
+  /* Set all tx buffer state to empty */
+
+  regval = CTUCANFD_TXCMD_TXCE + (0xff << CTUCANFD_TXCMD_TXB_SHIFT);
+  ctucanfd_putreg(priv, CTUCANFD_TXINFOCMD, regval);
+
+  return OK;
+}
+
+/*****************************************************************************
+ * Name: ctucanfd_chrdev_getstate
+ *
+ * Description:
+ *   Get the state status of the CAN device
+ *
+ * Input Parameters:
+ *   dev - An instance of the "upper half" can driver state structure.
+ *   state - The state status of the CAN device
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno on failure
+ *
+ *****************************************************************************/
+
+static int ctucanfd_chrdev_getstate(FAR struct can_dev_s *dev,
+                                   unsigned long *state)
+{
+  FAR struct ctucanfd_can_s *priv = (FAR struct ctucanfd_can_s *)dev;
+  uint32_t regval;
+
+  regval = ctucanfd_getreg(priv, CTUCANFD_SET_MODE);
+
+  if ((regval >> CTUCANFD_SET_SHFIT) & CTUCANFD_SET_ENA)
+    {
+      *state = CAN_STATE_START;
+    }
+  else
+    {
+      *state = CAN_STATE_STOP;
+    }
+
+  return OK;
+}
+
+/*****************************************************************************
+ * Name: ctucanfd_chrdev_setstate
+ *
+ * Description:
+ *   Set the state of the CAN device
+ *
+ * Input Parameters:
+ *   dev - An instance of the "upper half" can driver state structure.
+ *   state - The state of the CAN device
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno on failure
+ *
+ *****************************************************************************/
+
+static int ctucanfd_chrdev_setstate(FAR struct can_dev_s *dev,
+                                   unsigned long state)
+{
+  struct ctucanfd_can_s *priv = (struct ctucanfd_can_s *)dev;
+
+  switch (state)
+    {
+      case CAN_STATE_START:
+        ctucanfd_chrdev_enable(priv);
+        break;
+
+      case CAN_STATE_STOP:
+        ctucanfd_shutdown(priv);
+        break;
+
+      default:
+        return -EINVAL;
+        break;
+    }
+
+  return OK;
+}
+
+/*****************************************************************************
  * Name: ctucanfd_chrdev_reset
  *
  * Description:
@@ -557,7 +702,29 @@ static void ctucanfd_chrdev_txint(FAR struct can_dev_s *dev, bool enable)
 static int ctucanfd_chrdev_ioctl(FAR struct can_dev_s *dev, int cmd,
                                  unsigned long arg)
 {
-  return -ENOTTY;
+  FAR struct ctucanfd_can_s *priv = (FAR struct ctucanfd_can_s *)dev;
+  int ret = 0;
+
+  switch (cmd)
+    {
+      case CANIOC_BUSOFF_RECOVERY:
+        ctucanfd_chrdev_enable(priv);
+        break;
+      case CANIOC_SET_STATE:
+        ret = ctucanfd_chrdev_setstate(dev, arg);
+        break;
+      case CANIOC_GET_STATE:
+        ret = ctucanfd_chrdev_getstate(dev, (FAR unsigned long *)arg);
+        break;
+      case CANIOC_OFLUSH:
+        ret = ctucanfd_chrdev_txclear(priv);
+        break;
+      default:
+        ret = -ENOTTY;
+        break;
+    }
+
+  return ret;
 }
 
 /*****************************************************************************
