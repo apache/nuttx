@@ -31,6 +31,8 @@
 #include <debug.h>
 #include <errno.h>
 
+#include <nuttx/atomic.h>
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -75,6 +77,7 @@ int pthread_cond_init(FAR pthread_cond_t *cond,
     {
       cond->clockid = attr ? attr->clockid : CLOCK_REALTIME;
       cond->wait_count = 0;
+      nxmutex_init(&cond->mutex);
     }
 
   sinfo("Returning %d\n", ret);
