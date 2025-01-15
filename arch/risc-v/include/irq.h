@@ -750,6 +750,34 @@ int up_this_cpu(void);
  ****************************************************************************/
 
 /****************************************************************************
+ * Schedule acceleration macros
+ ****************************************************************************/
+
+/* When thread local storage is disabled (the usual case), the TP
+ * (Thread Pointer) register is available for use as a general purpose
+ * register. We use it to store the current task's TCB pointer for quick
+ * access.
+ * Note: If you want to use TLS (CONFIG_SCHED_THREAD_LOCAL), your toolchain
+ * must be compiled with --enable-tls option to properly support
+ * thread-local storage.
+ */
+
+#ifndef CONFIG_SCHED_THREAD_LOCAL
+#define up_this_task()                           \
+  ({                                             \
+    struct tcb_s* t;                             \
+    __asm__ __volatile__("mv %0, tp" : "=r"(t)); \
+    t;                                           \
+  })
+
+/* Update the current task pointer stored in TP register */
+#define up_update_task(t)                         \
+  {                                               \
+    __asm__ __volatile__("mv tp, %0" : : "r"(t)); \
+  }
+#endif /* CONFIG_SCHED_THREAD_LOCAL */
+
+/****************************************************************************
  * Name: up_irq_save
  *
  * Description:

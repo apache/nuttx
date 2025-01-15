@@ -36,6 +36,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/sched_note.h>
+#include <arch/irq.h>
 
 #include "sched/sched.h"
 #include "init/init.h"
@@ -69,6 +70,8 @@
 
 void riscv_cpu_boot(int cpu)
 {
+  struct tcb_s *tcb;
+
   /* Clear IPI for CPU(cpu) */
 
   riscv_ipi_clear(cpu);
@@ -100,9 +103,9 @@ void riscv_cpu_boot(int cpu)
 
   sinfo("CPU%d Started\n", this_cpu());
 
-#ifdef CONFIG_STACK_COLORATION
-  struct tcb_s *tcb = this_task();
+  tcb = current_task(this_cpu());
 
+#ifdef CONFIG_STACK_COLORATION
   /* If stack debug is enabled, then fill the stack with a
    * recognizable value that we can use later to test for high
    * water marks.
@@ -110,6 +113,8 @@ void riscv_cpu_boot(int cpu)
 
   riscv_stack_color(tcb->stack_alloc_ptr, 0);
 #endif
+
+  up_update_task(tcb);
 
   /* TODO: Setup FPU */
 
