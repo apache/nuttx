@@ -401,7 +401,7 @@ void esp32s2_lowputc_rst_rxfifo(const struct esp32s2_uart_s *priv);
  *
  ****************************************************************************/
 
-void esp32s2_lowputc_disable_all_uart_int(const struct esp32s2_uart_s *priv,
+void esp32s2_lowputc_disable_all_uart_int(struct esp32s2_uart_s *priv,
                                           uint32_t *current_status);
 
 /****************************************************************************
