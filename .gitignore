@@ -35,6 +35,8 @@
 *.mapfile
 *.SystemMap
 *~
+\#*\#
+.\#*
 .depend
 /.cache
 /.config
