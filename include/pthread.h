@@ -269,7 +269,8 @@ struct pthread_cond_s
 {
   sem_t sem;
   clockid_t clockid;
-  uint16_t wait_count;
+  unsigned int wait_count;
+  mutex_t mutex;
 };
 
 #ifndef __PTHREAD_COND_T_DEFINED
