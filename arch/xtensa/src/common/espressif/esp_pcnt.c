@@ -421,7 +421,7 @@ static int IRAM_ATTR esp_pcnt_isr_default(int irq, void *context,
           int event_id = __builtin_ffs(event_status) - 1;
           event_status &= (event_status - 1);
 
-          flags = spin_lock_irqsave(unit->lock);
+          flags = spin_lock_irqsave(&unit->lock);
           if (unit->config.accum_count)
             {
               if (event_id == PCNT_LL_WATCH_EVENT_LOW_LIMIT)
@@ -434,7 +434,7 @@ static int IRAM_ATTR esp_pcnt_isr_default(int irq, void *context,
                 }
             }
 
-          spin_unlock_irqrestore(&pcnt_units[unit_id].lock, flags);
+          spin_unlock_irqrestore(&unit->lock, flags);
           if (unit->cb)
             {
               data.unit_id = unit_id;
