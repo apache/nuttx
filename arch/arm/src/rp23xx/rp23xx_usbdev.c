@@ -34,6 +34,7 @@
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
+#include <sched.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/spinlock.h>
@@ -514,9 +515,9 @@ static int rp23xx_epwrite(struct rp23xx_ep_s *privep, uint8_t *buf,
 
   /* Start the transfer */
 
-  flags = spin_lock_irqsave(&g_usbdev.lock);
+  flags = spin_lock_irqsave(&privep->dev->lock);
   rp23xx_update_buffer_control(privep, 0, val);
-  spin_unlock_irqrestore(&g_usbdev.lock, flags);
+  spin_unlock_irqrestore(&privep->dev->lock, flags);
 
   return nbytes;
 }
@@ -543,9 +544,9 @@ static int rp23xx_epread(struct rp23xx_ep_s *privep, uint16_t nbytes)
 
   /* Start the transfer */
 
-  flags = spin_lock_irqsave(&g_usbdev.lock);
+  flags = spin_lock_irqsave(&privep->dev->lock);
   rp23xx_update_buffer_control(privep, 0, val);
-  spin_unlock_irqrestore(&g_usbdev.lock, flags);
+  spin_unlock_irqrestore(&privep->dev->lock, flags);
 
   return OK;
 }
@@ -582,17 +583,15 @@ static void rp23xx_abortrequest(struct rp23xx_ep_s *privep,
  *
  ****************************************************************************/
 
-static void rp23xx_reqcomplete(struct rp23xx_ep_s *privep, int16_t result)
+static void rp23xx_reqcomplete_nolock(struct rp23xx_ep_s *privep,
+                                      int16_t result)
 {
   struct rp23xx_req_s *privreq;
   int stalled = privep->stalled;
-  irqstate_t flags;
 
   /* Remove the completed request at the head of the endpoint request list */
 
-  flags = enter_critical_section();
   privreq = rp23xx_rqdequeue(privep);
-  leave_critical_section(flags);
 
   if (privreq)
     {
@@ -618,6 +617,13 @@ static void rp23xx_reqcomplete(struct rp23xx_ep_s *privep, int16_t result)
 
       privep->stalled = stalled;
     }
+}
+
+static void rp23xx_reqcomplete(struct rp23xx_ep_s *privep, int16_t result)
+{
+  irqstate_t flags = spin_lock_irqsave(&privep->dev->lock);
+  rp23xx_reqcomplete_nolock(privep, result);
+  spin_unlock_irqrestore(&privep->dev->lock, flags);
 }
 
 /****************************************************************************
@@ -854,14 +860,23 @@ static void rp23xx_handle_zlp(struct rp23xx_usbdev_s *priv)
  *
  ****************************************************************************/
 
-static void rp23xx_cancelrequests(struct rp23xx_ep_s *privep)
+static void rp23xx_cancelrequests_nolock(struct rp23xx_ep_s *privep)
 {
   while (!rp23xx_rqempty(privep))
     {
       usbtrace(TRACE_COMPLETE(privep->epphy),
                (rp23xx_rqpeek(privep))->req.xfrd);
-      rp23xx_reqcomplete(privep, -ESHUTDOWN);
+      rp23xx_reqcomplete_nolock(privep, -ESHUTDOWN);
     }
+}
+
+static void rp23xx_cancelrequests(struct rp23xx_ep_s *privep)
+{
+  irqstate_t flags = spin_lock_irqsave(&privep->dev->lock);
+  sched_lock();
+  rp23xx_cancelrequests_nolock(privep);
+  spin_unlock_irqrestore(&privep->dev->lock, flags);
+  sched_unlock();
 }
 
 /****************************************************************************
@@ -1330,9 +1345,11 @@ static bool rp23xx_usbintr_buffstat(struct rp23xx_usbdev_s *priv)
                     }
                   else if (privep->pending_stall)
                     {
-                      flags = spin_lock_irqsave(&g_usbdev.lock);
+                      flags = spin_lock_irqsave(&priv->lock);
+                      sched_lock();
                       rp23xx_epstall_exec(&privep->ep);
-                      spin_unlock_irqrestore(&g_usbdev.lock, flags);
+                      spin_unlock_irqrestore(&priv->lock, flags);
+                      sched_unlock();
                     }
                 }
               else
@@ -1519,7 +1536,8 @@ static int rp23xx_epdisable(struct usbdev_ep_s *ep)
   usbtrace(TRACE_EPDISABLE, privep->epphy);
   uinfo("EP%d\n", privep->epphy);
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&privep->dev->lock);
+  sched_lock();
 
   privep->ep.maxpacket = 64;
   privep->stalled = false;
@@ -1528,9 +1546,10 @@ static int rp23xx_epdisable(struct usbdev_ep_s *ep)
 
   /* Cancel all queued requests */
 
-  rp23xx_cancelrequests(privep);
+  rp23xx_cancelrequests_nolock(privep);
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&privep->dev->lock, flags);
+  sched_unlock();
 
   return OK;
 }
@@ -1623,7 +1642,8 @@ static int rp23xx_epsubmit(struct usbdev_ep_s *ep,
   req->result = -EINPROGRESS;
   req->xfrd = 0;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&privep->dev->lock);
+  sched_lock();
 
   if (privep->stalled && privep->in)
     {
@@ -1668,7 +1688,8 @@ static int rp23xx_epsubmit(struct usbdev_ep_s *ep,
         }
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&privep->dev->lock, flags);
+  sched_unlock();
   return ret;
 }
 
@@ -1698,9 +1719,11 @@ static int rp23xx_epcancel(struct usbdev_ep_s *ep,
 
   /* Remove request from req_queue */
 
-  flags = enter_critical_section();
-  rp23xx_cancelrequests(privep);
-  leave_critical_section(flags);
+  flags = spin_lock_irqsave(&privep->dev->lock);
+  sched_lock();
+  rp23xx_cancelrequests_nolock(privep);
+  spin_unlock_irqrestore(&privep->dev->lock, flags);
+  sched_unlock();
   return OK;
 }
 
@@ -1749,7 +1772,8 @@ static int rp23xx_epstall(struct usbdev_ep_s *ep, bool resume)
   struct rp23xx_usbdev_s *priv = privep->dev;
   irqstate_t flags;
 
-  flags = spin_lock_irqsave(&g_usbdev.lock);
+  flags = spin_lock_irqsave(&priv->lock);
+  sched_lock();
 
   if (resume)
     {
@@ -1790,7 +1814,8 @@ static int rp23xx_epstall(struct usbdev_ep_s *ep, bool resume)
       priv->zlp_stat = RP23XX_ZLP_NONE;
     }
 
-  spin_unlock_irqrestore(&g_usbdev.lock, flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
+  sched_unlock();
 
   return OK;
 }
@@ -2140,7 +2165,8 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
 
   usbtrace(TRACE_DEVUNREGISTER, 0);
 
-  flags = spin_lock_irqsave(&g_usbdev.lock);
+  flags = spin_lock_irqsave(&priv->lock);
+  sched_lock();
 
   /* Unbind the class driver */
 
@@ -2158,7 +2184,8 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
 
   priv->driver = NULL;
 
-  spin_unlock_irqrestore(&g_usbdev.lock, flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
+  sched_unlock();
 
   return OK;
 }
