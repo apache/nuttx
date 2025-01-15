@@ -31,6 +31,8 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/atomic.h>
+
 #include "pthread/pthread.h"
 
 /****************************************************************************
@@ -42,10 +44,7 @@
  *
  * Description:
  *    A thread broadcast on a condition variable.
- *    pthread_cond_broadcast shall unblock all threads currently blocked on a
- *    specified condition variable cond. We need own the mutex that threads
- *    calling pthread_cond_wait or pthread_cond_timedwait have associated
- *    with the condition variable during their wait.
+ *
  * Input Parameters:
  *   None
  *
@@ -68,22 +67,24 @@ int pthread_cond_broadcast(FAR pthread_cond_t *cond)
     }
   else
     {
+      int wcnt = atomic_read(COND_WAIT_COUNT(cond));
+
       /* Loop until all of the waiting threads have been restarted. */
 
-      while (cond->wait_count > 0)
+      while (wcnt > 0)
         {
-          /* If the value is less than zero (meaning that one or more
-           * thread is waiting), then post the condition semaphore.
-           * Only the highest priority waiting thread will get to execute
-           */
+          if (atomic_cmpxchg(COND_WAIT_COUNT(cond), &wcnt, wcnt - 1))
+            {
+              /* Post the condition semaphore to wake up a waiting thread.
+               * Only the highest priority waiting thread will get to execute
+               */
 
-          ret = -nxsem_post(&cond->sem);
+              ret = -nxsem_post(&cond->sem);
 
-          /* Increment the semaphore count (as was done by the
-           * above post).
-           */
+              /* Decrement the waiter count */
 
-          cond->wait_count--;
+              wcnt--;
+            }
         }
     }
 

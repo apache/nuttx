@@ -36,6 +36,7 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/atomic.h>
 #include <nuttx/irq.h>
 #include <nuttx/wdog.h>
 #include <nuttx/signal.h>
@@ -113,7 +114,7 @@ int pthread_cond_clockwait(FAR pthread_cond_t *cond,
 
       sinfo("Give up mutex...\n");
 
-      cond->wait_count++;
+      atomic_fetch_add(COND_WAIT_COUNT(cond), 1);
 
       /* Give up the mutex */
 
