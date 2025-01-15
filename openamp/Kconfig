@@ -30,4 +30,8 @@ config OPENAMP_VIRTIO_DRIVER_SUPPORT
 	bool "Enable VIRTIO_DRIVER_SUPPORT"
 	default y
 
+config OPENAMP_RPMSG_TRACE
+	bool "Enable OpenAMP Rpmsg Trace"
+	default n
+
 endif # OPENAMP
