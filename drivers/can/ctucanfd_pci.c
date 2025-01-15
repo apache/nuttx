@@ -176,6 +176,8 @@ static bool ctucanfd_chrdev_txempty(FAR struct can_dev_s *dev);
 static int  ctucanfd_chrdev_txconfirm(FAR struct can_dev_s *dev, int idx);
 #endif
 
+static bool ctucanfd_chrdev_cancel(FAR struct can_dev_s *dev,
+                                   FAR struct can_msg_s *msg);
 static void ctucanfd_chardev_receive(FAR struct ctucanfd_can_s *priv);
 static void ctucanfd_chardev_interrupt(FAR struct ctucanfd_driver_s *priv);
 #endif
@@ -228,6 +230,7 @@ static const struct can_ops_s g_ctucanfd_can_ops =
   .co_send          = ctucanfd_chrdev_send,
   .co_txready       = ctucanfd_chrdev_txready,
   .co_txempty       = ctucanfd_chrdev_txempty,
+  .co_cancel        = ctucanfd_chrdev_cancel,
 };
 #endif
 
@@ -799,6 +802,70 @@ static int ctucanfd_chrdev_txconfirm(struct can_dev_s *dev, int idx)
   return can_receive(dev, &hdr, NULL);
 }
 #endif
+
+/*****************************************************************************
+ * Name: ctucanfd_chrdev_cancel
+ *
+ * Description:
+ *   Cancel one can message.
+ *
+ * Input Parameters:
+ *   dev - An instance of the "upper half" can driver state structure.
+ *   msg - One can message.
+ *
+ * Returned Value:
+ *   true on success; zero on failure.
+ *****************************************************************************/
+
+static bool ctucanfd_chrdev_cancel(FAR struct can_dev_s *dev,
+                                   FAR struct can_msg_s *msg)
+{
+  FAR struct ctucanfd_can_s *priv = (FAR struct ctucanfd_can_s *)dev;
+  uint32_t regval;
+  uint32_t offset;
+  uint32_t id;
+  int i;
+
+  /* Find TXB to be canceled */
+
+  for (i = 0; i < CTUCANFD_TXBUF_CNT; i++)
+    {
+      offset = CTUCANFD_TXT1 + CTUCANFD_TXT_SIZE * i;
+      id = ctucanfd_getreg(priv, offset + CTUCANFD_TXBUF_ID);
+      if (id == msg->cm_hdr.ch_id)
+        {
+          /* Set abort to TXB */
+
+          regval = (CTUCANFD_TXCMD_TXCA +
+                    (1 << (CTUCANFD_TXCMD_TXB_SHIFT + i)));
+          ctucanfd_putreg(priv, CTUCANFD_TXINFOCMD, regval);
+
+          for (; ; )
+            {
+              /* Check TXB status, when status is not
+               * ready/tx_in_progress/abort_in_progress, set it to empty
+               */
+
+              regval = ctucanfd_getreg(priv, CTUCANFD_TXSTAT);
+
+              if (CTUCANFD_TXSTAT_GET(regval, i) >= CTUCANFD_TXSTAT_TOK)
+                {
+                  regval = (CTUCANFD_TXCMD_TXCE +
+                            (1 << (CTUCANFD_TXCMD_TXB_SHIFT + i)));
+                  ctucanfd_putreg(priv, CTUCANFD_TXINFOCMD, regval);
+
+                  /* Cancel success */
+#ifdef CONFIG_CAN_TXCONFIRM
+                  memset(&priv->tx_idbuf[i], 0, sizeof(struct can_hdr_s));
+#endif
+                  return true;
+                }
+            }
+        }
+    }
+
+  return false;
+}
 
 /*****************************************************************************
  * Name: ctucanfd_chardev_receive
