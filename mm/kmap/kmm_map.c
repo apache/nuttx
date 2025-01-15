@@ -159,7 +159,7 @@ static FAR void *map_pages(FAR void **pages, size_t npages, int prot)
 errout_with_pgmap:
   up_addrenv_kunmap_pages((uintptr_t)vaddr, npages);
 errout_with_vaddr:
-  gran_free(&g_kmm_map_vpages, vaddr, size);
+  gran_free(g_kmm_map_vpages, vaddr, size);
   return NULL;
 }
 
@@ -385,7 +385,7 @@ void kmm_unmap(FAR void *kaddr)
 
           /* Release the virtual memory area for use */
 
-          gran_free(&g_kmm_map_vpages, entry->vaddr, entry->length);
+          gran_free(g_kmm_map_vpages, entry->vaddr, entry->length);
 
           /* Remove the mapping from the kernel mapping list */
 
