@@ -443,12 +443,19 @@ irqstate_t spin_lock_irqsave_wo_note(FAR volatile spinlock_t *lock)
   irqstate_t flags;
   flags = up_irq_save();
 
+  sched_lock_wo_note();
   spin_lock_wo_note(lock);
 
   return flags;
 }
 #else
-#  define spin_lock_irqsave_wo_note(l) ((void)(l), up_irq_save())
+static inline_function
+irqstate_t spin_lock_irqsave_wo_note(FAR volatile spinlock_t *lock)
+{
+  irqstate_t flags = up_irq_save();
+  sched_lock_wo_note();
+  return flags;
+}
 #endif
 
 /****************************************************************************
@@ -496,7 +503,13 @@ irqstate_t spin_lock_irqsave(FAR volatile spinlock_t *lock)
   return flags;
 }
 #else
-#  define spin_lock_irqsave(l) ((void)(l), up_irq_save())
+static inline_function
+irqstate_t spin_lock_irqsave(FAR volatile spinlock_t *lock)
+{
+  irqstate_t flags = up_irq_save();
+  sched_lock_wo_note();
+  return flags;
+}
 #endif
 
 /****************************************************************************
@@ -590,9 +603,10 @@ void spin_unlock_irqrestore_wo_note(FAR volatile spinlock_t *lock,
   spin_unlock_wo_note(lock);
 
   up_irq_restore(flags);
+  sched_unlock_wo_note();
 }
 #else
-#  define spin_unlock_irqrestore_wo_note(l, f) ((void)(l), up_irq_restore(f))
+#  define spin_unlock_irqrestore_wo_note(l, f) ((void)(l), up_irq_restore(f), sched_unlock_wo_note())
 #endif
 
 /****************************************************************************
@@ -631,7 +645,7 @@ void spin_unlock_irqrestore(FAR volatile spinlock_t *lock,
   sched_note_spinlock_unlock(lock);
 }
 #else
-#  define spin_unlock_irqrestore(l, f) ((void)(l), up_irq_restore(f))
+#  define spin_unlock_irqrestore(l, f) ((void)(l), up_irq_restore(f), sched_unlock_wo_note())
 #endif
 
 #if defined(CONFIG_RW_SPINLOCK)
