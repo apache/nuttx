@@ -254,6 +254,7 @@ config ARCH_CORTEX_A53
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_TESTSET
 	select ARM64_HAVE_NEON
+	select ARCH_HAVE_DEBUG
 
 config ARCH_CORTEX_A55
 	bool
@@ -278,6 +279,7 @@ config ARCH_CORTEX_A57
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_TESTSET
 	select ARM64_HAVE_NEON
+	select ARCH_HAVE_DEBUG
 
 config ARCH_CORTEX_A72
 	bool
@@ -290,6 +292,7 @@ config ARCH_CORTEX_A72
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_TESTSET
 	select ARM64_HAVE_NEON
+	select ARCH_HAVE_DEBUG
 
 config ARCH_CORTEX_R82
 	bool
@@ -314,6 +317,7 @@ config ARCH_CPU_UNKNOWN
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_TESTSET
 	select ARM64_HAVE_NEON
+	select ARCH_HAVE_DEBUG
 
 config ARCH_FAMILY
 	string
