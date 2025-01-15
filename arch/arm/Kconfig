@@ -727,7 +727,6 @@ config ARCH_CHIP_QEMU_ARM
 	select ARCH_HAVE_RESET
 	select ARCH_IDLE_CUSTOM
 	select ARM_HAVE_PSCI
-	select ARM_HAVE_NEON
 	---help---
 		QEMU virt platform (ARMv7a)
 
