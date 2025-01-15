@@ -202,9 +202,6 @@ Configuration                        Description
                                      setting is *y*. This setting depends upon the ``strerror()``
                                      having been enabled with ``CONFIG_LIBC_STRERROR``.
 
- ``CONFIG_NSH_LINELEN``              The maximum length of one command line and of one output line.
-                                     Default: 80
-
  ``CONFIG_NSH_DISABLE_SEMICOLON``    By default, you can enter multiple NSH commands on a line
                                      with each command separated by a semicolon. You can disable this
                                      feature to save a little memory on FLASH challenged platforms.

@@ -1049,7 +1049,7 @@ NOTES
          -
          +sleep(2); // REMOVE ME
          +#if 0 // REMOVE ME
-                ret = readline(pstate->cn_line, CONFIG_NSH_LINELEN,
+                ret = readline(pstate->cn_line, LINE_MAX,
                                INSTREAM(pstate), OUTSTREAM(pstate));
                 if (ret > 0)
          @@ -153,6 +155,7 @@
