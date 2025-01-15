@@ -505,6 +505,7 @@ enum ioapic_trigger_mode
   TRIGGER_FALLING_EDGE      = (1 << 13),
   TRIGGER_LEVEL_ACTIVE_HIGH = (1 << 15),
   TRIGGER_LEVEL_ACTIVE_LOW  = (1 << 15) | (1 << 13),
+  TRIGGER_MODE_MASK         = (1 << 15) | (1 << 13),
 };
 
 /* This structure represents the return state from a system call */
