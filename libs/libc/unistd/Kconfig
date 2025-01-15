@@ -117,3 +117,25 @@ config LIBC_OPEN_MAX
 	---help---
 		The maximum number of files that a process can have open
 		at any time.  Must not be less than _POSIX_OPEN_MAX.
+
+config NAME_MAX
+	int "Maximum size of a file name"
+	default 32
+	---help---
+		The maximum size of a file name.
+
+config PATH_MAX
+	int "Maximum size of path name"
+	default 256
+	---help---
+		The maximum size of path name.
+
+config LINE_MAX
+	int "Maximum size of line"
+	default 64 if DEFAULT_SMALL
+	default 80 if !DEFAULT_SMALL
+	---help---
+		The maximum size of line. Unless otherwise noted, the maximum length, in bytes,
+		of a utility's input line (either standard input or another file), when the
+		utility is described as processing text files. The length includes room for
+		the trailing newline.
