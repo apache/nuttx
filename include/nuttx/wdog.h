@@ -298,25 +298,6 @@ static inline int wd_start_realtime(FAR struct wdog_s *wdog,
 int wd_cancel(FAR struct wdog_s *wdog);
 
 /****************************************************************************
- * Name: wd_cancel_irq
- *
- * Description:
- *   This function cancels a currently running watchdog timer. Watchdog
- *   timers may be cancelled from the interrupt level.  This function is
- *   intended to be called from critical sections.
- *
- * Input Parameters:
- *   wdog - ID of the watchdog to cancel.
- *
- * Returned Value:
- *   Zero (OK) is returned on success;  A negated errno value is returned to
- *   indicate the nature of any failure.
- *
- ****************************************************************************/
-
-int wd_cancel_irq(FAR struct wdog_s *wdog);
-
-/****************************************************************************
  * Name: wd_gettime
  *
  * Description:
