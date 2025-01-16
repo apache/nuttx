@@ -39,7 +39,6 @@ $(MINMEA_UNPACKNAME):
 # Files
 
 CSRCS  += minmea.c
-CFLAGS += -std=c99
 
 clean::
 	$(call DELFILE, $(OBJS))
