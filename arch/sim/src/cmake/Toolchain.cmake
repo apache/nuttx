@@ -148,6 +148,7 @@ if(NOT WIN32)
     -ffunction-sections
     -fdata-sections
     -Wall
+    -Wvla
     -Wshadow
     -Wundef
     -Wno-attributes

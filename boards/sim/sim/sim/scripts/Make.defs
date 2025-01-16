@@ -127,8 +127,8 @@ ARCHCXXFLAGS += -fvisibility=hidden
 ARCHCFLAGS += -ffunction-sections -fdata-sections
 ARCHCXXFLAGS += -ffunction-sections -fdata-sections
 
-ARCHCFLAGS += -Wall -Wstrict-prototypes -Wshadow -Wundef -Wno-attributes -Wno-unknown-pragmas
-ARCHCXXFLAGS += -Wall -Wshadow -Wundef -Wno-attributes -Wno-unknown-pragmas
+ARCHCFLAGS += -Wall -Wvla -Wstrict-prototypes -Wshadow -Wundef -Wno-attributes -Wno-unknown-pragmas
+ARCHCXXFLAGS += -Wall -Wvla -Wshadow -Wundef -Wno-attributes -Wno-unknown-pragmas
 
 ifneq ($(CONFIG_LIBCXXTOOLCHAIN),y)
   ARCHCXXFLAGS += -nostdinc++
