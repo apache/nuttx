@@ -69,21 +69,18 @@ int pthread_cond_destroy(FAR pthread_cond_t *cond)
 
   else
     {
-      ret = sem_getvalue(&cond->sem, &sval);
+      ret = nxsem_get_value(&cond->sem, &sval);
       if (ret < 0)
         {
           ret = -ret;
         }
+      else if (sval < 0)
+        {
+          ret = EBUSY;
+        }
       else
         {
-          if (sval < 0)
-            {
-              ret = EBUSY;
-            }
-          else if (sem_destroy(&cond->sem) != OK)
-            {
-              ret = get_errno();
-            }
+          ret = -nxsem_destroy(&cond->sem);
         }
     }
 
