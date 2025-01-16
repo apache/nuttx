@@ -2036,6 +2036,52 @@ int pci_connect_irq(FAR struct pci_device_s *dev, FAR int *irq, int num)
 }
 
 /****************************************************************************
+ * Name: pci_enable_irq
+ *
+ * Description:
+ *   Enable legacy irq if available.
+ *
+ * Input Parameters:
+ *   dev - PCI device
+ *   irq - allocated vectors
+ *
+ ****************************************************************************/
+
+void pci_enable_irq(FAR struct pci_device_s *dev, int irq)
+{
+  uint16_t command;
+  uint8_t line;
+
+  pci_read_config_byte(dev, PCI_INTERRUPT_LINE, &line);
+  pci_read_config_word(dev, PCI_COMMAND, &command);
+  command &= ~PCI_COMMAND_INTX_DISABLE;
+  pci_write_config_word(dev, PCI_COMMAND, command);
+  if (line == 0)
+    {
+      pci_write_config_byte(dev, PCI_INTERRUPT_LINE, irq);
+    }
+}
+
+/****************************************************************************
+ * Name: pci_disable_irq
+ *
+ * Description:
+ *   Disable legacy irq.
+ *
+ * Input Parameters:
+ *   dev - PCI device
+ *
+ ****************************************************************************/
+
+void pci_disable_irq(FAR struct pci_device_s *dev)
+{
+  uint16_t command;
+  pci_read_config_word(dev, PCI_COMMAND, &command);
+  command |= PCI_COMMAND_INTX_DISABLE;
+  pci_write_config_word(dev, PCI_COMMAND, command);
+}
+
+/****************************************************************************
  * Name: pci_register_driver
  *
  * Description:

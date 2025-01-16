@@ -835,6 +835,33 @@ void pci_release_irq(FAR struct pci_device_s *dev, FAR int *irq, int num);
 int pci_connect_irq(FAR struct pci_device_s *dev, FAR int *irq, int num);
 
 /****************************************************************************
+ * Name: pci_enable_irq
+ *
+ * Description:
+ *   Enable legacy irq if available.
+ *
+ * Input Parameters:
+ *   dev - PCI device
+ *   irq - allocated vectors
+ *
+ ****************************************************************************/
+
+void pci_enable_irq(FAR struct pci_device_s *dev, int irq);
+
+/****************************************************************************
+ * Name: pci_disable_irq
+ *
+ * Description:
+ *   Disable legacy irq.
+ *
+ * Input Parameters:
+ *   dev - PCI device
+ *
+ ****************************************************************************/
+
+void pci_disable_irq(FAR struct pci_device_s *dev);
+
+/****************************************************************************
  * Name: pci_register_driver
  *
  * Description:
