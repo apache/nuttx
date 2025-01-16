@@ -31,6 +31,7 @@
 
 #include <nuttx/compiler.h>
 #include <nuttx/clock.h>
+#include <errno.h>
 #include <stdint.h>
 
 /****************************************************************************
@@ -348,6 +349,12 @@ int wd_cancel(FAR struct wdog_s *wdog);
 
 static inline int wd_cancel_period(FAR struct wdog_period_s *wdog_period)
 {
+  if (!wdog_period)
+    {
+      return -EINVAL;
+    }
+
+  wdog_period->period = 0;
   return wd_cancel(&wdog_period->wdog);
 }
 
