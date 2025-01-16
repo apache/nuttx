@@ -513,7 +513,10 @@ config ESPRESSIF_WIRELESS
 	select ESP32S2_RNG if ARCH_CHIP_ESP32S2
 	select ESP32S2_RT_TIMER if ARCH_CHIP_ESP32S2
 	select ESP32S2_TIMER0 if ARCH_CHIP_ESP32S2
-	depends on ARCH_CHIP_ESP32S2
+	select ESP32S3_RNG if ARCH_CHIP_ESP32S3
+	select ESP32S3_RT_TIMER if ARCH_CHIP_ESP32S3
+	select ESP32S3_TIMER0 if ARCH_CHIP_ESP32S3
+	depends on ARCH_CHIP_ESP32S2 || ARCH_CHIP_ESP32S3
 	---help---
 		Enable Wireless support
 
@@ -523,6 +526,32 @@ config ESPRESSIF_WIFI
 	select ESPRESSIF_WIRELESS
 	---help---
 		Enable Wi-Fi support
+
+config ESPRESSIF_BLE
+	bool "BLE"
+	depends on ARCH_CHIP_ESP32S3
+	default n
+	select ESPRESSIF_WIRELESS
+	---help---
+		Enable BLE support.
+
+config ESP_COEX_SW_COEXIST_ENABLE
+	bool "Software WiFi/Bluetooth/IEEE 802.15.4 coexistence"
+	depends on (ESPRESSIF_WIFI && ESPRESSIF_BLE)
+	default y
+	---help---
+		If enabled, WiFi & Bluetooth coexistence is controlled by software rather than hardware.
+		Recommended for heavy traffic scenarios. Both coexistence configuration options are
+		automatically managed, no user intervention is required.
+		If only Bluetooth is used, it is recommended to disable this option to reduce binary file
+		size.
+
+menuconfig ESPRESSIF_WIFI_BT_COEXIST
+	bool "Wi-Fi and BT coexist"
+	default y if ESPRESSIF_WIFI && ESPRESSIF_BLE
+	default n
+	depends on ESPRESSIF_WIFI && ESPRESSIF_BLE
+	select ESPRESSIF_WIFI_STA_DISCONNECT_PM
 
 menu "Wi-Fi Configuration"
 	depends on ESPRESSIF_WIFI
@@ -692,3 +721,22 @@ config ESPRESSIF_WIFI_LISTEN_INTERVAL
 		to beacon is 300 ms.
 
 endmenu # ESPRESSIF_WIFI
+
+menu "BLE Configuration"
+	depends on ESPRESSIF_BLE
+
+config ESPRESSIF_BLE_TASK_STACK_SIZE
+	int "Controller task stack size"
+	default 4096
+
+config ESPRESSIF_BLE_TASK_PRIORITY
+	int "Controller task priority"
+	default 253
+
+config ESPRESSIF_BLE_INTERRUPT_SAVE_STATUS
+	int "Number of interrupt save status"
+	default 3
+	---help---
+		Number of interrupt save status variables to keep track. Increase it if any related bug is found.
+
+endmenu # BLE Configuration
