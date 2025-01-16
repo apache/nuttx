@@ -58,7 +58,7 @@
 #include "esp32s3_rt_timer.h"
 #include "esp32s3_rtc.h"
 #include "esp32s3_spiflash.h"
-#include "esp32s3_wireless.h"
+#include "espressif/esp_wireless.h"
 
 #include "esp_bt.h"
 #include "esp_log.h"
@@ -104,8 +104,8 @@
 #  define BLE_TASK_EVENT_QUEUE_LEN        8
 #endif
 
-#ifdef CONFIG_ESP32S3_BLE_INTERRUPT_SAVE_STATUS
-#  define NR_IRQSTATE_FLAGS   CONFIG_ESP32S3_BLE_INTERRUPT_SAVE_STATUS
+#ifdef CONFIG_ESPRESSIF_BLE_INTERRUPT_SAVE_STATUS
+#  define NR_IRQSTATE_FLAGS   CONFIG_ESPRESSIF_BLE_INTERRUPT_SAVE_STATUS
 #else
 #  define NR_IRQSTATE_FLAGS   3
 #endif
@@ -1845,7 +1845,7 @@ static void coex_wifi_sleep_set_hook(bool sleep)
  * Description:
  *   This is a wrapper for registering a BTDM callback with the coexistence
  *   scheme. If the Wi-Fi and Bluetooth coexistence feature is enabled
- *   (CONFIG_ESP32S3_WIFI_BT_COEXIST), it calls the
+ *   (CONFIG_ESPRESSIF_WIFI_BT_COEXIST), it calls the
  *   coex_schm_register_callback function with COEX_SCHM_CALLBACK_TYPE_BT
  *   and the provided callback. If the feature is not enabled, it returns 0.
  *
@@ -1860,7 +1860,7 @@ static void coex_wifi_sleep_set_hook(bool sleep)
 
 static int coex_schm_register_btdm_callback_wrapper(void *callback)
 {
-#if CONFIG_ESP32S3_WIFI_BT_COEXIST
+#if CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   return coex_schm_register_callback(COEX_SCHM_CALLBACK_TYPE_BT, callback);
 #else
   return 0;
@@ -1884,7 +1884,7 @@ static int coex_schm_register_btdm_callback_wrapper(void *callback)
 
 static void coex_schm_status_bit_set_wrapper(uint32_t type, uint32_t status)
 {
-#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   coex_schm_status_bit_set(type, status);
 #endif
 }
@@ -1907,7 +1907,7 @@ static void coex_schm_status_bit_set_wrapper(uint32_t type, uint32_t status)
 static void coex_schm_status_bit_clear_wrapper(uint32_t type,
                                                uint32_t status)
 {
-#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   coex_schm_status_bit_clear(type, status);
 #endif
 }
@@ -1917,7 +1917,7 @@ static void coex_schm_status_bit_clear_wrapper(uint32_t type,
  *
  * Description:
  *   This is a wrapper for coex_schm_interval_get. If the WiFi and Bluetooth
- *   coexistence feature is enabled (CONFIG_ESP32S3_WIFI_BT_COEXIST), it
+ *   coexistence feature is enabled (CONFIG_ESPRESSIF_WIFI_BT_COEXIST), it
  *   calls the function and returns its result. If not enabled, it returns 0.
  *
  * Input Parameters:
@@ -1931,7 +1931,7 @@ static void coex_schm_status_bit_clear_wrapper(uint32_t type,
 
 static uint32_t coex_schm_interval_get_wrapper(void)
 {
-#if CONFIG_ESP32S3_WIFI_BT_COEXIST
+#if CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   return coex_schm_interval_get();
 #else
   return 0;
@@ -1944,8 +1944,8 @@ static uint32_t coex_schm_interval_get_wrapper(void)
  * Description:
  *   This is a wrapper for coex_schm_curr_period_get. If the WiFi and
  *   Bluetooth coexistence feature is enabled
- *   (CONFIG_ESP32S3_WIFI_BT_COEXIST), it calls the function and returns its
- *   result. If the feature is not enabled, it returns 1.
+ *   (CONFIG_ESPRESSIF_WIFI_BT_COEXIST), it calls the function and returns
+ *   its result. If the feature is not enabled, it returns 1.
  *
  * Input Parameters:
  *   None
@@ -1958,7 +1958,7 @@ static uint32_t coex_schm_interval_get_wrapper(void)
 
 static uint8_t coex_schm_curr_period_get_wrapper(void)
 {
-#if CONFIG_ESP32S3_WIFI_BT_COEXIST
+#if CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   return coex_schm_curr_period_get();
 #else
   return 1;
@@ -1971,8 +1971,8 @@ static uint8_t coex_schm_curr_period_get_wrapper(void)
  * Description:
  *   This is a wrapper for coex_schm_curr_phase_get. If the WiFi and
  *   Bluetooth coexistence feature is enabled
- *   (CONFIG_ESP32S3_WIFI_BT_COEXIST), it calls the function and returns its
- *   result. If the feature is not enabled, it returns NULL.
+ *   (CONFIG_ESPRESSIF_WIFI_BT_COEXIST), it calls the function and returns
+ *   its result. If the feature is not enabled, it returns NULL.
  *
  * Input Parameters:
  *   None
@@ -1985,7 +1985,7 @@ static uint8_t coex_schm_curr_period_get_wrapper(void)
 
 static void * coex_schm_curr_phase_get_wrapper(void)
 {
-#if CONFIG_ESP32S3_WIFI_BT_COEXIST
+#if CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   return coex_schm_curr_phase_get();
 #else
   return NULL;
@@ -2627,7 +2627,7 @@ static esp_err_t btdm_low_power_mode_init(esp_bt_controller_config_t *cfg)
           break;
         }
 
-#if CONFIG_ESP32S3_WIFI_BT_COEXIST
+#if CONFIG_ESPRESSIF_WIFI_BT_COEXIST
       coex_update_lpclk_interval();
 #endif
 
@@ -2767,7 +2767,7 @@ static void btdm_low_power_mode_deinit(void)
 
       btdm_lpclk_select_src(BTDM_LPCLK_SEL_RTC_SLOW);
       btdm_lpclk_set_div(0);
-#if CONFIG_ESP32S3_WIFI_BT_COEXIST
+#if CONFIG_ESPRESSIF_WIFI_BT_COEXIST
       coex_update_lpclk_interval();
 #endif
     }
@@ -3076,8 +3076,8 @@ int esp32s3_bt_controller_init(void)
         }
     }
 
-  cfg->controller_task_stack_size = CONFIG_ESP32S3_BLE_TASK_STACK_SIZE;
-  cfg->controller_task_prio       = CONFIG_ESP32S3_BLE_TASK_PRIORITY;
+  cfg->controller_task_stack_size = CONFIG_ESPRESSIF_BLE_TASK_STACK_SIZE;
+  cfg->controller_task_prio       = CONFIG_ESPRESSIF_BLE_TASK_PRIORITY;
   cfg->controller_task_run_cpu    = CONFIG_BT_CTRL_PINNED_TO_CORE;
   cfg->magic                      = ESP_BT_CTRL_CONFIG_MAGIC_VAL;
 
@@ -3113,7 +3113,7 @@ int esp32s3_bt_controller_init(void)
       goto error;
     }
 
-#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   coex_init();
 #endif
 
@@ -3213,7 +3213,7 @@ int esp32s3_bt_controller_enable(esp_bt_mode_t mode)
   esp_phy_enable(PHY_MODEM_BT);
   g_lp_stat.phy_enabled = 1;
 
-#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   coex_enable();
 #endif
 
@@ -3290,7 +3290,7 @@ error:
     }
 #endif
 
-#if CONFIG_ESP32S3_WIFI_BT_COEXIST
+#if CONFIG_ESPRESSIF_WIFI_BT_COEXIST
     coex_disable();
 #endif
   if (g_lp_stat.phy_enabled)
@@ -3334,7 +3334,7 @@ int esp32s3_bt_controller_disable(void)
 
   async_wakeup_request_end(BTDM_ASYNC_WAKEUP_SRC_DISA);
 
-#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   coex_disable();
 #endif
 
