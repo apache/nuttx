@@ -474,7 +474,7 @@ SECTIONS
                     *libarch.a:*cache_hal.* *libarch.a:*mmu_hal.*
                     *libarch.a:*mpu_hal.*) .rodata.*)
 
-#ifdef CONFIG_ESP32S3_WIRELESS
+#ifdef CONFIG_ESPRESSIF_WIRELESS
     *(.rodata_wlog_verbose.*)
     *(.rodata_wlog_debug.*)
     *(.rodata_wlog_info.*)
