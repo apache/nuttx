@@ -1397,7 +1397,7 @@ config RAM_SIZE
 		does not execute out of RAM but from FLASH, then you may designate
 		any block of RAM as "primary."
 
-if BOOT_RUNFROMFLASH && ARCH_USE_MMU
+if BOOT_RUNFROMFLASH
 
 config FLASH_START
 	hex "Boot FLASH start address (physical)"
@@ -1409,6 +1409,7 @@ config FLASH_START
 config FLASH_VSTART
 	hex "Boot FLASH start address (virtual)"
 	default 0x0
+	depends on ARCH_USE_MMU
 	---help---
 		The virtual start address of installed boot FLASH.  "Boot" FLASH
 		refers to the FLASH that you link program code into.
@@ -1420,7 +1421,7 @@ config FLASH_SIZE
 		The size in bytes of the installed boot FLASH.  "Boot" FLASH
 		refers to the FLASH that you link program code into.
 
-endif # BOOT_RUNFROMFLASH && ARCH_USE_MMU
+endif # BOOT_RUNFROMFLASH
 
 config ARCH_HAVE_SDRAM
 	bool
