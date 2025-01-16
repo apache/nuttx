@@ -677,18 +677,20 @@ static int rpmsg_router_cb(FAR struct rpmsg_endpoint *ept,
   FAR struct rpmsg_router_s *msg = data;
   FAR struct rpmsg_router_edge_s *edge;
 
-  /* Destroy the router edge device */
+  /* Destroy the router edge device
+   * or set pm state for edge device
+   */
 
   if (msg->cmd == RPMSG_ROUTER_DESTROY)
     {
       edge = ept->priv;
-      if (edge == NULL)
+
+      if (edge != NULL)
         {
-          return -EINVAL;
+          rpmsg_router_edge_destroy(edge);
+          ept->priv = NULL;
         }
 
-      rpmsg_router_edge_destroy(edge);
-      ept->priv = NULL;
       return 0;
     }
   else if (msg->cmd == RPMSG_ROUTER_SUSPEND ||
