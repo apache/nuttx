@@ -60,19 +60,19 @@
 #include "hardware/esp32s3_syscon.h"
 #include "hardware/esp32s3_soc.h"
 #include "esp32s3_irq.h"
-#include "esp32s3_wireless.h"
+#include "espressif/esp_wireless.h"
 #include "esp32s3_wifi_adapter.h"
 #include "esp32s3_rt_timer.h"
-#include "esp32s3_wifi_utils.h"
-#include "esp32s3_wlan.h"
+#include "espressif/esp_wifi_utils.h"
+#include "espressif/esp_wlan.h"
 
 #ifdef CONFIG_PM
 #  include "esp32s3_pm.h"
 #endif
 
-#ifdef CONFIG_ESP32S3_BLE
+#ifdef CONFIG_ESPRESSIF_BLE
 #  include "esp32s3_ble_adapter.h"
-#  ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+#  ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
 #    include "private/esp_coexist_internal.h"
 #  endif
 #endif
@@ -94,7 +94,7 @@
 
 #define PHY_RF_MASK   ((1 << PHY_BT_MODULE) | (1 << PHY_WIFI_MODULE))
 
-#define WIFI_CONNECT_TIMEOUT  CONFIG_ESP32S3_WIFI_CONNECT_TIMEOUT
+#define WIFI_CONNECT_TIMEOUT  CONFIG_ESPRESSIF_WIFI_CONNECT_TIMEOUT
 
 #define TIMER_INITIALIZED_VAL (0x5aa5a55a)
 
@@ -115,11 +115,11 @@
 
 /* CONFIG_POWER_SAVE_MODEM */
 
-#if defined(CONFIG_ESP32S3_POWER_SAVE_MIN_MODEM)
+#if defined(CONFIG_ESPRESSIF_POWER_SAVE_MIN_MODEM)
 #  define DEFAULT_PS_MODE WIFI_PS_MIN_MODEM
-#elif defined(CONFIG_ESP32S3_POWER_SAVE_MAX_MODEM)
+#elif defined(CONFIG_ESPRESSIF_POWER_SAVE_MAX_MODEM)
 #  define DEFAULT_PS_MODE WIFI_PS_MAX_MODEM
-#elif defined(CONFIG_ESP32S3_POWER_SAVE_NONE)
+#elif defined(CONFIG_ESPRESSIF_POWER_SAVE_NONE)
 #  define DEFAULT_PS_MODE WIFI_PS_NONE
 #else
 #  define DEFAULT_PS_MODE WIFI_PS_NONE
@@ -197,11 +197,11 @@ struct nvs_adpt
  * Private Function Prototypes
  ****************************************************************************/
 
-#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
 static int semphr_take_from_isr_wrapper(void *semphr, void *hptw);
 static int semphr_give_from_isr_wrapper(void *semphr, void *hptw);
 static int is_in_isr_wrapper(void);
-#endif /* CONFIG_ESP32S3_WIFI_BT_COEXIST */
+#endif /* CONFIG_ESPRESSIF_WIFI_BT_COEXIST */
 
 static bool wifi_env_is_chip(void);
 static void wifi_set_intr(int32_t cpu_no, uint32_t intr_source,
@@ -365,7 +365,7 @@ static mutex_t g_wifiexcl_lock = NXMUTEX_INITIALIZER;
 
 static int g_wifi_ref;
 
-#ifdef ESP32S3_WLAN_HAS_STA
+#ifdef ESPRESSIF_WLAN_HAS_STA
 
 /* If reconnect automatically */
 
@@ -387,9 +387,9 @@ static wifi_txdone_cb_t g_sta_txdone_cb;
 
 static wifi_config_t g_sta_wifi_cfg;
 
-#endif /* ESP32S3_WLAN_HAS_STA */
+#endif /* ESPRESSIF_WLAN_HAS_STA */
 
-#ifdef ESP32S3_WLAN_HAS_SOFTAP
+#ifdef ESPRESSIF_WLAN_HAS_SOFTAP
 
 /* If Wi-Fi SoftAP starts */
 
@@ -403,7 +403,7 @@ static wifi_txdone_cb_t g_softap_txdone_cb;
 
 static wifi_config_t g_softap_wifi_cfg;
 
-#endif /* ESP32S3_WLAN_HAS_SOFTAP */
+#endif /* ESPRESSIF_WLAN_HAS_SOFTAP */
 
 /* Device specific lock */
 
@@ -415,7 +415,7 @@ static spinlock_t g_lock;
 
 /* Wi-Fi and BT coexistence OS adapter data */
 
-#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
 coex_adapter_funcs_t g_coex_adapter_funcs =
 {
   ._version = COEX_ADAPTER_VERSION,
@@ -436,7 +436,7 @@ coex_adapter_funcs_t g_coex_adapter_funcs =
   ._timer_arm_us = esp_timer_arm_us,
   ._magic = COEX_ADAPTER_MAGIC,
 };
-#endif /* CONFIG_ESP32S3_WIFI_BT_COEXIST */
+#endif /* CONFIG_ESPRESSIF_WIFI_BT_COEXIST */
 
 /* Wi-Fi OS adapter data */
 
@@ -498,7 +498,7 @@ wifi_osi_funcs_t g_wifi_osi_funcs =
   ._wifi_apb80m_release = wifi_apb80m_release,
   ._phy_disable = esp_phy_disable_wrapper,
   ._phy_enable = esp_phy_enable_wrapper,
-  ._phy_update_country_info = esp32s3_phy_update_country_info,
+  ._phy_update_country_info = esp_phy_update_country_info,
   ._read_mac = esp_wifi_read_mac,
   ._timer_arm = esp_timer_arm,
   ._timer_disarm = esp_timer_disarm,
@@ -2046,7 +2046,7 @@ static int esp_event_id_map(int event_id)
         id = WIFI_ADPT_EVT_SCAN_DONE;
         break;
 
-#ifdef ESP32S3_WLAN_HAS_STA
+#ifdef ESPRESSIF_WLAN_HAS_STA
       case WIFI_EVENT_STA_START:
         id = WIFI_ADPT_EVT_STA_START;
         break;
@@ -2066,9 +2066,9 @@ static int esp_event_id_map(int event_id)
       case WIFI_EVENT_STA_STOP:
         id = WIFI_ADPT_EVT_STA_STOP;
         break;
-#endif /* ESP32S3_WLAN_HAS_STA */
+#endif /* ESPRESSIF_WLAN_HAS_STA */
 
-#ifdef ESP32S3_WLAN_HAS_SOFTAP
+#ifdef ESPRESSIF_WLAN_HAS_SOFTAP
       case WIFI_EVENT_AP_START:
         id = WIFI_ADPT_EVT_AP_START;
         break;
@@ -2084,7 +2084,7 @@ static int esp_event_id_map(int event_id)
       case WIFI_EVENT_AP_STADISCONNECTED:
         id = WIFI_ADPT_EVT_AP_STADISCONNECTED;
         break;
-#endif /* ESP32S3_WLAN_HAS_SOFTAP */
+#endif /* ESPRESSIF_WLAN_HAS_SOFTAP */
 
       default:
         return -1;
@@ -2140,13 +2140,13 @@ static void esp_evt_work_cb(void *arg)
             esp_wifi_scan_event_parse();
             break;
 
-#ifdef ESP32S3_WLAN_HAS_STA
+#ifdef ESPRESSIF_WLAN_HAS_STA
           case WIFI_ADPT_EVT_STA_START:
             wlinfo("Wi-Fi sta start\n");
 
             g_sta_connected = false;
 
-#ifdef CONFIG_ESP32S3_BLE
+#ifdef CONFIG_ESPRESSIF_BLE
             if (esp32s3_bt_controller_get_status() !=
                 ESP_BT_CONTROLLER_STATUS_IDLE)
               {
@@ -2178,7 +2178,7 @@ static void esp_evt_work_cb(void *arg)
           case WIFI_ADPT_EVT_STA_CONNECT:
             wlinfo("Wi-Fi sta connect\n");
             g_sta_connected = true;
-            ret = esp32s3_wlan_sta_set_linkstatus(true);
+            ret = esp_wlan_sta_set_linkstatus(true);
             if (ret < 0)
               {
                 wlerr("ERROR: Failed to set Wi-Fi station link status\n");
@@ -2189,7 +2189,7 @@ static void esp_evt_work_cb(void *arg)
           case WIFI_ADPT_EVT_STA_DISCONNECT:
             wlinfo("Wi-Fi sta disconnect\n");
             g_sta_connected = false;
-            ret = esp32s3_wlan_sta_set_linkstatus(false);
+            ret = esp_wlan_sta_set_linkstatus(false);
             if (ret < 0)
               {
                 wlerr("ERROR: Failed to set Wi-Fi station link status\n");
@@ -2209,13 +2209,13 @@ static void esp_evt_work_cb(void *arg)
             wlinfo("Wi-Fi sta stop\n");
             g_sta_connected = false;
             break;
-#endif /* ESP32S3_WLAN_HAS_STA */
+#endif /* ESPRESSIF_WLAN_HAS_STA */
 
-#ifdef ESP32S3_WLAN_HAS_SOFTAP
+#ifdef ESPRESSIF_WLAN_HAS_SOFTAP
           case WIFI_ADPT_EVT_AP_START:
             wlinfo("INFO: Wi-Fi softap start\n");
 
-#ifdef CONFIG_ESP32S3_BLE
+#ifdef CONFIG_ESPRESSIF_BLE
             if (esp32s3_bt_controller_get_status() !=
                 ESP_BT_CONTROLLER_STATUS_IDLE)
               {
@@ -2255,7 +2255,7 @@ static void esp_evt_work_cb(void *arg)
           case WIFI_ADPT_EVT_AP_STADISCONNECTED:
             wlinfo("INFO: Wi-Fi station leave\n");
             break;
-#endif /* ESP32S3_WLAN_HAS_SOFTAP */
+#endif /* ESPRESSIF_WLAN_HAS_SOFTAP */
           default:
             break;
         }
@@ -2281,7 +2281,7 @@ static void esp_evt_work_cb(void *arg)
     }
 }
 
-#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
 
 /****************************************************************************
  * Name: semphr_take_from_isr_wrapper
@@ -2346,7 +2346,7 @@ static int IRAM_ATTR is_in_isr_wrapper(void)
   return up_interrupt_context();
 }
 
-#endif /* CONFIG_ESP32S3_WIFI_BT_COEXIST */
+#endif /* CONFIG_ESPRESSIF_WIFI_BT_COEXIST */
 
 /****************************************************************************
  * Name: wifi_env_is_chip
@@ -3655,7 +3655,7 @@ static void esp_wifi_delete_queue(void *queue)
 
 static int coex_init_wrapper(void)
 {
-#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   return coex_init();
 #else
   return 0;
@@ -3678,7 +3678,7 @@ static int coex_init_wrapper(void)
 
 static void coex_deinit_wrapper(void)
 {
-#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   coex_deinit();
 #endif
 }
@@ -3700,7 +3700,7 @@ static void coex_deinit_wrapper(void)
 
 static int coex_enable_wrapper(void)
 {
-#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   return coex_enable();
 #else
   return 0;
@@ -3723,7 +3723,7 @@ static int coex_enable_wrapper(void)
 
 static void coex_disable_wrapper(void)
 {
-#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   coex_disable();
 #endif
 }
@@ -3745,7 +3745,7 @@ static void coex_disable_wrapper(void)
 
 static IRAM_ATTR uint32_t coex_status_get_wrapper(void)
 {
-#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   return coex_status_get();
 #else
   return 0;
@@ -3772,7 +3772,7 @@ static IRAM_ATTR uint32_t coex_status_get_wrapper(void)
 static int32_t coex_wifi_request_wrapper(uint32_t event, uint32_t latency,
                                          uint32_t duration)
 {
-#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   return coex_wifi_request(event, latency, duration);
 #else
   return 0;
@@ -3796,7 +3796,7 @@ static int32_t coex_wifi_request_wrapper(uint32_t event, uint32_t latency,
 
 static IRAM_ATTR int32_t coex_wifi_release_wrapper(uint32_t event)
 {
-#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   return coex_wifi_release(event);
 #else
   return 0;
@@ -3821,7 +3821,7 @@ static IRAM_ATTR int32_t coex_wifi_release_wrapper(uint32_t event)
 
 static int coex_wifi_channel_set_wrapper(uint8_t primary, uint8_t secondary)
 {
-#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   return coex_wifi_channel_set(primary, secondary);
 #else
   return 0;
@@ -3847,7 +3847,7 @@ static int coex_wifi_channel_set_wrapper(uint8_t primary, uint8_t secondary)
 static int coex_event_duration_get_wrapper(uint32_t event,
                                            uint32_t *duration)
 {
-#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   return coex_event_duration_get(event, duration);
 #else
   return 0;
@@ -3872,7 +3872,7 @@ static int coex_event_duration_get_wrapper(uint32_t event,
 
 static int coex_pti_get_wrapper(uint32_t event, uint8_t *pti)
 {
-#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   return coex_pti_get(event, pti);
 #else
   return 0;
@@ -3897,7 +3897,7 @@ static int coex_pti_get_wrapper(uint32_t event, uint8_t *pti)
 static void coex_schm_status_bit_clear_wrapper(uint32_t type,
                                                uint32_t status)
 {
-#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   coex_schm_status_bit_clear(type, status);
 #endif
 }
@@ -3919,7 +3919,7 @@ static void coex_schm_status_bit_clear_wrapper(uint32_t type,
 
 static void coex_schm_status_bit_set_wrapper(uint32_t type, uint32_t status)
 {
-#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   coex_schm_status_bit_set(type, status);
 #endif
 }
@@ -3941,7 +3941,7 @@ static void coex_schm_status_bit_set_wrapper(uint32_t type, uint32_t status)
 
 static IRAM_ATTR int coex_schm_interval_set_wrapper(uint32_t interval)
 {
-#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   return coex_schm_interval_set(interval);
 #else
   return 0;
@@ -3964,7 +3964,7 @@ static IRAM_ATTR int coex_schm_interval_set_wrapper(uint32_t interval)
 
 static uint32_t coex_schm_interval_get_wrapper(void)
 {
-#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   return coex_schm_interval_get();
 #else
   return 0;
@@ -3987,7 +3987,7 @@ static uint32_t coex_schm_interval_get_wrapper(void)
 
 static uint8_t coex_schm_curr_period_get_wrapper(void)
 {
-#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   return coex_schm_curr_period_get();
 #else
   return 0;
@@ -4010,7 +4010,7 @@ static uint8_t coex_schm_curr_period_get_wrapper(void)
 
 static void *coex_schm_curr_phase_get_wrapper(void)
 {
-#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   return coex_schm_curr_phase_get();
 #else
   return NULL;
@@ -4034,7 +4034,7 @@ static void *coex_schm_curr_phase_get_wrapper(void)
 
 static int coex_register_start_cb_wrapper(int (* cb)(void))
 {
-#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   return coex_register_start_cb(cb);
 #else
   return 0;
@@ -4058,7 +4058,7 @@ static int coex_register_start_cb_wrapper(int (* cb)(void))
 
 static int coex_schm_process_restart_wrapper(void)
 {
-#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   return coex_schm_process_restart();
 #else
   return 0;
@@ -4083,7 +4083,7 @@ static int coex_schm_process_restart_wrapper(void)
 
 static int coex_schm_register_cb_wrapper(int type, int(*cb)(int))
 {
-#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   return coex_schm_register_callback(type, cb);
 #else
   return 0;
@@ -4185,7 +4185,7 @@ static unsigned long esp_random_ulong(void)
 static IRAM_ATTR void esp_wifi_tx_done_cb(uint8_t ifidx, uint8_t *data,
                                           uint16_t *len, bool txstatus)
 {
-#ifdef ESP32S3_WLAN_HAS_STA
+#ifdef ESPRESSIF_WLAN_HAS_STA
   if (ifidx == ESP_IF_WIFI_STA)
     {
       if (g_sta_txdone_cb)
@@ -4194,9 +4194,9 @@ static IRAM_ATTR void esp_wifi_tx_done_cb(uint8_t ifidx, uint8_t *data,
         }
     }
   else
-#endif /* ESP32S3_WLAN_HAS_STA */
+#endif /* ESPRESSIF_WLAN_HAS_STA */
 
-#ifdef ESP32S3_WLAN_HAS_SOFTAP
+#ifdef ESPRESSIF_WLAN_HAS_SOFTAP
   if (ifidx == ESP_IF_WIFI_AP)
     {
       if (g_softap_txdone_cb)
@@ -4205,13 +4205,13 @@ static IRAM_ATTR void esp_wifi_tx_done_cb(uint8_t ifidx, uint8_t *data,
         }
     }
   else
-#endif /* ESP32S3_WLAN_HAS_SOFTAP */
+#endif /* ESPRESSIF_WLAN_HAS_SOFTAP */
     {
       wlerr("ifidx=%d is error\n", ifidx);
     }
 }
 
-#ifdef ESP32S3_WLAN_HAS_STA
+#ifdef ESPRESSIF_WLAN_HAS_STA
 
 /****************************************************************************
  * Name: esp_wifi_auth_trans
@@ -4313,7 +4313,7 @@ static int esp_wifi_cipher_trans(uint32_t wifi_cipher)
   return cipher_mode;
 }
 
-#endif /* ESP32S3_WLAN_HAS_STA */
+#endif /* ESPRESSIF_WLAN_HAS_STA */
 
 /****************************************************************************
  * Name: esp_freq_to_channel
@@ -4649,28 +4649,28 @@ int esp_wifi_adapter_init(void)
 
   wifi_cfg.nvs_enable = 0;
 
-#ifdef CONFIG_ESP32S3_WIFI_TX_AMPDU
+#ifdef CONFIG_ESPRESSIF_WIFI_TX_AMPDU
   wifi_cfg.ampdu_tx_enable = 1;
 #else
   wifi_cfg.ampdu_tx_enable = 0;
 #endif
 
-#ifdef CONFIG_ESP32S3_WIFI_RX_AMPDU
+#ifdef CONFIG_ESPRESSIF_WIFI_RX_AMPDU
   wifi_cfg.ampdu_rx_enable = 1;
 #else
   wifi_cfg.ampdu_rx_enable = 0;
 #endif
 
-#ifdef CONFIG_ESP32S3_WIFI_STA_DISCONNECT_PM
+#ifdef CONFIG_ESPRESSIF_WIFI_STA_DISCONNECT_PM
   wifi_cfg.sta_disconnected_pm = true;
 #else
   wifi_cfg.sta_disconnected_pm = false;
 #endif
 
-  wifi_cfg.rx_ba_win          = CONFIG_ESP32S3_WIFI_RXBA_AMPDU_WZ;
-  wifi_cfg.static_rx_buf_num  = CONFIG_ESP32S3_WIFI_STATIC_RXBUF_NUM;
-  wifi_cfg.dynamic_rx_buf_num = CONFIG_ESP32S3_WIFI_DYNAMIC_RXBUF_NUM;
-  wifi_cfg.dynamic_tx_buf_num = CONFIG_ESP32S3_WIFI_DYNAMIC_TXBUF_NUM;
+  wifi_cfg.rx_ba_win          = CONFIG_ESPRESSIF_WIFI_RXBA_AMPDU_WZ;
+  wifi_cfg.static_rx_buf_num  = CONFIG_ESPRESSIF_WIFI_STATIC_RXBUF_NUM;
+  wifi_cfg.dynamic_rx_buf_num = CONFIG_ESPRESSIF_WIFI_DYNAMIC_RXBUF_NUM;
+  wifi_cfg.dynamic_tx_buf_num = CONFIG_ESPRESSIF_WIFI_DYNAMIC_TXBUF_NUM;
 
   ret = esp_wifi_init(&wifi_cfg);
   if (ret)
@@ -4708,7 +4708,7 @@ errout_init_wifi:
  * Station functions
  ****************************************************************************/
 
-#ifdef ESP32S3_WLAN_HAS_STA
+#ifdef ESPRESSIF_WLAN_HAS_STA
 
 /****************************************************************************
  * Name: esp_wifi_sta_start
@@ -4738,13 +4738,13 @@ int esp_wifi_sta_start(void)
       wlinfo("Failed to stop Wi-Fi ret=%d\n", ret);
     }
 
-#ifdef ESP32S3_WLAN_HAS_SOFTAP
+#ifdef ESPRESSIF_WLAN_HAS_SOFTAP
   if (g_softap_started)
     {
       mode = WIFI_MODE_APSTA;
     }
   else
-#endif /* ESP32S3_WLAN_HAS_SOFTAP */
+#endif /* ESPRESSIF_WLAN_HAS_SOFTAP */
     {
       mode = WIFI_MODE_STA;
     }
@@ -4803,7 +4803,7 @@ int esp_wifi_sta_stop(void)
 
   g_sta_started = false;
 
-#ifdef ESP32S3_WLAN_HAS_SOFTAP
+#ifdef ESPRESSIF_WLAN_HAS_SOFTAP
   if (g_softap_started)
     {
       ret = esp_wifi_set_mode(WIFI_MODE_AP);
@@ -4822,13 +4822,13 @@ int esp_wifi_sta_stop(void)
           goto errout;
         }
     }
-#endif /* ESP32S3_WLAN_HAS_SOFTAP */
+#endif /* ESPRESSIF_WLAN_HAS_SOFTAP */
 
   wlinfo("OK to stop Wi-Fi station\n");
 
-#ifdef ESP32S3_WLAN_HAS_SOFTAP
+#ifdef ESPRESSIF_WLAN_HAS_SOFTAP
 errout:
-#endif /* ESP32S3_WLAN_HAS_SOFTAP */
+#endif /* ESPRESSIF_WLAN_HAS_SOFTAP */
 
   esp_wifi_lock(false);
   return ret;
@@ -5703,7 +5703,7 @@ int esp_wifi_sta_bitrate(struct iwreq *iwr, bool set)
   return OK;
 }
 
-#endif /* ESP32S3_WLAN_HAS_STA */
+#endif /* ESPRESSIF_WLAN_HAS_STA */
 
 /****************************************************************************
  * Name: esp_wifi_sta_get_txpower
@@ -5906,7 +5906,7 @@ int esp_wifi_sta_country(struct iwreq *iwr, bool set)
   return OK;
 }
 
-#ifdef ESP32S3_WLAN_HAS_STA
+#ifdef ESPRESSIF_WLAN_HAS_STA
 
 /****************************************************************************
  * Name: esp_wifi_sta_rssi
@@ -5953,13 +5953,13 @@ int esp_wifi_sta_rssi(struct iwreq *iwr, bool set)
 
   return OK;
 }
-#endif /* ESP32S3_WLAN_HAS_STA */
+#endif /* ESPRESSIF_WLAN_HAS_STA */
 
 /****************************************************************************
  * SoftAP functions
  ****************************************************************************/
 
-#ifdef ESP32S3_WLAN_HAS_SOFTAP
+#ifdef ESPRESSIF_WLAN_HAS_SOFTAP
 
 /****************************************************************************
  * Name: esp_wifi_softap_start
@@ -5989,13 +5989,13 @@ int esp_wifi_softap_start(void)
       wlinfo("Failed to stop Wi-Fi ret=%d\n", ret);
     }
 
-#ifdef ESP32S3_WLAN_HAS_STA
+#ifdef ESPRESSIF_WLAN_HAS_STA
   if (g_sta_started)
     {
       mode = WIFI_MODE_APSTA;
     }
   else
-#endif /* ESP32S3_WLAN_HAS_STA */
+#endif /* ESPRESSIF_WLAN_HAS_STA */
     {
       mode = WIFI_MODE_AP;
     }
@@ -6054,7 +6054,7 @@ int esp_wifi_softap_stop(void)
 
   g_softap_started = false;
 
-#ifdef ESP32S3_WLAN_HAS_STA
+#ifdef ESPRESSIF_WLAN_HAS_STA
   if (g_sta_started)
     {
       ret = esp_wifi_set_mode(WIFI_MODE_STA);
@@ -6073,13 +6073,13 @@ int esp_wifi_softap_stop(void)
           goto errout;
         }
     }
-#endif /* ESP32S3_WLAN_HAS_STA */
+#endif /* ESPRESSIF_WLAN_HAS_STA */
 
   wlinfo("OK to stop Wi-Fi SoftAP\n");
 
-#ifdef ESP32S3_WLAN_HAS_STA
+#ifdef ESPRESSIF_WLAN_HAS_STA
 errout:
-#endif /* ESP32S3_WLAN_HAS_STA */
+#endif /* ESPRESSIF_WLAN_HAS_STA */
 
   esp_wifi_lock(false);
   return ret;
@@ -6718,10 +6718,10 @@ int esp_wifi_softap_rssi(struct iwreq *iwr, bool set)
   return -ENOSYS;
 }
 
-#endif /* ESP32S3_WLAN_HAS_SOFTAP */
+#endif /* ESPRESSIF_WLAN_HAS_SOFTAP */
 
 /****************************************************************************
- * Name: esp32s3_wifi_bt_coexist_init
+ * Name: esp_wifi_bt_coexist_init
  *
  * Description:
  *   Initialize ESP32-S3 Wi-Fi and BT coexistance module.
@@ -6735,15 +6735,15 @@ int esp_wifi_softap_rssi(struct iwreq *iwr, bool set)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
-int esp32s3_wifi_bt_coexist_init(void)
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
+int esp_wifi_bt_coexist_init(void)
 {
   esp_coex_adapter_register(&g_coex_adapter_funcs);
   coex_pre_init();
 
   return 0;
 }
-#endif /* CONFIG_ESP32S3_WIFI_BT_COEXIST */
+#endif /* CONFIG_ESPRESSIF_WIFI_BT_COEXIST */
 
 /****************************************************************************
  * Name: esp_wifi_stop_callback
