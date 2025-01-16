@@ -696,7 +696,7 @@ static inline void arm_cpu_sgi(int sgi, unsigned int cpuset)
        * SMP scenario.
        */
 
-      regval |= GIC_ICDSGIR_NSATT_GRP1;
+      regval |= GIC_ICDSGIR_NSATT;
     }
 
   putreg32(regval, GIC_ICDSGIR);
