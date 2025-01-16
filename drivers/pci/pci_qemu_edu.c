@@ -305,7 +305,7 @@ static void pci_qemu_edu_test_dma(FAR struct pci_qemu_edu_priv_s *priv)
 
   pciinfo("Test block checksum 0x%08" PRIx32 "\n", tx_checksum);
   pci_qemu_edu_write_reg64(priv, PCI_QEMU_EDU_REG_DMA_SOURCE,
-                           (uint64_t)test_block);
+                           (uint64_t)(uintptr_t)test_block);
   pci_qemu_edu_write_reg64(priv, PCI_QEMU_EDU_REG_DMA_DEST, dev_addr);
   pci_qemu_edu_write_reg64(priv, PCI_QEMU_EDU_REG_DMA_COUNT,
                            (uint64_t)block_size);
@@ -316,7 +316,7 @@ static void pci_qemu_edu_test_dma(FAR struct pci_qemu_edu_priv_s *priv)
   pciinfo("DMA transfer to device complete.\n");
 
   pci_qemu_edu_write_reg64(priv, PCI_QEMU_EDU_REG_DMA_DEST,
-                           (uint64_t)test_block);
+                           (uint64_t)(uintptr_t)test_block);
   pci_qemu_edu_write_reg64(priv, PCI_QEMU_EDU_REG_DMA_SOURCE, dev_addr);
   pci_qemu_edu_write_reg64(priv, PCI_QEMU_EDU_REG_DMA_COUNT,
                            (uint64_t)block_size);
