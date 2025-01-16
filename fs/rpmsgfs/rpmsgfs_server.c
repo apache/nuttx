@@ -609,7 +609,7 @@ static int rpmsgfs_readdir_handler(FAR struct rpmsg_endpoint *ept,
   FAR struct dirent *entry;
   int ret = -ENOENT;
   FAR void *dir;
-  size_t size;
+  ssize_t size;
 
   dir = rpmsgfs_get_dir(priv, msg->fd);
   if (dir)
@@ -619,14 +619,24 @@ static int rpmsgfs_readdir_handler(FAR struct rpmsg_endpoint *ept,
         {
           size = MIN(rpmsg_get_tx_buffer_size(ept),
                      rpmsg_get_rx_buffer_size(ept));
-          size = MIN(size - len, strlen(entry->d_name) + 1);
-          msg->type = entry->d_type;
-          strlcpy(msg->name, entry->d_name, size);
-          len += size;
-          ret = 0;
+          if (size < 0)
+            {
+              ret = size;
+              goto out;
+            }
+
+          if (size >= len)
+            {
+              size = MIN(size - len, strlen(entry->d_name) + 1);
+              msg->type = entry->d_type;
+              strlcpy(msg->name, entry->d_name, size);
+              len += size;
+              ret = 0;
+            }
         }
     }
 
+out:
   msg->header.result = ret;
   return rpmsg_send(ept, msg, len);
 }
