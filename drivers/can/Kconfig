@@ -157,13 +157,6 @@ config CAN_LOOPBACK
 		driver does support loopback mode, the setting will enable it. (If the
 		driver does not, this setting will have no effect).
 
-config CAN_NPOLLWAITERS
-	int "Number of poll waiters"
-	default 2
-	---help---
-		The maximum number of threads that may be waiting on the
-		poll method.
-
 config CAN_USE_RTR
 	bool "Include RTR in CAN header"
 	default n
