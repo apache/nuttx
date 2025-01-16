@@ -35,18 +35,6 @@
 
 struct i2c_master_s; /* Forward reference */
 
-struct sht4x_conv_data_s
-{
-  int32_t temp; /* Millidegrees Celsius or Fahrenheit (depending on config) */
-  int16_t hum;  /* Percentage relative humidity in units of 0.01 %RH */
-};
-
-struct sht4x_raw_data_s
-{
-  uint16_t raw_temp;
-  uint16_t raw_hum;
-};
-
 /* Precision for reading. */
 
 enum sht4x_precision_e
@@ -79,9 +67,9 @@ enum sht4x_heater_e
  *   Register the SHT4X character device as 'devpath'
  *
  * Input Parameters:
- *   devpath - The full path to the driver to register. E.g., "/dev/temp0"
  *   i2c     - An instance of the I2C interface to use to communicate with
  *             the SHT4X
+ *   devno   - The device number that this device should have.
  *   addr    - The I2C address of the SHT4X. The I2C address is one of 0x44,
  *             0x45 and 0x46.
  *
@@ -90,7 +78,6 @@ enum sht4x_heater_e
  *
  ****************************************************************************/
 
-int sht4x_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
-                   uint8_t addr);
+int sht4x_register(FAR struct i2c_master_s *i2c, int devno, uint8_t addr);
 
 #endif /* __INCLUDE_NUTTX_SENSORS_SHT4X_H */

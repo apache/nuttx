@@ -289,7 +289,7 @@ ifeq ($(CONFIG_SENSORS_SHT3X),y)
 endif
 
 ifeq ($(CONFIG_SENSORS_SHT4X),y)
-  CSRCS += sht4x.c
+  CSRCS += sht4x_uorb.c
 endif
 
 ifeq ($(CONFIG_SENSORS_SPS30),y)

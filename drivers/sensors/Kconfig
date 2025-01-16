@@ -1627,18 +1627,18 @@ config SHT4X_I2C_FREQUENCY
 	default 400000
 	range 1 400000
 
+config SHT4X_THREAD_STACKSIZE
+    int "SHT4X worker thread stack size"
+	default 1024
+	---help---
+		The stack size for the worker thread that performs measurements
+
 config SHT4X_I2C_ADDR
 	hex "SHT4X I2C address"
 	default 0x44
 	range 0x44 0x46
 	---help---
 		Enables debug features for the SHT4X
-
-config SHT4X_FAHRENHEIT
-	bool "SHT4X use Fahrenheit"
-	default n
-	---help---
-		Configures read outputs of the SHT4X to be in Fahrenheit. Default uses Celsius.
 
 config SHT4X_LIMIT_HUMIDITY
 	bool "SHT4X limit humidity between 0-100%"
@@ -1652,11 +1652,12 @@ config SHT4X_CRC_LOOKUP
 	---help---
 		Configures the SHT4X to do CRC checks with a lookup table. Default uses a bitwise CRC calculation.
 
-config SHT4X_DEBUG
-	bool "SHT4X debug support"
-	default n
+config SENSORS_SHT4X_POLL
+	bool "Use polling"
+	default y
 	---help---
-		Enables debug features for the SHT4X
+        Configures the SHT4X to be polled at an interval instead of allowing user code to choose when measurements are
+        taken.
 
 endif # SENSORS_SHT4X
 
