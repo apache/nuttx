@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/sensors/sht4x.c
+ * drivers/sensors/sht4x_uorb.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -24,34 +24,28 @@
  * Included Files
  ****************************************************************************/
 
-#include <debug.h>
-#include <nuttx/clock.h>
 #include <nuttx/config.h>
-#include <nuttx/fs/fs.h>
-#include <nuttx/i2c/i2c_master.h>
-#include <nuttx/kmalloc.h>
-#include <nuttx/mutex.h>
-#include <nuttx/random.h>
-#include <nuttx/sensors/sht4x.h>
+#include <nuttx/nuttx.h>
 
+#include <debug.h>
 #include <stdio.h>
 #include <unistd.h>
 
-#if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_SHT4X)
+#include <nuttx/clock.h>
+#include <nuttx/fs/fs.h>
+#include <nuttx/i2c/i2c_master.h>
+#include <nuttx/kmalloc.h>
+#include <nuttx/kthread.h>
+#include <nuttx/mutex.h>
+#include <nuttx/random.h>
+#include <nuttx/semaphore.h>
+#include <nuttx/sensors/sensor.h>
+#include <nuttx/sensors/sht4x.h>
+#include <nuttx/signal.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#ifdef CONFIG_SHT4X_DEBUG
-#define sht4x_dbg(x, ...) _info(x, ##__VA_ARGS__)
-#endif
-
-#if defined(CONFIG_SHT4X_FAHRENHEIT)
-#define SHT4X_TEMP_UNIT "F"
-#else
-#define SHT4X_TEMP_UNIT "C"
-#endif
 
 #ifndef CONFIG_SHT4X_I2C_FREQUENCY
 #define CONFIG_SHT4X_I2C_FREQUENCY 400000
@@ -76,19 +70,34 @@
  * Private
  ****************************************************************************/
 
+/* Sensor information for the lowerhalf sensors.
+ * Since the SHT4X has both a relative humidity and temperature sensor,
+ * two lower halves are needed which will follow this structure.
+ */
+
+struct sht4x_sensor_s
+{
+  FAR struct sensor_lowerhalf_s sensor_lower; /* Lower-half driver */
+  bool enabled;                               /* If this sensor is enabled */
+  FAR struct sht4x_dev_s *dev;                /* Backward reference to
+                                               * device */
+};
+
+/* Represents the main device, with two lower halves for both data types. */
+
 struct sht4x_dev_s
 {
-  FAR struct i2c_master_s *i2c; /* I2C interface. */
-  uint8_t addr;                 /* I2C address. */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  bool unlinked;                    /* True, driver has been unlinked. */
-#endif
+  struct sht4x_sensor_s hum;        /* Humidity lower-half */
+  struct sht4x_sensor_s temp;       /* Temperature lower-half */
+  FAR struct i2c_master_s *i2c;     /* I2C interface. */
+  uint8_t addr;                     /* I2C address. */
   struct timespec last_heat;        /* Last time heater was active. */
   enum sht4x_precision_e precision; /* The precision for read operations. */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  int16_t crefs; /* Number of open references. */
-#endif
-  mutex_t devlock;
+  sem_t run;                        /* Lock for the polling measurement
+                                     * cycle */
+  mutex_t devlock;                  /* Exclusive device access */
+  uint32_t interval;                /* Measurement interval for polling in
+                                     * us, shared by both halves. */
 };
 
 /* Easy unpacking of serial number from I2C packet. */
@@ -111,9 +120,9 @@ union sht4x_serialno_t
 
 static const uint8_t g_precision_read[] =
 {
-    [SHT4X_PREC_LOW] = SHT4X_READ_LOW_PREC,
-    [SHT4X_PREC_MED] = SHT4X_READ_MED_PREC,
-    [SHT4X_PREC_HIGH] = SHT4X_READ_HIGH_PREC,
+  [SHT4X_PREC_LOW] = SHT4X_READ_LOW_PREC,
+  [SHT4X_PREC_MED] = SHT4X_READ_MED_PREC,
+  [SHT4X_PREC_HIGH] = SHT4X_READ_HIGH_PREC,
 };
 
 #ifdef CONFIG_SHT4X_CRC_LOOKUP
@@ -153,68 +162,67 @@ static const uint8_t g_crc_lookup[] =
 
 static const uint16_t g_measurement_times[] =
 {
-    [SHT4X_PREC_LOW] = 1600,
-    [SHT4X_PREC_MED] = 4500,
-    [SHT4X_PREC_HIGH] = 8300,
+  [SHT4X_PREC_LOW] = 1600,
+  [SHT4X_PREC_MED] = 4500,
+  [SHT4X_PREC_HIGH] = 8300,
 };
 
 /* Commands for the various heating options. */
 
 static const uint8_t g_heat_cmds[] =
 {
-    [SHT4X_HEATER_200MW_1] = SHT4X_HEAT_200_1,
-    [SHT4X_HEATER_200MW_01] = SHT4X_HEAT_200_P1,
-    [SHT4X_HEATER_110MW_1] = SHT4X_HEAT_110_1,
-    [SHT4X_HEATER_110MW_01] = SHT4X_HEAT_110_P1,
-    [SHT4X_HEATER_20MW_1] = SHT4X_HEAT_20_1,
-    [SHT4X_HEATER_20MW_01] = SHT4X_HEAT_20_P1,
+  [SHT4X_HEATER_200MW_1] = SHT4X_HEAT_200_1,
+  [SHT4X_HEATER_200MW_01] = SHT4X_HEAT_200_P1,
+  [SHT4X_HEATER_110MW_1] = SHT4X_HEAT_110_1,
+  [SHT4X_HEATER_110MW_01] = SHT4X_HEAT_110_P1,
+  [SHT4X_HEATER_20MW_1] = SHT4X_HEAT_20_1,
+  [SHT4X_HEATER_20MW_01] = SHT4X_HEAT_20_P1,
 };
 
 /* Timeouts for the various heating options in microseconds. */
 
 static const uint32_t g_heat_times[] =
 {
-    [SHT4X_HEATER_200MW_1] = 1000000, [SHT4X_HEATER_200MW_01] = 100000,
-    [SHT4X_HEATER_110MW_1] = 1000000, [SHT4X_HEATER_110MW_01] = 100000,
-    [SHT4X_HEATER_20MW_1] = 1000000,  [SHT4X_HEATER_20MW_01] = 100000,
+  [SHT4X_HEATER_200MW_1] = 1000000, [SHT4X_HEATER_200MW_01] = 100000,
+  [SHT4X_HEATER_110MW_1] = 1000000, [SHT4X_HEATER_110MW_01] = 100000,
+  [SHT4X_HEATER_20MW_1] = 1000000,  [SHT4X_HEATER_20MW_01] = 100000,
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static int sht4x_open(FAR struct file *filep);
-static int sht4x_close(FAR struct file *filep);
-static ssize_t sht4x_write(FAR struct file *filep, FAR const char *buffer,
-                           size_t buflen);
-static ssize_t sht4x_read(FAR struct file *filep, FAR char *buffer,
-                          size_t buflen);
-static int sht4x_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
-static int sht4x_unlink(FAR struct inode *inode);
+static int sht4x_set_interval(FAR struct sensor_lowerhalf_s *lower,
+                              FAR struct file *filep,
+                              FAR uint32_t *period_us);
+static int sht4x_activate(FAR struct sensor_lowerhalf_s *lower,
+                          FAR struct file *filep, bool enable);
+static int sht4x_get_info(FAR struct sensor_lowerhalf_s *lower,
+                          FAR struct file *filep,
+                          FAR struct sensor_device_info_s *info);
+static int sht4x_control(FAR struct sensor_lowerhalf_s *lower,
+                         FAR struct file *filep, int cmd, unsigned long arg);
+#ifndef CONFIG_SENSORS_SHT4X_POLL
+static int sht4x_fetch(FAR struct sensor_lowerhalf_s *lower,
+                       FAR struct file *filep, FAR char *buffer,
+                       size_t buflen);
+#endif
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static const struct file_operations g_sht4xfops =
+static const struct sensor_ops_s g_sensor_ops =
 {
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-    .open = sht4x_open,
-    .close = sht4x_close,
+    .activate = sht4x_activate,
+#ifdef CONFIG_SENSORS_SHT4X_POLL
+    .fetch = NULL,
 #else
-    .open = NULL,
-    .close = NULL,
+    .fetch = sht4x_fetch,
 #endif
-    .read = sht4x_read,
-    .write = sht4x_write,
-    .seek = NULL,
-    .ioctl = sht4x_ioctl,
-    .mmap = NULL,
-    .truncate = NULL,
-    .poll = NULL,
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-    .unlink = sht4x_unlink,
-#endif
+    .set_interval = sht4x_set_interval,
+    .get_info = sht4x_get_info,
+    .control = sht4x_control,
 };
 
 /****************************************************************************
@@ -411,19 +419,13 @@ static int sht4x_reset(FAR struct sht4x_dev_s *priv)
  * Name: sht4x_calc_temp
  *
  * Description:
- *   Calculate the temperature from the SHT4X raw data.
+ *   Calculate the temperature in degrees Celsius from the SHT4X raw data.
  *
  ****************************************************************************/
 
-static int32_t sht4x_calc_temp(uint16_t temp)
+static float sht4x_calc_temp(uint16_t temp)
 {
-#ifdef CONFIG_SHT4X_FAHRENHEIT
-  /* Millidegrees Fahrenheit */
-
-  return -49000 + 315 * ((temp * 1000) / 65535);
-#else
-  return -45000 + 175 * ((temp * 1000) / 65535); /* Millidegrees Celsius */
-#endif
+  return (float)(-45000 + 175 * ((temp * 1000) / 65535)) / 1000.0f;
 }
 
 /****************************************************************************
@@ -434,7 +436,7 @@ static int32_t sht4x_calc_temp(uint16_t temp)
  *
  ****************************************************************************/
 
-static int16_t sht4x_calc_hum(uint16_t humidity)
+static float sht4x_calc_hum(uint16_t humidity)
 {
   int16_t hum = -600 + 125 * ((humidity * 100) / 65535); /* 0.01 %RH */
 #ifdef CONFIG_SHT4X_LIMIT_HUMIDITY
@@ -451,7 +453,61 @@ static int16_t sht4x_calc_hum(uint16_t humidity)
     }
 
 #endif
-  return hum;
+  return (float)(hum / 100.0f);
+}
+
+/****************************************************************************
+ * Name: sht4x_read
+ *
+ * Description: Read temperature and humidity into UORB sensor formats.
+ *
+ * Return:
+ *   Negated error code, or 0 on success.
+ *
+ ****************************************************************************/
+
+static int sht4x_read(FAR struct sht4x_dev_s *priv,
+                      FAR struct sensor_humi *humi,
+                      FAR struct sensor_temp *temp)
+{
+  uint16_t raw_temp;
+  uint16_t raw_hum;
+  int err;
+
+  /* Exclusive access */
+
+  err = nxmutex_lock(&priv->devlock);
+  if (err < 0)
+    {
+      return err;
+    }
+
+  /* Get temp and humidity */
+
+  err = sht4x_cmd(priv, g_precision_read[priv->precision],
+                  g_measurement_times[priv->precision], &raw_temp, &raw_hum);
+  if (err < 0)
+    {
+      nxmutex_unlock(&priv->devlock);
+      return err;
+    }
+
+  /* Release mutex */
+
+  err = nxmutex_unlock(&priv->devlock);
+  if (err < 0)
+    {
+      return err;
+    }
+
+  /* Store results */
+
+  humi->timestamp = sensor_get_timestamp();
+  humi->humidity = sht4x_calc_hum(raw_hum);
+  temp->timestamp = humi->timestamp;
+  temp->temperature = sht4x_calc_temp(raw_temp);
+
+  return err;
 }
 
 /****************************************************************************
@@ -474,227 +530,121 @@ static bool has_time_passed(struct timespec curr, struct timespec start,
 }
 
 /****************************************************************************
- * Name: sht4x_open
- *
- * Description:
- *   This function is called whenever the SHT4X device is opened.
- *
+ * Name: sht4x_get_info
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-static int sht4x_open(FAR struct file *filep)
+static int sht4x_get_info(FAR struct sensor_lowerhalf_s *lower,
+                          FAR struct file *filep,
+                          FAR struct sensor_device_info_s *info)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct sht4x_dev_s *priv = inode->i_private;
-  int err;
+  /* Fill out information */
 
-  err = nxmutex_lock(&priv->devlock);
-  if (err < 0)
+  info->version = 0;
+  info->power = 0.0004f;  /* 0.4uA */
+  info->min_delay = 1300; /* 1.3ms */
+  info->max_delay = 8300; /* 8.3ms */
+  memcpy(info->name, "SHT4x", sizeof("SHT4x"));
+  memcpy(info->vendor, "Sensirion", sizeof("Sensirion"));
+
+  /* Fill out information specific to a certain lower half */
+
+  if (lower->type == SENSOR_TYPE_RELATIVE_HUMIDITY)
     {
-      return err;
+      info->max_range = 100.0f;
+      info->resolution = 0.01f;
+    }
+  else if (lower->type == SENSOR_TYPE_AMBIENT_TEMPERATURE)
+    {
+      info->max_range = 125.0f;
+      info->resolution = 0.01f;
     }
 
-  /* Increment the count of open references on the driver */
-
-  priv->crefs++;
-  DEBUGASSERT(priv->crefs > 0);
-
-  nxmutex_unlock(&priv->devlock);
+  info->fifo_reserved_event_count = 0;
+  info->fifo_max_event_count = 0;
   return 0;
 }
-#endif
 
 /****************************************************************************
- * Name: sht4x_close
+ * Name: sht4x_set_interval
  *
  * Description:
- *   This routine is called when the SHT4X device is closed.
+ *     Sets the measurement interval for the SHT4X sensor in microseconds.
  *
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-static int sht4x_close(FAR struct file *filep)
+static int sht4x_set_interval(FAR struct sensor_lowerhalf_s *lower,
+                              FAR struct file *filep,
+                              FAR uint32_t *period_us)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct sht4x_dev_s *priv = inode->i_private;
-  int err;
-
-  err = nxmutex_lock(&priv->devlock);
-  if (err < 0)
-    {
-      return err;
-    }
-
-  /* Decrement the count of open references on the driver */
-
-  DEBUGASSERT(priv->crefs > 0);
-  priv->crefs--;
-
-  /* If the count has decremented to zero and the driver has been unlinked,
-   * then free memory now.
-   */
-
-  if (priv->crefs <= 0 && priv->unlinked)
-    {
-      nxmutex_destroy(&priv->devlock);
-      kmm_free(priv);
-      return 0;
-    }
-
-  nxmutex_unlock(&priv->devlock);
+  FAR struct sht4x_sensor_s *priv =
+      container_of(lower, FAR struct sht4x_sensor_s, sensor_lower);
+  FAR struct sht4x_dev_s *dev = priv->dev;
+  dev->interval = *period_us;
   return 0;
 }
-#endif
 
 /****************************************************************************
- * Name: sht4x_read
- *
- * Description:
- *     Character driver interface to sensor for debugging.
- *
+ * Name: sht4x_activate
  ****************************************************************************/
 
-static ssize_t sht4x_read(FAR struct file *filep, FAR char *buffer,
-                          size_t buflen)
+static int sht4x_activate(FAR struct sensor_lowerhalf_s *lower,
+                          FAR struct file *filep, bool enable)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct sht4x_dev_s *priv = inode->i_private;
-  ssize_t length = 0;
-  struct sht4x_raw_data_s raw_data;
-  struct sht4x_conv_data_s data;
-  int err;
+  bool start_thread = false;
+  FAR struct sht4x_sensor_s *priv =
+      container_of(lower, FAR struct sht4x_sensor_s, sensor_lower);
+  FAR struct sht4x_dev_s *dev = priv->dev;
 
-  /* If file position is non-zero, then we're at the end of file. */
-
-  if (filep->f_pos > 0)
+  if (enable)
     {
-      return 0;
+      if (!priv->enabled)
+        {
+          start_thread = true;
+        }
     }
 
-  /* Get exclusive access */
+  priv->enabled = enable;
 
-  err = nxmutex_lock(&priv->devlock);
-  if (err < 0)
+  if (start_thread)
     {
-      return err;
+      /* Wake up the polling thread */
+
+      nxsem_post(&dev->run);
     }
 
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  if (priv->unlinked)
-    {
-      /* Do not allow operations on unlinked sensors. This allows
-       * sensor use on hot swappable I2C bus.
-       */
-
-      nxmutex_unlock(&priv->devlock);
-      return 0;
-    }
-#endif
-
-  err = sht4x_cmd(priv, g_precision_read[priv->precision],
-                  g_measurement_times[priv->precision], &raw_data.raw_temp,
-                  &raw_data.raw_hum);
-  if (err < 0)
-    {
-#ifdef CONFIG_SHT4X_DEBUG
-      sht4x_dbg("Could not read device: %d\n", err);
-#endif
-      nxmutex_unlock(&priv->devlock);
-      return err;
-    }
-
-  /* Convert to proper units. */
-
-  data.temp = sht4x_calc_temp(raw_data.raw_temp);
-  data.hum = sht4x_calc_hum(raw_data.raw_hum);
-
-  length = snprintf(buffer, buflen, "%ld m" SHT4X_TEMP_UNIT ", %d %%RH\n",
-                    data.temp, data.hum / 100);
-  if (length > buflen)
-    {
-      length = buflen;
-    }
-
-  filep->f_pos += length;
-  nxmutex_unlock(&priv->devlock);
-  return length;
+  return 0;
 }
 
 /****************************************************************************
- * Name: sht4x_write
- *
- * Description:
- *     Not implemented.
+ * Name: sht4x_control
  ****************************************************************************/
 
-static ssize_t sht4x_write(FAR struct file *filep, FAR const char *buffer,
-                           size_t buflen)
+static int sht4x_control(FAR struct sensor_lowerhalf_s *lower,
+                         FAR struct file *filep, int cmd, unsigned long arg)
 {
-  return -ENOSYS;
-}
-
-/****************************************************************************
- * Name: sht4x_ioctl
- ****************************************************************************/
-
-static int sht4x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
-{
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct sht4x_dev_s *priv = inode->i_private;
+  FAR struct sht4x_sensor_s *priv =
+      container_of(lower, FAR struct sht4x_sensor_s, sensor_lower);
+  FAR struct sht4x_dev_s *dev = priv->dev;
   int err;
 
-  err = nxmutex_lock(&priv->devlock);
+  err = nxmutex_lock(&dev->devlock);
   if (err < 0)
     {
       return err;
     }
-
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  if (priv->unlinked)
-    {
-      /* Do not allow operations on unlinked sensors. This allows
-       * sensor use on hot swappable I2C bus.
-       */
-
-      nxmutex_unlock(&priv->devlock);
-      return -ENODEV;
-    }
-#endif
 
   switch (cmd)
     {
     case SNIOC_RESET:
-      err = sht4x_reset(priv);
+      err = sht4x_reset(dev);
       break;
 
     case SNIOC_WHO_AM_I:
       {
         union sht4x_serialno_t serialno;
-        err = sht4x_cmd(priv, SHT4X_READ_SERIAL, 10, &serialno.halves.msb,
+        err = sht4x_cmd(dev, SHT4X_READ_SERIAL, 10, &serialno.halves.msb,
                         &serialno.halves.lsb);
         *((FAR uint32_t *)(arg)) = serialno.full;
-      }
-      break;
-
-    case SNIOC_READ_RAW_DATA:
-      err = sht4x_cmd(priv, g_precision_read[priv->precision],
-                      g_measurement_times[priv->precision],
-                      &((FAR struct sht4x_raw_data_s *)(arg))->raw_temp,
-                      &((FAR struct sht4x_raw_data_s *)(arg))->raw_hum);
-      break;
-
-    case SNIOC_MEASURE:
-    case SNIOC_READ_CONVERT_DATA:
-      {
-        uint16_t raw_t;
-        uint16_t raw_h;
-
-        err = sht4x_cmd(priv, g_precision_read[priv->precision],
-                        g_measurement_times[priv->precision],
-                        &raw_t, &raw_h);
-        ((FAR struct sht4x_conv_data_s *)(arg))->temp =
-            sht4x_calc_temp(raw_t);
-        ((FAR struct sht4x_conv_data_s *)(arg))->hum = sht4x_calc_hum(raw_h);
       }
       break;
 
@@ -705,23 +655,30 @@ static int sht4x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
         /* Check if it has been one second since the last heat command. */
 
-        if (!has_time_passed(now, priv->last_heat, 1))
+        if (!has_time_passed(now, dev->last_heat, 1))
           {
             err = -EAGAIN; /* Signal to try again in some time. */
             break;
           }
 
-        /* Caller must pass heater option in the temperature argument. */
+        /* Check for invalid heater command */
 
-        uint16_t raw_t = ((FAR struct sht4x_conv_data_s *)(arg))->temp;
-        uint16_t raw_h;
+        if (0 < arg || arg >= (sizeof(g_heat_cmds) / sizeof(g_heat_cmds[0])))
+          {
+            return -EINVAL;
+          }
 
-        err = sht4x_cmd(priv, g_heat_cmds[raw_t], g_heat_times[raw_t],
-                        &raw_t, &raw_h);
-        ((FAR struct sht4x_conv_data_s *)(arg))->temp =
-            sht4x_calc_temp(raw_t);
-        ((FAR struct sht4x_conv_data_s *)(arg))->hum = sht4x_calc_hum(raw_h);
-        clock_systime_timespec(&priv->last_heat); /* Update last heat time. */
+        /* Heat for the desired period */
+
+        uint16_t trash;
+        err = sht4x_cmd(dev, g_heat_cmds[arg], g_heat_times[arg], &trash,
+                        &trash);
+        if (err)
+          {
+            break;
+          }
+
+        clock_systime_timespec(&dev->last_heat); /* Update last heat time. */
       }
       break;
 
@@ -729,11 +686,7 @@ static int sht4x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       /* Caller must pass precision option as argument. */
 
-      priv->precision = arg;
-#ifdef CONFIG_SHT4X_DEBUG
-      sht4x_dbg("Precision set to %d\n", priv->precision);
-#endif
-
+      dev->precision = arg;
       break;
 
     default:
@@ -741,47 +694,105 @@ static int sht4x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       break;
     }
 
-  nxmutex_unlock(&priv->devlock);
+  nxmutex_unlock(&dev->devlock);
   return err;
 }
 
 /****************************************************************************
- * Name: sht4x_unlink
+ * Name: sht4x_fetch
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-static int sht4x_unlink(FAR struct inode *inode)
+#ifndef CONFIG_SENSORS_SHT4X_POLL
+static int sht4x_fetch(FAR struct sensor_lowerhalf_s *lower,
+                       FAR struct file *filep, FAR char *buffer,
+                       size_t buflen)
 {
-  FAR struct sht4x_dev_s *priv;
+  FAR struct sht4x_sensor_s *priv =
+      container_of(lower, FAR struct sht4x_sensor_s, sensor_lower);
+  FAR struct sht4x_dev_s *dev = priv->dev;
   int err;
 
-  DEBUGASSERT(inode->i_private != NULL);
-  priv = inode->i_private;
-
-  err = nxmutex_lock(&priv->devlock);
+  err = sht4x_read(dev, &humi_data, &temp_data);
   if (err < 0)
     {
       return err;
     }
 
-  /* Are there open references to the driver data structure? */
-
-  if (priv->crefs <= 0)
+  if (dev->hum.enabled)
     {
-      nxmutex_destroy(&priv->devlock);
-      kmm_free(priv);
-      return 0;
+      dev->hum.sensor_lower.push_event(dev->hum.sensor_lower.priv,
+                                       &humi_data, sizeof(humi_data));
     }
 
-  /* No. Just mark the driver as unlinked and free the resources when
-   * the last client closes their reference to the driver.
-   */
+  if (dev->temp.enabled)
+    {
+      dev->temp.sensor_lower.push_event(dev->temp.sensor_lower.priv,
+                                        &temp_data, sizeof(temp_data));
+    }
 
-  priv->unlinked = true;
-  nxmutex_unlock(&priv->devlock);
+  return err;
+}
+#endif /* CONFIG_SENSORS_SHT4X_POLL */
+
+/****************************************************************************
+ * Name: sht4x_thread
+ *
+ * Description: Thread for performing interval measurement cycle and data
+ *              read.
+ *
+ * Parameter:
+ *   argc - Number of arguments
+ *   argv - Pointer to argument list
+ *
+ ****************************************************************************/
+
+static int sht4x_thread(int argc, char **argv)
+{
+  FAR struct sht4x_dev_s *dev =
+      (FAR struct sht4x_dev_s *)((uintptr_t)strtoul(argv[1], NULL, 16));
+
+  struct sensor_temp temp_data;
+  struct sensor_humi humi_data;
+  int err;
+
+  while (true)
+    {
+      if (!dev->hum.enabled && !dev->temp.enabled)
+        {
+          /* Wait for one of the lower halves to be enabled and wake us up */
+
+          err = nxsem_wait(&dev->run);
+          if (err < 0)
+            {
+              continue;
+            }
+        }
+
+      err = sht4x_read(dev, &humi_data, &temp_data);
+      if (err < 0)
+        {
+          continue;
+        }
+
+      if (dev->hum.enabled)
+        {
+          dev->hum.sensor_lower.push_event(dev->hum.sensor_lower.priv,
+                                           &humi_data, sizeof(humi_data));
+        }
+
+      if (dev->temp.enabled)
+        {
+          dev->temp.sensor_lower.push_event(dev->temp.sensor_lower.priv,
+                                            &temp_data, sizeof(temp_data));
+        }
+
+      /* Sleep before next fetch */
+
+      nxsig_usleep(dev->interval);
+    }
+
   return OK;
 }
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -805,11 +816,12 @@ static int sht4x_unlink(FAR struct inode *inode)
  *
  ****************************************************************************/
 
-int sht4x_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
-                   uint8_t addr)
+int sht4x_register(FAR struct i2c_master_s *i2c, int devno, uint8_t addr)
 {
   FAR struct sht4x_dev_s *priv;
   int err;
+  FAR char *argv[2];
+  char arg1[32];
 
   DEBUGASSERT(i2c != NULL);
   DEBUGASSERT(addr == 0x44 || addr == 0x45 || addr == 0x46);
@@ -826,6 +838,7 @@ int sht4x_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
   priv->i2c = i2c;
   priv->addr = addr;
   priv->precision = SHT4X_PREC_HIGH;
+  priv->interval = 1000000; /* 1s interval */
   err = clock_systime_timespec(&priv->last_heat);
 
   if (err < 0)
@@ -849,17 +862,74 @@ int sht4x_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
       return err;
     }
 
-  /* Register the character driver */
-
-  err = register_driver(devpath, &g_sht4xfops, 0666, priv);
+  err = nxsem_init(&priv->run, 0, 0);
   if (err < 0)
     {
-      snerr("ERROR: Failed to register SHT4X driver: %d\n", err);
+      snerr("Failed to register SHT4X driver: %d\n", err);
       nxmutex_destroy(&priv->devlock);
       kmm_free(priv);
+      return err;
     }
 
+  /* Register lower half for humidity */
+
+  priv->hum.sensor_lower.ops = &g_sensor_ops;
+  priv->hum.sensor_lower.type = SENSOR_TYPE_RELATIVE_HUMIDITY;
+  priv->hum.sensor_lower.uncalibrated = false;
+  priv->hum.enabled = false;
+  priv->hum.dev = priv;
+
+  /* Register UORB Sensor */
+
+  err = sensor_register(&priv->hum.sensor_lower, devno);
+  if (err < 0)
+    {
+      snerr("Failed to register SHT4X driver: %d\n", err);
+      nxmutex_destroy(&priv->devlock);
+      nxsem_destroy(&priv->run);
+      kmm_free(priv);
+      return err;
+    }
+
+  /* Register lower half for temperature */
+
+  priv->temp.sensor_lower.ops = &g_sensor_ops;
+  priv->temp.sensor_lower.type = SENSOR_TYPE_AMBIENT_TEMPERATURE;
+  priv->temp.sensor_lower.uncalibrated = false;
+  priv->temp.enabled = false;
+  priv->temp.dev = priv;
+
+  /* Register UORB Sensor */
+
+  err = sensor_register(&priv->temp.sensor_lower, devno);
+  if (err < 0)
+    {
+      snerr("Failed to register SHT4X driver: %d\n", err);
+      sensor_unregister(&priv->hum.sensor_lower, devno);
+      nxmutex_destroy(&priv->devlock);
+      nxsem_destroy(&priv->run);
+      kmm_free(priv);
+      return err;
+    }
+
+  /* Polling thread */
+
+  snprintf(arg1, 16, "%p", priv);
+  argv[0] = arg1;
+  argv[1] = NULL;
+  err = kthread_create("sht4x_thread", SCHED_PRIORITY_DEFAULT,
+                       CONFIG_SHT4X_THREAD_STACKSIZE, sht4x_thread, argv);
+  if (err < 0)
+    {
+      snerr("Failed to create the SHT4X notification kthread.\n");
+      sensor_unregister(&priv->hum.sensor_lower, devno);
+      sensor_unregister(&priv->temp.sensor_lower, devno);
+      nxmutex_destroy(&priv->devlock);
+      nxsem_destroy(&priv->run);
+      kmm_free(priv);
+      return err;
+    }
+
+  sninfo("Registered SHT4X driver.\n");
   return err;
 }
-
-#endif /* CONFIG_I2C && CONFIG_SENSORS_SHT4X */

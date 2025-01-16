@@ -538,9 +538,9 @@ int rp2040_common_bringup(void)
 
 #ifdef CONFIG_SENSORS_SHT4X
 
-  /* Try to register SHT4X device as /dev/sht4x0 at I2C0. */
+  /* Try to register SHT4X device on I2C0 */
 
-  ret = sht4x_register("/dev/sht4x0", rp2040_i2cbus_initialize(0),
+  ret = sht4x_register(rp2040_i2cbus_initialize(0), 0,
                        CONFIG_SHT4X_I2C_ADDR);
   if (ret < 0)
     {

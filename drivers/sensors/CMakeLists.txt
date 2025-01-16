@@ -285,7 +285,7 @@ if(CONFIG_SENSORS)
     endif()
 
     if(CONFIG_SENSORS_SHT4X)
-      list(APPEND SRCS sht4x.c)
+      list(APPEND SRCS sht4x_uorb.c)
     endif()
 
     if(CONFIG_SENSORS_SPS30)
