@@ -801,6 +801,7 @@ struct can_reader_s
 {
   struct list_node     list;
   struct can_rxfifo_s  fifo;             /* Describes receive FIFO */
+  FAR struct pollfd   *cd_fds;
 };
 
 struct can_transv_s
@@ -825,7 +826,6 @@ struct can_dev_s
   FAR const struct can_ops_s *cd_ops;    /* Arch-specific operations */
   FAR void            *cd_priv;          /* Used by the arch-specific logic */
   FAR struct can_transv_s *cd_transv;    /* Describes CAN transceiver */
-  FAR struct pollfd   *cd_fds[CONFIG_CAN_NPOLLWAITERS];
 };
 
 /* Structures used with ioctl calls */
