@@ -404,8 +404,8 @@ void work_notifier_signal(enum work_evtype_e evtype,
         }
     }
 
-  sched_unlock();
   spin_unlock_irqrestore(&g_notifier_lock, flags);
+  sched_unlock();
 }
 
 #endif /* CONFIG_WQUEUE_NOTIFIER */
