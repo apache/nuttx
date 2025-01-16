@@ -114,6 +114,7 @@ FAR char *lib_get_tempbuffer(size_t nbytes)
 #ifdef CONFIG_LIBC_TEMPBUFFER_MALLOC
   return lib_malloc(nbytes);
 #else
+  _NX_SETERRNO(ENOMEM);
   return NULL;
 #endif
 }
