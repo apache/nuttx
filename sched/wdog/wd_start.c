@@ -118,9 +118,12 @@ static void wdentry_period(wdparm_t arg)
    * we need to use `expired - 1` here to avoid time drift.
    */
 
-  wd_start_abstick(&wdperiod->wdog,
-                   wdperiod->wdog.expired + wdperiod->period - 1,
-                   wdentry_period, wdperiod->wdog.arg);
+  if (wdperiod->period != 0)
+    {
+      wd_start_abstick(&wdperiod->wdog,
+                       wdperiod->wdog.expired + wdperiod->period - 1,
+                       wdentry_period, wdperiod->wdog.arg);
+    }
 }
 
 /****************************************************************************
