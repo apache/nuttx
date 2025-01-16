@@ -303,7 +303,7 @@ SECTIONS
 
     *(.rodata)
     *(.rodata.*)
-#ifdef CONFIG_ESP32S3_WIRELESS
+#ifdef CONFIG_ESPRESSIF_WIRELESS
     *(.rodata_wlog_verbose.*)
     *(.rodata_wlog_debug.*)
     *(.rodata_wlog_info.*)
