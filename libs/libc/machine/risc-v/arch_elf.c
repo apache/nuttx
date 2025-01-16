@@ -33,6 +33,7 @@
 #include <assert.h>
 
 #include <nuttx/elf.h>
+#include <arch/barriers.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -129,7 +130,7 @@ static void _set_val(uint16_t *addr, uint32_t val)
 
   /* NOTE: Ensure relocation before execution */
 
-  asm volatile ("fence.i");
+  __ISB();
 }
 
 static void _add_val(uint16_t *addr, uint32_t val)
