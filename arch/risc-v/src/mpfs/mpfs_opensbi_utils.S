@@ -63,7 +63,8 @@ mpfs_global_pointer:
  *   times.
  *
  * Input Parameters:
- *   None
+ *   a0 - hartid
+ *   a1 - next_addr
  *
  * Returned Value:
  *   None
@@ -87,9 +88,9 @@ mpfs_opensbi_prepare_hart:
 
   /* Setup stacks per hart, the stack top is the end of the hart's scratch */
 
-  csrr a0, CSR_MHARTID
+  csrr t0, CSR_MHARTID
   li   t1, SBI_SCRATCH_SIZE
-  mul  t0, a0, t1
+  mul  t0, t0, t1
   la   sp, g_scratches
   add  sp, sp, t0
   tail mpfs_opensbi_setup

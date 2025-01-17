@@ -596,16 +596,17 @@ static int mpfs_opensbi_ecall_handler(long funcid,
  *     - Calls the sbi_init() that will not return
  *
  * Input Parameters:
- *   None
+ *   a0 - hartid
+ *   a1 - next_addr
  *
  * Returned Value:
  *   None - this will never return
  *
  ****************************************************************************/
 
-void __attribute__((noreturn)) mpfs_opensbi_setup(void)
+void __attribute__((noreturn)) mpfs_opensbi_setup(uintptr_t hartid,
+                                                  uintptr_t next_addr)
 {
-  uint32_t hartid = current_hartid();
   size_t i;
 
   for (i = 0; i < nitems(mpfs_hart_index2id); i++)
@@ -618,7 +619,7 @@ void __attribute__((noreturn)) mpfs_opensbi_setup(void)
 
   csr_write(mscratch, &g_scratches[hartid].scratch);
   g_scratches[hartid].scratch.next_mode = PRV_S;
-  g_scratches[hartid].scratch.next_addr = mpfs_get_entrypt(hartid);
+  g_scratches[hartid].scratch.next_addr = next_addr;
   g_scratches[hartid].scratch.next_arg1 = 0;
 
   sbi_init(&g_scratches[hartid].scratch);
