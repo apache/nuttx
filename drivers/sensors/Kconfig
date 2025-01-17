@@ -965,6 +965,21 @@ config MCP9600_I2C_FREQUENCY
 	range 10000 100000
 	depends on SENSORS_MCP9600
 
+config SENSORS_MCP9600_POLL
+	bool "MCP9600 polling"
+	default y
+	depends on SENSORS_MCP9600
+    ---help---
+        Enable the worker thread for polling the MCP9600 and collecting
+        measurements
+
+config MCP9600_THREAD_STACKSIZE
+    int "MCP9600 stack size"
+    default 1024
+	depends on SENSORS_MCP9600
+    ---help---
+        Stack size of the worker thread polling the MCP9600 for measurements
+
 endif # SENSORS_MCP9600
 
 config SENSORS_MCP9844

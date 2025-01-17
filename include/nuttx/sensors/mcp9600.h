@@ -56,20 +56,6 @@ enum mcp9600_alert_e
   MCP9600_ALERT4 = 3, /* Alert 4 */
 };
 
-/* Thermocouple types */
-
-enum mcp9600_thermocouple_e
-{
-  MCP9600_THERMO_TYPE_K = 0x0,
-  MCP9600_THERMO_TYPE_J = 0x1,
-  MCP9600_THERMO_TYPE_T = 0x2,
-  MCP9600_THERMO_TYPE_N = 0x3,
-  MCP9600_THERMO_TYPE_S = 0x4,
-  MCP9600_THERMO_TYPE_E = 0x5,
-  MCP9600_THERMO_TYPE_B = 0x6,
-  MCP9600_THERMO_TYPE_R = 0x7,
-};
-
 /* ADC resolution */
 
 enum mcp9600_resolution_e
@@ -134,7 +120,7 @@ struct mcp9600_alert_conf_s
 
 struct mcp9600_devconf_s
 {
-  enum mcp9600_thermocouple_e thermo_type; /* Thermocouple type */
+  enum sensor_thermo_type_e thermo_type;   /* Thermocouple type */
   uint8_t filter_coeff;                    /* Filter coefficient */
   enum mcp9600_resolution_e resolution;    /* ADC resolution */
   enum mcp9600_samples_e num_samples;      /* Number of samples */
@@ -161,15 +147,6 @@ struct mcp9600_status_s
   bool alerts[4];      /* Alert statuses for alerts 1-4 (0-3) */
 };
 
-/* Temperature readings */
-
-struct mcp9600_temp_s
-{
-  int16_t temp_delta; /* Temperature delta in degrees Celsius */
-  int16_t hot_junc;   /* Hot junction temperature in degrees Celsius */
-  int16_t cold_junc;  /* Cold junction temperature in degrees Celsius */
-};
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -178,20 +155,24 @@ struct mcp9600_temp_s
  * Name: mcp9600_register
  *
  * Description:
- *   Register the MCP9600 character device as 'devpath'
+ *   Register the MCP9600 UORB sensor. This registers 3 temperature UORB
+ *   topics.
  *
  * Input Parameters:
- *   devpath - The full path to the driver to register. E.g., "/dev/temp0"
  *   i2c     - An instance of the I2C interface to use to communicate with
  *             the MCP9600
  *   addr    - The I2C address of the MCP9600, between 0x60 and 0x67
+ *
+ *   h_devno - The device number for the hot junction topic
+ *   c_devno - The device number for the cold junction topic
+ *   d_devno - The device number for the delta topic
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-int mcp9600_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
-                     uint8_t addr);
+int mcp9600_register(FAR struct i2c_master_s *i2c, uint8_t addr,
+                     uint8_t h_devno, uint8_t c_devno, uint8_t d_devno);
 
 #endif /* __INCLUDE_NUTTX_SENSORS_MCP9600_H */

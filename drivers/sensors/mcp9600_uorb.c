@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/sensors/mcp9600.c
+ * drivers/sensors/mcp9600_uorb.c
  *
  * Contributed by Matteo Golin
  *
@@ -27,6 +27,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/nuttx.h>
 
 #include <assert.h>
 #include <debug.h>
@@ -36,7 +37,11 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/kthread.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/sensors/mcp9600.h>
+#include <nuttx/sensors/sensor.h>
+#include <nuttx/signal.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -73,84 +78,126 @@
  * Private Types
  ****************************************************************************/
 
+/* Lower half driver for each of the temperature measurement types */
+
+struct mcp9600_sens_s
+{
+  FAR struct sensor_lowerhalf_s lower; /* Lower-half driver */
+  FAR struct mcp9600_dev_s *dev;       /* Backward reference to parent */
+  bool enabled;                        /* Whether this sensor is enabled */
+};
+
+/* Full device */
+
 struct mcp9600_dev_s
 {
-  FAR struct i2c_master_s *i2c;  /* I2C interface */
-  uint8_t addr;                  /* I2C address */
-  struct mcp9600_devconf_s conf; /* Device configuration */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  int16_t crefs; /* Number of open references. */
-  bool unlinked; /* True, driver has been unlinked. */
-#endif
-  mutex_t devlock;
+  struct mcp9600_sens_s hot_junc;  /* Hot junction lower-half driver */
+  struct mcp9600_sens_s cold_junc; /* Cold-junction lower-half driver */
+  struct mcp9600_sens_s delta;     /* Delta lower-half driver */
+  uint32_t interval;               /* Measurement interval in us */
+  FAR struct i2c_master_s *i2c;    /* I2C interface */
+  uint8_t addr;                    /* I2C address */
+  struct mcp9600_devconf_s conf;   /* Device configuration */
+  sem_t run;                       /* Run the measurement thread */
+  mutex_t devlock;                 /* Single access */
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static int mcp9600_open(FAR struct file *filep);
-static int mcp9600_close(FAR struct file *filep);
-static ssize_t mcp9600_write(FAR struct file *filep, FAR const char *buffer,
-                             size_t buflen);
-static ssize_t mcp9600_read(FAR struct file *filep, FAR char *buffer,
-                            size_t buflen);
-static int mcp9600_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
-static int mcp9600_unlink(FAR struct inode *inode);
+static int mcp9600_control(FAR struct sensor_lowerhalf_s *lower,
+                           FAR struct file *filep, int cmd,
+                           unsigned long arg);
+static int mcp9600_get_info(FAR struct sensor_lowerhalf_s *lower,
+                            FAR struct file *filep,
+                            FAR struct sensor_device_info_s *info);
+static int mcp9600_set_interval(FAR struct sensor_lowerhalf_s *lower,
+                                FAR struct file *filep,
+                                FAR uint32_t *period_us);
+static int mcp9600_activate(FAR struct sensor_lowerhalf_s *lower,
+                            FAR struct file *filep, bool enable);
+#ifndef CONFIG_SENSORS_MCP9600_POLL
+static int mcp9600_fetch(FAR struct sensor_lowerhalf_s *lower,
+                         FAR struct file *filep, FAR char *buffer,
+                         size_t buflen);
+#endif
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static const struct file_operations g_mcp9600fops =
+/* Sensor operations */
+
+static const struct sensor_ops_s g_sensor_ops =
 {
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-    .open = mcp9600_open,
-    .close = mcp9600_close,
+  .activate = mcp9600_activate,
+  .set_interval = mcp9600_set_interval,
+  .get_info = mcp9600_get_info,
+  .control = mcp9600_control,
+#ifndef CONFIG_SENSORS_MCP9600_POLL
+  .fetch = mcp9600_fetch,
 #else
-    .open = NULL,
-    .close = NULL,
+  .fetch = NULL,
 #endif
-    .read = mcp9600_read,
-    .write = mcp9600_write,
-    .seek = NULL,
-    .ioctl = mcp9600_ioctl,
-    .mmap = NULL,
-    .truncate = NULL,
-    .poll = NULL,
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-    .unlink = mcp9600_unlink,
-#endif
+};
+
+/* Thermocouple types and their max ranges in Celsius (from datasheet) */
+
+static const float g_thermo_ranges[] =
+{
+  [SENSOR_THERMO_TYPE_K] = 1372.0f, [SENSOR_THERMO_TYPE_J] = 1200.0f,
+  [SENSOR_THERMO_TYPE_T] = 400.0f,  [SENSOR_THERMO_TYPE_N] = 1300.0f,
+  [SENSOR_THERMO_TYPE_S] = 1664.0f, [SENSOR_THERMO_TYPE_E] = 1000.0f,
+  [SENSOR_THERMO_TYPE_B] = 1800.0f, [SENSOR_THERMO_TYPE_R] = 1664.0f,
+};
+
+/* Thermocouple types and their register values */
+
+static const uint8_t g_thermo_types[] =
+{
+  [SENSOR_THERMO_TYPE_K] = 0x0, [SENSOR_THERMO_TYPE_J] = 0x1,
+  [SENSOR_THERMO_TYPE_T] = 0x2, [SENSOR_THERMO_TYPE_N] = 0x3,
+  [SENSOR_THERMO_TYPE_S] = 0x4, [SENSOR_THERMO_TYPE_E] = 0x5,
+  [SENSOR_THERMO_TYPE_B] = 0x6, [SENSOR_THERMO_TYPE_R] = 0x7,
+};
+
+/* Resolutions */
+
+static const float g_resolutions[] =
+{
+  [MCP9600_COLDRES_0625] = 0.0625f,
+  [MCP9600_COLDRES_25] = 0.25f,
 };
 
 /* Alert hysterisis registers */
 
 static const enum mcp9600_alert_e g_alert_hysts[] =
 {
-    [MCP9600_ALERT1] = REG_ALERT1_HYST,
-    [MCP9600_ALERT2] = REG_ALERT2_HYST,
-    [MCP9600_ALERT3] = REG_ALERT3_HYST,
-    [MCP9600_ALERT4] = REG_ALERT4_HYST,
+  [MCP9600_ALERT1] = REG_ALERT1_HYST,
+  [MCP9600_ALERT2] = REG_ALERT2_HYST,
+  [MCP9600_ALERT3] = REG_ALERT3_HYST,
+  [MCP9600_ALERT4] = REG_ALERT4_HYST,
 };
 
 /* Alert limit registers */
 
 static const enum mcp9600_alert_e g_alert_limits[] =
 {
-    [MCP9600_ALERT1] = REG_ALERT1_TEMP,
-    [MCP9600_ALERT2] = REG_ALERT2_TEMP,
-    [MCP9600_ALERT3] = REG_ALERT3_TEMP,
-    [MCP9600_ALERT4] = REG_ALERT4_TEMP,
+  [MCP9600_ALERT1] = REG_ALERT1_TEMP,
+  [MCP9600_ALERT2] = REG_ALERT2_TEMP,
+  [MCP9600_ALERT3] = REG_ALERT3_TEMP,
+  [MCP9600_ALERT4] = REG_ALERT4_TEMP,
 };
 
 /* Alert configuration registers */
 
 static const enum mcp9600_alert_e g_alert_configs[] =
 {
-    [MCP9600_ALERT1] = REG_ALERT1_CONF,
-    [MCP9600_ALERT2] = REG_ALERT2_CONF,
-    [MCP9600_ALERT3] = REG_ALERT3_CONF,
-    [MCP9600_ALERT4] = REG_ALERT4_CONF,
+  [MCP9600_ALERT1] = REG_ALERT1_CONF,
+  [MCP9600_ALERT2] = REG_ALERT2_CONF,
+  [MCP9600_ALERT3] = REG_ALERT3_CONF,
+  [MCP9600_ALERT4] = REG_ALERT4_CONF,
 };
 
 /****************************************************************************
@@ -233,9 +280,10 @@ static int mcp9600_write_reg(FAR struct mcp9600_dev_s *priv, uint8_t reg,
  ****************************************************************************/
 
 static int mcp9600_read_temp(FAR struct mcp9600_dev_s *priv, uint8_t reg,
-                             FAR int16_t *temp)
+                             FAR struct sensor_temp *temp)
 {
   int err;
+  int16_t raw_temp;
   uint8_t raw[2];
 
   err = mcp9600_read_reg(priv, reg, raw, sizeof(raw));
@@ -244,17 +292,52 @@ static int mcp9600_read_temp(FAR struct mcp9600_dev_s *priv, uint8_t reg,
       return err;
     }
 
-  /* Positive temperature */
+  raw_temp = (int16_t)(((uint16_t)raw[0] << 8) | raw[1]);
+  temp->temperature = (float)(raw_temp) / 16.0f;
+  temp->timestamp = sensor_get_timestamp();
 
-  *temp = (raw[0] * 16 + raw[1] / 16);
+  return err;
+}
 
-  /* Negative temperature */
+/****************************************************************************
+ * Name: mcp9600_read
+ *
+ * Description:
+ *   Reads all thermocouple values in degrees Celsius.
+ *
+ ****************************************************************************/
 
-  if (raw[0] & 0x80)
+static int mcp9600_read(FAR struct mcp9600_dev_s *priv,
+                        FAR struct sensor_temp *hot,
+                        FAR struct sensor_temp *cold,
+                        FAR struct sensor_temp *delta)
+{
+  int err;
+
+  /* Exclusive access */
+
+  err = nxmutex_lock(&priv->devlock);
+  if (err < 0)
     {
-      *temp -= 4096;
+      return err;
     }
 
+  err = mcp9600_read_temp(priv, REG_JUNC_TEMP_DELTA, delta);
+  if (err < 0)
+    {
+      goto early_ret;
+    };
+
+  err = mcp9600_read_temp(priv, REG_THERMO_HOT_JUNC, hot);
+  if (err < 0)
+    {
+      goto early_ret;
+    };
+
+  err = mcp9600_read_temp(priv, REG_COLD_JUNC_TEMP, cold);
+
+early_ret:
+  nxmutex_unlock(&priv->devlock);
   return err;
 }
 
@@ -304,6 +387,26 @@ static int mcp9600_config_alert(FAR struct mcp9600_dev_s *priv,
 }
 
 /****************************************************************************
+ * Name: mcp9600_write_devconf
+ *
+ * Description:
+ *      Writes configuration settings for the device configuration register.
+ *      Returns 0 on success and negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int mcp9600_write_devconf(FAR struct mcp9600_dev_s *dev)
+{
+  uint8_t reg = 0;
+  reg |= (dev->conf.mode & 0x3);
+  reg |= ((dev->conf.num_samples & 0x7) << 2);
+  reg |= ((dev->conf.resolution & 0x3) << 5);
+  reg |= ((dev->conf.cold_res & 0x1) << 7);
+
+  return mcp9600_write_reg(dev, REG_DEV_CONFIG, &reg, sizeof(reg));
+}
+
+/****************************************************************************
  * Name: mcp9600_validate_conf
  *
  * Description:
@@ -315,12 +418,6 @@ static int mcp9600_config_alert(FAR struct mcp9600_dev_s *priv,
 static int mcp9600_validate_conf(FAR struct mcp9600_devconf_s *conf)
 {
   if (conf == NULL)
-    {
-      return -EINVAL;
-    }
-
-  if (conf->thermo_type < MCP9600_THERMO_TYPE_K ||
-      conf->thermo_type > MCP9600_THERMO_TYPE_R)
     {
       return -EINVAL;
     }
@@ -357,222 +454,147 @@ static int mcp9600_validate_conf(FAR struct mcp9600_devconf_s *conf)
 }
 
 /****************************************************************************
- * Name: mcp9600_open
+ * Name: mcp9600_set_interval
  *
  * Description:
- *   This function is called whenever the MCP9600 device is opened.
+ *     Sets the measurement interval for the MCP9600 sensor in microseconds.
  *
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-static int mcp9600_open(FAR struct file *filep)
+static int mcp9600_set_interval(FAR struct sensor_lowerhalf_s *lower,
+                                FAR struct file *filep,
+                                FAR uint32_t *period_us)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct mcp9600_dev_s *priv = inode->i_private;
-  int err;
-
-  err = nxmutex_lock(&priv->devlock);
-  if (err < 0)
-    {
-      return err;
-    }
-
-  /* Increment the count of open references on the driver */
-
-  priv->crefs++;
-  DEBUGASSERT(priv->crefs > 0);
-
-  nxmutex_unlock(&priv->devlock);
+  FAR struct mcp9600_sens_s *sens =
+      container_of(lower, FAR struct mcp9600_sens_s, lower);
+  sens->dev->interval = *period_us;
   return 0;
 }
-#endif
 
 /****************************************************************************
- * Name: mcp9600_close
- *
- * Description:
- *   This routine is called when the MCP9600 device is closed.
- *
+ * Name: mcp9600_activate
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-static int mcp9600_close(FAR struct file *filep)
+static int mcp9600_activate(FAR struct sensor_lowerhalf_s *lower,
+                            FAR struct file *filep, bool enable)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct mcp9600_dev_s *priv = inode->i_private;
-  int err;
+  bool start_thread = false;
+  int err = 0;
+  FAR struct mcp9600_sens_s *priv =
+      container_of(lower, FAR struct mcp9600_sens_s, lower);
+  FAR struct mcp9600_dev_s *dev = priv->dev;
 
-  err = nxmutex_lock(&priv->devlock);
-  if (err < 0)
+  if (enable && !priv->enabled)
     {
-      return err;
+      start_thread = true;
+
+      /* Power on the sensor for operation */
+
+      if (dev->conf.mode == MCP9600_MODE_SHUTDOWN)
+        {
+          dev->conf.mode = MCP9600_MODE_NORMAL;
+          err = mcp9600_write_devconf(dev);
+        }
     }
 
-  /* Decrement the count of open references on the driver */
-
-  DEBUGASSERT(priv->crefs > 0);
-  priv->crefs--;
-
-  /* If the count has decremented to zero and the driver has been unlinked,
-   * then free memory now.
-   */
-
-  if (priv->crefs <= 0 && priv->unlinked)
+  else if (!enable && priv->enabled)
     {
-      nxmutex_destroy(&priv->devlock);
-      kmm_free(priv);
-      return 0;
-    }
-
-  nxmutex_unlock(&priv->devlock);
-  return 0;
-}
-#endif
-
-/****************************************************************************
- * Name: mcp9600_unlink
- ****************************************************************************/
-
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-static int mcp9600_unlink(FAR struct inode *inode)
-{
-  FAR struct mcp9600_dev_s *priv;
-  int err;
-
-  DEBUGASSERT(inode->i_private != NULL);
-  priv = inode->i_private;
-
-  err = nxmutex_lock(&priv->devlock);
-  if (err < 0)
-    {
-      return err;
-    }
-
-  /* Are there open references to the driver data structure? */
-
-  if (priv->crefs <= 0)
-    {
-      nxmutex_destroy(&priv->devlock);
-      kmm_free(priv);
-      return 0;
-    }
-
-  /* No. Just mark the driver as unlinked and free the resources when
-   * the last client closes their reference to the driver.
-   */
-
-  priv->unlinked = true;
-  nxmutex_unlock(&priv->devlock);
-  return OK;
-}
-#endif
-
-/****************************************************************************
- * Name: mcp9600_read
- *
- * Description:
- *     Character driver interface to sensor for debugging.
- *
- ****************************************************************************/
-
-static ssize_t mcp9600_read(FAR struct file *filep, FAR char *buffer,
-                            size_t buflen)
-{
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct mcp9600_dev_s *priv = inode->i_private;
-  int err;
-  int16_t hot_junc_temp;
-
-  /* If file position is non-zero, then we're at the end of file. */
-
-  if (filep->f_pos > 0)
-    {
-      return 0;
-    }
-
-  /* Get exclusive access */
-
-  err = nxmutex_lock(&priv->devlock);
-  if (err < 0)
-    {
-      return err;
-    }
-
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  if (priv->unlinked)
-    {
-      /* Do not allow operations on unlinked sensors. This allows
-       * sensor use on hot swappable I2C bus.
+      /* Temporarily mark disabled so we can check if everything is disabled
        */
 
-      goto finish_unlock;
-    }
-#endif
+      priv->enabled = enable;
 
-  err = mcp9600_read_temp(priv, REG_THERMO_HOT_JUNC, &hot_junc_temp);
+      /* Power off the sensor to save power only if all features are disabled
+       * and we're not yet shut down.
+       */
+
+      if ((dev->conf.mode != MCP9600_MODE_SHUTDOWN) &&
+          (!dev->hot_junc.enabled && !dev->cold_junc.enabled &&
+           !dev->delta.enabled))
+        {
+          /* Put back enable state in case we encounter an error and fail to
+           * disable
+           */
+
+          priv->enabled = true;
+
+          dev->conf.mode = MCP9600_MODE_SHUTDOWN;
+          err = mcp9600_write_devconf(dev);
+        }
+    }
 
   if (err < 0)
     {
-      goto finish_unlock;
+      return err;
     }
 
-  err = snprintf(buffer, buflen, "%d C\n", hot_junc_temp);
+  priv->enabled = enable;
 
-  if (err > buflen)
+  if (start_thread)
     {
-      err = buflen;
+      /* Wake up the polling thread */
+
+      nxsem_post(&dev->run);
     }
 
-  filep->f_pos += err;
-
-finish_unlock:
-  nxmutex_unlock(&priv->devlock);
   return err;
 }
 
 /****************************************************************************
- * Name: mcp9600_write
- *
- * Description:
- *     Not implemented.
+ * Name: mcp9600_get_info
  ****************************************************************************/
 
-static ssize_t mcp9600_write(FAR struct file *filep, FAR const char *buffer,
-                             size_t buflen)
+static int mcp9600_get_info(FAR struct sensor_lowerhalf_s *lower,
+                            FAR struct file *filep,
+                            FAR struct sensor_device_info_s *info)
 {
-  return -ENOSYS;
+  FAR struct mcp9600_sens_s *sens =
+      container_of(lower, FAR struct mcp9600_sens_s, lower);
+  FAR struct mcp9600_dev_s *dev = sens->dev;
+
+  info->version = 0;
+  info->power = 1.5f; /* 1.5mA */
+  info->min_delay = 63.0f;
+  info->max_delay = 250.0f;
+  memcpy(info->name, "MCP9600", sizeof("MCP9600"));
+  memcpy(info->vendor, "Microchip", sizeof("Microchip"));
+  info->max_range = g_thermo_ranges[dev->conf.thermo_type];
+  info->resolution = g_resolutions[dev->conf.thermo_type];
+  info->fifo_reserved_event_count = 0;
+  info->fifo_max_event_count = 0;
+  return 0;
 }
 
 /****************************************************************************
  * Name: mcp9600_ioctl
  ****************************************************************************/
 
-static int mcp9600_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
+static int mcp9600_control(FAR struct sensor_lowerhalf_s *lower,
+                           FAR struct file *filep, int cmd,
+                           unsigned long arg)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct mcp9600_dev_s *priv = inode->i_private;
+  FAR struct mcp9600_sens_s *sens =
+      container_of(lower, FAR struct mcp9600_sens_s, lower);
+  FAR struct mcp9600_dev_s *dev = sens->dev;
   int err;
 
-  err = nxmutex_lock(&priv->devlock);
+  err = nxmutex_lock(&dev->devlock);
   if (err < 0)
     {
       return err;
     }
 
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  if (priv->unlinked)
-    {
-      /* Do not allow operations on unlinked sensors. This allows
-       * sensor use on hot swappable I2C bus.
-       */
-
-      nxmutex_unlock(&priv->devlock);
-      return -ENODEV;
-    }
-#endif
-
   switch (cmd)
     {
+      /* Set thermocouple type */
+
+    case SNIOC_SET_THERMO:
+      {
+        dev->conf.thermo_type = g_thermo_types[arg];
+        err = mcp9600_write_devconf(dev);
+      }
+      break;
+
       /* Device ID */
 
     case SNIOC_WHO_AM_I:
@@ -585,7 +607,7 @@ static int mcp9600_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             break;
           }
 
-        err = mcp9600_read_reg(priv, REG_DEVID, devinfo, sizeof(*devinfo));
+        err = mcp9600_read_reg(dev, REG_DEVID, devinfo, sizeof(*devinfo));
       }
       break;
 
@@ -600,7 +622,7 @@ static int mcp9600_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             break;
           }
 
-        err = mcp9600_read_reg(priv, REG_RAW_ADC, raw_data,
+        err = mcp9600_read_reg(dev, REG_RAW_ADC, raw_data,
                                3); /* Only read 24 bits */
 
         /* Sign bit 1, set all upper bits to 1 for correct value in 32-bit
@@ -623,7 +645,7 @@ static int mcp9600_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             break;
           }
 
-        err = mcp9600_read_reg(priv, REG_STATUS, &status_reg,
+        err = mcp9600_read_reg(dev, REG_STATUS, &status_reg,
                                sizeof(status_reg));
         if (err < 0)
           {
@@ -643,7 +665,7 @@ static int mcp9600_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         /* Clear what has been read (burst & temp registers) */
 
         status_reg &= 0x3f;
-        err = mcp9600_write_reg(priv, REG_STATUS, &status_reg,
+        err = mcp9600_write_reg(dev, REG_STATUS, &status_reg,
                                 sizeof(status_reg));
       }
       break;
@@ -684,7 +706,7 @@ static int mcp9600_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
          * write operation.
          */
 
-        err = mcp9600_write_reg(priv, REG_THERMO_SEN_CONF, registers,
+        err = mcp9600_write_reg(dev, REG_THERMO_SEN_CONF, registers,
                                 sizeof(registers));
         if (err < 0)
           {
@@ -693,7 +715,7 @@ static int mcp9600_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
         /* Store this as the official configuration */
 
-        memcpy(&priv->conf, conf, sizeof(priv->conf));
+        memcpy(&dev->conf, conf, sizeof(dev->conf));
       }
 
       /* Configure alerts */
@@ -708,64 +730,7 @@ static int mcp9600_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             break;
           }
 
-        err = mcp9600_config_alert(priv, conf);
-      }
-
-      /* Read temperature data */
-
-    case SNIOC_READTEMP:
-      {
-        struct mcp9600_temp_s *temps = (struct mcp9600_temp_s *)(arg);
-        if (temps == NULL)
-          {
-            err = -EINVAL;
-            break;
-          }
-
-        err =
-            mcp9600_read_temp(priv, REG_JUNC_TEMP_DELTA, &temps->temp_delta);
-        if (err < 0)
-          {
-            break;
-          };
-
-        err = mcp9600_read_temp(priv, REG_THERMO_HOT_JUNC, &temps->hot_junc);
-        if (err < 0)
-          {
-            break;
-          };
-
-        err = mcp9600_read_temp(priv, REG_COLD_JUNC_TEMP, &temps->cold_junc);
-      }
-
-      /* Shutdown the device (argument unused) */
-
-    case SNIOC_SHUTDOWN:
-      {
-        uint8_t reg = 0;
-        priv->conf.mode = MCP9600_MODE_SHUTDOWN;
-
-        reg |= (priv->conf.mode & 0x3);
-        reg |= ((priv->conf.num_samples & 0x7) << 2);
-        reg |= ((priv->conf.resolution & 0x3) << 5);
-        reg |= ((priv->conf.cold_res & 0x1) << 7);
-
-        err = mcp9600_write_reg(priv, REG_DEV_CONFIG, &reg, sizeof(reg));
-      }
-
-      /* Start the device again */
-
-    case SNIOC_START:
-      {
-        uint8_t reg = 0;
-        priv->conf.mode = MCP9600_MODE_NORMAL;
-
-        reg |= (priv->conf.mode & 0x3);
-        reg |= ((priv->conf.num_samples & 0x7) << 2);
-        reg |= ((priv->conf.resolution & 0x3) << 5);
-        reg |= ((priv->conf.cold_res & 0x1) << 7);
-
-        err = mcp9600_write_reg(priv, REG_DEV_CONFIG, &reg, sizeof(reg));
+        err = mcp9600_config_alert(dev, conf);
       }
 
     default:
@@ -773,8 +738,78 @@ static int mcp9600_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       break;
     }
 
-  nxmutex_unlock(&priv->devlock);
+  nxmutex_unlock(&dev->devlock);
   return err;
+}
+
+/****************************************************************************
+ * Name: mcp9600_thread
+ *
+ * Description: Thread for performing interval measurement cycle and data
+ *              read.
+ *
+ * Parameter:
+ *   argc - Number of arguments
+ *   argv - Pointer to argument list
+ *
+ ****************************************************************************/
+
+static int mcp9600_thread(int argc, char **argv)
+{
+  FAR struct mcp9600_dev_s *dev =
+      (FAR struct mcp9600_dev_s *)((uintptr_t)strtoul(argv[1], NULL, 16));
+  int err;
+
+  struct sensor_temp hot_junc;
+  struct sensor_temp cold_junc;
+  struct sensor_temp delta;
+
+  while (true)
+    {
+      if (!dev->hot_junc.enabled && !dev->cold_junc.enabled &&
+          !dev->delta.enabled)
+        {
+          /* Wait for one of the lower halves to be enabled and wake us up */
+
+          snerr("MCP9600 disabled, waiting...\n");
+          err = nxsem_wait(&dev->run);
+          if (err < 0)
+            {
+              continue;
+            }
+        }
+
+      err = mcp9600_read(dev, &hot_junc, &cold_junc, &delta);
+      if (err < 0)
+        {
+          snerr("Error reading MCP9600: %d\n", err);
+          continue;
+        }
+
+      if (dev->hot_junc.enabled)
+        {
+          dev->hot_junc.lower.push_event(dev->hot_junc.lower.priv, &hot_junc,
+                                         sizeof(hot_junc));
+        }
+
+      if (dev->cold_junc.enabled)
+        {
+          dev->cold_junc.lower.push_event(dev->cold_junc.lower.priv,
+                                          &cold_junc, sizeof(cold_junc));
+        }
+
+      if (dev->delta.enabled)
+        {
+          dev->delta.lower.push_event(dev->delta.lower.priv, &delta,
+                                      sizeof(delta));
+        }
+
+      /* Sleep before next fetch */
+
+      nxsig_usleep(dev->interval);
+    }
+
+  return OK;
 }
 
 /****************************************************************************
@@ -785,23 +820,29 @@ static int mcp9600_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  * Name: mcp9600_register
  *
  * Description:
- *   Register the MCP9600 character device as 'devpath'
+ *   Register the MCP9600 UORB sensor. This registers 3 temperature UORB
+ *   topics.
  *
  * Input Parameters:
- *   devpath - The full path to the driver to register. E.g., "/dev/temp0"
  *   i2c     - An instance of the I2C interface to use to communicate with
  *             the MCP9600
  *   addr    - The I2C address of the MCP9600, between 0x60 and 0x67
+ *
+ *   h_devno - The device number for the hot junction topic
+ *   c_devno - The device number for the cold junction topic
+ *   d_devno - The device number for the delta topic
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-int mcp9600_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
-                     uint8_t addr)
+int mcp9600_register(FAR struct i2c_master_s *i2c, uint8_t addr,
+                     uint8_t h_devno, uint8_t c_devno, uint8_t d_devno)
 {
   FAR struct mcp9600_dev_s *priv;
+  FAR char *argv[2];
+  char arg1[32];
   int err;
 
   DEBUGASSERT(i2c != NULL);
@@ -818,10 +859,11 @@ int mcp9600_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 
   priv->i2c = i2c;
   priv->addr = addr;
+  priv->interval = 1000000; /* 1s default interval */
 
   priv->conf = (struct mcp9600_devconf_s)
     {
-      .thermo_type = MCP9600_THERMO_TYPE_T,
+      .thermo_type = SENSOR_THERMO_TYPE_T,
       .filter_coeff = 0,
       .resolution = MCP9600_ADC_RES_18,
       .num_samples = MCP9600_SAMPLE_1,
@@ -829,8 +871,15 @@ int mcp9600_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
       .mode = MCP9600_COLDRES_0625,
     };
 
-  priv->unlinked = false;
-  priv->crefs = 0;
+  /* Initialize semaphore */
+
+  err = nxsem_init(&priv->run, 0, 0);
+  if (err < 0)
+    {
+      snerr("Failed to register MCP9600 driver: %d\n", err);
+      kmm_free(priv);
+      return err;
+    }
 
   /* Initialize mutex */
 
@@ -838,18 +887,73 @@ int mcp9600_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
   if (err < 0)
     {
       snerr("ERROR: Failed to register MCP9600 driver: %d\n", err);
-      kmm_free(priv);
-      return err;
+      goto del_sem;
     }
 
-  /* Register the character driver */
+  /* Cold junction lower half */
 
-  err = register_driver(devpath, &g_mcp9600fops, 0666, priv);
+  priv->cold_junc.enabled = false;
+  priv->cold_junc.dev = priv;
+  priv->cold_junc.lower.type = SENSOR_TYPE_AMBIENT_TEMPERATURE;
+  priv->cold_junc.lower.ops = &g_sensor_ops;
+
+  err = sensor_register(&priv->cold_junc.lower, c_devno);
   if (err < 0)
     {
-      snerr("ERROR: Failed to register MCP9600 driver: %d\n", err);
+      snerr("Failed to register MCP9600 driver: %d\n", err);
+      goto del_mutex;
+    }
+
+  /* Hot junction lower half */
+
+  priv->hot_junc.enabled = false;
+  priv->hot_junc.dev = priv;
+  priv->hot_junc.lower.type = SENSOR_TYPE_TEMPERATURE;
+  priv->hot_junc.lower.ops = &g_sensor_ops;
+
+  err = sensor_register(&priv->hot_junc.lower, h_devno);
+  if (err < 0)
+    {
+      snerr("Failed to register MCP9600 driver: %d\n", err);
+      goto unreg_cold;
+    }
+
+  /* Delta lower half */
+
+  priv->delta.enabled = false;
+  priv->delta.dev = priv;
+  priv->delta.lower.type = SENSOR_TYPE_TEMPERATURE;
+  priv->delta.lower.ops = &g_sensor_ops;
+
+  err = sensor_register(&priv->delta.lower, d_devno);
+  if (err < 0)
+    {
+      snerr("Failed to register MCP9600 driver: %d\n", err);
+      goto unreg_hot;
+    }
+
+  /* Start polling thread */
+
+  snprintf(arg1, 16, "%p", priv);
+  argv[0] = arg1;
+  argv[1] = NULL;
+  err = kthread_create("mcp9600_thread", SCHED_PRIORITY_DEFAULT,
+                       CONFIG_MCP9600_THREAD_STACKSIZE, mcp9600_thread,
+                       argv);
+  if (err < 0)
+    {
+      snerr("Failed to create the MCP9600 notification kthread.\n");
+      sensor_unregister(&priv->delta.lower, d_devno);
+    unreg_hot:
+      sensor_unregister(&priv->hot_junc.lower, h_devno);
+    unreg_cold:
+      sensor_unregister(&priv->cold_junc.lower, c_devno);
+    del_mutex:
       nxmutex_destroy(&priv->devlock);
+    del_sem:
+      nxsem_destroy(&priv->run);
       kmm_free(priv);
+      return err;
     }
 
   return err;

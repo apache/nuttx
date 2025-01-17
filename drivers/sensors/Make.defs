@@ -225,7 +225,7 @@ ifeq ($(CONFIG_SENSORS_MB7040),y)
 endif
 
 ifeq ($(CONFIG_SENSORS_MCP9600),y)
-  CSRCS += mcp9600.c
+  CSRCS += mcp9600_uorb.c
 endif
 
 ifeq ($(CONFIG_SENSORS_MCP9844),y)
