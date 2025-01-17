@@ -135,6 +135,22 @@ foreach(NameAndValue ${ConfigContents})
   endif()
 endforeach()
 
+# cmake-format: off
+# add support of set custom command options to config.h
+# Use the -D parameter to pass the config to header file.
+# NOTE which must start with the CONFIG_ prefix.
+# eg:
+#    cmake -DCONFIG_AAA=1 -DCONFIG_BBB=1 -B build -DBOARD_CONFIG=sim/nsh -GNinja
+# cmake-format: on
+
+get_cmake_property(cache_vars CACHE_VARIABLES)
+foreach(var ${cache_vars})
+  string(REGEX MATCH "^CONFIG_[^=]+" name ${var})
+  if(name)
+    file(APPEND ${CONFIG_H} "#define ${var} ${${var}}\n")
+  endif()
+endforeach()
+
 file(APPEND ${CONFIG_H}
      "\n/* Sanity Checks *****************************************/\n\n")
 file(APPEND ${CONFIG_H}
