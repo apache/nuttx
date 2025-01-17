@@ -121,22 +121,22 @@ void mpfs_jump_to_app(void)
       "csrw pmpcfg0, t0\n"
       "csrw pmpcfg2, zero\n"
 #endif
-#ifdef CONFIG_MPFS_OPENSBI
+      "slli t1, a0, 3\n"                     /* To entrypoint offset */
+      "la   t0, g_app_entrypoints\n"         /* Entrypoint table base */
+      "add  t0, t0, t1\n"                    /* Index in table */
+      "ld   a1, 0(t0)\n"                     /* Load the address from table */
+      "li   t1, 1\n"
+      "la   t2, g_cpus_booted\n"
       "ld   t0, g_hart_use_sbi\n"            /* Load sbi usage bitmask */
+      "amoadd.w.aqrl zero, t1, 0(t2)\n"      /* g_cpus_booted + 1 */
+#ifdef CONFIG_MPFS_OPENSBI
       "srl  t0, t0, a0\n"                    /* Shift right by this hart */
       "andi t0, t0, 1\n"                     /* Check the 0 bit */
       "beqz t0, 1f\n"                        /* If bit was 1, jump to sbi */
       "tail mpfs_opensbi_prepare_hart\n"
       "1:\n"
 #endif
-      "slli t1, a0, 3\n"                     /* To entrypoint offset */
-      "la   t0, g_app_entrypoints\n"         /* Entrypoint table base */
-      "add  t0, t0, t1\n"                    /* Index in table */
-      "ld   t0, 0(t0)\n"                     /* Load the address from table */
-      "li   t1, 1\n"
-      "la   t2, g_cpus_booted\n"
-      "amoadd.w.aqrl zero, t1, 0(t2)\n"      /* g_cpus_booted + 1 */
-      "jr   t0\n"                            /* Jump to entrypoint */
+      "jr   a1\n"                            /* Jump to entrypoint */
       :
 #ifdef CONFIG_MPFS_BOARD_PMP
       : "i" (ENTRY_STACK)
