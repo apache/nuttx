@@ -113,7 +113,9 @@
  */
 
 #ifdef CONFIG_BUILD_KERNEL
-#  define ARCH_DATA_RESERVE_SIZE 512
+/* use MM_PGSIZE to unify among all archs for now */
+
+#  define ARCH_DATA_RESERVE_SIZE CONFIG_MM_PGSIZE
 #else
 #  define ARCH_DATA_RESERVE_SIZE 0
 #endif

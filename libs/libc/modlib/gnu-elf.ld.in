@@ -26,7 +26,8 @@
 #  include <nuttx/addrenv.h>
 
 #  define TEXT CONFIG_ARCH_TEXT_VBASE
-#  define DATA CONFIG_ARCH_DATA_VBASE + CONFIG_MM_PGSIZE
+#  define DATA CONFIG_ARCH_DATA_VBASE + ARCH_DATA_RESERVE_SIZE
+
 #else
 #  define TEXT 0x0
 #  define DATA
