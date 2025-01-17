@@ -454,7 +454,7 @@
 #endif
 
 /* Command:      SNIOC_FLUSH
- * Description:  Flush sensor harware fifo buffer.
+ * Description:  Flush sensor hardware fifo buffer.
  */
 
 #define SNIOC_FLUSH                   _SNIOC(0x009D)
@@ -465,5 +465,32 @@
  */
 
 #define SNIOC_GET_EVENTS              _SNIOC(0x009E)
+
+/* Command:      SNIOC_SET_THERMO
+ * Description:  Set the thermocouple type.
+ * Argument:     An option from `enum sensor_thermo_type_e`
+ */
+
+#define SNIOC_SET_THERMO              _SNIOC(0x009F)
+
+/****************************************************************************
+ * Public types
+ ****************************************************************************/
+
+/* Possible thermocouple types. Implementations should not rely on the enum's
+ * underlying value.
+ */
+
+enum sensor_thermo_type_e
+{
+  SENSOR_THERMO_TYPE_K,
+  SENSOR_THERMO_TYPE_J,
+  SENSOR_THERMO_TYPE_T,
+  SENSOR_THERMO_TYPE_N,
+  SENSOR_THERMO_TYPE_S,
+  SENSOR_THERMO_TYPE_E,
+  SENSOR_THERMO_TYPE_B,
+  SENSOR_THERMO_TYPE_R,
+};
 
 #endif /* __INCLUDE_NUTTX_SENSORS_IOCTL_H */

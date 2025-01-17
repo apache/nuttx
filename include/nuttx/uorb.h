@@ -112,7 +112,7 @@
  * Celsius.
  */
 
-#define SENSOR_TYPE_TEMPERAUTRE                     7
+#define SENSOR_TYPE_TEMPERATURE                     7
 
 /* Proximity
  * The values correspond to the distance to the nearest
@@ -162,7 +162,7 @@
 
 #define SENSOR_TYPE_AMBIENT_TEMPERATURE             13
 
-/* Magneric Field Uncalibrated
+/* Magnetic Field Uncalibrated
  * Similar to MAGNETIC_FIELD, all values are in micro-Tesla (uT)
  * and measure the geomagnetic field in X, Y and Z axis.
  */

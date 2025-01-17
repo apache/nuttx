@@ -1,10 +1,12 @@
+=======
 MCP9600
 =======
 
 Contributed by Matteo Golin.
 
-The MCP9600 is a thermocouple EMF to temperature converter made by Microchip. It is also sold as a `breakout board module
-by Adafruit <https://learn.adafruit.com/adafruit-mcp9600-i2c-thermocouple-amplifier>`_.
+The MCP9600 is a thermocouple EMF to temperature converter made by Microchip. It
+is also sold as a `breakout board module by Adafruit
+<https://learn.adafruit.com/adafruit-mcp9600-i2c-thermocouple-amplifier>`_.
 
 Application Programming Interface
 ==================================
@@ -15,26 +17,63 @@ The header file for the MCP9600 driver interface can be included using:
 
    #include <nuttx/sensors/mcp9600.h>
 
-The MCP9600 registration function allows the driver to be registered as a POSIX
-character driver.
+The MCP9600 registration function allows the driver to be registered as a
+:doc:`UORB </components/drivers/special/sensors/sensors_uorb>` sensor.
 
-The standard POSIX `read()` operation will return the device information in
-plain-text, which is useful when debugging/testing the driver using `cat` from
-the shell.
+The MCP9600 measures three types of temperature:
+ * Hot junction temperature
+ * Cold junction temperature
+ * Temperature delta
 
-The `write()` operation is not implemented for this sensor.
+Registering this sensor will create three UORB temperature topics, each with
+their own unique device number. You must specify the unique device numbers for
+each topic in the registration function:
 
-Specific operations the sensor offers can be performed via the POSIX `ioctl`
-operation. The supported commands are:
+.. code-block:: c
 
+   /* Registers sensor_temp1, sensor_temp2 and sensor_temp 3, where 1 is the
+    * hot junction topic, 2 is the cold junction topic and 3 is the delta
+    */
+
+   int err;
+   err = mcp9600_register(i2c_master, 0x60, 1, 2, 3);
+   if (err < 0) {
+     syslog(LOG_ERR, "Could not register MCP9600: %d\n", err);
+   }
+
+
+This sensor offers some additional control commands for features that are not
+accessible with the standard UORB interface.
+
+ * :c:macro:`SNIOC_SET_THERMO`
  * :c:macro:`SNIOC_WHO_AM_I`
  * :c:macro:`SNIOC_READ_RAW_DATA`
  * :c:macro:`SNIOC_CHECK_STATUS_REG`
  * :c:macro:`SNIOC_CONFIGURE`
  * :c:macro:`SNIOC_WRITECONF`
- * :c:macro:`SNIOC_READTEMP`
- * :c:macro:`SNIOC_SHUTDOWN`
- * :c:macro:`SNIOC_START`
+
+``SNIOC_SET_THERMO``
+--------------------
+
+This command configures the thermocouple type of the MCP9600. The device
+supports the following thermocouple types:
+
+ * K
+ * J
+ * T
+ * N
+ * E
+ * S
+ * B
+ * R
+
+.. code-block:: c
+
+   int err;
+   err = orb_ioctl(sensor, SNIOC_SET_THERMO, SENSOR_THERMO_TYPE_J);
+   if (err < 0) {
+     syslog(LOG_ERR, "Failed to set thermocouple type: %d\n", err);
+   }
 
 ``SNIOC_WHO_AM_I``
 ------------------
@@ -46,7 +85,7 @@ type ``struct mcp9600_devinfo_s *``.
 .. code-block:: c
 
   struct mcp9600_devinfo_s devinfo;
-  err = ioctl(sensor, SNIOC_WHO_AM_I, &devinfo);
+  err = orb_ioctl(sensor, SNIOC_WHO_AM_I, &devinfo);
 
   uint8_t revision_minor = MCP9600_REV_MINOR(devinfo.revision);
   uint8_t revision_major = MCP9600_REV_MAJOR(devinfo.revision);
@@ -64,7 +103,7 @@ configured resolution; consult the data sheet.
 .. code-block:: c
 
   int32_t raw;
-  err = ioctl(sensor, SNIOC_READ_RAW_DATA, &raw);
+  err = orb_ioctl(sensor, SNIOC_READ_RAW_DATA, &raw);
 
 ``SNIOC_CHECK_STATUS_REG``
 --------------------------
@@ -75,7 +114,7 @@ this command must be a pointer to type ``struct mcp9600_status_s``.
 .. code-block:: c
 
   struct mcp9600_status_s status;
-  err = ioctl(sensor, SNIOC_CHECK_STATUS_REG, &status);
+  err = orb_ioctl(sensor, SNIOC_CHECK_STATUS_REG, &status);
 
 ``SNIOC_CONFIGURE``
 -------------------
@@ -93,7 +132,7 @@ mcp9600_devconf_s``.
     .resolution = MCP9600_ADC_RES_18,
     /* More fields ... */
   };
-  err = ioctl(sensor, SNIOC_CONFIGURE, &conf);
+  err = orb_ioctl(sensor, SNIOC_CONFIGURE, &conf);
 
 ``SNIOC_WRITECONF``
 -------------------
@@ -111,36 +150,4 @@ mcp9600_alertconf_s``.
     .limit = 40 / 0.25,
     /* More fields ... */
   };
-  err = ioctl(sensor, SNIOC_WRITECONF, &conf);
-
-``SNIOC_READTEMP``
-------------------
-
-This command lets you read the three different types of temperature that the
-MCP9600 can measure. The argument to this command must be a pointer to type
-``struct mcp9600_temp_s``.
-
-.. code-block:: c
-
-  struct mcp9600_temp_s temps;
-  err = ioctl(sensor, SNIOC_READTEMP, &temps);
-
-  printf("Temperature: %d C\n", temps.hot_junc);
-
-``SNIOC_SHUTDOWN``
-------------------
-
-This command shuts down the sensor. It takes no arguments.
-
-.. code-block:: c
-
-  err = ioctl(sensor, SNIOC_SHUTDOWN, NULL);
-
-``SNIOC_START``
----------------
-
-This command starts the sensor in normal mode. It takes no arguments.
-
-.. code-block:: c
-
-  err = ioctl(sensor, SNIOC_START, NULL);
+  err = orb_ioctl(sensor, SNIOC_WRITECONF, &conf);
