@@ -324,7 +324,7 @@ function configure_default {
   fi
 
   if [ "X$toolchain" != "X" ]; then
-    setting=`grep _TOOLCHAIN_ $nuttx/.config | grep -v CONFIG_ARCH_TOOLCHAIN_* | grep =y`
+    setting=`grep _TOOLCHAIN_ $nuttx/.config | grep -v CONFIG_TOOLCHAIN_WINDOWS | grep -v CONFIG_ARCH_TOOLCHAIN_* | grep =y`
     original_toolchain=`echo $setting | cut -d'=' -f1`
     if [ ! -z "$original_toolchain" ]; then
       echo "  Disabling $original_toolchain"
@@ -347,7 +347,7 @@ function configure_cmake {
   fi
 
   if [ "X$toolchain" != "X" ]; then
-    setting=`grep _TOOLCHAIN_ $nuttx/build/.config | grep -v CONFIG_ARCH_TOOLCHAIN_* | grep =y`
+    setting=`grep _TOOLCHAIN_ $nuttx/build/.config | grep -v CONFIG_TOOLCHAIN_WINDOWS | grep -v CONFIG_ARCH_TOOLCHAIN_* | grep =y`
     original_toolchain=`echo $setting | cut -d'=' -f1`
     if [ ! -z "$original_toolchain" ]; then
       echo "  Disabling $original_toolchain"
