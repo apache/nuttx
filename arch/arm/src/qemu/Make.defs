@@ -20,11 +20,20 @@
 #
 ############################################################################
 
+ifeq ($(CONFIG_ARCH_ARMV7A),y)
 include armv7-a/Make.defs
+endif
+
+ifeq ($(CONFIG_ARCH_ARMV7R),y)
+include armv7-r/Make.defs
+endif
 
 # qemu-specific C source files
-CHIP_CSRCS  = qemu_boot.c qemu_serial.c qemu_irq.c qemu_timer.c qemu_memorymap.c
-CHIP_CSRCS += qemu_pgalloc.c
+CHIP_CSRCS  = qemu_boot.c qemu_serial.c qemu_irq.c qemu_timer.c
+
+ifeq ($(CONFIG_ARCH_ARMV7A),y)
+CHIP_CSRCS += qemu_pgalloc.c qemu_memorymap.c
+endif
 
 ifeq ($(CONFIG_SMP),y)
   CHIP_CSRCS += qemu_cpuboot.c
