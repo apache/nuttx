@@ -80,6 +80,7 @@ struct littlefs_mountpt_s
   struct mtd_geometry_s geo;
   struct lfs_config     cfg;
   struct lfs            lfs;
+  bool                  readonly;
 };
 
 /* NuttX specific file attributes.
@@ -375,6 +376,15 @@ static int littlefs_open(FAR struct file *filep, FAR const char *relpath,
 
   relpath = littlefs_convert_path(relpath);
   oflags = littlefs_convert_oflags(oflags);
+  if (fs->readonly)
+    {
+      if (oflags != LFS_O_RDONLY)
+        {
+          ret = -EROFS;
+          goto errout;
+        }
+    }
+
   ret = littlefs_convert_result(lfs_file_open(&fs->lfs, &priv->file,
                                               relpath, oflags));
   if (ret < 0)
@@ -1184,6 +1194,11 @@ static int littlefs_write_block(FAR const struct lfs_config *c,
   FAR struct inode *drv = fs->drv;
   int ret;
 
+  if (fs->readonly)
+    {
+      return -EROFS;
+    }
+
   block = (block * c->block_size + off) / geo->blocksize;
   size  = size / geo->blocksize;
 
@@ -1210,6 +1225,11 @@ static int littlefs_erase_block(FAR const struct lfs_config *c,
   FAR struct inode *drv = fs->drv;
   int ret = OK;
 
+  if (fs->readonly)
+    {
+      return -EROFS;
+    }
+
   if (INODE_IS_MTD(drv))
     {
       FAR struct mtd_geometry_s *geo = &fs->geo;
@@ -1231,6 +1251,11 @@ static int littlefs_sync_block(FAR const struct lfs_config *c)
   FAR struct littlefs_mountpt_s *fs = c->context;
   FAR struct inode *drv = fs->drv;
   int ret;
+
+  if (fs->readonly)
+    {
+      return -EROFS;
+    }
 
   if (INODE_IS_MTD(drv))
     {
@@ -1383,6 +1408,11 @@ static int littlefs_bind(FAR struct inode *driver, FAR const void *data,
         {
           goto errout_with_fs;
         }
+    }
+
+  if (data && !strcmp(data, "ro"))
+    {
+      fs->readonly = true;
     }
 
   ret = littlefs_convert_result(lfs_mount(&fs->lfs, &fs->cfg));
