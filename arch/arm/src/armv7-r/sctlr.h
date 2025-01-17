@@ -42,6 +42,10 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Vector Base Address Register (VBAR) */
+
+#define VBAR_MASK                (0xffffffe0)
+
 /* CP15 c0 Registers ********************************************************/
 
 /* Main ID Register (MIDR): CRn=c0, opc1=0, CRm=c0, opc2=0

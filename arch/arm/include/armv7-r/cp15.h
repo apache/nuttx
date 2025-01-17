@@ -161,6 +161,8 @@
 
 #define CP15_CNTPCT(lo,hi) _CP15_64(0, lo, hi, c14)   /* Physical Count register */
 
+#define CP15_CNTP_CVAL(lo,hi) _CP15_64(2, lo, hi, c14) /* Physical Timer CompareValue register */
+
 #define CP15_DCIALLU(r)    _CP15(0, r, c15, c5, 0)   /* Invalidate data cache */
 
 #define CP15_SET(reg, value)            \
