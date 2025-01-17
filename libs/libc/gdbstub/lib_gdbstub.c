@@ -1587,6 +1587,8 @@ static int gdb_is_thread_active(FAR struct gdb_state_s *state)
  * Description:
  *  The thread context packet is used by GDB to request information from
  *  the stub.
+ *  Set thread for subsequent operations (m, M, g, G, etc)
+ *  Thread ID of -1 means all all thread, 0 means any thread.
  *
  * Input Parameters:
  *   state   - The pointer to the GDB state structure.
@@ -1596,7 +1598,7 @@ static int gdb_is_thread_active(FAR struct gdb_state_s *state)
  *   Negative value on error.
  *
  * Note : Command Format: Hg<id>
- *                       Hc-<id>
+ *                       Hc<id>
  *        Response Format: OK
  ****************************************************************************/
 
@@ -1605,19 +1607,14 @@ static int gdb_thread_context(FAR struct gdb_state_s *state)
   FAR struct tcb_s *tcb;
   uintptr_t pid;
   int ret;
+  char c = state->pkt_buf[1];
 
-  if (state->pkt_buf[1] == 'g')
-    {
-      state->pkt_next += 2;
-    }
-  else if  (state->pkt_buf[1] == 'c')
-    {
-      state->pkt_next += 3;
-    }
-  else
+  if (c != 'g' && c != 'c')
     {
       return -EINVAL;
     }
+
+  state->pkt_next += 2;   /* Skip Hg/Hc */
 
   ret = gdb_expect_integer(state, &pid);
   if (ret < 0)
@@ -1625,17 +1622,24 @@ static int gdb_thread_context(FAR struct gdb_state_s *state)
       return ret;
     }
 
-  if (pid != 0)
+  if (pid == 0 || pid == -1)
     {
-      pid = pid == PID0_REPLACE ? 0 : pid;
-      tcb = nxsched_get_tcb(pid);
-      if (tcb == NULL)
-        {
-          return -EINVAL;
-        }
+      /* ‘-1’ to indicate all threads, or ‘0’ to pick any thread. */
 
-      state->pid = pid;
+      pid = state->pid;   /* Keep unchanged */
     }
+  else if (pid == PID0_REPLACE)
+    {
+      pid = 0;
+    }
+
+  tcb = nxsched_get_tcb(pid);
+  if (tcb == NULL)
+    {
+      return -EINVAL;
+    }
+
+  state->pid = pid;
 
   gdb_update_regcache(state);
 
