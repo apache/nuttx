@@ -2222,6 +2222,14 @@ config ARCH_BOARD_QEMU_ARMV8A
 		This options selects support for NuttX on the QEMU ARMv8a + virt
 		board featuring the qemu ARMv8a CPUs.
 
+config ARCH_BOARD_QEMU_ARMV7R
+	bool "Qemu ARMv7r CPUs board"
+	depends on ARCH_CHIP_QEMU_ARM
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This selects support for NuttX on the QEMU ARMv7r + virt
+		board featuring the qemu ARMv7r CPUs.
+
 config ARCH_BOARD_PINEPHONE
 	bool "PINE64 PinePhone"
 	depends on ARCH_CHIP_A64
@@ -3515,6 +3523,7 @@ config ARCH_BOARD
 	default "sabre-6quad"               if ARCH_BOARD_SABRE_6QUAD
 	default "tc397"                     if ARCH_BOARD_TC397
 	default "qemu-armv7a"               if ARCH_BOARD_QEMU_ARMV7A
+	default "qemu-armv7r"               if ARCH_BOARD_QEMU_ARMV7R
 	default "qemu-armv8a"               if ARCH_BOARD_QEMU_ARMV8A
 	default "pinephone"                 if ARCH_BOARD_PINEPHONE
 	default "pinephonepro"              if ARCH_BOARD_PINEPHONE_PRO
