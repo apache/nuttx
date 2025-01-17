@@ -1144,14 +1144,7 @@ static int littlefs_rewinddir(FAR struct inode *mountpt,
 }
 
 /****************************************************************************
- * Name: littlefs_bind
- *
- * Description: This implements a portion of the mount operation. This
- *  function allocates and initializes the mountpoint private data and
- *  binds the driver inode to the filesystem private data. The final
- *  binding of the private data (containing the driver) to the
- *  mountpoint is performed by mount().
- *
+ * Name: littlefs_read_block
  ****************************************************************************/
 
 static int littlefs_read_block(FAR const struct lfs_config *c,
@@ -1260,6 +1253,13 @@ static int littlefs_sync_block(FAR const struct lfs_config *c)
 
 /****************************************************************************
  * Name: littlefs_bind
+ *
+ * Description: This implements a portion of the mount operation. This
+ *  function allocates and initializes the mountpoint private data and
+ *  binds the driver inode to the filesystem private data. The final
+ *  binding of the private data (containing the driver) to the
+ *  mountpoint is performed by mount().
+ *
  ****************************************************************************/
 
 static int littlefs_bind(FAR struct inode *driver, FAR const void *data,
