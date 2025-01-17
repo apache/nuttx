@@ -62,6 +62,8 @@
 #  define XCPTCONTEXT_ALIGN 16
 #endif
 
+#define PID0_REPLACE  INT32_MAX
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -327,7 +329,11 @@ static void elf_emit_tcb_note(FAR struct elf_dumpinfo_s *cinfo,
   elf_emit(cinfo, &nhdr, sizeof(nhdr));
   elf_emit(cinfo, name, sizeof(name));
 
-  status.pr_pid = tcb->pid;
+  /* GDB treats PID 0 as invalid: for a core file it assigns an unused ID,
+   * and for the GDB stub 0 means "any thread".
+   */
+
+  status.pr_pid = tcb->pid == 0 ? PID0_REPLACE : tcb->pid;
 
   if (running_task() == tcb)
     {
