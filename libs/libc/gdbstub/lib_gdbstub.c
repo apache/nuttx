@@ -62,6 +62,14 @@
 #define IS_SPECIAL_CHARACTERS(c) \
         ((c) == '#' || (c) == '$' || (c) == '}' || (c) == '*')
 
+/* Architecture can overwrite the default XCPTCONTEXT alignment */
+
+#ifndef XCPTCONTEXT_ALIGN
+#  define XCPTCONTEXT_ALIGN 16
+#endif
+
+#define PID0_REPLACE INT32_MAX
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -79,7 +87,7 @@ struct gdb_state_s
                                            */
   int last_stopreason;                    /* Last stop reason */
   FAR void *last_stopaddr;                /* Last stop address */
-  pid_t pid;                              /* Gdb current thread */
+  pid_t pid;                              /* Current NuttX thread pid */
   FAR char *pkt_next;                     /* Pointer to next byte in packet */
   char pkt_buf[BUFSIZE];                  /* Packet buffer */
   size_t pkt_len;                         /* Packet send and receive length */
@@ -1339,12 +1347,10 @@ static int gdb_write_bin_memory(FAR struct gdb_state_s *state)
 
 static void gdb_get_thread(FAR struct tcb_s *tcb, FAR void *arg)
 {
+  int pid = tcb->pid == 0 ? PID0_REPLACE : tcb->pid;
   FAR struct gdb_state_s *state = arg;
-  int pid = tcb->pid;
 
-  /* Gdb pid start from 1, so add it */
-
-  state->pkt_len += sprintf(&state->pkt_buf[state->pkt_len], "%x,", pid + 1);
+  state->pkt_len += sprintf(&state->pkt_buf[state->pkt_len], "%x,", pid);
 }
 
 /****************************************************************************
@@ -1419,7 +1425,12 @@ static int gdb_query(FAR struct gdb_state_s *state)
           return ret;
         }
 
-      tcb = nxsched_get_tcb(pid - 1);
+      if (pid == PID0_REPLACE)
+        {
+          pid = 0;
+        }
+
+      tcb = nxsched_get_tcb(pid);
       if (tcb == NULL)
         {
           return -EINVAL;
@@ -1501,13 +1512,18 @@ static int gdb_is_thread_active(FAR struct gdb_state_s *state)
       return ret;
     }
 
-  tcb = nxsched_get_tcb(pid - 1);
+  if (pid == PID0_REPLACE)
+    {
+      pid = 0;
+    }
+
+  tcb = nxsched_get_tcb(pid);
   if (tcb == NULL)
     {
       return -EINVAL;
     }
 
-  state->pid = pid - 1;
+  state->pid = pid;
   gdb_send_ok_packet(state);
   return ret;
 }
@@ -1558,13 +1574,14 @@ static int gdb_thread_context(FAR struct gdb_state_s *state)
 
   if (pid != 0)
     {
-      tcb = nxsched_get_tcb(pid - 1);
+      pid = pid == PID0_REPLACE ? 0 : pid;
+      tcb = nxsched_get_tcb(pid);
       if (tcb == NULL)
         {
           return -EINVAL;
         }
 
-      state->pid = pid - 1;
+      state->pid = pid;
     }
 
   gdb_send_ok_packet(state);
@@ -1595,26 +1612,32 @@ static int gdb_send_stop(FAR struct gdb_state_s *state, int stopreason,
                          FAR void *stopaddr)
 {
   int ret;
+  int pid;
 
-  state->pid = _SCHED_GETTID();
+  state->pid = pid = _SCHED_GETTID();
+  if (pid == 0)
+    {
+      pid = PID0_REPLACE;
+    }
+
 retry:
   switch (stopreason)
     {
       case GDB_STOPREASON_WATCHPOINT_RO:
         ret = sprintf(state->pkt_buf, "T05thread:%x;rwatch:%" PRIxPTR ";",
-                      state->pid + 1, (uintptr_t)stopaddr);
+                      pid, (uintptr_t)stopaddr);
         break;
       case GDB_STOPREASON_WATCHPOINT_WO:
         ret = sprintf(state->pkt_buf, "T05thread:%x;awatch:%" PRIxPTR ";",
-                      state->pid + 1, (uintptr_t)stopaddr);
+                      pid, (uintptr_t)stopaddr);
         break;
       case GDB_STOPREASON_WATCHPOINT_RW:
         ret = sprintf(state->pkt_buf, "T05thread:%x;watch:%" PRIxPTR ";",
-                      state->pid + 1, (uintptr_t)stopaddr);
+                      pid, (uintptr_t)stopaddr);
         break;
       case GDB_STOPREASON_BREAKPOINT:
         ret = sprintf(state->pkt_buf, "T05thread:%x;hwbreak:;",
-                      state->pid + 1);
+                      pid);
         break;
       case GDB_STOPREASON_STEPPOINT:
         if (state->last_stopreason == GDB_STOPREASON_WATCHPOINT_RW ||
@@ -1627,7 +1650,7 @@ retry:
 
       case GDB_STOPREASON_CTRLC:
       default:
-        ret = sprintf(state->pkt_buf, "T05thread:%x;", state->pid + 1);
+        ret = sprintf(state->pkt_buf, "T05thread:%x;", pid);
     }
 
   if (ret < 0)
