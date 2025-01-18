@@ -1221,6 +1221,13 @@ config ARCH_BOARD_NRF52840_DONGLE
 	---help---
 		This option selects the Nordic nRF52840 Dongle (PCA10059)
 
+config ARCH_BOARD_XIAO_NRF52840
+	bool "Seeed Xiao nRF52840"
+	depends on ARCH_CHIP_NRF52
+	select ARCH_HAVE_LEDS
+	---help---
+		This option selects the Seeed Xiao nRF52840 Board
+
 config ARCH_BOARD_ARDUINO_NANO_33BLE
 	bool "Arduino Nano 33 BLE Sense based on Nordic nRF52840"
 	depends on ARCH_CHIP_NRF52
@@ -3414,6 +3421,7 @@ config ARCH_BOARD
 	default "nrf52832-dk"               if ARCH_BOARD_NRF52832_DK
 	default "nrf52840-dk"               if ARCH_BOARD_NRF52840_DK
 	default "nrf52840-dongle"           if ARCH_BOARD_NRF52840_DONGLE
+	default "xiao-nrf52840"             if ARCH_BOARD_XIAO_NRF52840
 	default "thingy52"                  if ARCH_BOARD_THINGY52
 	default "nrf5340-dk"                if ARCH_BOARD_NRF5340_DK
 	default "nrf5340-audio-dk"          if ARCH_BOARD_NRF5340_AUDIO_DK
@@ -3931,6 +3939,9 @@ source "boards/arm/nrf52/nrf52832-dk/Kconfig"
 endif
 if ARCH_BOARD_NRF52840_DK
 source "boards/arm/nrf52/nrf52840-dk/Kconfig"
+endif
+if ARCH_BOARD_XIAO_NRF52840
+source "boards/arm/nrf52/xiao-nrf52840/Kconfig"
 endif
 if ARCH_BOARD_THINGY52
 source "boards/arm/nrf52/thingy52/Kconfig"
