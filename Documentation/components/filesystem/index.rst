@@ -557,6 +557,7 @@ NuttX provides support for a variety of file systems out of the box.
   nxflat.rst
   pseudofs.rst
   special_files_dev_num.rst
+  v9fs.rst
 
 FS Categories
 -------------
