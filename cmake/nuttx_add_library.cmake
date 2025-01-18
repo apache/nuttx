@@ -53,6 +53,13 @@ function(nuttx_add_library_internal target)
     ${target}
     PRIVATE $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx,NUTTX_INCLUDE_DIRECTORIES>>)
 
+  # add extra flags into command line
+
+  if(DEFINED EXTRAFLAGS)
+    string(REPLACE " " ";" eflags "${EXTRAFLAGS}")
+    target_compile_options(${target} PRIVATE ${eflags})
+  endif()
+
   # Set install config for all library
   install(TARGETS ${target})
 endfunction()
