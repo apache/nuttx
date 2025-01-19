@@ -604,7 +604,7 @@ By following these instructions, users can effectively utilize the Generator deb
 ::
 
   The tool publishes topic data via uorb.
-  Notice:NSH_LINELEN must be set to 128 or more.
+  Notice:LINE_MAX must be set to 128 or more.
   
   generator <command> [arguments...]
     Commands:
