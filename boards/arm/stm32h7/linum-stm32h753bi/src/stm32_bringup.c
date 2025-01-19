@@ -353,5 +353,15 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_INPUT_FT5X06
+  /* Initialize the touchscreen */
+
+  ret = stm32_tsc_setup(0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_tsc_setup failed: %d\n", ret);
+    }
+#endif
+
   return OK;
 }

@@ -80,4 +80,8 @@ ifeq ($(CONFIG_AUDIO_TONE),y)
   CSRCS += stm32_tone.c
 endif
 
+ifeq ($(CONFIG_INPUT_FT5X06),y)
+CSRCS += stm32_touchscreen.c
+endif
+
 include $(TOPDIR)/boards/Board.mk
