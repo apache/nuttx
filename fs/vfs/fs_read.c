@@ -182,7 +182,7 @@ ssize_t file_readv(FAR struct file *filep,
 
   else if (inode != NULL && inode->u.i_ops)
     {
-      if (inode->u.i_ops->readv)
+      if (iovcnt > 1 && inode->u.i_ops->readv)
         {
           struct uio uio;
 

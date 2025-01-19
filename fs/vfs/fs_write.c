@@ -160,7 +160,7 @@ ssize_t file_writev(FAR struct file *filep,
   inode = filep->f_inode;
   if (inode != NULL && inode->u.i_ops)
     {
-      if (inode->u.i_ops->writev)
+      if (iovcnt > 1 && inode->u.i_ops->writev)
         {
           struct uio uio;
 
