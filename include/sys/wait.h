@@ -51,6 +51,7 @@
 #define WIFSTOPPED(s)   (false)             /* True: Child is currently stopped */
 #define WSTOPSIG(s)     (false)             /* Return signal number that caused process to stop */
 #define WTERMSIG(s)     (((s) >> 8) & 0x7f) /* Return signal number that caused process to terminate */
+#define WCOREDUMP(s)    (((s) >> 8) & 0x80) /* True: Child has produced a core dump */
 
 /* The following symbolic constants are possible values for the options
  * argument to waitpid() (1) and/or waitid() (2),
