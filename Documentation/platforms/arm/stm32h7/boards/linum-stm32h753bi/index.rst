@@ -232,7 +232,7 @@ EEPROM memory used is the 24LC256 with 256Kb with the control bytes value 0x54.
 TOUCHSCREEN SENSOR
 ------------------
 
-The touchscreen sensor used is the GT928.
+The touchscreen sensor used is the FT5X06.
 
   ======== =====
   GPIO     PINS
@@ -817,7 +817,37 @@ Configures the board to use the SPI4 and enables RFID driver with MFRC522::
 lvgl
 ----
 
-Configures the board to use display of 7 inch with lvgl example.
+Configures the board to use display of 7 inch with lvgl example. The touch screen functionality is implemented using 
+the FT5X06 capacitive touch controller connected to I2C3 interface, with interrupt handling configured on pin PH9 for touch event detection.
+
+To verify if the touch controller is functioning correctly, use the **tc** command.::
+
+  nsh> tc 2
+  tc_main: nsamples: 2
+  tc_main: Opening /dev/input0
+  Sample     :
+    npoints : 1
+  Point 1    :
+          id : 0
+      flags : 19
+          x : 0
+          y : 52
+          h : 0
+          w : 0
+    pressure : 0
+  timestamp : 0
+  Sample     :
+    npoints : 1
+  Point 1    :
+          id : 0
+      flags : 1a
+          x : 0
+          y : 52
+          h : 0
+          w : 0
+    pressure : 0
+  timestamp : 0
+  Terminating!
 
 To verify if the display is functioning correctly, use the **fb** command. You should see the display change colors.::
 
@@ -862,11 +892,11 @@ Once the **fd** command work, run the lvgl exemple. ::
 
 **WARNING:** This example at the moment is not working correctly yet and have a bug fix to be done.
 In the lvgl file **./apps/graphics/lvgl/lvgl/src/drivers/nuttx/lv_nuttx_fbdev.c**
-search the function **lv_nuttx_fbdev_set_file** and modify line 156 as follows:
+search the function **lv_nuttx_fbdev_set_file** and modify line 156 as follows::
 
     dsc->mem_off_screen = malloc(data_size);
     to
-    dsc->mem_off_screen = (void*)0xC00000000;
+    dsc->mem_off_screen = (void*)0xC0000000;
 
 tone
 ----

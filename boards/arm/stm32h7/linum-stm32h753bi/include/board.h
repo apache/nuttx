@@ -412,10 +412,17 @@
 #define GPIO_SDMMC1_D2   (GPIO_SDMMC1_D2_0|GPIO_SPEED_100MHz)  /* PC10 */
 #define GPIO_SDMMC1_D3   (GPIO_SDMMC1_D3_0|GPIO_SPEED_100MHz)  /* PC11 */
 
-/* I2C3 - Used by eeprom memory */
+/* I2C3 - Used by eeprom memory and touch screen */
 
 #define GPIO_I2C3_SCL (GPIO_I2C3_SCL_2|GPIO_SPEED_100MHz) /* PH7 */
 #define GPIO_I2C3_SDA (GPIO_I2C3_SDA_2|GPIO_SPEED_100MHz) /* PH8 */
+
+/* I2C - There is a FT5336 TouchPanel on I2C3 using these pins: */
+
+#define ADJ_SLEW_RATE(p) (((p) & ~GPIO_SPEED_MASK) | (GPIO_SPEED_100MHz))
+#define GPIO_TP_INT  (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTH|GPIO_PIN9) /* PH9 */
+
+#define FT5X06_I2C_ADDRESS          (0x38)
 
 /* PWM - Buzzer */
 #define GPIO_TIM4_CH2OUT  (GPIO_TIM4_CH2OUT_1|GPIO_SPEED_100MHz)   /* PB7 */
