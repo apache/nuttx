@@ -499,7 +499,6 @@ struct task_group_s
 #ifndef CONFIG_DISABLE_PTHREAD
   /* Pthreads ***************************************************************/
 
-  rmutex_t   tg_joinlock;           /* Synchronize access to tg_joinqueue   */
   sq_queue_t tg_joinqueue;          /* List of join status of tcb           */
 #endif
 
@@ -547,7 +546,8 @@ struct task_group_s
 
   struct mm_map_s tg_mm_map;        /* Task group virtual memory mappings   */
 
-  spinlock_t tg_lock;               /* lock */
+  spinlock_t tg_lock;               /* SpinLock for group */
+  rmutex_t   tg_mutex;              /* Mutex for group */
 };
 
 /* struct tcb_s *************************************************************/

@@ -75,8 +75,4 @@ void pthread_release(FAR struct task_group_s *group)
 
       kmm_free(container_of(curr, struct task_join_s, entry));
     }
-
-  /* Destroy the join list mutex */
-
-  nxrmutex_destroy(&group->tg_joinlock);
 }
