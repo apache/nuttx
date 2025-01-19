@@ -92,7 +92,6 @@ int setitimer(int which, FAR const struct itimerval *value,
   FAR struct tcb_s *rtcb;
   struct itimerspec spec;
   struct itimerspec ospec;
-  irqstate_t flags;
   int ret = OK;
 
   if (which != ITIMER_REAL || !value)
@@ -103,14 +102,14 @@ int setitimer(int which, FAR const struct itimerval *value,
 
   rtcb = this_task();
 
-  flags = enter_critical_section();
+  nxrmutex_lock(&rtcb->group->tg_mutex);
 
   if (!rtcb->group->itimer)
     {
       ret = timer_create(CLOCK_REALTIME, NULL, &rtcb->group->itimer);
     }
 
-  leave_critical_section(flags);
+  nxrmutex_unlock(&rtcb->group->tg_mutex);
 
   if (ret != OK)
     {
