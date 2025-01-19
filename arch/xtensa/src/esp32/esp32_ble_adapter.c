@@ -2353,12 +2353,7 @@ static int32_t esp_task_create_pinned_to_core(void *entry,
   DEBUGASSERT(task_handle != NULL);
 
 #ifdef CONFIG_SMP
-  ret = sched_lock();
-  if (ret)
-    {
-      wlerr("Failed to lock scheduler before creating pinned thread\n");
-      return false;
-    }
+  sched_lock();
 #endif
 
   pid = kthread_create(name, prio, stack_depth, entry,
@@ -2390,12 +2385,7 @@ static int32_t esp_task_create_pinned_to_core(void *entry,
     }
 
 #ifdef CONFIG_SMP
-  ret = sched_unlock();
-  if (ret)
-    {
-      wlerr("Failed to unlock scheduler after creating pinned thread\n");
-      return false;
-    }
+  sched_unlock();
 #endif
 
   return pid > 0;

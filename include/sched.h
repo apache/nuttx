@@ -265,8 +265,8 @@ int    sched_cpucount(FAR const cpu_set_t *set);
 
 /* Task Switching Interfaces (non-standard) */
 
-int    sched_lock(void);
-int    sched_unlock(void);
+void   sched_lock(void);
+void   sched_unlock(void);
 int    sched_lockcount(void);
 
 /* Queries */
