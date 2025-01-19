@@ -178,10 +178,11 @@ int group_initialize(FAR struct task_tcb_s *tcb, uint8_t ttype)
       return ret;
     }
 
+  nxrmutex_init(&group->tg_mutex);
+
 #ifndef CONFIG_DISABLE_PTHREAD
   /* Initialize the task group join */
 
-  nxrmutex_init(&group->tg_joinlock);
   sq_init(&group->tg_joinqueue);
 #endif
 

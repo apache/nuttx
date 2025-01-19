@@ -74,6 +74,10 @@
 static inline void
 group_release(FAR struct task_group_s *group, uint8_t ttype)
 {
+  /* Destroy the mutex */
+
+  nxrmutex_destroy(&group->tg_mutex);
+
   task_uninit_info(group);
 
 #if defined(CONFIG_SCHED_HAVE_PARENT) && defined(CONFIG_SCHED_CHILD_STATUS)
