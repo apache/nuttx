@@ -180,7 +180,7 @@ irqstate_t enter_critical_section_wo_note(void)
                * no longer blocked by the critical section).
                */
 
-              spin_lock_wo_note(&g_cpu_irqlock);
+              raw_spin_lock(&g_cpu_irqlock);
               cpu_irqlock_set(cpu);
             }
 
@@ -231,7 +231,7 @@ irqstate_t enter_critical_section_wo_note(void)
 
           DEBUGASSERT((g_cpu_irqset & (1 << cpu)) == 0);
 
-          spin_lock_wo_note(&g_cpu_irqlock);
+          raw_spin_lock(&g_cpu_irqlock);
 
           /* Then set the lock count to 1.
            *

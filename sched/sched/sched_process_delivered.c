@@ -73,7 +73,7 @@ void nxsched_process_delivered(int cpu)
 
   if ((g_cpu_irqset & (1 << cpu)) == 0)
     {
-      spin_lock_wo_note(&g_cpu_irqlock);
+      raw_spin_lock(&g_cpu_irqlock);
 
       g_cpu_irqset |= (1 << cpu);
     }
