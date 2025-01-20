@@ -35,8 +35,10 @@
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
+#include <sched.h>
 
 #include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/timers/timer.h>
 #include <arch/board/board.h>
 #include <arch/chip/timer.h>
@@ -91,12 +93,13 @@ struct cxd56_lowerhalf_s
 
   /* Private data */
 
-  uint32_t  base;     /* Base address of the timer */
-  tccb_t    callback; /* Current user interrupt callback */
-  void     *arg;      /* Argument passed to upper half callback */
-  uint32_t  timeout;  /* The current timeout value (us) */
-  uint32_t  clkticks; /* actual clock ticks for current interval */
-  bool      started;  /* The timer has been started */
+  uint32_t   base;     /* Base address of the timer */
+  tccb_t     callback; /* Current user interrupt callback */
+  void      *arg;      /* Argument passed to upper half callback */
+  uint32_t   timeout;  /* The current timeout value (us) */
+  uint32_t   clkticks; /* actual clock ticks for current interval */
+  bool       started;  /* The timer has been started */
+  spinlock_t lock;     /* Spinlock */
 };
 
 /****************************************************************************
@@ -430,7 +433,8 @@ static void cxd56_setcallback(struct timer_lowerhalf_s *lower,
   struct cxd56_lowerhalf_s *priv = (struct cxd56_lowerhalf_s *)lower;
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
+  sched_lock();
 
   DEBUGASSERT(priv);
   tmrinfo("Entry: callback=%p\n", callback);
@@ -440,7 +444,8 @@ static void cxd56_setcallback(struct timer_lowerhalf_s *lower,
   priv->callback = callback;
   priv->arg      = arg;
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
+  sched_unlock();
 }
 
 /****************************************************************************
@@ -559,6 +564,7 @@ void cxd56_timer_initialize(const char *devpath, int timer)
     }
 
   priv->ops = &g_tmrops;
+  spin_lock_init(&priv->lock);
 
   irq_attach(irq, cxd56_timer_interrupt, priv);
 
