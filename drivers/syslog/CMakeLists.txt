@@ -85,6 +85,12 @@ endif()
 
 if(CONFIG_SYSLOG_RPMSG)
   list(APPEND SRCS syslog_rpmsg.c)
+  if(NOT "${CONFIG_SYSLOG_RPMSG_BUFFER_SECTION}" STREQUAL "")
+    target_compile_definitions(
+      drivers
+      PRIVATE
+        -DSYSLOG_RPMSG_BUFFER_SECTION="${CONFIG_SYSLOG_RPMSG_BUFFER_SECTION}")
+  endif()
 endif()
 
 if(CONFIG_SYSLOG_RPMSG_SERVER)

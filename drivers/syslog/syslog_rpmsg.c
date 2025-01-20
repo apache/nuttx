@@ -104,6 +104,15 @@ static ssize_t syslog_rpmsg_file_write(FAR struct file *filep,
 
 static struct syslog_rpmsg_s g_syslog_rpmsg;
 
+#if CONFIG_SYSLOG_RPMSG_BUFSIZE != 0
+#  ifdef SYSLOG_RPMSG_BUFFER_SECTION
+static char g_sysbuffer[CONFIG_SYSLOG_RPMSG_BUFSIZE]
+                       locate_data(CONFIG_SYSLOG_RPMSG_BUFFER_SECTION);
+#  else
+static char g_sysbuffer[CONFIG_SYSLOG_RPMSG_BUFSIZE];
+#  endif
+#endif
+
 #ifdef CONFIG_SYSLOG_RPMSG_CHARDEV
 static const struct file_operations g_syslog_rpmsgfops =
 {
@@ -431,6 +440,12 @@ void syslog_rpmsg_init_early(FAR void *buffer, size_t size)
   char prev;
   char cur;
   size_t i;
+
+#if CONFIG_SYSLOG_RPMSG_BUFSIZE != 0
+  DEBUGASSERT(buffer == NULL && size == 0);
+  buffer = g_sysbuffer;
+  size = CONFIG_SYSLOG_RPMSG_BUFSIZE;
+#endif
 
   DEBUGASSERT((size & (size - 1)) == 0);
 
