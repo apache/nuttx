@@ -52,7 +52,8 @@ Please ensure that you have a working NuttX build environment, and with the foll
 
 3. Enable essential kernel configurations
 
-Pleae enable the following configurations in your NuttX configuration:
+Please enable the following configurations in your NuttX configuration:
+
 - CONFIG_SYSTEM_TIME64
 - CONFIG_FS_LARGEFILE
 - CONFIG_TLS_NELEM = 16
