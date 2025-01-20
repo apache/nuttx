@@ -942,7 +942,6 @@ int hyt271_register(int devno, FAR struct i2c_master_s *i2c, uint8_t addr,
   tmp->buffer_size = sizeof(struct sensor_humi);
   tmp->lower.ops = &g_hyt271_ops;
   tmp->lower.type = SENSOR_TYPE_RELATIVE_HUMIDITY;
-  tmp->lower.uncalibrated = false;
   tmp->lower.nbuffer = 1;
   ret = sensor_register(&tmp->lower, devno);
   if (ret < 0)
@@ -960,7 +959,6 @@ int hyt271_register(int devno, FAR struct i2c_master_s *i2c, uint8_t addr,
   tmp->buffer_size = sizeof(struct sensor_temp);
   tmp->lower.ops = &g_hyt271_ops;
   tmp->lower.type = SENSOR_TYPE_AMBIENT_TEMPERATURE;
-  tmp->lower.uncalibrated = false;
   tmp->lower.nbuffer = 1;
   ret = sensor_register(&tmp->lower, devno);
   if (ret < 0)

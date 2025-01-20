@@ -562,10 +562,9 @@ int l3gd20_register(int devno, FAR struct spi_dev_s *spi,
 #endif
   priv->timestamp        = 0;
 
-  priv->lower.type = SENSOR_TYPE_GYROSCOPE;
+  priv->lower.type = SENSOR_TYPE_GYROSCOPE_UNCALIBRATED;
   priv->lower.nbuffer = CONFIG_SENSORS_L3GD20_BUFFER_SIZE;
   priv->lower.ops = &g_l2gd20_ops;
-  priv->lower.uncalibrated = true;
 
   /* Setup SPI frequency and mode */
 

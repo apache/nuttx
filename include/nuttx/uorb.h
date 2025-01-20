@@ -42,6 +42,14 @@
 
 /* sensor type definition */
 
+/* Note: Some of the types of these sensors are aligned with Android, and
+ * the refs link is https://cs.android.com/android/_/android/platform/\
+ * hardware/libhardware/+/0e67aa0caee9500b61b9c1c8b6e5cab18301364c:\
+ * include_all/hardware/sensors-base.h.
+ *
+ * If you need to make modifications, please align with Android standards
+ */
+
 /* Custom Sensor
  * Some special sensor whose event size is not fixed or dynamically change,
  * are called sensor of custom type. You should treat its events as byte
@@ -99,11 +107,12 @@
 
 #define SENSOR_TYPE_BAROMETER                       6
 
-/* Noise Loudness
- * A sensor of this type returns the loudness of noise in SI units (db)
+/* Temperature
+ * A sensor of this type returns the measurement temperature in degree
+ * Celsius.
  */
 
-#define SENSOR_TYPE_NOISE                           7
+#define SENSOR_TYPE_TEMPERAUTRE                     7
 
 /* Proximity
  * The values correspond to the distance to the nearest
@@ -153,12 +162,12 @@
 
 #define SENSOR_TYPE_AMBIENT_TEMPERATURE             13
 
-/* PM25
- * A sensor of this type returns the content of pm2.5 in the air
- * This value is in SI units (ug/m^3)
+/* Magneric Field Uncalibrated
+ * Similar to MAGNETIC_FIELD, all values are in micro-Tesla (uT)
+ * and measure the geomagnetic field in X, Y and Z axis.
  */
 
-#define SENSOR_TYPE_PM25                            14
+#define SENSOR_TYPE_MAGNETIC_FIELD_UNCALIBRATED     14
 
 /* PM1P0
  * A sensor of this type returns the content of pm1.0 in the air
@@ -167,12 +176,12 @@
 
 #define SENSOR_TYPE_PM1P0                           15
 
-/* PM10
- * A sensor of this type returns the content of pm10 in the air
- * This value is in SI units (ug/m^3)
+/* Gyroscope Uncalibrated
+ * All values are in radians/second and measure the rate of rotation around
+ * the X, Y and Z axis.
  */
 
-#define SENSOR_TYPE_PM10                            16
+#define SENSOR_TYPE_GYROSCOPE_UNCALIBRATED          16
 
 /* Significant motion
  * A significant motion detector triggers when detecting a significant
@@ -335,12 +344,12 @@
 
 #define SENSOR_TYPE_LOW_LATENCY_OFFBODY_DETECT      34
 
-/* Ultraviolet light sensor
- * This sensor can identify the UV index in ambient light help people
- * to effectively protect themselves from sunburns, cancer or eye damage.
- * This value range is 0 - 15.
+/* Accelerometer Uncalibrate
+ * All values are in SI units (m/s^2), and measure the acceleration of the
+ * device minus the acceleration dut to gravity.
  */
-#define SENSOR_TYPE_ULTRAVIOLET                     35
+
+#define SENSOR_TYPE_ACCELEROMETER_UNCALIBRATED      35
 
 /* Hinge angle
  * A hinge angle sensor measures the angle, in degrees, between two integral
@@ -474,11 +483,39 @@
 
 #define SENSOR_TYPE_VELOCITY                        53
 
+/* Noise Loudness
+ * A sensor of this type returns the loudness of noise in SI units (db)
+ */
+
+#define SENSOR_TYPE_NOISE                           54
+
+/* PM25
+ * A sensor of this type returns the content of pm2.5 in the air
+ * This value is in SI units (ug/m^3)
+ */
+
+#define SENSOR_TYPE_PM25                            55
+
+/* PM10
+ * A sensor of this type returns the content of pm10 in the air
+ * This value is in SI units (ug/m^3)
+ */
+
+#define SENSOR_TYPE_PM10                            56
+
+/* Ultraviolet light sensor
+ * This sensor can identify the UV index in ambient light help people
+ * to effectively protect themselves from sunburns, cancer or eye damage.
+ * This value range is 0 - 15.
+ */
+
+#define SENSOR_TYPE_ULTRAVIOLET                     57
+
 /* The total number of sensor
  * please increase it if you added a new sensor type!
  */
 
-#define SENSOR_TYPE_COUNT                           54
+#define SENSOR_TYPE_COUNT                           58
 
 /* The additional sensor open flags */
 

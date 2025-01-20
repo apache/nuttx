@@ -52,7 +52,7 @@
 #define GOLDFISH_PRESSURE 7
 #define GOLDFISH_RELATIVE_HUMIDITY 8
 #define GOLDFISH_MAGNETIC_FIELD_UNCALIBRATED 9
-#define GOLDFISH_GYROSCOPE_FIELD_UNCALIBRATED 10
+#define GOLDFISH_GYROSCOPE_UNCALIBRATED 10
 #define GOLDFISH_HINGE_ANGLE0 11
 #define GOLDFISH_HINGE_ANGLE1 12
 #define GOLDFISH_HINGE_ANGLE2 13
@@ -620,45 +620,27 @@ static int goldfish_get_priv(FAR struct sensor_lowerhalf_s *lower,
 {
   switch (lower->type)
   {
+  case SENSOR_TYPE_ACCELEROMETER_UNCALIBRATED:
+    priv = container_of(lower, struct goldfish_sensor_s,
+                        lower_accel_uncalibrated);
+    return GOLDFISH_ACCELERATION_UNCALIBRATED;
   case SENSOR_TYPE_ACCELEROMETER:
-    if (lower->uncalibrated)
-      {
-        *priv = container_of(lower, struct goldfish_sensor_s,
-                             lower_accel_uncalibrated);
-        return GOLDFISH_ACCELERATION_UNCALIBRATED;
-      }
-    else
-      {
-        *priv = container_of(lower, struct goldfish_sensor_s, lower_accel);
-        return GOLDFISH_ACCELERATION;
-      }
-
+    priv = container_of(lower, struct goldfish_sensor_s, lower_accel);
+    return GOLDFISH_ACCELERATION;
+  case SENSOR_TYPE_MAGNETIC_FIELD_UNCALIBRATED:
+    priv = container_of(lower, struct goldfish_sensor_s,
+                        lower_mag_uncalibrated);
+    return GOLDFISH_MAGNETIC_FIELD_UNCALIBRATED;
   case SENSOR_TYPE_MAGNETIC_FIELD:
-    if (lower->uncalibrated)
-      {
-        *priv = container_of(lower, struct goldfish_sensor_s,
-                             lower_mag_uncalibrated);
-        return GOLDFISH_MAGNETIC_FIELD_UNCALIBRATED;
-      }
-    else
-      {
-        *priv = container_of(lower, struct goldfish_sensor_s, lower_mag);
-        return GOLDFISH_MAGNETIC_FIELD;
-      }
-
+    priv = container_of(lower, struct goldfish_sensor_s, lower_mag);
+    return GOLDFISH_MAGNETIC_FIELD;
+  case SENSOR_TYPE_GYROSCOPE_UNCALIBRATED:
+    priv = container_of(lower, struct goldfish_sensor_s,
+                        lower_gyro_uncalibrated);
+    return GOLDFISH_GYROSCOPE_UNCALIBRATED;
   case SENSOR_TYPE_GYROSCOPE:
-    if (lower->uncalibrated)
-      {
-        *priv = container_of(lower, struct goldfish_sensor_s,
-                             lower_gyro_uncalibrated);
-        return GOLDFISH_GYROSCOPE_FIELD_UNCALIBRATED;
-      }
-    else
-      {
-        *priv = container_of(lower, struct goldfish_sensor_s, lower_gyro);
-        return GOLDFISH_GYROSCOPE;
-      }
-
+    priv = container_of(lower, struct goldfish_sensor_s, lower_gyro);
+    return GOLDFISH_GYROSCOPE;
   case SENSOR_TYPE_PROXIMITY:
     *priv = container_of(lower, struct goldfish_sensor_s, lower_prox);
     return GOLDFISH_PROXIMITY;
@@ -868,20 +850,20 @@ int goldfish_sensor_init(int devno, uint32_t batch_number)
   sensor->lower_gyro.ops = &g_goldfish_sensor_ops;
   sensor->lower_gyro.nbuffer = batch_number;
 
-  sensor->lower_accel_uncalibrated.type = SENSOR_TYPE_ACCELEROMETER;
+  sensor->lower_accel_uncalibrated.type =
+                         SENSOR_TYPE_ACCELEROMETER_UNCALIBRATED;
   sensor->lower_accel_uncalibrated.ops = &g_goldfish_sensor_ops;
   sensor->lower_accel_uncalibrated.nbuffer = batch_number;
-  sensor->lower_accel_uncalibrated.uncalibrated = true;
 
-  sensor->lower_mag_uncalibrated.type = SENSOR_TYPE_MAGNETIC_FIELD;
+  sensor->lower_mag_uncalibrated.type =
+                      SENSOR_TYPE_MAGNETIC_FIELD_UNCALIBRATED;
   sensor->lower_mag_uncalibrated.ops = &g_goldfish_sensor_ops;
   sensor->lower_mag_uncalibrated.nbuffer = batch_number;
-  sensor->lower_mag_uncalibrated.uncalibrated = true;
 
-  sensor->lower_gyro_uncalibrated.type = SENSOR_TYPE_GYROSCOPE;
+  sensor->lower_gyro_uncalibrated.type =
+                            SENSOR_TYPE_GYROSCOPE_UNCALIBRATED;
   sensor->lower_gyro_uncalibrated.ops = &g_goldfish_sensor_ops;
   sensor->lower_gyro_uncalibrated.nbuffer = batch_number;
-  sensor->lower_gyro_uncalibrated.uncalibrated = true;
 
   sensor->lower_prox.type = SENSOR_TYPE_PROXIMITY;
   sensor->lower_prox.ops = &g_goldfish_sensor_ops;
