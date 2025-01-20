@@ -178,7 +178,11 @@ struct wlan_priv_s
 
   /* Packet buffer cache */
 
+#ifdef CONFIG_ESPRESSIF_WIFI_WLAN_BUFFER_OPTIMIZATION
+  struct wlan_pktbuf *pktbuf;
+#else
   struct wlan_pktbuf  pktbuf[WLAN_PKTBUF_NUM];
+#endif
 
   /* RX packet queue */
 
@@ -292,6 +296,9 @@ static int wlan_ioctl(struct net_driver_s *dev, int cmd,
                       unsigned long arg);
 #endif
 
+static inline void wlan_free_buffer(struct wlan_priv_s *priv,
+                                    uint8_t *buffer);
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -324,6 +331,17 @@ static inline void wlan_init_buffer(struct wlan_priv_s *priv)
 {
   irqstate_t flags;
 
+#ifdef CONFIG_ESPRESSIF_WIFI_WLAN_BUFFER_OPTIMIZATION
+  flags = spin_lock_irqsave(&priv->lock);
+
+  priv->dev.d_buf = NULL;
+  priv->dev.d_len = 0;
+
+  sq_init(&priv->rxb);
+  sq_init(&priv->txb);
+
+  spin_unlock_irqrestore(&priv->lock, flags);
+#else
   int i;
   flags = spin_lock_irqsave(&priv->lock);
 
@@ -340,6 +358,40 @@ static inline void wlan_init_buffer(struct wlan_priv_s *priv)
     }
 
   spin_unlock_irqrestore(&priv->lock, flags);
+#endif
+}
+
+/****************************************************************************
+ * Function: wlan_deinit_buffer
+ *
+ * Description:
+ *   De-initialize the buffer list
+ *
+ * Input Parameters:
+ *   priv - Reference to the driver state structure
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+static inline void wlan_deinit_buffer(struct wlan_priv_s *priv)
+{
+#ifdef CONFIG_ESPRESSIF_WIFI_WLAN_BUFFER_OPTIMIZATION
+  struct wlan_pktbuf *pktbuf;
+  while ((pktbuf = (struct wlan_pktbuf *)wlan_recvframe(priv)) != NULL)
+    {
+      wlan_free_buffer(priv, (void *)pktbuf->buffer);
+    }
+
+  while ((pktbuf = (struct wlan_pktbuf *)wlan_txframe(priv)) != NULL)
+    {
+      wlan_free_buffer(priv, (void *)pktbuf->buffer);
+    }
+
+  sq_init(&priv->rxb);
+  sq_init(&priv->txb);
+#endif
 }
 
 /****************************************************************************
@@ -360,6 +412,15 @@ static inline struct wlan_pktbuf *wlan_alloc_buffer(struct wlan_priv_s *priv)
 {
   struct wlan_pktbuf *pktbuf = NULL;
 
+#ifdef CONFIG_ESPRESSIF_WIFI_WLAN_BUFFER_OPTIMIZATION
+  struct mallinfo info = kmm_mallinfo();
+  if (info.fordblks < MINIMUM_HEAP_SIZE)
+    {
+      return NULL;
+    }
+
+  pktbuf = kmm_malloc(sizeof(struct wlan_pktbuf) + WLAN_BUF_SIZE);
+#else
   sq_entry_t *entry;
   irqstate_t flags = spin_lock_irqsave(&priv->lock);
 
@@ -371,6 +432,7 @@ static inline struct wlan_pktbuf *wlan_alloc_buffer(struct wlan_priv_s *priv)
 
   spin_unlock_irqrestore(&priv->lock, flags);
 
+#endif
   return pktbuf;
 }
 
@@ -394,12 +456,17 @@ static inline void wlan_free_buffer(struct wlan_priv_s *priv,
 {
   struct wlan_pktbuf *pktbuf;
 
+#ifdef CONFIG_ESPRESSIF_WIFI_WLAN_BUFFER_OPTIMIZATION
+  pktbuf = container_of(buffer, struct wlan_pktbuf, buffer);
+  kmm_free(pktbuf);
+#else
   irqstate_t flags = spin_lock_irqsave(&priv->lock);
 
   pktbuf = container_of(buffer, struct wlan_pktbuf, buffer);
   sq_addlast(&pktbuf->entry, &priv->freeb);
 
   spin_unlock_irqrestore(&priv->lock, flags);
+#endif
 }
 
 /****************************************************************************
@@ -1098,6 +1165,9 @@ static int wlan_ifup(struct net_driver_s *dev)
   ret = priv->ops->start();
   if (ret < 0)
     {
+#ifdef CONFIG_ARCH_CHIP_ESP32
+      wlan_deinit_buffer(priv);
+#endif
       net_unlock();
       nerr("ERROR: Failed to start Wi-Fi ret=%d\n", ret);
       return ret;
@@ -1114,6 +1184,14 @@ static int wlan_ifup(struct net_driver_s *dev)
     }
 
   ++g_callback_register_ref;
+
+#ifdef CONFIG_ARCH_CHIP_ESP32
+  /* We can make sure that the WLAN TX and RX are not doing, because
+   * the process is in "net_lock()"
+   */
+
+  wlan_deinit_buffer(priv);
+#endif
   net_unlock();
 
   return OK;
