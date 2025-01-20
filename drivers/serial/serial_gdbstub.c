@@ -253,7 +253,8 @@ static ssize_t uart_gdbstub_receive(FAR void *priv, FAR void *buf,
  *
  ****************************************************************************/
 
-static ssize_t uart_gdbstub_send(FAR void *priv, FAR void *buf, size_t len)
+static ssize_t uart_gdbstub_send(FAR void *priv, FAR const char *buf,
+                                 size_t len)
 {
   FAR struct uart_gdbstub_s *uart_gdbstub = priv;
   FAR uart_dev_t *dev = uart_gdbstub->dev;
@@ -269,7 +270,7 @@ static ssize_t uart_gdbstub_send(FAR void *priv, FAR void *buf, size_t len)
             }
           else
             {
-              uart_gdbstub->org_ops->send(dev, ((FAR char *)buf)[i++]);
+              uart_gdbstub->org_ops->send(dev, buf[i++]);
             }
         }
     }

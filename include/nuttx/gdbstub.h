@@ -47,7 +47,7 @@
  ****************************************************************************/
 
 struct gdb_state_s;
-typedef CODE ssize_t (*gdb_send_func_t)(FAR void *priv, FAR void *buf,
+typedef CODE ssize_t (*gdb_send_func_t)(FAR void *priv, FAR const char *buf,
                                         size_t len);
 typedef CODE ssize_t (*gdb_recv_func_t)(FAR void *priv, FAR void *buf,
                                         size_t len);
