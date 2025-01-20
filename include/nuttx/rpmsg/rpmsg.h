@@ -45,6 +45,7 @@
 #define RPMSGIOC_DUMP               _RPMSGIOC(2)
 #define RPMSGIOC_PING               _RPMSGIOC(3)
 #define RPMSGIOC_TEST               _RPMSGIOC(4)
+#define RPMSGIOC_RUNNING            _RPMSGIOC(5)
 
 #define RPMSG_SIGNAL_RUNNING        TIOCM_CD
 

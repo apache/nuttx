@@ -141,6 +141,10 @@ static int rpmsg_dev_ioctl_(FAR struct rpmsg_s *rpmsg, int cmd,
         ret = rpmsg_test(&rpmsg->test, arg);
         break;
 #endif
+      case RPMSGIOC_RUNNING:
+        *(FAR bool *)arg = rpmsg_is_running(rpmsg_get_rdev_by_rpmsg(rpmsg));
+        ret = OK;
+        break;
       default:
         if (rpmsg->ops->ioctl)
           {
