@@ -875,7 +875,6 @@ int sht4x_register(FAR struct i2c_master_s *i2c, int devno, uint8_t addr)
 
   priv->hum.sensor_lower.ops = &g_sensor_ops;
   priv->hum.sensor_lower.type = SENSOR_TYPE_RELATIVE_HUMIDITY;
-  priv->hum.sensor_lower.uncalibrated = false;
   priv->hum.enabled = false;
   priv->hum.dev = priv;
 
@@ -895,7 +894,6 @@ int sht4x_register(FAR struct i2c_master_s *i2c, int devno, uint8_t addr)
 
   priv->temp.sensor_lower.ops = &g_sensor_ops;
   priv->temp.sensor_lower.type = SENSOR_TYPE_AMBIENT_TEMPERATURE;
-  priv->temp.sensor_lower.uncalibrated = false;
   priv->temp.enabled = false;
   priv->temp.dev = priv;
 

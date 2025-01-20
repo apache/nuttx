@@ -973,7 +973,6 @@ int ds18b20_register(int devno, FAR struct onewire_master_s *onewire,
 #endif
   tmp->lower.ops = &g_ds18b20_ops;
   tmp->lower.type = SENSOR_TYPE_AMBIENT_TEMPERATURE;
-  tmp->lower.uncalibrated = false;
   tmp->lower.nbuffer = 1;
   ret = sensor_register(&tmp->lower, devno);
   if (ret < 0)

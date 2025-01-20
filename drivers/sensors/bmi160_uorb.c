@@ -602,8 +602,7 @@ static int bmi160_register_accel(int devno,
 #endif
 
   priv->lower.ops = &g_bmi160_accel_ops;
-  priv->lower.type = SENSOR_TYPE_ACCELEROMETER;
-  priv->lower.uncalibrated = true;
+  priv->lower.type = SENSOR_TYPE_ACCELEROMETER_UNCALIBRATED;
   priv->interval = BMI160_DEFAULT_INTERVAL;
   priv->lower.nbuffer = 1;
 
@@ -687,8 +686,7 @@ static int bmi160_register_gyro(int devno,
 #endif
 
   priv->lower.ops = &g_bmi160_gyro_ops;
-  priv->lower.type = SENSOR_TYPE_GYROSCOPE;
-  priv->lower.uncalibrated = true;
+  priv->lower.type = SENSOR_TYPE_GYROSCOPE_UNCALIBRATED;
   priv->interval = BMI160_DEFAULT_INTERVAL;
   priv->lower.nbuffer = 1;
 

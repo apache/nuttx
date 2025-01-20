@@ -532,13 +532,6 @@ struct sensor_lowerhalf_s
 
   uint32_t nbuffer;
 
-  /* The uncalibrated use to describe whether the sensor event is
-   * uncalibrated. True is uncalibrated data, false is calibrated data,
-   * default false.
-   */
-
-  bool uncalibrated;
-
   /* The lower half sensor driver operations */
 
   FAR const struct sensor_ops_s *ops;

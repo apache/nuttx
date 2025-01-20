@@ -735,8 +735,7 @@ static int bmi088_register_accel(int devno,
 #endif
 
   priv->lower.ops  = &g_bmi088_accel_ops;
-  priv->lower.type = SENSOR_TYPE_ACCELEROMETER;
-  priv->lower.uncalibrated = true;
+  priv->lower.type = SENSOR_TYPE_ACCELEROMETER_UNCALIBRATED;
   priv->interval = BMI088_DEFAULT_INTERVAL;
   priv->lower.nbuffer = 1;
 
@@ -818,8 +817,7 @@ static int bmi088_register_gyro(int devno,
 #endif
 
   priv->lower.ops = &g_bmi088_gyro_ops;
-  priv->lower.type = SENSOR_TYPE_GYROSCOPE;
-  priv->lower.uncalibrated = true;
+  priv->lower.type = SENSOR_TYPE_GYROSCOPE_UNCALIBRATED;
   priv->interval = BMI088_DEFAULT_INTERVAL;
   priv->lower.nbuffer = 1;
 
