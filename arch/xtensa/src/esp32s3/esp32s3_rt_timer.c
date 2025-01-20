@@ -32,9 +32,10 @@
 #include <stdint.h>
 #include <string.h>
 #include <sys/types.h>
+#include <sched.h>
 
 #include <nuttx/nuttx.h>
-#include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/kthread.h>
 #include <nuttx/semaphore.h>
@@ -611,7 +612,8 @@ static int rt_timer_isr(int irq, void *context, void *arg)
 
   modifyreg32(SYSTIMER_INT_CLR_REG, 0, SYSTIMER_TARGET2_INT_CLR);
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
+  sched_lock();
 
   /* Check if there is a timer running */
 
@@ -672,7 +674,8 @@ static int rt_timer_isr(int irq, void *context, void *arg)
         }
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
+  sched_unlock();
 
   return OK;
 }
@@ -805,7 +808,8 @@ void esp32s3_rt_timer_delete(struct rt_timer_s *timer)
   irqstate_t flags;
   struct esp32s3_rt_priv_s *priv = &g_rt_priv;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
+  sched_lock();
 
   if (timer->state == RT_TIMER_READY)
     {
@@ -832,7 +836,8 @@ void esp32s3_rt_timer_delete(struct rt_timer_s *timer)
     }
 
 exit:
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
+  sched_unlock();
 }
 
 /****************************************************************************
@@ -949,6 +954,8 @@ int esp32s3_rt_timer_init(void)
   irqstate_t flags;
   struct esp32s3_rt_priv_s *priv = &g_rt_priv;
 
+  spin_lock_init(&priv->lock);
+
   pid = kthread_create(RT_TIMER_TASK_NAME,
                        RT_TIMER_TASK_PRIORITY,
                        RT_TIMER_TASK_STACK_SIZE,
@@ -965,7 +972,7 @@ int esp32s3_rt_timer_init(void)
 
   priv->pid = (pid_t)pid;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
 
   /* ESP32-S3 hardware timer configuration:
    * 1 count = 1/16 us
@@ -1007,7 +1014,7 @@ int esp32s3_rt_timer_init(void)
 
   modifyreg32(SYSTIMER_CONF_REG, 0, SYSTIMER_TIMER_UNIT1_WORK_EN);
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 
   return OK;
 }
