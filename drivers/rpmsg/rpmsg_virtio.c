@@ -411,19 +411,49 @@ static void rpmsg_virtio_dump_buffer(FAR struct rpmsg_virtio_device *rvdev,
                                      bool rx)
 {
   FAR struct virtqueue *vq = rx ? rvdev->rvq : rvdev->svq;
+  unsigned int role;
   FAR void *addr;
   int desc_idx;
+  int unretrieved;
   int num;
   int i;
 
+  role = rpmsg_virtio_get_role(rvdev);
   num = rpmsg_virtio_buffer_nused(rvdev, rx);
-  metal_log(METAL_LOG_EMERGENCY,
-            "    %s buffer, total %d, pending %d\n",
-            rx ? "RX" : "TX", vq->vq_nentries, num);
+
+  if (role == RPMSG_HOST)
+    {
+      RPMSG_VIRTIO_INVALIDATE(vq->vq_ring.used->idx);
+      unretrieved = vq->vq_ring.used->idx - vq->vq_used_cons_idx;
+    }
+  else
+    {
+      RPMSG_VIRTIO_INVALIDATE(vq->vq_ring.avail->idx);
+      unretrieved = vq->vq_ring.avail->idx - vq->vq_available_idx;
+    }
+
+  if (rx)
+    {
+      metal_log(METAL_LOG_EMERGENCY, "    RX buffer total %d\n",
+                vq->vq_nentries);
+      metal_log(METAL_LOG_EMERGENCY, "      unretrieved %d\n", unretrieved);
+      metal_log(METAL_LOG_EMERGENCY, "      retrieved %d\n",
+                vq->vq_queued_cnt);
+      metal_log(METAL_LOG_EMERGENCY, "      pending %d:\n", num);
+    }
+  else
+    {
+      metal_log(METAL_LOG_EMERGENCY, "    TX buffer total %d\n",
+                vq->vq_nentries);
+      metal_log(METAL_LOG_EMERGENCY, "      unretrieved %d\n", unretrieved);
+      metal_log(METAL_LOG_EMERGENCY, "      retrieved %d\n",
+                vq->vq_free_cnt);
+      metal_log(METAL_LOG_EMERGENCY, "      sent %d:\n", num);
+    }
 
   for (i = 0; i < num; i++)
     {
-      if ((rpmsg_virtio_get_role(rvdev) == RPMSG_HOST) ^ rx)
+      if ((role == RPMSG_HOST) ^ rx)
         {
           RPMSG_VIRTIO_INVALIDATE(vq->vq_ring.used->idx);
           desc_idx = (vq->vq_ring.used->idx + i) & (vq->vq_nentries - 1);
@@ -450,7 +480,7 @@ static void rpmsg_virtio_dump_buffer(FAR struct rpmsg_virtio_device *rvdev,
           if (ept)
             {
               metal_log(METAL_LOG_EMERGENCY,
-                        "      %s buffer %p hold by %s\n",
+                        "        %s buffer %p hold by %s\n",
                         rx ? "RX" : "TX", hdr, ept->name);
             }
         }
