@@ -74,7 +74,7 @@ ifeq ($(CONFIG_ESP32_SPIFLASH),y)
   CSRCS += esp32_board_spiflash.c
 endif
 
-ifeq ($(CONFIG_ESP32_WIFI),y)
+ifeq ($(CONFIG_ESPRESSIF_WIFI),y)
   CSRCS += esp32_board_wlan.c
 endif
 
