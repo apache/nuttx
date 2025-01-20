@@ -860,7 +860,6 @@ static void dump_core_info(void)
 static void reset_board(void)
 {
 #if CONFIG_BOARD_RESET_ON_ASSERT >= 1
-  up_flush_dcache_all();
   board_reset(CONFIG_BOARD_ASSERT_RESET_VALUE);
 #else
   for (; ; )
@@ -968,6 +967,12 @@ void _assert(FAR const char *filename, int linenum,
       /* Dump fatal info of assertion. */
 
       dump_fatal_info(rtcb, filename, linenum, msg, regs);
+
+      /* Flush dcache before notify other CPU */
+
+      up_flush_dcache_all();
+
+      /* Notify PANIC_KERNEL_FINAL */
 
       panic_notifier_call_chain(PANIC_KERNEL_FINAL, &notifier_data);
 
