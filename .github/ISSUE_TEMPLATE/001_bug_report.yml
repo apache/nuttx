@@ -129,6 +129,13 @@ body:
     validations:
       required: true
 
+  - type: textarea
+    attributes:
+      label: "Host information"
+      description: "What is the output of `make host_info` command while your buggy configuration selected and if possible device connected to your system?"
+    validations:
+      required: false
+
   - type: markdown
     attributes:
       value: |
