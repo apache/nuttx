@@ -46,11 +46,11 @@ static spinlock_t g_atomic_lock = SP_UNLOCKED;
   void weak_function CONCATENATE(fn, n)(FAR volatile void *ptr,      \
                                         type value, int memorder)    \
   {                                                                  \
-    irqstate_t irqstate = spin_lock_irqsave_wo_note(&g_atomic_lock); \
+    irqstate_t irqstate = raw_spin_lock_irqsave(&g_atomic_lock);     \
                                                                      \
     *(FAR type *)ptr = value;                                        \
                                                                      \
-    spin_unlock_irqrestore_wo_note(&g_atomic_lock, irqstate);        \
+    raw_spin_unlock_irqrestore(&g_atomic_lock, irqstate);            \
   }
 
 #define LOAD(fn, n, type)                                             \
@@ -58,11 +58,11 @@ static spinlock_t g_atomic_lock = SP_UNLOCKED;
   type weak_function CONCATENATE(fn, n)(FAR const volatile void *ptr, \
                                         int memorder)                 \
   {                                                                   \
-    irqstate_t irqstate = spin_lock_irqsave_wo_note(&g_atomic_lock);  \
+    irqstate_t irqstate = raw_spin_lock_irqsave(&g_atomic_lock);      \
                                                                       \
     type ret = *(FAR type *)ptr;                                      \
                                                                       \
-    spin_unlock_irqrestore_wo_note(&g_atomic_lock, irqstate);         \
+    raw_spin_unlock_irqrestore(&g_atomic_lock, irqstate);             \
     return ret;                                                       \
   }
 
@@ -71,13 +71,13 @@ static spinlock_t g_atomic_lock = SP_UNLOCKED;
   type weak_function CONCATENATE(fn, n)(FAR volatile void *ptr,      \
                                         type value, int memorder)    \
   {                                                                  \
-    irqstate_t irqstate = spin_lock_irqsave_wo_note(&g_atomic_lock); \
+    irqstate_t irqstate = raw_spin_lock_irqsave(&g_atomic_lock);     \
     FAR type *tmp = (FAR type *)ptr;                                 \
                                                                      \
     type ret = *tmp;                                                 \
     *tmp = value;                                                    \
                                                                      \
-    spin_unlock_irqrestore_wo_note(&g_atomic_lock, irqstate);        \
+    raw_spin_unlock_irqrestore(&g_atomic_lock, irqstate);            \
     return ret;                                                      \
   }
 
@@ -89,7 +89,7 @@ static spinlock_t g_atomic_lock = SP_UNLOCKED;
                                         int success, int failure)    \
   {                                                                  \
     bool ret = false;                                                \
-    irqstate_t irqstate = spin_lock_irqsave_wo_note(&g_atomic_lock); \
+    irqstate_t irqstate = raw_spin_lock_irqsave(&g_atomic_lock);     \
     FAR type *tmpmem = (FAR type *)mem;                              \
     FAR type *tmpexp = (FAR type *)expect;                           \
                                                                      \
@@ -103,7 +103,7 @@ static spinlock_t g_atomic_lock = SP_UNLOCKED;
         *tmpexp = *tmpmem;                                           \
       }                                                              \
                                                                      \
-    spin_unlock_irqrestore_wo_note(&g_atomic_lock, irqstate);        \
+    raw_spin_unlock_irqrestore(&g_atomic_lock, irqstate);            \
     return ret;                                                      \
   }
 
@@ -112,13 +112,13 @@ static spinlock_t g_atomic_lock = SP_UNLOCKED;
   type weak_function CONCATENATE(fn, n)(FAR volatile void *ptr,      \
                                         int memorder)                \
   {                                                                  \
-    irqstate_t irqstate = spin_lock_irqsave_wo_note(&g_atomic_lock); \
+    irqstate_t irqstate = raw_spin_lock_irqsave(&g_atomic_lock);     \
     FAR type *tmp = (FAR type *)ptr;                                 \
     type ret = *tmp;                                                 \
                                                                      \
     *(FAR type *)ptr = 1;                                            \
                                                                      \
-    spin_unlock_irqrestore_wo_note(&g_atomic_lock, irqstate);        \
+    raw_spin_unlock_irqrestore(&g_atomic_lock, irqstate);            \
     return ret;                                                      \
   }
 
@@ -127,13 +127,13 @@ static spinlock_t g_atomic_lock = SP_UNLOCKED;
   type weak_function CONCATENATE(fn, n)(FAR volatile void *ptr,      \
                                         type value, int memorder)    \
   {                                                                  \
-    irqstate_t irqstate = spin_lock_irqsave_wo_note(&g_atomic_lock); \
+    irqstate_t irqstate = raw_spin_lock_irqsave(&g_atomic_lock);     \
     FAR type *tmp = (FAR type *)ptr;                                 \
     type ret = *tmp;                                                 \
                                                                      \
     *tmp = *tmp + value;                                             \
                                                                      \
-    spin_unlock_irqrestore_wo_note(&g_atomic_lock, irqstate);        \
+    raw_spin_unlock_irqrestore(&g_atomic_lock, irqstate);            \
     return ret;                                                      \
   }
 
@@ -142,13 +142,13 @@ static spinlock_t g_atomic_lock = SP_UNLOCKED;
   type weak_function CONCATENATE(fn, n)(FAR volatile void *ptr,      \
                                         type value, int memorder)    \
   {                                                                  \
-    irqstate_t irqstate = spin_lock_irqsave_wo_note(&g_atomic_lock); \
+    irqstate_t irqstate = raw_spin_lock_irqsave(&g_atomic_lock);     \
     FAR type *tmp = (FAR type *)ptr;                                 \
     type ret = *tmp;                                                 \
                                                                      \
     *tmp = *tmp - value;                                             \
                                                                      \
-    spin_unlock_irqrestore_wo_note(&g_atomic_lock, irqstate);        \
+    raw_spin_unlock_irqrestore(&g_atomic_lock, irqstate);            \
     return ret;                                                      \
   }
 
@@ -157,13 +157,13 @@ static spinlock_t g_atomic_lock = SP_UNLOCKED;
   type weak_function CONCATENATE(fn, n)(FAR volatile void *ptr,      \
                                         type value, int memorder)    \
   {                                                                  \
-    irqstate_t irqstate = spin_lock_irqsave_wo_note(&g_atomic_lock); \
+    irqstate_t irqstate = raw_spin_lock_irqsave(&g_atomic_lock);     \
     FAR type *tmp = (FAR type *)ptr;                                 \
     type ret = *tmp;                                                 \
                                                                      \
     *tmp = *tmp & value;                                             \
                                                                      \
-    spin_unlock_irqrestore_wo_note(&g_atomic_lock, irqstate);        \
+    raw_spin_unlock_irqrestore(&g_atomic_lock, irqstate);            \
     return ret;                                                      \
   }
 
@@ -172,13 +172,13 @@ static spinlock_t g_atomic_lock = SP_UNLOCKED;
   type weak_function CONCATENATE(fn, n)(FAR volatile void *ptr,      \
                                         type value, int memorder)    \
   {                                                                  \
-    irqstate_t irqstate = spin_lock_irqsave_wo_note(&g_atomic_lock); \
+    irqstate_t irqstate = raw_spin_lock_irqsave(&g_atomic_lock);     \
     FAR type *tmp = (FAR type *)ptr;                                 \
     type ret = *tmp;                                                 \
                                                                      \
     *tmp = *tmp | value;                                             \
                                                                      \
-    spin_unlock_irqrestore_wo_note(&g_atomic_lock, irqstate);        \
+    raw_spin_unlock_irqrestore(&g_atomic_lock, irqstate);            \
     return ret;                                                      \
   }
 
@@ -187,13 +187,13 @@ static spinlock_t g_atomic_lock = SP_UNLOCKED;
   type weak_function CONCATENATE(fn, n)(FAR volatile void *ptr,      \
                                         type value, int memorder)    \
   {                                                                  \
-    irqstate_t irqstate = spin_lock_irqsave_wo_note(&g_atomic_lock); \
+    irqstate_t irqstate = raw_spin_lock_irqsave(&g_atomic_lock);     \
     FAR type *tmp = (FAR type *)ptr;                                 \
     type ret = *tmp;                                                 \
                                                                      \
     *tmp = *tmp ^ value;                                             \
                                                                      \
-    spin_unlock_irqrestore_wo_note(&g_atomic_lock, irqstate);        \
+    raw_spin_unlock_irqrestore(&g_atomic_lock, irqstate);            \
     return ret;                                                      \
   }
 
@@ -202,12 +202,12 @@ static spinlock_t g_atomic_lock = SP_UNLOCKED;
   type weak_function CONCATENATE(fn, n)(FAR volatile void *ptr,      \
                                         type value)                  \
   {                                                                  \
-    irqstate_t irqstate = spin_lock_irqsave_wo_note(&g_atomic_lock); \
+    irqstate_t irqstate = raw_spin_lock_irqsave(&g_atomic_lock);     \
     FAR type *tmp = (FAR type *)ptr;                                 \
                                                                      \
     *tmp = *tmp + value;                                             \
                                                                      \
-    spin_unlock_irqrestore_wo_note(&g_atomic_lock, irqstate);        \
+    raw_spin_unlock_irqrestore(&g_atomic_lock, irqstate);            \
     return *tmp;                                                     \
   }
 
@@ -216,12 +216,12 @@ static spinlock_t g_atomic_lock = SP_UNLOCKED;
   type weak_function CONCATENATE(fn, n)(FAR volatile void *ptr,      \
                                         type value)                  \
   {                                                                  \
-    irqstate_t irqstate = spin_lock_irqsave_wo_note(&g_atomic_lock); \
+    irqstate_t irqstate = raw_spin_lock_irqsave(&g_atomic_lock);     \
     FAR type *tmp = (FAR type *)ptr;                                 \
                                                                      \
     *tmp = *tmp - value;                                             \
                                                                      \
-    spin_unlock_irqrestore_wo_note(&g_atomic_lock, irqstate);        \
+    raw_spin_unlock_irqrestore(&g_atomic_lock, irqstate);            \
     return *tmp;                                                     \
   }
 
@@ -230,12 +230,12 @@ static spinlock_t g_atomic_lock = SP_UNLOCKED;
   type weak_function CONCATENATE(fn, n)(FAR volatile void *ptr,      \
                                         type value)                  \
   {                                                                  \
-    irqstate_t irqstate = spin_lock_irqsave_wo_note(&g_atomic_lock); \
+    irqstate_t irqstate = raw_spin_lock_irqsave(&g_atomic_lock);     \
     FAR type *tmp = (FAR type *)ptr;                                 \
                                                                      \
     *tmp = *tmp | value;                                             \
                                                                      \
-    spin_unlock_irqrestore_wo_note(&g_atomic_lock, irqstate);        \
+    raw_spin_unlock_irqrestore(&g_atomic_lock, irqstate);            \
     return *tmp;                                                     \
   }
 
@@ -244,12 +244,12 @@ static spinlock_t g_atomic_lock = SP_UNLOCKED;
   type weak_function CONCATENATE(fn, n)(FAR volatile void *ptr,      \
                                         type value)                  \
   {                                                                  \
-    irqstate_t irqstate = spin_lock_irqsave_wo_note(&g_atomic_lock); \
+    irqstate_t irqstate = raw_spin_lock_irqsave(&g_atomic_lock);     \
     FAR type *tmp = (FAR type *)ptr;                                 \
                                                                      \
     *tmp = *tmp & value;                                             \
                                                                      \
-    spin_unlock_irqrestore_wo_note(&g_atomic_lock, irqstate);        \
+    raw_spin_unlock_irqrestore(&g_atomic_lock, irqstate);            \
     return *tmp;                                                     \
   }
 
@@ -258,12 +258,12 @@ static spinlock_t g_atomic_lock = SP_UNLOCKED;
   type weak_function CONCATENATE(fn, n)(FAR volatile void *ptr,      \
                                         type value)                  \
   {                                                                  \
-    irqstate_t irqstate = spin_lock_irqsave_wo_note(&g_atomic_lock); \
+    irqstate_t irqstate = raw_spin_lock_irqsave(&g_atomic_lock);     \
     FAR type *tmp = (FAR type *)ptr;                                 \
                                                                      \
     *tmp = *tmp ^ value;                                             \
                                                                      \
-    spin_unlock_irqrestore_wo_note(&g_atomic_lock, irqstate);        \
+    raw_spin_unlock_irqrestore(&g_atomic_lock, irqstate);            \
     return *tmp;                                                     \
   }
 
@@ -272,12 +272,12 @@ static spinlock_t g_atomic_lock = SP_UNLOCKED;
   type weak_function CONCATENATE(fn, n)(FAR volatile void *ptr,      \
                                         type value)                  \
   {                                                                  \
-    irqstate_t irqstate = spin_lock_irqsave_wo_note(&g_atomic_lock); \
+    irqstate_t irqstate = raw_spin_lock_irqsave(&g_atomic_lock);     \
     FAR type *tmp = (FAR type *)ptr;                                 \
                                                                      \
     *tmp = ~(*tmp & value);                                          \
                                                                      \
-    spin_unlock_irqrestore_wo_note(&g_atomic_lock, irqstate);        \
+    raw_spin_unlock_irqrestore(&g_atomic_lock, irqstate);            \
     return *tmp;                                                     \
   }
 
@@ -288,7 +288,7 @@ static spinlock_t g_atomic_lock = SP_UNLOCKED;
                                         type newvalue)               \
   {                                                                  \
     bool ret = false;                                                \
-    irqstate_t irqstate = spin_lock_irqsave_wo_note(&g_atomic_lock); \
+    irqstate_t irqstate = raw_spin_lock_irqsave(&g_atomic_lock);     \
     FAR type *tmp = (FAR type *)ptr;                                 \
                                                                      \
     if (*tmp == oldvalue)                                            \
@@ -297,7 +297,7 @@ static spinlock_t g_atomic_lock = SP_UNLOCKED;
         *tmp = newvalue;                                             \
       }                                                              \
                                                                      \
-    spin_unlock_irqrestore_wo_note(&g_atomic_lock, irqstate);        \
+    raw_spin_unlock_irqrestore(&g_atomic_lock, irqstate);            \
     return ret;                                                      \
   }
 
@@ -307,7 +307,7 @@ static spinlock_t g_atomic_lock = SP_UNLOCKED;
                                         type oldvalue,               \
                                         type newvalue)               \
   {                                                                  \
-    irqstate_t irqstate = spin_lock_irqsave_wo_note(&g_atomic_lock); \
+    irqstate_t irqstate = raw_spin_lock_irqsave(&g_atomic_lock);     \
     FAR type *tmp = (FAR type *)ptr;                                 \
     type ret = *tmp;                                                 \
                                                                      \
@@ -316,7 +316,7 @@ static spinlock_t g_atomic_lock = SP_UNLOCKED;
         *tmp = newvalue;                                             \
       }                                                              \
                                                                      \
-    spin_unlock_irqrestore_wo_note(&g_atomic_lock, irqstate);        \
+    raw_spin_unlock_irqrestore(&g_atomic_lock, irqstate);            \
     return ret;                                                      \
   }
 

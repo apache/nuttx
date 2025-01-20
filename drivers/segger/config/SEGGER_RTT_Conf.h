@@ -89,11 +89,11 @@ extern spinlock_t g_segger_lock;
 
 /* Lock RTT (nestable)   (i.e. disable interrupts) */
 
-#define SEGGER_RTT_LOCK()               irqstate_t __flags = spin_lock_irqsave_wo_note(&g_segger_lock)
+#define SEGGER_RTT_LOCK()               irqstate_t __flags = raw_spin_lock_irqsave(&g_segger_lock)
 
 /* Unlock RTT (nestable) (i.e. enable previous interrupt lock state) */
 
-#define SEGGER_RTT_UNLOCK()             spin_unlock_irqrestore_wo_note(&g_segger_lock, __flags)
+#define SEGGER_RTT_UNLOCK()             raw_spin_unlock_irqrestore(&g_segger_lock, __flags)
 
 /* Disable RTT SEGGER_RTT_WriteSkipNoLock */
 
