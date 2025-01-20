@@ -100,13 +100,13 @@
 #define ESP32_MAX_PRIORITY     5
 #define ESP32_PRIO_INDEX(p)    ((p) - ESP32_MIN_PRIORITY)
 
-#ifdef CONFIG_ESP32_WIFI
+#ifdef CONFIG_ESPRESSIF_WIFI
 #  define ESP32_WIFI_RESERVE_INT  (1 << ESP32_CPUINT_MAC)
 #else
 #  define ESP32_WIFI_RESERVE_INT  0
 #endif
 
-#ifdef CONFIG_ESP32_BLE
+#ifdef CONFIG_ESPRESSIF_BLE
 #  define ESP32_BLE_RESERVE_INT ((1 << ESP32_PERIPH_BT_BB_NMI) | \
                                  (1 << ESP32_PERIPH_RWBLE_IRQ) | \
                                  (1 << ESP32_PERIPH_RWBT_NMI))
@@ -520,11 +520,11 @@ void up_irqinitialize(void)
   g_irqmap[XTENSA_IRQ_SWINT] = IRQ_MKMAP(0, ESP32_CPUINT_SOFTWARE1);
   g_irqmap[XTENSA_IRQ_SWINT] = IRQ_MKMAP(1, ESP32_CPUINT_SOFTWARE1);
 
-#ifdef CONFIG_ESP32_WIFI
+#ifdef CONFIG_ESPRESSIF_WIFI
   g_irqmap[ESP32_IRQ_MAC] = IRQ_MKMAP(0, ESP32_CPUINT_MAC);
 #endif
 
-#ifdef CONFIG_ESP32_BLE
+#ifdef CONFIG_ESPRESSIF_BLE
   g_irqmap[ESP32_IRQ_BT_BB_NMI] = IRQ_MKMAP(0, ESP32_PERIPH_BT_BB_NMI);
   g_irqmap[ESP32_IRQ_RWBT_NMI]  = IRQ_MKMAP(0, ESP32_PERIPH_RWBT_NMI);
   g_irqmap[ESP32_IRQ_RWBLE_IRQ] = IRQ_MKMAP(0, ESP32_PERIPH_RWBLE_IRQ);
@@ -536,12 +536,12 @@ void up_irqinitialize(void)
 
   /* Reserve CPU0 interrupt for some special drivers */
 
-#ifdef CONFIG_ESP32_WIFI
+#ifdef CONFIG_ESPRESSIF_WIFI
   g_cpu0_intmap[ESP32_CPUINT_MAC] = CPUINT_ASSIGN(ESP32_IRQ_MAC);
   xtensa_enable_cpuint(&g_intenable[0], 1 << ESP32_CPUINT_MAC);
 #endif
 
-#ifdef CONFIG_ESP32_BLE
+#ifdef CONFIG_ESPRESSIF_BLE
   g_cpu0_intmap[ESP32_PERIPH_BT_BB_NMI] = CPUINT_ASSIGN(ESP32_IRQ_BT_BB_NMI);
   g_cpu0_intmap[ESP32_PERIPH_RWBT_NMI]  = CPUINT_ASSIGN(ESP32_IRQ_RWBT_NMI);
   g_cpu0_intmap[ESP32_PERIPH_RWBLE_IRQ] = CPUINT_ASSIGN(ESP32_IRQ_RWBLE_IRQ);
