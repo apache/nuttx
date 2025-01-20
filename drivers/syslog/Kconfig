@@ -355,6 +355,20 @@ config SYSLOG_RPMSG
 	---help---
 		Use the RPMSG as a SYSLOG output device, send message to remote proc.
 
+config SYSLOG_RPMSG_BUFSIZE
+	int "RPMSG SYSLOG buffer size"
+	default 0
+	depends on SYSLOG_RPMSG
+	---help---
+		Size of the console RPMSG syslog.  Default: 0
+
+config SYSLOG_RPMSG_BUFFER_SECTION
+	string "The section where rpmsg syslog buffer is located"
+	depends on SYSLOG_RPMSG_BUFSIZE != 0
+	---help---
+		The section where rpmsg syslog buffer is located.
+		The section shall not be initialized on system boot.
+
 config SYSLOG_CDCACM
 	bool "Log to CDCACM"
 	depends on CDCACM
