@@ -269,7 +269,7 @@ static int gdb_expect_addr_lenth(FAR struct gdb_state_s *state,
 
 static int gdb_putchar(FAR struct gdb_state_s *state, int ch)
 {
-  unsigned char tmp = ch & 0xff;
+  char tmp = ch & 0xff;
   ssize_t ret;
 
   ret = state->send(state->priv, &tmp, 1);
@@ -328,8 +328,8 @@ static int gdb_getchar(FAR struct gdb_state_s *state)
 
 static int gdb_send_packet(FAR struct gdb_state_s *state)
 {
-  unsigned char buf[3];
-  unsigned char csum;
+  char buf[3];
+  char csum;
   int ret;
 
   ret = gdb_putchar(state, '$'); /* Send packet start */
@@ -406,8 +406,8 @@ static int gdb_send_packet(FAR struct gdb_state_s *state)
 
 static int gdb_recv_packet(FAR struct gdb_state_s *state)
 {
-  unsigned char buf[2];
-  unsigned char csum;
+  char buf[2];
+  char csum;
   int ret;
 
   /* Wait for packet start */
@@ -525,7 +525,7 @@ static int gdb_recv_packet(FAR struct gdb_state_s *state)
 
 static int gdb_checksum(FAR const char *buf, size_t len)
 {
-  unsigned char csum = 0;
+  char csum = 0;
 
   while (len--)
     {
