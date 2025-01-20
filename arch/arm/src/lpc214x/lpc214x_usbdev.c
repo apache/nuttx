@@ -34,6 +34,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
+#include <sched.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
@@ -42,6 +43,7 @@
 #include <nuttx/usb/usbdev_trace.h>
 
 #include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <arch/board/board.h>
 
 #include "chip.h"
@@ -361,6 +363,10 @@ struct lpc214x_usbdev_s
   /* The endpoint list */
 
   struct lpc214x_ep_s     eplist[LPC214X_NPHYSENDPOINTS];
+
+  /* Spinlock */
+
+  spinlock_t              lock;
 };
 
 /****************************************************************************
@@ -595,14 +601,10 @@ static void lpc214x_putreg(uint32_t val, uint32_t addr)
  *
  ****************************************************************************/
 
-static uint32_t lpc214x_usbcmd(uint16_t cmd, uint8_t data)
+static uint32_t lpc214x_usbcmd_nolock(uint16_t cmd, uint8_t data)
 {
-  irqstate_t flags;
   uint32_t tmp = 0;
 
-  /* Disable interrupt and clear CDFULL and CCEMPTY interrupt status */
-
-  flags = enter_critical_section();
   lpc214x_putreg(USBDEV_DEVINT_CDFULL | USBDEV_DEVINT_CCEMTY,
                  LPC214X_USBDEV_DEVINTCLR);
 
@@ -734,9 +736,26 @@ static uint32_t lpc214x_usbcmd(uint16_t cmd, uint8_t data)
       break;
     }
 
+  return tmp;
+}
+
+static uint32_t lpc214x_usbcmd(uint16_t cmd, uint8_t data)
+{
+  irqstate_t flags;
+  uint32_t tmp = 0;
+
+  /* Disable interrupt and clear CDFULL and CCEMPTY interrupt status */
+
+  flags = spin_lock_irqsave(&g_usbdev.lock);
+  sched_lock();
+
+  tmp = lpc214x_usbcmd_nolock(cmd, data);
+
   /* Restore the interrupt flags */
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_usbdev.lock, flags);
+  sched_unlock();
+
   return tmp;
 }
 
@@ -975,17 +994,15 @@ static inline void lpc214x_abortrequest(struct lpc214x_ep_s *privep,
  *
  ****************************************************************************/
 
-static void lpc214x_reqcomplete(struct lpc214x_ep_s *privep, int16_t result)
+static void lpc214x_reqcomplete_nolock(struct lpc214x_ep_s *privep,
+                                       int16_t result)
 {
   struct lpc214x_req_s *privreq;
   int stalled = privep->stalled;
-  irqstate_t flags;
 
   /* Remove the completed request at the head of the endpoint request list */
 
-  flags = enter_critical_section();
   privreq = lpc214x_rqdequeue(privep);
-  leave_critical_section(flags);
 
   if (privreq)
     {
@@ -1013,6 +1030,15 @@ static void lpc214x_reqcomplete(struct lpc214x_ep_s *privep, int16_t result)
     }
 }
 
+static void lpc214x_reqcomplete(struct lpc214x_ep_s *privep, int16_t result)
+{
+  irqstate_t flags = spin_lock_irqsave(&privep->dev->lock);
+
+  lpc214x_reqcomplete_nolock(privep, result);
+
+  spin_unlock_irqrestore(&privep->dev->lock, flags);
+}
+
 /****************************************************************************
  * Name: lpc214x_wrrequest
  *
@@ -1021,7 +1047,7 @@ static void lpc214x_reqcomplete(struct lpc214x_ep_s *privep, int16_t result)
  *
  ****************************************************************************/
 
-static int lpc214x_wrrequest(struct lpc214x_ep_s *privep)
+static int lpc214x_wrrequest_nolock(struct lpc214x_ep_s *privep)
 {
   struct lpc214x_req_s *privreq;
   uint8_t *buf;
@@ -1056,7 +1082,7 @@ static int lpc214x_wrrequest(struct lpc214x_ep_s *privep)
 
       /* In any event, the request is complete */
 
-      lpc214x_reqcomplete(privep, OK);
+      lpc214x_reqcomplete_nolock(privep, OK);
       return OK;
     }
 
@@ -1118,10 +1144,23 @@ static int lpc214x_wrrequest(struct lpc214x_ep_s *privep)
     {
       usbtrace(TRACE_COMPLETE(privep->epphy), privreq->req.xfrd);
       privep->txnullpkt = 0;
-      lpc214x_reqcomplete(privep, OK);
+      lpc214x_reqcomplete_nolock(privep, OK);
     }
 
   return OK;
+}
+
+static int lpc214x_wrrequest(struct lpc214x_ep_s *privep)
+{
+  int ret;
+
+  irqstate_t flags = spin_lock_irqsave(&privep->dev->lock);
+  sched_lock();
+  ret = lpc214x_wrrequest_nolock(privep);
+  spin_unlock_irqrestore(&privep->dev->lock, flags);
+  sched_unlock();
+
+  return ret;
 }
 
 /****************************************************************************
@@ -1194,14 +1233,23 @@ static int lpc214x_rdrequest(struct lpc214x_ep_s *privep)
  *
  ****************************************************************************/
 
-static void lpc214x_cancelrequests(struct lpc214x_ep_s *privep)
+static void lpc214x_cancelrequests_nolock(struct lpc214x_ep_s *privep)
 {
   while (!lpc214x_rqempty(privep))
     {
       usbtrace(TRACE_COMPLETE(privep->epphy),
                (lpc214x_rqpeek(privep))->req.xfrd);
-      lpc214x_reqcomplete(privep, -ESHUTDOWN);
+      lpc214x_reqcomplete_nolock(privep, -ESHUTDOWN);
     }
+}
+
+static void lpc214x_cancelrequests(struct lpc214x_ep_s *privep)
+{
+  irqstate_t flags = spin_lock_irqsave(&privep->dev->lock);
+  sched_lock();
+  lpc214x_cancelrequests_nolock(privep);
+  spin_unlock_irqrestore(&privep->dev->lock, flags);
+  sched_unlock();
 }
 
 /****************************************************************************
@@ -2687,8 +2735,9 @@ static int lpc214x_epdisable(struct usbdev_ep_s *ep)
 
   /* Cancel any ongoing activity */
 
-  flags = enter_critical_section();
-  lpc214x_cancelrequests(privep);
+  flags = spin_lock_irqsave(&privep->dev->lock);
+  sched_lock();
+  lpc214x_cancelrequests_nolock(privep);
 
   /* Disable endpoint and interrupt */
 
@@ -2702,7 +2751,8 @@ static int lpc214x_epdisable(struct usbdev_ep_s *ep)
   reg &= ~mask;
   lpc214x_putreg(reg, LPC214X_USBDEV_EPINTEN);
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&privep->dev->lock, flags);
+  sched_unlock();
   return OK;
 }
 
@@ -2890,7 +2940,8 @@ static int lpc214x_epsubmit(struct usbdev_ep_s *ep,
 
   req->result = -EINPROGRESS;
   req->xfrd   = 0;
-  flags       = enter_critical_section();
+  flags       = spin_lock_irqsave(&priv->lock);
+  sched_lock();
 
   /* If we are stalled, then drop all requests on the floor */
 
@@ -2913,7 +2964,7 @@ static int lpc214x_epsubmit(struct usbdev_ep_s *ep,
 
       if (privep->txbusy == 0)
         {
-          ret = lpc214x_wrrequest(privep);
+          ret = lpc214x_wrrequest_nolock(privep);
         }
     }
 
@@ -2936,7 +2987,8 @@ static int lpc214x_epsubmit(struct usbdev_ep_s *ep,
         }
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
+  sched_unlock();
   return ret;
 }
 
@@ -2964,9 +3016,11 @@ static int lpc214x_epcancel(struct usbdev_ep_s *ep,
 
   usbtrace(TRACE_EPCANCEL, privep->epphy);
 
-  flags = enter_critical_section();
-  lpc214x_cancelrequests(privep);
-  leave_critical_section(flags);
+  flags = spin_lock_irqsave(&privep->dev->lock);
+  sched_lock();
+  lpc214x_cancelrequests_nolock(privep);
+  spin_unlock_irqrestore(&privep->dev->lock, flags);
+  sched_unlock();
   return OK;
 }
 
@@ -2985,19 +3039,21 @@ static int lpc214x_epstall(struct usbdev_ep_s *ep, bool resume)
 
   /* STALL or RESUME the endpoint */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&privep->dev->lock);
+  sched_lock();
   usbtrace(resume ? TRACE_EPRESUME : TRACE_EPSTALL, privep->epphy);
-  lpc214x_usbcmd(CMD_USB_EP_SETSTATUS | privep->epphy,
+  lpc214x_usbcmd_nolock(CMD_USB_EP_SETSTATUS | privep->epphy,
                 (resume ? 0 : USBDEV_EPSTALL));
 
   /* If the endpoint of was resumed, then restart any queue write requests */
 
   if (resume)
     {
-      lpc214x_wrrequest(privep);
+      lpc214x_wrrequest_nolock(privep);
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&privep->dev->lock, flags);
+  sched_unlock();
   return OK;
 }
 
@@ -3103,7 +3159,7 @@ static struct usbdev_ep_s *lcp214x_allocep(struct usbdev_s *dev,
     {
       /* Yes.. now see if any of the request endpoints are available */
 
-      flags = enter_critical_section();
+      flags = spin_lock_irqsave(&priv->lock);
       epset &= priv->epavail;
       if (epset)
         {
@@ -3119,7 +3175,7 @@ static struct usbdev_ep_s *lcp214x_allocep(struct usbdev_s *dev,
                   /* Mark the IN/OUT endpoint no longer available */
 
                   priv->epavail &= ~(3 << (bit & ~1));
-                  leave_critical_section(flags);
+                  spin_unlock_irqrestore(&priv->lock, flags);
 
                   /* And return the pointer to the standard endpoint
                    * structure
@@ -3132,7 +3188,7 @@ static struct usbdev_ep_s *lcp214x_allocep(struct usbdev_s *dev,
           /* Shouldn't get here */
         }
 
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(&priv->lock, flags);
     }
 
   usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_NOEP), (uint16_t)eplog);
@@ -3160,9 +3216,9 @@ static void lpc214x_freeep(struct usbdev_s *dev,
     {
       /* Mark the endpoint as available */
 
-      flags = enter_critical_section();
+      flags = spin_lock_irqsave(&priv->lock);
       priv->epavail |= (1 << privep->epphy);
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(&priv->lock, flags);
     }
 }
 
@@ -3201,19 +3257,22 @@ static int lpc214x_getframe(struct usbdev_s *dev)
 
 static int lpc214x_wakeup(struct usbdev_s *dev)
 {
+  struct lpc214x_usbdev_s *priv = (struct lpc214x_usbdev_s *)dev;
   uint8_t arg = USBDEV_DEVSTATUS_SUSPEND;
   irqstate_t flags;
 
   usbtrace(TRACE_DEVWAKEUP, (uint16_t)g_usbdev.devstatus);
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
+  sched_lock();
   if (DEVSTATUS_CONNECT(g_usbdev.devstatus))
     {
       arg |= USBDEV_DEVSTATUS_CONNECT;
     }
 
-  lpc214x_usbcmd(CMD_USB_DEV_SETSTATUS, arg);
-  leave_critical_section(flags);
+  lpc214x_usbcmd_nolock(CMD_USB_DEV_SETSTATUS, arg);
+  spin_unlock_irqrestore(&priv->lock, flags);
+  sched_unlock();
   return OK;
 }
 
@@ -3250,6 +3309,20 @@ static int lpc214x_selfpowered(struct usbdev_s *dev, bool selfpowered)
  *   Software-controlled connect to/disconnect from USB host
  *
  ****************************************************************************/
+
+static int lpc214x_pullup_nolock(struct usbdev_s *dev, bool enable)
+{
+  usbtrace(TRACE_DEVPULLUP, (uint16_t)enable);
+
+  /* The USBDEV_DEVSTATUS_CONNECT bit in the CMD_USB_DEV_SETSTATUS command
+   * controls the LPC214x SoftConnect_N output pin that is used for
+   * SoftConnect.
+   */
+
+  lpc214x_usbcmd_nolock(CMD_USB_DEV_SETSTATUS,
+                        (enable ? USBDEV_DEVSTATUS_CONNECT : 0));
+  return OK;
+}
 
 static int lpc214x_pullup(struct usbdev_s *dev, bool enable)
 {
@@ -3291,6 +3364,10 @@ void arm_usbinitialize(void)
   int i;
 
   usbtrace(TRACE_DEVINIT, 0);
+
+  /* Initialize driver lock */
+
+  spin_lock_init(&priv->lock);
 
   /* Disable USB interrupts */
 
@@ -3416,10 +3493,11 @@ void arm_usbuninitialize(void)
 
   /* Disconnect device */
 
-  flags = enter_critical_section();
-  lpc214x_pullup(&priv->usbdev, false);
+  flags = spin_lock_irqsave(&priv->lock);
+  sched_lock();
+  lpc214x_pullup_nolock(&priv->usbdev, false);
   priv->usbdev.speed = USB_SPEED_UNKNOWN;
-  lpc214x_usbcmd(CMD_USB_DEV_CONFIG, 0);
+  lpc214x_usbcmd_nolock(CMD_USB_DEV_CONFIG, 0);
 
   /* Disable and detach IRQs */
 
@@ -3431,7 +3509,8 @@ void arm_usbuninitialize(void)
   reg = lpc214x_getreg(LPC214X_PCON_PCONP);
   reg &= ~LPC214X_PCONP_PCUSB;
   lpc214x_putreg(reg, LPC214X_PCON_PCONP);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
+  sched_unlock();
 }
 
 /****************************************************************************

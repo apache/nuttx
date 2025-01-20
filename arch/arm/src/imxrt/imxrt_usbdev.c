@@ -34,6 +34,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
+#include <sched.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
@@ -42,6 +43,7 @@
 #include <nuttx/usb/usbdev_trace.h>
 
 #include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <arch/board/board.h>
 
 #include "chip.h"
@@ -388,6 +390,10 @@ struct imxrt_usbdev_s
   /* The endpoint list */
 
   struct imxrt_ep_s       eplist[IMXRT_NPHYSENDPOINTS];
+
+  /* Spinlock */
+
+  spinlock_t              lock;
 };
 
 #define EP0STATE_IDLE             0        /* Idle State, leave on receiving a setup packet or epsubmit */
@@ -2238,7 +2244,8 @@ static int imxrt_epdisable(struct usbdev_ep_s *ep)
 
   usbtrace(TRACE_EPDISABLE, privep->epphy);
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&privep->dev->lock);
+  sched_lock();
 
   /* Disable Endpoint */
 
@@ -2259,7 +2266,8 @@ static int imxrt_epdisable(struct usbdev_ep_s *ep)
 
   imxrt_cancelrequests(privep, -ESHUTDOWN);
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&privep->dev->lock, flags);
+  sched_unlock();
   return OK;
 }
 
@@ -2416,7 +2424,8 @@ static int imxrt_epsubmit(struct usbdev_ep_s *ep,
 
   /* Disable Interrupts */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
+  sched_lock();
 
   /* If we are stalled, then drop all requests on the floor */
 
@@ -2443,7 +2452,8 @@ static int imxrt_epsubmit(struct usbdev_ep_s *ep,
         }
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
+  sched_unlock();
   return ret;
 }
 
@@ -2471,7 +2481,8 @@ static int imxrt_epcancel(struct usbdev_ep_s *ep,
 
   usbtrace(TRACE_EPCANCEL, privep->epphy);
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&privep->dev->lock);
+  sched_lock();
 
   /* FIXME: if the request is the first, then we need to flush the EP
    *         otherwise just remove it from the list
@@ -2480,7 +2491,8 @@ static int imxrt_epcancel(struct usbdev_ep_s *ep,
    */
 
   imxrt_cancelrequests(privep, -ESHUTDOWN);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&privep->dev->lock, flags);
+  sched_unlock();
   return OK;
 }
 
@@ -2499,7 +2511,8 @@ static int imxrt_epstall(struct usbdev_ep_s *ep, bool resume)
 
   /* STALL or RESUME the endpoint */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&privep->dev->lock);
+  sched_lock();
   usbtrace(resume ? TRACE_EPRESUME : TRACE_EPSTALL, privep->epphy);
 
   uint32_t addr    = IMXRT_USBDEV_ENDPTCTRL(privep->epphy >> 1);
@@ -2523,7 +2536,8 @@ static int imxrt_epstall(struct usbdev_ep_s *ep, bool resume)
       imxrt_setbits(ctrl_xs, addr);
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&privep->dev->lock, flags);
+  sched_unlock();
   return OK;
 }
 
@@ -2627,7 +2641,7 @@ static struct usbdev_ep_s *imxrt_allocep(struct usbdev_s *dev,
     {
       /* Yes.. now see if any of the request endpoints are available */
 
-      flags = enter_critical_section();
+      flags = spin_lock_irqsave(&priv->lock);
       epset &= priv->epavail;
       if (epset)
         {
@@ -2643,7 +2657,7 @@ static struct usbdev_ep_s *imxrt_allocep(struct usbdev_s *dev,
                   /* Mark endpoint no longer available */
 
                   priv->epavail &= ~bit;
-                  leave_critical_section(flags);
+                  spin_unlock_irqrestore(&priv->lock, flags);
 
                   /* And return the pointer to the standard endpoint
                    * structure
@@ -2656,7 +2670,7 @@ static struct usbdev_ep_s *imxrt_allocep(struct usbdev_s *dev,
           /* Shouldn't get here */
         }
 
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(&priv->lock, flags);
     }
 
   usbtrace(TRACE_DEVERROR(IMXRT_TRACEERR_NOEP), (uint16_t)eplog);
@@ -2684,9 +2698,9 @@ static void imxrt_freeep(struct usbdev_s *dev,
     {
       /* Mark the endpoint as available */
 
-      flags = enter_critical_section();
+      flags = spin_lock_irqsave(&priv->lock);
       priv->epavail |= (1 << privep->epphy);
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(&priv->lock, flags);
     }
 }
 
@@ -2730,13 +2744,14 @@ static int imxrt_getframe(struct usbdev_s *dev)
 
 static int imxrt_wakeup(struct usbdev_s *dev)
 {
+  struct imxrt_usbdev_s *priv = (struct imxrt_usbdev_s *)dev;
   irqstate_t flags;
 
   usbtrace(TRACE_DEVWAKEUP, 0);
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
   imxrt_setbits(USBDEV_PRTSC1_FPR, IMXRT_USBDEV_PORTSC1);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
   return OK;
 }
 
@@ -2774,11 +2789,10 @@ static int imxrt_selfpowered(struct usbdev_s *dev, bool selfpowered)
  *
  ****************************************************************************/
 
-static int imxrt_pullup(struct usbdev_s *dev, bool enable)
+static int imxrt_pullup_nolock(struct usbdev_s *dev, bool enable)
 {
   usbtrace(TRACE_DEVPULLUP, (uint16_t)enable);
 
-  irqstate_t flags = enter_critical_section();
   if (enable)
     {
       imxrt_setbits(USBDEV_USBCMD_RS, IMXRT_USBDEV_USBCMD);
@@ -2795,8 +2809,21 @@ static int imxrt_pullup(struct usbdev_s *dev, bool enable)
       imxrt_clrbits(USBDEV_USBCMD_RS, IMXRT_USBDEV_USBCMD);
     }
 
-  leave_critical_section(flags);
   return OK;
+}
+
+static int imxrt_pullup(struct usbdev_s *dev, bool enable)
+{
+  struct imxrt_usbdev_s *priv = (struct imxrt_usbdev_s *)dev;
+  int ret;
+
+  irqstate_t flags = spin_lock_irqsave(&priv->lock);
+  sched_lock();
+  ret = imxrt_pullup_nolock(dev, enable);
+  spin_unlock_irqrestore(&priv->lock, flags);
+  sched_unlock();
+
+  return ret;
 }
 
 /****************************************************************************
@@ -2821,9 +2848,6 @@ void arm_usbinitialize(void)
 {
   struct imxrt_usbdev_s *priv = &g_usbdev;
   int i;
-  irqstate_t flags;
-
-  flags = enter_critical_section();
 
   /* Initialize the device state structure */
 
@@ -2831,6 +2855,7 @@ void arm_usbinitialize(void)
   priv->usbdev.ops = &g_devops;
   priv->usbdev.ep0 = &priv->eplist[IMXRT_EP0_IN].ep;
   priv->epavail    = IMXRT_EPALLSET & ~IMXRT_EPCTRLSET;
+  spin_lock_init(&priv->lock);
 
   /* Initialize the endpoint list */
 
@@ -2948,8 +2973,6 @@ void arm_usbinitialize(void)
   irq_attach(IMXRT_IRQ_USBOTG1, imxrt_usbinterrupt, NULL);
   up_enable_irq(IMXRT_IRQ_USBOTG1);
 
-  leave_critical_section(flags);
-
   /* Reset/Re-initialize the USB hardware */
 
   imxrt_usbreset(priv);
@@ -2972,11 +2995,12 @@ void arm_usbuninitialize(void)
       usbdev_unregister(priv->driver);
     }
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
+  sched_lock();
 
   /* Disconnect device */
 
-  imxrt_pullup(&priv->usbdev, false);
+  imxrt_pullup_nolock(&priv->usbdev, false);
   priv->usbdev.speed = USB_SPEED_UNKNOWN;
 
   /* Disable and detach IRQs */
@@ -3003,7 +3027,8 @@ void arm_usbuninitialize(void)
 
   imxrt_clockoff_usboh3();
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
+  sched_unlock();
 }
 
 /****************************************************************************
