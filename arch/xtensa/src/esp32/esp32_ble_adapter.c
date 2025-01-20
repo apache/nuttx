@@ -55,7 +55,7 @@
 #include "xtensa_attr.h"
 #include "utils/memory_reserve.h"
 #include "esp32_rt_timer.h"
-#include "esp32_wireless.h"
+#include "espressif/esp_wireless.h"
 #include "esp32_irq.h"
 #include "esp32_spicache.h"
 
@@ -127,8 +127,8 @@
 #  define BLE_TASK_EVENT_QUEUE_LEN          8
 #endif
 
-#ifdef CONFIG_ESP32_BLE_INTERRUPT_SAVE_STATUS
-#  define NR_IRQSTATE_FLAGS   CONFIG_ESP32_BLE_INTERRUPT_SAVE_STATUS
+#ifdef CONFIG_ESPRESSIF_BLE_INTERRUPT_SAVE_STATUS
+#  define NR_IRQSTATE_FLAGS   CONFIG_ESPRESSIF_BLE_INTERRUPT_SAVE_STATUS
 #else
 #  define NR_IRQSTATE_FLAGS   3
 #endif
@@ -1958,7 +1958,7 @@ static int IRAM_ATTR coex_bt_request_wrapper(uint32_t event,
                                              uint32_t latency,
                                              uint32_t duration)
 {
-#ifdef CONFIG_ESP32_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   return coex_bt_request(event, latency, duration);
 #else
   return 0;
@@ -1981,7 +1981,7 @@ static int IRAM_ATTR coex_bt_request_wrapper(uint32_t event,
 
 static int IRAM_ATTR coex_bt_release_wrapper(uint32_t event)
 {
-#ifdef CONFIG_ESP32_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   return coex_bt_release(event);
 #else
   return 0;
@@ -2005,7 +2005,7 @@ static int IRAM_ATTR coex_bt_release_wrapper(uint32_t event)
 
 static int adapter_coex_register_bt_cb_wrapper(coex_func_cb_t cb)
 {
-#ifdef CONFIG_ESP32_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   return coex_register_bt_cb(cb);
 #else
   return 0;
@@ -2029,7 +2029,7 @@ static int adapter_coex_register_bt_cb_wrapper(coex_func_cb_t cb)
 
 static uint32_t IRAM_ATTR coex_bb_reset_lock_wrapper(void)
 {
-#ifdef CONFIG_ESP32_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   return coex_bb_reset_lock();
 #else
   return 0;
@@ -2054,7 +2054,7 @@ static uint32_t IRAM_ATTR coex_bb_reset_lock_wrapper(void)
 
 static void IRAM_ATTR coex_bb_reset_unlock_wrapper(uint32_t restore)
 {
-#ifdef CONFIG_ESP32_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   coex_bb_reset_unlock(restore);
 #endif
 }
@@ -2075,7 +2075,7 @@ static void IRAM_ATTR coex_bb_reset_unlock_wrapper(uint32_t restore)
 
 static int coex_schm_register_btdm_callback_wrapper(void *callback)
 {
-#ifdef CONFIG_ESP32_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   return coex_schm_register_callback(COEX_SCHM_CALLBACK_TYPE_BT, callback);
 #else
   return 0;
@@ -2100,7 +2100,7 @@ static int coex_schm_register_btdm_callback_wrapper(void *callback)
 static void coex_schm_status_bit_clear_wrapper(uint32_t type,
                                                uint32_t status)
 {
-#ifdef CONFIG_ESP32_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   coex_schm_status_bit_clear(type, status);
 #endif
 }
@@ -2122,7 +2122,7 @@ static void coex_schm_status_bit_clear_wrapper(uint32_t type,
 
 static void coex_schm_status_bit_set_wrapper(uint32_t type, uint32_t status)
 {
-#ifdef CONFIG_ESP32_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   coex_schm_status_bit_set(type, status);
 #endif
 }
@@ -2143,7 +2143,7 @@ static void coex_schm_status_bit_set_wrapper(uint32_t type, uint32_t status)
 
 static uint32_t coex_schm_interval_get_wrapper(void)
 {
-#ifdef CONFIG_ESP32_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   return coex_schm_interval_get();
 #else
   return 0;
@@ -2166,7 +2166,7 @@ static uint32_t coex_schm_interval_get_wrapper(void)
 
 static uint8_t coex_schm_curr_period_get_wrapper(void)
 {
-#ifdef CONFIG_ESP32_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   return coex_schm_interval_get();
 #else
   return 0;
@@ -2189,7 +2189,7 @@ static uint8_t coex_schm_curr_period_get_wrapper(void)
 
 static void *coex_schm_curr_phase_get_wrapper(void)
 {
-#ifdef CONFIG_ESP32_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   return coex_schm_curr_phase_get();
 #else
   return NULL;
@@ -2214,7 +2214,7 @@ static void *coex_schm_curr_phase_get_wrapper(void)
 static int coex_wifi_channel_get_wrapper(uint8_t *primary,
                                          uint8_t *secondary)
 {
-#ifdef CONFIG_ESP32_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   return coex_wifi_channel_get(primary, secondary);
 #else
   return -1;
@@ -2238,7 +2238,7 @@ static int coex_wifi_channel_get_wrapper(uint8_t *primary,
 
 static int coex_register_wifi_channel_change_callback_wrapper(void *cb)
 {
-#ifdef CONFIG_ESP32_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   return coex_register_wifi_channel_change_callback(cb);
 #else
   return -1;
@@ -2265,7 +2265,7 @@ static int coex_version_get_wrapper(unsigned int *major,
                                     unsigned int *minor,
                                     unsigned int *patch)
 {
-#ifdef CONFIG_ESP32_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   coex_version_t version;
 
   ASSERT(coex_version_get_value(&version) == ESP_OK);
@@ -2944,8 +2944,8 @@ int esp32_bt_controller_init(void)
 
   /* overwrite some parameters */
 
-  cfg.controller_task_stack_size = CONFIG_ESP32_BLE_TASK_STACK_SIZE;
-  cfg.controller_task_prio       = CONFIG_ESP32_BLE_TASK_PRIORITY;
+  cfg.controller_task_stack_size = CONFIG_ESPRESSIF_BLE_TASK_STACK_SIZE;
+  cfg.controller_task_prio       = CONFIG_ESPRESSIF_BLE_TASK_PRIORITY;
   cfg.bt_max_sync_conn           = CONFIG_BTDM_CTRL_BR_EDR_MAX_SYNC_CONN_EFF;
   cfg.magic                      = ESP_BT_CONTROLLER_CONFIG_MAGIC_VAL;
 
@@ -3062,7 +3062,7 @@ int esp32_bt_controller_init(void)
   g_pm_lock_acquired = true;
 #endif
 
-#if CONFIG_ESP32_WIFI_BT_COEXIST
+#if CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   coex_init();
 #endif
 
@@ -3162,7 +3162,7 @@ int esp32_bt_controller_enable(esp_bt_mode_t mode)
 
   esp_phy_enable(PHY_MODEM_BT);
 
-#ifdef CONFIG_ESP32_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   coex_enable();
 #endif
 
@@ -3180,7 +3180,7 @@ int esp32_bt_controller_enable(esp_bt_mode_t mode)
   ret = btdm_controller_enable(mode);
   if (ret != 0)
     {
-#ifdef CONFIG_ESP32_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
       coex_disable();
 #endif
       esp_phy_disable(PHY_MODEM_BT);
@@ -3236,7 +3236,7 @@ int esp32_bt_controller_disable(void)
 
   btdm_controller_disable();
 
-#ifdef CONFIG_ESP32_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   coex_disable();
 #endif
 

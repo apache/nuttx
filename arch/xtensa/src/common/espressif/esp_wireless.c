@@ -132,7 +132,7 @@ struct esp_wireless_priv_s
 static inline void phy_digital_regs_store(void);
 static inline void phy_digital_regs_load(void);
 static int esp_swi_irq(int irq, void *context, void *arg);
-#ifdef CONFIG_ESP32_WIFI
+# if defined(CONFIG_ARCH_CHIP_ESP32) && defined(CONFIG_ESPRESSIF_WIFI)
 static void esp_wifi_set_log_level(void);
 #endif
 
@@ -1516,8 +1516,7 @@ int32_t esp_wifi_init(const wifi_init_config_t *config)
   esp_wifi_set_sleep_wait_broadcast_data_time(wait_broadcast_data_time_us);
 #endif
 
-#if defined(CONFIG_ESP32S3_WIFI_BT_COEXIST) || \
-    defined(CONFIG_ESP32_WIFI_BT_COEXIST)
+#if defined(CONFIG_ESPRESSIF_WIFI_BT_COEXIST)
   ret = coex_init();
   if (ret)
     {

@@ -236,7 +236,7 @@ void xtensa_add_region(void)
   MM_ADDREGION(start, size);
 #endif
 
-#ifndef CONFIG_ESP32_BLE
+#ifndef CONFIG_ESPRESSIF_BLE
   start = (void *)HEAP_REGION0_START;
   size  = (size_t)(HEAP_REGION0_END - HEAP_REGION0_START);
   MM_ADDREGION(start, size);

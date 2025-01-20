@@ -516,7 +516,9 @@ config ESPRESSIF_WIRELESS
 	select ESP32S3_RNG if ARCH_CHIP_ESP32S3
 	select ESP32S3_RT_TIMER if ARCH_CHIP_ESP32S3
 	select ESP32S3_TIMER0 if ARCH_CHIP_ESP32S3
-	depends on ARCH_CHIP_ESP32S2 || ARCH_CHIP_ESP32S3
+	select ESP32_RNG if ARCH_CHIP_ESP32
+	select ESP32_RT_TIMER if ARCH_CHIP_ESP32
+	select ESP32_TIMER0 if ARCH_CHIP_ESP32
 	---help---
 		Enable Wireless support
 
@@ -529,9 +531,11 @@ config ESPRESSIF_WIFI
 
 config ESPRESSIF_BLE
 	bool "BLE"
-	depends on ARCH_CHIP_ESP32S3
+	depends on ARCH_CHIP_ESP32S3 || ARCH_CHIP_ESP32
 	default n
 	select ESPRESSIF_WIRELESS
+	select BLUETOOTH_TXCMD_PINNED_TO_CORE if SMP && ARCH_CHIP_ESP32
+	select BLUETOOTH_CNTRL_HOST_FLOW_DISABLE if ARCH_CHIP_ESP32
 	---help---
 		Enable BLE support.
 
@@ -719,6 +723,13 @@ config ESPRESSIF_WIFI_LISTEN_INTERVAL
 		Interval for station to listen to beacon from AP. The unit of listen interval is one beacon interval.
 		For example, if beacon interval is 100 ms and listen interval is 3, the interval for station to listen
 		to beacon is 300 ms.
+
+config ESPRESSIF_WIFI_WLAN_BUFFER_OPTIMIZATION
+	bool "Enable optimization of WLAN driver buffer"
+	default n
+	depends on ARCH_CHIP_ESP32
+	---help---
+		Enable optimization of WLAN memory
 
 endmenu # ESPRESSIF_WIFI
 
