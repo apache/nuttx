@@ -28,6 +28,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/queue.h>
+#include <nuttx/spinlock.h>
 
 #include <assert.h>
 #include <debug.h>
@@ -79,6 +80,7 @@ static sq_queue_t          g_pushqueue;
 static sq_queue_t          g_emptyqueue;
 static struct cfpushdata_s g_pushbuffer[NR_PUSHBUFENTRIES];
 static cpufifo_handler_t   g_cfrxhandler;
+static spinlock_t          g_cpufifo_lock = SP_UNLOCKED;
 
 /****************************************************************************
  * Private Functions
@@ -175,11 +177,11 @@ int cxd56_cfpush(uint32_t data[2])
   irqstate_t flags;
   int        ret;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_cpufifo_lock);
   if (!sq_empty(&g_pushqueue))
     {
       ret = cpufifo_reserve(data);
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(&g_cpufifo_lock, flags);
       return ret;
     }
 
@@ -190,7 +192,7 @@ int cxd56_cfpush(uint32_t data[2])
       up_enable_irq(CXD56_IRQ_FIFO_TO);
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_cpufifo_lock, flags);
 
   return OK;
 }
@@ -214,7 +216,7 @@ int cxd56_cfregrxhandler(cpufifo_handler_t handler)
   irqstate_t flags;
   int ret = OK;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_cpufifo_lock);
   if (g_cfrxhandler)
     {
       ret = -1;
@@ -224,16 +226,16 @@ int cxd56_cfregrxhandler(cpufifo_handler_t handler)
       g_cfrxhandler = handler;
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_cpufifo_lock, flags);
   return ret;
 }
 
 void cxd56_cfunregrxhandler(void)
 {
   irqstate_t flags;
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_cpufifo_lock);
   g_cfrxhandler = NULL;
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_cpufifo_lock, flags);
 }
 
 int cxd56_cfinitialize(void)
