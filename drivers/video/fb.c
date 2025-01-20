@@ -1462,7 +1462,7 @@ static void fb_sem_post(FAR struct fb_chardev_s *fb, int overlay)
         {
           int semcount = 0;
 
-          sem_getvalue(&priv->wait, &semcount);
+          nxsem_get_value(&priv->wait, &semcount);
           if (semcount >= 0)
             {
               break;
