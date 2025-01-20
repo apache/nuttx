@@ -584,7 +584,7 @@ This tool provides a flexible way to monitor and log uORB topic data, aiding in 
 
 ``uorb_generator`` this tool can be used in conjunction with ``uorb_listener``.
 
-Before using the tool, it is necessary to set the NSH_LINELEN parameter to a sufficiently long length to ensure that the terminal
+Before using the tool, it is necessary to set the CONFIG_LINE_MAX parameter to a sufficiently long length to ensure that the terminal
 can accept complete input data. A recommendation is to set it to 256 or 512.
 
 Incoming data can be printed via uorb_listener or concatenated manually using format information, but it must be
