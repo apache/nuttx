@@ -165,7 +165,7 @@ void syslog_add_intbuffer(FAR const char *buffer, size_t buflen)
     }
   else
     {
-      syslog_flush_intbuffer(true);
+      syslog_flush_internal(true, sizeof(g_syslog_intbuffer.buffer));
       space = buflen - sizeof(g_syslog_intbuffer.buffer);
       syslog_write_foreach(buffer, space, true);
       circbuf_write(&g_syslog_intbuffer.circ,
