@@ -37,6 +37,7 @@ list(
   arm_cache.c
   arm_cpuinfo.c
   arm_dataabort.c
+  arm_hwdebug.c
   arm_doirq.c
   arm_gicv2.c
   arm_gicv2_dump.c
