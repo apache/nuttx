@@ -325,7 +325,7 @@ struct uart_dev_s
 {
   /* State data */
 
-  uint8_t              open_count;   /* Number of times the device has been opened */
+  uint16_t             open_count;   /* Number of times the device has been opened */
   uint8_t              escape;       /* VT100/ANSI escape sequence echo-
                                        * suppression state (see the
                                        * UART_ESCAPE_* values used in
