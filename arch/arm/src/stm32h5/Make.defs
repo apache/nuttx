@@ -68,6 +68,14 @@ ifeq ($(CONFIG_STM32H5_TIM),y)
 CHIP_CSRCS += stm32_tim.c
 endif
 
+ifeq ($(CONFIG_STM32H5_HAVE_HSI48),y)
+CHIP_CSRCS += stm32_hsi48.c
+endif
+
+ifeq ($(CONFIG_STM32H5_USBFS),y)
+CHIP_CSRCS += stm32_usbfs.c
+endif
+
 # Required chip type specific files
 
 ifeq ($(CONFIG_STM32H5_STM32H5XXXX),y)

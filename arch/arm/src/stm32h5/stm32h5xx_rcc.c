@@ -31,6 +31,7 @@
 #include "stm32_pwr.h"
 #include "stm32_flash.h"
 #include "stm32_rcc.h"
+#include "stm32_hsi48.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -58,7 +59,7 @@
 
 #if defined(CONFIG_STM32H5_HAVE_HSI48) && defined(STM32H5_USE_CLK48)
 #  if STM32H5_CLKUSB_SEL == RCC_CCIPR4_USBSEL_HSI48KERCK
-#    define STM32H5_USE_HSI48
+#    define STM32H5_USE_HSI48 1
 #  endif
 #endif
 
@@ -567,7 +568,7 @@ static inline void rcc_enableapb2(void)
   regval |= RCC_APB2ENR_SAI2EN;
 #endif
 
-#ifdef CONFIG_STM32H5_USB
+#ifdef CONFIG_STM32H5_USBFS
   /* USB clock enable */
 
   regval |= RCC_APB2ENR_USBEN;
@@ -1179,6 +1180,13 @@ void stm32_stdclockconfig(void)
       regval &= ~RCC_CCIPR3_SPI6SEL_MASK;
       regval |= STM32_RCC_CCIPR3_SPI6SEL;
       putreg32(regval, STM32_RCC_CCIPR3);
+#endif
+
+#if defined(STM32H5_CLKUSB_SEL)
+      regval = getreg32(STM32_RCC_CCIPR4);
+      regval &= ~RCC_CCIPR4_USBSEL_MASK;
+      regval |= STM32H5_CLKUSB_SEL;
+      putreg32(regval, STM32_RCC_CCIPR4);
 #endif
     }
 }
