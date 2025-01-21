@@ -402,7 +402,7 @@ process_next:
             case 'F':
               {
                 len = snprintf(dest, chleft, "%04d-%02d-%02d",
-                              tm->tm_year + TM_YEAR_BASE, tm->tm_mon,
+                              tm->tm_year + TM_YEAR_BASE, tm->tm_mon + 1,
                               tm->tm_mday);
               }
               break;
