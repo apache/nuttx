@@ -2290,10 +2290,6 @@ static reg_errcode_t tre_copy_ast(tre_mem_t mem, tre_stack_t *stack,
   while (status == REG_OK && tre_stack_num_objects(stack) > bottom)
     {
       tre_ast_node_t *node;
-      if (status != REG_OK)
-        {
-          break;
-        }
 
       symbol = (tre_copyast_symbol_t)tre_stack_pop_int(stack);
       switch (symbol)
@@ -2462,11 +2458,6 @@ static reg_errcode_t tre_expand_ast(tre_mem_t mem, tre_stack_t *stack,
     {
       tre_ast_node_t            *node;
       tre_expand_ast_symbol_t   symbol;
-
-      if (status != REG_OK)
-        {
-          break;
-        }
 
       symbol    = (tre_expand_ast_symbol_t)tre_stack_pop_int(stack);
       node      = tre_stack_pop_voidptr(stack);
