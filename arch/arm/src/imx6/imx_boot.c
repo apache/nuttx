@@ -35,6 +35,7 @@
 #  include <nuttx/page.h>
 #endif
 
+#include <nuttx/init.h>
 #include <arch/board/board.h>
 
 #include "chip.h"
@@ -505,4 +506,12 @@ void arm_boot(void)
   imx_cpu_enable();
   PROGRESS('Q');
   PROGRESS('\n');
+
+  /* moved here from armv7-a/arm_head.S as we dont return now */
+
+  arm_smp_busy_wait_fini();
+
+  /* jump to nx_start */
+
+  nx_start();
 }
