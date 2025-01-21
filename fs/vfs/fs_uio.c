@@ -131,7 +131,7 @@ int uio_init(FAR struct uio *uio, FAR const struct iovec *iov, int iovcnt)
   resid = uio_calc_resid(uio);
   if (resid < 0)
     {
-      return -EINVAL;
+      return resid;
     }
 
   uio->uio_resid = resid;
