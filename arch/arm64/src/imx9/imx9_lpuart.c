@@ -2358,6 +2358,14 @@ static void imx9_txint(struct uart_dev_s *dev, bool enable)
   regval &= ~LPUART_ALL_INTS;
   regval |= priv->ie;
   imx9_serialout(priv, IMX9_LPUART_CTRL_OFFSET, regval);
+
+#ifndef CONFIG_SUPPRESS_SERIAL_INTS
+  if (enable)
+    {
+      uart_xmitchars(dev);
+    }
+#endif
+
   spin_unlock_irqrestore(&priv->lock, flags);
 }
 #endif
