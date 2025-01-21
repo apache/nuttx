@@ -53,6 +53,8 @@ config STM32H5_STM32H56XXX
 	select STM32H5_HAVE_SPI4
 	select STM32H5_HAVE_SPI5
 	select STM32H5_HAVE_SPI6
+	select STM32H5_HAVE_USBFS
+	select STM32H5_HAVE_HSI48
 
 config STM32H5_STM32H563XX
 	# STM32H552 and STM32H562 devices documented in RM0439
@@ -220,6 +222,10 @@ config STM32H5_HAVE_FDCAN2
 	bool
 	default n
 
+config STM32H5_HAVE_HSI48
+	bool
+	default n
+
 config STM32H5_HAVE_LPUART1
 	bool
 	default n
@@ -277,6 +283,10 @@ config STM32H5_HAVE_USART11
 	default n
 
 config STM32H5_HAVE_UART12
+	bool
+	default n
+
+config STM32H5_HAVE_USBFS
 	bool
 	default n
 
@@ -554,6 +564,12 @@ config STM32H5_TIM17
 	select STM32H5_TIM
 
 endmenu # STM32H5 Timer Selection
+
+config STM32H5_USBFS
+	bool "USB Device"
+	default n
+	depends on STM32H5_HAVE_USBFS
+	select USBDEV
 
 endmenu
 
@@ -3769,6 +3785,20 @@ config STM32H5_TIM17_CH1IDLE
 endmenu #STM32 TIMx Outputs Configuration
 
 endmenu # Timer Configuration
+
+comment "USB Device Configuration"
+
+menu "USB Full Speed Debug Configuration"
+	depends on STM32H5_USBFS
+
+config STM32H5_USBFS_REGDEBUG
+	bool "Register-Level Debug"
+	default n
+	depends on STM32H5_USBFS && DEBUG_USB_INFO
+	---help---
+		Enable very low-level register access debug.
+
+endmenu
 
 config STM32H5_SERIALDRIVER
 	bool
