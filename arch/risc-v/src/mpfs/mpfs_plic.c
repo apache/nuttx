@@ -58,7 +58,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: get_iebase
+ * Name: mpfs_plic_get_iebase
  *
  * Description:
  *   Get base address for interrupt enable bits for a specific hart.
@@ -71,7 +71,7 @@
  *
  ****************************************************************************/
 
-static uintptr_t get_iebase(uintptr_t hartid)
+uintptr_t mpfs_plic_get_iebase(uintptr_t hartid)
 {
   uintptr_t iebase;
 
@@ -89,7 +89,7 @@ static uintptr_t get_iebase(uintptr_t hartid)
 }
 
 /****************************************************************************
- * Name: get_claimbase
+ * Name: mpfs_plic_get_claimbase
  *
  * Description:
  *   Get base address for interrupt claim for a specific hart.
@@ -102,7 +102,7 @@ static uintptr_t get_iebase(uintptr_t hartid)
  *
  ****************************************************************************/
 
-uintptr_t get_claimbase(uintptr_t hartid)
+uintptr_t mpfs_plic_get_claimbase(uintptr_t hartid)
 {
   uintptr_t claim_address;
 
@@ -173,7 +173,7 @@ void mpfs_plic_init_hart(uintptr_t hartid)
 {
   /* Disable all global interrupts for current hart */
 
-  uintptr_t iebase = get_iebase(hartid);
+  uintptr_t iebase = mpfs_plic_get_iebase(hartid);
 
   putreg32(0x0, iebase + 0);
   putreg32(0x0, iebase + 4);
@@ -187,7 +187,7 @@ void mpfs_plic_init_hart(uintptr_t hartid)
    * This has no effect on non-claimed or disabled interrupts.
    */
 
-  uintptr_t claim_address = get_claimbase(hartid);
+  uintptr_t claim_address = mpfs_plic_get_claimbase(hartid);
 
   for (int irq = MPFS_IRQ_EXT_START; irq < NR_IRQS; irq++)
     {
@@ -198,38 +198,6 @@ void mpfs_plic_init_hart(uintptr_t hartid)
 
   uintptr_t threshold_address = get_thresholdbase(hartid);
   putreg32(0, threshold_address);
-}
-
-/****************************************************************************
- * Name: mpfs_plic_get_iebase
- *
- * Description:
- *   Context aware way to query PLIC interrupt enable base address
- *
- * Returned Value:
- *   Interrupt enable base address
- *
- ****************************************************************************/
-
-uintptr_t mpfs_plic_get_iebase(void)
-{
-  return get_iebase(up_cpu_index());
-}
-
-/****************************************************************************
- * Name: mpfs_plic_get_claimbase
- *
- * Description:
- *   Context aware way to query PLIC interrupt claim base address
- *
- * Returned Value:
- *   Interrupt enable claim address
- *
- ****************************************************************************/
-
-uintptr_t mpfs_plic_get_claimbase(void)
-{
-  return get_claimbase(up_cpu_index());
 }
 
 /****************************************************************************

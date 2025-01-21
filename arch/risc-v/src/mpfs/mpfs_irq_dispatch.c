@@ -60,7 +60,7 @@ void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
 
   /* Firstly, check if the irq is machine external interrupt */
 
-  uintptr_t claim_address = mpfs_plic_get_claimbase();
+  uintptr_t claim_address = mpfs_plic_get_claimbase(up_cpu_index());
 
   if (irq == RISCV_IRQ_EXT)
     {
