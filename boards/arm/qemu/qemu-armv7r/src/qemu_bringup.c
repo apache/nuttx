@@ -94,7 +94,7 @@ static void register_devices_from_fdt(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: imx_bringup
+ * Name: qemu_bringup
  *
  * Description:
  *   Bring up board features
