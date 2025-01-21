@@ -46,8 +46,8 @@
          if (pid > 0 && \
              elapsed > CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION) \
            { \
-             CRITMONITOR_PANIC("PID %d hold sched lock too long %"PRIu32"\n", \
-                               pid, elapsed); \
+             CRITMONITOR_PANIC("PID %d hold sched lock too long %ju\n", \
+                               pid, (uintmax_t)elapsed); \
            } \
        } \
      while (0)
@@ -62,8 +62,8 @@
          if (pid > 0 && \
              elapsed > CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION) \
            { \
-             CRITMONITOR_PANIC("PID %d hold critical section too long %" \
-                               PRIu32 "\n", pid, elapsed); \
+             CRITMONITOR_PANIC("PID %d hold critical section too long " \
+                               "%ju\n", pid, (uintmax_t)elapsed); \
            } \
        } \
      while (0)
@@ -79,7 +79,8 @@
              elapsed > CONFIG_SCHED_CRITMONITOR_MAXTIME_BUSYWAIT) \
            { \
              CRITMONITOR_PANIC("PID %d wait for critical section or spin" \
-                               "lock too long %" PRIu32 "\n", pid, elapsed); \
+                               "lock too long %ju\n", \
+                               pid, (uintmax_t)elapsed); \
            } \
        } \
      while (0)
@@ -94,8 +95,8 @@
          if (pid > 0 && \
              elapsed > CONFIG_SCHED_CRITMONITOR_MAXTIME_THREAD) \
            { \
-             CRITMONITOR_PANIC("PID %d execute too long %"PRIu32"\n", \
-                               pid, elapsed); \
+             CRITMONITOR_PANIC("PID %d execute too long %ju\n", \
+                               pid, (uintmax_t)elapsed); \
            } \
        } \
      while (0)
