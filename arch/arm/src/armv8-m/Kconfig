@@ -57,6 +57,7 @@ config ARMV8M_TARGET2_PREL
 
 choice
 	prompt "Select the stack protection Schema"
+	default ARMV8M_STACKCHECK_HARDWARE if DEBUG_FEATURES
 	default ARMV8M_STACKCHECK_NONE
 
 config ARMV8M_STACKCHECK_NONE
