@@ -70,18 +70,13 @@
  *
  ****************************************************************************/
 
-static ssize_t file_readv_compat(FAR struct file *filep, FAR struct uio *uio)
+static ssize_t file_readv_compat(FAR struct file *filep,
+                                 FAR const struct iovec *iov, int iovcnt)
 {
-  FAR const struct iovec *iov = uio->uio_iov;
-  int iovcnt = uio->uio_iovcnt;
   FAR struct inode *inode = filep->f_inode;
   ssize_t ntotal;
   ssize_t nread;
-  size_t remaining;
-  FAR uint8_t *buffer;
   int i;
-
-  DEBUGASSERT(inode->u.i_ops->read != NULL);
 
   /* Process each entry in the struct iovec array */
 
@@ -94,36 +89,41 @@ static ssize_t file_readv_compat(FAR struct file *filep, FAR struct uio *uio)
           continue;
         }
 
-      buffer    = iov[i].iov_base;
-      remaining = iov[i].iov_len;
+      /* Sanity check to avoid total length overflow */
 
-      nread = inode->u.i_ops->read(filep, (void *)buffer, remaining);
+      if (SSIZE_MAX - ntotal < iov[i].iov_len)
+        {
+          if (ntotal > 0)
+            {
+              break;
+            }
+
+          return -EINVAL;
+        }
+
+      nread = inode->u.i_ops->read(filep, iov[i].iov_base,
+                                   iov[i].iov_len);
 
       /* Check for a read error */
 
       if (nread < 0)
         {
-          return ntotal ? ntotal : nread;
+          if (ntotal > 0)
+            {
+              break;
+            }
+
+          return nread;
         }
 
       ntotal += nread;
 
       /* Check for a parital success condition, including an end-of-file */
 
-      if (nread < remaining)
+      if (nread < iov[i].iov_len)
         {
-          return ntotal;
+          break;
         }
-
-      /* Update the pointer */
-
-      buffer    += nread;
-      remaining -= nread;
-    }
-
-  if (ntotal >= 0)
-    {
-      uio_advance(uio, ntotal);
     }
 
   return ntotal;
@@ -146,7 +146,8 @@ static ssize_t file_readv_compat(FAR struct file *filep, FAR struct uio *uio)
  *
  * Input Parameters:
  *   filep  - File structure instance
- *   uio    - User buffer information
+ *   iov    - User-provided iovec to save the data
+ *   iovcnt - The number of iovec
  *
  * Returned Value:
  *   The positive non-zero number of bytes read on success, 0 on if an
@@ -154,7 +155,8 @@ static ssize_t file_readv_compat(FAR struct file *filep, FAR struct uio *uio)
  *
  ****************************************************************************/
 
-ssize_t file_readv(FAR struct file *filep, FAR struct uio *uio)
+ssize_t file_readv(FAR struct file *filep,
+                   FAR const struct iovec *iov, int iovcnt)
 {
   FAR struct inode *inode;
   ssize_t ret = -EBADF;
@@ -182,11 +184,17 @@ ssize_t file_readv(FAR struct file *filep, FAR struct uio *uio)
     {
       if (inode->u.i_ops->readv)
         {
-          ret = inode->u.i_ops->readv(filep, uio);
+          struct uio uio;
+
+          ret = uio_init(&uio, iov, iovcnt);
+          if (ret == 0)
+            {
+              ret = inode->u.i_ops->readv(filep, &uio);
+            }
         }
       else if (inode->u.i_ops->read)
         {
-          ret = file_readv_compat(filep, uio);
+          ret = file_readv_compat(filep, iov, iovcnt);
         }
     }
 
@@ -227,18 +235,11 @@ ssize_t file_readv(FAR struct file *filep, FAR struct uio *uio)
 ssize_t file_read(FAR struct file *filep, FAR void *buf, size_t nbytes)
 {
   struct iovec iov;
-  struct uio uio;
-  ssize_t ret;
 
   iov.iov_base = buf;
   iov.iov_len = nbytes;
-  ret = uio_init(&uio, &iov, 1);
-  if (ret != 0)
-    {
-      return ret;
-    }
 
-  return file_readv(filep, &uio);
+  return file_readv(filep, &iov, 1);
 }
 
 /****************************************************************************
@@ -264,7 +265,6 @@ ssize_t file_read(FAR struct file *filep, FAR void *buf, size_t nbytes)
 
 ssize_t nx_readv(int fd, FAR const struct iovec *iov, int iovcnt)
 {
-  struct uio uio;
   FAR struct file *filep;
   ssize_t ret;
 
@@ -273,20 +273,15 @@ ssize_t nx_readv(int fd, FAR const struct iovec *iov, int iovcnt)
    */
 
   ret = (ssize_t)fs_getfilep(fd, &filep);
-  if (ret < 0)
+  if (ret >= 0)
     {
-      return ret;
+      /* Then let file_readv do all of the work. */
+
+      ret = file_readv(filep, iov, iovcnt);
+
+      fs_putfilep(filep);
     }
 
-  /* Then let file_readv do all of the work. */
-
-  ret = uio_init(&uio, iov, iovcnt);
-  if (ret == 0)
-    {
-      ret = file_readv(filep, &uio);
-    }
-
-  fs_putfilep(filep);
   return ret;
 }
 
