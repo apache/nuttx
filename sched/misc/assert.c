@@ -822,7 +822,14 @@ static void dump_fatal_info(FAR struct tcb_s *rtcb,
   /* Flush previous SYSLOG data before possible long time coredump */
 
   syslog_flush();
+}
 
+/****************************************************************************
+ * Name: dump_core_info
+ ****************************************************************************/
+
+static void dump_core_info(void)
+{
 #ifdef CONFIG_BOARD_CRASHDUMP_CUSTOM
   board_crashdump(up_getsp(), rtcb, filename, linenum, msg, regs);
 #endif
@@ -963,6 +970,10 @@ void _assert(FAR const char *filename, int linenum,
       dump_fatal_info(rtcb, filename, linenum, msg, regs);
 
       panic_notifier_call_chain(PANIC_KERNEL_FINAL, &notifier_data);
+
+      /* Dump core information */
+
+      dump_core_info();
 
       reboot_notifier_call_chain(SYS_HALT, NULL);
 
