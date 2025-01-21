@@ -402,7 +402,7 @@ typedef struct pthread_barrier_s pthread_barrier_t;
 
 struct pthread_once_s
 {
-  bool done;
+  volatile bool done;
   pthread_mutex_t mutex;
 };
 
