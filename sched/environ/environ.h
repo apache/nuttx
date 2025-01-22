@@ -36,7 +36,7 @@
 
 #ifdef CONFIG_DISABLE_ENVIRON
 #  define env_dup(group, envp) (0)
-#  define env_release(group)   (0)
+#  define env_release(group)   ((void)0)
 #else
 
 #  define SCHED_ENVIRON_RESERVED (4)
