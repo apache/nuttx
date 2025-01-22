@@ -110,19 +110,17 @@ def arg_parser():
     )
     parser.add_argument("-i", "--input", help="Input dump data")
     parser.add_argument("-t", dest="gcov_tool", help="Path to gcov tool")
-    parser.add_argument(
-        "-b", dest="base_dir", default=os.getcwd(), help="Compile base directory"
-    )
+    parser.add_argument("-b", dest="base_dir", help="Compile base directory")
     parser.add_argument(
         "-s",
         dest="gcno_dir",
-        default=os.getcwd(),
+        default=".",
         help="Directory containing gcno files",
     )
     parser.add_argument(
         "-a",
         dest="gcda_dir",
-        default=os.getcwd(),
+        default=".",
         nargs="+",
         help="Directory containing gcda files",
     )
@@ -136,8 +134,7 @@ def arg_parser():
     parser.add_argument(
         "-o",
         dest="gcov_dir",
-        nargs="?",
-        default=os.getcwd(),
+        default="gcov",
         help="Directory to store gcov data and report",
     )
 
@@ -151,10 +148,7 @@ def main():
     gcov_dir = os.path.abspath(args.gcov_dir)
     gcno_dir = os.path.abspath(args.gcno_dir)
 
-    if os.path.exists(gcov_dir):
-        shutil.rmtree(gcov_dir)
-
-    os.makedirs(gcov_dir)
+    os.makedirs(gcov_dir, exist_ok=True)
 
     gcda_dir = []
     for i in args.gcda_dir:
@@ -248,11 +242,6 @@ def main():
     except subprocess.CalledProcessError:
         print("Failed to generate coverage file.")
         sys.exit(1)
-
-    for i in gcov_data_dir:
-        shutil.rmtree(i)
-
-    os.remove(coverage_file)
 
 
 if __name__ == "__main__":

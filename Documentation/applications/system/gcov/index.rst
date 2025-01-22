@@ -86,6 +86,16 @@ Examples of applicable platforms
      find ./ -name "*.gcda"
      ```
 
+  5. Examples:
+     ```
+     $ ./tools/configure.sh sim:nsh
+     nsh: poweroff
+     $ ./nuttx/tools/gcov.py -t gcov
+     Then open ./gcov/result/index.html with your browser
+     ```
+
+2. Applicable to device
+
 2. Applicable to device
 
   Due to differences in implementation methods, the device side is divided into GCC and CLANG
@@ -129,10 +139,10 @@ Examples of applicable platforms
         # The -t parameter specifies the gcov version, which needs to match the gcc version
 
         # sim
-        ./tools/gcov.sh -t gcov-13
+        ./tools/gcov.py -t gcov
 
         # arm platform
-        ./tools/gcov.sh -t arm-none-eabi-gcov
+        ./tools/gcov.py -t arm-none-eabi-gcov
 
     5. Impact and precautions
        ```
