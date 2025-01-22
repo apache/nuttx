@@ -71,4 +71,7 @@ foreach(LINE IN LISTS LINES)
   file(APPEND ${OUTPUT_FILE} "${LINE}\n")
 endforeach()
 
+# Converts the newline style for the output file.
+configure_file(${OUTPUT_FILE} ${OUTPUT_FILE} @ONLY NEWLINE_STYLE LF)
+
 execute_process(COMMAND ${CMAKE_COMMAND} -E remove ${TARGET_FILE})
