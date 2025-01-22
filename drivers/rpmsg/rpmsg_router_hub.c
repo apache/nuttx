@@ -396,7 +396,8 @@ static int rpmsg_router_cb(FAR struct rpmsg_endpoint *ept, FAR void *data,
 
   /* Send pm signal to the other edge core */
 
-  if (data == NULL)
+  if (data == NULL && is_rpmsg_ept_ready(&hub->ept[0]) &&
+          is_rpmsg_ept_ready(&hub->ept[1]))
     {
       rpmsg_ept_incref(&hub->ept[0]);
       rpmsg_ept_incref(&hub->ept[1]);
