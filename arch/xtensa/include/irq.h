@@ -408,7 +408,11 @@ irqstate_t xtensa_disable_interrupts(irqstate_t mask);
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_HAVE_MULTICPU
-int up_cpu_index(void) noinstrument_function;
+noinstrument_function
+static inline_function int up_cpu_index(void)
+{
+  return xtensa_cpu_index();
+}
 #endif /* CONFIG_ARCH_HAVE_MULTICPU */
 
 /****************************************************************************

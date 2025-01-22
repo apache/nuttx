@@ -47,10 +47,6 @@ ifeq ($(CONFIG_SMP),y)
 CHIP_CSRCS += esp32s3_cpuidlestack.c esp32s3_cpustart.c esp32s3_intercpu_interrupt.c
 endif
 
-ifeq ($(CONFIG_ARCH_HAVE_MULTICPU),y)
-CHIP_ASRCS  = esp32s3_cpuindex.S
-endif
-
 ifeq ($(CONFIG_ESP32S3_EFUSE),y)
 CHIP_CSRCS += esp32s3_efuse.c
 CHIP_CSRCS += esp32s3_efuse_table.c
