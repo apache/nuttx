@@ -45,6 +45,11 @@
 #  define MAX(a,b)      (((a) > (b)) ? (a) : (b))
 #endif  /* MAX */
 
+#ifndef CLAMP
+/* inclusively clamping a value into a given range */
+#  define CLAMP(x, min, max) ((x) <= (min) ? (min) : MIN(x, max))
+#endif /* CLAMP */
+
 /* Macros for number of items.
  * (aka. ARRAY_SIZE, ArraySize, Size of an Array)
  */
