@@ -282,6 +282,12 @@ static inline void riscv_restorecontext(struct tcb_s *tcb)
 
   riscv_restorevpu(tcb->xcp.regs, riscv_vpuregs(tcb));
 #endif
+
+#ifdef CONFIG_LIB_SYSCALL
+  /* Update current thread pointer */
+
+  __asm__ __volatile__("mv tp, %0" : : "r"(tcb));
+#endif
 }
 
 #ifdef CONFIG_ARCH_RISCV_INTXCPT_EXTENSIONS

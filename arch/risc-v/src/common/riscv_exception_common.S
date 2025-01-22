@@ -153,6 +153,9 @@ exception_common:
   REGSTORE   s3, REG_SP(sp)
 
 #ifdef CONFIG_LIB_SYSCALL
+  csrr       tp, CSR_SCRATCH      /* Load kernel TP */
+  REGLOAD    tp, RISCV_PERCPU_TCB(tp)
+
   /* Check whether it is an exception or interrupt */
 
   blt        s2, x0, handle_irq   /* If cause < 0 it is interrupt */
@@ -176,9 +179,6 @@ exception_common:
 1:
   addi       s1, s1, 0x4          /* Must move EPC forward by +4 */
   REGSTORE   s1, REG_EPC(sp)      /* Updated EPC to user context */
-
-  csrr       tp, CSR_SCRATCH      /* Load kernel TP */
-  REGLOAD    tp, RISCV_PERCPU_TCB(tp)
 
   mv         a7, sp               /* a7 = context */
   call       x1, dispatch_syscall /* Dispatch the system call */
@@ -246,9 +246,8 @@ return_from_exception:
 #ifdef CONFIG_LIB_SYSCALL
   /* Store tcb to scratch register */
 
-  call       x1, nxsched_self
   csrr       s1, CSR_SCRATCH
-  REGSTORE   a0, RISCV_PERCPU_TCB(s1)
+  REGSTORE   tp, RISCV_PERCPU_TCB(s1)
 #endif
 
 #ifdef CONFIG_ARCH_KERNEL_STACK
