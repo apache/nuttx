@@ -41,7 +41,7 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/i2c/i2c_master.h>
 
-#include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <arch/board/board.h>
 
 #include "chip.h"
@@ -116,6 +116,7 @@ struct kinetis_i2cdev_s
   volatile uint8_t state;     /* State of state machine */
   bool restart;               /* Should next transfer restart or not */
   mutex_t lock;               /* Only one thread can access at a time */
+  spinlock_t spinlock;        /* Spinlock */
   sem_t wait;                 /* Place to wait for state machine completion */
   struct wdog_s timeout;      /* watchdog to timeout when bus hung */
   struct i2c_msg_s *msgs;     /* Remaining transfers - first one is in
@@ -193,6 +194,7 @@ static struct kinetis_i2cdev_s g_i2c0_dev =
   .config     = &kinetis_i2c0_config,
   .refs       = 0,
   .lock       = NXMUTEX_INITIALIZER,
+  .spinlock   = SP_UNLOCKED,
   .wait       = SEM_INITIALIZER(0),
   .state      = STATE_OK,
   .msgs       = NULL,
@@ -216,6 +218,7 @@ static struct kinetis_i2cdev_s g_i2c1_dev =
   .config     = &kinetis_i2c1_config,
   .refs       = 0,
   .lock       = NXMUTEX_INITIALIZER,
+  .spinlock   = SP_UNLOCKED,
   .wait       = SEM_INITIALIZER(0),
   .state      = STATE_OK,
   .msgs       = NULL,
@@ -239,6 +242,7 @@ static struct kinetis_i2cdev_s g_i2c2_dev =
   .config     = &kinetis_i2c2_config,
   .refs       = 0,
   .lock       = NXMUTEX_INITIALIZER,
+  .spinlock   = SP_UNLOCKED,
   .wait       = SEM_INITIALIZER(0),
   .state      = STATE_OK,
   .msgs       = NULL,
@@ -262,6 +266,7 @@ static struct kinetis_i2cdev_s g_i2c3_dev =
   .config     = &kinetis_i2c3_config,
   .refs       = 0,
   .lock       = NXMUTEX_INITIALIZER,
+  .spinlock   = SP_UNLOCKED,
   .wait       = SEM_INITIALIZER(0),
   .state      = STATE_OK,
   .msgs       = NULL,
@@ -818,10 +823,10 @@ static void kinetis_i2c_timeout(wdparm_t arg)
   DEBUGASSERT(priv != NULL);
   i2cinfo("Timeout msg=%p\n", priv->msgs);
 
-  irqstate_t flags = enter_critical_section();
+  irqstate_t flags = spin_lock_irqsave(&priv->spinlock);
   priv->state = STATE_TIMEOUT;
   kinetis_i2c_endwait(priv);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->spinlock, flags);
 }
 
 /****************************************************************************
