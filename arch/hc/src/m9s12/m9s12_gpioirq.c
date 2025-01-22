@@ -30,7 +30,7 @@
 #include <errno.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 
 #include "hc_internal.h"
 #include "m9s12.h"
@@ -48,6 +48,12 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+/* Spinlock */
+
+#ifdef CONFIG_HCS12_GPIOIRQ
+static spinlock_t g_gpioirq_lock = SP_UNLOCKED;
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -250,11 +256,11 @@ void hcs12_gpioirqenable(int irq)
 
   if (hcs12_mapirq(irq, &regaddr, &pin) == OK)
     {
-       irqstate_t flags  = enter_critical_section();
+       irqstate_t flags  = spin_lock_irqsave(&g_gpioirq_lock);
        uint8_t    regval = getreg8(regaddr);
        regval           |= (1 << pin);
        putreg8(regval, regaddr);
-       leave_critical_section(flags);
+       spin_unlock_irqrestore(&g_gpioirq_lock, flags);
     }
 }
 #endif /* CONFIG_HCS12_GPIOIRQ */
@@ -275,11 +281,11 @@ void hcs12_gpioirqdisable(int irq)
 
   if (hcs12_mapirq(irq, &regaddr, &pin) == OK)
     {
-       irqstate_t flags  = enter_critical_section();
+       irqstate_t flags  = spin_lock_irqsave(&g_gpioirq_lock);
        uint8_t    regval = getreg8(regaddr);
        regval           &= ~(1 << pin);
        putreg8(regval, regaddr);
-       leave_critical_section(flags);
+       spin_unlock_irqrestore(&g_gpioirq_lock, flags);
     }
 }
 #endif /* CONFIG_HCS12_GPIOIRQ */
