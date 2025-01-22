@@ -498,6 +498,23 @@
  * Inline functions
  ****************************************************************************/
 
+#ifdef CONFIG_ARCH_HAVE_MULTICPU
+noinstrument_function
+static inline_function int xtensa_cpu_index(void)
+{
+  int index;
+
+  __asm__ __volatile__
+  (
+    "rsr.prid %0\n"
+    "extui %0,%0,13,1\n"
+    : "=r"(index)
+  );
+
+  return index;
+}
+#endif /* CONFIG_ARCH_HAVE_MULTICPU */
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
