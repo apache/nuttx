@@ -456,7 +456,6 @@ __revoke_low_memory:
 	lea     g_pd_low, %edi
 	add     %rcx, %rdi
 	lea     g_pt_low, %esi
-	add     %rcx, %rsi
 
 	/* for ecx = 0...64 : Loop and setup 64x 2MB page directories */
 	mov     $64,   %ecx
