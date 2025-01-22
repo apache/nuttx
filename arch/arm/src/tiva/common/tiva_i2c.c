@@ -37,7 +37,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/clock.h>
 #include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
@@ -198,6 +198,7 @@ struct tiva_i2c_priv_s
 
   const struct tiva_i2c_config_s *config;
   mutex_t lock;                 /* Mutual exclusion mutex */
+  spinlock_t spinlock;          /* Spinlock */
 #ifndef CONFIG_I2C_POLLED
   sem_t waitsem;                /* Interrupt wait semaphore */
 #endif
@@ -323,6 +324,7 @@ static const struct tiva_i2c_config_s tiva_i2c0_config =
 static struct tiva_i2c_priv_s tiva_i2c0_priv =
 {
   .lock       = NXMUTEX_INITIALIZER,
+  .spinlock   = SP_UNLOCKED,
 #ifndef CONFIG_I2C_POLLED
   .waitsem    = SEM_INITIALIZER(0),
 #endif
@@ -350,6 +352,7 @@ static const struct tiva_i2c_config_s tiva_i2c1_config =
 static struct tiva_i2c_priv_s tiva_i2c1_priv =
 {
   .lock       = NXMUTEX_INITIALIZER,
+  .spinlock   = SP_UNLOCKED,
 #ifndef CONFIG_I2C_POLLED
   .waitsem    = SEM_INITIALIZER(0),
 #endif
@@ -377,6 +380,7 @@ static const struct tiva_i2c_config_s tiva_i2c2_config =
 static struct tiva_i2c_priv_s tiva_i2c2_priv =
 {
   .lock       = NXMUTEX_INITIALIZER,
+  .spinlock   = SP_UNLOCKED,
 #ifndef CONFIG_I2C_POLLED
   .waitsem    = SEM_INITIALIZER(0),
 #endif
@@ -404,6 +408,7 @@ static const struct tiva_i2c_config_s tiva_i2c3_config =
 static struct tiva_i2c_priv_s tiva_i2c3_priv =
 {
   .lock       = NXMUTEX_INITIALIZER,
+  .spinlock   = SP_UNLOCKED,
 #ifndef CONFIG_I2C_POLLED
   .waitsem    = SEM_INITIALIZER(0),
 #endif
@@ -431,6 +436,7 @@ static const struct tiva_i2c_config_s tiva_i2c4_config =
 static struct tiva_i2c_priv_s tiva_i2c4_priv =
 {
   .lock       = NXMUTEX_INITIALIZER,
+  .spinlock   = SP_UNLOCKED,
 #ifndef CONFIG_I2C_POLLED
   .waitsem    = SEM_INITIALIZER(0),
 #endif
@@ -458,6 +464,7 @@ static const struct tiva_i2c_config_s tiva_i2c5_config =
 static struct tiva_i2c_priv_s tiva_i2c5_priv =
 {
   .lock       = NXMUTEX_INITIALIZER,
+  .spinlock   = SP_UNLOCKED,
 #ifndef CONFIG_I2C_POLLED
   .waitsem    = SEM_INITIALIZER(0),
 #endif
@@ -485,6 +492,7 @@ static const struct tiva_i2c_config_s tiva_i2c6_config =
 static struct tiva_i2c_priv_s tiva_i2c6_priv =
 {
   .lock       = NXMUTEX_INITIALIZER,
+  .spinlock   = SP_UNLOCKED,
 #ifndef CONFIG_I2C_POLLED
   .waitsem    = SEM_INITIALIZER(0),
 #endif
@@ -512,6 +520,7 @@ static const struct tiva_i2c_config_s tiva_i2c7_config =
 static struct tiva_i2c_priv_s tiva_i2c7_priv =
 {
   .lock       = NXMUTEX_INITIALIZER,
+  .spinlock   = SP_UNLOCKED,
 #ifndef CONFIG_I2C_POLLED
   .waitsem    = SEM_INITIALIZER(0),
 #endif
@@ -539,6 +548,7 @@ static const struct tiva_i2c_config_s tiva_i2c8_config =
 static struct tiva_i2c_priv_s tiva_i2c8_priv =
 {
   .lock       = NXMUTEX_INITIALIZER,
+  .spinlock   = SP_UNLOCKED,
 #ifndef CONFIG_I2C_POLLED
   .waitsem    = SEM_INITIALIZER(0),
 #endif
@@ -566,6 +576,7 @@ static const struct tiva_i2c_config_s tiva_i2c9_config =
 static struct tiva_i2c_priv_s tiva_i2c9_priv =
 {
   .lock       = NXMUTEX_INITIALIZER,
+  .spinlock   = SP_UNLOCKED,
 #ifndef CONFIG_I2C_POLLED
   .waitsem    = SEM_INITIALIZER(0),
 #endif
@@ -734,7 +745,7 @@ static inline int tiva_i2c_sem_waitdone(struct tiva_i2c_priv_s *priv)
   irqstate_t flags;
   int ret;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->spinlock);
 
   /* Enable the master interrupt.  The I2C master module generates an
    * interrupt when a transaction completes (either transmit or receive),
@@ -750,6 +761,8 @@ static inline int tiva_i2c_sem_waitdone(struct tiva_i2c_priv_s *priv)
 
   do
     {
+      spin_unlock_irqrestore(&priv->spinlock, flags);
+
       /* Wait until either the transfer is complete or the timeout expires */
 
 #ifdef CONFIG_TIVA_I2C_DYNTIMEO
@@ -770,6 +783,8 @@ static inline int tiva_i2c_sem_waitdone(struct tiva_i2c_priv_s *priv)
                               tiva_i2c_getreg(priv, TIVA_I2CM_RIS_OFFSET));
           break;
         }
+
+      flags = spin_lock_irqsave(&priv->spinlock);
     }
 
   /* Loop until the interrupt level transfer is complete. */
@@ -784,7 +799,7 @@ static inline int tiva_i2c_sem_waitdone(struct tiva_i2c_priv_s *priv)
 
   tiva_i2c_putreg(priv, TIVA_I2CM_IMR_OFFSET, 0);
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->spinlock, flags);
   return ret;
 }
 #else

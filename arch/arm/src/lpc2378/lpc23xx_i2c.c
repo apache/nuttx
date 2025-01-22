@@ -62,7 +62,7 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/i2c/i2c_master.h>
 
-#include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <arch/board/board.h>
 
 #include "chip.h"
@@ -109,6 +109,7 @@ struct lpc2378_i2cdev_s
   uint16_t         irqid;      /* IRQ for this device */
 
   mutex_t          lock;       /* Only one thread can access at a time */
+  spinlock_t       spinlock;   /* Spinlock */
   sem_t            wait;       /* Place to wait for state machine completion */
   volatile uint8_t state;      /* State of state machine */
   struct wdog_s    timeout;    /* Watchdog to timeout when bus hung */
@@ -148,22 +149,25 @@ static int  lpc2378_i2c_reset(struct i2c_master_s *dev);
 #ifdef CONFIG_LPC2378_I2C0
 static struct lpc2378_i2cdev_s g_i2c0dev =
 {
-  .lock = NXMUTEX_INITIALIZER,
-  .wait = SEM_INITIALIZER(0),
+  .lock     = NXMUTEX_INITIALIZER,
+  .spinlock = SP_UNLOCKED,
+  .wait     = SEM_INITIALIZER(0),
 };
 #endif
 #ifdef CONFIG_LPC2378_I2C1
 static struct lpc2378_i2cdev_s g_i2c1dev =
 {
-  .lock = NXMUTEX_INITIALIZER,
-  .wait = SEM_INITIALIZER(0),
+  .lock     = NXMUTEX_INITIALIZER,
+  .spinlock = SP_UNLOCKED,
+  .wait     = SEM_INITIALIZER(0),
 };
 #endif
 #ifdef CONFIG_LPC2378_I2C2
 static struct lpc2378_i2cdev_s g_i2c2dev =
 {
-  .lock = NXMUTEX_INITIALIZER,
-  .wait = SEM_INITIALIZER(0),
+  .lock     = NXMUTEX_INITIALIZER,
+  .spinlock = SP_UNLOCKED,
+  .wait     = SEM_INITIALIZER(0),
 };
 #endif
 
@@ -265,10 +269,10 @@ static void lpc2378_i2c_timeout(wdparm_t arg)
 {
   struct lpc2378_i2cdev_s *priv = (struct lpc2378_i2cdev_s *)arg;
 
-  irqstate_t flags = enter_critical_section();
+  irqstate_t flags = spin_lock_irqsave(&priv->spinlock);
   priv->state = 0xff;
   nxsem_post(&priv->wait);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->spinlock, flags);
 }
 
 /****************************************************************************
@@ -481,7 +485,7 @@ struct i2c_master_s *lpc2378_i2cbus_initialize(int port)
   irqstate_t flags;
   uint32_t regval;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->spinlock);
 
 #ifdef CONFIG_LPC2378_I2C0
   if (port == 0)
@@ -577,11 +581,11 @@ struct i2c_master_s *lpc2378_i2cbus_initialize(int port)
   else
 #endif
     {
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(&priv->spinlock, flags);
       return NULL;
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->spinlock, flags);
 
   putreg32(I2C_CONSET_I2EN, priv->base + I2C_CONSET_OFFSET);
 

@@ -35,7 +35,7 @@
 
 #include <arch/board/board.h>
 #include <nuttx/mutex.h>
-#include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 
 #include "arm_internal.h"
 #include "chip.h"
@@ -122,8 +122,9 @@ struct xmc4_i2cdev_s
   uint32_t sda_gpio;            /* GPIO config of SDA */
   uint32_t scl_gpio;            /* GPIO config of SCL */
 
-  mutex_t lock; /* Only one thread can access at a time */
-  int refs;     /* Reference count */
+  mutex_t lock;                 /* Only one thread can access at a time */
+  spinlock_t spinlock;          /* Spinlock */
+  int refs;                     /* Reference count */
 };
 
 /*****************************************************************************
@@ -198,6 +199,7 @@ static struct xmc4_i2cdev_s g_i2c0 =
   .scl_gpio = GPIO_I2C0_SCL,    /* See i2c_set_input_source */
   .frequency = (uint32_t)I2C_DEFAULT_FREQUENCY,
   .lock = NXMUTEX_INITIALIZER,
+  .spinlock = SP_UNLOCKED,
   .refs = 0,
 };
 #endif
@@ -214,6 +216,7 @@ static struct xmc4_i2cdev_s g_i2c1 =
   .scl_gpio = GPIO_I2C1_SCL,    /* See i2c_set_input_source */
   .frequency = (uint32_t)I2C_DEFAULT_FREQUENCY,
   .lock = NXMUTEX_INITIALIZER,
+  .spinlock = SP_UNLOCKED,
   .refs = 0,
 };
 #endif
@@ -230,6 +233,7 @@ static struct xmc4_i2cdev_s g_i2c2 =
   .scl_gpio = GPIO_I2C2_SCL,    /* See i2c_set_input_source */
   .frequency = (uint32_t)I2C_DEFAULT_FREQUENCY,
   .lock = NXMUTEX_INITIALIZER,
+  .spinlock = SP_UNLOCKED,
   .refs = 0,
 };
 #endif
@@ -246,6 +250,7 @@ static struct xmc4_i2cdev_s g_i2c3 =
   .scl_gpio = GPIO_I2C3_SCL,    /* See i2c_set_input_source */
   .frequency = (uint32_t)I2C_DEFAULT_FREQUENCY,
   .lock = NXMUTEX_INITIALIZER,
+  .spinlock = SP_UNLOCKED,
   .refs = 0,
 };
 #endif
@@ -262,6 +267,7 @@ static struct xmc4_i2cdev_s g_i2c4 =
   .scl_gpio = GPIO_I2C4_SCL,    /* See i2c_set_input_source */
   .frequency = (uint32_t)I2C_DEFAULT_FREQUENCY,
   .lock = NXMUTEX_INITIALIZER,
+  .spinlock = SP_UNLOCKED,
   .refs = 0,
 };
 #endif
@@ -278,6 +284,7 @@ static struct xmc4_i2cdev_s g_i2c5 =
   .scl_gpio = GPIO_I2C5_SCL,    /* See i2c_set_input_source */
   .frequency = (uint32_t)I2C_DEFAULT_FREQUENCY,
   .lock = NXMUTEX_INITIALIZER,
+  .spinlock = SP_UNLOCKED,
   .refs = 0,
 };
 #endif
@@ -817,7 +824,7 @@ static int i2c_transfer(struct i2c_master_s *dev,
 
   /* Enter critical section to avoid interrupts during i2c transfert */
 
-  irqstate_t state = enter_critical_section();
+  irqstate_t state = spin_lock_irqsave(&priv->spinlock);
 
   for (int i = 0; i < count; i++)
     {
@@ -837,8 +844,8 @@ static int i2c_transfer(struct i2c_master_s *dev,
             }
           else
             {
+              spin_unlock_irqrestore(&priv->spinlock, state);
               i2cerr("Can't update frequency between Start & Stop symbols\n");
-              leave_critical_section(state);
               nxmutex_unlock(&priv->lock);
               return -EINVAL;
             }
@@ -926,7 +933,7 @@ static int i2c_transfer(struct i2c_master_s *dev,
         }
     }
 
-  leave_critical_section(state);
+  spin_unlock_irqrestore(&priv->spinlock, state);
   nxmutex_unlock(&priv->lock);
   return ret;
 }

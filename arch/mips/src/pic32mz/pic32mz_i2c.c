@@ -36,7 +36,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/clock.h>
 #include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
@@ -189,6 +189,7 @@ struct pic32mz_i2c_priv_s
 
   int refs;                       /* Reference count */
   mutex_t lock;                   /* Mutual exclusion mutex */
+  spinlock_t spinlock;            /* Spinlock */
 #ifndef CONFIG_I2C_POLLED
   sem_t sem_isr;                  /* Interrupt wait semaphore */
 #endif
@@ -337,6 +338,7 @@ static struct pic32mz_i2c_priv_s pic32mz_i2c1_priv =
   .config        = &pic32mz_i2c1_config,
   .refs          = 0,
   .lock          = NXMUTEX_INITIALIZER,
+  .spinlock      = SP_UNLOCKED,
 #ifndef CONFIG_I2C_POLLED
   .sem_isr       = SEM_INITIALIZER(0),
 #endif
@@ -369,6 +371,7 @@ static struct pic32mz_i2c_priv_s pic32mz_i2c2_priv =
   .config        = &pic32mz_i2c2_config,
   .refs          = 0,
   .lock          = NXMUTEX_INITIALIZER,
+  .spinlock      = SP_UNLOCKED,
 #ifndef CONFIG_I2C_POLLED
   .sem_isr       = SEM_INITIALIZER(0),
 #endif
@@ -401,6 +404,7 @@ static struct pic32mz_i2c_priv_s pic32mz_i2c3_priv =
   .config        = &pic32mz_i2c3_config,
   .refs          = 0,
   .lock          = NXMUTEX_INITIALIZER,
+  .spinlock      = SP_UNLOCKED,
 #ifndef CONFIG_I2C_POLLED
   .sem_isr       = SEM_INITIALIZER(0),
 #endif
@@ -433,6 +437,7 @@ static struct pic32mz_i2c_priv_s pic32mz_i2c4_priv =
   .config        = &pic32mz_i2c4_config,
   .refs          = 0,
   .lock          = NXMUTEX_INITIALIZER,
+  .spinlock      = SP_UNLOCKED,
 #ifndef CONFIG_I2C_POLLED
   .sem_isr       = SEM_INITIALIZER(0),
 #endif
@@ -465,6 +470,7 @@ static struct pic32mz_i2c_priv_s pic32mz_i2c5_priv =
   .config        = &pic32mz_i2c5_config,
   .refs          = 0,
   .lock          = NXMUTEX_INITIALIZER,
+  .spinlock      = SP_UNLOCKED,
 #ifndef CONFIG_I2C_POLLED
   .sem_isr       = SEM_INITIALIZER(0),
 #endif
@@ -682,7 +688,7 @@ pic32mz_i2c_sem_waitdone(struct pic32mz_i2c_priv_s *priv)
   irqstate_t flags;
   int ret;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->spinlock);
 
   /* Signal the interrupt handler that we are waiting */
 
@@ -690,6 +696,8 @@ pic32mz_i2c_sem_waitdone(struct pic32mz_i2c_priv_s *priv)
 
   do
     {
+      spin_unlock_irqrestore(&priv->spinlock, flags);
+
       /* Wait until either the transfer is complete or the timeout expires */
 
 #ifdef CONFIG_PIC32MZ_I2C_DYNTIMEO
@@ -708,6 +716,8 @@ pic32mz_i2c_sem_waitdone(struct pic32mz_i2c_priv_s *priv)
 
           break;
         }
+
+      flags = spin_lock_irqsave(&priv->spinlock);
     }
 
   /* Loop until the interrupt level transfer is complete. */
@@ -723,7 +733,7 @@ pic32mz_i2c_sem_waitdone(struct pic32mz_i2c_priv_s *priv)
   up_disable_irq(priv->config->ev_irq);
   up_disable_irq(priv->config->er_irq);
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->spinlock, flags);
 
   return ret;
 }
@@ -982,7 +992,7 @@ static int pic32mz_i2c_isr_process(struct pic32mz_i2c_priv_s *priv)
           if (priv->dcnt > 1)
             {
 #ifdef CONFIG_I2C_POLLED
-              irqstate_t flags = enter_critical_section();
+              irqstate_t flags = spin_lock_irqsave(&priv->spinlock);
 #endif
 
               *priv->ptr++ = pic32mz_i2c_receivebyte(priv);
@@ -999,7 +1009,7 @@ static int pic32mz_i2c_isr_process(struct pic32mz_i2c_priv_s *priv)
                 }
 
 #ifdef CONFIG_I2C_POLLED
-              leave_critical_section(flags);
+              spin_unlock_irqrestore(&priv->spinlock, flags);
 #endif
               /* Go back and re-enable read mode to handle the rest of
                * the data.
@@ -1014,7 +1024,7 @@ static int pic32mz_i2c_isr_process(struct pic32mz_i2c_priv_s *priv)
           else
             {
 #ifdef CONFIG_I2C_POLLED
-              irqstate_t flags = enter_critical_section();
+              irqstate_t flags = spin_lock_irqsave(&priv->spinlock);
 #endif
               *priv->ptr++ = pic32mz_i2c_receivebyte(priv);
 
@@ -1030,7 +1040,7 @@ static int pic32mz_i2c_isr_process(struct pic32mz_i2c_priv_s *priv)
                 }
 
 #ifdef CONFIG_I2C_POLLED
-              leave_critical_section(flags);
+              spin_unlock_irqrestore(&priv->spinlock, flags);
 #endif
               priv->process_state = PROCESS_STATE_FETCH_NEXT;
             }
