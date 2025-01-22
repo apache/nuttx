@@ -25,7 +25,7 @@ add_subdirectory(gnu)
 set(SRCS)
 
 if(CONFIG_LIBC_ARCH_ELF)
-  list(APPEND SRCS arch_elf.c)
+  list(APPEND SRCS arch_elf64.c)
 endif()
 
 if(CONFIG_ARCH_SETJMP_H)
