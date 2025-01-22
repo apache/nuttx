@@ -31,7 +31,7 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/arch.h>
 
 #include "arm_internal.h"
@@ -93,6 +93,12 @@ static struct kinetis_pinirq_s g_portdisrs[32];
 #endif
 #ifdef CONFIG_KINETIS_PORTEINTS
 static struct kinetis_pinirq_s g_porteisrs[32];
+#endif
+
+/* Spinlock */
+
+#ifdef HAVE_PORTINTS
+static spinlock_t g_pinirq_lock = SP_UNLOCKED;
 #endif
 
 /****************************************************************************
@@ -297,7 +303,7 @@ int kinetis_pinirqattach(uint32_t pinset, xcpt_t pinisr, void *arg)
   /* Get the table associated with this port */
 
   DEBUGASSERT(port < KINETIS_NPORTS);
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_pinirq_lock);
   switch (port)
     {
 #ifdef CONFIG_KINETIS_PORTAINTS
@@ -326,7 +332,7 @@ int kinetis_pinirqattach(uint32_t pinset, xcpt_t pinisr, void *arg)
         break;
 #endif
       default:
-        leave_critical_section(flags);
+        spin_unlock_irqrestore(&g_pinirq_lock, flags);
         return -EINVAL;
     }
 
@@ -337,7 +343,7 @@ int kinetis_pinirqattach(uint32_t pinset, xcpt_t pinisr, void *arg)
 
   /* And return the old PIN isr address */
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_pinirq_lock, flags);
   return OK;
 #else
   return -ENOSYS;

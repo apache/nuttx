@@ -30,7 +30,7 @@
 #include <assert.h>
 #include <debug.h>
 
-#include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/arch.h>
 #include <arch/irq.h>
 
@@ -50,6 +50,14 @@
 
 #if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
 #  define INTSTACK_ALLOC (CONFIG_SMP_NCPUS * INTSTACK_SIZE)
+#endif
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#if defined(CONFIG_DEBUG_IRQ_INFO)
+static spinlock_t g_irq_lock = SP_UNLOCKED;
 #endif
 
 /****************************************************************************
@@ -95,7 +103,7 @@ static void rp2040_dumpnvic(const char *msg, int irq)
 {
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_irq_lock);
 
   irqinfo("NVIC (%s, irq=%d):\n", msg, irq);
   irqinfo("  ISER:       %08x ICER:   %08x\n",
@@ -119,7 +127,7 @@ static void rp2040_dumpnvic(const char *msg, int irq)
   irqinfo("  SHPR2:      %08x SHPR3:  %08x\n",
           getreg32(ARMV6M_SYSCON_SHPR2), getreg32(ARMV6M_SYSCON_SHPR3));
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_irq_lock, flags);
 }
 
 #else
