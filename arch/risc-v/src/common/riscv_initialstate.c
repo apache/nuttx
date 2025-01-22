@@ -115,6 +115,12 @@ void up_initial_state(struct tcb_s *tcb)
       /* Set idle process' initial interrupt context */
 
       riscv_set_idleintctx();
+
+#ifdef CONFIG_LIB_SYSCALL
+      /* Update current thread pointer */
+
+      __asm__ __volatile__("mv tp, %0" : : "r"(tcb));
+#endif
       return;
     }
 
