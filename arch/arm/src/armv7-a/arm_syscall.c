@@ -556,6 +556,12 @@ uint32_t *arm_syscall(uint32_t *regs)
 
   up_set_interrupt_context(false);
 
+  /* (*running_task)->xcp.regs is about to become invalid
+   * and will be marked as NULL to avoid misusage.
+   */
+
+  (*running_task)->xcp.regs = NULL;
+
   /* Return the last value of curent_regs.  This supports context switches
    * on return from the exception.  That capability is only used with the
    * SYS_context_switch system call.

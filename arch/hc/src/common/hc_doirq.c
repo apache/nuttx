@@ -132,5 +132,11 @@ uint8_t *hc_doirq(int irq, uint8_t *regs)
   up_set_current_regs(NULL);
 #endif
   board_autoled_off(LED_INIRQ);
+
+  /* (*running_task)->xcp.regs is about to become invalid
+   * and will be marked as NULL to avoid misusage.
+   */
+
+  (*running_task)->xcp.regs = NULL;
   return regs;
 }

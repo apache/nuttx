@@ -117,6 +117,11 @@ IFX_INTERRUPT_INTERNAL(tricore_doirq, 0, 255)
 
   up_set_current_regs(NULL);
 
+  /* (*running_task)->xcp.regs is about to become invalid
+   * and will be marked as NULL to avoid misusage.
+   */
+
+  (*running_task)->xcp.regs = NULL;
   board_autoled_off(LED_INIRQ);
 #endif
 }
