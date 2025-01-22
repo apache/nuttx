@@ -2395,13 +2395,17 @@ struct i2c_master_s *imx9_i2cbus_initialize(int port)
 #ifdef CONFIG_IMX9_LPI2C_DMA
       if (priv->config->dma_txreqsrc != 0)
         {
+          spin_unlock_irqrestore(&priv->spinlock, flags);
           priv->txdma = imx9_dmach_alloc(priv->config->dma_txreqsrc, 0);
+          flags = spin_lock_irqsave(&priv->spinlock);
           DEBUGASSERT(priv->txdma != NULL);
         }
 
       if (priv->config->dma_rxreqsrc != 0)
         {
+          spin_unlock_irqrestore(&priv->spinlock, flags);
           priv->rxdma = imx9_dmach_alloc(priv->config->dma_rxreqsrc, 0);
+          flags = spin_lock_irqsave(&priv->spinlock);
           DEBUGASSERT(priv->rxdma != NULL);
         }
 #endif
