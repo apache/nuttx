@@ -29,6 +29,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 
+#include <sys/param.h>
 #include <stdio.h>
 
 #include "nvic.h"
@@ -36,6 +37,22 @@
 #include "arm_internal.h"
 
 #ifdef CONFIG_ARMV8M_SYSTICK
+
+/****************************************************************************
+ * Pre-processor definitions
+ ****************************************************************************/
+
+/* According to what arm specified, we should set the
+ * RELOAD value to N-1 for a desired systick interval of
+ * N processor clock cycles.
+ * Therefore, when reading the RELOAD value, it is important
+ * to add one clock cycle back.
+ */
+#define RELOAD2TIMEOUT(reload) ((reload) + 1)
+#define TIMEOUT2RELOAD(timeout) ((timeout) - 1)
+
+#define CLAMP_RELOAD(reload) \
+CLAMP(reload, NVIC_MIN_SYSTICK_CNT, NVIC_MAX_SYSTICK_CNT)
 
 /****************************************************************************
  * Private Types
@@ -141,8 +158,8 @@ static int systick_getstatus(struct timer_lowerhalf_s *lower_,
 
   status->flags    = lower->callback ? TCFLAGS_HANDLER : 0;
   status->flags   |= systick_is_running() ? TCFLAGS_ACTIVE : 0;
-  status->timeout  = usec_from_count(getreg32(NVIC_SYSTICK_RELOAD),
-                                     lower->freq);
+  status->timeout  = usec_from_count(
+    RELOAD2TIMEOUT(getreg32(NVIC_SYSTICK_RELOAD)), lower->freq);
   status->timeleft = usec_from_count(getreg32(NVIC_SYSTICK_CURRENT),
                                      lower->freq);
 
@@ -185,8 +202,9 @@ static int systick_settimeout(struct timer_lowerhalf_s *lower_,
     {
       uint32_t reload;
 
-      reload = usec_to_count(timeout, lower->freq);
-      putreg32(reload, NVIC_SYSTICK_RELOAD);
+      reload = TIMEOUT2RELOAD(usec_to_count(timeout, lower->freq));
+
+      putreg32(CLAMP_RELOAD(reload), NVIC_SYSTICK_RELOAD);
       if (systick_is_running())
         {
           if (reload != getreg32(NVIC_SYSTICK_CURRENT))
@@ -237,7 +255,8 @@ static int systick_interrupt(int irq, void *context, void *arg)
   if (lower->callback && systick_is_running())
     {
       uint32_t reload = getreg32(NVIC_SYSTICK_RELOAD);
-      uint32_t interval = usec_from_count(reload, lower->freq);
+      uint32_t interval = usec_from_count(
+        RELOAD2TIMEOUT(reload), lower->freq);
       uint32_t next_interval = interval;
 
       lower->next_interval = &next_interval;
@@ -245,8 +264,9 @@ static int systick_interrupt(int irq, void *context, void *arg)
         {
           if (next_interval && next_interval != interval)
             {
-              reload = usec_to_count(next_interval, lower->freq);
-              putreg32(reload, NVIC_SYSTICK_RELOAD);
+              reload = TIMEOUT2RELOAD(
+                usec_to_count(next_interval, lower->freq));
+              putreg32(CLAMP_RELOAD(reload), NVIC_SYSTICK_RELOAD);
               putreg32(0, NVIC_SYSTICK_CURRENT);
             }
         }
