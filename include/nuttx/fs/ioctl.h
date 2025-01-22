@@ -348,6 +348,10 @@
                                            *      to return sector numbers.
                                            * OUT: Data return in user-provided
                                            *      buffer. */
+#define BIOC_DISCARD    _BIOC(0x0011)     /* Discards the block device read buffer
+                                           * IN:  None
+                                           * OUT: None (ioctl return value provides
+                                           *      success/failure indication). */
 
 /* NuttX MTD driver ioctl definitions ***************************************/
 

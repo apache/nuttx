@@ -716,6 +716,13 @@ static int ftl_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
 
   dev = inode->i_private;
 
+  if (cmd == BIOC_DISCARD)
+    {
+#ifdef CONFIG_FTL_READAHEAD
+      rwb_discard(&dev->rwb);
+#endif
+    }
+
   if (cmd == BIOC_FLUSH)
     {
 #ifdef CONFIG_FTL_WRITEBUFFER
