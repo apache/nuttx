@@ -48,6 +48,26 @@
  * Description:
  *   Emulate readv using file_operation::read.
  *
+ *   Unless iovcnt <= 1, this implementation is NOT appropriate for files
+ *   with non-trivial semantics, including:
+ *
+ *     - Files which might return partial success. (except the EOF)
+ *       (Eg. certain character devices, including tty.)
+ *
+ *     - Files which need to preserve data boundaries.
+ *       (Eg. datagram sockets)
+ *
+ *     - Files which need to provide read/write atomicity.
+ *       (Eg. regular files, pipes, fifos. Note that, although NuttX
+ *       doesn't implement the atomicity for regular files as of writing
+ *       this, POSIX requires it.)
+ *
+ *     - Files with flow-control mechanisms might be confused a bit by
+ *       this implementation. (Eg. TCP socket)
+ *
+ *   For those kind of files, please consider to implement
+ *   file_operations::readv natively instead of using this function.
+ *
  ****************************************************************************/
 
 static ssize_t file_readv_compat(FAR struct file *filep, FAR struct uio *uio)
