@@ -367,8 +367,8 @@ static ssize_t meminfo_read(FAR struct file *filep, FAR char *buffer,
       max        = (unsigned long)pg_info.mxfree << MM_PGSHIFT;
 
       linesize   = procfs_snprintf(procfile->line, MEMINFO_LINELEN,
-                                   "%11lu%11lu%11lu%11lu %s\n",
-                                   total, allocated, available, max, "Page");
+                                   "%11lu%11lu%11lu%11s%11lu %18s\n", total,
+                                   allocated, available, "", max, "Page");
 
       copysize   = procfs_memcpy(procfile->line, linesize, buffer, buflen,
                                  &offset);
