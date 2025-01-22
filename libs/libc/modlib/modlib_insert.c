@@ -115,7 +115,9 @@ void modlib_dumploadinfo(FAR struct mod_loadinfo_s *loadinfo)
 void modlib_dumpmodule(FAR struct module_s *modp)
 {
   binfo("Module:\n");
+#ifdef HAVE_MODLIB_NAMES
   binfo("  modname:      %s\n", modp->modname);
+#endif
   binfo("  textalloc:    %08lx\n", (long)modp->textalloc);
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
   binfo("  dataalloc:    %08lx\n", (long)modp->dataalloc);
@@ -136,7 +138,11 @@ void modlib_dumpmodule(FAR struct module_s *modp)
   binfo("  dependents:   %d\n",    modp->dependents);
   for (int i = 0; i < modp->dependents; i++)
     {
+#  ifdef HAVE_MODLIB_NAMES
       binfo("%d    %s\n", i, modp->dependencies[i]->modname);
+#  else
+      binfo("%d\n", i);
+#  endif
       modlib_dumpmodule(modp->dependencies[i]);
     }
 #endif
