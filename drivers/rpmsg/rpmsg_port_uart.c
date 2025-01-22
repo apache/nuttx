@@ -216,7 +216,7 @@ rpmsg_port_uart_send_connect_req(FAR struct rpmsg_port_uart_s *rpuart)
   ssize_t ret = file_write(&rpuart->file, &ch, 1);
   if (ret != 1)
     {
-      rpmsgerr("Send connect request failed, ret=%d\n", ret);
+      rpmsgerr("Send connect request failed, ret=%zu\n", ret);
       PANIC();
     }
 }
@@ -232,7 +232,7 @@ rpmsg_port_uart_send_connect_ack(FAR struct rpmsg_port_uart_s *rpuart)
   ssize_t ret = file_write(&rpuart->file, &ch, 1);
   if (ret != 1)
     {
-      rpmsgerr("Send connect ack failed, ret=%d\n", ret);
+      rpmsgerr("Send connect ack failed, ret=%zu\n", ret);
       PANIC();
     }
 }
