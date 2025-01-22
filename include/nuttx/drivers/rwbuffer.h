@@ -198,6 +198,10 @@ int rwb_invalidate(FAR struct rwbuffer_s *rwb,
 int rwb_flush(FAR struct rwbuffer_s *rwb);
 #endif
 
+#ifdef CONFIG_DRVR_READAHEAD
+int rwb_discard(FAR struct rwbuffer_s *rwb);
+#endif
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

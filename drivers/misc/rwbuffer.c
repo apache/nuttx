@@ -1279,4 +1279,30 @@ int rwb_flush(FAR struct rwbuffer_s *rwb)
 }
 #endif
 
+/****************************************************************************
+ * Name: rwb_flush
+ *
+ * Description:
+ *   Flush the write buffer
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DRVR_READAHEAD
+int rwb_discard(FAR struct rwbuffer_s *rwb)
+{
+  int ret;
+
+  ret = rwb_lock(&rwb->rhlock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  rwb_resetrhbuffer(rwb);
+  rwb_unlock(&rwb->rhlock);
+
+  return ret;
+}
+#endif
+
 #endif /* CONFIG_DRVR_WRITEBUFFER || CONFIG_DRVR_READAHEAD */
