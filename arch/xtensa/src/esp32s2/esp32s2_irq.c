@@ -26,11 +26,12 @@
 
 #include <assert.h>
 #include <debug.h>
+#include <sched.h>
 #include <errno.h>
 #include <stdint.h>
 #include <string.h>
 
-#include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <arch/irq.h>
@@ -118,6 +119,10 @@ static const uint32_t g_priority[5] =
   ESP32S2_INTPRI4_MASK,
   ESP32S2_INTPRI5_MASK
 };
+
+/* Spinlock */
+
+static spinlock_t g_irq_lock = SP_UNLOCKED;
 
 /****************************************************************************
  * Private Functions
@@ -490,12 +495,13 @@ int esp32s2_cpuint_initialize(void)
 
 int esp32s2_setup_irq(int periphid, int priority, int type)
 {
-  irqstate_t irqstate;
+  irqstate_t flags;
   uintptr_t regaddr;
   int irq;
   int cpuint;
 
-  irqstate = enter_critical_section();
+  flags = spin_lock_irqsave(&g_irq_lock);
+  sched_lock();
 
   /* Setting up an IRQ includes the following steps:
    *    1. Allocate a CPU interrupt.
@@ -508,7 +514,8 @@ int esp32s2_setup_irq(int periphid, int priority, int type)
     {
       irqerr("Unable to allocate CPU interrupt for priority=%d and type=%d",
              priority, type);
-      leave_critical_section(irqstate);
+      spin_unlock_irqrestore(&g_irq_lock, flags);
+      sched_unlock();
 
       return cpuint;
     }
@@ -525,7 +532,8 @@ int esp32s2_setup_irq(int periphid, int priority, int type)
 
   putreg32(cpuint, regaddr);
 
-  leave_critical_section(irqstate);
+  spin_unlock_irqrestore(&g_irq_lock, flags);
+  sched_unlock();
 
   return cpuint;
 }
@@ -551,11 +559,11 @@ int esp32s2_setup_irq(int periphid, int priority, int type)
 
 void esp32s2_teardown_irq(int periphid, int cpuint)
 {
-  irqstate_t irqstate;
+  irqstate_t flags;
   uintptr_t regaddr;
   int irq;
 
-  irqstate = enter_critical_section();
+  flags = spin_lock_irqsave(&g_irq_lock);
 
   /* Tearing down an IRQ includes the following steps:
    *   1. Free the previously allocated CPU interrupt.
@@ -576,7 +584,7 @@ void esp32s2_teardown_irq(int periphid, int cpuint)
 
   putreg32(NO_CPUINT, regaddr);
 
-  leave_critical_section(irqstate);
+  spin_unlock_irqrestore(&g_irq_lock, flags);
 }
 
 /****************************************************************************
