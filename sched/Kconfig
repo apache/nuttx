@@ -2011,6 +2011,7 @@ config ASSERT_PAUSE_CPU_TIMEOUT
 config COREDUMP
 	bool "Coredump support"
 	depends on ARCH_HAVE_TCBINFO
+	select LIBC_ARCH_ELF
 	default n
 	---help---
 		Generate ELF core dump to provide information about the CPU state and the
