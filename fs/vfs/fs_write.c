@@ -48,6 +48,8 @@
  * Description:
  *   Emulate writev using file_operation::write.
  *
+ *   Please read the comment on file_readv_compat as well.
+ *
  ****************************************************************************/
 
 static ssize_t file_writev_compat(FAR struct file *filep,
