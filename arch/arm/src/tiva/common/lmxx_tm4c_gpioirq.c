@@ -26,7 +26,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
-#include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 
 #include <inttypes.h>
 #include <stdint.h>
@@ -69,6 +69,10 @@ struct gpio_handler_s
 /* A table of handlers for each GPIO port interrupt */
 
 static struct gpio_handler_s g_gpioportirqvector[TIVA_NIRQ_PINS];
+
+/* Spinlock */
+
+static spinlock_t g_gpioirq_lock = SP_UNLOCKED;
 
 /****************************************************************************
  * Private Functions
@@ -287,11 +291,11 @@ static int tiva_gpioporthandler(uint8_t port, void *context)
 static int tiva_gpioahandler(int irq, void *context, void *arg)
 {
   irqstate_t flags;
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_gpioirq_lock);
   up_disable_irq(irq);
   int ret = tiva_gpioporthandler((GPIO_PORTA >> GPIO_PORT_SHIFT), context);
   up_enable_irq(irq);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_gpioirq_lock, flags);
   return ret;
 }
 #endif
@@ -300,11 +304,11 @@ static int tiva_gpioahandler(int irq, void *context, void *arg)
 static int tiva_gpiobhandler(int irq, void *context, void *arg)
 {
   irqstate_t flags;
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_gpioirq_lock);
   up_disable_irq(irq);
   int ret = tiva_gpioporthandler((GPIO_PORTB >> GPIO_PORT_SHIFT), context);
   up_enable_irq(irq);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_gpioirq_lock, flags);
   return ret;
 }
 #endif
@@ -313,11 +317,11 @@ static int tiva_gpiobhandler(int irq, void *context, void *arg)
 static int tiva_gpiochandler(int irq, void *context, void *arg)
 {
   irqstate_t flags;
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_gpioirq_lock);
   up_disable_irq(irq);
   int ret = tiva_gpioporthandler((GPIO_PORTC >> GPIO_PORT_SHIFT), context);
   up_enable_irq(irq);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_gpioirq_lock, flags);
   return ret;
 }
 #endif
@@ -326,11 +330,11 @@ static int tiva_gpiochandler(int irq, void *context, void *arg)
 static int tiva_gpiodhandler(int irq, void *context, void *arg)
 {
   irqstate_t flags;
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_gpioirq_lock);
   up_disable_irq(irq);
   int ret = tiva_gpioporthandler((GPIO_PORTD >> GPIO_PORT_SHIFT), context);
   up_enable_irq(irq);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_gpioirq_lock, flags);
   return ret;
 }
 #endif
@@ -339,11 +343,11 @@ static int tiva_gpiodhandler(int irq, void *context, void *arg)
 static int tiva_gpioehandler(int irq, void *context, void *arg)
 {
   irqstate_t flags;
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_gpioirq_lock);
   up_disable_irq(irq);
   int ret = tiva_gpioporthandler((GPIO_PORTE >> GPIO_PORT_SHIFT), context);
   up_enable_irq(irq);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_gpioirq_lock, flags);
   return ret;
 }
 #endif
@@ -352,11 +356,11 @@ static int tiva_gpioehandler(int irq, void *context, void *arg)
 static int tiva_gpiofhandler(int irq, void *context, void *arg)
 {
   irqstate_t flags;
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_gpioirq_lock);
   up_disable_irq(irq);
   int ret = tiva_gpioporthandler((GPIO_PORTF >> GPIO_PORT_SHIFT), context);
   up_enable_irq(irq);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_gpioirq_lock, flags);
   return ret;
 }
 #endif
@@ -365,11 +369,11 @@ static int tiva_gpiofhandler(int irq, void *context, void *arg)
 static int tiva_gpioghandler(int irq, void *context, void *arg)
 {
   irqstate_t flags;
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_gpioirq_lock);
   up_disable_irq(irq);
   int ret = tiva_gpioporthandler((GPIO_PORTG >> GPIO_PORT_SHIFT), context);
   up_enable_irq(irq);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_gpioirq_lock, flags);
   return ret;
 }
 #endif
@@ -378,11 +382,11 @@ static int tiva_gpioghandler(int irq, void *context, void *arg)
 static int tiva_gpiohhandler(int irq, void *context, void *arg)
 {
   irqstate_t flags;
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_gpioirq_lock);
   up_disable_irq(irq);
   int ret = tiva_gpioporthandler((GPIO_PORTH >> GPIO_PORT_SHIFT), context);
   up_enable_irq(irq);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_gpioirq_lock, flags);
   return ret;
 }
 #endif
@@ -391,11 +395,11 @@ static int tiva_gpiohhandler(int irq, void *context, void *arg)
 static int tiva_gpiojhandler(int irq, void *context, void *arg)
 {
   irqstate_t flags;
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_gpioirq_lock);
   up_disable_irq(irq);
   int ret = tiva_gpioporthandler((GPIO_PORTJ >> GPIO_PORT_SHIFT), context);
   up_enable_irq(irq);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_gpioirq_lock, flags);
   return ret;
 }
 #endif
@@ -404,11 +408,11 @@ static int tiva_gpiojhandler(int irq, void *context, void *arg)
 static int tiva_gpiokhandler(int irq, void *context, void *arg)
 {
   irqstate_t flags;
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_gpioirq_lock);
   up_disable_irq(irq);
   int ret = tiva_gpioporthandler((GPIO_PORTK >> GPIO_PORT_SHIFT), context);
   up_enable_irq(irq);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_gpioirq_lock, flags);
   return ret;
 }
 #endif
@@ -417,11 +421,11 @@ static int tiva_gpiokhandler(int irq, void *context, void *arg)
 static int tiva_gpiolhandler(int irq, void *context, void *arg)
 {
   irqstate_t flags;
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_gpioirq_lock);
   up_disable_irq(irq);
   int ret = tiva_gpioporthandler((GPIO_PORTL >> GPIO_PORT_SHIFT), context);
   up_enable_irq(irq);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_gpioirq_lock, flags);
   return ret;
 }
 #endif
@@ -430,11 +434,11 @@ static int tiva_gpiolhandler(int irq, void *context, void *arg)
 static int tiva_gpiomhandler(int irq, void *context, void *arg)
 {
   irqstate_t flags;
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_gpioirq_lock);
   up_disable_irq(irq);
   int ret = tiva_gpioporthandler((GPIO_PORTM >> GPIO_PORT_SHIFT), context);
   up_enable_irq(irq);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_gpioirq_lock, flags);
   return ret;
 }
 #endif
@@ -443,11 +447,11 @@ static int tiva_gpiomhandler(int irq, void *context, void *arg)
 static int tiva_gpionhandler(int irq, void *context, void *arg)
 {
   irqstate_t flags;
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_gpioirq_lock);
   up_disable_irq(irq);
   int ret = tiva_gpioporthandler((GPIO_PORTN >> GPIO_PORT_SHIFT), context);
   up_enable_irq(irq);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_gpioirq_lock, flags);
   return ret;
 }
 #endif
@@ -456,11 +460,11 @@ static int tiva_gpionhandler(int irq, void *context, void *arg)
 static int tiva_gpiophandler(int irq, void *context, void *arg)
 {
   irqstate_t flags;
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_gpioirq_lock);
   up_disable_irq(irq);
   int ret = tiva_gpioporthandler((GPIO_PORTP >> GPIO_PORT_SHIFT), context);
   up_enable_irq(irq);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_gpioirq_lock, flags);
   return ret;
 }
 #endif
@@ -469,11 +473,11 @@ static int tiva_gpiophandler(int irq, void *context, void *arg)
 static int tiva_gpioqhandler(int irq, void *context, void *arg)
 {
   irqstate_t flags;
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_gpioirq_lock);
   up_disable_irq(irq);
   int ret = tiva_gpioporthandler((GPIO_PORTQ >> GPIO_PORT_SHIFT), context);
   up_enable_irq(irq);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_gpioirq_lock, flags);
   return ret;
 }
 #endif
@@ -482,11 +486,11 @@ static int tiva_gpioqhandler(int irq, void *context, void *arg)
 static int tiva_gpiorhandler(int irq, void *context, void *arg)
 {
   irqstate_t flags;
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_gpioirq_lock);
   up_disable_irq(irq);
   int ret = tiva_gpioporthandler((GPIO_PORTR >> GPIO_PORT_SHIFT), context);
   up_enable_irq(irq);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_gpioirq_lock, flags);
   return ret;
 }
 #endif
@@ -495,11 +499,11 @@ static int tiva_gpiorhandler(int irq, void *context, void *arg)
 static int tiva_gpioshandler(int irq, void *context, void *arg)
 {
   irqstate_t flags;
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_gpioirq_lock);
   up_disable_irq(irq);
   int ret = tiva_gpioporthandler((GPIO_PORTS >> GPIO_PORT_SHIFT), context);
   up_enable_irq(irq);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_gpioirq_lock, flags);
   return ret;
 }
 #endif
@@ -646,7 +650,7 @@ int tiva_gpioirqattach(pinconfig_t pinconfig, xcpt_t isr, void *arg)
 
   if (port < TIVA_NPORTS)
     {
-      flags = enter_critical_section();
+      flags = spin_lock_irqsave(&g_gpioirq_lock);
 
       /* If the new ISR is NULL, then the ISR is being detached.
        * In this case, disable the ISR and direct any interrupts
@@ -670,7 +674,7 @@ int tiva_gpioirqattach(pinconfig_t pinconfig, xcpt_t isr, void *arg)
           tiva_gpioirqenable(pinconfig);
         }
 
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(&g_gpioirq_lock, flags);
     }
 
   return OK;

@@ -30,7 +30,6 @@
 #include <assert.h>
 #include <debug.h>
 
-#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/board.h>
@@ -124,7 +123,7 @@ static void lc823450_dumpnvic(const char *msg, int irq)
 {
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_lc823450_irq_lock);
   irqinfo("NVIC (%s, irq=%d):\n", msg, irq);
   irqinfo("  INTCTRL:    %08x VECTAB:  %08x\n",
           getreg32(NVIC_INTCTRL), getreg32(NVIC_VECTAB));
@@ -166,7 +165,7 @@ static void lc823450_dumpnvic(const char *msg, int irq)
           getreg32(NVIC_IRQ60_63_PRIORITY));
   irqinfo("              %08x\n",
           getreg32(NVIC_IRQ64_67_PRIORITY));
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_lc823450_irq_lock, flags);
 }
 #else
 #  define lc823450_dumpnvic(msg, irq)
@@ -186,7 +185,6 @@ static void lc823450_dumpnvic(const char *msg, int irq)
 #ifdef CONFIG_DEBUG
 static int lc823450_nmi(int irq, void *context, void *arg)
 {
-  enter_critical_section();
   irqinfo("PANIC!!! NMI received\n");
   PANIC();
   return 0;
@@ -194,7 +192,6 @@ static int lc823450_nmi(int irq, void *context, void *arg)
 
 static int lc823450_pendsv(int irq, void *context, void *arg)
 {
-  enter_critical_section();
   irqinfo("PANIC!!! PendSV received\n");
   PANIC();
   return 0;
@@ -202,7 +199,6 @@ static int lc823450_pendsv(int irq, void *context, void *arg)
 
 static int lc823450_reserved(int irq, void *context, void *arg)
 {
-  enter_critical_section();
   irqinfo("PANIC!!! Reserved interrupt\n");
   PANIC();
   return 0;

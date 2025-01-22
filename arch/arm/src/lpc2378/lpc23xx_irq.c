@@ -46,12 +46,19 @@
 #include <errno.h>
 #include <debug.h>
 #include <nuttx/arch.h>
+#include <nuttx/spinlock.h>
 
 #include "arm.h"
 #include "chip.h"
 #include "arm_internal.h"
 #include "lpc2378.h"
 #include "lpc23xx_vic.h"
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static spinlock_t g_irq_lock = SP_UNLOCKED;
 
 /****************************************************************************
  * Public Functions
@@ -153,7 +160,7 @@ void up_enable_irq(int irq)
     {
       /* Disable all interrupts */
 
-      irqstate_t flags = enter_critical_section();
+      irqstate_t flags = spin_lock_irqsave(&g_irq_lock);
 
       /* Enable the irq by setting the corresponding bit in the VIC Interrupt
        * Enable register.
@@ -161,7 +168,7 @@ void up_enable_irq(int irq)
 
       uint32_t val = vic_getreg(VIC_INTENABLE_OFFSET);
       vic_putreg(val | (1 << irq), VIC_INTENABLE_OFFSET);
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(&g_irq_lock, flags);
     }
 }
 
@@ -239,7 +246,7 @@ void up_attach_vector(int irq, int vector, vic_vector_t handler)
 
       /* Disable all interrupts */
 
-      irqstate_t flags = enter_critical_section();
+      irqstate_t flags = spin_lock_irqsave(&g_irq_lock);
 
       /* Save the vector address */
 
@@ -250,7 +257,7 @@ void up_attach_vector(int irq, int vector, vic_vector_t handler)
       uint32_t val = vic_getreg(VIC_INTENABLE_OFFSET);
       vic_putreg(val | (1 << irq), VIC_INTENABLE_OFFSET);
 
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(&g_irq_lock, flags);
     }
 }
 #endif
