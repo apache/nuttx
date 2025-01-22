@@ -29,6 +29,7 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/mm/kasan.h>
 #include <nuttx/mm/mm.h>
 
 #include "mm_heap/mm.h"
@@ -40,10 +41,14 @@
 size_t mm_malloc_size(FAR struct mm_heap_s *heap, FAR void *mem)
 {
   FAR struct mm_freenode_s *node;
+  size_t size;
+  bool flag;
+
+  flag = kasan_bypass_save();
 #ifdef CONFIG_MM_HEAP_MEMPOOL
   if (heap->mm_mpool)
     {
-      ssize_t size = mempool_multiple_alloc_size(heap->mm_mpool, mem);
+      size = mempool_multiple_alloc_size(heap->mm_mpool, mem);
       if (size >= 0)
         {
           return size;
@@ -66,5 +71,8 @@ size_t mm_malloc_size(FAR struct mm_heap_s *heap, FAR void *mem)
 
   DEBUGASSERT(MM_NODE_IS_ALLOC(node));
 
-  return MM_SIZEOF_NODE(node) - MM_ALLOCNODE_OVERHEAD;
+  size = MM_SIZEOF_NODE(node) - MM_ALLOCNODE_OVERHEAD;
+
+  kasan_bypass_restore(flag);
+  return size;
 }
