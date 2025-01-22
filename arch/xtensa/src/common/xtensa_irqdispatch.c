@@ -114,5 +114,13 @@ uint32_t *xtensa_irq_dispatch(int irq, uint32_t *regs)
 #endif
 
   board_autoled_off(LED_INIRQ);
-  return tcb->xcp.regs;
+
+  regs = tcb->xcp.regs;
+
+  /* (*running_task)->xcp.regs is about to become invalid
+   * and will be marked as NULL to avoid misusage.
+   */
+
+  (*running_task)->xcp.regs = NULL;
+  return regs;
 }

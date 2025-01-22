@@ -324,5 +324,12 @@ uint64_t *arm64_syscall(uint64_t *regs)
         break;
     }
 
-  return tcb->xcp.regs;
+  regs = tcb->xcp.regs;
+
+  /* (*running_task)->xcp.regs is about to become invalid
+   * and will be marked as NULL to avoid misusage.
+   */
+
+  (*running_task)->xcp.regs = NULL;
+  return regs;
 }

@@ -89,5 +89,12 @@ void *riscv_perform_syscall(uintreg_t *regs)
 
   up_set_interrupt_context(false);
 
-  return tcb->xcp.regs;
+  regs = tcb->xcp.regs;
+
+  /* (*running_task)->xcp.regs is about to become invalid
+   * and will be marked as NULL to avoid misusage.
+   */
+
+  (*running_task)->xcp.regs = NULL;
+  return regs;
 }

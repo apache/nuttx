@@ -118,5 +118,11 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
 #endif
 
   board_autoled_off(LED_INIRQ);
+
+  /* (*running_task)->xcp.regs is about to become invalid
+   * and will be marked as NULL to avoid misusage.
+   */
+
+  tcb->xcp.regs = NULL;
   return regs;
 }

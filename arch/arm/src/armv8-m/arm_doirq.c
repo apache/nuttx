@@ -142,5 +142,10 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
     }
 #endif
 
+  /* (*running_task)->xcp.regs is about to become invalid
+   * and will be marked as NULL to avoid misusage.
+   */
+
+  (*running_task)->xcp.regs = NULL;
   return regs;
 }

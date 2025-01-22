@@ -119,6 +119,12 @@ uint32_t *ceva_doirq(int irq, uint32_t *regs)
           memcpy((uint32_t *)regs[REG_SP], regs, XCPTCONTEXT_SIZE);
           regs = (uint32_t *)regs[REG_SP];
         }
+
+      /* (*running_task)->xcp.regs is about to become invalid
+       * and will be marked as NULL to avoid misusage.
+       */
+
+      (*running_task)->xcp.regs = NULL;
     }
 
   return regs;
