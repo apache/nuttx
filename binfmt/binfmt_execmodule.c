@@ -369,7 +369,6 @@ errout_with_tcbinit:
 #endif
 
   nxtask_uninit(tcb);
-  return ret;
 
 errout_with_addrenv:
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
