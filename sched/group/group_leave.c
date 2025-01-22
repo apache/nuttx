@@ -104,11 +104,9 @@ group_release(FAR struct task_group_s *group, uint8_t ttype)
 
   fdlist_free(&group->tg_fdlist);
 
-#ifndef CONFIG_DISABLE_ENVIRON
   /* Release all shared environment variables */
 
   env_release(group);
-#endif
 
   /* Destroy the mm_map list */
 
