@@ -32,6 +32,8 @@
 #include <termios.h>
 #include <poll.h>
 #include <errno.h>
+#include <stdarg.h>
+#include <stdio.h>
 
 #include "sim_internal.h"
 
@@ -241,4 +243,17 @@ bool host_uart_checkout(int fd)
   pfd.fd     = fd;
   pfd.events = POLLOUT;
   return poll(&pfd, 1, 0) == 1;
+}
+
+/****************************************************************************
+ * Name: host_printf
+ ****************************************************************************/
+
+void host_printf(const char *fmt, ...)
+{
+  va_list ap;
+
+  va_start(ap, fmt);
+  vprintf(fmt, ap);
+  va_end(ap);
 }
