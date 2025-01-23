@@ -129,8 +129,6 @@ static void rpmsg_port_uart_send_packet(FAR struct rpmsg_port_uart_s *rpuart,
       data = (FAR uint8_t *)data + ret;
       datalen -= ret;
     }
-
-  rpmsgdbg("Sent %zu Data\n", datalen);
 }
 
 /****************************************************************************
