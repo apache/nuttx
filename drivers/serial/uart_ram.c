@@ -452,6 +452,7 @@ static void uart_ram_wdog(wdparm_t arg)
     {
       dev->dmatx.nbytes = dev->dmatx.length + dev->dmatx.nlength;
       uart_xmitchars_done(dev);
+      uart_ram_dmatxavail(dev);
     }
 
   /* When the read and write pointers of the rx buffer are different,
