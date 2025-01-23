@@ -321,6 +321,19 @@ config ESPRESSIF_LEDC
 	select PWM
 	select ARCH_HAVE_PWM_MULTICHAN
 
+config ESPRESSIF_I2S
+	bool
+	default n
+
+config ESPRESSIF_I2S0
+	bool "I2S 0"
+	default n
+	select ESPRESSIF_I2S
+	select I2S
+	select ESPRESSIF_DMA
+	select ESPRESSIF_GPIO_IRQ
+	select SCHED_HPWORK
+
 config ESPRESSIF_I2C
 	bool
 	default n
@@ -1646,6 +1659,125 @@ config ESPRESSIF_LEDC_CHANNEL5_PIN
 endif # PWM_MULTICHAN && PWM_NCHANNELS > 1
 
 endmenu # LEDC configuration
+
+menu "I2S Configuration"
+	depends on ESPRESSIF_I2S
+
+config ESPRESSIF_I2S_MAXINFLIGHT
+	int "I2S queue size"
+	default 4
+	---help---
+		This is the total number of transfers, both RX and TX, that can be
+		enqueued before the caller is required to wait.  This setting
+		determines the number certain queue data structures that will be
+		pre-allocated.
+
+if ESPRESSIF_I2S0
+
+config ESPRESSIF_I2S0_RX
+	bool "Enable I2S receiver"
+	default y
+	---help---
+		Enable I2S receiver (port 0)
+
+config ESPRESSIF_I2S0_TX
+	bool "Enable I2S transmitter"
+	default y
+	---help---
+		Enable I2S transmitter (port 0)
+
+choice ESPRESSIF_I2S0_ROLE
+	prompt "I2S0 role"
+	default ESPRESSIF_I2S0_ROLE_MASTER
+	---help---
+		Selects the operation role of the I2S0.
+
+config ESPRESSIF_I2S0_ROLE_MASTER
+	bool "Master"
+
+config ESPRESSIF_I2S0_ROLE_SLAVE
+	bool "Slave"
+
+endchoice # I2S0 role
+
+choice ESPRESSIF_I2S0_DATA_BIT_WIDTH
+	prompt "Bit width"
+	default ESPRESSIF_I2S0_DATA_BIT_WIDTH_16BIT
+	---help---
+		Selects the valid data bits per sample.
+		Note that this option may be overwritten by the audio
+		according to the bit width of the file being played
+
+config ESPRESSIF_I2S0_DATA_BIT_WIDTH_8BIT
+	bool "8 bits"
+
+config ESPRESSIF_I2S0_DATA_BIT_WIDTH_16BIT
+	bool "16 bits"
+
+config ESPRESSIF_I2S0_DATA_BIT_WIDTH_24BIT
+	bool "24 bits"
+
+config ESPRESSIF_I2S0_DATA_BIT_WIDTH_32BIT
+	bool "32 bits"
+
+endchoice # Bit width
+
+config ESPRESSIF_I2S0_SAMPLE_RATE
+	int "I2S0 sample rate"
+	default 44100
+	range 8000 48000
+	---help---
+		Selects the sample rate.
+		Note that this option may be overwritten by the audio
+		according to the bit width of the file being played
+
+config ESPRESSIF_I2S0_BCLKPIN
+	int "I2S0 BCLK pin"
+	default 4
+	range 0 48
+
+config ESPRESSIF_I2S0_WSPIN
+	int "I2S0 WS pin"
+	default 5
+	range 0 48
+
+config ESPRESSIF_I2S0_DINPIN
+	int "I2S0 DIN pin"
+	depends on ESPRESSIF_I2S0_RX
+	default 19 if !ESPRESSIF_ESP32H2
+	default 11 if ESPRESSIF_ESP32H2
+	range 0 48
+
+config ESPRESSIF_I2S0_DOUTPIN
+	int "I2S0 DOUT pin"
+	depends on ESPRESSIF_I2S0_TX
+	default 18 if !ESPRESSIF_ESP32H2
+	default 10 if ESPRESSIF_ESP32H2
+	range 0 48
+
+config ESPRESSIF_I2S0_MCLK
+	bool "Enable I2S Master Clock"
+	depends on ESPRESSIF_I2S0_ROLE_MASTER
+	default n
+	---help---
+		Enable I2S master clock
+
+config ESPRESSIF_I2S0_MCLKPIN
+	int "I2S MCLK pin"
+	depends on ESPRESSIF_I2S0_MCLK
+	default 0
+	range 0 48
+
+endif # ESPRESSIF_I2S0
+
+config I2S_DMADESC_NUM
+	int "I2S DMA maximum number of descriptors"
+	default 2
+	---help---
+		Configure the maximum number of out-link/in-link descriptors to
+		be chained for an I2S DMA transfer.
+
+endmenu # I2S configuration
 
 menu "I2C Configuration"
 	depends on ESPRESSIF_I2C
