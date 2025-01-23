@@ -40,7 +40,7 @@
 #include <net/ethernet.h>
 
 #include <nuttx/wdog.h>
-#include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/arch.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/net/ip.h>
@@ -299,6 +299,7 @@ struct c5471_driver_s
   struct wdog_s c_txtimeout; /* TX timeout timer */
   struct work_s c_irqwork;   /* For deferring interrupt work to the work queue */
   struct work_s c_pollwork;  /* For deferring poll work to the work queue */
+  spinlock_t c_lock;         /* Spinlock */
 
   /* Note: According to the C547x documentation: "The software has to
    * maintain two pointers to the current RX-CPU and TX-CPU descriptors.
@@ -1786,7 +1787,7 @@ static int c5471_ifdown(struct net_driver_s *dev)
 
   /* Disable the Ethernet interrupt */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->c_lock);
   up_disable_irq(C5471_IRQ_ETHER);
 
   /* Disable interrupts going from EIM Module to Interrupt Module. */
@@ -1809,7 +1810,7 @@ static int c5471_ifdown(struct net_driver_s *dev)
   /* Reset the device */
 
   priv->c_bifup = false;
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->c_lock, flags);
   return OK;
 }
 
@@ -2334,6 +2335,8 @@ void arm_netinitialize(void)
   g_c5471[0].c_dev.d_rmmac   = c5471_rmmac;     /* Remove multicast MAC address */
 #endif
   g_c5471[0].c_dev.d_private = g_c5471;         /* Used to recover private state from dev */
+
+  spin_lock_init(&g_c5471[0].c_lock);           /* Initialize spinlock */
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 

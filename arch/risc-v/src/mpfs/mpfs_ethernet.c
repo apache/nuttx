@@ -38,7 +38,7 @@
 #include <arpa/inet.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/kmalloc.h>
@@ -272,6 +272,7 @@ struct mpfs_ethmac_s
   struct wdog_s txtimeout;                       /* TX timeout timer */
   struct work_s irqwork;                         /* For deferring interrupt work to the work queue */
   struct work_s pollwork;                        /* For deferring poll work to the work queue */
+  spinlock_t    lock;                            /* Spinlock */
 
   /* This holds the information visible to the NuttX network */
 
@@ -1588,7 +1589,7 @@ static int mpfs_ifdown(struct net_driver_s *dev)
 
   /* Disable the Ethernet interrupt */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
   up_disable_irq(priv->mac_q_int[0]);
   up_disable_irq(priv->mac_q_int[1]);
   up_disable_irq(priv->mac_q_int[2]);
@@ -1613,7 +1614,7 @@ static int mpfs_ifdown(struct net_driver_s *dev)
   /* Mark the device "down" */
 
   priv->ifup = false;
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
   return OK;
 }
 
@@ -3607,6 +3608,8 @@ int mpfs_ethinitialize(int intf)
   priv->queue[1].dma_rxbuf_size = (uint32_t *)(base + DMA_RXBUF_SIZE_Q1);
   priv->queue[2].dma_rxbuf_size = (uint32_t *)(base + DMA_RXBUF_SIZE_Q2);
   priv->queue[3].dma_rxbuf_size = (uint32_t *)(base + DMA_RXBUF_SIZE_Q3);
+
+  spin_lock_init(&priv->lock);          /* Initialize spinlock */
 
   /* Generate a locally administrated MAC address for this ethernet if */
 
