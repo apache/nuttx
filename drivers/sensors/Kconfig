@@ -969,16 +969,16 @@ config SENSORS_MCP9600_POLL
 	bool "MCP9600 polling"
 	default y
 	depends on SENSORS_MCP9600
-    ---help---
-        Enable the worker thread for polling the MCP9600 and collecting
-        measurements
+	---help---
+		Enable the worker thread for polling the MCP9600 and collecting
+		measurements
 
 config MCP9600_THREAD_STACKSIZE
-    int "MCP9600 stack size"
-    default 1024
+	int "MCP9600 stack size"
+	default 1024
 	depends on SENSORS_MCP9600
-    ---help---
-        Stack size of the worker thread polling the MCP9600 for measurements
+	---help---
+		Stack size of the worker thread polling the MCP9600 for measurements
 
 endif # SENSORS_MCP9600
 
@@ -1643,7 +1643,7 @@ config SHT4X_I2C_FREQUENCY
 	range 1 400000
 
 config SHT4X_THREAD_STACKSIZE
-    int "SHT4X worker thread stack size"
+	int "SHT4X worker thread stack size"
 	default 1024
 	---help---
 		The stack size for the worker thread that performs measurements
@@ -1671,8 +1671,8 @@ config SENSORS_SHT4X_POLL
 	bool "Use polling"
 	default y
 	---help---
-        Configures the SHT4X to be polled at an interval instead of allowing user code to choose when measurements are
-        taken.
+		Configures the SHT4X to be polled at an interval instead of allowing user code to choose when measurements are
+		taken.
 
 endif # SENSORS_SHT4X
 

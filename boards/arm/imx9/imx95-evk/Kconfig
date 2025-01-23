@@ -4,7 +4,7 @@
 #
 
 choice IMX95_CODE_LOCATION
-    prompt "Code location"
+	prompt "Code location"
 
 config IMX95_RUN_FROM_ITCM
 	bool "Run from Instruction Tightly Coupled Memory (ITCM)"
