@@ -814,7 +814,6 @@ static int imx9_txpoll(struct net_driver_s *dev)
    */
 
   flags = spin_lock_irqsave(&priv->lock);
-  sched_lock();
 
   if (priv->dev.d_len > 0)
     {
@@ -835,7 +834,6 @@ static int imx9_txpoll(struct net_driver_s *dev)
     }
 
   spin_unlock_irqrestore(&priv->lock, flags);
-  sched_unlock();
 
   /* If zero is returned, the polling will continue until all connections
    * have been examined.

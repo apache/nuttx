@@ -34,7 +34,6 @@
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
-#include <sched.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
@@ -1046,12 +1045,10 @@ static int dm320_wrrequest(struct dm320_ep_s *privep)
 {
   int ret;
   irqstate_t flags = spin_lock_irqsave(&privep->dev->lock);
-  sched_lock();
 
   ret = dm320_wrrequest_nolock(privep);
 
   spin_unlock_irqrestore(&privep->dev->lock, flags);
-  sched_unlock();
 
   return ret;
 }
@@ -2028,12 +2025,10 @@ static int dm320_epdisable(struct usbdev_ep_s *ep)
   /* Cancel any ongoing activity and reset the endpoint */
 
   flags = spin_lock_irqsave(&privep->dev->lock);
-  sched_lock();
   dm320_cancelrequests(privep);
   dm320_epreset(privep->epphy);
 
   spin_unlock_irqrestore(&privep->dev->lock, flags);
-  sched_unlock();
   return OK;
 }
 
@@ -2173,7 +2168,6 @@ static int dm320_epsubmit(struct usbdev_ep_s *ep,
   req->result = -EINPROGRESS;
   req->xfrd   = 0;
   flags       = spin_lock_irqsave(&priv->lock);
-  sched_lock();
 
   /* Check for NULL packet */
 
@@ -2234,7 +2228,6 @@ static int dm320_epsubmit(struct usbdev_ep_s *ep,
     }
 
   spin_unlock_irqrestore(&priv->lock, flags);
-  sched_unlock();
   return ret;
 }
 
@@ -2265,10 +2258,8 @@ static int dm320_epcancel(struct usbdev_ep_s *ep,
   priv = privep->dev;
 
   flags = spin_lock_irqsave(&priv->lock);
-  sched_lock();
   dm320_cancelrequests(privep);
   spin_unlock_irqrestore(&priv->lock, flags);
-  sched_unlock();
   return OK;
 }
 

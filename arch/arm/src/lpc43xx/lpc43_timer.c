@@ -34,7 +34,6 @@
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
-#include <sched.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/spinlock.h>
@@ -636,7 +635,6 @@ static void lpc43_setcallback(struct timer_lowerhalf_s *lower,
   irqstate_t flags;
 
   flags = spin_lock_irqsave(&priv->lock);
-  sched_lock();
 
   DEBUGASSERT(priv);
   tmrinfo("Entry: callback=%p\n", callback);
@@ -647,7 +645,6 @@ static void lpc43_setcallback(struct timer_lowerhalf_s *lower,
   priv->arg      = arg;
 
   spin_unlock_irqrestore(&priv->lock, flags);
-  sched_unlock();
 }
 
 /****************************************************************************

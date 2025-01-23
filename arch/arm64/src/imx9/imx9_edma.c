@@ -239,10 +239,8 @@ static void imx9_tcd_free(struct imx9_edmatcd_s *tcd)
    */
 
   flags = spin_lock_irqsave(&g_edma.lock);
-  sched_lock();
   imx9_tcd_free_nolock(tcd);
   spin_unlock_irqrestore(&g_edma.lock, flags);
-  sched_unlock();
 }
 #endif
 
@@ -455,7 +453,6 @@ static void imx9_dmaterminate(struct imx9_dmach_s *dmach, int result)
   irqstate_t flags;
 
   flags = spin_lock_irqsave(&g_edma.lock);
-  sched_lock();
 
   /* Disable channel IRQ requests */
 
@@ -508,7 +505,6 @@ static void imx9_dmaterminate(struct imx9_dmach_s *dmach, int result)
     }
 
   spin_unlock_irqrestore(&g_edma.lock, flags);
-  sched_unlock();
 }
 
 /****************************************************************************

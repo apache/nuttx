@@ -35,7 +35,6 @@
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
-#include <sched.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/spinlock.h>
@@ -509,7 +508,6 @@ s32k3xx_lpi2c_sem_waitdone(struct s32k3xx_lpi2c_priv_s *priv)
   int ret;
 
   flags = spin_lock_irqsave(&priv->spinlock);
-  sched_lock();
 
 #ifdef CONFIG_S32K3XX_LPI2C_DMA
   if (priv->rxdma == NULL && priv->txdma == NULL)
@@ -590,7 +588,6 @@ s32k3xx_lpi2c_sem_waitdone(struct s32k3xx_lpi2c_priv_s *priv)
     }
 
   spin_unlock_irqrestore(&priv->spinlock, flags);
-  sched_unlock();
   return ret;
 }
 #else

@@ -34,7 +34,6 @@
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
-#include <sched.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/spinlock.h>
@@ -2301,7 +2300,6 @@ static int avr_epdisable(FAR struct usbdev_ep_s *ep)
   usbtrace(TRACE_EPDISABLE, privep->ep.eplog);
 
   flags = spin_lock_irqsave(&g_usbdev.lock);
-  sched_lock();
 
   /* Disable the endpoint */
 
@@ -2309,7 +2307,6 @@ static int avr_epdisable(FAR struct usbdev_ep_s *ep)
   g_usbdev.stalled = true;
 
   spin_unlock_irqrestore(&g_usbdev.lock, flags);
-  sched_unlock();
   return OK;
 }
 
@@ -2456,7 +2453,6 @@ static int avr_epsubmit(FAR struct usbdev_ep_s *ep,
   /* Disable Interrupts */
 
   flags = spin_lock_irqsave(&g_usbdev.lock);
-  sched_lock();
 
   /* If we are stalled, then drop all requests on the floor */
 
@@ -2518,7 +2514,6 @@ static int avr_epsubmit(FAR struct usbdev_ep_s *ep,
     }
 
   spin_unlock_irqrestore(&g_usbdev.lock, flags);
-  sched_unlock();
   return ret;
 }
 
@@ -2553,10 +2548,8 @@ static int avr_epcancel(FAR struct usbdev_ep_s *ep,
    */
 
   flags = spin_lock_irqsave(&g_usbdev.lock);
-  sched_lock();
   avr_cancelrequests(privep, -ESHUTDOWN);
   spin_unlock_irqrestore(&g_usbdev.lock, flags);
-  sched_unlock();
   return OK;
 }
 
@@ -2767,10 +2760,8 @@ static int avr_wakeup(struct usbdev_s *dev)
   usbtrace(TRACE_DEVWAKEUP, 0);
 
   flags = spin_lock_irqsave(&g_usbdev.lock);
-  sched_lock();
   avr_genwakeup();
   spin_unlock_irqrestore(&g_usbdev.lock, flags);
-  sched_unlock();
   return OK;
 }
 
@@ -2910,7 +2901,6 @@ void avr_usbuninitialize(void)
   /* Disconnect device */
 
   flags = spin_lock_irqsave(&g_usbdev.lock);
-  sched_lock();
   avr_pullup(&g_usbdev.usbdev, false);
   g_usbdev.usbdev.speed = USB_SPEED_UNKNOWN;
 
@@ -2923,7 +2913,6 @@ void avr_usbuninitialize(void)
 
   avr_usbshutdown();
   spin_unlock_irqrestore(&g_usbdev.lock, flags);
-  sched_unlock();
 }
 
 /****************************************************************************
@@ -3039,9 +3028,7 @@ void avr_pollvbus(void)
   irqstate_t flags;
 
   flags = spin_lock_irqsave(&g_usbdev.lock);
-  sched_lock();
   avr_genvbus();
   spin_unlock_irqrestore(&g_usbdev.lock, flags);
-  sched_unlock();
 }
 #endif

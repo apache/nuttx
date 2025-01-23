@@ -48,7 +48,6 @@
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
-#include <sched.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
@@ -3209,7 +3208,6 @@ static void khci_resume(struct khci_usbdev_s *priv)
   uint32_t regval;
 
   flags = spin_lock_irqsave(&priv->lock);
-  sched_lock();
 
   /* This function is called when the USB resume interrupt occurs.
    * If using clock switching, this is the place to call out to
@@ -3251,7 +3249,6 @@ static void khci_resume(struct khci_usbdev_s *priv)
     }
 
   spin_unlock_irqrestore(&priv->lock, flags);
-  sched_unlock();
 }
 
 /****************************************************************************
@@ -3537,7 +3534,6 @@ static int khci_epdisable(struct usbdev_ep_s *ep)
   /* Cancel any ongoing activity */
 
   flags = spin_lock_irqsave(&privep->dev->lock);
-  sched_lock();
   khci_cancelrequests(privep, -ESHUTDOWN);
 
   /* Disable the endpoint */
@@ -3555,7 +3551,6 @@ static int khci_epdisable(struct usbdev_ep_s *ep)
     }
 
   spin_unlock_irqrestore(&privep->dev->lock, flags);
-  sched_unlock();
   return OK;
 }
 
@@ -3655,7 +3650,6 @@ static int khci_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   privreq->inflight[1] = 0;
 #endif
   flags                = spin_lock_irqsave(&priv->lock);
-  sched_lock();
 
   /* Add the new request to the request queue for the OUT endpoint */
 
@@ -3700,7 +3694,6 @@ static int khci_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
     }
 
   spin_unlock_irqrestore(&priv->lock, flags);
-  sched_unlock();
   return ret;
 }
 
@@ -3724,10 +3717,8 @@ static int khci_epcancel(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   usbtrace(TRACE_EPCANCEL, USB_EPNO(ep->eplog));
 
   flags = spin_lock_irqsave(&privep->dev->lock);
-  sched_lock();
   khci_cancelrequests(privep, -EAGAIN);
   spin_unlock_irqrestore(&privep->dev->lock, flags);
-  sched_unlock();
   return OK;
 }
 
@@ -3935,7 +3926,6 @@ static int khci_epstall(struct usbdev_ep_s *ep, bool resume)
   /* STALL or RESUME the endpoint */
 
   flags = spin_lock_irqsave(&privep->dev->lock);
-  sched_lock();
 
   /* Special case EP0.  When we stall EP0 we have to stall both the IN and
    * OUT BDTs.
@@ -3965,7 +3955,6 @@ static int khci_epstall(struct usbdev_ep_s *ep, bool resume)
     }
 
   spin_unlock_irqrestore(&privep->dev->lock, flags);
-  sched_unlock();
   return ret;
 }
 
@@ -4615,7 +4604,6 @@ void arm_usbuninitialize(void)
   /* Disconnect the device */
 
   flags = spin_lock_irqsave(&priv->lock);
-  sched_lock();
 
   khci_swreset(priv);
 
@@ -4640,7 +4628,6 @@ void arm_usbuninitialize(void)
   putreg32(regval, KINETIS_SIM_SCGC4);
 
   spin_unlock_irqrestore(&priv->lock, flags);
-  sched_unlock();
 }
 
 /****************************************************************************
@@ -4742,7 +4729,6 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
    */
 
   flags = spin_lock_irqsave(&priv->lock);
-  sched_lock();
   khci_swreset(priv);
   kinetis_usbpullup(&priv->usbdev, false);
   khci_hwreset(priv);
@@ -4764,7 +4750,6 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
   khci_swinitialize(priv);
 
   spin_unlock_irqrestore(&priv->lock, flags);
-  sched_unlock();
   return OK;
 }
 #endif /* CONFIG_USBDEV */

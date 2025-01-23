@@ -35,7 +35,6 @@
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
-#include <sched.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
@@ -2942,7 +2941,6 @@ static int stm32l4_epdisable(struct usbdev_ep_s *ep)
   /* Cancel any ongoing activity */
 
   flags = spin_lock_irqsave(&privep->dev->lock);
-  sched_lock();
   stm32l4_cancelrequests(privep);
 
   /* Disable TX; disable RX */
@@ -2952,7 +2950,6 @@ static int stm32l4_epdisable(struct usbdev_ep_s *ep)
   stm32l4_seteptxstatus(epno, USB_EPR_STATTX_DIS);
 
   spin_unlock_irqrestore(&privep->dev->lock, flags);
-  sched_unlock();
   return OK;
 }
 
@@ -3049,7 +3046,6 @@ static int stm32l4_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   req->result = -EINPROGRESS;
   req->xfrd   = 0;
   flags       = spin_lock_irqsave(&priv->lock);
-  sched_lock();
 
   /* If we are stalled, then drop all requests on the floor */
 
@@ -3123,7 +3119,6 @@ static int stm32l4_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
     }
 
   spin_unlock_irqrestore(&priv->lock, flags);
-  sched_unlock();
   return ret;
 }
 
@@ -3147,10 +3142,8 @@ static int stm32l4_epcancel(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   usbtrace(TRACE_EPCANCEL, USB_EPNO(ep->eplog));
 
   flags = spin_lock_irqsave(&privep->dev->lock);
-  sched_lock();
   stm32l4_cancelrequests(privep);
   spin_unlock_irqrestore(&privep->dev->lock, flags);
-  sched_unlock();
   return OK;
 }
 
@@ -3181,7 +3174,6 @@ static int stm32l4_epstall(struct usbdev_ep_s *ep, bool resume)
   /* STALL or RESUME the endpoint */
 
   flags = spin_lock_irqsave(&priv->lock);
-  sched_lock();
   usbtrace(resume ? TRACE_EPRESUME : TRACE_EPSTALL, USB_EPNO(ep->eplog));
 
   /* Get status of the endpoint; stall the request if the endpoint is
@@ -3207,7 +3199,6 @@ static int stm32l4_epstall(struct usbdev_ep_s *ep, bool resume)
         }
 
       spin_unlock_irqrestore(&priv->lock, flags);
-      sched_unlock();
       return -ENODEV;
     }
 
@@ -3294,7 +3285,6 @@ static int stm32l4_epstall(struct usbdev_ep_s *ep, bool resume)
     }
 
   spin_unlock_irqrestore(&priv->lock, flags);
-  sched_unlock();
   return OK;
 }
 
@@ -3461,7 +3451,6 @@ static int stm32l4_wakeup(struct usbdev_s *dev)
    */
 
   flags = spin_lock_irqsave(&priv->lock);
-  sched_lock();
   stm32l4_initresume(priv);
   priv->rsmstate = RSMSTATE_STARTED;
 
@@ -3474,7 +3463,6 @@ static int stm32l4_wakeup(struct usbdev_s *dev)
   stm32l4_setimask(priv, USB_CNTR_ESOFM, USB_CNTR_WKUPM | USB_CNTR_SUSPM);
   stm32l4_putreg(~USB_ISTR_ESOF, STM32L4_USB_ISTR);
   spin_unlock_irqrestore(&priv->lock, flags);
-  sched_unlock();
   return OK;
 }
 
@@ -3812,7 +3800,6 @@ void arm_usbuninitialize(void)
   irqstate_t flags;
 
   flags = spin_lock_irqsave(&priv->lock);
-  sched_lock();
   usbtrace(TRACE_DEVUNINIT, 0);
 
   /* Disable and detach the USB IRQ */
@@ -3835,7 +3822,6 @@ void arm_usbuninitialize(void)
   stm32l4_pwr_enableusv(false);
 
   spin_unlock_irqrestore(&priv->lock, flags);
-  sched_unlock();
 }
 
 /****************************************************************************
@@ -3944,7 +3930,6 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
    */
 
   flags = spin_lock_irqsave(&priv->lock);
-  sched_lock();
   stm32l4_reset(priv);
 
   /* Unbind the class driver */
@@ -3967,7 +3952,6 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
 
   priv->driver = NULL;
   spin_unlock_irqrestore(&priv->lock, flags);
-  sched_unlock();
   return OK;
 }
 
