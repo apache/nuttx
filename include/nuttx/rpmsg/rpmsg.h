@@ -28,10 +28,10 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/atomic.h>
 
 #ifdef CONFIG_RPMSG
 
-#include <metal/atomic.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/rpmsg/rpmsg_ping.h>
 #include <openamp/rpmsg.h>
