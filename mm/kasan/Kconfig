@@ -12,7 +12,7 @@ config MM_KASAN
 		add -fsanitize=kernel-address to CFLAGS/CXXFLAGS too.
 
 config MM_KASAN_INSTRUMENT
-    bool
+	bool
 
 if MM_KASAN
 
@@ -39,7 +39,7 @@ config MM_KASAN_SW_TAGS
 	---help---
 		KAsan based on software tags
 
-endchoice
+endchoice # KAsan Mode
 
 config MM_KASAN_INSTRUMENT_ALL
 	bool "Enable KASan for the entire image"
