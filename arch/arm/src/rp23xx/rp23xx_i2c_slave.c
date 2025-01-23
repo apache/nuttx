@@ -37,7 +37,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/i2c/i2c_slave.h>
-#include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/kmalloc.h>
 
 #include <arch/chip/i2c_slave.h>
@@ -77,6 +77,8 @@ typedef struct rp23xx_i2c_slave_s
 
   i2c_slave_callback_t  *callback;     /* Callback function */
   void                  *callback_arg; /* Argument for callback */
+
+  spinlock_t             spinlock;     /* Spinlock */
 } rp23xx_i2c_slave_t;
 
 /****************************************************************************
@@ -123,6 +125,7 @@ rp23xx_i2c_slave_t i2c0_slave_dev =
 {
   .dev.ops      = &i2c_slaveops, /* Slave operations */
   .controller   =             0, /* I2C controller number */
+  .spinlock     = SP_UNLOCKED,   /* Spinlock */
 };
 
 #endif
@@ -133,6 +136,7 @@ rp23xx_i2c_slave_t i2c1_slave_dev =
 {
   .dev.ops      = &i2c_slaveops, /* Slave operations */
   .controller   =             1, /* I2C controller number */
+  .spinlock     = SP_UNLOCKED,   /* Spinlock */
 };
 
 #endif
@@ -312,12 +316,9 @@ static int i2c_interrupt(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-static void enable_i2c_slave(struct i2c_slave_s *dev)
+static void enable_i2c_slave_nolock(struct i2c_slave_s *dev)
 {
   rp23xx_i2c_slave_t *priv = (rp23xx_i2c_slave_t *) dev;
-  irqstate_t flags;
-
-  flags = enter_critical_section();
 
   uint32_t intr_mask =   RP23XX_I2C_IC_INTR_STAT_R_RD_REQ
                        | RP23XX_I2C_IC_INTR_STAT_R_RX_FULL
@@ -344,8 +345,15 @@ static void enable_i2c_slave(struct i2c_slave_s *dev)
 
   putreg32(RP23XX_I2C_IC_ENABLE_ENABLE,
            RP23XX_I2C_IC_ENABLE(priv->controller));
+}
 
-  leave_critical_section(flags);
+static void enable_i2c_slave(struct i2c_slave_s *dev)
+{
+  irqstate_t flags;
+
+  flags = spin_lock_irqsave(&priv->spinlock);
+  enable_i2c_slave_nolock(dev);
+  spin_unlock_irqrestore(&priv->spinlock, flags);
 }
 
 /****************************************************************************
@@ -366,7 +374,7 @@ static int my_set_own_address(struct i2c_slave_s  *dev,
                  | RP23XX_I2C_IC_CON_SPEED_FAST;
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->spinlock);
 
   putreg32(address, RP23XX_I2C_IC_SAR(priv->controller));
 
@@ -377,9 +385,9 @@ static int my_set_own_address(struct i2c_slave_s  *dev,
 
   putreg32(con, RP23XX_I2C_IC_CON(priv->controller));
 
-  enable_i2c_slave(dev);
+  enable_i2c_slave_nolock(dev);
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->spinlock, flags);
 
   return OK;
 }
@@ -399,13 +407,13 @@ static int my_write(struct i2c_slave_s  *dev,
   rp23xx_i2c_slave_t *priv = (rp23xx_i2c_slave_t *) dev;
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->spinlock);
 
   priv->tx_buffer  = buffer;
   priv->tx_buf_ptr = buffer;
   priv->tx_buf_end = priv->tx_buffer + length;
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->spinlock, flags);
 
   return OK;
 }
@@ -426,13 +434,13 @@ static int my_read(struct i2c_slave_s  *dev,
   rp23xx_i2c_slave_t *priv = (rp23xx_i2c_slave_t *) dev;
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->spinlock);
 
   priv->rx_buffer  = buffer;
   priv->rx_buf_ptr = buffer;
   priv->rx_buf_end = priv->rx_buffer + length;
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->spinlock, flags);
 
   return OK;
 }
@@ -453,12 +461,12 @@ static int my_register_callback(struct i2c_slave_s   *dev,
   rp23xx_i2c_slave_t *priv = (rp23xx_i2c_slave_t *) dev;
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->spinlock);
 
   priv->callback     = callback;
   priv->callback_arg = arg;
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->spinlock, flags);
 
   return OK;
 }

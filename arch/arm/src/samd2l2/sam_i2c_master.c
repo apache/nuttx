@@ -58,7 +58,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/wdog.h>
 #include <nuttx/clock.h>
 #include <nuttx/mutex.h>
@@ -171,6 +171,7 @@ struct sam_i2c_dev_s
   uint16_t nextflags;            /* Next message flags */
 
   mutex_t lock;               /* Only one thread can access at a time */
+  spinlock_t spinlock;        /* Spinlock */
   sem_t waitsem;              /* Wait for I2C transfer completion */
   volatile int result;        /* The result of the transfer */
   volatile int xfrd;          /* Number of bytes transfers */
@@ -284,6 +285,7 @@ static struct sam_i2c_dev_s g_i2c0 =
   },
   .attr      = &g_i2c0attr,
   .lock      = NXMUTEX_INITIALIZER,
+  .spinlock  = SP_UNLOCKED,
   .waitsem   = SEM_INITIALIZER(0),
 };
 #endif
@@ -310,6 +312,7 @@ static struct sam_i2c_dev_s g_i2c1 =
   },
   .attr      = &g_i2c1attr,
   .lock      = NXMUTEX_INITIALIZER,
+  .spinlock  = SP_UNLOCKED,
   .waitsem   = SEM_INITIALIZER(0),
 };
 #endif
@@ -337,6 +340,7 @@ static struct sam_i2c_dev_s g_i2c2 =
   },
   .attr      = &g_i2c2attr,
   .lock      = NXMUTEX_INITIALIZER,
+  .spinlock  = SP_UNLOCKED,
   .waitsem   = SEM_INITIALIZER(0),
 };
 #endif
@@ -364,6 +368,7 @@ static struct sam_i2c_dev_s g_i2c3 =
   },
   .attr      = &g_i2c3attr,
   .lock      = NXMUTEX_INITIALIZER,
+  .spinlock  = SP_UNLOCKED,
   .waitsem   = SEM_INITIALIZER(0),
 };
 #endif
@@ -391,6 +396,7 @@ static struct sam_i2c_dev_s g_i2c4 =
   },
   .attr      = &g_i2c4attr,
   .lock      = NXMUTEX_INITIALIZER,
+  .spinlock  = SP_UNLOCKED,
   .waitsem   = SEM_INITIALIZER(0),
 };
 #endif
@@ -418,6 +424,7 @@ static struct sam_i2c_dev_s g_i2c5 =
   },
   .attr      = &g_i2c5attr,
   .lock      = NXMUTEX_INITIALIZER,
+  .spinlock  = SP_UNLOCKED,
   .waitsem   = SEM_INITIALIZER(0),
 };
 #endif
@@ -1018,14 +1025,16 @@ static int sam_i2c_transfer(struct i2c_master_s *dev,
     {
       priv->msg = msgs;
       priv->nextflags = count == 0 ? 0 : msgs[1].flags;
-      flags = enter_critical_section();
+      flags = spin_lock_irqsave(&priv->spinlock);
       i2c_startmessage(priv, msgs);
 
       /* And wait for the transfers to complete.
        * Interrupts will be re-enabled while we are waiting.
        */
 
+      spin_unlock_irqrestore(&priv->spinlock, flags);
       ret = i2c_wait_for_bus(priv, msgs->length);
+      flags = spin_lock_irqsave(&priv->spinlock);
       if (ret < 0)
         {
 #if 0
@@ -1040,12 +1049,12 @@ static int sam_i2c_transfer(struct i2c_master_s *dev,
           i2c_putreg8(priv, I2C_INT_MB | I2C_INT_SB,
                       SAM_I2C_INTENCLR_OFFSET);
 
-          leave_critical_section(flags);
+          spin_unlock_irqrestore(&priv->spinlock, flags);
           nxmutex_unlock(&priv->lock);
           return ret;
         }
 
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(&priv->spinlock, flags);
 
       /* Move to the next message */
 
@@ -1169,9 +1178,9 @@ static uint32_t sam_i2c_setfrequency(struct sam_i2c_dev_s *priv,
  *
  ****************************************************************************/
 
-static void i2c_hw_initialize(struct sam_i2c_dev_s *priv, uint32_t frequency)
+static void i2c_hw_initialize_nolock(struct sam_i2c_dev_s *priv,
+                                     uint32_t frequency)
 {
-  irqstate_t flags;
   uint32_t regval;
   uint32_t ctrla = 0;
 
@@ -1179,7 +1188,6 @@ static void i2c_hw_initialize(struct sam_i2c_dev_s *priv, uint32_t frequency)
 
   /* Enable clocking to the SERCOM module in PM */
 
-  flags = enter_critical_section();
   sercom_enable(priv->attr->sercom);
 
   /* Configure the GCLKs for the SERCOM module */
@@ -1194,7 +1202,6 @@ static void i2c_hw_initialize(struct sam_i2c_dev_s *priv, uint32_t frequency)
     {
       i2cerr
        ("ERROR: Cannot initialize I2C because it is already initialized!\n");
-      leave_critical_section(flags);
       return;
     }
 
@@ -1204,7 +1211,6 @@ static void i2c_hw_initialize(struct sam_i2c_dev_s *priv, uint32_t frequency)
   if (regval & I2C_CTRLA_SWRST)
     {
       i2cerr("ERROR: Module is in RESET process!\n");
-      leave_critical_section(flags);
       return;
     }
 
@@ -1244,7 +1250,15 @@ static void i2c_hw_initialize(struct sam_i2c_dev_s *priv, uint32_t frequency)
   /* Enable SERCOM interrupts at the NVIC */
 
   up_enable_irq(priv->attr->irq);
-  leave_critical_section(flags);
+}
+
+static void i2c_hw_initialize(struct sam_i2c_dev_s *priv, uint32_t frequency)
+{
+  irqstate_t flags;
+
+  flags = spin_lock_irqsave(&priv->spinlock);
+  i2c_hw_initialize_nolock(priv, frequency);
+  spin_unlock_irqrestore(&priv->spinlock, flags);
 }
 
 /****************************************************************************
@@ -1369,7 +1383,7 @@ struct i2c_master_s *sam_i2c_master_initialize(int bus)
 
   /* Perform one-time I2C initialization */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->spinlock);
 
   /* Attach Interrupt Handler */
 
@@ -1377,14 +1391,14 @@ struct i2c_master_s *sam_i2c_master_initialize(int bus)
   if (ret < 0)
     {
       i2cerr("ERROR: Failed to attach irq %d\n", priv->attr->irq);
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(&priv->spinlock, flags);
       return NULL;
     }
 
   /* Perform repeatable I2C hardware initialization */
 
-  i2c_hw_initialize(priv, frequency);
-  leave_critical_section(flags);
+  i2c_hw_initialize_nolock(priv, frequency);
+  spin_unlock_irqrestore(&priv->spinlock, flags);
   return &priv->dev;
 }
 
