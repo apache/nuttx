@@ -389,8 +389,11 @@ SYSCALL_LOOKUP(nanosleep,                  2)
 
 /* I/O event notification facility */
 
+SYSCALL_LOOKUP(epoll_close,                1)
+SYSCALL_LOOKUP(epoll_create,               1)
 SYSCALL_LOOKUP(epoll_create1,              1)
 SYSCALL_LOOKUP(epoll_ctl,                  4)
+SYSCALL_LOOKUP(epoll_pwait,                5)
 SYSCALL_LOOKUP(epoll_wait,                 4)
 
 /* POSIX timers */
