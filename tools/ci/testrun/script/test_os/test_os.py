@@ -41,7 +41,7 @@ def test_ostest(p):
 def test_mm(p):
     if p.board in do_not_support:
         pytest.skip("unsupported at {}".format(p.board))
-    ret = p.sendCommand("mm", "TEST COMPLETE", timeout=120)
+    ret = p.sendCommand("heap", "TEST COMPLETE", timeout=120)
     assert ret == 0
 
 
