@@ -34,7 +34,6 @@
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
-#include <sched.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/spinlock.h>
@@ -877,10 +876,8 @@ static void rp2040_cancelrequests_nolock(struct rp2040_ep_s *privep)
 static void rp2040_cancelrequests(struct rp2040_ep_s *privep)
 {
   irqstate_t flags = spin_lock_irqsave(&privep->dev->lock);
-  sched_lock();
   rp2040_cancelrequests_nolock(privep);
   spin_unlock_irqrestore(&privep->dev->lock, flags);
-  sched_unlock();
 }
 
 /****************************************************************************
@@ -1536,7 +1533,6 @@ static int rp2040_epdisable(struct usbdev_ep_s *ep)
   uinfo("EP%d\n", privep->epphy);
 
   flags = spin_lock_irqsave(&privep->dev->lock);
-  sched_lock();
 
   privep->ep.maxpacket = 64;
   privep->stalled = false;
@@ -1548,7 +1544,6 @@ static int rp2040_epdisable(struct usbdev_ep_s *ep)
   rp2040_cancelrequests_nolock(privep);
 
   spin_unlock_irqrestore(&privep->dev->lock, flags);
-  sched_unlock();
 
   return OK;
 }
@@ -1642,7 +1637,6 @@ static int rp2040_epsubmit(struct usbdev_ep_s *ep,
   req->xfrd = 0;
 
   flags = spin_lock_irqsave(&privep->dev->lock);
-  sched_lock();
 
   if (privep->stalled && privep->in)
     {
@@ -1688,7 +1682,6 @@ static int rp2040_epsubmit(struct usbdev_ep_s *ep,
     }
 
   spin_unlock_irqrestore(&privep->dev->lock, flags);
-  sched_unlock();
   return ret;
 }
 
@@ -1719,10 +1712,8 @@ static int rp2040_epcancel(struct usbdev_ep_s *ep,
   /* Remove request from req_queue */
 
   flags = spin_lock_irqsave(&privep->dev->lock);
-  sched_lock();
   rp2040_cancelrequests_nolock(privep);
   spin_unlock_irqrestore(&privep->dev->lock, flags);
-  sched_unlock();
   return OK;
 }
 
@@ -1765,10 +1756,8 @@ static int rp2040_epstall_exec(struct usbdev_ep_s *ep)
   int ret;
 
   flags = spin_lock_irqsave(&priv->lock);
-  sched_lock();
   ret = rp2040_epstall_exec_nolock(ep);
   spin_unlock_irqrestore(&priv->lock, flags);
-  sched_unlock();
   return ret;
 }
 
@@ -1787,7 +1776,6 @@ static int rp2040_epstall(struct usbdev_ep_s *ep, bool resume)
   irqstate_t flags;
 
   flags = spin_lock_irqsave(&priv->lock);
-  sched_lock();
 
   if (resume)
     {
@@ -1829,7 +1817,6 @@ static int rp2040_epstall(struct usbdev_ep_s *ep, bool resume)
     }
 
   spin_unlock_irqrestore(&priv->lock, flags);
-  sched_unlock();
 
   return OK;
 }
@@ -2180,7 +2167,6 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
   usbtrace(TRACE_DEVUNREGISTER, 0);
 
   flags = spin_lock_irqsave(&priv->lock);
-  sched_lock();
 
   /* Unbind the class driver */
 
@@ -2199,7 +2185,6 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
   priv->driver = NULL;
 
   spin_unlock_irqrestore(&priv->lock, flags);
-  sched_unlock();
 
   return OK;
 }

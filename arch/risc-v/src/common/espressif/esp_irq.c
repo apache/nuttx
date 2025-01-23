@@ -28,7 +28,6 @@
 
 #include <assert.h>
 #include <debug.h>
-#include <sched.h>
 #include <errno.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -522,7 +521,6 @@ int esp_setup_irq(int source, irq_priority_t priority, int type)
   DEBUGASSERT(source >= 0 && source < ESP_NSOURCES);
 
   flags = spin_lock_irqsave(&g_irq_lock);
-  sched_lock();
 
   /* Setting up an IRQ includes the following steps:
    *    1. Allocate a CPU interrupt.
@@ -553,7 +551,6 @@ int esp_setup_irq(int source, irq_priority_t priority, int type)
     }
 
   spin_unlock_irqrestore(&g_irq_lock, flags);
-  sched_unlock();
 
   return cpuint;
 }

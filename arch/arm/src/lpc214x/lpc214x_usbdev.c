@@ -34,7 +34,6 @@
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
-#include <sched.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
@@ -747,14 +746,12 @@ static uint32_t lpc214x_usbcmd(uint16_t cmd, uint8_t data)
   /* Disable interrupt and clear CDFULL and CCEMPTY interrupt status */
 
   flags = spin_lock_irqsave(&g_usbdev.lock);
-  sched_lock();
 
   tmp = lpc214x_usbcmd_nolock(cmd, data);
 
   /* Restore the interrupt flags */
 
   spin_unlock_irqrestore(&g_usbdev.lock, flags);
-  sched_unlock();
 
   return tmp;
 }
@@ -1155,10 +1152,8 @@ static int lpc214x_wrrequest(struct lpc214x_ep_s *privep)
   int ret;
 
   irqstate_t flags = spin_lock_irqsave(&privep->dev->lock);
-  sched_lock();
   ret = lpc214x_wrrequest_nolock(privep);
   spin_unlock_irqrestore(&privep->dev->lock, flags);
-  sched_unlock();
 
   return ret;
 }
@@ -1246,10 +1241,8 @@ static void lpc214x_cancelrequests_nolock(struct lpc214x_ep_s *privep)
 static void lpc214x_cancelrequests(struct lpc214x_ep_s *privep)
 {
   irqstate_t flags = spin_lock_irqsave(&privep->dev->lock);
-  sched_lock();
   lpc214x_cancelrequests_nolock(privep);
   spin_unlock_irqrestore(&privep->dev->lock, flags);
-  sched_unlock();
 }
 
 /****************************************************************************
@@ -2736,7 +2729,6 @@ static int lpc214x_epdisable(struct usbdev_ep_s *ep)
   /* Cancel any ongoing activity */
 
   flags = spin_lock_irqsave(&privep->dev->lock);
-  sched_lock();
   lpc214x_cancelrequests_nolock(privep);
 
   /* Disable endpoint and interrupt */
@@ -2752,7 +2744,6 @@ static int lpc214x_epdisable(struct usbdev_ep_s *ep)
   lpc214x_putreg(reg, LPC214X_USBDEV_EPINTEN);
 
   spin_unlock_irqrestore(&privep->dev->lock, flags);
-  sched_unlock();
   return OK;
 }
 
@@ -2941,7 +2932,6 @@ static int lpc214x_epsubmit(struct usbdev_ep_s *ep,
   req->result = -EINPROGRESS;
   req->xfrd   = 0;
   flags       = spin_lock_irqsave(&priv->lock);
-  sched_lock();
 
   /* If we are stalled, then drop all requests on the floor */
 
@@ -2988,7 +2978,6 @@ static int lpc214x_epsubmit(struct usbdev_ep_s *ep,
     }
 
   spin_unlock_irqrestore(&priv->lock, flags);
-  sched_unlock();
   return ret;
 }
 
@@ -3017,10 +3006,8 @@ static int lpc214x_epcancel(struct usbdev_ep_s *ep,
   usbtrace(TRACE_EPCANCEL, privep->epphy);
 
   flags = spin_lock_irqsave(&privep->dev->lock);
-  sched_lock();
   lpc214x_cancelrequests_nolock(privep);
   spin_unlock_irqrestore(&privep->dev->lock, flags);
-  sched_unlock();
   return OK;
 }
 
@@ -3040,7 +3027,6 @@ static int lpc214x_epstall(struct usbdev_ep_s *ep, bool resume)
   /* STALL or RESUME the endpoint */
 
   flags = spin_lock_irqsave(&privep->dev->lock);
-  sched_lock();
   usbtrace(resume ? TRACE_EPRESUME : TRACE_EPSTALL, privep->epphy);
   lpc214x_usbcmd_nolock(CMD_USB_EP_SETSTATUS | privep->epphy,
                 (resume ? 0 : USBDEV_EPSTALL));
@@ -3053,7 +3039,6 @@ static int lpc214x_epstall(struct usbdev_ep_s *ep, bool resume)
     }
 
   spin_unlock_irqrestore(&privep->dev->lock, flags);
-  sched_unlock();
   return OK;
 }
 
@@ -3264,7 +3249,6 @@ static int lpc214x_wakeup(struct usbdev_s *dev)
   usbtrace(TRACE_DEVWAKEUP, (uint16_t)g_usbdev.devstatus);
 
   flags = spin_lock_irqsave(&priv->lock);
-  sched_lock();
   if (DEVSTATUS_CONNECT(g_usbdev.devstatus))
     {
       arg |= USBDEV_DEVSTATUS_CONNECT;
@@ -3272,7 +3256,6 @@ static int lpc214x_wakeup(struct usbdev_s *dev)
 
   lpc214x_usbcmd_nolock(CMD_USB_DEV_SETSTATUS, arg);
   spin_unlock_irqrestore(&priv->lock, flags);
-  sched_unlock();
   return OK;
 }
 
@@ -3494,7 +3477,6 @@ void arm_usbuninitialize(void)
   /* Disconnect device */
 
   flags = spin_lock_irqsave(&priv->lock);
-  sched_lock();
   lpc214x_pullup_nolock(&priv->usbdev, false);
   priv->usbdev.speed = USB_SPEED_UNKNOWN;
   lpc214x_usbcmd_nolock(CMD_USB_DEV_CONFIG, 0);
@@ -3510,7 +3492,6 @@ void arm_usbuninitialize(void)
   reg &= ~LPC214X_PCONP_PCUSB;
   lpc214x_putreg(reg, LPC214X_PCON_PCONP);
   spin_unlock_irqrestore(&priv->lock, flags);
-  sched_unlock();
 }
 
 /****************************************************************************
