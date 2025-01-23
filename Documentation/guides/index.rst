@@ -20,6 +20,7 @@ Guides
   citests.rst
   zerolatencyinterrupts.rst
   kasan.rst
+  fortify.rst
   nestedinterrupts.rst
   cortexmhardfaults.rst
   coredump.rst
