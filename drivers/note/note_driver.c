@@ -1519,9 +1519,9 @@ void sched_note_event_ip(uint32_t tag, uintptr_t ip, uint8_t event,
           formatted = true;
           note = (FAR struct note_event_s *)data;
           length = SIZEOF_NOTE_EVENT(len);
-          if (length > sizeof(data))
+          if (length >= sizeof(data))
             {
-              length = sizeof(data);
+              length = sizeof(data) - 1;
             }
 
           note_common(tcb, &note->nev_cmn, length, event);
