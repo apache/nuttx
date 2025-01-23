@@ -46,6 +46,9 @@
 #  define kasan_stop()
 #  define kasan_debugpoint(t,a,s) 0
 #  define kasan_init_early()
+#  define kasan_bypass(bypass)
+#  define kasan_bypass_save()          0
+#  define kasan_bypass_restore(state)  UNUSED(state)
 #else
 
 #  define kasan_init_early() kasan_stop()
@@ -159,7 +162,11 @@ FAR void *kasan_reset_tag(FAR const void *addr);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_MM_KASAN_INSTRUMENT
 void kasan_start(void);
+#else
+#  define kasan_start()
+#endif
 
 /****************************************************************************
  * Name: kasan_stop
@@ -177,7 +184,11 @@ void kasan_start(void);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_MM_KASAN_INSTRUMENT
 void kasan_stop(void);
+#else
+#  define kasan_stop()
+#endif
 
 /****************************************************************************
  * Name: kasan_debugpoint
@@ -200,6 +211,32 @@ void kasan_stop(void);
  ****************************************************************************/
 
 int kasan_debugpoint(int type, FAR void *addr, size_t size);
+
+#ifndef CONFIG_MM_KASAN_HW_TAGS
+#  define kasan_bypass(bypass)
+#  define kasan_bypass_save()          0
+#  define kasan_bypass_restore(state)  UNUSED(state)
+#else
+
+/****************************************************************************
+ * Name: kasan_bypass
+ ****************************************************************************/
+
+void kasan_bypass(bool bypass);
+
+/****************************************************************************
+ * Name: kasan_bypass_save
+ ****************************************************************************/
+
+bool kasan_bypass_save(void);
+
+/****************************************************************************
+ * Name: kasan_bypass_restore
+ ****************************************************************************/
+
+void kasan_bypass_restore(bool state);
+
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus

@@ -42,6 +42,8 @@
 #  include "generic.c"
 #elif defined(CONFIG_MM_KASAN_SW_TAGS)
 #  include "sw_tags.c"
+#elif defined(CONFIG_MM_KASAN_HW_TAGS)
+#  include "hw_tags.c"
 #else
 #  define kasan_is_poisoned(addr, size) false
 #endif
@@ -95,6 +97,8 @@
 #endif
 
 #define KASAN_INIT_VALUE 0xcafe
+
+#ifdef CONFIG_MM_KASAN_INSTRUMENT
 
 /****************************************************************************
  * Private Types
@@ -405,3 +409,6 @@ DEFINE_ASAN_LOAD_STORE(2)
 DEFINE_ASAN_LOAD_STORE(4)
 DEFINE_ASAN_LOAD_STORE(8)
 DEFINE_ASAN_LOAD_STORE(16)
+
+#endif /* CONFIG_MM_KASAN_INSTRUMENT */
+

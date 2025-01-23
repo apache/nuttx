@@ -1,5 +1,5 @@
 /****************************************************************************
- * mm/mm_heap/mm_malloc_size.c
+ * arch/arm64/include/memtag.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,59 +20,39 @@
  *
  ****************************************************************************/
 
-/****************************************************************************
- * Included Files
- ****************************************************************************/
-
-#include <nuttx/config.h>
-
-#include <assert.h>
-#include <debug.h>
-
-#include <nuttx/mm/kasan.h>
-#include <nuttx/mm/mm.h>
-
-#include "mm_heap/mm.h"
+#ifndef ___ARCH_ARM64_INCLUDE_MEMTAG_H
+#define ___ARCH_ARM64_INCLUDE_MEMTAG_H
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
-size_t mm_malloc_size(FAR struct mm_heap_s *heap, FAR void *mem)
-{
-  FAR struct mm_freenode_s *node;
-  size_t size;
-  bool flag;
+/* Initialize MTE settings and enable memory tagging */
 
-  flag = kasan_bypass_save();
-#ifdef CONFIG_MM_HEAP_MEMPOOL
-  if (heap->mm_mpool)
-    {
-      size = mempool_multiple_alloc_size(heap->mm_mpool, mem);
-      if (size >= 0)
-        {
-          return size;
-        }
-    }
-#endif
+void up_memtag_init(void);
 
-  /* Protect against attempts to query a NULL reference */
+/* Check if MTE is enabled */
 
-  if (!mem)
-    {
-      return 0;
-    }
+bool up_memtag_is_enable(void);
 
-  /* Map the memory chunk into a free node */
+/* Set MTE state */
 
-  node = (FAR struct mm_freenode_s *)((FAR char *)mem - MM_SIZEOF_ALLOCNODE);
+void up_memtag_bypass(bool bypass);
 
-  /* Sanity check against double-frees */
+/* Set memory tags for a given memory range */
 
-  DEBUGASSERT(MM_NODE_IS_ALLOC(node));
+void up_memtag_set_tag(const void *addr, size_t size);
 
-  size = MM_SIZEOF_NODE(node) - MM_ALLOCNODE_OVERHEAD;
+/* Get a random label based on the address through the mte register */
 
-  kasan_bypass_restore(flag);
-  return size;
-}
+uint8_t up_memtag_get_random_tag(const void *addr);
+
+/* Get the address without label */
+
+void *up_memtag_get_untagged_addr(const void *addr);
+
+/* Get the address with label */
+
+void *up_memtag_get_tagged_addr(const void *addr, uint8_t tag);
+
+#endif /* ___ARCH_ARM64_INCLUDE_MEMTAG_H */
