@@ -67,8 +67,6 @@ static uint64_t *common_handler(int irq, uint64_t *regs)
   struct tcb_s **running_task = &g_running_tasks[this_cpu()];
   struct tcb_s *tcb;
 
-  (*running_task)->xcp.regs = regs;
-
   /* Current regs non-zero indicates that we are processing an interrupt;
    * g_current_regs is also used to manage interrupt level context switches.
    *
@@ -126,14 +124,8 @@ static uint64_t *common_handler(int irq, uint64_t *regs)
   /* Clear irq flag */
 
   up_set_interrupt_context(false);
-  regs = tcb->xcp.regs;
 
-  /* (*running_task)->xcp.regs is about to become invalid
-   * and will be marked as NULL to avoid misusage.
-   */
-
-  (*running_task)->xcp.regs = NULL;
-  return regs;
+  return tcb->xcp.regs;
 }
 #endif
 
