@@ -97,8 +97,8 @@ if(CONFIG_BUILTIN_COMPILER_RT)
   endif()
 
   if(NOT CONFIG_COVERAGE_NONE)
-    target_compile_options(rt.builtins -fno-profile-instr-generate
-                           -fno-coverage-mapping)
+    target_compile_options(rt.builtins PRIVATE -fno-profile-instr-generate
+                                               -fno-coverage-mapping)
   endif()
 
   target_sources(rt.builtins PRIVATE ${RT_BUILTINS_SRCS})
