@@ -287,6 +287,7 @@ bool host_uart_checkin(int fd);
 bool host_uart_checkout(int fd);
 int  host_uart_setcflag(int fd, unsigned int cflag);
 int  host_uart_getcflag(int fd, unsigned int *cflag);
+void host_printf(const char *fmt, ...);
 
 /* sim_deviceimage.c ********************************************************/
 
