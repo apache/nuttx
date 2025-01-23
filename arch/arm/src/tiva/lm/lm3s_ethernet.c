@@ -40,7 +40,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
-#include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/netdev.h>
@@ -191,6 +191,7 @@ struct tiva_driver_s
   struct wdog_s ld_txtimeout;  /* TX timeout timer */
   struct work_s ld_irqwork;    /* For deferring interrupt work to the work queue */
   struct work_s ld_pollwork;   /* For deferring poll work to the work queue */
+  spinlock_t ld_lock;          /* Spinlock */
 
   /* This holds the information visible to the NuttX network */
 
@@ -353,7 +354,7 @@ static void tiva_ethreset(struct tiva_driver_s *priv)
 
   /* Make sure that clocking is enabled for the Ethernet&PHY peripherals */
 
-  flags   = enter_critical_section();
+  flags   = spin_lock_irqsave(&priv->ld_lock);
   regval  = getreg32(TIVA_SYSCON_RCGC2);
   regval |= (SYSCON_RCGC2_EMAC0 | SYSCON_RCGC2_EPHY0);
   putreg32(regval, TIVA_SYSCON_RCGC2);
@@ -400,7 +401,7 @@ static void tiva_ethreset(struct tiva_driver_s *priv)
 
   regval = tiva_ethin(priv, TIVA_MAC_RIS_OFFSET);
   tiva_ethout(priv, TIVA_MAC_IACK_OFFSET, regval);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->ld_lock, flags);
 }
 
 /****************************************************************************
@@ -510,7 +511,7 @@ static int tiva_transmit(struct tiva_driver_s *priv)
 
   /* Verify that the hardware is ready to send another packet */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->ld_lock);
   if ((tiva_ethin(priv, TIVA_MAC_TR_OFFSET) & MAC_TR_NEWTX) == 0)
     {
       /* Increment statistics */
@@ -582,7 +583,7 @@ static int tiva_transmit(struct tiva_driver_s *priv)
       ret = OK;
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->ld_lock, flags);
   return ret;
 }
 
@@ -1140,7 +1141,7 @@ static int tiva_ifup(struct net_driver_s *dev)
 
   /* Enable and reset the Ethernet controller */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->ld_lock);
   tiva_ethreset(priv);
 
   /* Set the management clock divider register for access to the PHY
@@ -1259,7 +1260,7 @@ static int tiva_ifup(struct net_driver_s *dev)
   tiva_ethout(priv, TIVA_MAC_IA1_OFFSET, regval);
 
   priv->ld_bifup = true;
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->ld_lock, flags);
   return OK;
 }
 
@@ -1292,7 +1293,7 @@ static int tiva_ifdown(struct net_driver_s *dev)
 
   /* Cancel the TX timeout timers */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->ld_lock);
   wd_cancel(&priv->ld_txtimeout);
 
   /* Disable the Ethernet interrupt */
@@ -1341,7 +1342,7 @@ static int tiva_ifdown(struct net_driver_s *dev)
   /* The interface is now DOWN */
 
   priv->ld_bifup = false;
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->ld_lock, flags);
   return OK;
 }
 
@@ -1546,6 +1547,8 @@ static inline int tiva_ethinitialize(int intf)
   priv->ld_base          = ??;             /* Ethernet controller base address */
   priv->ld_irq           = ??;             /* Ethernet controller IRQ number */
 #endif
+
+  spin_lock_init(&priv->ld_lock);          /* Initialize spinlock */
 
 #ifdef CONFIG_TIVA_BOARDMAC
   /* If the board can provide us with a MAC address, get the address

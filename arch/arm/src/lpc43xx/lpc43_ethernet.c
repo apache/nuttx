@@ -39,7 +39,7 @@
 #include <arpa/inet.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/queue.h>
 #include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
@@ -512,6 +512,7 @@ struct lpc43_ethmac_s
   struct wdog_s        txtimeout;   /* TX timeout timer */
   struct work_s        irqwork;     /* For deferring work to the work queue */
   struct work_s        pollwork;    /* For deferring work to the work queue */
+  spinlock_t           lock;        /* Spinlock */
 
   /* This holds the information visible to the NuttX network */
 
@@ -2126,7 +2127,7 @@ static int lpc43_ifdown(struct net_driver_s *dev)
 
   /* Disable the Ethernet interrupt */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
   up_disable_irq(LPC43M4_IRQ_ETHERNET);
 
   /* Cancel the TX timeout timers */
@@ -2143,7 +2144,7 @@ static int lpc43_ifdown(struct net_driver_s *dev)
   /* Mark the device "down" */
 
   priv->ifup = false;
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
   return OK;
 }
 
@@ -3606,6 +3607,8 @@ static inline int lpc43_ethinitialize(void)
   priv->dev.d_ioctl   = lpc43_ioctl;    /* Support PHY ioctl() calls */
 #endif
   priv->dev.d_private = &g_lpc43ethmac; /* Used to recover private state from dev */
+
+  spin_lock_init(&priv->lock);          /* Initialize spinlock */
 
   /* Configure GPIO pins to support Ethernet */
 
