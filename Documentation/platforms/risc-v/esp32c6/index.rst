@@ -282,7 +282,7 @@ eFuse            Yes
 GPIO             Yes
 HMAC             No
 I2C              Yes
-I2S              No
+I2S              Yes
 Int. Temp.       Yes
 LED              No
 LED_PWM          Yes

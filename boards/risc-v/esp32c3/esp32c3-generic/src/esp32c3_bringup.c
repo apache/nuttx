@@ -73,6 +73,10 @@
 #  include "esp_board_rmt.h"
 #endif
 
+#ifdef CONFIG_ESPRESSIF_I2S
+#  include "esp_board_i2s.h"
+#endif
+
 #ifdef CONFIG_ESPRESSIF_SPI
 #  include "espressif/esp_spi.h"
 #  include "esp_board_spidev.h"
@@ -314,6 +318,16 @@ int esp_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: board_rmt_txinitialize() failed: %d\n", ret);
+    }
+#endif
+
+#if defined(CONFIG_ESPRESSIF_I2S)
+  /* Configure I2S peripheral interfaces */
+
+  ret = board_i2s_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize I2S driver: %d\n", ret);
     }
 #endif
 
