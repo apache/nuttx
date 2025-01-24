@@ -39,4 +39,11 @@
 #  define BOARD_CLOCK_FREQUENCY 80000000
 #endif
 
+/* Peripherals definitions **************************************************/
+
+#ifdef CONFIG_AUDIO_ES8311
+#  define ES8311_I2C_FREQ       100000
+#  define ES8311_I2C_ADDR       0x18
+#endif
+
 #endif /* __BOARDS_XTENSA_ESP32S3_ESP32S3_LCD_EV_INCLUDE_BOARD_H */
