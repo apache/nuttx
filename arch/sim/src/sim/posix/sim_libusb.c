@@ -404,6 +404,10 @@ static int host_libusb_ep0outhandle(struct host_libusb_hostdev_s *dev,
             ret |= host_uninterruptible(libusb_claim_interface,
                                         dev->handle, 0);
           }
+        else if (ret == LIBUSB_ERROR_NOT_FOUND)
+          {
+            return LIBUSB_SUCCESS;
+          }
         break;
       case USB_REQ_SET_INTERFACE: /* TODO */
         break;
