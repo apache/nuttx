@@ -531,12 +531,11 @@ struct i2c_master_s *lpc17_40_i2cbus_initialize(int port)
   irqstate_t flags;
   uint32_t regval;
 
-  flags = spin_lock_irqsave(&priv->spinlock);
-
 #ifdef CONFIG_LPC17_40_I2C0
   if (port == 0)
     {
       priv        = &g_i2c0dev;
+      flags       = spin_lock_irqsave(&priv->spinlock);
       priv->base  = LPC17_40_I2C0_BASE;
       priv->irqid = LPC17_40_IRQ_I2C0;
 
@@ -559,6 +558,7 @@ struct i2c_master_s *lpc17_40_i2cbus_initialize(int port)
       /* Set default frequency */
 
       lpc17_40_i2c_setfrequency(priv, CONFIG_LPC17_40_I2C0_FREQUENCY);
+      spin_unlock_irqrestore(&priv->spinlock, flags);
     }
   else
 #endif
@@ -566,6 +566,7 @@ struct i2c_master_s *lpc17_40_i2cbus_initialize(int port)
   if (port == 1)
     {
       priv        = &g_i2c1dev;
+      flags       = spin_lock_irqsave(&priv->spinlock);
       priv->base  = LPC17_40_I2C1_BASE;
       priv->irqid = LPC17_40_IRQ_I2C1;
 
@@ -588,6 +589,7 @@ struct i2c_master_s *lpc17_40_i2cbus_initialize(int port)
       /* Set default frequency */
 
       lpc17_40_i2c_setfrequency(priv, CONFIG_LPC17_40_I2C1_FREQUENCY);
+      spin_unlock_irqrestore(&priv->spinlock, flags);
     }
   else
 #endif
@@ -595,6 +597,7 @@ struct i2c_master_s *lpc17_40_i2cbus_initialize(int port)
   if (port == 2)
     {
       priv        = &g_i2c2dev;
+      flags       = spin_lock_irqsave(&priv->spinlock);
       priv->base  = LPC17_40_I2C2_BASE;
       priv->irqid = LPC17_40_IRQ_I2C2;
 
@@ -617,16 +620,14 @@ struct i2c_master_s *lpc17_40_i2cbus_initialize(int port)
       /* Set default frequency */
 
       lpc17_40_i2c_setfrequency(priv, CONFIG_LPC17_40_I2C2_FREQUENCY);
+      spin_unlock_irqrestore(&priv->spinlock, flags);
     }
   else
 #endif
     {
-      spin_unlock_irqrestore(&priv->spinlock, flags);
       i2cerr("ERROR: LPC I2C Only supports ports 0, 1 and 2\n");
       return NULL;
     }
-
-  spin_unlock_irqrestore(&priv->spinlock, flags);
 
   putreg32(I2C_CONSET_I2EN, priv->base + LPC17_40_I2C_CONSET_OFFSET);
 
