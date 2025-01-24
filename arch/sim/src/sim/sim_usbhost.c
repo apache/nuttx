@@ -80,7 +80,7 @@ struct sim_epinfo_s
   uint16_t xfrtype:2;          /* See USB_EP_ATTR_XFER_* definitions in usb.h */
   uint16_t speed:2;            /* See USB_*_SPEED definitions */
   int result;                  /* The result of the transfer */
-  uint32_t xfrd;               /* On completion, will hold the number of bytes transferred */
+  ssize_t xfrd;                /* On completion, will hold the number of bytes transferred */
   sem_t iocsem;                /* Semaphore used to wait for transfer completion */
 };
 
@@ -495,6 +495,23 @@ static int sim_usbhost_iofree(struct usbhost_driver_s *drvr,
 }
 
 /****************************************************************************
+ * Name: sim_usbhost_transfer_cb
+ ****************************************************************************/
+
+static void sim_usbhost_transfer_cb(void *arg, ssize_t result)
+{
+  struct sim_epinfo_s *epinfo = arg;
+
+  if (result < 0)
+    {
+      uerr("transfer result: %d\n", result);
+    }
+
+  epinfo->xfrd = result;
+  nxsem_post(&epinfo->iocsem);
+}
+
+/****************************************************************************
  * Name: sim_usbhost_ctrlin
  ****************************************************************************/
 
@@ -508,8 +525,6 @@ static int sim_usbhost_ctrlin(struct usbhost_driver_s *drvr,
   struct host_usb_ctrlreq_s hostreq;
   struct host_usb_datareq_s *datareq;
   uint16_t len;
-  ssize_t nbytes;
-  sem_t iocsem;
 
   DEBUGASSERT(ep0info != NULL && req != NULL);
 
@@ -531,30 +546,28 @@ static int sim_usbhost_ctrlin(struct usbhost_driver_s *drvr,
 
   sim_usbhost_getctrlreq(&hostreq, req);
 
-  nxsem_init(&iocsem, 0, 0);
+  nxsem_init(&ep0info->iocsem, 0, 0);
 
   datareq->addr = 0;
   datareq->data = buffer;
   datareq->len = len;
-  datareq->priv = &iocsem;
+  datareq->priv = ep0info;
+  datareq->callback = sim_usbhost_transfer_cb;
 
   /* We must have exclusive access to the data structures. */
 
   nxmutex_lock(&priv->lock);
 
-  nbytes = host_usbhost_ep0trans(&hostreq, datareq);
+  host_usbhost_ep0trans(&hostreq, datareq);
 
   nxmutex_unlock(&priv->lock);
 
   /* Wait for transfer completion */
 
-  nxsem_wait(&iocsem);
+  nxsem_wait(&ep0info->iocsem);
+  nxsem_destroy(&ep0info->iocsem);
 
-  nbytes = datareq->xfer;
-
-  sim_usbhost_freerq(datareq);
-
-  return (int)nbytes;
+  return ep0info->xfrd;
 }
 
 /****************************************************************************
@@ -570,18 +583,18 @@ static int sim_usbhost_ctrlout(struct usbhost_driver_s *drvr,
 }
 
 /****************************************************************************
- * Name: sim_usbhost_transfer
+ * Name: sim_usbhost_asynch
  ****************************************************************************/
 
-static ssize_t sim_usbhost_transfer(struct usbhost_driver_s *drvr,
-                                    usbhost_ep_t ep, uint8_t *buffer,
-                                    size_t buflen)
+static int sim_usbhost_asynch(struct usbhost_driver_s *drvr,
+                              usbhost_ep_t ep, uint8_t *buffer,
+                              size_t buflen, usbhost_asynch_t callback,
+                              void *arg)
 {
   struct sim_usbhost_s *priv = (struct sim_usbhost_s *)drvr;
   struct sim_epinfo_s *epinfo = (struct sim_epinfo_s *)ep;
   struct host_usb_datareq_s *datareq;
-  sem_t iocsem;
-  int nbytes;
+  int ret;
 
   DEBUGASSERT(epinfo && buffer && buflen > 0);
 
@@ -592,33 +605,60 @@ static ssize_t sim_usbhost_transfer(struct usbhost_driver_s *drvr,
       return -ENOMEM;
     }
 
-  nbytes = MIN(buflen, epinfo->maxpacket);
-
-  nxsem_init(&iocsem, 0, 0);
-
   datareq->addr = (epinfo->dirin << 7) + epinfo->epno;
+  datareq->len = MIN(buflen, epinfo->maxpacket);
   datareq->xfrtype = epinfo->xfrtype;
+  datareq->callback = callback;
   datareq->data = buffer;
-  datareq->len = nbytes;
-  datareq->priv = &iocsem;
+  datareq->priv = arg;
 
   /* We must have exclusive access to and data structures. */
 
   nxmutex_lock(&priv->lock);
 
-  nbytes = host_usbhost_eptrans(datareq);
+  ret = host_usbhost_eptrans(datareq);
 
   nxmutex_unlock(&priv->lock);
 
+  if (ret < 0)
+    {
+      uerr("host_usbhost_eptrans fail: %d\n", ret);
+      sim_usbhost_freerq(datareq);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: sim_usbhost_transfer
+ ****************************************************************************/
+
+static ssize_t sim_usbhost_transfer(struct usbhost_driver_s *drvr,
+                                    usbhost_ep_t ep, uint8_t *buffer,
+                                    size_t buflen)
+{
+  struct sim_epinfo_s *epinfo = (struct sim_epinfo_s *)ep;
+  int ret;
+
+  nxsem_init(&epinfo->iocsem, 0, 0);
+
+  epinfo->xfrd = 0;
+
+  ret = sim_usbhost_asynch(drvr, ep, buffer, buflen,
+                           sim_usbhost_transfer_cb,
+                           epinfo);
+  if (ret < 0)
+    {
+      nxsem_destroy(&epinfo->iocsem);
+      return ret;
+    }
+
   /* Wait for transfer completion */
 
-  nxsem_wait(&iocsem);
+  nxsem_wait(&epinfo->iocsem);
+  nxsem_destroy(&epinfo->iocsem);
 
-  nbytes = datareq->xfer;
-
-  sim_usbhost_freerq(datareq);
-
-  return (ssize_t)nbytes;
+  return epinfo->xfrd;
 }
 
 /****************************************************************************
@@ -652,8 +692,11 @@ static void sim_usbhost_rqcomplete(struct sim_usbhost_s *drvr)
 
   while ((datareq = host_usbhost_getcomplete()) != NULL)
     {
-      sem_t *iocsem = datareq->priv;
-      nxsem_post(iocsem);
+      usbhost_asynch_t callback = datareq->callback;
+      ssize_t result = datareq->success ? datareq->xfer : -EIO;
+
+      callback(datareq->priv, result);
+      sim_usbhost_freerq(datareq);
     }
 }
 
@@ -693,6 +736,9 @@ int sim_usbhost_initialize(void)
   priv->drvr.transfer       = sim_usbhost_transfer;
   priv->drvr.cancel         = sim_usbhost_cancel;
   priv->drvr.disconnect     = sim_usbhost_disconnect;
+#ifdef CONFIG_USBHOST_ASYNCH
+  priv->drvr.asynch         = sim_usbhost_asynch;
+#endif
 
   /* Initialize the public port representation */
 
