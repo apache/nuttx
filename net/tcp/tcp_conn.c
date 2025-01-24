@@ -171,7 +171,17 @@ static FAR struct tcp_conn_s *
         }
     }
 
-  return NULL;
+/* Check if this port number is in use by any listen TCP connection.
+ * Since tcp_findlistener only uses laddr internally, and laddr offset is
+ * 0 in the ip_binding_u union, ipaddr can be passed in through directly.
+ */
+
+#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
+  return tcp_findlistener((FAR union ip_binding_u *)ipaddr,
+                          portno, domain);
+#else
+  return tcp_findlistener((FAR union ip_binding_u *)ipaddr, portno);
+#endif
 }
 
 /****************************************************************************
