@@ -107,6 +107,10 @@
 #define note_vprintf(drv, ip, fmt, va)                                       \
   ((drv)->ops->vprintf && ((drv)->ops->vprintf(drv, ip, fmt, va), true))
 
+#define BUFFER_SIZE 256
+static_assert(BUFFER_SIZE >= sizeof(struct note_event_s),
+              "Buffer size too small");
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -1498,7 +1502,7 @@ void sched_note_event_ip(uint32_t tag, uintptr_t ip, uint8_t event,
   FAR struct note_event_s *note;
   FAR struct note_driver_s **driver;
   bool formatted = false;
-  char data[256];
+  char data[BUFFER_SIZE];
   unsigned int length;
   FAR struct tcb_s *tcb = running_task();
 
@@ -1552,7 +1556,7 @@ void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
   FAR struct note_printf_s *note;
   FAR struct note_driver_s **driver;
   bool formatted = false;
-  uint8_t data[256];
+  uint8_t data[BUFFER_SIZE];
   size_t length = 0;
   FAR struct tcb_s *tcb = running_task();
 
