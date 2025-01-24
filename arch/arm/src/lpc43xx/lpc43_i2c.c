@@ -459,10 +459,7 @@ struct i2c_master_s *lpc43_i2cbus_initialize(int port)
       return NULL;
     }
 
-  irqstate_t flags;
   uint32_t regval;
-
-  flags = spin_lock_irqsave(&priv->spinlock);
 
 #ifdef CONFIG_LPC43_I2C0
   if (port == 0)
@@ -523,11 +520,8 @@ struct i2c_master_s *lpc43_i2cbus_initialize(int port)
   else
 #endif
     {
-      spin_unlock_irqrestore(&priv->spinlock, flags);
       return NULL;
     }
-
-  spin_unlock_irqrestore(&priv->spinlock, flags);
 
   putreg32(I2C_CONSET_I2EN, priv->base + LPC43_I2C_CONSET_OFFSET);
 
