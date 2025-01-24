@@ -27,7 +27,6 @@
 #include <nuttx/config.h>
 
 #include <unistd.h>
-#include <sched.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -205,9 +204,7 @@ static int work_thread(int argc, FAR char *argv[])
           while (kworker->wait_count > 0)
             {
               kworker->wait_count--;
-              sched_lock();
               nxsem_post(&kworker->wait);
-              sched_unlock();
             }
         }
 
