@@ -111,7 +111,8 @@ FAR struct tcp_conn_s *tcp_findlistener(FAR union ip_binding_u *uaddr,
           if (domain == PF_INET6)
 #  endif
             {
-              if (net_ipv6addr_cmp(conn->u.ipv6.laddr, uaddr->ipv6.laddr) ||
+              if (net_ipv6addr_cmp(uaddr->ipv6.laddr, g_ipv6_unspecaddr) ||
+                  net_ipv6addr_cmp(conn->u.ipv6.laddr, uaddr->ipv6.laddr) ||
                   net_ipv6addr_cmp(conn->u.ipv6.laddr, g_ipv6_unspecaddr))
                 {
                   /* Yes.. we found a listener on this port */
@@ -126,7 +127,8 @@ FAR struct tcp_conn_s *tcp_findlistener(FAR union ip_binding_u *uaddr,
           if (domain == PF_INET)
 #  endif
             {
-              if (net_ipv4addr_cmp(conn->u.ipv4.laddr, uaddr->ipv4.laddr) ||
+              if (net_ipv4addr_cmp(uaddr->ipv4.laddr, INADDR_ANY) ||
+                  net_ipv4addr_cmp(conn->u.ipv4.laddr, uaddr->ipv4.laddr) ||
                   net_ipv4addr_cmp(conn->u.ipv4.laddr, INADDR_ANY))
                 {
                   /* Yes.. we found a listener on this port */
