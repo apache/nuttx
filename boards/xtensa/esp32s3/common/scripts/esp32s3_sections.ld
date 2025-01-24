@@ -438,9 +438,64 @@ SECTIONS
     _sheap = ABSOLUTE(.);
   } >dram0_0_seg AT>ROM
 
-  _image_drom_vma = ADDR(.flash.rodata);
-  _image_drom_lma = LOADADDR(.flash.rodata);
-  _image_drom_size = LOADADDR(.flash.rodata) + SIZEOF(.flash.rodata) - _image_drom_lma;
+  /* The alignment of the ".flash.text" output section is forced to
+   * 0x00010000 (64KB) to ensure that it will be allocated at the beginning
+   * of the next available Flash block.
+   * This is required to meet the following constraint from the external
+   * flash MMU:
+   *    VMA % 64KB == LMA % 64KB
+   * i.e. the lower 16 bits of both the virtual address (address seen by the
+   * CPU) and the load address (physical address of the external flash) must
+   * be equal.
+   */
+
+  .flash.text : ALIGN(0x00010000)
+  {
+    _stext = .;
+    _instruction_reserved_start = ABSOLUTE(.);
+
+    *(.literal .text .literal.* .text.* .stub .gnu.warning .gnu.linkonce.literal.* .gnu.linkonce.t.*.literal .gnu.linkonce.t.*)
+    *(.irom0.text) /* catch stray ICACHE_RODATA_ATTR */
+    *(.fini.literal)
+    *(.fini)
+    *(.gnu.version)
+
+    *(EXCLUDE_FILE(*libnet80211.a *libpp.a) .wifi0iram EXCLUDE_FILE(*libnet80211.a *libpp.a) .wifi0iram.*)
+    *(.wifiextrairam .wifiextrairam.*)
+    *(EXCLUDE_FILE(*libpp.a) .wifiorslpiram EXCLUDE_FILE(*libpp.a) .wifiorslpiram.*)
+    *(EXCLUDE_FILE(*libnet80211.a *libpp.a) .wifirxiram EXCLUDE_FILE(*libnet80211.a *libpp.a) .wifirxiram.*)
+    *(.wifislpiram .wifislpiram.*)
+    *(EXCLUDE_FILE(*libnet80211.a *libpp.a) .wifislprxiram EXCLUDE_FILE(*libnet80211.a *libpp.a) .wifislprxiram.*)
+
+    /* CPU will try to prefetch up to 16 bytes of instructions.
+     * This means that any configuration (e.g. MMU, PMS) must allow
+     * safe access to up to 16 bytes after the last real instruction, add
+     * dummy bytes to ensure this
+     */
+
+    . += 16;
+
+    _instruction_reserved_end = ABSOLUTE(.);
+    _etext = .;
+  } >irom0_0_seg AT>ROM
+
+  _image_irom_vma = ADDR(.flash.text);
+  _image_irom_lma = LOADADDR(.flash.text);
+  _image_irom_size = LOADADDR(.flash.text) + SIZEOF(.flash.text) - _image_irom_lma;
+
+  /* Dummy section represents the .flash.text section but in drom0_0_seg.
+   * Thus, it must have its alignment and (at least) its size.
+   */
+
+  .flash.rodata_dummy (NOLOAD) :
+  {
+    _flash_rodata_dummy_start = ABSOLUTE(.);
+    . = ALIGN(ALIGNOF(.flash.text)) + SIZEOF(.flash.text);
+
+    /* Add alignment of MMU page size + 0x20 bytes for the mapping header. */
+
+    . = ALIGN(0x10000) + 0x20;
+  } > drom0_0_seg
 
   /* The alignment of the ".flash.rodata" output section is forced to
    * 0x00010000 (64KB) to ensure that it will be allocated at the beginning
@@ -452,11 +507,6 @@ SECTIONS
    * CPU) and the load address (physical address of the external flash) must
    * be equal.
    */
-
-  .flash.rodata_dummy (NOLOAD) :
-  {
-    . = ALIGN(0x10000);
-  } > ROM
 
   .flash.rodata : ALIGN(0x10000)
   {
@@ -544,62 +594,33 @@ SECTIONS
   } >drom0_0_seg AT>ROM
   _rodata_reserved_align = ALIGNOF(.flash.rodata);
 
-  _image_irom_vma = ADDR(.flash.text);
-  _image_irom_lma = LOADADDR(.flash.text);
-  _image_irom_size = LOADADDR(.flash.text) + SIZEOF(.flash.text) - _image_irom_lma;
+  _image_drom_vma = ADDR(.flash.rodata);
+  _image_drom_lma = LOADADDR(.flash.rodata);
+  _image_drom_size = LOADADDR(.flash.rodata) + SIZEOF(.flash.rodata) - _image_drom_lma;
 
-  /* The alignment of the ".flash.text" output section is forced to
-   * 0x00010000 (64KB) to ensure that it will be allocated at the beginning
-   * of the next available Flash block.
-   * This is required to meet the following constraint from the external
-   * flash MMU:
-   *    VMA % 64KB == LMA % 64KB
-   * i.e. the lower 16 bits of both the virtual address (address seen by the
-   * CPU) and the load address (physical address of the external flash) must
-   * be equal.
+  /* Dummy section to skip flash rodata sections.
+   * Because to `extern_ram_seg` and `drom0_0_seg` are on the same bus
    */
 
-#ifndef CONFIG_ESP32S3_RUN_IRAM
-  .flash.text_dummy (NOLOAD) : ALIGN(0x10000)
+  .ext_ram.dummy (NOLOAD):
   {
-    /* This section is required to skip .flash.rodata area because irom0_0_seg
-     * and drom0_0_seg reflect the same address space on different buses.
-     */
+    . = ORIGIN(extern_ram_seg);
+    . = . + (_rodata_reserved_end - _flash_rodata_dummy_start);
+    . = ALIGN (0x10000);
+  } > extern_ram_seg
 
-    . += _image_drom_lma;
-    . += _image_drom_size;
-  } >irom0_0_seg
-#endif
+  /* This section holds .ext_ram.bss data, and will be put in PSRAM */
 
-  .flash.text : ALIGN(0x00010000)
+  .ext_ram.bss (NOLOAD) :
   {
-    _stext = .;
-    _instruction_reserved_start = ABSOLUTE(.);
+    _ext_ram_bss_start = ABSOLUTE(.);
 
-    *(.literal .text .literal.* .text.* .stub .gnu.warning .gnu.linkonce.literal.* .gnu.linkonce.t.*.literal .gnu.linkonce.t.*)
-    *(.irom0.text) /* catch stray ICACHE_RODATA_ATTR */
-    *(.fini.literal)
-    *(.fini)
-    *(.gnu.version)
+    *(.ext_ram.bss .ext_ram.bss.*)
+    *libpython3.13.a:(*.PyRuntime)
 
-    *(EXCLUDE_FILE(*libnet80211.a *libpp.a) .wifi0iram EXCLUDE_FILE(*libnet80211.a *libpp.a) .wifi0iram.*)
-    *(.wifiextrairam .wifiextrairam.*)
-    *(EXCLUDE_FILE(*libpp.a) .wifiorslpiram EXCLUDE_FILE(*libpp.a) .wifiorslpiram.*)
-    *(EXCLUDE_FILE(*libnet80211.a *libpp.a) .wifirxiram EXCLUDE_FILE(*libnet80211.a *libpp.a) .wifirxiram.*)
-    *(.wifislpiram .wifislpiram.*)
-    *(EXCLUDE_FILE(*libnet80211.a *libpp.a) .wifislprxiram EXCLUDE_FILE(*libnet80211.a *libpp.a) .wifislprxiram.*)
-
-    /* CPU will try to prefetch up to 16 bytes of instructions.
-     * This means that any configuration (e.g. MMU, PMS) must allow
-     * safe access to up to 16 bytes after the last real instruction, add
-     * dummy bytes to ensure this
-     */
-
-    . += 16;
-
-    _instruction_reserved_end = ABSOLUTE(.);
-    _etext = .;
-  } >irom0_0_seg AT>ROM
+    . = ALIGN(4);
+    _ext_ram_bss_end = ABSOLUTE(.);
+  } > extern_ram_seg
 
   .rtc.text :
   {
