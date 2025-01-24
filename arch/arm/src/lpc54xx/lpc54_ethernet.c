@@ -297,7 +297,7 @@ struct lpc54_ethdriver_s
   struct work_s eth_pollwork;    /* For deferring poll work to the work queue */
   struct work_s eth_timeoutwork; /* For deferring timeout work to the work queue */
   struct sq_queue_s eth_freebuf; /* Free packet buffers */
-  spinlock_t lock;               /* Spinlock */
+  spinlock_t eth_lock;           /* Spinlock */
 
   /* Ring state */
 
@@ -1451,7 +1451,7 @@ static void lpc54_eth_interrupt_work(void *arg)
       lpc54_eth_channel_work(priv, 1);
     }
 
-  /* Un-eth_lock the network and re-enable Ethernet interrupts */
+  /* Un-lock the network and re-enable Ethernet interrupts */
 
   net_unlock();
   up_enable_irq(LPC54_IRQ_ETHERNET);
