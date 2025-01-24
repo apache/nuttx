@@ -184,6 +184,17 @@ MEMORY
 
   rtc_slow_seg(RW)  :    org = 0x50000000 + CONFIG_ESP32S3_ULP_COPROC_RESERVE_MEM,
                          len = 0x2000 - CONFIG_ESP32S3_ULP_COPROC_RESERVE_MEM
+
+  /* `extern_ram_seg` and `drom0_0_seg` share the same bus and the address region.
+   * A dummy section is used to avoid overlap. See `.ext_ram.dummy` in `esp32s3_sections.ld
+   */
+
+#ifdef CONFIG_ESP32S3_APP_FORMAT_MCUBOOT
+  extern_ram_seg(RWX) :               org = 0x3c000000 + ORIGIN(ROM),
+                                      len = 0x2000000 - ORIGIN(ROM)
+#else
+  extern_ram_seg(RWX) :               org = 0x3c000020 , len = 0x2000000-0x20
+#endif
 }
 
 #ifdef CONFIG_ESP32S3_RUN_IRAM
