@@ -1436,6 +1436,34 @@ config SENSORS_MAX6675
 	---help---
 		Enables support for the MAX6675 driver
 
+config SENSORS_LIS2MDL
+	bool "STMicro LIS2MDL 3-Axis magnetometer support"
+	default n
+	select I2C
+	---help---
+		Enable UORB driver support for the STMicro LIS2MDL 3-axis magnetometer.
+
+if SENSORS_LIS2MDL
+
+config SENSORS_LIS2MDL_FREQUENCY
+	int "LIS2MDL I2C frequency"
+	default 1000000
+	range 1 3400000
+
+config SENSORS_LIS2MDL_THREAD_STACKSIZE
+    int "LIS2MDL worker thread stack size"
+	default 1024
+	---help---
+		The stack size for the worker thread that performs measurements
+
+config SENSORS_LIS2MDL_FETCH
+    bool "Enable LIS2MDL fetch capability"
+	default n
+	---help---
+		Enables the `fetch` UORB function for the LIS2MDL
+
+endif
+
 config SENSORS_LIS3MDL
 	bool "STMicro LIS3MDL 3-Axis magnetometer support"
 	default n

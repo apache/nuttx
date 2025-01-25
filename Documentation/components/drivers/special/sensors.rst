@@ -30,3 +30,4 @@ general interafce.
     sensors/mcp9600.rst
     sensors/mpl115a.rst
     sensors/sht4x.rst
+    sensors/lis2mdl.rst

@@ -248,6 +248,10 @@ if(CONFIG_SENSORS)
       list(APPEND SRCS ltc4151.c)
     endif()
 
+    if(CONFIG_SENSORS_LIS2MDL)
+      list(APPEND SRCS lis2mdl_uorb.c)
+    endif()
+
     if(CONFIG_SENSORS_INA219)
       list(APPEND SRCS ina219.c)
     endif()

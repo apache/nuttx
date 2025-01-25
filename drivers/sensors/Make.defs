@@ -208,6 +208,10 @@ ifeq ($(CONFIG_SENSORS_HTS221),y)
   CSRCS += hts221.c
 endif
 
+ifeq ($(CONFIG_SENSORS_LIS2MDL),y)
+  CSRCS += lis2mdl_uorb.c
+endif
+
 ifeq ($(CONFIG_LM75_I2C),y)
   CSRCS += lm75.c
 endif
