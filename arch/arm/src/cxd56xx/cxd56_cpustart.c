@@ -122,7 +122,7 @@ static void appdsp_boot(void)
   irq_attach(CXD56_IRQ_SMP_CALL, cxd56_smp_call_handler, NULL);
   up_enable_irq(CXD56_IRQ_SMP_CALL);
 
-  spin_unlock(&g_appdsp_boot);
+  raw_spin_unlock(&g_appdsp_boot);
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION
   /* Notify that this CPU has started */
@@ -189,7 +189,7 @@ int up_cpu_start(int cpu)
                      tcb->adj_stack_size, VECTOR_ISTACK);
   putreg32((uint32_t)appdsp_boot, VECTOR_RESETV);
 
-  spin_lock(&g_appdsp_boot);
+  raw_spin_lock(&g_appdsp_boot);
 
   /* See 3.13.4.16.3 ADSP Startup */
 
@@ -238,11 +238,11 @@ int up_cpu_start(int cpu)
       up_enable_irq(CXD56_IRQ_SMP_CALL);
     }
 
-  spin_lock(&g_appdsp_boot);
+  raw_spin_lock(&g_appdsp_boot);
 
   /* APP_DSP(cpu) boot done */
 
-  spin_unlock(&g_appdsp_boot);
+  raw_spin_unlock(&g_appdsp_boot);
 
   return 0;
 }

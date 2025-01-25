@@ -156,7 +156,7 @@ static void core1_boot(void)
   irq_attach(RP2040_SMP_CALL_PROC1, rp2040_smp_call_handler, NULL);
   up_enable_irq(RP2040_SMP_CALL_PROC1);
 
-  spin_unlock(&g_core1_boot);
+  raw_spin_unlock(&g_core1_boot);
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION
   /* Notify that this CPU has started */
@@ -221,7 +221,7 @@ int up_cpu_start(int cpu)
     ;
   clrbits_reg32(RP2040_PSM_PROC1, RP2040_PSM_FRCE_OFF);
 
-  spin_lock(&g_core1_boot);
+  raw_spin_lock(&g_core1_boot);
 
   /* Send initial VTOR, MSP, PC for Core 1 boot */
 
@@ -252,11 +252,11 @@ int up_cpu_start(int cpu)
   irq_attach(RP2040_SMP_CALL_PROC0, rp2040_smp_call_handler, NULL);
   up_enable_irq(RP2040_SMP_CALL_PROC0);
 
-  spin_lock(&g_core1_boot);
+  raw_spin_lock(&g_core1_boot);
 
   /* CPU Core 1 boot done */
 
-  spin_unlock(&g_core1_boot);
+  raw_spin_unlock(&g_core1_boot);
 
   return 0;
 }
