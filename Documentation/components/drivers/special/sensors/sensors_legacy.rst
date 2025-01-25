@@ -72,7 +72,6 @@ Drivers that are available also with the new sensor framework are marked with ``
 - sgp30
 - sht21
 - sht3x
-- :doc:`sht4x`
 - sps30
 - t67xx
 - veml6070

@@ -473,6 +473,13 @@
 
 #define SNIOC_SET_THERMO              _SNIOC(0x009F)
 
+/* Command:      SNIOC_LPF
+ * Description:  Enable the low pass filter
+ * Argument:     Boolean true for enable, false to disable.
+ */
+
+#define SNIOC_LPF                     _SNIOC(0x00A0)
+
 /****************************************************************************
  * Public types
  ****************************************************************************/
