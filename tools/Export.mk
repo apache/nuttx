@@ -109,6 +109,9 @@ ifdef CONFIG_LIBCXX
 else
 	@echo "NUTTX_CXX=\"cxx\"" >> $(EXPORTDIR)/makeinfo.sh
 endif
+	@echo "LLVM_ARCHTYPE=\"$(LLVM_ARCHTYPE)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "LLVM_CPUTYPE=\"$(LLVM_CPUTYPE)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "LLVM_ABITYPE=\"$(LLVM_ABITYPE)\"" >> $(EXPORTDIR)/makeinfo.sh
 	$(Q) chmod 755 $(EXPORTDIR)/makeinfo.sh
 
 clean:
