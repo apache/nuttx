@@ -231,6 +231,10 @@ if [ "X${USRONLY}" != "Xy" ]; then
   done
 fi
 
+# Drop kernel folder modlib/gnu-elf.ld as the exported script shall suffice
+
+LDELFFLAGS=$(echo "$LDELFFLAGS" | sed -e 's:-T.*ld::')
+
 # Set LDMODULEFLAGS so that kernel modules can build in kernel mode
 
 LDMODULEFLAGS="-r"
