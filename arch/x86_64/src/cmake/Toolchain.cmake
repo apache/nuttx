@@ -122,6 +122,11 @@ add_compile_options(
   -Wno-unknown-pragmas
   $<$<COMPILE_LANGUAGE:C>:-Wstrict-prototypes>)
 
+# LLVM target definitions
+set(LLVM_ARCH "x86_64")
+set(LLVM_CPU "x86-64")
+set(LLVM_ABI "sysv")
+
 if(CONFIG_CXX_STANDARD)
   add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-std=${CONFIG_CXX_STANDARD}>)
 endif()

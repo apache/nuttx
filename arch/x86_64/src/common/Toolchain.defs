@@ -70,6 +70,11 @@ ARCHCPUFLAGS = -fno-pic -mcmodel=large -mno-red-zone -mrdrnd
 ARCHPICFLAGS = -fPIC
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 
+# LLVM target definitions
+LLVM_ARCHTYPE := x86_64
+LLVM_CPUTYPE := x86-64
+LLVM_ABITYPE := sysv
+
 # We have to use a cross-development toolchain under Cygwin because the native
 # Cygwin toolchains don't generate ELF binaries.
 
