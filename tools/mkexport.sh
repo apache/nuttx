@@ -231,6 +231,10 @@ if [ "X${USRONLY}" != "Xy" ]; then
   done
 fi
 
+# Set LDMODULEFLAGS so that kernel modules can build in kernel mode
+
+LDMODULEFLAGS="-r"
+
 # Save the compilation options
 
 echo "ARCHCFLAGS       = ${ARCHCFLAGS}" >"${EXPORTDIR}/scripts/Make.defs"
@@ -268,6 +272,7 @@ echo "HOSTLDFLAGS      = ${HOSTLDFLAGS}" >>"${EXPORTDIR}/scripts/Make.defs"
 echo "HOSTEXEEXT       = ${HOSTEXEEXT}" >>"${EXPORTDIR}/scripts/Make.defs"
 echo "LDNAME           = ${LDNAME}" >>"${EXPORTDIR}/scripts/Make.defs"
 echo "LDELFFLAGS       = ${LDELFFLAGS}" >>"${EXPORTDIR}/scripts/Make.defs"
+echo "LDMODULEFLAGS    = ${LDMODULEFLAGS}" >>"${EXPORTDIR}/scripts/Make.defs"
 echo "NUTTX_ARCH       = ${NUTTX_ARCH}" >>"${EXPORTDIR}/scripts/Make.defs"
 echo "NUTTX_ARCH_CHIP  = ${NUTTX_ARCH_CHIP}" >>"${EXPORTDIR}/scripts/Make.defs"
 echo "NUTTX_BOARD      = ${NUTTX_BOARD}" >>"${EXPORTDIR}/scripts/Make.defs"
@@ -302,6 +307,7 @@ echo "set(HOSTLDFLAGS         \"${HOSTLDFLAGS}\")"      >>"${EXPORTDIR}/scripts/
 echo "set(HOSTEXEEXT          \"${HOSTEXEEXT}\")"       >>"${EXPORTDIR}/scripts/target.cmake"
 echo "set(LDNAME              \"${LDNAME}\")"           >>"${EXPORTDIR}/scripts/target.cmake"
 echo "set(LDELFFLAGS          \"${LDELFFLAGS}\")"       >>"${EXPORTDIR}/scripts/target.cmake"
+echo "set(LDMODULEFLAGS       \"${LDMODULEFLAGS}\")"    >>"${EXPORTDIR}/scripts/target.cmake"
 echo "set(NUTTX_ARCH          \"${NUTTX_ARCH}\")"       >>"${EXPORTDIR}/scripts/target.cmake"
 echo "set(NUTTX_ARCH_CHIP     \"${NUTTX_ARCH_CHIP}\")"  >>"${EXPORTDIR}/scripts/target.cmake"
 echo "set(NUTTX_BOARD         \"${NUTTX_BOARD}\")"      >>"${EXPORTDIR}/scripts/target.cmake"
