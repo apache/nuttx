@@ -594,13 +594,18 @@ static int pl011_irq_tx_complete(FAR const struct pl011_uart_port_s *sport)
   return config->uart->fr & PL011_FR_TXFE;
 }
 
-static int pl011_irq_tx_ready(const struct pl011_uart_port_s *sport)
+static int pl011_irq_tx_ready(FAR const struct pl011_uart_port_s *sport)
 {
-  const struct pl011_config *config = &sport->config;
+  FAR const struct pl011_config *config = &sport->config;
+  FAR const struct pl011_data   *data   = &sport->data;
 
-  /* check for TX FIFO not full */
+  if (!data->sbsa && !(config->uart->cr & PL011_CR_TXE))
+    {
+      return false;
+    }
 
-  return ((config->uart->fr & PL011_FR_TXFF) == 0);
+  return (config->uart->imsc & PL011_IMSC_TXIM) &&
+         (!(config->uart->fr & PL011_FR_TXFF));
 }
 
 static int pl011_irq_rx_ready(FAR const struct pl011_uart_port_s *sport)
@@ -629,15 +634,10 @@ static bool pl011_txready(FAR struct uart_dev_s *dev)
 {
   FAR struct pl011_uart_port_s  *sport  = dev->priv;
   FAR const struct pl011_config *config = &sport->config;
-  FAR struct pl011_data         *data   = &sport->data;
 
-  if (!data->sbsa && !(config->uart->cr & PL011_CR_TXE))
-    {
-      return false;
-    }
+  /* check for TX FIFO not full */
 
-  return (config->uart->imsc & PL011_IMSC_TXIM) &&
-         pl011_irq_tx_ready(sport);
+  return ((config->uart->fr & PL011_FR_TXFF) == 0);
 }
 
 /***************************************************************************
@@ -668,7 +668,7 @@ static void pl011_send(FAR struct uart_dev_s *dev, int ch)
   FAR struct pl011_uart_port_s  *sport  = dev->priv;
   FAR const struct pl011_config *config = &sport->config;
 
-  while (!pl011_irq_tx_ready(sport));
+  while (!pl011_txready(dev));
 
   config->uart->dr = ch;
 }
@@ -837,7 +837,7 @@ static int pl011_irq_handler(int irq, FAR void *context, FAR void *arg)
       uart_recvchars(dev);
     }
 
-  if (pl011_txready(dev))
+  if (pl011_irq_tx_ready(sport))
     {
       uart_xmitchars(dev);
     }
