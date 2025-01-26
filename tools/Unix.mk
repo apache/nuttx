@@ -777,8 +777,7 @@ savedefconfig: apps_preconfig
 # that the archiver is 'ar'
 
 export: $(NUTTXLIBS)
-	$(Q) ZIG="${ZIG}" ZIGFLAGS="${ZIGFLAGS}" MAKE="${MAKE}" \
-		$(MKEXPORT) $(MKEXPORT_ARGS) -l "$(EXPORTLIBS)"
+	$(Q) MAKE="${MAKE}" $(MKEXPORT) $(MKEXPORT_ARGS) -l "$(EXPORTLIBS)"
 
 # General housekeeping targets:  dependencies, cleaning, etc.
 #
