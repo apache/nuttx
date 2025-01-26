@@ -149,14 +149,14 @@ int irqchain_attach(int ndx, xcpt_t isr, FAR void *arg)
   FAR struct irqchain_s *curr;
   irqstate_t flags;
 
-  flags = spin_lock_irqsave(&g_irqchainlock);
+  flags = raw_spin_lock_irqsave(&g_irqchainlock);
   if (isr != irq_unexpected_isr)
     {
       if (g_irqvector[ndx].handler != irqchain_dispatch)
         {
           if (sq_count(&g_irqchainfreelist) < 2)
             {
-              spin_unlock_irqrestore(&g_irqchainlock, flags);
+              raw_spin_unlock_irqrestore(&g_irqchainlock, flags);
               return -ENOMEM;
             }
 
@@ -174,7 +174,7 @@ int irqchain_attach(int ndx, xcpt_t isr, FAR void *arg)
       node = (FAR struct irqchain_s *)sq_remfirst(&g_irqchainfreelist);
       if (node == NULL)
         {
-          spin_unlock_irqrestore(&g_irqchainlock, flags);
+          raw_spin_unlock_irqrestore(&g_irqchainlock, flags);
           return -ENOMEM;
         }
 
@@ -195,7 +195,7 @@ int irqchain_attach(int ndx, xcpt_t isr, FAR void *arg)
       irqchain_detach_all(ndx);
     }
 
-  spin_unlock_irqrestore(&g_irqchainlock, flags);
+  raw_spin_unlock_irqrestore(&g_irqchainlock, flags);
   return OK;
 }
 
@@ -217,7 +217,7 @@ int irqchain_detach(int irq, xcpt_t isr, FAR void *arg)
           return ndx;
         }
 
-      flags = spin_lock_irqsave(&g_irqchainlock);
+      flags = raw_spin_lock_irqsave(&g_irqchainlock);
 
       if (g_irqvector[ndx].handler == irqchain_dispatch)
         {
@@ -263,7 +263,7 @@ int irqchain_detach(int irq, xcpt_t isr, FAR void *arg)
           ret = irq_detach(irq);
         }
 
-      spin_unlock_irqrestore(&g_irqchainlock, flags);
+      raw_spin_unlock_irqrestore(&g_irqchainlock, flags);
     }
 
   return ret;

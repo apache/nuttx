@@ -65,10 +65,10 @@ static void pthread_mutex_add(FAR struct pthread_mutex_s *mutex)
 
   /* Add the mutex to the list of mutexes held by this pthread */
 
-  flags        = spin_lock_irqsave(&rtcb->mutex_lock);
+  flags        = raw_spin_lock_irqsave(&rtcb->mutex_lock);
   mutex->flink = rtcb->mhead;
   rtcb->mhead  = mutex;
-  spin_unlock_irqrestore(&rtcb->mutex_lock, flags);
+  raw_spin_unlock_irqrestore(&rtcb->mutex_lock, flags);
 }
 
 /****************************************************************************
@@ -92,7 +92,7 @@ static void pthread_mutex_remove(FAR struct pthread_mutex_s *mutex)
   FAR struct pthread_mutex_s *prev;
   irqstate_t flags;
 
-  flags = spin_lock_irqsave(&rtcb->mutex_lock);
+  flags = raw_spin_lock_irqsave(&rtcb->mutex_lock);
 
   /* Remove the mutex from the list of mutexes held by this task */
 
@@ -118,7 +118,7 @@ static void pthread_mutex_remove(FAR struct pthread_mutex_s *mutex)
     }
 
   mutex->flink = NULL;
-  spin_unlock_irqrestore(&rtcb->mutex_lock, flags);
+  raw_spin_unlock_irqrestore(&rtcb->mutex_lock, flags);
 }
 
 /****************************************************************************
@@ -372,7 +372,7 @@ void pthread_mutex_inconsistent(FAR struct tcb_s *tcb)
 
   DEBUGASSERT(tcb != NULL);
 
-  flags = spin_lock_irqsave(&tcb->mutex_lock);
+  flags = raw_spin_lock_irqsave(&tcb->mutex_lock);
 
   /* Remove and process each mutex held by this task */
 
@@ -390,5 +390,5 @@ void pthread_mutex_inconsistent(FAR struct tcb_s *tcb)
       mutex_unlock(&mutex->mutex);
     }
 
-  spin_unlock_irqrestore(&tcb->mutex_lock, flags);
+  raw_spin_unlock_irqrestore(&tcb->mutex_lock, flags);
 }

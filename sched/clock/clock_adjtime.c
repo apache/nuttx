@@ -63,7 +63,7 @@ static void adjtime_wdog_callback(wdparm_t arg)
 
   UNUSED(arg);
 
-  flags = spin_lock_irqsave(&g_adjtime_lock);
+  flags = raw_spin_lock_irqsave(&g_adjtime_lock);
 
 #ifdef CONFIG_ARCH_HAVE_ADJTIME
   up_adjtime(0);
@@ -74,7 +74,7 @@ static void adjtime_wdog_callback(wdparm_t arg)
 #endif
 
   g_adjtime_ppb = 0;
-  spin_unlock_irqrestore(&g_adjtime_lock, flags);
+  raw_spin_unlock_irqrestore(&g_adjtime_lock, flags);
 }
 
 /* Query remaining adjustment in microseconds */

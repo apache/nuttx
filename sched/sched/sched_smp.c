@@ -77,13 +77,13 @@ static void nxsched_smp_call_add(int cpu,
 {
   irqstate_t flags;
 
-  flags = spin_lock_irqsave(&g_smp_call_lock);
+  flags = raw_spin_lock_irqsave(&g_smp_call_lock);
   if (!sq_inqueue(&data->node[cpu], &g_smp_call_queue[cpu]))
     {
       sq_addlast(&data->node[cpu], &g_smp_call_queue[cpu]);
     }
 
-  spin_unlock_irqrestore(&g_smp_call_lock, flags);
+  raw_spin_unlock_irqrestore(&g_smp_call_lock, flags);
 }
 
 /****************************************************************************
@@ -114,7 +114,7 @@ int nxsched_smp_call_handler(int irq, FAR void *context,
   FAR sq_entry_t *next;
   int cpu = this_cpu();
 
-  irqstate_t flags = spin_lock_irqsave(&g_smp_call_lock);
+  irqstate_t flags = raw_spin_lock_irqsave(&g_smp_call_lock);
 
   call_queue = &g_smp_call_queue[cpu];
 
@@ -126,11 +126,11 @@ int nxsched_smp_call_handler(int irq, FAR void *context,
 
       sq_rem(&data->node[cpu], call_queue);
 
-      spin_unlock_irqrestore(&g_smp_call_lock, flags);
+      raw_spin_unlock_irqrestore(&g_smp_call_lock, flags);
 
       ret = data->func(data->arg);
 
-      flags = spin_lock_irqsave(&g_smp_call_lock);
+      flags = raw_spin_lock_irqsave(&g_smp_call_lock);
 
       if (data->cookie != NULL)
         {
@@ -143,7 +143,7 @@ int nxsched_smp_call_handler(int irq, FAR void *context,
         }
     }
 
-  spin_unlock_irqrestore(&g_smp_call_lock, flags);
+  raw_spin_unlock_irqrestore(&g_smp_call_lock, flags);
   return OK;
 }
 
