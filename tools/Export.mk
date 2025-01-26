@@ -80,6 +80,8 @@ endif
 	@echo "NXFLATLDFLAGS2=\"$(NXFLATLDFLAGS2)\"" >> $(EXPORTDIR)/makeinfo.sh
 	@echo "OBJCOPY=\"$(OBJCOPY)\"" >> $(EXPORTDIR)/makeinfo.sh
 	@echo "OBJDUMP=\"$(OBJDUMP)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "ZIG=\"$(ZIG)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "ZIGFLAGS=\"$(ZIGFLAGS)\"" >> $(EXPORTDIR)/makeinfo.sh
 	@echo "OBJEXT=\"$(OBJEXT)\"" >> $(EXPORTDIR)/makeinfo.sh
 	@echo "STRIP=\"$(STRIP)\"" >> $(EXPORTDIR)/makeinfo.sh
 	@echo "NUTTX_ARCH=\"$(CONFIG_ARCH)\"" >> $(EXPORTDIR)/makeinfo.sh
