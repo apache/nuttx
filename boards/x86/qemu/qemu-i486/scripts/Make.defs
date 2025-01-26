@@ -22,47 +22,8 @@
 
 include $(TOPDIR)/.config
 include $(TOPDIR)/tools/Config.mk
-
-ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  ARCHOPTIMIZATION = -g
-endif
-
-ifneq ($(CONFIG_DEBUG_NOOPT),y)
-  ARCHOPTIMIZATION += -O2
-endif
+include $(TOPDIR)/arch/x86/src/common/Toolchain.defs
 
 ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)qemu.ld
 
-ARCHCPUFLAGS = -march=i486 -mtune=i486 -fno-stack-protector
-ARCHPICFLAGS = -fpic
-ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
-
-# Check if building a 32-bit target with a 64-bit toolchain
-
-ifeq ($(CONFIG_ARCH_X86_M32),y)
-ARCHCPUFLAGS += -m32
-LDFLAGS += -m elf_i386
-endif
-
-# We have to use a cross-development toolchain under Cygwin because the native
-# Cygwin toolchains don't generate ELF binaries.
-
-ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
-CROSSDEV = i486-nuttx-elf-
-endif
-
-CC = $(CROSSDEV)gcc
-CPP = $(CROSSDEV)gcc -E
-LD = $(CROSSDEV)ld
-STRIP = $(CROSSDEV)strip --strip-unneeded
-AR = $(CROSSDEV)ar rcs
-NM = $(CROSSDEV)nm
-OBJCOPY = $(CROSSDEV)objcopy
-OBJDUMP = $(CROSSDEV)objdump
-
-CFLAGS := $(ARCHWARNINGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
-CPPFLAGS := $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
-AFLAGS := $(CFLAGS) -D__ASSEMBLY__
-
 EXEEXT = .elf
-
