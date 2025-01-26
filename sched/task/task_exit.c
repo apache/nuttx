@@ -108,16 +108,6 @@ int nxtask_exit(void)
   rtcb = this_task();
 #endif
 
-  /* Update scheduler parameters.
-   *
-   * When the thread exits, SYS_restore_context is called to
-   * restore the context, which does not update the scheduling
-   * information.
-   * We need to update the scheduling information before tcb is released.
-   */
-
-  nxsched_switch_context(dtcb, rtcb);
-
   /* We are now in a bad state -- the head of the ready to run task list
    * does not correspond to the thread that is running.  Disabling pre-
    * emption on this TCB and marking the new ready-to-run task as not
@@ -143,6 +133,17 @@ int nxtask_exit(void)
 #endif
 
   dtcb->task_state = TSTATE_TASK_INACTIVE;
+
+  /* Update scheduler parameters.
+   *
+   * When the thread exits, SYS_restore_context is called to
+   * restore the context, which does not update the scheduling
+   * information.
+   * We need to update the scheduling information before tcb is released.
+   */
+
+  nxsched_switch_context(dtcb, rtcb);
+
   sched_note_stop(dtcb);
   ret = nxsched_release_tcb(dtcb, dtcb->flags & TCB_FLAG_TTYPE_MASK);
 
