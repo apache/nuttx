@@ -32,6 +32,11 @@ ARCHCPUFLAGS = -march=i486 -mtune=i486 -fno-stack-protector
 ARCHPICFLAGS = -fpic
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 
+# LLVM target definitions
+LLVM_ARCHTYPE := x86
+LLVM_CPUTYPE := i486
+LLVM_ABITYPE := sysv
+
 # Check if building a 32-bit target with a 64-bit toolchain
 
 ifeq ($(CONFIG_ARCH_X86_M32),y)
