@@ -17,12 +17,6 @@ config XPAR_CPU_CORTEXA53_0_TIMESTAMP_CLK_FREQ
 	---help---
 		Canonical definitions for peripheral PSU_CORTEXA53_0.
 
-config XPAR_PSU_UART_0_UART_CLK_FREQ_HZ
-	int "Zynq Mpsoc uart0 clock"
-	default 99999001
-	---help---
-		Clock definitions for uart0.
-			
 menu "XILINX ZYNQ_MPSOC Peripheral Selection"
 
 config ZYNQ_MPSOC_UART0
