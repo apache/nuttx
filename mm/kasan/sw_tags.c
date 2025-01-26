@@ -142,14 +142,14 @@ static void kasan_set_poison(FAR const void *addr,
     }
 
   size = KASAN_SHADOW_SIZE(size);
-  flags = spin_lock_irqsave(&g_lock);
+  flags = raw_spin_lock_irqsave(&g_lock);
 
   while (size--)
     {
       p[size] = value;
     }
 
-  spin_unlock_irqrestore(&g_lock, flags);
+  raw_spin_unlock_irqrestore(&g_lock, flags);
 }
 
 /****************************************************************************
@@ -186,12 +186,12 @@ void kasan_register(FAR void *addr, FAR size_t *size)
   region->begin = (uintptr_t)addr;
   region->end   = region->begin + *size;
 
-  flags = spin_lock_irqsave(&g_lock);
+  flags = raw_spin_lock_irqsave(&g_lock);
 
   DEBUGASSERT(g_region_count <= CONFIG_MM_KASAN_REGIONS);
   g_region[g_region_count++] = region;
 
-  spin_unlock_irqrestore(&g_lock, flags);
+  raw_spin_unlock_irqrestore(&g_lock, flags);
 
   kasan_start();
   kasan_poison(addr, *size);
@@ -203,7 +203,7 @@ void kasan_unregister(FAR void *addr)
   irqstate_t flags;
   size_t i;
 
-  flags = spin_lock_irqsave(&g_lock);
+  flags = raw_spin_lock_irqsave(&g_lock);
   for (i = 0; i < g_region_count; i++)
     {
       if (g_region[i]->begin == (uintptr_t)addr)
@@ -215,5 +215,5 @@ void kasan_unregister(FAR void *addr)
         }
     }
 
-  spin_unlock_irqrestore(&g_lock, flags);
+  raw_spin_unlock_irqrestore(&g_lock, flags);
 }

@@ -60,7 +60,7 @@ FAR struct iob_qentry_s *iob_free_qentry(FAR struct iob_qentry_s *iobq)
    * interrupts very briefly.
    */
 
-  flags = spin_lock_irqsave(&g_iob_lock);
+  flags = raw_spin_lock_irqsave(&g_iob_lock);
 
   /* Which list?  If there is a task waiting for an IOB chain, then put
    * the IOB chain on either the free list or on the committed list where
@@ -73,14 +73,14 @@ FAR struct iob_qentry_s *iob_free_qentry(FAR struct iob_qentry_s *iobq)
       iobq->qe_flink   = g_iob_qcommitted;
       g_iob_qcommitted = iobq;
       g_qentry_wait--;
-      spin_unlock_irqrestore(&g_iob_lock, flags);
+      raw_spin_unlock_irqrestore(&g_iob_lock, flags);
       nxsem_post(&g_qentry_sem);
     }
   else
     {
       iobq->qe_flink   = g_iob_freeqlist;
       g_iob_freeqlist  = iobq;
-      spin_unlock_irqrestore(&g_iob_lock, flags);
+      raw_spin_unlock_irqrestore(&g_iob_lock, flags);
     }
 
   /* And return the I/O buffer chain container after the one that was freed */
