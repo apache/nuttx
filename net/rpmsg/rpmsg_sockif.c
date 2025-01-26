@@ -983,7 +983,9 @@ static int rpmsg_socket_poll(FAR struct socket *psock,
             }
         }
 
+      nxmutex_lock(&conn->polllock);
       poll_notify(&fds, 1, eventset);
+      nxmutex_unlock(&conn->polllock);
     }
   else
     {
