@@ -27,7 +27,6 @@
 #include <nuttx/config.h>
 
 #include <assert.h>
-#include <sched.h>
 
 #include <arch/board/board.h>
 #include <nuttx/irq.h>
@@ -1084,7 +1083,6 @@ struct can_dev_s *am335x_can_initialize(int port)
   syslog(LOG_DEBUG, "CAN%d\n", port);
 
   flags = spin_lock_irqsave(&g_can_lock);
-  sched_lock();
 
 #ifdef CONFIG_AM335X_CAN0
   if (port == 0)
@@ -1112,15 +1110,14 @@ struct can_dev_s *am335x_can_initialize(int port)
   else
 #endif /* CONFIG_AM335X_CAN1 */
     {
+      spin_unlock_irqrestore(&g_can_lock, flags);
+
       canerr("Unsupported port: %d\n", port);
 
-      spin_unlock_irqrestore(&g_can_lock, flags);
-      sched_unlock();
       return NULL;
     }
 
   spin_unlock_irqrestore(&g_can_lock, flags);
-  sched_unlock();
 
   return candev;
 }
@@ -1132,7 +1129,6 @@ void am335x_can_uninitialize(struct can_dev_s *dev)
   DEBUGASSERT(dev);
 
   flags = spin_lock_irqsave(&g_can_lock);
-  sched_lock();
 
 #ifdef CONFIG_AM335X_CAN0
   if (dev == &g_can0dev)
@@ -1156,11 +1152,14 @@ void am335x_can_uninitialize(struct can_dev_s *dev)
   else
 #endif /* CONFIG_AM335X_CAN1 */
     {
+      spin_unlock_irqrestore(&g_can_lock, flags);
+
       canerr("Not a CAN device: %p\n", dev);
+
+      return;
     }
 
   spin_unlock_irqrestore(&g_can_lock, flags);
-  sched_unlock();
 }
 
 #endif

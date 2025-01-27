@@ -29,7 +29,6 @@
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
-#include <sched.h>
 
 #include <nuttx/spinlock.h>
 #include <nuttx/arch.h>
@@ -228,13 +227,7 @@ static uint64_t g_iram_count[NR_IRQS];
 #if defined(CONFIG_DEBUG_IRQ_INFO)
 static void esp32_irq_dump(const char *msg, int irq)
 {
-  irqstate_t flags;
-
-  flags = spin_lock_irqsave(&g_irq_lock);
-  sched_lock();
 #warning Missing logic
-  spin_unlock_irqrestore(&g_irq_lock, flags);
-  sched_unlock();
 }
 #else
 #  define esp32_irq_dump(msg, irq)
@@ -881,8 +874,7 @@ int esp32_setup_irq(int cpu, int periphid, int priority, int flags)
   int irq;
   int cpuint;
 
-  irqstate = spin_lock_irqsave(&g_irq_lock);
-  sched_lock();
+  irqstate = spin_lock_irqsave_nopreempt(&g_irq_lock);
 
   /* Setting up an IRQ includes the following steps:
    *    1. Allocate a CPU interrupt.
@@ -896,8 +888,7 @@ int esp32_setup_irq(int cpu, int periphid, int priority, int flags)
     {
       irqerr("Unable to allocate CPU interrupt for priority=%d and flags=%d",
              priority, flags);
-      spin_unlock_irqrestore(&g_irq_lock, irqstate);
-      sched_unlock();
+      spin_unlock_irqrestore_nopreempt(&g_irq_lock, irqstate);
 
       return cpuint;
     }
@@ -934,8 +925,7 @@ int esp32_setup_irq(int cpu, int periphid, int priority, int flags)
 
   putreg32(cpuint, regaddr);
 
-  spin_unlock_irqrestore(&g_irq_lock, irqstate);
-  sched_unlock();
+  spin_unlock_irqrestore_nopreempt(&g_irq_lock, irqstate);
 
   return cpuint;
 }
@@ -967,8 +957,7 @@ void esp32_teardown_irq(int cpu, int periphid, int cpuint)
   uint8_t *intmap;
   int irq;
 
-  flags = spin_lock_irqsave(&g_irq_lock);
-  sched_lock();
+  flags = spin_lock_irqsave_nopreempt(&g_irq_lock);
 
   /* Tearing down an IRQ includes the following steps:
    *   1. Free the previously allocated CPU interrupt.
@@ -990,8 +979,7 @@ void esp32_teardown_irq(int cpu, int periphid, int cpuint)
 
   putreg32(NO_CPUINT, regaddr);
 
-  spin_unlock_irqrestore(&g_irq_lock, flags);
-  sched_unlock();
+  spin_unlock_irqrestore_nopreempt(&g_irq_lock, flags);
 }
 
 /****************************************************************************

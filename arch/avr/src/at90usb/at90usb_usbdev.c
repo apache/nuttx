@@ -34,7 +34,6 @@
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
-#include <sched.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/spinlock.h>
@@ -2300,16 +2299,14 @@ static int avr_epdisable(FAR struct usbdev_ep_s *ep)
 
   usbtrace(TRACE_EPDISABLE, privep->ep.eplog);
 
-  flags = spin_lock_irqsave(&g_usbdev.lock);
-  sched_lock();
+  flags = spin_lock_irqsave_nopreempt(&g_usbdev.lock);
 
   /* Disable the endpoint */
 
   avr_epreset(privep, -ESHUTDOWN);
   g_usbdev.stalled = true;
 
-  spin_unlock_irqrestore(&g_usbdev.lock, flags);
-  sched_unlock();
+  spin_unlock_irqrestore_nopreempt(&g_usbdev.lock, flags);
   return OK;
 }
 
@@ -2455,8 +2452,7 @@ static int avr_epsubmit(FAR struct usbdev_ep_s *ep,
 
   /* Disable Interrupts */
 
-  flags = spin_lock_irqsave(&g_usbdev.lock);
-  sched_lock();
+  flags = spin_lock_irqsave_nopreempt(&g_usbdev.lock);
 
   /* If we are stalled, then drop all requests on the floor */
 
@@ -2517,8 +2513,7 @@ static int avr_epsubmit(FAR struct usbdev_ep_s *ep,
         }
     }
 
-  spin_unlock_irqrestore(&g_usbdev.lock, flags);
-  sched_unlock();
+  spin_unlock_irqrestore_nopreempt(&g_usbdev.lock, flags);
   return ret;
 }
 
@@ -2552,11 +2547,9 @@ static int avr_epcancel(FAR struct usbdev_ep_s *ep,
    * all requests ...
    */
 
-  flags = spin_lock_irqsave(&g_usbdev.lock);
-  sched_lock();
+  flags = spin_lock_irqsave_nopreempt(&g_usbdev.lock);
   avr_cancelrequests(privep, -ESHUTDOWN);
-  spin_unlock_irqrestore(&g_usbdev.lock, flags);
-  sched_unlock();
+  spin_unlock_irqrestore_nopreempt(&g_usbdev.lock, flags);
   return OK;
 }
 
@@ -2766,11 +2759,9 @@ static int avr_wakeup(struct usbdev_s *dev)
 
   usbtrace(TRACE_DEVWAKEUP, 0);
 
-  flags = spin_lock_irqsave(&g_usbdev.lock);
-  sched_lock();
+  flags = spin_lock_irqsave_nopreempt(&g_usbdev.lock);
   avr_genwakeup();
-  spin_unlock_irqrestore(&g_usbdev.lock, flags);
-  sched_unlock();
+  spin_unlock_irqrestore_nopreempt(&g_usbdev.lock, flags);
   return OK;
 }
 
@@ -2909,8 +2900,7 @@ void avr_usbuninitialize(void)
 
   /* Disconnect device */
 
-  flags = spin_lock_irqsave(&g_usbdev.lock);
-  sched_lock();
+  flags = spin_lock_irqsave_nopreempt(&g_usbdev.lock);
   avr_pullup(&g_usbdev.usbdev, false);
   g_usbdev.usbdev.speed = USB_SPEED_UNKNOWN;
 
@@ -2922,8 +2912,7 @@ void avr_usbuninitialize(void)
   /* Shutdown the USB controller hardware */
 
   avr_usbshutdown();
-  spin_unlock_irqrestore(&g_usbdev.lock, flags);
-  sched_unlock();
+  spin_unlock_irqrestore_nopreempt(&g_usbdev.lock, flags);
 }
 
 /****************************************************************************
@@ -3038,10 +3027,8 @@ void avr_pollvbus(void)
 {
   irqstate_t flags;
 
-  flags = spin_lock_irqsave(&g_usbdev.lock);
-  sched_lock();
+  flags = spin_lock_irqsave_nopreempt(&g_usbdev.lock);
   avr_genvbus();
-  spin_unlock_irqrestore(&g_usbdev.lock, flags);
-  sched_unlock();
+  spin_unlock_irqrestore_nopreempt(&g_usbdev.lock, flags);
 }
 #endif

@@ -148,8 +148,7 @@ static int work_thread(int argc, FAR char *argv[])
   kworker = (FAR struct kworker_s *)
             ((uintptr_t)strtoul(argv[2], NULL, 16));
 
-  flags = spin_lock_irqsave(&wqueue->lock);
-  sched_lock();
+  flags = spin_lock_irqsave_nopreempt(&wqueue->lock);
 
   /* Loop forever */
 
@@ -191,12 +190,10 @@ static int work_thread(int argc, FAR char *argv[])
            * performed... we don't have any idea how long this will take!
            */
 
-          spin_unlock_irqrestore(&wqueue->lock, flags);
-          sched_unlock();
+          spin_unlock_irqrestore_nopreempt(&wqueue->lock, flags);
 
           CALL_WORKER(worker, arg);
-          flags = spin_lock_irqsave(&wqueue->lock);
-          sched_lock();
+          flags = spin_lock_irqsave_nopreempt(&wqueue->lock);
 
           /* Mark the thread un-busy */
 
@@ -217,16 +214,13 @@ static int work_thread(int argc, FAR char *argv[])
        */
 
       wqueue->wait_count++;
-      spin_unlock_irqrestore(&wqueue->lock, flags);
-      sched_unlock();
+      spin_unlock_irqrestore_nopreempt(&wqueue->lock, flags);
 
       nxsem_wait_uninterruptible(&wqueue->sem);
-      flags = spin_lock_irqsave(&wqueue->lock);
-      sched_lock();
+      flags = spin_lock_irqsave_nopreempt(&wqueue->lock);
     }
 
-  spin_unlock_irqrestore(&wqueue->lock, flags);
-  sched_unlock();
+  spin_unlock_irqrestore_nopreempt(&wqueue->lock, flags);
 
   nxsem_post(&wqueue->exsem);
   return OK;

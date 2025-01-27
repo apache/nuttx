@@ -34,7 +34,6 @@
 #include <stdint.h>
 #include <string.h>
 #include <sys/types.h>
-#include <sched.h>
 
 #include <nuttx/nuttx.h>
 #include <nuttx/irq.h>
@@ -219,8 +218,7 @@ static int IRAM_ATTR esp_hr_timer_isr(int irq, void *context, void *arg)
 
   systimer_ll_clear_alarm_int(priv->hal.dev, SYSTIMER_ALARM_ESPTIMER);
 
-  flags = spin_lock_irqsave(&priv->lock);
-  sched_lock();
+  flags = spin_lock_irqsave_nopreempt(&priv->lock);
 
   /* Check if there is a timer running */
 
@@ -290,8 +288,7 @@ static int IRAM_ATTR esp_hr_timer_isr(int irq, void *context, void *arg)
         }
     }
 
-  spin_unlock_irqrestore(&priv->lock, flags);
-  sched_unlock();
+  spin_unlock_irqrestore_nopreempt(&priv->lock, flags);
 
   return OK;
 }

@@ -50,7 +50,6 @@
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
-#include <sched.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
@@ -4029,8 +4028,7 @@ static int sam_ep_submit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   req->result       = -EINPROGRESS;
   req->xfrd         = 0;
   privreq->inflight = 0;
-  flags             = spin_lock_irqsave(&priv->lock);
-  sched_lock();
+  flags             = spin_lock_irqsave_nopreempt(&priv->lock);
 
   /* Handle IN (device-to-host) requests.  NOTE:  If the class device is
    * using the bi-directional EP0, then we assume that they intend the EP0
@@ -4082,8 +4080,7 @@ static int sam_ep_submit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
         }
     }
 
-  spin_unlock_irqrestore(&priv->lock, flags);
-  sched_unlock();
+  spin_unlock_irqrestore_nopreempt(&priv->lock, flags);
   return ret;
 }
 
@@ -4101,11 +4098,9 @@ static int sam_ep_cancel(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   DEBUGASSERT(ep != NULL && req != NULL);
   usbtrace(TRACE_EPCANCEL, USB_EPNO(ep->eplog));
 
-  flags = spin_lock_irqsave(&privep->dev->lock);
-  sched_lock();
+  flags = spin_lock_irqsave_nopreempt(&privep->dev->lock);
   sam_req_cancel(privep, -EAGAIN);
-  spin_unlock_irqrestore(&privep->dev->lock, flags);
-  sched_unlock();
+  spin_unlock_irqrestore_nopreempt(&privep->dev->lock, flags);
   return OK;
 }
 
@@ -4136,8 +4131,7 @@ static int sam_ep_stall(struct usbdev_ep_s *ep, bool resume)
 
   /* STALL or RESUME the endpoint */
 
-  flags = spin_lock_irqsave(&priv->lock);
-  sched_lock();
+  flags = spin_lock_irqsave_nopreempt(&priv->lock);
   usbtrace(resume ? TRACE_EPRESUME : TRACE_EPSTALL, USB_EPNO(ep->eplog));
 
   /* Handle the resume condition */
@@ -4260,8 +4254,7 @@ static int sam_ep_stall(struct usbdev_ep_s *ep, bool resume)
         }
     }
 
-  spin_unlock_irqrestore(&priv->lock, flags);
-  sched_unlock();
+  spin_unlock_irqrestore_nopreempt(&priv->lock, flags);
   return OK;
 }
 
@@ -5072,8 +5065,7 @@ void arm_usbuninitialize(void)
    * easier.
    */
 
-  flags = spin_lock_irqsave(&priv->lock);
-  sched_lock();
+  flags = spin_lock_irqsave_nopreempt(&priv->lock);
   usbtrace(TRACE_DEVUNINIT, 0);
 
   /* Disable and detach the USBHS IRQ */
@@ -5091,8 +5083,7 @@ void arm_usbuninitialize(void)
 
   sam_hw_shutdown(priv);
   sam_sw_shutdown(priv);
-  spin_unlock_irqrestore(&priv->lock, flags);
-  sched_unlock();
+  spin_unlock_irqrestore_nopreempt(&priv->lock, flags);
 }
 
 /****************************************************************************
@@ -5169,8 +5160,7 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
    * canceled while the class driver is still bound.
    */
 
-  flags = spin_lock_irqsave(&priv->lock);
-  sched_lock();
+  flags = spin_lock_irqsave_nopreempt(&priv->lock);
 
   /* Unbind the class driver */
 
@@ -5194,8 +5184,7 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
   /* Unhook the driver */
 
   priv->driver = NULL;
-  spin_unlock_irqrestore(&priv->lock, flags);
-  sched_unlock();
+  spin_unlock_irqrestore_nopreempt(&priv->lock, flags);
   return OK;
 }
 

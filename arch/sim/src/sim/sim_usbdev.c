@@ -36,7 +36,6 @@
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
-#include <sched.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
@@ -643,8 +642,7 @@ static int sim_ep_disable(struct usbdev_ep_s *ep)
 
   /* Cancel any ongoing activity */
 
-  flags = spin_lock_irqsave(&privep->dev->lock);
-  sched_lock();
+  flags = spin_lock_irqsave_nopreempt(&privep->dev->lock);
 
   /* Disable TX; disable RX */
 
@@ -652,8 +650,7 @@ static int sim_ep_disable(struct usbdev_ep_s *ep)
 
   privep->epstate = SIM_EPSTATE_DISABLED;
 
-  spin_unlock_irqrestore(&privep->dev->lock, flags);
-  sched_unlock();
+  spin_unlock_irqrestore_nopreempt(&privep->dev->lock, flags);
   return OK;
 }
 
@@ -708,16 +705,14 @@ static int sim_ep_stall(struct usbdev_ep_s *ep, bool resume)
 
   /* STALL or RESUME the endpoint */
 
-  flags = spin_lock_irqsave(&privep->dev->lock);
-  sched_lock();
+  flags = spin_lock_irqsave_nopreempt(&privep->dev->lock);
   usbtrace(resume ? TRACE_EPRESUME : TRACE_EPSTALL, epno);
 
   ret = host_usbdev_epstall(epno, resume);
 
   privep->epstate = SIM_EPSTATE_STALLED;
 
-  spin_unlock_irqrestore(&privep->dev->lock, flags);
-  sched_unlock();
+  spin_unlock_irqrestore_nopreempt(&privep->dev->lock, flags);
   return ret;
 }
 
@@ -745,14 +740,12 @@ static int sim_ep_submit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   epno              = USB_EPNO(ep->eplog);
   req->result       = -EINPROGRESS;
   req->xfrd         = 0;
-  flags             = spin_lock_irqsave(&priv->lock);
-  sched_lock();
+  flags             = spin_lock_irqsave_nopreempt(&priv->lock);
 
   if (privep->epstate == SIM_EPSTATE_STALLED)
     {
       sim_reqabort(privep, privreq, -EBUSY);
-      spin_unlock_irqrestore(&priv->lock, flags);
-      sched_unlock();
+      spin_unlock_irqrestore_nopreempt(&priv->lock, flags);
       return -EPERM;
     }
 
@@ -787,8 +780,7 @@ static int sim_ep_submit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
       sim_rqenqueue(&privep->reqq, privreq);
     }
 
-  spin_unlock_irqrestore(&priv->lock, flags);
-  sched_unlock();
+  spin_unlock_irqrestore_nopreempt(&priv->lock, flags);
   return ret;
 }
 

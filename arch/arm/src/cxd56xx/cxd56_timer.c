@@ -35,7 +35,6 @@
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
-#include <sched.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/spinlock.h>
@@ -433,8 +432,7 @@ static void cxd56_setcallback(struct timer_lowerhalf_s *lower,
   struct cxd56_lowerhalf_s *priv = (struct cxd56_lowerhalf_s *)lower;
   irqstate_t flags;
 
-  flags = spin_lock_irqsave(&priv->lock);
-  sched_lock();
+  flags = spin_lock_irqsave_nopreempt(&priv->lock);
 
   DEBUGASSERT(priv);
   tmrinfo("Entry: callback=%p\n", callback);
@@ -444,8 +442,7 @@ static void cxd56_setcallback(struct timer_lowerhalf_s *lower,
   priv->callback = callback;
   priv->arg      = arg;
 
-  spin_unlock_irqrestore(&priv->lock, flags);
-  sched_unlock();
+  spin_unlock_irqrestore_nopreempt(&priv->lock, flags);
 }
 
 /****************************************************************************

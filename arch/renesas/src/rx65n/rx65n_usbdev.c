@@ -35,7 +35,6 @@
 #include <debug.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <sched.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
@@ -3004,12 +3003,10 @@ static int rx65n_epdisable(struct usbdev_ep_s *ep)
 
   /* Cancel any ongoing activity */
 
-  flags = spin_lock_irqsave(&privep->dev->lock);
-  sched_lock();
+  flags = spin_lock_irqsave_nopreempt(&privep->dev->lock);
   rx65n_cancelrequests(privep);
 
-  spin_unlock_irqrestore(&privep->dev->lock, flags);
-  sched_unlock();
+  spin_unlock_irqrestore_nopreempt(&privep->dev->lock, flags);
   return OK;
 }
 
@@ -3114,8 +3111,7 @@ static int rx65n_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   epno        = USB_EPNO(ep->eplog);
   req->result = -EINPROGRESS;
   req->xfrd   = 0;
-  flags       = spin_lock_irqsave(&priv->lock);
-  sched_lock();
+  flags       = spin_lock_irqsave_nopreempt(&priv->lock);
 
   /* If we are stalled, then drop all requests on the floor */
 
@@ -3142,8 +3138,7 @@ static int rx65n_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
         {
           privreq->req.len = CDC_CLASS_DATA_LENGTH;
           rx65n_rdrequest(epno, priv, privep);
-          spin_unlock_irqrestore(&priv->lock, flags);
-          sched_unlock();
+          spin_unlock_irqrestore_nopreempt(&priv->lock, flags);
           return OK;
         }
 
@@ -3152,8 +3147,7 @@ static int rx65n_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
       if (!privep->txbusy)
         {
           ret = rx65n_wrrequest(epno, priv, privep);
-          spin_unlock_irqrestore(&priv->lock, flags);
-          sched_unlock();
+          spin_unlock_irqrestore_nopreempt(&priv->lock, flags);
           return OK;
         }
     }
@@ -3167,8 +3161,7 @@ static int rx65n_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
       if (priv->ep0state == EP0STATE_RDREQUEST)
         {
           rx65n_rdrequest(epno, priv, privep);
-          spin_unlock_irqrestore(&priv->lock, flags);
-          sched_unlock();
+          spin_unlock_irqrestore_nopreempt(&priv->lock, flags);
           return OK;
         }
 
@@ -3201,8 +3194,7 @@ static int rx65n_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
         }
     }
 
-  spin_unlock_irqrestore(&priv->lock, flags);
-  sched_unlock();
+  spin_unlock_irqrestore_nopreempt(&priv->lock, flags);
   return ret;
 }
 
@@ -3243,11 +3235,9 @@ static int rx65n_epcancel(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
 #endif
   usbtrace(TRACE_EPCANCEL, USB_EPNO(ep->eplog));
 
-  flags = spin_lock_irqsave(&privep->dev->lock);
-  sched_lock();
+  flags = spin_lock_irqsave_nopreempt(&privep->dev->lock);
   rx65n_cancelrequests(privep);
-  spin_unlock_irqrestore(&privep->dev->lock, flags);
-  sched_unlock();
+  spin_unlock_irqrestore_nopreempt(&privep->dev->lock, flags);
   return OK;
 }
 

@@ -34,7 +34,6 @@
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
-#include <sched.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
@@ -2102,8 +2101,7 @@ static int lpc31_epdisable(struct usbdev_ep_s *ep)
 
   usbtrace(TRACE_EPDISABLE, privep->epphy);
 
-  flags = spin_lock_irqsave(&privep->dev->lock);
-  sched_lock();
+  flags = spin_lock_irqsave_nopreempt(&privep->dev->lock);
 
   /* Disable Endpoint */
 
@@ -2120,8 +2118,7 @@ static int lpc31_epdisable(struct usbdev_ep_s *ep)
 
   lpc31_cancelrequests(privep, -ESHUTDOWN);
 
-  spin_unlock_irqrestore(&privep->dev->lock, flags);
-  sched_unlock();
+  spin_unlock_irqrestore_nopreempt(&privep->dev->lock, flags);
   return OK;
 }
 
@@ -2270,8 +2267,7 @@ static int lpc31_epsubmit(struct usbdev_ep_s *ep,
 
   /* Disable Interrupts */
 
-  flags = spin_lock_irqsave(&privep->dev->lock);
-  sched_lock();
+  flags = spin_lock_irqsave_nopreempt(&privep->dev->lock);
 
   /* If we are stalled, then drop all requests on the floor */
 
@@ -2294,8 +2290,7 @@ static int lpc31_epsubmit(struct usbdev_ep_s *ep,
         }
     }
 
-  spin_unlock_irqrestore(&privep->dev->lock, flags);
-  sched_unlock();
+  spin_unlock_irqrestore_nopreempt(&privep->dev->lock, flags);
   return ret;
 }
 
@@ -2323,8 +2318,7 @@ static int lpc31_epcancel(struct usbdev_ep_s *ep,
 
   usbtrace(TRACE_EPCANCEL, privep->epphy);
 
-  flags = spin_lock_irqsave(&privep->dev->lock);
-  sched_lock();
+  flags = spin_lock_irqsave_nopreempt(&privep->dev->lock);
 
   /* FIXME: if the request is the first, then we need to flush the EP
    *         otherwise just remove it from the list
@@ -2333,8 +2327,7 @@ static int lpc31_epcancel(struct usbdev_ep_s *ep,
    */
 
   lpc31_cancelrequests(privep, -ESHUTDOWN);
-  spin_unlock_irqrestore(&privep->dev->lock, flags);
-  sched_unlock();
+  spin_unlock_irqrestore_nopreempt(&privep->dev->lock, flags);
   return OK;
 }
 
@@ -2353,8 +2346,7 @@ static int lpc31_epstall(struct usbdev_ep_s *ep, bool resume)
 
   /* STALL or RESUME the endpoint */
 
-  flags = spin_lock_irqsave(&privep->dev->lock);
-  sched_lock();
+  flags = spin_lock_irqsave_nopreempt(&privep->dev->lock);
   usbtrace(resume ? TRACE_EPRESUME : TRACE_EPSTALL, privep->epphy);
 
   uint32_t addr    = LPC31_USBDEV_ENDPTCTRL(privep->epphy);
@@ -2378,8 +2370,7 @@ static int lpc31_epstall(struct usbdev_ep_s *ep, bool resume)
       lpc31_setbits (ctrl_xs, addr);
     }
 
-  spin_unlock_irqrestore(&privep->dev->lock, flags);
-  sched_unlock();
+  spin_unlock_irqrestore_nopreempt(&privep->dev->lock, flags);
   return OK;
 }
 
@@ -2648,11 +2639,9 @@ static int lpc31_pullup(struct usbdev_s *dev, bool enable)
   struct lpc31_usbdev_s *priv = (struct lpc31_usbdev_s *)dev;
   int ret;
 
-  irqstate_t flags = spin_lock_irqsave(&priv->lock);
-  sched_lock();
+  irqstate_t flags = spin_lock_irqsave_nopreempt(&priv->lock);
   ret = lpc31_pullup_nolock(dev, enable);
-  spin_unlock_irqrestore(&priv->lock, flags);
-  sched_unlock();
+  spin_unlock_irqrestore_nopreempt(&priv->lock, flags);
 
   return ret;
 }
@@ -2824,8 +2813,7 @@ void arm_usbuninitialize(void)
 
   /* Disconnect device */
 
-  flags = spin_lock_irqsave(&priv->lock);
-  sched_lock();
+  flags = spin_lock_irqsave_nopreempt(&priv->lock);
   lpc31_pullup_nolock(&priv->usbdev, false);
   priv->usbdev.speed = USB_SPEED_UNKNOWN;
 
@@ -2845,8 +2833,7 @@ void arm_usbuninitialize(void)
   lpc31_disableclock (CLKID_USBOTGAHBCLK);
   lpc31_disableclock (CLKID_EVENTROUTERPCLK);
 
-  spin_unlock_irqrestore(&priv->lock, flags);
-  sched_unlock();
+  spin_unlock_irqrestore_nopreempt(&priv->lock, flags);
 }
 
 /****************************************************************************

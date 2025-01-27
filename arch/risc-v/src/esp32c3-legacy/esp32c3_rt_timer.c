@@ -34,7 +34,6 @@
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
-#include <sched.h>
 
 #include <nuttx/nuttx.h>
 #include <nuttx/spinlock.h>
@@ -294,8 +293,7 @@ static void delete_rt_timer(struct rt_timer_s *timer)
 
   struct esp32c3_rt_priv_s *priv = &g_rt_priv;
 
-  flags = spin_lock_irqsave(&priv->lock);
-  sched_lock();
+  flags = spin_lock_irqsave_nopreempt(&priv->lock);
 
   if (timer->state == RT_TIMER_READY)
     {
@@ -322,8 +320,7 @@ static void delete_rt_timer(struct rt_timer_s *timer)
     }
 
 exit:
-  spin_unlock_irqrestore(&priv->lock, flags);
-  sched_unlock();
+  spin_unlock_irqrestore_nopreempt(&priv->lock, flags);
 }
 
 /****************************************************************************
@@ -446,8 +443,7 @@ static int rt_timer_isr(int irq, void *context, void *arg)
 
   ESP32C3_TIM_ACKINT(priv->timer);
 
-  flags = spin_lock_irqsave(&priv->lock);
-  sched_lock();
+  flags = spin_lock_irqsave_nopreempt(&priv->lock);
 
   /* Check if there is a timer running */
 
@@ -506,8 +502,7 @@ static int rt_timer_isr(int irq, void *context, void *arg)
         }
     }
 
-  spin_unlock_irqrestore(&priv->lock, flags);
-  sched_unlock();
+  spin_unlock_irqrestore_nopreempt(&priv->lock, flags);
 
   return 0;
 }
