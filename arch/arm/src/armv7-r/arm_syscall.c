@@ -379,7 +379,7 @@ uint32_t *arm_syscall(uint32_t *regs)
            * unprivileged mode.
            */
 
-          regs[REG_PC]   = (uint32_t)ARCH_DATA_RESERVE->ar_sigtramp;
+          regs[REG_PC]   = (uint32_t)USERSPACE->signal_handler & ~1;
           cpsr           = regs[REG_CPSR] & ~PSR_MODE_MASK;
           regs[REG_CPSR] = cpsr | PSR_MODE_USR;
 
