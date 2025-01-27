@@ -115,6 +115,7 @@ static int adjtime_start(long long adjust_usec)
     }
 
   flags = spin_lock_irqsave(&g_adjtime_lock);
+  sched_lock();
 
   /* Set new adjustment */
 
@@ -141,6 +142,7 @@ static int adjtime_start(long long adjust_usec)
     }
 
   spin_unlock_irqrestore(&g_adjtime_lock, flags);
+  sched_unlock();
 
   return ret;
 }
