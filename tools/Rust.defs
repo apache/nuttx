@@ -38,13 +38,13 @@ ifeq ($(CONFIG_ARCH_SIM),y)
   ifeq ($(CONFIG_HOST_LINUX),y)
     ifeq ($(LLVM_ARCHTYPE),x86)
       # Only for x86 based host or x64 but m32 build
-      RUSTFLAGS += --target i686-unknown-linux-$(LLVM_ABITYPE)
+      RUSTFLAGS += --target i686-unknown-linux-gnu
     else
       # For other archs, such as aarch64, arm etc
-      RUSTFLAGS += --target $(LLVM_ARCHTYPE)-unknown-linux-$(LLVM_ABITYPE)
+        RUSTFLAGS += --target $(LLVM_ARCHTYPE)-unknown-linux-gnu
     endif
   else ifeq ($(CONFIG_HOST_MACOS),y)
-    RUSTFLAGS += --target $(LLVM_ARCHTYPE)-apple-$(LLVM_ABITYPE)
+    RUSTFLAGS += --target $(LLVM_ARCHTYPE)-apple-darwin
   endif
 else ifeq ($(CONFIG_ARCH_RISCV),y)
   # Target triple is riscv[32|64][isa]-unknown-none-elf
