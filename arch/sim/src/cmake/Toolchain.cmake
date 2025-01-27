@@ -29,6 +29,32 @@ if(WIN32)
   return()
 endif()
 
+# LLVM style architecture flags
+if(CONFIG_HOST_X86_64)
+  if(CONFIG_SIM_M32)
+    set(LLVM_ARCHTYPE "x86")
+    set(LLVM_CPUTYPE "i686")
+  else()
+    set(LLVM_ARCHTYPE "x86_64")
+    set(LLVM_CPUTYPE "skylake")
+  endif()
+elseif(CONFIG_HOST_X86_32)
+  set(LLVM_ARCHTYPE "x86")
+  set(LLVM_CPUTYPE "i686")
+elseif(CONFIG_HOST_ARM64)
+  set(LLVM_ARCHTYPE "aarch64")
+  set(LLVM_CPUTYPE "cortex-a53")
+elseif(CONFIG_HOST_ARM)
+  set(LLVM_ARCHTYPE "arm")
+  set(LLVM_CPUTYPE "cortex-a9")
+endif()
+
+if(CONFIG_HOST_LINUX OR CONFIG_HOST_MACOS)
+  set(LLVM_ABITYPE "sysv")
+elseif(WIN32)
+  set(LLVM_ABITYPE "msvc")
+endif()
+
 # NuttX is sometimes built as a native target. In that case, the __NuttX__ macro
 # is predefined by the compiler. https://github.com/NuttX/buildroot
 #
