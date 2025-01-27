@@ -58,14 +58,6 @@ void arm_enable_smp(int cpu)
 {
   uint32_t regval;
 
-  /* We need to confirm that current_task has been initialized. */
-
-  while (!current_task(this_cpu()));
-
-  /* Init idle task to percpu reg */
-
-  up_update_task(current_task(cpu));
-
   /* Handle actions unique to CPU0 which comes up first */
 
   if (cpu == 0)
@@ -114,6 +106,14 @@ void arm_enable_smp(int cpu)
       /* Wait for the SCU to be enabled by the primary processor -- should
        * not be necessary.
        */
+
+      /* We need to confirm that current_task has been initialized. */
+
+      while (!current_task(this_cpu()));
+
+      /* Init idle task to percpu reg */
+
+      up_update_task(current_task(cpu));
     }
 
   /* Enable the data cache, set the SMP mode with ACTLR.SMP=1.
