@@ -1161,6 +1161,61 @@ static int gdb_read_register(FAR struct gdb_state_s *state)
 }
 
 /****************************************************************************
+ * Name: gdb_write_register
+ *
+ * Description:
+ *   Write a Register Command Format: P n.
+ *   Note that this won't work for all architectures because the GDB remote
+ *   register number is not always the same as the NuttX register number.
+ *
+ * Input Parameters:
+ *   state   - The pointer to the GDB state structure.
+ *
+ * Returned Value:
+ *   Zero on success.
+ *   Negative value on error.
+ *
+ * Note: Comand Format: Pn.
+ *       Response Format: OK or negative value for error number.
+ ****************************************************************************/
+
+static int gdb_write_register(FAR struct gdb_state_s *state)
+{
+  uintptr_t addr;
+  int ret;
+
+  state->pkt_next++;
+
+  ret = gdb_expect_integer(state, &addr);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = gdb_expect_separator(state, '=');
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  if (addr > state->size / sizeof(uintptr_t) - 1)
+    {
+      return -EINVAL;
+    }
+
+  ret = gdb_hex2bin(&state->registers[addr], sizeof(uintptr_t),
+                    state->pkt_next, gdb_remaining_len(state));
+
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  gdb_send_ok_packet(state);
+  return 0;
+}
+
+/****************************************************************************
  * Name: gdb_read_memory
  *
  * Description:
@@ -2093,6 +2148,9 @@ int gdb_process(FAR struct gdb_state_s *state, int stopreason,
             break;
           case 'p': /* Read one register */
             ret = gdb_read_register(state);
+            break;
+          case 'P': /* Write one register */
+            ret = gdb_write_register(state);
             break;
           case 'm': /* Read memory */
             ret = gdb_read_memory(state);
