@@ -40,6 +40,7 @@
 #include <debug.h>
 #include <fcntl.h>
 #include <stdio.h>
+#include <sched.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
@@ -1136,10 +1137,12 @@ static void cxd56_cancelrequests_nolock(struct cxd56_ep_s *privep)
 static void cxd56_cancelrequests(struct cxd56_ep_s *privep)
 {
   irqstate_t flags = spin_lock_irqsave(&privep->dev->lock);
+  sched_lock();
 
   cxd56_cancelrequests_nolock(privep);
 
   spin_unlock_irqrestore(&privep->dev->lock, flags);
+  sched_unlock();
 }
 
 /****************************************************************************
@@ -2293,9 +2296,11 @@ static int cxd56_epdisable(struct usbdev_ep_s *ep)
   /* Cancel any ongoing activity and reset the endpoint */
 
   flags = spin_lock_irqsave(&privep->dev->lock);
+  sched_lock();
   cxd56_epstall(&privep->ep, false);
   cxd56_cancelrequests_nolock(privep);
   spin_unlock_irqrestore(&privep->dev->lock, flags);
+  sched_unlock();
   return OK;
 }
 
@@ -2435,6 +2440,7 @@ static int cxd56_epsubmit(struct usbdev_ep_s *ep,
   req->result = -EINPROGRESS;
   req->xfrd   = 0;
   flags       = spin_lock_irqsave(&priv->lock);
+  sched_lock();
 
   /* If we are stalled, then drop all requests on the floor, except OUT */
 
@@ -2539,6 +2545,7 @@ static int cxd56_epsubmit(struct usbdev_ep_s *ep,
     }
 
   spin_unlock_irqrestore(&priv->lock, flags);
+  sched_unlock();
   return ret;
 }
 
@@ -2567,8 +2574,10 @@ static int cxd56_epcancel(struct usbdev_ep_s *ep,
   usbtrace(TRACE_EPCANCEL, privep->epphy);
 
   flags = spin_lock_irqsave(&privep->dev->lock);
+  sched_lock();
   cxd56_cancelrequests_nolock(privep);
   spin_unlock_irqrestore(&privep->dev->lock, flags);
+  sched_unlock();
   return OK;
 }
 
@@ -3165,6 +3174,7 @@ void arm_usbuninitialize(void)
     }
 
   flags = spin_lock_irqsave(&priv->lock);
+  sched_lock();
   cxd56_pullup(&priv->usbdev, false);
   priv->usbdev.speed = USB_SPEED_UNKNOWN;
 
@@ -3182,6 +3192,7 @@ void arm_usbuninitialize(void)
 
   cxd56_usb_clock_disable();
   spin_unlock_irqrestore(&priv->lock, flags);
+  sched_unlock();
 
   /* Clear signal */
 
@@ -3276,6 +3287,7 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
   CLASS_UNBIND(driver, &g_usbdev.usbdev);
 
   flags = spin_lock_irqsave(&priv->lock);
+  sched_lock();
 
   /* Disable IRQs */
 
@@ -3296,6 +3308,7 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
   cxd56_usbhwuninit();
 
   spin_unlock_irqrestore(&priv->lock, flags);
+  sched_unlock();
 
   up_pm_release_freqlock(&g_hv_lock);
   up_pm_release_wakelock(&g_wake_lock);

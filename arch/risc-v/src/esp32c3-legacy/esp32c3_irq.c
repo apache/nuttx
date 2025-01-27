@@ -31,6 +31,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
+#include <sched.h>
 
 #include <nuttx/spinlock.h>
 #include <nuttx/arch.h>
@@ -367,8 +368,10 @@ void esp32c3_free_cpuint(uint8_t periphid)
   irqstate_t flags;
 
   flags = spin_lock_irqsave(&g_irq_lock);
+  sched_lock();
   esp32c3_free_cpuint_nolock(periphid);
   spin_unlock_irqrestore(&g_irq_lock, flags);
+  sched_unlock();
 }
 
 /****************************************************************************
@@ -485,6 +488,7 @@ int esp32c3_setup_irq(int periphid, int priority, int type)
   irqinfo("periphid = %d\n", periphid);
 
   flags = spin_lock_irqsave(&g_irq_lock);
+  sched_lock();
 
   /* Setting up an IRQ includes the following steps:
    *    1. Allocate a CPU interrupt.
@@ -498,6 +502,7 @@ int esp32c3_setup_irq(int periphid, int priority, int type)
       irqerr("Unable to allocate CPU interrupt for priority=%d and type=%d",
              priority, type);
       spin_unlock_irqrestore(&g_irq_lock, flags);
+      sched_unlock();
 
       return cpuint;
     }
@@ -514,6 +519,7 @@ int esp32c3_setup_irq(int periphid, int priority, int type)
   esp32c3_bind_irq(cpuint, periphid, priority, type);
 
   spin_unlock_irqrestore(&g_irq_lock, flags);
+  sched_unlock();
 
   return cpuint;
 }
@@ -544,6 +550,7 @@ void esp32c3_teardown_irq(int periphid, int cpuint)
   int irq;
 
   flags = spin_lock_irqsave(&g_irq_lock);
+  sched_lock();
 
   /* Tearing down an IRQ includes the following steps:
    *   1. Free the previously allocated CPU interrupt.
@@ -565,6 +572,7 @@ void esp32c3_teardown_irq(int periphid, int cpuint)
   putreg32(NO_CPUINT, regaddr);
 
   spin_unlock_irqrestore(&g_irq_lock, flags);
+  sched_unlock();
 }
 
 /****************************************************************************

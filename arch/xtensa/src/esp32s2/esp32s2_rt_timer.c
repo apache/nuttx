@@ -32,6 +32,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
+#include <sched.h>
 
 #include <nuttx/nuttx.h>
 #include <nuttx/spinlock.h>
@@ -196,8 +197,10 @@ static void start_rt_timer(struct rt_timer_s *timer,
   struct esp32s2_rt_priv_s *priv = &g_rt_priv;
 
   flags = spin_lock_irqsave(&priv->lock);
+  sched_lock();
   start_rt_timer_nolock(timer, timeout, repeat);
   spin_unlock_irqrestore(&priv->lock, flags);
+  sched_unlock();
 }
 
 /****************************************************************************
@@ -303,6 +306,7 @@ static void delete_rt_timer(struct rt_timer_s *timer)
   struct esp32s2_rt_priv_s *priv = &g_rt_priv;
 
   flags = spin_lock_irqsave(&priv->lock);
+  sched_lock();
 
   if (timer->state == RT_TIMER_READY)
     {
@@ -330,6 +334,7 @@ static void delete_rt_timer(struct rt_timer_s *timer)
 
 exit:
   spin_unlock_irqrestore(&priv->lock, flags);
+  sched_unlock();
 }
 
 /****************************************************************************
@@ -453,6 +458,7 @@ static int rt_timer_isr(int irq, void *context, void *arg)
   ESP32S2_TIM_ACKINT(priv->timer);
 
   flags = spin_lock_irqsave(&priv->lock);
+  sched_lock();
 
   /* Check if there is a timer running */
 
@@ -512,6 +518,7 @@ static int rt_timer_isr(int irq, void *context, void *arg)
     }
 
   spin_unlock_irqrestore(&priv->lock, flags);
+  sched_unlock();
 
   return 0;
 }
