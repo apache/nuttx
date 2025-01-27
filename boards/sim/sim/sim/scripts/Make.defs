@@ -179,9 +179,9 @@ else ifeq ($(CONFIG_HOST_ARM),y)
 endif
 
 ifeq ($(CONFIG_HOST_LINUX),y)
-  LLVM_ABITYPE := gnu
+  LLVM_ABITYPE := sysv
 else ifeq ($(CONFIG_HOST_MACOS),y)
-  LLVM_ABITYPE := darwin
+  LLVM_ABITYPE := sysv
 endif
 
 ARCHPICFLAGS = -fpic
