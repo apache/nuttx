@@ -497,7 +497,16 @@
 #  endif
 #endif
 
-#define BOARD_SDRAM1_SIZE               (8*1024*1024)
+/* BOARD_SDRAM1_SIZE - With ltdc enabled, we reserve the last 2M
+ * of SDRAM for use with the LTDC framebuffer. If using double buffering,
+ * this value will need to be doubled.
+ */
+
+#ifdef CONFIG_STM32H7_LTDC
+#  define BOARD_SDRAM1_SIZE        (6*1024*1024)
+#else
+#  define BOARD_SDRAM1_SIZE        (8*1024*1024)
+#endif
 
 /* BOARD_FMC_SDCR1 - Initial value for SDRAM control registers for SDRAM
  *      bank 1. Note bank 2 isn't used!
