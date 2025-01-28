@@ -132,7 +132,7 @@ FAR struct iob_s *iob_free(FAR struct iob_s *iob)
    * interrupts very briefly.
    */
 
-  flags = spin_lock_irqsave(&g_iob_lock);
+  flags = raw_spin_lock_irqsave(&g_iob_lock);
 
   /* Which list?  If there is a task waiting for an IOB, then put
    * the IOB on either the free list or on the committed list where
@@ -146,7 +146,7 @@ FAR struct iob_s *iob_free(FAR struct iob_s *iob)
       g_iob_count++;
       iob->io_flink   = g_iob_committed;
       g_iob_committed = iob;
-      spin_unlock_irqrestore(&g_iob_lock, flags);
+      raw_spin_unlock_irqrestore(&g_iob_lock, flags);
       nxsem_post(&g_iob_sem);
     }
 #if CONFIG_IOB_THROTTLE > 0
@@ -155,7 +155,7 @@ FAR struct iob_s *iob_free(FAR struct iob_s *iob)
       iob->io_flink   = g_iob_committed;
       g_iob_committed = iob;
       g_throttle_wait--;
-      spin_unlock_irqrestore(&g_iob_lock, flags);
+      raw_spin_unlock_irqrestore(&g_iob_lock, flags);
       nxsem_post(&g_throttle_sem);
     }
 #endif
@@ -164,7 +164,7 @@ FAR struct iob_s *iob_free(FAR struct iob_s *iob)
       g_iob_count++;
       iob->io_flink   = g_iob_freelist;
       g_iob_freelist  = iob;
-      spin_unlock_irqrestore(&g_iob_lock, flags);
+      raw_spin_unlock_irqrestore(&g_iob_lock, flags);
     }
 
   DEBUGASSERT(g_iob_count <= CONFIG_IOB_NBUFFERS);
