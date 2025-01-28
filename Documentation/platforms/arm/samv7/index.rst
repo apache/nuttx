@@ -284,10 +284,12 @@ The peripheral implements four timer counter modules, each supporting three inde
 Universal Synchronous Asynchronous Receiver Transceiver (USART)
 ---------------------------------------------------------------
 
-The MCU supports both UART and USART controllers. USART peripheral can be used with TX and RX DMA support.
-For RX DMA it is required to configure idle bus timeout value in ``CONFIG_SAMV7_SERIAL_DMA_TIMEOUT``.
-This option ensures data are read from the DMA buffer even if it is not full yet. DMA support is
-implemented only for USART peripheral and not for UART.
+The MCU supports both UART and USART controllers. These peripheral can be used with TX and RX DMA support.
+For RX DMA on USART, it is possible to configure idle bus timeout value in ``CONFIG_SAMV7_SERIAL_DMA_TIMEOUT``.
+This option ensures data are read from the DMA buffer even if it is not full yet. UART peripherals do not have
+this timeout support, therefore function :c:func:`sam_serial_dma_poll` should be called periodically to
+flush the DMA buffers. Boards can use common :c:func:`board_uart_rxdma_poll_init` function to initialize
+a timer triggering the poll.
 
 There are several modes in which USART peripheral can operate (ISO7816, IrDA, RS485, SPI, LIN and LON).
 Currently RS485 and SPI master are supported by NuttX.

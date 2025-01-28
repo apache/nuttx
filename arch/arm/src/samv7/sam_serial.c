@@ -66,16 +66,12 @@
 /* DMA Configuration */
 
 #if defined(CONFIG_USART0_RXDMA) || defined(CONFIG_USART1_RXDMA) || \
-    defined(CONFIG_USART2_RXDMA)
+    defined(CONFIG_USART2_RXDMA) || defined(CONFIG_UART0_RXDMA) || \
+    defined(CONFIG_UART1_RXDMA) || defined(CONFIG_UART2_RXDMA) || \
+    defined(CONFIG_UART3_RXDMA) || defined(CONFIG_UART4_RXDMA)
 #  define SERIAL_HAVE_RXDMA
 #else
 #  undef SERIAL_HAVE_RXDMA
-#endif
-
-#if defined(CONFIG_UART0_RXDMA) || defined(CONFIG_UART1_RXDMA) || \
-    defined(CONFIG_UART2_RXDMA) || defined(CONFIG_UART3_RXDMA) || \
-    defined(CONFIG_UART4_RXDMA)
-#  warning RX DMA is currently supported only for USART driver.
 #endif
 
 #if defined(SERIAL_HAVE_RXDMA) && !defined(CONFIG_SAMV7_XDMAC)
@@ -83,16 +79,12 @@
 #endif
 
 #if defined(CONFIG_USART0_TXDMA) || defined(CONFIG_USART1_TXDMA) || \
-    defined(CONFIG_USART2_TXDMA)
+    defined(CONFIG_USART2_TXDMA) || defined(CONFIG_UART0_TXDMA) || \
+    defined(CONFIG_UART1_TXDMA) || defined(CONFIG_UART2_TXDMA) || \
+    defined(CONFIG_UART3_TXDMA) || defined(CONFIG_UART4_TXDMA)
 #  define SERIAL_HAVE_TXDMA
 #else
 #  undef SERIAL_HAVE_TXDMA
-#endif
-
-#if defined(CONFIG_UART0_TXDMA) || defined(CONFIG_UART1_TXDMA) || \
-    defined(CONFIG_UART2_TXDMA) || defined(CONFIG_UART3_TXDMA) || \
-    defined(CONFIG_UART4_TXDMA)
-#  warning TX DMA is currently supported only for USART driver.
 #endif
 
 #if defined(SERIAL_HAVE_TXDMA) && !defined(CONFIG_SAMV7_XDMAC)
@@ -447,6 +439,7 @@ struct sam_dev_s
 #endif
 
   bool     has_rxdma;           /* True if RX DMA is enabled */
+  bool     has_rxdma_idle;
   bool     has_txdma;
   bool     has_rs485;           /* True if RS-485 mode is enabled */
 
@@ -620,22 +613,47 @@ static const struct uart_ops_s g_uart_rxtxdma_ops =
 #if defined(CONFIG_SAMV7_UART0) && defined(CONFIG_UART0_SERIALDRIVER)
 static char g_uart0rxbuffer[CONFIG_UART0_RXBUFSIZE];
 static char g_uart0txbuffer[CONFIG_UART0_TXBUFSIZE];
+#  ifdef CONFIG_UART0_RXDMA
+static uint32_t g_uart0rxbuf[2][RXDMA_BUFFER_SIZE]
+aligned_data(ARMV7M_DCACHE_LINESIZE);
+static struct chnext_view1_s g_uart0rxdesc[2];
+#  endif
 #endif
 #if defined(CONFIG_SAMV7_UART1) && defined(CONFIG_UART1_SERIALDRIVER)
 static char g_uart1rxbuffer[CONFIG_UART1_RXBUFSIZE];
 static char g_uart1txbuffer[CONFIG_UART1_TXBUFSIZE];
+#  ifdef CONFIG_UART1_RXDMA
+static uint32_t g_uart1rxbuf[2][RXDMA_BUFFER_SIZE]
+aligned_data(ARMV7M_DCACHE_LINESIZE);
+static struct chnext_view1_s g_uart1rxdesc[2];
+#  endif
 #endif
 #if defined(CONFIG_SAMV7_UART2) && defined(CONFIG_UART2_SERIALDRIVER)
 static char g_uart2rxbuffer[CONFIG_UART2_RXBUFSIZE];
 static char g_uart2txbuffer[CONFIG_UART2_TXBUFSIZE];
+#  ifdef CONFIG_UART2_RXDMA
+static uint32_t g_uart2rxbuf[2][RXDMA_BUFFER_SIZE]
+aligned_data(ARMV7M_DCACHE_LINESIZE);
+static struct chnext_view1_s g_uart2rxdesc[2];
+#  endif
 #endif
 #if defined(CONFIG_SAMV7_UART3) && defined(CONFIG_UART3_SERIALDRIVER)
 static char g_uart3rxbuffer[CONFIG_UART3_RXBUFSIZE];
 static char g_uart3txbuffer[CONFIG_UART3_TXBUFSIZE];
+#  ifdef CONFIG_UART3_RXDMA
+static uint32_t g_uart3rxbuf[2][RXDMA_BUFFER_SIZE]
+aligned_data(ARMV7M_DCACHE_LINESIZE);
+static struct chnext_view1_s g_uart3rxdesc[2];
+#  endif
 #endif
 #if defined(CONFIG_SAMV7_UART4) && defined(CONFIG_UART4_SERIALDRIVER)
 static char g_uart4rxbuffer[CONFIG_UART4_RXBUFSIZE];
 static char g_uart4txbuffer[CONFIG_UART4_TXBUFSIZE];
+#  ifdef CONFIG_UART4_RXDMA
+static uint32_t g_uart4rxbuf[2][RXDMA_BUFFER_SIZE]
+aligned_data(ARMV7M_DCACHE_LINESIZE);
+static struct chnext_view1_s g_uart4rxdesc[2];
+#  endif
 #endif
 #if defined(CONFIG_SAMV7_USART0) && defined(CONFIG_USART0_SERIALDRIVER)
 static char g_usart0rxbuffer[CONFIG_USART0_RXBUFSIZE];
@@ -677,6 +695,22 @@ static struct sam_dev_s g_uart0priv =
   .parity         = CONFIG_UART0_PARITY,
   .bits           = CONFIG_UART0_BITS,
   .stopbits2      = CONFIG_UART0_2STOP,
+#  ifdef CONFIG_UART0_RXDMA
+  .buf_idx        = 0,
+  .nextcache      = 0,
+  .rxbuf          =
+  {
+    g_uart0rxbuf[0], g_uart0rxbuf[1]
+  },
+  .desc           =
+  {
+    &g_uart0rxdesc[0], &g_uart0rxdesc[1]
+  },
+  .has_rxdma      = true,
+#  endif
+#  ifdef CONFIG_UART0_TXDMA
+  .has_txdma      = true,
+#  endif
 };
 
 static uart_dev_t g_uart0port =
@@ -691,7 +725,15 @@ static uart_dev_t g_uart0port =
     .size   = CONFIG_UART0_TXBUFSIZE,
     .buffer = g_uart0txbuffer,
   },
+#  if defined(CONFIG_UART0_RXDMA) && defined(CONFIG_UART0_TXDMA)
+  .ops      = &g_uart_rxtxdma_ops,
+#  elif defined(CONFIG_UART0_RXDMA) && !defined(CONFIG_UART0_TXDMA)
+  .ops      = &g_uart_rxdma_ops,
+#  elif !defined(CONFIG_UART0_RXDMA) && defined(CONFIG_UART0_TXDMA)
+  .ops      = &g_uart_txdma_ops,
+#  else
   .ops      = &g_uart_ops,
+#  endif
   .priv     = &g_uart0priv,
 };
 #endif
@@ -708,6 +750,22 @@ static struct sam_dev_s g_uart1priv =
   .parity         = CONFIG_UART1_PARITY,
   .bits           = CONFIG_UART1_BITS,
   .stopbits2      = CONFIG_UART1_2STOP,
+#  ifdef CONFIG_UART1_RXDMA
+  .buf_idx        = 0,
+  .nextcache      = 0,
+  .rxbuf          =
+  {
+    g_uart1rxbuf[0], g_uart1rxbuf[1]
+  },
+  .desc           =
+  {
+    &g_uart1rxdesc[0], &g_uart1rxdesc[1]
+  },
+  .has_rxdma      = true,
+#  endif
+#  ifdef CONFIG_UART1_TXDMA
+  .has_txdma      = true,
+#  endif
 };
 
 static uart_dev_t g_uart1port =
@@ -722,7 +780,15 @@ static uart_dev_t g_uart1port =
     .size   = CONFIG_UART1_TXBUFSIZE,
     .buffer = g_uart1txbuffer,
   },
+#  if defined(CONFIG_UART1_RXDMA) && defined(CONFIG_UART1_TXDMA)
+  .ops      = &g_uart_rxtxdma_ops,
+#  elif defined(CONFIG_UART1_RXDMA) && !defined(CONFIG_UART1_TXDMA)
+  .ops      = &g_uart_rxdma_ops,
+#  elif !defined(CONFIG_UART1_RXDMA) && defined(CONFIG_UART1_TXDMA)
+  .ops      = &g_uart_txdma_ops,
+#  else
   .ops      = &g_uart_ops,
+#  endif
   .priv     = &g_uart1priv,
 };
 #endif
@@ -739,6 +805,22 @@ static struct sam_dev_s g_uart2priv =
   .parity         = CONFIG_UART2_PARITY,
   .bits           = CONFIG_UART2_BITS,
   .stopbits2      = CONFIG_UART2_2STOP,
+#  ifdef CONFIG_UART2_RXDMA
+  .buf_idx        = 0,
+  .nextcache      = 0,
+  .rxbuf          =
+  {
+    g_uart2rxbuf[0], g_uart2rxbuf[1]
+  },
+  .desc           =
+  {
+    &g_uart2rxdesc[0], &g_uart2rxdesc[1]
+  },
+  .has_rxdma      = true,
+#  endif
+#  ifdef CONFIG_UART2_TXDMA
+  .has_txdma      = true,
+#  endif
 };
 
 static uart_dev_t g_uart2port =
@@ -753,7 +835,15 @@ static uart_dev_t g_uart2port =
     .size   = CONFIG_UART2_TXBUFSIZE,
     .buffer = g_uart2txbuffer,
   },
+#  if defined(CONFIG_UART2_RXDMA) && defined(CONFIG_UART2_TXDMA)
+  .ops      = &g_uart_rxtxdma_ops,
+#  elif defined(CONFIG_UART2_RXDMA) && !defined(CONFIG_UART2_TXDMA)
+  .ops      = &g_uart_rxdma_ops,
+#  elif !defined(CONFIG_UART2_RXDMA) && defined(CONFIG_UART2_TXDMA)
+  .ops      = &g_uart_txdma_ops,
+#  else
   .ops      = &g_uart_ops,
+#  endif
   .priv     = &g_uart2priv,
 };
 #endif
@@ -770,6 +860,22 @@ static struct sam_dev_s g_uart3priv =
   .parity         = CONFIG_UART3_PARITY,
   .bits           = CONFIG_UART3_BITS,
   .stopbits2      = CONFIG_UART3_2STOP,
+#  ifdef CONFIG_UART3_RXDMA
+  .buf_idx        = 0,
+  .nextcache      = 0,
+  .rxbuf          =
+  {
+    g_uart3rxbuf[0], g_uart3rxbuf[1]
+  },
+  .desc           =
+  {
+    &g_uart3rxdesc[0], &g_uart3rxdesc[1]
+  },
+  .has_rxdma      = true,
+#  endif
+#  ifdef CONFIG_UART3_TXDMA
+  .has_txdma      = true,
+#  endif
 };
 
 static uart_dev_t g_uart3port =
@@ -784,7 +890,15 @@ static uart_dev_t g_uart3port =
     .size   = CONFIG_UART3_TXBUFSIZE,
     .buffer = g_uart3txbuffer,
   },
+#  if defined(CONFIG_UART3_RXDMA) && defined(CONFIG_UART3_TXDMA)
+  .ops      = &g_uart_rxtxdma_ops,
+#  elif defined(CONFIG_UART3_RXDMA) && !defined(CONFIG_UART3_TXDMA)
+  .ops      = &g_uart_rxdma_ops,
+#  elif !defined(CONFIG_UART3_RXDMA) && defined(CONFIG_UART3_TXDMA)
+  .ops      = &g_uart_txdma_ops,
+#  else
   .ops      = &g_uart_ops,
+#  endif
   .priv     = &g_uart3priv,
 };
 #endif
@@ -801,6 +915,22 @@ static struct sam_dev_s g_uart4priv =
   .parity         = CONFIG_UART4_PARITY,
   .bits           = CONFIG_UART4_BITS,
   .stopbits2      = CONFIG_UART4_2STOP,
+#  ifdef CONFIG_UART4_RXDMA
+  .buf_idx        = 0,
+  .nextcache      = 0,
+  .rxbuf          =
+  {
+    g_uart4rxbuf[0], g_uart4rxbuf[1]
+  },
+  .desc           =
+  {
+    &g_uart4rxdesc[0], &g_uart4rxdesc[1]
+  },
+  .has_rxdma      = true,
+#  endif
+#  ifdef CONFIG_UART4_TXDMA
+  .has_txdma      = true,
+#  endif
 };
 
 static uart_dev_t g_uart4port =
@@ -815,7 +945,15 @@ static uart_dev_t g_uart4port =
     .size   = CONFIG_UART4_TXBUFSIZE,
     .buffer = g_uart4txbuffer,
   },
+#  if defined(CONFIG_UART4_RXDMA) && defined(CONFIG_UART4_TXDMA)
+  .ops      = &g_uart_rxtxdma_ops,
+#  elif defined(CONFIG_UART4_RXDMA) && !defined(CONFIG_UART4_TXDMA)
+  .ops      = &g_uart_rxdma_ops,
+#  elif !defined(CONFIG_UART4_RXDMA) && defined(CONFIG_UART4_TXDMA)
+  .ops      = &g_uart_txdma_ops,
+#  else
   .ops      = &g_uart_ops,
+#  endif
   .priv     = &g_uart4priv,
 };
 #endif
@@ -847,6 +985,7 @@ static struct sam_dev_s g_usart0priv =
     &g_usart0rxdesc[0], &g_usart0rxdesc[1]
   },
   .has_rxdma      = true,
+  .has_rxdma_idle = true,
 #  endif
 #  ifdef CONFIG_USART0_TXDMA
   .has_txdma      = true,
@@ -909,6 +1048,7 @@ static struct sam_dev_s g_usart1priv =
     &g_usart1rxdesc[0], &g_usart1rxdesc[1]
   },
   .has_rxdma      = true,
+  .has_rxdma_idle = true,
 #  endif
 #  ifdef CONFIG_USART1_TXDMA
   .has_txdma      = true,
@@ -971,6 +1111,7 @@ static struct sam_dev_s g_usart2priv =
     &g_usart2rxdesc[0], &g_usart2rxdesc[1]
   },
   .has_rxdma      = true,
+  .has_rxdma_idle = true,
 #  endif
 #  ifdef CONFIG_USART2_TXDMA
   .has_txdma      = true,
@@ -1371,11 +1512,14 @@ static int sam_dma_setup(struct uart_dev_s *dev)
 
       sam_dmastart_circular(priv->rxdma, sam_dma_rxcallback, (void *)dev);
 
-      /* Use defined timeout to check if RX bus is in idle state */
+      if (priv->has_rxdma_idle)
+        {
+          /* Use defined timeout to check if RX bus is in idle state */
 
-      sam_serialout(priv, SAM_UART_RTOR_OFFSET,
-                    CONFIG_SAMV7_SERIAL_DMA_TIMEOUT);
-      sam_serialout(priv, SAM_UART_IER_OFFSET, UART_INT_TIMEOUT);
+          sam_serialout(priv, SAM_UART_RTOR_OFFSET,
+                        CONFIG_SAMV7_SERIAL_DMA_TIMEOUT);
+          sam_serialout(priv, SAM_UART_IER_OFFSET, UART_INT_TIMEOUT);
+        }
     }
 
 #endif
@@ -1608,7 +1752,7 @@ static int sam_interrupt(int irq, void *context, void *arg)
 #ifdef SERIAL_HAVE_RXDMA
       if ((pending & UART_INT_TIMEOUT) != 0)
         {
-          if (priv->has_rxdma)
+          if (priv->has_rxdma && priv->has_rxdma_idle)
             {
               /* We received Timeout interrupt */
 
@@ -2334,7 +2478,8 @@ static void sam_dma_txcallback(DMA_HANDLE handle, void *arg, int status)
  *
  *   This polling also in not neccessary if CONFIG_SAMV7_SERIAL_DMA_TIMEOUT
  *   is defined as sam_dma_rxcallback() is called each time idle bus is
- *   detected.
+ *   detected. This however only applies to USART peripherals, UART has to
+ *   be polled in any case.
  *
  ****************************************************************************/
 
@@ -2344,6 +2489,41 @@ void sam_serial_dma_poll(void)
     irqstate_t flags;
 
     flags = enter_critical_section();
+
+#ifdef CONFIG_UART0_RXDMA
+  if (g_uart0priv.rxdma != NULL)
+    {
+      sam_dma_rxcallback(g_uart0priv.rxdma, &g_uart0port, 0);
+    }
+#endif
+
+#ifdef CONFIG_UART1_RXDMA
+  if (g_uart1priv.rxdma != NULL)
+    {
+      sam_dma_rxcallback(g_uart1priv.rxdma, &g_uart1port, 0);
+    }
+#endif
+
+#ifdef CONFIG_UART2_RXDMA
+  if (g_uart2priv.rxdma != NULL)
+    {
+      sam_dma_rxcallback(g_uart2priv.rxdma, &g_uart2port, 0);
+    }
+#endif
+
+#ifdef CONFIG_UART3_RXDMA
+  if (g_uart3priv.rxdma != NULL)
+    {
+      sam_dma_rxcallback(g_uart3priv.rxdma, &g_uart3port, 0);
+    }
+#endif
+
+#ifdef CONFIG_UART4_RXDMA
+  if (g_uart4priv.rxdma != NULL)
+    {
+      sam_dma_rxcallback(g_uart4priv.rxdma, &g_uart4port, 0);
+    }
+#endif
 
 #ifdef CONFIG_USART0_RXDMA
   if (g_usart0priv.rxdma != NULL)
