@@ -15,7 +15,7 @@ Board information
 =================
 
 This board was release by Witte Tenology in 2023 and developed based on
-STM32H753BI microcontroller. The board has 2 expansion connectors used by the LCD display with 
+STM32H753BI microcontroller. The board has 2 expansion connectors used by the LCD display with
 touchscreen and another for access to other peripherals of microcontroller.
 
 The board features:
@@ -38,7 +38,7 @@ The board features:
   - 2 On-board CAN-FD Transceiver
 
 Expansion connector 1 features:
-  - 1 Display RBG 888 
+  - 1 Display RBG 565
   - 1 Capacitive Touchscreen sensor
 
 Expansion connector 2 features.
@@ -61,7 +61,7 @@ The LINUM-STM32H753BI has 3 software controllable LEDs.
   ======= =====
   LED_R   PG2
   LED_G   PG3
-  LED_B   PB2  
+  LED_B   PB2
   ======= =====
 
 UART/USART
@@ -76,7 +76,7 @@ USART1
   USART1 PINS
   ====== =====
   TX     PB14
-  RX     PB15 
+  RX     PB15
   ====== =====
 
 The LINUM-STM32H753BI board has two on-board RS-232 transceiver connected to USART2 and USART3.
@@ -114,9 +114,9 @@ The LINUM-STM32H753BI board has two on-board RS-485 transceiver connected to USA
   ====== =====
   TXD    PC6
   RXD    PC7
-  DE     PG12  
+  DE     PG12
   ====== =====
-  
+
 SDMMC
 ======
 
@@ -137,7 +137,7 @@ The LINUM-STM32H753BI has one SDCard slot connected as below:
   =============== =====
   SDCARD_DETECTED PG7
   SDCARD_PWR_EN   PD7
-  =============== =====      
+  =============== =====
 
 ETHERNET
 ========
@@ -170,7 +170,7 @@ The LINUM-STM32H753BI board has two on-board CAN-FD transceiver connected to FDC
   ====== =====
   TXD    PH13
   RXD    PH14
-  STD    PI2  
+  STD    PI2
   ====== =====
 
   ====== =====
@@ -178,7 +178,7 @@ The LINUM-STM32H753BI board has two on-board CAN-FD transceiver connected to FDC
   ====== =====
   TXD    PB13
   RXD    PB12
-  STD    PE3  
+  STD    PE3
   ====== =====
 
 USB
@@ -212,7 +212,7 @@ The NOR memory used is the W25Q128JV with 16MB
   CLK     PF10
   NCS     PG6
   ======= =====
-  
+
 I2C3
 ============
 The LINUM-STM32H753BI connects the EEPROM memory and the touchscreen sensor to I2C3.
@@ -244,7 +244,7 @@ The touchscreen sensor used is the FT5X06.
 I2C4
 =======
 The I2C4 is available for general use on the expansion connector.
-  
+
   ====== =====
   I2C4   PINS
   ====== =====
@@ -356,7 +356,7 @@ The LINUM-STM32H753BI has a buzzer without internal oscillator connected to PB7
   ========= =====
   GPIO      PINS
   ========= =====
-  BUZZER    PB7  
+  BUZZER    PB7
   ========= =====
 
 ==============
@@ -541,7 +541,7 @@ Transmiting a file to PC::
 
     # Using zmodem to receive a file from target
     my_pc/temp$ rz > /dev/ttyACM0 < /dev/ttyACM0
-    Receiving: nuttx_logo.txt                         
+    Receiving: nuttx_logo.txt
     Bytes received:    1942/   1942   BPS:124544
 
     Transfer complete
@@ -672,7 +672,7 @@ In your pc you will be able connect to target using telnet and access their shel
     nsh> exit
     Connection closed by foreign host.
     $
-    
+
 Testing wget to download file from server::
 
     # PC: Creating a http server and sharing local folder.
@@ -682,7 +682,7 @@ Testing wget to download file from server::
     Serving HTTP on 0.0.0.0 port 80 (http://0.0.0.0:80/) ...
     10.42.0.2 - - [28/Apr/2024 16:14:39] "GET /nuttx_logo.txt HTTP/1.0" 200 -
 
-    # Using wget on target    
+    # Using wget on target
     nsh> mount -t tmpfs /tmp
     nsh> cd /tmp
     nsh> pwd
@@ -707,7 +707,7 @@ Enable the USB Mass Storage with the command **msconn**::
 After that check if your PC recognized the usb driver::
 
     $ sudo dmesg | tail
-    [sudo] password for jaga: 
+    [sudo] password for jaga:
     [27219.361934] usbcore: registered new interface driver uas
     [27220.378231] scsi 0:0:0:0: Direct-Access     NuttX    Mass Storage     0101 PQ: 0 ANSI: 2
     [27220.378646] sd 0:0:0:0: Attached scsi generic sg0 type 0
@@ -817,7 +817,7 @@ Configures the board to use the SPI4 and enables RFID driver with MFRC522::
 lvgl
 ----
 
-Configures the board to use display of 7 inch with lvgl example. The touch screen functionality is implemented using 
+Configures the board to use display of 7 inch with lvgl example. The touch screen functionality is implemented using
 the FT5X06 capacitive touch controller connected to I2C3 interface, with interrupt handling configured on pin PH9 for touch event detection.
 
 To verify if the touch controller is functioning correctly, use the **tc** command.::
@@ -886,17 +886,12 @@ To verify if the display is functioning correctly, use the **fb** command. You s
   5: (465,270) ( 94, 60)
   Test finished
 
-Once the **fd** command work, run the lvgl exemple. ::
+Once the **fd** command works, run the lvgl examples. ::
 
   nsh> lvgldemo
+  nsh> lvgldemo benchmark
 
-**WARNING:** This example at the moment is not working correctly yet and have a bug fix to be done.
-In the lvgl file **./apps/graphics/lvgl/lvgl/src/drivers/nuttx/lv_nuttx_fbdev.c**
-search the function **lv_nuttx_fbdev_set_file** and modify line 156 as follows::
-
-    dsc->mem_off_screen = malloc(data_size);
-    to
-    dsc->mem_off_screen = (void*)0xC0000000;
+**WARNING:** For this example, the total SDRAM size was reduced from 8M to 6M and the LTDC base address was moved to address 0xC0600000 to avoid video memory invasion since the SDRAM was mapped to use the nuttx heap. If using the example with 2 layers, the reserved value will need to be doubled.
 
 tone
 ----
