@@ -90,8 +90,7 @@ void mpfs_enable_cache(void)
   uint64_t *p_scratchpad = (uint64_t *)MPFS_ZERO_DEVICE_BOTTOM;
   uint32_t ways_inc;
   uint32_t inc;
-  uint64_t current_way = 1 << (((LIBERO_SETTING_WAY_ENABLE + 1) -
-                                 LIBERO_SETTING_NUM_SCRATCH_PAD_WAYS));
+  uint64_t current_way = 0x1;
 
   /* Increasing the ways decreases the 2 MB l2lim area:
    *   - Way0:  0x081e0000 - 0x08200000
@@ -146,6 +145,30 @@ void mpfs_enable_cache(void)
            MPFS_CACHE_WAY_MASK_U54_4_DCACHE);
   putreg32(LIBERO_SETTING_WAY_MASK_U54_4_ICACHE,
            MPFS_CACHE_WAY_MASK_U54_4_ICACHE);
+
+  /* Sanity check: the scratchpad area is not configured in use as
+   * cache on any master
+   */
+
+#if LIBERO_SETTING_NUM_SCRATCH_PAD_WAYS != 0
+  static_assert((
+    (LIBERO_SETTING_WAY_MASK_DMA |
+     LIBERO_SETTING_WAY_MASK_AXI4_PORT_0 |
+     LIBERO_SETTING_WAY_MASK_AXI4_PORT_1 |
+     LIBERO_SETTING_WAY_MASK_AXI4_PORT_2 |
+     LIBERO_SETTING_WAY_MASK_AXI4_PORT_3 |
+     LIBERO_SETTING_WAY_MASK_E51_DCACHE |
+     LIBERO_SETTING_WAY_MASK_E51_ICACHE |
+     LIBERO_SETTING_WAY_MASK_U54_1_DCACHE |
+     LIBERO_SETTING_WAY_MASK_U54_1_ICACHE |
+     LIBERO_SETTING_WAY_MASK_U54_2_DCACHE |
+     LIBERO_SETTING_WAY_MASK_U54_2_ICACHE |
+     LIBERO_SETTING_WAY_MASK_U54_3_DCACHE |
+     LIBERO_SETTING_WAY_MASK_U54_3_ICACHE |
+     LIBERO_SETTING_WAY_MASK_U54_4_DCACHE |
+     LIBERO_SETTING_WAY_MASK_U54_4_ICACHE) &
+    ((1 << LIBERO_SETTING_NUM_SCRATCH_PAD_WAYS) - 1)) == 0);
+#endif
 
   /* Assign ways to Zero Device */
 
