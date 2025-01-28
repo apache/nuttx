@@ -1409,11 +1409,15 @@ static ssize_t w25qxxxjv_bread(FAR struct mtd_dev_s *dev, off_t startblock,
    * read
    */
 
+  w25qxxxjv_lock(priv->qspi);
+
   if (priv->numofdies != 0)
     {
       priv->currentdie = w25qxxxjv_get_die_from_addr(priv, startblock <<
                                                      priv->pageshift);
     }
+
+  w25qxxxjv_unlock(priv->qspi);
 
 #ifdef CONFIG_W25QXXXJV_SECTOR512
   nbytes = w25qxxxjv_read(dev, startblock << W25QXXXJV_SECTOR512_SHIFT,
@@ -1447,6 +1451,8 @@ static ssize_t w25qxxxjv_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
   finfo("startblock: %08" PRIxOFF " nblocks: %d\n",
         startblock, (int)nblocks);
 
+  w25qxxxjv_lock(priv->qspi);
+
   if (priv->numofdies != 0)
     {
       priv->currentdie = w25qxxxjv_get_die_from_addr(priv, startblock <<
@@ -1454,8 +1460,6 @@ static ssize_t w25qxxxjv_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
     }
 
   /* Lock the QuadSPI bus and write all of the pages to FLASH */
-
-  w25qxxxjv_lock(priv->qspi);
 
 #if defined(CONFIG_W25QXXXJV_SECTOR512)
   ret = w25qxxxjv_write_cache(priv, buffer, startblock, nblocks);
