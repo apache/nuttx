@@ -1135,11 +1135,11 @@ static void cxd56_cancelrequests_nolock(struct cxd56_ep_s *privep)
 
 static void cxd56_cancelrequests(struct cxd56_ep_s *privep)
 {
-  irqstate_t flags = spin_lock_irqsave(&privep->dev->lock);
+  irqstate_t flags = spin_lock_irqsave_nopreempt(&privep->dev->lock);
 
   cxd56_cancelrequests_nolock(privep);
 
-  spin_unlock_irqrestore(&privep->dev->lock, flags);
+  spin_unlock_irqrestore_nopreempt(&privep->dev->lock, flags);
 }
 
 /****************************************************************************
@@ -2292,10 +2292,10 @@ static int cxd56_epdisable(struct usbdev_ep_s *ep)
 
   /* Cancel any ongoing activity and reset the endpoint */
 
-  flags = spin_lock_irqsave(&privep->dev->lock);
+  flags = spin_lock_irqsave_nopreempt(&privep->dev->lock);
   cxd56_epstall(&privep->ep, false);
   cxd56_cancelrequests_nolock(privep);
-  spin_unlock_irqrestore(&privep->dev->lock, flags);
+  spin_unlock_irqrestore_nopreempt(&privep->dev->lock, flags);
   return OK;
 }
 
@@ -2434,7 +2434,7 @@ static int cxd56_epsubmit(struct usbdev_ep_s *ep,
 
   req->result = -EINPROGRESS;
   req->xfrd   = 0;
-  flags       = spin_lock_irqsave(&priv->lock);
+  flags       = spin_lock_irqsave_nopreempt(&priv->lock);
 
   /* If we are stalled, then drop all requests on the floor, except OUT */
 
@@ -2538,7 +2538,7 @@ static int cxd56_epsubmit(struct usbdev_ep_s *ep,
       ret = cxd56_rdrequest(privep);
     }
 
-  spin_unlock_irqrestore(&priv->lock, flags);
+  spin_unlock_irqrestore_nopreempt(&priv->lock, flags);
   return ret;
 }
 
@@ -2566,9 +2566,9 @@ static int cxd56_epcancel(struct usbdev_ep_s *ep,
 
   usbtrace(TRACE_EPCANCEL, privep->epphy);
 
-  flags = spin_lock_irqsave(&privep->dev->lock);
+  flags = spin_lock_irqsave_nopreempt(&privep->dev->lock);
   cxd56_cancelrequests_nolock(privep);
-  spin_unlock_irqrestore(&privep->dev->lock, flags);
+  spin_unlock_irqrestore_nopreempt(&privep->dev->lock, flags);
   return OK;
 }
 
@@ -3164,7 +3164,7 @@ void arm_usbuninitialize(void)
       usbdev_unregister(priv->driver);
     }
 
-  flags = spin_lock_irqsave(&priv->lock);
+  flags = spin_lock_irqsave_nopreempt(&priv->lock);
   cxd56_pullup(&priv->usbdev, false);
   priv->usbdev.speed = USB_SPEED_UNKNOWN;
 
@@ -3181,7 +3181,7 @@ void arm_usbuninitialize(void)
   irq_detach(CXD56_IRQ_USB_VBUSN);
 
   cxd56_usb_clock_disable();
-  spin_unlock_irqrestore(&priv->lock, flags);
+  spin_unlock_irqrestore_nopreempt(&priv->lock, flags);
 
   /* Clear signal */
 
@@ -3275,7 +3275,7 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
 
   CLASS_UNBIND(driver, &g_usbdev.usbdev);
 
-  flags = spin_lock_irqsave(&priv->lock);
+  flags = spin_lock_irqsave_nopreempt(&priv->lock);
 
   /* Disable IRQs */
 
@@ -3295,7 +3295,7 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
 
   cxd56_usbhwuninit();
 
-  spin_unlock_irqrestore(&priv->lock, flags);
+  spin_unlock_irqrestore_nopreempt(&priv->lock, flags);
 
   up_pm_release_freqlock(&g_hv_lock);
   up_pm_release_wakelock(&g_wake_lock);

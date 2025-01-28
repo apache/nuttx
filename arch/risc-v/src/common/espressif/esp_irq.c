@@ -520,7 +520,7 @@ int esp_setup_irq(int source, irq_priority_t priority, int type)
 
   DEBUGASSERT(source >= 0 && source < ESP_NSOURCES);
 
-  flags = spin_lock_irqsave(&g_irq_lock);
+  flags = spin_lock_irqsave_nopreempt(&g_irq_lock);
 
   /* Setting up an IRQ includes the following steps:
    *    1. Allocate a CPU interrupt.
@@ -550,7 +550,7 @@ int esp_setup_irq(int source, irq_priority_t priority, int type)
       esp_irq_unset_iram_isr(irq);
     }
 
-  spin_unlock_irqrestore(&g_irq_lock, flags);
+  spin_unlock_irqrestore_nopreempt(&g_irq_lock, flags);
 
   return cpuint;
 }

@@ -814,7 +814,7 @@ int esp32s3_setup_irq(int cpu, int periphid, int priority, int flags)
       return -EINVAL;
     }
 
-  irqstate = spin_lock_irqsave(&g_irq_lock);
+  irqstate = spin_lock_irqsave_nopreempt(&g_irq_lock);
 
   /* Setting up an IRQ includes the following steps:
    *    1. Allocate a CPU interrupt.
@@ -828,7 +828,7 @@ int esp32s3_setup_irq(int cpu, int periphid, int priority, int flags)
     {
       irqerr("Unable to allocate CPU interrupt for priority=%d and flags=%d",
              priority, flags);
-      spin_unlock_irqrestore(&g_irq_lock, irqstate);
+      spin_unlock_irqrestore_nopreempt(&g_irq_lock, irqstate);
 
       return cpuint;
     }
@@ -856,7 +856,7 @@ int esp32s3_setup_irq(int cpu, int periphid, int priority, int flags)
 
   putreg32(cpuint, regaddr);
 
-  spin_unlock_irqrestore(&g_irq_lock, irqstate);
+  spin_unlock_irqrestore_nopreempt(&g_irq_lock, irqstate);
 
   return cpuint;
 }

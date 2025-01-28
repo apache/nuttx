@@ -694,7 +694,7 @@ imxrt_lpi2c_sem_waitdone(struct imxrt_lpi2c_priv_s *priv)
   uint32_t regval;
   int ret;
 
-  flags = spin_lock_irqsave(&priv->spinlock);
+  flags = spin_lock_irqsave_nopreempt(&priv->spinlock);
 
 #ifdef CONFIG_IMXRT_LPI2C_DMA
   if (priv->dma == NULL)
@@ -775,7 +775,7 @@ imxrt_lpi2c_sem_waitdone(struct imxrt_lpi2c_priv_s *priv)
       imxrt_lpi2c_putreg(priv, IMXRT_LPI2C_SIER_OFFSET, 0);
     }
 
-  spin_unlock_irqrestore(&priv->spinlock, flags);
+  spin_unlock_irqrestore_nopreempt(&priv->spinlock, flags);
   return ret;
 }
 #else

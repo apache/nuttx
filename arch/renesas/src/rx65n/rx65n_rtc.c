@@ -480,7 +480,7 @@ int up_rtc_gettime(struct timespec *tp)
   uint8_t regval;
   struct tm t;
 
-  flags = spin_lock_irqsave(&g_rtc_lock);
+  flags = spin_lock_irqsave_nopreempt(&g_rtc_lock);
 
   if (RTC.RCR2.BIT.START == 0)
     {
@@ -548,7 +548,7 @@ int up_rtc_gettime(struct timespec *tp)
   UNUSED(mincnt);
   UNUSED(seccnt);
 
-  spin_unlock_irqrestore(&g_rtc_lock, flags);
+  spin_unlock_irqrestore_nopreempt(&g_rtc_lock, flags);
   return OK;
 }
 #endif

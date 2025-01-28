@@ -493,9 +493,9 @@ static void s32k3xx_tcd_free(struct s32k3xx_edmatcd_s *tcd)
    * a TCD.
    */
 
-  flags = spin_lock_irqsave(&g_edma.lock);
+  flags = spin_lock_irqsave_nopreempt(&g_edma.lock);
   s32k3xx_tcd_free_nolock(tcd);
-  spin_unlock_irqrestore(&g_edma.lock, flags);
+  spin_unlock_irqrestore_nopreempt(&g_edma.lock, flags);
 }
 #endif
 
@@ -723,7 +723,7 @@ static void s32k3xx_dmaterminate(struct s32k3xx_dmach_s *dmach, int result)
   irqstate_t flags;
   void *arg;
 
-  flags = spin_lock_irqsave(&g_edma.lock);
+  flags = spin_lock_irqsave_nopreempt(&g_edma.lock);
 
   chan            = dmach->chan;
 
@@ -777,7 +777,7 @@ static void s32k3xx_dmaterminate(struct s32k3xx_dmach_s *dmach, int result)
       callback((DMACH_HANDLE)dmach, arg, true, result);
     }
 
-  spin_unlock_irqrestore(&g_edma.lock, flags);
+  spin_unlock_irqrestore_nopreempt(&g_edma.lock, flags);
 }
 
 /****************************************************************************

@@ -1110,9 +1110,10 @@ struct can_dev_s *am335x_can_initialize(int port)
   else
 #endif /* CONFIG_AM335X_CAN1 */
     {
+      spin_unlock_irqrestore(&g_can_lock, flags);
+
       canerr("Unsupported port: %d\n", port);
 
-      spin_unlock_irqrestore(&g_can_lock, flags);
       return NULL;
     }
 
@@ -1151,7 +1152,11 @@ void am335x_can_uninitialize(struct can_dev_s *dev)
   else
 #endif /* CONFIG_AM335X_CAN1 */
     {
+      spin_unlock_irqrestore(&g_can_lock, flags);
+
       canerr("Not a CAN device: %p\n", dev);
+
+      return;
     }
 
   spin_unlock_irqrestore(&g_can_lock, flags);
