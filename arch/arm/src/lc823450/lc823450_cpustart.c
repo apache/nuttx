@@ -112,7 +112,7 @@ static void cpu1_boot(void)
       up_enable_irq(LC823450_IRQ_SMP_CALL_01);
     }
 
-  spin_unlock(&g_cpu_wait[0]);
+  raw_spin_unlock(&g_cpu_wait[0]);
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION
   /* Notify that this CPU has started */
@@ -177,7 +177,7 @@ int up_cpu_start(int cpu)
                      tcb->adj_stack_size, CPU1_VECTOR_ISTACK);
   putreg32((uint32_t)cpu1_boot, CPU1_VECTOR_RESETV);
 
-  spin_lock(&g_cpu_wait[0]);
+  raw_spin_lock(&g_cpu_wait[0]);
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION
   /* Notify of the start event */
@@ -198,7 +198,7 @@ int up_cpu_start(int cpu)
   irq_attach(LC823450_IRQ_SMP_CALL_11, lc823450_smp_call_handler, NULL);
   up_enable_irq(LC823450_IRQ_SMP_CALL_11);
 
-  spin_lock(&g_cpu_wait[0]);
+  raw_spin_lock(&g_cpu_wait[0]);
 
   /* CPU1 boot done */
 
@@ -208,7 +208,7 @@ int up_cpu_start(int cpu)
   putreg32(backup[1], CPU1_VECTOR_RESETV);
   putreg32(0x0, REMAP); /* remap disable */
 
-  spin_unlock(&g_cpu_wait[0]);
+  raw_spin_unlock(&g_cpu_wait[0]);
 
   return 0;
 }
