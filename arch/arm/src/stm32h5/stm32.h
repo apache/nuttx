@@ -37,15 +37,16 @@
 /* Peripherals **************************************************************/
 
 #include "chip.h"
-#include "stm32_flash.h"
+#include "stm32_adc.h"
 #include "stm32_dbgmcu.h"
+#include "stm32_flash.h"
 #include "stm32_gpio.h"
+#include "stm32_i2c.h"
+#include "stm32_icache.h"
+#include "stm32_lowputc.h"
 #include "stm32_pwr.h"
 #include "stm32_rcc.h"
 #include "stm32_uart.h"
-#include "stm32_lowputc.h"
-#include "stm32_i2c.h"
-#include "stm32_adc.h"
 #include "stm32_usbfs.h"
 
 #endif /* __ARCH_ARM_SRC_STM32H5_STM32_H */
