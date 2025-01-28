@@ -29,6 +29,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/trace.h>
 
+#include <assert.h>
 #include "irq/irq.h"
 
 /****************************************************************************
@@ -59,6 +60,14 @@ struct irq_info_s g_irqvector[NR_IRQS];
  * Public Functions
  ****************************************************************************/
 
+#ifdef CONFIG_ARCH_PROTECT_ZERO_ADDRESS
+static void zero_addr_handler(int type, FAR void *addr, size_t size,
+                              FAR void *arg)
+{
+  PANIC();
+}
+#endif
+
 /****************************************************************************
  * Name: irq_initialize
  *
@@ -87,5 +96,11 @@ void irq_initialize(void)
 #endif
 
   up_irqinitialize();
+
+#ifdef CONFIG_ARCH_PROTECT_ZERO_ADDRESS
+  up_debugpoint_add(DEBUGPOINT_WATCHPOINT_RW, 0, 0,
+                    zero_addr_handler, NULL);
+#endif
+
   sched_trace_end();
 }
