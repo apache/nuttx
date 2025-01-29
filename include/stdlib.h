@@ -183,7 +183,7 @@ void      _Exit(int status) noreturn_function;
  * standards compatibility.
  */
 
-#ifndef __KERNEL__
+#if !defined(__KERNEL__) || defined(CONFIG_BUILD_FLAT)
 int       system(FAR const char *cmd);
 #endif
 
