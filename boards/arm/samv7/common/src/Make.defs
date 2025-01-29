@@ -46,6 +46,10 @@ ifeq ($(CONFIG_SAMV7_GPIO_ENC),y)
 CSRCS += sam_gpio_enc.c
 endif
 
+ifeq ($(CONFIG_SAMV7_UART_RXDMA_POLL),y)
+CSRCS += sam_uart_rxdma_poll.c
+endif
+
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src
