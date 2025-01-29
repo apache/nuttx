@@ -3943,19 +3943,31 @@ static int mpfs_ddr_setup(struct mpfs_ddr_priv_s *priv)
 int mpfs_ddr_init(void)
 {
   struct mpfs_ddr_priv_s *priv = &g_mpfs_ddr_priv;
+  int retry_count = 20;
   int ddr_status;
 
-  /* On -EAGAIN, the whole training is restarted from the very beginning */
+  /* Restart training until it passes or retry_count reaches 0.
+   * Errors which return -EAGAIN are known to be always
+   * recoverable by controller reset; don't count these errors.
+   * Only count errors which return -EIO; they are typically recoverable.
+   * If they persist, however, eventually return failure, leading to
+   * re-trying after full reset.
+   */
 
   do
     {
       ddr_status = mpfs_ddr_setup(priv);
-      if (ddr_status == -EAGAIN)
+      if (ddr_status != OK)
         {
           mpfs_ddr_fail(priv);
         }
+
+      if (ddr_status != -EAGAIN)
+        {
+          retry_count--;
+        }
     }
-  while (ddr_status == -EAGAIN);
+  while (ddr_status != OK && retry_count > 0);
 
   if (ddr_status == 0)
     {
