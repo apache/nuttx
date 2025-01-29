@@ -41,6 +41,7 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
+#include <nuttx/net/netstats.h>
 
 #include "netdev/netdev.h"
 #include "devif/devif.h"
@@ -199,7 +200,13 @@ static inline void can_newdata(FAR struct net_driver_s *dev,
 
   if (recvlen < dev->d_len)
     {
-      can_datahandler(dev, pstate->pr_conn);
+      if (can_datahandler(dev, pstate->pr_conn) < dev->d_len)
+        {
+          ninfo("Dropped %d bytes\n", dev->d_len);
+#ifdef CONFIG_NET_STATISTICS
+          g_netstats.can.drop++;
+#endif
+        }
     }
 
   /* Indicate no data in the buffer */
