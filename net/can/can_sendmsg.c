@@ -42,6 +42,7 @@
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/ip.h>
+#include <nuttx/net/netstats.h>
 
 #include "netdev/netdev.h"
 #include "devif/devif.h"
@@ -300,6 +301,10 @@ ssize_t can_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
     {
       return ret;
     }
+
+#ifdef CONFIG_NET_STATISTICS
+  g_netstats.can.sent++;
+#endif
 
   /* Return the number of bytes actually sent */
 

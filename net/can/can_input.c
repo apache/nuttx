@@ -32,6 +32,7 @@
 
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/can.h>
+#include <nuttx/net/netstats.h>
 
 #include "devif/devif.h"
 #include "can/can.h"
@@ -270,6 +271,10 @@ int can_input(FAR struct net_driver_s *dev)
   FAR uint8_t *buf;
   int ret;
 
+#ifdef CONFIG_NET_STATISTICS
+  g_netstats.can.recv++;
+#endif
+
   if (dev->d_iob != NULL)
     {
       buf = dev->d_buf;
@@ -284,7 +289,15 @@ int can_input(FAR struct net_driver_s *dev)
       return ret;
     }
 
-  return netdev_input(dev, can_in, false);
+  ret = netdev_input(dev, can_in, false);
+  if (ret < 0)
+    {
+#ifdef CONFIG_NET_STATISTICS
+    g_netstats.can.drop++;
+#endif
+    }
+
+  return ret;
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_CAN */

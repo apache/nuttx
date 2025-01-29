@@ -33,6 +33,7 @@
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/mm/iob.h>
+#include <nuttx/net/netstats.h>
 
 #include "devif/devif.h"
 #include "can/can.h"
@@ -83,10 +84,7 @@ can_data_event(FAR struct net_driver_s *dev, FAR struct can_conn_s *conn,
       ninfo("Dropped %d bytes\n", dev->d_len);
 
 #ifdef CONFIG_NET_STATISTICS
-      /* No support CAN net statistics yet */
-
-      /* g_netstats.tcp.drop++; */
-
+      g_netstats.can.drop++;
 #endif
     }
 

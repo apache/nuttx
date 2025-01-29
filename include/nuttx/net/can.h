@@ -2,7 +2,8 @@
  * include/nuttx/net/can.h
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2007, 2009-2012, 2015 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2007, 2009-2012, 2015 Gregory Nutt. All
+ * rights reserved.
  * SPDX-FileCopyrightText: 2001-2003, Adam Dunkels. All rights reserved.
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  * SPDX-FileContributor: Adam Dunkels <adam@dunkels.com>
@@ -43,6 +44,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/can.h>
+#include <nuttx/net/netconfig.h>
 #include <stdint.h>
 
 /****************************************************************************
@@ -58,6 +60,19 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
+/* The structure holding the CAN statistics that are gathered if
+ * CONFIG_NET_STATISTICS is defined.
+ */
+
+#ifdef CONFIG_NET_STATISTICS
+struct can_stats_s
+{
+  net_stats_t drop;       /* Number of dropped CAN frames */
+  net_stats_t recv;       /* Number of received CAN frames */
+  net_stats_t sent;       /* Number of sent CAN frames */
+};
+#endif
 
 /****************************************************************************
  * Public Data
