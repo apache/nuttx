@@ -78,7 +78,6 @@ int litex_bringup(void)
   if (ret != OK)
     {
       syslog(LOG_ERR, "litex_sdio_initialize() failed %d\n", ret);
-      return ret;
     }
 
   /* If automount not configured, force a mount point.
