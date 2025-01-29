@@ -37,6 +37,7 @@
 #include "mpfs_cache.h"
 #include "mpfs_mm_init.h"
 #include "mpfs_userspace.h"
+#include "hardware/mpfs_wdog.h"
 
 #include "riscv_internal.h"
 #include "riscv_percpu.h"
@@ -149,7 +150,15 @@ void __mpfs_start(uint64_t mhartid)
       /* Reset, but let the progress come out of the uart first */
 
       up_udelay(1000);
-      up_systemreset();
+
+      /* Reset by triggering WDOG */
+
+      putreg32(WDOG_FORCE_IMMEDIATE_RESET,
+               MPFS_WDOG0_LO_BASE + MPFS_WDOG_FORCE_OFFSET);
+
+      /* Wait for the reset */
+
+      for (; ; );
     }
 #endif
 
