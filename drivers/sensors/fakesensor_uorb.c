@@ -197,6 +197,20 @@ static inline void fakesensor_read_gyro(FAR struct fakesensor_s *sensor,
                     sizeof(struct sensor_gyro));
 }
 
+static inline void fakesensor_read_baro(FAR struct fakesensor_s *sensor,
+                                        uint64_t event_timestamp)
+{
+  struct sensor_baro baro;
+  char raw[50];
+
+  fakesensor_read_csv_line(&sensor->data, raw, sizeof(raw),
+                           sensor->raw_start);
+  sscanf(raw, "%f,%f\n", &baro.pressure, &baro.temperature);
+  baro.timestamp = event_timestamp;
+  sensor->lower.push_event(sensor->lower.priv, &baro,
+                           sizeof(struct sensor_baro));
+}
+
 static inline void fakesensor_read_gnss(FAR struct fakesensor_s *sensor)
 {
   char raw[150];
@@ -293,6 +307,10 @@ void fakesensor_push_event(FAR struct fakesensor_s *sensor,
 
     case SENSOR_TYPE_GYROSCOPE:
       fakesensor_read_gyro(sensor, event_timestamp);
+      break;
+
+    case SENSOR_TYPE_BAROMETER:
+      fakesensor_read_baro(sensor, event_timestamp);
       break;
 
     case SENSOR_TYPE_GNSS:
