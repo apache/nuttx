@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/qemu/qemu_boot.c
+ * arch/arm/src/qemu/qemu_userspace.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,115 +20,59 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_ARM_SRC_QEMU_QEMU_USERSPACE_H
+#define __ARCH_ARM_SRC_QEMU_QEMU_USERSPACE_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
+
+#include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
 
 #include "arm_internal.h"
-
-#ifdef CONFIG_ARM_PSCI
-#  include "arm_cpu_psci.h"
-#endif
-
-#include "qemu_irq.h"
-#include "qemu_memorymap.h"
-#include "qemu_userspace.h"
-#include "smp.h"
-#include "gic.h"
-
-#ifdef CONFIG_DEVICE_TREE
-#  include <nuttx/fdt.h>
-#endif
-
-#ifdef CONFIG_SCHED_INSTRUMENTATION
-#  include <sched/sched.h>
-#  include <nuttx/sched_note.h>
-#endif
-
-#ifdef CONFIG_ARCH_ARMV7R
-#  include <nuttx/init.h>
-#endif
-
-#include <nuttx/syslog/syslog_rpmsg.h>
+#include "chip.h"
 
 /****************************************************************************
- * Private Data
+ * Public Data
  ****************************************************************************/
 
-#ifdef CONFIG_SYSLOG_RPMSG
-static char g_syslog_rpmsg_buf[4096];
+#ifndef __ASSEMBLY__
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: arm_boot
+ * Name: qemu_userspace
  *
  * Description:
- *   Complete boot operations started in arm_head.S
+ *   For the case of the separate user-/kernel-space build, perform whatever
+ *   platform specific initialization of the user memory is required.
+ *   Normally this just means initializing the user space .data and .bss
+ *   segments.
  *
  ****************************************************************************/
 
-void arm_boot(void)
-{
-#ifdef CONFIG_ARCH_PERF_EVENTS
-  /* Perf init */
+void qemu_userspace(void);
 
-  up_perf_init(0);
-#endif
-
-#ifdef CONFIG_ARCH_ARMV7A
-  /* Set the page table for section */
-
-  qemu_setupmappings();
-#endif
-
-  arm_fpuconfig();
-
-#ifdef CONFIG_ARM_PSCI
-  arm_psci_init("hvc");
-#endif
-
-#ifdef CONFIG_DEVICE_TREE
-  fdt_register((const char *)0x40000000);
-#endif
-
-#ifdef USE_EARLYSERIALINIT
-  /* Perform early serial initialization if we are going to use the serial
-   * driver.
-   */
-
-  arm_earlyserialinit();
-#endif
-
-#ifdef CONFIG_SYSLOG_RPMSG
-  syslog_rpmsg_init_early(g_syslog_rpmsg_buf, sizeof(g_syslog_rpmsg_buf));
-#endif
-
-#ifdef CONFIG_BUILD_PROTECTED
-  qemu_userspace();
-#endif
-
-#ifdef CONFIG_ARCH_ARMV7R
-  /* dont return per armv7-r/arm_head.S design */
-
-  nx_start();
-#endif
-}
-
-#if defined(CONFIG_ARM_PSCI) && defined(CONFIG_SMP)
-int up_cpu_start(int cpu)
-{
-#ifdef CONFIG_SCHED_INSTRUMENTATION
-  /* Notify of the start event */
-
-  sched_note_cpu_start(this_task(), cpu);
-#endif
-
-  return psci_cpu_on(cpu, (uintptr_t)__start);
+#undef EXTERN
+#if defined(__cplusplus)
 }
 #endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_ARM_SRC_QEMU_QEMU_USERSPACE_H */
