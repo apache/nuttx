@@ -150,7 +150,7 @@ void syslog_add_intbuffer(FAR const char *buffer, size_t buflen)
 
   /* Disable concurrent modification from interrupt handling logic */
 
-  flags = raw_spin_lock_irqsave(&g_syslog_intbuffer.splock);
+  flags = spin_lock_irqsave_notrace(&g_syslog_intbuffer.splock);
 
   space = circbuf_space(&g_syslog_intbuffer.circ);
 
@@ -172,7 +172,7 @@ void syslog_add_intbuffer(FAR const char *buffer, size_t buflen)
                     buffer + space, buflen - space);
     }
 
-  raw_spin_unlock_irqrestore(&g_syslog_intbuffer.splock, flags);
+  spin_unlock_irqrestore_notrace(&g_syslog_intbuffer.splock, flags);
 }
 
 /****************************************************************************
@@ -198,9 +198,9 @@ void syslog_flush_intbuffer(bool force)
 {
   irqstate_t flags;
 
-  flags = raw_spin_lock_irqsave(&g_syslog_intbuffer.splock);
+  flags = spin_lock_irqsave_notrace(&g_syslog_intbuffer.splock);
   syslog_flush_internal(force, sizeof(g_syslog_intbuffer.buffer));
-  raw_spin_unlock_irqrestore(&g_syslog_intbuffer.splock, flags);
+  spin_unlock_irqrestore_notrace(&g_syslog_intbuffer.splock, flags);
 }
 
 #endif /* CONFIG_SYSLOG_INTBUFFER */
