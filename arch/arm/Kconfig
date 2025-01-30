@@ -354,6 +354,14 @@ config ARCH_CHIP_NUC1XX
 	---help---
 		Nuvoton NUC100/120 architectures (ARM Cortex-M0).
 
+config ARCH_CHIP_MCX_NXXX
+	bool "NXP MCX NXXx Cortex-M33"
+	select ARCH_CORTEXM33
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DFPU
+	---help---
+		NXXx architectures (Cortex-M33)
+
 config ARCH_CHIP_RP2040
 	bool "Raspberry Pi RP2040"
 	select ARCH_CORTEXM0
@@ -1187,6 +1195,7 @@ config ARCH_CHIP
 	default "at32"		if ARCH_CHIP_AT32
 	default "cxd32xx"	if ARCH_CHIP_CXD32XX
 	default "csk6"		if ARCH_CHIP_CSK6
+	default "mcx-nxxx"	if ARCH_CHIP_MCX_NXXX
 
 config ARM_THUMB
 	bool "Thumb Mode"
@@ -1702,5 +1711,8 @@ source "arch/arm/src/at32/Kconfig"
 endif
 if ARCH_CHIP_CXD32XX
 source "arch/arm/src/cxd32xx/Kconfig"
+endif
+if ARCH_CHIP_MCX_NXXX
+source "arch/arm/src/mcx-nxxx/Kconfig"
 endif
 endif # ARCH_ARM

@@ -1,0 +1,118 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CHIP_MCX_NXXX
+
+menu "MCX NXXx Chip Selection"
+
+choice
+	prompt "MCX NXXx Core Configuration"
+	default ARCH_CHIP_N236
+
+config ARCH_CHIP_N236
+	bool "MCXN236 Processor"
+	select ARCH_HAVE_RESET
+	select ARMV8M_HAVE_ICACHE
+
+endchoice # MCX NXXx Chip Selection
+
+endmenu # "MCX NXXx Chip Selection"
+
+menu "NXXX Peripheral Selection"
+
+menu "LPUART"
+
+config NXXX_LPUART
+	bool
+	default n
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config NXXX_LPUART1
+	bool "LPUART1"
+	default n
+	select NXXX_LPUART
+	select LPUART1_SERIALDRIVER
+
+config NXXX_LPUART2
+	bool "LPUART2"
+	default n
+	select NXXX_LPUART
+	select LPUART2_SERIALDRIVER
+
+config NXXX_LPUART3
+	bool "LPUART3"
+	default n
+	select NXXX_LPUART
+	select LPUART3_SERIALDRIVER
+
+config NXXX_LPUART4
+	bool "LPUART4"
+	default n
+	select NXXX_LPUART
+	select LPUART4_SERIALDRIVER
+
+config NXXX_LPUART5
+	bool "LPUART5"
+	default n
+	select NXXX_LPUART
+	select LPUART5_SERIALDRIVER
+
+config NXXX_LPUART6
+	bool "LPUART6"
+	default n
+	select NXXX_LPUART
+	select LPUART6_SERIALDRIVER
+
+config NXXX_LPUART7
+	bool "LPUART7"
+	default n
+	select NXXX_LPUART
+	select LPUART7_SERIALDRIVER
+
+config NXXX_LPUART8
+	bool "LPUART8"
+	default n
+	select NXXX_LPUART
+	select LPUART8_SERIALDRIVER
+
+config NXXX_LPUART9
+	bool "LPUART9"
+	default n
+	select NXXX_LPUART
+	select LPUART9_SERIALDRIVER
+	
+menu "LPUART Configuration"
+	depends on NXXX_LPUART
+
+config NXXX_LPUART_INVERT
+	bool "Signal Invert Support"
+	default n
+
+config NXXX_LPUART_SINGLEWIRE
+	bool "Signal Wire Support"
+	default n
+
+config NXXX_SERIAL_RXDMA_BUFFER_SIZE
+	int "RX DMA buffer size"
+	default 32
+	depends on LPUART1_RXDMA || LPUART2_RXDMA || LPUART3_RXDMA || LPUART4_RXDMA || \
+               LPUART5_RXDMA || LPUART6_RXDMA || LPUART7_RXDMA || LPUART8_RXDMA || \
+               LPUART9_RXDMA
+
+	---help---
+		The DMA buffer size when using RX DMA to emulate a FIFO.
+
+		When streaming data, the generic serial layer will be called
+		every time the FIFO receives half this number of bytes.
+
+		Value given here will be rounded up to next multiple of 32 bytes.
+
+endmenu # LPUART Configuration
+
+endmenu # LPUART
+
+endmenu # NXXX Peripheral Selection
+
+endif # ARCH_CHIP_NXXX

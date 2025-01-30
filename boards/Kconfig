@@ -3234,6 +3234,14 @@ config ARCH_BOARD_AT32F437_MINI
 	---help---
 		AT32F437-MINI board based on the Artery AT32F437VMT7 MCU.
 
+config ARCH_BOARD_FRDM_MCXN236
+	bool "NXP MCXN236 CPU EVK board"
+	depends on ARCH_CHIP_N236
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This options selects support for NuttX on the NXP MCXN236 CPU EVK
+		board with ARM Cortex-M33.
+
 config ARCH_BOARD_CUSTOM
 	bool "Custom development board"
 	---help---
@@ -3644,6 +3652,7 @@ config ARCH_BOARD
 	default "hpm6750evk2"               if ARCH_BOARD_HPM6750EVK2
 	default "at32f437-mini"             if ARCH_BOARD_AT32F437_MINI
 	default "csk6011a-nano"             if ARCH_BOARD_CSK6011A_NANO
+	default "frdm-mcxn236"              if ARCH_BOARD_FRDM_MCXN236
 
 comment "Common Board Options"
 
@@ -4677,6 +4686,9 @@ source "boards/arm/at32/at32f437-mini/Kconfig"
 endif
 if ARCH_BOARD_CSK6011A_NANO
 source "boards/arm/csk6/csk6011a-nano/Kconfig"
+endif
+if ARCH_BOARD_FRDM_MCXN236
+source "boards/arm/mcx-nxxx/frdm-mcxn236/Kconfig"
 endif
 
 comment "Board-Common Options"
