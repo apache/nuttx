@@ -65,7 +65,7 @@
  * Public Data
  ****************************************************************************/
 
-volatile static spinlock_t g_cpu1_boot;
+static volatile bool g_cpu1_boot;
 extern int sam4cm_smp_call_handler(int irq, void *c, void *arg);
 
 /****************************************************************************
@@ -114,7 +114,7 @@ static void cpu1_boot(void)
       up_enable_irq(SAM_IRQ_SMP_CALL1);
     }
 
-  spin_unlock(&g_cpu1_boot);
+  g_cpu1_boot = true;
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION
   /* Notify that this CPU has started */
@@ -209,8 +209,6 @@ int up_cpu_start(int cpu)
                      tcb->adj_stack_size, CPU1_VECTOR_ISTACK);
   putreg32((uint32_t)cpu1_boot, CPU1_VECTOR_RESETV);
 
-  spin_lock(&g_cpu1_boot);
-
   /* Unreset coprocessor */
 
   putreg32(0x5a000011, SAM_RSTC_CPMR);
@@ -223,11 +221,9 @@ int up_cpu_start(int cpu)
   irq_attach(SAM_IRQ_SMP_CALL0, sam4cm_smp_call_handler, NULL);
   up_enable_irq(SAM_IRQ_SMP_CALL0);
 
-  spin_lock(&g_cpu1_boot);
+  while (!g_cpu1_boot);
 
   /* CPU1 boot done */
-
-  spin_unlock(&g_cpu1_boot);
 
   return 0;
 }
