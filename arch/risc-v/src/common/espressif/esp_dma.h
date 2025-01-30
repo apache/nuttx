@@ -151,6 +151,77 @@ uint32_t esp_dma_setup(int chan, bool tx,
 void esp_dma_load(struct esp_dmadesc_s *dmadesc, int chan, bool tx);
 
 /****************************************************************************
+ * Name: esp_dma_enable_interrupt
+ *
+ * Description:
+ *   Enable DMA interrupt.
+ *
+ * Input Parameters:
+ *   chan - DMA channel
+ *   tx   - true: TX mode; false: RX mode
+ *   mask - Interrupt mask to change
+ *   en   - true: enable; false: disable
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp_dma_enable_interrupt(int chan, bool tx, uint32_t mask, bool en);
+
+/****************************************************************************
+ * Name: esp_dma_get_interrupt
+ *
+ * Description:
+ *   Gets DMA interrupt status.
+ *
+ * Input Parameters:
+ *   chan - DMA channel
+ *   tx   - true: TX mode; false: RX mode
+ *
+ * Returned Value:
+ *   Interrupt status value.
+ *
+ ****************************************************************************/
+
+int esp_dma_get_interrupt(int chan, bool tx);
+
+/****************************************************************************
+ * Name: esp_dma_clear_interrupt
+ *
+ * Description:
+ *   Clear DMA interrupt.
+ *
+ * Input Parameters:
+ *   chan - DMA channel
+ *   tx   - true: TX mode; false: RX mode
+ *   mask - Interrupt mask to change
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp_dma_clear_interrupt(int chan, bool tx, uint32_t mask);
+
+/****************************************************************************
+ * Name: esp_dma_get_desc_addr
+ *
+ * Description:
+ *   Gets desc addr of DMA interrupt.
+ *
+ * Input Parameters:
+ *   chan - DMA channel
+ *   tx   - true: TX mode; false: RX mode
+ *
+ * Returned Value:
+ *   Desc addr.
+ *
+ ****************************************************************************/
+
+int esp_dma_get_desc_addr(int chan, bool tx);
+
+/****************************************************************************
  * Name: esp_dma_enable
  *
  * Description:
@@ -200,6 +271,23 @@ void esp_dma_disable(int chan, bool tx);
  ****************************************************************************/
 
 void esp_dma_wait_idle(int chan, bool tx);
+
+/****************************************************************************
+ * Name: esp_dma_reset_channel
+ *
+ * Description:
+ *   Resets dma channel.
+ *
+ * Input Parameters:
+ *   chan - DMA channel
+ *   tx   - true: TX mode; false: RX mode
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp_dma_reset_channel(int chan, bool tx);
 
 /****************************************************************************
  * Name: esp_dma_init
