@@ -33,9 +33,8 @@
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
 #include <nuttx/sched_note.h>
-#include <nuttx/spinlock.h>
-#include <sched/sched.h>
 
+#include "sched/sched.h"
 #include "xtensa.h"
 #include "esp32s3_irq.h"
 #include "esp32s3_region.h"
@@ -48,7 +47,6 @@
  ****************************************************************************/
 
 static volatile bool g_appcpu_started;
-static volatile spinlock_t g_appcpu_interlock;
 
 /****************************************************************************
  * ROM function prototypes
@@ -127,12 +125,9 @@ void xtensa_appcpu_start(void)
   sched_note_cpu_started(tcb);
 #endif
 
-  /* Release the spinlock to signal to the PRO CPU that the APP CPU has
-   * started.
-   */
+  /* Signal to the PRO CPU that the APP CPU has started. */
 
   g_appcpu_started = true;
-  spin_unlock(&g_appcpu_interlock);
 
   /* Reset scheduler parameters */
 
@@ -205,80 +200,66 @@ void xtensa_appcpu_start(void)
 
 int up_cpu_start(int cpu)
 {
+  uint32_t regval;
+
   DEBUGASSERT(cpu >= 0 && cpu < CONFIG_SMP_NCPUS && cpu != this_cpu());
 
-  if (!g_appcpu_started)
-    {
-      uint32_t regval;
+  /* Start CPU1 */
 
-      /* Start CPU1 */
-
-      sinfo("Starting CPU%d\n", cpu);
+  sinfo("Starting CPU%d\n", cpu);
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION
-      /* Notify of the start event */
+  /* Notify of the start event */
 
-      sched_note_cpu_start(this_task(), cpu);
+  sched_note_cpu_start(this_task(), cpu);
 #endif
 
-      /* This spinlock will be used as a handshake between the two CPUs.
-       * It's first initialized to its locked state, later the PRO CPU will
-       * try to lock it but spins until the APP CPU starts and unlocks it.
-       */
+  /* OpenOCD might have already enabled clock gating and taken APP CPU
+   * out of reset.  Don't reset the APP CPU if that's the case as this
+   * will clear the breakpoints that may have already been set.
+   */
 
-      spin_lock_init(&g_appcpu_interlock);
-      spin_lock(&g_appcpu_interlock);
+  regval = getreg32(SYSTEM_CORE_1_CONTROL_0_REG);
+  if ((regval & SYSTEM_CONTROL_CORE_1_CLKGATE_EN) == 0)
+    {
+      regval  = getreg32(RTC_CNTL_RTC_SW_CPU_STALL_REG);
+      regval &= ~RTC_CNTL_SW_STALL_APPCPU_C1_M;
+      putreg32(regval, RTC_CNTL_RTC_SW_CPU_STALL_REG);
 
-      /* OpenOCD might have already enabled clock gating and taken APP CPU
-       * out of reset.  Don't reset the APP CPU if that's the case as this
-       * will clear the breakpoints that may have already been set.
-       */
+      regval  = getreg32(RTC_CNTL_RTC_OPTIONS0_REG);
+      regval &= ~RTC_CNTL_SW_STALL_APPCPU_C0_M;
+      putreg32(regval, RTC_CNTL_RTC_OPTIONS0_REG);
 
-      regval = getreg32(SYSTEM_CORE_1_CONTROL_0_REG);
-      if ((regval & SYSTEM_CONTROL_CORE_1_CLKGATE_EN) == 0)
-        {
-          regval  = getreg32(RTC_CNTL_RTC_SW_CPU_STALL_REG);
-          regval &= ~RTC_CNTL_SW_STALL_APPCPU_C1_M;
-          putreg32(regval, RTC_CNTL_RTC_SW_CPU_STALL_REG);
+      /* Enable clock gating for the APP CPU */
 
-          regval  = getreg32(RTC_CNTL_RTC_OPTIONS0_REG);
-          regval &= ~RTC_CNTL_SW_STALL_APPCPU_C0_M;
-          putreg32(regval, RTC_CNTL_RTC_OPTIONS0_REG);
+      regval  = getreg32(SYSTEM_CORE_1_CONTROL_0_REG);
+      regval |= SYSTEM_CONTROL_CORE_1_CLKGATE_EN;
+      putreg32(regval, SYSTEM_CORE_1_CONTROL_0_REG);
 
-          /* Enable clock gating for the APP CPU */
+      regval  = getreg32(SYSTEM_CORE_1_CONTROL_0_REG);
+      regval &= ~SYSTEM_CONTROL_CORE_1_RUNSTALL;
+      putreg32(regval, SYSTEM_CORE_1_CONTROL_0_REG);
 
-          regval  = getreg32(SYSTEM_CORE_1_CONTROL_0_REG);
-          regval |= SYSTEM_CONTROL_CORE_1_CLKGATE_EN;
-          putreg32(regval, SYSTEM_CORE_1_CONTROL_0_REG);
+      /* Reset the APP CPU */
 
-          regval  = getreg32(SYSTEM_CORE_1_CONTROL_0_REG);
-          regval &= ~SYSTEM_CONTROL_CORE_1_RUNSTALL;
-          putreg32(regval, SYSTEM_CORE_1_CONTROL_0_REG);
+      regval  = getreg32(SYSTEM_CORE_1_CONTROL_0_REG);
+      regval |= SYSTEM_CONTROL_CORE_1_RESETING;
+      putreg32(regval, SYSTEM_CORE_1_CONTROL_0_REG);
 
-          /* Reset the APP CPU */
-
-          regval  = getreg32(SYSTEM_CORE_1_CONTROL_0_REG);
-          regval |= SYSTEM_CONTROL_CORE_1_RESETING;
-          putreg32(regval, SYSTEM_CORE_1_CONTROL_0_REG);
-
-          regval  = getreg32(SYSTEM_CORE_1_CONTROL_0_REG);
-          regval &= ~SYSTEM_CONTROL_CORE_1_RESETING;
-          putreg32(regval, SYSTEM_CORE_1_CONTROL_0_REG);
-        }
-
-      /* Set the CPU1 start address */
-
-      ets_set_appcpu_boot_addr((uint32_t)xtensa_appcpu_start);
-
-      /* And wait until the APP CPU starts and releases the spinlock. */
-
-      spin_lock(&g_appcpu_interlock);
-
-      /* prev cpu boot done */
-
-      spin_unlock(&g_appcpu_interlock);
-      DEBUGASSERT(g_appcpu_started);
+      regval  = getreg32(SYSTEM_CORE_1_CONTROL_0_REG);
+      regval &= ~SYSTEM_CONTROL_CORE_1_RESETING;
+      putreg32(regval, SYSTEM_CORE_1_CONTROL_0_REG);
     }
+
+  /* Set the CPU1 start address */
+
+  ets_set_appcpu_boot_addr((uint32_t)xtensa_appcpu_start);
+
+  /* And wait until the APP CPU starts */
+
+  while (!g_appcpu_started);
+
+  /* prev cpu boot done */
 
   return OK;
 }
