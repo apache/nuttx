@@ -234,6 +234,7 @@ uint16_t can_datahandler(FAR struct net_driver_s *dev,
   else
     {
       nerr("ERROR: Failed to queue the I/O buffer chain: %d\n", ret);
+      ret = 0;
       goto errout;
     }
 
