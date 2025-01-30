@@ -157,13 +157,15 @@ int up_backtrace(struct tcb_s *tcb, void **buffer, int size, int skip)
                           (void *)getfp(), NULL, buffer, size, &skip);
 #else
           ret = backtrace(rtcb->stack_base_ptr,
-                          rtcb->stack_base_ptr + rtcb->adj_stack_size,
+                          (uintptr_t *)((uintptr_t)rtcb->stack_base_ptr +
+                                        rtcb->adj_stack_size),
                           (void *)getfp(), NULL, buffer, size, &skip);
 #endif
           if (ret < size)
             {
-              ret += backtrace(rtcb->stack_base_ptr,
-                               rtcb->stack_base_ptr + rtcb->adj_stack_size,
+              ret += backtrace(rtcb->stack_base_ptr, (uintptr_t *)
+                               ((uintptr_t)rtcb->stack_base_ptr +
+                                rtcb->adj_stack_size),
                                running_regs()[REG_FP],
                                running_regs()[REG_EPC],
                                &buffer[ret], size - ret, &skip);
@@ -174,16 +176,18 @@ int up_backtrace(struct tcb_s *tcb, void **buffer, int size, int skip)
 #ifdef CONFIG_ARCH_KERNEL_STACK
           if (rtcb->xcp.ustkptr != NULL)
             {
-              ret = backtrace(rtcb->stack_base_ptr,
-                              rtcb->stack_base_ptr + rtcb->adj_stack_size,
+              ret = backtrace(rtcb->stack_base_ptr, (uintptr_t *)
+                              ((uintptr_t)rtcb->stack_base_ptr +
+                               rtcb->adj_stack_size),
                               (void *)*(rtcb->xcp.ustkptr + 1), NULL,
                               buffer, size, &skip);
             }
           else
 #endif
             {
-              ret = backtrace(rtcb->stack_base_ptr,
-                              rtcb->stack_base_ptr + rtcb->adj_stack_size,
+              ret = backtrace(rtcb->stack_base_ptr, (uintptr_t *)
+                              ((uintptr_t)rtcb->stack_base_ptr +
+                               rtcb->adj_stack_size),
                               (void *)getfp(), NULL, buffer, size, &skip);
             }
         }
@@ -194,7 +198,8 @@ int up_backtrace(struct tcb_s *tcb, void **buffer, int size, int skip)
       if (tcb->xcp.ustkptr != NULL)
         {
           ret = backtrace(tcb->stack_base_ptr,
-                          tcb->stack_base_ptr + tcb->adj_stack_size,
+                          (uintptr_t *)((uintptr_t)tcb->stack_base_ptr +
+                                        tcb->adj_stack_size),
                           (void *)*(tcb->xcp.ustkptr + 1), NULL,
                           buffer, size, &skip);
         }
@@ -202,7 +207,8 @@ int up_backtrace(struct tcb_s *tcb, void **buffer, int size, int skip)
 #endif
         {
           ret = backtrace(tcb->stack_base_ptr,
-                          tcb->stack_base_ptr + tcb->adj_stack_size,
+                          (uintptr_t *)((uintptr_t)tcb->stack_base_ptr +
+                                        tcb->adj_stack_size),
                           (void *)tcb->xcp.regs[REG_FP],
                           (void *)tcb->xcp.regs[REG_EPC],
                           buffer, size, &skip);
