@@ -185,6 +185,10 @@
 #  include "espressif/esp_nxdiag.h"
 #endif
 
+#ifdef CONFIG_ESP32_ESPNOW_PKTRADIO
+#  include "esp32_espnow_pktradio.h"
+#endif
+
 #include "esp32-devkitc.h"
 
 /****************************************************************************
@@ -364,6 +368,15 @@ int esp32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize wireless subsystem=%d\n",
+             ret);
+    }
+#endif
+
+#ifdef CONFIG_ESP32_ESPNOW_PKTRADIO
+  ret = pktradio_espnow();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize ESPNOW pktradio=%d\n",
              ret);
     }
 #endif
