@@ -172,6 +172,11 @@ SECTIONS
     *libarch.a:*cpu_region_protect.*(.text .text.* .literal .literal.*)
 
     *libc.a:sq_remlast.*(.literal .text .literal.* .text.*)
+
+    *libsched.a:irq_dispatch.*(.text .text.* .literal .literal.*)
+    *libsched.a:sched_lock.*(.text .text.* .literal .literal.*)
+    *libsched.a:sched_unlock.*(.text .text.* .literal .literal.*)
+
     *(.wifirxiram .wifirxiram.*)
     *(.wifi0iram  .wifi0iram.*)
     *(.wifiorslpiram .wifiorslpiram.*)
@@ -318,6 +323,10 @@ SECTIONS
     *libarch.a:*log.*(.rodata .rodata.*)
     *libarch.a:*log_noos.*(.rodata .rodata.*)
     *libarch.a:*cpu_region_protect.*(.rodata .rodata.*)
+
+    *libsched.a:irq_dispatch.*(.rodata .rodata.*)
+    *libsched.a:sched_lock.*(.rodata .rodata.*)
+    *libsched.a:sched_unlock.*(.rodata .rodata.*)
 
     . = ALIGN(4);
     _edata = ABSOLUTE(.);
