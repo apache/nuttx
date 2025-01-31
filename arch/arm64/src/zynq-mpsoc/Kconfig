@@ -35,6 +35,139 @@ config ZYNQ_MPSOC_UART1
 	---help---
 		Select to enable support for UART1.
 
+config ZYNQ_ENET
+	bool "Ethernet"
+	default n
+	select ARCH_HAVE_PHY
+	select ARCH_HAVE_NETDEV_STATISTICS
+
 endmenu # XILINX ZYNQ_MPSOC Peripheral Selection
+
+menu "Ethernet Configuration"
+	depends on ZYNQ_ENET
+
+choice
+	prompt "ZYNQ Ethernet Interface"
+	default ZYNQ_ENET4
+	depends on ZYNQ_ENET
+
+config ZYNQ_ENET1
+	bool "ENET 1"
+
+config ZYNQ_ENET2
+	bool "ENET 2"
+
+config ZYNQ_ENET3
+	bool "ENET 3"
+
+config ZYNQ_ENET4
+	bool "ENET 4"
+
+endchoice # ZYNQ Ethernet Interface
+
+config ZYNQ_GMAC_NRXBUFFERS
+	int "Number of RX buffers"
+	default 16
+	range 16 256
+	---help---
+		GMAC buffer memory is segmented into 128 byte units (not
+		configurable).  This setting provides the number of such 128 byte
+		units used for reception.  This is also equal to the number of RX
+		descriptors that will be allocated. The selected value must be an
+		even power of 2.
+
+config ZYNQ_GMAC_NTXBUFFERS
+	int "Number of TX buffers"
+	default 8
+	range 8 256
+	---help---
+		GMAC buffer memory is segmented into full Ethernet packets (size
+		NET_BUFSIZE bytes).  This setting provides the number of such packets
+		that can be in flight.  This is also equal to the number of TX
+		descriptors that will be allocated.
+
+config ZYNQ_GMAC_PREALLOCATE
+	bool "Preallocate buffers"
+	default n
+	---help---
+		Buffer and descriptor may either be allocated from the memory
+		pool or pre-allocated to lie in .bss.  This option selects pre-
+		allocated buffer memory.
+
+config ZYNQ_GMAC_NBC
+	bool "No Broadcast"
+	default n
+	---help---
+		when set to logic one, frames addressed to the broadcast address of
+		all ones will not be accepted.
+
+config ZYNQ_GMAC_PHYADDR
+	int "PHY address"
+	default 1
+	---help---
+		The 5-bit address of the PHY on the board.  Default: 1
+
+config ZYNQ_ENET_PHYINIT
+	bool "Board-specific PHY Initialization for ENET"
+	default y
+	---help---
+		Some boards require specialized initialization of the PHY before it
+		can be used.  This may include such things as configuring GPIOs,
+		resetting the PHY, etc.  If CONFIG_ZYNQ_ENET_PHYINIT is defined in
+		the configuration then the board specific logic must provide
+		zynq_phy_boardinitialize();  The ZYNQ ENET driver will call this
+		function one time before it first uses the PHY.
+
+config ZYNQ_GMAC_AUTONEG
+	bool "Use autonegotiation"
+	default y
+	---help---
+		Use PHY autonegotiation to determine speed and mode
+
+if !ZYNQ_GMAC_AUTONEG
+
+config ZYNQ_GMAC_ETHFD
+	bool "Full duplex"
+	default n
+	---help---
+		If ZYNQ_GMAC_AUTONEG is not defined, then this may be defined to
+		select full duplex mode. Default: half-duplex
+
+choice
+	prompt "GMAC Speed"
+	default ZYNQ_GMAC_ETH100MBPS
+	---help---
+		If autonegotiation is not used, then you must select the fixed speed
+		of the PHY
+
+config ZYNQ_GMAC_ETH10MBPS
+	bool "10 Mbps"
+	---help---
+		If ZYNQ_GMAC_AUTONEG is not defined, then this may be defined to select 10 MBps
+		speed.  Default: 100 Mbps
+
+config ZYNQ_GMAC_ETH100MBPS
+	bool "100 Mbps"
+	---help---
+		If ZYNQ_GMAC_AUTONEG is not defined, then this may be defined to select 100 MBps
+		speed.  Default: 100 Mbps
+
+config ZYNQ_GMAC_ETH1000MBPS
+	bool "1000 Mbps"
+	---help---
+		If ZYNQ_GMAC_AUTONEG is not defined, then this may be defined to select 1000 MBps
+		speed.  Default: 100 Mbps
+
+endchoice # GMAC speed
+endif # !ZYNQ_GMAC_AUTONEG
+		
+config ZYNQ_GMAC_REGDEBUG
+	bool "Register-Level Debug"
+	default n
+	depends on DEBUG_NET_INFO
+	---help---
+		Enable very low-level register access debug.  Depends on CONFIG_DEBUG_NET_INFO.
+
+endmenu # ZYNQ_ENET
 
 endif # ARCH_CHIP_ZYNQ_MPSOC

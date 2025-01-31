@@ -28,3 +28,7 @@ CHIP_CSRCS  = zynq_boot.c zynq_serial.c zynq_mio.c zynq_timer.c zynq_pll.c
 ifeq ($(CONFIG_ARCH_EARLY_PRINT),y)
 CHIP_ASRCS  = zynq_lowputc.S
 endif
+
+ifeq ($(CONFIG_ZYNQ_ENET),y)
+CHIP_CSRCS += zynq_enet.c
+endif
