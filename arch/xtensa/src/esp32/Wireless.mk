@@ -43,6 +43,11 @@ ifeq ($(CONFIG_ESP32_WIFI),y)
 CHIP_CSRCS += esp32_wlan.c esp32_wifi_utils.c esp32_wifi_adapter.c
 EXTRA_LIBS += -lcore -lnet80211 -lpp
 
+ifeq ($(CONFIG_ESP32_ESPNOW_PKTRADIO),y)
+CHIP_CSRCS += esp32_espnow_pktradio.c
+EXTRA_LIBS += -lespnow
+endif
+
 ifeq ($(CONFIG_WPA_WAPI_PSK),y)
 EXTRA_LIBS += -lwapi
 endif
