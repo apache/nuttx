@@ -74,6 +74,8 @@ SECTIONS
     *(.iram1.*)
 
     *libsched.a:irq_dispatch.*(.text .text.* .literal .literal.*)
+    *libsched.a:sched_lock.*(.text .text.* .literal .literal.*)
+    *libsched.a:sched_unlock.*(.text .text.* .literal .literal.*)
 
     *libarch.a:*(.text.esprv_intc_int_get_type .literal.esprv_intc_int_get_type)
     *libarch.a:*riscv_doirq.*(.text .text.* .literal .literal.*)
@@ -194,6 +196,8 @@ SECTIONS
     *(.dram1.*)
 
     *libsched.a:irq_dispatch.*(.rodata .rodata.*)
+    *libsched.a:sched_lock.*(.rodata .rodata.*)
+    *libsched.a:sched_unlock.*(.rodata .rodata.*)
 
     *libarch.a:*(.rodata.esprv_intc_int_get_type)
     *libarch.a:*riscv_doirq.*(.rodata .rodata.*)
