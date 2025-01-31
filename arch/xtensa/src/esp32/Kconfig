@@ -207,15 +207,6 @@ config ESP32_RUN_IRAM
 		This loads all of NuttX inside IRAM.  Used to test somewhat small
 		images that can fit entirely in IRAM.
 
-config ESP32_EXCEPTION_ENABLE_CACHE
-	bool
-	default y
-	depends on ESP32_SPIFLASH
-	---help---
-		When an exception triggers, the panic function reenables the SPI Flash
-		cache to allow functions that are located in SPI Flash to run.
-		Disable this option to save IRAM space.
-
 menu "ESP32 Peripheral Selection"
 
 source "arch/xtensa/src/common/espressif/Kconfig"
