@@ -333,6 +333,10 @@ static int  stm32_tim_setmode(struct stm32_tim_dev_s *dev,
                               stm32_tim_mode_t mode);
 static int  stm32_tim_setclock(struct stm32_tim_dev_s *dev,
                                uint32_t freq);
+static uint32_t stm32_tim_getprescaler(struct stm32_tim_dev_s *dev);
+static void stm32_tim_setprescaler(struct stm32_tim_dev_s *dev,
+                                 uint32_t prescaler);
+static uint32_t stm32_tim_getperiod(struct stm32_tim_dev_s *dev);
 static void stm32_tim_setperiod(struct stm32_tim_dev_s *dev,
                                 uint32_t period);
 static uint32_t stm32_tim_getcounter(struct stm32_tim_dev_s *dev);
@@ -360,22 +364,25 @@ static int  stm32_tim_checkint(struct stm32_tim_dev_s *dev, int source);
 
 static const struct stm32_tim_ops_s stm32_tim_ops =
 {
-  .enable     = stm32_tim_enable,
-  .disable    = stm32_tim_disable,
-  .setmode    = stm32_tim_setmode,
-  .setclock   = stm32_tim_setclock,
-  .setperiod  = stm32_tim_setperiod,
-  .getcounter = stm32_tim_getcounter,
-  .setcounter = stm32_tim_setcounter,
-  .getwidth   = stm32_tim_getwidth,
-  .setchannel = stm32_tim_setchannel,
-  .setcompare = stm32_tim_setcompare,
-  .getcapture = stm32_tim_getcapture,
-  .setisr     = stm32_tim_setisr,
-  .enableint  = stm32_tim_enableint,
-  .disableint = stm32_tim_disableint,
-  .ackint     = stm32_tim_ackint,
-  .checkint   = stm32_tim_checkint,
+  .enable         = stm32_tim_enable,
+  .disable        = stm32_tim_disable,
+  .setmode        = stm32_tim_setmode,
+  .setclock       = stm32_tim_setclock,
+  .setprescaler   = stm32_tim_setprescaler,
+  .getprescaler   = stm32_tim_getprescaler,
+  .getperiod      = stm32_tim_getperiod,
+  .setperiod      = stm32_tim_setperiod,
+  .getcounter     = stm32_tim_getcounter,
+  .setcounter     = stm32_tim_setcounter,
+  .getwidth       = stm32_tim_getwidth,
+  .setchannel     = stm32_tim_setchannel,
+  .setcompare     = stm32_tim_setcompare,
+  .getcapture     = stm32_tim_getcapture,
+  .setisr         = stm32_tim_setisr,
+  .enableint      = stm32_tim_enableint,
+  .disableint     = stm32_tim_disableint,
+  .ackint         = stm32_tim_ackint,
+  .checkint       = stm32_tim_checkint,
 };
 
 #ifdef CONFIG_STM32_TIM1
@@ -897,6 +904,41 @@ static int stm32_tim_setclock(struct stm32_tim_dev_s *dev, uint32_t freq)
   stm32_tim_enable(dev);
 
   return prescaler;
+}
+
+/****************************************************************************
+ * Name: stm32_tim_getprescaler
+ ****************************************************************************/
+
+static uint32_t stm32_tim_getprescaler(struct stm32_tim_dev_s *dev)
+{
+  DEBUGASSERT(dev != NULL);
+  return stm32_tim_getwidth(dev) > 16 ?
+    stm32_getreg32(dev, STM32_GTIM_PSC_OFFSET) :
+    (uint32_t)stm32_getreg16(dev, STM32_GTIM_PSC_OFFSET);
+}
+
+/****************************************************************************
+ * Name: stm32_tim_setprescaler
+ ****************************************************************************/
+
+static void stm32_tim_setprescaler(struct stm32_tim_dev_s *dev,
+                                 uint32_t prescaler)
+{
+  DEBUGASSERT(dev != NULL);
+  stm32_putreg32(dev, STM32_GTIM_PSC_OFFSET, prescaler);
+}
+
+/****************************************************************************
+ * Name: stm32_tim_getperiod
+ ****************************************************************************/
+
+static uint32_t stm32_tim_getperiod(struct stm32_tim_dev_s *dev)
+{
+  DEBUGASSERT(dev != NULL);
+  return stm32_tim_getwidth(dev) > 16 ?
+    stm32_getreg32(dev, STM32_GTIM_ARR_OFFSET) :
+    (uint32_t)stm32_getreg16(dev, STM32_GTIM_ARR_OFFSET);
 }
 
 /****************************************************************************
