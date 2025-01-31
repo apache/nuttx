@@ -78,11 +78,11 @@ void nxclock_settime(clockid_t clock_id, FAR const struct timespec *tp)
 
   clock_systime_timespec(&bias);
 
-  flags = spin_lock_irqsave(&g_basetime_lock);
+  flags = raw_spin_lock_irqsave(&g_basetime_lock);
 
   clock_timespec_subtract(tp, &bias, &g_basetime);
 
-  spin_unlock_irqrestore(&g_basetime_lock, flags);
+  raw_spin_unlock_irqrestore(&g_basetime_lock, flags);
 
   /* Setup the RTC (lo- or high-res) */
 

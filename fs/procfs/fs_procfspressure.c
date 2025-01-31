@@ -131,11 +131,11 @@ static int pressure_open(FAR struct file *filep, FAR const char *relpath,
       return -ENOMEM;
     }
 
-  flags = spin_lock_irqsave(&g_pressure_lock);
+  flags = raw_spin_lock_irqsave(&g_pressure_lock);
   priv->interval = CLOCK_MAX;
   filep->f_priv = priv;
   dq_addfirst(&priv->entry, &g_pressure_memory_queue);
-  spin_unlock_irqrestore(&g_pressure_lock, flags);
+  raw_spin_unlock_irqrestore(&g_pressure_lock, flags);
   return OK;
 }
 
@@ -148,9 +148,9 @@ static int pressure_close(FAR struct file *filep)
   FAR struct pressure_file_s *priv = filep->f_priv;
   uint32_t flags;
 
-  flags = spin_lock_irqsave(&g_pressure_lock);
+  flags = raw_spin_lock_irqsave(&g_pressure_lock);
   dq_rem(&priv->entry, &g_pressure_memory_queue);
-  spin_unlock_irqrestore(&g_pressure_lock, flags);
+  raw_spin_unlock_irqrestore(&g_pressure_lock, flags);
   fs_heap_free(priv);
   return OK;
 }
@@ -169,10 +169,10 @@ static ssize_t pressure_read(FAR struct file *filep, FAR char *buffer,
   off_t offset;
   ssize_t ret;
 
-  flags   = spin_lock_irqsave(&g_pressure_lock);
+  flags   = raw_spin_lock_irqsave(&g_pressure_lock);
   remain  = g_remaining;
   largest = g_largest;
-  spin_unlock_irqrestore(&g_pressure_lock, flags);
+  raw_spin_unlock_irqrestore(&g_pressure_lock, flags);
 
   ret = procfs_snprintf(buf, sizeof(buf), "remaining %zu, largest:%zu\n",
                         remain, largest);
@@ -226,14 +226,14 @@ static ssize_t pressure_write(FAR struct file *filep, FAR const char *buffer,
       interval = USEC2TICK(interval);
     }
 
-  flags = spin_lock_irqsave(&g_pressure_lock);
+  flags = raw_spin_lock_irqsave(&g_pressure_lock);
 
   /* We should trigger the first event immediately */
 
   priv->lasttick  = CLOCK_MAX;
   priv->threshold = threshold;
   priv->interval  = interval;
-  spin_unlock_irqrestore(&g_pressure_lock, flags);
+  raw_spin_unlock_irqrestore(&g_pressure_lock, flags);
   return buflen;
 }
 
@@ -248,7 +248,7 @@ static int pressure_poll(FAR struct file *filep, FAR struct pollfd *fds,
   clock_t current = clock_systime_ticks();
   uint32_t flags;
 
-  flags = spin_lock_irqsave(&g_pressure_lock);
+  flags = raw_spin_lock_irqsave(&g_pressure_lock);
   if (setup)
     {
       if (priv->fds == NULL)
@@ -265,14 +265,14 @@ static int pressure_poll(FAR struct file *filep, FAR struct pollfd *fds,
               CLOCK_MAX || current - priv->lasttick >= priv->interval))
             {
               priv->lasttick = current;
-              spin_unlock_irqrestore(&g_pressure_lock, flags);
+              raw_spin_unlock_irqrestore(&g_pressure_lock, flags);
               poll_notify(&priv->fds, 1, POLLPRI);
               return OK;
             }
         }
       else
         {
-          spin_unlock_irqrestore(&g_pressure_lock, flags);
+          raw_spin_unlock_irqrestore(&g_pressure_lock, flags);
           return -EBUSY;
         }
     }
@@ -282,7 +282,7 @@ static int pressure_poll(FAR struct file *filep, FAR struct pollfd *fds,
       fds->priv = NULL;
     }
 
-  spin_unlock_irqrestore(&g_pressure_lock, flags);
+  raw_spin_unlock_irqrestore(&g_pressure_lock, flags);
   return OK;
 }
 
@@ -302,12 +302,12 @@ static int pressure_dup(FAR const struct file *oldp, FAR struct file *newp)
       return -ENOMEM;
     }
 
-  flags = spin_lock_irqsave(&g_pressure_lock);
+  flags = raw_spin_lock_irqsave(&g_pressure_lock);
   memcpy(newpriv, oldpriv, sizeof(struct pressure_file_s));
   dq_addfirst(&newpriv->entry, &g_pressure_memory_queue);
   newpriv->fds = NULL;
   newp->f_priv = newpriv;
-  spin_unlock_irqrestore(&g_pressure_lock, flags);
+  raw_spin_unlock_irqrestore(&g_pressure_lock, flags);
   return OK;
 }
 
@@ -425,7 +425,7 @@ void mm_notify_pressure(size_t remaining, size_t largest)
   FAR dq_entry_t *tmp;
   uint32_t flags;
 
-  flags       = spin_lock_irqsave(&g_pressure_lock);
+  flags       = raw_spin_lock_irqsave(&g_pressure_lock);
   g_remaining = remaining;
   g_largest   = largest;
 
@@ -463,11 +463,11 @@ void mm_notify_pressure(size_t remaining, size_t largest)
         }
 
       pressure->lasttick = current;
-      spin_unlock_irqrestore(&g_pressure_lock, flags);
+      raw_spin_unlock_irqrestore(&g_pressure_lock, flags);
       poll_notify(&pressure->fds, 1, POLLPRI);
-      flags = spin_lock_irqsave(&g_pressure_lock);
+      flags = raw_spin_lock_irqsave(&g_pressure_lock);
     }
 
-  spin_unlock_irqrestore(&g_pressure_lock, flags);
+  raw_spin_unlock_irqrestore(&g_pressure_lock, flags);
 }
 

@@ -139,7 +139,7 @@ void timer_deleteall(pid_t pid)
 
   sq_init(&freetimers);
 
-  flags = spin_lock_irqsave(&g_locktimers);
+  flags = raw_spin_lock_irqsave(&g_locktimers);
   for (timer = (FAR struct posix_timer_s *)g_alloctimers.head;
        timer != NULL;
        timer = next)
@@ -152,7 +152,7 @@ void timer_deleteall(pid_t pid)
         }
     }
 
-  spin_unlock_irqrestore(&g_locktimers, flags);
+  raw_spin_unlock_irqrestore(&g_locktimers, flags);
 
   for (timer = (FAR struct posix_timer_s *)freetimers.head;
        timer != NULL;
@@ -188,7 +188,7 @@ FAR struct posix_timer_s *timer_gethandle(timer_t timerid)
 
   if (timerid != NULL)
     {
-      flags = spin_lock_irqsave(&g_locktimers);
+      flags = raw_spin_lock_irqsave(&g_locktimers);
 
       sq_for_every(&g_alloctimers, entry)
         {
@@ -199,7 +199,7 @@ FAR struct posix_timer_s *timer_gethandle(timer_t timerid)
             }
         }
 
-      spin_unlock_irqrestore(&g_locktimers, flags);
+      raw_spin_unlock_irqrestore(&g_locktimers, flags);
     }
 
   return timer;

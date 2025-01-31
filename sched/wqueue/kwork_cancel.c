@@ -58,7 +58,7 @@ static int work_qcancel(FAR struct kwork_wqueue_s *wqueue, bool sync,
    * new work is typically added to the work queue from interrupt handlers.
    */
 
-  flags = spin_lock_irqsave(&wqueue->lock);
+  flags = raw_spin_lock_irqsave(&wqueue->lock);
   if (work->worker != NULL)
     {
       /* Remove the entry from the work queue and make sure that it is
@@ -84,14 +84,14 @@ static int work_qcancel(FAR struct kwork_wqueue_s *wqueue, bool sync,
               wqueue->worker[wndx].pid != nxsched_gettid())
             {
               wqueue->worker[wndx].wait_count++;
-              spin_unlock_irqrestore(&wqueue->lock, flags);
+              raw_spin_unlock_irqrestore(&wqueue->lock, flags);
               nxsem_wait_uninterruptible(&wqueue->worker[wndx].wait);
               return 1;
             }
         }
     }
 
-  spin_unlock_irqrestore(&wqueue->lock, flags);
+  raw_spin_unlock_irqrestore(&wqueue->lock, flags);
   return ret;
 }
 

@@ -73,7 +73,7 @@ static int clock_get_current_time(FAR struct timespec *ts,
   time_t sec;
   int ret;
 
-  flags = spin_lock_irqsave(&g_clock_lock);
+  flags = raw_spin_lock_irqsave(&g_clock_lock);
 
   ret = up_timer_gettick(&counter);
   if (ret < 0)
@@ -97,7 +97,7 @@ static int clock_get_current_time(FAR struct timespec *ts,
   ts->tv_sec = base->tv_sec + sec;
 
 errout_in_critical_section:
-  spin_unlock_irqrestore(&g_clock_lock, flags);
+  raw_spin_unlock_irqrestore(&g_clock_lock, flags);
   return ret;
 }
 
@@ -124,7 +124,7 @@ int clock_timekeeping_set_wall_time(FAR const struct timespec *ts)
   uint64_t counter;
   int ret;
 
-  flags = spin_lock_irqsave(&g_clock_lock);
+  flags = raw_spin_lock_irqsave(&g_clock_lock);
 
   ret = up_timer_gettick(&counter);
   if (ret < 0)
@@ -138,7 +138,7 @@ int clock_timekeeping_set_wall_time(FAR const struct timespec *ts)
   g_clock_last_counter = counter;
 
 errout_in_critical_section:
-  spin_unlock_irqrestore(&g_clock_lock, flags);
+  raw_spin_unlock_irqrestore(&g_clock_lock, flags);
   return ret;
 }
 
@@ -189,7 +189,7 @@ int adjtime(FAR const struct timeval *delta, FAR struct timeval *olddelta)
       return -1;
     }
 
-  flags = spin_lock_irqsave(&g_clock_lock);
+  flags = raw_spin_lock_irqsave(&g_clock_lock);
 
   adjust_usec = delta->tv_sec * USEC_PER_SEC + delta->tv_usec;
 
@@ -200,7 +200,7 @@ int adjtime(FAR const struct timeval *delta, FAR struct timeval *olddelta)
 
   g_clock_adjust = adjust_usec;
 
-  spin_unlock_irqrestore(&g_clock_lock, flags);
+  raw_spin_unlock_irqrestore(&g_clock_lock, flags);
 
   return OK;
 }
@@ -218,7 +218,7 @@ void clock_update_wall_time(void)
   time_t sec;
   int ret;
 
-  flags = spin_lock_irqsave(&g_clock_lock);
+  flags = raw_spin_lock_irqsave(&g_clock_lock);
 
   ret = up_timer_gettick(&counter);
   if (ret < 0)
@@ -272,7 +272,7 @@ void clock_update_wall_time(void)
   g_clock_last_counter = counter;
 
 errout_in_critical_section:
-  spin_unlock_irqrestore(&g_clock_lock, flags);
+  raw_spin_unlock_irqrestore(&g_clock_lock, flags);
 }
 
 /****************************************************************************
@@ -283,7 +283,7 @@ void clock_inittimekeeping(FAR const struct timespec *tp)
 {
   irqstate_t flags;
 
-  flags = spin_lock_irqsave(&g_clock_lock);
+  flags = raw_spin_lock_irqsave(&g_clock_lock);
   up_timer_getmask(&g_clock_mask);
 
   if (tp)
@@ -296,7 +296,7 @@ void clock_inittimekeeping(FAR const struct timespec *tp)
     }
 
   up_timer_gettick(&g_clock_last_counter);
-  spin_unlock_irqrestore(&g_clock_lock, flags);
+  raw_spin_unlock_irqrestore(&g_clock_lock, flags);
 }
 
 #endif /* CONFIG_CLOCK_TIMEKEEPING */

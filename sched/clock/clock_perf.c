@@ -95,7 +95,7 @@ clock_t perf_gettime(void)
 {
   FAR struct perf_s *perf = &g_perf;
   clock_t now = up_perf_gettime();
-  irqstate_t flags = spin_lock_irqsave(&perf->lock);
+  irqstate_t flags = raw_spin_lock_irqsave(&perf->lock);
   clock_t result;
 
   /* Check if overflow */
@@ -107,7 +107,7 @@ clock_t perf_gettime(void)
 
   perf->last = now;
   result = (clock_t)now | (clock_t)perf->overflow << 32;
-  spin_unlock_irqrestore(&perf->lock, flags);
+  raw_spin_unlock_irqrestore(&perf->lock, flags);
   return result;
 }
 

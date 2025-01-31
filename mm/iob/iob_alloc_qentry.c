@@ -59,7 +59,7 @@ static FAR struct iob_qentry_s *iob_alloc_qcommitted(void)
    * to protect the committed list:  We disable interrupts very briefly.
    */
 
-  flags = spin_lock_irqsave(&g_iob_lock);
+  flags = raw_spin_lock_irqsave(&g_iob_lock);
 
   /* Take the I/O buffer from the head of the committed list */
 
@@ -75,7 +75,7 @@ static FAR struct iob_qentry_s *iob_alloc_qcommitted(void)
       iobq->qe_head = NULL; /* Nothing is contained */
     }
 
-  spin_unlock_irqrestore(&g_iob_lock, flags);
+  raw_spin_unlock_irqrestore(&g_iob_lock, flags);
   return iobq;
 }
 
@@ -127,7 +127,7 @@ static FAR struct iob_qentry_s *iob_allocwait_qentry(void)
    * re-enabled while we are waiting for I/O buffers to become free.
    */
 
-  flags = spin_lock_irqsave(&g_iob_lock);
+  flags = raw_spin_lock_irqsave(&g_iob_lock);
 
   /* Try to get an I/O buffer chain container. */
 
@@ -139,7 +139,7 @@ static FAR struct iob_qentry_s *iob_allocwait_qentry(void)
        */
 
       g_qentry_wait++;
-      spin_unlock_irqrestore(&g_iob_lock, flags);
+      raw_spin_unlock_irqrestore(&g_iob_lock, flags);
       ret = nxsem_wait_uninterruptible(&g_qentry_sem);
       if (ret >= 0)
         {
@@ -156,7 +156,7 @@ static FAR struct iob_qentry_s *iob_allocwait_qentry(void)
       return qentry;
     }
 
-  spin_unlock_irqrestore(&g_iob_lock, flags);
+  raw_spin_unlock_irqrestore(&g_iob_lock, flags);
 
   return qentry;
 }
@@ -212,9 +212,9 @@ FAR struct iob_qentry_s *iob_tryalloc_qentry(void)
    * to protect the free list:  We disable interrupts very briefly.
    */
 
-  flags = spin_lock_irqsave(&g_iob_lock);
+  flags = raw_spin_lock_irqsave(&g_iob_lock);
   iobq = iob_tryalloc_qentry_internal();
-  spin_unlock_irqrestore(&g_iob_lock, flags);
+  raw_spin_unlock_irqrestore(&g_iob_lock, flags);
   return iobq;
 }
 

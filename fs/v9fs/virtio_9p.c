@@ -174,7 +174,7 @@ static int virtio_9p_request(FAR struct v9fs_transport_s *transport,
       vb[payload->wcount + i].len = payload->riov[i].iov_len;
     }
 
-  flags = spin_lock_irqsave(&priv->lock);
+  flags = raw_spin_lock_irqsave(&priv->lock);
   ret = virtqueue_add_buffer(vq, vb, payload->wcount, payload->rcount,
                              payload);
   if (ret < 0)
@@ -185,7 +185,7 @@ static int virtio_9p_request(FAR struct v9fs_transport_s *transport,
 
   virtqueue_kick(vq);
 out:
-  spin_unlock_irqrestore(&priv->lock, flags);
+  raw_spin_unlock_irqrestore(&priv->lock, flags);
   return ret;
 }
 

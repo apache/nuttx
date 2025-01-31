@@ -345,7 +345,7 @@ FAR void *mempool_allocate(FAR struct mempool_s *pool)
   irqstate_t flags;
 
 retry:
-  flags = spin_lock_irqsave(&pool->lock);
+  flags = raw_spin_lock_irqsave(&pool->lock);
   blk = mempool_remove_queue(pool, &pool->queue);
   if (blk == NULL)
     {
@@ -354,7 +354,7 @@ retry:
           blk = mempool_remove_queue(pool, &pool->iqueue);
           if (blk == NULL)
             {
-              spin_unlock_irqrestore(&pool->lock, flags);
+              raw_spin_unlock_irqrestore(&pool->lock, flags);
               return blk;
             }
         }
@@ -362,7 +362,7 @@ retry:
         {
           size_t blocksize = MEMPOOL_REALBLOCKSIZE(pool);
 
-          spin_unlock_irqrestore(&pool->lock, flags);
+          raw_spin_unlock_irqrestore(&pool->lock, flags);
           if (pool->expandsize >= blocksize + sizeof(sq_entry_t))
             {
               size_t nexpand = (pool->expandsize - sizeof(sq_entry_t)) /
@@ -376,7 +376,7 @@ retry:
                 }
 
               kasan_poison(base, size);
-              flags = spin_lock_irqsave(&pool->lock);
+              flags = raw_spin_lock_irqsave(&pool->lock);
               mempool_add_queue(pool, &pool->queue,
                                 base, nexpand, blocksize);
               sq_addlast((FAR sq_entry_t *)(base + nexpand * blocksize),
@@ -396,7 +396,7 @@ retry:
     }
 
   pool->nalloc++;
-  spin_unlock_irqrestore(&pool->lock, flags);
+  raw_spin_unlock_irqrestore(&pool->lock, flags);
 
 #if CONFIG_MM_BACKTRACE >= 0
   mempool_add_backtrace(pool, (FAR struct mempool_backtrace_s *)
@@ -424,7 +424,7 @@ retry:
 
 void mempool_release(FAR struct mempool_s *pool, FAR void *blk)
 {
-  irqstate_t flags = spin_lock_irqsave(&pool->lock);
+  irqstate_t flags = raw_spin_lock_irqsave(&pool->lock);
   size_t blocksize = MEMPOOL_REALBLOCKSIZE(pool);
 #if CONFIG_MM_BACKTRACE >= 0
   FAR struct mempool_backtrace_s *buf =
@@ -461,7 +461,7 @@ void mempool_release(FAR struct mempool_s *pool, FAR void *blk)
     }
 
   kasan_poison(blk, pool->blocksize);
-  spin_unlock_irqrestore(&pool->lock, flags);
+  raw_spin_unlock_irqrestore(&pool->lock, flags);
   if (pool->wait && pool->expandsize == 0)
     {
       int semcount;
@@ -495,13 +495,13 @@ int mempool_info(FAR struct mempool_s *pool, FAR struct mempoolinfo_s *info)
 
   DEBUGASSERT(pool != NULL && info != NULL);
 
-  flags = spin_lock_irqsave(&pool->lock);
+  flags = raw_spin_lock_irqsave(&pool->lock);
   info->ordblks = sq_count(&pool->queue);
   info->iordblks = sq_count(&pool->iqueue);
   info->aordblks = pool->nalloc;
   info->arena = sq_count(&pool->equeue) * sizeof(sq_entry_t) +
     (info->aordblks + info->ordblks + info->iordblks) * blocksize;
-  spin_unlock_irqrestore(&pool->lock, flags);
+  raw_spin_unlock_irqrestore(&pool->lock, flags);
   info->sizeblks = blocksize;
   if (pool->wait && pool->expandsize == 0)
     {
@@ -534,11 +534,11 @@ mempool_info_task(FAR struct mempool_s *pool,
 
   if (task->pid == PID_MM_FREE)
     {
-      irqstate_t flags = spin_lock_irqsave(&pool->lock);
+      irqstate_t flags = raw_spin_lock_irqsave(&pool->lock);
       size_t count = sq_count(&pool->queue) +
                      sq_count(&pool->iqueue);
 
-      spin_unlock_irqrestore(&pool->lock, flags);
+      raw_spin_unlock_irqrestore(&pool->lock, flags);
       info.aordblks += count;
       info.uordblks += count * blocksize;
     }

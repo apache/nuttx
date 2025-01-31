@@ -75,7 +75,7 @@ static int profil_timer_handler_cpu(FAR void *arg)
   uintptr_t pc = up_getusrpc(NULL);
   irqstate_t flags;
 
-  flags = spin_lock_irqsave(&prof->lock);
+  flags = raw_spin_lock_irqsave(&prof->lock);
   if (pc >= prof->lowpc && pc < prof->highpc)
     {
       size_t idx = (pc - prof->lowpc) / 2;
@@ -87,7 +87,7 @@ static int profil_timer_handler_cpu(FAR void *arg)
       prof->counter[idx]++;
     }
 
-  spin_unlock_irqrestore(&prof->lock, flags);
+  raw_spin_unlock_irqrestore(&prof->lock, flags);
   return OK;
 }
 
@@ -156,12 +156,12 @@ int profil(FAR unsigned short *buf, size_t bufsiz,
   memset(buf, 0, bufsiz);
   highpc = (uintmax_t)bufsiz * 65536 / scale;
 
-  flags = spin_lock_irqsave(&prof->lock);
+  flags = raw_spin_lock_irqsave(&prof->lock);
   prof->counter = buf;
   prof->lowpc   = offset;
   prof->highpc  = offset + highpc;
   prof->scale   = scale;
-  spin_unlock_irqrestore(&prof->lock, flags);
+  raw_spin_unlock_irqrestore(&prof->lock, flags);
 
   wd_start(&prof->timer, PROFTICK, profil_timer_handler,
            (wdparm_t)(uintptr_t)prof);
