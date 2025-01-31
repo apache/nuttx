@@ -111,6 +111,22 @@ extern "C"
 
 void arm_data_initialize(void);
 
+/****************************************************************************
+ * Name: arm_smp_busy_wait_fini
+ *
+ * Description:
+ *   Clearing armv7a SMP busy wait flag set in arm_head.S
+ *
+ ****************************************************************************/
+
+static inline void arm_smp_busy_wait_fini(void)
+{
+#ifdef CONFIG_ARMV7A_SMP_BUSY_WAIT
+  *(uint32_t *)CONFIG_ARMV7A_SMP_BUSY_WAIT_FLAG_ADDR = 1;
+  up_flush_dcache((uintptr_t)address, (uintptr_t)address + sizeof(uint32_t));
+#endif
+}
+
 #undef EXTERN
 #ifdef __cplusplus
 }
