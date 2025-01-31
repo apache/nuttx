@@ -745,6 +745,99 @@ config ESP32_WIRELESS
 	---help---
 		Enable Wireless support
 
+config ESP32_ESPNOW_PKTRADIO
+	bool "ESPNOW packet radio support"
+	select ESP32_WIRELESS
+	depends on WIRELESS_PKTRADIO
+	default n
+	---help---
+		Enable using espnow for packet radio
+
+if ESP32_ESPNOW_PKTRADIO
+
+config ESP32_ESPNOW_PKTRADIO_PANID
+	hex "panid"
+	range 0x0 0xffff
+	default 0x0
+	---help---
+		PANID for espnow packet radio
+
+comment "Node address for espnow packet radio"
+
+config ESP32_ESPNOW_PKTRADIO_NODE_ADDR_0
+	hex "[0]"
+	range 0x0 0xff
+	default 0x0
+	---help---
+		Node address for espnow packet radio
+
+if PKTRADIO_ADDRLEN > 1
+
+config ESP32_ESPNOW_PKTRADIO_NODE_ADDR_1
+	hex "[1]"
+	range 0x0 0xff
+	default 0x0
+	---help---
+		Node address for espnow packet radio
+
+if PKTRADIO_ADDRLEN > 2
+
+config ESP32_ESPNOW_PKTRADIO_NODE_ADDR_2
+	hex "[2]"
+	range 0x0 0xff
+	default 0x0
+	---help---
+		Node address for espnow packet radio
+
+config ESP32_ESPNOW_PKTRADIO_NODE_ADDR_3
+	hex "[3]"
+	range 0x0 0xff
+	default 0x0
+	---help---
+		Node address for espnow packet radio
+
+config ESP32_ESPNOW_PKTRADIO_NODE_ADDR_4
+	hex "[4]"
+	range 0x0 0xff
+	default 0x0
+	---help---
+		Node address for espnow packet radio
+
+config ESP32_ESPNOW_PKTRADIO_NODE_ADDR_5
+	hex "[5]"
+	range 0x0 0xff
+	default 0x0
+	---help---
+		Node address for espnow packet radio
+
+config ESP32_ESPNOW_PKTRADIO_NODE_ADDR_6
+	hex "[6]"
+	range 0x0 0xff
+	default 0x0
+	---help---
+		Node address for espnow packet radio
+
+config ESP32_ESPNOW_PKTRADIO_NODE_ADDR_7
+	hex "[7]"
+	range 0x0 0xff
+	default 0x0
+	---help---
+		Node address for espnow packet radio
+
+endif #PKTRADIO_ADDRLEN > 2
+
+endif # PKTRADIO_ADDRLEN > 1
+
+endif #ESP32_ESPNOW_PKTRADIO
+
+config ESP32_ESPNOW_PKTRADIO_HUB_NODE
+        hex "Hub node"
+	depends on NET_STARPOINT && (PKTRADIO_ADDRLEN = 1)
+	range 0x0 0xff
+	default 0x0
+	---help---
+	        Hub node address
+
 config ESP32_WIFI
 	bool "Wi-Fi"
 	default n
