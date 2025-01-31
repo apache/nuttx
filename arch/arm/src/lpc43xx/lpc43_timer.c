@@ -634,7 +634,7 @@ static void lpc43_setcallback(struct timer_lowerhalf_s *lower,
   struct lpc43_lowerhalf_s *priv = (struct lpc43_lowerhalf_s *)lower;
   irqstate_t flags;
 
-  flags = spin_lock_irqsave(&priv->lock);
+  flags = spin_lock_irqsave_nopreempt(&priv->lock);
 
   DEBUGASSERT(priv);
   tmrinfo("Entry: callback=%p\n", callback);
@@ -644,7 +644,7 @@ static void lpc43_setcallback(struct timer_lowerhalf_s *lower,
   priv->callback = callback;
   priv->arg      = arg;
 
-  spin_unlock_irqrestore(&priv->lock, flags);
+  spin_unlock_irqrestore_nopreempt(&priv->lock, flags);
 }
 
 /****************************************************************************

@@ -114,7 +114,7 @@ static int adjtime_start(long long adjust_usec)
       ppb = -ppb_limit;
     }
 
-  flags = spin_lock_irqsave(&g_adjtime_lock);
+  flags = spin_lock_irqsave_nopreempt(&g_adjtime_lock);
 
   /* Set new adjustment */
 
@@ -140,7 +140,7 @@ static int adjtime_start(long long adjust_usec)
       wd_cancel(&g_adjtime_wdog);
     }
 
-  spin_unlock_irqrestore(&g_adjtime_lock, flags);
+  spin_unlock_irqrestore_nopreempt(&g_adjtime_lock, flags);
 
   return ret;
 }

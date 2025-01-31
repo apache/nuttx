@@ -2243,7 +2243,7 @@ static int imxrt_epdisable(struct usbdev_ep_s *ep)
 
   usbtrace(TRACE_EPDISABLE, privep->epphy);
 
-  flags = spin_lock_irqsave(&privep->dev->lock);
+  flags = spin_lock_irqsave_nopreempt(&privep->dev->lock);
 
   /* Disable Endpoint */
 
@@ -2264,7 +2264,7 @@ static int imxrt_epdisable(struct usbdev_ep_s *ep)
 
   imxrt_cancelrequests(privep, -ESHUTDOWN);
 
-  spin_unlock_irqrestore(&privep->dev->lock, flags);
+  spin_unlock_irqrestore_nopreempt(&privep->dev->lock, flags);
   return OK;
 }
 
@@ -2421,7 +2421,7 @@ static int imxrt_epsubmit(struct usbdev_ep_s *ep,
 
   /* Disable Interrupts */
 
-  flags = spin_lock_irqsave(&priv->lock);
+  flags = spin_lock_irqsave_nopreempt(&priv->lock);
 
   /* If we are stalled, then drop all requests on the floor */
 
@@ -2448,7 +2448,7 @@ static int imxrt_epsubmit(struct usbdev_ep_s *ep,
         }
     }
 
-  spin_unlock_irqrestore(&priv->lock, flags);
+  spin_unlock_irqrestore_nopreempt(&priv->lock, flags);
   return ret;
 }
 
@@ -2476,7 +2476,7 @@ static int imxrt_epcancel(struct usbdev_ep_s *ep,
 
   usbtrace(TRACE_EPCANCEL, privep->epphy);
 
-  flags = spin_lock_irqsave(&privep->dev->lock);
+  flags = spin_lock_irqsave_nopreempt(&privep->dev->lock);
 
   /* FIXME: if the request is the first, then we need to flush the EP
    *         otherwise just remove it from the list
@@ -2485,7 +2485,7 @@ static int imxrt_epcancel(struct usbdev_ep_s *ep,
    */
 
   imxrt_cancelrequests(privep, -ESHUTDOWN);
-  spin_unlock_irqrestore(&privep->dev->lock, flags);
+  spin_unlock_irqrestore_nopreempt(&privep->dev->lock, flags);
   return OK;
 }
 
@@ -2504,7 +2504,7 @@ static int imxrt_epstall(struct usbdev_ep_s *ep, bool resume)
 
   /* STALL or RESUME the endpoint */
 
-  flags = spin_lock_irqsave(&privep->dev->lock);
+  flags = spin_lock_irqsave_nopreempt(&privep->dev->lock);
   usbtrace(resume ? TRACE_EPRESUME : TRACE_EPSTALL, privep->epphy);
 
   uint32_t addr    = IMXRT_USBDEV_ENDPTCTRL(privep->epphy >> 1);
@@ -2528,7 +2528,7 @@ static int imxrt_epstall(struct usbdev_ep_s *ep, bool resume)
       imxrt_setbits(ctrl_xs, addr);
     }
 
-  spin_unlock_irqrestore(&privep->dev->lock, flags);
+  spin_unlock_irqrestore_nopreempt(&privep->dev->lock, flags);
   return OK;
 }
 
@@ -2808,9 +2808,9 @@ static int imxrt_pullup(struct usbdev_s *dev, bool enable)
   struct imxrt_usbdev_s *priv = (struct imxrt_usbdev_s *)dev;
   int ret;
 
-  irqstate_t flags = spin_lock_irqsave(&priv->lock);
+  irqstate_t flags = spin_lock_irqsave_nopreempt(&priv->lock);
   ret = imxrt_pullup_nolock(dev, enable);
-  spin_unlock_irqrestore(&priv->lock, flags);
+  spin_unlock_irqrestore_nopreempt(&priv->lock, flags);
 
   return ret;
 }
@@ -2984,7 +2984,7 @@ void arm_usbuninitialize(void)
       usbdev_unregister(priv->driver);
     }
 
-  flags = spin_lock_irqsave(&priv->lock);
+  flags = spin_lock_irqsave_nopreempt(&priv->lock);
 
   /* Disconnect device */
 
@@ -3015,7 +3015,7 @@ void arm_usbuninitialize(void)
 
   imxrt_clockoff_usboh3();
 
-  spin_unlock_irqrestore(&priv->lock, flags);
+  spin_unlock_irqrestore_nopreempt(&priv->lock, flags);
 }
 
 /****************************************************************************

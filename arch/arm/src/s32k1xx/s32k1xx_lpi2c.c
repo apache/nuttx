@@ -500,7 +500,7 @@ s32k1xx_lpi2c_sem_waitdone(struct s32k1xx_lpi2c_priv_s *priv)
   uint32_t regval;
   int ret;
 
-  flags = spin_lock_irqsave(&priv->spinlock);
+  flags = spin_lock_irqsave_nopreempt(&priv->spinlock);
 
 #ifdef CONFIG_S32K1XX_LPI2C_DMA
   if (priv->rxdma == NULL && priv->txdma == NULL)
@@ -583,7 +583,7 @@ s32k1xx_lpi2c_sem_waitdone(struct s32k1xx_lpi2c_priv_s *priv)
     }
 #endif
 
-  spin_unlock_irqrestore(&priv->spinlock, flags);
+  spin_unlock_irqrestore_nopreempt(&priv->spinlock, flags);
   return ret;
 }
 #else

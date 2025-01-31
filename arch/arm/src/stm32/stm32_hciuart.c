@@ -2404,11 +2404,11 @@ static void hciuart_dma_rxcallback(DMA_HANDLE handle, uint8_t status,
   irqstate_t flags;
   ssize_t nbytes;
 
-  flags = spin_lock_irqsave(&config->lock);
+  flags = spin_lock_irqsave_nopreempt(&config->lock);
 
   if (config.state->rxdmastream == NULL)
     {
-      spin_unlock_irqrestore(&config->lock, flags);
+      spin_unlock_irqrestore_nopreempt(&config->lock, flags);
       return;
     }
 
@@ -2434,7 +2434,7 @@ static void hciuart_dma_rxcallback(DMA_HANDLE handle, uint8_t status,
       handled = true;
     }
 
-  spin_unlock_irqrestore(&config->lock, flags);
+  spin_unlock_irqrestore_nopreempt(&config->lock, flags);
 }
 #endif
 
