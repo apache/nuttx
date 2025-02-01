@@ -185,6 +185,8 @@ NM = $(CROSSDEV)nm
 OBJCOPY = $(CROSSDEV)objcopy
 OBJDUMP = $(CROSSDEV)objdump
 
+LDFLAGS += --print-memory-usage
+
 ifeq ($(CONFIG_ARCH_TOOLCHAIN_GNU),y)
   ifeq ($(CONFIG_ARCH_TOOLCHAIN_CLANG),)
     ifeq ($(GCCVER),)
