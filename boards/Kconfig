@@ -2202,6 +2202,7 @@ config ARCH_BOARD_SABRE_6QUAD
 
 config ARCH_BOARD_TC397
 	bool "Infineon's AURIX TC397 board: KIT_A2G_TC397_5V_TFT"
+	depends on ARCH_CHIP_TC397
 	---help---
 		This options selects support for NuttX on the Infineon's AURIX board
 		board featuring the TC397 6Quad CPU.
