@@ -40,3 +40,14 @@ If you wish to contribute to the NuttX project, read the [Contributing](https://
 
 ## License
 The code in this repository is under either the Apache 2 license, or a license compatible with the Apache 2 license. See the [License Page](https://nuttx.apache.org/docs/latest/introduction/licensing.html) for more information.
+## AI-generated ProductMaps
+
+
+
+| Github file | ProductMap |
+|-------------|------------|
+| [nxflat.c](https://github.com/apache/nuttx/blob/master/binfmt/nxflat.c) | [Link to Map](https://product-map.ai/app/public?url=https://github.com/apache/nuttx/blob/master/binfmt/nxflat.c) |
+
+Contact ProductMap if you have any questions at [juan@product-map.ai](juan@product-map.ai).
+
+Last updated on Mon Feb 03 22:54:37 UTC 2025.
