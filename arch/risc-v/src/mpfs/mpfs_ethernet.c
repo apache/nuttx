@@ -2246,7 +2246,8 @@ static int mpfs_phyfind(struct mpfs_ethmac_s *priv, uint8_t *phyaddr)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_NET) && defined(CONFIG_DEBUG_INFO)
+#if defined(CONFIG_DEBUG_NET) && defined(CONFIG_DEBUG_INFO) && \
+  defined(ETH_HAS_MDIO_PHY)
 static void mpfs_phydump(struct mpfs_ethmac_s *priv)
 {
   uint16_t phyval;
@@ -2601,6 +2602,8 @@ static void mpfs_linkspeed(struct mpfs_ethmac_s *priv)
 
   mac_putreg(priv, NETWORK_CONFIG, regval);
   mac_putreg(priv, NETWORK_CONTROL, ncr);
+
+  mpfs_phydump(priv);
 }
 #endif
 
