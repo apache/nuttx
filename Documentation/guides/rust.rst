@@ -32,6 +32,8 @@ Supported Platforms
 - ARMv8-M
 - RISCV32
 - RISCV64
+- X86
+- X86_64
 
 Getting Started
 ===============
