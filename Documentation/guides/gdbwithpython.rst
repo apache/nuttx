@@ -14,7 +14,7 @@ Usage
 
 1. Compile NuttX with CONFIG_DEBUG_SYMBOLS=y enabled and change `CONFIG_DEBUG_SYMBOLS_LEVEL` to -g3.
 2. Use GDB to debug the NuttX ELF binary (on a real device, a simulator, or with a coredump).
-3. Add the following argument to the GDB command line: `-ix="nuttx/tools/gdb/gdbinit.py"`
+3. Add the following argument to the GDB command line: `-ix="nuttx/tools/pynuttx/gdbinit.py"`
 4. GDB will automatically load the Python script, enabling the use of custom commands.
 
 How to write a GDB python script
