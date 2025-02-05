@@ -104,8 +104,12 @@ static inline void xtensa_attach_fromcpu0_interrupt(void)
 
 void xtensa_appcpu_start(void)
 {
-  struct tcb_s *tcb = this_task();
+  struct tcb_s *tcb = current_task(this_cpu());
   register uint32_t sp;
+
+  /* Init idle task to percpu reg */
+
+  up_update_task(tcb);
 
   /* Move to the stack assigned to us by up_smp_start immediately.  Although
    * we were give a stack pointer at start-up, we don't know where that stack

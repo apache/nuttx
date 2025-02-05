@@ -172,6 +172,11 @@ config XTENSA_DCACHE_LOCK
 	---help---
 		Enable Xtensa D-Cache lock & unlock feature
 
+config XTENSA_PERCPU_TCB_IN_MISC0
+	bool "Use misc0 register to store the percpu tcb"
+	default n if ARCH_CHIP_ESP32
+	default y
+
 config XTENSA_ONESHOT
 	bool "Xtensa oneshot lower half driver"
 	default n
