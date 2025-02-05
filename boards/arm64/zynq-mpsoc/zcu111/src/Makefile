@@ -38,6 +38,10 @@ ifeq ($(CONFIG_USERLED),y)
 CSRCS += zcu111_userleds.c
 endif
 
+ifeq ($(CONFIG_NET),y)
+CSRCS += zcu111_ethernet.c
+endif
+
 ifeq ($(CONFIG_ETC_ROMFS),y)
   RCSRCS = etc/init.d/rc.sysinit etc/init.d/rcS
 endif

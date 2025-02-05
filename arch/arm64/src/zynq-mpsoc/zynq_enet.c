@@ -99,8 +99,8 @@
 
 /* GMAC buffer sizes, number of buffers, and number of descriptors. *********/
 
-#define GMAC_RX_UNITSIZE 128                    /* Fixed size for RX buffer  */
-#define GMAC_TX_UNITSIZE CONFIG_NET_ETH_PKTSIZE /* MAX size for Ethernet packet */
+#define GMAC_RX_UNITSIZE CONFIG_ZYNQ_GMAC_RXDMA_BUFSIZE /* DMA buffer size for receive  */
+#define GMAC_TX_UNITSIZE CONFIG_NET_ETH_PKTSIZE         /* MAX size for Ethernet packet */
 
 /* The MAC can support frame lengths up to 1536 bytes */
 
@@ -3551,8 +3551,8 @@ static int zynq_gmac_configure(struct zynq_gmac_s *priv)
    *   IRXER = 0  : Disable ignore IPG GXER
    */
 
-  regval = GMAC_NCFGR_FD | GMAC_NCFGR_GBE |
-           GMAC_NCFGR_CLK_DIV64 | GMAC_NCFGR_DBW_64;
+  regval = GMAC_NCFGR_FD | GMAC_NCFGR_GBE | GMAC_NCFGR_PEN |
+           GMAC_NCFGR_RFCS | GMAC_NCFGR_CLK_DIV64 | GMAC_NCFGR_DBW_64;
 
 #ifdef CONFIG_NET_PROMISCUOUS
   regval |= GMAC_NCFGR_CAF;
@@ -3567,6 +3567,14 @@ static int zynq_gmac_configure(struct zynq_gmac_s *priv)
   /* DMA control config */
 
   regval = zynq_getreg(priv, ZYNQ_GMAC_DCFGR);
+
+  /* DMA receive buffer size in external AMBA (AHB/AXI) system memory */
+
+  regval &= ~GMAC_DCFGR_DRBS_MASK;
+
+  /* The value is defined in multiples of 64 bytes */
+
+  regval |= GMAC_DCFGR_DRBS(GMAC_RX_UNITSIZE / 64);
 
   regval &= ~GMAC_DCFGR_ESPA;
 

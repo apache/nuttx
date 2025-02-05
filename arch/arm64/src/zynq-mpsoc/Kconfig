@@ -86,6 +86,16 @@ config ZYNQ_GMAC_NTXBUFFERS
 		that can be in flight.  This is also equal to the number of TX
 		descriptors that will be allocated.
 
+config ZYNQ_GMAC_RXDMA_BUFSIZE
+	int "RX DMA buffer size"
+	default 128
+	range 64 10240
+	---help---
+		DMA receive buffer size in external AMBA (AHB/AXI) system memory.
+		The value defined by these bits determines the size of buffer to
+		use in main system memory when writing received data. The value
+		must be defined as multiples of 64 bytes, i.e. 64, 128, 256...
+
 config ZYNQ_GMAC_PREALLOCATE
 	bool "Preallocate buffers"
 	default n

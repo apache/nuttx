@@ -203,10 +203,3 @@ void arm64_chip_boot(void)
   up_perf_init((void *)CONFIG_SYS_CLOCK_HW_CYCLES_PER_SEC);
 #endif
 }
-
-#if defined(CONFIG_NET) && !defined(CONFIG_NETDEV_LATEINIT)
-void arm64_netinitialize(void)
-{
-  /* TODO: Support net initialize */
-}
-#endif
