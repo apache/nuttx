@@ -140,6 +140,7 @@ int work_queue_wq(FAR struct kwork_wqueue_s *wqueue,
                   FAR void *arg, clock_t delay)
 {
   irqstate_t flags;
+  int ret = OK;
 
   if (wqueue == NULL || work == NULL || worker == NULL)
     {
@@ -151,6 +152,7 @@ int work_queue_wq(FAR struct kwork_wqueue_s *wqueue,
    */
 
   flags = spin_lock_irqsave(&wqueue->lock);
+  sched_lock();
 
   /* Remove the entry from the timer and work queue. */
 
@@ -170,8 +172,7 @@ int work_queue_wq(FAR struct kwork_wqueue_s *wqueue,
 
   if (work_is_canceling(wqueue->worker, wqueue->nthreads, work))
     {
-      spin_unlock_irqrestore(&wqueue->lock, flags);
-      return 0;
+      goto out;
     }
 
   /* Initialize the work structure. */
@@ -184,18 +185,17 @@ int work_queue_wq(FAR struct kwork_wqueue_s *wqueue,
 
   if (!delay)
     {
-      sched_lock();
       queue_work(wqueue, work);
-      spin_unlock_irqrestore(&wqueue->lock, flags);
-      sched_unlock();
     }
   else
     {
       wd_start(&work->u.timer, delay, work_timer_expiry, (wdparm_t)work);
-      spin_unlock_irqrestore(&wqueue->lock, flags);
     }
 
-  return 0;
+out:
+  spin_unlock_irqrestore(&wqueue->lock, flags);
+  sched_unlock();
+  return ret;
 }
 
 int work_queue(int qid, FAR struct work_s *work, worker_t worker,
