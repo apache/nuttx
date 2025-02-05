@@ -39,7 +39,7 @@
 
 #include <sys/param.h>
 
-#include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
 #include <arch/board/board.h>
@@ -76,6 +76,7 @@ static bool forced_int = false;       /* true if interrupt was forced with mask,
 static bool armed = false;            /* true if alarm is armed for next match */
 static uint32_t synch = 0;            /* Synch all calls, recursion is possible */
 static irqstate_t g_flags;
+static spinlock_t g_lock = SP_UNLOCKED;
 
 static uint32_t ctrl_cache;
 static uint32_t mask_cache;
@@ -266,7 +267,7 @@ static uint32_t lpc43_tl_tick2ts(uint32_t ticks, struct timespec *ts,
 static inline void lpc43_tl_sync_up(void)
 {
   irqstate_t flags;
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_lock);
 
   if (synch == 0)
     {
@@ -281,7 +282,7 @@ static inline void lpc43_tl_sync_down(void)
   synch--;
   if (synch == 0)
     {
-      leave_critical_section(g_flags);
+      spin_unlock_irqrestore(&g_lock, g_flags);
     }
 }
 
@@ -569,7 +570,7 @@ static int lpc43_tl_isr(int irq, void *context, void *arg)
 void up_timer_initialize(void)
 {
   irqstate_t flags;
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_lock);
 
   ctrl_cache = getreg32(LPC43_RIT_CTRL);
   ctrl_cache &= ~RIT_CTRL_INT; /* Set interrupt to 0 */
@@ -604,7 +605,7 @@ void up_timer_initialize(void)
 
   lpc43_tl_calibrate_init();
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_lock, flags);
 }
 
 /* No reg changes, only processing */

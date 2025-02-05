@@ -52,7 +52,7 @@
 #include <time.h>
 #include <assert.h>
 
-#include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
 
@@ -101,6 +101,8 @@ static int up_timer_expire(int irq, void *regs, void *arg);
 static bool g_timer_started; /* Whether an interval timer is being started */
 static uint64_t g_cticks;    /* Total ticks of system since power-on */
 static uint32_t g_loop_cnt;  /* System Cycle counter cycle times */
+
+static spinlock_t g_timer_lock; /* Lock to protect the timer */
 
 /* Redundant ticks of an interval timer on the cycle counter */
 
@@ -208,16 +210,57 @@ static void IRAM_ATTR up_tmr_setcount(uint64_t ticks)
       xtensa_setcompare(last_ticks);
     }
 
-  flags = enter_critical_section();
-
   g_loop_cnt      = loop_cnt;
   g_last_cticks   = last_ticks;
   g_timer_started = true;
 
-  leave_critical_section(flags);
-
   g_cticks += xtensa_getcount();
   xtensa_setcount(0);
+}
+
+/****************************************************************************
+ * Name: up_timer_cancel_nolock
+ *
+ * Description:
+ *   Unlocked version of the public function up_timer_cancel().
+ *
+ ****************************************************************************/
+
+static int IRAM_ATTR up_timer_cancel_nolock(struct timespec *ts)
+{
+  uint64_t rst_ticks;
+  uint64_t cur_ticks;
+  uint64_t ticks;
+
+  if (ts != NULL)
+    {
+      if (!g_timer_started)
+        {
+          ts->tv_sec  = 0;
+          ts->tv_nsec = 0;
+        }
+      else
+        {
+          rst_ticks = up_tmr_getcount();
+          cur_ticks = xtensa_getcount();
+          if (rst_ticks <= cur_ticks)
+            {
+              ticks = 0;
+            }
+          else
+            {
+              ticks = rst_ticks - cur_ticks;
+            }
+
+          ts->tv_sec  = CTICK_2_SEC(ticks);
+          ts->tv_nsec = CTICK_2_NSEC(ticks % CTICK_PER_SEC);
+        }
+    }
+
+  g_timer_started = false;
+  up_tmr_setcompare(CPU_TICKS_MAX);
+
+  return OK;
 }
 
 /****************************************************************************
@@ -239,7 +282,7 @@ static int up_timer_expire(int irq, void *regs, void *arg)
   irqstate_t flags;
   bool do_sched = false;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_timer_lock);
 
   if (g_timer_started)
     {
@@ -270,7 +313,7 @@ static int up_timer_expire(int irq, void *regs, void *arg)
 
       if (do_sched)
         {
-          up_timer_cancel(NULL);
+          up_timer_cancel_nolock(NULL);
           nxsched_timer_expiration();
         }
     }
@@ -279,7 +322,7 @@ static int up_timer_expire(int irq, void *regs, void *arg)
       up_tmr_setcompare(CPU_TICKS_MAX);
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_timer_lock, flags);
   return OK;
 }
 
@@ -325,13 +368,13 @@ int IRAM_ATTR up_timer_gettime(struct timespec *ts)
   uint64_t ticks;
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_timer_lock);
 
   ticks = up_tmr_total_count();
   ts->tv_sec  = CTICK_2_SEC(ticks);
   ts->tv_nsec = CTICK_2_NSEC(ticks % CTICK_PER_SEC);
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_timer_lock, flags);
   return OK;
 }
 
@@ -373,43 +416,14 @@ int IRAM_ATTR up_timer_gettime(struct timespec *ts)
 
 int IRAM_ATTR up_timer_cancel(struct timespec *ts)
 {
-  uint64_t rst_ticks;
-  uint64_t cur_ticks;
-  uint64_t ticks;
+  int ret;
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_timer_lock);
+  ret = up_timer_cancel_nolock(ts);
+  spin_unlock_irqrestore(&g_timer_lock, flags);
 
-  if (ts != NULL)
-    {
-      if (!g_timer_started)
-        {
-          ts->tv_sec  = 0;
-          ts->tv_nsec = 0;
-        }
-      else
-        {
-          rst_ticks = up_tmr_getcount();
-          cur_ticks = xtensa_getcount();
-          if (rst_ticks <= cur_ticks)
-            {
-              ticks = 0;
-            }
-          else
-            {
-              ticks = rst_ticks - cur_ticks;
-            }
-
-          ts->tv_sec  = CTICK_2_SEC(ticks);
-          ts->tv_nsec = CTICK_2_NSEC(ticks % CTICK_PER_SEC);
-        }
-    }
-
-  g_timer_started = false;
-  up_tmr_setcompare(CPU_TICKS_MAX);
-
-  leave_critical_section(flags);
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
@@ -442,11 +456,11 @@ int IRAM_ATTR up_timer_start(const struct timespec *ts)
   uint64_t cpu_ticks;
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_timer_lock);
 
   if (g_timer_started)
     {
-      up_timer_cancel(NULL);
+      up_timer_cancel_nolock(NULL);
     }
 
   cpu_ticks = SEC_2_CTICK((uint64_t)ts->tv_sec) +
@@ -454,7 +468,7 @@ int IRAM_ATTR up_timer_start(const struct timespec *ts)
 
   up_tmr_setcount(cpu_ticks);
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_timer_lock, flags);
   return OK;
 }
 
@@ -485,6 +499,8 @@ int IRAM_ATTR up_timer_start(const struct timespec *ts)
 
 void up_timer_initialize(void)
 {
+  spin_lock_init(&g_timer_lock);
+
   /* Set up periodic timer */
 
   up_tmr_setcompare(CPU_TICKS_MAX);
@@ -524,7 +540,7 @@ uint32_t IRAM_ATTR up_get_idletime(void)
   uint64_t rst_ticks;
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_timer_lock);
 
   if (!g_timer_started)
     {
@@ -544,7 +560,7 @@ uint32_t IRAM_ATTR up_get_idletime(void)
         }
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_timer_lock, flags);
 
   return us;
 }
@@ -571,7 +587,7 @@ void IRAM_ATTR up_step_idletime(uint32_t us)
 
   DEBUGASSERT(g_timer_started);
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_timer_lock);
 
   ticks = USEC_2_CTICK((uint64_t)us);
   timer_ticks = up_tmr_getcount();
@@ -581,7 +597,7 @@ void IRAM_ATTR up_step_idletime(uint32_t us)
   g_cticks += ticks;
   up_tmr_setcount(timer_ticks - ticks);
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_timer_lock, flags);
 }
 
 #endif /* CONFIG_SCHED_TICKLESS */

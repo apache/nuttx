@@ -88,6 +88,7 @@
 #include <assert.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/spinlock.h>
 #include <debug.h>
 
 #include "arm_internal.h"
@@ -128,6 +129,7 @@ struct stm32_tickless_s
   volatile bool pending;       /* True: pending task */
   uint32_t period;             /* Interval period */
   uint32_t base;
+  spinlock_t lock;             /* Spinock for this structure */
 };
 
 /****************************************************************************
@@ -376,6 +378,113 @@ static int stm32_tickless_handler(int irq, void *context, void *arg)
 }
 
 /****************************************************************************
+ * Name: up_timer_cancel_nolock
+ *
+ * Description:
+ *   Unlocked version of the public function up_timer_cancel().
+ *
+ ****************************************************************************/
+
+static int up_timer_cancel_nolock(struct timespec *ts)
+{
+  uint64_t usec;
+  uint64_t sec;
+  uint64_t nsec;
+  uint32_t count;
+  uint32_t period;
+
+  /* Was the timer running? */
+
+  if (!g_tickless.pending)
+    {
+      /* No.. Just return zero timer remaining and successful cancellation.
+       * This function may execute at a high rate with no timer running
+       * (as when pre-emption is enabled and disabled).
+       */
+
+      if (ts)
+        {
+          ts->tv_sec  = 0;
+          ts->tv_nsec = 0;
+        }
+
+      return OK;
+    }
+
+  /* Yes.. Get the timer counter and period registers and disable the compare
+   * interrupt.
+   */
+
+  tmrinfo("Cancelling...\n");
+
+  /* Disable the interrupt. */
+
+  stm32_tickless_disableint(g_tickless.channel);
+
+  count  = STM32_TIM_GETCOUNTER(g_tickless.tch);
+  period = g_tickless.period;
+
+  g_tickless.pending = false;
+
+  /* Did the caller provide us with a location to return the time
+   * remaining?
+   */
+
+  if (ts != NULL)
+    {
+      /* Yes.. then calculate and return the time remaining on the
+       * oneshot timer.
+       */
+
+      tmrinfo("period=%lu count=%lu\n",
+             (unsigned long)period, (unsigned long)count);
+
+#ifndef HAVE_32BIT_TICKLESS
+      if (count > period)
+        {
+          /* Handle rollover */
+
+          period += UINT16_MAX;
+        }
+      else if (count == period)
+#else
+      if (count >= period)
+#endif
+        {
+          /* No time remaining */
+
+          ts->tv_sec  = 0;
+          ts->tv_nsec = 0;
+          return OK;
+        }
+
+      /* The total time remaining is the difference.  Convert that
+       * to units of microseconds.
+       *
+       *   frequency = ticks / second
+       *   seconds   = ticks * frequency
+       *   usecs     = (ticks * USEC_PER_SEC) / frequency;
+       */
+
+      usec        = (((uint64_t)(period - count)) * USEC_PER_SEC) /
+                    g_tickless.frequency;
+
+      /* Return the time remaining in the correct form */
+
+      sec         = usec / USEC_PER_SEC;
+      nsec        = ((usec) - (sec * USEC_PER_SEC)) * NSEC_PER_USEC;
+
+      ts->tv_sec  = (time_t)sec;
+      ts->tv_nsec = (unsigned long)nsec;
+
+      tmrinfo("remaining (%lu, %lu)\n",
+             (unsigned long)ts->tv_sec, (unsigned long)ts->tv_nsec);
+    }
+
+  return OK;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -523,6 +632,7 @@ void up_timer_initialize(void)
   g_tickless.pending   = false;
   g_tickless.period    = 0;
   g_tickless.overflow  = 0;
+  g_tickless.lock      = SP_UNLOCKED;
 
   tmrinfo("timer=%d channel=%d frequency=%lu Hz\n",
            g_tickless.timer, g_tickless.channel, g_tickless.frequency);
@@ -632,7 +742,7 @@ int up_timer_gettime(struct timespec *ts)
    * be lost.
    */
 
-  flags    = enter_critical_section();
+  flags    = spin_lock_irqsave(&g_tickless.lock);
 
   overflow = g_tickless.overflow;
   counter  = STM32_TIM_GETCOUNTER(g_tickless.tch);
@@ -659,7 +769,7 @@ int up_timer_gettime(struct timespec *ts)
       g_tickless.overflow = overflow;
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_tickless.lock, flags);
 
   tmrinfo("counter=%lu (%lu) overflow=%lu, pending=%i\n",
          (unsigned long)counter,  (unsigned long)verify,
@@ -778,105 +888,14 @@ void up_timer_getmask(clock_t *mask)
 
 int up_timer_cancel(struct timespec *ts)
 {
+  int ret;
   irqstate_t flags;
-  uint64_t usec;
-  uint64_t sec;
-  uint64_t nsec;
-  uint32_t count;
-  uint32_t period;
 
-  /* Was the timer running? */
+  flags = spin_lock_irqsave(&g_tickless.lock);
+  ret = up_timer_cancel_nolock(ts);
+  spin_unlock_irqrestore(&g_tickless.lock, flags);
 
-  flags = enter_critical_section();
-  if (!g_tickless.pending)
-    {
-      /* No.. Just return zero timer remaining and successful cancellation.
-       * This function may execute at a high rate with no timer running
-       * (as when pre-emption is enabled and disabled).
-       */
-
-      if (ts)
-        {
-          ts->tv_sec  = 0;
-          ts->tv_nsec = 0;
-        }
-
-      leave_critical_section(flags);
-      return OK;
-    }
-
-  /* Yes.. Get the timer counter and period registers and disable the compare
-   * interrupt.
-   */
-
-  tmrinfo("Cancelling...\n");
-
-  /* Disable the interrupt. */
-
-  stm32_tickless_disableint(g_tickless.channel);
-
-  count  = STM32_TIM_GETCOUNTER(g_tickless.tch);
-  period = g_tickless.period;
-
-  g_tickless.pending = false;
-  leave_critical_section(flags);
-
-  /* Did the caller provide us with a location to return the time
-   * remaining?
-   */
-
-  if (ts != NULL)
-    {
-      /* Yes.. then calculate and return the time remaining on the
-       * oneshot timer.
-       */
-
-      tmrinfo("period=%lu count=%lu\n",
-             (unsigned long)period, (unsigned long)count);
-
-#ifndef HAVE_32BIT_TICKLESS
-      if (count > period)
-        {
-          /* Handle rollover */
-
-          period += UINT16_MAX;
-        }
-      else if (count == period)
-#else
-      if (count >= period)
-#endif
-        {
-          /* No time remaining */
-
-          ts->tv_sec  = 0;
-          ts->tv_nsec = 0;
-          return OK;
-        }
-
-      /* The total time remaining is the difference.  Convert that
-       * to units of microseconds.
-       *
-       *   frequency = ticks / second
-       *   seconds   = ticks * frequency
-       *   usecs     = (ticks * USEC_PER_SEC) / frequency;
-       */
-
-      usec        = (((uint64_t)(period - count)) * USEC_PER_SEC) /
-                    g_tickless.frequency;
-
-      /* Return the time remaining in the correct form */
-
-      sec         = usec / USEC_PER_SEC;
-      nsec        = ((usec) - (sec * USEC_PER_SEC)) * NSEC_PER_USEC;
-
-      ts->tv_sec  = (time_t)sec;
-      ts->tv_nsec = (unsigned long)nsec;
-
-      tmrinfo("remaining (%lu, %lu)\n",
-             (unsigned long)ts->tv_sec, (unsigned long)ts->tv_nsec);
-    }
-
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
@@ -918,13 +937,13 @@ int up_timer_start(const struct timespec *ts)
 
   /* Was an interval already running? */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_tickless.lock);
   if (g_tickless.pending)
     {
       /* Yes.. then cancel it */
 
       tmrinfo("Already running... cancelling\n");
-      up_timer_cancel(NULL);
+      up_timer_cancel_nolock(NULL);
     }
 
   /* Express the delay in microseconds */
@@ -968,7 +987,7 @@ int up_timer_start(const struct timespec *ts)
   stm32_tickless_enableint(g_tickless.channel);
 
   g_tickless.pending = true;
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_tickless.lock, flags);
   return OK;
 }
 #endif /* CONFIG_SCHED_TICKLESS */

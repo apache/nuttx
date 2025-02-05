@@ -31,7 +31,7 @@
 
 #include <sys/param.h>
 
-#include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
 #include <arch/board/board.h>
@@ -74,6 +74,7 @@ static bool g_forced_int = false;      /* true if interrupt was forced with mask
 static bool g_armed = false;           /* true if alarm is g_armed for next match */
 static uint32_t g_synch = 0;           /* Synch all calls, recursion is possible */
 static irqstate_t g_flags;
+static spinlock_t g_lock = SP_UNLOCKED;
 
 static uint32_t g_cached_ctrl;
 static uint64_t g_cached_mask;
@@ -111,17 +112,13 @@ static uint64_t lpc54_get_counter(void)
 
 static void lpc54_set_compare(uint64_t value)
 {
-  irqstate_t flags;
-
   if (value != g_cached_compare)
     {
       g_cached_compare = value;
 
-      flags = enter_critical_section();
       putreg32(0, LPC54_RIT_COMPVAL);
       putreg16((uint32_t)(value >> 32), LPC54_RIT_COMPVALH);
       putreg32((uint32_t)(value & 0xffffffffllu), LPC54_RIT_COMPVAL);
-      leave_critical_section();
     }
 }
 
@@ -132,17 +129,13 @@ static inline uint64_t lpc54_get_compare(void)
 
 static void lpc54_set_mask(uint64_t value)
 {
-  irqstate_t flags;
-
   if (value != g_cached_mask)
     {
       g_cached_mask = value;
 
-      flags = enter_critical_section();
       putreg32(0, LPC54_RIT_MASK);
       putreg16((uint32_t)(value >> 32), LPC54_RIT_MASKH);
       putreg32((uint32_t)(value & 0xffffffffllu), LPC54_RIT_MASK);
-      leave_critical_section();
       putreg32(value,
               );
     }
@@ -305,7 +298,7 @@ static uint64_t lpc54_tick2ts(uint64_t ticks, struct timespec *ts,
 static inline void lpc54_sync_up(void)
 {
   irqstate_t flags;
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_lock);
 
   if (g_synch == 0)
     {
@@ -320,7 +313,7 @@ static inline void lpc54_sync_down(void)
   g_synch--;
   if (g_synch == 0)
     {
-      leave_critical_section(g_flags);
+      spin_unlock_irqrestore(&g_lock, g_flags)
     }
 }
 
@@ -612,7 +605,7 @@ static int lpc54_tl_isr(int irq, void *context, void *arg)
 void up_timer_initialize(void)
 {
   irqstate_t flags;
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_lock);
 
   g_cached_ctrl     = getreg32(LPC54_RIT_CTRL);
   g_cached_ctrl    &= ~RIT_CTRL_INT; /* Set interrupt to 0 */
@@ -644,7 +637,7 @@ void up_timer_initialize(void)
   lpc54_init_timer_vars();
   lpc54_set_enable(true);
   lpc54_calibrate_init();
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_lock, flags);
 }
 
 /* No reg changes, only processing */

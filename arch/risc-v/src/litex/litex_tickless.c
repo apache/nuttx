@@ -30,6 +30,8 @@
 #include <stdbool.h>
 #include <assert.h>
 
+#include <nuttx/spinlock.h>
+
 #include "chip.h"
 
 #include "riscv_internal.h"
@@ -55,7 +57,13 @@
 #define LITEX_TICK_2_USEC(tick)    ((tick) / LITEX_TICK_PER_USEC)
 #define LITEX_TICK_2_NSEC(tick)    ((tick) * 1000 / LITEX_TICK_PER_USEC)
 
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
 static bool g_timer_started; /* Whether an interval timer is being started */
+
+static spinlock_t g_timer_lock; /* Lock to protect the timer */
 
 /****************************************************************************
  * Private Functions
@@ -82,6 +90,10 @@ static int up_timer_expire(int irq, void *regs, void *arg)
   nxsched_timer_expiration();
   return OK;
 }
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: litex_get_uptime
@@ -246,7 +258,7 @@ int up_timer_cancel(struct timespec *ts)
   uint64_t alarm_value;
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_timer_lock);
 
   if (ts != NULL)
     {
@@ -264,7 +276,7 @@ int up_timer_cancel(struct timespec *ts)
         }
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_timer_lock, flags);
   return OK;
 }
 
@@ -298,7 +310,7 @@ int up_timer_start(const struct timespec *ts)
   uint64_t cpu_ticks;
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_timer_lock);
 
   litex_timer_cancel();
 
@@ -309,7 +321,7 @@ int up_timer_start(const struct timespec *ts)
 
   litex_timer_oneshot(cpu_ticks);
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_timer_lock, flags);
 
   return OK;
 }
@@ -325,6 +337,8 @@ int up_timer_start(const struct timespec *ts)
 
 void up_timer_initialize(void)
 {
+  spin_lock_init(&g_timer_lock);
+
   /* Cancel any configuration that has been done in the bios or openSBI */
 
   litex_timer_cancel();

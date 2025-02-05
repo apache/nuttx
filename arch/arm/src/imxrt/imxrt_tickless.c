@@ -71,7 +71,7 @@
 #include <assert.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <debug.h>
 
 #include "arm_internal.h"
@@ -120,6 +120,7 @@ struct imxrt_tickless_s
   uint32_t irq;                    /* Interrupt number */
   volatile bool pending;           /* True: pending task */
   uint32_t base;                   /* Base address of the timer */
+  spinlock_t lock;                 /* Spinock for this structure */
 };
 
 /****************************************************************************
@@ -313,6 +314,7 @@ void up_timer_initialize(void)
   g_tickless.out_compare  = CONFIG_IMXRT_TICKLESS_CHANNEL;
   g_tickless.pending      = false;
   g_tickless.overflow     = 0;
+  g_tickless.lock         = SP_UNLOCKED;
 
   tmrinfo("timer=%d channel=%d frequency=%lu Hz\n",
            g_tickless.timer, g_tickless.out_compare, g_tickless.frequency);
@@ -425,7 +427,7 @@ int up_timer_gettime(struct timespec *ts)
 
   /* Temporarily disable the overflow counter */
 
-  flags    = enter_critical_section();
+  flags    = spin_lock_irqsave(&g_tickless.lock);
 
   overflow = g_tickless.overflow;
   counter  = getreg32(g_tickless.base + IMXRT_GPT_CNT_OFFSET);
@@ -454,7 +456,7 @@ int up_timer_gettime(struct timespec *ts)
       g_tickless.overflow = overflow;
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_tickless.lock, flags);
 
   /* Convert the whole thing to units of microseconds.
    *
@@ -508,7 +510,7 @@ int up_alarm_start(const struct timespec *ts)
   irqstate_t flags;
   uint32_t regval;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_tickless.lock);
 
   /* Set compare value for output compare channel */
 
@@ -545,7 +547,7 @@ int up_alarm_start(const struct timespec *ts)
               (4 * (g_tickless.out_compare - 1)));
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_tickless.lock, flags);
   return OK;
 }
 

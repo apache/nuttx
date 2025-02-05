@@ -34,6 +34,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/spinlock.h>
 
 #include "arm_internal.h"
 #include "hardware/nrf52_rtc.h"
@@ -91,6 +92,7 @@ struct nrf52_tickless_dev_s
   uint32_t periods;            /* how many times the timer overflowed */
   bool alarm_set;              /* is the alarm set? */
   struct timespec alarm;       /* absolute time of alarm */
+  spinlock_t lock;             /* spinlock for this structure */
 };
 
 /****************************************************************************
@@ -188,6 +190,28 @@ static void rtc_prepare_alarm(void)
 }
 
 /****************************************************************************
+ * Name: up_alarm_cancel_nolock
+ *
+ * Description:
+ *   Unlocked version of the public function up_alarm_cancel().
+ *
+ ****************************************************************************/
+
+static int up_alarm_cancel_nolock(struct timespec *ts)
+{
+  uint32_t counter;
+
+  NRF52_RTC_DISABLEINT(g_tickless_dev.rtc, NRF52_RTC_EVT_COMPARE0);
+  NRF52_RTC_GETCOUNTER(g_tickless_dev.rtc, &counter);
+  rtc_counter_to_ts(counter, ts);
+
+  NRF52_RTC_ACKINT(g_tickless_dev.rtc, NRF52_RTC_EVT_COMPARE0);
+  g_tickless_dev.alarm_set = false;
+
+  return OK;
+}
+
+/****************************************************************************
  * Name: rtc_handler
  ****************************************************************************/
 
@@ -195,7 +219,7 @@ static int rtc_handler(int irq, void *context, void *arg)
 {
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_tickless_dev.lock);
 
   /* if the timer wrapped-around */
 
@@ -225,14 +249,14 @@ static int rtc_handler(int irq, void *context, void *arg)
 
       /* cancel alarm and get current time */
 
-      up_alarm_cancel(&now);
+      up_alarm_cancel_nolock(&now);
 
       /* let scheduler now of alarm firing */
 
       nxsched_alarm_expiration(&now);
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_tickless_dev.lock, flags);
 
   return OK;
 }
@@ -247,21 +271,14 @@ static int rtc_handler(int irq, void *context, void *arg)
 
 int up_alarm_cancel(struct timespec *ts)
 {
-  uint32_t counter;
+  int ret;
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_tickless_dev.lock);
+  ret = up_alarm_cancel_nolock(ts);
+  spin_unlock_irqrestore(&g_tickless_dev.lock, flags);
 
-  NRF52_RTC_DISABLEINT(g_tickless_dev.rtc, NRF52_RTC_EVT_COMPARE0);
-  NRF52_RTC_GETCOUNTER(g_tickless_dev.rtc, &counter);
-  rtc_counter_to_ts(counter, ts);
-
-  NRF52_RTC_ACKINT(g_tickless_dev.rtc, NRF52_RTC_EVT_COMPARE0);
-  g_tickless_dev.alarm_set = false;
-
-  leave_critical_section(flags);
-
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
@@ -271,7 +288,7 @@ int up_alarm_cancel(struct timespec *ts)
 int up_alarm_start(const struct timespec *ts)
 {
   irqstate_t flags;
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_tickless_dev->lock);
 
   /* remember the alarm time */
 
@@ -280,7 +297,7 @@ int up_alarm_start(const struct timespec *ts)
 
   rtc_prepare_alarm();
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_tickless_dev->lock, flags);
 
   return OK;
 }
@@ -294,12 +311,12 @@ int up_timer_gettime(struct timespec *ts)
   uint32_t counter;
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_tickless_dev->lock);
 
   NRF52_RTC_GETCOUNTER(g_tickless_dev.rtc, &counter);
   rtc_counter_to_ts(counter, ts);
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_tickless_dev->lock, flags);
 
   return OK;
 }
@@ -315,6 +332,10 @@ void up_timer_initialize(void)
   memset(&g_tickless_dev, 0, sizeof(struct nrf52_tickless_dev_s));
 
   g_tickless_dev.rtc = nrf52_rtc_init(CONFIG_NRF52_SYSTIMER_RTC_INSTANCE);
+
+  /* Initialize spinlock */
+
+  spin_lock_init(&g_tickless_dev.lock);
 
   /* Ensure we have support for the selected RTC instance */
 

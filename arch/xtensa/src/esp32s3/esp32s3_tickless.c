@@ -52,7 +52,7 @@
 #include <time.h>
 #include <assert.h>
 
-#include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
 #include <arch/board/board.h>
@@ -100,6 +100,8 @@ static int IRAM_ATTR tickless_isr(int irq, void *context, void *arg);
  ****************************************************************************/
 
 static bool g_timer_started; /* Whether an interval timer is being started */
+
+static spinlock_t g_timer_lock; /* Lock to protect the timer */
 
 /****************************************************************************
  * Private Functions
@@ -246,6 +248,53 @@ static int IRAM_ATTR tickless_isr(int irq, void *context, void *arg)
 }
 
 /****************************************************************************
+ * Name: up_timer_cancel_nolock
+ *
+ * Description:
+ *   Unlocked version of the public function up_timer_cancel().
+ *
+ ****************************************************************************/
+
+static int IRAM_ATTR up_timer_cancel_nolock(struct timespec *ts)
+{
+  uint64_t alarm_value;
+  uint64_t counter;
+
+  if (ts != NULL)
+    {
+      if (!g_timer_started)
+        {
+          ts->tv_sec  = 0;
+          ts->tv_nsec = 0;
+        }
+      else
+        {
+          alarm_value = tickless_getalarmvalue();
+          counter = tickless_getcounter();
+          if (alarm_value <= counter)
+            {
+              alarm_value = 0;
+            }
+          else
+            {
+              alarm_value -= counter;
+            }
+
+          ts->tv_sec  = CTICK_2_SEC(alarm_value);
+          ts->tv_nsec = CTICK_2_NSEC(alarm_value % CTICK_PER_SEC);
+        }
+    }
+
+  g_timer_started = false;
+
+  modifyreg32(SYSTIMER_CONF_REG, SYSTIMER_TARGET0_WORK_EN, 0);
+  modifyreg32(SYSTIMER_INT_ENA_REG, SYSTIMER_TARGET0_INT_ENA, 0);
+  modifyreg32(SYSTIMER_INT_CLR_REG, SYSTIMER_TARGET0_INT_CLR, 0);
+
+  return OK;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -287,13 +336,13 @@ int IRAM_ATTR up_timer_gettime(struct timespec *ts)
   uint64_t ticks;
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_timer_lock);
 
   ticks = tickless_getcounter();
   ts->tv_sec  = CTICK_2_SEC(ticks);
   ts->tv_nsec = CTICK_2_NSEC(ticks % CTICK_PER_SEC);
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_timer_lock, flags);
 
   return OK;
 }
@@ -336,46 +385,14 @@ int IRAM_ATTR up_timer_gettime(struct timespec *ts)
 
 int IRAM_ATTR up_timer_cancel(struct timespec *ts)
 {
-  uint64_t alarm_value;
-  uint64_t counter;
+  int ret;
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_timer_lock);
+  ret = up_timer_cancel_nolock(ts);
+  spin_unlock_irqrestore(&g_timer_lock, flags);
 
-  if (ts != NULL)
-    {
-      if (!g_timer_started)
-        {
-          ts->tv_sec  = 0;
-          ts->tv_nsec = 0;
-        }
-      else
-        {
-          alarm_value = tickless_getalarmvalue();
-          counter = tickless_getcounter();
-          if (alarm_value <= counter)
-            {
-              alarm_value = 0;
-            }
-          else
-            {
-              alarm_value -= counter;
-            }
-
-          ts->tv_sec  = CTICK_2_SEC(alarm_value);
-          ts->tv_nsec = CTICK_2_NSEC(alarm_value % CTICK_PER_SEC);
-        }
-    }
-
-  g_timer_started = false;
-
-  modifyreg32(SYSTIMER_CONF_REG, SYSTIMER_TARGET0_WORK_EN, 0);
-  modifyreg32(SYSTIMER_INT_ENA_REG, SYSTIMER_TARGET0_INT_ENA, 0);
-  modifyreg32(SYSTIMER_INT_CLR_REG, SYSTIMER_TARGET0_INT_CLR, 0);
-
-  leave_critical_section(flags);
-
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
@@ -408,11 +425,11 @@ int IRAM_ATTR up_timer_start(const struct timespec *ts)
   uint64_t cpu_ticks;
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_timer_lock);
 
   if (g_timer_started)
     {
-      up_timer_cancel(NULL);
+      up_timer_cancel_nolock(NULL);
     }
 
   cpu_ticks = SEC_2_CTICK((uint64_t)ts->tv_sec) +
@@ -421,7 +438,7 @@ int IRAM_ATTR up_timer_start(const struct timespec *ts)
   tickless_setcounter(cpu_ticks);
   g_timer_started = true;
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_timer_lock, flags);
 
   return OK;
 }
@@ -456,6 +473,7 @@ void up_timer_initialize(void)
   int cpuint;
 
   g_timer_started = false;
+  g_timer_lock    = SP_UNLOCKED;
 
   cpuint = esp32s3_setup_irq(0, ESP32S3_PERIPH_SYSTIMER_TARGET0, 1,
                              ESP32S3_CPUINT_LEVEL);
