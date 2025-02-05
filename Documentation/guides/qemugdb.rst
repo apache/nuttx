@@ -53,7 +53,7 @@ Start GDB to connect to QEMU
 
     .. code-block:: console
 
-      $ gdb-multiarch nuttx -ex "source tools/gdb/gdbinit.py" -ex "target remote 127.0.0.1:1234"
+      $ gdb-multiarch nuttx -ex "source tools/pynuttx/gdbinit.py" -ex "target remote 127.0.0.1:1234"
       Reading symbols from nuttx...
       Registering NuttX GDB commands from ~/nuttx/nuttx/tools/gdb/nuttxgdb
       set pagination off
