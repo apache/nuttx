@@ -30,6 +30,10 @@ if(CONFIG_DEVICE_TREE)
     list(APPEND SRCS fdt_virtio_mmio.c)
   endif()
 
+  if(CONFIG_MTD_CFI)
+    list(APPEND SRCS fdt_cfi.c)
+  endif()
+
   target_include_directories(drivers
                              PRIVATE ${NUTTX_DIR}/libs/libc/fdt/dtc/libfdt)
   target_sources(drivers PRIVATE ${SRCS})
