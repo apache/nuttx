@@ -65,6 +65,17 @@ static void tricore_trapinfo(volatile void *trap)
  * Public Functions
  ****************************************************************************/
 
+int weak_function tricore_nmitrap(uint32_t tid, void *context, void *arg)
+{
+  _alert("PANIC!!! NMI Trap:\n");
+  _alert("\tClass %d TID: %d regs: %p\n",
+         IfxCpu_Trap_Class_nonMaskableInterrupt, tid, context);
+
+  up_irq_save();
+  PANIC_WITH_REGS("panic", context);
+  return OK;
+}
+
 int tricore_mmutrap(uint32_t tid, void *context, void *arg)
 {
   _alert("PANIC!!! MMU Trap:\n");
@@ -321,6 +332,13 @@ void tricore_trapcall(volatile void *trap)
     }
 
   up_set_interrupt_context(true);
+
+  if (tclass == IfxCpu_Trap_Class_nonMaskableInterrupt)
+    {
+      tricore_nmitrap(tid, regs, NULL);
+      up_set_interrupt_context(false);
+      return;
+    }
 
   if (tclass == IfxCpu_Trap_Class_memoryManagement)
     {
