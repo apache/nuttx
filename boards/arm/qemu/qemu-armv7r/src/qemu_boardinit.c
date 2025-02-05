@@ -120,7 +120,9 @@ int board_power_off(int status)
 {
   UNUSED(status);
 
-  /* TODO: find a solution */
+#ifdef CONFIG_ARM_SEMIHOSTING_POWEROFF
+  up_systempoweroff();
+#endif
 
   return 0;
 }
