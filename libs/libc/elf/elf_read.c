@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/modlib/modlib_read.c
+ * libs/libc/elf/elf_read.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -35,7 +35,7 @@
 #include <errno.h>
 
 #include <nuttx/fs/fs.h>
-#include <nuttx/lib/modlib.h>
+#include <nuttx/lib/elf.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -48,13 +48,13 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: modlib_dumpreaddata
+ * Name: libelf_dumpreaddata
  ****************************************************************************/
 
 #ifdef ELF_DUMP_READDATA
-#  define modlib_dumpreaddata(b,n) binfodumpbuffer("modlib_read",b,n)
+#  define libelf_dumpreaddata(b,n) binfodumpbuffer("libelf_read",b,n)
 #else
-#  define modlib_dumpreaddata(b,n)
+#  define libelf_dumpreaddata(b,n)
 #endif
 
 /****************************************************************************
@@ -62,7 +62,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: modlib_read
+ * Name: libelf_read
  *
  * Description:
  *   Read 'readsize' bytes from the object file at 'offset'.  The data is
@@ -74,7 +74,7 @@
  *
  ****************************************************************************/
 
-int modlib_read(FAR struct mod_loadinfo_s *loadinfo, FAR uint8_t *buffer,
+int libelf_read(FAR struct mod_loadinfo_s *loadinfo, FAR uint8_t *buffer,
                 size_t readsize, off_t offset)
 {
   size_t  nsize = readsize;
@@ -127,6 +127,6 @@ int modlib_read(FAR struct mod_loadinfo_s *loadinfo, FAR uint8_t *buffer,
         }
     }
 
-  modlib_dumpreaddata(buffer, nsize);
+  libelf_dumpreaddata(buffer, nsize);
   return OK;
 }

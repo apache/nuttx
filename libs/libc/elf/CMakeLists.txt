@@ -1,5 +1,5 @@
 # ##############################################################################
-# libs/libc/modlib/CMakeLists.txt
+# libs/libc/elf/CMakeLists.txt
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -20,32 +20,32 @@
 #
 # ##############################################################################
 
-if(CONFIG_LIBC_MODLIB)
+if(CONFIG_LIBC_ELF)
 
   list(
     APPEND
     SRCS
-    modlib_addrenv.c
-    modlib_bind.c
-    modlib_depend.c
-    modlib_init.c
-    modlib_iobuffer.c
-    modlib_load.c
-    modlib_loadhdrs.c
-    modlib_verify.c
-    modlib_read.c
-    modlib_registry.c
-    modlib_sections.c
-    modlib_symbols.c
-    modlib_symtab.c
-    modlib_uninit.c
-    modlib_unload.c
-    modlib_gethandle.c
-    modlib_getsymbol.c
-    modlib_insert.c
-    modlib_remove.c)
+    elf_addrenv.c
+    elf_bind.c
+    elf_depend.c
+    elf_init.c
+    elf_iobuffer.c
+    elf_load.c
+    elf_loadhdrs.c
+    elf_verify.c
+    elf_read.c
+    elf_registry.c
+    elf_sections.c
+    elf_symbols.c
+    elf_symtab.c
+    elf_uninit.c
+    elf_unload.c
+    elf_gethandle.c
+    elf_getsymbol.c
+    elf_insert.c
+    elf_remove.c)
 
-  list(APPEND SRCS modlib_globals.S)
+  list(APPEND SRCS elf_globals.S)
 
   target_sources(c PRIVATE ${SRCS})
 

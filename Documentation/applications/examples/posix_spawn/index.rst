@@ -66,8 +66,8 @@ Test-specific configuration options:
 
 6. Linker scripts. You might also want to use a linker scripts to combine
    sections better. An example linker script is at
-   ``nuttx/binfmt/libelf/gnu-elf.ld``. That example might have to be tuned for
+   ``nuttx/binfmt/elf/gnu-elf.ld``. That example might have to be tuned for
    your particular linker output to position additional sections correctly. The
    GNU LD ``LDELFFLAGS`` then might be::
 
-     LDELFFLAGS = -r -e main -T$(TOPDIR)/binfmt/libelf/gnu-elf.ld
+     LDELFFLAGS = -r -e main -T$(TOPDIR)/binfmt/elf/gnu-elf.ld
