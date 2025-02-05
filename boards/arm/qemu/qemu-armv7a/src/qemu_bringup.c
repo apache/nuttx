@@ -84,6 +84,14 @@ static void register_devices_from_fdt(void)
     }
 #endif
 
+#ifdef CONFIG_MTD_CFI
+  ret = fdt_cfi_register(fdt);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "fdt_cfi_register failed, ret=%d\n", ret);
+    }
+#endif
+
   UNUSED(ret);
 }
 
@@ -128,6 +136,16 @@ int qemu_bringup(void)
 
 #if defined(CONFIG_LIBC_FDT) && defined(CONFIG_DEVICE_TREE)
   register_devices_from_fdt();
+#endif
+
+#if defined(CONFIG_FS_LITTLEFS) && defined(CONFIG_MTD_CFI)
+  /* Mount the procfs file system */
+
+  ret = nx_mount("/dev/cfi-flash1", "/data", "littlefs", 0, "autoformat");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to mount littlefs at /data: %d\n", ret);
+    }
 #endif
 
   UNUSED(ret);
