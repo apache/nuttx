@@ -490,4 +490,5 @@ Implemented Drivers
 - mpu9250
 - ms56xx
 - :doc:`sht4x`
+- :doc:`lsm6dso32`
 - wtgahrs2

@@ -793,6 +793,27 @@ config LSM6DSL_I2C_FREQUENCY
 	range 1 400000
 	depends on SENSORS_LSM6DSL
 
+config SENSORS_LSM6DSO32
+	bool "LSM6DSO32 support"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the STMicro LSM6DSO32 IMU.
+
+config SENSORS_LSM6DSO32_I2C_FREQUENCY
+	int "LSM6DSO32 frequency"
+	default 400000
+	range 1 400000
+	depends on SENSORS_LSM6DSO32
+	---help---
+		The I2C frequency used to communicate with the LSM6DSO32.
+
+config SENSORS_LSM6DSO32_THREAD_STACKSIZE
+	int "LSM6DSO32 worker thread stack size"
+	default 1024
+	---help---
+		The stack size for the worker threads that perform measurements.
+
 config SENSORS_LSM9DS1
 	bool "STMicro LSM9DS1 support"
 	default n
