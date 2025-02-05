@@ -228,6 +228,10 @@
 #define XCPTCONTEXT_REGS    (ARM64_CONTEXT_REGS + FPU_CONTEXT_REGS)
 #define XCPTCONTEXT_SIZE    (8 * XCPTCONTEXT_REGS)
 
+#if XCPTCONTEXT_SIZE % 16 != 0
+#  error "ARM64_CONTEXT_REGS and FPU_CONTEXT_REGS must be an even number to ensure the stack is aligned to 16 bytes"
+#endif
+
 /* Friendly register names */
 
 #define REG_FP              REG_X29
