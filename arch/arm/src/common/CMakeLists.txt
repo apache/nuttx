@@ -40,6 +40,7 @@ set(SRCS
     arm_stackframe.c
     arm_usestack.c
     arm_fork.c
+    arm_poweroff.c
     ${ARCH_TOOLCHAIN_PATH}/fork.S)
 
 if(NOT CONFIG_ALARM_ARCH AND NOT CONFIG_TIMER_ARCH)
