@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/modlib/modlib_gethandle.c
+ * libs/libc/elf/elf_gethandle.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -27,17 +27,17 @@
 #include <debug.h>
 #include <errno.h>
 
-#include <nuttx/lib/modlib.h>
+#include <nuttx/lib/elf.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: modlib_modhandle
+ * Name: libelf_modhandle
  *
  * Description:
- *   modlib_modhandle() returns the module handle for the installed
+ *   libelf_modhandle() returns the module handle for the installed
  *   module with the provided name.  A secondary use of this function is to
  *   determine if a module has been loaded or not.
  *
@@ -45,16 +45,16 @@
  *   name   - A pointer to the module name string.
  *
  * Returned Value:
- *   The non-NULL module handle previously returned by modlib_insert() is
+ *   The non-NULL module handle previously returned by libelf_insert() is
  *   returned on success.  If no module with that name is installed,
- *   modlib_modhandle() will return a NULL handle and the errno variable
+ *   libelf_modhandle() will return a NULL handle and the errno variable
  *   will be set appropriately.
  *
  ****************************************************************************/
 
-#ifdef HAVE_MODLIB_NAMES
+#ifdef HAVE_LIBC_ELF_NAMES
 
-FAR void *modlib_gethandle(FAR const char *name)
+FAR void *libelf_gethandle(FAR const char *name)
 {
   FAR struct module_s *modp;
 
@@ -62,19 +62,19 @@ FAR void *modlib_gethandle(FAR const char *name)
 
   /* Get exclusive access to the module registry */
 
-  modlib_registry_lock();
+  libelf_registry_lock();
 
   /* Find the module entry for this name in the registry */
 
-  modp = modlib_registry_find(name);
+  modp = libelf_registry_find(name);
   if (modp == NULL)
     {
       berr("ERROR: Failed to find module %s\n", name);
       set_errno(ENOENT);
     }
 
-  modlib_registry_unlock();
+  libelf_registry_unlock();
   return modp;
 }
 
-#endif /* HAVE_MODLIB_NAMES */
+#endif /* HAVE_LIBC_ELF_NAMES */

@@ -29,7 +29,7 @@
 #include <dlfcn.h>
 #include <errno.h>
 
-#include <nuttx/lib/modlib.h>
+#include <nuttx/lib/elf.h>
 
 /****************************************************************************
  * Public Functions
@@ -73,7 +73,7 @@ int dlsymtab(FAR const struct symtab_s *symtab, int nsymbols)
    * the module library.
    */
 
-  modlib_setsymtab(symtab, nsymbols);
+  libelf_setsymtab(symtab, nsymbols);
   return OK;
 #endif
 }
