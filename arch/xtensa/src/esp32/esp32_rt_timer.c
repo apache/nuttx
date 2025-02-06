@@ -263,7 +263,7 @@ static void delete_rt_timer(struct rt_timer_s *timer)
   irqstate_t flags;
   struct esp32_rt_priv_s *priv = &g_rt_priv;
 
-  flags = spin_lock_irqsave(&priv->lock);
+  flags = enter_critical_section();
 
   if (timer->state == RT_TIMER_READY)
     {
@@ -282,7 +282,7 @@ static void delete_rt_timer(struct rt_timer_s *timer)
   timer->state = RT_TIMER_DELETE;
 
 exit:
-  spin_unlock_irqrestore(&priv->lock, flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -684,7 +684,6 @@ int esp32_rt_timer_init(void)
   struct esp32_tim_dev_s *tim;
   struct esp32_rt_priv_s *priv = &g_rt_priv;
 
-  spin_lock_init(&priv->lock);
   tim = esp32_tim_init(ESP32_RT_TIMER);
   if (!tim)
     {
@@ -710,7 +709,7 @@ int esp32_rt_timer_init(void)
   priv->timer = tim;
   priv->pid   = (pid_t)pid;
 
-  flags = spin_lock_irqsave(&priv->lock);
+  flags = enter_critical_section();
 
   /* ESP32 hardware timer configuration:
    *   - 1 counter = 1us
@@ -728,7 +727,7 @@ int esp32_rt_timer_init(void)
 
   ESP32_TIM_START(tim);
 
-  spin_unlock_irqrestore(&priv->lock, flags);
+  leave_critical_section(flags);
 
   return 0;
 }
