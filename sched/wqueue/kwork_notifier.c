@@ -31,6 +31,7 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include <string.h>
+#include <sched.h>
 #include <assert.h>
 
 #include <nuttx/arch.h>
@@ -360,6 +361,7 @@ void work_notifier_signal(enum work_evtype_e evtype,
    */
 
   flags = spin_lock_irqsave(&g_notifier_lock);
+  sched_lock();
 
   /* Process the notification at the head of the pending list until the
    * pending list is empty
@@ -403,6 +405,7 @@ void work_notifier_signal(enum work_evtype_e evtype,
     }
 
   spin_unlock_irqrestore(&g_notifier_lock, flags);
+  sched_unlock();
 }
 
 #endif /* CONFIG_WQUEUE_NOTIFIER */
