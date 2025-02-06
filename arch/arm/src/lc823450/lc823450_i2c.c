@@ -37,7 +37,7 @@
 #include <stddef.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/spinlock.h>
+#include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/clock.h>
 #include <nuttx/signal.h>
@@ -121,7 +121,6 @@ struct lc823450_i2c_priv_s
 
   int   refs;                /* Reference count */
   mutex_t lock;              /* Mutual exclusion mutex */
-  spinlock_t spinlock;       /* Spinlock */
 #ifndef CONFIG_I2C_POLLED
   sem_t sem_isr;             /* Interrupt wait semaphore */
 #endif
@@ -210,7 +209,6 @@ static struct lc823450_i2c_priv_s lc823450_i2c0_priv =
   .config   = &lc823450_i2c0_config,
   .refs     = 0,
   .lock     = NXMUTEX_INITIALIZER,
-  .spinlock = SP_UNLOCKED,
 #ifndef CONFIG_I2C_POLLED
   .sem_isr  = SEM_INITIALIZER(0),
 #endif
@@ -241,7 +239,6 @@ static struct lc823450_i2c_priv_s lc823450_i2c1_priv =
   .config   = &lc823450_i2c1_config,
   .refs     = 0,
   .lock     = NXMUTEX_INITIALIZER,
-  .spinlock = SP_UNLOCKED,
 #ifndef CONFIG_I2C_POLLED
   .sem_isr  = SEM_INITIALIZER(0),
 #endif
@@ -1008,7 +1005,7 @@ static int lc823450_i2c_transfer(struct i2c_master_s *dev,
 
   if (lc823450_i2c_sem_waitdone(priv) < 0)
     {
-      irqs = spin_lock_irqsave(&priv->spinlock);
+      irqs = enter_critical_section();
 
       ret = -ETIMEDOUT;
 
@@ -1020,7 +1017,7 @@ static int lc823450_i2c_transfer(struct i2c_master_s *dev,
 
           priv->timedout = true;
 
-          spin_unlock_irqrestore(&priv->spinlock, irqs);
+          leave_critical_section(irqs);
 
           /* Wait for irq handler completion. 10msec wait is probably enough
            * to terminate i2c transaction, NACK and STOP contition for read
@@ -1031,9 +1028,10 @@ static int lc823450_i2c_transfer(struct i2c_master_s *dev,
         }
       else
         {
-          spin_unlock_irqrestore(&priv->spinlock, irqs);
           i2cerr("No need of timeout handling. "
                  "It may be done in irq handler\n");
+
+          leave_critical_section(irqs);
         }
 
 #ifndef CONFIG_LC823450_IPL2

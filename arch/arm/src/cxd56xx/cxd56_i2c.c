@@ -39,7 +39,7 @@
 #include <nuttx/mutex.h>
 #include <nuttx/i2c/i2c_master.h>
 
-#include <nuttx/spinlock.h>
+#include <nuttx/irq.h>
 #include <arch/board/board.h>
 
 #include "chip.h"
@@ -84,7 +84,6 @@ struct cxd56_i2cdev_s
   uint32_t         base_freq;  /* branch frequency */
 
   mutex_t          lock;       /* Only one thread can access at a time */
-  spinlock_t       spinlock;   /* Spinlock */
   sem_t            wait;       /* Place to wait for transfer completion */
   struct wdog_s    timeout;    /* watchdog to timeout when bus hung */
   uint32_t         frequency;  /* Current I2C frequency */
@@ -109,7 +108,6 @@ static struct cxd56_i2cdev_s g_i2c0dev =
   .base = CXD56_SCU_I2C0_BASE,
   .irqid = CXD56_IRQ_SCU_I2C0,
   .lock = NXMUTEX_INITIALIZER,
-  .spinlock = SP_UNLOCKED,
   .wait = SEM_INITIALIZER(0),
   .refs = 0,
 };
@@ -121,7 +119,6 @@ static struct cxd56_i2cdev_s g_i2c1dev =
   .base = CXD56_SCU_I2C1_BASE,
   .irqid = CXD56_IRQ_SCU_I2C1,
   .lock = NXMUTEX_INITIALIZER,
-  .spinlock = SP_UNLOCKED,
   .wait = SEM_INITIALIZER(0),
   .refs = 0,
 };
@@ -133,7 +130,6 @@ static struct cxd56_i2cdev_s g_i2c2dev =
   .base = CXD56_I2CM_BASE,
   .irqid = CXD56_IRQ_I2CM,
   .lock = NXMUTEX_INITIALIZER,
-  .spinlock = SP_UNLOCKED,
   .wait = SEM_INITIALIZER(0),
   .refs = 0,
 };
@@ -362,11 +358,11 @@ static void cxd56_i2c_setfrequency(struct cxd56_i2cdev_s *priv,
 static void cxd56_i2c_timeout(wdparm_t arg)
 {
   struct cxd56_i2cdev_s *priv = (struct cxd56_i2cdev_s *)arg;
-  irqstate_t flags            = spin_lock_irqsave(&priv->spinlock);
+  irqstate_t flags            = enter_critical_section();
 
   priv->error = -ENODEV;
   nxsem_post(&priv->wait);
-  spin_unlock_irqrestore(&priv->spinlock, flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -525,7 +521,7 @@ static int cxd56_i2c_receive(struct cxd56_i2cdev_s *priv, int last)
           i2c_reg_write(priv, CXD56_IC_DATA_CMD, CMD_READ);
         }
 
-      flags = spin_lock_irqsave(&priv->spinlock);
+      flags = enter_critical_section();
       wd_start(&priv->timeout, I2C_TIMEOUT,
                cxd56_i2c_timeout, (wdparm_t)priv);
 
@@ -534,7 +530,7 @@ static int cxd56_i2c_receive(struct cxd56_i2cdev_s *priv, int last)
       i2c_reg_write(priv, CXD56_IC_DATA_CMD, CMD_READ | (en ? CMD_STOP : 0));
 
       i2c_reg_rmw(priv, CXD56_IC_INTR_MASK, INTR_RX_FULL, INTR_RX_FULL);
-      spin_unlock_irqrestore(&priv->spinlock, flags);
+      leave_critical_section(flags);
       nxsem_wait_uninterruptible(&priv->wait);
 
       if (priv->error != OK)
@@ -571,7 +567,7 @@ static int cxd56_i2c_send(struct cxd56_i2cdev_s *priv, int last)
 
   while (!(i2c_reg_read(priv, CXD56_IC_STATUS) & STATUS_TFNF));
 
-  flags = spin_lock_irqsave(&priv->spinlock);
+  flags = enter_critical_section();
   wd_start(&priv->timeout, I2C_TIMEOUT,
            cxd56_i2c_timeout, (wdparm_t)priv);
   i2c_reg_write(priv, CXD56_IC_DATA_CMD,
@@ -580,7 +576,7 @@ static int cxd56_i2c_send(struct cxd56_i2cdev_s *priv, int last)
   /* Enable TX_EMPTY interrupt for determine transfer done. */
 
   i2c_reg_rmw(priv, CXD56_IC_INTR_MASK, INTR_TX_EMPTY, INTR_TX_EMPTY);
-  spin_unlock_irqrestore(&priv->spinlock, flags);
+  leave_critical_section(flags);
 
   nxsem_wait_uninterruptible(&priv->wait);
   return 0;

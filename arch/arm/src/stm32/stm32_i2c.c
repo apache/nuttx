@@ -66,7 +66,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/spinlock.h>
+#include <nuttx/irq.h>
 #include <nuttx/clock.h>
 #include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
@@ -244,7 +244,6 @@ struct stm32_i2c_priv_s
 
   int refs;                    /* Reference count */
   mutex_t lock;                /* Mutual exclusion lock */
-  spinlock_t spinlock;         /* Spinlock */
 #ifndef CONFIG_I2C_POLLED
   sem_t sem_isr;               /* Interrupt wait semaphore */
 #endif
@@ -382,7 +381,6 @@ static struct stm32_i2c_priv_s stm32_i2c1_priv =
   .config     = &stm32_i2c1_config,
   .refs       = 0,
   .lock       = NXMUTEX_INITIALIZER,
-  .spinlock   = SP_UNLOCKED,
 #ifndef CONFIG_I2C_POLLED
   .sem_isr    = SEM_INITIALIZER(0),
 #endif
@@ -416,7 +414,6 @@ static struct stm32_i2c_priv_s stm32_i2c2_priv =
   .config     = &stm32_i2c2_config,
   .refs       = 0,
   .lock       = NXMUTEX_INITIALIZER,
-  .spinlock   = SP_UNLOCKED,
 #ifndef CONFIG_I2C_POLLED
   .sem_isr    = SEM_INITIALIZER(0),
 #endif
@@ -450,7 +447,6 @@ static struct stm32_i2c_priv_s stm32_i2c3_priv =
   .config     = &stm32_i2c3_config,
   .refs       = 0,
   .lock       = NXMUTEX_INITIALIZER,
-  .spinlock   = SP_UNLOCKED,
 #ifndef CONFIG_I2C_POLLED
   .sem_isr    = SEM_INITIALIZER(0),
 #endif
@@ -556,7 +552,7 @@ static inline int stm32_i2c_sem_waitdone(struct stm32_i2c_priv_s *priv)
   uint32_t regval;
   int ret;
 
-  flags = spin_lock_irqsave(&priv->spinlock);
+  flags = enter_critical_section();
 
   /* Enable I2C interrupts */
 
@@ -572,8 +568,6 @@ static inline int stm32_i2c_sem_waitdone(struct stm32_i2c_priv_s *priv)
   priv->intstate = INTSTATE_WAITING;
   do
     {
-      spin_unlock_irqrestore(&priv->spinlock, flags);
-
       /* Wait until either the transfer is complete or the timeout expires */
 
 #ifdef CONFIG_STM32_I2C_DYNTIMEO
@@ -592,8 +586,6 @@ static inline int stm32_i2c_sem_waitdone(struct stm32_i2c_priv_s *priv)
 
           break;
         }
-
-      flags = spin_lock_irqsave(&priv->spinlock);
     }
 
   /* Loop until the interrupt level transfer is complete. */
@@ -610,7 +602,7 @@ static inline int stm32_i2c_sem_waitdone(struct stm32_i2c_priv_s *priv)
   regval &= ~I2C_CR2_ALLINTS;
   stm32_i2c_putreg(priv, STM32_I2C_CR2_OFFSET, regval);
 
-  spin_unlock_irqrestore(&priv->spinlock, flags);
+  leave_critical_section(flags);
   return ret;
 }
 #else
@@ -1215,7 +1207,7 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
            */
 
 #ifdef CONFIG_I2C_POLLED
-          irqstate_t flags = spin_lock_irqsave(&priv->spinlock);
+          irqstate_t flags = enter_critical_section();
 #endif
           /* Receive a byte */
 
@@ -1231,7 +1223,7 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
             }
 
 #ifdef CONFIG_I2C_POLLED
-          spin_unlock_irqrestore(&priv->spinlock, flags);
+          leave_critical_section(flags);
 #endif
         }
       else
