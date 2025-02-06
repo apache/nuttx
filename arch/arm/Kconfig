@@ -982,6 +982,7 @@ config ARCH_ARMV7R
 	default n
 	select ARCH_HAVE_CPUINFO
 	select ARCH_HAVE_PERF_EVENTS
+	select ARM_THUMB if BUILD_PROTECTED
 
 config ARCH_CORTEXR4
 	bool
