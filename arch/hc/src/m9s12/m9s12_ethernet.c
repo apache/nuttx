@@ -38,7 +38,7 @@
 #include <arpa/inet.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/spinlock.h>
+#include <nuttx/irq.h>
 #include <nuttx/wdog.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/netdev.h>
@@ -79,7 +79,6 @@ struct emac_driver_s
 {
   bool    d_bifup;            /* true:ifup false:ifdown */
   struct wdog_s d_txtimeout;  /* TX timeout timer */
-  spinlock_t d_lock;          /* Spinlock */
 
   /* This holds the information visible to the NuttX network */
 
@@ -476,7 +475,7 @@ static int emac_ifdown(struct net_driver_s *dev)
 
   /* Disable the Ethernet interrupt */
 
-  flags = spin_lock_irqsave(&priv->d_lock);
+  flags = enter_critical_section();
   up_disable_irq(CONFIG_HCS12_IRQ);
 
   /* Cancel the TX timeout timers */
@@ -491,7 +490,7 @@ static int emac_ifdown(struct net_driver_s *dev)
   /* Mark the device "down" */
 
   priv->d_bifup = false;
-  spin_unlock_irqrestore(&priv->d_lock, flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -524,7 +523,7 @@ static int emac_txavail(struct net_driver_s *dev)
    * level processing.
    */
 
-  flags = spin_lock_irqsave(&priv->d_lock);
+  flags = enter_critical_section();
 
   /* Ignore the notification if the interface is not yet up */
 
@@ -537,7 +536,7 @@ static int emac_txavail(struct net_driver_s *dev)
       devif_poll(&priv->d_dev, emac_txpoll);
     }
 
-  spin_unlock_irqrestore(&priv->d_lock, flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -654,8 +653,6 @@ int emac_initialize(int intf)
   priv->d_dev.d_rmmac   = emac_rmmac;    /* Remove multicast MAC address */
 #endif
   priv->d_dev.d_private = priv;          /* Used to recover private state from dev */
-
-  spin_lock_init(&priv->d_lock);         /* Initialize spinlock */
 
   /* Put the interface in the down state.  This usually amounts to resetting
    * the device and/or calling emac_ifdown().

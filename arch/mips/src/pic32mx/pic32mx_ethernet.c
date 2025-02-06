@@ -39,7 +39,7 @@
 
 #include <arpa/inet.h>
 
-#include <nuttx/spinlock.h>
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
@@ -304,7 +304,6 @@ struct pic32mx_driver_s
   struct wdog_s pd_txtimeout;   /* TX timeout timer */
   struct work_s pd_irqwork;     /* For deferring interrupt work to the work queue */
   struct work_s pd_pollwork;    /* For deferring poll work to the work queue */
-  spinlock_t pd_lock;           /* Spinlock */
 
   sq_queue_t pd_freebuffers;    /* The free buffer list */
 
@@ -2218,7 +2217,7 @@ static int pic32mx_ifdown(struct net_driver_s *dev)
 
   /* Disable the Ethernet interrupt */
 
-  flags = spin_lock_irqsave(&priv->pd_lock);
+  flags = enter_critical_section();
 #if CONFIG_PIC32MX_NINTERFACES > 1
   up_disable_irq(priv->pd_irqsrc);
 #else
@@ -2233,7 +2232,7 @@ static int pic32mx_ifdown(struct net_driver_s *dev)
 
   pic32mx_ethreset(priv);
   priv->pd_ifup = false;
-  spin_unlock_irqrestore(&priv->pd_lock, flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -3083,7 +3082,7 @@ static void pic32mx_ethreset(struct pic32mx_driver_s *priv)
 
   /* Reset the MAC */
 
-  flags = spin_lock_irqsave(&priv->pd_lock);
+  flags = enter_critical_section();
 
   /* Ethernet Controller Initialization *************************************/
 
@@ -3147,7 +3146,7 @@ static void pic32mx_ethreset(struct pic32mx_driver_s *priv)
 
   up_udelay(50);
   pic32mx_putreg(0, PIC32MX_EMAC1_CFG1);
-  spin_unlock_irqrestore(&priv->pd_lock, flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -3200,8 +3199,6 @@ static inline int pic32mx_ethinitialize(int intf)
   priv->pd_irq           = ??;             /* Ethernet controller IRQ vector number */
   priv->pd_irqsrc        = ??;             /* Ethernet controller IRQ source number */
 #endif
-
-  spin_lock_init(&priv->pd_lock);          /* Initialize spinlock */
 
   /* Reset the Ethernet controller and leave in the ifdown state.  The
    * Ethernet controller will be properly re-initialized each time
