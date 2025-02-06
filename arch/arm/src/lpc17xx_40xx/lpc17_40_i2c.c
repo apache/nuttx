@@ -528,7 +528,10 @@ struct i2c_master_s *lpc17_40_i2cbus_initialize(int port)
 {
   struct lpc17_40_i2cdev_s *priv;
 
+  irqstate_t flags;
   uint32_t regval;
+
+  flags = spin_lock_irqsave(&priv->spinlock);
 
 #ifdef CONFIG_LPC17_40_I2C0
   if (port == 0)
@@ -618,9 +621,12 @@ struct i2c_master_s *lpc17_40_i2cbus_initialize(int port)
   else
 #endif
     {
+      spin_unlock_irqrestore(&priv->spinlock, flags);
       i2cerr("ERROR: LPC I2C Only supports ports 0, 1 and 2\n");
       return NULL;
     }
+
+  spin_unlock_irqrestore(&priv->spinlock, flags);
 
   putreg32(I2C_CONSET_I2EN, priv->base + LPC17_40_I2C_CONSET_OFFSET);
 
