@@ -1199,7 +1199,7 @@ static inline int usbhost_talloc(FAR struct usbhost_state_s *priv)
       ret = DRVR_ALLOC(hport->drvr, &priv->evbuffer, &priv->evbuflen);
       if (ret < 0)
         {
-          uerr("ERROR: DRVR_IOALLOC of evbuffer failed: %d\n", ret);
+          uerr("ERROR: DRVR_ALLOC of evbuffer failed: %d\n", ret);
           return ret;
         }
     }
