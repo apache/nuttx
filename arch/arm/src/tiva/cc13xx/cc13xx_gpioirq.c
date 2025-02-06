@@ -26,7 +26,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
-#include <nuttx/spinlock.h>
+#include <nuttx/irq.h>
 
 #include <stdint.h>
 #include <string.h>
@@ -60,10 +60,6 @@ struct gpio_handler_s
 /* A table of handlers for each GPIO port interrupt */
 
 static struct gpio_handler_s g_gpio_inthandler[TIVA_NIRQ_PINS];
-
-/* Spinlock */
-
-static spinlock_t g_gpioirq_lock = SP_UNLOCKED;
 
 /****************************************************************************
  * Private Functions
@@ -180,7 +176,7 @@ int tiva_gpioirqattach(pinconfig_t pinconfig, xcpt_t isr, void *arg)
 
   if (dio < TIVA_NDIO)
     {
-      flags = spin_lock_irqsave(&g_gpioirq_lock);
+      flags = enter_critical_section();
 
       /* If the new ISR is NULL, then the ISR is being detached.
        * In this case, disable the ISR and direct any interrupts
@@ -203,7 +199,7 @@ int tiva_gpioirqattach(pinconfig_t pinconfig, xcpt_t isr, void *arg)
           tiva_gpioirqenable(pinconfig);
         }
 
-      spin_unlock_irqrestore(&g_gpioirq_lock, flags);
+      leave_critical_section(flags);
     }
 
   return OK;

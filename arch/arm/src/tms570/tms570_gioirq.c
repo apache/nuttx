@@ -34,7 +34,7 @@
 #include <nuttx/init.h>
 #include <nuttx/arch.h>
 
-#include <nuttx/spinlock.h>
+#include <nuttx/irq.h>
 #include <arch/board/board.h>
 
 #include "arm_internal.h"
@@ -42,12 +42,6 @@
 #include "hardware/tms570_gio.h"
 
 #ifdef CONFIG_TMS570_GIO_IRQ
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-static spinlock_t g_irq_lock = SP_UNLOCKED;
 
 /****************************************************************************
  * Private Functions
@@ -138,7 +132,7 @@ void tms570_gioirq(gio_pinset_t pinset)
 
   if ((pinset & GIO_MODE_MASK) == GIO_INPUT && port < TMS570_NIRQPORTS)
     {
-      flags = spin_lock_irqsave(&g_irq_lock);
+      flags = enter_critical_section();
       switch (pinset & GIO_INT_MASK)
       {
         case GIO_INT_NONE:
@@ -188,7 +182,7 @@ void tms570_gioirq(gio_pinset_t pinset)
           break;
         }
 
-      spin_unlock_irqrestore(&g_irq_lock, flags);
+      leave_critical_section(flags);
     }
 }
 

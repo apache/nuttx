@@ -41,9 +41,7 @@
  * Private Data
  ****************************************************************************/
 #ifdef CONFIG_ARCH_IRQPRIO
-#if defined(CONFIG_DEBUG_IRQ_INFO)
 static spinlock_t g_irq_lock = SP_UNLOCKED;
-#endif
 #endif
 
 /****************************************************************************

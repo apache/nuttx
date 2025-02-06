@@ -31,7 +31,7 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/spinlock.h>
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
 #include "arm_internal.h"
@@ -74,8 +74,6 @@ static struct s32k3xx_pinirq_s g_eirqisrs[32];
 #ifdef CONFIG_S32K3XX_WKPUINTS
 static struct s32k3xx_pinirq_s g_wkpuisrs[60];
 #endif
-
-static spinlock_t g_pinirq_lock = SP_UNLOCKED;
 
 /****************************************************************************
  * Private Functions
@@ -282,12 +280,12 @@ int s32k3xx_pinirqattach(uint32_t pinset, xcpt_t pinisr, void *arg)
 
       /* Attach the interrupt handler */
 
-      flags = spin_lock_irqsave(&g_pinirq_lock);
+      flags = enter_critical_section();
 
       g_eirqisrs[index].handler = pinisr;
       g_eirqisrs[index].arg     = arg;
 
-      spin_unlock_irqrestore(&g_pinirq_lock, flags);
+      leave_critical_section(flags);
       return OK;
     }
 #endif /* CONFIG_S32K3XX_EIRQINTS */
@@ -301,12 +299,12 @@ int s32k3xx_pinirqattach(uint32_t pinset, xcpt_t pinisr, void *arg)
 
       /* Attach the interrupt handler */
 
-      flags = spin_lock_irqsave(&g_pinirq_lock);
+      flags = enter_critical_section();
 
       g_wkpuisrs[index].handler = pinisr;
       g_wkpuisrs[index].arg     = arg;
 
-      spin_unlock_irqrestore(&g_pinirq_lock, flags);
+      leave_critical_section(flags);
       return OK;
     }
 #endif /* CONFIG_S32K3XX_WKPUINTS */

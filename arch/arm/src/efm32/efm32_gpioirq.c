@@ -31,7 +31,7 @@
 #include <assert.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/spinlock.h>
+#include <nuttx/irq.h>
 
 #include "arm_internal.h"
 #include "hardware/efm32_gpio.h"
@@ -43,12 +43,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-static spinlock_t g_gpioirq_lock = SP_UNLOCKED;
 
 /****************************************************************************
  * Private Functions
@@ -204,7 +198,7 @@ void efm32_gpioirq(gpio_pinset_t pinset)
 
   /* Make sure that the pin interrupt is disabled */
 
-  flags   = spin_lock_irqsave(&g_gpioirq_lock);
+  flags   = enter_critical_section();
   regval  = getreg32(EFM32_GPIO_IEN);
   regval &= ~bit;
   putreg32(regval, EFM32_GPIO_IEN);
@@ -254,7 +248,7 @@ void efm32_gpioirq(gpio_pinset_t pinset)
     }
 
   putreg32(regval, EFM32_GPIO_EXTIFALL);
-  spin_unlock_irqrestore(&g_gpioirq_lock, flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -276,11 +270,11 @@ void efm32_gpioirqenable(int irq)
       uint32_t regval;
       uint32_t bit;
       bit     = ((uint32_t)1 << (irq - EFM32_IRQ_EXTI0));
-      flags   = spin_lock_irqsave(&g_gpioirq_lock);
+      flags   = enter_critical_section();
       regval  = getreg32(EFM32_GPIO_IEN);
       regval |= bit;
       putreg32(regval, EFM32_GPIO_IEN);
-      spin_unlock_irqrestore(&g_gpioirq_lock, flags);
+      leave_critical_section(flags);
 #else
       bitband_set_peripheral(EFM32_GPIO_IEN, (irq - EFM32_IRQ_EXTI0), 1);
 #endif
@@ -307,11 +301,11 @@ void efm32_gpioirqdisable(int irq)
       uint32_t bit;
 
       bit     = ((uint32_t)1 << (irq - EFM32_IRQ_EXTI0));
-      flags   = spin_lock_irqsave(&g_gpioirq_lock);
+      flags   = enter_critical_section();
       regval  = getreg32(EFM32_GPIO_IEN);
       regval &= ~bit;
       putreg32(regval, EFM32_GPIO_IEN);
-      spin_unlock_irqrestore(&g_gpioirq_lock, flags);
+      leave_critical_section(flags);
 #else
       bitband_set_peripheral(EFM32_GPIO_IEN, (irq - EFM32_IRQ_EXTI0), 0);
 #endif
@@ -338,11 +332,11 @@ void efm32_gpioirqclear(int irq)
       uint32_t bit;
 
       bit     = ((uint32_t)1 << (irq - EFM32_IRQ_EXTI0));
-      flags   = spin_lock_irqsave(&g_gpioirq_lock);
+      flags   = enter_critical_section();
       regval  = getreg32(EFM32_GPIO_IFC);
       regval |= bit;
       putreg32(regval, EFM32_GPIO_IFC);
-      spin_unlock_irqrestore(&g_gpioirq_lock, flags);
+      leave_critical_section(flags);
 #else
       bitband_set_peripheral(EFM32_GPIO_IFC, (irq - EFM32_IRQ_EXTI0), 1);
 #endif

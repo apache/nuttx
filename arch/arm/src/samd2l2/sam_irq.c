@@ -30,7 +30,7 @@
 #include <assert.h>
 #include <debug.h>
 
-#include <nuttx/spinlock.h>
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <arch/irq.h>
 
@@ -47,14 +47,6 @@
 #define DEFPRIORITY32 \
   (NVIC_SYSH_PRIORITY_DEFAULT << 24 | NVIC_SYSH_PRIORITY_DEFAULT << 16 | \
    NVIC_SYSH_PRIORITY_DEFAULT << 8  | NVIC_SYSH_PRIORITY_DEFAULT)
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-#if defined(CONFIG_DEBUG_IRQ_INFO)
-static spinlock_t g_irq_lock = SP_UNLOCKED;
-#endif
 
 /****************************************************************************
  * Private Functions
@@ -278,7 +270,7 @@ void sam_dumpnvic(const char *msg, int irq)
 {
   irqstate_t flags;
 
-  flags = spin_lock_irqsave(&g_irq_lock);
+  flags = enter_critical_section();
 
   irqinfo("NVIC (%s, irq=%d):\n", msg, irq);
   irqinfo("  ISER:       %08x ICER:   %08x\n",
@@ -302,7 +294,7 @@ void sam_dumpnvic(const char *msg, int irq)
   irqinfo("  SHPR2:      %08x SHPR3:  %08x\n",
           getreg32(ARMV6M_SYSCON_SHPR2), getreg32(ARMV6M_SYSCON_SHPR3));
 
-  spin_unlock_irqrestore(&g_irq_lock, flags);
+  leave_critical_section(flags);
 }
 
 #else
