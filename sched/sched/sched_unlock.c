@@ -64,13 +64,13 @@ void sched_unlock(void)
 
       /* rtcb may be NULL only during early boot-up phases */
 
-      DEBUGASSERT(rtcb == NULL || rtcb->lockcount > 0);
+      DEBUGASSERT(rtcb && rtcb->lockcount > 0);
 
       /* Check if the lock counter has decremented to zero. If so,
        * then pre-emption has been re-enabled.
        */
 
-      if (rtcb != NULL && rtcb->lockcount == 1)
+      if (rtcb->lockcount == 1)
         {
           irqstate_t flags = enter_critical_section_wo_note();
           FAR struct tcb_s *ptcb;

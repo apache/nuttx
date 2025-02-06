@@ -76,13 +76,13 @@ void sched_lock(void)
        * integer type.
        */
 
-      DEBUGASSERT(rtcb == NULL || rtcb->lockcount < MAX_LOCK_COUNT);
+      DEBUGASSERT(rtcb && rtcb->lockcount < MAX_LOCK_COUNT);
 
       /* A counter is used to support locking. This allows nested lock
        * operations on this thread (on any CPU)
        */
 
-      if (rtcb != NULL && rtcb->lockcount++ == 0)
+      if (rtcb->lockcount++ == 0)
         {
 #if (CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION >= 0) || \
     defined(CONFIG_SCHED_INSTRUMENTATION_PREEMPTION)
