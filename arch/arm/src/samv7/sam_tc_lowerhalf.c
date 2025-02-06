@@ -193,6 +193,18 @@ static void sam_timer_handler(TC_HANDLE tch, void *arg, uint32_t sr)
   struct sam_lowerhalf_s *lower = (struct sam_lowerhalf_s *)arg;
   uint32_t next_interval_us = 0;
 
+  /*  CPCSTOP should not be set! This has a negative impact on periodic
+   *  timer operation. If CPCSTOP is set, the timer is stopped when
+   *  an overrun happens and must be restarted manually here.
+   *  However, as interrupt handlers are not infinitely fast, they can
+   *  introduce a delay for each start, effectively prolonging
+   *  the next timeout.
+   *
+   *  If notify.periodic = false, it can happen the timer is so fast
+   *  it overruns again before lower->callback returns false.
+   *  However, usage of such small delays is unlikely in an application.
+   */
+
   if (lower->callback(&next_interval_us, lower->arg))
     {
       if (next_interval_us > 0)
@@ -200,10 +212,6 @@ static void sam_timer_handler(TC_HANDLE tch, void *arg, uint32_t sr)
           sam_settimeout((struct timer_lowerhalf_s *)lower,
                          next_interval_us);
         }
-
-      /* Start the counter */
-
-      sam_tc_start(tch);
     }
   else
     {
@@ -624,7 +632,6 @@ int sam_timer_initialize(const char *devpath, int chan)
    *   TC_CMR_TCCLKS       - Returned by sam_tc_clockselect
    *   TC_CMR_CLKI=0       - Not inverted
    *   TC_CMR_BURST_NONE   - Not gated by an external signal
-   *   TC_CMR_CPCSTOP=1    - Stop the clock on an RC compare event
    *   TC_CMR_CPCDIS=0     - Don't disable the clock on an RC compare event
    *   TC_CMR_EEVTEDG_NONE - No external events (and, hence, no edges
    *   TC_CMR_EEVT_TIOB    - ???? REVISIT
@@ -640,13 +647,15 @@ int sam_timer_initialize(const char *devpath, int chan)
    *   TC_CMR_BCPC_NONE    - RC compare has no effect on TIOB
    *   TC_CMR_BEEVT_NONE   - No external event effect on TIOB
    *   TC_CMR_BSWTRG_NONE  - No software trigger effect on TIOB
+   *
+   *   Do not set CPCSTOP. More explanation in the irq handler.
    */
 
-  cmr |= (TC_CMR_BURST_NONE  | TC_CMR_CPCSTOP     | TC_CMR_EEVTEDG_NONE |
-          TC_CMR_EEVT_TIOB   | TC_CMR_WAVSEL_UPRC | TC_CMR_WAVE         |
-          TC_CMR_ACPA_NONE   | TC_CMR_ACPC_NONE   | TC_CMR_AEEVT_NONE   |
-          TC_CMR_ASWTRG_NONE | TC_CMR_BCPB_NONE   | TC_CMR_BCPC_NONE    |
-          TC_CMR_BEEVT_NONE  | TC_CMR_BSWTRG_NONE);
+  cmr |= (TC_CMR_BURST_NONE  | TC_CMR_EEVTEDG_NONE | TC_CMR_EEVT_TIOB   |
+          TC_CMR_WAVSEL_UPRC | TC_CMR_WAVE         | TC_CMR_ACPA_NONE   |
+          TC_CMR_ACPC_NONE   | TC_CMR_AEEVT_NONE   | TC_CMR_ASWTRG_NONE |
+          TC_CMR_BCPB_NONE   | TC_CMR_BCPC_NONE    | TC_CMR_BEEVT_NONE  |
+          TC_CMR_BSWTRG_NONE);
 
   lower->tch = sam_tc_allocate(chan, cmr);
 
