@@ -40,7 +40,7 @@ Configuring and Running (Single Core)
      make -j20
      mkdir -p pic
      arm-none-eabi-strip --remove-section=.rel.text --remove-section=.comment --strip-unneeded nuttx -o pic/boot
-     genromfs -a -f 128 ../romfs.img -d pic
+     genromfs -a 128 -f ../romfs.img -d pic
      make distclean -j20
      ./tools/configure.sh mps3-an547:bl
      make -j20
@@ -48,6 +48,11 @@ Configuring and Running (Single Core)
      -kernel nuttx.bin -gdb tcp::1127 \
      -device loader,file=../romfs.img,addr=0x60000000
      bl> boot /pic/boot
+     modlib_init...
+     modlib_load...
+     modlib_bind...
+     add-symbol-file ap.elf -s .text 0x60001080 -s .data 0x21000000
+
      ap> ostest
 
 Precautions
