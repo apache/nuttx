@@ -244,8 +244,10 @@ static void kinetis_tcd_free(struct kinetis_edmatcd_s *tcd)
    */
 
   flags = spin_lock_irqsave(&g_edma.lock);
+  sched_lock();
   kinetis_tcd_free_nolock(tcd);
   spin_unlock_irqrestore(&g_edma.lock, flags);
+  sched_unlock();
 }
 #endif
 
@@ -454,6 +456,7 @@ static void kinetis_dmaterminate(struct kinetis_dmach_s *dmach, int result)
   uint8_t chan;
 
   flags = spin_lock_irqsave(&g_edma.lock);
+  sched_lock();
 
   /* Disable channel ERROR interrupts */
 
@@ -505,6 +508,7 @@ static void kinetis_dmaterminate(struct kinetis_dmach_s *dmach, int result)
   dmach->state    = KINETIS_DMA_IDLE;
 
   spin_unlock_irqrestore(&g_edma.lock, flags);
+  sched_unlock();
 }
 
 /****************************************************************************

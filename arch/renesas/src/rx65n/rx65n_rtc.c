@@ -481,6 +481,7 @@ int up_rtc_gettime(struct timespec *tp)
   struct tm t;
 
   flags = spin_lock_irqsave(&g_rtc_lock);
+  sched_lock();
 
   if (RTC.RCR2.BIT.START == 0)
     {
@@ -549,6 +550,7 @@ int up_rtc_gettime(struct timespec *tp)
   UNUSED(seccnt);
 
   spin_unlock_irqrestore(&g_rtc_lock, flags);
+  sched_unlock();
   return OK;
 }
 #endif

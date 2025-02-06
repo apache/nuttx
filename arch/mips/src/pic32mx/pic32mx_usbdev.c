@@ -44,6 +44,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
+#include <sched.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/spinlock.h>
@@ -3334,6 +3335,7 @@ static int pic32mx_epdisable(struct usbdev_ep_s *ep)
   /* Cancel any ongoing activity */
 
   flags = spin_lock_irqsave(&privep->dev->lock);
+  sched_lock();
   pic32mx_cancelrequests(privep, -ESHUTDOWN);
 
   /* Disable the endpoint */
@@ -3351,6 +3353,7 @@ static int pic32mx_epdisable(struct usbdev_ep_s *ep)
     }
 
   spin_unlock_irqrestore(&privep->dev->lock, flags);
+  sched_unlock();
   return OK;
 }
 
@@ -3451,6 +3454,7 @@ static int pic32mx_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   privreq->inflight[1] = 0;
 #endif
   flags                = spin_lock_irqsave(&priv->lock);
+  sched_lock();
 
   /* Add the new request to the request queue for the OUT endpoint */
 
@@ -3495,6 +3499,7 @@ static int pic32mx_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
     }
 
   spin_unlock_irqrestore(&priv->lock, flags);
+  sched_unlock();
   return ret;
 }
 
@@ -3518,8 +3523,10 @@ static int pic32mx_epcancel(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   usbtrace(TRACE_EPCANCEL, USB_EPNO(ep->eplog));
 
   flags = spin_lock_irqsave(&privep->dev->lock);
+  sched_lock();
   pic32mx_cancelrequests(privep, -EAGAIN);
   spin_unlock_irqrestore(&privep->dev->lock, flags);
+  sched_unlock();
   return OK;
 }
 
@@ -3711,6 +3718,7 @@ static int pic32mx_epstall(struct usbdev_ep_s *ep, bool resume)
   /* STALL or RESUME the endpoint */
 
   flags = spin_lock_irqsave(&privep->dev->lock);
+  sched_lock();
 
   /* Special case EP0.  When we stall EP0 we have to stall both the IN and
    * OUT BDTs.
@@ -3740,6 +3748,7 @@ static int pic32mx_epstall(struct usbdev_ep_s *ep, bool resume)
     }
 
   spin_unlock_irqrestore(&privep->dev->lock, flags);
+  sched_unlock();
   return ret;
 }
 
@@ -4393,6 +4402,7 @@ void mips_usbuninitialize(void)
   irqstate_t flags;
 
   flags = spin_lock_irqsave(&priv->lock);
+  sched_lock();
   usbtrace(TRACE_DEVUNINIT, 0);
 
   /* Disable and detach the USB IRQs */
@@ -4410,6 +4420,7 @@ void mips_usbuninitialize(void)
 
   pic32mx_hwshutdown(priv);
   spin_unlock_irqrestore(&priv->lock, flags);
+  sched_unlock();
 }
 
 /****************************************************************************
@@ -4514,6 +4525,7 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
    */
 
   flags = spin_lock_irqsave(&priv->lock);
+  sched_lock();
   pic32mx_swreset(priv);
   pic32mx_hwreset(priv);
 
@@ -4537,6 +4549,7 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
 
   priv->driver = NULL;
   spin_unlock_irqrestore(&priv->lock, flags);
+  sched_unlock();
   return OK;
 }
 

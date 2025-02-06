@@ -26,6 +26,7 @@
 
 #include <assert.h>
 #include <debug.h>
+#include <sched.h>
 #include <errno.h>
 #include <stdint.h>
 #include <string.h>
@@ -500,6 +501,7 @@ int esp32s2_setup_irq(int periphid, int priority, int type)
   int cpuint;
 
   flags = spin_lock_irqsave(&g_irq_lock);
+  sched_lock();
 
   /* Setting up an IRQ includes the following steps:
    *    1. Allocate a CPU interrupt.
@@ -513,6 +515,7 @@ int esp32s2_setup_irq(int periphid, int priority, int type)
       irqerr("Unable to allocate CPU interrupt for priority=%d and type=%d",
              priority, type);
       spin_unlock_irqrestore(&g_irq_lock, flags);
+      sched_unlock();
 
       return cpuint;
     }
@@ -530,6 +533,7 @@ int esp32s2_setup_irq(int periphid, int priority, int type)
   putreg32(cpuint, regaddr);
 
   spin_unlock_irqrestore(&g_irq_lock, flags);
+  sched_unlock();
 
   return cpuint;
 }
