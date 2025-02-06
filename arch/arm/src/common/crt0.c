@@ -46,6 +46,17 @@ extern initializer_t _sdtors[];
 extern initializer_t _edtors[];
 
 /****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/* Linker defined symbols to .ctors and .dtors */
+
+extern initializer_t _sctors[];
+extern initializer_t _ectors[];
+extern initializer_t _sdtors[];
+extern initializer_t _edtors[];
+
+/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
@@ -136,6 +147,41 @@ static void exec_dtors(void)
 
 #endif
 
+#ifdef CONFIG_HAVE_CXXINITIALIZE
+
+/****************************************************************************
+ * Name: exec_ctors
+ *
+ * Description:
+ *   Call static constructors
+ *
+ ****************************************************************************/
+
+static void exec_ctors(void)
+{
+  for (initializer_t *ctor = _sctors; ctor != _ectors; ctor++)
+    {
+      (*ctor)();
+    }
+}
+
+/****************************************************************************
+ * Name: exec_dtors
+ *
+ * Description:
+ *   Call static destructors
+ *
+ ****************************************************************************/
+
+static void exec_dtors(void)
+{
+  for (initializer_t *dtor = _sdtors; dtor != _edtors; dtor++)
+    {
+      (*dtor)();
+    }
+}
+
+#endif
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
