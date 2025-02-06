@@ -465,6 +465,9 @@ struct up_dev_s
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
   const uint32_t    cts_gpio;  /* U[S]ART CTS GPIO pin configuration */
 #endif
+#ifdef CONFIG_SERIAL_TIOCGICOUNT
+  struct serial_icounter_s icount;  /* U[S]ART error report */
+#endif
 
   /* TX DMA state */
 
@@ -1485,7 +1488,7 @@ static void up_disableusartint(struct up_dev_s *priv, uint16_t *ie)
        * USART_CR1_TXEIE    USART_SR_TXE    Tx Data Register Empty
        * USART_CR1_PEIE     USART_SR_PE     Parity Error
        *
-       * USART_CR2_LBDIE    USART_SR_LBD    Break Flag             (not used)
+       * USART_CR2_LBDIE    USART_SR_LBD    Break Flag
        * USART_CR3_EIE      USART_SR_FE     Framing Error
        * "           "      USART_SR_NE     Noise Error
        * "           "      USART_SR_ORE    Overrun Error Detected
@@ -2358,7 +2361,7 @@ static int up_interrupt(int irq, void *context, void *arg)
        * USART_CR1_TXEIE    USART_SR_TXE    Tx Data Register Empty
        * USART_CR1_PEIE     USART_SR_PE     Parity Error
        *
-       * USART_CR2_LBDIE    USART_SR_LBD    Break Flag             (not used)
+       * USART_CR2_LBDIE    USART_SR_LBD    Break Flag
        * USART_CR3_EIE      USART_SR_FE     Framing Error
        * "           "      USART_SR_NE     Noise Error
        * "           "      USART_SR_ORE    Overrun Error Detected
@@ -2368,6 +2371,30 @@ static int up_interrupt(int irq, void *context, void *arg)
        * writing zero to the SR register: USART_SR_CTS, USART_SR_LBD. Note of
        * those are currently being used.
        */
+
+      /* Error report */
+
+#ifdef CONFIG_SERIAL_TIOCGICOUNT
+      if (priv->sr & USART_SR_FE)
+        {
+          priv->icount.frame++;
+        }
+
+      if (priv->sr & USART_SR_ORE)
+        {
+          priv->icount.overrun++;
+        }
+
+      if (priv->sr & USART_SR_PE)
+        {
+          priv->icount.parity++;
+        }
+
+      if (priv->sr & USART_SR_LBD)
+        {
+          priv->icount.brk++;
+        }
+#endif
 
 #ifdef HAVE_RS485
       /* Transmission of whole buffer is over - TC is set, TXEIE is cleared.
@@ -2403,7 +2430,8 @@ static int up_interrupt(int irq, void *context, void *arg)
        * error conditions.
        */
 
-      else if ((priv->sr & (USART_SR_ORE | USART_SR_NE | USART_SR_FE)) != 0)
+      else if ((priv->sr & (USART_SR_ORE | USART_SR_NE | USART_SR_FE |
+                            USART_SR_LBD)) != 0)
         {
 #if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
     defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32G4XXX)
@@ -2412,7 +2440,8 @@ static int up_interrupt(int irq, void *context, void *arg)
            */
 
           up_serialout(priv, STM32_USART_ICR_OFFSET,
-                      (USART_ICR_NCF | USART_ICR_ORECF | USART_ICR_FECF));
+                      (USART_ICR_NCF | USART_ICR_ORECF | USART_ICR_FECF |
+                       USART_ICR_LBDCF));
 #else
           /* If an error occurs, read from DR to clear the error (data has
            * been lost).  If ORE is set along with RXNE then it tells you
@@ -2452,12 +2481,14 @@ static int up_interrupt(int irq, void *context, void *arg)
 static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
 #if defined(CONFIG_SERIAL_TERMIOS) || defined(CONFIG_SERIAL_TIOCSERGSTRUCT) \
+    || defined(CONFIG_SERIAL_TIOCGICOUNT) \
     || defined(CONFIG_STM32_SERIALBRK_BSDCOMPAT) \
     || defined(CONFIG_STM32_USART_SINGLEWIRE)
   struct inode      *inode = filep->f_inode;
   struct uart_dev_s *dev   = inode->i_private;
 #endif
 #if defined(CONFIG_SERIAL_TERMIOS) \
+    || defined(CONFIG_SERIAL_TIOCGICOUNT) \
     || defined(CONFIG_STM32_SERIALBRK_BSDCOMPAT) \
     || defined(CONFIG_STM32_USART_SINGLEWIRE)
   struct up_dev_s   *priv  = (struct up_dev_s *)dev->priv;
@@ -2477,6 +2508,24 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
         else
           {
             memcpy(user, dev, sizeof(struct up_dev_s));
+          }
+      }
+      break;
+#endif
+
+#ifdef CONFIG_SERIAL_TIOCGICOUNT
+    /* Get U(S)ART error counters */
+
+    case TIOCGICOUNT:
+      {
+        struct serial_icounter_s *icount = (struct serial_icounter_s *)arg;
+        if (icount == NULL)
+          {
+            ret = -EINVAL;
+          }
+        else
+          {
+            memcpy(icount, &priv->icount, sizeof(struct serial_icounter_s));
           }
       }
       break;
@@ -2764,7 +2813,7 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
    * "              "   USART_SR_ORE    Overrun Error Detected
    * USART_CR1_PEIE     USART_SR_PE     Parity Error
    *
-   * USART_CR2_LBDIE    USART_SR_LBD    Break Flag                (not used)
+   * USART_CR2_LBDIE    USART_SR_LBD    Break Flag
    * USART_CR3_EIE      USART_SR_FE     Framing Error
    * "           "      USART_SR_NE     Noise Error
    * "           "      USART_SR_ORE    Overrun Error Detected
