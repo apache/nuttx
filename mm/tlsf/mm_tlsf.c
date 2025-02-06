@@ -172,7 +172,7 @@ struct mm_tlsf_node_s
 
 struct mm_memdump_priv_s
 {
-  FAR const struct mm_memdump_s *dump;
+  struct mm_memdump_s dump;
   struct mallinfo_task info;
 #if CONFIG_MM_HEAP_BIGGEST_COUNT > 0
   struct mm_tlsf_node_s node[CONFIG_MM_HEAP_BIGGEST_COUNT];
@@ -185,7 +185,7 @@ static inline_function
 void memdump_info_pool(FAR struct mm_memdump_priv_s *priv,
                        FAR struct mm_heap_s *heap)
 {
-  priv->info = mempool_multiple_info_task(heap->mm_mpool, priv->dump);
+  priv->info = mempool_multiple_info_task(heap->mm_mpool, &priv->dump);
 }
 
 static inline_function
@@ -194,7 +194,7 @@ void memdump_dump_pool(FAR struct mm_memdump_priv_s *priv,
 {
   if (priv->info.aordblks > 0)
     {
-      mempool_multiple_memdump(heap->mm_mpool, priv->dump);
+      mempool_multiple_memdump(heap->mm_mpool, &priv->dump);
     }
 }
 #else
@@ -696,7 +696,7 @@ static void memdump_handler(FAR void *ptr, size_t size, int used,
                             FAR void *user)
 {
   FAR struct mm_memdump_priv_s *priv = user;
-  FAR const struct mm_memdump_s *dump = priv->dump;
+  FAR struct mm_memdump_s *dump = &priv->dump;
 
   if (used)
     {
@@ -1335,7 +1335,19 @@ void mm_memdump(FAR struct mm_heap_s *heap,
   pid_t pid = dump->pid;
 
   memset(&priv, 0, sizeof(struct mm_memdump_priv_s));
-  priv.dump = dump;
+
+#ifdef CONFIG_MM_BACKTRACE_SEQNO
+  if (dump->seqmin == 0 && dump->seqmax == 0)
+    {
+      priv.dump.seqmin = 0;
+      priv.dump.seqmax = ULONG_MAX;
+    }
+  else
+    {
+      priv.dump.seqmin = dump->seqmin;
+      priv.dump.seqmax = dump->seqmax;
+    }
+#endif
 
   free_delaylist(heap, true);
 
