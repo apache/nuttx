@@ -20,16 +20,27 @@
  *
  ****************************************************************************/
 
-#include <nuttx/config.h>
+#include "memory.ld"
+
+/* Provide these to avoid using config files for them */
+
+__uflash_start = ORIGIN(uflash);
+__uflash_size = LENGTH(uflash);
+__usram_start = ORIGIN(usram);
+__usram_size = LENGTH(usram);
+
+/* Provide the kernel boundaries as well */
+
+__kflash_start = ORIGIN(kflash);
+__kflash_size = LENGTH(kflash);
+__ksram_start = ORIGIN(ksram);
+__ksram_size = LENGTH(ksram);
+__ksram_end = ORIGIN(ksram) + LENGTH(ksram);
+
 
 OUTPUT_ARCH(arm)
-ENTRY(__start)
 
-MEMORY
-{
-  ROM (rx) : ORIGIN = CONFIG_FLASH_START, LENGTH = CONFIG_FLASH_SIZE
-  RAM (rwx): ORIGIN = CONFIG_RAM_START,   LENGTH = CONFIG_RAM_SIZE
-}
+ENTRY(__start)
 
 SECTIONS
 {
@@ -56,7 +67,7 @@ SECTIONS
       *(.text*)
       *(.fixup)
       *(.gnu.warning)
-  } > ROM
+  } > kflash
 
   . = ALIGN(4096);
 
@@ -68,12 +79,12 @@ SECTIONS
       . = ALIGN(4096);
       _etext = .; /* End_1 of .text */
       _sztext = _etext - _stext;
-  } > ROM
+  } > kflash
 
   .ARM.extab :
   {
       *(.ARM.extab*)
-  } > ROM
+  } > kflash
 
   /* .ARM.exidx is sorted, so has to go in its own output section.  */
 
@@ -81,7 +92,7 @@ SECTIONS
   .ARM.exidx :
   {
       *(.ARM.exidx* .gnu.linkonce.armexidx.*)
-  } > ROM
+  } > kflash
   PROVIDE_HIDDEN (__exidx_end = .);
 
   .rodata : {
@@ -91,7 +102,7 @@ SECTIONS
       KEEP(*(SORT(.scattered_array*)));
       . = ALIGN(4096);
       _erodata = .;
-  } > ROM
+  } > kflash
 
   _eronly = LOADADDR(.data);
   .data : {                    /* Data */
@@ -104,20 +115,20 @@ SECTIONS
       . = ALIGN(4);
       __stop_impls = .;
       _edata = .;
-  } > RAM AT > ROM
+  } > ksram AT > kflash
 
   .noinit : {
       _snoinit = ABSOLUTE(.);
       *(.noinit*)
       _enoinit = ABSOLUTE(.);
-  } > RAM
+  } > ksram
 
   .bss : {                     /* BSS */
        _sbss = .;
        *(.bss*)
        . = ALIGN(4096);
        _ebss = .;
-  } > RAM
+  } > ksram
 
   /* Sections to be discarded */
   /DISCARD/ : {
