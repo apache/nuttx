@@ -152,8 +152,14 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
         {
           heap->mm_curused += newsize - oldsize;
           mm_shrinkchunk(heap, oldnode, newsize);
+
+#ifdef CONFIG_MM_NODE_PENDING
+          kasan_poison((FAR char *)oldnode + MM_SIZEOF_NODE(oldnode),
+                       oldsize - MM_SIZEOF_NODE(oldnode));
+#else
           kasan_poison((FAR char *)oldnode + MM_SIZEOF_NODE(oldnode) +
                        sizeof(mmsize_t), oldsize - MM_SIZEOF_NODE(oldnode));
+#endif
         }
 
       /* Then return the original address */

@@ -69,6 +69,14 @@ config MM_DEFAULT_ALIGNMENT
 		memory default alignment is equal to sizoef(uintptr), if this value
 		is not 0, this value must be 2^n and at least sizeof(uintptr).
 
+config MM_NODE_PENDING
+	bool "Enable pending memory node"
+	default n
+	---help---
+		After it is enabled, the "preceding" member will be retained
+		forever regardless of whether the previous node is in the
+		alloc state or the free state.
+
 config MM_SMALL
 	bool "Small memory model"
 	default n
