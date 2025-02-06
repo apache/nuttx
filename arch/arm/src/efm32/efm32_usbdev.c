@@ -35,6 +35,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
+#include <sched.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
@@ -4129,6 +4130,7 @@ static void efm32_epout_disable(struct efm32_ep_s *privep)
    */
 
   flags = spin_lock_irqsave(&privep->dev->lock);
+  sched_lock();
   efm32_enablegonak(privep);
 
   /* Disable the required OUT endpoint by setting the EPDIS and SNAK bits
@@ -4176,6 +4178,7 @@ static void efm32_epout_disable(struct efm32_ep_s *privep)
   efm32_req_cancel(privep, -ESHUTDOWN);
 
   spin_unlock_irqrestore(&privep->dev->lock, flags);
+  sched_unlock();
 }
 
 /****************************************************************************
@@ -4241,6 +4244,7 @@ static void efm32_epin_disable(struct efm32_ep_s *privep)
    */
 
   flags = spin_lock_irqsave(&privep->dev->lock);
+  sched_lock();
   regaddr = EFM32_USB_DIEPCTL(privep->epphy);
   regval  = efm32_getreg(regaddr);
   regval &= ~USB_DIEPCTL_USBACTEP;
@@ -4272,6 +4276,7 @@ static void efm32_epin_disable(struct efm32_ep_s *privep)
 
   efm32_req_cancel(privep, -ESHUTDOWN);
   spin_unlock_irqrestore(&privep->dev->lock, flags);
+  sched_unlock();
 }
 
 /****************************************************************************
@@ -4463,6 +4468,7 @@ static int efm32_ep_submit(struct usbdev_ep_s *ep,
   /* Disable Interrupts */
 
   flags = spin_lock_irqsave(&priv->lock);
+  sched_lock();
 
   /* If we are stalled, then drop all requests on the floor */
 
@@ -4508,6 +4514,7 @@ static int efm32_ep_submit(struct usbdev_ep_s *ep,
     }
 
   spin_unlock_irqrestore(&priv->lock, flags);
+  sched_unlock();
   return ret;
 }
 
@@ -4536,6 +4543,7 @@ static int efm32_ep_cancel(struct usbdev_ep_s *ep,
   usbtrace(TRACE_EPCANCEL, privep->epphy);
 
   flags = spin_lock_irqsave(&privep->dev->lock);
+  sched_lock();
 
   /* FIXME: if the request is the first, then we need to flush the EP
    *         otherwise just remove it from the list
@@ -4545,6 +4553,7 @@ static int efm32_ep_cancel(struct usbdev_ep_s *ep,
 
   efm32_req_cancel(privep, -ESHUTDOWN);
   spin_unlock_irqrestore(&privep->dev->lock, flags);
+  sched_unlock();
   return OK;
 }
 
@@ -4755,6 +4764,7 @@ static int efm32_ep_stall(struct usbdev_ep_s *ep, bool resume)
   /* Set or clear the stall condition as requested */
 
   flags = spin_lock_irqsave(&privep->dev->lock);
+  sched_lock();
   if (resume)
     {
       ret = efm32_ep_clrstall(privep);
@@ -4765,6 +4775,7 @@ static int efm32_ep_stall(struct usbdev_ep_s *ep, bool resume)
     }
 
   spin_unlock_irqrestore(&privep->dev->lock, flags);
+  sched_unlock();
 
   return ret;
 }
@@ -4825,6 +4836,7 @@ static struct usbdev_ep_s *efm32_ep_alloc(struct usbdev_s *dev,
   /* Get the set of available endpoints depending on the direction */
 
   flags = spin_lock_irqsave(&priv->lock);
+  sched_lock();
   epavail = priv->epavail[in];
 
   /* A physical address of 0 means that any endpoint will do */
@@ -4872,6 +4884,7 @@ static struct usbdev_ep_s *efm32_ep_alloc(struct usbdev_s *dev,
               /* And return the pointer to the standard endpoint structure */
 
               spin_unlock_irqrestore(&priv->lock, flags);
+              sched_unlock();
               return in ? &priv->epin[epno].ep : &priv->epout[epno].ep;
             }
         }
@@ -4881,6 +4894,7 @@ static struct usbdev_ep_s *efm32_ep_alloc(struct usbdev_s *dev,
 
   usbtrace(TRACE_DEVERROR(EFM32_TRACEERR_NOEP), (uint16_t)eplog);
   spin_unlock_irqrestore(&priv->lock, flags);
+  sched_unlock();
   return NULL;
 }
 
@@ -4950,6 +4964,7 @@ static int efm32_wakeup(struct usbdev_s *dev)
   /* Is wakeup enabled? */
 
   flags = spin_lock_irqsave(&priv->lock);
+  sched_lock();
   if (priv->wakeup)
     {
       /* Yes... is the core suspended? */
@@ -4976,6 +4991,7 @@ static int efm32_wakeup(struct usbdev_s *dev)
     }
 
   spin_unlock_irqrestore(&priv->lock, flags);
+  sched_unlock();
   return OK;
 }
 
@@ -5048,8 +5064,10 @@ static int efm32_pullup(struct usbdev_s *dev, bool enable)
   struct efm32_usbdev_s *priv = (struct efm32_usbdev_s *)dev;
 
   irqstate_t flags = spin_lock_irqsave(&priv->lock);
+  sched_lock();
   ret = efm32_pullup_nolock(dev, enable);
   spin_unlock_irqrestore(&priv->lock, flags);
+  sched_unlock();
 
   return ret;
 }
@@ -5678,6 +5696,7 @@ void arm_usbuninitialize(void)
   /* Disconnect device */
 
   flags = spin_lock_irqsave(&priv->lock);
+  sched_lock();
   efm32_pullup_nolock(&priv->usbdev, false);
   priv->usbdev.speed = USB_SPEED_UNKNOWN;
 
@@ -5714,6 +5733,7 @@ void arm_usbuninitialize(void)
 
   priv->devstate = DEVSTATE_DEFAULT;
   spin_unlock_irqrestore(&priv->lock, flags);
+  sched_unlock();
 }
 
 /****************************************************************************
@@ -5825,8 +5845,10 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
    */
 
   flags = spin_lock_irqsave(&priv->lock);
+  sched_lock();
   efm32_usbreset(priv);
   spin_unlock_irqrestore(&priv->lock, flags);
+  sched_unlock();
 
   /* Unbind the class driver */
 
@@ -5835,6 +5857,7 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
   /* Disable USB controller interrupts */
 
   flags = spin_lock_irqsave(&priv->lock);
+  sched_lock();
   up_disable_irq(EFM32_IRQ_USB);
 
   /* Disconnect device */
@@ -5845,6 +5868,7 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
 
   priv->driver = NULL;
   spin_unlock_irqrestore(&priv->lock, flags);
+  sched_unlock();
 
   return OK;
 }

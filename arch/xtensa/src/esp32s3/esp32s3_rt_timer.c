@@ -32,6 +32,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <sys/types.h>
+#include <sched.h>
 
 #include <nuttx/nuttx.h>
 #include <nuttx/spinlock.h>
@@ -612,6 +613,7 @@ static int rt_timer_isr(int irq, void *context, void *arg)
   modifyreg32(SYSTIMER_INT_CLR_REG, 0, SYSTIMER_TARGET2_INT_CLR);
 
   flags = spin_lock_irqsave(&priv->lock);
+  sched_lock();
 
   /* Check if there is a timer running */
 
@@ -673,6 +675,7 @@ static int rt_timer_isr(int irq, void *context, void *arg)
     }
 
   spin_unlock_irqrestore(&priv->lock, flags);
+  sched_unlock();
 
   return OK;
 }
@@ -806,6 +809,7 @@ void esp32s3_rt_timer_delete(struct rt_timer_s *timer)
   struct esp32s3_rt_priv_s *priv = &g_rt_priv;
 
   flags = spin_lock_irqsave(&priv->lock);
+  sched_lock();
 
   if (timer->state == RT_TIMER_READY)
     {
@@ -833,6 +837,7 @@ void esp32s3_rt_timer_delete(struct rt_timer_s *timer)
 
 exit:
   spin_unlock_irqrestore(&priv->lock, flags);
+  sched_unlock();
 }
 
 /****************************************************************************

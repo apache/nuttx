@@ -658,6 +658,7 @@ int sam_rtc_setalarm(const struct timespec *tp, alarmcb_t callback)
   /* Is there already something waiting on the ALARM? */
 
   flags = spin_lock_irqsave(&g_rtc_lock);
+  sched_lock();
   if (g_alarmcb == NULL)
     {
       /* No.. Save the callback function pointer */
@@ -736,6 +737,7 @@ int sam_rtc_setalarm(const struct timespec *tp, alarmcb_t callback)
     }
 
   spin_unlock_irqrestore(&g_rtc_lock, flags);
+  sched_unlock();
   return ret;
 }
 #endif
