@@ -909,9 +909,12 @@ static int lpc54_i2c_reset(struct i2c_master_s *dev)
 struct i2c_master_s *lpc54_i2cbus_initialize(int port)
 {
   struct lpc54_i2cdev_s *priv;
+  irqstate_t flags;
   uint32_t regval;
 
   i2cinfo("port=%d\n", port);
+
+  flags = spin_lock_irqsave(&priv->spinlock);
 
   /* Configure the requestin I2C peripheral */
 
@@ -1260,9 +1263,12 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
   else
 #endif
     {
+      spin_unlock_irqrestore(&priv->spinlock, flags);
       i2cerr("ERROR: Unsupported port=%d\n", port);
       return NULL;
     }
+
+  spin_unlock_irqrestore(&priv->spinlock, flags);
 
   /* Install our operations */
 
