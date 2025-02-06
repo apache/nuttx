@@ -43,3 +43,8 @@ Serial Device Drivers
    ``arch/arm/src/lpc214x/lpc214x_serial.c``,
    ``arch/z16/src/z16f/z16f_serial.c``, etc.
 
+Serial Error Reporting
+----------------------
+
+It is possible to check if there are some frame, parity, overrun, break, or
+other error using the ioctl TIOCGICOUNT just like on Linux.
