@@ -283,6 +283,20 @@ struct uart_ops_s
                           FAR const void *buf, size_t len);
 };
 
+/* This structure is used for U(S)ART frame, overrun, parity and brk error
+ * counters. This way applications will know if the UART communition is
+ * having some trouble.
+ */
+
+struct serial_icounter_s
+{
+  uint32_t frame;
+  uint32_t overrun;
+  uint32_t parity;
+  uint32_t brk;
+  uint32_t buf_overrun;
+};
+
 /* This is the device structure used by the driver.  The caller of
  * uart_register() must allocate and initialize this structure.  The
  * calling logic need only set all fields to zero except:

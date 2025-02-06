@@ -234,6 +234,13 @@ config SERIAL_IFLOWCONTROL_UPPER_WATERMARK
 
 endif # SERIAL_IFLOWCONTROL_WATERMARKS
 
+config SERIAL_TIOCGICOUNT
+	bool "Support TIOCGICOUNT (U[S]ART Error Report)"
+	default n
+	---help---
+		The ioctl TIOCGICOUNT is used to collect errors from serial ports
+                such as frame error, overrun, parity, etc.
+
 config SERIAL_TIOCSERGSTRUCT
 	bool "Support TIOCSERGSTRUCT"
 	default n
