@@ -57,7 +57,6 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
-#include <nuttx/spinlock.h>
 
 #ifdef CONFIG_SCHED_TICKLESS
 
@@ -91,7 +90,6 @@ static uint32_t g_timer_active;
 
 static irqstate_t g_tmr_sync_count;
 static irqstate_t g_tmr_flags;
-static spinlock_t g_tmr_lock = SP_UNLOCKED;
 
 /****************************************************************************
  * Private Functions
@@ -163,7 +161,7 @@ static inline void up_tmr_sync_up(void)
 {
   if (!g_tmr_sync_count)
     {
-      g_tmr_flags = spin_lock_irqsave(&g_tmr_lock);
+      g_tmr_flags = enter_critical_section();
     }
 
   g_tmr_sync_count++;
@@ -173,7 +171,7 @@ static inline void up_tmr_sync_down(void)
 {
   if (g_tmr_sync_count == 1)
     {
-      spin_unlock_irqrestore(&g_tmr_lock, g_tmr_flags);
+      leave_critical_section(g_tmr_flags);
     }
 
   if (g_tmr_sync_count > 0)
