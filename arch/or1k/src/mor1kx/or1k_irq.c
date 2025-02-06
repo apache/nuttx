@@ -30,22 +30,12 @@
 #include <assert.h>
 #include <debug.h>
 
-#include <nuttx/spinlock.h>
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <arch/irq.h>
 #include <arch/spr.h>
 
 #include "or1k_internal.h"
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/* Spinlock */
-
-#ifdef CONFIG_DEBUG_IRQ_INFO
-static spinlock_t g_irq_lock = SP_UNLOCKED;
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -144,6 +134,11 @@ void or1k_ack_irq(int irq)
 #ifdef CONFIG_DEBUG_IRQ_INFO
 void or1k_dump_pic(const char *msg, int irq)
 {
+  irqstate_t flags;
+
+  flags = enter_critical_section();
+
+  leave_critical_section(flags);
 }
 
 #else
