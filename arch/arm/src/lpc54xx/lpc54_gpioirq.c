@@ -30,7 +30,7 @@
 #include <errno.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/spinlock.h>
+#include <nuttx/irq.h>
 
 #include "arm_internal.h"
 #include "hardware/lpc54_syscon.h"
@@ -71,10 +71,6 @@ static const uint8_t g_pinirq[MAX_PININT] =
   LPC54_IRQ_PININT4, LPC54_IRQ_PININT5, LPC54_IRQ_PININT6, LPC54_IRQ_PININT7
 };
 
-/* Spinlock */
-
-static spinlock_t g_gpioirq_lock = SP_UNLOCKED;
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -90,7 +86,7 @@ static spinlock_t g_gpioirq_lock = SP_UNLOCKED;
 
 static int lpc54_alloc_pinint(lpc54_pinset_t pinset)
 {
-  irqstate_t flags = spin_lock_irqsave(&g_gpioirq_lock);
+  irqstate_t flags = enter_critical_section();
   int pin;
 
   /* REVISIT:  This is overlying complex in the current design.  There is
@@ -106,12 +102,12 @@ static int lpc54_alloc_pinint(lpc54_pinset_t pinset)
       if ((g_pinints & mask) == 0)
         {
           g_pinints |= mask;
-          spin_unlock_irqrestore(&g_gpioirq_lock, flags);
+          leave_critical_section(flags);
           return pin;
         }
     }
 
-  spin_unlock_irqrestore(&g_gpioirq_lock, flags);
+  leave_critical_section(flags);
   return -ENOSPC;
 }
 
@@ -288,7 +284,7 @@ int lpc54_gpio_irqno(lpc54_pinset_t pinset)
   int portpin = pinset & GPIO_PORTPIN_MASK;
   int i;
 
-  flags = spin_lock_irqsave(&g_gpioirq_lock);
+  flags = enter_critical_section();
 
   /* Find the PININT index that as the assignment to the this port and pin */
 
@@ -299,12 +295,12 @@ int lpc54_gpio_irqno(lpc54_pinset_t pinset)
       regval = getreg32(regaddr) & GPIO_PORTPIN_MASK;
       if (regval == portpin)
         {
-          spin_unlock_irqrestore(&g_gpioirq_lock, flags);
+          leave_critical_section(flags);
           return (int)g_pinirq[i];
         }
     }
 
-  spin_unlock_irqrestore(&g_gpioirq_lock, flags);
+  leave_critical_section(flags);
   return -ENOENT;
 }
 

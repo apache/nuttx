@@ -30,7 +30,7 @@
 #include <assert.h>
 #include <debug.h>
 
-#include <nuttx/spinlock.h>
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <arch/irq.h>
 #include <arch/armv7-m/nvicpri.h>
@@ -60,14 +60,6 @@
 #define NVIC_CLRENA_OFFSET (NVIC_IRQ0_31_CLEAR - NVIC_IRQ0_31_ENABLE)
 
 /****************************************************************************
- * Private Data
- ****************************************************************************/
-
-#if defined(CONFIG_DEBUG_IRQ_INFO)
-static spinlock_t g_irq_lock = SP_UNLOCKED;
-#endif
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -84,7 +76,7 @@ static void lpc54_dumpnvic(const char *msg, int irq)
 {
   irqstate_t flags;
 
-  flags = spin_lock_irqsave(&g_irq_lock);
+  flags = enter_critical_section();
 
   irqinfo("NVIC (%s, irq=%d):\n", msg, irq);
   irqinfo("  INTCTRL:    %08x VECTAB: %08x\n",
@@ -124,7 +116,7 @@ static void lpc54_dumpnvic(const char *msg, int irq)
           getreg32(NVIC_IRQ52_55_PRIORITY),
           getreg32(NVIC_IRQ56_59_PRIORITY));
 
-  spin_unlock_irqrestore(&g_irq_lock, flags);
+  leave_critical_section(flags);
 }
 #else
 #  define lpc54_dumpnvic(msg, irq)

@@ -31,7 +31,7 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/spinlock.h>
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
 #include "arm_internal.h"
@@ -39,12 +39,6 @@
 
 #include "a1x_pio.h"
 #include "a1x_irq.h"
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-static spinlock_t g_irq_lock = SP_UNLOCKED;
 
 /****************************************************************************
  * Private Functions
@@ -59,9 +53,13 @@ static spinlock_t g_irq_lock = SP_UNLOCKED;
  ****************************************************************************/
 
 #if defined(CONFIG_DEBUG_IRQ_INFO)
-static void a1x_dumpintc_nolock(const char *msg, int irq)
+static void a1x_dumpintc(const char *msg, int irq)
 {
+  irqstate_t flags;
+
   /* Dump some relevant ARMv7 register contents */
+
+  flags = enter_critical_section();
 
   irqinfo("ARMv7 (%s, irq=%d):\n", msg, irq);
   irqinfo("  CPSR: %08x SCTLR: %08x\n", flags, cp15_rdsctlr());
@@ -97,20 +95,10 @@ static void a1x_dumpintc_nolock(const char *msg, int irq)
           getreg32(A1X_INTC_PRIO0),     getreg32(A1X_INTC_PRIO1),
           getreg32(A1X_INTC_PRIO2),     getreg32(A1X_INTC_PRIO3),
           getreg32(A1X_INTC_PRIO4));
-}
 
-static void a1x_dumpintc(const char *msg, int irq)
-{
-  irqstate_t flags;
-
-  flags = spin_lock_irqsave(&g_irq_lock);
-
-  a1x_dumpintc_nolock(msg, irq);
-
-  spin_unlock_irqrestore(&g_irq_lock, flags);
+  leave_critical_section(flags);
 }
 #else
-#  define a1x_dumpintc_nolock(msg, irq)
 #  define a1x_dumpintc(msg, irq)
 #endif
 
@@ -309,7 +297,7 @@ void up_disable_irq(int irq)
     {
       /* These operations must be atomic */
 
-      flags = spin_lock_irqsave(&g_irq_lock);
+      flags = enter_critical_section();
 
       /* Make sure that the interrupt is disabled. */
 
@@ -325,8 +313,8 @@ void up_disable_irq(int irq)
       regval |= INTC_MASK(irq);
       putreg32(regval, regaddr);
 
-      a1x_dumpintc_nolock("disable", irq);
-      spin_unlock_irqrestore(&g_irq_lock, flags);
+      a1x_dumpintc("disable", irq);
+      leave_critical_section(flags);
     }
 
 #ifdef CONFIG_A1X_PIO_IRQ
@@ -357,7 +345,7 @@ void up_enable_irq(int irq)
     {
       /* These operations must be atomic */
 
-      flags = spin_lock_irqsave(&g_irq_lock);
+      flags = enter_critical_section();
 
       /* Make sure that the interrupt is enabled. */
 
@@ -373,8 +361,8 @@ void up_enable_irq(int irq)
       regval &= ~INTC_MASK(irq);
       putreg32(regval, regaddr);
 
-      a1x_dumpintc_nolock("enable", irq);
-      spin_unlock_irqrestore(&g_irq_lock, flags);
+      a1x_dumpintc("enable", irq);
+      leave_critical_section(flags);
     }
 
 #ifdef CONFIG_A1X_PIO_IRQ
@@ -410,7 +398,7 @@ int up_prioritize_irq(int irq, int priority)
     {
       /* These operations must be atomic */
 
-      flags = spin_lock_irqsave(&g_irq_lock);
+      flags = enter_critical_section();
 
       /* Set the new priority */
 
@@ -420,8 +408,8 @@ int up_prioritize_irq(int irq, int priority)
       regval |= INTC_PRIO(irq, priority);
       putreg32(regval, regaddr);
 
-      a1x_dumpintc_nolock("prioritize", irq);
-      spin_unlock_irqrestore(&g_irq_lock, flags);
+      a1x_dumpintc("prioritize", irq);
+      leave_critical_section(flags);
       return OK;
     }
 
