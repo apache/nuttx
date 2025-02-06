@@ -33,6 +33,12 @@
 #  define DATA
 #endif
 
+#if defined(CONFIG_LIBC_ARCH_ELF_64BIT)
+#  define SECTIONS_ALIGN 8
+#else
+#  define SECTIONS_ALIGN 4
+#endif
+
 SECTIONS
 {
   .text TEXT :
@@ -45,22 +51,8 @@ SECTIONS
       *(.glue_7)
       *(.glue_7t)
       *(.jcr)
+      . = ALIGN(SECTIONS_ALIGN);
       _etext = . ;
-    }
-
-  .init_array :
-    {
-      _sinit = .;
-      KEEP(*(SORT_BY_INIT_PRIORITY(.init_array.*) SORT_BY_INIT_PRIORITY(.ctors.*)))
-      KEEP(*(.init_array .ctors))
-      _einit = .;
-    }
-
-  .fini_array :
-    {
-      KEEP (*(.dtors))
-      KEEP (*(.fini_array))
-      KEEP (*(SORT(.fini_array.*)))
     }
 
   .rodata :
@@ -70,6 +62,7 @@ SECTIONS
       *(.rodata1)
       *(.rodata.*)
       *(.gnu.linkonce.r*)
+      . = ALIGN(SECTIONS_ALIGN);
       _erodata = . ;
     }
 
@@ -80,8 +73,31 @@ SECTIONS
       *(.data1)
       *(.data.*)
       *(.gnu.linkonce.d*)
-      . = ALIGN(4);
+      . = ALIGN(SECTIONS_ALIGN);
       _edata = . ;
+    }
+
+  .init_array :
+    {
+      _sinit = .;
+      _sctors = .;
+      KEEP(*(SORT_BY_INIT_PRIORITY(.init_array.*) SORT_BY_INIT_PRIORITY(.ctors.*)))
+      KEEP(*(.init_array .ctors))
+      . = ALIGN(SECTIONS_ALIGN);
+      _einit = .;
+      _ectors = .;
+    }
+
+  .fini_array :
+    {
+      _sfini = .;
+      _sdtors = .;
+      KEEP (*(.dtors))
+      KEEP (*(.fini_array))
+      KEEP (*(SORT(.fini_array.*)))
+      . = ALIGN(SECTIONS_ALIGN);
+      _efini = .;
+      _edtors = .;
     }
 
   .bss :
@@ -93,7 +109,7 @@ SECTIONS
       *(.sbss.*)
       *(.gnu.linkonce.b*)
       *(COMMON)
-      . = ALIGN(4);
+      . = ALIGN(SECTIONS_ALIGN);
       _ebss = . ;
     }
 
