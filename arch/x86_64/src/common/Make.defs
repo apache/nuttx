@@ -44,6 +44,7 @@ endif
 
 ifeq ($(CONFIG_ARCH_X86_64_ACPI),y)
 CMN_CSRCS += x86_64_acpi.c
+CMN_CSRCS += x86_64_acpi_procfs.c
 endif
 
 ifeq ($(CONFIG_SCHED_THREAD_LOCAL),y)

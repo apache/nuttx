@@ -30,6 +30,7 @@
 #include <nuttx/config.h>
 
 #include <nuttx/compiler.h>
+#include <sys/types.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -296,6 +297,29 @@ int acpi_lapic_get(int cpu, struct acpi_lapic_s **lapic);
 
 void acpi_dump(void);
 #endif
+
+/****************************************************************************
+ * Name: acpi_table_get
+ *
+ * Description:
+ *   Cache acpi tables as a copy.
+ *
+ ****************************************************************************/
+
+ssize_t acpi_table_get(const char *name, void **data);
+
+/****************************************************************************
+ * Name: acpi_procfs_register
+ *
+ * Description:
+ *   Register the acpi_procfs  procfs file system entry
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure
+ *
+ ****************************************************************************/
+
+int acpi_procfs_register(void);
 
 #undef EXTERN
 #if defined(__cplusplus)
