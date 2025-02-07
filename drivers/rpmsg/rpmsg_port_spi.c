@@ -35,6 +35,7 @@
 #include <nuttx/power/pm.h>
 #include <nuttx/irq.h>
 #include <nuttx/mutex.h>
+#include <nuttx/reboot_notifier.h>
 #include <nuttx/spinlock.h>
 
 #include "rpmsg_port.h"
@@ -49,6 +50,8 @@
 #else
 #  define rpmsg_port_spi_crc16(hdr) 0
 #endif
+
+#define RPMSG_PORT_SPI_CMD_TIMEOUT  1000
 
 #define BYTES2WORDS(s,b)            ((b) / ((s)->nbits >> 3))
 
@@ -110,6 +113,8 @@ struct rpmsg_port_spi_s
   struct wdog_s                  wdog;
   struct pm_wakelock_s           wakelock;
 #endif
+  volatile bool                  shutdown;
+  struct notifier_block          nb;
 
   /* Used for flow control */
 
@@ -312,12 +317,16 @@ static void rpmsg_port_spi_exchange(FAR struct rpmsg_port_spi_s *rpspi)
       return;
     }
 
+  txhdr = rpspi->cmdhdr;
   if (rpspi->state == RPMSG_PORT_SPI_STATE_UNCONNECTED)
     {
-      txhdr = rpspi->cmdhdr;
       txhdr->cmd = RPMSG_PORT_SPI_CMD_CONNECT;
       strlcpy((FAR char *)(txhdr + 1), rpspi->port.rpmsg.cpuname,
               RPMSG_NAME_SIZE);
+    }
+  else if (rpspi->shutdown)
+    {
+      txhdr->cmd = RPMSG_PORT_SPI_CMD_SHUTDOWN;
     }
   else if (rpspi->txavail > 0 &&
            rpmsg_port_queue_nused(&rpspi->port.txq) > 0)
@@ -330,7 +339,6 @@ static void rpmsg_port_spi_exchange(FAR struct rpmsg_port_spi_s *rpspi)
     }
   else
     {
-      txhdr = rpspi->cmdhdr;
       txhdr->cmd = RPMSG_PORT_SPI_CMD_AVAIL;
     }
 
@@ -366,6 +374,10 @@ static void rpmsg_port_spi_complete_handler(FAR void *arg)
     {
       rpmsg_port_queue_return_buffer(&rpspi->port.txq, rpspi->txhdr);
       rpspi->txhdr = NULL;
+    }
+  else if (rpspi->cmdhdr->cmd == RPMSG_PORT_SPI_CMD_SHUTDOWN)
+    {
+      rpspi->shutdown = false;
     }
 
   if (rpspi->rxhdr->crc != 0)
@@ -711,6 +723,41 @@ rpmsg_port_spi_init_hardware(FAR struct rpmsg_port_spi_s *rpspi,
 }
 
 /****************************************************************************
+ * Name: rpmsg_port_spi_reboot_handler
+ ****************************************************************************/
+
+static int
+rpmsg_port_spi_reboot_handler(FAR struct notifier_block *nb,
+                              unsigned long action, FAR void *data)
+{
+  FAR struct rpmsg_port_spi_s *rpspi =
+    container_of(nb, struct rpmsg_port_spi_s, nb);
+  int timeout = RPMSG_PORT_SPI_CMD_TIMEOUT / 10;
+
+  if ((action == SYS_POWER_OFF || action == SYS_RESTART) &&
+      rpspi->state == RPMSG_PORT_SPI_STATE_CONNECTED)
+    {
+      rpspi->shutdown = true;
+      IOEXP_WRITEPIN(rpspi->ioe, rpspi->mreq, 1);
+
+      /* Wait until shutdown cmd has been sent done. */
+
+      while (timeout >= 0 && rpspi->shutdown)
+        {
+          usleep(10000);
+          timeout--;
+        }
+
+      if (timeout < 0)
+        {
+          rpmsgerr("send cmd shutdown cmd timedout\n");
+        }
+    }
+
+  return 0;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -791,6 +838,9 @@ rpmsg_port_spi_initialize(FAR const struct rpmsg_port_config_s *cfg,
   pm_wakelock_init(&rpspi->wakelock, cfg->remotecpu,
                    PM_IDLE_DOMAIN, PM_NORMAL);
 #endif
+
+  rpspi->nb.notifier_call = rpmsg_port_spi_reboot_handler;
+  register_reboot_notifier(&rpspi->nb);
 
   return 0;
 
