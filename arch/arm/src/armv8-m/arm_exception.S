@@ -144,7 +144,7 @@ exception_common:
 	mrsne		r0, psplim
 	msrne		psplim, r3
 
-	stmdb		r1!, {r0}
+	stmdb		r1!, {r0, r3}
 #endif
 
 	mrs		r3, basepri				/* R3=Current BASEPRI setting */
@@ -209,7 +209,6 @@ exception_common:
 	beq		3f					/* Branch if context already on the handle mode */
 #ifdef CONFIG_ENABLE_ALL_SIGNALS
 	sub		r2, r1, #XCPTCONTEXT_SIZE		/* Reserve signal context */
-	bic		r2, r2, #7				/* Get the stack pointer with 8-byte alignment */
 	mov		sp, r2					/* Instantiate the aligned stack */
 #endif
 3:
@@ -237,6 +236,7 @@ exception_common:
 
 #ifdef CONFIG_ARMV8M_STACKCHECK_HARDWARE
 	ldmia		r0!, {r1}		/* Get psplim/msplim */
+	add		r0, r0, #4
 #endif
 
 	/* The EXC_RETURN value tells us whether we are returning on the MSP or PSP
