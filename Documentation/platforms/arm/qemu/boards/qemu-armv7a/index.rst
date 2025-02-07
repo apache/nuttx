@@ -60,6 +60,111 @@ This is a configuration of testing the BUILD_KERNEL configuration::
   Hello, World!!
   nsh>
 
+Inter-VM share memory Device (ivshmem)
+--------------------------------------
+
+Inter-VM shared memory support support can be found in ``drivers/pci/pci_ivshmem.c``.
+
+This implementation is for ``ivshmem-v1`` which is compatible with QEMU and
+ACRN hypervisor but won't work with Jailhouse hypervisor which uses ``ivshmem-v2``.
+
+Please refer to the official `Qemu ivshmem documentation
+<https://www.qemu.org/docs/master/system/devices/ivshmem.html>`_ for more information.
+
+This is an example implementation for OpenAMP based on the Inter-VM share memory(ivshmem)::
+
+  rpproxy_ivshmem:  Remote slave(client) proxy process.
+  rpserver_ivshmem: Remote master(host) server process.
+
+Steps for Using NuttX as IVSHMEM host and guest
+
+1. Build images
+
+  a. Build rpserver_ivshmem::
+
+      $ cmake -B server -DBOARD_CONFIG=qemu-armv7a:rpserver_ivshmem -GNinja
+      $ cmake --build server
+
+  b. Build rpproxy_ivshmem::
+
+      $ cmake -B proxy -DBOARD_CONFIG=qemu-armv7a:rpproxy_ivshmem -GNinja
+      $ cmake --build proxy
+
+2. Bringup firmware via Qemu:
+
+  The Inter-VM Shared Memory device basic syntax is::
+
+      -device ivshmem-plain,id=shmem0,memdev=shmmem-shmem0,addr=0xb \
+      -object memory-backend-file,id=shmmem-shmem0,mem-path=/dev/shm/ivshmem0,size=4194304,share=yes
+
+  a. Start rpserver_ivshmem::
+
+      $ qemu-system-arm -cpu cortex-a7 -nographic -machine virt,highmem=off \
+        -object memory-backend-file,id=shmmem-shmem0,mem-path=/dev/shm/ivshmem0,size=4194304,share=yes \
+        -device ivshmem-plain,id=shmem0,memdev=shmmem-shmem0,addr=0xb \
+        -kernel server/nuttx -nographic
+
+  b. Start rpproxy_ivshmem::
+
+      $ qemu-system-arm -cpu cortex-a7 -nographic -machine virt,highmem=off \
+        -object memory-backend-file,id=shmmem-shmem0,mem-path=/dev/shm/ivshmem0,size=4194304,share=yes \
+        -device ivshmem-plain,id=shmem0,memdev=shmmem-shmem0,addr=0xb \
+        -kernel proxy/nuttx -nographic
+
+  c. Check the RPMSG Syslog in rpserver shell:
+
+    In the current configuration, the proxy syslog will be sent to the server by default.
+    You can check whether there is proxy startup log in the server shell.
+
+    RpServer bring up::
+
+        $ qemu-system-arm -cpu cortex-a7 -nographic -machine virt,highmem=off \
+          -object memory-backend-file,id=shmmem-shmem0,mem-path=/dev/shm/ivshmem0,size=4194304,share=yes \
+          -device ivshmem-plain,id=shmem0,memdev=shmmem-shmem0,addr=0xb \
+          -kernel server/nuttx -nographic
+        [    0.000000] [ 0] [  INFO] [server] pci_register_rptun_ivshmem_driver: Register ivshmem driver, id=0, cpuname=proxy, master=0
+        ...
+        [    0.306127] [ 3] [  INFO] [server] rptun_ivshmem_probe: Start the wdog
+
+    After rpproxy bring up, check the log from rpserver::
+
+        NuttShell (NSH) NuttX-10.4.0
+        server>
+        [    0.000000] [ 0] [  INFO] [proxy] pci_register_rptun_ivshmem_driver: Register ivshmem driver, id=0, cpuname=server, master=1
+        ...
+        [    0.314039] [ 3] [  INFO] [proxy] ivshmem_probe: shmem addr=0x10400000 size=4194304 reg=0x10008000
+
+
+  d. IPC test via RPMSG socket:
+
+    Start rpmsg socket server::
+
+        server> rpsock_server stream block test
+        server: create socket SOCK_STREAM nonblock 0
+        server: bind cpu , name test ...
+        server: listen ...
+        server: try accept ...
+        server: Connection accepted -- 4
+        server: try accept ...
+
+    Switch to proxy shell and start rpmsg socket client, test start::
+
+        proxy> rpsock_client stream block test server
+        client: create socket SOCK_STREAM nonblock 0
+        client: Connecting to server,test...
+        client: Connected
+        client send data, cnt 0, total len 64, BUFHEAD process0007, msg0000, name:test
+        client recv data process0007, msg0000, name:test
+        ...
+        client recv done, total 4096000, endflags, send total 4096000
+        client: Terminating
+
+    Check the log on rpserver shell::
+
+        server recv data normal exit
+        server Complete ret 0, errno 0
+
+
 Debugging with QEMU
 ===================
 
