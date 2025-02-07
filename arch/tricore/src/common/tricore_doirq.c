@@ -34,6 +34,7 @@
 #include <nuttx/addrenv.h>
 #include <nuttx/board.h>
 
+#include <arch/barriers.h>
 #include <arch/board/board.h>
 
 #include <sched/sched.h>
@@ -106,7 +107,7 @@ IFX_INTERRUPT_INTERNAL(tricore_doirq, 0, 255)
       *running_task = tcb;
 
       __mtcr(CPU_PCXI, tricore_addr2csa(tcb->xcp.regs));
-      __isync();
+      UP_ISB();
     }
 
   /* Set irq flag */
