@@ -29,6 +29,7 @@ These can be found in the `apps <https://github.com/apache/nuttx-apps>`_ reposit
    mlearing/index.rst
    netutils/index.rst
    nsh/index.rst
+   sensors/index.rst
    sdr/index.rst
    system/index.rst
    testing/index.rst
