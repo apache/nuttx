@@ -2128,6 +2128,8 @@ int gdb_process(FAR struct gdb_state_s *state, int stopreason,
 
   if (stopreason != GDB_STOPREASON_NONE)
     {
+      state->pid = _SCHED_GETTID();
+      gdb_update_regcache(state);
       gdb_send_stop(state, stopreason, stopaddr);
     }
 
