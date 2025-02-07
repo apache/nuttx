@@ -51,7 +51,7 @@ struct vlan_device_s
   struct netdev_lowerhalf_s dev;
 
   FAR struct netdev_lowerhalf_s *real;
-  uint16_t vid;
+  uint16_t tci;
 };
 
 /****************************************************************************
@@ -161,7 +161,7 @@ static int vlan_transmit(FAR struct netdev_lowerhalf_s *dev,
 
   vlan_hdr       = (FAR struct eth_8021qhdr_s *)netpkt_getdata(dev, pkt);
   vlan_hdr->tpid = HTONS(TPID_8021QVLAN);
-  vlan_hdr->tci  = HTONS(vlan->vid);
+  vlan_hdr->tci  = HTONS(vlan->tci);
 
   /* Transmit the packet on the real device */
 
@@ -266,13 +266,15 @@ static void vlan_reclaim(FAR struct netdev_lowerhalf_s *dev)
  * Input Parameters:
  *   real - The real device to which the VLAN is attached
  *   vid  - VLAN ID
+ *   prio - Default VLAN priority (PCP)
  *
  * Returned Value:
  *   OK on success; Negated errno on failure.
  *
  ****************************************************************************/
 
-int vlan_register(FAR struct netdev_lowerhalf_s *real, uint16_t vid)
+int vlan_register(FAR struct netdev_lowerhalf_s *real, uint16_t vid,
+                  uint16_t prio)
 {
   FAR struct vlan_device_s *vlan;
   char vlanifname[IFNAMSIZ + 8];
@@ -280,6 +282,12 @@ int vlan_register(FAR struct netdev_lowerhalf_s *real, uint16_t vid)
 
   if (real == NULL || real->netdev.d_lltype != NET_LL_ETHERNET)
     {
+      return -EINVAL;
+    }
+
+  if (vid >= VLAN_N_VID || prio > (VLAN_PRIO_MASK >> VLAN_PRIO_SHIFT))
+    {
+      nerr("ERROR: Invalid VID %" PRIu16 " with PCP %" PRIu16, vid, prio);
       return -EINVAL;
     }
 
@@ -293,7 +301,8 @@ int vlan_register(FAR struct netdev_lowerhalf_s *real, uint16_t vid)
 
   /* Init the VLAN device */
 
-  vlan->vid           = vid;
+  vlan->tci           = (vid & VLAN_VID_MASK) |
+                        ((prio << VLAN_PRIO_SHIFT) & VLAN_PRIO_MASK);
   vlan->real          = real;
   vlan->dev.quota_ptr = real->quota_ptr;
   vlan->dev.ops       = &g_vlan_ops;
@@ -354,7 +363,7 @@ void vlan_unregister(FAR struct netdev_lowerhalf_s *dev)
       return;
     }
 
-  netdev_lower_vlan_del(vlan->real, vlan->vid);
+  netdev_lower_vlan_del(vlan->real, vlan->tci & VLAN_VID_MASK);
   netdev_lower_unregister(dev);
   kmm_free(dev);
 }
