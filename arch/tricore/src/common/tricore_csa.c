@@ -32,6 +32,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/tls.h>
+#include <arch/barriers.h>
 #include <arch/irq.h>
 
 #include "tricore_internal.h"
@@ -54,7 +55,7 @@ uintptr_t *tricore_alloc_csa(uintptr_t pc, uintptr_t sp,
 
   /* DSYNC instruction should be executed immediately prior to the MTCR */
 
-  __dsync();
+  UP_DSB();
 
   pucsa = (uintptr_t *)tricore_csa2addr(plcsa[REG_UPCXI]);
 
@@ -62,7 +63,7 @@ uintptr_t *tricore_alloc_csa(uintptr_t pc, uintptr_t sp,
 
   /* ISYNC instruction executed immediately following MTCR */
 
-  __isync();
+  UP_ISB();
 
   memset(pucsa, 0, TC_CONTEXT_SIZE);
   memset(plcsa, 0, TC_CONTEXT_SIZE);

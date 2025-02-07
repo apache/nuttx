@@ -32,6 +32,7 @@
 #include <nuttx/debug.h>
 #include <syscall.h>
 
+#include <arch/barriers.h>
 #include <arch/irq.h>
 #include <sched/sched.h>
 #include <nuttx/sched.h>
@@ -65,7 +66,7 @@ void tricore_svcall(volatile void *trap)
 
   /* DSYNC instruction should be executed immediately prior to the MTCR */
 
-  __dsync();
+  UP_DSB();
 
   regs = tricore_csa2addr((uintptr_t)regs);
 
@@ -94,7 +95,7 @@ void tricore_svcall(volatile void *trap)
       case SYS_restore_context:
         *running_task = tcb;
         regs[REG_UPCXI] = tricore_addr2csa(tcb->xcp.regs);
-        __isync();
+        UP_ISB();
         break;
 
       default:
