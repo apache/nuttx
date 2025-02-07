@@ -1156,7 +1156,7 @@ int netdev_upper_vlan_ioctl(FAR struct netdev_lowerhalf_s *lower,
   switch (args->cmd)
     {
       case ADD_VLAN_CMD:
-        return vlan_register(lower, args->u.VID);
+        return vlan_register(lower, args->u.VID, args->vlan_qos);
 
       case DEL_VLAN_CMD:
         vlan_unregister(lower);

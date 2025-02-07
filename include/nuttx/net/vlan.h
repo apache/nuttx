@@ -103,13 +103,15 @@ extern "C"
  * Input Parameters:
  *   real - The real device to which the VLAN is attached
  *   vid  - VLAN ID
+ *   prio - Default VLAN priority (PCP)
  *
  * Returned Value:
  *   OK on success; Negated errno on failure.
  *
  ****************************************************************************/
 
-int vlan_register(FAR struct netdev_lowerhalf_s *real, uint16_t vid);
+int vlan_register(FAR struct netdev_lowerhalf_s *real, uint16_t vid,
+                  uint16_t prio);
 
 /****************************************************************************
  * Name: vlan_unregister
