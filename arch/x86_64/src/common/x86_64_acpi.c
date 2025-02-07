@@ -31,6 +31,7 @@
 #include <stdint.h>
 
 #include <arch/acpi.h>
+#include <nuttx/kmalloc.h>
 
 #include "x86_64_internal.h"
 
@@ -60,6 +61,7 @@ struct acpi_s
   struct acpi_xsdt_s *xsdt;
   struct acpi_madt_s *madt;
   struct acpi_mcfg_s *mcfg;
+  struct acpi_facp_s *facp;
 };
 
 /****************************************************************************
@@ -477,7 +479,99 @@ int acpi_init(uintptr_t rsdp)
 
   acpi_table_find(ACPI_SIG_MCFG, (struct acpi_sdt_s **)&acpi->mcfg);
 
+  /* Get FACP */
+
+  acpi_table_find(ACPI_SIG_FACP, (struct acpi_sdt_s **)&acpi->facp);
+
   return OK;
+}
+
+/****************************************************************************
+ * Name: acpi_table_get
+ *
+ * Description:
+ *   Cache acpi tables as a copy.
+ *
+ ****************************************************************************/
+
+ssize_t acpi_table_get(const char *name, void **data)
+{
+  struct acpi_sdt_s *dsdt = NULL;
+  struct acpi_s     *acpi = &g_acpi;
+  ssize_t             len = 0;
+
+  /* Copy APIC */
+
+  if (strncmp(name, ACPI_SIG_APIC, 4) == 0)
+    {
+      if (data != NULL && acpi->madt)
+        {
+          *data = kmm_zalloc(acpi->madt->sdt.length);
+          if (!*data)
+            {
+              ferr("ERROR: Failed to allocate apic table\n");
+              return -ENOMEM;
+            }
+
+          len = acpi->madt->sdt.length;
+          memcpy(*data, acpi->madt, len);
+        }
+    }
+  else if (strncmp(name, ACPI_SIG_MCFG, 4) == 0)
+    {
+      if (data != NULL && acpi->mcfg)
+        {
+          *data = kmm_zalloc(acpi->mcfg->sdt.length);
+          if (!*data)
+            {
+              ferr("ERROR: Failed to allocate mcfs table\n");
+              return -ENOMEM;
+            }
+
+          len = acpi->mcfg->sdt.length;
+          memcpy(*data, acpi->mcfg, len);
+        }
+    }
+  else if (strncmp(name, ACPI_SIG_FACP, 4) == 0)
+    {
+      if (data != NULL && acpi->facp)
+        {
+          *data = kmm_zalloc(acpi->facp->sdt.length);
+          if (!*data)
+            {
+              ferr("ERROR: Failed to allocate facp table\n");
+              return -ENOMEM;
+            }
+
+          len = acpi->facp->sdt.length;
+          memcpy(*data, acpi->facp, len);
+        }
+    }
+  else if (strncmp(name, ACPI_SIG_DSDT, 4) == 0)
+    {
+      dsdt = (struct acpi_sdt_s *)(uintptr_t)acpi->facp->dsdt;
+      if (data != NULL && dsdt)
+        {
+          acpi_map_region((uintptr_t)dsdt, sizeof(struct acpi_sdt_s));
+          acpi_map_region((uintptr_t)dsdt + sizeof(struct acpi_sdt_s),
+                          dsdt->length - sizeof(struct acpi_sdt_s));
+          *data = kmm_zalloc(dsdt->length);
+          if (!*data)
+            {
+              ferr("ERROR: Failed to allocate dsdt table\n");
+              return -ENOMEM;
+            }
+
+          len = dsdt->length;
+          memcpy(*data, dsdt, len);
+        }
+    }
+  else
+    {
+      return -ENOENT;
+    }
+
+  return len;
 }
 
 /****************************************************************************

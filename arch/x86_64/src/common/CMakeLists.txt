@@ -48,6 +48,7 @@ endif()
 
 if(CONFIG_ARCH_X86_64_ACPI)
   list(APPEND SRCS x86_64_acpi.c)
+  list(APPEND SRCS x86_64_acpi_procfs.c)
 endif()
 
 if(CONFIG_SCHED_THREAD_LOCAL)
