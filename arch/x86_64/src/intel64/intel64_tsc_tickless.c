@@ -84,8 +84,10 @@ static uint64_t g_goal_time;
 static struct timespec g_goal_time_ts;
 #endif
 
-static uint64_t g_last_stop_time;
+#ifndef CONFIG_ARCH_INTEL64_HAVE_TSC_ADJUST
 static uint64_t g_start_tsc;
+#endif
+
 static uint32_t g_timer_active;
 
 static irqstate_t g_tmr_sync_count;
@@ -94,6 +96,15 @@ static irqstate_t g_tmr_flags;
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+static inline uint64_t get_tsc_offset(void)
+{
+#ifndef CONFIG_ARCH_INTEL64_HAVE_TSC_ADJUST
+  return g_start_tsc;
+#else
+  return 0;
+#endif
+}
 
 void up_mask_tmr(void)
 {
@@ -134,7 +145,12 @@ void up_alarm_expire(void);
 
 void up_timer_initialize(void)
 {
-  g_last_stop_time = g_start_tsc = rdtscp();
+  uint64_t tsc = rdtscp();
+#ifdef CONFIG_ARCH_INTEL64_HAVE_TSC_ADJUST
+  write_msr(MSR_IA32_TSC_ADJUST, 0 - tsc);
+#else
+  g_start_tsc = tsc;
+#endif
 
 #ifndef CONFIG_SCHED_TICKLESS_ALARM
   irq_attach(TMR_IRQ, (xcpt_t)up_timer_expire, NULL);
@@ -215,7 +231,7 @@ static inline void up_tmr_sync_down(void)
 
 int up_timer_gettime(struct timespec *ts)
 {
-  uint64_t diff = (rdtscp() - g_start_tsc);
+  uint64_t diff = rdtscp() - get_tsc_offset();
   up_tick2ts(diff, ts);
   return OK;
 }
@@ -430,7 +446,7 @@ int up_alarm_start(const struct timespec *ts)
 
   up_unmask_tmr();
 
-  ticks = up_ts2tick(ts) + g_start_tsc;
+  ticks = up_ts2tick(ts) + get_tsc_offset();
 
   write_msr(MSR_IA32_TSC_DEADLINE, ticks);
 
