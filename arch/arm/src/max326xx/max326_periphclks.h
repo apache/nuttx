@@ -33,6 +33,8 @@
 #  include "max32620_30/max32620_30_periphclks.h"
 #elif defined(CONFIG_ARCH_FAMILY_MAX32660)
 #  include "max32660/max32660_periphclks.h"
+#elif defined(CONFIG_ARCH_FAMILY_MAX32690)
+#  include "max32690/max32690_periphclks.h"
 #else
 #  error "Unsupported MAX326XX family"
 #endif
