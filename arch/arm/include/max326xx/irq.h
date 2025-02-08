@@ -69,6 +69,8 @@
 #  include <arch/max326xx/max32620_30_irq.h>
 #elif defined(CONFIG_ARCH_FAMILY_MAX32660)
 #  include <arch/max326xx/max32660_irq.h>
+#elif defined(CONFIG_ARCH_FAMILY_MAX32690)
+#  include <arch/max326xx/max32690_irq.h>
 #else
 #  error "Unsupported MAX326XX family"
 #endif
