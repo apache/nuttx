@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/include/max326xx/max32660_irq.h
+ * arch/arm/include/max326xx/max32690_irq.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -133,7 +133,6 @@
 #define MAX32690_IRQ_CAN1                124   /*  CAN 1 */
 #define MAX32690_IRQ_WUT1                125   /*  Wake-up Timer 1  */
                                                /*  126 - 127 Reserved */
-                                               
 
 /* Number of external interrupts and number of true interrupt vectors */
 
@@ -143,7 +142,5 @@
 /* Total number of interrupts handled by the OS */
 
 #define NR_IRQS               (MAX326_IRQ_NVECTORS)
-
-
 
 #endif /* __ARCH_ARM_INCLUDE_MAX326XX_MAX32690_IRQ_H */
