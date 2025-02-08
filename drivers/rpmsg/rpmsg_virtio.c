@@ -403,7 +403,7 @@ static void rpmsg_virtio_dump(FAR struct rpmsg_s *rpmsg)
   FAR struct rpmsg_virtio_priv_s *priv =
     (FAR struct rpmsg_virtio_priv_s *)rpmsg;
   FAR struct rpmsg_virtio_device *rvdev = &priv->rvdev;
-  FAR struct rpmsg_device *rdev = rpmsg->rdev;
+  FAR struct rpmsg_device *rdev = &rvdev->rdev;
   FAR struct rpmsg_endpoint *ept;
   FAR struct metal_list *node;
   bool needunlock = false;
@@ -515,8 +515,8 @@ static void rpmsg_virtio_tx_notify(FAR struct virtqueue *vq)
 static int rpmsg_virtio_notify_wait(FAR struct rpmsg_device *rdev,
                                     uint32_t id)
 {
-  FAR struct rpmsg_virtio_priv_s *priv = (FAR struct rpmsg_virtio_priv_s *)
-    metal_container_of(rdev, struct rpmsg_s, rdev);
+  FAR struct rpmsg_virtio_priv_s *priv =
+    metal_container_of(rdev, struct rpmsg_virtio_priv_s, rvdev);
 
   if (!rpmsg_virtio_is_recursive(priv))
     {

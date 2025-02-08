@@ -475,8 +475,8 @@ static void rpmsg_virtio_lite_dump(FAR struct rpmsg_s *rpmsg)
 {
   FAR struct rpmsg_virtio_lite_priv_s *priv =
       (FAR struct rpmsg_virtio_lite_priv_s *)rpmsg;
+  FAR struct rpmsg_device *rdev = rpmsg_get_rdev_by_rpmsg(rpmsg);
   FAR struct rpmsg_virtio_device *rvdev = &priv->rvdev;
-  FAR struct rpmsg_device *rdev = rpmsg->rdev;
   FAR struct rpmsg_endpoint *ept;
   FAR struct metal_list *node;
   bool needlock = true;

@@ -68,7 +68,6 @@ struct rpmsg_s
   struct rpmsg_endpoint        test;
 #endif
   atomic_int                   signals;
-  struct rpmsg_device          rdev[0];
 };
 
 /**
@@ -107,6 +106,17 @@ extern "C"
 #else
 #define EXTERN extern
 #endif
+
+static inline FAR struct rpmsg_device *
+rpmsg_get_rdev_by_rpmsg(FAR struct rpmsg_s *rpmsg)
+{
+  if (!rpmsg)
+    {
+      return NULL;
+    }
+
+  return (FAR struct rpmsg_device *)(rpmsg + 1);
+}
 
 int rpmsg_wait(FAR struct rpmsg_endpoint *ept, FAR sem_t *sem);
 int rpmsg_post(FAR struct rpmsg_endpoint *ept, FAR sem_t *sem);

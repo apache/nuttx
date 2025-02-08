@@ -96,7 +96,7 @@ rpmsg_get_by_rdev(FAR struct rpmsg_device *rdev)
       return NULL;
     }
 
-  return metal_container_of(rdev, struct rpmsg_s, rdev);
+  return (FAR struct rpmsg_s *)((FAR char *)rdev - sizeof(struct rpmsg_s));
 }
 
 static int rpmsg_dev_ioctl_(FAR struct rpmsg_s *rpmsg, int cmd,
@@ -248,6 +248,7 @@ int rpmsg_register_callback(FAR void *priv,
     {
       FAR struct rpmsg_s *rpmsg =
         metal_container_of(node, struct rpmsg_s, node);
+      FAR struct rpmsg_device *rdev = rpmsg_get_rdev_by_rpmsg(rpmsg);
 
       if (!rpmsg->init)
         {
@@ -256,7 +257,7 @@ int rpmsg_register_callback(FAR void *priv,
 
       if (device_created)
         {
-          device_created(rpmsg->rdev, priv);
+          device_created(rdev, priv);
         }
 
       if (ns_bind == NULL)
@@ -273,11 +274,11 @@ again:
           FAR struct rpmsg_bind_s *bind =
             metal_container_of(bnode, struct rpmsg_bind_s, node);
 
-          if (ns_match(rpmsg->rdev, priv, bind->name, bind->dest))
+          if (ns_match(rdev, priv, bind->name, bind->dest))
             {
               metal_list_del(bnode);
               nxrmutex_unlock(&rpmsg->lock);
-              ns_bind(rpmsg->rdev, priv, bind->name, bind->dest);
+              ns_bind(rdev, priv, bind->name, bind->dest);
 
               kmm_free(bind);
               goto again;
@@ -326,10 +327,11 @@ void rpmsg_unregister_callback(FAR void *priv,
         {
           FAR struct rpmsg_s *rpmsg =
             metal_container_of(pnode, struct rpmsg_s, node);
+          FAR struct rpmsg_device *rdev = rpmsg_get_rdev_by_rpmsg(rpmsg);
 
           if (rpmsg->init)
             {
-              device_destroy(rpmsg->rdev, priv);
+              device_destroy(rdev, priv);
             }
         }
     }
@@ -403,6 +405,7 @@ void rpmsg_ns_unbind(FAR struct rpmsg_device *rdev,
 
 void rpmsg_device_created(FAR struct rpmsg_s *rpmsg)
 {
+  FAR struct rpmsg_device *rdev = rpmsg_get_rdev_by_rpmsg(rpmsg);
   FAR struct metal_list *node;
   FAR struct metal_list *tmp;
 
@@ -414,7 +417,7 @@ void rpmsg_device_created(FAR struct rpmsg_s *rpmsg)
 
       if (cb->device_created)
         {
-          cb->device_created(rpmsg->rdev, cb->priv);
+          cb->device_created(rdev, cb->priv);
         }
     }
 
@@ -422,15 +425,16 @@ void rpmsg_device_created(FAR struct rpmsg_s *rpmsg)
   up_write(&g_rpmsg_lock);
 
 #ifdef CONFIG_RPMSG_PING
-  rpmsg_ping_init(rpmsg->rdev, &rpmsg->ping);
+  rpmsg_ping_init(rdev, &rpmsg->ping);
 #endif
 #ifdef CONFIG_RPMSG_TEST
-  rpmsg_test_init(rpmsg->rdev, &rpmsg->test);
+  rpmsg_test_init(rdev, &rpmsg->test);
 #endif
 }
 
 void rpmsg_device_destory(FAR struct rpmsg_s *rpmsg)
 {
+  FAR struct rpmsg_device *rdev = rpmsg_get_rdev_by_rpmsg(rpmsg);
   FAR struct metal_list *node;
   FAR struct metal_list *tmp;
   FAR struct rpmsg_endpoint *ept;
@@ -467,7 +471,7 @@ void rpmsg_device_destory(FAR struct rpmsg_s *rpmsg)
 
       if (cb->device_destroy)
         {
-          cb->device_destroy(rpmsg->rdev, cb->priv);
+          cb->device_destroy(rdev, cb->priv);
         }
     }
 
@@ -475,8 +479,8 @@ void rpmsg_device_destory(FAR struct rpmsg_s *rpmsg)
 
   /* Release all ept attached to current rpmsg device */
 
-  metal_mutex_acquire(&rpmsg->rdev->lock);
-  metal_list_for_each_safe(&rpmsg->rdev->endpoints, tmp, node)
+  metal_mutex_acquire(&rdev->lock);
+  metal_list_for_each_safe(&rdev->endpoints, tmp, node)
     {
       ept = metal_container_of(node, struct rpmsg_endpoint, node);
       if (ept->ns_unbind_cb)
@@ -489,7 +493,7 @@ void rpmsg_device_destory(FAR struct rpmsg_s *rpmsg)
         }
     }
 
-  metal_mutex_release(&rpmsg->rdev->lock);
+  metal_mutex_release(&rdev->lock);
 }
 
 int rpmsg_register(FAR const char *path, FAR struct rpmsg_s *rpmsg,
@@ -583,7 +587,7 @@ void rpmsg_dump_all(void)
 void rpmsg_modify_signals(FAR struct rpmsg_s *rpmsg,
                           int setflags, int clrflags)
 {
-  FAR struct rpmsg_device *rdev = rpmsg->rdev;
+  FAR struct rpmsg_device *rdev = rpmsg_get_rdev_by_rpmsg(rpmsg);
   FAR struct rpmsg_endpoint *ept;
   FAR struct metal_list *node;
   bool needlock;
