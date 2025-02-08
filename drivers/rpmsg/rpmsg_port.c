@@ -594,8 +594,9 @@ int rpmsg_port_initialize(FAR struct rpmsg_port_s *port,
 void rpmsg_port_uninitialize(FAR struct rpmsg_port_s *port)
 {
   FAR struct rpmsg_s *rpmsg = &port->rpmsg;
+  FAR struct rpmsg_device *rdev = rpmsg_get_rdev_by_rpmsg(rpmsg);
 
-  metal_mutex_deinit(&rpmsg->rdev->lock);
+  metal_mutex_deinit(&rdev->lock);
   rpmsg_port_destroy_queues(port);
 }
 
@@ -789,7 +790,7 @@ static void rpmsg_port_dump_buffer(FAR struct rpmsg_device *rdev,
 static void rpmsg_port_dump(FAR struct rpmsg_s *rpmsg)
 {
   FAR struct rpmsg_port_s *port = (FAR struct rpmsg_port_s *)rpmsg;
-  FAR struct rpmsg_device *rdev = rpmsg->rdev;
+  FAR struct rpmsg_device *rdev = rpmsg_get_rdev_by_rpmsg(rpmsg);
   FAR struct rpmsg_endpoint *ept;
   FAR struct metal_list *node;
   bool needunlock = false;
