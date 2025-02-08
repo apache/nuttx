@@ -72,7 +72,6 @@ struct arm64_oneshot_lowerhalf_s
   void *arg;                          /* Argument that is passed to the handler */
   uint64_t cycle_per_tick;            /* cycle per tick */
   oneshot_callback_t callback;        /* Internal handler that receives callback */
-  bool init[CONFIG_SMP_NCPUS];        /* True: timer is init */
 
   /* which cpu timer is running, -1 indicate timer stoppd */
 
@@ -274,18 +273,6 @@ static int arm64_tick_start(struct oneshot_lowerhalf_s *lower,
   priv->callback = callback;
   priv->arg = arg;
 
-  if (!priv->init[this_cpu()])
-    {
-      /* Enable int */
-
-      up_enable_irq(ARM_ARCH_TIMER_IRQ);
-
-      /* Start timer */
-
-      arm64_arch_timer_enable(true);
-      priv->init[this_cpu()] = true;
-    }
-
   priv->running = this_cpu();
 
   next_cycle =
@@ -388,7 +375,31 @@ struct oneshot_lowerhalf_s *arm64_oneshot_initialize(void)
   irq_attach(ARM_ARCH_TIMER_IRQ,
              arm64_arch_timer_compare_isr, priv);
 
+  arm64_oneshot_secondary_init();
+
   tmrinfo("oneshot_initialize ok %p \n", &priv->lh);
 
   return &priv->lh;
+}
+
+/****************************************************************************
+ * Name: arm64_arch_timer_secondary_init
+ *
+ * Description:
+ *   Initialize the ARM generic timer for secondary CPUs.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void arm64_oneshot_secondary_init(void)
+{
+  /* Enable int */
+
+  up_enable_irq(ARM_ARCH_TIMER_IRQ);
+
+  /* Start timer */
+
+  arm64_arch_timer_enable(true);
 }

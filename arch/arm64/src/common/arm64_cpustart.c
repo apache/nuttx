@@ -235,5 +235,7 @@ void arm64_boot_secondary_c_routine(void)
 
   arm64_gic_secondary_init();
 
+  arm64_timer_secondary_init();
+
   arm64_smp_init_top();
 }
