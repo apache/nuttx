@@ -127,6 +127,13 @@ static int virtio_9p_create(FAR struct v9fs_transport_s **transport,
   priv->transport.ops = &g_virtio_9p_transport_ops;
   *transport = &priv->transport;
   ret = virtio_register_driver(&priv->vdrv);
+  if (priv->vdev == NULL)
+    {
+      /* No corresponding driver was found, we should return an error */
+
+      ret = -ENODEV;
+    }
+
   if (ret < 0)
     {
       fs_heap_free(priv);
