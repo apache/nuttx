@@ -42,6 +42,10 @@ static void core_main(void)
   tricore_fpuinit();
 #endif
 
+#ifdef CONFIG_ARCH_USE_MPU
+  tricore_mpuinit();
+#endif
+
   /* !!WATCHDOG0 AND SAFETY WATCHDOG ARE DISABLED HERE!!
    * Enable the watchdogs and service them periodically if it is required
    */
