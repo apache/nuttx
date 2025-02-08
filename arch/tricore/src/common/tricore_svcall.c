@@ -146,7 +146,8 @@ void tricore_svcall(volatile void *trap)
           /* Return unprivileged mode */
 
           puregs[REG_PSW] =
-            (puregs[REG_PSW] & ~PSW_MODE_MASK) | PSW_IO_USER0;
+            (puregs[REG_PSW] & (~PSW_MODE_MASK) & (~PSW_PRS_MASK)) |
+            (PSW_IO_USER0 | PSW_PRS_USER);
         }
         break;
 #endif
@@ -188,7 +189,8 @@ void tricore_svcall(volatile void *trap)
           /* Return unprivileged mode */
 
           puregs[REG_PSW] =
-            (puregs[REG_PSW] & ~PSW_MODE_MASK) | PSW_IO_USER0;
+            (puregs[REG_PSW] & (~PSW_MODE_MASK) & (~PSW_PRS_MASK)) |
+            (PSW_IO_USER0 | PSW_PRS_USER);
         }
         break;
 #endif
@@ -235,7 +237,8 @@ void tricore_svcall(volatile void *trap)
           /* Return unprivileged mode */
 
           puregs[REG_PSW] =
-            (puregs[REG_PSW] & ~PSW_MODE_MASK) | PSW_IO_USER0;
+            (puregs[REG_PSW] & (~PSW_MODE_MASK) & (~PSW_PRS_MASK)) |
+            (PSW_IO_USER0 | PSW_PRS_USER);
         }
         break;
 #endif
@@ -260,7 +263,8 @@ void tricore_svcall(volatile void *trap)
           /* Return privileged mode */
 
           puregs[REG_PSW] =
-            (puregs[REG_PSW] & ~PSW_MODE_MASK) | PSW_IO_SUPERVISOR;
+            (puregs[REG_PSW] & (~PSW_MODE_MASK) & (~PSW_PRS_MASK)) |
+            (PSW_IO_SUPERVISOR);
         }
         break;
 #endif

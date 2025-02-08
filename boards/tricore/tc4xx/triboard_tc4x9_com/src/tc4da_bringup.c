@@ -31,11 +31,19 @@
 
 #include <nuttx/fs/fs.h>
 
+#include "tricore_internal.h"
 #include "tc4da.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+#ifdef CONFIG_ARCH_USE_MPU
+void tricore_mpuinit(void)
+{
+  /* TODO: Initialize the MPU. */
+}
+#endif
 
 /****************************************************************************
  * Name: tc4da_bringup
