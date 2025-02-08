@@ -79,15 +79,19 @@ int group_setuptaskfiles(FAR struct task_tcb_s *tcb,
 #ifndef CONFIG_FDCLONE_DISABLE
   DEBUGASSERT(rtcb->group);
 
-  /* Duplicate the parent task's file descriptors */
+  /* With the exception of kernel threads, duplicate the parent task's
+   * file descriptors.
+   */
 
-  if (group != rtcb->group)
+  if (group != rtcb->group &&
+      (tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
     {
       ret = fdlist_copy(&rtcb->group->tg_fdlist,
                         &group->tg_fdlist, actions, cloexec);
     }
 
-  if (ret >= 0 && actions != NULL)
+  if (ret >= 0 && actions != NULL &&
+      (tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
     {
       ret = spawn_file_actions(&tcb->cmn, actions);
     }
