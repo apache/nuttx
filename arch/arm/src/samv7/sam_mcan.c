@@ -108,6 +108,8 @@
 #  ifndef CONFIG_ARMV7M_DCACHE_WRITETHROUGH
 #    warning !!! This driver will not work without CONFIG_ARMV7M_DCACHE_WRITETHROUGH=y!!!
 #  endif
+#else
+#  define MCAN_ALIGN_UP(n)  (n)
 #endif
 
 /* General Configuration ****************************************************/
@@ -989,14 +991,30 @@ static const struct can_ops_s g_mcanops =
 
 #ifdef CONFIG_SAMV7_MCAN0
 
-/* MCAN0 message RAM allocation */
+/* MCAN0 message RAM allocation. The RAM is initalized to zeroes to ensure
+ * valid parity/ECC checksums. This should avoid possible BEC or BEU
+ * interrupts according to MCAN manual.
+ *
+ * The message RAM is also located in .mcan section that should be placed
+ * at the begining of .data section in linker script. The CAN controller
+ * seems to incorrectly handle lower 16 bits address overflow. For example
+ * message RAM starting at 0x2040fc20 would not work for buffers that
+ * go beyond 0x20410000. The same issue would occur even if TX buffers
+ * would start directly at 0x20410000. The upper 16 bits would still have
+ * 0x2040 value because of RX buffers located in 0x2040ffff range. The
+ * section ensures the RAM starts at the begining of the data section and
+ * thus overflow should not occur.
+ */
 
 static uint32_t g_mcan0_msgram[MCAN0_MSGRAM_WORDS]
+  locate_data(".mcan")
 #ifdef CONFIG_ARCH_DCACHE
-  __attribute__((aligned(MCAN_ALIGN)));
-#else
-  ;
+  __attribute__((aligned(MCAN_ALIGN)))
 #endif
+  =
+    {
+      0
+    };
 
 /* Constant configuration */
 
@@ -1088,14 +1106,30 @@ static struct can_dev_s g_mcan0dev =
 
 #ifdef CONFIG_SAMV7_MCAN1
 
-/* MCAN1 message RAM allocation */
+/* MCAN1 message RAM allocation. The RAM is initalized to zeroes to ensure
+ * valid parity/ECC checksums. This should avoid possible BEC or BEU
+ * interrupts according to MCAN manual.
+ *
+ * The message RAM is also located in .mcan section that should be placed
+ * at the begining of .data section in linker script. The CAN controller
+ * seems to incorrectly handle lower 16 bits address overflow. For example
+ * message RAM starting at 0x2040fc20 would not work for buffers that
+ * go beyond 0x20410000. The same issue would occur even if TX buffers
+ * would start directly at 0x20410000. The upper 16 bits would still have
+ * 0x2040 value because of RX buffers located in 0x2040ffff range. The
+ * section ensures the RAM starts at the begining of the data section and
+ * thus overflow should not occur.
+ */
 
 static uint32_t g_mcan1_msgram[MCAN1_MSGRAM_WORDS]
+  locate_data(".mcan")
 #ifdef CONFIG_ARCH_DCACHE
-  __attribute__((aligned(MCAN_ALIGN)));
-#else
-  ;
+  __attribute__((aligned(MCAN_ALIGN)))
 #endif
+  =
+    {
+      0
+    };
 
 /* MCAN1 constant configuration */
 
@@ -3519,6 +3553,7 @@ static void mcan_receive(struct can_dev_s *dev, uint32_t *rxbuffer,
 
   nbytes = (nwords << 2);
   up_invalidate_dcache((uintptr_t)rxbuffer, (uintptr_t)rxbuffer + nbytes);
+  UNUSED(nbytes);
 
   /* Format the CAN header */
 
