@@ -29,7 +29,12 @@ include armv7-m/Make.defs
 CHIP_CSRCS  = max326_start.c max326_irq.c max326_clrpend.c
 
 ifeq ($(CONFIG_MAX326XX_ICC),y)
-CHIP_CSRCS += max326_icc.c
+ifeq ($(CONFIG_ARCH_FAMILY_MAX32660),y)
+	CHIP_CSRCS += max32660_icc.c
+endif
+ifeq ($(CONFIG_ARCH_FAMILY_MAX32690),y)
+	CHIP_CSRCS += max32690_icc.c
+endif
 endif
 
 ifeq ($(CONFIG_RTC_DRIVER),y)
