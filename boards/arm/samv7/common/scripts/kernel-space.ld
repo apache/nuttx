@@ -74,6 +74,7 @@ SECTIONS
 
     .data : {
         _sdata = ABSOLUTE(.);
+        *(.mcan)
         *(.data .data.*)
         *(.gnu.linkonce.d.*)
         CONSTRUCTORS
