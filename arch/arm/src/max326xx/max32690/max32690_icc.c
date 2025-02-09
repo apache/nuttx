@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/max326xx/common/max326_icc.c
+ * arch/arm/src/max326xx/max32690/max32690_icc.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -43,7 +43,9 @@
  * Name: max326_icc_enable
  *
  * Description:
- *   Enable/disable the instruction cache
+ *   Enables or disables the instruction cache.
+ *   The MAX32690 actually has two cache controllers.
+ *   Support for the RISC-V core will be added later.
  *
  ****************************************************************************/
 
@@ -55,14 +57,16 @@ void max326_icc_enable(bool enable)
     {
       /* Enable ICC peripheral clocking */
 
-      max326_icc_enableclk();
+      max326_syscache_enableclk();
+
+      putreg32(1, MAX326_ICC0_INVDTALL);
 
       /* Enable the cache and wait for it to become ready */
 
+      putreg32(ICC_CTRLSTAT_ENABLE, MAX326_ICC0_CTRLSTAT);
       do
         {
-          putreg32(ICC_CTRLSTAT_ENABLE, MAX326_ICC_CTRLSTAT);
-          regval = getreg32(MAX326_ICC_CTRLSTAT);
+          regval = getreg32(MAX326_ICC0_CTRLSTAT);
         }
       while ((regval & ICC_CTRLSTAT_READY) == 0);
     }
@@ -70,11 +74,11 @@ void max326_icc_enable(bool enable)
     {
       /* Disable the cache */
 
-      putreg32(0, MAX326_ICC_CTRLSTAT);
+      putreg32(0, MAX326_ICC0_CTRLSTAT);
 
       /* Disable clocking to the ICC peripheral */
 
-      max326_icc_disableclk();
+      max326_syscache_disableclk();
     }
 }
 
@@ -90,11 +94,11 @@ void max326_icc_invalidate(void)
 {
   /* Any write to the INVDTALL register will invalidate the entire cache. */
 
-  putreg32(1, MAX326_ICC_INVDTALL);
+  putreg32(1, MAX326_ICC0_INVDTALL);
 
   /* Wait for the cache to become ready again */
 
-  while ((getreg32(MAX326_ICC_CTRLSTAT) & ICC_CTRLSTAT_READY) == 0)
+  while ((getreg32(MAX326_ICC0_CTRLSTAT) & ICC_CTRLSTAT_READY) == 0)
     {
     }
 }
