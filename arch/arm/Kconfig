@@ -1437,6 +1437,12 @@ config DEBUG_SECUREFAULT
 		output is sometimes helpful when debugging difficult usage fault problems,
 		but may be more than you typically want to see.
 
+config ARM_SEMIHOSTING_POWEROFF
+	bool "Semihosting POWEROFF support"
+	default n
+	---help---
+		Enable use of semihosting function to poweroff target.
+
 config ARM_SEMIHOSTING_SYSLOG
 	bool "Semihosting SYSLOG support"
 	select SYSLOG_REGISTER

@@ -128,6 +128,16 @@ class MemPoolBlock:
             )
         return self._backtrace
 
+    @property
+    def prevnode(self) -> MemPoolBlock:
+        addr = self.address - self.nodesize
+        return MemPoolBlock(addr, self.blocksize, self.overhead)
+
+    @property
+    def nextnode(self) -> MemPoolBlock:
+        addr = self.address + self.nodesize
+        return MemPoolBlock(addr, self.blocksize, self.overhead)
+
     def read_memory(self) -> memoryview:
         return gdb.selected_inferior().read_memory(self.address, self.blocksize)
 
@@ -469,6 +479,7 @@ class MMNode(gdb.Value, p.MMFreeNode):
     @property
     def nextnode(self) -> MMNode:
         if not self.nodesize:
+            gdb.write(f"\n\x1b[31;1m Node corrupted: {self} \x1b[m\n")
             return None
 
         addr = int(self.address) + self.nodesize

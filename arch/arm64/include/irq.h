@@ -154,10 +154,11 @@
 #define REG_SP_EL0          (34)
 #define REG_EXE_DEPTH       (35)
 #define REG_SCTLR_EL1       (36)
+#define REG_RESERVED        (37)
 
 /* In Armv8-A Architecture, the stack must align with 16 byte */
 
-#define ARM64_CONTEXT_REGS  (37)
+#define ARM64_CONTEXT_REGS  (38)
 #define ARM64_CONTEXT_SIZE  (8 * ARM64_CONTEXT_REGS)
 
 #ifdef CONFIG_ARCH_FPU
@@ -226,6 +227,10 @@
 
 #define XCPTCONTEXT_REGS    (ARM64_CONTEXT_REGS + FPU_CONTEXT_REGS)
 #define XCPTCONTEXT_SIZE    (8 * XCPTCONTEXT_REGS)
+
+#if XCPTCONTEXT_SIZE % 16 != 0
+#  error "ARM64_CONTEXT_REGS and FPU_CONTEXT_REGS must be an even number to ensure the stack is aligned to 16 bytes"
+#endif
 
 /* Friendly register names */
 

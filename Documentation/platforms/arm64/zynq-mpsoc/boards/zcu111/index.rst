@@ -60,6 +60,37 @@ LEDs and Buttons
 The PS-side pushbutton SW19 is connected to MIO22 (pin U1.Y28). The PS-side LED DS50,
 which is physically placed adjacent to the pushbutton, is connected to MIO23(pin U1.U29).
 
+Networking
+==========
+
+The ZCU111 board uses the TI DP83867IRPAP Ethernet RGMII PHY for Ethernet communications
+at 10 Mb/s, 100 Mb/s, or 1000 Mb/s. The board supports RGMII mode only. The PHY connection
+to a user-provided Ethernet cable is through a RJ-45 connector with built-in magnetics.
+The Ethernet connections from XCZU28DR to the DP83867 PHY device at are listed in fllowing:
+
+=== ================== === =============
+Pin XCZU28DR Name      Pin DP83867 Name
+=== ================== === =============
+J32 MIO65_ENET_TX_D0   38  TX_DO
+J34 MIO66_ENET_TX_D1   37  TX_D1
+K28 MIO67_ENET_TX_D2   36  TX_D2
+K29 MIO68_ENET_TX_D3   35  TX_D3
+K30 MIO69_ENET_TX_CTRL 52  TX_EN_TX_CTRL
+K31 MIO70_ENET_RX_CLK  43  RX_CLK
+K32 MIO71_ENET_RX_D0   44  RX_DO
+K33 MIO72_ENET_RX_D1   45  RX_D1
+K34 MIO73_ENET_RX_D2   46  RX_D2
+L29 MIO74_ENET_RX_D3   47  RX_D3
+L30 MIO75_ENET_RX_CTRL 53  RX_DV_RX_CTRL
+L33 MIO76_ENET_MDC     20  MDC
+L34 MIO77_ENET_MDIO    21  MDIO
+=== ================== === =============
+
+Networking is supported via GEM3. DHCP is not used in this configuration; rather, a hard-coded
+IP address of 192.168.0.15 is used with a netmask of 255.255.255.0. The host is assumed to
+be 192.168.0.101 in places. You can reconfigure to enabled DHCPC or to change these addresses
+as you see fit.
+
 Configurations
 ==============
 
@@ -82,6 +113,18 @@ Basic NuttShell configuration for Flash boot mode. We need create boot image wit
 zynqmp_fsbl.elf, zynqmp_pmufw.elf, bl31.elf and nuttx.elf in Vivado SDK or XSCT
 shell. Also we need copy BOOT.BIN into SD Card(in SD card boot mode) or Flash it
 into the QSPI FLASH(in QSPI boot mode).
+
+netjtag
+-------
+
+This is a network enabled configuration based on the NuttShell (NSH) for JTAG boot mode
+
+netnsh
+------
+
+This is a network enabled configuration based on the NuttShell (NSH). We need create boot
+image with zynqmp_fsbl.elf, zynqmp_pmufw.elf, bl31.elf and nuttx.elf in Vivado SDK or XSCT
+shell. Also we need Flash BOOT.BIN intothe QSPI FLASH(in QSPI boot mode).
 
 ARM64 Toolchain
 ===============

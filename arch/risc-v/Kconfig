@@ -212,6 +212,7 @@ config ARCH_CHIP_MPFS
 	select ARCH_HAVE_SPI_CS_CONTROL
 	select ARCH_HAVE_PWM_MULTICHAN
 	select ARCH_HAVE_S_MODE
+	select ARCH_RV_CPUID_MAP
 	select ONESHOT
 	select ALARM_ARCH
 	---help---

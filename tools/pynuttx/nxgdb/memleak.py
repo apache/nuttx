@@ -114,7 +114,9 @@ class MMLeak(gdb.Command):
         sorted_addr = set()
         t = time.time()
         print("Gather memory nodes...", flush=True, end="")
-        for node in memdump.dump_nodes(heaps, {"no_pid": mm.PID_MM_MEMPOOL}):
+        for node in memdump.dump_nodes(
+            heaps, {"no_pid": mm.PID_MM_MEMPOOL, "used": True}
+        ):
             nodes_dict[node.address] = node
             sorted_addr.add(node.address)
 
@@ -129,19 +131,34 @@ class MMLeak(gdb.Command):
 
         longsize = utils.get_long_type().sizeof
 
+        checked_ptr = {}
+
         def pointers(node: memdump.MMNodeDump) -> Generator[int, None, None]:
             # Return all possible pointers stored in this node
             size = node.nodesize - node.overhead
             memory = node.read_memory()
+            prev_mem = None
             while size > 0:
                 size -= longsize
-                ptr = int.from_bytes(memory[size : size + longsize], "little")
+                mem = memory[size : size + longsize]
+                if mem == prev_mem:
+                    continue
+
+                prev_mem = mem
+                ptr = int.from_bytes(mem, "little")
+                if ptr in checked_ptr:
+                    continue
+
+                checked_ptr[ptr] = True
+
                 if any(region["start"] <= ptr < region["end"] for region in regions):
                     yield ptr
 
         print("Leak analyzing...", flush=True, end="")
         t = time.time()
         for good in good_nodes:
+            if not sorted_addr:  # All nodes are checked
+                break
             for ptr in pointers(good):
                 if not (idx := bisect.bisect_right(sorted_addr, ptr)):
                     continue

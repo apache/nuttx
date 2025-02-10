@@ -70,3 +70,22 @@ nsh
 
 Basic configuration to run the NuttShell (nsh).
 
+hwtest
+---
+
+Configuration to run the NuttShell (nsh) and enabling the peripherals.
+
+The following peripherals are configured:
+- I2C0 & I2C1
+- Ethernet on MAC 1, configured to 1Gbit speed
+- USB (high speed) + CDCACM
+- SDCard
+- SPI0 & SPI1
+- UART0-4
+- CorePWM (nb. needs the FPGA IP installed to work)
+- CoreSPI (nb. needs the FPGA IP installed to work)
+
+The following applications are available:
+- TelnetD (at address 10.0.0.2)
+- tcpblaster & udpblaster
+- ostest

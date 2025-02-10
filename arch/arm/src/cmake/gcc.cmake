@@ -240,6 +240,13 @@ if(CONFIG_DEBUG_SYMBOLS)
   add_compile_options(${CONFIG_DEBUG_SYMBOLS_LEVEL})
 endif()
 
+set(PICFLAGS -fpic -fPIE -mno-pic-data-is-text-relative -msingle-pic-base)
+
+if(CONFIG_BUILD_PIC)
+  add_compile_options(${PICFLAGS} -mpic-register=r9)
+  add_link_options(-Wl,--emit-relocs)
+endif()
+
 add_compile_options(
   -Wno-attributes -Wno-unknown-pragmas
   $<$<COMPILE_LANGUAGE:C>:-Wstrict-prototypes>
