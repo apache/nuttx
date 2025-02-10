@@ -75,7 +75,7 @@
 /* Gives TTOA in microseconds, ~4.8% bias, +1 rounds up */
 
 #define I2C_TTOA_US(n, f)           ((((n) << 20) / (f)) + 1)
-#define I2C_TTOA_MARGIN             20
+#define I2C_TTOA_MARGIN             1000u
 
 /****************************************************************************
  * Private Types
