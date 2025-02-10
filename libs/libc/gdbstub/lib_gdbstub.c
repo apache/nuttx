@@ -784,6 +784,39 @@ static ssize_t gdb_hex2bin(FAR void *buf, size_t buf_len,
 }
 
 /****************************************************************************
+ * Name: gdb_memcpy
+ *
+ * Description:
+ *   Copy data from src to dest.
+ *
+ * Input Parameters:
+ *   dest - The destination buffer.
+ *   src  - The source buffer.
+ *   len  - The length of the data to copy.
+ *
+ * Returned Value:
+ *   The destination buffer.
+ *
+ ****************************************************************************/
+
+static FAR void *gdb_memcpy(FAR void *dest, FAR const void *src, size_t len)
+{
+#ifdef CONFIG_MM_KASAN
+  FAR char *d = dest;
+  FAR const char *s = src;
+
+  while (len--)
+    {
+      *d++ = *s++;
+    }
+
+  return dest;
+#else
+  return memcpy(dest, src, len);
+#endif
+}
+
+/****************************************************************************
  * Name: gdb_count_repeat
  *
  * Description:
@@ -882,7 +915,7 @@ static ssize_t gdb_get_memory(FAR struct gdb_state_s *state,
       else
         {
           ret = MIN(len, buf_len);
-          memcpy(buf, (FAR const void *)addr, ret);
+          gdb_memcpy(buf, (FAR const void *)addr, ret);
         }
     }
 
@@ -925,7 +958,7 @@ static ssize_t gdb_put_memory(FAR struct gdb_state_s *state,
       else
         {
           ret = MIN(len, buf_len);
-          memcpy((FAR void *)addr, buf, ret);
+          gdb_memcpy((FAR void *)addr, buf, ret);
         }
     }
 
@@ -1049,7 +1082,7 @@ static void gdb_update_regcache(FAR struct gdb_state_s *state)
   reg = (FAR uint8_t *)tcb->xcp.regs;
   if (state->pid == _SCHED_GETTID())
     {
-      if (up_interrupt_context())
+      if (up_interrupt_context() && running_regs())
         {
           reg = (FAR uint8_t *)running_regs();
         }

@@ -22,4 +22,10 @@
 
 if(CONFIG_LIB_GDBSTUB)
   target_sources(c PRIVATE lib_gdbstub.c)
+
+  if(CONFIG_MM_KASAN)
+    set_source_files_properties(
+      lib_gdbstub.c DIRECTORY .. PROPERTIES COMPILE_FLAGS
+                                            -fno-sanitize=kernel-address)
+  endif()
 endif()
