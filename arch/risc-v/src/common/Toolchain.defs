@@ -433,7 +433,7 @@ LDMODULEFLAGS = -r -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/modlib/gnu-elf.ld)
 CELFFLAGS = $(CFLAGS) -fvisibility=hidden
 CXXELFFLAGS = $(CXXFLAGS) -fvisibility=hidden
 
-LDELFFLAGS = -e main
+LDELFFLAGS = -e __start
 
 ifeq ($(CONFIG_BINFMT_ELF_RELOCATABLE),y)
   LDELFFLAGS += -r

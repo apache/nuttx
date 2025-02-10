@@ -297,12 +297,6 @@ union entry_u
 
 typedef union entry_u entry_t;
 
-/* This is the type of the function called at task startup */
-
-#ifdef CONFIG_SCHED_STARTHOOK
-typedef CODE void (*starthook_t)(FAR void *arg);
-#endif
-
 /* struct sporadic_s ********************************************************/
 
 #ifdef CONFIG_SCHED_SPORADIC
@@ -744,13 +738,6 @@ struct task_tcb_s
   /* Task Group *************************************************************/
 
   struct task_group_s group;             /* Shared task group data          */
-
-  /* Task Management Fields *************************************************/
-
-#ifdef CONFIG_SCHED_STARTHOOK
-  starthook_t starthook;                 /* Task startup function           */
-  FAR void *starthookarg;                /* The argument passed to the hook */
-#endif
 };
 
 /* struct pthread_tcb_s *****************************************************/
@@ -1128,30 +1115,6 @@ int nxtask_delete(pid_t pid);
  ****************************************************************************/
 
 void nxtask_activate(FAR struct tcb_s *tcb);
-
-/****************************************************************************
- * Name: nxtask_starthook
- *
- * Description:
- *   Configure a start hook... a function that will be called on the thread
- *   of the new task before the new task's main entry point is called.
- *   The start hook is useful, for example, for setting up automatic
- *   configuration of C++ constructors.
- *
- * Input Parameters:
- *   tcb - The new, unstarted task task that needs the start hook
- *   starthook - The pointer to the start hook function
- *   arg - The argument to pass to the start hook function.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SCHED_STARTHOOK
-void nxtask_starthook(FAR struct task_tcb_s *tcb, starthook_t starthook,
-                      FAR void *arg);
-#endif
 
 /****************************************************************************
  * Name: nxtask_startup

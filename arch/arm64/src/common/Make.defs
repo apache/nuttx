@@ -25,12 +25,7 @@
 
 HEAD_ASRC  = arm64_head.S
 
-ifeq ($(CONFIG_BUILD_KERNEL),y)
-crt0$(OBJEXT): crt0.c
-	$(CC) $(CFLAGS) -c common$(DELIM)crt0.c -o crt0$(OBJEXT)
-
 STARTUP_OBJS = crt0$(OBJEXT)
-endif
 
 # Force the start-up logic to be at the beginning of the .text to simplify
 # debug.

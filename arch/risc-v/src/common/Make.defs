@@ -20,9 +20,7 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_BUILD_KERNEL),y)
 STARTUP_OBJS = crt0$(OBJEXT)
-endif
 
 # Specify our general Assembly files
 CMN_ASRCS += riscv_vectors.S riscv_exception_common.S

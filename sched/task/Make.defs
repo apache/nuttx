@@ -44,10 +44,6 @@ CSRCS += task_execve.c task_posixspawn.c
 endif
 endif
 
-ifeq ($(CONFIG_SCHED_STARTHOOK),y)
-CSRCS += task_starthook.c
-endif
-
 # Include task build support
 
 DEPPATH += --dep-path task
