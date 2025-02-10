@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv7-a/crt0.c
+ * arch/arm/src/common/crt0.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -33,8 +33,6 @@
 #include <nuttx/arch.h>
 
 #include <arch/syscall.h>
-
-#ifdef CONFIG_BUILD_KERNEL
 
 /****************************************************************************
  * Public Data
@@ -80,6 +78,7 @@ int main(int argc, char *argv[]);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_BUILD_KERNEL
 static void sig_trampoline(void) naked_function;
 static void sig_trampoline(void)
 {
@@ -99,6 +98,7 @@ static void sig_trampoline(void)
       "i"(SYS_syscall)
   );
 }
+#endif
 
 #ifdef CONFIG_HAVE_CXXINITIALIZE
 
@@ -135,6 +135,7 @@ static void exec_dtors(void)
 }
 
 #endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -167,7 +168,9 @@ void __start(int argc, char *argv[])
    * that is visible to the RTOS.
    */
 
+#ifdef CONFIG_BUILD_KERNEL
   ARCH_DATA_RESERVE->ar_sigtramp = (addrenv_sigtramp_t)sig_trampoline;
+#endif
 
 #ifdef CONFIG_HAVE_CXXINITIALIZE
   /* Call C++ constructors */
@@ -193,5 +196,3 @@ void __start(int argc, char *argv[])
 
   exit(ret);
 }
-
-#endif /* CONFIG_BUILD_KERNEL */

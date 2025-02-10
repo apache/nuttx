@@ -52,54 +52,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* If C++ constructors are used, then CONFIG_SCHED_STARTHOOK must also be
- * selected be the start hook is used to schedule execution of the
- * constructors.
- */
-
-#if defined(CONFIG_BINFMT_CONSTRUCTORS) && !defined(CONFIG_SCHED_STARTHOOK)
-#  error "CONFIG_SCHED_STARTHOOK must be defined to use constructors"
-#endif
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: exec_ctors
- *
- * Description:
- *   Execute C++ static constructors.  This function is registered as a
- *   start hook and runs on the thread of the newly created task before
- *   the new task's main function is called.
- *
- * Input Parameters:
- *   arg - Argument is instance of load state info structure cast to void *.
- *
- * Returned Value:
- *   0 (OK) is returned on success and a negated errno is returned on
- *   failure.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_BINFMT_CONSTRUCTORS
-static void exec_ctors(FAR void *arg)
-{
-  FAR const struct binary_s *binp = (FAR const struct binary_s *)arg;
-  binfmt_ctor_t *ctor = (CODE binfmt_ctor_t *)binp->mod.initarr;
-  int i;
-
-  /* Execute each constructor */
-
-  for (i = 0; i < binp->mod.ninit; i++)
-    {
-      binfo("Calling ctor %d at %p\n", i, ctor);
-
-      (*ctor)();
-      ctor++;
-    }
-}
-#endif
 
 /****************************************************************************
  * Name: exec_swap
@@ -353,18 +308,6 @@ int exec_module(FAR struct binary_s *binp,
     {
       berr("ERROR: addrenv_attach() failed: %d\n", ret);
       goto errout_with_tcbinit;
-    }
-#endif
-
-#ifdef CONFIG_BINFMT_CONSTRUCTORS
-  /* Setup a start hook that will execute all of the C++ static constructors
-   * on the newly created thread.  The struct binary_s must persist at least
-   * until the new task has been started.
-   */
-
-  if (binp->mod.ninit > 0)
-    {
-      nxtask_starthook(tcb, exec_ctors, binp);
     }
 #endif
 

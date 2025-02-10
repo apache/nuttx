@@ -20,6 +20,8 @@
 #
 ############################################################################
 
+STARTUP_OBJS = crt0$(OBJEXT)
+
 # Common ARM files
 
 CMN_CSRCS += arm_allocateheap.c arm_createstack.c arm_exit.c

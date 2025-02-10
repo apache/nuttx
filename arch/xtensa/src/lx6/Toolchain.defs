@@ -217,5 +217,5 @@ LDMODULEFLAGS = -r -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/modlib/gnu-elf.ld)
 CELFFLAGS = $(CFLAGS) -fvisibility=hidden -mtext-section-literals
 CXXELFFLAGS = $(CXXFLAGS) -fvisibility=hidden -mtext-section-literals
 
-LDELFFLAGS = -r -e main
+LDELFFLAGS = -r -e __start
 LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)$(DELIM)libs$(DELIM)libc$(DELIM)modlib$(DELIM)gnu-elf.ld)

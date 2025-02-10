@@ -69,9 +69,6 @@ void nxtask_start(void)
 {
   FAR struct tcb_s *tcb = this_task();
   uint8_t ttype = tcb->flags & TCB_FLAG_TTYPE_MASK;
-#ifdef CONFIG_SCHED_STARTHOOK
-  FAR struct task_tcb_s *ttcb = (FAR struct task_tcb_s *)tcb;
-#endif
   int exitcode = EXIT_FAILURE;
   FAR char **argv;
   int argc;
@@ -84,15 +81,6 @@ void nxtask_start(void)
       /* Set up default signal actions for NON-kernel thread */
 
       nxsig_default_initialize(tcb);
-    }
-#endif
-
-  /* Execute the start hook if one has been registered */
-
-#ifdef CONFIG_SCHED_STARTHOOK
-  if (ttype != TCB_FLAG_TTYPE_KERNEL && ttcb->starthook != NULL)
-    {
-      ttcb->starthook(ttcb->starthookarg);
     }
 #endif
 

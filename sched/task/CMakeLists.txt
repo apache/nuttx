@@ -60,8 +60,4 @@ if(NOT CONFIG_BINFMT_DISABLE)
   endif()
 endif()
 
-if(CONFIG_SCHED_STARTHOOK)
-  list(APPEND SRCS task_starthook.c)
-endif()
-
 target_sources(sched PRIVATE ${SRCS})
