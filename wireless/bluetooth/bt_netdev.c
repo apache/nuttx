@@ -663,6 +663,9 @@ static int btnet_ifup(FAR struct net_driver_s *netdev)
              netdev->d_mac.radio.nv_addr[4], netdev->d_mac.radio.nv_addr[5]);
 #endif
 
+      /* The interface is now up */
+
+      netdev_carrier_on(netdev);
       ret = OK;
     }
 
@@ -687,6 +690,7 @@ static int btnet_ifup(FAR struct net_driver_s *netdev)
 
 static int btnet_ifdown(FAR struct net_driver_s *netdev)
 {
+  netdev_carrier_off(netdev);
   return OK;
 }
 
