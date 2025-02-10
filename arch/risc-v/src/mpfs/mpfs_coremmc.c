@@ -125,7 +125,7 @@
 
 /* Clocks and timing */
 
-#define MPFS_FPGA_FIC0_CLK                 (50000000)
+#define MPFS_FPGA_FIC0_CLK                 (125000000)
 
 #define COREMMC_CMDTIMEOUT                 (100000)
 #define COREMMC_LONGTIMEOUT                (100000000)
@@ -1039,7 +1039,7 @@ static bool mpfs_device_reset(struct sdio_dev_s *dev)
 
   /* Store fifo size for later to check no fifo overruns occur */
 
-  fifo_size = ((getreg8(MPFS_COREMMC_VR) >> 2) & 0x3);
+  fifo_size = ((getreg8(MPFS_COREMMC_VR) >> 4) & 0x3);
   if (fifo_size == 0)
     {
       priv->fifo_depth = 512;
@@ -1120,6 +1120,11 @@ static sdio_capset_t mpfs_capabilities(struct sdio_dev_s *dev)
   if (priv->onebit)
     {
       caps |= SDIO_CAPS_1BIT_ONLY;
+    }
+
+  if (((getreg8(MPFS_COREMMC_VR) >> 2) & 3) == 0x01)
+    {
+      caps |= SDIO_CAPS_4BIT;
     }
 
   return caps;
