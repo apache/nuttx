@@ -26,6 +26,10 @@ ifeq ($(CONFIG_LIB_GDBSTUB),y)
 
 CSRCS += lib_gdbstub.c
 
+ifneq ($(CONFIG_MM_KASAN),)
+lib_gdbstub.c_CFLAGS += -fno-sanitize=kernel-address
+endif
+
 # Add the userfs directory to the build
 
 DEPPATH += --dep-path gdbstub
