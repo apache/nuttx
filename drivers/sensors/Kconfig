@@ -183,7 +183,7 @@ config SENSORS_BH1749NUC_THREAD_STACKSIZE
 	---help---
 		The stack size for the worker thread.
 
-endif #SENSORS_BH1749NUC_UORB
+endif # SENSORS_BH1749NUC_UORB
 
 endif # SENSORS_BH1749NUC
 
@@ -366,7 +366,7 @@ config SENSORS_BMI270_THREAD_STACKSIZE
 	---help---
 		The stack size for the worker thread.
 
-endif #SENSORS_BMI270_UORB
+endif # SENSORS_BMI270_UORB
 
 choice
 	prompt "BMI270 Interface"
@@ -447,7 +447,7 @@ config SENSORS_BMP180_UORB
 		Enables work with the UORB or Character Device interface.
 		If not set, the Character Device is used by default.
 
-endif #SENSORS_BMP180
+endif # SENSORS_BMP180
 
 config SENSORS_BMP280
 	bool "Bosch BMP280 Barometric Pressure Sensor"
@@ -828,7 +828,7 @@ config SENSORS_LSM9DS1_THREAD_STACKSIZE
 	---help---
 		The stack size for the worker thread.
 
-endif #SENSORS_LSM9DS1_UORB
+endif # SENSORS_LSM9DS1_UORB
 
 config SENSORS_MSA301
 	bool "MSA301 support"
@@ -1186,7 +1186,7 @@ config SENSORS_ADXL372_THREAD_STACKSIZE
 	---help---
 		The stack size for the worker thread.
 
-endif #SENSORS_ADXL372_UORB
+endif # SENSORS_ADXL372_UORB
 
 endif # SENSORS_ADXL372
 
@@ -1451,18 +1451,18 @@ config SENSORS_LIS2MDL_FREQUENCY
 	range 1 3400000
 
 config SENSORS_LIS2MDL_THREAD_STACKSIZE
-    int "LIS2MDL worker thread stack size"
+	int "LIS2MDL worker thread stack size"
 	default 1024
 	---help---
 		The stack size for the worker thread that performs measurements
 
 config SENSORS_LIS2MDL_FETCH
-    bool "Enable LIS2MDL fetch capability"
+	bool "Enable LIS2MDL fetch capability"
 	default n
 	---help---
 		Enables the `fetch` UORB function for the LIS2MDL
 
-endif
+endif # SENSORS_LIS2MDL
 
 config SENSORS_LIS3MDL
 	bool "STMicro LIS3MDL 3-Axis magnetometer support"
