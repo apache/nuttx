@@ -125,9 +125,7 @@ void up_disable_irq(int irq)
           PANIC();
         }
 
-      /* Disable the irq on all harts, we don't know on which it was
-       * enabled
-       */
+      /* Disable the irq on all harts */
 
       for (i = 0; i < CONFIG_SMP_NCPUS; i++)
         {
@@ -157,6 +155,7 @@ void up_disable_irq(int irq)
 void up_enable_irq(int irq)
 {
   int extirq;
+  int i;
 
   if (irq == RISCV_IRQ_SOFT)
     {
@@ -173,18 +172,20 @@ void up_enable_irq(int irq)
   else if (irq >= MPFS_IRQ_EXT_START)
     {
       extirq = irq - MPFS_IRQ_EXT_START;
-
-      /* Set enable bit for the irq */
-
-      uintptr_t iebase = mpfs_plic_get_iebase(up_cpu_index());
-
-      if (0 <= extirq && extirq <= NR_IRQS - MPFS_IRQ_EXT_START)
-        {
-          modifyreg32(iebase + (4 * (extirq / 32)), 0, 1 << (extirq % 32));
-        }
-      else
+      if (extirq < 0 || extirq > NR_IRQS - MPFS_IRQ_EXT_START)
         {
           PANIC();
+        }
+
+      /* Enable the irq on all harts */
+
+      for (i = 0; i < CONFIG_SMP_NCPUS; i++)
+        {
+          uintptr_t iebase = mpfs_plic_get_iebase(riscv_cpuid_to_hartid(i));
+
+          /* Set enable bit for the irq */
+
+          modifyreg32(iebase + (4 * (extirq / 32)), 0, 1 << (extirq % 32));
         }
     }
 }
