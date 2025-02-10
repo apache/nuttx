@@ -105,7 +105,7 @@ static void register_pci_host_from_fdt(const void *fdt)
 
   /* Get the reg address, 64 or 32 */
 
-  cfg.start = fdt_get_reg_base(fdt, offset);
+  cfg.start = fdt_get_reg_base(fdt, offset, 0);
   cfg.end = cfg.start + fdt_get_reg_size(fdt, offset);
 
   /* Get the ranges address */
