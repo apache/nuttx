@@ -1047,6 +1047,7 @@ error:
 static int cdcecm_setinterface(FAR struct cdcecm_driver_s *self,
                                uint16_t interface, uint16_t altsetting)
 {
+  netdev_carrier_on(&self->dev);
   uinfo("interface: %hu, altsetting: %hu\n", interface, altsetting);
   return OK;
 }
