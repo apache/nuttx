@@ -39,7 +39,7 @@
 #define FDT_PCI_TYPE_MEM32    0x02000000
 #define FDT_PCI_TYPE_MEM64    0x03000000
 #define FDT_PCI_TYPE_MASK     0x03000000
-#define FDT_PCI_PREFTCH       0x40000000
+#define FDT_PCI_PREFETCH      0x40000000
 
 /****************************************************************************
  * Public Functions
@@ -123,7 +123,7 @@ int fdt_pci_ecam_register(FAR const void *fdt)
           io.offset = fdt_ld_by_cells(ranges + na, pna) - io.start;
           io.flags = PCI_RESOURCE_IO;
         }
-      else if ((type & FDT_PCI_PREFTCH) == FDT_PCI_PREFTCH ||
+      else if ((type & FDT_PCI_PREFETCH) == FDT_PCI_PREFETCH ||
                (type & FDT_PCI_TYPE_MASK) == FDT_PCI_TYPE_MEM64)
         {
           prefetch.start = fdt_ld_by_cells(ranges + 1, na - 1);
@@ -131,7 +131,7 @@ int fdt_pci_ecam_register(FAR const void *fdt)
                          fdt_ld_by_cells(ranges + na + pna, ns);
           prefetch.offset = fdt_ld_by_cells(ranges + na, pna) -
                             prefetch.start;
-          if ((type & FDT_PCI_PREFTCH) == FDT_PCI_PREFTCH)
+          if ((type & FDT_PCI_PREFETCH) == FDT_PCI_PREFETCH)
             {
               prefetch.flags = PCI_RESOURCE_PREFETCH;
             }
