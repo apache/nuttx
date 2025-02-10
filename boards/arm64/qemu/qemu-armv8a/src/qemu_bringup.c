@@ -127,7 +127,8 @@ static void register_pci_host_from_fdt(const void *fdt)
           io.start = fdt_ld_by_cells(ranges + na, pna);
           io.end = io.start + fdt_ld_by_cells(ranges + na + pna, ns);
         }
-      else if ((type & FDT_PCI_PREFTCH) == FDT_PCI_PREFTCH)
+      else if ((type & FDT_PCI_PREFTCH) == FDT_PCI_PREFTCH ||
+               (type & FDT_PCI_TYPE_MASK) == FDT_PCI_TYPE_MEM64)
         {
           prefetch.start = fdt_ld_by_cells(ranges + na, pna);
           prefetch.end = prefetch.start +
