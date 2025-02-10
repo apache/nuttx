@@ -248,14 +248,14 @@ static void host_raw_fifocreate(struct usb_raw_fifo_s *fifo,
   fifo->read = 0;
   fifo->elem_size = elem_size;
   fifo->elem_num = elem_num;
-  fifo->elems = malloc(elem_size * elem_num);
+  fifo->elems = host_uninterruptible(malloc, elem_size * elem_num);
 }
 
 static void host_raw_fifodelete(struct usb_raw_fifo_s *fifo)
 {
   fifo->write = 0;
   fifo->read = 0;
-  free(fifo->elems);
+  host_uninterruptible_no_return(free, fifo->elems);
 }
 
 static uint8_t *host_raw_fiforead(struct usb_raw_fifo_s *fifo)
@@ -287,7 +287,7 @@ static uint8_t *host_raw_fifoalloc(struct usb_raw_fifo_s *fifo)
 
 static int host_raw_open(void)
 {
-  int fd = open("/dev/raw-gadget", O_RDWR);
+  int fd = host_uninterruptible(open, "/dev/raw-gadget", O_RDWR);
   if (fd < 0)
     {
       ERROR("open fail");
@@ -300,7 +300,7 @@ static void host_raw_close(int fd)
 {
   if (fd >= 0)
     {
-      close(fd);
+      host_uninterruptible_no_return(close, fd);
     }
 }
 
@@ -308,10 +308,14 @@ static void host_raw_init(int fd, enum usb_device_speed speed,
                           const char *driver, const char *device)
 {
   struct usb_raw_init_s arg;
-  strcpy((char *)&arg.driver_name[0], driver);
-  strcpy((char *)&arg.device_name[0], device);
+  host_uninterruptible_no_return(strcpy,
+                                 (char *)&arg.driver_name[0],
+                                 driver);
+  host_uninterruptible_no_return(strcpy,
+                                 (char *)&arg.device_name[0],
+                                 device);
   arg.speed = speed;
-  int rv = ioctl(fd, USB_RAW_IOCTL_INIT, &arg);
+  int rv = host_uninterruptible(ioctl, fd, USB_RAW_IOCTL_INIT, &arg);
   if (rv < 0)
     {
       ERROR("ioctl(USB_RAW_IOCTL_INIT) fail");
@@ -320,7 +324,7 @@ static void host_raw_init(int fd, enum usb_device_speed speed,
 
 static int host_raw_run(int fd)
 {
-  int rv = ioctl(fd, USB_RAW_IOCTL_RUN, 0);
+  int rv = host_uninterruptible(ioctl, fd, USB_RAW_IOCTL_RUN, 0);
   if (rv < 0)
     {
       ERROR("ioctl(USB_RAW_IOCTL_RUN) fail");
@@ -331,7 +335,7 @@ static int host_raw_run(int fd)
 
 static int host_raw_eventfetch(int fd, struct usb_raw_event_s *event)
 {
-  int rv = ioctl(fd, USB_RAW_IOCTL_EVENT_FETCH, event);
+  int rv = host_uninterruptible(ioctl, fd, USB_RAW_IOCTL_EVENT_FETCH, event);
   if (rv < 0)
     {
       ERROR("ioctl(USB_RAW_IOCTL_EVENT_FETCH) fail");
@@ -342,7 +346,7 @@ static int host_raw_eventfetch(int fd, struct usb_raw_event_s *event)
 
 static int host_raw_ep0read(int fd, struct usb_raw_ep_io_s *io)
 {
-  int rv = ioctl(fd, USB_RAW_IOCTL_EP0_READ, io);
+  int rv = host_uninterruptible(ioctl, fd, USB_RAW_IOCTL_EP0_READ, io);
   if (rv < 0)
     {
       ERROR("ioctl(USB_RAW_IOCTL_EP0_READ)");
@@ -353,7 +357,7 @@ static int host_raw_ep0read(int fd, struct usb_raw_ep_io_s *io)
 
 static int host_raw_ep0write(int fd, struct usb_raw_ep_io_s *io)
 {
-  int rv = ioctl(fd, USB_RAW_IOCTL_EP0_WRITE, io);
+  int rv = host_uninterruptible(ioctl, fd, USB_RAW_IOCTL_EP0_WRITE, io);
   if (rv < 0)
     {
       ERROR("ioctl(USB_RAW_IOCTL_EP0_WRITE) fail");
@@ -364,7 +368,7 @@ static int host_raw_ep0write(int fd, struct usb_raw_ep_io_s *io)
 
 static int host_raw_epenable(int fd, struct usb_endpoint_descriptor *desc)
 {
-  int rv = ioctl(fd, USB_RAW_IOCTL_EP_ENABLE, desc);
+  int rv = host_uninterruptible(ioctl, fd, USB_RAW_IOCTL_EP_ENABLE, desc);
   if (rv < 0)
     {
       ERROR("ioctl(USB_RAW_IOCTL_EP_ENABLE) fail");
@@ -375,7 +379,7 @@ static int host_raw_epenable(int fd, struct usb_endpoint_descriptor *desc)
 
 static int host_raw_epdisable(int fd, uint8_t epno)
 {
-  int rv = ioctl(fd, USB_RAW_IOCTL_EP_DISABLE, epno);
+  int rv = host_uninterruptible(ioctl, fd, USB_RAW_IOCTL_EP_DISABLE, epno);
   if (rv < 0)
     {
       ERROR("ioctl(USB_RAW_IOCTL_EP_DISABLE) fail");
@@ -386,7 +390,7 @@ static int host_raw_epdisable(int fd, uint8_t epno)
 
 static int host_raw_epread(int fd, struct usb_raw_ep_io_s *io)
 {
-  int rv = ioctl(fd, USB_RAW_IOCTL_EP_READ, io);
+  int rv = host_uninterruptible(ioctl, fd, USB_RAW_IOCTL_EP_READ, io);
   if (rv < 0)
     {
       ERROR("ioctl(USB_RAW_IOCTL_EP_READ) fail");
@@ -397,7 +401,7 @@ static int host_raw_epread(int fd, struct usb_raw_ep_io_s *io)
 
 static int host_raw_epwrite(int fd, struct usb_raw_ep_io_s *io)
 {
-  int rv = ioctl(fd, USB_RAW_IOCTL_EP_WRITE, io);
+  int rv = host_uninterruptible(ioctl, fd, USB_RAW_IOCTL_EP_WRITE, io);
   if (rv < 0)
     {
       ERROR("ioctl(USB_RAW_IOCTL_EP_WRITE) fail");
@@ -408,7 +412,7 @@ static int host_raw_epwrite(int fd, struct usb_raw_ep_io_s *io)
 
 static void host_raw_configure(int fd)
 {
-  int rv = ioctl(fd, USB_RAW_IOCTL_CONFIGURE, 0);
+  int rv = host_uninterruptible(ioctl, fd, USB_RAW_IOCTL_CONFIGURE, 0);
   if (rv < 0)
     {
       ERROR("ioctl(USB_RAW_IOCTL_CONFIGURED) fail");
@@ -417,7 +421,7 @@ static void host_raw_configure(int fd)
 
 static void host_raw_vbusdraw(int fd, uint32_t power)
 {
-  int rv = ioctl(fd, USB_RAW_IOCTL_VBUS_DRAW, power);
+  int rv = host_uninterruptible(ioctl, fd, USB_RAW_IOCTL_VBUS_DRAW, power);
   if (rv < 0)
     {
       ERROR("ioctl(USB_RAW_IOCTL_VBUS_DRAW) fail");
@@ -426,7 +430,7 @@ static void host_raw_vbusdraw(int fd, uint32_t power)
 
 static int host_raw_epsinfo(int fd, struct usb_raw_eps_info_s *info)
 {
-  int rv = ioctl(fd, USB_RAW_IOCTL_EPS_INFO, info);
+  int rv = host_uninterruptible(ioctl, fd, USB_RAW_IOCTL_EPS_INFO, info);
   if (rv < 0)
     {
       ERROR("ioctl(USB_RAW_IOCTL_EPS_INFO) fail");
@@ -437,7 +441,7 @@ static int host_raw_epsinfo(int fd, struct usb_raw_eps_info_s *info)
 
 static int host_raw_ep0stall(int fd)
 {
-  int rv = ioctl(fd, USB_RAW_IOCTL_EP0_STALL, 0);
+  int rv = host_uninterruptible(ioctl, fd, USB_RAW_IOCTL_EP0_STALL, 0);
   if (rv < 0)
     {
       ERROR("ioctl(USB_RAW_IOCTL_EP0_STALL) fail");
@@ -474,7 +478,8 @@ static int host_raw_connecthandle(struct usb_raw_gadget_dev_t *dev)
   struct usb_raw_eps_info_s *info = &dev->eps_info;
   int i;
 
-  memset(info, 0, sizeof(struct usb_raw_eps_info_s));
+  host_uninterruptible_no_return(memset, info, 0,
+                                 sizeof(struct usb_raw_eps_info_s));
 
   dev->eps_num = host_raw_epsinfo(dev->fd, info);
   for (i = 0; i < dev->eps_num; i++)
@@ -568,7 +573,10 @@ static int host_raw_ctrlhandle(struct usb_raw_gadget_dev_t *dev,
           return ret;
         }
 
-      memcpy(host_ctrl_req->data, io->data, ret);
+      host_uninterruptible_no_return(memcpy,
+                                     host_ctrl_req->data,
+                                     io->data,
+                                     ret);
     }
 
   USB_RAW_FIFO_PUSH(&entry->fifo);
@@ -583,9 +591,9 @@ static void *host_raw_ep0handle(void *arg)
   struct usb_raw_control_event_s event;
   struct sigaction action;
 
-  memset(&action, 0, sizeof(action));
+  host_uninterruptible_no_return(memset, &action, 0, sizeof(action));
   action.sa_handler = host_raw_handle_signal;
-  sigaction(SIGUSR2, &action, NULL);
+  host_uninterruptible_no_return(sigaction, SIGUSR2, &action, NULL);
 
   while (!dev->loop_stop)
     {
@@ -623,9 +631,9 @@ static void *host_raw_ephandle(void *arg)
   struct usb_raw_data_io_s *io;
   struct sigaction action;
 
-  memset(&action, 0, sizeof(action));
+  host_uninterruptible_no_return(memset, &action, 0, sizeof(action));
   action.sa_handler = host_raw_handle_signal;
-  sigaction(SIGUSR2, &action, NULL);
+  host_uninterruptible_no_return(sigaction, SIGUSR2, &action, NULL);
 
   while (!dev->loop_stop)
     {
@@ -687,8 +695,8 @@ int host_usbdev_init(uint32_t speed)
                       + USB_RAW_EP0_MAX_LEN),
                       USB_RAW_RX_BUF_NUM);
 
-  return pthread_create(&dev->ep0_thread, NULL,
-                        host_raw_ep0handle, NULL);
+  return host_uninterruptible(pthread_create, &dev->ep0_thread, NULL,
+                              host_raw_ep0handle, NULL);
 }
 
 int host_usbdev_deinit(void)
@@ -699,12 +707,16 @@ int host_usbdev_deinit(void)
   for (i = 0; i < USB_RAW_EPS_NUM_MAX &&
               dev->eps_entry[i].ep_thread > 0; i++)
     {
-      pthread_kill(dev->eps_entry[i].ep_thread, SIGUSR2);
-      pthread_join(dev->eps_entry[i].ep_thread, NULL);
+      host_uninterruptible_no_return(pthread_kill,
+                                     dev->eps_entry[i].ep_thread,
+                                     SIGUSR2);
+      host_uninterruptible_no_return(pthread_join,
+                                     dev->eps_entry[i].ep_thread,
+                                     NULL);
     }
 
-  pthread_kill(dev->ep0_thread, SIGUSR2);
-  pthread_join(dev->ep0_thread, NULL);
+  host_uninterruptible_no_return(pthread_kill, dev->ep0_thread, SIGUSR2);
+  host_uninterruptible_no_return(pthread_join, dev->ep0_thread, NULL);
   host_raw_close(dev->fd);
   dev->fd = -1;
 
@@ -763,9 +775,11 @@ int host_usbdev_epconfig(uint8_t epno,
                           sizeof(struct usb_raw_data_io_s),
                           USB_RAW_RX_BUF_NUM);
 
-      ret = pthread_create(&entry->ep_thread, NULL,
-                           host_raw_ephandle,
-                           (void *)entry);
+      ret = host_uninterruptible(pthread_create,
+                                 &entry->ep_thread,
+                                 NULL,
+                                 host_raw_ephandle,
+                                 (void *)entry);
     }
 
   return ret;
@@ -837,7 +851,7 @@ int host_usbdev_epwrite(uint8_t epno, uint8_t flags,
 
   entry = &dev->eps_entry[epno];
 
-  io = malloc(sizeof(struct usb_raw_ep_io_s) + len);
+  io = host_uninterruptible(malloc, sizeof(struct usb_raw_ep_io_s) + len);
   if (!io)
     {
       ERROR("Host usb malloc ep write io fail");
@@ -847,7 +861,7 @@ int host_usbdev_epwrite(uint8_t epno, uint8_t flags,
   io->flags = flags;
   io->length = len;
   io->ep = entry->raw_epid;
-  memcpy(io->data, data, len);
+  host_uninterruptible(memcpy, io->data, data, len);
 
   if (epno == 0)
     {
@@ -858,7 +872,7 @@ int host_usbdev_epwrite(uint8_t epno, uint8_t flags,
       ret = host_raw_epwrite(dev->fd, io);
     }
 
-  free(io);
+  host_uninterruptible_no_return(free, io);
 
   return ret;
 }
