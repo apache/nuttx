@@ -961,6 +961,7 @@ static int w25qxxxjv_erase_sector(FAR struct w25qxxxjv_dev_s *priv,
 {
   off_t address;
   uint8_t status;
+  uint16_t nloops = priv->nsectors;
 
   finfo("sector: %08" PRIxOFF "\n", sector);
 
@@ -976,10 +977,16 @@ static int w25qxxxjv_erase_sector(FAR struct w25qxxxjv_dev_s *priv,
     }
 
   status = w25qxxxjv_read_status(priv);
-  if ((status & STATUS_BUSY_MASK) != STATUS_READY)
+  while ((status & STATUS_BUSY_MASK) != STATUS_READY)
     {
-      ferr("ERROR: Flash busy: %02x", status);
-      return -EBUSY;
+      if (nloops-- == 0)
+        {
+          ferr("ERROR: Flash busy: %02x", status);
+          return -EBUSY;
+        }
+
+      nxsig_usleep(priv->erasetime * 1000);
+      status = w25qxxxjv_read_status(priv);
     }
 
   if ((status & priv->protectmask) != 0 &&
@@ -1352,9 +1359,7 @@ static int w25qxxxjv_erase(FAR struct mtd_dev_s *dev, off_t startblock,
 {
   FAR struct w25qxxxjv_dev_s *priv = (FAR struct w25qxxxjv_dev_s *)dev;
   size_t blocksleft = nblocks;
-#ifdef CONFIG_W25QXXXJV_SECTOR512
   int ret;
-#endif
 
   finfo("startblock: %08" PRIxOFF " nblocks: %d\n",
         startblock, (int)nblocks);
@@ -1370,7 +1375,13 @@ static int w25qxxxjv_erase(FAR struct mtd_dev_s *dev, off_t startblock,
 #ifdef CONFIG_W25QXXXJV_SECTOR512
       w25qxxxjv_erase_cache(priv, startblock);
 #else
-      w25qxxxjv_erase_sector(priv, startblock);
+      ret = w25qxxxjv_erase_sector(priv, startblock);
+      if (ret < 0)
+        {
+          w25qxxxjv_unlock(priv->qspi);
+          return ret;
+        }
+
 #endif
       startblock++;
     }
