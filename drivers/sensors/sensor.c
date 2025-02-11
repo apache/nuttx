@@ -467,13 +467,16 @@ static void sensor_update_nonwakeup(FAR struct file *filep,
   if (nonwakeup != upper->state.nonwakeup)
     {
       upper->state.nonwakeup = nonwakeup;
+      nxrmutex_unlock(&upper->lock);
       if (lower->ops->set_nonwakeup)
         {
           lower->ops->set_nonwakeup(lower, filep, nonwakeup);
         }
     }
-
-  nxrmutex_unlock(&upper->lock);
+  else
+    {
+      nxrmutex_unlock(&upper->lock);
+    }
 }
 
 static void sensor_generate_timing(FAR struct sensor_upperhalf_s *upper,
