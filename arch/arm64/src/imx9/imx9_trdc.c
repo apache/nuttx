@@ -37,6 +37,7 @@
 
 #include "chip.h"
 #include "arm64_internal.h"
+#include "imx9_ele.h"
 #include "imx9_trdc.h"
 #include <arch/board/imx9_trdc_config.h>
 
@@ -240,145 +241,6 @@ static struct trdc_fuse_data g_fuse_data[] =
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
-
-/****************************************************************************
- * Name: imx9_init_mu
- *
- * Description:
- *   This function disable interrupts from AHAB
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void imx9_init_mu(void)
-{
-  putreg32(0, ELE_MU_TCR);
-  putreg32(0, ELE_MU_RCR);
-}
-
-/****************************************************************************
- * Name: imx9_ele_sendmsg
- *
- * Description:
- *   This function communicates with the Advanced High Assurance Boot (AHAB)
- *   image that should reside in the particular address. This function
- *   sends a message to AHAB.
- *
- * Input Parameters:
- *   msg         -  Message to send
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void imx9_ele_sendmsg(struct ele_msg *msg)
-{
-  /* Check that ele is ready to receive */
-
-  while (!((1) & getreg32(ELE_MU_TSR)));
-
-  /* write header to slog 0 */
-
-  putreg32(msg->header.data, ELE_MU_TR(0));
-
-  /* write data */
-
-  for (int i = 1; i < msg->header.size; i++)
-    {
-      int tx_channel;
-
-      tx_channel = i % ELE_TR_NUM ;
-      while (!((1 << tx_channel) & getreg32(ELE_MU_TSR)));
-
-      /* Write data */
-
-      putreg32(msg->data[i - 1], ELE_MU_TR(i));
-    }
-}
-
-/****************************************************************************
- * Name: imx9_ele_receivemsg
- *
- * Description:
- *   This function communicates with the Advanced High Assurance Boot (AHAB)
- *   image that should reside in the particular address. This function
- *   receives message from AHAB.
- *
- * Input Parameters:
- *   msg         -  receive message buffer
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void imx9_ele_receivemsg(struct ele_msg *msg)
-{
-  /* Check if data ready */
-
-  while (!((1) & getreg32(ELE_MU_RSR)));
-
-  /* Read Header from slot 0 */
-
-  msg->header.data = getreg32(ELE_MU_RR(0));
-
-  for (int i = 1; i < msg->header.size; i++)
-    {
-      /* Check if empty */
-
-      int rx_channel = (i) % ELE_RR_NUM;
-      while (!((1 << rx_channel) & getreg32(ELE_MU_RSR)));
-
-      /* Read data */
-
-      msg->data[i - 1] = getreg32(ELE_MU_RR(i));
-    }
-}
-
-/****************************************************************************
- * Name: imx9_release_rdc
- *
- * Description:
- *   Trusted Resource Domain Controller AHAB interface.  This function
- *   communicates with the Advanced High Assurance Boot (AHAB) image that
- *   should reside in the particular address. This releases particular
- *   resources.
- *
- * Input Parameters:
- *   xrdc    -  RDC index
- *
- * Returned Value:
- *   Zero (OK) is returned on success. A negated errno value is returned on
- *   failure.
- *
- ****************************************************************************/
-
-static int imx9_release_rdc(uint32_t rdc_id)
-{
-  static struct ele_msg msg;
-
-  msg.header.version = AHAB_VERSION;
-  msg.header.tag = AHAB_CMD_TAG;
-  msg.header.size = 2;
-  msg.header.command = ELE_RELEASE_RDC_REQ;
-  msg.data[0] = rdc_id;
-
-  imx9_ele_sendmsg(&msg);
-  imx9_ele_receivemsg(&msg);
-
-  if ((msg.data[0] & 0xff) == ELE_OK)
-    {
-      return 0;
-    }
-
-  return -EIO;
-}
 
 static int trdc_mda_set_noncpu(unsigned long trdc_reg, uint32_t mda_inst,
      uint32_t mda_reg, bool did_bypass, uint8_t sa,
@@ -651,29 +513,6 @@ static void trdc_mgr_mbc_setup(const struct trdc_mgr_info *mgr)
     }
 }
 
-static uint32_t ele_read_common_fuse(uint32_t fuse_id)
-{
-  static struct ele_msg msg;
-  uint32_t value = 0;
-
-  msg.header.version = AHAB_VERSION;
-  msg.header.tag = AHAB_CMD_TAG;
-  msg.header.size = 2;
-  msg.header.command = ELE_READ_FUSE_REQ;
-  msg.data[0] = fuse_id;
-
-  imx9_ele_sendmsg(&msg);
-  imx9_ele_receivemsg(&msg);
-
-  if ((msg.data[0] & 0xff) == ELE_OK)
-    {
-      value = msg.data[1];
-    }
-
-  VERBOSE("resp %x; %x; %x\n", msg.header.data, msg.data[0], value);
-  return value;
-}
-
 static void trdc_fuse_init(void)
 {
   uint32_t val;
@@ -685,7 +524,7 @@ static void trdc_fuse_init(void)
       if (val & BIT(0)) /* OSCCA enabled */
         {
           g_fuse_data[i].value =
-            ele_read_common_fuse(g_fuse_data[i].fsb_index);
+            imx9_ele_read_common_fuse(g_fuse_data[i].fsb_index);
         }
       else
         {
@@ -918,12 +757,12 @@ void imx9_trdc_config(void)
 int imx9_trdc_init(void)
 {
   int ret;
-  imx9_init_mu();
+  imx9_ele_init();
 
-  ret = imx9_release_rdc(TRDC_AON);
-  ret |= imx9_release_rdc(TRDC_MEDIA);
-  ret |= imx9_release_rdc(TRDC_WAKEUP);
-  ret |= imx9_release_rdc(TRDC_NIX);
+  ret = imx9_ele_release_rdc(TRDC_AON);
+  ret |= imx9_ele_release_rdc(TRDC_MEDIA);
+  ret |= imx9_ele_release_rdc(TRDC_WAKEUP);
+  ret |= imx9_ele_release_rdc(TRDC_NIX);
 
   if (ret != 0)
     {
