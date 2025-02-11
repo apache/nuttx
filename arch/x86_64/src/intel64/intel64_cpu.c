@@ -366,14 +366,7 @@ bool x86_64_cpu_ready_get(uint8_t cpu)
 
 uint8_t x86_64_cpu_count_get(void)
 {
-  irqstate_t flags;
-  uint8_t count;
-
-  flags = spin_lock_irqsave(&g_ap_boot);
-  count = g_cpu_count;
-  spin_unlock_irqrestore(&g_ap_boot, flags);
-
-  return count;
+  return g_cpu_count;
 }
 
 /****************************************************************************
@@ -424,11 +417,5 @@ void x86_64_cpu_priv_set(uint8_t cpu)
   /* Mask applied to RFLAGS when making a syscall */
 
   write_msr(MSR_FMASK, X86_64_RFLAGS_IF | X86_64_RFLAGS_DF);
-#endif
-
-#ifdef CONFIG_SMP
-  /* Attach TLB shootdown handler */
-
-  irq_attach(SMP_IPI_TLBSHOOTDOWN_IRQ, x86_64_tlb_handler, NULL);
 #endif
 }
