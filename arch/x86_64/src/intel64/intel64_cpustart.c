@@ -154,6 +154,7 @@ void x86_64_ap_boot(void)
 
   tcb = current_task(cpu);
   UNUSED(tcb);
+  up_update_task(tcb);
 
 #ifdef CONFIG_SCHED_THREAD_LOCAL
   /* Make sure that FS_BASE is not null */
@@ -211,8 +212,6 @@ void x86_64_ap_boot(void)
 
   x86_64_hwdebug_init();
 #endif
-
-  up_update_task(tcb);
 
   /* Then transfer control to the IDLE task */
 

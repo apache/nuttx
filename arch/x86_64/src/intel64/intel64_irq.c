@@ -544,6 +544,12 @@ void up_irqinitialize(void)
   irq_attach(ISR13, x86_64_fault_panic_isr, NULL);
   irq_attach(ISR14, x86_64_fault_panic_isr, NULL);
   irq_attach(ISR16, x86_64_fault_kill_isr, NULL);
+
+#ifdef CONFIG_SMP
+  /* Attach TLB shootdown handler */
+
+  irq_attach(SMP_IPI_TLBSHOOTDOWN_IRQ, x86_64_tlb_handler, NULL);
+#endif
 }
 
 /****************************************************************************
