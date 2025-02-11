@@ -682,25 +682,11 @@ __cpu0_start:
 	bl		arm_data_initialize
 #endif
 
-	/* Perform early C-level, platform-specific initialization.  Logic
-	 * within arm_boot() must configure SDRAM and call arm_data_initialize().
-	 */
+	/* C-level arm_boot() which calls nx_start() and never returns. */
 
+	mov		lr, #0     /* LR = return address (none) */
 	bl		arm_boot
 
-	/* finish busy wait */
-
-#ifdef CONFIG_ARMV7A_SMP_BUSY_WAIT
-	ldr		r0, =CONFIG_ARMV7A_SMP_BUSY_WAIT_FLAG_ADDR
-	mov		r1, #1
-	str		r1, [r0]
-	dsb		sy
-#endif
-
-	/* Finally branch to the OS entry point */
-
-	mov		lr, #0				/* LR = return address (none) */
-	b		nx_start			/* Branch to nx_start */
 	.size	.Lvstart, .-.Lvstart
 
 /***************************************************************************

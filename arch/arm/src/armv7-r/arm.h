@@ -150,6 +150,10 @@ void arm_boot(void);
 
 void arm_data_initialize(void);
 
+/* For unified armv7-a/r arm_boot(), use empty macro here */
+
+#define arm_smp_busy_wait_fini()
+
 #undef EXTERN
 #ifdef __cplusplus
 }

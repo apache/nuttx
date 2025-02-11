@@ -32,6 +32,7 @@
 #  include "arm_cpu_psci.h"
 #endif
 
+#include "arm.h"
 #include "qemu_irq.h"
 #include "qemu_memorymap.h"
 #include "smp.h"
@@ -46,9 +47,7 @@
 #  include <nuttx/sched_note.h>
 #endif
 
-#ifdef CONFIG_ARCH_ARMV7R
-#  include <nuttx/init.h>
-#endif
+#include <nuttx/init.h>
 
 #include <nuttx/syslog/syslog_rpmsg.h>
 
@@ -108,11 +107,13 @@ void arm_boot(void)
   syslog_rpmsg_init_early(g_syslog_rpmsg_buf, sizeof(g_syslog_rpmsg_buf));
 #endif
 
-#ifdef CONFIG_ARCH_ARMV7R
-  /* dont return per armv7-r/arm_head.S design */
+  /* moved here from armv7-a/arm_head.S as we dont return now */
+
+  arm_smp_busy_wait_fini();
+
+  /* jump to nx_start */
 
   nx_start();
-#endif
 }
 
 #if defined(CONFIG_ARM_PSCI) && defined(CONFIG_SMP)
