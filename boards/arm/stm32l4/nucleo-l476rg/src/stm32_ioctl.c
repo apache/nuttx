@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32l4/nucleo-l476rg/src/stm32_appinit.c
+ * boards/arm/stm32l4/nucleo-l476rg/src/stm32_ioctl.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -27,50 +27,50 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <stdint.h>
+#include <errno.h>
+
 #include <nuttx/board.h>
 
 #include "nucleo-l476rg.h"
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
+#ifdef CONFIG_BOARDCTL_IOCTL
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_app_initialize
+ * Name: board_ioctl
  *
  * Description:
- *   Perform application specific initialization.  This function is never
- *   called directly from application code, but only indirectly via the
- *   (non-standard) boardctl() interface using the command BOARDIOC_INIT.
+ *   The "landing site" for much of the boardctl() interface. Generic board-
+ *   control functions invoked via ioctl() get routed through here.
+ *
+ *   Since we don't do anything unusual at the moment, this function
+ *   accomplishes nothing except avoid a missing-function linker error if
+ *   CONFIG_BOARDCTL_IOCTL is selected.
  *
  * Input Parameters:
- *   arg - The boardctl() argument is passed to the board_app_initialize()
- *         implementation without modification.  The argument has no
- *         meaning to NuttX; the meaning of the argument is a contract
- *         between the board-specific initialization logic and the
- *         matching application logic.  The value could be such things as a
- *         mode enumeration value, a set of DIP switch switch settings, a
- *         pointer to configuration data read from a file or serial FLASH,
- *         or whatever you would like to do with it.  Every implementation
- *         should accept zero/NULL as a default configuration.
+ *   cmd - IOCTL command being requested.
+ *   arg - Arguments for the IOCTL.
  *
  * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned on
- *   any failure to indicate the nature of the failure.
+ *   we don't yet support any boardctl IOCTLs.  This function always returns
+ *  -ENOTTY which is the standard IOCTL return value when a command is not
+ *  supported
  *
  ****************************************************************************/
 
-int board_app_initialize(uintptr_t arg)
+int board_ioctl(unsigned int cmd, uintptr_t arg)
 {
-  /* Did we already initialize via board_late_initialize()? */
+  switch (cmd)
+    {
+      default:
+        return -ENOTTY;
+    }
 
-#ifndef CONFIG_BOARD_LATE_INITIALIZE
-  return stm32_bringup();
-#else
   return OK;
-#endif
 }
+
+#endif /* CONFIG_BOARDCTL_IOCTL */
