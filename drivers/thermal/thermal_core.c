@@ -912,6 +912,7 @@ void thermal_zone_device_update(FAR struct thermal_zone_device_s *zdev)
           (pos->target != 0 && pos->target != THERMAL_NO_TARGET))
         {
           delay = zdev->params->polling_delay;
+          break;
         }
     }
 
