@@ -46,6 +46,6 @@ endif
 	$(call DELFILE, build_info.h)
 	$(call DELFILE, fspi_fcb_gen.sh)
 	$(call DELFILE, fspi_header)
-	$(call DELFILE, firmware-ele-imx-0.1.1.bin)
-	$(call DELDIR, firmware-ele-imx-0.1.1)
+	$(call DELFILE, firmware-ele-imx-1.3.0-17945fc.bin)
+	$(call DELDIR, firmware-ele-imx-1.3.0-17945fc)
 	$(call CLEAN)

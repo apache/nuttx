@@ -38,7 +38,7 @@ ifeq ($(CONFIG_IMX9_BOOTLOADER),y)
 	FILE_3_PATH = $(BASE_PATH)$(FILE_3)
 	FILE_EXE = $(BASE_PATH)mkimage_imx9
 	AHAB_BASE_URL = https://www.nxp.com/lgfiles/NMG/MAD/YOCTO
-	AHAB = firmware-ele-imx-0.1.1
+	AHAB = firmware-ele-imx-1.3.0-17945fc
 	AHAB_BINARY = $(AHAB).bin
 	AHAB_PATH = $(BASE_PATH)$(AHAB_BINARY)
 	FSPI_HEADER = fspi_header
@@ -84,7 +84,6 @@ define POSTBUILD
 	$(Q) sh tools$(DELIM)imx9$(DELIM)fspi_fcb_gen.sh tools$(DELIM)imx9$(DELIM)/fspi_header
 	$(Q) tools$(DELIM)imx9$(DELIM)mkimage_imx9$(HOSTEXEEXT) -soc IMX9 -dev flexspi -append $(BASE_PATH)$(AHAB)$(DELIM)mx93a1-ahab-container.img -c -ap nuttx.bin a55 0x2049a000 -fcb fcb.bin 0x204F0000 -out flash.bin 1>/dev/null 2>&1
 	$(Q) mv flash.bin flash.tmp
-
 	$(Q) echo "Append FCB to flash.bin"
 	$(Q) dd if=fcb.bin of=flash.bin bs=1k seek=1
 	$(Q) dd if=flash.tmp of=flash.bin bs=1k seek=4
