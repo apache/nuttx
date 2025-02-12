@@ -4845,9 +4845,8 @@ config BOARD_COREDUMP_FULL
 
 config BOARD_COREDUMP_COMPRESSION
 	bool "Enable Core Dump compression"
-	default y
-	select LIBC_LZF
-	depends on !BOARD_CRASHDUMP_NONE
+	default BOARD_COREDUMP_SYSLOG
+	depends on LIBC_LZF && !BOARD_CRASHDUMP_NONE
 	---help---
 		Enable LZF compression algorithm for core dump content
 
