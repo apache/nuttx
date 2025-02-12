@@ -800,6 +800,7 @@ struct sensor_accel          /* Type: Accerometer */
   sensor_data_t y;           /* Axis Y in m/s^2 */
   sensor_data_t z;           /* Axis Z in m/s^2 */
   sensor_data_t temperature; /* Temperature in degrees celsius */
+  int32_t       status;      /* Status of calibration */
 };
 
 struct sensor_accel_uncal   /* Type: Accerometer Uncalibrated */
@@ -812,6 +813,7 @@ struct sensor_accel_uncal   /* Type: Accerometer Uncalibrated */
   sensor_data_t y_bias;      /* Axis Y bias in m/s^2 */
   sensor_data_t z_bias;      /* Axis Z bias in m/s^2 */
   sensor_data_t temperature; /* Temperature in degrees celsius */
+  int32_t       status;      /* Status of calibration */
 };
 
 struct sensor_mag            /* Type: Magnetic Field */
@@ -852,6 +854,7 @@ struct sensor_gyro           /* Type: Gyroscope */
   sensor_data_t y;           /* Axis Y in rad/s */
   sensor_data_t z;           /* Axis Z in rad/s */
   sensor_data_t temperature; /* Temperature in degrees celsius */
+  int32_t       status;      /* Status of calibration */
 };
 
 struct sensor_gyro_uncal     /* Type: Gyroscope Uncalibrated */
@@ -864,6 +867,7 @@ struct sensor_gyro_uncal     /* Type: Gyroscope Uncalibrated */
   sensor_data_t y_bias;      /* Axis Y bias in rad/s */
   sensor_data_t z_bias;      /* Axis Z bias in rad/s */
   sensor_data_t temperature; /* Temperature in degrees celsius */
+  int32_t       status;      /* Status of calibration */
 };
 
 struct sensor_light          /* Type: Light */
@@ -957,6 +961,7 @@ struct sensor_hrate          /* Type: Heart Rate */
 {
   uint64_t      timestamp;   /* Units is microseconds */
   sensor_data_t bpm;         /* is SI units BPM */
+  int32_t       status;      /* Status of calibration */
 };
 
 struct sensor_pose_6dof      /* Type: Pose 6dof */
@@ -989,6 +994,7 @@ struct sensor_hbeat         /* Type: Heart Beat */
 {
   uint64_t      timestamp;  /* Units is microseconds */
   sensor_data_t beat;       /* Units is times/minutes */
+  int32_t       status;     /* Status of calibration */
 };
 
 struct sensor_force         /* Type: Force */
@@ -1155,6 +1161,22 @@ struct sensor_inclinometer   /* Type: Inclinometer */
   sensor_data_t y;           /* Y axis inclination in degrees */
   sensor_data_t z;           /* Z axis inclination in degrees */
   sensor_data_t temperature; /* Temperature in degrees celsius */
+};
+
+/* Used to indicate the accuracy of sensor data. The type is consistent
+ * with Android.
+ * https://cs.android.com/android/_/android/platform/hardware/libhardware/+/\
+ * 0e67aa0caee9500b61b9c1c8b6e5cab18301364c:include_all/hardware/\
+ * sensors-base.h
+ */
+
+enum sensor_accuracy_status
+{
+  SENSOR_TYPE_STATUS_NO_CONTACT        = -1,   /* -1 */
+  SENSOR_TYPE_STATUS_UNRELIABLE        = 0,
+  SENSOR_TYPE_STATUS_ACCURACY_LOW      = 1,
+  SENSOR_TYPE_STATUS_ACCURACY_MEDIUM   = 2,
+  SENSOR_TYPE_STATUS_ACCURACY_HIGH     = 3,
 };
 
 struct sensor_gnss          /* Type: GNSS */
