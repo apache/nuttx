@@ -68,6 +68,15 @@ static int backtrace(uintptr_t *base, uintptr_t *limit,
                      void **buffer, int size, int *skip)
 {
   int i = 0;
+#if CONFIG_ARCH_INTERRUPTSTACK > 15
+  int cpu = up_cpu_index();
+  uintptr_t *intstack_limit =
+    (uintptr_t *)((uintptr_t)g_intstacktop -
+                  (CONFIG_ARCH_INTERRUPTSTACK * cpu));
+
+  uintptr_t *intstack_base =
+    (uintptr_t *)((uintptr_t)intstack_limit - CONFIG_ARCH_INTERRUPTSTACK);
+#endif
 
   if (ra)
     {
@@ -79,7 +88,11 @@ static int backtrace(uintptr_t *base, uintptr_t *limit,
 
   for (; i < size; fp = (uintptr_t *)*(fp - 2))
     {
-      if (fp > limit || fp < base)
+      if ((fp > limit || fp < base)
+#if CONFIG_ARCH_INTERRUPTSTACK > 15
+          && (fp > intstack_limit || fp < intstack_base)
+#endif
+         )
         {
           break;
         }
@@ -150,17 +163,10 @@ int up_backtrace(struct tcb_s *tcb, void **buffer, int size, int skip)
     {
       if (up_interrupt_context())
         {
-#if CONFIG_ARCH_INTERRUPTSTACK > 15
-          ret = backtrace((uintptr_t *)g_intstackalloc,
-                          (uintptr_t *)(g_intstackalloc +
-                                       CONFIG_ARCH_INTERRUPTSTACK),
-                          (void *)getfp(), NULL, buffer, size, &skip);
-#else
           ret = backtrace(rtcb->stack_base_ptr,
                           (uintptr_t *)((uintptr_t)rtcb->stack_base_ptr +
                                         rtcb->adj_stack_size),
                           (void *)getfp(), NULL, buffer, size, &skip);
-#endif
           if (ret < size)
             {
               ret += backtrace(rtcb->stack_base_ptr, (uintptr_t *)
