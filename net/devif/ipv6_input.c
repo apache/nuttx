@@ -455,11 +455,13 @@ static int ipv6_in(FAR struct net_driver_s *dev)
          *
          * Case 3 is handled here.  Logic here detects if (1) an attempt
          * to return with d_len > 0 and (2) that the device is an
-         * IEEE802.15.4 MAC network driver. Under those conditions, 6LoWPAN
-         * logic will be called to create the IEEE80215.4 frames.
+         * IEEE802.15.4 MAC or PKTRADIO network driver .
+         * Under those conditions, 6LoWPAN logic will be called to create the
+         * IEEE80215.4 or PKTRADIO frames.
          */
 
-        if (dev->d_len > 0 && dev->d_lltype == CONFIG_NET_6LOWPAN)
+        if ((dev->d_len > 0 && dev->d_lltype == NET_LL_IEEE802154) ||
+            (dev->d_len > 0 && dev->d_lltype == NET_LL_PKTRADIO))
           {
             /* Let 6LoWPAN handle the TCP output */
 
@@ -501,11 +503,13 @@ static int ipv6_in(FAR struct net_driver_s *dev)
          *
          * Case 2 is handled here.  Logic here detects if (1) an attempt
          * to return with d_len > 0 and (2) that the device is an
-         * IEEE802.15.4 MAC network driver. Under those conditions, 6LoWPAN
-         * logic will be called to create the IEEE80215.4 frames.
+         * IEEE802.15.4 MAC or PKTRADIO network driver.
+         * Under those conditions, 6LoWPAN logic will be called to create the
+         * IEEE80215.4 or PKTRADIO frames.
          */
 
-        if (dev->d_len > 0 && dev->d_lltype == CONFIG_NET_6LOWPAN)
+        if ((dev->d_len > 0 && dev->d_lltype == NET_LL_IEEE802154) ||
+            (dev->d_len > 0 && dev->d_lltype == NET_LL_PKTRADIO))
           {
             /* Let 6LoWPAN handle the ICMPv6 output */
 
