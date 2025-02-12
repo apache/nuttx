@@ -1399,16 +1399,6 @@ static int mpfs_sendcmd(struct sdio_dev_s *dev, uint32_t cmd,
   struct mpfs_dev_s *priv = (struct mpfs_dev_s *)dev;
   uint32_t cmdidx;
 
-  mpfs_reset_lines(priv);
-
-  /* Check if command / data lines are busy */
-
-  if (mpfs_check_lines_busy(priv))
-    {
-      mcerr("Busy!\n");
-      return -EBUSY;
-    }
-
   /* Clear all status interrupts */
 
   mpfs_putreg8(priv, COREMMC_ALL_ICR, MPFS_COREMMC_ICR);
