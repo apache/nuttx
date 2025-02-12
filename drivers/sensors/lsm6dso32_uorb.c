@@ -1833,7 +1833,7 @@ int lsm6dso32_register(FAR struct i2c_master_s *i2c, uint8_t addr,
   int gyro_pid;
 
   DEBUGASSERT(i2c != NULL);
-  DEBUGASSERT(addr == 0x6b || addr == 0x6c);
+  DEBUGASSERT(addr == 0x6b || addr == 0x6a);
 
   /* If HPWORK is not enabled and the attach functions are not NULL, let the
    * user know that HPWORK is required for interrupts.
