@@ -125,7 +125,7 @@
 
 /* Clocks and timing */
 
-#define MPFS_FPGA_FIC0_CLK                 (125000000)
+#define MPFS_FPGA_FIC0_CLK                 (CONFIG_MPFS_FPGA_FIC0_CLK_FREQ)
 
 #define COREMMC_CMDTIMEOUT                 (100000)
 #define COREMMC_LONGTIMEOUT                (100000000)
