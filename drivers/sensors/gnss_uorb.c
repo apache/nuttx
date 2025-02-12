@@ -110,6 +110,9 @@ static int gnss_set_interval(FAR struct sensor_lowerhalf_s *lower,
                              FAR uint32_t *interval);
 static int gnss_control(FAR struct sensor_lowerhalf_s *lower,
                         FAR struct file *filep, int cmd, unsigned long arg);
+static int gnss_get_info(FAR struct sensor_lowerhalf_s *lower,
+                         FAR struct file *filep,
+                         FAR struct sensor_device_info_s *info);
 
 static int     gnss_open(FAR struct file *filep);
 static int     gnss_close(FAR struct file *filep);
@@ -131,6 +134,7 @@ static const struct sensor_ops_s g_gnss_sensor_ops =
   .activate     = gnss_activate,
   .set_interval = gnss_set_interval,
   .control      = gnss_control,
+  .get_info     = gnss_get_info,
 };
 
 static const struct file_operations g_gnss_fops =
@@ -203,6 +207,21 @@ static int gnss_set_interval(FAR struct sensor_lowerhalf_s *lower,
     }
 
   return upper->lower->ops->set_interval(upper->lower, filep, interval);
+}
+
+static int gnss_get_info(FAR struct sensor_lowerhalf_s *lower,
+                         FAR struct file *filep,
+                         FAR struct sensor_device_info_s *info)
+{
+  FAR struct gnss_sensor_s *dev = (FAR struct gnss_sensor_s *)lower;
+  FAR struct gnss_upperhalf_s *upper = dev->upper;
+
+  if (upper->lower->ops->get_info == NULL)
+    {
+      return -ENOTSUP;
+    }
+
+  return upper->lower->ops->get_info(upper->lower, filep, info);
 }
 
 static int gnss_control(FAR struct sensor_lowerhalf_s *lower,
