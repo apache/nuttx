@@ -26,7 +26,7 @@ if(CONFIG_DRIVERS_VHOST)
 endif()
 
 if(CONFIG_DRIVERS_VHOST_RNG)
-  list(APPEND SRCS vhost_rng.c)
+  list(APPEND SRCS vhost-rng.c)
 endif()
 
 if(CONFIG_DRIVERS_VHOST_RPMSG)
