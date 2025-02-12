@@ -47,12 +47,4 @@ LDNXFLATFLAGS = -e main -s 2048
 
 # ELF module definitions
 
-CMODULEFLAGS = $(CFLAGS)
-
-LDMODULEFLAGS = -r -e module_initialize
-LDMODULEFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/modlib/gnu-elf.ld)
-
 SHMODULEFLAGS = -Bsymbolic -G -Bdynamic
-
-CELFFLAGS = $(CFLAGS) -mlong-calls # --target1-abs
-CXXELFFLAGS = $(CXXFLAGS) -mlong-calls # --target1-abs
