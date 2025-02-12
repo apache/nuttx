@@ -100,6 +100,7 @@ struct sam_pwm_fault_s
 {
   uint8_t source;                 /* Source of fault input */
   uint8_t polarity;
+  uint8_t latched;                /* Latched fault inputs */
   gpio_pinset_t gpio_0;           /* GPIO 1 fault input */
   gpio_pinset_t gpio_1;           /* GPIO 2 fault input */
   gpio_pinset_t gpio_2;           /* GPIO 3 fault input */
@@ -234,6 +235,7 @@ static struct sam_pwm_fault_s g_pwm0_fault =
 {
   .source = PWM0_FAULTS,
   .polarity = PWM0_POL,
+  .latched = PWM0_LATCH,
   .gpio_0 = GPIO_PWMC0_FI0,
   .gpio_1 = GPIO_PWMC0_FI1,
   .gpio_2 = GPIO_PWMC0_FI2,
@@ -378,6 +380,7 @@ static struct sam_pwm_fault_s g_pwm1_fault =
 {
   .source = PWM1_FAULTS,
   .polarity = PWM1_POL,
+  .latched = PWM1_LATCH,
   .gpio_0 = GPIO_PWMC1_FI0,
   .gpio_1 = GPIO_PWMC1_FI1,
   .gpio_2 = GPIO_PWMC1_FI2,
@@ -889,7 +892,8 @@ static int pwm_setup(struct pwm_lowerhalf_s *dev)
    * is set via configuration options.
    */
 
-  regval = FMR_FPOL_SEL(priv->fault->polarity);
+  regval = FMR_FPOL_SEL(priv->fault->polarity) |
+           FMR_FMOD_SEL(priv->fault->latched);
   pwm_putreg(priv, SAMV7_PWM_FMR, regval);
 
   /* Force both outputs to 0 if fault occurs */

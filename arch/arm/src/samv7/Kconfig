@@ -857,6 +857,15 @@ config SAMV7_PWM0_PA9_POL
 		Fault input is by default active on high level. This config
 		inverts the logic and makes fault active on low level.
 
+config SAMV7_PWM0_PA9_LATCHED
+	bool "Latched fault"
+	default n
+	---help---
+		When this option is selected, the fault input remains active until it
+		is cleared by the software. When this option is not selected, the
+		fault is cleared once the fault input changes its polarity level back
+		to normal state.
+
 endif
 
 config SAMV7_PWM0_PD8
@@ -871,6 +880,15 @@ config SAMV7_PWM0_PD8_POL
 	---help---
 		Fault input is by default active on high level. This config
 		inverts the logic and makes fault active on low level.
+
+config SAMV7_PWM0_PD8_LATCHED
+	bool "Latched fault"
+	default n
+	---help---
+		When this option is selected, the fault input remains active until it
+		is cleared by the software. When this option is not selected, the
+		fault is cleared once the fault input changes its polarity level back
+		to normal state.
 
 endif
 
@@ -887,27 +905,101 @@ config SAMV7_PWM0_PD9_POL
 		Fault input is by default active on high level. This config
 		inverts the logic and makes fault active on low level.
 
+config SAMV7_PWM0_PD9_LATCHED
+	bool "Latched fault"
+	default n
+	---help---
+		When this option is selected, the fault input remains active until it
+		is cleared by the software. When this option is not selected, the
+		fault is cleared once the fault input changes its polarity level back
+		to normal state.
+
 endif
 
 config SAMV7_PWM0_PMC
 	bool "External fault input from PMC"
 	default n
 
+if SAMV7_PWM0_PMC
+
+config SAMV7_PWM0_PMC_LATCHED
+	bool "Latched fault"
+	default n
+	---help---
+		When this option is selected, the fault input remains active until it
+		is cleared by the software. When this option is not selected, the
+		fault is cleared once the fault input changes its polarity level back
+		to normal state.
+
+endif
+
 config SAMV7_PWM0_AFEC0
 	bool "External fault input from AFEC0"
 	default n
+
+if SAMV7_PWM0_AFEC0
+
+config SAMV7_PWM0_AFEC0_LATCHED
+	bool "Latched fault"
+	default n
+	---help---
+		When this option is selected, the fault input remains active until it
+		is cleared by the software. When this option is not selected, the
+		fault is cleared once the fault input changes its polarity level back
+		to normal state.
+
+endif
 
 config SAMV7_PWM0_AFEC1
 	bool "External fault input from AFEC1"
 	default n
 
+if SAMV7_PWM0_AFEC1
+
+config SAMV7_PWM0_AFEC1_LATCHED
+	bool "Latched fault"
+	default n
+	---help---
+		When this option is selected, the fault input remains active until it
+		is cleared by the software. When this option is not selected, the
+		fault is cleared once the fault input changes its polarity level back
+		to normal state.
+
+endif
+
 config SAMV7_PWM0_ACC
 	bool "External fault input from ACC"
 	default n
 
+if SAMV7_PWM0_ACC
+
+config SAMV7_PWM0_ACC_LATCHED
+	bool "Latched fault"
+	default n
+	---help---
+		When this option is selected, the fault input remains active until it
+		is cleared by the software. When this option is not selected, the
+		fault is cleared once the fault input changes its polarity level back
+		to normal state.
+
+endif
+
 config SAMV7_PWM0_TIM0
 	bool "External fault input from Timer 0"
 	default n
+
+if SAMV7_PWM0_TIM0
+
+config SAMV7_PWM0_TIM0_LATCHED
+	bool "Latched fault"
+	default n
+	---help---
+		When this option is selected, the fault input remains active until it
+		is cleared by the software. When this option is not selected, the
+		fault is cleared once the fault input changes its polarity level back
+		to normal state.
+
+endif
 
 endmenu
 
@@ -1118,6 +1210,15 @@ config SAMV7_PWM1_PA21_POL
 		Fault input is by default active on high level. This config
 		inverts the logic and makes fault active on low level.
 
+config SAMV7_PWM1_PA21_LATCHED
+	bool "Latched fault"
+	default n
+	---help---
+		When this option is selected, the fault input remains active until it
+		is cleared by the software. When this option is not selected, the
+		fault is cleared once the fault input changes its polarity level back
+		to normal state.
+
 endif
 
 config SAMV7_PWM1_PA26
@@ -1132,6 +1233,15 @@ config SAMV7_PWM1_PA26_POL
 	---help---
 		Fault input is by default active on high level. This config
 		inverts the logic and makes fault active on low level.
+
+config SAMV7_PWM1_PA26_LATCHED
+	bool "Latched fault"
+	default n
+	---help---
+		When this option is selected, the fault input remains active until it
+		is cleared by the software. When this option is not selected, the
+		fault is cleared once the fault input changes its polarity level back
+		to normal state.
 
 endif
 
@@ -1148,30 +1258,103 @@ config SAMV7_PWM1_PA28_POL
 		Fault input is by default active on high level. This config
 		inverts the logic and makes fault active on low level.
 
+config SAMV7_PWM1_PA28_LATCHED
+	bool "Latched fault"
+	default n
+	---help---
+		When this option is selected, the fault input remains active until it
+		is cleared by the software. When this option is not selected, the
+		fault is cleared once the fault input changes its polarity level back
+		to normal state.
+
 endif
 
 config SAMV7_PWM1_PMC
 	bool "External fault input from PMC"
 	default n
 
+if SAMV7_PWM1_PMC
+
+config SAMV7_PWM1_PMC_LATCHED
+	bool "Latched fault"
+	default n
+	---help---
+		When this option is selected, the fault input remains active until it
+		is cleared by the software. When this option is not selected, the
+		fault is cleared once the fault input changes its polarity level back
+		to normal state.
+
+endif
+
 config SAMV7_PWM1_AFEC0
 	bool "External fault input from AFEC0"
 	default n
+
+if SAMV7_PWM1_AFEC0
+
+config SAMV7_PWM1_AFEC0_LATCHED
+	bool "Latched fault"
+	default n
+	---help---
+		When this option is selected, the fault input remains active until it
+		is cleared by the software. When this option is not selected, the
+		fault is cleared once the fault input changes its polarity level back
+		to normal state.
+
+endif
 
 config SAMV7_PWM1_AFEC1
 	bool "External fault input from AFEC1"
 	default n
 
+if SAMV7_PWM1_AFEC1
+
+config SAMV7_PWM1_AFEC1_LATCHED
+	bool "Latched fault"
+	default n
+	---help---
+		When this option is selected, the fault input remains active until it
+		is cleared by the software. When this option is not selected, the
+		fault is cleared once the fault input changes its polarity level back
+		to normal state.
+
+endif
+
 config SAMV7_PWM1_ACC
 	bool "External fault input from ACC"
 	default n
+
+if SAMV7_PWM1_ACC
+
+config SAMV7_PWM1_ACC_LATCHED
+	bool "Latched fault"
+	default n
+	---help---
+		When this option is selected, the fault input remains active until it
+		is cleared by the software. When this option is not selected, the
+		fault is cleared once the fault input changes its polarity level back
+		to normal state.
+
+endif
 
 config SAMV7_PWM1_TIM0
 	bool "External fault input from Timer 0"
 	default n
 
-endmenu
+if SAMV7_PWM1_TIM0
 
+config SAMV7_PWM1_TIM0_LATCHED
+	bool "Latched fault"
+	default n
+	---help---
+		When this option is selected, the fault input remains active until it
+		is cleared by the software. When this option is not selected, the
+		fault is cleared once the fault input changes its polarity level back
+		to normal state.
+
+endif
+
+endmenu
 
 config SAMV7_PWM1_EVENT0
 	bool "Generate trigger on Event Line 0"
