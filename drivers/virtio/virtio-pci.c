@@ -99,8 +99,7 @@ static void virtio_pci_vq_callback(FAR struct virtio_pci_device_s *vpdev)
   for (i = 0; i < vpdev->vdev.vrings_num; i++)
     {
       vq = vrings_info[i].vq;
-      if (vq->vq_used_cons_idx != vq->vq_ring.used->idx &&
-          vq->callback != NULL)
+      if (vq->callback != NULL && virtqueue_nused(vq) > 0)
         {
           vq->callback(vq);
         }
