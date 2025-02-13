@@ -85,13 +85,13 @@
  *
  ****************************************************************************/
 
-int nxtask_init(FAR struct task_tcb_s *tcb, const char *name, int priority,
+int nxtask_init(FAR struct tcb_s *tcb, const char *name, int priority,
                 FAR void *stack, uint32_t stack_size,
                 main_t entry, FAR char * const argv[],
                 FAR char * const envp[],
                 FAR const posix_spawn_file_actions_t *actions)
 {
-  uint8_t ttype = tcb->cmn.flags & TCB_FLAG_TTYPE_MASK;
+  uint8_t ttype = tcb->flags & TCB_FLAG_TTYPE_MASK;
   int ret;
 
   sched_trace_begin();
@@ -107,13 +107,13 @@ int nxtask_init(FAR struct task_tcb_s *tcb, const char *name, int priority,
 
   if (ttype == TCB_FLAG_TTYPE_KERNEL)
     {
-      tcb->cmn.addrenv_own = NULL;
+      tcb->addrenv_own = NULL;
     }
 #endif
 
   /* Create a new task group */
 
-  ret = group_allocate(tcb, tcb->cmn.flags);
+  ret = group_allocate(tcb, tcb->flags);
   if (ret < 0)
     {
       sched_trace_end();
@@ -123,16 +123,16 @@ int nxtask_init(FAR struct task_tcb_s *tcb, const char *name, int priority,
 #ifndef CONFIG_DISABLE_PTHREAD
   /* Initialize the task join */
 
-  nxtask_joininit(&tcb->cmn);
+  nxtask_joininit(tcb);
 #endif
 
 #if !defined(CONFIG_DISABLE_PTHREAD) && !defined(CONFIG_PTHREAD_MUTEX_UNSAFE)
-  spin_lock_init(&tcb->cmn.mhead_lock);
+  spin_lock_init(&tcb->mhead_lock);
 #endif
 
   /* Duplicate the parent tasks environment */
 
-  ret = env_dup(tcb->cmn.group, envp);
+  ret = env_dup(tcb->group, envp);
   if (ret < 0)
     {
       goto errout_with_group;
@@ -154,13 +154,13 @@ int nxtask_init(FAR struct task_tcb_s *tcb, const char *name, int priority,
     {
       /* Use pre-allocated stack */
 
-      ret = up_use_stack(&tcb->cmn, stack, stack_size);
+      ret = up_use_stack(tcb, stack, stack_size);
     }
   else
     {
       /* Allocate the stack for the TCB */
 
-      ret = up_create_stack(&tcb->cmn, stack_size, ttype);
+      ret = up_create_stack(tcb, stack_size, ttype);
     }
 
   if (ret < OK)
@@ -179,7 +179,7 @@ int nxtask_init(FAR struct task_tcb_s *tcb, const char *name, int priority,
 
   /* Initialize thread local storage */
 
-  ret = tls_init_info(&tcb->cmn);
+  ret = tls_init_info(tcb);
   if (ret < OK)
     {
       goto errout_with_group;
@@ -200,7 +200,7 @@ int nxtask_init(FAR struct task_tcb_s *tcb, const char *name, int priority,
   return ret;
 
 errout_with_group:
-  if (!stack && tcb->cmn.stack_alloc_ptr)
+  if (!stack && tcb->stack_alloc_ptr)
     {
 #ifdef CONFIG_BUILD_KERNEL
       /* If the exiting thread is not a kernel thread, then it has an
@@ -216,13 +216,13 @@ errout_with_group:
       if (ttype == TCB_FLAG_TTYPE_KERNEL)
 #endif
         {
-          up_release_stack(&tcb->cmn, ttype);
+          up_release_stack(tcb, ttype);
         }
     }
 
-  nxtask_joindestroy(&tcb->cmn);
+  nxtask_joindestroy(tcb);
 
-  group_leave(&tcb->cmn);
+  group_leave(tcb);
 
   sched_trace_end();
   return ret;
@@ -247,7 +247,7 @@ errout_with_group:
  *
  ****************************************************************************/
 
-void nxtask_uninit(FAR struct task_tcb_s *tcb)
+void nxtask_uninit(FAR struct tcb_s *tcb)
 {
   /* The TCB was added to the inactive task list by
    * nxtask_setup_scheduler().
@@ -259,6 +259,5 @@ void nxtask_uninit(FAR struct task_tcb_s *tcb)
    * itself.
    */
 
-  nxsched_release_tcb((FAR struct tcb_s *)tcb,
-                      tcb->cmn.flags & TCB_FLAG_TTYPE_MASK);
+  nxsched_release_tcb(tcb, tcb->flags & TCB_FLAG_TTYPE_MASK);
 }

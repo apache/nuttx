@@ -91,7 +91,7 @@ nosanitize_address
 pid_t sim_fork(const xcpt_reg_t *context)
 {
   struct tcb_s *parent = this_task();
-  struct task_tcb_s *child;
+  struct tcb_s *child;
   unsigned char *pout;
   unsigned char *pin;
   xcpt_reg_t newsp;
@@ -135,8 +135,8 @@ pid_t sim_fork(const xcpt_reg_t *context)
    * effort is overkill.
    */
 
-  newtop = (xcpt_reg_t)child->cmn.stack_base_ptr +
-                       child->cmn.adj_stack_size;
+  newtop = (xcpt_reg_t)child->stack_base_ptr +
+                       child->adj_stack_size;
   newsp = newtop - stackutil;
   pout = (unsigned char *)newsp;
   pin  = (unsigned char *)context[JB_SP];
@@ -166,10 +166,10 @@ pid_t sim_fork(const xcpt_reg_t *context)
    * child thread.
    */
 
-  memcpy(child->cmn.xcp.regs, context,
+  memcpy(child->xcp.regs, context,
          sizeof(xcpt_reg_t) * XCPTCONTEXT_REGS);
-  child->cmn.xcp.regs[JB_FP] = newfp; /* Frame pointer */
-  child->cmn.xcp.regs[JB_SP] = newsp; /* Stack pointer */
+  child->xcp.regs[JB_FP] = newfp; /* Frame pointer */
+  child->xcp.regs[JB_SP] = newsp; /* Stack pointer */
 
   /* And, finally, start the child task.  On a failure, nxtask_start_fork()
    * will discard the TCB by calling nxtask_abort_fork().

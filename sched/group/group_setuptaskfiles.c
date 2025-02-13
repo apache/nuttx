@@ -59,11 +59,11 @@
  *
  ****************************************************************************/
 
-int group_setuptaskfiles(FAR struct task_tcb_s *tcb,
+int group_setuptaskfiles(FAR struct tcb_s *tcb,
                          FAR const posix_spawn_file_actions_t *actions,
                          bool cloexec)
 {
-  FAR struct task_group_s *group = tcb->cmn.group;
+  FAR struct task_group_s *group = tcb->group;
   int ret = OK;
 #ifndef CONFIG_FDCLONE_DISABLE
   FAR struct tcb_s *rtcb = this_task();
@@ -72,7 +72,7 @@ int group_setuptaskfiles(FAR struct task_tcb_s *tcb,
   sched_trace_begin();
   DEBUGASSERT(group);
 #ifndef CONFIG_DISABLE_PTHREAD
-  DEBUGASSERT((tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) !=
+  DEBUGASSERT((tcb->flags & TCB_FLAG_TTYPE_MASK) !=
               TCB_FLAG_TTYPE_PTHREAD);
 #endif
 
@@ -84,16 +84,16 @@ int group_setuptaskfiles(FAR struct task_tcb_s *tcb,
    */
 
   if (group != rtcb->group &&
-      (tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
+      (tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
     {
       ret = fdlist_copy(&rtcb->group->tg_fdlist,
                         &group->tg_fdlist, actions, cloexec);
     }
 
   if (ret >= 0 && actions != NULL &&
-      (tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
+      (tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
     {
-      ret = spawn_file_actions(&tcb->cmn, actions);
+      ret = spawn_file_actions(tcb, actions);
     }
 #endif
 

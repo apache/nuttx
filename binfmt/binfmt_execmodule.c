@@ -156,7 +156,7 @@ int exec_module(FAR struct binary_s *binp,
                 FAR const posix_spawnattr_t *attr,
                 bool spawn)
 {
-  FAR struct task_tcb_s *tcb;
+  FAR struct tcb_s *tcb;
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
   FAR struct arch_addrenv_s *addrenv = &binp->addrenv->addrenv;
   FAR void *vheap;
@@ -179,7 +179,7 @@ int exec_module(FAR struct binary_s *binp,
 
   /* Allocate a TCB for the new task. */
 
-  tcb = kmm_zalloc(sizeof(struct task_tcb_s));
+  tcb = kmm_zalloc(sizeof(struct tcb_s));
   if (!tcb)
     {
       return -ENOMEM;
@@ -243,7 +243,7 @@ int exec_module(FAR struct binary_s *binp,
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_ARCH_KERNEL_STACK)
   /* Allocate the kernel stack */
 
-  ret = up_addrenv_kstackalloc(&tcb->cmn);
+  ret = up_addrenv_kstackalloc(tcb);
   if (ret < 0)
     {
       berr("ERROR: up_addrenv_kstackalloc() failed: %d\n", ret);
@@ -251,11 +251,11 @@ int exec_module(FAR struct binary_s *binp,
     }
 #endif
 
-  /* Note that tcb->cmn.flags are not modified.  0=normal task */
+  /* Note that tcb->flags are not modified.  0=normal task */
 
-  /* tcb->cmn.flags |= TCB_FLAG_TTYPE_TASK; */
+  /* tcb->flags |= TCB_FLAG_TTYPE_TASK; */
 
-  tcb->cmn.flags |= TCB_FLAG_FREE_TCB;
+  tcb->flags |= TCB_FLAG_FREE_TCB;
 
   /* Initialize the task */
 
@@ -293,17 +293,17 @@ int exec_module(FAR struct binary_s *binp,
    * must be the first allocated address space.
    */
 
-  tcb->cmn.dspace = binp->picbase;
+  tcb->dspace = binp->picbase;
 
   /* Re-initialize the task's initial state to account for the new PIC base */
 
-  up_initial_state(&tcb->cmn);
+  up_initial_state(tcb);
 #endif
 
 #ifdef CONFIG_ARCH_ADDRENV
   /* Attach the address environment to the new task */
 
-  ret = addrenv_attach((FAR struct tcb_s *)tcb, binp->addrenv);
+  ret = addrenv_attach(tcb, binp->addrenv);
   if (ret < 0)
     {
       berr("ERROR: addrenv_attach() failed: %d\n", ret);
@@ -314,23 +314,23 @@ int exec_module(FAR struct binary_s *binp,
 #ifdef CONFIG_SCHED_USER_IDENTITY
   if (binp->mode & S_ISUID)
     {
-      tcb->cmn.group->tg_euid = binp->uid;
+      tcb->group->tg_euid = binp->uid;
     }
 
   if (binp->mode & S_ISGID)
     {
-      tcb->cmn.group->tg_egid = binp->gid;
+      tcb->group->tg_egid = binp->gid;
     }
 #endif
 
   if (!spawn)
     {
-      exec_swap(this_task(), (FAR struct tcb_s *)tcb);
+      exec_swap(this_task(), tcb);
     }
 
   /* Get the assigned pid before we start the task */
 
-  pid = tcb->cmn.pid;
+  pid = tcb->pid;
 
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
   /* Restore the address environment of the caller */
@@ -356,7 +356,7 @@ int exec_module(FAR struct binary_s *binp,
 
   /* Then activate the task at the provided priority */
 
-  nxtask_activate((FAR struct tcb_s *)tcb);
+  nxtask_activate(tcb);
 
   return pid;
 
@@ -364,7 +364,7 @@ errout_with_tcbinit:
 #ifndef CONFIG_BUILD_KERNEL
   if (binp->stackaddr != NULL)
     {
-      tcb->cmn.stack_alloc_ptr = NULL;
+      tcb->stack_alloc_ptr = NULL;
     }
 #endif
 

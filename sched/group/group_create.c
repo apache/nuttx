@@ -116,12 +116,12 @@ static inline void group_inherit_identity(FAR struct task_group_s *group)
  *
  ****************************************************************************/
 
-int group_allocate(FAR struct task_tcb_s *tcb, uint8_t ttype)
+int group_allocate(FAR struct tcb_s *tcb, uint8_t ttype)
 {
   FAR struct task_group_s *group;
   int ret;
 
-  DEBUGASSERT(tcb && !tcb->cmn.group);
+  DEBUGASSERT(tcb && !tcb->group);
 
   ttype &= TCB_FLAG_TTYPE_MASK;
 
@@ -130,7 +130,7 @@ int group_allocate(FAR struct task_tcb_s *tcb, uint8_t ttype)
   if (ttype == TCB_FLAG_TTYPE_KERNEL)
     {
       group = &g_kthread_group;
-      tcb->cmn.group = group;
+      tcb->group = group;
       if (group->tg_info)
         {
           return OK;
@@ -165,7 +165,7 @@ int group_allocate(FAR struct task_tcb_s *tcb, uint8_t ttype)
 
   /* Attach the group to the TCB */
 
-  tcb->cmn.group = group;
+  tcb->group = group;
 
   /* Inherit the user identity from the parent task group */
 
@@ -225,23 +225,23 @@ errout_with_group:
  *
  ****************************************************************************/
 
-void group_initialize(FAR struct task_tcb_s *tcb)
+void group_initialize(FAR struct tcb_s *tcb)
 {
   FAR struct task_group_s *group;
 
-  DEBUGASSERT(tcb && tcb->cmn.group);
-  group = tcb->cmn.group;
+  DEBUGASSERT(tcb && tcb->group);
+  group = tcb->group;
   spin_lock_init(&group->tg_lock);
 
   /* Allocate mm_map list if required */
 
   mm_map_initialize(&group->tg_mm_map,
-                    (tcb->cmn.flags & TCB_FLAG_TTYPE_KERNEL) != 0);
+                    (tcb->flags & TCB_FLAG_TTYPE_KERNEL) != 0);
 
 #ifdef HAVE_GROUP_MEMBERS
   /* Assign the PID of this new task as a member of the group. */
 
-  sq_addlast(&tcb->cmn.member, &group->tg_members);
+  sq_addlast(&tcb->member, &group->tg_members);
 #endif
 
   /* Save the ID of the main task within the group of threads.  This needed
@@ -252,6 +252,6 @@ void group_initialize(FAR struct task_tcb_s *tcb)
 
   if (group != &g_kthread_group)
     {
-      group->tg_pid = tcb->cmn.pid;
+      group->tg_pid = tcb->pid;
     }
 }

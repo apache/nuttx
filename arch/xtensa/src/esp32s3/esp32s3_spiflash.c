@@ -1024,7 +1024,7 @@ static int spiflash_init_spi_flash_op_block_task(int cpu)
 
   /* Initialize the task */
 
-  ret = nxtask_init((FAR struct task_tcb_s *)tcb, "spiflash_op",
+  ret = nxtask_init(tcb, "spiflash_op",
                     SCHED_PRIORITY_MAX,
                     NULL, CONFIG_ESP32S3_SPIFLASH_OP_TASK_STACKSIZE,
                     spi_flash_op_block_task, argv, environ, NULL);
