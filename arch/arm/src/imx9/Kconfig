@@ -375,6 +375,27 @@ config IMX9_GPIO_IRQ
 	bool "GPIO Interrupt Support"
 	default n
 
+menu "GPIO Interrupt Configuration"
+	depends on IMX9_GPIO_IRQ
+
+config IMX9_GPIO1_IRQ
+	bool "GPIO1 Interrupt"
+	default n
+
+config IMX9_GPIO2_IRQ
+	bool "GPIO2 Interrupt"
+	default n
+
+config IMX9_GPIO3_IRQ
+	bool "GPIO3 Interrupt"
+	default n
+
+config IMX9_GPIO4_IRQ
+	bool "GPIO4 Interrupt"
+	default n
+
+endmenu # GPIO Interrupt Configuration
+
 config IMX9_LPI2C
 	bool "LPI2C support"
 	default n
