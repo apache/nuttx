@@ -29,6 +29,23 @@
 #include <debug.h>
 
 #include "stm32_fdcan.h"
+#include "b-g431b-esc1.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Configuration ************************************************************/
+
+#if !defined(CONFIG_STM32_FDCAN1)
+#  error "No CAN is enable. Please eneable at least one CAN device"
+#endif
+
+#ifdef CONFIG_BOARD_STM32_BG431BESC1_CANTERM
+#  define BG431BESC1_CANTERM (true)
+#else
+#  define BG431BESC1_CANTERM (false)
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -54,6 +71,14 @@ int stm32_cansock_setup(void)
       canerr("ERROR:  Failed to get FDCAN interface %d\n", ret);
       return ret;
     }
+
+  /* Configure CAN_TERM pin for output */
+
+  stm32_configgpio(GPIO_CANTERM);
+
+  /* Set CAN_TERM pin high or low */
+
+  stm32_gpiowrite(GPIO_CANTERM, BG431BESC1_CANTERM);
 
   return OK;
 }
