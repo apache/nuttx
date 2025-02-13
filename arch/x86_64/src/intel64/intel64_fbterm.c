@@ -261,6 +261,8 @@ static void fb_clear(void)
 
 void x86_64_mb2_fbinitialize(struct multiboot_tag_framebuffer *fbt)
 {
+  size_t map_size;
+
   g_fb.baseaddr = (void *)(uintptr_t)fbt->common.framebuffer_addr;
   g_fb.width    = fbt->common.framebuffer_width;
   g_fb.height   = fbt->common.framebuffer_height;
@@ -268,9 +270,19 @@ void x86_64_mb2_fbinitialize(struct multiboot_tag_framebuffer *fbt)
   g_fb.bpp      = fbt->common.framebuffer_bpp;
   g_fb.type     = fbt->common.framebuffer_type;
 
-  up_map_region(g_fb.baseaddr, g_fb.pitch * g_fb.height,
-    X86_PAGE_WR | X86_PAGE_PRESENT |
-    X86_PAGE_NOCACHE | X86_PAGE_GLOBAL);
+  map_size = g_fb.pitch * g_fb.height;
+
+  if ((uintptr_t)g_fb.baseaddr > 0xffffffff)
+    {
+      /* align map size to HUGE_PAGE_SIZE_1G to avoid page allocation. */
+
+      map_size = (map_size + (HUGE_PAGE_SIZE_1G - 1)) / HUGE_PAGE_SIZE_1G *
+                  HUGE_PAGE_SIZE_1G;
+    }
+
+  up_map_region(g_fb.baseaddr, map_size,
+                X86_PAGE_WR | X86_PAGE_PRESENT |
+                X86_PAGE_NOCACHE | X86_PAGE_GLOBAL);
 
   fb_clear();
 
@@ -284,11 +296,12 @@ void x86_64_mb2_fbinitialize(struct multiboot_tag_framebuffer *fbt)
  * Name: fb_putc
  ****************************************************************************/
 
-void fb_putc(char ch)
+void fb_putc(int ch)
 {
   const struct nx_fontbitmap_s *fbm;
   uint8_t                       gly_x;
   uint8_t                       gly_y;
+  NXHANDLE                      font_handle = (NXHANDLE)g_fb_term.font;
 
   if (g_fb.baseaddr == NULL)
     {
@@ -298,6 +311,7 @@ void fb_putc(char ch)
   if (ch == '\n')
     {
       g_fb_term.cursor_y += g_fb_term.font->metrics.mxheight;
+      g_fb_term.cursor_x = 0;
       return;
     }
 
@@ -307,10 +321,11 @@ void fb_putc(char ch)
       return;
     }
 
-  fbm = nxf_getbitmap((NXHANDLE)g_fb_term.font, ch);
+  fbm = nxf_getbitmap(font_handle, ch);
   if (fbm == NULL)
     {
-      fb_putc('.');
+      fbm = nxf_getbitmap(font_handle, '.');
+      g_fb_term.cursor_x += fbm->metric.width;
       return;
     }
 
@@ -319,8 +334,7 @@ void fb_putc(char ch)
       if (g_fb_term.cursor_y + gly_y >= g_fb.height)
         {
           fb_scroll();
-          fb_putc(ch);
-          return;
+          return fb_putc(ch);
         }
 
       for (gly_x = 0; gly_x < fbm->metric.width; gly_x++)
@@ -348,5 +362,7 @@ void fb_putc(char ch)
     }
 
   g_fb_term.cursor_x += fbm->metric.width;
+
+  return;
 }
 #endif  /* CONFIG_MULTBOOT2_FB_TERM */

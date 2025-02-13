@@ -215,6 +215,7 @@ int up_fbinitialize(int display)
 {
   struct multiboot_tag_framebuffer *fbt = g_mb_fb_tag;
   struct multiboot_fb_s            *fb  = &g_fb;
+  uint64_t map_size;
 
   UNUSED(display);
 
@@ -251,7 +252,17 @@ int up_fbinitialize(int display)
    *       up_map_region() can map this address.
    */
 
-  up_map_region(fb->baseaddr, fb->planeinfo.stride * fb->videoinfo.yres,
+  map_size = fb->planeinfo.stride * fb->videoinfo.yres;
+
+  if ((uintptr_t)fb->baseaddr > 0xffffffff)
+    {
+      /* align map size to HUGE_PAGE_SIZE_1G to avoid page allocation. */
+
+      map_size = (map_size + (HUGE_PAGE_SIZE_1G - 1)) / HUGE_PAGE_SIZE_1G *
+                  HUGE_PAGE_SIZE_1G;
+    }
+
+  up_map_region(fb->baseaddr, map_size,
                 X86_PAGE_WR | X86_PAGE_PRESENT |
                 X86_PAGE_NOCACHE | X86_PAGE_GLOBAL);
 

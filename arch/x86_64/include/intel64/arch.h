@@ -205,6 +205,9 @@
 #define HUGE_PAGE_SIZE                 (0x200000)
 #  define HUGE_PAGE_MASK               (~(HUGE_PAGE_SIZE - 1))
 
+#define HUGE_PAGE_SIZE_1G              (0x40000000)
+#  define HUGE_PAGE_MASK_1G            (~(HUGE_PAGE_SIZE_1G - 1))
+
 /* Kernel mapping - lower 1GB maps to 4GB-5GB */
 
 #define X86_PDPT_KERNEL_MAP            (X86_PAGE_GLOBAL | X86_PAGE_WR | \
