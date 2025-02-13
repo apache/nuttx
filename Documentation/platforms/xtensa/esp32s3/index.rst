@@ -430,6 +430,30 @@ using WPA2.
 
 The ``dhcpd_start`` is necessary to let your board to associate an IP to your smartphone.
 
+PSRAM
+-----
+
+The external PSRAM is supported in ESP32-S3. The PSRAM is mapped to the data bus during
+the boot process. The PSRAM is used as a heap memory and is available for the application.
+
+Please check the following examples for more information:
+
+* :ref:`esp32s3-devkit:psram_octal <platforms/xtensa/esp32s3/boards/esp32s3-devkit/index:psram_octal>`
+* :ref:`esp32s3-devkit:psram_quad <platforms/xtensa/esp32s3/boards/esp32s3-devkit/index:psram_quad>`
+
+Moving not initialized data to the external PSRAM
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Static or global not-initialized data can be moved to the external PSRAM. Usually allocated at the
+``.bss`` memory segment, this data can be set to another section in the external PSRAM.
+Set the attribute ``__attribute__ ((section (".ext_ram.bss")))`` to the variable. For example::
+
+  __attribute__ ((section (".ext_ram.bss"))) static uint8_t my_data[1024];
+
+``my_data`` will be allocated in the external PSRAM and can be explicitly initialized on runtime.
+
+This is particularly useful when the internal RAM is not enough to hold all the data.
+
 Supported Boards
 ================
 
