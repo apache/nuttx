@@ -2887,6 +2887,14 @@ config ARCH_BOARD_QEMU_ARMV7R
 		This selects support for NuttX on the QEMU ARMv7r + virt
 		board featuring the qemu ARMv7r CPUs.
 
+config ARCH_BOARD_QEMU_ARMV8R_AARCH32
+	bool "Qemu ARMv8r CPUs board"
+	depends on ARCH_CHIP_QEMU_ARM
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This selects support for NuttX on the QEMU ARMv8r + virt
+		board featuring the qemu ARMv8r aarch32 CPUs.
+
 config ARCH_BOARD_PINEPHONE
 	bool "PINE64 PinePhone"
 	depends on ARCH_CHIP_A64
@@ -4701,6 +4709,9 @@ source "boards/arm/rtl8730e/rtl8730e_evb/Kconfig"
 endif
 if ARCH_BOARD_QEMU_ARMV8A
 source "boards/arm64/qemu/qemu-armv8a/Kconfig"
+endif
+if ARCH_BOARD_QEMU_ARMV8R_AARCH32
+source "boards/arm/qemu/qemu-armv8r-aarch32/Kconfig"
 endif
 if ARCH_BOARD_PINEPHONE
 source "boards/arm64/a64/pinephone/Kconfig"
