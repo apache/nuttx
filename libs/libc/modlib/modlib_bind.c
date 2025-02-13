@@ -938,7 +938,7 @@ int modlib_bind(FAR struct module_s *modp,
   ret = modlib_findsymtab(loadinfo);
   if (ret < 0)
     {
-      return ret;
+      goto errout_with_addrenv;
     }
 
   /* Process relocations in every allocated section */
@@ -989,7 +989,7 @@ int modlib_bind(FAR struct module_s *modp,
 
           if (ret < 0)
             {
-              return ret;
+              goto errout_with_addrenv;
             }
         }
       else
@@ -1042,7 +1042,7 @@ int modlib_bind(FAR struct module_s *modp,
 
       if (ret < 0)
         {
-          return ret;
+          goto errout_with_addrenv;
         }
     }
 
@@ -1075,6 +1075,8 @@ int modlib_bind(FAR struct module_s *modp,
       up_coherent_dcache(loadinfo->sectalloc[i], loadinfo->shdr[i].sh_size);
     }
 #endif
+
+errout_with_addrenv:
 
 #ifdef CONFIG_ARCH_ADDRENV
   if (loadinfo->addrenv != NULL)
