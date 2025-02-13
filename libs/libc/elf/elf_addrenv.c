@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/modlib/modlib_addrenv.c
+ * libs/libc/elf/elf_addrenv.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -33,7 +33,7 @@
 #include <sys/mman.h>
 #include <sys/param.h>
 
-#include "modlib.h"
+#include "elf.h"
 
 #ifdef CONFIG_ARCH_ADDRENV
 
@@ -57,7 +57,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: modlib_addrenv_alloc
+ * Name: libelf_addrenv_alloc
  *
  * Description:
  *   Allocate memory for the ELF image (textalloc and datastart). If
@@ -80,7 +80,7 @@
  *
  ****************************************************************************/
 
-int modlib_addrenv_alloc(FAR struct mod_loadinfo_s *loadinfo,
+int libelf_addrenv_alloc(FAR struct mod_loadinfo_s *loadinfo,
                          size_t textsize, size_t datasize)
 {
 #if defined(CONFIG_ARCH_STACK_DYNAMIC)
@@ -143,7 +143,7 @@ errout_with_addrenv:
 }
 
 /****************************************************************************
- * Name: modlib_addrenv_select
+ * Name: libelf_addrenv_select
  *
  * Description:
  *   Temporarily select the task's address environment.
@@ -156,7 +156,7 @@ errout_with_addrenv:
  *
  ****************************************************************************/
 
-int modlib_addrenv_select(FAR struct mod_loadinfo_s *loadinfo)
+int libelf_addrenv_select(FAR struct mod_loadinfo_s *loadinfo)
 {
   int ret;
 
@@ -183,10 +183,10 @@ int modlib_addrenv_select(FAR struct mod_loadinfo_s *loadinfo)
 }
 
 /****************************************************************************
- * Name: modlib_addrenv_restore
+ * Name: libelf_addrenv_restore
  *
  * Description:
- *   Restore the address environment before modlib_addrenv_select() was
+ *   Restore the address environment before libelf_addrenv_select() was
  *   called.
  *
  * Input Parameters:
@@ -197,7 +197,7 @@ int modlib_addrenv_select(FAR struct mod_loadinfo_s *loadinfo)
  *
  ****************************************************************************/
 
-int modlib_addrenv_restore(FAR struct mod_loadinfo_s *loadinfo)
+int libelf_addrenv_restore(FAR struct mod_loadinfo_s *loadinfo)
 {
   int ret;
 
@@ -224,11 +224,11 @@ int modlib_addrenv_restore(FAR struct mod_loadinfo_s *loadinfo)
 }
 
 /****************************************************************************
- * Name: modlib_addrenv_free
+ * Name: libelf_addrenv_free
  *
  * Description:
  *   Release the address environment previously created by
- *   modlib_addrenv_alloc().  This function is called only under certain
+ *   libelf_addrenv_alloc().  This function is called only under certain
  *   error conditions after the module has been loaded but not yet started.
  *   After the module has been started, the address environment will
  *   automatically be freed when the module exits.
@@ -241,7 +241,7 @@ int modlib_addrenv_restore(FAR struct mod_loadinfo_s *loadinfo)
  *
  ****************************************************************************/
 
-void modlib_addrenv_free(FAR struct mod_loadinfo_s *loadinfo)
+void libelf_addrenv_free(FAR struct mod_loadinfo_s *loadinfo)
 {
   /* Free the address environment */
 
