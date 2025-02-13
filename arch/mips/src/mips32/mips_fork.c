@@ -92,7 +92,7 @@
 pid_t mips_fork(const struct fork_s *context)
 {
   struct tcb_s *parent = this_task();
-  struct task_tcb_s *child;
+  struct tcb_s *child;
   uint32_t newsp;
 #ifdef CONFIG_MIPS32_FRAMEPOINTER
   uint32_t newfp;
@@ -159,8 +159,8 @@ pid_t mips_fork(const struct fork_s *context)
    * effort is overkill.
    */
 
-  newtop = (uintptr_t)child->cmn.stack_base_ptr +
-                      child->cmn.adj_stack_size;
+  newtop = (uintptr_t)child->stack_base_ptr +
+                      child->adj_stack_size;
   newsp = newtop - stackutil;
   memcpy((void *)newsp, (const void *)context->sp, stackutil);
 
@@ -195,22 +195,22 @@ pid_t mips_fork(const struct fork_s *context)
    * indication to the newly started child thread.
    */
 
-  child->cmn.xcp.regs[REG_S0]  = context->s0;  /* Saved register s0 */
-  child->cmn.xcp.regs[REG_S1]  = context->s1;  /* Saved register s1 */
-  child->cmn.xcp.regs[REG_S2]  = context->s2;  /* Saved register s2 */
-  child->cmn.xcp.regs[REG_S3]  = context->s3;  /* Volatile register s3 */
-  child->cmn.xcp.regs[REG_S4]  = context->s4;  /* Volatile register s4 */
-  child->cmn.xcp.regs[REG_S5]  = context->s5;  /* Volatile register s5 */
-  child->cmn.xcp.regs[REG_S6]  = context->s6;  /* Volatile register s6 */
-  child->cmn.xcp.regs[REG_S7]  = context->s7;  /* Volatile register s7 */
+  child->xcp.regs[REG_S0]  = context->s0;  /* Saved register s0 */
+  child->xcp.regs[REG_S1]  = context->s1;  /* Saved register s1 */
+  child->xcp.regs[REG_S2]  = context->s2;  /* Saved register s2 */
+  child->xcp.regs[REG_S3]  = context->s3;  /* Volatile register s3 */
+  child->xcp.regs[REG_S4]  = context->s4;  /* Volatile register s4 */
+  child->xcp.regs[REG_S5]  = context->s5;  /* Volatile register s5 */
+  child->xcp.regs[REG_S6]  = context->s6;  /* Volatile register s6 */
+  child->xcp.regs[REG_S7]  = context->s7;  /* Volatile register s7 */
 #ifdef CONFIG_MIPS32_FRAMEPOINTER
-  child->cmn.xcp.regs[REG_FP]  = newfp;        /* Frame pointer */
+  child->xcp.regs[REG_FP]  = newfp;        /* Frame pointer */
 #else
-  child->cmn.xcp.regs[REG_S8]  = context->s8;  /* Volatile register s8 */
+  child->xcp.regs[REG_S8]  = context->s8;  /* Volatile register s8 */
 #endif
-  child->cmn.xcp.regs[REG_SP]  = newsp;        /* Stack pointer */
+  child->xcp.regs[REG_SP]  = newsp;        /* Stack pointer */
 #ifdef MIPS32_SAVE_GP
-  child->cmn.xcp.regs[REG_GP]  = context->gp;  /* Global pointer */
+  child->xcp.regs[REG_GP]  = context->gp;  /* Global pointer */
 #endif
 
   /* And, finally, start the child task.  On a failure, nxtask_start_fork()

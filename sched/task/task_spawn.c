@@ -86,13 +86,13 @@ static int nxtask_spawn_create(FAR const char *name, int priority,
                               FAR const posix_spawn_file_actions_t *actions,
                               FAR const posix_spawnattr_t *attr)
 {
-  FAR struct task_tcb_s *tcb;
+  FAR struct tcb_s *tcb;
   pid_t pid;
   int ret;
 
   /* Allocate a TCB for the new task. */
 
-  tcb = kmm_zalloc(sizeof(struct task_tcb_s));
+  tcb = kmm_zalloc(sizeof(struct tcb_s));
   if (tcb == NULL)
     {
       serr("ERROR: Failed to allocate TCB\n");
@@ -101,7 +101,7 @@ static int nxtask_spawn_create(FAR const char *name, int priority,
 
   /* Setup the task type */
 
-  tcb->cmn.flags = TCB_FLAG_TTYPE_TASK | TCB_FLAG_FREE_TCB;
+  tcb->flags = TCB_FLAG_TTYPE_TASK | TCB_FLAG_FREE_TCB;
 
   /* Initialize the task */
 
@@ -115,7 +115,7 @@ static int nxtask_spawn_create(FAR const char *name, int priority,
 
   /* Get the assigned pid before we start the task */
 
-  pid = tcb->cmn.pid;
+  pid = tcb->pid;
 
   /* Set the attributes */
 
@@ -130,7 +130,7 @@ static int nxtask_spawn_create(FAR const char *name, int priority,
 
   /* Activate the task */
 
-  nxtask_activate(&tcb->cmn);
+  nxtask_activate(tcb);
 
   return pid;
 
