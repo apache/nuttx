@@ -321,7 +321,7 @@ static int icmp_getsockopt_internal(FAR struct socket *psock, int option,
 
   if (psock->s_type != SOCK_RAW)
     {
-      return ENOPROTOOPT;
+      return -ENOPROTOOPT;
     }
 
   net_lock();
@@ -429,7 +429,7 @@ static int icmp_setsockopt_internal(FAR struct socket *psock, int option,
 
   if (psock->s_type != SOCK_RAW)
     {
-      return ENOPROTOOPT;
+      return -ENOPROTOOPT;
     }
 
   net_lock();
