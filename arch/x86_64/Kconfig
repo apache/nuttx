@@ -144,7 +144,7 @@ if ARCH_MULTIBOOT2
 config MULTBOOT2_FB_TERM
 	bool "Multiboot2 framebuffer terminal"
 	default n
-	depends on NXFONTS
+	depends on NXFONTS && MULTBOOT2_FB
 	---help---
 		Enable a framebuffer terminal for early debug printing
 
