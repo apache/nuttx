@@ -400,6 +400,7 @@ static int rpmsg_port_uart_rx_thread(int argc, FAR char *argv[])
               rpmsgdbg("Received poweroff command\n");
               rpmsg_port_drop_packets(&rpuart->port, RPMSG_PORT_DROP_TXQ);
               rpmsg_port_unregister(&rpuart->port);
+              DEBUGVERIFY(file_ioctl(&rpuart->file, TIOCVHANGUP, 0) >= 0);
               rpuart->connected = false;
               continue;
             }
