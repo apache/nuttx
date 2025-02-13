@@ -2821,6 +2821,18 @@ int arch_phy_irq(FAR const char *intf, xcpt_t handler, void *arg,
 void up_putc(int ch);
 
 /****************************************************************************
+ * Name: up_lowputc
+ *
+ * Description:
+ *   Output one character in early boot-stages.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_LOWPUTC
+void up_lowputc(int ch);
+#endif
+
+/****************************************************************************
  * Name: up_puts
  *
  * Description:
