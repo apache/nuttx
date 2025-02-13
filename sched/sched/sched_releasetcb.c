@@ -101,7 +101,7 @@ static void nxsched_releasepid(pid_t pid)
 int nxsched_release_tcb(FAR struct tcb_s *tcb, uint8_t ttype)
 {
 #ifndef CONFIG_DISABLE_PTHREAD
-  FAR struct task_tcb_s *ttcb;
+  FAR struct task_group_s *group;
 #endif
   int ret = OK;
 
@@ -180,16 +180,16 @@ int nxsched_release_tcb(FAR struct tcb_s *tcb, uint8_t ttype)
 
       if (ttype == TCB_FLAG_TTYPE_TASK)
         {
-          ttcb = (FAR struct task_tcb_s *)tcb;
-          if (!sq_empty(&ttcb->group.tg_members)
+          group = (FAR struct task_group_s *)(tcb + 1);
+          if (!sq_empty(&group->tg_members)
 #if defined(CONFIG_SCHED_WAITPID) && !defined(CONFIG_SCHED_HAVE_PARENT)
-              || ttcb->group.tg_nwaiters > 0
+              || group->tg_nwaiters > 0
 #endif
               )
             {
               /* Mark the group as deleted now */
 
-              ttcb->group.tg_flags |= GROUP_FLAG_DELETED;
+              group->tg_flags |= GROUP_FLAG_DELETED;
 
               return ret;
             }

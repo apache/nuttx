@@ -729,29 +729,6 @@ struct tcb_s
 #endif
 };
 
-/* struct task_tcb_s ********************************************************/
-
-/* This is the particular form of the task control block (TCB) structure used
- * by tasks (and kernel threads).  There are two TCB forms:  one for pthreads
- * and one for tasks.
- * Both share the common TCB fields (which must appear at the top of the
- * structure) plus additional fields unique to tasks and threads.
- * Having separate structures for tasks and pthreads adds some complexity,
- * but saves memory in that it prevents pthreads from being burdened with the
- * overhead required for tasks (and vice versa).
- */
-
-struct task_tcb_s
-{
-  /* Common TCB fields ******************************************************/
-
-  struct tcb_s cmn;                      /* Common TCB fields               */
-
-  /* Task Group *************************************************************/
-
-  struct task_group_s group;             /* Shared task group data          */
-};
-
 /* struct pthread_tcb_s *****************************************************/
 
 /* This is the particular form of the task control block (TCB) structure used
@@ -1013,7 +990,7 @@ FAR struct fdlist *nxsched_get_fdlist(void);
  *
  ****************************************************************************/
 
-int nxtask_init(FAR struct task_tcb_s *tcb, const char *name, int priority,
+int nxtask_init(FAR struct tcb_s *tcb, const char *name, int priority,
                 FAR void *stack, uint32_t stack_size, main_t entry,
                 FAR char * const argv[], FAR char * const envp[],
                 FAR const posix_spawn_file_actions_t *actions);
@@ -1037,7 +1014,7 @@ int nxtask_init(FAR struct task_tcb_s *tcb, const char *name, int priority,
  *
  ****************************************************************************/
 
-void nxtask_uninit(FAR struct task_tcb_s *tcb);
+void nxtask_uninit(FAR struct tcb_s *tcb);
 
 /****************************************************************************
  * Name: nxtask_create
@@ -1173,9 +1150,9 @@ void nxtask_startup(main_t entrypt, int argc, FAR char *argv[]);
  *
  ****************************************************************************/
 
-FAR struct task_tcb_s *nxtask_setup_fork(start_t retaddr);
-pid_t nxtask_start_fork(FAR struct task_tcb_s *child);
-void nxtask_abort_fork(FAR struct task_tcb_s *child, int errcode);
+FAR struct tcb_s *nxtask_setup_fork(start_t retaddr);
+pid_t nxtask_start_fork(FAR struct tcb_s *child);
+void nxtask_abort_fork(FAR struct tcb_s *child, int errcode);
 
 /****************************************************************************
  * Name: nxtask_argvstr

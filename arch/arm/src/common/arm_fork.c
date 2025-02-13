@@ -92,7 +92,7 @@
 pid_t arm_fork(const struct fork_s *context)
 {
   struct tcb_s *parent = this_task();
-  struct task_tcb_s *child;
+  struct tcb_s *child;
   uint32_t newsp;
   uint32_t newfp;
   uint32_t newtop;
@@ -144,17 +144,17 @@ pid_t arm_fork(const struct fork_s *context)
    * effort is overkill.
    */
 
-  newtop = (uint32_t)child->cmn.stack_base_ptr +
-                     child->cmn.adj_stack_size;
+  newtop = (uint32_t)child->stack_base_ptr +
+                     child->adj_stack_size;
 
   newsp = newtop - stackutil;
 
   /* Move the register context to newtop. */
 
   memcpy((void *)(newsp - XCPTCONTEXT_SIZE),
-         child->cmn.xcp.regs, XCPTCONTEXT_SIZE);
+         child->xcp.regs, XCPTCONTEXT_SIZE);
 
-  child->cmn.xcp.regs = (void *)(newsp - XCPTCONTEXT_SIZE);
+  child->xcp.regs = (void *)(newsp - XCPTCONTEXT_SIZE);
 
   memcpy((void *)newsp, (const void *)oldsp, stackutil);
 
@@ -182,16 +182,16 @@ pid_t arm_fork(const struct fork_s *context)
    * child thread.
    */
 
-  child->cmn.xcp.regs[REG_R4]  = context->r4;  /* Volatile register r4 */
-  child->cmn.xcp.regs[REG_R5]  = context->r5;  /* Volatile register r5 */
-  child->cmn.xcp.regs[REG_R6]  = context->r6;  /* Volatile register r6 */
-  child->cmn.xcp.regs[REG_R7]  = context->r7;  /* Volatile register r7 */
-  child->cmn.xcp.regs[REG_R8]  = context->r8;  /* Volatile register r8 */
-  child->cmn.xcp.regs[REG_R9]  = context->r9;  /* Volatile register r9 */
-  child->cmn.xcp.regs[REG_R10] = context->r10; /* Volatile register r10 */
-  child->cmn.xcp.regs[REG_R11] = context->r11; /* Volatile register r11 */
-  child->cmn.xcp.regs[REG_FP]  = newfp;        /* Frame pointer */
-  child->cmn.xcp.regs[REG_SP]  = newsp;        /* Stack pointer */
+  child->xcp.regs[REG_R4]  = context->r4;  /* Volatile register r4 */
+  child->xcp.regs[REG_R5]  = context->r5;  /* Volatile register r5 */
+  child->xcp.regs[REG_R6]  = context->r6;  /* Volatile register r6 */
+  child->xcp.regs[REG_R7]  = context->r7;  /* Volatile register r7 */
+  child->xcp.regs[REG_R8]  = context->r8;  /* Volatile register r8 */
+  child->xcp.regs[REG_R9]  = context->r9;  /* Volatile register r9 */
+  child->xcp.regs[REG_R10] = context->r10; /* Volatile register r10 */
+  child->xcp.regs[REG_R11] = context->r11; /* Volatile register r11 */
+  child->xcp.regs[REG_FP]  = newfp;        /* Frame pointer */
+  child->xcp.regs[REG_SP]  = newsp;        /* Stack pointer */
 
 #ifdef CONFIG_LIB_SYSCALL
   /* If we got here via a syscall, then we are going to have to setup some
@@ -203,7 +203,7 @@ pid_t arm_fork(const struct fork_s *context)
       int index;
       for (index = 0; index < parent->xcp.nsyscalls; index++)
         {
-          child->cmn.xcp.syscall[index].sysreturn =
+          child->xcp.syscall[index].sysreturn =
             parent->xcp.syscall[index].sysreturn;
 
           /* REVISIT:  This logic is *not* common. */
@@ -211,7 +211,7 @@ pid_t arm_fork(const struct fork_s *context)
 #if defined(CONFIG_ARCH_ARMV7A)
 #  ifdef CONFIG_BUILD_KERNEL
 
-          child->cmn.xcp.syscall[index].cpsr =
+          child->xcp.syscall[index].cpsr =
             parent->xcp.syscall[index].cpsr;
 
 #  endif
@@ -219,21 +219,21 @@ pid_t arm_fork(const struct fork_s *context)
 #elif defined(CONFIG_ARCH_ARMV7R)
 #  ifdef CONFIG_BUILD_PROTECTED
 
-          child->cmn.xcp.syscall[index].cpsr =
+          child->xcp.syscall[index].cpsr =
             parent->xcp.syscall[index].cpsr;
 
 #  endif
 #elif defined(CONFIG_ARCH_ARMV6M) || defined(CONFIG_ARCH_ARMV7M) || \
       defined(CONFIG_ARCH_ARMV8M)
 
-          child->cmn.xcp.syscall[index].excreturn =
+          child->xcp.syscall[index].excreturn =
             parent->xcp.syscall[index].excreturn;
 #else
 #  error Missing logic
 #endif
         }
 
-      child->cmn.xcp.nsyscalls = parent->xcp.nsyscalls;
+      child->xcp.nsyscalls = parent->xcp.nsyscalls;
     }
 #endif
 

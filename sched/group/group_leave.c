@@ -226,7 +226,7 @@ void group_leave(FAR struct tcb_s *tcb)
 
 void group_drop(FAR struct task_group_s *group)
 {
-  FAR struct task_tcb_s *tcb;
+  FAR struct tcb_s *tcb;
 
 #if defined(CONFIG_SCHED_WAITPID) && !defined(CONFIG_SCHED_HAVE_PARENT)
   /* If there are threads waiting for this group to be freed, then we cannot
@@ -246,11 +246,12 @@ void group_drop(FAR struct task_group_s *group)
 
   if (group->tg_flags & GROUP_FLAG_DELETED)
     {
-      tcb = container_of(group, struct task_tcb_s, group);
+      tcb = (FAR struct tcb_s *)
+        ((uintptr_t)group - sizeof(struct tcb_s));
 
       /* Release the group container itself */
 
-      if (tcb->cmn.flags & TCB_FLAG_FREE_TCB)
+      if (tcb->flags & TCB_FLAG_FREE_TCB)
         {
           kmm_free(tcb);
         }
