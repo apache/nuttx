@@ -172,21 +172,29 @@ void imx9_gpioirq_initialize(void)
 
   /* Attach the common GPIO interrupt handler and enable the interrupt */
 
+#ifdef CONFIG_IMX9_GPIO1_IRQ
   DEBUGVERIFY(irq_attach(IMX9_IRQ_GPIO1_0,
                          imx9_gpio_interrupt, (void *)GPIO_PORT1));
   up_enable_irq(IMX9_IRQ_GPIO1_0);
+#endif
 
+#ifdef CONFIG_IMX9_GPIO2_IRQ
   DEBUGVERIFY(irq_attach(IMX9_IRQ_GPIO2_0,
                          imx9_gpio_interrupt, (void *)GPIO_PORT2));
   up_enable_irq(IMX9_IRQ_GPIO2_0);
+#endif
 
+#ifdef CONFIG_IMX9_GPIO3_IRQ
   DEBUGVERIFY(irq_attach(IMX9_IRQ_GPIO3_0,
                          imx9_gpio_interrupt, (void *)GPIO_PORT3));
   up_enable_irq(IMX9_IRQ_GPIO3_0);
+#endif
 
+#ifdef CONFIG_IMX9_GPIO4_IRQ
   DEBUGVERIFY(irq_attach(IMX9_IRQ_GPIO4_0,
                          imx9_gpio_interrupt, (void *)GPIO_PORT4));
   up_enable_irq(IMX9_IRQ_GPIO4_0);
+#endif
 }
 
 /****************************************************************************
