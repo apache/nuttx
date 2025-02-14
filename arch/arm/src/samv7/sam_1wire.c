@@ -51,6 +51,7 @@
 #include "hardware/sam_uart.h"
 #include "sam_gpio.h"
 #include "sam_serial.h"
+#include "sam_periphclks.h"
 
 /****************************************************************************
  * Pre-processor Definitions
