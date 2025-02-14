@@ -146,6 +146,19 @@
 
 #define STM32F401RCRS485_QETIMER 3
 
+/* GPIO pins used by the GPIO Subsystem */
+
+#define BOARD_NGPIOIN     1 /* Amount of GPIO Input pins */
+#define BOARD_NGPIOOUT    1 /* Amount of GPIO Output pins */
+#define BOARD_NGPIOINT    1 /* Amount of GPIO Input w/ Interruption pins */
+
+#define GPIO_IN1          (GPIO_INPUT | GPIO_PULLDOWN | GPIO_SPEED_2MHz | \
+                           GPIO_PORTC | GPIO_PIN4)
+#define GPIO_OUT1         (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHz | \
+                           GPIO_OUTPUT_SET | GPIO_PORTB | GPIO_PIN0)
+#define GPIO_INT1         (GPIO_INPUT | GPIO_PULLDOWN | GPIO_SPEED_2MHz | \
+                           GPIO_PORTC | GPIO_PIN4)
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -264,6 +277,21 @@ struct i2c_master_s *stm32_i2cbus_initialize(int port);
  ****************************************************************************/
 
 int stm32_at24_init(char *path);
+
+/****************************************************************************
+ * Name: stm32_gpio_initialize
+ *
+ * Description:
+ *   Initialize GPIO drivers for use with /apps/examples/gpio
+ *
+ * Return Value:
+ *   OK on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEV_GPIO
+int stm32_gpio_initialize(void);
+#endif
 
 /****************************************************************************
  * Name: stm32_adc_setup
