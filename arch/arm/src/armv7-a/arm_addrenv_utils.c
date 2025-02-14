@@ -66,6 +66,7 @@ int arm_addrenv_create_region(uintptr_t **list, unsigned int listlen,
   uint32_t *l2table;
   size_t nmapped;
   unsigned int npages;
+  unsigned int nlist;
   unsigned int i;
   unsigned int j;
 
@@ -92,8 +93,9 @@ int arm_addrenv_create_region(uintptr_t **list, unsigned int listlen,
    * the L1 page table).
    */
 
+  nlist = (npages + ENTRIES_PER_L2TABLE - 1) / ENTRIES_PER_L2TABLE;
   nmapped = 0;
-  for (i = 0; i < npages; i += ENTRIES_PER_L2TABLE)
+  for (i = 0; i < nlist; i++)
     {
       /* Allocate one physical page for the L2 page table */
 
