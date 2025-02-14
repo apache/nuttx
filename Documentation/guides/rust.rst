@@ -132,3 +132,32 @@ Replace `your_cpu_model` with the specific CPU model you are targeting. For exam
     make
 
 This will ensure that the Rust compiler generates optimized code for the specified CPU.
+
+Editor Integration
+==================
+To enable proper IDE support for Rust development in NuttX, you'll need to configure your editor to recognize the Rust project structure correctly. This section focuses on VS Code with rust-analyzer, which is the most popular setup.
+
+1. Create or update `.vscode/settings.json` in your NuttX workspace:
+
+.. code-block:: json
+
+    {
+        "rust-analyzer.linkedProjects": [
+            "nuttx-apps/examples/rust/slint/Cargo.toml"
+        ]
+    }
+
+2. (Optional) If you're using a custom target specification, you can set the `rust-analyzer.cargo.target` setting:
+
+.. code-block:: json
+
+    {
+        "rust-analyzer.cargo.target": "thumbv8m.main-nuttx-eabihf"
+    }
+
+.. note::
+    Since NuttX now supports the Rust standard library (std), specifying an exact target triple is usually not necessary. The default host target should work fine for most cases.
+
+    If you're working with a crate that tightly depends on the NuttX target, you can specify the target triple as shown above to get more accurate code analysis.
+
+This configuration helps rust-analyzer understand your project structure and provide accurate code analysis, auto-completion, and other IDE features while working with Rust code in NuttX.
