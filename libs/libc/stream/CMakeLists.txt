@@ -35,6 +35,7 @@ list(
   lib_nullinstream.c
   lib_nulloutstream.c
   lib_mtdoutstream.c
+  lib_mtdsostream.c
   lib_libnoflush.c
   lib_libsnoflush.c
   lib_syslogstream.c
