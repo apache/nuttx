@@ -376,7 +376,7 @@ void __gcov_dump(void)
   FAR struct gcov_info *info;
   FAR const char *strip = getenv("GCOV_PREFIX_STRIP");
   FAR const char *prefix = getenv("GCOV_PREFIX");
-  FAR char new_path[PATH_MAX];
+  FAR char *new_path;
   FAR char *prefix2;
   int ret;
 
@@ -393,6 +393,7 @@ void __gcov_dump(void)
       return;
     }
 
+  new_path = lib_get_tempbuffer(PATH_MAX);
   for (info = __gcov_info_start; info; info = info->next)
     {
       FAR char *filename;
@@ -430,6 +431,7 @@ void __gcov_dump(void)
       lib_free(filename);
     }
 
+  lib_put_tempbuffer(new_path);
   lib_free(prefix2);
 }
 
