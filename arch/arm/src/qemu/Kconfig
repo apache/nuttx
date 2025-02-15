@@ -34,6 +34,15 @@ config ARCH_CHIP_QEMU_CORTEXR5
 	select ARMV7R_HAVE_GICv2
 	select ARMV7R_HAVE_PTM
 
+config ARCH_CHIP_QEMU_CORTEXR52
+	bool "Qemu virtual Processor (cortex-r52)"
+	select ARCH_CORTEXR52
+	select ARCH_HAVE_FETCHADD
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_LOWVECTORS
+	select ARMV8R_HAVE_DECODEFIQ
+	select ARMV8R_HAVE_GICv3
+
 endchoice # Qemu Chip Selection
 
 endmenu # "Qemu Virt Chip Selection"
