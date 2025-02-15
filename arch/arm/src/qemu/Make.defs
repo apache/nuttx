@@ -28,6 +28,10 @@ ifeq ($(CONFIG_ARCH_ARMV7R),y)
 include armv7-r/Make.defs
 endif
 
+ifeq ($(CONFIG_ARCH_ARMV8R),y)
+include armv8-r/Make.defs
+endif
+
 # qemu-specific C source files
 CHIP_CSRCS  = qemu_boot.c qemu_serial.c qemu_irq.c qemu_timer.c
 
