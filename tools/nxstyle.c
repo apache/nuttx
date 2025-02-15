@@ -1133,6 +1133,7 @@ int main(int argc, char **argv, char **envp)
   bool bfor;            /* True: This line is beginning of a 'for' statement */
   bool bif;             /* True: This line is beginning of a 'if' statement */
   bool bswitch;         /* True: Within a switch statement */
+  bool bcase;           /* True: Within a case statement of a switch */
   bool bstring;         /* True: Within a string */
   bool bquote;          /* True: Backslash quoted character next */
   bool bblank;          /* Used to verify block comment terminator */
@@ -1269,6 +1270,7 @@ int main(int argc, char **argv, char **envp)
   bcrs           = false;       /* True: Carriage return found on the line */
   bfunctions     = false;       /* True: In private or public functions */
   bswitch        = false;       /* True: Within a switch statement */
+  bcase          = false;       /* True: Within a case statement of a switch */
   bstring        = false;       /* True: Within a string */
   bexternc       = false;       /* True: Within 'extern "C"' */
   bif            = false;       /* True: This line is beginning of a 'if' statement */
@@ -2004,22 +2006,11 @@ int main(int argc, char **argv, char **envp)
            */
 
           else if (strncmp(&line[indent], "break ", 6) == 0 ||
-                   strncmp(&line[indent], "case ", 5) == 0 ||
-    #if 0 /* Part of switch */
-                   strncmp(&line[indent], "case ", 5) == 0 ||
-    #endif
                    strncmp(&line[indent], "continue ", 9) == 0 ||
-
-    #if 0 /* Part of switch */
-                   strncmp(&line[indent], "default ", 8) == 0 ||
-    #endif
                    strncmp(&line[indent], "do ", 3) == 0 ||
                    strncmp(&line[indent], "else ", 5) == 0 ||
                    strncmp(&line[indent], "goto ", 5) == 0 ||
                    strncmp(&line[indent], "return ", 7) == 0 ||
-    #if 0 /* Doesn't follow pattern */
-                   strncmp(&line[indent], "switch ", 7) == 0 ||
-    #endif
                    strncmp(&line[indent], "while ", 6) == 0)
             {
               bstatm = true;
@@ -2042,6 +2033,29 @@ int main(int argc, char **argv, char **envp)
             {
               bswitch = true;
             }
+          else if (strncmp(&line[indent], "switch(", 7) == 0)
+            {
+              ERROR("Missing whitespace after keyword", lineno, n);
+              bswitch = true;
+            }
+          else if (strncmp(&line[indent], "case ", 5) == 0)
+            {
+              bcase = true;
+            }
+          else if (strncmp(&line[indent], "case(", 5) == 0)
+            {
+              ERROR("Missing whitespace after keyword", lineno, n);
+              bcase = true;
+            }
+          else if (strncmp(&line[indent], "default ", 8) == 0)
+            {
+              ERROR("Missing whitespace after keyword", lineno, n);
+              bcase = true;
+            }
+          else if (strncmp(&line[indent], "default:", 8) == 0)
+            {
+              bcase = true;
+            }
 
           /* Also check for C keywords with missing white space */
 
@@ -2062,11 +2076,6 @@ int main(int argc, char **argv, char **envp)
               ERROR("Missing whitespace after keyword", lineno, n);
               bfor   = true;
               bstatm = true;
-            }
-          else if (strncmp(&line[indent], "switch(", 7) == 0)
-            {
-              ERROR("Missing whitespace after keyword", lineno, n);
-              bswitch = true;
             }
         }
 
@@ -2731,9 +2740,26 @@ int main(int argc, char **argv, char **envp)
                       }
                   }
                   break;
+                case ':':
+                  {
+                    if (bcase == true)
+                      {
+                        char *ndx = &line[n + 1];
+                        while ((int)isspace(*ndx))
+                          {
+                            ndx++;
+                          }
 
-                /* Semi-colon may terminate a declaration */
+                        if (*ndx != '\0' && *ndx != '/')
+                          {
+                            ERROR("Case statement should be on a new line",
+                                  lineno, n);
+                          }
 
+                        bcase = false;
+                      }
+                  }
+                  break;
                 case ',':
                   {
                     if (!isspace((int)line[n + 1]))
@@ -3072,7 +3098,6 @@ int main(int argc, char **argv, char **envp)
                     }
 
                   break;
-
                 case '^':
 
                   /* ^= */
