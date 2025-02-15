@@ -52,6 +52,10 @@
 #  include <nuttx/init.h>
 #endif
 
+#ifdef CONFIG_ARCH_ARMV8R
+#  include "sctlr.h"
+#endif
+
 #include <nuttx/syslog/syslog_rpmsg.h>
 
 /****************************************************************************
@@ -153,5 +157,27 @@ int up_cpu_start(int cpu)
 #endif
 
   return psci_cpu_on(cpu, (uintptr_t)__start);
+}
+#endif
+
+#ifdef CONFIG_ARCH_ARMV8R
+/****************************************************************************
+ * Name: arm_el_init
+ *
+ * Description:
+ *   The function called from arm_head.S at very early stage to:
+ *   - Handling special hardware initialize routine which is need to
+ *     run at high ELs
+ *   - Initialize system software such as hypervisor or security firmware
+ *     which is need to run at high ELs
+ *
+ ****************************************************************************/
+
+void arm_el_init(void)
+{
+  CP15_SET(ICC_HSRE, ICC_SRE_ELX_SRE_BIT | ICC_SRE_ELX_DFB_BIT |
+                     ICC_SRE_ELX_DIB_BIT | ICC_SRE_EL3_EN_BIT);
+
+  UP_ISB();
 }
 #endif
