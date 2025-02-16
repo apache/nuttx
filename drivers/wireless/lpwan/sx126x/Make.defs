@@ -1,5 +1,5 @@
 ############################################################################
-# drivers/wireless/lpwan/Make.defs
+# drivers/wireless/lpwan/sx126x/Make.defs
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -20,11 +20,16 @@
 #
 ############################################################################
 
-# Include nothing if LPWAN is disabled
+# Include SX126X drivers into the build
 
-ifeq ($(CONFIG_DRIVERS_LPWAN),y)
+ifeq ($(CONFIG_LPWAN_SX126X),y)
 
-include wireless/lpwan/sx127x/Make.defs
-include wireless/lpwan/sx126x/Make.defs
+CSRCS += sx126x.c
 
-endif # CONFIG_DRIVERS_LPWAN
+# Include SX126X build support
+
+DEPPATH += --dep-path wireless$(DELIM)lpwan$(DELIM)sx126x
+VPATH += :wireless$(DELIM)lpwan$(DELIM)sx126x
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)drivers$(DELIM)wireless$(DELIM)lpwan$(DELIM)sx126x
+
+endif # CONFIG_LPWAN_SX126X
