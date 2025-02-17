@@ -496,3 +496,97 @@ class InfoShmfs(gdb.Command):
 
             self.total_size += length / 1024
             self.block_count += 1
+
+
+class InfoRomfs(gdb.Command):
+    """Show romfs cache information"""
+
+    def __init__(self):
+        if utils.get_symbol_value("CONFIG_FS_ROMFS_CACHE_NODE"):
+            super().__init__("info romfs", gdb.COMMAND_USER)
+
+    def parse_arguments(self, argv):
+        parser = argparse.ArgumentParser(description=self.__doc__)
+        parser.add_argument(
+            "-P",
+            "--path",
+            type=str,
+            default=None,
+            help="set the romfs path to be dumped",
+        )
+
+        try:
+            args = parser.parse_args(argv)
+        except SystemExit:
+            return None
+
+        return args
+
+    def dump_romfs_mpt(self, mpt):
+        sector_size = mpt.rm_hwsectorsize
+        sector_num = mpt.rm_hwnsectors
+        volume_size = mpt.rm_volsize
+        xip_base = mpt.rm_xipbase
+        buffer_base = mpt.rm_buffer
+        gdb.write(
+            f" HW sector size: {sector_size} HW sector number: {sector_num}\n"
+            f" Volume size: {volume_size} XIP_addr: {hex(xip_base)}"
+            f" Buffer_addr: {hex(buffer_base)}\n"
+        )
+
+    def dump_romfs_files(self, node, level=1, prefix="", maxlevel=4096):
+        if level > maxlevel:
+            return
+
+        if node.rn_count > 0:
+            initial_indent = prefix + "├── "
+            newprefix = prefix + "│   "
+            dirfix = "/"
+        else:
+            initial_indent = prefix + "└── "
+            newprefix = prefix + "    "
+            dirfix = ""
+
+        name = node.rn_name.string(length=node.rn_namesize)
+        gdb.write(
+            f"{initial_indent}{name}{dirfix} offset:{node.rn_offset} next:{node.rn_next}"
+            f" size:{node.rn_size} child_count:{node.rn_count}\n"
+        )
+
+        for child in utils.ArrayIterator(node.rn_child, node.rn_count):
+            self.dump_romfs_files(child, level + 1, newprefix, maxlevel)
+
+    def dump_romfs_cache(self, node: Inode, path):
+        mpt = node.i_private.cast(utils.lookup_type("struct romfs_mountpt_s").pointer())
+        root = mpt.rm_root.cast(utils.lookup_type("struct romfs_nodeinfo_s").pointer())
+        gdb.write(f"Romfs {path} mount point information: {hex(mpt)}\n")
+        self.dump_romfs_mpt(mpt)
+        self.dump_romfs_files(root)
+
+    def diagnose(self, *args, **kwargs):
+        output = gdb.execute("info romfs", to_string=True)
+
+        return {
+            "title": "Romfs cache information",
+            "summary": "Romfs nodeinfo dump",
+            "command": "info romfs",
+            "result": "info",
+            "message": output or "No romfs information",
+        }
+
+    def invoke(self, args, from_tty):
+        args = self.parse_arguments(gdb.string_to_argv(args))
+
+        def romfs_filter(item):
+            inode, path = item
+            if inode_gettype(inode) != InodeType.MOUNTPT:
+                return False
+            if args and args.path and path != args.path:
+                return False
+
+            fstype = get_fstype(inode)
+            return fstype == "romfs"
+
+        nodes = filter(romfs_filter, foreach_inode())
+        for node, path in nodes:
+            self.dump_romfs_cache(node, path)
