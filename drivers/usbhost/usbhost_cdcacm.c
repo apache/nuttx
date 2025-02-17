@@ -1171,6 +1171,7 @@ static void usbhost_rxdata_work(FAR void *arg)
 
           uart_datareceived(uartdev);
           nxfrd = 0;
+          break;
         }
     }
 
