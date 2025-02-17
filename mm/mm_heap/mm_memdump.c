@@ -251,11 +251,11 @@ void mm_memdump(FAR struct mm_heap_s *heap,
   pid_t pid = dump->pid;
 
   memset(&priv, 0, sizeof(struct mm_memdump_priv_s));
+  priv.dump.pid = pid;
 
 #ifdef CONFIG_MM_BACKTRACE_SEQNO
   if (dump->seqmin == 0 && dump->seqmax == 0)
     {
-      priv.dump.seqmin = 0;
       priv.dump.seqmax = ULONG_MAX;
     }
   else
