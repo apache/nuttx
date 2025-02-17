@@ -280,6 +280,7 @@ static void rpmsg_port_spi_exchange(FAR struct rpmsg_port_spi_s *rpspi)
   rpmsginfo("send cmd:%u avail:%u\n", txhdr->cmd, txhdr->avail);
 
   rpmsg_port_spi_pm_action(rpspi, true);
+  rpmsg_port_update_timestamp(&rpspi->port.txq, txhdr, true);
   SPIS_CTRLR_ENQUEUE(rpspi->spictrlr, txhdr,
                      RPMSG_PORT_SPI_BYTES2WORDS(rpspi, rpspi->port.txq.len));
   IOEXP_WRITEPIN(rpspi->ioe, rpspi->sreq, 1);
@@ -411,6 +412,7 @@ static void rpmsg_port_spi_slave_notify(FAR struct spi_slave_dev_s *dev,
   rpmsginfo("received cmd:%u avail:%u\n",
             rpspi->rxhdr->cmd, rpspi->rxhdr->avail);
 
+  rpmsg_port_update_timestamp(&rpspi->port.rxq, rpspi->rxhdr, false);
   if (rpspi->txhdr != NULL)
     {
       rpmsg_port_queue_return_buffer(&rpspi->port.txq, rpspi->txhdr);
