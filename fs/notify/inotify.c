@@ -289,9 +289,12 @@ static void inotify_queue_event(FAR struct inotify_device_s *dev, int wd,
 
   poll_notify(dev->fds, CONFIG_FS_NOTIFY_FD_POLLWAITERS, POLLIN);
 
-  while (nxsem_get_value(&dev->sem, &semcnt) == 0 && semcnt <= 1)
+  if (nxsem_get_value(&dev->sem, &semcnt) >= 0)
     {
-      nxsem_post(&dev->sem);
+      while (semcnt++ <= 1)
+        {
+          nxsem_post(&dev->sem);
+        }
     }
 }
 
