@@ -253,6 +253,16 @@ AFLAGS := $(CFLAGS) -D__ASSEMBLY__ -Wa,--divide
 CMODULEFLAGS = $(CFLAGS) -fvisibility=hidden
 LDMODULEFLAGS = -r -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/elf/gnu-elf.ld)
 
+# Debug link map
+
+ifeq ($(CONFIG_DEBUG_LINK_MAP),y)
+  LDFLAGS += --cref -Map=$(call CONVERT_PATH,$(TOPDIR)$(DELIM)nuttx.map)
+endif
+
+ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
+  ARCHOPTIMIZATION += $(CONFIG_DEBUG_SYMBOLS_LEVEL)
+endif
+
 # ELF module definitions
 
 CELFFLAGS = $(CFLAGS) -fvisibility=hidden
