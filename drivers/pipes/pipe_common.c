@@ -76,9 +76,12 @@ static void pipecommon_wakeup(FAR sem_t *sem)
 {
   int sval;
 
-  while (nxsem_get_value(sem, &sval) == OK && sval <= 0)
+  if (nxsem_get_value(sem, &sval) >= 0)
     {
-      nxsem_post(sem);
+      while (sval++ <= 0)
+        {
+          nxsem_post(sem);
+        }
     }
 }
 

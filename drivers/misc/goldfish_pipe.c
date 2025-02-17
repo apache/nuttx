@@ -537,9 +537,12 @@ static void goldfish_pipe_wake(FAR struct goldfish_pipe_s *pipe,
   FAR sem_t *sem = is_write ? &pipe->wait_for_write : &pipe->wait_for_read;
   int sval;
 
-  while (nxsem_get_value(sem, &sval) >= 0 && sval <= 0)
+  if (nxsem_get_value(sem, &sval) >= 0)
     {
-      nxsem_post(sem);
+      while (sval++ <= 0)
+        {
+          nxsem_post(sem);
+        }
     }
 }
 

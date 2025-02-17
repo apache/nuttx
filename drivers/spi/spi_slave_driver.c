@@ -742,9 +742,12 @@ static void spi_slave_notify(FAR struct spi_slave_dev_s *dev,
       poll_notify(&priv->fds, 1, POLLERR);
     }
 
-  while (nxsem_get_value(&priv->wait, &semcnt) == 0 && semcnt <= 0)
+  if (nxsem_get_value(&priv->wait, &semcnt) >= 0)
     {
-      nxsem_post(&priv->wait);
+      while (semcnt++ <= 0)
+        {
+          nxsem_post(&priv->wait);
+        }
     }
 }
 

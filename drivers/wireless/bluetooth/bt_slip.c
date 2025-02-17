@@ -561,10 +561,12 @@ static void bt_slip_unack_handle(FAR struct sliphci_s *priv)
         {
           int semcount;
 
-          while (nxsem_get_value(&priv->sem, &semcount) >= 0 &&
-                 semcount <= 0)
+          if (nxsem_get_value(&priv->sem, &semcount) >= 0)
             {
-              nxsem_post(&priv->sem);
+              while (semcount++ <= 0)
+                {
+                  nxsem_post(&priv->sem);
+                }
             }
         }
 
