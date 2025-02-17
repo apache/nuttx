@@ -283,12 +283,12 @@ GPIO             Yes
 HMAC             No
 I2C              Yes
 I2S              No
-Int. Temp.       No
+Int. Temp.       Yes
 LED              No
 LED_PWM          Yes
 MCPWM            Yes
 Pulse Counter    Yes
-RMT              No
+RMT              Yes
 RNG              No
 RSA              No
 RTC              Yes
