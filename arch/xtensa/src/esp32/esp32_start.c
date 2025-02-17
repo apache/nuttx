@@ -257,11 +257,13 @@ static noreturn_function void __esp32_start(void)
   else
     {
       esp_spiram_init_cache();
+#  if defined(CONFIG_ESP32_SPIRAM_MEMTEST)
       if (esp_spiram_test() != OK)
         {
           ets_printf("SPIRAM test failed\n");
           PANIC();
         }
+#  endif // CONFIG_ESP32_SPIRAM_MEMTEST
     }
 
   /* Set external memory bss section to zero */
