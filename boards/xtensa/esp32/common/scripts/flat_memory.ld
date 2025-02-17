@@ -59,7 +59,7 @@ MEMORY
    * signing of firmware image.
    */
 
-  metadata (RX) :        org = CONFIG_ESP32_APP_MCUBOOT_HEADER_SIZE, len = 0x20
+  metadata (RX) :        org = CONFIG_ESP32_APP_MCUBOOT_HEADER_SIZE, len = 0x60
   ROM (RX) :             org = ORIGIN(metadata) + LENGTH(metadata),
                          len = FLASH_SIZE - ORIGIN(ROM)
 
