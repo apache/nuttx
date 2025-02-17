@@ -275,6 +275,14 @@ uint16_t rpmsg_port_queue_nused(FAR struct rpmsg_port_queue_s *queue)
 }
 
 /****************************************************************************
+ * Name: rpmsg_port_update_timestamp
+ ****************************************************************************/
+
+void rpmsg_port_update_timestamp(FAR struct rpmsg_port_queue_s *queue,
+                                 FAR struct rpmsg_port_header_s *hdr,
+                                 bool tx);
+
+/****************************************************************************
  * Name: rpmsg_port_drop_packets
  ****************************************************************************/
 

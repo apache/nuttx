@@ -311,6 +311,7 @@ static void rpmsg_port_spi_exchange(FAR struct rpmsg_port_spi_s *rpspi)
   rpmsginfo("irq send cmd:%u avail:%u\n", txhdr->cmd, txhdr->avail);
 
   rpmsg_port_spi_pm_action(rpspi, true);
+  rpmsg_port_update_timestamp(&rpspi->port.txq, txhdr, true);
   SPI_SELECT(rpspi->spi, rpspi->devid, true);
   SPI_EXCHANGE(rpspi->spi, txhdr, rpspi->rxhdr,
                RPMSG_PORT_SPI_BYTES2WORDS(rpspi, rpspi->port.txq.len));
@@ -332,6 +333,7 @@ static void rpmsg_port_spi_complete_handler(FAR void *arg)
   rpmsginfo("received cmd:%u avail:%u\n",
             rpspi->rxhdr->cmd, rpspi->rxhdr->avail);
 
+  rpmsg_port_update_timestamp(&rpspi->port.rxq, rpspi->rxhdr, false);
   if (rpspi->txhdr != NULL)
     {
       rpmsg_port_queue_return_buffer(&rpspi->port.txq, rpspi->txhdr);

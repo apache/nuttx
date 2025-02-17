@@ -27,6 +27,7 @@
 #include <debug.h>
 #include <execinfo.h>
 #include <stdio.h>
+#include <time.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
@@ -50,6 +51,9 @@
  ****************************************************************************/
 
 static void rpmsg_port_dump(FAR struct rpmsg_s *rpmsg);
+static int rpmsg_port_get_timestamp(FAR struct rpmsg_s *rpmsg,
+                                    FAR const void *data,
+                                    FAR struct rpmsg_timestamp_s *ts);
 
 /****************************************************************************
  * Private Data
@@ -62,6 +66,7 @@ static const struct rpmsg_ops_s g_rpmsg_port_ops =
   NULL,
   NULL,
   rpmsg_port_dump,
+  rpmsg_port_get_timestamp,
 };
 
 /****************************************************************************
@@ -253,7 +258,7 @@ rpmsg_port_get_tx_payload_buffer(FAR struct rpmsg_device *rdev,
     }
 
   *len = hdr->len - sizeof(struct rpmsg_port_header_s) -
-         sizeof(struct rpmsg_hdr);
+         sizeof(struct rpmsg_hdr) - sizeof(struct rpmsg_timestamp_s);
 
   return RPMSG_LOCATE_DATA(hdr->buf);
 }
@@ -379,7 +384,7 @@ static int rpmsg_port_get_tx_buffer_size(FAR struct rpmsg_device *rdev)
     metal_container_of(rdev, struct rpmsg_port_s, rdev);
 
   return port->txq.len - sizeof(struct rpmsg_port_header_s) -
-         sizeof(struct rpmsg_hdr);
+         sizeof(struct rpmsg_hdr) - sizeof(struct rpmsg_timestamp_s);
 }
 
 /****************************************************************************
@@ -392,7 +397,34 @@ static int rpmsg_port_get_rx_buffer_size(FAR struct rpmsg_device *rdev)
     metal_container_of(rdev, struct rpmsg_port_s, rdev);
 
   return port->rxq.len - sizeof(struct rpmsg_port_header_s) -
-         sizeof(struct rpmsg_hdr);
+         sizeof(struct rpmsg_hdr) - sizeof(struct rpmsg_timestamp_s);
+}
+
+/****************************************************************************
+ * Name: rpmsg_port_get_timestamp
+ ****************************************************************************/
+
+static int rpmsg_port_get_timestamp(FAR struct rpmsg_s *rpmsg,
+                                    FAR const void *data,
+                                    FAR struct rpmsg_timestamp_s *ts)
+{
+  FAR struct rpmsg_port_s *port = (FAR struct rpmsg_port_s *)rpmsg;
+  FAR const struct rpmsg_hdr *rphdr = RPMSG_LOCATE_HDR(data);
+  FAR const struct rpmsg_port_header_s *hdr =
+    metal_container_of(rphdr, struct rpmsg_port_header_s, buf);
+  FAR const struct rpmsg_timestamp_s *rpts =
+    (FAR const struct rpmsg_timestamp_s *)((uint8_t *)hdr + port->rxq.len -
+                                           sizeof(struct rpmsg_timestamp_s));
+
+  if (hdr->len > port->rxq.len - sizeof(struct rpmsg_timestamp_s))
+    {
+      return -EINVAL;
+    }
+
+  ts->tx_nsec = rpts->tx_nsec;
+  ts->rx_nsec = rpts->rx_nsec;
+
+  return RPMSG_SUCCESS;
 }
 
 /****************************************************************************
@@ -702,6 +734,30 @@ void rpmsg_port_queue_add_buffer(FAR struct rpmsg_port_queue_s *queue,
 
   rpmsg_port_add_node(&queue->ready, node);
   rpmsg_port_post(&queue->ready.sem);
+}
+
+/****************************************************************************
+ * Name: rpmsg_port_update_timestamp
+ ****************************************************************************/
+
+void rpmsg_port_update_timestamp(FAR struct rpmsg_port_queue_s *queue,
+                                 FAR struct rpmsg_port_header_s *hdr,
+                                 bool tx)
+{
+  FAR struct rpmsg_timestamp_s *rpts =
+    (FAR struct rpmsg_timestamp_s *)((uint8_t *)hdr + queue->len -
+                                     sizeof(struct rpmsg_timestamp_s));
+  struct timespec ts;
+
+  clock_gettime(CLOCK_MONOTONIC, &ts);
+  if (tx)
+    {
+      rpts->tx_nsec = 1000000000ull * ts.tv_sec + ts.tv_nsec;
+    }
+  else if (hdr->len <= queue->len - sizeof(struct rpmsg_timestamp_s))
+    {
+      rpts->rx_nsec = 1000000000ull * ts.tv_sec + ts.tv_nsec;
+    }
 }
 
 /****************************************************************************
