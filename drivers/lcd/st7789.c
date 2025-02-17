@@ -584,19 +584,22 @@ static void st7789_wrram(FAR struct st7789_dev_s *dev,
   size_t i;
 #ifdef CONFIG_LCD_ST7789_3WIRE
   size_t j;
+  size_t rowsiz;
 #endif
 
   st7789_sendcmd(dev, ST7789_RAMWR);
 
 #ifdef CONFIG_LCD_ST7789_3WIRE
-  if (count == 1)
+  rowsiz = ST7789_XRES * ST7789_BYTESPP;
+
+  if (count == 1 && size > rowsiz)
     {
       /* We cannot send the entire buffer at once, split it to
        * separate rows.
        */
 
-      count = ST7789_YRES;
-      size = ST7789_XRES * ST7789_BYTESPP;
+      count = size / rowsiz;
+      size = rowsiz;
     }
 
   st7789_select(dev->spi, LCD_ST7789_SPI_BITS);
@@ -607,7 +610,7 @@ static void st7789_wrram(FAR struct st7789_dev_s *dev,
     {
       /* Copy data to rowbuff and add 9th bit */
 
-      for (j = 0; j < ST7789_XRES * ST7789_BYTESPP; j += 2)
+      for (j = 0; j < size; j += 2)
         {
           /* Take care of correct byte order. */
 
