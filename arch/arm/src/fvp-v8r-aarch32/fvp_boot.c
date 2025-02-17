@@ -84,6 +84,10 @@ void arm_boot(void)
 {
   /* MAP IO and DRAM, enable MPU. */
 
+#ifdef CONFIG_ARCH_FPU
+  arm_fpuconfig();
+#endif
+
   /* Perform board-specific device initialization. This would include
    * configuration of board specific resources such as GPIOs, LEDs, etc.
    */
