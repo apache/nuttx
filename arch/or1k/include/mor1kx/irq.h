@@ -228,8 +228,7 @@ static inline_function void up_irq_restore(irqstate_t flags)
 
 /* Enable IRQs */
 
-static inline_function void up_irq_enable(void) always_inline_function;
-static inline_function void up_irq_enable(void)
+static always_inline_function void up_irq_enable(void)
 {
   irqstate_t flags;
   mfspr(SPR_SYS_SR, flags);
