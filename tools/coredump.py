@@ -24,7 +24,9 @@
 import argparse
 import base64
 import binascii
+import mmap
 import os
+import shutil
 import struct
 import sys
 
@@ -59,11 +61,14 @@ def decompress(lzffile, outfile):
 
 
 def unhexlify(infile, outfile):
-    for line in infile.readlines():
-        line = line.strip()
-        if line == "":
+    while True:
+        line = infile.readline()
+        if not line:
             break
-        index = line.rfind(" ")
+        line = line.replace(b"\n", b"").strip()
+        if line == b"":
+            continue
+        index = line.rfind(b" ")
         if index > 0:
             line = line[index + 1 :]
 
@@ -71,17 +76,26 @@ def unhexlify(infile, outfile):
 
 
 def unbase64file(infile, outfile):
-    input = ""
-    for line in infile.readlines():
-        line = line.strip()
-        if line == "":
+    while True:
+        line = infile.readline()
+        if not line:
             break
-        index = line.rfind(" ")
+        line = line.replace(b"\n", b"").strip()
+        if line == b"":
+            continue
+        index = line.rfind(b" ")
         if index > 0:
             line = line[index + 1 :]
 
-        input += line
-    outfile.write(base64.b64decode(input))
+        outfile.write(base64.b64decode(line))
+
+
+def mmap_file(file_path, size=None):
+    with open(file_path, "rb") as f:
+        fd = f.fileno()
+        if size is None:
+            size = os.fstat(fd).st_size
+        return mmap.mmap(fd, size, access=mmap.ACCESS_READ)
 
 
 def parse_args():
@@ -99,12 +113,27 @@ def parse_args():
         default=False,
         help="Set when input file is base64 encoded.",
     )
+    parser.add_argument(
+        "-b",
+        "--binary",
+        action="store_true",
+        default=False,
+        help="Treat input file as binary data and write directly to output.",
+    )
+    parser.add_argument(
+        "--size",
+        type=int,
+        default=None,
+        help="Size of memory to dump (default: mmap whole file).",
+    )
     args = parser.parse_args()
 
 
 def main():
     parse_args()
-    if not os.path.isfile(args.input):
+
+    if not os.path.exists(args.input):
+        print(f"Error: Input file {args.input} does not exist.")
         sys.exit(1)
 
     tmp = os.path.splitext(args.input)[0] + ".tmp"
@@ -112,10 +141,17 @@ def main():
     if args.output is None:
         args.output = os.path.splitext(args.input)[0] + ".core"
 
-    infile = open(args.input, "r")
+    try:
+        infile = mmap_file(args.input, args.size)
+    except Exception as e:
+        print(f"Failed to mmap input file: {e}")
+        sys.exit(1)
+
     tmpfile = open(tmp, "wb+")
 
-    if args.base64:
+    if args.binary:
+        tmpfile.write(infile)
+    elif args.base64:
         unbase64file(infile, tmpfile)
     else:
         unhexlify(infile, tmpfile)
@@ -135,7 +171,8 @@ def main():
         os.unlink(tmp)
     else:
         tmpfile.close()
-        os.rename(tmp, args.output)
+        shutil.copy(tmp, args.output)
+        os.unlink(tmp)
 
     print("Core file conversion completed: " + args.output)
 
