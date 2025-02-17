@@ -31,6 +31,11 @@ SECTIONS
 #ifdef CONFIG_ESP32S2_APP_FORMAT_MCUBOOT
   .metadata :
   {
+    /* The following metadata refers to the to MCUboot's struct
+     * esp_image_load_header defined at the following commit:
+     * https://github.com/mcu-tools/mcuboot/blob/cd22b693da426826e0255f8ee5b18d7360d9bc8f/boot/espressif/hal/include/esp_mcuboot_image.h
+     */
+
     /* Magic for load header */
 
     LONG(0xace637d3)
@@ -58,6 +63,46 @@ SECTIONS
     LONG(ADDR(.dram0.data))
     LONG(LOADADDR(.dram0.data))
     LONG(SIZEOF(.dram0.data))
+
+    /* RTC_IRAM metadata:
+     * - Destination address (VMA) for RTC_IRAM region
+     * - Flash offset (LMA) for start of RTC_IRAM region
+     * - Size of RTC_IRAM region
+     */
+
+    LONG(ADDR(.rtc.text))
+    LONG(LOADADDR(.rtc.text))
+    LONG(SIZEOF(.rtc.text))
+
+    /* RTC_DRAM metadata:
+     * - Destination address (VMA) for RTC_DRAM region
+     * - Flash offset (LMA) for start of RTC_DRAM region
+     * - Size of RTC_DRAM region
+     */
+
+    LONG(ADDR(.rtc.data))
+    LONG(LOADADDR(.rtc.data))
+    LONG(SIZEOF(.rtc.data))
+
+    /* IROM metadata:
+     * - Destination address (VMA) for IROM region
+     * - Flash offset (LMA) for start of IROM region
+     * - Size of IROM region
+     */
+
+    LONG(ADDR(.flash.text))
+    LONG(LOADADDR(.flash.text))
+    LONG(SIZEOF(.flash.text))
+
+    /* DROM metadata:
+     * - Destination address (VMA) for DROM region
+     * - Flash offset (LMA) for start of DROM region
+     * - Size of DROM region
+     */
+
+    LONG(ADDR(.flash.rodata))
+    LONG(LOADADDR(.flash.rodata))
+    LONG(LOADADDR(.flash.rodata) + SIZEOF(.flash.rodata) - LOADADDR(.flash.rodata))
   } >metadata
 #endif
 
