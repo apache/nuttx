@@ -386,7 +386,7 @@ static int lsm6dso32_read_bytes(FAR struct lsm6dso32_dev_s *priv,
 
   cmd[1].frequency = CONFIG_SENSORS_LSM6DSO32_I2C_FREQUENCY;
   cmd[1].addr = priv->addr;
-  cmd[1].flags = I2C_M_NOSTART | I2C_M_READ;
+  cmd[1].flags = I2C_M_READ;
   cmd[1].buffer = buf;
   cmd[1].length = nbytes;
 
