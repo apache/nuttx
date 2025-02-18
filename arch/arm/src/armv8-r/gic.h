@@ -326,6 +326,10 @@
  * Public Function Prototypes
  ****************************************************************************/
 
+/* redirect to arm_gic_initialize() beofre SMP added */
+
+#define arm_gic0_initialize  arm_gic_initialize
+
 bool arm_gic_irq_is_enabled(unsigned int intid);
 int  arm_gic_initialize(void);
 void arm_gic_irq_set_priority(unsigned int intid, unsigned int prio,
