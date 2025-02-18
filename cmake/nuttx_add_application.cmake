@@ -112,14 +112,18 @@ function(nuttx_add_application)
       # non-elf output
       if(NOT CMAKE_C_ELF_COMPILER)
         add_library(${TARGET} ${SRCS})
-
+        add_dependencies(${TARGET} nuttx_post)
         add_custom_command(
           TARGET ${TARGET}
           POST_BUILD
           COMMAND
-            ${CMAKE_C_COMPILER}
-            $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx,NUTTX_ELF_APP_LINK_OPTIONS>>
-            $<TARGET_FILE:${TARGET}> -o ${TARGET}
+            ${CMAKE_LD}
+            $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx_global,NUTTX_ELF_APP_LINK_OPTIONS>>
+            -e __start -Bstatic -T ${CMAKE_BINARY_DIR}/gnu-elf.ld
+            $<TARGET_OBJECTS:STARTUP_OBJS> --start-group
+            $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx_global,NUTTX_ELF_LINK_LIBRARIES>>
+            $<TARGET_FILE:${TARGET}> --end-group -o
+            ${CMAKE_BINARY_DIR}/bin/${TARGET}
           COMMAND_EXPAND_LISTS)
       else()
         add_executable(${TARGET} ${SRCS})

@@ -378,6 +378,12 @@ if(NOT EXISTS ${CMAKE_BINARY_DIR}/.config OR NOT "${NUTTX_DEFCONFIG}" STREQUAL
   message(STATUS "  Appdir: ${NUTTX_APPS_DIR}")
 endif()
 
+# declare global custom targets at very beginning `nuttx_global` is used to hold
+# global target properties to solve that cmake GLOBAL property can not use
+# generator expression this is needed to make sure added before project() create
+# before Toolchain file added before all cmake modules are loaded
+add_custom_target(nuttx_global)
+
 # Include .cmake files #######################################################
 
 # this exposes all Kconfig vars to CMake
@@ -598,15 +604,11 @@ endif()
 
 # Add apps/ to the build (if present)
 
-if(NOT CONFIG_BUILD_KERNEL)
-
-  if(EXISTS ${NUTTX_APPS_DIR}/CMakeLists.txt)
-    add_subdirectory(${NUTTX_APPS_DIR} apps)
-  else()
-    message(
-      STATUS "Application directory not found at ${NUTTX_APPS_DIR}, skipping")
-  endif()
-
+if(EXISTS ${NUTTX_APPS_DIR}/CMakeLists.txt)
+  add_subdirectory(${NUTTX_APPS_DIR} apps)
+else()
+  message(
+    STATUS "Application directory not found at ${NUTTX_APPS_DIR}, skipping")
 endif()
 
 # after we traverse all build directories unify all target dependencies and all
