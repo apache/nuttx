@@ -480,6 +480,8 @@ static void idle_group_initialize(void)
 
       group_postinitialize((FAR struct task_tcb_s *)tcb);
       tcb->group->tg_flags = GROUP_FLAG_NOCLDWAIT | GROUP_FLAG_PRIVILEGED;
+      atomic_set(&tcb->refs, 1);
+      nxsem_init(&tcb->exit_sem , 0, 0);
     }
 }
 

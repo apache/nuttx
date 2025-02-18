@@ -537,6 +537,7 @@ static ssize_t memdump_write(FAR struct file *filep, FAR const char *buffer,
         }
 
       tcb->flags |= TCB_FLAG_HEAP_DUMP;
+      nxsched_put_tcb(tcb);
       return buflen;
     }
   else if ((p = strstr(buffer, "off")) != NULL)
@@ -550,6 +551,7 @@ static ssize_t memdump_write(FAR struct file *filep, FAR const char *buffer,
         }
 
       tcb->flags &= ~TCB_FLAG_HEAP_DUMP;
+      nxsched_put_tcb(tcb);
       return buflen;
     }
 #endif

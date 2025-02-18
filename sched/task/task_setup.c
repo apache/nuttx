@@ -129,6 +129,7 @@ retry:
 
           g_pidhash[hash_ndx] = tcb;
           tcb->pid = next_pid;
+          atomic_set(&tcb->refs, 1);
           g_lastpid = next_pid;
 
           leave_critical_section(flags);
