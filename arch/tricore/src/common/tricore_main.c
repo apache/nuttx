@@ -93,3 +93,8 @@ void core5_main(void)
 {
   core_main();
 }
+
+void core6_main(void)
+{
+  core_main();
+}
