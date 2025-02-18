@@ -311,6 +311,8 @@ static void idle_task_initialize(void)
       tcb->pid        = i;
       tcb->task_state = TSTATE_TASK_RUNNING;
       tcb->lockcount  = 1;
+      tcb->refs       = 1;
+      nxsem_init(&tcb->exit_sem, 0, 0);
 
       /* Set the entry point.  This is only for debug purposes.  NOTE: that
        * the start_t entry point is not saved.  That is acceptable, however,

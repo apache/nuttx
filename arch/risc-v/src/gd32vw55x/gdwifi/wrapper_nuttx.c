@@ -179,6 +179,7 @@ static struct nx_task_s *task_slot_from_handle(void *task)
 {
   pid_t pid = (task == NULL) ? nxsched_gettid() :
               (pid_t)(uintptr_t)task - 1;
+
   return task_slot_find(pid);
 }
 
@@ -386,6 +387,7 @@ void sys_mfree(void *ptr)
 int32_t sys_free_heap_size(void)
 {
   struct mallinfo info = kmm_mallinfo();
+
   return info.fordblks;
 }
 
@@ -583,7 +585,10 @@ char *sys_task_name_get(void *task)
 #if CONFIG_TASK_NAME_SIZE > 0
   struct tcb_s *tcb = nxsched_get_tcb(task == NULL ? nxsched_gettid() :
                                       (pid_t)(uintptr_t)task - 1);
-  return tcb ? tcb->name : NULL;
+  char *name = tcb ? tcb->name : NULL;
+
+  nxsched_put_tcb(tcb);
+  return name;
 #else
   return NULL;
 #endif
@@ -1114,6 +1119,7 @@ int32_t sys_random_bytes_get(void *dst, uint32_t size)
   /* Hardware TRNG via the SDK driver (self-initializing) */
 
   extern int random_get(unsigned char *dst, unsigned int size);
+
   return random_get(dst, size);
 }
 

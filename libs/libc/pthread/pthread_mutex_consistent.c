@@ -32,6 +32,7 @@
 #include <nuttx/debug.h>
 #include <errno.h>
 
+#include <nuttx/sched.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/pthread.h>
 

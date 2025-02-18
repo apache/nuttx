@@ -557,6 +557,8 @@ static int x86_64_fault_user_isr(int irq, void *c, void *arg)
          ptcb != NULL ? get_task_name(ptcb) : "<gone>",
          tcb->pid, get_task_name(tcb));
 
+  nxsched_put_tcb(ptcb);
+
   /* Only a page fault sets CR2; for the others it is stale */
 
   if (irq == ISR14)

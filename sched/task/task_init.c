@@ -136,6 +136,8 @@ int nxtask_init(FAR struct tcb_s *tcb, const char *name, int priority,
   nxtask_joininit(tcb);
 #endif
 
+  nxsem_init(&tcb->exit_sem, 0, 0);
+
   /* Duplicate the parent tasks environment */
 
   ret = env_dup(tcb->group->tg_info, envp);
@@ -260,6 +262,8 @@ errout_with_group:
     }
 
   nxtask_joindestroy(tcb);
+
+  nxsem_destroy(&tcb->exit_sem);
 
   group_leave(tcb);
 

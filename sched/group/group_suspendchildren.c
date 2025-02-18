@@ -71,6 +71,7 @@ static int group_suspend_children_handler(pid_t pid, FAR void *arg)
       if (rtcb != NULL)
         {
           nxsched_suspend(rtcb);
+          nxsched_put_tcb(rtcb);
         }
     }
 
