@@ -21,18 +21,8 @@
 ############################################################################
 import argparse
 import re
+import subprocess
 import sys
-
-# Different package required if Python 3.8+
-if sys.version_info.minor < 8:
-    import pkg_resources
-
-    PYTHON_OLDER = True
-else:
-    from importlib.metadata import PackageNotFoundError, version
-
-    PYTHON_OLDER = False
-
 
 parser = argparse.ArgumentParser(
     prog="check_esptool",
@@ -55,29 +45,25 @@ def parse_version(version_string) -> list:
         return []
 
 
-def check_version(min_esptool_version: str) -> int:
-    """Attempts to read 'esptool' version using pkg_resources (for
-    Python <3.8) or importlib. Compare current version with
-    'min_esptool_version' and returns.
+def check_version(min_esptool_version: str) -> bool:
+    """Attempts to read 'esptool' version using subprocess command
+    which improves compatibility with esptool installed by pipx like tools.
+    Compare current version with 'min_esptool_version' and returns.
 
     Returns:
         True: packages does not exist or outdated
         False: package installed and up-to-date
     """
-    if PYTHON_OLDER:
-        try:
-            version_str = pkg_resources.get_distribution("esptool").version
-        except pkg_resources.DistributionNotFound:
-            print("esptool.py not found. Please run: 'pip install esptool'")
-            print("Run make again to create the nuttx.bin image.")
-            return True
-    else:
-        try:
-            version_str = version("esptool")
-        except PackageNotFoundError:
-            print("esptool.py not found. Please run: 'pip install esptool'")
-            print("Run make again to create the nuttx.bin image.")
-            return True
+    try:
+        # Run esptool.py version command
+        result = subprocess.run(
+            ["esptool.py", "version"], capture_output=True, text=True, check=True
+        )
+        version_str = result.stdout.strip()
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        print("esptool.py not found. Please run: 'pip install esptool'")
+        print("Run make again to create the nuttx.bin image.")
+        return True
 
     esptool_version = parse_version(version_str)
     min_esptool_version = parse_version(parser.version)
