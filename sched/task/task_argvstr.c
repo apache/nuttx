@@ -81,9 +81,10 @@ size_t nxtask_argvstr(FAR struct tcb_s *tcb, FAR char *args, size_t size)
 #ifndef CONFIG_DISABLE_PTHREAD
   if ((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD)
     {
-      FAR struct pthread_tcb_s *ptcb = (FAR struct pthread_tcb_s *)tcb;
+      FAR struct pthread_entry_s *entry =
+        (FAR struct pthread_entry_s *)(tcb + 1);
 
-      n += snprintf(args, size, " %p %p", ptcb->cmn.entry.main, ptcb->arg);
+      n += snprintf(args, size, " %p %p", tcb->entry.main, entry->arg);
     }
   else
 #endif

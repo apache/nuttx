@@ -663,8 +663,7 @@ int nxtask_setup_scheduler(FAR struct tcb_s *tcb, int priority,
 {
   /* Perform common thread setup */
 
-  return nxthread_setup_scheduler((FAR struct tcb_s *)tcb, priority,
-                                  start, (CODE void *)main, ttype);
+  return nxthread_setup_scheduler(tcb, priority, start, main, ttype);
 }
 
 /****************************************************************************
@@ -692,13 +691,12 @@ int nxtask_setup_scheduler(FAR struct tcb_s *tcb, int priority,
  ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_PTHREAD
-int pthread_setup_scheduler(FAR struct pthread_tcb_s *tcb, int priority,
+int pthread_setup_scheduler(FAR struct tcb_s *tcb, int priority,
                             start_t start, pthread_startroutine_t entry)
 {
   /* Perform common thread setup */
 
-  return nxthread_setup_scheduler((FAR struct tcb_s *)tcb, priority,
-                                  start, (CODE void *)entry,
+  return nxthread_setup_scheduler(tcb, priority, start, entry,
                                   TCB_FLAG_TTYPE_PTHREAD);
 }
 #endif

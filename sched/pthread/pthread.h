@@ -98,10 +98,9 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-struct pthread_tcb_s; /* Forward reference */
 struct task_group_s;  /* Forward reference */
 
-int pthread_setup_scheduler(FAR struct pthread_tcb_s *tcb, int priority,
+int pthread_setup_scheduler(FAR struct tcb_s *tcb, int priority,
                             start_t start, pthread_startroutine_t entry);
 
 int pthread_completejoin(pid_t pid, FAR void *exit_value);
