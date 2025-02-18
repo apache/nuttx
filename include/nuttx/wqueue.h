@@ -419,7 +419,7 @@ int work_queue_wq(FAR struct kwork_wqueue_s *wqueue,
                   FAR void *arg, clock_t delay);
 
 /****************************************************************************
- * Name: work_queue_period/work_queue_wq_period
+ * Name: work_queue_period/work_queue_period_wq
  *
  * Description:
  *   Queue work to be performed periodically.  All queued work will be
@@ -451,7 +451,7 @@ int work_queue_wq(FAR struct kwork_wqueue_s *wqueue,
 
 int work_queue_period(int qid, FAR struct work_s *work, worker_t worker,
                       FAR void *arg, clock_t delay, clock_t period);
-int work_queue_wq_period(FAR struct kwork_wqueue_s *wqueue,
+int work_queue_period_wq(FAR struct kwork_wqueue_s *wqueue,
                          FAR struct work_s *work, worker_t worker,
                          FAR void *arg, clock_t delay, clock_t period);
 

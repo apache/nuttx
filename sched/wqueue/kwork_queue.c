@@ -106,7 +106,7 @@ static bool work_is_canceling(FAR struct kworker_s *kworkers, int nthreads,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: work_queue_period/work_queue_wq_period
+ * Name: work_queue_period/work_queue_period_wq
  *
  * Description:
  *   Queue work to be performed periodically.  All queued work will be
@@ -136,7 +136,7 @@ static bool work_is_canceling(FAR struct kworker_s *kworkers, int nthreads,
  *
  ****************************************************************************/
 
-int work_queue_wq_period(FAR struct kwork_wqueue_s *wqueue,
+int work_queue_period_wq(FAR struct kwork_wqueue_s *wqueue,
                          FAR struct work_s *work, worker_t worker,
                          FAR void *arg, clock_t delay, clock_t period)
 {
@@ -208,7 +208,7 @@ out:
 int work_queue_period(int qid, FAR struct work_s *work, worker_t worker,
                       FAR void *arg, clock_t delay, clock_t period)
 {
-  return work_queue_wq_period(work_qid2wq(qid), work, worker,
+  return work_queue_period_wq(work_qid2wq(qid), work, worker,
                               arg, delay, period);
 }
 
@@ -246,7 +246,7 @@ int work_queue_wq(FAR struct kwork_wqueue_s *wqueue,
                   FAR struct work_s *work, worker_t worker,
                   FAR void *arg, clock_t delay)
 {
-  return work_queue_wq_period(wqueue, work, worker, arg, delay, 0);
+  return work_queue_period_wq(wqueue, work, worker, arg, delay, 0);
 }
 
 int work_queue(int qid, FAR struct work_s *work, worker_t worker,
