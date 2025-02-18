@@ -2432,6 +2432,14 @@ endif # DEBUG_CORESIGHT
 
 endif # DEBUG_FEATURES
 
+config ARCH_PROTECT_ZERO_ADDRESS
+	bool "Protect address zero"
+	depends on ARCH_HAVE_DEBUG
+	default n
+	---help---
+		When the program accesses address 0, it will assert automatically.
+		Hardware support is required, such as ARM V8M DWT watchpoint
+
 config ARCH_HAVE_STACKCHECK
 	bool
 	default n
