@@ -27,8 +27,9 @@ import re
 from typing import List
 
 import gdb
+import nxgdb.fs as fs
 
-from . import fs, utils
+from . import utils
 from .circbuf import CircBuf
 from .protocols import uorb as p
 
