@@ -765,7 +765,7 @@ static void pwm_set_polarity(struct pwm_lowerhalf_s *dev, uint8_t channel,
                              uint8_t cpol, uint8_t dcpol)
 {
   struct sam_pwm_s *priv = (struct sam_pwm_s *)dev;
-  uint16_t regval;
+  uint32_t regval;
 
   /* Can't change polarity, if the channel is enabled! */
 
@@ -844,10 +844,10 @@ static int pwm_setup(struct pwm_lowerhalf_s *dev)
       channel = priv->channels[i].channel;
 
 #ifdef CONFIG_PWM_DEADTIME
-      regval |= CMR_DTE;
+      pwm_putreg(priv, SAMV7_PWM_CMRX + (channel * CHANNEL_OFFSET), CMR_DTE);
+#else
+      pwm_putreg(priv, SAMV7_PWM_CMRX + (channel * CHANNEL_OFFSET), 0);
 #endif
-
-      pwm_putreg(priv, SAMV7_PWM_CMRX + (channel * CHANNEL_OFFSET), regval);
 
       /* Reset duty cycle register */
 
