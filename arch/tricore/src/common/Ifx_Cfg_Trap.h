@@ -56,6 +56,7 @@
 #define IFX_CFG_CPU_TRAP_SYSCALL_CPU3_HOOK(trapWatch)   tricore_svcall(&trapWatch)
 #define IFX_CFG_CPU_TRAP_SYSCALL_CPU4_HOOK(trapWatch)   tricore_svcall(&trapWatch)
 #define IFX_CFG_CPU_TRAP_SYSCALL_CPU5_HOOK(trapWatch)   tricore_svcall(&trapWatch)
+#define IFX_CFG_CPU_TRAP_SYSCALL_CPU6_HOOK(trapWatch)   tricore_svcall(&trapWatch)
 
 #endif /* IFX_CFG_EXTEND_TRAP_HOOKS */
 
