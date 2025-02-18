@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv8-r/arm_gic.h
+ * arch/arm/src/armv8-r/gic.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -21,8 +21,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_ARMV8_R_ARM_GIC_H
-#define __ARCH_ARM_SRC_ARMV8_R_ARM_GIC_H
+#ifndef __ARCH_ARM_SRC_ARMV8_R_GIC_H
+#define __ARCH_ARM_SRC_ARMV8_R_GIC_H
 
 /****************************************************************************
  * Included Files
@@ -364,4 +364,4 @@ static inline uint64_t arm_get_mpid(int cpu)
 #  define arm_get_mpid(cpu) GET_MPIDR()
 #endif /* CONFIG_SMP */
 
-#endif /* __ARCH_ARM_SRC_ARMV8_R_ARM_GIC_H */
+#endif /* __ARCH_ARM_SRC_ARMV8_R_GIC_H */

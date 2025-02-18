@@ -36,7 +36,7 @@
 #include <sched/sched.h>
 
 #include "arm_internal.h"
-#include "arm_gic.h"
+#include "gic.h"
 
 /****************************************************************************
  * Public Functions
