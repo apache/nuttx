@@ -72,6 +72,7 @@ static void lpwork_boostworker(pid_t wpid, uint8_t reqprio)
 
   if (wtcb->boost_priority != 0)
     {
+      nxsched_put_tcb(wtcb);
       return;
     }
 
@@ -105,6 +106,8 @@ static void lpwork_boostworker(pid_t wpid, uint8_t reqprio)
           nxsched_set_priority(wtcb, reqprio);
         }
     }
+
+  nxsched_put_tcb(wtcb);
 }
 
 /****************************************************************************
@@ -138,6 +141,7 @@ static void lpwork_restoreworker(pid_t wpid, uint8_t reqprio)
 
   if (wtcb->boost_priority != reqprio)
     {
+      nxsched_put_tcb(wtcb);
       return;
     }
 
@@ -184,6 +188,8 @@ static void lpwork_restoreworker(pid_t wpid, uint8_t reqprio)
 
       nxsched_set_priority(wtcb, wpriority);
     }
+
+  nxsched_put_tcb(wtcb);
 }
 
 /****************************************************************************

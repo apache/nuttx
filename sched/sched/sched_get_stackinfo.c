@@ -59,7 +59,7 @@
 int nxsched_get_stackinfo(pid_t pid, FAR struct stackinfo_s *stackinfo)
 {
   FAR struct tcb_s *rtcb = this_task();  /* TCB of running task */
-  FAR struct tcb_s *qtcb;                /* TCB of queried task */
+  FAR struct tcb_s *qtcb = NULL;         /* TCB of queried task */
   int ret = OK;
 
   DEBUGASSERT(stackinfo != NULL);
@@ -97,7 +97,8 @@ int nxsched_get_stackinfo(pid_t pid, FAR struct stackinfo_s *stackinfo)
 
                   if (rtcb->group != qtcb->group)
                     {
-                      ret = -EACCES;
+                      nxsched_put_tcb(qtcb);
+                      return -EACCES;
                     }
                 }
             }
@@ -117,6 +118,11 @@ int nxsched_get_stackinfo(pid_t pid, FAR struct stackinfo_s *stackinfo)
       stackinfo->adj_stack_size  = qtcb->adj_stack_size;
       stackinfo->stack_alloc_ptr = qtcb->stack_alloc_ptr;
       stackinfo->stack_base_ptr  = qtcb->stack_base_ptr;
+    }
+
+  if (pid != 0)
+    {
+      nxsched_put_tcb(qtcb);
     }
 
   return ret;

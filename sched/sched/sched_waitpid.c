@@ -168,7 +168,7 @@ int waittcb(FAR struct tcb_s *rtcb, pid_t pid, int options,
        */
 
       if (rtcb->group->tg_nchildren == 0 ||
-          (pid != INVALID_PROCESS_ID && nxsched_get_tcb(pid) == NULL))
+          (pid != INVALID_PROCESS_ID && !nxsched_verify_pid(pid)))
         {
           /* We know that the child task was running okay when we started,
            * so we must have lost the signal.  What can we do?
@@ -314,7 +314,7 @@ int waittcb(FAR struct tcb_s *rtcb, pid_t pid, int options,
 pid_t nxsched_waitpid(pid_t pid, FAR int *stat_loc, int options)
 {
   FAR struct tcb_s *rtcb = this_task();
-  FAR struct tcb_s *ctcb;
+  FAR struct tcb_s *ctcb = NULL;
   bool retains = false;
   irqstate_t flags;
   int ret = OK;
@@ -355,6 +355,8 @@ pid_t nxsched_waitpid(pid_t pid, FAR int *stat_loc, int options)
             }
         }
 
+      nxsched_put_tcb(ctcb);
+
       /* The child task is ours or it is no longer active.  Does the parent
        * task retain child status?
        */
@@ -391,6 +393,8 @@ pid_t nxsched_waitpid(pid_t pid, FAR int *stat_loc, int options)
         {
           ret = -ECHILD;
         }
+
+      nxsched_put_tcb(ctcb);
     }
 
 #endif /* CONFIG_SCHED_CHILD_STATUS */
@@ -457,7 +461,13 @@ pid_t nxsched_waitpid(pid_t pid, FAR int *stat_loc, int options)
               mystat = true;
             }
 
-          /* Then wait for the task to exit */
+          /* Then wait for the task to exit.  The reference on ctcb was
+           * taken to resolve the group; the group waiter count now keeps
+           * the group alive for the duration of the wait.
+           */
+
+          nxsched_put_tcb(ctcb);
+          ctcb = NULL;
 
           if ((options & WNOHANG) != 0)
             {
@@ -502,6 +512,7 @@ pid_t nxsched_waitpid(pid_t pid, FAR int *stat_loc, int options)
         }
     }
 
+  nxsched_put_tcb(ctcb);
   leave_critical_section(flags);
 
   return ret;

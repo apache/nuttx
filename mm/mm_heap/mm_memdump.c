@@ -277,6 +277,7 @@ void mm_memdump(FAR struct mm_heap_s *heap,
 #if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
           tcb  = nxsched_get_tcb(pid);
 #endif
+          nxsched_put_tcb(tcb);
         }
 
       if (tcb == NULL)
