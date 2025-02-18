@@ -281,6 +281,14 @@ function(nuttx_compile_definitions_for_all_apps)
     PROPERTY APPS_COMPILE_DEFINITIONS ${ARGN})
 endfunction()
 
+# all elf link options
+function(nuttx_add_elf_link_options)
+  set_property(
+    TARGET nuttx_global
+    APPEND
+    PROPERTY NUTTX_ELF_APP_LINK_OPTIONS ${ARGN})
+endfunction()
+
 # since we dont call `target_link_libraries` directly, we only inherit their
 # compilation configuration
 function(nuttx_link_libraries)

@@ -89,3 +89,5 @@ if(CONFIG_ARCH_HAVE_FETCHADD)
 endif()
 
 target_sources(arch PRIVATE ${SRCS})
+
+nuttx_add_aux_library(STARTUP_OBJS crt0.c)
