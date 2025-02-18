@@ -369,6 +369,7 @@ config MPFS_EMMCSD
 config MPFS_COREMMC
 	bool "COREMMC"
 	select ARCH_HAVE_SDIO
+	select ARCH_HAVE_SDIOWAIT_WRCOMPLETE
 	select SDIO_BLOCKSETUP
 	default n
 	---help---
@@ -384,6 +385,17 @@ config MPFS_COREMMC_IRQNUM
 	default 5
 	range 0 63
 	depends on MPFS_COREMMC
+
+config MPFS_COREMMC_WRCOMPLETE_IRQNUM
+	int "Number of F2H interrupt"
+	default 4
+	range 0 63
+	depends on MPFS_COREMMC
+	depends on MMCSD_SDIOWAIT_WRCOMPLETE
+	---help---
+		In case SD card's DAT0 line is connected to an F2H IRQ in the FPGA
+		design, select CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE and configure the
+		correct IRQ line here.
 
 config MPFS_IHC_CLIENT
 	bool "IHC slave"
