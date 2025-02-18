@@ -36,6 +36,7 @@
 #include <nuttx/semaphore.h>
 
 #include "pthread/pthread.h"
+#include "sched/sched.h"
 
 /****************************************************************************
  * Public Functions
@@ -89,7 +90,7 @@ int pthread_mutex_destroy(FAR pthread_mutex_t *mutex)
            * nxsched_get_tcb() does.
            */
 
-          if (nxsched_get_tcb(pid) == NULL)
+          if (!nxsched_verify_pid(pid))
             {
               /* The thread associated with the PID no longer exists */
 

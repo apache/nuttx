@@ -61,7 +61,9 @@ FAR struct task_group_s *task_getgroup(pid_t pid)
   FAR struct tcb_s *tcb = nxsched_get_tcb(pid);
   if (tcb)
     {
-      return tcb->group;
+      struct task_group_s *group = tcb->group;
+      nxsched_put_tcb(tcb);
+      return group;
     }
 
   return NULL;

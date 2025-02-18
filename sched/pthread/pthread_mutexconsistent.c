@@ -35,6 +35,7 @@
 #include <nuttx/semaphore.h>
 
 #include "pthread/pthread.h"
+#include "sched/sched.h"
 
 /****************************************************************************
  * Public Functions
@@ -102,7 +103,7 @@ int pthread_mutex_consistent(FAR pthread_mutex_t *mutex)
            * nxsched_get_tcb() does.
            */
 
-          if (nxsched_get_tcb(pid) == NULL)
+          if (!nxsched_verify_pid(pid))
             {
               /* Reset the semaphore.  This has the same affect as if the
                * dead task had called pthread_mutex_unlock().

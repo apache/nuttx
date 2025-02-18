@@ -84,6 +84,7 @@ int group_exitinfo(pid_t pid, FAR struct binary_s *bininfo)
   /* Get the group that this task belongs to */
 
   group = tcb->group;
+  nxsched_put_tcb(tcb);
   DEBUGASSERT(group != NULL && group->tg_bininfo == NULL);
 
   /* Save the binary info for use when the task exits */
