@@ -133,13 +133,22 @@ void up_disable_irq(int irq)
           uintptr_t claim_address =
             mpfs_plic_get_claimbase(riscv_cpuid_to_hartid(i));
 
+          /* Clear any already claimed IRQ (this must be done BEFORE
+           * disabling the interrupt source):
+           *
+           * To signal the completion of executing an interrupt handler, the
+           * processor core writes the received interrupt ID to the
+           * Claim/Complete register. The PLIC does not check whether the
+           * completion ID is the same as the last claim ID for that target.
+           * If the completion ID does not match an interrupt source that is
+           * currently enabled for the target, the completion is ignored.
+           */
+
+          putreg32(extirq, claim_address);
+
           /* Clear enable bit for the irq */
 
           modifyreg32(iebase + (4 * (extirq / 32)), 1 << (extirq % 32), 0);
-
-          /* Clear any already claimed IRQ */
-
-          putreg32(extirq, claim_address);
         }
     }
 }
