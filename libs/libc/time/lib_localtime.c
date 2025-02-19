@@ -392,7 +392,7 @@ static int  tzparse(FAR const char *name, FAR struct state_s *sp,
 
 static inline void tz_lock(FAR rmutex_t *lock)
 {
-#ifndef __KERNEL__
+#if defined(__KERNEL__) || defined(CONFIG_BUILD_FLAT)
   if (up_interrupt_context() || (sched_idletask() && OSINIT_IDLELOOP()))
     {
       return;
@@ -404,7 +404,7 @@ static inline void tz_lock(FAR rmutex_t *lock)
 
 static inline void tz_unlock(FAR rmutex_t *lock)
 {
-#ifndef __KERNEL__
+#if defined(__KERNEL__) || defined(CONFIG_BUILD_FLAT)
   if (up_interrupt_context() || (sched_idletask() && OSINIT_IDLELOOP()))
     {
       return;
