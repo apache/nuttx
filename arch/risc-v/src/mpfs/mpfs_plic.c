@@ -30,6 +30,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <debug.h>
+#include <nuttx/spinlock.h>
 
 #include <nuttx/arch.h>
 #include <arch/irq.h>
@@ -52,6 +53,12 @@
 #  define MPFS_PLIC_CLAIMPRIV_OFFSET      (0)
 #  define MPFS_PLIC_THRESHOLDPRIV_OFFSET  (0)
 #endif
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static volatile spinlock_t g_enable_lock = SP_UNLOCKED;
 
 /****************************************************************************
  * Private Functions
@@ -214,4 +221,119 @@ void mpfs_plic_init_hart(uintptr_t hartid)
 uintptr_t mpfs_plic_get_thresholdbase(void)
 {
   return get_thresholdbase(up_cpu_index());
+}
+
+/****************************************************************************
+ * Name: mpfs_plic_disable_irq(int extirq)
+ *
+ * Description:
+ *   Disable interrupt on all harts
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void mpfs_plic_disable_irq(int extirq)
+{
+  uintptr_t iebase;
+  uintptr_t claim_address;
+  int i;
+
+  irqstate_t flags = spin_lock_irqsave(&g_enable_lock);
+
+  /* Disable the irq on all harts */
+
+  for (i = 0; i < CONFIG_SMP_NCPUS; i++)
+    {
+      /* Clear any already claimed IRQ (this must be done BEFORE
+       * disabling the interrupt source):
+       *
+       * To signal the completion of executing an interrupt handler, the
+       * processor core writes the received interrupt ID to the
+       * Claim/Complete register. The PLIC does not check whether the
+       * completion ID is the same as the last claim ID for that target.
+       * If the completion ID does not match an interrupt source that is
+       * currently enabled for the target, the completion is ignored.
+       */
+
+      claim_address = mpfs_plic_get_claimbase(riscv_cpuid_to_hartid(i));
+      putreg32(extirq, claim_address);
+
+      /* Clear enable bit for the irq for every hart */
+
+      iebase = mpfs_plic_get_iebase(riscv_cpuid_to_hartid(i));
+      modifyreg32(iebase + (4 * (extirq / 32)), 1 << (extirq % 32), 0);
+    }
+
+  spin_unlock_irqrestore(&g_enable_lock, flags);
+}
+
+/****************************************************************************
+ * Name: mpfs_plic_clear_and_enable_irq
+ *
+ * Description:
+ *   Enable interrupt; if it is pending, clear it first
+ *
+ * Assumptions:
+ *   - Irq can only be pending, all the irq sources are disabled
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void mpfs_plic_clear_and_enable_irq(int extirq)
+{
+  int hartid = up_cpu_index();
+  uintptr_t claim_address = mpfs_plic_get_claimbase(hartid);
+  uintptr_t iebase = mpfs_plic_get_iebase(hartid);
+  uintptr_t pending_address = MPFS_PLIC_IP0 + (4 * (extirq / 32));
+  int i;
+  uint32_t claim;
+
+  irqstate_t flags = spin_lock_irqsave(&g_enable_lock);
+
+  /* Check if the extirq is pending */
+
+  if ((getreg32(pending_address) & (1 << (extirq % 32))) != 0)
+    {
+      /* Interrupt is pending. This means that the source is disabled on
+       * all harts. Only way to clear it is to claim and ack it; do it on
+       * this hart
+       *
+       * First bump the priority of the irq to highest, to get it to the
+       * head of the claim queue
+       */
+
+      putreg32(MPFS_PLIC_PRIO_MAX, MPFS_PLIC_PRIORITY + (4 * extirq));
+
+      /* Enable the irq on this hart */
+
+      modifyreg32(iebase + (4 * (extirq / 32)), 0, 1 << (extirq % 32));
+
+      /* Now we can claim and ack the pending irq */
+
+      claim = getreg32(claim_address);
+
+      DEBUGASSERT(claim == extirq);
+
+      putreg32(claim, claim_address);
+
+      /* Return the irq priority to mininum */
+
+      putreg32(MPFS_PLIC_PRIO_MIN, MPFS_PLIC_PRIORITY + (4 * extirq));
+    }
+
+  /* Enable the irq on all harts */
+
+  for (i = 0; i < CONFIG_SMP_NCPUS; i++)
+    {
+      /* Set enable bit for the irq */
+
+      iebase = mpfs_plic_get_iebase(riscv_cpuid_to_hartid(i));
+      modifyreg32(iebase + (4 * (extirq / 32)), 0, 1 << (extirq % 32));
+    }
+
+  spin_unlock_irqrestore(&g_enable_lock, flags);
 }
