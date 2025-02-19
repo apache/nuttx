@@ -143,7 +143,8 @@
  * previous freenode
  */
 
-#define MM_ALLOCNODE_OVERHEAD (MM_SIZEOF_ALLOCNODE - sizeof(mmsize_t))
+#define MM_ALLOCNODE_OVERHEAD (CONFIG_MM_NODE_GUARDSIZE + \
+                               MM_SIZEOF_ALLOCNODE - sizeof(mmsize_t))
 
 /* Get the node size */
 

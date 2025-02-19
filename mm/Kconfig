@@ -69,6 +69,13 @@ config MM_DEFAULT_ALIGNMENT
 		memory default alignment is equal to sizoef(uintptr), if this value
 		is not 0, this value must be 2^n and at least sizeof(uintptr).
 
+config MM_NODE_GUARDSIZE
+	int "Memory node guard size"
+	default 0
+	---help---
+		After it is enabled, the front and rear nodes will maintain a safety
+		distance of at least CONFIG_MM_NODE_GUARDSIZE.
+
 config MM_SMALL
 	bool "Small memory model"
 	default n
