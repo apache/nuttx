@@ -40,6 +40,7 @@ config RPMSG_PORT
 config RPMSG_PORT_SPI
 	bool "Rpmsg SPI Port Driver Support"
 	default n
+	depends on SPI
 	select RPMSG_PORT
 	---help---
 		Rpmsg SPI Port driver used for cross chip communication.
