@@ -88,4 +88,30 @@ uintptr_t mpfs_plic_get_claimbase(uintptr_t hartid);
 
 uintptr_t mpfs_plic_get_thresholdbase(void);
 
+/****************************************************************************
+ * Name: mpfs_plic_disable_irq(int extirq)
+ *
+ * Description:
+ *   Disable interrupt on all harts
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void mpfs_plic_disable_irq(int extirq);
+
+/****************************************************************************
+ * Name: mpfs_plic_clear_and_enable_irq
+ *
+ * Description:
+ *   Enable interrupt; if it is pending, clear it first
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void mpfs_plic_clear_and_enable_irq(int extirq);
+
 #endif /* __ARCH_RISC_V_SRC_MPFS_MPFS_PLIC_H */
