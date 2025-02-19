@@ -1140,10 +1140,6 @@ struct i2c_master_s *cxd56_i2cbus_initialize(int port)
 
   cxd56_i2c_setfrequency(priv, I2C_DEFAULT_FREQUENCY);
 
-  /* Configure pin */
-
-  cxd56_i2c_pincontrol(port, true);
-
   /* Attach Interrupt Handler */
 
   irq_attach(priv->irqid, cxd56_i2c_interrupt, priv);
@@ -1163,6 +1159,10 @@ struct i2c_master_s *cxd56_i2cbus_initialize(int port)
   /* Enable clock gating (clock disable) */
 
   cxd56_i2c_clock_gate_enable(port);
+
+  /* Configure pin */
+
+  cxd56_i2c_pincontrol(port, true);
 
   nxmutex_unlock(&priv->lock);
   return &priv->dev;
