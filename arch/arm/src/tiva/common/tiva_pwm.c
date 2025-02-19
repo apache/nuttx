@@ -82,6 +82,7 @@ struct tiva_pwm_chan_s
   uint8_t generator_id;
   uintptr_t generator_base;
   uint8_t channel_id;
+  bool complementary;
 #ifdef CONFIG_PWM_PULSECOUNT
   bool inited;
   uint8_t irq;
@@ -168,6 +169,11 @@ static struct tiva_pwm_chan_s g_pwm_chan0 =
   .generator_base  = TIVA_PWM0_BASE + TIVA_PWMN_BASE +
                      TIVA_PWMN_INTERVAL * 0,
   .channel_id      = 0,
+#ifdef CONFIG_TIVA_PWM_COMPLEMENTARY_G0
+  .complementary = true,
+#else
+  .complementary = false,
+#endif
 #ifdef CONFIG_PWM_PULSECOUNT
   .inited          = false,
   .irq             = TIVA_IRQ_PWM0_GEN0,
@@ -188,6 +194,11 @@ static struct tiva_pwm_chan_s g_pwm_chan1 =
   .generator_base  = TIVA_PWM0_BASE + TIVA_PWMN_BASE +
                      TIVA_PWMN_INTERVAL * 0,
   .channel_id      = 1,
+#ifdef CONFIG_TIVA_PWM_COMPLEMENTARY_G0
+  .complementary = true,
+#else
+  .complementary = false,
+#endif
 #ifdef CONFIG_PWM_PULSECOUNT
   .inited          = false,
   .irq             = TIVA_IRQ_PWM0_GEN0,
@@ -208,6 +219,11 @@ static struct tiva_pwm_chan_s g_pwm_chan2 =
   .generator_base  = TIVA_PWM0_BASE + TIVA_PWMN_BASE +
                      TIVA_PWMN_INTERVAL * 1,
   .channel_id      = 2,
+#ifdef CONFIG_TIVA_PWM_COMPLEMENTARY_G1
+  .complementary = true,
+#else
+  .complementary = false,
+#endif
 #ifdef CONFIG_PWM_PULSECOUNT
   .inited          = false,
   .irq             = TIVA_IRQ_PWM0_GEN1,
@@ -228,6 +244,11 @@ static struct tiva_pwm_chan_s g_pwm_chan3 =
   .generator_base  = TIVA_PWM0_BASE + TIVA_PWMN_BASE +
                      TIVA_PWMN_INTERVAL * 1,
   .channel_id      = 3,
+#ifdef CONFIG_TIVA_PWM_COMPLEMENTARY_G1
+  .complementary = true,
+#else
+  .complementary = false,
+#endif
 #ifdef CONFIG_PWM_PULSECOUNT
   .inited          = false,
   .irq             = TIVA_IRQ_PWM0_GEN1,
@@ -248,6 +269,11 @@ static struct tiva_pwm_chan_s g_pwm_chan4 =
   .generator_base  = TIVA_PWM0_BASE + TIVA_PWMN_BASE +
                      TIVA_PWMN_INTERVAL * 2,
   .channel_id      = 4,
+#ifdef CONFIG_TIVA_PWM_COMPLEMENTARY_G2
+  .complementary = true,
+#else
+  .complementary = false,
+#endif
 #ifdef CONFIG_PWM_PULSECOUNT
   .inited          = false,
   .irq             = TIVA_IRQ_PWM0_GEN2,
@@ -268,6 +294,11 @@ static struct tiva_pwm_chan_s g_pwm_chan5 =
   .generator_base  = TIVA_PWM0_BASE + TIVA_PWMN_BASE +
                      TIVA_PWMN_INTERVAL * 2,
   .channel_id      = 5,
+#ifdef CONFIG_TIVA_PWM_COMPLEMENTARY_G2
+  .complementary = true,
+#else
+  .complementary = false,
+#endif
 #ifdef CONFIG_PWM_PULSECOUNT
   .inited          = false,
   .irq             = TIVA_IRQ_PWM0_GEN2,
@@ -288,6 +319,11 @@ static struct tiva_pwm_chan_s g_pwm_chan6 =
   .generator_base  = TIVA_PWM0_BASE + TIVA_PWMN_BASE +
                      TIVA_PWMN_INTERVAL * 3,
   .channel_id      = 6,
+#ifdef CONFIG_TIVA_PWM_COMPLEMENTARY_G3
+  .complementary = true,
+#else
+  .complementary = false,
+#endif
 #ifdef CONFIG_PWM_PULSECOUNT
   .inited          = false,
   .irq             = TIVA_IRQ_PWM0_GEN3,
@@ -308,6 +344,11 @@ static struct tiva_pwm_chan_s g_pwm_chan7 =
   .generator_base  = TIVA_PWM0_BASE + TIVA_PWMN_BASE +
                      TIVA_PWMN_INTERVAL * 3,
   .channel_id      = 7,
+#ifdef CONFIG_TIVA_PWM_COMPLEMENTARY_G3
+  .complementary = true,
+#else
+  .complementary = false,
+#endif
 #ifdef CONFIG_PWM_PULSECOUNT
   .inited          = false,
   .irq             = TIVA_IRQ_PWM0_GEN3,
@@ -604,17 +645,29 @@ static inline int tiva_pwm_timer(struct tiva_pwm_chan_s *chan,
   /* Configure PWM countdown mode (refer to TM4C1294NCPDT 23.4.6) */
 
   tiva_pwm_putreg(chan, TIVA_PWMN_CTL_OFFSET, 0);
-  if (chan->channel_id % 2 == 0)
+  if (chan->complementary)
     {
       tiva_pwm_putreg(chan, TIVA_PWMN_GENA_OFFSET,
-                      GENX_LOW << TIVA_PWMN_GENX_ACTCMPAD |
+                      GENX_HIGH << TIVA_PWMN_GENX_ACTCMPAD |
+                      GENX_LOW << TIVA_PWMN_GENX_ACTLOAD);
+      tiva_pwm_putreg(chan, TIVA_PWMN_GENB_OFFSET,
+                      GENX_LOW << TIVA_PWMN_GENX_ACTCMPBD |
                       GENX_HIGH << TIVA_PWMN_GENX_ACTLOAD);
     }
   else
     {
-      tiva_pwm_putreg(chan, TIVA_PWMN_GENB_OFFSET,
-                      GENX_LOW << TIVA_PWMN_GENX_ACTCMPBD |
-                      GENX_HIGH << TIVA_PWMN_GENX_ACTLOAD);
+      if (chan->channel_id % 2 == 0)
+        {
+          tiva_pwm_putreg(chan, TIVA_PWMN_GENA_OFFSET,
+                          GENX_LOW << TIVA_PWMN_GENX_ACTCMPAD |
+                          GENX_HIGH << TIVA_PWMN_GENX_ACTLOAD);
+        }
+      else
+        {
+          tiva_pwm_putreg(chan, TIVA_PWMN_GENB_OFFSET,
+                          GENX_LOW << TIVA_PWMN_GENX_ACTCMPBD |
+                          GENX_HIGH << TIVA_PWMN_GENX_ACTLOAD);
+        }
     }
 
   /* Set the PWM period (refer to TM4C1294NCPDT 23.4.7) */
@@ -645,13 +698,21 @@ static inline int tiva_pwm_timer(struct tiva_pwm_chan_s *chan,
   comp = (duty == 0) ? (comp - 1) : (comp);
   pwminfo("> comp = %u (%08x)\n", comp, comp);
 
-  if (chan->channel_id % 2 == 0)
+  if (chan->complementary)
     {
       tiva_pwm_putreg(chan, TIVA_PWMN_CMPA_OFFSET, comp - 1);
+      tiva_pwm_putreg(chan, TIVA_PWMN_CMPB_OFFSET, comp - 1);
     }
   else
     {
-      tiva_pwm_putreg(chan, TIVA_PWMN_CMPB_OFFSET, comp - 1);
+      if (chan->channel_id % 2 == 0)
+        {
+          tiva_pwm_putreg(chan, TIVA_PWMN_CMPA_OFFSET, comp - 1);
+        }
+      else
+        {
+          tiva_pwm_putreg(chan, TIVA_PWMN_CMPB_OFFSET, comp - 1);
+        }
     }
 
   /* Enable the PWM generator (refer to TM4C1294NCPDT 23.4.10) */
