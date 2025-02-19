@@ -2757,4 +2757,26 @@ bool esp32_flash_encryption_enabled(void)
   return enabled;
 }
 
+/****************************************************************************
+ * Name: esp32_get_flash_address_mapped_as_text
+ *
+ * Description:
+ *   Get flash address which is currently mapped as text
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   flash address which is currently mapped as text
+ *
+ ****************************************************************************/
+
+uint32_t esp32_get_flash_address_mapped_as_text(void)
+{
+  uint32_t i = MMU_ADDR2PAGE((uint32_t)&_stext - SOC_IROM_MASK_LOW)
+               + IROM0_PAGES_START;
+  return (PRO_MMU_TABLE[i] & DPORT_MMU_ADDRESS_MASK)
+         * SPI_FLASH_MMU_PAGE_SIZE;
+}
+
 #endif /* CONFIG_ESP32_SPIFLASH */
