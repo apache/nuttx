@@ -70,7 +70,7 @@ struct arm64_oneshot_lowerhalf_s
   /* Private lower half data follows */
 
   void *arg;                          /* Argument that is passed to the handler */
-  uint64_t cycle_per_tick;            /* cycle per tick */
+  uint64_t frequency;                 /* Frequency in cycle per second */
   oneshot_callback_t callback;        /* Internal handler that receives callback */
 
   /* which cpu timer is running, -1 indicate timer stoppd */
@@ -85,6 +85,11 @@ struct arm64_oneshot_lowerhalf_s
 static inline void arm64_arch_timer_set_compare(uint64_t value)
 {
   write_sysreg(value, cntv_cval_el0);
+}
+
+static inline void arm64_arch_timer_set_relative(uint64_t value)
+{
+  write_sysreg(value, cntv_tval_el0);
 }
 
 static inline uint64_t arm64_arch_timer_get_compare(void)
@@ -136,6 +141,68 @@ static inline uint64_t arm64_arch_timer_count(void)
 static inline uint64_t arm64_arch_timer_get_cntfrq(void)
 {
   return read_sysreg(cntfrq_el0);
+}
+
+static inline uint64_t arm64_arch_cnt2tick(uint64_t count, uint64_t freq)
+{
+  uint64_t multiply_safe_count = UINT64_MAX / TICK_PER_SEC;
+  uint64_t result_ticks = 0;
+
+  /* We convert count to ticks via
+   *   ticks = count / cycle_per_tick.
+   * Concretely, we have:
+   *   ticks = count / (freq / TICK_PER_SEC).
+   * However, the `freq / TICK_PER_SEC` might be inaccurate
+   * due to the integer division.
+   * So we transform it to:
+   *   ticks = count * TICK_PER_SEC / freq.
+   */
+
+  if (count > multiply_safe_count)
+    {
+      /* In case of count * TICK_PER_SEC overflow.
+       * We divide the count into two parts:
+       * The multiply overflow part and non-overflow part.
+       * We convert the overflow part to ticks first,
+       * and then add the non-overflow part.
+       */
+
+      result_ticks += count / multiply_safe_count *
+                      (multiply_safe_count * TICK_PER_SEC / freq);
+      count         = count % multiply_safe_count;
+    }
+
+  /* Here we convert the non-overflow part to ticks. */
+
+  result_ticks += count * TICK_PER_SEC / freq;
+
+  return result_ticks;
+}
+
+static inline uint64_t arm64_arch_tick2cnt(uint64_t ticks, uint64_t freq)
+{
+  uint64_t multiply_safe_ticks = UINT64_MAX / freq;
+  uint64_t result_count = 0;
+
+  if (ticks > multiply_safe_ticks)
+    {
+      /* In case of count * freq overflow.
+       * We divide the ticks into two parts:
+       * The multiply overflow part and non-overflow part.
+       * We convert the overflow part to count first,
+       * and then add the non-overflow part.
+       */
+
+      result_count += ticks / multiply_safe_ticks *
+                      (multiply_safe_ticks * freq / TICK_PER_SEC);
+      ticks         = ticks % multiply_safe_ticks;
+    }
+
+  /* Here we convert the non-overflow part to count. */
+
+  result_count += ticks * freq / TICK_PER_SEC;
+
+  return result_count;
 }
 
 /****************************************************************************
@@ -194,7 +261,7 @@ static int arm64_tick_max_delay(struct oneshot_lowerhalf_s *lower,
 {
   DEBUGASSERT(ticks != NULL);
 
-  *ticks = (clock_t)UINT64_MAX;
+  *ticks = (clock_t)UINT32_MAX;
 
   return OK;
 }
@@ -262,9 +329,11 @@ static int arm64_tick_start(struct oneshot_lowerhalf_s *lower,
                             oneshot_callback_t callback, void *arg,
                             clock_t ticks)
 {
+  uint64_t next_cnt;
+  uint64_t next_tick;
   struct arm64_oneshot_lowerhalf_s *priv =
     (struct arm64_oneshot_lowerhalf_s *)lower;
-  uint64_t next_cycle;
+  uint64_t freq = priv->frequency;
 
   DEBUGASSERT(priv != NULL && callback != NULL);
 
@@ -275,11 +344,13 @@ static int arm64_tick_start(struct oneshot_lowerhalf_s *lower,
 
   priv->running = this_cpu();
 
-  next_cycle =
-    arm64_arch_timer_count() / priv->cycle_per_tick * priv->cycle_per_tick +
-    ticks * priv->cycle_per_tick;
+  /* Align the timer count to the tick boundary */
 
-  arm64_arch_timer_set_compare(next_cycle);
+  next_tick = arm64_arch_cnt2tick(arm64_arch_timer_count(), freq) + ticks;
+  next_cnt  = arm64_arch_tick2cnt(next_tick, freq);
+
+  arm64_arch_timer_set_compare(next_cnt);
+
   arm64_arch_timer_set_irq_mask(false);
 
   return OK;
@@ -306,12 +377,15 @@ static int arm64_tick_start(struct oneshot_lowerhalf_s *lower,
 static int arm64_tick_current(struct oneshot_lowerhalf_s *lower,
                               clock_t *ticks)
 {
+  uint64_t count;
   struct arm64_oneshot_lowerhalf_s *priv =
     (struct arm64_oneshot_lowerhalf_s *)lower;
 
   DEBUGASSERT(ticks != NULL);
 
-  *ticks = arm64_arch_timer_count() / priv->cycle_per_tick;
+  count = arm64_arch_timer_count();
+
+  *ticks = arm64_arch_cnt2tick(count, priv->frequency);
 
   return OK;
 }
@@ -367,8 +441,7 @@ struct oneshot_lowerhalf_s *arm64_oneshot_initialize(void)
 
   priv->lh.ops = &g_oneshot_ops;
   priv->running = -1;
-  priv->cycle_per_tick = arm64_arch_timer_get_cntfrq() / TICK_PER_SEC;
-  tmrinfo("cycle_per_tick %" PRIu64 "\n", priv->cycle_per_tick);
+  priv->frequency = arm64_arch_timer_get_cntfrq();
 
   /* Attach handler */
 
