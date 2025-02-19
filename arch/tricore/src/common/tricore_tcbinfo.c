@@ -34,7 +34,40 @@
  * Private Data
  ****************************************************************************/
 
-static const uint16_t g_reg_offs[1];
+static const uint16_t g_reg_offs[] =
+{
+  TCB_REG_OFF(REG_LPCXI),
+  TCB_REG_OFF(REG_LA11),
+  TCB_REG_OFF(REG_D0),
+  TCB_REG_OFF(REG_D1),
+  TCB_REG_OFF(REG_D2),
+  TCB_REG_OFF(REG_D3),
+  TCB_REG_OFF(REG_D4),
+  TCB_REG_OFF(REG_D5),
+  TCB_REG_OFF(REG_D6),
+  TCB_REG_OFF(REG_D7),
+  TCB_REG_OFF(REG_A2),
+  TCB_REG_OFF(REG_A3),
+  TCB_REG_OFF(REG_A4),
+  TCB_REG_OFF(REG_A5),
+  TCB_REG_OFF(REG_A6),
+  TCB_REG_OFF(REG_A7),
+  TCB_REG_OFF(REG_PSW),
+  TCB_REG_OFF(REG_A10),
+  TCB_REG_OFF(REG_UA11),
+  TCB_REG_OFF(REG_D8),
+  TCB_REG_OFF(REG_D9),
+  TCB_REG_OFF(REG_D10),
+  TCB_REG_OFF(REG_D11),
+  TCB_REG_OFF(REG_A12),
+  TCB_REG_OFF(REG_A13),
+  TCB_REG_OFF(REG_A14),
+  TCB_REG_OFF(REG_A15),
+  TCB_REG_OFF(REG_D12),
+  TCB_REG_OFF(REG_D13),
+  TCB_REG_OFF(REG_D14),
+  TCB_REG_OFF(REG_D15),
+};
 
 /****************************************************************************
  * Public Data
