@@ -248,7 +248,7 @@ static inline_function void spin_lock(FAR volatile spinlock_t *lock)
 #endif /* CONFIG_SPINLOCK */
 
 /****************************************************************************
- * Name: raw_spin_trylock
+ * Name: spin_trylock_notrace
  *
  * Description:
  *   Try once to lock the spinlock.  Do not wait if the spinlock is already
@@ -271,7 +271,7 @@ static inline_function void spin_lock(FAR volatile spinlock_t *lock)
 
 #ifdef CONFIG_SPINLOCK
 static inline_function bool
-raw_spin_trylock(FAR volatile spinlock_t *lock)
+spin_trylock_notrace(FAR volatile spinlock_t *lock)
 {
 #ifdef CONFIG_TICKET_SPINLOCK
   if (!atomic_cmpxchg(&lock->next, &lock->owner,
@@ -319,7 +319,7 @@ static inline_function bool spin_trylock(FAR volatile spinlock_t *lock)
 
   /* Try lock without trace note */
 
-  locked = raw_spin_trylock(lock);
+  locked = spin_trylock_notrace(lock);
   if (locked)
     {
       /* Notify that we have the spinlock */
@@ -500,7 +500,7 @@ irqstate_t spin_lock_irqsave(FAR volatile spinlock_t *lock)
 #endif
 
 /****************************************************************************
- * Name: raw_spin_trylock_irqsave
+ * Name: spin_trylock_irqsave_notrace
  *
  * Description:
  *   Try once to lock the spinlock.  Do not wait if the spinlock is already
@@ -523,14 +523,14 @@ irqstate_t spin_lock_irqsave(FAR volatile spinlock_t *lock)
  ****************************************************************************/
 
 #ifdef CONFIG_SPINLOCK
-#  define raw_spin_trylock_irqsave(l, f) \
+#  define spin_trylock_irqsave_notrace(l, f) \
 ({ \
   f = up_irq_save(); \
-  raw_spin_trylock(l) ? \
+  spin_trylock_notrace(l) ? \
   true : ({ up_irq_restore(f); false; }); \
 })
 #else
-#  define raw_spin_trylock_irqsave(l, f) \
+#  define spin_trylock_irqsave_notrace(l, f) \
 ({ \
   (void)(l); \
   f = up_irq_save(); \
