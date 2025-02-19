@@ -723,6 +723,10 @@ static int cxd56_i2c_reset(struct i2c_master_s *dev)
 
   nxmutex_lock(&priv->lock);
 
+  /* Disable clock gating (clock enable) */
+
+  cxd56_i2c_clock_gate_disable(priv->port);
+
   /* Use GPIO configuration to un-wedge the bus */
 
   cxd56_i2c_pincontrol(priv->port, false);
@@ -794,6 +798,11 @@ static int cxd56_i2c_reset(struct i2c_master_s *dev)
       up_udelay(10);
     }
 
+  /* Disable input of SCL and SDA pins */
+
+  cxd56_gpio_config(scl_gpio, false);
+  cxd56_gpio_config(sda_gpio, false);
+
   /* Generate a start followed by a stop to reset slave
    * state machines.
    */
@@ -819,6 +828,10 @@ out:
   /* Revert the GPIO configuration. */
 
   cxd56_i2c_pincontrol(priv->port, true);
+
+  /* Enable clock gating (clock disable) */
+
+  cxd56_i2c_clock_gate_enable(priv->port);
 
   /* Release the port for re-use by other clients */
 
