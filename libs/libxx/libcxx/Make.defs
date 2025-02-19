@@ -36,6 +36,7 @@ libcxx/libcxx: libcxx-$(LIBCXX_VERSION).src.tar.xz
 	$(Q) patch -p0 < libcxx/0001-libcxx-remove-mach-time-h.patch -d libcxx
 	$(Q) patch -p0 < libcxx/0001-libcxx-fix-ld-errors.patch -d libcxx
 	$(Q) patch -p0 < libcxx/0001-Fix-build-error-about-__GLIBC__.patch -d libcxx
+	$(Q) patch -p0 < libcxx/0001-libc-Fix-failures-with-GCC-14-92663.patch -d libcxx
 
 endif
 
