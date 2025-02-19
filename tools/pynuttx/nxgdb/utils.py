@@ -889,8 +889,7 @@ def get_task_argvstr(tcb: Tcb) -> List[str]:
         if tcb.flags & TCB_FLAG_TTYPE_MASK == TCB_FLAG_TTYPE_PTHREAD:
             if tcb.type.code != gdb.TYPE_CODE_PTR:
                 tcb = tcb.address
-            tcb = tcb.cast(lookup_type("struct pthread_tcb_s").pointer())
-            return ["", f"{tcb['cmn']['entry']['main']}", f'{tcb["arg"]}']
+            return ["", f"{tcb['entry']['main']}", f'{tcb["arg"]}']
 
         tls_info_s = lookup_type("struct tls_info_s").pointer()
         tls = tcb.stack_alloc_ptr.cast(tls_info_s)
