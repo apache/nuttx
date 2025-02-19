@@ -839,6 +839,7 @@ if(NOT CONFIG_ARCH_SIM)
     # Remove executable suffix
     set(CMAKE_EXECUTABLE_SUFFIX "")
   else()
+    get_property(NUTTX_EXTRA_FLAGS GLOBAL PROPERTY NUTTX_EXTRA_FLAGS)
     if(NUTTX_EXTRA_FLAGS)
       list(REMOVE_DUPLICATES NUTTX_EXTRA_FLAGS)
     endif()
