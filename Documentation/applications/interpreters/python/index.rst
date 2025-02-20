@@ -16,12 +16,15 @@ It is written in C and is the most widely used Python interpreter.
 How Does it Work?
 =================
 
-1. Python for NuttX target initially the ``rv-virt`` (RISC-V QEMU) board.
+1. Python for NuttX runs on RISC-V QEMU (emulated) and on Espressif's ESP32-S3.
 2. Python modules are stored in `pyc <https://docs.python.org/3/glossary.html#term-bytecode>`_ (byte-code format) and are loaded from a ROMFS image at startup.
 3. The Python wrapper application on NuttX mounts the ROMFS partition which contains the Python modules and sets the required environment variables (``PYTHONHOME`` and ``PYTHON_BASIC_REPL``) automatically.
 
-Building Python on NuttX
-========================
+Building and Running Python on NuttX
+====================================
+
+``rv-virt`` (RISC-V QEMU)
+----------------------------
 
 Use the ``rv-virt:python`` config to build Python for NuttX. Note that the CMake scripts don't work for this configuration. For now, please use the makefile build instead:
 
@@ -33,10 +36,7 @@ Use the ``rv-virt:python`` config to build Python for NuttX. Note that the CMake
    $ make -j$(nproc)
    $ ls -l nuttx
 
-This will generate a ``nutxx`` binary. This file can be run using the RISC-V QEMU.
-
-Try Python in NSH
-=================
+This will generate a ``nuttx`` binary. This file can be run using the RISC-V QEMU.
 
 Before running the RISC-V QEMU, create a raw disk image with the following command:
 
@@ -72,9 +72,35 @@ Then, run RISC-V QEMU with the following command:
    >>>
 
 Demo
-----
+^^^^
 
 Check the following `asciinema <https://asciinema.org/>`_ demo to see how to run Python on NuttX. You can copy and paste the commands from the demo to try it yourself.
 
 .. image:: https://asciinema.org/a/bYYy1fyIOQ3hOY4lJ7L3WFcNb.svg
    :target: https://asciinema.org/a/bYYy1fyIOQ3hOY4lJ7L3WFcNb
+
+ESP32-S3
+--------
+
+For this example, we will use the ESP32-S3 board. Use the ``esp32s3-devkit:python`` config to build
+Python for NuttX. Note that this defconfig uses a board with the ESP32-S3-WROOM-2 module with 32MiB
+of flash and 8MiB of PSRAM.
+
+Build and flash the ESP32-S3 board with the following commands:
+
+.. code:: console
+
+   $ cd nuttx
+   $ make distclean
+   $ ./tools/configure.sh esp32s3-devkit:python
+   $ make flash ESPTOOL_BINDIR=./ ESPTOOL_PORT=/dev/ttyUSB0 -s -j$(nproc)
+
+To run Python on ESP32-S3, just open a serial terminal and connect to the ESP32-S3 board.
+You will see the NuttShell (NSH) prompt. Run the following commands:
+
+.. code:: console
+
+   nsh> python
+   Python 3.13.0 (main, Dec  4 2024, 17:00:42) [GCC 13.2.0] on nuttx
+   Type "help", "copyright", "credits" or "license" for more information.
+   >>>

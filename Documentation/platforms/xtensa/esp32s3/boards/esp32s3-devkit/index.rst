@@ -481,6 +481,16 @@ To test it, just execute the ``pwm`` application::
     pwm_main: starting output with frequency: 10000 duty: 00008000
     pwm_main: stopping output
 
+python
+------
+
+This configuration enables the Python for ESP32-S3.
+Please refer to the :doc:`Python Interpreter </applications/interpreters/python/index>` page.
+
+.. warning:: Note that this defconfig uses a board with the ESP32-S3-WROOM-2 module with 32MiB
+  of flash and 8MiB of PSRAM. Running Python on ESP32-S3 requires at least 16MiB of flash and
+  8MiB of PSRAM.
+
 qemu_debug
 ----------
 
