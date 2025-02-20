@@ -560,10 +560,66 @@ _xtensa_nmi_handler:
 
 _xtensa_debug_handler:
 
+	/* Create an interrupt frame and save minimal context. */
+
 	exception_entry XCHAL_DEBUGLEVEL
 
+#if !defined(CONFIG_ARCH_HAVE_DEBUG)
 	movi	a2, XTENSA_DEBUG_EXCEPTION		/* Argument 1: Error code */
 	call0	_xtensa_panic					/* Does not return */
+
+#else
+	/* Save the rest of the state context. */
+
+	call0	_xtensa_context_save
+
+	/* Save current SP before (possibly) overwriting it,
+	 * it's the register save area.
+	 */
+
+	mov  a12, sp
+
+	/* Switch to an interrupt stack if we have one */
+
+#if CONFIG_ARCH_INTERRUPTSTACK > 15
+	setintstack a13 a14
+#endif
+
+	/* Set up PS for C, re-enable hi-pri interrupts, and clear EXCM. */
+
+	ps_setup	XCHAL_DEBUGLEVEL a0
+
+	/* Link the pre-exception frame for debugging. At this point, a12 points to the
+	 * allocated and filled exception stack frame (old value of SP in case of
+	 * an interrupt stack).
+	 */
+
+	exception_backtrace a12 XCHAL_DEBUGLEVEL
+
+	/* Call xtensa_debug_handler, passing the pointer to the beginning of the
+	 * register save area.
+	 */
+
+	mov	ARG1, a12
+	CALL	xtensa_debug_handler
+
+	mov	a2, RETVAL
+
+	/* Restore registers in preparation to return from interrupt */
+
+	call0	_xtensa_context_restore			/* Preserves a2 */
+
+	/* Restore only level-specific regs (the rest were already restored) */
+
+	exception_exit XCHAL_DEBUGLEVEL
+
+	/* Return from interrupt.  RFI restores the PS from EPS_DEBUGLEVEL and jumps to
+	 * the address in EPC_DEBUGLEVEL.
+	 */
+
+	rfi		XCHAL_DEBUGLEVEL
+
+#endif
 
 	.size	_xtensa_debug_handler, . -_xtensa_debug_handler
 
