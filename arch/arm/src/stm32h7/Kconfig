@@ -382,6 +382,7 @@ config STM32H7_STM32H7X3XX
 	bool
 	default n
 	select ARCH_HAVE_FPU
+	select ARCH_HAVE_LAZYFPU
 	select ARCH_HAVE_DPFPU
 	select STM32H7_HAVE_LTDC
 	select STM32H7_HAVE_ETHERNET
@@ -396,6 +397,7 @@ config STM32H7_STM32H7B3XX
 	bool
 	default n
 	select ARCH_HAVE_FPU
+	select ARCH_HAVE_LAZYFPU
 	select ARCH_HAVE_DPFPU
 	select STM32H7_HAVE_ETHERNET
 	select STM32H7_HAVE_FMC
