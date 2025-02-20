@@ -463,6 +463,12 @@ static int ipv6_in(FAR struct net_driver_s *dev)
         if ((dev->d_len > 0 && dev->d_lltype == NET_LL_IEEE802154) ||
             (dev->d_len > 0 && dev->d_lltype == NET_LL_PKTRADIO))
           {
+            /* tcp_ipv6_input() can update dev->d_iob. Update ipv6 to ensure
+             * using the correct data.
+             */
+
+            ipv6 = IPv6BUF;
+
             /* Let 6LoWPAN handle the TCP output */
 
             sixlowpan_tcp_send(dev, dev, ipv6);
