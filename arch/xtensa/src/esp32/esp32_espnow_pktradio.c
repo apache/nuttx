@@ -149,7 +149,8 @@ struct espnow_driver_s
 
   struct wdog_s txtimeout;  /* TX timeout timer */
 
-  struct work_s work;       /* Defer tx and rx work to the work queue */
+  struct work_s rxwork;     /* Defer rx work to the work queue */
+  struct work_s txwork;     /* Defer tx work to the work queue */
   struct work_s pollwork;   /* Defer pollwork to the work queue */
   struct work_s toutwork;   /* Defer driver reset to the work queue */
 
@@ -202,7 +203,8 @@ static void espnow_extract_pktmeta(FAR struct iob_s *iob,
 
 /* TX and RX work */
 
-static void espnow_work(FAR void *arg);
+static void espnow_rxwork(FAR void *arg);
+static void espnow_txwork(FAR void *arg);
 
 /* TX polling logic */
 
@@ -471,6 +473,8 @@ static void espnow_txtailadd(FAR struct espnow_driver_s *priv,
 {
   irqstate_t flags;
 
+  iob->io_flink = NULL;
+
   flags = spin_lock_irqsave(&priv->lock);
 
   if (priv->txhead == NULL)
@@ -595,6 +599,8 @@ static void espnow_rxtailadd(FAR struct espnow_driver_s *priv,
                              FAR struct iob_s *iob)
 {
   irqstate_t flags;
+
+  iob->io_flink = NULL;
 
   flags = spin_lock_irqsave(&priv->lock);
 
@@ -825,9 +831,9 @@ static void espnow_recv_cb(const esp_now_recv_info_t * esp_now_info,
 
   /* Schedule work to queue */
 
-  if (work_available(&priv->work))
+  if (work_available(&priv->rxwork))
     {
-      work_queue(LPBKWORK, &priv->work, espnow_work, priv, 0);
+      work_queue(LPBKWORK, &priv->rxwork, espnow_rxwork, priv, 0);
     }
 }
 
@@ -853,7 +859,7 @@ static void espnow_send_cb(const uint8_t *mac_address,
 
   wd_cancel(&priv->txtimeout);
 
-  /* If TX has been blocked reschedule espnow_work */
+  /* If TX has been blocked reschedule espnow_txwork */
 
   if (priv->txblocked)
     {
@@ -861,9 +867,9 @@ static void espnow_send_cb(const uint8_t *mac_address,
 
       /* Schedule the work on the worker thread. */
 
-      if (work_available(&priv->work))
+      if (work_available(&priv->txwork))
         {
-          work_queue(LPBKWORK, &priv->work, espnow_work, priv, 0);
+          work_queue(LPBKWORK, &priv->txwork, espnow_txwork, priv, 0);
         }
     }
 }
@@ -890,6 +896,8 @@ static void espnow_transmit(FAR struct espnow_driver_s *priv)
 
   while ((iob = espnow_txheadget(priv)))
     {
+      ninfo("Sending IOB %p [%d]\n", iob, iob->io_len);
+
       ret = espnow_send(iob);
 
       /* Increment statistics */
@@ -921,7 +929,26 @@ static void espnow_transmit(FAR struct espnow_driver_s *priv)
 }
 
 /****************************************************************************
- * Name: espnow_work
+ * Name: espnow_txwork
+ *
+ * Description:
+ *   Call espnow_transmit to send available packets to espnow.
+ *
+ * Input Parameters:
+ * priv - Reference to the driver state structure
+ *
+ *
+ ****************************************************************************/
+
+static void espnow_txwork(void *arg)
+{
+  FAR struct espnow_driver_s *priv = (FAR struct espnow_driver_s *)arg;
+
+  espnow_transmit(priv);
+}
+
+/****************************************************************************
+ * Name: espnow_rxwork
  *
  * Description:
  *   Call espnow_transmit to send available packets to espnow, process
@@ -934,7 +961,7 @@ static void espnow_transmit(FAR struct espnow_driver_s *priv)
  *
  ****************************************************************************/
 
-static void espnow_work(void *arg)
+static void espnow_rxwork(void *arg)
 {
   FAR struct espnow_driver_s *priv = (FAR struct espnow_driver_s *)arg;
   struct pktradio_metadata_s pktmeta;
@@ -942,8 +969,6 @@ static void espnow_work(void *arg)
   int ret;
 
   /* Send available packets */
-
-  espnow_transmit(priv);
 
   /* Loop while there are frames to be processed, send them to sixlowpan */
 
@@ -977,10 +1002,6 @@ static void espnow_work(void *arg)
           NETDEV_ERRORS(&priv->espnow_radio.r_dev);
         }
     }
-
-  /* Send response packets */
-
-  espnow_transmit(priv);
 
   net_unlock();
 }
@@ -1276,8 +1297,6 @@ static int espnow_txavail(FAR struct net_driver_s *dev)
   FAR struct espnow_driver_s *priv = (FAR struct espnow_driver_s *)
                                      dev->d_private;
 
-  ninfo("Available: %u\n", work_available(&priv->pollwork));
-
   /* Is our single work structure available?  It may not be if there are
    * pending actions and we will have to ignore the Tx availability
    * action.
@@ -1526,7 +1545,7 @@ static int espnow_req_data(FAR struct radio_driver_s *netdev,
       framelist     = iob->io_flink;
       iob->io_flink = NULL;
 
-      ninfo("Queuing frame IOB %p\n", iob);
+      ninfo("Queuing frame IOB %p [%d]\n", iob, iob->io_len);
       memcpy(mac, pktmeta->pm_dest.pa_addr, CONFIG_PKTRADIO_ADDRLEN);
 #if CONFIG_PKTRADIO_ADDRLEN == 1
       ninfo("MAC: %02x\n", mac[0]);
@@ -1559,11 +1578,11 @@ static int espnow_req_data(FAR struct radio_driver_s *netdev,
       espnow_txtailadd(priv, iob);
     }
 
-  /* Schedule the work on the worker thread. */
+  /* Schedule the txwork on the worker thread. */
 
-  if (work_available(&priv->work))
+  if (work_available(&priv->txwork))
     {
-      work_queue(LPBKWORK, &priv->work, espnow_work, priv, 0);
+      work_queue(LPBKWORK, &priv->txwork, espnow_txwork, priv, 0);
     }
 
   return OK;
