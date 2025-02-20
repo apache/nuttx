@@ -46,6 +46,7 @@
 
 #include "chip.h"
 #include "exc_return.h"
+#include "ghs_compat.S"
 
 /****************************************************************************
  * Pre-processor Definitions
