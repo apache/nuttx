@@ -109,7 +109,7 @@ int binfmt_copyactions(FAR const posix_spawn_file_actions_t **copy,
     }
 
   for (entry = (FAR struct spawn_general_file_action_s *)actions,
-       prev = NULL; entry != NULL; prev = entry, entry = entry->flink)
+       prev = NULL; entry != NULL; entry = entry->flink)
     {
       switch (entry->action)
         {
@@ -122,6 +122,7 @@ int binfmt_copyactions(FAR const posix_spawn_file_actions_t **copy,
                 prev->flink = (FAR void *)close;
               }
 
+            prev   = (FAR void *)close;
             buffer = close + 1;
             break;
 
@@ -134,6 +135,7 @@ int binfmt_copyactions(FAR const posix_spawn_file_actions_t **copy,
                 prev->flink = (FAR void *)dup2;
               }
 
+            prev   = (FAR void *)dup2;
             buffer = dup2 + 1;
             break;
 
@@ -149,6 +151,7 @@ int binfmt_copyactions(FAR const posix_spawn_file_actions_t **copy,
 
             strcpy(open->path, tmp->path);
 
+            prev   = (FAR void *)open;
             buffer = (FAR char *)buffer +
                      ALIGN_UP(SIZEOF_OPEN_FILE_ACTION_S(strlen(tmp->path)),
                               sizeof(FAR void *));
