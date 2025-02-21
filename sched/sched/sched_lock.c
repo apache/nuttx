@@ -86,13 +86,13 @@ void sched_lock(void)
         {
 #if (CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION >= 0) || \
     defined(CONFIG_SCHED_INSTRUMENTATION_PREEMPTION)
-          irqstate_t flags = enter_critical_section_wo_note();
+          irqstate_t flags = enter_critical_section_notrace();
 
           /* Note that we have pre-emption locked */
 
           nxsched_critmon_preemption(rtcb, true, return_address(0));
           sched_note_preemption(rtcb, true);
-          leave_critical_section_wo_note(flags);
+          leave_critical_section_notrace(flags);
 #endif
         }
     }
