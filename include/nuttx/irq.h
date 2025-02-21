@@ -328,13 +328,13 @@ int irqchain_detach(int irq, xcpt_t isr, FAR void *arg);
       defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION)
 irqstate_t enter_critical_section(void) noinstrument_function;
 #  else
-#    define enter_critical_section() enter_critical_section_wo_note()
+#    define enter_critical_section() enter_critical_section_notrace()
 #  endif
 
-irqstate_t enter_critical_section_wo_note(void) noinstrument_function;
+irqstate_t enter_critical_section_notrace(void) noinstrument_function;
 #else
 #  define enter_critical_section() up_irq_save()
-#  define enter_critical_section_wo_note() up_irq_save()
+#  define enter_critical_section_notrace() up_irq_save()
 #endif
 
 /****************************************************************************
@@ -366,13 +366,13 @@ irqstate_t enter_critical_section_wo_note(void) noinstrument_function;
       defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION)
 void leave_critical_section(irqstate_t flags) noinstrument_function;
 #  else
-#    define leave_critical_section(f) leave_critical_section_wo_note(f)
+#    define leave_critical_section(f) leave_critical_section_notrace(f)
 #  endif
 
-void leave_critical_section_wo_note(irqstate_t flags) noinstrument_function;
+void leave_critical_section_notrace(irqstate_t flags) noinstrument_function;
 #else
 #  define leave_critical_section(f) up_irq_restore(f)
-#  define leave_critical_section_wo_note(f) up_irq_restore(f)
+#  define leave_critical_section_notrace(f) up_irq_restore(f)
 #endif
 
 /****************************************************************************

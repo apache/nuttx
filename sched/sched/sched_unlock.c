@@ -72,7 +72,7 @@ void sched_unlock(void)
 
       if (rtcb->lockcount == 1)
         {
-          irqstate_t flags = enter_critical_section_wo_note();
+          irqstate_t flags = enter_critical_section_notrace();
           FAR struct tcb_s *ptcb;
 
           rtcb->lockcount = 0;
@@ -170,7 +170,7 @@ void sched_unlock(void)
             }
 #endif
 
-          leave_critical_section_wo_note(flags);
+          leave_critical_section_notrace(flags);
         }
       else
         {
