@@ -230,10 +230,12 @@
 
 /* Protocol-level socket operations. */
 
-#define SOL_IP          IPPROTO_IP   /* See options in include/netinet/ip.h */
-#define SOL_IPV6        IPPROTO_IPV6 /* See options in include/netinet/ip6.h */
-#define SOL_TCP         IPPROTO_TCP  /* See options in include/netinet/tcp.h */
-#define SOL_UDP         IPPROTO_UDP  /* See options in include/netinit/udp.h */
+#define SOL_IP          IPPROTO_IP     /* See options in include/netinet/in.h */
+#define SOL_IPV6        IPPROTO_IPV6   /* See options in include/netinet/in.h */
+#define SOL_TCP         IPPROTO_TCP    /* See options in include/netinet/in.h */
+#define SOL_UDP         IPPROTO_UDP    /* See options in include/netinet/in.h */
+#define SOL_RAW         IPPROTO_RAW    /* See options in include/netinet/in.h */
+#define SOL_ICMPV6      IPPROTO_ICMPV6 /* See options in include/netinet/in.h */
 
 /* Bluetooth-level operations. */
 
