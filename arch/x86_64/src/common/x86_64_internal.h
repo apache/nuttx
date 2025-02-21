@@ -193,6 +193,16 @@ extern uint8_t _etbss[];           /* End+1 of .tbss */
  * Inline Functions
  ****************************************************************************/
 
+static inline void x86_64_cpuid(uint32_t leaf, uint32_t subleaf,
+                                uint32_t *eax, uint32_t *ebx,
+                                uint32_t *ecx, uint32_t *edx)
+{
+  __asm__ volatile("cpuid"
+                   : "=a"(*eax), "=b"(*ebx), "=c"(*ecx), "=d"(*edx)
+                   : "a" (leaf), "c" (subleaf)
+                   : "memory");
+}
+
 #ifdef CONFIG_ARCH_KERNEL_STACK
 static inline_function uint64_t *x86_64_get_ktopstk(void)
 {
