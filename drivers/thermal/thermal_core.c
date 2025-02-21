@@ -835,7 +835,7 @@ void thermal_zone_device_update(FAR struct thermal_zone_device_s *zdev)
   if (ret < 0)
     {
       therr("Failed to get temperature from zone %s \n", zdev->name);
-      goto unlock;
+      goto delayed_work;
     }
 
   zdev->last_temperature = zdev->temperature;
@@ -895,6 +895,8 @@ void thermal_zone_device_update(FAR struct thermal_zone_device_s *zdev)
                  trip_low, trip_high, zdev->name);
         }
     }
+
+delayed_work:
 
   /* Update worker invoke delay */
 
