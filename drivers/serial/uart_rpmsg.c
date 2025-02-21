@@ -321,6 +321,13 @@ static bool uart_rpmsg_txempty(FAR struct uart_dev_s *dev)
   return true;
 }
 
+static void uart_rpmsg_ns_bound(struct rpmsg_endpoint *ept)
+{
+  FAR struct uart_dev_s *dev = ept->priv;
+
+  uart_rpmsg_dmatxavail(dev);
+}
+
 static void uart_rpmsg_device_created(FAR struct rpmsg_device *rdev,
                                       FAR void *priv_)
 {
@@ -331,6 +338,7 @@ static void uart_rpmsg_device_created(FAR struct rpmsg_device *rdev,
   if (strcmp(priv->cpuname, rpmsg_get_cpuname(rdev)) == 0)
     {
       priv->ept.priv = dev;
+      priv->ept.ns_bound_cb = uart_rpmsg_ns_bound;
       snprintf(eptname, sizeof(eptname), "%s%s",
                UART_RPMSG_EPT_PREFIX, priv->devname);
       rpmsg_create_ept(&priv->ept, rdev, eptname,
