@@ -38,6 +38,18 @@ if(CONFIG_SCHED_WORKQUEUE)
     list(APPEND SRCS kwork_notifier.c)
   endif()
 
+  if(CONFIG_SCHED_HPWORKSTACKSECTION)
+    target_compile_definitions(
+      sched
+      PRIVATE -DSCHED_HPWORKSTACKSECTION="${CONFIG_SCHED_HPWORKSTACKSECTION}")
+  endif()
+
+  if(CONFIG_SCHED_LPWORKSTACKSECTION)
+    target_compile_definitions(
+      sched
+      PRIVATE -DSCHED_LPWORKSTACKSECTION="${CONFIG_SCHED_LPWORKSTACKSECTION}")
+  endif()
+
   target_sources(sched PRIVATE ${SRCS})
 
 endif()

@@ -1855,6 +1855,12 @@ config SCHED_HPWORKSTACKSIZE
 	---help---
 		The stack size allocated for the worker thread.  Default: 2K.
 
+config SCHED_HPWORKSTACKSECTION
+	string "The section where hpwork stack is located"
+	default ""
+	---help---
+		The section where hpwork stack is located.
+
 endif # SCHED_HPWORK
 
 config SCHED_LPWORK
@@ -1953,6 +1959,12 @@ config SCHED_LPWORKSTACKSIZE
 	default DEFAULT_TASK_STACKSIZE
 	---help---
 		The stack size allocated for the lower priority worker thread.  Default: 2K.
+
+config SCHED_LPWORKSTACKSECTION
+	string "The section where lpwork stack is located"
+	default ""
+	---help---
+		The section where lpwork stack is located.
 
 endif # SCHED_LPWORK
 endmenu # Work Queue Support
