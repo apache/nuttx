@@ -1,5 +1,5 @@
 # ##############################################################################
-# arch/tricore/src/cmake/Toolchain.cmake
+# arch/tricore/src/cmake/ToolchainGnuc.cmake
 #
 # SPDX-License-Identifier: Apache-2.0
 #
