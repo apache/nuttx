@@ -27,4 +27,10 @@ config FS_ROMFS_CACHE_FILE_NSECTORS
 	---help---
 		The number of file cache sector
 
+config FS_ROMFS_DEBUG
+	bool "ROMFS file system read/write double check"
+	depends on DEBUG_FS_ERROR
+	---help---
+		Enable ROMFS file system read/write double check.
+
 endif

@@ -36,6 +36,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/crc16.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/ioctl.h>
 
@@ -509,6 +510,41 @@ static int romfs_cachenode(FAR struct romfs_mountpt_s *rm,
 #endif
 
 /****************************************************************************
+ * Name: romfs_check
+ ****************************************************************************/
+
+#ifdef CONFIG_FS_ROMFS_DEBUG
+static void romfs_check(FAR struct inode *inode, uint32_t sector,
+                        unsigned int nsectors, FAR uint8_t *buffer,
+                        uint16_t sectorsize)
+{
+  uint16_t crc16_check;
+  uint16_t crc16_ori;
+  ssize_t size;
+
+  crc16_ori = crc16(buffer, sectorsize * nsectors);
+
+  size = inode->u.i_bops->read(inode, buffer, sector, nsectors);
+  if (size != (ssize_t)nsectors)
+    {
+      ferr("Read failed: %zd\n", size);
+      lib_dumpbuffer("buffer:", buffer, sectorsize * nsectors);
+      DEBUGASSERT(0);
+    }
+  else
+    {
+      crc16_check = crc16(buffer, sectorsize * nsectors);
+      if (crc16_ori != crc16_check)
+        {
+          ferr("CRC16 check failed\n");
+          lib_dumpbuffer("check:", buffer, sectorsize * nsectors);
+          DEBUGASSERT(0);
+        }
+    }
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -550,6 +586,12 @@ int romfs_hwread(FAR struct romfs_mountpt_s *rm, FAR uint8_t *buffer,
         {
           ret = -EINVAL;
         }
+#ifdef CONFIG_FS_ROMFS_DEBUG
+      else
+        {
+          romfs_check(inode, sector, nsectors, buffer, rm->rm_hwsectorsize);
+        }
+#endif
     }
 
   return ret;

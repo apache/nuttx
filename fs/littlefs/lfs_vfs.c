@@ -30,6 +30,7 @@
 #include <fcntl.h>
 #include <string.h>
 
+#include <nuttx/crc16.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/kmalloc.h>
@@ -1154,6 +1155,49 @@ static int littlefs_rewinddir(FAR struct inode *mountpt,
 }
 
 /****************************************************************************
+ * Name: littlefs_check
+ ****************************************************************************/
+
+#ifdef CONFIG_FS_LITTLEFS_DEBUG
+static void littlefs_check(FAR struct inode *drv, lfs_block_t block,
+                           lfs_size_t size, FAR const void *buffer,
+                           FAR struct mtd_geometry_s *geo)
+{
+  uint16_t crc16_check;
+  uint16_t crc16_ori;
+  int ret;
+
+  crc16_ori = crc16(buffer, geo->blocksize * size);
+
+  if (INODE_IS_MTD(drv))
+    {
+      ret = MTD_BREAD(drv->u.i_mtd, block, size, (FAR void *)buffer);
+    }
+  else
+    {
+      ret = drv->u.i_bops->read(drv, (FAR void *)buffer, block, size);
+    }
+
+  if (ret < 0)
+    {
+      ferr("[%s] read block failed!\n", __func__);
+      lib_dumpbuffer("buffer:", buffer, geo->blocksize * size);
+      DEBUGASSERT(0);
+    }
+  else
+    {
+      crc16_check = crc16(buffer, geo->blocksize * size);
+      if (crc16_ori != crc16_check)
+        {
+          ferr("CRC16 check failed\n");
+          lib_dumpbuffer("check:", buffer, geo->blocksize * size);
+          DEBUGASSERT(0);
+        }
+    }
+}
+#endif
+
+/****************************************************************************
  * Name: littlefs_read_block
  ****************************************************************************/
 
@@ -1178,6 +1222,9 @@ static int littlefs_read_block(FAR const struct lfs_config *c,
       ret = drv->u.i_bops->read(drv, buffer, block, size);
     }
 
+#ifdef CONFIG_FS_LITTLEFS_DEBUG
+  littlefs_check(drv, block, size, buffer, geo);
+#endif
   return ret >= 0 ? OK : ret;
 }
 
@@ -1211,6 +1258,9 @@ static int littlefs_write_block(FAR const struct lfs_config *c,
       ret = drv->u.i_bops->write(drv, buffer, block, size);
     }
 
+#ifdef CONFIG_FS_LITTLEFS_DEBUG
+  littlefs_check(drv, block, size, buffer, geo);
+#endif
   return ret >= 0 ? OK : ret;
 }
 
