@@ -70,12 +70,14 @@
 #endif
 
 #ifdef CONFIG_RPMSG_PORT_UART_DEBUG
-#  define rpmsgdump                        lib_dumpbuffer
+#  define rpmsgdump(m,b,s)                 lib_dumpbuffer(m, (FAR const uint8_t *)b, s)
 #  define rpmsgdbg                         rpmsgerr
 #else
 #  define rpmsgdump(m,b,s)
 #  define rpmsgdbg(f,...)
 #endif
+
+#define rpmsgerrdump(m,b,s)                lib_dumpbuffer(m, (FAR const uint8_t *)b, s)
 
 /****************************************************************************
  * Private Types
@@ -401,6 +403,13 @@ static int rpmsg_port_uart_rx_thread(int argc, FAR char *argv[])
               rpuart->connected = false;
               continue;
             }
+          else if (buf[i] < RPMSG_PORT_UART_START &&
+                   buf[i] > RPMSG_PORT_UART_END &&
+                   buf[i] != RPMSG_PORT_UART_ESCAPE)
+            {
+              rpmsgdbg("Receive Command %x\n", buf[i]);
+              continue;
+            }
 
           if (rpuart->connected == false)
             {
@@ -426,18 +435,28 @@ static int rpmsg_port_uart_rx_thread(int argc, FAR char *argv[])
               case RPMSG_PORT_UART_RX_RECV_NORMAL:
                 if (buf[i] == RPMSG_PORT_UART_START)
                   {
-                    rpmsgerr("Recv dup start char, i=%zd\n", i);
+                    rpmsgerr("Recv dup start char, len=%u next=%u i=%zd\n",
+                             hdr->len, next, i);
+                    rpmsgerrdump("Recv error data:", buf, ret);
+                    rpmsgerrdump("Recv hdr:", hdr, hdr->len);
                     state = RPMSG_PORT_UART_RX_WAIT_START;
                     next = 0;
                   }
                 else if (buf[i] == RPMSG_PORT_UART_END)
                   {
-                    DEBUGASSERT(hdr->len == next);
-                    DEBUGASSERT(hdr->crc == 0 ||
-                                hdr->crc == rpmsg_port_uart_crc16(hdr));
+                    if (hdr->len != next || (hdr->crc != 0 &&
+                        hdr->crc != rpmsg_port_uart_crc16(hdr)))
+                      {
+                        rpmsgerr("Recv error crc=%u len=%u next=%u i=%zd\n",
+                                 hdr->crc, hdr->len, next, i);
+                        rpmsgerrdump("Recv error data:", buf, ret);
+                        rpmsgerrdump("Recv hdr:", hdr, hdr->len);
+                      }
+
                     DEBUGASSERT(rpuart->rx_cb != NULL);
 
                     rpuart->rx_cb(&rpuart->port, hdr);
+
                     state = RPMSG_PORT_UART_RX_WAIT_START;
                     hdr = NULL;
                   }
@@ -445,15 +464,29 @@ static int rpmsg_port_uart_rx_thread(int argc, FAR char *argv[])
                   {
                     state = RPMSG_PORT_UART_RX_RECV_ESCAPE;
                   }
-                else
+                else if (next < rxq->len)
                   {
                     *((FAR char *)hdr + next++) = buf[i];
+                  }
+                else
+                  {
+                    rpmsgerr("Recv len %u exceed buffer len %u\n",
+                             next, rxq->len);
                   }
                 break;
 
               case RPMSG_PORT_UART_RX_RECV_ESCAPE:
-                *((FAR char *)hdr + next++) =
-                  buf[i] ^ RPMSG_PORT_UART_ESCAPE_MASK;
+                if (next < rxq->len)
+                  {
+                    *((FAR char *)hdr + next++) =
+                      buf[i] ^ RPMSG_PORT_UART_ESCAPE_MASK;
+                  }
+                else
+                  {
+                    rpmsgerr("Recv escape len %u exceed buffer len %u\n",
+                             next, rxq->len);
+                  }
+
                 state = RPMSG_PORT_UART_RX_RECV_NORMAL;
                 break;
 
