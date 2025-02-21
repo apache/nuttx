@@ -51,7 +51,7 @@
 #define RPMSG_PORT_UART_RESUME             0x7a
 #define RPMSG_PORT_UART_WAKEUP             0x79
 #define RPMSG_PORT_UART_POWEROFF           0x78
-#define RPMSG_PORT_UART_END                0x77
+#define RPMSG_PORT_UART_END                0x70
 #define RPMSG_PORT_UART_ESCAPE_MASK        0x20
 
 #define RPMSG_PORT_UART_BUFLEN             256
