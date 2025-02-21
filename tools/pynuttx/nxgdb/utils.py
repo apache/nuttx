@@ -263,6 +263,9 @@ def get_type_field(obj: Union[TypeOrStr, gdb.Value], field: str) -> gdb.Field:
     else:
         raise gdb.GdbError(f"Unsupported type {type(obj)}")
 
+    if not t:
+        return None
+
     while t.code in (gdb.TYPE_CODE_PTR, gdb.TYPE_CODE_ARRAY, gdb.TYPE_CODE_TYPEDEF):
         t = t.target()
 
