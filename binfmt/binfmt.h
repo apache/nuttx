@@ -177,7 +177,8 @@ void binfmt_freeargv(FAR char * const *argv);
  *   do not have any real option other than to copy the callers action list.
  *
  * Input Parameters:
- *   copy     - Pointer of file actions
+ *   copy     - Pointer of the copied output file actions
+ *   actions  - Pointer of file actions to be copy
  *
  * Returned Value:
  *   A non-zero copy is returned on success.
