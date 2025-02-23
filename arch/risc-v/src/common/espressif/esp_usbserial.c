@@ -216,6 +216,12 @@ static void esp_shutdown(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
+/* Workaround: This function does not work when optimization is different
+ * from O0. This modification will be removed once a final solution is
+ * implemented.
+ */
+
+__attribute__((optimize("O0")))
 static void esp_txint(struct uart_dev_s *dev, bool enable)
 {
   if (enable)
