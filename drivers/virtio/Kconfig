@@ -3,15 +3,15 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-menuconfig DRIVERS_VIRTIO
-	bool "Virtio Device Support"
+config DRIVERS_VIRTIO
+	bool
 	select OPENAMP
 	default n
 
-if DRIVERS_VIRTIO
 config DRIVERS_VIRTIO_MMIO
 	bool "Virtio MMIO Device Support"
 	default n
+	select DRIVERS_VIRTIO
 
 config DRIVERS_VIRTIO_MMIO_QUEUE_LEN
 	int "Virtio MMIO Virtio Queue Length"
@@ -25,6 +25,7 @@ config DRIVERS_VIRTIO_MMIO_QUEUE_LEN
 config DRIVERS_VIRTIO_PCI
 	bool "Virtio PCI Device Support"
 	default n
+	select DRIVERS_VIRTIO
 
 config DRIVERS_VIRTIO_PCI_POLLING_PERIOD
 	int "Virtio PCI Polling Period (us)"
@@ -39,12 +40,14 @@ config DRIVERS_VIRTIO_BLK
 	bool "Virtio block support"
 	depends on !DISABLE_MOUNTPOINT
 	default n
+	select DRIVERS_VIRTIO
 
 config DRIVERS_VIRTIO_GPU
 	bool "Virtio gpu support"
 	default n
 	depends on VIDEO_FB
 	select FB_UPDATE
+	select DRIVERS_VIRTIO
 
 config DRIVERS_VIRTIO_INPUT
 	bool "Virtio input support"
@@ -53,6 +56,7 @@ config DRIVERS_VIRTIO_INPUT
 	select INPUT_KEYBOARD
 	select INPUT_MOUSE
 	default n
+	select DRIVERS_VIRTIO
 
 config DRIVERS_VIRTIO_NET
 	bool "Virtio network support"
@@ -60,6 +64,7 @@ config DRIVERS_VIRTIO_NET
 	default n
 	select ARCH_HAVE_NETDEV_STATISTICS
 	select NETDEV_LATEINIT
+	select DRIVERS_VIRTIO
 
 config DRIVERS_VIRTIO_NET_BUFNUM
 	int "Virtio network driver buffer number"
@@ -74,15 +79,18 @@ config DRIVERS_VIRTIO_RNG
 	bool "Virtio rng support"
 	default n
 	select ARCH_HAVE_RNG
+	select DRIVERS_VIRTIO
 
 config DRIVERS_VIRTIO_RPMB
 	bool "Virtio RPMB support"
 	default n
+	select DRIVERS_VIRTIO
 
 config DRIVERS_VIRTIO_RPMSG
 	bool "Virtio Rpmsg support"
 	default n
 	select RPMSG_VIRTIO
+	select DRIVERS_VIRTIO
 
 config DRIVERS_VIRTIO_SERIAL
 	bool "Virtio serial support"
@@ -90,6 +98,7 @@ config DRIVERS_VIRTIO_SERIAL
 	default n
 	select SERIAL_RXDMA
 	select SERIAL_TXDMA
+	select DRIVERS_VIRTIO
 
 if DRIVERS_VIRTIO_SERIAL
 config DRIVERS_VIRTIO_SERIAL_BUFSIZE
@@ -118,6 +127,7 @@ config DRIVERS_VIRTIO_SOUND
 	bool "Virtio sound support"
 	default n
 	depends on DRIVERS_AUDIO
+	select DRIVERS_VIRTIO
 
 if DRIVERS_VIRTIO_SOUND
 config DRIVERS_VIRTIO_SOUND_PERIOD_TIME
@@ -128,5 +138,3 @@ config DRIVERS_VIRTIO_SND_BUFFER_COUNT
 	int "Virtio snd driver buffer count"
 	default 6
 endif
-
-endif # DRIVERS_VIRTIO
