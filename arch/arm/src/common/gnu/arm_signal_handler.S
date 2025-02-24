@@ -68,10 +68,12 @@
  ****************************************************************************/
 
 	.text
-#ifdef __ghs__
+#ifdef CONFIG_ARM_THUMB
+#  ifdef __ghs__
 	.thumb
-#else
+#  else
 	.thumb_func
+#  endif
 #endif
 	.globl	up_signal_handler
 #ifdef __ghs__
