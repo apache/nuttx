@@ -375,6 +375,8 @@ struct rptun_ops_s
 struct rptun_dev_s
 {
   FAR const struct rptun_ops_s *ops;
+  FAR void *stack;
+  size_t stack_size;
 };
 
 /****************************************************************************

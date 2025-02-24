@@ -1127,8 +1127,23 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
 
   if (RPTUN_IS_AUTOSTART(dev))
     {
-      ret = kthread_create("rptun", CONFIG_RPTUN_PRIORITY,
-                           CONFIG_RPTUN_STACKSIZE, rptun_start_thread, argv);
+      if (dev->stack != NULL && dev->stack_size != 0)
+        {
+          ret = kthread_create_with_stack("rptun",
+                                          CONFIG_RPTUN_PRIORITY,
+                                          dev->stack,
+                                          dev->stack_size,
+                                          rptun_start_thread, argv);
+        }
+      else
+        {
+          ret = kthread_create("rptun",
+                               CONFIG_RPTUN_PRIORITY,
+                               CONFIG_RPTUN_STACKSIZE,
+                               rptun_start_thread,
+                               argv);
+        }
+
       if (ret < 0)
         {
           rptunerr("rptun thread create failed %d\n", ret);
