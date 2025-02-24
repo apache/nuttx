@@ -23,6 +23,7 @@ Commands
 - OEM
    - :code:`fastboot oem filedump <PARTITION> [OFFSET] [LENGTH]`: Get :code:`<LENGTH>` (full by default) bytes of :code:`<PARTITION>` from :code:`<OFFSET>` (zero by default)
    - :code:`fastboot oem memdump <ADDRESS> <LENGTH>`: Dump :code:`<LENGTH>` bytes memory from address :code:`<ADDRESS>`
+   - :code:`fastboot oem shell <COMMAND>`: Execute custom commands. e.g. "oem shell ps", "oem shell ls /dev/"
 - :code:`fastboot get_staged <OUT_FILE>`: Writes data staged by the last command to file :code:`<OUT_FILE>`. e.g. "oem filedump" and "oem memdump"
 
 Examples
@@ -32,3 +33,4 @@ Examples
 - Erase partition /dev/userdata: :code:`fastboot erase userdata`
 - Dump partition /dev/app: :code:`fastboot filedump /dev/app` and then :code:`fastboot get_staged ./dump_app.bin`
 - Dump memory from 0x44000000 to 0x440b6c00: :code:`fastboot oem memdump 0x44000000 0xb6c00` and then :code:`fastboot get_staged ./mem_44000000_440b6c00.bin`
+- Create RAM disk "/dev/ram10" of size 320KB: :code:`fastboot oem shell "mkrd -m 10 -s 512 640"`
