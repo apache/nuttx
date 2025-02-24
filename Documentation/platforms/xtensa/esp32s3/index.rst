@@ -324,8 +324,6 @@ Get or build QEMU from `here <https://github.com/espressif/qemu/wiki>`__. The mi
 
 Enable the ``ESP32S3_QEMU_IMAGE`` config found in :menuselection:`Board Selection --> ESP32S3 binary image for QEMU`.
 
-Enable ``ESP32S3_APP_FORMAT_LEGACY``.
-
 Build and generate the QEMU image::
 
  $ make bootloader
