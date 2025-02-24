@@ -37,6 +37,7 @@
 #include <nuttx/kthread.h>
 #include <nuttx/mutex.h>
 #include <nuttx/power/pm.h>
+#include <nuttx/reboot_notifier.h>
 #include <nuttx/semaphore.h>
 
 #include "rpmsg_port.h"
@@ -100,6 +101,7 @@ struct rpmsg_port_uart_s
   char                   localcpu[RPMSG_NAME_SIZE];
   rpmsg_port_rx_cb_t     rx_cb;
   nxevent_t              event;
+  struct notifier_block  nb;       /* Reboot notifier block */
 #ifdef CONFIG_PM
   struct pm_wakelock_s   txwakelock;
   struct pm_wakelock_s   rxwakelock;
@@ -680,6 +682,27 @@ static int rpmsg_port_uart_tx_thread(int argc, FAR char *argv[])
 }
 
 /****************************************************************************
+ * Name: rpmsg_port_uart_reboot_notifier
+ ****************************************************************************/
+
+static int rpmsg_port_uart_reboot_notifier(FAR struct notifier_block *nb,
+                                           unsigned long action,
+                                           FAR void *data)
+{
+  FAR struct rpmsg_port_uart_s *rpuart =
+    container_of(nb, struct rpmsg_port_uart_s, nb);
+
+  if ((action == SYS_POWER_OFF || action == SYS_RESTART) &&
+      rpmsg_port_uart_check(rpuart, RPMSG_PORT_UART_EVT_CONNED))
+    {
+      rpmsg_port_uart_staywake(rpuart);
+      rpmsg_port_uart_send_one(rpuart, RPMSG_PORT_UART_POWEROFF);
+    }
+
+  return 0;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -772,6 +795,8 @@ int rpmsg_port_uart_initialize(FAR const struct rpmsg_port_config_s *cfg,
       goto err_tx_thread;
     }
 
+  rpuart->nb.notifier_call = rpmsg_port_uart_reboot_notifier;
+  register_reboot_notifier(&rpuart->nb);
   return ret;
 
 err_tx_thread:
