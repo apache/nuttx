@@ -522,11 +522,14 @@ static void rpmsg_port_spi_slave_notify(FAR struct spi_slave_dev_s *dev,
 unlock:
   spin_unlock_irqrestore(&rpspi->lock, flags);
 out:
-  rpmsg_port_spi_pm_action(rpspi, false);
   if (atomic_xchg(&rpspi->transferring, 0) > 1 ||
       (rpspi->txavail > 0 && rpmsg_port_queue_nused(&rpspi->port.txq) > 0))
     {
       rpmsg_port_spi_exchange(rpspi);
+    }
+  else
+    {
+      rpmsg_port_spi_pm_action(rpspi, false);
     }
 }
 

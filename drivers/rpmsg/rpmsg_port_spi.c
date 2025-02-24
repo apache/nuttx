@@ -461,7 +461,6 @@ static void rpmsg_port_spi_complete_handler(FAR void *arg)
 unlock:
   spin_unlock_irqrestore(&rpspi->lock, flags);
 out:
-  rpmsg_port_spi_pm_action(rpspi, false);
   if (atomic_xchg(&rpspi->transferring, 0) > 1)
     {
       rpmsg_port_spi_exchange(rpspi);
@@ -470,6 +469,10 @@ out:
       rpspi->txavail > 0 && rpmsg_port_queue_nused(&rpspi->port.txq) > 0)
     {
       IOEXP_WRITEPIN(rpspi->ioe, rpspi->mreq, 1);
+    }
+  else
+    {
+      rpmsg_port_spi_pm_action(rpspi, false);
     }
 }
 
