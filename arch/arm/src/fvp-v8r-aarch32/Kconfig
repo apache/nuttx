@@ -34,7 +34,7 @@ choice
 
 config ARCH_CHIP_FVP_R52
 	bool "FVP virtual Processor (Cortex-r52)"
-	select ARMV8R_HAVE_GICv3
+	select ARCH_HAVE_IRQTRIGGER
 
 endchoice # FVP Chip Selection
 
