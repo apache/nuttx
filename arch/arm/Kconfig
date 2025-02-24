@@ -1406,6 +1406,7 @@ config ARM_GIC_VERSION
 	default 3 if ARCH_ARMV8R
 	default 2
 	range 2 4
+	depends on ARCH_ARMV7A || ARCH_ARMV7R || ARCH_ARMV8R
 	---help---
 		Version of Generic Interrupt Controller (GIC) supported.
 
