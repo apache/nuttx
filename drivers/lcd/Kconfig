@@ -783,6 +783,38 @@ config LCD_ST7789_FREQUENCY
 	int "SPI Frequency"
 	default 1000000
 
+config LCD_ST7789_START_DELAY
+	int "ST7789 SPI start delay"
+	depends on SPI_DELAY_CONTROL
+	range 0 1000000
+	default 60
+	---help---
+		The delay between CS active and first CLK. In ns.
+
+config LCD_ST7789_STOP_DELAY
+	int "ST7789 SPI stop delay"
+	depends on SPI_DELAY_CONTROL
+	range 0 1000000
+	default 65
+	---help---
+		The delay between last CLK and CS inactive. In ns.
+
+config LCD_ST7789_CS_DELAY
+	int "ST7789 SPI chip select delay"
+	depends on SPI_DELAY_CONTROL
+	range 0 1000000
+	default 40
+	---help---
+		The delay between CS inactive and CS active again. In ns.
+
+config LCD_ST7789_IFDELAY
+	int "ST7789 SPI frames delay"
+	depends on SPI_DELAY_CONTROL
+	range 0 1000000
+	default 50
+	---help---
+		The delay between consecutive frames. In ns.
+
 endif # LCD_ST7789
 
 config LCD_GC9A01
