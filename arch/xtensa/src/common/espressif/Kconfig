@@ -748,6 +748,13 @@ config ESPRESSIF_WIFI_WLAN_BUFFER_OPTIMIZATION
 
 endmenu # ESPRESSIF_WIFI
 
+config ESP_PHY_IRQSTATE_FLAGS_NUMBER
+	int "Number of IRQ status lists for PHY initialization"
+	default 3
+	---help---
+		The number of IRQ status lists to be saved when PHY enter a critical state multiple times
+		at the same time during initialization.
+
 menu "BLE Configuration"
 	depends on ESPRESSIF_BLE
 
