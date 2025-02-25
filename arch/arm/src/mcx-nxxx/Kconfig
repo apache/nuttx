@@ -22,6 +22,10 @@ endmenu # "MCX NXXx Chip Selection"
 
 menu "NXXX Peripheral Selection"
 
+config NXXX_GPIO_IRQ
+	bool "GPIO Interrupt Support"
+	default y
+
 menu "LPUART"
 
 config NXXX_LPUART
