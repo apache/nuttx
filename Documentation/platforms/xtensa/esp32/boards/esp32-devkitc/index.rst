@@ -279,6 +279,23 @@ You can check that the sensor is working by using the ``sensortest`` application
     baro0: timestamp:66870000 value1:1008.37 value2:31.70
     baro0: timestamp:66890000 value1:1008.31 value2:31.70
 
+brickmatch
+----------
+
+This configuration enables brickmatch game using LCD screen (APA102) and gesture sensor (APDS9960).
+Alternatively, you can use led matrix (ws2812) by enabling `GAMES_BRICKMATCH_USE_LED_MATRIX` option for
+output device. Also for input device selection you can enable `GAMES_BRICKMATCH_USE_DJOYSTICK` to use joystick,
+`GAMES_BRICKMATCH_USE_GPIO` to use gpio and `GAMES_BRICKMATCH_USE_CONSOLEKEY` to use serial console.
+
+You can run the game by using ``brick`` command::
+
+    nsh> brick
+
+Here is the sample wiring diagram that demonstrates how to wire ws2812 with buttons for brickmatch example:
+   
+.. figure:: esp32-brickmatch-game-schematic.jpg
+    :align: center
+
 buttons
 -------
 
