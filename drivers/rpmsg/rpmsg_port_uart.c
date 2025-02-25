@@ -63,8 +63,8 @@
 #define RPMSG_PORT_UART_WAKEUP_TIMEOUT     MSEC2TICK(100)
 
 #ifdef CONFIG_RPMSG_PORT_UART_CRC
-#  define rpmsg_port_uart_crc16(hdr)       \
-  crc16ibm((FAR uint8_t *)&(hdr)->cmd, (hdr)->len - sizeof((hdr)->crc))
+#  define rpmsg_port_uart_crc16(hdr)       crc16ibm((FAR uint8_t *)&(hdr)->cmd, \
+                                                     (hdr)->len - sizeof((hdr)->crc))
 #else
 #  define rpmsg_port_uart_crc16(hdr)       0
 #endif
@@ -74,7 +74,7 @@
 #  define rpmsgdbg                         rpmsgerr
 #else
 #  define rpmsgdump(m,b,s)
-#  define rpmsgdbg(fmt,...)
+#  define rpmsgdbg(f,...)
 #endif
 
 /****************************************************************************
@@ -427,18 +427,16 @@ static int rpmsg_port_uart_rx_thread(int argc, FAR char *argv[])
                   {
                     rpmsgerr("Recv dup start char, i=%zd\n", i);
                     state = RPMSG_PORT_UART_RX_WAIT_START;
+                    next = 0;
                   }
                 else if (buf[i] == RPMSG_PORT_UART_END)
                   {
                     DEBUGASSERT(hdr->len == next);
                     DEBUGASSERT(hdr->crc == 0 ||
                                 hdr->crc == rpmsg_port_uart_crc16(hdr));
+                    DEBUGASSERT(rpuart->rx_cb != NULL);
 
-                    if (rpuart->rx_cb != NULL)
-                      {
-                        rpuart->rx_cb(&rpuart->port, hdr);
-                      }
-
+                    rpuart->rx_cb(&rpuart->port, hdr);
                     state = RPMSG_PORT_UART_RX_WAIT_START;
                     hdr = NULL;
                   }
