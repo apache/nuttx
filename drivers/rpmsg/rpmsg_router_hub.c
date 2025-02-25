@@ -483,8 +483,12 @@ static void rpmsg_router_destroy(FAR struct rpmsg_device *rdev,
 
       /* Notify the other edge core to destroy router device */
 
-      msg.cmd = RPMSG_ROUTER_DESTROY;
-      rpmsg_send(&hub->ept[1 - i], &msg, sizeof(msg));
+      if (is_rpmsg_ept_ready(&hub->ept[1 - i]))
+        {
+          msg.cmd = RPMSG_ROUTER_DESTROY;
+          rpmsg_send(&hub->ept[1 - i], &msg, sizeof(msg));
+        }
+
       break;
     }
 }
