@@ -60,7 +60,7 @@
 #define RPMSG_PORT_UART_RX_RECV_NORMAL     2
 #define RPMSG_PORT_UART_RX_RECV_ESCAPE     3
 
-#define RPMSG_PORT_UART_WAKEUP_TIMEOUT     MSEC2TICK(100)
+#define RPMSG_PORT_UART_TIMEOUT            100000 /* us */
 
 #ifdef CONFIG_RPMSG_PORT_UART_CRC
 #  define rpmsg_port_uart_crc16(hdr)       crc16ibm((FAR uint8_t *)&(hdr)->cmd, \
@@ -174,7 +174,8 @@ rpmsg_port_uart_wakeup(FAR struct rpmsg_port_uart_s *rpuart)
       rpmsgdbg("Try to wakeup peer\n");
       rpmsg_port_uart_send_command(rpuart, RPMSG_PORT_UART_WAKEUP);
 
-      ret = nxsem_tickwait(&rpuart->wake, RPMSG_PORT_UART_WAKEUP_TIMEOUT);
+      ret = nxsem_tickwait(&rpuart->wake,
+                           USEC2TICK(RPMSG_PORT_UART_TIMEOUT));
       if (ret >= 0)
         {
           nxsem_post(&rpuart->wake);
@@ -482,7 +483,7 @@ static int rpmsg_port_uart_tx_thread(int argc, FAR char *argv[])
     {
       while (!rpuart->connected)
         {
-          nxsched_usleep(100000);
+          nxsched_usleep(RPMSG_PORT_UART_TIMEOUT);
         }
 
       while ((hdr = rpmsg_port_queue_get_buffer(txq, true)) != NULL)
