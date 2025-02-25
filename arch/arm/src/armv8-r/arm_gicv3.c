@@ -971,7 +971,7 @@ static void arm_gic_init(void)
 #endif
 }
 
-int arm_gic_initialize(void)
+int arm_gic0_initialize(void)
 {
   int err;
 
@@ -984,15 +984,10 @@ int arm_gic_initialize(void)
 
   gicv3_dist_init();
 
-  arm_gic_init();
-
   return 0;
 }
 
-#ifdef CONFIG_SMP
-void arm_gic_secondary_init(void)
+void arm_gic_initialize(void)
 {
   arm_gic_init();
 }
-
-#endif

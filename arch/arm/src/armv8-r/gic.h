@@ -326,12 +326,9 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-/* redirect to arm_gic_initialize() before SMP added */
-
-#define arm_gic0_initialize  arm_gic_initialize
-
 bool arm_gic_irq_is_enabled(unsigned int intid);
-int  arm_gic_initialize(void);
+int  arm_gic0_initialize(void);  /* For whole GIC */
+void arm_gic_initialize(void);   /* For per CPU interface */
 void arm_gic_irq_set_priority(unsigned int intid, unsigned int prio,
                                 uint32_t flags);
 
@@ -344,7 +341,6 @@ int arm_gic_raise_sgi(unsigned int sgi_id, uint16_t target_list);
 #ifdef CONFIG_SMP
 
 int arm_smp_sched_handler(int irq, void *context, void *arg);
-void arm_gic_secondary_init(void);
 
 #endif
 
