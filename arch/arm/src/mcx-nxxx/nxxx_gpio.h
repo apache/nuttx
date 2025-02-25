@@ -110,6 +110,7 @@
 
 #define GPIO_PORT_SHIFT        (5)      /* Bits 5-8: GPIO port index */
 #define GPIO_PORT_MASK         (0xf << GPIO_PORT_SHIFT)
+#  define GPIO_PORT0           (GPIO0 << GPIO_PORT_SHIFT)  /* GPIO0 */
 #  define GPIO_PORT1           (GPIO1 << GPIO_PORT_SHIFT)  /* GPIO1 */
 #  define GPIO_PORT2           (GPIO2 << GPIO_PORT_SHIFT)  /* GPIO2 */
 #  define GPIO_PORT3           (GPIO3 << GPIO_PORT_SHIFT)  /* GPIO3 */
