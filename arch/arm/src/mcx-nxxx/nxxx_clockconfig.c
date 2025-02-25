@@ -338,6 +338,14 @@ void nxxx_clockconfig(void)
   nxxx_set_clock_gate(CLOCK_GATE_PORT2, true);
   nxxx_set_clock_gate(CLOCK_GATE_PORT3, true);
   nxxx_set_clock_gate(CLOCK_GATE_PORT4, true);
+
+  /* Enable GPIO clocks */
+
+  nxxx_set_clock_gate(CLOCK_GATE_GPIO0, true);
+  nxxx_set_clock_gate(CLOCK_GATE_GPIO1, true);
+  nxxx_set_clock_gate(CLOCK_GATE_GPIO2, true);
+  nxxx_set_clock_gate(CLOCK_GATE_GPIO3, true);
+  nxxx_set_clock_gate(CLOCK_GATE_GPIO4, true);
 }
 
 /****************************************************************************
