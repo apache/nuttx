@@ -384,7 +384,7 @@ static void rpmsg_port_spi_complete_handler(FAR void *arg)
     {
       uint16_t crc = rpmsg_port_spi_crc16(rpspi->rxhdr);
 
-      if (rpspi->rxhdr->crc != crc)
+      if (crc != 0 && rpspi->rxhdr->crc != crc)
         {
           rpmsgerr("crc check fail received: %u calculated: %u\n",
                    rpspi->rxhdr->crc, crc);
