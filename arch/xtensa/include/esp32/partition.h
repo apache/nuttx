@@ -55,4 +55,24 @@ enum ota_img_bootseq
   OTA_IMG_BOOT_SEQ_MAX
 };
 
+/****************************************************************************
+ * Name: esp32_partition_read_decrypt
+ *
+ * Description:
+ *   Read data from SPI Flash at designated address. (with decryption)
+ *
+ * Input Parameters:
+ *   label  - Partition label
+ *   offset - Offset in SPI Flash
+ *   buf    - Data buffer pointer
+ *   size   - Data number
+ *
+ * Returned Value:
+ *   0 if success or a negative value if fail.
+ *
+ ****************************************************************************/
+
+int esp32_partition_read_decrypt(const char *label, size_t offset,
+                                 void *buf, size_t size);
+
 #endif /* __ARCH_XTENSA_INCLUDE_ESP32_PARTITION_H */
