@@ -39,19 +39,20 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define GPIO1                           0      /* Port 1 index */
-#define GPIO2                           1      /* Port 2 index */
-#define GPIO3                           2      /* Port 3 index */
-#define GPIO4                           3      /* Port 4 index */
-#define GPIO5                           4      /* Port 5 index */
-#define GPIO6                           5      /* Port 6 index */
-#define GPIO7                           6      /* Port 7 index */
-#define GPIO8                           7      /* Port 8 index */
-#define GPIO9                           8      /* Port 9 index */
-#define GPIO10                          9      /* Port 10 index */
-#define GPIO11                          10     /* Port 11 index */
-#define GPIO12                          11     /* Port 12 index */
-#define GPIO13                          12     /* Port 13 index */
+#define GPIO0                           0      /* Port 0 index */
+#define GPIO1                           1      /* Port 1 index */
+#define GPIO2                           2      /* Port 2 index */
+#define GPIO3                           3      /* Port 3 index */
+#define GPIO4                           4      /* Port 4 index */
+#define GPIO5                           5      /* Port 5 index */
+#define GPIO6                           6      /* Port 6 index */
+#define GPIO7                           7      /* Port 7 index */
+#define GPIO8                           8      /* Port 8 index */
+#define GPIO9                           9      /* Port 9 index */
+#define GPIO10                          10     /* Port 10 index */
+#define GPIO11                          11     /* Port 11 index */
+#define GPIO12                          12     /* Port 12 index */
+#define GPIO13                          13     /* Port 13 index */
 
 #define NXXX_GPIO_NPINS                 32     /* Up to 32 pins per port */
 
