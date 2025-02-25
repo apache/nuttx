@@ -500,6 +500,39 @@ irqstate_t spin_lock_irqsave(FAR volatile spinlock_t *lock)
 #endif
 
 /****************************************************************************
+ * Name: spin_lock_irqsave_nopreempt
+ *
+ * Description:
+ *   If SMP is enabled:
+ *     Disable local interrupts, sched_lock and take the lock spinlock and
+ *     return the interrupt state.
+ *
+ *     NOTE: This API is very simple to protect data (e.g. H/W register
+ *     or internal data structure) in SMP mode. But do not use this API
+ *     with kernel APIs which suspend a caller thread. (e.g. nxsem_wait)
+ *
+ *   If SMP is not enabled:
+ *     This function is equivalent to up_irq_save() + sched_lock().
+ *
+ * Input Parameters:
+ *   lock - Caller specific spinlock. not NULL.
+ *
+ * Returned Value:
+ *   An opaque, architecture-specific value that represents the state of
+ *   the interrupts prior to the call to spin_lock_irqsave(lock);
+ *
+ ****************************************************************************/
+
+static inline_function
+irqstate_t spin_lock_irqsave_nopreempt(FAR volatile spinlock_t *lock)
+{
+  irqstate_t flags;
+  flags = spin_lock_irqsave(lock);
+  sched_lock();
+  return flags;
+}
+
+/****************************************************************************
  * Name: spin_trylock_irqsave_notrace
  *
  * Description:
@@ -632,6 +665,38 @@ void spin_unlock_irqrestore(FAR volatile spinlock_t *lock, irqstate_t flags)
 #else
 #  define spin_unlock_irqrestore(l, f) ((void)(l), up_irq_restore(f))
 #endif
+
+/****************************************************************************
+ * Name: spin_unlock_irqrestore_nopreempt
+ *
+ * Description:
+ *   If SMP is enabled:
+ *     Release the lock and restore the interrupt state, sched_unlock
+ *     as it was prior to the previous call to
+ *     spin_unlock_irqrestore_nopreempt(lock).
+ *
+ *   If SMP is not enabled:
+ *     This function is equivalent to up_irq_restore() + sched_unlock().
+ *
+ * Input Parameters:
+ *   lock - Caller specific spinlock. not NULL
+ *
+ *   flags - The architecture-specific value that represents the state of
+ *           the interrupts prior to the call to
+ *           spin_unlock_irqrestore_nopreempt(lock);
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static inline_function
+void spin_unlock_irqrestore_nopreempt(FAR volatile spinlock_t *lock,
+                                      irqstate_t flags)
+{
+  spin_unlock_irqrestore(lock, flags);
+  sched_unlock();
+}
 
 #if defined(CONFIG_RW_SPINLOCK)
 
