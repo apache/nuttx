@@ -660,14 +660,60 @@ config ESP32S3_I2C0
 	default n
 	select ESP32S3_I2C
 	select I2C
-	select ESPRESSIF_I2C_PERIPH
 
 config ESP32S3_I2C1
 	bool "I2C 1"
 	default n
 	select ESP32S3_I2C
 	select I2C
-	select ESPRESSIF_I2C_PERIPH
+
+config ESP32S3_I2C_PERIPH_MASTER_MODE
+	bool
+	depends on (ESP32S3_I2C0_MASTER_MODE || ESP32S3_I2C1_MASTER_MODE)
+	default n
+	select ESPRESSIF_I2C_PERIPH_MASTER_MODE
+
+config ESP32S3_I2C_PERIPH_SLAVE_MODE
+	bool
+	depends on (ESP32S3_I2C0_SLAVE_MODE || ESP32S3_I2C1_SLAVE_MODE)
+	default n
+	select ESPRESSIF_I2C_PERIPH_SLAVE_MODE
+	select ESPRESSIF_I2C0_SLAVE if ESP32S3_I2C0_SLAVE_MODE
+	select ESPRESSIF_I2C1_SLAVE if ESP32S3_I2C1_SLAVE_MODE
+
+choice ESP32S3_I2C0_MODE
+	prompt "I2C0 Mode"
+	depends on ESP32S3_I2C0
+	default ESP32S3_I2C0_MASTER_MODE
+
+config ESP32S3_I2C0_MASTER_MODE
+	bool "I2C0 Master Mode"
+	select ESP32S3_I2C_PERIPH_MASTER_MODE
+
+config ESP32S3_I2C0_SLAVE_MODE
+	bool "I2C0 Slave Mode"
+	select I2C_SLAVE
+	select I2C_SLAVE_DRIVER
+	select ESP32S3_I2C_PERIPH_SLAVE_MODE
+
+endchoice # ESP32S3_I2C0_MODE
+
+choice ESP32S3_I2C1_MODE
+	prompt "I2C1 Mode"
+	depends on ESP32S3_I2C1
+	default ESP32S3_I2C1_MASTER_MODE
+
+config ESP32S3_I2C1_MASTER_MODE
+	bool "I2C1 Master Mode"
+	select ESP32S3_I2C_PERIPH_MASTER_MODE
+
+config ESP32S3_I2C1_SLAVE_MODE
+	bool "I2C1 Slave Mode"
+	select I2C_SLAVE
+	select I2C_SLAVE_DRIVER
+	select ESP32S3_I2C_PERIPH_SLAVE_MODE
+
+endchoice # ESP32S3_I2C1_MODE
 
 config ESP32S3_TWAI
 	bool "TWAI (CAN)"
@@ -1402,12 +1448,12 @@ endif # ESP32S3_I2C1
 config ESP32S3_I2CTIMEOSEC
 	int "Timeout seconds"
 	default 0
-	depends on ESPRESSIF_I2C_PERIPH
+	depends on ESP32S3_I2C_PERIPH_MASTER_MODE
 
 config ESP32S3_I2CTIMEOMS
 	int "Timeout milliseconds"
 	default 500
-	depends on ESPRESSIF_I2C_PERIPH
+	depends on ESP32S3_I2C_PERIPH_MASTER_MODE
 
 endmenu # I2C Configuration
 

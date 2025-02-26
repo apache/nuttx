@@ -24,7 +24,7 @@
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_ESPRESSIF_I2C_PERIPH
+#ifdef CONFIG_ESPRESSIF_I2C_PERIPH_MASTER_MODE
 
 #include <assert.h>
 #include <debug.h>
@@ -1647,4 +1647,4 @@ int esp32s3_i2cbus_uninitialize(struct i2c_master_s *dev)
   return OK;
 }
 
-#endif /* CONFIG_ESPRESSIF_I2C_PERIPH */
+#endif /* CONFIG_ESPRESSIF_I2C_PERIPH_MASTER_MODE */
