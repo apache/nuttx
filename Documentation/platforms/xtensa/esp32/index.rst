@@ -336,7 +336,7 @@ DAC          Yes    One-shot
 eFuse        Yes
 Ethernet     Yes
 GPIO         Yes
-I2C          Yes
+I2C          Yes    Master and Slave mode supported
 I2S          Yes
 LED_PWM      Yes
 MCPWM        Yes
