@@ -64,6 +64,10 @@ CHIP_CSRCS += esp_spiflash_mtd.c
 endif
 endif
 
+ifeq ($(CONFIG_ESPRESSIF_I2C_PERIPH_SLAVE_MODE),y)
+CHIP_CSRCS += esp_i2c_slave.c
+endif
+
 ifeq ($(CONFIG_SYSTEM_NXDIAG_ESPRESSIF_CHIP_WO_TOOL),y)
 CHIP_CSRCS += esp_nxdiag.c
 endif

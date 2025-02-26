@@ -55,7 +55,7 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-#ifdef CONFIG_ESPRESSIF_I2C_PERIPH
+#ifdef CONFIG_ESPRESSIF_I2C_PERIPH_MASTER_MODE
 /****************************************************************************
  * Name: esp32_i2cbus_initialize
  *
@@ -91,7 +91,7 @@ struct i2c_master_s *esp32_i2cbus_initialize(int port);
  ****************************************************************************/
 
 int esp32_i2cbus_uninitialize(struct i2c_master_s *dev);
-#endif /* CONFIG_ESPRESSIF_I2C_PERIPH */
+#endif /* CONFIG_ESPRESSIF_I2C_PERIPH_MASTER_MODE */
 
 #ifdef __cplusplus
 }
