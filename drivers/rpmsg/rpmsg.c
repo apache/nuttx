@@ -31,8 +31,8 @@
 #include <nuttx/mutex.h>
 #include <nuttx/rwsem.h>
 #include <nuttx/semaphore.h>
-#include <nuttx/rpmsg/rpmsg.h>
 
+#include "rpmsg.h"
 #include "rpmsg_ping.h"
 #include "rpmsg_router.h"
 #include "rpmsg_test.h"
