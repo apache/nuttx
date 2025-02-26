@@ -35,8 +35,20 @@
 #ifdef CONFIG_ESPRESSIF_I2C_BITBANG
 #include "espressif/esp_i2c_bitbang.h"
 #endif
-#ifdef CONFIG_ESPRESSIF_I2C_PERIPH
+#ifdef CONFIG_ESPRESSIF_I2C_PERIPH_MASTER_MODE
 #include "esp32s3_i2c.h"
+#endif
+#ifdef CONFIG_ESPRESSIF_I2C_PERIPH_SLAVE_MODE
+#include "espressif/esp_i2c_slave.h"
+#endif
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifdef CONFIG_ESPRESSIF_I2C_PERIPH_SLAVE_MODE
+#define I2C0_SLAVE_ADDR   0x28
+#define I2C0_SLAVE_NBITS  7
 #endif
 
 /****************************************************************************
@@ -66,7 +78,7 @@ static int i2c_bitbang_driver_init(int bus)
 }
 #endif
 
-#ifdef CONFIG_ESPRESSIF_I2C_PERIPH
+#ifdef CONFIG_ESPRESSIF_I2C_PERIPH_MASTER_MODE
 static int i2c_driver_init(int bus)
 {
   struct i2c_master_s *i2c;
@@ -90,6 +102,30 @@ static int i2c_driver_init(int bus)
 }
 #endif
 
+#ifdef CONFIG_ESPRESSIF_I2C_PERIPH_SLAVE_MODE
+static int i2c_slave_driver_init(int bus, int addr)
+{
+  struct i2c_slave_s *i2c;
+  int ret;
+
+  i2c = esp_i2cbus_slave_initialize(bus, addr);
+  if (i2c == NULL)
+    {
+      i2cerr("Failed to get I2C%d interface\n", bus);
+      return -ENODEV;
+    }
+
+  ret = i2c_slave_register(i2c, bus, addr, I2C0_SLAVE_NBITS);
+  if (ret < 0)
+    {
+      i2cerr("Failed to register I2C%d driver: %d\n", bus, ret);
+      esp_i2cbus_slave_uninitialize(i2c);
+    }
+
+  return ret;
+}
+#endif
+
 /****************************************************************************
  * Name: board_i2c_init
  *
@@ -106,20 +142,28 @@ int board_i2c_init(void)
 {
   int ret = OK;
 
-#ifdef CONFIG_ESP32S3_I2C0
+#ifdef CONFIG_ESPRESSIF_I2C_PERIPH_MASTER_MODE
+#  ifdef CONFIG_ESP32S3_I2C0_MASTER_MODE
   ret = i2c_driver_init(ESP32S3_I2C0);
   if (ret != OK)
     {
       goto done;
     }
-#endif
+#  endif
 
-#ifdef CONFIG_ESP32S3_I2C1
+#  ifdef CONFIG_ESP32S3_I2C1_MASTER_MODE
   ret = i2c_driver_init(ESP32S3_I2C1);
+#  endif
 #endif
 
 #ifdef CONFIG_ESPRESSIF_I2C_BITBANG
   ret = i2c_bitbang_driver_init(ESPRESSIF_I2C_BITBANG);
+#endif
+
+#ifdef CONFIG_ESPRESSIF_I2C_PERIPH_SLAVE_MODE
+#  ifdef CONFIG_ESP32S3_I2C0_SLAVE_MODE
+  ret = i2c_slave_driver_init(ESPRESSIF_I2C0_SLAVE, I2C0_SLAVE_ADDR);
+  #endif
 #endif
 
 #ifdef CONFIG_ESP32S3_I2C0
