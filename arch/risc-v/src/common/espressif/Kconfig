@@ -338,9 +338,14 @@ config ESPRESSIF_I2C
 	bool
 	default n
 
-config ESPRESSIF_I2C_PERIPH
+config ESPRESSIF_I2C_PERIPH_MASTER_MODE
 	bool
-	depends on (ESPRESSIF_I2C0 || ESPRESSIF_I2C1)
+	depends on (ESPRESSIF_I2C0_MASTER_MODE || ESPRESSIF_I2C1_MASTER_MODE)
+	default n
+
+config ESPRESSIF_I2C_PERIPH_SLAVE_MODE
+	bool
+	depends on (ESPRESSIF_I2C0_SLAVE_MODE || ESPRESSIF_I2C1_SLAVE_MODE)
 	default n
 
 config ESPRESSIF_I2C0
@@ -348,7 +353,6 @@ config ESPRESSIF_I2C0
 	default n
 	select ESPRESSIF_I2C
 	select I2C
-	select ESPRESSIF_I2C_PERIPH
 
 config ESPRESSIF_I2C1
 	bool "I2C 1"
@@ -356,7 +360,40 @@ config ESPRESSIF_I2C1
 	depends on ARCH_CHIP_ESP32H2
 	select ESPRESSIF_I2C
 	select I2C
-	select ESPRESSIF_I2C_PERIPH
+
+choice ESPRESSIF_I2C0_MODE
+	prompt "I2C0 Mode"
+	depends on ESPRESSIF_I2C0
+	default ESPRESSIF_I2C0_MASTER_MODE
+
+config ESPRESSIF_I2C0_MASTER_MODE
+	bool "I2C0 Master Mode"
+	select ESPRESSIF_I2C_PERIPH_MASTER_MODE
+
+config ESPRESSIF_I2C0_SLAVE_MODE
+	bool "I2C0 Slave Mode"
+	select I2C_SLAVE
+	select I2C_SLAVE_DRIVER
+	select ESPRESSIF_I2C_PERIPH_SLAVE_MODE
+
+endchoice # ESPRESSIF_I2C0_MODE
+
+choice ESPRESSIF_I2C1_MODE
+	prompt "I2C1 Mode"
+	depends on ESPRESSIF_I2C1
+	default ESPRESSIF_I2C1_MASTER_MODE
+
+config ESPRESSIF_I2C1_MASTER_MODE
+	bool "I2C1 Master Mode"
+	select ESPRESSIF_I2C_PERIPH_MASTER_MODE
+
+config ESPRESSIF_I2C1_SLAVE_MODE
+	bool "I2C1 Slave Mode"
+	select I2C_SLAVE
+	select I2C_SLAVE_DRIVER
+	select ESPRESSIF_I2C_PERIPH_SLAVE_MODE
+
+endchoice # ESPRESSIF_I2C1_MODE
 
 config ESPRESSIF_I2C_BITBANG
 	bool "I2C Bitbang"
@@ -1826,12 +1863,12 @@ endif # ESPRESSIF_I2C_BITBANG
 
 config ESPRESSIF_I2CTIMEOSEC
 	int "Timeout seconds"
-	depends on ESPRESSIF_I2C_PERIPH
+	depends on ESPRESSIF_I2C_PERIPH_MASTER_MODE
 	default 0
 
 config ESPRESSIF_I2CTIMEOMS
 	int "Timeout milliseconds"
-	depends on ESPRESSIF_I2C_PERIPH
+	depends on ESPRESSIF_I2C_PERIPH_MASTER_MODE
 	default 500
 
 endmenu # I2C configuration

@@ -26,7 +26,7 @@
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_ESPRESSIF_I2C_PERIPH
+#ifdef CONFIG_ESPRESSIF_I2C_PERIPH_MASTER_MODE
 
 #include <sys/types.h>
 #include <stdio.h>
@@ -316,7 +316,7 @@ static const struct i2c_ops_s esp_i2c_ops =
 #endif
 };
 
-#ifdef CONFIG_ESPRESSIF_I2C0
+#ifdef CONFIG_ESPRESSIF_I2C0_MASTER_MODE
 
 i2c_hal_context_t i2c0_ctx =
 {
@@ -366,7 +366,7 @@ static struct esp_i2c_priv_s esp_i2c0_priv =
 };
 #endif
 
-#ifdef CONFIG_ESPRESSIF_I2C1
+#ifdef CONFIG_ESPRESSIF_I2C1_MASTER_MODE
 
 i2c_hal_context_t i2c1_ctx =
 {
@@ -1485,12 +1485,12 @@ struct i2c_master_s *esp_i2cbus_initialize(int port)
 
   switch (port)
     {
-#ifdef CONFIG_ESPRESSIF_I2C0
+#ifdef CONFIG_ESPRESSIF_I2C0_MASTER_MODE
     case ESPRESSIF_I2C0:
       priv = &esp_i2c0_priv;
       break;
 #endif
-#ifdef CONFIG_ESPRESSIF_I2C1
+#ifdef CONFIG_ESPRESSIF_I2C1_MASTER_MODE
     case ESPRESSIF_I2C1:
       priv = &esp_i2c1_priv;
       break;
@@ -1606,4 +1606,4 @@ int esp_i2cbus_uninitialize(struct i2c_master_s *dev)
   return OK;
 }
 
-#endif /* CONFIG_ESPRESSIF_I2C_PERIPH */
+#endif /* CONFIG_ESPRESSIF_I2C_PERIPH_MASTER_MODE */
