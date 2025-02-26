@@ -2408,8 +2408,7 @@ static void hciuart_dma_rxcallback(DMA_HANDLE handle, uint8_t status,
 
   if (config.state->rxdmastream == NULL)
     {
-      spin_unlock_irqrestore(&config->lock, flags);
-      sched_unlock();
+      spin_unlock_irqrestore_nopreempt(&config->lock, flags);
       return;
     }
 
