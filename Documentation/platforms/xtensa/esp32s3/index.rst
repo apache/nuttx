@@ -356,7 +356,7 @@ CAN/TWAI     Yes
 DMA          Yes
 eFuse        No
 GPIO         Yes
-I2C          No
+I2C          Yes   Master and Slave mode supported
 I2S          Yes
 LCD          No
 LED_PWM      No
