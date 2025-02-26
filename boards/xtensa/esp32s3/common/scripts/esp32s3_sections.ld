@@ -236,6 +236,10 @@ SECTIONS
     *libarch.a:*cpu_region_protect.*(.text .text.* .literal .literal.*)
     *libarch.a:*mspi_timing_tuning.*(.text .text.* .literal .literal.*)
     *libarch.a:*esp_rom_cache_esp32s2_esp32s3.*(.literal .text .literal.* .text.*)
+    *libarch.a:*flash_qio_mode.*(.text .text.* .literal .literal.*)
+    *libarch.a:*spi_flash_wrap.*(.text .text.* .literal .literal.*)
+    *libarch.a:*spi_flash_oct_flash_init.*(.text .text.* .literal .literal.*)
+    *libarch.a:*spi_flash_hpm_enable.*(.text .text.* .literal .literal.*)
 
     *libc.a:*lib_instrument.*(.text .text.* .literal .literal.*)
 
@@ -432,6 +436,10 @@ SECTIONS
 #ifdef CONFIG_ESP32S3_SPIRAM_MODE_OCT
     *libarch.a:esp32s3_psram_octal.*(.rodata .rodata.*)
 #endif
+    *libarch.a:*flash_qio_mode.*(.rodata .rodata.*)
+    *libarch.a:*spi_flash_wrap.*(.rodata .rodata.*)
+    *libarch.a:*spi_flash_oct_flash_init.*(.rodata .rodata.*)
+    *libarch.a:*spi_flash_hpm_enable.*(.rodata .rodata.*)
 
     . = ALIGN(4);
     _edata = ABSOLUTE(.);

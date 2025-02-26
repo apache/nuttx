@@ -587,72 +587,6 @@ static void IRAM_ATTR config_psram_spi_phases(void)
 }
 
 /****************************************************************************
- * Name: spi_flash_set_rom_required_regs
- *
- * Description:
- *   Set flash ROM required register.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-void IRAM_ATTR spi_flash_set_rom_required_regs(void)
-{
-#ifdef CONFIG_ESP32S3_FLASH_MODE_OCT
-
-  /* Disable the variable dummy mode when doing timing tuning.
-   * STR /DTR mode setting is done every time when
-   * "esp_rom_opiflash_exec_cmd" is called.
-   * Add any registers that are not set in ROM SPI flash functions here
-   * in the future.
-   */
-
-  CLEAR_PERI_REG_MASK(SPI_MEM_DDR_REG(1), SPI_MEM_SPI_FMEM_VAR_DUMMY);
-#endif
-}
-
-/****************************************************************************
- * Name: flash_set_vendor_required_regs
- *
- * Description:
- *   Set flash vendor required register.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-static inline void flash_set_vendor_required_regs(void)
-{
-#ifdef CONFIG_ESP32S3_FLASH_MODE_OCT
-  /* Set MSPI specifical configuration,
-   * "esp32s3_bsp_opiflash_set_required_regs" is board defined function.
-   */
-
-  esp32s3_bsp_opiflash_set_required_regs();
-
-  SET_PERI_REG_BITS(SPI_MEM_CACHE_FCTRL_REG(1),
-                    SPI_MEM_CACHE_USR_CMD_4BYTE_V,
-                    1,
-                    SPI_MEM_CACHE_USR_CMD_4BYTE_S);
-#else
-  /* Restore MSPI registers after Octal PSRAM initialization. */
-
-  SET_PERI_REG_BITS(SPI_MEM_CACHE_FCTRL_REG(1),
-                    SPI_MEM_CACHE_USR_CMD_4BYTE_V,
-                    0,
-                    SPI_MEM_CACHE_USR_CMD_4BYTE_S);
-#endif
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -722,7 +656,7 @@ int IRAM_ATTR psram_enable(int mode, int vaddrmode)
 
   /* Flash chip requires MSPI specifically, call this function to set them */
 
-  flash_set_vendor_required_regs();
+  spi_flash_set_vendor_required_regs();
 
   config_psram_spi_phases();
 

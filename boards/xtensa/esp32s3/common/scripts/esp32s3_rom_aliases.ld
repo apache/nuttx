@@ -39,3 +39,8 @@ PROVIDE( cache_suspend_icache = Cache_Suspend_ICache );
 PROVIDE( cache_writeback_all = Cache_WriteBack_All );
 PROVIDE( cache_writeback_items = Cache_WriteBack_Items );
 PROVIDE( cache_writeback_addr = Cache_WriteBack_Addr );
+
+#ifndef CONFIG_ESP32S3_SPI_FLASH_DONT_USE_ROM_CODE
+spi_flash_guard_set = 0x40000b04;
+spi_flash_guard_get = 0x40000b10;
+#endif
