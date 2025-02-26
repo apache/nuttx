@@ -293,7 +293,7 @@ CDC Console  Yes    Rev.3
 DMA          Yes
 eFuse        Yes    Also virtual mode supported
 GPIO         Yes
-I2C          Yes
+I2C          Yes    Master and Slave mode supported
 LED_PWM      Yes
 RNG          No
 RSA          No
