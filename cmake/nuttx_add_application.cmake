@@ -234,7 +234,7 @@ function(nuttx_add_application)
 
     if(INCLUDE_DIRECTORIES)
       foreach(inc ${INCLUDE_DIRECTORIES})
-        target_include_directories(${TARGET} PRIVATE ${inc})
+        target_include_directories(${TARGET} BEFORE PRIVATE ${inc})
       endforeach()
     endif()
   endif()
