@@ -31,7 +31,6 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/kthread.h>
 #include <nuttx/power/pm.h>
-#include <nuttx/rpmsg/rpmsg.h>
 #include <nuttx/rpmsg/rpmsg_virtio.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/spinlock.h>
@@ -39,6 +38,8 @@
 #include <nuttx/wdog.h>
 #include <metal/utilities.h>
 #include <openamp/rpmsg_virtio.h>
+
+#include "rpmsg.h"
 
 /****************************************************************************
  * Pre-processor Definitions

@@ -1,7 +1,5 @@
 /****************************************************************************
- * drivers/rpmsg/rpmsg_router.h
- *
- * SPDX-License-Identifier: Apache-2.0
+ * drivers/rpmsg/rpmsg.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -20,43 +18,46 @@
  *
  ****************************************************************************/
 
-#ifndef __DRIVERS_RPMSG_RPMSG_ROUTER_H
-#define __DRIVERS_RPMSG_RPMSG_ROUTER_H
+#ifndef __DRIVERS_RPMSG_RPMSG_H
+#define __DRIVERS_RPMSG_RPMSG_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include "rpmsg.h"
+#ifdef CONFIG_RPMSG
+
+#include <nuttx/rpmsg/rpmsg.h>
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Function Prototypes
  ****************************************************************************/
 
-#define RPMSG_ROUTER_NAME            "router:"
-#define RPMSG_ROUTER_NAME_LEN        7
-#define RPMSG_ROUTER_NAME_PREFIX     "r:"
-#define RPMSG_ROUTER_NAME_PREFIX_LEN 2
-#define RPMSG_ROUTER_CPUNAME_LEN     8
-
-#define RPMSG_ROUTER_CREATE          1
-#define RPMSG_ROUTER_DESTROY         2
-#define RPMSG_ROUTER_SUSPEND         3
-#define RPMSG_ROUTER_RESUME          4
-
-#ifdef CONFIG_RPMSG_ROUTER
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-begin_packed_struct struct rpmsg_router_s
+static inline FAR struct rpmsg_device *
+rpmsg_get_rdev_by_rpmsg(FAR struct rpmsg_s *rpmsg)
 {
-  uint32_t cmd;
-  uint32_t tx_len;
-  uint32_t rx_len;
-  char     cpuname[RPMSG_ROUTER_CPUNAME_LEN];
-} end_packed_struct;
+  if (!rpmsg)
+    {
+      return NULL;
+    }
 
-#endif /* CONFIG_RPMSG_ROUTER */
-#endif /* __DRIVERS_RPMSG_RPMSG_ROUTER_H */
+  return (FAR struct rpmsg_device *)(rpmsg + 1);
+}
+
+void rpmsg_modify_signals(FAR struct rpmsg_s *rpmsg,
+                          int setflags, int clrflags);
+
+void rpmsg_ns_bind(FAR struct rpmsg_device *rdev,
+                   FAR const char *name, uint32_t dest);
+void rpmsg_ns_unbind(FAR struct rpmsg_device *rdev,
+                     FAR const char *name, uint32_t dest);
+
+void rpmsg_device_created(FAR struct rpmsg_s *rpmsg);
+void rpmsg_device_destory(FAR struct rpmsg_s *rpmsg);
+
+int rpmsg_register(FAR const char *path, FAR struct rpmsg_s *rpmsg,
+                   FAR const struct rpmsg_ops_s *ops);
+void rpmsg_unregister(FAR const char *path, FAR struct rpmsg_s *rpmsg);
+
+#endif /* CONFIG_RPMSG */
+#endif /* __DRIVERS_RPMSG_RPMSG_H */

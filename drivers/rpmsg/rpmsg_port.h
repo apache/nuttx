@@ -32,8 +32,9 @@
 #include <nuttx/list.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/semaphore.h>
-#include <nuttx/rpmsg/rpmsg.h>
 #include <nuttx/rpmsg/rpmsg_port.h>
+
+#include "rpmsg.h"
 
 /****************************************************************************
  * Pre-processor Definitions
