@@ -471,6 +471,40 @@ psram_octal
 Similar to the ```psram_quad``` configuration but using the SPIRAM
 interface in octal mode.
 
+psram_usrheap
+-------------
+
+This configuration enables allocating the userspace heap into SPI RAM and reserves the
+internal RAM for kernel heap.
+
+Important: this config defaults to flash QUAD mode, and should be changed if the board
+runs on OCTAL mode by setting ``CONFIG_ESP32S3_SPIRAM_MODE_OCT``. If wrong, a SPIRAM error
+will appear during boot.
+
+To check the flash type, run the following command::
+
+    $ esptool.py flash_id
+    esptool.py v4.8.1
+    Found 33 serial ports
+    Serial port /dev/ttyUSB0
+    Connecting....
+    Detecting chip type... ESP32-S3
+    Chip is ESP32-S3 (QFN56) (revision v0.1)
+    Features: WiFi, BLE, Embedded PSRAM 2MB (AP_3v3)
+    Crystal is 40MHz
+    MAC: 7c:df:a1:e5:d8:5c
+    Uploading stub...
+    Running stub...
+    Stub running...
+    Manufacturer: 20
+    Device: 4017
+    Detected flash size: 8MB
+    Flash type set in eFuse: quad (4 data lines)
+    Flash voltage set by eFuse to 3.3V
+    Hard resetting via RTS pin...
+
+The flash type can be seen on the "Flash type set in eFuse: quad" line.
+
 pwm
 ---
 
