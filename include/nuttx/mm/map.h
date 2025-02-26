@@ -214,6 +214,7 @@ void vm_release_region(FAR struct mm_map_s *mm, FAR void *vaddr,
  *   alignment as given paddr.
  *
  * Input Parameters:
+ *   mm    - A reference to the process mm_map struct
  *   paddr - Starting physical address
  *   size  - Size of the address range
  *
@@ -222,7 +223,8 @@ void vm_release_region(FAR struct mm_map_s *mm, FAR void *vaddr,
  *
  ****************************************************************************/
 
-FAR void *vm_map_region(uintptr_t paddr, size_t size);
+FAR void *vm_map_region(FAR struct mm_map_s *mm, uintptr_t paddr,
+                        size_t size);
 
 /****************************************************************************
  * Name: vm_unmap_region
@@ -231,15 +233,17 @@ FAR void *vm_map_region(uintptr_t paddr, size_t size);
  *   Unmap previously mapped userspace device and release the virtual memory.
  *
  * Input Parameters:
+ *   mm    - A reference to the process' mm_map struct
  *   vaddr - Starting virtual address of the mapped device
- *   size - Size of the address range
+ *   size  - Size of the address range
  *
  * Returned Value:
  *   OK for success or negative value for error
  *
  ****************************************************************************/
 
-int vm_unmap_region(FAR void *vaddr, size_t size);
+int vm_unmap_region(FAR struct mm_map_s *mm, FAR void *vaddr,
+                    size_t size);
 
 #endif /* CONFIG_ARCH_VMA_MAPPING */
 
