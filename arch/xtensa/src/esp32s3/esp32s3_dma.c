@@ -45,6 +45,13 @@
 #include "hardware/esp32s3_soc.h"
 #include "hardware/esp32s3_system.h"
 
+#include "soc/gdma_periph.h"
+#include "hal/gdma_hal.h"
+#include "hal/gdma_types.h"
+#include "hal/gdma_ll.h"
+#include "periph_ctrl.h"
+#include "hal/dma_types.h"
+
 /****************************************************************************
  * Pre-processor Macros
  ****************************************************************************/
@@ -58,6 +65,7 @@
 
 static bool    g_dma_chan_used[ESP32S3_DMA_CHAN_MAX];
 static mutex_t g_dma_lock = NXMUTEX_INITIALIZER;
+static gdma_hal_context_t ctx;
 
 /****************************************************************************
  * Public Functions
@@ -388,6 +396,152 @@ void esp32s3_dma_load(struct esp32s3_dmadesc_s *dmadesc, int chan, bool tx)
 }
 
 /****************************************************************************
+ * Name: esp32s3_dma_reset_channel
+ *
+ * Description:
+ *   Resets dma channel.
+ *
+ * Input Parameters:
+ *   chan - DMA channel
+ *   tx   - true: TX mode; false: RX mode
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp32s3_dma_reset_channel(int chan, bool tx)
+{
+  if (tx)
+    {
+      gdma_ll_tx_reset_channel(ctx.dev, chan);
+    }
+  else
+    {
+      gdma_ll_rx_reset_channel(ctx.dev, chan);
+    }
+}
+
+/****************************************************************************
+ * Name: esp32s3_dma_enable_interrupt
+ *
+ * Description:
+ *   Enable/Disable DMA interrupt.
+ *
+ * Input Parameters:
+ *   chan - DMA channel
+ *   tx   - true: TX mode; false: RX mode
+ *   mask - Interrupt mask to change
+ *   en   - true: enable; false: disable
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp32s3_dma_enable_interrupt(int chan, bool tx, uint32_t mask, bool en)
+{
+  if (tx)
+    {
+      gdma_ll_tx_enable_interrupt(ctx.dev, chan, mask, en);
+    }
+  else
+    {
+      gdma_ll_rx_enable_interrupt(ctx.dev, chan, mask, en);
+    }
+}
+
+/****************************************************************************
+ * Name: esp32s3_dma_get_interrupt
+ *
+ * Description:
+ *   Gets DMA interrupt status.
+ *
+ * Input Parameters:
+ *   chan - DMA channel
+ *   tx   - true: TX mode; false: RX mode
+ *
+ * Returned Value:
+ *   Interrupt status value.
+ *
+ ****************************************************************************/
+
+int esp32s3_dma_get_interrupt(int chan, bool tx)
+{
+  uint32_t intr_status = 0;
+
+  if (tx)
+    {
+      intr_status = gdma_ll_tx_get_interrupt_status(ctx.dev, chan);
+    }
+  else
+    {
+      intr_status = gdma_ll_rx_get_interrupt_status(ctx.dev, chan);
+    }
+
+  return intr_status;
+}
+
+/****************************************************************************
+ * Name: esp32s3_dma_clear_interrupt
+ *
+ * Description:
+ *   Clear DMA interrupt.
+ *
+ * Input Parameters:
+ *   chan - DMA channel
+ *   tx   - true: TX mode; false: RX mode
+ *   mask - Interrupt mask to change
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp32s3_dma_clear_interrupt(int chan, bool tx, uint32_t mask)
+{
+  if (tx)
+    {
+      gdma_ll_tx_clear_interrupt_status(ctx.dev, chan, mask);
+    }
+  else
+    {
+      gdma_ll_rx_clear_interrupt_status(ctx.dev, chan, mask);
+    }
+}
+
+/****************************************************************************
+ * Name: esp32s3_dma_get_desc_addr
+ *
+ * Description:
+ *   Gets desc addr of DMA interrupt.
+ *
+ * Input Parameters:
+ *   chan - DMA channel
+ *   tx   - true: TX mode; false: RX mode
+ *
+ * Returned Value:
+ *   Desc addr.
+ *
+ ****************************************************************************/
+
+int esp32s3_dma_get_desc_addr(int chan, bool tx)
+{
+  uint32_t desc_addr = 0;
+
+  if (tx)
+    {
+      desc_addr = gdma_ll_tx_get_eof_desc_addr(ctx.dev, chan);
+    }
+  else
+    {
+      desc_addr = gdma_ll_rx_get_success_eof_desc_addr(ctx.dev, chan);
+    }
+
+  return desc_addr;
+}
+
+/****************************************************************************
  * Name: esp32s3_dma_enable
  *
  * Description:
@@ -539,6 +693,8 @@ void esp32s3_dma_init(void)
 {
   modifyreg32(SYSTEM_PERIP_CLK_EN1_REG, 0, SYSTEM_DMA_CLK_EN_M);
   modifyreg32(SYSTEM_PERIP_RST_EN1_REG, SYSTEM_DMA_RST_M, 0);
+
+  gdma_hal_init(&ctx, 0);
 
   /* enable DMA clock gating */
 
