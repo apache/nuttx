@@ -108,11 +108,14 @@ ifeq ($(CONFIG_ESPRESSIF_TEMP),y)
 endif
 
 ifeq ($(CONFIG_ESPRESSIF_I2C),y)
-	ifeq ($(CONFIG_ESPRESSIF_I2C_PERIPH),y)
+	ifeq ($(CONFIG_ESPRESSIF_I2C_PERIPH_MASTER_MODE),y)
 		CHIP_CSRCS += esp_i2c.c
 	endif
 	ifeq ($(CONFIG_ESPRESSIF_I2C_BITBANG),y)
 		CHIP_CSRCS += esp_i2c_bitbang.c
+	endif
+	ifeq ($(CONFIG_ESPRESSIF_I2C_PERIPH_SLAVE_MODE),y)
+		CHIP_CSRCS += esp_i2c_slave.c
 	endif
 endif
 
