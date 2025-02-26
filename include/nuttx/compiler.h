@@ -1355,6 +1355,8 @@
 #  undef CONFIG_HAVE_FLOAT
 #  undef CONFIG_HAVE_DOUBLE
 #  undef CONFIG_HAVE_LONG_DOUBLE
+#  define float  int
+#  define double long
 #endif
 
 /* Decorators */
