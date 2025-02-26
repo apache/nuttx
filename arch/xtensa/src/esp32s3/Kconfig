@@ -1789,6 +1789,7 @@ config ESP32S3_FLASH_MODE_QOUT
 	bool "Quad Output (QOUT)"
 
 config ESP32S3_FLASH_MODE_OCT
+	select ESP32S3_SPI_FLASH_DONT_USE_ROM_CODE
 	bool "Octal"
 
 endchoice # ESP32S3_FLASH_MODE
