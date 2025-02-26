@@ -98,7 +98,8 @@ void vm_release_region(FAR struct mm_map_s *mm, FAR void *vaddr, size_t size)
 
 /* map physical region to userspace */
 
-FAR void *vm_map_region(uintptr_t paddr, size_t size)
+FAR void *vm_map_region(FAR struct mm_map_s *mm,
+                        uintptr_t paddr, size_t size)
 {
   FAR void *vaddr;
   uintptr_t tvaddr;
@@ -113,7 +114,7 @@ FAR void *vm_map_region(uintptr_t paddr, size_t size)
   npages = MM_NPAGES(size);
   DEBUGASSERT(npages);
 
-  vaddr = vm_alloc_region(get_current_mm(), 0, size);
+  vaddr = vm_alloc_region(mm, 0, size);
   if (vaddr)
     {
       tvaddr = (uintptr_t)vaddr;
@@ -137,13 +138,14 @@ error:
       up_shmdt((uintptr_t)vaddr, i);
     }
 
-  vm_release_region(get_current_mm(), vaddr, size);
+  vm_release_region(mm, vaddr, size);
   return 0;
 }
 
 /* unmap userspace device pointer */
 
-int vm_unmap_region(FAR void *vaddr, size_t size)
+int vm_unmap_region(FAR struct mm_map_s *mm,
+                    FAR void *vaddr, size_t size)
 {
   int ret;
 
@@ -151,6 +153,6 @@ int vm_unmap_region(FAR void *vaddr, size_t size)
   size += ((uintptr_t)vaddr & MM_PGMASK);
   vaddr = (FAR void *)MM_PGALIGNDOWN(vaddr);
   ret = up_shmdt((uintptr_t)vaddr, MM_NPAGES(size));
-  vm_release_region(get_current_mm(), vaddr, size);
+  vm_release_region(mm, vaddr, size);
   return ret;
 }
