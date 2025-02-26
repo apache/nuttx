@@ -24,6 +24,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/nuttx.h>
 #include <nuttx/mm/map.h>
 #include <nuttx/pgalloc.h>
 #include <nuttx/addrenv.h>
@@ -145,6 +146,8 @@ void mm_map_initialize(FAR struct mm_map_s *mm, bool kernel)
 void mm_map_destroy(FAR struct mm_map_s *mm)
 {
   FAR struct mm_map_entry_s *entry;
+  FAR struct task_group_s *group = container_of(
+                                       mm, struct task_group_s, tg_mm_map);
 
   while ((entry = (FAR struct mm_map_entry_s *)sq_remfirst(&mm->mm_map_sq)))
     {
@@ -158,7 +161,7 @@ void mm_map_destroy(FAR struct mm_map_s *mm)
 
       if (entry->munmap)
         {
-          if (entry->munmap(NULL, entry, entry->vaddr, entry->length) < 0)
+          if (entry->munmap(group, entry, entry->vaddr, entry->length) < 0)
             {
               /* This would be an error in the driver. It has defined munmap,
                * but is not able to munmap the full area which it has mapped
