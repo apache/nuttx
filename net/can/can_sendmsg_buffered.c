@@ -387,12 +387,20 @@ ssize_t can_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
       conn->sndcb->priv = (FAR void *)conn;
       conn->sndcb->event = psock_send_eventhandler;
 
+      /* unlock */
+
+      net_unlock();
+
       /* Notify the device driver that new TX data is available. */
 
       netdev_txnotify_dev(dev);
     }
+    else
+    {
+      /* unlock */
 
-  net_unlock();
+      net_unlock();
+    }
 
   return msg->msg_iov->iov_len;
 
