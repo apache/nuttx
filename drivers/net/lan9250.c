@@ -617,7 +617,7 @@ static void lan9250_wait_ready(FAR struct lan9250_driver_s *priv,
 
   if (timeout)
     {
-      nerr("ERROR: wait register:0x%02" PRIx32 \
+      nerr("ERROR: wait register:0x%04" PRIx16 \
            ", mask:0x%08" PRIx32 \
            ", expected:0x%08" PRIx32 "\n",
             address, mask, expected);
@@ -736,7 +736,7 @@ static void lan9250_wait_mac_ready(FAR struct lan9250_driver_s *priv,
 
   if (timeout)
     {
-      nerr("ERROR: wait MAC register:0x%02" PRIx32 \
+      nerr("ERROR: wait MAC register:0x%02" PRIx8 \
            ", mask:0x%08" PRIx32 ", expect:0x%08" PRIx32 "\n",
             address, mask, expected);
     }
