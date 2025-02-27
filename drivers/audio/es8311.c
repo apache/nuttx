@@ -498,12 +498,13 @@ static int es8311_getcoeff(FAR struct es8311_dev_s *priv,
       if (priv->mclk == es8311_coeff_div[i].mclk &&
           samplerate == es8311_coeff_div[i].rate)
         {
-          audinfo("MCLK: %d, samplerate: %d\n", priv->mclk, samplerate);
+          audinfo("MCLK: %" PRIu32 ", samplerate: %" PRIu32 "\n",
+                  priv->mclk, samplerate);
           return i;
         }
     }
 
-  auderr("MCLK = %d and samplerate = %d not supported.\n",
+  auderr("MCLK = %" PRIu32 " and samplerate = %" PRIu32 " not supported.\n",
          priv->mclk, samplerate);
 
   return -EINVAL;
@@ -775,7 +776,7 @@ static int es8311_setsamplerate(FAR struct es8311_dev_s *priv)
     }
   else
     {
-      audinfo("Sample rate set to: %d.\n", priv->samprate);
+      audinfo("Sample rate set to: %" PRIu32 ".\n", priv->samprate);
       return OK;
     }
 }
