@@ -107,7 +107,7 @@ Steps for Using NuttX as IVSHMEM host and guest
   b. Start rpproxy_ivshmem::
 
       $ qemu-system-arm -cpu cortex-a7 -nographic -machine virt,highmem=off \
-        -object memory-backend-file,id=shmmem-shmem0,mem-path=/dev/shm/ivshmem0,size=4194304,share=yes \
+        -object memory-backend-file,discard-data=on,id=shmmem-shmem0,mem-path=/dev/shm/ivshmem0,size=4194304,share=yes \
         -device ivshmem-plain,id=shmem0,memdev=shmmem-shmem0,addr=0xb \
         -kernel proxy/nuttx -nographic
 
