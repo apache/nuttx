@@ -83,6 +83,7 @@ struct rpmsg_port_spi_s
   FAR struct spi_slave_ctrlr_s   *spictrlr;
   struct spi_slave_dev_s         spislv;
   FAR struct ioexpander_dev_s    *ioe;
+  bool                           bound;
 
   /* GPIOs used for handshake */
 
@@ -92,6 +93,7 @@ struct rpmsg_port_spi_s
   /* SPI devices' configuration */
 
   int                            nbits;
+  int                            mode;
 
   /* Reserved for cmd send */
 
@@ -542,6 +544,14 @@ static int rpmsg_port_spi_mreq_handler(FAR struct ioexpander_dev_s *dev,
   FAR struct rpmsg_port_spi_s *rpspi = arg;
 
   rpmsginfo("received a mreq\n");
+
+  if (!rpspi->bound)
+    {
+      SPIS_CTRLR_BIND(rpspi->spictrlr, &rpspi->spislv,
+                      rpspi->mode, rpspi->nbits);
+      rpspi->bound = true;
+    }
+
   rpmsg_port_spi_exchange(rpspi);
   return 0;
 }
@@ -612,6 +622,8 @@ rpmsg_port_spi_process_packet(FAR struct rpmsg_port_spi_s *rpspi,
         flags = spin_lock_irqsave(&rpspi->lock);
         if (rpspi->state == RPMSG_PORT_SPI_STATE_DISCONNECTING)
           {
+            SPIS_CTRLR_UNBIND(rpspi->spictrlr);
+            rpspi->bound = false;
             rpspi->state = RPMSG_PORT_SPI_STATE_UNCONNECTED;
             spin_unlock_irqrestore(&rpspi->lock, flags);
             IOEXP_WRITEPIN(rpspi->ioe, rpspi->sreq, 0);
@@ -752,7 +764,9 @@ rpmsg_port_spi_init_hardware(FAR struct rpmsg_port_spi_s *rpspi,
   rpspi->spictrlr = spictrlr;
   rpspi->spislv.ops = &g_rpmsg_port_spi_slave_ops;
   rpspi->nbits = spicfg->nbits;
+  rpspi->mode = spicfg->mode;
   SPIS_CTRLR_BIND(spictrlr, &rpspi->spislv, spicfg->mode, spicfg->nbits);
+  rpspi->bound = true;
 
   return 0;
 }
