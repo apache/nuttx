@@ -147,7 +147,7 @@ void lib_dumpvhandler(FAR const char *msg, FAR const struct iovec *iov,
   line[_ASCIICHAR_OFFSET - 1] = ' ';
   line[_LINESIZE - 1] = '\0';
 
-  while (piov != &iov[iovcnt] && piov->iov_len)
+  while (piov != &iov[iovcnt] && piov->iov_base && piov->iov_len)
     {
       ptr = line;
 
