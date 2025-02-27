@@ -50,6 +50,10 @@ ifeq ($(CONFIG_ARCH_FPU),y)
   CMN_CSRCS += xtensa_fpucmp.c
 endif
 
+ifeq ($(CONFIG_ARCH_HAVE_DEBUG),y)
+  CMN_CSRCS += xtensa_debug.c
+endif
+
 ifeq ($(CONFIG_SCHED_BACKTRACE),y)
   CMN_CSRCS += xtensa_backtrace.c
 endif
