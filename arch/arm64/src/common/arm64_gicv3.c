@@ -747,6 +747,35 @@ void up_disable_irq(int irq)
 }
 
 /***************************************************************************
+ * Name: up_set_secure_irq
+ *
+ * Description:
+ *   Secure an IRQ
+ *
+ ***************************************************************************/
+
+#if defined(CONFIG_ARCH_TRUSTZONE_SECURE) || defined(CONFIG_ARCH_HIPRI_INTERRUPT)
+void up_secure_irq(int irq, bool secure)
+{
+  uint32_t mask      = BIT(irq & (GIC_NUM_INTR_PER_REG - 1));
+  uint32_t idx       = irq / GIC_NUM_INTR_PER_REG;
+  unsigned long base = GET_DIST_BASE(irq);
+  unsigned int val   = getreg32(IGROUPR(base, idx));
+
+  if (secure)
+    {
+      val &= (~mask);  /* group 0 fiq */
+    }
+  else
+    {
+      val |= mask;     /* group 1 irq */
+    }
+
+  putreg32(val, IGROUPR(base, idx));
+}
+#endif
+
+/***************************************************************************
  * Name: up_prioritize_irq
  *
  * Description:
