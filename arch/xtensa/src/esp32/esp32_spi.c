@@ -849,6 +849,7 @@ static void esp32_spi_dma_exchange(struct esp32_spi_priv_s *priv,
   const uintptr_t spi_miso_dlen_reg = SPI_MISO_DLEN_REG(id);
   const uintptr_t spi_user_reg = SPI_USER_REG(id);
   const uintptr_t spi_cmd_reg = SPI_CMD_REG(id);
+  const uintptr_t spi_dma_rstatus = SPI_DMA_RSTATUS_REG(id);
 
   DEBUGASSERT((txbuffer != NULL) || (rxbuffer != NULL));
 
@@ -938,6 +939,16 @@ static void esp32_spi_dma_exchange(struct esp32_spi_priv_s *priv,
       else
         {
           esp32_spi_reset_regbits(spi_user_reg, SPI_USR_MISO_M);
+        }
+
+      if (priv->config->flags & ESP32_SPI_IO_W)
+        {
+          /* Wait until SPI TX FIFO is not empty */
+
+          while ((getreg32(spi_dma_rstatus) & SPI_DMA_TX_FIFO_EMPTY) != 0)
+            {
+              ;
+            }
         }
 
       esp32_spi_set_regbits(spi_cmd_reg, SPI_USR_M);
