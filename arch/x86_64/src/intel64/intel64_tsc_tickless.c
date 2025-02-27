@@ -86,12 +86,25 @@ static struct timespec g_goal_time_ts;
 
 #ifndef CONFIG_ARCH_INTEL64_HAVE_TSC_ADJUST
 static uint64_t g_start_tsc;
+#else
+static uint64_t g_tsc_adjust;
 #endif
 
 static uint32_t g_timer_active;
 
 static irqstate_t g_tmr_sync_count;
 static irqstate_t g_tmr_flags;
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_INTEL64_HAVE_TSC_ADJUST
+uint64_t get_tsc_adjust(void)
+{
+  return g_tsc_adjust;
+}
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -147,8 +160,8 @@ void up_timer_initialize(void)
 {
   uint64_t tsc = rdtscp();
 #ifdef CONFIG_ARCH_INTEL64_HAVE_TSC_ADJUST
-  uint64_t offset = read_msr(MSR_IA32_TSC_ADJUST) - tsc;
-  write_msr(MSR_IA32_TSC_ADJUST, offset);
+  g_tsc_adjust = read_msr(MSR_IA32_TSC_ADJUST) - tsc;
+  write_msr(MSR_IA32_TSC_ADJUST, g_tsc_adjust);
 #else
   g_start_tsc = tsc;
 #endif
