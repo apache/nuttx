@@ -31,6 +31,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/lib/lib.h>
+#include <nuttx/arch.h>
 
 #include "client.h"
 #include "fs_heap.h"
@@ -935,7 +936,7 @@ ssize_t v9fs_client_read(FAR struct v9fs_client_s *client, uint32_t fid,
                         V9FS_BIT32SZ;
       riov[0].iov_base = &response;
       riov[0].iov_len = V9FS_HDRSZ + V9FS_BIT32SZ;
-      riov[1].iov_base = (FAR void *)buffer;
+      riov[1].iov_base = (FAR void *)up_addrenv_va_to_pa(buffer);
       riov[1].iov_len = request.count;
 
       ret = v9fs_client_rpc(client->transport, wiov, 1, riov, 2,
@@ -1109,7 +1110,7 @@ ssize_t v9fs_client_write(FAR struct v9fs_client_s *client, uint32_t fid,
       wiov[0].iov_base = &request;
       wiov[0].iov_len = V9FS_HDRSZ + V9FS_BIT32SZ + V9FS_BIT64SZ +
                         V9FS_BIT32SZ;
-      wiov[1].iov_base = (FAR void *)buffer;
+      wiov[1].iov_base = (FAR void *)up_addrenv_va_to_pa((FAR void *)buffer);
       wiov[1].iov_len = request.count;
       riov[0].iov_base = &response;
       riov[0].iov_len = V9FS_HDRSZ + V9FS_BIT32SZ;
