@@ -34,8 +34,14 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/wireless/wireless.h>
 
+#ifdef CONFIG_ARCH_CHIP_ESP32
+#include "esp32_wifi_adapter.h"
+#endif
 #ifdef CONFIG_ARCH_CHIP_ESP32S2
 #include "esp32s2_wifi_adapter.h"
+#endif
+#ifdef CONFIG_ARCH_CHIP_ESP32S3
+#include "esp32s3_wifi_adapter.h"
 #endif
 
 #include "esp_wifi_utils.h"

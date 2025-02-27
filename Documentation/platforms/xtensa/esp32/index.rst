@@ -336,7 +336,7 @@ DAC          Yes    One-shot
 eFuse        Yes
 Ethernet     Yes
 GPIO         Yes
-I2C          Yes
+I2C          Yes    Master and Slave mode supported
 I2S          Yes
 LED_PWM      Yes
 MCPWM        Yes
@@ -630,8 +630,6 @@ Using QEMU
 Get or build QEMU from `here <https://github.com/espressif/qemu/wiki>`__.
 
 Enable the ``ESP32_QEMU_IMAGE`` config found in :menuselection:`Board Selection --> ESP32 binary image for QEMU`.
-
-Enable ``ESP32_APP_FORMAT_LEGACY``.
 
 Build and generate the QEMU image::
 

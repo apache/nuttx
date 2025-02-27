@@ -32,7 +32,7 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/spinlock.h>
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
 #include "riscv_internal.h"
@@ -117,10 +117,6 @@ static uint32_t g_cpu_freeints = ESP32C3_CPUINT_PERIPHSET &
                                  (~ESP32C3_WIFI_RESERVE_INT &
                                   ~ESP32C3_BLE_RESERVE_INT);
 
-/* Spinlock */
-
-static spinlock_t g_irq_lock = SP_UNLOCKED;
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -196,45 +192,6 @@ static int esp32c3_getcpuint(void)
 }
 
 /****************************************************************************
- * Name: esp32c3_free_cpuint_nolock
- *
- * Description:
- *   The version of public function esp32c3_free_cpuint without spinlock.
- *
- ****************************************************************************/
-
-static void esp32c3_free_cpuint_nolock(uint8_t periphid)
-{
-  uint8_t cpuint;
-
-  DEBUGASSERT(periphid < ESP32C3_NPERIPHERALS);
-
-  /* Get the CPU interrupt ID mapped to this peripheral. */
-
-  cpuint = getreg32(DR_REG_INTERRUPT_BASE + periphid * 4) & 0x1f;
-
-  irqinfo("INFO: irq[%" PRIu8 "]=%" PRIu8 "\n", periphid, cpuint);
-
-  if (cpuint != 0)
-    {
-      /* Undo the allocation process:
-       *   1.  Unmap the peripheral from the CPU interrupt ID.
-       *   2.  Reset the interrupt type.
-       *   3.  Reset the interrupt priority.
-       *   4.  Clear the CPU interrupt.
-       */
-
-      DEBUGASSERT(g_cpu_intmap[cpuint] != CPUINT_UNASSIGNED);
-
-      g_cpu_intmap[cpuint] = CPUINT_UNASSIGNED;
-      putreg32(0, DR_REG_INTERRUPT_BASE + periphid * 4);
-      resetbits(1 << cpuint, INTERRUPT_CPU_INT_TYPE_REG);
-      putreg32(0, INTERRUPT_CPU_INT_PRI_0_REG + cpuint * 4);
-      resetbits(1 << cpuint, INTERRUPT_CPU_INT_ENABLE_REG);
-    }
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -303,15 +260,15 @@ void up_irqinitialize(void)
 void up_enable_irq(int irq)
 {
   int cpuint = g_irqmap[irq];
-  irqstate_t flags;
+  irqstate_t irqstate;
 
   irqinfo("irq=%d | cpuint=%d \n", irq, cpuint);
 
   DEBUGASSERT(cpuint >= 1 && cpuint <= ESP32C3_CPUINT_MAX);
 
-  flags = spin_lock_irqsave(&g_irq_lock);
+  irqstate = enter_critical_section();
   setbits(1 << cpuint, INTERRUPT_CPU_INT_ENABLE_REG);
-  spin_unlock_irqrestore(&g_irq_lock, flags);
+  leave_critical_section(irqstate);
 }
 
 /****************************************************************************
@@ -338,13 +295,13 @@ void up_disable_irq(int irq)
     }
   else
     {
-      irqstate_t flags;
+      irqstate_t irqstate;
 
       g_cpu_intmap[cpuint] = CPUINT_DISABLE(g_cpu_intmap[cpuint]);
 
-      flags = spin_lock_irqsave(&g_irq_lock);
+      irqstate = enter_critical_section();
       resetbits(1 << cpuint, INTERRUPT_CPU_INT_ENABLE_REG);
-      spin_unlock_irqrestore(&g_irq_lock, flags);
+      leave_critical_section(irqstate);
     }
 }
 
@@ -364,11 +321,38 @@ void up_disable_irq(int irq)
 
 void esp32c3_free_cpuint(uint8_t periphid)
 {
-  irqstate_t flags;
+  irqstate_t irqstate;
+  uint8_t cpuint;
 
-  flags = spin_lock_irqsave(&g_irq_lock);
-  esp32c3_free_cpuint_nolock(periphid);
-  spin_unlock_irqrestore(&g_irq_lock, flags);
+  DEBUGASSERT(periphid < ESP32C3_NPERIPHERALS);
+
+  irqstate = enter_critical_section();
+
+  /* Get the CPU interrupt ID mapped to this peripheral. */
+
+  cpuint = getreg32(DR_REG_INTERRUPT_BASE + periphid * 4) & 0x1f;
+
+  irqinfo("INFO: irq[%" PRIu8 "]=%" PRIu8 "\n", periphid, cpuint);
+
+  if (cpuint != 0)
+    {
+      /* Undo the allocation process:
+       *   1.  Unmap the peripheral from the CPU interrupt ID.
+       *   2.  Reset the interrupt type.
+       *   3.  Reset the interrupt priority.
+       *   4.  Clear the CPU interrupt.
+       */
+
+      DEBUGASSERT(g_cpu_intmap[cpuint] != CPUINT_UNASSIGNED);
+
+      g_cpu_intmap[cpuint] = CPUINT_UNASSIGNED;
+      putreg32(0, DR_REG_INTERRUPT_BASE + periphid * 4);
+      resetbits(1 << cpuint, INTERRUPT_CPU_INT_TYPE_REG);
+      putreg32(0, INTERRUPT_CPU_INT_PRI_0_REG + cpuint * 4);
+      resetbits(1 << cpuint, INTERRUPT_CPU_INT_ENABLE_REG);
+    }
+
+  leave_critical_section(irqstate);
 }
 
 /****************************************************************************
@@ -478,13 +462,13 @@ void esp32c3_bind_irq(uint8_t cpuint, uint8_t periphid, uint8_t prio,
 
 int esp32c3_setup_irq(int periphid, int priority, int type)
 {
-  irqstate_t flags;
+  irqstate_t irqstate;
   int irq;
   int cpuint;
 
   irqinfo("periphid = %d\n", periphid);
 
-  flags = spin_lock_irqsave(&g_irq_lock);
+  irqstate = enter_critical_section();
 
   /* Setting up an IRQ includes the following steps:
    *    1. Allocate a CPU interrupt.
@@ -497,7 +481,7 @@ int esp32c3_setup_irq(int periphid, int priority, int type)
     {
       irqerr("Unable to allocate CPU interrupt for priority=%d and type=%d",
              priority, type);
-      spin_unlock_irqrestore(&g_irq_lock, flags);
+      leave_critical_section(irqstate);
 
       return cpuint;
     }
@@ -513,7 +497,7 @@ int esp32c3_setup_irq(int periphid, int priority, int type)
 
   esp32c3_bind_irq(cpuint, periphid, priority, type);
 
-  spin_unlock_irqrestore(&g_irq_lock, flags);
+  leave_critical_section(irqstate);
 
   return cpuint;
 }
@@ -539,11 +523,11 @@ int esp32c3_setup_irq(int periphid, int priority, int type)
 
 void esp32c3_teardown_irq(int periphid, int cpuint)
 {
-  irqstate_t flags;
+  irqstate_t irqstate;
   uintptr_t regaddr;
   int irq;
 
-  flags = spin_lock_irqsave(&g_irq_lock);
+  irqstate = enter_critical_section();
 
   /* Tearing down an IRQ includes the following steps:
    *   1. Free the previously allocated CPU interrupt.
@@ -551,7 +535,7 @@ void esp32c3_teardown_irq(int periphid, int cpuint)
    *   3. Unmap the IRQ from the IRQ-to-cpuint map.
    */
 
-  esp32c3_free_cpuint_nolock(cpuint);
+  esp32c3_free_cpuint(cpuint);
 
   irq = ESP32C3_PERIPH2IRQ(periphid);
 
@@ -564,7 +548,7 @@ void esp32c3_teardown_irq(int periphid, int cpuint)
 
   putreg32(NO_CPUINT, regaddr);
 
-  spin_unlock_irqrestore(&g_irq_lock, flags);
+  leave_critical_section(irqstate);
 }
 
 /****************************************************************************

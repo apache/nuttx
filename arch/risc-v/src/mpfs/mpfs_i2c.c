@@ -41,6 +41,7 @@
 #include <nuttx/clock.h>
 #include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/signal.h>
 #include <nuttx/i2c/i2c_master.h>
 
 #include <arch/board/board.h>
@@ -74,7 +75,7 @@
 /* Gives TTOA in microseconds, ~4.8% bias, +1 rounds up */
 
 #define I2C_TTOA_US(n, f)           ((((n) << 20) / (f)) + 1)
-#define I2C_TTOA_MARGIN             20
+#define I2C_TTOA_MARGIN             1000u
 
 /****************************************************************************
  * Private Types
@@ -729,6 +730,10 @@ static int mpfs_i2c_irq(int cpuint, void *context, void *arg)
         nxsem_post(&priv->sem_isr);
       }
 
+  /* See note 1) in mpfs_i2c.h why the interrupt cannot be cleared
+   * unconditionally here.
+   */
+
   if (clear_irq)
     {
       /* Clear interrupt. */
@@ -749,7 +754,7 @@ static int mpfs_i2c_irq(int cpuint, void *context, void *arg)
  * Name: mpfs_i2c_sendstart
  *
  * Description:
- *   Send I2C start condition and enable the PLIC irq
+ *   Send I2C start condition.
  *
  * Parameters:
  *   priv          - Pointer to the internal driver state structure.
@@ -758,20 +763,64 @@ static int mpfs_i2c_irq(int cpuint, void *context, void *arg)
 
 static void mpfs_i2c_sendstart(struct mpfs_i2c_priv_s *priv)
 {
-  up_enable_irq(priv->plic_irq);
   modifyreg32(MPFS_I2C_CTRL, 0, MPFS_I2C_CTRL_STA_MASK);
 }
 
+/****************************************************************************
+ * Name: mpfs_i2c_force_idle
+ *
+ * Description:
+ *   Attempt to force I2C device to idle state.
+ *
+ * Parameters:
+ *   priv          - Pointer to the internal driver state structure.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success, ERROR is returned on failure.
+ *
+ ****************************************************************************/
+
+static int mpfs_i2c_force_idle(struct mpfs_i2c_priv_s *priv)
+{
+  uint32_t retries = 1000;
+  uint32_t status;
+
+  /* Forcefully send STOP to the bus */
+
+  modifyreg32(MPFS_I2C_CTRL, MPFS_I2C_CTRL_STA_MASK, MPFS_I2C_CTRL_AA_MASK);
+  modifyreg32(MPFS_I2C_CTRL, 0, MPFS_I2C_CTRL_STO_MASK);
+
+  do
+    {
+      /* Read the status */
+
+      status = getreg32(MPFS_I2C_STATUS);
+
+      if (status == MPFS_I2C_ST_IDLE)
+        {
+          return OK;
+        }
+
+      /* Clear interrupt */
+
+      modifyreg32(MPFS_I2C_CTRL, MPFS_I2C_CTRL_SI_MASK, 0);
+
+      /* Wait for a while for the command to go through */
+
+      nxsig_usleep(1000);
+    }
+  while (retries--);
+
+  return ERROR;
+}
+
 static int mpfs_i2c_transfer(struct i2c_master_s *dev,
-                                struct i2c_msg_s *msgs,
-                                int count)
+                             struct i2c_msg_s *msgs,
+                             int count)
 {
   struct mpfs_i2c_priv_s *priv = (struct mpfs_i2c_priv_s *)dev;
-  int ret = OK;
-#ifdef CONFIG_DEBUG_I2C_ERROR
-  int sval;
   uint32_t status;
-#endif
+  int ret = OK;
 
   i2cinfo("Starting transfer request of %d message(s):\n", count);
 
@@ -786,26 +835,31 @@ static int mpfs_i2c_transfer(struct i2c_master_s *dev,
       return ret;
     }
 
-#ifdef CONFIG_DEBUG_I2C_ERROR
-  /* We should never start at transfer with semaphore already signalled */
-
-  nxsem_get_value(&priv->sem_isr, &sval);
-  if (sval != 0)
-    {
-      i2cerr("Already signalled at start? %d\n", sval);
-    }
-
   /* We should always be idle before transfer */
 
   status = getreg32(MPFS_I2C_STATUS);
   if (status != MPFS_I2C_ST_IDLE)
     {
       i2cerr("I2C bus not idle before transfer! Status: 0x%x\n", status);
+      if (mpfs_i2c_force_idle(priv) < 0)
+        {
+          ret = -EAGAIN;
+          goto errout_with_mutex;
+        }
     }
-#endif
 
   priv->msgv = msgs;
   priv->msgc = count;
+  priv->inflight = false;
+
+  nxsem_reset(&priv->sem_isr, 0);
+
+  /* Then enable the interrupt. This would also be an opportune moment to
+   * clear any already pending interrupt, but that must not be done. See
+   * comment 1) in mpfs_i2c.h
+   */
+
+  up_enable_irq(priv->plic_irq);
 
   for (int i = 0; i < count; i++)
     {
@@ -846,8 +900,8 @@ static int mpfs_i2c_transfer(struct i2c_master_s *dev,
               if (msgs[i].flags & I2C_M_READ)
                 {
                   i2cerr("No read before write supported!\n");
-                  nxmutex_unlock(&priv->lock);
-                  return -EINVAL;
+                  ret = -EINVAL;
+                  break;
                 }
 
               /* Combine write + read transaction into one */
@@ -875,7 +929,6 @@ static int mpfs_i2c_transfer(struct i2c_master_s *dev,
       if (mpfs_i2c_sem_waitdone(priv) < 0)
         {
           i2cinfo("Message %" PRIu8 " timed out.\n", priv->msgid);
-          priv->inflight = false;
           ret = -ETIMEDOUT;
           break;
         }
@@ -906,10 +959,11 @@ static int mpfs_i2c_transfer(struct i2c_master_s *dev,
     }
 #endif
 
-  /* Irq was enabled at mpfs_i2c_sendstart()  */
+  /* Disable interrupts and get out */
 
   up_disable_irq(priv->plic_irq);
 
+errout_with_mutex:
   nxmutex_unlock(&priv->lock);
   return ret;
 }
@@ -928,6 +982,7 @@ static int mpfs_i2c_transfer(struct i2c_master_s *dev,
  *   Zero (OK) on success; this should not fail.
  *
  ****************************************************************************/
+
 #ifdef CONFIG_I2C_RESET
 static int mpfs_i2c_reset(struct i2c_master_s *dev)
 {
@@ -974,7 +1029,7 @@ static int mpfs_i2c_reset(struct i2c_master_s *dev)
  ****************************************************************************/
 
 static int mpfs_i2c_setfrequency(struct mpfs_i2c_priv_s *priv,
-                                  uint32_t frequency)
+                                 uint32_t frequency)
 {
   uint32_t new_freq = 0;
   uint32_t clock_div = 0;

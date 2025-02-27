@@ -42,7 +42,6 @@
 #include <nuttx/usb/usbdev_trace.h>
 
 #include <nuttx/irq.h>
-#include <nuttx/spinlock.h>
 #include <arch/barriers.h>
 #include <arch/board/board.h>
 
@@ -362,7 +361,6 @@ struct imx9_ep_s
    */
 
   struct usbdev_ep_s ep;           /* Standard endpoint structure */
-  spinlock_t         spinlock;     /* Spinlock */
 
   /* IMX9XX-specific fields */
 
@@ -393,7 +391,6 @@ struct imx9_usb_s
    */
 
   struct usbdev_s              usbdev;
-  spinlock_t                   spinlock;      /* Spinlock */
 
   /* The bound device class driver */
 
@@ -2301,7 +2298,7 @@ static int imx9_epdisable(struct usbdev_ep_s *ep)
 
   usbtrace(TRACE_EPDISABLE, privep->epphy);
 
-  flags = spin_lock_irqsave(&privep->spinlock);
+  flags = enter_critical_section();
 
   /* Disable Endpoint */
 
@@ -2322,7 +2319,7 @@ static int imx9_epdisable(struct usbdev_ep_s *ep)
 
   imx9_cancelrequests(privep, -ESHUTDOWN);
 
-  spin_unlock_irqrestore(&privep->spinlock, flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -2479,7 +2476,7 @@ static int imx9_epsubmit(struct usbdev_ep_s *ep,
 
   /* Disable Interrupts */
 
-  flags = spin_lock_irqsave(&privep->spinlock);
+  flags = enter_critical_section();
 
   /* If we are stalled, then drop all requests on the floor */
 
@@ -2506,7 +2503,7 @@ static int imx9_epsubmit(struct usbdev_ep_s *ep,
         }
     }
 
-  spin_unlock_irqrestore(&privep->spinlock, flags);
+  leave_critical_section(flags);
   return ret;
 }
 
@@ -2534,7 +2531,7 @@ static int imx9_epcancel(struct usbdev_ep_s *ep,
 
   usbtrace(TRACE_EPCANCEL, privep->epphy);
 
-  flags = spin_lock_irqsave(&privep->spinlock);
+  flags = enter_critical_section();
 
   /* FIXME: if the request is the first, then we need to flush the EP
    *         otherwise just remove it from the list
@@ -2543,7 +2540,7 @@ static int imx9_epcancel(struct usbdev_ep_s *ep,
    */
 
   imx9_cancelrequests(privep, -ESHUTDOWN);
-  spin_unlock_irqrestore(&privep->spinlock, flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -2563,7 +2560,7 @@ static int imx9_epstall(struct usbdev_ep_s *ep, bool resume)
 
   /* STALL or RESUME the endpoint */
 
-  flags = spin_lock_irqsave(&privep->spinlock);
+  flags = enter_critical_section();
   usbtrace(resume ? TRACE_EPRESUME : TRACE_EPSTALL, privep->epphy);
 
   uint32_t offs    = IMX9_USBDEV_ENDPTCTRL_OFFSET(privep->epphy >> 1);
@@ -2587,7 +2584,7 @@ static int imx9_epstall(struct usbdev_ep_s *ep, bool resume)
       imx9_modifyreg(priv, offs, 0, ctrl_xs);
     }
 
-  spin_unlock_irqrestore(&privep->spinlock, flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -2691,7 +2688,7 @@ static struct usbdev_ep_s *imx9_allocep(struct usbdev_s *dev,
     {
       /* Yes.. now see if any of the request endpoints are available */
 
-      flags = spin_lock_irqsave(&priv->spinlock);
+      flags = enter_critical_section();
       epset &= priv->epavail;
       if (epset)
         {
@@ -2707,7 +2704,7 @@ static struct usbdev_ep_s *imx9_allocep(struct usbdev_s *dev,
                   /* Mark endpoint no longer available */
 
                   priv->epavail &= ~bit;
-                  spin_unlock_irqrestore(&priv->spinlock, flags);
+                  leave_critical_section(flags);
 
                   /* And return the pointer to the standard endpoint
                    * structure
@@ -2720,7 +2717,7 @@ static struct usbdev_ep_s *imx9_allocep(struct usbdev_s *dev,
           /* Shouldn't get here */
         }
 
-      spin_unlock_irqrestore(&priv->spinlock, flags);
+      leave_critical_section(flags);
     }
 
   usbtrace(TRACE_DEVERROR(IMX9_TRACEERR_NOEP), (uint16_t)eplog);
@@ -2740,8 +2737,7 @@ static void imx9_freeep(struct usbdev_s *dev,
 {
   struct imx9_usb_s *priv = (struct imx9_usb_s *)dev;
   struct imx9_ep_s *privep = (struct imx9_ep_s *)ep;
-  irqstate_t flags_1;
-  irqstate_t flags_2;
+  irqstate_t flags;
 
   usbtrace(TRACE_DEVFREEEP, (uint16_t)privep->epphy);
 
@@ -2749,11 +2745,9 @@ static void imx9_freeep(struct usbdev_s *dev,
     {
       /* Mark the endpoint as available */
 
-      flags_1 = spin_lock_irqsave(&priv->spinlock);
-      flags_2 = spin_lock_irqsave(&privep->spinlock);
+      flags = enter_critical_section();
       priv->epavail |= (1 << privep->epphy);
-      spin_unlock_irqrestore(&privep->spinlock, flags_2);
-      spin_unlock_irqrestore(&priv->spinlock, flags_1);
+      leave_critical_section(flags);
     }
 }
 
@@ -2802,9 +2796,9 @@ static int imx9_wakeup(struct usbdev_s *dev)
 
   usbtrace(TRACE_DEVWAKEUP, 0);
 
-  flags = spin_lock_irqsave(&priv->spinlock);
+  flags = enter_critical_section();
   imx9_modifyreg(priv, IMX9_USBDEV_PORTSC1_OFFSET, 0, USBDEV_PRTSC1_FPR);
-  spin_unlock_irqrestore(&priv->spinlock, flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -2848,7 +2842,7 @@ static int imx9_pullup(struct usbdev_s *dev, bool enable)
 
   usbtrace(TRACE_DEVPULLUP, (uint16_t)enable);
 
-  irqstate_t flags = spin_lock_irqsave(&priv->spinlock);
+  irqstate_t flags = enter_critical_section();
   if (enable)
     {
       imx9_modifyreg(priv, IMX9_USBDEV_USBCMD_OFFSET, 0, USBDEV_USBCMD_RS);
@@ -2865,7 +2859,7 @@ static int imx9_pullup(struct usbdev_s *dev, bool enable)
       imx9_modifyreg(priv, IMX9_USBDEV_USBCMD_OFFSET, USBDEV_USBCMD_RS, 0);
     }
 
-  spin_unlock_irqrestore(&priv->spinlock, flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -2934,7 +2928,7 @@ void arm64_usbinitialize(void)
   int i;
   irqstate_t flags;
 
-  flags = spin_lock_irqsave(&priv->spinlock);
+  flags = enter_critical_section();
 
   /* Initialize the device state structure */
 
@@ -3022,7 +3016,7 @@ void arm64_usbinitialize(void)
   irq_attach(IMX9_IRQ_USB1 + priv->id, imx9_usbinterrupt, priv);
   up_enable_irq(IMX9_IRQ_USB1 + priv->id);
 
-  spin_unlock_irqrestore(&priv->spinlock, flags);
+  leave_critical_section(flags);
 
   /* Reset/Re-initialize the USB hardware */
 
@@ -3046,7 +3040,7 @@ void arm64_usbuninitialize(void)
       usbdev_unregister(priv->driver);
     }
 
-  flags = spin_lock_irqsave(&priv->spinlock);
+  flags = enter_critical_section();
 
   /* Disconnect device */
 
@@ -3073,7 +3067,7 @@ void arm64_usbuninitialize(void)
 
   imx9_ccm_gate_on(CCM_LPCG_USB_CONTROLLER, false);
 
-  spin_unlock_irqrestore(&priv->spinlock, flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************

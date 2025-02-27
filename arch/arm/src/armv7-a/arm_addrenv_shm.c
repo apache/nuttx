@@ -126,6 +126,10 @@ int up_shmat(uintptr_t *pages, unsigned int npages, uintptr_t vaddr)
           /* Initialize the page table */
 
           memset(l2table, 0, ENTRIES_PER_L2TABLE * sizeof(uint32_t));
+
+          /* In case first time set shm l1 entry */
+
+          mmu_l1_setentry(paddr, vaddr, MMU_L1_PGTABFLAGS);
         }
       else
         {
@@ -133,7 +137,7 @@ int up_shmat(uintptr_t *pages, unsigned int npages, uintptr_t vaddr)
            * table entry.
            */
 
-          paddr = (uintptr_t)l1entry & ~SECTION_MASK;
+          paddr = (uintptr_t)l1entry;
           flags = enter_critical_section();
 
           /* Get the virtual address corresponding to the physical page\
@@ -148,7 +152,7 @@ int up_shmat(uintptr_t *pages, unsigned int npages, uintptr_t vaddr)
       DEBUGASSERT(get_l2_entry(l2table, vaddr) == 0);
 
       paddr = *pages++;
-      set_l2_entry(l2table, paddr, vaddr, MMU_MEMFLAGS);
+      set_l2_entry(l2table, paddr, vaddr, MMU_L2_UDATAFLAGS);
       nmapped++;
       vaddr += MM_PGSIZE;
 
@@ -224,7 +228,7 @@ int up_shmdt(uintptr_t vaddr, unsigned int npages)
        * table entry.
        */
 
-       paddr = (uintptr_t)l1entry & ~SECTION_MASK;
+       paddr = (uintptr_t)l1entry;
        flags = enter_critical_section();
 
       /* Get the virtual address corresponding to the physical page

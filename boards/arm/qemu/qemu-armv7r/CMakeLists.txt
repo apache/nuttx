@@ -20,6 +20,6 @@
 #
 # ##############################################################################
 
-set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/dramboot.ld")
+set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/nuttx.ld")
 
 add_subdirectory(src)

@@ -12,6 +12,15 @@ config LPWAN_SX127X
 	---help---
 		This options adds driver support for the Samtech SX127X chip.
 
+config LPWAN_SX126X
+	bool "SX126X Low Power Long Range transceiver support"
+	default n
+	select SPI
+	---help---
+		This options adds driver support for the Samtech SX126X chip.
+
+source "drivers/wireless/lpwan/sx126x/Kconfig"
+
 if LPWAN_SX127X
 
 config LPWAN_SX127X_RFFREQ_DEFAULT

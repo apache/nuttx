@@ -40,7 +40,7 @@
 #include <arpa/inet.h>
 
 #include <nuttx/wdog.h>
-#include <nuttx/spinlock.h>
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/signal.h>
@@ -298,7 +298,6 @@ struct lpc17_40_driver_s
   struct work_s lp_rxwork;      /* RX work continuation */
   struct work_s lp_pollwork;    /* Poll work continuation */
   uint32_t status;
-  spinlock_t lp_lock;           /* Spinlock */
 
   /* This holds the information visible to the NuttX networking layer */
 
@@ -425,7 +424,6 @@ static inline void lpc17_40_txdescinit(struct lpc17_40_driver_s *priv);
 static inline void lpc17_40_rxdescinit(struct lpc17_40_driver_s *priv);
 static inline void lpc17_40_macmode(uint8_t mode);
 static void lpc17_40_ethreset(struct lpc17_40_driver_s *priv);
-static void lpc17_40_ethreset_nolock(struct lpc17_40_driver_s *priv);
 
 /****************************************************************************
  * Private Functions
@@ -1005,14 +1003,14 @@ static void lpc17_40_rxdone_work(void *arg)
    * lp-txpending TX underrun state is in effect.
    */
 
-  flags = spin_lock_irqsave(&priv->lp_lock);
+  flags = enter_critical_section();
   if (!priv->lp_txpending)
     {
       priv->lp_inten |= ETH_RXINTS;
       lpc17_40_putreg(priv->lp_inten, LPC17_40_ETH_INTEN);
     }
 
-  spin_unlock_irqrestore(&priv->lp_lock, flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -1536,7 +1534,7 @@ static int lpc17_40_ifdown(struct net_driver_s *dev)
 
   /* Disable the Ethernet interrupt */
 
-  flags = spin_lock_irqsave(&priv->lp_lock);
+  flags = enter_critical_section();
   up_disable_irq(LPC17_40_IRQ_ETH);
 
   /* Cancel the TX timeout timers */
@@ -1545,9 +1543,9 @@ static int lpc17_40_ifdown(struct net_driver_s *dev)
 
   /* Reset the device and mark it as down. */
 
-  lpc17_40_ethreset_nolock(priv);
+  lpc17_40_ethreset(priv);
   priv->lp_ifup = false;
-  spin_unlock_irqrestore(&priv->lp_lock, flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -2911,8 +2909,14 @@ static inline void lpc17_40_macmode(uint8_t mode)
  *
  ****************************************************************************/
 
-static void lpc17_40_ethreset_nolock(struct lpc17_40_driver_s *priv)
+static void lpc17_40_ethreset(struct lpc17_40_driver_s *priv)
 {
+  irqstate_t flags;
+
+  /* Reset the MAC */
+
+  flags = enter_critical_section();
+
   /* Put the MAC into the reset state */
 
   lpc17_40_putreg((ETH_MAC1_TXRST    | ETH_MAC1_MCSTXRST | ETH_MAC1_RXRST |
@@ -2961,15 +2965,7 @@ static void lpc17_40_ethreset_nolock(struct lpc17_40_driver_s *priv)
   /* Clear any pending interrupts (shouldn't be any) */
 
   lpc17_40_putreg(0xffffffff, LPC17_40_ETH_INTCLR);
-}
-
-static void lpc17_40_ethreset(struct lpc17_40_driver_s *priv)
-{
-  irqstate_t flags;
-
-  flags = spin_lock_irqsave(&priv->lp_lock);
-  lpc17_40_ethreset_nolock(priv);
-  spin_unlock_irqrestore(&priv->lp_lock, flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -3036,8 +3032,6 @@ static inline int lpc17_40_ethinitialize(int intf)
   priv->lp_dev.d_ioctl   = lpc17_40_eth_ioctl; /* Handle network IOCTL commands */
 #endif
   priv->lp_dev.d_private = priv;               /* Used to recover private state from dev */
-
-  spin_lock_init(&priv->lp_lock);              /* Initialize spinlock */
 
 #if CONFIG_LPC17_40_NINTERFACES > 1
 # error "A mechanism to associate base address an IRQ with an interface is needed"

@@ -995,6 +995,7 @@ int32_t imx9_scmi_pinctrlconfigset(uint32_t channel, uint32_t identifier,
       {
         uint32_t header;
         uint32_t identifier;
+        uint32_t function_id;
         uint32_t attributes;
         scmi_pin_config_t configs[SCMI_PINCTRL_MAX_CONFIGS_T];
       } msg_tpinctrld6_t;

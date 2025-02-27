@@ -52,7 +52,8 @@
  *   do not have any real option other than to copy the callers action list.
  *
  * Input Parameters:
- *   copy     - Pointer of file actions
+ *   copy     - Pointer of the copied output file actions
+ *   actions  - Pointer of file actions to be copy
  *
  * Returned Value:
  *   A non-zero copy is returned on success.
@@ -108,8 +109,13 @@ int binfmt_copyactions(FAR const posix_spawn_file_actions_t **copy,
       return -ENOMEM;
     }
 
+  /* We need to copy and re-organize the flink chain,  be care not modify
+   * the actions it self,  the prev have to point to the last time foreach
+   * item.
+   */
+
   for (entry = (FAR struct spawn_general_file_action_s *)actions,
-       prev = NULL; entry != NULL; prev = entry, entry = entry->flink)
+       prev = NULL; entry != NULL; entry = entry->flink)
     {
       switch (entry->action)
         {
@@ -122,6 +128,7 @@ int binfmt_copyactions(FAR const posix_spawn_file_actions_t **copy,
                 prev->flink = (FAR void *)close;
               }
 
+            prev   = (FAR void *)close;
             buffer = close + 1;
             break;
 
@@ -134,6 +141,7 @@ int binfmt_copyactions(FAR const posix_spawn_file_actions_t **copy,
                 prev->flink = (FAR void *)dup2;
               }
 
+            prev   = (FAR void *)dup2;
             buffer = dup2 + 1;
             break;
 
@@ -149,6 +157,7 @@ int binfmt_copyactions(FAR const posix_spawn_file_actions_t **copy,
 
             strcpy(open->path, tmp->path);
 
+            prev   = (FAR void *)open;
             buffer = (FAR char *)buffer +
                      ALIGN_UP(SIZEOF_OPEN_FILE_ACTION_S(strlen(tmp->path)),
                               sizeof(FAR void *));

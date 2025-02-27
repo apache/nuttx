@@ -33,7 +33,6 @@
 #include <debug.h>
 
 #include <nuttx/irq.h>
-#include <nuttx/spinlock.h>
 #include <nuttx/arch.h>
 #include <nuttx/timers/pwm.h>
 #include <arch/board/board.h>
@@ -92,7 +91,6 @@ struct lpc17_40_timer_s
   uint32_t                pincfg;  /* Output pin configuration */
   uint32_t                pclk;    /* The frequency of the peripheral clock
                                     * that drives the timer module. */
-  spinlock_t              lock;    /* Spinlock */
 };
 
 /****************************************************************************
@@ -156,7 +154,6 @@ static struct lpc17_40_timer_s g_pwm1dev =
   .base       = LPC17_40_TMR1_BASE,
   .pincfg     = GPIO_MAT0p1_2,
   .pclk       = (0x1 << 12),
-  .lock       = SP_UNLOCKED,
 };
 #endif
 
@@ -269,7 +266,7 @@ static int timer_timer(struct lpc17_40_timer_s *priv,
   irqstate_t flags;
   uint32_t regval;
 
-  flags = spin_lock_irqsave(&priv->lock);
+  flags = enter_critical_section();
 
   putreg32(info->frequency, LPC17_40_TMR0_MR1);  /* Set TIMER0 MR1 = number of counts */
   putreg32(info->frequency, LPC17_40_TMR1_MR0);  /* Set TIMER1 MR0 = number of counts */
@@ -277,7 +274,7 @@ static int timer_timer(struct lpc17_40_timer_s *priv,
   putreg32(1, LPC17_40_TMR0_TCR);                /* Start timer0 */
   putreg32(1, LPC17_40_TMR1_TCR);                /* Start timer1 */
 
-  spin_unlock_irqrestore(&priv->lock, flags);
+  leave_critical_section(flags);
   timer_dumpregs(priv, "After starting");
   return OK;
 }
@@ -364,7 +361,7 @@ static int timer_setup(struct pwm_lowerhalf_s *dev)
   irqstate_t flags;
   uint32_t regval;
 
-  flags = spin_lock_irqsave(&priv->lock);
+  flags = enter_critical_section();
 
   /* Power on the timer peripherals */
 
@@ -426,7 +423,7 @@ static int timer_setup(struct pwm_lowerhalf_s *dev)
 
   /* lpc17_40_configgpio(GPIO_MAT0p1_2); */
 
-  spin_unlock_irqrestore(&priv->lock, flags);
+  leave_critical_section(flags);
   pwm_dumpgpio(priv->pincfg, "TIMER setup");
   return OK;
 }
@@ -514,7 +511,7 @@ static int timer_stop(struct pwm_lowerhalf_s *dev)
    * to prevent any concurrent access to the reset register.
    */
 
-  flags = spin_lock_irqsave(&priv->lock);
+  flags = enter_critical_section();
 
   /* Disable further interrupts and stop the timer */
 
@@ -532,7 +529,7 @@ static int timer_stop(struct pwm_lowerhalf_s *dev)
    * into a state where timer_start() can be called.
    */
 
-  spin_unlock_irqrestore(&priv->lock, flags);
+  leave_critical_section(flags);
 
   pwminfo("regaddr: %08x resetbit: %08x\n", regaddr, resetbit);
   timer_dumpregs(priv, "After stop");

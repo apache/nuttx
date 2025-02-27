@@ -2189,6 +2189,7 @@ int up_rtc_cancelalarm(enum alm_id_e alarmid)
 
   if (cbinfo->ac_cb != NULL)
     {
+      sched_lock();
       flags = spin_lock_irqsave(&g_rtc_lock);
 
       /* Stop and delete the alarm */
@@ -2201,6 +2202,7 @@ int up_rtc_cancelalarm(enum alm_id_e alarmid)
       cbinfo->alarm_hdl = NULL;
 
       spin_unlock_irqrestore(&g_rtc_lock, flags);
+      sched_unlock();
 
       ret = OK;
     }

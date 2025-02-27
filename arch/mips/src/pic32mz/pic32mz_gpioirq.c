@@ -29,7 +29,7 @@
 #include <stdint.h>
 #include <assert.h>
 
-#include <nuttx/spinlock.h>
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
 #include <arch/pic32mz/irq.h>
@@ -151,10 +151,6 @@ static struct ioport_level2_s * const g_level2_handlers[CHIP_NPORTS] =
   [PIC32MZ_IOPORTK] = &g_ioportk_cnisrs,
 #endif
 };
-
-/* Spinlock */
-
-static spinlock_t g_gpioirq_lock = SP_UNLOCKED;
 
 /****************************************************************************
  * Private Functions
@@ -484,7 +480,7 @@ int pic32mz_gpioattach(pinset_t pinset, xcpt_t handler, void *arg)
         {
           /* Get the previously attached handler as the return value */
 
-          flags = spin_lock_irqsave(&g_gpioirq_lock);
+          flags = enter_critical_section();
 
           /* Are we attaching or detaching? */
 
@@ -539,7 +535,7 @@ int pic32mz_gpioattach(pinset_t pinset, xcpt_t handler, void *arg)
 
           handlers->handler[pin].entry = handler;
           handlers->handler[pin].arg   = arg;
-          spin_unlock_irqrestore(&g_gpioirq_lock, flags);
+          leave_critical_section(flags);
         }
     }
 

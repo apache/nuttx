@@ -218,7 +218,7 @@ static int IRAM_ATTR esp_hr_timer_isr(int irq, void *context, void *arg)
 
   systimer_ll_clear_alarm_int(priv->hal.dev, SYSTIMER_ALARM_ESPTIMER);
 
-  flags = spin_lock_irqsave(&priv->lock);
+  flags = enter_critical_section();
 
   /* Check if there is a timer running */
 
@@ -288,7 +288,7 @@ static int IRAM_ATTR esp_hr_timer_isr(int irq, void *context, void *arg)
         }
     }
 
-  spin_unlock_irqrestore(&priv->lock, flags);
+  leave_critical_section(flags);
 
   return OK;
 }
@@ -710,7 +710,7 @@ void IRAM_ATTR esp_hr_timer_calibration(uint64_t time_us)
 
 int esp_hr_timer_init(void)
 {
-  struct esp_hr_timer_context_s *priv = &g_hr_timer_context;
+  struct esp_hr_timer_context_s *priv;
   int pid;
 
   if (g_hr_timer_initialized)
@@ -719,8 +719,6 @@ int esp_hr_timer_init(void)
 
       return OK;
     }
-
-  spin_lock_init(&priv->lock);
 
   pid  = kthread_create(CONFIG_ESPRESSIF_HR_TIMER_TASK_NAME,
                         CONFIG_ESPRESSIF_HR_TIMER_TASK_PRIORITY,
@@ -733,6 +731,8 @@ int esp_hr_timer_init(void)
 
       return pid;
     }
+
+  priv = &g_hr_timer_context;
 
   list_initialize(&priv->runlist);
   list_initialize(&priv->toutlist);

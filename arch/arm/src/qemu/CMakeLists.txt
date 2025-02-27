@@ -38,4 +38,8 @@ if(CONFIG_BUILD_KERNEL)
   list(APPEND SRCS qemu_pgalloc.c)
 endif()
 
+if(CONFIG_BUILD_PROTECTED)
+  list(APPEND SRCS qemu_userspace.c qemu_allocateheap.c)
+endif()
+
 target_sources(arch PRIVATE ${SRCS})

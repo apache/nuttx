@@ -69,6 +69,7 @@ static void work_timer_expiry(wdparm_t arg)
   FAR struct work_s *work = (FAR struct work_s *)arg;
 
   irqstate_t flags = spin_lock_irqsave(&work->wq->lock);
+  sched_lock();
 
   /* We have being canceled */
 
@@ -78,6 +79,7 @@ static void work_timer_expiry(wdparm_t arg)
     }
 
   spin_unlock_irqrestore(&work->wq->lock, flags);
+  sched_unlock();
 }
 
 static bool work_is_canceling(FAR struct kworker_s *kworkers, int nthreads,
@@ -138,6 +140,7 @@ int work_queue_wq(FAR struct kwork_wqueue_s *wqueue,
                   FAR void *arg, clock_t delay)
 {
   irqstate_t flags;
+  int ret = OK;
 
   if (wqueue == NULL || work == NULL || worker == NULL)
     {
@@ -149,6 +152,7 @@ int work_queue_wq(FAR struct kwork_wqueue_s *wqueue,
    */
 
   flags = spin_lock_irqsave(&wqueue->lock);
+  sched_lock();
 
   /* Remove the entry from the timer and work queue. */
 
@@ -168,8 +172,7 @@ int work_queue_wq(FAR struct kwork_wqueue_s *wqueue,
 
   if (work_is_canceling(wqueue->worker, wqueue->nthreads, work))
     {
-      spin_unlock_irqrestore(&wqueue->lock, flags);
-      return 0;
+      goto out;
     }
 
   /* Initialize the work structure. */
@@ -183,15 +186,16 @@ int work_queue_wq(FAR struct kwork_wqueue_s *wqueue,
   if (!delay)
     {
       queue_work(wqueue, work);
-      spin_unlock_irqrestore(&wqueue->lock, flags);
     }
   else
     {
       wd_start(&work->u.timer, delay, work_timer_expiry, (wdparm_t)work);
-      spin_unlock_irqrestore(&wqueue->lock, flags);
     }
 
-  return 0;
+out:
+  spin_unlock_irqrestore(&wqueue->lock, flags);
+  sched_unlock();
+  return ret;
 }
 
 int work_queue(int qid, FAR struct work_s *work, worker_t worker,

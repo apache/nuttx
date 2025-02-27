@@ -53,7 +53,7 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-#ifdef CONFIG_ESPRESSIF_I2C_PERIPH
+#ifdef CONFIG_ESPRESSIF_I2C_PERIPH_MASTER_MODE
 /****************************************************************************
  * Name: esp_i2cbus_initialize
  *
@@ -89,7 +89,7 @@ struct i2c_master_s *esp_i2cbus_initialize(int port);
  ****************************************************************************/
 
 int esp_i2cbus_uninitialize(struct i2c_master_s *dev);
-#endif /* CONFIG_ESPRESSIF_I2C_PERIPH */
+#endif /* CONFIG_ESPRESSIF_I2C_PERIPH_MASTER_MODE */
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_RISCV_SRC_COMMON_ESPRESSIF_ESP_I2C_H */

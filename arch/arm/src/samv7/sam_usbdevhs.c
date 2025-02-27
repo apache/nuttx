@@ -58,7 +58,6 @@
 #include <nuttx/usb/usbdev_trace.h>
 
 #include <nuttx/irq.h>
-#include <nuttx/spinlock.h>
 #include <arch/barriers.h>
 #include <arch/board/board.h>
 
@@ -425,10 +424,6 @@ struct sam_usbdev_s
    */
 
   uint8_t                  ep0out[SAM_EP0_MAXPACKET];
-
-  /* Spinlock */
-
-  spinlock_t               lock;
 };
 
 /****************************************************************************
@@ -1196,13 +1191,16 @@ sam_req_abort(struct sam_ep_s *privep, struct sam_req_s *privreq,
  *
  ****************************************************************************/
 
-static void sam_req_complete_nolock(struct sam_ep_s *privep, int16_t result)
+static void sam_req_complete(struct sam_ep_s *privep, int16_t result)
 {
   struct sam_req_s *privreq;
+  irqstate_t flags;
 
   /* Remove the completed request at the head of the endpoint request list */
 
+  flags = enter_critical_section();
   privreq = sam_req_dequeue(&privep->reqq);
+  leave_critical_section(flags);
 
   if (privreq)
     {
@@ -1231,15 +1229,6 @@ static void sam_req_complete_nolock(struct sam_ep_s *privep, int16_t result)
       privreq->flink = NULL;
       privreq->req.callback(&privep->ep, &privreq->req);
     }
-}
-
-static void sam_req_complete(struct sam_ep_s *privep, int16_t result)
-{
-  irqstate_t flags = spin_lock_irqsave(&privep->dev->lock);
-
-  sam_req_complete_nolock(privep, result);
-
-  spin_unlock_irqrestore(&privep->dev->lock, flags);
 }
 
 /****************************************************************************
@@ -1796,7 +1785,7 @@ static void sam_req_cancel(struct sam_ep_s *privep, int16_t result)
     {
       usbtrace(TRACE_COMPLETE(USB_EPNO(privep->ep.eplog)),
                (sam_rqpeek(&privep->reqq))->req.xfrd);
-      sam_req_complete_nolock(privep, result);
+      sam_req_complete(privep, result);
     }
 }
 
@@ -3538,7 +3527,7 @@ sam_ep_reserve(struct sam_usbdev_s *priv, uint16_t epset)
   irqstate_t flags;
   int epndx = 0;
 
-  flags = spin_lock_irqsave(&priv->lock);
+  flags = enter_critical_section();
   epset &= priv->epavail;
   if (epset)
     {
@@ -3563,7 +3552,7 @@ sam_ep_reserve(struct sam_usbdev_s *priv, uint16_t epset)
         }
     }
 
-  spin_unlock_irqrestore(&priv->lock, flags);
+  leave_critical_section(flags);
   return privep;
 }
 
@@ -3580,9 +3569,9 @@ sam_ep_reserve(struct sam_usbdev_s *priv, uint16_t epset)
 static inline void
 sam_ep_unreserve(struct sam_usbdev_s *priv, struct sam_ep_s *privep)
 {
-  irqstate_t flags = spin_lock_irqsave(&priv->lock);
+  irqstate_t flags = enter_critical_section();
   priv->epavail   |= SAM_EP_BIT(USB_EPNO(privep->ep.eplog));
-  spin_unlock_irqrestore(&priv->lock, flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -3905,14 +3894,14 @@ static int sam_ep_disable(struct usbdev_ep_s *ep)
 
   /* Reset the endpoint and cancel any ongoing activity */
 
-  flags = spin_lock_irqsave(&priv->lock);
+  flags = enter_critical_section();
   priv  = privep->dev;
   sam_ep_reset(priv, epno);
 
   /* Revert to the addressed-but-not-configured state */
 
   priv->devstate = USBHS_DEVSTATE_ADDRESSED;
-  spin_unlock_irqrestore(&priv->lock, flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -4028,7 +4017,7 @@ static int sam_ep_submit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   req->result       = -EINPROGRESS;
   req->xfrd         = 0;
   privreq->inflight = 0;
-  flags             = spin_lock_irqsave(&priv->lock);
+  flags             = enter_critical_section();
 
   /* Handle IN (device-to-host) requests.  NOTE:  If the class device is
    * using the bi-directional EP0, then we assume that they intend the EP0
@@ -4080,7 +4069,7 @@ static int sam_ep_submit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
         }
     }
 
-  spin_unlock_irqrestore(&priv->lock, flags);
+  leave_critical_section(flags);
   return ret;
 }
 
@@ -4098,9 +4087,9 @@ static int sam_ep_cancel(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   DEBUGASSERT(ep != NULL && req != NULL);
   usbtrace(TRACE_EPCANCEL, USB_EPNO(ep->eplog));
 
-  flags = spin_lock_irqsave(&privep->dev->lock);
+  flags = enter_critical_section();
   sam_req_cancel(privep, -EAGAIN);
-  spin_unlock_irqrestore(&privep->dev->lock, flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -4131,7 +4120,7 @@ static int sam_ep_stall(struct usbdev_ep_s *ep, bool resume)
 
   /* STALL or RESUME the endpoint */
 
-  flags = spin_lock_irqsave(&priv->lock);
+  flags = enter_critical_section();
   usbtrace(resume ? TRACE_EPRESUME : TRACE_EPSTALL, USB_EPNO(ep->eplog));
 
   /* Handle the resume condition */
@@ -4215,7 +4204,7 @@ static int sam_ep_stall(struct usbdev_ep_s *ep, bool resume)
 
           else if (privep->epstate == USBHS_EPSTATE_RECEIVING)
             {
-              sam_req_complete_nolock(privep, -EPERM);
+              sam_req_complete(privep, -EPERM);
             }
 
           /* Put endpoint into stalled state */
@@ -4254,7 +4243,7 @@ static int sam_ep_stall(struct usbdev_ep_s *ep, bool resume)
         }
     }
 
-  spin_unlock_irqrestore(&priv->lock, flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -4398,7 +4387,7 @@ static int sam_wakeup(struct usbdev_s *dev)
 
   /* Resume normal operation */
 
-  flags = spin_lock_irqsave(&priv->lock);
+  flags = enter_critical_section();
   sam_resume(priv);
 
   /* Activate a remote wakeup.
@@ -4411,7 +4400,7 @@ static int sam_wakeup(struct usbdev_s *dev)
   regval  = sam_getreg(SAM_USBHS_DEVCTRL);
   regval |= USBHS_DEVCTRL_RMWKUP;
   sam_putreg(regval, SAM_USBHS_DEVCTRL);
-  spin_unlock_irqrestore(&priv->lock, flags);
+  leave_critical_section(flags);
 
   /* This bit is automatically cleared by hardware at the end of the Upstream
    * Resume
@@ -4458,7 +4447,7 @@ static int sam_pullup(struct usbdev_s *dev, bool enable)
 
   usbtrace(TRACE_DEVPULLUP, (uint16_t)enable);
 
-  flags = spin_lock_irqsave(&priv->lock);
+  flags = enter_critical_section();
   if (enable)
     {
       /* Un-freeze clocking.
@@ -4610,7 +4599,7 @@ static int sam_pullup(struct usbdev_s *dev, bool enable)
         }
     }
 
-  spin_unlock_irqrestore(&priv->lock, flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -5003,10 +4992,6 @@ void arm_usbinitialize(void)
 
   usbtrace(TRACE_DEVINIT, 0);
 
-  /* Initialize driver lock */
-
-  spin_lock_init(&priv->lock);
-
   /* Software initialization */
 
   sam_sw_setup(priv);
@@ -5065,7 +5050,7 @@ void arm_usbuninitialize(void)
    * easier.
    */
 
-  flags = spin_lock_irqsave(&priv->lock);
+  flags = enter_critical_section();
   usbtrace(TRACE_DEVUNINIT, 0);
 
   /* Disable and detach the USBHS IRQ */
@@ -5083,7 +5068,7 @@ void arm_usbuninitialize(void)
 
   sam_hw_shutdown(priv);
   sam_sw_shutdown(priv);
-  spin_unlock_irqrestore(&priv->lock, flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -5160,7 +5145,7 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
    * canceled while the class driver is still bound.
    */
 
-  flags = spin_lock_irqsave(&priv->lock);
+  flags = enter_critical_section();
 
   /* Unbind the class driver */
 
@@ -5184,7 +5169,7 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
   /* Unhook the driver */
 
   priv->driver = NULL;
-  spin_unlock_irqrestore(&priv->lock, flags);
+  leave_critical_section(flags);
   return OK;
 }
 

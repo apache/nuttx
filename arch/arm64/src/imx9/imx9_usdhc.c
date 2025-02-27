@@ -43,7 +43,6 @@
 #include <nuttx/mmcsd.h>
 
 #include <nuttx/irq.h>
-#include <nuttx/spinlock.h>
 #include <arch/board/board.h>
 
 #include "chip.h"
@@ -178,7 +177,6 @@
 struct imx9_dev_s
 {
   struct sdio_dev_s dev;              /* Standard, base SDIO interface */
-  spinlock_t spinlock;                /* Spinlock */
 
   /* Imx9-specific extensions */
 
@@ -564,7 +562,7 @@ static void imx9_configwaitints(struct imx9_dev_s *priv, uint32_t waitints,
    * operation.
    */
 
-  flags            = spin_lock_irqsave(&priv->spinlock);
+  flags            = enter_critical_section();
   priv->waitevents = waitevents;
   priv->wkupevent  = wkupevent;
   priv->waitints   = waitints;
@@ -574,7 +572,7 @@ static void imx9_configwaitints(struct imx9_dev_s *priv, uint32_t waitints,
 #endif
   putreg32(priv->xfrints | priv->waitints | priv->cintints,
            priv->addr + IMX9_USDHC_IRQSIGEN_OFFSET);
-  spin_unlock_irqrestore(&priv->spinlock, flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -596,11 +594,11 @@ static void imx9_configxfrints(struct imx9_dev_s *priv, uint32_t xfrints)
 {
   irqstate_t flags;
 
-  flags = spin_lock_irqsave(&priv->spinlock);
+  flags = enter_critical_section();
   priv->xfrints = xfrints;
   putreg32(priv->xfrints | priv->waitints | priv->cintints,
            priv->addr + IMX9_USDHC_IRQSIGEN_OFFSET);
-  spin_unlock_irqrestore(&priv->spinlock, flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -3291,11 +3289,11 @@ void imx9_usdhc_set_sdio_card_isr(struct sdio_dev_s *dev,
     }
 #endif
 
-  flags  = spin_lock_irqsave(&priv->spinlock);
+  flags  = enter_critical_section();
   regval = getreg32(priv->addr + IMX9_USDHC_IRQSIGEN_OFFSET);
   regval = (regval & ~USDHC_INT_CINT) | priv->cintints;
   putreg32(regval, priv->addr + IMX9_USDHC_IRQSIGEN_OFFSET);
-  spin_unlock_irqrestore(&priv->spinlock, flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************

@@ -3,7 +3,8 @@
 =========================
 
 Brickmatch is a kind puzzle game like a mix between tetris and Candy
-Crush. It is a 6x6 matrix with blocks (cells) with different colors.
+Crush. It is matrix (e.g 6x6, 8x8) with blocks (cells) with different
+colors.
 
 Your goal is to move the blocks of the board to unite three or
 more with the same color.
@@ -26,7 +27,8 @@ matrix to the right SPI pins (look your board configuration) and the
 APDS9960 to the I2C port (also connect its INT pin).
 
 If you don't have an APA102 matrix you can also play it using an LCD
-display and a digital joystick (DJOYSTICK) or the console input. 
+display or led matrix(WS2812) and a digital joystick (DJOYSTICK), gpio pins
+or the console input.
 
 Then you can configure and compile the game to play in your board,
 i.e. for ESP32-Devkitc there is already an example using the APA102::

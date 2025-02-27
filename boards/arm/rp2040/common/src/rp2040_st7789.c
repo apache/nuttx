@@ -48,7 +48,7 @@
 
 #if LCD_SPI_PORTNO
 #define LCD_DC         CONFIG_RP2040_SPI1_RX_GPIO
-#define LCD_RST        12
+#define LCD_RST        CONFIG_LCD_ST7789_RST_GPIO
 #define LCD_BL         13
 #else
 #define LCD_DC         CONFIG_RP2040_SPI0_RX_GPIO
@@ -96,6 +96,7 @@ int board_lcd_initialize(void)
 
   rp2040_gpio_init(LCD_RST);
   rp2040_gpio_setdir(LCD_RST, true);
+  rp2040_gpio_put(LCD_RST, false);
   rp2040_gpio_put(LCD_RST, true);
 
   /* Set full brightness */

@@ -69,7 +69,7 @@ void up_irqinitialize(void)
 
   for (int id = 1; id <= NR_IRQS; id++)
     {
-      putreg32(1, MPFS_PLIC_PRIORITY + (4 * id));
+      putreg32(MPFS_PLIC_PRIO_MIN, MPFS_PLIC_PRIORITY + (4 * id));
     }
 
   /* Attach the common interrupt handler */
@@ -103,7 +103,6 @@ void up_irqinitialize(void)
 void up_disable_irq(int irq)
 {
   int extirq = 0;
-  int i;
 
   if (irq == RISCV_IRQ_SOFT)
     {
@@ -125,24 +124,7 @@ void up_disable_irq(int irq)
           PANIC();
         }
 
-      /* Disable the irq on all harts, we don't know on which it was
-       * enabled
-       */
-
-      for (i = 0; i < CONFIG_SMP_NCPUS; i++)
-        {
-          uintptr_t iebase = mpfs_plic_get_iebase(riscv_cpuid_to_hartid(i));
-          uintptr_t claim_address =
-            mpfs_plic_get_claimbase(riscv_cpuid_to_hartid(i));
-
-          /* Clear enable bit for the irq */
-
-          modifyreg32(iebase + (4 * (extirq / 32)), 1 << (extirq % 32), 0);
-
-          /* Clear any already claimed IRQ */
-
-          putreg32(extirq, claim_address);
-        }
+      mpfs_plic_disable_irq(extirq);
     }
 }
 
@@ -173,19 +155,12 @@ void up_enable_irq(int irq)
   else if (irq >= MPFS_IRQ_EXT_START)
     {
       extirq = irq - MPFS_IRQ_EXT_START;
-
-      /* Set enable bit for the irq */
-
-      uintptr_t iebase = mpfs_plic_get_iebase(up_cpu_index());
-
-      if (0 <= extirq && extirq <= NR_IRQS - MPFS_IRQ_EXT_START)
-        {
-          modifyreg32(iebase + (4 * (extirq / 32)), 0, 1 << (extirq % 32));
-        }
-      else
+      if (extirq < 0 || extirq > NR_IRQS - MPFS_IRQ_EXT_START)
         {
           PANIC();
         }
+
+      mpfs_plic_clear_and_enable_irq(extirq);
     }
 }
 

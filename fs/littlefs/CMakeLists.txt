@@ -49,7 +49,7 @@ if(CONFIG_FS_LITTLEFS)
     FetchContent_MakeAvailable(littlefs)
   endif()
 
-  target_compile_definitions(
+  target_compile_options(
     fs
     PRIVATE
       $<$<NOT:$<BOOL:${CONFIG_FS_LITTLEFS_HAS_LFS_DEFINES}>>:-DLFS_TRACE=finfo>

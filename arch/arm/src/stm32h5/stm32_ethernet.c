@@ -38,7 +38,7 @@
 #include <arpa/inet.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/spinlock.h>
+#include <nuttx/irq.h>
 #include <nuttx/queue.h>
 #include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
@@ -613,7 +613,6 @@ struct stm32_ethmac_s
   struct wdog_s        txtimeout;   /* TX timeout timer */
   struct work_s        irqwork;     /* For deferring interrupt work to the work queue */
   struct work_s        pollwork;    /* For deferring poll work to the work queue */
-  spinlock_t           lock;        /* Spinlock */
 
   /* This holds the information visible to the NuttX network */
 
@@ -2473,7 +2472,7 @@ static int stm32_ifdown(struct net_driver_s *dev)
 
   /* Disable the Ethernet interrupt */
 
-  flags = spin_lock_irqsave(&priv->lock);
+  flags = enter_critical_section();
   up_disable_irq(STM32_IRQ_ETH);
 
   /* Cancel the TX timeout timers */
@@ -2490,7 +2489,7 @@ static int stm32_ifdown(struct net_driver_s *dev)
   /* Mark the device "down" */
 
   priv->ifup = false;
-  spin_unlock_irqrestore(&priv->lock, flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -4192,8 +4191,6 @@ static inline int stm32_ethinitialize(int intf)
 #endif
   priv->dev.d_private = g_stm32ethmac;  /* Used to recover private state */
   priv->intf          = intf;           /* Remember the interface number */
-
-  spin_lock_init(&priv->lock);          /* Initialize spinlock */
 
   stm32_get_uniqueid(uid);
   crc = crc64(uid, 12);

@@ -36,7 +36,7 @@
 #include <nuttx/wireless/wireless.h>
 
 #include "esp32_spiflash.h"
-#include "esp32_wlan.h"
+#include "espressif/esp_wlan.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -66,23 +66,23 @@ int board_wlan_init(void)
 {
   int ret = OK;
 
-#ifdef ESP32_WLAN_HAS_STA
-  ret = esp32_wlan_sta_initialize();
+#ifdef ESPRESSIF_WLAN_HAS_STA
+  ret = esp_wlan_sta_initialize();
   if (ret)
     {
       wlerr("ERROR: Failed to initialize Wi-Fi station\n");
       return ret;
     }
-#endif /* ESP32_WLAN_HAS_STA */
+#endif /* ESPRESSIF_WLAN_HAS_STA */
 
-#ifdef ESP32_WLAN_HAS_SOFTAP
-  ret = esp32_wlan_softap_initialize();
+#ifdef ESPRESSIF_WLAN_HAS_SOFTAP
+  ret = esp_wlan_softap_initialize();
   if (ret)
     {
       wlerr("ERROR: Failed to initialize Wi-Fi softAP\n");
       return ret;
     }
-#endif /* ESP32_WLAN_HAS_SOFTAP */
+#endif /* ESPRESSIF_WLAN_HAS_SOFTAP */
 
   return ret;
 }

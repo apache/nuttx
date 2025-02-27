@@ -28,9 +28,24 @@ config ESPRESSIF_TEMP
 	---help---
 		A built-in sensor used to measure the chip's internal temperature.
 
-config ESPRESSIF_I2C_PERIPH
+config ESPRESSIF_I2C_PERIPH_MASTER_MODE
 	bool
-	depends on (ESP32S3_I2C0 || ESP32S3_I2C1) || (ESP32_I2C0 || ESP32_I2C1) || (ESP32S2_I2C0 || ESP32S2_I2C1)
+	depends on (ESP32S3_I2C_PERIPH_MASTER_MODE || ESP32S2_I2C_PERIPH_MASTER_MODE || ESP32_I2C_PERIPH_MASTER_MODE)
+	default n
+
+config ESPRESSIF_I2C_PERIPH_SLAVE_MODE
+	bool
+	depends on (ESP32S3_I2C_PERIPH_SLAVE_MODE || ESP32S2_I2C_PERIPH_SLAVE_MODE || ESP32_I2C_PERIPH_SLAVE_MODE)
+	default n
+
+config ESPRESSIF_I2C0_SLAVE
+	bool
+	depends on (ESP32S3_I2C0_SLAVE_MODE || ESP32S2_I2C0_SLAVE_MODE || ESP32_I2C0_SLAVE_MODE)
+	default n
+
+config ESPRESSIF_I2C1_SLAVE
+	bool
+	depends on (ESP32S3_I2C1_SLAVE_MODE || ESP32S2_I2C1_SLAVE_MODE || ESP32_I2C1_SLAVE_MODE)
 	default n
 
 config ESPRESSIF_I2C_BITBANG
@@ -513,7 +528,12 @@ config ESPRESSIF_WIRELESS
 	select ESP32S2_RNG if ARCH_CHIP_ESP32S2
 	select ESP32S2_RT_TIMER if ARCH_CHIP_ESP32S2
 	select ESP32S2_TIMER0 if ARCH_CHIP_ESP32S2
-	depends on ARCH_CHIP_ESP32S2
+	select ESP32S3_RNG if ARCH_CHIP_ESP32S3
+	select ESP32S3_RT_TIMER if ARCH_CHIP_ESP32S3
+	select ESP32S3_TIMER0 if ARCH_CHIP_ESP32S3
+	select ESP32_RNG if ARCH_CHIP_ESP32
+	select ESP32_RT_TIMER if ARCH_CHIP_ESP32
+	select ESP32_TIMER0 if ARCH_CHIP_ESP32
 	---help---
 		Enable Wireless support
 
@@ -523,6 +543,34 @@ config ESPRESSIF_WIFI
 	select ESPRESSIF_WIRELESS
 	---help---
 		Enable Wi-Fi support
+
+config ESPRESSIF_BLE
+	bool "BLE"
+	depends on ARCH_CHIP_ESP32S3 || ARCH_CHIP_ESP32
+	default n
+	select ESPRESSIF_WIRELESS
+	select BLUETOOTH_TXCMD_PINNED_TO_CORE if SMP && ARCH_CHIP_ESP32
+	select BLUETOOTH_CNTRL_HOST_FLOW_DISABLE if ARCH_CHIP_ESP32
+	---help---
+		Enable BLE support.
+
+config ESP_COEX_SW_COEXIST_ENABLE
+	bool "Software WiFi/Bluetooth/IEEE 802.15.4 coexistence"
+	depends on (ESPRESSIF_WIFI && ESPRESSIF_BLE)
+	default y
+	---help---
+		If enabled, WiFi & Bluetooth coexistence is controlled by software rather than hardware.
+		Recommended for heavy traffic scenarios. Both coexistence configuration options are
+		automatically managed, no user intervention is required.
+		If only Bluetooth is used, it is recommended to disable this option to reduce binary file
+		size.
+
+menuconfig ESPRESSIF_WIFI_BT_COEXIST
+	bool "Wi-Fi and BT coexist"
+	default y if ESPRESSIF_WIFI && ESPRESSIF_BLE
+	default n
+	depends on ESPRESSIF_WIFI && ESPRESSIF_BLE
+	select ESPRESSIF_WIFI_STA_DISCONNECT_PM
 
 menu "Wi-Fi Configuration"
 	depends on ESPRESSIF_WIFI
@@ -691,4 +739,30 @@ config ESPRESSIF_WIFI_LISTEN_INTERVAL
 		For example, if beacon interval is 100 ms and listen interval is 3, the interval for station to listen
 		to beacon is 300 ms.
 
+config ESPRESSIF_WIFI_WLAN_BUFFER_OPTIMIZATION
+	bool "Enable optimization of WLAN driver buffer"
+	default n
+	depends on ARCH_CHIP_ESP32
+	---help---
+		Enable optimization of WLAN memory
+
 endmenu # ESPRESSIF_WIFI
+
+menu "BLE Configuration"
+	depends on ESPRESSIF_BLE
+
+config ESPRESSIF_BLE_TASK_STACK_SIZE
+	int "Controller task stack size"
+	default 4096
+
+config ESPRESSIF_BLE_TASK_PRIORITY
+	int "Controller task priority"
+	default 253
+
+config ESPRESSIF_BLE_INTERRUPT_SAVE_STATUS
+	int "Number of interrupt save status"
+	default 3
+	---help---
+		Number of interrupt save status variables to keep track. Increase it if any related bug is found.
+
+endmenu # BLE Configuration

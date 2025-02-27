@@ -99,9 +99,15 @@
 #else
 #define PWM0_PA9_POL 1
 #endif
+#ifdef CONFIG_SAMV7_PWM0_PA9_LATCHED
+#define PWM0_PA9_LATCH 1
+#else
+#define PWM0_PA9_LATCH 0
+#endif
 #else
 #define PWM0_PA9 0
 #define PWM0_PA9_POL 0
+#define PWM0_PA9_LATCH 0
 #endif
 
 #ifdef CONFIG_SAMV7_PWM0_PD8
@@ -111,9 +117,15 @@
 #else
 #define PWM0_PD8_POL (1 << 1)
 #endif
+#ifdef CONFIG_SAMV7_PWM0_PD8_LATCHED
+#define PWM0_PD8_LATCH (1 << 1)
+#else
+#define PWM0_PD8_LATCH 0
+#endif
 #else
 #define PWM0_PD8 0
 #define PWM0_PD8_POL 0
+#define PWM0_PD8_LATCH 0
 #endif
 
 #ifdef CONFIG_SAMV7_PWM0_PD9
@@ -123,39 +135,75 @@
 #else
 #define PWM0_PD9_POL (1 << 2)
 #endif
+#ifdef CONFIG_SAMV7_PWM0_PD9_LATCHED
+#define PWM0_PD9_LATCH (1 << 2)
+#else
+#define PWM0_PD9_LATCH 0
+#endif
 #else
 #define PWM0_PD9 0
 #define PWM0_PD9_POL 0
+#define PWM0_PD9_LATCH 0
 #endif
 
 #ifdef CONFIG_SAMV7_PWM0_PMC
 #define PWM0_PMC (1 << 3)
+#ifdef CONFIG_SAMV7_PWM0_PMC_LATCHED
+#define PWM0_PMC_LATCH (1 << 3)
+#else
+#define PWM0_PMC_LATCH 0
+#endif
 #else
 #define PWM0_PMC 0
+#define PWM0_PMC_LATCH 0
 #endif
 
 #ifdef CONFIG_SAMV7_PWM0_AFEC0
 #define PWM0_AFEC0 (1 << 4)
+#ifdef CONFIG_SAMV7_PWM0_AFEC0_LATCHED
+#define PWM0_AFEC0_LATCH (1 << 4)
+#else
+#define PWM0_AFEC0_LATCH 0
+#endif
 #else
 #define PWM0_AFEC0 0
+#define PWM0_AFEC0_LATCH 0
 #endif
 
 #ifdef CONFIG_SAMV7_PWM0_AFEC1
 #define PWM0_AFEC1 (1 << 5)
+#ifdef CONFIG_SAMV7_PWM0_AFEC1_LATCHED
+#define PWM0_AFEC1_LATCH (1 << 5)
+#else
+#define PWM0_AFEC1_LATCH 0
+#endif
 #else
 #define PWM0_AFEC1 0
+#define PWM0_AFEC1_LATCH 0
 #endif
 
 #ifdef CONFIG_SAMV7_PWM0_ACC
 #define PWM0_ACC (1 << 6)
+#ifdef CONFIG_SAMV7_PWM0_ACC_LATCHED
+#define PWM0_ACC_LATCH (1 << 6)
+#else
+#define PWM0_ACC_LATCH 0
+#endif
 #else
 #define PWM0_ACC 0
+#define PWM0_ACC_LATCH 0
 #endif
 
 #ifdef CONFIG_SAMV7_PWM0_TIM0
 #define PWM0_TIM0 (1 << 7)
+#ifdef CONFIG_SAMV7_PWM0_TIM0_LATCHED
+#define PWM0_TIM0_LATCH (1 << 7)
+#else
+#define PWM0_TIM0_LATCH 0
+#endif
 #else
 #define PWM0_TIM0 0
+#define PWM0_TIM0_LATCH 0
 #endif
 
 #define PWM0_FAULTS (PWM0_PA9 + PWM0_PD8 + PWM0_PD9 + PWM0_PMC + \
@@ -165,6 +213,10 @@
                      PWM0_PMC + PWM0_AFEC0 + PWM0_AFEC1 + PWM0_ACC + \
                      PWM0_TIM0)
 
+#define PWM0_LATCH  (PWM0_PA9_LATCH + PWM0_PD8_LATCH + PWM0_PD9_LATCH + \
+                     PWM0_PMC_LATCH + PWM0_AFEC0_LATCH + PWM0_AFEC1_LATCH + \
+                     PWM0_ACC_LATCH + PWM0_TIM0_LATCH)
+
 #ifdef CONFIG_SAMV7_PWM1_PA21
 #define PWM1_PA21 1
 #ifdef CONFIG_SAMV7_PWM1_PA21_POL
@@ -172,9 +224,15 @@
 #else
 #define PWM1_PA21_POL 1
 #endif
+#ifdef CONFIG_SAMV7_PWM1_PA21_LATCHED
+#define PWM1_PA21_LATCH 1
+#else
+#define PWM1_PA21_LATCH 0
+#endif
 #else
 #define PWM1_PA21 0
 #define PWM1_PA21_POL 0
+#define PWM1_PA21_LATCH 0
 #endif
 
 #ifdef CONFIG_SAMV7_PWM1_PA26
@@ -184,9 +242,15 @@
 #else
 #define PWM1_PA26_POL (1 << 1)
 #endif
+#ifdef CONFIG_SAMV7_PWM1_PA26_LATCHED
+#define PWM1_PA26_LATCH (1 << 1)
+#else
+#define PWM1_PA26_LATCH 0
+#endif
 #else
 #define PWM1_PA26 0
 #define PWM1_PA26_POL 0
+#define PWM1_PA26_LATCH 0
 #endif
 
 #ifdef CONFIG_SAMV7_PWM1_PA28
@@ -196,39 +260,75 @@
 #else
 #define PWM1_PA28_POL (1 << 2)
 #endif
+#ifdef CONFIG_SAMV7_PWM1_PA28_LATCHED
+#define PWM1_PA28_LATCH (1 << 2)
+#else
+#define PWM1_PA28_LATCH 0
+#endif
 #else
 #define PWM1_PA28 0
 #define PWM1_PA28_POL 0
+#define PWM1_PA28_LATCH 0
 #endif
 
 #ifdef CONFIG_SAMV7_PWM1_PMC
 #define PWM1_PMC (1 << 3)
+#ifdef CONFIG_SAMV7_PWM1_PMC_LATCHED
+#define PWM1_PMC_LATCH (1 << 3)
+#else
+#define PWM1_PMC_LATCH 0
+#endif
 #else
 #define PWM1_PMC 0
+#define PWM1_PMC_LATCH 0
 #endif
 
 #ifdef CONFIG_SAMV7_PWM1_AFEC0
 #define PWM1_AFEC0 (1 << 4)
+#ifdef CONFIG_SAMV7_PWM1_AFEC0_LATCHED
+#define PWM1_AFEC0_LATCH (1 << 4)
+#else
+#define PWM1_AFEC0_LATCH 0
+#endif
 #else
 #define PWM1_AFEC0 0
+#define PWM1_AFEC0_LATCH 0
 #endif
 
 #ifdef CONFIG_SAMV7_PWM1_AFEC1
 #define PWM1_AFEC1 (1 << 5)
+#ifdef CONFIG_SAMV7_PWM1_AFEC1_LATCHED
+#define PWM1_AFEC1_LATCH (1 << 5)
+#else
+#define PWM1_AFEC1_LATCH 0
+#endif
 #else
 #define PWM1_AFEC1 0
+#define PWM1_AFEC1_LATCH 0
 #endif
 
 #ifdef CONFIG_SAMV7_PWM1_ACC
 #define PWM1_ACC (1 << 6)
+#ifdef CONFIG_SAMV7_PWM1_ACC_LATCHED
+#define PWM1_ACC_LATCH (1 << 6)
 #else
+#define PWM1_ACC_LATCH 0
+#endif
+#else
+#define PWM1_ACC_LATCH 0
 #define PWM1_ACC 0
 #endif
 
 #ifdef CONFIG_SAMV7_PWM1_TIM0
 #define PWM1_TIM0 (1 << 7)
+#ifdef CONFIG_SAMV7_PWM1_TIM0_LATCHED
+#define PWM1_TIM0_LATCH (1 << 7)
+#else
+#define PWM1_TIM0_LATCH 0
+#endif
 #else
 #define PWM1_TIM0 0
+#define PWM1_TIM0_LATCH 0
 #endif
 
 #define PWM1_FAULTS (PWM1_PA21 + PWM1_PA26 + PWM1_PA28 + PWM1_PMC + \
@@ -237,6 +337,10 @@
 #define PWM1_POL    (PWM1_PA21_POL + PWM1_PA26_POL + PWM1_PA28_POL + \
                      PWM1_PMC + PWM1_AFEC0 + PWM1_AFEC1 + PWM1_ACC + \
                      PWM1_TIM0)
+
+#define PWM1_LATCH  (PWM1_PA21_LATCH + PWM1_PA26_LATCH + PWM1_PA28_LATCH + \
+                     PWM1_PMC_LATCH + PWM1_AFEC0_LATCH + PWM1_AFEC1_LATCH + \
+                     PWM1_ACC_LATCH + PWM1_TIM0_LATCH)
 
 /****************************************************************************
  * Public Function Prototypes

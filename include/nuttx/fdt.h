@@ -491,4 +491,21 @@ int fdt_pci_ecam_register(FAR const void *fdt);
 int fdt_virtio_mmio_devices_register(FAR const void *fdt, int irqbase);
 #endif
 
+/****************************************************************************
+ * Name: fdt_cfi_register
+ *
+ * Description:
+ *   This function is used to register an fci flash from the device tree
+ *
+ * Input Parameters:
+ *   fdt - Device tree handle
+ *
+ * Returned Value:
+ *   Return 0 if success, nageative if failed
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MTD_CFI
+int fdt_cfi_register(FAR const void *fdt);
+#endif
 #endif /* __INCLUDE_NUTTX_FDT_H */

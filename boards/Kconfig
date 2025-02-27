@@ -35,6 +35,14 @@ config ARCH_BOARD_ARDUINO_DUE
 		This options selects the Arduino DUE board featuring the Atmel
 		ATSAM3X8E MCU running at 84 MHz.
 
+config ARCH_BOARD_ARDUINO_R4_MINIMA
+	bool "Arduino R4 Minima"
+	depends on ARCH_CHIP_RA4
+	select ARCH_HAVE_LEDS
+	---help---
+		This options selects the Arduino R4 Minima board featuring the Renesas
+		R7FA4M1 MCU running at 48 MHz.
+
 config ARCH_BOARD_ARDUINO_M0
 	bool "Arduino M0"
 	depends on ARCH_CHIP_SAMD21G18A
@@ -423,7 +431,7 @@ config ARCH_BOARD_FRANZININHO_WIFI
 
 config ARCH_BOARD_ESP32S3_DEVKIT
 	bool "Espressif ESP32-S3 DevKit"
-	depends on ARCH_CHIP_ESP32S3WROOM1N4 || ARCH_CHIP_ESP32S3MINI1N8 || ARCH_CHIP_ESP32S3WROOM2N16R8V || ARCH_CHIP_ESP32S3WROOM2N32R8V || ARCH_CHIP_ESP32S3CUSTOM || ARCH_CHIP_ESP32S3WROOM1N8R8
+	depends on ARCH_CHIP_ESP32S3WROOM1N4 || ARCH_CHIP_ESP32S3MINI1N8 || ARCH_CHIP_ESP32S3WROOM1N16R8 || ARCH_CHIP_ESP32S3WROOM2N16R8V || ARCH_CHIP_ESP32S3WROOM2N32R8V || ARCH_CHIP_ESP32S3CUSTOM || ARCH_CHIP_ESP32S3WROOM1N8R8
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS if ESP32S3_GPIO_IRQ
@@ -1220,6 +1228,13 @@ config ARCH_BOARD_NRF52840_DONGLE
 	select ARCH_HAVE_BUTTONS
 	---help---
 		This option selects the Nordic nRF52840 Dongle (PCA10059)
+
+config ARCH_BOARD_XIAO_NRF52840
+	bool "Seeed Xiao nRF52840"
+	depends on ARCH_CHIP_NRF52
+	select ARCH_HAVE_LEDS
+	---help---
+		This option selects the Seeed Xiao nRF52840 Board
 
 config ARCH_BOARD_ARDUINO_NANO_33BLE
 	bool "Arduino Nano 33 BLE Sense based on Nordic nRF52840"
@@ -3227,6 +3242,14 @@ config ARCH_BOARD_AT32F437_MINI
 	---help---
 		AT32F437-MINI board based on the Artery AT32F437VMT7 MCU.
 
+config ARCH_BOARD_FRDM_MCXN236
+	bool "NXP MCXN236 CPU EVK board"
+	depends on ARCH_CHIP_N236
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This options selects support for NuttX on the NXP MCXN236 CPU EVK
+		board with ARM Cortex-M33.
+
 config ARCH_BOARD_CUSTOM
 	bool "Custom development board"
 	---help---
@@ -3298,6 +3321,7 @@ config ARCH_BOARD
 	default "amber"                     if ARCH_BOARD_AMBER
 	default "arduino-mega2560"          if ARCH_BOARD_ARDUINO_MEGA2560
 	default "arduino-due"               if ARCH_BOARD_ARDUINO_DUE
+	default "arduino-r4-minima"         if ARCH_BOARD_ARDUINO_R4_MINIMA
 	default "arduino-m0"                if ARCH_BOARD_ARDUINO_M0
 	default "arduino-nano-33ble"        if ARCH_BOARD_ARDUINO_NANO_33BLE
 	default "arduino-nano-33ble-rev2"   if ARCH_BOARD_ARDUINO_NANO_33BLE_REV2
@@ -3414,6 +3438,7 @@ config ARCH_BOARD
 	default "nrf52832-dk"               if ARCH_BOARD_NRF52832_DK
 	default "nrf52840-dk"               if ARCH_BOARD_NRF52840_DK
 	default "nrf52840-dongle"           if ARCH_BOARD_NRF52840_DONGLE
+	default "xiao-nrf52840"             if ARCH_BOARD_XIAO_NRF52840
 	default "thingy52"                  if ARCH_BOARD_THINGY52
 	default "nrf5340-dk"                if ARCH_BOARD_NRF5340_DK
 	default "nrf5340-audio-dk"          if ARCH_BOARD_NRF5340_AUDIO_DK
@@ -3636,6 +3661,7 @@ config ARCH_BOARD
 	default "hpm6750evk2"               if ARCH_BOARD_HPM6750EVK2
 	default "at32f437-mini"             if ARCH_BOARD_AT32F437_MINI
 	default "csk6011a-nano"             if ARCH_BOARD_CSK6011A_NANO
+	default "frdm-mcxn236"              if ARCH_BOARD_FRDM_MCXN236
 
 comment "Common Board Options"
 
@@ -3932,6 +3958,9 @@ endif
 if ARCH_BOARD_NRF52840_DK
 source "boards/arm/nrf52/nrf52840-dk/Kconfig"
 endif
+if ARCH_BOARD_XIAO_NRF52840
+source "boards/arm/nrf52/xiao-nrf52840/Kconfig"
+endif
 if ARCH_BOARD_THINGY52
 source "boards/arm/nrf52/thingy52/Kconfig"
 endif
@@ -3979,6 +4008,9 @@ source "boards/arm/rp23xx/pimoroni-pico-2-plus/Kconfig"
 endif
 if ARCH_BOARD_ARDUINO_DUE
 source "boards/arm/sam34/arduino-due/Kconfig"
+endif
+if ARCH_BOARD_ARDUINO_R4_MINIMA
+source "boards/arm/ra4/arduino-r4-minima/Kconfig"
 endif
 if ARCH_BOARD_ARDUINO_M0
 source "boards/arm/samd2l2/arduino-m0/Kconfig"
@@ -4666,6 +4698,9 @@ source "boards/arm/at32/at32f437-mini/Kconfig"
 endif
 if ARCH_BOARD_CSK6011A_NANO
 source "boards/arm/csk6/csk6011a-nano/Kconfig"
+endif
+if ARCH_BOARD_FRDM_MCXN236
+source "boards/arm/mcx-nxxx/frdm-mcxn236/Kconfig"
 endif
 
 comment "Board-Common Options"

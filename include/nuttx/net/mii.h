@@ -396,6 +396,13 @@
 #define DP83840_PHYADDR_DUPLEX       (1 << 7)
 #define DP83840_PHYADDR_SPEED        (1 << 6)
 
+/* Davicom DM9161  **********************************************************/
+
+/* DM9161  MII ID1/2 register bits */
+
+#define MII_PHYID1_DM9161            0x0181
+#define MII_PHYID2_DM9161            0xB800
+
 /* National Semiconductor DP83848C ******************************************/
 
 /* DP83848C MII ID1/2 register bits */

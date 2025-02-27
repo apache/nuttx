@@ -33,6 +33,8 @@
 #  include "hardware/max32620_30_gpio.h"
 #elif defined(CONFIG_ARCH_FAMILY_MAX32660)
 #  include "hardware/max32660_gpio.h"
+#elif defined(CONFIG_ARCH_FAMILY_MAX32690)
+#  include "hardware/max32690_gpio.h"
 #else
 #  error "Unsupported MAX326XX family"
 #endif

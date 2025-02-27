@@ -30,7 +30,7 @@
 #include <assert.h>
 #include <debug.h>
 
-#include <nuttx/spinlock.h>
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
 #include "arm_internal.h"
@@ -87,12 +87,6 @@ static struct g_portisrs_s g_portaisrs[32];
 
 #ifdef CONFIG_KL_PORTDINTS
 static struct g_portisrs_s g_portdisrs[32];
-#endif
-
-/* Spinlock */
-
-#ifdef HAVE_PORTINTS
-static spinlock_t g_gpioirq_lock = SP_UNLOCKED;
 #endif
 
 /****************************************************************************
@@ -257,7 +251,7 @@ int kl_gpioirqattach(uint32_t pinset, xcpt_t pinisr, void *pinarg)
   /* Get the table associated with this port */
 
   DEBUGASSERT(port < KL_NPORTS);
-  flags = spin_lock_irqsave(&g_gpioirq_lock);
+  flags = enter_critical_section();
   switch (port)
     {
 #ifdef CONFIG_KL_PORTAINTS
@@ -271,7 +265,7 @@ int kl_gpioirqattach(uint32_t pinset, xcpt_t pinisr, void *pinarg)
         break;
 #endif
       default:
-        spin_unlock_irqrestore(&g_gpioirq_lock, flags);
+        leave_critical_section(flags);
         return NULL;
     }
 
@@ -282,7 +276,7 @@ int kl_gpioirqattach(uint32_t pinset, xcpt_t pinisr, void *pinarg)
 
   /* And return the old PIN isr address */
 
-  spin_unlock_irqrestore(&g_gpioirq_lock, flags);
+  leave_critical_section(flags);
   return OK;
 
 #else

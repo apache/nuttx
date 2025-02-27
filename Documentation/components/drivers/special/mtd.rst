@@ -66,6 +66,26 @@ massive data storage. For these reasons, it may not be convenient to use
 the more complex MTD interface but instead use the simple character
 interface provided by the EEPROM drivers.  See drivers/eeprom.
 
+CFI FLASH
+=========
+
+CFI, the full name of which is Common Flash Interface, is a standard proposed
+by JEDEC (Joint Electron Device Engineering Council) in 2003. The role of CFI
+(Common Flash Interface) is to read the information of NOR Flash through a
+unified method.
+
+This standard defines a query interface for Flash that complies with CFI,
+allowing parameterization and platformization of read, write, erase, and other
+interfaces for Flash. It allows programmers to read electrical characteristics
+of Flash-related devices, including memory size, erase speed, special features,
+and more. In other words, it is equivalent to loading the data manual of Flash
+into the physical device of Flash, It can be read and used by relevant personnel
+when needed.
+
+CFI's instruction link:
+https://netwinder.osuosl.org/pub/netwinder/docs/nw/flash/29220403.pdf
+CFI supports intel and amd instruction sets, and currently device drivers are
+already supported
 
 NAND MEMORY
 ===========

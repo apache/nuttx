@@ -40,10 +40,21 @@
 #define MPFS_I2C_CTRL_ENS1_MASK       (1 << 6)
 #define MPFS_I2C_CTRL_STA_MASK        (1 << 5)
 #define MPFS_I2C_CTRL_STO_MASK        (1 << 4)
-#define MPFS_I2C_CTRL_SI_MASK         (1 << 3)
+#define MPFS_I2C_CTRL_SI_MASK         (1 << 3) /* Note 1) */
 #define MPFS_I2C_CTRL_AA_MASK         (1 << 2)
 #define MPFS_I2C_CTRL_CR1_MASK        (1 << 1)
 #define MPFS_I2C_CTRL_CR0_MASK        (1 << 0)
+
+/* 1) As an undocumented feature, clearing the pending interrupt (SI) moves
+ *    the I2C IP block's internal state machine forward. This has to be taken
+ *    into account in the driver's internal logic; you must NOT clear the
+ *    interrupt pending bit "as a precaution" or at the wrong time.
+ *
+ *    This necessitates adding logic to e.g. the interrupt handler, where the
+ *    IP's internal state must be moved forward at precise moments, and the
+ *    fact that the interrupt was already cleared must be remembered later.
+ *    This is why 'clear_irq' is used.
+ */
 
 #define MPFS_I2C_ST_IDLE              0xF8  /* No activity, I2C bus idle */
 #define MPFS_I2C_ST_STOP_SENT         0xE0  /* Stop condition has been sent */

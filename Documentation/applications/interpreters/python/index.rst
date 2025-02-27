@@ -18,10 +18,10 @@ How Does it Work?
 
 1. Python for NuttX target initially the ``rv-virt`` (RISC-V QEMU) board.
 2. Python modules are stored in `pyc <https://docs.python.org/3/glossary.html#term-bytecode>`_ (byte-code format) and are loaded from a ROMFS image at startup.
-3. Environment variables like ``PYTHONHOME`` and ``PYTHON_BASIC_REPL`` need to be set accordingly.
+3. The Python wrapper application on NuttX mounts the ROMFS partition which contains the Python modules and sets the required environment variables (``PYTHONHOME`` and ``PYTHON_BASIC_REPL``) automatically.
 
-Building Python NuttX
-=====================
+Building Python on NuttX
+========================
 
 Use the ``rv-virt:python`` config to build Python for NuttX. Note that the CMake scripts don't work for this configuration. For now, please use the makefile build instead:
 
@@ -66,10 +66,6 @@ Then, run RISC-V QEMU with the following command:
    telnetd [4:100]
 
    NuttShell (NSH) NuttX-10.4.0
-   nsh> python_mount_modules
-   Mounting ROMFS filesystem at target=/usr/local/lib/ with source=/dev/ram1
-   nsh> export PYTHONHOME /usr/local
-   nsh> export PYTHON_BASIC_REPL 1
    nsh> python
    Python 3.13.0 (main, Dec  4 2024, 17:00:42) [GCC 13.2.0] on nuttx
    Type "help", "copyright", "credits" or "license" for more information.

@@ -252,26 +252,6 @@ static void spiflash_suspend_cache(void)
 }
 
 /****************************************************************************
- * Name: spiflash_resume_cache
- *
- * Description:
- *   Resume CPU cache.
- *
- ****************************************************************************/
-
-static void spiflash_resume_cache(void)
-{
-  int cpu = this_cpu();
-#ifdef CONFIG_SMP
-  int other_cpu = cpu ? 0 : 1;
-#endif
-
-  spi_flash_restore_cache();
-
-  g_spi_flash_cache_suspended = false;
-}
-
-/****************************************************************************
  * Name: spiflash_start
  *
  * Description:
@@ -925,6 +905,32 @@ static int spiflash_init_spi_flash_op_block_task(int cpu)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: spiflash_resume_cache
+ *
+ * Description:
+ *   Resume CPU cache.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void spiflash_resume_cache(void)
+{
+  int cpu = this_cpu();
+#ifdef CONFIG_SMP
+  int other_cpu = cpu ? 0 : 1;
+#endif
+
+  spi_flash_restore_cache();
+
+  g_spi_flash_cache_suspended = false;
+}
 
 /****************************************************************************
  * Name: esp32s3_mmap

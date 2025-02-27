@@ -815,6 +815,9 @@ void thermal_zone_device_update(FAR struct thermal_zone_device_s *zdev)
 {
   int trip_high = INT_MAX;
   int trip_low  = INT_MIN;
+  FAR struct thermal_instance_s *pos;
+  unsigned int current;
+  clock_t delay;
   int trip;
   int temp;
   int ret;
@@ -832,7 +835,7 @@ void thermal_zone_device_update(FAR struct thermal_zone_device_s *zdev)
   if (ret < 0)
     {
       therr("Failed to get temperature from zone %s \n", zdev->name);
-      goto unlock;
+      goto delayed_work;
     }
 
   zdev->last_temperature = zdev->temperature;
@@ -893,8 +896,30 @@ void thermal_zone_device_update(FAR struct thermal_zone_device_s *zdev)
         }
     }
 
+delayed_work:
+
+  /* Update worker invoke delay */
+
+  delay = zdev->params->passive_delay;
+  list_for_every_entry(&zdev->instance_list, pos,
+                       struct thermal_instance_s, zdev_node)
+    {
+      if (zdev->params->trips[pos->trip].type == THERMAL_PASSIVE)
+        {
+          continue;
+        }
+
+      pos->cdev->ops->get_state(pos->cdev, &current);
+      if ((current != 0 && current != THERMAL_NO_TARGET) ||
+          (pos->target != 0 && pos->target != THERMAL_NO_TARGET))
+        {
+          delay = zdev->params->polling_delay;
+          break;
+        }
+    }
+
   work_queue(LPWORK, &zdev->monitor, (worker_t)thermal_zone_device_update,
-             zdev, zdev->params->polling_delay);
+             zdev, delay);
 
 unlock:
   nxmutex_unlock(&g_thermal_lock);

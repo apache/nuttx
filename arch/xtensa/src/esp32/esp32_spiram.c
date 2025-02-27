@@ -34,6 +34,7 @@
 #include <sys/param.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/init.h>
+#include <nuttx/nuttx.h>
 
 #include "esp32_spiram.h"
 #include "esp32_spicache.h"
@@ -503,6 +504,123 @@ void IRAM_ATTR esp_spiram_writeback_cache(void)
       i += psram[x + (1024 * 1024 * 2)];
     }
 #endif
+
+  if (cache_was_disabled & (1 << 0))
+    {
+      while (((getreg32(DPORT_PRO_DCACHE_DBUG0_REG) >>
+              (DPORT_PRO_CACHE_STATE_S)) &
+              (DPORT_PRO_CACHE_STATE)) != 1)
+        {
+        };
+
+      regval  = getreg32(DPORT_PRO_CACHE_CTRL_REG);
+      regval &= ~(1 << DPORT_PRO_CACHE_ENABLE_S);
+      putreg32(regval, DPORT_PRO_CACHE_CTRL_REG);
+    }
+
+#ifdef CONFIG_SMP
+  if (cache_was_disabled & (1 << 1))
+    {
+      while (((getreg32(DPORT_APP_DCACHE_DBUG0_REG) >>
+              (DPORT_APP_CACHE_STATE_S)) &
+              (DPORT_APP_CACHE_STATE)) != 1)
+        {
+        };
+
+      regval  = getreg32(DPORT_APP_CACHE_CTRL_REG);
+      regval &= ~(1 << DPORT_APP_CACHE_ENABLE_S);
+      putreg32(regval, DPORT_APP_CACHE_CTRL_REG);
+    }
+#endif
+}
+
+/****************************************************************************
+ * Name: esp_spiram_writeback_range
+ *
+ * Description:
+ *   Writeback the Cache items (also clean the dirty bit) in the region from
+ *   DCache. If the region is not in DCache addr room, nothing will be done.
+ *
+ * Input Parameters:
+ *   addr - writeback region start address
+ *   size - writeback region size
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void esp_spiram_writeback_range(uint32_t addr, uint32_t size)
+{
+  int x;
+  uint32_t regval;
+  uint32_t start_len;
+  uint32_t end_len;
+  uint32_t start = addr;
+  uint32_t end = addr + size;
+  uint32_t dcache_line_size = 32;
+  volatile int i = 0;
+  volatile uint8_t *psram = (volatile uint8_t *)SOC_EXTRAM_DATA_LOW;
+  int cache_was_disabled = 0;
+
+  if (!spiram_inited)
+    {
+      return;
+    }
+
+  /* We need cache enabled for this to work. Re-enable it if needed; make
+   * sure we disable it again on exit as well.
+   */
+
+  regval = getreg32(DPORT_PRO_CACHE_CTRL_REG);
+
+  if ((regval & DPORT_PRO_CACHE_ENABLE) == 0)
+    {
+      cache_was_disabled |= (1 << 0);
+      regval  = getreg32(DPORT_PRO_CACHE_CTRL_REG);
+      regval |= (1 << DPORT_PRO_CACHE_ENABLE_S);
+      putreg32(regval, DPORT_PRO_CACHE_CTRL_REG);
+    }
+
+#ifdef CONFIG_SMP
+  regval = getreg32(DPORT_APP_CACHE_CTRL_REG);
+
+  if ((regval & DPORT_APP_CACHE_ENABLE) == 0)
+    {
+      cache_was_disabled |= (1 << 1);
+      regval  = getreg32(DPORT_APP_CACHE_CTRL_REG);
+      regval |= 1 << DPORT_APP_CACHE_ENABLE_S;
+      putreg32(regval, DPORT_APP_CACHE_CTRL_REG);
+    }
+#endif
+
+  /* the start address is unaligned */
+
+  if (start & (dcache_line_size -1))
+    {
+      addr = ALIGN_UP_MASK(start, dcache_line_size);
+      start_len = addr - start;
+      size = (size < start_len) ? 0 : (size - start_len);
+      i += psram[start_len];
+    }
+
+  /* the end address is unaligned */
+
+  if ((end & (dcache_line_size -1)) && (size != 0))
+    {
+      end = ALIGN_DOWN_MASK(end, dcache_line_size);
+      end_len = addr + size - end;
+      size = (size - end_len);
+      i += psram[end_len];
+    }
+
+  if (size != 0)
+    {
+      for (x = addr; x < addr + size; x += 32)
+        {
+          i += psram[x];
+        }
+    }
 
   if (cache_was_disabled & (1 << 0))
     {

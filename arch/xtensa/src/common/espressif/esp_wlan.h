@@ -29,8 +29,14 @@
 
 #include <nuttx/config.h>
 
+#ifdef CONFIG_ARCH_CHIP_ESP32
+#  include "esp32_wifi_adapter.h"
+#endif
 #ifdef CONFIG_ARCH_CHIP_ESP32S2
 #  include "esp32s2_wifi_adapter.h"
+#endif
+#ifdef CONFIG_ARCH_CHIP_ESP32S3
+#  include "esp32s3_wifi_adapter.h"
 #endif
 
 #ifndef __ASSEMBLY__

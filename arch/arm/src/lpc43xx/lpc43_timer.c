@@ -36,7 +36,6 @@
 #include <debug.h>
 
 #include <nuttx/irq.h>
-#include <nuttx/spinlock.h>
 #include <nuttx/timers/timer.h>
 #include <arch/board/board.h>
 
@@ -79,15 +78,14 @@ struct lpc43_lowerhalf_s
 
   /* Private data */
 
-  uint32_t   base;       /* Base address of the timer */
-  tccb_t     callback;   /* Current user interrupt callback */
-  void      *arg;        /* Argument passed to the callback function */
-  uint32_t   timeout;    /* The current timeout value (us) */
-  uint32_t   adjustment; /* time lost due to clock resolution truncation (us) */
-  uint32_t   clkticks;   /* actual clock ticks for current interval */
-  bool       started;    /* The timer has been started */
-  uint16_t   tmrid;      /* Timer id */
-  spinlock_t lock;       /* Spinlock */
+  uint32_t base;       /* Base address of the timer */
+  tccb_t   callback;   /* Current user interrupt callback */
+  void     *arg;       /* Argument passed to the callback function */
+  uint32_t timeout;    /* The current timeout value (us) */
+  uint32_t adjustment; /* time lost due to clock resolution truncation (us) */
+  uint32_t clkticks;   /* actual clock ticks for current interval */
+  bool     started;    /* The timer has been started */
+  uint16_t tmrid;      /* Timer id */
 };
 
 /****************************************************************************
@@ -634,7 +632,7 @@ static void lpc43_setcallback(struct timer_lowerhalf_s *lower,
   struct lpc43_lowerhalf_s *priv = (struct lpc43_lowerhalf_s *)lower;
   irqstate_t flags;
 
-  flags = spin_lock_irqsave(&priv->lock);
+  flags = enter_critical_section();
 
   DEBUGASSERT(priv);
   tmrinfo("Entry: callback=%p\n", callback);
@@ -644,7 +642,7 @@ static void lpc43_setcallback(struct timer_lowerhalf_s *lower,
   priv->callback = callback;
   priv->arg      = arg;
 
-  spin_unlock_irqrestore(&priv->lock, flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -751,7 +749,6 @@ void lpc43_tmrinitialize(const char *devpath, int irq)
     }
 
   priv->ops = &g_tmrops;
-  spin_lock_init(&priv->lock);
 
   irq_attach(irq, lpc43_interrupt, NULL);
 

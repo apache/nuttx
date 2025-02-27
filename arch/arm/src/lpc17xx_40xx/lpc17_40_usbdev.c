@@ -42,7 +42,6 @@
 #include <nuttx/usb/usbdev_trace.h>
 
 #include <nuttx/irq.h>
-#include <nuttx/spinlock.h>
 #include <arch/board/board.h>
 
 #include "arm_internal.h"
@@ -354,10 +353,6 @@ struct lpc17_40_usbdev_s
   /* The endpoint list */
 
   struct lpc17_40_ep_s     eplist[LPC17_40_NPHYSENDPOINTS];
-
-  /* Spinlock */
-
-  spinlock_t               lock;
 };
 
 /****************************************************************************
@@ -656,12 +651,16 @@ static void lpc17_40_putreg(uint32_t val, uint32_t addr)
  *
  ****************************************************************************/
 
-static uint32_t lpc17_40_usbcmd_nolock(uint16_t cmd, uint8_t data)
+static uint32_t lpc17_40_usbcmd(uint16_t cmd, uint8_t data)
 {
+  irqstate_t flags;
   uint32_t cmd32;
   uint32_t data32;
   uint32_t tmp = 0;
 
+  /* Disable interrupt and clear CDFULL and CCEMPTY interrupt status */
+
+  flags = enter_critical_section();
   lpc17_40_putreg(USBDEV_INT_CDFULL | USBDEV_INT_CCEMPTY,
                   LPC17_40_USBDEV_INTCLR);
 
@@ -798,20 +797,9 @@ static uint32_t lpc17_40_usbcmd_nolock(uint16_t cmd, uint8_t data)
       break;
     }
 
-  return tmp;
-}
+  /* Restore the interrupt flags */
 
-static uint32_t lpc17_40_usbcmd(uint16_t cmd, uint8_t data)
-{
-  irqstate_t flags;
-  uint32_t tmp;
-
-  /* Disable interrupt and clear CDFULL and CCEMPTY interrupt status */
-
-  flags = spin_lock_irqsave(&g_usbdev.lock);
-  tmp = lpc17_40_usbcmd_nolock(cmd, data);
-  spin_unlock_irqrestore(&g_usbdev.lock, flags);
-
+  leave_critical_section(flags);
   return tmp;
 }
 
@@ -1049,15 +1037,18 @@ static inline void lpc17_40_abortrequest(struct lpc17_40_ep_s *privep,
  *
  ****************************************************************************/
 
-static void lpc17_40_reqcomplete_nolock(struct lpc17_40_ep_s *privep,
-                                        int16_t result)
+static void lpc17_40_reqcomplete(struct lpc17_40_ep_s *privep,
+                                 int16_t result)
 {
   struct lpc17_40_req_s *privreq;
   int stalled = privep->stalled;
+  irqstate_t flags;
 
   /* Remove the completed request at the head of the endpoint request list */
 
+  flags = enter_critical_section();
   privreq = lpc17_40_rqdequeue(privep);
+  leave_critical_section(flags);
 
   if (privreq)
     {
@@ -1085,16 +1076,6 @@ static void lpc17_40_reqcomplete_nolock(struct lpc17_40_ep_s *privep,
     }
 }
 
-static void lpc17_40_reqcomplete(struct lpc17_40_ep_s *privep,
-                                 int16_t result)
-{
-  irqstate_t flags = spin_lock_irqsave(&privep->dev->lock);
-
-  lpc17_40_reqcomplete_nolock(privep, result);
-
-  spin_unlock_irqrestore(&privep->dev->lock, flags);
-}
-
 /****************************************************************************
  * Name: lpc17_40_wrrequest
  *
@@ -1103,7 +1084,7 @@ static void lpc17_40_reqcomplete(struct lpc17_40_ep_s *privep,
  *
  ****************************************************************************/
 
-static int lpc17_40_wrrequest_nolock(struct lpc17_40_ep_s *privep)
+static int lpc17_40_wrrequest(struct lpc17_40_ep_s *privep)
 {
   struct lpc17_40_req_s *privreq;
   uint8_t *buf;
@@ -1138,7 +1119,7 @@ static int lpc17_40_wrrequest_nolock(struct lpc17_40_ep_s *privep)
 
       /* In any event, the request is complete */
 
-      lpc17_40_reqcomplete_nolock(privep, OK);
+      lpc17_40_reqcomplete(privep, OK);
       return OK;
     }
 
@@ -1200,21 +1181,10 @@ static int lpc17_40_wrrequest_nolock(struct lpc17_40_ep_s *privep)
     {
       usbtrace(TRACE_COMPLETE(privep->epphy), privreq->req.xfrd);
       privep->txnullpkt = 0;
-      lpc17_40_reqcomplete_nolock(privep, OK);
+      lpc17_40_reqcomplete(privep, OK);
     }
 
   return OK;
-}
-
-static int lpc17_40_wrrequest(struct lpc17_40_ep_s *privep)
-{
-  int ret;
-
-  irqstate_t flags = spin_lock_irqsave(&privep->dev->lock);
-  ret = lpc17_40_wrrequest_nolock(privep);
-  spin_unlock_irqrestore(&privep->dev->lock, flags);
-
-  return ret;
 }
 
 /****************************************************************************
@@ -1293,7 +1263,7 @@ static void lpc17_40_cancelrequests(struct lpc17_40_ep_s *privep)
     {
       usbtrace(TRACE_COMPLETE(privep->epphy),
                (lpc17_40_rqpeek(privep))->req.xfrd);
-      lpc17_40_reqcomplete_nolock(privep, -ESHUTDOWN);
+      lpc17_40_reqcomplete(privep, -ESHUTDOWN);
     }
 }
 
@@ -2757,7 +2727,7 @@ static int lpc17_40_epdisable(struct usbdev_ep_s *ep)
 
   /* Cancel any ongoing activity */
 
-  flags = spin_lock_irqsave(&privep->dev->lock);
+  flags = enter_critical_section();
   lpc17_40_cancelrequests(privep);
 
   /* Disable endpoint and interrupt */
@@ -2772,7 +2742,7 @@ static int lpc17_40_epdisable(struct usbdev_ep_s *ep)
   regval &= ~mask;
   lpc17_40_putreg(regval, LPC17_40_USBDEV_EPINTEN);
 
-  spin_unlock_irqrestore(&privep->dev->lock, flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -2961,7 +2931,7 @@ static int lpc17_40_epsubmit(struct usbdev_ep_s *ep,
 
   req->result = -EINPROGRESS;
   req->xfrd   = 0;
-  flags       = spin_lock_irqsave(&priv->lock);
+  flags       = enter_critical_section();
 
   /* If we are stalled, then drop all requests on the floor */
 
@@ -3007,7 +2977,7 @@ static int lpc17_40_epsubmit(struct usbdev_ep_s *ep,
         }
     }
 
-  spin_unlock_irqrestore(&priv->lock, flags);
+  leave_critical_section(flags);
   return ret;
 }
 
@@ -3035,9 +3005,9 @@ static int lpc17_40_epcancel(struct usbdev_ep_s *ep,
 
   usbtrace(TRACE_EPCANCEL, privep->epphy);
 
-  flags = spin_lock_irqsave(&privep->dev->lock);
+  flags = enter_critical_section();
   lpc17_40_cancelrequests(privep);
-  spin_unlock_irqrestore(&privep->dev->lock, flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -3056,19 +3026,19 @@ static int lpc17_40_epstall(struct usbdev_ep_s *ep, bool resume)
 
   /* STALL or RESUME the endpoint */
 
-  flags = spin_lock_irqsave(&privep->dev->lock);
+  flags = enter_critical_section();
   usbtrace(resume ? TRACE_EPRESUME : TRACE_EPSTALL, privep->epphy);
-  lpc17_40_usbcmd_nolock(CMD_USBDEV_EPSETSTATUS | privep->epphy,
-                         (resume ? 0 : CMD_SETSTAUS_ST));
+  lpc17_40_usbcmd(CMD_USBDEV_EPSETSTATUS | privep->epphy,
+                 (resume ? 0 : CMD_SETSTAUS_ST));
 
   /* If the endpoint of was resumed, then restart any queue write requests */
 
   if (resume)
     {
-      lpc17_40_wrrequest_nolock(privep);
+      lpc17_40_wrrequest(privep);
     }
 
-  spin_unlock_irqrestore(&privep->dev->lock, flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -3175,7 +3145,7 @@ static struct usbdev_ep_s *lpc17_40_allocep(struct usbdev_s *dev,
     {
       /* Yes.. now see if any of the request endpoints are available */
 
-      flags = spin_lock_irqsave(&priv->lock);
+      flags = enter_critical_section();
       epset &= priv->epavail;
       if (epset)
         {
@@ -3191,7 +3161,7 @@ static struct usbdev_ep_s *lpc17_40_allocep(struct usbdev_s *dev,
                   /* Mark the IN/OUT endpoint no longer available */
 
                   priv->epavail &= ~(3 << (epndx & ~1));
-                  spin_unlock_irqrestore(&priv->lock, flags);
+                  leave_critical_section(flags);
 
                   /* And return the pointer to the standard endpoint
                    * structure
@@ -3204,7 +3174,7 @@ static struct usbdev_ep_s *lpc17_40_allocep(struct usbdev_s *dev,
           /* Shouldn't get here */
         }
 
-      spin_unlock_irqrestore(&priv->lock, flags);
+      leave_critical_section(flags);
     }
 
   usbtrace(TRACE_DEVERROR(LPC17_40_TRACEERR_NOEP), (uint16_t)eplog);
@@ -3232,9 +3202,9 @@ static void lpc17_40_freeep(struct usbdev_s *dev,
     {
       /* Mark the IN/OUT endpoint as available */
 
-      flags = spin_lock_irqsave(&priv->lock);
+      flags = enter_critical_section();
       priv->epavail |= (3 << (privep->epphy & ~1));
-      spin_unlock_irqrestore(&priv->lock, flags);
+      leave_critical_section(flags);
     }
 }
 
@@ -3273,20 +3243,19 @@ static int lpc17_40_getframe(struct usbdev_s *dev)
 
 static int lpc17_40_wakeup(struct usbdev_s *dev)
 {
-  struct lpc17_40_usbdev_s *priv = (struct lpc17_40_usbdev_s *)dev;
   uint8_t arg = CMD_STATUS_SUSPEND;
   irqstate_t flags;
 
   usbtrace(TRACE_DEVWAKEUP, (uint16_t)g_usbdev.devstatus);
 
-  flags = spin_lock_irqsave(&priv->lock);
+  flags = enter_critical_section();
   if (DEVSTATUS_CONNECT(g_usbdev.devstatus))
     {
       arg |= CMD_STATUS_CONNECT;
     }
 
-  lpc17_40_usbcmd_nolock(CMD_USBDEV_SETSTATUS, arg);
-  spin_unlock_irqrestore(&priv->lock, flags);
+  lpc17_40_usbcmd(CMD_USBDEV_SETSTATUS, arg);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -3323,20 +3292,6 @@ static int lpc17_40_selfpowered(struct usbdev_s *dev, bool selfpowered)
  *   Software-controlled connect to/disconnect from USB host
  *
  ****************************************************************************/
-
-static int lpc17_40_pullup_nolock(struct usbdev_s *dev, bool enable)
-{
-  usbtrace(TRACE_DEVPULLUP, (uint16_t)enable);
-
-  /* The CMD_STATUS_CONNECT bit in the CMD_USBDEV_SETSTATUS command
-   * controls the LPC17xx/LPC40xx SoftConnect_N output pin that is used for
-   * SoftConnect.
-   */
-
-  lpc17_40_usbcmd_nolock(CMD_USBDEV_SETSTATUS,
-                         (enable ? CMD_STATUS_CONNECT : 0));
-  return OK;
-}
 
 static int lpc17_40_pullup(struct usbdev_s *dev, bool enable)
 {
@@ -3376,13 +3331,9 @@ void arm_usbinitialize(void)
 
   usbtrace(TRACE_DEVINIT, 0);
 
-  /* Initialize driver lock */
-
-  spin_lock_init(&priv->lock);
-
   /* Step 1: Enable power by setting PCUSB in the PCONP register */
 
-  flags   = spin_lock_irqsave(&priv->lock);
+  flags   = enter_critical_section();
   regval  = lpc17_40_getreg(LPC17_40_SYSCON_PCONP);
   regval |= SYSCON_PCONP_PCUSB;
   lpc17_40_putreg(regval, LPC17_40_SYSCON_PCONP);
@@ -3423,7 +3374,7 @@ void arm_usbinitialize(void)
   regval = lpc17_40_getreg(LPC17_40_SYSCON_USBINTST);
   regval &= ~SYSCON_USBINTST_ENINTS;
   lpc17_40_putreg(regval, LPC17_40_SYSCON_USBINTST);
-  spin_unlock_irqrestore(&priv->lock, flags);
+  leave_critical_section(flags);
 
   /* Initialize the device state structure */
 
@@ -3509,11 +3460,11 @@ void arm_usbinitialize(void)
    * driver
    */
 
-  flags = spin_lock_irqsave(&priv->lock);
+  flags = enter_critical_section();
   regval = lpc17_40_getreg(LPC17_40_SYSCON_USBINTST);
   regval |= SYSCON_USBINTST_ENINTS;
   lpc17_40_putreg(regval, LPC17_40_SYSCON_USBINTST);
-  spin_unlock_irqrestore(&priv->lock, flags);
+  leave_critical_section(flags);
 
   /* Disconnect device */
 
@@ -3557,10 +3508,10 @@ void arm_usbuninitialize(void)
 
   /* Disconnect device */
 
-  flags = spin_lock_irqsave(&priv->lock);
-  lpc17_40_pullup_nolock(&priv->usbdev, false);
+  flags = enter_critical_section();
+  lpc17_40_pullup(&priv->usbdev, false);
   priv->usbdev.speed = USB_SPEED_UNKNOWN;
-  lpc17_40_usbcmd_nolock(CMD_USBDEV_CONFIG, 0);
+  lpc17_40_usbcmd(CMD_USBDEV_CONFIG, 0);
 
   /* Disable and detach IRQs */
 
@@ -3572,7 +3523,7 @@ void arm_usbuninitialize(void)
   regval = lpc17_40_getreg(LPC17_40_SYSCON_PCONP);
   regval &= ~SYSCON_PCONP_PCUSB;
   lpc17_40_putreg(regval, LPC17_40_SYSCON_PCONP);
-  spin_unlock_irqrestore(&priv->lock, flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************

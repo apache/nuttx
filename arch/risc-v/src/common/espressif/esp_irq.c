@@ -32,7 +32,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include <nuttx/spinlock.h>
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
 #include "riscv_internal.h"
@@ -144,10 +144,6 @@ static bool non_iram_int_disabled_flag[CONFIG_ESPRESSIF_NUM_CPUS];
 
 static uint64_t g_iram_count[NR_IRQS];
 #endif
-
-/* Spinlock */
-
-static spinlock_t g_irq_lock = SP_UNLOCKED;
 
 /****************************************************************************
  * Private Functions
@@ -311,11 +307,11 @@ static void esp_cpuint_initialize(void)
 
 IRAM_ATTR void esp_irq_iram_interrupt_record(int irq)
 {
-  irqstate_t flags = spin_lock_irqsave(&g_irq_lock);
+  irqstate_t flags = enter_critical_section();
 
   g_iram_count[irq]++;
 
-  spin_unlock_irqrestore(&g_irq_lock, flags);
+  leave_critical_section(flags);
 }
 #endif
 
@@ -406,12 +402,12 @@ void up_enable_irq(int irq)
 
   DEBUGASSERT(cpuint >= 0 && cpuint < ESP_NCPUINTS);
 
-  irqstate_t flags = spin_lock_irqsave(&g_irq_lock);
+  irqstate_t irqstate = enter_critical_section();
 
   CPUINT_ENABLE(g_cpuint_map[cpuint]);
   esprv_intc_int_enable(BIT(cpuint));
 
-  spin_unlock_irqrestore(&g_irq_lock, flags);
+  leave_critical_section(irqstate);
 }
 
 /****************************************************************************
@@ -438,12 +434,12 @@ void up_disable_irq(int irq)
 
   DEBUGASSERT(cpuint >= 0 && cpuint < ESP_NCPUINTS);
 
-  irqstate_t flags = spin_lock_irqsave(&g_irq_lock);
+  irqstate_t irqstate = enter_critical_section();
 
   CPUINT_DISABLE(g_cpuint_map[cpuint]);
   esprv_intc_int_disable(BIT(cpuint));
 
-  spin_unlock_irqrestore(&g_irq_lock, flags);
+  leave_critical_section(irqstate);
 }
 
 /****************************************************************************
@@ -512,7 +508,7 @@ void esp_route_intr(int source, int cpuint, irq_priority_t priority,
 
 int esp_setup_irq(int source, irq_priority_t priority, int type)
 {
-  irqstate_t flags;
+  irqstate_t irqstate;
   int irq;
   int cpuint;
 
@@ -520,7 +516,7 @@ int esp_setup_irq(int source, irq_priority_t priority, int type)
 
   DEBUGASSERT(source >= 0 && source < ESP_NSOURCES);
 
-  flags = spin_lock_irqsave(&g_irq_lock);
+  irqstate = enter_critical_section();
 
   /* Setting up an IRQ includes the following steps:
    *    1. Allocate a CPU interrupt.
@@ -550,7 +546,7 @@ int esp_setup_irq(int source, irq_priority_t priority, int type)
       esp_irq_unset_iram_isr(irq);
     }
 
-  spin_unlock_irqrestore(&g_irq_lock, flags);
+  leave_critical_section(irqstate);
 
   return cpuint;
 }
@@ -576,7 +572,7 @@ int esp_setup_irq(int source, irq_priority_t priority, int type)
 
 void esp_teardown_irq(int source, int cpuint)
 {
-  irqstate_t flags = spin_lock_irqsave(&g_irq_lock);
+  irqstate_t irqstate = enter_critical_section();
 
   /* Tearing down an IRQ includes the following steps:
    *   1. Free the previously allocated CPU interrupt.
@@ -590,7 +586,7 @@ void esp_teardown_irq(int source, int cpuint)
 
   esp_rom_route_intr_matrix(PRO_CPU_NUM, source, NO_CPUINT);
 
-  spin_unlock_irqrestore(&g_irq_lock, flags);
+  leave_critical_section(irqstate);
 }
 
 /****************************************************************************
@@ -697,11 +693,11 @@ irqstate_t up_irq_enable(void)
 void esp_intr_noniram_disable(void)
 {
   uint32_t oldint;
-  irqstate_t flags;
+  irqstate_t irqstate;
   uint32_t cpu;
   uint32_t non_iram_ints;
 
-  flags = spin_lock_irqsave(&g_irq_lock);
+  irqstate = enter_critical_section();
   cpu = esp_cpu_get_core_id();
   non_iram_ints = non_iram_int_mask[cpu];
 
@@ -717,7 +713,7 @@ void esp_intr_noniram_disable(void)
   /* Save disabled ints */
 
   non_iram_int_disabled[cpu] = oldint & non_iram_ints;
-  spin_unlock_irqrestore(&g_irq_lock, flags);
+  leave_critical_section(irqstate);
 }
 
 /****************************************************************************
@@ -736,11 +732,11 @@ void esp_intr_noniram_disable(void)
 
 void esp_intr_noniram_enable(void)
 {
-  irqstate_t flags;
+  irqstate_t irqstate;
   uint32_t cpu;
   int non_iram_ints;
 
-  flags = spin_lock_irqsave(&g_irq_lock);
+  irqstate = enter_critical_section();
   cpu = esp_cpu_get_core_id();
   non_iram_ints = non_iram_int_disabled[cpu];
 
@@ -751,7 +747,7 @@ void esp_intr_noniram_enable(void)
 
   non_iram_int_disabled_flag[cpu] = false;
   esp_cpu_intr_enable(non_iram_ints);
-  spin_unlock_irqrestore(&g_irq_lock, flags);
+  leave_critical_section(irqstate);
 }
 
 /****************************************************************************
@@ -899,10 +895,10 @@ int esp_irq_unset_iram_isr(int irq)
 #ifdef CONFIG_ESPRESSIF_IRAM_ISR_DEBUG
 void esp_get_iram_interrupt_records(uint64_t *irq_count)
 {
-  irqstate_t flags = spin_lock_irqsave(&g_irq_lock);
+  irqstate_t flags = enter_critical_section();
 
   memcpy(irq_count, &g_iram_count, sizeof(uint64_t) * NR_IRQS);
 
-  spin_unlock_irqrestore(&g_irq_lock, flags);
+  leave_critical_section(flags);
 }
 #endif

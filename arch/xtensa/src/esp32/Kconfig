@@ -207,15 +207,6 @@ config ESP32_RUN_IRAM
 		This loads all of NuttX inside IRAM.  Used to test somewhat small
 		images that can fit entirely in IRAM.
 
-config ESP32_EXCEPTION_ENABLE_CACHE
-	bool
-	default y
-	depends on ESP32_SPIFLASH
-	---help---
-		When an exception triggers, the panic function reenables the SPI Flash
-		cache to allow functions that are located in SPI Flash to run.
-		Disable this option to save IRAM space.
-
 menu "ESP32 Peripheral Selection"
 
 source "arch/xtensa/src/common/espressif/Kconfig"
@@ -734,44 +725,165 @@ config ESP32_UART2
 	select UART2_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
-config ESP32_WIRELESS
-	bool
-	default n
-	select NET
-	select ARCH_PHY_INTERRUPT
-	select ESP32_RNG
-	select ESP32_RT_TIMER
-	select ESP32_TIMER0
-	---help---
-		Enable Wireless support
-
-config ESP32_WIFI
-	bool "Wi-Fi"
-	default n
+config ESP32_ESPNOW_PKTRADIO
+	bool "ESPNOW packet radio support"
 	select ESP32_WIRELESS
-	---help---
-		Enable Wi-Fi support
-
-config ESP32_BLE
-	bool "BLE"
+	depends on WIRELESS_PKTRADIO
 	default n
-	select ESP32_WIRELESS
-	select BLUETOOTH_TXCMD_PINNED_TO_CORE if SMP
-	select BLUETOOTH_CNTRL_HOST_FLOW_DISABLE
 	---help---
-		Enable BLE support
+		Enable using espnow for packet radio
+
+if ESP32_ESPNOW_PKTRADIO
+
+config ESP32_ESPNOW_PKTRADIO_FRAMELEN
+	int "ESPNOW frame length"
+	range 127 250
+	default 196
+	---help---
+		Frame size used for espnow transmitions. Ensure that this is
+		set equal for all nodes.
+
+config ESP32_ESPNOW_PKTRADIO_PANID
+	hex "ESPNOW node panid"
+	range 0x0 0xffff
+	default 0x0
+	---help---
+		PANID for espnow packet radio
+
+if PKTRADIO_ADDRLEN = 1
+
+config ESP32_ESPNOW_PKTRADIO_NODE_ADDR_0
+	hex "ESPNOW node address"
+	range 0x0 0xff
+	default 0x0
+	---help---
+		Node address for espnow packet radio
+
+endif #PKTRADIO_ADDRLEN = 1
+
+if PKTRADIO_ADDRLEN > 1
+
+config ESP32_ESPNOW_PKTRADIO_NODE_ADDR_0
+	hex "ESPNOW node address[0]"
+	range 0x0 0xff
+	default 0x0
+	---help---
+		Node address for espnow packet radio
+
+config ESP32_ESPNOW_PKTRADIO_NODE_ADDR_1
+	hex "ESPNOW node address[1]"
+	range 0x0 0xff
+	default 0x0
+	---help---
+		Node address for espnow packet radio
+
+if PKTRADIO_ADDRLEN > 2
+
+config ESP32_ESPNOW_PKTRADIO_NODE_ADDR_2
+	hex "ESPNOW node address[2]"
+	range 0x0 0xff
+	default 0x0
+	---help---
+		Node address for espnow packet radio
+
+config ESP32_ESPNOW_PKTRADIO_NODE_ADDR_3
+	hex "ESPNOW node address[3]"
+	range 0x0 0xff
+	default 0x0
+	---help---
+		Node address for espnow packet radio
+
+config ESP32_ESPNOW_PKTRADIO_NODE_ADDR_4
+	hex "ESPNOW node address[4]"
+	range 0x0 0xff
+	default 0x0
+	---help---
+		Node address for espnow packet radio
+
+config ESP32_ESPNOW_PKTRADIO_NODE_ADDR_5
+	hex "ESPNOW node address[5]"
+	range 0x0 0xff
+	default 0x0
+	---help---
+		Node address for espnow packet radio
+
+config ESP32_ESPNOW_PKTRADIO_NODE_ADDR_6
+	hex "ESPNOW node address[6]"
+	range 0x0 0xff
+	default 0x0
+	---help---
+		Node address for espnow packet radio
+
+config ESP32_ESPNOW_PKTRADIO_NODE_ADDR_7
+	hex "ESPNOW node address[7]"
+	range 0x0 0xff
+	default 0x0
+	---help---
+		Node address for espnow packet radio
+
+endif #PKTRADIO_ADDRLEN > 2
+
+endif #PKTRADIO_ADDRLEN > 1
+
+endif #ESP32_ESPNOW_PKTRADIO
 
 config ESP32_I2C0
 	bool "I2C 0"
 	default n
 	select ESP32_I2C
-	select ESPRESSIF_I2C_PERIPH
 
 config ESP32_I2C1
 	bool "I2C 1"
 	default n
 	select ESP32_I2C
-	select ESPRESSIF_I2C_PERIPH
+
+	config ESP32_I2C_PERIPH_MASTER_MODE
+	bool
+	depends on (ESP32_I2C0_MASTER_MODE || ESP32_I2C1_MASTER_MODE)
+	default n
+	select ESPRESSIF_I2C_PERIPH_MASTER_MODE
+
+config ESP32_I2C_PERIPH_SLAVE_MODE
+	bool
+	depends on (ESP32_I2C0_SLAVE_MODE || ESP32_I2C1_SLAVE_MODE)
+	default n
+	select ESPRESSIF_I2C_PERIPH_SLAVE_MODE
+	select ESPRESSIF_I2C0_SLAVE if ESP32_I2C0_SLAVE_MODE
+	select ESPRESSIF_I2C1_SLAVE if ESP32_I2C1_SLAVE_MODE
+
+choice ESP32_I2C0_MODE
+	prompt "I2C0 Mode"
+	depends on ESP32_I2C0
+	default ESP32_I2C0_MASTER_MODE
+
+config ESP32_I2C0_MASTER_MODE
+	bool "I2C0 Master Mode"
+	select ESP32_I2C_PERIPH_MASTER_MODE
+
+config ESP32_I2C0_SLAVE_MODE
+	bool "I2C0 Slave Mode"
+	select I2C_SLAVE
+	select I2C_SLAVE_DRIVER
+	select ESP32_I2C_PERIPH_SLAVE_MODE
+
+endchoice # ESP32_I2C0_MODE
+
+choice ESP32_I2C1_MODE
+	prompt "I2C1 Mode"
+	depends on ESP32_I2C1
+	default ESP32_I2C1_MASTER_MODE
+
+config ESP32_I2C1_MASTER_MODE
+	bool "I2C1 Master Mode"
+	select ESP32_I2C_PERIPH_MASTER_MODE
+
+config ESP32_I2C1_SLAVE_MODE
+	bool "I2C1 Slave Mode"
+	select I2C_SLAVE
+	select I2C_SLAVE_DRIVER
+	select ESP32_I2C_PERIPH_SLAVE_MODE
+
+endchoice # ESP32_I2C1_MODE
 
 config ESP32_TWAI0
 	bool "TWAI (CAN) 0"
@@ -792,13 +904,6 @@ config ESP32_PID
 
 endmenu # ESP32 Peripheral Selection
 
-config ESP32_WIFI_BT_COEXIST
-	bool "Wi-Fi and BT coexist"
-	default y if ESP32_WIFI && ESP32_BLE
-	default n
-	depends on ESP32_WIFI && ESP32_BLE
-	select ESP32_WIFI_STA_DISCONNECT_PM
-
 menu "Interrupt Configuration"
 
 config ESP32_IRAM_ISR_DEBUG
@@ -816,8 +921,8 @@ menu "Memory Configuration"
 
 config ESP32_BT_RESERVE_DRAM
 	int "Reserved BT DRAM"
-	default 0 if !ESP32_BLE
-	default 65536 if ESP32_BLE
+	default 0 if !ESPRESSIF_BLE
+	default 65536 if ESPRESSIF_BLE
 
 config ESP32_TRACEMEM_RESERVE_DRAM
 	int "Reserved trace memory DRAM"
@@ -1143,12 +1248,12 @@ endif # ESP32_I2C1
 config ESP32_I2CTIMEOSEC
 	int "Timeout seconds"
 	default 0
-	depends on ESPRESSIF_I2C_PERIPH
+	depends on ESP32_I2C_PERIPH_MASTER_MODE
 
 config ESP32_I2CTIMEOMS
 	int "Timeout milliseconds"
 	default 500
-	depends on ESPRESSIF_I2C_PERIPH
+	depends on ESP32_I2C_PERIPH_MASTER_MODE
 
 endmenu # I2C configuration
 
@@ -2074,142 +2179,10 @@ config ESP32_ETH_PHY_ADDR
 
 endmenu # ESP32_EMAC
 
-menu "Wi-Fi Configuration"
-	depends on ESP32_WIFI
-
-choice
-	prompt "ESP32 Wi-Fi mode"
-	default ESP32_WIFI_STATION
-
-config ESP32_WIFI_STATION
-	bool "Station mode"
-
-config ESP32_WIFI_SOFTAP
-	bool "SoftAP mode"
-
-config ESP32_WIFI_STATION_SOFTAP
-	bool "Station + SoftAP"
-
-endchoice # ESP32 Wi-Fi mode
-
-config ESP32_WIFI_STATIC_RXBUF_NUM
-	int "Wi-Fi static RX buffer number"
-	default 10
-
-config ESP32_WIFI_DYNAMIC_RXBUF_NUM
-	int "Wi-Fi dynamic RX buffer number"
-	default 32
-
-config ESP32_WIFI_DYNAMIC_TXBUF_NUM
-	int "Wi-Fi dynamic TX buffer number"
-	default 32
-
-config ESP32_WIFI_TX_AMPDU
-	bool "Wi-Fi TX AMPDU"
-	default y
-
-config ESP32_WIFI_RX_AMPDU
-	bool "Wi-Fi RX AMPDU"
-	default y
-
-config ESP32_WIFI_RXBA_AMPDU_WZ
-	int "Wi-Fi RX BA AMPDU windown size"
-	default 6
-
-config ESP32_WLAN_PKTBUF_NUM
-	int "WLAN netcard packet buffer number per netcard"
-	default 16
-
-config ESP32_WIFI_CONNECT_TIMEOUT
-	int "Connect timeout by second"
-	default 10
-	---help---
-		Max waiting time of connecting to AP.
-
-config ESP32_WIFI_SCAN_RESULT_SIZE
-	int "Scan result buffer"
-	default 4096
-	---help---
-		Maximum scan result buffer size.
-
-config ESP32_WIFI_STA_DISCONNECT_PM
-	bool "Power Management for station when disconnected"
-	default n
-	---help---
-		Select this option to enable power management for station when disconnected.
-		Chip will do modem-sleep when RF module is not in use anymore.
-
-config EXAMPLE_WIFI_LISTEN_INTERVAL
-	int "Wi-Fi listen interval"
-	default 3
-	---help---
-		Interval for station to listen to beacon from AP. The unit of listen interval is one beacon interval.
-		For example, if beacon interval is 100 ms and listen interval is 3, the interval for station to listen
-		to beacon is 300 ms.
-
-choice EXAMPLE_POWER_SAVE_MODE
-	prompt "Power save mode"
-	default EXAMPLE_POWER_SAVE_NONE
-	---help---
-		Power save mode for the esp32 to use. Modem sleep mode includes minimum and maximum power save modes.
-		In minimum power save mode, station wakes up every DTIM to receive beacon. Broadcast data will not be
-		lost because it is transmitted after DTIM. However, it can not save much more power if DTIM is short
-		for DTIM is determined by AP.
-		In maximum power save mode, station wakes up every listen interval to receive beacon. Broadcast data
-		may be lost because station may be in sleep state at DTIM time. If listen interval is longer, more power
-		is saved but broadcast data is more easy to lose.
-
-config EXAMPLE_POWER_SAVE_NONE
-	bool "none"
-
-config EXAMPLE_POWER_SAVE_MIN_MODEM
-	bool "minimum modem"
-
-config EXAMPLE_POWER_SAVE_MAX_MODEM
-	bool "maximum modem"
-
-endchoice # EXAMPLE_POWER_SAVE_MODE
-
-config ESP32_WIFI_WLAN_BUFFER_OPTIMIZATION
-	bool "Enable optimization of WLAN driver buffer"
-	default n
-	---help---
-		Enable optimization of WLAN memory
-
-endmenu # ESP32_WIFI
-
-menu "BLE Configuration"
-	depends on ESP32_BLE
-
-config ESP32_BLE_PKTBUF_NUM
-	int "BLE netcard packet buffer number per netcard"
-	default 16
-
-config ESP32_BLE_TASK_STACK_SIZE
-	int "Controller task stack size"
-	default 4096
-
-config ESP32_BLE_TASK_PRIORITY
-	int "Controller task priority"
-	default 110
-
-config ESP32_BLE_INTERRUPT_SAVE_STATUS
-	int "Number of interrupt save status"
-	default 3
-	---help---
-		Number of interrupt save status variables to keep track. Increase it if any related bug is found.
-
-config ESP32_BLE_MAX_CONN
-	int "Maximum BLE simultaneous connections"
-	range 1 3
-	default 1
-
-endmenu # BLE Configuration
-
 choice ESP32_UNIVERSAL_MAC_ADDRESSES
 	bool "Number of universally administered (by IEEE) MAC addresses"
 	default ESP32_UNIVERSAL_MAC_ADDRESSES_FOUR
-	depends on ESP32_WIFI || ESP32_BLE
+	depends on ESPRESSIF_WIFI || ESPRESSIF_BLE
 	---help---
 		Configure the number of universally administered (by IEEE) MAC addresses.
 		During initialization, MAC addresses for each network interface are generated or derived from a

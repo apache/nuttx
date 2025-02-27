@@ -584,15 +584,17 @@ static void rp2040_abortrequest(struct rp2040_ep_s *privep,
  *
  ****************************************************************************/
 
-static void rp2040_reqcomplete_nolock(struct rp2040_ep_s *privep,
-                                      int16_t result)
+static void rp2040_reqcomplete(struct rp2040_ep_s *privep, int16_t result)
 {
   struct rp2040_req_s *privreq;
   int stalled = privep->stalled;
+  irqstate_t flags;
 
   /* Remove the completed request at the head of the endpoint request list */
 
+  flags = enter_critical_section();
   privreq = rp2040_rqdequeue(privep);
+  leave_critical_section(flags);
 
   if (privreq)
     {
@@ -618,15 +620,6 @@ static void rp2040_reqcomplete_nolock(struct rp2040_ep_s *privep,
 
       privep->stalled = stalled;
     }
-}
-
-static void rp2040_reqcomplete(struct rp2040_ep_s *privep, int16_t result)
-{
-  irqstate_t flags = spin_lock_irqsave(&privep->dev->lock);
-
-  rp2040_reqcomplete_nolock(privep, result);
-
-  spin_unlock_irqrestore(&privep->dev->lock, flags);
 }
 
 /****************************************************************************
@@ -863,21 +856,14 @@ static void rp2040_handle_zlp(struct rp2040_usbdev_s *priv)
  *
  ****************************************************************************/
 
-static void rp2040_cancelrequests_nolock(struct rp2040_ep_s *privep)
+static void rp2040_cancelrequests(struct rp2040_ep_s *privep)
 {
   while (!rp2040_rqempty(privep))
     {
       usbtrace(TRACE_COMPLETE(privep->epphy),
                (rp2040_rqpeek(privep))->req.xfrd);
-      rp2040_reqcomplete_nolock(privep, -ESHUTDOWN);
+      rp2040_reqcomplete(privep, -ESHUTDOWN);
     }
-}
-
-static void rp2040_cancelrequests(struct rp2040_ep_s *privep)
-{
-  irqstate_t flags = spin_lock_irqsave(&privep->dev->lock);
-  rp2040_cancelrequests_nolock(privep);
-  spin_unlock_irqrestore(&privep->dev->lock, flags);
 }
 
 /****************************************************************************
@@ -1532,7 +1518,7 @@ static int rp2040_epdisable(struct usbdev_ep_s *ep)
   usbtrace(TRACE_EPDISABLE, privep->epphy);
   uinfo("EP%d\n", privep->epphy);
 
-  flags = spin_lock_irqsave(&privep->dev->lock);
+  flags = enter_critical_section();
 
   privep->ep.maxpacket = 64;
   privep->stalled = false;
@@ -1541,9 +1527,9 @@ static int rp2040_epdisable(struct usbdev_ep_s *ep)
 
   /* Cancel all queued requests */
 
-  rp2040_cancelrequests_nolock(privep);
+  rp2040_cancelrequests(privep);
 
-  spin_unlock_irqrestore(&privep->dev->lock, flags);
+  leave_critical_section(flags);
 
   return OK;
 }
@@ -1636,7 +1622,7 @@ static int rp2040_epsubmit(struct usbdev_ep_s *ep,
   req->result = -EINPROGRESS;
   req->xfrd = 0;
 
-  flags = spin_lock_irqsave(&privep->dev->lock);
+  flags = enter_critical_section();
 
   if (privep->stalled && privep->in)
     {
@@ -1681,7 +1667,7 @@ static int rp2040_epsubmit(struct usbdev_ep_s *ep,
         }
     }
 
-  spin_unlock_irqrestore(&privep->dev->lock, flags);
+  leave_critical_section(flags);
   return ret;
 }
 
@@ -1711,9 +1697,9 @@ static int rp2040_epcancel(struct usbdev_ep_s *ep,
 
   /* Remove request from req_queue */
 
-  flags = spin_lock_irqsave(&privep->dev->lock);
-  rp2040_cancelrequests_nolock(privep);
-  spin_unlock_irqrestore(&privep->dev->lock, flags);
+  flags = enter_critical_section();
+  rp2040_cancelrequests(privep);
+  leave_critical_section(flags);
   return OK;
 }
 

@@ -41,7 +41,7 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/i2c/i2c_master.h>
 
-#include <nuttx/spinlock.h>
+#include <nuttx/irq.h>
 #include <arch/board/board.h>
 
 #include "chip.h"
@@ -74,7 +74,6 @@ struct lpc31_i2cdev_s
     uint16_t          irqid;      /* IRQ for this device */
 
     mutex_t           lock;       /* Only one thread can access at a time */
-    spinlock_t        spinlock;   /* Spinlock */
     sem_t             wait;       /* Place to wait for state machine completion */
     volatile uint8_t  state;      /* State of state machine */
     struct wdog_s     timeout;    /* Watchdog to timeout when bus hung */
@@ -97,14 +96,12 @@ struct lpc31_i2cdev_s
 static struct lpc31_i2cdev_s i2cdevices[2] =
 {
   {
-    .lock     = NXMUTEX_INITIALIZER,
-    .spinlock = SP_UNLOCKED,
-    .wait     = SEM_INITIALIZER(0),
+    .lock = NXMUTEX_INITIALIZER,
+    .wait = SEM_INITIALIZER(0),
   },
   {
-    .lock     = NXMUTEX_INITIALIZER,
-    .spinlock = SP_UNLOCKED,
-    .wait     = SEM_INITIALIZER(0),
+    .lock = NXMUTEX_INITIALIZER,
+    .wait = SEM_INITIALIZER(0),
   },
 };
 
@@ -426,7 +423,7 @@ static void i2c_timeout(wdparm_t arg)
 {
   struct lpc31_i2cdev_s *priv = (struct lpc31_i2cdev_s *)arg;
 
-  irqstate_t flags = spin_lock_irqsave(&priv->spinlock);
+  irqstate_t flags = enter_critical_section();
 
   if (priv->state != I2C_STATE_DONE)
     {
@@ -452,7 +449,7 @@ static void i2c_timeout(wdparm_t arg)
       nxsem_post(&priv->wait);
     }
 
-  spin_unlock_irqrestore(&priv->spinlock, flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -491,7 +488,7 @@ static int i2c_transfer(struct i2c_master_s *dev,
   /* Get exclusive access to the I2C bus */
 
   nxmutex_lock(&priv->lock);
-  flags = spin_lock_irqsave(&priv->spinlock);
+  flags = enter_critical_section();
 
   /* Set up for the transfer */
 
@@ -519,17 +516,13 @@ static int i2c_transfer(struct i2c_master_s *dev,
 
   while (priv->state != I2C_STATE_DONE)
     {
-      spin_unlock_irqrestore(&priv->spinlock, flags);
-
       nxsem_wait(&priv->wait);
-
-      flags = spin_lock_irqsave(&priv->spinlock);
     }
 
   wd_cancel(&priv->timeout);
   ret = count - priv->nmsg;
 
-  spin_unlock_irqrestore(&priv->spinlock, flags);
+  leave_critical_section(flags);
   nxmutex_unlock(&priv->lock);
   return ret;
 }

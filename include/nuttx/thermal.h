@@ -71,7 +71,8 @@ enum thermal_trend_e
 
 enum thermal_trip_type_e
 {
-  THERMAL_NORMAL,
+  THERMAL_ACTIVE,
+  THERMAL_PASSIVE,
   THERMAL_HOT,
   THERMAL_CRITICAL,
   THERMAL_TRIP_TYPE_MAX,
@@ -163,6 +164,7 @@ struct thermal_zone_trip_s
 struct thermal_zone_params_s
 {
   FAR const char *gov_name;
+  int passive_delay;
   int polling_delay;
   FAR const struct thermal_zone_trip_s *trips;
   int num_trips;

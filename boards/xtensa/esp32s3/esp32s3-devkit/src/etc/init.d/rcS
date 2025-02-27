@@ -25,3 +25,7 @@
 #ifdef CONFIG_SYSTEM_ADBD
 adbd &
 #endif
+
+#ifdef CONFIG_SYSTEM_FASTBOOTD
+fastbootd &
+#endif

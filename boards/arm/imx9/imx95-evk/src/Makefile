@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm/imx95/imx95-evk/src/Makefile
+# boards/arm/imx9/imx95-evk/src/Makefile
 #
 # SPDX-License-Identifier: Apache-2.0
 # SPDX-FileCopyrightText: 2024 NXP

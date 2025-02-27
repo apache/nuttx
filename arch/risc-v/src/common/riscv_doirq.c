@@ -88,13 +88,24 @@ uintreg_t *riscv_doirq(int irq, uintreg_t *regs)
       (*running_task)->xcp.regs = regs;
     }
 
-  /* Nested interrupts are not supported */
+  /* Current regs non-zero indicates that we are processing an interrupt;
+   * current_regs is also used to manage interrupt level context switches.
+   *
+   * Nested interrupts are not supported. But an exception may occur while
+   * processing an interrupt. In this case, current_regs will be non-NULL.
+   */
 
-  DEBUGASSERT(!up_interrupt_context());
+  DEBUGASSERT(((irq > RISCV_MAX_EXCEPTION) && !up_interrupt_context()) ||
+              (irq <= RISCV_MAX_EXCEPTION));
 
-  /* Set irq flag */
+  /* Don't override current regs if it is already set (which is true if
+   * we were in a interrupt handler).
+   */
 
-  up_set_interrupt_context(true);
+  if (!up_interrupt_context())
+    {
+      up_set_interrupt_context(true);
+    }
 
   /* Deliver the IRQ */
 

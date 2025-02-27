@@ -283,6 +283,125 @@ void esp_dma_load(struct esp_dmadesc_s *dmadesc, int chan, bool tx)
 }
 
 /****************************************************************************
+ * Name: esp_dma_enable_interrupt
+ *
+ * Description:
+ *   Enable/Disable DMA interrupt.
+ *
+ * Input Parameters:
+ *   chan - DMA channel
+ *   tx   - true: TX mode; false: RX mode
+ *   mask - Interrupt mask to change
+ *   en   - true: enable; false: disable
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp_dma_enable_interrupt(int chan, bool tx, uint32_t mask, bool en)
+{
+  if (tx)
+    {
+      gdma_ll_tx_enable_interrupt(ctx.dev, chan, mask, en);
+    }
+  else
+    {
+      gdma_ll_rx_enable_interrupt(ctx.dev, chan, mask, en);
+    }
+}
+
+/****************************************************************************
+ * Name: esp_dma_get_interrupt
+ *
+ * Description:
+ *   Gets DMA interrupt status.
+ *
+ * Input Parameters:
+ *   chan - DMA channel
+ *   tx   - true: TX mode; false: RX mode
+ *
+ * Returned Value:
+ *   Interrupt status value.
+ *
+ ****************************************************************************/
+
+int esp_dma_get_interrupt(int chan, bool tx)
+{
+  uint32_t intr_status = 0;
+
+  if (tx)
+    {
+      intr_status = gdma_ll_tx_get_interrupt_status(ctx.dev, chan);
+    }
+  else
+    {
+      intr_status = gdma_ll_rx_get_interrupt_status(ctx.dev, chan);
+    }
+
+  return intr_status;
+}
+
+/****************************************************************************
+ * Name: esp_dma_clear_interrupt
+ *
+ * Description:
+ *   Clear DMA interrupt.
+ *
+ * Input Parameters:
+ *   chan - DMA channel
+ *   tx   - true: TX mode; false: RX mode
+ *   mask - Interrupt mask to change
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp_dma_clear_interrupt(int chan, bool tx, uint32_t mask)
+{
+  if (tx)
+    {
+      gdma_ll_tx_clear_interrupt_status(ctx.dev, chan, mask);
+    }
+  else
+    {
+      gdma_ll_rx_clear_interrupt_status(ctx.dev, chan, mask);
+    }
+}
+
+/****************************************************************************
+ * Name: esp_dma_get_desc_addr
+ *
+ * Description:
+ *   Gets desc addr of DMA interrupt.
+ *
+ * Input Parameters:
+ *   chan - DMA channel
+ *   tx   - true: TX mode; false: RX mode
+ *
+ * Returned Value:
+ *   Desc addr.
+ *
+ ****************************************************************************/
+
+int esp_dma_get_desc_addr(int chan, bool tx)
+{
+  uint32_t desc_addr = 0;
+
+  if (tx)
+    {
+      desc_addr = gdma_ll_tx_get_eof_desc_addr(ctx.dev, chan);
+    }
+  else
+    {
+      desc_addr = gdma_ll_rx_get_success_eof_desc_addr(ctx.dev, chan);
+    }
+
+  return desc_addr;
+}
+
+/****************************************************************************
  * Name: esp_dma_enable
  *
  * Description:
@@ -360,6 +479,33 @@ void esp_dma_wait_idle(int chan, bool tx)
   else
     {
       while (gdma_ll_rx_is_fsm_idle(ctx.dev, chan) == 0);
+    }
+}
+
+/****************************************************************************
+ * Name: esp_dma_reset_channel
+ *
+ * Description:
+ *   Resets dma channel.
+ *
+ * Input Parameters:
+ *   chan - DMA channel
+ *   tx   - true: TX mode; false: RX mode
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp_dma_reset_channel(int chan, bool tx)
+{
+  if (tx)
+    {
+      gdma_ll_tx_reset_channel(ctx.dev, chan);
+    }
+  else
+    {
+      gdma_ll_rx_reset_channel(ctx.dev, chan);
     }
 }
 

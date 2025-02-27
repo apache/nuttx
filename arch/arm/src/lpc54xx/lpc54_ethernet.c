@@ -71,7 +71,7 @@
 #include <arpa/inet.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/spinlock.h>
+#include <nuttx/irq.h>
 #include <nuttx/queue.h>
 #include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
@@ -297,7 +297,6 @@ struct lpc54_ethdriver_s
   struct work_s eth_pollwork;    /* For deferring poll work to the work queue */
   struct work_s eth_timeoutwork; /* For deferring timeout work to the work queue */
   struct sq_queue_s eth_freebuf; /* Free packet buffers */
-  spinlock_t eth_lock;           /* Spinlock */
 
   /* Ring state */
 
@@ -2002,7 +2001,7 @@ static int lpc54_eth_ifdown(struct net_driver_s *dev)
 
   /* Disable the Ethernet interrupt */
 
-  flags = spin_lock_irqsave(&priv->eth_lock);
+  flags = enter_critical_section();
   up_disable_irq(LPC54_IRQ_ETHERNET);
 
   /* Cancel the TX timeout timers */
@@ -2041,14 +2040,14 @@ static int lpc54_eth_ifdown(struct net_driver_s *dev)
   if (ret < 0)
     {
       nerr("ERROR: lpc54_phy_reset failed: %d\n", ret);
-      spin_unlock_irqrestore(&priv->eth_lock, flags);
+      leave_critical_section(flags);
       return ret;
     }
 
   /* Mark the device "down" */
 
   priv->eth_bifup = 0;
-  spin_unlock_irqrestore(&priv->eth_lock, flags);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -2881,8 +2880,6 @@ void arm_netinitialize(void)
   priv->eth_dev.d_ioctl   = lpc54_eth_ioctl;    /* Handle network IOCTL commands */
 #endif
   priv->eth_dev.d_private = &g_ethdriver;       /* Used to recover private state from dev */
-
-  spin_lock_init(&priv->eth_lock);              /* Initialize spinlock */
 
   /* Configure GPIO pins to support Ethernet */
 

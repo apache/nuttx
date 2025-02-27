@@ -441,6 +441,20 @@ def get_field(val, key, default=None):
         return default
 
 
+def has_field(obj: Union[gdb.Type, gdb.Value], key):
+    if isinstance(obj, gdb.Type):
+        t = obj
+    elif isinstance(obj, gdb.Value):
+        t = obj.type
+    else:
+        raise gdb.GdbError(f"Unsupported type {type(obj)}")
+
+    while t.code in (gdb.TYPE_CODE_PTR, gdb.TYPE_CODE_ARRAY, gdb.TYPE_CODE_TYPEDEF):
+        t = t.target()
+
+    return any(f.name == key for f in t.fields())
+
+
 def get_bytes(val, size):
     """Convert a gdb value to a bytes object"""
     try:
@@ -958,7 +972,7 @@ class ArrayIterator:
             raise gdb.error(f"Not an array: {array}, type: {array.type}")
 
         if type_code == gdb.TYPE_CODE_ARRAY:
-            if n := nitems(array) > 0:
+            if (n := nitems(array)) > 0:
                 maxlen = min(n, maxlen) if maxlen is not None else n
 
         if maxlen is None:

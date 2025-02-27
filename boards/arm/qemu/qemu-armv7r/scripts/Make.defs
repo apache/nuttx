@@ -24,7 +24,7 @@ include $(TOPDIR)/.config
 include $(TOPDIR)/tools/Config.mk
 include $(TOPDIR)/arch/arm/src/armv7-r/Toolchain.defs
 
-LDSCRIPT = dramboot.ld
+LDSCRIPT = nuttx.ld
 
 ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
 

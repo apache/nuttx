@@ -1,0 +1,37 @@
+############################################################################
+# arch/arm/src/ra4/Make.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+# The start-up, "head", file
+
+# Common ARM and Cortex-M4 files
+
+include armv7-m/Make.defs
+
+# Required RA files
+
+CHIP_CSRCS += ra_start.c
+CHIP_CSRCS += ra_clockconfig.c
+CHIP_CSRCS += ra_irq.c
+CHIP_CSRCS += ra_icu.c
+CHIP_CSRCS += ra_gpio.c
+CHIP_CSRCS += ra_serial.c
+CHIP_CSRCS += ra_lowputc.c
+CHIP_CSRCS += ra_allocateheap.c
+CHIP_CSRCS += ra_timerisr.c

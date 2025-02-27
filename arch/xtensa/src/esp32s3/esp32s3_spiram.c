@@ -42,6 +42,7 @@
 #include "hardware/esp32s3_soc.h"
 #include "hardware/esp32s3_cache_memory.h"
 #include "hardware/esp32s3_iomux.h"
+#include "hal/cache_hal.h"
 
 #include "soc/extmem_reg.h"
 
@@ -121,6 +122,9 @@ static int pause_cpu_handler(void *cookie);
 static struct smp_call_data_s g_call_data =
 SMP_CALL_INITIALIZER(pause_cpu_handler, NULL);
 #endif
+
+extern uint8_t _ext_ram_bss_start;
+extern uint8_t _ext_ram_bss_end;
 
 /****************************************************************************
  * ROM Function Prototypes
@@ -393,6 +397,7 @@ int IRAM_ATTR esp_spiram_init_cache(void)
   uint32_t mapped_vaddr_size;
   uint32_t target_mapped_vaddr_start;
   uint32_t target_mapped_vaddr_end;
+  uint32_t ext_bss_size;
 
   int ret = psram_get_available_size(&psram_size);
   if (ret != OK)
@@ -473,10 +478,12 @@ int IRAM_ATTR esp_spiram_init_cache(void)
 
   cache_resume_dcache(0);
 
-  /* Currently no non-heap stuff on ESP32S3 */
+  ext_bss_size = ((intptr_t)&_ext_ram_bss_end -
+                  (intptr_t)&_ext_ram_bss_start);
 
-  g_allocable_vaddr_start = g_mapped_vaddr_start;
-  g_allocable_vaddr_end = g_mapped_vaddr_start + g_mapped_size;
+  g_allocable_vaddr_start = g_mapped_vaddr_start + ext_bss_size;
+  g_allocable_vaddr_end = g_mapped_vaddr_start + g_mapped_size -
+                          ext_bss_size;
 
   return ret;
 }
@@ -689,6 +696,27 @@ size_t esp_spiram_get_size(void)
 void IRAM_ATTR esp_spiram_writeback_cache(void)
 {
   cache_writeback_all();
+}
+
+/****************************************************************************
+ * Name: esp_spiram_writeback_range
+ *
+ * Description:
+ *   Writeback the Cache items (also clean the dirty bit) in the region from
+ *   DCache. If the region is not in DCache addr room, nothing will be done.
+ *
+ * Input Parameters:
+ *   addr - writeback region start address
+ *   size - writeback region size
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void esp_spiram_writeback_range(uint32_t addr, uint32_t size)
+{
+  cache_hal_writeback_addr(addr, size);
 }
 
 /* If SPI RAM(PSRAM) has been initialized
