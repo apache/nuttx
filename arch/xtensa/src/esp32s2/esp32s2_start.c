@@ -404,7 +404,13 @@ static void noreturn_function IRAM_ATTR __esp32s2_start(void)
   else
     {
       esp_spiram_init_cache();
-      esp_spiram_test();
+#  if defined(CONFIG_ESP32S2_SPIRAM_MEMTEST)
+      if (esp_spiram_test() != OK)
+        {
+            ets_printf("SPIRAM test failed\n");
+            PANIC();
+        }
+#  endif // CONFIG_ESP32S2_SPIRAM_MEMTEST
     }
 #endif
 
