@@ -51,6 +51,33 @@
  * Macros
  ****************************************************************************/
 
+#define CFI_UNWIND_REGS(reg, offst)             \
+	.cfi_def_cfa    %##reg, (offst);            \
+	.cfi_rel_offset %rip, (REG_RIP * 8);        \
+	.cfi_rel_offset %rsp, (REG_RSP * 8);        \
+	.cfi_rel_offset %rbp, (REG_RBP * 8);        \
+	.cfi_rel_offset %rsi, (REG_RSI * 8);        \
+	.cfi_rel_offset %rdi, (REG_RDI * 8);        \
+	.cfi_rel_offset %rdx, (REG_RDX * 8);        \
+	.cfi_rel_offset %rcx, (REG_RCX * 8);        \
+	.cfi_rel_offset %r8, (REG_R8 * 8);          \
+	.cfi_rel_offset %r9, (REG_R9 * 8);          \
+	.cfi_rel_offset %r15, (REG_R15 * 8);        \
+	.cfi_rel_offset %r14, (REG_R14 * 8);        \
+	.cfi_rel_offset %r13, (REG_R13 * 8);        \
+	.cfi_rel_offset %r12, (REG_R12 * 8);        \
+	.cfi_rel_offset %r11, (REG_R11 * 8);        \
+	.cfi_rel_offset %r10, (REG_R10 * 8);        \
+	.cfi_rel_offset %rbx, (REG_RBX * 8);        \
+	.cfi_rel_offset %rax, (REG_RAX * 8);        \
+	.cfi_rel_offset %rflags, (REG_RFLAGS * 8);  \
+	.cfi_rel_offset %cs, (REG_CS * 8);          \
+	.cfi_rel_offset %ss, (REG_SS * 8);          \
+	.cfi_rel_offset %ds, (REG_DS * 8);          \
+	.cfi_rel_offset %es, (REG_ES * 8);          \
+	.cfi_rel_offset %fs, (REG_FS * 8);          \
+	.cfi_rel_offset %gs, (REG_GS * 8);
+
 	/* This macro creates a stub for an ISR which does NOT pass it's own
 	 * error code (adds a dummy errcode byte).
 	 */
@@ -701,6 +728,8 @@ vector_isr\intno:
  *
  ****************************************************************************/
 
+.cfi_sections .debug_frame
+
 	.type   irq_common, @function
 irq_common:
 	/* Already swap to the interrupt stack
@@ -710,6 +739,8 @@ irq_common:
 	/* Get current task regs area - this logic assumes that irq_xcp_regs
 	 * corrupts only RAX, RDI and RDX registers.
 	 */
+
+	.cfi_startproc
 
 	pushq   %rax
 	pushq   %rdx
@@ -785,11 +816,15 @@ irq_common:
 	 * that we don't lose the correct stack alignment for vector operations
 	 */
 
+	CFI_UNWIND_REGS(rdi, 0)
+
 	pushq   %rdi
 	pushq   $0
 	call    irq_handler
 	add     $8, %rsp
 	popq    %rdi
+
+	.cfi_endproc
 
 	/* The common return point for irq_handler */
 
