@@ -40,6 +40,7 @@ config ARCH_CHIP_MPS3_AN524
 config ARCH_CHIP_MPS3_AN547
 	bool "MPS3 AN547 Processor Cortexm55"
 	select ARCH_CORTEXM55
+	select ARCH_HAVE_MPU
 	select ARCH_HAVE_FPU
 	select ARM_HAVE_MVE
 	select ARCH_HAVE_TEXT_HEAP

@@ -132,7 +132,7 @@ static uintptr_t g_alloc_count;
 
 void up_allocate_heap(void **heap_start, size_t *heap_size)
 {
-#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
+#if defined(CONFIG_BUILD_PROTECTED)
   /* Get the unaligned size and position of the user-space heap.
    * This heap begins after the user-space .bss section at an offset
    * of CONFIG_MM_KERNEL_HEAPSIZE (subject to alignment).
@@ -187,6 +187,10 @@ void up_allocate_heap(void **heap_start, size_t *heap_size)
       *heap_size  = MPS_SRAM1_START + MPS_SRAM1_SIZE - g_idle_topstack;
     }
 
+#  if defined(CONFIG_MM_KERNEL_HEAP)
+  *heap_size -= CONFIG_MM_KERNEL_HEAPSIZE;
+#  endif
+
 #endif
 }
 
@@ -201,9 +205,10 @@ void up_allocate_heap(void **heap_start, size_t *heap_size)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
+#if defined(CONFIG_MM_KERNEL_HEAP)
 void up_allocate_kheap(void **heap_start, size_t *heap_size)
 {
+#  if defined(CONFIG_BUILD_PROTECTED)
   /* Get the unaligned size and position of the user-space heap.
    * This heap begins after the user-space .bss section at an offset
    * of CONFIG_MM_KERNEL_HEAPSIZE (subject to alignment).
@@ -232,6 +237,25 @@ void up_allocate_kheap(void **heap_start, size_t *heap_size)
 
   *heap_start = (void *)USERSPACE->us_bssend;
   *heap_size  = ubase - (uintptr_t)USERSPACE->us_bssend;
+#  else
+  if (g_idle_topstack > MPS_SRAM1_START + MPS_SRAM1_SIZE)
+    {
+      /* If the range of SRAM1 is exceeded, we think that the extern REGION
+       * is enabled
+       */
+
+      *heap_size  = PRIMARY_RAM_END - g_idle_topstack;
+    }
+  else
+    {
+      *heap_size  = MPS_SRAM1_START + MPS_SRAM1_SIZE - g_idle_topstack;
+    }
+
+  *heap_size -= CONFIG_MM_KERNEL_HEAPSIZE;
+  *heap_start = (void *)g_idle_topstack + *heap_size;
+  *heap_size = CONFIG_MM_KERNEL_HEAPSIZE;
+
+#  endif
 }
 #endif
 

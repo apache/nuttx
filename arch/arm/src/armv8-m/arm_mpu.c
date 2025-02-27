@@ -316,6 +316,62 @@ void mpu_initialize(const struct mpu_region_s *table, size_t count,
 }
 
 /****************************************************************************
+ * Name: mpu_log2regionceil
+ *
+ * Description:
+ *   Determine the smallest value of l2size (log base 2 size) such that the
+ *   following is true:
+ *
+ *   size <= (1 << l2size)
+ *
+ * Input Parameters:
+ *   size - The size of the region.
+ *
+ * Returned Value:
+ *   The logarithm base 2 of the ceiling value for the MPU region size.
+ *
+ ****************************************************************************/
+
+uint8_t mpu_log2regionceil(size_t size)
+{
+  uint8_t l2size;
+
+  /* The minimum permitted region size is 32 bytes (log2(32) = 5. */
+
+  for (l2size = 5; l2size < 32 && size > (1 << l2size); l2size++);
+  return l2size;
+}
+
+/****************************************************************************
+ * Name: mpu_log2regionfloor
+ *
+ * Description:
+ *   Determine the largest value of l2size (log base 2 size) such that the
+ *   following is true:
+ *
+ *   size >= (1 << l2size)
+ *
+ * Input Parameters:
+ *   size - The size of the region.
+ *
+ * Returned Value:
+ *   The logarithm base 2 of the floor value for the MPU region size.
+ *
+ ****************************************************************************/
+
+uint8_t mpu_log2regionfloor(size_t size)
+{
+  uint8_t l2size = mpu_log2regionceil(size);
+
+  if (l2size > 4 && size < (1 << l2size))
+    {
+      l2size--;
+    }
+
+  return l2size;
+}
+
+/****************************************************************************
  * Name: mpu_dump_region
  *
  * Description:
