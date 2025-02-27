@@ -237,13 +237,11 @@
 #define REG_FP              REG_X29
 #define REG_LR              REG_X30
 
-#ifdef CONFIG_ARM64_DECODEFIQ
-#  define IRQ_DAIF_MASK (3)
-#else
-#  define IRQ_DAIF_MASK (2)
-#endif
+#define FIQ_DAIF_MASK       (1)
+#define IRQ_DAIF_MASK       (2)
+#define IRQ_FIQ_DAIF_MASK   (FIQ_DAIF_MASK | IRQ_DAIF_MASK)
 
-#define IRQ_SPSR_MASK (IRQ_DAIF_MASK << 6)
+#define IRQ_SPSR_MASK       (IRQ_DAIF_MASK << 6)
 
 #ifndef __ASSEMBLY__
 
@@ -352,7 +350,11 @@ static inline_function irqstate_t up_irq_save(void)
       "mrs %0, daif\n"
       "msr daifset, %1\n"
       : "=r" (flags)
+#if defined(CONFIG_ARCH_TRUSTZONE_SECURE)
+      : "i" (FIQ_DAIF_MASK)
+#else
       : "i" (IRQ_DAIF_MASK)
+#endif
       : "memory"
     );
 
@@ -370,7 +372,13 @@ static inline_function irqstate_t up_irq_enable(void)
       "mrs %0, daif\n"
       "msr daifclr, %1\n"
       : "=r" (flags)
+#if defined(CONFIG_ARCH_HIPRI_INTERRUPT)
+      : "i" (IRQ_FIQ_DAIF_MASK)
+#elif defined(CONFIG_ARCH_TRUSTZONE_SECURE)
+      : "i" (FIQ_DAIF_MASK)
+#else
       : "i" (IRQ_DAIF_MASK)
+#endif
       : "memory"
     );
   return flags;

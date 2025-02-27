@@ -310,7 +310,7 @@ SECTION_FUNC(text, arm64_fiq_handler)
      * with interrupts disabled
      */
 
-    bl     arm64_decodeirq
+    bl     arm64_decodefiq
 
     mov    sp, x0
     b      arm64_exit_exception

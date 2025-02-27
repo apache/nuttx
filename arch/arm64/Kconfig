@@ -332,6 +332,7 @@ config ARCH_CORTEX_R82
 	bool
 	default n
 	select ARCH_ARMV8R
+	select ARCH_HAVE_TRUSTZONE
 	select ARCH_DCACHE
 	select ARCH_ICACHE
 	select ARCH_HAVE_MPU
