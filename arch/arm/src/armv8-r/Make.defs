@@ -59,4 +59,10 @@ ifeq ($(CONFIG_ARCH_HIPRI_INTERRUPT),y)
   CMN_CSRCS += arm_dofiq.c
 endif
 
+ifeq ($(CONFIG_SMP),y)
+  CMN_ASRCS += arm_cpuhead.S
+  CMN_CSRCS += arm_cpustart.c arm_smpcall.c
+  CMN_CSRCS += arm_cpuidlestack.c arm_scu.c
+endif
+
 VPATH += arm_a_r
