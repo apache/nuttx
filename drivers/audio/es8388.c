@@ -530,7 +530,7 @@ static void es8388_setmclkfrequency(FAR struct es8388_dev_s *priv)
 
   if (priv->mclk)
     {
-      audinfo("MCLK Freq: %u\n", priv->mclk);
+      audinfo("MCLK Freq: %" PRIu32"\n", priv->mclk);
 
       int ret = I2S_SETMCLKFREQUENCY(priv->i2s, priv->mclk);
 
@@ -748,7 +748,7 @@ static void es8388_setsamplerate(FAR struct es8388_dev_s *priv)
       es8388_writereg(priv, ES8388_DACCONTROL2, ES8388_DACFSRATIO(regval));
     }
 
-  audinfo("Sample rate set to %d\n", priv->samprate);
+  audinfo("Sample rate set to %" PRIu32 "\n", priv->samprate);
 }
 
 /****************************************************************************
