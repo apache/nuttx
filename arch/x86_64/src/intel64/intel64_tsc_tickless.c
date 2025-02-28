@@ -85,7 +85,7 @@ static uint64_t g_goal_time;
 #ifdef CONFIG_ARCH_INTEL64_HAVE_TSC_ADJUST
 static uint64_t g_tsc_adjust;
 #else
-static uint64_t g_start_tsc;
+static uint64_t g_tsc_start;
 #endif
 
 static uint32_t g_timer_active;
@@ -113,7 +113,7 @@ static inline uint64_t get_tsc_offset(void)
 #ifdef CONFIG_ARCH_INTEL64_HAVE_TSC_ADJUST
   return 0;
 #else
-  return g_start_tsc;
+  return g_tsc_start;
 #endif
 }
 
@@ -161,7 +161,7 @@ void up_timer_initialize(void)
   g_tsc_adjust = read_msr(MSR_IA32_TSC_ADJUST) - tsc;
   write_msr(MSR_IA32_TSC_ADJUST, g_tsc_adjust);
 #else
-  g_start_tsc = tsc;
+  g_tsc_start = tsc;
 #endif
 
 #ifdef CONFIG_SCHED_TICKLESS_ALARM
