@@ -58,8 +58,6 @@
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
 
-#ifdef CONFIG_SCHED_TICKLESS
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -78,16 +76,16 @@
 
 extern unsigned long g_x86_64_timer_freq;
 
-#ifndef CONFIG_SCHED_TICKLESS_ALARM
-static uint64_t g_goal_time;
-#else
+#ifdef CONFIG_SCHED_TICKLESS_ALARM
 static struct timespec g_goal_time_ts;
+#else
+static uint64_t g_goal_time;
 #endif
 
-#ifndef CONFIG_ARCH_INTEL64_HAVE_TSC_ADJUST
-static uint64_t g_start_tsc;
-#else
+#ifdef CONFIG_ARCH_INTEL64_HAVE_TSC_ADJUST
 static uint64_t g_tsc_adjust;
+#else
+static uint64_t g_start_tsc;
 #endif
 
 static uint32_t g_timer_active;
@@ -112,10 +110,10 @@ uint64_t get_tsc_adjust(void)
 
 static inline uint64_t get_tsc_offset(void)
 {
-#ifndef CONFIG_ARCH_INTEL64_HAVE_TSC_ADJUST
-  return g_start_tsc;
-#else
+#ifdef CONFIG_ARCH_INTEL64_HAVE_TSC_ADJUST
   return 0;
+#else
+  return g_start_tsc;
 #endif
 }
 
@@ -150,10 +148,10 @@ void up_unmask_tmr(void)
   __asm__ volatile("mfence" : : : "memory");
 }
 
-#ifndef CONFIG_SCHED_TICKLESS_ALARM
-void up_timer_expire(void);
-#else
+#ifdef CONFIG_SCHED_TICKLESS_ALARM
 void up_alarm_expire(void);
+#else
+void up_timer_expire(void);
 #endif
 
 void up_timer_initialize(void)
@@ -166,10 +164,10 @@ void up_timer_initialize(void)
   g_start_tsc = tsc;
 #endif
 
-#ifndef CONFIG_SCHED_TICKLESS_ALARM
-  irq_attach(TMR_IRQ, (xcpt_t)up_timer_expire, NULL);
-#else
+#ifdef CONFIG_SCHED_TICKLESS_ALARM
   irq_attach(TMR_IRQ, (xcpt_t)up_alarm_expire, NULL);
+#else
+  irq_attach(TMR_IRQ, (xcpt_t)up_timer_expire, NULL);
 #endif
 }
 
@@ -250,133 +248,7 @@ int up_timer_gettime(struct timespec *ts)
   return OK;
 }
 
-#ifndef CONFIG_SCHED_TICKLESS_ALARM
-
-/****************************************************************************
- * Name: up_timer_cancel
- *
- * Description:
- *   Cancel the interval timer and return the time remaining on the timer.
- *   These two steps need to be as nearly atomic as possible.
- *   sched_timer_expiration() will not be called unless the timer is
- *   restarted with up_timer_start().
- *
- *   If, as a race condition, the timer has already expired when this
- *   function is called, then that pending interrupt must be cleared so
- *   that up_timer_start() and the remaining time of zero should be
- *   returned.
- *
- *   Provided by platform-specific code and called from the RTOS base code.
- *
- * Input Parameters:
- *   ts - Location to return the remaining time.  Zero should be returned
- *        if the timer is not active.
- *
- * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned on
- *   any failure.
- *
- * Assumptions:
- *   May be called from interrupt level handling or from the normal tasking
- *   level.  Interrupts may need to be disabled internally to assure
- *   non-reentrancy.
- *
- ****************************************************************************/
-
-int up_timer_cancel(struct timespec *ts)
-{
-  up_tmr_sync_up();
-
-  up_mask_tmr();
-
-  if (ts != NULL)
-    {
-      if (g_timer_active)
-        {
-          up_tick2ts(g_goal_time - rdtscp(), ts);
-        }
-      else
-        {
-          ts->tv_sec = 0;
-          ts->tv_nsec = 0;
-        }
-    }
-
-  g_timer_active = 0;
-
-  up_tmr_sync_down();
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: up_timer_start
- *
- * Description:
- *   Start the interval timer.  sched_timer_expiration() will be
- *   called at the completion of the timeout (unless up_timer_cancel
- *   is called to stop the timing.
- *
- *   Provided by platform-specific code and called from the RTOS base code.
- *
- * Input Parameters:
- *   ts - Provides the time interval until sched_timer_expiration() is
- *        called.
- *
- * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned on
- *   any failure.
- *
- * Assumptions:
- *   May be called from interrupt level handling or from the normal tasking
- *   level.  Interrupts may need to be disabled internally to assure
- *   non-reentrancy.
- *
- ****************************************************************************/
-
-int up_timer_start(const struct timespec *ts)
-{
-  uint64_t ticks;
-
-  up_tmr_sync_up();
-
-  up_unmask_tmr();
-
-  ticks = up_ts2tick(ts) + rdtscp();
-
-  g_timer_active = 1;
-
-  write_msr(MSR_IA32_TSC_DEADLINE, ticks);
-
-  g_goal_time = ticks;
-
-  up_tmr_sync_down();
-  return OK;
-}
-
-/****************************************************************************
- * Name: up_timer_expire
- *
- * Description:
- *   Called as the IRQ handler for alarm expiration.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void up_timer_expire(void)
-{
-  g_timer_active = 0;
-
-  up_mask_tmr();
-  nxsched_timer_expiration();
-}
-
-#else /* CONFIG_SCHED_TICKLESS_ALARM */
+#ifdef CONFIG_SCHED_TICKLESS_ALARM
 
 /****************************************************************************
  * Name: up_timer_cancel
@@ -505,5 +377,130 @@ void up_alarm_expire(void)
   nxsched_alarm_expiration(&now);
 }
 
+#else
+
+/****************************************************************************
+ * Name: up_timer_cancel
+ *
+ * Description:
+ *   Cancel the interval timer and return the time remaining on the timer.
+ *   These two steps need to be as nearly atomic as possible.
+ *   sched_timer_expiration() will not be called unless the timer is
+ *   restarted with up_timer_start().
+ *
+ *   If, as a race condition, the timer has already expired when this
+ *   function is called, then that pending interrupt must be cleared so
+ *   that up_timer_start() and the remaining time of zero should be
+ *   returned.
+ *
+ *   Provided by platform-specific code and called from the RTOS base code.
+ *
+ * Input Parameters:
+ *   ts - Location to return the remaining time.  Zero should be returned
+ *        if the timer is not active.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
+ *
+ * Assumptions:
+ *   May be called from interrupt level handling or from the normal tasking
+ *   level.  Interrupts may need to be disabled internally to assure
+ *   non-reentrancy.
+ *
+ ****************************************************************************/
+
+int up_timer_cancel(struct timespec *ts)
+{
+  up_tmr_sync_up();
+
+  up_mask_tmr();
+
+  if (ts != NULL)
+    {
+      if (g_timer_active)
+        {
+          up_tick2ts(g_goal_time - rdtscp(), ts);
+        }
+      else
+        {
+          ts->tv_sec = 0;
+          ts->tv_nsec = 0;
+        }
+    }
+
+  g_timer_active = 0;
+
+  up_tmr_sync_down();
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: up_timer_start
+ *
+ * Description:
+ *   Start the interval timer.  sched_timer_expiration() will be
+ *   called at the completion of the timeout (unless up_timer_cancel
+ *   is called to stop the timing.
+ *
+ *   Provided by platform-specific code and called from the RTOS base code.
+ *
+ * Input Parameters:
+ *   ts - Provides the time interval until sched_timer_expiration() is
+ *        called.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
+ *
+ * Assumptions:
+ *   May be called from interrupt level handling or from the normal tasking
+ *   level.  Interrupts may need to be disabled internally to assure
+ *   non-reentrancy.
+ *
+ ****************************************************************************/
+
+int up_timer_start(const struct timespec *ts)
+{
+  uint64_t ticks;
+
+  up_tmr_sync_up();
+
+  up_unmask_tmr();
+
+  ticks = up_ts2tick(ts) + rdtscp();
+
+  g_timer_active = 1;
+
+  write_msr(MSR_IA32_TSC_DEADLINE, ticks);
+
+  g_goal_time = ticks;
+
+  up_tmr_sync_down();
+  return OK;
+}
+
+/****************************************************************************
+ * Name: up_timer_expire
+ *
+ * Description:
+ *   Called as the IRQ handler for alarm expiration.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void up_timer_expire(void)
+{
+  g_timer_active = 0;
+
+  up_mask_tmr();
+  nxsched_timer_expiration();
+}
+
 #endif /* CONFIG_SCHED_TICKLESS_ALARM */
-#endif /* CONFIG_SCHED_TICKLESS */
