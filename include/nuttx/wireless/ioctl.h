@@ -33,6 +33,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/fs/ioctl.h>
+#include <fixedmath.h>
 
 #ifdef CONFIG_DRIVERS_WIRELESS
 
@@ -46,6 +47,10 @@
  * wireless drivers that are accessed via a character device.
  * Use of these IOCTL commands requires a file descriptor created by
  * the open() interface.
+ ****************************************************************************/
+
+/****************************************************************************
+ * RF common IOCTL commands
  ****************************************************************************/
 
 #define WLIOC_SETRADIOFREQ  _WLCIOC(0x0001)  /* arg: Pointer to uint32_t, */
@@ -62,11 +67,28 @@
                                              /* output power (in dBm) */
 
 /****************************************************************************
+ * LoRa common IOCTL commands
+ ****************************************************************************/
+
+#define WLIOC_LORA_SETSF       _WLCIOC(0x0007) /* arg: Pointer to uint8_t */
+                                               /* Spreading factor */
+#define WLIOC_LORA_SETBW       _WLCIOC(0x0008) /* arg: Pointer to uint16_t */
+                                               /* Bandwidth kHz */
+#define WLIOC_LORA_SETCR       _WLCIOC(0x0009) /* arg: Pointer to wlioc_lora_cr_e */
+                                               /* Coding rate */
+#define WLIOC_LORA_ENCRC       _WLCIOC(0x000A) /* arg: Pointer to uint8_t */ 
+                                               /* Enable/disable CRC */
+#define WLIOC_LORA_ENFIXEDHDR  _WLCIOC(0x000B) /* arg: Pointer to uint8_t */
+                                               /* Enable/disable length byte */
+#define WLIOC_LORA_SYNCWORD    _WLCIOC(0x000C) /* arg: Pointer to wlioc_lora_syncword_s */
+                                               /* Sets custom length syncword */
+
+/****************************************************************************
  * Device-specific IOCTL commands
  ****************************************************************************/
 
 #define WL_FIRST            0x0001          /* First common command */
-#define WL_NCMDS            0x0006          /* Number of common commands */
+#define WL_NCMDS            0x000C          /* Number of common commands */
 
 /* User defined ioctl commands are also supported. These will be forwarded
  * by the upper-half driver to the lower-half driver via the ioctl()
@@ -98,6 +120,69 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
+/* LoRa common types ********************************************************/
+
+/* wlioc_lora_cr_e is the coding rate, which is commonly
+ * supported by LoRa devices to correct errors.
+ */
+
+enum wlioc_lora_cr_e
+{
+  WLIOC_LORA_CR_4_5 = 0x01,
+  WLIOC_LORA_CR_4_6 = 0x02,
+  WLIOC_LORA_CR_4_7 = 0x03,
+  WLIOC_LORA_CR_4_8 = 0x04
+};
+
+/* wlioc_lora_syncword_s is used to seperate lora networks.
+ * Radios will try to catch only packets with the specified syncword.
+ */
+
+struct wlioc_lora_syncword_s
+{
+  size_t syncword_length;
+  uint8_t *syncword;
+};
+
+/* Common RF types **********************************************************/
+
+/* wlioc_rx_hdr_s gets written to by reading the character device.
+ * Contains information about the payload.
+ */
+
+struct wlioc_rx_hdr_s
+{
+  /* Length of payload in bytes */
+
+  size_t payload_length;
+
+  /* Pointer to payload bytes */
+
+  uint8_t *payload;
+
+  /* When error detection is supported and enabled,
+   * this will be greater than 0 when an error is
+   * detected. The payload is still returned which
+   * allows the user to reconstruct the payload
+   */
+
+  uint8_t error;
+
+  /* RSSI dBm in 8 fractional bits fixed point.
+   * Gives steps of 0.125dB precision
+   * ranging between b8MIN and b8MAX
+   */
+
+  b8_t rssi_dbm;
+
+  /* SNR dB in 8 fractional bits fixed point.
+   * Gives steps of 0.125dB precision
+   * ranging between b8MIN and b8MAX
+   */
+
+  b8_t snr_db;
+};
 
 #endif /* CONFIG_DRIVERS_WIRELESS */
 #endif /* __INCLUDE_NUTTX_WIRELESS_IOCTL_H */
