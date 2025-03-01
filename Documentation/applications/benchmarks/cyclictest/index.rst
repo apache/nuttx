@@ -64,6 +64,7 @@ Following command-line parameters can be supplied:
 - ``-l --loops [N]``: The number of measurement loops. Default is 0 (endless).
 - ``-m --measurement [METHODS]``: Sets the time measurement method. 0 selects ``clock_gettime``, 1 uses the NuttX timer API. Be advised that if 1 is selected, you need to specify a timer device (e.g. ``/dev/timer0``) in ``-T``.
 - ``-n --nanosleep [METHOD]``: Sets the waiting method: 0 selects ``clock_nanosleep``, 1 waits for the POLLIN flag on a timer device. Default is 0. Choosing 1 works only with one thread, the ``-t`` value is therefore set to 1. If METHOD 1 is selected, you need to specify a timer device (e.g. ``/dev/timer0``) in ``-T``.
+- ``-q --quiet``: Prints a summary only on exit.
 - ``-p --prio``: Sets the priority of the first thread.
 - ``-t --threads [N]``: The number of test threads to be created. Default is 1.
 - ``-T --timer-device [DEV]``: The measuring timer device. Must be specified when ``-m=1`` or ``-n=1``.
