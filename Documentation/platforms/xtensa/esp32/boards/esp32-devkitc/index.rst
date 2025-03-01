@@ -928,6 +928,22 @@ The apps/testing/smp test is included::
   CONFIG_TESTING_SMP_PRIORITY=100
   CONFIG_TESTING_SMP_STACKSIZE=2048
 
+snake
+-----
+
+This configuration enables snake game using led matrix (ws2812) and gpio pins.
+Alternatively, you can use serial console for input with enabling `GAMES_SNAKE_USE_CONSOLEKEY`
+option.
+
+You can run the game by using ``snake`` command::
+
+    nsh> snake
+
+Here is the sample wiring diagram that demonstrates how to wire ws2812 with buttons for snake example:
+
+.. figure:: esp32-brickmatch-game-schematic.jpg
+    :align: center
+
 sotest
 ------
 
