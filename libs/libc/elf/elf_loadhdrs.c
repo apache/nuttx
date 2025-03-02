@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/modlib/modlib_loadhdrs.c
+ * libs/libc/elf/elf_loadhdrs.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -30,10 +30,10 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/lib/modlib.h>
+#include <nuttx/lib/elf.h>
 
 #include "libc.h"
-#include "modlib/modlib.h"
+#include "elf/elf.h"
 
 /****************************************************************************
  * Private Functions
@@ -44,7 +44,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: modlib_loadhdrs
+ * Name: libelf_loadhdrs
  *
  * Description:
  *   Loads program and section headers into memory.
@@ -55,7 +55,7 @@
  *
  ****************************************************************************/
 
-int modlib_loadhdrs(FAR struct mod_loadinfo_s *loadinfo)
+int libelf_loadhdrs(FAR struct mod_loadinfo_s *loadinfo)
 {
   size_t shdrsize;
   size_t phdrsize;
@@ -94,7 +94,7 @@ int modlib_loadhdrs(FAR struct mod_loadinfo_s *loadinfo)
 
   /* Read the section header table into memory */
 
-  ret = modlib_read(loadinfo, (FAR uint8_t *)loadinfo->shdr, shdrsize,
+  ret = libelf_read(loadinfo, (FAR uint8_t *)loadinfo->shdr, shdrsize,
                     loadinfo->ehdr.e_shoff);
   if (ret < 0)
     {
@@ -125,7 +125,7 @@ int modlib_loadhdrs(FAR struct mod_loadinfo_s *loadinfo)
 
       /* Read the program header table into memory */
 
-      ret = modlib_read(loadinfo, (FAR uint8_t *)loadinfo->phdr, phdrsize,
+      ret = libelf_read(loadinfo, (FAR uint8_t *)loadinfo->phdr, phdrsize,
                         loadinfo->ehdr.e_phoff);
       if (ret < 0)
         {

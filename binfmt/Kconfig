@@ -50,7 +50,7 @@ config ELF
 	bool "Enable the ELF Binary Format"
 	default n
 	select BINFMT_LOADABLE
-	select LIBC_MODLIB
+	select LIBC_ELF
 	---help---
 		Enable support for the ELF binary format.  Default: n
 
