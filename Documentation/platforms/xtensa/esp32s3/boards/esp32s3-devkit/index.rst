@@ -157,10 +157,10 @@ the following output is expected::
     nsh> cap
     cap_main: Hardware initialized. Opening the capture device: /dev/capture0
     cap_main: Number of samples: 0
-    pwm duty cycle: 50 % 
-    pwm frequence: 50 Hz 
-    pwm duty cycle: 50 % 
-    pwm frequence: 50 Hz 
+    pwm duty cycle: 50 %
+    pwm frequence: 50 Hz
+    pwm duty cycle: 50 %
+    pwm frequence: 50 Hz
 
 coremark
 --------
@@ -488,6 +488,12 @@ A configuration tailored for the `Espressif fork of QEMU`_.
 
 .. _Espressif fork of QEMU: https://github.com/espressif/qemu
 
+qemu_toywasm
+------------
+
+Based on ``qemu_debug`` defconfig, with the addition of WebAssembly support.
+See :ref:`toywasm` for more further details.
+
 random
 ------
 
@@ -667,6 +673,8 @@ To test it, just run the following::
   nsh> timer -d /dev/timerx
 
 Where x in the timer instance.
+
+.. _toywasm:
 
 toywasm
 -------
