@@ -376,11 +376,18 @@ static bool usbhost_txempty(FAR struct uart_dev_s *uartdev);
  * device.
  */
 
-static const struct usbhost_id_s g_id[4] =
+static const struct usbhost_id_s g_id[5] =
 {
   {
     USB_CLASS_CDC,          /* base     */
     CDC_SUBCLASS_NONE,      /* subclass */
+    CDC_PROTO_NONE,         /* proto    */
+    0,                      /* vid      */
+    0                       /* pid      */
+  },
+  {
+    USB_CLASS_CDC,          /* base     */
+    CDC_SUBCLASS_ACM,       /* subclass */
     CDC_PROTO_NONE,         /* proto    */
     0,                      /* vid      */
     0                       /* pid      */
@@ -414,7 +421,7 @@ static struct usbhost_registry_s g_cdcacm =
 {
   NULL,                   /* flink    */
   usbhost_create,         /* create   */
-  4,                      /* nids     */
+  5,                      /* nids     */
   &g_id[0]                /* id[]     */
 };
 
