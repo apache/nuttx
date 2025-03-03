@@ -5,6 +5,17 @@
 
 if DRIVERS_LPWAN
 
+config LPWAN_RN2XX3
+	bool "Microchip RN2xx3 driver support"
+	default n
+	select UART # TODO what to select?
+	---help---
+        Enable driver support for the RN2xx3 LoRa radio transceiver.
+
+if LPWAN_RN2XX3
+
+endif # LPWAN_RN2XX3
+
 config LPWAN_SX127X
 	bool "SX127X Low Power Long Range transceiver support"
 	default n
