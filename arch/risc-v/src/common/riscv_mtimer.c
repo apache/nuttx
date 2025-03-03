@@ -221,7 +221,11 @@ static int riscv_mtimer_start(struct oneshot_lowerhalf_s *lower,
   flags = up_irq_save();
 
   mtime = riscv_mtimer_get_mtime(priv);
-  alarm = mtime + ticks * priv->cycle_per_tick;
+
+  /* Align each tick start to cycle_per_tick boundary to avoid clock drift */
+
+  alarm = mtime / priv->cycle_per_tick * priv->cycle_per_tick +
+    ticks * priv->cycle_per_tick;
 
   priv->alarm    = alarm;
   priv->callback = callback;
