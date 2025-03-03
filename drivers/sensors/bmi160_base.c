@@ -52,6 +52,78 @@ static void bmi160_configspi(FAR struct spi_dev_s *spi)
 #endif
 
 /****************************************************************************
+ * Name: bmi160_transferspi
+ *
+ * Description:
+ *   SPI transfer data
+ *
+ * spi:     Handle to the initialized SPI device structure
+ * write:   Flag indicating the transfer direction r/w
+ * regaddr: Address of the BMI160 sensor register to read/write
+ * data:    Pointer to the data buffer for send/receive
+ * len:     Length of the data to be transferred in bytes
+ *
+ ****************************************************************************/
+
+static void bmi160_transferspi(FAR struct spi_dev_s *spi, bool write,
+                               uint8_t regaddr, FAR void *data, int len)
+{
+  uint8_t addr = 0;
+  uint8_t tmp[128];
+
+  if (len > 127)
+    {
+      snerr("SPI_TRANSFER failed: len %d is too large\n", len);
+      len = 127;
+    }
+
+  /* If SPI bus is shared then lock and configure it */
+
+  SPI_LOCK(spi, true);
+  bmi160_configspi(spi);
+
+  /* Select the BMI160 */
+
+  SPI_SELECT(spi, SPIDEV_ACCELEROMETER(0), true);
+
+  if (write)
+    {
+      tmp[0] = regaddr;
+#ifdef CONFIG_SPI_EXCHANGE
+      memcpy(tmp + 1, data, len);
+      SPI_EXCHANGE(spi, tmp, 0, len + 1);
+#else
+      /* Send register address and set the value */
+
+      SPI_SEND(spi, regaddr);
+      SPI_SNDBLOCK(spi, data, len);
+#endif
+    }
+  else
+    {
+      addr = regaddr | 0x80;
+
+#ifdef CONFIG_SPI_EXCHANGE
+      SPI_EXCHANGE(spi, &addr, tmp, len + 1);
+      memcpy(data, tmp + 1, len);
+#else
+      /* Send register to read and get the next byte */
+
+      SPI_SEND(spi, addr);
+      SPI_RECVBLOCK(spi, data, len);
+#endif
+    }
+
+  /* Deselect the BMI160 */
+
+  SPI_SELECT(spi, SPIDEV_ACCELEROMETER(0), false);
+
+  /* Unlock bus */
+
+  SPI_LOCK(spi, false);
+}
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -94,27 +166,9 @@ uint8_t bmi160_getreg8(FAR struct bmi160_dev_s *priv, uint8_t regaddr)
     }
 
 #else /* CONFIG_SENSORS_BMI160_SPI */
-  /* If SPI bus is shared then lock and configure it */
 
-  SPI_LOCK(priv->spi, true);
-  bmi160_configspi(priv->spi);
+  bmi160_transferspi(priv->spi, false, regaddr, &regval, sizeof(uint8_t));
 
-  /* Select the BMI160 */
-
-  SPI_SELECT(priv->spi, SPIDEV_ACCELEROMETER(0), true);
-
-  /* Send register to read and get the next byte */
-
-  SPI_SEND(priv->spi, regaddr | 0x80);
-  SPI_RECVBLOCK(priv->spi, &regval, 1);
-
-  /* Deselect the BMI160 */
-
-  SPI_SELECT(priv->spi, SPIDEV_ACCELEROMETER(0), false);
-
-  /* Unlock bus */
-
-  SPI_LOCK(priv->spi, false);
 #endif
 
   return regval;
@@ -152,27 +206,8 @@ void bmi160_putreg8(FAR struct bmi160_dev_s *priv, uint8_t regaddr,
     }
 
 #else /* CONFIG_SENSORS_BMI160_SPI */
-  /* If SPI bus is shared then lock and configure it */
 
-  SPI_LOCK(priv->spi, true);
-  bmi160_configspi(priv->spi);
-
-  /* Select the BMI160 */
-
-  SPI_SELECT(priv->spi, SPIDEV_ACCELEROMETER(0), true);
-
-  /* Send register address and set the value */
-
-  SPI_SEND(priv->spi, regaddr);
-  SPI_SEND(priv->spi, regval);
-
-  /* Deselect the BMI160 */
-
-  SPI_SELECT(priv->spi, SPIDEV_ACCELEROMETER(0), false);
-
-  /* Unlock bus */
-
-  SPI_LOCK(priv->spi, false);
+  bmi160_transferspi(priv->spi, true, regaddr, &regval, sizeof(uint8_t));
 
 #endif
 }
@@ -212,27 +247,10 @@ uint16_t bmi160_getreg16(FAR struct bmi160_dev_s *priv, uint8_t regaddr)
     }
 
 #else /* CONFIG_SENSORS_BMI160_SPI */
-  /* If SPI bus is shared then lock and configure it */
 
-  SPI_LOCK(priv->spi, true);
-  bmi160_configspi(priv->spi);
+  bmi160_transferspi(priv->spi, false, regaddr, &regval,
+                     sizeof(uint16_t));
 
-  /* Select the BMI160 */
-
-  SPI_SELECT(priv->spi, SPIDEV_ACCELEROMETER(0), true);
-
-  /* Send register to read and get the next 2 bytes */
-
-  SPI_SEND(priv->spi, regaddr | 0x80);
-  SPI_RECVBLOCK(priv->spi, &regval, 2);
-
-  /* Deselect the BMI160 */
-
-  SPI_SELECT(priv->spi, SPIDEV_ACCELEROMETER(0), false);
-
-  /* Unlock bus */
-
-  SPI_LOCK(priv->spi, false);
 #endif
 
   return regval;
@@ -272,27 +290,8 @@ void bmi160_getregs(FAR struct bmi160_dev_s *priv, uint8_t regaddr,
     }
 
 #else /* CONFIG_SENSORS_BMI160_SPI */
-  /* If SPI bus is shared then lock and configure it */
 
-  SPI_LOCK(priv->spi, true);
-  bmi160_configspi(priv->spi);
-
-  /* Select the BMI160 */
-
-  SPI_SELECT(priv->spi, SPIDEV_ACCELEROMETER(0), true);
-
-  /* Send register to read and get the next 2 bytes */
-
-  SPI_SEND(priv->spi, regaddr | 0x80);
-  SPI_RECVBLOCK(priv->spi, regval, len);
-
-  /* Deselect the BMI160 */
-
-  SPI_SELECT(priv->spi, SPIDEV_ACCELEROMETER(0), false);
-
-  /* Unlock bus */
-
-  SPI_LOCK(priv->spi, false);
+  bmi160_transferspi(priv->spi, false, regaddr, regval, len);
 
 #endif
 }
