@@ -132,7 +132,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
   /* Map the memory chunk into an allocated node structure */
 
   oldnode = (FAR struct mm_allocnode_s *)
-    ((FAR char *)kasan_reset_tag(oldmem) - MM_SIZEOF_ALLOCNODE);
+    ((FAR char *)kasan_clear_tag(oldmem) - MM_SIZEOF_ALLOCNODE);
 
   /* We need to hold the MM mutex while we muck with the nodelist. */
 
