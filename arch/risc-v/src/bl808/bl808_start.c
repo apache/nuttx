@@ -224,7 +224,7 @@ void bl808_start_s(int mhartid)
 
   showprogress('B');
 
-  /* Do board initialization */
+  /* TODO: Additional initialization */
 
   showprogress('C');
 

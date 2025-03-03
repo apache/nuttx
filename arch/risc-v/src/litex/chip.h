@@ -40,7 +40,8 @@
  * Name: setintstack
  *
  * Description:
- *   Set the current stack pointer to the  "top" the correct interrupt stack.
+ *   Set the current stack pointer to the "top" of the correct interrupt
+ *   stack.
  *
  ****************************************************************************/
 
