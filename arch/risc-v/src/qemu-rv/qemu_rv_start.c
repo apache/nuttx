@@ -197,7 +197,7 @@ void qemu_rv_start(int mhartid, const char *dtb)
 
   showprogress('B');
 
-  /* Do board initialization */
+  /* TODO: Additional initialization */
 
   showprogress('C');
 

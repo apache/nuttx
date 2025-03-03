@@ -65,8 +65,8 @@
  *   IDLE thread stack.  Size determined by CONFIG_IDLETHREAD_STACKSIZE.
  *   Heap.  Extends to the end of User SRAM.
  *
- *   The following memory map is assumed for the protect build.
- *   The kernel and user space have it's own dedicated heap space.
+ *   The following memory map is assumed for the protected build.
+ *   The kernel and user space have their own dedicated heap spaces.
  *
  *   User .data region         Size determined at link time
  *   User .bss region          Size determined at link time
