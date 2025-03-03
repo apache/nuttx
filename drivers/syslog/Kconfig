@@ -259,6 +259,21 @@ config SYSLOG_RPMSG
 	---help---
 		Use the RPMSG as a SYSLOG output device, send message to remote proc.
 
+config SYSLOG_CDCACM
+	bool "Log to CDCACM"
+	depends on CDCACM
+	default n
+	---help---
+		Use the CDCACM as a SYSLOG output device, send message to remote proc.
+
+config SYSLOG_CDCACM_MINOR
+	int "The syslog CDCACM minor number"
+	depends on SYSLOG_CDCACM
+	default 0
+	---help---
+		If there are more than one CDCACM devices, then a device minor number
+		may also need to be provided. Default: 0
+
 config SYSLOG_STREAM
 	bool "Log to stream"
 	default n
@@ -269,7 +284,7 @@ config SYSLOG_STREAM
 
 config SYSLOG_CONSOLE
 	bool "Log to /dev/console"
-	default !ARCH_LOWPUTC && !SYSLOG_CHAR && !RAMLOG_SYSLOG && !SYSLOG_RPMSG && !SYSLOG_RTT
+	default !ARCH_LOWPUTC && !SYSLOG_CHAR && !RAMLOG_SYSLOG && !SYSLOG_RPMSG && !SYSLOG_RTT && !SYSLOG_CDCACM
 	depends on DEV_CONSOLE
 	select SYSLOG_REGISTER
 	---help---
@@ -277,7 +292,7 @@ config SYSLOG_CONSOLE
 
 config SYSLOG_DEFAULT
 	bool "Default SYSLOG device"
-	default ARCH_LOWPUTC && !SYSLOG_CHAR && !RAMLOG_SYSLOG && !SYSLOG_RPMSG && !SYSLOG_RTT && !SYSLOG_CONSOLE
+	default ARCH_LOWPUTC && !SYSLOG_CHAR && !RAMLOG_SYSLOG && !SYSLOG_RPMSG && !SYSLOG_RTT && !SYSLOG_CDCACM && !SYSLOG_CONSOLE
 	---help---
 		syslog() interfaces will be present, but all output will go to the
 		up_putc(ARCH_LOWPUTC == y) or bit-bucket(ARCH_LOWPUTC == n).
