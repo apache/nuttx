@@ -31,6 +31,7 @@ config STM32H5_STM32H5XXXX
 	bool
 	default n
 	select ARCH_HAVE_FPU
+	select STM32H5_HAVE_ICACHE
 
 config STM32H5_STM32H56XXX
 	bool
@@ -55,6 +56,7 @@ config STM32H5_STM32H56XXX
 	select STM32H5_HAVE_SPI6
 	select STM32H5_HAVE_USBFS
 	select STM32H5_HAVE_HSI48
+	select STM32H5_HAVE_ICACHE_REMAP
 
 config STM32H5_STM32H563XX
 	# STM32H552 and STM32H562 devices documented in RM0439
@@ -226,6 +228,10 @@ config STM32H5_HAVE_HSI48
 	bool
 	default n
 
+config STM32H5_HAVE_ICACHE
+	bool
+	default n
+
 config STM32H5_HAVE_LPUART1
 	bool
 	default n
@@ -332,6 +338,11 @@ config STM32H5_ETHMAC
 	select NETDEVICES
 	select ARCH_HAVE_PHY
 	select STM32H5_HAVE_PHY_POLLED
+
+config STM32H5_ICACHE
+	bool "ICACHE"
+	default n
+	depends on STM32H5_HAVE_ICACHE
 
 config STM32H5_QSPI1
 	bool "QSPI1"
@@ -578,6 +589,241 @@ config STM32H5_FLASH_PREFETCH
 	default y
 	---help---
 		Enable FLASH prefetch
+
+menu "ICACHE Configuration"
+	depends on STM32H5_ICACHE
+
+config STM32H5_ICACHE_MONITOR_EN
+	bool "Enable ICACHE Hit/Miss Counters"
+	default n
+
+config STM32H5_ICACHE_DIRECT
+	bool "Enable 1-Way Direct Mapped Cache (N-Way = default)"
+	default n
+
+menu "ICACHE Interrupt Configuration"
+	depends on STM32H5_ICACHE
+
+config STM32H5_ICACHE_INV_INT
+	bool "Enable interrupts on full invalidation completion."
+	default n
+
+config STM32H5_ICACHE_ERR_INT
+	bool "Enable interrupts on occurrences of cache errors."
+	default n
+
+endmenu # ICACHE Interrupt Configuration
+
+menu "ICACHE Region Configuration"
+	depends on STM32H5_ICACHE
+
+config STM32H5_ICACHE_REGION0
+	bool "Enable Configuration of ICACHE Region 0"
+	default n
+
+config STM32H5_ICACHE_REGION1
+	bool "Enable Configuration of ICACHE Region 1"
+	default n
+
+config STM32H5_ICACHE_REGION2
+	bool "Enable Configuration of ICACHE Region 2"
+	default n
+
+config STM32H5_ICACHE_REGION3
+	bool "Enable Configuration of ICACHE Region 3"
+	default n
+
+menu "Region 0 Configuration"
+	depends on STM32H5_ICACHE_REGION0 && STM32H5_HAVE_ICACHE_REMAP
+
+config STM32H5_ICACHE_REGION0_BADDR
+	hex "ICACHE Region 0 Base Address Bits [28:21]"
+	default 0
+	range 0 255
+	depends on STM32H5_ICACHE_REGION0
+	---help---
+		Set bits [28:21] of the base address for ICACHE Region 0.
+
+config STM32H5_ICACHE_REGION0_RSIZE
+	int "ICACHE Region 0 Size"
+	default 1
+	range 1 7
+	depends on STM32H5_ICACHE_REGION0
+	---help---
+		Set the size of Region 0.
+                1 = 2 Mbytes, 2 = 4 Mbytes, 3 = 8 Mbytes, 4 = 16 Mbytes,
+                5 = 2 Mbytes, 6 = 64 Mbytes, 7 = 128 Mbytes.
+
+config STM32H5_ICACHE_REGION0_REMAPADDR
+	hex "ICACHE Region 0 Remap Address Bits [31:21]"
+	default 0
+	range 0 2047
+	depends on STM32H5_ICACHE_REGION0
+	---help---
+		Set bits [31:21] of ICACHE Region 0 Remap Address..
+
+config STM32H5_ICACHE_REGION0_MSTSEL
+	int "ICACHE Region 0 Master Select (0 or 1)"
+	default 0
+	range 0 1
+	depends on STM32H5_ICACHE_REGION0
+	---help---
+		Select ICACHE Region 0 Master 1 (0) or Master 2 (1).
+
+config STM32H5_ICACHE_REGION0_HBURST
+	int "ICACHE Region 0 Output Burst Type (0 = Wrap, 1 = Incr)"
+	default 0
+	range 0 1
+	depends on STM32H5_ICACHE_REGION0
+	---help---
+		Select Wrap (0) or Increment (1) Output Burst Type.
+
+endmenu # Region 0 Configuration
+
+menu "Region 1 Configuration"
+	depends on STM32H5_ICACHE_REGION1 && STM32H5_HAVE_ICACHE_REMAP
+
+config STM32H5_ICACHE_REGION1_BADDR
+	hex "ICACHE Region 1 Base Address Bits [28:21]"
+	default 0
+	range 0 255
+	depends on STM32H5_ICACHE_REGION1
+	---help---
+		Set bits [28:21] of the base address for ICACHE Region 1.
+
+config STM32H5_ICACHE_REGION1_RSIZE
+	int "ICACHE Region 1 Size"
+	default 1
+	range 1 7
+	depends on STM32H5_ICACHE_REGION1
+	---help---
+		Set the size of Region 1.
+                1 = 2 Mbytes, 2 = 4 Mbytes, 3 = 8 Mbytes, 4 = 16 Mbytes,
+                5 = 2 Mbytes, 6 = 64 Mbytes, 7 = 128 Mbytes.
+
+config STM32H5_ICACHE_REGION1_REMAPADDR
+	hex "ICACHE Region 1 Remap Address Bits [31:21]"
+	default 0
+	range 0 2047
+	depends on STM32H5_ICACHE_REGION1
+	---help---
+		Set bits [31:21] of ICACHE Region 1 Remap Address..
+
+config STM32H5_ICACHE_REGION1_MSTSEL
+	int "ICACHE Region 1 Master Select (0 or 1)"
+	default 0
+	range 0 1
+	depends on STM32H5_ICACHE_REGION1
+	---help---
+		Select ICACHE Region 1 Master 1 (0) or Master 2 (1).
+
+config STM32H5_ICACHE_REGION1_HBURST
+	int "ICACHE Region 1 Output Burst Type (0 = Wrap, 1 = Incr)"
+	default 0
+	range 0 1
+	depends on STM32H5_ICACHE_REGION1
+	---help---
+		Select Wrap (0) or Increment (1) Output Burst Type.
+
+endmenu # Region 1 Configuration
+
+menu "Region 2 Configuration"
+	depends on STM32H5_ICACHE_REGION2 && STM32H5_HAVE_ICACHE_REMAP
+
+config STM32H5_ICACHE_REGION2_BADDR
+	hex "ICACHE Region 2 Base Address Bits [28:21]"
+	default 0
+	range 0 255
+	depends on STM32H5_ICACHE_REGION2
+	---help---
+		Set bits [28:21] of the base address for ICACHE Region 2.
+
+config STM32H5_ICACHE_REGION2_RSIZE
+	int "ICACHE Region 2 Size"
+	default 1
+	range 1 7
+	depends on STM32H5_ICACHE_REGION2
+	---help---
+		Set the size of Region 2.
+                1 = 2 Mbytes, 2 = 4 Mbytes, 3 = 8 Mbytes, 4 = 16 Mbytes,
+                5 = 2 Mbytes, 6 = 64 Mbytes, 7 = 128 Mbytes.
+
+config STM32H5_ICACHE_REGION2_REMAPADDR
+	hex "ICACHE Region 2 Remap Address Bits [31:21]"
+	default 0
+	range 0 2047
+	depends on STM32H5_ICACHE_REGION2
+	---help---
+		Set bits [31:21] of ICACHE Region 2 Remap Address..
+
+config STM32H5_ICACHE_REGION2_MSTSEL
+	int "ICACHE Region 2 Master Select (0 or 1)"
+	default 0
+	range 0 1
+	depends on STM32H5_ICACHE_REGION2
+	---help---
+		Select ICACHE Region 2 Master 1 (0) or Master 2 (1).
+
+config STM32H5_ICACHE_REGION2_HBURST
+	int "ICACHE Region 2 Output Burst Type (0 = Wrap, 1 = Incr)"
+	default 0
+	range 0 1
+	depends on STM32H5_ICACHE_REGION2
+	---help---
+		Select Wrap (0) or Increment (1) Output Burst Type.
+
+endmenu # Region 2 Configuration
+
+menu "Region 3 Configuration"
+	depends on STM32H5_ICACHE_REGION3 && STM32H5_HAVE_ICACHE_REMAP
+
+config STM32H5_ICACHE_REGION3_BADDR
+	hex "ICACHE Region 3 Base Address Bits [28:21]"
+	default 0
+	range 0 255
+	depends on STM32H5_ICACHE_REGION3
+	---help---
+		Set bits [28:21] of the base address for ICACHE Region 3.
+
+config STM32H5_ICACHE_REGION3_RSIZE
+	int "ICACHE Region 3 Size"
+	default 1
+	range 1 7
+	depends on STM32H5_ICACHE_REGION3
+	---help---
+		Set the size of Region 3.
+                1 = 2 Mbytes, 2 = 4 Mbytes, 3 = 8 Mbytes, 4 = 16 Mbytes,
+                5 = 2 Mbytes, 6 = 64 Mbytes, 7 = 128 Mbytes.
+
+config STM32H5_ICACHE_REGION3_REMAPADDR
+	hex "ICACHE Region 3 Remap Address Bits [31:21]"
+	default 0
+	range 0 2047
+	depends on STM32H5_ICACHE_REGION3
+	---help---
+		Set bits [31:21] of ICACHE Region 3 Remap Address..
+
+config STM32H5_ICACHE_REGION3_MSTSEL
+	int "ICACHE Region 3 Master Select (0 or 1)"
+	default 0
+	range 0 1
+	depends on STM32H5_ICACHE_REGION3
+	---help---
+		Select ICACHE Region 3 Master 1 (0) or Master 2 (1).
+
+config STM32H5_ICACHE_REGION3_HBURST
+	int "ICACHE Region 3 Output Burst Type (0 = Wrap, 1 = Incr)"
+	default 0
+	range 0 1
+	depends on STM32H5_ICACHE_REGION3
+	---help---
+		Select Wrap (0) or Increment (1) Output Burst Type.
+
+endmenu # Region 3 Configuration
+
+endmenu # ICACHE Region Configuration
+
+endmenu # ICACHE Configuration
 
 config STM32H5_DISABLE_IDLE_SLEEP_DURING_DEBUG
 	bool "Disable IDLE Sleep (WFI) in debug mode"
