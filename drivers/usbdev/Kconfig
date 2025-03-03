@@ -432,8 +432,6 @@ menuconfig CDCACM
 	bool "USB Modem (CDC/ACM) support"
 	default n
 	select SERIAL_REMOVABLE
-	select SERIAL_TXDMA
-	select SERIAL_RXDMA
 	---help---
 		Enables USB Modem (CDC/ACM) support
 
@@ -681,28 +679,6 @@ config CDCACM_BULKIN_REQLEN
 		There is also no reason from CDCACM_BULKIN_REQLEN to be greater
 		than CDCACM_TXBUFSIZE-1, since a request larger than the TX
 		buffer can never be sent.
-
-config CDCACM_RXBUFSIZE
-	int "Receive buffer size"
-	default 513 if USBDEV_DUALSPEED
-	default 257 if !USBDEV_DUALSPEED
-	---help---
-		Size of the serial receive buffers.  The actual amount of data that
-		can be held in the buffer is this number minus one due to the way
-		that the circular buffer is managed.  So an RX buffer size of 257
-		will hold four full-speed, 64 byte packets; a buffer size of 513
-		will hold one high-speed, 512 byte packet.
-
-config CDCACM_TXBUFSIZE
-	int "Transmit buffer size"
-	default 769 if USBDEV_DUALSPEED
-	default 193 if !USBDEV_DUALSPEED
-	---help---
-		Size of the serial transmit buffers.  The actual amount of data that
-		can be held in the buffer is this number minus one due to the way
-		that the circular buffer is managed.  So a TX buffer size of 769
-		will hold one request of size 768; a buffer size of 193 will hold
-		two requests of size 96 bytes.
 
 if !CDCACM_COMPOSITE
 
