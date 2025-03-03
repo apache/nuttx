@@ -14604,7 +14604,6 @@ include/nuttx/rpmsg/rpmsg_port.h liaoao@xiaomi.com wangbowen6@xiaomi.com devel@s
 include/nuttx/rpmsg/rpmsg_router.h yintao@xiaomi.com alin.jerpelea@sony.com
 include/nuttx/rpmsg/rpmsg_virtio_ivshmem.h wangyongrong@xiaomi.com alin.jerpelea@sony.com
 include/nuttx/rpmsg/rpmsg_virtio_lite.h wangbowen6@xiaomi.com
-include/nuttx/rptun/openamp.h liguiding@pinecone.net wangyongrong@xiaomi.com xiaoxiang@xiaomi.com liguiding1@xiaomi.com dongjiuzhu1@xiaomi.com
 include/nuttx/rptun/rptun.h liguiding@pinecone.net liguiding1@xiaomi.com wangyongrong@xiaomi.com zhongan@xiaomi.com xiaoxiang@xiaomi.com
 include/nuttx/rptun/rptun_bmp.h hujun5@xiaomi.com
 include/nuttx/rptun/rptun_ivshmem.h wangbowen6@xiaomi.com alin.jerpelea@sony.com
