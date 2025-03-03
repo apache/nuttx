@@ -204,7 +204,7 @@ static void kasan_set_poison(FAR const void *addr, size_t size,
  * Public Functions
  ****************************************************************************/
 
-FAR void *kasan_reset_tag(FAR const void *addr)
+FAR void *kasan_clear_tag(FAR const void *addr)
 {
   return (FAR void *)addr;
 }
