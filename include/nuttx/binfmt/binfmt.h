@@ -33,7 +33,7 @@
 #include <sys/types.h>
 
 #include <nuttx/sched.h>
-#include <nuttx/lib/modlib.h>
+#include <nuttx/lib/elf.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -69,7 +69,7 @@ struct binary_s
   main_t entrypt;                      /* Entry point into a program module */
   FAR void *mapped;                    /* Memory-mapped, address space */
 
-#ifdef CONFIG_LIBC_MODLIB
+#ifdef CONFIG_LIBC_ELF
   struct module_s mod;                 /* Module context */
 #endif
 

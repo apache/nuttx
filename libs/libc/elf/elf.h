@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/modlib/modlib.h
+ * libs/libc/elf/elf.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,22 +20,22 @@
  *
  ****************************************************************************/
 
-#ifndef __LIBS_LIBC_MODLIB_MODLIB_H
-#define __LIBS_LIBC_MODLIB_MODLIB_H
+#ifndef __LIBS_LIBC_LIBC_ELF_LIBC_ELF_H
+#define __LIBS_LIBC_LIBC_ELF_LIBC_ELF_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/addrenv.h>
-#include <nuttx/lib/modlib.h>
+#include <nuttx/lib/elf.h>
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: modlib_verifyheader
+ * Name: libelf_verifyheader
  *
  * Description:
  *   Given the header from a possible ELF executable, verify that it is
@@ -47,10 +47,10 @@
  *
  ****************************************************************************/
 
-int modlib_verifyheader(FAR const Elf_Ehdr *header);
+int libelf_verifyheader(FAR const Elf_Ehdr *header);
 
 /****************************************************************************
- * Name: modlib_findsymtab
+ * Name: libelf_findsymtab
  *
  * Description:
  *   Find the symbol table section.
@@ -61,10 +61,10 @@ int modlib_verifyheader(FAR const Elf_Ehdr *header);
  *
  ****************************************************************************/
 
-int modlib_findsymtab(FAR struct mod_loadinfo_s *loadinfo);
+int libelf_findsymtab(FAR struct mod_loadinfo_s *loadinfo);
 
 /****************************************************************************
- * Name: modlib_readsym
+ * Name: libelf_readsym
  *
  * Description:
  *   Read the ELF symbol structure at the specified index into memory.
@@ -80,11 +80,11 @@ int modlib_findsymtab(FAR struct mod_loadinfo_s *loadinfo);
  *
  ****************************************************************************/
 
-int modlib_readsym(FAR struct mod_loadinfo_s *loadinfo, int index,
+int libelf_readsym(FAR struct mod_loadinfo_s *loadinfo, int index,
                    FAR Elf_Sym *sym, FAR Elf_Shdr *shdr);
 
 /****************************************************************************
- * Name: modlib_symvalue
+ * Name: libelf_symvalue
  *
  * Description:
  *   Get the value of a symbol.  The updated value of the symbol is returned
@@ -110,13 +110,13 @@ int modlib_readsym(FAR struct mod_loadinfo_s *loadinfo, int index,
  *
  ****************************************************************************/
 
-int modlib_symvalue(FAR struct module_s *modp,
+int libelf_symvalue(FAR struct module_s *modp,
                     FAR struct mod_loadinfo_s *loadinfo, FAR Elf_Sym *sym,
                     Elf_Off sh_offset,
                     FAR const struct symtab_s *exports, int nexports);
 
 /****************************************************************************
- * Name: modlib_insertsymtab
+ * Name: libelf_insertsymtab
  *
  * Description:
  *   Insert a symbol table for the current module.
@@ -135,13 +135,13 @@ int modlib_symvalue(FAR struct module_s *modp,
  *
  ****************************************************************************/
 
-int modlib_insertsymtab(FAR struct module_s *modp,
+int libelf_insertsymtab(FAR struct module_s *modp,
                         FAR struct mod_loadinfo_s *loadinfo,
                         FAR Elf_Shdr *shdr,
                         FAR Elf_Sym *sym);
 
 /****************************************************************************
- * Name: modlib_findglobal
+ * Name: libelf_findglobal
  *
  * Description:
  *   Find a symbol in the global symbol table
@@ -160,13 +160,13 @@ int modlib_insertsymtab(FAR struct module_s *modp,
  *
  ****************************************************************************/
 
-void *modlib_findglobal(FAR struct module_s *modp,
+void *libelf_findglobal(FAR struct module_s *modp,
                         FAR struct mod_loadinfo_s *loadinfo,
                         FAR Elf_Shdr *shdr,
                         FAR Elf_Sym *sym);
 
 /****************************************************************************
- * Name: modlib_loadhdrs
+ * Name: libelf_loadhdrs
  *
  * Description:
  *   Loads program and section headers into memory.
@@ -177,10 +177,10 @@ void *modlib_findglobal(FAR struct module_s *modp,
  *
  ****************************************************************************/
 
-int modlib_loadhdrs(FAR struct mod_loadinfo_s *loadinfo);
+int libelf_loadhdrs(FAR struct mod_loadinfo_s *loadinfo);
 
 /****************************************************************************
- * Name: modlib_sectname
+ * Name: libelf_sectname
  *
  * Description:
  *   Get the symbol name in loadinfo->iobuffer[].
@@ -191,11 +191,11 @@ int modlib_loadhdrs(FAR struct mod_loadinfo_s *loadinfo);
  *
  ****************************************************************************/
 
-int modlib_sectname(FAR struct mod_loadinfo_s *loadinfo,
+int libelf_sectname(FAR struct mod_loadinfo_s *loadinfo,
                     FAR const Elf_Shdr *shdr);
 
 /****************************************************************************
- * Name: modlib_allocbuffer
+ * Name: libelf_allocbuffer
  *
  * Description:
  *   Perform the initial allocation of the I/O buffer, if it has not already
@@ -207,10 +207,10 @@ int modlib_sectname(FAR struct mod_loadinfo_s *loadinfo,
  *
  ****************************************************************************/
 
-int modlib_allocbuffer(FAR struct mod_loadinfo_s *loadinfo);
+int libelf_allocbuffer(FAR struct mod_loadinfo_s *loadinfo);
 
 /****************************************************************************
- * Name: modlib_reallocbuffer
+ * Name: libelf_reallocbuffer
  *
  * Description:
  *   Increase the size of I/O buffer by the specified buffer increment.
@@ -221,11 +221,11 @@ int modlib_allocbuffer(FAR struct mod_loadinfo_s *loadinfo);
  *
  ****************************************************************************/
 
-int modlib_reallocbuffer(FAR struct mod_loadinfo_s *loadinfo,
+int libelf_reallocbuffer(FAR struct mod_loadinfo_s *loadinfo,
                          size_t increment);
 
 /****************************************************************************
- * Name: modlib_freebuffers
+ * Name: libelf_freebuffers
  *
  * Description:
  *  Release all working buffers.
@@ -236,12 +236,12 @@ int modlib_reallocbuffer(FAR struct mod_loadinfo_s *loadinfo,
  *
  ****************************************************************************/
 
-int modlib_freebuffers(FAR struct mod_loadinfo_s *loadinfo);
+int libelf_freebuffers(FAR struct mod_loadinfo_s *loadinfo);
 
 #ifdef CONFIG_ARCH_ADDRENV
 
 /****************************************************************************
- * Name: modlib_addrenv_alloc
+ * Name: libelf_addrenv_alloc
  *
  * Description:
  *   Allocate memory for the ELF image (textalloc and datastart). If
@@ -264,11 +264,11 @@ int modlib_freebuffers(FAR struct mod_loadinfo_s *loadinfo);
  *
  ****************************************************************************/
 
-int modlib_addrenv_alloc(FAR struct mod_loadinfo_s *loadinfo,
+int libelf_addrenv_alloc(FAR struct mod_loadinfo_s *loadinfo,
                          size_t textsize, size_t datasize);
 
 /****************************************************************************
- * Name: modlib_addrenv_select
+ * Name: libelf_addrenv_select
  *
  * Description:
  *   Temporarily select the task's address environment.
@@ -281,13 +281,13 @@ int modlib_addrenv_alloc(FAR struct mod_loadinfo_s *loadinfo,
  *
  ****************************************************************************/
 
-int modlib_addrenv_select(FAR struct mod_loadinfo_s *loadinfo);
+int libelf_addrenv_select(FAR struct mod_loadinfo_s *loadinfo);
 
 /****************************************************************************
- * Name: modlib_addrenv_restore
+ * Name: libelf_addrenv_restore
  *
  * Description:
- *   Restore the address environment before modlib_addrenv_select() was
+ *   Restore the address environment before libelf_addrenv_select() was
  *   called.
  *
  * Input Parameters:
@@ -298,14 +298,14 @@ int modlib_addrenv_select(FAR struct mod_loadinfo_s *loadinfo);
  *
  ****************************************************************************/
 
-int modlib_addrenv_restore(FAR struct mod_loadinfo_s *loadinfo);
+int libelf_addrenv_restore(FAR struct mod_loadinfo_s *loadinfo);
 
 /****************************************************************************
- * Name: modlib_addrenv_free
+ * Name: libelf_addrenv_free
  *
  * Description:
  *   Release the address environment previously created by
- *   modlib_addrenv_alloc().  This function is called only under certain
+ *   libelf_addrenv_alloc().  This function is called only under certain
  *   error conditions after the module has been loaded but not yet started.
  *   After the module has been started, the address environment will
  *   automatically be freed when the module exits.
@@ -318,7 +318,7 @@ int modlib_addrenv_restore(FAR struct mod_loadinfo_s *loadinfo);
  *
  ****************************************************************************/
 
-void modlib_addrenv_free(FAR struct mod_loadinfo_s *loadinfo);
+void libelf_addrenv_free(FAR struct mod_loadinfo_s *loadinfo);
 
 #endif /* CONFIG_ARCH_ADDRENV */
-#endif /* __LIBS_LIBC_MODLIB_MODLIB_H */
+#endif /* __LIBS_LIBC_LIBC_ELF_LIBC_ELF_H */

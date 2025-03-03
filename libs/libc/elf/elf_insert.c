@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/modlib/modlib_insert.c
+ * libs/libc/elf/elf_insert.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -29,16 +29,16 @@
 #include <sys/param.h>
 
 #include <nuttx/lib/lib.h>
-#include <nuttx/lib/modlib.h>
+#include <nuttx/lib/elf.h>
 
-#include "modlib.h"
+#include "elf.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: modlib_dumploadinfo
+ * Name: libelf_dumploadinfo
  *
  * Description:
  *  Dump the load information to debug output.
@@ -46,7 +46,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_BINFMT_INFO
-void modlib_dumploadinfo(FAR struct mod_loadinfo_s *loadinfo)
+void libelf_dumploadinfo(FAR struct mod_loadinfo_s *loadinfo)
 {
   int i;
 
@@ -109,13 +109,13 @@ void modlib_dumploadinfo(FAR struct mod_loadinfo_s *loadinfo)
 }
 
 /****************************************************************************
- * Name: modlib_dumpmodule
+ * Name: libelf_dumpmodule
  ****************************************************************************/
 
-void modlib_dumpmodule(FAR struct module_s *modp)
+void libelf_dumpmodule(FAR struct module_s *modp)
 {
   binfo("Module:\n");
-#ifdef HAVE_MODLIB_NAMES
+#ifdef HAVE_LIBC_ELF_NAMES
   binfo("  modname:      %s\n", modp->modname);
 #endif
   binfo("  textalloc:    %08lx\n", (long)modp->textalloc);
@@ -134,16 +134,16 @@ void modlib_dumpmodule(FAR struct module_s *modp)
 
 #endif
 
-#if CONFIG_MODLIB_MAXDEPEND > 0
+#if CONFIG_LIBC_ELF_MAXDEPEND > 0
   binfo("  dependents:   %d\n",    modp->dependents);
   for (int i = 0; i < modp->dependents; i++)
     {
-#  ifdef HAVE_MODLIB_NAMES
+#  ifdef HAVE_LIBC_ELF_NAMES
       binfo("%d    %s\n", i, modp->dependencies[i]->modname);
 #  else
       binfo("%d\n", i);
 #  endif
-      modlib_dumpmodule(modp->dependencies[i]);
+      libelf_dumpmodule(modp->dependencies[i]);
     }
 #endif
 
@@ -156,24 +156,24 @@ void modlib_dumpmodule(FAR struct module_s *modp)
  * Name: elf_dumpentrypt
  ****************************************************************************/
 
-#ifdef CONFIG_MODLIB_DUMPBUFFER
-void modlib_dumpentrypt(FAR struct mod_loadinfo_s *loadinfo)
+#ifdef CONFIG_LIBC_ELF_DUMPBUFFER
+void libelf_dumpentrypt(FAR struct mod_loadinfo_s *loadinfo)
 {
   FAR const uint8_t *entry;
 #ifdef CONFIG_ARCH_ADDRENV
   int ret;
 
   /* If CONFIG_ARCH_ADDRENV=y, then the loaded ELF lies in a virtual address
-   * space that may not be in place now.  modlib_addrenv_select() will
+   * space that may not be in place now.  libelf_addrenv_select() will
    * temporarily instantiate that address space.
    */
 
   if (loadinfo->addrenv != NULL)
     {
-      ret = modlib_addrenv_select(loadinfo);
+      ret = libelf_addrenv_select(loadinfo);
       if (ret < 0)
         {
-          berr("ERROR: modlib_addrenv_select() failed: %d\n", ret);
+          berr("ERROR: libelf_addrenv_select() failed: %d\n", ret);
           return;
         }
     }
@@ -193,7 +193,7 @@ void modlib_dumpentrypt(FAR struct mod_loadinfo_s *loadinfo)
       entry = (FAR const uint8_t *)loadinfo->textalloc;
     }
 
-  modlib_dumpbuffer("Entry code", entry,
+  libelf_dumpbuffer("Entry code", entry,
                     MIN(loadinfo->textsize - loadinfo->ehdr.e_entry, 512));
 
 #ifdef CONFIG_ARCH_ADDRENV
@@ -201,10 +201,10 @@ void modlib_dumpentrypt(FAR struct mod_loadinfo_s *loadinfo)
 
   if (loadinfo->addrenv != NULL)
     {
-      ret = modlib_addrenv_restore(loadinfo);
+      ret = libelf_addrenv_restore(loadinfo);
       if (ret < 0)
         {
-          berr("ERROR: modlib_addrenv_restore() failed: %d\n", ret);
+          berr("ERROR: libelf_addrenv_restore() failed: %d\n", ret);
         }
     }
 #endif
@@ -212,14 +212,14 @@ void modlib_dumpentrypt(FAR struct mod_loadinfo_s *loadinfo)
 #endif
 
 /****************************************************************************
- * Name: modlib_loadsymtab
+ * Name: libelf_loadsymtab
  *
  * Description:
  *   Load the symbol table into memory.
  *
  ****************************************************************************/
 
-static int modlib_loadsymtab(FAR struct module_s *modp,
+static int libelf_loadsymtab(FAR struct module_s *modp,
                              FAR struct mod_loadinfo_s *loadinfo)
 {
   FAR Elf_Shdr *symhdr = &loadinfo->shdr[loadinfo->symtabidx];
@@ -232,7 +232,7 @@ static int modlib_loadsymtab(FAR struct module_s *modp,
       return -ENOMEM;
     }
 
-  ret = modlib_read(loadinfo, (FAR uint8_t *)sym, symhdr->sh_size,
+  ret = libelf_read(loadinfo, (FAR uint8_t *)sym, symhdr->sh_size,
                     symhdr->sh_offset);
 
   if (ret < 0)
@@ -253,7 +253,7 @@ static int modlib_loadsymtab(FAR struct module_s *modp,
         }
     }
 
-  ret = modlib_insertsymtab(modp, loadinfo, symhdr, sym);
+  ret = libelf_insertsymtab(modp, loadinfo, symhdr, sym);
   lib_free(sym);
   if (ret != 0)
     {
@@ -265,13 +265,13 @@ static int modlib_loadsymtab(FAR struct module_s *modp,
 }
 
 /****************************************************************************
- * Name: modlib_insert
+ * Name: libelf_insert
  *
  * Description:
  *   Verify that the file is an ELF module binary and, if so, load the
  *   module into kernel memory and initialize it for use.
  *
- *   NOTE: modlib_setsymtab() had to have been called in board-specific OS
+ *   NOTE: libelf_setsymtab() had to have been called in board-specific OS
  *   logic prior to calling this function from application logic (perhaps via
  *   boardctl(BOARDIOC_OS_SYMTAB).  Otherwise, insmod will be unable to
  *   resolve symbols in the OS module.
@@ -284,13 +284,13 @@ static int modlib_loadsymtab(FAR struct module_s *modp,
  *
  * Returned Value:
  *   A non-NULL module handle that can be used on subsequent calls to other
- *   module interfaces is returned on success.  If modlib_insert() was
- *   unable to load the module modlib_insert() will return a NULL handle
+ *   module interfaces is returned on success.  If libelf_insert() was
+ *   unable to load the module libelf_insert() will return a NULL handle
  *   and the errno variable will be set appropriately.
  *
  ****************************************************************************/
 
-FAR void *modlib_insert(FAR const char *filename, FAR const char *modname)
+FAR void *libelf_insert(FAR const char *filename, FAR const char *modname)
 {
   FAR const struct symtab_s *exports;
   struct mod_loadinfo_s loadinfo;
@@ -305,14 +305,14 @@ FAR void *modlib_insert(FAR const char *filename, FAR const char *modname)
 
   /* Get exclusive access to the module registry */
 
-  modlib_registry_lock();
+  libelf_registry_lock();
 
   /* Check if this module is already installed */
 
-#ifdef HAVE_MODLIB_NAMES
-  if (modlib_registry_find(modname) != NULL)
+#ifdef HAVE_LIBC_ELF_NAMES
+  if (libelf_registry_find(modname) != NULL)
     {
-      modlib_registry_unlock();
+      libelf_registry_unlock();
       set_errno(EEXIST);
       return NULL;
     }
@@ -320,8 +320,8 @@ FAR void *modlib_insert(FAR const char *filename, FAR const char *modname)
 
   /* Initialize the ELF library to load the program binary. */
 
-  ret = modlib_initialize(filename, &loadinfo);
-  modlib_dumploadinfo(&loadinfo);
+  ret = libelf_initialize(filename, &loadinfo);
+  libelf_dumploadinfo(&loadinfo);
   if (ret != 0)
     {
       berr("ERROR: Failed to initialize to load module: %d\n", ret);
@@ -338,7 +338,7 @@ FAR void *modlib_insert(FAR const char *filename, FAR const char *modname)
       goto errout_with_loadinfo;
     }
 
-#ifdef HAVE_MODLIB_NAMES
+#ifdef HAVE_LIBC_ELF_NAMES
   /* Save the module name in the registry entry */
 
   strlcpy(modp->modname, modname, sizeof(modp->modname));
@@ -346,8 +346,8 @@ FAR void *modlib_insert(FAR const char *filename, FAR const char *modname)
 
   /* Load the program binary */
 
-  ret = modlib_load(&loadinfo);
-  modlib_dumploadinfo(&loadinfo);
+  ret = libelf_load(&loadinfo);
+  libelf_dumploadinfo(&loadinfo);
   if (ret != 0)
     {
       binfo("Failed to load ELF program binary: %d\n", ret);
@@ -356,18 +356,18 @@ FAR void *modlib_insert(FAR const char *filename, FAR const char *modname)
 
   /* Get the symbol table */
 
-  modlib_getsymtab(&exports, &nexports);
+  libelf_getsymtab(&exports, &nexports);
 
   /* Bind the program to the kernel symbol table */
 
-  ret = modlib_bind(modp, &loadinfo, exports, nexports);
+  ret = libelf_bind(modp, &loadinfo, exports, nexports);
   if (ret != 0)
     {
       binfo("Failed to bind symbols program binary: %d\n", ret);
       goto errout_with_load;
     }
 
-  ret = modlib_loadsymtab(modp, &loadinfo);
+  ret = libelf_loadsymtab(modp, &loadinfo);
   if (ret != 0)
     {
       binfo("Failed to load symbol table: %d\n", ret);
@@ -420,22 +420,22 @@ FAR void *modlib_insert(FAR const char *filename, FAR const char *modname)
 
   /* Add the new module entry to the registry */
 
-  modlib_registry_add(modp);
+  libelf_registry_add(modp);
 
-  modlib_uninitialize(&loadinfo);
-  modlib_registry_unlock();
+  libelf_uninitialize(&loadinfo);
+  libelf_registry_unlock();
   return modp;
 
 errout_with_load:
-  modlib_unload(&loadinfo);
-#if CONFIG_MODLIB_MAXDEPEND > 0
-  modlib_undepend(modp);
+  libelf_unload(&loadinfo);
+#if CONFIG_LIBC_ELF_MAXDEPEND > 0
+  libelf_undepend(modp);
 #endif
 errout_with_registry_entry:
   lib_free(modp);
 errout_with_loadinfo:
-  modlib_uninitialize(&loadinfo);
-  modlib_registry_unlock();
+  libelf_uninitialize(&loadinfo);
+  libelf_registry_unlock();
   set_errno(-ret);
   return NULL;
 }
