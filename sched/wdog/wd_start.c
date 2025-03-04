@@ -82,6 +82,9 @@
 
 #endif
 
+#define wdparm_to_ptr(type, arg) ((type)(uintptr_t)arg)
+#define ptr_to_wdparm(ptr)       wdparm_to_ptr(wdparm_t, ptr)
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -110,7 +113,9 @@ static unsigned int g_wdtimernested;
 
 static void wdentry_period(wdparm_t arg)
 {
-  FAR struct wdog_period_s *wdperiod = (FAR struct wdog_period_s *)arg;
+  FAR struct wdog_period_s *wdperiod;
+
+  wdperiod = wdparm_to_ptr(FAR struct wdog_period_s *, arg);
 
   wdperiod->func(wdperiod->wdog.arg);
 
@@ -144,9 +149,9 @@ static void wdentry_period(wdparm_t arg)
 static inline_function void wd_expiration(clock_t ticks)
 {
   FAR struct wdog_s *wdog;
-  irqstate_t flags;
-  wdentry_t func;
-  wdparm_t arg;
+  irqstate_t         flags;
+  wdentry_t          func;
+  wdparm_t           arg;
 
   flags = spin_lock_irqsave(&g_wdspinlock);
 
@@ -180,11 +185,10 @@ static inline_function void wd_expiration(clock_t ticks)
       /* Indicate that the watchdog is no longer active. */
 
       func = wdog->func;
-      arg = wdog->arg;
       wdog->func = NULL;
 
-      arg = func != wdentry_period ? wdog->arg :
-            (wdparm_t)list_container_of(wdog, struct wdog_period_s, wdog);
+      arg = func != wdentry_period ? wdog->arg : ptr_to_wdparm(
+            list_container_of(wdog, struct wdog_period_s, wdog));
 
       /* Execute the watchdog function */
 
