@@ -79,3 +79,27 @@ nuttx_create_symlink(${CMAKE_CURRENT_BINARY_DIR}/libmetal/lib/include/metal
                      ${NUTTX_BINARY_DIR}/include/metal)
 
 nuttx_add_external_library(metal-static MODE KERNEL)
+
+# decorate lib metal output object file name in TASKING. TASKING archive tool
+# `artc` DO NOT support obj files with the same name in different directories.
+# We workaround this by adding a prefix to the object file name in BINARY dir
+if(CONFIG_ARCH_TOOLCHAIN_TASKING)
+  get_target_property(METAL_SOURCES metal-static SOURCES)
+  set_target_properties(metal-static PROPERTIES SOURCES "")
+  foreach(SRC_FILE IN LISTS METAL_SOURCES)
+    get_filename_component(ABS_SRC_FILE "${SRC_FILE}" ABSOLUTE)
+    file(RELATIVE_PATH REL_SRC_FILE "${CMAKE_SOURCE_DIR}" "${ABS_SRC_FILE}")
+    get_filename_component(DIR_PART "${REL_SRC_FILE}" DIRECTORY)
+    get_filename_component(FILE_PART "${REL_SRC_FILE}" NAME)
+    string(REPLACE "/" "_" DIR_PREFIX "${DIR_PART}")
+    if(DIR_PREFIX)
+      set(NEW_OBJ_NAME "${DIR_PREFIX}_${FILE_PART}")
+    else()
+      set(NEW_OBJ_NAME "${FILE_PART}")
+    endif()
+    configure_file(${CMAKE_CURRENT_LIST_DIR}/libmetal/lib/${SRC_FILE}
+                   ${CMAKE_CURRENT_BINARY_DIR}/${NEW_OBJ_NAME} COPYONLY)
+    target_sources(metal-static
+                   PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/${NEW_OBJ_NAME})
+  endforeach()
+endif()
