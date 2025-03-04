@@ -198,7 +198,8 @@ int board_bmp180_initialize(int devno, int busno);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_ESP32S2_I2S) && !defined(CONFIG_AUDIO_CS4344)
+#if (defined(CONFIG_ESP32S2_I2S) && !defined(CONFIG_AUDIO_ES8311)) || \
+    defined(CONFIG_ESPRESSIF_I2S)
 int board_i2sdev_initialize(bool enable_tx, bool enable_rx);
 #endif
 

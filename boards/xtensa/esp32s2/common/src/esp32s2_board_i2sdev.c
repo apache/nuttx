@@ -37,10 +37,16 @@
 
 #include <arch/board/board.h>
 
-#include "esp32s2_i2s.h"
+#ifdef CONFIG_ESP32S2_I2S
+#  include "esp32s2_i2s.h"
+#endif
 
-#if defined(CONFIG_ESP32S2_I2S) && !defined(CONFIG_AUDIO_CS4344) && \
-    !defined(CONFIG_AUDIO_ES8311)
+#ifdef CONFIG_ESPRESSIF_I2S
+#  include "espressif/esp_i2s.h"
+#endif
+
+#if (defined(CONFIG_ESP32S2_I2S) && !defined(CONFIG_AUDIO_CS4344) && \
+    !defined(CONFIG_AUDIO_ES8311)) || defined(CONFIG_ESPRESSIF_I2S)
 
 /****************************************************************************
  * Public Functions
@@ -74,7 +80,11 @@ int board_i2sdev_initialize(bool enable_tx, bool enable_rx)
 
   ainfo("Initializing I2S\n");
 
+#ifdef CONFIG_ESP32S2_I2S
   i2s = esp32s2_i2sbus_initialize();
+#else
+  i2s = esp_i2sbus_initialize(0);
+#endif
 
 #ifdef CONFIG_AUDIO_I2SCHAR
   ret = i2schar_register(i2s, 0);
