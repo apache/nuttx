@@ -40,8 +40,8 @@ set(CMAKE_STRIP strip --strip-unneeded)
 set(CMAKE_OBJCOPY echo)
 set(CMAKE_OBJDUMP ${TOOLCHAIN_PREFIX}elfdump)
 
-set(CMAKE_LINKER ${TOOLCHAIN_PREFIX}cctc)
-set(CMAKE_LD ${TOOLCHAIN_PREFIX}cctc)
+set(CMAKE_LINKER ${TOOLCHAIN_PREFIX}ltc)
+set(CMAKE_LD ${TOOLCHAIN_PREFIX}ltc)
 set(CMAKE_AR ${TOOLCHAIN_PREFIX}artc -r)
 set(CMAKE_NM nm)
 set(CMAKE_RANLIB ranlib)
@@ -64,6 +64,13 @@ endif()
 set(CMAKE_C_ARCHIVE_CREATE "<CMAKE_AR> rcs <TARGET> <LINK_FLAGS> <OBJECTS>")
 set(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> rcs <TARGET> <LINK_FLAGS> <OBJECTS>")
 set(CMAKE_ASM_ARCHIVE_CREATE "<CMAKE_AR> rcs <TARGET> <LINK_FLAGS> <OBJECTS>")
+
+# override the LINK command
+
+add_link_options(-I${CMAKE_BINARY_DIR}/include)
+set(CMAKE_C_LINK_EXECUTABLE
+    "<CMAKE_LINKER> <FLAGS> <CMAKE_CXX_LINK_FLAGS> <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>"
+)
 
 # Architecture flags
 
@@ -88,6 +95,12 @@ add_compile_options(--integer-enumeration)
 # tradeoff between speed (-t0) and size (-t4) (default: 4)
 
 add_compile_options(--tradeoff=2)
+
+# Debug link map
+
+if(CONFIG_DEBUG_LINK_MAP)
+  add_link_options(--map-file=nuttx.map)
+endif()
 
 # enable symbolic debug information
 
@@ -119,11 +132,11 @@ add_compile_options(--branch-target-align)
 # cmake-format: on
 
 add_compile_options(--fp-model=2)
-add_link_options(--no-default-libraries)
-add_link_options(--fp-model=2)
+add_link_options(-lc_fpu)
 add_link_options(-lfp_fpu)
 
-add_link_options(--hex-format=s -Wl-OtxYcL -Wl-mcrfiklsmnoduq)
+add_link_options(--core=mpe:vtc)
+add_link_options(--hex-format=s -OtxYcL -mcrfiklsmnoduq)
 add_link_options(-lrt)
 
 # cmake-format: off
