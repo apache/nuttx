@@ -206,7 +206,7 @@ rptun_ivshmem_get_resource(FAR struct rptun_dev_s *dev)
       rsc->rng0_vring.align           = 8;
       rsc->rng0_vring.num             = 8;
       rsc->rng0_vring.notifyid        = RSC_NOTIFY_ID_ANY;
-      rsc->rng0_vring.da              = 0;
+      rsc->rng0_vring.da              = FW_RSC_U32_ADDR_ANY;
 
       /* Virtio Rng0 share memory buffer */
 
@@ -217,7 +217,7 @@ rptun_ivshmem_get_resource(FAR struct rptun_dev_s *dev)
                                                  rsc.rng0_shm);
       rsc->rng0_carveout.pa           = (uint32_t)METAL_BAD_PHYS;
       rsc->rng0_carveout.len          = sizeof(priv->shmem->rsc.rng0_shm);
-      memcpy(rsc->rng0_carveout.name, "rng0_shm", 9);
+      memcpy(rsc->rng0_carveout.name, "vdev0buffer", 11);
 
       /* Virtio Driver 1, VIRTIO_ID_ENTROPY */
 
@@ -234,7 +234,7 @@ rptun_ivshmem_get_resource(FAR struct rptun_dev_s *dev)
       rsc->rng1_vring.align           = 8;
       rsc->rng1_vring.num             = 8;
       rsc->rng1_vring.notifyid        = RSC_NOTIFY_ID_ANY;
-      rsc->rng1_vring.da              = 0;
+      rsc->rng1_vring.da              = FW_RSC_U32_ADDR_ANY;
 
       /* Virtio Rng1 share memory buffer */
 
@@ -245,7 +245,7 @@ rptun_ivshmem_get_resource(FAR struct rptun_dev_s *dev)
                                                  rsc.rng1_shm);
       rsc->rng1_carveout.pa           = (uint32_t)METAL_BAD_PHYS;
       rsc->rng1_carveout.len          = sizeof(priv->shmem->rsc.rng1_shm);
-      memcpy(rsc->rng1_carveout.name, "rng1_shm", 9);
+      memcpy(rsc->rng1_carveout.name, "vdev1buffer", 11);
 
       /* Virtio Driver 2, VIRTIO_ID_RPMSG */
 
@@ -265,11 +265,11 @@ rptun_ivshmem_get_resource(FAR struct rptun_dev_s *dev)
       rsc->rpmsg0_vring0.align        = 8;
       rsc->rpmsg0_vring0.num          = 8;
       rsc->rpmsg0_vring0.notifyid     = RSC_NOTIFY_ID_ANY;
-      rsc->rpmsg0_vring0.da           = 0;
+      rsc->rpmsg0_vring0.da           = FW_RSC_U32_ADDR_ANY;
       rsc->rpmsg0_vring1.align        = 8;
       rsc->rpmsg0_vring1.num          = 8;
       rsc->rpmsg0_vring1.notifyid     = RSC_NOTIFY_ID_ANY;
-      rsc->rpmsg0_vring1.da           = 0;
+      rsc->rpmsg0_vring1.da           = FW_RSC_U32_ADDR_ANY;
       rsc->rpmsg0_config.h2r_buf_size = 0x600;
       rsc->rpmsg0_config.r2h_buf_size = 0x600;
       memcpy(rsc->rpmsg0_config.host_cpuname, "server", 6);
@@ -284,7 +284,7 @@ rptun_ivshmem_get_resource(FAR struct rptun_dev_s *dev)
                                                  rsc.rpmsg0_shm);
       rsc->rpmsg0_carveout.pa         = (uint32_t)METAL_BAD_PHYS;
       rsc->rpmsg0_carveout.len        = sizeof(priv->shmem->rsc.rpmsg0_shm);
-      memcpy(rsc->rpmsg0_carveout.name, "rpmsg0_shm", 10);
+      memcpy(rsc->rpmsg0_carveout.name, "vdev2buffer", 11);
 
       priv->shmem->rsc_size           = sizeof(struct rptun_ivshmem_rsc_s);
       cmd->cmd_slave                  = RPTUN_CMD(RPTUN_CMD_READY, 0);
