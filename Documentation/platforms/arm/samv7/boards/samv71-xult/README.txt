@@ -967,9 +967,6 @@ serial device class:
     CONFIG_CDCACM_NRDREQS=8                   : Number of read requests
     CONFIG_CDCACM_BULKIN_REQLEN=96            : Size of write request buffer (for full speed)
     CONFIG_CDCACM_BULKIN_REQLEN=768           : Size of write request buffer (for high speed)
-    CONFIG_CDCACM_RXBUFSIZE=257               : Serial read buffer size
-    CONFIG_CDCACM_TXBUFSIZE=193               : Serial transmit buffer size (for full speed)
-    CONFIG_CDCACM_TXBUFSIZE=769               : Serial transmit buffer size (for high speed)
     CONFIG_CDCACM_VENDORID=0x0525             : Vendor ID
     CONFIG_CDCACM_PRODUCTID=0xa4a7            : Product ID
     CONFIG_CDCACM_VENDORSTR="NuttX"           : Vendor string
@@ -983,7 +980,7 @@ CDC/ACM serial device:
 
     CONFIG_SYSTEM_CDCACM=y                     : Enable connect/disconnect support
     CONFIG_SYSTEM_CDCACM_DEVMINOR=0            : Use device /dev/ttyACM0
-    CONFIG_CDCACM_RXBUFSIZE=???                : A large RX may be needed
+    CONFIG_CDCACM_NRDREQS=???                  : Multiple read requests may be needed
 
 If you include this CDC/ACM application, then you can connect the CDC/ACM
 serial device to the host by entering the command 'sercon' and you detach

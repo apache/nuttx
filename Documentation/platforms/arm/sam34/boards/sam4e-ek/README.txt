@@ -593,9 +593,11 @@ USB Full-Speed Device
 
      1. RX buffer size.  All incoming data is buffered by the serial driver
         until it can be read by the application.  The default size of this
-        RX buffer is only 256 but can be increased as you see fit:
+        RX buffer is related to CONFIG_CDCACM_NRDREQS, the maximum packet
+        length and CONFIG_CDCACM_BULKOUT_REQLEN. It can be increased as you
+        see fit:
 
-         CONFIG_CDCACM_RXBUFSIZE=256        : Default RX buffer size is only 256 bytes
+         CONFIG_CDCACM_NRDREQS=xxx
 
      2. Upstream from the RX buffers are USB read request buffers.  Each
         buffer is the maximum size of one USB packet (64 byte) and that cannot
