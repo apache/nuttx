@@ -68,6 +68,10 @@
 #  include "esp32s3_i2s.h"
 #endif
 
+#ifdef CONFIG_ESPRESSIF_I2S
+#  include "espressif/esp_i2s.h"
+#endif
+
 #ifdef CONFIG_WATCHDOG
 #  include "esp32s3_board_wdt.h"
 #endif
@@ -161,7 +165,7 @@ int esp32s3_bringup(void)
 {
   int ret;
 #if (defined(CONFIG_ESP32S3_I2S0) && !defined(CONFIG_AUDIO_CS4344)) || \
-    defined(CONFIG_ESP32S3_I2S1)
+    defined(CONFIG_ESP32S3_I2S1) || defined(CONFIG_ESPRESSIF_I2S)
   bool i2s_enable_tx;
   bool i2s_enable_rx;
 #endif
@@ -350,7 +354,7 @@ int esp32s3_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_ESP32S3_I2S
+#if defined(CONFIG_ESP32S3_I2S) || defined(CONFIG_ESPRESSIF_I2S)
 
 #ifdef CONFIG_AUDIO_CS4344
 
@@ -363,17 +367,17 @@ int esp32s3_bringup(void)
     }
 #else
 
-#ifdef CONFIG_ESP32S3_I2S0_TX
+#if defined(CONFIG_ESP32S3_I2S0_TX) || defined(CONFIG_ESPRESSIF_I2S0_TX)
   i2s_enable_tx = true;
 #else
   i2s_enable_tx = false;
-#endif /* CONFIG_ESP32S3_I2S0_TX */
+#endif /* CONFIG_ESP32S3_I2S0_TX || CONFIG_ESPRESSIF_I2S0_TX */
 
-#ifdef CONFIG_ESP32S3_I2S0_RX
+#if defined(CONFIG_ESP32S3_I2S0_RX) || defined(CONFIG_ESPRESSIF_I2S0_RX)
   i2s_enable_rx = true;
 #else
   i2s_enable_rx = false;
-#endif /* CONFIG_ESP32S3_I2S0_RX */
+#endif /* CONFIG_ESP32S3_I2S0_RX || CONFIG_ESPRESSIF_I2S0_RX */
 
   /* Configure I2S generic audio on I2S0 */
 
@@ -384,19 +388,19 @@ int esp32s3_bringup(void)
     }
 #endif /* CONFIG_AUDIO_CS4344 */
 
-#ifdef CONFIG_ESP32S3_I2S1
+#if defined(CONFIG_ESP32S3_I2S1) || defined(CONFIG_ESPRESSIF_I2S1)
 
-#ifdef CONFIG_ESP32S3_I2S1_TX
+#if defined(CONFIG_ESP32S3_I2S1_TX) || defined(CONFIG_ESPRESSIF_I2S1_TX)
   i2s_enable_tx = true;
 #else
   i2s_enable_tx = false;
 #endif /* CONFIG_ESP32S3_I2S1_TX */
 
-#ifdef CONFIG_ESP32S3_I2S1_RX
+#if defined(CONFIG_ESP32S3_I2S1_RX) || defined(CONFIG_ESPRESSIF_I2S1_RX)
   i2s_enable_rx = true;
 #else
   i2s_enable_rx = false;
-#endif /* CONFIG_ESP32S3_I2S1_RX */
+#endif /* CONFIG_ESP32S3_I2S1_RX || CONFIG_ESPRESSIF_I2S1_RX */
 
   /* Configure I2S generic audio on I2S1 */
 
@@ -404,12 +408,12 @@ int esp32s3_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize I2S%d driver: %d\n",
-             CONFIG_ESP32S3_I2S1, ret);
+             ESP32S3_I2S1, ret);
     }
 
-#endif /* CONFIG_ESP32S3_I2S1 */
+#endif /* CONFIG_ESP32S3_I2S1 || CONFIG_ESPRESSIF_I2S1 */
 
-#endif /* CONFIG_ESP32S3_I2S */
+#endif /* CONFIG_ESP32S3_I2S || CONFIG_ESPRESSIF_I2S */
 
 #ifdef CONFIG_INPUT_BUTTONS
   /* Register the BUTTON driver */

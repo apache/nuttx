@@ -357,7 +357,7 @@ int esp32s2_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_ESP32S2_I2S
+#if defined(CONFIG_ESP32S2_I2S) || defined(CONFIG_ESPRESSIF_I2S)
 
 #ifdef CONFIG_AUDIO_CS4344
 
@@ -373,17 +373,17 @@ int esp32s2_bringup(void)
   bool i2s_enable_tx;
   bool i2s_enable_rx;
 
-#ifdef CONFIG_ESP32S2_I2S_TX
+#if defined(CONFIG_ESP32S2_I2S_TX) || defined(CONFIG_ESPRESSIF_I2S0_TX)
   i2s_enable_tx = true;
 #else
   i2s_enable_tx = false;
-#endif /* CONFIG_ESP32S2_I2S_TX */
+#endif /* CONFIG_ESP32S2_I2S_TX || CONFIG_ESPRESSIF_I2S0_TX */
 
-#ifdef CONFIG_ESP32S2_I2S_RX
+#if defined(CONFIG_ESP32S2_I2S_RX) || defined(CONFIG_ESPRESSIF_I2S0_RX)
     i2s_enable_rx = true;
 #else
     i2s_enable_rx = false;
-#endif /* CONFIG_ESP32S2_I2S_RX */
+#endif /* CONFIG_ESP32S2_I2S_RX || CONFIG_ESPRESSIF_I2S0_RX */
 
   /* Configure I2S generic audio on I2S0 */
 
@@ -394,7 +394,7 @@ int esp32s2_bringup(void)
     }
 #endif /* CONFIG_AUDIO_CS4344 */
 
-#endif /* CONFIG_ESP32S2_I2S */
+#endif /* CONFIG_ESP32S2_I2S || CONFIG_ESPRESSIF_I2S */
 
 #ifdef CONFIG_ESP_RMT
   ret = board_rmt_txinitialize(RMT_TXCHANNEL, RMT_OUTPUT_PIN);
