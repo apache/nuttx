@@ -171,6 +171,8 @@ NX Header Files
   nxtk.rst
   nxfonts.rst
   nxcursor.rst
+  nxwm_threading.rst
+  framebuffer_char_driver.rst
   sample.rst
   appendix.rst
 

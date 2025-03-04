@@ -1,0 +1,70 @@
+From 76fd1e2c7e967ec979a24a49ce1c9626a4279f21 Mon Sep 17 00:00:00 2001
+From: Yongrong Wang <wangyongrong@xiaomi.com>
+Date: Wed, 10 Jul 2024 15:02:01 +0800
+Subject: [PATCH 10/14] rpmsg_virtio.c: virtqueue_kick after all rx buffer
+ release
+
+Only kick once when all the rx buffers has been returned to decrease
+the interrupt times to improve the performance
+
+Signed-off-by: Yongrong Wang <wangyongrong@xiaomi.com>
+Signed-off-by: Bowen Wang <wangbowen6@xiaomi.com>
+---
+ lib/rpmsg/rpmsg_virtio.c | 20 +++++++++++++-------
+ 1 file changed, 13 insertions(+), 7 deletions(-)
+
+diff --git a/lib/rpmsg/rpmsg_virtio.c open-amp/lib/rpmsg/rpmsg_virtio.c
+index dfd36e3..bdf9046 100644
+--- a/lib/rpmsg/rpmsg_virtio.c
++++ open-amp/lib/rpmsg/rpmsg_virtio.c
+@@ -314,8 +314,6 @@ static bool rpmsg_virtio_release_rx_buffer_nolock(struct rpmsg_virtio_device *rv
+ 	/* Return buffer on virtqueue. */
+ 	len = virtqueue_get_buffer_length(rvdev->rvq, idx);
+ 	rpmsg_virtio_return_buffer(rvdev, rp_hdr, len, idx);
+-	/* Tell peer we returned an rx buffer */
+-	virtqueue_kick(rvdev->rvq);
+ 
+ 	return true;
+ }
+@@ -330,8 +328,11 @@ static void rpmsg_virtio_release_rx_buffer(struct rpmsg_device *rdev,
+ 	rp_hdr = RPMSG_LOCATE_HDR(rxbuf);
+ 
+ 	metal_mutex_acquire(&rdev->lock);
+-	if (rpmsg_virtio_buf_held_dec_test(rp_hdr))
++	if (rpmsg_virtio_buf_held_dec_test(rp_hdr)) {
+ 		rpmsg_virtio_release_rx_buffer_nolock(rvdev, rp_hdr);
++		/* Tell peer we returned an rx buffer */
++		virtqueue_kick(rvdev->rvq);
++	}
+ 	metal_mutex_release(&rdev->lock);
+ }
+ 
+@@ -560,16 +561,21 @@ static void rpmsg_virtio_rx_callback(struct virtqueue *vq)
+ 			metal_mutex_acquire(&rdev->lock);
+ 			rp_hdr = rpmsg_virtio_get_rx_buffer(rvdev, &len, &idx);
+ 			metal_mutex_release(&rdev->lock);
++			if (!rp_hdr)
++				break;
+ 		} else {
++			/* No more filled rx buffers */
++			if (!next_hdr) {
++				/* Tell peer we returned some rx buffer */
++				virtqueue_kick(rvdev->rvq);
++				break;
++			}
++
+ 			rp_hdr = next_hdr;
+ 			len = next_len;
+ 			idx = next_idx;
+ 		}
+ 
+-		/* No more filled rx buffers */
+-		if (!rp_hdr)
+-			break;
+-
+ 		rp_hdr->reserved = idx;
+ 
+ 		/* Get the channel node from the remote device channels list. */
+-- 
+2.34.1
+

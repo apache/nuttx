@@ -1,6 +1,7 @@
 /****************************************************************************
  * fs/mnemofs/mnemofs.c
- * mnemofs: Filesystem for NAND Flash storage devices.
+ *
+ * SPDX-License-Identifier: Apache-2.0 or BSD-3-Clause
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -97,6 +98,7 @@
 #include <sys/statfs.h>
 
 #include "mnemofs.h"
+#include "fs_heap.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -187,6 +189,8 @@ const struct mountpt_operations g_mnemofs_operations =
   NULL,              /* mmap */
   mnemofs_truncate,  /* truncate */
   NULL,              /* poll */
+  NULL,              /* readv */
+  NULL,              /* writev */
 
   mnemofs_sync,      /* sync */
   mnemofs_dup,       /* dup */
@@ -256,8 +260,10 @@ static int mnemofs_open(FAR struct file *filep, FAR const char *relpath,
   FAR struct mfs_ocom_s   *fcom;
   FAR struct mfs_dirent_s *dirent = NULL;
 
-  finfo("Mnemofs open on path \"%s\" with flags %x and mode %x.",
-        relpath, oflags, mode);
+  MFS_LOG("OPEN", "Entry.");
+  MFS_LOG("OPEN", "Requested path is %s.", relpath);
+  MFS_LOG("OPEN", "Flags set as 0x%x.", oflags);
+  MFS_LOG("OPEN", "Mode set as 0x%x.", mode);
 
   inode = filep->f_inode;
   DEBUGASSERT(inode != NULL);
@@ -267,26 +273,37 @@ static int mnemofs_open(FAR struct file *filep, FAR const char *relpath,
   ret   = nxmutex_lock(&MFS_LOCK(sb));
   if (predict_false(ret < 0))
     {
+      MFS_LOG("OPEN", "Failed to acquire mutex.");
       goto errout;
     }
+  else
+    {
+      MFS_EXTRA_LOG("OPEN", "Mutex acquired.");
+    }
 
-  finfo("Lock Acquired.");
-
-  f     = kmm_zalloc(sizeof(*f));
+  f     = fs_heap_zalloc(sizeof(*f));
   if (predict_false(f == NULL))
     {
+      MFS_LOG("OPEN", "Failed to allocate file structure.");
       ret = -ENOMEM;
       goto errout_with_lock;
     }
+  else
+    {
+      MFS_EXTRA_LOG("OPEN", "Allocated file structure at %p.", f);
+    }
 
-  fcom  = kmm_zalloc(sizeof(*fcom));
+  fcom  = fs_heap_zalloc(sizeof(*fcom));
   if (predict_false(fcom == NULL))
     {
+      MFS_LOG("OPEN", "Failed to allocate common file structure.");
       ret = -ENOMEM;
       goto errout_with_f;
     }
-
-  finfo("Memory allocations done.");
+  else
+    {
+      MFS_EXTRA_LOG("OPEN", "Allocated common file structure at %p.", fcom);
+    }
 
   f->com = fcom;
   f->com->refcount++;
@@ -294,50 +311,81 @@ static int mnemofs_open(FAR struct file *filep, FAR const char *relpath,
   /* Check creation flags. */
 
   flags = mfs_get_patharr(sb, relpath, &f->com->path, &f->com->depth);
+  MFS_EXTRA_LOG("OPEN", "Retrieved flags are 0x%x.", flags);
+
   if ((flags & MFS_EXIST) == 0)
     {
+      MFS_EXTRA_LOG("OPEN", "Path doesn't exists.");
+
       if ((flags & MFS_P_ISDIR) != 0)
         {
+          MFS_EXTRA_LOG("OPEN", "Parent is a directory.");
+
           if ((oflags & O_CREAT) != 0)
             {
+              MFS_EXTRA_LOG("OPEN", "Creation flag is set.");
+
               /* Add direntry to parent's directory file. */
 
               f->com->new_ent = true;
 
               mfs_pitr_init(sb, f->com->path, f->com->depth, &pitr, true);
               child = mfs_path2childname(relpath);
-              finfo("Child is: %s.", child);
+
+              MFS_EXTRA_LOG("OPEN", "The final child is \"%s\".", child);
+
               mfs_pitr_appendnew(sb, f->com->path, f->com->depth, &pitr,
                                 child, mode);
               mfs_pitr_free(&pitr);
 
-              finfo("Created new file.");
+              MFS_EXTRA_LOG("OPEN", "Added child direntry.");
 
               /* OK */
+
+              MFS_EXTRA_LOG("OPEN", "All OK");
             }
         }
       else
         {
-          ret = -EISDIR;
+          MFS_LOG("OPEN", "Ancestor is not a directory.");
+
+          ret = -ENOTDIR;
           goto errout_with_fcom;
-        }
-    }
-  else if ((flags & MFS_ISFILE) != 0)
-    {
-      if ((oflags & (O_CREAT | O_EXCL)) == (O_CREAT | O_EXCL))
-        {
-          ret = -EEXIST;
-          goto errout_with_fcom;
-        }
-      else
-        {
-          /* OK */
         }
     }
   else
     {
-      ret = -EISDIR;
-      goto errout_with_fcom;
+      MFS_EXTRA_LOG("OPEN", "Path exists.");
+
+      if ((flags & MFS_ISFILE) != 0)
+        {
+          MFS_EXTRA_LOG("OPEN", "Path points to a file.");
+
+          /* NOTE: O_DIRECTORY is not supported. Use opendir. */
+
+          if ((oflags & (O_CREAT | O_EXCL)) == (O_CREAT | O_EXCL))
+            {
+              MFS_LOG("OPEN", "O_CREAT and O_EXCL flag are set.");
+              MFS_LOG("OPEN", "Operation failed as file exists with O_EXCL"
+                      "flag set.");
+
+              ret = -EEXIST;
+              goto errout_with_fcom;
+            }
+          else
+            {
+              /* OK */
+
+              MFS_EXTRA_LOG("OPEN", "All OK");
+            }
+        }
+      else
+        {
+          MFS_EXTRA_LOG("OPEN", "Path points to a directory.");
+
+          ret = -EISDIR;
+          goto errout_with_fcom;
+        }
     }
 
   /* Check r/w permission flags. */
@@ -349,14 +397,30 @@ static int mnemofs_open(FAR struct file *filep, FAR const char *relpath,
 
   if (dirent != NULL)
     {
+      MFS_EXTRA_LOG_DIRENT(dirent);
+
+      DEBUGASSERT((flags & MFS_EXIST) != 0);
+
+      MFS_EXTRA_LOG("OPEN", "Direntry exists at %p.", dirent);
+
       if ((oflags & O_WRONLY) != 0 && (dirent->mode & O_WRONLY) == 0)
         {
+          MFS_LOG("OPEN", "Write is not allowed.");
+
           ret = -EACCES;
           goto errout_with_dirent;
         }
 
+      /* man page says: The argument flags must include one of the following
+       * access modes: O_RDONLY, O_WRONLY, or O_RDWR.
+       */
+
       mfs_free_dirent(dirent);
       dirent  = NULL;
+    }
+  else
+    {
+      DEBUGASSERT((flags & MFS_EXIST) == 0);
     }
 
   f->com->sz     = mfs_get_fsz(sb, f->com->path, f->com->depth);
@@ -365,35 +429,45 @@ static int mnemofs_open(FAR struct file *filep, FAR const char *relpath,
 
   mfs_pitr_free(&pitr);
 
-  finfo("Direntry processing done.");
+  MFS_EXTRA_LOG("OPEN", "Direntry processing is done.");
 
   /* Check Offset flags. */
 
   if ((oflags & (O_TRUNC | O_WRONLY)) == (O_TRUNC | O_WRONLY) ||
-      (oflags & (O_TRUNC | O_RDONLY)) == (O_TRUNC | O_RDONLY))
+      (oflags & (O_TRUNC | O_RDWR)) == (O_TRUNC | O_RDWR))
     {
       /* Truncate to size 0. If write and truncate are mentioned only
        * then it's truncated. Else, the truncate flag is ignored.
        */
 
+      MFS_EXTRA_LOG("OPEN", "O_TRUNC is set.");
+
       ret = mfs_lru_del(sb, 0, f->com->sz, f->com->path, f->com->depth);
       if (predict_false(ret < 0))
         {
-          finfo("Error while truncating file. Ret: %d.", ret);
+          MFS_LOG("OPEN", "Could not truncate file.");
           goto errout_with_dirent;
+        }
+      else
+        {
+          MFS_EXTRA_LOG("OPEN", "File truncated.");
         }
     }
 
   if ((oflags & O_APPEND) != 0)
     {
+      MFS_EXTRA_LOG("OPEN", "Append flag is set.");
       f->com->off = f->com->sz;
     }
 
+  MFS_EXTRA_LOG_F(f);
+
   list_add_tail(&MFS_OFILES(sb), &f->list);
   filep->f_priv = f;
+  MFS_EXTRA_LOG("OPEN", "File structure is set at %p.", filep);
 
   nxmutex_unlock(&MFS_LOCK(sb));
-  finfo("Lock Released.");
+  MFS_EXTRA_LOG("OPEN", "Mutex released.");
 
   finfo("Mnemofs open exited with %d.", ret);
   return ret;
@@ -404,18 +478,20 @@ errout_with_dirent:
       mfs_free_dirent(dirent);
     }
 
+  mfs_free_patharr(fcom->path);
+
 errout_with_fcom:
-  kmm_free(fcom);
+  fs_heap_free(fcom);
 
 errout_with_f:
-  kmm_free(f);
+  fs_heap_free(f);
 
 errout_with_lock:
   nxmutex_unlock(&MFS_LOCK(sb));
-  finfo("Lock Released.");
+  MFS_EXTRA_LOG("OPEN", "Mutex released.");
 
 errout:
-  finfo("Mnemofs open exited with %d.", ret);
+  MFS_LOG("OPEN", "Exit | Return: %d.", ret);
   return ret;
 }
 
@@ -446,7 +522,8 @@ static int mnemofs_close(FAR struct file *filep)
   FAR struct mfs_sb_s  *sb;
   FAR struct mfs_ofd_s *f;
 
-  finfo("Mnemofs close.");
+  MFS_LOG("CLOSE", "Entry.");
+  MFS_LOG("CLOSE", "File structure is at %p.", filep);
 
   inode = filep->f_inode;
   DEBUGASSERT(inode != NULL);
@@ -454,55 +531,70 @@ static int mnemofs_close(FAR struct file *filep)
   DEBUGASSERT(sb != NULL);
 
   ret   = nxmutex_lock(&MFS_LOCK(sb));
-  if (ret < 0)
+  if (predict_false(ret < 0))
     {
+      MFS_LOG("CLOSE", "Failed to acquire mutex.");
       goto errout;
     }
-
-  finfo("Lock Acquired.");
+  else
+    {
+      MFS_EXTRA_LOG("CLOSE", "Mutex acquired.");
+    }
 
   f     = filep->f_priv;
   DEBUGASSERT(f != NULL);
 
+  MFS_EXTRA_LOG_F(f);
+
   /* Flushing in-memory data to on-flash journal. */
 
-  finfo("Original refcount is %u.", f->com->refcount);
   f->com->refcount--;
+
+  MFS_EXTRA_LOG("CLOSE", "Reference Counter updated.");
+  MFS_EXTRA_LOG_F(f);
 
   if (f->com->refcount == 0)
     {
+      MFS_EXTRA_LOG("CLOSE", "Reference Counter is 0.");
+
       ret = mnemofs_flush(sb);
       if (predict_false(ret < 0))
         {
-          finfo("Error while flushing. Ret: %d.", ret);
+          MFS_LOG("CLOSE", "Could not flush file system.");
+
+          /* This could be problematic.
+           * TODO: For now, this is same as no-op.
+           */
+
+          f->com->refcount++; /* Revert to old refcount. */
           goto errout_with_lock;
         }
-
-      kmm_free(f->com->path);
-      kmm_free(f->com);
-
-      finfo("Open file structure freed.");
-
-      ret = mnemofs_flush(sb);
-      if (predict_false(ret < 0))
+      else
         {
-          goto errout_with_fcom;
+          MFS_EXTRA_LOG("CLOSE", "File system flushed.");
         }
+
+      fs_heap_free(f->com->path);
+      MFS_EXTRA_LOG("CLOSE", "Freed file structure path.");
+
+      fs_heap_free(f->com);
+      MFS_EXTRA_LOG("CLOSE", "Freed common file structure.");
     }
 
-errout_with_fcom:
   list_delete(&f->list);
-  kmm_free(f);
-  filep->f_priv = NULL;
+  MFS_EXTRA_LOG("CLOSE", "Removed file structure from open files list.");
 
-  finfo("File entry removed from the open files list.");
+  fs_heap_free(f);
+  MFS_EXTRA_LOG("CLOSE", "Freed file structure.");
+
+  filep->f_priv = NULL;
 
 errout_with_lock:
   nxmutex_unlock(&MFS_LOCK(sb));
-  finfo("Lock Released.");
+  MFS_EXTRA_LOG("CLOSE", "Mutex released.");
 
 errout:
-  finfo("Mnemofs close exited with %d.", ret);
+  MFS_LOG("CLOSE", "Exit | Return: %d.", ret);
   return ret;
 }
 
@@ -539,7 +631,10 @@ static ssize_t mnemofs_read(FAR struct file *filep, FAR char *buffer,
   FAR struct mfs_sb_s  *sb;
   FAR struct mfs_ofd_s *f;
 
-  finfo("Mnemofs read.");
+  MFS_LOG("READ", "Entry.");
+  MFS_LOG("READ", "File structure is at %p.", filep);
+  MFS_LOG("READ", "Buffer is at %p.", buffer);
+  MFS_LOG("READ", "Length of the buffer is %zu.", buflen);
 
   inode = filep->f_inode;
   DEBUGASSERT(inode != NULL);
@@ -547,24 +642,27 @@ static ssize_t mnemofs_read(FAR struct file *filep, FAR char *buffer,
   DEBUGASSERT(sb != NULL);
 
   ret   = nxmutex_lock(&MFS_LOCK(sb));
-  if (ret < 0)
+  if (predict_false(ret < 0))
     {
+      MFS_LOG("READ", "Failed to acquire mutex.");
       goto errout;
     }
-
-  finfo("Lock acquired.");
+  else
+    {
+      MFS_EXTRA_LOG("READ", "Mutex acquired.");
+    }
 
   f     = filep->f_priv;
   DEBUGASSERT(f != NULL);
 
-  finfo("Mnemofs read %zu bytes from %" PRIu32 " offset", buflen,
-        f->com->off);
+  MFS_EXTRA_LOG_F(f);
 
   /* Check if allowed to read. */
 
   if ((f->com->oflags & O_RDONLY) == 0)
     {
-      finfo("Not allowed to read.");
+      MFS_EXTRA_LOG("READ", "Not allowed to read file.");
+
       ret = -EINVAL;
       goto errout_with_lock;
     }
@@ -576,11 +674,13 @@ static ssize_t mnemofs_read(FAR struct file *filep, FAR char *buffer,
                                                    * lower down the chain.
                                                    */
 
+  MFS_EXTRA_LOG("READ", "Final buffer length is %zu.", buflen);
+
   ret = mfs_lru_rdfromoff(sb, f->com->off, f->com->path, f->com->depth,
                           buffer, buflen);
   if (ret < 0)
     {
-      finfo("Error while reading. Ret: %zd.", ret);
+      MFS_EXTRA_LOG("READ", "Could not read.");
       goto errout_with_lock;
     }
 
@@ -589,12 +689,15 @@ static ssize_t mnemofs_read(FAR struct file *filep, FAR char *buffer,
   /* Update offset. */
 
   f->com->off += buflen;
+  MFS_EXTRA_LOG("READ", "File structure offset updated.");
+  MFS_EXTRA_LOG_F(f);
 
 errout_with_lock:
   nxmutex_unlock(&MFS_LOCK(sb));
+  MFS_EXTRA_LOG("READ", "Mutex released.");
 
 errout:
-  finfo("Mnemofs read exited with %zd.", ret);
+  MFS_LOG("READ", "Exit | Return: %zd.", ret);
   return ret;
 }
 
@@ -625,7 +728,10 @@ static ssize_t mnemofs_write(FAR struct file *filep, FAR const char *buffer,
   FAR struct mfs_sb_s  *sb;
   FAR struct mfs_ofd_s *f;
 
-  finfo("Mnemofs write.");
+  MFS_LOG("WRITE", "Entry.");
+  MFS_LOG("WRITE", "File structure is at %p.", filep);
+  MFS_LOG("WRITE", "Buffer is at %p.", buffer);
+  MFS_LOG("WRITE", "Length of the buffer is %zu.", buflen);
 
   inode = filep->f_inode;
   DEBUGASSERT(inode != NULL);
@@ -633,23 +739,26 @@ static ssize_t mnemofs_write(FAR struct file *filep, FAR const char *buffer,
   DEBUGASSERT(sb != NULL);
 
   ret   = nxmutex_lock(&MFS_LOCK(sb));
-  if (ret < 0)
+  if (predict_false(ret < 0))
     {
+      MFS_LOG("WRITE", "Failed to acquire mutex.");
       goto errout;
     }
-
-  finfo("Lock acquired.");
+  else
+    {
+      MFS_EXTRA_LOG("WRITE", "Mutex acquired.");
+    }
 
   f     = filep->f_priv;
   DEBUGASSERT(f != NULL);
 
-  finfo("Mnemofs write %zu bytes at offset %" PRIu32, buflen,
-        f->com->off);
+  MFS_EXTRA_LOG_F(f);
 
   /* Check if allowed to write. */
 
   if ((f->com->oflags & O_WRONLY) == 0)
     {
+      MFS_EXTRA_LOG("WRITE", "Write not allowed.");
       ret = -EINVAL;
       goto errout_with_lock;
     }
@@ -658,9 +767,14 @@ static ssize_t mnemofs_write(FAR struct file *filep, FAR const char *buffer,
 
   ret = mfs_lru_wr(sb, f->com->off, buflen, f->com->path, f->com->depth,
                   buffer);
-  if (ret < 0)
+  if (predict_false(ret < 0))
     {
+      MFS_LOG("WRITE", "Could not write to LRU.");
       goto errout_with_lock;
+    }
+  else
+    {
+      MFS_EXTRA_LOG("WRITE", "Completed writing to LRU.");
     }
 
   /* Update offset and size. */
@@ -669,14 +783,15 @@ static ssize_t mnemofs_write(FAR struct file *filep, FAR const char *buffer,
   f->com->sz   = MAX(f->com->sz, f->com->off);
   ret          = buflen;
 
-  finfo("Offset updated to %u and size to %u", f->com->off, f->com->sz);
+  MFS_EXTRA_LOG("WRITE", "Updated file offset and size.");
+  MFS_EXTRA_LOG_F(f);
 
 errout_with_lock:
   nxmutex_unlock(&MFS_LOCK(sb));
-  finfo("Lock released.");
+  MFS_EXTRA_LOG("WRITE", "Mutex  released.");
 
 errout:
-  finfo("Mnemofs write exited with %zd.", ret);
+  MFS_LOG("WRITE", "Exit | Return: %zd.", ret);
   return ret;
 }
 
@@ -713,7 +828,8 @@ static off_t mnemofs_seek(FAR struct file *filep, off_t offset, int whence)
   FAR struct mfs_sb_s  *sb;
   FAR struct mfs_ofd_s *f;
 
-  finfo("Mnemofs seek.");
+  MFS_LOG("SEEK", "Entry.");
+  MFS_LOG("SEEK", "Offset: %u, Whence: %d", offset, whence);
 
   inode = filep->f_inode;
   DEBUGASSERT(inode != NULL);
@@ -723,16 +839,19 @@ static off_t mnemofs_seek(FAR struct file *filep, off_t offset, int whence)
   ret   = nxmutex_lock(&MFS_LOCK(sb));
   if (ret < 0)
     {
+      MFS_LOG("SEEK", "Failed to acquire mutex.");
       goto errout;
     }
-
-  finfo("Lock acquired.");
+  else
+    {
+      MFS_EXTRA_LOG("SEEK", "Mutex acquired.");
+    }
 
   f     = filep->f_priv;
   DEBUGASSERT(f != NULL);
 
-  finfo("Mnemofs seek from %u offset to %u using whence %d.",
-        f->com->off, offset, whence);
+  MFS_EXTRA_LOG("SEEK", "File offset: %u, Command offset: %u, Whence %d.",
+                f->com->off, offset, whence);
 
   pos   = f->com->off;
   switch (whence)
@@ -754,26 +873,29 @@ static off_t mnemofs_seek(FAR struct file *filep, off_t offset, int whence)
         goto errout_with_lock;
     }
 
-    /* Check bounds of the position data type. */
+  MFS_EXTRA_LOG("SEEK", "Proposed final position: %" PRIu32, pos);
 
-    if ((pos < f->com->off && offset > 0) ||
-        (pos > f->com->off && offset < 0))
-    {
-      finfo("Out of bounds seek.");
-      ret = -EINVAL;
-      goto errout_with_lock;
-    }
+  /* Check bounds of the position data type. */
 
-    f->com->off = pos;
-    ret         = pos;
+  if (pos > f->com->off && offset < 0)
+  {
+    MFS_LOG("SEEK", "Proposed final position (%" PRIu32 ") out of bounds.",
+            pos);
+    ret = -EINVAL;
+    goto errout_with_lock;
+  }
 
-    finfo("Final position %u.", pos);
+  f->com->off = pos;
+  ret         = pos;
+
+  MFS_EXTRA_LOG("SEEK", "Final position: %" PRIu32, pos);
 
 errout_with_lock:
   nxmutex_unlock(&MFS_LOCK(sb));
-  finfo("Lock released.");
+  MFS_EXTRA_LOG("SEEK", "Mutex released.");
 
 errout:
+  MFS_LOG("SEEK", "Exit | Return: %d.", ret);
   return ret;
 }
 
@@ -1005,7 +1127,7 @@ static int mnemofs_dup(FAR const struct file *oldp, FAR struct file *newp)
   of    = oldp->f_priv;
   DEBUGASSERT(of != NULL);
 
-  nf    = kmm_zalloc(sizeof(*nf));
+  nf    = fs_heap_zalloc(sizeof(*nf));
   if (predict_false(nf == NULL))
     {
       finfo("No memory left.");
@@ -1037,7 +1159,7 @@ static int mnemofs_dup(FAR const struct file *oldp, FAR struct file *newp)
   return ret;
 
 errout_with_nf:
-  kmm_free(nf);
+  fs_heap_free(nf);
 
 errout_with_lock:
   nxmutex_unlock(&MFS_LOCK(sb));
@@ -1157,15 +1279,16 @@ static int mnemofs_opendir(FAR struct inode *mountpt,
                            FAR const char *relpath,
                            FAR struct fs_dirent_s **dir)
 {
-  int                      ret      = OK;
-  int                      flags;
-  mfs_t                    depth;
-  FAR struct mfs_sb_s     *sb;
-  FAR struct mfs_path_s   *path;
-  FAR struct mfs_pitr_s   *pitr;
-  FAR struct mfs_fsdirent *fsdirent;
+  int                        ret      = OK;
+  int                        flags;
+  mfs_t                      depth;
+  FAR struct mfs_sb_s       *sb;
+  FAR struct mfs_path_s     *path;
+  FAR struct mfs_pitr_s     *pitr;
+  FAR struct mfs_fsdirent_s *fsdirent;
 
-  finfo("Mnemofs opendir for directory %s.", relpath);
+  MFS_LOG("OPENDIR", "Entry.");
+  MFS_LOG("OPENDIR", "Requested path is \"%s\".", relpath);
 
   DEBUGASSERT(mountpt != NULL);
   sb       = mountpt->i_private;
@@ -1174,43 +1297,73 @@ static int mnemofs_opendir(FAR struct inode *mountpt,
   ret      = nxmutex_lock(&MFS_LOCK(sb));
   if (ret < 0)
     {
+      MFS_LOG("OPENDIR", "Failed to acquire mutex.");
       goto errout;
     }
-
-  finfo("Lock acquired.");
+  else
+    {
+      MFS_EXTRA_LOG("OPENDIR", "Mutex acquired.");
+    }
 
   flags    = mfs_get_patharr(sb, relpath, &path, &depth);
   if ((flags & MFS_ISDIR) == 0)
     {
+      MFS_LOG("OPENDIR", "Not a directory.");
       ret = -ENOTDIR;
       goto errout_with_lock;
     }
+  else
+    {
+      MFS_EXTRA_LOG("OPENDIR", "Path is at %p.", path);
+      MFS_EXTRA_LOG("OPENDIR", "Path is at %" PRIu32, depth);
+      MFS_EXTRA_LOG("OPENDIR", "Retrieved flags is %d.", flags);
+    }
 
-  ret = mfs_lru_updatedinfo(sb, path, depth);
+  ret = mfs_lru_getupdatedinfo(sb, path, depth);
   if (predict_false(ret < 0))
     {
+      MFS_LOG("OPENDIR", "Failed to get updated information from LRU.");
       goto errout_with_path;
     }
+  else
+    {
+      MFS_EXTRA_LOG("OPENDIR", "Got updated information from LRU.");
+    }
 
-  pitr     = kmm_zalloc(sizeof(*pitr));
+  pitr     = fs_heap_zalloc(sizeof(*pitr));
   if (predict_false(pitr == NULL))
     {
+      MFS_LOG("OPENDIR", "Could not allocate space for pitr.");
       ret  = -ENOMEM;
       goto errout_with_path;
     }
+  else
+    {
+      MFS_EXTRA_LOG("OPENDIR", "Space allocated for pitr at %p.", pitr);
+    }
 
-  fsdirent = kmm_zalloc(sizeof(*fsdirent));
+  fsdirent = fs_heap_zalloc(sizeof(*fsdirent));
   if (predict_false(fsdirent == NULL))
     {
+      MFS_LOG("OPENDIR", "Could not allocate space for FS Direntry.");
       ret  = -ENOMEM;
       goto errout_with_pitr;
+    }
+  else
+    {
+      MFS_EXTRA_LOG("OPENDIR", "Space allocated for FS Direntry at %p.",
+                    fsdirent);
     }
 
   ret = mfs_pitr_init(sb, path, depth, pitr, false);
   if (predict_false(ret < 0))
     {
-      finfo("Failed PITR initialization.");
+      MFS_LOG("OPENDIR", "Failed to initialize pitr.");
       goto errout_with_fsdirent;
+    }
+  else
+    {
+      MFS_EXTRA_LOG("OPENDIR", "Pitr initialized successfully.");
     }
 
   fsdirent->idx   = 0;
@@ -1218,30 +1371,32 @@ static int mnemofs_opendir(FAR struct inode *mountpt,
   fsdirent->depth = depth;
   fsdirent->pitr  = pitr;
 
-  *dir = (FAR struct fs_dirent_s *) fsdirent;
+  MFS_EXTRA_LOG_FSDIRENT(fsdirent);
 
-  finfo("Opened directory with index %u at depth %u.", fsdirent->idx,
-        fsdirent->depth);
+  *dir = (FAR struct fs_dirent_s *) fsdirent;
+  MFS_EXTRA_LOG("OPENDIR", "Directory structure is %p.", dir);
 
   nxmutex_unlock(&MFS_LOCK(sb));
-  finfo("Lock released.");
+  MFS_EXTRA_LOG("OPENDIR", "Mutex released.");
+
+  MFS_LOG("OPENDIR", "Exit | Return: %d.", ret);
   return ret;
 
 errout_with_fsdirent:
-  kmm_free(fsdirent);
+  fs_heap_free(fsdirent);
 
 errout_with_pitr:
-  kmm_free(pitr);
+  fs_heap_free(pitr);
 
 errout_with_path:
   mfs_free_patharr(path);
 
 errout_with_lock:
   nxmutex_unlock(&MFS_LOCK(sb));
-  finfo("Lock released.");
+  MFS_EXTRA_LOG("OPENDIR", "Mutex released.");
 
 errout:
-  finfo("Mnemofs opendir exited with %d.", ret);
+  MFS_LOG("OPENDIR", "Exit | Return: %d.", ret);
   return ret;
 }
 
@@ -1264,14 +1419,19 @@ errout:
 static int mnemofs_closedir(FAR struct inode *mountpt,
                             FAR struct fs_dirent_s *dir)
 {
-  struct mfs_fsdirent *fsdirent = (struct mfs_fsdirent *) dir;
+  struct mfs_fsdirent_s *fsdirent = (struct mfs_fsdirent_s *) dir;
 
-  finfo("Mnemofs closedir.");
+  MFS_LOG("CLOSEDIR", "Entry.");
+  MFS_LOG("CLOSEDIR", "FS Direntry at %p.", fsdirent);
+
+  MFS_EXTRA_LOG_FSDIRENT(fsdirent);
 
   mfs_free_patharr(fsdirent->path);
   mfs_pitr_free(fsdirent->pitr);
-  kmm_free(fsdirent->pitr);
-  kmm_free(fsdirent);
+  fs_heap_free(fsdirent->pitr);
+  fs_heap_free(fsdirent);
+
+  MFS_LOG("CLOSEDIR", "Exit | Return: %d.", OK);
   return OK;
 }
 
@@ -1305,45 +1465,65 @@ static int mnemofs_readdir(FAR struct inode *mountpt,
                            FAR struct fs_dirent_s *dir,
                            FAR struct dirent *entry)
 {
-  int                      ret      = OK;
-  FAR struct mfs_sb_s     *sb;
-  FAR struct mfs_dirent_s *dirent;
-  FAR struct mfs_fsdirent *fsdirent = (FAR struct mfs_fsdirent *) dir;
+  int                        ret      = OK;
+  FAR struct mfs_sb_s       *sb;
+  FAR struct mfs_dirent_s   *dirent;
+  FAR struct mfs_fsdirent_s *fsdirent = (FAR struct mfs_fsdirent_s *) dir;
+
+  MFS_LOG("READDIR", "Entry.");
+  MFS_LOG("READDIR", "FS Direntry at %p.", fsdirent);
+  MFS_EXTRA_LOG_FSDIRENT(fsdirent);
 
   DEBUGASSERT(mountpt != NULL);
   sb  = mountpt->i_private;
   DEBUGASSERT(sb != NULL);
 
-  finfo("Mnemofs readdir with dirent idx %u.", fsdirent->idx);
-
   ret = nxmutex_lock(&MFS_LOCK(sb));
   if (ret < 0)
     {
+      MFS_LOG("READDIR", "Failed to acquire mutex.");
       goto errout;
     }
+  else
+    {
+      MFS_EXTRA_LOG("READDIR", "Mutex acquired.");
+    }
 
-  finfo("Lock acquired.");
+  MFS_EXTRA_LOG("READDIR", "Curretn direntry index is %" PRIu8,
+                fsdirent->idx);
 
   if (fsdirent->idx == 0)
     {
       /* . */
 
+      MFS_EXTRA_LOG("READDIR", "Direntry for \".\"");
+
       snprintf(entry->d_name, NAME_MAX + 1, ".");
       entry->d_type = DTYPE_DIRECTORY;
       fsdirent->idx++;
+
+      MFS_EXTRA_LOG("READDIR", "Direntry index updated to %" PRIu8,
+                    fsdirent->idx);
       goto errout_with_lock;
     }
   else if (fsdirent->idx == 1)
     {
       /* .. */
 
+      MFS_EXTRA_LOG("READDIR", "Direntry for \"..\"");
+
       snprintf(entry->d_name, NAME_MAX + 1, "..");
       entry->d_type = DTYPE_DIRECTORY;
       fsdirent->idx++;
+
+      MFS_EXTRA_LOG("READDIR", "Direntry index updated to %" PRIu8,
+                    fsdirent->idx);
       goto errout_with_lock;
     }
-
-  /* Regular direntries from here. */
+  else
+    {
+      MFS_EXTRA_LOG("READDIR", "Direntry for regular directory items.");
+    }
 
   /* TODO: Need to think why *exactly* below line is needed. The LRU node
    * seems to contain wrong size during opendir, but updating it here
@@ -1351,43 +1531,56 @@ static int mnemofs_readdir(FAR struct inode *mountpt,
    * called in opendir?
    */
 
-  ret = mfs_lru_updatedinfo(sb, fsdirent->path, fsdirent->depth);
+  ret = mfs_lru_getupdatedinfo(sb, fsdirent->path, fsdirent->depth);
   if (predict_false(ret < 0))
     {
+      MFS_LOG("READDIR", "Failed to get updated information from LRU.");
       goto errout_with_lock;
+    }
+  else
+    {
+      MFS_EXTRA_LOG("READDIR", "Got updated information from LRU.");
     }
 
   ret = mfs_pitr_readdirent(sb, fsdirent->path, fsdirent->pitr, &dirent);
   if (predict_false(ret < 0))
     {
+      MFS_LOG("READDIR", "Could not read direntry.");
       goto errout_with_lock;
     }
   else if (dirent == NULL)
     {
-      /* End of Directory. */
-
-      finfo("End of directory.");
+      MFS_LOG("READDIR", "No more direntries left.");
+      MFS_LOG("READDIR", "End of directory.");
 
       ret = -ENOENT;
       goto errout_with_lock;
     }
+  else
+    {
+      MFS_LOG("READDIR", "Direntry retrieved.");
+      MFS_EXTRA_LOG_DIRENT(dirent);
+    }
 
   memset(entry->d_name, 0, NAME_MAX + 1);
-  memcpy(entry->d_name, dirent->name, dirent->namelen);
-  entry->d_type = (S_ISDIR(dirent->mode) ? DTYPE_DIRECTORY: DTYPE_FILE);
+  MFS_EXTRA_LOG("READDIR", "Resetting entry name.");
 
-  finfo("Size of direntry %u, current off %u.", MFS_DIRENTSZ(dirent),
-        fsdirent->pitr->c_off);
+  memcpy(entry->d_name, dirent->name, dirent->namelen);
+  MFS_EXTRA_LOG("READDIR", "Setting entry name to be \"%.*s\".",
+                dirent->namelen, dirent->name);
+
+  entry->d_type = (S_ISDIR(dirent->mode) ? DTYPE_DIRECTORY: DTYPE_FILE);
+  MFS_EXTRA_LOG("READDIR", "Setting entry d_type to %" PRIu8, entry->d_type);
 
   mfs_pitr_adv_bydirent(fsdirent->pitr, dirent);
   mfs_free_dirent(dirent);
 
 errout_with_lock:
   nxmutex_unlock(&MFS_LOCK(sb));
-  finfo("Lock released.");
+  MFS_EXTRA_LOG("READDIR", "Mutex released.");
 
 errout:
-  finfo("Mnemofs readdir exited with %d.", ret);
+  MFS_LOG("READDIR", "Exit | Return: %d.", ret);
   return ret;
 }
 
@@ -1413,11 +1606,13 @@ errout:
 static int mnemofs_rewinddir(FAR struct inode *mountpt,
                              FAR struct fs_dirent_s *dir)
 {
-  int                  ret      = OK;
-  FAR struct mfs_sb_s *sb;
-  struct mfs_fsdirent *fsdirent = (struct mfs_fsdirent *) dir;
+  int                    ret      = OK;
+  FAR struct mfs_sb_s   *sb;
+  struct mfs_fsdirent_s *fsdirent = (struct mfs_fsdirent_s *) dir;
 
-  finfo("Rewind dir.");
+  MFS_LOG("REWINDDIR", "Entry.");
+  MFS_LOG("REWINDDIR", "FS Direntry at %p.", fsdirent);
+  MFS_EXTRA_LOG_FSDIRENT(fsdirent);
 
   DEBUGASSERT(mountpt != NULL);
   sb  = mountpt->i_private;
@@ -1426,19 +1621,26 @@ static int mnemofs_rewinddir(FAR struct inode *mountpt,
   ret = nxmutex_lock(&MFS_LOCK(sb));
   if (ret < 0)
     {
+      MFS_LOG("REWINDDIR", "Failed to acquire mutex.");
       goto errout;
     }
-
-  finfo("Lock acquired.");
+  else
+    {
+      MFS_EXTRA_LOG("REWINDDIR", "Mutex acquired.");
+    }
 
   mfs_pitr_reset(fsdirent->pitr);
+
   fsdirent->idx = 0;
+  MFS_EXTRA_LOG("REWINDDIR", "Direntry index reset to 0.");
+
+  MFS_EXTRA_LOG_FSDIRENT(fsdirent);
 
   nxmutex_unlock(&MFS_LOCK(sb));
-  finfo("Lock released.");
+  MFS_EXTRA_LOG("REWINDDIR", "Mutex released.");
 
 errout:
-  finfo("Mnemofs rewinddir exited with %d.", ret);
+  MFS_LOG("REWINDDIR", "Exit | Return: %d.", ret);
   return ret;
 }
 
@@ -1453,7 +1655,7 @@ errout:
  *
  *   See `mount(2)` and `mount(8)` for more information.
  *
- *   In mnemofs, the superblock is not stored on disk. It does not contain
+ *   In mnemofs, the superblock is not stored on disk yet. It does not have
  *   any information about the current state of the device, but rather just
  *   the information about the storage device, which is obtained from the
  *   driver anyway. To know if the device is formatted, the entire device
@@ -1482,21 +1684,29 @@ static int mnemofs_bind(FAR struct inode *driver, FAR const void *data,
   bool                   format   = false;
   FAR char               buf[8];
   mfs_t                  i        = 0;
+  mfs_t                  j        = 0;
   mfs_t                  mnblk1;
   mfs_t                  mnblk2;
   mfs_t                  jrnl_blk;
   FAR struct mfs_sb_s   *sb       = NULL;
   struct mtd_geometry_s  geo;
 
-  finfo("Mnemofs bind.");
+  MFS_LOG("BIND", "Entry.");
 
+  MFS_EXTRA_LOG("BIND", "Resetting temporary buffer.");
   memset(buf, 0, 8);
 
-  sb = kmm_zalloc(sizeof(*sb));
+  MFS_EXTRA_LOG("BIND", "Allocating superblock in memory.");
+  sb = fs_heap_zalloc(sizeof(*sb));
   if (!sb)
     {
+      MFS_LOG("BIND", "SB in-memory allocation error.");
       ret = -ENOMEM;
       goto errout;
+    }
+  else
+    {
+      MFS_EXTRA_LOG("BIND", "Superblock allocated at %p", sb);
     }
 
   /* Currently only supports NAND flashes (MTD devices). */
@@ -1505,34 +1715,53 @@ static int mnemofs_bind(FAR struct inode *driver, FAR const void *data,
     {
       if (!driver || !driver->u.i_mtd || !driver->u.i_mtd->ioctl)
         {
+          MFS_LOG("BIND", "Unsupported device.");
           ret = -ENODEV;
-          finfo("MTD driver not supported.\n");
           goto errout_with_sb;
+        }
+      else
+        {
+          MFS_EXTRA_LOG("BIND", "Device is of MTD type.");
         }
 
       ret = MTD_IOCTL(driver->u.i_mtd, MTDIOC_GEOMETRY,
                       (unsigned long) &geo);
-      finfo("MTD Driver Geometry read. "
-            "Page size: %d, Block size: %d, Pages/Block: %d, Blocks: %d\n",
-            geo.blocksize, geo.erasesize, geo.erasesize / geo.blocksize,
-            geo.neraseblocks);
+
+      MFS_LOG("BIND", "MTD Driver Geometry read.");
+      MFS_EXTRA_LOG("BIND", "MTD Driver Geometry details."
+                    " Page size: %d, Block size: %d,"
+                    " Pages/Block: %d, Blocks: %d\n",
+                    geo.blocksize, geo.erasesize,
+                    geo.erasesize / geo.blocksize, geo.neraseblocks);
     }
   else
     {
-      finfo("Not an MTD device.\n");
+      MFS_LOG("BIND", "Device is not an MTD device.");
       ret = -ENODEV;
       goto errout_with_sb;
     }
 
-  nxmutex_init(&MFS_LOCK(sb));
+  ret = nxmutex_init(&MFS_LOCK(sb));
+  if (predict_false(ret < 0))
+    {
+      MFS_LOG("BIND", "FS-wide Mutex failed to initialize.");
+      goto errout_with_sb;
+    }
+  else
+    {
+      MFS_EXTRA_LOG("BIND", "FS-wide Mutex Initialized.");
+    }
 
   ret = nxmutex_lock(&MFS_LOCK(sb));
   if (ret < 0)
     {
-      goto errout_with_sb;
+      MFS_LOG("BIND", "Mutex failed to lock. Return %d.", ret);
+      goto errout_with_lockinit;
     }
-
-  finfo("Lock acquired.");
+  else
+    {
+      MFS_EXTRA_LOG("BIND", "Mutex acquired.");
+    }
 
   sb->drv             = driver;
   sb->pg_sz           = geo.blocksize;
@@ -1552,64 +1781,105 @@ static int mnemofs_bind(FAR struct inode *driver, FAR const void *data,
 
   list_initialize(&MFS_OFILES(sb));
 
-  sb->rw_buf        = kmm_zalloc(MFS_PGSZ(sb));
+  MFS_EXTRA_LOG("BIND", "SB initialized in-memory.");
+  MFS_EXTRA_LOG("BIND", "SB Details.");
+  MFS_EXTRA_LOG("BIND", "\tDriver: %p", driver);
+  MFS_EXTRA_LOG("BIND", "\tPage Size: %" PRIu32, sb->pg_sz);
+  MFS_EXTRA_LOG("BIND", "\tLog Page Size: %" PRIu8, sb->log_pg_sz);
+  MFS_EXTRA_LOG("BIND", "\tBlock Size: %" PRIu32, sb->blk_sz);
+  MFS_EXTRA_LOG("BIND", "\tLog Block Size: %" PRIu8,
+                sb->log_blk_sz);
+  MFS_EXTRA_LOG("BIND", "\tPages Per Block: %" PRIu16,
+                sb->pg_in_blk);
+  MFS_EXTRA_LOG("BIND", "\tBlocks: %" PRIu32, sb->n_blks);
+  MFS_EXTRA_LOG("BIND", "\tLog Blocks: %" PRIu8, sb->log_n_blks);
+  MFS_EXTRA_LOG("BIND", "\tJournal Blocks: %" PRIu16,
+                MFS_JRNL(sb).n_blks);
+  MFS_EXTRA_LOG("BIND", "\tFlush State: %" PRIu8, MFS_FLUSH(sb));
+
+  sb->rw_buf        = fs_heap_zalloc(MFS_PGSZ(sb));
   if (predict_false(sb->rw_buf == NULL))
     {
+      MFS_LOG("BIND", "RW Buffer in-memory allocation error.");
       goto errout_with_lock;
     }
+  else
+    {
+      MFS_EXTRA_LOG("BIND", "RW Buffer allocated.");
+    }
 
-  /* TODO: Print the super block in Block 0. */
+  /* TODO: Format the superblock in Block 0. */
 
   srand(time(NULL));
 
-  if (!strncmp(data, "autoformat", 11))
+  if (!MFS_STRLITCMP(data, "autoformat"))
     {
-      /* Format if not formatted already. */
-
-      finfo("Auto format.\n");
+      MFS_LOG("BIND", "Autoformat is ON.");
 
       /* Look for journal and maybe hopefully, the master node
        * if it comes first.
        */
 
+      MFS_LOG("BIND", "Checking for valid mnemofs formatting.");
+
       for (i = 0; i < MFS_NBLKS(sb); i++)
         {
+          MFS_EXTRA_LOG("BIND", "Checking start of Block %" PRIu32,
+                        i + 1);
           mfs_read_page(sb, buf, 8, MFS_BLK2PG(sb, i), 0);
 
-          if (!strncmp(buf, MFS_JRNL_MAGIC, 8))
+          for (j = 0; j < 8; j++)
             {
-              /* Found journal first block. */
+              MFS_EXTRA_LOG("BIND", "\tBlock %" PRIu32
+                            ", Offset %" PRIu32 ": %x", i, j, buf[j]);
+            }
+
+          if (!MFS_STRLITCMP(buf, MFS_JRNL_MAGIC))
+            {
+              MFS_LOG("BIND", "Found Journal at Block %" PRIu32,
+                      i + 1);
 
               ret = mfs_jrnl_init(sb, i);
               if (predict_false(ret < 0))
                 {
+                  MFS_LOG("BIND", "Error initializing journal.");
                   goto errout_with_rwbuf;
                 }
-
-              finfo("Journal initialized.");
+              else
+                {
+                  MFS_LOG("BIND", "Journal initialized.");
+                }
 
               ret = mfs_mn_init(sb, i);
               if (predict_false(ret < 0))
                 {
+                  MFS_LOG("BIND", "Error initializing masternode.");
                   goto errout_with_rwbuf;
                 }
-
-              finfo("Master Node initialized.");
+              else
+                {
+                  MFS_LOG("BIND", "Master node initialized.");
+                }
 
               break;
             }
+
+          MFS_EXTRA_LOG("BIND", "Resetting temporary buffer.");
+          memset(buf, 0, 8);
         }
 
       if (predict_false(sb->mn.pg == 0))
         {
+          MFS_LOG("BIND", "Journal not found on device.");
+          MFS_LOG("BIND", "Device needs formatting.");
+
           format = true;
           memset(&MFS_JRNL(sb), 0, sizeof(struct mfs_jrnl_state_s));
           memset(&MFS_MN(sb), 0, sizeof(struct mfs_mn_s));
-          finfo("Device needs to formatted.\n");
         }
       else
         {
-          finfo("Device already formatted.\n");
+          MFS_LOG("BIND", "Device already formatted.");
 
           mfs_lru_init(sb);
           mfs_ba_init(sb);
@@ -1620,9 +1890,13 @@ static int mnemofs_bind(FAR struct inode *driver, FAR const void *data,
     {
       /* Format. */
 
-      if (!format)
+      if (format)
         {
-          finfo("Force format.\n");
+          MFS_LOG("BIND", "Device format necessary.");
+        }
+      else
+        {
+          MFS_EXTRA_LOG("BIND", "Device formatting configured.");
         }
 
       mfs_ba_fmt(sb);
@@ -1630,40 +1904,59 @@ static int mnemofs_bind(FAR struct inode *driver, FAR const void *data,
 
       mnblk1 = 0;
       mnblk2 = 0;
+
       ret = mfs_jrnl_fmt(sb, &mnblk1, &mnblk2, &jrnl_blk);
       if (predict_false(ret < 0))
         {
+          MFS_LOG("BIND", "Error formatting Journal");
           goto errout_with_rwbuf;
+        }
+      else
+        {
+          MFS_LOG("BIND", "Journal format completed.");
         }
 
       ret = mfs_mn_fmt(sb, mnblk1, mnblk2, jrnl_blk);
       if (predict_false(ret < 0))
         {
+          MFS_LOG("BIND", "Error formatting Master Node");
           goto errout_with_rwbuf;
         }
+      else
+        {
+          MFS_LOG("BIND", "Master node format completed.");
+        }
 
-      finfo("Device formatted.\n");
+      MFS_LOG("BIND", "Device formatted.");
     }
 
   *handle = (FAR void *)sb;
-  finfo("Successfully mounted mnemofs! Super Block %p\n", sb);
+  MFS_LOG("BIND", "Mount Successful. Super Block %p.", sb);
 
   nxmutex_unlock(&MFS_LOCK(sb));
-  finfo("Lock released.");
+  MFS_LOG("BIND", "Mutex released.");
+
+  MFS_LOG("BIND", "Exit | Return: %d.", ret);
   return ret;
 
 errout_with_rwbuf:
-  kmm_free(sb->rw_buf);
+  fs_heap_free(sb->rw_buf);
+  MFS_LOG("BIND", "RW Buffer freed.");
 
 errout_with_lock:
   nxmutex_unlock(&MFS_LOCK(sb));
-  finfo("Lock released.");
+  MFS_EXTRA_LOG("BIND", "Mutex released.");
 
 errout_with_sb:
-  kmm_free(sb);
+  fs_heap_free(sb);
+  MFS_LOG("BIND", "Superblock freed.");
+
+errout_with_lockinit:
+  nxmutex_destroy(&MFS_LOCK(sb));
+  MFS_EXTRA_LOG("BIND", "Mutex destroyed.");
 
 errout:
-  finfo("Mnemofs bind exited with %d.", ret);
+  MFS_LOG("BIND", "Exit | Return: %d.", ret);
   return ret;
 }
 
@@ -1690,20 +1983,28 @@ static int mnemofs_unbind(FAR void *handle, FAR struct inode **driver,
 {
   FAR struct mfs_sb_s *sb;
 
-  finfo("Mnemofs unbind.");
+  MFS_LOG("UNBIND", "Entry.");
 
   DEBUGASSERT(handle);
   sb      = handle;
+  MFS_LOG("UNBIND", "Superblock %p.", sb);
 
   *driver = sb->drv;
+  MFS_LOG("UNBIND", "Driver %p.", driver);
 
   mfs_jrnl_free(sb);
   mfs_ba_free(sb);
 
-  kmm_free(sb->rw_buf);
-  kmm_free(sb);
+  nxmutex_destroy(&MFS_LOCK(sb));
+  MFS_EXTRA_LOG("UNBIND", "Mutex destroyed.");
 
-  finfo("Successfully unmounted mnemofs!");
+  fs_heap_free(sb->rw_buf);
+  MFS_LOG("UNBIND", "RW Buffer freed.");
+
+  fs_heap_free(sb);
+  MFS_LOG("UNBIND", "Superblock freed.");
+
+  MFS_LOG("UNBIND", "Exit.");
   return OK;
 }
 
@@ -1782,7 +2083,7 @@ errout:
 static int mnemofs_unlink(FAR struct inode *mountpt, FAR const char *relpath)
 {
   int                    ret       = OK;
-  int                    ret_flags;
+  int                    flags;
   mfs_t                  depth;
   FAR struct mfs_sb_s   *sb;
   FAR struct mfs_path_s *path;
@@ -1801,8 +2102,8 @@ static int mnemofs_unlink(FAR struct inode *mountpt, FAR const char *relpath)
 
   finfo("Lock acquired.");
 
-  ret_flags = mfs_get_patharr(sb, relpath, &path, &depth);
-  if ((ret_flags & MFS_ISFILE) == 0)
+  flags = mfs_get_patharr(sb, relpath, &path, &depth);
+  if ((flags & MFS_ISFILE) == 0)
     {
       ret = -EISDIR;
       goto errout_with_lock;
@@ -1852,12 +2153,16 @@ static int mnemofs_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
   FAR struct mfs_sb_s   *sb;
   FAR struct mfs_path_s *path;
 
-  finfo("Mnemofs mkdir at %s.", relpath);
+  MFS_LOG("MKDIR", "Entry.");
+  MFS_LOG("MKDIR", "New directory at \"%s\".", relpath);
 
   mode |= S_IFDIR;
 
+  MFS_LOG("MKDIR", "Mode is 0x%x.", mode);
+
   DEBUGASSERT(mountpt != NULL);
   sb  = mountpt->i_private;
+  MFS_EXTRA_LOG("MKDIR", "Superblock is %p.", sb);
   DEBUGASSERT(sb != NULL);
 
   ret = nxmutex_lock(&MFS_LOCK(sb));
@@ -1865,61 +2170,96 @@ static int mnemofs_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
     {
       goto errout;
     }
-
-  finfo("Lock acquired.");
+  else
+    {
+      MFS_EXTRA_LOG("MKDIR", "Mutex lock acquired.");
+    }
 
   flags = mfs_get_patharr(sb, relpath, &path, &depth);
+  MFS_EXTRA_LOG("MKDIR", "Retrieved flags are 0x%x.", flags);
+  MFS_EXTRA_LOG("MKDIR", "Path received is at %p.", path);
+  MFS_EXTRA_LOG("MKDIR", "Depth of path is %" PRIu32 ".", depth);
+
   if ((flags & MFS_EXIST) != 0)
     {
-      finfo("File exists.");
-
+      MFS_LOG("MKDIR", "The requested directory already exists.");
       ret = -EEXIST;
       goto errout_with_path;
     }
   else
     {
+      MFS_LOG("MKDIR", "The requested directory does not exist.");
       if ((flags & MFS_P_EXIST) != 0)
         {
+          MFS_EXTRA_LOG("MKDIR", "Parent exists.");
           if ((flags  & MFS_P_ISDIR) != 0)
             {
               /* OK */
 
-              finfo("OK");
+              MFS_EXTRA_LOG("MKDIR", "Parent is all right.");
             }
           else
             {
+              MFS_EXTRA_LOG("MKDIR", "Ancestor is not a directory.");
               ret = -ENOTDIR;
               goto errout_with_path;
             }
         }
       else
         {
+          MFS_EXTRA_LOG("MKDIR", "Parent not found.");
           ret = -ENOENT;
           goto errout_with_path;
         }
     }
 
   memset(&path[depth - 1], 0, sizeof(struct mfs_path_s));
+  MFS_EXTRA_LOG("MKDIR", "Resetting, at index %u, path array %p.",
+                depth - 1, path);
+
   mfs_pitr_init(sb, path, depth, &pitr, true);
+  MFS_EXTRA_LOG("MKDIR", "The path contains the child.");
+  MFS_EXTRA_LOG("MKDIR", "Parent iterator initialized.");
+  MFS_EXTRA_LOG("MKDIR", "\tDepth of parent %" PRIu32 ".",
+                pitr.depth);
+  MFS_EXTRA_LOG("MKDIR", "\tCurrent iteration offset %" PRIu32 ".",
+                pitr.c_off);
+  MFS_EXTRA_LOG("MKDIR", "\tParent's offset %" PRIu32 ".",
+                pitr.p.off);
+  MFS_EXTRA_LOG("MKDIR", "\tParent's size %" PRIu32 ".", pitr.p.sz);
+  MFS_EXTRA_LOG("MKDIR", "\tParent's CTZ (%" PRIu32 ", %" PRIu32 ")"
+                , pitr.p.ctz.idx_e, pitr.p.ctz.pg_e);
 
   /* The last incomplete direntry will be added by mfs_pitr_appendnew. */
 
   ret = mfs_pitr_appendnew(sb, path, depth, &pitr, relpath, mode);
   if (predict_false(ret < 0))
     {
+      MFS_LOG("MKDIR", "Could not append direntry. Return %d", ret);
       goto errout_with_path;
+    }
+  else
+    {
+      MFS_EXTRA_LOG("MKDIR", "Direntry append successful.");
+      MFS_EXTRA_LOG("MKDIR", "\tDepth of parent %" PRIu32 ".", pitr.depth);
+      MFS_EXTRA_LOG("MKDIR", "\tCurrent iteration offset %" PRIu32 ".",
+                    pitr.c_off);
+      MFS_EXTRA_LOG("MKDIR", "\tParent's offset %" PRIu32 ".", pitr.p.off);
+      MFS_EXTRA_LOG("MKDIR", "\tParent's size %" PRIu32 ".", pitr.p.sz);
+      MFS_EXTRA_LOG("MKDIR", "\tParent's CTZ (%" PRIu32 ", %" PRIu32 ")",
+                    pitr.p.ctz.idx_e, pitr.p.ctz.pg_e);
     }
 
   mfs_pitr_free(&pitr);
 
-  finfo("Directory created at %s", relpath);
+  MFS_LOG("MKDIR", "Directory created at \"%s\".", relpath);
 
   mfs_free_patharr(path);
 
   nxmutex_unlock(&MFS_LOCK(sb));
-  finfo("Lock released.");
+  MFS_EXTRA_LOG("MKDIR", "Mutex released.");
 
-  finfo("Mnemofs mkdir exited with ret %d.", ret);
+  MFS_LOG("MKDIR", "Exit | Return: %d.", ret);
   return ret;
 
 errout_with_path:
@@ -1928,10 +2268,15 @@ errout_with_path:
   mfs_pitr_free(&pitr);
 
   nxmutex_unlock(&MFS_LOCK(sb));
-  finfo("Lock released.");
+  MFS_EXTRA_LOG("MKDIR", "Mutex released.");
+
+  /* TODO: The flush operation does not work properly, and causes memory
+   * leaks by most likely not flushing out anything and keeping it in
+   * memory.
+   */
 
 errout:
-  finfo("Mnemofs mkdir exited with ret %d.", ret);
+  MFS_LOG("MKDIR", "Exit | Return: %d.", ret);
   return ret;
 }
 
@@ -1962,7 +2307,8 @@ static int mnemofs_rmdir(FAR struct inode *mountpt, FAR const char *relpath)
   FAR struct mfs_sb_s   *sb;
   FAR struct mfs_path_s *path;
 
-  finfo("Mnemofs rmdir for path \"%s\".", relpath);
+  MFS_LOG("RMDIR", "Entry");
+  MFS_LOG("RMDIR", "Directory \"%s\" to be removed.", relpath);
 
   DEBUGASSERT(mountpt != NULL);
   sb  = mountpt->i_private;
@@ -1971,16 +2317,27 @@ static int mnemofs_rmdir(FAR struct inode *mountpt, FAR const char *relpath)
   ret = nxmutex_lock(&MFS_LOCK(sb));
   if (ret < 0)
     {
+      MFS_LOG("RMDIR", "Mutex could not be acquired.");
       goto errout;
     }
-
-  finfo("Lock acquired.");
+  else
+    {
+      MFS_EXTRA_LOG("RMDIR", "Mutex acquired.");
+    }
 
   flags = mfs_get_patharr(sb, relpath, &path, &depth);
   if ((flags & MFS_ISDIR) == 0)
     {
-      ret = -EISDIR;
+      MFS_LOG("RMDIR", "FS Object is not a directory.");
+      ret = -ENOTDIR;
       goto errout_with_lock;
+    }
+  else
+    {
+      MFS_EXTRA_LOG("RMDIR", "Path is at %p with depth %" PRIu32, path,
+                    depth);
+      MFS_EXTRA_LOG("RMDIR", "FS Object is a directory.");
+      MFS_EXTRA_LOG("RMDIR", "Retrieved flags are 0x%x.", flags);
     }
 
   mfs_pitr_init(sb, path, depth, &pitr, true);
@@ -1988,6 +2345,7 @@ static int mnemofs_rmdir(FAR struct inode *mountpt, FAR const char *relpath)
 
   if (!mfs_obj_isempty(sb, path, &pitr))
     {
+      MFS_EXTRA_LOG("RMDIR", "Directory is not empty.");
       ret = -ENOTEMPTY;
       goto errout_with_pitr;
     }
@@ -2001,10 +2359,10 @@ errout_with_pitr:
 
 errout_with_lock:
   nxmutex_unlock(&MFS_LOCK(sb));
-  finfo("Lock released.");
+  MFS_EXTRA_LOG("RMDIR", "Mutex released.");
 
 errout:
-  finfo("Mnemofs rmdir exited with ret %d.", ret);
+  MFS_LOG("RMDIR", "Exit | Return: %d.", ret);
   return ret;
 }
 
@@ -2165,14 +2523,15 @@ static int mnemofs_stat(FAR struct inode *mountpt, FAR const char *relpath,
                         FAR struct stat *buf)
 {
   int                     ret       = OK;
-  int                     ret_flags;
+  int                     flags;
   mfs_t                   depth;
   struct mfs_pitr_s       pitr;
   FAR struct mfs_sb_s     *sb;
   FAR struct mfs_path_s   *path;
   FAR struct mfs_dirent_s *dirent   = NULL;
 
-  finfo("Mnemofs stat for path \"%s\".", relpath);
+  MFS_LOG("STAT", "Entry.");
+  MFS_LOG("STAT", "Requested path is \"%s\".", relpath);
 
   DEBUGASSERT(mountpt != NULL);
   sb  = mountpt->i_private;
@@ -2181,28 +2540,39 @@ static int mnemofs_stat(FAR struct inode *mountpt, FAR const char *relpath,
   ret = nxmutex_lock(&MFS_LOCK(sb));
   if (ret < 0)
     {
+      MFS_LOG("STAT", "Could not acquire mutex.");
       goto errout;
     }
-
-  finfo("Lock acquired.");
-
-  finfo("Master node: Root (%u, %u), Size %u", MFS_MN(sb).root_ctz.idx_e,
-        MFS_MN(sb).root_ctz.pg_e, MFS_MN(sb).root_sz);
-
-  ret_flags = mfs_get_patharr(sb, relpath, &path, &depth);
-  if ((ret_flags & MFS_EXIST) == 0)
+  else
     {
+      MFS_EXTRA_LOG("STAT", "Mutex acquired.");
+    }
+
+  MFS_EXTRA_LOG_MN(&MFS_MN(sb));
+
+  flags = mfs_get_patharr(sb, relpath, &path, &depth);
+  if ((flags & MFS_EXIST) == 0)
+    {
+      MFS_LOG("STAT", "File does not exist.");
       ret = -ENOENT;
       goto errout_with_path;
     }
+  else
+    {
+      MFS_EXTRA_LOG("STAT", "Path is at %p.", path);
+      MFS_EXTRA_LOG("STAT", "Depth is %" PRIu32, depth);
+      MFS_EXTRA_LOG("STAT", "Retrieved flags are 0x%x.", flags);
+    }
 
-  finfo("Got path array. Depth %u for path \"%s\". Return flags %u.", depth,
-        relpath, ret_flags);
-
-  ret = mfs_lru_updatedinfo(sb, path, depth);
+  ret = mfs_lru_getupdatedinfo(sb, path, depth);
   if (predict_false(ret < 0))
     {
+      MFS_LOG("STAT", "Could not get updated information.");
       goto errout_with_path;
+    }
+  else
+    {
+      MFS_EXTRA_LOG("STAT", "Updated information received from LRU.");
     }
 
   mfs_pitr_init(sb, path, depth, &pitr, true);
@@ -2211,15 +2581,21 @@ static int mnemofs_stat(FAR struct inode *mountpt, FAR const char *relpath,
   ret = mfs_pitr_readdirent(sb, path, &pitr, &dirent);
   if (predict_false(ret < 0))
     {
+      MFS_LOG("STAT", "Could not read from direntry.");
       goto errout_with_path;
     }
   else if (dirent == NULL)
     {
+      MFS_LOG("STAT", "No entry found.");
       ret = -ENOENT;
       goto errout_with_path;
     }
+  else
+    {
+      MFS_EXTRA_LOG("STAT", "Direntry read successfully.");
+    }
 
-  finfo("Read stats.");
+  MFS_EXTRA_LOG_DIRENT(dirent);
 
   buf->st_nlink   = 1;
   buf->st_blksize = sb->pg_sz;
@@ -2236,11 +2612,11 @@ static int mnemofs_stat(FAR struct inode *mountpt, FAR const char *relpath,
 errout_with_path:
   mfs_free_patharr(path);
 
-  finfo("Lock released.");
   nxmutex_unlock(&MFS_LOCK(sb));
+  MFS_EXTRA_LOG("STAT", "Mutex released.");
 
 errout:
-  finfo("Ret %d.", ret);
+  MFS_LOG("STAT", "Exit | Return: %d.", ret);
   return ret;
 }
 
@@ -2297,5 +2673,3 @@ int mnemofs_flush(FAR struct mfs_sb_s *sb)
 errout:
   return ret;
 }
-
-/* TODO: Superblock still doesn't exist. Plus bug fixes. */

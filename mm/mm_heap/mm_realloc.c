@@ -1,6 +1,8 @@
 /****************************************************************************
  * mm/mm_heap/mm_realloc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -31,9 +33,10 @@
 #include <assert.h>
 
 #include <nuttx/mm/mm.h>
+#include <nuttx/mm/kasan.h>
+#include <nuttx/sched_note.h>
 
 #include "mm_heap/mm.h"
-#include "kasan/kasan.h"
 
 /****************************************************************************
  * Public Functions
@@ -129,7 +132,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
   /* Map the memory chunk into an allocated node structure */
 
   oldnode = (FAR struct mm_allocnode_s *)
-    ((FAR char *)oldmem - MM_SIZEOF_ALLOCNODE);
+    ((FAR char *)kasan_reset_tag(oldmem) - MM_SIZEOF_ALLOCNODE);
 
   /* We need to hold the MM mutex while we muck with the nodelist. */
 
@@ -380,11 +383,16 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
           heap->mm_maxused = heap->mm_curused;
         }
 
+      sched_note_heap(NOTE_HEAP_FREE, heap, oldmem, oldsize,
+                      heap->mm_curused - newsize);
+      sched_note_heap(NOTE_HEAP_ALLOC, heap, newmem, newsize,
+                      heap->mm_curused);
       mm_unlock(heap);
       MM_ADD_BACKTRACE(heap, (FAR char *)newmem - MM_SIZEOF_ALLOCNODE);
 
-      kasan_unpoison(newmem, mm_malloc_size(heap, newmem));
-      if (newmem != oldmem)
+      newmem = kasan_unpoison(newmem, MM_SIZEOF_NODE(oldnode) -
+                              MM_ALLOCNODE_OVERHEAD);
+      if (kasan_reset_tag(newmem) != kasan_reset_tag(oldmem))
         {
           /* Now we have to move the user contents 'down' in memory.  memcpy
            * should be safe for this.

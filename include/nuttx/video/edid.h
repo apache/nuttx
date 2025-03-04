@@ -1,17 +1,11 @@
 /****************************************************************************
  * include/nuttx/video/edid.h
- * EDID (Extended Display Identification Data) Format
  *
- *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * Reference:  Wikipedia (initial version)
- *
- * Updated and extended with definitions from FreeBSD which has a compatible
- * 2-clause BSD license:
- *
- *  Copyright (c) 2006 Itronix Inc. All rights reserved.
- *  Written by Garrett D'Amore for Itronix Inc.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2019 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2006 Itronix Inc. All rights reserved.
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-FileContributor: Garrett D'Amore for Itronix Inc.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

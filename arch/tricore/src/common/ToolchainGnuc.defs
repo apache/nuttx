@@ -1,6 +1,8 @@
 ############################################################################
 # arch/tricore/src/common/ToolchainGnuc.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -58,8 +60,8 @@ ifneq ($(CONFIG_STACK_USAGE_WARNING),0)
   ARCHOPTIMIZATION += -Wstack-usage=$(CONFIG_STACK_USAGE_WARNING)
 endif
 
-ifeq ($(CONFIG_ARCH_COVERAGE_ALL),y)
-  ARCHOPTIMIZATION += -fprofile-generate -ftest-coverage
+ifeq ($(CONFIG_COVERAGE_ALL),y)
+  ARCHOPTIMIZATION += -fprofile-arcs -ftest-coverage -fno-inline
 endif
 
 ifeq ($(CONFIG_MM_UBSAN_ALL),y)
@@ -70,7 +72,7 @@ ifeq ($(CONFIG_MM_UBSAN_TRAP_ON_ERROR),y)
   ARCHOPTIMIZATION += -fsanitize-undefined-trap-on-error
 endif
 
-ifeq ($(CONFIG_MM_KASAN_ALL),y)
+ifeq ($(CONFIG_MM_KASAN_INSTRUMENT_ALL),y)
   ARCHOPTIMIZATION += -fsanitize=kernel-address
 endif
 
@@ -164,7 +166,7 @@ ifeq ($(CONFIG_DEBUG_LINK_MAP),y)
 endif
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  ARCHOPTIMIZATION += -g
+  ARCHOPTIMIZATION += $(CONFIG_DEBUG_SYMBOLS_LEVEL)
 endif
 
 LDFLAGS += --no-warn-rwx-segments
@@ -183,7 +185,7 @@ ifeq ($(CONFIG_LIBSUPCXX),y)
   EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libsupc++.a))
 endif
 
-ifeq ($(CONFIG_ARCH_COVERAGE),y)
+ifeq ($(CONFIG_COVERAGE_TOOLCHAIN),y)
   EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libgcov.a))
 endif
 

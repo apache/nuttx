@@ -2,6 +2,8 @@
 ############################################################################
 # tools/ci/platforms/linux.sh
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -54,7 +56,7 @@ arm_gcc_toolchain() {
     basefile=arm-gnu-toolchain-13.2.Rel1-x86_64-arm-none-eabi
     cd "${NUTTXTOOLS}"
     # Download the latest ARM GCC toolchain prebuilt by ARM
-    wget --quiet https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/${basefile}.tar.xz
+    curl -O -L -s https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/${basefile}.tar.xz
     xz -d ${basefile}.tar.xz
     tar xf ${basefile}.tar
     mv ${basefile} gcc-arm-none-eabi
@@ -72,7 +74,7 @@ arm64_gcc_toolchain() {
     basefile=arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf
     cd "${NUTTXTOOLS}"
     # Download the latest ARM64 GCC toolchain prebuilt by ARM
-    wget --quiet https://developer.arm.com/-/media/Files/downloads/gnu/13.2.Rel1/binrel/${basefile}.tar.xz
+    curl -O -L -s https://developer.arm.com/-/media/Files/downloads/gnu/13.2.Rel1/binrel/${basefile}.tar.xz
     xz -d ${basefile}.tar.xz
     tar xf ${basefile}.tar
     mv ${basefile} gcc-aarch64-none-elf
@@ -104,7 +106,7 @@ kconfig_frontends() {
   add_path "${NUTTXTOOLS}"/kconfig-frontends/bin
 
   if [ ! -f "${NUTTXTOOLS}/kconfig-frontends/bin/kconfig-conf" ]; then
-    git clone https://bitbucket.org/nuttx/tools.git "${NUTTXTOOLS}"/nuttx-tools
+    git clone --depth 1 https://bitbucket.org/nuttx/tools.git "${NUTTXTOOLS}"/nuttx-tools
     cd "${NUTTXTOOLS}"/nuttx-tools/kconfig-frontends
     ./configure --prefix="${NUTTXTOOLS}"/kconfig-frontends \
       --disable-kconfig --disable-nconf --disable-qconf \
@@ -141,6 +143,7 @@ python_tools() {
   pip3 install \
     cmake-format \
     CodeChecker \
+    construct \
     cvt2utf \
     cxxfilt \
     esptool==4.8.dev4 \
@@ -238,7 +241,7 @@ sparc_gcc_toolchain() {
     basefile=bcc-2.1.0-gcc-linux64
     cd "${NUTTXTOOLS}"
     # Download the SPARC GCC toolchain prebuilt by Gaisler
-    wget --quiet https://www.gaisler.com/anonftp/bcc2/bin/${basefile}.tar.xz
+    curl -O -L -s https://www.gaisler.com/anonftp/bcc2/bin/${basefile}.tar.xz
     xz -d ${basefile}.tar.xz
     tar xf ${basefile}.tar
     mv bcc-2.1.0-gcc sparc-gaisler-elf-gcc
@@ -256,7 +259,7 @@ xtensa_esp32_gcc_toolchain() {
     basefile=xtensa-esp32-elf-12.2.0_20230208-x86_64-linux-gnu
     cd "${NUTTXTOOLS}"
     # Download the latest ESP32 GCC toolchain prebuilt by Espressif
-    wget --quiet https://github.com/espressif/crosstool-NG/releases/download/esp-12.2.0_20230208/${basefile}.tar.xz
+    curl -O -L -s https://github.com/espressif/crosstool-NG/releases/download/esp-12.2.0_20230208/${basefile}.tar.xz
     xz -d ${basefile}.tar.xz
     tar xf ${basefile}.tar
     rm ${basefile}.tar
@@ -273,7 +276,7 @@ xtensa_esp32s2_gcc_toolchain() {
     basefile=xtensa-esp32s2-elf-12.2.0_20230208-x86_64-linux-gnu
     cd "${NUTTXTOOLS}"
     # Download the latest ESP32 S2 GCC toolchain prebuilt by Espressif
-    wget --quiet https://github.com/espressif/crosstool-NG/releases/download/esp-12.2.0_20230208/${basefile}.tar.xz
+    curl -O -L -s https://github.com/espressif/crosstool-NG/releases/download/esp-12.2.0_20230208/${basefile}.tar.xz
     xz -d ${basefile}.tar.xz
     tar xf ${basefile}.tar
     rm ${basefile}.tar
@@ -290,7 +293,7 @@ xtensa_esp32s3_gcc_toolchain() {
     basefile=xtensa-esp32s3-elf-12.2.0_20230208-x86_64-linux-gnu
     cd "${NUTTXTOOLS}"
     # Download the latest ESP32 S3 GCC toolchain prebuilt by Espressif
-    wget --quiet https://github.com/espressif/crosstool-NG/releases/download/esp-12.2.0_20230208/${basefile}.tar.xz
+    curl -O -L -s https://github.com/espressif/crosstool-NG/releases/download/esp-12.2.0_20230208/${basefile}.tar.xz
     xz -d ${basefile}.tar.xz
     tar xf ${basefile}.tar
     rm ${basefile}.tar
@@ -311,13 +314,13 @@ wasi_sdk() {
     mkdir -p wamrc
 
     # Download the latest WASI-enabled WebAssembly C/C++ toolchain prebuilt by WASM
-    wget --quiet https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-19/${wasibasefile}.tar.gz
+    curl -O -L -s https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-19/${wasibasefile}.tar.gz
     tar xzf ${wasibasefile}.tar.gz
     mv wasi-sdk-19.0 wasi-sdk
     rm ${wasibasefile}.tar.gz
     cd wamrc
     # Download the latest "wamrc" AOT compiler prebuilt by WAMR
-    wget --quiet https://github.com/bytecodealliance/wasm-micro-runtime/releases/download/WAMR-1.1.2/${wasmbasefile}.tar.gz
+    curl -O -L -s https://github.com/bytecodealliance/wasm-micro-runtime/releases/download/WAMR-1.1.2/${wasmbasefile}.tar.gz
     tar xzf ${wasmbasefile}.tar.gz
     rm ${wasmbasefile}.tar.gz
 
@@ -365,7 +368,7 @@ install_build_tools() {
   mkdir -p "${NUTTXTOOLS}"
   echo "#!/usr/bin/env sh" > "${NUTTXTOOLS}"/env.sh
 
-  install="arm_clang_toolchain arm_gcc_toolchain arm64_gcc_toolchain bloaty kconfig_frontends mips_gcc_toolchain python_tools riscv_gcc_toolchain rx_gcc_toolchain sparc_gcc_toolchain xtensa_esp32_gcc_toolchain util_linux wasi_sdk"
+  install="arm_clang_toolchain arm_gcc_toolchain arm64_gcc_toolchain bloaty kconfig_frontends mips_gcc_toolchain python_tools riscv_gcc_toolchain rx_gcc_toolchain sparc_gcc_toolchain xtensa_esp32_gcc_toolchain xtensa_esp32s2_gcc_toolchain xtensa_esp32s3_gcc_toolchain util_linux wasi_sdk"
 
   oldpath=$(cd . && pwd -P)
   for func in ${install}; do

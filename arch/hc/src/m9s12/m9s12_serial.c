@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/hc/src/m9s12/m9s12_serial.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -767,7 +769,7 @@ void hc_serialinit(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef HAVE_CONSOLE
   struct up_dev_s *priv = (struct up_dev_s *)CONSOLE_DEV.priv;
@@ -777,20 +779,9 @@ int up_putc(int ch)
   up_waittxnotfull(priv);
   up_send(CONSOLE_DEV, ch);
 
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      up_waittxnotfull(priv);
-      up_send(CONSOLE_DEV, '\r');
-    }
-
   up_waittxnotfull(priv);
   up_restoresciint(priv, im);
 #endif
-  return ch;
 }
 
 #else /* USE_SERIALDRIVER */
@@ -803,22 +794,11 @@ int up_putc(int ch)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef CONFIG_ARCH_LOWPUTC
   hc_lowputc(ch);
-
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      hc_lowputc('\r');
-    }
-
 #endif
-  return ch;
 }
 
 #endif /* USE_SERIALDRIVER */

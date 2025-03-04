@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/machine/arm/gnu/arm_setjmp.S
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -76,13 +78,14 @@ setjmp:
 #ifdef CONFIG_ARCH_ARMV6M
 	stmia		r0!, {r4-r7}			/* Save R4 ~ R7 */
 
-	mov		r2, r8
-	mov		r3, r9
-	mov		r4, r10
-	mov		r5, r11
-	mov		r6, ip
-	mov		r7, lr
-	stmia		r0!, {r2-r7}			/* Save R8 ~ R11, IP, LR */
+	mov		r1, r8
+	mov		r2, r9
+	mov		r3, r10
+	stmia		r0!, {r1-r3}			/* Save R8 ~ R10 */
+	mov		r1, r11
+	mov		r2, ip
+	mov		r3, lr
+	stmia		r0!, {r1-r3}			/* Save R11, IP, LR */
 #else
 	stmia		r0!, {r4-r11, ip, lr}
 #endif
@@ -140,15 +143,13 @@ longjmp:
 #ifdef CONFIG_ARCH_ARMV6M
 	ldmia		r0!, {r4-r7}			/* Restore R4 ~ R7 */
 
-	ldmia		r0!, {r2-r3}			/* Restore R8, R9 */
-	mov		r8, r2
-	mov		r9, r3
+	ldmia		r0!, {r1-r3}			/* Restore R8 ~ R10 */
+	mov		r8, r1
+	mov		r9, r2
+	mov		r10, r3
 
-	ldmia		r0!, {r2-r3}			/* Restore R10, R11 */
-	mov		r10, r2
-	mov		r11, r3
-
-	ldmia		r0!, {r2-r3}			/* Restore IP, LR */
+	ldmia		r0!, {r1-r3}			/* Restore R11, IP, LR */
+	mov		r11, r1
 	mov		ip, r2
 	mov		lr, r3
 #else
@@ -169,7 +170,21 @@ longjmp:
 	vmsr		fpscr, r2			/* Restore the FPSCR */
 #endif /* CONFIG_ARCH_FPU */
 
-	mov		r0, r1				/* return val */
+	/* Check and substitute the given return value to 1 if it's 0 */
+
+	movs		r0, r1
+#ifdef CONFIG_ARCH_ARMV6M
+	/* ARMv6-M only supports branching with condition
+	 * So we fall back to not use IT blocks in that case
+	 */
+
+	bne		1f
+	movs		r0, #1
+1:
+#else
+	it		eq
+	moveq		r0, #1
+#endif
 	bx		lr
 
 	.size	longjmp, .-longjmp

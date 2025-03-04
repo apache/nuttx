@@ -1,6 +1,8 @@
 ############################################################################
 # tools/espressif/Config.mk
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -66,6 +68,8 @@ endif
 
 # Configure the variables according to build environment
 
+ESPTOOL_MIN_VERSION := 4.8.0
+
 ifdef ESPTOOL_BINDIR
 	ifeq ($(CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT),y)
 		BL_OFFSET       := 0x0000
@@ -87,7 +91,7 @@ ifeq ($(CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT),y)
 	APP_IMAGE      := nuttx.bin
 	FLASH_APP      := $(APP_OFFSET) $(APP_IMAGE)
 	IMGTOOL_ALIGN_ARGS := --align 4
-	IMGTOOL_SIGN_ARGS  := --pad $(VERIFIED) $(IMGTOOL_ALIGN_ARGS) -v 0 -s auto \
+	IMGTOOL_SIGN_ARGS  := --pad $(VERIFIED) $(IMGTOOL_ALIGN_ARGS) -v $(CONFIG_ESPRESSIF_MCUBOOT_SIGN_IMAGE_VERSION) -s auto \
 		-H $(CONFIG_ESPRESSIF_APP_MCUBOOT_HEADER_SIZE) --pad-header \
 		-S $(CONFIG_ESPRESSIF_OTA_SLOT_SIZE)
 else ifeq ($(CONFIG_ESPRESSIF_SIMPLE_BOOT),y)
@@ -102,6 +106,7 @@ ESPTOOL_BINS += $(FLASH_APP)
 # MERGEBIN -- Merge raw binary files into a single file
 
 define MERGEBIN
+	@python3 tools/espressif/check_esptool.py -v $(ESPTOOL_MIN_VERSION)
 	$(Q) if [ -z $(ESPTOOL_BINDIR) ]; then \
 		echo "MERGEBIN error: Missing argument for binary files directory."; \
 		echo "USAGE: make ESPTOOL_BINDIR=<dir>"; \
@@ -111,7 +116,7 @@ define MERGEBIN
 		echo "Missing Flash memory size configuration."; \
 		exit 1; \
 	fi
-	esptool.py -c $(CHIP_SERIES) merge_bin --output nuttx.merged.bin $(ESPTOOL_BINS)
+	esptool.py -c $(CHIP_SERIES) merge_bin --fill-flash-size $(FLASH_SIZE) --output nuttx.merged.bin $(ESPTOOL_BINS)
 	$(Q) echo nuttx.merged.bin >> nuttx.manifest
 	$(Q) echo "Generated: nuttx.merged.bin"
 endef
@@ -135,13 +140,7 @@ endef
 else
 define MKIMAGE
 	$(Q) echo "MKIMAGE: NuttX binary"
-	$(Q) if ! esptool.py version 1>/dev/null 2>&1; then \
-		echo ""; \
-		echo "esptool.py not found.  Please run: \"pip install esptool==4.8.dev4\""; \
-		echo ""; \
-		echo "Run make again to create the nuttx.bin image."; \
-		exit 1; \
-	fi
+	@python3 tools/espressif/check_esptool.py -v $(ESPTOOL_MIN_VERSION)
 	$(Q) if [ -z $(FLASH_SIZE) ]; then \
 		echo "Missing Flash memory size configuration."; \
 		exit 1; \

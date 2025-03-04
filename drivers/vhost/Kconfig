@@ -1,0 +1,17 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+menuconfig DRIVERS_VHOST
+	bool "Virtual Host Support"
+	select OPENAMP
+	default n
+
+if DRIVERS_VHOST
+
+config DRIVERS_VHOST_RNG
+	bool "Virtual Host Rng Device Support"
+	default n
+
+endif # DRIVERS_VHOST

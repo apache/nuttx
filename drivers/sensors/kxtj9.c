@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/sensors/kxtj9.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -27,7 +29,6 @@
 #include <assert.h>
 #include <errno.h>
 #include <stdlib.h>
-#include <errno.h>
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>

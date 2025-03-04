@@ -1,6 +1,8 @@
 # ##############################################################################
 # arch/x86_64/src/cmake/Toolchain.cmake
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -40,6 +42,8 @@ set(CMAKE_C_ARCHIVE_FINISH ${CMAKE_RANLIB_COMMAND})
 set(CMAKE_CXX_ARCHIVE_FINISH ${CMAKE_RANLIB_COMMAND})
 set(CMAKE_ASM_ARCHIVE_FINISH ${CMAKE_RANLIB_COMMAND})
 
+set(NO_LTO "-fno-lto")
+
 if(CONFIG_DEBUG_CUSTOMOPT)
   add_compile_options(${CONFIG_DEBUG_OPTLEVEL})
 elseif(CONFIG_DEBUG_FULLOPT)
@@ -73,12 +77,16 @@ if(${CONFIG_STACK_USAGE_WARNING})
   endif()
 endif()
 
-if(CONFIG_ARCH_COVERAGE)
-  add_compile_options(-fprofile-generate -ftest-coverage)
+if(CONFIG_COVERAGE_ALL)
+  add_compile_options(-fprofile-arcs -ftest-coverage -fno-inline)
 endif()
 
 if(CONFIG_DEBUG_SYMBOLS)
-  add_compile_options(-g)
+  add_compile_options(${CONFIG_DEBUG_SYMBOLS_LEVEL})
+endif()
+
+if(CONFIG_HOST_LINUX)
+  add_link_options(-Wl,-z,noexecstack)
 endif()
 
 # Architecture flags
@@ -87,8 +95,19 @@ add_link_options(-Wl,--entry=__pmode_entry)
 add_link_options(-z max-page-size=0x1000)
 add_link_options(-no-pie -nostdlib)
 add_link_options(-Wl,--no-relax)
-add_compile_options(-fPIC)
+add_compile_options(-fno-pic -mcmodel=large)
 add_compile_options(-mno-red-zone)
+
+add_compile_options(
+  -U_AIX
+  -U_WIN32
+  -U__APPLE__
+  -U__FreeBSD__
+  -U__NetBSD__
+  -U__linux__
+  -U__sun__
+  -U__unix__
+  -U__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__)
 
 if(CONFIG_DEBUG_LINK_MAP)
   add_link_options(-Wl,--cref -Wl,-Map=nuttx.map)
@@ -103,8 +122,17 @@ add_compile_options(
   -Wno-unknown-pragmas
   $<$<COMPILE_LANGUAGE:C>:-Wstrict-prototypes>)
 
+# LLVM target definitions
+set(LLVM_ARCH "x86_64")
+set(LLVM_CPU "x86-64")
+set(LLVM_ABI "sysv")
+
 if(CONFIG_CXX_STANDARD)
   add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-std=${CONFIG_CXX_STANDARD}>)
+endif()
+
+if(CONFIG_LIBCXX)
+  add_compile_options(-D_LIBCPP_DISABLE_AVAILABILITY)
 endif()
 
 if(NOT CONFIG_LIBCXXTOOLCHAIN)
@@ -191,4 +219,14 @@ endif()
 
 if(CONFIG_ARCH_X86_64_AVX512VBMI)
   add_compile_options(-mavx512vbmi)
+endif()
+
+if(CONFIG_ARCH_TOOLCHAIN_GNU AND NOT CONFIG_ARCH_TOOLCHAIN_CLANG)
+  if(NOT GCCVER)
+    execute_process(COMMAND ${CMAKE_C_COMPILER} --version
+                    OUTPUT_VARIABLE GCC_VERSION_OUTPUT)
+    string(REGEX MATCH "[0-9]+\\.[0-9]+" GCC_VERSION_REGEX
+                 "${GCC_VERSION_OUTPUT}")
+    set(GCCVER ${CMAKE_MATCH_1})
+  endif()
 endif()

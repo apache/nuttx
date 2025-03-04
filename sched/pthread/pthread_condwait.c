@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/pthread/pthread_condwait.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -30,6 +32,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/atomic.h>
 #include <nuttx/cancelpt.h>
 
 #include "pthread/pthread.h"
@@ -58,7 +61,6 @@ int pthread_cond_wait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex)
 {
   int status;
   int ret;
-  irqstate_t flags;
 
   sinfo("cond=%p mutex=%p\n", cond, mutex);
 
@@ -87,24 +89,16 @@ int pthread_cond_wait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex)
 
       sinfo("Give up mutex / take cond\n");
 
-      flags = enter_critical_section();
-      sched_lock();
+      atomic_fetch_add(COND_WAIT_COUNT(cond), 1);
       ret = pthread_mutex_breaklock(mutex, &nlocks);
 
-      /* Take the semaphore.  This may be awakened only be a signal (EINTR)
-       * or if the thread is canceled (ECANCELED)
-       */
-
-      status = pthread_sem_take(&cond->sem, NULL);
+      status = -nxsem_wait_uninterruptible(&cond->sem);
       if (ret == OK)
         {
           /* Report the first failure that occurs */
 
           ret = status;
         }
-
-      sched_unlock();
-      leave_critical_section(flags);
 
       /* Reacquire the mutex.
        *

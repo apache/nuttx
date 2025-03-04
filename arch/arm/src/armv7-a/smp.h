@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/armv7-a/smp.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -83,6 +85,8 @@ extern uint32_t g_cpu3_idlestack[SMP_STACK_WORDS];
  *   Do not return.
  *
  ****************************************************************************/
+
+void __start(void);
 
 #if CONFIG_SMP_NCPUS > 1
 void __cpu1_start(void);

@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/usrsock/usrsock_sockif.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -100,9 +102,10 @@ static int usrsock_sockif_setup(FAR struct socket *psock)
 {
   int ret;
 
-  if (psock->s_domain != PF_INET && psock->s_domain != PF_INET6)
+  if (psock->s_domain != PF_INET && psock->s_domain != PF_INET6 &&
+      psock->s_domain != PF_NETLINK)
     {
-      return -ENOTSUP; /* Only ipv4 and ipv6 support the offload */
+      return -ENOTSUP; /* Only ipv4, ipv6 and netlink support the offload */
     };
 
   /* Let the user socket logic handle the setup...

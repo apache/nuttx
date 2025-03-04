@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/samv7/common/scripts/kernel-space.ld
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -72,6 +74,7 @@ SECTIONS
 
     .data : {
         _sdata = ABSOLUTE(.);
+        *(.mcan)
         *(.data .data.*)
         *(.gnu.linkonce.d.*)
         CONSTRUCTORS

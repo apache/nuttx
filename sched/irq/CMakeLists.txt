@@ -1,6 +1,8 @@
 # ##############################################################################
 # sched/irq/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -38,6 +40,11 @@ endif()
 
 if(CONFIG_IRQCHAIN)
   list(APPEND SRCS irq_chain.c)
+endif()
+
+if(CONFIG_IRQ_WORK_SECTION)
+  target_compile_definitions(
+    sched PRIVATE -DIRQ_WORK_SECTION="${CONFIG_IRQ_WORK_SECTION}")
 endif()
 
 target_sources(sched PRIVATE ${SRCS})

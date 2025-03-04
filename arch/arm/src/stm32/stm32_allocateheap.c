@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_allocateheap.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -466,7 +468,7 @@
 
 #    if CONFIG_MM_REGIONS < 2
 #      ifdef CONFIG_STM32_HAVE_CCM
-#        error "CCM SRAM excluded from the heap because CONFIG_MM_REGIONS < 2"
+#        warning "CCM SRAM excluded from the heap because CONFIG_MM_REGIONS < 2"
 #      endif
 #      undef CONFIG_STM32_CCMEXCLUDE
 #      define CONFIG_STM32_CCMEXCLUDE 1

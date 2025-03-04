@@ -1,6 +1,8 @@
 # ##############################################################################
 # tools/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -62,3 +64,10 @@ install(TARGETS nxstyle DESTINATION bin)
 
 add_executable(gencromfs gencromfs.c)
 install(TARGETS gencromfs DESTINATION bin)
+
+add_executable(mkdeps mkdeps.c)
+target_link_libraries(mkdeps PRIVATE csvparser)
+install(TARGETS mkdeps DESTINATION bin)
+
+add_executable(incdir incdir.c)
+install(TARGETS incdir DESTINATION bin)

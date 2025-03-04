@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/wireless/bluetooth/bt_rpmsghci_server.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -29,7 +31,7 @@
 #include <stdlib.h>
 
 #include <nuttx/kmalloc.h>
-#include <nuttx/rptun/openamp.h>
+#include <nuttx/rpmsg/rpmsg.h>
 #include <nuttx/wireless/bluetooth/bt_rpmsghci.h>
 
 #include "bt_rpmsghci.h"
@@ -132,6 +134,7 @@ static int rpmsghci_send(FAR struct rpmsghci_server_s *priv,
   ret = rpmsg_send_nocopy(&priv->ept, msg, len);
   if (ret < 0)
     {
+      rpmsg_release_tx_buffer(&priv->ept, msg);
       goto errout;
     }
 
@@ -398,17 +401,18 @@ static int rpmsghci_ept_cb(FAR struct rpmsg_endpoint *ept, FAR void *data,
 }
 
 /****************************************************************************
- * Name: rpmsghci_ns_unbind
+ * Name: rpmsghci_ept_release
  *
  * Description:
- *   Unbind from the rpmsg name service.
+ *   Release the rpmsg endpoint.
  *
  ****************************************************************************/
 
-static void rpmsghci_ns_unbind(FAR struct rpmsg_endpoint *ept)
+static void rpmsghci_ept_release(FAR struct rpmsg_endpoint *ept)
 {
-  rpmsg_destroy_ept(ept);
-  kmm_free(ept);
+  FAR struct rpmsghci_server_s *server = ept->priv;
+
+  kmm_free(server);
 }
 
 /****************************************************************************
@@ -425,9 +429,11 @@ static void rpmsghci_ns_bind(FAR struct rpmsg_device *rdev, FAR void *priv,
   FAR struct rpmsghci_server_s *server = priv;
 
   server->ept.priv = priv;
+  server->ept.release_cb = rpmsghci_ept_release;
+
   rpmsg_create_ept(&server->ept, rdev, name,
                    RPMSG_ADDR_ANY, dest,
-                   rpmsghci_ept_cb, rpmsghci_ns_unbind);
+                   rpmsghci_ept_cb, rpmsg_destroy_ept);
 }
 
 /****************************************************************************

@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/machine/xtensa/arch_memset.S
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -62,9 +64,9 @@
 	.local	.Ldst2mod4
 
 	.align	4
-	.global	memset
-	.type	memset, @function
-memset:
+	.global	ARCH_LIBCFUN(memset)
+	.type	ARCH_LIBCFUN(memset), @function
+ARCH_LIBCFUN(memset):
   ENTRY(16)
 	/* a2 = dst, a3 = c, a4 = length */
 
@@ -178,6 +180,6 @@ __memset_aux:
 
 	.end schedule
 
-	.size	memset, . - memset
+	.size	ARCH_LIBCFUN(memset), . - ARCH_LIBCFUN(memset)
 
 #endif

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/bl808/bl808_serial.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -1004,23 +1006,11 @@ void bl808_serialinit(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
   struct bl808_uart_s *priv = CONSOLE_DEV.priv;
   uint8_t uart_idx = priv->config.idx;
   irqstate_t flags = enter_critical_section();
-
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      while ((getreg32(BL808_UART_FIFO_CONFIG_1(uart_idx)) &
-            UART_FIFO_CONFIG_1_TX_CNT_MASK) == 0);
-
-      putreg32('\r', BL808_UART_FIFO_WDATA(uart_idx));
-    }
 
   while ((getreg32(BL808_UART_FIFO_CONFIG_1(uart_idx)) &
             UART_FIFO_CONFIG_1_TX_CNT_MASK) == 0);
@@ -1028,5 +1018,4 @@ int up_putc(int ch)
   putreg32(ch, BL808_UART_FIFO_WDATA(uart_idx));
 
   leave_critical_section(flags);
-  return ch;
 }

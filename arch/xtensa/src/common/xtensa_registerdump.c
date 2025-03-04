@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/xtensa/src/common/xtensa_registerdump.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -38,23 +40,12 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_getusrsp
- ****************************************************************************/
-
-uintptr_t up_getusrsp(void *regs)
-{
-  uintptr_t *ptr = regs;
-  return ptr[REG_A1];
-}
-
-/****************************************************************************
  * Name: up_dump_register
  ****************************************************************************/
 
 void up_dump_register(void *dumpregs)
 {
-  volatile uintptr_t *regs = dumpregs ? dumpregs :
-                            (uintptr_t *)CURRENT_REGS;
+  volatile uintptr_t *regs = dumpregs ? dumpregs : running_regs();
 
   _alert("   PC: %08lx    PS: %08lx\n",
          (unsigned long)regs[REG_PC], (unsigned long)regs[REG_PS]);

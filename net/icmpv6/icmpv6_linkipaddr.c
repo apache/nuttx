@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/icmpv6/icmpv6_linkipaddr.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -26,6 +28,7 @@
 
 #include "netdev/netdev.h"
 #include "icmpv6/icmpv6.h"
+#include "inet/inet.h"
 
 #ifdef CONFIG_NET_ICMPv6
 
@@ -36,18 +39,35 @@
 static inline void
 icmpv6_linkipaddr_0(FAR struct net_driver_s *dev, net_ipv6addr_t ipaddr)
 {
+  FAR const uint16_t *current = netdev_ipv6_srcaddr(dev, g_ipv6_unspecaddr);
+
   ipaddr[0]  = HTONS(0xfe80);
   ipaddr[1]  = 0;
   ipaddr[2]  = 0;
   ipaddr[3]  = 0;
-  ipaddr[4]  = 0;
-  ipaddr[5]  = 0;
-  ipaddr[6]  = 0;
+
+  if (!net_ipv6addr_cmp(current, g_ipv6_unspecaddr))
+    {
+      /* Keep current interface indentifier */
+
+      ipaddr[4]  = current[4];
+      ipaddr[5]  = current[5];
+      ipaddr[6]  = current[6];
+      ipaddr[7]  = current[7];
+    }
+  else
+    {
+      /* Try to generate interface identifier */
+
+      ipaddr[4]  = 0;
+      ipaddr[5]  = 0;
+      ipaddr[6]  = 0;
 #ifdef CONFIG_NETDEV_IFINDEX
-  ipaddr[7]  = HTONS(dev->d_ifindex);
+      ipaddr[7]  = HTONS(dev->d_ifindex);
 #else
-  ipaddr[7]  = 0;
+      ipaddr[7]  = 0;
 #endif
+    }
 }
 
 static inline void

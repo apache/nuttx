@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/sensors/ms56xx_uorb.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -31,6 +33,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/signal.h>
 #include <nuttx/kmalloc.h>
@@ -96,7 +99,7 @@ struct ms56xx_dev_s
   enum ms56xx_model_e      model;     /* Model of MS56XX */
   uint32_t                 freq;      /* Bus Frequency I2C/SPI */
   struct ms56xx_calib_s    calib;     /* Calib. params from ROM */
-  unsigned long            interval;  /* Polling interval */
+  uint32_t                 interval;  /* Polling interval */
   bool                     enabled;   /* Enable/Disable MS56XX */
   sem_t                    run;       /* Locks measure cycle */
   mutex_t                  lock;      /* Manages exclusive to device */
@@ -125,7 +128,7 @@ static unsigned long ms56xx_curtime(void);
 
 static int ms56xx_set_interval(FAR struct sensor_lowerhalf_s *lower,
                                FAR struct file *filep,
-                               FAR unsigned long *period_us);
+                               FAR uint32_t *period_us);
 static int ms56xx_activate(FAR struct sensor_lowerhalf_s *lower,
                            FAR struct file *filep, bool enable);
 
@@ -156,6 +159,7 @@ static const struct sensor_ops_s g_sensor_ops =
  *
  * Return:
  *   Timestamp in microseconds
+ *
  ****************************************************************************/
 
 static unsigned long ms56xx_curtime(void)
@@ -282,7 +286,7 @@ static inline void baro_measure_read(FAR struct ms56xx_dev_s *priv,
 
   /* Wait data acquisition */
 
-  up_udelay(10000);
+  nxsig_usleep(10000);
 
   /* Send command to start a read sequence */
 
@@ -319,7 +323,7 @@ static inline void baro_measure_read(FAR struct ms56xx_dev_s *priv,
 
   /* Wait data acquisition */
 
-  up_udelay(10000);
+  nxsig_usleep(10000);
 
   /* Send command to start a read sequence */
 
@@ -368,6 +372,7 @@ static inline void baro_measure_read(FAR struct ms56xx_dev_s *priv,
  * Parameter:
  *   argc - Number of arguments
  *   argv - Pointer to argument list
+ *
  ****************************************************************************/
 
 static int ms56xx_thread(int argc, char **argv)
@@ -432,7 +437,7 @@ static int ms56xx_initialize(FAR struct ms56xx_dev_s *priv)
 
   /* We have to wait before the prom is ready is be read */
 
-  up_udelay(10000);
+  nxsig_usleep(10000);
 
   for (i = 0; i < 8; i++)
     {
@@ -614,7 +619,7 @@ static uint32_t ms56xx_compensate_press(FAR struct ms56xx_dev_s *priv,
 
 static int ms56xx_set_interval(FAR struct sensor_lowerhalf_s *lower,
                                FAR struct file *filep,
-                               FAR unsigned long *period_us)
+                               FAR uint32_t *period_us)
 {
   FAR struct ms56xx_dev_s *priv = container_of(lower,
                                                FAR struct ms56xx_dev_s,

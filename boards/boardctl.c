@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/boardctl.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -24,14 +26,16 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
 #include <sys/boardctl.h>
+#include <sys/types.h>
+#include <assert.h>
 #include <stdint.h>
 #include <errno.h>
-#include <assert.h>
+#include <gcov.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
+#include <nuttx/cache.h>
 #include <nuttx/lib/modlib.h>
 #include <nuttx/binfmt/symtab.h>
 #include <nuttx/drivers/ramdisk.h>
@@ -394,6 +398,7 @@ int boardctl(unsigned int cmd, uintptr_t arg)
       case BOARDIOC_POWEROFF:
         {
           reboot_notifier_call_chain(SYS_POWER_OFF, (FAR void *)arg);
+          up_flush_dcache_all();
           ret = board_power_off((int)arg);
         }
         break;
@@ -410,6 +415,7 @@ int boardctl(unsigned int cmd, uintptr_t arg)
       case BOARDIOC_RESET:
         {
           reboot_notifier_call_chain(SYS_RESTART, (FAR void *)arg);
+          up_flush_dcache_all();
           ret = board_reset((int)arg);
         }
         break;
@@ -882,6 +888,22 @@ int boardctl(unsigned int cmd, uintptr_t arg)
           FAR unsigned int *affinity = (FAR unsigned int *)arg;
           up_affinity_irq(affinity[0], affinity[1]);
           ret = OK;
+        }
+        break;
+#endif
+
+#ifdef CONFIG_BOARDCTL_START_CPU
+      /* CMD:           BOARDIOC_START_CPU
+       * DESCRIPTION:   Start specified slave core by master core
+       * ARG:           Integer value for cpu core id.
+       * CONFIGURATION: CONFIG_BOARDCTL_START_CPU
+       * DEPENDENCIES:  Board logic must provide the
+       *                board_start_cpu() interface.
+       */
+
+      case BOARDIOC_START_CPU:
+        {
+          ret = board_start_cpu((int)arg);
         }
         break;
 #endif

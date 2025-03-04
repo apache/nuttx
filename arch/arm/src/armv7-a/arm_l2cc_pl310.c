@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/armv7-a/arm_l2cc_pl310.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -36,9 +38,10 @@
 #include <debug.h>
 
 #include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 
+#include <arch/barriers.h>
 #include "arm_internal.h"
-#include "barriers.h"
 #include "l2cc.h"
 #include "l2cc_pl310.h"
 
@@ -224,6 +227,12 @@
 #define PL310_GULP_SIZE            4096
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static spinlock_t g_l2cc_lock = SP_UNLOCKED;
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -252,6 +261,65 @@ static void pl310_flush_all(void)
   /* Wait for cache operation by way to complete */
 
   while ((getreg32(L2CC_CIWR) & PL310_WAY_MASK) != 0);
+
+  /* Drain the STB. Operation complete when all buffers, LRB, LFB, STB, and
+   * EB, are empty.
+   */
+
+  putreg32(0, L2CC_CSR);
+}
+
+/****************************************************************************
+ * Name: l2cc_disable_nolock
+ *
+ * Description:
+ *    Disable the L2CC-P310 L2 cache by clearing the Control Register (CR)
+ *
+ * Input Parameters:
+ *    None
+ *
+ * Returned Value:
+ *    None
+ *
+ ****************************************************************************/
+
+static void l2cc_disable_nolock(void)
+{
+  /* Flush all ways using the Clean Invalidate Way Register (CIWR). */
+
+  pl310_flush_all();
+
+  /* Disable the L2CC-P310 L2 cache by clearing the Control Register (CR) */
+
+  putreg32(0, L2CC_CR);
+  UP_MB();
+}
+
+/****************************************************************************
+ * Name: l2cc_invalidate_all_nolock
+ *
+ * Description:
+ *   Invalidate all ways using the Invalidate Way Register (IWR).
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void l2cc_invalidate_all_nolock(void)
+{
+  /* Invalidate all ways by writing the bit mask of ways to be invalidated
+   * the Invalidate Way Register (IWR).
+   */
+
+  putreg32(PL310_WAY_MASK, L2CC_IWR);
+
+  /* Wait for cache operation by way to complete */
+
+  while ((getreg32(L2CC_IWR) & PL310_WAY_MASK) != 0);
 
   /* Drain the STB. Operation complete when all buffers, LRB, LFB, STB, and
    * EB, are empty.
@@ -388,8 +456,7 @@ void arm_l2ccinitialize(void)
 
       l2cc_invalidate_all();
       putreg32(L2CC_CR_L2CEN, L2CC_CR);
-      ARM_DSB();
-      ARM_ISB();
+      UP_MB();
     }
 
   sinfo("(%d ways) * (%d bytes/way) = %d bytes\n",
@@ -455,18 +522,17 @@ void l2cc_enable(void)
 
   /* Invalidate and enable the cache (must be disabled to do this!) */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_l2cc_lock);
 
   if ((getreg32(L2CC_CR) & L2CC_CR_L2CEN) != 0)
     {
-      l2cc_disable();
+      l2cc_disable_nolock();
     }
 
-  l2cc_invalidate_all();
+  l2cc_invalidate_all_nolock();
   putreg32(L2CC_CR_L2CEN, L2CC_CR);
-  ARM_DSB();
-  ARM_ISB();
-  leave_critical_section(flags);
+  UP_MB();
+  spin_unlock_irqrestore(&g_l2cc_lock, flags);
 }
 
 /****************************************************************************
@@ -487,17 +553,11 @@ void l2cc_disable(void)
 {
   irqstate_t flags;
 
-  /* Flush all ways using the Clean Invalidate Way Register (CIWR). */
+  flags = spin_lock_irqsave(&g_l2cc_lock);
 
-  flags = enter_critical_section();
-  pl310_flush_all();
+  l2cc_disable_nolock();
 
-  /* Disable the L2CC-P310 L2 cache by clearing the Control Register (CR) */
-
-  putreg32(0, L2CC_CR);
-  ARM_DSB();
-  ARM_ISB();
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_l2cc_lock, flags);
 }
 
 /****************************************************************************
@@ -523,9 +583,9 @@ void l2cc_sync(void)
    * EB, are empty.
    */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_l2cc_lock);
   putreg32(0, L2CC_CSR);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_l2cc_lock, flags);
 }
 
 /****************************************************************************
@@ -546,27 +606,11 @@ void l2cc_invalidate_all(void)
 {
   irqstate_t flags;
 
-  /* Invalidate all ways */
+  flags = spin_lock_irqsave(&g_l2cc_lock);
 
-  flags = enter_critical_section();
+  l2cc_invalidate_all_nolock();
 
-  /* Invalidate all ways by writing the bit mask of ways to be invalidated
-   * the Invalidate Way Register (IWR).
-   */
-
-  putreg32(PL310_WAY_MASK, L2CC_IWR);
-
-  /* Wait for cache operation by way to complete */
-
-  while ((getreg32(L2CC_IWR) & PL310_WAY_MASK) != 0);
-
-  /* Drain the STB. Operation complete when all buffers, LRB, LFB, STB, and
-   * EB, are empty.
-   */
-
-  putreg32(0, L2CC_CSR);
-
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_l2cc_lock, flags);
 }
 
 /****************************************************************************
@@ -593,7 +637,7 @@ void l2cc_invalidate(uintptr_t startaddr, uintptr_t endaddr)
 
   /* Check if the start address is aligned with a cacheline */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_l2cc_lock);
   if ((startaddr & PL310_CACHE_LINE_MASK) != 0)
     {
       /* No.. align down and flush the cache line by writing the address to
@@ -620,7 +664,7 @@ void l2cc_invalidate(uintptr_t startaddr, uintptr_t endaddr)
       putreg32(endaddr, L2CC_CIPALR);
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_l2cc_lock, flags);
 
   /* Loop, invalidated the address range by cache line.  Interrupts are re-
    * enabled momentarily every PL310_GULP_SIZE bytes.
@@ -638,7 +682,7 @@ void l2cc_invalidate(uintptr_t startaddr, uintptr_t endaddr)
 
       /* Disable interrupts and invalidate the gulp */
 
-      flags = enter_critical_section();
+      flags = spin_lock_irqsave(&g_l2cc_lock);
       while (startaddr < gulpend)
         {
           /* Invalidate the cache line by writing the address to the
@@ -654,16 +698,16 @@ void l2cc_invalidate(uintptr_t startaddr, uintptr_t endaddr)
 
       /* Enable interrupts momentarily */
 
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(&g_l2cc_lock, flags);
     }
 
   /* Drain the STB. Operation complete when all buffers, LRB, LFB, STB, and
    * EB, are empty.
    */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_l2cc_lock);
   putreg32(0, L2CC_CSR);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_l2cc_lock, flags);
 }
 
 /****************************************************************************
@@ -688,7 +732,7 @@ void l2cc_clean_all(void)
    * Ways Register (CWR).
    */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_l2cc_lock);
   putreg32(PL310_WAY_MASK, L2CC_CWR);
 
   /* Wait for cache operation by way to complete */
@@ -700,7 +744,7 @@ void l2cc_clean_all(void)
    */
 
   putreg32(0, L2CC_CSR);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_l2cc_lock, flags);
 }
 
 /****************************************************************************
@@ -756,7 +800,7 @@ void l2cc_clean(uintptr_t startaddr, uintptr_t endaddr)
 
       /* Disable interrupts and clean the gulp */
 
-      flags = enter_critical_section();
+      flags = spin_lock_irqsave(&g_l2cc_lock);
       while (startaddr < gulpend)
         {
           /* Clean the cache line by writing the address to the Clean
@@ -772,16 +816,16 @@ void l2cc_clean(uintptr_t startaddr, uintptr_t endaddr)
 
       /* Enable interrupts momentarily */
 
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(&g_l2cc_lock, flags);
     }
 
   /* Drain the STB. Operation complete when all buffers, LRB, LFB, STB, and
    * EB, are empty.
    */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_l2cc_lock);
   putreg32(0, L2CC_CSR);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_l2cc_lock, flags);
 }
 
 /****************************************************************************
@@ -804,9 +848,9 @@ void l2cc_flush_all(void)
 
   /* Flush all ways using the Clean Invalidate Way Register (CIWR). */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_l2cc_lock);
   pl310_flush_all();
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_l2cc_lock, flags);
 }
 
 /****************************************************************************
@@ -862,7 +906,7 @@ void l2cc_flush(uint32_t startaddr, uint32_t endaddr)
 
       /* Disable interrupts and flush the gulp */
 
-      flags = enter_critical_section();
+      flags = spin_lock_irqsave(&g_l2cc_lock);
       while (startaddr < gulpend)
         {
           /* Flush the cache line by writing the address to the Clean
@@ -878,16 +922,16 @@ void l2cc_flush(uint32_t startaddr, uint32_t endaddr)
 
       /* Enable interrupts momentarily */
 
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(&g_l2cc_lock, flags);
     }
 
   /* Drain the STB. Operation complete when all buffers, LRB, LFB, STB, and
    * EB, are empty.
    */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_l2cc_lock);
   putreg32(0, L2CC_CSR);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_l2cc_lock, flags);
 }
 
 #endif /* CONFIG_ARMV7A_L2CC_PL310 */

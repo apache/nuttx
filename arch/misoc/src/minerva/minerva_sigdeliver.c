@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/misoc/src/minerva/minerva_sigdeliver.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -57,13 +59,12 @@ void minerva_sigdeliver(void)
 {
   struct tcb_s *rtcb = this_task();
   uint32_t regs[XCPTCONTEXT_REGS];
-  sig_deliver_t sigdeliver;
 
   board_autoled_on(LED_SIGNAL);
 
-  sinfo("rtcb=%p sigdeliver=%p sigpendactionq.head=%p\n",
-        rtcb, rtcb->xcp.sigdeliver, rtcb->sigpendactionq.head);
-  DEBUGASSERT(rtcb->xcp.sigdeliver != NULL);
+  sinfo("rtcb=%p sigpendactionq.head=%p\n",
+        rtcb, rtcb->sigpendactionq.head);
+  DEBUGASSERT((rtcb->flags & TCB_FLAG_SIGDELIVER) != 0);
 
   /* Save the real return state on the stack. */
 
@@ -71,13 +72,12 @@ void minerva_sigdeliver(void)
   regs[REG_CSR_MEPC] = rtcb->xcp.saved_epc;
   regs[REG_CSR_MSTATUS] = rtcb->xcp.saved_int_ctx;
 
-  /* Get a local copy of the sigdeliver function pointer. We do this so that
-   * we can nullify the sigdeliver function pointer in the TCB and accept
-   * more signal deliveries while processing the current pending signals.
+  /* We do this so that we can nullify the TCB_FLAG_SIGDELIVER in the TCB
+   * and accept more signal deliveries while processing the current pending
+   * signals.
    */
 
-  sigdeliver = rtcb->xcp.sigdeliver;
-  rtcb->xcp.sigdeliver = NULL;
+  rtcb->flags &= ~TCB_FLAG_SIGDELIVER;
 
 #  ifndef CONFIG_SUPPRESS_INTERRUPTS
   /* Then make sure that interrupts are enabled.  Signal handlers must always
@@ -89,7 +89,7 @@ void minerva_sigdeliver(void)
 
   /* Deliver the signals */
 
-  sigdeliver(rtcb);
+  nxsig_deliver(rtcb);
 
   /* Output any debug messages BEFORE restoring errno (because they may
    * alter errno), then disable interrupts again and restore the original

@@ -1,6 +1,8 @@
 ############################################################################
 # arch/arm/src/goldfish/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -21,5 +23,10 @@
 include armv7-a/Make.defs
 
 # goldfish-specific C source files
-CHIP_CSRCS  = goldfish_boot.c goldfish_serial.c goldfish_irq.c goldfish_timer.c goldfish_memorymap.c
+CHIP_CSRCS  = goldfish_boot.c
+CHIP_CSRCS += goldfish_irq.c goldfish_pgalloc.c
+CHIP_CSRCS += goldfish_memorymap.c goldfish_serial.c goldfish_timer.c
 
+ifeq ($(CONFIG_SMP),y)
+CHIP_CSRCS += goldfish_cpuboot.c
+endif

@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/module/mod_modsym.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -24,11 +26,6 @@
 
 #include <nuttx/config.h>
 
-#include <assert.h>
-#include <errno.h>
-#include <debug.h>
-
-#include <nuttx/symtab.h>
 #include <nuttx/module.h>
 #include <nuttx/lib/modlib.h>
 
@@ -67,50 +64,5 @@
 
 FAR const void *modsym(FAR void *handle, FAR const char *name)
 {
-  FAR struct module_s *modp = (FAR struct module_s *)handle;
-  FAR const struct symtab_s *symbol;
-  int err;
-  int ret;
-
-  /* Verify that the module is in the registry */
-
-  modlib_registry_lock();
-  ret = modlib_registry_verify(modp);
-  if (ret < 0)
-    {
-      berr("ERROR: Failed to verify module: %d\n", ret);
-      err = -ret;
-      goto errout_with_lock;
-    }
-
-  /* Does the module have a symbol table? */
-
-  if (modp->modinfo.exports == NULL || modp->modinfo.nexports == 0)
-    {
-      berr("ERROR: Module has no symbol table\n");
-      err = ENOENT;
-      goto errout_with_lock;
-    }
-
-  /* Search the symbol table for the matching symbol */
-
-  symbol = symtab_findbyname(modp->modinfo.exports, name,
-                             modp->modinfo.nexports);
-  if (symbol == NULL)
-    {
-      berr("ERROR: Failed to find symbol in symbol \"%s\" in table\n", name);
-      err = ENOENT;
-      goto errout_with_lock;
-    }
-
-  /* Return the address within the module associated with the symbol */
-
-  modlib_registry_unlock();
-  DEBUGASSERT(symbol->sym_value != NULL);
-  return symbol->sym_value;
-
-errout_with_lock:
-  modlib_registry_unlock();
-  set_errno(err);
-  return NULL;
+  return modlib_getsymbol(handle, name);
 }

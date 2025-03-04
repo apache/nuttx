@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/src/common/arm64_arch_timer.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -39,6 +41,19 @@
 #include "arm64_arch_timer.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define CONFIG_ARM_TIMER_SECURE_IRQ         (GIC_PPI_INT_BASE + 13)
+#define CONFIG_ARM_TIMER_NON_SECURE_IRQ     (GIC_PPI_INT_BASE + 14)
+#define CONFIG_ARM_TIMER_VIRTUAL_IRQ        (GIC_PPI_INT_BASE + 11)
+#define CONFIG_ARM_TIMER_HYP_IRQ            (GIC_PPI_INT_BASE + 10)
+
+#define ARM_ARCH_TIMER_IRQ                  CONFIG_ARM_TIMER_VIRTUAL_IRQ
+#define ARM_ARCH_TIMER_PRIO                 IRQ_DEFAULT_PRIORITY
+#define ARM_ARCH_TIMER_FLAGS                IRQ_TYPE_LEVEL
+
+/****************************************************************************
  * Private Types
  ****************************************************************************/
 
@@ -57,6 +72,11 @@ struct arm64_oneshot_lowerhalf_s
   void *arg;                          /* Argument that is passed to the handler */
   uint64_t cycle_per_tick;            /* cycle per tick */
   oneshot_callback_t callback;        /* Internal handler that receives callback */
+  bool init[CONFIG_SMP_NCPUS];        /* True: timer is init */
+
+  /* which cpu timer is running, -1 indicate timer stoppd */
+
+  int running;
 };
 
 /****************************************************************************
@@ -142,7 +162,7 @@ static int arm64_arch_timer_compare_isr(int irq, void *regs, void *arg)
 
   arm64_arch_timer_set_irq_mask(true);
 
-  if (priv->callback)
+  if (priv->callback && priv->running == this_cpu())
     {
       /* Then perform the callback */
 
@@ -213,6 +233,7 @@ static int arm64_tick_cancel(struct oneshot_lowerhalf_s *lower,
 
   /* Disable int */
 
+  priv->running = -1;
   arm64_arch_timer_set_irq_mask(true);
 
   return OK;
@@ -244,6 +265,7 @@ static int arm64_tick_start(struct oneshot_lowerhalf_s *lower,
 {
   struct arm64_oneshot_lowerhalf_s *priv =
     (struct arm64_oneshot_lowerhalf_s *)lower;
+  uint64_t next_cycle;
 
   DEBUGASSERT(priv != NULL && callback != NULL);
 
@@ -252,10 +274,25 @@ static int arm64_tick_start(struct oneshot_lowerhalf_s *lower,
   priv->callback = callback;
   priv->arg = arg;
 
-  /* Set the timeout */
+  if (!priv->init[this_cpu()])
+    {
+      /* Enable int */
 
-  arm64_arch_timer_set_compare(arm64_arch_timer_count() +
-                               priv->cycle_per_tick * ticks);
+      up_enable_irq(ARM_ARCH_TIMER_IRQ);
+
+      /* Start timer */
+
+      arm64_arch_timer_enable(true);
+      priv->init[this_cpu()] = true;
+    }
+
+  priv->running = this_cpu();
+
+  next_cycle =
+    arm64_arch_timer_count() / priv->cycle_per_tick * priv->cycle_per_tick +
+    ticks * priv->cycle_per_tick;
+
+  arm64_arch_timer_set_compare(next_cycle);
   arm64_arch_timer_set_irq_mask(false);
 
   return OK;
@@ -305,6 +342,10 @@ static const struct oneshot_operations_s g_oneshot_ops =
 };
 
 /****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
  * Name: oneshot_initialize
  *
  * Description:
@@ -317,7 +358,7 @@ static const struct oneshot_operations_s g_oneshot_ops =
  *
  ****************************************************************************/
 
-static struct oneshot_lowerhalf_s *arm64_oneshot_initialize(void)
+struct oneshot_lowerhalf_s *arm64_oneshot_initialize(void)
 {
   struct arm64_oneshot_lowerhalf_s *priv;
 
@@ -338,6 +379,7 @@ static struct oneshot_lowerhalf_s *arm64_oneshot_initialize(void)
   /* Initialize the lower-half driver structure */
 
   priv->lh.ops = &g_oneshot_ops;
+  priv->running = -1;
   priv->cycle_per_tick = arm64_arch_timer_get_cntfrq() / TICK_PER_SEC;
   tmrinfo("cycle_per_tick %" PRIu64 "\n", priv->cycle_per_tick);
 
@@ -346,76 +388,7 @@ static struct oneshot_lowerhalf_s *arm64_oneshot_initialize(void)
   irq_attach(ARM_ARCH_TIMER_IRQ,
              arm64_arch_timer_compare_isr, priv);
 
-  /* Enable int */
-
-  up_enable_irq(ARM_ARCH_TIMER_IRQ);
-
-  /* Start timer */
-
-  arm64_arch_timer_enable(true);
-
   tmrinfo("oneshot_initialize ok %p \n", &priv->lh);
 
   return &priv->lh;
 }
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Function:  up_timer_initialize
- *
- * Description:
- *   This function is called during start-up to initialize the system timer
- *   interrupt.
- *
- ****************************************************************************/
-
-void up_timer_initialize(void)
-{
-  uint64_t freq;
-
-  freq = arm64_arch_timer_get_cntfrq();
-  tmrinfo("%s: cp15 timer(s) running at %" PRIu64 ".%" PRIu64 "MHz\n",
-          __func__, freq / 1000000, (freq / 10000) % 100);
-
-  up_alarm_set_lowerhalf(arm64_oneshot_initialize());
-}
-
-#ifdef CONFIG_SMP
-/****************************************************************************
- * Function:  arm64_arch_timer_secondary_init
- *
- * Description:
- *   This function is called during start-up to initialize the system timer
- *   interrupt for smp.
- *
- * Notes:
- * The origin design for ARMv8-A timer is assigned private timer to
- * every PE(CPU core), the ARM_ARCH_TIMER_IRQ is a PPI so it's
- * should be enable at every core.
- *
- * But for NuttX, it's design only for primary core to handle timer
- * interrupt and call nxsched_process_timer at timer tick mode.
- * So we need only enable timer for primary core
- *
- * IMX6 use GPT which is a SPI rather than generic timer to handle
- * timer interrupt
- ****************************************************************************/
-
-void arm64_arch_timer_secondary_init()
-{
-#ifdef CONFIG_SCHED_TICKLESS
-  tmrinfo("arm64_arch_timer_secondary_init\n");
-
-  /* Enable int */
-
-  up_enable_irq(ARM_ARCH_TIMER_IRQ);
-
-  /* Start timer */
-
-  arm64_arch_timer_enable(true);
-#endif
-}
-#endif

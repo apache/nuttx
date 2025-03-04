@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/include/goldfish/chip.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -55,10 +57,14 @@
  */
 
 #if CONFIG_ARM64_GIC_VERSION == 2
-
 #define CONFIG_GICD_BASE          0x8000000
 #define CONFIG_GICR_BASE          0x8010000
-
+#elif CONFIG_ARM64_GIC_VERSION == 3 || CONFIG_ARM64_GIC_VERSION == 4
+#define CONFIG_GICD_BASE          0x8000000
+#define CONFIG_GICR_BASE          0x80a0000
+#define CONFIG_GICR_OFFSET        0x20000
+#else
+#error CONFIG_ARM64_GIC_VERSION should be 2, 3 or 4
 #endif /* CONFIG_ARM64_GIC_VERSION */
 
 #define CONFIG_FLASH_BASEADDR     0x7000000

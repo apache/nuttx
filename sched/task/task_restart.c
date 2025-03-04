@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/task/task_restart.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -36,9 +38,125 @@
 #include "signal/signal.h"
 #include "task/task.h"
 
+#ifndef CONFIG_BUILD_KERNEL
+
+/****************************************************************************
+ * Private Type Declarations
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
+struct restart_arg_s
+{
+  pid_t pid;
+  cpu_set_t saved_affinity;
+  bool need_restore;
+};
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+static int restart_handler(FAR void *cookie)
+{
+  FAR struct restart_arg_s *arg = cookie;
+  FAR struct tcb_s *tcb;
+  irqstate_t flags;
+
+  flags = enter_critical_section();
+
+  /* tcb that we want restart */
+
+  tcb = nxsched_get_tcb(arg->pid);
+  if (!tcb || tcb->task_state == TSTATE_TASK_INVALID ||
+      (tcb->flags & TCB_FLAG_EXIT_PROCESSING) != 0)
+    {
+      /* There is no TCB with this pid or, if there is, it is not a task. */
+
+      leave_critical_section(flags);
+      return -ESRCH;
+    }
+
+  if (arg->need_restore)
+    {
+      tcb->affinity = arg->saved_affinity;
+      tcb->flags &= ~TCB_FLAG_CPU_LOCKED;
+    }
+
+  nxsched_remove_readytorun(tcb);
+
+  leave_critical_section(flags);
+
+  return OK;
+}
+#endif
+
+/****************************************************************************
+ * Name: nxtask_reset_task
+ *
+ * Description:
+ *   We use this function to reset tcb
+ *
+ ****************************************************************************/
+
+static void nxtask_reset_task(FAR struct tcb_s *tcb, bool remove)
+{
+  /* Try to recover from any bad states */
+
+  nxtask_recover(tcb);
+
+  /* Kill any children of this thread */
+
+#ifdef HAVE_GROUP_MEMBERS
+  group_kill_children(tcb);
+#endif
+
+  /* Remove the TCB from whatever list it is in.  After this point, the TCB
+   * should no longer be accessible to the system
+   */
+
+  if (remove)
+    {
+      nxsched_remove_readytorun(tcb);
+    }
+
+  /* Deallocate anything left in the TCB's signal queues */
+
+  nxsig_cleanup(tcb);             /* Deallocate Signal lists */
+  sigemptyset(&tcb->sigprocmask); /* Reset sigprocmask */
+
+  /* Reset the current task priority  */
+
+  tcb->sched_priority = tcb->init_priority;
+
+  /* The task should restart with pre-emption disabled and not in a critical
+   * section.
+   */
+
+  tcb->lockcount = 0;
+#ifdef CONFIG_SMP
+  tcb->irqcount  = 0;
+#endif
+
+  /* Reset the base task priority and the number of pending
+   * reprioritizations.
+   */
+
+#ifdef CONFIG_PRIORITY_INHERITANCE
+  tcb->base_priority = tcb->init_priority;
+  tcb->boost_priority = 0;
+#endif
+
+  /* Re-initialize the processor-specific portion of the TCB.  This will
+   * reset the entry point and the start-up parameters
+   */
+
+  up_initial_state(tcb);
+
+  /* Add the task to the inactive task list */
+
+  dq_addfirst((FAR dq_entry_t *)tcb, list_inactivetasks());
+  tcb->task_state = TSTATE_TASK_INACTIVE;
+}
 
 /****************************************************************************
  * Name: nxtask_restart
@@ -62,28 +180,12 @@
  *
  ****************************************************************************/
 
-#ifndef CONFIG_BUILD_KERNEL
 static int nxtask_restart(pid_t pid)
 {
   FAR struct tcb_s *rtcb;
-  FAR struct task_tcb_s *tcb;
-  FAR dq_queue_t *tasklist;
+  FAR struct tcb_s *tcb;
   irqstate_t flags;
   int ret;
-#ifdef CONFIG_SMP
-  int cpu;
-#endif
-
-  /* Check if the task to restart is the calling task */
-
-  rtcb = this_task();
-  if ((pid == 0) || (pid == rtcb->pid))
-    {
-      /* Not implemented */
-
-      ret = -ENOSYS;
-      goto errout;
-    }
 
   /* We are restarting some other task than ourselves.  Make sure that the
    * task does not change its state while we are executing.  In the single
@@ -94,11 +196,22 @@ static int nxtask_restart(pid_t pid)
 
   flags = enter_critical_section();
 
+  /* Check if the task to restart is the calling task */
+
+  rtcb = this_task();
+  if (pid == 0 || pid == rtcb->pid)
+    {
+      /* Not implemented */
+
+      ret = -ENOSYS;
+      goto errout_with_lock;
+    }
+
   /* Find for the TCB associated with matching pid  */
 
-  tcb = (FAR struct task_tcb_s *)nxsched_get_tcb(pid);
+  tcb = nxsched_get_tcb(pid);
 #ifndef CONFIG_DISABLE_PTHREAD
-  if (!tcb || (tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) ==
+  if (!tcb || (tcb->flags & TCB_FLAG_TTYPE_MASK) ==
       TCB_FLAG_TTYPE_PTHREAD)
 #else
   if (!tcb)
@@ -111,98 +224,58 @@ static int nxtask_restart(pid_t pid)
     }
 
 #ifdef CONFIG_SMP
-  /* If the task is running on another CPU, then pause that CPU.  We can
-   * then manipulate the TCB of the restarted task and when we resume the
-   * that CPU, the restart take effect.
-   */
-
-  cpu = nxsched_pause_cpu(&tcb->cmn);
-#endif /* CONFIG_SMP */
-
-  /* Try to recover from any bad states */
-
-  nxtask_recover((FAR struct tcb_s *)tcb);
-
-  /* Kill any children of this thread */
-
-#ifdef HAVE_GROUP_MEMBERS
-  group_kill_children((FAR struct tcb_s *)tcb);
-#endif
-
-  /* Remove the TCB from whatever list it is in.  After this point, the TCB
-   * should no longer be accessible to the system
-   */
-
-#ifdef CONFIG_SMP
-  tasklist = TLIST_HEAD(&tcb->cmn, tcb->cmn.cpu);
-#else
-  tasklist = TLIST_HEAD(&tcb->cmn);
-#endif
-
-  dq_rem((FAR dq_entry_t *)tcb, tasklist);
-  tcb->cmn.task_state = TSTATE_TASK_INVALID;
-
-  /* Deallocate anything left in the TCB's signal queues */
-
-  nxsig_cleanup((FAR struct tcb_s *)tcb);  /* Deallocate Signal lists */
-  sigemptyset(&tcb->cmn.sigprocmask);      /* Reset sigprocmask */
-
-  /* Reset the current task priority  */
-
-  tcb->cmn.sched_priority = tcb->cmn.init_priority;
-
-  /* The task should restart with pre-emption disabled and not in a critical
-   * section.
-   */
-
-  tcb->cmn.lockcount = 0;
-#ifdef CONFIG_SMP
-  tcb->cmn.irqcount  = 0;
-#endif
-
-  /* Reset the base task priority and the number of pending
-   * reprioritizations.
-   */
-
-#ifdef CONFIG_PRIORITY_INHERITANCE
-  tcb->cmn.base_priority = tcb->cmn.init_priority;
-  tcb->cmn.boost_priority = 0;
-#endif
-
-  /* Re-initialize the processor-specific portion of the TCB.  This will
-   * reset the entry point and the start-up parameters
-   */
-
-  up_initial_state((FAR struct tcb_s *)tcb);
-
-  /* Add the task to the inactive task list */
-
-  dq_addfirst((FAR dq_entry_t *)tcb, list_inactivetasks());
-  tcb->cmn.task_state = TSTATE_TASK_INACTIVE;
-
-#ifdef CONFIG_SMP
-  /* Resume the paused CPU (if any) */
-
-  if (cpu >= 0)
+  if (tcb->task_state == TSTATE_TASK_RUNNING &&
+      tcb->cpu != this_cpu())
     {
-      ret = up_cpu_resume(cpu);
-      if (ret < 0)
+      struct restart_arg_s arg;
+
+      if ((tcb->flags & TCB_FLAG_CPU_LOCKED) != 0)
         {
+          arg.pid = tcb->pid;
+          arg.need_restore = false;
+        }
+      else
+        {
+          arg.pid = tcb->pid;
+          arg.saved_affinity = tcb->affinity;
+          arg.need_restore = true;
+
+          tcb->flags |= TCB_FLAG_CPU_LOCKED;
+          CPU_SET(tcb->cpu, &tcb->affinity);
+        }
+
+      nxsched_smp_call_single(tcb->cpu, restart_handler, &arg);
+
+      tcb = nxsched_get_tcb(pid);
+      if (!tcb || tcb->task_state != TSTATE_TASK_INVALID ||
+          (tcb->flags & TCB_FLAG_EXIT_PROCESSING) != 0)
+        {
+          ret = -ESRCH;
           goto errout_with_lock;
         }
+
+      DEBUGASSERT(tcb->task_state != TSTATE_TASK_RUNNING);
+      nxtask_reset_task(tcb, false);
+      leave_critical_section(flags);
+
+      /* Activate the task. */
+
+      nxtask_activate(tcb);
+
+      return OK;
     }
 #endif /* CONFIG_SMP */
 
+  nxtask_reset_task(tcb, true);
   leave_critical_section(flags);
 
   /* Activate the task. */
 
-  nxtask_activate((FAR struct tcb_s *)tcb);
+  nxtask_activate(tcb);
   return OK;
 
 errout_with_lock:
   leave_critical_section(flags);
-errout:
   return ret;
 }
 

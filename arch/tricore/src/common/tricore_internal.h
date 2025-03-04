@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/tricore/src/common/tricore_internal.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -142,13 +144,6 @@ extern void tricore_switchcontext(uintptr_t **saveregs,
                                   uintptr_t *restoreregs);
 #endif
 
-/* Address <--> Context Save Areas */
-
-#define tricore_csa2addr(csa) ((uintptr_t *)((((csa) & 0x000F0000) << 12) \
-                                             | (((csa) & 0x0000FFFF) << 6)))
-#define tricore_addr2csa(addr) ((uintptr_t)(((((uintptr_t)(addr)) & 0xF0000000) >> 12) \
-                                            | (((uintptr_t)(addr) & 0x003FFFC0) >> 6)))
-
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -207,13 +202,10 @@ extern uintptr_t        __A0_MEM[];    /* End+1 of .data */
  * Inline Functions
  ****************************************************************************/
 
-#define tricore_savecontext(regs)    (regs = (uintptr_t *)CURRENT_REGS)
-#define tricore_restorecontext(regs) (CURRENT_REGS = regs)
-
 /* Macros to handle saving and restoring interrupt state. */
 
-#define tricore_savestate(regs)    (regs = (uintptr_t *)CURRENT_REGS)
-#define tricore_restorestate(regs) (CURRENT_REGS = regs)
+#define tricore_savestate(regs)    (regs = up_current_regs())
+#define tricore_restorestate(regs) (up_set_current_regs(regs))
 
 /****************************************************************************
  * Public Function Prototypes

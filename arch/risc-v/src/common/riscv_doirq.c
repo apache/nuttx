@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/common/riscv_doirq.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -58,6 +60,10 @@
 
 uintreg_t *riscv_doirq(int irq, uintreg_t *regs)
 {
+  struct tcb_s **running_task = &g_running_tasks[this_cpu()];
+  bool restore_context = false;
+  struct tcb_s *tcb = this_task();
+
   board_autoled_on(LED_INIRQ);
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   PANIC();
@@ -68,29 +74,47 @@ uintreg_t *riscv_doirq(int irq, uintreg_t *regs)
   if (irq >= RISCV_IRQ_ECALLU && irq <= RISCV_IRQ_ECALLM)
     {
       regs[REG_EPC] += 4;
+      if (regs[REG_A0] != SYS_restore_context)
+        {
+          (*running_task)->xcp.regs = regs;
+        }
+      else
+        {
+          restore_context = true;
+        }
+    }
+  else
+    {
+      (*running_task)->xcp.regs = regs;
     }
 
   /* Current regs non-zero indicates that we are processing an interrupt;
-   * CURRENT_REGS is also used to manage interrupt level context switches.
+   * current_regs is also used to manage interrupt level context switches.
    *
-   * Nested interrupts are not supported
+   * Nested interrupts are not supported. But an exception may occur while
+   * processing an interrupt. In this case, current_regs will be non-NULL.
    */
 
-  DEBUGASSERT(CURRENT_REGS == NULL);
-  CURRENT_REGS = regs;
+  DEBUGASSERT(((irq > RISCV_MAX_EXCEPTION) && !up_interrupt_context()) ||
+              (irq <= RISCV_MAX_EXCEPTION));
+
+  /* Don't override current regs if it is already set (which is true if
+   * we were in a interrupt handler).
+   */
+
+  if (!up_interrupt_context())
+    {
+      up_set_interrupt_context(true);
+    }
 
   /* Deliver the IRQ */
 
   irq_dispatch(irq, regs);
+  tcb = this_task();
 
-  /* Check for a context switch.  If a context switch occurred, then
-   * CURRENT_REGS will have a different value than it did on entry.  If an
-   * interrupt level context switch has occurred, then restore the floating
-   * point state and the establish the correct address environment before
-   * returning from the interrupt.
-   */
+  /* Check for a context switch. */
 
-  if (regs != CURRENT_REGS)
+  if (*running_task != tcb || restore_context)
     {
 #ifdef CONFIG_ARCH_ADDRENV
       /* Make sure that the address environment for the previously
@@ -99,32 +123,39 @@ uintreg_t *riscv_doirq(int irq, uintreg_t *regs)
        * thread at the head of the ready-to-run list.
        */
 
-      addrenv_switch(NULL);
+      addrenv_switch(tcb);
 #endif
+
+      /* Update scheduler parameters */
+
+      if (!restore_context)
+        {
+          nxsched_suspend_scheduler(*running_task);
+        }
+
+      nxsched_resume_scheduler(tcb);
 
       /* Record the new "running" task when context switch occurred.
        * g_running_tasks[] is only used by assertion logic for reporting
        * crashes.
        */
 
-      g_running_tasks[this_cpu()] = this_task();
-
-      /* If a context switch occurred while processing the interrupt then
-       * CURRENT_REGS may have change value.  If we return any value
-       * different from the input regs, then the lower level will know
-       * that a context switch occurred during interrupt processing.
-       */
-
-      regs = (uintreg_t *)CURRENT_REGS;
+      *running_task = tcb;
     }
 
-  /* Set CURRENT_REGS to NULL to indicate that we are no longer in an
-   * interrupt handler.
-   */
+  /* Set irq flag */
 
-  CURRENT_REGS = NULL;
+  up_set_interrupt_context(false);
 
 #endif
   board_autoled_off(LED_INIRQ);
+
+  regs = tcb->xcp.regs;
+
+  /* (*running_task)->xcp.regs is about to become invalid
+   * and will be marked as NULL to avoid misusage.
+   */
+
+  (*running_task)->xcp.regs = NULL;
   return regs;
 }

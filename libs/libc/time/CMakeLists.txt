@@ -1,6 +1,8 @@
 # ##############################################################################
 # libs/libc/time/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -16,7 +18,6 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 #
-# ##############################################################################
 # ##############################################################################
 
 set(SRCS
@@ -41,6 +42,10 @@ if(CONFIG_LIBC_LOCALTIME)
   list(APPEND SRCS lib_localtime.c)
 else()
   list(APPEND SRCS lib_timegm.c lib_gmtime.c lib_gmtimer.c)
+endif()
+
+if(CONFIG_ALLOW_MIT_COMPONENTS)
+  list(APPEND SRCS lib_strptime.c)
 endif()
 
 target_sources(c PRIVATE ${SRCS})

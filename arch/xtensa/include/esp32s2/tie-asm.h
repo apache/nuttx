@@ -1,13 +1,8 @@
 /****************************************************************************
  * arch/xtensa/include/esp32s2/tie-asm.h
- * Compile-time assembler definitions dependent on CORE & TIE
  *
- * This header file contains assembly-language definitions (assembly
- * macros, etc.) for this specific Xtensa processor's TIE extensions
- * and options.  It is customized to this Xtensa processor configuration.
- *
- * Customer ID=11657; Build=0x5fe96;
- * Copyright (c) 1999-2016 Cadence Design Systems Inc.
+ * SPDX-License-Identifier: MIT
+ * SPDX-FileCopyrightText: 1999-2016 Cadence Design Systems Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the

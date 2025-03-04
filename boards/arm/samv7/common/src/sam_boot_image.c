@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/samv7/common/src/sam_boot_image.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -31,10 +33,10 @@
 #include <sys/boardctl.h>
 #include <nuttx/irq.h>
 #include <nuttx/cache.h>
+#include <arch/barriers.h>
 
 #include "nvic.h"
 #include "arm_internal.h"
-#include "barriers.h"
 
 #ifdef CONFIG_ARM_MPU
 #  include "mpu.h"
@@ -89,7 +91,7 @@ static void cleanup_arm_nvic(void)
 
   /* Allow any pending interrupts to be recognized */
 
-  ARM_ISB();
+  UP_ISB();
   cpsid();
 
   /* Disable all interrupts */

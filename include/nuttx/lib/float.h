@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/lib/float.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -39,6 +41,12 @@
 /* Radix of exponent representation, b. */
 
 #define FLT_RADIX 2
+
+/* Addition rounds to 0: zero, 1: nearest, 2: +inf, 3: -inf, -1: unknown.  */
+
+#ifndef FLT_ROUNDS  /* May be defined in a toolchain header */
+#  define FLT_ROUNDS 1
+#endif
 
 /* Number of base-FLT_RADIX digits in the floating-point significand, p. */
 

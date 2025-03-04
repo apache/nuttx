@@ -35,13 +35,19 @@
 *.mapfile
 *.SystemMap
 *~
+\#*\#
+.\#*
 .depend
+/.cache
 /.config
 /.config.*
 /.config-*
 /.config\ *
 /.cproject
+/.cache
+/.clang-format
 /.gdbinit
+/.gdb_history
 /.project
 /.version
 /_SAVED_APPS_config
@@ -49,6 +55,7 @@
 /defconfig
 /Make.defs
 /nuttx
+/nuttx32
 /nuttx-*
 /nuttx.*
 /nuttx_user*
@@ -75,3 +82,6 @@ imx9-sdimage.img
 kwarning
 SAVEMake.defs
 SAVEconfig
+.aider*
+imx9-norimage.img
+config.txt

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/src/imx9/imx9_flexspi_nor.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -37,6 +39,7 @@
 #include <nuttx/signal.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/mtd/mtd.h>
+#include <nuttx/nuttx.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/drivers/drivers.h>
 #include <arch/board/board.h>
@@ -61,9 +64,6 @@
 #    undef ARMV8A_DCACHE_LINESIZE
 #    define ARMV8A_DCACHE_LINESIZE 64
 #  endif
-
-#define ALIGN_MASK        (ARMV8A_DCACHE_LINESIZE - 1)
-#define ALIGN_UP(n)       (((n)+ALIGN_MASK) & ~ALIGN_MASK)
 
 /* Configuration ************************************************************/
 
@@ -248,12 +248,14 @@
 #define M25P_BE        0xc7  /* 1 Bulk Erase                0   0     0     */
 #define M25P_DP        0xb9  /* 2 Deep power down           0   0     0     */
 #define M25P_RES       0xab  /* 2 Read Electronic Signature 0   3     >=1   */
-#define M25P_SSE       0x20  /* 3 Sub-Sector Erase          0   0     0     */
+#define M25P_SSE       0x21  /* 3 Sub-Sector Erase          4   0     0     */
 #define M25P_WECR      0x61  /* 1 Write Enhanched config    0   0     1     */
+#define M25P_RFSR      0x70  /* 1 Read Flag Status Register 0   0     1     */
+#define M25P_4B_ENTER  0xB7  /* 1 Enter 4byte addressing    0   0     0     */
 
 /* Quad commands */
-#define M25P_Q_FAST_RD 0x6b  /* 1 Quad output fast read     3/4 0     1-256 */
-#define M25P_Q_FAST_PP 0x32  /* 1 Quad input fast program   3/4 0     1-256 */
+#define M25P_Q_FAST_RD 0x6c  /* 1 Quad output fast read     4   0     1-256 */
+#define M25P_Q_FAST_PP 0x34  /* 1 Quad input fast program   4   0     1-256 */
 #define M25P_Q_ENTER   0x35  /* 1 Enter Quad input/output   0   0     0     */
 
 /* NOTE 1: All parts.
@@ -262,18 +264,23 @@
  *         is a sector erase.
  */
 
+#define ADDRESS_24BIT   0x18
+#define ADDRESS_32BIT   0x20
+
 enum
 {
   /* SPI instructions */
 
   READ_ID,
   READ_STATUS_REG,
+  READ_FLAG_STATUS_REG,
   WRITE_STATUS_REG,
   WRITE_ENABLE,
   ERASE_SECTOR,
   ERASE_CHIP,
   ENTER_DDR,
   READ_FAST,
+  ENTER_4BYTE,
 
   /* Quad SPI instructions */
 
@@ -298,6 +305,12 @@ static const uint32_t g_flexspi_nor_lut[][4] =
         FLEXSPI_COMMAND_READ_SDR, FLEXSPI_1PAD, 0x04),
   },
 
+  [READ_FLAG_STATUS_REG] =
+  {
+    FLEXSPI_LUT_SEQ(FLEXSPI_COMMAND_SDR, FLEXSPI_1PAD, M25P_RFSR,
+        FLEXSPI_COMMAND_READ_SDR, FLEXSPI_1PAD, 0x04),
+  },
+
   [WRITE_STATUS_REG] =
   {
     FLEXSPI_LUT_SEQ(FLEXSPI_COMMAND_SDR, FLEXSPI_1PAD, M25P_WRSR,
@@ -313,7 +326,7 @@ static const uint32_t g_flexspi_nor_lut[][4] =
   [ERASE_SECTOR] =
   {
     FLEXSPI_LUT_SEQ(FLEXSPI_COMMAND_SDR,       FLEXSPI_1PAD, M25P_SSE, /* note: sub-sector erase */
-        FLEXSPI_COMMAND_RADDR_SDR, FLEXSPI_1PAD, 0x18),
+        FLEXSPI_COMMAND_RADDR_SDR, FLEXSPI_1PAD, ADDRESS_32BIT),
   },
 
   [ERASE_CHIP] =
@@ -325,7 +338,7 @@ static const uint32_t g_flexspi_nor_lut[][4] =
   [READ_FAST_QUAD_OUTPUT] =
   {
     FLEXSPI_LUT_SEQ(FLEXSPI_COMMAND_SDR, FLEXSPI_1PAD, M25P_Q_FAST_RD,
-        FLEXSPI_COMMAND_RADDR_SDR, FLEXSPI_1PAD, 0x18),
+        FLEXSPI_COMMAND_RADDR_SDR, FLEXSPI_1PAD, ADDRESS_32BIT),
     FLEXSPI_LUT_SEQ(FLEXSPI_COMMAND_DUMMY_SDR, FLEXSPI_4PAD, 0x08,
         FLEXSPI_COMMAND_READ_SDR,  FLEXSPI_4PAD, 0x04),
   },
@@ -333,8 +346,14 @@ static const uint32_t g_flexspi_nor_lut[][4] =
   [PAGE_PROGRAM_QUAD_INPUT] =
   {
     FLEXSPI_LUT_SEQ(FLEXSPI_COMMAND_SDR, FLEXSPI_1PAD, M25P_Q_FAST_PP,
-        FLEXSPI_COMMAND_RADDR_SDR, FLEXSPI_1PAD, 0x18),
+        FLEXSPI_COMMAND_RADDR_SDR, FLEXSPI_1PAD, ADDRESS_32BIT),
     FLEXSPI_LUT_SEQ(FLEXSPI_COMMAND_WRITE_SDR, FLEXSPI_4PAD, 0x04,
+        FLEXSPI_COMMAND_STOP,      FLEXSPI_1PAD, 0),
+  },
+
+  [ENTER_4BYTE] =
+  {
+    FLEXSPI_LUT_SEQ(FLEXSPI_COMMAND_SDR,       FLEXSPI_1PAD, M25P_4B_ENTER,
         FLEXSPI_COMMAND_STOP,      FLEXSPI_1PAD, 0),
   },
 
@@ -353,7 +372,7 @@ static const uint32_t g_flexspi_nor_lut[][4] =
   [READ_FAST] =
   {
     FLEXSPI_LUT_SEQ(FLEXSPI_COMMAND_SDR, FLEXSPI_1PAD, M25P_FAST_READ,
-        FLEXSPI_COMMAND_RADDR_SDR, FLEXSPI_1PAD, 0x18),
+        FLEXSPI_COMMAND_RADDR_SDR, FLEXSPI_1PAD, ADDRESS_32BIT),
     FLEXSPI_LUT_SEQ(FLEXSPI_COMMAND_DUMMY_SDR, FLEXSPI_1PAD, 0x08,
         FLEXSPI_COMMAND_READ_SDR,  FLEXSPI_1PAD, 0x04)
   },
@@ -412,7 +431,7 @@ static int imx9_flexspi_nor_ioctl(struct mtd_dev_s *dev,
 
 static struct flexspi_device_config_s g_flexspi_device_config =
 {
-  .flexspi_root_clk = 50000000,
+  .flexspi_root_clk = 133000000,
   .flash_size = 1024 * 64, /* size in kB */
   .cs_interval_unit = FLEXSPI_CS_INTERVAL_UNIT1_SCK_CYCLE,
   .cs_interval = 0,
@@ -629,9 +648,9 @@ static int imx9_flexspi_nor_get_id(
   return -ENODEV;
 }
 
-static int imx9_flexspi_nor_read_status(
+static int imx9_flexspi_nor_read_register(
                 const struct imx9_flexspi_nor_dev_s *dev,
-                uint32_t *status)
+                uint32_t *value, uint32_t len, int seq)
 {
   int stat;
 
@@ -641,8 +660,8 @@ static int imx9_flexspi_nor_read_status(
     .port = dev->port,
     .cmd_type = FLEXSPI_READ,
     .seq_number = 1,
-    .seq_index = READ_STATUS_REG,
-    .data = status,
+    .seq_index = seq,
+    .data = value,
     .data_size = 1,
   };
 
@@ -655,34 +674,9 @@ static int imx9_flexspi_nor_read_status(
   return 0;
 }
 
-static int imx9_flexspi_nor_write_status(
+static int imx9_flexspi_nor_write_cmd(
                 const struct imx9_flexspi_nor_dev_s *dev,
-    uint32_t *status)
-{
-  int stat;
-
-  struct flexspi_transfer_s transfer =
-  {
-    .device_address = 0,
-    .port = dev->port,
-    .cmd_type = FLEXSPI_WRITE,
-    .seq_number = 1,
-    .seq_index = WRITE_STATUS_REG,
-    .data = status,
-    .data_size = 1,
-  };
-
-  stat = FLEXSPI_TRANSFER(dev->flexspi, &transfer);
-  if (stat != 0)
-    {
-      return -EIO;
-    }
-
-  return 0;
-}
-
-static int imx9_flexspi_nor_write_enable(
-                const struct imx9_flexspi_nor_dev_s *dev)
+                int cmd)
 {
   int stat;
 
@@ -692,7 +686,7 @@ static int imx9_flexspi_nor_write_enable(
     .port = dev->port,
     .cmd_type = FLEXSPI_COMMAND,
     .seq_number = 1,
-    .seq_index = WRITE_ENABLE,
+    .seq_index = cmd,
     .data = NULL,
     .data_size = 0,
   };
@@ -732,31 +726,6 @@ static int imx9_flexspi_nor_erase_sector(
   return 0;
 }
 
-static int imx9_flexspi_nor_erase_chip(
-                const struct imx9_flexspi_nor_dev_s *dev)
-{
-  int stat;
-
-  struct flexspi_transfer_s transfer =
-  {
-    .device_address = 0,
-    .port = dev->port,
-    .cmd_type = FLEXSPI_COMMAND,
-    .seq_number = 1,
-    .seq_index = ERASE_CHIP,
-    .data = NULL,
-    .data_size = 0,
-  };
-
-  stat = FLEXSPI_TRANSFER(dev->flexspi, &transfer);
-  if (stat != 0)
-    {
-      return -EIO;
-    }
-
-  return 0;
-}
-
 static int imx9_flexspi_nor_page_program(
                       const struct imx9_flexspi_nor_dev_s *dev,
                       off_t offset,
@@ -776,9 +745,7 @@ static int imx9_flexspi_nor_page_program(
     .data_size = len,
   };
 
-  up_clean_dcache((uintptr_t)buffer, (uintptr_t)buffer + len);
-
-  stat = FLEXSPI_TRANSFER(dev->flexspi, &transfer);
+    stat = FLEXSPI_TRANSFER(dev->flexspi, &transfer);
   if (stat != 0)
     {
       return -EIO;
@@ -795,25 +762,13 @@ static int imx9_flexspi_nor_wait_bus_busy(
 
   do
     {
-      ret = imx9_flexspi_nor_read_status(dev, &status);
+      ret = imx9_flexspi_nor_read_register(dev, &status, 1, READ_STATUS_REG);
       if (ret)
         {
           return ret;
         }
     }
   while (status & 1);
-
-  return 0;
-}
-
-static int imx9_flexspi_nor_enable_quad_mode(
-                const struct imx9_flexspi_nor_dev_s *dev)
-{
-  uint32_t status = 0x40;
-
-  imx9_flexspi_nor_write_status(dev, &status);
-  imx9_flexspi_nor_wait_bus_busy(dev);
-  FLEXSPI_SOFTWARE_RESET(dev->flexspi);
 
   return 0;
 }
@@ -827,7 +782,7 @@ static ssize_t imx9_flexspi_nor_read(struct mtd_dev_s *dev,
                   (struct imx9_flexspi_nor_dev_s *)dev;
   uint8_t *src;
 
-  finfo("offset: %08lx nbytes: %d\n", (long)offset, (int)nbytes);
+  finfo("Read offset: %08lx nbytes: %d\n", (long)offset, (int)nbytes);
 
   if (priv->port >= FLEXSPI_PORT_COUNT)
     {
@@ -835,12 +790,13 @@ static ssize_t imx9_flexspi_nor_read(struct mtd_dev_s *dev,
     }
 
   src = priv->ahb_base + offset;
-  DEBUGASSERT(((uintptr_t)src & ALIGN_MASK) == 0);
 
-  up_invalidate_dcache((uintptr_t)src,
-                       (uintptr_t)src + ALIGN_UP(nbytes));
+  int n = nbytes;
 
-  memcpy(buffer, src, nbytes);
+  while (n-- > 0)
+    {
+      *buffer++ = *src++;
+    }
 
   finfo("return nbytes: %d\n", (int)nbytes);
   return (ssize_t)nbytes;
@@ -851,9 +807,9 @@ static ssize_t imx9_flexspi_nor_bread(struct mtd_dev_s *dev,
                                        size_t nblocks,
                                        uint8_t *buffer)
 {
-  struct imx9_flexspi_nor_dev_s *priv =
-           (struct imx9_flexspi_nor_dev_s *)dev;
   ssize_t nbytes;
+  struct imx9_flexspi_nor_dev_s *priv =
+                  (struct imx9_flexspi_nor_dev_s *)dev;
 
   finfo("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
 
@@ -861,14 +817,15 @@ static ssize_t imx9_flexspi_nor_bread(struct mtd_dev_s *dev,
    * read
    */
 
-  nbytes = imx9_flexspi_nor_read(dev, startblock << priv->pageshift,
-                                 nblocks << priv->pageshift, buffer);
-  if (nbytes > 0)
+  nbytes = imx9_flexspi_nor_read(dev, startblock << priv->subsectorshift,
+                                 nblocks << priv->subsectorshift, buffer);
+
+  if (nbytes < 0)
     {
-      nbytes >>= priv->pageshift;
+      return nbytes;
     }
 
-  return nbytes;
+  return nblocks;
 }
 
 static ssize_t imx9_flexspi_nor_bwrite(struct mtd_dev_s *dev,
@@ -879,16 +836,20 @@ static ssize_t imx9_flexspi_nor_bwrite(struct mtd_dev_s *dev,
   struct imx9_flexspi_nor_dev_s *priv =
                   (struct imx9_flexspi_nor_dev_s *)dev;
   size_t pgsize = 1 << priv->pageshift;
-  size_t len = nblocks << priv->pageshift;
-  off_t offset = startblock << priv->pageshift;
-  int i;
+  size_t len = nblocks << priv->subsectorshift;
+  off_t offset = startblock << priv->subsectorshift;
 
-  finfo("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
+  int i = 0;
+
+  up_clean_dcache((uintptr_t)src, (uintptr_t)src +
+                  ALIGN_UP(len, ARMV8A_DCACHE_LINESIZE));
+
+  finfo("Wstartblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
 
   while (len)
     {
       i = MIN(pgsize, len);
-      imx9_flexspi_nor_write_enable(priv);
+      imx9_flexspi_nor_write_cmd(priv, WRITE_ENABLE);
       imx9_flexspi_nor_page_program(priv, offset, src, i);
       imx9_flexspi_nor_wait_bus_busy(priv);
       FLEXSPI_SOFTWARE_RESET(priv->flexspi);
@@ -907,7 +868,6 @@ static int imx9_flexspi_nor_erase(struct mtd_dev_s *dev,
   struct imx9_flexspi_nor_dev_s *priv =
                   (struct imx9_flexspi_nor_dev_s *)dev;
   size_t blocksleft = nblocks;
-  uint8_t *dst = priv->ahb_base + (startblock << priv->subsectorshift);
 
   finfo("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
 
@@ -915,16 +875,13 @@ static int imx9_flexspi_nor_erase(struct mtd_dev_s *dev,
     {
       /* Erase each sector */
 
-      imx9_flexspi_nor_write_enable(priv);
+      imx9_flexspi_nor_write_cmd(priv, WRITE_ENABLE);
       imx9_flexspi_nor_erase_sector(priv,
                                     startblock << priv->subsectorshift);
       imx9_flexspi_nor_wait_bus_busy(priv);
       FLEXSPI_SOFTWARE_RESET(priv->flexspi);
       startblock++;
     }
-
-  up_invalidate_dcache((uintptr_t)dst,
-                       (uintptr_t)dst + (nblocks << priv->subsectorshift));
 
   return (int)nblocks;
 }
@@ -957,7 +914,11 @@ static int imx9_flexspi_nor_ioctl(struct mtd_dev_s *dev,
                * necessary to make it appear so.
                */
 
-              geo->blocksize = (1 << priv->pageshift);
+              /* We report 4k blocksize, that is more convient for upper
+               * layers
+               */
+
+              geo->blocksize = (1 << priv->subsectorshift);
 #ifdef CONFIG_M25P_SUBSECTOR_ERASE
               if (priv->subsectorshift > 0)
                 {
@@ -989,8 +950,8 @@ static int imx9_flexspi_nor_ioctl(struct mtd_dev_s *dev,
         {
           /* Erase the entire device */
 
-          imx9_flexspi_nor_write_enable(priv);
-          ret = imx9_flexspi_nor_erase_chip(priv);
+          imx9_flexspi_nor_write_cmd(priv, WRITE_ENABLE);
+          ret = imx9_flexspi_nor_write_cmd(priv, ERASE_CHIP);
           if (ret)
             {
               ferr("bulk erase failed\n");
@@ -1041,6 +1002,8 @@ static int imx9_flexspi_nor_ioctl(struct mtd_dev_s *dev,
 
 struct mtd_dev_s *imx9_flexspi_nor_initialize(int intf)
 {
+  uint32_t val = 0;
+
   /* Configure multiplexed pins as connected on the board */
 
   imx9_iomux_configure(MUX_FLEXSPI_IO0);
@@ -1070,10 +1033,11 @@ struct mtd_dev_s *imx9_flexspi_nor_initialize(int intf)
       return NULL;
     }
 
-  if (imx9_flexspi_nor_enable_quad_mode(&g_flexspi_nor))
-    {
-      return NULL;
-    }
+  imx9_flexspi_nor_write_cmd(&g_flexspi_nor, ENTER_4BYTE);
+
+  imx9_flexspi_nor_read_register(&g_flexspi_nor, &val,
+    1, READ_FLAG_STATUS_REG);
+  finfo("Flag status register = 0x%x\n", val);
 
   return &g_flexspi_nor.mtd;
 }

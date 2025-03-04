@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/sched/sched_suspendscheduler.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -59,6 +61,13 @@
 
 void nxsched_suspend_scheduler(FAR struct tcb_s *tcb)
 {
+  /* Handle the task exiting case */
+
+  if (tcb == NULL)
+    {
+      return;
+    }
+
 #ifdef CONFIG_SCHED_SPORADIC
   /* Perform sporadic schedule operations */
 

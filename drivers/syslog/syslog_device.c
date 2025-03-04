@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/syslog/syslog_device.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -74,7 +76,7 @@ enum syslog_dev_state
 
 struct syslog_dev_s
 {
-  struct syslog_channel_s channel;
+  syslog_channel_t channel;
 
   uint8_t      sl_state;    /* See enum syslog_dev_state */
   uint8_t      sl_oflags;   /* Saved open mode (for re-open) */
@@ -88,11 +90,11 @@ struct syslog_dev_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static ssize_t syslog_dev_write(FAR struct syslog_channel_s *channel,
+static ssize_t syslog_dev_write(FAR syslog_channel_t *channel,
                                 FAR const char *buffer, size_t buflen);
-static int syslog_dev_putc(FAR struct syslog_channel_s *channel, int ch);
-static int syslog_dev_force(FAR struct syslog_channel_s *channel, int ch);
-static int syslog_dev_flush(FAR struct syslog_channel_s *channel);
+static int syslog_dev_putc(FAR syslog_channel_t *channel, int ch);
+static int syslog_dev_force(FAR syslog_channel_t *channel, int ch);
+static int syslog_dev_flush(FAR syslog_channel_t *channel);
 
 /****************************************************************************
  * Private Data
@@ -373,7 +375,7 @@ static int syslog_dev_outputready(FAR struct syslog_dev_s *syslog_dev)
  *
  ****************************************************************************/
 
-static ssize_t syslog_dev_write(FAR struct syslog_channel_s *channel,
+static ssize_t syslog_dev_write(FAR syslog_channel_t *channel,
                                 FAR const char *buffer, size_t buflen)
 {
   FAR struct syslog_dev_s *syslog_dev = (FAR struct syslog_dev_s *)channel;
@@ -526,7 +528,7 @@ errout_with_lock:
  *
  ****************************************************************************/
 
-static int syslog_dev_putc(FAR struct syslog_channel_s *channel, int ch)
+static int syslog_dev_putc(FAR syslog_channel_t *channel, int ch)
 {
   FAR struct syslog_dev_s *syslog_dev = (FAR struct syslog_dev_s *)channel;
   ssize_t nbytes;
@@ -619,7 +621,7 @@ static int syslog_dev_putc(FAR struct syslog_channel_s *channel, int ch)
  *
  ****************************************************************************/
 
-static int syslog_dev_force(FAR struct syslog_channel_s *channel, int ch)
+static int syslog_dev_force(FAR syslog_channel_t *channel, int ch)
 {
   UNUSED(channel);
   return ch;
@@ -639,7 +641,7 @@ static int syslog_dev_force(FAR struct syslog_channel_s *channel, int ch)
  *
  ****************************************************************************/
 
-static int syslog_dev_flush(FAR struct syslog_channel_s *channel)
+static int syslog_dev_flush(FAR syslog_channel_t *channel)
 {
 #if defined(CONFIG_SYSLOG_FILE) && !defined(CONFIG_DISABLE_MOUNTPOINT)
   FAR struct syslog_dev_s *syslog_dev = (FAR struct syslog_dev_s *)channel;
@@ -687,7 +689,7 @@ static int syslog_dev_flush(FAR struct syslog_channel_s *channel)
  *
  ****************************************************************************/
 
-FAR struct syslog_channel_s *syslog_dev_initialize(FAR const char *devpath,
+FAR syslog_channel_t *syslog_dev_initialize(FAR const char *devpath,
                                                    int oflags, int mode)
 {
   FAR struct syslog_dev_s *syslog_dev;
@@ -703,7 +705,7 @@ FAR struct syslog_channel_s *syslog_dev_initialize(FAR const char *devpath,
 
   syslog_dev->channel.sc_ops = &g_syslog_dev_ops;
 
-  return (FAR struct syslog_channel_s *)syslog_dev;
+  return (FAR syslog_channel_t *)syslog_dev;
 }
 
 /****************************************************************************
@@ -726,7 +728,7 @@ FAR struct syslog_channel_s *syslog_dev_initialize(FAR const char *devpath,
  *
  ****************************************************************************/
 
-void syslog_dev_uninitialize(FAR struct syslog_channel_s *channel)
+void syslog_dev_uninitialize(FAR syslog_channel_t *channel)
 {
   FAR struct syslog_dev_s *syslog_dev = (FAR struct syslog_dev_s *)channel;
 

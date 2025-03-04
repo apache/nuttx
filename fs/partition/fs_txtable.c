@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/partition/fs_txtable.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -30,6 +32,7 @@
 #include <nuttx/kmalloc.h>
 
 #include "partition.h"
+#include "fs_heap.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -77,7 +80,7 @@ int parse_txtable_partition(FAR struct partition_state_s *state,
 
   /* Allocate memory for table of parsed and raw */
 
-  part = kmm_malloc(CONFIG_TXTABLE_PARTITION_MAX_NUM *
+  part = fs_heap_malloc(CONFIG_TXTABLE_PARTITION_MAX_NUM *
                     sizeof(struct partition_s) +
                     TXTABLE_LENGTH);
   if (part == NULL)
@@ -130,7 +133,8 @@ int parse_txtable_partition(FAR struct partition_state_s *state,
       /* Parsing data of partition table */
 
       token = strtok_r(token, "\n", &save_ptr);
-      if (strncmp(token, TXTABLE_MAGIC, strlen(TXTABLE_MAGIC)) != 0)
+      if (token == NULL ||
+          strncmp(token, TXTABLE_MAGIC, strlen(TXTABLE_MAGIC)) != 0)
         {
           save_ptr = NULL;
           ret = -EFTYPE;
@@ -217,6 +221,6 @@ int parse_txtable_partition(FAR struct partition_state_s *state,
   handler(&part[j], arg);
 
 out:
-  kmm_free(part);
+  fs_heap_free(part);
   return ret;
 }

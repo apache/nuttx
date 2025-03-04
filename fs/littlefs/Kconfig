@@ -119,4 +119,72 @@ config FS_LITTLEFS_ATTR_MAX
 
 		Note: Many of tools to generate LITTLEFS images use 1022
 		for this by default.
+
+config FS_LITTLEFS_LOCAL_PATCHES
+	bool
+	depends on FS_LITTLEFS_VERSION = "v2.5.1"
+	default y
+	---help---
+		For the internal use to control the application of NuttX local
+		patches for LITTLEFS.
+		This is NOT expected to be tweaked directly by users.
+
+config FS_LITTLEFS_HAS_LFS_DEFINES
+	bool "Use LFS_DEFINES (available for littlefs >=2.10.0)"
+	depends on !FS_LITTLEFS_LOCAL_PATCHES
+	default y
+	---help---
+		Set this y if you are using littlefs versions which supports
+		LFS_DEFINES. (that is, 2.10.0 and later)
+		Otherwise, set this n.
+
+		See the littlefs 2.10.0 release notes about what LFS_DEFINES is.
+		https://github.com/littlefs-project/littlefs/releases/tag/v2.10.0
+
+config FS_LITTLEFS_ATTR_UPDATE
+	bool "LITTLEFS update attributes"
+	depends on FS_LITTLEFS_ATTR_MAX > 0
+	depends on FS_LITTLEFS_LOCAL_PATCHES
+	default y
+	---help---
+		Enable support for attributes when create a file.
+
+		CAVEAT: This feature is implemented with NuttX specific
+		modifications to LITTLEFS v2.5.1. The modifications might
+		not be compatible with other versions of LITTLEFS.
+
+config FS_LITTLEFS_GETPATH
+	bool "LITTLEFS FIOC_FILEPATH ioctl support"
+	depends on FS_LITTLEFS_LOCAL_PATCHES
+	default y
+	---help---
+		FIOC_FILEPATH ioctl support for LITTLEFS file system.
+
+		CAVEAT: This feature is implemented with NuttX specific
+		modifications to LITTLEFS v2.5.1. The modifications might
+		not be compatible with other versions of LITTLEFS.
+
+config FS_LITTLEFS_VERSION
+	string "LITTLEFS version to use"
+	default "v2.5.1"
+	---help---
+		The LITTLEFS version to use.
+
+config FS_LITTLEFS_MULTI_VERSION
+	bool "Support multiple on-disk versions"
+	default n
+	---help---
+		Enable LFS_MULTIVERSION for LITTLEFS file system
+
+config FS_LITTLEFS_DISK_VERSION
+	hex "LITTLEFS on-disk version"
+	default 0x0
+	depends on FS_LITTLEFS_MULTI_VERSION
+	---help---
+		The LITTLEFS disk version to use.
+
+		0 means to leave it to the default from the LITTLEFS.
+		0x00020000 means 2.0.
+		0x00020001 means 2.1.
+
 endif

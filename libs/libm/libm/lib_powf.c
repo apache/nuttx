@@ -1,10 +1,9 @@
 /****************************************************************************
  * libs/libm/libm/lib_powf.c
  *
- * This file is a part of NuttX:
- *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
- *   Ported by: Darcy Gong
+ * SPDX-License-Identifier: ISC
+ * SPDX-FileCopyrightText: Copyright (C) 2012 Gregory Nutt.
+ * SPDX-FileContributor: Ported by: Darcy Gong
  *
  * It derives from the Rhombus OS math library by Nick Johnson which has
  * a compatible, MIT-style license:
@@ -37,5 +36,21 @@
 
 float powf(float b, float e)
 {
-  return expf(e * logf(b));
+  if (b > 0.0f)
+    {
+      return expf(e * logf(b));
+    }
+  else if (b < 0.0f && e == (int)e)
+    {
+      if ((int)e % 2 == 0)
+        {
+          return expf(e * logf(fabsf(b)));
+        }
+      else
+        {
+          return -expf(e * logf(fabsf(b)));
+        }
+    }
+
+  return 0.0f;
 }

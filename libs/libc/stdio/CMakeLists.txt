@@ -1,6 +1,8 @@
 # ##############################################################################
 # libs/libc/stdio/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -37,6 +39,9 @@ set(SRCS
     lib_putchar.c
     lib_getchar.c
     lib_puts.c
+    lib_gets_s.c
+    lib_gets.c
+    lib_libdgets.c
     lib_sscanf.c
     lib_vsscanf.c
     lib_libvscanf.c
@@ -45,7 +50,9 @@ set(SRCS
     lib_tempnam.c
     lib_tmpnam.c
     lib_ultoa_invert.c
-    lib_putwchar.c)
+    lib_renameat.c
+    lib_putwchar.c
+    lib_libbsprintf.c)
 
 if(CONFIG_LIBC_FLOATINGPOINT)
   list(APPEND SRCS lib_dtoa_engine.c lib_dtoa_data.c)
@@ -72,8 +79,6 @@ if(CONFIG_FILE_STREAM)
     lib_getc.c
     lib_fgetc.c
     lib_fgets.c
-    lib_gets_s.c
-    lib_gets.c
     lib_libfgets.c
     lib_fwrite.c
     lib_libfwrite.c
@@ -101,11 +106,13 @@ if(CONFIG_FILE_STREAM)
     lib_setvbuf.c
     lib_libfilelock.c
     lib_libgetstreams.c
+    lib_setbuffer.c
     lib_fputwc.c
     lib_putwc.c
     lib_fputws.c
     lib_fopencookie.c
     lib_fmemopen.c
+    lib_open_memstream.c
     lib_fgetwc.c
     lib_getwc.c
     lib_ungetwc.c)

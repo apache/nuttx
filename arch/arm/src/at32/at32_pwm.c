@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/at32/at32_pwm.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -94,7 +96,7 @@
 
 #  define TIMCLK_TIM1      AT32_APB2_TIM1_CLKIN
 #  define TIMRCCEN_TIM1    AT32_CRM_APB2EN
-#  define TIMEN_TIM1       CRM_APB2EN_TMR1EN  
+#  define TIMEN_TIM1       CRM_APB2EN_TMR1EN
 #  define TIMRCCRST_TIM1   AT32_CRM_APB2RST
 #  define TIMRST_TIM1      CRM_APB2RST_TMR1RST
 

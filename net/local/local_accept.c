@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/local/local_accept.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -149,9 +151,9 @@ int local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 
           /* Return the address family */
 
-          if (addr != NULL)
+          if (addr != NULL && conn->lc_peer != NULL)
             {
-              ret = local_getaddr(conn, addr, addrlen);
+              ret = local_getaddr(conn->lc_peer, addr, addrlen);
             }
 
           if (ret == OK && nonblock)

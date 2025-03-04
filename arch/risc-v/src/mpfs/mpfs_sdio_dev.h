@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/mpfs/mpfs_sdio_dev.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -42,6 +44,9 @@ struct mpfs_dev_s
 
   const uintptr_t hw_base; /* Base address */
   const int plic_irq;      /* PLIC interrupt */
+#ifdef CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE
+  const int wrcomplete_irq; /* Card write complete interrupt */
+#endif
   bool clk_enabled;        /* Clk state */
 
   /* eMMC / SD and HW parameters */

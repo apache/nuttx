@@ -165,6 +165,15 @@ config BLUETOOTH_BUFFER_IRQRESERVE
 		interrupt level.  This setting only needs to be non-zero if your
 		low-level Bluetooth driver needs to do such allocations.
 
+config BLUETOOTH_CNTRL_HOST_FLOW_DISABLE
+	bool "Disable Controller to Host Flow Control"
+	default n
+	---help---
+		Controller to Host Flow Control prevents buffer overflow
+		between the Controller and the Host layers. When enabled, the Controller can
+		indicate to the Host when its buffers are nearly full, allowing the Host to
+		stop sending data until buffer space becomes available.
+
 menu "Kernel Thread Configuration"
 
 config BLUETOOTH_TXCMD_STACKSIZE

@@ -1,0 +1,74 @@
+From ccedce5807709d184a9fe89529e611a556f0bf23 Mon Sep 17 00:00:00 2001
+From: ligd <liguiding1@xiaomi.com>
+Date: Tue, 19 Oct 2021 19:45:14 +0800
+Subject: [PATCH 03/14] rpmsg: notify the user when the remote address is
+ received
+
+Signed-off-by: ligd <liguiding1@xiaomi.com>
+Signed-off-by: wangyongrong <wangyongrong@xiaomi.com>
+---
+ lib/include/openamp/rpmsg.h |  4 ++++
+ lib/rpmsg/rpmsg_virtio.c    | 17 ++++++++++++++---
+ 2 files changed, 18 insertions(+), 3 deletions(-)
+
+diff --git a/lib/include/openamp/rpmsg.h open-amp/lib/include/openamp/rpmsg.h
+index b2a9b17..bb1c160 100644
+--- a/lib/include/openamp/rpmsg.h
++++ open-amp/lib/include/openamp/rpmsg.h
+@@ -52,6 +52,7 @@ struct rpmsg_device;
+ typedef int (*rpmsg_ept_cb)(struct rpmsg_endpoint *ept, void *data,
+ 			    size_t len, uint32_t src, void *priv);
+ typedef void (*rpmsg_ept_release_cb)(struct rpmsg_endpoint *ept);
++typedef void (*rpmsg_ns_bound_cb)(struct rpmsg_endpoint *ept);
+ typedef void (*rpmsg_ns_unbind_cb)(struct rpmsg_endpoint *ept);
+ typedef void (*rpmsg_ns_bind_cb)(struct rpmsg_device *rdev,
+ 				 const char *name, uint32_t dest);
+@@ -87,6 +88,9 @@ struct rpmsg_endpoint {
+ 	 */
+ 	rpmsg_ept_cb cb;
+ 
++	/** Endpoint service bound callback, called when remote ept address is received */
++	rpmsg_ns_bound_cb ns_bound_cb;
++
+ 	/** Endpoint service unbind callback, called when remote ept is destroyed */
+ 	rpmsg_ns_unbind_cb ns_unbind_cb;
+ 
+diff --git a/lib/rpmsg/rpmsg_virtio.c open-amp/lib/rpmsg/rpmsg_virtio.c
+index 94c4b95..ad9a730 100644
+--- a/lib/rpmsg/rpmsg_virtio.c
++++ open-amp/lib/rpmsg/rpmsg_virtio.c
+@@ -683,17 +683,28 @@ static int rpmsg_virtio_ns_callback(struct rpmsg_endpoint *ept, void *data,
+ 			metal_mutex_release(&rdev->lock);
+ 			if (rdev->ns_bind_cb)
+ 				rdev->ns_bind_cb(rdev, name, dest);
+-		} else {
++		} else if (_ept->dest_addr == RPMSG_ADDR_ANY) {
+ 			_ept->dest_addr = dest;
+ 			metal_mutex_release(&rdev->lock);
+ 			if (_ept->name[0] && rdev->support_ack)
+ 				rpmsg_send_ns_message(_ept, RPMSG_NS_CREATE_ACK);
++			/* notify application that the endpoint has been bound */
++			if (_ept->ns_bound_cb)
++				_ept->ns_bound_cb(_ept);
+ 		}
++		else
++			metal_mutex_release(&rdev->lock);
+ 	} else { /* RPMSG_NS_CREATE_ACK */
+ 		/* save the received destination address */
+-		if (_ept)
++		if (_ept && _ept->dest_addr == RPMSG_ADDR_ANY) {
+ 			_ept->dest_addr = dest;
+-		metal_mutex_release(&rdev->lock);
++			metal_mutex_release(&rdev->lock);
++			/* notify application that the endpoint has been bound */
++			if (_ept->ns_bound_cb)
++				_ept->ns_bound_cb(_ept);
++		}
++		else
++			metal_mutex_release(&rdev->lock);
+ 	}
+ 
+ 	return RPMSG_SUCCESS;
+-- 
+2.34.1
+

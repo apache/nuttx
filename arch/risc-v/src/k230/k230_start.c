@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/k230/k230_start.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -191,10 +193,7 @@ void riscv_serialinit(void)
 }
 
 #ifdef CONFIG_RPMSG_UART_CONSOLE
-int up_putc(int ch)
+void up_putc(int ch)
 {
-  /* place holder for now */
-
-  return ch;
 }
 #endif

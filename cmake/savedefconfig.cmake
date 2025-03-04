@@ -1,6 +1,8 @@
 # ##############################################################################
 # cmake/savedefconfig.cmake
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -68,5 +70,8 @@ foreach(LINE IN LISTS LINES)
   decode_semicolon(LINE)
   file(APPEND ${OUTPUT_FILE} "${LINE}\n")
 endforeach()
+
+# Converts the newline style for the output file.
+configure_file(${OUTPUT_FILE} ${OUTPUT_FILE} @ONLY NEWLINE_STYLE LF)
 
 execute_process(COMMAND ${CMAKE_COMMAND} -E remove ${TARGET_FILE})

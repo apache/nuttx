@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/clock/clock.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -31,6 +33,7 @@
 
 #include <nuttx/clock.h>
 #include <nuttx/compiler.h>
+#include <nuttx/spinlock_type.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -54,7 +57,7 @@
  * Public Data
  ****************************************************************************/
 
-#if !defined(CONFIG_SCHED_TICKLESS) && !defined(__HAVE_KERNEL_GLOBALS)
+#if !defined(__HAVE_KERNEL_GLOBALS)
   /* The system clock exists (CONFIG_SCHED_TICKLESS), but it not prototyped
    * globally in include/nuttx/clock.h.
    */
@@ -64,6 +67,7 @@ extern volatile clock_t g_system_ticks;
 
 #ifndef CONFIG_CLOCK_TIMEKEEPING
 extern struct timespec  g_basetime;
+extern spinlock_t g_basetime_lock;
 #endif
 
 /****************************************************************************
@@ -73,20 +77,21 @@ extern struct timespec  g_basetime;
 int  clock_basetime(FAR struct timespec *tp);
 
 void clock_initialize(void);
-#ifndef CONFIG_SCHED_TICKLESS
+#if !defined(CONFIG_SCHED_TICKLESS) && \
+    !defined(CONFIG_ALARM_ARCH) && !defined(CONFIG_TIMER_ARCH)
 void clock_timer(void);
 #else
 #  define clock_timer()
 #endif
-
-int  clock_abstime2ticks(clockid_t clockid,
-                         FAR const struct timespec *abstime,
-                         FAR sclock_t *ticks);
 
 /****************************************************************************
  * perf_init
  ****************************************************************************/
 
 void perf_init(void);
+
+#ifdef CONFIG_SCHED_CPULOAD_SYSCLK
+void cpuload_init(void);
+#endif
 
 #endif /* __SCHED_CLOCK_CLOCK_H */

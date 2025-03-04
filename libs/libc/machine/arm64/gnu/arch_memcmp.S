@@ -1,8 +1,8 @@
 /****************************************************************************
  * libs/libc/machine/arm64/gnu/arch_memcmp.S
  *
- * Copyright (c) 2018 Linaro Limited
- *  All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2018 Linaro Limited, 2017 ARM Ltd
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -94,7 +94,7 @@
 \f:
         .endm
 
-def_fn memcmp p2align=6
+def_fn ARCH_LIBCFUN(memcmp) p2align=6
 	subs	limit, limit, 8
 	b.lo	L(less8)
 
@@ -197,6 +197,6 @@ L(byte_loop):
 	sub	result, data1w, data2w
 	ret
 
-	.size	memcmp, . - memcmp
+	.size	ARCH_LIBCFUN(memcmp), . - ARCH_LIBCFUN(memcmp)
 
 #endif

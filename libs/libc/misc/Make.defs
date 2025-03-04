@@ -1,6 +1,8 @@
 ############################################################################
 # libs/libc/misc/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -20,12 +22,16 @@
 
 # Add the internal C files to the build
 
-CSRCS += lib_mknod.c lib_umask.c lib_utsname.c lib_getrandom.c
-CSRCS += lib_xorshift128.c lib_tea_encrypt.c lib_tea_decrypt.c
+CSRCS += lib_bitmap.c lib_circbuf.c lib_mknod.c lib_umask.c lib_utsname.c
+CSRCS += lib_getrandom.c lib_xorshift128.c lib_tea_encrypt.c lib_tea_decrypt.c
 CSRCS += lib_cxx_initialize.c lib_impure.c lib_memfd.c lib_mutex.c
 CSRCS += lib_fchmodat.c lib_fstatat.c lib_getfullpath.c lib_openat.c
-CSRCS += lib_mkdirat.c lib_utimensat.c lib_mallopt.c lib_memoryregion.c
-CSRCS += lib_idr.c lib_getnprocs.c lib_pathbuffer.c
+CSRCS += lib_mkdirat.c lib_utimensat.c lib_mallopt.c
+CSRCS += lib_idr.c lib_getnprocs.c
+
+ifeq ($(CONFIG_LIBC_TEMPBUFFER),y)
+CSRCS += lib_tempbuffer.c
+endif
 
 # Support for platforms that do not have long long types
 
@@ -40,12 +46,8 @@ endif
 
 CSRCS += lib_dumpbuffer.c lib_dumpvbuffer.c lib_fnmatch.c lib_debug.c
 CSRCS += lib_crc64.c lib_crc32.c lib_crc16.c lib_crc16ccitt.c lib_crc8.c
-CSRCS += lib_crc8ccitt.c lib_crc8table.c lib_glob.c lib_execinfo.c
-CSRCS += lib_ftok.c lib_err.c lib_instrument.c
-
-# Add generic integer math functions
-
-CSRCS += lib_log2ceil.c lib_log2floor.c
+CSRCS += lib_crc8ccitt.c lib_crc8table.c lib_crc8rohc.c lib_glob.c
+CSRCS += lib_backtrace.c lib_ftok.c lib_err.c lib_instrument.c
 
 # Keyboard driver encoder/decoder
 

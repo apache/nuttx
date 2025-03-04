@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/ipcc/ipcc_write.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -90,11 +92,10 @@ void ipcc_txfree_notify(FAR struct ipcc_driver_s *priv)
 
   /* Notify all blocked writers that data is available to write */
 
-  do
+  while (nxsem_get_value(&priv->txsem, &semval) >= 0 && semval <= 0)
     {
       nxsem_post(&priv->txsem);
     }
-  while (nxsem_get_value(&priv->txsem, &semval) == 0 && semval <= 0);
 }
 
 /****************************************************************************

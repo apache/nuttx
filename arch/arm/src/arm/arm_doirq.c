@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/arm/arm_doirq.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -58,19 +60,20 @@
 
 uint32_t *arm_doirq(int irq, uint32_t *regs)
 {
+  struct tcb_s *tcb = this_task();
+
   board_autoled_on(LED_INIRQ);
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   PANIC();
 #else
   /* Nested interrupts are not supported */
 
-  DEBUGASSERT(CURRENT_REGS == NULL);
+  DEBUGASSERT(!up_interrupt_context());
 
-  /* Current regs non-zero indicates that we are processing an interrupt;
-   * CURRENT_REGS is also used to manage interrupt level context switches.
-   */
+  /* Set irq flag */
 
-  CURRENT_REGS = regs;
+  up_set_interrupt_context(true);
+  tcb->xcp.regs = regs;
 
   /* Acknowledge the interrupt */
 
@@ -79,15 +82,11 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
   /* Deliver the IRQ */
 
   irq_dispatch(irq, regs);
+  tcb = this_task();
 
-  /* Check for a context switch.  If a context switch occurred, then
-   * CURRENT_REGS will have a different value than it did on entry.  If an
-   * interrupt level context switch has occurred, then restore the floating
-   * point state and the establish the correct address environment before
-   * returning from the interrupt.
-   */
+  /* Check for a context switch. */
 
-  if (regs != CURRENT_REGS)
+  if (regs != tcb->xcp.regs)
     {
 #ifdef CONFIG_ARCH_ADDRENV
       /* Make sure that the address environment for the previously
@@ -96,24 +95,27 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
        * thread at the head of the ready-to-run list.
        */
 
-      addrenv_switch(NULL);
+      addrenv_switch(tcb);
 #endif
+
+      /* Update scheduler parameters */
+
+      nxsched_suspend_scheduler(g_running_tasks[this_cpu()]);
+      nxsched_resume_scheduler(tcb);
 
       /* Record the new "running" task when context switch occurred.
        * g_running_tasks[] is only used by assertion logic for reporting
        * crashes.
        */
 
-      g_running_tasks[this_cpu()] = this_task();
+      g_running_tasks[this_cpu()] = tcb;
 
-      regs = (uint32_t *)CURRENT_REGS;
+      regs = tcb->xcp.regs;
     }
 
-  /* Set CURRENT_REGS to NULL to indicate that we are no longer in an
-   * interrupt handler.
-   */
+  /* Set irq flag */
 
-  CURRENT_REGS = NULL;
+  up_set_interrupt_context(false);
 #endif
   board_autoled_off(LED_INIRQ);
   return regs;

@@ -1,8 +1,8 @@
 /****************************************************************************
  * libs/libc/machine/arm64/gnu/arch_strchrnul.S
  *
- * Copyright (c) 2014, ARM Limited
- *  All rights Reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2014, ARM Limited, All rights Reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -80,7 +80,7 @@
 \f:
 	.endm
 
-def_fn strchrnul
+def_fn ARCH_LIBCFUN(strchrnul)
 	/* Magic constant 0x40100401 to allow us to identify which lane
 	   matches the termination condition.  */
 	mov	wtmp2, #0x0401
@@ -147,6 +147,6 @@ def_fn strchrnul
 	add	result, src, tmp1, lsr #1
 	ret
 
-	.size	strchrnul, . - strchrnul
+	.size	ARCH_LIBCFUN(strchrnul), . - ARCH_LIBCFUN(strchrnul)
 
 #endif

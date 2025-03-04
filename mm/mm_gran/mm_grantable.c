@@ -1,6 +1,8 @@
 /****************************************************************************
  * mm/mm_gran/mm_grantable.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -172,7 +174,10 @@ bool gran_match(const gran_t *gran, size_t posi, size_t size, bool used,
   uint32_t e;   /* expected cell value */
   gatr_t   r;   /* range helper */
 
-  gran_range(gran, posi, size, &r);
+  if (gran_range(gran, posi, size, &r) < 0)
+    {
+      memset(&r, 0, sizeof(r));
+    }
 
   /* check the ending cell */
 
@@ -218,17 +223,33 @@ failure:
 
   if (mpos && !used)
     {
-      /* offset of last used when matching for free */
+      size_t tmp;
 
+      v = gran->gat[c];
       DEBUGASSERT(v);
+
+      if (v == GATCFULL)
+        {
+          /* Handle full GAT quickly */
+
+          tmp = 31;
+        }
+      else
+        {
+          /* offset of last used when matching for free */
+
 #ifdef CONFIG_HAVE_BUILTIN_CLZ
-      *mpos = 31 - __builtin_clz(v);
+          tmp = 31 - __builtin_clz(v);
 #else
-      *mpos = (uint32_t)((msb_mask(v)) * DEBRUJIN_NUM) >> 27;
-      DEBUGASSERT(*mpos < sizeof(DEBRUJIN_LUT));
-      *mpos = DEBRUJIN_LUT[*mpos];
+          tmp = (uint32_t)((msb_mask(v)) * DEBRUJIN_NUM) >> 27;
+          DEBUGASSERT(tmp < sizeof(DEBRUJIN_LUT));
+          tmp = DEBRUJIN_LUT[tmp];
 #endif
-      *mpos += c * GATC_BITS(gran);
+        }
+
+      /* return the last used position to caller */
+
+      *mpos = tmp + c * GATC_BITS(gran);
     }
 
   return false;

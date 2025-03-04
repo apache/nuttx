@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/usbdev/usbdev_desc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -137,7 +139,9 @@ int usbdev_copy_epdesc(FAR struct usb_epdesc_s *epdesc,
   int len = sizeof(struct usb_epdesc_s);
 
 #ifdef CONFIG_USBDEV_SUPERSPEED
-  if (speed == USB_SPEED_SUPER || speed == USB_SPEED_SUPER_PLUS)
+  if (speed == USB_SPEED_SUPER ||
+      speed == USB_SPEED_SUPER_PLUS ||
+      speed == USB_SPEED_UNKNOWN)
     {
       len += sizeof(struct usb_ss_epcompdesc_s);
     }

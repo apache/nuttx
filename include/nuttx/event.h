@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/event.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -61,6 +63,17 @@ struct nxevent_s
   struct list_node         list;    /* Waiting list of nxevent_wait_t */
   volatile nxevent_mask_t  events;  /* Pending Events */
 };
+
+#ifdef CONFIG_FS_NAMED_EVENTS
+/* This is the named event inode */
+
+struct inode;
+struct nevent_inode_s
+{
+  nxevent_t         ne_event;
+  FAR struct inode *ne_inode;
+};
+#endif
 
 /****************************************************************************
  * Public Data
@@ -249,6 +262,70 @@ nxevent_mask_t nxevent_tickwait(FAR nxevent_t *event, nxevent_mask_t events,
 
 nxevent_mask_t nxevent_trywait(FAR nxevent_t *event, nxevent_mask_t events,
                                nxevent_flags_t eflags);
+
+/****************************************************************************
+ * Name: nxevent_open
+ *
+ * Description:
+ *   This function establishes a connection between named event groups and a
+ *   task. the task may reference the event group associated with name using
+ *   the address returned by this call. The event group may be used in a
+ *   subsequent calls to nxevent_wait(), or nxevent_post(). And the event
+ *   group remains usable until the event group is closed by a successful
+ *   call to nxevent_close().
+ *
+ *   If a task makes multiple calls to event_open() with the same name, then
+ *   the same event group address is returned.
+ *
+ * Input Parameters:
+ *   event  - Location to return the event group reference.
+ *   name   - event group name.
+ *   oflags - event group creation options.  This may either or both of the
+ *     following bit settings.
+ *     oflags = 0:  Connect to the event group only if it already exists.
+ *     oflags = O_CREAT:  Connect to the event group if it exists, otherwise
+ *        create the event group.
+ *     oflags = O_CREAT|O_EXCL:  Create a new event group unless
+ *        already exists.
+ *   Optional parameters.  When the O_CREAT flag is specified, two optional
+ *     parameters are expected:
+ *     1. mode_t mode, is required but not used in the present
+ *     implementation.
+ *     2. unsigned events. The event group is created with an initial
+ *     value of events.
+ *
+ * Returned Value:
+ *   0 (OK), or negated errno if unsuccessful.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+int nxevent_open(FAR nxevent_t **event, FAR const char *name,
+                 int oflags, ...);
+
+/****************************************************************************
+ * Name:  nxevent_close
+ *
+ * Description:
+ *   This function is called to indicate that the calling task is finished
+ *   with the specified named event group. The event_close() deallocates
+ *   any system resources allocated by the system for this named event.
+ *
+ * Input Parameters:
+ *  event - event descriptor
+ *
+ * Returned Value:
+ *  0 (OK), or negated errno if unsuccessful.
+ *
+ * Assumptions:
+ *   - Care must be taken to avoid risking the deletion of a event that
+ *     another calling task has already locked.
+ *   - event_close must not be called for an un-named event
+ *
+ ****************************************************************************/
+
+int nxevent_close(FAR nxevent_t *event);
 
 #undef EXTERN
 #ifdef __cplusplus

@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/procfs/fs_procfstcbinfo.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -36,9 +38,13 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/sched.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/procfs.h>
+
+#include "fs_heap.h"
+#include "sched/sched.h"
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_FS_PROCFS) && \
     defined(CONFIG_ARCH_HAVE_TCBINFO) && !defined(CONFIG_FS_PROCFS_EXCLUDE_TCBINFO)
@@ -140,7 +146,7 @@ static int tcbinfo_open(FAR struct file *filep, FAR const char *relpath,
   /* Allocate a container to hold the file attributes */
 
   attr = (FAR struct tcbinfo_file_s *)
-    kmm_zalloc(sizeof(struct tcbinfo_file_s));
+    fs_heap_zalloc(sizeof(struct tcbinfo_file_s));
 
   if (attr == NULL)
     {
@@ -169,9 +175,23 @@ static int tcbinfo_close(FAR struct file *filep)
 
   /* Release the file attributes structure */
 
-  kmm_free(attr);
+  fs_heap_free(attr);
   filep->f_priv = NULL;
   return OK;
+}
+
+/****************************************************************************
+ * Name: tcbinfo_running_regs
+ *
+ * Description:
+ *   A special version of running_regs() that is non-optimized.
+ *
+ ****************************************************************************/
+
+nooptimiziation_function
+FAR static void *tcbinfo_running_regs(void)
+{
+  return running_regs();
 }
 
 /****************************************************************************
@@ -196,8 +216,9 @@ static ssize_t tcbinfo_read(FAR struct file *filep, FAR char *buffer,
   if (filep->f_pos == 0)
     {
       linesize = procfs_snprintf(attr->line, TCBINFO_LINELEN,
-                                 "pointer %p size %zu\n", &g_tcbinfo,
-                                  sizeof(struct tcbinfo_s));
+                                 "pointer %p size %zu current regs %p\n",
+                                 &g_tcbinfo, sizeof(struct tcbinfo_s),
+                                 tcbinfo_running_regs());
 
       /* Save the linesize in case we are re-entered with f_pos > 0 */
 
@@ -240,7 +261,7 @@ static int tcbinfo_dup(FAR const struct file *oldp, FAR struct file *newp)
   /* Allocate a new container to hold the task and attribute selection */
 
   newattr = (FAR struct tcbinfo_file_s *)
-    kmm_malloc(sizeof(struct tcbinfo_file_s));
+    fs_heap_malloc(sizeof(struct tcbinfo_file_s));
 
   if (!newattr)
     {

@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/inode/fs_inodeaddref.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -41,19 +43,10 @@
  *
  ****************************************************************************/
 
-int inode_addref(FAR struct inode *inode)
+void inode_addref(FAR struct inode *inode)
 {
-  int ret = OK;
-
   if (inode)
     {
-      ret = inode_lock();
-      if (ret >= 0)
-        {
-          inode->i_crefs++;
-          inode_unlock();
-        }
+      atomic_fetch_add(&inode->i_crefs, 1);
     }
-
-  return ret;
 }

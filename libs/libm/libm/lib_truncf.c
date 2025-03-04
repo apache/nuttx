@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libm/libm/lib_truncf.c
  *
+ * SPDX-License-Identifier: MIT
+ *
  * This implementation is derived from the musl library under the MIT License
  *
  * Copyright © 2005-2014 Rich Felker, et al.

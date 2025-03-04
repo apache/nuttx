@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/stm32f401rc-rs485/src/stm32_bringup.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -77,6 +79,14 @@
 
 #ifdef CONFIG_SENSORS_BMP280
 #include "stm32_bmp280.h"
+#endif
+
+#ifdef CONFIG_LCD_BACKPACK
+#include "stm32_lcd_backpack.h"
+#endif
+
+#ifdef CONFIG_WS2812
+#include "stm32_ws2812.h"
 #endif
 
 /****************************************************************************
@@ -310,6 +320,27 @@ int stm32_bringup(void)
     {
       syslog(LOG_ERR, "Failed to initialize BMP280, error %d\n", ret);
       return ret;
+    }
+#endif
+
+#ifdef CONFIG_LCD_BACKPACK
+  /* slcd:0, i2c:1, rows=2, cols=16 */
+
+  ret = board_lcd_backpack_init(0, 1, 2, 16);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize PCF8574 LCD, error %d\n", ret);
+      return ret;
+    }
+#endif
+
+#if defined(CONFIG_WS2812) && defined(CONFIG_WS2812_LED_COUNT)
+  /* Configure and initialize the WS2812 LEDs. */
+
+  ret = board_ws2812_initialize(0, WS2812_SPI, CONFIG_WS2812_LED_COUNT);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_ws2812_initialize() failed: %d\n", ret);
     }
 #endif
 

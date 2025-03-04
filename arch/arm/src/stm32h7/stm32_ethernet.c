@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32h7/stm32_ethernet.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -35,6 +37,7 @@
 
 #include <sys/param.h>
 
+#include <arch/barriers.h>
 #include <arpa/inet.h>
 
 #include <nuttx/arch.h>
@@ -54,7 +57,6 @@
 
 #include <nuttx/cache.h>
 #include "arm_internal.h"
-#include "barriers.h"
 
 #include "hardware/stm32_syscfg.h"
 #include "hardware/stm32_pinmap.h"
@@ -75,10 +77,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-/* Memory synchronization */
-
-#define MEMORY_SYNC() do { ARM_DSB(); ARM_ISB(); } while (0)
 
 /* Configuration ************************************************************/
 
@@ -107,6 +105,64 @@
 #  else
 #    define ETHWORK LPWORK
 #  endif
+#endif
+
+#if defined(CONFIG_ETH0_PHY_AM79C874)
+#  define STM32H7_PHYID1       MII_PHYID1_AM79C874
+#  define STM32H7_PHYID2       MII_PHYID2_AM79C874
+#elif defined(CONFIG_ETH0_PHY_AR8031)
+#  define STM32H7_PHYID1       MII_PHYID1_AR8031
+#  define STM32H7_PHYID2       MII_PHYID2_AR8031
+#elif defined(CONFIG_ETH0_PHY_KS8721)
+#  define STM32H7_PHYID1       MII_PHYID1_KS8721
+#  define STM32H7_PHYID2       MII_PHYID2_KS8721
+#elif defined(CONFIG_ETH0_PHY_KSZ8041)
+#  define STM32H7_PHYID1       MII_PHYID1_KSZ8041
+#  define STM32H7_PHYID2       MII_PHYID2_KSZ8041
+#elif defined(CONFIG_ETH0_PHY_KSZ8051)
+#  define STM32H7_PHYID1       MII_PHYID1_KSZ8051
+#  define STM32H7_PHYID2       MII_PHYID2_KSZ8051
+#elif defined(CONFIG_ETH0_PHY_KSZ8061)
+#  define STM32H7_PHYID1       MII_PHYID1_KSZ8061
+#  define STM32H7_PHYID2       MII_PHYID2_KSZ8061
+#elif defined(CONFIG_ETH0_PHY_KSZ8081)
+#  define STM32H7_PHYID1       MII_PHYID1_KSZ8081
+#  define STM32H7_PHYID2       MII_PHYID2_KSZ8081
+#elif defined(CONFIG_ETH0_PHY_DP83848C)
+#  define STM32H7_PHYID1       MII_PHYID1_DP83848C
+#  define STM32H7_PHYID2       MII_PHYID2_DP83848C
+#elif defined(CONFIG_ETH0_PHY_DP83825I)
+#  define STM32H7_PHYID1       MII_PHYID1_DP83825I
+#  define STM32H7_PHYID2       MII_PHYID2_DP83825I
+#elif defined(CONFIG_ETH0_PHY_TJA1100)
+#  define STM32H7_PHYID1       MII_PHYID1_TJA1100
+#  define STM32H7_PHYID2       MII_PHYID2_TJA1100
+#elif defined(CONFIG_ETH0_PHY_TJA1101)
+#  define STM32H7_PHYID1       MII_PHYID1_TJA1101
+#  define STM32H7_PHYID2       MII_PHYID2_TJA1101
+#elif defined(CONFIG_ETH0_PHY_TJA1103)
+#  define STM32H7_PHYID1       MII_PHYID1_TJA1103
+#  define STM32H7_PHYID2       MII_PHYID2_TJA1103
+#elif defined(CONFIG_ETH0_PHY_LAN8720)
+#  define STM32H7_PHYID1       MII_PHYID1_LAN8720
+#  define STM32H7_PHYID2       MII_PHYID2_LAN8720
+#elif defined(CONFIG_ETH0_PHY_LAN8740)
+#  define STM32H7_PHYID1       MII_PHYID1_LAN8740
+#  define STM32H7_PHYID2       MII_PHYID2_LAN8740
+#elif defined(CONFIG_ETH0_PHY_LAN8740A)
+#  define STM32H7_PHYID1       MII_PHYID1_LAN8740A
+#  define STM32H7_PHYID2       MII_PHYID2_LAN8740A
+#elif defined(CONFIG_ETH0_PHY_LAN8742A)
+#  define STM32H7_PHYID1       MII_PHYID1_LAN8742A
+#  define STM32H7_PHYID2       MII_PHYID2_LAN8742A
+#elif defined(CONFIG_ETH0_PHY_DM9161)
+#  define STM32H7_PHYID1       MII_PHYID1_DM9161
+#  define STM32H7_PHYID2       MII_PHYID2_DM9161
+#elif defined(CONFIG_ETH0_PHY_YT8512)
+#  define STM32H7_PHYID1       MII_PHYID1_YT8512
+#  define STM32H7_PHYID2       MII_PHYID2_YT8512
+#else
+#  warning "No PHY specified!"
 #endif
 
 #ifndef CONFIG_STM32H7_PHYADDR
@@ -1266,7 +1322,7 @@ static int stm32_transmit(struct stm32_ethmac_s *priv)
       stm32_disableint(priv, ETH_DMACIER_RIE);
     }
 
-  MEMORY_SYNC();
+  UP_MB();
 
   /* Enable TX interrupts */
 
@@ -3336,7 +3392,10 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
     {
       up_mdelay(10);
       to -= 10;
+      phyval = 0xffff;
       ret = stm32_phyread(CONFIG_STM32H7_PHYADDR, MII_MCR, &phyval);
+
+      ninfo("MII_MCR: phyval: %u ret: %d\n", phyval, ret);
     }
   while (phyval & MII_MCR_RESET && to > 0);
 
@@ -3349,6 +3408,40 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
     {
       ninfo("Phy reset in %d ms\n", PHY_RESET_DELAY - to);
     }
+
+  ret = stm32_phyread(CONFIG_STM32H7_PHYADDR, MII_PHYID1, &phyval);
+
+  if (ret < 0)
+    {
+      nerr("ERROR: Failed to read PHYID1: %d\n", ret);
+      return ret;
+    }
+
+  if (phyval != STM32H7_PHYID1)
+    {
+      nerr("ERROR: Incorrect PHYID1: %u expected: %u\n",
+            phyval, STM32H7_PHYID1);
+      return -ENXIO;
+    }
+
+  ninfo("MII_PHYID1: phyval: %u ret: %d\n", phyval, ret);
+
+  ret = stm32_phyread(CONFIG_STM32H7_PHYADDR, MII_PHYID2, &phyval);
+
+  if (ret < 0)
+    {
+      nerr("ERROR: Failed to read PHYID2: %d\n", ret);
+      return ret;
+    }
+
+  if ((phyval & 0xfff0) != (STM32H7_PHYID2 & 0xfff0))
+    {
+      nerr("ERROR: Incorrect PHYID2: %u expected: %u\n",
+            phyval, STM32H7_PHYID2);
+      return -ENXIO;
+    }
+
+  ninfo("MII_PHYID2: phyval: %u ret: %d\n", phyval, ret);
 
 #ifdef CONFIG_STM32H7_ETHMAC_REGDEBUG
   stm32_phyregdump();
@@ -3379,6 +3472,7 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
         }
       else if ((phyval & MII_MSR_LINKSTATUS) != 0)
         {
+          ninfo("MII_MSR: phyval: %u ret: %d \n", phyval, ret);
           break;
         }
 

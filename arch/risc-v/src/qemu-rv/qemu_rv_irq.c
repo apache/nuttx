@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/qemu-rv/qemu_rv_irq.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -279,7 +281,7 @@ void up_enable_irq(int irq)
 #else
           riscv_aplic_configure_irq(QEMU_RV_APLIC_BASE, extirq,
                                     RISCV_APLIC_SOURCECFG_SM_EDGE_RISE,
-                                    riscv_mhartid());
+                                    up_cpu_index());
 #ifdef CONFIG_ARCH_RV_HAVE_IMSIC
           riscv_imsic_local_eie_enable(extirq);
 #endif

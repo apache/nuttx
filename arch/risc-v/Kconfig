@@ -89,6 +89,7 @@ config ARCH_CHIP_ESP32C3
 	select ARCH_HAVE_BOOTLOADER
 	select ARCH_HAVE_PERF_EVENTS
 	select ARCH_HAVE_DEBUG
+	select ARCH_HAVE_RAMFUNCS
 	---help---
 		Espressif ESP32-C3 (RV32IMC).
 
@@ -103,7 +104,6 @@ config ARCH_CHIP_ESP32C3_GENERIC
 	select ARCH_HAVE_RESET
 	select ARCH_HAVE_RNG
 	select ARCH_HAVE_TICKLESS
-	select LIBC_ARCH_ATOMIC
 	select LIBC_ARCH_MEMCPY
 	select LIBC_ARCH_MEMCHR
 	select LIBC_ARCH_MEMCMP
@@ -119,6 +119,7 @@ config ARCH_CHIP_ESP32C3_GENERIC
 	select ESPRESSIF_SOC_RTC_MEM_SUPPORTED
 	select ARCH_CHIP_ESPRESSIF
 	select ARCH_HAVE_DEBUG
+	select ARCH_HAVE_RAMFUNCS
 	---help---
 		ESP32-C3 chip with a single RISC-V IMC core, no embedded Flash memory
 
@@ -148,6 +149,7 @@ config ARCH_CHIP_ESP32C6
 	select LIBC_ARCH_STRNLEN
 	select ESPRESSIF_SOC_RTC_MEM_SUPPORTED
 	select ARCH_CHIP_ESPRESSIF
+	select ARCH_HAVE_RAMFUNCS
 	---help---
 		Espressif ESP32-C6 (RV32IMAC).
 
@@ -162,7 +164,6 @@ config ARCH_CHIP_ESP32H2
 	select ARCH_HAVE_RESET
 	select ARCH_HAVE_RNG
 	select ARCH_HAVE_TICKLESS
-	select LIBC_ARCH_ATOMIC
 	select LIBC_ARCH_MEMCPY
 	select LIBC_ARCH_MEMCHR
 	select LIBC_ARCH_MEMCMP
@@ -178,6 +179,7 @@ config ARCH_CHIP_ESP32H2
 	select ESPRESSIF_ESPTOOLPY_NO_STUB
 	select ESPRESSIF_SOC_RTC_MEM_SUPPORTED
 	select ARCH_CHIP_ESPRESSIF
+	select ARCH_HAVE_RAMFUNCS
 	---help---
 		Espressif ESP32-H2 (RV32IMC).
 
@@ -203,6 +205,7 @@ config ARCH_CHIP_MPFS
 	select ARCH_RV_ISA_C
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_DPFPU
+	select ARCH_HAVE_MULTICPU
 	select ARCH_HAVE_MPU
 	select ARCH_MMU_TYPE_SV39
 	select ARCH_HAVE_ADDRENV
@@ -211,6 +214,7 @@ config ARCH_CHIP_MPFS
 	select ARCH_HAVE_SPI_CS_CONTROL
 	select ARCH_HAVE_PWM_MULTICHAN
 	select ARCH_HAVE_S_MODE
+	select ARCH_RV_CPUID_MAP
 	select ONESHOT
 	select ALARM_ARCH
 	---help---
@@ -403,8 +407,16 @@ config ARCH_RV_VECTOR_BYTE_LENGTH
 
 endif
 
+config ARCH_RV_MACHINE_ISA_1_13
+	bool "Machine ISA Version 1.13 or later"
+	default n
+	---help---
+		Indicates support for Machine ISA Version 1.13 or later.
+		This version defined hardware error and software check exception codes,
+		which extend the range of exception codes from 0 ~ 15 to 0 ~ 19.
+
 config ARCH_RV_ISA_ZICSR_ZIFENCEI
-	bool
+	bool "Enable Zicsr and Zifencei extensions (GCC >= 12.1.0.)"
 	default y
 	---help---
 		https://sourceware.org/git/?p=binutils-gdb.git;a=commit;h=aed44286efa8ae8717a77d94b51ac3614e2ca6dc
@@ -452,19 +464,50 @@ config ARCH_RV_MMIO_BITS
 	default 32 if ARCH_RV32
 	default 64 if ARCH_RV64
 
+config ARCH_RV_CPUID_MAP
+	bool "Enable CPUID mapping"
+	default n
+	---help---
+		Enable CPUID mapping for systems where the hardware CPU IDs
+		need to be mapped to logical CPU IDs. This is useful for
+		systems with non-contiguous or non-linear CPU numbering.
+
 config ARCH_RV_HARTID_BASE
 	int "Base hartid of this cluster"
 	default 0
 	---help---
-		Some RV chips have multiple cluster of harts with
-		globally numbered mhartids, like qemu-rv, mpfs and
-		jh7110 etc.  Clusters with SMP ability can be managed
-		by NuttX. As NuttX expects cluster-local hart ids,
-		we can shift mhartid by this value to derive such
-		local ids. The SMP_NCPUS still defines number of
-		harts in the cluster. Note that we assume that global
-		ids for each cluster are continuous. Note that there
-		are chips like k230 which don't have global mhartid.
+		This setting is used in multi-cluster RISC-V systems where each hardware
+		thread (hart) has a globally unique mhartid value.
+
+		Purpose:
+		- Maps global hardware thread IDs (mhartid) to cluster-local IDs
+		- Enables NuttX to work with cluster-local hart IDs while maintaining
+		  global uniqueness across the system
+
+		Example:
+		In a system with:
+		- Cluster A: harts 100-103
+		- Cluster B: harts 200-203
+		- Cluster C: harts 300-303
+
+		If this is Cluster B's configuration, set ARCH_RV_HARTID_BASE=200.
+		NuttX will then map:
+		- Global hart 200 -> Local hart 0
+		- Global hart 201 -> Local hart 1
+		- Global hart 202 -> Local hart 2
+		- Global hart 203 -> Local hart 3
+
+		Key Points:
+		1. SMP_NCPUS defines the number of harts in this cluster
+		2. Global hart IDs within a cluster must be consecutive
+		3. Some chips like K230 don't use global mhartid numbering
+		4. The base value should match the starting mhartid of this cluster
+		5. Local hart IDs always start from 0 within each cluster
+
+		Special Cases:
+		- For chips like K230 that don't use global mhartid numbering,
+		  this value should typically be set to 0
+		- In single-cluster systems, this can usually remain at default (0)
 
 config ARCH_FAMILY
 	string
@@ -495,7 +538,6 @@ config ARCH_CHIP
 config ARCH_RISCV_INTXCPT_EXTENSIONS
 	bool "RISC-V Integer Context Extensions"
 	default n
-	depends on RV32M1_OPENISA_TOOLCHAIN
 	---help---
 		RISC-V could be customized with extensions. Some Integer Context
 		Registers have to be saved and restored when Contexts switch.
@@ -669,6 +711,7 @@ config LITEX_CORE_VEXRISCV_SMP
 	select ARCH_NEED_ADDRENV_MAPPING
 	select ARCH_HAVE_S_MODE
 	select ARCH_HAVE_ELF_EXECUTABLE
+	select ARCH_HAVE_PERF_EVENTS
 
 endchoice # LITEX Core Selection
 

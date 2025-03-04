@@ -1,6 +1,8 @@
 ############################################################################
 # fs/romfs/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -22,6 +24,10 @@ ifeq ($(CONFIG_FS_ROMFS),y)
 # Files required for ROMFS file system support
 
 CSRCS += fs_romfs.c fs_romfsutil.c
+
+ifeq ($(CONFIG_TRACE_ROMFS_FS),y)
+romfs/fs_romfs.c_CFLAGS += -finstrument-functions
+endif
 
 # Include ROMFS build support
 

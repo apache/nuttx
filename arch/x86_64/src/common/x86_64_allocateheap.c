@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/x86_64/src/common/x86_64_allocateheap.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -93,7 +95,11 @@ const uintptr_t g_idle_topstack[CONFIG_SMP_NCPUS] =
  *
  ****************************************************************************/
 
+#ifdef CONFIG_BUILD_KERNEL
+void up_allocate_kheap(void **heap_start, size_t *heap_size)
+#else
 void up_allocate_heap(void **heap_start, size_t *heap_size)
+#endif /* CONFIG_BUILD_KERNEL */
 {
   uintptr_t hstart;
   uintptr_t topstack;

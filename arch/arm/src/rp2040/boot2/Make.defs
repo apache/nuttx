@@ -1,6 +1,8 @@
 ############################################################################
 # arch/arm/src/rp2040/boot2/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -24,7 +26,7 @@ BOOT_STAGE2 = rp2040_boot_stage2
 
 CONFIG_RP2040_FLASH_CHIP := $(patsubst "%",%,$(strip $(CONFIG_RP2040_FLASH_CHIP)))
 
-BOOT2DIR = $(PICO_SDK_PATH)/src/rp2_common/boot_stage2
+BOOT2DIR = $(PICO_SDK_PATH)/src/rp2040/boot_stage2
 BOOT2SRC = $(BOOT2DIR)/boot2_$(CONFIG_RP2040_FLASH_CHIP).S
 
 BOOT2CFLAGS += -DPICO_BOARD=\"pico\"
@@ -35,9 +37,12 @@ BOOT2CFLAGS += -Ichip/boot2
 BOOT2CFLAGS += -I$(BOOT2DIR)/asminclude
 BOOT2CFLAGS += -I$(PICO_SDK_PATH)/src/rp2040/hardware_regs/include
 BOOT2CFLAGS += -I$(PICO_SDK_PATH)/src/rp2_common/hardware_base/include
-BOOT2CFLAGS += -I$(PICO_SDK_PATH)/src/common/pico_base/include
+BOOT2CFLAGS += -I$(PICO_SDK_PATH)/src/common/pico_base_headers/include
 BOOT2CFLAGS += -I$(PICO_SDK_PATH)/src/boards/include
-BOOT2CFLAGS += -I$(PICO_SDK_PATH)/src/rp2_common/pico_platform/include
+BOOT2CFLAGS += -I$(PICO_SDK_PATH)/src/rp2040/pico_platform/include
+BOOT2CFLAGS += -I$(PICO_SDK_PATH)/src/rp2_common/pico_platform_compiler/include
+BOOT2CFLAGS += -I$(PICO_SDK_PATH)/src/rp2_common/pico_platform_sections/include
+BOOT2CFLAGS += -I$(PICO_SDK_PATH)/src/rp2_common/pico_platform_panic/include
 
 $(BOOT_STAGE2).S: %.S: %.bin
 	python3 $(BOOT2DIR)/pad_checksum -s 0xffffffff $< $@
@@ -46,10 +51,10 @@ $(BOOT_STAGE2).bin: %.bin: %.elf
 	$(OBJCOPY) -Obinary $< $@
 
 $(BOOT_STAGE2).elf: $(BOOT2SRC)
-	$(Q) touch $(PICO_SDK_PATH)/src/common/pico_base/include/pico/version.h
-	$(Q) touch $(PICO_SDK_PATH)/src/common/pico_base/include/pico/config_autogen.h
+	$(Q) touch $(PICO_SDK_PATH)/src/common/pico_base_headers/include/pico/version.h
+	$(Q) touch $(PICO_SDK_PATH)/src/common/pico_base_headers/include/pico/config_autogen.h
 	$(CC) -nostdlib -T$(ARCHSCRIPT) $(BOOT2CFLAGS) -o $@ $<
-	$(DELFILE) $(PICO_SDK_PATH)/src/common/pico_base/include/pico/version.h
-	$(DELFILE) $(PICO_SDK_PATH)/src/common/pico_base/include/pico/config_autogen.h
+	$(DELFILE) $(PICO_SDK_PATH)/src/common/pico_base_headers/include/pico/version.h
+	$(DELFILE) $(PICO_SDK_PATH)/src/common/pico_base_headers/include/pico/config_autogen.h
 
 EXTRADELFILE = $(BOOT_STAGE2).*

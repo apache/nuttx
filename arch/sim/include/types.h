@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/sim/include/types.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -119,6 +121,9 @@ typedef __SIZE_TYPE__      _size_t;
 #elif defined(CONFIG_ARCH_SIZET_LONG)
 typedef signed long        _ssize_t;
 typedef unsigned long      _size_t;
+#elif defined(_WIN64)
+typedef signed long long   _ssize_t;
+typedef unsigned long long _size_t;
 #else
 typedef signed int         _ssize_t;
 typedef unsigned int       _size_t;

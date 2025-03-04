@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/bl808/bl808_start.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -222,7 +224,7 @@ void bl808_start_s(int mhartid)
 
   showprogress('B');
 
-  /* Do board initialization */
+  /* TODO: Additional initialization */
 
   showprogress('C');
 

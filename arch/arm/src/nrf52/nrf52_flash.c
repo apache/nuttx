@@ -1,15 +1,11 @@
 /****************************************************************************
  * arch/arm/src/nrf52/nrf52_flash.c
- * Standard Flash access functions needed by the flash mtd driver.
  *
- *   Copyright (C) 2018 Zglue Inc. All rights reserved.
- *   Author: Levin Li <zhiqiang@zglue.com>
- *   Author: Alan Carvalho de Assis <acassis@gmail.com>
- *
- * Ported from the Nordic SDK, this is the original license:
- *
- * Copyright (c) 2012 - 2018, Nordic Semiconductor ASA
- * All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2018 Zglue Inc. All rights reserved.
+ * SPDX-FileCopyrightText: 2012 - 2018, Nordic Semiconductor ASA
+ * SPDX-FileContributor: Levin Li <zhiqiang@zglue.com>
+ * SPDX-FileContributor: Alan Carvalho de Assis <acassis@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -49,7 +45,6 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/config.h>
 #include <nuttx/progmem.h>
 
 #include "chip.h"

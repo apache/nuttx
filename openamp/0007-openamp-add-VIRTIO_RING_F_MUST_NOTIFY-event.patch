@@ -1,0 +1,42 @@
+From 9a8e63285c30026a8fabaf0ed8af323eafd07539 Mon Sep 17 00:00:00 2001
+From: ligd <liguiding1@xiaomi.com>
+Date: Thu, 23 Jun 2022 00:41:13 +0800
+Subject: [PATCH 07/14] openamp: add VIRTIO_RING_F_MUST_NOTIFY event
+
+Signed-off-by: ligd <liguiding1@xiaomi.com>
+---
+ lib/include/openamp/virtqueue.h | 3 +++
+ lib/virtio/virtqueue.c          | 3 +++
+ 2 files changed, 6 insertions(+)
+
+diff --git a/lib/include/openamp/virtqueue.h open-amp/lib/include/openamp/virtqueue.h
+index 8194398..dd42c3a 100644
+--- a/lib/include/openamp/virtqueue.h
++++ open-amp/lib/include/openamp/virtqueue.h
+@@ -48,6 +48,9 @@ extern "C" {
+ /* Support to suppress interrupt until specific index is reached. */
+ #define VIRTIO_RING_F_EVENT_IDX        (1 << 29)
+ 
++/* Support to can't suppress interrupt. */
++#define VIRTIO_RING_F_MUST_NOTIFY      (1 << 30)
++
+ /* cache invalidation helpers */
+ #define CACHE_FLUSH(x, s)		metal_cache_flush(x, s)
+ #define CACHE_INVALIDATE(x, s)		metal_cache_invalidate(x, s)
+diff --git a/lib/virtio/virtqueue.c open-amp/lib/virtio/virtqueue.c
+index 363fda8..7ffe569 100644
+--- a/lib/virtio/virtqueue.c
++++ open-amp/lib/virtio/virtqueue.c
+@@ -609,6 +609,9 @@ static int vq_ring_must_notify(struct virtqueue *vq)
+ {
+ 	uint16_t new_idx, prev_idx, event_idx;
+ 
++	if (vq->vq_dev->features & VIRTIO_RING_F_MUST_NOTIFY)
++		return 1;
++
+ 	if (vq->vq_dev->features & VIRTIO_RING_F_EVENT_IDX) {
+ 		if (VIRTIO_ROLE_IS_DRIVER(vq->vq_dev)) {
+ 			/* CACHE: no need to invalidate avail */
+-- 
+2.34.1
+

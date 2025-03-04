@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/src/common/arm64_initialstate.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -47,10 +49,6 @@
 #include "chip.h"
 #include "arm64_fatal.h"
 
-#ifdef CONFIG_ARCH_FPU
-#include "arm64_fpu.h"
-#endif
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -58,7 +56,7 @@
 void arm64_new_task(struct tcb_s * tcb)
 {
   uint64_t stack_ptr = (uintptr_t)tcb->stack_base_ptr + tcb->adj_stack_size;
-  struct regs_context *pinitctx;
+  struct xcptcontext *xcp = &tcb->xcp;
 
 #ifdef CONFIG_ARCH_KERNEL_STACK
   /* Use the process kernel stack to store context for user processes */
@@ -70,44 +68,44 @@ void arm64_new_task(struct tcb_s * tcb)
     }
 #endif
 
-#ifdef CONFIG_ARCH_FPU
-  struct fpu_reg *pfpuctx;
-  pfpuctx = STACK_PTR_TO_FRAME(struct fpu_reg, stack_ptr);
-  tcb->xcp.fpu_regs   = (uint64_t *)pfpuctx;
+  /* Initialize the context registers to stack top */
 
-  /* set fpu context */
+  xcp->regs = (void *)(stack_ptr - XCPTCONTEXT_SIZE);
 
-  arm64_init_fpu(tcb);
-  stack_ptr  = (uintptr_t)pfpuctx;
-#endif
+  /* Initialize the xcp registers */
 
-  pinitctx = STACK_PTR_TO_FRAME(struct regs_context, stack_ptr);
-  memset(pinitctx, 0, sizeof(struct regs_context));
-  pinitctx->elr       = (uint64_t)tcb->start;
+  memset(xcp->regs, 0, XCPTCONTEXT_SIZE);
+
+  xcp->regs[REG_ELR]       = (uint64_t)tcb->start;
 
   /* Keep using SP_EL1 or SP_EL3 */
 
 #if CONFIG_ARCH_ARM64_EXCEPTION_LEVEL == 3
-  pinitctx->spsr      = SPSR_MODE_EL3H;
+  xcp->regs[REG_SPSR]      = SPSR_MODE_EL3H;
 #else
-  pinitctx->spsr      = SPSR_MODE_EL1H;
+  xcp->regs[REG_SPSR]      = SPSR_MODE_EL1H;
+#endif
+
+  xcp->regs[REG_SCTLR_EL1] = read_sysreg(sctlr_el1);
+#ifdef CONFIG_ARM64_MTE
+  xcp->regs[REG_SCTLR_EL1] |= SCTLR_TCF1_BIT;
 #endif
 
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
-  pinitctx->spsr       |= (DAIF_IRQ_BIT | DAIF_FIQ_BIT);
+  xcp->regs[REG_SPSR]     |= (DAIF_IRQ_BIT | DAIF_FIQ_BIT);
 #endif /* CONFIG_SUPPRESS_INTERRUPTS */
 
-  pinitctx->sp_elx    = (uint64_t)stack_ptr;
+  xcp->regs[REG_SP_ELX]    = (uint64_t)stack_ptr;
 #ifdef CONFIG_ARCH_KERNEL_STACK
-  pinitctx->sp_el0    = (uint64_t)tcb->xcp.ustkptr;
+  xcp->regs[REG_SP_EL0]    = (uint64_t)tcb->xcp.ustkptr;
 #else
-  pinitctx->sp_el0    = (uint64_t)pinitctx;
+  xcp->regs[REG_SP_EL0]    = (uint64_t)stack_ptr - XCPTCONTEXT_SIZE;
 #endif
-  pinitctx->exe_depth = 0;
-  pinitctx->tpidr_el0 = (uint64_t)tcb;
-  pinitctx->tpidr_el1 = (uint64_t)tcb;
+  xcp->regs[REG_EXE_DEPTH] = 0;
 
-  tcb->xcp.regs       = (uint64_t *)pinitctx;
+#ifndef CONFIG_BUILD_FLAT
+  tcb->xcp.initregs        = tcb->xcp.regs;
+#endif
 }
 
 /****************************************************************************
@@ -148,18 +146,11 @@ void up_initial_state(struct tcb_s *tcb)
       tcb->stack_base_ptr  = tcb->stack_alloc_ptr;
       tcb->adj_stack_size  = CONFIG_IDLETHREAD_STACKSIZE;
 
-#ifdef CONFIG_ARCH_FPU
-      /* set fpu context */
-
-      arm64_init_fpu(tcb);
-#endif
       /* set initialize idle thread tcb and exception depth
        * core 0, idle0
        */
 
       write_sysreg(0, tpidrro_el0);
-      write_sysreg(tcb, tpidr_el1);
-      write_sysreg(tcb, tpidr_el0);
 
 #ifdef CONFIG_STACK_COLORATION
 

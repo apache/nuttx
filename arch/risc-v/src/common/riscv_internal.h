@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/common/riscv_internal.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -37,7 +39,6 @@
 
 #include <nuttx/irq.h>
 
-#include "riscv_sbi.h"
 #include "riscv_common_memorymap.h"
 
 /****************************************************************************
@@ -83,14 +84,8 @@
 #define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
 
 /* Interrupt Stack macros */
+
 #define INT_STACK_SIZE  (STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK))
-
-/* In the RISC-V model, the state is saved in stack,
- * only a reference stored in TCB.
- */
-
-#define riscv_savestate(regs) (regs = (uintreg_t *)CURRENT_REGS)
-#define riscv_restorestate(regs) (CURRENT_REGS = regs)
 
 /* Determine which (if any) console driver to use.  If a console is enabled
  * and no other console device is specified, then a serial console is
@@ -167,67 +162,6 @@ static inline void putreg64(uint64_t v, const volatile uintreg_t a)
 {
   __asm__ __volatile__("sd %0, 0(%1)" : : "r" (v), "r" (a));
 }
-
-#define READ_CSR(reg) \
-  ({ \
-     uintreg_t __regval; \
-     __asm__ __volatile__("csrr %0, " __STR(reg) : "=r"(__regval)); \
-     __regval; \
-  })
-
-#define READ_AND_SET_CSR(reg, bits) \
-  ({ \
-     uintreg_t __regval; \
-     __asm__ __volatile__("csrrs %0, " __STR(reg) ", %1": "=r"(__regval) : "rK"(bits)); \
-     __regval; \
-  })
-
-#define WRITE_CSR(reg, val) \
-  ({ \
-     __asm__ __volatile__("csrw " __STR(reg) ", %0" :: "rK"(val)); \
-  })
-
-#define SET_CSR(reg, bits) \
-  ({ \
-     __asm__ __volatile__("csrs " __STR(reg) ", %0" :: "rK"(bits)); \
-  })
-
-#define CLEAR_CSR(reg, bits) \
-  ({ \
-     __asm__ __volatile__("csrc " __STR(reg) ", %0" :: "rK"(bits)); \
-  })
-
-#define SWAP_CSR(reg, val) \
-  ({ \
-     uintptr_t regval; \
-     __asm__ __volatile__("csrrw %0, " __STR(reg) ", %1" : "=r"(regval) \
-                                                         : "rK"(val)); \
-     regval; \
-  })
-
-#define WRITE_INDIRECT_CSR_REG0(reg, val) \
-  ({ \
-     WRITE_CSR(CSR_ISELECT, reg); \
-     WRITE_CSR(CSR_IREG, val); \
-  })
-
-#define READ_INDIRECT_CSR_REG0(reg, val) \
-  ({ \
-     WRITE_CSR(CSR_ISELECT, reg); \
-     READ_CSR(CSR_IREG, val); \
-  })
-
-#define SET_INDIRECT_CSR_REG0(reg, val) \
-  ({ \
-     WRITE_CSR(CSR_ISELECT, reg); \
-     SET_CSR(CSR_IREG, val); \
-  })
-
-#define CLEAR_INDIRECT_CSR_REG0(reg, val) \
-  ({ \
-     WRITE_CSR(CSR_ISELECT, reg); \
-     CLEAR_CSR(CSR_IREG, val); \
-  })
 
 #define riscv_append_pmp_region(a, b, s) \
   riscv_config_pmp_region(riscv_next_free_pmp_region(), a, b, s)
@@ -322,8 +256,6 @@ static inline uintptr_t *riscv_vpuregs(struct tcb_s *tcb)
 
 static inline void riscv_savecontext(struct tcb_s *tcb)
 {
-  tcb->xcp.regs = (uintreg_t *)CURRENT_REGS;
-
 #ifdef CONFIG_ARCH_FPU
   /* Save current process FPU state to TCB */
 
@@ -339,8 +271,6 @@ static inline void riscv_savecontext(struct tcb_s *tcb)
 
 static inline void riscv_restorecontext(struct tcb_s *tcb)
 {
-  CURRENT_REGS = (uintreg_t *)tcb->xcp.regs;
-
 #ifdef CONFIG_ARCH_FPU
   /* Restore FPU state for next process */
 
@@ -352,7 +282,17 @@ static inline void riscv_restorecontext(struct tcb_s *tcb)
 
   riscv_restorevpu(tcb->xcp.regs, riscv_vpuregs(tcb));
 #endif
+
+#ifdef CONFIG_LIB_SYSCALL
+  /* Update current thread pointer */
+
+  __asm__ __volatile__("mv tp, %0" : : "r"(tcb));
+#endif
 }
+
+#ifdef CONFIG_ARCH_RISCV_INTXCPT_EXTENSIONS
+void riscv_initial_extctx_state(struct tcb_s *tcb);
+#endif
 
 /* RISC-V PMP Config ********************************************************/
 
@@ -419,21 +359,25 @@ void riscv_stack_color(void *stackbase, size_t nbytes);
 
 #ifdef CONFIG_SMP
 void riscv_cpu_boot(int cpu);
-int riscv_pause_handler(int irq, void *c, void *arg);
+int riscv_smp_call_handler(int irq, void *c, void *arg);
 #endif
 
+#ifdef CONFIG_ARCH_RV_CPUID_MAP
 /****************************************************************************
- * Name: riscv_mhartid
+ * Name: riscv_hartid_to_cpuid / riscv_cpuid_to_hartid
  *
  * Description:
- *   Context aware way to query hart id
- *
- * Returned Value:
- *   Hart id
+ *   CPU ID mapping functions for systems where physical hart IDs don't match
+ *   logical CPU IDs.
  *
  ****************************************************************************/
 
-uintptr_t riscv_mhartid(void);
+int riscv_hartid_to_cpuid(int hart);
+int riscv_cpuid_to_hartid(int cpu);
+#else
+#define riscv_hartid_to_cpuid(hart) (hart)
+#define riscv_cpuid_to_hartid(cpu)  (cpu)
+#endif /* CONFIG_ARCH_RV_CPUID_MAP */
 
 /* If kernel runs in Supervisor mode, a system call trampoline is needed */
 
@@ -441,23 +385,67 @@ uintptr_t riscv_mhartid(void);
 void *riscv_perform_syscall(uintreg_t *regs);
 #endif
 
+/****************************************************************************
+ * Name: riscv_jump_to_user
+ *
+ * Description:
+ *   Routine to jump to user space, called when a user process is started and
+ *   the kernel is ready to give control to the user task in user space.
+ *
+ * Parameters:
+ *   entry - Process entry point.
+ *   a0    - Parameter 0 for the process.
+ *   a1    - Parameter 1 for the process.
+ *   a2    - Parameter 2 for the process.
+ *   sp    - User stack pointer.
+ *   regs  - Integer register save area to use.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void riscv_jump_to_user(uintptr_t entry, uintreg_t a0, uintreg_t a1,
+                        uintreg_t a2, uintreg_t sp,
+                        uintreg_t *regs) noreturn_function;
+
 /* Context switching via system calls ***************************************/
 
-/* SYS call 1:
+/****************************************************************************
+ * Name: riscv_fullcontextrestore
  *
- * void riscv_fullcontextrestore(struct tcb_s *next) noreturn_function;
- */
-
-#define riscv_fullcontextrestore(next) \
-  sys_call1(SYS_restore_context, (uintptr_t)next)
-
-/* SYS call 2:
+ * Description:
+ *   Restores the full context.
  *
- * riscv_switchcontext(struct tcb_s *prev, struct tcb_s *next);
- */
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
 
-#define riscv_switchcontext(prev, next) \
-  sys_call2(SYS_switch_context, (uintptr_t)prev, (uintptr_t)next)
+#define riscv_fullcontextrestore()    \
+  do                                  \
+    {                                 \
+      sys_call0(SYS_restore_context); \
+    }                                 \
+  while (1)
+
+/****************************************************************************
+ * Name: riscv_switchcontext
+ *
+ * Description:
+ *   Switches the context.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#define riscv_switchcontext()        \
+  do                                 \
+    {                                \
+      sys_call0(SYS_switch_context); \
+    }                                \
+  while (0)
 
 #undef EXTERN
 #ifdef __cplusplus

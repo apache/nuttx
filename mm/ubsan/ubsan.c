@@ -1,6 +1,8 @@
 /****************************************************************************
  * mm/ubsan/ubsan.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -27,15 +29,11 @@
 #include <debug.h>
 #include <stdio.h>
 
+#include <nuttx/nuttx.h>
+
 #include "ubsan.h"
 
 #ifndef CONFIG_MM_UBSAN_DUMMY
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define IS_ALIGNED(x, a) (((x) & ((a) - 1)) == 0)
 
 /****************************************************************************
  * Private Data

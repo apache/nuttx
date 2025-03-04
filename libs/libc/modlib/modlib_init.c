@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/modlib/modlib_init.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -42,10 +44,10 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: modlib_filelen
+ * Name: modlib_fileinfo
  *
  * Description:
- *  Get the size of the ELF file
+ *  Get the info of the ELF file
  *
  * Returned Value:
  *   0 (OK) is returned on success and a negated errno is returned on
@@ -53,7 +55,7 @@
  *
  ****************************************************************************/
 
-static inline int modlib_filelen(FAR struct mod_loadinfo_s *loadinfo)
+static inline int modlib_fileinfo(FAR struct mod_loadinfo_s *loadinfo)
 {
   struct stat buf;
   int ret;
@@ -68,17 +70,12 @@ static inline int modlib_filelen(FAR struct mod_loadinfo_s *loadinfo)
       return -errval;
     }
 
-  /* Verify that it is a regular file */
+  /* Return some stats info of the file in the loadinfo structure */
 
-  if (!S_ISREG(buf.st_mode))
-    {
-      berr("ERROR: Not a regular file.  mode: %d\n", buf.st_mode);
-      return -ENOENT;
-    }
-
-  /* Return the size of the file in the loadinfo structure */
-
-  loadinfo->filelen = buf.st_size;
+  loadinfo->filelen  = buf.st_size;
+  loadinfo->fileuid  = buf.st_uid;
+  loadinfo->filegid  = buf.st_gid;
+  loadinfo->filemode = buf.st_mode;
   return OK;
 }
 
@@ -120,12 +117,12 @@ int modlib_initialize(FAR const char *filename,
       return -errval;
     }
 
-  /* Get the length of the file. */
+  /* Get some stats info of the file. */
 
-  ret = modlib_filelen(loadinfo);
+  ret = modlib_fileinfo(loadinfo);
   if (ret < 0)
     {
-      berr("ERROR: modlib_filelen failed: %d\n", ret);
+      berr("ERROR: modlib_fileinfo failed: %d\n", ret);
       return ret;
     }
 

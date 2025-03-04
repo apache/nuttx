@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/lcd/pcf8574_lcd_backpack.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -29,6 +31,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
 #include <nuttx/signal.h>
@@ -119,7 +122,9 @@ static const struct file_operations g_pcf8574_lcd_fops =
   pcf8574_lcd_ioctl,            /* ioctl */
   NULL,                         /* mmap */
   NULL,                         /* truncate */
-  pcf8574_lcd_poll              /* poll */
+  pcf8574_lcd_poll,             /* poll */
+  NULL,                         /* readv */
+  NULL                          /* writev */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , pcf8574_lcd_unlink          /* unlink */
 #endif

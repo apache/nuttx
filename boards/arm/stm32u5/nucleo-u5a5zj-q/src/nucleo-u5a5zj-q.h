@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32u5/nucleo-u5a5zj-q/src/nucleo-u5a5zj-q.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The

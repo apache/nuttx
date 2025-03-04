@@ -1,8 +1,8 @@
 /****************************************************************************
  * include/crypto/idgen.h
- * $OpenBSD: idgen.h,v 1.3 2013/06/05 05:45:54 djm Exp $
  *
- * Copyright (c) 2008 Damien Miller <djm@mindrot.org>
+ * SPDX-License-Identifier: ISC
+ * SPDX-FileCopyrightText: 2008 Damien Miller <djm@mindrot.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above

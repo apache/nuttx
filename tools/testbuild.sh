@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # tools/testbuild.sh
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -31,6 +33,7 @@ EXTRA_FLAGS="EXTRAFLAGS="
 MAKE=make
 unset testfile
 unset HOPTION
+unset STORE
 unset JOPTION
 PRINTLISTONLY=0
 GITCLEAN=0
@@ -63,7 +66,7 @@ esac
 function showusage {
   echo ""
   echo "USAGE: $progname -h [-l|m|c|g|n] [-d] [-e <extraflags>] [-x] [-j <ncpus>] [-a <appsdir>] [-t <topdir>] [-p]"
-  echo "       [-A] [-C] [-G] [-N] [-R] [--codechecker] <testlist-file>"
+  echo "       [-A] [-C] [-G] [-N] [-R] [-S] [--codechecker] <testlist-file>"
   echo ""
   echo "Where:"
   echo "  -h will show this help test and terminate"
@@ -86,6 +89,7 @@ function showusage {
   echo "         as well."
   echo "  -N Use CMake with Ninja as the backend."
   echo "  -R execute \"run\" script in the config directories if exists."
+  echo "  -S Adds the nxtmpdir folder for third-party packages."
   echo "  --codechecker enables CodeChecker statically analyze the code."
   echo "  <testlist-file> selects the list of configurations to test.  No default"
   echo ""
@@ -142,6 +146,9 @@ while [ ! -z "$1" ]; do
     ;;
   -R )
     RUN=1
+    ;;
+  -S )
+    STORE+=" $1"
     ;;
   --codechecker )
     CODECHECKER=1
@@ -312,12 +319,12 @@ function distclean {
 # Configure for the next build
 
 function configure_default {
-  if ! ./tools/configure.sh ${HOPTION} $config ${JOPTION} 1>/dev/null; then
+  if ! ./tools/configure.sh ${HOPTION} ${STORE} $config ${JOPTION} 1>/dev/null; then
     fail=1
   fi
 
   if [ "X$toolchain" != "X" ]; then
-    setting=`grep _TOOLCHAIN_ $nuttx/.config | grep -v CONFIG_ARCH_TOOLCHAIN_* | grep =y`
+    setting=`grep _TOOLCHAIN_ $nuttx/.config | grep -v CONFIG_TOOLCHAIN_WINDOWS | grep -v CONFIG_ARCH_TOOLCHAIN_* | grep =y`
     original_toolchain=`echo $setting | cut -d'=' -f1`
     if [ ! -z "$original_toolchain" ]; then
       echo "  Disabling $original_toolchain"
@@ -340,7 +347,7 @@ function configure_cmake {
   fi
 
   if [ "X$toolchain" != "X" ]; then
-    setting=`grep _TOOLCHAIN_ $nuttx/build/.config | grep -v CONFIG_ARCH_TOOLCHAIN_* | grep =y`
+    setting=`grep _TOOLCHAIN_ $nuttx/build/.config | grep -v CONFIG_TOOLCHAIN_WINDOWS | grep -v CONFIG_ARCH_TOOLCHAIN_* | grep =y`
     original_toolchain=`echo $setting | cut -d'=' -f1`
     if [ ! -z "$original_toolchain" ]; then
       echo "  Disabling $original_toolchain"
@@ -443,8 +450,8 @@ function refresh_cmake {
     kconfig-tweak --file $nuttx/build/.config -d $toolchain
   fi
 
-  if ! cmake --build build -t savedefconfig 1>/dev/null; then
-    cmake --build build -t savedefconfig
+  if ! cmake --build build -t refreshsilent 1>/dev/null; then
+    cmake --build build -t refreshsilent
     fail=1
   fi
 
@@ -559,12 +566,14 @@ function dotest {
   echo $(date '+%Y-%m-%d %H:%M:%S')
   echo "------------------------------------------------------------------------------------"
   distclean
-  configure
   if [ ${skip} -ne 1 ]; then
+    configure
     build
     run
+    refresh
+  else
+    echo "  Skipping: $1"
   fi
-  refresh
 }
 
 # Perform the build test for each entry in the test list file

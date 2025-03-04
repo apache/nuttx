@@ -11,6 +11,12 @@ config LIBC_CRC64_FAST
 	---help---
 		Enable the CRC64 lookup table to compute the CRC64 faster.
 
+config LIBC_CRC32_SLOW
+	bool "CRC32 not use table to decrease rodata size"
+	default n
+	---help---
+		Optional disable the CRC32 lookup table to decrease rodata usage.
+
 config LIBC_KBDCODEC
 	bool "Keyboard CODEC"
 	default n
@@ -113,16 +119,48 @@ config LIBC_MEM_FD_VFS_PATH
 	---help---
 		The relative path to where memfd will exist in the tmpfs namespace.
 
-config LIBC_MAX_PATHBUFFER
-	int "Maximum size of a temporary file path buffer array"
+config LIBC_TEMPBUFFER
+	bool "Enable global temp buffer"
+	default !DEFAULT_SMALL
+	---help---
+		Enable this option to enable the global temp buffer, otherwise use stack variables via alloca().
+		If the current platform does not require a large TEMP_MAX_SIZE size support and toolchain supports alloca(),
+		we could turn off this option to improve performance.
+
+if LIBC_TEMPBUFFER
+
+config LIBC_MAX_TEMPBUFFER
+	int "Maximum size of a temporary file temp buffer array"
 	range 0 32
 	default 2
 	---help---
-		This value is the maximum size of the buffer that will hold the full
-		file path.
+		This value is the maximum size of the buffer that will hold the full line.
 
-config LIBC_PATHBUFFER_MALLOC
-	bool "Enable malloc pathbuffer"
+config LIBC_TEMPBUFFER_MALLOC
+	bool "Enable malloc tempbuffer"
 	default y
 	---help---
-		Enable malloc path buffer from the heap when pathbuffer is insufficient.
+		Enable malloc temp buffer from the heap when tempbuffer is insufficient.
+
+endif # LIBC_TEMPBUFFER
+
+config LIBC_BACKTRACE_BUFFSIZE
+	int "The size of backtrace record buffer"
+	depends on SCHED_BACKTRACE
+	default 0
+	---help---
+		The size of the backtrace buffer.
+
+config LIBC_BACKTRACE_DEPTH
+	int "The depth of backtrace"
+	depends on LIBC_BACKTRACE_BUFFSIZE > 0
+	default 8
+	---help---
+		The depth of the backtrace buffer.
+
+config LIBC_MUTEX_BACKTRACE
+	int "The depth of mutex backtrace"
+	default 0
+	---help---
+		Config the depth of backtrace, dumping the backtrace of thread which
+		last acquired the mutex. Disable mutex backtrace by 0.

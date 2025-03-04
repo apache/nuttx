@@ -1,6 +1,7 @@
 /****************************************************************************
  * fs/mnemofs/mnemofs_blkalloc.c
- * Block Allocator for mnemofs
+ *
+ * SPDX-License-Identifier: Apache-2.0 or BSD-3-Clause
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -86,6 +87,7 @@
 #include <stdlib.h>
 
 #include "mnemofs.h"
+#include "fs_heap.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -307,7 +309,7 @@ int mfs_ba_fmt(FAR struct mfs_sb_s * const sb)
 
   /* MFS_BA(sb).k_del_elemsz = ((log + 7) & (-8)) / 8; */
 
-  MFS_BA(sb).k_del = kmm_zalloc(sizeof(size_t) * MFS_NBLKS(sb));
+  MFS_BA(sb).k_del = fs_heap_zalloc(sizeof(size_t) * MFS_NBLKS(sb));
   if (predict_false(MFS_BA(sb).k_del == NULL))
     {
       ret = -ENOMEM;
@@ -316,7 +318,7 @@ int mfs_ba_fmt(FAR struct mfs_sb_s * const sb)
 
   MFS_BA(sb).n_bmap_upgs = MFS_UPPER8(MFS_NPGS(sb));
 
-  MFS_BA(sb).bmap_upgs = kmm_zalloc(MFS_BA(sb).n_bmap_upgs);
+  MFS_BA(sb).bmap_upgs = fs_heap_zalloc(MFS_BA(sb).n_bmap_upgs);
   if (predict_false(MFS_BA(sb).bmap_upgs == NULL))
     {
       ret = -ENOMEM;
@@ -330,7 +332,7 @@ int mfs_ba_fmt(FAR struct mfs_sb_s * const sb)
   return ret;
 
 errout_with_k_del:
-  kmm_free(MFS_BA(sb).k_del);
+  fs_heap_free(MFS_BA(sb).k_del);
 
 errout:
   return ret;
@@ -367,8 +369,8 @@ errout:
 
 void mfs_ba_free(FAR struct mfs_sb_s * const sb)
 {
-  kmm_free(MFS_BA(sb).k_del);
-  kmm_free(MFS_BA(sb).bmap_upgs);
+  fs_heap_free(MFS_BA(sb).k_del);
+  fs_heap_free(MFS_BA(sb).bmap_upgs);
 
   finfo("Block Allocator Freed.");
 }

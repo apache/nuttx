@@ -1,0 +1,51 @@
+From 6842947d3cd08748b8d44fd771a53a86ddfc8dac Mon Sep 17 00:00:00 2001
+From: Yongrong Wang <wangyongrong@xiaomi.com>
+Date: Fri, 19 Jul 2024 17:40:51 +0800
+Subject: [PATCH 3/5] atomic.h: fix compiler error
+
+/home/wyr/work/code/velasim/upgrade/nuttx/include/metal/compiler/gcc/atomic.h:19:13: error: conflicting type qualifiers for 'atomic_flag'
+   19 | typedef int atomic_flag;
+      |             ^~~~~~~~~~~
+In file included from /home/wyr/work/code/velasim/upgrade/nuttx/include/nuttx/net/netdev_lowerhalf.h:38,
+                 from virtio/virtio-net.c:33:
+/home/wyr/work/code/velasim/upgrade/prebuilts/gcc/linux/arm/lib/gcc/arm-none-eabi/13.2.1/include/stdatomic.h:233:3: note: previous declaration of 'atomic_flag' with type 'atomic_flag'
+  233 | } atomic_flag;
+      |   ^~~~~~~~~~~
+/home/wyr/work/code/velasim/upgrade/nuttx/include/metal/compiler/gcc/atomic.h:20:14: error: conflicting type qualifiers for 'atomic_char'
+   20 | typedef char atomic_char;
+      |              ^~~~~~~~~~~
+/home/wyr/work/code/velasim/upgrade/prebuilts/gcc/linux/arm/lib/gcc/arm-none-eabi/13.2.1/include/stdatomic.h:41:22: note: previous declaration of 'atomic_char' with type 'atomic_char' {aka '_Atomic char'}
+   41 | typedef _Atomic char atomic_char;
+      |                      ^~~~~~~~~~~
+/home/wyr/work/code/velasim/upgrade/nuttx/include/metal/compiler/gcc/atomic.h:21:23: error: conflicting type qualifiers for 'atomic_uchar'
+   21 | typedef unsigned char atomic_uchar;
+      |                       ^~~~~~~~~~~~
+/home/wyr/work/code/velasim/upgrade/prebuilts/gcc/linux/arm/lib/gcc/arm-none-eabi/13.2.1/include/stdatomic.h:43:31: note: previous declaration of 'atomic_uchar' with type 'atomic_uchar' {aka '_Atomic unsigned char'}
+   43 | typedef _Atomic unsigned char atomic_uchar;
+      |                               ^~~~~~~~~~~~
+/home/wyr/work/code/velasim/upgrade/nuttx/include/metal/compiler/gcc/atomic.h:22:15: error: conflicting type qualifiers for 'atomic_short'
+   22 | typedef short atomic_short;
+
+Signed-off-by: Yongrong Wang <wangyongrong@xiaomi.com>
+---
+ lib/atomic.h | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/lib/atomic.h libmetal/lib/atomic.h
+index 2f4ab04..fe2c1e0 100644
+--- a/lib/atomic.h
++++ libmetal/lib/atomic.h
+@@ -100,8 +100,8 @@ using std::atomic_fetch_and_explicit;
+ using std::atomic_thread_fence;
+ using std::atomic_signal_fence;
+ 
+-#elif defined(HAVE_STDATOMIC_H) && !defined(__CC_ARM) && !defined(__arm__) && \
+-      !defined(__STDC_NO_ATOMICS__)
++#elif defined(HAVE_STDATOMIC_H) && !defined(__STDC_NO_ATOMICS__) && \
++      ((!defined(__CC_ARM) && !defined(__arm__)) || defined(__GNUC__))
+ # include <stdint.h>
+ # include <stdatomic.h>
+ #elif defined(__GNUC__)
+-- 
+2.34.1
+

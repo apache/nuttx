@@ -124,7 +124,7 @@ some Kconfig syntax errors.  Install kconfiglib via following command:
 
 .. code-block:: shell
 
-  pip install kconfiglib
+  sudo apt install python3-kconfiglib
 
 If you are a working on Windows, which also need the support of windows-curses:
 
@@ -132,11 +132,6 @@ If you are a working on Windows, which also need the support of windows-curses:
 
   pip install windows-curses
 
-.. tip::
-  It should be noted that kconfiglib does not support **modules** attributes.
-  (https://github.com/ulfalizer/Kconfiglib/blob/master/kconfiglib.py#L3239-L3254,
-  the community seems to have stopped updating), if the features depends on
-  ``CONFIG_BUILD_LOADABLE``, kconfiglib may not be a good choice.
 
 Toolchain
 =========

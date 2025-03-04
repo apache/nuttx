@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/sim/src/sim/posix/sim_hostirq.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -87,6 +89,7 @@ uint64_t up_irq_flags(void)
  *
  ****************************************************************************/
 
+__attribute__((no_sanitize_address))
 uint64_t up_irq_save(void)
 {
   union sigset_u nmask;

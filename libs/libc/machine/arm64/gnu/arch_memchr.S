@@ -1,8 +1,8 @@
 /****************************************************************************
  * libs/libc/machine/arm64/gnu/arch_memchr.S
  *
- * Copyright (c) 2014, ARM Limited
- * All rights Reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2014, ARM Limited, All rights Reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -80,7 +80,7 @@
 \f:
 	.endm
 
-def_fn memchr
+def_fn ARCH_LIBCFUN(memchr)
 	/* Do not dereference srcin if no bytes to compare.  */
 	cbz	cntin, .Lzero_length
 	/*
@@ -174,6 +174,6 @@ def_fn memchr
 	mov	result, #0
 	ret
 
-	.size	memchr, . - memchr
+	.size	ARCH_LIBCFUN(memchr), . - ARCH_LIBCFUN(memchr)
 
 #endif

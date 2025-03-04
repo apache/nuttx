@@ -30,6 +30,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <nuttx/mm/mm.h>
+#include <nuttx/nuttx.h>
 #include <nuttx/userspace.h>
 #include <arch/board/board.h>
 #ifdef CONFIG_MM_KERNEL_HEAP
@@ -58,10 +59,6 @@
 #  define MM_ADDREGION kmm_addregion
 #else
 #  define MM_ADDREGION umm_addregion
-#endif
-
-#ifndef ALIGN_DOWN
-#  define ALIGN_DOWN(num, align)  ((num) & ~((align) - 1))
 #endif
 
 /****************************************************************************

@@ -1,6 +1,8 @@
 # ##############################################################################
 # sched/instrument/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -21,7 +23,7 @@
 set(SRCS instrument.c)
 
 if(NOT "${CONFIG_SCHED_STACK_RECORD}" STREQUAL "0")
-  list(APPEND SRCS stack_record.c)
+  list(APPEND SRCS stack_monitor.c)
 endif()
 
 target_sources(sched PRIVATE ${SRCS})

@@ -1,8 +1,8 @@
 /****************************************************************************
  * include/nuttx/wireless/ieee80211/ieee80211_cypto.h
- * 802.11 protocol crypto-related definitions.
  *
- * Copyright (c) 2007, 2008 Damien Bergamini <damien.bergamini@free.fr>
+ * SPDX-License-Identifier: ISC
+ * SPDX-FileCopyrightText: 2007, 2008 Damien Bergamini <damien.bergamini@free.fr>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/max326xx/hardware/max326_icc.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -41,10 +43,20 @@
 
 /* Register Addresses *******************************************************/
 
-#define MAX326_ICC_ID                 (MAX326_ICC_BASE + MAX326_ICC_ID_OFFSET)
-#define MAX326_ICC_MEMCFG             (MAX326_ICC_BASE + MAX326_ICC_MEMCFG_OFFSET)
-#define MAX326_ICC_CTRLSTAT           (MAX326_ICC_BASE + MAX326_ICC_CTRLSTAT_OFFSET)
-#define MAX326_ICC_INVDTALL           (MAX326_ICC_BASE + MAX326_ICC_INVDTALL_OFFSET)
+/* The MAX32690 has two ICC controllers because it includes a
+ * second integrated RISC-V core.
+ */
+#if defined(CONFIG_ARCH_FAMILY_MAX32690)
+    #define MAX326_ICC0_ID                 (MAX326_ICC0_BASE + MAX326_ICC_ID_OFFSET)
+    #define MAX326_ICC0_MEMCFG             (MAX326_ICC0_BASE + MAX326_ICC_MEMCFG_OFFSET)
+    #define MAX326_ICC0_CTRLSTAT           (MAX326_ICC0_BASE + MAX326_ICC_CTRLSTAT_OFFSET)
+    #define MAX326_ICC0_INVDTALL           (MAX326_ICC0_BASE + MAX326_ICC_INVDTALL_OFFSET)
+#else
+    #define MAX326_ICC_ID                 (MAX326_ICC_BASE + MAX326_ICC_ID_OFFSET)
+    #define MAX326_ICC_MEMCFG             (MAX326_ICC_BASE + MAX326_ICC_MEMCFG_OFFSET)
+    #define MAX326_ICC_CTRLSTAT           (MAX326_ICC_BASE + MAX326_ICC_CTRLSTAT_OFFSET)
+    #define MAX326_ICC_INVDTALL           (MAX326_ICC_BASE + MAX326_ICC_INVDTALL_OFFSET)
+#endif
 
 /* Register Bit-field Definitions *******************************************/
 

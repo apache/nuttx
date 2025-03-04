@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/src/common/arm64_gic.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -281,13 +283,13 @@
 #define GIC_IRQ_SGI15               15
 
 #ifdef CONFIG_ARCH_TRUSTZONE_SECURE
-#  define GIC_SMP_CPUSTART          GIC_IRQ_SGI9
-#  define GIC_SMP_CPUPAUSE          GIC_IRQ_SGI10
-#  define GIC_SMP_CPUCALL           GIC_IRQ_SGI11
+#  define GIC_SMP_SCHED             GIC_IRQ_SGI9
+#  define GIC_SMP_CPUSTART          GIC_IRQ_SGI10
+#  define GIC_SMP_CALL              GIC_IRQ_SGI11
 #else
-#  define GIC_SMP_CPUSTART          GIC_IRQ_SGI1
-#  define GIC_SMP_CPUPAUSE          GIC_IRQ_SGI2
-#  define GIC_SMP_CPUCALL           GIC_IRQ_SGI3
+#  define GIC_SMP_SCHED             GIC_IRQ_SGI1
+#  define GIC_SMP_CPUSTART          GIC_IRQ_SGI2
+#  define GIC_SMP_CALL              GIC_IRQ_SGI3
 #endif
 
 /****************************************************************************
@@ -317,19 +319,24 @@ int arm64_gic_irq_trigger(unsigned int intid, uint32_t flags);
 
 uint64_t * arm64_decodeirq(uint64_t *regs);
 
-int arm64_gic_raise_sgi(unsigned int sgi_id, uint16_t target_list);
+void arm64_gic_raise_sgi(unsigned int sgi_id, uint16_t target_list);
+
+int arm64_gicv_irq_trigger(int irq, bool edge);
+#ifdef CONFIG_ARM64_GICV2M
+int arm64_gic_v2m_initialize(void);
+#endif
 
 #ifdef CONFIG_SMP
 
 /****************************************************************************
- * Name: arm64_pause_handler
+ * Name: arm64_smp_sched_handler
  *
  * Description:
- *   This is the handler for SGI2.  It performs the following operations:
+ *   This is the handler for sched.
  *
  *   1. It saves the current task state at the head of the current assigned
  *      task list.
- *   2. It waits on a spinlock, then
+ *   2. It porcess g_delivertasks
  *   3. Returns from interrupt, restoring the state of the new task at the
  *      head of the ready to run list.
  *
@@ -341,7 +348,7 @@ int arm64_gic_raise_sgi(unsigned int sgi_id, uint16_t target_list);
  *
  ****************************************************************************/
 
-int arm64_pause_handler(int irq, void *context, void *arg);
+int arm64_smp_sched_handler(int irq, void *context, void *arg);
 
 void arm64_gic_secondary_init(void);
 

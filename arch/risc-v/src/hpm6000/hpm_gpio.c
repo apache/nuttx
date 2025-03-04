@@ -1,6 +1,8 @@
 /***************************************************************************
  * arch/risc-v/src/hpm6000/hpm_gpio.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -39,7 +41,6 @@
 #include "hardware/hpm_gpio.h"
 #include "hpm_gpio.h"
 #include "riscv_internal.h"
-#include "hpm_gpio.h"
 #include "hpm_ioc.h"
 
 /***************************************************************************

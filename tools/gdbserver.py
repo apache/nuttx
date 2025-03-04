@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # tools/gdbserver.py
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -28,6 +30,7 @@ import socket
 import struct
 import subprocess
 import sys
+import traceback
 
 import elftools
 from elftools.elf.elffile import ELFFile
@@ -113,6 +116,41 @@ reg_table = {
         "LR": 14,
         "PC": 15,
         "CPSR": 41,
+    },
+    "arm64": {
+        "X0": 0,
+        "X1": 1,
+        "X2": 2,
+        "X3": 3,
+        "X4": 4,
+        "X5": 5,
+        "X6": 6,
+        "X7": 7,
+        "X8": 8,
+        "X9": 9,
+        "X10": 10,
+        "X11": 11,
+        "X12": 12,
+        "X13": 13,
+        "X14": 14,
+        "X15": 15,
+        "X16": 16,
+        "X17": 17,
+        "X18": 18,
+        "X19": 19,
+        "X20": 20,
+        "X21": 21,
+        "X22": 22,
+        "X23": 23,
+        "X24": 24,
+        "X25": 25,
+        "X26": 26,
+        "X27": 27,
+        "X28": 28,
+        "X29": 29,
+        "X30": 30,
+        "SP_ELX": 31,
+        "ELR": 32,
     },
     # rv64 works with gdb-multiarch on Ubuntu
     "riscv": {
@@ -228,6 +266,9 @@ reg_fix_value = {
     },
     "riscv": {
         "ZERO": 0,
+        "WINDOWBASE": (0, 584),
+        "WINDOWSTART": (1, 585),
+        "PS": (0x40000, 742),
     },
 }
 
@@ -258,7 +299,7 @@ class DumpELFFile:
         self.__xlen = None
         self.__text = 0
 
-    def parse(self):
+    def parse(self, load_symbol: bool):
         self.__memories = []
         elf = ELFFile.load_from_path(self.elffile)
         self.__arch = elf.get_machine_arch().lower().replace("-", "")
@@ -308,26 +349,27 @@ class DumpELFFile:
             if segment.header.p_flags & 1 and not self.__text:
                 self.__text = segment.header.p_vaddr
 
-        symtab = elf.get_section_by_name(".symtab")
-        self.symbol = {}
-        for symbol in symtab.iter_symbols():
-            if symbol["st_info"]["type"] != "STT_OBJECT":
-                continue
+        self.load_symbol = load_symbol
+        if load_symbol:
+            symtab = elf.get_section_by_name(".symtab")
+            self.symbol = {}
+            for symbol in symtab.iter_symbols():
+                if symbol["st_info"]["type"] != "STT_OBJECT":
+                    continue
 
-            if symbol.name in (
-                "g_tcbinfo",
-                "g_pidhash",
-                "g_npidhash",
-                "g_last_regs",
-                "g_running_tasks",
-            ):
-                self.symbol[symbol.name] = symbol
-                logger.debug(
-                    f"name:{symbol.name} size:{symbol['st_size']} value:{hex(symbol['st_value'])}"
-                )
+                    if symbol.name in (
+                        "g_tcbinfo",
+                        "g_pidhash",
+                        "g_npidhash",
+                        "g_last_regs",
+                        "g_running_tasks",
+                    ):
+                        self.symbol[symbol.name] = symbol
+                        logger.debug(
+                            f"name:{symbol.name} size:{symbol['st_size']} value:{hex(symbol['st_value'])}"
+                        )
 
         elf.close()
-
         return True
 
     def merge(self, other):
@@ -368,9 +410,10 @@ class DumpLogFile:
 
         line = line.strip()
         # find register value
-        find_res = re.findall(r"(?P<REG>\w+): (?P<REGV>[0-9a-fA-F]+)", line)
+        find_res = re.findall(r"(?P<REG>\w+):\s*(?P<REGV>[0-9a-fxA-FX]+)", line)
 
         for reg_name, reg_val in find_res:
+            reg_name = reg_name.upper()
             if reg_name in self.reg_table:
                 reg_index = self.reg_table[reg_name]
                 self.registers[reg_index] = int(reg_val, 16)
@@ -496,7 +539,7 @@ class CoreDumpFile:
                 data = f.read(segment["p_filesz"])
                 self.__memories.append(
                     pack_memory(
-                        segment["p_paddr"], segment["p_paddr"] + len(data), data
+                        segment["p_vaddr"], segment["p_vaddr"] + len(data), data
                     )
                 )
 
@@ -518,6 +561,9 @@ class GDBStub:
         self.socket = None
         self.gdb_signal = GDB_SIGNAL_DEFAULT
         self.arch = arch
+        self.reg_fmt = "<I" if elffile.xlen() <= 32 else "<Q"
+        self.int_size = elffile.xlen() // 8
+        self.reg_digits = elffile.xlen() // 4
 
         # new list oreder is coredump, rawfile, logfile, elffile
 
@@ -532,25 +578,31 @@ class GDBStub:
 
         self.threadinfo = []
         self.current_thread = 0
-        try:
-            self.parse_thread()
-            logger.debug(f"Have {len(self.threadinfo)} threads to debug.")
-            if len(self.threadinfo) == 0:
-                logger.critical(
-                    "Check if your coredump or raw file matches the ELF file"
-                )
-                sys.exit(1)
+        self.regfix = False
+        if elffile.load_symbol:
+            try:
+                self.parse_thread()
+                logger.debug(f"Have {len(self.threadinfo)} threads to debug.")
+                if len(self.threadinfo) == 0:
+                    logger.critical(
+                        "Check if your coredump or raw file matches the ELF file"
+                    )
+                    sys.exit(1)
 
-            if arch in reg_fix_value.keys():
-                self.regfix = True
-                logger.info(f"Current arch is {arch}, need reg index fix.")
+                if arch in reg_fix_value.keys():
+                    self.regfix = True
+                    logger.info(f"Current arch is {arch}, need reg index fix.")
 
-        except TypeError:
-            if not self.registers:
-                logger.critical(
-                    "Logfile, coredump, or rawfile do not contain register. Please check if the files are correct."
-                )
-                sys.exit(1)
+            except TypeError as e:
+                if not self.registers:
+                    logger.critical(
+                        "Logfile, coredump, or rawfile do not contain register,"
+                        f"Please check if the files are correct. {e}"
+                    )
+
+                    stack_trace = traceback.format_exc()
+                    logger.debug(stack_trace)
+                    sys.exit(1)
 
     def get_gdb_packet(self):
         socket = self.socket
@@ -622,11 +674,12 @@ class GDBStub:
     def handle_register_group_read_packet(self):
 
         def put_register_packet(regs):
+            reg_fmt = self.reg_fmt
             pkt = b""
 
             for reg in regs:
                 if reg != b"x":
-                    bval = struct.pack(self.reg_fmt, reg)
+                    bval = struct.pack(reg_fmt, reg)
                     pkt += binascii.hexlify(bval)
                 else:
                     # Register not in coredump -> unknown value
@@ -651,8 +704,9 @@ class GDBStub:
 
         def put_one_register_packet(regs):
 
-            regval = None
             reg = int(pkt[1:].decode("utf8"), 16)
+            regval = None
+
             if self.regfix:
                 for reg_name, reg_vals in reg_fix_value[self.arch].items():
                     if reg == reg_vals[1]:
@@ -709,8 +763,9 @@ class GDBStub:
 
         self.put_gdb_packet(b"OK")
 
-    def get_mem_region(self, addr):
-        for mem in self.mem_regions:
+    def get_mem_region(self, addr, mem_regions=None):
+        mem_regions = mem_regions or self.mem_regions
+        for mem in mem_regions:
             if mem["start"] <= addr < mem["end"]:
                 return mem
 
@@ -767,11 +822,14 @@ class GDBStub:
         self.put_gdb_packet(b"OK")
 
     def parse_thread(self):
-        def unpack_data(addr, size, fmt):
-            r = self.get_mem_region(addr)
+        def unpack_data(addr, fmt, from_elf=False):
+            if from_elf:
+                r = self.get_mem_region(addr, self.elffile.get_memories())
+            else:
+                r = self.get_mem_region(addr)
             offset = addr - r["start"]
-            data = r["data"][offset : offset + size]
-            return struct.unpack(fmt, data)
+            data = r["data"]
+            return struct.unpack_from(fmt, data, offset)
 
         TCBINFO_FMT = "<8HQ"
 
@@ -791,8 +849,8 @@ class GDBStub:
 
         unpacked_data = unpack_data(
             self.elffile.symbol["g_tcbinfo"]["st_value"],
-            self.elffile.symbol["g_tcbinfo"]["st_size"],
             TCBINFO_FMT,
+            True,
         )
         tcbinfo = {
             "pid_off": int(unpacked_data[0]),
@@ -808,7 +866,6 @@ class GDBStub:
 
         unpacked_data = unpack_data(
             self.elffile.symbol["g_npidhash"]["st_value"],
-            self.elffile.symbol["g_npidhash"]["st_size"],
             "<I",
         )
         npidhash = int(unpacked_data[0])
@@ -816,32 +873,35 @@ class GDBStub:
 
         unpacked_data = unpack_data(
             self.elffile.symbol["g_pidhash"]["st_value"],
-            self.elffile.symbol["g_pidhash"]["st_size"],
-            "<I",
+            self.reg_fmt,
         )
         pidhash = int(unpacked_data[0])
         logger.debug(f"g_pidhash is {hex(pidhash)}")
 
         tcbptr_list = []
         for i in range(0, npidhash):
-            unpacked_data = unpack_data(pidhash + i * 4, 4, "<I")
+            unpacked_data = unpack_data(pidhash + i * self.int_size, self.reg_fmt)
             tcbptr_list.append(int(unpacked_data[0]))
 
         def parse_tcb(tcbptr):
             tcb = {}
-            tcb["pid"] = int(unpack_data(tcbptr + tcbinfo["pid_off"], 4, "<I")[0])
-            tcb["state"] = int(unpack_data(tcbptr + tcbinfo["state_off"], 1, "<B")[0])
-            tcb["pri"] = int(unpack_data(tcbptr + tcbinfo["pri_off"], 1, "<B")[0])
-            tcb["stack"] = int(unpack_data(tcbptr + tcbinfo["stack_off"], 4, "<I")[0])
-            tcb["stack_size"] = int(
-                unpack_data(tcbptr + tcbinfo["stack_size_off"], 4, "<I")[0]
+            tcb["pid"] = int(unpack_data(tcbptr + tcbinfo["pid_off"], "<I")[0])
+            tcb["state"] = int(unpack_data(tcbptr + tcbinfo["state_off"], "<B")[0])
+            tcb["pri"] = int(unpack_data(tcbptr + tcbinfo["pri_off"], "<B")[0])
+            tcb["stack"] = int(
+                unpack_data(tcbptr + tcbinfo["stack_off"], self.reg_fmt)[0]
             )
-            tcb["regs"] = int(unpack_data(tcbptr + tcbinfo["regs_off"], 4, "<I")[0])
+            tcb["stack_size"] = int(
+                unpack_data(tcbptr + tcbinfo["stack_size_off"], self.reg_fmt)[0]
+            )
+            tcb["regs"] = int(
+                unpack_data(tcbptr + tcbinfo["regs_off"], self.reg_fmt)[0]
+            )
             tcb["tcbptr"] = tcbptr
             i = 0
             tcb["name"] = ""
             while True:
-                c = int(unpack_data(tcbptr + tcbinfo["name_off"] + i, 1, "<B")[0])
+                c = int(unpack_data(tcbptr + tcbinfo["name_off"] + i, "<B")[0])
                 if c == 0:
                     break
                 i += 1
@@ -852,18 +912,17 @@ class GDBStub:
         def parse_regs_to_gdb(regs):
             gdb_regs = []
             for i in range(0, tcbinfo["regs_num"]):
-                reg_off = int(unpack_data(tcbinfo["reg_off"] + i * 2, 2, "<H")[0])
+                reg_off = int(unpack_data(tcbinfo["reg_off"] + i * 2, "<H", True)[0])
                 if reg_off == UINT16_MAX:
                     gdb_regs.append(b"x")
                 else:
-                    gdb_regs.append(int(unpack_data(regs + reg_off, 4, "<I")[0]))
+                    gdb_regs.append(int(unpack_data(regs + reg_off, self.reg_fmt)[0]))
             return gdb_regs
 
         self.cpunum = self.elffile.symbol["g_running_tasks"]["st_size"] // 4
         logger.debug(f"Have {self.cpunum} cpu")
         unpacked_data = unpack_data(
             self.elffile.symbol["g_running_tasks"]["st_value"],
-            self.elffile.symbol["g_running_tasks"]["st_size"],
             f"<{self.cpunum}I",
         )
 
@@ -1012,6 +1071,15 @@ def arg_parser():
     )
 
     parser.add_argument(
+        "-s",
+        "--symbol",
+        action="store_true",
+        help="Analyze the symbol table in the ELF file, use in thread awareness"
+        "if use logfile input, this option will is false by default"
+        "if use rawfile or coredump input, this option will is true by default",
+    )
+
+    parser.add_argument(
         "--debug",
         action="store_true",
         default=False,
@@ -1095,7 +1163,11 @@ def main(args):
 
     config_log(args.debug)
     elf = DumpELFFile(args.elffile[0])
-    elf.parse()
+    if args.symbol is False:
+        if args.rawfile or args.coredump:
+            args.symbol = True
+
+    elf.parse(args.symbol)
     elf_texts = [elf.text()]
     for name in args.elffile[1:]:
         other = DumpELFFile(name)
@@ -1117,7 +1189,6 @@ def main(args):
         else:
             logger.error("Architecture unknown, exiting...")
             sys.exit(2)
-        elf.parse_addr2line(args.arch, args.addr2line, log.stack_data)
 
     raw = RawMemoryFile(args.rawfile)
     coredump = CoreDumpFile(args.coredump)

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -40,7 +42,6 @@ RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -q
   ninja-build \
   nodejs \
   npm \
-  subversion \
   unzip
 
 RUN mkdir -p /tools
@@ -357,6 +358,7 @@ RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" TZ=Etc/UTC apt-get in
   wget \
   xxd \
   file \
+  subversion \
   tclsh \
   && rm -rf /var/lib/apt/lists/*
 
@@ -385,6 +387,7 @@ RUN pip3 install cmake-format
 RUN pip3 install cvt2utf
 # Install pytest
 RUN pip3 install cxxfilt
+RUN pip3 install construct
 RUN pip3 install esptool==4.8.dev4
 RUN pip3 install imgtool
 RUN pip3 install kconfiglib

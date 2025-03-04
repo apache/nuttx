@@ -718,7 +718,6 @@ menuconfig NRF53_SOFTDEVICE_CONTROLLER
 	bool "SoftDevice Controller"
 	depends on ALLOW_BSDNORDIC_COMPONENTS
 	depends on NRF53_NETCORE
-	select ARMV8M_USEBASEPRI
 	select ARCH_RAMVECTORS
 	select ARCH_IRQPRIO
 	select CRYPTO
@@ -791,11 +790,6 @@ config NRF53_SDC_LE_CODED_PHY
 config NRF53_SDC_DLE
 	bool "Support Data Length Extension (DLE)"
 	default y
-
-config NRF53_BLE_TTY_NAME
-	string "BLE TTY device name"
-	default "/dev/ttyHCI0"
-	depends on UART_BTH4
 
 config NRF53_SDC_FICR_STATIC_ADDR
 	bool "Configure factory generated static random address"

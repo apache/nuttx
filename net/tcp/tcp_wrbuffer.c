@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/tcp/tcp_wrbuffer.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -47,62 +49,18 @@
 #if defined(CONFIG_NET_TCP) && defined(CONFIG_NET_TCP_WRITE_BUFFERS)
 
 /****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/* Package all globals used by this logic into a structure */
-
-struct wrbuffer_s
-{
-  /* The semaphore to protect the buffers */
-
-  sem_t sem;
-
-  /* This is the list of available write buffers */
-
-  sq_queue_t freebuffers;
-
-  /* These are the pre-allocated write buffers */
-
-  struct tcp_wrbuffer_s buffers[CONFIG_NET_TCP_NWRBCHAINS];
-};
-
-/****************************************************************************
  * Private Data
  ****************************************************************************/
 
 /* This is the state of the global write buffer resource */
 
-static struct wrbuffer_s g_wrbuffer;
+NET_BUFPOOL_DECLARE(g_wrbuffer, sizeof(struct tcp_wrbuffer_s),
+                    CONFIG_NET_TCP_NWRBCHAINS,
+                    CONFIG_NET_TCP_ALLOC_WRBCHAINS, 0);
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: tcp_wrbuffer_initialize
- *
- * Description:
- *   Initialize the list of free write buffers
- *
- * Assumptions:
- *   Called once early initialization.
- *
- ****************************************************************************/
-
-void tcp_wrbuffer_initialize(void)
-{
-  int i;
-
-  sq_init(&g_wrbuffer.freebuffers);
-
-  nxsem_init(&g_wrbuffer.sem, 0, CONFIG_NET_TCP_NWRBCHAINS);
-
-  for (i = 0; i < CONFIG_NET_TCP_NWRBCHAINS; i++)
-    {
-      sq_addfirst(&g_wrbuffer.buffers[i].wb_node, &g_wrbuffer.freebuffers);
-    }
-}
 
 /****************************************************************************
  * Name: tcp_wrbuffer_timedalloc
@@ -125,7 +83,6 @@ void tcp_wrbuffer_initialize(void)
 FAR struct tcp_wrbuffer_s *tcp_wrbuffer_timedalloc(unsigned int timeout)
 {
   FAR struct tcp_wrbuffer_s *wrb;
-  int ret;
 
   /* We need to allocate two things:  (1) A write buffer structure and (2)
    * at least one I/O buffer to start the chain.
@@ -135,19 +92,11 @@ FAR struct tcp_wrbuffer_s *tcp_wrbuffer_timedalloc(unsigned int timeout)
    * buffer
    */
 
-  ret = net_sem_timedwait_uninterruptible(&g_wrbuffer.sem, timeout);
-  if (ret != OK)
+  wrb = NET_BUFPOOL_TIMEDALLOC(g_wrbuffer, timeout);
+  if (wrb == NULL)
     {
       return NULL;
     }
-
-  /* Now, we are guaranteed to have a write buffer structure reserved
-   * for us in the free list.
-   */
-
-  wrb = (FAR struct tcp_wrbuffer_s *)sq_remfirst(&g_wrbuffer.freebuffers);
-  DEBUGASSERT(wrb);
-  memset(wrb, 0, sizeof(struct tcp_wrbuffer_s));
 
   /* Now get the first I/O buffer for the write buffer structure */
 
@@ -245,8 +194,7 @@ void tcp_wrbuffer_release(FAR struct tcp_wrbuffer_s *wrb)
 
   /* Then free the write buffer structure */
 
-  sq_addlast(&wrb->wb_node, &g_wrbuffer.freebuffers);
-  nxsem_post(&g_wrbuffer.sem);
+  NET_BUFPOOL_FREE(g_wrbuffer, wrb);
 }
 
 /****************************************************************************
@@ -302,16 +250,7 @@ uint32_t tcp_wrbuffer_inqueue_size(FAR struct tcp_conn_s *conn)
 
 int tcp_wrbuffer_test(void)
 {
-  int val = 0;
-  int ret;
-
-  ret = nxsem_get_value(&g_wrbuffer.sem, &val);
-  if (ret >= 0)
-    {
-      ret = val > 0 ? OK : -ENOSPC;
-    }
-
-  return ret;
+  return NET_BUFPOOL_TEST(g_wrbuffer);
 }
 
 #endif /* CONFIG_NET_TCP && CONFIG_NET_TCP_WRITE_BUFFERS */

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/src/common/arm64_addrenv_utils.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -30,7 +32,8 @@
 #include <nuttx/pgalloc.h>
 #include <nuttx/sched.h>
 
-#include "barriers.h"
+#include <arch/barriers.h>
+
 #include "pgalloc.h"
 #include "arm64_mmu.h"
 
@@ -66,8 +69,8 @@ uintptr_t arm64_get_pgtable(arch_addrenv_t *addrenv, uintptr_t vaddr)
 
   /* Get the current level MAX_LEVELS-1 entry corresponding to this vaddr */
 
-  ptlevel = ARCH_SPGTS;
-  ptprev  = arm64_pgvaddr(addrenv->spgtables[ARCH_SPGTS - 1]);
+  ptlevel = MMU_PGT_LEVEL_MAX - 1;
+  ptprev  = arm64_pgvaddr(addrenv->spgtables[ptlevel]);
   if (!ptprev)
     {
       /* Something is very wrong */
@@ -134,7 +137,7 @@ int arm64_map_pages(arch_addrenv_t *addrenv, uintptr_t *pages,
   uintptr_t ptlevel;
   uintptr_t paddr;
 
-  ptlevel = MMU_PGT_LEVELS;
+  ptlevel = MMU_PGT_LEVEL_MAX;
 
   /* Add the references to pages[] into the caller's address environment */
 
@@ -184,15 +187,16 @@ int arm64_unmap_pages(arch_addrenv_t *addrenv, uintptr_t vaddr,
   uintptr_t ptlevel;
   uintptr_t paddr;
 
-  ptprev  = arm64_pgvaddr(addrenv->spgtables[ARCH_SPGTS - 1]);
+  /* Get the current level MAX_LEVELS-1 entry corresponding to this vaddr */
+
+  ptlevel = MMU_PGT_LEVEL_MAX - 1;
+  ptprev  = arm64_pgvaddr(addrenv->spgtables[ptlevel]);
   if (!ptprev)
     {
       /* Something is very wrong */
 
       return -EFAULT;
     }
-
-  ptlevel = ARCH_SPGTS;
 
   /* Remove the references from the caller's address environment */
 

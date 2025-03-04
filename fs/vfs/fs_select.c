@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/vfs/fs_select.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -38,6 +40,7 @@
 #include <nuttx/fs/fs.h>
 
 #include "inode/inode.h"
+#include "fs_heap.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -128,7 +131,7 @@ int select(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
   if (npfds > 0)
     {
       pollset = (FAR struct pollfd *)
-        kmm_zalloc(npfds * sizeof(struct pollfd));
+        fs_heap_zalloc(npfds * sizeof(struct pollfd));
 
       if (pollset == NULL)
         {
@@ -277,6 +280,6 @@ int select(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
         }
     }
 
-  kmm_free(pollset);
+  fs_heap_free(pollset);
   return ret;
 }

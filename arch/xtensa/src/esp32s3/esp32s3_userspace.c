@@ -29,6 +29,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include <nuttx/nuttx.h>
 #include <nuttx/userspace.h>
 
 #include <arch/board/board_memorymap.h>
@@ -109,14 +110,6 @@
 
 #define PIF_PMS_MAX_REG_ENTRY     16
 #define PIF_PMS_V                 3
-
-#ifndef ALIGN_UP
-#  define ALIGN_UP(num, align) (((num) + ((align) - 1)) & ~((align) - 1))
-#endif
-
-#ifndef ALIGN_DOWN
-#  define ALIGN_DOWN(num, align)  ((num) & ~((align) - 1))
-#endif
 
 /****************************************************************************
  * Private Types

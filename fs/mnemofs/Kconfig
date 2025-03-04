@@ -6,11 +6,18 @@
 config FS_MNEMOFS
 	bool "MNEMOFS NAND Flash File System"
 	default n
-	depends on !DISABLE_MOUNTPOINT && MTD_NAND 
+	depends on !DISABLE_MOUNTPOINT && MTD_NAND
 	---help---
 		Build the mnemofs NAND flash file system.
 
 if FS_MNEMOFS
+config MNEMOFS_EXTRA_DEBUG
+	bool "MNEMOFS Extra Debug Logs"
+	default n
+	depends on FS_MNEMOFS
+	---help---
+		Prints extra log information related to mnemofs.
+
 config MNEMOFS_JOURNAL_NBLKS
 	int "MNEMOFS Journal Block Count"
 	default 20

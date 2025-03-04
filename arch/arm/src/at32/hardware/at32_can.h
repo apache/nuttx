@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/at32/hardware/at32_can.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -305,7 +307,7 @@
 #define CAN_ESTS_BOF                        (1 << 0) /* Bus-off flag */
 
 #define CAN_ESTS_ETR_SHIFT                  (4)                       /* Error type record */
-#define CAN_ESTS_ETR_MASK                   (7 << CAN_ESTS_ETR_SHIFT) 
+#define CAN_ESTS_ETR_MASK                   (7 << CAN_ESTS_ETR_SHIFT)
 #define CAN_ESTS_ETR_NONE                   (0 << CAN_ESTS_ETR_SHIFT) /* No error */
 #define CAN_ESTS_ETR_STUFF                  (1 << CAN_ESTS_ETR_SHIFT) /* Stuff error */
 #define CAN_ESTS_ETR_FORM                   (2 << CAN_ESTS_ETR_SHIFT) /* Form error */
@@ -316,7 +318,7 @@
 #define CAN_ESTS_ETR_SOFT                   (7 << CAN_ESTS_ETR_SHIFT) /* Set by soft */
 
 #define CAN_ESTS_TEC_SHIFT                  (16) /* Transmit error counter */
-#define CAN_ESTS_TEC_MASK                   (0xff << CAN_ESTS_TEC_SHIFT) 
+#define CAN_ESTS_TEC_MASK                   (0xff << CAN_ESTS_TEC_SHIFT)
 
 #define CAN_ESTS_REC_SHIFT                  (24) /* Receive error counter */
 #define CAN_ESTS_REC_MASK                   (0xff << CAN_ESTS_REC_SHIFT)

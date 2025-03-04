@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/machine/risc-v/gnu/arch_memcpy.S
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -39,7 +41,7 @@
 
 	.text
 
-memcpy:
+ARCH_LIBCFUN(memcpy):
 	move		t6, a0  /* Preserve return value */
 
 	/* Defer to byte-oriented copy for small sizes */

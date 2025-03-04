@@ -1,6 +1,8 @@
 # ##############################################################################
 # arch/risc-v/src/cmake/platform.cmake
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -43,7 +45,7 @@ execute_process(
 
 list(APPEND EXTRA_LIB ${extra_library})
 
-if(NOT CONFIG_LIBM)
+if(CONFIG_LIBM_TOOLCHAIN)
   execute_process(
     COMMAND ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} ${NUTTX_EXTRA_FLAGS}
             --print-file-name=libm.a
@@ -52,7 +54,7 @@ if(NOT CONFIG_LIBM)
   list(APPEND EXTRA_LIB ${extra_library})
 endif()
 
-if(CONFIG_LIBSUPCXX)
+if(CONFIG_LIBSUPCXX_TOOLCHAIN)
   execute_process(
     COMMAND ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} ${NUTTX_EXTRA_FLAGS}
             --print-file-name=libsupc++.a
@@ -61,7 +63,7 @@ if(CONFIG_LIBSUPCXX)
   list(APPEND EXTRA_LIB ${extra_library})
 endif()
 
-if(CONFIG_ARCH_COVERAGE)
+if(CONFIG_COVERAGE_TOOLCHAIN)
   execute_process(
     COMMAND ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} ${NUTTX_EXTRA_FLAGS}
             --print-file-name=libgcov.a
@@ -72,4 +74,4 @@ endif()
 
 nuttx_add_extra_library(${EXTRA_LIB})
 
-set(PREPROCES ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} -E -P -x c)
+set(PREPROCESS ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} -E -P -x c)

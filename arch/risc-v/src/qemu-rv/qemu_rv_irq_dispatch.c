@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/qemu-rv/qemu_rv_irq_dispatch.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -61,7 +63,7 @@ static void *riscv_dispatch_irq_ext(uintreg_t irq, uintreg_t *regs)
 static void *riscv_dispatch_irq_ext(uintreg_t irq, uintreg_t *regs)
 {
   int extirq;
-  int hartid = riscv_mhartid();
+  int hartid = up_cpu_index();
   uintptr_t aplic_base = RISCV_APLIC_IDC(QEMU_RV_APLIC_BASE, hartid) +
                             RISCV_APLIC_IDC_CLAIMI;
 

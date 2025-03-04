@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/serial/serial_io.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -66,12 +68,37 @@ void uart_xmitchars(FAR uart_dev_t *dev)
     {
       /* Send the next byte */
 
-      uart_send(dev, dev->xmit.buffer[dev->xmit.tail]);
-      nbytes++;
+      if (dev->ops->sendbuf)
+        {
+          ssize_t sent;
+
+          if (dev->xmit.tail < dev->xmit.head)
+            {
+              sent = dev->xmit.head - dev->xmit.tail;
+            }
+          else
+            {
+              sent = dev->xmit.size - dev->xmit.tail;
+            }
+
+          sent = uart_sendbuf(dev,
+                              &dev->xmit.buffer[dev->xmit.tail],
+                              sent);
+          if (sent > 0)
+            {
+              dev->xmit.tail += sent;
+              nbytes += sent;
+            }
+        }
+      else
+        {
+          uart_send(dev, dev->xmit.buffer[dev->xmit.tail++]);
+          nbytes++;
+        }
 
       /* Increment the tail index */
 
-      if (++(dev->xmit.tail) >= dev->xmit.size)
+      if (dev->xmit.tail >= dev->xmit.size)
         {
           dev->xmit.tail = 0;
         }
@@ -120,27 +147,16 @@ void uart_recvchars(FAR uart_dev_t *dev)
 {
   FAR struct uart_buffer_s *rxbuf = &dev->recv;
 #ifdef CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS
-  unsigned int watermark;
+  /* Pre-calculate the watermark level that we will need to test against. */
+
+  unsigned int watermark =
+    (CONFIG_SERIAL_IFLOWCONTROL_UPPER_WATERMARK * rxbuf->size) / 100;
 #endif
-  unsigned int status;
-  int nexthead = rxbuf->head + 1;
 #if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP) || \
     defined(CONFIG_TTY_FORCE_PANIC) || defined(CONFIG_TTY_LAUNCH)
   int signo = 0;
 #endif
   uint16_t nbytes = 0;
-
-  if (nexthead >= rxbuf->size)
-    {
-      nexthead = 0;
-    }
-
-#ifdef CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS
-  /* Pre-calculate the watermark level that we will need to test against. */
-
-  watermark = (CONFIG_SERIAL_IFLOWCONTROL_UPPER_WATERMARK * rxbuf->size) /
-              100;
-#endif
 
   /* Loop putting characters into the receive buffer until there are no
    * further characters to available.
@@ -148,10 +164,11 @@ void uart_recvchars(FAR uart_dev_t *dev)
 
   while (uart_rxavailable(dev))
     {
+      int nexthead = rxbuf->head + 1 < rxbuf->size ? rxbuf->head + 1 : 0;
       bool is_full = (nexthead == rxbuf->tail);
+      FAR char *pbuf;
       char ch;
 
-#ifdef CONFIG_SERIAL_IFLOWCONTROL
 #ifdef CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS
       unsigned int nbuffered;
 
@@ -181,7 +198,7 @@ void uart_recvchars(FAR uart_dev_t *dev)
               break;
             }
         }
-#else
+#elif defined(CONFIG_SERIAL_IFLOWCONTROL)
       /* Check if RX buffer is full and allow serial low-level driver to
        * pause processing. This allows proper utilization of hardware flow
        * control.
@@ -197,40 +214,73 @@ void uart_recvchars(FAR uart_dev_t *dev)
             }
         }
 #endif
-#endif
 
       /* Get this next character from the hardware */
 
-      ch = uart_receive(dev, &status);
+      if (!is_full && dev->ops->recvbuf)
+        {
+          ssize_t ret;
+
+          if (rxbuf->tail > rxbuf->head)
+            {
+              nbytes = rxbuf->tail - rxbuf->head - 1;
+            }
+          else if (rxbuf->tail)
+            {
+              nbytes = rxbuf->size - rxbuf->head;
+            }
+          else
+            {
+              nbytes = rxbuf->size - rxbuf->head - 1;
+            }
+
+          pbuf = &rxbuf->buffer[rxbuf->head];
+          ret = uart_recvbuf(dev, pbuf, nbytes);
+          if (ret <= 0)
+            {
+              continue;
+            }
+
+          nbytes = ret;
+          rxbuf->head += nbytes;
+          if (rxbuf->head >= rxbuf->size)
+            {
+              rxbuf->head = 0;
+            }
+        }
+      else
+        {
+          unsigned int status;
+
+          ch = uart_receive(dev, &status);
+          pbuf = &ch;
+          nbytes = 1;
+
+          /* If the RX buffer becomes full, then the serial data is
+           * discarded. This is necessary because on most serial hardware,
+           * you must read the data in order to clear the RX interrupt.
+           * An option on some hardware might be to simply disable RX
+           * interrupts until the RX buffer becomes non-FULL. However, that
+           * would probably just cause the overrun to occur in hardware
+           * (unless it has some large internal buffering).
+           */
+
+          if (!is_full)
+            {
+              /* Add the character to the buffer */
+
+              rxbuf->buffer[rxbuf->head] = ch;
+
+              /* Increment the head index */
+
+              rxbuf->head = nexthead;
+            }
+        }
 
 #if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP) || \
     defined(CONFIG_TTY_FORCE_PANIC) || defined(CONFIG_TTY_LAUNCH)
-      signo = uart_check_special(dev, &ch, 1);
+      signo = uart_check_special(dev, pbuf, nbytes);
 #endif
-
-      /* If the RX buffer becomes full, then the serial data is discarded.
-       * This is necessary because on most serial hardware, you must read
-       * the data in order to clear the RX interrupt. An option on some
-       * hardware might be to simply disable RX interrupts until the RX
-       * buffer becomes non-FULL.  However, that would probably just cause
-       * the overrun to occur in hardware (unless it has some large internal
-       * buffering).
-       */
-
-      if (!is_full)
-        {
-          /* Add the character to the buffer */
-
-          rxbuf->buffer[rxbuf->head] = ch;
-
-          /* Increment the head index */
-
-          rxbuf->head = nexthead;
-          if (++nexthead >= rxbuf->size)
-            {
-               nexthead = 0;
-            }
-        }
     }
 
   /* If any bytes were added to the buffer, inform any waiters there is new
@@ -261,8 +311,7 @@ void uart_recvchars(FAR uart_dev_t *dev)
 
   if (signo != 0)
     {
-      nxsig_kill(dev->pid, signo);
-      uart_reset_sem(dev);
+      nxsig_tgkill(-1, dev->pid, signo);
     }
 #endif
 }

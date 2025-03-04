@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/paging/pg_worker.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -37,7 +39,6 @@
 #include <nuttx/signal.h>
 #include <nuttx/page.h>
 #include <nuttx/clock.h>
-#include <nuttx/signal.h>
 
 #include "sched/sched.h"
 #include "paging/paging.h"

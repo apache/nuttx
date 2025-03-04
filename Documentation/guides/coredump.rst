@@ -16,9 +16,7 @@ Enable Kconfig
 
     .. code-block:: console
 
-      CONFIG_ELF=y                        /* Enable ELF */
-
-      CONFIG_ELF_COREDUMP=y               /* Enable ELF Coredump */
+      CONFIG_COREDUMP=y                   /* Enable Coredump */
 
       CONFIG_BOARD_COREDUMP_SYSLOG=y      /* Enable Board Coredump, if exceptions and assertions occur, */
 

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/mpfs/mpfs_coremmc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -208,9 +210,16 @@ static int  mpfs_registercallback(struct sdio_dev_s *dev,
                                   worker_t callback, void *arg);
 static void mpfs_callback(void *arg);
 
+#ifdef CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE
+static int mpfs_coremmc_wrcomplete_interrupt(int irq, void *context,
+                                             void *arg);
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+static spinlock_t g_mpfs_modifyreg_lock = SP_UNLOCKED;
 
 struct mpfs_dev_s g_coremmc_dev =
 {
@@ -242,6 +251,10 @@ struct mpfs_dev_s g_coremmc_dev =
   },
   .hw_base           = CONFIG_MPFS_COREMMC_BASE,
   .plic_irq          = MPFS_IRQ_FABRIC_F2H_0 + CONFIG_MPFS_COREMMC_IRQNUM,
+#ifdef CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE
+  .wrcomplete_irq    = MPFS_IRQ_FABRIC_F2H_0 +
+                       CONFIG_MPFS_COREMMC_WRCOMPLETE_IRQNUM,
+#endif
   .blocksize         = 512,
   .fifo_depth        = 0,
   .onebit            = false,
@@ -280,12 +293,12 @@ static void mpfs_modifyreg8(uintptr_t addr, uint8_t clearbits,
   irqstate_t flags;
   uint8_t    regval;
 
-  flags   = spin_lock_irqsave(NULL);
+  flags   = spin_lock_irqsave(&g_mpfs_modifyreg_lock);
   regval  = getreg8(addr);
   regval &= ~clearbits;
   regval |= setbits;
   putreg8(regval, addr);
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&g_mpfs_modifyreg_lock, flags);
 }
 
 /****************************************************************************
@@ -472,6 +485,17 @@ static void mpfs_configwaitints(struct mpfs_dev_s *priv, uint32_t waitmask,
    */
 
   flags = enter_critical_section();
+
+#ifdef CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE
+  if ((waitevents & SDIOWAIT_WRCOMPLETE) != 0)
+    {
+      up_enable_irq(priv->wrcomplete_irq);
+    }
+  else if ((priv->waitevents & SDIOWAIT_WRCOMPLETE) != 0)
+    {
+      up_disable_irq(priv->wrcomplete_irq);
+    }
+#endif
 
   priv->waitevents = waitevents;
   priv->wkupevent  = wkupevent;
@@ -773,6 +797,34 @@ static void mpfs_endtransfer(struct mpfs_dev_s *priv,
       mpfs_endwait(priv, wkupevent);
     }
 }
+
+/****************************************************************************
+ * Name: mpfs_coremmc_wrcomplete_interrupt
+ *
+ * Description:
+ *   coremmc interrupt handler for SD card wrcomplete (DAT0) detection
+ *
+ * Input Parameters:
+ *   priv  - Instance of the coremmc private state structure.
+ *
+ * Returned Value:
+ *   OK    - Interrupt handled
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE
+static int mpfs_coremmc_wrcomplete_interrupt(int irq, void *context,
+                                             void *arg)
+{
+  struct mpfs_dev_s *priv = (struct mpfs_dev_s *)arg;
+
+  DEBUGASSERT(priv != NULL);
+
+  mpfs_endwait(priv, SDIOWAIT_WRCOMPLETE);
+
+  return OK;
+}
+#endif
 
 /****************************************************************************
  * Name: mpfs_coremmc_interrupt
@@ -1307,7 +1359,19 @@ static int mpfs_attach(struct sdio_dev_s *dev)
       mpfs_putreg8(priv, 0x00, MPFS_COREMMC_MBIMR);
       mpfs_putreg8(priv, 0xff, MPFS_COREMMC_MBICR);
 
-      up_enable_irq(priv->plic_irq);
+#ifdef CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE
+      ret = irq_attach(priv->wrcomplete_irq,
+                       mpfs_coremmc_wrcomplete_interrupt, priv);
+
+      if (ret != OK)
+        {
+          irq_detach(priv->plic_irq);
+        }
+      else
+#endif
+        {
+          up_enable_irq(priv->plic_irq);
+        }
     }
 
   mcinfo("attach: %d\n", ret);

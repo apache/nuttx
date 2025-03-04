@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/reset/reset.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -58,12 +60,12 @@ struct reset_control
   FAR struct reset_controller_dev *rcdev;
   struct list_node list;
   unsigned int id;
-  atomic_int refcnt;
+  atomic_t refcnt;
   bool acquired;
   bool shared;
   bool array;
-  atomic_int deassert_count;
-  atomic_int triggered_count;
+  atomic_t deassert_count;
+  atomic_t triggered_count;
 };
 
 /****************************************************************************
@@ -135,7 +137,7 @@ int reset_control_status(FAR struct reset_control *rstc);
  *
  *   Firstly, get a reset controller device from list, and then call
  *   reset_control_get_internal function by index, shared or acquired
- *   parameters retrun a reset control.
+ *   parameters return a reset control.
  *
  * Input Parameters:
  *   name     - The reset controller name

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/armv7-a/gic.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -135,6 +137,11 @@
                                              /* 0x000c-0x001c: Reserved */
                                              /* 0x0020-0x003c: Implementation defined */
                                              /* 0x0040-0x007c: Reserved */
+
+/* V2M Registers */
+
+#define GIC_V2MTYPER_OFFSET        0x008
+#define GIC_V2MSETSPI_OFFSET       0x040
 
 /* Interrupt Security Registers: 0x0080-0x009c */
 
@@ -276,6 +283,11 @@
 #define GIC_ICDSSPR(n)             (MPCORE_ICD_VBASE+GIC_ICDSSPR_OFFSET(n))
 #define GIC_ICDPIDR(n)             (MPCORE_ICD_VBASE+GIC_ICDPIDR_OFFSET(n))
 #define GIC_ICDCIDR(n)             (MPCORE_ICD_VBASE+GIC_ICDCIDR_OFFSET(n))
+
+/* V2M Registers */
+
+#define GIC_V2MTYPER               (MPCORE_V2M_VBASE + GIC_V2MTYPER_OFFSET)
+#define GIC_V2MSETSPI              (MPCORE_V2M_VBASE + GIC_V2MSETSPI_OFFSET)
 
 /* GIC Register Bit Definitions *********************************************/
 
@@ -557,6 +569,14 @@
 #  define GIC_ICDSGIR_TGTFILTER_THIS  (2 << GIC_ICDSGIR_TGTFILTER_SHIFT) /* Interrupt is sent to requesting CPU only */
                                                                          /* Bits 26-31: Reserved */
 
+/* V2M Registers */
+
+#define GIC_V2MTYPES_BASE_SHIFT       16
+#define GIC_V2MTYPES_BASE_MASK        0x3FF
+#define GIC_V2MTYPES_NUMBER_MASK      0x3FF
+#define GIC_V2MTYPES_BASE(x)          (((x) >> GIC_V2MTYPES_BASE_SHIFT) & GIC_V2MTYPES_BASE_MASK)
+#define GIC_V2MTYPES_NUMBER(x)        ((x) & GIC_V2MTYPES_NUMBER_MASK)
+
 /* Interrupt IDs ************************************************************/
 
 /* The Global Interrupt Controller (GIC) collects up to 224 interrupt
@@ -617,12 +637,12 @@
 
 #ifdef CONFIG_ARCH_TRUSTZONE_SECURE
 #  define GIC_SMP_CPUSTART       GIC_IRQ_SGI9
-#  define GIC_SMP_CPUPAUSE       GIC_IRQ_SGI10
-#  define GIC_SMP_CPUCALL        GIC_IRQ_SGI11
+#  define GIC_SMP_CALL           GIC_IRQ_SGI10
+#  define GIC_SMP_SCHED          GIC_IRQ_SGI11
 #else
 #  define GIC_SMP_CPUSTART       GIC_IRQ_SGI1
-#  define GIC_SMP_CPUPAUSE       GIC_IRQ_SGI2
-#  define GIC_SMP_CPUCALL        GIC_IRQ_SGI3
+#  define GIC_SMP_CALL           GIC_IRQ_SGI2
+#  define GIC_SMP_SCHED          GIC_IRQ_SGI3
 #endif
 
 /****************************************************************************
@@ -678,36 +698,7 @@ static inline unsigned int arm_gic_nlines(void)
  *
  ****************************************************************************/
 
-static inline void arm_cpu_sgi(int sgi, unsigned int cpuset)
-{
-  uint32_t regval;
-
-#ifdef CONFIG_SMP
-  regval = GIC_ICDSGIR_INTID(sgi) | GIC_ICDSGIR_CPUTARGET(cpuset) |
-           GIC_ICDSGIR_TGTFILTER_LIST;
-#else
-  regval = GIC_ICDSGIR_INTID(sgi) | GIC_ICDSGIR_CPUTARGET(0) |
-           GIC_ICDSGIR_TGTFILTER_THIS;
-#endif
-
-#if defined(CONFIG_ARCH_TRUSTZONE_SECURE)
-  if (sgi >= GIC_IRQ_SGI0 && sgi <= GIC_IRQ_SGI7)
-#endif
-    {
-      /* Set NSATT be 1: forward the SGI specified in the SGIINTID field to a
-       * specified CPU interfaces only if the SGI is configured as Group 1 on
-       * that interface.
-       * For non-secure context, the configuration of GIC_ICDSGIR_NSATT_GRP1
-       * is not mandatory in the GICv2 specification, but for SMP scenarios,
-       * this value needs to be configured, otherwise issues may occur in the
-       * SMP scenario.
-       */
-
-      regval |= GIC_ICDSGIR_NSATT_GRP1;
-    }
-
-  putreg32(regval, GIC_ICDSGIR);
-}
+void arm_cpu_sgi(int sgi, unsigned int cpuset);
 
 /****************************************************************************
  * Public Function Prototypes
@@ -845,14 +836,14 @@ int arm_start_handler(int irq, void *context, void *arg);
 #endif
 
 /****************************************************************************
- * Name: arm_pause_handler
+ * Name: arm_smp_sched_handler
  *
  * Description:
- *   This is the handler for SGI2.  It performs the following operations:
+ *   This is the handler for sched.
  *
  *   1. It saves the current task state at the head of the current assigned
  *      task list.
- *   2. It waits on a spinlock, then
+ *   2. It porcess g_delivertasks
  *   3. Returns from interrupt, restoring the state of the new task at the
  *      head of the ready to run list.
  *
@@ -865,9 +856,8 @@ int arm_start_handler(int irq, void *context, void *arg);
  ****************************************************************************/
 
 #ifdef CONFIG_SMP
-int arm_pause_handler(int irq, void *context, void *arg);
+int arm_smp_sched_handler(int irq, void *context, void *arg);
 #endif
-
 /****************************************************************************
  * Name: arm_gic_dump
  *
@@ -884,10 +874,14 @@ int arm_pause_handler(int irq, void *context, void *arg);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_IRQ_INFO
+#ifdef CONFIG_ARMV7A_GICv2_DUMP
 void arm_gic_dump(const char *msg, bool all, int irq);
 #else
 #  define arm_gic_dump(msg, all, irq)
+#endif
+
+#ifdef CONFIG_ARMV7A_GICv2M
+int gic_v2m_initialize(void);
 #endif
 
 #undef EXTERN

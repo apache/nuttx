@@ -1,14 +1,10 @@
 /****************************************************************************
  * arch/arm/src/tms570/tms570_lowputc.c
  *
- *   Copyright (C) 2015, 2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * Includes some logic from TI sample which has a compatible three-clause
- * BSD license and:
- *
- *   Copyright (c) 2012, Texas Instruments Incorporated
- *   All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2015,2018 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2012 Texas Instruments Incorporated
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -85,6 +81,12 @@
 #  error "No CONFIG_SCIn_SERIAL_CONSOLE Setting"
 #  undef HAVE_SERIAL_CONSOLE
 #endif
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static spinlock_t g_tms570_lowputc_lock = SP_UNLOCKED;
 
 /****************************************************************************
  * Public Data
@@ -191,30 +193,18 @@ void arm_lowputc(char ch)
 #ifdef HAVE_SERIAL_CONSOLE
   irqstate_t flags;
 
-  for (; ; )
-    {
-      /* Wait for the transmitter to be available */
+  /* Wait for the transmitter to be available */
 
-      while ((getreg32(TMS570_CONSOLE_BASE + TMS570_SCI_FLR_OFFSET) &
-        SCI_FLR_TXRDY) == 0);
+  flags = spin_lock_irqsave(&g_tms570_lowputc_lock);
 
-      /* Disable interrupts so that the test and the transmission are
-       * atomic.
-       */
+  while ((getreg32(TMS570_CONSOLE_BASE + TMS570_SCI_FLR_OFFSET) &
+    SCI_FLR_TXRDY) == 0);
 
-      flags = spin_lock_irqsave(NULL);
-      if ((getreg32(TMS570_CONSOLE_BASE + TMS570_SCI_FLR_OFFSET) &
-        SCI_FLR_TXRDY) != 0)
-        {
-          /* Send the character */
+  /* Send the character */
 
-          putreg32((uint32_t)ch, TMS570_CONSOLE_BASE + TMS570_SCI_TD_OFFSET);
-          spin_unlock_irqrestore(NULL, flags);
-          return;
-        }
+  putreg32((uint32_t)ch, TMS570_CONSOLE_BASE + TMS570_SCI_TD_OFFSET);
 
-      spin_unlock_irqrestore(NULL, flags);
-    }
+  spin_unlock_irqrestore(&g_tms570_lowputc_lock, flags);
 #endif
 }
 
@@ -226,21 +216,11 @@ void arm_lowputc(char ch)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef HAVE_SERIAL_CONSOLE
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      arm_lowputc('\r');
-    }
-
   arm_lowputc(ch);
 #endif
-  return ch;
 }
 
 /****************************************************************************

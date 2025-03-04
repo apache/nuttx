@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/task/task_setup.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -402,6 +404,7 @@ static int nxthread_setup_scheduler(FAR struct tcb_s *tcb, int priority,
                                     uint8_t ttype)
 {
   FAR struct tcb_s *rtcb = this_task();
+  irqstate_t flags;
   int ret;
 
   /* Assign a unique task ID to the task. */
@@ -479,63 +482,24 @@ static int nxthread_setup_scheduler(FAR struct tcb_s *tcb, int priority,
 
       /* Add the task to the inactive task list */
 
-      sched_lock();
+      flags = enter_critical_section();
       dq_addfirst((FAR dq_entry_t *)tcb, list_inactivetasks());
       tcb->task_state = TSTATE_TASK_INACTIVE;
-      sched_unlock();
+      leave_critical_section(flags);
     }
 
   return ret;
 }
 
 /****************************************************************************
- * Name: nxtask_setup_name
- *
- * Description:
- *   Assign the task name.
- *
- * Input Parameters:
- *   tcb  - Address of the new task's TCB
- *   name - Name of the new task
- *
- * Returned Value:
- *  None
- *
+ * Public Functions
  ****************************************************************************/
-
-#if CONFIG_TASK_NAME_SIZE > 0
-static void nxtask_setup_name(FAR struct task_tcb_s *tcb,
-                              FAR const char *name)
-{
-  FAR char *dst = tcb->cmn.name;
-  int i;
-
-  /* Copy the name into the TCB */
-
-  for (i = 0; i < CONFIG_TASK_NAME_SIZE; i++)
-    {
-      char c = *name++;
-
-      if (c == '\0')
-        {
-          break;
-        }
-
-      *dst++ = isspace(c) ? '_' : c;
-    }
-
-  *dst = '\0';
-}
-#else
-#  define nxtask_setup_name(t,n)
-#endif /* CONFIG_TASK_NAME_SIZE */
 
 /****************************************************************************
  * Name: nxtask_setup_stackargs
  *
  * Description:
- *   This functions is called only from nxtask_setup_arguments()  It will
- *   allocate space on the new task's stack and will copy the argv[] array
+ *   Allocate space on the new task's stack and will copy the argv[] array
  *   and all strings to the task's stack where it is readily accessible to
  *   the task.  Data on the stack, on the other hand, is guaranteed to be
  *   accessible no matter what privilege mode the task runs in.
@@ -552,9 +516,9 @@ static void nxtask_setup_name(FAR struct task_tcb_s *tcb,
  *
  ****************************************************************************/
 
-static int nxtask_setup_stackargs(FAR struct task_tcb_s *tcb,
-                                  FAR const char *name,
-                                  FAR char * const argv[])
+int nxtask_setup_stackargs(FAR struct task_tcb_s *tcb,
+                           FAR const char *name,
+                           FAR char * const argv[])
 {
   FAR char **stackargv;
   FAR char *str;
@@ -563,6 +527,13 @@ static int nxtask_setup_stackargs(FAR struct task_tcb_s *tcb,
   int nbytes;
   int argc;
   int i;
+
+  /* Give a name to the unnamed tasks */
+
+  if (!name)
+    {
+      name = (FAR char *)g_noname;
+    }
 
   /* Get the size of the task name (including the NUL terminator) */
 
@@ -663,10 +634,6 @@ static int nxtask_setup_stackargs(FAR struct task_tcb_s *tcb,
 }
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Name: nxtask_setup_scheduler
  *
  * Description:
@@ -737,37 +704,26 @@ int pthread_setup_scheduler(FAR struct pthread_tcb_s *tcb, int priority,
 #endif
 
 /****************************************************************************
- * Name: nxtask_setup_arguments
+ * Name: nxtask_setup_name
  *
  * Description:
- *   This functions sets up parameters in the Task Control Block (TCB) in
- *   preparation for starting a new thread.
- *
- *   nxtask_setup_arguments() is called only from nxtask_init() and
- *   nxtask_start() to create a new task.  In the "normal" case, the argv[]
- *   array is a structure in the TCB, the arguments are cloned via strdup.
- *
- *   In the kernel build case, the argv[] array and all strings are copied
- *   to the task's stack.  This is done because the TCB (and kernel allocated
- *   strings) are only accessible in kernel-mode.  Data on the stack, on the
- *   other hand, is guaranteed to be accessible no matter what mode the
- *   task runs in.
+ *   Assign the task name.
  *
  * Input Parameters:
  *   tcb  - Address of the new task's TCB
- *   name - Name of the new task (not used)
- *   argv - A pointer to an array of input parameters.  The array should be
- *          terminated with a NULL argv[] value.  If no parameters are
- *          required, argv may be NULL.
+ *   name - Name of the new task
  *
  * Returned Value:
- *  OK
+ *  None
  *
  ****************************************************************************/
 
-int nxtask_setup_arguments(FAR struct task_tcb_s *tcb,
-                           FAR const char *name, FAR char * const argv[])
+#if CONFIG_TASK_NAME_SIZE > 0
+void nxtask_setup_name(FAR struct task_tcb_s *tcb, FAR const char *name)
 {
+  FAR char *dst = tcb->cmn.name;
+  int i;
+
   /* Give a name to the unnamed tasks */
 
   if (!name)
@@ -775,14 +731,20 @@ int nxtask_setup_arguments(FAR struct task_tcb_s *tcb,
       name = (FAR char *)g_noname;
     }
 
-  /* Setup the task name */
+  /* Copy the name into the TCB */
 
-  nxtask_setup_name(tcb, name);
+  for (i = 0; i < CONFIG_TASK_NAME_SIZE; i++)
+    {
+      char c = *name++;
 
-  /* Copy the argv[] array and all strings are to the task's stack.  Data on
-   * the stack is guaranteed to be accessible by the ask no matter what
-   * privilege mode the task runs in.
-   */
+      if (c == '\0')
+        {
+          break;
+        }
 
-  return nxtask_setup_stackargs(tcb, name, argv);
+      *dst++ = isspace(c) ? '_' : c;
+    }
+
+  *dst = '\0';
 }
+#endif /* CONFIG_TASK_NAME_SIZE */

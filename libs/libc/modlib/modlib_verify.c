@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/modlib/modlib_verify.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -79,7 +81,8 @@ int modlib_verifyheader(FAR const Elf_Ehdr *ehdr)
 
   /* Verify that this is a relocatable file */
 
-  if (ehdr->e_type != ET_REL && ehdr->e_type != ET_DYN)
+  if (ehdr->e_type != ET_REL && ehdr->e_type != ET_DYN &&
+      ehdr->e_type != ET_EXEC)
     {
       berr("ERROR: Not a relocatable file: e_type=%d\n", ehdr->e_type);
       return -EINVAL;

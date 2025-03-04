@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/common/gnu/arm_signal_handler.S
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -32,7 +34,6 @@
  * File info
  ****************************************************************************/
 
-	.syntax		unified
 	.file		"arm_signal_handler.S"
 
 /****************************************************************************
@@ -67,9 +68,17 @@
  ****************************************************************************/
 
 	.text
+#ifdef __ghs__
+	.thumb
+#else
 	.thumb_func
+#endif
 	.globl	up_signal_handler
+#ifdef __ghs__
+	.type	up_signal_handler, $function
+#else
 	.type	up_signal_handler, function
+#endif
 up_signal_handler:
 
 	/* Save some register */

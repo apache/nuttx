@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/clk/clk_rpmsg.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -32,7 +34,7 @@
 #include <nuttx/clk/clk_provider.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
-#include <nuttx/rptun/openamp.h>
+#include <nuttx/rpmsg/rpmsg.h>
 #include <nuttx/semaphore.h>
 
 /****************************************************************************
@@ -166,7 +168,6 @@ static void clk_rpmsg_server_bind(FAR struct rpmsg_device *rdev,
                                   FAR void *priv_,
                                   FAR const char *name,
                                   uint32_t dest);
-static void clk_rpmsg_server_unbind(FAR struct rpmsg_endpoint *ept);
 
 static int clk_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept,
                             FAR void *data, size_t len,
@@ -497,6 +498,10 @@ static int64_t clk_rpmsg_sendrecv(FAR struct rpmsg_endpoint *ept,
           ret = cookie.result;
         }
     }
+  else
+    {
+      rpmsg_release_tx_buffer(ept, msg);
+    }
 
   nxsem_destroy(&cookie.sem);
   return ret;
@@ -510,30 +515,7 @@ static bool clk_rpmsg_server_match(FAR struct rpmsg_device *rdev,
   return !strcmp(name, CLK_RPMSG_EPT_NAME);
 }
 
-static void clk_rpmsg_server_bind(FAR struct rpmsg_device *rdev,
-                                  FAR void *priv_,
-                                  FAR const char *name,
-                                  uint32_t dest)
-{
-  FAR struct clk_rpmsg_server_s *priv;
-
-  priv = kmm_zalloc(sizeof(struct clk_rpmsg_server_s));
-  if (!priv)
-    {
-      return;
-    }
-
-  priv->ept.priv = priv;
-
-  list_initialize(&priv->clk_list);
-
-  rpmsg_create_ept(&priv->ept, rdev, name,
-                   RPMSG_ADDR_ANY, RPMSG_ADDR_ANY,
-                   clk_rpmsg_ept_cb,
-                   clk_rpmsg_server_unbind);
-}
-
-static void clk_rpmsg_server_unbind(FAR struct rpmsg_endpoint *ept)
+static void clk_rpmsg_server_ept_release(FAR struct rpmsg_endpoint *ept)
 {
   FAR struct clk_rpmsg_server_s *priv = ept->priv;
   FAR struct clk_rpmsg_s *clkrp_tmp;
@@ -551,9 +533,31 @@ static void clk_rpmsg_server_unbind(FAR struct rpmsg_endpoint *ept)
       kmm_free(clkrp);
     }
 
-  rpmsg_destroy_ept(ept);
-
   kmm_free(priv);
+}
+
+static void clk_rpmsg_server_bind(FAR struct rpmsg_device *rdev,
+                                  FAR void *priv_,
+                                  FAR const char *name,
+                                  uint32_t dest)
+{
+  FAR struct clk_rpmsg_server_s *priv;
+
+  priv = kmm_zalloc(sizeof(struct clk_rpmsg_server_s));
+  if (!priv)
+    {
+      return;
+    }
+
+  priv->ept.priv = priv;
+  priv->ept.release_cb = clk_rpmsg_server_ept_release;
+
+  list_initialize(&priv->clk_list);
+
+  rpmsg_create_ept(&priv->ept, rdev, name,
+                   RPMSG_ADDR_ANY, RPMSG_ADDR_ANY,
+                   clk_rpmsg_ept_cb,
+                   rpmsg_destroy_ept);
 }
 
 static void clk_rpmsg_client_created(FAR struct rpmsg_device *rdev,
@@ -628,6 +632,11 @@ static int clk_rpmsg_enable(FAR struct clk_s *clk)
   uint32_t size;
   uint32_t len;
 
+  if (up_interrupt_context() || sched_idletask())
+    {
+      return -EPERM;
+    }
+
   ept = clk_rpmsg_get_ept(&name);
   if (!ept)
     {
@@ -659,6 +668,11 @@ static void clk_rpmsg_disable(FAR struct clk_s *clk)
   uint32_t size;
   uint32_t len;
 
+  if (up_interrupt_context() || sched_idletask())
+    {
+      return;
+    }
+
   ept = clk_rpmsg_get_ept(&name);
   if (!ept)
     {
@@ -688,6 +702,11 @@ static int clk_rpmsg_is_enabled(FAR struct clk_s *clk)
   FAR const char *name = clk->name;
   uint32_t size;
   uint32_t len;
+
+  if (up_interrupt_context() || sched_idletask())
+    {
+      return -EPERM;
+    }
 
   ept = clk_rpmsg_get_ept(&name);
   if (!ept)

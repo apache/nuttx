@@ -1,8 +1,9 @@
 /****************************************************************************
  * boards/arm/stm32l4/nucleo-l476rg/src/stm32_as726x.c
  *
- *   Copyright (C) 2019 Fabian Justi. All rights reserved.
- *   Author: Fabian Justi <Fabian.Justi@gmx.de>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2019 Fabian Justi. All rights reserved.
+ * SPDX-FileContributor: Fabian Justi <Fabian.Justi@gmx.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

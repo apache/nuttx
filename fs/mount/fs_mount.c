@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/mount/fs_mount.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -69,8 +71,8 @@
     defined(CONFIG_FS_PROCFS) || defined(CONFIG_NFS) || \
     defined(CONFIG_FS_TMPFS) || defined(CONFIG_FS_USERFS) || \
     defined(CONFIG_FS_CROMFS) || defined(CONFIG_FS_UNIONFS) || \
-    defined(CONFIG_FS_HOSTFS) || defined(CONFIG_FS_RPMSGFS) || \
-    defined(CONFIG_FS_V9FS)
+    defined(CONFIG_FS_HOSTFS) || defined(CONFIG_FS_ZIPFS) || \
+    defined(CONFIG_FS_RPMSGFS) || defined(CONFIG_FS_V9FS)
 #  define NODFS_SUPPORT
 #endif
 
@@ -125,9 +127,6 @@ static const struct fsmap_t g_bdfsmap[] =
 #ifdef MDFS_SUPPORT
 /* File systems that require MTD drivers */
 
-#ifdef CONFIG_FS_ROMFS
-extern const struct mountpt_operations g_romfs_operations;
-#endif
 #ifdef CONFIG_FS_SPIFFS
 extern const struct mountpt_operations g_spiffs_operations;
 #endif
@@ -140,9 +139,6 @@ extern const struct mountpt_operations g_mnemofs_operations;
 
 static const struct fsmap_t g_mdfsmap[] =
 {
-#ifdef CONFIG_FS_ROMFS
-    { "romfs", &g_romfs_operations },
-#endif
 #ifdef CONFIG_FS_SPIFFS
     { "spiffs", &g_spiffs_operations },
 #endif
@@ -298,7 +294,7 @@ int nx_mount(FAR const char *source, FAR const char *target,
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   struct inode_search_s desc;
 #endif
-  void *fshandle = NULL;
+  FAR void *fshandle = NULL;
   int ret;
 
   /* Verify required pointer arguments */
@@ -334,11 +330,28 @@ int nx_mount(FAR const char *source, FAR const char *target,
 #endif /* MDFS_SUPPORT */
       if (mops == NULL)
         {
-          ferr("ERROR: Failed to find MTD based file system %s\n",
-               filesystemtype);
+#ifdef BDFS_SUPPORT
+          mops = mount_findfs(g_bdfsmap, filesystemtype);
+#endif /* BDFS_SUPPORT */
+          if (mops == NULL)
+            {
+              ferr("ERROR: Failed to find MTD based file system %s\n",
+                   filesystemtype);
 
-          ret = -ENODEV;
-          goto errout_with_inode;
+              ret = -ENODEV;
+              goto errout_with_inode;
+            }
+#ifdef CONFIG_MTD
+          else
+            {
+              inode_release(drvr_inode);
+              ret = mtd_proxy(source, mountflags, &drvr_inode);
+              if (ret < 0)
+                {
+                  goto errout_with_inode;
+                }
+            }
+#endif
         }
     }
   else
@@ -356,12 +369,7 @@ int nx_mount(FAR const char *source, FAR const char *target,
       goto errout;
     }
 
-  ret = inode_lock();
-  if (ret < 0)
-    {
-      goto errout_with_inode;
-    }
-
+  inode_lock();
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   /* Check if the inode already exists */
 
@@ -389,8 +397,63 @@ int nx_mount(FAR const char *source, FAR const char *target,
           goto errout_with_lock;
         }
     }
-  else
 #endif
+
+  /* Bind the block driver to an instance of the file system.  The file
+   * system returns a reference to some opaque, fs-dependent structure
+   * that encapsulates this binding.
+   */
+
+  if (mops->bind == NULL)
+    {
+      /* The filesystem does not support the bind operation ??? */
+
+      ferr("ERROR: Filesystem does not support bind\n");
+      ret = -EINVAL;
+      goto errout_with_lock;
+    }
+
+  /* Increment reference count for the reference we pass to the file system */
+
+#if defined(BDFS_SUPPORT) || defined(MDFS_SUPPORT)
+#ifdef NODFS_SUPPORT
+  if (drvr_inode != NULL)
+#endif
+    {
+      atomic_fetch_add(&drvr_inode->i_crefs, 1);
+    }
+#endif
+
+  inode_unlock();
+
+  /* On failure, the bind method returns -errorcode */
+
+#if defined(BDFS_SUPPORT) || defined(MDFS_SUPPORT)
+  ret = mops->bind(drvr_inode, data, &fshandle);
+#else
+  ret = mops->bind(NULL, data, &fshandle);
+#endif
+  inode_lock();
+  if (ret < 0)
+    {
+      /* The inode is unhappy with the driver for some reason.  Back out
+       * the count for the reference we failed to pass and exit with an
+       * error.
+       */
+
+      ferr("ERROR: Bind method failed: %d\n", ret);
+
+#if defined(BDFS_SUPPORT) || defined(MDFS_SUPPORT)
+#ifdef NODFS_SUPPORT
+      if (drvr_inode != NULL)
+#endif
+        {
+          atomic_fetch_sub(&drvr_inode->i_crefs, 1);
+        }
+#endif
+
+      goto errout_with_lock;
+    }
 
   /* Insert a dummy node -- we need to hold the inode semaphore
    * to do this because we will have a momentarily bad structure.
@@ -398,6 +461,7 @@ int nx_mount(FAR const char *source, FAR const char *target,
    * count of zero.
    */
 
+  if (mountpt_inode == NULL)
     {
       ret = inode_reserve(target, 0777, &mountpt_inode);
       if (ret < 0)
@@ -413,61 +477,8 @@ int nx_mount(FAR const char *source, FAR const char *target,
            */
 
           ferr("ERROR: Failed to reserve inode for target %s\n", target);
-          goto errout_with_lock;
+          goto errout_with_bind;
         }
-    }
-
-  /* Bind the block driver to an instance of the file system.  The file
-   * system returns a reference to some opaque, fs-dependent structure
-   * that encapsulates this binding.
-   */
-
-  if (mops->bind == NULL)
-    {
-      /* The filesystem does not support the bind operation ??? */
-
-      ferr("ERROR: Filesystem does not support bind\n");
-      ret = -EINVAL;
-      goto errout_with_mountpt;
-    }
-
-  /* Increment reference count for the reference we pass to the file system */
-
-#if defined(BDFS_SUPPORT) || defined(MDFS_SUPPORT)
-#ifdef NODFS_SUPPORT
-  if (drvr_inode != NULL)
-#endif
-    {
-      drvr_inode->i_crefs++;
-    }
-#endif
-
-  /* On failure, the bind method returns -errorcode */
-
-#if defined(BDFS_SUPPORT) || defined(MDFS_SUPPORT)
-  ret = mops->bind(drvr_inode, data, &fshandle);
-#else
-  ret = mops->bind(NULL, data, &fshandle);
-#endif
-  if (ret < 0)
-    {
-      /* The inode is unhappy with the driver for some reason.  Back out
-       * the count for the reference we failed to pass and exit with an
-       * error.
-       */
-
-      ferr("ERROR: Bind method failed: %d\n", ret);
-
-#if defined(BDFS_SUPPORT) || defined(MDFS_SUPPORT)
-#ifdef NODFS_SUPPORT
-      if (drvr_inode != NULL)
-#endif
-        {
-          drvr_inode->i_crefs--;
-        }
-#endif
-
-      goto errout_with_mountpt;
     }
 
   /* We have it, now populate it with driver specific information. */
@@ -503,9 +514,11 @@ int nx_mount(FAR const char *source, FAR const char *target,
 
   /* A lot of goto's!  But they make the error handling much simpler */
 
-errout_with_mountpt:
-  inode_release(mountpt_inode);
-  inode_remove(target);
+errout_with_bind:
+  if (mops->unbind != NULL)
+    {
+      mops->unbind(fshandle, &drvr_inode, 0);
+    }
 
 errout_with_lock:
   inode_unlock();

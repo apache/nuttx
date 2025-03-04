@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/local/local_sendmsg.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -118,11 +120,13 @@ static int local_sendctl(FAR struct local_conn_s *conn,
           filep2 = kmm_zalloc(sizeof(*filep2));
           if (!filep2)
             {
+              fs_putfilep(filep);
               ret = -ENOMEM;
               goto fail;
             }
 
           ret = file_dup2(filep, filep2);
+          fs_putfilep(filep);
           if (ret < 0)
             {
               kmm_free(filep2);
@@ -261,6 +265,7 @@ static ssize_t local_sendto(FAR struct socket *psock,
 {
 #ifdef CONFIG_NET_LOCAL_DGRAM
   FAR struct local_conn_s *conn = psock->s_conn;
+  FAR struct local_conn_s *server;
   FAR const struct sockaddr_un *unaddr = (FAR const struct sockaddr_un *)to;
   ssize_t ret;
 
@@ -307,7 +312,9 @@ static ssize_t local_sendto(FAR struct socket *psock,
     }
 
   net_lock();
-  if (local_findconn(conn, unaddr) == NULL)
+
+  server = local_findconn(conn, unaddr);
+  if (server == NULL)
     {
       net_unlock();
       nerr("ERROR: No such file or directory\n");
@@ -335,7 +342,7 @@ static ssize_t local_sendto(FAR struct socket *psock,
    * REVISIT:  Or should be just make sure that it already exists?
    */
 
-  ret = local_create_halfduplex(conn, unaddr->sun_path);
+  ret = local_create_halfduplex(conn, unaddr->sun_path, server->lc_rcvsize);
   if (ret < 0)
     {
       nerr("ERROR: Failed to create FIFO for %s: %zd\n",
@@ -358,7 +365,8 @@ static ssize_t local_sendto(FAR struct socket *psock,
 
   /* Send the preamble */
 
-  ret = local_send_preamble(conn, &conn->lc_outfile, buf, len);
+  ret = local_send_preamble(conn, &conn->lc_outfile, buf, len,
+                            server->lc_rcvsize);
   if (ret < 0)
     {
       nerr("ERROR: Failed to send the preamble: %zd\n", ret);
@@ -423,12 +431,20 @@ errout_with_lock:
 ssize_t local_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
                       int flags)
 {
+  FAR struct local_conn_s *conn = psock->s_conn;
   FAR const struct sockaddr *to = msg->msg_name;
   FAR const struct iovec *buf = msg->msg_iov;
   socklen_t tolen = msg->msg_namelen;
   size_t len = msg->msg_iovlen;
+
+  /* Check shutdown state */
+
+  if (conn->lc_outfile.f_inode == NULL)
+    {
+      return -EPIPE;
+    }
+
 #ifdef CONFIG_NET_LOCAL_SCM
-  FAR struct local_conn_s *conn = psock->s_conn;
   int count = 0;
 
   if (msg->msg_control &&
@@ -440,17 +456,19 @@ ssize_t local_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
           return count;
         }
     }
-#endif /* CONFIG_NET_LOCAL_SCM */
 
   len = to ? local_sendto(psock, buf, len, flags, to, tolen) :
              local_send(psock, buf, len, flags);
-#ifdef CONFIG_NET_LOCAL_SCM
+
   if (len < 0 && count > 0)
     {
       net_lock();
       local_freectl(conn, count);
       net_unlock();
     }
+#else
+  len = to ? local_sendto(psock, buf, len, flags, to, tolen) :
+             local_send(psock, buf, len, flags);
 #endif
 
   return len;

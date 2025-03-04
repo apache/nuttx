@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/mpfs/mpfs_ethernet.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -3354,6 +3356,10 @@ static int mpfs_phyinit(struct mpfs_ethmac_s *priv)
   if (bus)
     {
       ret = ksz9477_i2c_init(bus, KSZ9477_PORT_SGMII);
+    }
+  else
+    {
+      ret = -EINVAL;
     }
 
 #endif

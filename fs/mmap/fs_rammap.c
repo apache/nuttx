@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/mmap/fs_rammap.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -24,10 +26,12 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
+#include <sys/ioctl.h>
 
 #include <assert.h>
 #include <debug.h>
 #include <errno.h>
+#include <inttypes.h>
 #include <string.h>
 #include <unistd.h>
 
@@ -37,8 +41,7 @@
 
 #include "fs_rammap.h"
 #include "sched/sched.h"
-
-#ifdef CONFIG_FS_RAMMAP
+#include "fs_heap.h"
 
 /****************************************************************************
  * Public Data
@@ -48,14 +51,93 @@
  * Private Functions
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: msync_rammap
+ ****************************************************************************/
+
+static int msync_rammap(FAR struct mm_map_entry_s *entry, FAR void *start,
+                        size_t length, int flags)
+{
+  FAR struct file *filep = (FAR void *)((uintptr_t)entry->priv.p & ~3);
+  FAR uint8_t *wrbuffer = start;
+  ssize_t nwrite = 0;
+  off_t offset;
+  off_t fpos;
+  off_t opos;
+
+  offset = (uintptr_t)start - (uintptr_t)entry->vaddr;
+  if (length > entry->length - offset)
+    {
+      length = entry->length - offset;
+    }
+
+  opos = file_seek(filep, 0, SEEK_CUR);
+  if (opos < 0)
+    {
+      ferr("ERROR: Get current position failed\n");
+      return opos;
+    }
+
+  fpos = file_seek(filep, entry->offset + offset, SEEK_SET);
+  if (fpos < 0)
+    {
+      ferr("ERROR: Seek to position %"PRIdOFF" failed\n", fpos);
+      return fpos;
+    }
+
+  while (length > 0)
+    {
+      nwrite = file_write(filep, wrbuffer, length);
+      if (nwrite < 0)
+        {
+          /* Handle the special case where the write was interrupted by a
+           * signal.
+           */
+
+          if (nwrite != -EINTR)
+            {
+              /* All other write errors are bad. */
+
+              ferr("ERROR: Write failed: offset=%"PRIdOFF" nwrite=%zd\n",
+                   entry->offset, nwrite);
+              break;
+            }
+        }
+
+      /* Increment number of bytes written */
+
+      wrbuffer += nwrite;
+      length   -= nwrite;
+    }
+
+  /* Restore file pos */
+
+  fpos = file_seek(filep, opos, SEEK_SET);
+  if (fpos < 0)
+    {
+      /* Ensure that we finally seek back to the current file pos */
+
+      ferr("ERROR: Seek back to position %"PRIdOFF" failed\n", fpos);
+      return fpos;
+    }
+
+  return nwrite >= 0 ? 0 : nwrite;
+}
+
+/****************************************************************************
+ * Name: unmap_rammap
+ ****************************************************************************/
+
 static int unmap_rammap(FAR struct task_group_s *group,
                         FAR struct mm_map_entry_s *entry,
                         FAR void *start,
                         size_t length)
 {
+  FAR struct file *filep = (FAR void *)((uintptr_t)entry->priv.p & ~3);
+  enum mm_map_type_e type =
+                    (enum mm_map_type_e)((uintptr_t)entry->priv.p & 3);
   FAR void *newaddr = NULL;
   off_t offset;
-  bool kernel = entry->priv.i;
   int ret = OK;
 
   /* Get the offset from the beginning of the region and the actual number
@@ -84,14 +166,16 @@ static int unmap_rammap(FAR struct task_group_s *group,
     {
       /* Free the region */
 
-      if (kernel)
+      if (type == MAP_KERNEL)
         {
-          kmm_free(entry->vaddr);
+          fs_heap_free(entry->vaddr);
         }
-      else
+      else if (type == MAP_USER)
         {
           kumm_free(entry->vaddr);
         }
+
+      fs_putfilep(filep);
 
       /* Then remove the mapping from the list */
 
@@ -104,11 +188,11 @@ static int unmap_rammap(FAR struct task_group_s *group,
 
   else
     {
-      if (kernel)
+      if (type == MAP_KERNEL)
         {
-          newaddr = kmm_realloc(entry->vaddr, length);
+          newaddr = fs_heap_realloc(entry->vaddr, length);
         }
-      else
+      else if (type == MAP_USER)
         {
           newaddr = kumm_realloc(entry->vaddr, length);
         }
@@ -135,7 +219,7 @@ static int unmap_rammap(FAR struct task_group_s *group,
  *   filep   file descriptor of the backing file -- required.
  *   entry   mmap entry information.
  *           field offset and length must be initialized correctly.
- *   kernel  kmm_zalloc or kumm_zalloc
+ *   type    fs_heap_zalloc or kumm_zalloc or xip_base
  *
  * Returned Value:
  *  On success, rammap returns 0 and entry->vaddr points to memory mapped.
@@ -151,13 +235,20 @@ static int unmap_rammap(FAR struct task_group_s *group,
  ****************************************************************************/
 
 int rammap(FAR struct file *filep, FAR struct mm_map_entry_s *entry,
-           bool kernel)
+           enum mm_map_type_e type)
 {
   FAR uint8_t *rdbuffer;
   ssize_t nread;
   off_t fpos;
   int ret;
   size_t length = entry->length;
+
+  ret = file_ioctl(filep, BIOC_XIPBASE, (unsigned long)&entry->vaddr);
+  if (ret == OK)
+    {
+      type = MAP_XIP;
+      goto out;
+    }
 
   /* There is a major design flaw that I have not yet thought of fix for:
    * The goal is to have a single region of memory that represents a single
@@ -174,7 +265,8 @@ int rammap(FAR struct file *filep, FAR struct mm_map_entry_s *entry,
 
   /* Allocate a region of memory of the specified size */
 
-  rdbuffer = kernel ? kmm_malloc(length) : kumm_malloc(length);
+  rdbuffer = type == MAP_KERNEL ? fs_heap_malloc(length)
+                                : kumm_malloc(length);
   if (!rdbuffer)
     {
       ferr("ERROR: Region allocation failed, length: %zu\n", length);
@@ -239,8 +331,11 @@ int rammap(FAR struct file *filep, FAR struct mm_map_entry_s *entry,
 
   /* Add the buffer to the list of regions */
 
-  entry->priv.i = kernel;
+out:
+  fs_reffilep(filep);
+  entry->priv.p = (FAR void *)((uintptr_t)filep | type);
   entry->munmap = unmap_rammap;
+  entry->msync = msync_rammap;
 
   ret = mm_map_add(get_current_mm(), entry);
   if (ret < 0)
@@ -251,16 +346,14 @@ int rammap(FAR struct file *filep, FAR struct mm_map_entry_s *entry,
   return OK;
 
 errout_with_region:
-  if (kernel)
+  if (type == MAP_KERNEL)
     {
-      kmm_free(entry->vaddr);
+      fs_heap_free(entry->vaddr);
     }
-  else
+  else if (type == MAP_USER)
     {
       kumm_free(entry->vaddr);
     }
 
   return ret;
 }
-
-#endif /* CONFIG_FS_RAMMAP */

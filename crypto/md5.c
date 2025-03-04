@@ -1,6 +1,7 @@
 /****************************************************************************
  * crypto/md5.c
- * $OpenBSD: md5.c,v 1.4 2014/12/28 10:04:35 tedu Exp $
+ *
+ * SPDX-License-Identifier: NuttX-PublicDomain
  *
  * This code implements the MD5 message-digest algorithm.
  * The algorithm is due to Ron Rivest. This code was
@@ -16,6 +17,7 @@
  * MD5Context structure, pass it to MD5Init, call MD5Update as
  * needed on buffers full of bytes, and then call MD5Final, which
  * will fill a supplied 16-byte array with the digest.
+ *
  ****************************************************************************/
 
 /****************************************************************************

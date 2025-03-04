@@ -1,8 +1,7 @@
 /****************************************************************************
  * include/nuttx/lcd/ug-2864ambag01.h
  *
- * Driver for Univision UG-2864AMBAG01 OLED display (with SH1101A controller)
- * in SPI mode
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

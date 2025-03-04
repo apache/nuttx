@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm64/qemu/qemu-armv8a/src/qemu_bringup.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -30,6 +32,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/virtio/virtio-mmio.h>
 #include <nuttx/fdt.h>
+#include <nuttx/pci/pci_ecam.h>
 
 #ifdef CONFIG_LIBC_FDT
 #  include <libfdt.h>
@@ -45,40 +48,101 @@
 #define QEMU_SPI_IRQ_BASE     32
 #endif
 
+#define FDT_PCI_TYPE_IO              0x01000000
+#define FDT_PCI_TYPE_MEM32           0x02000000
+#define FDT_PCI_TYPE_MEM64           0x03000000
+#define FDT_PCI_TYPE_MASK            0x03000000
+#define FDT_PCI_PREFETCH             0x40000000
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 #if defined(CONFIG_LIBC_FDT) && defined(CONFIG_DEVICE_TREE)
-#ifdef CONFIG_DRIVERS_VIRTIO_MMIO
 
 /****************************************************************************
- * Name: register_virtio_devices_from_fdt
+ * Name: register_pci_host_from_fdt
  ****************************************************************************/
 
-static void register_virtio_devices_from_fdt(const void *fdt)
+#ifdef CONFIG_PCI
+static void register_pci_host_from_fdt(const void *fdt)
 {
-  uintptr_t addr;
-  int offset = -1;
-  int irqnum;
+  struct pci_resource_s prefetch;
+  struct pci_resource_s cfg;
+  struct pci_resource_s mem;
+  struct pci_resource_s io;
+  const fdt32_t *ranges;
+  int offset;
 
-  for (; ; )
+  /* #address-size must be 3
+   * defined in the PCI Bus Binding to IEEE Std 1275-1994 :
+   * Bit#
+   *
+   * phys.hi cell:  npt000ss bbbbbbbb dddddfff rrrrrrrr
+   * phys.mid cell: hhhhhhhh hhhhhhhh hhhhhhhh hhhhhhhh
+   * phys.lo cell:  llllllll llllllll llllllll llllllll
+   */
+
+  const int na = 3;
+
+  /* #size-cells must be 2 */
+
+  const int ns = 2;
+  int rlen;
+  int pna;
+
+  memset(&prefetch, 0, sizeof(prefetch));
+  memset(&cfg, 0, sizeof(cfg));
+  memset(&mem, 0, sizeof(mem));
+  memset(&io, 0, sizeof(io));
+
+  offset = fdt_node_offset_by_compatible(fdt, -1,
+                                         "pci-host-ecam-generic");
+  if (offset < 0)
     {
-      offset = fdt_node_offset_by_compatible(fdt, offset, "virtio,mmio");
-      if (offset == -FDT_ERR_NOTFOUND)
-        {
-          break;
-        }
+      return;
+    }
 
-      addr = fdt_get_reg_base(fdt, offset, 0);
-      irqnum = fdt_get_irq(fdt, offset, 1, QEMU_SPI_IRQ_BASE);
-      if (addr > 0 && irqnum >= 0)
+  /* Get the reg address, 64 or 32 */
+
+  cfg.start = fdt_get_reg_base(fdt, offset, 0);
+  cfg.end = cfg.start + fdt_get_reg_size(fdt, offset);
+
+  /* Get the ranges address */
+
+  ranges = fdt_getprop(fdt, offset, "ranges", &rlen);
+  if (ranges < 0)
+    {
+      return;
+    }
+
+  pna = fdt_get_parent_address_cells(fdt, offset);
+
+  for (rlen /= 4; (rlen -= na + pna + ns) >= 0; ranges += na + pna + ns)
+    {
+      uint32_t type = fdt32_ld(ranges);
+
+      if ((type & FDT_PCI_TYPE_MASK) == FDT_PCI_TYPE_IO)
         {
-          virtio_register_mmio_device((void *)addr, irqnum);
+          io.start = fdt_ld_by_cells(ranges + na, pna);
+          io.end = io.start + fdt_ld_by_cells(ranges + na + pna, ns);
+        }
+      else if ((type & FDT_PCI_PREFETCH) == FDT_PCI_PREFETCH ||
+               (type & FDT_PCI_TYPE_MASK) == FDT_PCI_TYPE_MEM64)
+        {
+          prefetch.start = fdt_ld_by_cells(ranges + na, pna);
+          prefetch.end = prefetch.start +
+                         fdt_ld_by_cells(ranges + na + pna, ns);
+        }
+      else
+        {
+          mem.start = fdt_ld_by_cells(ranges + na, pna);
+          mem.end = mem.start + fdt_ld_by_cells(ranges + na + pna, ns);
         }
     }
-}
 
+  pci_ecam_register(&cfg, &io, &mem, NULL);
+}
 #endif
 
 /****************************************************************************
@@ -88,6 +152,7 @@ static void register_virtio_devices_from_fdt(const void *fdt)
 static void register_devices_from_fdt(void)
 {
   const void *fdt = fdt_get();
+  int ret;
 
   if (fdt == NULL)
     {
@@ -95,8 +160,20 @@ static void register_devices_from_fdt(void)
     }
 
 #ifdef CONFIG_DRIVERS_VIRTIO_MMIO
-  register_virtio_devices_from_fdt(fdt);
+
+  ret = fdt_virtio_mmio_devices_register(fdt, QEMU_SPI_IRQ_BASE);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "fdt_virtio_mmio_devices_register failed, ret=%d\n",
+             ret);
+    }
 #endif
+
+#ifdef CONFIG_PCI
+  register_pci_host_from_fdt(fdt);
+#endif
+
+  UNUSED(ret);
 }
 
 #endif

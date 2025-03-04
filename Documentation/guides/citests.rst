@@ -60,7 +60,7 @@ by following command.
 
   .. code-block:: console
 
-      $ python3 -m pytest -m 'common or sim' ./ -B sim -P nuttx-path -L log-path -R sim -C --json=log-path/pytest.json
+      $ python3 -m pytest -m 'common or sim' ./ -B sim -P <nuttx-path> -L <log-path> -R sim -C --json=<log-path>/pytest.json
 
 Where nuttx-path is an absolute path to NuttX root directory and log-path is
 a user defined directory to which tests log are saved.

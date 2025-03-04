@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/modem/alt1250/alt1250.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -856,6 +858,24 @@ static int parse_altcompkt(FAR struct alt1250_dev_s *dev, FAR uint8_t *pkt,
       if (*container)
         {
           (*container)->result = -ENOSYS;
+          *bitmap = get_bitmap(dev, cid, get_altver(h));
+          if (LTE_IS_ASYNC_CMD((*container)->cmdid))
+            {
+              /* Asynchronous types need to call the callback corresponding
+               * to the received event, so the REPLY bit is added to the
+               * received event.
+               */
+
+              *bitmap |= ALT1250_EVTBIT_REPLY;
+            }
+          else
+            {
+              /* Synchronous types do not call a callback,
+               * so only the REPLY bit is needed.
+               */
+
+              *bitmap = ALT1250_EVTBIT_REPLY;
+            }
         }
 
       return *container == NULL ? ERROR: OK;

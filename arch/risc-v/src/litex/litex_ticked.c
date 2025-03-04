@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/litex/litex_ticked.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -81,6 +83,7 @@ void up_timer_initialize(void)
 
   /* Set the timer period */
 
+  putreg32(TICK_COUNT, LITEX_TIMER0_LOAD);
   putreg32(TICK_COUNT, LITEX_TIMER0_RELOAD);
 
   /* Attach timer interrupt handler */

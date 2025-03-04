@@ -1,6 +1,8 @@
 # ##############################################################################
 # mm/kmm_heap/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -35,7 +37,8 @@ if(CONFIG_MM_KERNEL_HEAP)
       kmm_memalign.c
       kmm_realloc.c
       kmm_zalloc.c
-      kmm_heapmember.c)
+      kmm_heapmember.c
+      kmm_memdump.c)
 
   if(CONFIG_DEBUG_MM)
     list(APPEND SRCS kmm_checkcorruption.c)

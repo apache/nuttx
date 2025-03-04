@@ -1,6 +1,8 @@
 # ##############################################################################
 # boards/arm/stm32/common/src/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -126,6 +128,10 @@ endif()
 
 if(CONFIG_CL_MFRC522)
   list(APPEND SRCS stm32_mfrc522.c)
+endif()
+
+if(CONFIG_SENSORS_AMG88XX)
+  list(APPEND SRCS stm32_amg88xx.c)
 endif()
 
 if(CONFIG_LIS3DSH)

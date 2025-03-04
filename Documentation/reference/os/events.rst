@@ -115,3 +115,43 @@ Notifier Chain Interfaces
   :param event: Address of the event object
   :param events: Set of events to wait, 0 will indicate wait from any events
   :param eflags: Events flags
+
+.. c:function:: int nxevent_open(FAR nxevent_t **event, FAR const char *name, int oflags, ...)
+
+  This function establishes a connection between named event groups and a
+  task. the task may reference the event group associated with name using
+  the address returned by this call. The event group may be used in a
+  subsequent calls to nxevent_wait(), or nxevent_post(). And the event
+  group remains usable until the event group is closed by a successful
+  call to nxevent_close().
+
+  If a task makes multiple calls to event_open() with the same name, then
+  the same event group address is returned.
+
+  :param event: Location to return the event group reference.
+  :param name: Event group name.
+  :param oflags: Event group creation options. This may the following settings:
+
+    -  ``oflags`` = 0: Connect to the event group only if it already exists.
+    -  ``oflags`` = O_CREAT: Connect to the event group if it exists, otherwise create the event group.
+    -  ``oflags`` = O_CREAT|O_EXCL: Create a new event group unless already exists.
+
+  :param ...: Optional parameters. When the O_CREAT flag is specified,
+              the two optional parameters are expected:
+
+    -  ``mode``: The mode parameter is of type mode_t. This parameter is
+        required but not used in the present implementation.
+    -  ``events``: The events parameter is type unsigned. The event group
+        is created with an initial value of ``events``.
+
+  :return: 0 (OK), or negated errno if unsuccessful.
+
+.. c:function:: int nxevent_close(FAR nxevent_t *event)
+
+    This function is called to indicate that the calling task is finished
+    with the specified named event group. The event_close() deallocates
+    any system resources allocated by the system for this named event group.
+
+  :param event: event descriptor
+
+  :return: 0 (OK), or negated errno if unsuccessful.

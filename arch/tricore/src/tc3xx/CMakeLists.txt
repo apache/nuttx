@@ -1,6 +1,8 @@
 # ##############################################################################
 # arch/tricore/src/tc3xx/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -37,5 +39,13 @@ if(CONFIG_ARCH_CHIP_TC397)
   endif()
 
   add_subdirectory(tc397)
+
+  if(CONFIG_TRICORE_TOOLCHAIN_TASKING)
+    nuttx_add_kernel_library(c_fpu)
+    target_sources(c_fpu PRIVATE tc3xx_libc.c)
+    target_link_options(
+      nuttx PRIVATE
+      --library-directory=${CMAKE_BINARY_DIR}/arch/tricore/src/exclude_chip)
+  endif()
 
 endif()

@@ -1,6 +1,8 @@
 ############################################################################
 # arch/arm/src/qemu/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -18,12 +20,29 @@
 #
 ############################################################################
 
+ifeq ($(CONFIG_ARCH_ARMV7A),y)
 include armv7-a/Make.defs
+endif
+
+ifeq ($(CONFIG_ARCH_ARMV7R),y)
+include armv7-r/Make.defs
+endif
 
 # qemu-specific C source files
-CHIP_CSRCS  = qemu_boot.c qemu_serial.c qemu_irq.c qemu_timer.c qemu_memorymap.c
-CHIP_CSRCS += qemu_idle.c
+CHIP_CSRCS  = qemu_boot.c qemu_serial.c qemu_irq.c qemu_timer.c
+
+ifeq ($(CONFIG_ARCH_ARMV7A),y)
+CHIP_CSRCS += qemu_pgalloc.c qemu_memorymap.c
+endif
 
 ifeq ($(CONFIG_SMP),y)
   CHIP_CSRCS += qemu_cpuboot.c
+endif
+
+ifeq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
+CHIP_CSRCS += qemu_idle.c
+endif
+
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
+  CHIP_CSRCS += qemu_userspace.c qemu_allocateheap.c
 endif

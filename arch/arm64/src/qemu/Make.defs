@@ -1,6 +1,8 @@
 ############################################################################
 # arch/arm64/src/qemu/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -23,10 +25,16 @@ include common/Make.defs
 # qemu-specific C source files
 CHIP_CSRCS  = qemu_boot.c qemu_serial.c
 
+CHIP_CSRCS += qemu_timer.c
+
 ifeq ($(CONFIG_ARCH_EARLY_PRINT),y)
 CHIP_ASRCS  = qemu_lowputc.S
 endif
 
 ifeq ($(CONFIG_ARCH_USE_TEXT_HEAP),y)
 CHIP_CSRCS += qemu_textheap.c
+endif
+
+ifeq ($(CONFIG_PM), y)
+CHIP_CSRCS += qemu_initialize.c
 endif

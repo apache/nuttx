@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/sensors/ioctl.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -240,6 +242,28 @@
 #define SNIOC_FEAT_MANAGE          _SNIOC(0x006b)  /* Feature manage command */
 #define SNIOC_SET_SCALE_XL         _SNIOC(0x006c)  /* Set accelerator scale command */
 
+/* IOCTL commands unique to AMG88xx */
+
+/* Command:      SNIOC_SET_OPERATIONAL_MODE
+ * Description:  Control power mode: Normal / Sleep
+ *               Reuse from ISL29023
+ * Arg:          amg88xx_operation_mode_e pointer
+ */
+
+/* Command:      SNIOC_SET_FRAMERATE
+ * Description:  Set the framerate of the sensor
+ * Arg:          amg88xx_fps_e
+ */
+
+#define SNIOC_SET_FRAMERATE        _SNIOC(0x006d)
+
+/* Command:      SNIOC_SET_MOVING_AVG
+ * Description:  Toggle moving average mode
+ * Arg:          bool
+ */
+
+#define SNIOC_SET_MOVING_AVG       _SNIOC(0x006e)
+
 /* Command:      SNIOC_GET_STATE
  * Description:  Get state for all subscribers, include min_interval,
  *               min_latency and the number of subscribers.
@@ -412,5 +436,68 @@
  */
 
 #define SNIOC_HEAT             _SNIOC(0x009B)
+
+/* Command:      SNIOC_GET_INFO
+ * Description:  Get device information.
+ * Argument:     This is the device info pointer.
+ */
+
+#define SNIOC_GET_INFO                _SNIOC(0x009B)
+
+#ifdef CONFIG_USENSOR
+/* Command:      SNIOC_SET_INFO
+ * Description:  Set device information. Only used by user space.
+ * Argument:     This is the device info pointer.
+ */
+
+#  define SNIOC_SET_INFO              _SNIOC(0x009C)
+#endif
+
+/* Command:      SNIOC_FLUSH
+ * Description:  Flush sensor hardware fifo buffer.
+ */
+
+#define SNIOC_FLUSH                   _SNIOC(0x009D)
+
+/* Command:      SNIOC_GET_EVENTS
+ * Description:  Get events of the sensor device.
+ * Argument:     The events pointer, (unsigned int *)
+ */
+
+#define SNIOC_GET_EVENTS              _SNIOC(0x009E)
+
+/* Command:      SNIOC_SET_THERMO
+ * Description:  Set the thermocouple type.
+ * Argument:     An option from `enum sensor_thermo_type_e`
+ */
+
+#define SNIOC_SET_THERMO              _SNIOC(0x009F)
+
+/* Command:      SNIOC_LPF
+ * Description:  Enable the low pass filter
+ * Argument:     Boolean true for enable, false to disable.
+ */
+
+#define SNIOC_LPF                     _SNIOC(0x00A0)
+
+/****************************************************************************
+ * Public types
+ ****************************************************************************/
+
+/* Possible thermocouple types. Implementations should not rely on the enum's
+ * underlying value.
+ */
+
+enum sensor_thermo_type_e
+{
+  SENSOR_THERMO_TYPE_K,
+  SENSOR_THERMO_TYPE_J,
+  SENSOR_THERMO_TYPE_T,
+  SENSOR_THERMO_TYPE_N,
+  SENSOR_THERMO_TYPE_S,
+  SENSOR_THERMO_TYPE_E,
+  SENSOR_THERMO_TYPE_B,
+  SENSOR_THERMO_TYPE_R,
+};
 
 #endif /* __INCLUDE_NUTTX_SENSORS_IOCTL_H */

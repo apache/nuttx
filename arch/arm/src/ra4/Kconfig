@@ -1,0 +1,86 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "RA Configuration Options"
+
+choice
+	prompt "RA Chip Selection"
+	default ARCH_CHIP_R7FA4M1ABxxFM
+	depends on ARCH_CHIP_RA4
+
+config ARCH_CHIP_R7FA4M1ABxxFP
+	bool "R7FA4M1ABxxFP"
+	select RA_HAVE_SCI0_UART
+	select RA_HAVE_SCI1_UART
+	select RA_HAVE_SCI2_UART
+	select RA_HAVE_SCI9_UART
+	select RA4M1_FAMILY
+
+config ARCH_CHIP_R7FA4M1ABxxFM
+	bool "R7FA4M1ABxxFM"
+	select RA_HAVE_SCI0_UART
+	select RA_HAVE_SCI1_UART
+	select RA_HAVE_SCI2_UART
+	select RA_HAVE_SCI9_UART
+	select RA4M1_FAMILY
+
+config ARCH_CHIP_R7FA4M1ABxxFL
+	bool "R7FA4M1ABxxFL"
+	select RA_HAVE_SCI0_UART
+	select RA_HAVE_SCI1_UART
+	select RA_HAVE_SCI2_UART
+	select RA_HAVE_SCI9_UART
+	select RA4M1_FAMILY
+
+endchoice # RA4 Chip Selection
+
+config RA4M1_FAMILY
+	bool
+	default n
+	select ARCH_CORTEXM4
+
+menu "RA4M1 Peripheral Support"
+
+config RA_HAVE_SCI0_UART
+	bool
+	default n
+
+config RA_HAVE_SCI1_UART
+	bool
+	default n
+
+config RA_HAVE_SCI2_UART
+	bool
+	default n
+
+config RA_HAVE_SCI9_UART
+	bool
+	default n
+
+config RA_SCI0_UART
+	bool "UART 0"
+	default n
+	depends on RA_HAVE_SCI0_UART
+	select SCI0_SERIALDRIVER
+
+config RA_SCI1_UART
+	bool "UART 1"
+	default n
+	depends on RA_HAVE_SCI1_UART
+	select SCI1_SERIALDRIVER
+
+config RA_SCI2_UART
+	bool "UART 2"
+	default y
+	depends on RA_HAVE_SCI2_UART
+	select SCI2_SERIALDRIVER
+
+config RA_SCI9_UART
+	bool "UART 9"
+	default n
+	depends on RA_HAVE_SCI9_UART
+	select SCI9_SERIALDRIVER
+
+endmenu # RA4M1 Peripheral Support

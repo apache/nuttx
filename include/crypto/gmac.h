@@ -1,8 +1,8 @@
 /****************************************************************************
  * include/crypto/gmac.h
- * $OpenBSD: gmac.h,v 1.6 2017/05/02 11:44:32 mikeb Exp $
  *
- * Copyright (c) 2010 Mike Belopuhov
+ * SPDX-License-Identifier: ISC
+ * SPDX-FileCopyrightText: 2010 Mike Belopuhov
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above

@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/binfs/fs_binfs.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -41,6 +43,7 @@
 #include <nuttx/lib/builtin.h>
 
 #include "inode/inode.h"
+#include "fs_heap.h"
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_FS_BINFS)
 
@@ -111,6 +114,8 @@ const struct mountpt_operations g_binfs_operations =
   NULL,              /* mmap */
   NULL,              /* truncate */
   NULL,              /* poll */
+  NULL,              /* readv */
+  NULL,              /* writev */
 
   NULL,              /* sync */
   binfs_dup,         /* dup */
@@ -305,7 +310,7 @@ static int binfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
       return -ENOENT;
     }
 
-  bdir = kmm_zalloc(sizeof(*bdir));
+  bdir = fs_heap_zalloc(sizeof(*bdir));
   if (bdir == NULL)
     {
       return -ENOMEM;
@@ -330,7 +335,7 @@ static int binfs_closedir(FAR struct inode *mountpt,
                           FAR struct fs_dirent_s *dir)
 {
   DEBUGASSERT(dir);
-  kmm_free(dir);
+  fs_heap_free(dir);
   return 0;
 }
 

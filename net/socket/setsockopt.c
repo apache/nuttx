@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/socket/setsockopt.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -33,6 +35,7 @@
 #include <assert.h>
 #include <arch/irq.h>
 
+#include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 #include <netdev/netdev.h>
@@ -134,6 +137,9 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
                            * periodic transmission of probes */
       case SO_OOBINLINE:  /* Leaves received out-of-band data inline */
       case SO_REUSEADDR:  /* Allow reuse of local addresses */
+#ifdef CONFIG_NET_TIMESTAMP
+      case SO_TIMESTAMP:  /* Generates a timestamp for each incoming packet */
+#endif
         {
           int setting;
 
@@ -383,17 +389,19 @@ int setsockopt(int sockfd, int level, int option, const void *value,
                socklen_t value_len)
 {
   FAR struct socket *psock;
+  FAR struct file *filep;
   int ret;
 
   /* Get the underlying socket structure */
 
-  ret = sockfd_socket(sockfd, &psock);
+  ret = sockfd_socket(sockfd, &filep, &psock);
 
   /* Then let psock_setockopt() do all of the work */
 
   if (ret == OK)
     {
       ret = psock_setsockopt(psock, level, option, value, value_len);
+      fs_putfilep(filep);
     }
 
   if (ret < 0)

@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/board.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -818,7 +820,7 @@ int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_BOARD_CRASHDUMP
+#ifdef CONFIG_BOARD_CRASHDUMP_CUSTOM
 struct tcb_s;
 void board_crashdump(uintptr_t sp, FAR struct tcb_s *tcb,
                      FAR const char *filename, int lineno,
@@ -853,6 +855,21 @@ void board_init_rngseed(void);
 
 #ifdef CONFIG_BOARDCTL_RESET_CAUSE
 int board_reset_cause(FAR struct boardioc_reset_cause_s *cause);
+#endif
+
+/****************************************************************************
+ * Name: board_start_cpu
+ *
+ * Description:
+ *   This interface may be used by application specific logic to start
+ *   specified slave cpu core under the pseudo AMP case which is different
+ *   with armv7-a/armv8-a SMP. Support for this function is required by
+ *   board-level logic if CONFIG_BOARDCTL_START_CPU is selected.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BOARDCTL_START_CPU
+int board_start_cpu(int cpuid);
 #endif
 
 #undef EXTERN

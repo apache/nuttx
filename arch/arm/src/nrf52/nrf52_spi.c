@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/nrf52/nrf52_spi.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -32,11 +34,11 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/mutex.h>
+#include <arch/barriers.h>
 #include <arch/board/board.h>
 #include <nuttx/power/pm.h>
 
 #include "arm_internal.h"
-#include "barriers.h"
 
 #include "nrf52_gpio.h"
 #include "nrf52_spi.h"
@@ -490,8 +492,7 @@ static int nrf52_spi_deinit(struct nrf52_spidev_s *priv)
    */
 
   nrf52_spi_putreg(priv, NRF52_SPIM_POWER_OFFSET, 0);
-  ARM_DSB();
-  ARM_ISB();
+  UP_MB();
   nrf52_spi_putreg(priv, NRF52_SPIM_POWER_OFFSET, 1);
 #endif
 

@@ -1,6 +1,8 @@
 ############################################################################
 # arch/arm/src/armv7-a/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -47,7 +49,11 @@ CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c
 CMN_CSRCS += arm_syscall.c arm_tcbinfo.c arm_undefinedinsn.c
 CMN_CSRCS += arm_perf.c cp15_cacheops.c
 
-ifeq ($(CONFIG_ARMV7A_HAVE_PTM), y)
+ifeq ($(CONFIG_ARMV7A_GICv2M),y)
+  CMN_CSRCS += arm_gicv2m.c
+endif
+
+ifeq ($(CONFIG_ARMV7A_HAVE_PTM),y)
   CMN_CSRCS += arm_timer.c
 endif
 
@@ -90,11 +96,11 @@ ifeq ($(CONFIG_ARCH_FPU),y)
 endif
 
 ifeq ($(CONFIG_SMP),y)
-  CMN_CSRCS += arm_cpustart.c arm_cpupause.c arm_cpuidlestack.c
+  CMN_CSRCS += arm_cpustart.c arm_smpcall.c arm_cpuidlestack.c
   CMN_CSRCS += arm_scu.c
 endif
 
-ifeq ($(CONFIG_ARCH_HAVE_PSCI),y)
+ifeq ($(CONFIG_ARM_PSCI),y)
   CMN_ASRCS += arm_smccc.S
   CMN_CSRCS += arm_cpu_psci.c
 endif

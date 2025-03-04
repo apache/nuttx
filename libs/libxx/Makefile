@@ -1,6 +1,8 @@
 ############################################################################
 # libs/libxx/Makefile
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -30,18 +32,19 @@ include $(TOPDIR)/Make.defs
 # in the NuttX uClibc++ GIT repository for more information
 
 ifeq ($(CONFIG_UCLIBCXX),y)
-include uClibc++.defs
+include uClibc++/Make.defs
 else ifeq ($(CONFIG_LIBCXX),y)
-include libcxx.defs
-else
-include libcxxmini.defs
-ifeq ($(CONFIG_ETL),y)
-include etl.defs
+include libcxx/Make.defs
+else ifeq ($(CONFIG_LIBCXXMINI),y)
+include libcxxmini/Make.defs
 endif
+
+ifeq ($(CONFIG_ETL),y)
+include etl/Make.defs
 endif
 
 ifeq ($(CONFIG_LIBCXXABI),y)
-include libcxxabi.defs
+include libcxxabi/Make.defs
 endif
 
 # Object Files

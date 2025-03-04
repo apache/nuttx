@@ -1,6 +1,8 @@
 ############################################################################
 # arch/xtensa/src/common/espressif/Wireless.mk
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -18,17 +20,40 @@
 #
 ############################################################################
 
+ifeq ($(CONFIG_ARCH_CHIP_ESP32),y)
+INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)bt$(DELIM)include$(DELIM)$(CHIP_SERIES)$(DELIM)include
+endif
+ifeq ($(CONFIG_ARCH_CHIP_ESP32S3),y)
+INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)bt$(DELIM)include$(DELIM)esp32c3$(DELIM)include
+endif
+INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)esp_coex$(DELIM)include
 INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)soc$(DELIM)$(CHIP_SERIES)$(DELIM)include
 INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)nuttx$(DELIM)$(CHIP_SERIES)$(DELIM)include
 INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)nuttx$(DELIM)include$(DELIM)esp_wifi
 
+ifeq ($(CONFIG_ARCH_CHIP_ESP32),y)
+EXTRA_LIBPATHS += -L $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)bt$(DELIM)controller$(DELIM)lib_esp32$(DELIM)$(CHIP_SERIES)
+endif
+ifeq ($(CONFIG_ARCH_CHIP_ESP32S3),y)
+EXTRA_LIBPATHS += -L $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)bt$(DELIM)controller$(DELIM)lib_esp32c3_family$(DELIM)$(CHIP_SERIES)
+endif
+EXTRA_LIBPATHS += -L $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)esp_coex$(DELIM)lib$(DELIM)$(CHIP_SERIES)
 EXTRA_LIBPATHS += -L $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)esp_phy$(DELIM)lib$(DELIM)$(CHIP_SERIES)
 EXTRA_LIBPATHS += -L $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)esp_wifi$(DELIM)lib$(DELIM)$(CHIP_SERIES)
+
+ifeq ($(CONFIG_ARCH_CHIP_ESP32),y)
+EXTRA_LIBS += -lrtc
+endif
+
+ifneq ($(CONFIG_ARCH_CHIP_ESP32S2),y)
+EXTRA_LIBS += -lcoexist
+endif
 
 EXTRA_LIBS += -lphy
 
 ifeq ($(CONFIG_ESPRESSIF_WIFI),y)
 EXTRA_LIBS += -lcore -lnet80211 -lpp
+endif
 
 ifeq ($(CONFIG_WPA_WAPI_PSK),y)
 EXTRA_LIBS += -lwapi
@@ -238,5 +263,3 @@ CHIP_CSRCS += crypto_mbedtls-rsa.c
 CHIP_CSRCS += crypto_mbedtls.c
 CHIP_CSRCS += tls_mbedtls.c
 CHIP_CSRCS += aes-siv.c
-
-endif

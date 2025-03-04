@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/ceva/include/spinlock.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -60,9 +62,6 @@
  * instruction complete.
  *
  */
-
-#define SP_DSB() up_dsb()
-#define SP_DMB() up_dmb()
 
 /****************************************************************************
  * Public Types

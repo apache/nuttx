@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/inode/fs_inodesearch.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -34,14 +36,15 @@
 #include <nuttx/fs/fs.h>
 
 #include "inode/inode.h"
+#include "fs_heap.h"
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static int _inode_compare(FAR const char *fname, FAR struct inode *node);
+static int _inode_compare(FAR const char *fname, FAR struct inode *inode);
 #ifdef CONFIG_PSEUDOFS_SOFTLINKS
-static int _inode_linktarget(FAR struct inode *node,
+static int _inode_linktarget(FAR struct inode *inode,
                              FAR struct inode_search_s *desc);
 #endif
 static int _inode_search(FAR struct inode_search_s *desc);
@@ -65,9 +68,9 @@ FAR struct inode *g_root_inode = NULL;
  *
  ****************************************************************************/
 
-static int _inode_compare(FAR const char *fname, FAR struct inode *node)
+static int _inode_compare(FAR const char *fname, FAR struct inode *inode)
 {
-  FAR char *nname = node->i_name;
+  FAR char *nname = inode->i_name;
 
   if (!fname)
     {
@@ -142,21 +145,21 @@ static int _inode_compare(FAR const char *fname, FAR struct inode *node)
  ****************************************************************************/
 
 #ifdef CONFIG_PSEUDOFS_SOFTLINKS
-static int _inode_linktarget(FAR struct inode *node,
+static int _inode_linktarget(FAR struct inode *inode,
                              FAR struct inode_search_s *desc)
 {
   unsigned int count = 0;
   bool save;
   int ret = -ENOENT;
 
-  DEBUGASSERT(desc != NULL && node != NULL);
+  DEBUGASSERT(desc != NULL && inode != NULL);
 
   /* An infinite loop is avoided only by the loop count. */
 
   save = desc->nofollow;
-  while (INODE_IS_SOFTLINK(node))
+  while (INODE_IS_SOFTLINK(inode))
     {
-      FAR const char *link = (FAR const char *)node->u.i_link;
+      FAR const char *link = (FAR const char *)inode->u.i_link;
 
       /* Reset and reinitialize the search descriptor.  */
 
@@ -181,8 +184,8 @@ static int _inode_linktarget(FAR struct inode *node,
 
       /* Set up for the next time through the loop */
 
-      node = desc->node;
-      DEBUGASSERT(node != NULL);
+      inode = desc->node;
+      DEBUGASSERT(inode != NULL);
     }
 
   desc->nofollow = save;
@@ -214,7 +217,7 @@ static int _inode_linktarget(FAR struct inode *node,
 static int _inode_search(FAR struct inode_search_s *desc)
 {
   FAR const char   *name;
-  FAR struct inode *node    = g_root_inode;
+  FAR struct inode *inode   = g_root_inode;
   FAR struct inode *left    = NULL;
   FAR struct inode *above   = NULL;
   FAR const char   *relpath = NULL;
@@ -237,9 +240,9 @@ static int _inode_search(FAR struct inode_search_s *desc)
    * matching node is found.
    */
 
-  while (node != NULL)
+  while (inode != NULL)
     {
-      int result = _inode_compare(name, node);
+      int result = _inode_compare(name, inode);
 
       /* Case 1:  The name is less than the name of the node.
        * Since the names are ordered, these means that there
@@ -249,7 +252,7 @@ static int _inode_search(FAR struct inode_search_s *desc)
 
       if (result < 0)
         {
-          node = NULL;
+          inode = NULL;
           break;
         }
 
@@ -262,8 +265,8 @@ static int _inode_search(FAR struct inode_search_s *desc)
         {
           /* Continue looking to the "right" of this inode. */
 
-          left = node;
-          node = node->i_peer;
+          left  = inode;
+          inode = inode->i_peer;
         }
 
       /* The names match */
@@ -278,7 +281,7 @@ static int _inode_search(FAR struct inode_search_s *desc)
            */
 
           name = inode_nextname(name);
-          if (*name == '\0' || INODE_IS_MOUNTPT(node))
+          if (*name == '\0' || INODE_IS_MOUNTPT(inode))
             {
               /* Either (1) we are at the end of the path, so this must be
                * the node we are looking for or else (2) this node is a
@@ -299,7 +302,7 @@ static int _inode_search(FAR struct inode_search_s *desc)
                * continue below the target of the link, not the link itself.
                */
 
-              if (INODE_IS_SOFTLINK(node))
+              if (INODE_IS_SOFTLINK(inode))
                 {
                   int status;
 
@@ -309,7 +312,7 @@ static int _inode_search(FAR struct inode_search_s *desc)
                    * instead.
                    */
 
-                  status = _inode_linktarget(node, desc);
+                  status = _inode_linktarget(inode, desc);
                   if (status < 0)
                     {
                       /* Probably means that the target of the symbolic link
@@ -323,7 +326,7 @@ static int _inode_search(FAR struct inode_search_s *desc)
                     {
                       FAR struct inode *newnode = desc->node;
 
-                      if (newnode != node)
+                      if (newnode != inode)
                         {
                           /* The node was a valid symbolic link and we have
                            * jumped to a different, spot in the pseudo file
@@ -339,7 +342,7 @@ static int _inode_search(FAR struct inode_search_s *desc)
                                * was already set by _inode_linktarget().
                                */
 
-                              node    = newnode;
+                              inode   = newnode;
                               above   = desc->parent;
                               left    = desc->peer;
                               ret     = OK;
@@ -348,12 +351,12 @@ static int _inode_search(FAR struct inode_search_s *desc)
                                 {
                                   FAR char *buffer = NULL;
 
-                                  ret = asprintf(&buffer,
-                                                 "%s/%s", desc->relpath,
-                                                 name);
+                                  ret = fs_heap_asprintf(&buffer, "%s/%s",
+                                                         desc->relpath,
+                                                         name);
                                   if (ret > 0)
                                     {
-                                      lib_free(desc->buffer);
+                                      fs_heap_free(desc->buffer);
                                       desc->buffer = buffer;
                                       relpath = buffer;
                                       ret = OK;
@@ -373,7 +376,7 @@ static int _inode_search(FAR struct inode_search_s *desc)
 
                           /* Continue from this new inode. */
 
-                          node = newnode;
+                          inode = newnode;
                         }
                     }
                 }
@@ -381,9 +384,9 @@ static int _inode_search(FAR struct inode_search_s *desc)
 
               /* Keep looking at the next level "down" */
 
-              above = node;
+              above = inode;
               left  = NULL;
-              node  = node->i_child;
+              inode = inode->i_child;
             }
         }
     }
@@ -405,7 +408,7 @@ static int _inode_search(FAR struct inode_search_s *desc)
    */
 
   desc->path    = name;
-  desc->node    = node;
+  desc->node    = inode;
   desc->peer    = left;
   desc->parent  = above;
   desc->relpath = relpath;
@@ -478,7 +481,8 @@ int inode_search(FAR struct inode_search_s *desc)
 
   if (*desc->path != '/')
     {
-      ret = asprintf(&desc->buffer, "%s/%s", _inode_getcwd(), desc->path);
+      ret = fs_heap_asprintf(&desc->buffer, "%s/%s",
+                             _inode_getcwd(), desc->path);
       if (ret < 0)
         {
           return -ENOMEM;
@@ -492,16 +496,16 @@ int inode_search(FAR struct inode_search_s *desc)
 #ifdef CONFIG_PSEUDOFS_SOFTLINKS
   if (ret >= 0)
     {
-      FAR struct inode *node;
+      FAR struct inode *inode;
 
       /* Search completed successfully */
 
-      node    = desc->node;
-      DEBUGASSERT(node != NULL);
+      inode = desc->node;
+      DEBUGASSERT(inode != NULL);
 
       /* Is the terminal node a softlink? Should we follow it? */
 
-      if (!desc->nofollow && INODE_IS_SOFTLINK(node))
+      if (!desc->nofollow && INODE_IS_SOFTLINK(inode))
         {
           /* The terminating inode is a valid soft link:  Return the inode,
            * corresponding to link target.  _inode_linktarget() will follow
@@ -509,7 +513,7 @@ int inode_search(FAR struct inode_search_s *desc)
            * link target of the final symbolic link in the series.
            */
 
-          ret = _inode_linktarget(node, desc);
+          ret = _inode_linktarget(inode, desc);
           if (ret < 0)
             {
               /* The most likely cause for failure is that the target of the

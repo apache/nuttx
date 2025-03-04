@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/litex/litex_emac.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -167,6 +169,7 @@ struct litex_emac_s
   uint8_t               phyaddr;     /* PHY address (pre-defined by pins on reset) */
 
   uint8_t               txslot;
+  spinlock_t            lock;
 };
 
 /****************************************************************************
@@ -509,7 +512,7 @@ static int litex_transmit(struct litex_emac_s *priv)
 
   /* Make the following operations atomic */
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&priv->lock);
 
   /* Now start transmission */
 
@@ -526,7 +529,7 @@ static int litex_transmit(struct litex_emac_s *priv)
   wd_start(&priv->txtimeout, LITEX_TXTIMEOUT,
            litex_txtimeout_expiry, (wdparm_t)priv);
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 
   return OK;
 }
@@ -551,11 +554,11 @@ static int litex_transmit(struct litex_emac_s *priv)
 
 static void litex_receive(struct litex_emac_s *priv)
 {
+  priv->dev.d_len = getreg16(LITEX_ETHMAC_SRAM_WRITER_LENGTH);
+
   /* Update statistics */
 
   NETDEV_RXPACKETS(&priv->dev);
-
-  priv->dev.d_len = getreg16(LITEX_ETHMAC_SRAM_WRITER_LENGTH);
 
   if (priv->dev.d_len == 0 || priv->dev.d_len > ETHMAC_SLOT_SIZE)
     {
@@ -1521,6 +1524,8 @@ static void litex_ethinitialize(void)
     {
       return;
     }
+
+  spin_lock_init(&priv->lock);
 
   nerr("ERROR: netdev_register() failed: %d\n", ret);
 }

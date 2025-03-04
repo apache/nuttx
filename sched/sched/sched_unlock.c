@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/sched/sched_unlock.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -51,63 +53,30 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SMP
-
-int sched_unlock(void)
+void sched_unlock(void)
 {
-  FAR struct tcb_s *rtcb;
+  /* sched_unlock should have no effect if called from the interrupt level. */
 
-  /* This operation is safe because the scheduler is locked and no context
-   * switch may occur.
-   */
-
-  rtcb = this_task();
-
-  /* Check for some special cases:  (1) rtcb may be NULL only during
-   * early boot-up phases, and (2) sched_unlock() should have no
-   * effect if called from the interrupt level.
-   */
-
-  if (rtcb != NULL && !up_interrupt_context())
+  if (!up_interrupt_context())
     {
-      /* Prevent context switches throughout the following. */
+      FAR struct tcb_s *rtcb = this_task();
 
-      irqstate_t flags = enter_critical_section();
-      int cpu = this_cpu();
+      /* rtcb may be NULL only during early boot-up phases */
 
-      /* Decrement the preemption lock counter */
+      DEBUGASSERT(rtcb == NULL || rtcb->lockcount > 0);
 
-      if (rtcb->lockcount > 0)
-        {
-          rtcb->lockcount--;
-        }
-
-      /* Check if the lock counter has decremented to zero.  If so,
+      /* Check if the lock counter has decremented to zero. If so,
        * then pre-emption has been re-enabled.
        */
 
-      if (rtcb->lockcount <= 0)
+      if (rtcb != NULL && --rtcb->lockcount == 0)
         {
+          irqstate_t flags = enter_critical_section_wo_note();
+
           /* Note that we no longer have pre-emption disabled. */
 
-#ifdef CONFIG_SCHED_CRITMONITOR
-          nxsched_critmon_preemption(rtcb, false);
-#endif
-#ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
-          sched_note_premption(rtcb, false);
-#endif
-
-          /* Set the lock count to zero */
-
-          rtcb->lockcount = 0;
-
-          /* The lockcount has decremented to zero and we need to perform
-           * release our hold on the lock.
-           */
-
-          DEBUGASSERT((g_cpu_lockset & (1 << cpu)) != 0);
-
-          g_cpu_lockset &= ~(1 << cpu);
+          nxsched_critmon_preemption(rtcb, false, return_address(0));
+          sched_note_preemption(rtcb, false);
 
           /* Release any ready-to-run tasks that have collected in
            * g_pendingtasks.
@@ -116,27 +85,7 @@ int sched_unlock(void)
            * this task to be switched out!
            */
 
-          /* In the SMP case, the tasks remains pend(1) if we are
-           * in a critical section, i.e., g_cpu_irqlock is locked by other
-           * CPUs, or (2) other CPUs still have pre-emption disabled, i.e.,
-           * g_cpu_lockset is locked.  In those cases, the release of the
-           * pending tasks must be deferred until those conditions are met.
-           *
-           * There are certain conditions that we must avoid by preventing
-           * releasing the pending tasks while within the critical section
-           * of other CPUs.  This logic does that and there is matching
-           * logic in nxsched_add_readytorun to avoid starting new tasks
-           * within the critical section (unless the CPU is the holder of
-           * the lock).
-           *
-           * REVISIT: If this CPU is only one that holds the IRQ lock, then
-           * we should go ahead and release the pending tasks.  See the logic
-           * leave_critical_section():  It will call nxsched_merge_pending()
-           * BEFORE it clears IRQ lock.
-           */
-
-          if (!nxsched_islocked_global() &&
-              list_pendingtasks()->head != NULL)
+          if (list_pendingtasks()->head != NULL)
             {
               if (nxsched_merge_pending())
                 {
@@ -162,157 +111,25 @@ int sched_unlock(void)
                * maximum.
                */
 
-              if (rtcb != current_task(cpu))
-                {
-                  rtcb->timeslice = MSEC2TICK(CONFIG_RR_INTERVAL);
-                }
-#ifdef CONFIG_SCHED_TICKLESS
-              else
-                {
-                  nxsched_reassess_timer();
-                }
-#endif
-            }
-#endif
-
-#ifdef CONFIG_SCHED_SPORADIC
-#if CONFIG_RR_INTERVAL > 0
-          else
-#endif
-          /* If (1) the task that was running supported sporadic scheduling
-           * and (2) if its budget slice has already expired, but (3) it
-           * could not slice out because pre-emption was disabled, then we
-           * need to swap the task out now and reassess the interval timer
-           * for the next time slice.
-           */
-
-          if ((rtcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC
-              && rtcb->timeslice < 0)
-            {
-              /* Yes.. that is the situation.  Force the low-priority state
-               * now
-               */
-
-              nxsched_sporadic_lowpriority(rtcb);
-
-#ifdef CONFIG_SCHED_TICKLESS
-              /* Make sure that the call to nxsched_merge_pending() did not
-               * change the currently active task.
-               */
-
-              if (rtcb == current_task(cpu))
-                {
-                  nxsched_reassess_timer();
-                }
-#endif
-            }
-#endif
-        }
-
-      leave_critical_section(flags);
-    }
-
-  return OK;
-}
-
-#else /* CONFIG_SMP */
-
-int sched_unlock(void)
-{
-  FAR struct tcb_s *rtcb = this_task();
-
-  /* Check for some special cases:  (1) rtcb may be NULL only during
-   * early boot-up phases, and (2) sched_unlock() should have no
-   * effect if called from the interrupt level.
-   */
-
-  if (rtcb != NULL && !up_interrupt_context())
-    {
-      /* Prevent context switches throughout the following. */
-
-      irqstate_t flags = enter_critical_section();
-
-      /* Decrement the preemption lock counter */
-
-      if (rtcb->lockcount > 0)
-        {
-          rtcb->lockcount--;
-        }
-
-      /* Check if the lock counter has decremented to zero.  If so,
-       * then pre-emption has been re-enabled.
-       */
-
-      if (rtcb->lockcount <= 0)
-        {
-          /* Note that we no longer have pre-emption disabled. */
-
-#ifdef CONFIG_SCHED_CRITMONITOR
-          nxsched_critmon_preemption(rtcb, false);
-#endif
-#ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
-          sched_note_premption(rtcb, false);
-#endif
-
-          /* Set the lock count to zero */
-
-          rtcb->lockcount = 0;
-
-          /* Release any ready-to-run tasks that have collected in
-           * g_pendingtasks.
-           *
-           * NOTE: This operation has a very high likelihood of causing
-           * this task to be switched out!
-           *
-           * In the single CPU case, decrementing lockcount to zero is
-           * sufficient to release the pending tasks.  Further, in that
-           * configuration, critical sections and pre-emption can operate
-           * fully independently.
-           */
-
-          if (list_pendingtasks()->head != NULL)
-            {
-              if (nxsched_merge_pending())
-                {
-                  up_switch_context(this_task(), rtcb);
-                }
-            }
-
-#if CONFIG_RR_INTERVAL > 0
-          /* If (1) the task that was running supported round-robin
-           * scheduling and (2) if its time slice has already expired, but
-           * (3) it could not be sliced out because pre-emption was disabled,
-           * then we need to swap the task out now and reassess the interval
-           * timer for the next time slice.
-           */
-
-          if ((rtcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_RR &&
-              rtcb->timeslice == 0)
-            {
-              /* Yes.. that is the situation.  But one more thing:  The call
-               * to nxsched_merge_pending() above may have actually replaced
-               * the task at the head of the ready-to-run list.  In that
-               * case, we need only to reset the timeslice value back to the
-               * maximum.
-               */
-
               if (rtcb != this_task())
                 {
                   rtcb->timeslice = MSEC2TICK(CONFIG_RR_INTERVAL);
                 }
-#ifdef CONFIG_SCHED_TICKLESS
-              else
+#  ifdef CONFIG_SCHED_TICKLESS
+              else if ((rtcb->flags & TCB_FLAG_PREEMPT_SCHED) == 0)
                 {
+                  rtcb->flags |= TCB_FLAG_PREEMPT_SCHED;
                   nxsched_reassess_timer();
+                  rtcb->flags &= ~TCB_FLAG_PREEMPT_SCHED;
                 }
-#endif
+#  endif
             }
 #endif
 
 #ifdef CONFIG_SCHED_SPORADIC
-#if CONFIG_RR_INTERVAL > 0
+#  if CONFIG_RR_INTERVAL > 0
           else
-#endif
+#  endif
           /* If (1) the task that was running supported sporadic scheduling
            * and (2) if its budget slice has already expired, but (3) it
            * could not slice out because pre-emption was disabled, then we
@@ -329,24 +146,23 @@ int sched_unlock(void)
 
               nxsched_sporadic_lowpriority(rtcb);
 
-#ifdef CONFIG_SCHED_TICKLESS
+#  ifdef CONFIG_SCHED_TICKLESS
               /* Make sure that the call to nxsched_merge_pending() did not
                * change the currently active task.
                */
 
-              if (rtcb == this_task())
+              if (rtcb == this_task() &&
+                  (rtcb->flags & TCB_FLAG_PREEMPT_SCHED) == 0)
                 {
+                  rtcb->flags |= TCB_FLAG_PREEMPT_SCHED;
                   nxsched_reassess_timer();
+                  rtcb->flags &= ~TCB_FLAG_PREEMPT_SCHED;
                 }
-#endif
+#  endif
             }
 #endif
+
+          leave_critical_section_wo_note(flags);
         }
-
-      leave_critical_section(flags);
     }
-
-  return OK;
 }
-
-#endif /* CONFIG_SMP */

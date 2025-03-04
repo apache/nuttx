@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/machine/arm64/arch_elf.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -33,6 +35,7 @@
 #include <nuttx/compiler.h>
 #include <nuttx/bits.h>
 #include <nuttx/elf.h>
+#include <nuttx/mm/kasan.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -181,6 +184,9 @@ aarch64_insn_encode_immediate(enum insn_imm_type_e type,
 static uint64_t do_reloc(enum reloc_op_e op,
                          uintptr_t place, uint64_t val)
 {
+  val = (uint64_t)kasan_reset_tag((const void *)val);
+  place = (uint64_t)kasan_reset_tag((const void *)place);
+
   switch (op)
     {
       case RELOC_OP_ABS:

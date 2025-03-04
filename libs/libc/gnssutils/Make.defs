@@ -1,0 +1,64 @@
+############################################################################
+# libs/libc/gnssutils/Make.defs
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+ifneq ($(CONFIG_GNSSUTILS_MINMEA_LIB),)
+
+MINMEA_URL ?= "https://github.com/kosma/minmea/archive"
+MINMEA_VERSION ?= db46128e73cee26d6a6eb0482dcba544ee1ea9f5
+
+MINMEA_UNPACKNAME = gnssutils/minmea
+
+$(MINMEA_UNPACKNAME):
+	@echo "Downloading: $(MINMEA_UNPACKNAME)"
+	$(Q) curl -O -L $(MINMEA_URL)/$(MINMEA_VERSION).zip
+	$(Q) mkdir $(MINMEA_UNPACKNAME)
+	$(Q) unzip -o -j $(MINMEA_VERSION).zip -d $(MINMEA_UNPACKNAME)
+	$(call DELFILE, $(MINMEA_VERSION).zip)
+	$(Q) mkdir -p $(TOPDIR)$(DELIM)include$(DELIM)minmea$(DELIM)
+	$(Q) cp gnssutils/minmea/minmea.h $(TOPDIR)$(DELIM)include$(DELIM)minmea$(DELIM)
+
+# Files
+
+CSRCS  += minmea.c
+
+clean::
+	$(call DELFILE, $(OBJS))
+
+# Download and unpack tarball if no git repo found
+ifeq ($(wildcard $(MINMEA_UNPACKNAME)/.git),)
+context:: $(MINMEA_UNPACKNAME)
+
+distclean::
+	$(call DELDIR, $(MINMEA_UNPACKNAME))
+	$(call DELDIR, $(TOPDIR)$(DELIM)include$(DELIM)minmea$(DELIM))
+else
+context::
+	$(Q) mkdir -p $(TOPDIR)$(DELIM)include$(DELIM)minmea$(DELIM)
+	$(Q) cp gnssutils/minmea/minmea.h $(TOPDIR)$(DELIM)include$(DELIM)minmea$(DELIM)
+
+distclean::
+	$(call DELDIR, $(TOPDIR)$(DELIM)include$(DELIM)minmea$(DELIM))
+endif
+
+DEPPATH += --dep-path gnssutils/minmea
+VPATH += :gnssutils/minmea
+endif

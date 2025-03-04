@@ -1,6 +1,8 @@
 /****************************************************************************
  * audio/pcm_decode.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -1090,6 +1092,7 @@ static int pcm_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
   if (headersize > 0)
     {
       struct audio_caps_s caps;
+      memset(&caps, 0, sizeof(caps));
 
       /* Configure the lower level for the number of channels, bitrate,
        * and sample bitwidth.

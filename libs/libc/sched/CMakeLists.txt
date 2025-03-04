@@ -1,6 +1,8 @@
 # ##############################################################################
 # libs/libc/sched/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -21,10 +23,6 @@
 set(SRCS
     sched_getprioritymax.c
     sched_getprioritymin.c
-    clock_ticks2time.c
-    clock_time2ticks.c
-    clock_timespec_add.c
-    clock_timespec_subtract.c
     clock_getcpuclockid.c
     clock_getres.c
     task_cancelpt.c

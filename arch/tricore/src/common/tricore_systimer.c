@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/tricore/src/common/tricore_systimer.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -22,7 +24,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/kmalloc.h>
 
 #include <nuttx/timers/oneshot.h>
@@ -49,6 +51,7 @@ struct tricore_systimer_lowerhalf_s
   uint64_t                   alarm;
   oneshot_callback_t         callback;
   void                       *arg;
+  spinlock_t                 lock;
 };
 
 /****************************************************************************
@@ -92,11 +95,11 @@ tricore_systimer_get_time(struct tricore_systimer_lowerhalf_s *priv)
   irqstate_t flags;
   uint64_t ticks;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
 
   ticks = IfxStm_get(priv->tbase);
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 
   return ticks;
 }
@@ -107,11 +110,11 @@ tricore_systimer_set_timecmp(struct tricore_systimer_lowerhalf_s *priv,
 {
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
 
   IfxStm_updateCompare(priv->tbase, IfxStm_Comparator_0, value);
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************
@@ -313,6 +316,7 @@ tricore_systimer_initialize(volatile void *tbase, int irq, uint64_t freq)
 
   priv->tbase = tbase;
   priv->freq  = freq;
+  spin_lock_init(&priv->lock);
 
   IfxStm_setCompareControl(tbase,
       IfxStm_Comparator_0,

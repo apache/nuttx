@@ -1,6 +1,8 @@
 ############################################################################
 # boards/arm/stm32l4/stm32l4r9ai-disco/src/Makefile
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -20,7 +22,7 @@
 
 include $(TOPDIR)/Make.defs
 
-CSRCS = stm32_boot.c
+CSRCS = stm32_boot.c stm32_bringup.c
 
 ifeq ($(CONFIG_ARCH_BOARD_STM32L4_CUSTOM_CLOCKCONFIG),y)
 CSRCS += stm32_clockconfig.c
@@ -59,10 +61,23 @@ endif
 
 ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += stm32_appinit.c
+ifeq ($(CONFIG_BOARDCTL_IOCTL),y)
+CSRCS += stm32_ioctl.c
+endif
 endif
 
 ifeq ($(CONFIG_ETC_ROMFS),y)
 CSRCS += etc_romfs.c
+endif
+
+ifeq ($(CONFIG_BOARDCTL_UNIQUEID),y)
+CSRCS += stm32_uid.c
+endif
+
+ifneq ($(CONFIG_STM32_ETHMAC),y)
+ifeq ($(CONFIG_NETDEVICES),y)
+CSRCS += stm32_netinit.c
+endif
 endif
 
 include $(TOPDIR)/boards/Board.mk

@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/note/noteram_driver.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -46,12 +48,20 @@
  * NOTERAM_SETMODE
  *              - Set overwrite mode
  *                Argument: A read-only pointer to unsigned int
+ * NOTERAM_GETREADMODE
+ *              - Get read mode
+ *                Argument: A writable pointer to unsigned int
+ * NOTERAM_SETREADMODE
+ *              - Set read mode
+ *                Argument: A read-only pointer to unsigned int
  */
 
 #ifdef CONFIG_DRIVERS_NOTERAM
 #define NOTERAM_CLEAR           _NOTERAMIOC(0x01)
 #define NOTERAM_GETMODE         _NOTERAMIOC(0x02)
 #define NOTERAM_SETMODE         _NOTERAMIOC(0x03)
+#define NOTERAM_GETREADMODE     _NOTERAMIOC(0x04)
+#define NOTERAM_SETREADMODE     _NOTERAMIOC(0x05)
 #endif
 
 /* Overwrite mode definitions */
@@ -60,6 +70,9 @@
 #define NOTERAM_MODE_OVERWRITE_DISABLE      0
 #define NOTERAM_MODE_OVERWRITE_ENABLE       1
 #define NOTERAM_MODE_OVERWRITE_OVERFLOW     2
+
+#define NOTERAM_MODE_READ_ASCII             0
+#define NOTERAM_MODE_READ_BINARY            1
 #endif
 
 /****************************************************************************

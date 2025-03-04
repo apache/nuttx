@@ -1,6 +1,8 @@
 ############################################################################
 # arch/ceva/src/xc5/Toolchain.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -61,7 +63,7 @@ else
 endif
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  ARCHOPTIMIZATION += -g
+  ARCHOPTIMIZATION += $(CONFIG_DEBUG_SYMBOLS_LEVEL)
 endif
 
 ARCHCFLAGS += -fno-common
@@ -86,3 +88,16 @@ LIBGCC += $(CROSSDEV)libs/xc5/libcc.lib
 CC  = $(CROSSDEV)/cevaxccc -mquiet -Wa,-quiet
 CXX = $(CROSSDEV)/cevaxccc -mquiet -Wa,-quiet -x c++
 CPP = $(CROSSDEV)/cevaxccc -mquiet -Wa,-quiet -E -P -x c
+
+# Loadable module definitions
+
+CMODULEFLAGS = $(CFLAGS) -fvisibility=hidden
+LDMODULEFLAGS = -r -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/modlib/gnu-elf.ld)
+
+# ELF module definitions
+
+CELFFLAGS = $(CFLAGS) -fvisibility=hidden
+CXXELFFLAGS = $(CXXFLAGS) -fvisibility=hidden
+
+LDELFFLAGS = -r -e main
+LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)$(DELIM)libs$(DELIM)libc$(DELIM)modlib$(DELIM)gnu-elf.ld)

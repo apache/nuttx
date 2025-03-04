@@ -1,6 +1,8 @@
 /****************************************************************************
  * mm/iob/iob_free.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -81,9 +83,6 @@ FAR struct iob_s *iob_free(FAR struct iob_s *iob)
 #ifdef CONFIG_IOB_NOTIFIER
   int16_t navail;
 #endif
-#if CONFIG_IOB_THROTTLE > 0
-  bool committed_thottled = false;
-#endif
 
   iobinfo("iob=%p io_pktlen=%u io_len=%u next=%p\n",
           iob, iob->io_pktlen, iob->io_len, next);
@@ -142,80 +141,33 @@ FAR struct iob_s *iob_free(FAR struct iob_s *iob)
    * cases.
    */
 
+  if (g_iob_count < 0)
+    {
+      g_iob_count++;
+      iob->io_flink   = g_iob_committed;
+      g_iob_committed = iob;
+      spin_unlock_irqrestore(&g_iob_lock, flags);
+      nxsem_post(&g_iob_sem);
+    }
 #if CONFIG_IOB_THROTTLE > 0
-  if ((g_iob_sem.semcount < 0) ||
-      ((g_iob_sem.semcount >= CONFIG_IOB_THROTTLE) &&
-       (g_throttle_sem.semcount < 0)))
-#else
-  if (g_iob_sem.semcount < 0)
-#endif
+  else if (g_throttle_wait > 0 && g_iob_count >= CONFIG_IOB_THROTTLE)
     {
       iob->io_flink   = g_iob_committed;
       g_iob_committed = iob;
-#if CONFIG_IOB_THROTTLE > 0
-      if ((g_iob_sem.semcount >= CONFIG_IOB_THROTTLE) &&
-          (g_throttle_sem.semcount < 0))
-        {
-          committed_thottled = true;
-        }
-#endif
+      g_throttle_wait--;
+      spin_unlock_irqrestore(&g_iob_lock, flags);
+      nxsem_post(&g_throttle_sem);
     }
+#endif
   else
     {
+      g_iob_count++;
       iob->io_flink   = g_iob_freelist;
       g_iob_freelist  = iob;
-    }
-
-  spin_unlock_irqrestore(&g_iob_lock, flags);
-
-  /* Signal that an IOB is available. This is done with schedule locked
-   * to make sure that both g_iob_sem and g_throttle_sem are incremented
-   * together (if applicable). After the schedule is unlocked, if there
-   * is a thread blocked, waiting for an IOB, this will wake up exactly
-   * one thread.  The semaphore count will correctly indicate that the
-   * awakened task owns an IOB and should find it in the committed list.
-   */
-
-  sched_lock();
-
-  nxsem_post(&g_iob_sem);
-  DEBUGASSERT(g_iob_sem.semcount <= CONFIG_IOB_NBUFFERS);
-
-#if CONFIG_IOB_THROTTLE > 0
-  flags = spin_lock_irqsave(&g_iob_lock);
-
-  if (g_iob_sem.semcount > CONFIG_IOB_THROTTLE)
-    {
-      /* If posting to the the throttled semaphore is going to awake a
-       * waiting task, then the g_iob_sem count should be decremented
-       * because an I/O buffer (from the head of the g_iob_committed list)
-       * will be allocated to this waiting task.
-       * Decrementing the g_throttled_sem (when posting to the g_iob_sem)
-       * is not necessary because this condition can only occur when the
-       * g_throttled_sem is less or equal to zero. On the other hand, if
-       * the g_iob_sem is greater than the CONFIG_IOB_THROTTLE and there
-       * is a waiting thread, then the I/O buffer just freed will be
-       * committed to a waiting task and is not available for general use.
-       */
-
-      if (committed_thottled)
-        {
-          g_iob_sem.semcount--;
-        }
-
-      spin_unlock_irqrestore(&g_iob_lock, flags);
-
-      nxsem_post(&g_throttle_sem);
-      DEBUGASSERT(g_throttle_sem.semcount <=
-              (CONFIG_IOB_NBUFFERS - CONFIG_IOB_THROTTLE));
-    }
-  else
-    {
       spin_unlock_irqrestore(&g_iob_lock, flags);
     }
-#endif
 
-  sched_unlock();
+  DEBUGASSERT(g_iob_count <= CONFIG_IOB_NBUFFERS);
 
 #ifdef CONFIG_IOB_NOTIFIER
   /* Check if the IOB was claimed by a thread that is blocked waiting

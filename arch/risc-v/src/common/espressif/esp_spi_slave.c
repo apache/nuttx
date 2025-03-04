@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/common/espressif/esp_spi_slave.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -192,6 +194,7 @@ static int spislave_periph_interrupt(int irq, void *context, void *arg);
 
 static void spislave_evict_sent_data(struct spislave_priv_s *priv,
                                      uint32_t sent_bytes);
+static inline void spislave_hal_store_result(spi_slave_hal_context_t *hal);
 #ifdef CONFIG_ESPRESSIF_SPI2_DMA
 static void spislave_setup_rx_dma(struct spislave_priv_s *priv);
 static void spislave_setup_tx_dma(struct spislave_priv_s *priv);
@@ -300,6 +303,41 @@ static struct esp_dmadesc_s dma_txdesc[SPI_DMA_DESC_NUM];
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: spislave_hal_store_result
+ *
+ * Description:
+ *   Get data from SPI peripheral driver and update local buffer. A similar
+ *   function is present in the ESP HAL, but it seems there is an issue in
+ *   the spi_ll_read_buffer(hal->hw, hal->rx_buffer, hal->rcv_bitlen) call.
+ *   Therefore, we are developing our own function to handle this issue.
+ *
+ * NOTE: We have a similar function in the ESP HAL, but the
+ *   spi_ll_read_buffer seems to be receiving the wrong parameter.
+ *   This function will address the issue until the Espressif HAL is fixed.
+ *
+ * Input Parameters:
+ *   hw - Beginning address of the HAL context register
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+static inline void spislave_hal_store_result(spi_slave_hal_context_t *hal)
+{
+  hal->rcv_bitlen = spi_ll_slave_get_rcv_bitlen(hal->hw);
+  if (hal->rcv_bitlen == hal->bitlen - 1)
+    {
+      hal->rcv_bitlen++;
+    }
+
+  if (!hal->use_dma && hal->rx_buffer)
+    {
+      spi_ll_read_buffer(hal->hw, hal->rx_buffer, hal->rcv_bitlen);
+    }
+}
 
 /****************************************************************************
  * Name: spislave_cpu_tx_fifo_reset
@@ -506,6 +544,31 @@ static void spislave_setup_tx_dma(struct spislave_priv_s *priv)
 #endif
 
 /****************************************************************************
+ * Name: spi_slave_prepare_data
+ *
+ * Description:
+ *   Prepare the SPI Slave controller for transmitting data in CPU-controlled
+ *   mode. This function resets the SPI Slave hardware, writes the data to
+ *   the TX buffer, and resets the TX FIFO.
+ *
+ * Input Parameters:
+ *   priv           - Private SPI Slave controller structure
+ *   nbits_to_send  - Number of bits to send in the next transaction
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+static inline void spi_slave_prepare_data(struct spislave_priv_s *priv,
+                      ssize_t nbits_to_send)
+{
+  spi_ll_slave_reset(priv->ctx.hw);
+  spi_ll_write_buffer(priv->ctx.hw, priv->tx_buffer, nbits_to_send);
+  spislave_cpu_tx_fifo_reset(priv->ctx.hw);
+}
+
+/****************************************************************************
  * Name: spislave_prepare_next_tx
  *
  * Description:
@@ -522,12 +585,15 @@ static void spislave_setup_tx_dma(struct spislave_priv_s *priv)
 
 static void spislave_prepare_next_tx(struct spislave_priv_s *priv)
 {
+  uint32_t nbits_to_send;
+
   if (priv->tx_length != 0)
     {
 #ifdef CONFIG_ESPRESSIF_SPI2_DMA
       spislave_setup_tx_dma(priv);
 #else
-      spi_slave_hal_prepare_data(&priv->ctx);
+      nbits_to_send = priv->nbits * priv->tx_length;
+      spi_slave_prepare_data(priv, nbits_to_send);
 #endif
       priv->is_tx_enabled = true;
     }
@@ -536,11 +602,15 @@ static void spislave_prepare_next_tx(struct spislave_priv_s *priv)
       spiwarn("TX buffer empty! Disabling TX for next transaction\n");
 
 #ifndef CONFIG_ESPRESSIF_SPI2_DMA
-      spislave_cpu_tx_fifo_reset(priv->ctx.hw);
+      memset(priv->tx_buffer, 0, sizeof(priv->tx_buffer));
+      spi_slave_prepare_data(priv, priv->ctx.rcv_bitlen);
 #endif
 
       priv->is_tx_enabled = false;
     }
+
+    spi_ll_slave_set_rx_bitlen(priv->ctx.hw, priv->ctx.rcv_bitlen);
+    spi_ll_slave_set_tx_bitlen(priv->ctx.hw, priv->ctx.rcv_bitlen);
 }
 
 /****************************************************************************
@@ -563,9 +633,6 @@ static void spislave_prepare_next_tx(struct spislave_priv_s *priv)
 static int spislave_periph_interrupt(int irq, void *context, void *arg)
 {
   struct spislave_priv_s *priv = (struct spislave_priv_s *)arg;
-
-  uint32_t transfer_size = spi_slave_hal_get_rcv_bitlen(&priv->ctx) / 8;
-
   if (!priv->is_processing)
     {
       SPIS_DEV_SELECT(priv->dev, true);
@@ -574,11 +641,12 @@ static int spislave_periph_interrupt(int irq, void *context, void *arg)
 
   /* RX process */
 
-  if (transfer_size > 0)
-    {
-      spi_slave_hal_store_result(&priv->ctx);
-      priv->rx_length += transfer_size;
-    }
+  /* Point to the next free position in the buffer */
+
+  priv->ctx.rx_buffer += priv->rx_length;
+  spislave_hal_store_result(&priv->ctx);
+  priv->rx_length += priv->ctx.rcv_bitlen / priv->nbits;
+  SPIS_DEV_NOTIFY(priv->dev, SPISLAVE_RX_COMPLETE);
 
 #ifdef CONFIG_ESPRESSIF_SPI2_DMA
   if (priv->rx_length < SPI_SLAVE_BUFSIZE)
@@ -589,9 +657,10 @@ static int spislave_periph_interrupt(int irq, void *context, void *arg)
 
   /* TX process */
 
-  if (transfer_size > 0 && priv->is_tx_enabled)
+  if (priv->ctx.rcv_bitlen > 0 && priv->is_tx_enabled)
     {
-      spislave_evict_sent_data(priv, transfer_size);
+      spislave_evict_sent_data(priv, priv->ctx.rcv_bitlen / priv->nbits);
+      SPIS_DEV_NOTIFY(priv->dev, SPISLAVE_TX_COMPLETE);
     }
 
   priv->ctx.bitlen = priv->tx_length;

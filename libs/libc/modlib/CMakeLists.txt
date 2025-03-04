@@ -1,6 +1,8 @@
 # ##############################################################################
 # libs/libc/modlib/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -23,12 +25,14 @@ if(CONFIG_LIBC_MODLIB)
   list(
     APPEND
     SRCS
+    modlib_addrenv.c
     modlib_bind.c
     modlib_depend.c
     modlib_init.c
     modlib_iobuffer.c
     modlib_load.c
     modlib_loadhdrs.c
+    modlib_verify.c
     modlib_read.c
     modlib_registry.c
     modlib_sections.c
@@ -36,7 +40,10 @@ if(CONFIG_LIBC_MODLIB)
     modlib_symtab.c
     modlib_uninit.c
     modlib_unload.c
-    modlib_verify.c)
+    modlib_gethandle.c
+    modlib_getsymbol.c
+    modlib_insert.c
+    modlib_remove.c)
 
   list(APPEND SRCS modlib_globals.S)
 

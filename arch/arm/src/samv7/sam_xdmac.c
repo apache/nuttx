@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/samv7/sam_xdmac.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -1913,7 +1915,7 @@ int sam_dmarxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
  *   maddr - array of memory addresses (i.e. destination addresses)
  *   paddr - peripheral address (i.e. source address)
  *   nbytes - number of bytes to transfer
- *   ndescrs - number of descriptors (i.e. the lenght of descr array)
+ *   ndescrs - number of descriptors (i.e. the length of descr array)
  *
  ****************************************************************************/
 

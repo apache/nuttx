@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/sim/src/sim/sim_internal.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -102,8 +104,8 @@
 
 /* Macros to handle saving and restoring interrupt state ********************/
 
-#define sim_savestate(regs) sim_copyfullstate(regs, (xcpt_reg_t *)CURRENT_REGS)
-#define sim_restorestate(regs) (CURRENT_REGS = regs)
+#define sim_savestate(regs) sim_copyfullstate(regs, up_current_regs())
+#define sim_restorestate(regs) up_set_current_regs(regs)
 
 #define sim_saveusercontext(saveregs, ret)                      \
     do                                                          \
@@ -180,6 +182,7 @@
  ****************************************************************************/
 
 typedef int pid_t;
+typedef size_t xcpt_reg_t;
 
 /****************************************************************************
  * Public Type Definitions
@@ -203,8 +206,9 @@ extern char **g_argv;
 
 /* Context switching */
 
-void sim_copyfullstate(unsigned long *dest, unsigned long *src);
+void sim_copyfullstate(xcpt_reg_t *dest, xcpt_reg_t *src);
 void *sim_doirq(int irq, void *regs);
+void  sim_unlock(void);
 
 /* sim_hostmisc.c ***********************************************************/
 
@@ -224,7 +228,7 @@ int   host_waitpid(pid_t pid);
 
 void *host_allocheap(size_t size, bool exec);
 void  host_freeheap(void *mem);
-void *host_allocshmem(const char *name, size_t size, int master);
+void *host_allocshmem(const char *name, size_t size);
 void  host_freeshmem(void *mem);
 
 size_t host_mallocsize(void *mem);
@@ -283,6 +287,7 @@ bool host_uart_checkin(int fd);
 bool host_uart_checkout(int fd);
 int  host_uart_setcflag(int fd, unsigned int cflag);
 int  host_uart_getcflag(int fd, unsigned int *cflag);
+void host_printf(const char *fmt, ...);
 
 /* sim_deviceimage.c ********************************************************/
 
@@ -407,6 +412,20 @@ void sim_netdriver_loop(void);
 
 #ifdef CONFIG_RPTUN
 int sim_rptun_init(const char *shmemname, const char *cpuname, int master);
+#endif
+
+/* sim_rpmsg_virtio.c *******************************************************/
+
+#ifdef CONFIG_RPMSG_VIRTIO_LITE
+int sim_rpmsg_virtio_init(const char *shmemname, const char *cpuname,
+                          bool master);
+#endif
+
+/* sim_rpmsg_port_uart.c ****************************************************/
+
+#ifdef CONFIG_RPMSG_PORT_UART
+int sim_rpmsg_port_uart_init(const char *localcpu, const char *remotecpu,
+                             const char *uartpath);
 #endif
 
 /* sim_hcisocket.c **********************************************************/

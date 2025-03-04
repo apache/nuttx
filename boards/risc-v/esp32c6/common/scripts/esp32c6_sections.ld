@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/risc-v/esp32c6/common/scripts/esp32c6_sections.ld
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -66,13 +68,17 @@ SECTIONS
     /* Vectors go to start of IRAM */
 
     KEEP(*(.exception_vectors.text));
-    . = ALIGN(4);
+    . = ALIGN(16);
 
     *(.iram1)
     *(.iram1.*)
 
     *libsched.a:irq_dispatch.*(.text .text.* .literal .literal.*)
+    *libsched.a:sched_lock.*(.text .text.* .literal .literal.*)
+    *libsched.a:sched_unlock.*(.text .text.* .literal .literal.*)
 
+    *libarch.a:*(.text.esprv_intc_int_get_type .literal.esprv_intc_int_get_type)
+    *libarch.a:*riscv_doirq.*(.text .text.* .literal .literal.*)
     *libarch.a:*brownout.*(.text .text.* .literal .literal.*)
     *libarch.a:*cpu.*(.text .text.* .literal .literal.*)
     *libarch.a:*gpio_hal.*(.text .text.* .literal .literal.*)
@@ -130,6 +136,7 @@ SECTIONS
     *libarch.a:*esp_rom_spiflash.*(.text .text.* .literal .literal.*)
     *libarch.a:*esp_efuse_fields.*(.text .text.* .literal .literal.*)
     *libarch.a:*esp_efuse_api_key.*(.text .text.* .literal .literal.*)
+    *libarch.a:*esp_efuse_utility.*(.text .text.* .literal .literal.*)
     *libarch.a:*efuse_hal.*(.text .text.* .literal .literal.*)
     *libarch.a:*log.*(.text .text.* .literal .literal.*)
     *libarch.a:*log_noos.*(.text .text.* .literal .literal.*)
@@ -140,11 +147,13 @@ SECTIONS
     esp_head.*(.literal .text .literal.* .text.*)
     esp_start.*(.literal .text .literal.* .text.*)
 
-    *(.wifi0iram.*)
-    *(.wifirxiram.*)
-    *(.wifislpiram.*)
-    *(.wifiorslpiram.*)
-    *(.wifislprxiram.*)
+    *(.wifi0iram .wifi0iram.*)
+    *(.wifirxiram .wifirxiram.*)
+    *(.wifislpiram .wifislpiram.*)
+    *(.wifiorslpiram .wifiorslpiram.*)
+    *(.wifislprxiram .wifislprxiram.*)
+    *(.wifiextrairam .wifiextrairam.*)
+
   } >iram0_0_seg AT > ROM
 
   /* Marks the end of IRAM code segment */
@@ -211,7 +220,11 @@ SECTIONS
     *(.dram1.*)
 
     *libsched.a:irq_dispatch.*(.rodata .rodata.*)
+    *libsched.a:sched_lock.*(.rodata .rodata.*)
+    *libsched.a:sched_unlock.*(.rodata .rodata.*)
 
+    *libarch.a:*(.rodata.esprv_intc_int_get_type)
+    *libarch.a:*riscv_doirq.*(.rodata .rodata.*)
     *libarch.a:*brownout.*(.rodata .rodata.*)
     *libarch.a:*cpu.*(.rodata .rodata.*)
     *libarch.a:*gpio_hal.*(.rodata .rodata.*)
@@ -269,6 +282,7 @@ SECTIONS
     *libarch.a:*esp_rom_spiflash.*(.rodata .rodata.*)
     *libarch.a:*esp_efuse_fields.*(.rodata .rodata.*)
     *libarch.a:*esp_efuse_api_key.*(.rodata .rodata.*)
+    *libarch.a:*esp_efuse_utility.*(.rodata .rodata.*)
     *libarch.a:*efuse_hal.*(.rodata .rodata.*)
     *libarch.a:*log.*(.rodata .rodata.*)
     *libarch.a:*log_noos.*(.rodata .rodata.*)
@@ -324,18 +338,18 @@ SECTIONS
     _instruction_reserved_start = ABSOLUTE(.);  /* This is a symbol marking the flash.text start, this can be used for mmu driver to maintain virtual address */
     _text_start = ABSOLUTE(.);
 
-    *(.wifi0iram .wifi0iram.*)
-    *(.wifiextrairam .wifiextrairam.*)
-    *(.wifiorslpiram .wifiorslpiram.*)
-    *(.wifirxiram .wifirxiram.*)
-    *(.wifislpiram .wifislpiram.*)
-    *(.wifislprxiram .wifislprxiram.*)
+    *(EXCLUDE_FILE(*libnet80211.a *libpp.a) .wifi0iram EXCLUDE_FILE(*libnet80211.a *libpp.a) .wifi0iram.*)
+    *(EXCLUDE_FILE(*libpp.a) .wifiorslpiram EXCLUDE_FILE(*libpp.a) .wifiorslpiram.*)
+    *(EXCLUDE_FILE(*libnet80211.a *libpp.a) .wifirxiram EXCLUDE_FILE(*libnet80211.a *libpp.a) .wifirxiram.*)
+    *(EXCLUDE_FILE(*libnet80211.a *libpp.a) .wifislprxiram EXCLUDE_FILE(*libnet80211.a *libpp.a) .wifislprxiram.*)
 
     *(.literal .text .literal.* .text.* .stub .gnu.warning .gnu.linkonce.literal.* .gnu.linkonce.t.*.literal .gnu.linkonce.t.*)
     *(.irom0.text) /* catch stray ICACHE_RODATA_ATTR */
     *(.fini.literal)
     *(.fini)
     *(.gnu.version)
+
+    . += 16;
 
     _text_end = ABSOLUTE(.);
     _instruction_reserved_end = ABSOLUTE(.);  /* This is a symbol marking the flash.text end, this can be used for mmu driver to maintain virtual address */
@@ -349,26 +363,17 @@ SECTIONS
     _flash_cache_start = ABSOLUTE(0);
   } >default_code_seg AT > ROM
 
-  .flash_rodata_dummy (NOLOAD) :
-  {
-    . += SIZEOF(.flash.text);
-    . = ALIGN(0x10000);
-  } >default_rodata_seg AT > ROM
-
   _image_drom_vma = ADDR(.flash.rodata);
   _image_drom_lma = LOADADDR(.flash.rodata);
   _image_drom_size = SIZEOF(.flash.rodata);
 
-  .flash.appdesc : ALIGN(0x10)
+  .flash_rodata_dummy (NOLOAD) :
   {
+    . += SIZEOF(.flash.text);
+    . = ALIGN(0x10000);
     _rodata_reserved_start = ABSOLUTE(.);  /* This is a symbol marking the flash.rodata start, this can be used for mmu driver to maintain virtual address */
     _rodata_start = ABSOLUTE(.);
-
-    /* Create an empty gap within this section. Thanks to this, the end of this
-     * section will match .flash.rodata's begin address. Thus, both sections
-     * will be merged when creating the final bin image. */
-    . = ALIGN(ALIGNOF(.flash.rodata));
-  } >default_rodata_seg
+  } >default_rodata_seg AT > ROM
 
   .flash.rodata : ALIGN(0xFFFF)
   {
@@ -438,6 +443,7 @@ SECTIONS
       This is a symbol marking the flash.rodata end, this can be used for mmu driver to maintain virtual address
       We don't need to include the noload rodata in this section
     */
+    _rodata_end = ABSOLUTE(.);
     _rodata_reserved_end = ABSOLUTE(.);
     . = ALIGN (4);
   } > default_rodata_seg AT > ROM
@@ -448,24 +454,29 @@ SECTIONS
   {
     . = ALIGN(4);
     *(.rtc.literal .rtc.text)
-  } >rtc_iram_seg
+    *(.rtc.entry.text)
+    /* 16B padding for possible CPU prefetch and 4B alignment for PMS split lines */
+    . += 16;
+    . = ALIGN(4);
+
+  } > lp_ram_seg AT > ROM
 
   /* RTC BSS section. */
 
   .rtc.bss (NOLOAD) :
   {
     *(.rtc.bss)
-  } >rtc_iram_seg
-
-  /* RTC data section holds RTC wake stub data/rodata. */
+  } > lp_ram_seg
 
   .rtc.data :
   {
+    _rtc_data_start = ABSOLUTE(.);
     *(.rtc.data)
     *(.rtc.data.*)
     *(.rtc.rodata)
     *(.rtc.rodata.*)
-  } >rtc_iram_seg
+    _rtc_data_end = ABSOLUTE(.);
+  } > lp_ram_seg
 
   /* This section holds RTC data that should have fixed addresses.
    * The data are not initialized at power-up and are retained during deep sleep.
@@ -488,4 +499,3 @@ SECTIONS
           "RTC reserved segment data does not fit.")
 
 }
-

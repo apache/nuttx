@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/analog/adc.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -44,15 +46,15 @@
  ****************************************************************************/
 
 /* Default configuration settings that may be overridden in the NuttX
- * configuration file.  The configured size is limited to 255 to fit into a
- * uint8_t.
+ * configuration file.  The configured size is limited to 65535 to fit into
+ * a uint16_t.
  */
 
 #if !defined(CONFIG_ADC_FIFOSIZE)
 #  define CONFIG_ADC_FIFOSIZE 8
-#elif CONFIG_ADC_FIFOSIZE > 255
+#elif CONFIG_ADC_FIFOSIZE > 65535
 #  undef  CONFIG_ADC_FIFOSIZE
-#  define CONFIG_ADC_FIFOSIZE 255
+#  define CONFIG_ADC_FIFOSIZE 65535
 #endif
 
 #if !defined(CONFIG_ADC_NPOLLWAITERS)
@@ -91,6 +93,26 @@ struct adc_callback_s
                          int32_t data);
 
   /* This method is called from the lower half, platform-specific ADC logic
+   * when new ADC sample data is available,
+   * enable transfer all data at once .
+   *
+   * Input Parameters:
+   *   dev  - The ADC device structure that was previously registered by
+   *          adc_register()
+   *   channel - Pointer to the channel lists buffer
+   *   data    - Pointer to the DMA buffer.
+   *   count   - Number of data elements in the channelbuffer and databuffer.
+   *
+   * Returned Value:
+   *   Zero on success; a negated errno value on failure.
+   */
+
+  CODE int (*au_receive_batch)(FAR struct adc_dev_s *dev,
+                               FAR const uint8_t *channel,
+                               FAR const uint32_t *data,
+                               size_t count);
+
+  /* This method is called from the lower half, platform-specific ADC logic
    * when an overrun appeared to free / reset upper half.
    *
    * Input Parameters:
@@ -117,10 +139,12 @@ begin_packed_struct struct adc_msg_s
 struct adc_fifo_s
 {
   sem_t        af_sem;                   /* Counting semaphore */
-  uint8_t      af_head;                  /* Index to the head [IN] index in the circular buffer */
-  uint8_t      af_tail;                  /* Index to the tail [OUT] index in the circular buffer */
-                                         /* Circular buffer of CAN messages */
-  struct adc_msg_s af_buffer[CONFIG_ADC_FIFOSIZE];
+  uint16_t     af_head;                  /* Index to the head [IN] index in the circular buffer */
+  uint16_t     af_tail;                  /* Index to the tail [OUT] index in the circular buffer */
+                                         /* Circular buffer of ADC messages */
+  FAR uint8_t  *af_channel;
+  FAR uint32_t *af_data;
+  uint16_t     af_fifosize;
 };
 
 /* This structure defines all of the operations provided by the architecture
@@ -245,15 +269,15 @@ int adc_register(FAR const char *path, FAR struct adc_dev_s *dev);
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_ads1255initialize
+ * Name: ads1255_initialize
  *
  * Description:
  *   Initialize the TI ADS 125X lower half driver
  *
  ****************************************************************************/
 
-FAR struct adc_dev_s *up_ads1255initialize(FAR struct spi_dev_s *spi,
-                                           unsigned int devno);
+FAR struct adc_dev_s *ads1255_initialize(FAR struct spi_dev_s *spi,
+                                         unsigned int devno);
 
 /****************************************************************************
  * Name: lmp92001_adc_initialize
@@ -289,7 +313,7 @@ FAR struct adc_dev_s *lmp92001_adc_initialize(FAR struct i2c_master_s *i2c,
  ****************************************************************************/
 
 FAR struct adc_dev_s *ads7828_initialize(FAR struct i2c_master_s *i2c,
-                                               uint8_t addr);
+                                         uint8_t addr);
 
 /****************************************************************************
  * Name: max1161x_initialize

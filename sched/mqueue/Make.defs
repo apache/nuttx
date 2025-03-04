@@ -1,6 +1,8 @@
 ############################################################################
 # sched/mqueue/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -24,8 +26,8 @@ endif
 
 ifneq ($(CONFIG_DISABLE_MQUEUE),y)
 
-CSRCS += mq_send.c mq_timedsend.c mq_sndinternal.c mq_receive.c
-CSRCS += mq_timedreceive.c mq_rcvinternal.c mq_getattr.c
+CSRCS += mq_send.c mq_sndinternal.c mq_receive.c
+CSRCS += mq_rcvinternal.c mq_getattr.c
 CSRCS += mq_msgfree.c mq_msgqalloc.c mq_msgqfree.c
 CSRCS += mq_setattr.c mq_notify.c
 

@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/unistd/lib_chdir.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -30,8 +32,6 @@
 #include <errno.h>
 
 #include "libc.h"
-
-#ifndef CONFIG_DISABLE_ENVIRON
 
 /****************************************************************************
  * Public Functions
@@ -72,9 +72,9 @@
 
 int chdir(FAR const char *path)
 {
-  struct stat buf;
-  FAR char *oldpwd;
+  FAR char *oldpwd = NULL;
   FAR char *abspath;
+  struct stat buf;
   int ret;
 
   /* Verify that 'path' refers to a directory */
@@ -97,17 +97,24 @@ int chdir(FAR const char *path)
    * Remove any trailing '/' characters from the path
    */
 
-  abspath = realpath(path, NULL);
-  if (abspath == NULL)
+  abspath = lib_get_pathbuffer();
+  if (abspath != NULL)
     {
+      oldpwd = realpath(path, abspath);
+    }
+
+  if (abspath == NULL || oldpwd == NULL)
+    {
+      lib_put_pathbuffer(abspath);
       return ERROR;
     }
+
+#ifndef CONFIG_DISABLE_ENVIRON
 
   /* Replace any preceding OLDPWD with the current PWD (this is to
    * support 'cd -' in NSH)
    */
 
-  sched_lock();
   oldpwd = getenv("PWD");
   if (!oldpwd)
     {
@@ -119,9 +126,9 @@ int chdir(FAR const char *path)
   /* Set the cwd to the input 'path' */
 
   ret = setenv("PWD", abspath, TRUE);
-  lib_free(abspath);
-  sched_unlock();
+#endif /* !CONFIG_DISABLE_ENVIRON */
+
+  lib_put_pathbuffer(abspath);
 
   return ret;
 }
-#endif /* !CONFIG_DISABLE_ENVIRON */

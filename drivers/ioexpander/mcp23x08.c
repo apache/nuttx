@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/ioexpander/mcp23x08.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -747,7 +749,7 @@ static FAR void *mcp23x08_attach(FAR struct ioexpander_dev_s *dev,
 {
   FAR struct mcp23x08_dev_s *priv = (FAR struct mcp23x08_dev_s *)dev;
   FAR void *handle = NULL;
-  uint8_t addr = MCP23X08_GPINTENA;
+  uint8_t addr = MCP23X08_GPINTEN;
   uint8_t buf[2];
   int i;
   int ret;
@@ -847,7 +849,7 @@ static int mcp23x08_detach(FAR struct ioexpander_dev_s *dev,
 static void mcp23x08_irqworker(void *arg)
 {
   FAR struct mcp23x08_dev_s *priv = (FAR struct mcp23x08_dev_s *)arg;
-  uint8_t addr = MCP23X08_INTFA;
+  uint8_t addr = MCP23X08_INTF;
   uint8_t buf[2];
   ioe_pinset_t pinset;
   int ret;
@@ -957,7 +959,7 @@ static int mcp23x08_interrupt(int irq, FAR void *context, FAR void *arg)
 
 FAR struct ioexpander_dev_s *mcp23x08_initialize(
                               FAR struct i2c_master_s *i2cdev,
-                              FAR struct mcp23x08_config_s *config)
+                              FAR const struct mcp23x08_config_s *config)
 {
   FAR struct mcp23x08_dev_s *priv;
 #ifdef CONFIG_MCP23X08_INT_MIRROR

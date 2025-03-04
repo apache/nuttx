@@ -1,6 +1,8 @@
 /***************************************************************************
  * arch/arm64/src/common/arm64_gicv3.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -27,6 +29,7 @@
 #include <assert.h>
 
 #include <nuttx/arch.h>
+#include <arch/barriers.h>
 #include <arch/irq.h>
 #include <arch/chip/chip.h>
 #include <sched/sched.h>
@@ -254,10 +257,12 @@ void arm64_gic_irq_enable(unsigned int intid)
    * SPI's affinity, now set it to be the PE on which it is enabled.
    */
 
+#ifndef CONFIG_ARM64_GICV3_SPI_ROUTING_CPU0
   if (GIC_IS_SPI(intid))
     {
-      arm64_gic_write_irouter((GET_MPIDR() & MPIDR_ID_MASK), intid);
+      arm64_gic_write_irouter(up_cpu_index(), intid);
     }
+#endif
 
   putreg32(mask, ISENABLER(GET_DIST_BASE(intid), idx));
 }
@@ -299,7 +304,7 @@ unsigned int arm64_gic_get_active_irq(void)
    * to be visible until after the execution of a DSB.
    */
 
-  ARM64_DSB();
+  UP_DSB();
   return intid;
 }
 
@@ -318,7 +323,7 @@ unsigned int arm64_gic_get_active_fiq(void)
    * to be visible until after the execution of a DSB.
    */
 
-  ARM64_DSB();
+  UP_DSB();
   return intid;
 }
 #endif
@@ -336,13 +341,13 @@ void aarm64_gic_eoi_irq(unsigned int intid)
    * DEVICE nGnRnE attribute.
    */
 
-  ARM64_DSB();
+  UP_DSB();
 
   /* (AP -> Pending) Or (Active -> Inactive) or (AP to AP) nested case */
 
   write_sysreg(intid, ICC_EOIR1_EL1);
 
-  ARM64_ISB();
+  UP_ISB();
 }
 
 #ifdef CONFIG_ARM64_DECODEFIQ
@@ -359,12 +364,12 @@ void arm64_gic_eoi_fiq(unsigned int intid)
    * DEVICE nGnRnE attribute.
    */
 
-  ARM64_DSB();
+  UP_DSB();
 
   /* (AP -> Pending) Or (Active -> Inactive) or (AP to AP) nested case */
 
   write_sysreg(intid, ICC_EOIR0_EL1);
-  ARM64_ISB();
+  UP_ISB();
 }
 #endif
 
@@ -376,9 +381,7 @@ static int arm64_gic_send_sgi(unsigned int sgi_id, uint64_t target_aff,
   uint32_t aff1;
   uint64_t sgi_val;
   uint32_t regval;
-  unsigned long base;
 
-  base = gic_get_rdist() + GICR_SGI_BASE_OFF;
   ASSERT(GIC_IS_SGI(sgi_id));
 
   /* Extract affinity fields from target */
@@ -390,9 +393,11 @@ static int arm64_gic_send_sgi(unsigned int sgi_id, uint64_t target_aff,
   sgi_val = GICV3_SGIR_VALUE(aff3, aff2, aff1, sgi_id, SGIR_IRM_TO_AFF,
                              target_list);
 
-  ARM64_DSB();
+  UP_DSB();
 
-  regval = getreg32(IGROUPR(base, 0));
+  /* Read the IGROUPR0 value we set in `gicv3_cpuif_init` */
+
+  regval = IGROUPR_SGI_VAL;
 
   if (regval & BIT(sgi_id))
     {
@@ -403,12 +408,12 @@ static int arm64_gic_send_sgi(unsigned int sgi_id, uint64_t target_aff,
       write_sysreg(sgi_val, ICC_SGI0R_EL1); /* Group 0 */
     }
 
-  ARM64_ISB();
+  UP_ISB();
 
   return 0;
 }
 
-int arm64_gic_raise_sgi(unsigned int sgi_id, uint16_t target_list)
+void arm64_gic_raise_sgi(unsigned int sgi_id, uint16_t target_list)
 {
   uint64_t pre_cluster_id = UINT64_MAX;
   uint64_t curr_cluster_id;
@@ -437,8 +442,6 @@ int arm64_gic_raise_sgi(unsigned int sgi_id, uint16_t target_list)
     }
 
   arm64_gic_send_sgi(sgi_id, pre_cluster_id, tlist);
-
-  return 0;
 }
 
 /* Wake up GIC redistributor.
@@ -483,10 +486,6 @@ static void gicv3_cpuif_init(void)
 
   gic_wait_rwp(0);
 
-  /* Clear pending */
-
-  putreg32(BIT64_MASK(GIC_NUM_INTR_PER_REG), ICPENDR(base, 0));
-
   /* Configure all SGIs/PPIs as G1S or G1NS depending on Zephyr
    * is run in EL1S or EL1NS respectively.
    * All interrupts will be delivered as irq
@@ -522,7 +521,7 @@ static void gicv3_cpuif_init(void)
          ICC_SRE_ELX_DFB_BIT);
       write_sysreg(icc_sre, ICC_SRE_EL1);
 
-      ARM64_ISB();
+      UP_ISB();
 
       icc_sre = read_sysreg(ICC_SRE_EL1);
 
@@ -539,7 +538,7 @@ static void gicv3_cpuif_init(void)
   write_sysreg(1, ICC_IGRPEN0_EL1);
 #endif
 
-  ARM64_ISB();
+  UP_ISB();
 }
 
 static void gicv3_dist_init(void)
@@ -613,8 +612,27 @@ static void gicv3_dist_init(void)
        intid += GIC_NUM_CFG_PER_REG)
     {
       idx = intid / GIC_NUM_CFG_PER_REG;
+#ifdef CONFIG_ARM64_GICV3_SPI_EDGE
+      /* Configure all SPIs as edge-triggered by default */
+
+      putreg32(0xaaaaaaaa, ICFGR(base, idx));
+#else
+      /* Configure all SPIs as level-sensitive by default */
+
       putreg32(0, ICFGR(base, idx));
+#endif
     }
+
+  /* Configure SPI interrupt affinity routing to CPU0 */
+
+#ifdef CONFIG_ARM64_GICV3_SPI_ROUTING_CPU0
+  uint64_t mpid = arm64_get_mpid(0);
+
+  for (intid = GIC_SPI_INT_BASE; intid < num_ints; intid++)
+    {
+      putreg64(mpid, IROUTER(base, intid));
+    }
+#endif
 
   /* TODO: Some arrch64 Cortex-A core maybe without security state
    * it has different GIC configure with standard arrch64 A or R core
@@ -655,9 +673,8 @@ static void gicv3_dist_init(void)
 #ifdef CONFIG_SMP
   /* Attach SGI interrupt handlers. This attaches the handler to all CPUs. */
 
-  DEBUGVERIFY(irq_attach(GIC_SMP_CPUPAUSE, arm64_pause_handler, NULL));
-  DEBUGVERIFY(irq_attach(GIC_SMP_CPUCALL,
-                         nxsched_smp_call_handler, NULL));
+  DEBUGVERIFY(irq_attach(GIC_SMP_SCHED, arm64_smp_sched_handler, NULL));
+  DEBUGVERIFY(irq_attach(GIC_SMP_CALL, nxsched_smp_call_handler, NULL));
 #endif
 }
 
@@ -953,8 +970,8 @@ static void arm64_gic_init(void)
   gicv3_cpuif_init();
 
 #ifdef CONFIG_SMP
-  up_enable_irq(GIC_SMP_CPUPAUSE);
-  up_enable_irq(GIC_SMP_CPUCALL);
+  up_enable_irq(GIC_SMP_SCHED);
+  up_enable_irq(GIC_SMP_CALL);
 #endif
 }
 
@@ -981,25 +998,17 @@ void arm64_gic_secondary_init(void)
 {
   arm64_gic_init();
 }
+#endif
 
-#  ifdef CONFIG_SMP
 /***************************************************************************
- * Name: up_send_smp_call
+ * Name: up_get_legacy_irq
  *
  * Description:
- *   Send smp call to target cpu.
- *
- * Input Parameters:
- *   cpuset - The set of CPUs to receive the SGI.
- *
- * Returned Value:
- *   None.
+ *   Reserve vector for legacy
  *
  ***************************************************************************/
 
-void up_send_smp_call(cpu_set_t cpuset)
+int up_get_legacy_irq(uint32_t devfn, uint8_t line, uint8_t pin)
 {
-  up_trigger_irq(GIC_SMP_CPUCALL, cpuset);
+  return -ENOTSUP;
 }
-#  endif
-#endif

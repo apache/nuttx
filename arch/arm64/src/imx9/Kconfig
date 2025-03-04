@@ -15,10 +15,13 @@ config ARCH_CHIP_IMX93
 	bool "i.MX9 Application Processor"
 	select ARCH_HAVE_MULTICPU
 	select ARMV8A_HAVE_GICv3
-	select ARCH_CORTEX_A55
-	select ARM64_HAVE_PSCI if !IMX9_BOOTLOADER
+	select ARCH_CORTEX_A55 if !IMX9_BOOTLOADER
+	select ARCH_CORTEX_A53 if IMX9_BOOTLOADER
 	select ARCH_HAVE_PWM_MULTICHAN
 	select ARCH_HAVE_RESET
+	---help---
+		EL3/OCRAM is a bad combination for atomic instructions, they don't work.
+		Instead, use A53 that will have no atomic instruction set available.
 
 endchoice # i.MX9 Chip Selection
 
@@ -47,9 +50,19 @@ config IMX9_FLEXIO_PWM
 	select PWM_MULTICHAN
 	default n
 
+config IMX9_HAVE_ATF_FIRMWARE
+	bool "ARM ATF services support in bootloader"
+	default y
+	select ARM64_HAVE_PSCI
+	---help---
+		Configure this n if using Nuttx bootloader that does not
+		implemet EL3 services, by default this is y when using uboot as
+		a booloader
+
 config IMX9_BOOTLOADER
 	bool "Bootloader"
 	select ARM64_DECODEFIQ
+	select IMX9_DDR_TRAINING
 	default n
 	---help---
 		Configure NuttX as the bootloader. NuttX will be compiled
@@ -62,6 +75,13 @@ config BOOTLOADER_SYS_CLOCK
 	---help---
 		If the sysclk is set to a certain value, this should be it.
 		The value is used by the timer interrupt infrastructure.
+
+config IMX9_DDR_TRAINING
+	bool "DDR Training"
+	depends on IMX9_BOOTLOADER
+	default n
+	---help---
+		Perform DDR training to prepare the external memory for use.
 
 menu "i.MX9 Peripheral Selection"
 
@@ -951,6 +971,16 @@ config IMX9_ENET1_RGMII
 
 endchoice
 
+config IMX9_ENET1_TX_CLOCK_IS_INPUT
+	bool "ENET1 TX clock is input"
+	default y if IMX9_ENET1_RMII
+	default n if IMX9_ENET1_RGMII
+	---help---
+		The ethernet TX clock can be either driven by the PHY, in
+		which case it is input to the MAC. Or it can be driven by
+		the MAC, in which case it is output. Typical configuration is
+		input for RMII and output for RGMII.
+
 config IMX9_ENET1_PHY_AUTONEG
 	bool "ENET1 PHY autonegotiation enable"
 	default y
@@ -1013,6 +1043,134 @@ config IMX9_ENET1_PHYINIT
 		function one time before it first uses the PHY.
 
 endmenu # IMX9_ENET
+
+config IMX9_FLEXCAN
+	bool
+	default n
+	select ARCH_HAVE_CAN_ERRORS
+	select ARCH_HAVE_NETDEV_STATISTICS
+	select CAN
+	select NET_CAN
+	select NET_CAN_HAVE_CANFD
+	select NET_CAN_HAVE_TX_DEADLINE
+
+menu "FLEXCAN Peripherals"
+
+config IMX9_FLEXCAN1
+	bool "FLEXCAN1"
+	default n
+	select IMX9_FLEXCAN
+
+config IMX9_FLEXCAN2
+	bool "FLEXCAN2"
+	default n
+	select IMX9_FLEXCAN
+
+if IMX9_FLEXCAN1 || IMX9_FLEXCAN2
+
+config IMX9_FLEXCAN_TXMB
+	int "Number of TX message buffers"
+	default 4
+	---help---
+	This defines number of TX messages buffers. Please note that
+	maximum number of all message buffers is 13 (one MB has to
+	be reserved for chip errata ERR005829).
+
+config IMX9_FLEXCAN_RXMB
+	int "Number of RX message buffers"
+	default 16
+	---help---
+	This defines number of RX messages buffers. Please note that
+	maximum number of all message buffers is 13 (one MB has to
+	be reserved for chip errata ERR005829).
+
+endif
+
+endmenu # FLEXCAN Peripherals
+
+menu "FLEXCAN1 Configuration"
+	depends on IMX9_FLEXCAN1
+
+config IMX9_FLEXCAN1_BITRATE
+	int "CAN bitrate"
+	depends on !NET_CAN_CANFD
+	default 1000000
+
+config IMX9_FLEXCAN1_SAMPLEP
+	int "CAN sample point"
+	depends on !NET_CAN_CANFD
+	default 75
+
+config IMX9_FLEXCAN1_ARBI_BITRATE
+	int "CAN FD Arbitration phase bitrate"
+	depends on NET_CAN_CANFD
+	default 1000000
+
+config IMX9_FLEXCAN1_ARBI_SAMPLEP
+	int "CAN FD Arbitration phase sample point"
+	depends on NET_CAN_CANFD
+	default 75
+
+config IMX9_FLEXCAN1_DATA_BITRATE
+	int "CAN FD Data phase bitrate"
+	depends on NET_CAN_CANFD
+	default 4000000
+
+config IMX9_FLEXCAN1_DATA_SAMPLEP
+	int "CAN FD Data phase sample point"
+	depends on NET_CAN_CANFD
+	default 75
+
+config IMX9_FLEXCAN1_SRXDIS
+	bool "CAN1 Self reception disable"
+	default n
+	---help---
+		Configure this y if you want that CAN1 doesn't receive the
+		frames which it sent itself
+
+endmenu # IMX9_FLEXCAN1
+
+menu "FLEXCAN2 Configuration"
+	depends on IMX9_FLEXCAN2
+
+config IMX9_FLEXCAN2_BITRATE
+	int "CAN bitrate"
+	depends on !NET_CAN_CANFD
+	default 1000000
+
+config IMX9_FLEXCAN2_SAMPLEP
+	int "CAN sample point"
+	depends on !NET_CAN_CANFD
+	default 75
+
+config IMX9_FLEXCAN2_ARBI_BITRATE
+	int "CAN FD Arbitration phase bitrate"
+	depends on NET_CAN_CANFD
+	default 1000000
+
+config IMX9_FLEXCAN2_ARBI_SAMPLEP
+	int "CAN FD Arbitration phase sample point"
+	depends on NET_CAN_CANFD
+	default 75
+
+config IMX9_FLEXCAN2_DATA_BITRATE
+	int "CAN FD Data phase bitrate"
+	depends on NET_CAN_CANFD
+	default 4000000
+
+config IMX9_FLEXCAN2_DATA_SAMPLEP
+	int "CAN FD Data phase sample point"
+	depends on NET_CAN_CANFD
+	default 75
+
+config IMX9_FLEXCAN2_SRXDIS
+	bool "CAN2 Self reception disable"
+	default n
+	---help---
+		Configure this y if you want that CAN2 doesn't receive the
+		frames which it sent itself
+
+endmenu # IMX9_FLEXCAN2
 
 endmenu # iMX Peripheral Selection
 

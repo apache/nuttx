@@ -1,13 +1,10 @@
 /****************************************************************************
  * arch/arm/src/sama5/sam_udphs.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.orgr>
- *
- * The Atmel sample code has a BSD compatible license that requires this
- * copyright notice:
- *
- *   Copyright (c) 2009, Atmel Corporation
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2013 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2009 Atmel Corporation
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.orgr>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -2374,11 +2371,6 @@ static void sam_dma_interrupt(struct sam_usbdev_s *priv, int epno)
 
   privep = &priv->eplist[epno];
 
-  /* Get the request from the head of the endpoint request queue */
-
-  privreq = sam_rqpeek(&privep->reqq);
-  DEBUGASSERT(privreq);
-
   /* Get the result of the DMA operation */
 
   dmastatus = sam_getreg(SAM_UDPHS_DMASTATUS(epno));
@@ -2439,7 +2431,12 @@ static void sam_dma_interrupt(struct sam_usbdev_s *priv, int epno)
         }
       else if (privep->epstate == UDPHS_EPSTATE_RECEIVING)
         {
-          /* privreg->inflight holds the total transfer size */
+          /* privreg->inflight holds the total transfer size
+           * Get the request from the head of the endpoint request queue
+          */
+
+          privreq           = sam_rqpeek(&privep->reqq);
+          DEBUGASSERT(privreq);
 
           xfrsize           = privreq->inflight;
           privreq->inflight = 0;
@@ -2495,7 +2492,12 @@ static void sam_dma_interrupt(struct sam_usbdev_s *priv, int epno)
        * BUFF_COUNT should not be zero.  BUFF_COUNT was set to the
        * 'inflight' count when the DMA started so the difference will
        * give us the actual size of the transfer.
+       *
+       * Get the request from the head of the endpoint request queue first.
        */
+
+      privreq            = sam_rqpeek(&privep->reqq);
+      DEBUGASSERT(privreq);
 
       bufcnt             = ((dmastatus & UDPHS_DMASTATUS_BUFCNT_MASK)
                            >> UDPHS_DMASTATUS_BUFCNT_SHIFT);

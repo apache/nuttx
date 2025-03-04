@@ -1,0 +1,17 @@
+LSM330_SPI
+==========
+
+Contributed by Bob Feretich
+
+The LSM330 consists of a multi-range tri-axis accelerometer and a
+multi-range tri-axis gyroscope. The tri-axis accelerometer features two
+state machines that can be firmware programmed for event detection. The
+tri-axis gyroscope features threshold and duration registers for event
+detection.
+
+This driver supports the LSM330 in SPI mode. In this mode, the LSM330
+that can transfer data at 10 MHz. The data transfer performance of
+this part permits the sensor to be sampled "on demand" rather than
+periodically sampled by a worker task. See the description of the "Common
+Sensor Register Interface" below for more details. It also implements the
+"Sensor Cluster Driver Interface".

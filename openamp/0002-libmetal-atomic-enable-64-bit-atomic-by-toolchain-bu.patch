@@ -1,0 +1,42 @@
+From 61756465a3dc241297b7a12d5500ac36a5ffa070 Mon Sep 17 00:00:00 2001
+From: chao an <anchao@lixiang.com>
+Date: Sat, 29 Jun 2024 09:40:26 +0800
+Subject: [PATCH 2/5] libmetal/atomic: enable 64-bit atomic by toolchain
+ builtin flags
+
+Fix compile error:
+arm-none-eabi-ld: (remoteproc_virtio.o): in function `metal_io_read':
+metal/io.h:252: undefined reference to `__atomic_load_8'
+arm-none-eabi-ld: (remoteproc_virtio.o): in function `metal_io_write':
+metal/io.h:290: undefined reference to `__atomic_store_8'
+
+Not all 32-bit architectures support 64bit atomic, gcc/clang
+toolchains have built-in properties to indicate whether support atomic64:
+
+| $ arm-none-eabi-gcc -march=armv7e-m  -dM -E - < /dev/null | grep SYNC
+| #define __GCC_HAVE_SYNC_COMPARE_AND_SWAP_1 1
+| #define __GCC_HAVE_SYNC_COMPARE_AND_SWAP_2 1
+| #define __GCC_HAVE_SYNC_COMPARE_AND_SWAP_4 1
+
+Signed-off-by: chao an <anchao@lixiang.com>
+---
+ lib/io.h | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/lib/io.h libmetal/lib/io.h
+index ba416dd..81105e2 100644
+--- a/lib/io.h
++++ libmetal/lib/io.h
+@@ -30,7 +30,8 @@ extern "C" {
+  *  @{
+  */
+ 
+-#ifdef __MICROBLAZE__
++#if defined(__MICROBLAZE__) || \
++(defined(__GNUC__) && !defined(__GCC_HAVE_SYNC_COMPARE_AND_SWAP_8))
+ #define NO_ATOMIC_64_SUPPORT
+ #endif
+ 
+-- 
+2.34.1
+

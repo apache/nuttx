@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/fcntl.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -103,6 +105,8 @@
 #define F_ADD_SEALS     16 /* Add the bit-mask argument arg to the set of seals of the inode */
 #define F_GET_SEALS     17 /* Get (as the function result) the current set of seals of the inode */
 #define F_DUPFD_CLOEXEC 18 /* Duplicate file descriptor with close-on-exit set.  */
+#define F_SETPIPE_SZ    19 /* Modify the capacity of the pipe to arg bytes, but not larger than CONFIG_DEV_PIPE_MAXSIZE */
+#define F_GETPIPE_SZ    20 /* Return the capacity of the pipe */
 
 /* For posix fcntl() and lockf() */
 

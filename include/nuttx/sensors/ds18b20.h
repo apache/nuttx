@@ -1,6 +1,7 @@
 /****************************************************************************
  * include/nuttx/sensors/ds18b20.h
- * Character driver for DS18B20 Digital Temperature Module.
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -82,6 +83,7 @@ extern "C"
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
+ *
  ****************************************************************************/
 
 int ds18b20_register(int devno, FAR struct onewire_master_s *dev,

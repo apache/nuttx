@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/mm/map.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -56,11 +58,14 @@ struct mm_map_entry_s
     int i;
   } priv;
 
-  /* Drivers which register mappings may also implement the unmap function
-   * to undo anything done in mmap.
-   * Nb. Implementation must NOT use "this_task()->group" since it is not
-   * valid during process exit. The argument "group" will be NULL in this
-   * case.
+  int (*msync)(FAR struct mm_map_entry_s *entry, FAR void *start,
+               size_t length, int flags);
+
+  /* Drivers which register mappings may also
+   * implement the unmap function to undo anything done in mmap.
+   * Nb. Implementation must NOT use "this_task()->group" since
+   * this is not valid during process exit. The argument "group" will be
+   * NULL in this case.
    */
 
   int (*munmap)(FAR struct task_group_s *group,

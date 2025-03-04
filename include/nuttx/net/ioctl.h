@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/net/ioctl.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -123,6 +125,8 @@
 #define SIOCACANSTDFILTER  _SIOC(0x0030)  /* Add hardware-level standard ID filter */
 #define SIOCDCANSTDFILTER  _SIOC(0x0031)  /* Delete hardware-level standard ID filter */
 #define SIOCCANRECOVERY    _SIOC(0x0032)  /* Recovery can, work only when bus-off state */
+#define SIOCGCANSTATE      _SIOC(0x0041)  /* Get state from a CAN/LIN controller */
+#define SIOCSCANSTATE      _SIOC(0x0042)  /* Set the LIN/CAN controller state */
 
 /* Network socket control ***************************************************/
 

@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/lib/modlib.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -29,6 +31,8 @@
 
 #include <sys/types.h>
 #include <elf.h>
+
+#include <nuttx/addrenv.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -153,12 +157,17 @@ struct module_s
 #ifdef HAVE_MODLIB_NAMES
   char modname[MODLIB_NAMEMAX];        /* Module name */
 #endif
-#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
-  mod_initializer_t initializer;       /* Module initializer function */
-#endif
   struct mod_info_s modinfo;           /* Module information */
   FAR void *textalloc;                 /* Allocated kernel text memory */
   FAR void *dataalloc;                 /* Allocated kernel memory */
+  uintptr_t xipbase;                   /* if elf is position independent, and use
+                                        * romfs/tmps, we can try get xipbase,
+                                        * skip the copy.
+                                        */
+#ifdef CONFIG_ARCH_USE_SEPARATED_SECTION
+  FAR void **sectalloc;                /* All sections memory allocated when ELF file was loaded */
+  uint16_t nsect;                      /* Number of entries in sectalloc array */
+#endif
   int dynamic;                         /* Module is a dynamic shared object */
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
   size_t textsize;                     /* Size of the kernel .text memory allocation */
@@ -174,6 +183,8 @@ struct module_s
 
   FAR struct module_s *dependencies[CONFIG_MODLIB_MAXDEPEND];
 #endif
+  uintptr_t initarr;                     /* .init_array */
+  uint16_t  ninit;                       /* Number of entries in .init_array */
   uintptr_t finiarr;                     /* .fini_array */
   uint16_t  nfini;                       /* Number of entries in .fini_array */
 };
@@ -191,6 +202,10 @@ struct mod_loadinfo_s
    * after the module has been loaded.
    */
 
+#ifdef CONFIG_ARCH_USE_SEPARATED_SECTION
+  FAR uintptr_t *sectalloc;  /* All sections memory allocated when ELF file was loaded */
+#endif
+
   uintptr_t     textalloc;   /* .text memory allocated when module was loaded */
   uintptr_t     datastart;   /* Start of.bss/.data memory in .text allocation */
   size_t        textsize;    /* Size of the module .text memory allocation */
@@ -198,6 +213,9 @@ struct mod_loadinfo_s
   size_t        textalign;   /* Necessary alignment of .text */
   size_t        dataalign;   /* Necessary alignment of .bss/.text */
   off_t         filelen;     /* Length of the entire module file */
+  uid_t         fileuid;     /* Uid of the file system */
+  gid_t         filegid;     /* Gid of the file system */
+  int           filemode;    /* Mode of the file system */
   Elf_Ehdr      ehdr;        /* Buffered module file header */
   FAR Elf_Phdr *phdr;        /* Buffered module program headers */
   FAR Elf_Shdr *shdr;        /* Buffered module section headers */
@@ -217,6 +235,22 @@ struct mod_loadinfo_s
   uint16_t      buflen;      /* size of iobuffer[] */
   int           filfd;       /* Descriptor for the file being loaded */
   int           nexports;    /* ET_DYN - Number of symbols exported */
+  int           gotindex;    /* Index to the GOT section */
+  uintptr_t     xipbase;     /* if elf is position independent, and use
+                              * romfs/tmps, we can try get xipbase,
+                              * skip the copy.
+                              */
+
+  /* Address environment.
+   *
+   * addrenv - This is the handle created by addrenv_allocate() that can be
+   *   used to manage the tasks address space.
+   */
+
+#ifdef CONFIG_ARCH_ADDRENV
+  FAR addrenv_t     *addrenv;    /* Address environment */
+  FAR addrenv_t     *oldenv;     /* Saved address environment */
+#endif
 };
 
 /****************************************************************************
@@ -309,12 +343,37 @@ void modlib_setsymtab(FAR const struct symtab_s *symtab, int nsymbols);
 int modlib_load(FAR struct mod_loadinfo_s *loadinfo);
 
 /****************************************************************************
+ * Name: modlib_load_with_addrenv
+ *
+ * Description:
+ *   Loads the binary into memory, use the address environment to load the
+ *   binary.
+ *
+ * Returned Value:
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_ADDRENV
+int modlib_load_with_addrenv(FAR struct mod_loadinfo_s *loadinfo);
+#else
+#  define modlib_load_with_addrenv(l) modlib_load(l)
+#endif
+
+/****************************************************************************
  * Name: modlib_bind
  *
  * Description:
  *   Bind the imported symbol names in the loaded module described by
  *   'loadinfo' using the exported symbol values provided by
  *   modlib_setsymtab().
+ *
+ * Input Parameters:
+ *   modp     - Module state information
+ *   loadinfo - Load state information
+ *   exports  - The table of exported symbols
+ *   nexports - The number of symbols in the exports table
  *
  * Returned Value:
  *   0 (OK) is returned on success and a negated errno is returned on
@@ -323,7 +382,8 @@ int modlib_load(FAR struct mod_loadinfo_s *loadinfo);
  ****************************************************************************/
 
 int modlib_bind(FAR struct module_s *modp,
-                FAR struct mod_loadinfo_s *loadinfo);
+                FAR struct mod_loadinfo_s *loadinfo,
+                FAR const struct symtab_s *exports, int nexports);
 
 /****************************************************************************
  * Name: modlib_unload
@@ -403,6 +463,25 @@ int modlib_undepend(FAR struct module_s *importer);
 
 int modlib_read(FAR struct mod_loadinfo_s *loadinfo, FAR uint8_t *buffer,
                 size_t readsize, off_t offset);
+
+/****************************************************************************
+ * Name: modlib_findsection
+ *
+ * Description:
+ *   A section by its name.
+ *
+ * Input Parameters:
+ *   loadinfo - Load state information
+ *   sectname - Name of the section to find
+ *
+ * Returned Value:
+ *   On success, the index to the section is returned; A negated errno value
+ *   is returned on failure.
+ *
+ ****************************************************************************/
+
+int modlib_findsection(FAR struct mod_loadinfo_s *loadinfo,
+                       FAR const char *sectname);
 
 /****************************************************************************
  * Name: modlib_registry_lock
@@ -554,5 +633,151 @@ int modlib_registry_foreach(mod_callback_t callback, FAR void *arg);
  ****************************************************************************/
 
 void modlib_freesymtab(FAR struct module_s *modp);
+
+/****************************************************************************
+ * Name: modlib_dumploadinfo
+ *
+ * Description:
+ *  Dump the load information to debug output.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEBUG_BINFMT_INFO
+void modlib_dumploadinfo(FAR struct mod_loadinfo_s *loadinfo);
+#else
+#  define modlib_dumploadinfo(i)
+#endif
+
+/****************************************************************************
+ * Name: modlib_dumpmodule
+ ****************************************************************************/
+
+#ifdef CONFIG_DEBUG_BINFMT_INFO
+void modlib_dumpmodule(FAR struct module_s *modp);
+#else
+#  define modlib_dumpmodule(m)
+#endif
+
+/****************************************************************************
+ * Name: elf_dumpentrypt
+ ****************************************************************************/
+
+#ifdef CONFIG_MODLIB_DUMPBUFFER
+void modlib_dumpentrypt(FAR struct mod_loadinfo_s *loadinfo);
+#else
+#  define modlib_dumpentrypt(l)
+#endif
+
+/****************************************************************************
+ * Name: modlib_insert
+ *
+ * Description:
+ *   Verify that the file is an ELF module binary and, if so, load the
+ *   module into kernel memory and initialize it for use.
+ *
+ *   NOTE: modlib_setsymtab() had to have been called in board-specific OS
+ *   logic prior to calling this function from application logic (perhaps via
+ *   boardctl(BOARDIOC_OS_SYMTAB).  Otherwise, insmod will be unable to
+ *   resolve symbols in the OS module.
+ *
+ * Input Parameters:
+ *
+ *   filename - Full path to the module binary to be loaded
+ *   modname  - The name that can be used to refer to the module after
+ *     it has been loaded.
+ *
+ * Returned Value:
+ *   A non-NULL module handle that can be used on subsequent calls to other
+ *   module interfaces is returned on success.  If modlib_insert() was
+ *   unable to load the module modlib_insert() will return a NULL handle
+ *   and the errno variable will be set appropriately.
+ *
+ ****************************************************************************/
+
+FAR void *modlib_insert(FAR const char *filename, FAR const char *modname);
+
+/****************************************************************************
+ * Name: modlib_getsymbol
+ *
+ * Description:
+ *   modlib_getsymbol() returns the address of a symbol defined within the
+ *   object that was previously made accessible through a modlib_getsymbol()
+ *   call.  handle is the value returned from a call to modlib_insert() (and
+ *   which has not since been released via a call to modlib_remove()),
+ *   name is the symbol's name as a character string.
+ *
+ *   The returned symbol address will remain valid until modlib_remove() is
+ *   called.
+ *
+ * Input Parameters:
+ *   handle - The opaque, non-NULL value returned by a previous successful
+ *            call to modlib_insert().
+ *   name   - A pointer to the symbol name string.
+ *
+ * Returned Value:
+ *   The address associated with the symbol is returned on success.
+ *   If handle does not refer to a valid module opened by modlib_insert(),
+ *   or if the named modlib_symbol cannot be found within any of the objects
+ *   associated with handle, modlib_getsymbol() will return NULL and the
+ *   errno variable will be set appropriately.
+ *
+ *   NOTE: This means that the address zero can never be a valid return
+ *   value.
+ *
+ ****************************************************************************/
+
+FAR const void *modlib_getsymbol(FAR void *handle, FAR const char *name);
+
+/****************************************************************************
+ * Name: modlib_uninit
+ *
+ * Description:
+ *   Uninitialize module resources.
+ *
+ ****************************************************************************/
+
+int modlib_uninit(FAR struct module_s *modp);
+
+/****************************************************************************
+ * Name: modlib_remove
+ *
+ * Description:
+ *   Remove a previously installed module from memory.
+ *
+ * Input Parameters:
+ *   handle - The module handler previously returned by modlib_insert().
+ *
+ * Returned Value:
+ *   Zero (OK) on success.  On any failure, -1 (ERROR) is returned the
+ *   errno value is set appropriately.
+ *
+ ****************************************************************************/
+
+int modlib_remove(FAR void *handle);
+
+/****************************************************************************
+ * Name: modlib_modhandle
+ *
+ * Description:
+ *   modlib_modhandle() returns the module handle for the installed
+ *   module with the provided name.  A secondary use of this function is to
+ *   determine if a module has been loaded or not.
+ *
+ * Input Parameters:
+ *   name   - A pointer to the module name string.
+ *
+ * Returned Value:
+ *   The non-NULL module handle previously returned by modlib_insert() is
+ *   returned on success.  If no module with that name is installed,
+ *   modlib_modhandle() will return a NULL handle and the errno variable
+ *   will be set appropriately.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_MODLIB_NAMES
+FAR void *modlib_gethandle(FAR const char *name);
+#else
+#  define modlib_gethandle(n) NULL
+#endif
 
 #endif /* __INCLUDE_NUTTX_LIB_MODLIB_H */

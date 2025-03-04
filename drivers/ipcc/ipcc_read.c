@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/ipcc/ipcc_read.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -90,11 +92,10 @@ void ipcc_rxfree_notify(FAR struct ipcc_driver_s *priv)
 
   /* Notify all blocked readers that data is available to read */
 
-  do
+  while (nxsem_get_value(&priv->rxsem, &semval) >= 0 && semval <= 0)
     {
       nxsem_post(&priv->rxsem);
     }
-  while (nxsem_get_value(&priv->rxsem, &semval) == 0 && semval <= 0);
 }
 
 /****************************************************************************

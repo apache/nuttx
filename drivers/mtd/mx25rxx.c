@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/mtd/mx25rxx.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -36,7 +38,6 @@
 #endif
 
 #include <nuttx/kmalloc.h>
-#include <nuttx/signal.h>
 #include <nuttx/signal.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/spi/qspi.h>

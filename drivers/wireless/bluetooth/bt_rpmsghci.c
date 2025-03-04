@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/wireless/bluetooth/bt_rpmsghci.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -32,7 +34,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/net/bluetooth.h>
 #include <nuttx/semaphore.h>
-#include <nuttx/rptun/openamp.h>
+#include <nuttx/rpmsg/rpmsg.h>
 #include <nuttx/wireless/bluetooth/bt_rpmsghci.h>
 
 #include "bt_rpmsghci.h"
@@ -130,6 +132,7 @@ static int rpmsghci_send(FAR struct rpmsghci_s *priv, uint32_t command,
   ret = rpmsg_send_nocopy(&priv->ept, msg, len);
   if (ret < 0)
     {
+      rpmsg_release_tx_buffer(&priv->ept, msg);
       goto errout;
     }
 

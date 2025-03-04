@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/cxd56xx/cxd56_uart0.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -115,7 +117,7 @@ static int uart0_open(struct file *filep)
   int stop;
   int ret;
 
-  if (inode->i_crefs > 1)
+  if (atomic_read(&inode->i_crefs) > 2)
     {
       return OK;
     }
@@ -172,7 +174,7 @@ static int uart0_close(struct file *filep)
 {
   struct inode *inode = filep->f_inode;
 
-  if (inode->i_crefs == 1)
+  if (atomic_read(&inode->i_crefs) == 2)
     {
       fw_pd_uartdisable(0);
       fw_pd_uartuninit(0);

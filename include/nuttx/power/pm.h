@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/power/pm.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -145,7 +147,63 @@ enum pm_state_e
   PM_COUNT,
 };
 
-typedef void (*pm_idle_handler_t)(enum pm_state_e);
+#ifdef CONFIG_SMP
+
+/****************************************************************************
+ * Name: pm_idle_handler_t
+ *
+ * Description:
+ *   Handle the pm low power operations and lock actions.
+ *   As there is WFI inside handler, must manually call
+ *   pm_idle_unlock before go into WFI.
+ *   Also must call pm_idle_lock when woken from WFI at once.
+ *
+ * Input Parameters:
+ *   cpu         - The current working cpu.
+ *   cpustate    - The current cpu power state.
+ *   systemstate - The current system power state.  If not the lastcore
+ *                 enter idle, systemstate always PM_RESTORE.  If not
+ *                 PM_RESTORE, handler should cover system pm operations.
+ *
+ * Returned Value:
+ *   Should pass the parameter get from pm_idle_lock.
+ *   true  - Is the first core already wake up from WFI.
+ *   false - Not the first core who woken up from WFI.
+ *
+ * Assumptions:
+ *   The action between pm_idle_unlock and pm_idle_lock must be
+ *   no cross cpu and no system pm operation related.
+ *   Always call handler with locked, should do this action chain inside
+ *   handle.  enter_ops->unlock->wfi->lock->leave_ops->return.
+ *   Wait-like kernel API not allowed here.
+ *
+ ****************************************************************************/
+
+typedef bool (*pm_idle_handler_t)(int cpu,
+                                  enum pm_state_e cpustate,
+                                  enum pm_state_e systemstate);
+#else
+
+/****************************************************************************
+ * Name: pm_idle_handler_t
+ *
+ * Description:
+ *   Handle the pm low power action and execution for not SMP case.
+ *   Possible execution for long time because of WFI inside.
+ *
+ * Input Parameters:
+ *   systemstate - The new system power state.
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Wait-like kernel API not allowed here.
+ *
+ ****************************************************************************/
+
+typedef void (*pm_idle_handler_t)(enum pm_state_e systemstate);
+#endif
 
 #ifdef CONFIG_PM_PROCFS
 struct pm_preparefail_s
@@ -823,10 +881,11 @@ void pm_auto_updatestate(int domain);
  * Name: pm_idle
  *
  * Description:
- *   Standard pm idle work flow for up_idle, for not smp case.
+ *   Standard pm idle work flow for up_idle.
+ *   pm_idle_handler_t will be different prototype when SMP.
  *
  * Input Parameters:
- *   handler - The execution after PM_IDLE_DOMAIN state changed.
+ *   handler - The execution after cpu and system domain state changed.
  *
  * Returned Value:
  *   None.
@@ -834,6 +893,53 @@ void pm_auto_updatestate(int domain);
  ****************************************************************************/
 
 void pm_idle(pm_idle_handler_t handler);
+
+/****************************************************************************
+ * Name: pm_idle_unlock
+ *
+ * Description:
+ *   Release SMP idle cpus lock, allow other cpu continue idle process.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#if CONFIG_SMP
+void pm_idle_unlock(void);
+#else
+#  define pm_idle_unlock()
+#endif
+
+/****************************************************************************
+ * Name: pm_idle_lock
+ *
+ * Description:
+ *   Claim SMP idle cpus lock, other cpu have to wait until released.
+ *
+ * Input Parameters:
+ *   cpu - The current CPU, used to update cpu_set_t
+ *
+ * Returned Value:
+ *   true  - Current CPU is the first one woken from sleep, should handle
+ *           system domain restore process also.
+ *   false - Current CPU is not the first one woken from sleep, should only
+ *           handle cpu domain restore process.
+ *
+ * Assumptions:
+ *   Restore operation pm_changestate(, PM_RESTORE) will done inside pm_idle.
+ *   Handler don't have to care about it.
+ *
+ ****************************************************************************/
+
+#if CONFIG_SMP
+bool pm_idle_lock(int cpu);
+#else
+#  define pm_idle_lock(cpu) (0)
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus
@@ -874,6 +980,9 @@ void pm_idle(pm_idle_handler_t handler);
 #  define pm_changestate(domain,state)        (0)
 #  define pm_querystate(domain)               (0)
 #  define pm_auto_updatestate(domain)
+#  define pm_idle(handler)
+#  define pm_idle_unlock()
+#  define pm_idle_lock(cpu)                   (0)
 
 #endif /* CONFIG_PM */
 #endif /* __INCLUDE_NUTTX_POWER_PM_H */

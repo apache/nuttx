@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/pthread/pthread_mutextimedlock.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -79,7 +81,6 @@ int pthread_mutex_timedlock(FAR pthread_mutex_t *mutex,
                             FAR const struct timespec *abs_timeout)
 {
   int ret = EINVAL;
-  irqstate_t flags;
 
   sinfo("mutex=%p\n", mutex);
   DEBUGASSERT(mutex != NULL);
@@ -89,12 +90,6 @@ int pthread_mutex_timedlock(FAR pthread_mutex_t *mutex,
 #ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
       pid_t pid = mutex_get_holder(&mutex->mutex);
 #endif
-
-      /* Make sure the semaphore is stable while we make the following
-       * checks.  This all needs to be one atomic action.
-       */
-
-      flags = enter_critical_section();
 
 #ifdef CONFIG_PTHREAD_MUTEX_TYPES
       /* All mutex types except for NORMAL (and DEFAULT) will return
@@ -186,8 +181,6 @@ int pthread_mutex_timedlock(FAR pthread_mutex_t *mutex,
 
           ret = pthread_mutex_take(mutex, abs_timeout);
         }
-
-      leave_critical_section(flags);
     }
 
   sinfo("Returning %d\n", ret);

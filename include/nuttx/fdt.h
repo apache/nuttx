@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/fdt.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -136,6 +138,16 @@ int fdt_get_irq_by_path(FAR const void *fdt, int offset,
                         FAR const char *path, int irqbase);
 
 /****************************************************************************
+ * Name: fdt_get_bankwidth
+ *
+ * Description:
+ *   Get the value of bankwidth
+ *
+ ****************************************************************************/
+
+uint32_t fdt_get_bankwidth(FAR const void *fdt, int offset);
+
+/****************************************************************************
  * Name: fdt_get_parent_address_cells
  *
  * Description:
@@ -188,6 +200,16 @@ int fdt_get_parent_size_cells(FAR const void *fdt, int offset);
 uintptr_t fdt_ld_by_cells(FAR const void *value, int cells);
 
 /****************************************************************************
+ * Name: fdt_get_reg_count
+ *
+ * Description:
+ *   Get the count (in bytes) of the register space
+ *
+ ****************************************************************************/
+
+uint32_t fdt_get_reg_count(FAR const void *fdt, int offset);
+
+/****************************************************************************
  * Name: fdt_get_reg_base_by_name
  *
  * Description:
@@ -231,6 +253,17 @@ uintptr_t fdt_get_reg_base_by_name(FAR const void *fdt, int offset,
 uintptr_t fdt_get_reg_base(FAR const void *fdt, int offset, int index);
 
 /****************************************************************************
+ * Name: fdt_get_reg_base_by_index
+ *
+ * Description:
+ *   Get the base address of the register space by index
+ *
+ ****************************************************************************/
+
+uintptr_t fdt_get_reg_base_by_index(FAR const void *fdt, int offset,
+                                    int index);
+
+/****************************************************************************
  * Name: fdt_get_reg_size
  *
  * Description:
@@ -246,6 +279,17 @@ uintptr_t fdt_get_reg_base(FAR const void *fdt, int offset, int index);
  ****************************************************************************/
 
 uintptr_t fdt_get_reg_size(FAR const void *fdt, int offset);
+
+/****************************************************************************
+ * Name: fdt_get_reg_size_by_index
+ *
+ * Description:
+ *   Get the size of the register space by index
+ *
+ ****************************************************************************/
+
+uintptr_t fdt_get_reg_size_by_index(FAR const void *fdt, int offset,
+                                    int index);
 
 /****************************************************************************
  * Name: fdt_get_reg_base_by_path
@@ -409,4 +453,59 @@ int fdt_load_prop_u32(FAR const void *fdt, int offset,
                       FAR const char *property, int index,
                       FAR uint32_t *value);
 
+/****************************************************************************
+ * Name: pci_ecam_register_from_fdt
+ *
+ * Description:
+ *   This function is used to register an ecam driver from the device tree
+ *
+ * Input Parameters:
+ *   fdt      - Device tree handle
+ *
+ * Returned Value:
+ *   Return 0 if success, nageative if failed
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PCI
+int fdt_pci_ecam_register(FAR const void *fdt);
+#endif
+
+/****************************************************************************
+ * Name: fdt_virtio_mmio_devices_register
+ *
+ * Description:
+ *   This function is used to register the virtio mmio devices from the
+ *   device tree
+ *
+ * Input Parameters:
+ *   fdt      - Device tree handle
+ *   irqbase  - Interrupt base number
+ *
+ * Returned Value:
+ *   Return 0 if success, nageative if failed
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DRIVERS_VIRTIO_MMIO
+int fdt_virtio_mmio_devices_register(FAR const void *fdt, int irqbase);
+#endif
+
+/****************************************************************************
+ * Name: fdt_cfi_register
+ *
+ * Description:
+ *   This function is used to register an fci flash from the device tree
+ *
+ * Input Parameters:
+ *   fdt - Device tree handle
+ *
+ * Returned Value:
+ *   Return 0 if success, nageative if failed
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MTD_CFI
+int fdt_cfi_register(FAR const void *fdt);
+#endif
 #endif /* __INCLUDE_NUTTX_FDT_H */

@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/xtensa/esp32/esp32-devkitc/src/esp32_bringup.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -27,14 +29,10 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include <syslog.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
 #include <sys/types.h>
-#include <syslog.h>
 #include <debug.h>
-#include <stdio.h>
-
 #include <errno.h>
 #if defined(CONFIG_ESP32_EFUSE)
 #include <nuttx/efuse/efuse.h>
@@ -72,15 +70,15 @@
 #  include "esp32_board_spiflash.h"
 #endif
 
-#ifdef CONFIG_ESP32_BLE
+#ifdef CONFIG_ESPRESSIF_BLE
 #  include "esp32_ble.h"
 #endif
 
-#ifdef CONFIG_ESP32_WIFI
+#ifdef CONFIG_ESPRESSIF_WIFI
 #  include "esp32_board_wlan.h"
 #endif
 
-#ifdef CONFIG_ESP32_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
 #  include "esp32_wifi_adapter.h"
 #endif
 
@@ -92,8 +90,9 @@
 #  include "esp32_i2s.h"
 #endif
 
-#ifdef CONFIG_ESP32_PCNT_AS_QE
-#  include "board_qencoder.h"
+#ifdef CONFIG_ESP_PCNT
+#  include "espressif/esp_pcnt.h"
+#  include "esp32_board_pcnt.h"
 #endif
 
 #ifdef CONFIG_I2CMULTIPLEXER_TCA9548A
@@ -137,7 +136,6 @@
 #endif
 
 #ifdef CONFIG_LCD_DEV
-#  include <nuttx/board.h>
 #  include <nuttx/lcd/lcd_dev.h>
 #endif
 
@@ -154,7 +152,6 @@
 #endif
 
 #ifdef CONFIG_SPI_SLAVE_DRIVER
-#  include "esp32_spi.h"
 #  include "esp32_board_spislavedev.h"
 #endif
 
@@ -176,6 +173,14 @@
 
 #ifdef CONFIG_ESP_MCPWM
 #  include "esp32_board_mcpwm.h"
+#endif
+
+#ifdef CONFIG_SYSTEM_NXDIAG_ESPRESSIF_CHIP_WO_TOOL
+#  include "espressif/esp_nxdiag.h"
+#endif
+
+#ifdef CONFIG_ESP32_ESPNOW_PKTRADIO
+#  include "esp32_espnow_pktradio.h"
 #endif
 
 #include "esp32-devkitc.h"
@@ -335,7 +340,7 @@ int esp32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_ESP32_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   ret = esp32_wifi_bt_coexist_init();
   if (ret)
     {
@@ -344,7 +349,7 @@ int esp32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_ESP32_BLE
+#ifdef CONFIG_ESPRESSIF_BLE
   ret = esp32_ble_initialize();
   if (ret)
     {
@@ -352,7 +357,7 @@ int esp32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_ESP32_WIFI
+#ifdef CONFIG_ESPRESSIF_WIFI
   ret = board_wlan_init();
   if (ret < 0)
     {
@@ -361,8 +366,17 @@ int esp32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_ESP32_ESPNOW_PKTRADIO
+  ret = pktradio_espnow();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize ESPNOW pktradio=%d\n",
+             ret);
+    }
+#endif
+
 #ifdef CONFIG_ESP32_OPENETH
-  ret = esp32_openeth_initialize();
+  ret = esp_openeth_initialize();
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize Open ETH ethernet.\n");
@@ -469,16 +483,11 @@ int esp32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_SENSORS_QENCODER
-  /* Initialize and register the qencoder driver */
-
-  ret = board_qencoder_initialize(0, PCNT_QE0_ID);
-  if (ret != OK)
+#ifdef CONFIG_ESP_PCNT
+  ret = board_pcnt_initialize();
+  if (ret < 0)
     {
-      syslog(LOG_ERR,
-             "ERROR: Failed to register the qencoder: %d\n",
-             ret);
-      return ret;
+      syslog(LOG_ERR, "ERROR: board_pcnt_initialize failed: %d\n", ret);
     }
 #endif
 
@@ -753,6 +762,14 @@ int esp32_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: board_apds9960_initialize() failed: %d\n",
              ret);
+    }
+#endif
+
+#ifdef CONFIG_SYSTEM_NXDIAG_ESPRESSIF_CHIP_WO_TOOL
+  ret = esp_nxdiag_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: esp_nxdiag_initialize failed: %d\n", ret);
     }
 #endif
 

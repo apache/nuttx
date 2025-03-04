@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/pwd/lib_getpwbufr.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -65,20 +67,23 @@
 
 int getpwbuf_r(uid_t uid, gid_t gid, FAR const char *name,
                FAR const char *gecos, FAR const char *dir,
-               FAR const char *shell, FAR struct passwd *pwd,
-               FAR char *buf, size_t buflen, FAR struct passwd **result)
+               FAR const char *shell, FAR const char *passwd,
+               FAR struct passwd *pwd, FAR char *buf, size_t buflen,
+               FAR struct passwd **result)
 {
   size_t reqdlen;
   size_t nsize;
   size_t gsize;
   size_t dsize;
   size_t ssize;
+  size_t psize;
 
   nsize = strlen(name) + 1;
   gsize = strlen(gecos) + 1;
   dsize = strlen(dir) + 1;
   ssize = strlen(shell) + 1;
-  reqdlen = nsize + gsize + dsize + ssize;
+  psize = strlen(passwd) + 1;
+  reqdlen = nsize + gsize + dsize + ssize + psize;
 
   if (buflen < reqdlen)
     {
@@ -88,10 +93,11 @@ int getpwbuf_r(uid_t uid, gid_t gid, FAR const char *name,
       return ERANGE;
     }
 
-  pwd->pw_name  = buf;
-  pwd->pw_gecos = &buf[nsize];
-  pwd->pw_dir   = &buf[nsize + gsize];
-  pwd->pw_shell = &buf[nsize + gsize + dsize];
+  pwd->pw_name   = buf;
+  pwd->pw_gecos  = &buf[nsize];
+  pwd->pw_dir    = &buf[nsize + gsize];
+  pwd->pw_shell  = &buf[nsize + gsize + dsize];
+  pwd->pw_passwd = &buf[nsize + gsize + dsize + ssize];
 
   pwd->pw_uid = uid;
   pwd->pw_gid = gid;
@@ -99,6 +105,7 @@ int getpwbuf_r(uid_t uid, gid_t gid, FAR const char *name,
   strlcpy(pwd->pw_gecos, gecos, gsize);
   strlcpy(pwd->pw_dir, dir, dsize);
   strlcpy(pwd->pw_shell, shell, ssize);
+  strlcpy(pwd->pw_passwd, passwd, psize);
 
   *result = pwd;
   return 0;

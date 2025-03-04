@@ -27,4 +27,11 @@ config FS_ROMFS_CACHE_FILE_NSECTORS
 	---help---
 		The number of file cache sector
 
+config FS_ROMFS_WRITEABLE
+	bool "Enable write extended feature in romfs"
+	default n
+	depends on FS_ROMFS_CACHE_NODE
+	---help---
+		Enable write extended feature in romfs
+
 endif

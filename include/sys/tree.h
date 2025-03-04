@@ -1,7 +1,9 @@
 /****************************************************************************
  * include/sys/tree.h
  *
- * Copyright 2002 Niels Provos <provos@citi.umich.edu>
+ * SPDX-License-Identifier: BSD-2-Clause
+ * SPDX-FileCopyrightText: 2002 Niels Provos <provos@citi.umich.edu>
+ *
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without

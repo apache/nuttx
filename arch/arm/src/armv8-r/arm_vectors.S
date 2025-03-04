@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/armv8-r/arm_vectors.S
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -26,7 +28,6 @@
 #include <nuttx/irq.h>
 
 #include "arm.h"
-#include "cp15.h"
 
 	.file	"arm_vectors.S"
 
@@ -164,7 +165,7 @@ arm_vectorirq:
 
 	/* Switch to SYS mode */
 
-#ifdef CONFIG_ARMV8R_DECODEFIQ
+#ifdef CONFIG_ARCH_HIPRI_INTERRUPT
 	cpsid		if, #PSR_MODE_SYS
 #else
 	cpsid		i, #PSR_MODE_SYS
@@ -274,7 +275,7 @@ arm_vectorsvc:
 
 	/* Switch to SYS mode */
 
-#ifdef CONFIG_ARMV8R_DECODEFIQ
+#ifdef CONFIG_ARCH_HIPRI_INTERRUPT
 	cpsid		if, #PSR_MODE_SYS
 #else
 	cpsid		i, #PSR_MODE_SYS
@@ -385,7 +386,7 @@ arm_vectordata:
 
 	/* Switch to SYS mode */
 
-#ifdef CONFIG_ARMV8R_DECODEFIQ
+#ifdef CONFIG_ARCH_HIPRI_INTERRUPT
 	cpsid		if, #PSR_MODE_SYS
 #else
 	cpsid		i, #PSR_MODE_SYS
@@ -626,14 +627,14 @@ arm_vectorundefinsn:
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ARMV8R_DECODEFIQ
+#ifdef CONFIG_ARCH_HIPRI_INTERRUPT
 	.globl	arm_decodefiq
 #endif
 	.globl	arm_vectorfiq
 	.type	arm_vectorfiq, %function
 
 arm_vectorfiq:
-#ifdef CONFIG_ARMV8R_DECODEFIQ
+#ifdef CONFIG_ARCH_HIPRI_INTERRUPT
 
 	/* Save the LR and SPSR onto the SYS mode stack before switch. */
 
@@ -755,7 +756,7 @@ g_intstacktop:
  *  Name: g_fiqstackalloc/g_fiqstacktop
  ****************************************************************************/
 
-#ifdef CONFIG_ARMV8R_DECODEFIQ
+#ifdef CONFIG_ARCH_HIPRI_INTERRUPT
 	.globl	g_fiqstackalloc
 	.type	g_fiqstackalloc, object
 	.globl	g_fiqstacktop

@@ -1,6 +1,8 @@
 # ##############################################################################
 # libs/libc/misc/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -24,6 +26,8 @@
 list(
   APPEND
   SRCS
+  lib_bitmap.c
+  lib_circbuf.c
   lib_mknod.c
   lib_umask.c
   lib_utsname.c
@@ -42,9 +46,12 @@ list(
   lib_openat.c
   lib_mkdirat.c
   lib_utimensat.c
-  lib_memoryregion.c
-  lib_getnprocs.c
-  lib_pathbuffer.c)
+  lib_mallopt.c
+  lib_getnprocs.c)
+
+if(CONFIG_LIBC_TEMPBUFFER)
+  list(APPEND SRCS lib_tempbuffer.c)
+endif()
 
 # Support for platforms that do not have long long types
 
@@ -78,16 +85,13 @@ list(
   lib_crc16ccitt.c
   lib_crc8.c
   lib_crc8ccitt.c
+  lib_crc8rohc.c
   lib_crc8table.c
   lib_glob.c
-  lib_execinfo.c
+  lib_backtrace.c
   lib_ftok.c
   lib_err.c
   lib_instrument.c)
-
-# Add generic integer math functions
-
-list(APPEND SRCS lib_log2ceil.c lib_log2floor.c)
 
 # Keyboard driver encoder/decoder
 

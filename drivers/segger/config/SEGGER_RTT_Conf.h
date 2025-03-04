@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/segger/config/SEGGER_RTT_Conf.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -29,6 +31,14 @@
 
 #ifndef __ASSEMBLY__
 #  include <nuttx/spinlock.h>
+#endif
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#ifndef __ASSEMBLY__
+extern spinlock_t g_segger_lock;
 #endif
 
 /****************************************************************************
@@ -79,11 +89,11 @@
 
 /* Lock RTT (nestable)   (i.e. disable interrupts) */
 
-#define SEGGER_RTT_LOCK()               irqstate_t __flags = spin_lock_irqsave(NULL)
+#define SEGGER_RTT_LOCK()               irqstate_t __flags = spin_lock_irqsave_notrace(&g_segger_lock)
 
 /* Unlock RTT (nestable) (i.e. enable previous interrupt lock state) */
 
-#define SEGGER_RTT_UNLOCK()             spin_unlock_irqrestore(NULL, __flags)
+#define SEGGER_RTT_UNLOCK()             spin_unlock_irqrestore_notrace(&g_segger_lock, __flags)
 
 /* Disable RTT SEGGER_RTT_WriteSkipNoLock */
 
@@ -111,5 +121,7 @@
         } \
     } \
   while (0)
+
+#define SEGGER_SYSVIEW_PRINTF_IMPLICIT_FORMAT 1
 
 #endif /* __DRIVERS_SEGGER_CONFIG_SEGGER_RTT_CONF_H */

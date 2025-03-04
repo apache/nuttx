@@ -1,10 +1,10 @@
 /****************************************************************************
  * arch/arm/src/armv7-m/arm_exception.S
  *
- *   Copyright (C) 2009-2013, 2015-2016, 2018 Gregory Nutt.
- *   All rights reserved.
- *   Copyright (C) 2012 Michael Smith. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2009-2013, 2015-2016, 2018 Gregory Nutt.
+ * SPDX-FileCopyrightText: 2012 Michael Smith. All rights reserved.
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -72,14 +72,6 @@
 #  if defined(CONFIG_BUILD_PROTECTED) && CONFIG_ARCH_INTERRUPTSTACK < 8
 #    error Interrupt stack must be used with high priority interrupts in protected mode
 #  endif
-
-  /* Use the BASEPRI to control interrupts is required if nested, high
-   * priority interrupts are supported.
-   */
-
-#  ifndef CONFIG_ARMV7M_USEBASEPRI
-#    error CONFIG_ARMV7M_USEBASEPRI must be used with CONFIG_ARCH_HIPRI_INTERRUPT
-#  endif
 #endif
 
 /****************************************************************************
@@ -129,7 +121,8 @@
 	.type	exception_common, function
 #endif
 exception_common:
-
+	.cfi_sections	.debug_frame
+	.cfi_startproc
 	mrs		r0, ipsr				/* R0=exception number */
 	mrs		r12, control				/* R12=control */
 
@@ -151,11 +144,8 @@ exception_common:
 	mov		r2, r1					/* R2=Copy of the main/process stack pointer */
 	add		r2, #HW_XCPT_SIZE			/* R2=MSP/PSP before the interrupt was taken */
 								/* (ignoring the xPSR[9] alignment bit) */
-#ifdef CONFIG_ARMV7M_USEBASEPRI
+
 	mrs		r3, basepri				/* R3=Current BASEPRI setting */
-#else
-	mrs		r3, primask				/* R3=Current PRIMASK setting */
-#endif
 
 #ifdef CONFIG_ARCH_FPU
 
@@ -210,7 +200,11 @@ exception_common:
 	mov		sp, r2					/* Instantiate the aligned stack */
 3:
 #endif
-
+	mov		fp,	r1
+	.cfi_def_cfa	r4,	0				/* Register in fp, so we just set fp as frame */
+	.cfi_offset	pc,	REG_PC * 4
+	.cfi_offset	sp,	REG_SP * 4
+	.cfi_offset	lr,	REG_LR * 4
 	bl		arm_doirq				/* R0=IRQ, R1=register save (msp) */
 
 	/* On return from arm_doirq, R0 will hold a pointer to register context
@@ -237,11 +231,7 @@ exception_common:
 
 	/* Restore the interrupt state */
 
-#ifdef CONFIG_ARMV7M_USEBASEPRI
 	msr		basepri, r3				/* Restore interrupts priority masking */
-#else
-	msr		primask, r3				/* Restore interrupts */
-#endif
 
 	msr		control, r12				/* Restore control */
 
@@ -250,6 +240,7 @@ exception_common:
 	 */
 
 	bx		r14					/* And return */
+	.cfi_endproc
 
 	.size	exception_common, .-exception_common
 

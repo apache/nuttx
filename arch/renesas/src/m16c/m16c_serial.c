@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/renesas/src/m16c/m16c_serial.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -1094,31 +1096,19 @@ void renesas_consoleinit(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef HAVE_SERIALCONSOLE
   struct up_dev_s *priv = (struct up_dev_s *)CONSOLE_DEV.priv;
   uint8_t  ucon;
 
   up_disableuartint(priv, &ucon);
-
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      up_waittxready(priv);
-      up_serialout16(priv, M16C_UART_TB, (uint16_t)'\r');
-    }
-
   up_waittxready(priv);
   up_serialout16(priv, M16C_UART_TB, (uint16_t)ch);
 
   up_waittxready(priv);
   up_restoreuartint(priv, ucon);
 #endif
-  return ch;
 }
 
 #else /* USE_SERIALDRIVER */
@@ -1131,21 +1121,11 @@ int up_putc(int ch)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef HAVE_SERIALCONSOLE
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      renesas_lowputc('\r');
-    }
-
   renesas_lowputc(ch);
 #endif
-  return ch;
 }
 
 #endif /* USE_SERIALDRIVER */

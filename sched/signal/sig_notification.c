@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/signal/sig_notification.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -108,12 +110,10 @@ int nxsig_notification(pid_t pid, FAR struct sigevent *event,
 
   /* Notify client via a signal? */
 
-  if (event->sigev_notify == SIGEV_SIGNAL)
+  if (event->sigev_notify & SIGEV_SIGNAL)
     {
-#ifdef CONFIG_SCHED_HAVE_PARENT
-      FAR struct tcb_s *rtcb = this_task();
-#endif
       siginfo_t info;
+      bool      thread = false;
 
       /* Yes.. Create the siginfo structure */
 
@@ -121,9 +121,10 @@ int nxsig_notification(pid_t pid, FAR struct sigevent *event,
       info.si_code   = code;
       info.si_errno  = OK;
 #ifdef CONFIG_SCHED_HAVE_PARENT
-      info.si_pid    = rtcb->pid;
+      info.si_pid    = this_task()->pid;
       info.si_status = OK;
 #endif
+      info.si_user   = NULL;
 
       /* Some compilers (e.g., SDCC), do not permit assignment of aggregates.
        * Use of memcpy() is overkill;  We could just copy the larger of the
@@ -133,15 +134,23 @@ int nxsig_notification(pid_t pid, FAR struct sigevent *event,
 
       memcpy(&info.si_value, &event->sigev_value, sizeof(union sigval));
 
+      /* SIGEV_THREAD_ID currently used only by POSIX timer. */
+
+      if (event->sigev_notify & SIGEV_THREAD_ID)
+        {
+          thread = true;
+          pid = event->sigev_notify_thread_id;
+        }
+
       /* Send the signal */
 
-      return nxsig_dispatch(pid, &info);
+      return nxsig_dispatch(pid, &info, thread);
     }
 
 #ifdef CONFIG_SIG_EVTHREAD
   /* Notify the client via a function call */
 
-  else if (event->sigev_notify == SIGEV_THREAD)
+  else if (event->sigev_notify & SIGEV_THREAD)
     {
       /* Initialize the work information */
 

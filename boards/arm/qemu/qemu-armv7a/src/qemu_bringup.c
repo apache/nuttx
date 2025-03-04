@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/qemu/qemu-armv7a/src/qemu_bringup.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -28,13 +30,13 @@
 #include <syslog.h>
 
 #include <nuttx/fs/fs.h>
-#include <nuttx/virtio/virtio-mmio.h>
 #include <nuttx/fdt.h>
 
 #ifdef CONFIG_LIBC_FDT
 #  include <libfdt.h>
 #endif
 
+#include "chip.h"
 #include "qemu-armv7a.h"
 
 /****************************************************************************
@@ -50,36 +52,6 @@
  ****************************************************************************/
 
 #if defined(CONFIG_LIBC_FDT) && defined(CONFIG_DEVICE_TREE)
-#ifdef CONFIG_DRIVERS_VIRTIO_MMIO
-
-/****************************************************************************
- * Name: register_virtio_devices_from_fdt
- ****************************************************************************/
-
-static void register_virtio_devices_from_fdt(const void *fdt)
-{
-  uintptr_t addr;
-  int offset = -1;
-  int irqnum;
-
-  for (; ; )
-    {
-      offset = fdt_node_offset_by_compatible(fdt, offset, "virtio,mmio");
-      if (offset == -FDT_ERR_NOTFOUND)
-        {
-          break;
-        }
-
-      addr = fdt_get_reg_base(fdt, offset, 0);
-      irqnum = fdt_get_irq(fdt, offset, 1, QEMU_SPI_IRQ_BASE);
-      if (addr > 0 && irqnum >= 0)
-        {
-          virtio_register_mmio_device((void *)addr, irqnum);
-        }
-    }
-}
-
-#endif
 
 /****************************************************************************
  * Name: register_devices_from_fdt
@@ -88,6 +60,7 @@ static void register_virtio_devices_from_fdt(const void *fdt)
 static void register_devices_from_fdt(void)
 {
   const void *fdt = fdt_get();
+  int ret;
 
   if (fdt == NULL)
     {
@@ -95,8 +68,31 @@ static void register_devices_from_fdt(void)
     }
 
 #ifdef CONFIG_DRIVERS_VIRTIO_MMIO
-  register_virtio_devices_from_fdt(fdt);
+  ret = fdt_virtio_mmio_devices_register(fdt, QEMU_SPI_IRQ_BASE);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "fdt_virtio_mmio_devices_register failed, ret=%d\n",
+             ret);
+    }
 #endif
+
+#ifdef CONFIG_PCI
+  ret = fdt_pci_ecam_register(fdt);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "fdt_pci_ecam_register failed, ret=%d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_MTD_CFI
+  ret = fdt_cfi_register(fdt);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "fdt_cfi_register failed, ret=%d\n", ret);
+    }
+#endif
+
+  UNUSED(ret);
 }
 
 #endif
@@ -117,6 +113,17 @@ int qemu_bringup(void)
 {
   int ret;
 
+#ifdef CONFIG_FS_TMPFS
+  /* Mount the tmpfs file system */
+
+  ret = nx_mount(NULL, CONFIG_LIBC_TMPDIR, "tmpfs", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to mount tmpfs at %s: %d\n",
+             CONFIG_LIBC_TMPDIR, ret);
+    }
+#endif
+
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */
 
@@ -129,6 +136,16 @@ int qemu_bringup(void)
 
 #if defined(CONFIG_LIBC_FDT) && defined(CONFIG_DEVICE_TREE)
   register_devices_from_fdt();
+#endif
+
+#if defined(CONFIG_FS_LITTLEFS) && defined(CONFIG_MTD_CFI)
+  /* Mount the procfs file system */
+
+  ret = nx_mount("/dev/cfi-flash1", "/data", "littlefs", 0, "autoformat");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to mount littlefs at /data: %d\n", ret);
+    }
 #endif
 
   UNUSED(ret);

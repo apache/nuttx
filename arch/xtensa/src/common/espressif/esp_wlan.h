@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/xtensa/src/common/espressif/esp_wlan.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -27,8 +29,14 @@
 
 #include <nuttx/config.h>
 
+#ifdef CONFIG_ARCH_CHIP_ESP32
+#  include "esp32_wifi_adapter.h"
+#endif
 #ifdef CONFIG_ARCH_CHIP_ESP32S2
 #  include "esp32s2_wifi_adapter.h"
+#endif
+#ifdef CONFIG_ARCH_CHIP_ESP32S3
+#  include "esp32s3_wifi_adapter.h"
 #endif
 
 #ifndef __ASSEMBLY__

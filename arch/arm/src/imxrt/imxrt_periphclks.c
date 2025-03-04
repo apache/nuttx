@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/imxrt/imxrt_periphclks.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -26,8 +28,9 @@
 
 #include <stdint.h>
 
+#include <arch/barriers.h>
+
 #include "arm_internal.h"
-#include "barriers.h"
 #include "imxrt_periphclks.h"
 
 /****************************************************************************
@@ -70,8 +73,7 @@ void imxrt_periphclk_configure(unsigned int index, unsigned int value)
 
       putreg32(regval, IMXRT_CCM_LPCG_DIR(index));
 
-      ARM_DSB();
-      ARM_ISB();
+      UP_MB();
 
       /* Ensure the clock setting is written and active before we return */
 
@@ -103,8 +105,7 @@ void imxrt_periphclk_configure(uintptr_t regaddr, unsigned int index,
                                unsigned int value)
 {
   modifyreg32(regaddr, CCM_CCGRX_CG_MASK(index), CCM_CCGRX_CG(index, value));
-  ARM_DSB();
-  ARM_ISB();
+  UP_MB();
 }
 
 #endif

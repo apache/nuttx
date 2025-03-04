@@ -1,6 +1,8 @@
 /****************************************************************************
  * mm/mm_heap/mm_lock.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -114,4 +116,32 @@ void mm_unlock(FAR struct mm_heap_s *heap)
 #endif
 
   DEBUGVERIFY(nxmutex_unlock(&heap->mm_lock));
+}
+
+/****************************************************************************
+ * Name: mm_lock_irq
+ *
+ * Description:
+ *   Locking by pausing interruption
+ *
+ ****************************************************************************/
+
+irqstate_t mm_lock_irq(FAR struct mm_heap_s *heap)
+{
+  UNUSED(heap);
+  return up_irq_save();
+}
+
+/****************************************************************************
+ * Name: mm_unlock_irq
+ *
+ * Description:
+ *   Release the lock by resuming the interrupt
+ *
+ ****************************************************************************/
+
+void mm_unlock_irq(FAR struct mm_heap_s *heap, irqstate_t state)
+{
+  UNUSED(heap);
+  up_irq_restore(state);
 }

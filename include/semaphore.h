@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/semaphore.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -49,6 +51,10 @@
 
 #define SEM_FAILED                NULL
 
+#ifndef CONFIG_SEM_PREALLOCHOLDERS
+#  define CONFIG_SEM_PREALLOCHOLDERS 0
+#endif
+
 /****************************************************************************
  * Public Type Declarations
  ****************************************************************************/
@@ -67,7 +73,7 @@ struct semholder_s
   FAR struct semholder_s *tlink;  /* List of task held semaphores          */
   FAR struct sem_s *sem;          /* Ths corresponding semaphore           */
   FAR struct tcb_s *htcb;         /* Ths corresponding TCB                 */
-  int16_t counts;                 /* Number of counts owned by this holder */
+  int32_t counts;                 /* Number of counts owned by this holder */
 };
 
 #if CONFIG_SEM_PREALLOCHOLDERS > 0
@@ -98,7 +104,7 @@ struct semholder_s
 
 struct sem_s
 {
-  volatile int16_t semcount;     /* >0 -> Num counts available */
+  volatile int32_t semcount;     /* >0 -> Num counts available */
                                  /* <0 -> Num tasks waiting for semaphore */
 
   /* If priority inheritance is enabled, then we have to keep track of which
@@ -115,6 +121,10 @@ struct sem_s
 #  else
   struct semholder_s holder;     /* Slot for old and new holder */
 #  endif
+#endif
+#ifdef CONFIG_PRIORITY_PROTECT
+  uint8_t ceiling;               /* The priority ceiling owned by mutex  */
+  uint8_t saved;                 /* The saved priority of thread before boost */
 #endif
 };
 

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/kinetis/kinetis_rtc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -26,6 +28,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 #include <nuttx/timers/rtc.h>
+#include <nuttx/spinlock.h>
 #include <arch/board/board.h>
 
 #include <stdlib.h>
@@ -59,6 +62,10 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+#ifdef CONFIG_RTC_HIRES
+static spinlock_t g_rtc_lock = SP_UNLOCKED;
+#endif
 
 #ifdef CONFIG_RTC_ALARM
 static alarmcb_t g_alarmcb;
@@ -434,7 +441,7 @@ int up_rtc_gettime(struct timespec *tp)
    * wrapped-around.
    */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_rtc_lock);
   do
     {
       prescaler = getreg32(KINETIS_RTC_TPR);
@@ -443,7 +450,7 @@ int up_rtc_gettime(struct timespec *tp)
     }
   while (prescaler > prescaler2);
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_rtc_lock, flags);
 
   /* Build seconds + nanoseconds from seconds and prescaler register */
 
@@ -477,7 +484,7 @@ int up_rtc_settime(const struct timespec *tp)
   seconds = tp->tv_sec;
   prescaler = tp->tv_nsec / (1000000000 / CONFIG_RTC_FREQUENCY);
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_rtc_lock);
 
   putreg32(0, KINETIS_RTC_SR);  /* Disable counter */
 
@@ -486,7 +493,7 @@ int up_rtc_settime(const struct timespec *tp)
 
   putreg32(RTC_SR_TCE, KINETIS_RTC_SR); /* Re-enable counter */
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_rtc_lock, flags);
 
   return OK;
 }

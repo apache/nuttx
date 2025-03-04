@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/common/espressif/esp_timer.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -31,6 +33,7 @@
 #include <stdio.h>
 
 #include <nuttx/timers/timer.h>
+#include <nuttx/lib/lib.h>
 
 #include "esp_irq.h"
 #include "esp_timer.h"
@@ -508,7 +511,7 @@ IRAM_ATTR static int esp_timer_isr(int irq, void *context, void *arg)
 int esp_timer_initialize(uint32_t timer_id)
 {
   struct esp_timer_lowerhalf_s *lower = NULL;
-  char devpath[PATH_MAX];
+  char *devpath;
   uint32_t group_num;
   uint32_t timer_num;
 
@@ -539,7 +542,13 @@ int esp_timer_initialize(uint32_t timer_id)
         break;
     }
 
-  snprintf(devpath, sizeof(devpath), "/dev/timer%" PRIu32, timer_id);
+  devpath = lib_get_pathbuffer();
+  if (devpath == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  snprintf(devpath, PATH_MAX, "/dev/timer%" PRIu32, timer_id);
 
   /* Initialize the elements of lower half state structure */
 
@@ -562,9 +571,11 @@ int esp_timer_initialize(uint32_t timer_id)
        * indicate the failure (implying the non-unique devpath).
        */
 
+      lib_put_pathbuffer(devpath);
       return -EEXIST;
     }
 
+  lib_put_pathbuffer(devpath);
   esp_setup_irq(lower->source,
                 ESP_IRQ_PRIORITY_DEFAULT,
                 ESP_IRQ_TRIGGER_LEVEL);

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32l5/stm32l5_gpio.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -32,12 +34,19 @@
 
 #include <arch/irq.h>
 #include <arch/stm32l5/chip.h>
+#include <nuttx/spinlock.h>
 
 #include "arm_internal.h"
 #include "chip.h"
 #include "stm32l5_gpio.h"
 
 #include "hardware/stm32l5_syscfg.h"
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static spinlock_t g_configgpio_lock = SP_UNLOCKED;
 
 /****************************************************************************
  * Public Data
@@ -181,7 +190,7 @@ int stm32l5_configgpio(uint32_t cfgset)
    * exclusive access to all of the GPIO configuration registers.
    */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_configgpio_lock);
 
   /* Now apply the configuration to the mode register */
 
@@ -294,7 +303,7 @@ int stm32l5_configgpio(uint32_t cfgset)
 
   putreg32(regval, base + STM32L5_GPIO_OTYPER_OFFSET);
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_configgpio_lock, flags);
   return OK;
 }
 

@@ -33,6 +33,15 @@ config NETDEV_CAN_FILTER_IOCTL
 		Enable support for ioctl() commands to add/remove CAN hardware-level
 		filters (NOTE: Not supported by all drivers)
 
+config NETDEV_CAN_STATE_IOCTL
+	bool "Enable CAN state ioctl()"
+	default n
+	select NETDEV_IOCTL
+	depends on NET_CAN
+	---help---
+		Enable support for ioctl() commands to set/see CAN or LIN controller-state
+		(NOTE: Not supported by all drivers)
+
 config NETDEV_WIRELESS_IOCTL
 	bool "Enable Wireless ioctl()"
 	default n

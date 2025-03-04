@@ -67,4 +67,14 @@ config TLS_TASK_NELEM
 		NOTE that the 0 value of CONFIG_SCHED_TLS_NELEM disables these
 		TLS interfaces.
 
+config TLS_NCLEANUP
+	int "Number of cleanup stack levels"
+	default 0
+	range 0 255
+	---help---
+		The number of cleanup stack levels.  These are used to support
+		POSIX pthread cancellation.  The number of cleanup stack levels
+		is the maximum number of pthread_cleanup_push() calls that can
+		be made without a corresponding pthread_cleanup_pop() call.
+
 endmenu # Thread Local Storage (TLS)

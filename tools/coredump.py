@@ -2,6 +2,8 @@
 ############################################################################
 # tools/coredump.py
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -20,6 +22,7 @@
 ############################################################################
 
 import argparse
+import base64
 import binascii
 import os
 import struct
@@ -67,6 +70,20 @@ def unhexlify(infile, outfile):
         outfile.write(binascii.unhexlify(line))
 
 
+def unbase64file(infile, outfile):
+    input = ""
+    for line in infile.readlines():
+        line = line.strip()
+        if line == "":
+            break
+        index = line.rfind(" ")
+        if index > 0:
+            line = line[index + 1 :]
+
+        input += line
+    outfile.write(base64.b64decode(input))
+
+
 def parse_args():
     global args
     parser = argparse.ArgumentParser(
@@ -76,6 +93,12 @@ def parse_args():
     )
     parser.add_argument("input")
     parser.add_argument("-o", "--output", help="Output file in hex.")
+    parser.add_argument(
+        "--base64",
+        action="store_true",
+        default=False,
+        help="Set when input file is base64 encoded.",
+    )
     args = parser.parse_args()
 
 
@@ -92,7 +115,10 @@ def main():
     infile = open(args.input, "r")
     tmpfile = open(tmp, "wb+")
 
-    unhexlify(infile, tmpfile)
+    if args.base64:
+        unbase64file(infile, tmpfile)
+    else:
+        unhexlify(infile, tmpfile)
 
     infile.close()
 
@@ -108,8 +134,8 @@ def main():
         outfile.close()
         os.unlink(tmp)
     else:
-        tmpfile.rename(args.output)
         tmpfile.close()
+        os.rename(tmp, args.output)
 
     print("Core file conversion completed: " + args.output)
 

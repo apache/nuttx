@@ -1,6 +1,8 @@
 # ##############################################################################
 # arch/arm64/src/common/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -27,9 +29,9 @@ list(APPEND SRCS arm64_fork_func.S)
 
 # Common C source files ( OS call up_xxx)
 list(APPEND SRCS arm64_initialize.c arm64_initialstate.c arm64_boot.c)
-list(APPEND SRCS arm64_nputs.c arm64_copystate.c arm64_createstack.c)
+list(APPEND SRCS arm64_nputs.c arm64_createstack.c)
 list(APPEND SRCS arm64_releasestack.c arm64_stackframe.c arm64_usestack.c)
-list(APPEND SRCS arm64_exit.c arm64_fork.c arm64_switchcontext.c)
+list(APPEND SRCS arm64_exit.c arm64_fork.c)
 list(APPEND SRCS arm64_schedulesigaction.c arm64_sigdeliver.c)
 list(APPEND SRCS arm64_getintstack.c arm64_registerdump.c)
 list(APPEND SRCS arm64_perf.c arm64_tcbinfo.c)
@@ -52,10 +54,17 @@ endif()
 
 if(CONFIG_ARM64_GIC_VERSION EQUAL 2)
   list(APPEND SRCS arm64_gicv2.c)
+  if(CONFIG_ARM64_GICV2M)
+    list(APPEND SRCS arm64_gicv2m.c)
+  endif()
 endif()
 
 if(CONFIG_ARCH_HAVE_MMU)
   list(APPEND SRCS arm64_mmu.c)
+endif()
+
+if(CONFIG_ARM64_MTE)
+  list(APPEND SRCS arm64_mte.c)
 endif()
 
 if(CONFIG_ARCH_HAVE_MPU)
@@ -68,7 +77,7 @@ endif()
 
 if(CONFIG_SMP)
   list(APPEND SRCS arm64_cpuidlestack.c arm64_cpustart.c)
-  list(APPEND SRCS arm64_cpupause.c)
+  list(APPEND SRCS arm64_smpcall.c)
 endif()
 
 if(CONFIG_BUILD_KERNEL)

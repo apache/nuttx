@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/tricore/include/irq.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -61,9 +63,9 @@ extern "C"
  ****************************************************************************/
 
 /* g_current_regs[] holds a references to the current interrupt level
- * register storage structure.  It is non-NULL only during interrupt
+ * register storage structure.  If is non-NULL only during interrupt
  * processing.  Access to g_current_regs[] must be through the macro
- * CURRENT_REGS for portability.
+ * g_current_regs for portability.
  */
 
 /* For the case of architectures with multiple CPUs, then there must be one
@@ -71,7 +73,6 @@ extern "C"
  */
 
 EXTERN volatile uintptr_t *g_current_regs[CONFIG_SMP_NCPUS];
-#define CURRENT_REGS (g_current_regs[up_cpu_index()])
 
 /****************************************************************************
  * Public Function Prototypes
@@ -81,23 +82,13 @@ EXTERN volatile uintptr_t *g_current_regs[CONFIG_SMP_NCPUS];
  * Name: up_cpu_index
  *
  * Description:
- *   Return an index in the range of 0 through (CONFIG_SMP_NCPUS-1) that
- *   corresponds to the currently executing CPU.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   An integer index in the range of 0 through (CONFIG_SMP_NCPUS-1) that
- *   corresponds to the currently executing CPU.
+ *   Return the real core number regardless CONFIG_SMP setting
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SMP
+#ifdef CONFIG_ARCH_HAVE_MULTICPU
 int up_cpu_index(void) noinstrument_function;
-#else
-#  define up_cpu_index() (0)
-#endif
+#endif /* CONFIG_ARCH_HAVE_MULTICPU */
 
 /****************************************************************************
  * Name: up_irq_enable
@@ -113,7 +104,7 @@ void up_irq_enable(void);
  * Inline functions
  ****************************************************************************/
 
-noinstrument_function static inline uintptr_t up_getsp(void)
+noinstrument_function static inline_function uintptr_t up_getsp(void)
 {
 #ifdef CONFIG_TRICORE_TOOLCHAIN_TASKING
   return (uintptr_t)__get_sp();
@@ -130,7 +121,7 @@ noinstrument_function static inline uintptr_t up_getsp(void)
  *
  ****************************************************************************/
 
-noinstrument_function static inline irqstate_t up_irq_save(void)
+noinstrument_function static inline_function irqstate_t up_irq_save(void)
 {
   return __disable_and_save();
 }
@@ -143,9 +134,32 @@ noinstrument_function static inline irqstate_t up_irq_save(void)
  *
  ****************************************************************************/
 
-noinstrument_function static inline void up_irq_restore(irqstate_t flags)
+noinstrument_function static inline_function
+void up_irq_restore(irqstate_t flags)
 {
   __restore(flags);
+}
+
+/****************************************************************************
+ * Inline Functions
+ ****************************************************************************/
+
+static inline_function uintptr_t *up_current_regs(void)
+{
+#ifdef CONFIG_SMP
+  return (uintptr_t *)g_current_regs[up_cpu_index()];
+#else
+  return (uintptr_t *)g_current_regs[0];
+#endif
+}
+
+static inline_function void up_set_current_regs(uintptr_t *regs)
+{
+#ifdef CONFIG_SMP
+  g_current_regs[up_cpu_index()] = regs;
+#else
+  g_current_regs[0] = regs;
+#endif
 }
 
 /****************************************************************************
@@ -158,13 +172,13 @@ noinstrument_function static inline void up_irq_restore(irqstate_t flags)
  ****************************************************************************/
 
 noinstrument_function
-static inline bool up_interrupt_context(void)
+static inline_function bool up_interrupt_context(void)
 {
 #ifdef CONFIG_SMP
   irqstate_t flags = up_irq_save();
 #endif
 
-  bool ret = CURRENT_REGS != NULL;
+  bool ret = up_current_regs() != NULL;
 
 #ifdef CONFIG_SMP
   up_irq_restore(flags);
@@ -172,6 +186,26 @@ static inline bool up_interrupt_context(void)
 
   return ret;
 }
+
+/****************************************************************************
+ * Name: up_getusrsp
+ ****************************************************************************/
+
+static inline_function uintptr_t up_getusrsp(void *regs)
+{
+  uintptr_t *csa = regs;
+
+  while (((uintptr_t)csa & PCXI_UL) == 0)
+    {
+      csa = tricore_csa2addr((uintptr_t)csa);
+      csa = (uintptr_t *)csa[0];
+    }
+
+  csa = tricore_csa2addr((uintptr_t)csa);
+
+  return csa[REG_SP];
+}
+
 #endif /* __ASSEMBLY__ */
 
 #undef EXTERN

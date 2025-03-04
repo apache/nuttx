@@ -1,57 +1,13 @@
-/sim/*/*/*/[a-n]*
+/sim/*/*/*/[a-b]*
+/sim/*/*/*/c[0-i]*
 
 # macOS doesn't have ALSA
 -Darwin,sim:alsa
 
-# macOS doesn't have V4L2
--Darwin,sim:nxcamera
-
 # clang doesn't -fsanitize=kernel-address
--Darwin,sim:kasan
 -Darwin,sim:citest
-
-# macOS doesn't support ELF loading
--Darwin,sim:elf
--Darwin,sim:loadable
-
-# macOS doesn't support 32bit(CONFIG_SIM_M32=y) anymore
--Darwin,sim:module32
-
-# Do not build Linux configs
--Darwin,sim:linuxi2c
--Darwin,sim:linuxspi
-
-# macOS doesn't have X11
--Darwin,sim:lvgl_fb
--Darwin,sim:lvgl_lcd
--Darwin,sim:nimble
--Darwin,sim:nsh2
--Darwin,sim:nx11
--Darwin,sim:nxlines
--Darwin,sim:nxwm
-
-# Skip WebAssembly Micro Runtime
--Darwin,sim:wamr
-
-# macOS matter compilation is not currently supported
--Darwin,sim:matter
 
 # Boards build by CMake
 CMake,sim:alsa
 CMake,sim:bluetooth
 CMake,sim:bthcisock
-CMake,sim:dynconns
-CMake,sim:fb
-CMake,sim:foc
-CMake,sim:ipforward
-CMake,sim:linuxi2c
-CMake,sim:linuxspi
-CMake,sim:minibasic
-CMake,sim:mount
-CMake,sim:mtdpart
-CMake,sim:mtdrwb
-CMake,sim:nettest
-CMake,sim:note
-CMake,sim:nsh
-CMake,sim:nxffs
-CMake,sim:matter

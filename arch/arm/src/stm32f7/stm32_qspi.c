@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32f7/stm32_qspi.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -35,6 +37,7 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <arch/barriers.h>
 #include <arch/board/board.h>
 
 #include <nuttx/arch.h>
@@ -43,10 +46,10 @@
 #include <nuttx/cache.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
+#include <nuttx/nuttx.h>
 #include <nuttx/spi/qspi.h>
 
 #include "arm_internal.h"
-#include "barriers.h"
 
 #include "stm32_gpio.h"
 #include "stm32_dma.h"
@@ -58,17 +61,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-/* QSPI memory synchronization */
-
-#define MEMORY_SYNC()     do { ARM_DSB(); ARM_ISB(); } while (0)
-
-/* Ensure that the DMA buffers are word-aligned. */
-
-#define ALIGN_SHIFT       2
-#define ALIGN_MASK        3
-#define ALIGN_UP(n)       (((n)+ALIGN_MASK) & ~ALIGN_MASK)
-#define IS_ALIGNED(n)     (((uint32_t)(n) & ALIGN_MASK) == 0)
 
 /* Debug ********************************************************************/
 
@@ -1557,7 +1549,7 @@ static int qspi_memory_dma(struct stm32f7_qspidev_s *priv,
 
   qspi_waitstatusflags(priv, QSPI_SR_TCF, 1);
   qspi_waitstatusflags(priv, QSPI_SR_BUSY, 0);
-  MEMORY_SYNC();
+  UP_MB();
 
   /* Dump the sampled DMA registers */
 
@@ -2025,7 +2017,7 @@ static int qspi_command(struct qspi_dev_s *dev,
   if (QSPICMD_ISDATA(cmdinfo->flags))
     {
       DEBUGASSERT(cmdinfo->buffer != NULL && cmdinfo->buflen > 0);
-      DEBUGASSERT(IS_ALIGNED(cmdinfo->buffer));
+      DEBUGASSERT(IS_ALIGNED((uintptr_t)cmdinfo->buffer, 4));
 
       if (QSPICMD_ISWRITE(cmdinfo->flags))
         {
@@ -2095,7 +2087,7 @@ static int qspi_command(struct qspi_dev_s *dev,
   /* Wait for the interrupt routine to finish it's magic */
 
   nxsem_wait(&priv->op_sem);
-  MEMORY_SYNC();
+  UP_MB();
 
   /* Convey the result */
 
@@ -2117,7 +2109,7 @@ static int qspi_command(struct qspi_dev_s *dev,
   if (QSPICMD_ISDATA(cmdinfo->flags))
     {
       DEBUGASSERT(cmdinfo->buffer != NULL && cmdinfo->buflen > 0);
-      DEBUGASSERT(IS_ALIGNED(cmdinfo->buffer));
+      DEBUGASSERT(IS_ALIGNED((uintptr_t)cmdinfo->buffer, 4));
 
       if (QSPICMD_ISWRITE(cmdinfo->flags))
         {
@@ -2128,7 +2120,7 @@ static int qspi_command(struct qspi_dev_s *dev,
           ret = qspi_receive_blocking(priv, &xctn);
         }
 
-      MEMORY_SYNC();
+      UP_MB();
     }
   else
     {
@@ -2204,7 +2196,7 @@ static int qspi_memory(struct qspi_dev_s *dev,
   priv->xctn = &xctn;
 
   DEBUGASSERT(meminfo->buffer != NULL && meminfo->buflen > 0);
-  DEBUGASSERT(IS_ALIGNED(meminfo->buffer));
+  DEBUGASSERT(IS_ALIGNED((uintptr_t)meminfo->buffer, 4));
 
   if (QSPIMEM_ISWRITE(meminfo->flags))
     {
@@ -2253,7 +2245,7 @@ static int qspi_memory(struct qspi_dev_s *dev,
   /* Wait for the interrupt routine to finish it's magic */
 
   nxsem_wait(&priv->op_sem);
-  MEMORY_SYNC();
+  UP_MB();
 
   /* convey the result */
 
@@ -2264,8 +2256,8 @@ static int qspi_memory(struct qspi_dev_s *dev,
 
   if (priv->candma &&
       meminfo->buflen > CONFIG_STM32F7_QSPI_DMATHRESHOLD &&
-      IS_ALIGNED((uintptr_t)meminfo->buffer) &&
-      IS_ALIGNED(meminfo->buflen))
+      IS_ALIGNED((uintptr_t)meminfo->buffer, 4) &&
+      IS_ALIGNED(meminfo->buflen, 4))
     {
       ret = qspi_memory_dma(priv, meminfo, &xctn);
     }
@@ -2284,7 +2276,7 @@ static int qspi_memory(struct qspi_dev_s *dev,
       /* Transfer data */
 
       DEBUGASSERT(meminfo->buffer != NULL && meminfo->buflen > 0);
-      DEBUGASSERT(IS_ALIGNED(meminfo->buffer));
+      DEBUGASSERT(IS_ALIGNED((uintptr_t)meminfo->buffer, 4));
 
       if (QSPIMEM_ISWRITE(meminfo->flags))
         {
@@ -2300,7 +2292,7 @@ static int qspi_memory(struct qspi_dev_s *dev,
       qspi_waitstatusflags(priv, QSPI_SR_TCF, 1);
       qspi_waitstatusflags(priv, QSPI_SR_BUSY, 0);
 
-      MEMORY_SYNC();
+      UP_MB();
     }
 
 #else
@@ -2315,7 +2307,7 @@ static int qspi_memory(struct qspi_dev_s *dev,
   /* Transfer data */
 
   DEBUGASSERT(meminfo->buffer != NULL && meminfo->buflen > 0);
-  DEBUGASSERT(IS_ALIGNED(meminfo->buffer));
+  DEBUGASSERT(IS_ALIGNED((uintptr_t)meminfo->buffer, 4));
 
   if (QSPIMEM_ISWRITE(meminfo->flags))
     {
@@ -2331,7 +2323,7 @@ static int qspi_memory(struct qspi_dev_s *dev,
   qspi_waitstatusflags(priv, QSPI_SR_TCF, 1);
   qspi_waitstatusflags(priv, QSPI_SR_BUSY, 0);
 
-  MEMORY_SYNC();
+  UP_MB();
 
 #endif
 
@@ -2361,7 +2353,9 @@ static void *qspi_alloc(struct qspi_dev_s *dev, size_t buflen)
    * hold the rested buflen in units a 32-bits.
    */
 
-  return kmm_malloc(ALIGN_UP(buflen));
+  /* Ensure that the DMA buffers are word-aligned. */
+
+  return kmm_malloc(ALIGN_UP(buflen, 4));
 }
 
 /****************************************************************************

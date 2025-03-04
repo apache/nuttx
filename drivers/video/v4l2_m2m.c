@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/video/v4l2_m2m.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -27,6 +29,7 @@
 #include <fcntl.h>
 #include <poll.h>
 
+#include <nuttx/sched.h>
 #include <nuttx/video/v4l2_m2m.h>
 #include <nuttx/video/video.h>
 
@@ -268,7 +271,7 @@ static int codec_reqbufs(FAR struct file *filep,
   FAR codec_file_t *cfile = filep->f_priv;
   FAR codec_type_inf_t *type_inf;
   irqstate_t flags;
-  size_t buf_size;
+  uint32_t buf_size;
   int ret = OK;
 
   if (reqbufs == NULL)

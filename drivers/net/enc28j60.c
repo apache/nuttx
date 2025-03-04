@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/net/enc28j60.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -33,7 +35,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <stdint.h>
 #include <time.h>
 #include <string.h>
 #include <assert.h>
@@ -1434,10 +1435,6 @@ static void enc_pktif(FAR struct enc_driver_s *priv)
   uint16_t pktlen;
   uint16_t rxstat;
 
-  /* Update statistics */
-
-  NETDEV_RXPACKETS(&priv->dev);
-
   /* Set the read pointer to the start of the received packet (ERDPT) */
 
   DEBUGASSERT(priv->nextpkt <= PKTMEM_RX_END);
@@ -1505,6 +1502,10 @@ static void enc_pktif(FAR struct enc_driver_s *priv)
 
       enc_rxdispatch(priv);
     }
+
+  /* Update statistics */
+
+  NETDEV_RXPACKETS(&priv->dev);
 
   /* Move the RX read pointer to the start of the next received packet.
    * This frees the memory we just read.

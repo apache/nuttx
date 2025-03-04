@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/stm3240g-eval/src/stm32_lcd.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -504,39 +506,6 @@ static void stm3240g_setcursor(uint16_t col, uint16_t row)
   stm3240g_writereg(LCD_REG_32, row); /* GRAM horizontal address */
   stm3240g_writereg(LCD_REG_33, col); /* GRAM vertical address */
 }
-
-/****************************************************************************
- * Name:  stm3240g_dumprun
- *
- * Description:
- *   Dump the contexts of the run buffer:
- *
- *  run     - The buffer in containing the run read to be dumped
- *  npixels - The number of pixels to dump
- *
- ****************************************************************************/
-
-#if 0 /* Sometimes useful */
-static void stm3240g_dumprun(const char *msg,
-                             uint16_t *run, size_t npixels)
-{
-  int i;
-  int j;
-
-  syslog(LOG_DEBUG, "\n%s:\n", msg);
-  for (i = 0; i < npixels; i += 16)
-    {
-      up_putc(' ');
-      syslog(LOG_DEBUG, " ");
-      for (j = 0; j < 16; j++)
-        {
-          syslog(LOG_DEBUG, " %04x", *run++);
-        }
-
-      up_putc('\n');
-    }
-}
-#endif
 
 /****************************************************************************
  * Name:  stm3240g_putrun

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/nuc1xx/nuc_serial.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -1049,7 +1051,7 @@ void arm_serialinit(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef HAVE_CONSOLE
   struct nuc_dev_s *priv = (struct nuc_dev_s *)CONSOLE_DEV.priv;
@@ -1057,21 +1059,10 @@ int up_putc(int ch)
   up_disableuartint(priv, &ier);
 #endif
 
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      nuc_lowputc((uint32_t)'\r');
-    }
-
   nuc_lowputc((uint32_t)ch);
 #ifdef HAVE_CONSOLE
   up_restoreuartint(priv, ier);
 #endif
-
-  return ch;
 }
 
 #else /* USE_SERIALDRIVER && HAVE_UART */
@@ -1084,21 +1075,11 @@ int up_putc(int ch)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef HAVE_UART
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      nuc_lowputc((uint32_t)'\r');
-    }
-
   nuc_lowputc((uint32_t)ch);
 #endif
-  return ch;
 }
 
 #endif /* USE_SERIALDRIVER && HAVE_UART */

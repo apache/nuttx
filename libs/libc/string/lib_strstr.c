@@ -1,9 +1,8 @@
 /****************************************************************************
  * libs/libc/string/lib_strstr.c
  *
- * The MIT License (MIT)
- *
- * Copyright (c) 2014-2015 Tal Einat
+ * SPDX-License-Identifier: MIT
+ * SPDX-FileCopyrightText: 2014-2015 Tal Einat
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation files
@@ -41,7 +40,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#ifdef CONFIG_ALLOW_MIT_COMPONENTS
 #define LONG_INT_N_BYTES    sizeof(long)
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -54,6 +55,7 @@
 #undef strstr /* See mm/README.txt */
 FAR char *strstr(FAR const char *haystack, FAR const char *needle)
 {
+#ifdef CONFIG_ALLOW_MIT_COMPONENTS
   FAR const unsigned char *needle_cmp_end;
   FAR const unsigned char *i_haystack;
   const char needle_first = *needle;
@@ -227,6 +229,57 @@ FAR char *strstr(FAR const char *haystack, FAR const char *needle)
             }
         }
     }
+#else
+  FAR const char *candidate; /* Candidate in haystack with matching start character */
+  char ch;                   /* First character of the substring */
+  size_t len;                /* The length of the substring */
+
+  /* Special case the empty substring */
+
+  len = strlen(needle);
+  ch  = *needle;
+
+  if (!ch)
+    {
+      /* We'll say that an empty substring matches at the beginning of
+       * the string
+       */
+
+      return (FAR char *)haystack;
+    }
+
+  /* Search for the substring */
+
+  candidate = haystack;
+  for (; ; )
+    {
+      /* strchr() will return a pointer to the next occurrence of the
+       * character ch in the string
+       */
+
+      candidate = strchr(candidate, ch);
+      if (!candidate || strlen(candidate) < len)
+        {
+          /* First character of the substring does not appear in the string
+           * or the remainder of the string is not long enough to contain the
+           * substring.
+           */
+
+          return NULL;
+        }
+
+      /* Check if this is the beginning of a matching substring */
+
+      if (strncmp(candidate, needle, len) == 0)
+        {
+          return (FAR char *)candidate;
+        }
+
+      /* No, find the next candidate after this one */
+
+      candidate++;
+    }
+#endif
 
   return NULL;
 }

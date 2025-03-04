@@ -1,0 +1,27 @@
+From b9181b30e8fc1c7ee058b34e6cfe2f54c43af665 Mon Sep 17 00:00:00 2001
+From: Bowen Wang <wangbowen6@xiaomi.com>
+Date: Wed, 9 Oct 2024 20:54:56 +0800
+Subject: [PATCH 6/6] lib/system/nuttx/io.c: include <stddef.h> in nuttx/io.c
+
+Because nuttx/io.c use NULL and NULL is defined in <stddef.h>
+
+Signed-off-by: Bowen Wang <wangbowen6@xiaomi.com>
+---
+ lib/system/nuttx/io.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/lib/system/nuttx/io.c libmetal/lib/system/nuttx/io.c
+index 41697a7..cc5e0a7 100644
+--- a/lib/system/nuttx/io.c
++++ libmetal/lib/system/nuttx/io.c
+@@ -4,6 +4,7 @@
+  * SPDX-License-Identifier: BSD-3-Clause
+  */
+ 
++#include <stddef.h>
+ #include <metal/cache.h>
+ #include <metal/io.h>
+ #include <nuttx/arch.h>
+-- 
+2.34.1
+

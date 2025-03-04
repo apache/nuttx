@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/src/common/arm64_arch_timer.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -25,26 +27,26 @@
  * Included Files
  ****************************************************************************/
 
-#include "arm64_gic.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define CONFIG_ARM_TIMER_SECURE_IRQ         (GIC_PPI_INT_BASE + 13)
-#define CONFIG_ARM_TIMER_NON_SECURE_IRQ     (GIC_PPI_INT_BASE + 14)
-#define CONFIG_ARM_TIMER_VIRTUAL_IRQ        (GIC_PPI_INT_BASE + 11)
-#define CONFIG_ARM_TIMER_HYP_IRQ            (GIC_PPI_INT_BASE + 10)
-
-#define ARM_ARCH_TIMER_IRQ     CONFIG_ARM_TIMER_VIRTUAL_IRQ
-#define ARM_ARCH_TIMER_PRIO    IRQ_DEFAULT_PRIORITY
-#define ARM_ARCH_TIMER_FLAGS   IRQ_TYPE_LEVEL
+#include <nuttx/config.h>
+#include <nuttx/timers/oneshot.h>
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
-#ifdef CONFIG_SMP
-void arm64_arch_timer_secondary_init(void);
-#endif
+
+/****************************************************************************
+ * Name: arm64_oneshot_initialize
+ *
+ * Description:
+ *   This function initialize generic timer hardware module
+ *   and return an instance of a "lower half" timer interface.
+ *
+ * Returned Value:
+ *   On success, a non-NULL oneshot_lowerhalf_s is returned to the caller.
+ *   In the event of any failure, a NULL value is returned.
+ *
+ ****************************************************************************/
+
+struct oneshot_lowerhalf_s *arm64_oneshot_initialize(void);
 
 #endif /* __ARCH_ARM64_SRC_COMMON_ARM64_ARCH_TIMER_H */

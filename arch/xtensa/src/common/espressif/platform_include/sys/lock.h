@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/xtensa/src/common/espressif/platform_include/sys/lock.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -41,12 +43,12 @@ struct __lock
 {
 #ifdef CONFIG_PRIORITY_INHERITANCE
 #  if CONFIG_SEM_PREALLOCHOLDERS > 0
-  int reserved[5];
+  int reserved[6];
 #  else
-  int reserved[8];
+  int reserved[9];
 #  endif
 #else
-  int reserved[4];
+  int reserved[5];
 #endif
 };
 

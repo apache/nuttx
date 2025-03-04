@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/stream/lib_memoutstream.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -34,12 +36,12 @@
  * Name: memoutstream_puts
  ****************************************************************************/
 
-static int memoutstream_puts(FAR struct lib_outstream_s *self,
-                             FAR const void *buf, int len)
+static ssize_t memoutstream_puts(FAR struct lib_outstream_s *self,
+                                 FAR const void *buf, size_t len)
 {
   FAR struct lib_memoutstream_s *stream =
                                 (FAR struct lib_memoutstream_s *)self;
-  int ncopy;
+  size_t ncopy;
 
   DEBUGASSERT(self);
 
@@ -92,7 +94,7 @@ static void memoutstream_putc(FAR struct lib_outstream_s *self, int ch)
  ****************************************************************************/
 
 void lib_memoutstream(FAR struct lib_memoutstream_s *outstream,
-                      FAR char *bufstart, int buflen)
+                      FAR char *bufstart, size_t buflen)
 {
   outstream->common.putc  = memoutstream_putc;
   outstream->common.puts  = memoutstream_puts;

@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/sys/mount.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -37,7 +39,16 @@
 
 /* Mount flags */
 
-#define MS_RDONLY 1 /* Mount file system read-only */
+#define MS_RDONLY       1    /* Mount file system read-only */
+#define MS_NOSUID       2    /* Ignore suid and sgid bits */
+#define MS_NODEV        4    /* Disallow access to device special files */
+#define MS_NOEXEC       8    /* Disallow program execution */
+#define MS_SYNCHRONOUS  16   /* Writes are synced at once */
+#define MS_REMOUNT      32   /* Alter flags of a mounted FS */
+#define MS_MANDLOCK     64   /* Allow mandatory locks on an FS */
+#define MS_DIRSYNC      128  /* Directory modifications are synchronous */
+#define MS_NOSYMFOLLOW  256  /* Do not follow symlinks */
+#define MS_NOATIME      1024 /* Do not update access times. */
 
 /* Un-mount flags
  *

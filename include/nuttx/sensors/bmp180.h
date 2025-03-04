@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/sensors/bmp180.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -77,6 +79,7 @@ extern "C"
  *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
+
 #ifndef CONFIG_SENSORS_BMP180_UORB
 int bmp180_register(FAR const char *devpath, FAR struct i2c_master_s *i2c);
 #else

@@ -61,12 +61,18 @@ ifeq ($(EXTERNALDIR),external)
   KERNDEPDIRS += external
 endif
 
-CONTEXTDIRS = boards drivers fs $(APPDIR) $(ARCH_SRC)
+CONTEXTDIRS = boards drivers fs $(APPDIR) $(ARCH_SRC) mm
 CLEANDIRS += pass1
 
 ifeq ($(CONFIG_BUILD_FLAT),y)
 
 KERNDEPDIRS += libs$(DELIM)libc mm
+
+ifeq ($(CONFIG_LIB_BUILTIN),y)
+KERNDEPDIRS += libs$(DELIM)libbuiltin
+else
+CLEANDIRS += libs$(DELIM)libbuiltin
+endif
 
 ifeq ($(CONFIG_LIBM_TOOLCHAIN)$(CONFIG_LIBM_NONE),)
 KERNDEPDIRS += libs$(DELIM)libm
@@ -83,6 +89,12 @@ endif
 else
 
 USERDEPDIRS += libs$(DELIM)libc mm
+
+ifeq ($(CONFIG_LIB_BUILTIN),y)
+USERDEPDIRS += libs$(DELIM)libbuiltin
+else
+CLEANDIRS += libs$(DELIM)libbuiltin
+endif
 
 ifeq ($(CONFIG_LIBM_TOOLCHAIN)$(CONFIG_LIBM_NONE),)
 USERDEPDIRS += libs$(DELIM)libm
@@ -110,7 +122,7 @@ CLEANDIRS += syscall
 endif
 endif
 
-CONTEXTDIRS += libs$(DELIM)libc
+CONTEXTDIRS += libs$(DELIM)libc libs$(DELIM)libbuiltin
 
 ifeq ($(CONFIG_LIBM_TOOLCHAIN)$(CONFIG_LIBM_NONE),)
 CONTEXTDIRS += libs$(DELIM)libm
@@ -133,10 +145,11 @@ KERNDEPDIRS += libs$(DELIM)libnx
 else
 USERDEPDIRS += libs$(DELIM)libnx
 endif
-CONTEXTDIRS += libs$(DELIM)libnx
 else
 CLEANDIRS += libs$(DELIM)libnx
 endif
+
+CONTEXTDIRS += libs$(DELIM)libnx
 
 ifeq ($(CONFIG_AUDIO),y)
 KERNDEPDIRS += audio
@@ -181,10 +194,6 @@ KERNDEPDIRS += openamp
 CONTEXTDIRS += openamp
 else
 CLEANDIRS += openamp
-endif
-
-ifeq ($(CONFIG_MM_TLSF_MANAGER),y)
-CONTEXTDIRS += mm
 endif
 
 CLEANDIRS += $(KERNDEPDIRS) $(USERDEPDIRS)

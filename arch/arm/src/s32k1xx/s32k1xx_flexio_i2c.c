@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/s32k1xx/s32k1xx_flexio_i2c.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -45,7 +47,6 @@
 
 #include "arm_internal.h"
 #include "s32k1xx_edma.h"
-#include "s32k1xx_pin.h"
 #include "hardware/s32k1xx_dmamux.h"
 #include "hardware/s32k1xx_pinmux.h"
 #include "s32k1xx_flexio_i2c.h"
@@ -421,7 +422,7 @@ static int s32k1xx_flexio_i2c_interrupt(int irq, void *context, void *arg)
   return OK;
 }
 
-static int set_expiretime(int expire_time, FAR struct timespec *set_time)
+static int set_expiretime(int expire_time, struct timespec *set_time)
 {
   struct timespec curr_time;
 

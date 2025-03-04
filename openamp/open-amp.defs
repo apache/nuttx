@@ -1,6 +1,8 @@
 ############################################################################
 # openamp/open-amp.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -24,12 +26,22 @@ ifeq ($(CONFIG_OPENAMP_CACHE),y)
   CFLAGS += -DVIRTIO_CACHED_BUFFERS -DVIRTIO_CACHED_VRINGS
 endif
 
-ifeq ($(CONFIG_OPENAMP_RPMSG_DEBUG),y)
-  CFLAGS += -DRPMSG_DEBUG
+ifeq ($(CONFIG_OPENAMP_DEBUG),y)
+  CFLAGS += -DRPMSG_DEBUG -DVQUEUE_DEBUG
 endif
 
-ifeq ($(CONFIG_OPENAMP_VQUEUE_DEBUG),y)
-  CFLAGS += -DVQUEUE_DEBUG
+CFLAGS += -Delf_load=remoteproc_elf_load
+
+ifeq ($(CONFIG_OPENAMP_VIRTIO_DEVICE_SUPPORT),y)
+  CFLAGS += -DVIRTIO_DEVICE_SUPPORT=1
+else
+  CFLAGS += -DVIRTIO_DEVICE_SUPPORT=0
+endif
+
+ifeq ($(CONFIG_OPENAMP_VIRTIO_DRIVER_SUPPORT),y)
+  CFLAGS += -DVIRTIO_DRIVER_SUPPORT=1
+else
+  CFLAGS += -DVIRTIO_DRIVER_SUPPORT=0
 endif
 
 CSRCS += open-amp/lib/remoteproc/elf_loader.c
@@ -44,31 +56,23 @@ CSRCS += open-amp/lib/virtio/virtqueue.c
 # Download and unpack tarball if no git repo found
 ifeq ($(wildcard open-amp/.git),)
 open-amp.zip:
-	$(call DOWNLOAD,https://github.com/OpenAMP/open-amp/archive,v$(VERSION).zip,open-amp.zip)
+	$(call DOWNLOAD,https://github.com/OpenAMP/open-amp/archive,$(OPENAMP_COMMIT).zip,open-amp.zip)
 	$(Q) unzip -o open-amp.zip
-	$(Q) mv open-amp-$(VERSION) open-amp
+	mv open-amp-$(OPENAMP_COMMIT) open-amp
 	$(Q) patch -p0 < 0001-ns-acknowledge-the-received-creation-message.patch
 	$(Q) patch -p0 < 0002-Negotiate-individual-buffer-size-dynamically.patch
-	$(Q) patch -p0 < 0003-rpmsg-wait-endpoint-ready-in-rpmsg_send-and-rpmsg_se.patch
-	$(Q) patch -p0 < 0004-openamp-add-new-ops-notify_wait-support.patch
-	$(Q) patch -p0 < 0005-rpmsg_virtio-don-t-need-check-status-when-get_tx_pay.patch
-	$(Q) patch -p0 < 0006-rpmsg-notify-the-user-when-the-remote-address-is-rec.patch
-	$(Q) patch -p0 < 0007-openamp-avoid-double-calling-ns_bound-when-each-othe.patch
-	$(Q) patch -p0 < 0008-remoteproc-make-all-elf_-functions-static-except-elf.patch
-	$(Q) patch -p0 < 0009-Fix-warn-declaration-of-vring_rsc-shadows-a-previous.patch
-	$(Q) patch -p0 < 0010-rptun-fix-rptun-don-t-wait-issue-when-get-tx-patyloa.patch
-	$(Q) patch -p0 < 0011-rpmsg-fix-rpmsg_virtio_get_tx_buffer-no-idx-return.patch
-	$(Q) patch -p0 < 0012-rpmsg-add-new-API-rpdev_release_tx-rx_buffer.patch
-	$(Q) patch -p0 < 0013-openamp-add-error-log-when-ept-cb-return-error.patch
-	$(Q) patch -p0 < 0014-rpmsg-add-cache-flash-when-hold-rx-buffer.patch
-	$(Q) patch -p0 < 0015-rpmsg-do-cache_invalidate-when-real-data-returned.patch
-	$(Q) patch -p0 < 0016-openamp-add-new-API-rpmsg_virtio_get_rxbuffer_size.patch
-	$(Q) patch -p0 < 0017-virtio-follow-virtio-1.2-spec-add-more-virtio-status.patch
-	$(Q) patch -p0 < 0018-virtio-decoupling-the-transport-layer-and-virtio-dev.patch
-	$(Q) patch -p0 < 0019-virtio.h-add-version-in-device-id-table.patch
-	$(Q) patch -p0 < 0020-virtio-Add-the-virtio_negotiate_features-interface.patch
-
-
+	$(Q) patch -p0 < 0003-rpmsg-notify-the-user-when-the-remote-address-is-rec.patch
+	$(Q) patch -p0 < 0004-openamp-virtio.h-negotiate_features-also-can-be-call.patch
+	$(Q) patch -p0 < 0005-remoteproc-rpmsg_virtio-change-sched_yeild-to-usleep.patch
+	$(Q) patch -p0 < 0006-rpmsg-wait-ept-ready-in-rpmsg_send.patch
+	$(Q) patch -p0 < 0007-openamp-add-VIRTIO_RING_F_MUST_NOTIFY-event.patch
+	$(Q) patch -p0 < 0008-rpmsg_virtio-don-t-need-check-status-when-get_tx_pay.patch
+	$(Q) patch -p0 < 0009-openamp-swap-get_rx_buffer-return_rx_buffer-to-resol.patch
+	$(Q) patch -p0 < 0010-rpmsg_virtio.c-virtqueue_kick-after-all-rx-buffer-re.patch
+	$(Q) patch -p0 < 0011-virtio-change-feature-to-64-bit-in-all-virtio_dispat.patch
+	$(Q) patch -p0 < 0012-rpmsg_virtio.c-fix-get_tx_payload_buffer-error.patch
+	$(Q) patch -p0 < 0013-openamp-add-assert-when-get-tx-buffer-failed.patch
+	$(Q) patch -p0 < 0014-virtio.h-add-memory-operation-for-virtio-device.patch
 
 .openamp_headers: open-amp.zip
 else

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/src/common/arm64_initialize.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -49,18 +51,6 @@
 /****************************************************************************
  * Public data
  ****************************************************************************/
-
-/* g_current_regs[] holds a references to the current interrupt level
- * register storage structure.  It is non-NULL only during interrupt
- * processing.  Access to g_current_regs[] must be through the macro
- * CURRENT_REGS for portability.
- */
-
-/* For the case of configurations with multiple CPUs, then there must be one
- * such value for each processor that can receive an interrupt.
- */
-
-volatile uint64_t *g_current_regs[CONFIG_SMP_NCPUS];
 
 #ifdef CONFIG_ARCH_FPU
 static struct notifier_block g_fpu_panic_block;
@@ -206,6 +196,10 @@ void up_initialize(void)
   /* Initialize the network */
 
   arm64_netinitialize();
+
+#  ifdef CONFIG_NET_CAN
+  arm64_caninitialize();
+#  endif
 #endif
 
 #if defined(CONFIG_USBDEV) || defined(CONFIG_USBHOST)

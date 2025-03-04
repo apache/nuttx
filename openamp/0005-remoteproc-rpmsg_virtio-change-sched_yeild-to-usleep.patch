@@ -1,0 +1,48 @@
+From 8892766fc72db6d607e2057be0cf7386ee7fea14 Mon Sep 17 00:00:00 2001
+From: wangyongrong <wangyongrong@xiaomi.com>
+Date: Wed, 3 Jul 2024 10:00:34 +0800
+Subject: [PATCH 05/14] remoteproc/rpmsg_virtio: change sched_yeild to usleep
+
+Signed-off-by: wangyongrong <wangyongrong@xiaomi.com>
+---
+ lib/remoteproc/remoteproc_virtio.c | 3 ++-
+ lib/rpmsg/rpmsg_virtio.c           | 3 +--
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/lib/remoteproc/remoteproc_virtio.c open-amp/lib/remoteproc/remoteproc_virtio.c
+index ef39c49..aae026c 100644
+--- a/lib/remoteproc/remoteproc_virtio.c
++++ open-amp/lib/remoteproc/remoteproc_virtio.c
+@@ -15,6 +15,7 @@
+ #include <metal/cpu.h>
+ #include <metal/utilities.h>
+ #include <metal/alloc.h>
++#include <metal/sleep.h>
+ 
+ static void rproc_virtio_delete_virtqueues(struct virtio_device *vdev)
+ {
+@@ -412,6 +413,6 @@ void rproc_virtio_wait_remote_ready(struct virtio_device *vdev)
+ 		status = rproc_virtio_get_status(vdev);
+ 		if (status & VIRTIO_CONFIG_STATUS_DRIVER_OK)
+ 			return;
+-		metal_cpu_yield();
++		metal_sleep_usec(1000);
+ 	}
+ }
+diff --git a/lib/rpmsg/rpmsg_virtio.c open-amp/lib/rpmsg/rpmsg_virtio.c
+index ad9a730..db3392e 100644
+--- a/lib/rpmsg/rpmsg_virtio.c
++++ open-amp/lib/rpmsg/rpmsg_virtio.c
+@@ -272,8 +272,7 @@ static int rpmsg_virtio_wait_remote_ready(struct rpmsg_virtio_device *rvdev)
+ 		} else if (status & VIRTIO_CONFIG_STATUS_DRIVER_OK) {
+ 			return 0;
+ 		}
+-		/* TODO: clarify metal_cpu_yield usage*/
+-		metal_cpu_yield();
++		metal_sleep_usec(1000);
+ 	}
+ }
+ 
+-- 
+2.34.1
+

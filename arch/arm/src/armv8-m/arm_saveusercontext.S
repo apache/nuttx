@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/armv8-m/arm_saveusercontext.S
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -81,11 +83,7 @@ up_saveusercontext:
 	/* Save r13, primask, r4~r11 */
 
 	mov		r2, sp
-#ifdef CONFIG_ARMV7M_USEBASEPRI
 	mrs		r3, basepri
-#else
-	mrs		r3, primask
-#endif
 	stmia		r0!, {r2-r11}
 
 	/* Save EXC_RETURN to 0xffffffff */

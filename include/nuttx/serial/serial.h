@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/serial/serial.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -87,6 +89,8 @@
 #define uart_txempty(dev)        dev->ops->txempty(dev)
 #define uart_send(dev,ch)        dev->ops->send(dev,ch)
 #define uart_receive(dev,s)      dev->ops->receive(dev,s)
+#define uart_recvbuf(dev,b,l)    dev->ops->recvbuf(dev,b,l)
+#define uart_sendbuf(dev,b,l)    dev->ops->sendbuf(dev,b,l)
 
 #define uart_release(dev)      \
   ((dev)->ops->release ? (dev)->ops->release(dev) : -ENOSYS)
@@ -263,6 +267,34 @@ struct uart_ops_s
    */
 
   CODE int (*release)(FAR struct uart_dev_s *dev);
+
+  /* Receive multiple bytes.
+   * Returns the actual number of characters received.
+   */
+
+  CODE ssize_t (*recvbuf)(FAR struct uart_dev_s *dev,
+                          FAR void *buf, size_t len);
+
+  /* This method will send multiple bytes.
+   * Returns the actual number of characters sent.
+   */
+
+  CODE ssize_t (*sendbuf)(FAR struct uart_dev_s *dev,
+                          FAR const void *buf, size_t len);
+};
+
+/* This structure is used for U(S)ART frame, overrun, parity and brk error
+ * counters. This way applications will know if the UART communition is
+ * having some trouble.
+ */
+
+struct serial_icounter_s
+{
+  uint32_t frame;
+  uint32_t overrun;
+  uint32_t parity;
+  uint32_t brk;
+  uint32_t buf_overrun;
 };
 
 /* This is the device structure used by the driver.  The caller of
@@ -292,6 +324,10 @@ struct uart_dev_s
   pid_t                pid;          /* Thread PID to receive signals (-1 if none) */
 #endif
 
+#ifdef CONFIG_TTY_FORCE_PANIC
+  int                  panic_count;
+#endif
+
   /* Terminal control flags */
 
   tcflag_t             tc_iflag;     /* Input modes */
@@ -303,7 +339,6 @@ struct uart_dev_s
   sem_t                xmitsem;      /* Wakeup user waiting for space in xmit.buffer */
   sem_t                recvsem;      /* Wakeup user waiting for data in recv.buffer */
   mutex_t              closelock;    /* Locks out new open while close is in progress */
-  mutex_t              polllock;     /* Manages exclusive access to fds[] */
 
   /* I/O buffers */
 
@@ -543,7 +578,7 @@ int uart_check_special(FAR uart_dev_t *dev, FAR const char *buf,
  ****************************************************************************/
 
 #ifdef CONFIG_SERIAL_GDBSTUB
-int uart_gdbstub_register(FAR uart_dev_t *dev);
+int uart_gdbstub_register(FAR uart_dev_t *dev, FAR const char *path);
 #endif
 
 #undef EXTERN

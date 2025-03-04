@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/x86/src/qemu/qemu_handlers.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -76,6 +78,8 @@ static void idt_outb(uint8_t val, uint16_t addr)
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
 static uint32_t *common_handler(int irq, uint32_t *regs)
 {
+  struct tcb_s **running_task = &g_running_tasks[this_cpu()];
+  struct tcb_s *tcb;
   board_autoled_on(LED_INIRQ);
 
   /* Current regs non-zero indicates that we are processing an interrupt;
@@ -84,8 +88,10 @@ static uint32_t *common_handler(int irq, uint32_t *regs)
    * Nested interrupts are not supported.
    */
 
-  DEBUGASSERT(g_current_regs == NULL);
-  g_current_regs = regs;
+  DEBUGASSERT(up_current_regs() == NULL);
+  up_set_current_regs(regs);
+
+  x86_savestate((*running_task)->xcp.regs);
 
   /* Deliver the IRQ */
 
@@ -98,14 +104,15 @@ static uint32_t *common_handler(int irq, uint32_t *regs)
    * returning from the interrupt.
    */
 
-  if (regs != g_current_regs)
+  if (regs != up_current_regs())
     {
 #ifdef CONFIG_ARCH_FPU
       /* Restore floating point registers */
 
-      up_restorefpu((uint32_t *)g_current_regs);
+      up_restorefpu(up_current_regs());
 #endif
 
+      tcb = this_task();
 #ifdef CONFIG_ARCH_ADDRENV
       /* Make sure that the address environment for the previously
        * running task is closed down gracefully (data caches dump,
@@ -113,15 +120,20 @@ static uint32_t *common_handler(int irq, uint32_t *regs)
        * thread at the head of the ready-to-run list.
        */
 
-      addrenv_switch(NULL);
+      addrenv_switch(tcb);
 #endif
+
+      /* Update scheduler parameters */
+
+      nxsched_suspend_scheduler(*running_task);
+      nxsched_resume_scheduler(tcb);
 
       /* Record the new "running" task when context switch occurred.
        * g_running_tasks[] is only used by assertion logic for reporting
        * crashes.
        */
 
-      g_running_tasks[this_cpu()] = this_task();
+      *running_task = tcb;
     }
 
   /* If a context switch occurred while processing the interrupt then
@@ -130,13 +142,13 @@ static uint32_t *common_handler(int irq, uint32_t *regs)
    * switch occurred during interrupt processing.
    */
 
-  regs = (uint32_t *)g_current_regs;
+  regs = up_current_regs();
 
   /* Set g_current_regs to NULL to indicate that we are no longer in an
    * interrupt handler.
    */
 
-  g_current_regs = NULL;
+  up_set_current_regs(NULL);
   return regs;
 }
 #endif

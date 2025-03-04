@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/xtensa/esp32/common/scripts/flat_memory.ld
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -157,7 +159,7 @@ MEMORY
   extmem_seg (RWX) :     org = 0x3f800000, len = 0x400000
 }
 
-#if CONFIG_ESP32_RUN_IRAM
+#ifdef CONFIG_ESP32_RUN_IRAM
   REGION_ALIAS("default_rodata_seg", dram0_0_seg);
   REGION_ALIAS("default_code_seg", iram0_0_seg);
 #else

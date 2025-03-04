@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/include/tlsr82/irq.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -158,12 +160,6 @@
 #ifndef __ASSEMBLY__
 struct xcptcontext
 {
-  /* The following function pointer is non-zero if there
-   * are pending signals to be processed.
-   */
-
-  void *sigdeliver; /* Actual type is sig_deliver_t */
-
   /* These are saved register array pointer used during
    * signal processing.
    */
@@ -174,13 +170,18 @@ struct xcptcontext
 
   uint32_t *regs;
 };
-#endif
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/* g_interrupt_context store irq status */
+
+extern volatile bool g_interrupt_context[CONFIG_SMP_NCPUS];
 
 /****************************************************************************
  * Inline functions
  ****************************************************************************/
-
-#ifndef __ASSEMBLY__
 
 /* Name: up_irq_save, up_irq_restore, and friends.
  *
@@ -193,7 +194,7 @@ struct xcptcontext
 
 /* Save the current interrupt enable state & disable IRQs. */
 
-static inline irqstate_t up_irq_save(void)
+static inline_function irqstate_t up_irq_save(void)
 {
   irqstate_t r = _IRQ_EN_REG;
   _IRQ_EN_REG = 0;
@@ -202,36 +203,36 @@ static inline irqstate_t up_irq_save(void)
 
 /* Restore saved IRQ & FIQ state */
 
-static inline void up_irq_restore(irqstate_t flags)
+static inline_function void up_irq_restore(irqstate_t flags)
 {
   _IRQ_EN_REG = flags;
 }
 
 /* Enable IRQs and return the previous IRQ state */
 
-static inline irqstate_t up_irq_enable(void)
+static inline_function irqstate_t up_irq_enable(void)
 {
   irqstate_t r = _IRQ_EN_REG;
   _IRQ_EN_REG = 1;
   return r;
 }
 
-static inline void up_irq_disable(void)
+static inline_function void up_irq_disable(void)
 {
   up_irq_save();
 }
 
-static inline void up_disable_irq(int irq)
+static inline_function void up_disable_irq(int irq)
 {
   _IRQ_MASK_REG &= ~(1 << irq);
 }
 
-static inline void up_enable_irq(int irq)
+static inline_function void up_enable_irq(int irq)
 {
   _IRQ_MASK_REG |= (1 << irq);
 }
 
-static inline uint32_t getcontrol(void)
+static inline_function uint32_t getcontrol(void)
 {
   return 0;
 }
@@ -240,23 +241,13 @@ static inline uint32_t getcontrol(void)
  * Name: up_cpu_index
  *
  * Description:
- *   Return an index in the range of 0 through (CONFIG_SMP_NCPUS-1) that
- *   corresponds to the currently executing CPU.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   An integer index in the range of 0 through (CONFIG_SMP_NCPUS-1) that
- *   corresponds to the currently executing CPU.
+ *   Return the real core number regardless CONFIG_SMP setting
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SMP
+#ifdef CONFIG_ARCH_HAVE_MULTICPU
 int up_cpu_index(void) noinstrument_function;
-#else
-#  define up_cpu_index() 0
-#endif /* CONFIG_SMP */
+#endif /* CONFIG_ARCH_HAVE_MULTICPU */
 
 static inline_function uint32_t up_getsp(void)
 {
@@ -271,17 +262,47 @@ static inline_function uint32_t up_getsp(void)
   return sp;
 }
 
-#endif /* __ASSEMBLY__ */
+static inline_function uintptr_t up_getusrsp(void *regs)
+{
+  uint32_t *ptr = (uint32_t *)regs;
+  return ptr[REG_SP];
+}
 
-/****************************************************************************
- * Public Data
- ****************************************************************************/
+noinstrument_function
+static inline_function bool up_interrupt_context(void)
+{
+#ifdef CONFIG_SMP
+  irqstate_t flags = up_irq_save();
+  bool ret = g_interrupt_context[up_cpu_index()];
+  up_irq_restore(flags);
+  return ret;
+#else
+  return g_interrupt_context[0];
+#endif
+}
+
+noinstrument_function
+static inline_function void up_set_interrupt_context(bool flag)
+{
+#ifdef CONFIG_ARCH_HAVE_MULTICPU
+  g_interrupt_context[up_cpu_index()] = flag;
+#else
+  g_interrupt_context[0] = flag;
+#endif
+}
+
+#define up_switch_context(tcb, rtcb)                        \
+  do {                                                      \
+    if (!up_interrupt_context())                            \
+      {                                                     \
+        tc32_switchcontext(&rtcb->xcp.regs, tcb->xcp.regs); \
+      }                                                     \
+  } while (0)
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
 #ifdef __cplusplus
 #define EXTERN extern "C"
 extern "C"
@@ -294,6 +315,6 @@ extern "C"
 #ifdef __cplusplus
 }
 #endif
-#endif
+#endif /* __ASSEMBLY__ */
 
 #endif /* __ARCH_ARM_INCLUDE_TLSR82_IRQ_H */

@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/module/mod_insmod.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -24,101 +26,10 @@
 
 #include <nuttx/config.h>
 
-#include <sys/param.h>
-#include <sys/types.h>
-#include <stdint.h>
-#include <string.h>
-#include <assert.h>
-#include <errno.h>
-#include <debug.h>
-
-#include <nuttx/arch.h>
-#include <nuttx/kmalloc.h>
 #include <nuttx/module.h>
 #include <nuttx/lib/modlib.h>
 
 #ifdef CONFIG_MODULE
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: mod_dumploadinfo
- ****************************************************************************/
-
-#ifdef CONFIG_DEBUG_BINFMT_INFO
-static void mod_dumploadinfo(FAR struct mod_loadinfo_s *loadinfo)
-{
-  int i;
-
-  binfo("LOAD_INFO:\n");
-  binfo("  textalloc:    %08lx\n", (long)loadinfo->textalloc);
-  binfo("  datastart:    %08lx\n", (long)loadinfo->datastart);
-  binfo("  textsize:     %ld\n",   (long)loadinfo->textsize);
-  binfo("  datasize:     %ld\n",   (long)loadinfo->datasize);
-  binfo("  textalign:    %zu\n",   loadinfo->textalign);
-  binfo("  dataalign:    %zu\n",   loadinfo->dataalign);
-  binfo("  filelen:      %ld\n",   (long)loadinfo->filelen);
-  binfo("  filfd:        %d\n",    loadinfo->filfd);
-  binfo("  symtabidx:    %d\n",    loadinfo->symtabidx);
-  binfo("  strtabidx:    %d\n",    loadinfo->strtabidx);
-
-  binfo("ELF Header:\n");
-  binfo("  e_ident:      %02x %02x %02x %02x\n",
-        loadinfo->ehdr.e_ident[0], loadinfo->ehdr.e_ident[1],
-        loadinfo->ehdr.e_ident[2], loadinfo->ehdr.e_ident[3]);
-  binfo("  e_type:       %04x\n",  loadinfo->ehdr.e_type);
-  binfo("  e_machine:    %04x\n",  loadinfo->ehdr.e_machine);
-  binfo("  e_version:    %08x\n",  loadinfo->ehdr.e_version);
-  binfo("  e_entry:      %08lx\n", (long)loadinfo->ehdr.e_entry);
-  binfo("  e_phoff:      %ju\n",   (uintmax_t)loadinfo->ehdr.e_phoff);
-  binfo("  e_shoff:      %ju\n",   (uintmax_t)loadinfo->ehdr.e_shoff);
-  binfo("  e_flags:      %08x\n",  loadinfo->ehdr.e_flags);
-  binfo("  e_ehsize:     %d\n",    loadinfo->ehdr.e_ehsize);
-  binfo("  e_phentsize:  %d\n",    loadinfo->ehdr.e_phentsize);
-  binfo("  e_phnum:      %d\n",    loadinfo->ehdr.e_phnum);
-  binfo("  e_shentsize:  %d\n",    loadinfo->ehdr.e_shentsize);
-  binfo("  e_shnum:      %d\n",    loadinfo->ehdr.e_shnum);
-  binfo("  e_shstrndx:   %d\n",    loadinfo->ehdr.e_shstrndx);
-
-  if (loadinfo->shdr && loadinfo->ehdr.e_shnum > 0)
-    {
-      for (i = 0; i < loadinfo->ehdr.e_shnum; i++)
-        {
-          FAR Elf_Shdr *shdr = &loadinfo->shdr[i];
-          binfo("Sections %d:\n", i);
-          binfo("  sh_name:      %08x\n",  shdr->sh_name);
-          binfo("  sh_type:      %08x\n",  shdr->sh_type);
-          binfo("  sh_flags:     %08jx\n", (uintmax_t)shdr->sh_flags);
-          binfo("  sh_addr:      %08jx\n", (uintmax_t)shdr->sh_addr);
-          binfo("  sh_offset:    %ju\n",   (uintmax_t)shdr->sh_offset);
-          binfo("  sh_size:      %ju\n",   (uintmax_t)shdr->sh_size);
-          binfo("  sh_link:      %d\n",    shdr->sh_link);
-          binfo("  sh_info:      %d\n",    shdr->sh_info);
-          binfo("  sh_addralign: %ju\n",   (uintmax_t)shdr->sh_addralign);
-          binfo("  sh_entsize:   %ju\n",   (uintmax_t)shdr->sh_entsize);
-        }
-    }
-}
-#else
-#  define mod_dumploadinfo(i)
-#endif
-
-/****************************************************************************
- * Name: mod_dumpinitializer
- ****************************************************************************/
-
-#ifdef CONFIG_MODLIB_DUMPBUFFER
-static void mod_dumpinitializer(mod_initializer_t initializer,
-                                FAR struct mod_loadinfo_s *loadinfo)
-{
-  modlib_dumpbuffer("Initializer code", (FAR const uint8_t *)initializer,
-                    MIN(loadinfo->textsize - loadinfo->ehdr.e_entry, 512));
-}
-#else
-#  define mod_dumpinitializer(b,l)
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -152,147 +63,7 @@ static void mod_dumpinitializer(mod_initializer_t initializer,
 
 FAR void *insmod(FAR const char *filename, FAR const char *modname)
 {
-  struct mod_loadinfo_s loadinfo;
-  FAR struct module_s *modp;
-  mod_initializer_t initializer;
-  FAR void (**array)(void);
-  int ret;
-  int i;
-
-  DEBUGASSERT(filename != NULL && modname != NULL);
-  binfo("Loading file: %s\n", filename);
-
-  /* Get exclusive access to the module registry */
-
-  modlib_registry_lock();
-
-  /* Check if this module is already installed */
-
-  if (modlib_registry_find(modname) != NULL)
-    {
-      ret = -EEXIST;
-      goto errout_with_lock;
-    }
-
-  /* Initialize the ELF library to load the program binary. */
-
-  ret = modlib_initialize(filename, &loadinfo);
-  mod_dumploadinfo(&loadinfo);
-  if (ret != 0)
-    {
-      berr("ERROR: Failed to initialize to load module: %d\n", ret);
-      goto errout_with_loadinfo;
-    }
-
-  /* Allocate a module registry entry to hold the module data */
-
-  modp = kmm_zalloc(sizeof(struct module_s));
-  if (modp == NULL)
-    {
-      berr("Failed to allocate struct module_s\n");
-      ret = -ENOMEM;
-      goto errout_with_loadinfo;
-    }
-
-#ifdef HAVE_MODLIB_NAMES
-  /* Save the module name in the registry entry */
-
-  strlcpy(modp->modname, modname, sizeof(modp->modname));
-#endif
-
-  /* Load the program binary */
-
-  ret = modlib_load(&loadinfo);
-  mod_dumploadinfo(&loadinfo);
-  if (ret != 0)
-    {
-      binfo("Failed to load ELF program binary: %d\n", ret);
-      goto errout_with_registry_entry;
-    }
-
-  /* Bind the program to the kernel symbol table */
-
-  ret = modlib_bind(modp, &loadinfo);
-  if (ret != 0)
-    {
-      binfo("Failed to bind symbols program binary: %d\n", ret);
-      goto errout_with_load;
-    }
-
-  /* Save the load information */
-
-  modp->textalloc = (FAR void *)loadinfo.textalloc;
-  modp->dataalloc = (FAR void *)loadinfo.datastart;
-#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
-  modp->textsize  = loadinfo.textsize;
-  modp->datasize  = loadinfo.datasize;
-#endif
-
-  /* Get the module initializer entry point */
-
-  initializer = (mod_initializer_t)(loadinfo.textalloc +
-                                    loadinfo.ehdr.e_entry);
-#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
-  modp->initializer = initializer;
-#endif
-  mod_dumpinitializer(initializer, &loadinfo);
-
-  /* Call the module initializer */
-
-  switch (loadinfo.ehdr.e_type)
-    {
-      case ET_REL :
-          ret = initializer(&modp->modinfo);
-          if (ret < 0)
-            {
-              binfo("Failed to initialize the module: %d\n", ret);
-              goto errout_with_load;
-            }
-          break;
-      case ET_DYN :
-
-          /* Process any preinit_array entries */
-
-          array = (FAR void (**)(void))loadinfo.preiarr;
-          for (i = 0; i < loadinfo.nprei; i++)
-            {
-              array[i]();
-            }
-
-          /* Process any init_array entries */
-
-          array = (FAR void (**)(void))loadinfo.initarr;
-          for (i = 0; i < loadinfo.ninit; i++)
-            {
-              array[i]();
-            }
-
-          modp->finiarr = loadinfo.finiarr;
-          modp->nfini = loadinfo.nfini;
-          break;
-    }
-
-  /* Add the new module entry to the registry */
-
-  modlib_registry_add(modp);
-
-  modlib_uninitialize(&loadinfo);
-  modlib_registry_unlock();
-  return modp;
-
-errout_with_load:
-  modlib_unload(&loadinfo);
-#if CONFIG_MODLIB_MAXDEPEND > 0
-  modlib_undepend(modp);
-#endif
-errout_with_registry_entry:
-  kmm_free(modp);
-errout_with_loadinfo:
-  modlib_uninitialize(&loadinfo);
-errout_with_lock:
-  modlib_registry_unlock();
-  set_errno(-ret);
-  return NULL;
+  return modlib_insert(filename, modname);
 }
 
 #endif /* CONFIG_MODULE */

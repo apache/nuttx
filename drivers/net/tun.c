@@ -1,8 +1,9 @@
 /****************************************************************************
  * drivers/net/tun.c
  *
- *   Copyright (C) 2015-2016 Max Nekludov. All rights reserved.
- *   Author: Max Nekludov <macscomp@gmail.com>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: (C) 2015-2016 Max Nekludov. All rights reserved.
+ * SPDX-FileContributor: Max Nekludov <macscomp@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -271,7 +272,6 @@ static void tun_pollnotify(FAR struct tun_device_s *priv,
 
 static void tun_fd_transmit(FAR struct tun_device_s *priv)
 {
-  NETDEV_TXPACKETS(&priv->dev);
   tun_pollnotify(priv, POLLIN);
 }
 
@@ -307,6 +307,7 @@ static int tun_txpoll(FAR struct net_driver_s *dev)
 
   DEBUGASSERT(priv->read_buf == NULL);
 
+  NETDEV_TXPACKETS(dev);
 #ifdef CONFIG_NET_PKT
   /* When packet sockets are enabled, feed the frame into the tap */
 
@@ -1313,6 +1314,7 @@ int tun_initialize(void)
 {
   g_tun.free_tuns = (1 << CONFIG_TUN_NINTERFACES) - 1;
   register_driver("/dev/tun", &g_tun_file_ops, 0644, &g_tun);
+  register_driver("/dev/net/tun", &g_tun_file_ops, 0644, &g_tun);
   return OK;
 }
 

@@ -1,9 +1,9 @@
 /****************************************************************************
  * include/crypto/aes.h
- * $OpenBSD: aes.h,v 1.4 2020/07/22 13:54:30 tobhe Exp $
  *
- * Copyright (c) 2016 Thomas Pornin <pornin@bolet.org>
- * Copyright (c) 2016 Mike Belopuhov
+ * SPDX-License-Identifier: MIT
+ * SPDX-FileCopyrightText: 2016 Thomas Pornin <pornin@bolet.org>
+ * SPDX-FileCopyrightText: 2016 Mike Belopuhov
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the

@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/net/lib_base64.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -81,7 +83,12 @@ int b64_ntop(FAR const unsigned char *src, size_t srclen,
       *target++ = g_pad64;
     }
 
-  *target = '\0';
+  if (datalen >= targsize)
+    {
+      return -1;
+    }
+
+  *target = '\0'; /* Returned length doesn't include '\0' */
   return datalen;
 }
 

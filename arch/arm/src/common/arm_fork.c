@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/common/arm_fork.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -96,6 +98,11 @@ pid_t arm_fork(const struct fork_s *context)
   uint32_t newtop;
   uint32_t stacktop;
   uint32_t stackutil;
+#ifdef CONFIG_ARCH_KERNEL_STACK
+  uint32_t oldsp = (uint32_t)parent->xcp.ustkptr;
+#else
+  uint32_t oldsp = context->sp;
+#endif
 
   sinfo("fork context [%p]:\n", context);
   sinfo("  r4:%08" PRIx32 " r5:%08" PRIx32
@@ -104,7 +111,7 @@ pid_t arm_fork(const struct fork_s *context)
   sinfo("  r8:%08" PRIx32 " r9:%08" PRIx32 " r10:%08" PRIx32 "\n",
         context->r8, context->r9, context->r10);
   sinfo("  r11:%08" PRIx32 " sp:%08" PRIx32 " lr:%08" PRIx32 "\n",
-        context->r11, context->sp, context->lr);
+        context->r11, oldsp, context->lr);
 
   /* Allocate and initialize a TCB for the child task. */
 
@@ -125,8 +132,8 @@ pid_t arm_fork(const struct fork_s *context)
 
   stacktop = (uint32_t)parent->stack_base_ptr +
                        parent->adj_stack_size;
-  DEBUGASSERT(stacktop > context->sp);
-  stackutil = stacktop - context->sp;
+  DEBUGASSERT(stacktop > oldsp && oldsp >= (uint32_t)parent->stack_base_ptr);
+  stackutil = stacktop - oldsp;
 
   sinfo("Parent: stackutil:%" PRIu32 "\n", stackutil);
 
@@ -149,11 +156,11 @@ pid_t arm_fork(const struct fork_s *context)
 
   child->cmn.xcp.regs = (void *)(newsp - XCPTCONTEXT_SIZE);
 
-  memcpy((void *)newsp, (const void *)context->sp, stackutil);
+  memcpy((void *)newsp, (const void *)oldsp, stackutil);
 
   /* Was there a frame pointer in place before? */
 
-  if (context->fp >= context->sp && context->fp < stacktop)
+  if (context->fp >= oldsp && context->fp < stacktop)
     {
       uint32_t frameutil = stacktop - context->fp;
       newfp = newtop - frameutil;
@@ -164,7 +171,7 @@ pid_t arm_fork(const struct fork_s *context)
     }
 
   sinfo("Old stack top:%08" PRIx32 " SP:%08" PRIx32 " FP:%08" PRIx32 "\n",
-        stacktop, context->sp, context->fp);
+        stacktop, oldsp, context->fp);
   sinfo("New stack top:%08" PRIx32 " SP:%08" PRIx32 " FP:%08" PRIx32 "\n",
         newtop, newsp, newfp);
 

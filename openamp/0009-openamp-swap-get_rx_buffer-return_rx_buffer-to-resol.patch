@@ -1,0 +1,57 @@
+From fc935c6e5abcd0a96e5c3ca3bd5ec272543abc1a Mon Sep 17 00:00:00 2001
+From: ligd <liguiding1@xiaomi.com>
+Date: Fri, 7 Apr 2023 12:42:09 +0800
+Subject: [PATCH 09/14] openamp: swap get_rx_buffer & return_rx_buffer to
+ resolve remote low power.
+
+Signed-off-by: ligd <liguiding1@xiaomi.com>
+Signed-off-by: wangyongrong <wangyongrong@xiaomi.com>
+---
+ lib/rpmsg/rpmsg_virtio.c | 16 +++++++++++++---
+ 1 file changed, 13 insertions(+), 3 deletions(-)
+
+diff --git a/lib/rpmsg/rpmsg_virtio.c open-amp/lib/rpmsg/rpmsg_virtio.c
+index 9dd14b6..dfd36e3 100644
+--- a/lib/rpmsg/rpmsg_virtio.c
++++ open-amp/lib/rpmsg/rpmsg_virtio.c
+@@ -545,17 +545,26 @@ static void rpmsg_virtio_rx_callback(struct virtqueue *vq)
+ 	struct virtio_device *vdev = vq->vq_dev;
+ 	struct rpmsg_virtio_device *rvdev = vdev->priv;
+ 	struct rpmsg_device *rdev = &rvdev->rdev;
++	struct rpmsg_hdr *next_hdr = NULL;
+ 	struct rpmsg_endpoint *ept;
+ 	struct rpmsg_hdr *rp_hdr;
++	uint32_t next_len;
++	uint16_t next_idx;
+ 	uint32_t len;
+ 	uint16_t idx;
+ 	int status;
+ 
+ 	while (1) {
+ 		/* Process the received data from remote node */
+-		metal_mutex_acquire(&rdev->lock);
+-		rp_hdr = rpmsg_virtio_get_rx_buffer(rvdev, &len, &idx);
+-		metal_mutex_release(&rdev->lock);
++		if (!next_hdr) {
++			metal_mutex_acquire(&rdev->lock);
++			rp_hdr = rpmsg_virtio_get_rx_buffer(rvdev, &len, &idx);
++			metal_mutex_release(&rdev->lock);
++		} else {
++			rp_hdr = next_hdr;
++			len = next_len;
++			idx = next_idx;
++		}
+ 
+ 		/* No more filled rx buffers */
+ 		if (!rp_hdr)
+@@ -587,6 +596,7 @@ static void rpmsg_virtio_rx_callback(struct virtqueue *vq)
+ 
+ 		metal_mutex_acquire(&rdev->lock);
+ 		rpmsg_ept_decref(ept);
++		next_hdr = rpmsg_virtio_get_rx_buffer(rvdev, &next_len, &next_idx);
+ 		if (rpmsg_virtio_buf_held_dec_test(rp_hdr))
+ 			rpmsg_virtio_release_rx_buffer_nolock(rvdev, rp_hdr);
+ 		metal_mutex_release(&rdev->lock);
+-- 
+2.34.1
+

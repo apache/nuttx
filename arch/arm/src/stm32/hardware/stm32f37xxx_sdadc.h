@@ -1,10 +1,12 @@
 /****************************************************************************
  * arch/arm/src/stm32/hardware/stm32f37xxx_sdadc.h
  *
- *   Copyright (C) 2009, 2011, 2013 Gregory Nutt. All rights reserved.
- *   Copyright (C) 2016 Studelec SA. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
- *            Marc Rechté <mrechte@studelec-sa.com>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2016 Studelec SA. All rights reserved.
+ * SPDX-FileCopyrightText: 2011, 2013 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2009 Gregory Nutt. All rights reserved.
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-FileContributor: Marc Rechté <mrechte@studelec-sa.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

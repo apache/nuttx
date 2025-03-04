@@ -1,9 +1,8 @@
 /****************************************************************************
  * arch/xtensa/src/common/xtensa_asm_utils.h
  *
- * Copyright (c) 2017, Intel Corporation
- *
  * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: 2017, Intel Corporation
  *
  ****************************************************************************/
 

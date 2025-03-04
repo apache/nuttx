@@ -197,6 +197,11 @@ config ESPRESSIF_ESPTOOL_TARGET_SECONDARY
 
 endchoice
 
+config ESPRESSIF_MCUBOOT_SIGN_IMAGE_VERSION
+	string "Sign image version"
+	depends on ESPRESSIF_BOOTLOADER_MCUBOOT
+	default "1.0.0"
+
 config ESPRESSIF_APP_MCUBOOT_HEADER_SIZE
 	int "Application image header size (in bytes)"
 	default 32
@@ -316,8 +321,31 @@ config ESPRESSIF_LEDC
 	select PWM
 	select ARCH_HAVE_PWM_MULTICHAN
 
+config ESPRESSIF_I2S
+	bool
+	default n
+
+config ESPRESSIF_I2S0
+	bool "I2S 0"
+	default n
+	select ESPRESSIF_I2S
+	select I2S
+	select ESPRESSIF_DMA
+	select ESPRESSIF_GPIO_IRQ
+	select SCHED_HPWORK
+
 config ESPRESSIF_I2C
 	bool
+	default n
+
+config ESPRESSIF_I2C_PERIPH_MASTER_MODE
+	bool
+	depends on (ESPRESSIF_I2C0_MASTER_MODE || ESPRESSIF_I2C1_MASTER_MODE)
+	default n
+
+config ESPRESSIF_I2C_PERIPH_SLAVE_MODE
+	bool
+	depends on (ESPRESSIF_I2C0_SLAVE_MODE || ESPRESSIF_I2C1_SLAVE_MODE)
 	default n
 
 config ESPRESSIF_I2C0
@@ -333,8 +361,57 @@ config ESPRESSIF_I2C1
 	select ESPRESSIF_I2C
 	select I2C
 
+choice ESPRESSIF_I2C0_MODE
+	prompt "I2C0 Mode"
+	depends on ESPRESSIF_I2C0
+	default ESPRESSIF_I2C0_MASTER_MODE
+
+config ESPRESSIF_I2C0_MASTER_MODE
+	bool "I2C0 Master Mode"
+	select ESPRESSIF_I2C_PERIPH_MASTER_MODE
+
+config ESPRESSIF_I2C0_SLAVE_MODE
+	bool "I2C0 Slave Mode"
+	select I2C_SLAVE
+	select I2C_SLAVE_DRIVER
+	select ESPRESSIF_I2C_PERIPH_SLAVE_MODE
+
+endchoice # ESPRESSIF_I2C0_MODE
+
+choice ESPRESSIF_I2C1_MODE
+	prompt "I2C1 Mode"
+	depends on ESPRESSIF_I2C1
+	default ESPRESSIF_I2C1_MASTER_MODE
+
+config ESPRESSIF_I2C1_MASTER_MODE
+	bool "I2C1 Master Mode"
+	select ESPRESSIF_I2C_PERIPH_MASTER_MODE
+
+config ESPRESSIF_I2C1_SLAVE_MODE
+	bool "I2C1 Slave Mode"
+	select I2C_SLAVE
+	select I2C_SLAVE_DRIVER
+	select ESPRESSIF_I2C_PERIPH_SLAVE_MODE
+
+endchoice # ESPRESSIF_I2C1_MODE
+
+config ESPRESSIF_I2C_BITBANG
+	bool "I2C Bitbang"
+	default n
+	select I2C_BITBANG
+	select ESPRESSIF_I2C
+	select I2C
+	select I2C_BITBANG
+	---help---
+		Software implemented I2C peripheral with GPIOs. Suggested to use if I2C peripherals are already in use.
+
 config ESPRESSIF_SPI
 	bool
+	default n
+
+config ESPRESSIF_SPI_PERIPH
+	bool
+	depends on ESPRESSIF_SPI2
 	default n
 
 config ESPRESSIF_SPI2
@@ -342,6 +419,16 @@ config ESPRESSIF_SPI2
 	default n
 	select ESPRESSIF_SPI
 	select SPI
+	select ESPRESSIF_SPI_PERIPH
+
+config ESPRESSIF_SPI_BITBANG
+	bool "SPI Bitbang"
+	default n
+	select ESPRESSIF_SPI
+	select SPI
+	select SPI_BITBANG
+	---help---
+		Software implemented SPI peripheral with GPIOs. Suggested to use if SPI peripheral is already in use.
 
 config ESPRESSIF_SPIFLASH
 	bool "SPI Flash"
@@ -351,6 +438,19 @@ config ESPRESSIF_DMA
 	bool "General DMA (GDMA)"
 	default n
 	select ARCH_DMA
+
+config ESPRESSIF_EFUSE
+	bool "EFUSE support"
+	default n
+	---help---
+		Enable efuse support.
+
+config ESPRESSIF_EFUSE_VIRTUAL
+	bool "Virtual EFUSE support"
+	depends on ESPRESSIF_EFUSE
+	default n
+	---help---
+		Enable virtual efuse support to simulate eFuse operations in RAM, changes will be reverted each reboot
 
 config ESPRESSIF_HR_TIMER
 	bool
@@ -465,6 +565,14 @@ config ESPRESSIF_WIFI
 	---help---
 		Enable Wi-Fi support
 
+config ESPRESSIF_BLE
+	bool "BLE"
+	depends on ESPRESSIF_ESP32C3
+	default n
+	select ESP_WIRELESS
+	---help---
+		Enable BLE support
+
 config ESP_COEX_SW_COEXIST_ENABLE
 	bool "Software WiFi/Bluetooth/IEEE 802.15.4 coexistence"
 	depends on (ESPRESSIF_WIFI && ESPRESSIF_BLE) || \
@@ -478,6 +586,13 @@ config ESP_COEX_SW_COEXIST_ENABLE
 		If only Bluetooth is used, it is recommended to disable this option to reduce binary file
 		size.
 
+menuconfig ESPRESSIF_WIFI_BT_COEXIST
+	bool "Wi-Fi and BT coexist"
+	default y if ESPRESSIF_WIFI && ESPRESSIF_BLE
+	default n
+	depends on ESPRESSIF_WIFI && ESPRESSIF_BLE
+	select ESPRESSIF_WIFI_STA_DISCONNECT_PM
+
 config ESP_MCPWM
 	bool "Motor Control PWM (MCPWM)"
 	default n
@@ -485,6 +600,232 @@ config ESP_MCPWM
 	---help---
 		Enable support for timer capture and motor control using
 		the Motor Control PWM peripheral.
+
+config ESP_PCNT
+	bool "Pulse Counter (PCNT / QE) Module"
+	default n
+	select CAPTURE
+	depends on ESPRESSIF_ESP32H2 || ESPRESSIF_ESP32C6
+
+menu "Pulse Counter (PCNT) Configuration"
+	depends on ESP_PCNT
+
+config ESP_PCNT_TEST_MODE
+	bool "Pulse Counter character driver loopback test mode (for testing only)"
+	default n
+	---help---
+		This enables a loopback test mode that attaches the transmitter
+		to the receiver internally, being able to test the PCNT
+		peripheral without any external connection.
+
+config ESP_PCNT_AS_QE
+	bool
+	default n
+
+config ESP_PCNT_U0
+	bool "Enable PCNT Unit 0"
+	default n
+
+if ESP_PCNT_U0
+
+config ESP_PCNT_U0_QE
+	bool "Use this PCNT Unit as Quadrature Encoder"
+	default n
+	select ESP_PCNT_AS_QE
+
+config ESP_PCNT_U0_CH0_EDGE_PIN
+	int "PCNT_U0 CH0 Edge/Pulse Pin Number"
+	default 0
+	range -1 39
+
+config ESP_PCNT_U0_CH0_LEVEL_PIN
+	int "PCNT_U0 CH0 Level/Control Pin Number"
+	default 4 if !ESP_PCNT_U0_QE
+	default -1 if ESP_PCNT_U0_QE
+	range -1 39
+
+config ESP_PCNT_U0_CH1_EDGE_PIN
+	int "PCNT_U0 CH1 Edge/Pulse Pin Number"
+	default 0 if !ESP_PCNT_U0_QE
+	default -1 if ESP_PCNT_U0_QE
+	range -1 39
+
+config ESP_PCNT_U0_CH1_LEVEL_PIN
+	int "PCNT_U0 CH1 Level/Control Pin Number"
+	default 4
+	range -1 39
+
+config ESP_PCNT_U0_FILTER_EN
+	bool "Enable Glitch Filter for this PCNT Unit"
+	default n
+
+if ESP_PCNT_U0_FILTER_EN
+
+config ESP_PCNT_U0_FILTER_THRES
+	int "PCNT_U0 Filter Threshold value"
+	default 5
+	---help---
+		If a pulse is shorter than this number of APB_CLK clock cycles
+		then it will not be considered as a valid pulse.
+
+endif # ESP_PCNT_U0_FILTER_EN
+
+endif # ESP_PCNT_U0
+
+config ESP_PCNT_U1
+	bool "Enable PCNT Unit 1"
+	depends on ESP_PCNT_U0
+	default n
+
+if ESP_PCNT_U1
+
+config ESP_PCNT_U1_QE
+	bool "Use this PCNT Unit as Quadrature Encoder"
+	default n
+	select ESP_PCNT_AS_QE
+
+config ESP_PCNT_U1_CH0_EDGE_PIN
+	int "PCNT_U1 CH0 Edge/Pulse Pin Number"
+	default 0
+	range -1 39
+
+config ESP_PCNT_U1_CH0_LEVEL_PIN
+	int "PCNT_U1 CH0 Level/Control Pin Number"
+	default 4
+	range -1 39
+	depends on !ESP_PCNT_U1_QE
+
+config ESP_PCNT_U1_CH1_EDGE_PIN
+	int "PCNT_U1 CH1 Edge/Pulse Pin Number"
+	default 0
+	range -1 39
+	depends on !ESP_PCNT_U1_QE
+
+config ESP_PCNT_U1_CH1_LEVEL_PIN
+	int "PCNT_U1 CH1 Level/Control Pin Number"
+	default 4
+	range -1 39
+
+config ESP_PCNT_U1_FILTER_EN
+	bool "Enable Glitch Filter for this PCNT Unit"
+	default n
+
+if ESP_PCNT_U1_FILTER_EN
+
+config ESP_PCNT_U1_FILTER_THRES
+	int "PCNT_U1 Filter Threshold value"
+	default 5
+	---help---
+		If a pulse is shorter than this number of APB_CLK clock cycles
+		then it will not be considered as a valid pulse.
+
+endif # ESP_PCNT_U1_FILTER_EN
+
+endif # ESP_PCNT_U1
+
+config ESP_PCNT_U2
+	bool "Enable PCNT Unit 2"
+	depends on ESP_PCNT_U1
+	default n
+
+if ESP_PCNT_U2
+
+config ESP_PCNT_U2_QE
+	bool "Use this PCNT Unit as Quadrature Encoder"
+	default n
+	select ESP_PCNT_AS_QE
+
+config ESP_PCNT_U2_CH0_EDGE_PIN
+	int "PCNT_U2 CH0 Edge/Pulse Pin Number"
+	default 0
+	range -1 39
+
+config ESP_PCNT_U2_CH0_LEVEL_PIN
+	int "PCNT_U2 CH0 Level/Control Pin Number"
+	default 4
+	range -1 39
+	depends on !ESP_PCNT_U2_QE
+
+config ESP_PCNT_U2_CH1_EDGE_PIN
+	int "PCNT_U2 CH1 Edge/Pulse Pin Number"
+	default 0
+	range -1 39
+	depends on !ESP_PCNT_U2_QE
+
+config ESP_PCNT_U2_CH1_LEVEL_PIN
+	int "PCNT_U2 CH1 Level/Control Pin Number"
+	default 4
+	range -1 39
+
+config ESP_PCNT_U2_FILTER_EN
+	bool "Enable Glitch Filter for this PCNT Unit"
+	default n
+
+if ESP_PCNT_U2_FILTER_EN
+
+config ESP_PCNT_U2_FILTER_THRES
+	int "PCNT_U2 Filter Threshold value"
+	default 5
+	---help---
+		If a pulse is shorter than this number of APB_CLK clock cycles
+		then it will not be considered as a valid pulse.
+
+endif # ESP_PCNT_U2_FILTER_EN
+
+endif # ESP_PCNT_U2
+
+config ESP_PCNT_U3
+	bool "Enable PCNT Unit 3"
+	depends on ESP_PCNT_U2
+	default n
+
+if ESP_PCNT_U3
+
+config ESP_PCNT_U3_QE
+	bool "Use this PCNT Unit as Quadrature Encoder"
+	default n
+	select ESP_PCNT_AS_QE
+
+config ESP_PCNT_U3_CH0_EDGE_PIN
+	int "PCNT_U3 CH0 Edge/Pulse Pin Number"
+	default 0
+	range -1 39
+
+config ESP_PCNT_U3_CH0_LEVEL_PIN
+	int "PCNT_U3 CH0 Level/Control Pin Number"
+	default 4
+	range -1 39
+	depends on !ESP_PCNT_U3_QE
+
+config ESP_PCNT_U3_CH1_EDGE_PIN
+	int "PCNT_U3 CH1 Edge/Pulse Pin Number"
+	default 0
+	range -1 39
+	depends on !ESP_PCNT_U3_QE
+
+config ESP_PCNT_U3_CH1_LEVEL_PIN
+	int "PCNT_U3 CH1 Level/Control Pin Number"
+	default 4
+	range -1 39
+
+config ESP_PCNT_U3_FILTER_EN
+	bool "Enable Glitch Filter for this PCNT Unit"
+	default n
+
+if ESP_PCNT_U3_FILTER_EN
+
+config ESP_PCNT_U3_FILTER_THRES
+	int "PCNT_U3 Filter Threshold value"
+	default 5
+	---help---
+		If a pulse is shorter than this number of APB_CLK clock cycles
+		then it will not be considered as a valid pulse.
+
+endif # ESP_PCNT_U3_FILTER_EN
+
+endif # ESP_PCNT_U3
+
+endmenu # ESP_PCNT
 
 endmenu # Peripheral Support
 
@@ -716,6 +1057,30 @@ endchoice # ESP_POWER_SAVE_MODE
 
 endmenu # ESPRESSIF_WIFI
 
+menu "BLE Configuration"
+	depends on ESPRESSIF_BLE
+
+config ESPRESSIF_BLE_TTY_NAME
+	string "BLE TTY device name"
+	default "/dev/ttyHCI0"
+	depends on UART_BTH4
+
+config ESPRESSIF_BLE_TASK_STACK_SIZE
+	int "Controller task stack size"
+	default 4096
+
+config ESPRESSIF_BLE_TASK_PRIORITY
+	int "Controller task priority"
+	default 253
+
+config ESPRESSIF_BLE_INTERRUPT_SAVE_STATUS
+	int "Number of interrupt save status"
+	default 3
+	---help---
+		Number of interrupt save status variables to keep track. Increase it if any related bug is found.
+
+endmenu # BLE Configuration
+
 menu "UART Configuration"
 	depends on ESPRESSIF_UART
 
@@ -894,6 +1259,7 @@ menu "SPI configuration"
 
 config ESPRESSIF_SPI_SWCS
 	bool "SPI software CS"
+	depends on ESPRESSIF_SPI_PERIPH
 	default n
 	---help---
 		Use SPI software CS.
@@ -902,6 +1268,7 @@ config ESPRESSIF_SPI_UDCS
 	bool "User defined CS"
 	default n
 	depends on ESPRESSIF_SPI_SWCS
+	depends on ESPRESSIF_SPI_PERIPH
 	---help---
 		Use user-defined CS.
 
@@ -972,16 +1339,72 @@ config ESPRESSIF_SPI2_MISOPIN
 
 endif # ESPRESSIF_SPI2
 
+if ESPRESSIF_SPI_BITBANG
+
+config ESPRESSIF_SPI_BITBANG_CSPIN
+	int "SPI Bitbang CS Pin"
+	default 0
+	range 0 21
+
+config ESPRESSIF_SPI_BITBANG_CLKPIN
+	int "SPI Bitbang CLK Pin"
+	default 1
+	range 0 21
+
+config ESPRESSIF_SPI_BITBANG_MOSIPIN
+	int "SPI Bitbang MOSI Pin"
+	default 2
+	range 0 21
+
+config ESPRESSIF_SPI_BITBANG_MISOPIN
+	int "SPI Bitbang MISO Pin"
+	default 3
+	range 0 21
+
+choice ESPRESSIF_SPI_BITBANG_MODE
+	prompt "SPI Bitbang mode"
+	default ESPRESSIF_SPI_BITBANG_MODE0
+
+config ESPRESSIF_SPI_BITBANG_MODE0
+	bool "SPI MODE0"
+
+config ESPRESSIF_SPI_BITBANG_MODE1
+	bool "SPI MODE1"
+
+config ESPRESSIF_SPI_BITBANG_MODE2
+	bool "SPI MODE2"
+
+config ESPRESSIF_SPI_BITBANG_MODE3
+	bool "SPI MODE3"
+
+endchoice # ESPRESSIF_SPI_BITBANG_MODE
+
+endif # ESPRESSIF_SPI_BITBANG
+
 config ESPRESSIF_SPI_TEST_MODE
 	bool "SPI driver loopback test mode (for testing only)"
 	default n
 	depends on SYSTEM_SPITOOL
+	depends on ESPRESSIF_SPI_PERIPH
 	---help---
 		This enables a loopback test mode that attaches the transmitter
 		to the receiver internally, being able to test the SPI
 		peripheral without any external connection.
 
 endmenu # SPI configuration
+
+menu "Interrupt Configuration"
+
+config ESPRESSIF_IRAM_ISR_DEBUG
+	bool "Enable debugging of the IRAM-enabled interrupts"
+	default n
+	---help---
+		This option enables keeping track of the IRAM-enabled interrupts by
+		registering its execution when non-IRAM interrupts are disabled. It
+		keeps track of the IRQ executed and register how many times since
+		boot it was executed. Generally used for testing.
+
+endmenu
 
 menu "SPI Flash Configuration"
 
@@ -1274,6 +1697,125 @@ endif # PWM_MULTICHAN && PWM_NCHANNELS > 1
 
 endmenu # LEDC configuration
 
+menu "I2S Configuration"
+	depends on ESPRESSIF_I2S
+
+config ESPRESSIF_I2S_MAXINFLIGHT
+	int "I2S queue size"
+	default 4
+	---help---
+		This is the total number of transfers, both RX and TX, that can be
+		enqueued before the caller is required to wait.  This setting
+		determines the number certain queue data structures that will be
+		pre-allocated.
+
+if ESPRESSIF_I2S0
+
+config ESPRESSIF_I2S0_RX
+	bool "Enable I2S receiver"
+	default y
+	---help---
+		Enable I2S receiver (port 0)
+
+config ESPRESSIF_I2S0_TX
+	bool "Enable I2S transmitter"
+	default y
+	---help---
+		Enable I2S transmitter (port 0)
+
+choice ESPRESSIF_I2S0_ROLE
+	prompt "I2S0 role"
+	default ESPRESSIF_I2S0_ROLE_MASTER
+	---help---
+		Selects the operation role of the I2S0.
+
+config ESPRESSIF_I2S0_ROLE_MASTER
+	bool "Master"
+
+config ESPRESSIF_I2S0_ROLE_SLAVE
+	bool "Slave"
+
+endchoice # I2S0 role
+
+choice ESPRESSIF_I2S0_DATA_BIT_WIDTH
+	prompt "Bit width"
+	default ESPRESSIF_I2S0_DATA_BIT_WIDTH_16BIT
+	---help---
+		Selects the valid data bits per sample.
+		Note that this option may be overwritten by the audio
+		according to the bit width of the file being played
+
+config ESPRESSIF_I2S0_DATA_BIT_WIDTH_8BIT
+	bool "8 bits"
+
+config ESPRESSIF_I2S0_DATA_BIT_WIDTH_16BIT
+	bool "16 bits"
+
+config ESPRESSIF_I2S0_DATA_BIT_WIDTH_24BIT
+	bool "24 bits"
+
+config ESPRESSIF_I2S0_DATA_BIT_WIDTH_32BIT
+	bool "32 bits"
+
+endchoice # Bit width
+
+config ESPRESSIF_I2S0_SAMPLE_RATE
+	int "I2S0 sample rate"
+	default 44100
+	range 8000 48000
+	---help---
+		Selects the sample rate.
+		Note that this option may be overwritten by the audio
+		according to the bit width of the file being played
+
+config ESPRESSIF_I2S0_BCLKPIN
+	int "I2S0 BCLK pin"
+	default 4
+	range 0 48
+
+config ESPRESSIF_I2S0_WSPIN
+	int "I2S0 WS pin"
+	default 5
+	range 0 48
+
+config ESPRESSIF_I2S0_DINPIN
+	int "I2S0 DIN pin"
+	depends on ESPRESSIF_I2S0_RX
+	default 19 if !ESPRESSIF_ESP32H2
+	default 11 if ESPRESSIF_ESP32H2
+	range 0 48
+
+config ESPRESSIF_I2S0_DOUTPIN
+	int "I2S0 DOUT pin"
+	depends on ESPRESSIF_I2S0_TX
+	default 18 if !ESPRESSIF_ESP32H2
+	default 10 if ESPRESSIF_ESP32H2
+	range 0 48
+
+config ESPRESSIF_I2S0_MCLK
+	bool "Enable I2S Master Clock"
+	depends on ESPRESSIF_I2S0_ROLE_MASTER
+	default n
+	---help---
+		Enable I2S master clock
+
+config ESPRESSIF_I2S0_MCLKPIN
+	int "I2S MCLK pin"
+	depends on ESPRESSIF_I2S0_MCLK
+	default 0
+	range 0 48
+
+endif # ESPRESSIF_I2S0
+
+config I2S_DMADESC_NUM
+	int "I2S DMA maximum number of descriptors"
+	default 2
+	---help---
+		Configure the maximum number of out-link/in-link descriptors to
+		be chained for an I2S DMA transfer.
+
+endmenu # I2S configuration
+
 menu "I2C Configuration"
 	depends on ESPRESSIF_I2C
 
@@ -1305,12 +1847,28 @@ config ESPRESSIF_I2C1_SDAPIN
 
 endif # ESPRESSIF_I2C1
 
+if ESPRESSIF_I2C_BITBANG
+
+config ESPRESSIF_I2C_BITBANG_SCLPIN
+	int "I2C Bitbang SCL Pin"
+	default 0
+	range 0 21
+
+config ESPRESSIF_I2C_BITBANG_SDAPIN
+	int "I2C Bitbang SDA Pin"
+	default 1
+	range 0 21
+
+endif # ESPRESSIF_I2C_BITBANG
+
 config ESPRESSIF_I2CTIMEOSEC
 	int "Timeout seconds"
+	depends on ESPRESSIF_I2C_PERIPH_MASTER_MODE
 	default 0
 
 config ESPRESSIF_I2CTIMEOMS
 	int "Timeout milliseconds"
+	depends on ESPRESSIF_I2C_PERIPH_MASTER_MODE
 	default 500
 
 endmenu # I2C configuration
@@ -1549,9 +2107,44 @@ endmenu # ESPRESSIF_BROWNOUT_DET
 menu "Internal Temperature Sensor Configuration"
 	depends on ESPRESSIF_TEMP
 
+config ESPRESSIF_TEMP_UORB
+	bool "Internal Temperature Sensor UORB Interface"
+	default n
+	---help---
+		Enables work with the UORB or Character Device interface.
+		If not set, the Character Device is used by default.
+
 config ESPRESSIF_TEMP_PATH
 	string "Internal Temperature Sensor Path"
+	depends on !ESPRESSIF_TEMP_UORB
 	default "dev/temp"
+
+config ESPRESSIF_TEMP_PATH_DEVNO
+	int "Internal Temperature Sensor Path Device Number"
+	depends on ESPRESSIF_TEMP_UORB
+	default 0
+
+config ESPRESSIF_TEMP_UORB_POLL
+	bool "Enables polling sensor data"
+	depends on ESPRESSIF_TEMP_UORB
+	default n
+	---help---
+		Enables polling of sensor.
+
+config ESPRESSIF_TEMP_UORB_POLL_INTERVAL
+	int "Polling interval in microseconds, default 1 sec"
+	depends on ESPRESSIF_TEMP_UORB_POLL
+	default 1000000
+	range 0 4294967295
+	---help---
+		The interval until a new sensor measurement will be triggered.
+
+config ESPRESSIF_TEMP_THREAD_STACKSIZE
+	int "Worker thread stack size"
+	depends on ESPRESSIF_TEMP_UORB_POLL
+	default 1024
+	---help---
+		The stack size for the worker thread.
 
 endmenu # ESPRESSIF_TEMP
 

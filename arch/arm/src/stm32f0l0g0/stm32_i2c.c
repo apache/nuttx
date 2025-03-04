@@ -1,23 +1,16 @@
 /****************************************************************************
  * arch/arm/src/stm32f0l0g0/stm32_i2c.c
- * STM32 I2C IPv2 Hardware Layer - Device Driver ported from STM32F7
  *
- *   Copyright (C) 2011 Uros Platise. All rights reserved.
- *   Author: Uros Platise <uros.platise@isotel.eu>
- *
- * With extensions and modifications for the F1, F2, and F4 by:
- *
- *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
- *            John Wharington
- *            David Sidrane <david_s5@nscdg.com>
- *            Bob Feretich <bob.feretich@rafresearch.com>
- *
- * Major rewrite of ISR and supporting methods, including support
- * for NACK and RELOAD by:
- *
- *   Copyright (c) 2016 Doug Vetter.  All rights reserved.
- *   Author: Doug Vetter <oss@aileronlabs.com>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2011 Uros Platise. All rights reserved.
+ * SPDX-FileCopyrightText: 2016-2017 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2016 Doug Vetter.  All rights reserved.
+ * SPDX-FileContributor: Uros Platise <uros.platise@isotel.eu>
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-FileContributor: John Wharington
+ * SPDX-FileContributor: David Sidrane <david_s5@nscdg.com>
+ * SPDX-FileContributor: Bob Feretich <bob.feretich@rafresearch.com>
+ * SPDX-FileContributor: Doug Vetter <oss@aileronlabs.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -259,7 +252,7 @@
 
 #undef INVALID_CLOCK_SOURCE
 
-#warning TODO: check I2C clock source. It must be HSI!
+#warning TODO: check I2C clock source and clock frequency. It must be HSI!
 
 /* CONFIG_I2C_POLLED may be set so that I2C interrupts will not be used.
  * Instead, CPU-intensive polling will be used.
@@ -1991,9 +1984,9 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
               i2cinfo("TCR: DISABLE RELOAD: NBYTES = dcnt = %i msgc = %i\n",
                       priv->dcnt, priv->msgc);
 
-              stm32_i2c_disable_reload(priv);
-
               stm32_i2c_set_bytes_to_transfer(priv, priv->dcnt);
+
+              stm32_i2c_disable_reload(priv);
             }
 
           i2cinfo("TCR: EXIT dcnt = %i msgc = %i status 0x%08" PRIx32 "\n",
@@ -2708,13 +2701,6 @@ struct i2c_master_s *stm32_i2cbus_initialize(int port)
 {
   struct stm32_i2c_priv_s *priv = NULL;  /* private data of device with multiple instances */
   struct stm32_i2c_inst_s *inst = NULL;  /* device, single instance */
-
-#if 0                           /* REVISIT: this is not true for all STM32 M0 */
-#if STM32_HSI_FREQUENCY != 8000000 || defined(INVALID_CLOCK_SOURCE)
-#  warning STM32_I2C_INIT: Peripheral clock is HSI and it must be 16mHz or the speed/timing calculations need to be redone.
-  return NULL;
-#endif
-#endif
 
   /* Get I2C private structure */
 

@@ -1,9 +1,8 @@
 /****************************************************************************
  * fs/spiffs/src/spiffs_vfs.c
- * Interface between SPIFFS and the NuttX VFS
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2018 Gregory Nutt
  *
  * Includes logic taken from 0.3.7 of SPIFFS by Peter Andersion.  That
  * version was originally released under the MIT license.
@@ -60,6 +59,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
 
+#include "fs_heap.h"
 #include "spiffs.h"
 #include "spiffs_core.h"
 #include "spiffs_cache.h"
@@ -144,6 +144,8 @@ const struct mountpt_operations g_spiffs_operations =
   NULL,              /* mmap */
   spiffs_truncate,   /* truncate */
   NULL,              /* poll */
+  NULL,              /* readv */
+  NULL,              /* writev */
 
   spiffs_sync,       /* sync */
   spiffs_dup,        /* dup */
@@ -333,7 +335,7 @@ static int spiffs_open(FAR struct file *filep, FAR const char *relpath,
   /* Allocate a new file object with a reference count of one. */
 
   fobj = (FAR struct spiffs_file_s *)
-    kmm_zalloc(sizeof(struct spiffs_file_s));
+    fs_heap_zalloc(sizeof(struct spiffs_file_s));
   if (fobj == NULL)
     {
       ferr("ERROR: Failed to allocate fail object\n");
@@ -348,7 +350,7 @@ static int spiffs_open(FAR struct file *filep, FAR const char *relpath,
   ret = spiffs_lock_volume(fs);
   if (ret < 0)
     {
-      kmm_free(fobj);
+      fs_heap_free(fobj);
       return ret;
     }
 
@@ -449,7 +451,7 @@ static int spiffs_open(FAR struct file *filep, FAR const char *relpath,
   return OK;
 
 errout_with_fileobject:
-  kmm_free(fobj);
+  fs_heap_free(fobj);
   spiffs_unlock_volume(fs);
   return spiffs_map_errno(ret);
 }
@@ -1265,7 +1267,7 @@ static int spiffs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
 
   DEBUGASSERT(mountpt != NULL && relpath != NULL && dir != NULL);
 
-  sdir = kmm_zalloc(sizeof(*sdir));
+  sdir = fs_heap_zalloc(sizeof(*sdir));
   if (sdir == NULL)
     {
       return -ENOMEM;
@@ -1288,7 +1290,7 @@ static int spiffs_closedir(FAR struct inode *mountpt,
 {
   finfo("mountpt=%p dir=%p\n",  mountpt, dir);
   DEBUGASSERT(mountpt != NULL && dir != NULL);
-  kmm_free(dir);
+  fs_heap_free(dir);
   return OK;
 }
 
@@ -1385,7 +1387,7 @@ static int spiffs_bind(FAR struct inode *mtdinode, FAR const void *data,
 
   /* Create an instance of the SPIFFS file system */
 
-  fs = kmm_zalloc(sizeof(struct spiffs_s));
+  fs = fs_heap_zalloc(sizeof(struct spiffs_s));
   if (fs == NULL)
     {
       ferr("ERROR: Failed to allocate volume structure\n");
@@ -1427,7 +1429,7 @@ static int spiffs_bind(FAR struct inode *mtdinode, FAR const void *data,
   /* Allocate the cache */
 
   fs->cache_size = cache_size;
-  fs->cache      = kmm_malloc(cache_size);
+  fs->cache      = fs_heap_malloc(cache_size);
 
   if (fs->cache == NULL)
     {
@@ -1448,7 +1450,7 @@ static int spiffs_bind(FAR struct inode *mtdinode, FAR const void *data,
    */
 
   work_size = 3 * SPIFFS_GEO_PAGE_SIZE(fs);
-  work      = kmm_malloc(work_size);
+  work      = fs_heap_malloc(work_size);
 
   if (work == NULL)
     {
@@ -1503,13 +1505,13 @@ static int spiffs_bind(FAR struct inode *mtdinode, FAR const void *data,
   return OK;
 
 errout_with_work:
-  kmm_free(fs->work);
+  fs_heap_free(fs->work);
 
 errout_with_cache:
-  kmm_free(fs->cache);
+  fs_heap_free(fs->cache);
 
 errout_with_volume:
-  kmm_free(fs);
+  fs_heap_free(fs);
   return spiffs_map_errno(ret);
 }
 
@@ -1553,19 +1555,19 @@ static int spiffs_unbind(FAR void *handle, FAR struct inode **mtdinode,
 
   if (fs->work != NULL)
     {
-      kmm_free(fs->work);
+      fs_heap_free(fs->work);
     }
 
   if (fs->cache != NULL)
     {
-      kmm_free(fs->cache);
+      fs_heap_free(fs->cache);
     }
 
   /* Free the volume memory (note that the mutex is now stale!) */
 
   spiffs_unlock_volume(fs);
   nxrmutex_destroy(&fs->lock);
-  kmm_free(fs);
+  fs_heap_free(fs);
 
   return spiffs_map_errno(OK);
 }
@@ -1698,7 +1700,7 @@ static int spiffs_unlink(FAR struct inode *mountpt, FAR const char *relpath)
        */
 
       fobj = (FAR struct spiffs_file_s *)
-        kmm_zalloc(sizeof(struct spiffs_file_s));
+        fs_heap_zalloc(sizeof(struct spiffs_file_s));
       if (fobj == NULL)
         {
           fwarn("WARNING: Failed to allocate fobj\n");
@@ -1712,14 +1714,14 @@ static int spiffs_unlink(FAR struct inode *mountpt, FAR const char *relpath)
       if (ret < 0)
         {
           ferr("ERROR: spiffs_fobj_open_bypage failed: %d\n", ret);
-          kmm_free(fobj);
+          fs_heap_free(fobj);
           goto errout_with_lock;
         }
 
       /* Now we can remove the file by truncating it to zero length */
 
       ret = spiffs_fobj_truncate(fs, fobj, 0, true);
-      kmm_free(fobj);
+      fs_heap_free(fobj);
 
       if (ret < 0)
         {
@@ -1831,7 +1833,7 @@ static int spiffs_rename(FAR struct inode *mountpt,
   /* Allocate new file object.  NOTE:  The file could already be open. */
 
   fobj = (FAR struct spiffs_file_s *)
-    kmm_zalloc(sizeof(struct spiffs_file_s));
+    fs_heap_zalloc(sizeof(struct spiffs_file_s));
   if (fobj == NULL)
     {
       ret = -ENOMEM;
@@ -1854,7 +1856,7 @@ static int spiffs_rename(FAR struct inode *mountpt,
                                   &newpgndx);
 
 errout_with_fobj:
-  kmm_free(fobj);
+  fs_heap_free(fobj);
 
 errout_with_lock:
   spiffs_unlock_volume(fs);

@@ -1,12 +1,9 @@
 /****************************************************************************
  * drivers/lcd/ra8875.c
  *
- * Driver for the RAiO Technologies RA8875 LCD controller
- *
- *   Copyright (C) 2015 Intuitive Aerial AB. All rights reserved.
- *   Author: Marten Svanfeldt <marten@intuitiveaerial.com>
- *
- * References: RA8875, Rev 1.6, Apr 2013, RAiO Technologies Inc
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2015 Intuitive Aerial AB. All rights reserved.
+ * SPDX-FileContributor: Marten Svanfeldt <marten@intuitiveaerial.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -247,14 +244,6 @@ static inline void ra8875_setforeground(FAR struct ra8875_lcd_s *lcd,
 static void ra8875_clearmem(FAR struct ra8875_lcd_s *lcd);
 
 /* LCD Data Transfer Methods */
-
-#if 0 /* Sometimes useful */
-static void ra8875_dumprun(FAR const char *msg,
-                           FAR uint16_t *run,
-                           size_t npixels);
-#else
-#  define ra8875_dumprun(m,r,n)
-#endif
 
 #ifdef CONFIG_DEBUG_LCD
 static void ra8875_showrun(FAR struct ra8875_dev_s *priv, fb_coord_t row,

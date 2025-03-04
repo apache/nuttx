@@ -1,8 +1,8 @@
 /****************************************************************************
  * libs/libc/machine/arm64/gnu/arch_strchr.S
  *
- * Copyright (c) 2014, ARM Limited
- *  All rights Reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2014, ARM Limited, All rights Reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -84,7 +84,7 @@
 \f:
 	.endm
 
-def_fn strchr
+def_fn ARCH_LIBCFUN(strchr)
 	/* Magic constant 0x40100401 to allow us to identify which lane
 	   matches the requested byte.  Magic constant 0x80200802 used
 	   similarly for NUL termination.  */
@@ -162,6 +162,6 @@ def_fn strchr
 	csel	result, result, xzr, eq
 	ret
 
-	.size	strchr, . - strchr
+	.size	ARCH_LIBCFUN(strchr), . - ARCH_LIBCFUN(strchr)
 
 #endif

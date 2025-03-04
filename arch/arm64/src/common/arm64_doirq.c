@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/src/common/arm64_doirq.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -57,28 +59,31 @@
 
 uint64_t *arm64_doirq(int irq, uint64_t * regs)
 {
+  struct tcb_s *tcb = this_task();
+
   /* Nested interrupts are not supported */
 
-  DEBUGASSERT(CURRENT_REGS == NULL);
+  DEBUGASSERT(!up_interrupt_context());
 
-  /* Current regs non-zero indicates that we are processing an interrupt;
-   * CURRENT_REGS is also used to manage interrupt level context switches.
-   */
+  /* Set irq flag */
 
-  CURRENT_REGS = regs;
+  write_sysreg((uintptr_t)tcb | 1, tpidr_el1);
+
+  tcb->xcp.regs = regs;
 
   /* Deliver the IRQ */
 
   irq_dispatch(irq, regs);
+  tcb = this_task();
 
   /* Check for a context switch.  If a context switch occurred, then
-   * CURRENT_REGS will have a different value than it did on entry.  If an
+   * current_regs will have a different value than it did on entry.  If an
    * interrupt level context switch has occurred, then restore the floating
    * point state and the establish the correct address environment before
    * returning from the interrupt.
    */
 
-  if (regs != CURRENT_REGS)
+  if (regs != tcb->xcp.regs)
     {
       /* need to do a context switch */
 
@@ -89,25 +94,32 @@ uint64_t *arm64_doirq(int irq, uint64_t * regs)
        * thread at the head of the ready-to-run list.
        */
 
-      addrenv_switch(NULL);
+      addrenv_switch(tcb);
 #endif
+
+      /* Update scheduler parameters */
+
+      nxsched_suspend_scheduler(g_running_tasks[this_cpu()]);
+      nxsched_resume_scheduler(tcb);
 
       /* Record the new "running" task when context switch occurred.
        * g_running_tasks[] is only used by assertion logic for reporting
        * crashes.
        */
 
-      g_running_tasks[this_cpu()] = this_task();
-
-      regs = (uint64_t *)CURRENT_REGS;
+      g_running_tasks[this_cpu()] = tcb;
+      regs = tcb->xcp.regs;
     }
 
-  /* Set CURRENT_REGS to NULL to indicate that we are no longer in an
-   * interrupt handler.
+  /* Clear irq flag */
+
+  write_sysreg((uintptr_t)tcb & ~1ul, tpidr_el1);
+
+  /* (*running_task)->xcp.regs is about to become invalid
+   * and will be marked as NULL to avoid misusage.
    */
 
-  CURRENT_REGS = NULL;
-
+  tcb->xcp.regs = NULL;
   return regs;
 }
 

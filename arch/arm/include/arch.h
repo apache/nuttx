@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/include/arch.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -62,7 +64,7 @@ do { \
     "\tmov %0, " PIC_REG_STRING "\n\t" \
     : "=r"(picbase) \
   ); \
-  *ppicbase = (void *)picbase; \
+  *(uint32_t *)ppicbase = picbase; \
 } while (0)
 
 #define up_setpicbase(picbase) \
@@ -95,7 +97,7 @@ do { \
 #  define ARCH_HEAP_NSECTS    ARCH_PG2SECT(CONFIG_ARCH_HEAP_NPAGES)
 
 #  ifdef CONFIG_ARCH_VMA_MAPPING
-#    define ARCH_SHM_NSECTS   ARCH_PG2SECT(ARCH_SHM_MAXPAGES)
+#    define ARCH_SHM_NSECTS   ARCH_PG2SECT((CONFIG_ARCH_SHM_NPAGES * CONFIG_ARCH_SHM_MAXREGIONS))
 #  endif
 
 #  ifdef CONFIG_ARCH_STACK_DYNAMIC

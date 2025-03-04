@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/coredump.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -25,45 +27,59 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/memoryregion.h>
+#include <elf.h>
 #include <unistd.h>
+#include <sys/utsname.h>
+
+#include <nuttx/nuttx.h>
+#include <nuttx/streams.h>
+#include <nuttx/memoryregion.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define COREDUMP_MAGIC          0x434f5245
+#define COREDUMP_INFONAME_SIZE  ALIGN_UP(CONFIG_TASK_NAME_SIZE, 8)
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+/* Coredump information for block header */
+
+struct coredump_info_s
+{
+  struct utsname  name;
+  struct timespec time;
+  size_t          size;
+};
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: coredump_set_memory_region
+ * Name: coredump_add_memory_region
  *
  * Description:
- *   Set do coredump memory region.
+ *   Use coredump to dump the memory of the specified area.
  *
  ****************************************************************************/
 
-int coredump_set_memory_region(FAR struct memory_region_s *region);
+int coredump_add_memory_region(FAR const void *ptr, size_t size,
+                               uint32_t flags);
 
 /****************************************************************************
- * Name: coredump_initialize
+ * Name: coredump
  *
  * Description:
- *   Initialize the coredump facility.  Called once and only from
- *   nx_start_application.
+ *   This function for generating core dump stream.
  *
  ****************************************************************************/
 
-int coredump_initialize(void);
-
-/****************************************************************************
- * Name: coredump_dump
- *
- * Description:
- *   Do coredump of the task specified by pid.
- *
- * Input Parameters:
- *   pid - The task/thread ID of the thread to dump
- *
- ****************************************************************************/
-
-void coredump_dump(pid_t pid);
+int coredump(FAR const struct memory_region_s *regions,
+             FAR struct lib_outstream_s *stream,
+             pid_t pid);
 
 #endif /* __INCLUDE_NUTTX_COREDUMP_H */

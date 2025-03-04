@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/pwd/lib_getpwuidr.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -82,6 +84,6 @@ int getpwuid_r(uid_t uid, FAR struct passwd *pwd, FAR char *buf,
     }
 
   return getpwbuf_r(ROOT_UID, ROOT_GID, ROOT_NAME, ROOT_GEOCS, ROOT_DIR,
-                    ROOT_SHELL, pwd, buf, buflen, result);
+                    ROOT_SHELL, ROOT_PASSWD, pwd, buf, buflen, result);
 #endif
 }

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32l4/stm32l4_rtc_lowerhalf.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -399,6 +401,7 @@ stm32l4_setrelative(struct rtc_lowerhalf_s *lower,
   struct tm time;
   time_t seconds;
   int ret = -EINVAL;
+  irqstate_t flags;
 
   DEBUGASSERT(lower != NULL && alarminfo != NULL);
   DEBUGASSERT(alarminfo->id == RTC_ALARMA || alarminfo->id == RTC_ALARMB);
@@ -410,7 +413,7 @@ stm32l4_setrelative(struct rtc_lowerhalf_s *lower,
        * about being suspended and working on an old time.
        */
 
-      sched_lock();
+      flags = enter_critical_section();
 
       /* Get the current time in broken out format */
 
@@ -440,7 +443,7 @@ stm32l4_setrelative(struct rtc_lowerhalf_s *lower,
           ret = stm32l4_setalarm(lower, &setalarm);
         }
 
-      sched_unlock();
+      leave_critical_section(flags);
     }
 
   return ret;
@@ -525,6 +528,7 @@ static int stm32l4_rdalarm(struct rtc_lowerhalf_s *lower,
 {
   struct alm_rdalarm_s lowerinfo;
   int ret = -EINVAL;
+  irqstate_t flags;
 
   DEBUGASSERT(lower != NULL && alarminfo != NULL && alarminfo->time != NULL);
   DEBUGASSERT(alarminfo->id == RTC_ALARMA || alarminfo->id == RTC_ALARMB);
@@ -535,14 +539,14 @@ static int stm32l4_rdalarm(struct rtc_lowerhalf_s *lower,
        * about being suspended and working on an old time.
        */
 
-      sched_lock();
+      flags = enter_critical_section();
 
       lowerinfo.ar_id = alarminfo->id;
       lowerinfo.ar_time = alarminfo->time;
 
       ret = stm32l4_rtc_rdalarm(&lowerinfo);
 
-      sched_unlock();
+      leave_critical_section(flags);
     }
 
   return ret;

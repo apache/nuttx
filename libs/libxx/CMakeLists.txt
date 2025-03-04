@@ -1,6 +1,8 @@
 # ##############################################################################
 # libs/libxx/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -27,16 +29,4 @@
 # the configuration problem.  Refer to the README.txt file in the NuttX uClibc++
 # GIT repository for more information
 
-if(CONFIG_HAVE_CXX)
-  if(CONFIG_UCLIBCXX)
-    include(uClibc++.cmake)
-  elseif(CONFIG_LIBCXX)
-    include(libcxx.cmake)
-  else()
-    include(libcxxmini.cmake)
-  endif()
-
-  if(CONFIG_LIBCXXABI)
-    include(libcxxabi.cmake)
-  endif()
-endif()
+nuttx_add_subdirectory()

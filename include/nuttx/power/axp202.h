@@ -1,6 +1,7 @@
 /****************************************************************************
  * include/nuttx/power/axp202.h
- * msa301 Driver declaration
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

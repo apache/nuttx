@@ -1,0 +1,28 @@
+From a2f4672050433811aabfcd8abef206c28397276d Mon Sep 17 00:00:00 2001
+From: dongjiuzhu1 <dongjiuzhu1@xiaomi.com>
+Date: Mon, 27 May 2024 20:32:46 +0800
+Subject: [PATCH 13/14] openamp: add assert when get tx buffer failed
+
+So we can found the error more eaily
+
+Signed-off-by: dongjiuzhu1 <dongjiuzhu1@xiaomi.com>
+---
+ lib/rpmsg/rpmsg_virtio.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/lib/rpmsg/rpmsg_virtio.c open-amp/lib/rpmsg/rpmsg_virtio.c
+index 7aeec5b..33c6c33 100644
+--- a/lib/rpmsg/rpmsg_virtio.c
++++ open-amp/lib/rpmsg/rpmsg_virtio.c
+@@ -384,6 +384,8 @@ static void *rpmsg_virtio_get_tx_payload_buffer(struct rpmsg_device *rdev,
+ 		}
+ 	}
+ 
++	metal_assert(!wait || rp_hdr != NULL);
++
+ 	if (!rp_hdr)
+ 		return NULL;
+ 
+-- 
+2.34.1
+

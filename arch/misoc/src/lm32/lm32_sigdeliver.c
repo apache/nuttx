@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/misoc/src/lm32/lm32_sigdeliver.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -36,6 +38,7 @@
 #include <arch/board/board.h>
 
 #include "sched/sched.h"
+#include "signal/signal.h"
 #include "lm32.h"
 
 /****************************************************************************
@@ -59,9 +62,9 @@ void lm32_sigdeliver(void)
 
   board_autoled_on(LED_SIGNAL);
 
-  sinfo("rtcb=%p sigdeliver=%p sigpendactionq.head=%p\n",
-        rtcb, rtcb->xcp.sigdeliver, rtcb->sigpendactionq.head);
-  DEBUGASSERT(rtcb->xcp.sigdeliver != NULL);
+  sinfo("rtcb=%p sigpendactionq.head=%p\n",
+        rtcb, rtcb->sigpendactionq.head);
+  DEBUGASSERT((rtcb->flags & TCB_FLAG_SIGDELIVER) != 0);
 
   /* Save the return state on the stack. */
 
@@ -77,7 +80,7 @@ void lm32_sigdeliver(void)
 
   /* Deliver the signal */
 
-  ((sig_deliver_t)rtcb->xcp.sigdeliver)(rtcb);
+  nxsig_deliver(rtcb);
 
   /* Output any debug messages BEFORE restoring errno (because they may
    * alter errno), then disable interrupts again and restore the original
@@ -99,9 +102,12 @@ void lm32_sigdeliver(void)
    * could be modified by a hostile program.
    */
 
-  regs[REG_EPC]        = rtcb->xcp.saved_epc;
-  regs[REG_INT_CTX]    = rtcb->xcp.saved_int_ctx;
-  rtcb->xcp.sigdeliver = NULL;  /* Allows next handler to be scheduled */
+  regs[REG_EPC]     = rtcb->xcp.saved_epc;
+  regs[REG_INT_CTX] = rtcb->xcp.saved_int_ctx;
+
+  /* Allows next handler to be scheduled */
+
+  rtcb->flags &= ~TCB_FLAG_SIGDELIVER;
 
   /* Then restore the correct state for this thread of
    * execution.

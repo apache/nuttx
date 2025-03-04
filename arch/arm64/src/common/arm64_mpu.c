@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/src/common/arm64_mpu.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -28,6 +30,7 @@
 #include <assert.h>
 
 #include <nuttx/arch.h>
+#include <arch/barriers.h>
 #include <arch/irq.h>
 #include <arch/chip/chip.h>
 
@@ -126,8 +129,7 @@ static void mpu_init(void)
   uint64_t mair = MPU_MAIR_ATTRS;
 
   write_sysreg(mair, mair_el1);
-  ARM64_DSB();
-  ARM64_ISB();
+  UP_MB();
 }
 
 /****************************************************************************
@@ -183,15 +185,14 @@ void mpu_freeregion(unsigned int region)
   DEBUGASSERT(region < num_regions);
 
   write_sysreg(region, prselr_el1);
-  ARM64_DSB();
+  UP_DSB();
 
   /* Set the region base, limit and attribute */
 
   write_sysreg(0, prbar_el1);
   write_sysreg(0, prlar_el1);
   g_mpu_region &= ~(1 << region);
-  ARM64_DSB();
-  ARM64_ISB();
+  UP_MB();
 }
 
 /****************************************************************************
@@ -219,8 +220,7 @@ void arm64_mpu_enable(void)
 #endif
          );
   write_sysreg(val, sctlr_el1);
-  ARM64_DSB();
-  ARM64_ISB();
+  UP_MB();
 }
 
 /****************************************************************************
@@ -243,13 +243,12 @@ void arm64_mpu_disable(void)
 
   /* Force any outstanding transfers to complete before disabling MPU */
 
-  ARM64_DMB();
+  UP_DMB();
 
   val = read_sysreg(sctlr_el1);
   val &= ~(SCTLR_M_BIT | SCTLR_C_BIT);
   write_sysreg(val, sctlr_el1);
-  ARM64_DSB();
-  ARM64_ISB();
+  UP_MB();
 }
 
 /****************************************************************************
@@ -288,14 +287,13 @@ void mpu_modify_region(unsigned int region,
   /* Select the region */
 
   write_sysreg(region, prselr_el1);
-  ARM64_DSB();
+  UP_DSB();
 
   /* Set the region base, limit and attribute */
 
   write_sysreg(rbar, prbar_el1);
   write_sysreg(rlar, prlar_el1);
-  ARM64_DSB();
-  ARM64_ISB();
+  UP_MB();
 }
 
 /****************************************************************************
@@ -352,7 +350,7 @@ void mpu_dump_region(void)
       write_sysreg(i, prselr_el1);
       prlar = read_sysreg(prlar_el1);
       prbar = read_sysreg(prbar_el1);
-      _info("MPU-%d, 0x%08X-0x%08X SH=%X AP=%X XN=%X\n", i,
+      _info("MPU-%d, 0x%08llX-0x%08llX SH=%llX AP=%llX XN=%llX\n", i,
             prbar & MPU_RBAR_BASE_MSK, prlar & MPU_RLAR_LIMIT_MSK,
             prbar & MPU_RBAR_SH_MSK, prbar & MPU_RBAR_AP_MSK,
             prbar & MPU_RBAR_XN_MSK);
@@ -386,6 +384,12 @@ void arm64_mpu_init(bool is_primary_core)
 {
   uint64_t  val;
   uint32_t  r_index;
+
+#ifdef CONFIG_MM_KASAN_SW_TAGS
+  val  = read_sysreg(tcr_el1);
+  val |= (TCR_TBI0 | TCR_TBI1 | TCR_ASID_8);
+  write_sysreg(val, tcr_el1);
+#endif
 
   /* Current MPU code supports only EL1 */
 

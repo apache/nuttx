@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_spi.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -99,7 +101,7 @@
 #  if defined(CONFIG_SPI_DMAPRIO)
 #    define SPI_DMA_PRIO  CONFIG_SPI_DMAPRIO
 #  elif defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32L15XX) || \
-        defined(CONFIG_STM32_STM32F30XX)
+        defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32G4XXX)
 #    define SPI_DMA_PRIO  DMA_CCR_PRIMED
 #  elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
 #    define SPI_DMA_PRIO  DMA_SCR_PRIMED
@@ -108,7 +110,7 @@
 #  endif
 
 #  if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32L15XX) || \
-      defined(CONFIG_STM32_STM32F30XX)
+      defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32G4XXX)
 #    if (SPI_DMA_PRIO & ~DMA_CCR_PL_MASK) != 0
 #      error "Illegal value for CONFIG_SPI_DMAPRIO"
 #    endif
@@ -123,7 +125,8 @@
 /* DMA channel configuration */
 
 #if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32L15XX) || \
-    defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
+    defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX) || \
+    defined(CONFIG_STM32_STM32G4XXX)
 #  define SPI_RXDMA16_CONFIG        (SPI_DMA_PRIO|DMA_CCR_MSIZE_16BITS|DMA_CCR_PSIZE_16BITS|DMA_CCR_MINC            )
 #  define SPI_RXDMA8_CONFIG         (SPI_DMA_PRIO|DMA_CCR_MSIZE_8BITS |DMA_CCR_PSIZE_8BITS |DMA_CCR_MINC            )
 #  define SPI_RXDMA16NULL_CONFIG    (SPI_DMA_PRIO|DMA_CCR_MSIZE_8BITS |DMA_CCR_PSIZE_16BITS                         )
@@ -757,7 +760,8 @@ static inline uint16_t spi_getreg(struct stm32_spidev_s *priv,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
+#if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX) || \
+    defined(CONFIG_STM32_STM32G4XXX)
 static inline uint8_t spi_getreg8(struct stm32_spidev_s *priv,
                                   uint8_t offset)
 {
@@ -804,7 +808,8 @@ static inline void spi_putreg(struct stm32_spidev_s *priv,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
+#if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX) || \
+    defined(CONFIG_STM32_STM32G4XXX)
 static inline void spi_putreg8(struct stm32_spidev_s *priv,
                                uint8_t offset,
                                uint8_t value)
@@ -837,7 +842,8 @@ static inline uint16_t spi_readword(struct stm32_spidev_s *priv)
 
   /* Then return the received byte */
 
-#if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
+#if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)|| \
+    defined(CONFIG_STM32_STM32G4XXX)
   /* "When the data frame size fits into one byte
    * (less than or equal to 8 bits),
    *  data packing is used automatically when any read or write 16-bit access
@@ -888,7 +894,8 @@ static inline void spi_writeword(struct stm32_spidev_s *priv,
 
   /* Then send the word */
 
-#if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
+#if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX) || \
+    defined(CONFIG_STM32_STM32G4XXX)
   /* "When the data frame size fits into one byte (less than or equal to 8
    *  bits), data packing is used automatically when any read or write 16-bit
    *  access is performed on the SPIx_DR register. The double data frame
@@ -1232,7 +1239,7 @@ static void spi_modifycr1(struct stm32_spidev_s *priv,
 
 #if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F30XX) || \
     defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32F4XXX) || \
-    defined(CONFIG_STM32_SPI_DMA)
+    defined(CONFIG_STM32_STM32G4XXX) || defined(CONFIG_STM32_SPI_DMA)
 static void spi_modifycr2(struct stm32_spidev_s *priv, uint16_t setbits,
                           uint16_t clrbits)
 {
@@ -1510,7 +1517,8 @@ static void spi_setbits(struct spi_dev_s *dev, int nbits)
 
   if (nbits != priv->nbits)
     {
-#if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
+#if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX) || \
+    defined(CONFIG_STM32_STM32G4XXX)
       /* Yes... Set CR2 appropriately */
 
       /* Set the number of bits (valid range 4-16) */
@@ -2055,7 +2063,8 @@ static void spi_bus_initialize(struct stm32_spidev_s *priv)
   uint16_t setbits;
   uint16_t clrbits;
 
-#if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
+#if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX) || \
+    defined(CONFIG_STM32_STM32G4XXX)
   /* Configure CR1 and CR2. Default configuration:
    *   Mode 0:                        CR1.CPHA=0 and CR1.CPOL=0
    *   Master:                        CR1.MSTR=1

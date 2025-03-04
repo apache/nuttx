@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/semaphore/sem_wait.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -36,16 +38,15 @@
 #include "semaphore/semaphore.h"
 
 /****************************************************************************
- * Public Functions
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxsem_wait
+ * Name: nxsem_wait_slow
  *
  * Description:
- *   This function attempts to lock the semaphore referenced by 'sem'.  If
- *   the semaphore value is (<=) zero, then the calling task will not return
- *   until it successfully acquires the lock.
+ *   This function attempts to lock the semaphore referenced by 'sem' in
+ *   slow mode.
  *
  *   This is an internal OS interface.  It is functionally equivalent to
  *   sem_wait except that:
@@ -67,17 +68,11 @@
  *
  ****************************************************************************/
 
-int nxsem_wait(FAR sem_t *sem)
+static int nxsem_wait_slow(FAR sem_t *sem)
 {
-  FAR struct tcb_s *rtcb = this_task();
+  FAR struct tcb_s *rtcb;
   irqstate_t flags;
-  bool switch_needed;
   int ret;
-
-  /* This API should not be called from interrupt handlers & idleloop */
-
-  DEBUGASSERT(sem != NULL && up_interrupt_context() == false);
-  DEBUGASSERT(!OSINIT_IDLELOOP() || !sched_idletask());
 
   /* The following operations must be performed with interrupts
    * disabled because nxsem_post() may be called from an interrupt
@@ -90,14 +85,19 @@ int nxsem_wait(FAR sem_t *sem)
 
   /* Check if the lock is available */
 
-  if (sem->semcount > 0)
+  if (atomic_fetch_sub(NXSEM_COUNT(sem), 1) > 0)
     {
       /* It is, let the task take the semaphore. */
 
-      sem->semcount--;
+      ret = nxsem_protect_wait(sem);
+      if (ret < 0)
+        {
+          atomic_fetch_add(NXSEM_COUNT(sem), 1);
+          leave_critical_section(flags);
+          return ret;
+        }
+
       nxsem_add_holder(sem);
-      rtcb->waitobj = NULL;
-      ret = OK;
     }
 
   /* The semaphore is NOT available, We will have to block the
@@ -109,16 +109,13 @@ int nxsem_wait(FAR sem_t *sem)
 #ifdef CONFIG_PRIORITY_INHERITANCE
       uint8_t prioinherit = sem->flags & SEM_PRIO_MASK;
 #endif
+      rtcb = this_task();
 
       /* First, verify that the task is not already waiting on a
        * semaphore
        */
 
       DEBUGASSERT(rtcb->waitobj == NULL);
-
-      /* Handle the POSIX semaphore (but don't set the owner yet) */
-
-      sem->semcount--;
 
       /* Save the waited on semaphore in the TCB */
 
@@ -159,21 +156,18 @@ int nxsem_wait(FAR sem_t *sem)
 
       DEBUGASSERT(!is_idle_task(rtcb));
 
-      /* Remove the tcb task from the ready-to-run list. */
+      /* Remove the tcb task from the running list. */
 
-      switch_needed = nxsched_remove_readytorun(rtcb, true);
+      nxsched_remove_self(rtcb);
 
       /* Add the task to the specified blocked task list */
 
       rtcb->task_state = TSTATE_WAIT_SEM;
       nxsched_add_prioritized(rtcb, SEM_WAITLIST(sem));
 
-      /* Now, perform the context switch if one is needed */
+      /* Now, perform the context switch */
 
-      if (switch_needed)
-        {
-          up_switch_context(this_task(), rtcb);
-        }
+      up_switch_context(this_task(), rtcb);
 
       /* When we resume at this point, either (1) the semaphore has been
        * assigned to this thread of execution, or (2) the semaphore wait
@@ -217,6 +211,63 @@ int nxsem_wait(FAR sem_t *sem)
 
   leave_critical_section(flags);
   return ret;
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: nxsem_wait
+ *
+ * Description:
+ *   This function attempts to lock the semaphore referenced by 'sem'.  If
+ *   the semaphore value is (<=) zero, then the calling task will not return
+ *   until it successfully acquires the lock.
+ *
+ *   This is an internal OS interface.  It is functionally equivalent to
+ *   sem_wait except that:
+ *
+ *   - It is not a cancellation point, and
+ *   - It does not modify the errno value.
+ *
+ * Input Parameters:
+ *   sem - Semaphore descriptor.
+ *
+ * Returned Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *   Possible returned errors:
+ *
+ *   - EINVAL:  Invalid attempt to get the semaphore
+ *   - EINTR:   The wait was interrupted by the receipt of a signal.
+ *
+ ****************************************************************************/
+
+int nxsem_wait(FAR sem_t *sem)
+{
+  /* This API should not be called from interrupt handlers & idleloop */
+
+  DEBUGASSERT(sem != NULL && up_interrupt_context() == false);
+  DEBUGASSERT(!OSINIT_IDLELOOP() || !sched_idletask());
+
+  /* If this is a mutex, we can try to get the mutex in fast mode,
+   * else try to get it in slow mode.
+   */
+
+#if !defined(CONFIG_PRIORITY_INHERITANCE) && !defined(CONFIG_PRIORITY_PROTECT)
+  if (sem->flags & SEM_TYPE_MUTEX)
+    {
+      int32_t old = 1;
+      if (atomic_try_cmpxchg_acquire(NXSEM_COUNT(sem), &old, 0))
+        {
+          return OK;
+        }
+    }
+#endif
+
+  return nxsem_wait_slow(sem);
 }
 
 /****************************************************************************

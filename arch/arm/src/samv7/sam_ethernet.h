@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/samv7/sam_ethernet.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -243,7 +245,7 @@ int sam_emac_setmacaddr(int intf, uint8_t mac[6]);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SAMV7_EMAC0_PHYINIT) | defined(CONFIG_SAMV7_EMAC1_PHYINIT)
+#if defined(CONFIG_SAMV7_EMAC0_PHYINIT) || defined(CONFIG_SAMV7_EMAC1_PHYINIT)
 int sam_phy_boardinitialize(int intf);
 #endif
 

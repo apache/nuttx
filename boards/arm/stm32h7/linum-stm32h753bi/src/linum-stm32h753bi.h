@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32h7/linum-stm32h753bi/src/linum-stm32h753bi.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -38,12 +40,12 @@
 
 /* LED of board */
 
-#define GPIO_LD1       (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
-                        GPIO_OUTPUT_SET | GPIO_PORTG | GPIO_PIN2)
-#define GPIO_LD2       (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
-                        GPIO_OUTPUT_SET | GPIO_PORTG | GPIO_PIN3)
-#define GPIO_LD3       (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
-                        GPIO_OUTPUT_SET | GPIO_PORTB | GPIO_PIN2)
+#define GPIO_LD1       (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz | \
+                        GPIO_OUTPUT_SET|GPIO_PORTG|GPIO_PIN2)
+#define GPIO_LD2       (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz | \
+                        GPIO_OUTPUT_SET|GPIO_PORTG|GPIO_PIN3)
+#define GPIO_LD3       (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz | \
+                        GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN2)
 
 #define GPIO_LED_RED     GPIO_LD1
 #define GPIO_LED_GREEN   GPIO_LD2
@@ -92,24 +94,29 @@
 #  undef HAVE_SDIO
 #endif
 
-#define GPIO_SDIO_NCD     (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI | GPIO_PORTG | GPIO_PIN7) /* PG7 */
-#define GPIO_SD1_PWR_EN_N (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
-                           GPIO_OUTPUT_SET | GPIO_PORTD | GPIO_PIN7)                     /* PD7 */
+#define GPIO_SDIO_NCD     (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTG|GPIO_PIN7) /* PG7 */
+#define GPIO_SD1_PWR_EN_N (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz| \
+                           GPIO_OUTPUT_SET|GPIO_PORTD|GPIO_PIN7)                 /* PD7 */
 
 #define SDIO_SLOTNO        0
 #define SDIO_MINOR         0
 
 /* PWM */
 
-#define BUZZER_PWMTIMER 4
+#define BUZZER_PWMTIMER    4
+
+/* OneShot Timer */
+
+#define BOARD_TONE_ONESHOT_TIM     17  /* Timer 17 - Oneshot timer for note timings */
+#define BOARD_TONE_ONESHOT_TIM_RES 10  /* Timer 17 - Oneshot timer resolution (us)  */
 
 /* Ethernet
  *
  * PI4  Reset PHY pin
  */
 
-#define GPIO_ETH_RESET    (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_100MHz |\
-                           GPIO_OUTPUT_CLEAR | GPIO_PORTI | GPIO_PIN4)  /* PI4 */
+#define GPIO_ETH_RESET    (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_100MHz|\
+                           GPIO_OUTPUT_CLEAR|GPIO_PORTI|GPIO_PIN4)       /* PI4 */
 
 /* Quadrature Encoder
  *
@@ -118,10 +125,12 @@
 
 #define LINUMSTM32H753BI_QETIMER 5
 
-/* LCD */
+/* DISP_RESET */
 
 #define GPIO_LCD_DISP      (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
                             GPIO_OUTPUT_SET|GPIO_PORTI|GPIO_PIN7)
+
+/* DISP_PWM */
 
 #define GPIO_LCD_BL        (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
                             GPIO_OUTPUT_SET|GPIO_PORTH|GPIO_PIN6)
@@ -210,6 +219,19 @@ int stm32_at24_init(char *path);
 #ifdef CONFIG_PWM
 int stm32_pwm_setup(void);
 #endif
+
+/****************************************************************************
+ * Name: stm32_spidev_initialize
+ *
+ * Description:
+ *   Called to configure SPI chip select GPIO pins.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_STM32H7_SPI
+void stm32_spidev_initialize(void);
+#endif
+
 /****************************************************************************
  * Name: stm32_n25qxxx_setup
  *
@@ -231,5 +253,59 @@ int stm32_w25qxxx_setup(void);
  ****************************************************************************/
 
 int board_qencoder_initialize(int devno, int timerno);
+
+/****************************************************************************
+ * Name: stm32_mfrc522initialize
+ *
+ * Description:
+ *   Initialize and register the MFRC522 RFID driver.
+ *
+ * Input Parameters:
+ *   devpath - The full path to the driver to register. E.g., "/dev/rfid0"
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_CL_MFRC522
+int stm32_mfrc522initialize(const char *devpath);
+#endif
+
+/****************************************************************************
+ * Name: board_tone_initialize
+ *
+ * Input Parameters:
+ *   devno - The device number, used to build the device path as /dev/toneN
+ *
+ * Description:
+ *   Configure and initialize the tone generator.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_AUDIO_TONE
+int board_tone_initialize(int devno);
+#endif
+
+/****************************************************************************
+ * Name: stm32_tsc_setup
+ *
+ * Description:
+ *   This function is called by board-bringup logic to configure the
+ *   touchscreen device.  This function will register the driver as
+ *   /dev/inputN where N is the minor device number.
+ *
+ * Input Parameters:
+ *   minor   - The input device minor number
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_INPUT_FT5X06
+int stm32_tsc_setup(int minor);
+#endif
 
 #endif /* __BOARDS_ARM_STM32H7_LINUM_STM32H753BI_SRC_LINUM_STM32H753BI_H */

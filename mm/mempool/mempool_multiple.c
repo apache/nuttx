@@ -1,6 +1,8 @@
 /****************************************************************************
  * mm/mempool/mempool_multiple.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -22,24 +24,16 @@
  * Included Files
  ****************************************************************************/
 
+#include <assert.h>
 #include <strings.h>
 #include <syslog.h>
 #include <sys/param.h>
 
 #include <nuttx/mutex.h>
+#include <nuttx/nuttx.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mm/mempool.h>
-
-#include <assert.h>
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#undef  ALIGN_UP
-#define ALIGN_UP(x, a)        ((((size_t)x) + ((a) - 1)) & (~((a) - 1)))
-#undef  ALIGN_DOWN
-#define ALIGN_DOWN(x, a)      ((size_t)(x) & (~((a) - 1)))
+#include <nuttx/mm/kasan.h>
 
 /****************************************************************************
  * Private Types
@@ -192,7 +186,7 @@ retry:
       sq_addfirst(&chunk->entry, &mpool->chunk_queue);
     }
 
-  ret = (FAR void *)ALIGN_UP(chunk->next, align);
+  ret = (FAR void *)ALIGN_UP((uintptr_t)chunk->next, align);
   if ((uintptr_t)chunk->end - (uintptr_t)ret < size)
     {
       goto retry;
@@ -309,13 +303,13 @@ mempool_multiple_get_dict(FAR struct mempool_multiple_s *mpool,
   size_t row;
   size_t col;
 
-  if (mpool == NULL || blk == NULL)
+  if (mpool == NULL || blk == NULL || mpool->dict == NULL)
     {
       return NULL;
     }
 
-  addr = (FAR void *)ALIGN_DOWN(blk, mpool->expandsize);
-  if (blk == addr)
+  addr = (FAR void *)ALIGN_DOWN((uintptr_t)blk, mpool->expandsize);
+  if (kasan_reset_tag(blk) == kasan_reset_tag(addr))
     {
       /* It is not a memory block allocated by mempool
        * Because the blk is need not aligned with the expandsize
@@ -333,9 +327,12 @@ mempool_multiple_get_dict(FAR struct mempool_multiple_s *mpool,
 
   row = index >> mpool->dict_col_num_log2;
   col = index - (row << mpool->dict_col_num_log2);
-  if (mpool->dict[row] == NULL ||
-      mpool->dict[row][col].addr != addr ||
-      (FAR char *)blk - (FAR char *)addr >= mpool->dict[row][col].size)
+
+  addr = kasan_reset_tag(addr);
+  if (kasan_reset_tag(mpool->dict[row]) == NULL ||
+      kasan_reset_tag(mpool->dict[row][col].addr) != addr ||
+      ((FAR char *)kasan_reset_tag(blk) -
+       (FAR char *)addr >= mpool->dict[row][col].size))
     {
       return NULL;
     }
@@ -431,11 +428,17 @@ mempool_multiple_init(FAR const char *name,
         }
     }
 
-  mpool = alloc(arg, sizeof(uintptr_t), sizeof(struct mempool_multiple_s));
+  mpool = alloc(arg, sizeof(uintptr_t),
+                sizeof(struct mempool_multiple_s) +
+                npools * sizeof(struct mempool_s));
+
   if (mpool == NULL)
     {
       return NULL;
     }
+
+  pools = (FAR struct mempool_s *)
+          ((uintptr_t)mpool + sizeof(struct mempool_multiple_s));
 
   mpool->alloc_size = alloc_size;
   mpool->expandsize = expandsize;
@@ -445,13 +448,6 @@ mempool_multiple_init(FAR const char *name,
   mpool->arg = arg;
   mpool->alloced = alloc_size(arg, mpool);
   sq_init(&mpool->chunk_queue);
-  pools = mempool_multiple_alloc_chunk(mpool, sizeof(uintptr_t),
-                                       npools * sizeof(struct mempool_s));
-  if (pools == NULL)
-    {
-      goto err_with_mpool;
-    }
-
   mpool->pools = pools;
   mpool->npools = npools;
   mpool->minpoolsize = minpoolsize;
@@ -515,8 +511,6 @@ err_with_pools:
     }
 
   mempool_multiple_free_chunk(mpool, pools);
-err_with_mpool:
-  free(arg, mpool);
   return NULL;
 }
 
@@ -636,8 +630,9 @@ int mempool_multiple_free(FAR struct mempool_multiple_s *mpool,
       return -EINVAL;
     }
 
-  blk = (FAR char *)blk - (((FAR char *)blk -
-                           ((FAR char *)dict->addr + mpool->minpoolsize)) %
+  blk = (FAR char *)blk - (((FAR char *)kasan_reset_tag(blk) -
+                            ((FAR char *)kasan_reset_tag(dict->addr) +
+                             mpool->minpoolsize)) %
                            MEMPOOL_REALBLOCKSIZE(dict->pool));
   mempool_release(dict->pool, blk);
   return 0;
@@ -721,7 +716,7 @@ FAR void *mempool_multiple_memalign(FAR struct mempool_multiple_s *mpool,
       FAR char *blk = mempool_allocate(pool);
       if (blk != NULL)
         {
-          return (FAR void *)ALIGN_UP(blk, alignment);
+          return (FAR void *)ALIGN_UP((uintptr_t)blk, alignment);
         }
     }
   while (++pool < end);
@@ -893,7 +888,7 @@ void mempool_multiple_deinit(FAR struct mempool_multiple_s *mpool)
     }
 
   mempool_multiple_free_chunk(mpool, mpool->dict);
-  mempool_multiple_free_chunk(mpool, mpool->pools);
+  mpool->dict = NULL;
   nxrmutex_destroy(&mpool->lock);
   mpool->free(mpool->arg, mpool);
 }

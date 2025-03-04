@@ -1,5 +1,7 @@
 ############################################################################
-# boards/arm/csk6011a/csk6011a-nano/src/Makefile
+# boards/arm/csk6/csk6011a-nano/src/Makefile
+#
+# SPDX-License-Identifier: Apache-2.0
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with

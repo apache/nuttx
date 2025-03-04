@@ -28,12 +28,16 @@ jobs:
           script: |
             const body = context.payload.issue.body;
             const bodySplit = body.split(/\[|\]/).map(e => e.toLowerCase());
-            const oskeywords = ['other', 'bsd', 'linux', 'mac', 'windows'];
-            const archkeywords1 = ['all', 'arm', 'arm64', 'avr', 'ceva', 'hc', 'mips', 'misoc', 'openrisc', 'renesas'];
-            const archkeywords2 = ['risc-v', 'simulator', 'sparc', 'tricore', 'x86', 'x86_64', 'xtensa', 'z16', 'z80', 'renesas'];
-            const areakeywords1 = ['applications', 'api', 'board support', 'build system', 'configuring', 'debugging', 'drivers', 'file system', 'installing', 'kconfig'];
-            const areakeywords2 = ['kernel', 'memory management', 'native port', 'networking', 'os components', 'posix', 'sensors', 'specific peripheral', 'openrisc', 'renesas'];
-            const keywords = [...oskeywords, ...archkeywords1, ...archkeywords2, ...areakeywords1, ...areakeywords2];
+            const oskeywords = ['os: other', 'os: bsd', 'os: linux', 'os: mac', 'os: windows'];
+            const archkeywords1 = ['arch: all', 'arch: arm', 'arch: arm64', 'arch: avr', 'arch: ceva'];
+            const archkeywords2 = ['arch: hc', 'arch: mips', 'arch: misoc', 'arch: openrisc', 'arch:renesas'];
+            const archkeywords3 = ['arch: risc-v', 'arch: simulator', 'arch: sparc', 'arch: tricore'];
+            const archkeywords4 = ['arch: x86', 'arch: x86_64', 'arch: xtensa', 'arch: z16', 'arch: z80', 'arch:renesas'];
+            const areakeywords1 = ['area: applications', 'area: api', 'area: board support', 'area: build system'];
+            const areakeywords2 = ['area: configuring', 'area: debugging', 'area: drivers', 'area: file system', 'area: installing', 'area: kconfig'];
+            const areakeywords3 = ['area: kernel', 'area: memory management', 'area: native port', 'area: networking'];
+            const areakeywords4 = ['area: os components', 'area: posix', 'area: sensors', 'area: specific peripheral'];
+            const keywords = [...oskeywords, ...archkeywords1, ...archkeywords2, ...archkeywords3, ...archkeywords4, ...areakeywords1, ...areakeywords2, ...areakeywords3, ...areakeywords4];
             var keywordsfound = new Set();
             for (const keyword of keywords) {
               if (bodySplit.includes(keyword)) {

@@ -1,9 +1,8 @@
 /****************************************************************************
  * libs/libc/machine/arm/armv7-a/gnu/arch_strcmp.S
  *
- * Copyright (c) 2011 The Android Open Source Project
- * Copyright (c) 2008 ARM Ltd
- * All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2011 The Android Open Source Project,2008 ARM Ltd
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -54,9 +53,9 @@
 
 	.arm
 	.syntax unified
-	.global strcmp
-	.type	strcmp, %function
-strcmp:
+	.global ARCH_LIBCFUN(strcmp)
+	.type	ARCH_LIBCFUN(strcmp), %function
+ARCH_LIBCFUN(strcmp):
 	pld	[r0, #0]
 	pld	[r1, #0]
 	eor	r2, r0, r1
@@ -304,6 +303,6 @@ strcmp:
 	ldr	r4, [sp], #4
 	ldr	r5, [sp], #4
 	bx	lr
-	.size strcmp, . - strcmp
+	.size ARCH_LIBCFUN(strcmp), . - ARCH_LIBCFUN(strcmp)
 
 #endif

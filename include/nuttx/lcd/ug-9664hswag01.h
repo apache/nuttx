@@ -1,8 +1,7 @@
 /****************************************************************************
  * include/nuttx/lcd/ug-9664hswag01.h
  *
- * Driver for the Univision UG-9664HSWAG01 Display with the Solomon Systech
- * SSD1305 LCD controller.
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

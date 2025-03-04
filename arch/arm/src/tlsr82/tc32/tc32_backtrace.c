@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/tlsr82/tc32/tc32_backtrace.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -494,10 +496,11 @@ int up_backtrace(struct tcb_s *tcb, void **buffer, int size, int skip)
 #endif
           if (ret < size)
             {
-              sp = (void *)CURRENT_REGS[REG_SP];
+              sp = ((uint32_t *)running_regs())[REG_SP];
               ret += backtrace_push(rtcb->stack_base_ptr +
                                     rtcb->adj_stack_size, &sp,
-                                    (void *)CURRENT_REGS[REG_PC],
+                                    (void *)((uint32_t *)
+                                    running_regs())[REG_PC],
                                     &buffer[ret], size - ret, &skip);
             }
         }

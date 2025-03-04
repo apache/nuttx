@@ -1,17 +1,12 @@
 /****************************************************************************
  * arch/arm/src/kinetis/kinetis_edma.c
  *
- *   Copyright (C) 2019, 2021 Gregory Nutt. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
- *            David Sidrane <david.sidrane@nscdg.com>
- *
- * This file was leveraged from the NuttX S32K port.  Portions of that eDMA
- * logic derived from NXP sample code which has a compatible BSD 3-clause
- * license:
- *
- *   Copyright (c) 2015, Freescale Semiconductor, Inc.
- *   Copyright 2016-2017 NXP
- *   All rights reserved
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2019, 2021 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2016-2017 NXP
+ * SPDX-FileCopyrightText: 2015, Freescale Semiconductor, Inc.
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-FileContributor: David Sidrane <david.sidrane@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -160,6 +155,7 @@ struct kinetis_edma_s
 static struct kinetis_edma_s g_edma =
 {
   .chlock = NXMUTEX_INITIALIZER,
+  .lock = SP_UNLOCKED,
 #if CONFIG_KINETIS_EDMA_NTCD > 0
   .dsem = SEM_INITIALIZER(CONFIG_KINETIS_EDMA_NTCD),
 #endif
@@ -202,15 +198,16 @@ static struct kinetis_edmatcd_s *kinetis_tcd_alloc(void)
    * waiting.
    */
 
-  flags = enter_critical_section();
   nxsem_wait_uninterruptible(&g_edma.dsem);
+
+  flags = spin_lock_irqsave(&g_edma.lock);
 
   /* Now there should be a TCD in the free list reserved just for us */
 
   tcd = (struct kinetis_edmatcd_s *)sq_remfirst(&g_tcd_free);
   DEBUGASSERT(tcd != NULL);
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_edma.lock, flags);
   return tcd;
 }
 #endif
@@ -224,6 +221,19 @@ static struct kinetis_edmatcd_s *kinetis_tcd_alloc(void)
  ****************************************************************************/
 
 #if CONFIG_KINETIS_EDMA_NTCD > 0
+static void kinetis_tcd_free_nolock(struct kinetis_edmatcd_s *tcd)
+{
+  irqstate_t flags;
+
+  /* Add the the TCD to the end of the free list and post the 'dsem',
+   * possibly waking up another thread that might be waiting for
+   * a TCD.
+   */
+
+  sq_addlast((sq_entry_t *)tcd, &g_tcd_free);
+  nxsem_post(&g_edma.dsem);
+}
+
 static void kinetis_tcd_free(struct kinetis_edmatcd_s *tcd)
 {
   irqstate_t flags;
@@ -233,10 +243,11 @@ static void kinetis_tcd_free(struct kinetis_edmatcd_s *tcd)
    * a TCD.
    */
 
-  flags = spin_lock_irqsave(NULL);
-  sq_addlast((sq_entry_t *)tcd, &g_tcd_free);
-  nxsem_post(&g_edma.dsem);
-  spin_unlock_irqrestore(NULL, flags);
+  flags = spin_lock_irqsave(&g_edma.lock);
+  sched_lock();
+  kinetis_tcd_free_nolock(tcd);
+  spin_unlock_irqrestore(&g_edma.lock, flags);
+  sched_unlock();
 }
 #endif
 
@@ -440,8 +451,12 @@ static void kinetis_dmaterminate(struct kinetis_dmach_s *dmach, int result)
   struct kinetis_edmatcd_s *next;
 #endif
   uintptr_t regaddr;
+  irqstate_t flags;
   uint8_t regval8;
   uint8_t chan;
+
+  flags = spin_lock_irqsave(&g_edma.lock);
+  sched_lock();
 
   /* Disable channel ERROR interrupts */
 
@@ -474,7 +489,7 @@ static void kinetis_dmaterminate(struct kinetis_dmach_s *dmach, int result)
        next = dmach->flags & EDMA_CONFIG_LOOPDEST ?
               NULL : (struct kinetis_edmatcd_s *)tcd->dlastsga;
 
-       kinetis_tcd_free(tcd);
+       kinetis_tcd_free_nolock(tcd);
     }
 
   dmach->head = NULL;
@@ -491,6 +506,9 @@ static void kinetis_dmaterminate(struct kinetis_dmach_s *dmach, int result)
   dmach->callback = NULL;
   dmach->arg      = NULL;
   dmach->state    = KINETIS_DMA_IDLE;
+
+  spin_unlock_irqrestore(&g_edma.lock, flags);
+  sched_unlock();
 }
 
 /****************************************************************************
@@ -1119,7 +1137,7 @@ int kinetis_dmach_start(DMACH_HANDLE handle, edma_callback_t callback,
 
   /* Save the callback info.  This will be invoked when the DMA completes */
 
-  flags           = spin_lock_irqsave(NULL);
+  flags           = spin_lock_irqsave(&g_edma.lock);
   dmach->callback = callback;
   dmach->arg      = arg;
 
@@ -1144,7 +1162,7 @@ int kinetis_dmach_start(DMACH_HANDLE handle, edma_callback_t callback,
       putreg8(regval8, KINETIS_EDMA_SERQ);
     }
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&g_edma.lock, flags);
   return OK;
 }
 
@@ -1167,14 +1185,11 @@ int kinetis_dmach_start(DMACH_HANDLE handle, edma_callback_t callback,
 void kinetis_dmach_stop(DMACH_HANDLE handle)
 {
   struct kinetis_dmach_s *dmach = (struct kinetis_dmach_s *)handle;
-  irqstate_t flags;
 
   dmainfo("dmach: %p\n", dmach);
   DEBUGASSERT(dmach != NULL);
 
-  flags = spin_lock_irqsave(NULL);
   kinetis_dmaterminate(dmach, -EINTR);
-  spin_unlock_irqrestore(NULL, flags);
 }
 
 /****************************************************************************
@@ -1272,7 +1287,7 @@ void kinetis_dmasample(DMACH_HANDLE handle, struct kinetis_dmaregs_s *regs)
 
   /* eDMA Global Registers */
 
-  flags          = spin_lock_irqsave(NULL);
+  flags          = spin_lock_irqsave(&g_edma.lock);
 
   regs->cr       = getreg32(KINETIS_EDMA_CR);   /* Control */
   regs->es       = getreg32(KINETIS_EDMA_ES);   /* Error Status */
@@ -1307,7 +1322,7 @@ void kinetis_dmasample(DMACH_HANDLE handle, struct kinetis_dmaregs_s *regs)
   regaddr        = KINETIS_DMAMUX_CHCFG(chan);
   regs->dmamux   = getreg32(regaddr);         /* Channel configuration */
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&g_edma.lock, flags);
 }
 #endif /* CONFIG_DEBUG_DMA */
 

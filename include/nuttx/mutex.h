@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/mutex.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -47,6 +49,9 @@ struct mutex_s
 {
   sem_t sem;
   pid_t holder;
+#if CONFIG_LIBC_MUTEX_BACKTRACE > 0
+  FAR void *backtrace[CONFIG_LIBC_MUTEX_BACKTRACE];
+#endif
 };
 
 typedef struct mutex_s mutex_t;
@@ -119,7 +124,7 @@ int nxmutex_destroy(FAR mutex_t *mutex);
  * Name: nxmutex_is_hold
  *
  * Description:
- *   This function check whether the caller hold the mutex
+ *   This function check whether the calling thread hold the mutex
  *   referenced by 'mutex'.
  *
  * Parameters:
@@ -136,6 +141,8 @@ bool nxmutex_is_hold(FAR mutex_t *mutex);
  *
  * Description:
  *   This function get the holder of the mutex referenced by 'mutex'.
+ *   Note that this is inherently racy unless the calling thread is
+ *   holding the mutex.
  *
  * Parameters:
  *   mutex - mutex descriptor.
@@ -151,6 +158,8 @@ int nxmutex_get_holder(FAR mutex_t *mutex);
  *
  * Description:
  *   This function get the lock state the mutex referenced by 'mutex'.
+ *   Note that this is inherently racy unless the calling thread is
+ *   holding the mutex.
  *
  * Parameters:
  *   mutex - mutex descriptor.
@@ -337,6 +346,65 @@ int nxmutex_breaklock(FAR mutex_t *mutex, FAR unsigned int *locked);
 int nxmutex_restorelock(FAR mutex_t *mutex, unsigned int locked);
 
 /****************************************************************************
+ * Name: nxmutex_set_protocol
+ *
+ * Description:
+ *   This function attempts to set the priority protocol of a mutex.
+ *
+ * Parameters:
+ *   mutex        - mutex descriptor.
+ *   protocol     - mutex protocol value to set.
+ *
+ * Return Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure
+ *
+ ****************************************************************************/
+
+int nxmutex_set_protocol(FAR mutex_t *mutex, int protocol);
+
+/****************************************************************************
+ * Name: nxmutex_getprioceiling
+ *
+ * Description:
+ *   This function attempts to get the priority ceiling of a mutex.
+ *
+ * Parameters:
+ *   mutex        - mutex descriptor.
+ *   prioceiling  - location to return the mutex priority ceiling.
+ *
+ * Return Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure
+ *
+ ****************************************************************************/
+
+int nxmutex_getprioceiling(FAR const mutex_t *mutex, FAR int *prioceiling);
+
+/****************************************************************************
+ * Name: nxmutex_setprioceiling
+ *
+ * Description:
+ *   This function attempts to set the priority ceiling of a mutex.
+ *
+ * Parameters:
+ *   mutex        - mutex descriptor.
+ *   prioceiling  - mutex priority ceiling value to set.
+ *   old_ceiling  - location to return the mutex ceiling priority set before.
+ *
+ * Return Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure
+ *
+ ****************************************************************************/
+
+int nxmutex_setprioceiling(FAR mutex_t *mutex, int prioceiling,
+                           FAR int *old_ceiling);
+
+/****************************************************************************
  * Name: nxrmutex_init
  *
  * Description:
@@ -380,7 +448,7 @@ int nxrmutex_destroy(FAR rmutex_t *rmutex);
  * Name: nxrmutex_is_hold
  *
  * Description:
- *   This function check whether the caller hold the recursive mutex
+ *   This function check whether the calling thread hold the recursive mutex
  *   referenced by 'rmutex'.
  *
  * Parameters:
@@ -396,7 +464,11 @@ bool nxrmutex_is_hold(FAR rmutex_t *rmutex);
  * Name: nxrmutex_is_recursive
  *
  * Description:
- *   This function check whether the recursive mutex is recursive
+ *   This function check whether the recursive mutex is currently held
+ *   recursively. That is, whether it's locked more than once by the
+ *   current holder.
+ *   Note that this is inherently racy unless the calling thread is
+ *   holding the mutex.
  *
  * Parameters:
  *   rmutex - Recursive mutex descriptor.
@@ -413,6 +485,8 @@ bool nxrmutex_is_recursive(FAR rmutex_t *rmutex);
  *
  * Description:
  *   This function get the holder of the mutex referenced by 'mutex'.
+ *   Note that this is inherently racy unless the calling thread is
+ *   holding the mutex.
  *
  * Parameters:
  *   rmutex - Rmutex descriptor.
@@ -429,6 +503,8 @@ int nxrmutex_get_holder(FAR rmutex_t *rmutex);
  * Description:
  *   This function get the lock state the recursive mutex
  *   referenced by 'rmutex'.
+ *   Note that this is inherently racy unless the calling thread is
+ *   holding the mutex.
  *
  * Parameters:
  *   rmutex - Recursive mutex descriptor.
@@ -614,6 +690,13 @@ int nxrmutex_breaklock(FAR rmutex_t *rmutex, FAR unsigned int *count);
  ****************************************************************************/
 
 int nxrmutex_restorelock(FAR rmutex_t *rmutex, unsigned int count);
+
+#define nxrmutex_set_protocol(rmutex, protocol) \
+        nxmutex_set_protocol(&(rmutex)->mutex, protocol)
+#define nxrmutex_getprioceiling(rmutex, prioceiling) \
+        nxmutex_getprioceiling(&(rmutex)->mutex, prioceiling)
+#define nxrmutex_setprioceiling(rmutex, prioceiling, old_ceiling) \
+        nxmutex_setprioceiling(&(rmutex)->mutex, prioceiling, old_ceiling)
 
 #undef EXTERN
 #ifdef __cplusplus

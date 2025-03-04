@@ -1,8 +1,8 @@
 /****************************************************************************
  * libs/libc/machine/arm64/gnu/arch_strncmp.S
  *
- * Copyright (c) 2013, 2018, Linaro Limited
- *  All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2013, 2018, Linaro Limited, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -83,7 +83,7 @@
 	.rep 7
 	nop	/* Pad so that the loop below fits a cache line.  */
 	.endr
-def_fn strncmp
+def_fn ARCH_LIBCFUN(strncmp)
 	cbz	limit, .Lret0
 	eor	tmp1, src1, src2
 	mov	zeroones, #REP8_01
@@ -295,6 +295,6 @@ def_fn strncmp
 .Lret0:
 	mov	result, #0
 	ret
-	.size strncmp, . - strncmp
+	.size ARCH_LIBCFUN(strncmp), . - ARCH_LIBCFUN(strncmp)
 
 #endif

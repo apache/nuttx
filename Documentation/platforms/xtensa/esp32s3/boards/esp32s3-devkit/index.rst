@@ -242,6 +242,24 @@ You can scan for all I2C devices using the following command::
 
     nsh> i2c dev 0x00 0x7f
 
+To use slave mode, you can enable `ESP32S3_I2S0_ROLE_SLAVE` or
+`ESP32S3_I2S1_ROLE_SLAVE` option.
+To use slave mode driver following snippet demonstrates how write to i2c bus
+using slave driver:
+
+.. code-block:: C
+
+   #define ESP_I2C_SLAVE_PATH  "/dev/i2cslv0"
+   int main(int argc, char *argv[])
+     {
+       int i2c_slave_fd;
+       int ret;
+       uint8_t buffer[5] = {0xAA};
+       i2c_slave_fd = open(ESP_I2C_SLAVE_PATH, O_RDWR);
+       ret = write(i2c_slave_fd, buffer, 5);
+       close(i2c_slave_fd);
+    }
+
 knsh
 ----
 
@@ -357,6 +375,16 @@ To test it, just run the ``oneshot`` example::
     Starting oneshot timer with delay 2000000 microseconds
     Waiting...
     Finished
+
+qencoder
+---
+
+This configuration demostrates the use of Quadrature Encoder connected to pins
+GPIO10 and GPIO11. You can start measurement of pulses using the following
+command (by default, it will open ``\dev\qe0`` device and print 20 samples
+using 1 second delay)::
+
+    nsh> qe
 
 pm
 -------
@@ -668,9 +696,9 @@ https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-guides/bootloade
         --disk-version 2.0 \
         ..../wasm_module_dir
 
-2. Build a NuttX binary as usual with this config.
+2. Build a NuttX binary and write it to the board as usual with this config.
 
-3. Write the NuttX binary and the filesystem image to the board::
+3. Write the filesystem image to the board::
 
       % esptool.py \
         -c esp32s3 \
@@ -680,7 +708,6 @@ https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-guides/bootloade
         -fs detect \
         -fm dio \
         -ff 40m \
-        0x10000 nuttx.bin \
         0x180000 ..../littlefs.bin
 
 4. Mount the filesystem and run a wasm module on it::
@@ -783,3 +810,151 @@ To test the XTWDT(/dev/watchdog3) an interrupt handler needs to be
 implemented because XTWDT does not have system reset feature. To implement
 an interrupt handler `WDIOC_CAPTURE` command can be used. When interrupt
 rises, XTAL32K clock can be restored with `WDIOC_RSTCLK` command.
+
+adb
+---
+
+Basic NuttShell configuration console enabled over USB Device (USB ADB).
+
+You can run the configuration and compilation procedure::
+
+  $ ./tools/configure.sh esp32s3-devkit:adb
+  $ make -j16
+  $ make flash ESPTOOL_PORT=/dev/ttyACMx
+
+Then run the adb command::
+
+  $ adb -s 1234 shell
+  nsh> uname -a
+  NuttX 0.0.0  Nov 22 2024 11:41:43 xtensa esp32s3-devkit
+
+txtable
+-------
+
+Basic TXTABLE(Text based Partition Table) configuration console enabled over USB ADB.
+
+You can run the configuration and compilation procedure::
+
+  $ ./tools/configure.sh -l esp32s3-devkit:txtable
+  $ make -j16
+  $ make flash ESPTOOL_PORT=/dev/ttyACMx
+
+Then check the partition::
+
+  nsh> ls -l /dev/
+  /dev:
+   dr--r--r--           0 adb0/
+   crw-rw-rw-           0 console
+   frw-rw-rw-     1044480 data
+   frw-rw-rw-     1048576 esp32s3flash
+   c-w--w--w-           0 log
+   crw-rw-rw-           0 null
+   crw-rw-rw-           0 ptmx
+   dr--r--r--           0 pts/
+   brw-rw-rw-        1024 ram0
+   crw-rw-rw-           0 ttyS0
+   frw-rw-rw-        4096 txtable
+   crw-rw-rw-           0 zero
+
+usbmsc
+------
+
+Basic USBMSC(USB Mass Storage Class) configuration based on esp32s3-devkit:usb_device
+
+You can run the configuration and compilation procedure::
+
+  $ ./tools/configure.sh -l esp32s3-devkit:usbmsc
+  $ make flash ESPTOOL_PORT=/dev/ttyACMx -j16
+
+To test it, just run the following::
+
+  # Device
+  nsh> mkrd -m 10 -s 512 640
+  nsh> msconn
+
+  # Host
+  $ sudo mkfs.ext4 /dev/sdx
+  $ sudo mount /dev/sdx ./mnt/
+
+fastboot
+--------
+
+The basic Fastboot configuration is based on esp32s3-devkit:usb_device.
+More details about usage of fastboot, please refer to `fastbootd — NuttX latest documentation <https://nuttx.apache.org/docs/latest/applications/system/fastboot/index.html>`_.
+
+You can run the configuration and compilation procedure::
+
+  $ ./tools/configure.sh -l esp32s3-devkit:fastboot
+  $ make flash ESPTOOL_PORT=/dev/ttyACMx -j
+
+To test it, just run the following (**Default is host side**):
+
+1. Install fastboot tool::
+
+    sudo apt install fastboot
+
+2. List devices running fastboot::
+
+    fastboot devices
+
+  Example::
+
+    $ fastboot devices
+    1234    fastboot
+
+3. Display given variable::
+
+    fastboot getvar <NAME>
+
+  Example::
+
+    # Display the "kernel" variable::
+    $ fastboot -s 1234 getvar kernel
+    Kernel: NuttX
+    Finished. Total time: 0.000s
+
+4. Flash given partition::
+
+    fastboot flash PARTITION FILENAME
+
+  Example (Flash test.img to partition ram10)::
+
+    # 1. Generate a test image
+    $ dd if=/dev/random of=test.img bs=1 count=128
+
+    # 2. Create a RAM disk (Device side)
+    nsh> mkrd -m 10 -s 512 640
+    nsh> ls -l /dev/ram10
+     brw-rw-rw-      327680 /dev/ram10
+
+    # 3. Flash test.img to partition ram10
+    $ fastboot flash ram10 ./test.img
+    Sending 'ram10' (0 KB)                             OKAY [  0.001s]
+    Writing 'ram10'                                    OKAY [  0.001s]
+    Finished. Total time: 0.003s
+
+    # 4. Hexdump the test.img and partition ram10, and compare
+
+    ## Host side
+    $ hexdump test.img
+    0000000 b1e8 b297 4ac5 9dfa d170 244e 4f83 0f93
+    0000010 1bf7 0b19 7bde 5543 0520 9719 746d 54fc
+    0000020 369d 72b3 f2e6 f463 c8e9 24c8 c876 e820
+    0000030 384d 07ab 52ca 2b24 dee7 0404 2663 91e4
+    0000040 6752 3611 aece b543 5194 2224 d1d5 8144
+    0000050 ff44 3bc9 5155 b393 1efb 9e88 2de9 3669
+    0000060 d010 2770 9192 2532 ccf5 591f 39ea 2431
+    0000070 2e3f feb0 87ef 9bdf 7dd4 2e79 64de edf6
+    0000080
+
+    ## Device side
+    nsh> hexdump /dev/ram10 count=128
+    /dev/ram10 at 00000000:
+    0000: e8 b1 97 b2 c5 4a fa 9d 70 d1 4e 24 83 4f 93 0f .....J..p.N$.O..
+    0010: f7 1b 19 0b de 7b 43 55 20 05 19 97 6d 74 fc 54 .....{CU ...mt.T
+    0020: 9d 36 b3 72 e6 f2 63 f4 e9 c8 c8 24 76 c8 20 e8 .6.r..c....$v. .
+    0030: 4d 38 ab 07 ca 52 24 2b e7 de 04 04 63 26 e4 91 M8...R$+....c&..
+    0040: 52 67 11 36 ce ae 43 b5 94 51 24 22 d5 d1 44 81 Rg.6..C..Q$"..D.
+    0050: 44 ff c9 3b 55 51 93 b3 fb 1e 88 9e e9 2d 69 36 D..;UQ.......-i6
+    0060: 10 d0 70 27 92 91 32 25 f5 cc 1f 59 ea 39 31 24 ..p'..2%...Y.91$
+    0070: 3f 2e b0 fe ef 87 df 9b d4 7d 79 2e de 64 f6 ed ?........}y..d..

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/s32k1xx/s32k1xx_flexcan.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -728,7 +730,7 @@ static int s32k1xx_transmit(struct s32k1xx_driver_s *priv)
 
       cs.rtr = frame->can_id & FLAGRTR ? 1 : 0;
 
-      cs.dlc = len_to_can_dlc[frame->len];
+      cs.dlc = g_len_to_can_dlc[frame->len];
 
       frame_data_word = (uint32_t *)&frame->data[0];
 
@@ -881,7 +883,7 @@ static void s32k1xx_receive(struct s32k1xx_driver_s *priv,
               frame->can_id |= FLAGRTR;
             }
 
-          frame->len = can_dlc_to_len[rf->cs.dlc];
+          frame->len = g_can_dlc_to_len[rf->cs.dlc];
 
           frame_data_word = (uint32_t *)&frame->data[0];
 

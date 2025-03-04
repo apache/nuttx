@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/tiva/common/tiva_hciuart.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -101,6 +103,7 @@ struct hciuart_config_s
 {
   struct btuart_lowerhalf_s lower;   /* Generic HCI-UART lower half */
   struct hciuart_state_s *state;     /* Reference to variable state */
+  spinlock_t lock;                   /* Spinlock */
   uint8_t *rxbuffer;                 /* Rx buffer start */
   uint8_t *txbuffer;                 /* Tx buffer start */
   uint16_t rxbufsize;                /* Size of the Rx buffer */
@@ -203,6 +206,7 @@ static const struct hciuart_config_s g_hciuart0_config =
   },
 
   .state         = &g_hciuart0_state,
+  .lock          = SP_UNLOCKED,
 
   .rxbuffer      = g_uart0_rxbuffer,
   .txbuffer      = g_uart0_txbuffer,
@@ -253,6 +257,7 @@ static const struct hciuart_config_s g_hciuart1_config =
   },
 
   .state         = &g_hciuart1_state,
+  .lock          = SP_UNLOCKED,
 
   .rxbuffer      = g_uart1_rxbuffer,
   .txbuffer      = g_uart1_txbuffer,
@@ -303,6 +308,7 @@ static const struct hciuart_config_s g_hciuart2_config =
   },
 
   .state         = &g_hciuart2_state,
+  .lock          = SP_UNLOCKED,
 
   .rxbuffer      = g_uart2_rxbuffer,
   .txbuffer      = g_uart2_txbuffer,
@@ -353,6 +359,7 @@ static const struct hciuart_config_s g_hciuart3_config =
   },
 
   .state         = &g_hciuart3_state,
+  .lock          = SP_UNLOCKED,
 
   .rxbuffer      = g_uart3_rxbuffer,
   .txbuffer      = g_uart3_txbuffer,
@@ -403,6 +410,7 @@ static const struct hciuart_config_s g_hciuart4_config =
   },
 
   .state         = &g_hciuart4_state,
+  .lock          = SP_UNLOCKED,
 
   .rxbuffer      = g_uart4_rxbuffer,
   .txbuffer      = g_uart4_txbuffer,
@@ -453,6 +461,7 @@ static const struct hciuart_config_s g_hciuart5_config =
   },
 
   .state         = &g_hciuart5_state,
+  .lock          = SP_UNLOCKED,
 
   .rxbuffer      = g_uart5_rxbuffer,
   .txbuffer      = g_uart5_txbuffer,
@@ -503,6 +512,7 @@ static const struct hciuart_config_s g_hciuart6_config =
   },
 
   .state         = &g_hciuart6_state,
+  .lock          = SP_UNLOCKED,
 
   .rxbuffer      = g_uart6_rxbuffer,
   .txbuffer      = g_uart6_txbuffer,
@@ -553,6 +563,7 @@ static const struct hciuart_config_s g_hciuart7_config =
   },
 
   .state         = &g_hciuart7_state,
+  .lock          = SP_UNLOCKED,
 
   .rxbuffer      = g_uart7_rxbuffer,
   .txbuffer      = g_uart7_txbuffer,
@@ -1270,7 +1281,7 @@ static void hciuart_rxattach(const struct btuart_lowerhalf_s *lower,
 
   /* If the callback is NULL, then we are detaching */
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&config->lock);
   if (callback == NULL)
     {
       uint32_t intset;
@@ -1292,7 +1303,7 @@ static void hciuart_rxattach(const struct btuart_lowerhalf_s *lower,
       state->callback = callback;
     }
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&config->lock, flags);
 }
 
 /****************************************************************************
@@ -1320,7 +1331,7 @@ static void hciuart_rxenable(const struct btuart_lowerhalf_s *lower,
       uint32_t intset;
       irqstate_t flags;
 
-      flags = spin_lock_irqsave(NULL);
+      flags = spin_lock_irqsave(&config->lock);
       if (enable)
         {
           /* Receive an interrupt when their is anything in the Rx data
@@ -1336,7 +1347,7 @@ static void hciuart_rxenable(const struct btuart_lowerhalf_s *lower,
           hciuart_disableints(config, intset);
         }
 
-      spin_unlock_irqrestore(NULL, flags);
+      spin_unlock_irqrestore(&config->lock, flags);
     }
 }
 
@@ -1522,9 +1533,9 @@ static ssize_t hciuart_write(const struct btuart_lowerhalf_s *lower,
 
   /* Make sure that the Tx Interrupts are disabled. */
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&config->lock);
   hciuart_disableints(config, UART_IM_TXIM);
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&config->lock, flags);
 
   /* Loop until all of the user data have been moved to the Tx buffer */
 
@@ -1619,9 +1630,9 @@ static ssize_t hciuart_write(const struct btuart_lowerhalf_s *lower,
 
   if (state->txhead != state->txtail)
     {
-      flags = spin_lock_irqsave(NULL);
+      flags = spin_lock_irqsave(&config->lock);
       hciuart_enableints(config, UART_IM_TXIM);
-      spin_unlock_irqrestore(NULL, flags);
+      spin_unlock_irqrestore(&config->lock, flags);
     }
 
   return ntotal;

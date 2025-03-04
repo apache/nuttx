@@ -1,6 +1,8 @@
 /****************************************************************************
  *  arch/x86/src/intel64/intel64_head.S
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -53,6 +55,12 @@
 #  define X86_CR4_FPU_VAL (X86_CR4_OSXFSR | X86_CR4_XMMEXCPT)
 #endif
 
+/* XSAVE header data offset */
+
+#define X86_XSAVE_XSTATEBV_OFFSET  512
+#define X86_XSAVE_XCOMPBC_OFFSET   520
+#define X86_XSAVE_RESERVED0_OFFSET 528
+
 /* Memory Map: _sbss is the start of the BSS region (see ld.script) _ebss is
  * the end of the BSS region (see ld.script). The idle task stack starts at
  * the end of BSS and is of size CONFIG_IDLETHREAD_STACKSIZE.  The IDLE thread
@@ -72,6 +80,10 @@
 	.global    __enable_sse_avx
 	.global    __enable_pcid
 	.global    __revoke_low_memory
+#ifdef CONFIG_LIB_SYSCALL
+	.global    x86_64_syscall_entry
+	.global    x86_64_syscall
+#endif
 	.global    __nxstart                       /* __nxstart is defined elsewhere */
 	.global    nx_start                        /* nx_start is defined elsewhere */
 	.global    x86_64_ap_boot                  /* x86_64_ap_boot is defined elsewhere */
@@ -119,6 +131,16 @@ header_start:
 	.long   MULTIBOOT_TAG_TYPE_ACPI_OLD
 	.long   MULTIBOOT_TAG_TYPE_ACPI_NEW
 
+#ifdef CONFIG_MULTBOOT2_FB
+	.short  MULTIBOOT_HEADER_TAG_FRAMEBUFFER
+	.short  0                           /* flags, none set */
+	.long   20                          /* size, including itself (short + short + long) */
+	.long   CONFIG_MULTBOOT2_FB_WIDTH   /* width */
+	.long   CONFIG_MULTBOOT2_FB_HEIGHT  /* height */
+	.long   CONFIG_MULTBOOT2_FB_DEEPTH  /* depth */
+	.long   0
+#endif
+
 	.short  MULTIBOOT_HEADER_TAG_END
 	.short  0    /* flags, none set */
 	.long   8    /* size, including itself (short + short + long) */
@@ -149,7 +171,7 @@ __reset_entry:
 	mov     %eax, %cr0
 
 	/* Long jump into protected mode. Hardcode the address. */
-	ljmpl   $0x8, $0x100000
+	ljmpl   $0x8, $start32_0
 
 	/* Loader GDT and GDTR */
 	.align(16)
@@ -163,9 +185,6 @@ loader_gdt_ptr:
 	.long   loader_gdt
 
 	.size   __reset_entry, . - __reset_entry
-
-bsp_done:
-	.long   0
 
 #ifdef CONFIG_SMP
 /****************************************************************************
@@ -190,7 +209,7 @@ __ap_entry:
 	mov     %eax, %cr0
 
 	/* Long jump into protected mode. Hardcode the address. */
-	ljmpl   $0x8, $0x100000
+	ljmpl   $0x8, $start32_0
 #endif
 
 /****************************************************************************
@@ -198,6 +217,34 @@ __ap_entry:
  ****************************************************************************/
 
 	.code32
+#ifdef CONFIG_ARCH_MULTIBOOT1
+	.section ".multiboot1", "a"
+.set MB_FLAG_ALIGNED,   1       /* All boot modules must be loaded aligned */
+.set MB_FLAG_MEMINFO,   2       /* Boot with memory maps passing  */
+.set MB_FLAG_VIDEO,     4       /* Enable video mode  */
+
+.set MB_FLAGS,          MB_FLAG_ALIGNED | MB_FLAG_MEMINFO
+.set MB_MAGIC,          0x1BADB002
+.set MB_CHECKSUM,       -(MB_MAGIC + MB_FLAGS)
+
+multiboot1_header:
+	.align 4
+	.long               MB_MAGIC
+	.long               MB_FLAGS
+	.long               MB_CHECKSUM
+
+	.long               0       /* header_addr  */
+	.long               0       /* load_addr */
+	.long               0       /* load_end_addr */
+	.long               0       /* bss_end_addr */
+	.long               0       /* entry_addr */
+
+	.long               0       /* Video mode type */
+	.long               1024    /* Video width */
+	.long               768     /* Video height */
+	.long               32      /* Video depth */
+#endif
+
 	.section ".loader.text", "ax"
 
 start32_0:
@@ -301,7 +348,11 @@ start64_init:
 
 	movl    $MSR_EFER,  %ecx
 	rdmsr
+#ifdef CONFIG_LIB_SYSCALL
+	or      $(EFER_LME | EFER_SCE),  %eax
+#else
 	or      $EFER_LME,  %eax
+#endif
 	wrmsr
 
 	/* Enable paging related bits in CR0 */
@@ -367,8 +418,19 @@ ap_start:
 	add     %rax, %rbx
 	mov     (%rbx),   %rsp
 
+	/* Move initial RSP below IDLE TCB regs */
+	sub     $XCPTCONTEXT_SIZE, %rsp
+	and     $(~XCPTCONTEXT_SIZE), %rsp
+
 	/* Jump to ap_start routine */
 	movabs  $x86_64_ap_boot,   %rbx
+
+	/* We need to simulate the behavior of the call instruction, which by
+	 * default pushes 8 bytes of the RIP. Otherwise, the function's stack
+	 * won't be 16-byte aligned.
+	 */
+
+	pushq   $0
 	jmp     *%rbx
 #endif
 
@@ -390,17 +452,20 @@ g_cpu_count:
 
 __revoke_low_memory:
 	/* Revoke the lower 128MB memory mapping */
+	movq    $X86_64_LOAD_OFFSET,%rcx
 	lea     g_pd_low, %edi
+	add     %rcx, %rdi
 	lea     g_pt_low, %esi
+	add     %rcx, %rsi
 
 	/* for ecx = 0...64 : Loop and setup 64x 2MB page directories */
 	mov     $64,   %ecx
 npd_loop:
-	mov     %esi,   %edx
-	or      $(X86_PAGE_WR | X86_PAGE_PRESENT), %edx
-	mov     %edx, 0(%edi)
-	add     $(PAGE_SIZE), %esi
-	add     $(X86_PAGE_ENTRY_SIZE), %edi
+	mov     %rsi,   %rdx
+	or      $(X86_PAGE_WR | X86_PAGE_PRESENT), %rdx
+	mov     %rdx, 0(%rdi)
+	add     $(PAGE_SIZE), %rsi
+	add     $(X86_PAGE_ENTRY_SIZE), %rdi
 
 	/* end for ecx */
 	dec     %ecx
@@ -471,11 +536,181 @@ __enable_pcid:
 
 	.size   __enable_pcid, . - __enable_pcid
 
+#ifdef CONFIG_LIB_SYSCALL
+  /****************************************************************************
+  * Name: x86_64_syscall_entry
+  *
+  * Description:
+  *   Landing point for syscall instruction.
+  *
+  *   At this point RFLAGS are masked with MSR_FMASK
+  *     - IF=0 (interrupts are disabled)
+  *     - DF=0
+  *
+  ****************************************************************************/
+
+	.type   x86_64_syscall_entry, @function
+x86_64_syscall_entry:
+	/* Store current RSP on CPU private data first */
+	movq   %rsp, %gs:X86_64_CPUPRIV_USTACK_OFFSET
+
+#ifdef CONFIG_ARCH_KERNEL_STACK
+	/* If current RSP is greater than kernel stack, we have to switch stack.
+	 * Otherwise we are in nested syscall and we can't modify stack pointer
+	 */
+	cmp    %gs:X86_64_CPUPRIV_UVBASE_OFFSET, %rsp
+	jb     no_kstack_switch
+
+	/* Change to kernel stack */
+	movq   %gs:X86_64_CPUPRIV_KTOPSTK_OFFSET, %rsp
+no_kstack_switch:
+#endif
+
+	/* Store some registers on stack.
+	 * We need some free registers here to handle stored registers alignment
+	 * and kernel stack for nested syscalls but at this point we don't have any
+	 *
+	 * RDI is needed only for CONFIG_ARCH_KERNEL_STACK=y but to simplify
+	 * the logic here - we always release it.
+	 */
+	pushq   %rcx
+	pushq   %rdi
+
+	/* Get original kernel stack for this call */
+
+	movq   %rsp, %rdi
+	add    $16, %rdi
+
+	/* Get aligned registers area */
+	movq   %rsp, %rcx
+	sub    $8, %rcx
+	sub    $((XCPTCONTEXT_REGS + 8) * 8), %rcx
+	add    $(0x3f), %rcx
+	and    $(0xffffffffffffffc0), %rcx
+
+	/* Syscall arguments */
+	movq    %rax, (8*REG_RAX)(%rcx)
+	movq    %rsi, (8*REG_RSI)(%rcx)
+	movq    %rdx, (8*REG_RDX)(%rcx)
+	movq    %r10, (8*REG_R10)(%rcx)
+	movq    %r8,  (8*REG_R8)(%rcx)
+	movq    %r9,  (8*REG_R9)(%rcx)
+
+	/* Callee registers */
+	movq    %rbx, (8*REG_RBX)(%rcx)
+	movq    %r11, (8*REG_R11)(%rcx)
+	movq    %r12, (8*REG_R12)(%rcx)
+	movq    %r13, (8*REG_R13)(%rcx)
+	movq    %r14, (8*REG_R14)(%rcx)
+	movq    %r15, (8*REG_R15)(%rcx)
+	movq    %rbp, (8*REG_RBP)(%rcx)
+
+#ifndef CONFIG_ARCH_X86_64_HAVE_XSAVE
+	/* Save xmm registers */
+	fxsaveq (%rcx)
+#else
+#  ifdef CONFIG_ARCH_CHIP_INTEL64_QEMU
+	/* BUGFIX for QEMU: make sure that xsave header is zeroed!
+	 * QEMU desn't clear these fields during xsave, so if the memory region
+	 * for xsave state was not cleared before use, there may be junk data there,
+	 * that cause xrstor to crash later.
+	 */
+	movq    $0, (X86_XSAVE_XSTATEBV_OFFSET)(%rcx)
+	movq    $0, (X86_XSAVE_XCOMPBC_OFFSET)(%rcx)
+	movq    $0, (X86_XSAVE_RESERVED0_OFFSET)(%rcx)
+#  endif
+
+	movl    $XSAVE_STATE_COMPONENTS, %eax
+	xor     %edx, %edx
+	xsave   (%rcx)
+#endif
+
+	/* Save RDI and RCX which are on stack now */
+	popq    (8*REG_RDI)(%rcx)
+	popq    (8*REG_RCX)(%rcx)
+
+	/* Store user stack pointer. We can't movq directly here.
+	 * NOTE: for nested syscalls this value points to kernel stack.
+	 */
+	pushq   %gs:X86_64_CPUPRIV_USTACK_OFFSET
+	popq    (8*REG_RSP)(%rcx)
+
+	/* Move stack pointer after registers area */
+	movq    %rcx, %rsp
+
+#ifdef CONFIG_ARCH_KERNEL_STACK
+	/* Update stored kernel stack */
+	movq    %rsp, %gs:X86_64_CPUPRIV_KTOPSTK_OFFSET
+
+	/* Store original kernel stack on stack which is now in RDI */
+	pushq   %rdi
+#endif
+
+	/* Return value from syscall stored in rax */
+	movq    %rcx, %rdi
+	call    x86_64_syscall
+	movq    %rax, %rdi
+
+#ifndef CONFIG_ARCH_X86_64_HAVE_XSAVE
+	/* Restore xmm registers */
+	fxrstorq (%rdi)
+#else
+	movl    $XSAVE_STATE_COMPONENTS, %eax
+	xor     %edx, %edx
+	xrstor  (%rdi)
+#endif
+
+#ifdef CONFIG_ARCH_KERNEL_STACK
+	/* Restore original kernel stack */
+	popq    %gs:X86_64_CPUPRIV_KTOPSTK_OFFSET
+#endif
+
+	/* Restore original user RSP */
+	movq    (8*REG_RSP)(%rdi), %rsp
+
+	/* Restore CPU registers - regs are on RDI now */
+	movq    (8*REG_RBX)(%rdi), %rbx
+	movq    (8*REG_R11)(%rdi), %r11
+	movq    (8*REG_R12)(%rdi), %r12
+	movq    (8*REG_R13)(%rdi), %r13
+	movq    (8*REG_R14)(%rdi), %r14
+	movq    (8*REG_R15)(%rdi), %r15
+	movq    (8*REG_RBP)(%rdi), %rbp
+
+	movq    (8*REG_RAX)(%rdi), %rax
+	movq    (8*REG_RSI)(%rdi), %rsi
+	movq    (8*REG_RDX)(%rdi), %rdx
+	movq    (8*REG_R10)(%rdi), %r10
+	movq    (8*REG_RCX)(%rdi), %rcx
+
+	movq    (8*REG_R11)(%rdi), %r11
+	movq    (8*REG_RDI)(%rdi), %rdi
+
+#  ifdef CONFIG_BUILD_KERNEL
+	/* Do not return to RING3 if this is nested syscall */
+	cmp %gs:X86_64_CPUPRIV_UVBASE_OFFSET, %rcx
+	jb syscall_no_ring3
+
+	/* Return to user code pointed in RCX */
+	sysretq
+
+syscall_no_ring3:
+#  endif
+	/* Return to address pointed in RCX - must be on stack */
+	pushq   %rcx
+	ret
+
+	.size   x86_64_syscall_entry, . - x86_64_syscall_entry
+#endif
+
 /****************************************************************************
  * .data
  ****************************************************************************/
 
 	.section ".loader.data", "ax"
+
+bsp_done:
+	.long   0
 
 	/* TSS (IST) for 64 bit long mode will be filled in up_irq. */
 	.align(16)
@@ -485,12 +720,18 @@ g_ist64_low:
 	/* GDT for 64 bit long mode */
 	.align(16)
 g_gdt64_low:
-	.quad   0
-	.quad   X86_GDT_CODE64_ENTRY
-	.quad   X86_GDT_DATA_ENTRY
-	.quad   X86_GDT_CODE32_ENTRY
-	.quad   X86_GDT_DATA_ENTRY
-	.quad   X86_GDT_CODE64_ENTRY
+	/* Must be in sequence required by SYSCALL and SYSRET.
+	 * For details look at the comment in intel64_cpu.c about MSR_STAT write.
+	 */
+	.quad   0                      /* 0x00: null descriptor */
+	.quad   X86_GDT_CODE64_ENTRY   /* 0x08: kernel code 64 */
+	.quad   X86_GDT_DATA_ENTRY     /* 0x10: kernel data */
+	.quad   X86_GDT_CODE32_ENTRY   /* 0x18: kernel code 32 */
+	.quad   X86_GDT_DATA_ENTRY     /* 0x20: kernel data */
+	.quad   X86_GDT_CODE64_ENTRY   /* 0x28: kernel code 64 */
+	.quad   X86_GDT_DATAUSER_ENTRY /* 0x30: user data */
+	.quad   X86_GDT_CODEUSER_ENTRY /* 0x38: user code */
+
 g_gdt64_ist_low:
 	/* TSS segment low + segment high per CPU */
 	.fill   CONFIG_SMP_NCPUS * 16, 1, 0
@@ -539,3 +780,17 @@ g_pt_low:
 	.fill   X86_NUM_PAGE_ENTRY * X86_NUM_PAGE_ENTRY, X86_PAGE_ENTRY_SIZE, 0
 	.fill   X86_NUM_PAGE_ENTRY * X86_NUM_PAGE_ENTRY, X86_PAGE_ENTRY_SIZE, 0
 	.fill   X86_NUM_PAGE_ENTRY * X86_NUM_PAGE_ENTRY, X86_PAGE_ENTRY_SIZE, 0
+
+#ifdef CONFIG_ARCH_PVHBOOT
+	/* PVH Header with pvh_start_addr = start32 */
+	.pushsection .note.nuttx, "a", @note
+	.align 4
+	.long 2f - 1f
+	.long 4f - 3f
+	.long 18
+	1:.asciz "nuttx"
+	2:.align 4
+	3:.long start32
+	4:.align 4
+	.popsection
+#endif

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/xtensa/src/common/espressif/esp_spiflash.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -137,8 +139,8 @@ spi_mem_dev_t *dev = spimem_flash_ll_get_hw(SPI1_HOST);
  * Private Functions Declaration
  ****************************************************************************/
 
-static void spiflash_start(void);
-static void spiflash_end(void);
+void spiflash_start(void);
+void spiflash_end(void);
 #if !CONFIG_ESPRESSIF_SPI_FLASH_USE_ROM_CODE && CONFIG_ARCH_CHIP_ESP32S3
 extern bool spi_flash_check_and_flush_cache(size_t start_addr,
                                             size_t length);
@@ -180,7 +182,7 @@ static volatile bool s_sched_suspended[CONFIG_ESPRESSIF_NUM_CPUS];
  *
  ****************************************************************************/
 
-static IRAM_ATTR void spiflash_start(void)
+IRAM_ATTR void spiflash_start(void)
 {
   extern uint32_t cache_suspend_icache(void);
   int cpu;
@@ -189,7 +191,7 @@ static IRAM_ATTR void spiflash_start(void)
 
   nxmutex_lock(&s_flash_op_mutex);
   flags = enter_critical_section();
-  cpu = up_cpu_index();
+  cpu = this_cpu();
   s_sched_suspended[cpu] = true;
 
 #ifndef CONFIG_ARCH_CHIP_ESP32S2
@@ -215,7 +217,7 @@ static IRAM_ATTR void spiflash_start(void)
  *
  ****************************************************************************/
 
-static IRAM_ATTR void spiflash_end(void)
+IRAM_ATTR void spiflash_end(void)
 {
   extern void cache_resume_icache(uint32_t);
   extern void cache_invalidate_icache_all(void);
@@ -225,7 +227,7 @@ static IRAM_ATTR void spiflash_end(void)
 
   flags = enter_critical_section();
 
-  cpu = up_cpu_index();
+  cpu = this_cpu();
 
   cache_invalidate_icache_all();
   cache_resume_icache(s_flash_op_cache_state[cpu] >> 16);

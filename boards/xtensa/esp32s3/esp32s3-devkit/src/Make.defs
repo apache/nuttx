@@ -1,6 +1,8 @@
 ############################################################################
 # boards/xtensa/esp32s3/esp32s3-devkit/src/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -17,8 +19,6 @@
 # under the License.
 #
 ############################################################################
-
-include $(TOPDIR)/Make.defs
 
 CSRCS = esp32s3_boot.c esp32s3_bringup.c
 
@@ -61,3 +61,10 @@ DEPPATH += --dep-path board
 VPATH += :board
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board
 
+ifeq ($(CONFIG_ETC_ROMFS),y)
+RCSRCS  = etc/init.d/rc.sysinit etc/init.d/rcS
+
+ifeq ($(CONFIG_TXTABLE_PARTITION),y)
+RCRAWS  = etc/txtable.txt
+endif # CONFIG_TXTABLE_PARTITION
+endif

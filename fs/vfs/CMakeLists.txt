@@ -1,6 +1,8 @@
 # ##############################################################################
 # fs/vfs/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -39,13 +41,15 @@ set(SRCS
     fs_rename.c
     fs_rmdir.c
     fs_select.c
-    fs_sendfile.c
     fs_stat.c
+    fs_sendfile.c
     fs_statfs.c
+    fs_uio.c
     fs_unlink.c
     fs_write.c
     fs_dir.c
     fs_fsync.c
+    fs_syncfs.c
     fs_truncate.c)
 
 # File lock support
@@ -75,9 +79,6 @@ endif()
 # Support for timerfd
 
 if(CONFIG_TIMER_FD)
-  set_source_files_properties(
-    fs_timerfd.c DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/..
-    PROPERTIES INCLUDE_DIRECTORIES ${NUTTX_DIR}/sched)
   list(APPEND SRCS fs_timerfd.c)
 endif()
 

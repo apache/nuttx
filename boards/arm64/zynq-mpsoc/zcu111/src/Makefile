@@ -1,6 +1,8 @@
 ############################################################################
 # boards/arm64/zynq-mpsoc/zcu111/src/Makefile
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -20,7 +22,7 @@
 
 include $(TOPDIR)/Make.defs
 
-CSRCS = zcu111_boardinit.c
+CSRCS = zcu111_boardinit.c zcu111_bringup.c
 ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += zcu111_appinit.c
 ifeq ($(CONFIG_BOARDCTL_RESET),y)
@@ -30,6 +32,14 @@ endif
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += zcu111_autoleds.c
+endif
+
+ifeq ($(CONFIG_USERLED),y)
+CSRCS += zcu111_userleds.c
+endif
+
+ifeq ($(CONFIG_NET),y)
+CSRCS += zcu111_ethernet.c
 endif
 
 ifeq ($(CONFIG_ETC_ROMFS),y)

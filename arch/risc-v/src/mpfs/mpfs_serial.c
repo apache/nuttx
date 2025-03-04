@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/mpfs/mpfs_serial.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -142,6 +144,10 @@ static int  up_ioctl(struct file *filep, int cmd, unsigned long arg);
 static int  up_receive(struct uart_dev_s *dev, unsigned int *status);
 static void up_rxint(struct uart_dev_s *dev, bool enable);
 static bool up_rxavailable(struct uart_dev_s *dev);
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+static bool up_rxflowcontrol(struct uart_dev_s *dev,
+                             unsigned int nbuffered, bool upper);
+#endif
 static void up_send(struct uart_dev_s *dev, int ch);
 static void up_txint(struct uart_dev_s *dev, bool enable);
 static bool up_txready(struct uart_dev_s *dev);
@@ -162,7 +168,7 @@ static const struct uart_ops_s g_uart_ops =
   .rxint          = up_rxint,
   .rxavailable    = up_rxavailable,
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-  .rxflowcontrol  = NULL,
+  .rxflowcontrol  = up_rxflowcontrol,
 #endif
   .send           = up_send,
   .txint          = up_txint,
@@ -1015,6 +1021,47 @@ static bool up_rxavailable(struct uart_dev_s *dev)
   return ((up_serialin(priv, MPFS_UART_LSR_OFFSET) & UART_LSR_DR) != 0);
 }
 
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+/****************************************************************************
+ * Name: up_rxflowcontrol
+ *
+ * Description:
+ *   Basic flowcontrol functionality.
+ *   Disable RX interrupts and clear the fifo in case of full RX buffer.
+ *   Enable RX interrupts in case of empty buffer.
+ *   Return true if RX FIFO was cleared.
+ *
+ ****************************************************************************/
+
+static bool up_rxflowcontrol(struct uart_dev_s *dev,
+                             unsigned int nbuffered, bool upper)
+{
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
+  bool ret = false;
+
+  if (nbuffered == 0 || upper == false)
+    {
+      /* Empty buffer. Enable RX ints */
+
+      up_rxint(dev, true);
+
+      ret = false;
+    }
+  else
+    {
+      /* Full buffer. Disable RX ints and clear the RX FIFO */
+
+      up_rxint(dev, false);
+
+      up_serialout(priv, MPFS_UART_FCR_OFFSET, UART_FCR_RFIFOR);
+
+      ret = true;
+    }
+
+  return ret;
+}
+#endif
+
 /****************************************************************************
  * Name: up_send
  *
@@ -1200,7 +1247,7 @@ void riscv_serialinit(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef HAVE_SERIAL_CONSOLE
   struct up_dev_s *priv = (struct up_dev_s *)CONSOLE_DEV.priv;
@@ -1208,26 +1255,16 @@ int up_putc(int ch)
 
   if (!CONSOLE_DEV.isconsole)
     {
-      return ch;
+      return;
     }
 
   up_disableuartint(priv, &ier);
 #endif
 
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      riscv_lowputc('\r');
-    }
-
   riscv_lowputc(ch);
 #ifdef HAVE_SERIAL_CONSOLE
   up_restoreuartint(priv, ier);
 #endif
-  return ch;
 }
 
 /****************************************************************************
@@ -1250,9 +1287,8 @@ void riscv_serialinit(void)
 {
 }
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
-  return ch;
 }
 
 #endif /* HAVE_UART_DEVICE */
@@ -1266,21 +1302,11 @@ int up_putc(int ch)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef HAVE_SERIAL_CONSOLE
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      riscv_lowputc('\r');
-    }
-
   riscv_lowputc(ch);
 #endif
-  return ch;
 }
 
 #endif /* USE_SERIALDRIVER */

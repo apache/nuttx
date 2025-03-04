@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/clock/clock_systime_timespec.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -31,6 +33,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
+#include <nuttx/spinlock.h>
 
 #include "clock/clock.h"
 
@@ -59,76 +62,28 @@
 int clock_systime_timespec(FAR struct timespec *ts)
 {
 #ifdef CONFIG_RTC_HIRES
-  /* Do we have a high-resolution RTC that can provide us with the time? */
-
   if (g_rtc_enabled)
     {
-      int ret;
+      irqstate_t flags;
 
-      /* Get the hi-resolution time from the RTC.  This will return the
-       * current time, not the time since power up.
-       */
+      up_rtc_gettime(ts);
 
-      ret = up_rtc_gettime(ts);
-      if (ret < 0)
-        {
-          return ret;
-        }
-
-      /* Subtract the base time to this in order to convert this to the
-       * time since power up.
-       */
-
-      DEBUGASSERT(ts->tv_sec >= g_basetime.tv_sec);
-      if (ts->tv_sec < g_basetime.tv_sec)
-        {
-          /* Negative times are not supported */
-
-          return -ENOSYS;
-        }
-
-      ts->tv_sec -= g_basetime.tv_sec;
-      if (ts->tv_nsec < g_basetime.tv_nsec)
-        {
-          /* Borrow */
-
-          if (ts->tv_sec < 1)
-            {
-              /* Negative times are not supported */
-
-              return -ENOSYS;
-            }
-
-          ts->tv_sec--;
-          ts->tv_nsec += NSEC_PER_SEC;
-        }
-
-      ts->tv_nsec -= g_basetime.tv_nsec;
-      return OK;
+      flags = spin_lock_irqsave(&g_basetime_lock);
+      clock_timespec_subtract(ts, &g_basetime, ts);
+      spin_unlock_irqrestore(&g_basetime_lock, flags);
     }
   else
-#endif
     {
-      /* In tickless mode, all timing is controlled by platform-specific
-       * code.  Let the platform timer do the work.
-       */
-
-#if defined(CONFIG_SCHED_TICKLESS_TICK_ARGUMENT)
-      clock_t ticks;
-      int ret;
-
-      ret = up_timer_gettick(&ticks);
-      timespec_from_tick(ts, ticks);
-      return ret;
-#elif defined(CONFIG_SCHED_TICKLESS)
-      return up_timer_gettime(ts);
-#else
-      /* 64-bit microsecond calculations should improve our accuracy
-       * when the clock period is in units of microseconds.
-       */
-
-      timespec_from_tick(ts, clock_systime_ticks());
-      return OK;
-#endif
+      ts->tv_sec = 0;
+      ts->tv_nsec = 0;
     }
+#elif defined(CONFIG_ALARM_ARCH) || \
+      defined(CONFIG_TIMER_ARCH) || \
+      defined(CONFIG_SCHED_TICKLESS)
+  up_timer_gettime(ts);
+#else
+  clock_ticks2time(ts, g_system_ticks);
+#endif
+  return 0;
 }
+

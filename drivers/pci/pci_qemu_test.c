@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/pci/pci_qemu_test.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -28,7 +30,8 @@
 #include <stdint.h>
 
 #include <nuttx/pci/pci.h>
-#include <nuttx/pci/pci_qemu_test.h>
+
+#include "pci_drivers.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -318,6 +321,10 @@ static int pci_qemu_test_probe(FAR struct pci_device_s *dev)
       else if ((flags & PCI_RESOURCE_IO) == PCI_RESOURCE_IO)
         {
           ops = &g_pci_qemu_test_io_ops;
+        }
+      else
+        {
+          PANIC();
         }
 
       for (test_cnt = 0; test_cnt < 0xff; test_cnt++)

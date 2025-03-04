@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/mpfs/hardware/mpfs_plic.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -35,6 +37,10 @@
 #define MPFS_PLIC_IP3        (MPFS_PLIC_BASE + 0x00100C)
 #define MPFS_PLIC_IP4        (MPFS_PLIC_BASE + 0x001010)
 #define MPFS_PLIC_I51        (MPFS_PLIC_BASE + 0x001014)
+
+#define MPFS_PLIC_PRIO_DIS   0
+#define MPFS_PLIC_PRIO_MIN   1
+#define MPFS_PLIC_PRIO_MAX   7
 
 #define MPFS_HART_MIE_OFFSET (0x100)
 #define MPFS_HART_SIE_OFFSET (0x80)

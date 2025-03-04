@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/xtensa/esp32s3/common/scripts/mcuboot_sections.ld
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -77,7 +79,7 @@ SECTIONS
                     *libarch.a:*cache_hal.* *libarch.a:*mmu_hal.*
                     *libarch.a:*mpu_hal.*) .rodata.*)
 
-#ifdef CONFIG_ESP32S3_WIRELESS
+#ifdef CONFIG_ESPRESSIF_WIRELESS
     *(.rodata_wlog_verbose.*)
     *(.rodata_wlog_debug.*)
     *(.rodata_wlog_info.*)
@@ -206,10 +208,13 @@ SECTIONS
     *libsched.a:irq_csection.*(.literal .text .literal.* .text.*)
     *libsched.a:irq_dispatch.*(.literal .text .literal.* .text.*)
     *libsched.a:irq_spinlock.*(.literal .text .literal.* .text.*)
+    *libsched.a:sched_lock.*(.literal .text .literal.* .text.*)
     *libsched.a:sched_note.*(.literal .text .literal.* .text.*)
     *libsched.a:sched_suspendscheduler.*(.literal .text .literal.* .text.*)
     *libsched.a:sched_thistask.*(.literal .text .literal.* .text.*)
+    *libsched.a:sched_unlock.*(.literal .text .literal.* .text.*)
     *libsched.a:spinlock.*(.literal .text .literal.* .text.*)
+    *libsched.a:stack_record.*(.literal .text .literal.* .text.*)
 
 #ifdef CONFIG_ESP32S3_SPEED_UP_ISR
     *libarch.a:xtensa_switchcontext.*(.literal.up_switch_context .text.up_switch_context)

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/xtensa/src/common/espressif/esp_mcpwm.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -452,6 +454,7 @@ static int esp_motor_setup(struct motor_lowerhalf_s *dev)
   if ((priv->state.state == MOTOR_STATE_FAULT) ||
       (priv->state.state == MOTOR_STATE_CRITICAL))
     {
+      spin_unlock_irqrestore(&g_mcpwm_common.mcpwm_spinlock, flags);
       mtrerr("Motor is in fault state. Clear faults first\n");
       return ERROR;
     }
@@ -577,6 +580,7 @@ static int esp_motor_stop(struct motor_lowerhalf_s *dev)
   flags = spin_lock_irqsave(&g_mcpwm_common.mcpwm_spinlock);
   if (priv->state.state == MOTOR_STATE_IDLE)
     {
+      spin_unlock_irqrestore(&g_mcpwm_common.mcpwm_spinlock, flags);
       mtrerr("Motor already stopped\n");
       return -EPERM;
     }
@@ -593,6 +597,7 @@ static int esp_motor_stop(struct motor_lowerhalf_s *dev)
   ret = esp_motor_set_duty_cycle(priv, 0.0);
   if (ret < 0)
     {
+      spin_unlock_irqrestore(&g_mcpwm_common.mcpwm_spinlock, flags);
       mtrerr("Failed setting duty cycle to 0 on stop: %d\n", ret);
       return ret;
     }
@@ -647,6 +652,7 @@ static int esp_motor_start(struct motor_lowerhalf_s *dev)
   flags = spin_lock_irqsave(&g_mcpwm_common.mcpwm_spinlock);
   if (priv->state.state == MOTOR_STATE_RUN)
     {
+      spin_unlock_irqrestore(&g_mcpwm_common.mcpwm_spinlock, flags);
       mtrerr("Motor already running\n");
       return -EINVAL;
     }
@@ -654,6 +660,7 @@ static int esp_motor_start(struct motor_lowerhalf_s *dev)
   if ((priv->state.state == MOTOR_STATE_CRITICAL) ||
        (priv->state.state == MOTOR_STATE_FAULT))
     {
+      spin_unlock_irqrestore(&g_mcpwm_common.mcpwm_spinlock, flags);
       mtrerr("Motor is in fault state\n");
       return -EINVAL;
     }
@@ -661,6 +668,7 @@ static int esp_motor_start(struct motor_lowerhalf_s *dev)
   ret = esp_motor_pwm_config(priv);
   if (ret < 0)
     {
+      spin_unlock_irqrestore(&g_mcpwm_common.mcpwm_spinlock, flags);
       mtrerr("Failed setting PWM configuration\n");
       return ret;
     }
@@ -680,6 +688,7 @@ static int esp_motor_start(struct motor_lowerhalf_s *dev)
       ret = esp_motor_set_duty_cycle(priv, duty);
       if (ret < 0)
         {
+          spin_unlock_irqrestore(&g_mcpwm_common.mcpwm_spinlock, flags);
           mtrerr("Failed starting motor\n");
           return ret;
         }
@@ -1054,6 +1063,7 @@ static int esp_motor_fault_configure(struct mcpwm_motor_lowerhalf_s *lower,
       mcpwm_ll_intr_enable(hal->dev,
                            MCPWM_LL_EVENT_FAULT_EXIT(lower->fault_id),
                            false);
+      spin_unlock_irqrestore(&g_mcpwm_common.mcpwm_spinlock, flags);
       return OK;
     }
 
@@ -1446,7 +1456,7 @@ static int esp_capture_start(struct cap_lowerhalf_s *lower)
     struct mcpwm_cap_channel_lowerhalf_s *)lower;
   mcpwm_hal_context_t *hal = &priv->common->hal;
   irqstate_t flags;
-  flags = spin_lock_irqsave(priv->common->mcpwm_spinlock);
+  flags = spin_lock_irqsave(&priv->common->mcpwm_spinlock);
 
   DEBUGASSERT(priv->common->initialized);
 
@@ -1471,7 +1481,7 @@ static int esp_capture_start(struct cap_lowerhalf_s *lower)
   priv->ready = false;
 
   cpinfo("Channel enabled: %d\n", priv->channel_id);
-  spin_unlock_irqrestore(priv->common->mcpwm_spinlock, flags);
+  spin_unlock_irqrestore(&priv->common->mcpwm_spinlock, flags);
 
   return OK;
 }
@@ -1499,7 +1509,7 @@ static int esp_capture_stop(struct cap_lowerhalf_s *lower)
     struct mcpwm_cap_channel_lowerhalf_s *)lower;
   mcpwm_hal_context_t *hal = &priv->common->hal;
   irqstate_t flags;
-  flags = spin_lock_irqsave(priv->common->mcpwm_spinlock);
+  flags = spin_lock_irqsave(&priv->common->mcpwm_spinlock);
 
   /* Disable channel and interrupts */
 
@@ -1511,7 +1521,7 @@ static int esp_capture_stop(struct cap_lowerhalf_s *lower)
   priv->enabled = false;
 
   cpinfo("Channel disabled: %d\n", priv->channel_id);
-  spin_unlock_irqrestore(priv->common->mcpwm_spinlock, flags);
+  spin_unlock_irqrestore(&priv->common->mcpwm_spinlock, flags);
 
   return OK;
 }
@@ -1701,7 +1711,7 @@ static int IRAM_ATTR mcpwm_driver_isr_default(int irq, void *context,
   struct mcpwm_motor_lowerhalf_s *priv = NULL;
 #endif
 
-  flags = spin_lock_irqsave(common->mcpwm_spinlock);
+  flags = spin_lock_irqsave(&common->mcpwm_spinlock);
   status = mcpwm_ll_intr_get_status(common->hal.dev);
 
   /* Evaluate capture interrupt for all 3 cap channels */
@@ -1758,7 +1768,7 @@ static int IRAM_ATTR mcpwm_driver_isr_default(int irq, void *context,
 #ifdef CONFIG_ESP_MCPWM_CAPTURE
   if (lower == NULL)
     {
-      spin_unlock_irqrestore(common->mcpwm_spinlock, flags);
+      spin_unlock_irqrestore(&common->mcpwm_spinlock, flags);
       return OK;
     }
 
@@ -1823,7 +1833,7 @@ static int IRAM_ATTR mcpwm_driver_isr_default(int irq, void *context,
     }
 #endif
 
-  spin_unlock_irqrestore(common->mcpwm_spinlock, flags);
+  spin_unlock_irqrestore(&common->mcpwm_spinlock, flags);
   return OK;
 }
 #endif

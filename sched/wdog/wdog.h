@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/wdog/wdog.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -34,27 +36,16 @@
 #include <nuttx/clock.h>
 #include <nuttx/queue.h>
 #include <nuttx/wdog.h>
+#include <nuttx/list.h>
+#include <nuttx/spinlock_type.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: wd_elapse
- *
- * Description:
- *   This function is used to get time-elapse from last time wd_timer() be
- *   called. In case of CONFIG_SCHED_TICKLESS configured, wd_timer() may
- *   take lots of ticks, during this time, wd_start()/wd_cancel() may
- *   called, so we need wd_elapse() to correct the delay/lag.
- *
- ****************************************************************************/
+/* Redefine to the standard list */
 
-#ifdef CONFIG_SCHED_TICKLESS
-#  define wd_elapse() (clock_systime_ticks() - g_wdtickbase)
-#else
-#  define wd_elapse() (0)
-#endif
+#define list_node wdlist_node
 
 /****************************************************************************
  * Public Data
@@ -73,15 +64,8 @@ extern "C"
  * this linked list are removed and the function is called.
  */
 
-extern sq_queue_t g_wdactivelist;
-
-/* This is wdog tickbase, for wd_gettime() may called many times
- * between 2 times of wd_timer(), we use it to update wd_gettime().
- */
-
-#ifdef CONFIG_SCHED_TICKLESS
-extern clock_t g_wdtickbase;
-#endif
+extern struct list_node g_wdactivelist;
+extern spinlock_t g_wdspinlock;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -114,9 +98,9 @@ extern clock_t g_wdtickbase;
  ****************************************************************************/
 
 #ifdef CONFIG_SCHED_TICKLESS
-unsigned int wd_timer(int ticks, bool noswitches);
+clock_t wd_timer(clock_t ticks, bool noswitches);
 #else
-void wd_timer(void);
+void wd_timer(clock_t ticks);
 #endif
 
 /****************************************************************************

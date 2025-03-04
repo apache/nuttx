@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/z16/src/z16f/z16f_sysexec.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -47,13 +49,16 @@
 
 void z16f_sysexec(FAR chipreg_t *regs)
 {
+  struct tcb_s **running_task = &g_running_tasks[this_cpu()];
   uint16_t excp;
+
+  z16_copystate((*running_task)->xcp.regs, regs)
 
   /* Save that register reference so that it can be used for built-in
    * diagnostics.
    */
 
-  g_current_regs = regs;
+  up_set_current_regs(regs);
 
   /* The cause of the system exception is indicated in the SYSEXCPH&L
    * registers

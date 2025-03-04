@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/x86_64/src/intel64/intel64_irq.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -28,17 +30,19 @@
 #include <stdint.h>
 #include <string.h>
 #include <debug.h>
-#include <sched.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/pci/pci.h>
 #include <arch/arch.h>
 #include <arch/irq.h>
 #include <arch/io.h>
 #include <arch/board/board.h>
 
 #include <nuttx/spinlock.h>
+#include <nuttx/signal.h>
 
+#include "sched/sched.h"
 #include "x86_64_internal.h"
 #include "intel64_cpu.h"
 #include "intel64.h"
@@ -47,13 +51,17 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define X86_64_MAR_DEST      0xfee00000
+#define X86_64_MDR_TYPE      0x4000
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
 struct intel64_irq_priv_s
 {
-  cpu_set_t busy;
+  bool busy;
+  bool msi;
 };
 
 /****************************************************************************
@@ -66,15 +74,12 @@ static void up_idtentry(unsigned int index, uint64_t base, uint16_t sel,
 static inline void up_idtinit(void);
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
  * Private Data
  ****************************************************************************/
 
 static struct idt_entry_s        g_idt_entries[NR_IRQS];
 static struct intel64_irq_priv_s g_irq_priv[NR_IRQS];
+static int                       g_msi_now = IRQ_MSI_START;
 static spinlock_t                g_irq_spinlock;
 
 /****************************************************************************
@@ -317,8 +322,8 @@ static void up_ioapic_init(void)
 
   for (i = 0; i < maxintr; i++)
     {
-      up_ioapic_pin_set_vector(i, TRIGGER_RISING_EDGE, IRQ0 + i);
-      up_ioapic_mask_pin(i);
+      up_ioapic_pin_set_vector(i, TRIGGER_RISING_EDGE |
+                               IOAPIC_PIN_DISABLE, IRQ0 + i);
     }
 }
 #endif
@@ -343,11 +348,12 @@ static void up_idtentry(unsigned int index, uint64_t base, uint16_t sel,
   entry->sel     = sel;
   entry->zero    = 0;
 
-  /* We must uncomment the OR below when we get to using user-mode. It sets
-   * the interrupt gate's privilege level to 3.
+  /* We don't use software interrupts from user-space (INT) so DPL level
+   * can be set to privilage level 0. DPL bits have no effect on hardware
+   * interrupts.
    */
 
-  entry->flags  = flags; /* | 0x60 */
+  entry->flags   = flags;
 }
 
 /****************************************************************************
@@ -366,6 +372,8 @@ static inline void up_idtinit(void)
   size_t   offset = 0;
   uint64_t vector = 0;
   int      irq    = 0;
+  uint16_t sel    = X86_GDT_CODE_SEL;
+  uint8_t  ist    = X86_GDT_IST_ISR;
 
   memset(&g_idt_entries, 0, sizeof(g_idt_entries));
 
@@ -374,53 +382,110 @@ static inline void up_idtinit(void)
    * interrupts enabled when the IRS/IRQ handler is entered.
    */
 
-  up_idtentry(ISR0,  (uint64_t)vector_isr0 , 0x08, 0x8e, 0x2);
-  up_idtentry(ISR1,  (uint64_t)vector_isr1 , 0x08, 0x8e, 0x2);
-  up_idtentry(ISR2,  (uint64_t)vector_isr2 , 0x08, 0x8e, 0x2);
-  up_idtentry(ISR3,  (uint64_t)vector_isr3 , 0x08, 0x8e, 0x2);
-  up_idtentry(ISR4,  (uint64_t)vector_isr4 , 0x08, 0x8e, 0x2);
-  up_idtentry(ISR5,  (uint64_t)vector_isr5 , 0x08, 0x8e, 0x2);
-  up_idtentry(ISR6,  (uint64_t)vector_isr6 , 0x08, 0x8e, 0x2);
-  up_idtentry(ISR7,  (uint64_t)vector_isr7 , 0x08, 0x8e, 0x2);
-  up_idtentry(ISR8,  (uint64_t)vector_isr8 , 0x08, 0x8e, 0x2);
-  up_idtentry(ISR9,  (uint64_t)vector_isr9 , 0x08, 0x8e, 0x2);
-  up_idtentry(ISR10, (uint64_t)vector_isr10, 0x08, 0x8e, 0x2);
-  up_idtentry(ISR11, (uint64_t)vector_isr11, 0x08, 0x8e, 0x2);
-  up_idtentry(ISR12, (uint64_t)vector_isr12, 0x08, 0x8e, 0x2);
-  up_idtentry(ISR13, (uint64_t)vector_isr13, 0x08, 0x8e, 0x2);
-  up_idtentry(ISR14, (uint64_t)vector_isr14, 0x08, 0x8e, 0x2);
-  up_idtentry(ISR15, (uint64_t)vector_isr15, 0x08, 0x8e, 0x2);
-  up_idtentry(ISR16, (uint64_t)vector_isr16, 0x08, 0x8e, 0x2);
-  up_idtentry(ISR17, (uint64_t)vector_isr17, 0x08, 0x8e, 0x2);
-  up_idtentry(ISR18, (uint64_t)vector_isr18, 0x08, 0x8e, 0x2);
-  up_idtentry(ISR19, (uint64_t)vector_isr19, 0x08, 0x8e, 0x2);
-  up_idtentry(ISR20, (uint64_t)vector_isr20, 0x08, 0x8e, 0x2);
-  up_idtentry(ISR21, (uint64_t)vector_isr21, 0x08, 0x8e, 0x2);
-  up_idtentry(ISR22, (uint64_t)vector_isr22, 0x08, 0x8e, 0x2);
-  up_idtentry(ISR23, (uint64_t)vector_isr23, 0x08, 0x8e, 0x2);
-  up_idtentry(ISR24, (uint64_t)vector_isr24, 0x08, 0x8e, 0x2);
-  up_idtentry(ISR25, (uint64_t)vector_isr25, 0x08, 0x8e, 0x2);
-  up_idtentry(ISR26, (uint64_t)vector_isr26, 0x08, 0x8e, 0x2);
-  up_idtentry(ISR27, (uint64_t)vector_isr27, 0x08, 0x8e, 0x2);
-  up_idtentry(ISR28, (uint64_t)vector_isr28, 0x08, 0x8e, 0x2);
-  up_idtentry(ISR29, (uint64_t)vector_isr29, 0x08, 0x8e, 0x2);
-  up_idtentry(ISR30, (uint64_t)vector_isr30, 0x08, 0x8e, 0x2);
-  up_idtentry(ISR31, (uint64_t)vector_isr31, 0x08, 0x8e, 0x2);
+  up_idtentry(ISR0,  (uint64_t)vector_isr0 , sel, 0x8e, ist);
+  up_idtentry(ISR1,  (uint64_t)vector_isr1 , sel, 0x8e, ist);
+  up_idtentry(ISR2,  (uint64_t)vector_isr2 , sel, 0x8e, ist);
+  up_idtentry(ISR3,  (uint64_t)vector_isr3 , sel, 0x8e, ist);
+  up_idtentry(ISR4,  (uint64_t)vector_isr4 , sel, 0x8e, ist);
+  up_idtentry(ISR5,  (uint64_t)vector_isr5 , sel, 0x8e, ist);
+  up_idtentry(ISR6,  (uint64_t)vector_isr6 , sel, 0x8e, ist);
+  up_idtentry(ISR7,  (uint64_t)vector_isr7 , sel, 0x8e, ist);
+  up_idtentry(ISR8,  (uint64_t)vector_isr8 , sel, 0x8e, ist);
+  up_idtentry(ISR9,  (uint64_t)vector_isr9 , sel, 0x8e, ist);
+  up_idtentry(ISR10, (uint64_t)vector_isr10, sel, 0x8e, ist);
+  up_idtentry(ISR11, (uint64_t)vector_isr11, sel, 0x8e, ist);
+  up_idtentry(ISR12, (uint64_t)vector_isr12, sel, 0x8e, ist);
+  up_idtentry(ISR13, (uint64_t)vector_isr13, sel, 0x8e, ist);
+  up_idtentry(ISR14, (uint64_t)vector_isr14, sel, 0x8e, ist);
+  up_idtentry(ISR15, (uint64_t)vector_isr15, sel, 0x8e, ist);
+  up_idtentry(ISR16, (uint64_t)vector_isr16, sel, 0x8e, ist);
+  up_idtentry(ISR17, (uint64_t)vector_isr17, sel, 0x8e, ist);
+  up_idtentry(ISR18, (uint64_t)vector_isr18, sel, 0x8e, ist);
+  up_idtentry(ISR19, (uint64_t)vector_isr19, sel, 0x8e, ist);
+  up_idtentry(ISR20, (uint64_t)vector_isr20, sel, 0x8e, ist);
+  up_idtentry(ISR21, (uint64_t)vector_isr21, sel, 0x8e, ist);
+  up_idtentry(ISR22, (uint64_t)vector_isr22, sel, 0x8e, ist);
+  up_idtentry(ISR23, (uint64_t)vector_isr23, sel, 0x8e, ist);
+  up_idtentry(ISR24, (uint64_t)vector_isr24, sel, 0x8e, ist);
+  up_idtentry(ISR25, (uint64_t)vector_isr25, sel, 0x8e, ist);
+  up_idtentry(ISR26, (uint64_t)vector_isr26, sel, 0x8e, ist);
+  up_idtentry(ISR27, (uint64_t)vector_isr27, sel, 0x8e, ist);
+  up_idtentry(ISR28, (uint64_t)vector_isr28, sel, 0x8e, ist);
+  up_idtentry(ISR29, (uint64_t)vector_isr29, sel, 0x8e, ist);
+  up_idtentry(ISR30, (uint64_t)vector_isr30, sel, 0x8e, ist);
+  up_idtentry(ISR31, (uint64_t)vector_isr31, sel, 0x8e, ist);
 
-  /* Set all IRQ vectors */
+  /* Set all IRQ vectors and use separate stack from ISR */
 
+  ist = X86_GDT_IST_IRQ;
   offset = (uint64_t)vector_irq1 - (uint64_t)vector_irq0;
 
   for (irq = IRQ0, vector = (uint64_t)vector_irq0;
        irq <= IRQ255;
        irq += 1, vector += offset)
     {
-      up_idtentry(irq,  (uint64_t)vector,  0x08, 0x8e, 0x1);
+      up_idtentry(irq,  (uint64_t)vector,  sel, 0x8e, ist);
     }
 
   /* Then program the IDT */
 
   setidt(&g_idt_entries, sizeof(struct idt_entry_s) * NR_IRQS - 1);
+}
+
+/****************************************************************************
+ * Name: arm_color_intstack
+ *
+ * Description:
+ *   Set the interrupt stack to a value so that later we can determine how
+ *   much stack space was used by interrupt handling logic
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_STACK_COLORATION) && CONFIG_ARCH_INTERRUPTSTACK > 3
+static inline void x86_64_color_intstack(void)
+{
+  x86_64_stack_color((void *)up_get_intstackbase(this_cpu()),
+                     IRQ_STACK_SIZE);
+}
+#else
+#  define x86_64_color_intstack()
+#endif
+
+/****************************************************************************
+ * Name: x86_64_fault_panic_isr
+ ****************************************************************************/
+
+static int x86_64_fault_panic_isr(int irq, void *c, void *arg)
+{
+  uint64_t *regs = (uint64_t *)running_regs();
+
+  /* Let's say, all ISR are asserted when REALLY BAD things happened.
+   * Don't even brother to recover, just dump the regs and PANIC.
+   */
+
+  _alert("PANIC:\n");
+  _alert("Exception %" PRId32 " occurred "
+         "with error code %" PRId64 ":\n",
+         irq, regs[REG_ERRCODE]);
+
+  PANIC_WITH_REGS("panic", regs);
+
+  up_trash_cpu();
+
+  return 0;
+}
+
+/****************************************************************************
+ * Name: x86_64_fault_kill_isr
+ ****************************************************************************/
+
+static int x86_64_fault_kill_isr(int irq, void *c, void *arg)
+{
+  __asm__ volatile("fnclex":::"memory");
+
+  nxsig_kill(running_task()->pid, SIGFPE);
+
+  return 0;
 }
 
 /****************************************************************************
@@ -438,6 +503,10 @@ void up_irqinitialize(void)
   /* Initialize the TSS */
 
   x86_64_cpu_tss_init(cpu);
+
+  /* Colorize the interrupt stack */
+
+  x86_64_color_intstack();
 
   /* Initialize the APIC */
 
@@ -469,6 +538,15 @@ void up_irqinitialize(void)
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
   up_irq_restore(X86_64_RFLAGS_IF);
 #endif
+
+  /* Attach default handlers for faults */
+
+  irq_attach(ISR0, x86_64_fault_kill_isr, NULL);
+  irq_attach(ISR6, x86_64_fault_panic_isr, NULL);
+  irq_attach(ISR8, x86_64_fault_panic_isr, NULL);
+  irq_attach(ISR13, x86_64_fault_panic_isr, NULL);
+  irq_attach(ISR14, x86_64_fault_panic_isr, NULL);
+  irq_attach(ISR16, x86_64_fault_kill_isr, NULL);
 }
 
 /****************************************************************************
@@ -484,21 +562,17 @@ void up_disable_irq(int irq)
 #ifndef CONFIG_ARCH_INTEL64_DISABLE_INT_INIT
   irqstate_t flags = spin_lock_irqsave(&g_irq_spinlock);
 
-  if (irq > IRQ255)
-    {
-      /* Not supported yet */
+  DEBUGASSERT(irq <= IRQ255);
 
-      ASSERT(0);
+  /* Do nothing if this is MSI/MSI-X */
+
+  if (g_irq_priv[irq].msi)
+    {
+      spin_unlock_irqrestore(&g_irq_spinlock, flags);
+      return;
     }
 
-  if (g_irq_priv[irq].busy > 0)
-    {
-      g_irq_priv[irq].busy -= 1;
-    }
-
-  CPU_CLR(this_cpu(), &g_irq_priv[irq].busy);
-
-  if (CPU_COUNT(&g_irq_priv[irq].busy) == 0)
+  if (g_irq_priv[irq].busy)
     {
       /* One time disable */
 
@@ -506,6 +580,8 @@ void up_disable_irq(int irq)
         {
           up_ioapic_mask_pin(irq - IRQ0);
         }
+
+      g_irq_priv[irq].busy = false;
     }
 
   spin_unlock_irqrestore(&g_irq_spinlock, flags);
@@ -525,23 +601,26 @@ void up_enable_irq(int irq)
 #ifndef CONFIG_ARCH_INTEL64_DISABLE_INT_INIT
   irqstate_t flags = spin_lock_irqsave(&g_irq_spinlock);
 
+  DEBUGASSERT(irq <= IRQ255);
+
+  /* Do nothing if this is MSI/MSI-X */
+
+  if (g_irq_priv[irq].msi)
+    {
+      spin_unlock_irqrestore(&g_irq_spinlock, flags);
+      return;
+    }
+
 #  ifndef CONFIG_IRQCHAIN
   /* Check if IRQ is free if we don't support IRQ chains */
 
-  if (CPU_ISSET(this_cpu(), &g_irq_priv[irq].busy))
+  if (g_irq_priv[irq].busy)
     {
       ASSERT(0);
     }
 #  endif
 
-  if (irq > IRQ255)
-    {
-      /* Not supported yet */
-
-      ASSERT(0);
-    }
-
-  if (CPU_COUNT(&g_irq_priv[irq].busy) == 0)
+  if (!g_irq_priv[irq].busy)
     {
       /* One time enable */
 
@@ -549,9 +628,9 @@ void up_enable_irq(int irq)
         {
           up_ioapic_unmask_pin(irq - IRQ0);
         }
-    }
 
-  CPU_SET(this_cpu(), &g_irq_priv[irq].busy);
+      g_irq_priv[irq].busy = true;
+    }
 
   spin_unlock_irqrestore(&g_irq_spinlock, flags);
 #endif
@@ -600,4 +679,117 @@ void up_trigger_irq(int irq, cpu_set_t cpuset)
                     irq);
         }
     }
+}
+
+/****************************************************************************
+ * Name: up_get_legacy_irq
+ *
+ * Description:
+ *   Reserve vector for legacy
+ *
+ ****************************************************************************/
+
+int up_get_legacy_irq(uint32_t devfn, uint8_t line, uint8_t pin)
+{
+  UNUSED(devfn);
+  UNUSED(pin);
+  return IRQ0 + line;
+}
+
+/****************************************************************************
+ * Name: up_alloc_irq_msi
+ *
+ * Description:
+ *   Reserve vector for MSI/MSI-X
+ *
+ ****************************************************************************/
+
+int up_alloc_irq_msi(uint8_t busno, uint32_t devfn, int *pirq, int num)
+{
+  irqstate_t flags = spin_lock_irqsave(&g_irq_spinlock);
+  int        irq   = 0;
+  int        i     = 0;
+
+  /* Limit requested number of vectors */
+
+  if (g_msi_now + num > IRQ255)
+    {
+      num = IRQ255 - g_msi_now;
+    }
+
+  if (num <= 0)
+    {
+      spin_unlock_irqrestore(&g_irq_spinlock, flags);
+
+      /* No IRQs available */
+
+      return -ENODEV;
+    }
+
+  irq = g_msi_now;
+  g_msi_now += num;
+
+  /* Mark IRQs as MSI/MSI-X */
+
+  for (i = 0; i < num; i++)
+    {
+      ASSERT(g_irq_priv[irq + i].busy == false);
+      g_irq_priv[irq + i].busy = true;
+      g_irq_priv[irq + i].msi  = true;
+      pirq[i] = irq + i;
+    }
+
+  spin_unlock_irqrestore(&g_irq_spinlock, flags);
+
+  return num;
+}
+
+/****************************************************************************
+ * Name: up_release_irq_msi
+ *
+ * Description:
+ *   Release MSI/MSI-X vector
+ *
+ ****************************************************************************/
+
+void up_release_irq_msi(int *irq, int num)
+{
+  irqstate_t flags = spin_lock_irqsave(&g_irq_spinlock);
+  int        i     = 0;
+
+  /* Mark IRQ as MSI/MSI-X */
+
+  for (i = 0; i < num; i++)
+    {
+      g_irq_priv[irq[i]].busy = false;
+      g_irq_priv[irq[i]].msi  = false;
+    }
+
+  spin_unlock_irqrestore(&g_irq_spinlock, flags);
+}
+
+/****************************************************************************
+ * Name: up_connect_irq
+ *
+ * Description:
+ *   Connect MSI/MSI-X vector to irq
+ *
+ ****************************************************************************/
+
+int up_connect_irq(const int *irq, int num, uintptr_t *mar, uint32_t *mdr)
+{
+  UNUSED(num);
+
+  if (mar != NULL)
+    {
+      *mar = X86_64_MAR_DEST |
+        (up_apic_cpu_id() << PCI_MSI_DATA_CPUID_SHIFT);
+    }
+
+  if (mdr != NULL)
+    {
+      *mdr = X86_64_MDR_TYPE | irq[0];
+    }
+
+  return OK;
 }

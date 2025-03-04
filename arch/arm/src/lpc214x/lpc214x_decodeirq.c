@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/lpc214x/lpc214x_decodeirq.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -33,6 +35,7 @@
 #include "chip.h"
 #include "arm_internal.h"
 #include "lpc214x_vic.h"
+#include "sched/sched.h"
 
 /****************************************************************************
  * Private Data
@@ -81,8 +84,11 @@ uint32_t *arm_decodeirq(uint32_t *regs)
 static uint32_t *lpc214x_decodeirq(uint32_t *regs)
 #endif
 {
+  struct tcb_s *tcb = this_task();
+
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
-  CURRENT_REGS = regs;
+  tcb->xcp.regs = regs;
+  up_set_interrupt_context(true);
   err("ERROR: Unexpected IRQ\n");
   PANIC();
   return NULL;
@@ -116,26 +122,22 @@ static uint32_t *lpc214x_decodeirq(uint32_t *regs)
 
   if (irq < NR_IRQS)
     {
-      uint32_t *savestate;
+      uint32_t *saveregs;
+      bool savestate;
 
-      /* Current regs non-zero indicates that we are processing an interrupt;
-       * CURRENT_REGS is also used to manage interrupt level context
-       * switches.
-       */
-
-      savestate    = (uint32_t *)CURRENT_REGS;
-      CURRENT_REGS = regs;
+      savestate = up_interrupt_context();
+      saveregs = tcb->xcp.regs;
+      up_set_interrupt_context(true);
+      tcb->xcp.regs = regs;
 
       /* Deliver the IRQ */
 
       irq_dispatch(irq, regs);
 
-      /* Restore the previous value of CURRENT_REGS.  NULL would indicate
-       * that we are no longer in an interrupt handler.  It will be non-NULL
-       * if we are returning from a nested interrupt.
-       */
+      /* Restore the previous value of saveregs. */
 
-      CURRENT_REGS = savestate;
+      up_set_interrupt_context(savestate);
+      tcb->xcp.regs = saveregs;
     }
 
   return NULL;  /* Return not used in this architecture */

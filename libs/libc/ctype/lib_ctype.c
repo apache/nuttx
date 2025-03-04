@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/ctype/lib_ctype.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -25,6 +27,27 @@
 #include <nuttx/config.h>
 
 #include <ctype.h>
+
+/****************************************************************************
+ * Macro Definitions
+ ****************************************************************************/
+
+#ifndef CONFIG_LIBCXXTOOLCHAIN
+
+/* MSVC seems to conflict with theses macro if defined in the public area.
+ * As such, they are defined in the private section to let NuttX build
+ */
+
+#define _U  01
+#define _L  02
+#define _N  04
+#define _S  010
+#define _P  020
+#define _C  040
+#define _X  0100
+#define _B  0200
+
+#else
 
 /****************************************************************************
  * Private Types
@@ -75,3 +98,6 @@ const char _ctype_[] =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+#endif
+

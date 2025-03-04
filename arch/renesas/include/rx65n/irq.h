@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/renesas/include/rx65n/irq.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -986,12 +988,6 @@
 #ifndef __ASSEMBLY__
 struct xcptcontext
 {
-  /* The following function pointer is non-zero if there are pending signals
-   * to be processed.
-   */
-
-  void *sigdeliver; /* Actual type is sig_deliver_t */
-
   /* These are saved copies of LR and SR used during signal processing. */
 
   uint32_t saved_pc;
@@ -1017,7 +1013,7 @@ struct xcptcontext
 
 /* Get the current value of the SR */
 
-static inline irqstate_t __getsr(void)
+static inline_function irqstate_t __getsr(void)
 {
   irqstate_t flags;
   __asm__ __volatile__("mvfc psw, %0":"=r"(flags));
@@ -1026,14 +1022,14 @@ static inline irqstate_t __getsr(void)
 
 /* Set the new value of the SR */
 
-static inline void __setsr(irqstate_t psw)
+static inline_function void __setsr(irqstate_t psw)
 {
   __asm__ __volatile__("mvtc %0, psw": :"r"(psw));
 }
 
 /* Return the current value of the stack pointer */
 
-static inline uint16_t up_getsp(void)
+static inline_function uint16_t up_getsp(void)
 {
   uint16_t sp;
 
@@ -1050,21 +1046,21 @@ static inline uint16_t up_getsp(void)
 
 /* Disable interrupts */
 
-static inline void up_irq_disable(void)
+static inline_function void up_irq_disable(void)
 {
   __asm__ __volatile__("CLRPSW I");
 }
 
 /* Enable interrupts */
 
-static inline void up_irq_enable(void)
+static inline_function void up_irq_enable(void)
 {
   __asm__ __volatile__("SETPSW I");
 }
 
 /* Return the current interrupt enable state and disable interrupts */
 
-static inline irqstate_t up_irq_save(void)
+static inline_function irqstate_t up_irq_save(void)
 {
   irqstate_t flags = __getsr();
   up_irq_disable();
@@ -1073,7 +1069,7 @@ static inline irqstate_t up_irq_save(void)
 
 /* Restore saved interrupt state */
 
-static inline void up_irq_restore(irqstate_t flags)
+static inline_function void up_irq_restore(irqstate_t flags)
 {
   if (RX65N_PSW_INTERRUPT == (flags & RX65N_PSW_INTERRUPT))
   {
@@ -1084,6 +1080,20 @@ static inline void up_irq_restore(irqstate_t flags)
     up_irq_disable();
   }
 }
+
+/****************************************************************************
+ * Name: up_getusrpc
+ ****************************************************************************/
+
+#define up_getusrpc(regs) \
+    (((uint32_t *)((regs) ? (regs) : up_current_regs()))[REG_PC])
+
+/****************************************************************************
+ * Name: up_getusrsp
+ ****************************************************************************/
+
+#define up_getusrsp(regs) \
+    ((uintptr_t)((uint32_t *)(regs))[REG_SP])
 
 #endif /* __ASSEMBLY__ */
 

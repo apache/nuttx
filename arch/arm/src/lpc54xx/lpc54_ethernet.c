@@ -1,15 +1,12 @@
 /****************************************************************************
  * arch/arm/src/lpc54xx/lpc54_ethernet.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * Some of the logic in this file was developed using sample code provided by
- * NXP that has a compatible BSD license:
- *
- *   Copyright (c) 2016, Freescale Semiconductor, Inc.
- *   Copyright 2016-2017 NXP
- *   All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2017 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2016 Freescale Semiconductor Inc.
+ * SPDX-FileCopyrightText: 2016 - 2017, NXP
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
+ * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -1223,7 +1220,7 @@ static void lpc54_eth_txdone(struct lpc54_ethdriver_s *priv,
     {
       /* Update statistics */
 
-      NETDEV_TXDONE(priv->eth_dev);
+      NETDEV_TXDONE(&priv->eth_dev);
 
       /* Free the Tx buffer assigned to the descriptor */
 
@@ -1321,12 +1318,12 @@ static void lpc54_eth_channel_work(struct lpc54_ethdriver_s *priv,
 
       if ((pending & LPC54_RXERR_INTMASK) != 0)
         {
-          NETDEV_RXERRORS(priv->eth_dev);
+          NETDEV_RXERRORS(&priv->eth_dev);
         }
 
       if ((pending & LPC54_TXERR_INTMASK) != 0)
         {
-          NETDEV_TXERRORS(priv->eth_dev);
+          NETDEV_TXERRORS(&priv->eth_dev);
         }
 
       /* The Receive Buffer Unavailable (RBU) error is a special case.  It
@@ -1375,7 +1372,7 @@ static void lpc54_eth_channel_work(struct lpc54_ethdriver_s *priv,
             {
               /* Update statistics if a packet was dispatched */
 
-              NETDEV_RXPACKETS(priv->eth_dev);
+              NETDEV_RXPACKETS(&priv->eth_dev);
             }
           else
             {
@@ -1576,7 +1573,7 @@ static void lpc54_eth_txtimeout_work(void *arg)
 
   /* Increment statistics and dump debug info */
 
-  NETDEV_TXTIMEOUTS(priv->eth_dev);
+  NETDEV_TXTIMEOUTS(&priv->eth_dev);
 
   /* Then reset the hardware by bringing it down and taking it back up
    * again.

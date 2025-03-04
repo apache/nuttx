@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/timers/oneshot.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -267,10 +269,13 @@ int oneshot_max_delay(FAR struct oneshot_lowerhalf_s *lower,
   clock_t tick;
   int ret;
 
-  DEBUGASSERT(lower->ops->tick_max_delay);
+  if (lower->ops->tick_max_delay == NULL)
+    {
+      return -ENOTSUP;
+    }
 
   ret = lower->ops->tick_max_delay(lower, &tick);
-  timespec_from_tick(ts, tick);
+  clock_ticks2time(ts, tick);
   return ret;
 }
 
@@ -281,9 +286,12 @@ int oneshot_start(FAR struct oneshot_lowerhalf_s *lower,
 {
   clock_t tick;
 
-  DEBUGASSERT(lower->ops->tick_start);
+  if (lower->ops->tick_start == NULL)
+    {
+      return -ENOTSUP;
+    }
 
-  tick = timespec_to_tick(ts);
+  tick = clock_time2ticks(ts);
   return lower->ops->tick_start(lower, callback, arg, tick);
 }
 
@@ -294,10 +302,13 @@ int oneshot_cancel(FAR struct oneshot_lowerhalf_s *lower,
   clock_t tick;
   int ret;
 
-  DEBUGASSERT(lower->ops->tick_cancel);
+  if (lower->ops->tick_cancel == NULL)
+    {
+      return -ENOTSUP;
+    }
 
   ret = lower->ops->tick_cancel(lower, &tick);
-  timespec_from_tick(ts, tick);
+  clock_ticks2time(ts, tick);
 
   return ret;
 }
@@ -309,10 +320,13 @@ int oneshot_current(FAR struct oneshot_lowerhalf_s *lower,
   clock_t tick;
   int ret;
 
-  DEBUGASSERT(lower->ops->tick_current);
+  if (lower->ops->tick_current == NULL)
+    {
+      return -ENOTSUP;
+    }
 
   ret = lower->ops->tick_current(lower, &tick);
-  timespec_from_tick(ts, tick);
+  clock_ticks2time(ts, tick);
 
   return ret;
 }
@@ -324,10 +338,13 @@ int oneshot_tick_max_delay(FAR struct oneshot_lowerhalf_s *lower,
   struct timespec ts;
   int ret;
 
-  DEBUGASSERT(lower->ops->max_delay);
+  if (lower->ops->max_delay == NULL)
+    {
+      return -ENOTSUP;
+    }
 
   ret = lower->ops->max_delay(lower, &ts);
-  *ticks = timespec_to_tick(&ts);
+  *ticks = clock_time2ticks(&ts);
   return ret;
 }
 
@@ -338,9 +355,12 @@ int oneshot_tick_start(FAR struct oneshot_lowerhalf_s *lower,
 {
   struct timespec ts;
 
-  DEBUGASSERT(lower->ops->start);
+  if (lower->ops->start == NULL)
+    {
+      return -ENOTSUP;
+    }
 
-  timespec_from_tick(&ts, ticks);
+  clock_ticks2time(&ts, ticks);
   return lower->ops->start(lower, callback, arg, &ts);
 }
 
@@ -351,10 +371,13 @@ int oneshot_tick_cancel(FAR struct oneshot_lowerhalf_s *lower,
   struct timespec ts;
   int ret;
 
-  DEBUGASSERT(lower->ops->cancel);
+  if (lower->ops->cancel == NULL)
+    {
+      return -ENOTSUP;
+    }
 
   ret = lower->ops->cancel(lower, &ts);
-  *ticks = timespec_to_tick(&ts);
+  *ticks = clock_time2ticks(&ts);
 
   return ret;
 }
@@ -366,10 +389,13 @@ int oneshot_tick_current(FAR struct oneshot_lowerhalf_s *lower,
   struct timespec ts;
   int ret;
 
-  DEBUGASSERT(lower->ops->current);
+  if (lower->ops->current == NULL)
+    {
+      return -ENOTSUP;
+    }
 
   ret = lower->ops->current(lower, &ts);
-  *ticks = timespec_to_tick(&ts);
+  *ticks = clock_time2ticks(&ts);
 
   return ret;
 }

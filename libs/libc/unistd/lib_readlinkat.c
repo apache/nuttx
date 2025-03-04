@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/unistd/lib_readlinkat.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -68,17 +70,27 @@
 ssize_t readlinkat(int dirfd, FAR const char *path, FAR char *buf,
                    size_t bufsize)
 {
-  char fullpath[PATH_MAX];
+  FAR char *fullpath;
   int ret;
 
-  ret = lib_getfullpath(dirfd, path, fullpath, sizeof(fullpath));
+  fullpath = lib_get_pathbuffer();
+  if (fullpath == NULL)
+    {
+      set_errno(ENOMEM);
+      return ERROR;
+    }
+
+  ret = lib_getfullpath(dirfd, path, fullpath, PATH_MAX);
   if (ret < 0)
     {
+      lib_put_pathbuffer(fullpath);
       set_errno(-ret);
       return ERROR;
     }
 
-  return readlink(fullpath, buf, bufsize);
+  ret = readlink(fullpath, buf, bufsize);
+  lib_put_pathbuffer(fullpath);
+  return ret;
 }
 
 #endif /* CONFIG_PSEUDOFS_SOFTLINKS */

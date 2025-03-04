@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/icmp/icmp.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -159,19 +161,6 @@ EXTERN const struct sock_intf_s g_icmp_sockif;
  ****************************************************************************/
 
 void icmp_input(FAR struct net_driver_s *dev);
-
-/****************************************************************************
- * Name: icmp_sock_initialize
- *
- * Description:
- *   Initialize the IPPROTO_ICMP socket connection structures.  Called once
- *   and only from the network initialization layer.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_ICMP_SOCKET
-void icmp_sock_initialize(void);
-#endif
 
 /****************************************************************************
  * Name: icmp_alloc

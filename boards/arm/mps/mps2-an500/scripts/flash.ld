@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/mps/mps2-an500/scripts/flash.ld
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -20,7 +22,7 @@
 
 MEMORY
 {
-  flash (rx)  : ORIGIN = 0x00000000, LENGTH = 512K
+  flash (rx)  : ORIGIN = 0x00000000, LENGTH = 4M
   sram1 (rwx) : ORIGIN = 0x60000000, LENGTH = 16M
 }
 

@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/obstack/lib_obstack_make_room.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -25,6 +27,8 @@
 #include <obstack.h>
 #include <assert.h>
 #include <string.h>
+#include <sys/param.h>
+#include <syslog.h>
 #include "lib_obstack_malloc.h"
 
 /****************************************************************************
@@ -45,7 +49,7 @@
  *   size: number of bytes to be free for growth
  *
  * Assumptions/Limitations:
- *   The obstack's chunk_size is expected to be power of two. This helps to
+ *   The obstack's chunk_size is rounded up to be power of two. This helps to
  *   eliminate division that might not be implemented in the HW and thus
  *   inefficient.
  *
@@ -67,13 +71,18 @@ void obstack_make_room(FAR struct obstack *h, size_t size)
 
   size += object_size + sizeof(struct _obstack_chunk);
 
-  /* Note: this is rounding up to the multiple of chunk size that is power of
-   * two. Thus this creates limitation that chunks can be only power of two.
+  /* Note: this is rounding up to the multiple of chunk size that is rounded
+   * up to the power of two.
    */
 
-  mask = h->chunk_size;
-  for (i = 1; i < sizeof(size_t); i <<= 1)
+  DEBUGASSERT(h->chunk_size > 0);
+  mask = h->chunk_size - 1;
+
+  for (i = 1; i < sizeof(size_t) * 8; i <<= 1)
+    {
       mask |= mask >> i;
+    }
+
   size = (size + mask) & ~mask;
 
   if (h->chunk == NULL ||
@@ -98,8 +107,7 @@ void obstack_make_room(FAR struct obstack *h, size_t size)
       h->chunk = lib_obstack_realloc(h->chunk, size);
     }
 
-  h->chunk->limit =
-    (FAR char *)h->chunk + sizeof(struct _obstack_chunk) + size;
+  h->chunk->limit = (FAR char *)h->chunk + size;
   h->object_base = (FAR char *)h->chunk + sizeof(struct _obstack_chunk);
   h->next_free = h->object_base + object_size;
 }

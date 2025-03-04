@@ -1,6 +1,8 @@
 ############################################################################
 # tools/ProtectedLibs.mk
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -49,6 +51,13 @@ NUTTXLIBS += staging$(DELIM)libstubs$(LIBEXT) staging$(DELIM)libkc$(LIBEXT)
 NUTTXLIBS += staging$(DELIM)libkmm$(LIBEXT) staging$(DELIM)libkarch$(LIBEXT)
 USERLIBS  += staging$(DELIM)libproxies$(LIBEXT) staging$(DELIM)libc$(LIBEXT)
 USERLIBS  += staging$(DELIM)libmm$(LIBEXT) staging$(DELIM)libarch$(LIBEXT)
+
+# Add toolchain library support
+
+ifeq ($(CONFIG_LIB_BUILTIN),y)
+NUTTXLIBS += staging$(DELIM)libkbuiltin$(LIBEXT)
+USERLIBS += staging$(DELIM)libbuiltin$(LIBEXT)
+endif
 
 # Add libraries for math support.
 

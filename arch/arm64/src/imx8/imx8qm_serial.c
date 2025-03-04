@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/src/imx8/imx8qm_serial.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -1049,21 +1051,11 @@ void arm64_earlyserialinit(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
   struct uart_dev_s *dev = &CONSOLE_DEV;
 
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      imx8_send(dev, '\r');
-    }
-
   imx8_send(dev, (uint8_t)ch);
-  return ch;
 }
 
 /****************************************************************************

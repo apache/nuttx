@@ -1,8 +1,7 @@
 /****************************************************************************
  * drivers/mtd/mtd_nandwrapper.c
- * This deals with the wrapper over the upper half of the driver, to enable
- * logging for debugging, and essentially passes the parameters right to the
- * actual upper half of the NAND Flash device driver without changing them.
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

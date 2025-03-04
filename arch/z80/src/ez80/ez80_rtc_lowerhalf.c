@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/z80/src/ez80/ez80_rtc_lowerhalf.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -405,6 +407,7 @@ static int ez80_setrelative(FAR struct rtc_lowerhalf_s *lower,
   struct tm time;
   time_t seconds;
   int ret = -EINVAL;
+  irqstate_t flags;
 
   DEBUGASSERT(lower != NULL && alarminfo != NULL && alarminfo->id == 0);
 
@@ -412,7 +415,7 @@ static int ez80_setrelative(FAR struct rtc_lowerhalf_s *lower,
    * about being suspended and working on an old time.
    */
 
-  sched_lock();
+  flags = enter_critical_section();
 
   /* Get the current time in broken out format */
 
@@ -441,7 +444,7 @@ static int ez80_setrelative(FAR struct rtc_lowerhalf_s *lower,
       ret = ez80_setalarm(lower, &setalarm);
     }
 
-  sched_unlock();
+  leave_critical_section(flags);
   return ret;
 }
 #endif
@@ -516,6 +519,7 @@ static int ez80_rdalarm(FAR struct rtc_lowerhalf_s *lower,
                         FAR struct lower_rdalarm_s *alarminfo)
 {
   int ret = -EINVAL;
+  irqstate_t flags;
 
   DEBUGASSERT(lower != NULL && alarminfo != NULL &&
               alarminfo->time != NULL && alarminfo->id == 0);
@@ -524,9 +528,9 @@ static int ez80_rdalarm(FAR struct rtc_lowerhalf_s *lower,
    * about being suspended and working on an old time.
    */
 
-  sched_lock();
+  flags = enter_critical_section();
   ret = ez80_rtc_rdalarm((FAR struct tm *)alarminfo->time);
-  sched_unlock();
+  leave_critical_section(flags);
 
   return ret;
 }

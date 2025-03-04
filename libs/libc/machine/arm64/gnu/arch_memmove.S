@@ -1,8 +1,8 @@
 /****************************************************************************
  * libs/libc/machine/arm64/gnu/arch_memmove.S
  *
- * Copyright (c) 2013, Linaro Limited
- *  All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2013, Linaro Limited, 2015 ARM Ltd
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -100,7 +100,7 @@
    unrolled loop processes 64 bytes per iteration.
 */
 
-def_fn memmove, 6
+def_fn ARCH_LIBCFUN(memmove), 6
 	sub	tmp1, dstin, src
 	cmp	count, 96
 	ccmp	tmp1, count, 2, hi
@@ -158,6 +158,6 @@ def_fn memmove, 6
 	stp	C_l, C_h, [dstin]
 3:	ret
 
-	.size	memmove, . - memmove
+	.size	ARCH_LIBCFUN(memmove), . - ARCH_LIBCFUN(memmove)
 
 #endif

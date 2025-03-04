@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/xtensa/esp32s3/esp32s3-lcd-ev/src/esp32s3-lcd-ev.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -42,6 +44,10 @@
 /* I2C Port */
 
 #define I2C_PORT            0
+
+#ifdef CONFIG_AUDIO_ES8311
+#  define SPEAKER_ENABLE_GPIO  4
+#endif
 
 /****************************************************************************
  * Public Types
@@ -190,6 +196,31 @@ int board_ioexpander_output(int pin, bool level);
 
 #ifdef CONFIG_ESP32S3_BOARD_IOEXPANDER
 int board_ioexpander_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: esp32s3_es8311_initialize
+ *
+ * Description:
+ *   This function is called by platform-specific, setup logic to configure
+ *   and register the ES8311 device.  This function will register the driver
+ *   as /dev/audio/pcm[x] where x is determined by the I2S port number.
+ *
+ * Input Parameters:
+ *   i2c_port  - The I2C port used for the device
+ *   i2c_addr  - The I2C address used by the device
+ *   i2c_freq  - The I2C frequency used for the device
+ *   i2s_port  - The I2S port used for the device
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_AUDIO_ES8311
+int esp32s3_es8311_initialize(int i2c_port, uint8_t i2c_addr, int i2c_freq,
+                              int i2s_port);
 #endif
 
 #endif /* __ASSEMBLY__ */

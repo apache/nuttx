@@ -1,8 +1,8 @@
 /****************************************************************************
  * include/nuttx/wireless/bluetooth/bt_hci.h
  *
- *   Copyright (c) 2016, Intel Corporation
- *   All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2016, Intel Corporation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -113,6 +113,7 @@
 #define BT_OGF_INFO              0x04
 #define BT_OGF_STATUS            0x05
 #define BT_OGF_LE                0x08
+#define BT_OGF_VS_RTK            0x3f
 
 /* Construct OpCode from OGF and OCF */
 
@@ -136,6 +137,7 @@
 #define BT_HCI_OP_LE_SET_EVENT_MASK           BT_OP(BT_OGF_LE, 0x0001)
 #define BT_HCI_OP_LE_READ_BUFFER_SIZE         BT_OP(BT_OGF_LE, 0x0002)
 #define BT_HCI_OP_LE_READ_LOCAL_FEATURES      BT_OP(BT_OGF_LE, 0x0003)
+#define BT_HCI_OP_LE_REM_CONN_PARAM_REQ_RPLY  BT_OP(BT_OGF_LE, 0x0020)
 
 #define BT_HCI_OP_LE_SET_RAND_ADDR            BT_OP(BT_OGF_LE, 0x0005)
 
@@ -148,6 +150,7 @@
 #define BT_LE_ADV_SCAN_RSP                    0x04
 
 #define BT_HCI_OP_LE_SET_ADV_PARAMETERS       BT_OP(BT_OGF_LE, 0x0006)
+#define BT_HIC_OP_LE_READ_ADV_CHANNEL_TX_PWR  BT_OP(BT_OGF_LE, 0x0007)
 #define BT_HCI_OP_LE_SET_ADV_DATA             BT_OP(BT_OGF_LE, 0x0008)
 #define BT_HCI_OP_LE_SET_SCAN_RSP_DATA        BT_OP(BT_OGF_LE, 0x0009)
 #define BT_HCI_OP_LE_SET_ADV_ENABLE           BT_OP(BT_OGF_LE, 0x000a)
@@ -509,6 +512,17 @@ begin_packed_struct struct bt_hci_cp_le_ltk_req_neg_reply_s
   uint16_t handle;
 } end_packed_struct;
 
+begin_packed_struct struct bt_hci_cp_le_rem_conn_param_req_reply_s
+{
+  uint16_t handle;
+  uint16_t min_interval;
+  uint16_t max_interval;
+  uint16_t latency;
+  uint16_t timeout;
+  uint16_t min_ce_len;
+  uint16_t max_ce_len;
+} end_packed_struct;
+
 /* Event definitions */
 
 begin_packed_struct struct bt_hci_evt_disconn_complete_s
@@ -627,6 +641,15 @@ begin_packed_struct struct bt_hci_evt_le_ltk_request_s
   uint16_t handle;
   uint64_t rand;
   uint16_t ediv;
+} end_packed_struct;
+
+begin_packed_struct struct bt_hci_evt_le_rem_conn_param_req_s
+{
+  uint16_t handle;
+  uint16_t min_interval;
+  uint16_t max_interval;
+  uint16_t latency;
+  uint16_t timeout;
 } end_packed_struct;
 
 #endif /* CONFIG_WIRELESS_BLUETOOTH */

@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/vfs/fs_dup.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -52,28 +54,50 @@
 
 int file_dup(FAR struct file *filep, int minfd, int flags)
 {
-  struct file filep2;
+  FAR struct file *filep2;
   int fd2;
   int ret;
+#ifdef CONFIG_FDSAN
+  uint64_t f_tag_fdsan; /* File owner fdsan tag, init to 0 */
+#endif
 
-  /* Let file_dup3() do the real work */
+#ifdef CONFIG_FDCHECK
+  uint8_t f_tag_fdcheck; /* File owner fdcheck tag, init to 0 */
+#endif
 
-  memset(&filep2, 0, sizeof(filep2));
-  ret = file_dup3(filep, &filep2, flags);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  fd2 = file_allocate(filep2.f_inode, filep2.f_oflags,
-                      filep2.f_pos, filep2.f_priv, minfd, false);
+  fd2 = file_allocate(g_root_inode, 0, 0, NULL, minfd, true);
   if (fd2 < 0)
     {
-      file_close(&filep2);
       return fd2;
     }
 
-  return fd2;
+  ret = fs_getfilep(fd2, &filep2);
+#ifdef CONFIG_FDSAN
+  f_tag_fdsan = filep2->f_tag_fdsan;
+#endif
+
+#ifdef CONFIG_FDCHECK
+  f_tag_fdcheck = filep2->f_tag_fdcheck;
+#endif
+  DEBUGASSERT(ret >= 0);
+
+  ret = file_dup3(filep, filep2, flags);
+#ifdef CONFIG_FDSAN
+  filep2->f_tag_fdsan = f_tag_fdsan;
+#endif
+
+#ifdef CONFIG_FDCHECK
+  filep2->f_tag_fdcheck = f_tag_fdcheck;
+#endif
+
+  fs_putfilep(filep2);
+  if (ret >= 0)
+    {
+      return fd2;
+    }
+
+  fs_putfilep(filep2);
+  return ret;
 }
 
 /****************************************************************************
@@ -97,11 +121,10 @@ int dup(int fd)
       goto err;
     }
 
-  DEBUGASSERT(filep != NULL);
-
   /* Let file_dup() do the real work */
 
   ret = file_dup(filep, 0, 0);
+  fs_putfilep(filep);
   if (ret < 0)
     {
       goto err;

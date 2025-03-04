@@ -1,0 +1,143 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "Toolchain Library Support"
+
+config LIB_BUILTIN
+	bool
+
+config LIB_COMPILER_RT
+	bool
+
+choice
+	prompt "Builtin toolchain support"
+	default BUILTIN_TOOLCHAIN
+	---help---
+		Select the builtin library
+
+config BUILTIN_COMPILER_RT
+	bool "Builtin LLVM libclang_rt.builtins"
+	depends on ARCH_TOOLCHAIN_GNU
+	select LIB_BUILTIN
+	select LIB_COMPILER_RT
+	---help---
+		Compile the LLVM Compiler-rt library into the OS.
+
+config BUILTIN_TOOLCHAIN
+	bool "Link toolchain builtin library to the OS"
+
+endchoice
+
+choice
+	prompt "Code coverage analysis support"
+	default COVERAGE_NONE
+	---help---
+		Select the code coverage analysis library
+
+config COVERAGE_COMPILER_RT
+	bool "Builtin libclang_rt.profile"
+	depends on ARCH_TOOLCHAIN_CLANG
+	select LIB_BUILTIN
+	select LIB_COMPILER_RT
+	---help---
+		Compile the LLVM Compiler-rt library into the OS.
+		Support adding native rich compilation options "-fprofile-xxx"
+
+config COVERAGE_MINI
+	bool "Builtin code coverage analysis mini library"
+	select LIB_BUILTIN
+	---help---
+		This is a mini version of the library, which is
+		used for code coverage analysis. If the toolchain
+		is clang, only support the compilation option
+		"-fprofile-instr-generate -fcoverage-mapping"
+
+config COVERAGE_TOOLCHAIN
+	bool "Link toolchain gcov library to the OS"
+	depends on ARCH_TOOLCHAIN_GCC
+	depends on HAVE_CXXINITIALIZE
+	---help---
+		Link the toolchain coverage library to the OS.
+
+config COVERAGE_NONE
+	bool "Disable coverage function"
+
+endchoice
+
+config COVERAGE_GCOV_DUMP_REBOOT
+	bool "Dump gcov data on reboot"
+	default n
+	---help---
+		Dump gcov data on reboot, this will cause the gcov data to be
+		dumped to the default path when the system is rebooted.
+
+config COVERAGE_DEFAULT_PREFIX_STRIP
+	string "Default gcov dump path prefix strip"
+	default "99"
+	---help---
+		The default prefix strip of the gcov data
+
+config COVERAGE_DEFAULT_PREFIX
+	string "Default gcov dump path prefix"
+	default "/data"
+	---help---
+		The default prefix to store the gcov data
+
+choice
+	prompt "Builtin profile support"
+	default PROFILE_NONE
+	---help---
+		Select the profile library
+
+config PROFILE_MINI
+	bool "Enable mini gprof profiling"
+	select LIB_BUILTIN
+	---help---
+		Enable gprof profiling support.  This will cause the compiler to
+		generate additional code to support profiling.  This will also
+		cause the linker to include the gmon.out file in the final
+		executable.
+		Add the "-pg" parameter to the Makefile when compiling to obtain
+		the function call graph of the specified module. If you do this,
+		please enable "CONFIG_FRAME_POINTER"
+
+config PROFILE_NONE
+	bool "None profile support"
+
+endchoice
+
+config COVERAGE_ALL
+	bool "Enable code coverage for all module"
+	depends on !COVERAGE_NONE
+	default n
+	---help---
+		Enable code coverage for all code, it will instrument
+		all code, which will cause a large performance penalty for the code.
+		If use GCC, it will add the '-fprofile-generate
+		-ftest-coverage' parameter to all module.
+		If use Clang, it will add the '-fprofile-instr-generate
+		-fcoverage-mapping' parameter to all module.
+		The data can then be printed nsh run "gcov dump -d /xxx/xxx"
+
+
+config PROFILE_ALL
+	bool "Enable gprof call graph for all modules"
+	depends on FRAME_POINTER && !PROFILE_NONE
+	default n
+	---help---
+		Enable gprof profiling for all code, it will instrument
+		all code, which will cause a large performance penalty for the code.
+		You can add the '-pg' parameter to the specified module in the
+		makefile to only analyze the content of the module.
+
+config LIB_COMPILER_RT_VERSION
+	string "Select LLVM Compiler-rt version"
+	depends on LIB_COMPILER_RT
+	default "17.0.1"
+
+config LIB_COMPILER_RT_HAS_BFLOAT16
+	bool "Enable support for bfloat16 in Compiler-rt"
+	depends on LIB_COMPILER_RT
+	default n

@@ -825,9 +825,17 @@ void esp32s3_lowputc_disable_all_uart_int(struct esp32s3_uart_s *priv,
 
   putreg32(0, UART_INT_ENA_REG(priv->id));
 
-  /* Clear all ints */
+  /* Note: this function is used to disable interrupts temporarily,
+   * paired with esp32s3_lowputc_restore_all_uart_int. (eg. up_putc)
+   * In that case, it might not be safe to clear interrupt bits.
+   */
 
-  putreg32(0xffffffff, UART_INT_CLR_REG(priv->id));
+  if (current_status == NULL)
+    {
+      /* Clear all ints */
+
+      putreg32(0xffffffff, UART_INT_CLR_REG(priv->id));
+    }
 
   spin_unlock_irqrestore(&priv->lock, flags);
 }

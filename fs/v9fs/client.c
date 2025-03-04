@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/v9fs/client.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -31,6 +33,7 @@
 #include <nuttx/lib/lib.h>
 
 #include "client.h"
+#include "fs_heap.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -170,7 +173,7 @@ begin_packed_struct struct v9fs_attach_s
 {
   struct v9fs_header_s header;
   uint32_t fid;
-  uint16_t afid;
+  uint32_t afid;
   uint8_t buffer[2 * (V9FS_BIT16SZ + NAME_MAX) + V9FS_BIT32SZ];
 } end_packed_struct;
 
@@ -490,7 +493,7 @@ static int v9fs_fid_create(FAR struct v9fs_client_s *client,
   int ret;
 
   len = strlen(relpath);
-  fid = kmm_zalloc(sizeof(struct v9fs_fid_s) + len);
+  fid = fs_heap_zalloc(sizeof(struct v9fs_fid_s) + len);
   if (fid == NULL)
     {
       return -ENOMEM;
@@ -508,7 +511,7 @@ static int v9fs_fid_create(FAR struct v9fs_client_s *client,
 
   /* Failed to initialize fid */
 
-  kmm_free(fid);
+  fs_heap_free(fid);
   return ret;
 }
 
@@ -531,7 +534,7 @@ static void v9fs_fid_destroy(FAR struct v9fs_client_s *client,
 
   idr_remove(client->fids, fid);
   nxmutex_unlock(&client->lock);
-  kmm_free(fidp);
+  fs_heap_free(fidp);
 }
 
 /****************************************************************************
@@ -1095,13 +1098,13 @@ ssize_t v9fs_client_write(FAR struct v9fs_client_s *client, uint32_t fid,
 
   while (buflen > 0)
     {
+      request.count = buflen > fidp->iounit ? fidp->iounit : buflen;
       request.header.size = V9FS_HDRSZ + V9FS_BIT32SZ + V9FS_BIT64SZ +
                             V9FS_BIT32SZ + request.count;
       request.header.type = V9FS_TWRITE;
       request.header.tag = v9fs_get_tagid(client);
       request.fid = fid;
       request.offset = offset;
-      request.count = buflen > fidp->iounit ? fidp->iounit : buflen;
 
       wiov[0].iov_base = &request;
       wiov[0].iov_len = V9FS_HDRSZ + V9FS_BIT32SZ + V9FS_BIT64SZ +
@@ -1462,7 +1465,7 @@ int v9fs_client_walk(FAR struct v9fs_client_s *client, FAR const char *path,
   struct iovec wiov[2];
   struct iovec riov[2];
   uint16_t nwname = 0;
-  uint32_t newfid;
+  uint32_t newfid = V9FS_NOFID;
   size_t total_len = 0;
   size_t offset = 0;
   size_t name_len;
@@ -1523,12 +1526,13 @@ int v9fs_client_walk(FAR struct v9fs_client_s *client, FAR const char *path,
       return -ENOMEM;
     }
 
-  newfid = v9fs_fid_create(client, path);
-  if (newfid < 0)
+  ret = v9fs_fid_create(client, path);
+  if (ret < 0)
     {
       goto err;
     }
 
+  newfid = ret;
   request.header.size = V9FS_HDRSZ + V9FS_BIT32SZ * 2 + V9FS_BIT16SZ +
                         total_len;
   request.header.type = V9FS_TWALK;
@@ -1583,13 +1587,23 @@ int v9fs_client_walk(FAR struct v9fs_client_s *client, FAR const char *path,
   if (ret < 0)
     {
       v9fs_fid_destroy(client, newfid);
-      newfid = ret;
+      goto err;
+    }
+
+  /* There are differences in different server implementations, so it is
+   * necessary to check whether the returned nwqid satisfies the requested
+   * number.
+   */
+
+  if (response.nwqid != nwname)
+    {
+      ret = -ENOENT;
     }
 
 err:
   lib_put_pathbuffer(request_payload);
   lib_put_pathbuffer(response_payload);
-  return newfid;
+  return ret == 0 ? newfid : ret;
 }
 
 /****************************************************************************
@@ -1600,12 +1614,8 @@ int v9fs_client_init(FAR struct v9fs_client_s *client,
                      FAR const char *data)
 {
   FAR const char *options;
+  FAR char *aname;
   char transport[NAME_MAX];
-  char aname[PATH_MAX] =
-    {
-      0
-    };
-
   char uname[NAME_MAX] =
     {
       0
@@ -1613,6 +1623,14 @@ int v9fs_client_init(FAR struct v9fs_client_s *client,
 
   size_t length;
   int ret;
+
+  aname = lib_get_pathbuffer();
+  if (aname == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  aname[0] = '\0';
 
   /* Parse commandline */
 
@@ -1654,6 +1672,7 @@ int v9fs_client_init(FAR struct v9fs_client_s *client,
   ret = v9fs_transport_create(&client->transport, transport, data);
   if (ret < 0)
     {
+      lib_put_pathbuffer(aname);
       return ret;
     }
 
@@ -1661,6 +1680,7 @@ int v9fs_client_init(FAR struct v9fs_client_s *client,
   if (client->fids == NULL)
     {
       v9fs_transport_destroy(client->transport);
+      lib_put_pathbuffer(aname);
       return -ENOMEM;
     }
 
@@ -1684,12 +1704,14 @@ int v9fs_client_init(FAR struct v9fs_client_s *client,
 
   client->root_fid = ret;
   client->tag_id = 1;
+  lib_put_pathbuffer(aname);
   return 0;
 
 out:
   v9fs_transport_destroy(client->transport);
   nxmutex_destroy(&client->lock);
   idr_destroy(client->fids);
+  lib_put_pathbuffer(aname);
   return ret;
 }
 
@@ -1788,4 +1810,14 @@ int v9fs_fid_get(FAR struct v9fs_client_s *client, uint32_t fid)
   fidp->refcount++;
   nxmutex_unlock(&client->lock);
   return 0;
+}
+
+/****************************************************************************
+ * v9fs_parse_size
+ ****************************************************************************/
+
+ssize_t v9fs_parse_size(FAR const void *buffer)
+{
+  FAR const struct v9fs_header_s *ptr = buffer;
+  return ptr->size;
 }

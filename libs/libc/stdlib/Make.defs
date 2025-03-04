@@ -1,6 +1,8 @@
 ############################################################################
 # libs/libc/stdlib/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -28,7 +30,7 @@ CSRCS += lib_strtoll.c lib_strtoul.c lib_strtoull.c lib_strtold.c
 CSRCS += lib_checkbase.c lib_mktemp.c lib_mkstemp.c lib_mkdtemp.c
 CSRCS += lib_aligned_alloc.c lib_posix_memalign.c lib_valloc.c lib_mblen.c
 CSRCS += lib_mbtowc.c lib_wctomb.c lib_mbstowcs.c lib_wcstombs.c lib_atexit.c
-CSRCS += lib_reallocarray.c
+CSRCS += lib_reallocarray.c lib_arc4random.c
 
 ifeq ($(CONFIG_PSEUDOTERM),y)
 CSRCS += lib_ptsname.c lib_ptsnamer.c lib_unlockpt.c lib_openpty.c

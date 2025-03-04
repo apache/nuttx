@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/sama5/sam_classd.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -335,7 +337,7 @@ static void classd_putreg(uint32_t regaddr, uint32_t regval);
 static void classd_dump_registers(const char *msg);
 #else
 #  define classd_dump_registers(msg);
-#endif 
+#endif
 
 /* Audio lower half functions */
 
@@ -501,9 +503,9 @@ static struct sam_classd_config_s sam_classd_const =
 
 #if defined(CONFIG_SAMA5D2_CLASSD_EQ_FLAT)
   .eq_mode = CLASSD_EQ_FLAT,
-#  elif defined(CONFIG_SAMA5D2_CLASSD_EQ_BB12)  
+#  elif defined(CONFIG_SAMA5D2_CLASSD_EQ_BB12)
   .eq_mode = CLASSD_EQ_BASS_BOOST_12DB,
-#  elif defined(CONFIG_SAMA5D2_CLASSD_EQ_BB6)  
+#  elif defined(CONFIG_SAMA5D2_CLASSD_EQ_BB6)
   .eq_mode = CLASSD_EQ_BASS_BOOST_6DB,
 #  elif defined(CONFIG_SAMA5D2_CLASSD_EQ_BC12)
   .eq_mode = CLASSD_EQ_BASS_CUT_12DB,

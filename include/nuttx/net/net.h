@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/net/net.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -597,7 +599,8 @@ int sockfd_allocate(FAR struct socket *psock, int oflags);
  ****************************************************************************/
 
 FAR struct socket *file_socket(FAR struct file *filep);
-int sockfd_socket(int sockfd, FAR struct socket **socketp);
+int sockfd_socket(int sockfd, FAR struct file **filep,
+                  FAR struct socket **socketp);
 
 /****************************************************************************
  * Name: psock_socket

@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/bluetooth/bluetooth_recvmsg.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -326,6 +328,11 @@ ssize_t bluetooth_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
     {
       nerr("ERROR: Unsupported socket type: %d\n", psock->s_type);
       return -EPROTONOSUPPORT;
+    }
+
+  if (msg->msg_iovlen != 1)
+    {
+      return -ENOTSUP;
     }
 
   /* Perform the packet recvmsg() operation */

@@ -7,6 +7,13 @@ The Tiny2040 is a general purpose RP2040 board supplied by Pimoroni.
 .. figure:: Tiny2040.png
    :align: center
 
+The Pimoroni Tiny 2040 has two buttons (RESET and BOOT) allowing to boot
+from ROM without disconnecting the device.
+
+See the `Pimoroni website
+<https://shop.pimoroni.com/products/tiny-2040?variant=39560012234835/>`_ for
+information about the Pimoroni Tiny 2040.
+
 Features
 ========
 
@@ -78,6 +85,95 @@ or by supplying +5V to pin 1.
 The Raspberry Pi Pico chip run on 3.3 volts.  This is supplied
 by an onboard voltage regulator.
 
+Supported Capabilities
+======================
+
+NuttX supports the following RP2040 capabilities:
+
+* UART  (console port)
+
+  * GPIO 0 (UART0 TX) and GPIO 1 (UART0 RX) are used for the console.
+
+* I2C
+* SPI (master only)
+* DMAC
+* PWM
+* ADC
+* Watchdog
+* USB device
+
+  * MSC, CDC/ACM serial and these composite device are supported.
+  * CDC/ACM serial device can be used for the console.
+
+* PIO (RP2040 Programmable I/O)
+* Flash ROM Boot
+* SRAM Boot
+
+  * If Pico SDK is available, nuttx.uf2 file which can be used in BOOTSEL mode will be created.
+
+* Persistent flash filesystem in unused flash ROM
+* WiFi wireless communication
+
+There is currently no direct user mode access to these RP2040 hardware features:
+
+* SPI Slave Mode
+* SSI
+* RTC
+* Timers
+
+NuttX also provide support for these external devices:
+
+* WS2812 smart pixel support
+
+Installation
+============
+
+1. Download Raspberry Pi Pico SDK
+
+.. code-block:: console
+
+  $ git clone -b 2.0.0 https://github.com/raspberrypi/pico-sdk.git
+
+2. Download and install picotool
+
+  Instructions can be found here: https://github.com/raspberrypi/picotool
+
+  If you are on Arch Linux, you can install the picotool through the AUR:
+
+.. code-block:: console
+
+  $ yay -S picotool
+
+3. Set PICO_SDK_PATH environment variable
+
+.. code-block:: console
+
+  $ export PICO_SDK_PATH=<absolute_path_to_pico-sdk_directory>
+
+4. Configure and build NuttX
+
+.. code-block:: console
+
+  $ git clone https://github.com/apache/nuttx.git nuttx
+  $ git clone https://github.com/apache/nuttx-apps.git apps
+  $ cd nuttx
+  $ make distclean
+  $ ./tools/configure.sh pimoroni-tiny2040:nsh
+  $ make V=1
+
+5. Connect Pimoroni Tiny 2040 board to USB port. While pressing the
+   BOOT button, shortly press the RESET button. On releasing the BOOT
+   button the board boots from internal ROM and will be detected as
+   USB Mass Storage Device. Then copy "nuttx.uf2" into the device.
+   (Same manner as the standard Pico SDK applications installation.)
+
+6. To access the console, GPIO 0 and 1 pins must be connected to the
+   device such as USB-serial converter.
+
+   `usbnsh` configuration provides the console access by USB CDC/ACM serial
+   decive.  The console is available by using a terminal software on the USB
+   host.
+
 Configurations
 ==============
 
@@ -85,12 +181,30 @@ composite
 ---------
 
 NuttShell configuration (console enabled in UART0, at 115200 bps) with support for
-CDC/ACM with MSC USB composite driver.
+CDC/ACM with MSC USB composite driver. ``conn`` command enables the composite
+device.
 
 gpio
 --------
 
 NuttShell configuration (console enabled in UART0, at 115200 bps) with GPIO examples.
+
+.. list-table:: GPIO pin options
+   :widths: auto
+   :header-rows: 1
+
+   * - GPIO
+     - Function
+   * - GPIO18
+     - Onboard RGB LED (red, out)
+   * - GPIO19
+     - Onboard RGB LED (green, out)
+   * - GPIO20
+     - Onboard RGB LED (blue, out)
+   * - GPIO23
+     - Onboard BOOT button (user)
+
+No interrupt pin configured.
 
 nsh
 ---
@@ -118,21 +232,68 @@ both ARM cores enabled.
 spisd
 -----
 
-NuttShell configuration (console enabled in UART0, at 115200 bps) with SPI configured.
+NuttShell configuration (console enabled in UART0, at 115200 bps) with SPI SD
+card support enabled.
+
+.. list-table:: spisd connections
+   :widths: auto
+   :header-rows: 1
+
+   * - SD card slot
+     - Pimoroni Tiny 2040
+   * - DAT2
+     - Not connected
+   * - DAT3/CS
+     - GP5 (SPI0 CSn) (Pin 11)
+   * - CMD /DI
+     - GP7 (SPI0 TX)  (Pin 9)
+   * - VDD
+     - 3V3 OUT (Pin 3)
+   * - CLK/SCK
+     - GP6 (SPI0 SCK) (Pin 10)
+   * - VSS
+     - GND (Pin 2 or 8)
+   * - DAT0/DO
+     - GP4 (SPI0 RX)  (Pin 12)
+   * - DAT1          
+     - Not connected
+
+Card hot swapping is not supported.
 
 usbmsc
 ------
 
 NuttShell configuration (console enabled in UART0, at 115200 bps) with support for
-usbmsc.
+USB MSC and CDC/ACM.
+
+``msconn`` and ``sercon`` commands enable the MSC and CDC/ACM devices. The MSC
+support provides the interface to the SD card with SPI, so the SD card slot
+connection like spisd configuration is required.
 
 usbnsh
 ------
 
-Basic NuttShell configuration (console enabled in USB Port, at 115200 bps).
+Basic NuttShell configuration using CDC/ACM serial (console enabled in USB Port,
+at 115200 bps).
 
-README.txt
-==========
+License exceptions
+==================
 
-.. include:: README.txt
-   :literal:
+The following files are originated from the files in Pico SDK.
+So, the files are licensed under 3-Clause BSD same as Pico SDK.
+
+* arch/arm/src/rp2040/rp2040_clock.c
+* arch/arm/src/rp2040/rp2040_pll.c
+* arch/arm/src/rp2040/rp2040_xosc.c
+
+  * These are created by referring the Pico SDK clock initialization.
+
+* arch/arm/src/rp2040/rp2040_pio.c
+* arch/arm/src/rp2040/rp2040_pio.h
+* arch/arm/src/rp2040/rp2040_pio_instructions.h
+
+  * These provide the similar APIs to Pico SDK's hardware_pio APIs.
+
+* arch/arm/src/rp2040/hardware/\*.h
+
+  * These are generated from rp2040.svd originally provided in Pico SDK.

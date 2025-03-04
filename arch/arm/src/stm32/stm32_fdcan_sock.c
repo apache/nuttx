@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_fdcan_sock.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -9,7 +11,7 @@
  * License.  You may obtain a copy of the License at
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
- *s
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
@@ -1682,7 +1684,7 @@ static int fdcan_send(struct stm32_fdcan_s *priv)
 #ifdef CONFIG_NET_CAN_EXTID
       if ((frame->can_id & CAN_EFF_FLAG) != 0)
         {
-          DEBUGASSERT(frame->can_id < (1 << 29));
+          DEBUGASSERT((frame->can_id ^ CAN_EFF_FLAG) < (1 << 29));
 
           txbuffer[0] |= BUFFER_R0_EXTID(frame->can_id) | BUFFER_R0_XTD;
         }
@@ -1749,7 +1751,7 @@ static int fdcan_send(struct stm32_fdcan_s *priv)
 
       /* Set DLC */
 
-      txbuffer[1] |= BUFFER_R1_DLC(len_to_can_dlc[frame->len]);
+      txbuffer[1] |= BUFFER_R1_DLC(g_len_to_can_dlc[frame->len]);
 
       /* Set flags */
 
@@ -2467,8 +2469,8 @@ static void fdcan_receive(struct stm32_fdcan_s *priv,
 
       /* Word R1 contains the DLC and timestamp */
 
-      frame->len = can_dlc_to_len[((rxbuffer[1] & BUFFER_R1_DLC_MASK) >>
-                                   BUFFER_R1_DLC_SHIFT)];
+      frame->len = g_can_dlc_to_len[((rxbuffer[1] & BUFFER_R1_DLC_MASK) >>
+                                    BUFFER_R1_DLC_SHIFT)];
 
       /* Get CANFD flags */
 

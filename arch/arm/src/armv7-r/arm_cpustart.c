@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/armv7-r/arm_cpustart.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -79,12 +81,8 @@ int arm_start_handler(int irq, void *context, void *arg)
 
   nxsched_resume_scheduler(tcb);
 
-  /* Then switch contexts. This instantiates the exception context of the
-   * tcb at the head of the assigned task list.  In this case, this should
-   * be the CPUs NULL task.
-   */
+  UNUSED(tcb);
 
-  arm_restorestate(tcb->xcp.regs);
   return OK;
 }
 

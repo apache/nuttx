@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/shm/shmfs.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -26,12 +28,9 @@
 
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/mm/map.h>
-
-#if defined (CONFIG_BUILD_KERNEL)
 #include <nuttx/arch.h>
 #include <nuttx/pgalloc.h>
 #include <nuttx/sched.h>
-#endif
 
 #include "shm/shmfs.h"
 #include "inode/inode.h"
@@ -74,6 +73,8 @@ const struct file_operations g_shmfs_operations =
   shmfs_mmap,       /* mmap */
   shmfs_truncate,   /* truncate */
   NULL,             /* poll */
+  NULL,             /* readv */
+  NULL,             /* writev */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   shmfs_unlink      /* unlink */
 #endif
@@ -185,21 +186,13 @@ static int shmfs_release(FAR struct inode *inode)
    * The inode is released after this call, hence checking if i_crefs <= 1.
    */
 
-  int ret = inode_lock();
-  if (ret >= 0)
+  if (inode->i_parent == NULL && atomic_read(&inode->i_crefs) <= 1)
     {
-      if (inode->i_parent == NULL &&
-          inode->i_crefs <= 1)
-        {
-          shmfs_free_object(inode->i_private);
-          inode->i_private = NULL;
-          ret = OK;
-        }
-
-      inode_unlock();
+      shmfs_free_object(inode->i_private);
+      inode->i_private = NULL;
     }
 
-  return ret;
+  return OK;
 }
 
 /****************************************************************************
@@ -223,40 +216,36 @@ static int shmfs_close(FAR struct file *filep)
 static int shmfs_truncate(FAR struct file *filep, off_t length)
 {
   FAR struct shmfs_object_s *object;
-  int ret;
+  int ret = 0;
 
   if (length == 0)
     {
       return -EINVAL;
     }
 
-  ret = inode_lock();
-  if (ret >= 0)
+  inode_lock();
+  object = filep->f_inode->i_private;
+  if (!object)
     {
-      object = filep->f_inode->i_private;
-      if (!object)
+      filep->f_inode->i_private = shmfs_alloc_object(length);
+      if (!filep->f_inode->i_private)
         {
-          filep->f_inode->i_private = shmfs_alloc_object(length);
-          if (!filep->f_inode->i_private)
-            {
-              filep->f_inode->i_size = 0;
-              ret = -EFAULT;
-            }
-          else
-            {
-              filep->f_inode->i_size = length;
-            }
+          filep->f_inode->i_size = 0;
+          ret = -EFAULT;
         }
-      else if (object->length != length)
+      else
         {
-          /* This doesn't support resize */
-
-          ret = -EINVAL;
+          filep->f_inode->i_size = length;
         }
+    }
+  else if (object->length != length)
+    {
+      /* This doesn't support resize */
 
-      inode_unlock();
+      ret = -EINVAL;
     }
 
+  inode_unlock();
   return ret;
 }
 
@@ -267,20 +256,13 @@ static int shmfs_truncate(FAR struct file *filep, off_t length)
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int shmfs_unlink(FAR struct inode *inode)
 {
-  int ret = inode_lock();
-
-  if (ret >= 0)
+  if (atomic_read(&inode->i_crefs) <= 1)
     {
-      if (inode->i_crefs <= 1)
-        {
-          shmfs_free_object(inode->i_private);
-          inode->i_private = NULL;
-        }
-
-      inode_unlock();
+      shmfs_free_object(inode->i_private);
+      inode->i_private = NULL;
     }
 
-  return ret;
+  return OK;
 }
 #endif
 
@@ -369,24 +351,17 @@ static int shmfs_mmap(FAR struct file *filep,
 
   /* Keep the inode when mmapped, increase refcount */
 
-  ret = inode_addref(filep->f_inode);
-  if (ret >= 0)
+  inode_addref(filep->f_inode);
+  object = filep->f_inode->i_private;
+  if (object)
     {
-      object = filep->f_inode->i_private;
-      if (object)
-        {
-          ret = shmfs_map_object(object, &entry->vaddr);
-        }
-      else
-        {
-          ret = -EINVAL;
-        }
+      ret = shmfs_map_object(object, &entry->vaddr);
+    }
 
-      if (ret < 0 ||
-          (ret = shmfs_add_map(entry, filep->f_inode)) < 0)
-        {
-          inode_release(filep->f_inode);
-        }
+  if (ret < 0 ||
+      (ret = shmfs_add_map(entry, filep->f_inode)) < 0)
+    {
+      inode_release(filep->f_inode);
     }
 
   return ret;
@@ -413,10 +388,18 @@ static int shmfs_unmap_area(FAR struct task_group_s *group,
       /* Unmap the memory from user virtual address space */
 
       ret = up_shmdt((uintptr_t)vaddr, npages);
+      if (ret < 0)
+        {
+          return ret;
+        }
 
-      /* Add the virtual memory back to the shared memory pool */
+      /* Free the virtual address space */
 
       vm_release_region(get_group_mm(group), vaddr, length);
+    }
+  else
+    {
+      return -EINVAL;
     }
 #endif
 

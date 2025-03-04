@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/imxrt/imxrt_lpi2c.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -47,7 +49,6 @@
 #include "imxrt_lpi2c.h"
 #include "imxrt_edma.h"
 #include "imxrt_gpio.h"
-#include "imxrt_lpi2c.h"
 
 #include "hardware/imxrt_dmamux.h"
 #include "hardware/imxrt_pinmux.h"
@@ -1160,7 +1161,7 @@ static void imxrt_lpi2c_setclock(struct imxrt_lpi2c_priv_s *priv,
 #endif
 
           /* LPI2C output frequency = (Source Clock (Hz)/ 2^prescale) /
-           *   (CLKLO + 1 + CLKHI + 1 + ROUNDDOWN((2 + FILTSCL) / 2^prescale)
+           *   (CLKLO + 1 + CLKHI + 1 + ALIGN_DOWN((2 + FILTSCL)/2^prescale)
            *
            * Assume  CLKLO = 2 * CLKHI, SETHOLD = CLKHI, DATAVD = CLKHI / 2
            */

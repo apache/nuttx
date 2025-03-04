@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/kinetis/kinetis_enet.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -576,10 +578,6 @@ static void kinetis_receive(struct kinetis_driver_s *priv)
 
   while ((priv->rxdesc[priv->rxtail].status1 & RXDESC_E) == 0)
     {
-      /* Update statistics */
-
-      NETDEV_RXPACKETS(&priv->dev);
-
       /* Copy the buffer pointer to priv->dev.d_buf.  Set amount of data in
        * priv->dev.d_len
        */
@@ -587,6 +585,10 @@ static void kinetis_receive(struct kinetis_driver_s *priv)
       priv->dev.d_len = kinesis_swap16(priv->rxdesc[priv->rxtail].length);
       priv->dev.d_buf =
         (uint8_t *)kinesis_swap32((uint32_t)priv->rxdesc[priv->rxtail].data);
+
+      /* Update statistics */
+
+      NETDEV_RXPACKETS(&priv->dev);
 
 #ifdef CONFIG_NET_PKT
       /* When packet sockets are enabled, feed the frame into the tap */

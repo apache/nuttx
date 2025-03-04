@@ -1,20 +1,10 @@
 /****************************************************************************
  * arch/arm/src/samv7/sam_usbdevhs.c
  *
- *   Copyright (C) 2015-2016, 2019 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.orgr>
- *
- * This code derives from the UDPHS device controller driver for the SAMA5D3.
- * That code, in turn, includes some reference logic extracted from the
- * SAMA5D3 sample code.  That Atmel sample code has a BSD compatible license
- * that requires this copyright notice:
- *
- *   Copyright (c) 2009, Atmel Corporation
- *
- * Additional updates for the SAMV7 was taken from Atmel sample code for the
- * SAMV71:
- *
- *   Copyright (c) 2014, Atmel Corporation
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2019 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2015-2016 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2009,2014 Atmel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -68,10 +58,10 @@
 #include <nuttx/usb/usbdev_trace.h>
 
 #include <nuttx/irq.h>
+#include <arch/barriers.h>
 #include <arch/board/board.h>
 
 #include "arm_internal.h"
-#include "barriers.h"
 
 #include "chip.h"
 #include "sam_periphclks.h"
@@ -157,10 +147,6 @@
                                USB_EPR_EP_KIND | USB_EPR_CTR_TX | USB_EPR_EA_MASK)
 #define EPR_TXDTOG_MASK       (USB_EPR_STATTX_MASK | EPR_NOTOG_MASK)
 #define EPR_RXDTOG_MASK       (USB_EPR_STATRX_MASK | EPR_NOTOG_MASK)
-
-/* Cache-related */
-
-#define MEMORY_SYNC()          do { ARM_DSB();ARM_ISB(); } while (0)
 
 /* Request queue operations *************************************************/
 
@@ -1564,7 +1550,7 @@ static void sam_req_rddone(struct sam_usbdev_s *priv,
       *dest++ = *fifo++;
     }
 
-  MEMORY_SYNC();
+  UP_MB();
 }
 
 /****************************************************************************
@@ -1830,7 +1816,7 @@ static void sam_ep0_read(uint8_t *buffer, size_t buflen)
       *buffer++ = *fifo++;
     }
 
-  MEMORY_SYNC();
+  UP_MB();
 }
 
 /****************************************************************************
@@ -1862,7 +1848,7 @@ static void sam_ctrlep_write(struct sam_ep_s *privep, const uint8_t *buffer,
       *fifo++ = *buffer++;
     }
 
-  MEMORY_SYNC();
+  UP_MB();
 
   /* Indicate that there is data in the TX packet memory.  This will
    * be cleared when the next NAKIN interrupt is received.
@@ -1924,7 +1910,7 @@ static void sam_ep_write(struct sam_ep_s *privep, const uint8_t *buffer,
       *fifo++ = *buffer++;
     }
 
-  MEMORY_SYNC();
+  UP_MB();
 
   /* Indicate that there is data in the TX packet memory.  This will
    * be cleared when the next data out interrupt is received.
@@ -3335,7 +3321,7 @@ static int sam_usbhs_interrupt(int irq, void *context, void *arg)
     }
 
   usbtrace(TRACE_INTEXIT(SAM_TRACEINTID_INTERRUPT), devisr);
-  MEMORY_SYNC();
+  UP_MB();
   return OK;
 }
 

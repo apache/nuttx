@@ -1,9 +1,7 @@
 ; arch/arm/src/rp2040/rp2040_ws2812.pio
 ;
-; Adapted from code release under the BSD-3-Clause license
-; supplied by Raspberry Pi (Trading) Ltd.
-;
-;   Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
+; SPDX-License-Identifier: BSD-3-Clause
+; SPDX-FileCopyrightText: 2020 Raspberry Pi (Trading) Ltd.
 ;
 ; This code was compiled with pioasm and the results included
 ; in "arch/arm/src/rp2040/rp2040_ws2812.c".  This file is

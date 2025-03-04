@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/wdog/wd_cancel.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -31,6 +33,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
+#include <nuttx/sched_note.h>
 
 #include "sched/sched.h"
 #include "wdog/wdog.h"
@@ -57,82 +60,46 @@
 
 int wd_cancel(FAR struct wdog_s *wdog)
 {
-  FAR struct wdog_s *curr;
-  FAR struct wdog_s *prev;
   irqstate_t flags;
-  int ret = -EINVAL;
+  bool head;
+
+  flags = spin_lock_irqsave(&g_wdspinlock);
+
+  /* Make sure that the watchdog is valid and still active. */
+
+  if (wdog == NULL || !WDOG_ISACTIVE(wdog))
+    {
+      spin_unlock_irqrestore(&g_wdspinlock, flags);
+      return -EINVAL;
+    }
+
+  sched_note_wdog(NOTE_WDOG_CANCEL, (FAR void *)wdog->func,
+                  (FAR void *)(uintptr_t)wdog->expired);
 
   /* Prohibit timer interactions with the timer queue until the
    * cancellation is complete
    */
 
-  flags = enter_critical_section();
+  head = list_is_head(&g_wdactivelist, &wdog->node);
 
-  /* Make sure that the watchdog is initialized (non-NULL) and is still
-   * active.
-   */
+  /* Now, remove the watchdog from the timer queue */
 
-  if (wdog != NULL && WDOG_ISACTIVE(wdog))
+  list_delete(&wdog->node);
+
+  /* Mark the watchdog inactive */
+
+  wdog->func = NULL;
+  spin_unlock_irqrestore(&g_wdspinlock, flags);
+
+  if (head)
     {
-      /* Search the g_wdactivelist for the target FCB.  We can't use sq_rem
-       * to do this because there are additional operations that need to be
-       * done.
+      /* If the watchdog is at the head of the timer queue, then
+       * we will need to re-adjust the interval timer that will
+       * generate the next interval event.
        */
 
-      prev = NULL;
-      curr = (FAR struct wdog_s *)g_wdactivelist.head;
-
-      while ((curr) && (curr != wdog))
-        {
-          prev = curr;
-          curr = curr->next;
-        }
-
-      /* Check if the watchdog was found in the list.  If not, then an OS
-       * error has occurred because the watchdog is marked active!
-       */
-
-      DEBUGASSERT(curr);
-
-      /* If there is a watchdog in the timer queue after the one that
-       * is being canceled, then it inherits the remaining ticks.
-       */
-
-      if (curr->next)
-        {
-          curr->next->lag += curr->lag;
-        }
-
-      /* Now, remove the watchdog from the timer queue */
-
-      if (prev)
-        {
-          /* Remove the watchdog from mid- or end-of-queue */
-
-          sq_remafter((FAR sq_entry_t *)prev, &g_wdactivelist);
-        }
-      else
-        {
-          /* Remove the watchdog at the head of the queue */
-
-          sq_remfirst(&g_wdactivelist);
-
-          /* Reassess the interval timer that will generate the next
-           * interval event.
-           */
-
-          nxsched_reassess_timer();
-        }
-
-      /* Mark the watchdog inactive */
-
-      wdog->func = NULL;
-
-      /* Return success */
-
-      ret = OK;
+      nxsched_reassess_timer();
     }
 
-  leave_critical_section(flags);
-  return ret;
+  return 0;
 }

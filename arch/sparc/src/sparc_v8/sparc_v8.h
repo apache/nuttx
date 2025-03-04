@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/sparc/src/sparc_v8/sparc_v8.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -41,9 +43,9 @@
  * state from the TCB.
  */
 
-#define sparc_restorestate(regs) (CURRENT_REGS = regs)
+#define sparc_restorestate(regs) up_set_current_regs(regs)
 
-#define sparc_savestate(regs)   trap_flush_task(regs, (uint32_t*)CURRENT_REGS)
+#define sparc_savestate(regs)   trap_flush_task(regs, up_current_regs())
 
 /****************************************************************************
  * Public Types

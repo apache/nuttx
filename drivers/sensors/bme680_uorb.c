@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/sensors/bme680_uorb.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -32,6 +34,7 @@
 #include <debug.h>
 #include <string.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/kthread.h>
 #include <nuttx/signal.h>
@@ -422,9 +425,11 @@ static const struct sensor_ops_s g_sensor_ops =
   NULL,             /* set_interval */
   NULL,             /* batch */
   NULL,             /* fetch */
+  NULL,             /* flush */
   NULL,             /* selftest */
   NULL,             /* set_calibvalue */
   bme680_calibrate, /* calibrate */
+  NULL,             /* get_info */
   bme680_control    /* control */
 };
 

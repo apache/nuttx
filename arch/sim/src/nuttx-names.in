@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/sim/src/nuttx-names.in
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -38,6 +40,7 @@ NXSYMBOLS(atexit)
 NXSYMBOLS(backtrace)
 NXSYMBOLS(bind)
 NXSYMBOLS(calloc)
+NXSYMBOLS(cfmakeraw)
 NXSYMBOLS(chmod)
 NXSYMBOLS(chdir)
 NXSYMBOLS(chown)
@@ -53,6 +56,7 @@ NXSYMBOLS(fchown)
 NXSYMBOLS(fclose)
 NXSYMBOLS(fcntl)
 NXSYMBOLS(fdopen)
+NXSYMBOLS(feof)
 NXSYMBOLS(fopen)
 NXSYMBOLS(fprintf)
 NXSYMBOLS(fread)
@@ -86,6 +90,7 @@ NXSYMBOLS(munmap)
 NXSYMBOLS(open)
 NXSYMBOLS(opendir)
 NXSYMBOLS(pclose)
+NXSYMBOLS(pipe2)
 NXSYMBOLS(perror)
 NXSYMBOLS(poll)
 NXSYMBOLS(popen)
@@ -99,6 +104,7 @@ NXSYMBOLS(pthread_cond_init)
 NXSYMBOLS(pthread_cond_signal)
 NXSYMBOLS(pthread_cond_wait)
 NXSYMBOLS(pthread_create)
+NXSYMBOLS(pthread_gettid_np)
 #if defined(CONFIG_TLS_NELEM) && CONFIG_TLS_NELEM > 0
 NXSYMBOLS(pthread_getspecific)
 NXSYMBOLS(pthread_key_create)
@@ -111,6 +117,7 @@ NXSYMBOLS(pthread_mutex_unlock)
 #if defined(CONFIG_TLS_NELEM) && CONFIG_TLS_NELEM > 0
 NXSYMBOLS(pthread_setspecific)
 #endif
+NXSYMBOLS(pthread_self)
 NXSYMBOLS(pthread_sigmask)
 NXSYMBOLS(puts)
 NXSYMBOLS(read)

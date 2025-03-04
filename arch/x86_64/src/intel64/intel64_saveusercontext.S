@@ -1,6 +1,8 @@
 /**************************************************************************
  * arch/x86/src/intel64/intel64_saveusercontext.S
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -80,13 +82,13 @@ up_saveusercontext:
 	/* Save the value of SP as will be at the time of the IRET that will
 	 * appear to be the return from this function.
 	 *
-	 *         CURRENT STACK           IRET STACK
-	 *        ------------------------------        -----------------
+	 * CURRENT STACK                IRET STACK
+	 * ---------------------        -----------------
 	 *                              RIP
 	 *                              CS
 	 *                              RFLAGS
 	 *                              RSP
-	 * ESP->Return address          SS
+	 * RSP->Return address          SS
 	 * Argument                     Alignment (16bytes)
 	 *
 	 */
@@ -102,6 +104,15 @@ up_saveusercontext:
 	/* Save the framepointer */
 
 	movq    %rbp, (8*REG_RBP)(%rdi)
+
+#ifdef CONFIG_LIB_SYSCALL
+	/* Save CS and SS if we support syscalls */
+	xor     %rax, %rax
+	mov     %cs, %ax
+	movq    %rax, (8*REG_CS)(%rdi)
+	mov     %ss, %ax
+	movq    %rax, (8*REG_SS)(%rdi)
+#endif
 
 	/* Save EAX=1.  This will be the "apparent" return value from this
 	 * function when context is switch back to this thread.  The non-zero

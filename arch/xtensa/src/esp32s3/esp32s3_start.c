@@ -401,8 +401,17 @@ noinstrument_function void noreturn_function IRAM_ATTR __esp32s3_start(void)
     }
   else
     {
-      esp_spiram_init_cache();
-      esp_spiram_test();
+      if (esp_spiram_init_cache() != OK)
+        {
+          ets_printf("SPIRAM init cache failed\n");
+          PANIC();
+        }
+
+      if (esp_spiram_test() != OK)
+        {
+          ets_printf("SPIRAM test failed\n");
+          PANIC();
+        }
     }
 #endif
 

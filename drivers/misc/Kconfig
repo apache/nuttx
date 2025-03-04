@@ -13,7 +13,7 @@ config DEV_NULL
 
 config DEV_ZERO
 	bool "Enable /dev/zero"
-	default n
+	default !DEFAULT_SMALL
 
 config DEV_MEM
 	bool "Enable /dev/mem"
@@ -87,6 +87,10 @@ config BLK_RPMSG_SERVER
 	bool "RPMSG Block Server Support"
 	default n
 	depends on RPMSG
+
+config GOLDFISH_PIPE
+	bool "Goldfish Pipe Support"
+	default n
 
 # ARCH needs to support memory access while CPU is running to be able to use
 # the LWL CONSOLE

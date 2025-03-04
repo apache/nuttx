@@ -1,9 +1,8 @@
 /****************************************************************************
  * fs/spiffs/src/spiffs_volume.c
- * SPIFFS Utility Functions for Volume and File Object Support
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2018 Gregory Nutt
  *
  * This is a port of version 0.3.7 of SPIFFS by Peter Andersion.  That
  * version was originally released under the MIT license but is here re-
@@ -54,6 +53,7 @@
 
 #include <nuttx/kmalloc.h>
 
+#include "fs_heap.h"
 #include "spiffs.h"
 #include "spiffs_core.h"
 #include "spiffs_cache.h"
@@ -489,5 +489,5 @@ void spiffs_fobj_free(FAR struct spiffs_s *fs,
 
   /* Then free the file object itself (which contains the lock we hold) */
 
-  kmm_free(fobj);
+  fs_heap_free(fobj);
 }

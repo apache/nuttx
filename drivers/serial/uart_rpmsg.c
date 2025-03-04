@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/serial/uart_rpmsg.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -31,7 +33,7 @@
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
-#include <nuttx/rptun/openamp.h>
+#include <nuttx/rpmsg/rpmsg.h>
 #include <nuttx/serial/serial.h>
 #include <nuttx/serial/uart_rpmsg.h>
 
@@ -217,7 +219,10 @@ static void uart_rpmsg_dmasend(FAR struct uart_dev_s *dev)
   msg->header.result  = -ENXIO;
   msg->header.cookie  = (uintptr_t)dev;
 
-  rpmsg_send_nocopy(&priv->ept, msg, sizeof(*msg) + len);
+  if (rpmsg_send_nocopy(&priv->ept, msg, sizeof(*msg) + len) < 0)
+    {
+      rpmsg_release_tx_buffer(&priv->ept, msg);
+    }
 }
 
 static void uart_rpmsg_dmareceive(FAR struct uart_dev_s *dev)
@@ -344,6 +349,9 @@ static void uart_rpmsg_device_destroy(FAR struct rpmsg_device *rdev,
     {
       rpmsg_destroy_ept(&priv->ept);
     }
+
+  dev->dmatx.nbytes = dev->dmatx.length + dev->dmatx.nlength;
+  uart_xmitchars_done(dev);
 }
 
 static int uart_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept, FAR void *data,
@@ -381,9 +389,11 @@ static int uart_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept, FAR void *data,
     {
       /* Get write-cmd, there are some data, we need receive them */
 
+      nxmutex_lock(&dev->recv.lock);
       priv->recv_data = data;
       uart_recvchars_dma(dev);
       priv->recv_data = NULL;
+      nxmutex_unlock(&dev->recv.lock);
 
       header->response = 1;
       rpmsg_send(ept, msg, sizeof(*msg));
@@ -439,6 +449,7 @@ int uart_rpmsg_init(FAR const char *cpuname, FAR const char *devname,
       goto fail;
     }
 
+  nxmutex_init(&priv->lock);
   priv->cpuname = cpuname;
   priv->devname = devname;
 
@@ -451,10 +462,10 @@ int uart_rpmsg_init(FAR const char *cpuname, FAR const char *devname,
                                 NULL);
   if (ret < 0)
     {
+      nxmutex_destroy(&priv->lock);
       goto fail;
     }
 
-  nxmutex_init(&priv->lock);
   snprintf(dev_name, sizeof(dev_name), "%s%s",
            UART_RPMSG_DEV_PREFIX, devname);
   uart_register(dev_name, dev);

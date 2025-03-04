@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_tim.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -358,6 +360,8 @@ static int  stm32_tim_checkint(struct stm32_tim_dev_s *dev, int source);
 
 static const struct stm32_tim_ops_s stm32_tim_ops =
 {
+  .enable     = stm32_tim_enable,
+  .disable    = stm32_tim_disable,
   .setmode    = stm32_tim_setmode,
   .setclock   = stm32_tim_setclock,
   .setperiod  = stm32_tim_setperiod,

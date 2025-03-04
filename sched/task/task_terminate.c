@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/task/task_terminate.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -36,6 +38,40 @@
 #include "sched/sched.h"
 #include "signal/signal.h"
 #include "task/task.h"
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+static int terminat_handler(FAR void *cookie)
+{
+  pid_t pid = (pid_t)(uintptr_t)cookie;
+  FAR struct tcb_s *tcb;
+  irqstate_t flags;
+
+  flags = enter_critical_section();
+  tcb = nxsched_get_tcb(pid);
+
+  if (!tcb)
+    {
+      /* There is no TCB with this pid or, if there is, it is not a task. */
+
+      leave_critical_section(flags);
+      return -ESRCH;
+    }
+
+  nxsched_remove_readytorun(tcb);
+
+  leave_critical_section(flags);
+  return OK;
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -86,19 +122,51 @@ int nxtask_terminate(pid_t pid)
   /* Find for the TCB associated with matching PID */
 
   dtcb = nxsched_get_tcb(pid);
-  if (!dtcb)
+  if (!dtcb || dtcb->flags & TCB_FLAG_EXIT_PROCESSING)
     {
       leave_critical_section(flags);
       return -ESRCH;
     }
 
+  dtcb->flags |= TCB_FLAG_EXIT_PROCESSING;
+
   /* Remove dtcb from tasklist, let remove_readtorun() do the job */
 
   task_state = dtcb->task_state;
-  nxsched_remove_readytorun(dtcb, false);
-  dtcb->task_state = task_state;
+#ifdef CONFIG_SMP
+  if (task_state == TSTATE_TASK_RUNNING &&
+      dtcb->cpu != this_cpu())
+    {
+      cpu_set_t affinity;
+      uint16_t tcb_flags;
+      int ret;
 
-  leave_critical_section(flags);
+      tcb_flags = dtcb->flags;
+      dtcb->flags |= TCB_FLAG_CPU_LOCKED;
+      affinity = dtcb->affinity;
+      CPU_SET(dtcb->cpu, &dtcb->affinity);
+
+      ret = nxsched_smp_call_single(dtcb->cpu, terminat_handler,
+                                    (FAR void *)(uintptr_t)pid);
+
+      if (ret < 0)
+        {
+          /* Already terminate */
+
+          leave_critical_section(flags);
+          return ret;
+        }
+
+      dtcb->flags = tcb_flags;
+      dtcb->affinity = affinity;
+    }
+  else
+#endif
+    {
+      nxsched_remove_readytorun(dtcb);
+    }
+
+  dtcb->task_state = task_state;
 
   /* Perform common task termination logic.  We need to do
    * this as early as possible so that higher level clean-up logic
@@ -109,6 +177,7 @@ int nxtask_terminate(pid_t pid)
 
   nxtask_exithook(dtcb, EXIT_SUCCESS);
 
+  leave_critical_section(flags);
   /* Since all tasks pass through this function as the final step in their
    * exit sequence, this is an appropriate place to inform any
    * instrumentation layer that the task no longer exists.

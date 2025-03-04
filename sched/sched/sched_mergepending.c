@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/sched/sched_mergepending.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -87,7 +89,7 @@ bool nxsched_merge_pending(void)
    * Do nothing if pre-emption is still disabled
    */
 
-  if (rtcb->lockcount == 0)
+  if (!nxsched_islocked_tcb(rtcb))
     {
       for (ptcb = (FAR struct tcb_s *)list_pendingtasks()->head;
            ptcb;
@@ -132,6 +134,7 @@ bool nxsched_merge_pending(void)
                                 = (FAR dq_entry_t *)ptcb;
               rtcb->task_state  = TSTATE_TASK_READYTORUN;
               ptcb->task_state  = TSTATE_TASK_RUNNING;
+              up_update_task(ptcb);
               ret               = true;
             }
           else
@@ -197,7 +200,7 @@ bool nxsched_merge_pending(void)
    * some CPU other than this one is in a critical section.
    */
 
-  if (!nxsched_islocked_global())
+  if (!nxsched_islocked_tcb(this_task()))
     {
       /* Find the CPU that is executing the lowest priority task */
 
@@ -235,7 +238,7 @@ bool nxsched_merge_pending(void)
            * Check if that happened.
            */
 
-          if (nxsched_islocked_global())
+          if (nxsched_islocked_tcb(this_task()))
             {
               /* Yes.. then we may have incorrectly placed some TCBs in the
                * g_readytorun list (unlikely, but possible).  We will have to

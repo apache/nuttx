@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/syslog/ramlog.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -235,6 +237,21 @@ static void ramlog_pollnotify(FAR struct ramlog_dev_s *priv)
 }
 
 /****************************************************************************
+ * Name: ramlog_flush
+ ****************************************************************************/
+
+static void ramlog_bufferflush(FAR struct ramlog_dev_s *priv)
+{
+  FAR struct ramlog_user_s *upriv;
+
+  priv->rl_header->rl_head = 0;
+  list_for_every_entry(&priv->rl_list, upriv, struct ramlog_user_s, rl_node)
+    {
+      upriv->rl_tail = 0;
+    }
+}
+
+/****************************************************************************
  * Name: ramlog_copybuf
  ****************************************************************************/
 
@@ -274,16 +291,11 @@ static void ramlog_copybuf(FAR struct ramlog_dev_s *priv,
 static ssize_t ramlog_addbuf(FAR struct ramlog_dev_s *priv,
                              FAR const char *buffer, size_t len)
 {
-#if defined(CONFIG_RAMLOG_SYSLOG) || defined(CONFIG_RAMLOG_CRLF)
+#ifdef CONFIG_RAMLOG_SYSLOG
   FAR struct ramlog_header_s *header = priv->rl_header;
 #endif
   size_t buflen = len;
   irqstate_t flags;
-#ifdef CONFIG_RAMLOG_CRLF
-  FAR const char *end;
-  FAR const char *pos;
-  FAR char *buf;
-#endif
 
   /* Disable interrupts (in case we are NOT called from interrupt handler) */
 
@@ -303,40 +315,19 @@ static ssize_t ramlog_addbuf(FAR struct ramlog_dev_s *priv,
       buflen = priv->rl_bufsize;
     }
 
-#ifdef CONFIG_RAMLOG_CRLF
-  buf = header->rl_buffer;
-  end = buffer + buflen;
-  pos = buffer;
-
-  do
-    {
-      /* Ignore carriage returns */
-
-      if (*pos == '\r' || *pos == '\n')
-        {
-          ramlog_copybuf(priv, buffer, pos - buffer);
-          buffer = pos + 1;
-        }
-
-      /* Pre-pend a carriage before a linefeed */
-
-      if (*pos == '\n')
-        {
-          buf[header->rl_head++ % priv->rl_bufsize] = '\r';
-          buf[header->rl_head++ % priv->rl_bufsize] = '\n';
-        }
-    }
-  while (++pos != end);
-
-  ramlog_copybuf(priv, buffer, pos - buffer);
-#else
   ramlog_copybuf(priv, buffer, buflen);
-#endif
 
   /* Was anything written? */
 
   if (len > 0)
     {
+      /* Lock the scheduler do NOT switch out */
+
+      if (!up_interrupt_context())
+        {
+          sched_lock();
+        }
+
 #ifndef CONFIG_RAMLOG_NONBLOCKING
       /* Are there threads waiting for read data? */
 
@@ -345,6 +336,13 @@ static ssize_t ramlog_addbuf(FAR struct ramlog_dev_s *priv,
       /* Notify all poll/select waiters that they can read from the FIFO */
 
       ramlog_pollnotify(priv);
+
+      /* Unlock the scheduler */
+
+      if (!up_interrupt_context())
+        {
+          sched_unlock();
+        }
     }
 
   /* We always have to return the number of bytes requested and NOT the
@@ -510,7 +508,7 @@ static int ramlog_file_ioctl(FAR struct file *filep, int cmd,
   irqstate_t flags;
   int ret = 0;
 
-  flags = spin_lock_irqsave(NULL);
+  flags = enter_critical_section();
 
   switch (cmd)
     {
@@ -521,14 +519,14 @@ static int ramlog_file_ioctl(FAR struct file *filep, int cmd,
         upriv->rl_threashold = (uint32_t)arg;
         break;
       case BIOC_FLUSH:
-        priv->rl_header->rl_head = 0;
+        ramlog_bufferflush(priv);
         break;
       default:
         ret = -ENOTTY;
         break;
     }
 
-  spin_unlock_irqrestore(NULL, flags);
+  leave_critical_section(flags);
   return ret;
 }
 
@@ -615,11 +613,11 @@ static int ramlog_file_open(FAR struct file *filep)
   nxsem_init(&upriv->rl_waitsem, 0, 0);
 #endif
 
-  flags = spin_lock_irqsave(NULL);
+  flags = enter_critical_section();
   list_add_tail(&priv->rl_list, &upriv->rl_node);
   upriv->rl_tail = header->rl_head > priv->rl_bufsize ?
                    header->rl_head - priv->rl_bufsize : 0;
-  spin_unlock_irqrestore(NULL, flags);
+  leave_critical_section(flags);
 
   filep->f_priv = upriv;
   return 0;
@@ -636,9 +634,9 @@ static int ramlog_file_close(FAR struct file *filep)
 
   /* Get exclusive access to the rl_tail index */
 
-  flags = spin_lock_irqsave(NULL);
+  flags = enter_critical_section();
   list_delete(&upriv->rl_node);
-  spin_unlock_irqrestore(NULL, flags);
+  leave_critical_section(flags);
 
 #ifndef CONFIG_RAMLOG_NONBLOCKING
   nxsem_destroy(&upriv->rl_waitsem);
@@ -718,7 +716,7 @@ void ramlog_syslog_register(void)
  ****************************************************************************/
 
 #ifdef CONFIG_RAMLOG_SYSLOG
-int ramlog_putc(FAR struct syslog_channel_s *channel, int ch)
+int ramlog_putc(FAR syslog_channel_t *channel, int ch)
 {
   char cch = ch;
 
@@ -733,7 +731,7 @@ int ramlog_putc(FAR struct syslog_channel_s *channel, int ch)
   return ch;
 }
 
-ssize_t ramlog_write(FAR struct syslog_channel_s *channel,
+ssize_t ramlog_write(FAR syslog_channel_t *channel,
                      FAR const char *buffer, size_t buflen)
 {
   return ramlog_addbuf(&g_sysdev, buffer, buflen);

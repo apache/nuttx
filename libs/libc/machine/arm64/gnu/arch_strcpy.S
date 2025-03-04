@@ -1,8 +1,8 @@
 /****************************************************************************
  * libs/libc/machine/arm64/gnu/arch_strcpy.S
  *
- * Copyright (c) 2013, 2014, 2015 ARM Ltd.
- *  All rights Reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2013, 2014, 2015 ARM Ltd., All rights Reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -38,7 +38,7 @@
  * ARMv8-a, AArch64, unaligned accesses, min page size 4k.
  */
 
-/* To build as stpcpy, define BUILD_STPCPY before compiling this file.
+/* To build as stpcpy.
 
    To test the page crossing code path more thoroughly, compile with
    -DSTRCPY_TEST_PAGE_CROSS - this will force all copies through the slower
@@ -67,12 +67,6 @@
 #define pos		x15
 #define len		x16
 #define to_align	x17
-
-#ifdef BUILD_STPCPY
-#define STRCPY stpcpy
-#else
-#define STRCPY strcpy
-#endif
 
 	.macro def_fn f p2align=0
 	.text
@@ -113,7 +107,7 @@
 
 #define MIN_PAGE_SIZE (1 << MIN_PAGE_P2)
 
-def_fn STRCPY p2align=6
+def_fn ARCH_LIBCFUN(strcpy) p2align=6
 	/* For moderately short strings, the fastest way to do the copy is to
 	   calculate the length of the string in the same way as strlen, then
 	   essentially do a memcpy of the result.  This avoids the need for
@@ -178,9 +172,6 @@ def_fn STRCPY p2align=6
 #endif
 	str	data2, [dst, #1]
 	str	data1, [dstin]
-#ifdef BUILD_STPCPY
-	add	dstin, dst, #8
-#endif
 	ret
 
 .Lfp_le8:
@@ -200,9 +191,6 @@ def_fn STRCPY p2align=6
 	/* 4->7 bytes to copy.  */
 	str	data2w, [dst, #-3]
 	str	data1w, [dstin]
-#ifdef BUILD_STPCPY
-	mov	dstin, dst
-#endif
 	ret
 .Lfp_lt4:
 	cbz	pos, .Lfp_lt2
@@ -215,9 +203,6 @@ def_fn STRCPY p2align=6
 .Lfp_lt2:
 	/* Null-terminated string.  Last character must be zero!  */
 	strb	wzr, [dst]
-#ifdef BUILD_STPCPY
-	mov	dstin, dst
-#endif
 	ret
 
 	.p2align 6
@@ -273,9 +258,6 @@ def_fn STRCPY p2align=6
 	add	dst, dst, pos, lsr #3
 	ldp	data1, data2, [src, #-32]
 	stp	data1, data2, [dst, #-16]
-#ifdef BUILD_STPCPY
-	sub	dstin, dst, #1
-#endif
 	ret
 
 .Lpage_cross:
@@ -339,6 +321,6 @@ def_fn STRCPY p2align=6
 	bic	has_nul2, tmp3, tmp4
 	b	.Lfp_gt8
 
-	.size	STRCPY, . - STRCPY
+	.size	ARCH_LIBCFUN(strcpy), . - ARCH_LIBCFUN(strcpy)
 
 #endif

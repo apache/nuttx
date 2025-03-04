@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/sim/src/sim/posix/sim_hostuart.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -30,6 +32,8 @@
 #include <termios.h>
 #include <poll.h>
 #include <errno.h>
+#include <stdarg.h>
+#include <stdio.h>
 
 #include "sim_internal.h"
 
@@ -55,11 +59,16 @@ static void setrawmode(int fd)
 
   /* Switch to raw mode */
 
-  raw.c_iflag &= ~(IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR |
-                   ICRNL | IXON);
-  raw.c_lflag &= ~(ECHO | ECHONL | ICANON | ISIG | IEXTEN);
-  raw.c_cflag &= ~(CSIZE | PARENB);
-  raw.c_cflag |= CS8;
+  cfmakeraw(&raw);
+
+  /* Disable output processing, We need to exclude stdout to prevent the
+   * terminal configuration from being changed after an abnormal exit.
+   */
+
+  if (fd == 0)
+    {
+      raw.c_oflag |= OPOST;
+    }
 
   tcsetattr(fd, TCSANOW, &raw);
 }
@@ -234,4 +243,17 @@ bool host_uart_checkout(int fd)
   pfd.fd     = fd;
   pfd.events = POLLOUT;
   return poll(&pfd, 1, 0) == 1;
+}
+
+/****************************************************************************
+ * Name: host_printf
+ ****************************************************************************/
+
+void host_printf(const char *fmt, ...)
+{
+  va_list ap;
+
+  va_start(ap, fmt);
+  vprintf(fmt, ap);
+  va_end(ap);
 }

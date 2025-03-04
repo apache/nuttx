@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/gdbstub.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -45,7 +47,7 @@
  ****************************************************************************/
 
 struct gdb_state_s;
-typedef CODE ssize_t (*gdb_send_func_t)(FAR void *priv, FAR void *buf,
+typedef CODE ssize_t (*gdb_send_func_t)(FAR void *priv, FAR const char *buf,
                                         size_t len);
 typedef CODE ssize_t (*gdb_recv_func_t)(FAR void *priv, FAR void *buf,
                                         size_t len);

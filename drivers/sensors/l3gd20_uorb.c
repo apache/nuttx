@@ -1,6 +1,7 @@
 /****************************************************************************
  * drivers/sensors/l3gd20_uorb.c
- * Character driver for the ST L3GD20 3-Axis gyroscope.
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -32,6 +33,7 @@
 #include <string.h>
 #include <math.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/nuttx.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/wqueue.h>
@@ -560,10 +562,9 @@ int l3gd20_register(int devno, FAR struct spi_dev_s *spi,
 #endif
   priv->timestamp        = 0;
 
-  priv->lower.type = SENSOR_TYPE_GYROSCOPE;
+  priv->lower.type = SENSOR_TYPE_GYROSCOPE_UNCALIBRATED;
   priv->lower.nbuffer = CONFIG_SENSORS_L3GD20_BUFFER_SIZE;
   priv->lower.ops = &g_l2gd20_ops;
-  priv->lower.uncalibrated = true;
 
   /* Setup SPI frequency and mode */
 

@@ -1,6 +1,8 @@
 ############################################################################
 # arch/arm64/src/imx8/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -22,7 +24,7 @@ include common/Make.defs
 
 # i.MX8-specific C source files
 
-CHIP_CSRCS  = imx8_boot.c
+CHIP_CSRCS  = imx8_boot.c imx8_timer.c
 
 ifeq ($(CONFIG_ARCH_CHIP_IMX8_QUADMAX),y)
   CHIP_CSRCS += imx8qm_serial.c

@@ -1,6 +1,8 @@
 ############################################################################
 # drivers/syslog/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -21,14 +23,16 @@
 ############################################################################
 # Include SYSLOG Infrastructure
 
-CSRCS += vsyslog.c syslog_channel.c syslog_putc.c
+ifeq ($(CONFIG_SYSLOG),y)
+CSRCS += vsyslog.c syslog_channel.c
 CSRCS += syslog_write.c syslog_flush.c
+endif
 
 ifeq ($(CONFIG_SYSLOG_INTBUFFER),y)
   CSRCS += syslog_intbuffer.c
 endif
 
-ifneq ($(CONFIG_ARCH_SYSLOG),y)
+ifeq ($(CONFIG_SYSLOG),y)
   CSRCS += syslog_initialize.c
 endif
 
@@ -47,7 +51,11 @@ endif
 
 # System logging to a character device (or file)
 
-CSRCS += syslog_device.c
+ifneq ($(CONFIG_SYSLOG_CONSOLE)$(CONFIG_SYSLOG_CHAR)$(CONFIG_SYSLOG_FILE),)
+  ifeq ($(CONFIG_SYSLOG),y)
+    CSRCS += syslog_device.c
+  endif
+endif
 
 ifeq ($(CONFIG_SYSLOG_CHAR),y)
 CSRCS += syslog_devchannel.c

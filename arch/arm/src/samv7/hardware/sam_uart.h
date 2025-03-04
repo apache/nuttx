@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/samv7/hardware/sam_uart.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -356,6 +358,8 @@
 #define UART_INT_LINCE               (1 << 28) /* Bit 28: LIN Checksum Error Interrupt (USART, LIN mode only) */
 #define UART_INT_LBLOVFE             (1 << 28) /* Bit 28: LON Backlog Overflow Error Interrupt Enable (USART, LON mode only) */
 #define UART_INT_LINSNRE             (1 << 29) /* Bit 29: LIN Slave Not Responding Error Interrupt (USART, LIN mode only) */
+#define UART_INT_LINSTE              (1 << 30) /* Bit 30: LIN Synch Tolerance Error Interrupt (USART, LIN mode only) */
+#define UART_INT_LINHTE              (1 << 31) /* Bit 31: LIN Header Timeout Error Interrupt (USART, LIN mode only) */
 
 #define UART_INT_ALLINTS             0x3f08e7e7
 

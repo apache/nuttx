@@ -16,6 +16,11 @@ config ESP_MCPWM
 		Enable support for timer capture and motor control using
 		the Motor Control PWM peripheral.
 
+config ESP_PCNT
+	bool "Pulse Counter (PCNT / QE) Module"
+	default n
+	select CAPTURE
+
 config ESPRESSIF_TEMP
 	bool "Internal Temperature Sensor"
 	default n
@@ -23,19 +28,380 @@ config ESPRESSIF_TEMP
 	---help---
 		A built-in sensor used to measure the chip's internal temperature.
 
+config ESPRESSIF_I2C_PERIPH_MASTER_MODE
+	bool
+	depends on (ESP32S3_I2C_PERIPH_MASTER_MODE || ESP32S2_I2C_PERIPH_MASTER_MODE || ESP32_I2C_PERIPH_MASTER_MODE)
+	default n
+
+config ESPRESSIF_I2C_PERIPH_SLAVE_MODE
+	bool
+	depends on (ESP32S3_I2C_PERIPH_SLAVE_MODE || ESP32S2_I2C_PERIPH_SLAVE_MODE || ESP32_I2C_PERIPH_SLAVE_MODE)
+	default n
+
+config ESPRESSIF_I2C0_SLAVE
+	bool
+	depends on (ESP32S3_I2C0_SLAVE_MODE || ESP32S2_I2C0_SLAVE_MODE || ESP32_I2C0_SLAVE_MODE)
+	default n
+
+config ESPRESSIF_I2C1_SLAVE
+	bool
+	depends on (ESP32S3_I2C1_SLAVE_MODE || ESP32S2_I2C1_SLAVE_MODE || ESP32_I2C1_SLAVE_MODE)
+	default n
+
+config ESPRESSIF_I2C_BITBANG
+	bool "I2C Bitbang"
+	default n
+	select I2C_BITBANG
+	select ESP32S3_I2C if ARCH_CHIP_ESP32S3
+	select ESP32S2_I2C if ARCH_CHIP_ESP32S2
+	select ESP32_I2C if ARCH_CHIP_ESP32
+	select I2C
+	select I2C_BITBANG
+	---help---
+		Software implemented I2C peripheral with GPIOs. Suggested to use if I2C peripherals are already in use.
+
+config ESPRESSIF_SPI_PERIPH
+	bool
+	depends on (ESP32S3_SPI2 || ESP32S3_SPI3) || (ESP32_SPI2 || ESP32_SPI3) || (ESP32S2_SPI2 || ESP32S2_SPI3)
+	default n
+
+config ESPRESSIF_SPI_BITBANG
+	bool "SPI Bitbang"
+	default n
+	select ESP32_SPI if ARCH_CHIP_ESP32
+	select ESP32S2_SPI if ARCH_CHIP_ESP32S2
+	select ESP32S3_SPI if ARCH_CHIP_ESP32S3
+	select SPI
+	select SPI_BITBANG
+	---help---
+		Software implemented SPI peripheral with GPIOs. Suggested to use if SPI peripherals are already in use.
+
 config ESPRESSIF_SPIFLASH
 	bool "SPI Flash"
 	depends on ARCH_CHIP_ESP32S2
 	default n
 
+menu "Pulse Counter (PCNT) Configuration"
+	depends on ESP_PCNT
+
+config ESP_PCNT_TEST_MODE
+	bool "Pulse Counter character driver loopback test mode (for testing only)"
+	default n
+	---help---
+		This enables a loopback test mode that attaches the transmitter
+		to the receiver internally, being able to test the PCNT
+		peripheral without any external connection.
+
+config ESP_PCNT_AS_QE
+	bool
+	default n
+
+config ESP_PCNT_U0
+	bool "Enable PCNT Unit 0"
+	default n
+
+if ESP_PCNT_U0
+
+config ESP_PCNT_U0_QE
+	bool "Use this PCNT Unit as Quadrature Encoder"
+	default n
+	select ESP_PCNT_AS_QE
+
+config ESP_PCNT_U0_CH0_EDGE_PIN
+	int "PCNT_U0 CH0 Edge/Pulse Pin Number"
+	default 0
+	range -1 39
+
+config ESP_PCNT_U0_CH0_LEVEL_PIN
+	int "PCNT_U0 CH0 Level/Control Pin Number"
+	default 4 if !ESP_PCNT_U0_QE
+	default -1 if ESP_PCNT_U0_QE
+	range -1 39
+
+config ESP_PCNT_U0_CH1_EDGE_PIN
+	int "PCNT_U0 CH1 Edge/Pulse Pin Number"
+	default 0 if !ESP_PCNT_U0_QE
+	default -1 if ESP_PCNT_U0_QE
+	range -1 39
+
+config ESP_PCNT_U0_CH1_LEVEL_PIN
+	int "PCNT_U0 CH1 Level/Control Pin Number"
+	default 4
+	range -1 39
+
+config ESP_PCNT_U0_FILTER_EN
+	bool "Enable Glitch Filter for this PCNT Unit"
+	default n
+
+if ESP_PCNT_U0_FILTER_EN
+
+config ESP_PCNT_U0_FILTER_THRES
+	int "PCNT_U0 Filter Threshold value"
+	default 5
+	---help---
+		If a pulse is shorter than this number of APB_CLK clock cycles
+		then it will not be considered as a valid pulse.
+
+endif # ESP_PCNT_U0_FILTER_EN
+
+endif # ESP_PCNT_U0
+
+config ESP_PCNT_U1
+	bool "Enable PCNT Unit 1"
+	depends on ESP_PCNT_U0
+	default n
+
+if ESP_PCNT_U1
+
+config ESP_PCNT_U1_QE
+	bool "Use this PCNT Unit as Quadrature Encoder"
+	default n
+	select ESP_PCNT_AS_QE
+
+config ESP_PCNT_U1_CH0_EDGE_PIN
+	int "PCNT_U1 CH0 Edge/Pulse Pin Number"
+	default 0
+	range -1 39
+
+config ESP_PCNT_U1_CH0_LEVEL_PIN
+	int "PCNT_U1 CH0 Level/Control Pin Number"
+	default 4
+	range -1 39
+	depends on !ESP_PCNT_U1_QE
+
+config ESP_PCNT_U1_CH1_EDGE_PIN
+	int "PCNT_U1 CH1 Edge/Pulse Pin Number"
+	default 0
+	range -1 39
+	depends on !ESP_PCNT_U1_QE
+
+config ESP_PCNT_U1_CH1_LEVEL_PIN
+	int "PCNT_U1 CH1 Level/Control Pin Number"
+	default 4
+	range -1 39
+
+config ESP_PCNT_U1_FILTER_EN
+	bool "Enable Glitch Filter for this PCNT Unit"
+	default n
+
+if ESP_PCNT_U1_FILTER_EN
+
+config ESP_PCNT_U1_FILTER_THRES
+	int "PCNT_U1 Filter Threshold value"
+	default 5
+	---help---
+		If a pulse is shorter than this number of APB_CLK clock cycles
+		then it will not be considered as a valid pulse.
+
+endif # ESP_PCNT_U1_FILTER_EN
+
+endif # ESP_PCNT_U1
+
+config ESP_PCNT_U2
+	bool "Enable PCNT Unit 2"
+	depends on ESP_PCNT_U1
+	default n
+
+if ESP_PCNT_U2
+
+config ESP_PCNT_U2_QE
+	bool "Use this PCNT Unit as Quadrature Encoder"
+	default n
+	select ESP_PCNT_AS_QE
+
+config ESP_PCNT_U2_CH0_EDGE_PIN
+	int "PCNT_U2 CH0 Edge/Pulse Pin Number"
+	default 0
+	range -1 39
+
+config ESP_PCNT_U2_CH0_LEVEL_PIN
+	int "PCNT_U2 CH0 Level/Control Pin Number"
+	default 4
+	range -1 39
+	depends on !ESP_PCNT_U2_QE
+
+config ESP_PCNT_U2_CH1_EDGE_PIN
+	int "PCNT_U2 CH1 Edge/Pulse Pin Number"
+	default 0
+	range -1 39
+	depends on !ESP_PCNT_U2_QE
+
+config ESP_PCNT_U2_CH1_LEVEL_PIN
+	int "PCNT_U2 CH1 Level/Control Pin Number"
+	default 4
+	range -1 39
+
+config ESP_PCNT_U2_FILTER_EN
+	bool "Enable Glitch Filter for this PCNT Unit"
+	default n
+
+if ESP_PCNT_U2_FILTER_EN
+
+config ESP_PCNT_U2_FILTER_THRES
+	int "PCNT_U2 Filter Threshold value"
+	default 5
+	---help---
+		If a pulse is shorter than this number of APB_CLK clock cycles
+		then it will not be considered as a valid pulse.
+
+endif # ESP_PCNT_U2_FILTER_EN
+
+endif # ESP_PCNT_U2
+
+config ESP_PCNT_U3
+	bool "Enable PCNT Unit 3"
+	depends on ESP_PCNT_U2
+	default n
+
+if ESP_PCNT_U3
+
+config ESP_PCNT_U3_QE
+	bool "Use this PCNT Unit as Quadrature Encoder"
+	default n
+	select ESP_PCNT_AS_QE
+
+config ESP_PCNT_U3_CH0_EDGE_PIN
+	int "PCNT_U3 CH0 Edge/Pulse Pin Number"
+	default 0
+	range -1 39
+
+config ESP_PCNT_U3_CH0_LEVEL_PIN
+	int "PCNT_U3 CH0 Level/Control Pin Number"
+	default 4
+	range -1 39
+	depends on !ESP_PCNT_U3_QE
+
+config ESP_PCNT_U3_CH1_EDGE_PIN
+	int "PCNT_U3 CH1 Edge/Pulse Pin Number"
+	default 0
+	range -1 39
+	depends on !ESP_PCNT_U3_QE
+
+config ESP_PCNT_U3_CH1_LEVEL_PIN
+	int "PCNT_U3 CH1 Level/Control Pin Number"
+	default 4
+	range -1 39
+
+config ESP_PCNT_U3_FILTER_EN
+	bool "Enable Glitch Filter for this PCNT Unit"
+	default n
+
+if ESP_PCNT_U3_FILTER_EN
+
+config ESP_PCNT_U3_FILTER_THRES
+	int "PCNT_U3 Filter Threshold value"
+	default 5
+	---help---
+		If a pulse is shorter than this number of APB_CLK clock cycles
+		then it will not be considered as a valid pulse.
+
+endif # ESP_PCNT_U3_FILTER_EN
+
+endif # ESP_PCNT_U3
+
+endmenu # ESP_PCNT
+
 menu "Internal Temperature Sensor Configuration"
 	depends on ESPRESSIF_TEMP
 
+config ESPRESSIF_TEMP_UORB
+	bool "Internal Temperature Sensor UORB Interface"
+	default n
+	---help---
+		Enables work with the UORB or Character Device interface.
+		If not set, the Character Device is used by default.
+
 config ESPRESSIF_TEMP_PATH
 	string "Internal Temperature Sensor Path"
+	depends on !ESPRESSIF_TEMP_UORB
 	default "dev/temp"
 
+config ESPRESSIF_TEMP_PATH_DEVNO
+	int "Internal Temperature Sensor Path Device Number"
+	depends on ESPRESSIF_TEMP_UORB
+	default 0
+
+config ESPRESSIF_TEMP_UORB_POLL
+	bool "Enables polling sensor data"
+	depends on ESPRESSIF_TEMP_UORB
+	default n
+	---help---
+		Enables polling of sensor.
+
+config ESPRESSIF_TEMP_UORB_POLL_INTERVAL
+	int "Polling interval in microseconds, default 1 sec"
+	depends on ESPRESSIF_TEMP_UORB_POLL
+	default 1000000
+	range 0 4294967295
+	---help---
+		The interval until a new sensor measurement will be triggered.
+
+config ESPRESSIF_TEMP_THREAD_STACKSIZE
+	int "Worker thread stack size"
+	depends on ESPRESSIF_TEMP_UORB_POLL
+	default 1024
+	---help---
+		The stack size for the worker thread.
+
 endmenu # ESPRESSIF_TEMP
+
+menu "I2C bitbang configuration"
+	depends on ESPRESSIF_I2C_BITBANG
+
+config ESPRESSIF_I2C_BITBANG_SCLPIN
+	int "I2C Bitbang SCL Pin"
+	default 0
+	range 0 21
+
+config ESPRESSIF_I2C_BITBANG_SDAPIN
+	int "I2C Bitbang SDA Pin"
+	default 1
+	range 0 21
+
+endmenu # I2C bitbang configuration
+
+menu "SPI bitbang configuration"
+	depends on ESPRESSIF_SPI_BITBANG
+
+config ESPRESSIF_SPI_BITBANG_CSPIN
+	int "SPI Bitbang CS Pin"
+	default 0
+	range 0 21
+
+config ESPRESSIF_SPI_BITBANG_CLKPIN
+	int "SPI Bitbang CLK Pin"
+	default 1
+	range 0 21
+
+config ESPRESSIF_SPI_BITBANG_MOSIPIN
+	int "SPI Bitbang MOSI Pin"
+	default 2
+	range 0 21
+
+config ESPRESSIF_SPI_BITBANG_MISOPIN
+	int "SPI Bitbang MISO Pin"
+	default 3
+	range 0 21
+
+choice ESPRESSIF_SPI_BITBANG_MODE
+	prompt "SPI Bitbang mode"
+	default ESPRESSIF_SPI_BITBANG_MODE0
+
+config ESPRESSIF_SPI_BITBANG_MODE0
+	bool "SPI MODE0"
+
+config ESPRESSIF_SPI_BITBANG_MODE1
+	bool "SPI MODE1"
+
+config ESPRESSIF_SPI_BITBANG_MODE2
+	bool "SPI MODE2"
+
+config ESPRESSIF_SPI_BITBANG_MODE3
+	bool "SPI MODE3"
+
+endchoice # ESPRESSIF_SPI_BITBANG_MODE
+
+endmenu # SPI bitbang configuration
 
 config ESPRESSIF_HAVE_OTA_PARTITION
 	bool
@@ -162,7 +528,12 @@ config ESPRESSIF_WIRELESS
 	select ESP32S2_RNG if ARCH_CHIP_ESP32S2
 	select ESP32S2_RT_TIMER if ARCH_CHIP_ESP32S2
 	select ESP32S2_TIMER0 if ARCH_CHIP_ESP32S2
-	depends on ARCH_CHIP_ESP32S2
+	select ESP32S3_RNG if ARCH_CHIP_ESP32S3
+	select ESP32S3_RT_TIMER if ARCH_CHIP_ESP32S3
+	select ESP32S3_TIMER0 if ARCH_CHIP_ESP32S3
+	select ESP32_RNG if ARCH_CHIP_ESP32
+	select ESP32_RT_TIMER if ARCH_CHIP_ESP32
+	select ESP32_TIMER0 if ARCH_CHIP_ESP32
 	---help---
 		Enable Wireless support
 
@@ -172,6 +543,34 @@ config ESPRESSIF_WIFI
 	select ESPRESSIF_WIRELESS
 	---help---
 		Enable Wi-Fi support
+
+config ESPRESSIF_BLE
+	bool "BLE"
+	depends on ARCH_CHIP_ESP32S3 || ARCH_CHIP_ESP32
+	default n
+	select ESPRESSIF_WIRELESS
+	select BLUETOOTH_TXCMD_PINNED_TO_CORE if SMP && ARCH_CHIP_ESP32
+	select BLUETOOTH_CNTRL_HOST_FLOW_DISABLE if ARCH_CHIP_ESP32
+	---help---
+		Enable BLE support.
+
+config ESP_COEX_SW_COEXIST_ENABLE
+	bool "Software WiFi/Bluetooth/IEEE 802.15.4 coexistence"
+	depends on (ESPRESSIF_WIFI && ESPRESSIF_BLE)
+	default y
+	---help---
+		If enabled, WiFi & Bluetooth coexistence is controlled by software rather than hardware.
+		Recommended for heavy traffic scenarios. Both coexistence configuration options are
+		automatically managed, no user intervention is required.
+		If only Bluetooth is used, it is recommended to disable this option to reduce binary file
+		size.
+
+menuconfig ESPRESSIF_WIFI_BT_COEXIST
+	bool "Wi-Fi and BT coexist"
+	default y if ESPRESSIF_WIFI && ESPRESSIF_BLE
+	default n
+	depends on ESPRESSIF_WIFI && ESPRESSIF_BLE
+	select ESPRESSIF_WIFI_STA_DISCONNECT_PM
 
 menu "Wi-Fi Configuration"
 	depends on ESPRESSIF_WIFI
@@ -340,4 +739,30 @@ config ESPRESSIF_WIFI_LISTEN_INTERVAL
 		For example, if beacon interval is 100 ms and listen interval is 3, the interval for station to listen
 		to beacon is 300 ms.
 
+config ESPRESSIF_WIFI_WLAN_BUFFER_OPTIMIZATION
+	bool "Enable optimization of WLAN driver buffer"
+	default n
+	depends on ARCH_CHIP_ESP32
+	---help---
+		Enable optimization of WLAN memory
+
 endmenu # ESPRESSIF_WIFI
+
+menu "BLE Configuration"
+	depends on ESPRESSIF_BLE
+
+config ESPRESSIF_BLE_TASK_STACK_SIZE
+	int "Controller task stack size"
+	default 4096
+
+config ESPRESSIF_BLE_TASK_PRIORITY
+	int "Controller task priority"
+	default 253
+
+config ESPRESSIF_BLE_INTERRUPT_SAVE_STATUS
+	int "Number of interrupt save status"
+	default 3
+	---help---
+		Number of interrupt save status variables to keep track. Increase it if any related bug is found.
+
+endmenu # BLE Configuration

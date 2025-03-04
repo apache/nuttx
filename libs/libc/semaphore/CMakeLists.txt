@@ -1,6 +1,8 @@
 # ##############################################################################
 # libs/libc/semaphore/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -32,6 +34,10 @@ set(SRCS
 
 if(CONFIG_FS_NAMED_SEMAPHORES)
   list(APPEND SRCS sem_open.c sem_close.c sem_unlink.c)
+endif()
+
+if(CONFIG_PRIORITY_PROTECT)
+  list(APPEND SRCS sem_getprioceiling.c sem_setprioceiling.c)
 endif()
 
 target_sources(c PRIVATE ${SRCS})

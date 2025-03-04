@@ -1,0 +1,21 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config FS_NAMED_EVENTS
+	bool "Named event group support"
+	default n
+	depends on SCHED_EVENTS
+	---help---
+		Include support for named event group.
+
+if FS_NAMED_EVENTS
+
+config FS_NAMED_EVENTS_VFS_PATH
+	string "Path to event group storage"
+	default "/var/event"
+	---help---
+		The path to where named event group will exist in the VFS namespace.
+
+endif # FS_NAMED_EVENTS

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/common/espressif/esp_wlan.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -319,8 +321,11 @@ static inline void wlan_cache_txpkt_tail(struct wlan_priv_s *priv)
 static struct iob_s *wlan_recvframe(struct wlan_priv_s *priv)
 {
   struct iob_s *iob;
+  irqstate_t flags;
 
+  flags = spin_lock_irqsave(&priv->lock);
   iob = iob_remove_queue(&priv->rxb);
+  spin_unlock_irqrestore(&priv->lock, flags);
 
   return iob;
 }

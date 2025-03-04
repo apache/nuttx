@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/machine/xtensa/arch_memset.S
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -45,7 +47,7 @@
  ****************************************************************************/
   .text
   .begin schedule
-  .global memmove
+  .global ARCH_LIBCFUN(memmove)
 
 /*
  * Byte by byte copy
@@ -308,7 +310,7 @@
           # return to main algorithm
 
   .align  4
-memmove:
+ARCH_LIBCFUN(memmove):
 
   ENTRY(16)
   # a2/ dst, a3/ src, a4/ len
@@ -482,6 +484,6 @@ memmove:
   RET(16)
 
   .end schedule
-  .size memmove, . - memmove
+  .size ARCH_LIBCFUN(memmove), . - ARCH_LIBCFUN(memmove)
 
 #endif

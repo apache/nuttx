@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/samv7/sam_pwm.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -98,6 +100,7 @@ struct sam_pwm_fault_s
 {
   uint8_t source;                 /* Source of fault input */
   uint8_t polarity;
+  uint8_t latched;                /* Latched fault inputs */
   gpio_pinset_t gpio_0;           /* GPIO 1 fault input */
   gpio_pinset_t gpio_1;           /* GPIO 2 fault input */
   gpio_pinset_t gpio_2;           /* GPIO 3 fault input */
@@ -232,6 +235,7 @@ static struct sam_pwm_fault_s g_pwm0_fault =
 {
   .source = PWM0_FAULTS,
   .polarity = PWM0_POL,
+  .latched = PWM0_LATCH,
   .gpio_0 = GPIO_PWMC0_FI0,
   .gpio_1 = GPIO_PWMC0_FI1,
   .gpio_2 = GPIO_PWMC0_FI2,
@@ -376,6 +380,7 @@ static struct sam_pwm_fault_s g_pwm1_fault =
 {
   .source = PWM1_FAULTS,
   .polarity = PWM1_POL,
+  .latched = PWM1_LATCH,
   .gpio_0 = GPIO_PWMC1_FI0,
   .gpio_1 = GPIO_PWMC1_FI1,
   .gpio_2 = GPIO_PWMC1_FI2,
@@ -760,7 +765,7 @@ static void pwm_set_polarity(struct pwm_lowerhalf_s *dev, uint8_t channel,
                              uint8_t cpol, uint8_t dcpol)
 {
   struct sam_pwm_s *priv = (struct sam_pwm_s *)dev;
-  uint16_t regval;
+  uint32_t regval;
 
   /* Can't change polarity, if the channel is enabled! */
 
@@ -839,10 +844,10 @@ static int pwm_setup(struct pwm_lowerhalf_s *dev)
       channel = priv->channels[i].channel;
 
 #ifdef CONFIG_PWM_DEADTIME
-      regval |= CMR_DTE;
+      pwm_putreg(priv, SAMV7_PWM_CMRX + (channel * CHANNEL_OFFSET), CMR_DTE);
+#else
+      pwm_putreg(priv, SAMV7_PWM_CMRX + (channel * CHANNEL_OFFSET), 0);
 #endif
-
-      pwm_putreg(priv, SAMV7_PWM_CMRX + (channel * CHANNEL_OFFSET), regval);
 
       /* Reset duty cycle register */
 
@@ -887,7 +892,8 @@ static int pwm_setup(struct pwm_lowerhalf_s *dev)
    * is set via configuration options.
    */
 
-  regval = FMR_FPOL_SEL(priv->fault->polarity);
+  regval = FMR_FPOL_SEL(priv->fault->polarity) |
+           FMR_FMOD_SEL(priv->fault->latched);
   pwm_putreg(priv, SAMV7_PWM_FMR, regval);
 
   /* Force both outputs to 0 if fault occurs */
@@ -1112,7 +1118,43 @@ static int pwm_stop(struct pwm_lowerhalf_s *dev)
 static int pwm_ioctl(struct pwm_lowerhalf_s *dev, int cmd,
                      unsigned long arg)
 {
-  return -ENOTTY;
+  struct sam_pwm_s *priv = (struct sam_pwm_s *)dev;
+  uint32_t regval;
+  int ret = OK;
+
+  switch (cmd)
+    {
+      case PWMIOC_FAULTS_FETCH_AND_CLEAR:
+        {
+          unsigned long clear = arg != 0 ?
+            *(unsigned long *)(uintptr_t)arg : FCR_FCLR_MASK;
+
+          /* Get current faults. */
+
+          regval = pwm_getreg(priv, SAMV7_PWM_FSR);
+
+          /* Clear the faults. */
+
+          clear &= ((regval & FSR_FS_MASK) >> FSR_FS_SHIFT);
+          pwm_putreg(priv, SAMV7_PWM_FCR, FCR_FCLR_SEL(clear));
+
+          /* And return the previously read faults. */
+
+          if (arg != 0)
+            {
+              *(unsigned long *)(uintptr_t)arg =
+              (regval & FSR_FS_MASK) >> FSR_FS_SHIFT;
+            }
+        }
+        break;
+      default:
+        {
+          pwmerr("ERROR: Unknown cmd: %d\n", cmd);
+          ret = -ENOTTY;
+      }
+    }
+
+  return ret;
 }
 
 /****************************************************************************

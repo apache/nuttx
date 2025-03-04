@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/imxrt/imxrt_serial.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -730,6 +732,7 @@ struct imxrt_uart_s
   struct uart_dev_s dev;    /* Generic UART device */
   uint32_t uartbase;        /* Base address of UART registers */
   uint32_t baud;            /* Configured baud */
+  spinlock_t lock;          /* Spinlock */
   uint32_t ie;              /* Saved enabled interrupts */
   uint8_t  irq;             /* IRQ associated with this UART */
   uint8_t  parity;          /* 0=none, 1=odd, 2=even */
@@ -1145,6 +1148,7 @@ static struct imxrt_uart_s g_lpuart1priv =
 
   .uartbase     = IMXRT_LPUART1_BASE,
   .baud         = CONFIG_LPUART1_BAUD,
+  .lock         = SP_UNLOCKED,
   .irq          = IMXRT_IRQ_LPUART1,
   .parity       = CONFIG_LPUART1_PARITY,
   .bits         = CONFIG_LPUART1_BITS,
@@ -1214,6 +1218,7 @@ static struct imxrt_uart_s g_lpuart2priv =
 
   .uartbase     = IMXRT_LPUART2_BASE,
   .baud         = CONFIG_LPUART2_BAUD,
+  .lock         = SP_UNLOCKED,
   .irq          = IMXRT_IRQ_LPUART2,
   .parity       = CONFIG_LPUART2_PARITY,
   .bits         = CONFIG_LPUART2_BITS,
@@ -1280,6 +1285,7 @@ static struct imxrt_uart_s g_lpuart3priv =
 
   .uartbase     = IMXRT_LPUART3_BASE,
   .baud         = CONFIG_LPUART3_BAUD,
+  .lock         = SP_UNLOCKED,
   .irq          = IMXRT_IRQ_LPUART3,
   .parity       = CONFIG_LPUART3_PARITY,
   .bits         = CONFIG_LPUART3_BITS,
@@ -1346,6 +1352,7 @@ static struct imxrt_uart_s g_lpuart4priv =
 
   .uartbase     = IMXRT_LPUART4_BASE,
   .baud         = CONFIG_LPUART4_BAUD,
+  .lock         = SP_UNLOCKED,
   .irq          = IMXRT_IRQ_LPUART4,
   .parity       = CONFIG_LPUART4_PARITY,
   .bits         = CONFIG_LPUART4_BITS,
@@ -1412,6 +1419,7 @@ static struct imxrt_uart_s g_lpuart5priv =
 
   .uartbase     = IMXRT_LPUART5_BASE,
   .baud         = CONFIG_LPUART5_BAUD,
+  .lock         = SP_UNLOCKED,
   .irq          = IMXRT_IRQ_LPUART5,
   .parity       = CONFIG_LPUART5_PARITY,
   .bits         = CONFIG_LPUART5_BITS,
@@ -1478,6 +1486,7 @@ static struct imxrt_uart_s g_lpuart6priv =
 
   .uartbase     = IMXRT_LPUART6_BASE,
   .baud         = CONFIG_LPUART6_BAUD,
+  .lock         = SP_UNLOCKED,
   .irq          = IMXRT_IRQ_LPUART6,
   .parity       = CONFIG_LPUART6_PARITY,
   .bits         = CONFIG_LPUART6_BITS,
@@ -1544,6 +1553,7 @@ static struct imxrt_uart_s g_lpuart7priv =
 
   .uartbase     = IMXRT_LPUART7_BASE,
   .baud         = CONFIG_LPUART7_BAUD,
+  .lock         = SP_UNLOCKED,
   .irq          = IMXRT_IRQ_LPUART7,
   .parity       = CONFIG_LPUART7_PARITY,
   .bits         = CONFIG_LPUART7_BITS,
@@ -1610,6 +1620,7 @@ static struct imxrt_uart_s g_lpuart8priv =
 
   .uartbase     = IMXRT_LPUART8_BASE,
   .baud         = CONFIG_LPUART8_BAUD,
+  .lock         = SP_UNLOCKED,
   .irq          = IMXRT_IRQ_LPUART8,
   .parity       = CONFIG_LPUART8_PARITY,
   .bits         = CONFIG_LPUART8_BITS,
@@ -1676,6 +1687,7 @@ static struct imxrt_uart_s g_lpuart9priv =
 
   .uartbase     = IMXRT_LPUART9_BASE,
   .baud         = CONFIG_LPUART9_BAUD,
+  .lock         = SP_UNLOCKED,
   .irq          = IMXRT_IRQ_LPUART9,
   .parity       = CONFIG_LPUART9_PARITY,
   .bits         = CONFIG_LPUART9_BITS,
@@ -1742,6 +1754,7 @@ static struct imxrt_uart_s g_lpuart10priv =
 
   .uartbase     = IMXRT_LPUART10_BASE,
   .baud         = CONFIG_LPUART10_BAUD,
+  .lock         = SP_UNLOCKED,
   .irq          = IMXRT_IRQ_LPUART10,
   .parity       = CONFIG_LPUART10_PARITY,
   .bits         = CONFIG_LPUART10_BITS,
@@ -1808,6 +1821,7 @@ static struct imxrt_uart_s g_lpuart11priv =
 
   .uartbase     = IMXRT_LPUART11_BASE,
   .baud         = CONFIG_LPUART11_BAUD,
+  .lock         = SP_UNLOCKED,
   .irq          = IMXRT_IRQ_LPUART11,
   .parity       = CONFIG_LPUART11_PARITY,
   .bits         = CONFIG_LPUART11_BITS,
@@ -1874,6 +1888,7 @@ static struct imxrt_uart_s g_lpuart12priv =
 
   .uartbase     = IMXRT_LPUART12_BASE,
   .baud         = CONFIG_LPUART12_BAUD,
+  .lock         = SP_UNLOCKED,
   .irq          = IMXRT_IRQ_LPUART12,
   .parity       = CONFIG_LPUART12_PARITY,
   .bits         = CONFIG_LPUART12_BITS,
@@ -1973,7 +1988,7 @@ static inline void imxrt_disableuartint(struct imxrt_uart_s *priv,
   irqstate_t flags;
   uint32_t regval;
 
-  flags  = spin_lock_irqsave(NULL);
+  flags  = spin_lock_irqsave(&priv->lock);
   regval = imxrt_serialin(priv, IMXRT_LPUART_CTRL_OFFSET);
 
   /* Return the current Rx and Tx interrupt state */
@@ -1985,7 +2000,7 @@ static inline void imxrt_disableuartint(struct imxrt_uart_s *priv,
 
   regval &= ~LPUART_ALL_INTS;
   imxrt_serialout(priv, IMXRT_LPUART_CTRL_OFFSET, regval);
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 #endif
 
@@ -2004,12 +2019,12 @@ static inline void imxrt_restoreuartint(struct imxrt_uart_s *priv,
    * enabled/disabled.
    */
 
-  flags   = spin_lock_irqsave(NULL);
+  flags   = spin_lock_irqsave(&priv->lock);
   regval  = imxrt_serialin(priv, IMXRT_LPUART_CTRL_OFFSET);
   regval &= ~LPUART_ALL_INTS;
   regval |= ie;
   imxrt_serialout(priv, IMXRT_LPUART_CTRL_OFFSET, regval);
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 #endif
 
@@ -2450,9 +2465,12 @@ static int imxrt_interrupt(int irq, void *context, void *arg)
 
 static int imxrt_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
-#if defined(CONFIG_SERIAL_TIOCSERGSTRUCT) || defined(CONFIG_SERIAL_TERMIOS)
+#if defined(CONFIG_SERIAL_TIOCSERGSTRUCT)    || \
+    defined(CONFIG_SERIAL_TERMIOS)           || \
+    defined(CONFIG_IMXRT_LPUART_SINGLEWIRE ) || \
+    defined(CONFIG_IMXRT_LPUART_INVERT )
   struct inode *inode = filep->f_inode;
-  struct uart_dev_s *dev   = inode->i_private;
+  struct uart_dev_s *dev = inode->i_private;
   irqstate_t flags;
 #endif
   int ret   = OK;
@@ -2631,7 +2649,7 @@ static int imxrt_ioctl(struct file *filep, int cmd, unsigned long arg)
              * implement TCSADRAIN / TCSAFLUSH
              */
 
-            flags  = spin_lock_irqsave(NULL);
+            flags  = spin_lock_irqsave(&priv->lock);
             imxrt_disableuartint(priv, &ie);
             ret = dev->ops->setup(dev);
 
@@ -2639,7 +2657,7 @@ static int imxrt_ioctl(struct file *filep, int cmd, unsigned long arg)
 
             imxrt_restoreuartint(priv, ie);
             priv->ie = ie;
-            spin_unlock_irqrestore(NULL, flags);
+            spin_unlock_irqrestore(&priv->lock, flags);
           }
       }
       break;
@@ -2649,10 +2667,9 @@ static int imxrt_ioctl(struct file *filep, int cmd, unsigned long arg)
     case TIOCSSINGLEWIRE:
       {
         uint32_t regval;
-        irqstate_t flags;
         struct imxrt_uart_s *priv = (struct imxrt_uart_s *)dev;
 
-        flags  = spin_lock_irqsave(NULL);
+        flags  = spin_lock_irqsave(&priv->lock);
         regval   = imxrt_serialin(priv, IMXRT_LPUART_CTRL_OFFSET);
 
         if ((arg & SER_SINGLEWIRE_ENABLED) != 0)
@@ -2686,7 +2703,7 @@ static int imxrt_ioctl(struct file *filep, int cmd, unsigned long arg)
 
         imxrt_serialout(priv, IMXRT_LPUART_CTRL_OFFSET, regval);
 
-        spin_unlock_irqrestore(NULL, flags);
+        spin_unlock_irqrestore(&priv->lock, flags);
       }
       break;
 #endif
@@ -2697,10 +2714,9 @@ static int imxrt_ioctl(struct file *filep, int cmd, unsigned long arg)
         uint32_t ctrl;
         uint32_t stat;
         uint32_t regval;
-        irqstate_t flags;
         struct imxrt_uart_s *priv = (struct imxrt_uart_s *)dev;
 
-        flags  = spin_lock_irqsave(NULL);
+        flags  = spin_lock_irqsave(&priv->lock);
         ctrl   = imxrt_serialin(priv, IMXRT_LPUART_CTRL_OFFSET);
         stat   = imxrt_serialin(priv, IMXRT_LPUART_STAT_OFFSET);
         regval = ctrl;
@@ -2736,7 +2752,7 @@ static int imxrt_ioctl(struct file *filep, int cmd, unsigned long arg)
         imxrt_serialout(priv, IMXRT_LPUART_STAT_OFFSET, stat);
         imxrt_serialout(priv, IMXRT_LPUART_CTRL_OFFSET, ctrl);
 
-        spin_unlock_irqrestore(NULL, flags);
+        spin_unlock_irqrestore(&priv->lock, flags);
       }
       break;
 #endif
@@ -2790,7 +2806,7 @@ static void imxrt_rxint(struct uart_dev_s *dev, bool enable)
 
   /* Enable interrupts for data available at Rx */
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&priv->lock);
   if (enable)
     {
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
@@ -2806,7 +2822,7 @@ static void imxrt_rxint(struct uart_dev_s *dev, bool enable)
   regval &= ~LPUART_ALL_INTS;
   regval |= priv->ie;
   imxrt_serialout(priv, IMXRT_LPUART_CTRL_OFFSET, regval);
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 #endif
 
@@ -3258,12 +3274,12 @@ static void imxrt_singlewire_send(struct uart_dev_s *dev, int ch)
   uint32_t regval;
   irqstate_t flags;
 
-  flags  = spin_lock_irqsave(NULL);
+  flags  = spin_lock_irqsave(&priv->lock);
   regval = imxrt_serialin(priv, IMXRT_LPUART_CTRL_OFFSET);
   regval &= ~(LPUART_CTRL_RSRC);
   regval |= (LPUART_CTRL_TXDIR);
   imxrt_serialout(priv, IMXRT_LPUART_CTRL_OFFSET, regval);
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 
   imxrt_serialout(priv, IMXRT_LPUART_DATA_OFFSET, (uint32_t)ch);
 }
@@ -3323,7 +3339,7 @@ static void imxrt_txint(struct uart_dev_s *dev, bool enable)
 
   /* Enable interrupt for TX complete */
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&priv->lock);
   if (enable)
     {
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
@@ -3339,7 +3355,7 @@ static void imxrt_txint(struct uart_dev_s *dev, bool enable)
   regval &= ~LPUART_ALL_INTS;
   regval |= priv->ie;
   imxrt_serialout(priv, IMXRT_LPUART_CTRL_OFFSET, regval);
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 #endif
 
@@ -3360,7 +3376,7 @@ static void imxrt_singlewire_txint(struct uart_dev_s *dev, bool enable)
 
   /* Enable interrupt for TX complete */
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&priv->lock);
   regval  = imxrt_serialin(priv, IMXRT_LPUART_CTRL_OFFSET);
   if (enable)
     {
@@ -3384,7 +3400,7 @@ static void imxrt_singlewire_txint(struct uart_dev_s *dev, bool enable)
   regval |= priv->ie;
 
   imxrt_serialout(priv, IMXRT_LPUART_CTRL_OFFSET, regval);
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 #endif
 
@@ -3671,28 +3687,16 @@ void arm_serialinit(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef CONSOLE_DEV
   struct imxrt_uart_s *priv = (struct imxrt_uart_s *)CONSOLE_DEV.dev.priv;
   uint32_t ie;
 
   imxrt_disableuartint(priv, &ie);
-
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      imxrt_lowputc('\r');
-    }
-
   imxrt_lowputc(ch);
   imxrt_restoreuartint(priv, ie);
 #endif
-
-  return ch;
 }
 
 #else /* USE_SERIALDRIVER */
@@ -3705,22 +3709,11 @@ int up_putc(int ch)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #if CONSOLE_LPUART > 0
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      arm_lowputc('\r');
-    }
-
   arm_lowputc(ch);
 #endif
-
-  return ch;
 }
 
 #endif /* USE_SERIALDRIVER */

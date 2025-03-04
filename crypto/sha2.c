@@ -1,11 +1,9 @@
 /****************************************************************************
  * crypto/sha2.c
- * $OpenBSD: sha2.c,v 1.19 2021/03/12 10:22:46 jsg Exp $
- * FILE: sha2.c
- * AUTHOR: Aaron D. Gifford <me@aarongifford.com>
  *
- * Copyright (c) 2000-2001, Aaron D. Gifford
- * All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2000-2001, Aaron D. Gifford
+ * SPDX-FileCopyrightText: Aaron D. Gifford <me@aarongifford.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -31,7 +29,6 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $From: sha2.c,v 1.1 2001/11/08 00:01:51 adg Exp adg $
  ****************************************************************************/
 
 /****************************************************************************

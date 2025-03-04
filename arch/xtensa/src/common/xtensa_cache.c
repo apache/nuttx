@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/xtensa/src/common/xtensa_cache.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -345,6 +347,15 @@ void up_enable_dcache(void)
   uint32_t memctl = 0;
 
   __asm__ __volatile__ ("rsr %0, memctl\n" : "=r"(memctl) :);
+
+  /* Check if the D-Cache is enabled */
+
+  if ((memctl & MEMCTL_INV_EN) != 0)
+    {
+      return;
+    }
+
+  up_invalidate_dcache_all();
 
   /* set ways allocatable & ways use */
 

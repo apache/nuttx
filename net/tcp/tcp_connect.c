@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/tcp/tcp_connect.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -35,6 +37,7 @@
 #include <arch/irq.h>
 
 #include <nuttx/semaphore.h>
+#include <nuttx/tls.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/udp.h>
@@ -287,6 +290,7 @@ int psock_tcp_connect(FAR struct socket *psock,
 {
   FAR struct tcp_conn_s *conn;
   struct tcp_connect_s   state;
+  struct tcp_callback_s  info;
   int                    ret = OK;
 
   /* Interrupts must be disabled through all of the following because
@@ -303,6 +307,11 @@ int psock_tcp_connect(FAR struct socket *psock,
   if (conn == NULL) /* Should always be non-NULL */
     {
       ret = -EINVAL;
+    }
+  else if (conn->tcpstateflags == TCP_CLOSED)
+    {
+      nerr("ERROR: tcp conn was released, connect failed \n");
+      ret = -ENOTCONN;
     }
   else
     {
@@ -359,6 +368,15 @@ int psock_tcp_connect(FAR struct socket *psock,
           ret = psock_setup_callbacks(psock, &state);
           if (ret >= 0)
             {
+              /* Push a cancellation point onto the stack.  This will be
+               * called if the thread is canceled.
+               */
+
+              info.tc_conn = conn;
+              info.tc_cb = state.tc_cb;
+              info.tc_sem = &state.tc_sem;
+              tls_cleanup_push(tls_get_info(), tcp_callback_cleanup, &info);
+
               /* Wait for either the connect to complete or for an
                * error/timeout to occur.
                * NOTES:  net_sem_wait will also terminate if a
@@ -366,6 +384,8 @@ int psock_tcp_connect(FAR struct socket *psock,
                */
 
               ret = net_sem_wait(&state.tc_sem);
+
+              tls_cleanup_pop(tls_get_info(), 0);
 
               /* Uninitialize the state structure */
 

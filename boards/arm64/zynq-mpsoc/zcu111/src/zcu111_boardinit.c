@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm64/zynq-mpsoc/zcu111/src/zcu111_boardinit.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -103,5 +105,7 @@ void zynq_board_initialize(void)
 void board_late_initialize(void)
 {
   /* Perform board initialization */
+
+  zcu111_bringup();
 }
 #endif /* CONFIG_BOARD_LATE_INITIALIZE */

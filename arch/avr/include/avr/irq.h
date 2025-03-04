@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/avr/include/avr/irq.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -93,12 +95,6 @@
 #ifndef __ASSEMBLY__
 struct xcptcontext
 {
-  /* The following function pointer is non-zero if there are pending signals
-   * to be processed.
-   */
-
-  void *sigdeliver; /* Actual type is sig_deliver_t */
-
   /* These are saved copies of PC and SR used during signal processing.
    *
    * REVISIT:  Because there is only one copy of these save areas,
@@ -137,21 +133,21 @@ struct xcptcontext
 
 /* Read/write the SREG */
 
-static inline irqstate_t getsreg(void)
+static inline_function irqstate_t getsreg(void)
 {
   irqstate_t sreg;
   asm volatile ("in %0, __SREG__" : "=r" (sreg) ::);
   return sreg;
 }
 
-static inline void putsreg(irqstate_t sreg)
+static inline_function void putsreg(irqstate_t sreg)
 {
   asm volatile ("out __SREG__, %s" : : "r" (sreg) :);
 }
 
 /* Return the current value of the stack pointer */
 
-static inline uint16_t up_getsp(void)
+static inline_function uint16_t up_getsp(void)
 {
   uint8_t spl;
   uint8_t sph;
@@ -169,19 +165,19 @@ static inline uint16_t up_getsp(void)
 
 /* Interrupt enable/disable */
 
-static inline void up_irq_enable()
+static inline_function void up_irq_enable()
 {
   asm volatile ("sei" ::);
 }
 
-static inline void up_irq_disabled()
+static inline_function void up_irq_disabled()
 {
   asm volatile ("cli" ::);
 }
 
 /* Save the current interrupt enable state & disable all interrupts */
 
-static inline irqstate_t up_irq_save(void)
+static inline_function irqstate_t up_irq_save(void)
 {
   irqstate_t sreg;
   asm volatile
@@ -195,7 +191,7 @@ static inline irqstate_t up_irq_save(void)
 
 /* Restore saved interrupt state */
 
-static inline void up_irq_restore(irqstate_t flags)
+static inline_function void up_irq_restore(irqstate_t flags)
 {
   asm volatile ("out __SREG__, %0" : : "r" (flags) :);
 }
@@ -208,6 +204,28 @@ static inline void up_irq_restore(irqstate_t flags)
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: up_getusrpc
+ ****************************************************************************/
+
+#if defined(REG_PC2)
+#  define up_getusrpc(regs) \
+    ((regs) ? \
+     ((((uint8_t *)(regs))[REG_PC0] << 16) | \
+      (((uint8_t *)(regs))[REG_PC1] <<  8) | \
+      (((uint8_t *)(regs))[REG_PC2] <<  0)) : \
+     (((uint8_t *)up_current_regs())[REG_PC0] << 16) | \
+     (((uint8_t *)up_current_regs())[REG_PC1] <<  8) | \
+     (((uint8_t *)up_current_regs())[REG_PC2] <<  0))
+#else
+#  define up_getusrpc(regs) \
+    ((regs) ? \
+     ((((uint8_t *)(regs))[REG_PC0] << 8) | \
+      (((uint8_t *)(regs))[REG_PC1] << 0)) : \
+     (((uint8_t *)up_current_regs())[REG_PC0] << 8) | \
+     (((uint8_t *)up_current_regs())[REG_PC1] << 0))
+#endif
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus

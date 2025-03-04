@@ -1,8 +1,8 @@
 /****************************************************************************
  * crypto/hmac.c
- * $OpenBSD: hmac.c,v 1.4 2016/09/19 18:09:40 tedu Exp $
  *
- * Copyright (c) 2008 Damien Bergamini <damien.bergamini@free.fr>
+ * SPDX-License-Identifier: ISC
+ * SPDX-FileCopyrightText: 2008 Damien Bergamini <damien.bergamini@free.fr>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above

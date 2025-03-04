@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm64/fvp-v8r/fvp-armv8r/scripts/dramboot.ld
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -17,6 +19,8 @@
  * under the License.
  *
  ****************************************************************************/
+
+#include <nuttx/config.h>
 
 OUTPUT_ARCH(aarch64)
 
@@ -82,11 +86,20 @@ SECTIONS
        *(.data.page_aligned)
        *(.data)
        . = ALIGN(8);
+        __start_impls = .;
+        *(.impls)
+        KEEP(*(.impls))
+        . = ALIGN(4);
+        __stop_impls = .;
        *(.data.rel)
        *(.data.rel.*)
        CONSTRUCTORS
   } :text
   _edata = .; /* End+1 of .data */
+
+#if defined(CONFIG_SMP) && defined(CONFIG_ARM64_SMP_BUSY_WAIT)
+  . = CONFIG_ARM64_SMP_BUSY_WAIT_FLAG_ADDR + 4;
+#endif
 
   .bss : {                     /* BSS */
        . = ALIGN(8);

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32h7/stm32h7x3xx_rcc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -926,11 +928,13 @@ void stm32_stdclockconfig(void)
         {
         }
 
+#ifndef CONFIG_STM32H7_PWR_IGNORE_ACTVOSRDY
       /* See Reference manual Section 5.4.1, System supply startup */
 
       while ((getreg32(STM32_PWR_CSR1) & PWR_CSR1_ACTVOSRDY) == 0)
         {
         }
+#endif
 
 #if STM32_VOS_OVERDRIVE && (STM32_PWR_VOS_SCALE == PWR_D3CR_VOS_SCALE_1)
       /* Over-drive support for VOS1 */

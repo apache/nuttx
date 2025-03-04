@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/time/lib_strftime.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -400,7 +402,7 @@ process_next:
             case 'F':
               {
                 len = snprintf(dest, chleft, "%04d-%02d-%02d",
-                              tm->tm_year + TM_YEAR_BASE, tm->tm_mon,
+                              tm->tm_year + TM_YEAR_BASE, tm->tm_mon + 1,
                               tm->tm_mday);
               }
               break;

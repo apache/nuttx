@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/z16/src/common/z16_registerdump.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -34,23 +36,13 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_getusrsp
- ****************************************************************************/
-
-uintptr_t up_getusrsp(FAR void *regs)
-{
-  FAR uint32_t *ptr = regs;
-  return ptr[REG_SP];
-}
-
-/****************************************************************************
  * Name: up_dump_register
  ****************************************************************************/
 
 void up_dump_register(FAR void *dumpregs)
 {
 #ifdef CONFIG_DEBUG_INFO
-  FAR volatile uint32_t *regs = dumpregs ? dumpregs : g_current_regs;
+  FAR volatile uint32_t *regs = dumpregs ? dumpregs : up_current_regs();
 
   _alert("R0 :%08x R1 :%08x R2 :%08x R3 :%08x "
          "R4 :%08x R5 :%08x R6 :%08x R7 :%08x\n"

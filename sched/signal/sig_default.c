@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/signal/sig_default.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -28,10 +30,10 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <pthread.h>
 #include <signal.h>
 #include <assert.h>
 
+#include <nuttx/pthread.h>
 #include <nuttx/sched.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/signal.h>
@@ -223,6 +225,8 @@ static void nxsig_abnormal_termination(int signo)
   group_kill_children(rtcb);
 #endif
 
+  tls_cleanup_popall(tls_get_info());
+
 #ifndef CONFIG_DISABLE_PTHREAD
   /* Check if the currently running task is actually a pthread */
 
@@ -233,7 +237,7 @@ static void nxsig_abnormal_termination(int signo)
        * REVISIT:  This will not work if HAVE_GROUP_MEMBERS is not set.
        */
 
-      pthread_exit(NULL);
+      nx_pthread_exit(NULL);
     }
   else
 #endif
@@ -530,9 +534,9 @@ _sa_handler_t nxsig_default(FAR struct tcb_s *tcb, int signo, bool defaction)
         {
           /* nxsig_addset() is not atomic (but neither is sigaction()) */
 
-          flags = spin_lock_irqsave(NULL);
+          flags = spin_lock_irqsave(&group->tg_lock);
           nxsig_addset(&group->tg_sigdefault, signo);
-          spin_unlock_irqrestore(NULL, flags);
+          spin_unlock_irqrestore(&group->tg_lock, flags);
         }
     }
 
@@ -542,9 +546,9 @@ _sa_handler_t nxsig_default(FAR struct tcb_s *tcb, int signo, bool defaction)
        * atomic (but neither is sigaction()).
        */
 
-      flags = spin_lock_irqsave(NULL);
+      flags = spin_lock_irqsave(&group->tg_lock);
       nxsig_delset(&group->tg_sigdefault, signo);
-      spin_unlock_irqrestore(NULL, flags);
+      spin_unlock_irqrestore(&group->tg_lock, flags);
     }
 
   return handler;

@@ -1,6 +1,8 @@
 ############################################################################
 # fs/v9fs/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -22,6 +24,10 @@ ifeq ($(CONFIG_FS_V9FS),y)
 # Files required for V9FS file system support
 
 CSRCS += client.c transport.c v9fs.c
+
+ifeq ($(CONFIG_V9FS_SOCKET_9P),y)
+  CSRCS += socket_9p.c
+endif
 
 ifeq ($(CONFIG_V9FS_VIRTIO_9P),y)
   CSRCS += virtio_9p.c

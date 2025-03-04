@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/hex2bin/lib_hex2bin.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -248,21 +250,21 @@ static int readstream(FAR struct lib_instream_s *instream,
   /* Skip until the beginning of line start code is encountered */
 
   ch = lib_stream_getc(instream);
-  while (ch != RECORD_STARTCODE && ch != EOF)
+  while (ch != RECORD_STARTCODE && !lib_stream_eof(ch))
     {
       ch = lib_stream_getc(instream);
     }
 
   /* Skip over the startcode */
 
-  if (ch != EOF)
+  if (!lib_stream_eof(ch))
     {
       ch = lib_stream_getc(instream);
     }
 
   /* Then read, verify, and buffer until the end of line is encountered */
 
-  while (ch != EOF && nbytes < (MAXRECORD_ASCSIZE - 1))
+  while (!lib_stream_eof(ch) && nbytes < (MAXRECORD_ASCSIZE - 1))
     {
       if (ch == '\n' || ch == '\r')
         {

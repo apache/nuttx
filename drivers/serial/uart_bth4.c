@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/serial/uart_bth4.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -22,11 +24,12 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/irq.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
-#include <nuttx/mm/circbuf.h>
+#include <nuttx/circbuf.h>
 
 #include <fcntl.h>
 #include <string.h>
@@ -59,6 +62,8 @@ struct uart_bth4_s
   uint8_t                 sendbuf[CONFIG_UART_BTH4_TXBUFSIZE];
   size_t                  sendlen;
   mutex_t                 sendlock;
+  mutex_t                 openlock;
+  uint8_t                 refcnt;
 
   FAR struct pollfd      *fds[CONFIG_UART_BTH4_NPOLLWAITERS];
 };
@@ -173,14 +178,35 @@ static int uart_bth4_open(FAR struct file *filep)
   FAR struct inode *inode = filep->f_inode;
   FAR struct uart_bth4_s *dev = inode->i_private;
   int ret;
+  uint8_t tmp;
 
-  ret = dev->drv->open(dev->drv);
+  ret = nxmutex_lock(&dev->openlock);
   if (ret < 0)
     {
       return ret;
     }
 
-  dev->sendlen = 0;
+  tmp = dev->refcnt + 1;
+  if (tmp == 0)
+    {
+      nxmutex_unlock(&dev->openlock);
+      return -EMFILE;
+    }
+
+  if (tmp == 1)
+    {
+      ret = dev->drv->open(dev->drv);
+      if (ret < 0)
+        {
+          nxmutex_unlock(&dev->openlock);
+          return ret;
+        }
+
+      dev->sendlen = 0;
+    }
+
+  dev->refcnt = tmp;
+  nxmutex_unlock(&dev->openlock);
 
   return OK;
 }
@@ -190,9 +216,19 @@ static int uart_bth4_close(FAR struct file *filep)
   FAR struct inode *inode = filep->f_inode;
   FAR struct uart_bth4_s *dev = inode->i_private;
 
-  dev->drv->close(dev->drv);
+  nxmutex_lock(&dev->openlock);
+  if (dev->refcnt > 1)
+    {
+      dev->refcnt--;
+      nxmutex_unlock(&dev->openlock);
+      return OK;
+    }
 
+  dev->refcnt = 0;
+  dev->drv->close(dev->drv);
   uart_bth4_pollnotify(dev, POLLIN | POLLOUT);
+  nxmutex_unlock(&dev->openlock);
+
   return OK;
 }
 
@@ -436,12 +472,14 @@ int uart_bth4_register(FAR const char *path, FAR struct bt_driver_s *drv)
   drv->priv    = dev;
 
   nxmutex_init(&dev->sendlock);
+  nxmutex_init(&dev->openlock);
   nxsem_init(&dev->recvsem, 0, 0);
 
   ret = register_driver(path, &g_uart_bth4_ops, 0666, dev);
   if (ret < 0)
     {
       nxmutex_destroy(&dev->sendlock);
+      nxmutex_destroy(&dev->openlock);
       nxsem_destroy(&dev->recvsem);
       circbuf_uninit(&dev->circbuf);
       kmm_free(dev);

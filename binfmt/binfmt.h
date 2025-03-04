@@ -1,6 +1,8 @@
 /****************************************************************************
  * binfmt/binfmt.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -175,7 +177,8 @@ void binfmt_freeargv(FAR char * const *argv);
  *   do not have any real option other than to copy the callers action list.
  *
  * Input Parameters:
- *   copy     - Pointer of file actions
+ *   copy     - Pointer of the copied output file actions
+ *   actions  - Pointer of file actions to be copy
  *
  * Returned Value:
  *   A non-zero copy is returned on success.

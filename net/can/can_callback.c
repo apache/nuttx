@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/can/can_callback.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -31,6 +33,7 @@
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/mm/iob.h>
+#include <nuttx/net/netstats.h>
 
 #include "devif/devif.h"
 #include "can/can.h"
@@ -81,10 +84,7 @@ can_data_event(FAR struct net_driver_s *dev, FAR struct can_conn_s *conn,
       ninfo("Dropped %d bytes\n", dev->d_len);
 
 #ifdef CONFIG_NET_STATISTICS
-      /* No support CAN net statistics yet */
-
-      /* g_netstats.tcp.drop++; */
-
+      g_netstats.can.drop++;
 #endif
     }
 
@@ -138,7 +138,7 @@ uint16_t can_callback(FAR struct net_driver_s *dev,
            * create timestamp and copy to iob
            */
 
-          if (conn->timestamp)
+          if (_SO_GETOPT(conn->sconn.s_options, SO_TIMESTAMP))
             {
               struct timeval tv;
               FAR struct timespec *ts = (FAR struct timespec *)&tv;
@@ -234,6 +234,7 @@ uint16_t can_datahandler(FAR struct net_driver_s *dev,
   else
     {
       nerr("ERROR: Failed to queue the I/O buffer chain: %d\n", ret);
+      ret = 0;
       goto errout;
     }
 

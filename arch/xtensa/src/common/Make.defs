@@ -1,6 +1,8 @@
 ############################################################################
 # arch/xtensa/src/common/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -34,7 +36,7 @@ CMN_CSRCS += xtensa_irqdispatch.c xtensa_lowputs.c xtensa_mdelay.c
 CMN_CSRCS += xtensa_modifyreg8.c xtensa_modifyreg16.c xtensa_modifyreg32.c
 CMN_CSRCS += xtensa_mpu.c xtensa_nputs.c xtensa_oneshot.c xtensa_perf.c
 CMN_CSRCS += xtensa_releasestack.c xtensa_registerdump.c xtensa_sigdeliver.c
-CMN_CSRCS += xtensa_switchcontext.c xtensa_swint.c xtensa_stackframe.c
+CMN_CSRCS += xtensa_swint.c xtensa_stackframe.c
 CMN_CSRCS += xtensa_saveusercontext.c xtensa_schedsigaction.c xtensa_udelay.c
 CMN_CSRCS += xtensa_usestack.c xtensa_tcbinfo.c
 
@@ -52,8 +54,12 @@ ifeq ($(CONFIG_SCHED_BACKTRACE),y)
   CMN_CSRCS += xtensa_backtrace.c
 endif
 
+ifeq ($(CONFIG_SCHED_THREAD_LOCAL),y)
+  CMN_CSRCS += xtensa_tls.c
+endif
+
 ifeq ($(CONFIG_SMP),y)
-  CMN_CSRCS += xtensa_cpupause.c
+  CMN_CSRCS += xtensa_smpcall.c
 endif
 
 ifeq ($(CONFIG_STACK_COLORATION),y)

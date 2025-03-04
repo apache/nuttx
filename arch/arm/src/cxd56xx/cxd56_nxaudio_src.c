@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/cxd56xx/cxd56_nxaudio_src.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -85,6 +87,8 @@ struct cxd56_srcdata_s
 
   float buf_count;
   float buf_increment;
+
+  spinlock_t lock;
 };
 
 /****************************************************************************
@@ -114,18 +118,18 @@ static struct ap_buffer_s *cxd56_src_get_apb(void)
   struct ap_buffer_s *src_apb;
   irqstate_t flags;
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&g_src.lock);
 
   if (dq_count(g_src.inq) == 0)
     {
       size_t bufsize = sizeof(struct ap_buffer_s) +
                               CONFIG_CXD56_AUDIO_BUFFER_SIZE;
 
-      spin_unlock_irqrestore(NULL, flags);
+      spin_unlock_irqrestore(&g_src.lock, flags);
 
       src_apb = kmm_zalloc(bufsize);
 
-      flags = spin_lock_irqsave(NULL);
+      flags = spin_lock_irqsave(&g_src.lock);
 
       if (!src_apb)
         {
@@ -146,7 +150,7 @@ static struct ap_buffer_s *cxd56_src_get_apb(void)
   src_apb->flags = 0;
 
 errorout_with_lock:
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&g_src.lock, flags);
   return src_apb;
 }
 
@@ -183,9 +187,9 @@ static int cxd56_src_process(struct ap_buffer_s *apb)
       src_apb->nbytes = apb->nbytes;
       src_apb->flags |= AUDIO_APB_SRC_FINAL;
 
-      flags = spin_lock_irqsave(NULL);
+      flags = spin_lock_irqsave(&g_src.lock);
       dq_put(g_src.outq, &src_apb->dq_entry);
-      spin_unlock_irqrestore(NULL, flags);
+      spin_unlock_irqrestore(&g_src.lock, flags);
 
       goto exit;
     }
@@ -287,9 +291,9 @@ static int cxd56_src_process(struct ap_buffer_s *apb)
 
               /* Put in out queue to be DMA'd */
 
-              flags = spin_lock_irqsave(NULL);
+              flags = spin_lock_irqsave(&g_src.lock);
               dq_put(g_src.outq, &src_apb->dq_entry);
-              spin_unlock_irqrestore(NULL, flags);
+              spin_unlock_irqrestore(&g_src.lock, flags);
 
 #ifdef DUMP_DATA
               file_write(&dump_file_post, src_apb->samp, src_apb->nbytes);
@@ -318,9 +322,9 @@ static int cxd56_src_process(struct ap_buffer_s *apb)
 
           src_apb->nbytes += g_src.bytewidth * src_nframes * g_src.channels;
 
-          flags = spin_lock_irqsave(NULL);
+          flags = spin_lock_irqsave(&g_src.lock);
           dq_put_back(g_src.inq, &src_apb->dq_entry);
-          spin_unlock_irqrestore(NULL, flags);
+          spin_unlock_irqrestore(&g_src.lock, flags);
 
           apb->curbyte += (float_in_left * g_src.bytewidth);
         }
@@ -521,6 +525,7 @@ int cxd56_src_deinit(void)
     }
 
   src_delete(g_src.src_state);
+  spin_lock_init(&g_src.lock);
 
 #ifdef DUMP_DATA
   if (dump_file_pre.f_inode)

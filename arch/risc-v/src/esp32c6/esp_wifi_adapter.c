@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/esp32c6/esp_wifi_adapter.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -2528,6 +2530,13 @@ static void esp_evt_work_cb(void *arg)
           break;
         }
 
+      /* Some of the following logic (eg. esp_wlan_sta_set_linkstatus)
+       * can take net_lock(). To maintain the consistent locking order,
+       * we take net_lock() here before taking esp_wifi_lock. Note that
+       * net_lock() is a recursive lock.
+       */
+
+      net_lock();
       esp_wifi_lock(true);
 
       switch (evt_adpt->id)
@@ -2649,6 +2658,7 @@ static void esp_evt_work_cb(void *arg)
         }
 
       esp_wifi_lock(false);
+      net_unlock();
 
       kmm_free(evt_adpt);
     }
@@ -3098,15 +3108,10 @@ static void esp_nvs_close(uint32_t handle)
 
 static void esp_update_time(struct timespec *timespec, uint32_t ticks)
 {
-  uint32_t tmp;
+  struct timespec ts;
 
-  tmp = TICK2SEC(ticks);
-  timespec->tv_sec += tmp;
-
-  ticks -= SEC2TICK(tmp);
-  tmp = TICK2NSEC(ticks);
-
-  timespec->tv_nsec += tmp;
+  clock_ticks2time(&ts, ticks);
+  clock_timespec_add(timespec, &ts, timespec);
 }
 
 #ifdef ESP_WLAN_HAS_STA
@@ -5175,7 +5180,7 @@ int esp_wifi_softap_password(struct iwreq *iwr, bool set)
 
       if (ext->alg != IW_ENCODE_ALG_NONE)
         {
-          memcpy(wifi_cfg.sta.password, pdata, len);
+          memcpy(wifi_cfg.ap.password, pdata, len);
         }
 
       if (g_softap_started)

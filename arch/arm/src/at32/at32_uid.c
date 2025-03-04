@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/at32/at32_uid.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -27,7 +29,7 @@
 #include "hardware/at32_memorymap.h"
 #include "at32_uid.h"
 
-#ifdef AT32_SYSMEM_UID 
+#ifdef AT32_SYSMEM_UID
 
 /****************************************************************************
  * Public Functions

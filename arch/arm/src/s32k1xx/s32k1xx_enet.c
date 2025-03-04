@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/s32k1xx/s32k1xx_enet.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -258,6 +260,7 @@ struct s32k1xx_driver_s
   struct work_s pollwork;      /* For deferring poll work to the work queue */
   struct enet_desc_s *txdesc;  /* A pointer to the list of TX descriptor */
   struct enet_desc_s *rxdesc;  /* A pointer to the list of RX descriptors */
+  spinlock_t lock;             /* Spinlock */
 
   /* This holds the information visible to the NuttX network */
 
@@ -539,7 +542,7 @@ static int s32k1xx_transmit(struct s32k1xx_driver_s *priv)
 
   /* Make the following operations atomic */
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&priv->lock);
 
   /* Enable TX interrupts */
 
@@ -556,7 +559,7 @@ static int s32k1xx_transmit(struct s32k1xx_driver_s *priv)
 
   putreg32(ENET_TDAR, S32K1XX_ENET_TDAR);
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
   return OK;
 }
 
@@ -2440,6 +2443,8 @@ int s32k1xx_netinitialize(int intf)
   priv->dev.d_ioctl   = s32k1xx_ioctl;    /* Support PHY ioctl() calls */
 #endif
   priv->dev.d_private = g_enet;           /* Used to recover private state from dev */
+
+  spin_lock_init(&priv->lock);
 
 #ifdef CONFIG_NET_ETHERNET
   /* Determine a semi-unique MAC address from MCU UID

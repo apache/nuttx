@@ -1,0 +1,608 @@
+/****************************************************************************
+ * arch/arm64/src/bcm2711/hardware/bcm2711_irq.h
+ *
+ * Author: Matteo Golin <matteo.golin@gmail.com>
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
+#ifndef __ARCH_ARM64_SRC_BCM2711_IRQ_H
+#define __ARCH_ARM64_SRC_BCM2711_IRQ_H
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include "bcm2711_memmap.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* ARM_LOCAL interrupts */
+
+/* ARMC interrupts */
+
+#define BCM_IRQ_ARMC_TIMER 0      /* Timer */
+#define BCM_IRQ_ARMC_MAILBOX 1    /* Mailbox */
+#define BCM_IRQ_ARMC_DOORBELL0 2  /* Doorbell 0 */
+#define BCM_IRQ_ARMC_DOORBELL1 3  /* Doorbell 1 */
+#define BCM_IRQ_ARMC_VPU0HALT 4   /* VPU 0 halted */
+#define BCM_IRQ_ARMC_VPU1HALT 5   /* VPU 1 halted */
+#define BCM_IRQ_ARMC_ARMADDRERR 6 /* ARM address error */
+#define BCM_IRQ_ARMC_ARMAXIERR 7  /* ARM AXI error */
+#define BCM_IRQ_ARMC_SWI0 8       /* Software interrupt 0 */
+#define BCM_IRQ_ARMC_SWI1 9       /* Software interrupt 1 */
+#define BCM_IRQ_ARMC_SWI2 10      /* Software interrupt 2 */
+#define BCM_IRQ_ARMC_SWI3 11      /* Software interrupt 3 */
+#define BCM_IRQ_ARMC_SWI4 12      /* Software interrupt 4 */
+#define BCM_IRQ_ARMC_SWI5 13      /* Software interrupt 5 */
+#define BCM_IRQ_ARMC_SWI6 14      /* Software interrupt 6 */
+#define BCM_IRQ_ARMC_SWI7 15      /* Software interrupt 7 */
+
+/* VideoCore interrupts */
+
+#define BCM_IRQ_VC_TIMER0 0
+#define BCM_IRQ_VC_TIMER1 1
+#define BCM_IRQ_VC_TIMER2 2
+#define BCM_IRQ_VC_TIMER3 3
+#define BCM_IRQ_VC_H2640 4
+#define BCM_IRQ_VC_H2641 5
+#define BCM_IRQ_VC_H2642 6
+#define BCM_IRQ_VC_JPEG 7
+#define BCM_IRQ_VC_ISP 8
+#define BCM_IRQ_VC_USB 9
+#define BCM_IRQ_VC_V3D 10
+#define BCM_IRQ_VC_TRANSPOSE 11
+#define BCM_IRQ_VC_MCSYNC0 12
+#define BCM_IRQ_VC_MCSYNC1 13
+#define BCM_IRQ_VC_MCSYNC2 14
+#define BCM_IRQ_VC_MCSYNC3 15
+#define BCM_IRQ_VC_DMA0 16
+#define BCM_IRQ_VC_DMA1 17
+#define BCM_IRQ_VC_DMA2 18
+#define BCM_IRQ_VC_DMA3 19
+#define BCM_IRQ_VC_DMA4 20
+#define BCM_IRQ_VC_DMA5 21
+#define BCM_IRQ_VC_DMA6 22
+#define BCM_IRQ_VC_DMA7N8 23
+#define BCM_IRQ_VC_DMA9N10 24
+#define BCM_IRQ_VC_DMA11 25
+#define BCM_IRQ_VC_DMA12 26
+#define BCM_IRQ_VC_DMA13 27
+#define BCM_IRQ_VC_DMA14 28
+#define BCM_IRQ_VC_AUX 29
+#define BCM_IRQ_VC_ARM 30
+#define BCM_IRQ_VC_DMA15 31
+#define BCM_IRQ_VC_HDMICEC 32
+#define BCM_IRQ_VC_HVS 33
+#define BCM_IRQ_VC_RPIVID 34
+#define BCM_IRQ_VC_SDC 35
+#define BCM_IRQ_VC_DSI0 36
+#define BCM_IRQ_VC_PIXVLV2 37
+#define BCM_IRQ_VC_CAM0 38
+#define BCM_IRQ_VC_CAM1 39
+#define BCM_IRQ_VC_HDMI0 40
+#define BCM_IRQ_VC_HDMI1 41
+#define BCM_IRQ_VC_PIXVLV3 42
+#define BCM_IRQ_VC_SPIBSCSLV 43
+#define BCM_IRQ_VC_DSI1 44
+#define BCM_IRQ_VC_PXLVLV0 45
+#define BCM_IRQ_VC_PXLVLV1N4 46
+#define BCM_IRQ_VC_CPR 47
+#define BCM_IRQ_VC_SMI 48
+#define BCM_IRQ_VC_GPIO0 49
+#define BCM_IRQ_VC_GPIO1 50
+#define BCM_IRQ_VC_GPIO2 51
+#define BCM_IRQ_VC_GPIO3 52
+#define BCM_IRQ_VC_I2C 53
+#define BCM_IRQ_VC_SPI 54
+#define BCM_IRQ_VC_PCMI2S 55
+#define BCM_IRQ_VC_SDHOST 56
+#define BCM_IRQ_VC_PL011UART 57
+#define BCM_IRQ_VC_ETHPCIE 58
+#define BCM_IRQ_VC_VEC 59
+#define BCM_IRQ_VC_CPG 60
+#define BCM_IRQ_VC_RNG 61
+#define BCM_IRQ_VC_EMMC 62
+#define BCM_IRQ_VC_ETHPCIESEC 63
+
+/* TODO: what about PACTL_CS address section 6.2.4? */
+
+/* ETH_PCIe interrupts */
+
+#define BCM_IRQ_ETH_AVS 9
+#define BCM_IRQ_ETH_PCIE0_INTA 15
+#define BCM_IRQ_ETH_PCIE0_INTB 16
+#define BCM_IRQ_ETH_PCIE0_INTC 17
+#define BCM_IRQ_ETH_PCIE0_INTD 18
+#define BCM_IRQ_ETH_PCIE0_MSI 20
+#define BCM_IRQ_ETH_GENET0_A 29
+#define BCM_IRQ_ETH_GENET0_B 30
+#define BCM_IRQ_ETH_USB0_XHCI0 48
+
+/* ARM_LOCAL interrupt register offsets */
+
+#define BCM_IRQ_ARMLOCAL_ARM_CONTROL_OFFSET 0x00
+#define BCM_IRQ_ARMLOCAL_CORE_IRQ_CONTROL_OFFSET 0x0c
+#define BCM_IRQ_ARMLOCAL_PMU_CONTROL_SET_OFFSET 0x10
+#define BCM_IRQ_ARMLOCAL_PMU_CONTROL_CLR_OFFSET 0x14
+#define BCM_IRQ_ARMLOCAL_PERI_IRQ_ROUTE0_OFFSET 0x24
+#define BCM_IRQ_ARMLOCAL_AXI_QUIET_TIME_OFFSET 0x30
+#define BCM_IRQ_ARMLOCAL_LOCAL_TIMER_CONTROL_OFFSET 0x34
+#define BCM_IRQ_ARMLOCAL_LOCAL_TIMER_IRQ_OFFSET 0x38
+#define BCM_IRQ_ARMLOCAL_TIMER_CNTRL0_OFFSET 0x40
+#define BCM_IRQ_ARMLOCAL_TIMER_CNTRL1_OFFSET 0x44
+#define BCM_IRQ_ARMLOCAL_TIMER_CNTRL2_OFFSET 0x48
+#define BCM_IRQ_ARMLOCAL_TIMER_CNTRL3_OFFSET 0x4c
+#define BCM_IRQ_ARMLOCAL_MAILBOX_CNTRL0_OFFSET 0x50
+#define BCM_IRQ_ARMLOCAL_MAILBOX_CNTRL1_OFFSET 0x54
+#define BCM_IRQ_ARMLOCAL_MAILBOX_CNTRL2_OFFSET 0x58
+#define BCM_IRQ_ARMLOCAL_MAILBOX_CNTRL3_OFFSET 0x5c
+#define BCM_IRQ_ARMLOCAL_IRQ_SOURCE0_OFFSET 0x60
+#define BCM_IRQ_ARMLOCAL_IRQ_SOURCE1_OFFSET 0x64
+#define BCM_IRQ_ARMLOCAL_IRQ_SOURCE2_OFFSET 0x68
+#define BCM_IRQ_ARMLOCAL_IRQ_SOURCE3_OFFSET 0x6c
+#define BCM_IRQ_ARMLOCAL_FIQ_SOURCE0_OFFSET 0x70
+#define BCM_IRQ_ARMLOCAL_FIQ_SOURCE1_OFFSET 0x74
+#define BCM_IRQ_ARMLOCAL_FIQ_SOURCE2_OFFSET 0x78
+#define BCM_IRQ_ARMLOCAL_FIQ_SOURCE3_OFFSET 0x7c
+
+/* ARM_LOCAL interrupt register addresses */
+
+#define _BCM_ARMLOCAL(offset) (BCM_ARMLOCAL_BASEADDR + offset)
+
+#define BCM_IRQ_ARMLOCAL_ARM_CONTROL                                         \
+  _BCM_ARMLOCAL(BCM_IRQ_ARMLOCAL_ARM_CONTROL_OFFSET)
+#define BCM_IRQ_ARMLOCAL_CORE_IRQ_CONTROL                                    \
+  _BCM_ARMLOCAL(BCM_IRQ_ARMLOCAL_CORE_IRQ_CONTROL_OFFSET)
+#define BCM_IRQ_ARMLOCAL_PMU_CONTROL_SET                                     \
+  _BCM_ARMLOCAL(BCM_IRQ_ARMLOCAL_PMU_CONTROL_SET_OFFSET)
+#define BCM_IRQ_ARMLOCAL_PMU_CONTROL_CLR                                     \
+  _BCM_ARMLOCAL(BCM_IRQ_ARMLOCAL_PMU_CONTROL_CLR_OFFSET)
+#define BCM_IRQ_ARMLOCAL_PERI_IRQ_ROUTE0                                     \
+  _BCM_ARMLOCAL(BCM_IRQ_ARMLOCAL_PERI_IRQ_ROUTE0_OFFSET)
+#define BCM_IRQ_ARMLOCAL_AXI_QUIET_TIME                                      \
+  _BCM_ARMLOCAL(BCM_IRQ_ARMLOCAL_AXI_QUIET_TIME_OFFSET)
+#define BCM_IRQ_ARMLOCAL_LOCAL_TIMER_CONTROL                                 \
+  _BCM_ARMLOCAL(BCM_IRQ_ARMLOCAL_LOCAL_TIMER_CONTROL_OFFSET)
+#define BCM_IRQ_ARMLOCAL_LOCAL_TIMER_IRQ                                     \
+  _BCM_ARMLOCAL(BCM_IRQ_ARMLOCAL_LOCAL_TIMER_IRQ_OFFSET)
+#define BCM_IRQ_ARMLOCAL_TIMER_CNTRL0                                        \
+  _BCM_ARMLOCAL(BCM_IRQ_ARMLOCAL_TIMER_CNTRL0_OFFSET)
+#define BCM_IRQ_ARMLOCAL_TIMER_CNTRL1                                        \
+  _BCM_ARMLOCAL(BCM_IRQ_ARMLOCAL_TIMER_CNTRL1_OFFSET)
+#define BCM_IRQ_ARMLOCAL_TIMER_CNTRL2                                        \
+  _BCM_ARMLOCAL(BCM_IRQ_ARMLOCAL_TIMER_CNTRL2_OFFSET)
+#define BCM_IRQ_ARMLOCAL_TIMER_CNTRL3                                        \
+  _BCM_ARMLOCAL(BCM_IRQ_ARMLOCAL_TIMER_CNTRL3_OFFSET)
+#define BCM_IRQ_ARMLOCAL_MAILBOX_CNTRL0                                      \
+  _BCM_ARMLOCAL(BCM_IRQ_ARMLOCAL_MAILBOX_CNTRL0_OFFSET)
+#define BCM_IRQ_ARMLOCAL_MAILBOX_CNTRL1                                      \
+  _BCM_ARMLOCAL(BCM_IRQ_ARMLOCAL_MAILBOX_CNTRL1_OFFSET)
+#define BCM_IRQ_ARMLOCAL_MAILBOX_CNTRL2                                      \
+  _BCM_ARMLOCAL(BCM_IRQ_ARMLOCAL_MAILBOX_CNTRL2_OFFSET)
+#define BCM_IRQ_ARMLOCAL_MAILBOX_CNTRL3                                      \
+  _BCM_ARMLOCAL(BCM_IRQ_ARMLOCAL_MAILBOX_CNTRL3_OFFSET)
+#define BCM_IRQ_ARMLOCAL_IRQ_SOURCE0                                         \
+  _BCM_ARMLOCAL(BCM_IRQ_ARMLOCAL_IRQ_SOURCE0_OFFSET)
+#define BCM_IRQ_ARMLOCAL_IRQ_SOURCE1                                         \
+  _BCM_ARMLOCAL(BCM_IRQ_ARMLOCAL_IRQ_SOURCE1_OFFSET)
+#define BCM_IRQ_ARMLOCAL_IRQ_SOURCE2                                         \
+  _BCM_ARMLOCAL(BCM_IRQ_ARMLOCAL_IRQ_SOURCE2_OFFSET)
+#define BCM_IRQ_ARMLOCAL_IRQ_SOURCE3                                         \
+  _BCM_ARMLOCAL(BCM_IRQ_ARMLOCAL_IRQ_SOURCE3_OFFSET)
+#define BCM_IRQ_ARMLOCAL_FIQ_SOURCE0                                         \
+  _BCM_ARMLOCAL(BCM_IRQ_ARMLOCAL_FIQ_SOURCE0_OFFSET)
+#define BCM_IRQ_ARMLOCAL_FIQ_SOURCE1                                         \
+  _BCM_ARMLOCAL(BCM_IRQ_ARMLOCAL_FIQ_SOURCE1_OFFSET)
+#define BCM_IRQ_ARMLOCAL_FIQ_SOURCE2                                         \
+  _BCM_ARMLOCAL(BCM_IRQ_ARMLOCAL_FIQ_SOURCE2_OFFSET)
+#define BCM_IRQ_ARMLOCAL_FIQ_SOURCE3                                         \
+  _BCM_ARMLOCAL(BCM_IRQ_ARMLOCAL_FIQ_SOURCE3_OFFSET)
+
+/* ARM_LOCAL register bit definitions */
+
+#define BCM_IRQ_ARMLOCAL_ARM_CONTROL_TIMERINC (1 << 8)
+#define BCM_IRQ_ARMLOCAL_ARM_CONTROL_PROC_CLK_TIMER (1 << 7)
+#define BCM_IRQ_ARMLOCAL_ARM_CONTROL_AXIERRIRQ_EN (1 << 6)
+#define BCM_IRQ_ARMLOCAL_ARM_CONTROL_AXI_ERR_CORE (0x7 << 4)
+#define BCM_IRQ_ARMLOCAL_ARM_CONTROL_CORE0_IRQ (0 << 4)
+#define BCM_IRQ_ARMLOCAL_ARM_CONTROL_CORE1_IRQ (1 << 4)
+#define BCM_IRQ_ARMLOCAL_ARM_CONTROL_CORE2_IRQ (2 << 4)
+#define BCM_IRQ_ARMLOCAL_ARM_CONTROL_CORE3_IRQ (3 << 4)
+#define BCM_IRQ_ARMLOCAL_ARM_CONTROL_CORE0_FIQ (4 << 4)
+#define BCM_IRQ_ARMLOCAL_ARM_CONTROL_CORE1_FIQ (5 << 4)
+#define BCM_IRQ_ARMLOCAL_ARM_CONTROL_CORE2_FIQ (6 << 4)
+#define BCM_IRQ_ARMLOCAL_ARM_CONTROL_CORE3_FIQ (7 << 4)
+
+#define BCM_IRQ_ARMLOCAL_PMU_CONTROL_SET_PMU_FIQ (0xf << 4)
+#define BCM_IRQ_ARMLOCAL_PMU_CONTROL_SET_PMU_IRQ (0xf)
+
+#define BCM_IRQ_ARMLOCAL_PMU_CONTROL_CLR_PMU_FIQ (0xf << 4)
+#define BCM_IRQ_ARMLOCAL_PMU_CONTROL_CLR_PMU_IRQ (0xf)
+
+#define BCM_IRQ_ARMLOCAL_PERI_IRQ_ROUTE0_WRITE_MASKS (0xff << 24)
+#define BCM_IRQ_ARMLOCAL_PERI_IRQ_ROUTE0_LOCAL_TIMER_IRQ (0x3)
+
+#define BCM_IRQ_ARMLOCAL_AXI_QUIET_TIME_AXI_QUIET_IRQ_ENB (1 << 20)
+#define BCM_IRQ_ARMLOCAL_AXI_QUIET_TIME_AXI_QUIET_TIME (0xfffff)
+
+#define BCM_IRQ_ARMLOCAL_LOCAL_TIMER_CONTROL_TIMER_IRQ_FLAG (1 << 31)
+#define BCM_IRQ_ARMLOCAL_LOCAL_TIMER_CONTROL_TIMER_IRQ_EN (1 << 29)
+#define BCM_IRQ_ARMLOCAL_LOCAL_TIMER_CONTROL_TIMER_EN (1 << 28)
+#define BCM_IRQ_ARMLOCAL_LOCAL_TIMER_CONTROL_TIMER_TIMEOUT (0xfffffff)
+
+#define BCM_IRQ_ARMLOCAL_LOCAL_TIMER_IRQ_IRQ_CLEAR (1 << 31)
+#define BCM_IRQ_ARMLOCAL_LOCAL_TIMER_IRQ_RELOAD (1 << 30)
+
+#define BCM_IRQ_ARMLOCAL_TIMER_CNTRLN_CNT_V_IRQ_FIQ (1 << 7)
+#define BCM_IRQ_ARMLOCAL_TIMER_CNTRLN_CNT_HP_IRQ_FIQ (1 << 6)
+#define BCM_IRQ_ARMLOCAL_TIMER_CNTRLN_CNT_PNS_IRQ_FIQ (1 << 5)
+#define BCM_IRQ_ARMLOCAL_TIMER_CNTRLN_CNT_PS_IRQ_FIQ (1 << 4)
+#define BCM_IRQ_ARMLOCAL_TIMER_CNTRLN_CNT_V_IRQ (1 << 3)
+#define BCM_IRQ_ARMLOCAL_TIMER_CNTRLN_CNT_HP_IRQ (1 << 2)
+#define BCM_IRQ_ARMLOCAL_TIMER_CNTRLN_CNT_PNS_IRQ (1 << 1)
+#define BCM_IRQ_ARMLOCAL_TIMER_CNTRLN_CNT_PS_IRQ (1 << 0)
+
+#define BCM_IRQ_ARMLOCAL_MAILBOX_CNTRLN_MBOX3_FIQ (1 << 7)
+#define BCM_IRQ_ARMLOCAL_MAILBOX_CNTRLN_MBOX2_FIQ (1 << 6)
+#define BCM_IRQ_ARMLOCAL_MAILBOX_CNTRLN_MBOX1_FIQ (1 << 5)
+#define BCM_IRQ_ARMLOCAL_MAILBOX_CNTRLN_MBOX0_FIQ (1 << 4)
+#define BCM_IRQ_ARMLOCAL_MAILBOX_CNTRLN_MBOX3_IRQ (1 << 3)
+#define BCM_IRQ_ARMLOCAL_MAILBOX_CNTRLN_MBOX2_IRQ (1 << 2)
+#define BCM_IRQ_ARMLOCAL_MAILBOX_CNTRLN_MBOX1_IRQ (1 << 1)
+#define BCM_IRQ_ARMLOCAL_MAILBOX_CNTRLN_MBOX0_IRQ (1 << 0)
+
+#define BCM_IRQ_ARMLOCAL_IRQ_SOURCEN_AXI_IRQ (1 << 30)
+#define BCM_IRQ_ARMLOCAL_IRQ_SOURCEN_TIMER_IRQ (1 << 11)
+#define BCM_IRQ_ARMLOCAL_IRQ_SOURCEN_AXI_QUIET (1 << 10)
+#define BCM_IRQ_ARMLOCAL_IRQ_SOURCEN_PMU_IRQ (1 << 9)
+#define BCM_IRQ_ARMLOCAL_IRQ_SOURCEN_CORE_IRQ (1 << 8)
+#define BCM_IRQ_ARMLOCAL_IRQ_SOURCEN_MAILBOX_CORE0_IRQ (1 << 7)
+#define BCM_IRQ_ARMLOCAL_IRQ_SOURCEN_MAILBOX_CORE1_IRQ (1 << 6)
+#define BCM_IRQ_ARMLOCAL_IRQ_SOURCEN_MAILBOX_CORE2_IRQ (1 << 5)
+#define BCM_IRQ_ARMLOCAL_IRQ_SOURCEN_MAILBOX_CORE3_IRQ (1 << 4)
+#define BCM_IRQ_ARMLOCAL_IRQ_SOURCEN_CNT_V_IRQ (1 << 3)
+#define BCM_IRQ_ARMLOCAL_IRQ_SOURCEN_CNT_HP_IRQ (1 << 2)
+#define BCM_IRQ_ARMLOCAL_IRQ_SOURCEN_CNT_PNS_IRQ (1 << 1)
+#define BCM_IRQ_ARMLOCAL_IRQ_SOURCEN_CNT_PS_IRQ (1 << 0)
+
+#define BCM_IRQ_ARMLOCAL_FIQ_SOURCEN_AXI_FIQ (1 << 30)
+#define BCM_IRQ_ARMLOCAL_FIQ_SOURCEN_LOCAL_TIMER_FIQ (1 << 11)
+#define BCM_IRQ_ARMLOCAL_FIQ_SOURCEN_PMU_FIQ (1 << 9)
+#define BCM_IRQ_ARMLOCAL_FIQ_SOURCEN_CORE_FIQ (1 << 8)
+#define BCM_IRQ_ARMLOCAL_FIQ_SOURCEN_MAILBOX_CORE0_FIQ (1 << 7)
+#define BCM_IRQ_ARMLOCAL_FIQ_SOURCEN_MAILBOX_CORE1_FIQ (1 << 6)
+#define BCM_IRQ_ARMLOCAL_FIQ_SOURCEN_MAILBOX_CORE2_FIQ (1 << 5)
+#define BCM_IRQ_ARMLOCAL_FIQ_SOURCEN_MAILBOX_CORE3_FIQ (1 << 4)
+#define BCM_IRQ_ARMLOCAL_FIQ_SOURCEN_CNT_V_FIQ (1 << 3)
+#define BCM_IRQ_ARMLOCAL_FIQ_SOURCEN_CNT_HP_FIQ (1 << 2)
+#define BCM_IRQ_ARMLOCAL_FIQ_SOURCEN_CNT_PNS_FIQ (1 << 1)
+#define BCM_IRQ_ARMLOCAL_FIQ_SOURCEN_CNT_PS_FIQ (1 << 0)
+
+/* ARMC register offsets */
+
+#define BCM_IRQ_ARMC_BASEADDR 0x7e00b000
+
+#define BCM_IRQ_ARMC_IRQ0_PENDING0_OFFSET 0x200
+#define BCM_IRQ_ARMC_IRQ0_PENDING1_OFFSET 0x204
+#define BCM_IRQ_ARMC_IRQ0_PENDING2_OFFSET 0x208
+#define BCM_IRQ_ARMC_IRQ0_SET_EN_0_OFFSET 0x210
+#define BCM_IRQ_ARMC_IRQ0_SET_EN_1_OFFSET 0x214
+#define BCM_IRQ_ARMC_IRQ0_SET_EN_2_OFFSET 0x218
+#define BCM_IRQ_ARMC_IRQ0_CLR_EN_0_OFFSET 0x220
+#define BCM_IRQ_ARMC_IRQ0_CLR_EN_1_OFFSET 0x224
+#define BCM_IRQ_ARMC_IRQ0_CLR_EN_2_OFFSET 0x228
+#define BCM_IRQ_ARMC_IRQ_STATUS0_OFFSET 0x230
+#define BCM_IRQ_ARMC_IRQ_STATUS1_OFFSET 0x234
+#define BCM_IRQ_ARMC_IRQ_STATUS2_OFFSET 0x238
+#define BCM_IRQ_ARMC_IRQ1_PENDING0_OFFSET 0x240
+#define BCM_IRQ_ARMC_IRQ1_PENDING1_OFFSET 0x244
+#define BCM_IRQ_ARMC_IRQ1_PENDING2_OFFSET 0x248
+#define BCM_IRQ_ARMC_IRQ1_SET_EN_0_OFFSET 0x250
+#define BCM_IRQ_ARMC_IRQ1_SET_EN_1_OFFSET 0x254
+#define BCM_IRQ_ARMC_IRQ1_SET_EN_2_OFFSET 0x258
+#define BCM_IRQ_ARMC_IRQ1_CLR_EN_0_OFFSET 0x260
+#define BCM_IRQ_ARMC_IRQ1_CLR_EN_1_OFFSET 0x264
+#define BCM_IRQ_ARMC_IRQ1_CLR_EN_2_OFFSET 0x268
+#define BCM_IRQ_ARMC_IRQ2_PENDING0_OFFSET 0x280
+#define BCM_IRQ_ARMC_IRQ2_PENDING1_OFFSET 0x284
+#define BCM_IRQ_ARMC_IRQ2_PENDING2_OFFSET 0x288
+#define BCM_IRQ_ARMC_IRQ2_SET_EN_0_OFFSET 0x290
+#define BCM_IRQ_ARMC_IRQ2_SET_EN_1_OFFSET 0x294
+#define BCM_IRQ_ARMC_IRQ2_SET_EN_2_OFFSET 0x298
+#define BCM_IRQ_ARMC_IRQ2_CLR_EN_0_OFFSET 0x2a0
+#define BCM_IRQ_ARMC_IRQ2_CLR_EN_1_OFFSET 0x2a4
+#define BCM_IRQ_ARMC_IRQ2_CLR_EN_2_OFFSET 0x2a8
+#define BCM_IRQ_ARMC_IRQ3_PENDING0_OFFSET 0x2c0
+#define BCM_IRQ_ARMC_IRQ3_PENDING1_OFFSET 0x2c4
+#define BCM_IRQ_ARMC_IRQ3_PENDING2_OFFSET 0x2c8
+#define BCM_IRQ_ARMC_IRQ3_SET_EN_0_OFFSET 0x2d0
+#define BCM_IRQ_ARMC_IRQ3_SET_EN_1_OFFSET 0x2d4
+#define BCM_IRQ_ARMC_IRQ3_SET_EN_2_OFFSET 0x2d8
+#define BCM_IRQ_ARMC_IRQ3_CLR_EN_0_OFFSET 0x2e0
+#define BCM_IRQ_ARMC_IRQ3_CLR_EN_1_OFFSET 0x2e4
+#define BCM_IRQ_ARMC_IRQ3_CLR_EN_2_OFFSET 0x2e8
+#define BCM_IRQ_ARMC_FIQ0_PENDING0_OFFSET 0x300
+#define BCM_IRQ_ARMC_FIQ0_PENDING1_OFFSET 0x304
+#define BCM_IRQ_ARMC_FIQ0_PENDING2_OFFSET 0x308
+#define BCM_IRQ_ARMC_FIQ0_SET_EN_0_OFFSET 0x310
+#define BCM_IRQ_ARMC_FIQ0_SET_EN_1_OFFSET 0x314
+#define BCM_IRQ_ARMC_FIQ0_SET_EN_2_OFFSET 0x318
+#define BCM_IRQ_ARMC_FIQ0_CLR_EN_0_OFFSET 0x320
+#define BCM_IRQ_ARMC_FIQ0_CLR_EN_1_OFFSET 0x324
+#define BCM_IRQ_ARMC_FIQ0_CLR_EN_2_OFFSET 0x328
+#define BCM_IRQ_ARMC_FIQ1_PENDING0_OFFSET 0x340
+#define BCM_IRQ_ARMC_FIQ1_PENDING1_OFFSET 0x344
+#define BCM_IRQ_ARMC_FIQ1_PENDING2_OFFSET 0x348
+#define BCM_IRQ_ARMC_FIQ1_SET_EN_0_OFFSET 0x350
+#define BCM_IRQ_ARMC_FIQ1_SET_EN_1_OFFSET 0x354
+#define BCM_IRQ_ARMC_FIQ1_SET_EN_2_OFFSET 0x358
+#define BCM_IRQ_ARMC_FIQ1_CLR_EN_0_OFFSET 0x360
+#define BCM_IRQ_ARMC_FIQ1_CLR_EN_1_OFFSET 0x364
+#define BCM_IRQ_ARMC_FIQ1_CLR_EN_2_OFFSET 0x368
+#define BCM_IRQ_ARMC_FIQ2_PENDING0_OFFSET 0x380
+#define BCM_IRQ_ARMC_FIQ2_PENDING1_OFFSET 0x384
+#define BCM_IRQ_ARMC_FIQ2_PENDING2_OFFSET 0x388
+#define BCM_IRQ_ARMC_FIQ2_SET_EN_0_OFFSET 0x390
+#define BCM_IRQ_ARMC_FIQ2_SET_EN_1_OFFSET 0x394
+#define BCM_IRQ_ARMC_FIQ2_SET_EN_2_OFFSET 0x398
+#define BCM_IRQ_ARMC_FIQ2_CLR_EN_0_OFFSET 0x3a0
+#define BCM_IRQ_ARMC_FIQ2_CLR_EN_1_OFFSET 0x3a4
+#define BCM_IRQ_ARMC_FIQ2_CLR_EN_2_OFFSET 0x3a8
+#define BCM_IRQ_ARMC_FIQ3_PENDING0_OFFSET 0x3c0
+#define BCM_IRQ_ARMC_FIQ3_PENDING1_OFFSET 0x3c4
+#define BCM_IRQ_ARMC_FIQ3_PENDING2_OFFSET 0x3c8
+#define BCM_IRQ_ARMC_FIQ3_SET_EN_0_OFFSET 0x3d0
+#define BCM_IRQ_ARMC_FIQ3_SET_EN_1_OFFSET 0x3d4
+#define BCM_IRQ_ARMC_FIQ3_SET_EN_2_OFFSET 0x3d8
+#define BCM_IRQ_ARMC_FIQ3_CLR_EN_0_OFFSET 0x3e0
+#define BCM_IRQ_ARMC_FIQ3_CLR_EN_1_OFFSET 0x3e4
+#define BCM_IRQ_ARMC_FIQ3_CLR_EN_2_OFFSET 0x3e8
+#define BCM_IRQ_ARMC_SWIRQ_SET_OFFSET 0x3f0
+#define BCM_IRQ_ARMC_SWIRQ_CLEAR_OFFSET 0x3f4
+
+/* ARMC register addresses */
+
+#define _BCM_ARMC(offset) (BCM_IRQ_ARMC_BASEADDR + (offset))
+
+#define BCM_IRQ_ARMC_IRQ0_PENDING0                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_IRQ0_PENDING0_OFFSET)
+#define BCM_IRQ_ARMC_IRQ0_PENDING1                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_IRQ0_PENDING1_OFFSET)
+#define BCM_IRQ_ARMC_IRQ0_PENDING2                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_IRQ0_PENDING2_OFFSET)
+#define BCM_IRQ_ARMC_IRQ0_SET_EN_0                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_IRQ0_SET_EN_0_OFFSET)
+#define BCM_IRQ_ARMC_IRQ0_SET_EN_1                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_IRQ0_SET_EN_1_OFFSET)
+#define BCM_IRQ_ARMC_IRQ0_SET_EN_2                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_IRQ0_SET_EN_2_OFFSET)
+#define BCM_IRQ_ARMC_IRQ0_CLR_EN_0                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_IRQ0_CLR_EN_0_OFFSET)
+#define BCM_IRQ_ARMC_IRQ0_CLR_EN_1                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_IRQ0_CLR_EN_1_OFFSET)
+#define BCM_IRQ_ARMC_IRQ0_CLR_EN_2                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_IRQ0_CLR_EN_2_OFFSET)
+#define BCM_IRQ_ARMC_IRQ_STATUS0 _BCM_ARMC(BCM_IRQ_ARMC_IRQ_STATUS0_OFFSET)
+#define BCM_IRQ_ARMC_IRQ_STATUS1 _BCM_ARMC(BCM_IRQ_ARMC_IRQ_STATUS1_OFFSET)
+#define BCM_IRQ_ARMC_IRQ_STATUS2 _BCM_ARMC(BCM_IRQ_ARMC_IRQ_STATUS2_OFFSET)
+#define BCM_IRQ_ARMC_IRQ1_PENDING0                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_IRQ1_PENDING0_OFFSET)
+#define BCM_IRQ_ARMC_IRQ1_PENDING1                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_IRQ1_PENDING1_OFFSET)
+#define BCM_IRQ_ARMC_IRQ1_PENDING2                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_IRQ1_PENDING2_OFFSET)
+#define BCM_IRQ_ARMC_IRQ1_SET_EN_0                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_IRQ1_SET_EN_0_OFFSET)
+#define BCM_IRQ_ARMC_IRQ1_SET_EN_1                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_IRQ1_SET_EN_1_OFFSET)
+#define BCM_IRQ_ARMC_IRQ1_SET_EN_2                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_IRQ1_SET_EN_2_OFFSET)
+#define BCM_IRQ_ARMC_IRQ1_CLR_EN_0                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_IRQ1_CLR_EN_0_OFFSET)
+#define BCM_IRQ_ARMC_IRQ1_CLR_EN_1                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_IRQ1_CLR_EN_1_OFFSET)
+#define BCM_IRQ_ARMC_IRQ1_CLR_EN_2                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_IRQ1_CLR_EN_2_OFFSET)
+#define BCM_IRQ_ARMC_IRQ2_PENDING0                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_IRQ2_PENDING0_OFFSET)
+#define BCM_IRQ_ARMC_IRQ2_PENDING1                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_IRQ2_PENDING1_OFFSET)
+#define BCM_IRQ_ARMC_IRQ2_PENDING2                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_IRQ2_PENDING2_OFFSET)
+#define BCM_IRQ_ARMC_IRQ2_SET_EN_0                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_IRQ2_SET_EN_0_OFFSET)
+#define BCM_IRQ_ARMC_IRQ2_SET_EN_1                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_IRQ2_SET_EN_1_OFFSET)
+#define BCM_IRQ_ARMC_IRQ2_SET_EN_2                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_IRQ2_SET_EN_2_OFFSET)
+#define BCM_IRQ_ARMC_IRQ2_CLR_EN_0                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_IRQ2_CLR_EN_0_OFFSET)
+#define BCM_IRQ_ARMC_IRQ2_CLR_EN_1                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_IRQ2_CLR_EN_1_OFFSET)
+#define BCM_IRQ_ARMC_IRQ2_CLR_EN_2                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_IRQ2_CLR_EN_2_OFFSET)
+#define BCM_IRQ_ARMC_IRQ3_PENDING0                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_IRQ3_PENDING0_OFFSET)
+#define BCM_IRQ_ARMC_IRQ3_PENDING1                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_IRQ3_PENDING1_OFFSET)
+#define BCM_IRQ_ARMC_IRQ3_PENDING2                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_IRQ3_PENDING2_OFFSET)
+#define BCM_IRQ_ARMC_IRQ3_SET_EN_0                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_IRQ3_SET_EN_0_OFFSET)
+#define BCM_IRQ_ARMC_IRQ3_SET_EN_1                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_IRQ3_SET_EN_1_OFFSET)
+#define BCM_IRQ_ARMC_IRQ3_SET_EN_2                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_IRQ3_SET_EN_2_OFFSET)
+#define BCM_IRQ_ARMC_IRQ3_CLR_EN_0                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_IRQ3_CLR_EN_0_OFFSET)
+#define BCM_IRQ_ARMC_IRQ3_CLR_EN_1                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_IRQ3_CLR_EN_1_OFFSET)
+#define BCM_IRQ_ARMC_IRQ3_CLR_EN_2                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_IRQ3_CLR_EN_2_OFFSET)
+#define BCM_IRQ_ARMC_FIQ0_PENDING0                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_FIQ0_PENDING0_OFFSET)
+#define BCM_IRQ_ARMC_FIQ0_PENDING1                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_FIQ0_PENDING1_OFFSET)
+#define BCM_IRQ_ARMC_FIQ0_PENDING2                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_FIQ0_PENDING2_OFFSET)
+#define BCM_IRQ_ARMC_FIQ0_SET_EN_0                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_FIQ0_SET_EN_0_OFFSET)
+#define BCM_IRQ_ARMC_FIQ0_SET_EN_1                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_FIQ0_SET_EN_1_OFFSET)
+#define BCM_IRQ_ARMC_FIQ0_SET_EN_2                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_FIQ0_SET_EN_2_OFFSET)
+#define BCM_IRQ_ARMC_FIQ0_CLR_EN_0                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_FIQ0_CLR_EN_0_OFFSET)
+#define BCM_IRQ_ARMC_FIQ0_CLR_EN_1                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_FIQ0_CLR_EN_1_OFFSET)
+#define BCM_IRQ_ARMC_FIQ0_CLR_EN_2                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_FIQ0_CLR_EN_2_OFFSET)
+#define BCM_IRQ_ARMC_FIQ1_PENDING0                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_FIQ1_PENDING0_OFFSET)
+#define BCM_IRQ_ARMC_FIQ1_PENDING1                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_FIQ1_PENDING1_OFFSET)
+#define BCM_IRQ_ARMC_FIQ1_PENDING2                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_FIQ1_PENDING2_OFFSET)
+#define BCM_IRQ_ARMC_FIQ1_SET_EN_0                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_FIQ1_SET_EN_0_OFFSET)
+#define BCM_IRQ_ARMC_FIQ1_SET_EN_1                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_FIQ1_SET_EN_1_OFFSET)
+#define BCM_IRQ_ARMC_FIQ1_SET_EN_2                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_FIQ1_SET_EN_2_OFFSET)
+#define BCM_IRQ_ARMC_FIQ1_CLR_EN_0                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_FIQ1_CLR_EN_0_OFFSET)
+#define BCM_IRQ_ARMC_FIQ1_CLR_EN_1                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_FIQ1_CLR_EN_1_OFFSET)
+#define BCM_IRQ_ARMC_FIQ1_CLR_EN_2                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_FIQ1_CLR_EN_2_OFFSET)
+#define BCM_IRQ_ARMC_FIQ2_PENDING0                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_FIQ2_PENDING0_OFFSET)
+#define BCM_IRQ_ARMC_FIQ2_PENDING1                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_FIQ2_PENDING1_OFFSET)
+#define BCM_IRQ_ARMC_FIQ2_PENDING2                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_FIQ2_PENDING2_OFFSET)
+#define BCM_IRQ_ARMC_FIQ2_SET_EN_0                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_FIQ2_SET_EN_0_OFFSET)
+#define BCM_IRQ_ARMC_FIQ2_SET_EN_1                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_FIQ2_SET_EN_1_OFFSET)
+#define BCM_IRQ_ARMC_FIQ2_SET_EN_2                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_FIQ2_SET_EN_2_OFFSET)
+#define BCM_IRQ_ARMC_FIQ2_CLR_EN_0                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_FIQ2_CLR_EN_0_OFFSET)
+#define BCM_IRQ_ARMC_FIQ2_CLR_EN_1                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_FIQ2_CLR_EN_1_OFFSET)
+#define BCM_IRQ_ARMC_FIQ2_CLR_EN_2                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_FIQ2_CLR_EN_2_OFFSET)
+#define BCM_IRQ_ARMC_FIQ3_PENDING0                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_FIQ3_PENDING0_OFFSET)
+#define BCM_IRQ_ARMC_FIQ3_PENDING1                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_FIQ3_PENDING1_OFFSET)
+#define BCM_IRQ_ARMC_FIQ3_PENDING2                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_FIQ3_PENDING2_OFFSET)
+#define BCM_IRQ_ARMC_FIQ3_SET_EN_0                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_FIQ3_SET_EN_0_OFFSET)
+#define BCM_IRQ_ARMC_FIQ3_SET_EN_1                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_FIQ3_SET_EN_1_OFFSET)
+#define BCM_IRQ_ARMC_FIQ3_SET_EN_2                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_FIQ3_SET_EN_2_OFFSET)
+#define BCM_IRQ_ARMC_FIQ3_CLR_EN_0                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_FIQ3_CLR_EN_0_OFFSET)
+#define BCM_IRQ_ARMC_FIQ3_CLR_EN_1                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_FIQ3_CLR_EN_1_OFFSET)
+#define BCM_IRQ_ARMC_FIQ3_CLR_EN_2                                           \
+  _BCM_ARMC(BCM_IRQ_ARMC_FIQ3_CLR_EN_2_OFFSET)
+#define BCM_IRQ_ARMC_SWIRQ_SET _BCM_ARMC(BCM_IRQ_ARMC_SWIRQ_SET_OFFSET)
+#define BCM_IRQ_ARMC_SWIRQ_CLEAR _BCM_ARMC(BCM_IRQ_ARMC_SWIRQ_CLEAR_OFFSET)
+
+/* ARMC register bit definitions */
+
+#define BCM_IRQ_ARMC_IRQN_PENDING2_IRQ (1 << 31)
+#define BCM_IRQ_ARMC_IRQN_PENDING2_INT63_32 (1 << 25)
+#define BCM_IRQ_ARMC_IRQN_PENDING2_INT31_0 (1 << 24)
+#define BCM_IRQ_ARMC_IRQN_PENDING2_SW_TRIG_INT (0xff << 8)
+#define BCM_IRQ_ARMC_IRQN_PENDING2_ARM_AXI_ERROR (1 << 7)
+#define BCM_IRQ_ARMC_IRQN_PENDING2_ARM_ADDR_ERROR (1 << 6)
+#define BCM_IRQ_ARMC_IRQN_PENDING2_VPU_C1_HALT (1 << 5)
+#define BCM_IRQ_ARMC_IRQN_PENDING2_VPU_C0_C1_HALT (1 << 4)
+#define BCM_IRQ_ARMC_IRQN_PENDING2_BELL_IRQ1 (1 << 3)
+#define BCM_IRQ_ARMC_IRQN_PENDING2_BELL_IRQ0 (1 << 2)
+#define BCM_IRQ_ARMC_IRQN_PENDING2_MAILBOX_IRQ0 (1 << 1)
+#define BCM_IRQ_ARMC_IRQN_PENDING2_TIMER_IRQ (1 << 0)
+
+#define BCM_IRQ_ARMC_IRQN_SET_EN_2_IRQ (1 << 31)
+#define BCM_IRQ_ARMC_IRQN_SET_EN_2_SW_TRIG_INT (0xf << 8)
+#define BCM_IRQ_ARMC_IRQN_SET_EN_2_ARM_AXI_ERROR (1 << 7)
+#define BCM_IRQ_ARMC_IRQN_SET_EN_2_ARM_ADDR_ERROR (1 << 6)
+#define BCM_IRQ_ARMC_IRQN_SET_EN_2_VPU_C1_HALT (1 << 5)
+#define BCM_IRQ_ARMC_IRQN_SET_EN_2_VPU_C0_C1_HALT (1 << 4)
+#define BCM_IRQ_ARMC_IRQN_SET_EN_2_BELL_IRQ1 (1 << 3)
+#define BCM_IRQ_ARMC_IRQN_SET_EN_2_BELL_IRQ0 (1 << 2)
+#define BCM_IRQ_ARMC_IRQN_SET_EN_2_MAILBOX_IRQ0 (1 << 1)
+#define BCM_IRQ_ARMC_IRQN_SET_EN_2_TIMER_IRQ (1 << 0)
+
+#define BCM_IRQ_ARMC_IRQN_CLR_EN_2_IRQ (1 << 31)
+#define BCM_IRQ_ARMC_IRQN_CLR_EN_2_SW_TRIG_INT (0xf << 8)
+#define BCM_IRQ_ARMC_IRQN_CLR_EN_2_ARM_AXI_ERROR (1 << 7)
+#define BCM_IRQ_ARMC_IRQN_CLR_EN_2_ARM_ADDR_ERROR (1 << 6)
+#define BCM_IRQ_ARMC_IRQN_CLR_EN_2_VPU_C1_HALT (1 << 5)
+#define BCM_IRQ_ARMC_IRQN_CLR_EN_2_VPU_C0_C1_HALT (1 << 4)
+#define BCM_IRQ_ARMC_IRQN_CLR_EN_2_BELL_IRQ1 (1 << 3)
+#define BCM_IRQ_ARMC_IRQN_CLR_EN_2_BELL_IRQ0 (1 << 2)
+#define BCM_IRQ_ARMC_IRQN_CLR_EN_2_MAILBOX_IRQ0 (1 << 1)
+#define BCM_IRQ_ARMC_IRQN_CLR_EN_2_TIMER_IRQ (1 << 0)
+
+#define BCM_IRQ_ARMC_IRQ_STATUS2_IRQ (1 << 31)
+#define BCM_IRQ_ARMC_IRQ_STATUS2_SW_TRIG_INT (0xf << 8)
+#define BCM_IRQ_ARMC_IRQ_STATUS2_ARM_AXI_ERROR (1 << 7)
+#define BCM_IRQ_ARMC_IRQ_STATUS2_ARM_ADDR_ERROR (1 << 6)
+#define BCM_IRQ_ARMC_IRQ_STATUS2_VPU_C1_HALT (1 << 5)
+#define BCM_IRQ_ARMC_IRQ_STATUS2_VPU_C0_C1_HALT (1 << 4)
+#define BCM_IRQ_ARMC_IRQ_STATUS2_BELL_IRQ1 (1 << 3)
+#define BCM_IRQ_ARMC_IRQ_STATUS2_BELL_IRQ0 (1 << 2)
+#define BCM_IRQ_ARMC_IRQ_STATUS2_MAILBOX_IRQ0 (1 << 1)
+#define BCM_IRQ_ARMC_IRQ_STATUS2_TIMER_IRQ (1 << 0)
+
+#define BCM_IRQ_ARMC_FIQ_PENDING2_IRQ (1 << 31)
+#define BCM_IRQ_ARMC_FIQ_PENDING2_INT63_32 (1 << 25)
+#define BCM_IRQ_ARMC_FIQ_PENDING2_INT31_0 (1 << 24)
+#define BCM_IRQ_ARMC_FIQ_PENDING2_SW_TRIG_INT (0xff << 8)
+#define BCM_IRQ_ARMC_FIQ_PENDING2_ARM_AXI_ERROR (1 << 7)
+#define BCM_IRQ_ARMC_FIQ_PENDING2_ARM_ADDR_ERROR (1 << 6)
+#define BCM_IRQ_ARMC_FIQ_PENDING2_VPU_C1_HALT (1 << 5)
+#define BCM_IRQ_ARMC_FIQ_PENDING2_VPU_C0_C1_HALT (1 << 4)
+#define BCM_IRQ_ARMC_FIQ_PENDING2_BELL_IRQ1 (1 << 3)
+#define BCM_IRQ_ARMC_FIQ_PENDING2_BELL_IRQ0 (1 << 2)
+#define BCM_IRQ_ARMC_FIQ_PENDING2_MAILBOX_IRQ0 (1 << 1)
+
+#define BCM_IRQ_ARMC_FIQ_SET_EN_2_IRQ (1 << 31)
+#define BCM_IRQ_ARMC_FIQ_SET_EN_2_SW_TRIG_INT (0xf << 8)
+#define BCM_IRQ_ARMC_FIQ_SET_EN_2_ARM_AXI_ERROR (1 << 7)
+#define BCM_IRQ_ARMC_FIQ_SET_EN_2_ARM_ADDR_ERROR (1 << 6)
+#define BCM_IRQ_ARMC_FIQ_SET_EN_2_VPU_C1_HALT (1 << 5)
+#define BCM_IRQ_ARMC_FIQ_SET_EN_2_VPU_C0_C1_HALT (1 << 4)
+#define BCM_IRQ_ARMC_FIQ_SET_EN_2_BELL_IRQ1 (1 << 3)
+#define BCM_IRQ_ARMC_FIQ_SET_EN_2_BELL_IRQ0 (1 << 2)
+#define BCM_IRQ_ARMC_FIQ_SET_EN_2_MAILBOX_IRQ0 (1 << 1)
+#define BCM_IRQ_ARMC_FIQ_SET_EN_2_TIMER_IRQ (1 << 0)
+
+#define BCM_IRQ_ARMC_SWIRQ_SET_SW_INT (0xff)
+#define BCM_IRQ_ARMC_SWIRQ_CLEAR_SW_INT (0xff)
+
+#endif /* __ARCH_ARM64_SRC_BCM2711_IRQ_H */

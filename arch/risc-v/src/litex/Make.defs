@@ -1,6 +1,8 @@
 ############################################################################
 # arch/risc-v/src/litex/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -40,6 +42,7 @@ CHIP_ASRCS += litex_cache.S
 ifeq ($(CONFIG_SCHED_TICKLESS),y)
 ifeq ($(CONFIG_SCHED_TICKLESS_ALARM),y)
 CHIP_CSRCS += litex_arch_alarm.c
+CHIP_CSRCS += riscv_perf_time.c
 else
 CHIP_CSRCS += litex_tickless.c
 endif

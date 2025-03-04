@@ -768,4 +768,57 @@ config WIFI_SIM_NUMBER
 	---help---
 		The number of simulated wifi network devices.
 
+menuconfig NET_E1000
+	bool "Intel E1000 support"
+	default n
+	depends on PCI
+	---help---
+		Enable E1000 PCI Ethernet driver.
+
+if NET_E1000
+
+config NET_E1000_TXDESC
+	int "Intel E1000 TX descriptors"
+	default 256
+
+config NET_E1000_RXDESC
+	int "Intel E1000 RX descriptors"
+	default 256
+
+config NET_E1000_RXSPARE
+	int "Intel E1000 spare RX buffers"
+	default 8
+
+endif # NET_E1000
+
+config NET_IGC_TXDESC
+	int "Intel IGC TX descriptors"
+	default 256
+
+config NET_IGC_RXDESC
+	int "Intel IGC RX descriptors"
+	default 256
+
+menuconfig NET_IGC
+	bool "Intel IGC support"
+	default n
+	depends on PCI && PCI_MSIX
+	---help---
+		Enable IGC PCI Ethernet driver.
+
+if NET_IGC
+
+config NET_IGC_RXSPARE
+	int "Intel IGC spare RX buffers"
+	default 8
+
+config NET_IGC_INT_INTERVAL
+	int "Intel IGC interrupt interval"
+	default 100
+	range 1 8191
+	---help---
+		Minimum Inter-interrupt Interval in 1 us increments.
+
+endif # NET_IGC
+
 endif # NETDEVICES

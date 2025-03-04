@@ -1,8 +1,8 @@
 /****************************************************************************
  * libs/libc/machine/arm/armv7-a/gnu/arch_memcpy.S
  *
- * Copyright (c) 2013, Linaro Limited
- *  All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText:  2013, Linaro Limited
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -163,7 +163,7 @@
 \f:
 	.endm
 
-def_fn memcpy p2align=6
+def_fn ARCH_LIBCFUN(memcpy) p2align=6
 
 	mov	dst, dstin	/* Preserve dstin, we need to return it.  */
 	cmp	count, #64
@@ -627,6 +627,6 @@ def_fn memcpy p2align=6
 	bne	.Ltail63unaligned
 	bx	lr
 
-	.size	memcpy, . - memcpy
+	.size	ARCH_LIBCFUN(memcpy), . - ARCH_LIBCFUN(memcpy)
 
 #endif

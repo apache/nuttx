@@ -566,7 +566,7 @@ Drivers With Improvements
 * [#10778](https://github.com/apache/nuttx/pull/10778) mmcsd: add get emmc cid register interface.
 * [#10168](https://github.com/apache/nuttx/pull/10168) mmcsd: fix byte_block_count error in byte mode
 * [#10440](https://github.com/apache/nuttx/pull/10440) mmcsd: fix regression causing emmcsd not working
-* [#9937](https://github.com/apache/nuttx/pull/9937) mmcsd: mmcsd_sdio: config timout to write one data block
+* [#9937](https://github.com/apache/nuttx/pull/9937) mmcsd: mmcsd_sdio: config timeout to write one data block
 * [#10560](https://github.com/apache/nuttx/pull/10560) mmcsd: Rename mmc_rpmb_frame_s to rpmb_frame
 * [#10732](https://github.com/apache/nuttx/pull/10732) mmcsd: support dump cid and csd with mmc-utils
 * [#10672](https://github.com/apache/nuttx/pull/10672) mmcsd: update cid reg layout
@@ -774,7 +774,7 @@ Boards With Improvements
 * [#9884](https://github.com/apache/nuttx/pull/9884) xtensa: esp32: esp32-devkitc: Refresh wifi_smp_rmt config
 * [#9709](https://github.com/apache/nuttx/pull/9709) xtensa: esp32: esp32-devkitc: wamr_wasi_debug: enable wasi-threads
 * [#9752](https://github.com/apache/nuttx/pull/9752) xtensa: esp32s2: Add basic support to SPIFLASH
-* [#9868](https://github.com/apache/nuttx/pull/9868) xtensa: esp32s3: Do not include specfic board in commom
+* [#9868](https://github.com/apache/nuttx/pull/9868) xtensa: esp32s3: Do not include specific board in commom
 * [#9870](https://github.com/apache/nuttx/pull/9870) xtensa: esp32s3: Some follow-up changes for ESP32s3 32M flash support
 * [#10748](https://github.com/apache/nuttx/pull/10748) xtensa: esp32s3: esp32s3-devkit:disable esp32s3-devkit:ksta_softap spinlock config
 * [#10588](https://github.com/apache/nuttx/pull/10588) xtensa: esp32s3: esp32s3-devkit:Add board GPIO support

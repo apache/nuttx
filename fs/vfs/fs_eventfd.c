@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/vfs/fs_eventfd.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -35,6 +37,7 @@
 #include <sys/eventfd.h>
 
 #include "inode/inode.h"
+#include "fs_heap.h"
 
 /****************************************************************************
  * Private Types
@@ -128,7 +131,7 @@ static FAR struct eventfd_priv_s *eventfd_allocdev(void)
   FAR struct eventfd_priv_s *dev;
 
   dev = (FAR struct eventfd_priv_s *)
-    kmm_zalloc(sizeof(struct eventfd_priv_s));
+    fs_heap_zalloc(sizeof(struct eventfd_priv_s));
   if (dev)
     {
       /* Initialize the private structure */
@@ -145,7 +148,7 @@ static void eventfd_destroy(FAR struct eventfd_priv_s *dev)
 {
   nxmutex_unlock(&dev->lock);
   nxmutex_destroy(&dev->lock);
-  kmm_free(dev);
+  fs_heap_free(dev);
 }
 
 static int eventfd_do_open(FAR struct file *filep)

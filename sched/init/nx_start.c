@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/init/nx_start.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -124,9 +126,10 @@ dq_queue_t g_readytorun;
 
 #ifdef CONFIG_SMP
 dq_queue_t g_assignedtasks[CONFIG_SMP_NCPUS];
+FAR struct tcb_s *g_delivertasks[CONFIG_SMP_NCPUS];
 #endif
 
-/* g_running_tasks[] holds a references to the running task for each cpu.
+/* g_running_tasks[] holds a references to the running task for each CPU.
  * It is valid only when up_interrupt_context() returns true.
  */
 
@@ -192,7 +195,7 @@ struct tasklist_s g_tasklisttable[NUM_TASK_STATES];
  * hardware resources may not yet be available to the kernel logic.
  */
 
-uint8_t g_nx_initstate;  /* See enum nx_initstate_e */
+volatile uint8_t g_nx_initstate;  /* See enum nx_initstate_e */
 
 /****************************************************************************
  * Private Data
@@ -358,6 +361,7 @@ static void idle_task_initialize(void)
 
       tcb->pid        = i;
       tcb->task_state = TSTATE_TASK_RUNNING;
+      tcb->lockcount  = 1;
 
       /* Set the entry point.  This is only for debug purposes.  NOTE: that
        * the start_t entry point is not saved.  That is acceptable, however,
@@ -425,6 +429,11 @@ static void idle_task_initialize(void)
       /* Mark the idle task as the running task */
 
       g_running_tasks[i] = tcb;
+
+      if (i == 0)
+        {
+          up_update_task(&g_idletcb[0]); /* Init idle task to percpu reg */
+        }
     }
 }
 
@@ -459,6 +468,10 @@ static void idle_group_initialize(void)
       /* Initialize the task join */
 
       nxtask_joininit(tcb);
+
+#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
+      spin_lock_init(&tcb->mutex_lock);
+#endif
 
 #ifdef CONFIG_SMP
       /* Create a stack for all CPU IDLE threads (except CPU0 which already
@@ -602,14 +615,16 @@ void nx_start(void)
 
   /* Initialize the logic that determine unique process IDs. */
 
-  g_npidhash = 1 << LOG2_CEIL(CONFIG_PID_INITIAL_COUNT);
-  while (g_npidhash <= CONFIG_SMP_NCPUS)
+  i = 1 << LOG2_CEIL(CONFIG_PID_INITIAL_COUNT);
+  while (i <= CONFIG_SMP_NCPUS)
     {
-      g_npidhash <<= 1;
+      i <<= 1;
     }
 
-  g_pidhash = kmm_zalloc(sizeof(*g_pidhash) * g_npidhash);
+  g_pidhash = kmm_zalloc(sizeof(*g_pidhash) * i);
   DEBUGASSERT(g_pidhash);
+
+  g_npidhash = i;
 
   /* IDLE Group Initialization **********************************************/
 
@@ -624,13 +639,6 @@ void nx_start(void)
   /* Initialize tasking data structures */
 
   task_initialize();
-
-  /* Disables context switching because we need take the memory manager
-   * semaphore on this CPU so that it will not be available on the other
-   * CPUs until we have finished initialization.
-   */
-
-  sched_lock();
 
   /* Initialize the instrument function */
 

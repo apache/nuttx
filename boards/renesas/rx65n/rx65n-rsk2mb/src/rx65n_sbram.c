@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/renesas/rx65n/rx65n-rsk2mb/src/rx65n_sbram.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -181,18 +183,16 @@ typedef enum
 
 typedef struct
 {
-  fault_flags_t flags;                  /* What is in the dump */
-  uintptr_t     current_regs;           /* Used to validate the dump */
-  int           lineno;                 /* __LINE__ to up_assert */
-  pid_t         pid;                    /* Process ID */
-  uint32_t      regs[XCPTCONTEXT_REGS]; /* Interrupt register save area */
-  stack_t       stacks;                 /* Stack info */
-#if CONFIG_TASK_NAME_SIZE > 0
-  char          name[CONFIG_TASK_NAME_SIZE + 1]; /* Task name (with NULL
-                                                  * terminator) */
-#endif
-  char          filename[MAX_FILE_PATH_LENGTH];  /* the Last of chars in
-                                                  * __FILE__ to up_assert */
+  fault_flags_t flags;                            /* What is in the dump */
+  uintptr_t     current_regs;                     /* Used to validate the dump */
+  int           lineno;                           /* __LINE__ to up_assert */
+  pid_t         pid;                              /* Process ID */
+  uint32_t      regs[XCPTCONTEXT_REGS];           /* Interrupt register save area */
+  stack_t       stacks;                           /* Stack info */
+  char          name[CONFIG_TASK_NAME_SIZE + 1];  /* Task name (with NULL
+                                                   * terminator) */
+  char          filename[MAX_FILE_PATH_LENGTH];   /* the Last of chars in
+                                                   * __FILE__ to up_assert */
 } info_t;
 
 struct fullcontext
@@ -368,27 +368,20 @@ void board_crashdump(uintptr_t sp, struct tcb_s *tcb,
    * fault.
    */
 
-  pdump->info.current_regs = (uintptr_t) g_current_regs;
+  pdump->info.current_regs = (uintptr_t)up_current_regs();
 
   /* Save Context */
 
-#if CONFIG_TASK_NAME_SIZE > 0
-  strlcpy(pdump->info.name, tcb->name, sizeof(pdump->info.name));
-#endif
+  strlcpy(pdump->info.name, get_task_name(tcb), sizeof(pdump->info.name));
 
   pdump->info.pid = tcb->pid;
 
-  /* If  current_regs is not NULL then we are in an interrupt context
-   * and the user context is in current_regs else we are running in
-   * the users context
-   */
-
-  if (g_current_regs)
+  if (up_interrupt_context())
     {
       pdump->info.stacks.interrupt.sp = sp;
-      pdump->info.flags |= (REGS_PRESENT | USERSTACK_PRESENT | \
+      pdump->info.flags |= (REGS_PRESENT | USERSTACK_PRESENT |
                             INTSTACK_PRESENT);
-      memcpy((uint8_t *)pdump->info.regs, (void *)g_current_regs,
+      memcpy((uint8_t *)pdump->info.regs, up_current_regs(),
              sizeof(pdump->info.regs));
       pdump->info.stacks.user.sp = pdump->info.regs[REG_SP];
     }

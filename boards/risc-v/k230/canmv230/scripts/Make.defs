@@ -1,6 +1,8 @@
 ############################################################################
 # boards/risc-v/k230/canmv230/scripts/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -43,16 +45,6 @@ CXXFLAGS := $(ARCHCXXFLAGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHXXINCLUDES
 CXXPICFLAGS = $(ARCHPICFLAGS) $(CXXFLAGS)
 CPPFLAGS := $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
 AFLAGS += $(CFLAGS) -D__ASSEMBLY__
-
-# ELF module definitions
-
-CELFFLAGS = $(CFLAGS)
-CXXELFFLAGS = $(CXXFLAGS)
-
-LDELFFLAGS = --oformat elf64-littleriscv
-ifeq ($(CONFIG_BINFMT_ELF_RELOCATABLE),y)
-LDELFFLAGS += -r
-endif
 
 # POSTBUILD management
 

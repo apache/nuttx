@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/reset/core.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -24,6 +26,7 @@
 
 #include <errno.h>
 #include <debug.h>
+#include <string.h>
 
 #include <nuttx/nuttx.h>
 #include <nuttx/kmalloc.h>
@@ -288,10 +291,26 @@ reset_control_get_internal(FAR struct reset_controller_dev *rcdev,
       return NULL;
     }
 
+#if defined(CONFIG_RESET_RPMSG)
+
+  /* Only client defines this function */
+
+  if (rcdev->ops->acquire)
+    {
+      int ret = rcdev->ops->acquire(rcdev, index, shared, acquired);
+
+      if (ret < 0)
+        {
+          kmm_free(rstc);
+          return NULL;
+        }
+    }
+#endif
+
   rstc->rcdev = rcdev;
   list_add_after(&rcdev->reset_control_head, &rstc->list);
   rstc->id = index;
-  atomic_init(&rstc->refcnt, 1);
+  atomic_set(&rstc->refcnt, 1);
   rstc->acquired = acquired;
   rstc->shared = shared;
 
@@ -317,6 +336,17 @@ static void reset_control_put_internal(FAR struct reset_control *rstc)
     {
       DEBUGASSERT(nxmutex_is_locked(&g_reset_list_mutex));
       list_delete(&rstc->list);
+
+#if defined(CONFIG_RESET_RPMSG)
+
+      /* Only client defines this function */
+
+      if (rstc->rcdev->ops->release)
+        {
+          rstc->rcdev->ops->release(rstc->rcdev, rstc->id);
+        }
+#endif
+
       kmm_free(rstc);
     }
 }
@@ -378,6 +408,14 @@ reset_controller_get_by_name(FAR const char *name)
   }
 
   nxmutex_unlock(&g_reset_list_mutex);
+
+#if defined(CONFIG_RESET_RPMSG)
+  if (strchr(name, '/'))
+    {
+      return reset_rpmsg_get(name);
+    }
+#endif
+
   return NULL;
 }
 
@@ -393,7 +431,7 @@ reset_controller_get_by_name(FAR const char *name)
  *
  *   Firstly, get a reset controller device from list, and then call
  *   reset_control_get_internal function by index, shared or acquired
- *   parameters retrun a reset control.
+ *   parameters return a reset control.
  *
  * Input Parameters:
  *   name     - The reset controller name
@@ -490,7 +528,7 @@ int reset_control_reset(FAR struct reset_control *rstc)
 
   if (rstc->shared)
     {
-      if (atomic_load(&rstc->deassert_count) != 0)
+      if (atomic_read(&rstc->deassert_count) != 0)
         {
           return -EINVAL;
         }
@@ -560,12 +598,12 @@ int reset_control_assert(FAR struct reset_control *rstc)
 
   if (rstc->shared)
     {
-      if (atomic_load(&rstc->triggered_count) != 0)
+      if (atomic_read(&rstc->triggered_count) != 0)
         {
           return -EINVAL;
         }
 
-      if (atomic_load(&rstc->deassert_count) == 0)
+      if (atomic_read(&rstc->deassert_count) == 0)
         {
           rsterr("deassert_count = 0, invalid value\n");
           return -EINVAL;
@@ -644,7 +682,7 @@ int reset_control_deassert(FAR struct reset_control *rstc)
 
   if (rstc->shared)
     {
-      if (atomic_load(&rstc->triggered_count) != 0)
+      if (atomic_read(&rstc->triggered_count) != 0)
         {
           rsterr("triggered_count != 0, invalid value\n");
           return -EINVAL;

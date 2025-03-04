@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/x86_64/src/intel64/intel64_cpustart.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -32,6 +34,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/spinlock.h>
 
+#include "sched/sched.h"
 #include "init/init.h"
 
 #include "intel64_lowsetup.h"
@@ -46,7 +49,8 @@
  ****************************************************************************/
 
 extern void __ap_entry(void);
-extern int up_pause_handler(int irq, void *c, void *arg);
+extern int x86_64_smp_call_handler(int irq, void *c, void *arg);
+extern int x86_64_smp_sched_handler(int irq, void *c, void *arg);
 
 /****************************************************************************
  * Private Functions
@@ -78,13 +82,14 @@ static int x86_64_ap_startup(int cpu)
 
   /* Send an INIT IPI to the CPU */
 
-  regval = MSR_X2APIC_ICR_INIT | dest;
+  regval = MSR_X2APIC_ICR_INIT | MSR_X2APIC_ICR_ASSERT
+           | MSR_X2APIC_ICR_LEVEL | dest;
   write_msr(MSR_X2APIC_ICR, regval);
 
   /* Wait for 10 ms */
 
   up_mdelay(10);
-  SP_DMB();
+  UP_DMB();
 
   /* Send an STARTUP IPI to the CPU */
 
@@ -93,16 +98,13 @@ static int x86_64_ap_startup(int cpu)
 
   /* Wait for AP ready */
 
-  up_udelay(300);
-  SP_DMB();
-
-  /* Check CPU ready flag */
-
-  if (x86_64_cpu_ready_get(cpu) == false)
+  do
     {
-      sinfo("failed to startup cpu=%d\n", cpu);
-      return -EBUSY;
+      up_udelay(300);
+      UP_DMB();
+      sinfo("wait for startup cpu=%d...\n", cpu);
     }
+  while (x86_64_cpu_ready_get(cpu) == false);
 
   return OK;
 }
@@ -127,6 +129,7 @@ static int x86_64_ap_startup(int cpu)
 
 void x86_64_ap_boot(void)
 {
+  struct tcb_s *tcb;
   uint8_t cpu = 0;
 
   /* Do some checking on CPU compatibilities at the top of this function */
@@ -145,6 +148,9 @@ void x86_64_ap_boot(void)
 
   x86_64_cpu_priv_set(cpu);
 
+  tcb = current_task(cpu);
+  UNUSED(tcb);
+
   /* Configure interrupts */
 
   up_irqinitialize();
@@ -152,15 +158,28 @@ void x86_64_ap_boot(void)
 #ifdef CONFIG_SCHED_INSTRUMENTATION
   /* Notify that this CPU has started */
 
-  sched_note_cpu_started(this_task());
+  sched_note_cpu_started(tcb);
 #endif
 
   sinfo("cpu=%d\n", cpu);
 
   /* Connect Pause IRQ to CPU */
 
-  irq_attach(SMP_IPI_IRQ, up_pause_handler, NULL);
-  up_enable_irq(SMP_IPI_IRQ);
+  irq_attach(SMP_IPI_CALL_IRQ, x86_64_smp_call_handler, NULL);
+  irq_attach(SMP_IPI_SCHED_IRQ, x86_64_smp_sched_handler, NULL);
+
+  /* NOTE: IPC interrupts don't use IOAPIC but interrupts are sent
+   * directly to CPU, so we don't use up_enable_irq() API here.
+   */
+
+#ifdef CONFIG_STACK_COLORATION
+  /* If stack debug is enabled, then fill the stack with a
+   * recognizable value that we can use later to test for high
+   * water marks.
+   */
+
+  x86_64_stack_color(tcb->stack_alloc_ptr, 0);
+#endif
 
   /* CPU ready */
 
@@ -172,6 +191,8 @@ void x86_64_ap_boot(void)
     {
       __revoke_low_memory();
     }
+
+  up_update_task(tcb);
 
   /* Then transfer control to the IDLE task */
 

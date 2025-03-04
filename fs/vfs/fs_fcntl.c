@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/vfs/fs_fcntl.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -159,7 +161,7 @@ static int file_vfcntl(FAR struct file *filep, int cmd, va_list ap)
 
               if ((filep->f_oflags & O_APPEND) != 0)
                 {
-                  file_seek(filep, 0, SEEK_END);
+                  ret = file_seek(filep, 0, SEEK_END);
                 }
             }
         }
@@ -243,6 +245,26 @@ static int file_vfcntl(FAR struct file *filep, int cmd, va_list ap)
           ret = file_ioctl(filep, FIOC_FILEPATH, va_arg(ap, FAR char *));
         }
 
+        break;
+      case F_SETPIPE_SZ:
+        /* Modify the capacity of the pipe to arg bytes, but not larger than
+         * CONFIG_DEV_PIPE_MAXSIZE.
+         */
+
+        {
+          ret = file_ioctl(filep, PIPEIOC_SETSIZE, va_arg(ap, int));
+        }
+
+        break;
+      case F_GETPIPE_SZ:
+
+        /* Return the capacity of the pipe */
+
+        {
+          ret = file_ioctl(filep, PIPEIOC_GETSIZE);
+        }
+
+        break;
       default:
         break;
     }
@@ -330,13 +352,12 @@ int fcntl(int fd, int cmd, ...)
   ret = fs_getfilep(fd, &filep);
   if (ret >= 0)
     {
-      DEBUGASSERT(filep != NULL);
-
       /* Let file_vfcntl() do the real work.  The errno is not set on
        * failures.
        */
 
       ret = file_vfcntl(filep, cmd, ap);
+      fs_putfilep(filep);
     }
 
   if (ret < 0)

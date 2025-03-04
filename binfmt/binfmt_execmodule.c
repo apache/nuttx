@@ -1,6 +1,8 @@
 /****************************************************************************
  * binfmt/binfmt_execmodule.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -84,12 +86,12 @@
 static void exec_ctors(FAR void *arg)
 {
   FAR const struct binary_s *binp = (FAR const struct binary_s *)arg;
-  binfmt_ctor_t *ctor = binp->ctors;
+  binfmt_ctor_t *ctor = (CODE binfmt_ctor_t *)binp->mod.initarr;
   int i;
 
   /* Execute each constructor */
 
-  for (i = 0; i < binp->nctors; i++)
+  for (i = 0; i < binp->mod.ninit; i++)
     {
       binfo("Calling ctor %d at %p\n", i, ctor);
 
@@ -203,7 +205,7 @@ int exec_module(FAR struct binary_s *binp,
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
   FAR struct arch_addrenv_s *addrenv = &binp->addrenv->addrenv;
   FAR void *vheap;
-  char name[CONFIG_PATH_MAX];
+  char name[PATH_MAX];
 #endif
   FAR void *stackaddr = NULL;
   pid_t pid;
@@ -258,7 +260,7 @@ int exec_module(FAR struct binary_s *binp,
 
   if (argv == NULL)
     {
-      strlcpy(name, filename, CONFIG_PATH_MAX);
+      strlcpy(name, filename, PATH_MAX);
       filename = name;
     }
 
@@ -336,7 +338,7 @@ int exec_module(FAR struct binary_s *binp,
    * must be the first allocated address space.
    */
 
-  tcb->cmn.dspace = binp->alloc[0];
+  tcb->cmn.dspace = binp->picbase;
 
   /* Re-initialize the task's initial state to account for the new PIC base */
 
@@ -360,7 +362,7 @@ int exec_module(FAR struct binary_s *binp,
    * until the new task has been started.
    */
 
-  if (binp->nctors > 0)
+  if (binp->mod.ninit > 0)
     {
       nxtask_starthook(tcb, exec_ctors, binp);
     }

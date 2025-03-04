@@ -1,8 +1,9 @@
 /****************************************************************************
  * arch/arm/src/tiva/hardware/tiva_adc.h
  *
- *   Copyright (C) 2015 Calvin Maguranis. All rights reserved.
- *   Author: Calvin Maguranis <c.maguranis@gmail.com>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2015 Calvin Maguranis. All rights reserved.
+ * SPDX-FileContributor: Calvin Maguranis <c.maguranis@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

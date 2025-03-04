@@ -1,8 +1,8 @@
 /****************************************************************************
  * include/nuttx/wireless/bluetooth/bt_driver.h
  *
- *   Copyright (c) 2016, Intel Corporation
- *   All rights reserved.
+ * SPDX-License-Identifier: BSD-2-Clause
+ * SPDX-FileCopyrightText: 2016, Intel Corporation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -48,6 +48,13 @@
 
 #define bt_netdev_receive(btdev, type, data, len) \
         (btdev)->receive(btdev, type, data, len)
+
+#ifdef CONFIG_DRIVERS_BLUETOOTH
+#  define bt_driver_register(btdev) \
+        bt_driver_register_with_id(btdev, CONFIG_BLUETOOTH_DEVICE_ID)
+#else
+#  define bt_driver_register(btdev) bt_netdev_register(btdev)
+#endif
 
 /****************************************************************************
  * Public Types
@@ -135,5 +142,25 @@ int bt_netdev_register(FAR struct bt_driver_s *btdev);
  ****************************************************************************/
 
 int bt_netdev_unregister(FAR struct bt_driver_s *btdev);
+
+/****************************************************************************
+ * Name: bt_driver_register_with_id
+ *
+ * Description:
+ *   Register bluetooth driver.
+ *
+ * Input Parameters:
+ *   driver - an instance of the bt_driver_s interface
+ *   id     - bluetooth device id
+ *
+ * Returned Value:
+ *   Zero is returned on success; a negated errno value is returned on any
+ *   failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DRIVERS_BLUETOOTH
+int bt_driver_register_with_id(FAR struct bt_driver_s *driver, int id);
+#endif
 
 #endif /* __INCLUDE_NUTTX_WIRELESS_BLUETOOTH_BT_DRIVER_H */

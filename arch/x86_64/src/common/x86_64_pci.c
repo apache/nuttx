@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/x86_64/src/common/x86_64_pci.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -27,6 +29,7 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/pci/pci.h>
 
 #include "x86_64_internal.h"
@@ -35,17 +38,33 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define PCI_CFG_ADDR      0xcf8
-#define PCI_DATA_ADDR     0xcfc
-#define PCI_CFG_EN        (1 << 31)
+#define PCI_CFG_ADDR         0xcf8
+#define PCI_DATA_ADDR        0xcfc
+#define PCI_CFG_EN           (1 << 31)
+
+#define X86_64_IO_ADDR_LIMIT 0xffff
+
+#define readb(addr)          ((addr) > X86_64_IO_ADDR_LIMIT ? \
+                              *((volatile uint8_t *)(addr)) : inb(addr))
+#define readw(addr)          ((addr) > X86_64_IO_ADDR_LIMIT ? \
+                              *((volatile uint16_t *)(addr)) : inw(addr))
+#define readl(addr)          ((addr) > X86_64_IO_ADDR_LIMIT ? \
+                              *((volatile uint32_t *)(addr)) : inl(addr))
+
+#define writeb(addr, val)    ((addr) > X86_64_IO_ADDR_LIMIT ? \
+                              *((volatile uint8_t *)(addr)) = (val) : outb(val, addr))
+#define writew(addr, val)    ((addr) > X86_64_IO_ADDR_LIMIT ? \
+                              *((volatile uint16_t *)(addr)) = (val) : outw(val, addr))
+#define writel(addr, val)    ((addr) > X86_64_IO_ADDR_LIMIT ? \
+                              *((volatile uint32_t *)(addr)) = (val) : outl(val, addr))
 
 /****************************************************************************
  * Private Functions Definitions
  ****************************************************************************/
 
-static int x86_64_pci_write(struct pci_bus_s *bus, unsigned int devfn,
+static int x86_64_pci_write(struct pci_bus_s *bus, uint32_t devfn,
                             int where, int size, uint32_t val);
-static int x86_64_pci_read(struct pci_bus_s *bus, unsigned int devfn,
+static int x86_64_pci_read(struct pci_bus_s *bus, uint32_t devfn,
                            int where, int size, uint32_t *val);
 static uintptr_t x86_64_pci_map(struct pci_bus_s *bus, uintptr_t start,
                                 uintptr_t end);
@@ -54,17 +73,32 @@ static int x86_64_pci_read_io(struct pci_bus_s *bus, uintptr_t addr,
 static int x86_64_pci_write_io(struct pci_bus_s *bus, uintptr_t addr,
                                int size, uint32_t val);
 
+static int x86_64_pci_get_irq(struct pci_bus_s *bus, uint32_t devfn,
+                              uint8_t line, uint8_t pin);
+
+static int x86_64_pci_alloc_irq(struct pci_bus_s *bus, uint32_t devfn,
+                                int *irq, int num);
+static void x86_64_pci_release_irq(struct pci_bus_s *bus,
+                                   int *irq, int num);
+static int x86_64_pci_connect_irq(struct pci_bus_s *bus,
+                                  int *irq, int num,
+                                  uintptr_t *mar, uint32_t *mdr);
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
 static const struct pci_ops_s g_x86_64_pci_ops =
 {
-  .write    = x86_64_pci_write,
-  .read     = x86_64_pci_read,
-  .map      = x86_64_pci_map,
-  .read_io  = x86_64_pci_read_io,
-  .write_io = x86_64_pci_write_io,
+  .write       = x86_64_pci_write,
+  .read        = x86_64_pci_read,
+  .map         = x86_64_pci_map,
+  .read_io     = x86_64_pci_read_io,
+  .write_io    = x86_64_pci_write_io,
+  .get_irq     = x86_64_pci_get_irq,
+  .alloc_irq   = x86_64_pci_alloc_irq,
+  .release_irq = x86_64_pci_release_irq,
+  .connect_irq = x86_64_pci_connect_irq,
 };
 
 static struct pci_controller_s g_x86_64_pci =
@@ -95,7 +129,7 @@ static struct pci_controller_s g_x86_64_pci =
  *
  ****************************************************************************/
 
-static int x86_64_pci_write(struct pci_bus_s *bus, unsigned int devfn,
+static int x86_64_pci_write(struct pci_bus_s *bus, uint32_t devfn,
                             int where, int size, uint32_t val)
 {
   uint8_t offset_mask = (4 - size);
@@ -141,7 +175,7 @@ static int x86_64_pci_write(struct pci_bus_s *bus, unsigned int devfn,
  *
  ****************************************************************************/
 
-static int x86_64_pci_read(struct pci_bus_s *bus, unsigned int devfn,
+static int x86_64_pci_read(struct pci_bus_s *bus, uint32_t devfn,
                            int where, int size, uint32_t *val)
 {
   uint8_t offset_mask = 4 - size;
@@ -189,18 +223,16 @@ static int x86_64_pci_read(struct pci_bus_s *bus, unsigned int devfn,
 static int x86_64_pci_read_io(struct pci_bus_s *bus, uintptr_t addr,
                               int size, uint32_t *val)
 {
-  uint16_t portaddr = (uint16_t)addr;
-
   switch (size)
   {
     case 1:
-      *val = (uint32_t)inb(portaddr);
+      *val = readb(addr);
       break;
     case 2:
-      *val = (uint32_t)inw(portaddr);
+      *val = readw(addr);
       break;
     case 4:
-      *val = (uint32_t)inl(portaddr);
+      *val = readl(addr);
       break;
     default:
       *val = 0;
@@ -232,18 +264,16 @@ static int x86_64_pci_read_io(struct pci_bus_s *bus, uintptr_t addr,
 static int x86_64_pci_write_io(struct pci_bus_s *bus, uintptr_t addr,
                                int size, uint32_t val)
 {
-  uint16_t portaddr = (uint16_t)addr;
-
   switch (size)
   {
     case 1:
-      outb((uint8_t)val, portaddr);
+      writeb(addr, val);
       break;
     case 2:
-      outw((uint16_t)val, portaddr);
+      writew(addr, val);
       break;
     case 4:
-      outl((uint32_t)val, portaddr);
+      writel(addr, val);
       break;
     default:
       pcierr("Invalid write size %d\n", size);
@@ -279,6 +309,102 @@ static uintptr_t x86_64_pci_map(struct pci_bus_s *bus, uintptr_t start,
                  X86_PAGE_PRESENT | X86_PAGE_NOCACHE | X86_PAGE_GLOBAL);
 
   return ret < 0 ? 0 : start;
+}
+
+/****************************************************************************
+ * Name: x86_64_pci_get_irq
+ *
+ * Description:
+ *  Get interrupt number associated with a given INTx line.
+ *
+ * Input Parameters:
+ *   bus   - Bus that PCI device resides
+ *   devfn - The pci device and function number
+ *   line  - Activated PCI legacy interrupt line
+ *   pin   - Intx pin number
+ *
+ * Returned Value:
+ *   Return interrupt number associated with a given INTx
+ *
+ ****************************************************************************/
+
+static int x86_64_pci_get_irq(struct pci_bus_s *bus, uint32_t devfn,
+                              uint8_t line, uint8_t pin)
+{
+  UNUSED(bus);
+
+  return up_get_legacy_irq(devfn, line, pin);
+}
+
+/****************************************************************************
+ * Name: x86_64_pci_alloc_irq
+ *
+ * Description:
+ *  Allocate interrupts for MSI/MSI-X vector.
+ *
+ * Input Parameters:
+ *   bus - Bus that PCI device resides
+ *   irq - allocated vectors array
+ *   num - number of vectors to allocate
+ *   devfn - The pci device and function number
+ *
+ * Returned Value:
+ *   >0: success, return number of allocated vectors,
+ *   <0: A negative value errno
+ *
+ ****************************************************************************/
+
+static int x86_64_pci_alloc_irq(struct pci_bus_s *bus, uint32_t devfn,
+                                int *irq, int num)
+{
+  return up_alloc_irq_msi(bus->ctrl->busno, devfn, irq, num);
+}
+
+/****************************************************************************
+ * Name: x86_64_pci_release_irq
+ *
+ * Description:
+ *  Allocate interrupts for MSI/MSI-X vector.
+ *
+ * Input Parameters:
+ *   bus - Bus that PCI device resides
+ *   irq - vectors array to release
+ *   num - number of vectors in array
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void x86_64_pci_release_irq(struct pci_bus_s *bus, int *irq, int num)
+{
+  up_release_irq_msi(irq, num);
+}
+
+/****************************************************************************
+ * Name: x86_64_pci_connect_irq
+ *
+ * Description:
+ *  Connect interrupt for MSI/MSI-X.
+ *
+ * Input Parameters:
+ *   bus - Bus that PCI device resides
+ *   irq - vectors array
+ *   num - number of vectors in array
+ *   mar - returned value for Message Address Register
+ *   mdr - returned value for Message Data Register
+ *
+ * Returned Value:
+ *   >0: success, 0: A positive value errno
+ *
+ ****************************************************************************/
+
+static int x86_64_pci_connect_irq(struct pci_bus_s *bus, int *irq, int num,
+                                  uintptr_t *mar, uint32_t *mdr)
+{
+  UNUSED(bus);
+
+  return up_connect_irq(irq, num, mar, mdr);
 }
 
 /****************************************************************************

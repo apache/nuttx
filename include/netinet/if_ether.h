@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/netinet/if_ether.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -33,10 +35,30 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define ETH_ALEN  6    /* Octets in one ethernet addr   */
+#define ETH_ALEN  6         /* Octets in one ethernet addr   */
+#define ETH_TLEN  2         /* Octets in ethernet type field */
+#define ETH_HLEN  14        /* Total octets in header.   */
+#define ETH_ZLEN  60        /* Min. octets in frame sans FCS */
+#define ETH_DATA_LEN  1500  /* Max. octets in payload  */
+#define ETH_FRAME_LEN 1514  /* Max. octets in frame sans FCS */
+#define ETH_FCS_LEN 4       /* Octets in the FCS     */
+
+#define ETH_MIN_MTU 68      /* Min IPv4 MTU per RFC791  */
+#define ETH_MAX_MTU 0xFFFFU /* 65535, same as IP_MAX_MTU  */
 
 #define ETH_P_IP  ETHERTYPE_IP
 #define ETH_P_ARP ETHERTYPE_ARP
+
+/****************************************************************************
+ * Public Type Definitions
+ ****************************************************************************/
+
+struct ethhdr
+{
+  uint8_t  h_dest[ETH_ALEN];      /* destination eth addr    */
+  uint8_t  h_source[ETH_ALEN];    /* source ether addr    */
+  uint16_t h_proto;               /* packet type ID field    */
+};
 
 /* Ethernet Address Resolution Protocol.
  *

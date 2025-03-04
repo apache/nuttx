@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/at32/hardware/at32f43xxx_uart.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -174,7 +176,7 @@
 #define USART_CTRL1_TCDT_MASK               (31 << USART_CTRL1_TCDT_SHIFT)
 #define USART_CTRL1_TCDT(X)                 ((X) << USART_CTRL1_TCDT_SHIFT)
 #define USART_CTRL1_TSDT_SHIFT              (21) /* transmit start delay time */
-#define USART_CTRL1_TSDT_MASK               (31 << USART_CTRL1_TSDT_SHIFT) 
+#define USART_CTRL1_TSDT_MASK               (31 << USART_CTRL1_TSDT_SHIFT)
 #define USART_CTRL1_TSDT(X)                 ((X) << USART_CTRL1_TSDT_SHIFT)
 #define USART_CTRL1_DBN1                    (1 << 28) /* Data bit num */
 

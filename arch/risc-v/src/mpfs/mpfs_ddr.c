@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/mpfs/mpfs_ddr.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -100,8 +102,6 @@
 
 /* Retraining limits */
 
-#define ABNORMAL_RETRAIN_CA_DECREASE_COUNT          2
-#define ABNORMAL_RETRAIN_CA_DLY_DECREASE_COUNT      2
 #define DQ_DQS_NUM_TAPS                             5
 
 /* PLL convenience bits */
@@ -719,6 +719,8 @@ static int mpfs_ddr_pll_lock_scb(void)
 #define INIT_SETTING_SEG1_6    0x00000000
 #define INIT_SETTING_SEG1_7    0x00000000
 
+#define SEG_LOCKED             (1 << 31)
+
 /****************************************************************************
  * Name: mpfs_setup_ddr_segments
  *
@@ -758,10 +760,17 @@ void mpfs_setup_ddr_segments(enum seg_setup_e option)
     }
   else
     {
+      /* This is the final configuration that cannot be changed after being
+       * locked.
+       */
+
       /* Segment 0 */
 
       val_l = LIBERO_SETTING_SEG0_0 & 0x7fff;
       val_h = LIBERO_SETTING_SEG0_1 & 0x7fff;
+
+      val_l |= SEG_LOCKED;
+      val_h |= SEG_LOCKED;
 
       putreg64((((uint64_t)val_h) << 32) | val_l, MPFS_MPUCFG_SEG0_REG0);
 
@@ -770,10 +779,16 @@ void mpfs_setup_ddr_segments(enum seg_setup_e option)
       val_l = LIBERO_SETTING_SEG1_2 & 0x7fff;
       val_h = LIBERO_SETTING_SEG1_3 & 0x7fff;
 
+      val_l |= SEG_LOCKED;
+      val_h |= SEG_LOCKED;
+
       putreg64((((uint64_t)val_h) << 32) | val_l, MPFS_MPUCFG_SEG1_REG1);
 
       val_l = LIBERO_SETTING_SEG1_4 & 0x7fff;
       val_h = LIBERO_SETTING_SEG1_5 & 0x7fff;
+
+      val_l |= SEG_LOCKED;
+      val_h |= SEG_LOCKED;
 
       putreg64((((uint64_t)val_h) << 32) | val_l, MPFS_MPUCFG_SEG1_REG2);
     }
@@ -781,7 +796,7 @@ void mpfs_setup_ddr_segments(enum seg_setup_e option)
   /* Disable ddr blocker: cleared at reset. When written to '1' disables
    * the blocker function allowing the L2 cache controller to access the
    * DDRC. Once written to '1' the register cannot be written to 0, only
-   * an devie reset will clear the register.
+   * an device reset will clear the register.
    */
 
   putreg64((((uint64_t)0x01) << 32) , MPFS_MPUCFG_SEG0_REG3);
@@ -3407,15 +3422,15 @@ static int mpfs_training_addcmd(void)
 
 static int mpfs_training_verify(void)
 {
-  uint32_t low_ca_dly_count;
-  uint32_t decrease_count;
   uint32_t addcmd_status0;
   uint32_t addcmd_status1;
   uint32_t retries = MPFS_DEFAULT_RETRIES;
   uint32_t t_status = 0;
   uint32_t lane_sel;
-  uint32_t last;
   uint32_t i;
+  uint32_t off_taps;
+  uint32_t width_taps;
+  uint32_t gt_clk_sel;
 
   while (!(getreg32(MPFS_DDR_CSR_APB_STAT_DFI_TRAINING_COMPLETE) & 0x01) &&
         --retries);
@@ -3426,19 +3441,15 @@ static int mpfs_training_verify(void)
       return -ETIMEDOUT;
     }
 
-  for (lane_sel = 0; lane_sel < LIBERO_SETTING_DATA_LANES_USED; lane_sel++)
+  /* Verify cmd address results, rejects if not acceptable */
+
+  addcmd_status0 = getreg32(MPFS_CFG_DDR_SGMII_PHY_ADDCMD_STATUS0);
+  addcmd_status1 = getreg32(MPFS_CFG_DDR_SGMII_PHY_ADDCMD_STATUS1);
+
+  if ((LIBERO_SETTING_TRAINING_SKIP_SETTING & ADDCMD_BIT) != ADDCMD_BIT)
     {
-      mpfs_wait_cycles(10);
-
-      putreg32(lane_sel, MPFS_CFG_DDR_SGMII_PHY_LANE_SELECT);
-      mpfs_wait_cycles(10);
-
-      /* Verify cmd address results, rejects if not acceptable */
-
-      addcmd_status0 = getreg32(MPFS_CFG_DDR_SGMII_PHY_ADDCMD_STATUS0);
-      addcmd_status1 = getreg32(MPFS_CFG_DDR_SGMII_PHY_ADDCMD_STATUS1);
-
-      uint32_t ca_status[8] =
+      unsigned low_ca_dly_count = 0;
+      uint8_t ca_status[8] =
         {
           ((addcmd_status0) & 0xff),
           ((addcmd_status0 >> 8) & 0xff),
@@ -3450,46 +3461,40 @@ static int mpfs_training_verify(void)
           ((addcmd_status1 >> 24) & 0xff)
         };
 
-      low_ca_dly_count = 0;
-      last             = 0;
-      decrease_count   = 0;
+      uint8_t last = ca_status[7];
+
+      /* Retrain if abnormal CA training result detected
+       * Expected result is increasing numbers, starting at index n and
+       * wrapping around. For example:
+       *   [0x35, 0x3b, 0x4, 0x14, 0x1b, 0x21, 0x28, 0x2f].
+       *
+       * Also they need to be separated by at least 5
+       */
 
       for (i = 0; i < 8; i++)
         {
-          if (ca_status[i] < 5)
+          if (ca_status[i] < last + 5)
             {
               low_ca_dly_count++;
-            }
-
-          if (ca_status[i] <= last)
-            {
-              decrease_count++;
             }
 
           last = ca_status[i];
         }
 
-      if (ca_status[0] <= ca_status[7])
+      if (low_ca_dly_count > 1)
         {
-          decrease_count++;
+          /* Retrain via reset */
+
+          return -EIO;
         }
+    }
 
-      if ((LIBERO_SETTING_TRAINING_SKIP_SETTING & ADDCMD_BIT) != ADDCMD_BIT)
-        {
-          /* Retrain if abnormal CA training result detected */
+  for (lane_sel = 0; lane_sel < LIBERO_SETTING_DATA_LANES_USED; lane_sel++)
+    {
+      mpfs_wait_cycles(10);
 
-          if (low_ca_dly_count > ABNORMAL_RETRAIN_CA_DLY_DECREASE_COUNT)
-            {
-              t_status |= 0x01;
-            }
-
-          /* Retrain if abnormal CA training result detected */
-
-          if (decrease_count > ABNORMAL_RETRAIN_CA_DECREASE_COUNT)
-            {
-              t_status |= 0x01;
-            }
-        }
+      putreg32(lane_sel, MPFS_CFG_DDR_SGMII_PHY_LANE_SELECT);
+      mpfs_wait_cycles(10);
 
       /* Check that gate training passed without error  */
 
@@ -3503,56 +3508,27 @@ static int mpfs_training_verify(void)
           t_status |= 0x01;
         }
 
-      /* Check that DQ/DQS calculated window is above 5 taps. */
+      /* Check that DQ/DQS calculated window is above 5 taps
+       * and centered with margin
+       */
 
-      if (getreg32(MPFS_CFG_DDR_SGMII_PHY_DQDQS_STATUS2) < DQ_DQS_NUM_TAPS)
+      off_taps = getreg32(MPFS_CFG_DDR_SGMII_PHY_DQDQS_STATUS1);
+      width_taps = getreg32(MPFS_CFG_DDR_SGMII_PHY_DQDQS_STATUS2);
+
+      if (width_taps < DQ_DQS_NUM_TAPS ||
+          width_taps + off_taps <= 16 + DQ_DQS_NUM_TAPS / 2)
         {
           t_status |= 0x01;
         }
 
       /* Extra checks */
 
-      uint32_t temp = 0;
-      uint32_t gt_clk_sel = getreg32(MPFS_CFG_DDR_SGMII_PHY_GT_CLK_SEL) &
-                                     0x03;
+      /* Check the GT_TXDLY result for the selected clock */
 
-      if ((getreg32(MPFS_CFG_DDR_SGMII_PHY_GT_TXDLY) & 0xff) == 0)
-        {
-          temp++;
-          if (gt_clk_sel == 0)
-            {
-              t_status |= 0x01;
-            }
-        }
+      gt_clk_sel = getreg32(MPFS_CFG_DDR_SGMII_PHY_GT_CLK_SEL) & 0x03;
 
-      if (((getreg32(MPFS_CFG_DDR_SGMII_PHY_GT_TXDLY) >> 8) & 0xff) == 0)
-        {
-          temp++;
-          if (gt_clk_sel == 1)
-            {
-              t_status |= 0x01;
-            }
-        }
-
-      if (((getreg32(MPFS_CFG_DDR_SGMII_PHY_GT_TXDLY) >> 16) & 0xff) == 0)
-        {
-          temp++;
-          if (gt_clk_sel == 2)
-            {
-              t_status |= 0x01;
-            }
-        }
-
-      if (((getreg32(MPFS_CFG_DDR_SGMII_PHY_GT_TXDLY) >> 24) & 0xff) == 0)
-        {
-          temp++;
-          if (gt_clk_sel == 3)
-            {
-              t_status |= 0x01;
-            }
-        }
-
-      if (temp > 1)
+      if (((getreg32(MPFS_CFG_DDR_SGMII_PHY_GT_TXDLY) >> (gt_clk_sel * 8)) &
+           0xff) == 0)
         {
           t_status |= 0x01;
         }
@@ -3967,19 +3943,31 @@ static int mpfs_ddr_setup(struct mpfs_ddr_priv_s *priv)
 int mpfs_ddr_init(void)
 {
   struct mpfs_ddr_priv_s *priv = &g_mpfs_ddr_priv;
+  int retry_count = 20;
   int ddr_status;
 
-  /* On -EAGAIN, the whole training is restarted from the very beginning */
+  /* Restart training until it passes or retry_count reaches 0.
+   * Errors which return -EAGAIN are known to be always
+   * recoverable by controller reset; don't count these errors.
+   * Only count errors which return -EIO; they are typically recoverable.
+   * If they persist, however, eventually return failure, leading to
+   * re-trying after full reset.
+   */
 
   do
     {
       ddr_status = mpfs_ddr_setup(priv);
-      if (ddr_status == -EAGAIN)
+      if (ddr_status != OK)
         {
           mpfs_ddr_fail(priv);
         }
+
+      if (ddr_status != -EAGAIN)
+        {
+          retry_count--;
+        }
     }
-  while (ddr_status == -EAGAIN);
+  while (ddr_status != OK && retry_count > 0);
 
   if (ddr_status == 0)
     {

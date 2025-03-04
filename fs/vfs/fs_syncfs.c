@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/vfs/fs_syncfs.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -85,8 +87,8 @@ int syncfs(int fd)
   ret = fs_getfilep(fd, &filep);
   if (ret == OK)
     {
-      DEBUGASSERT(filep != NULL);
       ret = file_syncfs(filep);
+      fs_putfilep(filep);
     }
 
   leave_cancellation_point();

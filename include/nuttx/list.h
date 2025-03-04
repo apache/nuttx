@@ -1,12 +1,13 @@
 /****************************************************************************
  * include/nuttx/list.h
  *
+ * SPDX-License-Identifier: BSD-2-Clause
+ * SPDX-FileCopyrightText: 2008 Travis Geiselbrecht. All rights reserved.
+ * SPDX-FileContributor: Travis Geiselbrecht <geist@foobox.com>
+ *
  * Extracted from logic originally written by Travis Geiselbrecht and
  * released under a public domain license.  Re-released here under the 3-
  * clause BSD license by Pinecone, Inc.
- *
- *   Copyright (C) 2008 Travis Geiselbrecht. All rights reserved.
- *   Author: Travis Geiselbrecht <geist@foobox.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -90,6 +91,8 @@
     } \
   while (0)
 
+#define list_is_head(list, item) ((list)->next == (item))
+#define list_is_tail(list, item) ((list)->prev == (item))
 #define list_peek_head(list) ((list)->next != (list) ? (list)->next : NULL)
 #define list_peek_tail(list) ((list)->prev != (list) ? (list)->prev : NULL)
 

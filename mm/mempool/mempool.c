@@ -1,6 +1,8 @@
 /****************************************************************************
  * mm/mempool/mempool.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -29,17 +31,14 @@
 #include <syslog.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/mm/kasan.h>
 #include <nuttx/mm/mempool.h>
+#include <nuttx/nuttx.h>
 #include <nuttx/sched.h>
-
-#include "kasan/kasan.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#undef  ALIGN_UP
-#define ALIGN_UP(x, a) (((x) + ((a) - 1)) & (~((a) - 1)))
 
 #if CONFIG_MM_BACKTRACE >= 0
 #define MEMPOOL_MAGIC_FREE  0xAAAAAAAA
@@ -175,10 +174,8 @@ static void mempool_info_task_callback(FAR struct mempool_s *pool,
       return;
     }
 
-  if ((MM_DUMP_ASSIGN(task->pid, buf->pid) ||
-       MM_DUMP_ALLOC(task->pid, buf->pid) ||
-       MM_DUMP_LEAK(task->pid, buf->pid)) &&
-      buf->seqno >= task->seqmin && buf->seqno <= task->seqmax)
+  if ((MM_DUMP_ASSIGN(task, buf) || MM_DUMP_ALLOC(task, buf) ||
+       MM_DUMP_LEAK(task, buf)) && MM_DUMP_SEQNO(task, buf))
     {
       info->aordblks++;
       info->uordblks += blocksize;
@@ -190,6 +187,7 @@ static void mempool_memdump_callback(FAR struct mempool_s *pool,
                                      FAR const void *input, FAR void *output)
 {
   size_t blocksize = MEMPOOL_REALBLOCKSIZE(pool);
+  size_t overhead = blocksize - pool->blocksize;
   FAR const struct mm_memdump_s *dump = input;
 
   if (buf->magic == MEMPOOL_MAGIC_FREE)
@@ -197,29 +195,20 @@ static void mempool_memdump_callback(FAR struct mempool_s *pool,
       return;
     }
 
-  if ((MM_DUMP_ASSIGN(dump->pid, buf->pid) ||
-       MM_DUMP_ALLOC(dump->pid, buf->pid) ||
-       MM_DUMP_LEAK(dump->pid, buf->pid)) &&
-      buf->seqno >= dump->seqmin && buf->seqno <= dump->seqmax)
+  if ((MM_DUMP_ASSIGN(dump, buf) || MM_DUMP_ALLOC(dump, buf) ||
+       MM_DUMP_LEAK(dump, buf)) && MM_DUMP_SEQNO(dump, buf))
     {
-      char tmp[CONFIG_MM_BACKTRACE * BACKTRACE_PTR_FMT_WIDTH + 1] = "";
-
 #  if CONFIG_MM_BACKTRACE > 0
-      FAR const char *format = " %0*p";
-      int i;
+      char tmp[BACKTRACE_BUFFER_SIZE(CONFIG_MM_BACKTRACE)];
 
-      for (i = 0; i < CONFIG_MM_BACKTRACE &&
-                      buf->backtrace[i]; i++)
-        {
-          snprintf(tmp + i * BACKTRACE_PTR_FMT_WIDTH,
-                   sizeof(tmp) - i * BACKTRACE_PTR_FMT_WIDTH,
-                   format, BACKTRACE_PTR_FMT_WIDTH - 1,
-                   buf->backtrace[i]);
-        }
+      backtrace_format(tmp, sizeof(tmp), buf->backtrace,
+                       CONFIG_MM_BACKTRACE);
+#  else
+      FAR const char *tmp = "";
 #  endif
 
-      syslog(LOG_INFO, "%6d%12zu%12lu%*p%s\n",
-             buf->pid, blocksize, buf->seqno,
+      syslog(LOG_INFO, "%6d%12zu%9zu%12lu%*p %s\n",
+             buf->pid, blocksize, overhead, buf->seqno,
              BACKTRACE_PTR_FMT_WIDTH,
              ((FAR char *)buf - pool->blocksize), tmp);
     }
@@ -231,11 +220,12 @@ mempool_memdump_free_callback(FAR struct mempool_s *pool,
                               FAR const void *input, FAR void *output)
 {
   size_t blocksize = MEMPOOL_REALBLOCKSIZE(pool);
+  size_t overhead = blocksize - pool->blocksize;
 
   if (buf->magic == MEMPOOL_MAGIC_FREE)
     {
-      syslog(LOG_INFO, "%12zu%*p\n",
-             blocksize, BACKTRACE_PTR_FMT_WIDTH,
+      syslog(LOG_INFO, "%12zu%9zu%*p\n",
+             blocksize, overhead, BACKTRACE_PTR_FMT_WIDTH,
              ((FAR char *)buf - pool->blocksize));
     }
 }
@@ -314,7 +304,7 @@ int mempool_init(FAR struct mempool_s *pool, FAR const char *name)
       kasan_poison(base, size);
     }
 
-  spin_initialize(&pool->lock, SP_UNLOCKED);
+  spin_lock_init(&pool->lock);
   if (pool->wait && pool->expandsize == 0)
     {
       nxsem_init(&pool->waitsem, 0, 0);
@@ -324,6 +314,8 @@ int mempool_init(FAR struct mempool_s *pool, FAR const char *name)
   mempool_procfs_register(&pool->procfs, name);
 #  ifdef CONFIG_MM_BACKTRACE_DEFAULT
   pool->procfs.backtrace = true;
+#  elif CONFIG_MM_BACKTRACE > 0
+  pool->procfs.backtrace = false;
 #  endif
 #endif
 
@@ -405,14 +397,15 @@ retry:
 
   pool->nalloc++;
   spin_unlock_irqrestore(&pool->lock, flags);
-  kasan_unpoison(blk, pool->blocksize);
-#ifdef CONFIG_MM_FILL_ALLOCATIONS
-  memset(blk, MM_ALLOC_MAGIC, pool->blocksize);
-#endif
 
 #if CONFIG_MM_BACKTRACE >= 0
   mempool_add_backtrace(pool, (FAR struct mempool_backtrace_s *)
                               ((FAR char *)blk + pool->blocksize));
+#endif
+
+  blk = kasan_unpoison(blk, pool->blocksize);
+#ifdef CONFIG_MM_FILL_ALLOCATIONS
+  memset(blk, MM_ALLOC_MAGIC, pool->blocksize);
 #endif
 
   return blk;
@@ -597,11 +590,12 @@ void mempool_memdump(FAR struct mempool_s *pool,
     }
 #else
   size_t blocksize = MEMPOOL_REALBLOCKSIZE(pool);
+  size_t overhead = blocksize - pool->blocksize;
 
   /* Avoid race condition */
 
-  syslog(LOG_INFO, "%12zu%*p skip block dump\n",
-         blocksize, BACKTRACE_PTR_FMT_WIDTH, pool);
+  syslog(LOG_INFO, "%12zu%9zu%*p skip block dump\n",
+         blocksize, overhead, BACKTRACE_PTR_FMT_WIDTH, pool);
 #endif
 }
 
@@ -647,7 +641,7 @@ int mempool_deinit(FAR struct mempool_s *pool)
     {
       blk = (FAR sq_entry_t *)((FAR char *)blk - count * blocksize);
 
-      kasan_unpoison(blk, count * blocksize + sizeof(sq_entry_t));
+      blk = kasan_unpoison(blk, count * blocksize + sizeof(sq_entry_t));
       pool->free(pool, blk);
       if (pool->expandsize >= blocksize + sizeof(sq_entry_t))
         {
@@ -657,8 +651,8 @@ int mempool_deinit(FAR struct mempool_s *pool)
 
   if (pool->ibase)
     {
-      kasan_unpoison(pool->ibase,
-                     pool->interruptsize / blocksize * blocksize);
+      pool->ibase = kasan_unpoison(pool->ibase,
+                      pool->interruptsize / blocksize * blocksize);
       pool->free(pool, pool->ibase);
     }
 

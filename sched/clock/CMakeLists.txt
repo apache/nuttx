@@ -1,6 +1,8 @@
 # ##############################################################################
 # sched/clock/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -20,13 +22,13 @@
 
 set(SRCS
     clock.c
-    clock_perf.c
     clock_initialize.c
     clock_settime.c
     clock_gettime.c
-    clock_abstime2ticks.c
+    clock_realtime2absticks.c
     clock_systime_ticks.c
-    clock_systime_timespec.c)
+    clock_systime_timespec.c
+    clock_perf.c)
 
 if(CONFIG_CLOCK_TIMEKEEPING)
   list(APPEND SRCS clock_timekeeping.c)

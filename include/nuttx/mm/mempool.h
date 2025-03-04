@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/mm/mempool.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -30,6 +32,7 @@
 #include <nuttx/list.h>
 #include <nuttx/queue.h>
 #include <nuttx/mm/mm.h>
+#include <nuttx/nuttx.h>
 #include <nuttx/fs/procfs.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/semaphore.h>
@@ -38,16 +41,10 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if CONFIG_MM_DEFAULT_ALIGNMENT == 0
-#  define MEMPOOL_ALIGN       (2 * sizeof(uintptr_t))
-#else
-#  define MEMPOOL_ALIGN       CONFIG_MM_DEFAULT_ALIGNMENT
-#endif
-
 #if CONFIG_MM_BACKTRACE >= 0
 #  define MEMPOOL_REALBLOCKSIZE(pool) (ALIGN_UP((pool)->blocksize + \
                                        sizeof(struct mempool_backtrace_s), \
-                                       MEMPOOL_ALIGN))
+                                       MM_ALIGN))
 #else
 #  define MEMPOOL_REALBLOCKSIZE(pool) ((pool)->blocksize)
 #endif

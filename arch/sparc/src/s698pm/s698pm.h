@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/sparc/src/s698pm/s698pm.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -416,21 +418,15 @@ void gpio_irqdisable(int irq);
 #endif
 
 /****************************************************************************
- * Name: s698pm_pause_handler
+ * Name: s698pm_smp_call_handler
  *
  * Description:
- *   Inter-CPU interrupt handler
- *
- * Input Parameters:
- *   Standard interrupt handler inputs
- *
- * Returned Value:
- *   Should always return OK
+ *   This is the handler for SMP_CALL.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_SMP
-int s698pm_pause_handler(int irq, void *c, void *arg);
+int s698pm_smp_call_handler(int irq, void *c, void *arg);
 #endif
 
 #undef EXTERN

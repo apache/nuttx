@@ -1,12 +1,10 @@
 /****************************************************************************
  * libs/libc/net/lib_inetaddr.c
  *
- *   Copyright (C) 2011 Yu Qiang. All rights reserved.
- *   Author: Yu Qiang <yuq825@gmail.com>
- *
- * This file is a part of NuttX:
- *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2011 Yu Qiang. All rights reserved.
+ * SPDX-FileCopyrightText: 2012 Gregory Nutt. All rights reserved.
+ * SPDX-FileContributor: Yu Qiang <yuq825@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

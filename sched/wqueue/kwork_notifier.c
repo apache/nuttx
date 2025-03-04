@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/wqueue/kwork_notifier.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -32,6 +34,7 @@
 #include <sched.h>
 #include <assert.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/wqueue.h>
 
@@ -51,10 +54,9 @@
 
 struct work_notifier_entry_s
 {
-  /* This must appear at the beginning of the structure.  A reference to
-   * the struct work_notifier_entry_s instance must be cast-compatible with
-   * struct dq_entry_s.
-   */
+  struct dq_entry_s entry;
+
+  /* The work structure */
 
   struct work_s work;           /* Used for scheduling the work */
 
@@ -64,12 +66,14 @@ struct work_notifier_entry_s
 
   /* Additional payload needed to manage the notification */
 
-  uint32_t key;                 /* Unique ID for the notification */
+  int key;                      /* Unique ID for the notification */
 };
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+static spinlock_t g_notifier_lock = SP_UNLOCKED;
 
 /* This is a doubly linked list of free notifications. */
 
@@ -98,7 +102,7 @@ static dq_queue_t g_notifier_pending;
  *
  ****************************************************************************/
 
-static FAR struct work_notifier_entry_s *work_notifier_find(uint32_t key)
+static FAR struct work_notifier_entry_s *work_notifier_find(int key)
 {
   FAR struct work_notifier_entry_s *notifier;
   FAR dq_entry_t *entry;
@@ -132,11 +136,11 @@ static FAR struct work_notifier_entry_s *work_notifier_find(uint32_t key)
  *
  ****************************************************************************/
 
-static uint32_t work_notifier_key(void)
+static int work_notifier_key(void)
 {
-  static uint32_t notifier_key;
+  static int notifier_key;
 
-  if (++notifier_key == 0)
+  if (++notifier_key <= 0)
     {
       notifier_key = 1;
     }
@@ -164,13 +168,21 @@ static void work_notifier_worker(FAR void *arg)
 
   /* Disable interrupts very briefly. */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_notifier_lock);
 
-  /* Put the notification to the free list */
+  /* Remove the notification from the pending list */
 
-  dq_addlast((FAR dq_entry_t *)notifier, &g_notifier_free);
+  notifier = work_notifier_find(notifier->key);
+  if (notifier != NULL)
+    {
+      dq_rem(&notifier->entry, &g_notifier_pending);
 
-  leave_critical_section(flags);
+      /* Put the notification to the free list */
+
+      dq_addlast(&notifier->entry, &g_notifier_free);
+    }
+
+  spin_unlock_irqrestore(&g_notifier_lock, flags);
 }
 
 /****************************************************************************
@@ -207,14 +219,14 @@ int work_notifier_setup(FAR struct work_notifier_s *info)
 
   /* Disable interrupts very briefly. */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_notifier_lock);
 
   /* Try to get the entry from the free list */
 
   notifier = (FAR struct work_notifier_entry_s *)
     dq_remfirst(&g_notifier_free);
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_notifier_lock, flags);
 
   if (notifier == NULL)
     {
@@ -239,7 +251,7 @@ int work_notifier_setup(FAR struct work_notifier_s *info)
 
       /* Disable interrupts very briefly. */
 
-      flags = enter_critical_section();
+      flags = spin_lock_irqsave(&g_notifier_lock);
 
       /* Generate a unique key for this notification */
 
@@ -253,10 +265,10 @@ int work_notifier_setup(FAR struct work_notifier_s *info)
        * notifications executed in a saner order?
        */
 
-      dq_addlast((FAR dq_entry_t *)notifier, &g_notifier_pending);
+      dq_addlast(&notifier->entry, &g_notifier_pending);
       ret = notifier->key;
 
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(&g_notifier_lock, flags);
     }
 
   return ret;
@@ -287,25 +299,32 @@ void work_notifier_teardown(int key)
 
   /* Disable interrupts very briefly. */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_notifier_lock);
 
-  /* Find the entry matching this PID in the g_notifier_pending list.  We
+  /* Find the entry matching this key in the g_notifier_pending list.  We
    * assume that there is only one.
    */
 
   notifier = work_notifier_find(key);
   if (notifier != NULL)
     {
-      /* Found it!  Remove the notification from the pending list */
+      /* Remove the notification from the pending list */
 
-      dq_rem((FAR dq_entry_t *)notifier, &g_notifier_pending);
+      dq_rem(&notifier->entry, &g_notifier_pending);
+      spin_unlock_irqrestore(&g_notifier_lock, flags);
+
+      /* Cancel the work, this may be waiting */
+
+      work_cancel_sync(notifier->info.qid, &notifier->work);
+
+      flags = spin_lock_irqsave(&g_notifier_lock);
 
       /* Put the notification to the free list */
 
-      dq_addlast((FAR dq_entry_t *)notifier, &g_notifier_free);
+      dq_addlast(&notifier->entry, &g_notifier_free);
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_notifier_lock, flags);
 }
 
 /****************************************************************************
@@ -338,10 +357,11 @@ void work_notifier_signal(enum work_evtype_e evtype,
   irqstate_t flags;
 
   /* Don't let any newly started threads block this thread until all of
-   * the notifications and been sent.
+   * the notifications have been sent.
    */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_notifier_lock);
+  sched_lock();
 
   /* Process the notification at the head of the pending list until the
    * pending list is empty
@@ -364,15 +384,15 @@ void work_notifier_signal(enum work_evtype_e evtype,
       notifier = (FAR struct work_notifier_entry_s *)entry;
       info     = &notifier->info;
 
-      /* Check if this is the a notification request for the event that
+      /* Check if this is a notification request for the event that
        * just occurred.
        */
 
       if (info->evtype == evtype && info->qualifier == qualifier)
         {
-          /* Yes.. Remove the notification from the pending list */
+          /* Mark the notification as no longer pending */
 
-          dq_rem((FAR dq_entry_t *)notifier, &g_notifier_pending);
+          info->qualifier = NULL;
 
           /* Schedule the work.  The entire notifier entry is passed as an
            * argument to the work function because that function is
@@ -384,7 +404,8 @@ void work_notifier_signal(enum work_evtype_e evtype,
         }
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_notifier_lock, flags);
+  sched_unlock();
 }
 
 #endif /* CONFIG_WQUEUE_NOTIFIER */

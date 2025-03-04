@@ -62,7 +62,7 @@ config MM_KERNEL_HEAPSIZE
 
 config MM_DEFAULT_ALIGNMENT
 	int "Memory default alignment in bytes"
-	default 0
+	default 8
 	range 0 64
 	---help---
 		The memory default alignment in bytes, if this value is 0, the real
@@ -103,255 +103,6 @@ config MM_MAP_COUNT_MAX
 	default 1024
 	---help---
 		The maximum number of memory map areas for each task.
-
-config ARCH_HAVE_HEAP2
-	bool
-	default n
-
-if ARCH_HAVE_HEAP2
-
-config HEAP2_BASE
-	hex "Start address of second user heap region"
-	default 0x00000000
-	---help---
-		The base address of the second heap region.
-
-config HEAP2_SIZE
-	int "Size of the second user heap region"
-	default 0
-	---help---
-		The size of the second heap region.
-
-endif # ARCH_HAVE_HEAP2
-
-config GRAN
-	bool "Enable Granule Allocator"
-	default n
-	---help---
-		Enable granule allocator support.  Allocations will be aligned to the
-		granule size; allocations will be in units of the granule size.
-		Larger granules will give better performance and less overhead but
-		more losses of memory due to alignment and quantization waste.
-
-		NOTE: The current implementation also restricts the maximum
-		allocation size to 32 granules.  That restriction could be
-		eliminated with some additional coding effort.
-
-config GRAN_INTR
-	bool "Interrupt level support"
-	default n
-	depends on GRAN
-	---help---
-		Normally mutual exclusive access to granule allocator data is assured
-		using a semaphore.  If this option is set then, instead, mutual
-		exclusion logic will disable interrupts.  While this options is more
-		invasive to system performance, it will also support use of the granule
-		allocator from interrupt level logic.
-
-config DEBUG_GRAN
-	bool "Granule Allocator Debug"
-	default n
-	depends on GRAN && DEBUG_FEATURES
-	---help---
-		Just like DEBUG_MM, but only generates output from the gran
-		allocation logic.
-
-config MM_PGALLOC
-	bool "Enable Page Allocator"
-	default n
-	depends on ARCH_USE_MMU
-	select GRAN
-	---help---
-		Enable support for a MMU physical page allocator based on the
-		granule allocator.
-
-if MM_PGALLOC
-
-config MM_PGSIZE
-	int "Page Size"
-	default 4096
-	---help---
-		The MMU page size.  Must be one of {1024, 2048, 4096, 8192, or
-		16384}.  This is easily extensible, but only those values are
-		currently support.
-
-config DEBUG_PGALLOC
-	bool "Page Allocator Debug"
-	default n
-	depends on DEBUG_FEATURES
-	---help---
-		Just like DEBUG_MM, but only generates output from the page
-		allocation logic.
-
-endif # MM_PGALLOC
-
-config MM_SHM
-	bool "Shared memory support"
-	default n
-	depends on MM_PGALLOC && BUILD_KERNEL
-	select ARCH_VMA_MAPPING
-	---help---
-		Build support for mapping physical memory to user-space via
-		shared memory interfaces like shmget(), shmat(), shmctl(),
-		etc, or device mapping interfaces like vm_map_region() etc.
-
-config MM_KMAP
-	bool "Support for dynamic kernel virtual mappings"
-	default n
-	depends on MM_PGALLOC && BUILD_KERNEL
-	select ARCH_KVMA_MAPPING
-	---help---
-		Build support for dynamically mapping pages from the page pool into
-		kernel virtual memory. This includes pages that are already mapped
-		for user.
-
-config MM_HEAP_MEMPOOL_THRESHOLD
-	int "The default size of threshold to avoid using multiple mempool in heap"
-	default -1
-	---help---
-		If the size of the memory requested by the user is less
-		than the threshold, the memory will be requested from the
-		multiple mempool by default.
-		 > 0 Enable pool feature, and set umm/kmm pool threshold size.
-		== 0 Enable pool feature, but disable the umm/kmm pool function.
-		 < 0 Disable pool feature.
-
-config MM_HEAP_MEMPOOL_EXPAND_SIZE
-	int "The expand size for each mempool in multiple mempool"
-	default 4096
-	depends on MM_HEAP_MEMPOOL_THRESHOLD > 0
-	---help---
-		This size describes the size of each expansion of each memory
-		pool with insufficient memory in the multi-level memory pool.
-
-config MM_HEAP_MEMPOOL_DICTIONARY_EXPAND_SIZE
-	int "The expand size for multiple mempool's dictionary"
-	default MM_HEAP_MEMPOOL_EXPAND_SIZE
-	depends on MM_HEAP_MEMPOOL_THRESHOLD > 0
-	---help---
-		This size describes the multiple mempool dictionary expand.
-
-config MM_HEAP_MEMPOOL_CHUNK_SIZE
-	int "The multiples pool chunk size"
-	default 0
-	depends on MM_HEAP_MEMPOOL_THRESHOLD > 0
-	---help---
-		This size describes the multiple mempool chunk size.
-
-config MM_HEAP_MEMPOOL_BACKTRACE_SKIP
-	int "The skip depth of backtrace for mempool"
-	default 6
-	depends on MM_HEAP_MEMPOOL_THRESHOLD != 0 && MM_BACKTRACE > 0
-	---help---
-		This number is the skipped backtrace depth for mempool.
-
-config FS_PROCFS_EXCLUDE_MEMPOOL
-	bool "Exclude mempool"
-	default DEFAULT_SMALL
-	depends on FS_PROCFS
-
-config MM_KASAN
-	bool "Kernel Address Sanitizer"
-	default n
-	---help---
-		KASan is a fast compiler-based tool for detecting memory
-		bugs in native code. After turn on this option, Please
-		add -fsanitize=kernel-address to CFLAGS/CXXFLAGS too.
-
-config MM_KASAN_ALL
-	bool "Enable KASan for the entire image"
-	depends on MM_KASAN
-	default y
-	---help---
-		This option activates address sanitizer for the entire image.
-		If you don't enable this option, you have to explicitly specify
-		"-fsanitize=kernel-address" for the files/directories you want
-		to check. Enabling this option will get image size increased
-		and performance decreased significantly.
-
-config MM_KASAN_DISABLE_READS_CHECK
-	bool "Disable reads check"
-	depends on MM_KASAN
-	default n
-	---help---
-		This option disable kasan reads check. It speeds up performance
-		compared with default read/write check. Only disable it when you are
-		sure there's no need to do so. Or performance is too bad and only focus
-		on writes check.
-
-config MM_KASAN_DISABLE_WRITES_CHECK
-	bool "Disable writes check"
-	depends on MM_KASAN
-	default n
-	---help---
-		This option disable kasan writes check.
-
-config MM_KASAN_GLOBAL
-	bool "Enable global data check"
-	depends on MM_KASAN
-	default n
-	---help---
-		This option enables KASan global data check.
-		It's used to extract segments in the linker script.
-		Two new segments need to be created, one being
-		".kasan.unused: { *(.data..LASANLOC*) }",
-		used to eliminate excess data generated.
-		One is ".kasan.global:{
-		KEEP ( *(. data.. LASAN0))
-		KEEP ( *(. data. rel. local.. LASAN0))
-		}", used to extract data generated by the compiler
-
-config MM_KASAN_DISABLE_PANIC
-	bool "Disable panic on kasan error"
-	depends on MM_KASAN
-	default n
-	---help---
-		This option disable panic on kasan error. It will print error info
-		and continue to run.
-
-config MM_UBSAN
-	bool "Undefined Behavior Sanitizer"
-	default n
-	---help---
-		UBSan is a fast undefined behavior detector. UBSan modifies
-		the program at compile-time to catch various kinds of
-		undefined behavior during program execution
-
-config MM_UBSAN_ALL
-	bool "Enable UBSan for the entire image"
-	depends on MM_UBSAN
-	default y
-	---help---
-		This option activates UBSan instrumentation for the
-		entire image. If you don't enable this option, you have to
-		explicitly specify "-fsanitize=undefined" for
-		the files/directories you want to check. Enabling this option
-		will get image size increased and performance decreased
-		significantly.
-
-config MM_UBSAN_OPTION
-	string "UBSan options"
-	depends on MM_UBSAN
-	default "-fsanitize=undefined"
-	---help---
-		This option activates specified UBSan instrumentation. Please
-		refer to https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html
-		for available options.
-
-config MM_UBSAN_TRAP_ON_ERROR
-	bool "Enable UBSan trap on error to crash immediately"
-	depends on MM_UBSAN
-	default n
-	---help---
-		The undefined instruction trap should cause your program to crash,
-		save the code space significantly.
-
-config MM_UBSAN_DUMMY
-	bool "Bypass Undefined Behaviour Sanitizer Runtime Actions"
-	default n
-	depends on MM_UBSAN
-	---help---
-		Keep UBSAN compile time but disable runtime actions.
 
 config MM_FILL_ALLOCATIONS
 	bool "Fill allocations with debug value"
@@ -402,5 +153,215 @@ config MM_FREE_DELAYCOUNT_MAX
 		Set to 0 to disable the delayed free mechanism. Otherwise,
 		the value decides the maximum number of memory nodes that
 		will be delayed to free.
+
+config MM_HEAP_BIGGEST_COUNT
+	int "The largest malloc element dump count"
+	default 30
+	---help---
+		The dump support for largest allocated memory.
+		If too big, should take care of stack usage.
+		Define 0 to disable largest allocated element dump feature.
+
+config MM_HEAP_MEMPOOL_THRESHOLD
+	int "Threshold for malloc size to use multi-level mempool"
+	default -1
+	---help---
+		If the size of the memory requested by the user is less
+		than the threshold, the memory will be requested from the
+		multiple mempool by default.
+		 > 0 Enable pool feature, and set umm/kmm pool threshold size.
+		== 0 Enable pool feature, but disable the umm/kmm pool function.
+		 < 0 Disable pool feature.
+
+if MM_HEAP_MEMPOOL_THRESHOLD > 0
+
+config MM_HEAP_MEMPOOL_EXPAND_SIZE
+	int "The expand size for each mempool in multiple mempool"
+	default 4096
+	---help---
+		This size describes the size of each expansion of each memory
+		pool with insufficient memory in the multi-level memory pool.
+
+config MM_HEAP_MEMPOOL_DICTIONARY_EXPAND_SIZE
+	int "The expand size for multiple mempool's dictionary"
+	default MM_HEAP_MEMPOOL_EXPAND_SIZE
+	---help---
+		This size describes the multiple mempool dictionary expand.
+
+config MM_HEAP_MEMPOOL_CHUNK_SIZE
+	int "The multiples pool chunk size"
+	default 0
+	---help---
+		This size describes the multiple mempool chunk size.
+
+config MM_MIN_BLKSIZE
+	int "Minimum memory block size"
+	default 0
+	---help---
+		Users can configure the minimum memory block size as needed
+
+endif # MM_HEAP_MEMPOOL_THRESHOLD > 0
+
+config ARCH_HAVE_HEAP2
+	bool
+	default n
+
+if ARCH_HAVE_HEAP2
+
+config HEAP2_BASE
+	hex "Start address of second user heap region"
+	default 0x00000000
+	---help---
+		The base address of the second heap region.
+
+config HEAP2_SIZE
+	int "Size of the second user heap region"
+	default 0
+	---help---
+		The size of the second heap region.
+
+endif # ARCH_HAVE_HEAP2
+
+config GRAN
+	bool "Enable Granule Allocator"
+	default n
+	---help---
+		Enable granule allocator support.  Allocations will be aligned to the
+		granule size; allocations will be in units of the granule size.
+		Larger granules will give better performance and less overhead but
+		more losses of memory due to alignment and quantization waste.
+
+		NOTE: The current implementation also restricts the maximum
+		allocation size to 32 granules.  That restriction could be
+		eliminated with some additional coding effort.
+
+if GRAN
+
+config GRAN_INTR
+	bool "Interrupt level support"
+	default n
+	---help---
+		Normally mutual exclusive access to granule allocator data is assured
+		using a semaphore.  If this option is set then, instead, mutual
+		exclusion logic will disable interrupts.  While this options is more
+		invasive to system performance, it will also support use of the granule
+		allocator from interrupt level logic.
+
+config DEBUG_GRAN
+	bool "Granule Allocator Debug"
+	default n
+	depends on DEBUG_FEATURES
+	---help---
+		Just like DEBUG_MM, but only generates output from the gran
+		allocation logic.
+
+endif # GRAN
+
+config MM_PGALLOC
+	bool "Enable Page Allocator"
+	default n
+	depends on ARCH_USE_MMU
+	select GRAN
+	---help---
+		Enable support for a MMU physical page allocator based on the
+		granule allocator.
+
+if MM_PGALLOC
+
+config MM_PGSIZE
+	int "Page Size"
+	default 4096
+	---help---
+		The MMU page size.  Must be one of {1024, 2048, 4096, 8192, or
+		16384}.  This is easily extensible, but only those values are
+		currently support.
+
+config DEBUG_PGALLOC
+	bool "Page Allocator Debug"
+	default n
+	depends on DEBUG_FEATURES
+	---help---
+		Just like DEBUG_MM, but only generates output from the page
+		allocation logic.
+
+endif # MM_PGALLOC
+
+config MM_SHM
+	bool "Shared memory support"
+	default n
+	depends on MM_PGALLOC && BUILD_KERNEL
+	select ARCH_VMA_MAPPING
+	---help---
+		Build support for mapping physical memory to user-space via
+		shared memory interfaces like shmget(), shmat(), shmctl(),
+		etc, or device mapping interfaces like vm_map_region() etc.
+
+config MM_KMAP
+	bool "Support for dynamic kernel virtual mappings"
+	default n
+	depends on MM_PGALLOC && BUILD_KERNEL
+	select ARCH_KVMA_MAPPING
+	---help---
+		Build support for dynamically mapping pages from the page pool into
+		kernel virtual memory. This includes pages that are already mapped
+		for user.
+
+config MM_HEAP_MEMPOOL_BACKTRACE_SKIP
+	int "The skip depth of backtrace for mempool"
+	default 6
+	depends on MM_BACKTRACE > 0
+	---help---
+		This number is the skipped backtrace depth for mempool.
+
+config FS_PROCFS_EXCLUDE_MEMPOOL
+	bool "Exclude mempool from procfs"
+	default DEFAULT_SMALL
+	depends on FS_PROCFS && MM_HEAP_MEMPOOL_THRESHOLD > 0
+
+source "mm/kasan/Kconfig"
+
+config MM_UBSAN
+	bool "Undefined Behavior Sanitizer"
+	default n
+	---help---
+		UBSan is a fast undefined behavior detector. UBSan modifies
+		the program at compile-time to catch various kinds of
+		undefined behavior during program execution
+
+if MM_UBSAN
+
+config MM_UBSAN_ALL
+	bool "Enable UBSan for the entire image"
+	default y
+	---help---
+		This option activates UBSan instrumentation for the
+		entire image. If you don't enable this option, you have to
+		explicitly specify "-fsanitize=undefined" for
+		the files/directories you want to check. Enabling this option
+		will get image size increased and performance decreased
+		significantly.
+
+config MM_UBSAN_OPTION
+	string "UBSan options"
+	default "-fsanitize=undefined"
+	---help---
+		This option activates specified UBSan instrumentation. Please
+		refer to https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html
+		for available options.
+
+config MM_UBSAN_TRAP_ON_ERROR
+	bool "Enable UBSan trap on error to crash immediately"
+	default n
+	---help---
+		The undefined instruction trap should cause your program to crash,
+		save the code space significantly.
+
+config MM_UBSAN_DUMMY
+	bool "Bypass Undefined Behaviour Sanitizer Runtime Actions"
+	default n
+	---help---
+		Allow to compile with UBSAN enabled but disables runtime actions.
+
+endif # MM_UBSAN
 
 source "mm/iob/Kconfig"

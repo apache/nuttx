@@ -1,6 +1,8 @@
 /***************************************************************************
  * arch/arm64/src/zynq-mpsoc/zynq_serial.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -50,6 +52,7 @@
 #include "arm64_arch_timer.h"
 #include "zynq_boot.h"
 #include "arm64_gic.h"
+#include "hardware/zynq_pll.h"
 
 #ifdef USE_SERIALDRIVER
 
@@ -124,7 +127,7 @@
  ***************************************************************************/
 
 #define XUARTPS_CR_STOPBRK     0x00000100U  /* Stop transmission of break */
-#define XUARTPS_CR_STARTBRK	   0x00000080U  /* Set break */
+#define XUARTPS_CR_STARTBRK    0x00000080U  /* Set break */
 #define XUARTPS_CR_TORST       0x00000040U  /* RX timeout counter restart */
 #define XUARTPS_CR_TX_DIS      0x00000020U  /* TX disabled. */
 #define XUARTPS_CR_TX_EN       0x00000010U  /* TX enabled */
@@ -235,8 +238,8 @@
  *
  ***************************************************************************/
 
-#define XUARTPS_BAUDDIV_MASK        0x000000FFU	/* 8 bit baud divider mask */
-#define XUARTPS_BAUDDIV_RESET_VAL   0x0000000FU	/* Reset value */
+#define XUARTPS_BAUDDIV_MASK        0x000000FFU /* 8 bit baud divider mask */
+#define XUARTPS_BAUDDIV_RESET_VAL   0x0000000FU /* Reset value */
 
 /***************************************************************************
  * The following constant defines the amount of error that is allowed for
@@ -298,9 +301,9 @@
  *
  ***************************************************************************/
 
-#define XUARTPS_MODEMCR_FCM	0x00000020U  /* Flow control mode */
-#define XUARTPS_MODEMCR_RTS	0x00000002U  /* Request to send */
-#define XUARTPS_MODEMCR_DTR	0x00000001U  /* Data terminal ready */
+#define XUARTPS_MODEMCR_FCM 0x00000020U  /* Flow control mode */
+#define XUARTPS_MODEMCR_RTS 0x00000002U  /* Request to send */
+#define XUARTPS_MODEMCR_DTR 0x00000001U  /* Data terminal ready */
 
 /***************************************************************************
  * Modem Status Register
@@ -361,7 +364,7 @@
  *
  ***************************************************************************/
 
-#define XUARTPS_FLOWDEL_MASK    XUARTPS_RXWM_MASK	/* Valid bit mask */
+#define XUARTPS_FLOWDEL_MASK    XUARTPS_RXWM_MASK /* Valid bit mask */
 
 /***************************************************************************
  * Receiver FIFO Byte Status Register
@@ -376,18 +379,18 @@
  ***************************************************************************/
 
 #define XUARTPS_RXBS_BYTE3_BRKE 0x00000800U /* Byte3 Break Error */
-#define XUARTPS_RXBS_BYTE3_FRME	0x00000400U /* Byte3 Frame Error */
-#define XUARTPS_RXBS_BYTE3_PARE	0x00000200U /* Byte3 Parity Error */
-#define XUARTPS_RXBS_BYTE2_BRKE	0x00000100U /* Byte2 Break Error */
-#define XUARTPS_RXBS_BYTE2_FRME	0x00000080U /* Byte2 Frame Error */
-#define XUARTPS_RXBS_BYTE2_PARE	0x00000040U /* Byte2 Parity Error */
-#define XUARTPS_RXBS_BYTE1_BRKE	0x00000020U /* Byte1 Break Error */
-#define XUARTPS_RXBS_BYTE1_FRME	0x00000010U /* Byte1 Frame Error */
-#define XUARTPS_RXBS_BYTE1_PARE	0x00000008U /* Byte1 Parity Error */
-#define XUARTPS_RXBS_BYTE0_BRKE	0x00000004U /* Byte0 Break Error */
-#define XUARTPS_RXBS_BYTE0_FRME	0x00000002U /* Byte0 Frame Error */
-#define XUARTPS_RXBS_BYTE0_PARE	0x00000001U /* Byte0 Parity Error */
-#define XUARTPS_RXBS_MASK	0x00000007U       /* 3 bit RX byte status mask */
+#define XUARTPS_RXBS_BYTE3_FRME 0x00000400U /* Byte3 Frame Error */
+#define XUARTPS_RXBS_BYTE3_PARE 0x00000200U /* Byte3 Parity Error */
+#define XUARTPS_RXBS_BYTE2_BRKE 0x00000100U /* Byte2 Break Error */
+#define XUARTPS_RXBS_BYTE2_FRME 0x00000080U /* Byte2 Frame Error */
+#define XUARTPS_RXBS_BYTE2_PARE 0x00000040U /* Byte2 Parity Error */
+#define XUARTPS_RXBS_BYTE1_BRKE 0x00000020U /* Byte1 Break Error */
+#define XUARTPS_RXBS_BYTE1_FRME 0x00000010U /* Byte1 Frame Error */
+#define XUARTPS_RXBS_BYTE1_PARE 0x00000008U /* Byte1 Parity Error */
+#define XUARTPS_RXBS_BYTE0_BRKE 0x00000004U /* Byte0 Break Error */
+#define XUARTPS_RXBS_BYTE0_FRME 0x00000002U /* Byte0 Frame Error */
+#define XUARTPS_RXBS_BYTE0_PARE 0x00000001U /* Byte0 Parity Error */
+#define XUARTPS_RXBS_MASK       0x00000007U /* 3 bit RX byte status mask */
 
 /***************************************************************************
  * Private Types
@@ -500,7 +503,7 @@ static int zynq_uart_irq_handler(int irq, void *context, void *arg)
   return OK;
 }
 
-static int zynq_uart_baudrate(struct uart_dev_s *dev, uint32_t in_clk)
+static int zynq_uart_baudrate(struct uart_dev_s *dev)
 {
   struct zynq_uart_port_s *port = (struct zynq_uart_port_s *)dev->priv;
   const struct zynq_uart_config *config = &port->config;
@@ -522,11 +525,13 @@ static int zynq_uart_baudrate(struct uart_dev_s *dev, uint32_t in_clk)
   DEBUGASSERT(data->baud_rate <= (uint32_t)XUARTPS_MAX_RATE);
   DEBUGASSERT(data->baud_rate >= (uint32_t)XUARTPS_MIN_RATE);
 
+  input_clk = mpsoc_clk_rate_get(uart0_ref);
+
   /* Make sure the baud rate is not impossilby large.
    * Fastest possible baud rate is Input Clock / 2.
    */
 
-  if ((data->baud_rate * 2) > in_clk)
+  if ((data->baud_rate * 2) > input_clk)
     {
       return ERROR;
     }
@@ -535,10 +540,9 @@ static int zynq_uart_baudrate(struct uart_dev_s *dev, uint32_t in_clk)
 
   reg = getreg32(config->uart + XUARTPS_MR_OFFSET);
 
-  input_clk = in_clk;
   if (reg & XUARTPS_MR_CLKSEL)
     {
-      input_clk = in_clk / 8;
+      input_clk = input_clk / 8;
     }
 
   /* Determine the Baud divider. It can be 4to 254.
@@ -636,8 +640,7 @@ static int zynq_uart_setup(struct uart_dev_s *dev)
 
   DEBUGASSERT(data != NULL);
 
-  if (zynq_uart_baudrate(dev, CONFIG_XPAR_PSU_UART_0_UART_CLK_FREQ_HZ)
-      != OK)
+  if (zynq_uart_baudrate(dev) != OK)
     {
       return ERROR;
     }
@@ -1308,23 +1311,13 @@ void arm64_earlyserialinit(void)
  *
  ***************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef CONSOLE_DEV
   struct uart_dev_s *dev = &CONSOLE_DEV;
 
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      zynq_uart_wait_send(dev, '\r');
-    }
-
   zynq_uart_wait_send(dev, ch);
 #endif
-  return ch;
 }
 
 /***************************************************************************

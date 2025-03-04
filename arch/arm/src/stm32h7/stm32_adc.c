@@ -1,15 +1,16 @@
 /****************************************************************************
  * arch/arm/src/stm32h7/stm32_adc.c
  *
- *   Copyright (C) 2017, 2019 Gregory Nutt. All rights reserved.
- *   Copyright (C) 2015 Motorola Mobility, LLC. All rights reserved.
- *   Copyright (C) 2015 Omni Hoverboards Inc. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
- *            Diego Sanchez <dsanchez@nx-engineering.com>
- *            Paul Alexander Patience <paul-a.patience@polymtl.ca>
- *            Mateusz Szafoni <raiden00@railab.me>
- *            Juha Niskanen <juha.niskanen@haltian.com>
- *            David Sidrane <david_s5@nscdg.com>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2017, 2019 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2015 Motorola Mobility, LLC. All rights reserved.
+ * SPDX-FileCopyrightText: 2015 Omni Hoverboards Inc. All rights reserved.
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-FileContributor: Diego Sanchez <dsanchez@nx-engineering.com>
+ * SPDX-FileContributor: Paul Alexander Patience <paul-a.patience@polymtl.ca>
+ * SPDX-FileContributor: Mateusz Szafoni <raiden00@railab.me>
+ * SPDX-FileContributor: Juha Niskanen <juha.niskanen@haltian.com>
+ * SPDX-FileContributor: David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

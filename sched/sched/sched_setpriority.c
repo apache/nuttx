@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/sched/sched_setpriority.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -36,8 +38,55 @@
 #include "sched/sched.h"
 
 /****************************************************************************
+ * Private Type Declarations
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
+struct reprioritize_arg_s
+{
+  pid_t pid;
+  cpu_set_t saved_affinity;
+  int  sched_priority;
+  bool need_restore;
+};
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+static int reprioritize_handler(FAR void *cookie)
+{
+  FAR struct reprioritize_arg_s *arg = cookie;
+  FAR struct tcb_s *rtcb = this_task();
+  FAR struct tcb_s *tcb;
+  irqstate_t flags;
+
+  flags = enter_critical_section();
+
+  tcb = nxsched_get_tcb(arg->pid);
+
+  if (!tcb || tcb->task_state == TSTATE_TASK_INVALID ||
+      (tcb->flags & TCB_FLAG_EXIT_PROCESSING) != 0)
+    {
+      leave_critical_section(flags);
+      return OK;
+    }
+
+  if (arg->need_restore)
+    {
+      tcb->affinity = arg->saved_affinity;
+      tcb->flags &= ~TCB_FLAG_CPU_LOCKED;
+    }
+
+  if (nxsched_reprioritize_rtr(tcb, arg->sched_priority))
+    {
+      up_switch_context(this_task(), rtcb);
+    }
+
+  leave_critical_section(flags);
+  return OK;
+}
+#endif
 
 /****************************************************************************
  * Name: nxsched_nexttcb
@@ -68,7 +117,7 @@ static FAR struct tcb_s *nxsched_nexttcb(FAR struct tcb_s *tcb)
    * then use the 'nxttcb' which will probably be the IDLE thread.
    */
 
-  if (!nxsched_islocked_global())
+  if (!nxsched_islocked_tcb(this_task()))
     {
       /* Search for the highest priority task that can run on tcb->cpu. */
 
@@ -142,7 +191,7 @@ static inline void nxsched_running_setpriority(FAR struct tcb_s *tcb,
     {
       FAR struct tcb_s *rtcb = this_task();
 
-      if (rtcb->lockcount > 0)
+      if (nxsched_islocked_tcb(rtcb))
         {
           /* Move all tasks with the higher priority from the ready-to-run
            * list to the pending list.
@@ -150,7 +199,7 @@ static inline void nxsched_running_setpriority(FAR struct tcb_s *tcb,
 
           do
             {
-              bool check = nxsched_remove_readytorun(nxttcb, false);
+              bool check = nxsched_remove_readytorun(nxttcb);
               DEBUGASSERT(check == false);
               UNUSED(check);
 
@@ -173,6 +222,32 @@ static inline void nxsched_running_setpriority(FAR struct tcb_s *tcb,
         {
           /* A context switch will occur. */
 
+#ifdef CONFIG_SMP
+          if (tcb->cpu != this_cpu() &&
+              tcb->task_state == TSTATE_TASK_RUNNING)
+            {
+              struct reprioritize_arg_s arg;
+
+              if ((tcb->flags & TCB_FLAG_CPU_LOCKED) != 0)
+                {
+                  arg.pid = tcb->pid;
+                  arg.need_restore = false;
+                }
+              else
+                {
+                  arg.pid = tcb->pid;
+                  arg.saved_affinity = tcb->affinity;
+                  arg.need_restore = true;
+
+                  tcb->flags |= TCB_FLAG_CPU_LOCKED;
+                  CPU_SET(tcb->cpu, &tcb->affinity);
+                }
+
+              arg.sched_priority = sched_priority;
+              nxsched_smp_call_single(tcb->cpu, reprioritize_handler, &arg);
+            }
+          else
+#endif
           if (nxsched_reprioritize_rtr(tcb, sched_priority))
             {
               up_switch_context(this_task(), rtcb);
@@ -212,83 +287,13 @@ static void nxsched_readytorun_setpriority(FAR struct tcb_s *tcb,
 {
   FAR struct tcb_s *rtcb;
 
-#ifdef CONFIG_SMP
-  int cpu;
-
-  /* CASE 2a. The task is ready-to-run (but not running) but not assigned to
-   * a CPU. An increase in priority could cause a context switch may be
-   * caused by the re-prioritization.  The task is not assigned and may run
-   * on any CPU.
-   */
-
-  if (tcb->task_state == TSTATE_TASK_READYTORUN)
-    {
-      cpu = nxsched_select_cpu(tcb->affinity);
-    }
-
-  /* CASE 2b.  The task is ready to run, and assigned to a CPU.  An increase
-   * in priority could cause this task to become running but the task can
-   * only run on its assigned CPU.
-   */
-
-  else
-    {
-      cpu = tcb->cpu;
-    }
-
-  /* The running task is the task at the head of the g_assignedtasks[]
-   * associated with the selected CPU.
-   */
-
-  rtcb = current_task(cpu);
-
-#else
-  /* CASE 2. The task is ready-to-run (but not running) and a context switch
-   * may be caused by the re-prioritization.
-   */
-
   rtcb = this_task();
-#endif
 
-  /* A context switch will occur if the new priority of the ready-to-run
-   * task is (strictly) greater than the current running task
-   */
+  /* A context switch will occur. */
 
-  if (sched_priority > rtcb->sched_priority)
+  if (nxsched_reprioritize_rtr(tcb, sched_priority))
     {
-      /* A context switch will occur. */
-
-      if (nxsched_reprioritize_rtr(tcb, sched_priority))
-        {
-          up_switch_context(this_task(), rtcb);
-        }
-    }
-
-  /* Otherwise, we can just change priority and re-schedule (since it have
-   * no other effect).
-   */
-
-  else
-    {
-      /* Remove the TCB from the ready-to-run task list that it resides in.
-       * It should not be at the head of the list.
-       */
-
-      bool check = nxsched_remove_readytorun(tcb, false);
-      DEBUGASSERT(check == false);
-      UNUSED(check);
-
-      /* Change the task priority */
-
-      tcb->sched_priority = (uint8_t)sched_priority;
-
-      /* Put it back into the correct ready-to-run task list.  It must not
-       * end up at the head of the list.
-       */
-
-      check = nxsched_add_readytorun(tcb);
-      DEBUGASSERT(check == false);
-      UNUSED(check);
+      up_switch_context(this_task(), rtcb);
     }
 }
 

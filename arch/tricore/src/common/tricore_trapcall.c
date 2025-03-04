@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/tricore/src/common/tricore_trapcall.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -60,8 +62,8 @@ void tricore_trapcall(volatile void *trap)
 
   regs = tricore_csa2addr(__mfcr(CPU_PCXI));
 
-  CURRENT_REGS = regs;
+  up_set_current_regs(regs);
 
   up_irq_save();
-  PANIC_WITH_REGS("Trap", (void *)CURRENT_REGS);
+  PANIC_WITH_REGS("Trap", up_current_regs());
 }

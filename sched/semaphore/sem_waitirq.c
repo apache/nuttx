@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/semaphore/sem_waitirq.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -28,9 +30,9 @@
 #include <assert.h>
 #include <errno.h>
 
-#include <nuttx/addrenv.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/mm/kmap.h>
 
 #include "sched/sched.h"
 #include "semaphore/semaphore.h"
@@ -52,16 +54,16 @@
  *   2. From logic associated with sem_timedwait().  This function is called
  *      when the timeout elapses without receiving the semaphore.
  *
- *   Note: this function should used within critical_section
+ *   Note: this function should be used within critical_section.
  *
  * Input Parameters:
  *   wtcb    - A pointer to the TCB of the task that is waiting on a
  *             semphaphore, but has received a signal or timeout instead.
  *   errcode - EINTR if the semaphore wait was awakened by a signal;
- *             ETIMEDOUT if awakened by a timeout
+ *             ETIMEDOUT if awakened by a timeout.
  *
  * Returned Value:
- *   None
+ *   None.
  *
  * Assumptions:
  *
@@ -72,20 +74,15 @@ void nxsem_wait_irq(FAR struct tcb_s *wtcb, int errcode)
   FAR struct tcb_s *rtcb = this_task();
   FAR sem_t *sem = wtcb->waitobj;
 
-#ifdef CONFIG_ARCH_ADDRENV
-  FAR struct addrenv_s *oldenv;
-
-  if (wtcb->addrenv_own)
-    {
-      addrenv_select(wtcb->addrenv_own, &oldenv);
-    }
+#ifdef CONFIG_MM_KMAP
+  sem = kmm_map_user(wtcb, sem, sizeof(*sem));
 #endif
 
   /* It is possible that an interrupt/context switch beat us to the punch
    * and already changed the task's state.
    */
 
-  DEBUGASSERT(sem != NULL && sem->semcount < 0);
+  DEBUGASSERT(sem != NULL && atomic_read(NXSEM_COUNT(sem)) < 0);
 
   /* Restore the correct priority of all threads that hold references
    * to this semaphore.
@@ -99,17 +96,14 @@ void nxsem_wait_irq(FAR struct tcb_s *wtcb, int errcode)
    * place.
    */
 
-  sem->semcount++;
+  atomic_fetch_add(NXSEM_COUNT(sem), 1);
 
   /* Remove task from waiting list */
 
   dq_rem((FAR dq_entry_t *)wtcb, SEM_WAITLIST(sem));
 
-#ifdef CONFIG_ARCH_ADDRENV
-  if (wtcb->addrenv_own)
-    {
-      addrenv_restore(oldenv);
-    }
+#ifdef CONFIG_MM_KMAP
+  kmm_unmap(sem);
 #endif
 
   /* Indicate that the wait is over. */

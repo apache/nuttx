@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/xtensa/src/common/xtensa_signal_handler.S
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -77,9 +79,7 @@ up_signal_handler:
   /* Execute the SYS_signal_handler_return syscall (will not return) */
 
   movi   a2, SYS_signal_handler_return
-  movi   a3, XCHAL_SWINT_CALL
-  wsr    a3, INTSET
-  rsync
+  syscall
 
   .size up_signal_handler, .-up_signal_handler
 

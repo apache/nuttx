@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/x86_64/src/intel64/intel64_lowsetup.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -90,12 +92,4 @@ void intel64_lowsetup(void)
   /* reload the GDTR with mapped high memory address */
 
   setgdt((void *)g_gdt64, (uintptr_t)(&g_gdt64_low_end - &g_gdt64_low) - 1);
-
-#ifndef CONFIG_SMP
-  /* Revoke the lower memory if not SMP, otherwise this is done in
-   * x86_64_ap_boot() after the initialization of the last AP is finished.
-   */
-
-  __revoke_low_memory();
-#endif
 }

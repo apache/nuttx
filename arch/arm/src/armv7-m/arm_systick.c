@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/armv7-m/arm_systick.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -135,7 +137,7 @@ static int systick_getstatus(struct timer_lowerhalf_s *lower_,
                              struct timer_status_s *status)
 {
   struct systick_lowerhalf_s *lower = (struct systick_lowerhalf_s *)lower_;
-  irqstate_t flags = enter_critical_section();
+  irqstate_t flags = up_irq_save();
 
   status->flags    = lower->callback ? TCFLAGS_HANDLER : 0;
   status->flags   |= systick_is_running() ? TCFLAGS_ACTIVE : 0;
@@ -161,7 +163,7 @@ static int systick_getstatus(struct timer_lowerhalf_s *lower_,
       status->timeleft = status->timeout;
     }
 
-  leave_critical_section(flags);
+  up_irq_restore(flags);
   return 0;
 }
 
@@ -169,8 +171,8 @@ static int systick_settimeout(struct timer_lowerhalf_s *lower_,
                               uint32_t timeout)
 {
   struct systick_lowerhalf_s *lower = (struct systick_lowerhalf_s *)lower_;
+  irqstate_t flags = up_irq_save();
 
-  irqstate_t flags = enter_critical_section();
   if (lower->next_interval)
     {
       /* If the timer callback is in the process,
@@ -194,7 +196,7 @@ static int systick_settimeout(struct timer_lowerhalf_s *lower_,
         }
     }
 
-  leave_critical_section(flags);
+  up_irq_restore(flags);
   return 0;
 }
 
@@ -202,11 +204,12 @@ static void systick_setcallback(struct timer_lowerhalf_s *lower_,
                                 tccb_t callback, void *arg)
 {
   struct systick_lowerhalf_s *lower = (struct systick_lowerhalf_s *)lower_;
+  irqstate_t flags = up_irq_save();
 
-  irqstate_t flags = enter_critical_section();
   lower->callback  = callback;
   lower->arg       = arg;
-  leave_critical_section(flags);
+
+  up_irq_restore(flags);
 }
 
 static int systick_maxtimeout(struct timer_lowerhalf_s *lower_,
@@ -258,6 +261,13 @@ static int systick_interrupt(int irq, void *context, void *arg)
   return 0;
 }
 
+#ifdef CONFIG_ARMV7M_SYSTICK_IRQ_WQUEUE
+static int systick_isr_handle(int irq, void *regs, void *arg)
+{
+  return IRQ_WAKE_THREAD;
+}
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -293,7 +303,13 @@ struct timer_lowerhalf_s *systick_initialize(bool coreclk,
       putreg32(NVIC_SYSTICK_CTRL_TICKINT, NVIC_SYSTICK_CTRL);
     }
 
+#ifdef CONFIG_ARMV7M_SYSTICK_IRQ_WQUEUE
+  irq_attach_wqueue(NVIC_IRQ_SYSTICK, systick_isr_handle,
+                    systick_interrupt, lower,
+                    CONFIG_ARMV7M_SYSTICK_IRQ_WQUEUE_PRIORITY);
+#else
   irq_attach(NVIC_IRQ_SYSTICK, systick_interrupt, lower);
+#endif
   up_enable_irq(NVIC_IRQ_SYSTICK);
 
   /* Register the timer driver if need */

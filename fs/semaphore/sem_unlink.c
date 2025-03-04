@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/semaphore/sem_unlink.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -102,12 +104,7 @@ int nxsem_unlink(FAR const char *name)
    * functioning as a directory and the directory is not empty.
    */
 
-  ret = inode_lock();
-  if (ret < 0)
-    {
-      goto errout_with_inode;
-    }
-
+  inode_lock();
   if (inode->i_child != NULL)
     {
       ret = -ENOTEMPTY;
@@ -115,8 +112,8 @@ int nxsem_unlink(FAR const char *name)
     }
 
   /* Remove the old inode from the tree.  Because we hold a reference count
-   * on the inode, it will not be deleted now.  This will set the
-   * FSNODEFLAG_DELETED bit in the inode flags.
+   * on the inode, it will not be deleted now. This will put reference of
+   * inode.
    */
 
   ret = inode_remove(fullpath);

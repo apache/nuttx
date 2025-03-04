@@ -12,6 +12,21 @@ menuconfig PCI
 
 if PCI
 
+config PCI_LATE_DRIVERS_REGISTER
+	bool
+	default n
+	---help---
+		This option disables PCI driver registration in drivers_initialize().
+		Care must be taken to call pci_register_drivers() in later code, most likely
+		as board specific code.
+
+config PCI_MSIX
+	bool "PCI MSI-X support"
+	default n
+	---help---
+		Enables support for PCI MSI-X. When enabled, MSI-X takse priority 
+		over MSI when a device supports it.
+	
 config PCI_ASSIGN_ALL_BUSES
 	bool "Assign resource to all buses"
 	default !ARCH_X86 && !ARCH_X86_64
@@ -31,4 +46,59 @@ config PCI_QEMU_EDU
 	---help---
 		Driver for QEMU EDU test device
 
+config PCI_IVSHMEM
+	bool "PCI ivshmem driver"
+	default n
+	---help---
+		Enable Inter-VM share memory device driver.
+
+config PCI_UIO_IVSHMEM
+	bool "Enable uio ivshmem driver support"
+	default n
+	depends on PCI_IVSHMEM
+	---help---
+		When this option is enabled, char ivshmem driver will register
+		char device with name: "/dev/uioX" to the VFS, then
+		application can open this device and use `mmap()` to get the
+		share memory provided by ivshmem device.
+
+config PCI_UIO_IVSHMEM_IDTABLE
+	string "The id table of uio ivshmem device"
+	depends on PCI_UIO_IVSHMEM
+	---help---
+		"id0;id1;id2", e.g.: "0;1;2"
+
+config PCI_UIO_IVSHMEM_NPOLLWAITERS
+	int "PCI uio ivshmem poll waiter number"
+	default 2
+	depends on PCI_UIO_IVSHMEM
+
+config PCI_EP_TEST
+	bool "PCI endpoint test"
+	---help---
+		pci endpoint test driver
+
 endif # PCI
+
+menuconfig PCI_ENDPOINT
+	bool "PCI Endpoint Support"
+	default n
+	---help---
+		Enable this configuration option to support configurable PCI
+		endpoint. This should be enabled if the platform has a PCI
+		controller that can operate in endpoint mode.
+
+if PCI_ENDPOINT
+
+config PCI_QEMU_EPC
+	bool "QEMU Ep Controller Support"
+	---help---
+		Enable qemu ep controller
+
+config PCI_EPF_TEST
+	bool "PCI epf test"
+	---help---
+		pci epf test driver
+
+endif # PCI_ENDPOINT
+

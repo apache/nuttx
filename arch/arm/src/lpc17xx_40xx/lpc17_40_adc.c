@@ -1,14 +1,11 @@
 /****************************************************************************
  * arch/arm/src/lpc17xx_40xx/lpc17_40_adc.c
  *
- *   Copyright (C) 2011 Li Zhuoyi. All rights reserved.
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: Li Zhuoyi <lzyy.cn@gmail.com>
- *           Gregory Nutt <gnutt@nuttx.org>
- *
- * This file is a part of NuttX:
- *
- *   Copyright (C) 2010, 2013, 2016 Gregory Nutt. All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2011 Li Zhuoyi. All rights reserved.
+ * SPDX-FileCopyrightText: 2010,2013,2016 Gregory Nutt. All rights reserved.
+ * SPDX-FileContributor: Li Zhuoyi <lzyy.cn@gmail.com>
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

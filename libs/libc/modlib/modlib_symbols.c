@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/modlib/modlib_symbols.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -320,6 +322,8 @@ int modlib_readsym(FAR struct mod_loadinfo_s *loadinfo, int index,
  *   loadinfo  - Load state information
  *   sym       - Symbol table entry (value might be undefined)
  *   sh_offset - Offset of strtab
+ *   exports   - Pointer to the symbol table
+ *   nexports  - Number of symbols in the symbol table*
  *
  * Returned Value:
  *   0 (OK) is returned on success and a negated errno is returned on
@@ -335,12 +339,12 @@ int modlib_readsym(FAR struct mod_loadinfo_s *loadinfo, int index,
 
 int modlib_symvalue(FAR struct module_s *modp,
                     FAR struct mod_loadinfo_s *loadinfo, FAR Elf_Sym *sym,
-                    Elf_Off sh_offset)
+                    Elf_Off sh_offset,
+                    FAR const struct symtab_s *exports, int nexports)
 {
   FAR const struct symtab_s *symbol;
   struct mod_exportinfo_s exportinfo;
   uintptr_t secbase;
-  int nsymbols;
   int ret;
 
   switch (sym->st_shndx)
@@ -404,9 +408,8 @@ int modlib_symvalue(FAR struct module_s *modp,
 
         if (symbol == NULL)
           {
-            modlib_getsymtab(&symbol, &nsymbols);
-            symbol = symtab_findbyname(symbol, exportinfo.name,
-                                       nsymbols);
+            symbol = symtab_findbyname(exports, exportinfo.name,
+                                       nexports);
           }
 
         /* Was the symbol found from any exporter? */
@@ -426,7 +429,7 @@ int modlib_symvalue(FAR struct module_s *modp,
               "%08" PRIxPTR "+%08" PRIxPTR "=%08" PRIxPTR "\n",
               loadinfo->iobuffer,
               (uintptr_t)sym->st_value, (uintptr_t)symbol->sym_value,
-              (uintptr_t)(sym->st_value + symbol->sym_value));
+              (uintptr_t)(sym->st_value + (uintptr_t)symbol->sym_value));
 
         sym->st_value += ((uintptr_t)symbol->sym_value);
       }
@@ -442,6 +445,10 @@ int modlib_symvalue(FAR struct module_s *modp,
               (uintptr_t)(sym->st_value + secbase));
 
         sym->st_value += secbase;
+        if (loadinfo->gotindex >= 0)
+          {
+            sym->st_value -= loadinfo->shdr[sym->st_shndx].sh_offset;
+          }
       }
       break;
     }
@@ -493,8 +500,13 @@ int modlib_insertsymtab(FAR struct module_s *modp,
   nsym = shdr->sh_size / sizeof(Elf_Sym);
   for (i = 0, symcount = 0; i < nsym; i++)
     {
-      if (sym[i].st_name != 0)
+      if (sym[i].st_name != 0 &&
+          ELF_ST_BIND(sym[i].st_info) == STB_GLOBAL &&
+          ELF_ST_TYPE(sym[i].st_info) != STT_NOTYPE &&
+          ELF_ST_VISIBILITY(sym[i].st_other) == STV_DEFAULT)
+        {
           symcount++;
+        }
     }
 
   if (symcount > 0)
@@ -509,7 +521,10 @@ int modlib_insertsymtab(FAR struct module_s *modp,
           modp->modinfo.nexports = symcount;
           for (i = 0, j = 0; i < nsym; i++)
             {
-              if (sym[i].st_name != 0)
+              if (sym[i].st_name != 0 &&
+                  ELF_ST_BIND(sym[i].st_info) == STB_GLOBAL &&
+                  ELF_ST_TYPE(sym[i].st_info) != STT_NOTYPE &&
+                  ELF_ST_VISIBILITY(sym[i].st_other) == STV_DEFAULT)
                 {
                   ret = modlib_symname(loadinfo, &sym[i], strtab->sh_offset);
                   if (ret < 0)
@@ -526,6 +541,10 @@ int modlib_insertsymtab(FAR struct module_s *modp,
                   j++;
                 }
             }
+
+#ifdef CONFIG_SYMTAB_ORDEREDBYNAME
+          symtab_sortbyname(symbol, symcount);
+#endif
         }
       else
         {

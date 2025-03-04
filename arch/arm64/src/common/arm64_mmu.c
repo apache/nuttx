@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/src/common/arm64_mmu.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -28,6 +30,7 @@
 #include <assert.h>
 
 #include <nuttx/arch.h>
+#include <arch/barriers.h>
 #include <arch/irq.h>
 #include <arch/chip/chip.h>
 
@@ -82,7 +85,7 @@
 #define XLAT_TABLE_SIZE                 (1U << XLAT_TABLE_SIZE_SHIFT)
 
 #define XLAT_TABLE_ENTRY_SIZE_SHIFT     3U /* Each table entry is 8 bytes */
-#define XLAT_TABLE_LEVEL_MAX            MMU_PGT_LEVELS
+#define XLAT_TABLE_LEVEL_MAX            MMU_PGT_LEVEL_MAX
 
 #define XLAT_TABLE_ENTRIES_SHIFT \
   (XLAT_TABLE_SIZE_SHIFT - XLAT_TABLE_ENTRY_SIZE_SHIFT)
@@ -131,6 +134,14 @@
 #define NUM_BASE_LEVEL_ENTRIES  GET_NUM_BASE_LEVEL_ENTRIES( \
     CONFIG_ARM64_VA_BITS)
 
+#ifdef CONFIG_BUILD_KERNEL
+#define BASE_XLAT_TABLE_SIZE  XLAT_TABLE_ENTRIES
+#define BASE_XLAT_TABLE_ALIGN PAGE_SIZE
+#else
+#define BASE_XLAT_TABLE_SIZE  NUM_BASE_LEVEL_ENTRIES
+#define BASE_XLAT_TABLE_ALIGN NUM_BASE_LEVEL_ENTRIES * sizeof(uint64_t)
+#endif
+
 #if (CONFIG_ARM64_PA_BITS == 48)
 #define TCR_PS_BITS             TCR_PS_BITS_256TB
 #elif (CONFIG_ARM64_PA_BITS == 44)
@@ -145,12 +156,18 @@
 #define TCR_PS_BITS             TCR_PS_BITS_4GB
 #endif
 
+#ifdef CONFIG_ARM64_TBI
+#define TCR_TBI_FLAGS (TCR_TBI0 | TCR_TBI1 | TCR_ASID_8)
+#else
+#define TCR_TBI_FLAGS 0
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static uint64_t base_xlat_table[NUM_BASE_LEVEL_ENTRIES] aligned_data(
-  NUM_BASE_LEVEL_ENTRIES * sizeof(uint64_t));
+static uint64_t base_xlat_table[BASE_XLAT_TABLE_SIZE]
+aligned_data(BASE_XLAT_TABLE_ALIGN);
 
 static uint64_t xlat_tables[CONFIG_MAX_XLAT_TABLES][XLAT_TABLE_ENTRIES]
 aligned_data(XLAT_TABLE_ENTRIES * sizeof(uint64_t));
@@ -199,6 +216,7 @@ static const struct arm_mmu_config g_mmu_nxrt_config =
 
 static const size_t g_pgt_sizes[] =
 {
+  MMU_L0_PAGE_SIZE,
   MMU_L1_PAGE_SIZE,
   MMU_L2_PAGE_SIZE,
   MMU_L3_PAGE_SIZE
@@ -246,7 +264,8 @@ static uint64_t get_tcr(int el)
    * inner shareable
    */
 
-  tcr |= TCR_TG0_4K | TCR_SHARED_INNER | TCR_ORGN_WBWA | TCR_IRGN_WBWA;
+  tcr |= TCR_TG0_4K | TCR_SHARED_INNER | TCR_ORGN_WBWA |
+         TCR_IRGN_WBWA | TCR_TBI_FLAGS;
 
   return tcr;
 }
@@ -558,8 +577,7 @@ static void enable_mmu_el3(unsigned int flags)
 
   /* Ensure these changes are seen before MMU is enabled */
 
-  ARM64_DSB();
-  ARM64_ISB();
+  UP_MB();
 
   /* Enable the MMU and data cache */
 
@@ -572,7 +590,7 @@ static void enable_mmu_el3(unsigned int flags)
 
   /* Ensure the MMU enable takes effect immediately */
 
-  ARM64_ISB();
+  UP_ISB();
 #ifdef CONFIG_MMU_DEBUG
   sinfo("MMU enabled with dcache\n");
 #endif
@@ -591,8 +609,7 @@ static void enable_mmu_el1(unsigned int flags)
 
   /* Ensure these changes are seen before MMU is enabled */
 
-  ARM64_DSB();
-  ARM64_ISB();
+  UP_MB();
 
   /* Enable the MMU and data cache */
 
@@ -605,7 +622,7 @@ static void enable_mmu_el1(unsigned int flags)
 
   /* Ensure the MMU enable takes effect immediately */
 
-  ARM64_ISB();
+  UP_ISB();
 #ifdef CONFIG_MMU_DEBUG
   sinfo("MMU enabled with dcache\n");
 #endif
@@ -701,15 +718,12 @@ void mmu_ln_setentry(uint32_t ptlevel, uintptr_t lnvaddr, uintptr_t paddr,
   uintptr_t *lntable = (uintptr_t *)lnvaddr;
   uint32_t   index;
 
-  DEBUGASSERT(ptlevel > 0 && ptlevel <= XLAT_TABLE_LEVEL_MAX);
+  DEBUGASSERT(ptlevel >= XLAT_TABLE_BASE_LEVEL &&
+              ptlevel <= XLAT_TABLE_LEVEL_MAX);
 
   /* Calculate index for lntable */
 
   index = XLAT_TABLE_VA_IDX(vaddr, ptlevel);
-
-  /* Setup the page descriptor and access flag */
-
-  mmuflags |= PTE_PAGE_DESC | PTE_BLOCK_DESC_AF;
 
   /* Save it */
 
@@ -731,7 +745,8 @@ uintptr_t mmu_ln_getentry(uint32_t ptlevel, uintptr_t lnvaddr,
   uintptr_t *lntable = (uintptr_t *)lnvaddr;
   uint32_t  index;
 
-  DEBUGASSERT(ptlevel > 0 && ptlevel <= XLAT_TABLE_LEVEL_MAX);
+  DEBUGASSERT(ptlevel >= XLAT_TABLE_BASE_LEVEL &&
+              ptlevel <= XLAT_TABLE_LEVEL_MAX);
 
   index = XLAT_TABLE_VA_IDX(vaddr, ptlevel);
 
@@ -749,7 +764,8 @@ void mmu_ln_restore(uint32_t ptlevel, uintptr_t lnvaddr, uintptr_t vaddr,
   uintptr_t *lntable = (uintptr_t *)lnvaddr;
   uint32_t  index;
 
-  DEBUGASSERT(ptlevel > 0 && ptlevel <= XLAT_TABLE_LEVEL_MAX);
+  DEBUGASSERT(ptlevel >= XLAT_TABLE_BASE_LEVEL &&
+              ptlevel <= XLAT_TABLE_LEVEL_MAX);
 
   index = XLAT_TABLE_VA_IDX(vaddr, ptlevel);
 
@@ -767,7 +783,13 @@ void mmu_ln_restore(uint32_t ptlevel, uintptr_t lnvaddr, uintptr_t vaddr,
 
 size_t mmu_get_region_size(uint32_t ptlevel)
 {
-  DEBUGASSERT(ptlevel > 0 && ptlevel <= XLAT_TABLE_LEVEL_MAX);
+  DEBUGASSERT(ptlevel >= XLAT_TABLE_BASE_LEVEL &&
+              ptlevel <= XLAT_TABLE_LEVEL_MAX);
 
-  return g_pgt_sizes[ptlevel - 1];
+  return g_pgt_sizes[ptlevel];
+}
+
+uintptr_t mmu_get_base_pgt_level(void)
+{
+  return XLAT_TABLE_BASE_LEVEL;
 }

@@ -1,13 +1,9 @@
 /****************************************************************************
  * arch/risc-v/src/mpfs/mpfs_opensbi_trap.S
  *
- * mpfs_exception_opensbi function is based on OpenSBI fw_base.S
- *
- * The 2-Clause BSD License
  * SPDX short identifier: BSD-2-Clause
- *
- * Copyright (c) 2019 Western Digital Corporation or its affiliates and other
- * contributors.
+ * SPDX-FileCopyrightText: 2019 Western Digital Corporation or
+ * SPDX-FileCopyrightText: or affiliates and other contributors.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:

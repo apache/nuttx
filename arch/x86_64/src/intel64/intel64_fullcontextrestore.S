@@ -1,6 +1,8 @@
 /**************************************************************************
  * arch/x86_64/src/intel64/intel64_fullcontextrestore.S
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -108,7 +110,6 @@ x86_64_fullcontextrestore:
 	movq    (8*REG_R10)(%rdi), %r10
 	movq    (8*REG_RBP)(%rdi), %rbp
 	movq    (8*REG_RBX)(%rdi), %rbx
-	movq    (8*REG_RAX)(%rdi), %rax
 
 	/* Restore the data segment register.  I think there is an issue that will
 	* need to be address here at some time:  If the register save area is in
@@ -124,9 +125,19 @@ x86_64_fullcontextrestore:
 	* XXX: Should use wrgsbase and wrfsbase to restore the gs and fs register
 	*/
 
-	/* Restore the correct value of EAX and then return */
+#ifdef CONFIG_SCHED_THREAD_LOCAL
+	mov     (8*REG_FS)(%rdi), %rax
+	wrfsbase  %rax
+#endif
+
+	movq    (8*REG_RAX)(%rdi), %rax
+
+	/* Restore the correct value of RDI */
 
 	popq    %rdi
+
+	/* Pops 5 things at once: RIP, CS, RFLAGS RSP and SS */
+
 	iretq
 	.size x86_64_fullcontextrestore, . - x86_64_fullcontextrestore
 	.end

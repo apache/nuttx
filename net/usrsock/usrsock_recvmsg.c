@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/usrsock/usrsock_recvmsg.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -219,6 +221,11 @@ ssize_t usrsock_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
   socklen_t addrlen = 0;
   socklen_t outaddrlen = 0;
   ssize_t ret;
+
+  if (msg->msg_iovlen != 1)
+    {
+      return -ENOTSUP;
+    }
 
   if (fromlen)
     {

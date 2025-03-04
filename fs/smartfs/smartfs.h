@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/smartfs/smartfs.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -307,6 +309,7 @@ struct smartfs_ofile_s
                                              * a seek, or more data is written that
                                              * causes the sector to change.
                                              */
+  char                        path[1];      /* The full path to the file */
 };
 
 /* This structure represents the overall mountpoint state.  An instance of

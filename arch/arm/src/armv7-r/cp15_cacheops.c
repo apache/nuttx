@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/armv7-r/cp15_cacheops.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -111,7 +113,7 @@ static void cp15_dcache_op_mva(uintptr_t start, uintptr_t end, int op)
 
   line = cp15_dcache_linesize();
 
-  ARM_DSB();
+  UP_DSB();
 
   if ((start & (line - 1)) != 0)
     {
@@ -150,7 +152,7 @@ static void cp15_dcache_op_mva(uintptr_t start, uintptr_t end, int op)
       start += line;
     }
 
-  ARM_ISB();
+  UP_ISB();
 }
 
 /****************************************************************************
@@ -179,7 +181,7 @@ void cp15_dcache_op_level(uint32_t level, int op)
   way_shift = 32 - ilog2(ways);
   set_shift = ilog2(line);
 
-  ARM_DSB();
+  UP_DSB();
 
   /* A: Log2(ways)
    * B: L+S
@@ -218,7 +220,7 @@ void cp15_dcache_op_level(uint32_t level, int op)
         }
     }
 
-  ARM_ISB();
+  UP_ISB();
 }
 
 void cp15_invalidate_icache(uintptr_t start, uintptr_t end)
@@ -228,7 +230,7 @@ void cp15_invalidate_icache(uintptr_t start, uintptr_t end)
   line = cp15_icache_linesize();
   start &= ~(line - 1);
 
-  ARM_DSB();
+  UP_DSB();
 
   while (start < end)
     {
@@ -236,7 +238,7 @@ void cp15_invalidate_icache(uintptr_t start, uintptr_t end)
       start += line;
     }
 
-  ARM_ISB();
+  UP_ISB();
 }
 
 void cp15_coherent_dcache(uintptr_t start, uintptr_t end)

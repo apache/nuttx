@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/sparc/src/sparc_v8/sparc_v8_sigdeliver.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -36,6 +38,7 @@
 #include <arch/board/board.h>
 
 #include "sched/sched.h"
+#include "signal/signal.h"
 #include "sparc_internal.h"
 
 /****************************************************************************
@@ -76,9 +79,9 @@ void sparc_sigdeliver(void)
 
   board_autoled_on(LED_SIGNAL);
 
-  sinfo("rtcb=%p sigdeliver=%p sigpendactionq.head=%p\n",
-        rtcb, rtcb->xcp.sigdeliver, rtcb->sigpendactionq.head);
-  DEBUGASSERT(rtcb->xcp.sigdeliver != NULL);
+  sinfo("rtcb=%p sigpendactionq.head=%p\n",
+        rtcb, rtcb->sigpendactionq.head);
+  DEBUGASSERT((rtcb->flags & TCB_FLAG_SIGDELIVER) != 0);
 
   /* Save the return state on the stack. */
 
@@ -114,7 +117,7 @@ retry:
 
   /* Deliver the signal */
 
-  ((sig_deliver_t)rtcb->xcp.sigdeliver)(rtcb);
+  nxsig_deliver(rtcb);
 
   /* Output any debug messages BEFORE restoring errno (because they may
    * alter errno), then disable interrupts again and restore the original
@@ -163,10 +166,10 @@ retry:
    * could be modified by a hostile program.
    */
 
-  regs[REG_PC]         = rtcb->xcp.saved_pc;
-  regs[REG_NPC]        = rtcb->xcp.saved_npc;
-  regs[REG_PSR]        = rtcb->xcp.saved_status;
-  rtcb->xcp.sigdeliver = NULL;  /* Allows next handler to be scheduled */
+  regs[REG_PC]     = rtcb->xcp.saved_pc;
+  regs[REG_NPC]    = rtcb->xcp.saved_npc;
+  regs[REG_PSR]    = rtcb->xcp.saved_status;
+  rtcb->flags &= ~TCB_FLAG_SIGDELIVER;
 
 #ifdef CONFIG_SMP
   /* Restore the saved 'irqcount' and recover the critical section

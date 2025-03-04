@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/armv7-r/mpcore.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -45,14 +47,18 @@
 /* Peripheral Base Offsets **************************************************/
 
 #define MPCORE_SCU_OFFSET  0x0000 /* 0x0000-0x00fc SCU registers */
+#ifndef MPCORE_ICC_OFFSET
 #define MPCORE_ICC_OFFSET  0x2000 /* 0x0000-0x00FC Interrupt controller interface */
+#endif
 #define MPCORE_GTM_OFFSET  0x0200 /* 0x0200-0x02ff Global timer */
 
 /* 0x0300-0x05ff Reserved */
 #define MPCORE_PTM_OFFSET  0x0600 /* 0x0600-0x06ff Private timers and watchdogs */
 
 /* 0x0700-0x07ff Reserved */
+#ifndef MPCORE_ICD_OFFSET
 #define MPCORE_ICD_OFFSET  0x1000 /* 0x1000-0x1fff Interrupt Distributor */
+#endif
 
 /* Peripheral Base Addresses ************************************************/
 

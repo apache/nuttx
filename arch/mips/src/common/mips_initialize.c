@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/mips/src/common/mips_initialize.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -34,8 +36,8 @@
 
 /* g_current_regs holds a references to the current interrupt level
  * register storage structure.  It is non-NULL only during interrupt
- * processing.  Access to g_current_regs must be through the macro
- * CURRENT_REGS for portability.
+ * processing.  Access to g_current_regs must be through the
+ * [get/set]_current_regs for portability.
  */
 
 volatile uint32_t *g_current_regs;

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/mps/mps_irq.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -61,9 +63,11 @@ static int mps_nmi(int irq, void *context, void *arg)
 
 static int mps_pendsv(int irq, void *context, void *arg)
 {
+#ifndef CONFIG_ARCH_HIPRI_INTERRUPT
   up_irq_save();
   _err("PANIC!!! PendSV received\n");
   PANIC();
+#endif
   return 0;
 }
 
@@ -85,7 +89,6 @@ static int mps_reserved(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ARMV8M_USEBASEPRI
 static inline void mps_prioritize_syscall(int priority)
 {
   uint32_t regval;
@@ -97,11 +100,54 @@ static inline void mps_prioritize_syscall(int priority)
   regval |= (priority << NVIC_SYSH_PRIORITY_PR11_SHIFT);
   putreg32(regval, NVIC_SYSH8_11_PRIORITY);
 }
-#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: up_prioritize_irq
+ *
+ * Description:
+ *  Set the priority of an IRQ.  This function may be needed internally
+ *  even if support for prioritized interrupts is not enabled.
+ *
+ ****************************************************************************/
+
+int up_prioritize_irq(int irq, int priority)
+{
+  uint32_t regaddr;
+  uint32_t regval;
+  int shift;
+
+  DEBUGASSERT(irq >= 0 && irq < NR_IRQS &&
+              (unsigned)priority <= NVIC_SYSH_PRIORITY_MIN);
+
+  if (irq < 16)
+    {
+      /* NVIC_SYSH_PRIORITY() maps {0..15} to one of three priority
+       * registers (0-3 are invalid)
+       */
+
+      regaddr = NVIC_SYSH_PRIORITY(irq);
+      irq    -= 4;
+    }
+  else
+    {
+      /* NVIC_IRQ_PRIORITY() maps {0..} to one of many priority registers */
+
+      irq    -= 16;
+      regaddr = NVIC_IRQ_PRIORITY(irq);
+    }
+
+  regval      = getreg32(regaddr);
+  shift       = ((irq & 3) << 3);
+  regval     &= ~(0xff << shift);
+  regval     |= (priority << shift);
+  putreg32(regval, regaddr);
+
+  return OK;
+}
 
 /****************************************************************************
  * Name: up_irqinitialize
@@ -173,14 +219,9 @@ void up_irqinitialize(void)
 
   /* Set the priority of the SVCall interrupt */
 
-#ifdef CONFIG_ARCH_IRQPRIO
+  up_prioritize_irq(MPS_IRQ_PENDSV, NVIC_SYSH_PRIORITY_MIN);
 
-  /* up_prioritize_irq(MPS_IRQ_PENDSV, NVIC_SYSH_PRIORITY_MIN); */
-
-#endif
-#ifdef CONFIG_ARMV8M_USEBASEPRI
   mps_prioritize_syscall(NVIC_SYSH_SVCALL_PRIORITY);
-#endif
 
   /* If the MPU is enabled, then attach and enable the Memory Management
    * Fault handler.

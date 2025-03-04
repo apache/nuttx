@@ -1,6 +1,8 @@
 # ##############################################################################
 # arch/arm/src/cmake/armv8-m.cmake
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -20,8 +22,63 @@
 
 set(PLATFORM_FLAGS)
 
+# LLVM Configuration
+if(CONFIG_ARCH_CORTEXM23)
+  set(LLVM_ARCHTYPE thumbv8m.base)
+  set(LLVM_CPUTYPE cortex-m23)
+elseif(CONFIG_ARCH_CORTEXM33)
+  set(LLVM_ARCHTYPE thumbv8m.main)
+  set(LLVM_CPUTYPE cortex-m33)
+elseif(CONFIG_ARCH_CORTEXM35P)
+  set(LLVM_ARCHTYPE thumbv8m.main)
+  set(LLVM_CPUTYPE cortex-m35p)
+elseif(CONFIG_ARCH_CORTEXM55)
+  set(LLVM_ARCHTYPE thumbv8.1m.main)
+  set(LLVM_CPUTYPE cortex-m55)
+elseif(CONFIG_ARCH_CORTEXM85)
+  set(LLVM_ARCHTYPE thumbv8.1m.main)
+  set(LLVM_CPUTYPE cortex-m85)
+endif()
+
+# Set ABI type based on FPU configuration
+if(CONFIG_ARCH_FPU)
+  set(LLVM_ABITYPE eabihf)
+else()
+  set(LLVM_ABITYPE eabi)
+endif()
+
 if(CONFIG_ARM_DSP)
   set(EXTCPUFLAGS +dsp)
+endif()
+
+if(CONFIG_ARM_TOOLCHAIN_CLANG)
+  if(CONFIG_ARCH_CORTEXM23)
+    set(TOOLCHAIN_CLANG_CONFIG armv8m.main_soft_nofp)
+  elseif(CONFIG_ARCH_CORTEXM33)
+    if(CONFIG_ARCH_FPU)
+      set(TOOLCHAIN_CLANG_CONFIG armv8m.main_hard_fp)
+    else()
+      set(TOOLCHAIN_CLANG_CONFIG armv8m.main_soft_nofp)
+    endif()
+  elseif(CONFIG_ARCH_CORTEXM35P)
+    if(CONFIG_ARCH_FPU)
+      set(TOOLCHAIN_CLANG_CONFIG armv8m.main_hard_fp)
+    else()
+      set(TOOLCHAIN_CLANG_CONFIG armv8m.main_soft_nofp)
+    endif()
+  elseif(CONFIG_ARCH_CORTEXM55)
+    if(CONFIG_ARCH_FPU)
+      set(TOOLCHAIN_CLANG_CONFIG armv8.1m.main_hard_fp)
+    else()
+      set(TOOLCHAIN_CLANG_CONFIG armv8.1m.main_soft_nofp_nomve)
+    endif()
+  elseif(CONFIG_ARCH_CORTEXM85)
+    if(CONFIG_ARCH_FPU)
+      set(TOOLCHAIN_CLANG_CONFIG armv8.1m.main_hard_fp)
+    else()
+      set(TOOLCHAIN_CLANG_CONFIG armv8.1m.main_soft_nofp_nomve)
+    endif()
+  endif()
 endif()
 
 if(CONFIG_ARCH_CORTEXM23)

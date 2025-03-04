@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/z16/src/common/z16_schedulesigaction.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -32,6 +34,7 @@
 #include <nuttx/irq.h>
 
 #include "sched/sched.h"
+#include "signal/signal.h"
 #include "z16_internal.h"
 
 /****************************************************************************
@@ -74,93 +77,85 @@
  *
  ****************************************************************************/
 
-void up_schedule_sigaction(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver)
+void up_schedule_sigaction(FAR struct tcb_s *tcb)
 {
-  sinfo("tcb=%p sigdeliver=0x%06x\n", tcb, (uint32_t)sigdeliver);
+  sinfo("tcb=%p, rtcb=%p current_regs=%p\n", tcb,
+        this_task(), up_current_regs());
 
-  /* Refuse to handle nested signal actions */
+  /* First, handle some special cases when the signal is
+   * being delivered to the currently executing task.
+   */
 
-  if (!tcb->xcp.sigdeliver)
+  if (tcb == this_task())
     {
-      tcb->xcp.sigdeliver = sigdeliver;
-
-      /* First, handle some special cases when the signal is
-       * being delivered to the currently executing task.
+      /* CASE 1:  We are not in an interrupt handler and
+       * a task is signalling itself for some reason.
        */
 
-      sinfo("rtcb=%p g_current_regs=%p\n", this_task(), g_current_regs);
-
-      if (tcb == this_task())
+      if (!up_current_regs())
         {
-          /* CASE 1:  We are not in an interrupt handler and
-           * a task is signalling itself for some reason.
-           */
+          /* In this case just deliver the signal now. */
 
-          if (!g_current_regs)
-            {
-              /* In this case just deliver the signal now. */
-
-              sigdeliver(tcb);
-              tcb->xcp.sigdeliver = NULL;
-            }
-
-          /* CASE 2:  We are in an interrupt handler AND the interrupted
-           * task is the same as the one that must receive the signal, then
-           * we will have to modify the return state as well as the state
-           * in the TCB.
-           */
-
-          else
-            {
-              FAR uint32_t *current_pc  =
-                (FAR uint32_t *)&g_current_regs[REG_PC];
-
-              /* Save the return address and interrupt state. These will be
-               * restored by the signal trampoline after the signals have
-               * been delivered.
-               */
-
-              tcb->xcp.saved_pc         = *current_pc;
-              tcb->xcp.saved_i          = g_current_regs[REG_FLAGS];
-
-              /* Then set up to vector to the trampoline with interrupts
-               * disabled
-               */
-
-              *current_pc               = (uint32_t)z16_sigdeliver;
-              g_current_regs[REG_FLAGS] = 0;
-
-              /* And make sure that the saved context in the TCB is the
-               * same as the interrupt return context.
-               */
-
-              z16_copystate(tcb->xcp.regs, g_current_regs);
-            }
+          nxsig_deliver(tcb);
+          tcb->flags &= ~TCB_FLAG_SIGDELIVER;
         }
 
-      /* Otherwise, we are (1) signaling a task is not running from an
-       * interrupt handler or (2) we are not in an interrupt handler
-       * and the running task is signalling some non-running task.
+      /* CASE 2:  We are in an interrupt handler AND the interrupted
+       * task is the same as the one that must receive the signal, then
+       * we will have to modify the return state as well as the state
+       * in the TCB.
        */
 
       else
         {
-          FAR uint32_t *saved_pc   = (FAR uint32_t *)&tcb->xcp.regs[REG_PC];
+          FAR uint32_t *current_pc  =
+            (FAR uint32_t *)&up_current_regs()[REG_PC];
 
-          /* Save the return lr and cpsr and one scratch register
-           * These will be restored by the signal trampoline after
-           * the signals have been delivered.
+          /* Save the return address and interrupt state. These will be
+           * restored by the signal trampoline after the signals have
+           * been delivered.
            */
 
-          tcb->xcp.saved_pc        = *saved_pc;
-          tcb->xcp.saved_i         = tcb->xcp.regs[REG_FLAGS];
+          tcb->xcp.saved_pc = *current_pc;
+          tcb->xcp.saved_i  = up_current_regs()[REG_FLAGS];
 
           /* Then set up to vector to the trampoline with interrupts
            * disabled
            */
 
-          *saved_pc                = (uint32_t)z16_sigdeliver;
-          tcb->xcp.regs[REG_FLAGS] = 0;
+         *current_pc = (uint32_t)z16_sigdeliver;
+          up_current_regs()[REG_FLAGS] = 0;
+
+          /* And make sure that the saved context in the TCB is the
+           * same as the interrupt return context.
+           */
+
+          z16_copystate(tcb->xcp.regs, up_current_regs());
         }
+    }
+
+  /* Otherwise, we are (1) signaling a task is not running from an
+   * interrupt handler or (2) we are not in an interrupt handler
+   * and the running task is signalling some non-running task.
+   */
+
+  else
+    {
+      FAR uint32_t *saved_pc   = (FAR uint32_t *)&tcb->xcp.regs[REG_PC];
+
+      /* Save the return lr and cpsr and one scratch register
+       * These will be restored by the signal trampoline after
+       * the signals have been delivered.
+       */
+
+      tcb->xcp.saved_pc        = *saved_pc;
+      tcb->xcp.saved_i         = tcb->xcp.regs[REG_FLAGS];
+
+      /* Then set up to vector to the trampoline with interrupts
+       * disabled
+       */
+
+     *saved_pc                = (uint32_t)z16_sigdeliver;
+      tcb->xcp.regs[REG_FLAGS] = 0;
     }
 }

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/ceva/include/xm6/spinlock.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -26,6 +28,7 @@
  ****************************************************************************/
 
 #include <arch/xm6/irq.h>
+#include <arch/xm6/barriers.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -38,42 +41,6 @@
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
-
-static inline void up_dsb(void)
-{
-  /* MSS_BARRIER(0x638):
-   * Bit [7] Internal Barrier Activation
-   */
-#define MSS_BARRIER 0x638
-
-  uint32_t barrier = 0x80;
-
-  __asm__ __volatile__
-  (
-    "out {cpm} %0.ui, (%1.ui).ui"
-     : : "r"(barrier), "r"(MSS_BARRIER)
-  );
-
-  do
-    {
-      __asm__ __volatile__
-      (
-        "in {cpm} (%1.ui).ui, %0.ui\n"
-        "nop #0x04\nnop #0x02"
-        : "=r"(barrier)
-        : "r"(MSS_BARRIER)
-      );
-
-      /* Wait unitl the barrier operation complete */
-    }
-  while ((barrier & 0x80) != 0);
-#undef MSS_BARRIER
-}
-
-static inline void up_dmb(void)
-{
-  up_dsb(); /* use dsb instead since dmb doesn't exist on xm6 */
-}
 
 /****************************************************************************
  * Name: up_testset

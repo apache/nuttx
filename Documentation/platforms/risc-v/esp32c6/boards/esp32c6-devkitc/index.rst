@@ -125,6 +125,43 @@ disables the NuttShell to get the best possible score.
 .. note:: As the NSH is disabled, the application will start as soon as the
   system is turned on.
 
+efuse
+-----
+
+This configuration demonstrates the use of the eFuse driver. It can be accessed
+through the ``/dev/efuse`` device file.
+Virtual eFuse mode can be used by enabling `CONFIG_ESPRESSIF_EFUSE_VIRTUAL`
+option to prevent possible damages on chip.
+
+The following snippet demonstrates how to read MAC address:
+
+.. code-block:: C
+
+   int fd;
+   int ret;
+   uint8_t mac[6];
+   struct efuse_param_s param;
+   struct efuse_desc_s mac_addr =
+   {
+     .bit_offset = 1,
+     .bit_count = 48
+   };
+
+   const efuse_desc_t* desc[] =
+   {
+       &mac_addr,
+       NULL
+   };
+   param.field = desc;
+   param.size = 48;
+   param.data = mac;
+
+   fd = open("/dev/efuse", O_RDONLY);
+   ret = ioctl(fd, EFUSEIOC_READ_FIELD, &param);
+
+To find offset and count variables for related eFuse,
+please refer to Espressif's Technical Reference Manuals.
+
 gpio
 ----
 
@@ -153,6 +190,46 @@ This configuration can be used to scan and manipulate I2C devices.
 You can scan for all I2C devices using the following command::
 
     nsh> i2c dev 0x00 0x7f
+
+To use slave mode, you can enable `ESPRESSIF_I2C0_SLAVE_MODE` option.
+To use slave mode driver following snippet demonstrates how write to i2c bus
+using slave driver:
+
+.. code-block:: C
+
+   #define ESP_I2C_SLAVE_PATH  "/dev/i2cslv0"
+   int main(int argc, char *argv[])
+     {
+       int i2c_slave_fd;
+       int ret;
+       uint8_t buffer[5] = {0xAA};
+       i2c_slave_fd = open(ESP_I2C_SLAVE_PATH, O_RDWR);
+       ret = write(i2c_slave_fd, buffer, 5);
+       close(i2c_slave_fd);
+    }
+
+i2schar
+-------
+
+This configuration enables the I2S character device and the i2schar example
+app, which provides an easy-to-use way of testing the I2S peripheral,
+enabling both the TX and the RX for those peripherals.
+
+**I2S pinout**
+
+============ ========== =========================================
+ESP32-C3 Pin Signal Pin Description
+============ ========== =========================================
+0            MCLK       Master Clock
+4            SCLK       Bit Clock (SCLK)
+5            LRCK       Word Select (LRCLK)
+18           DOUT       Data Out
+19           DIN        Data In
+============ ========== =========================================
+
+After successfully built and flashed, run on the boards's terminal::
+
+    nsh> i2schar
 
 motor
 -------
@@ -193,6 +270,16 @@ To test it, just execute the ``pwm`` application::
     nsh> pwm
     pwm_main: starting output with frequency: 10000 duty: 00008000
     pwm_main: stopping output
+
+qencoder
+---
+
+This configuration demostrates the use of Quadrature Encoder connected to pins
+GPIO10 and GPIO11. You can start measurement of pulses using the following
+command (by default, it will open ``\dev\qe0`` device and print 20 samples
+using 1 second delay)::
+
+    nsh> qe
 
 rmt
 ---
@@ -249,6 +336,10 @@ by default to each other and running the ``spi`` example::
     nsh> spi exch -b 2 "AB"
     Sending:	AB
     Received:	AB
+
+If SPI peripherals are already in use you can also use bitbang driver which is a
+software implemented SPI peripheral by enabling `CONFIG_ESPRESSIF_SPI_BITBANG`
+option.
 
 spiflash
 --------

@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/pkt/pkt_recvmsg.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -406,6 +408,11 @@ ssize_t pkt_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
   if (from != NULL && *fromlen < sizeof(sa_family_t))
     {
       return -EINVAL;
+    }
+
+  if (msg->msg_iovlen != 1)
+    {
+      return -ENOTSUP;
     }
 
   if (psock->s_type != SOCK_RAW)

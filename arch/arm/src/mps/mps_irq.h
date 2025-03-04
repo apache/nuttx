@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/mps/mps_irq.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -49,8 +51,6 @@
 #define MPS_IRQ_SYSTICK              (15) /* Vector 15: System tick */
 
 #define MPS_IRQ_FIRST                (16) /* Vector number of the first external interrupt */
-
-#define NVIC_SYSH_PRIORITY_DEFAULT (0x80) /* Midpoint is the default */
 
 #ifndef __ASSEMBLY__
 

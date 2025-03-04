@@ -1,6 +1,8 @@
 /********************************************************************************
  * tools/nxstyle.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -202,6 +204,7 @@ static const char *g_white_prefix[] =
   "b8",      /* Ref:  include/fixedmath.h */
   "b16",     /* Ref:  include/fixedmath.h */
   "b32",     /* Ref:  include/fixedmath.h */
+  "cJSON",   /* Ref:  apps/wireless/wapi/src */
   "ub8",     /* Ref:  include/fixedmath.h */
   "ub16",    /* Ref:  include/fixedmath.h */
   "ub32",    /* Ref:  include/fixedmath.h */
@@ -225,6 +228,16 @@ static const char *g_white_suffix[] =
 
 static const char *g_white_content_list[] =
 {
+  /* Ref:
+   * nuttx-apps/examples/wamr_module/module_hello.c
+   * nuttx-apps/interpreters/wamr/wamr_custom_init.c
+   *
+   * They are from the WAMR project.
+   */
+
+  "NativeSymbol",
+  "RuntimeInitArgs",
+
   /* Ref:  gnu_unwind_find_exidx.c */
 
   "__EIT_entry",
@@ -292,12 +305,19 @@ static const char *g_white_content_list[] =
    * drivers/segger/note_sysview.c
    */
 
-  "SEGGER_SYSVIEW",
-  "TaskID",
-  "sName",
+  "DataType",
+  "Offset",
   "Prio",
+  "pU32_Value",
+  "RangeMax",
+  "RangeMin",
+  "SEGGER_SYSVIEW",
+  "ScalingFactor",
+  "sName",
+  "sUnit",
   "StackBase",
   "StackSize",
+  "TaskID",
 
   /* Ref:
    * drivers/segger/syslog_rtt.c
@@ -347,6 +367,8 @@ static const char *g_white_content_list[] =
   "__asan_storeN",
   "__asan_loadN_noabort",
   "__asan_storeN_noabort",
+  "__hwasan_loadN_noabort",
+  "__hwasan_storeN_noabort",
 
   /* Ref:
    * tools/jlink-nuttx.c
@@ -595,6 +617,17 @@ static const char *g_white_content_list[] =
   "unzGetCurrentFileInfo64",
   "unzGoToNextFile",
   "unzGoToFirstFile",
+
+  /* Ref:
+   * apps/netutils/telnetc/telnetc.c
+   */
+
+  "deflateInit",
+  "deflateEnd",
+  "inflateInit",
+  "inflateEnd",
+  "zError",
+
   NULL
 };
 
@@ -620,6 +653,19 @@ static const char *g_white_files[] =
 
   "arm-acle-compat.h",
   "arm_asm.h",
+
+  /* Skip Mixed case
+   * Ref:
+   * libs/libbuiltin/
+   */
+
+  "InstrProfilingPlatform.c",
+
+  /* Skip Mixed case
+   * arch/arm/src/phy62xx/uart.c:1229:13: error: Mixed case identifier found
+   */
+
+  "phy62xx/uart.c",
   NULL
 };
 
@@ -1087,6 +1133,7 @@ int main(int argc, char **argv, char **envp)
   bool bfor;            /* True: This line is beginning of a 'for' statement */
   bool bif;             /* True: This line is beginning of a 'if' statement */
   bool bswitch;         /* True: Within a switch statement */
+  bool bcase;           /* True: Within a case statement of a switch */
   bool bstring;         /* True: Within a string */
   bool bquote;          /* True: Backslash quoted character next */
   bool bblank;          /* Used to verify block comment terminator */
@@ -1223,6 +1270,7 @@ int main(int argc, char **argv, char **envp)
   bcrs           = false;       /* True: Carriage return found on the line */
   bfunctions     = false;       /* True: In private or public functions */
   bswitch        = false;       /* True: Within a switch statement */
+  bcase          = false;       /* True: Within a case statement of a switch */
   bstring        = false;       /* True: Within a string */
   bexternc       = false;       /* True: Within 'extern "C"' */
   bif            = false;       /* True: This line is beginning of a 'if' statement */
@@ -1958,22 +2006,11 @@ int main(int argc, char **argv, char **envp)
            */
 
           else if (strncmp(&line[indent], "break ", 6) == 0 ||
-                   strncmp(&line[indent], "case ", 5) == 0 ||
-    #if 0 /* Part of switch */
-                   strncmp(&line[indent], "case ", 5) == 0 ||
-    #endif
                    strncmp(&line[indent], "continue ", 9) == 0 ||
-
-    #if 0 /* Part of switch */
-                   strncmp(&line[indent], "default ", 8) == 0 ||
-    #endif
                    strncmp(&line[indent], "do ", 3) == 0 ||
                    strncmp(&line[indent], "else ", 5) == 0 ||
                    strncmp(&line[indent], "goto ", 5) == 0 ||
                    strncmp(&line[indent], "return ", 7) == 0 ||
-    #if 0 /* Doesn't follow pattern */
-                   strncmp(&line[indent], "switch ", 7) == 0 ||
-    #endif
                    strncmp(&line[indent], "while ", 6) == 0)
             {
               bstatm = true;
@@ -1996,6 +2033,29 @@ int main(int argc, char **argv, char **envp)
             {
               bswitch = true;
             }
+          else if (strncmp(&line[indent], "switch(", 7) == 0)
+            {
+              ERROR("Missing whitespace after keyword", lineno, n);
+              bswitch = true;
+            }
+          else if (strncmp(&line[indent], "case ", 5) == 0)
+            {
+              bcase = true;
+            }
+          else if (strncmp(&line[indent], "case(", 5) == 0)
+            {
+              ERROR("Missing whitespace after keyword", lineno, n);
+              bcase = true;
+            }
+          else if (strncmp(&line[indent], "default ", 8) == 0)
+            {
+              ERROR("Missing whitespace after keyword", lineno, n);
+              bcase = true;
+            }
+          else if (strncmp(&line[indent], "default:", 8) == 0)
+            {
+              bcase = true;
+            }
 
           /* Also check for C keywords with missing white space */
 
@@ -2016,11 +2076,6 @@ int main(int argc, char **argv, char **envp)
               ERROR("Missing whitespace after keyword", lineno, n);
               bfor   = true;
               bstatm = true;
-            }
-          else if (strncmp(&line[indent], "switch(", 7) == 0)
-            {
-              ERROR("Missing whitespace after keyword", lineno, n);
-              bswitch = true;
             }
         }
 
@@ -2685,9 +2740,26 @@ int main(int argc, char **argv, char **envp)
                       }
                   }
                   break;
+                case ':':
+                  {
+                    if (bcase == true)
+                      {
+                        char *ndx = &line[n + 1];
+                        while ((int)isspace(*ndx))
+                          {
+                            ndx++;
+                          }
 
-                /* Semi-colon may terminate a declaration */
+                        if (*ndx != '\0' && *ndx != '/')
+                          {
+                            ERROR("Case statement should be on a new line",
+                                  lineno, n);
+                          }
 
+                        bcase = false;
+                      }
+                  }
+                  break;
                 case ',':
                   {
                     if (!isspace((int)line[n + 1]))
@@ -3026,7 +3098,6 @@ int main(int argc, char **argv, char **envp)
                     }
 
                   break;
-
                 case '^':
 
                   /* ^= */

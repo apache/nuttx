@@ -1,5 +1,6 @@
 =======================================
-``ina226`` Current/Power Monitor INA219
+``ina226`` Current/Power Monitor INA226
 =======================================
 
-TODO
+This is a simple infinite loop that polls the ``INA226`` sensor and displays the
+measurements.

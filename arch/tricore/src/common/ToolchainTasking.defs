@@ -1,6 +1,8 @@
 ############################################################################
 # arch/tricore/src/common/ToolchainTasking.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -74,7 +76,7 @@ ARCHOPTIMIZATION += --tradeoff=2
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   ARCHOPTIMIZATION += --debug-info=default
   ARCHOPTIMIZATION += --keep-temporary-files
-  LDFLAGS          += -g
+  LDFLAGS          += $(CONFIG_DEBUG_SYMBOLS_LEVEL)
 endif
 
 # merge source code with assembly output
@@ -125,3 +127,16 @@ LDFLAGS          += -lrt
 TASKING_WARNINGS  = 500,507,508,525,526,527,529,544,549,553,560,562,557,558,587,588,589
 
 ARCHOPTIMIZATION += --pass-c=--no-warnings=$(TASKING_WARNINGS)
+
+# Loadable module definitions
+
+CMODULEFLAGS = $(CFLAGS) -fvisibility=hidden
+LDMODULEFLAGS = -r -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/modlib/gnu-elf.ld)
+
+# ELF module definitions
+
+CELFFLAGS = $(CFLAGS) -fvisibility=hidden
+CXXELFFLAGS = $(CXXFLAGS) -fvisibility=hidden
+
+LDELFFLAGS = -r -e main
+LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)$(DELIM)libs$(DELIM)libc$(DELIM)modlib$(DELIM)gnu-elf.ld)

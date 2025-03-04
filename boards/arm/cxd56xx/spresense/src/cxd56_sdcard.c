@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/cxd56xx/spresense/src/cxd56_sdcard.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -277,6 +279,9 @@ static int board_sdcard_detect_int(int irq, void *context, void *arg)
 int board_sdcard_initialize(void)
 {
   int ret = OK;
+#ifdef CONFIG_MMCSD_HAVE_CARDDETECT
+  int irq;
+#endif
 
 #ifdef CONFIG_SDCARD_TXS02612_PORT0
   /* Select port0 for SD-Card (default) */
@@ -296,8 +301,15 @@ int board_sdcard_initialize(void)
   /* Configure Interrupt pin with internal pull-up */
 
   cxd56_pin_config(PINCONF_SDIO_CD_GPIO);
-  cxd56_gpioint_config(PIN_SDIO_CD, GPIOINT_PSEUDO_EDGE_BOTH,
-                       board_sdcard_detect_int, NULL);
+  irq = cxd56_gpioint_config(PIN_SDIO_CD, GPIOINT_PSEUDO_EDGE_BOTH,
+                             board_sdcard_detect_int, NULL);
+
+  /* Disable wakeup from SD Card detect interrupt */
+
+  if ((CXD56_IRQ_EXDEVICE_0 <= irq) && (irq <= CXD56_IRQ_EXDEVICE_11))
+    {
+      up_pm_clr_bootmask(PM_BOOT_GPIO_MASK(irq));
+    }
 
   /* Handle the case when SD card is already inserted */
 

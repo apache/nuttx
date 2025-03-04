@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/common/riscv_initialstate.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -97,7 +99,7 @@ void up_initial_state(struct tcb_s *tcb)
 
   if (tcb->pid == IDLE_PROCESS_ID)
     {
-      tcb->stack_alloc_ptr = (void *)g_cpux_idlestack(riscv_mhartid());
+      tcb->stack_alloc_ptr = (void *)g_cpux_idlestack(this_cpu());
       tcb->stack_base_ptr  = tcb->stack_alloc_ptr;
       tcb->adj_stack_size  = SMP_STACK_SIZE;
 
@@ -113,6 +115,12 @@ void up_initial_state(struct tcb_s *tcb)
       /* Set idle process' initial interrupt context */
 
       riscv_set_idleintctx();
+
+#ifdef CONFIG_LIB_SYSCALL
+      /* Update current thread pointer */
+
+      __asm__ __volatile__("mv tp, %0" : : "r"(tcb));
+#endif
       return;
     }
 
@@ -163,4 +171,14 @@ void up_initial_state(struct tcb_s *tcb)
 
   regval = riscv_get_newintctx();
   xcp->regs[REG_INT_CTX] = regval;
+
+  /* Initialize the state of the extended context */
+
+#ifdef CONFIG_ARCH_RISCV_INTXCPT_EXTENSIONS
+  riscv_initial_extctx_state(tcb);
+#endif
+
+#ifndef CONFIG_BUILD_FLAT
+  tcb->xcp.initregs = tcb->xcp.regs;
+#endif
 }

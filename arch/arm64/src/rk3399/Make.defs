@@ -1,6 +1,8 @@
 ############################################################################
 # arch/arm64/src/rk3399/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -21,7 +23,7 @@
 include common/Make.defs
 
 # Rockchip RK3399 specific C source files
-CHIP_CSRCS  = rk3399_boot.c rk3399_serial.c
+CHIP_CSRCS  = rk3399_boot.c rk3399_serial.c rk3399_timer.c
 
 ifeq ($(CONFIG_ARCH_EARLY_PRINT),y)
 CHIP_ASRCS  = rk3399_lowputc.S

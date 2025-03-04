@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/common/riscv_addrenv_pgmap.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -213,7 +215,7 @@ int up_addrenv_kmap_init(void)
 
   /* When all is set and done, flush the data caches */
 
-  __DMB();
+  UP_DMB();
 
   return OK;
 }

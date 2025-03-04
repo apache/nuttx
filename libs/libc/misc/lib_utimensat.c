@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/misc/lib_utimensat.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -64,20 +66,33 @@
 int utimensat(int dirfd, FAR const char *path,
               const struct timespec times[2], int flags)
 {
-  char fullpath[PATH_MAX];
+  FAR char *fullpath;
   int ret;
 
-  ret = lib_getfullpath(dirfd, path, fullpath, sizeof(fullpath));
+  fullpath = lib_get_pathbuffer();
+  if (fullpath == NULL)
+    {
+      set_errno(ENOMEM);
+      return ERROR;
+    }
+
+  ret = lib_getfullpath(dirfd, path, fullpath, PATH_MAX);
   if (ret < 0)
     {
+      lib_put_pathbuffer(fullpath);
       set_errno(-ret);
       return ERROR;
     }
 
   if ((flags & AT_SYMLINK_NOFOLLOW) != 0)
     {
-      return lutimens(fullpath, times);
+      ret = lutimens(fullpath, times);
+    }
+  else
+    {
+      ret = utimens(fullpath, times);
     }
 
-  return utimens(fullpath, times);
+  lib_put_pathbuffer(fullpath);
+  return ret;
 }

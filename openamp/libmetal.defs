@@ -1,6 +1,8 @@
 ############################################################################
 # openamp/libmetal.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -54,6 +56,10 @@ CSRCS += libmetal/lib/log.c
 CSRCS += libmetal/lib/shmem.c
 CSRCS += libmetal/lib/version.c
 
+ifeq ($(CONFIG_OPENAMP_CACHE),y)
+  CFLAGS += -DMETAL_CACHE
+endif
+
 CFLAGS += -DMETAL_INTERNAL
 
 LIBMETAL_HDRS_SEDEXP := \
@@ -73,20 +79,22 @@ LIBMETAL_HDRS_SEDEXP := \
 ifeq ($(wildcard libmetal/.git),)
 libmetal.zip:
 # Download and unpack tarball if no git repo found
-	$(call DOWNLOAD,https://github.com/OpenAMP/libmetal/archive,v$(VERSION).zip,libmetal.zip)
+	$(call DOWNLOAD,https://github.com/OpenAMP/libmetal/archive,$(LIBMETAL_COMMIT).zip,libmetal.zip)
 	$(Q) unzip -o libmetal.zip
-	$(Q) mv libmetal-$(VERSION) libmetal
-	$(Q) patch -p0 < 0001-libmetal-add-metal_list_for_each_safe-support.patch
-	$(Q) patch -p0 < 0002-libmetal-nuttx-io.c-align-access-when-read-write-siz.patch
-	$(Q) patch -p0 < 0003-libmetal-nuttx-io.c-Fix-void-pointer-arithmetic-in-a.patch
-	$(Q) patch -p0 < 0004-libmetal-atomic-enable-64-bit-atomic-by-toolchain-bu.patch
+	mv libmetal-$(LIBMETAL_COMMIT) libmetal
+	$(Q) patch -p0 < 0001-lib-errno.h-fix-compile-error.patch
+	$(Q) patch -p0 < 0002-libmetal-atomic-enable-64-bit-atomic-by-toolchain-bu.patch
+	$(Q) patch -p0 < 0003-atomic.h-fix-compiler-error.patch
+	$(Q) patch -p0 < 0004-lib-system-nuttx-fix-unused-parameter-compile-error.patch
+	$(Q) patch -p0 < 0005-libmetal-cmake-set-HAVE_STDATOMIC_H-default-true-in-.patch
+	$(Q) patch -p0 < 0006-lib-system-nuttx-io.c-include-stddef.h-in-nuttx-io.c.patch
 
 .libmetal_headers: libmetal.zip
 else
 .libmetal_headers:
 endif
 	$(eval headers := $(wildcard libmetal/lib/compiler/gcc/*.h))
-	$(eval headers += $(wildcard libmetal/lib/processor/$(LIBMETAL_ARCH)/*.h))
+	$(eval headers += $(wildcard libmetal/lib/processor/generic/*.h))
 	$(eval headers += $(wildcard libmetal/lib/system/nuttx/*.h))
 	$(eval headers += $(wildcard libmetal/lib/*.h))
 	$(foreach header,$(headers), \

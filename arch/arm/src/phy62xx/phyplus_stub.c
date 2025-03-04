@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/phy62xx/phyplus_stub.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -40,7 +42,6 @@
 #include "phyplus_tim.h"
 #include "timer.h"
 #include "mcu_phy_bumbee.h"
-#include "phyplus_gpio.h"
 
 /****************************************************************************
  * Pre-processor Definitions

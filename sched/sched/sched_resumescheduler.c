@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/sched/sched_resumescheduler.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -76,4 +78,4 @@ void nxsched_resume_scheduler(FAR struct tcb_s *tcb)
 #endif
 }
 
-#endif /* CONFIG_RR_INTERVAL > 0 || CONFIG_SCHED_RESUMESCHEDULER */
+#endif /* CONFIG_SCHED_RESUMESCHEDULER */

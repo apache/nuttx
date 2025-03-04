@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/stream/lib_rawsostream.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -45,7 +47,7 @@ static void rawsostream_putc(FAR struct lib_sostream_s *self, int ch)
   FAR struct lib_rawsostream_s *stream =
                                        (FAR struct lib_rawsostream_s *)self;
   char buffer = ch;
-  int nwritten;
+  ssize_t nwritten;
 
   DEBUGASSERT(self && stream->fd >= 0);
 
@@ -77,12 +79,12 @@ static void rawsostream_putc(FAR struct lib_sostream_s *self, int ch)
  * Name: rawsostream_puts
  ****************************************************************************/
 
-static int rawsostream_puts(FAR struct lib_sostream_s *self,
-                            FAR const void *buffer, int len)
+static ssize_t rawsostream_puts(FAR struct lib_sostream_s *self,
+                                FAR const void *buffer, size_t len)
 {
   FAR struct lib_rawsostream_s *stream =
                                        (FAR struct lib_rawsostream_s *)self;
-  int nwritten;
+  ssize_t nwritten;
 
   DEBUGASSERT(self && stream->fd >= 0);
 
@@ -123,7 +125,13 @@ static off_t rawsostream_seek(FAR struct lib_sostream_s *self, off_t offset,
                                        (FAR struct lib_rawsostream_s *)self;
 
   DEBUGASSERT(self);
-  return _NX_SEEK(stream->fd, offset, whence);
+  offset = _NX_SEEK(stream->fd, offset, whence);
+  if (offset < 0)
+    {
+      offset = _NX_GETERRVAL(offset);
+    }
+
+  return offset;
 }
 
 /****************************************************************************

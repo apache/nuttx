@@ -1,6 +1,8 @@
 /*****************************************************************************
  * include/nuttx/usb/cdc.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -247,7 +249,7 @@
                                       * defined interface for media specific hardware
                                       * configuration and management. (Optional)
                                       */
-#define ECM_GET_RESPONSE        0x01 /* equests a response in the format of the supported
+#define ECM_GET_RESPONSE        0x01 /* Requests a response in the format of the supported
                                       * control protocol.
                                       * (Optional)
                                       */

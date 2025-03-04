@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/s32k1xx/s32k1xx_serial.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -179,6 +181,7 @@
 struct s32k1xx_uart_s
 {
   struct uart_dev_s dev;    /* Generic UART device */
+  spinlock_t lock;          /* Spinlock */
   uint32_t uartbase;        /* Base address of UART registers */
   uint32_t baud;            /* Configured baud */
   uint32_t ie;              /* Saved enabled interrupts */
@@ -450,6 +453,7 @@ static struct s32k1xx_uart_s g_lpuart0priv =
 #  endif
         .priv         = &g_lpuart0priv,
       },
+  .lock         = SP_UNLOCKED,
   .uartbase     = S32K1XX_LPUART0_BASE,
   .baud         = CONFIG_LPUART0_BAUD,
   .irq          = S32K1XX_IRQ_LPUART0,
@@ -515,6 +519,7 @@ static struct s32k1xx_uart_s g_lpuart1priv =
           .priv           = &g_lpuart1priv,
   },
 
+  .lock         = SP_UNLOCKED,
   .uartbase     = S32K1XX_LPUART1_BASE,
   .baud         = CONFIG_LPUART1_BAUD,
   .irq          = S32K1XX_IRQ_LPUART1,
@@ -577,6 +582,7 @@ static struct s32k1xx_uart_s g_lpuart2priv =
         .priv           = &g_lpuart2priv,
   },
 
+  .lock         = SP_UNLOCKED,
   .uartbase     = S32K1XX_LPUART2_BASE,
   .baud         = CONFIG_LPUART2_BAUD,
   .irq          = S32K1XX_IRQ_LPUART2,
@@ -669,10 +675,8 @@ static int s32k1xx_dma_nextrx(struct s32k1xx_uart_s *priv)
 static inline void s32k1xx_disableuartint(struct s32k1xx_uart_s *priv,
                                           uint32_t *ie)
 {
-  irqstate_t flags;
   uint32_t regval;
 
-  flags  = spin_lock_irqsave(NULL);
   regval = s32k1xx_serialin(priv, S32K1XX_LPUART_CTRL_OFFSET);
 
   /* Return the current Rx and Tx interrupt state */
@@ -684,7 +688,6 @@ static inline void s32k1xx_disableuartint(struct s32k1xx_uart_s *priv,
 
   regval &= ~LPUART_ALL_INTS;
   s32k1xx_serialout(priv, S32K1XX_LPUART_CTRL_OFFSET, regval);
-  spin_unlock_irqrestore(NULL, flags);
 }
 
 /****************************************************************************
@@ -694,19 +697,16 @@ static inline void s32k1xx_disableuartint(struct s32k1xx_uart_s *priv,
 static inline void s32k1xx_restoreuartint(struct s32k1xx_uart_s *priv,
                                         uint32_t ie)
 {
-  irqstate_t flags;
   uint32_t regval;
 
   /* Enable/disable any interrupts that are currently disabled but should be
    * enabled/disabled.
    */
 
-  flags   = spin_lock_irqsave(NULL);
   regval  = s32k1xx_serialin(priv, S32K1XX_LPUART_CTRL_OFFSET);
   regval &= ~LPUART_ALL_INTS;
   regval |= ie;
   s32k1xx_serialout(priv, S32K1XX_LPUART_CTRL_OFFSET, regval);
-  spin_unlock_irqrestore(NULL, flags);
 }
 
 /****************************************************************************
@@ -1329,7 +1329,7 @@ static int s32k1xx_ioctl(struct file *filep, int cmd, unsigned long arg)
              * implement TCSADRAIN / TCSAFLUSH
              */
 
-            flags = spin_lock_irqsave(NULL);
+            flags = spin_lock_irqsave(&priv->lock);
             s32k1xx_disableuartint(priv, &ie);
             ret = dev->ops->setup(dev);
 
@@ -1337,7 +1337,7 @@ static int s32k1xx_ioctl(struct file *filep, int cmd, unsigned long arg)
 
             s32k1xx_restoreuartint(priv, ie);
             priv->ie = ie;
-            spin_unlock_irqrestore(NULL, flags);
+            spin_unlock_irqrestore(&priv->lock, flags);
           }
       }
       break;
@@ -1351,7 +1351,7 @@ static int s32k1xx_ioctl(struct file *filep, int cmd, unsigned long arg)
         uint32_t regval;
         struct s32k1xx_uart_s *priv = (struct s32k1xx_uart_s *)dev->priv;
 
-        flags  = spin_lock_irqsave(NULL);
+        flags  = spin_lock_irqsave(&priv->lock);
         ctrl   = s32k1xx_serialin(priv, S32K1XX_LPUART_CTRL_OFFSET);
         stat   = s32k1xx_serialin(priv, S32K1XX_LPUART_STAT_OFFSET);
         regval = ctrl;
@@ -1387,7 +1387,7 @@ static int s32k1xx_ioctl(struct file *filep, int cmd, unsigned long arg)
         s32k1xx_serialout(priv, S32K1XX_LPUART_STAT_OFFSET, stat);
         s32k1xx_serialout(priv, S32K1XX_LPUART_CTRL_OFFSET, ctrl);
 
-        spin_unlock_irqrestore(NULL, flags);
+        spin_unlock_irqrestore(&priv->lock, flags);
       }
       break;
 #endif
@@ -1441,7 +1441,7 @@ static void s32k1xx_rxint(struct uart_dev_s *dev, bool enable)
 
   /* Enable interrupts for data available at Rx */
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&priv->lock);
   if (enable)
     {
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
@@ -1457,7 +1457,7 @@ static void s32k1xx_rxint(struct uart_dev_s *dev, bool enable)
   regval &= ~LPUART_ALL_INTS;
   regval |= priv->ie;
   s32k1xx_serialout(priv, S32K1XX_LPUART_CTRL_OFFSET, regval);
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 #endif
 
@@ -1890,7 +1890,7 @@ static void s32k1xx_txint(struct uart_dev_s *dev, bool enable)
 
   /* Enable interrupt for TX complete */
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&priv->lock);
   if (enable)
     {
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
@@ -1906,7 +1906,7 @@ static void s32k1xx_txint(struct uart_dev_s *dev, bool enable)
   regval &= ~LPUART_ALL_INTS;
   regval |= priv->ie;
   s32k1xx_serialout(priv, S32K1XX_LPUART_CTRL_OFFSET, regval);
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 #endif
 
@@ -2544,29 +2544,20 @@ void arm_serialinit(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef CONSOLE_DEV
   struct s32k1xx_uart_s *priv =
       (struct s32k1xx_uart_s *)CONSOLE_DEV.dev.priv;
+  irqstate_t flags;
   uint32_t ie;
 
+  flags = spin_lock_irqsave(&priv->lock);
   s32k1xx_disableuartint(priv, &ie);
-
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      s32k1xx_lowputc('\r');
-    }
-
   s32k1xx_lowputc(ch);
   s32k1xx_restoreuartint(priv, ie);
+  spin_unlock_irqrestore(&priv->lock, flags);
 #endif
-
-  return ch;
 }
 
 #else /* USE_SERIALDRIVER */
@@ -2579,22 +2570,11 @@ int up_putc(int ch)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #if CONSOLE_LPUART > 0
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      arm_lowputc('\r');
-    }
-
   arm_lowputc(ch);
 #endif
-
-  return ch;
 }
 
 #endif /* USE_SERIALDRIVER */

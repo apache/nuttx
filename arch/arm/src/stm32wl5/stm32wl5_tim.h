@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32wl5/stm32wl5_tim.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -50,6 +52,8 @@
 #define STM32WL5_TIM_DISABLEINT(d,s)       ((d)->ops->disableint(d,s))
 #define STM32WL5_TIM_ACKINT(d,s)           ((d)->ops->ackint(d,s))
 #define STM32WL5_TIM_CHECKINT(d,s)         ((d)->ops->checkint(d,s))
+#define STM32_TIM_ENABLE(d)                ((d)->ops->enable(d))
+#define STM32_TIM_DISABLE(d)               ((d)->ops->disable(d))
 
 /****************************************************************************
  * Public Types
@@ -139,6 +143,8 @@ struct stm32wl5_tim_ops_s
 {
   /* Basic Timers */
 
+  void (*enable)(struct stm32wl5_tim_dev_s *dev);
+  void (*disable)(struct stm32wl5_tim_dev_s *dev);
   int  (*setmode)(struct stm32wl5_tim_dev_s *dev,
                   enum stm32wl5_tim_mode_e mode);
   int  (*setclock)(struct stm32wl5_tim_dev_s *dev, uint32_t freq);

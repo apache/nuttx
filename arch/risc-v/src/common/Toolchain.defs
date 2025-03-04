@@ -1,6 +1,8 @@
 ############################################################################
 # arch/risc-v/src/common/Toolchain.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -81,10 +83,6 @@ ifneq ($(CONFIG_STACK_USAGE_WARNING),0)
   ARCHOPTIMIZATION += -Wstack-usage=$(CONFIG_STACK_USAGE_WARNING)
 endif
 
-ifeq ($(CONFIG_ARCH_COVERAGE_ALL),y)
-  ARCHOPTIMIZATION += -fprofile-generate -ftest-coverage
-endif
-
 ARCHCFLAGS += -fno-common
 ARCHCXXFLAGS += -fno-common
 
@@ -150,7 +148,7 @@ ifeq ($(CONFIG_DEBUG_LINK_MAP),y)
 endif
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  ARCHOPTIMIZATION += -g
+  ARCHOPTIMIZATION += $(CONFIG_DEBUG_SYMBOLS_LEVEL)
 endif
 
 # Generic GNU RVG toolchain
@@ -214,10 +212,10 @@ ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RVG)
   endif
 
   ifeq ($(CONFIG_ARCH_RV_ISA_ZICSR_ZIFENCEI),y)
-    ifeq ($(GCCVER),)
-      export GCCVER = ${shell $(CROSSDEV)gcc --version | grep gcc | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | tail -n 1 | cut -d"." -f1 }
+    ifeq ($(shell expr "$(GCCVER)" \>= 12), 1)
+      ARCHCPUEXTFLAGS := $(ARCHCPUEXTFLAGS)_zicsr_zifencei
     endif
-    ifeq ($(shell expr $(GCCVER) \>= 12), 1)
+    ifeq ($(CONFIG_ARCH_TOOLCHAIN_CLANG),y)
       ARCHCPUEXTFLAGS := $(ARCHCPUEXTFLAGS)_zicsr_zifencei
     endif
   endif
@@ -279,22 +277,22 @@ endif
 # These models can't cover all implementation of RISCV, but it's enough for most cases.
 
 ifeq ($(CONFIG_ARCH_RV32),y)
-  ifeq ($(ARCHCPUEXTFLAGS), imc)
+  ifeq ($(findstring imc,$(ARCHCPUEXTFLAGS)),imc)
     LLVM_CPUTYPE := sifive-e20
-  else ifeq ($(ARCHCPUEXTFLAGS), imac)
+  else ifeq ($(findstring imac,$(ARCHCPUEXTFLAGS)),imac)
     LLVM_CPUTYPE := sifive-e31
-  else ifeq ($(ARCHCPUEXTFLAGS), imafc)
+  else ifeq ($(findstring imafc,$(ARCHCPUEXTFLAGS)),imafc)
     LLVM_CPUTYPE := sifive-e76
   endif
 else
-  ifeq ($(ARCHCPUEXTFLAGS), imac)
+  ifeq ($(findstring imac,$(ARCHCPUEXTFLAGS)),imac)
     LLVM_CPUTYPE := sifive-s51
-  else ifeq ($(ARCHCPUEXTFLAGS), imafdc)
+  else ifeq ($(findstring imafdc,$(ARCHCPUEXTFLAGS)),imafdc)
     LLVM_CPUTYPE := sifive-u54
   endif
 endif
 
-ifeq ($(CONFIG_MM_KASAN_ALL),y)
+ifeq ($(CONFIG_MM_KASAN_INSTRUMENT_ALL),y)
   ARCHOPTIMIZATION += -fsanitize=kernel-address
 endif
 
@@ -382,6 +380,22 @@ else
     endif
   endif
 
+  LDFLAGS += --print-memory-usage
+endif
+
+ifeq ($(CONFIG_ARCH_TOOLCHAIN_GNU),y)
+  ifeq ($(CONFIG_ARCH_TOOLCHAIN_CLANG),)
+    ifeq ($(GCCVER),)
+      export GCCVER := $(shell $(CC) --version | grep gcc | sed -E "s/.* ([0-9]+\.[0-9]+).*/\1/" | cut -d'.' -f1)
+    endif
+    ifeq ($(shell expr "$(GCCVER)" \>= 12), 1)
+      ifeq ($(CONFIG_ARCH_RAMFUNCS),y)
+        LDFLAGS += --no-warn-rwx-segments
+      else ifeq ($(CONFIG_BOOT_RUNFROMFLASH),)
+        LDFLAGS += --no-warn-rwx-segments
+      endif
+    endif
+  endif
 endif
 
 # Add the builtin library
@@ -401,13 +415,37 @@ ifeq ($(CONFIG_LIBM_TOOLCHAIN),y)
   EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libm.a))
 endif
 
-ifeq ($(CONFIG_LIBSUPCXX),y)
+ifeq ($(CONFIG_LIBSUPCXX_TOOLCHAIN),y)
   EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libsupc++.a))
 endif
 
-ifeq ($(CONFIG_ARCH_COVERAGE),y)
+ifeq ($(CONFIG_COVERAGE_TOOLCHAIN),y)
   EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libgcov.a))
 endif
+
+# Loadable module definitions
+
+CMODULEFLAGS = $(CFLAGS) -fvisibility=hidden
+LDMODULEFLAGS = -r -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/modlib/gnu-elf.ld)
+
+# ELF module definitions
+
+CELFFLAGS = $(CFLAGS) -fvisibility=hidden
+CXXELFFLAGS = $(CXXFLAGS) -fvisibility=hidden
+
+LDELFFLAGS = -e main
+
+ifeq ($(CONFIG_BINFMT_ELF_RELOCATABLE),y)
+  LDELFFLAGS += -r
+endif
+
+ifeq ($(CONFIG_ARCH_RV32),y)
+  LDELFFLAGS += --oformat elf32-littleriscv
+else
+  LDELFFLAGS += --oformat elf64-littleriscv
+endif
+
+LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/modlib/gnu-elf.ld)
 
 # Zig toolchain
 

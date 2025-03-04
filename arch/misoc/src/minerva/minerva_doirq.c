@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/misoc/src/minerva/minerva_doirq.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -45,6 +47,14 @@
 
 uint32_t *minerva_doirq(int irq, uint32_t * regs)
 {
+  struct tcb_s **running_task = &g_running_tasks[this_cpu()];
+  struct tcb_s *tcb;
+
+  if (*running_task != NULL)
+    {
+      minerva_copystate((*running_task)->xcp.regs, regs);
+    }
+
   board_autoled_on(LED_INIRQ);
 
   /* Current regs non-zero indicates that we are processing an interrupt;
@@ -52,8 +62,8 @@ uint32_t *minerva_doirq(int irq, uint32_t * regs)
    * Nested interrupts are not supported
    */
 
-  DEBUGASSERT(g_current_regs == NULL);
-  g_current_regs = regs;
+  DEBUGASSERT(up_current_regs() == NULL);
+  up_set_current_regs(regs);
 
   /* Disable further occurrences of this interrupt (until the interrupt
    * sources have been clear by the driver).
@@ -72,13 +82,15 @@ uint32_t *minerva_doirq(int irq, uint32_t * regs)
    * returning from the interrupt.
    */
 
-  if (regs != g_current_regs)
+  if (regs != up_current_regs())
     {
 #ifdef CONFIG_ARCH_FPU
       /* Restore floating point registers */
 
-      up_restorefpu((uint32_t *) g_current_regs);
+      up_restorefpu(up_current_regs());
 #endif
+
+      tcb = this_task();
 
 #ifdef CONFIG_ARCH_ADDRENV
       /* Make sure that the address environment for the previously running
@@ -87,7 +99,7 @@ uint32_t *minerva_doirq(int irq, uint32_t * regs)
        * the ready-to-run list.
        */
 
-      addrenv_switch(NULL);
+      addrenv_switch(tcb);
 #endif
 
       /* Record the new "running" task when context switch occurred.
@@ -95,7 +107,7 @@ uint32_t *minerva_doirq(int irq, uint32_t * regs)
        * crashes.
        */
 
-      g_running_tasks[this_cpu()] = this_task();
+      g_running_tasks[this_cpu()] = tcb;
     }
 
   /* If a context switch occurred while processing the interrupt then
@@ -104,13 +116,13 @@ uint32_t *minerva_doirq(int irq, uint32_t * regs)
    * switch occurred during interrupt processing.
    */
 
-  regs = (uint32_t *) g_current_regs;
+  regs = up_current_regs();
 
   /* Set g_current_regs to NULL to indicate that we are no longer in an
    * interrupt handler.
    */
 
-  g_current_regs = NULL;
+  up_set_current_regs(NULL);
 
   /* Unmask the last interrupt (global interrupts are still disabled) */
 

@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/group/group_exitinfo.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -68,14 +70,14 @@ int group_exitinfo(pid_t pid, FAR struct binary_s *bininfo)
   irqstate_t flags;
 
   DEBUGASSERT(bininfo != NULL);
-  flags = spin_lock_irqsave(NULL);
+  flags = enter_critical_section();
 
   /* Get the TCB associated with the PID */
 
   tcb = nxsched_get_tcb(pid);
   if (tcb == NULL)
     {
-      spin_unlock_irqrestore(NULL, flags);
+      leave_critical_section(flags);
       return -ESRCH;
     }
 
@@ -88,7 +90,7 @@ int group_exitinfo(pid_t pid, FAR struct binary_s *bininfo)
 
   group->tg_bininfo = bininfo;
 
-  spin_unlock_irqrestore(NULL, flags);
+  leave_critical_section(flags);
   return OK;
 }
 

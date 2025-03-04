@@ -1,8 +1,9 @@
 /****************************************************************************
  * boards/arm/stm32l4/stm32l476-mdk/include/board.h
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Copyright (C) 2016 Motorola Mobility, LLC.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2016 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2016 Motorola Mobility, LLC.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

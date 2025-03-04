@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/wdog/wd_initialize.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -24,7 +26,7 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/queue.h>
+#include <nuttx/list.h>
 
 #include "wdog/wdog.h"
 
@@ -32,20 +34,14 @@
  * Public Data
  ****************************************************************************/
 
+spinlock_t g_wdspinlock = SP_UNLOCKED;
+
 /* The g_wdactivelist data structure is a singly linked list ordered by
  * watchdog expiration time. When watchdog timers expire,the functions on
  * this linked list are removed and the function is called.
  */
 
-sq_queue_t g_wdactivelist;
-
-/* This is wdog tickbase, for wd_gettime() may called many times
- * between 2 times of wd_timer(), we use it to update wd_gettime().
- */
-
-#ifdef CONFIG_SCHED_TICKLESS
-clock_t g_wdtickbase;
-#endif
+struct list_node g_wdactivelist = LIST_INITIAL_VALUE(g_wdactivelist);
 
 /****************************************************************************
  * Public Functions

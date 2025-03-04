@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/stdio/lib_vsscanf.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -22,13 +24,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <stdio.h>
-
 #include <nuttx/streams.h>
-
-#include "libc.h"
 
 /****************************************************************************
  * Public Functions
@@ -45,7 +41,7 @@ int vsscanf(FAR const char *buf, FAR const IPTR char *fmt, va_list ap)
 
   /* Initialize a memory stream to freadm from the buffer */
 
-  lib_meminstream(&meminstream, buf, LIB_BUFLEN_UNKNOWN);
+  lib_meminstream(&meminstream, buf, strlen(buf));
 
   /* Then let lib_vscanf do the real work */
 

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/armv8-m/arm_securefault.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -112,16 +114,15 @@ int arm_securefault(int irq, void *context, void *arg)
       sfalert("\tLazy state error\n");
     }
 
-  /* clear SFSR sticky bits */
-
-  putreg32(0xff, SAU_SFSR);
-
 #ifdef CONFIG_DEBUG_SECUREFAULT
   if (arm_gen_nonsecurefault(irq, context))
     {
+      putreg32(0xff, SAU_SFSR);
       return OK;
     }
 #endif
+
+  putreg32(0xff, SAU_SFSR);
 
   up_irq_save();
   PANIC_WITH_REGS("panic", context);

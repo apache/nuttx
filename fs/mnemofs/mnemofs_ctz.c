@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/mnemofs/mnemofs_ctz.c
  *
+ * SPDX-License-Identifier: Apache-2.0 or BSD-3-Clause
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -97,11 +99,12 @@
 #include <debug.h>
 #include <fcntl.h>
 #include <nuttx/kmalloc.h>
-#include <math.h> 
+#include <math.h>
 #include <sys/param.h>
 #include <sys/stat.h>
 
 #include "mnemofs.h"
+#include "fs_heap.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -452,7 +455,7 @@ int mfs_ctz_wrtnode(FAR struct mfs_sb_s * const sb,
 
   /* So, till cur_idx - 1, the CTZ blocks are common. */
 
-  buf = kmm_zalloc(MFS_PGSZ(sb));
+  buf = fs_heap_zalloc(MFS_PGSZ(sb));
   if (predict_false(buf == NULL))
     {
       ret = -ENOMEM;
@@ -595,7 +598,7 @@ int mfs_ctz_wrtnode(FAR struct mfs_sb_s * const sb,
     }
 
 errout_with_buf:
-  kmm_free(buf);
+  fs_heap_free(buf);
 
 errout:
   return ret;

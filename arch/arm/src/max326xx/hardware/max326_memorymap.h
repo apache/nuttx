@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/max326xx/hardware/max326_memorymap.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -31,6 +33,8 @@
 #  include "hardware/max32620_30_memorymap.h"
 #elif defined(CONFIG_ARCH_FAMILY_MAX32660)
 #  include "hardware/max32660_memorymap.h"
+#elif defined(CONFIG_ARCH_FAMILY_MAX32690)
+#  include "hardware/max32690_memorymap.h"
 #else
 #  error "Unsupported MAX326XX family"
 #endif

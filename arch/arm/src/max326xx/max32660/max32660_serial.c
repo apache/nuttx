@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/max326xx/max32660/max32660_serial.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -47,8 +49,6 @@
 #include "max326_clockconfig.h"
 #include "max326_lowputc.h"
 #include "max326_serial.h"
-
-#include <arch/board/board.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -127,6 +127,7 @@ struct max326_dev_s
 {
   uintptr_t uartbase;  /* Base address of UART registers */
   uint8_t   irq;       /* IRQ associated with this UART */
+  spinlock_t lock;     /* Spinlock */
 
   /* UART configuration */
 
@@ -192,6 +193,7 @@ static struct max326_dev_s g_uart0priv =
 {
   .uartbase       = MAX326_UART0_BASE,
   .irq            = MAX326_IRQ_UART0,
+  .lock           = SP_UNLOCKED,
   .config         =
   {
     .baud         = CONFIG_UART0_BAUD,
@@ -236,6 +238,7 @@ static struct max326_dev_s g_uart1priv =
 {
   .uartbase       = MAX326_UART1_BASE,
   .irq            = MAX326_IRQ_UART1,
+  .lock           = SP_UNLOCKED,
   .config         =
   {
     .baud         = CONFIG_UART1_BAUD,
@@ -307,11 +310,11 @@ static inline void max326_int_enable(struct max326_dev_s *priv,
   irqstate_t flags;
   uint32_t regval;
 
-  flags   = spin_lock_irqsave(NULL);
+  flags   = spin_lock_irqsave(&priv->lock);
   regval  = max326_serialin(priv, MAX326_UART_INTEN_OFFSET);
   regval |= intset;
   max326_serialout(priv, MAX326_UART_INTEN_OFFSET, regval);
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************
@@ -324,11 +327,11 @@ static inline void max326_int_disable(struct max326_dev_s *priv,
   irqstate_t flags;
   uint32_t regval;
 
-  flags   = spin_lock_irqsave(NULL);
+  flags   = spin_lock_irqsave(&priv->lock);
   regval  = max326_serialin(priv, MAX326_UART_INTEN_OFFSET);
   regval &= ~intset;
   max326_serialout(priv, MAX326_UART_INTEN_OFFSET, regval);
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************
@@ -340,14 +343,14 @@ static void max326_int_disableall(struct max326_dev_s *priv,
 {
   irqstate_t flags;
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&priv->lock);
   if (intset)
     {
       *intset = max326_serialin(priv, MAX326_UART_INTEN_OFFSET);
     }
 
   max326_serialout(priv, MAX326_UART_INTEN_OFFSET, 0);
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************
@@ -825,28 +828,16 @@ void arm_serialinit(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef HAVE_UART_CONSOLE
   struct max326_dev_s *priv = (struct max326_dev_s *)CONSOLE_DEV.priv;
   uint32_t intset;
 
   max326_int_disableall(priv, &intset);
-
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      arm_lowputc('\r');
-    }
-
   arm_lowputc(ch);
   max326_int_enable(priv, intset);
 #endif
-
-  return ch;
 }
 
 #else /* USE_SERIALDRIVER */
@@ -859,20 +850,10 @@ int up_putc(int ch)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef HAVE_UART_CONSOLE
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      arm_lowputc('\r');
-    }
-
   arm_lowputc(ch);
-  return ch;
 }
 #endif
 

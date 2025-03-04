@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/irq.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -78,9 +80,7 @@
   do \
     { \
       g_cpu_irqset = 0; \
-      SP_DMB(); \
-      g_cpu_irqlock = SP_UNLOCKED; \
-      SP_DSB(); \
+      spin_unlock_notrace(&g_cpu_irqlock); \
     } \
   while (0)
 #endif
@@ -92,6 +92,32 @@
 /* Handler requests to wake the handler thread */
 
 #define IRQ_WAKE_THREAD 1
+
+/* Scheduling monitor */
+
+#ifndef CONFIG_SCHED_CRITMONITOR_MAXTIME_THREAD
+#  define CONFIG_SCHED_CRITMONITOR_MAXTIME_THREAD -1
+#endif
+
+#ifndef CONFIG_SCHED_CRITMONITOR_MAXTIME_WQUEUE
+#  define CONFIG_SCHED_CRITMONITOR_MAXTIME_WQUEUE -1
+#endif
+
+#ifndef CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION
+#  define CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION -1
+#endif
+
+#ifndef CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION
+#  define CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION -1
+#endif
+
+#ifndef CONFIG_SCHED_CRITMONITOR_MAXTIME_IRQ
+#  define CONFIG_SCHED_CRITMONITOR_MAXTIME_IRQ -1
+#endif
+
+#ifndef CONFIG_SCHED_CRITMONITOR_MAXTIME_WDOG
+#  define CONFIG_SCHED_CRITMONITOR_MAXTIME_WDOG -1
+#endif
 
 /****************************************************************************
  * Public Types
@@ -258,9 +284,17 @@ int irqchain_detach(int irq, xcpt_t isr, FAR void *arg);
  ****************************************************************************/
 
 #ifdef CONFIG_IRQCOUNT
+#  if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0 || \
+      defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION)
 irqstate_t enter_critical_section(void) noinstrument_function;
+#  else
+#    define enter_critical_section() enter_critical_section_wo_note()
+#  endif
+
+irqstate_t enter_critical_section_wo_note(void) noinstrument_function;
 #else
 #  define enter_critical_section() up_irq_save()
+#  define enter_critical_section_wo_note() up_irq_save()
 #endif
 
 /****************************************************************************
@@ -288,9 +322,17 @@ irqstate_t enter_critical_section(void) noinstrument_function;
  ****************************************************************************/
 
 #ifdef CONFIG_IRQCOUNT
+#  if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0 || \
+      defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION)
 void leave_critical_section(irqstate_t flags) noinstrument_function;
+#  else
+#    define leave_critical_section(f) leave_critical_section_wo_note(f)
+#  endif
+
+void leave_critical_section_wo_note(irqstate_t flags) noinstrument_function;
 #else
 #  define leave_critical_section(f) up_irq_restore(f)
+#  define leave_critical_section_wo_note(f) up_irq_restore(f)
 #endif
 
 /****************************************************************************
@@ -308,9 +350,18 @@ void leave_critical_section(irqstate_t flags) noinstrument_function;
  ****************************************************************************/
 
 #ifdef CONFIG_SMP
-void restore_critical_section(void);
+#  define restore_critical_section(tcb, cpu) \
+   do { \
+       if (tcb->irqcount <= 0) \
+         {\
+           if ((g_cpu_irqset & (1 << cpu)) != 0) \
+             { \
+               cpu_irqlock_clear(); \
+             } \
+         } \
+    } while (0)
 #else
-#  define restore_critical_section()
+#  define restore_critical_section(tcb, cpu)
 #endif
 
 #undef EXTERN

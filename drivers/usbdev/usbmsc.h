@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/usbdev/usbmsc.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -309,15 +311,14 @@
 
 /* Configuration descriptor size */
 
-#ifndef CONFIG_USBMSC_COMPOSITE
-
-/* The size of the config descriptor: (9 + 9 + 2*7) = 32 */
+#if defined(CONFIG_USBDEV_COMPOSITE) && defined(CONFIG_USBMSC_COMPOSITE)
+/* The size of the config descriptor: (9 + 2*7 + 2*6) = 35 */
 
 #  define SIZEOF_USBMSC_CFGDESC \
-     (USB_SIZEOF_CFGDESC + USB_SIZEOF_IFDESC + USBMSC_NENDPOINTS * USB_SIZEOF_EPDESC)
+     (USB_SIZEOF_IFDESC + USBMSC_NENDPOINTS * USB_SIZEOF_EPDESC + \
+      USBMSC_NENDPOINTS * USB_SIZEOF_SS_EPCOMPDESC)
 
 #else
-
 /* The size of the config descriptor: (9 + 2*7) = 23 */
 
 #  define SIZEOF_USBMSC_CFGDESC \

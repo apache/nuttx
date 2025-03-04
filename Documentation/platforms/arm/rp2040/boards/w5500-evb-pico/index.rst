@@ -165,7 +165,7 @@ Installation
 
 ::
 
-  $ git clone -b 1.1.2 https://github.com/raspberrypi/pico-sdk.git
+  $ git clone -b 2.0.0 https://github.com/raspberrypi/pico-sdk.git
 
 2. Set PICO_SDK_PATH environment variable
 

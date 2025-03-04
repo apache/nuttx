@@ -1,6 +1,8 @@
 ############################################################################
 # arch/x86_64/src/Makefile
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -18,7 +20,7 @@
 #
 ############################################################################
 
-include $(TOPDIR)/tools/apps-or-nuttx-Make.defs
+include $(TOPDIR)/tools/Make.defs
 include chip/Make.defs
 
 ifeq ($(CONFIG_ARCH_INTEL64),y)
@@ -93,8 +95,12 @@ ifeq ($(CONFIG_LIBM_TOOLCHAIN),y)
   EXTRA_LIBS += ${wildcard ${shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libm.a}}
 endif
 
-ifeq ($(CONFIG_LIBSUPCXX),y)
+ifeq ($(CONFIG_LIBSUPCXX_TOOLCHAIN),y)
   EXTRA_LIBS += ${wildcard ${shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libsupc++.a}}
+endif
+
+ifeq ($(CONFIG_CXX_EXCEPTION),y)
+  EXTRA_LIBS += ${wildcard ${shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libgcc_eh.a}}
 endif
 
 VPATH = chip:common:$(ARCH_SUBDIR)
@@ -123,15 +129,58 @@ $(KBIN): $(OBJS)
 board/libboard$(LIBEXT):
 	$(Q) $(MAKE) -C board libboard$(LIBEXT) EXTRAFLAGS="$(EXTRAFLAGS)"
 
-nuttx$(EXEEXT): board/libboard$(LIBEXT) $(ARCHSCRIPT)
-	@echo "LD: nuttx$(EXEEXT)"
+ifeq ($(CONFIG_ALLSYMS),y)
+EXTRA_LIBS += allsyms$(OBJEXT)
+endif
+
+ifeq ($(CONFIG_MM_KASAN_GLOBAL),y)
+EXTRA_LIBS += kasan_globals$(OBJEXT)
+endif
+
+define LINK_ALLSYMS_KASAN
+	$(if $(CONFIG_ALLSYMS),
+	$(Q) $(TOPDIR)/tools/mkallsyms.py $(NUTTX) allsyms.tmp --orderbyname $(CONFIG_SYMTAB_ORDEREDBYNAME)
+	$(Q) $(call COMPILE, allsyms.tmp, allsyms$(OBJEXT), -x c)
+	$(Q) $(call DELFILE, allsyms.tmp))
+	$(if $(CONFIG_MM_KASAN_GLOBAL),
+	$(Q) $(TOPDIR)/tools/kasan_global.py -e $(NUTTX) -o kasan_globals.tmp -a $(CONFIG_MM_KASAN_GLOBAL_ALIGN)
+	$(Q) $(call COMPILE, kasan_globals.tmp, kasan_globals$(OBJEXT) -fno-sanitize=kernel-address, -x c)
+	$(Q) $(call DELFILE, kasan_globals.tmp))
 	$(Q) $(LD) $(LDFLAGS) $(LIBPATHS) $(EXTRA_LIBPATHS) \
-		-o $(NUTTX) $(EXTRA_OBJS) \
+		-o $(NUTTX) $(HEAD_OBJ) $(EXTRA_OBJS) \
 		$(LDSTARTGROUP) $(EXTRA_LIBS) --no-relax $(LDLIBS) $(LDENDGROUP)
+endef
+
+$(addsuffix .tmp,$(ARCHSCRIPT)): $(ARCHSCRIPT)
+	$(call PREPROCESS, $(patsubst %.tmp,%,$@), $@)
+
+nuttx$(EXEEXT): $(HEAD_OBJ) board/libboard$(LIBEXT) $(addsuffix .tmp,$(ARCHSCRIPT))
+	@echo "LD: nuttx$(EXEEXT)"
+
+ifeq ($(CONFIG_ALLSYMS)$(CONFIG_MM_KASAN_GLOBAL),)
+	$(Q) $(LD) $(LDFLAGS) $(LIBPATHS) $(EXTRA_LIBPATHS) \
+		-o $(NUTTX) $(HEAD_OBJ) $(EXTRA_OBJS) \
+		$(LDSTARTGROUP) $(EXTRA_LIBS) --no-relax $(LDLIBS) $(LDENDGROUP)
+else
+	$(Q) $(call LINK_ALLSYMS_KASAN)
+	$(Q) $(call LINK_ALLSYMS_KASAN)
+	$(Q) $(call LINK_ALLSYMS_KASAN)
+	$(Q) $(call LINK_ALLSYMS_KASAN)
+endif
+	$(Q) $(call DELFILE, $(addsuffix .tmp,$(ARCHSCRIPT)))
+
 ifneq ($(CONFIG_WINDOWS_NATIVE),y)
 	$(Q) $(NM) $(NUTTX) | \
 	grep -v '\(compiled\)\|\(\$(OBJEXT)$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | \
 	sort > $(TOPDIR)/System.map
+endif
+
+ifeq ($(CONFIG_ARCH_MULTIBOOT1),y)
+	@echo "Generating: nuttx32 in ELF32/multiboot1"
+	$(Q) $(OBJCOPY) -R.realmode -R.note.* -O binary $(NUTTX) $(NUTTX).bin \
+	&& $(OBJCOPY) -j.realmode -O binary $(NUTTX) $(NUTTX)_realmode.bin \
+	&& $(CC) -m32 -no-pie -nostdlib common/multiboot1.S \
+			-T common/multiboot1.ld -o $(NUTTX)32
 endif
 
 # This is part of the top-level export target

@@ -225,8 +225,7 @@ Debugging
 If you are going to use a debugger, you should make sure that the following
 settings are selection in your configuration file::
 
-    CONFIG_DEBUG_SYMBOLS=y     : Enable debug symbols in the build
-    CONFIG_ARMV7M_USEBASEPRI=y : Use the BASEPRI register to disable interrupts
+    CONFIG_DEBUG_SYMBOLS=y : Enable debug symbols in the build
 
 STM32 ST-LINK Utility
 ---------------------

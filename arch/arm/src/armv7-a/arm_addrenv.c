@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/armv7-a/arm_addrenv.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -556,7 +558,7 @@ int up_addrenv_select(const arch_addrenv_t *addrenv)
         }
       else
         {
-          binfo("data: clear l1 (vaddr=%x)\n", vaddr);
+          binfo("heap: clear l1 (vaddr=%x)\n", vaddr);
           mmu_l1_clrentry(vaddr);
         }
     }

@@ -1,6 +1,7 @@
 /****************************************************************************
  * net/can/can_input.c
- * Handling incoming packet input
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -31,6 +32,7 @@
 
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/can.h>
+#include <nuttx/net/netstats.h>
 
 #include "devif/devif.h"
 #include "can/can.h"
@@ -39,92 +41,92 @@
  * Public Data
  ****************************************************************************/
 
-const uint8_t can_dlc_to_len[16] =
+const uint8_t g_can_dlc_to_len[16] =
 {
-    0,
-    1,
-    2,
-    3,
-    4,
-    5,
-    6,
-    7,
-    8,
-    12,
-    16,
-    20,
-    24,
-    32,
-    48,
-    64,
+  0,
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  12,
+  16,
+  20,
+  24,
+  32,
+  48,
+  64,
 };
-const uint8_t len_to_can_dlc[65] =
+const uint8_t g_len_to_can_dlc[65] =
 {
-    0,
-    1,
-    2,
-    3,
-    4,
-    5,
-    6,
-    7,
-    8,
-    9,
-    9,
-    9,
-    9,
-    10,
-    10,
-    10,
-    10,
-    11,
-    11,
-    11,
-    11,
-    12,
-    12,
-    12,
-    12,
-    13,
-    13,
-    13,
-    13,
-    13,
-    13,
-    13,
-    13,
-    14,
-    14,
-    14,
-    14,
-    14,
-    14,
-    14,
-    14,
-    14,
-    14,
-    14,
-    14,
-    14,
-    14,
-    14,
-    14,
-    15,
-    15,
-    15,
-    15,
-    15,
-    15,
-    15,
-    15,
-    15,
-    15,
-    15,
-    15,
-    15,
-    15,
-    15,
-    15,
+  0,
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  9,
+  9,
+  9,
+  10,
+  10,
+  10,
+  10,
+  11,
+  11,
+  11,
+  11,
+  12,
+  12,
+  12,
+  12,
+  13,
+  13,
+  13,
+  13,
+  13,
+  13,
+  13,
+  13,
+  14,
+  14,
+  14,
+  14,
+  14,
+  14,
+  14,
+  14,
+  14,
+  14,
+  14,
+  14,
+  14,
+  14,
+  14,
+  14,
+  15,
+  15,
+  15,
+  15,
+  15,
+  15,
+  15,
+  15,
+  15,
+  15,
+  15,
+  15,
+  15,
+  15,
+  15,
+  15,
 };
 
 /****************************************************************************
@@ -269,6 +271,10 @@ int can_input(FAR struct net_driver_s *dev)
   FAR uint8_t *buf;
   int ret;
 
+#ifdef CONFIG_NET_STATISTICS
+  g_netstats.can.recv++;
+#endif
+
   if (dev->d_iob != NULL)
     {
       buf = dev->d_buf;
@@ -283,7 +289,15 @@ int can_input(FAR struct net_driver_s *dev)
       return ret;
     }
 
-  return netdev_input(dev, can_in, false);
+  ret = netdev_input(dev, can_in, false);
+  if (ret < 0)
+    {
+#ifdef CONFIG_NET_STATISTICS
+    g_netstats.can.drop++;
+#endif
+    }
+
+  return ret;
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_CAN */

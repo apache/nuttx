@@ -2,6 +2,8 @@
 ############################################################################
 # tools/ci/platforms/darwin.sh
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -19,19 +21,38 @@
 #
 ############################################################################
 
-# Darwin
+# NuttX CI Job for macOS, runs on Apple Intel Mac
 
 # Prerequisites for macOS
 #  - Xcode (cc, etc)
 #  - homebrew
-#  - autoconf
+#  - curl
 #  - wget
+#  - cmake
 
 set -e
 set -o xtrace
 
 add_path() {
   PATH=$1:${PATH}
+}
+
+arm_clang_toolchain() {
+  add_path "${NUTTXTOOLS}"/clang-arm-none-eabi/bin
+
+  if [ ! -f "${NUTTXTOOLS}/clang-arm-none-eabi/bin/clang" ]; then
+    local basefile
+    basefile=LLVMEmbeddedToolchainForArm-17.0.1-Darwin
+    cd "${NUTTXTOOLS}"
+    # Download the latest ARM clang toolchain prebuilt by ARM
+    curl -O -L -s https://github.com/ARM-software/LLVM-embedded-toolchain-for-Arm/releases/download/release-17.0.1/${basefile}.dmg
+    sudo hdiutil attach ${basefile}.dmg
+    sudo cp -R /Volumes/${basefile}/${basefile} "${NUTTXTOOLS}"/${basefile}
+    sudo mv ${basefile} clang-arm-none-eabi
+    rm ${basefile}.dmg
+  fi
+
+  command clang --version
 }
 
 arm_gcc_toolchain() {
@@ -41,7 +62,7 @@ arm_gcc_toolchain() {
     local basefile
     basefile=arm-gnu-toolchain-13.2.rel1-darwin-x86_64-arm-none-eabi
     cd "${NUTTXTOOLS}"
-    wget --quiet https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/${basefile}.tar.xz
+    curl -O -L -s https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/${basefile}.tar.xz
     xz -d ${basefile}.tar.xz
     tar xf ${basefile}.tar
     mv ${basefile} gcc-arm-none-eabi
@@ -59,7 +80,7 @@ arm64_gcc_toolchain() {
     basefile=arm-gnu-toolchain-13.2.Rel1-darwin-x86_64-aarch64-none-elf
     cd "${NUTTXTOOLS}"
     # Download the latest ARM64 GCC toolchain prebuilt by ARM
-    wget --quiet https://developer.arm.com/-/media/Files/downloads/gnu/13.2.Rel1/binrel/${basefile}.tar.xz
+    curl -O -L -s https://developer.arm.com/-/media/Files/downloads/gnu/13.2.Rel1/binrel/${basefile}.tar.xz
     xz -d ${basefile}.tar.xz
     tar xf ${basefile}.tar
     mv ${basefile} gcc-aarch64-none-elf
@@ -78,12 +99,20 @@ avr_gcc_toolchain() {
   command avr-gcc --version
 }
 
+autoconf_brew() {
+  if ! type autoconf > /dev/null 2>&1; then
+    brew install autoconf
+  fi
+
+  command autoconf --version
+}
+
 binutils() {
-  mkdir -p "${NUTTXTOOLS}"/bintools/bin
   add_path "${NUTTXTOOLS}"/bintools/bin
 
   if ! type objcopy > /dev/null 2>&1; then
     brew install binutils
+    mkdir -p "${NUTTXTOOLS}"/bintools/bin
     # It is possible we cached prebuilt but did brew install so recreate
     # symlink if it exists
     rm -f "${NUTTXTOOLS}"/bintools/bin/objcopy
@@ -101,9 +130,11 @@ bloaty() {
     cd "${NUTTXTOOLS}"/bloaty-src
     # Due to issues with latest MacOS versions use pinned commit.
     # https://github.com/google/bloaty/pull/326
-    git checkout 52948c107c8f81045e7f9223ec02706b19cfa882
+    # https://github.com/google/bloaty/pull/347
+    # https://github.com/google/bloaty/pull/385
+    git checkout 8026607280ef139bc0ea806e88cfe4fd0af60bad
     mkdir -p "${NUTTXTOOLS}"/bloaty
-    cmake -B build/bloaty -D BLOATY_PREFER_SYSTEM_CAPSTONE=NO -D CMAKE_INSTALL_PREFIX="${NUTTXTOOLS}"/bloaty
+    cmake -B build/bloaty -GNinja -D BLOATY_PREFER_SYSTEM_CAPSTONE=NO -D CMAKE_INSTALL_PREFIX="${NUTTXTOOLS}"/bloaty
     cmake --build build/bloaty
     cmake --build build/bloaty --target install
     cd "${NUTTXTOOLS}"
@@ -120,6 +151,7 @@ c_cache() {
   if ! type ccache > /dev/null 2>&1; then
     brew install ccache
   fi
+
   setup_links
   command ccache --version
 }
@@ -147,7 +179,7 @@ gperf() {
     basefile=gperf-3.1
 
     cd "${NUTTXTOOLS}"
-    wget --quiet http://ftp.gnu.org/pub/gnu/gperf/${basefile}.tar.gz
+    curl -O -L -s http://ftp.gnu.org/pub/gnu/gperf/${basefile}.tar.gz
     tar zxf ${basefile}.tar.gz
     cd "${NUTTXTOOLS}"/${basefile}
     ./configure --prefix="${NUTTXTOOLS}"/gperf; make; make install
@@ -162,7 +194,7 @@ kconfig_frontends() {
   add_path "${NUTTXTOOLS}"/kconfig-frontends/bin
 
   if [ ! -f "${NUTTXTOOLS}/kconfig-frontends/bin/kconfig-conf" ]; then
-    git clone https://bitbucket.org/nuttx/tools.git "${NUTTXTOOLS}"/nuttx-tools
+    git clone --depth 1 https://bitbucket.org/nuttx/tools.git "${NUTTXTOOLS}"/nuttx-tools
     cd "${NUTTXTOOLS}"/nuttx-tools/kconfig-frontends
     ./configure --prefix="${NUTTXTOOLS}"/kconfig-frontends \
       --disable-kconfig --disable-nconf --disable-qconf \
@@ -187,14 +219,28 @@ mips_gcc_toolchain() {
   command mips-elf-gcc --version
 }
 
-python_tools() {
-  # Python User Env
-  export PIP_USER=yes
-  export PYTHONUSERBASE=${NUTTXTOOLS}/pylocal
-  echo "export PIP_USER=yes" >> "${NUTTXTOOLS}"/env.sh
-  echo "export PYTHONUSERBASE=${NUTTXTOOLS}/pylocal" >> "${NUTTXTOOLS}"/env.sh
-  add_path "${PYTHONUSERBASE}"/bin
+ninja_brew() {
+  if ! type ninja > /dev/null 2>&1; then
+    brew install ninja
+  fi
 
+  command ninja --version
+}
+
+python_tools() {
+  if [ -z "${VIRTUAL_ENV}" ]; then
+    # Python User Env
+    export PIP_USER=yes
+    export PYTHONUSERBASE=${NUTTXTOOLS}/pylocal
+    echo "export PIP_USER=yes" >> "${NUTTXTOOLS}"/env.sh
+    echo "export PYTHONUSERBASE=${NUTTXTOOLS}/pylocal" >> "${NUTTXTOOLS}"/env.sh
+    add_path "${PYTHONUSERBASE}"/bin
+  fi
+  
+  if [ "X$osarch" == "Xarm64" ]; then
+    python3 -m venv --system-site-packages /opt/homebrew
+  fi
+  
   # workaround for Cython issue
   # https://github.com/yaml/pyyaml/pull/702#issuecomment-1638930830
   pip3 install "Cython<3.0"
@@ -209,6 +255,7 @@ python_tools() {
 
   pip3 install \
     cmake-format \
+    construct \
     cvt2utf \
     cxxfilt \
     esptool==4.8.dev4 \
@@ -231,11 +278,12 @@ riscv_gcc_toolchain() {
     basefile=xpack-riscv-none-elf-gcc-13.2.0-2-darwin-x64
     cd "${NUTTXTOOLS}"
     # Download the latest RISCV GCC toolchain prebuilt by xPack
-    wget --quiet https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v13.2.0-2/${basefile}.tar.gz
+    curl -O -L -s https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v13.2.0-2/${basefile}.tar.gz
     tar zxf ${basefile}.tar.gz
     mv xpack-riscv-none-elf-gcc-13.2.0-2 riscv-none-elf-gcc
     rm ${basefile}.tar.gz
   fi
+
   command riscv-none-elf-gcc --version
 }
 
@@ -268,13 +316,48 @@ xtensa_esp32_gcc_toolchain() {
     local basefile
     basefile=xtensa-esp32-elf-12.2.0_20230208-x86_64-apple-darwin
     cd "${NUTTXTOOLS}"
-    wget --quiet https://github.com/espressif/crosstool-NG/releases/download/esp-12.2.0_20230208/${basefile}.tar.xz
+    # Download the latest ESP32 GCC toolchain prebuilt by Espressif
+    curl -O -L -s https://github.com/espressif/crosstool-NG/releases/download/esp-12.2.0_20230208/${basefile}.tar.xz
     xz -d ${basefile}.tar.xz
     tar xf ${basefile}.tar
     rm ${basefile}.tar
   fi
 
   command xtensa-esp32-elf-gcc --version
+}
+
+xtensa_esp32s2_gcc_toolchain() {
+  add_path "${NUTTXTOOLS}"/xtensa-esp32s2-elf/bin
+
+  if [ ! -f "${NUTTXTOOLS}/xtensa-esp32s2-elf/bin/xtensa-esp32s2-elf-gcc" ]; then
+    local basefile
+    basefile=xtensa-esp32s2-elf-12.2.0_20230208-x86_64-apple-darwin
+    cd "${NUTTXTOOLS}"
+    # Download the latest ESP32 S2 GCC toolchain prebuilt by Espressif
+    curl -O -L -s https://github.com/espressif/crosstool-NG/releases/download/esp-12.2.0_20230208/${basefile}.tar.xz
+    xz -d ${basefile}.tar.xz
+    tar xf ${basefile}.tar
+    rm ${basefile}.tar
+  fi
+
+  command xtensa-esp32s2-elf-gcc --version
+}
+
+xtensa_esp32s3_gcc_toolchain() {
+  add_path "${NUTTXTOOLS}"/xtensa-esp32s3-elf/bin
+
+  if [ ! -f "${NUTTXTOOLS}/xtensa-esp32s3-elf/bin/xtensa-esp32s3-elf-gcc" ]; then
+    local basefile
+    basefile=xtensa-esp32s3-elf-12.2.0_20230208-x86_64-apple-darwin
+    cd "${NUTTXTOOLS}"
+    # Download the latest ESP32 S3 GCC toolchain prebuilt by Espressif
+    curl -O -L -s https://github.com/espressif/crosstool-NG/releases/download/esp-12.2.0_20230208/${basefile}.tar.xz
+    xz -d ${basefile}.tar.xz
+    tar xf ${basefile}.tar
+    rm ${basefile}.tar
+  fi
+
+  command xtensa-esp32s3-elf-gcc --version
 }
 
 u_boot_tools() {
@@ -302,12 +385,12 @@ wasi_sdk() {
     wasmbasefile=wamrc-1.1.2-x86_64-macos-latest
     cd "${NUTTXTOOLS}"
     mkdir -p wamrc
-    wget --quiet https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-19/${wasibasefile}.tar.gz
+    curl -O -L -s https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-19/${wasibasefile}.tar.gz
     tar xzf ${wasibasefile}.tar.gz
     mv wasi-sdk-19.0 wasi-sdk
     rm ${wasibasefile}.tar.gz
     cd wamrc
-    wget --quiet https://github.com/bytecodealliance/wasm-micro-runtime/releases/download/WAMR-1.1.2/${wasmbasefile}.tar.gz
+    curl -O -L -s https://github.com/bytecodealliance/wasm-micro-runtime/releases/download/WAMR-1.1.2/${wasmbasefile}.tar.gz
     tar xzf ${wasmbasefile}.tar.gz
     rm ${wasmbasefile}.tar.gz
   fi
@@ -342,13 +425,18 @@ setup_links() {
   ln -sf "$(which ccache)" "${NUTTXTOOLS}"/ccache/bin/x86_64-elf-gcc
   ln -sf "$(which ccache)" "${NUTTXTOOLS}"/ccache/bin/x86_64-elf-g++
   ln -sf "$(which ccache)" "${NUTTXTOOLS}"/ccache/bin/xtensa-esp32-elf-gcc
+  ln -sf "$(which ccache)" "${NUTTXTOOLS}"/ccache/bin/xtensa-esp32-elf-g++
+  ln -sf "$(which ccache)" "${NUTTXTOOLS}"/ccache/bin/xtensa-esp32s2-elf-gcc
+  ln -sf "$(which ccache)" "${NUTTXTOOLS}"/ccache/bin/xtensa-esp32s2-elf-g++
+  ln -sf "$(which ccache)" "${NUTTXTOOLS}"/ccache/bin/xtensa-esp32s3-elf-gcc
+  ln -sf "$(which ccache)" "${NUTTXTOOLS}"/ccache/bin/xtensa-esp32s3-elf-g++
 }
 
 install_build_tools() {
   mkdir -p "${NUTTXTOOLS}"
   echo "#!/usr/bin/env sh" > "${NUTTXTOOLS}"/env.sh
 
-  install="arm_gcc_toolchain arm64_gcc_toolchain avr_gcc_toolchain binutils bloaty elf_toolchain gen_romfs gperf kconfig_frontends mips_gcc_toolchain python_tools riscv_gcc_toolchain rust dlang zig xtensa_esp32_gcc_toolchain u_boot_tools util_linux wasi_sdk c_cache"
+  install="ninja_brew autoconf_brew arm_clang_toolchain arm_gcc_toolchain arm64_gcc_toolchain avr_gcc_toolchain binutils bloaty elf_toolchain gen_romfs gperf kconfig_frontends mips_gcc_toolchain python_tools riscv_gcc_toolchain rust dlang zig xtensa_esp32_gcc_toolchain xtensa_esp32s2_gcc_toolchain xtensa_esp32s3_gcc_toolchain u_boot_tools util_linux wasi_sdk c_cache"
 
   mkdir -p "${NUTTXTOOLS}"/homebrew
   export HOMEBREW_CACHE=${NUTTXTOOLS}/homebrew

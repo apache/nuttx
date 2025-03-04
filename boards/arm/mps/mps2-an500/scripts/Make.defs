@@ -1,6 +1,8 @@
 ############################################################################
 # boards/arm/mps/mps2-an500/scripts/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -22,15 +24,39 @@ include $(TOPDIR)/.config
 include $(TOPDIR)/tools/Config.mk
 include $(TOPDIR)/arch/arm/src/armv7-m/Toolchain.defs
 
-LDSCRIPT = flash.ld
+ifeq ($(CONFIG_ARM_TOOLCHAIN_GHS),y)
+  define POSTBUILD
+    $(GMEMFILE) nuttx -o nuttx.bin
+  endef
+
+  LDSCRIPT = ghs-flash.ld
+else
+  define POSTBUILD
+    $(OBJCOPY) -O binary nuttx nuttx.bin
+  endef
+
+  LDSCRIPT = flash.ld
+endif
 
 ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
 
-CFLAGS := $(ARCHCFLAGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
+CFLAGS := $(ARCHCFLAGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES)
+ifeq ($(CONFIG_ARM_TOOLCHAIN_GHS),y)
+  CFLAGS += $(subst -Wno-cpp,,$(EXTRAFLAGS))
+endif
 CPICFLAGS = $(ARCHPICFLAGS) $(CFLAGS)
-CXXFLAGS := $(ARCHCXXFLAGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
+CXXFLAGS := $(ARCHCXXFLAGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHXXINCLUDES) $(ARCHDEFINES)
+ifeq ($(CONFIG_ARM_TOOLCHAIN_GHS),y)
+  CXXFLAGS += $(subst -Wno-cpp,,$(EXTRAFLAGS))
+endif
 CXXPICFLAGS = $(ARCHPICFLAGS) $(CXXFLAGS)
-CPPFLAGS := $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
+CPPFLAGS := $(ARCHINCLUDES) $(ARCHDEFINES)
+ifeq ($(CONFIG_ARM_TOOLCHAIN_GHS),y)
+  CPPFLAGS += $(subst -Wno-cpp,,$(EXTRAFLAGS))
+else
+  CFLAGS   += $(EXTRAFLAGS)
+  CPPFLAGS += $(EXTRAFLAGS)
+endif
 AFLAGS := $(CFLAGS) -D__ASSEMBLY__
 
 # NXFLAT module definitions
@@ -42,4 +68,4 @@ LDNXFLATFLAGS = -e main -s 2048
 # ELF module definitions
 
 LDELFFLAGS = -r -e main
-LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/binfmt/libelf/gnu-elf.ld)
+LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/modlib/gnu-elf.ld)

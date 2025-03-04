@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/efm32/efm32_serial.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -221,6 +223,7 @@ struct efm32_usart_s
   const struct efm32_config_s *config;
 #endif
   uint16_t ien;        /* Interrupts enabled */
+  spinlock_t lock;     /* Spinlock */
 };
 
 /****************************************************************************
@@ -301,7 +304,7 @@ static char g_uart1txbuffer[CONFIG_UART1_TXBUFSIZE];
 /* This describes the state of the EFM32 USART0 port. */
 
 #ifdef CONFIG_EFM32_USART0_ISUART
-static const struct efm32_usart_s g_usart0config =
+static const struct efm32_config_s g_usart0config =
 {
   .uartbase  = EFM32_USART0_BASE,
   .baud      = CONFIG_USART0_BAUD,
@@ -315,6 +318,7 @@ static const struct efm32_usart_s g_usart0config =
 static struct efm32_usart_s g_usart0priv =
 {
   .config    = &g_usart0config,
+  .lock      = SP_UNLOCKED
 };
 
 static struct uart_dev_s g_usart0port =
@@ -351,6 +355,7 @@ static struct efm32_config_s g_usart1config =
 static struct efm32_usart_s g_usart1priv =
 {
   .config    = &g_usart1config,
+  .lock      = SP_UNLOCKED
 };
 
 static struct uart_dev_s g_usart1port =
@@ -387,6 +392,7 @@ static struct efm32_config_s g_usart2config =
 static struct efm32_usart_s g_usart2priv =
 {
   .config    = &g_usart2config,
+  .lock      = SP_UNLOCKED
 };
 
 static struct uart_dev_s g_usart2port =
@@ -423,6 +429,7 @@ static struct efm32_config_s g_uart0config =
 static struct efm32_usart_s g_uart0priv =
 {
   .config    = &g_uart0config,
+  .lock      = SP_UNLOCKED
 };
 
 static struct uart_dev_s g_uart0port =
@@ -445,7 +452,7 @@ static struct uart_dev_s g_uart0port =
 /* This describes the state of the EFM32 UART1 port. */
 
 #ifdef CONFIG_EFM32_UART1
-static struct efm32_usart_s g_uart1config =
+static struct efm32_config_s g_uart1config =
 {
   .uartbase  = EFM32_UART1_BASE,
   .baud      = CONFIG_UART1_BAUD,
@@ -459,6 +466,7 @@ static struct efm32_usart_s g_uart1config =
 static struct efm32_usart_s g_uart1priv =
 {
   .config    = &g_uart1config,
+  .lock      = SP_UNLOCKED
 };
 
 static struct uart_dev_s g_uart1port =
@@ -514,6 +522,13 @@ static inline void efm32_setuartint(struct efm32_usart_s *priv)
  * Name: efm32_restoreuartint
  ****************************************************************************/
 
+static void efm32_restoreuartint_nolock(struct efm32_usart_s *priv,
+                                        uint32_t ien)
+{
+  priv->ien = ien;
+  efm32_setuartint(priv);
+}
+
 static void efm32_restoreuartint(struct efm32_usart_s *priv, uint32_t ien)
 {
   irqstate_t flags;
@@ -522,10 +537,9 @@ static void efm32_restoreuartint(struct efm32_usart_s *priv, uint32_t ien)
    * ien
    */
 
-  flags     = spin_lock_irqsave(NULL);
-  priv->ien = ien;
-  efm32_setuartint(priv);
-  spin_unlock_irqrestore(NULL, flags);
+  flags = spin_lock_irqsave(&priv->lock);
+  efm32_restoreuartint_nolock(priv, len);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************
@@ -537,14 +551,14 @@ static void efm32_disableuartint(struct efm32_usart_s *priv, uint32_t *ien)
 {
   irqstate_t flags;
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&priv->lock);
   if (ien)
     {
       *ien = priv->ien;
     }
 
-  efm32_restoreuartint(priv, 0);
-  spin_unlock_irqrestore(NULL, flags);
+  efm32_restoreuartint_nolock(priv, 0);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 #endif
 
@@ -964,7 +978,7 @@ static void efm32_rxint(struct uart_dev_s *dev, bool enable)
   struct efm32_usart_s *priv = (struct efm32_usart_s *)dev->priv;
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
   if (enable)
     {
       /* Receive an interrupt when their is anything in the Rx data register
@@ -982,7 +996,7 @@ static void efm32_rxint(struct uart_dev_s *dev, bool enable)
       efm32_setuartint(priv);
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************
@@ -1030,7 +1044,7 @@ static void efm32_txint(struct uart_dev_s *dev, bool enable)
   struct efm32_usart_s *priv = (struct efm32_usart_s *)dev->priv;
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
   if (enable)
     {
       /* Enable the TX interrupt */
@@ -1054,7 +1068,7 @@ static void efm32_txint(struct uart_dev_s *dev, bool enable)
       efm32_setuartint(priv);
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************
@@ -1185,27 +1199,16 @@ void arm_serialinit(void)
  ****************************************************************************/
 
 #ifndef HAVE_LEUART_CONSOLE
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef HAVE_UART_CONSOLE
   struct efm32_usart_s *priv = (struct efm32_usart_s *)CONSOLE_DEV.priv;
   uint32_t ien;
 
   efm32_disableuartint(priv, &ien);
-
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      efm32_lowputc('\r');
-    }
-
   efm32_lowputc(ch);
   efm32_restoreuartint(priv, ien);
 #endif
-  return ch;
 }
 #endif
 
@@ -1220,21 +1223,11 @@ int up_putc(int ch)
  ****************************************************************************/
 
 #ifndef HAVE_LEUART_CONSOLE
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef HAVE_UART_CONSOLE
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      efm32_lowputc('\r');
-    }
-
   efm32_lowputc(ch);
 #endif
-  return ch;
 }
 #endif
 

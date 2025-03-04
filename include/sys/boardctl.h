@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/sys/boardctl.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -213,6 +215,7 @@
 #define BOARDIOC_BOOT_IMAGE        _BOARDIOC(0x0014)
 #define BOARDIOC_RESET_CAUSE       _BOARDIOC(0x0015)
 #define BOARDIOC_IRQ_AFFINITY      _BOARDIOC(0x0016)
+#define BOARDIOC_START_CPU         _BOARDIOC(0x0017)
 
 /* If CONFIG_BOARDCTL_IOCTL=y, then board-specific commands will be support.
  * In this case, all commands not recognized by boardctl() will be forwarded
@@ -221,7 +224,7 @@
  * User defined board commands may begin with this value:
  */
 
-#define BOARDIOC_USER              _BOARDIOC(0x0017)
+#define BOARDIOC_USER              _BOARDIOC(0x0018)
 
 /****************************************************************************
  * Public Type Definitions
@@ -353,6 +356,7 @@ enum boardioc_usbdev_identifier_e
   BOARDIOC_USBDEV_NONE = 0        /* Not valid */
 #ifdef CONFIG_USBADB
   , BOARDIOC_USBDEV_ADB           /* ADB */
+  , BOARDIOC_USBDEV_FASTBOOT = BOARDIOC_USBDEV_ADB
 #endif
 #ifdef CONFIG_CDCACM
   , BOARDIOC_USBDEV_CDCACM        /* CDC/ACM */
@@ -462,7 +466,8 @@ enum boardioc_softreset_subreason_e
   BOARDIOC_SOFTRESETCAUSE_ENTER_BOOTLOADER,
   BOARDIOC_SOFTRESETCAUSE_ENTER_RECOVERY,
   BOARDIOC_SOFTRESETCAUSE_RESTORE_FACTORY,
-  BOARDIOC_SOFTRESETCAUSE_RESTORE_FACTORY_INQUIRY
+  BOARDIOC_SOFTRESETCAUSE_RESTORE_FACTORY_INQUIRY,
+  BOARDIOC_SOFTRESETCAUSE_THERMAL
 };
 
 struct boardioc_reset_cause_s

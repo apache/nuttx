@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/common/riscv_addrenv_perms.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -95,8 +97,8 @@ static int modify_region(uintptr_t vstart, uintptr_t vend, uintptr_t setmask)
 
   /* When all is set and done, flush the data caches */
 
-  __ISB();
-  __DMB();
+  UP_ISB();
+  UP_DMB();
 
   return OK;
 }

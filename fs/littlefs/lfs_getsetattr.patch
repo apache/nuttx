@@ -1,0 +1,80 @@
+--- ./littlefs/littlefs/lfs.c
++++ ./littlefs/littlefs/lfs.c
+@@ -5717,6 +5717,41 @@ int lfs_file_path(lfs_t *lfs, lfs_file_t *file, char *path, lfs_size_t size) {
+     return err < 0 ? err : 0;
+ }
+ 
++lfs_ssize_t lfs_file_getattr(lfs_t *lfs, lfs_file_t *file,
++        uint8_t type, void *buffer, lfs_size_t size)
++{
++    int err = LFS_LOCK(lfs->cfg);
++    if (err) {
++        return err;
++    }
++    LFS_TRACE("lfs_file_setattr(%p, %p)", (void*)lfs, (void*)file);
++    LFS_TRACE("lfs_file_setattr(%"PRIu8", %p, %"PRIu32")",
++            type, buffer, size);
++    LFS_ASSERT(lfs_mlist_isopen(lfs->mlist, (struct lfs_mlist*)file));
++
++    return lfs_dir_get(lfs, &file->m, LFS_MKTAG(0x7ff, 0x3ff, 0),
++            LFS_MKTAG(LFS_TYPE_USERATTR + type,
++                file->id, lfs_min(size, lfs->attr_max)), buffer);
++}
++
++#ifndef LFS_READONLY
++int lfs_file_setattr(lfs_t *lfs, lfs_file_t *file,
++        uint8_t type, const void *buffer, lfs_size_t size)
++{
++    int err = LFS_LOCK(lfs->cfg);
++    if (err) {
++        return err;
++    }
++    LFS_TRACE("lfs_file_getattr(%p, %p)", (void*)lfs, (void*)file);
++    LFS_TRACE("lfs_file_getattr(%"PRIu8", %p, %"PRIu32")",
++            type, buffer, size);
++    LFS_ASSERT(lfs_mlist_isopen(lfs->mlist, (struct lfs_mlist*)file));
++
++    return lfs_dir_commit(lfs, &file->m, LFS_MKATTRS(
++            {LFS_MKTAG(LFS_TYPE_USERATTR + type, file->id, size), buffer}));
++}
++#endif
++
+ #ifndef LFS_READONLY
+ int lfs_mkdir(lfs_t *lfs, const char *path) {
+     int err = LFS_LOCK(lfs->cfg);
+--- ./littlefs/littlefs/lfs.h
++++ ./littlefs/littlefs/lfs.h
+@@ -611,6 +611,33 @@ lfs_soff_t lfs_file_size(lfs_t *lfs, lfs_file_t *file);
+ // Returns a negative error code on failure.
+ int lfs_file_path(lfs_t *lfs, lfs_file_t *file, char *path, lfs_size_t size);
+ 
++// Get a custom attribute of file
++//
++// Custom attributes are uniquely identified by an 8-bit type and limited
++// to LFS_ATTR_MAX bytes. When read, if the stored attribute is smaller than
++// the buffer, it will be padded with zeros. If the stored attribute is larger,
++// then it will be silently truncated. If no attribute is found, the error
++// LFS_ERR_NOATTR is returned and the buffer is filled with zeros.
++//
++// Returns the size of the attribute, or a negative error code on failure.
++// Note, the returned size is the size of the attribute on disk, irrespective
++// of the size of the buffer. This can be used to dynamically allocate a buffer
++// or check for existance.
++lfs_ssize_t lfs_file_getattr(lfs_t *lfs, lfs_file_t *file,
++        uint8_t type, void *buffer, lfs_size_t size);
++
++// Set custom attributes of file
++//
++// Custom attributes are uniquely identified by an 8-bit type and limited
++// to LFS_ATTR_MAX bytes. If an attribute is not found, it will be
++// implicitly created.
++//
++// Returns a negative error code on failure.
++#ifndef LFS_READONLY
++int lfs_file_setattr(lfs_t *lfs, lfs_file_t *file,
++        uint8_t type, const void *buffer, lfs_size_t size);
++#endif
++
+ /// Directory operations ///
+ 
+ #ifndef LFS_READONLY

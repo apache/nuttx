@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/x86_64/src/intel64/intel64_oneshot_lower.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -347,7 +349,7 @@ static int intel64_tick_max_delay(struct oneshot_lowerhalf_s *lower,
 
   /* Convert time to ticks */
 
-  clock_time2ticks(&ts, (sclock_t *)ticks);
+  *ticks = clock_time2ticks(&ts);
 
   return ret;
 }
@@ -380,7 +382,7 @@ static int intel64_tick_start(struct oneshot_lowerhalf_s *lower,
 
   /* Convert ticks to time */
 
-  clock_ticks2time(ticks, &ts);
+  clock_ticks2time(&ts, ticks);
 
   return intel64_start(lower, callback, arg, &ts);
 }
@@ -418,7 +420,7 @@ static int intel64_tick_cancel(struct oneshot_lowerhalf_s *lower,
 
   /* Convert time to ticks */
 
-  clock_time2ticks(&ts, (sclock_t *)ticks);
+  *ticks = clock_time2ticks(&ts);
 
   return ret;
 }
@@ -451,7 +453,7 @@ static int intel64_tick_current(struct oneshot_lowerhalf_s *lower,
 
   /* Convert time to ticks */
 
-  clock_time2ticks(&ts, (sclock_t *)ticks);
+  *ticks = clock_time2ticks(&ts);
 
   return ret;
 }

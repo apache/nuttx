@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/qemu-rv/qemu_rv_start.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -31,6 +33,7 @@
 
 #include <debug.h>
 #include "riscv_internal.h"
+#include "riscv_sbi.h"
 #include "chip.h"
 
 #include "qemu_rv_userspace.h"
@@ -194,7 +197,7 @@ void qemu_rv_start(int mhartid, const char *dtb)
 
   showprogress('B');
 
-  /* Do board initialization */
+  /* TODO: Additional initialization */
 
   showprogress('C');
 

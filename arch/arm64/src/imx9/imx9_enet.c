@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/src/imx9/imx9_enet.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -33,7 +35,6 @@
 #include <assert.h>
 #include <debug.h>
 #include <errno.h>
-#include <barriers.h>
 #include <endian.h>
 
 #include <arpa/inet.h>
@@ -53,6 +54,7 @@
 #  include <nuttx/net/pkt.h>
 #endif
 
+#include <arch/barriers.h>
 #include <arch/board/board.h>
 
 #include "arm64_internal.h"
@@ -64,6 +66,7 @@
 #include "imx9_iomuxc.h"
 #include "hardware/imx9_ccm.h"
 #include "hardware/imx9_pinmux.h"
+#include "hardware/imx9_blk_ctrl.h"
 
 #ifdef CONFIG_IMX9_ENET
 
@@ -423,7 +426,7 @@ static inline uint32_t imx9_enet_getreg32(struct imx9_driver_s *priv,
 }
 
 /****************************************************************************
- * Name: imx9_enet_putreg32
+ * Name: imx9_enet_modifyreg32
  *
  * Description:
  *   Atomically modify the specified bits in a memory mapped register
@@ -608,7 +611,7 @@ static int imx9_transmit(struct imx9_driver_s *priv, uint32_t *buf_swap)
 
   txdesc2->data = buf + split;
 
-  ARM64_DSB();
+  UP_DSB();
 
   /* Make sure the buffer data is in memory */
 
@@ -647,9 +650,9 @@ static int imx9_transmit(struct imx9_driver_s *priv, uint32_t *buf_swap)
    * is safe to clean the cache
    */
 
-  ARM64_DMB();
+  UP_DMB();
   txdesc->status1 = TXDESC_R;
-  ARM64_DSB();
+  UP_DSB();
 
   /* Make sure the descriptors are written from cache to memory */
 
@@ -996,9 +999,9 @@ static void imx9_receive(struct imx9_driver_s *priv)
                * to this descriptor pair.
                */
 
-              ARM64_DMB();
+              UP_DMB();
               rxdesc->status1  = RXDESC_E;
-              ARM64_DSB();
+              UP_DSB();
 
               up_clean_dcache((uintptr_t)&rxdesc[(-1)],
                               (uintptr_t)&rxdesc[(-1)] +
@@ -2952,7 +2955,7 @@ static void imx9_initbuffers(struct imx9_driver_s *priv)
   priv->txdesc[IMX9_ENET_NTXBUFFERS - 1].d2.status1 |= TXDESC_W;
   priv->rxdesc[IMX9_ENET_NRXBUFFERS - 1].status1 |= RXDESC_W;
 
-  ARM64_DSB();
+  UP_DSB();
 
   up_clean_dcache((uintptr_t)priv->txdesc,
                   (uintptr_t)priv->txdesc +
@@ -3091,6 +3094,14 @@ int imx9_netinitialize(int intf)
   /* Enet ref clock to 25 MHz */
 
   imx9_ccm_configure_root_clock(CCM_CR_ENETREFPHY, SYS_PLL1PFD0DIV2, 20);
+
+  /* Enet TX / ref clock direction */
+
+#ifdef CONFIG_IMX9_ENET1_TX_CLOCK_IS_INPUT
+  modifyreg32(IMX9_WAKUPMIX_ENET_CLK_SEL, WAKEUPMIX_ENET1_TX_CLK_SEL, 0);
+#else
+  modifyreg32(IMX9_WAKUPMIX_ENET_CLK_SEL, 0, WAKEUPMIX_ENET1_TX_CLK_SEL);
+#endif
 
   /* Enable the ENET clock */
 

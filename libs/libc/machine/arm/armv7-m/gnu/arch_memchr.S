@@ -1,8 +1,8 @@
 /****************************************************************************
  * libs/libc/machine/arm/armv7-m/gnu/arch_memchr.S
  *
- * Copyright (c) 2010-2011, Linaro Limited
- * All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2010-2011, Linaro Limited, 2015 ARM Ltd
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -140,10 +140,10 @@
 	.thumb_func
 	.align 4
 	.p2align 4,,15
-	.global memchr
-	.type memchr,%function
+	.global ARCH_LIBCFUN(memchr)
+	.type ARCH_LIBCFUN(memchr),%function
 
-memchr:
+ARCH_LIBCFUN(memchr):
 	.cfi_sections .debug_frame
 	.cfi_startproc
 	/* Use a simple loop if there are less than 8 bytes to search.  */
@@ -272,7 +272,7 @@ memchr:
 	bx	lr
 
 	.cfi_endproc
-	.size	memchr, . - memchr
+	.size	ARCH_LIBCFUN(memchr), . - ARCH_LIBCFUN(memchr)
 
 #elif __ARM_ARCH_ISA_THUMB >= 2 && defined (__ARM_FEATURE_DSP)
 
@@ -295,9 +295,9 @@ memchr:
 	.thumb_func
 	.align 2
 	.p2align 4,,15
-	.global memchr
-	.type memchr,%function
-memchr:
+	.global ARCH_LIBCFUN(memchr)
+	.type ARCH_LIBCFUN(memchr),%function
+ARCH_LIBCFUN(memchr):
 	@ r0 = start of memory to scan
 	@ r1 = character to look for
 	@ r2 = length

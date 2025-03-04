@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/common/espressif/esp_spi.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -24,7 +26,7 @@
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_ESPRESSIF_SPI
+#ifdef CONFIG_ESPRESSIF_SPI_PERIPH
 
 #include <assert.h>
 #include <debug.h>
@@ -752,6 +754,7 @@ static uint32_t esp_spi_poll_send(struct esp_spi_priv_s *priv, uint32_t wd)
 
   spi_ll_set_mosi_bitlen(priv->ctx->hw, priv->nbits);
   spi_hal_prepare_data(priv->ctx, priv->dev_cfg, &trans);
+  spi_hal_setup_trans(priv->ctx, priv->dev_cfg, &trans);
   spi_hal_user_start(priv->ctx);
 
   while (!spi_hal_usr_is_done(priv->ctx));
@@ -847,12 +850,12 @@ static void esp_spi_poll_exchange(struct esp_spi_priv_s *priv,
 
       if (rp != NULL)
         {
+          rp += transfer_size;
           spi_hal_fetch_result(priv->ctx);
         }
 
       bytes_remaining -= transfer_size;
       tp += transfer_size;
-      rp += transfer_size;
     }
 }
 
@@ -1282,4 +1285,4 @@ int esp_spibus_uninitialize(struct spi_dev_s *dev)
   return OK;
 }
 
-#endif /* CONFIG_ESPRESSIF_SPI */
+#endif /* CONFIG_ESPRESSIF_SPI_PERIPH */

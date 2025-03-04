@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/z80/src/z180/z180_lowserial.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -58,22 +60,12 @@
 #ifdef USE_SERIALDRIVER
 int z80_lowputc(int ch)
 #else
-int up_putc(int ch)
+void up_putc(int ch)
 #endif
 {
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Output CR before LF */
-
-      z180_putc('\r');
-    }
-
   /* Output the character */
 
   z180_putc(ch);
-  return ch;
 }
 
 #endif /* HAVE_SERIAL */

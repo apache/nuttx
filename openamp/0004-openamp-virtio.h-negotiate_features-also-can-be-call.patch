@@ -1,0 +1,36 @@
+From 17ca934563b3d62f950f5d1693d89556495d150f Mon Sep 17 00:00:00 2001
+From: wangyongrong <wangyongrong@xiaomi.com>
+Date: Tue, 2 Jul 2024 16:33:32 +0800
+Subject: [PATCH 04/14] openamp/virtio.h: negotiate_features also can be call
+ when final_features is NULL
+
+Signed-off-by: wangyongrong <wangyongrong@xiaomi.com>
+---
+ lib/include/openamp/virtio.h | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/lib/include/openamp/virtio.h open-amp/lib/include/openamp/virtio.h
+index c4d4927..278d2da 100644
+--- a/lib/include/openamp/virtio.h
++++ open-amp/lib/include/openamp/virtio.h
+@@ -468,13 +468,15 @@ static inline int virtio_negotiate_features(struct virtio_device *vdev,
+ 					    uint32_t features,
+ 					    uint32_t *final_features)
+ {
+-	if (!vdev || !final_features)
++	if (!vdev)
+ 		return -EINVAL;
+ 
+ 	if (!vdev->func || !vdev->func->negotiate_features)
+ 		return -ENXIO;
+ 
+-	*final_features = vdev->func->negotiate_features(vdev, features);
++	vdev->features = vdev->func->negotiate_features(vdev, features);
++	if (final_features)
++		*final_features = vdev->features;
+ 	return 0;
+ }
+ 
+-- 
+2.34.1
+

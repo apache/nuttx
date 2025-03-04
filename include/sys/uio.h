@@ -1,10 +1,11 @@
 /****************************************************************************
  * include/sys/uio.h
  *
- *   Copyright (C) 2017 Grefory Nutt. All rights reserved.
- *   Copyright (C) 2015 Stavros Polymenis. All rights reserved.
- *   Author: Stavros Polymenis <sp@orbitalfox.com>
- *           Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2017 Grefory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText 2015 Stavros Polymenis. All rights reserved.
+ * SPDX-FileContributor: Stavros Polymenis <sp@orbitalfox.com>
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

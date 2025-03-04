@@ -1,6 +1,8 @@
 ############################################################################
 # tools/imx9/Makefile.host
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -42,6 +44,8 @@ endif
 	$(call DELFILE, imx8qxb0.c)
 	$(call DELFILE, mkimage_common.h)
 	$(call DELFILE, build_info.h)
+	$(call DELFILE, fspi_fcb_gen.sh)
+	$(call DELFILE, fspi_header)
 	$(call DELFILE, firmware-ele-imx-0.1.1.bin)
 	$(call DELDIR, firmware-ele-imx-0.1.1)
 	$(call CLEAN)

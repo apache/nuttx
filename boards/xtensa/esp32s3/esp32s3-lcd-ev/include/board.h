@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/xtensa/esp32s3/esp32s3-lcd-ev/include/board.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -35,6 +37,13 @@
 #  define BOARD_CLOCK_FREQUENCY (CONFIG_ESP32S3_DEFAULT_CPU_FREQ_MHZ * 1000000)
 #else
 #  define BOARD_CLOCK_FREQUENCY 80000000
+#endif
+
+/* Peripherals definitions **************************************************/
+
+#ifdef CONFIG_AUDIO_ES8311
+#  define ES8311_I2C_FREQ       100000
+#  define ES8311_I2C_ADDR       0x18
 #endif
 
 #endif /* __BOARDS_XTENSA_ESP32S3_ESP32S3_LCD_EV_INCLUDE_BOARD_H */

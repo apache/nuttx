@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/x86_64/src/intel64/intel64_freq.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -77,10 +79,11 @@ void x86_64_timer_calibrate_freq(void)
   unsigned long numerator;
   unsigned long denominator;
 
-  asm volatile("cpuid"
-      : "=c" (crystal_freq), "=b" (numerator), "=a" (denominator)
-      : "a" (X86_64_CPUID_TSC)
-      : "rdx", "memory");
+  __asm__ volatile("cpuid"
+                   : "=c" (crystal_freq), "=b" (numerator),
+                     "=a" (denominator)
+                   : "a" (X86_64_CPUID_TSC)
+                   : "rdx", "memory");
 
   if (numerator == 0 || denominator == 0 || crystal_freq == 0)
     {

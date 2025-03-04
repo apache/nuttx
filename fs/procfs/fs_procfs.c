@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/procfs/fs_procfs.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -48,6 +50,7 @@
 
 #include "mount/mount.h"
 #include "sched/sched.h"
+#include "fs_heap.h"
 
 /****************************************************************************
  * External Definitions
@@ -67,6 +70,7 @@ extern const struct procfs_operations g_module_operations;
 extern const struct procfs_operations g_pm_operations;
 extern const struct procfs_operations g_proc_operations;
 extern const struct procfs_operations g_tcbinfo_operations;
+extern const struct procfs_operations g_thermal_operations;
 extern const struct procfs_operations g_uptime_operations;
 extern const struct procfs_operations g_version_operations;
 extern const struct procfs_operations g_pressure_operations;
@@ -81,7 +85,7 @@ extern const struct procfs_operations g_mount_operations;
 extern const struct procfs_operations g_net_operations;
 extern const struct procfs_operations g_netroute_operations;
 extern const struct procfs_operations g_part_operations;
-extern const struct procfs_operations g_smartfs_operations;
+extern const struct procfs_operations g_smartfs_procfs_operations;
 
 /****************************************************************************
  * Private Types
@@ -130,7 +134,7 @@ static const struct procfs_entry_s g_procfs_entries[] =
 #endif
 
 #if defined(CONFIG_FS_SMARTFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_SMARTFS)
-  { "fs/smartfs**", &g_smartfs_operations,  PROCFS_UNKOWN_TYPE },
+  { "fs/smartfs**", &g_smartfs_procfs_operations,  PROCFS_UNKOWN_TYPE },
 #endif
 
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_USAGE
@@ -190,6 +194,11 @@ static const struct procfs_entry_s g_procfs_entries[] =
 
 #if defined(CONFIG_ARCH_HAVE_TCBINFO) && !defined(CONFIG_FS_PROCFS_EXCLUDE_TCBINFO)
   { "tcbinfo",      &g_tcbinfo_operations,  PROCFS_FILE_TYPE   },
+#endif
+
+#ifdef CONFIG_THERMAL_PROCFS
+  { "thermal",      &g_thermal_operations,  PROCFS_DIR_TYPE    },
+  { "thermal/**",   &g_thermal_operations,  PROCFS_UNKOWN_TYPE },
 #endif
 
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_UPTIME
@@ -280,6 +289,8 @@ const struct mountpt_operations g_procfs_operations =
   NULL,              /* mmap */
   NULL,              /* truncate */
   procfs_poll,       /* poll */
+  NULL,              /* readv */
+  NULL,              /* writev */
 
   NULL,              /* sync */
   procfs_dup,        /* dup */
@@ -415,6 +426,11 @@ static int procfs_open(FAR struct file *filep, FAR const char *relpath,
 
       if (fnmatch(g_procfs_entries[x].pathpattern, relpath, 0) == 0)
         {
+          if (g_procfs_entries[x].type == PROCFS_DIR_TYPE)
+            {
+              return -EISDIR;
+            }
+
           /* Match found!  Stat using this procfs entry */
 
           DEBUGASSERT(g_procfs_entries[x].ops &&
@@ -457,7 +473,7 @@ static int procfs_close(FAR struct file *filep)
     }
   else
     {
-      kmm_free(attr);
+      fs_heap_free(attr);
     }
 
   filep->f_priv = NULL;
@@ -645,7 +661,7 @@ static int procfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
 #endif
 
       level0 = (FAR struct procfs_level0_s *)
-         kmm_zalloc(sizeof(struct procfs_level0_s) + sizeof(pid_t) * num) ;
+      fs_heap_zalloc(sizeof(struct procfs_level0_s) + sizeof(pid_t) * num);
       if (!level0)
         {
           ferr("ERROR: Failed to allocate the level0 directory structure\n");
@@ -731,7 +747,7 @@ static int procfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
                */
 
               level1 = (FAR struct procfs_level1_s *)
-                 kmm_zalloc(sizeof(struct procfs_level1_s));
+                 fs_heap_zalloc(sizeof(struct procfs_level1_s));
               if (!level1)
                 {
                   ferr("ERROR: Failed to allocate the level0 directory "
@@ -771,9 +787,24 @@ static int procfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
 static int procfs_closedir(FAR struct inode *mountpt,
                            FAR struct fs_dirent_s *dir)
 {
+  FAR struct procfs_dir_priv_s *dirpriv;
+  int ret = OK;
+
   DEBUGASSERT(mountpt && dir);
-  kmm_free(dir);
-  return OK;
+
+  dirpriv = (FAR struct procfs_dir_priv_s *)dir;
+
+  if (dirpriv->procfsentry != NULL &&
+      dirpriv->procfsentry->ops->closedir != NULL)
+    {
+      ret = dirpriv->procfsentry->ops->closedir(dir);
+    }
+  else
+    {
+      fs_heap_free(dir);
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -1169,7 +1200,7 @@ int procfs_initialize(void)
       /* No.. allocate a modifiable list of entries */
 
       g_procfs_entries = (FAR struct procfs_entry_s *)
-        kmm_malloc(sizeof(g_base_entries));
+        fs_heap_malloc(sizeof(g_base_entries));
       if (g_procfs_entries == NULL)
         {
           return -ENOMEM;
@@ -1235,7 +1266,7 @@ int procfs_register(FAR const struct procfs_entry_s *entry)
   newsize  = newcount * sizeof(struct procfs_entry_s);
 
   newtable = (FAR struct procfs_entry_s *)
-    kmm_realloc(g_procfs_entries, newsize);
+    fs_heap_realloc(g_procfs_entries, newsize);
   if (newtable != NULL)
     {
       /* Copy the new entry at the end of the reallocated table */

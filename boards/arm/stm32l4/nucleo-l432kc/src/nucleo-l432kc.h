@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32l4/nucleo-l432kc/src/nucleo-l432kc.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -118,6 +120,22 @@ extern struct spi_dev_s *g_spi2;
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: stm32_bringup
+ *
+ * Description:
+ *   Perform architecture-specific initialization
+ *
+ *   CONFIG_BOARD_LATE_INITIALIZE=y :
+ *     Called from board_late_initialize().
+ *
+ *   CONFIG_BOARD_LATE_INITIALIZE=y && CONFIG_BOARDCTL=y :
+ *     Called from the NSH library
+ *
+ ****************************************************************************/
+
+int stm32_bringup(void);
+
+/****************************************************************************
  * Name: stm32l4_gpio_initialize
  *
  * Description:
@@ -182,6 +200,18 @@ int stm32l4_pwm_setup(void);
 
 #ifdef CONFIG_ADC
 int stm32l4_adc_setup(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32l4_dac_setup
+ *
+ * Description:
+ *   Initialize DAC and register the DAC driver.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DAC
+int stm32l4_dac_setup(void);
 #endif
 
 /****************************************************************************

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/str71x/str71x_decodeirq.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -35,6 +37,7 @@
 
 #include "chip.h"
 #include "arm_internal.h"
+#include "sched/sched.h"
 
 /****************************************************************************
  * Public Functions
@@ -53,9 +56,13 @@
 
 uint32_t *arm_decodeirq(uint32_t *regs)
 {
+  struct tcb_s *tcb = this_task();
+
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   board_autoled_on(LED_INIRQ);
-  CURRENT_REGS = regs;
+
+  tcb->xcp.regs = regs;
+  up_set_interrupt_context(true);
   err("ERROR: Unexpected IRQ\n");
   PANIC();
   return NULL;
@@ -73,15 +80,13 @@ uint32_t *arm_decodeirq(uint32_t *regs)
 
   if (irq < NR_IRQS)
     {
-      uint32_t *savestate;
+      uint32_t *saveregs;
+      bool savestate;
 
-      /* Current regs non-zero indicates that we are processing an
-       * interrupt; CURRENT_REGS is also used to manage interrupt level
-       * context switches.
-       */
-
-      savestate     = (uint32_t *)CURRENT_REGS;
-      CURRENT_REGS = regs;
+      savestate = up_interrupt_context();
+      saveregs = tcb->xcp.regs;
+      up_set_interrupt_context(true);
+      tcb->xcp.regs = regs;
 
       /* Acknowledge the interrupt */
 
@@ -91,12 +96,10 @@ uint32_t *arm_decodeirq(uint32_t *regs)
 
       irq_dispatch(irq, regs);
 
-      /* Restore the previous value of CURRENT_REGS.
-       *  NULL would indicate that we are no longer in an interrupt handler.
-       *  It will be non-NULL if we are returning from a nested interrupt.
-       */
+      /* Restore the previous value of saveregs. */
 
-      CURRENT_REGS = savestate;
+      up_set_interrupt_context(savestate);
+      tcb->xcp.regs = saveregs;
     }
 #ifdef CONFIG_DEBUG_FEATURES
   else

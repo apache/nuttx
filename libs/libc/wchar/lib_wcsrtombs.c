@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/wchar/lib_wcsrtombs.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -38,5 +40,14 @@
 size_t wcsrtombs(FAR char *dst, FAR const wchar_t **src,
                  size_t len, FAR mbstate_t *ps)
 {
-  return wcsnrtombs(dst, src, SIZE_MAX, len, ps);
+  size_t ret;
+
+  ret = wcsnrtombs(dst, src, SIZE_MAX, len, ps);
+
+  if (dst != NULL && ret != (size_t)-1 && ret != len)
+    {
+      dst[ret] = '\0';
+    }
+
+  return ret;
 }

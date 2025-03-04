@@ -1,6 +1,8 @@
 ############################################################################
 # arch/risc-v/src/common/espressif/Bootloader.mk
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -72,6 +74,7 @@ ifeq ($(CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT),y)
 		$(call cfg_val,CONFIG_ESP_SCRATCH_SIZE,$(CONFIG_ESPRESSIF_OTA_SCRATCH_SIZE)) \
 		$(call cfg_en,CONFIG_ESP_CONSOLE_UART) \
 		$(if $(CONFIG_UART0_SERIAL_CONSOLE),$(call cfg_val,CONFIG_ESP_CONSOLE_UART_NUM,0)) \
+		$(if $(CONFIG_ESPRESSIF_USBSERIAL),$(call cfg_val,CONFIG_ESP_CONSOLE_UART_NUM,0)) \
 		$(if $(CONFIG_UART1_SERIAL_CONSOLE),$(call cfg_val,CONFIG_ESP_CONSOLE_UART_NUM,1)) \
 	} >> $(BOOTLOADER_CONFIG)
 endif

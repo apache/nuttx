@@ -20,6 +20,8 @@
 
 include common/Make.defs
 
+STORAGETMP = $(if $(wildcard $(NXTMPDIR)/.*),y,)
+
 # The start-up, "head", file.  May be either a .S or a .c file.
 
 HEAD_CSRC  = esp32_start.c esp32_wdt.c
@@ -42,6 +44,9 @@ endif
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CHIP_CSRCS += esp32_userspace.c
+ifeq ($(CONFIG_ESP32_PID),y)
+CHIP_CSRCS += esp32_userspace_pid.c
+endif
 endif
 
 ifeq ($(CONFIG_SCHED_TICKLESS),y)
@@ -70,7 +75,9 @@ CHIP_CSRCS += esp32_ledc.c
 endif
 
 ifeq ($(CONFIG_ESP32_I2C),y)
+ifeq ($(CONFIG_ESPRESSIF_I2C_PERIPH_MASTER_MODE),y)
 CHIP_CSRCS += esp32_i2c.c
+endif
 endif
 
 ifeq ($(CONFIG_ESP32_I2S),y)
@@ -123,7 +130,6 @@ endif
 # Configuration-dependent ESP32 files
 
 ifeq ($(CONFIG_SMP),y)
-CHIP_ASRCS  = esp32_cpuindex.S
 CHIP_CSRCS += esp32_cpuidlestack.c esp32_cpustart.c esp32_intercpu_interrupt.c
 endif
 
@@ -197,7 +203,21 @@ endif
 endif
 
 ifeq ($(CONFIG_ESP32_OPENETH),y)
-CHIP_CSRCS += esp32_openeth.c
+CHIP_CSRCS += esp_openeth.c
+endif
+
+ifeq ($(CONFIG_ESPRESSIF_WIFI),y)
+CHIP_CSRCS += esp32_wifi_adapter.c
+endif
+
+ifeq ($(CONFIG_ESPRESSIF_BLE),y)
+CHIP_CSRCS += esp32_ble_adapter.c esp32_ble.c
+EXTRA_LIBS += -lbtdm_app
+endif
+
+ifeq ($(CONFIG_ESP32_ESPNOW_PKTRADIO),y)
+CHIP_CSRCS += esp32_espnow_pktradio.c
+EXTRA_LIBS += -lespnow
 endif
 
 #############################################################################
@@ -208,7 +228,7 @@ endif
 
 ESP_HAL_3RDPARTY_REPO   = esp-hal-3rdparty
 ifndef ESP_HAL_3RDPARTY_VERSION
-	ESP_HAL_3RDPARTY_VERSION = 51770f0c97201401b535d833a30c5c0cb7df4edd
+	ESP_HAL_3RDPARTY_VERSION = e5cef265cca9d272c428d210453d574bcc25c5f4
 endif
 
 ifndef ESP_HAL_3RDPARTY_URL
@@ -222,15 +242,26 @@ endif
 	GIT_DEPTH_PARAMETER = --depth=$(GIT_DEPTH)
 endif
 
+ifeq ($(STORAGETMP),y)
+define CLONE_ESP_HAL_3RDPARTY_REPO
+	$(call CHECK_COMMITSHA, $(NXTMPDIR)/$(ESP_HAL_3RDPARTY_REPO),$(ESP_HAL_3RDPARTY_VERSION))
+	$(call CLONE, $(ESP_HAL_3RDPARTY_URL),chip/$(ESP_HAL_3RDPARTY_REPO),$(NXTMPDIR)/$(ESP_HAL_3RDPARTY_REPO))
+endef
+else
+define CLONE_ESP_HAL_3RDPARTY_REPO
+	$(call CLONE, $(ESP_HAL_3RDPARTY_URL),chip/$(ESP_HAL_3RDPARTY_REPO))
+endef
+endif
+
 chip/$(ESP_HAL_3RDPARTY_REPO):
 	$(Q) echo "Cloning Espressif HAL for 3rd Party Platforms"
-	$(Q) git clone --quiet $(ESP_HAL_3RDPARTY_URL) chip/$(ESP_HAL_3RDPARTY_REPO)
+	$(Q) $(call CLONE_ESP_HAL_3RDPARTY_REPO)
 	$(Q) echo "Espressif HAL for 3rd Party Platforms: ${ESP_HAL_3RDPARTY_VERSION}"
 	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) checkout --quiet $(ESP_HAL_3RDPARTY_VERSION)
 
 # Silent preprocessor warnings
 
-CFLAGS += -Wno-undef -Wno-unused-variable
+CFLAGS += -Wno-undef -Wno-unused-variable -fno-jump-tables -fno-tree-switch-conversion
 
 # Enable strict volatile bitfield access
 
@@ -247,16 +278,12 @@ include chip/hal.mk
 include common/espressif/Make.defs
 
 context:: chip/$(ESP_HAL_3RDPARTY_REPO)
-ifeq ($(CONFIG_ESP32_WIRELESS),y)
+ifeq ($(CONFIG_ESPRESSIF_WIRELESS),y)
 	$(Q) echo "Espressif HAL for 3rd Party Platforms: initializing submodules..."
 	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) submodule --quiet update --init $(GIT_DEPTH_PARAMETER) components/mbedtls/mbedtls components/esp_phy/lib components/esp_wifi/lib components/bt/controller/lib_esp32 components/esp_coex/lib
 	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO)/components/mbedtls/mbedtls reset --quiet --hard
 	$(Q) echo "Applying patches..."
 	$(Q) cd chip/$(ESP_HAL_3RDPARTY_REPO)/components/mbedtls/mbedtls && git apply ../../../nuttx/patches/components/mbedtls/mbedtls/*.patch
-endif
-
-ifeq ($(CONFIG_ESP32_WIRELESS),y)
-include chip/Wireless.mk
 endif
 
 distclean::

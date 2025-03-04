@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/usrsock/usrsock.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -47,6 +49,8 @@
 #define USRSOCK_EVENT_REQ_COMPLETE  (1 << 15)
 #define USRSOCK_EVENT_INTERNAL_MASK (USRSOCK_EVENT_CONNECT_READY | \
                                      USRSOCK_EVENT_REQ_COMPLETE)
+
+#define USRSOCK_USOCKID_INVALID     (-1)
 
 /****************************************************************************
  * Public Type Definitions

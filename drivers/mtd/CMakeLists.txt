@@ -1,6 +1,8 @@
 # ##############################################################################
 # drivers/mtd/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -15,8 +17,6 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
 # License for the specific language governing permissions and limitations under
 # the License.
-#
-# ##############################################################################
 #
 # ##############################################################################
 
@@ -163,6 +163,27 @@ if(CONFIG_MTD)
 
   if(CONFIG_MTD_SMART AND CONFIG_FS_SMARTFS)
     list(APPEND SRCS smart.c)
+  endif()
+
+  if(CONFIG_MTD_DHARA)
+    if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/dhara)
+      FetchContent_Declare(
+        dhara
+        URL https://github.com/dlbeer/dhara/archive/refs/heads/master.zip
+            SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/dhara BINARY_DIR
+            ${CMAKE_BINARY_DIR}/drivers/mtd/dhara
+        DOWNLOAD_NO_PROGRESS true)
+      FetchContent_Populate(dhara)
+    endif()
+
+    list(APPEND SRCS dhara.c mtd/dhara/dhara/map.c mtd/dhara/dhara/error.c
+         mtd/dhara/dhara/journal.c)
+    target_include_directories(drivers PRIVATE ${CMAKE_CURRENT_LIST_DIR}/dhara)
+  endif()
+
+  if(CONFIG_MTD_CFI)
+    list(APPEND SRCS mtd_cfi.c)
+    list(APPEND SRCS cfi.c)
   endif()
 
   target_sources(drivers PRIVATE ${SRCS})

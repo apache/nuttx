@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/virtio/virtio-serial.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -29,6 +31,7 @@
 #include <stdio.h>
 
 #include <nuttx/serial/serial.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/virtio/virtio.h>
 
 #include "virtio-serial.h"
@@ -55,6 +58,7 @@ struct virtio_serial_priv_s
 
   FAR struct uart_dev_s     udev;
   char                      name[NAME_MAX];
+  spinlock_t                lock;
 };
 
 /****************************************************************************
@@ -322,6 +326,7 @@ static void virtio_serial_dmasend(FAR struct uart_dev_s *dev)
   FAR struct virtqueue *vq = priv->vdev->vrings_info[VIRTIO_SERIAL_TX].vq;
   FAR struct uart_dmaxfer_s *xfer = &dev->dmatx;
   struct virtqueue_buf vb[2];
+  irqstate_t flags;
   uintptr_t len;
   int num = 1;
 
@@ -343,8 +348,10 @@ static void virtio_serial_dmasend(FAR struct uart_dev_s *dev)
 
   /* Add buffer to TX virtiqueue and notify the other size */
 
+  flags = spin_lock_irqsave(&priv->lock);
   virtqueue_add_buffer(vq, vb, num, 0, (FAR void *)len);
   virtqueue_kick(vq);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************
@@ -369,6 +376,7 @@ static void virtio_serial_dmareceive(FAR struct uart_dev_s *dev)
   FAR struct virtqueue *vq = priv->vdev->vrings_info[VIRTIO_SERIAL_RX].vq;
   FAR struct uart_dmaxfer_s *xfer = &dev->dmarx;
   struct virtqueue_buf vb[2];
+  irqstate_t flags;
   int num = 1;
 
   vb[0].buf = xfer->buffer;
@@ -383,8 +391,10 @@ static void virtio_serial_dmareceive(FAR struct uart_dev_s *dev)
 
   /* Add buffer to the RX virtqueue and notify the device side */
 
+  flags = spin_lock_irqsave(&priv->lock);
   virtqueue_add_buffer(vq, vb, 0, num, xfer);
   virtqueue_kick(vq);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************
@@ -415,7 +425,7 @@ static void virtio_serial_rxready(FAR struct virtqueue *vq)
 
   /* Received some data, call uart_recvchars_done() */
 
-  xfer = virtqueue_get_buffer(vq, &len, NULL);
+  xfer = virtqueue_get_buffer_lock(vq, &len, NULL, &priv->lock);
   if (xfer == NULL)
     {
       return;
@@ -441,7 +451,8 @@ static void virtio_serial_txdone(FAR struct virtqueue *vq)
 
   /* Call uart_xmitchars_done to notify the upperhalf */
 
-  len = (uintptr_t)virtqueue_get_buffer(vq, NULL, NULL);
+  len = (uintptr_t)virtqueue_get_buffer_lock(vq, NULL, NULL, &priv->lock);
+
   priv->udev.dmatx.nbytes = len;
   uart_xmitchars_done(&priv->udev);
   uart_dmatxavail(&priv->udev);
@@ -461,6 +472,7 @@ static int virtio_serial_init(FAR struct virtio_serial_priv_s *priv,
 
   priv->vdev = vdev;
   vdev->priv = priv;
+  spin_lock_init(&priv->lock);
 
   /* Uart device buffer and ops init */
 
@@ -495,7 +507,7 @@ static int virtio_serial_init(FAR struct virtio_serial_priv_s *priv,
   callbacks[VIRTIO_SERIAL_RX] = virtio_serial_rxready;
   callbacks[VIRTIO_SERIAL_TX] = virtio_serial_txdone;
   ret = virtio_create_virtqueues(vdev, 0, VIRTIO_SERIAL_NUM, vqnames,
-                                 callbacks);
+                                 callbacks, NULL);
   if (ret < 0)
     {
       vrterr("virtio_device_create_virtqueue failed, ret=%d\n", ret);
@@ -528,6 +540,61 @@ static void virtio_serial_uninit(FAR struct virtio_serial_priv_s *priv)
 }
 
 /****************************************************************************
+ * Name: virtio_serial_uart_register
+ ****************************************************************************/
+
+static int virtio_serial_uart_register(FAR struct virtio_serial_priv_s *priv)
+{
+  FAR const char *name = CONFIG_DRIVERS_VIRTIO_SERIAL_NAME;
+  bool found = false;
+  int start = 0;
+  int ret;
+  int i;
+  int j;
+
+  for (i = 0, j = 0; name[start] != '\0'; i++)
+    {
+      if (name[i] == ';' || name[i] == '\0')
+        {
+          if (j++ == g_virtio_serial_idx)
+            {
+              found = true;
+              break;
+            }
+
+          start = i + 1;
+        }
+    }
+
+  if (found)
+    {
+      snprintf(priv->name, NAME_MAX, "/dev/%.*s", i - start, &name[start]);
+    }
+  else
+    {
+      snprintf(priv->name, NAME_MAX, "/dev/ttyV%d", g_virtio_serial_idx);
+    }
+
+  ret = uart_register(priv->name, &priv->udev);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+#ifdef CONFIG_DRIVERS_VIRTIO_SERIAL_CONSOLE
+  if (g_virtio_console == NULL)
+    {
+      DEBUGVERIFY(uart_register("/dev/console", &priv->udev));
+      g_virtio_console = &priv->udev;
+      g_virtio_console->isconsole = true;
+    }
+#endif
+
+  g_virtio_serial_idx++;
+  return ret;
+}
+
+/****************************************************************************
  * Name: virtio_serial_probe
  ****************************************************************************/
 
@@ -554,25 +621,13 @@ static int virtio_serial_probe(FAR struct virtio_device *vdev)
 
   /* Uart driver register */
 
-  snprintf(priv->name, NAME_MAX, "/dev/ttyV%d", g_virtio_serial_idx);
-  ret = uart_register(priv->name, &priv->udev);
+  ret = virtio_serial_uart_register(priv);
   if (ret < 0)
     {
       vrterr("uart_register failed, ret=%d\n", ret);
       goto err_with_init;
     }
 
-#ifdef CONFIG_DRIVERS_VIRTIO_SERIAL_CONSOLE
-  if (g_virtio_console == NULL)
-    {
-      DEBUGVERIFY(uart_register("/dev/console", &priv->udev));
-      g_virtio_console = &priv->udev;
-      g_virtio_console->isconsole = true;
-    }
-
-#endif
-
-  g_virtio_serial_idx++;
   return ret;
 
 err_with_init:
@@ -615,20 +670,11 @@ int virtio_register_serial_driver(void)
  * Name: up_putc
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
   if (g_virtio_console != NULL)
     {
-      if (ch == '\n')
-        {
-          /* Add CR */
-
-          virtio_serial_send(g_virtio_console, '\r');
-        }
-
       virtio_serial_send(g_virtio_console, ch);
     }
-
-  return ch;
 }
 #endif

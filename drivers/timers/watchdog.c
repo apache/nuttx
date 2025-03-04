@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/timers/watchdog.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -51,8 +53,8 @@
  ****************************************************************************/
 
 #ifdef CONFIG_WATCHDOG_AUTOMONITOR
-#  define WATCHDOG_AUTOMONITOR_TIMEOUT_MSEC \
-     (CONFIG_WATCHDOG_AUTOMONITOR_TIMEOUT * MSEC_PER_SEC)
+#  define WATCHDOG_AUTOMONITOR_TIMEOUT \
+     (CONFIG_WATCHDOG_AUTOMONITOR_TIMEOUT)
 #  if !defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_CAPTURE) && \
       !defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_IDLE)
 #    if CONFIG_WATCHDOG_AUTOMONITOR_PING_INTERVAL == 0
@@ -63,10 +65,24 @@
          CONFIG_WATCHDOG_AUTOMONITOR_PING_INTERVAL
 #    endif
 #    define WATCHDOG_AUTOMONITOR_PING_INTERVAL_MSEC \
-       (WATCHDOG_AUTOMONITOR_PING_INTERVAL * MSEC_PER_SEC)
+       (WATCHDOG_AUTOMONITOR_PING_INTERVAL)
 #    define WATCHDOG_AUTOMONITOR_PING_INTERVAL_TICK \
-       SEC2TICK(WATCHDOG_AUTOMONITOR_PING_INTERVAL)
+       MSEC2TICK(WATCHDOG_AUTOMONITOR_PING_INTERVAL)
 #  endif
+#endif
+
+#if defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_ONESHOT)
+#  define WATCHDOG_NOTIFIER_ACTION WATCHDOG_KEEPALIVE_BY_ONESHOT
+#elif defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_TIMER)
+#  define WATCHDOG_NOTIFIER_ACTION WATCHDOG_KEEPALIVE_BY_TIMER
+#elif defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_WDOG)
+#  define WATCHDOG_NOTIFIER_ACTION WATCHDOG_KEEPALIVE_BY_WDOG
+#elif defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_WORKER)
+#  define WATCHDOG_NOTIFIER_ACTION WATCHDOG_KEEPALIVE_BY_WORKER
+#elif defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_CAPTURE)
+#  define WATCHDOG_NOTIFIER_ACTION WATCHDOG_KEEPALIVE_BY_CAPTURE
+#elif defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_IDLE)
+#  define WATCHDOG_NOTIFIER_ACTION WATCHDOG_KEEPALIVE_BY_IDLE
 #endif
 
 /****************************************************************************
@@ -132,6 +148,10 @@ static const struct file_operations g_wdogops =
   NULL,       /* seek */
   wdog_ioctl, /* ioctl */
 };
+
+#ifdef CONFIG_WATCHDOG_TIMEOUT_NOTIFIER
+static ATOMIC_NOTIFIER_HEAD(g_watchdog_notifier_list);
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -274,7 +294,7 @@ watchdog_automonitor_start(FAR struct watchdog_upperhalf_s *upper)
       upper->monitor = true;
       if (lower->ops->settimeout)
         {
-          lower->ops->settimeout(lower, WATCHDOG_AUTOMONITOR_TIMEOUT_MSEC);
+          lower->ops->settimeout(lower, WATCHDOG_AUTOMONITOR_TIMEOUT);
         }
 
       lower->ops->start(lower);
@@ -696,6 +716,55 @@ static int wdog_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+#ifdef CONFIG_WATCHDOG_TIMEOUT_NOTIFIER
+/****************************************************************************
+ * Name:  watchdog_notifier_chain_register
+ *
+ * Description:
+ *   Add notifier to the watchdog notifier chain
+ *
+ * Input Parameters:
+ *    nb - New entry in notifier chain
+ *
+ ****************************************************************************/
+
+void watchdog_notifier_chain_register(FAR struct notifier_block *nb)
+{
+  atomic_notifier_chain_register(&g_watchdog_notifier_list, nb);
+}
+
+/****************************************************************************
+ * Name:  watchdog_notifier_chain_unregister
+ *
+ * Description:
+ *   Remove notifier from the watchdog notifier chain
+ *
+ * Input Parameters:
+ *    nb - Entry to remove from notifier chain
+ *
+ ****************************************************************************/
+
+void watchdog_notifier_chain_unregister(FAR struct notifier_block *nb)
+{
+  atomic_notifier_chain_unregister(&g_watchdog_notifier_list, nb);
+}
+
+/****************************************************************************
+ * Name: watchdog_automonitor_timeout
+ *
+ * Description:
+ *   This function can be called in the watchdog timeout interrupt handler.
+ *   If so, callbacks on the watchdog timer notify chain are called when the
+ *   watchdog timer times out.
+ *
+ ****************************************************************************/
+
+void watchdog_automonitor_timeout(void)
+{
+  atomic_notifier_call_chain(&g_watchdog_notifier_list, action, data);
+}
+#endif /* CONFIG_WATCHDOG_TIMEOUT_NOTIFIER */
 
 /****************************************************************************
  * Name: watchdog_register

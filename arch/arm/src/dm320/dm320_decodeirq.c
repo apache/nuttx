@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/dm320/dm320_decodeirq.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -34,6 +36,7 @@
 
 #include "chip.h"
 #include "arm_internal.h"
+#include "sched/sched.h"
 
 /****************************************************************************
  * Public Functions
@@ -41,8 +44,11 @@
 
 uint32_t *arm_decodeirq(uint32_t *regs)
 {
+  struct tcb_s *tcb = this_task();
+
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
-  CURRENT_REGS = regs;
+  tcb->xcp.regs = regs;
+  up_set_interrupt_context(true);
   err("ERROR: Unexpected IRQ\n");
   PANIC();
   return NULL;
@@ -69,30 +75,24 @@ uint32_t *arm_decodeirq(uint32_t *regs)
 
           arm_ack_irq(irq);
 
-          /* Current regs non-zero indicates that we are processing an
-           * interrupt;
-           * CURRENT_REGS is also used to manage interrupt level context
-           * switches.
-           *
-           * Nested interrupts are not supported.
-           */
+          /* Nested interrupts are not supported. */
 
-          DEBUGASSERT(CURRENT_REGS == NULL);
-          CURRENT_REGS = regs;
+          DEBUGASSERT(!up_interrupt_context());
+          tcb->xcp.regs = regs;
+
+          /* Set irq flag */
+
+          up_set_interrupt_context(true);
 
           /* Deliver the IRQ */
 
           irq_dispatch(irq, regs);
+          tcb = this_task();
 
 #ifdef CONFIG_ARCH_ADDRENV
-          /* Check for a context switch.  If a context switch occurred, then
-           * CURRENT_REGS will have a different value than it did on entry.
-           * If an interrupt level context switch has occurred, then
-           * establish the correct address environment before returning
-           * from the interrupt.
-           */
+          /* Check for a context switch. */
 
-          if (regs != CURRENT_REGS)
+          if (regs != tcb->xcp.regs)
             {
               /* Make sure that the address environment for the previously
                * running task is closed down gracefully (data caches dump,
@@ -100,15 +100,13 @@ uint32_t *arm_decodeirq(uint32_t *regs)
                * thread at the head of the ready-to-run list.
                */
 
-              addrenv_switch(NULL);
+              addrenv_switch(tcb);
             }
 #endif
 
-          /* Set CURRENT_REGS to NULL to indicate that we are no longer in
-           * an interrupt handler.
-           */
+          /* Set irq flag */
 
-          CURRENT_REGS = NULL;
+          up_set_interrupt_context(false);
         }
     }
 #endif

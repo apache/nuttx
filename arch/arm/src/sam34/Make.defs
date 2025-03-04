@@ -1,6 +1,8 @@
 ############################################################################
 # arch/arm/src/sam34/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -28,6 +30,10 @@ include armv7-m/Make.defs
 
 CHIP_CSRCS  = sam_allocateheap.c sam_irq.c sam_lowputc.c sam_serial.c
 CHIP_CSRCS += sam_start.c
+
+ifeq ($(CONFIG_ARCH_HAVE_CUSTOM_VECTORS),y)
+CHIP_CSRCS += sam_vectors.c
+endif
 
 # Configuration-dependent SAM3/4 files
 
@@ -137,11 +143,15 @@ endif # CONFIG_SCHED_TICKLESS
 endif # CONFIG_SAM34_TC
 
 ifeq ($(CONFIG_SMP),y)
-CHIP_CSRCS += sam4cm_cpuindex.c sam4cm_cpuidlestack.c
-CHIP_CSRCS += sam4cm_cpupause.c sam4cm_cpustart.c
+CHIP_CSRCS += sam4cm_cpuidlestack.c
+CHIP_CSRCS += sam4cm_smpcall.c sam4cm_cpustart.c
 ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CHIP_CSRCS += sam4cm_idle.c
 endif
 endif # CONFIG_SMP
+
+ifeq ($(CONFIG_ARCH_HAVE_MULTICPU),y)
+CHIP_CSRCS += sam4cm_cpuindex.c
+endif # CONFIG_ARCH_HAVE_MULTICPU
 
 endif # CONFIG_ARCH_CHIP_SAM4CM

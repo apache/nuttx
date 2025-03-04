@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/hc/include/hc12/irq.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -63,20 +65,21 @@ struct xcptcontext
 
 /* Save the current interrupt enable state & disable IRQs */
 
-static inline irqstate_t up_irq_save(void)
+static inline_function irqstate_t up_irq_save(void)
 {
   /* To be provided */
 }
 
 /* Restore saved IRQ & FIQ state */
 
-static inline void up_irq_restore(irqstate_t flags)
+static inline_function void up_irq_restore(irqstate_t flags)
 {
   /* To be provided */
 }
 
-static inline void system_call3(unsigned int nbr, uintptr_t parm1,
-                                uintptr_t parm2, uintptr_t parm3)
+static inline_function
+void system_call3(unsigned int nbr, uintptr_t parm1,
+                  uintptr_t parm2, uintptr_t parm3)
 {
   /* To be provided */
 }

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/imxrt/imxrt_flexspi.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -33,6 +35,7 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <arch/barriers.h>
 #include <arch/board/board.h>
 
 #include <nuttx/arch.h>
@@ -42,7 +45,6 @@
 #include <nuttx/mutex.h>
 
 #include "arm_internal.h"
-#include "barriers.h"
 
 #include "imxrt_gpio.h"
 #include "imxrt_periphclks.h"
@@ -81,6 +83,8 @@ static int imxrt_flexspi_lock(struct flexspi_dev_s *dev, bool lock);
 static int imxrt_flexspi_transfer_blocking(struct flexspi_dev_s *dev,
                                       struct flexspi_transfer_s *xfer);
 static void imxrt_flexspi_software_reset(struct flexspi_dev_s *dev);
+static void imxrt_flexspi_configure_prefetch(struct flexspi_dev_s *dev,
+                                             bool enable);
 static void imxrt_flexspi_update_lut(struct flexspi_dev_s *dev,
                                      uint32_t index,
                                      const uint32_t *cmd,
@@ -100,6 +104,7 @@ static const struct flexspi_ops_s g_flexspi0ops =
   .lock              = imxrt_flexspi_lock,
   .transfer_blocking = imxrt_flexspi_transfer_blocking,
   .software_reset    = imxrt_flexspi_software_reset,
+  .configure_prefetch = imxrt_flexspi_configure_prefetch,
   .update_lut        = imxrt_flexspi_update_lut,
   .set_device_config  = imxrt_flexspi_set_device_config,
 };
@@ -116,6 +121,9 @@ static struct imxrt_flexspidev_s g_flexspi0dev =
   },
   .base = (struct flexspi_type_s *)IMXRT_FLEXSPIC_BASE,
   .lock = NXMUTEX_INITIALIZER,
+#ifdef CONFIG_IMXRT_FLEXSPI1_XIP
+  .initialized = true,
+#endif
 };
 
 #endif
@@ -129,6 +137,9 @@ static struct imxrt_flexspidev_s g_flexspi1dev =
     .ops = &g_flexspi0ops,
   },
   .base = (struct flexspi_type_s *) IMXRT_FLEXSPI2C_BASE,
+#ifdef CONFIG_IMXRT_FLEXSPI2_XIP
+  .initialized = true,
+#endif
 };
 
 #endif
@@ -326,6 +337,31 @@ static inline void imxrt_flexspi_software_reset_private(
   while (0u != (base->MCR0 & FLEXSPI_MCR0_SWRESET_MASK))
     {
     }
+}
+
+/* Configure FLEXSPI preftech.
+ *
+ * This function enables/disabled the prefetcher
+ * Which is needed to do RWW see NXP AN12564
+ *
+ * @param base FLEXSPI peripheral base address.
+ */
+
+static inline void imxrt_flexspi_configure_prefetch_private(
+                        struct flexspi_type_s *base, bool enable)
+{
+  uint32_t config_value = base->AHBCR;
+
+  if (enable)
+    {
+      config_value |= FLEXSPI_AHBCR_PREFETCHEN(1);
+    }
+  else
+    {
+      config_value &= ~FLEXSPI_AHBCR_PREFETCHEN(1);
+    }
+
+  base->AHBCR = config_value;
 }
 
 /* Returns whether the bus is idle.
@@ -1169,6 +1205,29 @@ static void imxrt_flexspi_software_reset(struct flexspi_dev_s *dev)
   struct imxrt_flexspidev_s *priv = (struct imxrt_flexspidev_s *)dev;
 
   imxrt_flexspi_software_reset_private(priv->base);
+}
+
+/****************************************************************************
+ * Name: imxrt_flexspi_configure_prefetch
+ *
+ * Description:
+ *   Configures prefetch
+ *
+ * Input Parameters:
+ *   dev  - Device-specific state data
+ *   enable - Enable prefetch
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void imxrt_flexspi_configure_prefetch(struct flexspi_dev_s *dev,
+                                             bool enable)
+{
+  struct imxrt_flexspidev_s *priv = (struct imxrt_flexspidev_s *)dev;
+
+  imxrt_flexspi_configure_prefetch_private(priv->base, enable);
 }
 
 /****************************************************************************

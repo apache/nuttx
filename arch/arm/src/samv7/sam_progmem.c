@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/samv7/sam_progmem.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -30,10 +32,10 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/mutex.h>
+#include <arch/barriers.h>
 #include <arch/samv7/chip.h>
 
 #include "arm_internal.h"
-#include "barriers.h"
 
 #include "hardware/sam_memorymap.h"
 
@@ -547,7 +549,7 @@ ssize_t up_progmem_write(size_t address, const void *buffer, size_t buflen)
           *dest++ = *src++;
 
 #ifdef CONFIG_ARMV7M_DCACHE_WRITETHROUGH
-          ARM_DMB();
+          UP_DMB();
 #endif
         }
 

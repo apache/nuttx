@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/procfs/net_procfs.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -120,7 +122,7 @@ static const struct netprocfs_entry_s g_net_entries[] =
     }
   },
 #  endif
-#  if defined(CONFIG_NET_TCP) && !defined(CONFIG_NET_TCP_NO_STACK)
+#  ifdef NET_TCP_HAVE_STACK
   {
     DTYPE_FILE, "tcp",
     {
@@ -128,7 +130,7 @@ static const struct netprocfs_entry_s g_net_entries[] =
     }
   },
 #  endif
-#  if defined(CONFIG_NET_UDP) && !defined(CONFIG_NET_UDP_NO_STACK)
+#  ifdef NET_UDP_HAVE_STACK
   {
     DTYPE_FILE, "udp",
     {

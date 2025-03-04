@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/usbdev/cdcacm_desc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -231,6 +233,7 @@ cdcacm_copy_epcompdesc(enum cdcacm_epdesc_e epid,
 {
   switch (epid)
     {
+#ifdef CONFIG_CDCACM_HAVE_EPINTIN
     case CDCACM_EPINTIN:  /* Interrupt IN endpoint */
       {
         epcompdesc->len  = USB_SIZEOF_SS_EPCOMPDESC;                      /* Descriptor length */
@@ -252,6 +255,7 @@ cdcacm_copy_epcompdesc(enum cdcacm_epdesc_e epid,
                                         CONFIG_CDCACM_EPINTIN_SSSIZE);
       }
       break;
+#endif
 
     case CDCACM_EPBULKOUT:  /* Bulk OUT endpoint */
       {
@@ -336,7 +340,9 @@ int cdcacm_copy_epdesc(enum cdcacm_epdesc_e epid,
 #endif
 
 #ifdef CONFIG_USBDEV_SUPERSPEED
-  if (speed == USB_SPEED_SUPER || speed == USB_SPEED_SUPER_PLUS)
+  if (speed == USB_SPEED_SUPER ||
+      speed == USB_SPEED_SUPER_PLUS ||
+      speed == USB_SPEED_UNKNOWN)
     {
       len += sizeof(struct usb_ss_epcompdesc_s);
     }
@@ -349,6 +355,7 @@ int cdcacm_copy_epdesc(enum cdcacm_epdesc_e epid,
 
   switch (epid)
     {
+#ifdef CONFIG_CDCACM_HAVE_EPINTIN
     case CDCACM_EPINTIN:  /* Interrupt IN endpoint */
       {
         epdesc->len  = USB_SIZEOF_EPDESC;            /* Descriptor length */
@@ -392,6 +399,7 @@ int cdcacm_copy_epdesc(enum cdcacm_epdesc_e epid,
         epdesc->interval = 10;                       /* Interval */
       }
       break;
+#endif
 
     case CDCACM_EPBULKOUT:  /* Bulk OUT endpoint */
       {
@@ -585,7 +593,11 @@ int16_t cdcacm_mkcfgdesc(FAR uint8_t *buf,
       dest->type     = USB_DESC_TYPE_INTERFACE;              /* Descriptor type */
       dest->ifno     = devinfo->ifnobase;                    /* Interface number */
       dest->alt      = CDCACM_NOTALTIFID;                    /* Alternate setting */
+#ifdef CONFIG_CDCACM_HAVE_EPINTIN
       dest->neps     = 1;                                    /* Number of endpoints */
+#else
+      dest->neps     = 0;                                    /* Number of endpoints */
+#endif
       dest->classid  = USB_CLASS_CDC;                        /* Interface class */
       dest->subclass = CDC_SUBCLASS_ACM;                     /* Interface sub-class */
       dest->protocol = CDC_PROTO_ATM;                        /* Interface protocol */
@@ -675,6 +687,7 @@ int16_t cdcacm_mkcfgdesc(FAR uint8_t *buf,
 
   length += sizeof(struct cdc_callmgmt_funcdesc_s);
 
+#ifdef CONFIG_CDCACM_HAVE_EPINTIN
   /* Interrupt IN endpoint descriptor */
 
   ret = cdcacm_copy_epdesc(CDCACM_EPINTIN,
@@ -687,6 +700,7 @@ int16_t cdcacm_mkcfgdesc(FAR uint8_t *buf,
     }
 
   length += ret;
+#endif
 
   /* Data interface descriptor */
 

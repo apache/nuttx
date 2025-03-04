@@ -11,22 +11,6 @@
 
 /x86
 
-# x86_64-elf-gcc from homebrew doesn't seem to
-# provide __udivdi3 etc for -m32
-/x86_64
-
 # Sparc-gaisler-elf toolchain doesn't provide macOS binaries
 /sparc
 -xx3823:nsh
-
-/arm64
-
-# arm64 Boards build by CMake
-CMake,qemu-armv8a:citest
-CMake,qemu-armv8a:citest_smp
-CMake,qemu-armv8a:nsh
-CMake,qemu-armv8a:nsh_fiq
-CMake,qemu-armv8a:nsh_gicv2
-CMake,qemu-armv8a:nsh_smp
-CMake,qemu-armv8a:nsh_smp_tickless
-CMake,qemu-armv8a:sotest

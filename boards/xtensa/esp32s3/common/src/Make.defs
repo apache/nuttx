@@ -1,6 +1,8 @@
 #############################################################################
 # boards/xtensa/esp32s3/common/src/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -36,7 +38,7 @@ ifeq ($(CONFIG_SPI_DRIVER),y)
   CSRCS += esp32s3_board_spidev.c
 endif
 
-ifeq ($(CONFIG_ESP32S3_WIFI),y)
+ifeq ($(CONFIG_ESPRESSIF_WIFI),y)
   CSRCS += esp32s3_board_wlan.c
 endif
 
@@ -72,6 +74,10 @@ ifeq ($(CONFIG_NET_LAN9250),y)
   CSRCS += esp32s3_lan9250.c
 endif
 
+ifeq ($(CONFIG_ESP_PCNT),y)
+  CSRCS += esp32s3_board_pcnt.c
+endif
+
 ifeq ($(CONFIG_ESP_RMT),y)
   CSRCS += esp32s3_board_rmt.c
 endif
@@ -82,6 +88,10 @@ endif
 
 ifeq ($(CONFIG_ESP32S3_SDMMC),y)
   CSRCS += esp32s3_board_sdmmc.c
+endif
+
+ifeq ($(CONFIG_USBMSC),y)
+  CSRCS += esp32s3_usbmsc.c
 endif
 
 DEPPATH += --dep-path src

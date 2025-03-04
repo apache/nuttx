@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/z16/src/common/z16_doirq.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -58,7 +60,10 @@ FAR chipreg_t *z16_doirq(int irq, FAR chipreg_t *regs)
 #else
   if ((unsigned)irq < NR_IRQS)
     {
+      struct tcb_s **running_task = &g_running_tasks[this_cpu()];
       FAR chipreg_t *savestate;
+
+      z16_copystate((*running_task)->xcp.regs, regs)
 
       /* Nested interrupts are not supported in this implementation.  If
        * you want to implement nested interrupts, you would have to (1)
@@ -74,8 +79,8 @@ FAR chipreg_t *z16_doirq(int irq, FAR chipreg_t *regs)
        * interrupt level context switches.
        */
 
-      savestate    = (FAR chipreg_t *)g_current_regs;
-      g_current_regs = regs;
+      savestate = up_current_regs();
+      up_set_current_regs(regs);
 
       /* Acknowledge the interrupt */
 
@@ -85,14 +90,14 @@ FAR chipreg_t *z16_doirq(int irq, FAR chipreg_t *regs)
 
       irq_dispatch(irq, regs);
 
-      if (regs != g_current_regs)
+      if (regs != up_current_regs())
         {
           /* Record the new "running" task when context switch occurred.
            * g_running_tasks[] is only used by assertion logic for reporting
            * crashes.
            */
 
-          g_running_tasks[this_cpu()] = this_task();
+          *running_task = this_task();
         }
 
       /* Restore the previous value of g_current_regs.  NULL would indicate
@@ -100,8 +105,8 @@ FAR chipreg_t *z16_doirq(int irq, FAR chipreg_t *regs)
        * if we are returning from a nested interrupt.
        */
 
-      ret          = g_current_regs;
-      g_current_regs = savestate;
+      ret = up_current_regs();
+      up_set_current_regs(savestate);
     }
 
   board_autoled_off(LED_INIRQ);

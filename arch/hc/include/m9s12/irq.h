@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/hc/include/m9s12/irq.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -163,6 +165,14 @@ extern "C"
 #else
 #define EXTERN extern
 #endif
+
+/****************************************************************************
+ * Name: up_getusrpc
+ ****************************************************************************/
+
+#define up_getusrpc(regs) \
+    ((((uint8_t *)((regs) ? (regs) : up_current_regs()))[REG_PCH] << 8) | \
+     (((uint8_t *)((regs) ? (regs) : up_current_regs()))[REG_PCL] << 0))
 
 /****************************************************************************
  * Public Functions Prototypes

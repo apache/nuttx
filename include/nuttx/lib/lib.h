@@ -1,6 +1,7 @@
 /****************************************************************************
  * include/nuttx/lib/lib.h
- * Non-standard, internal APIs available in lib/.
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -29,6 +30,9 @@
 #include <nuttx/config.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
+
+#include <limits.h>
+#include <alloca.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -116,10 +120,18 @@ FAR struct file_struct *lib_get_stream(int fd);
 
 unsigned long nrand(unsigned long limit);
 
-/* Functions defined in lib_pathbuffer.c ************************************/
+/* Functions defined in lib_tempbuffer.c ************************************/
 
-FAR char *lib_get_pathbuffer(void);
-void lib_put_pathbuffer(FAR char *buffer);
+#ifdef CONFIG_LIBC_TEMPBUFFER
+FAR char *lib_get_tempbuffer(size_t nbytes);
+void lib_put_tempbuffer(FAR char *buffer);
+#else
+#  define lib_get_tempbuffer(n) alloca(n)
+#  define lib_put_tempbuffer(b)
+#endif
+
+#define lib_get_pathbuffer() lib_get_tempbuffer(PATH_MAX)
+#define lib_put_pathbuffer(b) lib_put_tempbuffer(b)
 
 /* Functions defined in lib_realpath.c **************************************/
 

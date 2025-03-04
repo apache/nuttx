@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/sama5/sam_lowputc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -210,6 +212,14 @@
 #endif
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#if defined(SAMA5_HAVE_UART_CONSOLE) || defined(SAMA5_HAVE_USART_CONSOLE)
+static spinlock_t g_sam_lowputc_lock = SP_UNLOCKED;
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -226,30 +236,16 @@ void arm_lowputc(char ch)
 #if defined(SAMA5_HAVE_UART_CONSOLE) || defined(SAMA5_HAVE_USART_CONSOLE)
   irqstate_t flags;
 
-  for (; ; )
-    {
-      /* Wait for the transmitter to be available */
+  /* Wait for the transmitter to be available */
 
-      while ((getreg32(SAM_CONSOLE_VBASE + SAM_UART_SR_OFFSET) &
-        UART_INT_TXEMPTY) == 0);
+  flags = spin_lock_irqsave(&g_sam_lowputc_lock);
+  while ((getreg32(SAM_CONSOLE_VBASE + SAM_UART_SR_OFFSET) &
+    UART_INT_TXEMPTY) == 0);
 
-      /* Disable interrupts so that the test and the transmission are
-       * atomic.
-       */
+  /* Send the character */
 
-      flags = spin_lock_irqsave(NULL);
-      if ((getreg32(SAM_CONSOLE_VBASE + SAM_UART_SR_OFFSET) &
-        UART_INT_TXEMPTY) != 0)
-        {
-          /* Send the character */
-
-          putreg32((uint32_t)ch, SAM_CONSOLE_VBASE + SAM_UART_THR_OFFSET);
-          spin_unlock_irqrestore(NULL, flags);
-          return;
-        }
-
-      spin_unlock_irqrestore(NULL, flags);
-    }
+  putreg32((uint32_t)ch, SAM_CONSOLE_VBASE + SAM_UART_THR_OFFSET);
+  spin_unlock_irqrestore(&g_sam_lowputc_lock, flags);
 
 #elif defined(SAMA5_HAVE_FLEXCOM_CONSOLE)
   irqstate_t flags;
@@ -315,22 +311,13 @@ void arm_lowputc(char ch)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #if defined(SAMA5_HAVE_UART_CONSOLE) || defined(SAMA5_HAVE_USART_CONSOLE) || \
     defined(SAMA5_HAVE_FLEXCOM_CONSOLE) || defined(CONFIG_SAMA5_DBGU_CONSOLE)
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      arm_lowputc('\r');
-    }
 
   arm_lowputc(ch);
 #endif
-  return ch;
 }
 
 /****************************************************************************

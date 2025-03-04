@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/common/riscv_addrenv_utils.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -106,7 +108,7 @@ uintptr_t riscv_get_pgtable(arch_addrenv_t *addrenv, uintptr_t vaddr)
 
   /* Flush the data cache, so the changes are committed to memory */
 
-  __DMB();
+  UP_DMB();
 
   return paddr;
 }
@@ -162,7 +164,7 @@ int riscv_map_pages(arch_addrenv_t *addrenv, uintptr_t *pages,
 
   /* Flush the data cache, so the changes are committed to memory */
 
-  __DMB();
+  UP_DMB();
 
   return OK;
 }
@@ -223,7 +225,7 @@ int riscv_unmap_pages(arch_addrenv_t *addrenv, uintptr_t vaddr,
 
   /* Flush the data cache, so the changes are committed to memory */
 
-  __DMB();
+  UP_DMB();
 
   return OK;
 }

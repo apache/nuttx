@@ -1,6 +1,8 @@
 # ##############################################################################
 # libs/libc/machine/x86_64/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -23,7 +25,11 @@ add_subdirectory(gnu)
 set(SRCS)
 
 if(CONFIG_LIBC_ARCH_ELF)
-  list(APPEND SRCS arch_elf.c)
+  list(APPEND SRCS arch_elf64.c)
+endif()
+
+if(CONFIG_ARCH_SETJMP_H)
+  list(APPEND SRCS arch_setjmp_x86_64.S)
 endif()
 
 target_sources(c PRIVATE ${SRCS})

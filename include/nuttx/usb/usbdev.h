@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/usb/usbdev.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -71,6 +73,13 @@
 
 #define EP_STALL(ep)               (ep)->ops->stall(ep,false)
 #define EP_RESUME(ep)              (ep)->ops->stall(ep,true)
+
+/* Check the endpoint interrupt status, call interrupt handler
+ * if the transfer is done. This is used for polling mode.
+ */
+
+#define EP_POLL(ep) \
+  do { if ((ep)->ops->poll) (ep)->ops->poll(ep); } while (0)
 
 /* USB Device Driver Helpers ************************************************/
 
@@ -297,6 +306,12 @@ struct usbdev_epops_s
   /* Stall or resume an endpoint */
 
   CODE int (*stall)(FAR struct usbdev_ep_s *ep, bool resume);
+
+  /* Check the endpoint interrupt status, call interrupt handler
+   * if the transfer is done. This is used for polling mode.
+   */
+
+  CODE void (*poll)(FAR struct usbdev_ep_s *ep);
 };
 
 /* Representation of one USB endpoint */

@@ -72,10 +72,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Memory synchronization */
-
-#define MEMORY_SYNC() //do { ARM_DSB(); ARM_ISB(); } while (0)
-
 /* If processing is not done at the interrupt level, then work queue support
  * is required.
  */
@@ -839,7 +835,7 @@ static int s32k3xx_transmit(struct s32k3xx_driver_s *priv)
       s32k3xx_disableint(priv, EMAC_DMA_CH0_INTERRUPT_ENABLE_RIE);
     }
 
-  MEMORY_SYNC();
+  UP_MB();
 
   /* Enable TX interrupts */
 

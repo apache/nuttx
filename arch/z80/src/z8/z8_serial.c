@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/z80/src/z8/z8_serial.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -68,6 +70,7 @@ struct z8_uart_s
   uint8_t      rxirq;              /* RX IRQ associated with this UART */
   uint8_t      txirq;              /* RX IRQ associated with this UART */
   uint8_t      parity;             /* 0=none, 1=odd, 2=even */
+  spinlock_t   lock;               /* Spinlock */
   bool         stopbits2;          /* true: Configure with 2 stop bits
                                     * (instead of 1) */
 };
@@ -132,6 +135,7 @@ static struct z8_uart_s g_uart0priv =
   Z8_UART0_RX_IRQ,          /* rxirq */
   Z8_UART0_TX_IRQ,          /* txirq */
   CONFIG_UART0_PARITY,      /* parity */
+  SP_UNLOCKED,              /* Spinlock */
   CONFIG_UART0_2STOP        /* stopbits2 */
 };
 
@@ -177,6 +181,7 @@ static struct z8_uart_s g_uart1priv =
   Z8_UART1_RX_IRQ,          /* rxirq */
   Z8_UART1_TX_IRQ,          /* txirq */
   CONFIG_UART1_PARITY,      /* parity */
+  SP_UNLOCKED,              /* Spinlock */
   CONFIG_UART1_2STOP        /* stopbits2 */
 };
 
@@ -252,17 +257,17 @@ static inline uint8_t z8_getuart(FAR struct z8_uart_s *priv, uint8_t offset)
 
 static uint8_t z8_disableuartirq(FAR struct uart_dev_s *dev)
 {
-  struct z8_uart_s *priv    = (struct z8_uart_s *)dev->priv;
-  irqstate_t          flags = spin_lock_irqsave(NULL);
-  uint8_t             state = priv->rxenabled ?
-                              STATE_RXENABLED : STATE_DISABLED | \
-                              priv->txenabled ?
-                              STATE_TXENABLED : STATE_DISABLED;
+  struct z8_uart_s *priv  = (struct z8_uart_s *)dev->priv;
+  irqstate_t        flags = spin_lock_irqsave(&priv->lock);
+  uint8_t           state = priv->rxenabled ?
+                            STATE_RXENABLED : STATE_DISABLED | \
+                            priv->txenabled ?
+                            STATE_TXENABLED : STATE_DISABLED;
 
-  z8_txint(dev, false);
-  z8_rxint(dev, false);
+  z8_txint_nolock(dev, false);
+  z8_rxint_nolock(dev, false);
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
   return state;
 }
 
@@ -272,12 +277,12 @@ static uint8_t z8_disableuartirq(FAR struct uart_dev_s *dev)
 
 static void z8_restoreuartirq(FAR struct uart_dev_s *dev, uint8_t state)
 {
-  irqstate_t flags = spin_lock_irqsave(NULL);
+  irqstate_t flags = spin_lock_irqsave(&priv->lock);
 
-  z8_txint(dev, (state & STATE_TXENABLED) ? true : false);
-  z8_rxint(dev, (state & STATE_RXENABLED) ? true : false);
+  z8_txint_nolock(dev, (state & STATE_TXENABLED) ? true : false);
+  z8_rxint_nolock(dev, (state & STATE_RXENABLED) ? true : false);
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************
@@ -580,10 +585,9 @@ static int z8_receive(FAR struct uart_dev_s *dev, FAR uint32_t *status)
  *
  ****************************************************************************/
 
-static void z8_rxint(FAR struct uart_dev_s *dev, bool enable)
+static void z8_rxint_nolock(FAR struct uart_dev_s *dev, bool enable)
 {
-  struct z8_uart_s *priv    = (struct z8_uart_s *)dev->priv;
-  irqstate_t          flags = enter_critical_section();
+  struct z8_uart_s *priv = (struct z8_uart_s *)dev->priv;
 
   if (enable)
     {
@@ -597,7 +601,15 @@ static void z8_rxint(FAR struct uart_dev_s *dev, bool enable)
     }
 
   priv->rxenabled = enable;
-  leave_critical_section(flags);
+}
+
+static void z8_rxint(FAR struct uart_dev_s *dev, bool enable)
+{
+  struct z8_uart_s *priv = (struct z8_uart_s *)dev->priv;
+  irqstate_t flags = spin_lock_irqsave(&priv->lock);
+
+  z8_rxint_nolock(dev, enable);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************
@@ -636,10 +648,9 @@ static void z8_send(FAR struct uart_dev_s *dev, int ch)
  *
  ****************************************************************************/
 
-static void z8_txint(FAR struct uart_dev_s *dev, bool enable)
+static void z8_txint_nolock(FAR struct uart_dev_s *dev, bool enable)
 {
-  struct z8_uart_s *priv    = (struct z8_uart_s *)dev->priv;
-  irqstate_t          flags = enter_critical_section();
+  struct z8_uart_s *priv = (struct z8_uart_s *)dev->priv;
 
   if (enable)
     {
@@ -653,7 +664,15 @@ static void z8_txint(FAR struct uart_dev_s *dev, bool enable)
     }
 
   priv->txenabled = enable;
-  leave_critical_section(flags);
+}
+
+static void z8_txint(FAR struct uart_dev_s *dev, bool enable)
+{
+  struct z8_uart_s *priv = (struct z8_uart_s *)dev->priv;
+  irqstate_t flags = spin_lock_irqsave(&priv->lock);
+
+  z8_txint_nolock(dev, enable);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************
@@ -724,7 +743,7 @@ void z80_serial_initialize(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
   uint8_t  state;
 
@@ -733,15 +752,6 @@ int up_putc(int ch)
    */
 
   state = z8_disableuartirq(&CONSOLE_DEV);
-
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR before LF */
-
-      z8_consoleput('\r');
-    }
 
   /* Output the character */
 
@@ -753,7 +763,6 @@ int up_putc(int ch)
    */
 
   z8_restoreuartirq(&CONSOLE_DEV, state);
-  return ch;
 }
 
 #else /* USE_SERIALDRIVER */
@@ -805,21 +814,11 @@ static void z8_putc(int ch)
  * Name: up_putc
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Output CR before LF */
-
-      z8_putc('\r');
-    }
-
   /* Output character */
 
   z8_putc(ch);
-  return ch;
 }
 
 #endif /* USE_SERIALDRIVER */

@@ -1,6 +1,8 @@
 /**************************************************************************
  * libs/libc/machine/sim/arch_setjmp_x86.S
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -83,9 +85,11 @@ SYMBOL(setjmp):
 SYMBOL(longjmp):
 	movl	4(%esp), %ecx      /* jmpbuf in %ecx.  */
 	movl	8(%esp), %eax      /* Second argument is return value.  */
-
+	testl	%eax, %eax
+	jnz	1f
+	incl	%eax
 	/* Save the return address now.  */
-
+1:
 	movl	(JB_PC)(%ecx), %edx
 
 	/* Restore registers.  */

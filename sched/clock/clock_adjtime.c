@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/clock/clock_adjtime.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -34,6 +36,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/spinlock.h>
 
 #include "clock/clock.h"
 
@@ -47,6 +50,7 @@
 
 static struct wdog_s g_adjtime_wdog;
 static long g_adjtime_ppb;
+static spinlock_t g_adjtime_lock = SP_UNLOCKED;
 
 /****************************************************************************
  * Private Functions
@@ -56,7 +60,11 @@ static long g_adjtime_ppb;
 
 static void adjtime_wdog_callback(wdparm_t arg)
 {
+  irqstate_t flags;
+
   UNUSED(arg);
+
+  flags = spin_lock_irqsave(&g_adjtime_lock);
 
 #ifdef CONFIG_ARCH_HAVE_ADJTIME
   up_adjtime(0);
@@ -67,6 +75,7 @@ static void adjtime_wdog_callback(wdparm_t arg)
 #endif
 
   g_adjtime_ppb = 0;
+  spin_unlock_irqrestore(&g_adjtime_lock, flags);
 }
 
 /* Query remaining adjustment in microseconds */
@@ -106,7 +115,8 @@ static int adjtime_start(long long adjust_usec)
       ppb = -ppb_limit;
     }
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_adjtime_lock);
+  sched_lock();
 
   /* Set new adjustment */
 
@@ -132,7 +142,8 @@ static int adjtime_start(long long adjust_usec)
       wd_cancel(&g_adjtime_wdog);
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_adjtime_lock, flags);
+  sched_unlock();
 
   return ret;
 }

@@ -27,6 +27,10 @@
 #include <stdint.h>
 
 #include "xtensa.h"
+#ifdef CONFIG_ESP32S3_SPIFLASH
+#include "rom/esp32s3_spiflash.h"
+#include "esp32s3_spiflash.h"
+#endif
 
 /****************************************************************************
  * Public Data
@@ -61,6 +65,13 @@
 
 uint32_t *xtensa_user(int exccause, uint32_t *regs)
 {
+#ifdef CONFIG_ESP32S3_SPIFLASH
+  if (!spi_flash_cache_enabled())
+    {
+      spiflash_resume_cache();
+    }
+#endif /* CONFIG_ESP32S3_SPIFLASH */
+
   /* xtensa_user_panic never returns. */
 
   xtensa_user_panic(exccause, regs);

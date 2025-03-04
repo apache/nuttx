@@ -1,6 +1,8 @@
 ############################################################################
 # libs/libc/unistd/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -21,8 +23,8 @@
 # Add the unistd C files to the build
 
 CSRCS += lib_access.c lib_daemon.c lib_swab.c lib_pathconf.c lib_sysconf.c
-CSRCS += lib_getentropy.c lib_getopt_common.c lib_getopt.c lib_getopt_long.c
-CSRCS += lib_getopt_longonly.c lib_getoptvars.c lib_getoptargp.c
+CSRCS += lib_getcwd.c lib_getentropy.c lib_getopt_common.c lib_getopt.c
+CSRCS += lib_getopt_long.c lib_getopt_longonly.c lib_getoptvars.c lib_getoptargp.c
 CSRCS += lib_getopterrp.c lib_getoptindp.c lib_getoptoptp.c lib_times.c
 CSRCS += lib_alarm.c lib_fstatvfs.c lib_statvfs.c lib_sleep.c lib_nice.c
 CSRCS += lib_setreuid.c lib_setregid.c lib_getrusage.c lib_utime.c lib_utimes.c
@@ -30,7 +32,8 @@ CSRCS += lib_setrlimit.c lib_getrlimit.c lib_setpriority.c lib_getpriority.c
 CSRCS += lib_futimes.c lib_lutimes.c lib_gethostname.c lib_sethostname.c
 CSRCS += lib_fchownat.c lib_linkat.c lib_readlinkat.c lib_symlinkat.c
 CSRCS += lib_unlinkat.c lib_usleep.c lib_getpgrp.c lib_getpgid.c
-CSRCS += lib_lockf.c lib_flock.c
+CSRCS += lib_lockf.c lib_flock.c lib_getpass.c
+CSRCS += lib_chdir.c lib_fchdir.c
 
 ifneq ($(CONFIG_SCHED_USER_IDENTITY),y)
 CSRCS += lib_setuid.c lib_setgid.c lib_getuid.c lib_getgid.c
@@ -38,7 +41,7 @@ CSRCS += lib_seteuid.c lib_setegid.c lib_geteuid.c lib_getegid.c
 endif
 
 ifneq ($(CONFIG_DISABLE_ENVIRON),y)
-CSRCS += lib_chdir.c lib_fchdir.c lib_getcwd.c lib_restoredir.c
+CSRCS += lib_restoredir.c
 endif
 
 ifeq ($(CONFIG_LIBC_EXECFUNCS),y)
@@ -51,9 +54,10 @@ endif
 
 ifeq ($(CONFIG_ARCH_HAVE_FORK),y)
 CSRCS += lib_fork.c
-ifeq ($(CONFIG_SCHED_WAITPID),y)
-CSRCS += lib_vfork.c
 endif
+
+ifeq ($(CONFIG_CRYPTO),y)
+CSRCS += lib_crypt.c lib_crypt_r.c
 endif
 
 # Add the unistd directory to the build

@@ -1,6 +1,8 @@
 /****************************************************************************
  * mm/mm_heap/mm.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -32,6 +34,7 @@
 #include <nuttx/fs/procfs.h>
 #include <nuttx/lib/math32.h>
 #include <nuttx/mm/mempool.h>
+#include <nuttx/mm/mm.h>
 
 #include <assert.h>
 #include <sys/types.h>
@@ -112,11 +115,6 @@
 #define MM_MAX_CHUNK     (1 << MM_MAX_SHIFT)
 #define MM_NNODES        (MM_MAX_SHIFT - MM_MIN_SHIFT + 1)
 
-#if CONFIG_MM_DEFAULT_ALIGNMENT == 0
-#  define MM_ALIGN       (2 * sizeof(uintptr_t))
-#else
-#  define MM_ALIGN       CONFIG_MM_DEFAULT_ALIGNMENT
-#endif
 #define MM_GRAN_MASK     (MM_ALIGN - 1)
 #define MM_ALIGN_UP(a)   (((a) + MM_GRAN_MASK) & ~MM_GRAN_MASK)
 #define MM_ALIGN_DOWN(a) ((a) & ~MM_GRAN_MASK)
@@ -284,20 +282,13 @@ typedef CODE void (*mm_node_handler_t)(FAR struct mm_allocnode_s *node,
 
 int mm_lock(FAR struct mm_heap_s *heap);
 void mm_unlock(FAR struct mm_heap_s *heap);
+irqstate_t mm_lock_irq(FAR struct mm_heap_s *heap);
+void mm_unlock_irq(FAR struct mm_heap_s *heap, irqstate_t state);
 
 /* Functions contained in mm_shrinkchunk.c **********************************/
 
 void mm_shrinkchunk(FAR struct mm_heap_s *heap,
                     FAR struct mm_allocnode_s *node, size_t size);
-
-/* Functions contained in mm_addfreechunk.c *********************************/
-
-void mm_addfreechunk(FAR struct mm_heap_s *heap,
-                     FAR struct mm_freenode_s *node);
-
-/* Functions contained in mm_size2ndx.c *************************************/
-
-int mm_size2ndx(size_t size);
 
 /* Functions contained in mm_foreach.c **************************************/
 
@@ -307,5 +298,57 @@ void mm_foreach(FAR struct mm_heap_s *heap, mm_node_handler_t handler,
 /* Functions contained in mm_free.c *****************************************/
 
 void mm_delayfree(FAR struct mm_heap_s *heap, FAR void *mem, bool delay);
+
+/****************************************************************************
+ * Inline Functions
+ ****************************************************************************/
+
+static inline_function int mm_size2ndx(size_t size)
+{
+  DEBUGASSERT(size >= MM_MIN_CHUNK);
+  if (size >= MM_MAX_CHUNK)
+    {
+      return MM_NNODES - 1;
+    }
+
+  size >>= MM_MIN_SHIFT;
+  return flsl(size) - 1;
+}
+
+static inline_function void mm_addfreechunk(FAR struct mm_heap_s *heap,
+                                            FAR struct mm_freenode_s *node)
+{
+  FAR struct mm_freenode_s *next;
+  FAR struct mm_freenode_s *prev;
+  size_t nodesize = MM_SIZEOF_NODE(node);
+  int ndx;
+
+  DEBUGASSERT(nodesize >= MM_MIN_CHUNK);
+  DEBUGASSERT(MM_NODE_IS_FREE(node));
+
+  /* Convert the size to a nodelist index */
+
+  ndx = mm_size2ndx(nodesize);
+
+  /* Now put the new node into the next */
+
+  for (prev = &heap->mm_nodelist[ndx],
+       next = heap->mm_nodelist[ndx].flink;
+       next && next->size && MM_SIZEOF_NODE(next) < nodesize;
+       prev = next, next = next->flink);
+
+  /* Does it go in mid next or at the end? */
+
+  prev->flink = node;
+  node->blink = prev;
+  node->flink = next;
+
+  if (next)
+    {
+      /* The new node goes between prev and next */
+
+      next->blink = node;
+    }
+}
 
 #endif /* __MM_MM_HEAP_MM_H */

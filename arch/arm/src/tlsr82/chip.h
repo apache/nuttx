@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/tlsr82/chip.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -32,6 +34,8 @@
 /* Include the chip capabilities file */
 
 #define ARMV6M_PERIPHERAL_INTERRUPTS NR_IRQS
+
+#define arm_fullcontextrestore() tc32_fullcontextrestore(this_task()->xcp.regs)
 
 /* Include the memory map file.
  * Other chip hardware files should then include this file for the proper

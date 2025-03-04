@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/syslog/syslog_devchannel.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -53,9 +55,10 @@
  *   SYSLOG channel.
  *
  *   This tiny function is simply a wrapper around syslog_dev_initialize()
- *   and syslog_channel().  It calls syslog_dev_initialize() to configure
- *   the character device at CONFIG_SYSLOG_DEVPATH then calls
- *   syslog_channel() to use that device as the SYSLOG output channel.
+ *   and syslog_channel_register().  It calls syslog_dev_initialize() to
+ *   configure the character device at CONFIG_SYSLOG_DEVPATH then calls
+ *   syslog_channel_register() to use that device as the SYSLOG output
+ *   channel.
  *
  *   NOTE interrupt level SYSLOG output will be lost in this case unless
  *   the interrupt buffer is used.
@@ -68,9 +71,9 @@
  *
  ****************************************************************************/
 
-FAR struct syslog_channel_s *syslog_dev_channel(void)
+FAR syslog_channel_t *syslog_dev_channel(void)
 {
-  FAR struct syslog_channel_s *dev_channel;
+  FAR syslog_channel_t *dev_channel;
 
   /* Initialize the character driver interface */
 
@@ -83,7 +86,7 @@ FAR struct syslog_channel_s *syslog_dev_channel(void)
 
   /* Use the character driver as the SYSLOG channel */
 
-  if (syslog_channel(dev_channel) != OK)
+  if (syslog_channel_register(dev_channel) != OK)
     {
       syslog_dev_uninitialize(dev_channel);
       dev_channel = NULL;

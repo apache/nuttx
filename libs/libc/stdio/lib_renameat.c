@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/stdio/lib_renameat.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -68,23 +70,43 @@
 int renameat(int olddirfd, FAR const char *oldpath,
              int newdirfd, FAR const char *newpath)
 {
-  char oldfullpath[PATH_MAX];
-  char newfullpath[PATH_MAX];
+  FAR char *oldfullpath;
+  FAR char *newfullpath;
   int ret;
 
+  oldfullpath = lib_get_pathbuffer();
+  if (oldfullpath == NULL)
+    {
+      set_errno(ENOMEM);
+      return ERROR;
+    }
+
+  newfullpath = lib_get_pathbuffer();
+  if (newfullpath == NULL)
+    {
+      lib_put_pathbuffer(oldfullpath);
+      set_errno(ENOMEM);
+      return ERROR;
+    }
+
   ret = lib_getfullpath(olddirfd, oldpath,
-                        oldfullpath, sizeof(oldfullpath));
+                        oldfullpath, PATH_MAX);
   if (ret >= 0)
     {
       ret = lib_getfullpath(newdirfd, newpath,
-                            newfullpath, sizeof(newfullpath));
+                            newfullpath, PATH_MAX);
     }
 
   if (ret < 0)
     {
+      lib_put_pathbuffer(oldfullpath);
+      lib_put_pathbuffer(newfullpath);
       set_errno(-ret);
       return ERROR;
     }
 
-  return rename(oldfullpath, newfullpath);
+  ret = rename(oldfullpath, newfullpath);
+  lib_put_pathbuffer(oldfullpath);
+  lib_put_pathbuffer(newfullpath);
+  return ret;
 }

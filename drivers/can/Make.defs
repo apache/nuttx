@@ -1,6 +1,8 @@
 ############################################################################
 # drivers/can/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -21,8 +23,8 @@
 # Don't build anything if there is no CAN support
 
 ifeq ($(CONFIG_CAN),y)
-
-CSRCS += can.c
+CSRCS += can.c can_sender.c
+endif
 
 ifeq ($(CONFIG_CAN_MCP2515),y)
 CSRCS += mcp2515.c
@@ -32,9 +34,16 @@ ifeq ($(CONFIG_CAN_SJA1000),y)
   CSRCS += sja1000.c
 endif
 
+ifeq ($(CONFIG_CAN_KVASER),y)
+CSRCS += kvaser_pci.c
+endif
+
+ifeq ($(CONFIG_CAN_CTUCANFD),y)
+CSRCS += ctucanfd_pci.c
+endif
+
 # Include CAN device driver build support
 
 DEPPATH += --dep-path can
 VPATH += :can
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)drivers$(DELIM)can
-endif

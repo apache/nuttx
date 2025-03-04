@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/sched/sched_setaffinity.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -124,8 +126,8 @@ int nxsched_set_affinity(pid_t pid, size_t cpusetsize,
    * First... is the task in an assigned task list?
    */
 
-  if (tcb->task_state >= FIRST_ASSIGNED_STATE &&
-      tcb->task_state <= LAST_ASSIGNED_STATE)
+  if (tcb->task_state >= FIRST_READY_TO_RUN_STATE &&
+      tcb->task_state <= LAST_READY_TO_RUN_STATE)
     {
       /* Yes... is the CPU associated with the assigned task in the new
        * affinity mask?

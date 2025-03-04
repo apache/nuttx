@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/vfs/fs_dup2.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -78,11 +80,7 @@ int file_dup3(FAR struct file *filep1, FAR struct file *filep2, int flags)
   /* Increment the reference count on the contained inode */
 
   inode = filep1->f_inode;
-  ret   = inode_addref(inode);
-  if (ret < 0)
-    {
-      return ret;
-    }
+  inode_addref(inode);
 
   /* If there is already an inode contained in the new file structure,
    * close the file and release the inode.
@@ -150,7 +148,7 @@ int file_dup3(FAR struct file *filep1, FAR struct file *filep2, int flags)
               ret = file_ioctl(filep2, FIONBIO, 0);
               if (ret < 0 && inode->u.i_ops->close)
                 {
-                  ret = inode->u.i_ops->close(filep2);
+                  inode->u.i_ops->close(filep2);
                 }
             }
         }

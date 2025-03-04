@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/mips/src/pic32mx/pic32mx_ethernet.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -1290,14 +1292,14 @@ static void pic32mx_rxdone(struct pic32mx_driver_s *priv)
 
       pic32mx_dumprxdesc(rxdesc, "RX Complete");
 
-      /* Update statistics */
-
-      NETDEV_RXPACKETS(&priv->pd_dev);
-
       /* Get the packet length */
 
       priv->pd_dev.d_len = (rxdesc->rsv2 & RXDESC_RSV2_BYTECOUNT_MASK) >>
                             RXDESC_RSV2_BYTECOUNT_SHIFT;
+
+      /* Update statistics */
+
+      NETDEV_RXPACKETS(&priv->pd_dev);
 
       /* Check for errors */
 

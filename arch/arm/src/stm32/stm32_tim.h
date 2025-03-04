@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_tim.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -52,6 +54,8 @@
 #define STM32_TIM_DISABLEINT(d,s)       ((d)->ops->disableint(d,s))
 #define STM32_TIM_ACKINT(d,s)           ((d)->ops->ackint(d,s))
 #define STM32_TIM_CHECKINT(d,s)         ((d)->ops->checkint(d,s))
+#define STM32_TIM_ENABLE(d)             ((d)->ops->enable(d))
+#define STM32_TIM_DISABLE(d)            ((d)->ops->disable(d))
 
 /****************************************************************************
  * Public Types
@@ -151,6 +155,8 @@ struct stm32_tim_ops_s
 {
   /* Basic Timers */
 
+  void (*enable)(struct stm32_tim_dev_s *dev);
+  void (*disable)(struct stm32_tim_dev_s *dev);
   int  (*setmode)(struct stm32_tim_dev_s *dev, stm32_tim_mode_t mode);
   int  (*setclock)(struct stm32_tim_dev_s *dev, uint32_t freq);
   void (*setperiod)(struct stm32_tim_dev_s *dev, uint32_t period);

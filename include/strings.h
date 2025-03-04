@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/strings.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -48,6 +50,10 @@
 
 #ifndef bcopy /* See mm/README.txt */
 #define bcopy(b1,b2,len) memmove(b2,b1,len)
+#endif
+
+#ifndef bzero /* See mm/README.txt */
+#define bzero(s,n)       memset(s,0,n)
 #endif
 
 #define strcasecmp_l(s1, s2, l)     strcasecmp(s1, s2)
@@ -152,16 +158,6 @@ FAR char *rindex(FAR const char *s, int c);
 
 int strcasecmp(FAR const char *, FAR const char *);
 int strncasecmp(FAR const char *, FAR const char *, size_t);
-
-void bzero(FAR void *s, size_t n);
-
-#if CONFIG_FORTIFY_SOURCE > 0
-fortify_function(bzero) void bzero(FAR void *s, size_t n)
-{
-  fortify_assert(n <= fortify_size(s, 0));
-  return __real_bzero(s, n);
-}
-#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

@@ -686,6 +686,10 @@ config LCD_ST7735_BGR
 	bool "Swap R & B channel"
 	default n
 
+config LCD_ST7735_INVCOLOR
+	bool "Invert display color"
+	default n
+
 config LCD_ST7735_BPP
 	int "Bit Per Pixel (12, 16 or 18)"
 	default 16
@@ -751,6 +755,15 @@ config LCD_ST7789_INVCOLOR
 	---help---
 		Invert colors of the LCD display. This is useful for implementations
 		that assume that that colors are inverted by default.
+
+config LCD_ST7789_DEFAULT_COLOR
+	hex "ST7789 Default Background Color"
+	default 0xffff
+	range 0 0xffff
+	---help---
+		This sets the default color of ST7789 display during its initialization.
+		It is the color that is filled to the display and remains there unless
+		higher layer (framebuffer/lcd) overwrites it.
 
 config LCD_ST7789_BGR
 	bool "ST7789 Use BGR Instead Of RGB"

@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/clk/clk_divider.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -107,7 +109,7 @@ static uint32_t divider_recalc_rate(uint32_t parent_rate,
       return parent_rate;
     }
 
-  return DIV_ROUND_UP(parent_rate, div);
+  return div_round_up(parent_rate, div);
 }
 
 static uint32_t clk_divider_recalc_rate(FAR struct clk_s *clk,
@@ -125,7 +127,7 @@ static uint32_t clk_divider_recalc_rate(FAR struct clk_s *clk,
 static uint32_t _div_round_up(uint32_t parent_rate, uint32_t rate,
                               uint16_t flags)
 {
-  uint32_t div = DIV_ROUND_UP(parent_rate, rate);
+  uint32_t div = div_round_up(parent_rate, rate);
 
   if (flags & CLK_DIVIDER_POWER_OF_TWO)
     {
@@ -143,7 +145,7 @@ static uint32_t _div_round_closest(uint32_t parent_rate,
   uint32_t up_rate;
   uint32_t down_rate;
 
-  up = DIV_ROUND_UP(parent_rate, rate);
+  up = div_round_up(parent_rate, rate);
   down = parent_rate / rate;
 
   if (flags & CLK_DIVIDER_POWER_OF_TWO)
@@ -152,8 +154,8 @@ static uint32_t _div_round_closest(uint32_t parent_rate,
       down = rounddown_pow_of_two(down);
     }
 
-  up_rate = DIV_ROUND_UP(parent_rate, up);
-  down_rate = DIV_ROUND_UP(parent_rate, down);
+  up_rate = div_round_up(parent_rate, up);
+  down_rate = div_round_up(parent_rate, down);
 
   return (rate - up_rate) <= (down_rate - rate) ? up : down;
 }
@@ -174,7 +176,7 @@ static bool _is_best_div(uint32_t rate, uint32_t now,
 {
   if (flags & CLK_DIVIDER_ROUND_CLOSEST)
     {
-      return abs(rate - now) < abs(rate - best);
+      return clk_is_best_rate_closest(rate, now, best);
     }
 
   return now <= rate && now > best;
@@ -255,7 +257,7 @@ static uint32_t clk_divider_bestdiv(FAR struct clk_s *clk, uint32_t rate,
     {
       parent_rate = clk_round_rate(clk_get_parent(clk),
           rate * i);
-      now = DIV_ROUND_UP(parent_rate, i);
+      now = div_round_up(parent_rate, i);
       if (_is_best_div(rate, now, best, divider->flags))
         {
           bestdiv = i;
@@ -280,7 +282,7 @@ static uint32_t divider_round_rate(FAR struct clk_s *clk, uint32_t rate,
 
   div = clk_divider_bestdiv(clk, rate, prate, width);
 
-  return DIV_ROUND_UP(*prate, div);
+  return div_round_up(*prate, div);
 }
 
 static uint32_t clk_divider_round_rate(FAR struct clk_s *clk, uint32_t rate,
@@ -302,9 +304,9 @@ static int32_t divider_get_val(uint32_t rate, uint32_t parent_rate,
       return -EINVAL;
     }
 
-  div = DIV_ROUND_UP(parent_rate, rate);
+  div = div_round_up(parent_rate, rate);
 
-  if ((flags & CLK_DIVIDER_POWER_OF_TWO) && !is_power_of_2(div))
+  if ((flags & CLK_DIVIDER_POWER_OF_TWO) && !IS_POWER_OF_2(div))
     {
       return -EINVAL;
     }

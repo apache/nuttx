@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/nxffs/nxffs_initialize.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -36,6 +38,7 @@
 #include <nuttx/fs/ioctl.h>
 
 #include "nxffs.h"
+#include "fs_heap.h"
 
 /****************************************************************************
  * Private Data
@@ -61,6 +64,8 @@ const struct mountpt_operations g_nxffs_operations =
   NULL,              /* truncate */
 #endif
   NULL,              /* poll */
+  NULL,              /* readv */
+  NULL,              /* writev */
 
   NULL,              /* sync -- No buffered data */
   nxffs_dup,         /* dup */
@@ -162,7 +167,7 @@ int nxffs_initialize(FAR struct mtd_dev_s *mtd)
 
   /* Allocate a NXFFS volume structure */
 
-  volume = kmm_zalloc(sizeof(struct nxffs_volume_s));
+  volume = fs_heap_zalloc(sizeof(struct nxffs_volume_s));
   if (!volume)
     {
       return -ENOMEM;
@@ -191,7 +196,7 @@ int nxffs_initialize(FAR struct mtd_dev_s *mtd)
 
   /* Allocate one I/O block buffer to general files system access */
 
-  volume->cache = kmm_malloc(volume->geo.blocksize);
+  volume->cache = fs_heap_malloc(volume->geo.blocksize);
   if (!volume->cache)
     {
       ferr("ERROR: Failed to allocate an erase block buffer\n");
@@ -204,7 +209,7 @@ int nxffs_initialize(FAR struct mtd_dev_s *mtd)
    * is not needed often, but is best to have pre-allocated and in-place.
    */
 
-  volume->pack = kmm_malloc(volume->geo.erasesize);
+  volume->pack = fs_heap_malloc(volume->geo.erasesize);
   if (!volume->pack)
     {
       ferr("ERROR: Failed to allocate an I/O block buffer\n");
@@ -302,14 +307,14 @@ int nxffs_initialize(FAR struct mtd_dev_s *mtd)
   ferr("ERROR: Failed to calculate file system limits: %d\n", -ret);
 
 errout_with_buffer:
-  kmm_free(volume->pack);
+  fs_heap_free(volume->pack);
 errout_with_cache:
-  kmm_free(volume->cache);
+  fs_heap_free(volume->cache);
 errout_with_volume:
   nxmutex_destroy(&volume->lock);
   nxsem_destroy(&volume->wrsem);
 #ifndef CONFIG_NXFFS_PREALLOCATED
-  kmm_free(volume);
+  fs_heap_free(volume);
 #endif
   return ret;
 }

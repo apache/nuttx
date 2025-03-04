@@ -1,0 +1,17 @@
+diff --git libcxx/src/locale.cpp libcxx/src/locale.cpp
+--- libcxx/src/locale.cpp
++++ libcxx/src/locale.cpp
+@@ -41,6 +41,10 @@
+ #include "include/atomic_support.h"
+ #include "include/sso_allocator.h"
+
++#if defined(__NuttX__) && defined(__GLIBC__)
++#   undef __GLIBC__
++#endif
++
+ // On Linux, wint_t and wchar_t have different signed-ness, and this causes
+ // lots of noise in the build log, but no bugs that I know of.
+ _LIBCPP_CLANG_DIAGNOSTIC_IGNORED("-Wsign-conversion")
+--
+2.34.1
+

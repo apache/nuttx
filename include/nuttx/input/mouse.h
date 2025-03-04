@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/input/mouse.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -35,6 +37,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/fs/ioctl.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -47,6 +50,54 @@
 #define MOUSE_BUTTON_1       (1 << 0) /* True: Left mouse button pressed */
 #define MOUSE_BUTTON_2       (1 << 1) /* True: Right mouse button pressed */
 #define MOUSE_BUTTON_3       (1 << 2) /* True: Middle mouse button pressed */
+
+/* IOCTL Commands ***********************************************************/
+
+/* Common mouse IOCTL commands */
+
+#define MSIOC_VENDOR         _MSIOC(0x0001)  /* Vendor-specific commands */
+
+#define MSC_FIRST            0x0001          /* First common command */
+#define MSC_NCMDS            1               /* One common commands */
+
+/* Vendor-specific command structure
+ *
+ * This structure is used to pass vendor-specific commands to the mouse
+ * driver.  The vendor-specific command is identified by the 'cmd' field
+ * and the length of the data is specified by the 'len' field.  The
+ * data follows the structure in a contiguous block of memory.
+ *
+ * The vendor-specific command is defined by the vendor and is not
+ * standardized.  The data format and meaning is defined by the vendor.
+ *
+ * The usage is as follows :
+ *
+ *   struct mse_vendor_data_s
+ *   {
+ *     uint16_t cmd;
+ *     uint16_t len;
+ *     uint16_t data;
+ *     ... ... ...
+ *   };
+ *
+ *   struct mse_vendor_data_s cmd_data;
+ *   cmd_data.cmd = VENDOR_CMD_ID;
+ *   cmd_data.data = 12;
+ *
+ *   struct mouse_vendor_cmd_s *ioctl;
+ *   ioctl = malloc(sizeof(*ioctl) + sizeof(struct mse_vendor_data_s));
+ *   ioctl->len = sizeof(struct mse_vendor_data_s);
+ *   memcpy(ioctl->data, &cmd_data, sizeof(struct mse_vendor_data_s));
+ *
+ *   ioctl(file, MSIOC_VENDOR, ioctl);
+ *
+ */
+
+struct mouse_vendor_cmd_s
+{
+  size_t len;
+  char data[1];
+};
 
 /****************************************************************************
  * Public Types
@@ -63,9 +114,7 @@ struct mouse_report_s
                     /* Possibly padded with 1 byte here */
   int16_t x;        /* X coordinate of the mouse position */
   int16_t y;        /* Y coordinate of the mouse position */
-#ifdef CONFIG_INPUT_MOUSE_WHEEL
   int16_t wheel;    /* Mouse wheel position */
-#endif
 };
 
 /* This structure is for mouse lower half driver */
@@ -73,6 +122,64 @@ struct mouse_report_s
 struct mouse_lowerhalf_s
 {
   FAR void *priv;  /* Save the upper half pointer */
+
+  /**************************************************************************
+   * Name: control
+   *
+   * Description:
+   *   Users can use this interface to implement custom IOCTL.
+   *
+   * Arguments:
+   *   lower   - The instance of lower half of mouse device.
+   *   cmd     - User defined specific command.
+   *   arg     - Argument of the specific command.
+   *
+   * Return Value:
+   *   Zero(OK) on success; a negated errno value on failure.
+   *   -ENOTTY - The command is not supported.
+   **************************************************************************/
+
+  CODE int (*control)(FAR struct mouse_lowerhalf_s *lower,
+                      int cmd, unsigned long arg);
+
+  /**************************************************************************
+   * Name: open
+   *
+   * Description:
+   *   This function pointer is used to open a connection to the mouse driver
+   *   instance. It initializes the mouse and prepares it for subsequent
+   *   interactions with the user. This function typically sets up the state
+   *   of the driver and allocates any necessary resources.
+   *
+   * Input Parameters:
+   *   lower  - A pointer to the instance of the lower half mouse driver.
+   *   filep  - A pointer to the file structure representing the user.
+   *
+   * Returned Value:
+   *   It returns zero (OK) on success; a negative errno value on failure.
+   **************************************************************************/
+
+  CODE int (*open)(FAR struct mouse_lowerhalf_s *lower);
+
+  /**************************************************************************
+   * Name: close
+   *
+   * Description:
+   *   This function pointer is used to close the connection to the mouse
+   *   driver instance. It performs any necessary cleanup operations, such as
+   *   releasing resources and resetting the state of the mouse driver,
+   *   before ending theinteraction with the user.
+   *
+   * Input Parameters:
+   *   lower  - A pointer to the instance of the lower half mouse driver.
+   *   filep  - A pointer to the file structure representing the user closing
+   *            the mouse connection.
+   *
+   * Returned Value:
+   *   Returns zero (OK) on success; a negative errno value on failure.
+   **************************************************************************/
+
+  CODE int (*close)(FAR struct mouse_lowerhalf_s *lower);
 };
 
 /****************************************************************************

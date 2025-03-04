@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/syslog/syslog_intbuffer.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -30,7 +32,8 @@
 #include <errno.h>
 
 #include <nuttx/syslog/syslog.h>
-#include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
+#include <nuttx/circbuf.h>
 
 #include "syslog.h"
 
@@ -51,79 +54,67 @@
 
 /* This structure encapsulates the interrupt buffer state */
 
-struct g_syslog_intbuffer_s
+struct syslog_intbuffer_s
 {
-  volatile uint16_t si_inndx;
-  volatile uint16_t si_outndx;
-  uint8_t si_buffer[CONFIG_SYSLOG_INTBUFSIZE];
+  struct circbuf_s circ;
+  spinlock_t       splock;
+  uint8_t          buffer[CONFIG_SYSLOG_INTBUFSIZE];
 };
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static struct g_syslog_intbuffer_s g_syslog_intbuffer;
+static struct syslog_intbuffer_s g_syslog_intbuffer =
+{
+  CIRCBUF_INITIALIZER(g_syslog_intbuffer.buffer,
+                      sizeof(g_syslog_intbuffer.buffer)),
+  SP_UNLOCKED,
+};
 
 /****************************************************************************
- * Private Data
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: syslog_remove_intbuffer
+ * Name: syslog_flush_internal
  *
  * Description:
- *   Extract any characters that may have been added to the interrupt buffer
+ *   Flush any characters that may have been added to the interrupt buffer
  *   to the SYSLOG device.
  *
  * Input Parameters:
- *   None
+ *   force   - Use the force() method of the channel vs. the putc() method.
  *
  * Returned Value:
- *   On success, the extracted character is returned.  EOF is returned if
- *   the interrupt buffer is empty.
+ *   None
  *
  * Assumptions:
  *   Interrupts may or may not be disabled.
  *
  ****************************************************************************/
 
-int syslog_remove_intbuffer(void)
+static void syslog_flush_internal(bool force, size_t buflen)
 {
-  irqstate_t flags;
-  uint32_t outndx;
-  int ret = EOF;
+  FAR char *buffer;
+  size_t size;
 
-  /* Extraction of the character and adjustment of the circular buffer
-   * indices must be performed in a critical section to protect from
-   * concurrent modification from interrupt handlers.
+  /* This logic is performed with the scheduler disabled to protect from
+   * concurrent modification by other tasks.
    */
 
-  flags = enter_critical_section();
-
-  /* Check if the interrupt buffer is empty */
-
-  outndx = (uint32_t)g_syslog_intbuffer.si_outndx;
-  if (outndx != (uint32_t)g_syslog_intbuffer.si_inndx)
+  do
     {
-      /* Not empty.. Take the next character from the interrupt buffer */
-
-      ret = g_syslog_intbuffer.si_buffer[outndx];
-
-      /* Increment the OUT index, handling wrap-around */
-
-      if (++outndx >= CONFIG_SYSLOG_INTBUFSIZE)
+      buffer = circbuf_get_readptr(&g_syslog_intbuffer.circ, &size);
+      if (size > 0)
         {
-          outndx -= CONFIG_SYSLOG_INTBUFSIZE;
+          size = (size >= buflen) ? buflen : size;
+          syslog_write_foreach(buffer, size, force);
+          circbuf_readcommit(&g_syslog_intbuffer.circ, size);
+          buflen -= size;
         }
-
-      g_syslog_intbuffer.si_outndx = (uint16_t)outndx;
     }
-
-  leave_critical_section(flags);
-
-  /* Now we can send the extracted character to the SYSLOG device */
-
-  return ret;
+  while (size > 0 && buflen > 0);
 }
 
 /****************************************************************************
@@ -142,8 +133,7 @@ int syslog_remove_intbuffer(void)
  *   ch - The character to add to the interrupt buffer (must be positive).
  *
  * Returned Value:
- *   Zero success, the character is echoed back to the caller.  A negated
- *   errno value is returned on any failure.
+ *   None
  *
  * Assumptions:
  *   - Called either from (1) interrupt handling logic with interrupts
@@ -153,78 +143,36 @@ int syslog_remove_intbuffer(void)
  *
  ****************************************************************************/
 
-int syslog_add_intbuffer(int ch)
+void syslog_add_intbuffer(FAR const char *buffer, size_t buflen)
 {
   irqstate_t flags;
-  uint32_t inndx;
-  uint32_t outndx;
-  uint32_t endndx;
-  unsigned int inuse;
-  int ret = OK;
-  int i;
+  size_t space;
 
   /* Disable concurrent modification from interrupt handling logic */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave_notrace(&g_syslog_intbuffer.splock);
 
-  /* How much space is left in the intbuffer? */
+  space = circbuf_space(&g_syslog_intbuffer.circ);
 
-  inndx  = (uint32_t)g_syslog_intbuffer.si_inndx;
-  outndx = (uint32_t)g_syslog_intbuffer.si_outndx;
-
-  endndx = inndx;
-  if (endndx < outndx)
+  if (space >= buflen)
     {
-      endndx += CONFIG_SYSLOG_INTBUFSIZE;
+      circbuf_write(&g_syslog_intbuffer.circ, buffer, buflen);
+    }
+  else if (buflen <= sizeof(g_syslog_intbuffer.buffer))
+    {
+      syslog_flush_internal(true, buflen - space);
+      circbuf_write(&g_syslog_intbuffer.circ, buffer, buflen);
+    }
+  else
+    {
+      syslog_flush_internal(true, sizeof(g_syslog_intbuffer.buffer));
+      space = buflen - sizeof(g_syslog_intbuffer.buffer);
+      syslog_write_foreach(buffer, space, true);
+      circbuf_write(&g_syslog_intbuffer.circ,
+                    buffer + space, buflen - space);
     }
 
-  inuse = (unsigned int)(endndx - outndx);
-
-  /* Is there space for another character */
-
-  if (inuse == CONFIG_SYSLOG_INTBUFSIZE - 1)
-    {
-      int oldch = syslog_remove_intbuffer();
-      for (i = 0; i < CONFIG_SYSLOG_MAX_CHANNELS; i++)
-        {
-          if (g_syslog_channel[i] == NULL)
-            {
-              break;
-            }
-
-#ifdef CONFIG_SYSLOG_IOCTL
-          if (g_syslog_channel[i]->sc_disable)
-            {
-              continue;
-            }
-#endif
-
-          /* Select which putc function to use for this flush */
-
-          if (g_syslog_channel[i]->sc_ops->sc_force)
-            {
-              g_syslog_channel[i]->sc_ops->sc_force(
-                                           g_syslog_channel[i], oldch);
-            }
-        }
-
-        ret = -ENOSPC;
-    }
-
-  /* Copy one character */
-
-  g_syslog_intbuffer.si_buffer[inndx] = (uint8_t)ch;
-
-  /* Increment the IN index, handling wrap-around */
-
-  if (++inndx >= CONFIG_SYSLOG_INTBUFSIZE)
-    {
-      inndx -= CONFIG_SYSLOG_INTBUFSIZE;
-    }
-
-  g_syslog_intbuffer.si_inndx = (uint16_t)inndx;
-  leave_critical_section(flags);
-  return ret;
+  spin_unlock_irqrestore_notrace(&g_syslog_intbuffer.splock, flags);
 }
 
 /****************************************************************************
@@ -246,57 +194,13 @@ int syslog_add_intbuffer(int ch)
  *
  ****************************************************************************/
 
-int syslog_flush_intbuffer(bool force)
+void syslog_flush_intbuffer(bool force)
 {
-  syslog_putc_t putfunc;
   irqstate_t flags;
-  int ch;
-  int i;
 
-  /* This logic is performed with the scheduler disabled to protect from
-   * concurrent modification by other tasks.
-   */
-
-  flags = enter_critical_section();
-
-  do
-    {
-      /* Transfer one character to time.  This is inefficient, but is
-       * done in this way to: (1) Deal with concurrent modification of
-       * the interrupt buffer from interrupt activity, (2) Avoid keeper
-       * interrupts disabled for a long time, and (3) to handler
-       * wrap-around of the circular buffer indices.
-       */
-
-      ch = syslog_remove_intbuffer();
-
-      for (i = 0; i < CONFIG_SYSLOG_MAX_CHANNELS; i++)
-        {
-          if ((g_syslog_channel[i] == NULL) || (ch == EOF))
-            {
-              break;
-            }
-
-#ifdef CONFIG_SYSLOG_IOCTL
-          if (g_syslog_channel[i]->sc_disable)
-            {
-              continue;
-            }
-#endif
-
-          /* Select which putc function to use for this flush */
-
-          putfunc = force ? g_syslog_channel[i]->sc_ops->sc_force :
-                    g_syslog_channel[i]->sc_ops->sc_putc;
-
-          putfunc(g_syslog_channel[i], ch);
-        }
-    }
-  while (ch != EOF);
-
-  leave_critical_section(flags);
-
-  return ch;
+  flags = spin_lock_irqsave_notrace(&g_syslog_intbuffer.splock);
+  syslog_flush_internal(force, sizeof(g_syslog_intbuffer.buffer));
+  spin_unlock_irqrestore_notrace(&g_syslog_intbuffer.splock, flags);
 }
 
 #endif /* CONFIG_SYSLOG_INTBUFFER */

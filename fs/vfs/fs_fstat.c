@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/vfs/fs_fstat.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -32,6 +34,7 @@
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/mtd/mtd.h>
+#include <nuttx/net/net.h>
 #include "inode/inode.h"
 
 /****************************************************************************
@@ -109,12 +112,12 @@ static int proxy_fstat(FAR struct file *filep, FAR struct inode *inode,
         {
           memset(buf, 0, sizeof(struct stat));
           buf->st_mode = S_IFBLK;
-          if (inode->u.i_ops->read)
+          if (inode->u.i_ops->readv || inode->u.i_ops->read)
             {
               buf->st_mode |= S_IROTH | S_IRGRP | S_IRUSR;
             }
 
-          if (inode->u.i_ops->write)
+          if (inode->u.i_ops->writev || inode->u.i_ops->read)
             {
               buf->st_mode |= S_IWOTH | S_IWGRP | S_IWUSR;
             }
@@ -236,7 +239,8 @@ int nx_fstat(int fd, FAR struct stat *buf)
     {
       /* Perform the fstat operation */
 
-      return file_fstat(filep, buf);
+      ret = file_fstat(filep, buf);
+      fs_putfilep(filep);
     }
 
   return ret;

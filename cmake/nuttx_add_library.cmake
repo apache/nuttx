@@ -1,6 +1,8 @@
 # ##############################################################################
 # cmake/nuttx_add_library.cmake
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -35,9 +37,8 @@ function(nuttx_add_library_internal target)
 
   # add main include directories
   target_include_directories(
-    ${target} SYSTEM
-    PRIVATE ${CMAKE_SOURCE_DIR}/include ${CMAKE_BINARY_DIR}/include
-            ${CMAKE_BINARY_DIR}/include_arch)
+    ${target} SYSTEM PRIVATE ${CMAKE_SOURCE_DIR}/include
+                             ${CMAKE_BINARY_DIR}/include)
 
   # Set global compile options & definitions We use the "nuttx" target to hold
   # these properties so that libraries added after this property is set can read
@@ -51,6 +52,13 @@ function(nuttx_add_library_internal target)
   target_include_directories(
     ${target}
     PRIVATE $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx,NUTTX_INCLUDE_DIRECTORIES>>)
+
+  # add extra flags into command line
+
+  if(DEFINED EXTRAFLAGS)
+    string(REPLACE " " ";" eflags "${EXTRAFLAGS}")
+    target_compile_options(${target} PRIVATE ${eflags})
+  endif()
 
   # Set install config for all library
   install(TARGETS ${target})
@@ -182,7 +190,22 @@ function(nuttx_add_library target)
   add_library(${target} ${ARGN})
   add_dependencies(${target} apps_context)
   set_property(GLOBAL APPEND PROPERTY NUTTX_SYSTEM_LIBRARIES ${target})
-
+  # Set apps global compile options & definitions hold by nuttx_apps_interface
+  target_compile_options(
+    ${target}
+    PRIVATE
+      $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx_apps_interface,APPS_COMPILE_OPTIONS>>
+  )
+  target_compile_definitions(
+    ${target}
+    PRIVATE
+      $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx_apps_interface,APPS_COMPILE_DEFINITIONS>>
+  )
+  target_include_directories(
+    ${target}
+    PRIVATE
+      $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx_apps_interface,APPS_INCLUDE_DIRECTORIES>>
+  )
   nuttx_add_library_internal(${target})
 endfunction()
 
@@ -190,11 +213,24 @@ endfunction()
 #
 # nuttx_add_extra_library
 #
-# Add extra library to extra attribute
+# Add extra library to extra attribute, extra library will be treated as an
+# import target and have a complete full path this will be used to avoid adding
+# the -l prefix to the link target between different cmake versions and
+# platformss
 #
 function(nuttx_add_extra_library)
-  foreach(target ${ARGN})
-    set_property(GLOBAL APPEND PROPERTY NUTTX_EXTRA_LIBRARIES ${target})
+  foreach(extra_lib ${ARGN})
+    # define the target name of the extra library
+    string(REGEX REPLACE "[^a-zA-Z0-9]" "_" extra_target "${extra_lib}")
+    # set the absolute path of the library for the import target
+    if(NOT TARGET ${extra_target})
+      nuttx_library_import(${extra_target} ${extra_lib})
+      set_property(GLOBAL APPEND PROPERTY NUTTX_EXTRA_LIBRARIES ${extra_target})
+      if(CONFIG_BUILD_PROTECTED)
+        set_property(GLOBAL APPEND PROPERTY NUTTX_USER_EXTRA_LIBRARIES
+                                            ${extra_target})
+      endif()
+    endif()
   endforeach()
 endfunction()
 

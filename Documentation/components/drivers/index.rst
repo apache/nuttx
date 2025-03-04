@@ -11,6 +11,7 @@ divided in three classes:
   character/index.rst
   block/index.rst
   special/index.rst
+  thermal/index.rst
 
 .. note::
   Device driver support depends on the *in-memory*, *pseudo*
@@ -29,6 +30,9 @@ Drivers in NuttX generally work in two distinct layers:
     the *lower half* via callbacks.
   * A "lower half" which is typically hardware-specific. This is
     usually implemented at the architecture or board level.
+
+Details about drivers implementation can be found in
+:doc:`../../implementation/drivers_design` and :doc:`../../implementation/device_drivers`.
 
 Subdirectories of ``nuttx/drivers``
 ===================================
@@ -107,6 +111,11 @@ Subdirectories of ``nuttx/drivers``
 
   I2S drivers and support logic.
 
+
+* ``i3c/`` :doc:`special/i3c`
+
+  I3C drivers and support logic.
+
 * ``input/`` :doc:`character/input/index`
 
   This directory holds implementations of human input device (HID) drivers.
@@ -177,6 +186,10 @@ Subdirectories of ``nuttx/drivers``
 * ``notes/`` :doc:`character/note`
 
   Note Driver Support.
+
+* ``pinctrl/`` :doc:`special/pinctrl`
+
+  Configure and manage pin.
 
 * ``pipes/`` :doc:`special/pipes`
 

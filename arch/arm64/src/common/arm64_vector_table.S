@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/src/common/arm64_vector_table.S
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -40,13 +42,13 @@
 
 /* Save Corruptible Registers and exception context
  * on the task stack
- * note: allocate stackframe with XCPTCONTEXT_GP_REGS
+ * note: allocate stackframe with ARM64_CONTEXT_REGS
  *     which is ARM64_ESF_REGS + ARM64_CS_REGS
  *     but only save ARM64_ESF_REGS
  */
 
 .macro arm64_enter_exception xreg0, xreg1
-    sub    sp, sp, #8 * XCPTCONTEXT_GP_REGS
+    sub    sp, sp, #8 * XCPTCONTEXT_REGS
 
     stp    x0,  x1,  [sp, #8 * REG_X0]
     stp    x2,  x3,  [sp, #8 * REG_X2]
@@ -65,8 +67,8 @@
     stp    x28, x29, [sp, #8 * REG_X28]
 
     /* Save the current task's SP_ELx and x30 */
-    add    \xreg0, sp, #8 * XCPTCONTEXT_GP_REGS
-    stp    x30, \xreg0,  [sp, #8 * REG_X30]
+    add    \xreg0, sp,  #8 * XCPTCONTEXT_REGS
+    stp    x30, \xreg0, [sp, #8 * REG_X30]
 
     /* ELR and SPSR */
 #if CONFIG_ARCH_ARM64_EXCEPTION_LEVEL == 3
@@ -78,17 +80,25 @@
 #endif
     stp    \xreg0, \xreg1,  [sp, #8 * REG_ELR]
 
-    /* increment exception depth */
+    mrs    \xreg0, sctlr_el1
+    str    \xreg0,  [sp, #8 * REG_SCTLR_EL1]
 
-    mrs    \xreg0, tpidrro_el0
-    mov    \xreg1, #1
-    add    \xreg0, \xreg0, \xreg1
-    msr    tpidrro_el0, \xreg0
+    mrs    \xreg0, sp_el0
+    mrs    \xreg1, tpidrro_el0
+    stp    \xreg0, \xreg1, [sp, #8 * REG_SP_EL0]
+
+    /* Increment exception depth */
+
+    add    \xreg1, \xreg1, #1
+    msr    tpidrro_el0, \xreg1
+
+    /* Save the FPU registers */
 
 #ifdef CONFIG_ARCH_FPU
-    bl    arm64_fpu_enter_exception
+    add    x0, sp, #8 * ARM64_CONTEXT_REGS
+    bl     arm64_fpu_save
+    ldr    x0, [sp, #8 * REG_X0]
 #endif
-
 .endm
 
 /****************************************************************************
@@ -133,12 +143,13 @@
  * +------------------+------------------+-------------------------+
  */
 
-GTEXT(_vector_table)
+SECTION_SUBSEC_FUNC(exc_vector_table,_vector_table_section,_vector_table)
 
     /* The whole table must be 2K aligned */
 
     .align 11
-SECTION_SUBSEC_FUNC(exc_vector_table,_vector_table_section,_vector_table)
+
+GTEXT(_vector_table)
 
     /* Current EL with SP0 / Synchronous */
 
@@ -216,25 +227,25 @@ SECTION_SUBSEC_FUNC(exc_vector_table,_vector_table_section,_vector_table)
 
     .align 7
     arm64_enter_exception x0, x1
-    b    arm64_mode32_error
+    b    arm64_mode32_handler
 
     /* Lower EL using AArch32 / IRQ */
 
     .align 7
     arm64_enter_exception x0, x1
-    b    arm64_mode32_error
+    b    arm64_mode32_handler
 
     /* Lower EL using AArch32 / FIQ */
 
     .align 7
     arm64_enter_exception x0, x1
-    b    arm64_mode32_error
+    b    arm64_mode32_handler
 
     /* Lower EL using AArch32 / SError */
 
     .align 7
     arm64_enter_exception x0, x1
-    b    arm64_mode32_error
+    b    arm64_mode32_handler
 
 /* Restore Corruptible Registers and exception context
  * from the task stack.
@@ -243,9 +254,8 @@ SECTION_SUBSEC_FUNC(exc_vector_table,_vector_table_section,_vector_table)
 GTEXT(arm64_exit_exception)
 SECTION_FUNC(text, arm64_exit_exception)
 #ifdef CONFIG_ARCH_FPU
-    bl    arm64_fpu_exit_exception
-GTEXT(arm64_exit_exc_fpu_done)
-arm64_exit_exc_fpu_done:
+    add    x0, sp, #8 * ARM64_CONTEXT_REGS
+    bl     arm64_fpu_restore
 #endif
 
     /* restore spsr and elr at el1*/
@@ -259,6 +269,13 @@ arm64_exit_exc_fpu_done:
     msr    spsr_el1,  x1
 #endif
 
+    ldr    x0,   [sp, #8 * REG_SCTLR_EL1]
+    msr    sctlr_el1, x0
+
+    ldp    x0, x1,   [sp, #8 * REG_SP_EL0]
+    msr    sp_el0,   x0
+    msr    tpidrro_el0,  x1
+
     /* decrement exception depth */
 
     mrs    x0, tpidrro_el0
@@ -266,8 +283,6 @@ arm64_exit_exc_fpu_done:
     sub    x0, x0, x1
     msr    tpidrro_el0, x0
 
-    ldp    x30, x0,  [sp, #8 * REG_X30]
-    sub    x0,  x0, #8 * XCPTCONTEXT_GP_REGS
     ldp    x0,  x1,  [sp, #8 * REG_X0]
     ldp    x2,  x3,  [sp, #8 * REG_X2]
     ldp    x4,  x5,  [sp, #8 * REG_X4]
@@ -283,7 +298,8 @@ arm64_exit_exc_fpu_done:
     ldp    x24, x25, [sp, #8 * REG_X24]
     ldp    x26, x27, [sp, #8 * REG_X26]
     ldp    x28, x29, [sp, #8 * REG_X28]
+    ldp    x30, xzr, [sp, #8 * REG_X30]
 
-    add    sp, sp, #8 * XCPTCONTEXT_GP_REGS
+    add    sp, sp, #8 * XCPTCONTEXT_REGS
 
     eret

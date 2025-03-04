@@ -247,6 +247,7 @@ config ARCH_CHIP_SAM4CM
 	default n
 	select ARCH_HAVE_MULTICPU
 	select ARCH_HAVE_TICKLESS
+	select ARCH_HAVE_CUSTOM_VECTORS
 
 config ARCH_CHIP_SAM4L
 	bool

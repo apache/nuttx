@@ -7,8 +7,10 @@ config ARCH_HAVE_CAN_ERRORS
 	bool
 	default n
 
-menuconfig CAN
-	bool "CAN Driver Support"
+menu "CAN Driver Support"
+
+config CAN
+	bool "CAN Character Driver Support"
 	default n
 	---help---
 		This selection enables building of the "upper-half" CAN driver.
@@ -33,23 +35,50 @@ config CAN_ERRORS
 		bit will be set in the CAN message and the following message payload
 		will include a more detailed description of certain errors.
 
+config CAN_TIMESTAMP
+	bool "CAN timestamp reporting"
+	default n
+	---help---
+		Support CAN timestamp reporting. if this option is selected then
+		CAN timestamp reporting is enabled. in the CAN message the ch_ts
+		member variable will record the timestamp of each frame.
+
 config CAN_FD
 	bool "CAN FD"
 	default n
 	---help---
 		Enables support for the CAN_FD mode.
 
-config CAN_FIFOSIZE
-	int "CAN driver I/O buffer size"
+config CAN_TXFIFOSIZE
+	int "CAN driver I/O tx buffer size"
 	default 8
+	range 1 255
 	---help---
-		The size of the circular buffer of CAN messages. Default: 8
+		The size of the circular tx buffer of CAN messages. Default: 8
+
+config CAN_RXFIFOSIZE
+	int "CAN driver I/O rx buffer size"
+	default 8
+	range 1 255
+	---help---
+		The size of the circular rx buffer of CAN messages. Default: 8
 
 config CAN_NPENDINGRTR
 	int "Number of pending RTRs"
 	default 4
 	---help---
 		The size of the list of pending RTR requests. Default: 4
+
+config CAN_TXCONFIRM
+	bool "can txconfirm ability"
+	default n
+	---help---
+		this section enables the can txconfirm ability.
+
+		Enabling this feature adds support for the can txconfirm
+		ability, the ability is used from CAN interrupt handler
+		when the transfer is complete, the ability will notify all
+		readers that the canid has been transferred.
 
 config CAN_TXREADY
 	bool "can_txready interface"
@@ -99,6 +128,12 @@ config CAN_TXREADY
 		no longer full.  can_txready() will then awaken the
 		can_write() logic and the hang condition is avoided.
 
+config CAN_TXPRIORITY
+	bool "Prioritize sending based on canid"
+	default n
+	---help---
+		Prioritize sending based on canid.
+
 choice
 	prompt "TX Ready Work Queue"
 	default CAN_TXREADY_HIPRI
@@ -121,13 +156,6 @@ config CAN_LOOPBACK
 		A CAN driver may or may not support a loopback mode for testing. If the
 		driver does support loopback mode, the setting will enable it. (If the
 		driver does not, this setting will have no effect).
-
-config CAN_NPOLLWAITERS
-	int "Number of poll waiters"
-	default 2
-	---help---
-		The maximum number of threads that may be waiting on the
-		poll method.
 
 config CAN_USE_RTR
 	bool "Include RTR in CAN header"
@@ -234,3 +262,64 @@ config CAN_SJA1000_DEBUG
 endif # CAN_SJA1000
 
 endif # CAN
+
+config CAN_KVASER
+	bool "Kvaser PCI CAN card"
+	default n
+	depends on PCI
+	---help---
+		Enable driver support for Kvase PCI CAN card.
+		NOTE: for now works only with QEMU
+
+if CAN_KVASER
+
+choice
+	prompt "Kvaser PCI CAN device type"
+	default CAN_KVASER_CHARDEV if CAN
+	default CAN_KVASER_SOCKET if NET_CAN
+
+config CAN_KVASER_CHARDEV
+	bool "Kvaser PCI can device as chardev"
+	depends on CAN
+	select ARCH_HAVE_CAN_ERRORS
+
+config CAN_KVASER_SOCKET
+	bool "Kvaser PCI can device as socketCAN"
+	depends on NET_CAN
+	select NET_CAN_HAVE_ERRORS
+
+endchoice # "Kvaser PCI CAN device type"
+
+endif # CAN_KVASER
+
+config CAN_CTUCANFD
+	bool "CTUCANFD PCI CAN card"
+	default n
+	depends on PCI
+	---help---
+		Enable driver support for CTU CAN FD PCI card.
+		NOTE: for now works only with QEMU
+
+if CAN_CTUCANFD
+
+choice
+	prompt "CTU CAN FD PCI CAN device type"
+	default CAN_CTUCANFD_CHARDEV if CAN
+	default CAN_CTUCANFD_SOCKET if NET_CAN
+
+config CAN_CTUCANFD_CHARDEV
+	bool "CTU CAN FD PCI can device as chardev"
+	depends on CAN
+	select ARCH_HAVE_CAN_ERRORS
+
+config CAN_CTUCANFD_SOCKET
+	bool "CTU CAN FD PCI can device as socketCAN"
+	depends on NET_CAN
+	select NET_CAN_HAVE_ERRORS
+	select NET_CAN_HAVE_CANFD
+
+endchoice # "CTU CAN FD PCI CAN device type"
+
+endif # CAN_CTUCANFD
+
+endmenu # CAN Driver Support

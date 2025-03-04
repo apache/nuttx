@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/xtensa/esp32s3/esp32s3-devkit/src/esp32s3-devkit.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -267,6 +269,10 @@ int esp32s3_lan9250_initialize(int port);
  ****************************************************************************/
 
 int esp32s3_lan9250_uninitialize(int port);
+#endif
+
+#ifdef CONFIG_ESP32S3_OPENETH
+int esp_openeth_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

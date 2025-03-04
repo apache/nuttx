@@ -1,6 +1,8 @@
 ############################################################################
 # arch/x86_64/src/intel64/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -22,7 +24,7 @@ include common/Make.defs
 
 CMN_CSRCS += intel64_createstack.c intel64_initialstate.c intel64_irq.c
 CMN_CSRCS += intel64_map_region.c intel64_regdump.c intel64_releasestack.c
-CMN_CSRCS += intel64_rtc.c intel64_restore_auxstate.c intel64_savestate.c
+CMN_CSRCS += intel64_rtc.c intel64_restore_auxstate.c
 CMN_CSRCS += intel64_stackframe.c intel64_schedulesigaction.c
 CMN_CSRCS += intel64_sigdeliver.c intel64_usestack.c x86_64_tcbinfo.c
 CMN_CSRCS += intel64_systemreset.c intel64_freq.c intel64_cache.c
@@ -34,6 +36,18 @@ CHIP_CSRCS  = intel64_start.c intel64_handlers.c intel64_idle.c intel64_lowsetup
 CHIP_CSRCS += intel64_serial.c intel64_rng.c intel64_check_capability.c
 CHIP_CSRCS += intel64_cpu.c
 
+ifeq ($(CONFIG_X86_64_UNWINDER_FRAME_POINTER),y)
+  CMN_CSRCS += intel64_backtrace_fp.c
+endif
+
+ifeq ($(CONFIG_STACK_COLORATION),y)
+  CMN_CSRCS += intel64_checkstack.c
+endif
+
+#ifdef CONFIG_ARCH_PERF_EVENTS
+  CMN_CSRCS += intel64_perf.c
+#endif
+
 ifeq ($(CONFIG_MM_PGALLOC),y)
 CHIP_CSRCS += intel64_pgalloc.c
 endif
@@ -44,14 +58,18 @@ endif
 
 ifeq ($(CONFIG_SMP),y)
 CHIP_CSRCS += intel64_cpuidlestack.c
-CHIP_CSRCS += intel64_cpupause.c
+CHIP_CSRCS += intel64_smpcall.c
 CHIP_CSRCS += intel64_cpustart.c
 endif
 
 # Configuration-dependent intel64 files
 
 ifeq ($(CONFIG_MULTBOOT2_FB_TERM),y)
-CHIP_CSRCS += intel64_mbfb.c
+CHIP_CSRCS += intel64_fbterm.c
+endif
+
+ifeq ($(CONFIG_MULTBOOT2_FB),y)
+CHIP_CSRCS += intel64_fb.c
 endif
 
 ifeq ($(CONFIG_ARCH_INTEL64_HAVE_TSC),y)
@@ -60,6 +78,7 @@ CHIP_CSRCS += intel64_tsc_tickless.c
 else
 CHIP_CSRCS += intel64_tsc_timerisr.c
 endif
+CHIP_CSRCS += intel64_tsc_ndelay.c
 endif
 
 ifeq ($(CONFIG_INTEL64_HPET),y)

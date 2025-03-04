@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/video/max7456.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -72,11 +74,12 @@
 #include <debug.h>
 #include <string.h>
 #include <limits.h>
-#include <nuttx/mutex.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/bits.h>
 #include <nuttx/compiler.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/mutex.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/video/max7456.h>

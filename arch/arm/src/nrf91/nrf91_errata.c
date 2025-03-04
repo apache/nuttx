@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/nrf91/nrf91_errata.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -24,8 +26,9 @@
 
 #include <nuttx/config.h>
 
+#include <arch/barriers.h>
+
 #include "arm_internal.h"
-#include "barriers.h"
 
 #include "hardware/nrf91_memorymap.h"
 #include "hardware/nrf91_regulators.h"
@@ -36,8 +39,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#define MEMORY_SYNC() ARM_ISB(); ARM_DSB()
 
 /****************************************************************************
  * Private Functions
@@ -85,7 +86,7 @@ void nrf91_uicr_recover(void)
 
   /* Memory sync */
 
-  MEMORY_SYNC();
+  UP_MB();
 
   /* Write HFXOSRC */
 
@@ -102,7 +103,7 @@ void nrf91_uicr_recover(void)
 
   /* Memory sync */
 
-  MEMORY_SYNC();
+  UP_MB();
 
   /* Write HFXOCNT */
 
@@ -119,7 +120,7 @@ void nrf91_uicr_recover(void)
 
   /* Memory sync */
 
-  MEMORY_SYNC();
+  UP_MB();
 
   /* Read only access */
 

@@ -1,0 +1,62 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+menuconfig CORESIGHT
+	bool "Coresight Driver Support"
+	default n
+	---help---
+		Coresight drivers support.
+
+if CORESIGHT
+
+config CORESIGHT_MAX_OUTPORT_NUM
+	int "Max outport number of coresight device"
+	default 2
+
+config CORESIGHT_TIMEOUT
+	int "Timeout us for waiting register state change"
+	default 100
+
+config CORESIGHT_ETB
+	bool "ETB coresight device support"
+	default n
+
+config CORESIGHT_ETM
+	bool "ETM coresight device support"
+	default n
+
+if CORESIGHT_ETM
+
+config CORESIGHT_ETM_VERSION
+	string "Coresight ETM version"
+	default "v3"
+
+config CORESIGHT_ETM_USE_COPROCESSOR
+	bool "Whether use coprocessor to access ETM registers"
+	default n
+
+endif # CORESIGHT_ETM
+
+config CORESIGHT_FUNNEL
+	bool "Funnel coresight device support"
+	default n
+
+config CORESIGHT_REPLICATOR
+	bool "Replicator coresight device support"
+	default n
+
+config CORESIGHT_STM
+	bool "STM coresight device support"
+	default n
+
+config CORESIGHT_TMC
+	bool "TMC coresight device support"
+	default n
+
+config CORESIGHT_TPIU
+	bool "TPIU coresight device support"
+	default n
+
+endif # CORESIGHT

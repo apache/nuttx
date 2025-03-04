@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/power/battery/goldfish_battery.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -25,8 +27,10 @@
 #include <stdint.h>
 #include <errno.h>
 #include <debug.h>
-#include <nuttx/nuttx.h>
+
+#include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/nuttx.h>
 #include <nuttx/power/battery_gauge.h>
 #include <nuttx/power/battery_ioctl.h>
 
@@ -321,8 +325,9 @@ int goldfish_battery_register(FAR void *regs, int irq)
       goto fail;
     }
 
-  GOLDFISH_BATTERY_WRITE(data, BATTERY_INT_ENABLE, BATTERY_INT_MASK);
   up_enable_irq(data->irq);
+  GOLDFISH_BATTERY_WRITE(data, BATTERY_INT_ENABLE, BATTERY_INT_MASK);
+
   batinfo("goldfish_battery_register over");
   return 0;
 fail:

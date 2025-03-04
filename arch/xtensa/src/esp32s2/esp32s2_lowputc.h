@@ -106,6 +106,7 @@ struct esp32s2_uart_s
   uint8_t  rs485_dir_gpio;     /* UART RS-485 DIR GPIO pin cfg */
   bool     rs485_dir_polarity; /* UART RS-485 DIR TXEN polarity */
 #endif
+  spinlock_t lock;             /* Spinlock */
 };
 
 extern struct esp32s2_uart_s g_uart0_config;
@@ -400,7 +401,7 @@ void esp32s2_lowputc_rst_rxfifo(const struct esp32s2_uart_s *priv);
  *
  ****************************************************************************/
 
-void esp32s2_lowputc_disable_all_uart_int(const struct esp32s2_uart_s *priv,
+void esp32s2_lowputc_disable_all_uart_int(struct esp32s2_uart_s *priv,
                                           uint32_t *current_status);
 
 /****************************************************************************

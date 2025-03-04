@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/xtensa/esp32/common/scripts/legacy_sections.ld
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -276,7 +278,7 @@ SECTIONS
     _srodata = ABSOLUTE(.);
     *(.rodata)
     *(.rodata.*)
-#ifdef CONFIG_ESP32_WIRELESS
+#ifdef CONFIG_ESPRESSIF_WIRELESS
     *(.rodata_wlog_verbose.*)
     *(.rodata_wlog_debug.*)
     *(.rodata_wlog_info.*)

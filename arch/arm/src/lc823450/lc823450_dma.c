@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/lc823450/lc823450_dma.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -104,7 +106,7 @@ struct lc823450_dmach_s
 
 struct lc823450_dma_s
 {
-  mutex_t lock;            /* For exclusive access to the DMA channel list */
+  spinlock_t lock;            /* For exclusive access to the DMA channel list */
 
   /* This is the state of each DMA channel */
 
@@ -121,7 +123,7 @@ static int phydmastart(struct lc823450_phydmach_s *pdmach);
 
 static struct lc823450_dma_s g_dma =
 {
-  .lock = NXMUTEX_INITIALIZER,
+  .lock = SP_UNLOCKED,
 };
 volatile uint8_t g_dma_inprogress;
 
@@ -142,7 +144,7 @@ static int dma_interrupt_core(void *context)
 
   pdmach = (struct lc823450_phydmach_s *)context;
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&g_dma.lock);
   q_ent = pdmach->req_q.tail;
   DEBUGASSERT(q_ent != NULL);
   dmach = (struct lc823450_dmach_s *)q_ent;
@@ -152,18 +154,20 @@ static int dma_interrupt_core(void *context)
       /* finish one transfer */
 
       sq_remlast(&pdmach->req_q);
-      spin_unlock_irqrestore(NULL, flags);
+      spin_unlock_irqrestore(&g_dma.lock, flags);
 
       if (dmach->callback)
         dmach->callback((DMA_HANDLE)dmach, dmach->arg, 0);
     }
   else
     {
-      spin_unlock_irqrestore(NULL, flags);
+      spin_unlock_irqrestore(&g_dma.lock, flags);
     }
 
   up_disable_clk(LC823450_CLOCK_DMA);
+  flags = spin_lock_irqsave(&g_dma.lock);
   phydmastart(pdmach);
+  spin_unlock_irqrestore(&g_dma.lock, flags);
 
   return OK;
 }
@@ -210,20 +214,16 @@ static int dma_interrupt(int irq, void *context, void *arg)
 
 static int phydmastart(struct lc823450_phydmach_s *pdmach)
 {
-  irqstate_t flags;
   int trnum;
 
   struct lc823450_dmach_s *dmach;
   sq_entry_t *q_ent;
-
-  flags = spin_lock_irqsave(NULL);
 
   q_ent = pdmach->req_q.tail;
 
   if (!q_ent)
     {
       pdmach->inprogress = 0;
-      spin_unlock_irqrestore(NULL, flags);
       return 0;
     }
 
@@ -286,7 +286,6 @@ static int phydmastart(struct lc823450_phydmach_s *pdmach)
 
   modifyreg32(DMACCFG(dmach->chn), 0, DMACCFG_ITC | DMACCFG_E);
 
-  spin_unlock_irqrestore(NULL, flags);
   return 0;
 }
 
@@ -611,7 +610,7 @@ int lc823450_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
 
   /* select physical channel */
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&g_dma.lock);
 
   sq_addfirst(&dmach->q_ent, &g_dma.phydmach[dmach->chn].req_q);
 
@@ -625,7 +624,7 @@ int lc823450_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
       phydmastart(&g_dma.phydmach[dmach->chn]);
     }
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&g_dma.lock, flags);
 
   return OK;
 }
@@ -642,7 +641,7 @@ void lc823450_dmastop(DMA_HANDLE handle)
 
   DEBUGASSERT(dmach != NULL);
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&g_dma.lock);
 
   modifyreg32(DMACCFG(dmach->chn), DMACCFG_ITC | DMACCFG_E, 0);
 
@@ -658,5 +657,5 @@ void lc823450_dmastop(DMA_HANDLE handle)
       sq_rem(&dmach->q_ent, &pdmach->req_q);
     }
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&g_dma.lock, flags);
 }

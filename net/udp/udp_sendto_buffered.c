@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/udp/udp_sendto_buffered.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -939,7 +941,11 @@ int psock_udp_cansend(FAR struct udp_conn_s *conn)
    * many more.
    */
 
-  if (udp_wrbuffer_test() < 0 || iob_navail(false) <= 0)
+  if (udp_wrbuffer_test() < 0 || iob_navail(false) <= 0
+#if CONFIG_NET_SEND_BUFSIZE > 0
+      || udp_wrbuffer_inqueue_size(conn) >= conn->sndbufs
+#endif
+     )
     {
       return -EWOULDBLOCK;
     }

@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/note/notectl_driver.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -38,7 +40,7 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static int notectl_ioctl(struct file *filep, int cmd, unsigned long arg);
+static int notectl_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 
 /****************************************************************************
  * Private Data
@@ -62,7 +64,7 @@ static const struct file_operations g_notectl_fops =
  * Name: notectl_ioctl
  ****************************************************************************/
 
-static int notectl_ioctl(struct file *filep, int cmd, unsigned long arg)
+static int notectl_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   int ret = -ENOSYS;
 
@@ -77,7 +79,8 @@ static int notectl_ioctl(struct file *filep, int cmd, unsigned long arg)
 
       case NOTECTL_GETMODE:
         {
-          struct note_filter_mode_s *mode = (struct note_filter_mode_s *)arg;
+          FAR struct note_filter_named_mode_s *mode =
+                         (FAR struct note_filter_named_mode_s *)arg;
 
           if (mode == NULL)
             {
@@ -98,7 +101,8 @@ static int notectl_ioctl(struct file *filep, int cmd, unsigned long arg)
 
       case NOTECTL_SETMODE:
         {
-          struct note_filter_mode_s *mode = (struct note_filter_mode_s *)arg;
+          FAR struct note_filter_named_mode_s *mode =
+                        (FAR struct note_filter_named_mode_s *)arg;
 
           if (mode == NULL)
             {
@@ -120,8 +124,8 @@ static int notectl_ioctl(struct file *filep, int cmd, unsigned long arg)
 
       case NOTECTL_GETSYSCALLFILTER:
         {
-          struct note_filter_syscall_s *filter;
-          filter = (struct note_filter_syscall_s *)arg;
+          FAR struct note_filter_named_syscall_s *filter;
+          filter = (FAR struct note_filter_named_syscall_s *)arg;
 
           if (filter == NULL)
             {
@@ -142,8 +146,8 @@ static int notectl_ioctl(struct file *filep, int cmd, unsigned long arg)
 
       case NOTECTL_SETSYSCALLFILTER:
         {
-          struct note_filter_syscall_s *filter;
-          filter = (struct note_filter_syscall_s *)arg;
+          FAR struct note_filter_named_syscall_s *filter;
+          filter = (FAR struct note_filter_named_syscall_s *)arg;
 
           if (filter == NULL)
             {
@@ -166,8 +170,8 @@ static int notectl_ioctl(struct file *filep, int cmd, unsigned long arg)
 
       case NOTECTL_GETIRQFILTER:
         {
-          struct note_filter_irq_s *filter;
-          filter = (struct note_filter_irq_s *)arg;
+          FAR struct note_filter_named_irq_s *filter;
+          filter = (FAR struct note_filter_named_irq_s *)arg;
 
           if (filter == NULL)
             {
@@ -189,8 +193,8 @@ static int notectl_ioctl(struct file *filep, int cmd, unsigned long arg)
 
       case NOTECTL_SETIRQFILTER:
         {
-          struct note_filter_irq_s *filter;
-          filter = (struct note_filter_irq_s *)arg;
+          FAR struct note_filter_named_irq_s *filter;
+          filter = (FAR struct note_filter_named_irq_s *)arg;
 
           if (filter == NULL)
             {

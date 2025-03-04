@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/power/pm/pm_activity.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -313,10 +315,10 @@ void pm_wakelock_uninit(FAR struct pm_wakelock_s *wakelock)
     }
 
   wakelock->count = 0;
-  wd_cancel(wdog);
   pm_wakelock_stats_rm(wakelock);
 
   spin_unlock_irqrestore(&pdom->lock, flags);
+  wd_cancel(wdog);
 }
 
 /****************************************************************************

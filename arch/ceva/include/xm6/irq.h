@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/ceva/include/xm6/irq.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -130,12 +132,6 @@ struct xcpt_syscall_s
 struct xcptcontext
 {
 #ifndef CONFIG_DISABLE_SIGNALS
-  /* The following function pointer is non-zero if there
-   * are pending signals to be processed.
-   */
-
-  void *sigdeliver; /* Actual type is sig_deliver_t */
-
   /* These are saved copies of the context used during
    * signal processing.
    */
@@ -209,45 +205,45 @@ struct xcptcontext
  * Both behavior don't match the nuttx requirement.
  */
 
-static inline uint32_t getmoda(void)
+static inline_function uint32_t getmoda(void)
 {
   uint32_t moda;
   __asm__ __volatile__("mov moda.ui, %0.ui\nnop #0x02" : "=r"(moda));
   return moda;
 }
 
-static inline void setmoda(uint32_t moda)
+static inline_function void setmoda(uint32_t moda)
 {
   __asm__ __volatile__("nop #0x04\nnop\nmovp %0.ui, moda.ui" : : "r"(moda));
 }
 
 /* Return the current value of the stack pointer */
 
-static inline uint32_t up_getsp(void)
+static inline_function uint32_t up_getsp(void)
 {
   uint32_t sp;
   __asm__ __volatile__("mov sp.ui, %0.ui" : "=r"(sp));
   return sp;
 }
 
-static inline void up_irq_disable(void)
+static inline_function void up_irq_disable(void)
 {
   setmoda(REG_MODA_DISABLE);
 }
 
-static inline irqstate_t up_irq_save(void)
+static inline_function irqstate_t up_irq_save(void)
 {
   irqstate_t flags = getmoda();
   up_irq_disable();
   return flags;
 }
 
-static inline void up_irq_enable(void)
+static inline_function void up_irq_enable(void)
 {
   setmoda(REG_MODA_ENABLE);
 }
 
-static inline void up_irq_restore(irqstate_t flags)
+static inline_function void up_irq_restore(irqstate_t flags)
 {
   setmoda(flags);
 }

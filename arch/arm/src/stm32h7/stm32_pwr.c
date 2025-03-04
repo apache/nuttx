@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32h7/stm32_pwr.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -24,13 +26,13 @@
 
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
+#include <arch/barriers.h>
 
 #include <stdint.h>
 #include <stdbool.h>
 #include <assert.h>
 #include <errno.h>
 
-#include "barriers.h"
 #include "arm_internal.h"
 #include "stm32_pwr.h"
 #include "stm32_gpio.h"
@@ -137,7 +139,7 @@ void stm32_pwr_enablebkp(bool writable)
   bool wait = false;
 
   flags = enter_critical_section();
-  ARM_DSB();
+  UP_DSB();
 
   /* Get the current state of the STM32 PWR control register */
 
@@ -173,7 +175,7 @@ void stm32_pwr_enablebkp(bool writable)
       wait = true;
     }
 
-  ARM_DSB();
+  UP_DSB();
   leave_critical_section(flags);
 
   if (wait)

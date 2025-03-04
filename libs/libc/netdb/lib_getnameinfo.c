@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/netdb/lib_getnameinfo.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -32,8 +34,6 @@
 #include <assert.h>
 
 #include "netdb/lib_netdb.h"
-
-#ifdef CONFIG_LIBC_NETDB
 
 /****************************************************************************
  * Public Functions
@@ -197,4 +197,3 @@ int getnameinfo(FAR const struct sockaddr *addr, socklen_t addrlen,
   return OK;
 }
 
-#endif /* CONFIG_LIBC_NETDB */

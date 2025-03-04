@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/goldfish/chip.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -35,6 +37,7 @@
 #define CHIP_MPCORE_VBASE     0x8000000
 #define MPCORE_ICD_OFFSET     0x0000
 #define MPCORE_ICC_OFFSET     0x10000
+#define MPCORE_V2M_OFFSET     0x20000
 
 #define PGTABLE_SIZE          0x00004000
 #define PGTABLE_BASE_PADDR    (CONFIG_RAM_START + CONFIG_RAM_SIZE - PGTABLE_SIZE * CONFIG_SMP_NCPUS)

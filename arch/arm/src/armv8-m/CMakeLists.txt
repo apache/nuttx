@@ -1,6 +1,8 @@
 # ##############################################################################
 # arch/arm/src/armv8-m/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -30,6 +32,7 @@ set(SRCS
     arm_initialstate.c
     arm_itm.c
     arm_memfault.c
+    arm_perf.c
     arm_sau.c
     arm_schedulesigaction.c
     arm_securefault.c
@@ -41,10 +44,6 @@ set(SRCS
     arm_trigger_irq.c
     arm_usagefault.c
     arm_vectors.c)
-
-if(CONFIG_ARCH_PERF_EVENTS)
-  list(APPEND SRCS arm_perf.c)
-endif()
 
 if(CONFIG_ARMV8M_SYSTICK)
   list(APPEND SRCS arm_systick.c)
@@ -72,6 +71,10 @@ endif()
 
 if(CONFIG_ARCH_TRUSTZONE_SECURE)
   list(APPEND SRCS arm_gen_nonsecfault.c)
+endif()
+
+if(CONFIG_ARM_COREDUMP_REGION)
+  list(APPEND SRCS arm_dumpnvic.c)
 endif()
 
 target_sources(arch PRIVATE ${SRCS})

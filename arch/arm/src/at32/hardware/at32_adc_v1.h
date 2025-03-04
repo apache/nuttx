@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/at32/hardware/at32_adc_v1.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -610,7 +612,7 @@
 
 /* Calibration value register */
 
-#define ADC_CALVAL_SHIFT             (0) 
+#define ADC_CALVAL_SHIFT             (0)
 #define ADC_CALVAL_MASK              (0x7f << ADC_CALVAL_SHIFT)
 #  define ADC_CALVAL(n)              (n << ADC_CALVAL_SHIFT)
 

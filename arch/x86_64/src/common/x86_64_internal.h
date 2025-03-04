@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/x86_64/src/common/x86_64_internal.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -32,6 +34,7 @@
 #  include <nuttx/sched.h>
 #  include <stdint.h>
 #  include <arch/io.h>
+#  include <arch/irq.h>
 #  include <arch/multiboot2.h>
 #endif
 
@@ -64,9 +67,14 @@
 #    undef  USE_SERIALDRIVER
 #    undef  USE_EARLYSERIALINIT
 #    undef  CONFIG_DEV_LOWCONSOLE
-#  elif defined(CONFIG_16550_UART)
+#  elif defined(CONFIG_16550_UART) && \
+        !defined(CONFIG_16550_NO_SERIAL_CONSOLE)
 #    define USE_SERIALDRIVER 1
 #    define USE_EARLYSERIALINIT 1
+#  elif defined(CONFIG_16550_PCI_UART) && \
+        !defined(CONFIG_16550_PCI_NO_SERIAL_CONSOLE)
+#    define USE_SERIALDRIVER 1
+#    undef  USE_EARLYSERIALINIT
 #  endif
 #endif
 
@@ -99,19 +107,20 @@
 #define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
 #define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
 
+/* This is the value used to mark the stack for subsequent stack monitoring
+ * logic.
+ */
+
+#define STACK_COLOR         0xdeadbeef
+#define INTSTACK_COLOR      0xdeadbeef
+#define HEAP_COLOR          'h'
+
 #define getreg8(p)          inb(p)
 #define putreg8(v,p)        outb(v,p)
 #define getreg16(p)         inw(p)
 #define putreg16(v,p)       outw(v,p)
 #define getreg32(p)         inl(p)
 #define putreg32(v,p)       outl(v,p)
-
-/* Macros to handle saving and restore interrupt state.  In the current
- * model, the state is copied from the stack to the TCB, but only a
- * referenced is passed to get the state from the TCB.
- */
-
-#define x86_64_restorestate(regs) (up_set_current_regs(regs))
 
 /* ISR/IRQ stack size */
 
@@ -120,6 +129,20 @@
 #else
 #  define IRQ_STACK_SIZE CONFIG_ARCH_INTERRUPTSTACK
 #endif
+
+/* Linker defined section addresses */
+
+#define _START_TEXT  _stext
+#define _END_TEXT    _etext
+#define _START_BSS   _sbss
+#define _END_BSS     _ebss
+#define _DATA_INIT   _eronly
+#define _START_DATA  _sdata
+#define _END_DATA    _edata
+#define _START_TDATA _stdata
+#define _END_TDATA   _etdata
+#define _START_TBSS  _stbss
+#define _END_TBSS    _etbss
 
 /****************************************************************************
  * Public Types
@@ -146,7 +169,7 @@ extern const uintptr_t g_idle_topstack[];
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 extern uint8_t g_intstackalloc[];
-extern uint8_t g_intstackalloc[];
+extern uint8_t g_isrstackalloc[];
 #endif
 
 /* These symbols are setup by the linker script. */
@@ -158,17 +181,40 @@ extern uint8_t _sdata[];           /* Start of .data */
 extern uint8_t _edata[];           /* End+1 of .data */
 extern uint8_t _sbss[];            /* Start of .bss */
 extern uint8_t _ebss[];            /* End+1 of .bss */
+extern uint8_t _stdata[];          /* Start of .tdata */
+extern uint8_t _etdata[];          /* End+1 of .tdata */
+extern uint8_t _stbss[];           /* Start of .tbss */
+extern uint8_t _etbss[];           /* End+1 of .tbss */
 #endif
+
+#ifndef __ASSEMBLY__
 
 /****************************************************************************
  * Inline Functions
  ****************************************************************************/
 
+#ifdef CONFIG_ARCH_KERNEL_STACK
+static inline_function uint64_t *x86_64_get_ktopstk(void)
+{
+  uint64_t *ktopstk;
+  __asm__ volatile("movq %%gs:(%c1), %0"
+                   : "=rm" (ktopstk)
+                   : "i" (offsetof(struct intel64_cpu_s, ktopstk)));
+  return ktopstk;
+}
+
+static inline_function void x86_64_set_ktopstk(uint64_t *ktopstk)
+{
+  __asm__ volatile("movq %0, %%gs:(%c1)"
+                   :: "r" (ktopstk), "i" (offsetof(struct intel64_cpu_s,
+                                                   ktopstk)));
+}
+#endif
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
 /* Atomic modification of registers */
 
 void modifyreg8(unsigned int addr, uint8_t clearbits, uint8_t setbits);
@@ -189,7 +235,6 @@ void x86_64_boardinitialize(void);
 /* Defined in files with the same name as the function */
 
 void x86_64_copystate(uint64_t *dest, uint64_t *src);
-void x86_64_savestate(uint64_t *regs);
 void x86_64_decodeirq(uint64_t *regs);
 #ifdef CONFIG_ARCH_DMA
 void weak_function x86_64_dmainitialize(void);
@@ -202,7 +247,7 @@ void x86_64_lowputs(const char *str);
 void x86_64_restore_auxstate(struct tcb_s *rtcb);
 void x86_64_checktasks(void);
 
-void x86_64_syscall(uint64_t *regs);
+uint64_t *x86_64_syscall(uint64_t *regs);
 
 #ifdef CONFIG_ARCH_MULTIBOOT2
 void x86_64_mb2_fbinitialize(struct multiboot_tag_framebuffer *tag);
@@ -248,6 +293,18 @@ void x86_64_usbuninitialize(void);
 #ifdef CONFIG_PCI
 void x86_64_pci_init(void);
 #endif
+
+/* Defined in intel64_checkstack.c */
+
+#ifdef CONFIG_STACK_COLORATION
+size_t x86_64_stack_check(void *stackbase, size_t nbytes);
+void x86_64_stack_color(void *stackbase, size_t nbytes);
+#endif
+
+/* TLB shootdown */
+
+int x86_64_tlb_handler(int irq, void *c, void *arg);
+void x86_64_tlb_shootdown(void);
 
 #endif /* __ASSEMBLY__ */
 

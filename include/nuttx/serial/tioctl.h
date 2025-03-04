@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/serial/tioctl.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -197,10 +199,6 @@
 #define TIOCGSWAP       _TIOC(0x0036)  /* Get RX/TX Swap */
 
 #define SER_SWAP_ENABLED   (1 << 0) /* Enable/disable RX/TX swap */
-
-/* LIN Protocol Support */
-
-#define TIOCSLINID      _TIOC(0x0037) /* Master send one LIN header with specified LIN identifier: uint8_t */
 
 /****************************************************************************
  * Public Type Definitions

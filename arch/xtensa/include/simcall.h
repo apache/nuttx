@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/xtensa/include/simcall.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -63,6 +65,11 @@
 #define SIMCALL_O_RDWR     0x0002
 #define SIMCALL_O_ACCMODE  0x0003
 #define SIMCALL_O_APPEND   0x0400
+#ifdef CONFIG_XTENSA_TARGET_ISS
+#  define SIMCALL_O_NONBLOCK 0x0080
+#else
+#  define SIMCALL_O_NONBLOCK 0x0800
+#endif
 #define SIMCALL_O_CREAT    0x0040
 #define SIMCALL_O_TRUNC    0x0200
 #define SIMCALL_O_EXCL     0x0080

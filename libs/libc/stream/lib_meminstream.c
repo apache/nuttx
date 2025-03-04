@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/stream/lib_meminstream.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -23,6 +25,7 @@
  ****************************************************************************/
 
 #include <assert.h>
+#include <errno.h>
 #include <string.h>
 
 #include "libc.h"
@@ -39,7 +42,7 @@ static int meminstream_getc(FAR struct lib_instream_s *self)
 {
   FAR struct lib_meminstream_s *stream =
                                        (FAR struct lib_meminstream_s *)self;
-  int ret;
+  int ret = -EINVAL;
 
   DEBUGASSERT(self);
 
@@ -50,10 +53,6 @@ static int meminstream_getc(FAR struct lib_instream_s *self)
       ret = stream->buffer[self->nget];
       self->nget++;
     }
-  else
-    {
-      ret = EOF;
-    }
 
   return ret;
 }
@@ -62,12 +61,12 @@ static int meminstream_getc(FAR struct lib_instream_s *self)
  * Name: meminstream_gets
  ****************************************************************************/
 
-static int meminstream_gets(FAR struct lib_instream_s *self,
-                            FAR void *buffer, int len)
+static ssize_t meminstream_gets(FAR struct lib_instream_s *self,
+                                FAR void *buffer, size_t len)
 {
   FAR struct lib_meminstream_s *stream =
                                        (FAR struct lib_meminstream_s *)self;
-  int ret;
+  ssize_t ret = -EINVAL;
 
   DEBUGASSERT(self);
 
@@ -79,10 +78,6 @@ static int meminstream_gets(FAR struct lib_instream_s *self,
             stream->buflen - self->nget : len;
       self->nget += ret;
       memcpy(buffer, stream->buffer, ret);
-    }
-  else
-    {
-      ret = EOF;
     }
 
   return ret;
@@ -110,7 +105,7 @@ static int meminstream_gets(FAR struct lib_instream_s *self,
  ****************************************************************************/
 
 void lib_meminstream(FAR struct lib_meminstream_s *stream,
-                     FAR const char *bufstart, int buflen)
+                     FAR const char *bufstart, size_t buflen)
 {
   stream->common.getc = meminstream_getc;
   stream->common.gets = meminstream_gets;

@@ -1,6 +1,8 @@
 ############################################################################
 # libs/libc/pthread/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -38,7 +40,7 @@ CSRCS += pthread_attr_setschedparam.c pthread_attr_getschedparam.c
 CSRCS += pthread_attr_setscope.c pthread_attr_getscope.c
 CSRCS += pthread_barrierattr_init.c pthread_barrierattr_destroy.c
 CSRCS += pthread_barrierattr_getpshared.c pthread_barrierattr_setpshared.c
-CSRCS += pthread_barrierinit.c pthread_barrierdestroy.c
+CSRCS += pthread_barrierinit.c pthread_barrierdestroy.c pthread_barrierwait.c
 CSRCS += pthread_condattr_init.c pthread_condattr_destroy.c
 CSRCS += pthread_condattr_getpshared.c pthread_condattr_setpshared.c
 CSRCS += pthread_condattr_setclock.c pthread_condattr_getclock.c
@@ -51,7 +53,9 @@ CSRCS += pthread_mutexattr_getpshared.c pthread_mutexattr_setpshared.c
 CSRCS += pthread_mutexattr_setprotocol.c pthread_mutexattr_getprotocol.c
 CSRCS += pthread_mutexattr_settype.c pthread_mutexattr_gettype.c
 CSRCS += pthread_mutexattr_setrobust.c pthread_mutexattr_getrobust.c
+CSRCS += pthread_mutexattr_setprioceiling.c pthread_mutexattr_getprioceiling.c
 CSRCS += pthread_mutex_lock.c
+CSRCS += pthread_mutex_setprioceiling.c pthread_mutex_getprioceiling.c
 CSRCS += pthread_once.c pthread_yield.c pthread_atfork.c
 CSRCS += pthread_rwlockattr_init.c pthread_rwlockattr_destroy.c
 CSRCS += pthread_rwlockattr_getpshared.c pthread_rwlockattr_setpshared.c
@@ -68,7 +72,7 @@ ifeq ($(CONFIG_PTHREAD_SPINLOCKS),y)
 CSRCS += pthread_spinlock.c
 endif
 
-ifneq ($(CONFIG_PTHREAD_CLEANUP_STACKSIZE),0)
+ifneq ($(CONFIG_TLS_NCLEANUP),0)
 CSRCS += pthread_cleanup.c
 endif
 

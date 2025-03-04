@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/src/zynq-mpsoc/zynq_boot.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -33,6 +35,7 @@
 #  include <nuttx/page.h>
 #endif
 
+#include <arch/barriers.h>
 #include <arch/chip/chip.h>
 
 #ifdef CONFIG_SMP
@@ -97,11 +100,11 @@ void arm64_el_init(void)
   /* At EL3, cntfrq_el0 is uninitialized. It must be set. */
 
   write_sysreg(CONFIG_XPAR_CPU_CORTEXA53_0_TIMESTAMP_CLK_FREQ, cntfrq_el0);
-  ARM64_ISB();
+  UP_ISB();
 #endif
 }
 
-#ifdef CONFIG_SMP
+#ifdef CONFIG_ARCH_HAVE_MULTICPU
 
 /****************************************************************************
  * Public Functions
@@ -111,19 +114,7 @@ void arm64_el_init(void)
  * Name: up_cpu_index
  *
  * Description:
- *   Return an index in the range of 0 through (CONFIG_SMP_NCPUS-1) that
- *   corresponds to the currently executing CPU.
- *
- *   If TLS is enabled, then the RTOS can get this information from the TLS
- *   info structure.  Otherwise, the MCU-specific logic must provide some
- *   mechanism to provide the CPU index.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   An integer index in the range of 0 through (CONFIG_SMP_NCPUS-1) that
- *   corresponds to the currently executing CPU.
+ *   Return the real core number regardless CONFIG_SMP setting
  *
  ****************************************************************************/
 
@@ -165,7 +156,7 @@ int arm64_get_cpuid(uint64_t mpid)
   return MPID_TO_CORE(mpid, 0);
 }
 
-#endif /* CONFIG_SMP */
+#endif /* CONFIG_ARCH_HAVE_MULTICPU */
 
 /****************************************************************************
  * Name: arm64_chip_boot
@@ -207,11 +198,8 @@ void arm64_chip_boot(void)
 
   arm64_earlyserialinit();
 #endif
-}
 
-#if defined(CONFIG_NET) && !defined(CONFIG_NETDEV_LATEINIT)
-void arm64_netinitialize(void)
-{
-  /* TODO: Support net initialize */
-}
+#ifdef CONFIG_ARCH_PERF_EVENTS
+  up_perf_init((void *)CONFIG_SYS_CLOCK_HW_CYCLES_PER_SEC);
 #endif
+}

@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/mount/fs_procfs_mount.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -46,6 +48,7 @@
 #include <nuttx/fs/procfs.h>
 
 #include "mount/mount.h"
+#include "fs_heap.h"
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_FS_PROCFS)
 #if !defined(CONFIG_FS_PROCFS_EXCLUDE_MOUNT) || \
@@ -409,7 +412,7 @@ static int mount_open(FAR struct file *filep, FAR const char *relpath,
   /* Allocate a container to hold the task and node selection */
 
   procfile = (FAR struct mount_file_s *)
-    kmm_zalloc(sizeof(struct mount_file_s));
+    fs_heap_zalloc(sizeof(struct mount_file_s));
   if (!procfile)
     {
       ferr("ERROR: Failed to allocate file container\n");
@@ -441,7 +444,7 @@ static int mount_close(FAR struct file *filep)
 
   /* Release the file container structure */
 
-  kmm_free(procfile);
+  fs_heap_free(procfile);
   filep->f_priv = NULL;
   return OK;
 }
@@ -539,7 +542,7 @@ static int mount_dup(FAR const struct file *oldp, FAR struct file *newp)
   /* Allocate a new container to hold the task and node selection */
 
   newfile = (FAR struct mount_file_s *)
-    kmm_malloc(sizeof(struct mount_file_s));
+    fs_heap_malloc(sizeof(struct mount_file_s));
   if (!newfile)
     {
       ferr("ERROR: Failed to allocate file container\n");

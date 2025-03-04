@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/driver/fs_blockpartition.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -35,6 +37,7 @@
 
 #include "driver/driver.h"
 #include "inode/inode.h"
+#include "fs_heap.h"
 
 /****************************************************************************
  * Private Types
@@ -284,7 +287,7 @@ static int part_unlink(FAR struct inode *inode)
   FAR struct inode *parent = dev->parent;
 
   inode_release(parent);
-  kmm_free(dev);
+  fs_heap_free(dev);
 
   return OK;
 }
@@ -332,7 +335,7 @@ int register_partition_with_inode(FAR const char *partition,
 
   /* Allocate a partition device structure */
 
-  dev = kmm_zalloc(sizeof(*dev));
+  dev = fs_heap_zalloc(sizeof(*dev));
   if (dev == NULL)
     {
       return -ENOMEM;
@@ -365,7 +368,7 @@ int register_partition_with_inode(FAR const char *partition,
 
 errout_free:
   inode_release(parent);
-  kmm_free(dev);
+  fs_heap_free(dev);
   return ret;
 }
 

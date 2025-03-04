@@ -1,6 +1,8 @@
 ############################################################################
 # libs/libc/machine/arm/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -40,9 +42,11 @@ else ifeq ($(CONFIG_ARCH_ARMV7M),y)     # All ARMv7-M
 include $(TOPDIR)/libs/libc/machine/arm/armv7-m/Make.defs
 else ifeq ($(CONFIG_ARCH_ARMV8M),y)     # All ARMv8-M
 include $(TOPDIR)/libs/libc/machine/arm/armv8-m/Make.defs
+else ifeq ($(CONFIG_ARCH_ARMV8R),y)     # All ARMv8-R
+include $(TOPDIR)/libs/libc/machine/arm/armv8-r/Make.defs
 endif
 
-ifneq ($(CONFIG_LIBSUPCXX),y)
+ifneq ($(CONFIG_LIBSUPCXX_TOOLCHAIN),y)
 CSRCS += aeabi_atexit.c
 endif
 
@@ -56,6 +60,10 @@ ASRCS += tc32_setjmp.S
 else
 ASRCS += arch_setjmp.S
 endif
+endif
+
+ifeq ($(CONFIG_PROFILE_MINI),y)
+ASRCS += mcount.S
 endif
 
 ifeq ($(CONFIG_ARCH_TOOLCHAIN_GNU),y)

@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/driver/fs_mtdproxy.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -38,6 +40,7 @@
 #include <nuttx/mutex.h>
 
 #include "driver/driver.h"
+#include "fs_heap.h"
 
 /****************************************************************************
  * Private Data
@@ -105,7 +108,7 @@ static FAR char *unique_blkdev(void)
       if (ret < 0)
         {
           DEBUGASSERT(ret == -ENOENT);
-          return strdup(devbuf);
+          return fs_heap_strdup(devbuf);
         }
 
       /* It is in use, try again */
@@ -188,6 +191,6 @@ int mtd_proxy(FAR const char *mtddev, int mountflags,
 out_with_fltdev:
   nx_unlink(blkdev);
 out_with_blkdev:
-  lib_free(blkdev);
+  fs_heap_free(blkdev);
   return ret;
 }

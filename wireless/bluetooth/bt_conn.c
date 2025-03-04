@@ -1,6 +1,8 @@
 /****************************************************************************
  * wireless/bluetooth/bt_conn.c
  *
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
  *   Copyright (c) 2016, Intel Corporation
  *   All rights reserved.
  *
@@ -409,7 +411,7 @@ void bt_conn_send(FAR struct bt_conn_s *conn, FAR struct bt_buf_s *buf)
 
   sq_init(&fraglist);
 
-  wlinfo("conn handle %u buf len %u\n", conn->handle, buf->len);
+  wlwarn("conn handle %u buf len %u\n", conn->handle, buf->len);
 
   if (conn->state != BT_CONN_CONNECTED)
     {
@@ -760,7 +762,8 @@ FAR struct bt_conn_s *bt_conn_addref(FAR struct bt_conn_s *conn)
 {
   bt_atomic_incr(&conn->ref);
 
-  wlinfo("handle %u ref %u\n", conn->handle, bt_atomic_get(&conn->ref));
+  wlinfo("handle %u ref %" PRId32 "\n", conn->handle,
+         bt_atomic_get(&conn->ref));
 
   return conn;
 }
@@ -785,7 +788,8 @@ void bt_conn_release(FAR struct bt_conn_s *conn)
 
   old_ref = bt_atomic_decr(&conn->ref);
 
-  wlinfo("handle %u ref %u\n", conn->handle, bt_atomic_get(&conn->ref));
+  wlinfo("handle %u ref %" PRId32 "\n", conn->handle,
+          bt_atomic_get(&conn->ref));
 
   if (old_ref > 1)
     {

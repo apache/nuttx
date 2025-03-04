@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/stm32f103-minimum/scripts/ld.script
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -86,7 +88,7 @@ SECTIONS
         _etbss = ABSOLUTE(.);
     } > flash
 
-    _eronly = ABSOLUTE(.);
+    _eronly = LOADADDR(.data);
 
     /* The STM32F103C8T6 has 20Kb of SRAM beginning at the following address */
 

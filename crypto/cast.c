@@ -1,6 +1,7 @@
 /****************************************************************************
  * crypto/cast.c
- * $OpenBSD: cast.c,v 1.4 2012/04/25 04:12:27 matthew Exp $
+ *
+ * SPDX-License-Identifier: NuttX-PublicDomain
  *
  * CAST-128 in C
  * Written by Steve Reid <sreid@sea-to-sky.net>

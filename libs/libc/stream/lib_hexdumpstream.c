@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/stream/lib_hexdumpstream.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -98,7 +100,7 @@ static int hexdumpstream_flush(FAR struct lib_outstream_s *self)
 static void hexdumpstream_putc(FAR struct lib_outstream_s *self, int ch)
 {
   FAR struct lib_hexdumpstream_s *stream = (FAR void *)self;
-  int outlen = CONFIG_STREAM_HEXDUMP_BUFFER_SIZE;
+  size_t outlen = CONFIG_STREAM_HEXDUMP_BUFFER_SIZE;
   const uint8_t byte = ch;
 
   bin2hex(&byte, 1, stream->buffer + stream->pending,
@@ -110,21 +112,23 @@ static void hexdumpstream_putc(FAR struct lib_outstream_s *self, int ch)
     {
       hexdumpstream_flush(self);
     }
+
+  self->nput++;
 }
 
 /****************************************************************************
  * Name: hexdumpstream_puts
  ****************************************************************************/
 
-static int hexdumpstream_puts(FAR struct lib_outstream_s *self,
-                           FAR const void *buf, int len)
+static ssize_t hexdumpstream_puts(FAR struct lib_outstream_s *self,
+                                  FAR const void *buf, size_t len)
 {
   FAR struct lib_hexdumpstream_s *stream = (FAR void *)self;
   const unsigned char *p = buf;
-  int outlen = CONFIG_STREAM_HEXDUMP_BUFFER_SIZE;
-  int line = outlen / 2;
-  int remain = len;
-  int ret;
+  size_t outlen = CONFIG_STREAM_HEXDUMP_BUFFER_SIZE;
+  size_t line = outlen / 2;
+  size_t remain = len;
+  ssize_t ret;
 
   while (remain > 0)
     {
@@ -132,8 +136,8 @@ static int hexdumpstream_puts(FAR struct lib_outstream_s *self,
       ret = bin2hex(p, ret, stream->buffer + stream->pending,
                     (outlen - stream->pending) / 2);
 
-      p              += ret;
-      remain         -= ret;
+      p               += ret;
+      remain          -= ret;
       stream->pending += ret * 2;
 
       if (stream->pending == outlen)
@@ -177,6 +181,6 @@ void lib_hexdumpstream(FAR struct lib_hexdumpstream_s *stream,
   public->flush   = hexdumpstream_flush;
   public->nput    = 0;
 
-  stream->pending  = 0;
-  stream->backend  = backend;
+  stream->pending = 0;
+  stream->backend = backend;
 }

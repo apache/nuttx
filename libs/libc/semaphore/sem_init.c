@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/semaphore/sem_init.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -68,7 +70,7 @@ int nxsem_init(FAR sem_t *sem, int pshared, unsigned int value)
 
   /* Initialize the semaphore count */
 
-  sem->semcount = (int16_t)value;
+  sem->semcount = (int32_t)value;
 
   /* Initialize semaphore wait list */
 

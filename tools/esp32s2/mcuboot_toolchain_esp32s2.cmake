@@ -1,6 +1,8 @@
 # ##############################################################################
 # tools/esp32s2/mcuboot_toolchain_esp32s2.cmake
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this

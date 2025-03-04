@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/mqueue/mq_open.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -74,7 +76,7 @@ static int nxmq_file_close(FAR struct file *filep)
 {
   FAR struct inode *inode = filep->f_inode;
 
-  if (inode->i_crefs <= 1 && (inode->i_flags & FSNODEFLAG_DELETED))
+  if (atomic_read(&inode->i_crefs) <= 0)
     {
       FAR struct mqueue_inode_s *msgq = inode->i_private;
 
@@ -285,12 +287,7 @@ static int file_mq_vopen(FAR struct file *mq, FAR const char *mq_name,
 
       /* Create an inode in the pseudo-filesystem at this path */
 
-      ret = inode_lock();
-      if (ret < 0)
-        {
-          goto errout_with_lock;
-        }
-
+      inode_lock();
       ret = inode_reserve(fullpath, mode, &inode);
       inode_unlock();
 
@@ -322,7 +319,7 @@ static int file_mq_vopen(FAR struct file *mq, FAR const char *mq_name,
 
       /* Set the initial reference count on this inode to one */
 
-      inode->i_crefs    = 1;
+      atomic_fetch_add(&inode->i_crefs, 1);
 
       if (created)
         {

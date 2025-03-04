@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/syslog/syslog_stream.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -41,7 +43,7 @@
 
 struct syslog_stream_s
 {
-  struct syslog_channel_s     channel;
+  syslog_channel_t     channel;
   FAR struct lib_outstream_s *stream;
 };
 
@@ -49,12 +51,12 @@ struct syslog_stream_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static ssize_t syslog_stream_write(FAR struct syslog_channel_s *channel,
+static ssize_t syslog_stream_write(FAR syslog_channel_t *channel,
                                    FAR const char *buffer, size_t buflen);
-static int syslog_stream_putc(FAR struct syslog_channel_s *channel, int ch);
-static int syslog_stream_force(FAR struct syslog_channel_s *channel, int ch);
-static int syslog_stream_flush(FAR struct syslog_channel_s *channel);
-void syslog_stream_uninit(FAR struct syslog_channel_s *channel);
+static int syslog_stream_putc(FAR syslog_channel_t *channel, int ch);
+static int syslog_stream_force(FAR syslog_channel_t *channel, int ch);
+static int syslog_stream_flush(FAR syslog_channel_t *channel);
+void syslog_stream_uninit(FAR syslog_channel_t *channel);
 
 /****************************************************************************
  * Private Data
@@ -92,7 +94,7 @@ static const struct syslog_channel_ops_s g_syslog_stream_ops =
  *
  ****************************************************************************/
 
-static ssize_t syslog_stream_write(FAR struct syslog_channel_s *channel,
+static ssize_t syslog_stream_write(FAR syslog_channel_t *channel,
                                    FAR const char *buffer, size_t buflen)
 {
   FAR struct syslog_stream_s *chan =
@@ -123,7 +125,7 @@ static ssize_t syslog_stream_write(FAR struct syslog_channel_s *channel,
  *
  ****************************************************************************/
 
-static int syslog_stream_putc(FAR struct syslog_channel_s *channel, int ch)
+static int syslog_stream_putc(FAR syslog_channel_t *channel, int ch)
 {
   FAR struct syslog_stream_s *chan =
     (FAR struct syslog_stream_s *)channel;
@@ -150,7 +152,7 @@ static int syslog_stream_putc(FAR struct syslog_channel_s *channel, int ch)
  *
  ****************************************************************************/
 
-static int syslog_stream_flush(FAR struct syslog_channel_s *channel)
+static int syslog_stream_flush(FAR syslog_channel_t *channel)
 {
   FAR struct syslog_stream_s *chan =
     (FAR struct syslog_stream_s *)channel;
@@ -186,7 +188,7 @@ static int syslog_stream_flush(FAR struct syslog_channel_s *channel)
  *
  ****************************************************************************/
 
-void syslog_stream_uninit(FAR struct syslog_channel_s *channel)
+void syslog_stream_uninit(FAR syslog_channel_t *channel)
 {
   FAR struct syslog_stream_s *chan =
     (FAR struct syslog_stream_s *)channel;
@@ -220,7 +222,7 @@ void syslog_stream_uninit(FAR struct syslog_channel_s *channel)
  *
  ****************************************************************************/
 
-FAR struct syslog_channel_s *
+FAR syslog_channel_t *
 syslog_stream_channel(FAR struct lib_outstream_s *stream)
 {
   FAR struct syslog_stream_s *chan;
@@ -237,7 +239,7 @@ syslog_stream_channel(FAR struct lib_outstream_s *stream)
 
   chan->stream = stream;
   chan->channel.sc_ops = &g_syslog_stream_ops;
-  return (FAR struct syslog_channel_s *)chan;
+  return (FAR syslog_channel_t *)chan;
 }
 
 #endif /* CONFIG_SYSLOG_STREAM */

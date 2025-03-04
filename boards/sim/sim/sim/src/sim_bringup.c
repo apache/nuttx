@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/sim/sim/sim/src/sim_bringup.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -48,7 +50,6 @@
 #include <nuttx/timers/oneshot.h>
 #include <nuttx/video/fb.h>
 #include <nuttx/video/v4l2_cap.h>
-#include <nuttx/timers/oneshot.h>
 #include <nuttx/wireless/pktradio.h>
 #include <nuttx/wireless/bluetooth/bt_null.h>
 #include <nuttx/wireless/bluetooth/bt_uart_shim.h>
@@ -480,6 +481,22 @@ int sim_bringup(void)
                  SIM_RPTUN_MASTER | SIM_RPTUN_NOBOOT);
 #  else
   sim_rptun_init("server-proxy", "server", SIM_RPTUN_SLAVE);
+#  endif
+#endif
+
+#ifdef CONFIG_RPMSG_VIRTIO_LITE
+#  ifdef CONFIG_SIM_RPMSG_MASTER
+  sim_rpmsg_virtio_init("server-proxy", "proxy", true);
+#  else
+  sim_rpmsg_virtio_init("server-proxy", "server", false);
+#  endif
+#endif
+
+#ifdef CONFIG_RPMSG_PORT_UART
+#  ifdef CONFIG_SIM_RPMSG_MASTER
+  sim_rpmsg_port_uart_init("server", "proxy", "/dev/ttyVS0");
+#  else
+  sim_rpmsg_port_uart_init("proxy", "server", "/dev/ttyVS0");
 #  endif
 #endif
 

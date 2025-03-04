@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/mqueue/mq_msgfree.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -29,6 +31,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/spinlock.h>
 
 #include "mqueue/mqueue.h"
 
@@ -54,6 +57,8 @@
 
 void nxmq_free_msg(FAR struct mqueue_msg_s *mqmsg)
 {
+  irqstate_t flags;
+
   /* If this is a generally available pre-allocated message,
    * then just put it back in the free list.
    */
@@ -64,7 +69,9 @@ void nxmq_free_msg(FAR struct mqueue_msg_s *mqmsg)
        * list from interrupt handlers.
        */
 
+      flags = spin_lock_irqsave(&g_msgfreelock);
       list_add_tail(&g_msgfree, &mqmsg->node);
+      spin_unlock_irqrestore(&g_msgfreelock, flags);
     }
 
   /* If this is a message pre-allocated for interrupts,
@@ -77,7 +84,9 @@ void nxmq_free_msg(FAR struct mqueue_msg_s *mqmsg)
        * list from interrupt handlers.
        */
 
+      flags = spin_lock_irqsave(&g_msgfreelock);
       list_add_tail(&g_msgfreeirq, &mqmsg->node);
+      spin_unlock_irqrestore(&g_msgfreelock, flags);
     }
 
   /* Otherwise, deallocate it.  Note:  interrupt handlers

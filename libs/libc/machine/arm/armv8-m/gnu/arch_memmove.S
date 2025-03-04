@@ -1,8 +1,8 @@
 /****************************************************************************
  * libs/libc/machine/arm/armv8-m/gnu/arch_memmove.S
  *
- * Copyright (c) 2015 ARM Ltd
- * All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2015 ARM Ltd
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -43,9 +43,9 @@
 
 	.thumb
 	.syntax unified
-	.global memmove
-	.type	memmove, %function
-memmove:
+	.global ARCH_LIBCFUN(memmove)
+	.type	ARCH_LIBCFUN(memmove), %function
+ARCH_LIBCFUN(memmove):
 #if __ARM_FEATURE_PAC_DEFAULT
 #  if __ARM_FEATURE_BTI_DEFAULT
 	pacbti	ip, lr, sp
@@ -88,6 +88,6 @@ memmove:
 	aut	ip, lr, sp
 #endif /* __ARM_FEATURE_PAC_DEFAULT */
 	bx	lr
-	.size memmove, . - memmove
+	.size ARCH_LIBCFUN(memmove), . - ARCH_LIBCFUN(memmove)
 
 #endif

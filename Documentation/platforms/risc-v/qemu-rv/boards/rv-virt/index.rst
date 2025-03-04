@@ -358,6 +358,14 @@ Configures the NuttShell (nsh) located at examples/nsh.  This NSH
 configuration is focused on low-level, command-line driver testing.
 This configuration is used for 32-bit RISC-V
 
+python
+------
+
+Enables the Python interpreter for NuttX. This configuration is based on `netnsh`_.
+
+For more information on how to build and run Python on NuttX,
+please refer to the :doc:`Python Interpreter </applications/interpreters/python/index>` page.
+
 nsh64
 -----
 
@@ -416,7 +424,7 @@ After building the kernel (and the applications, in kernel mode), use the toolch
 to debug RISC-V applications. For instance, if you are using the xPack's prebuilt toolchain,
 you can use the following command to start GDB::
 
-    $ riscv-none-elf-gdb-py3 -ix tools/gdb/__init__.py --tui nuttx
+    $ riscv-none-elf-gdb-py3 -ix tools/pynuttx/gdbinit.py --tui nuttx
 
 To use QEMU for debugging, one should add the parameters ``-s -S`` to the QEMU command line.
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/sensors/wtgahrs2_uorb.c
- * Driver for the Wit-Motion WTGAHRS2 accelerometer, gyroscope, magnetic,
- * angle, barometer, temperature, gps sensors by serial interface with host
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -47,21 +47,21 @@
 #define WTGAHRS2_GYRO_IDX          1
 #define WTGAHRS2_MAG_IDX           2
 #define WTGAHRS2_BARO_IDX          3
-#define WTGAHRS2_GPS_IDX           4
+#define WTGAHRS2_GNSS_IDX          4
 #define WTGAHRS2_MAX_IDX           5
 
-#define WTGAHRS2_GPS0_MASK         (1 << 0) /* Time */
-#define WTGAHRS2_GPS1_MASK         (1 << 1) /* Longitude, Latitude */
-#define WTGAHRS2_GPS2_MASK         (1 << 2) /* Ground speed, Height, Yaw */
-#define WTGAHRS2_GPS_MASK          (7 << 0)
+#define WTGAHRS2_GNSS0_MASK        (1 << 0) /* Time */
+#define WTGAHRS2_GNSS1_MASK        (1 << 1) /* Longitude, Latitude */
+#define WTGAHRS2_GNSS2_MASK        (1 << 2) /* Ground speed, Height, Yaw */
+#define WTGAHRS2_GNSS_MASK         (7 << 0)
 
-#define WTGAHRS2_GPS0_INFO         0x50
+#define WTGAHRS2_GNSS0_INFO        0x50
 #define WTGAHRS2_ACCEL_INFO        0x51
 #define WTGAHRS2_GYRO_INFO         0x52
 #define WTGAHRS2_MAG_INFO          0x54
 #define WTGAHRS2_BARO_INFO         0x56
-#define WTGAHRS2_GPS1_INFO         0x57
-#define WTGAHRS2_GPS2_INFO         0x58
+#define WTGAHRS2_GNSS1_INFO        0x57
+#define WTGAHRS2_GNSS2_INFO        0x58
 
 #define WTGAHRS2_RSP_HEADER        0x55
 #define WTGAHRS2_RSP_LENGTH        11
@@ -74,7 +74,7 @@
 struct wtgahrs2_sensor_s
 {
   struct sensor_lowerhalf_s lower;
-  unsigned long             interval;
+  uint32_t                  interval;
   uint64_t                  last_update;
   bool                      enable;
 };
@@ -84,8 +84,8 @@ struct wtgahrs2_dev_s
   struct wtgahrs2_sensor_s  dev[WTGAHRS2_MAX_IDX];
   struct file               file;
 
-  struct sensor_gps   gps;
-  unsigned char             gps_mask;
+  struct sensor_gnss        gnss;
+  unsigned char             gnss_mask;
 };
 
 /****************************************************************************
@@ -100,7 +100,7 @@ static int wtgahrs2_activate(FAR struct sensor_lowerhalf_s *lower,
                              FAR struct file *filep, bool sw);
 static int wtgahrs2_set_interval(FAR struct sensor_lowerhalf_s *lower,
                                  FAR struct file *filep,
-                                 FAR unsigned long *interval);
+                                 FAR uint32_t *interval);
 
 /****************************************************************************
  * Private Data
@@ -108,7 +108,7 @@ static int wtgahrs2_set_interval(FAR struct sensor_lowerhalf_s *lower,
 
 /* in microseconds */
 
-static const unsigned long g_wtgahrs2_interval[] =
+static const uint32_t g_wtgahrs2_interval[] =
 {
   10000000,  /* 0.1 hz */
   2000000,   /* 0.5 hz */
@@ -166,7 +166,7 @@ static int wtgahrs2_activate(FAR struct sensor_lowerhalf_s *lower,
 
 static int wtgahrs2_set_interval(FAR struct sensor_lowerhalf_s *lower,
                                  FAR struct file *filep,
-                                 FAR unsigned long *interval)
+                                 FAR uint32_t *interval)
 {
   FAR struct wtgahrs2_sensor_s *dev = (FAR struct wtgahrs2_sensor_s *)lower;
   int idx = 0;
@@ -287,10 +287,10 @@ static void wtgahrs2_baro_data(FAR struct wtgahrs2_dev_s *rtdata,
   sninfo("Pressure : %.3fhPa\n", baro.pressure);
 }
 
-static void wtgahrs2_gps_data(FAR struct wtgahrs2_dev_s *rtdata,
-                              FAR unsigned char *buffer, int info_type)
+static void wtgahrs2_gnss_data(FAR struct wtgahrs2_dev_s *rtdata,
+                               FAR unsigned char *buffer, int info_type)
 {
-  FAR struct wtgahrs2_sensor_s *dev = &rtdata->dev[WTGAHRS2_GPS_IDX];
+  FAR struct wtgahrs2_sensor_s *dev = &rtdata->dev[WTGAHRS2_GNSS_IDX];
   FAR struct sensor_lowerhalf_s *lower = &dev->lower;
   uint64_t now = sensor_get_timestamp();
 
@@ -299,47 +299,47 @@ static void wtgahrs2_gps_data(FAR struct wtgahrs2_dev_s *rtdata,
       return;
     }
 
-  if (rtdata->gps_mask == 0)
+  if (rtdata->gnss_mask == 0)
     {
       dev->last_update = now;
     }
 
   switch (info_type)
     {
-      case WTGAHRS2_GPS0_INFO:
-        rtdata->gps_mask |= WTGAHRS2_GPS0_MASK;
+      case WTGAHRS2_GNSS0_INFO:
+        rtdata->gnss_mask |= WTGAHRS2_GNSS0_MASK;
         break;
 
-      case WTGAHRS2_GPS1_INFO:
-        rtdata->gps_mask |= WTGAHRS2_GPS1_MASK;
-        rtdata->gps.longitude = (buffer[3] << 8
-                                | buffer[2] << 8
-                                | buffer[1] << 8
-                                | buffer[0]) / 10000000.0f;
-        rtdata->gps.latitude = (buffer[7] << 8
-                               | buffer[6] << 8
-                               | buffer[5] << 8
-                               | buffer[4]) / 10000000.0f;
+      case WTGAHRS2_GNSS1_INFO:
+        rtdata->gnss_mask |= WTGAHRS2_GNSS1_MASK;
+        rtdata->gnss.longitude = (buffer[3] << 8
+                                 | buffer[2] << 8
+                                 | buffer[1] << 8
+                                 | buffer[0]) / 10000000.0f;
+        rtdata->gnss.latitude = (buffer[7] << 8
+                                | buffer[6] << 8
+                                | buffer[5] << 8
+                                | buffer[4]) / 10000000.0f;
         break;
 
-      case WTGAHRS2_GPS2_INFO:
-        rtdata->gps_mask |= WTGAHRS2_GPS2_MASK;
-        rtdata->gps.altitude = (float)(buffer[1] << 8 | buffer[0]) / 10.0f;
-        rtdata->gps.ground_speed = (float)(buffer[7] << 8 | buffer[6] << 8
-                    | buffer[5] << 8 | buffer[4]) / 3600.0f;
+      case WTGAHRS2_GNSS2_INFO:
+        rtdata->gnss_mask |= WTGAHRS2_GNSS2_MASK;
+        rtdata->gnss.altitude = (float)(buffer[1] << 8 | buffer[0]) / 10.0f;
+        rtdata->gnss.ground_speed = (float)(buffer[7] << 8 | buffer[6] << 8
+                     | buffer[5] << 8 | buffer[4]) / 3600.0f;
         break;
     }
 
-  if (rtdata->gps_mask == WTGAHRS2_GPS_MASK)
+  if (rtdata->gnss_mask == WTGAHRS2_GNSS_MASK)
     {
-      rtdata->gps_mask = 0;
-      lower->push_event(lower->priv, &rtdata->gps, sizeof(rtdata->gps));
+      rtdata->gnss_mask = 0;
+      lower->push_event(lower->priv, &rtdata->gnss, sizeof(rtdata->gnss));
       sninfo("Time : %" PRIu64 " utc_time: %" PRIu64 "\n",
-             rtdata->gps.timestamp, rtdata->gps.time_utc);
-      sninfo("GPS longitude : %fdegree, latitude:%fdegree\n",
-              rtdata->gps.longitude, rtdata->gps.latitude);
-      sninfo("GPS speed: %fm/s, altitude: %fm\n",
-              rtdata->gps.ground_speed, rtdata->gps.altitude);
+             rtdata->gnss.timestamp, rtdata->gnss.time_utc);
+      sninfo("GNSS longitude : %fdegree, latitude:%fdegree\n",
+              rtdata->gnss.longitude, rtdata->gnss.latitude);
+      sninfo("GNSS speed: %fm/s, altitude: %fm\n",
+              rtdata->gnss.ground_speed, rtdata->gnss.altitude);
     }
 }
 
@@ -379,10 +379,10 @@ static bool wtgahrs2_process_data(FAR struct wtgahrs2_dev_s *rtdata,
         wtgahrs2_baro_data(rtdata, &buffer[2]);
         break;
 
-      case WTGAHRS2_GPS0_INFO:
-      case WTGAHRS2_GPS1_INFO:
-      case WTGAHRS2_GPS2_INFO:
-        wtgahrs2_gps_data(rtdata, &buffer[2], buffer[1]);
+      case WTGAHRS2_GNSS0_INFO:
+      case WTGAHRS2_GNSS1_INFO:
+      case WTGAHRS2_GNSS2_INFO:
+        wtgahrs2_gnss_data(rtdata, &buffer[2], buffer[1]);
         break;
     }
 
@@ -519,16 +519,16 @@ int wtgahrs2_initialize(FAR const char *path, int devno)
       goto baro_err;
     }
 
-  /* GPS register */
+  /* GNSS register */
 
-  tmp = &rtdata->dev[WTGAHRS2_GPS_IDX];
+  tmp = &rtdata->dev[WTGAHRS2_GNSS_IDX];
   tmp->lower.ops = &g_wtgahrs2_ops;
-  tmp->lower.type = SENSOR_TYPE_GPS;
+  tmp->lower.type = SENSOR_TYPE_GNSS;
   tmp->lower.nbuffer = 1;
   ret = sensor_register(&tmp->lower, devno);
   if (ret < 0)
     {
-      goto gps_err;
+      goto gnss_err;
     }
 
   /* Set sensor default attributes and enter unlock mode */
@@ -558,8 +558,8 @@ int wtgahrs2_initialize(FAR const char *path, int devno)
   return ret;
 
 thr_err:
-  sensor_unregister(&rtdata->dev[WTGAHRS2_GPS_IDX].lower, devno);
-gps_err:
+  sensor_unregister(&rtdata->dev[WTGAHRS2_GNSS_IDX].lower, devno);
+gnss_err:
   sensor_unregister(&rtdata->dev[WTGAHRS2_BARO_IDX].lower, devno);
 baro_err:
   sensor_unregister(&rtdata->dev[WTGAHRS2_MAG_IDX].lower, devno);

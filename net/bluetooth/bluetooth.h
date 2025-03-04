@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/bluetooth/bluetooth.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -140,20 +142,6 @@ struct sockaddr;                /* Forward reference */
  ****************************************************************************/
 
 void bluetooth_initialize(void);
-
-/****************************************************************************
- * Name: bluetooth_conn_initialize
- *
- * Description:
- *   Initialize the Bluetooth connection structure allocator.  Called
- *   once and only from bluetooth_initialize().
- *
- * Assumptions:
- *   Called early in the initialization sequence
- *
- ****************************************************************************/
-
-void bluetooth_conn_initialize(void);
 
 /****************************************************************************
  * Name: bluetooth_conn_alloc()

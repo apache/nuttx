@@ -1,14 +1,11 @@
 /****************************************************************************
  * include/nuttx/net/netstats.h
  *
- *   Copyright (C) 2007-2012 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * This logic was leveraged from uIP which also has a BSD-style license:
- *
- *   Author Adam Dunkels <adam@dunkels.com>
- *   Copyright (c) 2001-2003, Adam Dunkels.
- *   All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2007-2012 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2001-2003, Adam Dunkels. All rights reserved.
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-FileContributor: Adam Dunkels <adam@dunkels.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -69,6 +66,9 @@
 #ifdef CONFIG_NET_MLD
 #  include <nuttx/net/mld.h>
 #endif
+#ifdef CONFIG_NET_CAN
+#  include <nuttx/net/can.h>
+#endif
 
 #ifdef CONFIG_NET_STATISTICS
 
@@ -116,6 +116,10 @@ struct net_stats_s
 
 #ifdef CONFIG_NET_UDP
   struct udp_stats_s  udp;      /* UDP statistics */
+#endif
+
+#ifdef CONFIG_NET_CAN
+  struct can_stats_s  can;      /* CAN statistics */
 #endif
 };
 

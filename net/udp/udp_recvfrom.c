@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/udp/udp_recvfrom.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -37,6 +39,7 @@
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/udp.h>
+#include <nuttx/tls.h>
 #include <netinet/in.h>
 
 #include "netdev/netdev.h"
@@ -626,7 +629,7 @@ static void udp_notify_recvcpu(FAR struct udp_conn_s *conn)
       return;
     }
 
-  cpu = up_cpu_index();
+  cpu = this_cpu();
   if (cpu != conn->rcvcpu)
     {
       if (conn->domain == PF_INET)
@@ -644,8 +647,6 @@ static void udp_notify_recvcpu(FAR struct udp_conn_s *conn)
 
       conn->rcvcpu = cpu;
     }
-
-  return;
 }
 #else
 #  define udp_notify_recvcpu(c)
@@ -678,10 +679,16 @@ ssize_t psock_udp_recvfrom(FAR struct socket *psock, FAR struct msghdr *msg,
 {
   FAR struct udp_conn_s *conn = psock->s_conn;
   FAR struct net_driver_s *dev;
+  struct udp_callback_s info;
   struct udp_recvfrom_s state;
-  int ret;
+  ssize_t ret;
 
   /* Perform the UDP recvfrom() operation */
+
+  if (msg->msg_iovlen != 1)
+    {
+      return -ENOTSUP;
+    }
 
   /* Initialize the state structure.  This is done with the network locked
    * because we don't want anything to happen until we are ready.
@@ -746,6 +753,16 @@ ssize_t psock_udp_recvfrom(FAR struct socket *psock, FAR struct msghdr *msg,
           state.ir_cb->priv  = (FAR void *)&state;
           state.ir_cb->event = udp_eventhandler;
 
+          /* Push a cancellation point onto the stack.  This will be
+           * called if the thread is canceled.
+           */
+
+          info.dev  = dev;
+          info.conn = conn;
+          info.udp_cb = state.ir_cb;
+          info.sem = &state.ir_sem;
+          tls_cleanup_push(tls_get_info(), udp_callback_cleanup, &info);
+
           /* Wait for either the receive to complete or for an error/timeout
            * to occur.  net_sem_timedwait will also terminate if a signal is
            * received.
@@ -753,6 +770,7 @@ ssize_t psock_udp_recvfrom(FAR struct socket *psock, FAR struct msghdr *msg,
 
           ret = net_sem_timedwait(&state.ir_sem,
                               _SO_TIMEOUT(conn->sconn.s_rcvtimeo));
+          tls_cleanup_pop(tls_get_info(), 0);
           if (ret == -ETIMEDOUT)
             {
               ret = -EAGAIN;

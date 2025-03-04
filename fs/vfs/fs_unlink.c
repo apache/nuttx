@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/vfs/fs_unlink.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -171,12 +173,7 @@ int nx_unlink(FAR const char *pathname)
        * return -EBUSY to indicate that the inode was not deleted now.
        */
 
-      ret = inode_lock();
-      if (ret < 0)
-        {
-          goto errout_with_inode;
-        }
-
+      inode_lock();
       ret = inode_remove(pathname);
       inode_unlock();
 

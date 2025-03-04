@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/x86/src/i486/i486_savestate.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -67,7 +69,7 @@ void x86_savestate(uint32_t *regs)
 
   /* First, just copy all of the registers */
 
-  x86_copystate(regs, (uint32_t *)g_current_regs);
+  x86_copystate(regs, up_current_regs());
 
   /* The RES_SP and REG_SS values will not be saved by the interrupt handling
    * logic if there is no change in privilege level.  In that case, we will
@@ -90,11 +92,12 @@ void x86_savestate(uint32_t *regs)
        * to the execution of the PUSHA.  It will point at REG_IRQNO.
        */
 
-      regs[REG_SP] = g_current_regs[REG_ESP] + 4*BOTTOM_NOPRIO;
+      regs[REG_SP] = up_current_regs()[REG_ESP] + 4*BOTTOM_NOPRIO;
       regs[REG_SS] = up_getss();
     }
   else
     {
-      DEBUGASSERT(regs[REG_SP] == g_current_regs[REG_ESP] + 4*BOTTOM_PRIO);
+      DEBUGASSERT(regs[REG_SP] == up_current_regs()[REG_ESP] +
+                                  4 * BOTTOM_PRIO);
     }
 }

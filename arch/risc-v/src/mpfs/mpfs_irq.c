@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/mpfs/mpfs_irq.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -33,6 +35,8 @@
 #include <nuttx/irq.h>
 
 #include "riscv_internal.h"
+#include "riscv_ipi.h"
+
 #include "mpfs.h"
 #include "mpfs_plic.h"
 
@@ -50,28 +54,9 @@ void up_irqinitialize(void)
 
   up_irq_save();
 
-  /* Complete possibly claimed IRQs in PLIC (for current hart) in case
-   * of warm reboot, e.g. after a crash in the middle of IRQ handler.
-   * This has no effect on non-claimed or disabled interrupts.
-   */
+  /* Initialize PLIC for current hart */
 
-  uintptr_t claim_address = mpfs_plic_get_claimbase();
-
-  for (int irq = MPFS_IRQ_EXT_START; irq < NR_IRQS; irq++)
-    {
-      putreg32(irq - MPFS_IRQ_EXT_START, claim_address);
-    }
-
-  /* Disable all global interrupts for current hart */
-
-  uintptr_t iebase = mpfs_plic_get_iebase();
-
-  putreg32(0x0, iebase + 0);
-  putreg32(0x0, iebase + 4);
-  putreg32(0x0, iebase + 8);
-  putreg32(0x0, iebase + 12);
-  putreg32(0x0, iebase + 16);
-  putreg32(0x0, iebase + 20);
+  mpfs_plic_init_hart(up_cpu_index());
 
   /* Colorize the interrupt stack for debug purposes */
 
@@ -84,17 +69,20 @@ void up_irqinitialize(void)
 
   for (int id = 1; id <= NR_IRQS; id++)
     {
-      putreg32(1, (uintptr_t)(MPFS_PLIC_PRIORITY + (4 * id)));
+      putreg32(MPFS_PLIC_PRIO_MIN, MPFS_PLIC_PRIORITY + (4 * id));
     }
-
-  /* Set irq threshold to 0 (permits all global interrupts) */
-
-  uintptr_t threshold_address = mpfs_plic_get_thresholdbase();
-  putreg32(0, threshold_address);
 
   /* Attach the common interrupt handler */
 
   riscv_exception_attach();
+
+#ifdef CONFIG_SMP
+  /* Clear IPI for CPU0 */
+
+  riscv_ipi_clear(0);
+
+  up_enable_irq(RISCV_IRQ_SOFT);
+#endif
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
 
@@ -131,19 +119,12 @@ void up_disable_irq(int irq)
   else if (irq >= MPFS_IRQ_EXT_START)
     {
       extirq = irq - MPFS_IRQ_EXT_START;
-
-      /* Clear enable bit for the irq */
-
-      uintptr_t iebase = mpfs_plic_get_iebase();
-
-      if (0 <= extirq && extirq <= NR_IRQS - MPFS_IRQ_EXT_START)
-        {
-          modifyreg32(iebase + (4 * (extirq / 32)), 1 << (extirq % 32), 0);
-        }
-      else
+      if (extirq < 0 || extirq > NR_IRQS - MPFS_IRQ_EXT_START)
         {
           PANIC();
         }
+
+      mpfs_plic_disable_irq(extirq);
     }
 }
 
@@ -174,19 +155,12 @@ void up_enable_irq(int irq)
   else if (irq >= MPFS_IRQ_EXT_START)
     {
       extirq = irq - MPFS_IRQ_EXT_START;
-
-      /* Set enable bit for the irq */
-
-      uintptr_t iebase = mpfs_plic_get_iebase();
-
-      if (0 <= extirq && extirq <= NR_IRQS - MPFS_IRQ_EXT_START)
-        {
-          modifyreg32(iebase + (4 * (extirq / 32)), 0, 1 << (extirq % 32));
-        }
-      else
+      if (extirq < 0 || extirq > NR_IRQS - MPFS_IRQ_EXT_START)
         {
           PANIC();
         }
+
+      mpfs_plic_clear_and_enable_irq(extirq);
     }
 }
 

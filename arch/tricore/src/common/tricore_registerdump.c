@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/tricore/src/common/tricore_registerdump.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -36,25 +38,6 @@
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: up_getusrsp
- ****************************************************************************/
-
-uintptr_t up_getusrsp(void *regs)
-{
-  uintptr_t *csa = regs;
-
-  while (((uintptr_t)csa & PCXI_UL) == 0)
-    {
-      csa = tricore_csa2addr((uintptr_t)csa);
-      csa = (uintptr_t *)csa[0];
-    }
-
-  csa = tricore_csa2addr((uintptr_t)csa);
-
-  return csa[REG_SP];
-}
 
 /****************************************************************************
  * Name: up_dump_register

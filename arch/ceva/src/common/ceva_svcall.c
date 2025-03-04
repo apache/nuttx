@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/ceva/src/common/ceva_svcall.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -52,7 +54,7 @@ int ceva_svcall(int irq, void *context, void *arg)
   uint32_t *regs = (uint32_t *)context;
   uint32_t cmd;
 
-  DEBUGASSERT(regs && regs == CURRENT_REGS);
+  DEBUGASSERT(regs && regs == up_current_regs());
   cmd = regs[REG_A0];
 
   /* The SVCall software interrupt is called with A0 = system call command
@@ -112,16 +114,16 @@ int ceva_svcall(int irq, void *context, void *arg)
        *   A0 = SYS_restore_context
        *   A1 = restoreregs
        *
-       * In this case, we simply need to set CURRENT_REGS to restore register
-       * area referenced in the saved A1. context == CURRENT_REGS is the
-       * noraml exception return.  By setting CURRENT_REGS = context[A1],
+       * In this case, we simply need to set current_regs to restore register
+       * area referenced in the saved A1. context == current_regs is the
+       * noraml exception return.  By setting current_regs = context[A1],
        * we force the return to the saved context referenced in A1.
        */
 
       case SYS_restore_context:
         {
           DEBUGASSERT(regs[REG_A1] != 0);
-          CURRENT_REGS = (uint32_t *)regs[REG_A1];
+          up_set_current_regs((uint32_t *)regs[REG_A1]);
         }
         break;
 
@@ -138,7 +140,7 @@ int ceva_svcall(int irq, void *context, void *arg)
        *
        * In this case, we do both: We save the context registers to the save
        * register area reference by the saved contents of A1 and then set
-       * CURRENT_REGS to to the save register area referenced by the saved
+       * current_regs to to the save register area referenced by the saved
        * contents of A2.
        */
 
@@ -146,7 +148,7 @@ int ceva_svcall(int irq, void *context, void *arg)
         {
           DEBUGASSERT(regs[REG_A1] != 0 && regs[REG_A2] != 0);
           *(uint32_t **)regs[REG_A1] = regs;
-          CURRENT_REGS = (uint32_t *)regs[REG_A2];
+          up_set_current_regs((uint32_t *)regs[REG_A2]);
         }
         break;
 
@@ -384,20 +386,20 @@ int ceva_svcall(int irq, void *context, void *arg)
 #  ifndef CONFIG_DEBUG_SVCALL
   if (cmd > SYS_switch_context)
 #  else
-  if (regs != CURRENT_REGS)
+  if (regs != up_current_regs())
 #  endif
     {
       svcinfo("SVCall Return:\n");
       svcinfo("A0: %08x %08x %08x %08x %08x %08x %08x\n",
-              CURRENT_REGS[REG_A0], CURRENT_REGS[REG_A1],
-              CURRENT_REGS[REG_A2], CURRENT_REGS[REG_A3],
-              CURRENT_REGS[REG_A4], CURRENT_REGS[REG_A5],
-              CURRENT_REGS[REG_A6]);
+              up_current_regs()[REG_A0], up_current_regs()[REG_A1],
+              up_current_regs()[REG_A2], up_current_regs()[REG_A3],
+              up_current_regs()[REG_A4], up_current_regs()[REG_A5],
+              up_current_regs()[REG_A6]);
       svcinfo("FP: %08x LR: %08x PC: %08x IRQ: %08x OM: %08x\n",
-              CURRENT_REGS[REG_FP], CURRENT_REGS[REG_LR],
-              CURRENT_REGS[REG_PC], CURRENT_REGS[REG_IRQ],
+              up_current_regs()[REG_FP], up_current_regs()[REG_LR],
+              up_current_regs()[REG_PC], up_current_regs()[REG_IRQ],
 # ifdef REG_OM
-              CURRENT_REGS[REG_OM]
+              up_current_regs()[REG_OM]
 #else
               0x00000000
 #endif

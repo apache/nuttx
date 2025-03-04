@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/lc823450/lc823450_irq.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -95,6 +97,8 @@ const uint32_t g_cpu_intstack_top[CONFIG_SMP_NCPUS] =
  * Private Data
  ****************************************************************************/
 
+static spinlock_t g_lc823450_irq_lock = SP_UNLOCKED;
+
 #ifdef CONFIG_LC823450_VIRQ
 static struct lc823450_irq_ops *virq_ops[LC823450_IRQ_NVIRTUALIRQS];
 #endif /* CONFIG_LC823450_VIRQ */
@@ -102,8 +106,6 @@ static struct lc823450_irq_ops *virq_ops[LC823450_IRQ_NVIRTUALIRQS];
 /****************************************************************************
  * Public Data
  ****************************************************************************/
-
-volatile uint32_t *current_regs;
 
 /****************************************************************************
  * Private Functions
@@ -216,7 +218,6 @@ static int lc823450_reserved(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ARMV7M_USEBASEPRI
 static inline void lc823450_prioritize_syscall(int priority)
 {
   uint32_t regval;
@@ -228,7 +229,6 @@ static inline void lc823450_prioritize_syscall(int priority)
   regval |= (priority << NVIC_SYSH_PRIORITY_PR11_SHIFT);
   putreg32(regval, NVIC_SYSH8_11_PRIORITY);
 }
-#endif
 
 /****************************************************************************
  * Name: lc823450_extint_clr
@@ -488,9 +488,8 @@ void up_irqinitialize(void)
 #ifdef CONFIG_ARCH_IRQPRIO
   /* up_prioritize_irq(LC823450_IRQ_PENDSV, NVIC_SYSH_PRIORITY_MIN); */
 #endif
-#ifdef CONFIG_ARMV7M_USEBASEPRI
+
   lc823450_prioritize_syscall(NVIC_SYSH_SVCALL_PRIORITY);
-#endif
 
   /* If the MPU is enabled, then attach and enable the Memory Management
    * Fault handler.
@@ -628,7 +627,7 @@ void up_enable_irq(int irq)
        * set the bit in the System Handler Control and State Register.
        */
 
-      flags = spin_lock_irqsave(NULL);
+      flags = spin_lock_irqsave(&g_lc823450_irq_lock);
 
       if (irq >= LC823450_IRQ_NIRQS)
         {
@@ -651,7 +650,7 @@ void up_enable_irq(int irq)
           putreg32(regval, regaddr);
         }
 
-      spin_unlock_irqrestore(NULL, flags);
+      spin_unlock_irqrestore(&g_lc823450_irq_lock, flags);
     }
 
   /* lc823450_dumpnvic("enable", irq); */
@@ -776,7 +775,7 @@ int lc823450_irq_srctype(int irq, enum lc823450_srctype_e srctype)
   port = (irq & 0x70) >> 4;
   gpio = irq & 0xf;
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&g_lc823450_irq_lock);
 
   regaddr = INTC_REG(EXTINTCND_BASE, port);
   regval = getreg32(regaddr);
@@ -786,7 +785,7 @@ int lc823450_irq_srctype(int irq, enum lc823450_srctype_e srctype)
 
   putreg32(regval, regaddr);
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&g_lc823450_irq_lock, flags);
 
   return OK;
 }

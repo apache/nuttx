@@ -20,6 +20,7 @@ config ARCH_INTEL64
 	select ARCH_USE_MMU
 	select ARCH_HAVE_ADDRENV
 	select ARCH_NEED_ADDRENV_MAPPING
+	select ARCH_HAVE_ELF_EXECUTABLE
 	select ARCH_HAVE_TICKLESS
 	select ARCH_HAVE_STACKCHECK
 	select ARCH_HAVE_RNG
@@ -48,6 +49,24 @@ config ARCH_CHIP_X86_64_CUSTOM
 		Select this option if there is no directory for the chip under arch/x86_64/src/.
 
 endchoice
+
+if SCHED_BACKTRACE
+choice
+	prompt "Choose x86_64 unwinder"
+	default X86_64_UNWINDER_FRAME_POINTER
+	---help---
+		This determines which method will be used for unwinding nuttx stack
+		traces for debug.
+
+config X86_64_UNWINDER_FRAME_POINTER
+	bool "Frame pointer unwinder"
+	select FRAME_POINTER
+	---help---
+		This option enables the frame pointer unwinder for unwinding
+		nuttx stack traces.
+
+endchoice # Choose x86_64 unwinder
+endif
 
 # CPU features
 
@@ -106,6 +125,13 @@ config ARCH_CHIP
 
 endif # ARCH_INTEL64
 
+config ARCH_MULTIBOOT1
+	bool "Enable ELF32/Multiboot1"
+	default n
+	---help---
+		This enables generating `nuttx32` and allows x86 QEMU
+		`-kernel` boot in multiboot1 protocol.
+
 config ARCH_MULTIBOOT2
 	bool "Append multiboot2 header"
 	default y
@@ -122,6 +148,40 @@ config MULTBOOT2_FB_TERM
 	---help---
 		Enable a framebuffer terminal for early debug printing
 
+config MULTBOOT2_FB
+	bool "Multiboot2 framebuffer"
+	default n
+	---help---
+		Enable a framebuffer support
+
+if MULTBOOT2_FB
+
+config MULTBOOT2_FB_WIDTH
+	int "Multiboot2 framebuffer width"
+	default 1024
+	---help---
+		Requested framebuffer width
+
+config MULTBOOT2_FB_HEIGHT
+	int "Multiboot2 framebuffer height"
+	default 768
+	---help---
+		Requested framebuffer height
+
+config MULTBOOT2_FB_DEEPTH
+	int "Multiboot2 framebuffer deepth"
+	default 32
+	---help---
+		Requested framebuffer deepth
+
+endif # MULTBOOT2_FB
+
 endif # ARCH_MULTIBOOT2
+
+config ARCH_PVHBOOT
+	bool "Append Xen PVH ELF Note"
+	default y
+	---help---
+		This allows x86 QEMU `-kernel` boot in PVH protocol.
 
 endif # ARCH_X86_64

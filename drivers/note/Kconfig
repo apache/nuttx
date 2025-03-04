@@ -71,6 +71,11 @@ config DRIVERS_NOTERAM_BUFSIZE
 	---help---
 		The size of the in-memory, circular instrumentation buffer (in bytes).
 
+config DRIVERS_NOTERAM_SECTION
+	string "Note RAM section"
+	---help---
+		Enable section information.
+
 config DRIVERS_NOTERAM_DEFAULT_NOOVERWRITE
 	bool "Disable overwrite by default"
 	default n
@@ -87,10 +92,33 @@ config DRIVERS_NOTERAM_CRASH_DUMP
 
 endif # DRIVERS_NOTERAM
 
+config DRIVERS_NOTE_STRIP_FORMAT
+	bool "Strip sched_note_printf format string"
+	---help---
+		Strip sched_note_printf format string.
+
+config DRIVERS_NOTELOWEROUT
+	bool "Note lower output"
+	default n
+	---help---
+		Note uses lower output.
+
+config DRIVERS_NOTEFILE
+	bool "Note file driver"
+	---help---
+		The Note driver output to file.
+
+config DRIVERS_NOTEFILE_PATH
+	string "Note file path"
+	depends on DRIVERS_NOTEFILE
+	default "/dev/ttyS1"
+	---help---
+		The Note driver output to file path.
+
 config DRIVERS_NOTELOG
 	bool "Note syslog driver"
 	---help---
-		The note driver output to syslog.
+		The Note driver output to syslog.
 
 config DRIVERS_NOTESNAP
 	bool "Last scheduling information"
@@ -104,6 +132,42 @@ config DRIVERS_NOTESNAP_NBUFFERS
 	default 128
 	---help---
 		Number of last scheduling information buffers.
+endif
+
+config DRIVERS_NOTERPMSG_SERVER
+	bool "Enable RPMSG server for NOTE"
+	default n
+	depends on RPTUN
+	---help---
+		Use rpmsg to receive message from remote proc.
+
+config DRIVERS_NOTERPMSG
+	bool "Note to RPMSG"
+	depends on RPTUN
+	depends on SCHED_WORKQUEUE
+	default n
+	---help---
+		Use the rpmsg as a Note output device, send message to remote proc.
+
+if DRIVERS_NOTERPMSG
+
+config DRIVERS_NOTERPMSG_BUFSIZE
+	int "Note RPMSG client buffer size"
+	default 1024
+	---help---
+		The size of the client buffer (in bytes)
+
+config DRIVERS_NOTERPMSG_SERVER_NAME
+	string "The name of Note Rpmsg Server"
+	default "ap"
+	---help---
+		The proc name of rpmsg server. Client sends message to
+		specified name of remote proc.
+
+config DRIVERS_NOTERPMSG_WORK_DELAY
+	int "NOTE RPMSG work delay(ms)"
+	default 100
+
 endif
 
 endif # DRIVERS_NOTE

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32l5/stm32l5_tim.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -281,6 +283,8 @@ static int stm32l5_tim_checkint(struct stm32l5_tim_dev_s *dev,
 
 static const struct stm32l5_tim_ops_s stm32l5_tim_ops =
 {
+  .enable     = stm32l5_tim_enable,
+  .disable    = stm32l5_tim_disable,
   .setmode    = stm32l5_tim_setmode,
   .setclock   = stm32l5_tim_setclock,
   .getclock   = stm32l5_tim_getclock,

@@ -1,6 +1,8 @@
 ############################################################################
 # libs/libc/syslog/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -20,7 +22,9 @@
 
 # Add the internal C files to the build
 
+ifeq ($(CONFIG_SYSLOG),y)
 CSRCS += lib_syslog.c lib_setlogmask.c
+endif
 
 # Add the syslog directory to the build
 

@@ -1,19 +1,11 @@
 /****************************************************************************
  * libs/libc/netdb/lib_dnsquery.c
- * DNS host name to IP address resolver.
  *
- * The DNS resolver functions are used to lookup a hostname and map it to a
- * numerical IP address.
- *
- *   Copyright (C) 2007, 2009, 2012, 2014-2018 Gregory Nutt. All rights
- *     reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * Based heavily on portions of uIP:
- *
- *   Author: Adam Dunkels <adam@dunkels.com>
- *   Copyright (c) 2002-2003, Adam Dunkels.
- *   All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-License-Identifier: 2007, 2009, 2012, 2014-2018 Gregory Nutt.
+ * SPDX-License-Identifier:  2002-2003, Adam Dunkels. All rights reserved.
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-FileContributor: Adam Dunkels <adam@dunkels.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -119,6 +111,189 @@ struct dns_query_data_s
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: stream_send
+ *
+ * Description:
+ *   A wrapper of send() to deal with short results for SOCK_STREAM socket.
+ *
+ * Input Parameters:
+ *   Same as send().
+ *
+ * Returned Value:
+ *   Same as send().
+ *
+ ****************************************************************************/
+
+static ssize_t stream_send(int fd, FAR const void *buf, size_t len)
+{
+  ssize_t total = 0;
+
+  while (len > 0)
+    {
+      ssize_t ret = send(fd, buf, len, 0);
+      if (ret == -1)
+        {
+          if (total == 0)
+            {
+              total = ret;
+            }
+          break;
+        }
+
+      buf = (FAR const uint8_t *)buf + len;
+      len -= ret;
+      total += ret;
+    }
+
+  return total;
+}
+
+/****************************************************************************
+ * Name: stream_recv
+ *
+ * Description:
+ *   A wrapper of recv() to deal with short results for SOCK_STREAM socket.
+ *
+ * Input Parameters:
+ *   Same as recv().
+ *
+ * Returned Value:
+ *   Same as recv().
+ *
+ ****************************************************************************/
+
+static ssize_t stream_recv(int fd, FAR void *buf, size_t len)
+{
+  ssize_t total = 0;
+
+  while (len > 0)
+    {
+      ssize_t ret = recv(fd, buf, len, 0);
+      if (ret == 0)
+        {
+          /* the peer closed the connection */
+
+          set_errno(EMSGSIZE);
+          ret = -1;
+        }
+
+      if (ret == -1)
+        {
+          if (total == 0)
+            {
+              total = ret;
+            }
+          break;
+        }
+
+      buf = (FAR uint8_t *)buf + len;
+      len -= ret;
+      total += ret;
+    }
+
+  return total;
+}
+
+/****************************************************************************
+ * Name: stream_send_record
+ *
+ * Description:
+ *   Send a DNS message over SOCK_STREAM socket.
+ *
+ * Input Parameters:
+ *   Same as send().
+ *
+ * Returned Value:
+ *   Same as send().
+ *
+ ****************************************************************************/
+
+static ssize_t stream_send_record(int fd, FAR const void *buf, size_t len)
+{
+  ssize_t ret;
+  uint8_t reclen[2];
+
+  /* RFC 1035
+   * 4.2.2. TCP usage
+   *
+   * > The message is prefixed with a two byte length field which
+   * > gives the message length, excluding the two byte length field.
+   */
+
+  reclen[0] = (uint8_t)(len >> 8);
+  reclen[1] = (uint8_t)len;
+  ret = stream_send(fd, reclen, sizeof(reclen));
+  if (ret < sizeof(reclen))
+    {
+      return -1;
+    }
+
+  return stream_send(fd, buf, len);
+}
+
+/****************************************************************************
+ * Name: stream_recv_record
+ *
+ * Description:
+ *   Receive a DNS message over SOCK_STREAM socket.
+ *
+ * Input Parameters:
+ *   Same as recv().
+ *
+ * Returned Value:
+ *   Same as recv().
+ *
+ ****************************************************************************/
+
+static ssize_t stream_recv_record(int fd, FAR void *buf, size_t len)
+{
+  size_t rlen;
+  ssize_t ret;
+  uint8_t reclen[2];
+
+  /* RFC 1035
+   * 4.2.2. TCP usage
+   *
+   * > The message is prefixed with a two byte length field which
+   * > gives the message length, excluding the two byte length field.
+   */
+
+  ret = stream_recv(fd, reclen, sizeof(reclen));
+  if (ret < sizeof(reclen))
+    {
+      if (ret >= 0)
+        {
+          set_errno(EMSGSIZE);
+        }
+
+      return -1;
+    }
+
+  rlen = ((uint16_t)reclen[0] << 8) + reclen[1];
+  if (rlen > len)
+    {
+      nerr("ERROR: DNS response (%zu bytes) didn't fit "
+           "the buffer. (%zu bytes) You may need to bump "
+           "CONFIG_NETDB_DNSCLIENT_MAXRESPONSE\n", rlen, len);
+      set_errno(EMSGSIZE);
+      return -1;
+    }
+
+  ret = stream_recv(fd, buf, rlen);
+  if (ret != rlen)
+    {
+      if (ret >= 0)
+        {
+          set_errno(EMSGSIZE);
+        }
+
+      return -1;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
  * Name: dns_parse_name
  *
  * Description:
@@ -208,7 +383,8 @@ static inline uint16_t dns_alloc_id(void)
 static int dns_send_query(int sd, FAR const char *name,
                           FAR union dns_addr_u *uaddr, uint16_t rectype,
                           FAR struct dns_query_info_s *qinfo,
-                          FAR uint8_t *buffer)
+                          FAR uint8_t *buffer,
+                          bool stream)
 {
   FAR struct dns_header_s *hdr;
   FAR uint8_t *dest;
@@ -312,7 +488,15 @@ static int dns_send_query(int sd, FAR const char *name,
       return ret;
     }
 
-  ret = send(sd, buffer, dest - buffer, 0);
+  if (stream)
+    {
+      ret = stream_send_record(sd, buffer, dest - buffer);
+    }
+  else
+    {
+      ret = send(sd, buffer, dest - buffer, 0);
+    }
+
   if (ret < 0)
     {
       ret = -get_errno();
@@ -337,7 +521,8 @@ static int dns_send_query(int sd, FAR const char *name,
 
 static int dns_recv_response(int sd, FAR union dns_addr_u *addr, int naddr,
                              FAR struct dns_query_info_s *qinfo,
-                             FAR uint32_t *ttl, FAR uint8_t *buffer)
+                             FAR uint32_t *ttl, FAR uint8_t *buffer,
+                             bool stream, bool *should_try_stream)
 {
   FAR uint8_t *nameptr;
   FAR uint8_t *namestart;
@@ -358,7 +543,15 @@ static int dns_recv_response(int sd, FAR union dns_addr_u *addr, int naddr,
 
   /* Receive the response */
 
-  ret = recv(sd, buffer, RECV_BUFFER_SIZE, 0);
+  if (stream)
+    {
+      ret = stream_recv_record(sd, buffer, RECV_BUFFER_SIZE);
+    }
+  else
+    {
+      ret = recv(sd, buffer, RECV_BUFFER_SIZE, 0);
+    }
+
   if (ret < 0)
     {
       ret = -get_errno();
@@ -385,6 +578,29 @@ static int dns_recv_response(int sd, FAR union dns_addr_u *addr, int naddr,
         NTOHS(hdr->numauthrr), NTOHS(hdr->numextrarr));
 
   /* Check for error */
+
+  if ((hdr->flags1 & DNS_FLAG1_TRUNC) != 0)
+    {
+      /* RFC 2181
+       * 9. The TC (truncated) header bit
+       *
+       * > When a DNS client receives a reply with TC set,
+       * > it should ignore that response, and query again,
+       * > using a mechanism, such as a TCP connection,
+       * > that will permit larger replies.
+       */
+
+      if (stream)
+        {
+          nerr("ERROR: DNS response truncated on stream socket.\n");
+          return -EPROTO;
+        }
+
+      ninfo("ERROR: DNS response truncated. "
+            "Falling back to stream socket.\n");
+      *should_try_stream = true;
+      return -EAGAIN;
+    }
 
   if ((hdr->flags2 & DNS_FLAG2_ERR_MASK) != 0)
     {
@@ -635,6 +851,7 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
   int retries;
   int ret;
   int sd;
+  bool stream = false;
 
   /* Loop while receive timeout errors occur and there are remaining
    * retries.
@@ -642,12 +859,15 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
 
   for (retries = 0; retries < CONFIG_NETDB_DNSCLIENT_RETRIES; retries++)
     {
+      bool should_try_stream;
+
+try_stream:
 #ifdef CONFIG_NET_IPv6
       if (dns_is_queryfamily(AF_INET6))
         {
           /* Send the IPv6 query */
 
-          sd = dns_bind(addr->sa_family);
+          sd = dns_bind(addr->sa_family, stream);
           if (sd < 0)
             {
               query->result = sd;
@@ -657,7 +877,7 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
           ret = dns_send_query(sd, query->hostname,
                                (FAR union dns_addr_u *)addr,
                                DNS_RECTYPE_AAAA, &qdata->qinfo,
-                               qdata->buffer);
+                               qdata->buffer, stream);
           if (ret < 0)
             {
               dns_query_error("ERROR: IPv6 dns_send_query failed",
@@ -668,16 +888,24 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
             {
               /* Obtain the IPv6 response */
 
+              should_try_stream = false;
               ret = dns_recv_response(sd, &query->addr[next],
                                       CONFIG_NETDB_MAX_IPv6ADDR,
                                       &qdata->qinfo,
-                                      &query->ttl, qdata->buffer);
+                                      &query->ttl, qdata->buffer,
+                                      stream, &should_try_stream);
               if (ret >= 0)
                 {
                   next += ret;
                 }
               else
                 {
+                  if (!stream && should_try_stream)
+                    {
+                      stream = true;
+                      goto try_stream; /* Don't consume retry count */
+                    }
+
                   dns_query_error("ERROR: IPv6 dns_recv_response failed",
                                   ret, (FAR union dns_addr_u *)addr);
                   query->result = ret;
@@ -693,7 +921,7 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
         {
           /* Send the IPv4 query */
 
-          sd = dns_bind(addr->sa_family);
+          sd = dns_bind(addr->sa_family, stream);
           if (sd < 0)
             {
               query->result = sd;
@@ -702,7 +930,8 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
 
           ret = dns_send_query(sd, query->hostname,
                                (FAR union dns_addr_u *)addr,
-                               DNS_RECTYPE_A, &qdata->qinfo, qdata->buffer);
+                               DNS_RECTYPE_A, &qdata->qinfo, qdata->buffer,
+                               stream);
           if (ret < 0)
             {
               dns_query_error("ERROR: IPv4 dns_send_query failed",
@@ -718,16 +947,24 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
                   next = *query->naddr / 2;
                 }
 
+              should_try_stream = false;
               ret = dns_recv_response(sd, &query->addr[next],
                                       CONFIG_NETDB_MAX_IPv4ADDR,
                                       &qdata->qinfo,
-                                      &query->ttl, qdata->buffer);
+                                      &query->ttl, qdata->buffer,
+                                      stream, &should_try_stream);
               if (ret >= 0)
                 {
                   next += ret;
                 }
               else
                 {
+                  if (!stream && should_try_stream)
+                    {
+                      stream = true;
+                      goto try_stream; /* Don't consume retry count */
+                    }
+
                   dns_query_error("ERROR: IPv4 dns_recv_response failed",
                                   ret, (FAR union dns_addr_u *)addr);
                   query->result = ret;

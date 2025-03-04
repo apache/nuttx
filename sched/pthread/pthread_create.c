@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/pthread/pthread_create.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -220,6 +222,10 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
 
   nxtask_joininit(&ptcb->cmn);
 
+#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
+  spin_lock_init(&ptcb->cmn.mutex_lock);
+#endif
+
   /* Bind the parent's group to the new TCB (we have not yet joined the
    * group).
    */
@@ -337,8 +343,8 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
 
       /* Convert timespec values to system clock ticks */
 
-      clock_time2ticks(&param.sched_ss_repl_period, &repl_ticks);
-      clock_time2ticks(&param.sched_ss_init_budget, &budget_ticks);
+      repl_ticks = clock_time2ticks(&param.sched_ss_repl_period);
+      budget_ticks = clock_time2ticks(&param.sched_ss_init_budget);
 
       /* The replenishment period must be greater than or equal to the
        * budget period.
@@ -440,12 +446,6 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
 #endif
     }
 
-  /* Then activate the task */
-
-  sched_lock();
-
-  nxtask_activate((FAR struct tcb_s *)ptcb);
-
   /* Return the thread information to the caller */
 
   if (thread != NULL)
@@ -453,7 +453,9 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
       *thread = (pthread_t)ptcb->cmn.pid;
     }
 
-  sched_unlock();
+  /* Then activate the task */
+
+  nxtask_activate((FAR struct tcb_s *)ptcb);
 
   return OK;
 

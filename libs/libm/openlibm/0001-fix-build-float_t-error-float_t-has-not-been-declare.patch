@@ -6,14 +6,11 @@ MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-VELAPLATFO-6159
-
 libcxx/cmath:335:9: error: ‘::float_t’ has not been declared
 
 (1)open menuconfig (2)close math.h:build setup->Customize Header Files->math.h (2) select openlibm:Library Rountines->Select math library->Math Library fram openlibm (3)build
 
 Signed-off-by: yanghuatao <yanghuatao@xiaomi.com>
-Change-Id: Iec6dbcebbe4ef15a96bcebb038f0c64ab39c5af7
 ---
  include/openlibm_math.h | 4 ++--
  1 file changed, 2 insertions(+), 2 deletions(-)

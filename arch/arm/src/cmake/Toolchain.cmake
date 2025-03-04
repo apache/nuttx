@@ -1,6 +1,8 @@
 # ##############################################################################
 # arch/arm/src/cmake/Toolchain.cmake
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -43,183 +45,18 @@ endif()
 
 include(${ARCH_SUBDIR})
 
-if(CONFIG_ARCH_TOOLCHAIN_CLANG)
-  set(CMAKE_ASM_COMPILER clang)
-  set(CMAKE_C_COMPILER clang)
-  set(CMAKE_CXX_COMPILER clang++)
-  set(CMAKE_STRIP llvm-strip --strip-unneeded)
-  set(CMAKE_OBJCOPY llvm-objcopy)
-  set(CMAKE_OBJDUMP llvm-objdump)
-  set(CMAKE_LINKER ld.lld)
-  set(CMAKE_LD ld.lld)
-  set(CMAKE_AR llvm-ar)
-  set(CMAKE_NM llvm-nm)
-  set(CMAKE_RANLIB llvm-ranlib)
+# include the toolchain specific cmake file
 
-  # Since the no_builtin attribute is not fully supported on Clang disable the
-  # built-in functions, refer:
-  # https://github.com/apache/incubator-nuttx/pull/5971
+set(TOOLCHAIN_FILE)
 
-  add_compile_options(-fno-builtin)
-else()
-  set(TOOLCHAIN_PREFIX arm-none-eabi)
-  set(CMAKE_LIBRARY_ARCHITECTURE ${TOOLCHAIN_PREFIX})
-  set(CMAKE_C_COMPILER_TARGET ${TOOLCHAIN_PREFIX})
-  set(CMAKE_CXX_COMPILER_TARGET ${TOOLCHAIN_PREFIX})
-
-  set(CMAKE_ASM_COMPILER ${TOOLCHAIN_PREFIX}-gcc)
-  set(CMAKE_C_COMPILER ${CMAKE_ASM_COMPILER})
-  set(CMAKE_CXX_COMPILER ${TOOLCHAIN_PREFIX}-g++)
-  set(CMAKE_STRIP ${TOOLCHAIN_PREFIX}-strip --strip-unneeded)
-  set(CMAKE_OBJCOPY ${TOOLCHAIN_PREFIX}-objcopy)
-  set(CMAKE_OBJDUMP ${TOOLCHAIN_PREFIX}-objdump)
-
-  if(CONFIG_LTO_FULL AND CONFIG_ARCH_TOOLCHAIN_GNU)
-    set(CMAKE_LINKER ${TOOLCHAIN_PREFIX}-gcc)
-    set(CMAKE_LD ${TOOLCHAIN_PREFIX}-gcc)
-    set(CMAKE_AR ${TOOLCHAIN_PREFIX}-gcc-ar)
-    set(CMAKE_NM ${TOOLCHAIN_PREFIX}-gcc-nm)
-    set(CMAKE_RANLIB ${TOOLCHAIN_PREFIX}-gcc-ranlib)
-  else()
-    set(CMAKE_LINKER ${TOOLCHAIN_PREFIX}-ld)
-    set(CMAKE_LD ${TOOLCHAIN_PREFIX}-ld)
-    set(CMAKE_AR ${TOOLCHAIN_PREFIX}-ar)
-    set(CMAKE_NM ${TOOLCHAIN_PREFIX}-nm)
-    set(CMAKE_RANLIB ${TOOLCHAIN_PREFIX}-ranlib)
-  endif()
+if(CONFIG_ARCH_TOOLCHAIN_CLANG) # clang
+  set(TOOLCHAIN_FILE clang)
+elseif(CONFIG_ARCH_TOOLCHAIN_ARMCLANG) # arm clang
+  set(TOOLCHAIN_FILE armclang)
+elseif(CONFIG_ARCH_TOOLCHAIN_GHS) # greenhills
+  set(TOOLCHAIN_FILE ghs)
+else() # gcc
+  set(TOOLCHAIN_FILE gcc)
 endif()
 
-# override the ARCHIVE command
-set(CMAKE_ARCHIVE_COMMAND "<CMAKE_AR> rcs <TARGET> <LINK_FLAGS> <OBJECTS>")
-set(CMAKE_RANLIB_COMMAND "<CMAKE_RANLIB> <TARGET>")
-set(CMAKE_C_ARCHIVE_CREATE ${CMAKE_ARCHIVE_COMMAND})
-set(CMAKE_CXX_ARCHIVE_CREATE ${CMAKE_ARCHIVE_COMMAND})
-set(CMAKE_ASM_ARCHIVE_CREATE ${CMAKE_ARCHIVE_COMMAND})
-
-set(CMAKE_C_ARCHIVE_APPEND ${CMAKE_ARCHIVE_COMMAND})
-set(CMAKE_CXX_ARCHIVE_APPEND ${CMAKE_ARCHIVE_COMMAND})
-set(CMAKE_ASM_ARCHIVE_APPEND ${CMAKE_ARCHIVE_COMMAND})
-
-set(CMAKE_C_ARCHIVE_FINISH ${CMAKE_RANLIB_COMMAND})
-set(CMAKE_CXX_ARCHIVE_FINISH ${CMAKE_RANLIB_COMMAND})
-set(CMAKE_ASM_ARCHIVE_FINISH ${CMAKE_RANLIB_COMMAND})
-
-# Architecture flags
-
-add_link_options(-Wl,--entry=__start)
-add_link_options(-nostdlib)
-add_compile_options(-fno-common)
-add_compile_options(-Wall -Wshadow -Wundef)
-add_compile_options(-nostdlib)
-
-if(CONFIG_ARM_THUMB)
-  add_compile_options(-mthumb)
-
-  # GCC Manual: -mthumb ... If you want to force assembler files to be
-  # interpreted as Thumb code, either add a `.thumb' directive to the source or
-  # pass the -mthumb option directly to the assembler by prefixing it with -Wa.
-
-  add_compile_options(-Wa,-mthumb)
-
-  # Outputs an implicit IT block when there is a conditional instruction without
-  # an enclosing IT block.
-
-  add_compile_options(-Wa,-mimplicit-it=always)
-endif()
-
-if(CONFIG_UNWINDER_ARM)
-  add_compile_options(-funwind-tables -fasynchronous-unwind-tables)
-endif()
-
-if(CONFIG_DEBUG_CUSTOMOPT)
-  add_compile_options(${CONFIG_DEBUG_OPTLEVEL})
-elseif(CONFIG_DEBUG_FULLOPT)
-  if(CONFIG_ARCH_TOOLCHAIN_CLANG)
-    add_compile_options(-Oz)
-  else()
-    add_compile_options(-Os)
-  endif()
-endif()
-
-if(NOT CONFIG_DEBUG_NOOPT)
-  add_compile_options(-fno-strict-aliasing)
-endif()
-
-if(CONFIG_FRAME_POINTER)
-  add_compile_options(-fno-omit-frame-pointer -fno-optimize-sibling-calls)
-else()
-  add_compile_options(-fomit-frame-pointer)
-endif()
-
-if(CONFIG_STACK_CANARIES)
-  add_compile_options(-fstack-protector-all)
-endif()
-
-if(CONFIG_ARCH_COVERAGE)
-  add_compile_options(-fprofile-generate -ftest-coverage)
-endif()
-
-# Optimization of unused sections
-
-if(CONFIG_DEBUG_OPT_UNUSED_SECTIONS)
-  add_link_options(-Wl,--gc-sections)
-  add_compile_options(-ffunction-sections -fdata-sections)
-endif()
-
-# Debug --whole-archive
-
-if(CONFIG_DEBUG_LINK_WHOLE_ARCHIVE)
-  add_link_options(-Wl,--whole-archive)
-endif()
-
-if(CONFIG_ENDIAN_BIG)
-  add_compile_options(-mbig-endian)
-endif()
-
-# Link Time Optimization
-
-if(CONFIG_LTO_THIN)
-  add_compile_options(-flto=thin)
-elseif(CONFIG_LTO_FULL)
-  add_compile_options(-flto)
-  if(CONFIG_ARCH_TOOLCHAIN_GNU)
-    add_compile_options(-fno-builtin)
-    add_compile_options(-fuse-linker-plugin)
-  endif()
-endif()
-
-# Debug link map
-
-if(CONFIG_DEBUG_LINK_MAP)
-  add_link_options(-Wl,--cref -Wl,-Map=nuttx.map)
-endif()
-
-if(CONFIG_DEBUG_SYMBOLS)
-  add_compile_options(-g)
-endif()
-
-add_compile_options(-Wno-attributes -Wno-unknown-pragmas
-                    $<$<COMPILE_LANGUAGE:C>:-Wstrict-prototypes>)
-
-if(CONFIG_CXX_STANDARD)
-  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-std=${CONFIG_CXX_STANDARD}>)
-endif()
-
-if(NOT CONFIG_LIBCXXTOOLCHAIN)
-  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-nostdinc++>)
-endif()
-
-if(NOT CONFIG_CXX_EXCEPTION)
-  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions>
-                      $<$<COMPILE_LANGUAGE:CXX>:-fcheck-new>)
-endif()
-
-if(NOT CONFIG_CXX_RTTI)
-  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fno-rtti>)
-endif()
-
-if(CONFIG_ARCH_TOOLCHAIN_CLANG)
-  set(CMAKE_EXE_LINKER_FLAGS_INIT "-c")
-else()
-  set(CMAKE_EXE_LINKER_FLAGS_INIT "--specs=nosys.specs")
-endif()
+include(${TOOLCHAIN_FILE})

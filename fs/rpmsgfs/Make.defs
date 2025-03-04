@@ -1,6 +1,8 @@
 ############################################################################
 # fs/rpmsgfs/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -25,6 +27,9 @@ VPATH += :rpmsgfs
 
 ifeq ($(CONFIG_FS_RPMSGFS),y)
 CSRCS += rpmsgfs.c rpmsgfs_client.c
+ifeq ($(CONFIG_TRACE_RPMSGFS_FS),y)
+rpmsgfs/rpmsgfs.c_CFLAGS += -finstrument-functions
+endif
 endif
 
 ifeq ($(CONFIG_FS_RPMSGFS_SERVER),y)

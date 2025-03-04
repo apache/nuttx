@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/xtensa/src/common/xtensa_dispatch_syscall.S
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -95,9 +97,7 @@ xtensa_dispatch_syscall:
   /* Execute the SYS_signal_handler_return syscall (will not return) */
 
   movi   a2, SYS_syscall_return
-  movi   a4, XCHAL_SWINT_CALL
-  wsr    a4, INTSET
-  rsync
+  syscall
 
   .size xtensa_dispatch_syscall, .-xtensa_dispatch_syscall
 

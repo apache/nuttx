@@ -1,10 +1,8 @@
 /****************************************************************************
  * arch/arm/src/rp2040/rp2040_clock.c
  *
- * Based upon the software originally developed by
- *   Raspberry Pi (Trading) Ltd.
- *
- * Copyright 2020 (c) 2020 Raspberry Pi (Trading) Ltd.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2020 Raspberry Pi (Trading) Ltd.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -62,8 +60,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#define RESETS_RESET_BITS   0x01ffffff
 
 /****************************************************************************
  * Private Data
@@ -412,33 +408,33 @@ void rp2040_clockconfig(void)
    *   this boot
    */
 
-  setbits_reg32(RESETS_RESET_BITS & ~(RP2040_RESETS_RESET_IO_QSPI |
-                                      RP2040_RESETS_RESET_PADS_QSPI |
-                                      RP2040_RESETS_RESET_PLL_USB |
-                                      RP2040_RESETS_RESET_PLL_SYS),
+  setbits_reg32(RP2040_RESETS_RESET_MASK & ~(RP2040_RESETS_RESET_IO_QSPI |
+                                             RP2040_RESETS_RESET_PADS_QSPI |
+                                             RP2040_RESETS_RESET_PLL_USB |
+                                             RP2040_RESETS_RESET_PLL_SYS),
                 RP2040_RESETS_RESET);
 
   /* Remove reset from peripherals which are clocked only by clk_sys and
    * clk_ref. Other peripherals stay in reset until we've configured clocks.
    */
 
-  clrbits_reg32(RESETS_RESET_BITS & ~(RP2040_RESETS_RESET_ADC |
-                                      RP2040_RESETS_RESET_RTC |
-                                      RP2040_RESETS_RESET_SPI0 |
-                                      RP2040_RESETS_RESET_SPI1 |
-                                      RP2040_RESETS_RESET_UART0 |
-                                      RP2040_RESETS_RESET_UART1 |
-                                      RP2040_RESETS_RESET_USBCTRL),
+  clrbits_reg32(RP2040_RESETS_RESET_MASK & ~(RP2040_RESETS_RESET_ADC |
+                                             RP2040_RESETS_RESET_RTC |
+                                             RP2040_RESETS_RESET_SPI0 |
+                                             RP2040_RESETS_RESET_SPI1 |
+                                             RP2040_RESETS_RESET_UART0 |
+                                             RP2040_RESETS_RESET_UART1 |
+                                             RP2040_RESETS_RESET_USBCTRL),
                 RP2040_RESETS_RESET);
 
   while (~getreg32(RP2040_RESETS_RESET_DONE) &
-         (RESETS_RESET_BITS & ~(RP2040_RESETS_RESET_ADC |
-                                RP2040_RESETS_RESET_RTC |
-                                RP2040_RESETS_RESET_SPI0 |
-                                RP2040_RESETS_RESET_SPI1 |
-                                RP2040_RESETS_RESET_UART0 |
-                                RP2040_RESETS_RESET_UART1 |
-                                RP2040_RESETS_RESET_USBCTRL)))
+         (RP2040_RESETS_RESET_MASK & ~(RP2040_RESETS_RESET_ADC |
+                                       RP2040_RESETS_RESET_RTC |
+                                       RP2040_RESETS_RESET_SPI0 |
+                                       RP2040_RESETS_RESET_SPI1 |
+                                       RP2040_RESETS_RESET_UART0 |
+                                       RP2040_RESETS_RESET_UART1 |
+                                       RP2040_RESETS_RESET_USBCTRL)))
     ;
 
   /* After calling preinit we have enough runtime to do the exciting maths
@@ -449,7 +445,7 @@ void rp2040_clockconfig(void)
 
   /* Peripheral clocks should now all be running */
 
-  clrbits_reg32(RESETS_RESET_BITS, RP2040_RESETS_RESET);
-  while (~getreg32(RP2040_RESETS_RESET_DONE) & RESETS_RESET_BITS)
+  clrbits_reg32(RP2040_RESETS_RESET_MASK, RP2040_RESETS_RESET);
+  while (~getreg32(RP2040_RESETS_RESET_DONE) & RP2040_RESETS_RESET_MASK)
     ;
 }

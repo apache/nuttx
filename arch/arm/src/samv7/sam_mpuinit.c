@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/samv7/sam_mpuinit.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -28,9 +30,9 @@
 #include <sys/param.h>
 
 #include <nuttx/userspace.h>
+#include <arch/barriers.h>
 
 #include "mpu.h"
-#include "barriers.h"
 
 #include "hardware/sam_memorymap.h"
 
@@ -73,7 +75,7 @@ void sam_mpu_initialize(void)
 #ifdef CONFIG_ARMV7M_DCACHE
   /* Memory barrier */
 
-  ARM_DMB();
+  UP_DMB();
 
 #ifdef CONFIG_SAMV7_QSPI
   /* Make QSPI memory region strongly ordered */

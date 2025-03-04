@@ -1,7 +1,8 @@
 /****************************************************************************
  * libs/libm/libm/lib_gamma.c
  *
- * Ported to NuttX from FreeBSD by Alan Carvalho de Assis:
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileContributor: Ported by: Alan Carvalho de Assis
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

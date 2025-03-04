@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/local/local_recvmsg.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -369,16 +371,10 @@ psock_dgram_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
   size_t readlen;
   size_t pathlen;
   bool bclose = false;
-  uint16_t addrlen;
-  uint16_t pktlen;
+  lc_size_t addrlen;
+  lc_size_t pktlen;
   int offset = 0;
   int ret;
-
-  /* We keep packet sizes in a uint16_t, so there is a upper limit to the
-   * 'len' that can be supported.
-   */
-
-  DEBUGASSERT(len <= UINT16_MAX);
 
   /* Verify that this is a bound, un-connected peer socket */
 
@@ -397,7 +393,7 @@ psock_dgram_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
       /* Make sure that half duplex FIFO has been created */
 
-      ret = local_create_halfduplex(conn, conn->lc_path);
+      ret = local_create_halfduplex(conn, conn->lc_path, conn->lc_rcvsize);
       if (ret < 0)
         {
           nerr("ERROR: Failed to create FIFO for %s: %d\n",
@@ -543,10 +539,23 @@ errout_with_halfduplex:
 ssize_t local_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
                       int flags)
 {
+  FAR struct local_conn_s *conn = psock->s_conn;
   FAR socklen_t *fromlen = &msg->msg_namelen;
   FAR struct sockaddr *from = msg->msg_name;
   FAR void *buf = msg->msg_iov->iov_base;
   size_t len = msg->msg_iov->iov_len;
+
+  /* Check shutdown state */
+
+  if (conn->lc_infile.f_inode == NULL)
+    {
+      return 0;
+    }
+
+  if (msg->msg_iovlen != 1)
+    {
+      return -ENOTSUP;
+    }
 
   DEBUGASSERT(buf);
 

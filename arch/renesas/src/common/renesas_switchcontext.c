@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/renesas/src/common/renesas_switchcontext.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -62,7 +64,7 @@ void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
 
   /* Are we in an interrupt handler? */
 
-  if (g_current_regs)
+  if (up_current_regs())
     {
       /* Yes, then we have to do things differently.
        * Just copy the g_current_regs into the OLD rtcb.
@@ -78,7 +80,7 @@ void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
        * changes will be made when the interrupt returns.
        */
 
-      g_current_regs = tcb->xcp.regs;
+      up_set_current_regs(tcb->xcp.regs);
     }
 
   /* We are not in an interrupt handler.  Copy the user C context
@@ -101,6 +103,10 @@ void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
       /* Update scheduler parameters */
 
       nxsched_resume_scheduler(tcb);
+
+      /* Record the new "running" task */
+
+      g_running_tasks[this_cpu()] = tcb;
 
       /* Then switch contexts */
 

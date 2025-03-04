@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/xtensa/include/syscall.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -41,43 +43,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-/* Select software interrupt number for context-switch.
- * The SW interrupt level must be greater than XCHAL_SYSCALL_LEVEL
- * and less than XCHAL_EXCM_LEVEL.
- * So that we can generate an interrupt when up_irq_save is called.
- * and not generate interrupt when up_irq_disable is called.
- * Return an error if no suitable software interrupt was found.
- */
-
-#ifndef XTENSA_SWINT
-#  ifdef XCHAL_SOFTWARE2_INTERRUPT
-#    if XCHAL_INT_LEVEL(XCHAL_SOFTWARE2_INTERRUPT) > XCHAL_SYSCALL_LEVEL && \
-        XCHAL_INT_LEVEL(XCHAL_SOFTWARE2_INTERRUPT) <= XCHAL_EXCM_LEVEL
-#      undef  XTENSA_SWINT
-#      define XTENSA_SWINT XCHAL_SOFTWARE2_INTERRUPT
-#    endif
-#  endif
-#  ifdef XCHAL_SOFTWARE1_INTERRUPT
-#    if XCHAL_INT_LEVEL(XCHAL_SOFTWARE1_INTERRUPT) > XCHAL_SYSCALL_LEVEL && \
-        XCHAL_INT_LEVEL(XCHAL_SOFTWARE1_INTERRUPT) <= XCHAL_EXCM_LEVEL
-#      undef  XTENSA_SWINT
-#      define XTENSA_SWINT XCHAL_SOFTWARE1_INTERRUPT
-#    endif
-#  endif
-#  ifdef XCHAL_SOFTWARE0_INTERRUPT
-#    if XCHAL_INT_LEVEL(XCHAL_SOFTWARE0_INTERRUPT) > XCHAL_SYSCALL_LEVEL && \
-        XCHAL_INT_LEVEL(XCHAL_SOFTWARE0_INTERRUPT) <= XCHAL_EXCM_LEVEL
-#      undef  XTENSA_SWINT
-#      define XTENSA_SWINT XCHAL_SOFTWARE0_INTERRUPT
-#    endif
-#  endif
-#endif
-#ifndef XTENSA_SWINT
-#  error "There is no suitable sw interrupt in this Xtensa configuration."
-#endif
-
-#define XCHAL_SWINT_CALL        (1 << XTENSA_SWINT)
 
 #define SYS_syscall 0x00
 
@@ -207,12 +172,10 @@ static inline uintptr_t sys_call0(unsigned int nbr)
 
   __asm__ __volatile__
   (
-    "movi a3, %1\n"
-    "wsr a3, intset\n"
-    "rsync\n"
+    "syscall\n"
     : "=r"(reg0)
-    : "i"(XCHAL_SWINT_CALL), "r"(reg0)
-    : "a3", "memory"
+    : "r"(reg0)
+    : "memory"
   );
 
   return reg0;
@@ -233,12 +196,10 @@ static inline uintptr_t sys_call1(unsigned int nbr, uintptr_t parm1)
 
   __asm__ __volatile__
   (
-    "movi a4, %1\n"
-    "wsr a4, intset\n"
-    "rsync\n"
+    "syscall\n"
     : "=r"(reg0)
-    : "i"(XCHAL_SWINT_CALL), "r"(reg0), "r"(reg1)
-    : "a4", "memory"
+    : "r"(reg0), "r"(reg1)
+    : "memory"
   );
 
   return reg0;
@@ -261,12 +222,10 @@ static inline uintptr_t sys_call2(unsigned int nbr, uintptr_t parm1,
 
   __asm__ __volatile__
   (
-    "movi a5, %1\n"
-    "wsr a5, intset\n"
-    "rsync\n"
+    "syscall\n"
     : "=r"(reg0)
-    : "i"(XCHAL_SWINT_CALL), "r"(reg0), "r"(reg1), "r"(reg2)
-    : "a5", "memory"
+    : "r"(reg0), "r"(reg1), "r"(reg2)
+    : "memory"
   );
 
   return reg0;
@@ -290,13 +249,11 @@ static inline uintptr_t sys_call3(unsigned int nbr, uintptr_t parm1,
 
   __asm__ __volatile__
   (
-    "movi a6, %1\n"
-    "wsr a6, intset\n"
-    "rsync\n"
+    "syscall\n"
     : "=r"(reg0)
-    : "i"(XCHAL_SWINT_CALL), "r"(reg0), "r"(reg1), "r"(reg2),
+    : "r"(reg0), "r"(reg1), "r"(reg2),
       "r"(reg3)
-    : "a6", "memory"
+    : "memory"
   );
 
   return reg0;
@@ -322,13 +279,11 @@ static inline uintptr_t sys_call4(unsigned int nbr, uintptr_t parm1,
 
   __asm__ __volatile__
   (
-    "movi a7, %1\n"
-    "wsr a7, intset\n"
-    "rsync\n"
+    "syscall\n"
     : "=r"(reg0)
-    : "i"(XCHAL_SWINT_CALL), "r"(reg0), "r"(reg1), "r"(reg2),
+    : "r"(reg0), "r"(reg1), "r"(reg2),
       "r"(reg3), "r"(reg4)
-    : "a7", "memory"
+    : "memory"
   );
 
   return reg0;
@@ -355,13 +310,11 @@ static inline uintptr_t sys_call5(unsigned int nbr, uintptr_t parm1,
 
   __asm__ __volatile__
   (
-    "movi a8, %1\n"
-    "wsr a8, intset\n"
-    "rsync\n"
+    "syscall\n"
     : "=r"(reg0)
-    : "i"(XCHAL_SWINT_CALL), "r"(reg0), "r"(reg1), "r"(reg2),
+    : "r"(reg0), "r"(reg1), "r"(reg2),
       "r"(reg3), "r"(reg4), "r"(reg5)
-    : "a8", "memory"
+    : "memory"
   );
 
   return reg0;
@@ -390,13 +343,11 @@ static inline uintptr_t sys_call6(unsigned int nbr, uintptr_t parm1,
 
   __asm__ __volatile__
   (
-    "movi a9, %1\n"
-    "wsr a9, intset\n"
-    "rsync\n"
+    "syscall\n"
     : "=r"(reg0)
-    : "i"(XCHAL_SWINT_CALL), "r"(reg0), "r"(reg1), "r"(reg2),
+    : "r"(reg0), "r"(reg1), "r"(reg2),
       "r"(reg3), "r"(reg4), "r"(reg5), "r"(reg6)
-    : "a9", "memory"
+    : "memory"
   );
 
   return reg0;

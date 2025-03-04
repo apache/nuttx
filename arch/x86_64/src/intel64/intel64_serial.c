@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/x86_64/src/intel64/intel64_serial.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -26,6 +28,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/serial/uart_16550.h>
+#include <nuttx/serial/uart_pci_16550.h>
 
 #include <arch/io.h>
 
@@ -52,12 +55,12 @@
  *
  ****************************************************************************/
 
-uart_datawidth_t uart_getreg(uart_addrwidth_t base, unsigned int offset)
+uart_datawidth_t uart_getreg(struct u16550_s *priv, unsigned int offset)
 {
-  return inb(base + offset);
+  return inb(priv->uartbase + offset);
 }
 
-void uart_putreg(uart_addrwidth_t base, unsigned int offset,
+void uart_putreg(struct u16550_s *priv, unsigned int offset,
                  uart_datawidth_t value)
 {
   /* Intel x86 platform require OUT2 of MCR being set
@@ -69,10 +72,10 @@ void uart_putreg(uart_addrwidth_t base, unsigned int offset,
       value |= UART_MCR_OUT2;
     }
 
-  outb(value, base + offset);
+  outb(value, priv->uartbase + offset);
 }
 
-#else /* USE_SERIALDRIVER */
+#elif defined(CONFIG_MULTBOOT2_FB_TERM)
 
 /****************************************************************************
  * Name: up_putc
@@ -87,31 +90,34 @@ void up_lowputc(char ch)
   fb_putc(ch);
 }
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      up_lowputc('\r');
-    }
-
   up_lowputc(ch);
-  return ch;
 }
-#endif /* USE_SERIALDRIVER */
+#endif
 
 #ifdef USE_EARLYSERIALINIT
-
 void x86_64_earlyserialinit(void)
 {
+#ifndef CONFIG_16550_NO_SERIAL_CONSOLE
   u16550_earlyserialinit();
+#endif
 }
+#endif
 
+#ifdef USE_SERIALDRIVER
 void x86_64_serialinit(void)
 {
+#ifdef CONFIG_16550_PCI_UART
+  /* Initialize PCI UART 16550 */
+
+  pci_u16550_init();
+#endif
+
+#ifdef CONFIG_16550_UART
+  /* Initialize UART 16550 */
+
   u16550_serialinit();
+#endif
 }
 #endif

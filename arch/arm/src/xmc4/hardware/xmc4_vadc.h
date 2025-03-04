@@ -1,6 +1,8 @@
 /******************************************************************************************************************
  * arch/arm/src/xmc4/hardware/xmc4_vadc.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -16,6 +18,9 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
+ ******************************************************************************************************************/
+
+/******************************************************************************************************************
  * May include some logic from sample code provided by Infineon:
  *
  * Copyright (C) 2011-2015 Infineon Technologies AG. All rights reserved.

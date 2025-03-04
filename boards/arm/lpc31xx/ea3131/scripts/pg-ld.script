@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/lpc31xx/ea3131/scripts/pg-ld.script
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -99,6 +101,7 @@ SECTIONS
 
     .paged : {
         _spaged = ABSOLUTE(.);
+        _stext = _spaged;
         *(.text .text.*)
         *(.fixup)
         *(.gnu.warning)
@@ -110,6 +113,7 @@ SECTIONS
         *(.gcc_except_table)
         *(.gnu.linkonce.r.*)
         _epaged = ABSOLUTE(.);
+        _etext = _epaged;
     } > paged
 
     .data : {

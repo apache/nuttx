@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/xtensa/src/common/xtensa_hostfs.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -95,6 +97,11 @@ int host_open(const char *pathname, int flags, int mode)
   if ((flags & O_EXCL) != 0)
     {
       simcall_flags |= SIMCALL_O_EXCL;
+    }
+
+  if ((flags & O_NONBLOCK) != 0)
+    {
+      simcall_flags |= SIMCALL_O_NONBLOCK;
     }
 
 #ifdef CONFIG_XTENSA_SEMIHOSTING_HOSTFS_CACHE_COHERENCE

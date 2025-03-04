@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/samv7/sam_qspi.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -33,6 +35,7 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <arch/barriers.h>
 #include <arch/board/board.h>
 
 #include <nuttx/arch.h>
@@ -40,11 +43,11 @@
 #include <nuttx/clock.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
+#include <nuttx/nuttx.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/spi/qspi.h>
 
 #include "arm_internal.h"
-#include "barriers.h"
 
 #include "sam_gpio.h"
 #include "sam_xdmac.h"
@@ -114,19 +117,6 @@
 
 #define DMA_TIMEOUT_MS    (800)
 #define DMA_TIMEOUT_TICKS MSEC2TICK(DMA_TIMEOUT_MS)
-
-/* QSPI memory synchronization */
-
-#define MEMORY_SYNC()     do { ARM_DSB(); ARM_ISB(); } while (0)
-
-/* The SAMV7x QSPI driver insists that transfers be performed in multiples
- * of 32-bits.  The alignment requirement only applies to RX DMA data.
- */
-
-#define ALIGN_SHIFT       2
-#define ALIGN_MASK        3
-#define ALIGN_UP(n)       (((n)+ALIGN_MASK) & ~ALIGN_MASK)
-#define IS_ALIGNED(n)     (((uint32_t)(n) & ALIGN_MASK) == 0)
 
 /* Debug ********************************************************************/
 
@@ -916,7 +906,7 @@ static int qspi_memory_dma(struct sam_qspidev_s *priv,
   qspi_putreg(priv, QSPI_CR_LASTXFER, SAM_QSPI_CR_OFFSET);
 
   while ((qspi_getreg(priv, SAM_QSPI_SR_OFFSET) & QSPI_SR_INSTRE) == 0);
-  MEMORY_SYNC();
+  UP_MB();
 
   /* Dump the sampled DMA registers */
 
@@ -977,7 +967,7 @@ static int qspi_memory_nodma(struct sam_qspidev_s *priv,
                   meminfo->buflen);
     }
 
-  MEMORY_SYNC();
+  UP_MB();
 
   /* Indicate the end of the transfer as soon as the transmission
    * registers are empty.
@@ -1471,7 +1461,7 @@ static int qspi_command(struct qspi_dev_s *dev,
                       (const uint8_t *)SAM_QSPIMEM_BASE, cmdinfo->buflen);
         }
 
-      MEMORY_SYNC();
+      UP_MB();
 
       /* Indicate the end of the transfer as soon as the transmission
        * registers are empty.
@@ -1504,7 +1494,7 @@ static int qspi_command(struct qspi_dev_s *dev,
              QSPI_IFR_NBDUM(0);
       qspi_putreg(priv, ifr, SAM_QSPI_IFR_OFFSET);
 
-      MEMORY_SYNC();
+      UP_MB();
 
       /* If the insruction frame does not include data, writing to the IFR
        * triggers sending of the instruction frame. Fall through to INSTRE
@@ -1558,8 +1548,8 @@ static int qspi_memory(struct qspi_dev_s *dev,
 
   if (priv->candma &&
       meminfo->buflen > CONFIG_SAMV7_QSPI_DMATHRESHOLD &&
-      IS_ALIGNED((uintptr_t)meminfo->buffer) &&
-      IS_ALIGNED(meminfo->buflen))
+      IS_ALIGNED((uintptr_t)meminfo->buffer, 4) &&
+      IS_ALIGNED(meminfo->buflen, 4))
     {
       return qspi_memory_dma(priv, meminfo);
     }
@@ -1593,7 +1583,11 @@ static void *qspi_alloc(struct qspi_dev_s *dev, size_t buflen)
    * enough to hold the rested buflen in units a 32-bits.
    */
 
-  return kmm_malloc(ALIGN_UP(buflen));
+  /* The SAMV7x QSPI driver insists that transfers be performed in multiples
+   * of 32-bits.  The alignment requirement only applies to RX DMA data.
+   */
+
+  return kmm_malloc(ALIGN_UP(buflen, 4));
 }
 
 /****************************************************************************

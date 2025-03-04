@@ -1,0 +1,64 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+menuconfig THERMAL
+	bool "Thermal framework"
+	default n
+	depends on SCHED_LPWORK
+	---help---
+		Enable thermal framework.
+
+if THERMAL
+
+config THERMAL_DEFAULT_GOVERNOR
+	string "Thermal default governor name"
+	default "step_wise"
+	---help---
+		Default governor name.
+
+config THERMAL_GOVERNOR_STEP_WISE
+	bool "Enable step wise governor"
+	default y
+	---help---
+		Enable step wise governor.
+
+config THERMAL_CDEV_CPUFREQ
+	bool "Thermal cpufreq cooling device"
+	default n
+	depends on CPUFREQ
+	---help---
+		Enable thermal cpufreq cooling device.
+
+config THERMAL_PROCFS
+	bool "Thermal PROCFS support"
+	default n
+	depends on FS_PROCFS
+	---help---
+		Enable thermal procfs.
+
+config THERMAL_DUMMY
+	bool "Thermal dummy driver"
+	default n
+	---help---
+		Enable thermal dummy driver.
+
+if THERMAL_DUMMY
+
+config THERMAL_DUMMY_POLLING_DELAY
+	int "Polling delay"
+	default 200
+	---help---
+		Polling delay(tick).
+
+config THERMAL_DUMMY_CPUFREQ
+	bool "Dummy cpufreq driver"
+	default n
+	depends on CPUFREQ
+	---help---
+		Enable cpufreq dummy driver.
+
+endif # THERMAL_DUMMY
+
+endif # THERMAL

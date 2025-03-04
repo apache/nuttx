@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/net/lan9250.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -26,7 +28,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <stdint.h>
 #include <time.h>
 #include <string.h>
 #include <assert.h>
@@ -616,7 +617,9 @@ static void lan9250_wait_ready(FAR struct lan9250_driver_s *priv,
 
   if (timeout)
     {
-      nerr("ERROR: wait register:0x%02x, mask:0x%08x, expected:0x%08x\n",
+      nerr("ERROR: wait register:0x%02" PRIx32 \
+           ", mask:0x%08" PRIx32 \
+           ", expected:0x%08" PRIx32 "\n",
             address, mask, expected);
     }
 }
@@ -733,7 +736,8 @@ static void lan9250_wait_mac_ready(FAR struct lan9250_driver_s *priv,
 
   if (timeout)
     {
-      nerr("ERROR: wait MAC register:0x%02x, mask:0x%08x, expected:0x%08x\n",
+      nerr("ERROR: wait MAC register:0x%02" PRIx32 \
+           ", mask:0x%08" PRIx32 ", expect:0x%08" PRIx32 "\n",
             address, mask, expected);
     }
 }
@@ -1177,11 +1181,11 @@ static int lan9250_reset(FAR struct lan9250_driver_s *priv)
   regval = lan9250_get_reg(priv, LAN9250_CIARR);
   if ((regval & CIARR_CID_M) != CIARR_CID_V)
     {
-      nerr("ERROR: Bad Rev ID: %08x\n", regval);
+      nerr("ERROR: Bad Rev ID: %08" PRIx32 "\n", regval);
       return -ENODEV;
     }
 
-  ninfo("Rev ID: %08x\n", regval & CIARR_CREV_M);
+  ninfo("Rev ID: %08" PRIx32 "\n", regval & CIARR_CREV_M);
 
   /* Configure TX FIFO size mode to be 8:
    *
@@ -1808,7 +1812,7 @@ static void lan9250_int_worker(FAR void *arg)
        * settings.
        */
 
-      ninfo("Interrupt status: %08x\n", regval);
+      ninfo("Interrupt status: %08" PRIx32 "\n", regval);
 
 #if LAN9250_INT_SOURCE & IER_SW
       if ((regval & ISR_SW) != 0)
@@ -2472,7 +2476,11 @@ int lan9250_initialize(
 
   if (lower->getmac)
     {
-      lower->getmac(lower, priv->dev.d_mac.ether.ether_addr_octet);
+      if (lower->getmac(lower, priv->dev.d_mac.ether.ether_addr_octet) < 0)
+        {
+          nerr("ERROR: Failed read MAC address\n");
+          return -EAGAIN;
+        }
     }
 
   /* Register the device with the OS so that socket IOCTLs can be performed */

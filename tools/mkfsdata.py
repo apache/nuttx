@@ -3,6 +3,8 @@
 """
 tools/mkfsdata.py
 
+SPDX-License-Identifier: ???
+
 Copyright (c) 2024 Alexey Matveev
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS

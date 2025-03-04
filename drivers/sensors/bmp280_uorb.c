@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/sensors/bmp280_uorb.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -30,6 +32,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/i2c/i2c_master.h>
@@ -165,7 +168,7 @@ static int bmp280_putreg8(FAR struct bmp280_dev_s *priv, uint8_t regaddr,
 
 static int bmp280_set_interval(FAR struct sensor_lowerhalf_s *lower,
                                FAR struct file *filep,
-                               FAR unsigned long *period_us);
+                               FAR uint32_t *period_us);
 static int bmp280_activate(FAR struct sensor_lowerhalf_s *lower,
                            FAR struct file *filep,
                            bool enable);
@@ -512,7 +515,7 @@ static uint32_t bmp280_compensate_press(FAR struct bmp280_dev_s *priv,
 
 static int bmp280_set_interval(FAR struct sensor_lowerhalf_s *lower,
                                FAR struct file *filep,
-                               FAR unsigned long *period_us)
+                               FAR uint32_t *period_us)
 {
   FAR struct bmp280_dev_s *priv = container_of(lower,
                                                FAR struct bmp280_dev_s,

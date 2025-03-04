@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/sched/sched_suspend.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -33,6 +35,56 @@
 #include <nuttx/arch.h>
 
 #include "sched/sched.h"
+
+#ifdef CONFIG_SMP
+/****************************************************************************
+ * Private Type Declarations
+ ****************************************************************************/
+
+struct suspend_arg_s
+{
+  pid_t pid;
+  cpu_set_t saved_affinity;
+  bool need_restore;
+};
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+static int nxsched_suspend_handler(FAR void *cookie)
+{
+  FAR struct suspend_arg_s *arg = cookie;
+  FAR struct tcb_s *tcb;
+  irqstate_t flags;
+
+  flags = enter_critical_section();
+  tcb = nxsched_get_tcb(arg->pid);
+
+  if (!tcb || tcb->task_state == TSTATE_TASK_INVALID ||
+      (tcb->flags & TCB_FLAG_EXIT_PROCESSING) != 0)
+    {
+      /* There is no TCB with this pid or, if there is, it is not a task. */
+
+      leave_critical_section(flags);
+      return OK;
+    }
+
+  if (arg->need_restore)
+    {
+      tcb->affinity = arg->saved_affinity;
+      tcb->flags &= ~TCB_FLAG_CPU_LOCKED;
+    }
+
+  nxsched_remove_readytorun(tcb);
+
+  tcb->task_state = TSTATE_TASK_STOPPED;
+  dq_addlast((FAR dq_entry_t *)tcb, &g_stoppedtasks);
+
+  leave_critical_section(flags);
+  return OK;
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -92,18 +144,49 @@ void nxsched_suspend(FAR struct tcb_s *tcb)
 
       /* Remove the tcb task from the ready-to-run list. */
 
-      switch_needed = nxsched_remove_readytorun(tcb, true);
-
-      /* Add the task to the specified blocked task list */
-
-      tcb->task_state = TSTATE_TASK_STOPPED;
-      dq_addlast((FAR dq_entry_t *)tcb, list_stoppedtasks());
-
-      /* Now, perform the context switch if one is needed */
-
-      if (switch_needed)
+#ifdef CONFIG_SMP
+      if (tcb->task_state == TSTATE_TASK_RUNNING && tcb->cpu != this_cpu())
         {
-          up_switch_context(this_task(), rtcb);
+          struct suspend_arg_s arg;
+
+          if ((tcb->flags & TCB_FLAG_CPU_LOCKED) != 0)
+            {
+              arg.pid = tcb->pid;
+              arg.need_restore = false;
+            }
+          else
+            {
+              arg.pid = tcb->pid;
+              arg.saved_affinity = tcb->affinity;
+              arg.need_restore = true;
+
+              tcb->flags |= TCB_FLAG_CPU_LOCKED;
+              CPU_SET(tcb->cpu, &tcb->affinity);
+            }
+
+          nxsched_smp_call_single(tcb->cpu, nxsched_suspend_handler, &arg);
+        }
+      else
+#endif
+        {
+          switch_needed = nxsched_remove_readytorun(tcb);
+
+          if (list_pendingtasks()->head)
+            {
+              switch_needed |= nxsched_merge_pending();
+            }
+
+          /* Add the task to the specified blocked task list */
+
+          tcb->task_state = TSTATE_TASK_STOPPED;
+          dq_addlast((FAR dq_entry_t *)tcb, list_stoppedtasks());
+
+          /* Now, perform the context switch if one is needed */
+
+          if (switch_needed)
+            {
+              up_switch_context(this_task(), rtcb);
+            }
         }
     }
 

@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/vfs/fs_epoll.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -42,6 +44,7 @@
 #include <nuttx/signal.h>
 
 #include "inode/inode.h"
+#include "fs_heap.h"
 
 /****************************************************************************
  * Private Types
@@ -134,14 +137,13 @@ static struct inode g_epoll_inode =
  * Private Functions
  ****************************************************************************/
 
-static FAR epoll_head_t *epoll_head_from_fd(int fd)
+static FAR epoll_head_t *epoll_head_from_fd(int fd, FAR struct file **filep)
 {
-  FAR struct file *filep;
   int ret;
 
   /* Get file pointer by file descriptor */
 
-  ret = fs_getfilep(fd, &filep);
+  ret = fs_getfilep(fd, filep);
   if (ret < 0)
     {
       set_errno(-ret);
@@ -150,13 +152,14 @@ static FAR epoll_head_t *epoll_head_from_fd(int fd)
 
   /* Check fd come from us */
 
-  if (!filep->f_inode || filep->f_inode->u.i_ops != &g_epoll_ops)
+  if ((*filep)->f_inode->u.i_ops != &g_epoll_ops)
     {
+      fs_putfilep(*filep);
       set_errno(EBADF);
       return NULL;
     }
 
-  return (FAR epoll_head_t *)filep->f_priv;
+  return (*filep)->f_priv;
 }
 
 static int epoll_do_open(FAR struct file *filep)
@@ -201,10 +204,10 @@ static int epoll_do_close(FAR struct file *filep)
       list_for_every_entry_safe(&eph->extend, epn, tmp, epoll_node_t, node)
         {
           list_delete(&epn->node);
-          kmm_free(epn);
+          fs_heap_free(epn);
         }
 
-      kmm_free(eph);
+      fs_heap_free(eph);
     }
 
   return ret;
@@ -224,7 +227,7 @@ static int epoll_do_create(int size, int flags)
   int i;
 
   size = size <= 0 ? 1 : size;
-  eph = kmm_zalloc(sizeof(epoll_head_t) + sizeof(epoll_node_t) * size);
+  eph = fs_heap_zalloc(sizeof(epoll_head_t) + sizeof(epoll_node_t) * size);
   if (eph == NULL)
     {
       set_errno(ENOMEM);
@@ -257,7 +260,7 @@ static int epoll_do_create(int size, int flags)
   if (fd < 0)
     {
       nxmutex_destroy(&eph->lock);
-      kmm_free(eph);
+      fs_heap_free(eph);
       set_errno(-fd);
       return ERROR;
     }
@@ -476,12 +479,13 @@ void epoll_close(int epfd)
 int epoll_ctl(int epfd, int op, int fd, FAR struct epoll_event *ev)
 {
   FAR struct list_node *extend;
+  FAR struct file *filep;
   FAR epoll_head_t *eph;
   FAR epoll_node_t *epn;
   int ret;
   int i;
 
-  eph = epoll_head_from_fd(epfd);
+  eph = epoll_head_from_fd(epfd, &filep);
   if (eph == NULL)
     {
       return ERROR;
@@ -534,7 +538,7 @@ int epoll_ctl(int epfd, int op, int fd, FAR struct epoll_event *ev)
              * list.
              */
 
-            extend = kmm_zalloc(sizeof(*extend) +
+            extend = fs_heap_zalloc(sizeof(*extend) +
                                 2 * sizeof(epoll_node_t) * eph->size);
             if (extend == NULL)
               {
@@ -690,10 +694,12 @@ int epoll_ctl(int epfd, int op, int fd, FAR struct epoll_event *ev)
 
 out:
   nxmutex_unlock(&eph->lock);
+  fs_putfilep(filep);
   return OK;
 err:
   nxmutex_unlock(&eph->lock);
 err_without_lock:
+  fs_putfilep(filep);
   set_errno(-ret);
   return ERROR;
 }
@@ -705,14 +711,15 @@ err_without_lock:
 int epoll_pwait(int epfd, FAR struct epoll_event *evs,
                 int maxevents, int timeout, FAR const sigset_t *sigmask)
 {
+  FAR struct file *filep;
   FAR epoll_head_t *eph;
   sigset_t oldsigmask;
   int ret;
 
-  eph = epoll_head_from_fd(epfd);
+  eph = epoll_head_from_fd(epfd, &filep);
   if (eph == NULL)
     {
-      return ERROR;
+      goto out;
     }
 
 retry:
@@ -755,10 +762,14 @@ retry:
       ret = num;
     }
 
+  fs_putfilep(filep);
   return ret;
 
 err:
+  fs_putfilep(filep);
   set_errno(-ret);
+out:
+  ferr("epoll wait failed:%d, timeout:%d\n", errno, timeout);
   return ERROR;
 }
 
@@ -776,13 +787,14 @@ err:
 int epoll_wait(int epfd, FAR struct epoll_event *evs,
                int maxevents, int timeout)
 {
+  FAR struct file *filep;
   FAR epoll_head_t *eph;
   int ret;
 
-  eph = epoll_head_from_fd(epfd);
+  eph = epoll_head_from_fd(epfd, &filep);
   if (eph == NULL)
     {
-      return ERROR;
+      goto out;
     }
 
 retry:
@@ -822,9 +834,13 @@ retry:
       ret = num;
     }
 
+  fs_putfilep(filep);
   return ret;
 
 err:
+  fs_putfilep(filep);
   set_errno(-ret);
+out:
+  ferr("epoll wait failed:%d, timeout:%d\n", errno, timeout);
   return ERROR;
 }

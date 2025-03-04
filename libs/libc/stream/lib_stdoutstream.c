@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/stream/lib_stdoutstream.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -69,12 +71,12 @@ static void stdoutstream_putc(FAR struct lib_outstream_s *self, int ch)
  * Name: stdoutstream_puts
  ****************************************************************************/
 
-static int stdoutstream_puts(FAR struct lib_outstream_s *self,
-                             FAR const void *buffer, int len)
+static ssize_t stdoutstream_puts(FAR struct lib_outstream_s *self,
+                                 FAR const void *buffer, size_t len)
 {
   FAR struct lib_stdoutstream_s *stream =
                                (FAR struct lib_stdoutstream_s *)self;
-  int result;
+  ssize_t result;
 
   DEBUGASSERT(self && stream->handle);
 
@@ -84,7 +86,7 @@ static int stdoutstream_puts(FAR struct lib_outstream_s *self,
 
   do
     {
-      result = fwrite(buffer, len, 1, stream->handle);
+      result = fwrite(buffer, 1, len, stream->handle);
       if (result >= 0)
         {
           self->nput += result;

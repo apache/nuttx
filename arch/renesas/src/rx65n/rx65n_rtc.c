@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/renesas/src/rx65n/rx65n_rtc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -33,6 +35,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/compiler.h>
+#include <nuttx/spinlock.h>
 #include <arch/board/board.h>
 #include <rx65n_rtc.h>
 #include "renesas_internal.h"
@@ -100,6 +103,8 @@ struct prd_cbinfo_s
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+static spinlock_t g_rtc_lock = SP_UNLOCKED;
 
 #ifdef CONFIG_RTC_ALARM
 /* Callback to use when an EXTI is activated  */
@@ -459,6 +464,7 @@ int up_rtc_initialize(void)
 #if defined(CONFIG_RTC_HIRES)
 int up_rtc_gettime(struct timespec *tp)
 {
+  irqstate_t flags;
   uint8_t weekcnt;
   uint8_t daycnt;
   uint8_t monthcnt;
@@ -473,6 +479,9 @@ int up_rtc_gettime(struct timespec *tp)
   uint16_t bcd_years;
   uint8_t regval;
   struct tm t;
+
+  flags = spin_lock_irqsave(&g_rtc_lock);
+  sched_lock();
 
   if (RTC.RCR2.BIT.START == 0)
     {
@@ -539,6 +548,9 @@ int up_rtc_gettime(struct timespec *tp)
   UNUSED(hrcnt);
   UNUSED(mincnt);
   UNUSED(seccnt);
+
+  spin_unlock_irqrestore(&g_rtc_lock, flags);
+  sched_unlock();
   return OK;
 }
 #endif
@@ -914,7 +926,7 @@ int rx65n_rtc_setalarm(struct alm_setalarm_s *alminfo)
 
   /* Is there already something waiting on the ALARM? */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_rtc_lock);
 
   /* Save the callback info */
 
@@ -1049,8 +1061,6 @@ int rx65n_rtc_setalarm(struct alm_setalarm_s *alminfo)
       dummy_word = RTC.RYRAR.WORD;
     }
 
-  rtc_dumpregs("New alarm setting");
-
   /* Enable RTC ALARM interrupt */
 
   RTC.RCR1.BIT.AIE = 1U;
@@ -1066,7 +1076,9 @@ int rx65n_rtc_setalarm(struct alm_setalarm_s *alminfo)
   /* Set Priority of ALM interrupt */
 
   IPR(RTC, ALM) = _0F_RTC_PRIORITY_LEVEL15;
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_rtc_lock, flags);
+
+  rtc_dumpregs("New alarm setting");
   UNUSED(dummy_byte);
   UNUSED(dummy_word);
   return OK;
@@ -1080,7 +1092,7 @@ int rx65n_rtc_setperiodic(const struct timespec *period,
   irqstate_t flags;
   volatile uint8_t regval;
   uint8_t prd;
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_rtc_lock);
 
   /* No.. Save the callback function pointer */
 
@@ -1114,7 +1126,7 @@ int rx65n_rtc_setperiodic(const struct timespec *period,
   /* Set PRD priority level */
 
   IPR(RTC, PRD) = _0F_RTC_PRIORITY_LEVEL15;
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_rtc_lock, flags);
   return OK;
 }
 #endif
@@ -1123,7 +1135,7 @@ int rx65n_rtc_setperiodic(const struct timespec *period,
 void rx65n_rtc_set_carry(carrycb_t callback)
 {
   irqstate_t flags;
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_rtc_lock);
 
   /* No.. Save the callback function pointer */
 
@@ -1146,7 +1158,7 @@ void rx65n_rtc_set_carry(carrycb_t callback)
   IPR(PERIB, INTB176) = 15;
   RTC.RCR1.BIT.CIE = 1U;
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_rtc_lock, flags);
 }
 
 #endif
@@ -1156,7 +1168,7 @@ int rx65n_rtc_cancelalarm(void)
   irqstate_t flags;
   int ret = -ENODATA;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_rtc_lock);
 
   /* Cancel the global callback function */
 
@@ -1174,7 +1186,7 @@ int rx65n_rtc_cancelalarm(void)
   rx65n_putreg(0x0, RX65N_RTC_RYRAR);
   ret = OK;
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_rtc_lock, flags);
 
   return ret;
 }

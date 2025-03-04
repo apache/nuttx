@@ -106,4 +106,21 @@ config LIBC_SCANSET
 	---help---
 		Add scanset support to sscanf().
 
+config LIBC_PRINT_EXTENSION
+	bool
+	default n
+	---help---
+		Enables non-standard "%p*" extensions for the printf family.
+
+		CAVEAT: If your system is using any of the printf C family
+		functions, it's probably unsafe to enable this option because
+		the extension is not compatible with the C standard. Namely,
+		an ordinary character following a "%p" conversion is interpreted
+		in a non-standard way, which might crash the code which expects
+		the standard semantics. For that reason, in the future versions
+		of NuttX, this extension might be removed, or changed in an
+		API-incompatible way to avoid conflicts with the standards.
+		(Eg. use different characters for converions specifiers,
+		or switch to a completely separate API, say "nuttx_printf".)
+
 endmenu #Standard C I/O

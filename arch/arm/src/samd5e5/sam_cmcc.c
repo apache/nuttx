@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/samd5e5/sam_cmcc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -28,6 +30,8 @@
 #include <stdint.h>
 #include <assert.h>
 
+#include <nuttx/nuttx.h>
+
 #include "arm_internal.h"
 #include "hardware/sam_cmcc.h"
 #include "sam_cmcc.h"
@@ -51,9 +55,6 @@
 #else
 #  error Unknown cache line size
 #endif
-
-#define ALIGN_UP(a)   (((a)+CMCC_MASK) & ~CMCC_MASK)
-#define ALIGN_DOWN(a) ((a) & ~CMCC_MASK)
 
 /****************************************************************************
  * Private Data
@@ -138,8 +139,8 @@ void sam_cmcc_invalidate(uintptr_t start, uintptr_t end)
    * to be invalidated.
    */
 
-  start  = ALIGN_DOWN(start);
-  end    = ALIGN_UP(end);
+  start  = ALIGN_DOWN_MASK(start, CMCC_MASK);
+  end    = ALIGN_UP_MASK(end, CMCC_MASK);
   size   = end - start + 1;
 
   /* If this is a large region (as big as the cache), then just invalidate

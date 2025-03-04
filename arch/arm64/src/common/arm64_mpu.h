@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/src/common/arm64_mpu.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -49,6 +51,14 @@
 #define MPU_RBAR_SH_MSK     (0x3UL << MPU_RBAR_SH_POS)
 #define MPU_RBAR_AP_POS     2U
 #define MPU_RBAR_AP_MSK     (0x3UL << MPU_RBAR_AP_POS)
+
+/* TCR_EL1 */
+
+#define TCR_AS_SHIFT        36U
+#define TCR_ASID_8          (0ULL << TCR_AS_SHIFT)
+#define TCR_ASID_16         (1ULL << TCR_AS_SHIFT)
+#define TCR_TBI0            (1ULL << 37)
+#define TCR_TBI1            (1ULL << 38)
 
 /* RBAR_EL1 XN */
 

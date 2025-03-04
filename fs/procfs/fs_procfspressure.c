@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/procfs/fs_procfspressure.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -35,6 +37,8 @@
 #include <nuttx/nuttx.h>
 #include <nuttx/queue.h>
 #include <nuttx/spinlock.h>
+
+#include "fs_heap.h"
 
 /****************************************************************************
  * Private Types
@@ -121,7 +125,7 @@ static int pressure_open(FAR struct file *filep, FAR const char *relpath,
       return -ENOENT;
     }
 
-  priv = kmm_zalloc(sizeof(struct pressure_file_s));
+  priv = fs_heap_zalloc(sizeof(struct pressure_file_s));
   if (!priv)
     {
       return -ENOMEM;
@@ -147,7 +151,7 @@ static int pressure_close(FAR struct file *filep)
   flags = spin_lock_irqsave(&g_pressure_lock);
   dq_rem(&priv->entry, &g_pressure_memory_queue);
   spin_unlock_irqrestore(&g_pressure_lock, flags);
-  free(priv);
+  fs_heap_free(priv);
   return OK;
 }
 
@@ -292,7 +296,7 @@ static int pressure_dup(FAR const struct file *oldp, FAR struct file *newp)
   FAR struct pressure_file_s *newpriv;
   uint32_t flags;
 
-  newpriv = kmm_zalloc(sizeof(struct pressure_file_s));
+  newpriv = fs_heap_zalloc(sizeof(struct pressure_file_s));
   if (newpriv == NULL)
     {
       return -ENOMEM;
@@ -319,7 +323,7 @@ static int pressure_opendir(FAR const char *relpath,
   finfo("relpath: \"%s\"\n", relpath ? relpath : "NULL");
   DEBUGASSERT(relpath);
 
-  level = kmm_zalloc(sizeof(struct procfs_dir_priv_s));
+  level = fs_heap_zalloc(sizeof(struct procfs_dir_priv_s));
   if (level == NULL)
     {
       return -ENOMEM;
@@ -339,7 +343,7 @@ static int pressure_opendir(FAR const char *relpath,
 static int pressure_closedir(FAR struct fs_dirent_s *dir)
 {
   DEBUGASSERT(dir);
-  kmm_free(dir);
+  fs_heap_free(dir);
   return OK;
 }
 

@@ -1,8 +1,8 @@
 /****************************************************************************
  * libs/libc/machine/arm/armv7-r/gnu/arch_memset.S
  *
- * Copyright (C) 2013 The Android Open Source Project
- * All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2013 The Android Open Source Project
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -35,9 +35,9 @@
 
 	.arm
 	.syntax unified
-	.global memset
-	.type	memset, %function
-memset:
+	.global ARCH_LIBCFUN(memset)
+	.type	ARCH_LIBCFUN(memset), %function
+ARCH_LIBCFUN(memset):
 	mov         r3, r0
 	// At this point only d0, d1 are going to be used below.
 	vdup.8      q0, r1
@@ -147,6 +147,6 @@ memset:
 	strbcs      r1, [r3], #1
 	strbcs      r1, [r3], #1
 	bx          lr
-	.size memset, . - memset
+	.size ARCH_LIBCFUN(memset), . - ARCH_LIBCFUN(memset)
 
 #endif

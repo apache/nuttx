@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/sim/src/sim/sim_heap.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -33,6 +35,7 @@
 #include <nuttx/atomic.h>
 #include <nuttx/fs/procfs.h>
 #include <nuttx/mm/mm.h>
+#include <nuttx/sched_note.h>
 
 #include "sim_internal.h"
 
@@ -57,9 +60,9 @@ struct mm_heap_s
   size_t mm_delaycount[CONFIG_SMP_NCPUS];
 #endif
 
-  atomic_int aordblks;
-  atomic_int uordblks;
-  atomic_int usmblks;
+  atomic_t aordblks;
+  atomic_t uordblks;
+  atomic_t usmblks;
 
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
   struct procfs_meminfo_entry_s mm_procfs;
@@ -185,6 +188,7 @@ static void mm_delayfree(struct mm_heap_s *heap, void *mem, bool delay)
       int size = host_mallocsize(mem);
       atomic_fetch_sub(&heap->aordblks, 1);
       atomic_fetch_sub(&heap->uordblks, size);
+      sched_note_heap(NOTE_HEAP_FREE, heap, mem, size, 0);
       host_free(mem);
     }
 }
@@ -228,7 +232,35 @@ struct mm_heap_s *mm_initialize(const char *name,
   procfs_register_meminfo(&heap->mm_procfs);
 #endif
 
+  sched_note_heap(NOTE_HEAP_ADD, heap, heap_start, heap_size, 0);
   return heap;
+}
+
+/****************************************************************************
+ * Name: mm_uninitialize
+ *
+ * Description:
+ *   Uninitialize the selected heap data structures
+ *
+ * Input Parameters:
+ *   heap      - The selected heap
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+void mm_uninitialize(struct mm_heap_s *heap)
+{
+  sched_note_heap(NOTE_HEAP_REMOVE, heap, NULL, 0, 0);
+
+#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
+  procfs_unregister_meminfo(&heap->mm_procfs);
+#endif
+  mm_free_delaylist(heap);
+  host_free(heap);
 }
 
 /****************************************************************************
@@ -339,32 +371,42 @@ void *mm_realloc(struct mm_heap_s *heap, void *oldmem,
   int uordblks;
   int usmblks;
   int newsize;
+  int oldsize;
 
   free_delaylist(heap, false);
 
   if (size == 0)
     {
-      mm_free(heap, oldmem);
-      return NULL;
+      size = 1;
     }
 
-  atomic_fetch_sub(&heap->uordblks, host_mallocsize(oldmem));
+  oldsize = host_mallocsize(oldmem);
+  atomic_fetch_sub(&heap->uordblks, oldsize);
   mem = host_realloc(oldmem, size);
 
   atomic_fetch_add(&heap->aordblks, oldmem == NULL && mem != NULL);
   newsize = host_mallocsize(mem ? mem : oldmem);
   atomic_fetch_add(&heap->uordblks, newsize);
-  usmblks = atomic_load(&heap->usmblks);
+  usmblks = atomic_read(&heap->usmblks);
+  if (mem != NULL)
+    {
+      if (oldmem != NULL)
+        {
+          sched_note_heap(NOTE_HEAP_FREE, heap, oldmem, oldsize, 0);
+        }
+
+      sched_note_heap(NOTE_HEAP_ALLOC, heap, mem, newsize, 0);
+    }
 
   do
     {
-      uordblks = atomic_load(&heap->uordblks);
+      uordblks = atomic_read(&heap->uordblks);
       if (uordblks <= usmblks)
         {
           break;
         }
     }
-  while (atomic_compare_exchange_weak(&heap->usmblks, &usmblks, uordblks));
+  while (atomic_try_cmpxchg(&heap->usmblks, &usmblks, uordblks));
 
 #if CONFIG_MM_FREE_DELAYCOUNT_MAX > 0
   if (mem == NULL && free_delaylist(heap, true))
@@ -445,19 +487,20 @@ void *mm_memalign(struct mm_heap_s *heap, size_t alignment, size_t size)
     }
 
   size = host_mallocsize(mem);
+  sched_note_heap(NOTE_HEAP_ALLOC, heap, mem, size, 0);
   atomic_fetch_add(&heap->aordblks, 1);
   atomic_fetch_add(&heap->uordblks, size);
-  usmblks = atomic_load(&heap->usmblks);
+  usmblks = atomic_read(&heap->usmblks);
 
   do
     {
-      uordblks = atomic_load(&heap->uordblks);
+      uordblks = atomic_read(&heap->uordblks);
       if (uordblks <= usmblks)
         {
           break;
         }
     }
-  while (atomic_compare_exchange_weak(&heap->usmblks, &usmblks, uordblks));
+  while (atomic_try_cmpxchg(&heap->usmblks, &usmblks, uordblks));
 
 #if CONFIG_MM_FREE_DELAYCOUNT_MAX > 0
   if (mem == NULL && free_delaylist(heap, true))
@@ -532,9 +575,9 @@ struct mallinfo mm_mallinfo(struct mm_heap_s *heap)
   struct mallinfo info;
 
   memset(&info, 0, sizeof(struct mallinfo));
-  info.aordblks = atomic_load(&heap->aordblks);
-  info.uordblks = atomic_load(&heap->uordblks);
-  info.usmblks  = atomic_load(&heap->usmblks);
+  info.aordblks = atomic_read(&heap->aordblks);
+  info.uordblks = atomic_read(&heap->uordblks);
+  info.usmblks  = atomic_read(&heap->usmblks);
   return info;
 }
 
@@ -632,7 +675,7 @@ size_t mm_heapfree(struct mm_heap_s *heap)
  *
  ****************************************************************************/
 
-size_t mm_heapfree_largest(FAR struct mm_heap_s *heap)
+size_t mm_heapfree_largest(struct mm_heap_s *heap)
 {
   return SIZE_MAX;
 }

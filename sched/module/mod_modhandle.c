@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/module/mod_modhandle.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -23,11 +25,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <sys/types.h>
-#include <assert.h>
-#include <debug.h>
-#include <errno.h>
 
 #include <nuttx/module.h>
 #include <nuttx/lib/modlib.h>
@@ -58,25 +55,7 @@
 
 FAR void *modhandle(FAR const char *name)
 {
-  FAR struct module_s *modp;
-
-  DEBUGASSERT(name != NULL);
-
-  /* Get exclusive access to the module registry */
-
-  modlib_registry_lock();
-
-  /* Find the module entry for this name in the registry */
-
-  modp = modlib_registry_find(name);
-  if (modp == NULL)
-    {
-      berr("ERROR: Failed to find module %s\n", name);
-      set_errno(ENOENT);
-    }
-
-  modlib_registry_unlock();
-  return modp;
+  return modlib_gethandle(name);
 }
 
 #endif /* CONFIG_MODULE */

@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/power/regulator.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -121,7 +123,10 @@ struct regulator_desc_s
   unsigned int   boot_on;           /* true if this regulator is to be enabled
                                      * at power up/reset
                                      */
-  unsigned int   always_on;
+  unsigned int   always_on;         /* true if this regulator is always on */
+  unsigned int   bypass_on;         /* true if this regulator should be ignored
+                                     * during initialization
+                                     */
   FAR const char *supply_name;
 #ifdef CONFIG_PM
   unsigned int auto_lp;

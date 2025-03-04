@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/mmcsd/sdio.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -380,6 +382,7 @@ int sdio_set_wide_bus(FAR struct sdio_dev_s *dev)
 int sdio_probe(FAR struct sdio_dev_s *dev)
 {
   int ret;
+  int bit;
   uint32_t data = 0;
 
   nxmutex_init(&dev->mutex);
@@ -407,6 +410,26 @@ int sdio_probe(FAR struct sdio_dev_s *dev)
   /* Receive R4 response */
 
   ret = SDIO_RECVR4(dev, SDIO_CMD5, &data);
+  if (ret != OK)
+    {
+      goto err;
+    }
+
+  /* Get the maximun and minimum values for VDD */
+
+  bit = ffs(data);
+  if (bit)
+    {
+      bit -= 1;
+      data &= 3 << bit;
+    }
+  else
+    {
+      ret = -EINVAL;
+      goto err;
+    }
+
+  ret = sdio_sendcmdpoll(dev, SDIO_CMD5, data);
   if (ret != OK)
     {
       goto err;

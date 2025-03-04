@@ -3,14 +3,11 @@ From: yanghuatao <yanghuatao@xiaomi.com>
 Date: Thu, 23 Mar 2023 09:54:59 +0800
 Subject: [PATCH 3/3] fix build error: INFINITY error in quickjs.c
 
-VELAPLATFO-6159
-
 quickjs/quickjs.c:40035:45: error: initializer element is not constant 40035 | JS_PROP_DOUBLE_DEF("POSITIVE_INFINITY", INFINITY, 0 )
 
 (1)open menuconfig  (2)close math.h:build setup->Customize Header Files->math.h (2) select libmcs:Library Rountines->Select math library->Math Library fram LibmCS (3)build
 
 Signed-off-by: yanghuatao <yanghuatao@xiaomi.com>
-Change-Id: I6d70b7152e047b893429f49abc3c6c0e191735a4
 ---
  libmcs/libmcs/Makefile.in                                          |  1 -
  .../2000_misc_internal.rst                           |  1 -

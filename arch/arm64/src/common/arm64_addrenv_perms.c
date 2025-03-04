@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/src/common/arm64_addrenv_perms.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -31,9 +33,10 @@
 #include <nuttx/arch.h>
 #include <nuttx/pgalloc.h>
 
+#include <arch/barriers.h>
+
 #include <sys/mman.h>
 
-#include "barriers.h"
 #include "pgalloc.h"
 #include "arm64_arch.h"
 #include "arm64_mmu.h"
@@ -70,8 +73,8 @@ static int modify_region(uintptr_t vstart, uintptr_t vend, uintptr_t setmask)
 
   for (vaddr = vstart; vaddr < vend; vaddr += MM_PGSIZE)
     {
-      for (ptlevel = 1, lnvaddr = l1vaddr;
-           ptlevel < MMU_PGT_LEVELS;
+      for (ptlevel = mmu_get_base_pgt_level(), lnvaddr = l1vaddr;
+           ptlevel < MMU_PGT_LEVEL_MAX;
            ptlevel++)
         {
           paddr = mmu_pte_to_paddr(mmu_ln_getentry(ptlevel, lnvaddr, vaddr));

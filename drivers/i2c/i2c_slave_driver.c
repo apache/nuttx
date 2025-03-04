@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/i2c/i2c_slave_driver.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -134,7 +136,9 @@ static const struct file_operations g_i2cslavefops =
   NULL,               /* ioctl */
   NULL,               /* mmap */
   NULL,               /* truncate */
-  i2c_slave_poll      /* poll */
+  i2c_slave_poll,     /* poll */
+  NULL,               /* readv */
+  NULL                /* writev */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , i2c_slave_unlink  /* unlink */
 #endif
@@ -502,7 +506,7 @@ static int i2c_slave_callback(FAR void *arg, i2c_slave_complete_t status,
       priv->read_index = 0;
       priv->read_length = length;
 
-      while (nxsem_get_value(&priv->wait, &semcount) >= 0 && semcount <= 1)
+      while (nxsem_get_value(&priv->wait, &semcount) >= 0 && semcount <= 0)
         {
           nxsem_post(&priv->wait);
         }

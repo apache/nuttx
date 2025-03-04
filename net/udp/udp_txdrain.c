@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/udp/udp_txdrain.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -29,8 +31,10 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <nuttx/cancelpt.h>
 #include <nuttx/net/net.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/tls.h>
 
 #include "utils/utils.h"
 #include "udp/udp.h"
@@ -94,6 +98,10 @@ int udp_txdrain(FAR struct socket *psock, unsigned int timeout)
 
   DEBUGASSERT(psock->s_type == SOCK_DGRAM);
 
+  /* udp_txdrain() is a cancellation point */
+
+  enter_cancellation_point();
+
   conn = psock->s_conn;
 
   /* Initialize the wait semaphore */
@@ -110,18 +118,22 @@ int udp_txdrain(FAR struct socket *psock, unsigned int timeout)
 
       /* There is pending write data.. wait for it to drain. */
 
+      tls_cleanup_push(tls_get_info(), udp_notifier_teardown, &key);
       ret = net_sem_timedwait_uninterruptible(&waitsem, timeout);
 
       /* Tear down the notifier (in case we timed out or were canceled) */
 
       if (ret < 0)
         {
-          udp_notifier_teardown(key);
+          udp_notifier_teardown(&key);
         }
+
+      tls_cleanup_pop(tls_get_info(), 0);
     }
 
   net_unlock();
   nxsem_destroy(&waitsem);
+  leave_cancellation_point();
   return ret;
 }
 

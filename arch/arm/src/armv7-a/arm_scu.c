@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/armv7-a/arm_scu.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -26,12 +28,14 @@
 
 #include <stdint.h>
 
+#include <arch/barriers.h>
+#include <arch/irq.h>
+#include <sched/sched.h>
+
 #include "arm_internal.h"
 #include "cp15_cacheops.h"
-#include "barriers.h"
 #include "sctlr.h"
 #include "scu.h"
-#include "cp15.h"
 
 /****************************************************************************
  * Public Functions
@@ -71,7 +75,7 @@ void arm_enable_smp(int cpu)
        */
 
       cp15_invalidate_dcache_all();
-      ARM_DSB();
+      UP_DSB();
 
       /* Invalidate the L2C-310 -- Missing logic. */
 
@@ -83,7 +87,7 @@ void arm_enable_smp(int cpu)
 
       /* Initialize done, kick other cpus which waiting on __start */
 
-      ARM_SEV();
+      UP_SEV();
     }
 
   /* Actions for other CPUs */
@@ -95,11 +99,19 @@ void arm_enable_smp(int cpu)
        */
 
       cp15_dcache_op_level(0, CP15_CACHE_INVALIDATE);
-      ARM_DSB();
+      UP_DSB();
 
       /* Wait for the SCU to be enabled by the primary processor -- should
        * not be necessary.
        */
+
+      /* We need to confirm that current_task has been initialized. */
+
+      while (!current_task(this_cpu()));
+
+      /* Init idle task to percpu reg */
+
+      up_update_task(current_task(cpu));
     }
 
   /* Enable the data cache, set the SMP mode with ACTLR.SMP=1.

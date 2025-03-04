@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/net/if.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -46,7 +48,6 @@
 
 /* Interface flag bits */
 
-#define IFF_DOWN           (1 << 0)  /* Interface is down */
 #define IFF_UP             (1 << 1)  /* Interface is up */
 #define IFF_RUNNING        (1 << 2)  /* Carrier is available */
 #define IFF_IPv6           (1 << 3)  /* Configured for IPv6 packet (vs ARP or IPv4) */
@@ -197,6 +198,22 @@ struct can_ioctl_filter_s
   uint8_t  fprio; /* See CAN_MSGPRIO_* definitions */
 };
 
+/* Define an struct type that describes the CAN/LIN state */
+
+enum can_ioctl_state_e
+{
+  CAN_STATE_OPERATIONAL = 1, /* The can/lin controller is in the awake state */
+  CAN_STATE_SLEEP,           /* The can/lin controller is in the sleep state */
+  CAN_STATE_SPENDING,        /* The can/lin controller is preparing to enter sleep state */
+  CAN_STATE_BUSY             /* The can/lin bus is busy */
+};
+
+struct can_ioctl_state_s
+{
+  uintptr_t priv;             /* This is private data. */
+  enum can_ioctl_state_e state;
+};
+
 /* There are two forms of the I/F request structure.
  * One for IPv6 and one for IPv4.
  * Notice that they are (and must be) cast compatible and really different
@@ -223,6 +240,7 @@ struct lifreq
     struct mii_ioctl_data_s    lifru_mii_data;       /* MII request data */
     struct can_ioctl_data_s    lifru_can_data;       /* CAN bitrate request data */
     struct can_ioctl_filter_s  lifru_can_filter;     /* CAN filter request data */
+    struct can_ioctl_state_s   lifru_can_state;      /* CAN/LIN controller state */
   } lifr_ifru;
 };
 
@@ -276,6 +294,7 @@ struct ifreq
     struct mii_ioctl_data_s    ifru_mii_data;       /* MII request data */
     struct can_ioctl_data_s    ifru_can_data;       /* CAN bitrate request data */
     struct can_ioctl_filter_s  ifru_can_filter;     /* CAN filter request data */
+    struct can_ioctl_state_s   ifru_can_state;      /* CAN/LIN controller state */
     FAR void                  *ifru_data;           /* For use by interface */
   } ifr_ifru;
 };

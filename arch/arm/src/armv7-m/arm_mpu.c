@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/armv7-m/arm_mpu.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -28,9 +30,10 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <arch/barriers.h>
+
 #include "mpu.h"
 #include "arm_internal.h"
-#include "barriers.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -208,7 +211,7 @@ static inline uint32_t mpu_subregion_ls(size_t offset, uint8_t l2size)
  ****************************************************************************/
 
 #if defined(CONFIG_ARM_MPU_RESET) || defined(CONFIG_ARM_MPU_EARLY_RESET)
-static void mpu_reset_internal()
+static void mpu_reset_internal(void)
 {
   int region;
   int regions;
@@ -224,8 +227,7 @@ static void mpu_reset_internal()
 
   putreg32(0, MPU_CTRL);
 
-  ARM_DSB();
-  ARM_ISB();
+  UP_MB();
 }
 #endif
 
@@ -282,8 +284,7 @@ void mpu_freeregion(unsigned int region)
   putreg32(0, MPU_RASR);
   putreg32(0, MPU_RBAR);
   g_mpu_region &= ~(1 << region);
-  ARM_DSB();
-  ARM_ISB();
+  UP_MB();
 }
 
 /****************************************************************************
@@ -448,8 +449,7 @@ void mpu_control(bool enable, bool hfnmiena, bool privdefena)
 
   /* Ensure MPU setting take effects */
 
-  ARM_DSB();
-  ARM_ISB();
+  UP_MB();
 }
 
 /****************************************************************************
@@ -522,8 +522,7 @@ void mpu_modify_region(unsigned int region, uintptr_t base, size_t size,
 
   /* Ensure MPU setting take effects */
 
-  ARM_DSB();
-  ARM_ISB();
+  UP_MB();
 }
 
 /****************************************************************************
@@ -647,7 +646,7 @@ void mpu_dump_region(void)
  *
  ****************************************************************************/
 #if defined(CONFIG_ARM_MPU_RESET)
-void mpu_reset()
+void mpu_reset(void)
 {
   mpu_reset_internal();
 }
@@ -668,7 +667,7 @@ void mpu_reset()
  *
  ****************************************************************************/
 #if defined(CONFIG_ARM_MPU_EARLY_RESET)
-void mpu_early_reset()
+void mpu_early_reset(void)
 {
   mpu_reset_internal();
 }

@@ -1,8 +1,8 @@
 /****************************************************************************
  * libs/libc/machine/arm/armv8-m/gnu/arch_strcmp.S
  *
- * Copyright (c) 2012-2014 ARM Ltd
- * All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2012-2014 ARM Ltd
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -88,7 +88,7 @@
 
 	.thumb
 	.syntax unified
-def_fn strcmp
+def_fn ARCH_LIBCFUN(strcmp)
 	.cfi_sections .debug_frame
 	.cfi_startproc
 #if __ARM_FEATURE_PAC_DEFAULT
@@ -439,6 +439,6 @@ def_fn strcmp
 #endif /* __ARM_FEATURE_PAC_DEFAULT */
 	bx	lr
 	.cfi_endproc
-	.size strcmp, . - strcmp
+	.size ARCH_LIBCFUN(strcmp), . - ARCH_LIBCFUN(strcmp)
 
 #endif

@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/vfs/fs_mkdir.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -139,13 +141,7 @@ int mkdir(const char *pathname, mode_t mode)
        * count of zero.
        */
 
-      ret = inode_lock();
-      if (ret < 0)
-        {
-          errcode = -ret;
-          goto errout_with_search;
-        }
-
+      inode_lock();
       ret = inode_reserve(pathname, mode, &inode);
       inode_unlock();
 

@@ -1,17 +1,14 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_i2c_alt.c
- * STM32 I2C Hardware Layer - Device Driver
  *
- *   Copyright (C) 2011 Uros Platise. All rights reserved.
- *   Author: Uros Platise <uros.platise@isotel.eu>
- *
- * With extensions, modifications by:
- *
- *   Copyright (C) 2011-2014, 2016-2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- *   Copyright (C) 2014 Patrizio Simona. All rights reserved.
- *   Author: Patrizio Simona <psimona@ethz.ch>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2016-2017 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2014 Patrizio Simona. All rights reserved.
+ * SPDX-FileCopyrightText: 2011-2014 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2011 Uros Platise. All rights reserved.
+ * SPDX-FileContributor: Uros Platise <uros.platise@isotel.eu>
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-FileContributor: Patrizio Simona <psimona@ethz.ch>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -120,6 +117,14 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#if STM32_PCLK1_FREQUENCY < 4000000
+#  warning STM32_I2C: Peripheral clock must be at least 4 MHz to support 400 kHz operation.
+#endif
+
+#if STM32_PCLK1_FREQUENCY < 2000000
+#  error STM32_I2C: Peripheral clock must be at least 2 MHz to support 100 kHz operation.
+#endif
 
 /* Configuration ************************************************************/
 
@@ -2368,15 +2373,6 @@ out:
 struct i2c_master_s *stm32_i2cbus_initialize(int port)
 {
   struct stm32_i2c_priv_s *priv = NULL;
-
-#if STM32_PCLK1_FREQUENCY < 4000000
-#   warning STM32_I2C_INIT: Peripheral clock must be at least 4 MHz to support 400 kHz operation.
-#endif
-
-#if STM32_PCLK1_FREQUENCY < 2000000
-#   warning STM32_I2C_INIT: Peripheral clock must be at least 2 MHz to support 100 kHz operation.
-  return NULL;
-#endif
 
   /* Get I2C private structure */
 

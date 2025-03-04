@@ -1,6 +1,8 @@
 # ##############################################################################
 # drivers/can/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -18,12 +20,22 @@
 #
 # ##############################################################################
 
+set(SRCS)
+
 if(CONFIG_CAN)
-  set(SRCS can.c)
-
-  if(CONFIG_CAN_MCP2515)
-    list(APPEND SRCS mcp2515.c)
-  endif()
-
-  target_sources(drivers PRIVATE ${SRCS})
+  set(SRCS can.c can_sender.c)
 endif()
+
+if(CONFIG_CAN_MCP2515)
+  list(APPEND SRCS mcp2515.c)
+endif()
+
+if(CONFIG_CAN_KVASER)
+  list(APPEND SRCS kvaser_pci.c)
+endif()
+
+if(CONFIG_CAN_CTUCANFD)
+  list(APPEND SRCS ctucanfd_pci.c)
+endif()
+
+target_sources(drivers PRIVATE ${SRCS})

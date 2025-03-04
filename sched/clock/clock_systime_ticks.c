@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/clock/clock_systime_ticks.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -76,86 +78,45 @@
 clock_t clock_systime_ticks(void)
 {
 #ifdef CONFIG_RTC_HIRES
-  /* Do we have a high-resolution RTC that can provide us with the time? */
-
-  if (g_rtc_enabled)
+  struct timespec ts =
     {
-      struct timespec ts;
+      0
+    };
 
-      /* Get the time from the platform specific hardware */
+  clock_systime_timespec(&ts);
+  return clock_time2ticks(&ts);
+#elif defined(CONFIG_ALARM_ARCH) || \
+      defined(CONFIG_TIMER_ARCH) || \
+      defined(CONFIG_SCHED_TICKLESS)
+  clock_t ticks = 0;
 
-      if (clock_systime_timespec(&ts) == OK)
-        {
-          /* Convert to a 64-bit value in microseconds,
-           * then in clock tick units.
-           */
-
-          return timespec_to_tick(&ts);
-        }
-      else
-        {
-          return 0;
-        }
-    }
-  else
-#endif
-    {
-      /* In tickless mode, all timing is controlled by platform-specific
-       * code.  Let the platform timer do the work.
-       */
-
-#if defined(CONFIG_SCHED_TICKLESS_TICK_ARGUMENT)
-      clock_t ticks;
-      if (up_timer_gettick(&ticks) == OK)
-        {
-          return ticks;
-        }
-      else
-        {
-          return 0;
-        }
-#elif defined(CONFIG_SCHED_TICKLESS)
-      struct timespec ts;
-      if (up_timer_gettime(&ts) == OK)
-        {
-          return timespec_to_tick(&ts);
-        }
-      else
-        {
-          return 0;
-        }
+  up_timer_gettick(&ticks);
+  return ticks;
 #elif defined(CONFIG_SYSTEM_TIME64)
+  clock_t sample;
+  clock_t verify;
 
-      clock_t sample;
-      clock_t verify;
+  /* 64-bit accesses are not atomic on most architectures.  The following
+   * loop samples the 64-bit timer twice and loops in the rare event that
+   * there was 32-bit rollover between samples.
+   *
+   * If there is no 32-bit rollover, then:
+   *
+   *  - The MS 32-bits of each sample will be the same, and
+   *  - The LS 32-bits of the second sample will be greater than or equal
+   *    to the LS 32-bits for the first sample.
+   */
 
-      /* 64-bit accesses are not atomic on most architectures.  The following
-       * loop samples the 64-bit timer twice and loops in the rare event that
-       * there was 32-bit rollover between samples.
-       *
-       * If there is no 32-bit rollover, then:
-       *
-       *  - The MS 32-bits of each sample will be the same, and
-       *  - The LS 32-bits of the second sample will be greater than or equal
-       *    to the LS 32-bits for the first sample.
-       */
-
-      do
-        {
-          verify = g_system_ticks;
-          sample = g_system_ticks;
-        }
-      while ((sample &  TIMER_MASK32)  < (verify &  TIMER_MASK32) ||
-             (sample & ~TIMER_MASK32) != (verify & ~TIMER_MASK32));
-
-      return sample;
-
-#else /* CONFIG_SYSTEM_TIME64 */
-
-      /* Return the current system time */
-
-      return g_system_ticks;
-
-#endif /* CONFIG_SYSTEM_TIME64 */
+  do
+    {
+      verify = g_system_ticks;
+      sample = g_system_ticks;
     }
+  while ((sample &  TIMER_MASK32)  < (verify &  TIMER_MASK32) ||
+         (sample & ~TIMER_MASK32) != (verify & ~TIMER_MASK32));
+
+  return sample;
+#else
+  return g_system_ticks;
+#endif
 }

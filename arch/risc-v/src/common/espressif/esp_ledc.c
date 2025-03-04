@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/common/espressif/esp_ledc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -822,9 +824,14 @@ static int ledc_set_timer_div(ledc_timer_t timer_num,
               pwmerr("Timer clock conflict. Already is %d but attempt to %d",
                      p_ledc_obj->glb_clk,
                      glb_clk);
-              return -EINVAL;
             }
         }
+    }
+
+  if (timer_num == LEDC_TIMER_MAX - 1 &&
+      p_ledc_obj->glb_clk_is_acquired[timer_num - 1])
+    {
+      return -EINVAL;
     }
 
   p_ledc_obj->glb_clk_is_acquired[timer_num] = true;

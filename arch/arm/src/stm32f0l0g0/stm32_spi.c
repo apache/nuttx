@@ -1,6 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32f0l0g0/stm32_spi.c
- * copied from arch/arm/src/stm32
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

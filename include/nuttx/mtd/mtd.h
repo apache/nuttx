@@ -1,6 +1,7 @@
 /****************************************************************************
  * include/nuttx/mtd/mtd.h
- * Memory Technology Device (MTD) interface
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -490,6 +491,19 @@ FAR struct mtd_dev_s *mx35_initialize(FAR struct spi_dev_s *dev);
 FAR struct mtd_dev_s *rammtd_initialize(FAR uint8_t *start, size_t size);
 
 /****************************************************************************
+ * Name: rammtd_uninitialize
+ *
+ * Description:
+ *   Free the resources associated with a RAM MTD device instance.
+ *
+ * Input Parameters:
+ *   dev - Pointer to the MTD device instance to be uninitialized.
+ *
+ ****************************************************************************/
+
+void rammtd_uninitialize(FAR struct mtd_dev_s *dev);
+
+/****************************************************************************
  * Name: ramtron_initialize
  *
  * Description:
@@ -577,6 +591,17 @@ FAR struct mtd_dev_s *gd25_initialize(FAR struct spi_dev_s *dev,
                                       uint32_t spi_devid);
 
 /****************************************************************************
+ * Name: gd55_initialize
+ *
+ * Description:
+ *   Initializes the driver for QSPI-based GD55 FLASH
+ *
+ ****************************************************************************/
+
+FAR struct mtd_dev_s *gd55_initialize(FAR struct qspi_dev_s *dev,
+                                      bool unprotect);
+
+/****************************************************************************
  * Name: gd5f_initialize
  *
  * Description:
@@ -657,7 +682,7 @@ FAR struct mtd_dev_s *w25qxxxjv_initialize(FAR struct qspi_dev_s *qspi,
  *
  ****************************************************************************/
 
-FAR struct mtd_dev_s *filemtd_initialize(FAR const char *path, size_t offset,
+FAR struct mtd_dev_s *filemtd_initialize(FAR const char *path, off_t offset,
                                          int16_t sectsize,
                                          int32_t erasesize);
 
@@ -778,6 +803,26 @@ int dhara_initialize(int minor, FAR struct mtd_dev_s *mtd);
 #ifdef CONFIG_MTD_DHARA
 int dhara_initialize_by_path(FAR const char *path,
                              FAR struct mtd_dev_s *mtd);
+#endif
+
+/****************************************************************************
+ * Name: register_cfi_driver
+ *
+ * Description:
+ *   Initialize and register a cfi nor flash.
+ *
+ * Input Parameters:
+ *   addr_base - The base(start) address of the device.
+ *   addr_end  - The end address of the device.
+ *   bankwidth - The bankwidth(port width) of the device.
+ *   id        - The device id used for register name.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MTD_CFI
+int register_cfi_driver(volatile uintptr_t addr_base,
+                        volatile uintptr_t addr_end, uint32_t bankwidth,
+                        int id);
 #endif
 
 #undef EXTERN

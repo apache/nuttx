@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/pthread/pthread_mutexdestroy.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -66,12 +68,6 @@ int pthread_mutex_destroy(FAR pthread_mutex_t *mutex)
   if (mutex != NULL)
     {
       pid_t pid;
-
-      /* Make sure the semaphore is stable while we make the following
-       * checks.
-       */
-
-      sched_lock();
 
       pid = mutex_get_holder(&mutex->mutex);
 
@@ -139,8 +135,6 @@ int pthread_mutex_destroy(FAR pthread_mutex_t *mutex)
           status = mutex_destroy(&mutex->mutex);
           ret = ((status < 0) ? -status : OK);
         }
-
-      sched_unlock();
     }
 
   sinfo("Returning %d\n", ret);

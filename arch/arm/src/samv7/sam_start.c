@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/samv7/sam_start.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -30,10 +32,10 @@
 
 #include <nuttx/cache.h>
 #include <nuttx/init.h>
+#include <arch/barriers.h>
 #include <arch/board/board.h>
 
 #include "arm_internal.h"
-#include "barriers.h"
 #include "nvic.h"
 
 #include "sam_clockconfig.h"
@@ -101,8 +103,7 @@ static inline void sam_tcmenable(void)
 {
   uint32_t regval;
 
-  ARM_DSB();
-  ARM_ISB();
+  UP_MB();
 
   /* Assure that GPNVM 7-8 settings are as expected */
 #warning Missing logic
@@ -127,8 +128,7 @@ static inline void sam_tcmenable(void)
 #endif
   putreg32(regval, NVIC_DTCMCR);
 
-  ARM_DSB();
-  ARM_ISB();
+  UP_MB();
 
 #ifdef CONFIG_ARMV7M_ITCM
   /* Copy TCM code from flash to ITCM */

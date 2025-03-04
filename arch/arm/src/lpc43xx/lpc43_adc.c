@@ -1,19 +1,12 @@
 /****************************************************************************
  * arch/arm/src/lpc43xx/lpc43_adc.c
  *
- *   Copyright(C) 2012, 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * Ported from the LPC17 version:
- *
- *   Copyright(C) 2011 Li Zhuoyi. All rights reserved.
- *   Copyright(C) 2016 Gregory Nutt. All rights reserved.
- *   Author: Li Zhuoyi <lzyy.cn@gmail.com>
- *           Gregory Nutt
- *
- * This file is a part of NuttX:
- *
- *   Copyright(C) 2010-2012, 2015 Gregory Nutt. All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2015,2016 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2010-2012 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2011 Li Zhuoyi. All rights reserved.
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-FileContributor: Li Zhuoyi <lzyy.cn@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/procfs/fs_skeleton.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -44,6 +46,7 @@
 #include <nuttx/fs/procfs.h>
 
 #include <arch/irq.h>
+#include "fs_heap.h"
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_FS_PROCFS)
 
@@ -174,7 +177,7 @@ static int skel_open(FAR struct file *filep, FAR const char *relpath,
 
   /* Allocate the open file structure */
 
-  priv = kmm_zalloc(sizeof(struct skel_file_s));
+  priv = fs_heap_zalloc(sizeof(struct skel_file_s));
   if (!priv)
     {
       ferr("ERROR: Failed to allocate file attributes\n");
@@ -206,7 +209,7 @@ static int skel_close(FAR struct file *filep)
 
   /* Release the file attributes structure */
 
-  kmm_free(priv);
+  fs_heap_free(priv);
   filep->f_priv = NULL;
   return OK;
 }
@@ -313,7 +316,7 @@ static int skel_dup(FAR const struct file *oldp, FAR struct file *newp)
 
   /* Allocate a new container to hold the task and attribute selection */
 
-  newpriv = kmm_zalloc(sizeof(struct skel_file_s));
+  newpriv = fs_heap_zalloc(sizeof(struct skel_file_s));
   if (!newpriv)
     {
       ferr("ERROR: Failed to allocate file attributes\n");
@@ -351,7 +354,7 @@ static int skel_opendir(FAR const char *relpath,
    */
 
   level1 = (FAR struct skel_level1_s *)
-     kmm_zalloc(sizeof(struct skel_level1_s));
+     fs_heap_zalloc(sizeof(struct skel_level1_s));
 
   if (!level1)
     {
@@ -381,7 +384,7 @@ static int skel_opendir(FAR const char *relpath,
 static int skel_closedir(FAR struct fs_dirent_s *dir)
 {
   DEBUGASSERT(dir);
-  kmm_free(dir);
+  fs_heap_free(dir);
   return OK;
 }
 

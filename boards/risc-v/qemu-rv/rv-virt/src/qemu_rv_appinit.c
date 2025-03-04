@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/risc-v/qemu-rv/rv-virt/src/qemu_rv_appinit.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -40,7 +42,7 @@
 #include "qemu_rv_memorymap.h"
 #include "qemu_rv_rptun.h"
 
-#include "riscv_internal.h"
+#include "riscv_sbi.h"
 #include "romfs.h"
 
 #ifdef CONFIG_USERLED
@@ -129,7 +131,7 @@ int board_app_initialize(uintptr_t arg)
 #endif
 
 #ifdef CONFIG_FS_TMPFS
-  mount(NULL, "/tmp", "tmpfs", 0, NULL);
+  mount(NULL, CONFIG_LIBC_TMPDIR, "tmpfs", 0, NULL);
 #endif
 
 #endif
@@ -142,6 +144,16 @@ int board_app_initialize(uintptr_t arg)
 
 #ifdef CONFIG_RPTUN
   qemu_rptun_init();
+#endif
+
+#ifdef CONFIG_USERLED
+  /* Register the LED driver */
+
+  int ret = userled_lower_initialize("/dev/userleds");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
+    }
 #endif
 
   return OK;

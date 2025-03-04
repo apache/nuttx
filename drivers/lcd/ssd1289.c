@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/lcd/ssd1289.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -279,13 +281,6 @@ static void ssd1289_setcursor(FAR struct ssd1289_lcd_s *lcd,
 
 /* LCD Data Transfer Methods */
 
-#if 0 /* Sometimes useful */
-static void ssd1289_dumprun(FAR const char *msg, FAR uint16_t *run,
-                            size_t npixels);
-#else
-#  define ssd1289_dumprun(m,r,n)
-#endif
-
 #ifdef CONFIG_DEBUG_LCD
 static void ssd1289_showrun(FAR struct ssd1289_dev_s *priv, fb_coord_t row,
                             fb_coord_t col, size_t npixels, bool put);
@@ -480,39 +475,6 @@ static void ssd1289_setcursor(FAR struct ssd1289_lcd_s *lcd,
   ssd1289_putreg(lcd, SSD1289_YADDR, column);    /* 0-319 */
 #endif
 }
-
-/****************************************************************************
- * Name:  ssd1289_dumprun
- *
- * Description:
- *   Dump the contexts of the run buffer:
- *
- *  run     - The buffer in containing the run read to be dumped
- *  npixels - The number of pixels to dump
- *
- ****************************************************************************/
-
-#if 0 /* Sometimes useful */
-static void ssd1289_dumprun(FAR const char *msg,
-                            FAR uint16_t *run, size_t npixels)
-{
-  int i;
-  int j;
-
-  syslog(LOG_INFO, "\n%s:\n", msg);
-  for (i = 0; i < npixels; i += 16)
-    {
-      up_putc(' ');
-      syslog(LOG_INFO, " ");
-      for (j = 0; j < 16; j++)
-        {
-          syslog(LOG_INFO, " %04x", *run++);
-        }
-
-      up_putc('\n');
-    }
-}
-#endif
 
 /****************************************************************************
  * Name:  ssd1289_showrun

@@ -1,11 +1,26 @@
 /************************************************************************************************
  * libs/libc/misc/lib_crc32.c
  *
- * This file is a part of NuttX:
+ * SPDX-License-Identifier: Apache-2.0
  *
- *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * The logic in this file was developed by Gary S. Brown:
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ***********************************************************************************************/
+
+/* The logic in this file was developed by Gary S. Brown:
  *
  *   COPYRIGHT (C) 1986 Gary S. Brown.  You may use this program, or code or tables
  *   extracted from it, as desired without restriction.
@@ -52,6 +67,9 @@
  * Private Data
  ************************************************************************************************/
 
+#ifdef CONFIG_LIBC_CRC32_SLOW
+#  define LIBC_CRC32_POLY 0xedb88320
+#else
 static const uint32_t crc32_tab[] =
 {
   0x00000000, 0x77073096, 0xee0e612c, 0x990951ba, 0x076dc419, 0x706af48f, 0xe963a535, 0x9e6495a3,
@@ -87,6 +105,7 @@ static const uint32_t crc32_tab[] =
   0xbdbdf21c, 0xcabac28a, 0x53b39330, 0x24b4a3a6, 0xbad03605, 0xcdd70693, 0x54de5729, 0x23d967bf,
   0xb3667a2e, 0xc4614ab8, 0x5d681b02, 0x2a6f2b94, 0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d
 };
+#endif
 
 /************************************************************************************************
  * Public Functions
@@ -103,11 +122,29 @@ static const uint32_t crc32_tab[] =
 uint32_t crc32part(FAR const uint8_t *src, size_t len, uint32_t crc32val)
 {
   size_t i;
-
+#ifdef CONFIG_LIBC_CRC32_SLOW
+  for (i = 0; i < len; i++)
+    {
+      size_t j;
+      crc32val ^= src[i];
+      for (j = 0; j < 8; j++)
+        {
+          if (crc32val & 1)
+            {
+              crc32val = (crc32val >> 1) ^ LIBC_CRC32_POLY;
+            }
+          else
+            {
+              crc32val = crc32val >> 1;
+            }
+        }
+    }
+#else
   for (i = 0; i < len; i++)
     {
       crc32val = crc32_tab[(crc32val & 0xff) ^ src[i]] ^ (crc32val >> 8);
     }
+#endif
 
   return crc32val;
 }

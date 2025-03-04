@@ -1,6 +1,8 @@
 ############################################################################
 # arch/arm/src/rp2040/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -35,12 +37,15 @@ CHIP_CSRCS += rp2040_xosc.c
 CHIP_CSRCS += rp2040_pll.c
 
 ifeq ($(CONFIG_SMP),y)
-CHIP_CSRCS += rp2040_cpuindex.c
 CHIP_CSRCS += rp2040_cpustart.c
-CHIP_CSRCS += rp2040_cpupause.c
+CHIP_CSRCS += rp2040_smpcall.c
 CHIP_CSRCS += rp2040_cpuidlestack.c
 CHIP_CSRCS += rp2040_testset.c
 CMN_ASRCS  := $(filter-out arm_testset.S,$(CMN_ASRCS))
+endif
+
+ifeq ($(CONFIG_ARCH_HAVE_MULTICPU),y)
+CHIP_CSRCS += rp2040_cpuindex.c
 endif
 
 ifeq ($(CONFIG_RP2040_DMAC),y)

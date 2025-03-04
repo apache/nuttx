@@ -1,6 +1,8 @@
 ############################################################################
 # boards/xtensa/esp32s2/franzininho-wifi/src/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -17,8 +19,6 @@
 # under the License.
 #
 ############################################################################
-
-include $(TOPDIR)/Make.defs
 
 CSRCS = esp32s2_boot.c esp32s2_bringup.c
 

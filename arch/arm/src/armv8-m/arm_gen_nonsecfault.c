@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/armv8-m/arm_gen_nonsecfault.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -47,6 +49,17 @@
 #define OFFSET_XPSR            (7 * 4) /* xPSR */
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static uint32_t g_psp_ns;
+static uint32_t g_msp_ns;
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
  * Name: arm_should_gen_nonsecurefault
  *
  * Description:
@@ -85,7 +98,7 @@ bool weak_function arm_should_gen_nonsecurefault(void)
 
 int arm_gen_nonsecurefault(int irq, uint32_t *regs)
 {
-  uint32_t nsp;
+  uint32_t sp_ns;
 
   if (!arm_should_gen_nonsecurefault())
     {
@@ -99,38 +112,51 @@ int arm_gen_nonsecurefault(int irq, uint32_t *regs)
       return 0;
     }
 
-  /* busfault are forward to REE ? */
-
-  if (getreg32(NVIC_AIRCR) & NVIC_AIRCR_BFHFNMINS)
+  if (getreg32(SAU_SFSR) == 0)
     {
-      return 0;
+      /* busfault are forward to REE ? */
+
+      if (getreg32(NVIC_AIRCR) & NVIC_AIRCR_BFHFNMINS)
+        {
+          return 0;
+        }
+
+      /* Redict busfault to REE */
+
+      up_secure_irq(NVIC_IRQ_BUSFAULT, false);
     }
-
-  /* Redict busfault to REE */
-
-  up_secure_irq(NVIC_IRQ_BUSFAULT, false);
 
   /* Get non-secure SP */
 
-  __asm__ __volatile__ ("mrs %0, msp_ns" : "=r" (nsp));
+  if (regs[REG_EXC_RETURN] & EXC_RETURN_THREAD_MODE)
+    {
+      __asm__ __volatile__ ("mrs %0, psp_ns" : "=r" (g_psp_ns));
+      sp_ns = g_psp_ns;
+    }
+  else
+    {
+      __asm__ __volatile__ ("mrs %0, msp_ns" : "=r" (g_msp_ns));
+      sp_ns = g_msp_ns;
+    }
 
   _alert("Dump REE registers:\n");
   _alert("R0: %08" PRIx32 " R1: %08" PRIx32
          " R2: %08" PRIx32 "  R3: %08" PRIx32 "\n",
-         getreg32(nsp + OFFSET_R0), getreg32(nsp + OFFSET_R1),
-         getreg32(nsp + OFFSET_R2), getreg32(nsp + OFFSET_R3));
+         getreg32(sp_ns + OFFSET_R0), getreg32(sp_ns + OFFSET_R1),
+         getreg32(sp_ns + OFFSET_R2), getreg32(sp_ns + OFFSET_R3));
   _alert("IP: %08" PRIx32 " SP: %08" PRIx32
           " LR: %08" PRIx32 "  PC: %08" PRIx32 "\n",
-         getreg32(nsp + OFFSET_R12), nsp,
-         getreg32(nsp + OFFSET_R14), getreg32(nsp + OFFSET_R15));
+         getreg32(sp_ns + OFFSET_R12), sp_ns,
+         getreg32(sp_ns + OFFSET_R14), getreg32(sp_ns + OFFSET_R15));
+
   syslog_flush();
 
   /* Force set return ReturnAddress to 0, then non-secure cpu will crash.
    * Also, the ReturnAddress is very important, so move it to R12.
    */
 
-  putreg32(getreg32(nsp + OFFSET_R15), nsp + OFFSET_R12);
-  putreg32(0, nsp + OFFSET_R15);
+  putreg32(getreg32(sp_ns + OFFSET_R15), sp_ns + OFFSET_R12);
+  putreg32(0, sp_ns + OFFSET_R15);
 
   return 1;
 }

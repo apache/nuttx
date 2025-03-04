@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/esp32c3-legacy/esp32c3_ice40.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -52,8 +54,6 @@
 #include "esp32c3_ice40.h"
 
 #include "esp32c3_gpio.h"
-
-#include <nuttx/spi/ice40.h>
 
 /****************************************************************************
  * Private Function Prototypes

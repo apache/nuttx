@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/net/lib_getifaddrs.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -22,6 +24,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <debug.h>
 #include <errno.h>
 #include <ifaddrs.h>
 #include <net/if.h>
@@ -54,6 +57,83 @@ struct myifaddrs
   struct sockaddr_storage dstaddr;
   struct sockaddr         hwaddr;
 };
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: getmutil_ipv6addr
+ *
+ * Input Parameters:
+ *   fd     - socket fd of ioctl.
+ *   req    - lifreq struct for ioctl request.
+ *   ifaddr - the ifaddrs struct to be filled.
+ *
+ * Returned Value:
+ *   On success, getmutil_ipv6addr() returns newest pointer of the linked
+ *   list; on error, NULL is returned.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NETDEV_MAX_IPv6_ADDR
+static FAR struct myifaddrs *getmutil_ipv6addr(int fd,
+                                               FAR struct lifreq *req,
+                                               FAR struct myifaddrs *ifaddr)
+{
+  FAR struct sockaddr_in6 *ipv6addr;
+  int index;
+
+  if (req == NULL || ifaddr == NULL)
+    {
+      return NULL;
+    }
+
+  /* eth0:0 is the second ipaddr */
+
+  for (index = 0; index < CONFIG_NETDEV_MAX_IPv6_ADDR - 1; index++)
+    {
+      int len = snprintf(req->lifr_name, sizeof(req->lifr_name),
+                         "%s:%d", ifaddr->name, index);
+
+      if (len < 0 || len >= sizeof(req->lifr_name))
+        {
+          nwarn("ifname %s:%2d error or too long\n", ifaddr->name, index);
+          return ifaddr;
+        }
+
+      if (ioctl(fd, SIOCGLIFADDR, (unsigned long)req) < 0)
+        {
+          continue;
+        }
+
+      ipv6addr = (FAR struct sockaddr_in6 *)&(req->lifr_addr);
+      if (IN6_IS_ADDR_UNSPECIFIED(&ipv6addr->sin6_addr))
+        {
+          continue;
+        }
+
+      ifaddr->addrs.ifa_next = lib_zalloc(sizeof(*ifaddr));
+      if (ifaddr->addrs.ifa_next == NULL)
+        {
+          return NULL;
+        }
+
+      memcpy(ifaddr->addrs.ifa_next, ifaddr, sizeof(struct myifaddrs));
+      ifaddr = (FAR struct myifaddrs *)ifaddr->addrs.ifa_next;
+      memcpy(&ifaddr->addr, &(req->lifr_addr), sizeof(req->lifr_addr));
+      ifaddr->addrs.ifa_addr = (FAR struct sockaddr *)&ifaddr->addr;
+      ifaddr->addrs.ifa_netmask = (FAR struct sockaddr *)&ifaddr->netmask;
+      ifaddr->addrs.ifa_dstaddr = (FAR struct sockaddr *)&ifaddr->dstaddr;
+      ifaddr->addrs.ifa_broadaddr =
+            (FAR struct sockaddr *)&ifaddr->broadaddr;
+      ifaddr->addrs.ifa_data = (FAR struct sockaddr *)&ifaddr->hwaddr;
+    }
+
+  ifaddr->addrs.ifa_next = NULL;
+  return ifaddr;
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -265,6 +345,13 @@ int getifaddrs(FAR struct ifaddrs **addrs)
               memcpy(&myaddrs->hwaddr,
                      &req.lifr_hwaddr, sizeof(req.lifr_hwaddr));
             }
+
+#  ifdef CONFIG_NETDEV_MAX_IPv6_ADDR
+          if (getmutil_ipv6addr(sockfd, &req, myaddrs) == NULL)
+            {
+              goto err;
+            }
+#  endif
         }
 #endif
     }

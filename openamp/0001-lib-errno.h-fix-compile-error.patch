@@ -1,0 +1,28 @@
+From b7eaa824f0f660825a7c2d601940d59141fb4f83 Mon Sep 17 00:00:00 2001
+From: wangyongrong <wangyongrong@xiaomi.com>
+Date: Tue, 2 Jul 2024 10:27:44 +0800
+Subject: [PATCH 1/5] lib/errno.h: fix compile error
+
+lib/errno.h: delete defined(__arm__) for use GCC compile
+
+Signed-off-by: wangyongrong <wangyongrong@xiaomi.com>
+---
+ lib/errno.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/lib/errno.h libmetal/lib/errno.h
+index 2fc4f77..e84a2bc 100644
+--- a/lib/errno.h
++++ libmetal/lib/errno.h
+@@ -14,7 +14,7 @@
+ 
+ #if defined(__ICCARM__)
+ # include <metal/compiler/iar/errno.h>
+-#elif defined(__CC_ARM) || defined(__arm__)
++#elif defined(__CC_ARM)
+ # include <metal/compiler/armcc/errno.h>
+ #else
+ # include <errno.h>
+-- 
+2.34.1
+

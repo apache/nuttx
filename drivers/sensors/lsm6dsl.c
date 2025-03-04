@@ -1,17 +1,13 @@
 /****************************************************************************
  * drivers/sensors/lsm6dsl.c
  *
- *   Copyright (C) 2018 Inc. All rights reserved.
- *   Author: Ben vd Veen <disruptivesolutionsnl@gmail.com>
- *   Alias: DisruptiveNL
- *
- * Based on:
- *
- *   Copyright (C) 2016 Omni Hoverboards Inc. All rights reserved.
- *   Author: Paul Alexander Patience <paul-a.patience@polymtl.ca>
- *
- *   Copyright (C) 2016, 2019 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2018 Inc. All rights reserved.
+ * SPDX-FileCopyrightText: 2016 Omni Hoverboards Inc. All rights reserved.
+ * SPDX-FileCopyrightText: 2016, 2019 Gregory Nutt. All rights reserved.
+ * SPDX-FileContributor: Ben vd Veen <disruptivesolutionsnl@gmail.com>
+ * SPDX-FileContributor: Paul Alexander Patience <paul-a.patience@polymtl.ca>
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

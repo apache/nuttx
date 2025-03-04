@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/armv7-r/gic.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -608,12 +610,12 @@
 
 #ifdef CONFIG_ARCH_TRUSTZONE_SECURE
 #  define GIC_SMP_CPUSTART       GIC_IRQ_SGI9
-#  define GIC_SMP_CPUPAUSE       GIC_IRQ_SGI10
-#  define GIC_SMP_CPUCALL        GIC_IRQ_SGI11
+#  define GIC_SMP_CALL           GIC_IRQ_SGI10
+#  define GIC_SMP_SCHED          GIC_IRQ_SGI11
 #else
 #  define GIC_SMP_CPUSTART       GIC_IRQ_SGI1
-#  define GIC_SMP_CPUPAUSE       GIC_IRQ_SGI2
-#  define GIC_SMP_CPUCALL        GIC_IRQ_SGI3
+#  define GIC_SMP_CALL           GIC_IRQ_SGI2
+#  define GIC_SMP_SCHED          GIC_IRQ_SGI3
 #endif
 
 /****************************************************************************
@@ -694,7 +696,7 @@ static inline void arm_cpu_sgi(int sgi, unsigned int cpuset)
        * SMP scenario.
        */
 
-      regval |= GIC_ICDSGIR_NSATT_GRP1;
+      regval |= GIC_ICDSGIR_NSATT;
     }
 
   putreg32(regval, GIC_ICDSGIR);
@@ -804,14 +806,14 @@ int arm_start_handler(int irq, void *context, void *arg);
 #endif
 
 /****************************************************************************
- * Name: arm_pause_handler
+ * Name: arm_smp_sched_handler
  *
  * Description:
- *   This is the handler for SGI2.  It performs the following operations:
+ *   This is the handler for sched.
  *
  *   1. It saves the current task state at the head of the current assigned
  *      task list.
- *   2. It waits on a spinlock, then
+ *   2. It porcess g_delivertasks
  *   3. Returns from interrupt, restoring the state of the new task at the
  *      head of the ready to run list.
  *
@@ -824,7 +826,7 @@ int arm_start_handler(int irq, void *context, void *arg);
  ****************************************************************************/
 
 #ifdef CONFIG_SMP
-int arm_pause_handler(int irq, void *context, void *arg);
+int arm_smp_sched_handler(int irq, void *context, void *arg);
 #endif
 
 /****************************************************************************

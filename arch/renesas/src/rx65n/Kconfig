@@ -149,7 +149,7 @@ config RX65N_CMT0
 config RX65N_CMT1
 	bool "CMT1"
 	default n
-	depends on BOARD_CRASHDUMP && RX65N_SBRAM && RX65N_SAVE_CRASHDUMP
+	depends on BOARD_CRASHDUMP_CUSTOM && RX65N_SBRAM && RX65N_SAVE_CRASHDUMP
 
 config RX65N_CMT2
 	bool "CMT2"
@@ -170,7 +170,7 @@ config RX65N_IRQ_GROUP
 config RX65N_SBRAM
 	bool "SBRAM"
 	default n
-	depends on BOARD_CRASHDUMP
+	depends on BOARD_CRASHDUMP_CUSTOM
 
 config RX65N_SAVE_CRASHDUMP
 	bool "SBRAM Save Crashdump"
@@ -541,7 +541,7 @@ config RX65N_CMT0
 config RX65N_CMT1
 	bool "CMT1"
 	default n
-	depends on BOARD_CRASHDUMP && RX65N_SBRAM && RX65N_SAVE_CRASHDUMP
+	depends on BOARD_CRASHDUMP_CUSTOM && RX65N_SBRAM && RX65N_SAVE_CRASHDUMP
 
 config RX65N_CMT2
 	bool "CMT2"
@@ -562,7 +562,7 @@ config RX65N_IRQ_GROUP
 config RX65N_SBRAM
 	bool "SBRAM"
 	default n
-	depends on BOARD_CRASHDUMP
+	depends on BOARD_CRASHDUMP_CUSTOM
 
 config RX65N_SAVE_CRASHDUMP
 	bool "SBRAM Save Crashdump"

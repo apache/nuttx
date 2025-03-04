@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/x86_64/src/intel64/intel64_map_region.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -33,19 +35,19 @@
 #include "pgalloc.h"
 
 /****************************************************************************
- * Public Functions
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_map_region
+ * Name: up_map_region_higmem
  *
  * Description:
- *   Map a memory region as 1:1 by MMU
+ *   Map a memory region as 1:1 by MMU for high memory region (>4Gb)
  *
  ****************************************************************************/
 
 #ifdef CONFIG_MM_PGALLOC
-int up_map_region(void *base, size_t size, int flags)
+static int up_map_region_highmem(void *base, size_t size, int flags)
 {
   uintptr_t bb;
   int       ptlevel;
@@ -89,7 +91,7 @@ int up_map_region(void *base, size_t size, int flags)
 
               /* Map the page table to the prior level */
 
-              mmu_ln_setentry(ptlevel, ptprev, paddr, vaddr, 0);
+              mmu_ln_setentry(ptlevel, ptprev, paddr, vaddr, X86_PAGE_WR);
 
               /* This is then used to map the final level */
 
@@ -113,7 +115,20 @@ int up_map_region(void *base, size_t size, int flags)
 
   return 0;
 }
-#else
+#endif
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: up_map_region
+ *
+ * Description:
+ *   Map a memory region as 1:1 by MMU
+ *
+ ****************************************************************************/
+
 int up_map_region(void *base, size_t size, int flags)
 {
   uint64_t bb;
@@ -133,9 +148,13 @@ int up_map_region(void *base, size_t size, int flags)
 
   if (bb > 0xffffffff)
     {
-      /* More than 4GB can't be mapped with this implementtion */
+#ifdef CONFIG_MM_PGALLOC
+      return up_map_region_highmem(base, size, flags);
+#else
+      /* More than 4GB can't be mapped without CONFIG_MM_PGALLOC */
 
       PANIC();
+#endif
     }
 
   curr = bb;
@@ -149,4 +168,3 @@ int up_map_region(void *base, size_t size, int flags)
 
   return 0;
 }
-#endif

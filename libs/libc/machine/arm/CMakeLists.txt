@@ -1,6 +1,8 @@
 # ##############################################################################
 # libs/libc/machine/arm/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -42,9 +44,11 @@ elseif(CONFIG_ARCH_ARMV7M) # All ARMv7-M
   add_subdirectory(armv7-m)
 elseif(CONFIG_ARCH_ARMV8M) # All ARMv8-M
   add_subdirectory(armv8-m)
+elseif(CONFIG_ARCH_ARMV8R) # All ARMv8-R
+  add_subdirectory(armv8-r)
 endif()
 
-if(NOT CONFIG_LIBSUPCXX)
+if(NOT CONFIG_LIBSUPCXX_TOOLCHAIN)
   list(APPEND SRCS aeabi_atexit.c)
 endif()
 
@@ -58,6 +62,10 @@ if(CONFIG_ARCH_SETJMP_H)
   elseif(CONFIG_ARCH_TOOLCHAIN_GNU)
     list(APPEND SRCS gnu/arch_setjmp.S)
   endif()
+endif()
+
+if(CONFIG_PROFILE_MINI)
+  list(APPEND SRCS gnu/mcount.S)
 endif()
 
 target_sources(c PRIVATE ${SRCS})

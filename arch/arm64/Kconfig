@@ -12,7 +12,7 @@ choice
 
 config ARM64_TOOLCHAIN_GNU_EABI
 	bool "Generic GNU EABI toolchain"
-	select ARCH_TOOLCHAIN_GNU
+	select ARCH_TOOLCHAIN_GCC
 	---help---
 		This option should work for any modern GNU toolchain (GCC 4.5 or newer)
 
@@ -50,6 +50,7 @@ config ARCH_CHIP_RK3399
 config ARCH_CHIP_QEMU
 	bool "QEMU virt platform (ARMv8a)"
 	select ARCH_HAVE_ADDRENV
+	select ARCH_HAVE_ELF_EXECUTABLE
 	select ARCH_HAVE_IRQTRIGGER
 	select ARCH_NEED_ADDRENV_MAPPING
 	select ARCH_HAVE_POWEROFF
@@ -65,6 +66,7 @@ config ARCH_CHIP_GOLDFISH
 	select ARCH_HAVE_MULTICPU
 	select ARMV8A_HAVE_GICv2
 	select ARCH_HAVE_ADDRENV
+	select ARCH_HAVE_ELF_EXECUTABLE
 	select ARCH_HAVE_IRQTRIGGER
 	select ARCH_HAVE_POWEROFF
 	select ARCH_HAVE_RESET
@@ -108,7 +110,20 @@ config ARCH_CHIP_ZYNQ_MPSOC
 	select ARM64_HAVE_PSCI
 	---help---
 		XilinX ZYNQ MPSOC
-		
+
+config ARCH_CHIP_BCM2711
+	bool "Broadcom BCM2711"
+	select ARCH_CORTEX_A72
+	select ARCH_HAVE_ADDRENV
+	select ARCH_HAVE_RESET
+	select ARCH_HAVE_IRQTRIGGER
+	select ARCH_NEED_ADDRENV_MAPPING
+	select ARCH_HAVE_MULTICPU
+	select ARCH_USE_MMU # Required for up_testset
+	select ARMV8A_HAVE_GICv2
+	---help---
+		Broadcom BCM2711 quad-core ARM Cortex A72
+
 config ARCH_CHIP_ARM64_CUSTOM
 	bool "Custom ARM64 chip"
 	select ARCH_CHIP_CUSTOM
@@ -127,6 +142,22 @@ config ARCH_ARMV8R
 	default n
 	select ARCH_SINGLE_SECURITY_STATE
 
+config ARCH_AS_HAS_ARMV8_5
+	bool "Support ARMv8.5 assembly"
+	depends on ARCH_ARMV8A
+	---help---
+		Support ARMv8.5 assembly instruction set
+
+menu "ARMv8.5 architectural features"
+	depends on ARCH_AS_HAS_ARMV8_5
+
+config ARM64_MTE
+	bool "Memory Tagging Extension support"
+	select ARM64_TBI
+	default y
+
+endmenu # "ARMv8.5 architectural features"
+
 config ARCH_SINGLE_SECURITY_STATE
 	bool "ARM Single Security State Support"
 	default n
@@ -136,6 +167,21 @@ config ARCH_SINGLE_SECURITY_STATE
 		GIC or other ARM architecture feature will with different
 		configure
 
+config ARM64_TBI
+	bool "Top Byte Ignore support"
+	default n
+
+config ARM64_SMP_BUSY_WAIT
+	bool "Busy wait when SMP boot"
+	default n
+	depends on SMP
+	---help---
+		Enables busy wait when SMP boot
+
+config ARM64_SMP_BUSY_WAIT_FLAG_ADDR
+	hex "Busy wait flag address"
+	depends on ARM64_SMP_BUSY_WAIT
+
 config ARCH_HAVE_EL3
 	bool
 	default n
@@ -144,6 +190,19 @@ config ARCH_HAVE_EL3
 		EL0~El2(eg. Cortex-R82). For these Processors, the code
 		runing at EL3 is not necessary and system register for EL3
 		is not accessible
+
+config ARCH_HAVE_CLUSTER_PMU
+	bool
+	default n
+	---help---
+		Some processors implement cluster PMUs, such as Cortex-R82
+
+config ARCH_CLUSTER_PMU
+	bool "Enable the cluster PMUs"
+	default n
+	depends on ARCH_HAVE_CLUSTER_PMU
+	---help---
+		If the processor supports cluster PMU, can configure cluster PMU
 
 config ARCH_ARM64_EXCEPTION_LEVEL
 	int "Exception level to operate"
@@ -242,6 +301,19 @@ config ARCH_CORTEX_R82
 	select ARCH_ICACHE
 	select ARCH_HAVE_MPU
 	select ARCH_HAVE_FPU
+	select ARCH_HAVE_CLUSTER_PMU
+	select ARCH_HAVE_TESTSET
+	select ARM64_HAVE_NEON
+
+config ARCH_CPU_UNKNOWN
+	bool
+	default n
+	select ARCH_ARMV8A
+	select ARCH_HAVE_TRUSTZONE
+	select ARCH_DCACHE
+	select ARCH_ICACHE
+	select ARCH_HAVE_MMU
+	select ARCH_HAVE_FPU
 	select ARCH_HAVE_TESTSET
 	select ARM64_HAVE_NEON
 
@@ -260,6 +332,7 @@ config ARCH_CHIP
 	default "fvp-v8r"   if ARCH_CHIP_FVP_ARMV8R
 	default "imx8"      if ARCH_CHIP_IMX8
 	default "imx9"      if ARCH_CHIP_IMX9
+	default "bcm2711"   if ARCH_CHIP_BCM2711
 
 config ARM64_HAVE_PSCI
 	bool "ARM PCSI (Power State Coordination Interface) Support"
@@ -299,7 +372,7 @@ config ARM64_DECODEFIQ
 
 config ARM64_GIC_VERSION
 	int "GIC version"
-	default 2           if ARCH_CHIP_A64
+	default 2 if ARCH_CHIP_A64 || ARCH_CHIP_BCM2711
 	default 3
 	range 2 4
 	---help---
@@ -314,6 +387,34 @@ config ARM64_GIC_EOIMODE
 	---help---
 		Enable GICC_CTLR.EOImode, this will separates the priority drop and interrupt
 		deactivation operations.
+
+config ARM64_GICV2M
+	bool "gicv2m support message irq"
+	depends on PCI_MSIX
+	default n
+
+config ARM64_GICV2_LEGACY_IRQ0
+	int "pci legacy irq0 default val"
+	default 35
+	---help---
+		qemu pci legacy irq0 val, not support if val < 0
+
+endif
+
+if ARM64_GIC_VERSION = 3
+
+config ARM64_GICV3_SPI_EDGE
+	bool "Configure all SPIs(Shared Peripheral Interrupts) as edge-triggered by default"
+	default n
+	---help---
+		Configure all SPIs(Shared Peripheral Interrupts) as edge-triggered by default.
+
+config ARM64_GICV3_SPI_ROUTING_CPU0
+	bool "Configure SPI interrupt affinity routing to CPU0 by default"
+	default y if SMP
+	default n
+	---help---
+		Configure SPI interrupt affinity routing to CPU0 by default.
 
 endif
 
@@ -343,6 +444,24 @@ config ARM64_DCACHE_DISABLE
 config ARM64_ICACHE_DISABLE
 	bool "Disable ICACHE at __start"
 	default n
+
+config ARM64_VA_BITS
+	int "Virtual address space size"
+	default 48
+	---help---
+		Allows choosing one of multiple possible virtual address
+		space sizes. The level of translation table is determined by
+		a combination of page size and virtual address space size.
+
+		The choice could be: 32, 36, 42, 48
+
+config ARM64_PA_BITS
+	int "Physical address space size"
+	default 48
+	---help---
+		Choose the maximum physical address range that the kernel will support.
+
+		The choice could be: 32, 36, 42, 48
 
 if ARCH_CHIP_A64
 source "arch/arm64/src/a64/Kconfig"
@@ -374,6 +493,10 @@ endif
 
 if ARCH_CHIP_ZYNQ_MPSOC
 source "arch/arm64/src/zynq-mpsoc/Kconfig"
+endif
+
+if ARCH_CHIP_BCM2711
+source "arch/arm64/src/bcm2711/Kconfig"
 endif
 
 endif # ARCH_ARM64

@@ -1210,7 +1210,7 @@ static void dma_attach(uint8_t dma_chan)
 }
 
 /****************************************************************************
- * Name: esp32_interrupt
+ * Name: esp32_interrupt_dma
  *
  * Description:
  *   DMA interrupt.
@@ -2114,29 +2114,17 @@ void xtensa_serialinit(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef HAVE_SERIAL_CONSOLE
   uint32_t intena;
 
   esp32_disableallints(CONSOLE_DEV.priv, &intena);
 
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      while (!esp32_txready(&CONSOLE_DEV));
-      esp32_send(&CONSOLE_DEV, '\r');
-    }
-
   while (!esp32_txready(&CONSOLE_DEV));
   esp32_send(&CONSOLE_DEV, ch);
 
   esp32_restoreuartint(CONSOLE_DEV.priv, intena);
 #endif
-
-  return ch;
 }
 #endif /* USE_SERIALDRIVER */

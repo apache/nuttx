@@ -1,6 +1,6 @@
-=========================================
-High Performance, Zero Latency Interrupts
-=========================================
+=====================================================================
+High Performance: Zero Latency Interrupts, Maskable Nested Interrupts
+=====================================================================
 
 Generic Interrupt Handling
 ==========================
@@ -111,6 +111,66 @@ between the high priority interrupt handler and *PendSV* interrupt
 handler. A detailed discussion of that custom logic is beyond the
 scope of this Wiki page.
 
+The following table shows the priority levels of the Cortex-M family:
+
+.. code-block::
+
+  IRQ type               Priority
+  Dataabort              0x00
+  High prio IRQ1         0x20	(Zero-latency interrupt)
+  High prio IRQ2         0x30	(Can't call OS API in ISR)
+  SVC                    0x70
+  Disable IRQ            0x80
+  (critical-section)
+  Low  prio IRQ          0xB0
+  PendSV                 0xE0
+
+Lower priority *numbers* mean a higher priority on this architecture.
+
+As you can see, the zero-latency interrupts have higher priority than
+the critical section and SVC, but with the tradeoff that High prio IRQ
+can't call OS APIs in ISR.
+
+
+Maskable Nested Interrupts
+==========================
+
+The ARM Cortex-M family supports a feature called *BASEPRI* that can be
+used to disable interrupts at a priority level below a certain level.
+This feature can be used to support maskable nested interrupts.
+
+Maskable nested interrupts differ from zero-latency interrupts in
+that they obey the interrupt masking mechanisms of the system.
+For example, setting the BASEPRI register to a specific threshold will
+block all interrupts of a lower or equal priority.
+However, high-priority interrupts (such as Non-Maskable Interrupts
+or zero-latency interrupts) are unaffected by these masks.
+
+This is useful when you have a high-priority interrupt that needs to
+be able to interrupt the system, but you also have lower-priority
+interrupts that you want to be able to mask.
+
+The following table shows the priority levels of the Cortex-M family:
+
+.. code-block::
+
+  IRQ type                Priority
+  Dataabort               0x00
+  SVC                     0x70
+  Disable IRQ             0x80
+  (critical-section)
+  High prio IRQ1          0x90    (Maskable nested interrupt)
+  High prio IRQ2          0xA0    (Can call OS API in ISR)
+  Low  prio IRQ           0xB0
+  PendSV                  0xE0
+
+Lower priority *numbers* mean a higher priority on this architecture.
+
+As you can see, the priority levels of the maskable nested interrupts
+are between the critical section and the low-priority interrupts. In
+this case, High prio IRQ can call OS APIs in ISR.
+
+
 Nested Interrupt Handling
 =========================
 
@@ -160,8 +220,7 @@ Configuration Options
 
 ``CONFIG_ARCH_HIPRI_INTERRUPT``
 
-If ``CONFIG_ARMV7M_USEBASEPRI`` is selected, then interrupts will be
-disabled by setting the *BASEPRI* register to
+The OS disables interrupts by setting the *BASEPRI* register to
 ``NVIC_SYSH_DISABLE_PRIORITY`` so that most interrupts will not have
 execution priority. *SVCall* must have execution priority in all
 cases.
@@ -199,8 +258,8 @@ priority interrupt response time.
 Hence, if you need to disable the high priority interrupt, you will
 have to disable the interrupt either at the peripheral that generates
 the interrupt or at the interrupt controller, the *NVIC*. Disabling
-global interrupts via the *BASEPRI* register cannot affect high
-priority interrupts.
+global interrupts via the *BASEPRI* register must not be allowed to
+affect high priority interrupts.
 
 Dependencies
 ------------
@@ -231,7 +290,7 @@ There are two ways to do this:
 * Alternatively, you could keep your vectors in FLASH but in order to
   this, you would have to develop your own custom vector table.
 
-Second, you need to set the priority of your interrupt to *NVIC* to
+Second, you need to set the priority of your interrupt in *NVIC* to
 ``NVIC_SYSH_HIGH_PRIORITY`` using the standard interface:
 ``int up_prioritize_irq(int irq, int priority);``
 

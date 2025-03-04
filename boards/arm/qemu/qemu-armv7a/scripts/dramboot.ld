@@ -1,5 +1,7 @@
 /****************************************************************************
- * boards/arm/qemu/qemu-armv7a/scripts/dramboot_armv7a.ld
+ * boards/arm/qemu/qemu-armv7a/scripts/dramboot.ld
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -17,97 +19,113 @@
  * under the License.
  *
  ****************************************************************************/
+
+#include <nuttx/config.h>
+
 OUTPUT_ARCH(arm)
 ENTRY(__start)
-PHDRS
+
+MEMORY
 {
-  text PT_LOAD ;
+  ROM (rx) : ORIGIN = CONFIG_FLASH_START, LENGTH = CONFIG_FLASH_SIZE
+  RAM (rwx): ORIGIN = CONFIG_RAM_START,   LENGTH = CONFIG_RAM_SIZE
 }
+
 SECTIONS
 {
-  . = 0x40101000;
 
   /* where the global variable out-of-bounds detection information located */
+
 #ifdef CONFIG_MM_KASAN_GLOBAL
-  .kasan.unused :
-  {
+  .kasan.unused : {
     *(.data..LASANLOC*)
-  } > ROM
-  .kasan.global :
-  {
+  }
+  .kasan.global : {
     KEEP (*(.data..LASAN0))
     KEEP (*(.data.rel.local..LASAN0))
-  } > ROM
+  }
+  .kasan.shadows : {
+    *(.kasan.shadows)
+  }
 #endif
 
   .text : {
-        _stext = .;            /* Text section */
-       *(.vectors)
-       *(.text)
-       *(.text.cold)
-       *(.text.unlikely)
-       *(.fixup)
-       *(.gnu.warning)
-  } :text
+      _stext = .;            /* Text section */
+      __text_start = .;
+      *(.vectors)
+      *(.text*)
+      *(.fixup)
+      *(.gnu.warning)
+  } > ROM
+
   . = ALIGN(4096);
+
   .init_section : {
-        _sinit = ABSOLUTE(.);
-        KEEP(*(SORT_BY_INIT_PRIORITY(.init_array.*) SORT_BY_INIT_PRIORITY(.ctors.*)))
-        KEEP(*(.init_array EXCLUDE_FILE(*crtbegin.o *crtbegin?.o *crtend.o *crtend?.o) .ctors))
-        _einit = ABSOLUTE(.);
-  } :text
-  . = ALIGN(4096);
-  _etext = .; /* End_1 of .text */
-  _sztext = _etext - _stext;
+      _sinit = ABSOLUTE(.);
+      KEEP(*(SORT_BY_INIT_PRIORITY(.init_array.*) SORT_BY_INIT_PRIORITY(.ctors.*)))
+      KEEP(*(.init_array EXCLUDE_FILE(*crtbegin.o *crtbegin?.o *crtend.o *crtend?.o) .ctors))
+      _einit = ABSOLUTE(.);
+      . = ALIGN(4096);
+      _etext = .; /* End_1 of .text */
+      _sztext = _etext - _stext;
+  } > ROM
+
+  .ARM.extab :
+  {
+      *(.ARM.extab*)
+  } > ROM
+
+  /* .ARM.exidx is sorted, so has to go in its own output section.  */
+
+  PROVIDE_HIDDEN (__exidx_start = .);
+  .ARM.exidx :
+  {
+      *(.ARM.exidx* .gnu.linkonce.armexidx.*)
+  } > ROM
+  PROVIDE_HIDDEN (__exidx_end = .);
+
   .rodata : {
-        _srodata = .;          /* Read-only data */
-       *(.rodata)
-       *(.rodata.*)
-       *(.data.rel.ro)
-       *(.data.rel.ro.*)
-  } :text
-  . = ALIGN(4096);
-  _erodata = .;                /* End of read-only data */
-  _szrodata = _erodata - _srodata;
-  _eronly = .;  /* End of read-only data */
+      _srodata = .;          /* Read-only data */
+      *(.rodata*)
+      *(.data.rel.ro*)
+      KEEP(*(SORT(.scattered_array*)));
+      . = ALIGN(4096);
+      _erodata = .;
+  } > ROM
+
+  _eronly = LOADADDR(.data);
   .data : {                    /* Data */
-        _sdata = .;
-       *(.data.page_aligned)
-       *(.data)
-       . = ALIGN(8);
-       __start_impls = .;
-        *(.impls)
-        KEEP(*(.impls))
-        . = ALIGN(4);
-        __stop_impls = .;
-       *(.data.rel)
-       *(.data.rel.*)
-       CONSTRUCTORS
-  } :text
-  _edata = .; /* End+1 of .data */
+      _sdata = .;
+      *(.data*)
+      . = ALIGN(8);
+      __start_impls = .;
+      *(.impls)
+      KEEP(*(.impls))
+      . = ALIGN(4);
+      __stop_impls = .;
+      _edata = .;
+  } > RAM AT > ROM
+
+  .noinit : {
+      _snoinit = ABSOLUTE(.);
+      *(.noinit*)
+      _enoinit = ABSOLUTE(.);
+  } > RAM
+
   .bss : {                     /* BSS */
        _sbss = .;
-       *(.bss)
-       . = ALIGN(1 << 3);
-  } :text
-  . = ALIGN(4096);
-  _ebss = .;
-  _szbss = _ebss - _sbss;
-  .initstack : {             /* INIT STACK */
-       _s_initstack = .;
-       *(.initstack)
-       . = ALIGN(16);
-  } :text
-  . = ALIGN(4096);
-  _e_initstack = . ;
-  _szdata = _e_initstack - _sdata;
+       *(.bss*)
+       . = ALIGN(4096);
+       _ebss = .;
+  } > RAM
+
   /* Sections to be discarded */
   /DISCARD/ : {
        *(.exit.text)
        *(.exit.data)
        *(.exitcall.exit)
-       *(.eh_frame)
   }
+
   /* Stabs debugging sections.  */
   .stab 0 : { *(.stab) }
   .stabstr 0 : { *(.stabstr) }

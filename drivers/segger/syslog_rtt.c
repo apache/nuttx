@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/segger/syslog_rtt.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -30,14 +32,14 @@
  * Public Functions
  ****************************************************************************/
 
-int syslog_rtt_putc(FAR struct syslog_channel_s *channel, int ch)
+int syslog_rtt_putc(FAR syslog_channel_t *channel, int ch)
 {
   SEGGER_RTT_BLOCK_IF_FIFO_FULL(CONFIG_SYSLOG_RTT_CHANNEL);
   SEGGER_RTT_PutChar(CONFIG_SYSLOG_RTT_CHANNEL, ch);
   return ch;
 }
 
-ssize_t syslog_rtt_write(FAR struct syslog_channel_s *channel,
+ssize_t syslog_rtt_write(FAR syslog_channel_t *channel,
                          FAR const char *buffer, size_t buflen)
 {
   SEGGER_RTT_BLOCK_IF_FIFO_FULL(CONFIG_SYSLOG_RTT_CHANNEL);

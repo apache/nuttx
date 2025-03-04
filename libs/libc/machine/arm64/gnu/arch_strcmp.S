@@ -1,8 +1,8 @@
 /****************************************************************************
  * libs/libc/machine/arm64/gnu/arch_strcmp.S
  *
- * Copyright (c) 2012-2018, Linaro Limited
- *  All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2012-2018, Linaro Limited, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -76,7 +76,7 @@
 #define pos		x11
 
 	/* Start of performance-critical section  -- one 64B cache line.  */
-def_fn strcmp p2align=6
+def_fn ARCH_LIBCFUN(strcmp) p2align=6
 	eor	tmp1, src1, src2
 	mov	zeroones, #REP8_01
 	tst	tmp1, #7
@@ -206,6 +206,6 @@ L(loop_misaligned):
 L(done):
 	sub	result, data1, data2
 	ret
-	.size	strcmp, .-strcmp
+	.size	ARCH_LIBCFUN(strcmp), .-ARCH_LIBCFUN(strcmp)
 
 #endif

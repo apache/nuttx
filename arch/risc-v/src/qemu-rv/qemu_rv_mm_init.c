@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/qemu-rv/qemu_rv_mm_init.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -60,8 +62,8 @@
 #define SLAB_COUNT      (sizeof(m_l2_pgtable) / RV_MMU_PAGE_SIZE)
 
 #define KMM_PAGE_SIZE   RV_MMU_L2_PAGE_SIZE
-#define KMM_PBASE       PGT_L2_PBASE   
-#define KMM_PBASE_IDX   2   
+#define KMM_PBASE       PGT_L2_PBASE
+#define KMM_PBASE_IDX   2
 #define KMM_SPBASE      PGT_L1_PBASE
 #define KMM_SPBASE_IDX  1
 
@@ -83,8 +85,8 @@
 #define SLAB_COUNT      (sizeof(m_l3_pgtable) / RV_MMU_PAGE_SIZE)
 
 #define KMM_PAGE_SIZE   RV_MMU_L3_PAGE_SIZE
-#define KMM_PBASE       PGT_L3_PBASE   
-#define KMM_PBASE_IDX   3   
+#define KMM_PBASE       PGT_L3_PBASE
+#define KMM_PBASE_IDX   3
 #define KMM_SPBASE      PGT_L2_PBASE
 #define KMM_SPBASE_IDX  2
 

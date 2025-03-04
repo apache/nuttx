@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/syslog/syslog_rpmsg.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -36,7 +38,7 @@
 #endif
 
 #include <nuttx/irq.h>
-#include <nuttx/rptun/openamp.h>
+#include <nuttx/rpmsg/rpmsg.h>
 #include <nuttx/syslog/syslog_rpmsg.h>
 #include <nuttx/wqueue.h>
 
@@ -80,8 +82,8 @@ struct syslog_rpmsg_s
  ****************************************************************************/
 
 static void syslog_rpmsg_work(FAR void *priv_);
-static void syslog_rpmsg_putchar(FAR struct syslog_rpmsg_s *priv, int ch,
-                                 bool last);
+static void syslog_rpmsg_addbuf(FAR struct syslog_rpmsg_s *priv,
+                                FAR const char *buffer, size_t len);
 static void syslog_rpmsg_device_created(FAR struct rpmsg_device *rdev,
                                         FAR void *priv_);
 static void syslog_rpmsg_device_destroy(FAR struct rpmsg_device *rdev,
@@ -168,7 +170,11 @@ static bool syslog_rpmsg_transfer(FAR struct syslog_rpmsg_s *priv, bool wait)
       msg->count          = len;
       priv->tail         += len;
       msg->header.command = SYSLOG_RPMSG_TRANSFER;
-      rpmsg_send_nocopy(&priv->ept, msg, sizeof(*msg) + len);
+      if (rpmsg_send_nocopy(&priv->ept, msg, sizeof(*msg) + len) < 0)
+        {
+          rpmsg_release_tx_buffer(&priv->ept, msg);
+        }
+
       len                 = SYSLOG_RPMSG_COUNT(priv);
 
       leave_critical_section(flags);
@@ -189,10 +195,19 @@ static void syslog_rpmsg_work(FAR void *priv_)
     }
 }
 
-static void syslog_rpmsg_putchar(FAR struct syslog_rpmsg_s *priv, int ch,
-                                 bool last)
+static void syslog_rpmsg_addbuf(FAR struct syslog_rpmsg_s *priv,
+                                FAR const char *buffer, size_t len)
 {
-  if (priv->head + 1 - priv->tail >= priv->size)
+  bool overwritten = false;
+  size_t offset;
+  size_t tail;
+
+  if (len <= 0)
+    {
+      return;
+    }
+
+  if (priv->head + len - priv->tail >= priv->size)
     {
       bool ret = false;
 
@@ -203,26 +218,41 @@ static void syslog_rpmsg_putchar(FAR struct syslog_rpmsg_s *priv, int ch,
 
       if (!ret)
         {
-          /* Overwrite */
-
-          priv->buffer[SYSLOG_RPMSG_TAILOFF(priv)] = 0;
-          priv->tail++;
+          overwritten = true;
         }
     }
 
-  priv->buffer[SYSLOG_RPMSG_HEADOFF(priv)] = ch & 0xff;
-  priv->head++;
+  offset = SYSLOG_RPMSG_HEADOFF(priv);
+  tail = priv->size - offset;
+
+  if (len > tail)
+    {
+      memcpy(&priv->buffer[offset], buffer, tail);
+      memcpy(priv->buffer, buffer + tail, len - tail);
+    }
+  else
+    {
+      memcpy(&priv->buffer[offset], buffer, len);
+    }
+
+  priv->head += len;
+  if (overwritten)
+    {
+      priv->tail = priv->head - priv->size;
+      priv->buffer[SYSLOG_RPMSG_TAILOFF(priv)] = 0;
+      priv->tail++;
+    }
 
   if (priv->flush)
     {
 #if defined(CONFIG_ARCH_LOWPUTC)
-      up_putc(ch);
+      up_nputs(buffer, len);
 #endif
-      priv->flush++;
+      priv->flush += len;
       return;
     }
 
-  if (last && !priv->suspend && is_rpmsg_ept_ready(&priv->ept))
+  if (!priv->suspend && is_rpmsg_ept_ready(&priv->ept))
     {
       clock_t delay = SYSLOG_RPMSG_WORK_DELAY;
       size_t space = SYSLOG_RPMSG_SPACE(priv);
@@ -338,19 +368,20 @@ static ssize_t syslog_rpmsg_file_write(FAR struct file *filep,
  * Public Functions
  ****************************************************************************/
 
-int syslog_rpmsg_putc(FAR struct syslog_channel_s *channel, int ch)
+int syslog_rpmsg_putc(FAR syslog_channel_t *channel, int ch)
 {
-  FAR struct syslog_rpmsg_s *priv = &g_syslog_rpmsg;
   irqstate_t flags;
+  char tmp = ch;
+  UNUSED(channel);
 
   flags = enter_critical_section();
-  syslog_rpmsg_putchar(priv, ch, true);
+  syslog_rpmsg_addbuf(&g_syslog_rpmsg, &tmp, 1);
   leave_critical_section(flags);
 
   return ch;
 }
 
-int syslog_rpmsg_flush(FAR struct syslog_channel_s *channel)
+int syslog_rpmsg_flush(FAR syslog_channel_t *channel)
 {
   FAR struct syslog_rpmsg_s *priv = &g_syslog_rpmsg;
   irqstate_t flags;
@@ -376,19 +407,12 @@ int syslog_rpmsg_flush(FAR struct syslog_channel_s *channel)
   return OK;
 }
 
-ssize_t syslog_rpmsg_write(FAR struct syslog_channel_s *channel,
+ssize_t syslog_rpmsg_write(FAR syslog_channel_t *channel,
                            FAR const char *buffer, size_t buflen)
 {
   FAR struct syslog_rpmsg_s *priv = &g_syslog_rpmsg;
-  irqstate_t flags;
-  size_t nwritten;
-
-  flags = enter_critical_section();
-  for (nwritten = 1; nwritten <= buflen; nwritten++)
-    {
-      syslog_rpmsg_putchar(priv, *buffer++, nwritten == buflen);
-    }
-
+  irqstate_t flags = enter_critical_section();
+  syslog_rpmsg_addbuf(priv, buffer, buflen);
   leave_critical_section(flags);
 
   return buflen;

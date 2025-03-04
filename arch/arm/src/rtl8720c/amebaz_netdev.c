@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/rtl8720c/amebaz_netdev.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -107,12 +109,12 @@ void amebaz_netdev_notify_receive(struct amebaz_dev_s *priv,
       return;
     }
 
-  NETDEV_RXPACKETS(&priv->dev);
   net_lock();
   oldbuf = priv->dev.d_buf;
   hdr = (struct eth_hdr_s *)skb->data;
   priv->dev.d_buf = (void *)skb->data;
   priv->dev.d_len = len;
+  NETDEV_RXPACKETS(&priv->dev);
 #ifdef CONFIG_NET_PKT
   pkt_input(&priv->dev);
 #endif

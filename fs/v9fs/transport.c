@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/v9fs/transport.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -43,11 +45,17 @@ struct v9fs_transport_ops_map_s
 #ifdef CONFIG_V9FS_VIRTIO_9P
 extern const struct v9fs_transport_ops_s g_virtio_9p_transport_ops;
 #endif
+#ifdef CONFIG_V9FS_SOCKET_9P
+extern const struct v9fs_transport_ops_s g_socket_9p_transport_ops;
+#endif
 
 static const struct v9fs_transport_ops_map_s g_transport_ops_map[] =
 {
 #ifdef CONFIG_V9FS_VIRTIO_9P
   { "virtio", &g_virtio_9p_transport_ops },
+#endif
+#ifdef CONFIG_V9FS_SOCKET_9P
+  { "socket", &g_socket_9p_transport_ops },
 #endif
   { NULL, NULL},
 };

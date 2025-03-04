@@ -70,7 +70,7 @@ int esp_spiram_init(void);
  * Attention this function must be called with flash cache disabled.
  */
 
-void esp_spiram_init_cache(void);
+int esp_spiram_init_cache(void);
 
 /* Memory test for SPI RAM. Should be called after SPI RAM is
  * initialized and (in case of a dual-core system) the app CPU is online.
@@ -80,7 +80,7 @@ void esp_spiram_init_cache(void);
  *  Return true on success, false on failed memory test
  */
 
-bool esp_spiram_test(void);
+int esp_spiram_test(void);
 
 /* Add the initialized SPI RAM to the heap allocator. */
 
@@ -104,6 +104,24 @@ size_t esp_spiram_get_size(void);
  */
 
 void esp_spiram_writeback_cache(void);
+
+/****************************************************************************
+ * Name: esp_spiram_writeback_range
+ *
+ * Description:
+ *   Writeback the Cache items (also clean the dirty bit) in the region from
+ *   DCache. If the region is not in DCache addr room, nothing will be done.
+ *
+ * Input Parameters:
+ *   addr - writeback region start address
+ *   size - writeback region size
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp_spiram_writeback_range(uint32_t addr, uint32_t size);
 
 /* If SPI RAM(PSRAM) has been initialized
  *

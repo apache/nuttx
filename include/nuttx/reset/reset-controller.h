@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/reset/reset-controller.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -25,6 +27,8 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #include <nuttx/list.h>
 #include <nuttx/compiler.h>
 
@@ -44,13 +48,18 @@ struct reset_controller_dev;
 
 struct reset_control_ops
 {
-  CODE int (*reset)(FAR struct reset_controller_dev *rcdev, unsigned int id);
+  CODE int (*acquire)(FAR struct reset_controller_dev *rcdev,
+                      unsigned int id, bool shared, bool acquired);
+  CODE int (*release)(FAR struct reset_controller_dev *rcdev,
+                      unsigned int id);
+  CODE int (*reset)(FAR struct reset_controller_dev *rcdev,
+                    unsigned int id);
   CODE int (*assert)(FAR struct reset_controller_dev *rcdev,
                      unsigned int id);
   CODE int (*deassert)(FAR struct reset_controller_dev *rcdev,
                        unsigned int id);
   CODE int (*status)(FAR struct reset_controller_dev *rcdev,
-                       unsigned long id);
+                     unsigned int id);
 };
 
 /* struct reset_controller_dev - reset controller entity that might
@@ -72,6 +81,39 @@ struct reset_controller_dev
 /****************************************************************************
  * Public Functions Definitions
  ****************************************************************************/
+
+#ifdef CONFIG_RESET_RPMSG
+
+/****************************************************************************
+ * Name: reset_rpmsg_get
+ *
+ * Description:
+ *
+ * Input Parameters:
+ *
+ *   name - the name of the remote reset controller
+ *
+ * Returned Value:
+ *
+ *   Reset controller pointer
+ *
+ ****************************************************************************/
+
+FAR struct reset_controller_dev *reset_rpmsg_get(FAR const char *name);
+
+/****************************************************************************
+ * Name: reset_rpmsg_server_init
+ *
+ * Description:
+ * Server side rpmsg initialization
+ *
+ * Returned Value:
+ *   Returns 0 if success.
+ ****************************************************************************/
+
+int reset_rpmsg_server_init(void);
+
+#endif
 
 /****************************************************************************
  * Name: reset_controller_register()

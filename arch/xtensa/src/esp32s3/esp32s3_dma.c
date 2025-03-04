@@ -35,6 +35,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
+#include <nuttx/nuttx.h>
 #include <arch/irq.h>
 
 #include "xtensa.h"
@@ -47,10 +48,6 @@
 /****************************************************************************
  * Pre-processor Macros
  ****************************************************************************/
-
-#ifndef ALIGN_UP
-#  define ALIGN_UP(num, align) (((num) + ((align) - 1)) & ~((align) - 1))
-#endif
 
 #define DMA_INVALID_PERIPH_ID        (0x3F)
 #define GDMA_CH_REG_ADDR(_r, _ch)    ((_r) + (_ch) * GDMA_REG_OFFSET)

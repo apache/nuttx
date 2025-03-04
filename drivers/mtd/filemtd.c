@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/mtd/filemtd.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -725,7 +727,7 @@ static int mtd_loop_ioctl(FAR struct file *filep, int cmd,
  *
  ****************************************************************************/
 
-FAR struct mtd_dev_s *filemtd_initialize(FAR const char *path, size_t offset,
+FAR struct mtd_dev_s *filemtd_initialize(FAR const char *path, off_t offset,
                                          int16_t sectsize, int32_t erasesize)
 {
   FAR struct file_dev_s *priv;

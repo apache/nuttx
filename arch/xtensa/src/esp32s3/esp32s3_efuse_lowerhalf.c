@@ -25,6 +25,8 @@
 #include <stdlib.h>
 #include <debug.h>
 #include <assert.h>
+
+#include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/efuse/efuse.h>
 

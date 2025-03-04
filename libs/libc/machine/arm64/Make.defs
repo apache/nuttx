@@ -1,6 +1,8 @@
 ############################################################################
 # libs/libc/machine/arm64/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -76,6 +78,10 @@ endif
 
 ifeq ($(CONFIG_ARCH_SETJMP_H),y)
 ASRCS += arch_setjmp.S
+endif
+
+ifeq ($(CONFIG_PROFILE_NONE),)
+CSRCS += mcount.c
 endif
 
 ifeq ($(CONFIG_ARCH_TOOLCHAIN_GNU),y)

@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/xtensa/esp32s3/common/include/esp32s3_board_wlan.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -46,7 +48,7 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-#ifdef CONFIG_ESP32S3_WIFI
+#ifdef CONFIG_ESPRESSIF_WIFI
 
 /****************************************************************************
  * Name: board_wlan_init
@@ -62,7 +64,7 @@ extern "C"
 
 int board_wlan_init(void);
 
-#endif /* CONFIG_ESP32S3_WIFI */
+#endif /* CONFIG_ESPRESSIF_WIFI */
 
 #undef EXTERN
 #if defined(__cplusplus)

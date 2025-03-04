@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/avr/src/avr/avr.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -43,8 +45,8 @@
  * state from the TCB.
  */
 
-#define avr_savestate(regs)    avr_copystate(regs, (uint8_t*)g_current_regs)
-#define avr_restorestate(regs) (g_current_regs = regs)
+#define avr_savestate(regs)    avr_copystate(regs, up_current_regs())
+#define avr_restorestate(regs) up_set_current_regs(regs)
 
 /****************************************************************************
  * Public Types

@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/userfs/fs_userfs.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -46,6 +48,8 @@
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/net/net.h>
 #include <nuttx/mutex.h>
+
+#include "fs_heap.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -163,6 +167,8 @@ const struct mountpt_operations g_userfs_operations =
   NULL,              /* mmap */
   userfs_truncate,   /* truncate */
   NULL,              /* poll */
+  NULL,              /* readv */
+  NULL,              /* writev */
 
   userfs_sync,       /* sync */
   userfs_dup,        /* dup */
@@ -1158,7 +1164,7 @@ static int userfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
   /* Save the opaque dir reference in struct fs_dirent_s */
 
   DEBUGASSERT(dir != NULL);
-  udir = kmm_zalloc(sizeof(struct userfs_dir_s));
+  udir = fs_heap_zalloc(sizeof(struct userfs_dir_s));
   if (udir == NULL)
     {
       return -ENOMEM;
@@ -1243,7 +1249,7 @@ static int userfs_closedir(FAR struct inode *mountpt,
       return -EIO;
     }
 
-  kmm_free(udir);
+  fs_heap_free(udir);
   return resp->ret;
 }
 
@@ -1430,7 +1436,7 @@ static int userfs_bind(FAR struct inode *blkdriver, FAR const void *data,
   /* Allocate an instance of the UserFS state structure */
 
   iolen = USERFS_REQ_MAXSIZE + config->mxwrite;
-  priv  = kmm_malloc(SIZEOF_USERFS_STATE_S(iolen));
+  priv  = fs_heap_malloc(SIZEOF_USERFS_STATE_S(iolen));
   if (priv == NULL)
     {
       ferr("ERROR: Failed to allocate state structure\n");
@@ -1490,7 +1496,7 @@ errout_with_psock:
 
 errout_with_alloc:
   nxmutex_destroy(&priv->lock);
-  kmm_free(priv);
+  fs_heap_free(priv);
   return ret;
 }
 
@@ -1574,7 +1580,7 @@ static int userfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
 
   psock_close(&priv->psock);
   nxmutex_destroy(&priv->lock);
-  kmm_free(priv);
+  fs_heap_free(priv);
   return OK;
 }
 

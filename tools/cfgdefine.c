@@ -1,6 +1,8 @@
 /****************************************************************************
  * tools/cfgdefine.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -62,6 +64,8 @@ static const char *dequote_list[] =
   "CONFIG_PASS1_OBJECT",                  /* Pass1 build object */
   "CONFIG_TTY_LAUNCH_ENTRYPOINT",         /* Name of entry point from tty launch */
   "CONFIG_TTY_LAUNCH_ARGS",               /* Argument list of entry point from tty launch */
+  "CONFIG_BOARD_MEMORY_RANGE",            /* Memory range for board */
+  "CONFIG_FAKE_AUDIO_DEVICE_PARAMS",      /* Arguments for the fake audio device */
 
   /* NxWidgets/NxWM */
 

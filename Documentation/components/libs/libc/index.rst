@@ -127,7 +127,7 @@ Symbol tables have differing usefulness in different NuttX build modes:
    share resources with other user code (but should use system calls to
    interact with the OS).
 
-#. But in the kernel build mode (``CONFIG_BUILD_LOADABLE``), only fully linked
+#. But in the kernel build mode (``CONFIG_MODULES``), only fully linked
    executables loadable via ``execl()``, ``execv()``, or ``posix_spawan()``
    can be used.
    There is no use for a symbol table with the kernel build since all

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/armv6-m/arm_dumpnvic.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -23,7 +25,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
+#include <nuttx/coredump.h>
 #include <sys/types.h>
 #include <debug.h>
 
@@ -87,3 +89,22 @@ void arm_dumpnvic(const char *msg)
 }
 
 #endif /* CONFIG_DEBUG_FEATURES */
+
+#ifdef CONFIG_ARM_COREDUMP_REGION
+
+/****************************************************************************
+ * Function:  arm_coredump_add_region
+ *
+ * Description:
+ *   Dump all NVIC registers during a core dump.
+ *
+ ****************************************************************************/
+
+void arm_coredump_add_region(void)
+{
+  coredump_add_memory_region((uint32_t *)ARMV6M_NVIC1_BASE,
+                             ARMV6M_NVIC_IPR7 + 4 - ARMV6M_NVIC1_BASE,
+                             PF_REGISTER);
+}
+
+#endif /* CONFIG_ARM_COREDUMP_REGION */

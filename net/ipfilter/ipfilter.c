@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/ipfilter/ipfilter.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -496,8 +498,9 @@ int ipv4_filter_in(FAR struct net_driver_s *dev)
   if (ret == IPFILTER_TARGET_REJECT)
     {
       /* TODO: Support more --reject-with types later. */
-
+#if defined(CONFIG_NET_ICMP) && !defined(CONFIG_NET_ICMP_NO_STACK)
       icmp_reply(dev, ICMP_DEST_UNREACHABLE, ICMP_NET_UNREACH);
+#endif
     }
 
   return ret;
@@ -565,7 +568,9 @@ void ipfilter_out(FAR struct net_driver_s *dev)
 
       if (ret == IPFILTER_TARGET_REJECT)
         {
+#if defined(CONFIG_NET_ICMP) && !defined(CONFIG_NET_ICMP_NO_STACK)
           icmp_reply(dev, ICMP_DEST_UNREACHABLE, ICMP_NET_UNREACH);
+#endif
         }
     }
 #endif

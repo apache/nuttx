@@ -135,6 +135,18 @@
                                    CONFIG_ESP32S3_LCD_VRES * \
                                    ESP32S3_LCD_DATA_WIDTH)
 
+#ifdef CONFIG_ESP32S3_LCD_DOUBLE_BUFFERED
+#  define ESP32S3_LCD_FB_MULT     2
+#else
+#  define ESP32S3_LCD_FB_MULT     1
+#endif
+
+#define ESP32S3_LCD_HRES_VIRTUAL  CONFIG_ESP32S3_LCD_HRES
+#define ESP32S3_LCD_VRES_VIRTUAL  (CONFIG_ESP32S3_LCD_VRES * \
+                                   ESP32S3_LCD_FB_MULT)
+
+#define ESP32S3_LCD_FB_MEM_SIZE   (ESP32S3_LCD_FB_SIZE * ESP32S3_LCD_FB_MULT)
+
 #define ESP32S3_LCD_DMADESC_NUM   (ESP32S3_LCD_FB_SIZE / \
                                    ESP32S3_DMA_BUFLEN_MAX + 1)
 
@@ -187,6 +199,8 @@ struct esp32s3_lcd_s
   struct esp32s3_layer_s layer[ESP32S3_LCD_LAYERS];
 
   uint8_t cur_layer;              /* Current layer number */
+
+  uint32_t yoffset;               /* The current pan offset */
 
   int cpuint;                     /* CPU interrupt assigned to this LCD */
   uint8_t cpu;                    /* CPU ID */
@@ -242,6 +256,11 @@ static int esp32s3_lcd_base_getplaneinfo(struct fb_vtable_s *vtable,
 #ifdef CONFIG_FB_UPDATE
 static int esp32s3_lcd_base_updatearea(struct fb_vtable_s *vtable,
                                        const struct fb_area_s *area);
+#endif
+
+#ifdef CONFIG_ESP32S3_LCD_DOUBLE_BUFFERED
+static int esp32s3_lcd_base_pandisplay(struct fb_vtable_s *vtable,
+                                       struct fb_planeinfo_s *pinfo);
 #endif
 
 /* Initialization ***********************************************************/
@@ -300,12 +319,15 @@ static const struct fb_videoinfo_s g_base_videoinfo =
 
 /* This structure provides the base layer interface */
 
-static const struct fb_vtable_s g_base_vtable =
+static struct fb_vtable_s g_base_vtable =
 {
   .getvideoinfo  = esp32s3_lcd_base_getvideoinfo,
   .getplaneinfo  = esp32s3_lcd_base_getplaneinfo,
 #ifdef CONFIG_FB_UPDATE
   .updatearea    = esp32s3_lcd_base_updatearea,
+#endif
+#ifdef CONFIG_ESP32S3_LCD_DOUBLE_BUFFERED
+  .pandisplay    = esp32s3_lcd_base_pandisplay,
 #endif
 };
 
@@ -515,9 +537,11 @@ static int esp32s3_lcd_base_getplaneinfo(struct fb_vtable_s *vtable,
 
       pinfo->display = 0;
       pinfo->fbmem   = (void *)layer->framebuffer;
-      pinfo->fblen   = ESP32S3_LCD_FB_SIZE;
+      pinfo->fblen   = ESP32S3_LCD_FB_MEM_SIZE;
       pinfo->stride  = ESP32S3_LCD_STRIDE;
       pinfo->bpp     = ESP32S3_LCD_DATA_BPP;
+      pinfo->xres_virtual = ESP32S3_LCD_HRES_VIRTUAL;
+      pinfo->yres_virtual = ESP32S3_LCD_VRES_VIRTUAL;
       return OK;
     }
 
@@ -546,9 +570,69 @@ static int esp32s3_lcd_base_updatearea(struct fb_vtable_s *vtable,
                                        const struct fb_area_s *area)
 {
   struct esp32s3_lcd_s *priv = &g_lcd_priv;
+  uint8_t *first_pixel;
+  uint32_t size;
 
-  cache_writeback_addr(CURRENT_LAYER(priv)->framebuffer,
-                       ESP32S3_LCD_FB_SIZE);
+  if (area->w == 0 || area->h == 0)
+    {
+      return 0;
+    }
+
+  if (area->x > UINT16_MAX - area->w ||
+      area->y > UINT16_MAX - area->h ||
+      area->x + area->w > ESP32S3_LCD_HRES_VIRTUAL ||
+      area->y + area->h > ESP32S3_LCD_VRES_VIRTUAL)
+    {
+      gerr("ERROR: updatearea area is out of bounds. "
+           "x: %" PRIu16 ", y: %" PRIu16 ", w: %" PRIu16 ", h: %" PRIu16 ", "
+           "virtual hres: %d, virtual vres: %d\n",
+           area->x, area->y, area->w, area->h,
+           ESP32S3_LCD_HRES_VIRTUAL, ESP32S3_LCD_VRES_VIRTUAL);
+      return -EINVAL;
+    }
+
+  first_pixel = CURRENT_LAYER(priv)->framebuffer +
+                (area->y * ESP32S3_LCD_STRIDE +
+                 area->x * ESP32S3_LCD_DATA_WIDTH);
+
+  size = (area->h - 1) * ESP32S3_LCD_STRIDE +
+         area->w       * ESP32S3_LCD_DATA_WIDTH;
+
+  cache_writeback_addr(first_pixel, size);
+
+  return 0;
+}
+#endif
+
+/****************************************************************************
+ * Name: esp32s3_lcd_base_pandisplay
+ *
+ * Description:
+ *   Validate the pan info. The pan info is queued by the framebuffer
+ *   subsystem.
+ *
+ * Input Parameters:
+ *   vtable - The framebuffer driver object
+ *   pinfo  - the planeinfo object
+ *
+ * Returned Value:
+ *   Zero is returned on success; a negated errno value is returned on any
+ *   failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32S3_LCD_DOUBLE_BUFFERED
+static int esp32s3_lcd_base_pandisplay(struct fb_vtable_s *vtable,
+                                       struct fb_planeinfo_s *pinfo)
+{
+  if (pinfo->yoffset > ESP32S3_LCD_VRES_VIRTUAL - CONFIG_ESP32S3_LCD_VRES)
+    {
+      gerr("ERROR: pandisplay yoffset out of bounds: %" PRIu32 ". "
+           "The maximum is: %d\n",
+           pinfo->yoffset,
+           ESP32S3_LCD_VRES_VIRTUAL - CONFIG_ESP32S3_LCD_VRES);
+      return -EINVAL;
+    }
 
   return 0;
 }
@@ -575,6 +659,9 @@ static int IRAM_ATTR lcd_interrupt(int irq, void *context, void *arg)
   uint32_t regval;
   struct esp32s3_lcd_s *priv = &g_lcd_priv;
   uint32_t status = esp32s3_lcd_getreg(LCD_CAM_LC_DMA_INT_ST_REG);
+  int paninfo_count;
+  union fb_paninfo_u info;
+  struct esp32s3_layer_s *layer;
 
   esp32s3_lcd_putreg(LCD_CAM_LC_DMA_INT_CLR_REG, status);
   if (status & LCD_CAM_LCD_VSYNC_INT_ST_M)
@@ -603,10 +690,44 @@ static int IRAM_ATTR lcd_interrupt(int irq, void *context, void *arg)
                        true);
 #endif
 
+#ifdef CONFIG_ESP32S3_LCD_DOUBLE_BUFFERED
+      /* Pan the display to a new buffer offset if one was queued */
+
+      paninfo_count = fb_paninfo_count(&g_base_vtable, FB_NO_OVERLAY);
+      if (paninfo_count > 1)
+        {
+          fb_remove_paninfo(&g_base_vtable, FB_NO_OVERLAY);
+        }
+
+      if (paninfo_count > 0 &&
+          fb_peek_paninfo(&g_base_vtable, &info, FB_NO_OVERLAY) == OK &&
+          priv->yoffset != info.planeinfo.yoffset)
+        {
+          priv->yoffset = info.planeinfo.yoffset;
+          layer = CURRENT_LAYER(priv);
+
+          esp32s3_dma_setup(layer->dmadesc,
+                            ESP32S3_LCD_DMADESC_NUM,
+                            &layer->framebuffer[priv->yoffset *
+                                                ESP32S3_LCD_STRIDE],
+                            ESP32S3_LCD_FB_SIZE,
+                            true,
+                            priv->dma_channel);
+
+          /* Leave this paninfo in the panbuffer so the buffer will be full
+           * after the user adds another. poll will report unreadyness to
+           * write until it's taken by the next cycle here.
+           */
+        }
+#endif
+
 #ifndef CONFIG_FB_UPDATE
       /* Write framebuffer data from D-cache to PSRAM */
 
-      cache_writeback_addr(CURRENT_LAYER(priv)->framebuffer,
+      layer = CURRENT_LAYER(priv);
+
+      cache_writeback_addr(&layer->framebuffer[priv->yoffset *
+                                               ESP32S3_LCD_STRIDE],
                            ESP32S3_LCD_FB_SIZE);
 #endif
 
@@ -662,9 +783,9 @@ static int esp32s3_lcd_dmasetup(void)
     {
       struct esp32s3_layer_s *layer = &priv->layer[i];
 
-      layer->framebuffer = memalign(64, ESP32S3_LCD_FB_SIZE);
+      layer->framebuffer = memalign(64, ESP32S3_LCD_FB_MEM_SIZE);
       DEBUGASSERT(layer->framebuffer != NULL);
-      memset(layer->framebuffer, 0, ESP32S3_LCD_FB_SIZE);
+      memset(layer->framebuffer, 0, ESP32S3_LCD_FB_MEM_SIZE);
 
       esp32s3_dma_setup(layer->dmadesc,
                         ESP32S3_LCD_DMADESC_NUM,
@@ -1013,7 +1134,7 @@ struct fb_vtable_s *up_fbgetvplane(int display, int vplane)
   lcdinfo("vplane: %d\n", vplane);
   if (vplane == 0)
     {
-      return (struct fb_vtable_s *)&g_base_vtable;
+      return &g_base_vtable;
     }
   else
     {

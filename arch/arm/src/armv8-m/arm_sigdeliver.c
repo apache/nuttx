@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/armv8-m/arm_sigdeliver.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -35,6 +37,7 @@
 #include <arch/board/board.h>
 
 #include "sched/sched.h"
+#include "signal/signal.h"
 #include "arm_internal.h"
 
 /****************************************************************************
@@ -67,9 +70,9 @@ void arm_sigdeliver(void)
 
   board_autoled_on(LED_SIGNAL);
 
-  sinfo("rtcb=%p sigdeliver=%p sigpendactionq.head=%p\n",
-        rtcb, rtcb->xcp.sigdeliver, rtcb->sigpendactionq.head);
-  DEBUGASSERT(rtcb->xcp.sigdeliver != NULL);
+  sinfo("rtcb=%p sigpendactionq.head=%p\n",
+        rtcb, rtcb->sigpendactionq.head);
+  DEBUGASSERT((rtcb->flags & TCB_FLAG_SIGDELIVER) != 0);
 
 retry:
 #ifdef CONFIG_SMP
@@ -87,11 +90,7 @@ retry:
 
   while (rtcb->irqcount > 0)
     {
-#ifdef CONFIG_ARMV8M_USEBASEPRI
       leave_critical_section((uint8_t)regs[REG_BASEPRI]);
-#else
-      leave_critical_section((uint16_t)regs[REG_PRIMASK]);
-#endif
     }
 #endif /* CONFIG_SMP */
 
@@ -105,7 +104,7 @@ retry:
 
   /* Deliver the signal */
 
-  ((sig_deliver_t)rtcb->xcp.sigdeliver)(rtcb);
+  nxsig_deliver(rtcb);
 
   /* Output any debug messages BEFORE restoring errno (because they may
    * alter errno), then disable interrupts again and restore the original
@@ -137,11 +136,7 @@ retry:
       (rtcb->flags & TCB_FLAG_SIGNAL_ACTION) == 0)
     {
 #ifdef CONFIG_SMP
-#  ifdef CONFIG_ARMV8M_USEBASEPRI
       leave_critical_section((uint8_t)regs[REG_BASEPRI]);
-#  else
-      leave_critical_section((uint16_t)regs[REG_PRIMASK]);
-#  endif
 #endif
       goto retry;
     }
@@ -156,7 +151,9 @@ retry:
    * could be modified by a hostile program.
    */
 
-  rtcb->xcp.sigdeliver = NULL;  /* Allows next handler to be scheduled */
+  /* Allows next handler to be scheduled */
+
+  rtcb->flags &= ~TCB_FLAG_SIGDELIVER;
 
   /* Then restore the correct state for this thread of
    * execution.
@@ -167,12 +164,11 @@ retry:
   /* We need to keep the IRQ lock until task switching */
 
   rtcb->irqcount++;
-#ifdef CONFIG_ARMV8M_USEBASEPRI
   leave_critical_section((uint8_t)regs[REG_BASEPRI]);
-#else
-  leave_critical_section((uint16_t)regs[REG_PRIMASK]);
-#endif
   rtcb->irqcount--;
 #endif
-  arm_fullcontextrestore(regs);
+
+  rtcb->xcp.regs = rtcb->xcp.saved_regs;
+  arm_fullcontextrestore();
+  UNUSED(regs);
 }

@@ -1,6 +1,8 @@
 # ##############################################################################
 # libs/libc/queue/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -18,15 +20,4 @@
 #
 # ##############################################################################
 
-target_sources(
-  c
-  PRIVATE sq_addafter.c
-          sq_remlast.c
-          sq_remfirst.c
-          sq_remafter.c
-          sq_count.c
-          dq_addafter.c
-          dq_remlast.c
-          dq_remfirst.c
-          dq_remafter.c
-          dq_count.c)
+target_sources(c PRIVATE queue.c)

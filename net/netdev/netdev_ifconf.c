@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/netdev/netdev_ifconf.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -175,6 +177,7 @@ static int ifconf_ipv6_addr_callback(FAR struct net_driver_s *dev,
         (FAR struct sockaddr_in6 *)&req->lifr_addr;
 #ifdef CONFIG_NETDEV_MULTIPLE_IPv6
       int addr_idx = addr - dev->d_ipv6;
+      char ifname[IFNAMSIZ + 16];
 
       /* There is space for information about another adapter.  Within
        * each ifreq structure, lifr_name will receive the interface
@@ -186,12 +189,14 @@ static int ifconf_ipv6_addr_callback(FAR struct net_driver_s *dev,
         {
           /* eth0:0 represents the second addr on eth0 */
 
-          if (snprintf(req->lifr_name, IFNAMSIZ,
+          if (snprintf(ifname, sizeof(ifname),
                        "%s:%d", dev->d_ifname, addr_idx - 1) >= IFNAMSIZ)
             {
               nwarn("WARNING: ifname too long to print %s:%d\n",
                     dev->d_ifname, addr_idx - 1);
             }
+
+          strlcpy(req->lifr_name, ifname, IFNAMSIZ);
         }
       else
 #endif

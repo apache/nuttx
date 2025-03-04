@@ -1,8 +1,7 @@
 /****************************************************************************
  * drivers/mtd/mtd_nandram.c
- * This file deals with the raw lower half of the device driver, and manages
- * reading and writing to the actual NAND Flash device that has been emulated
- * from RAM.
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

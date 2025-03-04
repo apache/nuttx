@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/pthread/pthread_mutexconsistent.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -82,10 +84,6 @@ int pthread_mutex_consistent(FAR pthread_mutex_t *mutex)
     {
       pid_t pid;
 
-      /* Make sure the mutex is stable while we make the following checks. */
-
-      sched_lock();
-
       pid = mutex_get_holder(&mutex->mutex);
 
       /* Is the mutex available? */
@@ -131,8 +129,6 @@ int pthread_mutex_consistent(FAR pthread_mutex_t *mutex)
           mutex->flags &= _PTHREAD_MFLAGS_ROBUST;
           ret = OK;
         }
-
-      sched_unlock();
     }
 
   sinfo("Returning %d\n", ret);

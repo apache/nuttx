@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/ceva/src/common/ceva_switchcontext.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -69,37 +71,25 @@ void ceva_switchcontext(uint32_t **saveregs, uint32_t *restoreregs)
 
 void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
 {
-  /* Update scheduler parameters */
-
-  sched_suspend_scheduler(rtcb);
-
   /* Are we in an interrupt handler? */
 
-  if (CURRENT_REGS)
+  if (up_current_regs())
     {
       /* Yes, then we have to do things differently.
-       * Just copy the CURRENT_REGS into the OLD rtcb.
+       * Just copy the current_regs into the OLD rtcb.
        */
 
-      rtcb->xcp.regs = CURRENT_REGS;
-
-      /* Update scheduler parameters */
-
-      sched_resume_scheduler(tcb);
+      rtcb->xcp.regs = up_current_regs();
 
       /* Then switch contexts */
 
-      CURRENT_REGS = tcb->xcp.regs;
+      up_set_current_regs(tcb->xcp.regs);
     }
 
   /* No, then we will need to perform the user context switch */
 
   else
     {
-      /* Update scheduler parameters */
-
-      sched_resume_scheduler(tcb);
-
       /* Switch context to the context of the task at the head of the
        * ready to run list.
        */

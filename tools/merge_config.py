@@ -2,6 +2,8 @@
 ############################################################################
 # tools/merge_config.py
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -26,7 +28,7 @@ try:
     from kconfiglib import Kconfig
 except ModuleNotFoundError:
     print("Please execute the following command to install dependencies:")
-    print("pip install kconfiglib")
+    print("sudo apt install python3-kconfiglib")
     exit()
 
 script_path = os.path.split(os.path.realpath(__file__))[0]

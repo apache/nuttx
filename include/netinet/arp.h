@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/netinet/arp.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -63,13 +65,13 @@
 
 /* All ARP ioctls take a pointer to a struct arpreq as their parameter: */
 
-struct arpreq
+struct aligned_data(sizeof(uint32_t)) arpreq
 {
   struct sockaddr arp_pa;                /* Protocol address */
   struct sockaddr arp_ha;                /* Hardware address */
   struct sockaddr arp_netmask;           /* Netmask of protocol address */
   uint8_t         arp_flags;             /* Flags */
-  uint8_t         arp_dev[IFNAMSIZ + 1]; /* Device name (zero terminated) */
+  char            arp_dev[IFNAMSIZ + 1]; /* Device name (zero terminated) */
 };
 
 /****************************************************************************

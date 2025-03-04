@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/shm/shm_unlink.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -77,12 +79,7 @@ static int file_shm_unlink(FAR const char *name)
 
   SETUP_SEARCH(&desc, fullpath, false);
 
-  ret = inode_lock();
-  if (ret < 0)
-    {
-      goto errout_with_search;
-    }
-
+  inode_lock();
   ret = inode_find(&desc);
   if (ret < 0)
     {
@@ -117,8 +114,8 @@ static int file_shm_unlink(FAR const char *name)
 #endif
 
   /* Remove the old inode from the tree. If we hold a reference count
-   * on the inode, it will not be deleted now.  This will set the
-   * FSNODEFLAG_DELETED bit in the inode flags.
+   * on the inode, it will not be deleted now. This will put reference of
+   * inode.
    */
 
   ret = inode_remove(fullpath);
@@ -139,7 +136,6 @@ errout_with_inode:
   inode_release(inode);
 errout_with_sem:
   inode_unlock();
-errout_with_search:
   RELEASE_SEARCH(&desc);
 #ifdef CONFIG_FS_NOTIFY
   if (ret >= 0)

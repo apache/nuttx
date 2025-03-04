@@ -432,6 +432,8 @@ menuconfig CDCACM
 	bool "USB Modem (CDC/ACM) support"
 	default n
 	select SERIAL_REMOVABLE
+	select SERIAL_TXDMA
+	select SERIAL_RXDMA
 	---help---
 		Enables USB Modem (CDC/ACM) support
 
@@ -444,9 +446,17 @@ config CDCACM_CONSOLE
 		Register the USB device as /dev/console so that is will be used
 		as the console device.
 
+config CDCACM_HAVE_EPINTIN
+	bool "CDC/ACM have interrupt IN endpoint"
+	default y
+	---help---
+		Using the interrupt endpoint as notification element to transmit
+		asynchronous event information from device to host.
+
 config CDCACM_IFLOWCONTROL
 	bool "CDC/ACM RTS flow control"
 	default n
+	depends on CDCACM_HAVE_EPINTIN
 	select SERIAL_IFLOWCONTROL
 	---help---
 		Enable CDC/ACM RTS flow control
@@ -648,6 +658,14 @@ config CDCACM_NWRREQS
 	default 4
 	---help---
 		The number of write/read requests that can be in flight
+
+config CDCACM_BULKOUT_REQLEN
+	int "Size of one read request buffer"
+	default 512 if USBDEV_DUALSPEED
+	default 256 if !USBDEV_DUALSPEED
+	---help---
+		Read buffer size maybe larger than the maxpacket size. Increasing
+		the buffer size can effectively improve the transmission speed.
 
 config CDCACM_BULKIN_REQLEN
 	int "Size of one write request buffer"
@@ -1741,6 +1759,12 @@ config USBDEV_FS_NPOLLWAITERS
 	default 2
 	---help---
 		Maximum number of threads that can be waiting on poll().
+
+config USBDEV_FS_NEP0REQS
+	int "Number of ep0 requests that can be in flight"
+	default 4
+	---help---
+		The number of ep0 requests that can be in flight
 
 endif #USBDEV_FS
 

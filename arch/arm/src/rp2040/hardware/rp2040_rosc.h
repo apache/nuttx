@@ -1,10 +1,8 @@
 /****************************************************************************
  * arch/arm/src/rp2040/hardware/rp2040_rosc.h
  *
- * Generated from rp2040.svd originally provided by
- *   Raspberry Pi (Trading) Ltd.
- *
- * Copyright 2020 (c) 2020 Raspberry Pi (Trading) Ltd.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2020 Raspberry Pi (Trading) Ltd.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

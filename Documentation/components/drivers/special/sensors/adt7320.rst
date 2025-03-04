@@ -1,0 +1,7 @@
+ADT7320
+=======
+
+Contributed by Augusto Fraga Giachero
+
+The ADT7320 is a SPI temperature sensor with a temperature range of
+−40°C to +150°C.

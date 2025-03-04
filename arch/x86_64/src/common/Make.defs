@@ -1,6 +1,8 @@
 ############################################################################
 # arch/x86_64/src/common/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -18,12 +20,28 @@
 #
 ############################################################################
 
+ifeq ($(CONFIG_BUILD_KERNEL),y)
+crt0$(OBJEXT): crt0.c
+	$(CC) $(CFLAGS) -c common$(DELIM)crt0.c -o crt0$(OBJEXT)
+
+STARTUP_OBJS = crt0$(OBJEXT)
+endif
+
 # Common x86_64 files
 
 CMN_CSRCS += x86_64_allocateheap.c x86_64_copystate.c x86_64_exit.c
-CMN_CSRCS += x86_64_getintstack.c x86_64_mdelay.c x86_64_initialize.c
+CMN_CSRCS += x86_64_getintstack.c  x86_64_initialize.c x86_64_nputs.c
 CMN_CSRCS += x86_64_modifyreg8.c x86_64_modifyreg16.c x86_64_modifyreg32.c
-CMN_CSRCS += x86_64_nputs.c x86_64_switchcontext.c x86_64_udelay.c
+CMN_CSRCS += x86_64_switchcontext.c x86_64_tlb.c
+
+ifeq ($(CONFIG_ARCH_HAVE_FORK),y)
+CMN_CSRCS += x86_64_fork.c
+CMN_ASRCS += fork.S
+endif
+
+ifeq ($(CONFIG_LIB_SYSCALL),y)
+CMN_CSRCS += x86_64_syscall.c
+endif
 
 ifeq ($(CONFIG_PCI),y)
 CMN_CSRCS += x86_64_pci.c
@@ -33,10 +51,29 @@ ifeq ($(CONFIG_ARCH_X86_64_ACPI),y)
 CMN_CSRCS += x86_64_acpi.c
 endif
 
+ifeq ($(CONFIG_SCHED_THREAD_LOCAL),y)
+CMN_CSRCS += x86_64_tls.c
+endif
+
 ifeq ($(CONFIG_ARCH_USE_MMU),y)
 CMN_CSRCS += x86_64_mmu.c
 endif
 
 ifeq ($(CONFIG_ARCH_ADDRENV),y)
-CMN_CSRCS += x86_64_addrenv.c x86_64_addrenv_perms.c
+CMN_CSRCS += x86_64_addrenv.c x86_64_pgalloc.c x86_64_addrenv_perms.c
+endif
+
+ifeq ($(CONFIG_ARCH_KERNEL_STACK),y)
+CMN_CSRCS += x86_64_addrenv_kstack.c
+endif
+
+ifneq ($(CONFIG_BUILD_FLAT),y)
+CMN_CSRCS  += x86_64_task_start.c
+CMN_CSRCS  += x86_64_pthread_start.c
+CMN_CSRCS  += x86_64_signal_dispatch.c
+CMN_UASRCS += x86_64_signal_handler.S
+endif
+
+ifndef CONFIG_ALARM_ARCH
+CMN_CSRCS += x86_64_udelay.c x86_64_mdelay.c
 endif

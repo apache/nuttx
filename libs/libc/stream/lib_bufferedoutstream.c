@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/stream/lib_bufferedoutstream.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -61,12 +63,12 @@ static int bufferedoutstream_flush(FAR struct lib_outstream_s *self)
  * Name: bufferedoutstream_puts
  ****************************************************************************/
 
-static int bufferedoutstream_puts(FAR struct lib_outstream_s *self,
-                                 FAR const void *buf, int len)
+static ssize_t bufferedoutstream_puts(FAR struct lib_outstream_s *self,
+                                      FAR const void *buf, size_t len)
 {
   FAR struct lib_bufferedoutstream_s *stream =
     (FAR struct lib_bufferedoutstream_s *)self;
-  int ret = len;
+  size_t ret = len;
 
   if (stream->pending + len <= CONFIG_STREAM_OUT_BUFFER_SIZE)
     {

@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/ioexpander/gpio_lower_half.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -113,6 +115,33 @@ static const uint32_t g_gplh_inttype[GPIO_NPINTYPES] =
   IOEXPANDER_VAL_RISING,          /* GPIO_INTERRUPT_RISING_PIN */
   IOEXPANDER_VAL_FALLING,         /* GPIO_INTERRUPT_FALLING_PIN */
   IOEXPANDER_VAL_BOTH,            /* GPIO_INTERRUPT_BOTH_PIN */
+  CONFIG_GPIO_LOWER_HALF_INTTYPE, /* GPIO_INTERRUPT_PIN_WAKEUP */
+  IOEXPANDER_VAL_HIGH,            /* GPIO_INTERRUPT_HIGH_PIN_WAKEUP */
+  IOEXPANDER_VAL_LOW,             /* GPIO_INTERRUPT_LOW_PIN_WAKEUP */
+  IOEXPANDER_VAL_RISING,          /* GPIO_INTERRUPT_RISING_PIN_WAKEUP */
+  IOEXPANDER_VAL_FALLING,         /* GPIO_INTERRUPT_FALLING_PIN_WAKEUP */
+  IOEXPANDER_VAL_BOTH,            /* GPIO_INTERRUPT_BOTH_PIN_WAKEUP */
+};
+
+static const uint32_t g_gplh_wakeuptype[GPIO_NPINTYPES] =
+{
+  IOEXPANDER_WAKEUP_DISABLE,         /* GPIO_INPUT_PIN */
+  IOEXPANDER_WAKEUP_DISABLE,         /* GPIO_INPUT_PIN_PULLUP */
+  IOEXPANDER_WAKEUP_DISABLE,         /* GPIO_INPUT_PIN_PULLDOWN */
+  IOEXPANDER_WAKEUP_DISABLE,         /* GPIO_OUTPUT_PIN */
+  IOEXPANDER_WAKEUP_DISABLE,         /* GPIO_OUTPUT_PIN_OPENDRAIN */
+  IOEXPANDER_WAKEUP_DISABLE,         /* GPIO_INTERRUPT_PIN */
+  IOEXPANDER_WAKEUP_DISABLE,         /* GPIO_INTERRUPT_HIGH_PIN */
+  IOEXPANDER_WAKEUP_DISABLE,         /* GPIO_INTERRUPT_LOW_PIN */
+  IOEXPANDER_WAKEUP_DISABLE,         /* GPIO_INTERRUPT_RISING_PIN */
+  IOEXPANDER_WAKEUP_DISABLE,         /* GPIO_INTERRUPT_FALLING_PIN */
+  IOEXPANDER_WAKEUP_DISABLE,         /* GPIO_INTERRUPT_BOTH_PIN */
+  IOEXPANDER_WAKEUP_ENABLE,          /* GPIO_INTERRUPT_PIN_WAKEUP */
+  IOEXPANDER_WAKEUP_ENABLE,          /* GPIO_INTERRUPT_HIGH_PIN_WAKEUP */
+  IOEXPANDER_WAKEUP_ENABLE,          /* GPIO_INTERRUPT_LOW_PIN_WAKEUP */
+  IOEXPANDER_WAKEUP_ENABLE,          /* GPIO_INTERRUPT_RISING_PIN_WAKEUP */
+  IOEXPANDER_WAKEUP_ENABLE,          /* GPIO_INTERRUPT_FALLING_PIN_WAKEUP */
+  IOEXPANDER_WAKEUP_ENABLE,          /* GPIO_INTERRUPT_BOTH_PIN_WAKEUP */
 };
 
 /****************************************************************************
@@ -357,6 +386,9 @@ static int gplh_setpintype(FAR struct gpio_dev_s *gpio,
 
       IOEXP_SETOPTION(ioe, pin, IOEXPANDER_OPTION_INTCFG,
                       (FAR void *)(uintptr_t)g_gplh_inttype[pintype]);
+
+      IOEXP_SETOPTION(ioe, pin, IOEXPANDER_OPTION_WAKEUPCFG,
+                      (FAR void *)(uintptr_t)g_gplh_wakeuptype[pintype]);
     }
 
   gpio->gp_pintype = pintype;

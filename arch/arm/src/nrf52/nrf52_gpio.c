@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/nrf52/nrf52_gpio.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -35,6 +37,12 @@
 #include "arm_internal.h"
 #include "hardware/nrf52_gpio.h"
 #include "nrf52_gpio.h"
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static spinlock_t g_nrf52_gpio_lock = SP_UNLOCKED;
 
 /****************************************************************************
  * Private Functions
@@ -273,7 +281,7 @@ int nrf52_gpio_config(nrf52_pinset_t cfgset)
 
       pin = GPIO_PIN_DECODE(cfgset);
 
-      flags = spin_lock_irqsave(NULL);
+      flags = spin_lock_irqsave(&g_nrf52_gpio_lock);
 
       /* First, configure the port as a generic input so that we have a
        * known starting point and consistent behavior during the re-
@@ -308,7 +316,7 @@ int nrf52_gpio_config(nrf52_pinset_t cfgset)
           ret = -EINVAL;
         }
 
-      spin_unlock_irqrestore(NULL, flags);
+      spin_unlock_irqrestore(&g_nrf52_gpio_lock, flags);
     }
   else
     {
@@ -409,7 +417,14 @@ bool nrf52_gpio_read(nrf52_pinset_t pinset)
 
   /* Get register address */
 
-  offset = nrf52_gpio_regget(port, NRF52_GPIO_IN_OFFSET);
+  if ((pinset & GPIO_FUNC_MASK) == GPIO_OUTPUT)
+    {
+      offset = nrf52_gpio_regget(port, NRF52_GPIO_OUTSET_OFFSET);
+    }
+  else
+    {
+      offset = nrf52_gpio_regget(port, NRF52_GPIO_IN_OFFSET);
+    }
 
   /* Get register value */
 

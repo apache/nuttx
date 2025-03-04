@@ -1,6 +1,8 @@
 ############################################################################
 # drivers/serial/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -48,6 +50,10 @@ ifeq ($(CONFIG_RPMSG_UART),y)
   CSRCS += uart_rpmsg.c
 endif
 
+ifeq ($(CONFIG_UART_HOSTFS),y)
+  CSRCS += uart_hostfs.c
+endif
+
 # Pseudo-terminal support
 
 ifeq ($(CONFIG_PSEUDOTERM),y)
@@ -73,6 +79,12 @@ endif
 
 ifeq ($(CONFIG_RAM_UART),y)
   CSRCS += uart_ram.c
+endif
+
+# UART PCI drivers
+
+ifeq ($(CONFIG_16550_PCI_UART),y)
+  CSRCS += uart_pci_16550.c
 endif
 
 # Include serial build support

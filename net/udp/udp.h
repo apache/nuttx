@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/udp/udp.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -41,13 +43,11 @@
 #  include <nuttx/wqueue.h>
 #endif
 
-#if defined(CONFIG_NET_UDP) && !defined(CONFIG_NET_UDP_NO_STACK)
+#ifdef NET_UDP_HAVE_STACK
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#define NET_UDP_HAVE_STACK 1
 
 #ifdef CONFIG_NET_UDP_WRITE_BUFFERS
 /* UDP write buffer dump macros */
@@ -176,6 +176,14 @@ struct udp_wrbuffer_s
   FAR struct iob_s *wb_iob;        /* Head of the I/O buffer chain */
 };
 #endif
+
+struct udp_callback_s
+{
+  FAR struct net_driver_s *dev;
+  FAR struct udp_conn_s *conn;
+  FAR struct devif_callback_s *udp_cb;
+  FAR sem_t *sem;
+};
 
 /****************************************************************************
  * Public Data
@@ -473,21 +481,6 @@ int udp_setsockopt(FAR struct socket *psock, int option,
 #endif
 
 /****************************************************************************
- * Name: udp_wrbuffer_initialize
- *
- * Description:
- *   Initialize the list of free write buffers
- *
- * Assumptions:
- *   Called once early initialization.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_UDP_WRITE_BUFFERS
-void udp_wrbuffer_initialize(void);
-#endif /* CONFIG_NET_UDP_WRITE_BUFFERS */
-
-/****************************************************************************
  * Name: udp_wrbuffer_alloc
  *
  * Description:
@@ -726,6 +719,19 @@ uint16_t udp_callback(FAR struct net_driver_s *dev,
                       FAR struct udp_conn_s *conn, uint16_t flags);
 
 /****************************************************************************
+ * Name: udp_callback_cleanup
+ *
+ * Description:
+ *   Cleanup data and cb when thread is canceled.
+ *
+ * Input Parameters:
+ *   arg - A pointer with conn and callback struct.
+ *
+ ****************************************************************************/
+
+void udp_callback_cleanup(FAR void *arg);
+
+/****************************************************************************
  * Name: psock_udp_recvfrom
  *
  * Description:
@@ -895,7 +901,7 @@ int udp_writebuffer_notifier_setup(worker_t worker,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_UDP_NOTIFIER
-void udp_notifier_teardown(int key);
+void udp_notifier_teardown(FAR void *key);
 #endif
 
 /****************************************************************************
@@ -1023,5 +1029,5 @@ uint16_t udpip_hdrsize(FAR struct udp_conn_s *conn);
 }
 #endif
 
-#endif /* CONFIG_NET_UDP && !CONFIG_NET_UDP_NO_STACK */
+#endif /* NET_UDP_HAVE_STACK */
 #endif /* __NET_UDP_UDP_H */

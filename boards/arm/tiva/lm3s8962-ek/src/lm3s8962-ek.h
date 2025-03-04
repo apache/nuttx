@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/tiva/lm3s8962-ek/src/lm3s8962-ek.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The

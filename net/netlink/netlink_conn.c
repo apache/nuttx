@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/netlink/netlink_conn.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -39,6 +41,7 @@
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netlink.h>
+#include <nuttx/tls.h>
 
 #include "utils/utils.h"
 #include "netlink/netlink.h"
@@ -46,19 +49,22 @@
 #ifdef CONFIG_NET_NETLINK
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifndef CONFIG_NETLINK_MAX_CONNS
+#  define CONFIG_NETLINK_MAX_CONNS 0
+#endif
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
 /* The array containing all NetLink connections. */
 
-#if CONFIG_NETLINK_PREALLOC_CONNS > 0
-static struct netlink_conn_s
-       g_netlink_connections[CONFIG_NETLINK_PREALLOC_CONNS];
-#endif
-
-/* A list of all free NetLink connections */
-
-static dq_queue_t g_free_netlink_connections;
+NET_BUFPOOL_DECLARE(g_netlink_connections, sizeof(struct netlink_conn_s),
+                    CONFIG_NETLINK_PREALLOC_CONNS,
+                    CONFIG_NETLINK_ALLOC_CONNS, CONFIG_NETLINK_MAX_CONNS);
 static mutex_t g_free_lock = NXMUTEX_INITIALIZER;
 
 /* A list of all allocated NetLink connections */
@@ -144,17 +150,6 @@ netlink_get_terminator(FAR const struct nlmsghdr *req)
 
 void netlink_initialize(void)
 {
-#if CONFIG_NETLINK_PREALLOC_CONNS > 0
-  int i;
-
-  for (i = 0; i < CONFIG_NETLINK_PREALLOC_CONNS; i++)
-    {
-      /* Mark the connection closed and move it to the free list */
-
-      dq_addlast(&g_netlink_connections[i].sconn.node,
-                 &g_free_netlink_connections);
-    }
-#endif
 }
 
 /****************************************************************************
@@ -169,38 +164,12 @@ void netlink_initialize(void)
 FAR struct netlink_conn_s *netlink_alloc(void)
 {
   FAR struct netlink_conn_s *conn;
-#if CONFIG_NETLINK_ALLOC_CONNS > 0
-  int i;
-#endif
 
   /* The free list is protected by a mutex. */
 
   nxmutex_lock(&g_free_lock);
-#if CONFIG_NETLINK_ALLOC_CONNS > 0
-  if (dq_peek(&g_free_netlink_connections) == NULL)
-    {
-#if CONFIG_NETLINK_MAX_CONNS > 0
-      if (dq_count(&g_active_netlink_connections) +
-          CONFIG_NETLINK_ALLOC_CONNS > CONFIG_NETLINK_MAX_CONNS)
-        {
-          nxmutex_unlock(&g_free_lock);
-          return NULL;
-        }
-#endif
 
-      conn = kmm_zalloc(sizeof(*conn) * CONFIG_NETLINK_ALLOC_CONNS);
-      if (conn != NULL)
-        {
-          for (i = 0; i < CONFIG_NETLINK_ALLOC_CONNS; i++)
-            {
-              dq_addlast(&conn[i].sconn.node, &g_free_netlink_connections);
-            }
-        }
-    }
-#endif
-
-  conn = (FAR struct netlink_conn_s *)
-           dq_remfirst(&g_free_netlink_connections);
+  conn = NET_BUFPOOL_TRYALLOC(g_netlink_connections);
   if (conn != NULL)
     {
       /* Enqueue the connection into the active list */
@@ -242,22 +211,9 @@ void netlink_free(FAR struct netlink_conn_s *conn)
       kmm_free(resp);
     }
 
-  /* If this is a preallocated or a batch allocated connection store it in
-   * the free connections list. Else free it.
-   */
+  /* Free the connection */
 
-#if CONFIG_NETLINK_ALLOC_CONNS == 1
-  if (conn < g_netlink_connections || conn >= (g_netlink_connections +
-      CONFIG_NETLINK_PREALLOC_CONNS))
-    {
-      kmm_free(conn);
-    }
-  else
-#endif
-    {
-      memset(conn, 0, sizeof(*conn));
-      dq_addlast(&conn->sconn.node, &g_free_netlink_connections);
-    }
+  NET_BUFPOOL_FREE(g_netlink_connections, conn);
 
   nxmutex_unlock(&g_free_lock);
 }
@@ -483,19 +439,23 @@ netlink_tryget_response(FAR struct netlink_conn_s *conn)
  *   Note:  The network will be momentarily locked to support exclusive
  *   access to the pending response list.
  *
+ * Input Parameters:
+ *   conn     - The Netlink connection
+ *   response - The next response from the head of the pending response list
+ *              is returned.  This function will block until a response is
+ *              received if the pending response list is empty.  NULL will be
+ *              returned only in the event of a failure.
+ *
  * Returned Value:
- *   The next response from the head of the pending response list is
- *   returned.  This function will block until a response is received if
- *   the pending response list is empty.  NULL will be returned only in the
- *   event of a failure.
+ *   Zero (OK) is returned if the notification was successfully set up.
+ *   A negated error value is returned if an unexpected error occurred
  *
  ****************************************************************************/
 
-FAR struct netlink_response_s *
-netlink_get_response(FAR struct netlink_conn_s *conn)
+int netlink_get_response(FAR struct netlink_conn_s *conn,
+                         FAR struct netlink_response_s **response)
 {
-  FAR struct netlink_response_s *resp;
-  int ret;
+  int ret = OK;
 
   DEBUGASSERT(conn != NULL);
 
@@ -505,7 +465,7 @@ netlink_get_response(FAR struct netlink_conn_s *conn)
    */
 
   net_lock();
-  while ((resp = netlink_tryget_response(conn)) == NULL)
+  while ((*response = netlink_tryget_response(conn)) == NULL)
     {
       sem_t waitsem;
 
@@ -527,7 +487,9 @@ netlink_get_response(FAR struct netlink_conn_s *conn)
         {
           /* Wait for a response to be queued */
 
-          nxsem_post(&waitsem);
+          tls_cleanup_push(tls_get_info(), netlink_notifier_teardown, conn);
+          ret = net_sem_wait(&waitsem);
+          tls_cleanup_pop(tls_get_info(), 0);
         }
 
       /* Clean-up the semaphore */
@@ -544,7 +506,7 @@ netlink_get_response(FAR struct netlink_conn_s *conn)
     }
 
   net_unlock();
-  return resp;
+  return ret;
 }
 
 /****************************************************************************

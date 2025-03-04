@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/group/group_join.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -100,9 +102,9 @@ void group_join(FAR struct pthread_tcb_s *tcb)
 
   /* Add the member to the group */
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&group->tg_lock);
   sq_addfirst(&tcb->cmn.member, &group->tg_members);
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&group->tg_lock, flags);
 }
 
 #endif /* !CONFIG_DISABLE_PTHREAD */

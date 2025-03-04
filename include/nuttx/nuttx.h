@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/nuttx.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -27,11 +29,39 @@
 
 #include <nuttx/config.h>
 
-#include <stddef.h>
+#ifndef __ASSEMBLY__
+#  include <stddef.h>
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* Align definitions */
+
+#ifndef IS_ALIGNED
+#  define IS_ALIGNED(x,a)      (((x) & ((a) - 1)) == 0)
+#endif
+
+#ifndef ALIGN_MASK
+#  define ALIGN_MASK(s)        ((1 << (s)) - 1)
+#endif
+
+#ifndef ALIGN_UP
+#  define ALIGN_UP(x,a)        ((((x) + (a) - 1) / (a)) * (a))
+#endif
+
+#ifndef ALIGN_UP_MASK
+#  define ALIGN_UP_MASK(x,m)   (((x) + (m)) & ~(m))
+#endif
+
+#ifndef ALIGN_DOWN
+#  define ALIGN_DOWN(x,a)      (((x) / (a)) * (a))
+#endif
+
+#ifndef ALIGN_DOWN_MASK
+#  define ALIGN_DOWN_MASK(x,m) ((x) & ~(m))
+#endif
 
 /* Name: container_of
  *
@@ -47,10 +77,5 @@
 
 #define container_of(ptr, type, member) \
   ((type *)((uintptr_t)(ptr) - offsetof(type, member)))
-
-/* Stringify the arguments */
-
-#define STRINGIFY_(x) #x
-#define STRINGIFY(x)  STRINGIFY_(x)
 
 #endif /* __INCLUDE_NUTTX_NUTTX_H */

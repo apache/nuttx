@@ -1,8 +1,8 @@
 /****************************************************************************
  * libs/libc/machine/arm/armv8-m/gnu/arch_strlen.S
  *
- * Copyright (c) 2010-2011,2013 Linaro Limited
- *  All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2010-2011,2013 Linaro Limited, 2015 ARM Ltd.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -115,7 +115,7 @@
 #define tmp1		r4		/* Overlaps const_0  */
 #define tmp2		r5
 
-def_fn	strlen p2align=6
+def_fn	ARCH_LIBCFUN(strlen) p2align=6
 #if __ARM_FEATURE_PAC_DEFAULT
 #  if __ARM_FEATURE_BTI_DEFAULT
 	pacbti	ip, lr, sp
@@ -203,6 +203,6 @@ def_fn	strlen p2align=6
 	movne	data1a, const_m1
 	mov	const_0, #0
 	b	.Lstart_realigned
-	.size	strlen, . - strlen
+	.size	ARCH_LIBCFUN(strlen), . - ARCH_LIBCFUN(strlen)
 
 #endif

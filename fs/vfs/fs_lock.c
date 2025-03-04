@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/vfs/fs_lock.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -36,8 +38,9 @@
 #include <nuttx/mutex.h>
 #include <nuttx/list.h>
 
-#include "sched/sched.h"
 #include "lock.h"
+#include "sched/sched.h"
+#include "fs_heap.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -219,7 +222,7 @@ static int file_lock_normalize(FAR struct file *filep,
 static void file_lock_delete(FAR struct file_lock_s *file_lock)
 {
   list_delete(&file_lock->fl_node);
-  kmm_free(file_lock);
+  fs_heap_free(file_lock);
 }
 
 /****************************************************************************
@@ -236,7 +239,7 @@ static void file_lock_delete_bucket(FAR struct file_lock_bucket_s *bucket,
    * released
    */
 
-  if (list_is_empty(&bucket->list))
+  if (list_is_empty(&bucket->list) && bucket->nwaiter == 0)
     {
       /* At this point, the file has no lock information context, so we can
        * remove it from the hash table, and the return result is 0 or 1 means
@@ -299,8 +302,8 @@ file_lock_find_bucket(FAR const char *filepath)
 
 static void file_lock_free_entry(FAR ENTRY *entry)
 {
-  lib_free(entry->key);
-  kmm_free(entry->data);
+  fs_heap_free(entry->key);
+  fs_heap_free(entry->data);
 }
 
 /****************************************************************************
@@ -314,7 +317,7 @@ file_lock_create_bucket(FAR const char *filepath)
   FAR ENTRY *hretvalue;
   ENTRY item;
 
-  bucket = kmm_zalloc(sizeof(*bucket));
+  bucket = fs_heap_zalloc(sizeof(*bucket));
   if (bucket == NULL)
     {
       return NULL;
@@ -322,10 +325,10 @@ file_lock_create_bucket(FAR const char *filepath)
 
   /* Creating an instance store */
 
-  item.key = strdup(filepath);
+  item.key = fs_heap_strdup(filepath);
   if (item.key == NULL)
     {
-      kmm_free(bucket);
+      fs_heap_free(bucket);
       return NULL;
     }
 
@@ -333,8 +336,8 @@ file_lock_create_bucket(FAR const char *filepath)
 
   if (hsearch_r(item, ENTER, &hretvalue, &g_file_lock_table) == 0)
     {
-      lib_free(item.key);
-      kmm_free(bucket);
+      fs_heap_free(item.key);
+      fs_heap_free(bucket);
       return NULL;
     }
 
@@ -496,7 +499,7 @@ static int file_lock_modify(FAR struct file *filep,
 
       /* insert a new lock */
 
-      new_file_lock = kmm_zalloc(sizeof(struct file_lock_s));
+      new_file_lock = fs_heap_zalloc(sizeof(struct file_lock_s));
       if (new_file_lock == NULL)
         {
           return -ENOMEM;
@@ -514,7 +517,7 @@ static int file_lock_modify(FAR struct file *filep,
         {
           /* Splitting old locks */
 
-          new_file_lock = kmm_zalloc(sizeof(struct file_lock_s));
+          new_file_lock = fs_heap_zalloc(sizeof(struct file_lock_s));
           if (new_file_lock == NULL)
             {
               return -ENOMEM;

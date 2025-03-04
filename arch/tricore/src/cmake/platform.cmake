@@ -1,6 +1,8 @@
 # ##############################################################################
 # arch/tricore/src/cmake/platform.cmake
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -17,6 +19,7 @@
 # the License.
 #
 # ##############################################################################
+
 get_directory_property(TOOLCHAIN_DIR_FLAGS DIRECTORY ${CMAKE_SOURCE_DIR}
                                                      COMPILE_OPTIONS)
 
@@ -36,37 +39,39 @@ endforeach()
 
 separate_arguments(CMAKE_C_FLAG_ARGS NATIVE_COMMAND ${CMAKE_C_FLAGS})
 
-execute_process(
-  COMMAND ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} ${NUTTX_EXTRA_FLAGS}
-          --print-libgcc-file-name
-  OUTPUT_STRIP_TRAILING_WHITESPACE
-  OUTPUT_VARIABLE extra_library)
-list(APPEND EXTRA_LIB ${extra_library})
-if(NOT CONFIG_LIBM)
+if(CONFIG_TRICORE_TOOLCHAIN_GNU)
   execute_process(
     COMMAND ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} ${NUTTX_EXTRA_FLAGS}
-            --print-file-name=libm.a
+            --print-libgcc-file-name
     OUTPUT_STRIP_TRAILING_WHITESPACE
     OUTPUT_VARIABLE extra_library)
   list(APPEND EXTRA_LIB ${extra_library})
-endif()
-if(CONFIG_LIBSUPCXX)
-  execute_process(
-    COMMAND ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} ${NUTTX_EXTRA_FLAGS}
-            --print-file-name=libsupc++.a
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-    OUTPUT_VARIABLE extra_library)
-  list(APPEND EXTRA_LIB ${extra_library})
-endif()
-if(CONFIG_ARCH_COVERAGE)
-  execute_process(
-    COMMAND ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} ${NUTTX_EXTRA_FLAGS}
-            --print-file-name=libgcov.a
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-    OUTPUT_VARIABLE extra_library)
-  list(APPEND EXTRA_LIB ${extra_library})
-endif()
+  if(CONFIG_LIBM_TOOLCHAIN)
+    execute_process(
+      COMMAND ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} ${NUTTX_EXTRA_FLAGS}
+              --print-file-name=libm.a
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+      OUTPUT_VARIABLE extra_library)
+    list(APPEND EXTRA_LIB ${extra_library})
+  endif()
+  if(CONFIG_LIBSUPCXX)
+    execute_process(
+      COMMAND ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} ${NUTTX_EXTRA_FLAGS}
+              --print-file-name=libsupc++.a
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+      OUTPUT_VARIABLE extra_library)
+    list(APPEND EXTRA_LIB ${extra_library})
+  endif()
+  if(CONFIG_COVERAGE_TOOLCHAIN)
+    execute_process(
+      COMMAND ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} ${NUTTX_EXTRA_FLAGS}
+              --print-file-name=libgcov.a
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+      OUTPUT_VARIABLE extra_library)
+    list(APPEND EXTRA_LIB ${extra_library})
+  endif()
 
-nuttx_add_extra_library(${EXTRA_LIB})
+  nuttx_add_extra_library(${EXTRA_LIB})
 
-set(PREPROCES ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} -E -P -x c)
+  set(PREPROCESS ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} -E -P -x c)
+endif()

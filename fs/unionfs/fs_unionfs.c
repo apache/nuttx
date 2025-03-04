@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/unionfs/fs_unionfs.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -46,6 +48,7 @@
 #include <nuttx/mutex.h>
 
 #include "inode/inode.h"
+#include "fs_heap.h"
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_FS_UNIONFS)
 
@@ -229,7 +232,9 @@ const struct mountpt_operations g_unionfs_operations =
   unionfs_ioctl,       /* ioctl */
   NULL,                /* mmap */
   unionfs_truncate,    /* truncate */
-  NULL,                /* pool */
+  NULL,                /* poll */
+  NULL,                /* readv */
+  NULL,                /* writev */
 
   unionfs_sync,        /* sync */
   unionfs_dup,         /* dup */
@@ -728,11 +733,11 @@ static FAR char *unionfs_relpath(FAR const char *path, FAR const char *name)
 
       if (path[pathlen - 1] == '/')
         {
-          ret = asprintf(&relpath, "%s%s", path, name);
+          ret = fs_heap_asprintf(&relpath, "%s%s", path, name);
         }
       else
         {
-          ret = asprintf(&relpath, "%s/%s", path, name);
+          ret = fs_heap_asprintf(&relpath, "%s/%s", path, name);
         }
 
       /* Handle errors */
@@ -748,11 +753,11 @@ static FAR char *unionfs_relpath(FAR const char *path, FAR const char *name)
     }
   else
     {
-      /* There is no path... just duplicate the name (so that kmm_free()
+      /* There is no path... just duplicate the name (so that fs_heap_free()
        * will work later).
        */
 
-      return strdup(name);
+      return fs_heap_strdup(name);
     }
 }
 
@@ -839,18 +844,18 @@ static void unionfs_destroy(FAR struct unionfs_inode_s *ui)
 
   if (ui->ui_fs[0].um_prefix)
     {
-      lib_free(ui->ui_fs[0].um_prefix);
+      fs_heap_free(ui->ui_fs[0].um_prefix);
     }
 
   if (ui->ui_fs[1].um_prefix)
     {
-      lib_free(ui->ui_fs[1].um_prefix);
+      fs_heap_free(ui->ui_fs[1].um_prefix);
     }
 
   /* And finally free the allocated unionfs state structure as well */
 
   nxmutex_destroy(&ui->ui_lock);
-  kmm_free(ui);
+  fs_heap_free(ui);
 }
 
 /****************************************************************************
@@ -882,7 +887,7 @@ static int unionfs_open(FAR struct file *filep, FAR const char *relpath,
   /* Allocate a container to hold the open file system information */
 
   uf = (FAR struct unionfs_file_s *)
-    kmm_zalloc(sizeof(struct unionfs_file_s));
+    fs_heap_zalloc(sizeof(struct unionfs_file_s));
   if (uf == NULL)
     {
       ret = -ENOMEM;
@@ -1000,7 +1005,7 @@ static int unionfs_close(FAR struct file *filep)
 
   /* Free the open file container */
 
-  kmm_free(uf);
+  fs_heap_free(uf);
   filep->f_priv = NULL;
   return ret;
 }
@@ -1248,7 +1253,7 @@ static int unionfs_dup(FAR const struct file *oldp, FAR struct file *newp)
   /* Allocate a new container for the union FS open file */
 
   newpriv = (FAR struct unionfs_file_s *)
-    kmm_malloc(sizeof(struct unionfs_file_s));
+    fs_heap_malloc(sizeof(struct unionfs_file_s));
   if (newpriv != NULL)
     {
       /* Clone the old file structure into the newly allocated one */
@@ -1264,7 +1269,7 @@ static int unionfs_dup(FAR const struct file *oldp, FAR struct file *newp)
           ret = ops->dup(&oldpriv->uf_file, &newpriv->uf_file);
           if (ret < 0)
             {
-              kmm_free(newpriv);
+              fs_heap_free(newpriv);
               newpriv = NULL;
             }
         }
@@ -1413,7 +1418,7 @@ static int unionfs_opendir(FAR struct inode *mountpt,
   DEBUGASSERT(mountpt != NULL && mountpt->i_private != NULL);
   ui = mountpt->i_private;
 
-  udir = kmm_zalloc(sizeof(*udir));
+  udir = fs_heap_zalloc(sizeof(*udir));
   if (udir == NULL)
     {
       return -ENOMEM;
@@ -1435,7 +1440,7 @@ static int unionfs_opendir(FAR struct inode *mountpt,
 
   if (strlen(relpath) > 0)
     {
-      udir->fu_relpath = strdup(relpath);
+      udir->fu_relpath = fs_heap_strdup(relpath);
       if (!udir->fu_relpath)
         {
           goto errout_with_lock;
@@ -1521,14 +1526,14 @@ static int unionfs_opendir(FAR struct inode *mountpt,
 errout_with_relpath:
   if (udir->fu_relpath != NULL)
     {
-      lib_free(udir->fu_relpath);
+      fs_heap_free(udir->fu_relpath);
     }
 
 errout_with_lock:
   nxmutex_unlock(&ui->ui_lock);
 
 errout_with_udir:
-  kmm_free(udir);
+  fs_heap_free(udir);
   return ret;
 }
 
@@ -1591,10 +1596,10 @@ static int unionfs_closedir(FAR struct inode *mountpt,
 
   if (udir->fu_relpath != NULL)
     {
-      kmm_free(udir->fu_relpath);
+      fs_heap_free(udir->fu_relpath);
     }
 
-  kmm_free(udir);
+  fs_heap_free(udir);
 
   /* Decrement the count of open reference.  If that count would go to zero
    * and if the file system has been unmounted, then destroy the file system
@@ -1775,7 +1780,7 @@ static int unionfs_readdir(FAR struct inode *mountpt,
 
                       /* Free the allocated relpath */
 
-                      lib_free(relpath);
+                      fs_heap_free(relpath);
 
                       /* Check for a duplicate */
 
@@ -1862,7 +1867,7 @@ static int unionfs_readdir(FAR struct inode *mountpt,
 
                   /* Free the allocated relpath */
 
-                  lib_free(relpath);
+                  fs_heap_free(relpath);
                 }
             }
         }
@@ -1945,7 +1950,7 @@ static int unionfs_bind(FAR struct inode *blkdriver, FAR const void *data,
 
   /* Parse options from mount syscall */
 
-  dup = tmp = strdup(data);
+  dup = tmp = fs_heap_strdup(data);
   if (!dup)
     {
       return -ENOMEM;
@@ -1974,7 +1979,7 @@ static int unionfs_bind(FAR struct inode *blkdriver, FAR const void *data,
   /* Call unionfs_dobind to do the real work. */
 
   ret = unionfs_dobind(fspath1, prefix1, fspath2, prefix2, handle);
-  lib_free(dup);
+  fs_heap_free(dup);
 
   return ret;
 }
@@ -2595,7 +2600,7 @@ static int unionfs_dobind(FAR const char *fspath1, FAR const char *prefix1,
    */
 
   ui = (FAR struct unionfs_inode_s *)
-    kmm_zalloc(sizeof(struct unionfs_inode_s));
+    fs_heap_zalloc(sizeof(struct unionfs_inode_s));
   if (!ui)
     {
       ferr("ERROR: Failed to allocated union FS state structure\n");
@@ -2624,10 +2629,10 @@ static int unionfs_dobind(FAR const char *fspath1, FAR const char *prefix1,
 
   if (prefix1 && strlen(prefix1) > 0)
     {
-      ui->ui_fs[0].um_prefix = strdup(prefix1);
+      ui->ui_fs[0].um_prefix = fs_heap_strdup(prefix1);
       if (ui->ui_fs[0].um_prefix == NULL)
         {
-          ferr("ERROR: strdup(prefix1) failed\n");
+          ferr("ERROR: fs_heap_strdup(prefix1) failed\n");
           ret = -ENOMEM;
           goto errout_with_fs2;
         }
@@ -2635,10 +2640,10 @@ static int unionfs_dobind(FAR const char *fspath1, FAR const char *prefix1,
 
   if (prefix2 && strlen(prefix2) > 0)
     {
-      ui->ui_fs[1].um_prefix = strdup(prefix2);
+      ui->ui_fs[1].um_prefix = fs_heap_strdup(prefix2);
       if (ui->ui_fs[1].um_prefix == NULL)
         {
-          ferr("ERROR: strdup(prefix2) failed\n");
+          ferr("ERROR: fs_heap_strdup(prefix2) failed\n");
           ret = -ENOMEM;
           goto errout_with_prefix1;
         }
@@ -2660,7 +2665,7 @@ static int unionfs_dobind(FAR const char *fspath1, FAR const char *prefix1,
 errout_with_prefix1:
   if (ui->ui_fs[0].um_prefix != NULL)
     {
-      lib_free(ui->ui_fs[0].um_prefix);
+      fs_heap_free(ui->ui_fs[0].um_prefix);
     }
 
 errout_with_fs2:
@@ -2671,7 +2676,7 @@ errout_with_fs1:
 
 errout_with_uinode:
   nxmutex_destroy(&ui->ui_lock);
-  kmm_free(ui);
+  fs_heap_free(ui);
   return ret;
 }
 

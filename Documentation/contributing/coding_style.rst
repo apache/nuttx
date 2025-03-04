@@ -8,9 +8,28 @@ C Coding Standard
 NuttX follows a specific coding style which needs to be followed at all times
 a contribution to be accepted. Please read this document before working on
 new code so that you can follow the style from the start. To check your code
-for conformance to the coding style, you should use the `nxstyle <#nxstyle>`_
-tool included under ``tools/`` in the main NuttX repository, or enable the
-pre-commit functionality described in `pre-commit <#precommit>`__.
+for conformance to the coding style, you should use the checkpatch.sh script
+(that calls the `nxstyle <#nxstyle>`_ tool) included under ``tools/`` in the
+main NuttX repository, or enable the pre-commit functionality described in
+`pre-commit <#precommit>`__.
+
+**************************
+Quick Check for Compliance
+**************************
+
+You should check for coding style issues before submitting your Pull Request.
+There is a script that you can run to check for coding styles issue:
+
+  .. code-block:: bash
+
+    ./tools/checkpatch.sh -g HEAD~...HEAD
+
+Alternatevily you can run this script passing the .c file or .h header you
+want to check:
+
+  .. code-block:: bash
+
+    ./tools/checkpatch.sh -f path/to/your/file.c
 
 *******************
 General Conventions

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/src/common/arm64_fpu.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -70,8 +72,8 @@ int  arm64_fpu_procfs_register(void);
 void arm64_fpu_disable(void);
 void arm64_fpu_enable(void);
 
-void arm64_fpu_save(struct fpu_reg *saved_fp_context);
-void arm64_fpu_restore(struct fpu_reg *saved_fp_context);
+void arm64_fpu_save(uint64_t *context);
+void arm64_fpu_restore(uint64_t *context);
 
 #endif /* __ASSEMBLY__ */
 

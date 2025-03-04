@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/string.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -107,6 +109,14 @@ FAR void  *memmem(FAR const void *haystack, size_t haystacklen,
 
 void explicit_bzero(FAR void *s, size_t n);
 int timingsafe_bcmp(FAR const void *b1, FAR const void *b2, size_t n);
+
+#ifdef __KERNEL__
+#  define strdup(s)       nx_strdup(s)
+#  define strndup(s,sz)   nx_strndup(s,sz)
+#endif
+
+FAR char *nx_strdup(FAR const char *s) malloc_like;
+FAR char *nx_strndup(FAR const char *s, size_t size) malloc_like;
 
 #if CONFIG_FORTIFY_SOURCE > 0
 fortify_function(strcat) FAR char *strcat(FAR char *dest,

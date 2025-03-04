@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/xtensa/esp32s3/esp32s3-lcd-ev/src/esp32s3_lcd.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -29,7 +31,6 @@
 #include <debug.h>
 #include <assert.h>
 #include <sys/param.h>
-#include <unistd.h>
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <nuttx/video/fb.h>

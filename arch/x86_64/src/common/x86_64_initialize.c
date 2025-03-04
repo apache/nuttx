@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/x86_64/src/common/x86_64_initialize.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -143,6 +145,12 @@ void up_initialize(void)
 
 #ifndef CONFIG_NETDEV_LATEINIT
   x86_64_netinitialize();
+#endif
+
+  /* Initialize the PCI bus */
+
+#ifdef CONFIG_PCI
+  x86_64_pci_init();
 #endif
 
   /* Initialize USB -- device and/or host */

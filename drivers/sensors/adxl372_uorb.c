@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/sensors/adxl372_uorb.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -27,9 +29,9 @@
 #include <debug.h>
 #include <stdio.h>
 #include <string.h>
-
 #include <sys/param.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/kthread.h>
 #include <nuttx/signal.h>
@@ -55,7 +57,7 @@ struct adxl372_sensor_s
   int                        devno;
 #ifdef CONFIG_SENSORS_ADXL372_POLL
   bool                       enabled;
-  unsigned long              interval;
+  uint32_t                   interval;
   sem_t                      run;
 #endif
 };
@@ -82,7 +84,7 @@ static int adxl372_activate(FAR struct sensor_lowerhalf_s *lower,
                             bool enable);
 static int adxl372_set_interval(FAR struct sensor_lowerhalf_s *lower,
                                 FAR struct file *filep,
-                                FAR unsigned long *period_us);
+                                FAR uint32_t *period_us);
 #ifndef CONFIG_SENSORS_ADXL372_POLL
 static int adxl372_fetch(FAR struct sensor_lowerhalf_s *lower,
                          FAR struct file *filep,
@@ -105,9 +107,11 @@ static const struct sensor_ops_s g_adxl372_accel_ops =
 #else
   adxl372_fetch,
 #endif
+  NULL,                 /* flush */
   NULL,                 /* selftest */
   NULL,                 /* set_calibvalue */
   NULL,                 /* calibrate */
+  NULL                  /* get_info */
   NULL                  /* control */
 };
 
@@ -410,7 +414,7 @@ static int adxl372_activate(FAR struct sensor_lowerhalf_s *lower,
 
 static int adxl372_set_interval(FAR struct sensor_lowerhalf_s *lower,
                                 FAR struct file *filep,
-                                FAR unsigned long *period_us)
+                                FAR uint32_t *period_us)
 {
 #ifdef CONFIG_SENSORS_ADXL372_POLL
   FAR struct adxl372_sensor_s *priv = (FAR struct adxl372_sensor_s *)lower;

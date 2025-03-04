@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/src/imx9/imx9_lpuart.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -294,36 +296,29 @@
 
 struct imx9_uart_s
 {
-  struct uart_dev_s dev;    /* Generic UART device */
-  const uint32_t uartbase;  /* Base address of UART registers */
-  const int uartnum;        /* LPUART number 1-8 */
-  uint32_t baud;            /* Configured baud */
-  uint32_t ie;              /* Saved enabled interrupts */
-  uint8_t  irq;             /* IRQ associated with this UART */
-  uint8_t  parity;          /* 0=none, 1=odd, 2=even */
-  uint8_t  bits;            /* Number of bits (7 or 8) */
-#if defined(CONFIG_SERIAL_RS485CONTROL) || defined(CONFIG_SERIAL_IFLOWCONTROL)
-  uint8_t  inviflow:1;      /* Invert RTS sense */
-  const uint32_t rts_gpio;  /* LPUART RTS GPIO pin configuration */
-#endif
-#ifdef CONFIG_SERIAL_OFLOWCONTROL
-  const uint32_t cts_gpio;  /* LPUART CTS GPIO pin configuration */
-#endif
-  uint8_t  stopbits2:1;     /* 1: Configure with 2 stop bits vs 1 */
-#ifdef CONFIG_SERIAL_IFLOWCONTROL
-  uint8_t  iflow:1;         /* input flow control (RTS) enabled */
-#endif
-#ifdef CONFIG_SERIAL_OFLOWCONTROL
-  uint8_t  oflow:1;         /* output flow control (CTS) enabled */
-#endif
-#ifdef CONFIG_SERIAL_RS485CONTROL
-  uint8_t rs485mode:1;      /* We are in RS485 (RTS on TX) mode */
-#endif
+  struct uart_dev_s dev;     /* Generic UART device */
+
+  const uint32_t uartbase;   /* Base address of UART registers */
+  const int      uartnum;    /* LPUART number 1-8 */
+  const bool     usects;     /* output flow control (CTS) available */
+  const bool     userts;     /* input flow control (RTS) available */
+  const bool     rs485mode;  /* We are in RS485 (RTS on TX) mode */
+  const bool     inviflow;   /* Invert RTS sense */
+  spinlock_t     lock;       /* Spinlock */
+  uint32_t       baud;       /* Configured baud */
+  uint32_t       ie;         /* Saved enabled interrupts */
+  uint8_t        irq;        /* IRQ associated with this UART */
+  uint8_t        parity;     /* 0=none, 1=odd, 2=even */
+  uint8_t        bits;       /* Number of bits (7 or 8) */
+  bool           stopbits2;  /* true: Configure with 2 stop bits vs 1 */
+  bool           oflow;      /* output flow control (CTS) enabled */
+  bool           iflow;      /* input flow control (RTS) enabled */
+
   /* TX DMA state */
 
 #ifdef SERIAL_HAVE_TXDMA
-  const unsigned int txch;  /* DMAMUX source of TX DMA request */
-  DMACH_HANDLE       txdma; /* currently-open transmit DMA stream */
+  const unsigned int txch;   /* DMAMUX source of TX DMA request */
+  DMACH_HANDLE       txdma;  /* currently-open transmit DMA stream */
 #endif
 
   /* RX DMA state */
@@ -369,10 +364,6 @@ static bool imx9_rxavailable(struct uart_dev_s *dev);
 static void imx9_txint(struct uart_dev_s *dev, bool enable);
 #endif
 
-#ifdef CONFIG_SERIAL_IFLOWCONTROL
-static bool imx9_rxflowcontrol(struct uart_dev_s *dev,
-                                  unsigned int nbuffered, bool upper);
-#endif
 static void imx9_send(struct uart_dev_s *dev, int ch);
 
 static bool imx9_txready(struct uart_dev_s *dev);
@@ -430,7 +421,7 @@ static const struct uart_ops_s g_lpuart_ops =
   .rxint          = imx9_rxint,
   .rxavailable    = imx9_rxavailable,
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-  .rxflowcontrol  = imx9_rxflowcontrol,
+  .rxflowcontrol  = NULL,
 #endif
   .send           = imx9_send,
   .txint          = imx9_txint,
@@ -451,7 +442,7 @@ static const struct uart_ops_s g_lpuart_rxtxdma_ops =
   .rxint          = imx9_dma_rxint,
   .rxavailable    = imx9_dma_rxavailable,
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-  .rxflowcontrol  = imx9_rxflowcontrol,
+  .rxflowcontrol  = NULL,
 #endif
   .send           = imx9_send,
   .txint          = imx9_dma_txint,
@@ -474,7 +465,7 @@ static const struct uart_ops_s g_lpuart_rxdma_ops =
   .rxint          = imx9_dma_rxint,
   .rxavailable    = imx9_dma_rxavailable,
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-  .rxflowcontrol  = imx9_rxflowcontrol,
+  .rxflowcontrol  = NULL,
 #endif
   .send           = imx9_send,
   .txint          = imx9_txint,
@@ -495,7 +486,7 @@ static const struct uart_ops_s g_lpuart_txdma_ops =
     .rxint          = imx9_rxint,
     .rxavailable    = imx9_rxavailable,
   #ifdef CONFIG_SERIAL_IFLOWCONTROL
-    .rxflowcontrol  = imx9_rxflowcontrol,
+    .rxflowcontrol  = NULL,
   #endif
     .send           = imx9_send,
     .txint          = imx9_dma_txint,
@@ -636,26 +627,22 @@ static struct imx9_uart_s g_lpuart1priv =
   .irq          = IMX9_IRQ_LPUART1,
   .parity       = CONFIG_LPUART1_PARITY,
   .bits         = CONFIG_LPUART1_BITS,
+  .lock         = SP_UNLOCKED,
   .stopbits2    = CONFIG_LPUART1_2STOP,
 #  if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_LPUART1_OFLOWCONTROL)
-  .oflow        = 1,
-  .cts_gpio     = GPIO_LPUART1_CTS,
+  .usects       = true,
 #  endif
 #  if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART1_IFLOWCONTROL)
-  .iflow        = 1,
-#  endif
-#  if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART1_RS485RTSCONTROL)) || \
-      (defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART1_IFLOWCONTROL)))
-  .rts_gpio     = GPIO_LPUART1_RTS,
+  .userts       = true,
 #  endif
 
 #  if (defined(CONFIG_SERIAL_RS485CONTROL) || defined(CONFIG_SERIAL_IFLOWCONTROL)) && \
       defined(CONFIG_LPUART1_INVERTIFLOWCONTROL)
-  .inviflow     = 1,
+  .inviflow     = true,
 #  endif
 
 #  if defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART1_RS485RTSCONTROL)
-  .rs485mode    = 1,
+  .rs485mode    = true,
 #  endif
 
 #  ifdef CONFIG_LPUART1_TXDMA
@@ -663,7 +650,7 @@ static struct imx9_uart_s g_lpuart1priv =
 #  endif
 #  ifdef CONFIG_LPUART1_RXDMA
   .rxch = DMA_REQUEST_MUXLPUART1RX,
-  .rxfifo        = g_lpuart1rxfifo,
+  .rxfifo       = g_lpuart1rxfifo,
 #  endif
 };
 #endif
@@ -700,26 +687,22 @@ static struct imx9_uart_s g_lpuart2priv =
   .irq          = IMX9_IRQ_LPUART2,
   .parity       = CONFIG_LPUART2_PARITY,
   .bits         = CONFIG_LPUART2_BITS,
+  .lock         = SP_UNLOCKED,
   .stopbits2    = CONFIG_LPUART2_2STOP,
 #  if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_LPUART2_OFLOWCONTROL)
-  .oflow        = 1,
-  .cts_gpio     = GPIO_LPUART2_CTS,
+  .usects       = true,
 #  endif
 #  if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART2_IFLOWCONTROL)
-  .iflow        = 1,
-#  endif
-#  if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART2_RS485RTSCONTROL)) || \
-      (defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART2_IFLOWCONTROL)))
-  .rts_gpio     = GPIO_LPUART2_RTS,
+  .userts       = true,
 #  endif
 
 #  if (defined(CONFIG_SERIAL_RS485CONTROL) || defined(CONFIG_SERIAL_IFLOWCONTROL)) && \
       defined(CONFIG_LPUART2_INVERTIFLOWCONTROL)
-  .inviflow     = 1,
+  .inviflow     = true,
 #  endif
 
 #  if defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART2_RS485RTSCONTROL)
-  .rs485mode    = 1,
+  .rs485mode    = true,
 #  endif
 
 #  ifdef CONFIG_LPUART2_TXDMA
@@ -764,26 +747,22 @@ static struct imx9_uart_s g_lpuart3priv =
   .irq          = IMX9_IRQ_LPUART3,
   .parity       = CONFIG_LPUART3_PARITY,
   .bits         = CONFIG_LPUART3_BITS,
+  .lock         = SP_UNLOCKED,
   .stopbits2    = CONFIG_LPUART3_2STOP,
 #  if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_LPUART3_OFLOWCONTROL)
-  .oflow        = 1,
-  .cts_gpio     = GPIO_LPUART3_CTS,
+  .usects       = true,
 #  endif
 #  if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART3_IFLOWCONTROL)
-  .iflow        = 1,
-#  endif
-#  if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART3_RS485RTSCONTROL)) || \
-      (defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART3_IFLOWCONTROL)))
-  .rts_gpio     = GPIO_LPUART3_RTS,
+  .userts       = true,
 #  endif
 
 #  if (defined(CONFIG_SERIAL_RS485CONTROL) || defined(CONFIG_SERIAL_IFLOWCONTROL)) && \
       defined(CONFIG_LPUART3_INVERTIFLOWCONTROL)
-  .inviflow     = 1,
+  .inviflow     = true,
 #  endif
 
 #  if defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART3_RS485RTSCONTROL)
-  .rs485mode    = 1,
+  .rs485mode    = true,
 #  endif
 
 #  ifdef CONFIG_LPUART3_TXDMA
@@ -828,26 +807,22 @@ static struct imx9_uart_s g_lpuart4priv =
   .irq          = IMX9_IRQ_LPUART4,
   .parity       = CONFIG_LPUART4_PARITY,
   .bits         = CONFIG_LPUART4_BITS,
+  .lock         = SP_UNLOCKED,
   .stopbits2    = CONFIG_LPUART4_2STOP,
 #  if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_LPUART4_OFLOWCONTROL)
-  .oflow        = 1,
-  .cts_gpio     = GPIO_LPUART4_CTS,
+  .usects       = true,
 #  endif
 #  if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART4_IFLOWCONTROL)
-  .iflow        = 1,
-#  endif
-#  if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART4_RS485RTSCONTROL)) || \
-      (defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART4_IFLOWCONTROL)))
-  .rts_gpio     = GPIO_LPUART4_RTS,
+  .userts       = true,
 #  endif
 
 #  if (defined(CONFIG_SERIAL_RS485CONTROL) || defined(CONFIG_SERIAL_IFLOWCONTROL)) && \
       defined(CONFIG_LPUART4_INVERTIFLOWCONTROL)
-  .inviflow     = 1,
+  .inviflow     = true,
 #  endif
 
 #  if defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART4_RS485RTSCONTROL)
-  .rs485mode    = 1,
+  .rs485mode    = true,
 #  endif
 
 #  ifdef CONFIG_LPUART4_TXDMA
@@ -892,26 +867,22 @@ static struct imx9_uart_s g_lpuart5priv =
   .irq          = IMX9_IRQ_LPUART5,
   .parity       = CONFIG_LPUART5_PARITY,
   .bits         = CONFIG_LPUART5_BITS,
+  .lock         = SP_UNLOCKED,
   .stopbits2    = CONFIG_LPUART5_2STOP,
 #  if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_LPUART5_OFLOWCONTROL)
-  .oflow        = 1,
-  .cts_gpio     = GPIO_LPUART5_CTS,
+  .usects       = true,
 #  endif
 #  if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART5_IFLOWCONTROL)
-  .iflow        = 1,
-#  endif
-#  if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART5_RS485RTSCONTROL)) || \
-      (defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART5_IFLOWCONTROL)))
-  .rts_gpio     = GPIO_LPUART5_RTS,
+  .userts       = true,
 #  endif
 
 #  if (defined(CONFIG_SERIAL_RS485CONTROL) || defined(CONFIG_SERIAL_IFLOWCONTROL)) && \
       defined(CONFIG_LPUART5_INVERTIFLOWCONTROL)
-  .inviflow     = 1,
+  .inviflow     = true,
 #  endif
 
 #  if defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART5_RS485RTSCONTROL)
-  .rs485mode    = 1,
+  .rs485mode    = true,
 #  endif
 
 #  ifdef CONFIG_LPUART5_TXDMA
@@ -956,26 +927,22 @@ static struct imx9_uart_s g_lpuart6priv =
   .irq          = IMX9_IRQ_LPUART6,
   .parity       = CONFIG_LPUART6_PARITY,
   .bits         = CONFIG_LPUART6_BITS,
+  .lock         = SP_UNLOCKED,
   .stopbits2    = CONFIG_LPUART6_2STOP,
 #  if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_LPUART6_OFLOWCONTROL)
-  .oflow        = 1,
-  .cts_gpio     = GPIO_LPUART6_CTS,
+  .usects       = true,
 #  endif
 #  if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART6_IFLOWCONTROL)
-  .iflow        = 1,
-#  endif
-#  if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART6_RS485RTSCONTROL)) || \
-      (defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART6_IFLOWCONTROL)))
-  .rts_gpio     = GPIO_LPUART6_RTS,
+  .userts       = true,
 #  endif
 
 #  if (defined(CONFIG_SERIAL_RS485CONTROL) || defined(CONFIG_SERIAL_IFLOWCONTROL)) && \
       defined(CONFIG_LPUART6_INVERTIFLOWCONTROL)
-  .inviflow     = 1,
+  .inviflow     = true,
 #  endif
 
 #  if defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART6_RS485RTSCONTROL)
-  .rs485mode    = 1,
+  .rs485mode    = true,
 #  endif
 
 #  ifdef CONFIG_LPUART6_TXDMA
@@ -1020,26 +987,22 @@ static struct imx9_uart_s g_lpuart7priv =
   .irq          = IMX9_IRQ_LPUART7,
   .parity       = CONFIG_LPUART7_PARITY,
   .bits         = CONFIG_LPUART7_BITS,
+  .lock         = SP_UNLOCKED,
   .stopbits2    = CONFIG_LPUART7_2STOP,
 #  if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_LPUART7_OFLOWCONTROL)
-  .oflow        = 1,
-  .cts_gpio     = GPIO_LPUART7_CTS,
+  .usects       = true,
 #  endif
 #  if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART7_IFLOWCONTROL)
-  .iflow        = 1,
-#  endif
-#  if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART7_RS485RTSCONTROL)) || \
-      (defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART7_IFLOWCONTROL)))
-  .rts_gpio     = GPIO_LPUART7_RTS,
+  .userts       = true,
 #  endif
 
 #  if (defined(CONFIG_SERIAL_RS485CONTROL) || defined(CONFIG_SERIAL_IFLOWCONTROL)) && \
       defined(CONFIG_LPUART7_INVERTIFLOWCONTROL)
-  .inviflow     = 1,
+  .inviflow     = true,
 #  endif
 
 #  if defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART7_RS485RTSCONTROL)
-  .rs485mode    = 1,
+  .rs485mode    = true,
 #  endif
 
 #  ifdef CONFIG_LPUART7_TXDMA
@@ -1084,26 +1047,22 @@ static struct imx9_uart_s g_lpuart8priv =
   .irq          = IMX9_IRQ_LPUART8,
   .parity       = CONFIG_LPUART8_PARITY,
   .bits         = CONFIG_LPUART8_BITS,
+  .lock         = SP_UNLOCKED,
   .stopbits2    = CONFIG_LPUART8_2STOP,
 #  if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_LPUART8_OFLOWCONTROL)
-  .oflow        = 1,
-  .cts_gpio     = GPIO_LPUART8_CTS,
+  .usects       = true,
 #  endif
 #  if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART8_IFLOWCONTROL)
-  .iflow        = 1,
-#  endif
-#  if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART8_RS485RTSCONTROL)) || \
-      (defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART8_IFLOWCONTROL)))
-  .rts_gpio     = GPIO_LPUART8_RTS,
+  .userts       = true,
 #  endif
 
 #  if (defined(CONFIG_SERIAL_RS485CONTROL) || defined(CONFIG_SERIAL_IFLOWCONTROL)) && \
       defined(CONFIG_LPUART8_INVERTIFLOWCONTROL)
-  .inviflow     = 1,
+  .inviflow     = true,
 #  endif
 
 #  if defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART8_RS485RTSCONTROL)
-  .rs485mode    = 1,
+  .rs485mode    = true,
 #  endif
 
 #  ifdef CONFIG_LPUART8_TXDMA
@@ -1171,13 +1130,11 @@ static int imx9_dma_nextrx(struct imx9_uart_s *priv)
  * Name: imx9_disableuartint
  ****************************************************************************/
 
-static inline void imx9_disableuartint(struct imx9_uart_s *priv,
-                                          uint32_t *ie)
+static inline void imx9_disableuartint_nolock(struct imx9_uart_s *priv,
+                                              uint32_t *ie)
 {
-  irqstate_t flags;
   uint32_t regval;
 
-  flags  = spin_lock_irqsave(NULL);
   regval = imx9_serialin(priv, IMX9_LPUART_CTRL_OFFSET);
 
   /* Return the current Rx and Tx interrupt state */
@@ -1189,29 +1146,45 @@ static inline void imx9_disableuartint(struct imx9_uart_s *priv,
 
   regval &= ~LPUART_ALL_INTS;
   imx9_serialout(priv, IMX9_LPUART_CTRL_OFFSET, regval);
-  spin_unlock_irqrestore(NULL, flags);
+}
+
+static inline void imx9_disableuartint(struct imx9_uart_s *priv,
+                                       uint32_t *ie)
+{
+  irqstate_t flags;
+
+  flags = spin_lock_irqsave(&priv->lock);
+  imx9_disableuartint_nolock(priv, ie);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************
  * Name: imx9_restoreuartint
  ****************************************************************************/
 
+static inline void imx9_restoreuartint_nolock(struct imx9_uart_s *priv,
+                                              uint32_t ie)
+{
+  uint32_t regval;
+
+  regval  = imx9_serialin(priv, IMX9_LPUART_CTRL_OFFSET);
+  regval &= ~LPUART_ALL_INTS;
+  regval |= ie;
+  imx9_serialout(priv, IMX9_LPUART_CTRL_OFFSET, regval);
+}
+
 static inline void imx9_restoreuartint(struct imx9_uart_s *priv,
-                                        uint32_t ie)
+                                       uint32_t ie)
 {
   irqstate_t flags;
-  uint32_t regval;
 
   /* Enable/disable any interrupts that are currently disabled but should be
    * enabled/disabled.
    */
 
-  flags   = spin_lock_irqsave(NULL);
-  regval  = imx9_serialin(priv, IMX9_LPUART_CTRL_OFFSET);
-  regval &= ~LPUART_ALL_INTS;
-  regval |= ie;
-  imx9_serialout(priv, IMX9_LPUART_CTRL_OFFSET, regval);
-  spin_unlock_irqrestore(NULL, flags);
+  flags = spin_lock_irqsave(&priv->lock);
+  imx9_restoreuartint_nolock(priv, ie);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************
@@ -1358,37 +1331,21 @@ static int imx9_setup(struct uart_dev_s *dev)
 {
   struct imx9_uart_s *priv = (struct imx9_uart_s *)dev;
 #ifndef CONFIG_SUPPRESS_LPUART_CONFIG
-  struct uart_config_s config =
-    {
-      0
-    };
-
+  struct uart_config_s config;
   int ret;
 
   /* Configure the UART */
 
+  memset(&config, 0, sizeof(config));
   config.baud       = priv->baud;       /* Configured baud */
   config.parity     = priv->parity;     /* 0=none, 1=odd, 2=even */
   config.bits       = priv->bits;       /* Number of bits (5-9) */
   config.stopbits2  = priv->stopbits2;  /* true: Configure with 2 stop bits instead of 1 */
-#ifdef CONFIG_SERIAL_OFLOWCONTROL
-  config.usects     = priv->oflow;      /* Flow control on outbound side */
-#endif
-#ifdef CONFIG_SERIAL_IFLOWCONTROL
-  /* Flow control on outbound side if not GPIO based */
 
-  if (priv->rts_gpio == 0)
-    {
-      config.userts = priv->iflow;
-    }
-
-#endif
-#ifdef CONFIG_SERIAL_RS485CONTROL
   config.users485   = priv->rs485mode;  /* Switch into RS485 mode */
-#endif
-#if defined(CONFIG_SERIAL_RS485CONTROL) || defined(CONFIG_SERIAL_IFLOWCONTROL)
+  config.userts     = priv->iflow;
   config.invrts     = priv->inviflow;   /* Inversion of outbound flow control */
-#endif
+  config.usects     = priv->oflow;
 
   ret = imx9_lpuart_configure(priv->uartbase, priv->uartnum, &config);
 
@@ -1541,8 +1498,6 @@ static int imx9_interrupt(int irq, void *context, void *arg)
   struct imx9_uart_s *priv;
   uint32_t usr;
   uint32_t lsr;
-  int passes = 0;
-  bool handled;
 
   DEBUGASSERT(dev != NULL && dev != NULL);
   priv = (struct imx9_uart_s *)dev;
@@ -1553,96 +1508,82 @@ static int imx9_interrupt(int irq, void *context, void *arg)
   pm_activity(PM_IDLE_DOMAIN, CONFIG_IMX9_PM_SERIAL_ACTIVITY);
 #endif
 
-  /* Loop until there are no characters to be transferred or,
-   * until we have been looping for a long time.
+  /* Get the current UART status and check for loop
+   * termination conditions
    */
 
-  handled = true;
-  for (passes = 0; passes < 256 && handled; passes++)
+  usr  = imx9_serialin(priv, IMX9_LPUART_STAT_OFFSET);
+
+  /* Removed all W1C from the last sr */
+
+  lsr  = usr & ~(LPUART_STAT_LBKDIF | LPUART_STAT_RXEDGIF |
+                 LPUART_STAT_IDLE   | LPUART_STAT_OR      |
+                 LPUART_STAT_NF     | LPUART_STAT_FE      |
+                 LPUART_STAT_PF     | LPUART_STAT_MA1F    |
+                 LPUART_STAT_MA2F);
+
+  /* Keep what we will service */
+
+  usr &= (LPUART_STAT_RDRF | LPUART_STAT_TDRE | LPUART_STAT_OR |
+          LPUART_STAT_FE | LPUART_STAT_NF | LPUART_STAT_PF |
+          LPUART_STAT_IDLE);
+
+  /* Clear serial overrun, parity and framing errors */
+
+  if ((usr & LPUART_STAT_OR) != 0)
     {
-      handled = false;
+      imx9_serialout(priv, IMX9_LPUART_STAT_OFFSET,
+                     LPUART_STAT_OR | lsr);
+    }
 
-      /* Get the current UART status and check for loop
-       * termination conditions
-       */
+  if ((usr & LPUART_STAT_NF) != 0)
+    {
+      imx9_serialout(priv, IMX9_LPUART_STAT_OFFSET,
+                     LPUART_STAT_NF | lsr);
+    }
 
-      usr  = imx9_serialin(priv, IMX9_LPUART_STAT_OFFSET);
+  if ((usr & LPUART_STAT_PF) != 0)
+    {
+      imx9_serialout(priv, IMX9_LPUART_STAT_OFFSET,
+                     LPUART_STAT_PF | lsr);
+    }
 
-      /* Removed all W1C from the last sr */
+  if ((usr & LPUART_STAT_FE) != 0)
+    {
+      imx9_serialout(priv, IMX9_LPUART_STAT_OFFSET,
+                     LPUART_STAT_FE | lsr);
+    }
 
-      lsr  = usr & ~(LPUART_STAT_LBKDIF | LPUART_STAT_RXEDGIF |
-                     LPUART_STAT_IDLE   | LPUART_STAT_OR      |
-                     LPUART_STAT_NF     | LPUART_STAT_FE      |
-                     LPUART_STAT_PF     | LPUART_STAT_MA1F    |
-                     LPUART_STAT_MA2F);
+  if ((usr & (LPUART_STAT_FE | LPUART_STAT_PF | LPUART_STAT_NF)) != 0)
+    {
+      /* Discard data */
 
-      /* Keep what we will service */
-
-      usr &= (LPUART_STAT_RDRF | LPUART_STAT_TDRE | LPUART_STAT_OR |
-              LPUART_STAT_FE | LPUART_STAT_NF | LPUART_STAT_PF |
-              LPUART_STAT_IDLE);
-
-      /* Clear serial overrun, parity and framing errors */
-
-      if ((usr & LPUART_STAT_OR) != 0)
-        {
-          imx9_serialout(priv, IMX9_LPUART_STAT_OFFSET,
-                            LPUART_STAT_OR | lsr);
-        }
-
-      if ((usr & LPUART_STAT_NF) != 0)
-        {
-          imx9_serialout(priv, IMX9_LPUART_STAT_OFFSET,
-                            LPUART_STAT_NF | lsr);
-        }
-
-      if ((usr & LPUART_STAT_PF) != 0)
-        {
-          imx9_serialout(priv, IMX9_LPUART_STAT_OFFSET,
-                            LPUART_STAT_PF | lsr);
-        }
-
-      if ((usr & LPUART_STAT_FE) != 0)
-        {
-          imx9_serialout(priv, IMX9_LPUART_STAT_OFFSET,
-                            LPUART_STAT_FE | lsr);
-        }
-
-      if ((usr & (LPUART_STAT_FE | LPUART_STAT_PF | LPUART_STAT_NF)) != 0)
-        {
-          /* Discard data */
-
-          imx9_serialin(priv, IMX9_LPUART_DATA_OFFSET);
-        }
+      imx9_serialin(priv, IMX9_LPUART_DATA_OFFSET);
+    }
 
 #ifdef SERIAL_HAVE_RXDMA
-      /* The line going to idle, deliver any fractions of RX data */
+  /* The line going to idle, deliver any fractions of RX data */
 
-      if ((usr & LPUART_STAT_IDLE) != 0)
-        {
-          imx9_serialout(priv, IMX9_LPUART_STAT_OFFSET,
-                            LPUART_STAT_IDLE | lsr);
-          imx9_dma_rxcallback(priv->rxdma, priv, false, LPUART_STAT_IDLE);
-        }
+  if ((usr & LPUART_STAT_IDLE) != 0)
+    {
+      imx9_serialout(priv, IMX9_LPUART_STAT_OFFSET,
+                     LPUART_STAT_IDLE | lsr);
+      imx9_dma_rxcallback(priv->rxdma, priv, false, LPUART_STAT_IDLE);
+    }
 #endif
 
-      /* Handle incoming, receive bytes */
+  /* Handle incoming, receive bytes */
 
-      if ((usr & LPUART_STAT_RDRF) != 0 &&
-          (priv->ie & LPUART_CTRL_RIE) != 0)
-        {
-          uart_recvchars(dev);
-          handled = true;
-        }
+  if ((priv->ie & LPUART_CTRL_RIE) != 0 && imx9_rxavailable(&priv->dev))
+    {
+      uart_recvchars(dev);
+    }
 
-      /* Handle outgoing, transmit bytes */
+  /* Handle outgoing, transmit bytes */
 
-      if ((usr & LPUART_STAT_TDRE) != 0 &&
-          (priv->ie & LPUART_CTRL_TIE) != 0)
-        {
-          uart_xmitchars(dev);
-          handled = true;
-        }
+  if ((priv->ie & LPUART_CTRL_TIE) != 0)
+    {
+      uart_xmitchars(dev);
     }
 
   return OK;
@@ -1658,9 +1599,12 @@ static int imx9_interrupt(int irq, void *context, void *arg)
 
 static int imx9_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
-#if defined(CONFIG_SERIAL_TIOCSERGSTRUCT) || defined(CONFIG_SERIAL_TERMIOS)
+#if defined(CONFIG_SERIAL_TIOCSERGSTRUCT)   || \
+    defined(CONFIG_SERIAL_TERMIOS)          || \
+    defined(CONFIG_IMX9_LPUART_SINGLEWIRE ) || \
+    defined(CONFIG_IMX9_LPUART_INVERT )
   struct inode *inode = filep->f_inode;
-  struct uart_dev_s *dev   = inode->i_private;
+  struct uart_dev_s *dev = inode->i_private;
   irqstate_t flags;
 #endif
   int ret   = OK;
@@ -1702,15 +1646,16 @@ static int imx9_ioctl(struct file *filep, int cmd, unsigned long arg)
 
         /* Return stop bits */
 
-        termiosp->c_cflag |= (priv->stopbits2) ? CSTOPB : 0;
+        termiosp->c_cflag |= priv->stopbits2 ? CSTOPB : 0;
 
         /* Return flow control */
 
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
-        termiosp->c_cflag |= ((priv->oflow) ? CCTS_OFLOW : 0);
+        termiosp->c_cflag |= (priv->oflow ? CCTS_OFLOW : 0);
+
 #endif
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-        termiosp->c_cflag |= ((priv->iflow) ? CRTS_IFLOW : 0);
+        termiosp->c_cflag |= (priv->iflow ? CRTS_IFLOW : 0);
 #endif
         /* Return baud */
 
@@ -1758,12 +1703,12 @@ static int imx9_ioctl(struct file *filep, int cmd, unsigned long arg)
 
         if ((!termiosp)
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
-            || ((termiosp->c_cflag & CCTS_OFLOW) && (priv->cts_gpio == 0))
+            || ((termiosp->c_cflag & CCTS_OFLOW) && !priv->usects)
 #endif
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-            || ((termiosp->c_cflag & CRTS_IFLOW) && (priv->rts_gpio == 0))
+            || ((termiosp->c_cflag & CRTS_IFLOW) && !priv->userts)
 #endif
-           )
+            )
           {
             ret = -EINVAL;
             break;
@@ -1829,25 +1774,22 @@ static int imx9_ioctl(struct file *filep, int cmd, unsigned long arg)
             priv->parity    = parity;
             priv->bits      = nbits;
             priv->stopbits2 = stop2;
-#ifdef CONFIG_SERIAL_OFLOWCONTROL
             priv->oflow     = (termiosp->c_cflag & CCTS_OFLOW) != 0;
-#endif
-#ifdef CONFIG_SERIAL_IFLOWCONTROL
             priv->iflow     = (termiosp->c_cflag & CRTS_IFLOW) != 0;
-#endif
+
             /* effect the changes immediately - note that we do not
              * implement TCSADRAIN / TCSAFLUSH
              */
 
-            flags  = spin_lock_irqsave(NULL);
-            imx9_disableuartint(priv, &ie);
+            flags = spin_lock_irqsave(&priv->lock);
+            imx9_disableuartint_nolock(priv, &ie);
             ret = dev->ops->setup(dev);
 
             /* Restore the interrupt state */
 
-            imx9_restoreuartint(priv, ie);
+            imx9_restoreuartint_nolock(priv, ie);
             priv->ie = ie;
-            spin_unlock_irqrestore(NULL, flags);
+            spin_unlock_irqrestore(&priv->lock, flags);
           }
       }
       break;
@@ -1857,11 +1799,10 @@ static int imx9_ioctl(struct file *filep, int cmd, unsigned long arg)
     case TIOCSSINGLEWIRE:
       {
         uint32_t regval;
-        irqstate_t flags;
         struct imx9_uart_s *priv = (struct imx9_uart_s *)dev;
 
-        flags  = spin_lock_irqsave(NULL);
-        regval   = imx9_serialin(priv, IMX9_LPUART_CTRL_OFFSET);
+        flags  = spin_lock_irqsave(&priv->lock);
+        regval = imx9_serialin(priv, IMX9_LPUART_CTRL_OFFSET);
 
         if ((arg & SER_SINGLEWIRE_ENABLED) != 0)
           {
@@ -1874,7 +1815,7 @@ static int imx9_ioctl(struct file *filep, int cmd, unsigned long arg)
 
         imx9_serialout(priv, IMX9_LPUART_CTRL_OFFSET, regval);
 
-        spin_unlock_irqrestore(NULL, flags);
+        spin_unlock_irqrestore(&priv->lock, flags);
       }
       break;
 #endif
@@ -1885,10 +1826,9 @@ static int imx9_ioctl(struct file *filep, int cmd, unsigned long arg)
         uint32_t ctrl;
         uint32_t stat;
         uint32_t regval;
-        irqstate_t flags;
         struct imx9_uart_s *priv = (struct imx9_uart_s *)dev;
 
-        flags  = spin_lock_irqsave(NULL);
+        flags  = spin_lock_irqsave(&priv->lock);
         ctrl   = imx9_serialin(priv, IMX9_LPUART_CTRL_OFFSET);
         stat   = imx9_serialin(priv, IMX9_LPUART_STAT_OFFSET);
         regval = ctrl;
@@ -1927,7 +1867,7 @@ static int imx9_ioctl(struct file *filep, int cmd, unsigned long arg)
         imx9_serialout(priv, IMX9_LPUART_STAT_OFFSET, stat);
         imx9_serialout(priv, IMX9_LPUART_CTRL_OFFSET, ctrl);
 
-        spin_unlock_irqrestore(NULL, flags);
+        spin_unlock_irqrestore(&priv->lock, flags);
       }
       break;
 #endif
@@ -1981,7 +1921,7 @@ static void imx9_rxint(struct uart_dev_s *dev, bool enable)
 
   /* Enable interrupts for data available at Rx */
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&priv->lock);
   if (enable)
     {
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
@@ -1997,7 +1937,7 @@ static void imx9_rxint(struct uart_dev_s *dev, bool enable)
   regval &= ~LPUART_ALL_INTS;
   regval |= priv->ie;
   imx9_serialout(priv, IMX9_LPUART_CTRL_OFFSET, regval);
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 #endif
 
@@ -2017,99 +1957,8 @@ static bool imx9_rxavailable(struct uart_dev_s *dev)
 
   /* Return true is data is ready in the Rx FIFO */
 
-  regval = imx9_serialin(priv, IMX9_LPUART_STAT_OFFSET);
-  return ((regval & LPUART_STAT_RDRF) != 0);
-}
-#endif
-
-/****************************************************************************
- * Name: imx9_rxflowcontrol
- *
- * Description:
- *   Called when Rx buffer is full (or exceeds configured watermark levels
- *   if CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS is defined).
- *   Return true if UART activated RX flow control to block more incoming
- *   data
- *
- * Input Parameters:
- *   dev       - UART device instance
- *   nbuffered - the number of characters currently buffered
- *               (if CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS is
- *               not defined the value will be 0 for an empty buffer or the
- *               defined buffer size for a full buffer)
- *   upper     - true indicates the upper watermark was crossed where
- *               false indicates the lower watermark has been crossed
- *
- * Returned Value:
- *   true if RX flow control activated.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SERIAL_IFLOWCONTROL
-static bool imx9_rxflowcontrol(struct uart_dev_s *dev,
-                             unsigned int nbuffered, bool upper)
-{
-  struct imx9_uart_s *priv = (struct imx9_uart_s *)dev;
-
-  if (priv->iflow && (priv->rts_gpio != 0))
-    {
-      /* Assert/de-assert nRTS set it high resume/stop sending */
-
-      imx9_gpiowrite(priv->rts_gpio, upper);
-
-      if (upper)
-        {
-          /* With heavy Rx traffic, RXNE might be set and data pending.
-           * Returning 'true' in such case would cause RXNE left unhandled
-           * and causing interrupt storm. Sending end might be also be slow
-           * to react on nRTS, and returning 'true' here would prevent
-           * processing that data.
-           *
-           * Therefore, return 'false' so input data is still being processed
-           * until sending end reacts on nRTS signal and stops sending more.
-           */
-
-          return false;
-        }
-
-      return upper;
-    }
-  else
-    {
-      /* Is the RX buffer full? */
-
-      if (upper)
-        {
-          /* Disable Rx interrupt to prevent more data being from
-           * peripheral.  When hardware RTS is enabled, this will
-           * prevent more data from coming in.
-           *
-           * This function is only called when UART recv buffer is full,
-           * that is: "dev->recv.head + 1 == dev->recv.tail".
-           *
-           * Logic in "uart_read" will automatically toggle Rx interrupts
-           * when buffer is read empty and thus we do not have to re-
-           * enable Rx interrupts.
-           */
-
-          uart_disablerxint(dev);
-          return true;
-        }
-
-      /* No.. The RX buffer is empty */
-
-      else
-        {
-          /* We might leave Rx interrupt disabled if full recv buffer was
-           * read empty.  Enable Rx interrupt to make sure that more input is
-           * received.
-           */
-
-          uart_enablerxint(dev);
-        }
-    }
-
-  return false;
+  regval = imx9_serialin(priv, IMX9_LPUART_WATER_OFFSET);
+  return ((regval & LPUART_WATER_RXCOUNT_MASK) != 0);
 }
 #endif
 
@@ -2493,7 +2342,7 @@ static void imx9_txint(struct uart_dev_s *dev, bool enable)
 
   /* Enable interrupt for TX complete */
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&priv->lock);
   if (enable)
     {
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
@@ -2509,7 +2358,15 @@ static void imx9_txint(struct uart_dev_s *dev, bool enable)
   regval &= ~LPUART_ALL_INTS;
   regval |= priv->ie;
   imx9_serialout(priv, IMX9_LPUART_CTRL_OFFSET, regval);
-  spin_unlock_irqrestore(NULL, flags);
+
+#ifndef CONFIG_SUPPRESS_SERIAL_INTS
+  if (enable)
+    {
+      uart_xmitchars(dev);
+    }
+#endif
+
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 #endif
 
@@ -2517,7 +2374,7 @@ static void imx9_txint(struct uart_dev_s *dev, bool enable)
  * Name: imx9_txready
  *
  * Description:
- *   Return true if the transmit register is available to be written to
+ *   Return true if the transmit fifo is available to be written to
  *
  ****************************************************************************/
 
@@ -2525,16 +2382,29 @@ static bool imx9_txready(struct uart_dev_s *dev)
 {
   struct imx9_uart_s *priv = (struct imx9_uart_s *)dev;
   uint32_t regval;
+  uint32_t fifo_size;
+  uint32_t fifo_count;
 
-  regval = imx9_serialin(priv, IMX9_LPUART_STAT_OFFSET);
-  return ((regval & LPUART_STAT_TDRE) != 0);
+  /* Read the fifo size and current fill ratio. Return true if fifo is not
+   * full
+   */
+
+  regval = imx9_serialin(priv, IMX9_LPUART_FIFO_OFFSET);
+  fifo_size = (regval & LPUART_FIFO_TXFIFOSIZE_MASK) >>
+    LPUART_FIFO_TXFIFOSIZE_SHIFT;
+  fifo_size = fifo_size == 0 ? 1 : (1 << (fifo_size + 1));
+  regval = imx9_serialin(priv, IMX9_LPUART_WATER_OFFSET);
+  fifo_count = (regval & LPUART_WATER_TXCOUNT_MASK) >>
+    LPUART_WATER_TXCOUNT_SHIFT;
+
+  return fifo_count < fifo_size;
 }
 
 /****************************************************************************
  * Name: imx9_txempty
  *
  * Description:
- *   Return true if the transmit reg is empty
+ *   Return true if the transmit fifo is empty
  *
  ****************************************************************************/
 
@@ -2543,8 +2413,8 @@ static bool imx9_txempty(struct uart_dev_s *dev)
   struct imx9_uart_s *priv = (struct imx9_uart_s *)dev;
   uint32_t regval;
 
-  regval = imx9_serialin(priv, IMX9_LPUART_STAT_OFFSET);
-  return ((regval & LPUART_STAT_TDRE) != 0);
+  regval = imx9_serialin(priv, IMX9_LPUART_WATER_OFFSET);
+  return (regval & LPUART_WATER_TXCOUNT_MASK) == 0;
 }
 
 /****************************************************************************
@@ -2790,7 +2660,7 @@ void arm64_serialinit(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef CONSOLE_DEV
   struct imx9_uart_s *priv = (struct imx9_uart_s *)&CONSOLE_DEV;
@@ -2798,24 +2668,14 @@ int up_putc(int ch)
 
   if (!CONSOLE_DEV.dev.isconsole)
     {
-      return ch;
+      return;
     }
 
   imx9_disableuartint(priv, &ie);
 #endif
 
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      arm64_lowputc('\r');
-    }
-
   arm64_lowputc(ch);
 #ifdef CONSOLE_DEV
   imx9_restoreuartint(priv, ie);
 #endif
-  return ch;
 }

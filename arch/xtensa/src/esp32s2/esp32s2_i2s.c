@@ -42,7 +42,8 @@
 #include <nuttx/clock.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/mqueue.h>
-#include <nuttx/mm/circbuf.h>
+#include <nuttx/circbuf.h>
+#include <nuttx/nuttx.h>
 #include <nuttx/audio/audio.h>
 #include <nuttx/audio/i2s.h>
 
@@ -92,10 +93,6 @@
 #  define I2S_HAVE_RX 1
 #else
 #  define I2S_RX_ENABLED 0
-#endif
-
-#ifndef ALIGN_UP
-#  define ALIGN_UP(num, align) (((num) + ((align) - 1)) & ~((align) - 1))
 #endif
 
 /* Debug ********************************************************************/

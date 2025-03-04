@@ -1,8 +1,8 @@
 /****************************************************************************
  * libs/libc/machine/arm64/gnu/arch_memcpy.S
  *
- * Copyright (c) 2012-2013, Linaro Limited
- *  All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2012-2013, Linaro Limited, 2015 ARM Ltd
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -111,7 +111,7 @@
    well as non-overlapping copies.
 */
 
-def_fn memcpy p2align=6
+def_fn ARCH_LIBCFUN(memcpy) p2align=6
 	prfm	PLDL1KEEP, [src]
 	add	srcend, src, count
 	add	dstend, dstin, count
@@ -233,6 +233,6 @@ L(copy_long):
 	stp	C_l, C_h, [dstend, -16]
 	ret
 
-	.size	memcpy, . - memcpy
+	.size	ARCH_LIBCFUN(memcpy), . - ARCH_LIBCFUN(memcpy)
 
 #endif

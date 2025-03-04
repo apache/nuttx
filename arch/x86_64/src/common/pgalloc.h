@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/x86_64/src/common/pgalloc.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -91,6 +93,28 @@ static inline uintptr_t x86_64_pgpaddr(uintptr_t vaddr)
     }
 
   return 0;
+}
+
+/****************************************************************************
+ * Name: x86_64_uservaddr
+ *
+ * Description:
+ *   Return true if the virtual address, vaddr, lies in the user address
+ *   space.
+ *
+ ****************************************************************************/
+
+static inline bool x86_64_uservaddr(uintptr_t vaddr)
+{
+  /* Check if this address is within the range of the virtualized .bss/.data,
+   * heap, or stack regions.
+   */
+
+  return ((vaddr >= ARCH_ADDRENV_VBASE && vaddr < ARCH_ADDRENV_VEND)
+#ifdef CONFIG_ARCH_VMA_MAPPING
+          || (vaddr >= CONFIG_ARCH_SHM_VBASE && vaddr < ARCH_SHM_VEND)
+#endif
+    );
 }
 
 /****************************************************************************

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/armv7-a/arm_addrenv_utils.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -64,6 +66,7 @@ int arm_addrenv_create_region(uintptr_t **list, unsigned int listlen,
   uint32_t *l2table;
   size_t nmapped;
   unsigned int npages;
+  unsigned int nlist;
   unsigned int i;
   unsigned int j;
 
@@ -90,8 +93,9 @@ int arm_addrenv_create_region(uintptr_t **list, unsigned int listlen,
    * the L1 page table).
    */
 
+  nlist = (npages + ENTRIES_PER_L2TABLE - 1) / ENTRIES_PER_L2TABLE;
   nmapped = 0;
-  for (i = 0; i < npages; i += ENTRIES_PER_L2TABLE)
+  for (i = 0; i < nlist; i++)
     {
       /* Allocate one physical page for the L2 page table */
 
@@ -209,6 +213,7 @@ void arm_addrenv_destroy_region(uintptr_t **list, unsigned int listlen,
           /* And free the L2 page table itself */
 
           mm_pgfree((uintptr_t)list[i], 1);
+          list[i] = NULL;
         }
     }
 }

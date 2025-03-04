@@ -1,6 +1,8 @@
 ############################################################################
 # sched/instrument/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -21,7 +23,7 @@
 CSRCS += instrument.c
 
 ifneq ($(CONFIG_SCHED_STACK_RECORD),0)
-CSRCS += stack_record.c
+CSRCS += stack_monitor.c
 endif
 
 # Include instrument build support

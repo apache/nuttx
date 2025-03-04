@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/misc/lib_ftok.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -29,6 +31,7 @@
 #include <sys/ipc.h>
 #include <errno.h>
 #include <string.h>
+#include <stdio.h>
 
 /****************************************************************************
  * Public Functions
@@ -58,21 +61,31 @@
 
 key_t ftok(FAR const char *pathname, int proj_id)
 {
-  char fullpath[PATH_MAX] = CONFIG_LIBC_FTOK_VFS_PATH "/";
+  FAR char *fullpath;
   struct stat st;
 
+  fullpath = lib_get_pathbuffer();
+  if (fullpath == NULL)
+    {
+      return (key_t)-1;
+    }
+
+  snprintf(fullpath, PATH_MAX, "%s/",
+           CONFIG_LIBC_FTOK_VFS_PATH);
   strlcat(fullpath, pathname, sizeof(fullpath));
   if (stat(fullpath, &st) < 0 && get_errno() == ENOENT)
     {
       /* Directory not exist, let's create one for caller */
 
-      mkdir(fullpath, S_IRWXU);
-      if (stat(fullpath, &st) < 0)
+      if (mkdir(fullpath, S_IRWXU) < 0 ||
+          stat(fullpath, &st) < 0)
         {
+          lib_put_pathbuffer(fullpath);
           return (key_t)-1;
         }
     }
 
+  lib_put_pathbuffer(fullpath);
   return ((key_t)proj_id << 24 |
           (key_t)(st.st_dev & 0xff) << 16 |
           (key_t)(st.st_ino & 0xffff));

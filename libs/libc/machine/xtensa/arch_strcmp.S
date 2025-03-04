@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/machine/xtensa/arch_strcmp.S
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -46,11 +48,11 @@
   .align  4
   .literal_position
 
-  .global strcmp
-  .type strcmp,@function
+  .global ARCH_LIBCFUN(strcmp)
+  .type ARCH_LIBCFUN(strcmp),@function
   .align  4
 
-strcmp:
+ARCH_LIBCFUN(strcmp):
 
 #if XCHAL_HAVE_LOOPS && XCHAL_HAVE_DENSITY && !XCHAL_HAVE_BE && XCHAL_HAVE_FLIX3
 /*  Fast version for FLIX3 Little Endian */
@@ -762,6 +764,6 @@ strcmp:
 #endif /* FLIX3 */
 
   .end  schedule
-  .size strcmp, . - strcmp
+  .size ARCH_LIBCFUN(strcmp), . - ARCH_LIBCFUN(strcmp)
 
 #endif

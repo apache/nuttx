@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/armv7-a/arm_gicv2.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -30,6 +32,8 @@
 #include <errno.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/pci/pci.h>
+#include <nuttx/spinlock.h>
 #include <arch/irq.h>
 
 #include "arm_internal.h"
@@ -42,6 +46,49 @@
 #endif
 
 #ifdef CONFIG_ARMV7A_HAVE_GICv2
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#if defined(CONFIG_SMP) && CONFIG_SMP_NCPUS > 1
+static atomic_t g_gic_init_done;
+#endif
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: arm_gic_init_done
+ *
+ * Description:
+ *   Indicates gic init done, and only cpu0 need wait the gic initialize
+ *   done. Because cpu1 ~ (CONFIG_SMP_NCPUS - 1) may not response the
+ *   interrupt request by cpu0 when the gic not initialize done.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_SMP) && CONFIG_SMP_NCPUS > 1
+static void arm_gic_init_done(void)
+{
+  atomic_fetch_or(&g_gic_init_done, 1 << this_cpu());
+}
+
+static void arm_gic_wait_done(cpu_set_t cpuset)
+{
+  cpu_set_t tmpset;
+
+  do
+    {
+      tmpset = (cpu_set_t)atomic_read(&g_gic_init_done) & cpuset;
+    }
+  while (!CPU_EQUAL(&tmpset, &cpuset));
+}
+#else
+#define arm_gic_init_done()
+#define arm_gic_wait_done(cpuset)
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -162,13 +209,16 @@ void arm_gic0_initialize(void)
       putreg32(0x01010101, GIC_ICDIPTR(irq));  /* SPI on CPU0 */
     }
 
+#ifdef CONFIG_ARMV7A_GICv2M
+  gic_v2m_initialize();
+#endif
+
 #ifdef CONFIG_SMP
   /* Attach SGI interrupt handlers. This attaches the handler to all CPUs. */
 
   DEBUGVERIFY(irq_attach(GIC_SMP_CPUSTART, arm_start_handler, NULL));
-  DEBUGVERIFY(irq_attach(GIC_SMP_CPUPAUSE, arm_pause_handler, NULL));
-  DEBUGVERIFY(irq_attach(GIC_SMP_CPUCALL,
-                         nxsched_smp_call_handler, NULL));
+  DEBUGVERIFY(irq_attach(GIC_SMP_SCHED, arm_smp_sched_handler, NULL));
+  DEBUGVERIFY(irq_attach(GIC_SMP_CALL, nxsched_smp_call_handler, NULL));
 #endif
 
   arm_gic_dump("Exit arm_gic0_initialize", true, 0);
@@ -295,9 +345,7 @@ void arm_gic_initialize(void)
 #  endif
 #endif
 
-#ifndef CONFIG_ARCH_TRUSTZONE_SECURE
   iccicr |= GIC_ICCICRS_ACKTCTL;
-#endif
 
 #ifdef CONFIG_ARCH_TRUSTZONE_NONSECURE
   /* Enable the Group 1 interrupts and disable Group 1 bypass. */
@@ -326,6 +374,7 @@ void arm_gic_initialize(void)
 
   putreg32(icddcr, GIC_ICDDCR);
   arm_gic_dump("Exit arm_gic_initialize", true, 0);
+  arm_gic_init_done();
 }
 
 /****************************************************************************
@@ -669,24 +718,55 @@ int arm_gic_irq_trigger(int irq, bool edge)
   return -EINVAL;
 }
 
-#ifdef CONFIG_SMP
+void arm_cpu_sgi(int sgi, unsigned int cpuset)
+{
+  uint32_t regval;
+
+  arm_gic_wait_done(cpuset);
+
+  regval = GIC_ICDSGIR_INTID(sgi) | GIC_ICDSGIR_CPUTARGET(cpuset) |
+           GIC_ICDSGIR_TGTFILTER_LIST;
+
+#if defined(CONFIG_ARCH_TRUSTZONE_SECURE)
+  if (sgi >= GIC_IRQ_SGI0 && sgi <= GIC_IRQ_SGI7)
+#endif
+    {
+      /* Set NSATT be 1: forward the SGI specified in the SGIINTID field to a
+       * specified CPU interfaces only if the SGI is configured as Group 1 on
+       * that interface.
+       * For non-secure context, the configuration of GIC_ICDSGIR_NSATT_GRP1
+       * is not mandatory in the GICv2 specification, but for SMP scenarios,
+       * this value needs to be configured, otherwise issues may occur in the
+       * SMP scenario.
+       */
+
+      regval |= GIC_ICDSGIR_NSATT_GRP1;
+    }
+
+  putreg32(regval, GIC_ICDSGIR);
+}
+
 /****************************************************************************
- * Name: up_send_smp_call
+ * Name: up_get_legacy_irq
  *
  * Description:
- *   Send smp call to target cpu.
- *
- * Input Parameters:
- *   cpuset - The set of CPUs to receive the SGI.
- *
- * Returned Value:
- *   None.
+ *   Reserve vector for legacy
  *
  ****************************************************************************/
 
-void up_send_smp_call(cpu_set_t cpuset)
+int up_get_legacy_irq(uint32_t devfn, uint8_t line, uint8_t pin)
 {
-  up_trigger_irq(GIC_SMP_CPUCALL, cpuset);
-}
+#if CONFIG_ARMV7A_GICV2_LEGACY_IRQ0 >= 0
+  uint8_t slot;
+  uint8_t tmp;
+
+  UNUSED(line);
+  slot = PCI_SLOT(devfn);
+  tmp = (pin - 1 + slot) % 4;
+  return CONFIG_ARMV7A_GICV2_LEGACY_IRQ0 + tmp;
+#else
+  return -ENOTSUP;
 #endif
+}
+
 #endif /* CONFIG_ARMV7A_HAVE_GICv2 */

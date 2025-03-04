@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/virtio/virtio-mmio.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -58,6 +60,18 @@ extern "C"
  ****************************************************************************/
 
 int virtio_register_mmio_device(FAR void *regs, int irq);
+
+/****************************************************************************
+ * Name: virtio_register_mmio_device_secure
+ *
+ * Description:
+ *   Register secure virtio mmio device to the virtio bus
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_TRUSTZONE_SECURE
+int virtio_register_mmio_device_secure(FAR void *regs, int irq);
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus

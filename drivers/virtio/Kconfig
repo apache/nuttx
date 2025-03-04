@@ -22,6 +22,19 @@ config DRIVERS_VIRTIO_MMIO_QUEUE_LEN
 		If this value equals to 0, use the max queue length get from
 		mmio register.
 
+config DRIVERS_VIRTIO_PCI
+	bool "Virtio PCI Device Support"
+	default n
+
+config DRIVERS_VIRTIO_PCI_POLLING_PERIOD
+	int "Virtio PCI Polling Period (us)"
+	depends on DRIVERS_VIRTIO_PCI
+	default 0
+	---help---
+		if Polling Period <= 0, not support polling mode.
+		if Polling Period > 0, support polling mode, and it represent
+		polling period (us).
+
 config DRIVERS_VIRTIO_BLK
 	bool "Virtio block support"
 	depends on !DISABLE_MOUNTPOINT
@@ -82,6 +95,15 @@ config DRIVERS_VIRTIO_SERIAL_CONSOLE
 	---help---
 		This enables using first virtio serial device as console.
 
+config DRIVERS_VIRTIO_SERIAL_NAME
+	string "Virtio serial driver name"
+	default ""
+	---help---
+		Using this config to custom the virtio serial registered device name,
+		using ";" to split the names.
+		For example, if DRIVERS_VIRTIO_SERIAL_NAME = "ttyBT;ttyTEL" and pass
+		three virtio-serial devices to the qemu, we will get three uart devices
+		with names: "/dev/ttyBT", "/dev/ttyTEL", "/dev/ttyV2"
 endif
 
 config DRIVERS_VIRTIO_SOUND

@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/avr/at32uc3/avr32dev1/src/avr32_leds.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/xtensa/src/common/xtensa_assert.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -65,7 +67,11 @@
 
 void xtensa_panic(int xptcode, uint32_t *regs)
 {
-  CURRENT_REGS = regs;
+  struct tcb_s **running_task = &g_running_tasks[this_cpu()];
+
+  (*running_task)->xcp.regs = regs;
+
+  up_set_interrupt_context(true);
 
   /* We get here when a un-dispatch-able, irrecoverable exception occurs */
 
@@ -75,11 +81,8 @@ void xtensa_panic(int xptcode, uint32_t *regs)
 
   syslog_flush();
 
-#if CONFIG_TASK_NAME_SIZE > 0
-  _alert("Unhandled Exception %d task: %s\n", xptcode, running_task()->name);
-#else
-  _alert("Unhandled Exception %d\n", xptcode);
-#endif
+  _alert("Unhandled Exception %d task: %s\n", xptcode,
+         get_task_name(running_task()));
 
   PANIC_WITH_REGS("panic", regs);  /* Should not return */
   for (; ; );
@@ -167,7 +170,11 @@ void xtensa_panic(int xptcode, uint32_t *regs)
 
 void xtensa_user_panic(int exccause, uint32_t *regs)
 {
-  CURRENT_REGS = regs;
+  struct tcb_s **running_task = &g_running_tasks[this_cpu()];
+
+  (*running_task)->xcp.regs = regs;
+
+  up_set_interrupt_context(true);
 
   /* We get here when a un-dispatch-able, irrecoverable exception occurs */
 
@@ -177,12 +184,8 @@ void xtensa_user_panic(int exccause, uint32_t *regs)
 
   syslog_flush();
 
-#if CONFIG_TASK_NAME_SIZE > 0
   _alert("User Exception: EXCCAUSE=%04x task: %s\n",
-         exccause, running_task()->name);
-#else
-  _alert("User Exception: EXCCAUSE=%04x\n", exccause);
-#endif
+         exccause, get_task_name(running_task()));
 
   PANIC_WITH_REGS("user panic", regs); /* Should not return */
   for (; ; );

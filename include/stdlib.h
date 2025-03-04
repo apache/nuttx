@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/stdlib.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -150,10 +152,8 @@ double    erand48(FAR unsigned short int xsubi[3]);
 #define   srandom(s) srand(s)
 long      random(void);
 
-#ifdef CONFIG_CRYPTO_RANDOM_POOL
 void      arc4random_buf(FAR void *bytes, size_t nbytes);
 uint32_t  arc4random(void);
-#endif
 
 /* Environment variable support */
 
@@ -183,7 +183,7 @@ void      _Exit(int status) noreturn_function;
  * standards compatibility.
  */
 
-#ifndef __KERNEL__
+#if !defined(__KERNEL__) || defined(CONFIG_BUILD_FLAT)
 int       system(FAR const char *cmd);
 #endif
 

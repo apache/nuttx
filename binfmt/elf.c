@@ -1,6 +1,8 @@
 /****************************************************************************
  * binfmt/elf.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -33,9 +35,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/binfmt/binfmt.h>
-#include <nuttx/binfmt/elf.h>
-
-#include "libelf/libelf.h"
+#include <nuttx/kmalloc.h>
 
 #ifdef CONFIG_ELF
 
@@ -44,21 +44,15 @@
  ****************************************************************************/
 
 /* CONFIG_DEBUG_FEATURES, CONFIG_DEBUG_INFO, and CONFIG_DEBUG_BINFMT
- * have to be defined or CONFIG_ELF_DUMPBUFFER does nothing.
+ * have to be defined or CONFIG_MODLIB_DUMPBUFFER does nothing.
  */
 
 #if !defined(CONFIG_DEBUG_INFO) || !defined(CONFIG_DEBUG_BINFMT)
-#  undef CONFIG_ELF_DUMPBUFFER
+#  undef CONFIG_MODLIB_DUMPBUFFER
 #endif
 
 #ifndef CONFIG_ELF_STACKSIZE
 #  define CONFIG_ELF_STACKSIZE 2048
-#endif
-
-#ifdef CONFIG_ELF_DUMPBUFFER
-#  define elf_dumpbuffer(m,b,n) binfodumpbuffer(m,b,n)
-#else
-#  define elf_dumpbuffer(m,b,n)
 #endif
 
 /****************************************************************************
@@ -69,14 +63,8 @@ static int elf_loadbinary(FAR struct binary_s *binp,
                           FAR const char *filename,
                           FAR const struct symtab_s *exports,
                           int nexports);
-#ifdef CONFIG_ELF_COREDUMP
-static int elf_dumpbinary(FAR struct memory_region_s *regions,
-                          FAR struct lib_outstream_s *stream,
-                          pid_t pid);
-#endif
-#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_DEBUG_BINFMT)
-static void elf_dumploadinfo(FAR struct elf_loadinfo_s *loadinfo);
-#endif
+
+static int elf_unloadbinary(FAR struct binary_s *binp);
 
 /****************************************************************************
  * Private Data
@@ -86,142 +74,12 @@ static struct binfmt_s g_elfbinfmt =
 {
   NULL,             /* next */
   elf_loadbinary,   /* load */
-  NULL,             /* unload */
-#ifdef CONFIG_ELF_COREDUMP
-  elf_dumpbinary,   /* coredump */
-#endif
+  elf_unloadbinary, /* unload */
 };
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: elf_dumploadinfo
- ****************************************************************************/
-
-#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_DEBUG_BINFMT)
-static void elf_dumploadinfo(FAR struct elf_loadinfo_s *loadinfo)
-{
-  int i;
-
-  binfo("LOAD_INFO:\n");
-  binfo("  textalloc:    %08lx\n", (long)loadinfo->textalloc);
-  binfo("  dataalloc:    %08lx\n", (long)loadinfo->dataalloc);
-  binfo("  textsize:     %ld\n",   (long)loadinfo->textsize);
-  binfo("  datasize:     %ld\n",   (long)loadinfo->datasize);
-  binfo("  textalign:    %zu\n",   loadinfo->textalign);
-  binfo("  dataalign:    %zu\n",   loadinfo->dataalign);
-  binfo("  filelen:      %ld\n",   (long)loadinfo->filelen);
-#ifdef CONFIG_BINFMT_CONSTRUCTORS
-  binfo("  ctoralloc:    %08lx\n", (long)loadinfo->ctoralloc);
-  binfo("  ctors:        %08lx\n", (long)loadinfo->ctors);
-  binfo("  nctors:       %d\n",    loadinfo->nctors);
-  binfo("  dtoralloc:    %08lx\n", (long)loadinfo->dtoralloc);
-  binfo("  dtors:        %08lx\n", (long)loadinfo->dtors);
-  binfo("  ndtors:       %d\n",    loadinfo->ndtors);
-#endif
-  binfo("  symtabidx:    %d\n",    loadinfo->symtabidx);
-  binfo("  strtabidx:    %d\n",    loadinfo->strtabidx);
-
-  binfo("ELF Header:\n");
-  binfo("  e_ident:      %02x %02x %02x %02x\n",
-    loadinfo->ehdr.e_ident[0], loadinfo->ehdr.e_ident[1],
-    loadinfo->ehdr.e_ident[2], loadinfo->ehdr.e_ident[3]);
-  binfo("  e_type:       %04x\n",  loadinfo->ehdr.e_type);
-  binfo("  e_machine:    %04x\n",  loadinfo->ehdr.e_machine);
-  binfo("  e_version:    %08x\n",  loadinfo->ehdr.e_version);
-  binfo("  e_entry:      %08lx\n", (long)loadinfo->ehdr.e_entry);
-  binfo("  e_phoff:      %ju\n",   (uintmax_t)loadinfo->ehdr.e_phoff);
-  binfo("  e_shoff:      %ju\n",   (uintmax_t)loadinfo->ehdr.e_shoff);
-  binfo("  e_flags:      %08x\n" , loadinfo->ehdr.e_flags);
-  binfo("  e_ehsize:     %d\n",    loadinfo->ehdr.e_ehsize);
-  binfo("  e_phentsize:  %d\n",    loadinfo->ehdr.e_phentsize);
-  binfo("  e_phnum:      %d\n",    loadinfo->ehdr.e_phnum);
-  binfo("  e_shentsize:  %d\n",    loadinfo->ehdr.e_shentsize);
-  binfo("  e_shnum:      %d\n",    loadinfo->ehdr.e_shnum);
-  binfo("  e_shstrndx:   %d\n",    loadinfo->ehdr.e_shstrndx);
-
-  if (loadinfo->phdr && loadinfo->ehdr.e_phnum > 0)
-    {
-      for (i = 0; i < loadinfo->ehdr.e_phnum; i++)
-        {
-          FAR Elf_Phdr *phdr = &loadinfo->phdr[i];
-          binfo("Programs %d:\n", i);
-          binfo("  p_type:       %08jx\n", (uintmax_t)phdr->p_type);
-          binfo("  p_offset:     %08jx\n", (uintmax_t)phdr->p_offset);
-          binfo("  p_vaddr:      %08jx\n", (uintmax_t)phdr->p_vaddr);
-          binfo("  p_paddr:      %08jx\n", (uintmax_t)phdr->p_paddr);
-          binfo("  p_filesz:     %08jx\n", (uintmax_t)phdr->p_filesz);
-          binfo("  p_memsz:      %08jx\n", (uintmax_t)phdr->p_memsz);
-          binfo("  p_flags:      %08jx\n", (uintmax_t)phdr->p_flags);
-          binfo("  p_align:      %08x\n",  phdr->p_align);
-        }
-    }
-
-  if (loadinfo->shdr && loadinfo->ehdr.e_shnum > 0)
-    {
-      for (i = 0; i < loadinfo->ehdr.e_shnum; i++)
-        {
-          FAR Elf_Shdr *shdr = &loadinfo->shdr[i];
-          binfo("Sections %d:\n", i);
-          binfo("  sh_name:      %08x\n",  shdr->sh_name);
-          binfo("  sh_type:      %08x\n",  shdr->sh_type);
-          binfo("  sh_flags:     %08jx\n", (uintmax_t)shdr->sh_flags);
-          binfo("  sh_addr:      %08jx\n", (uintmax_t)shdr->sh_addr);
-          binfo("  sh_offset:    %ju\n",   (uintmax_t)shdr->sh_offset);
-          binfo("  sh_size:      %ju\n",   (uintmax_t)shdr->sh_size);
-          binfo("  sh_link:      %d\n",    shdr->sh_link);
-          binfo("  sh_info:      %d\n",    shdr->sh_info);
-          binfo("  sh_addralign: %ju\n",   (uintmax_t)shdr->sh_addralign);
-          binfo("  sh_entsize:   %ju\n",   (uintmax_t)shdr->sh_entsize);
-        }
-    }
-}
-#else
-#  define elf_dumploadinfo(i)
-#endif
-
-/****************************************************************************
- * Name: elf_dumpentrypt
- ****************************************************************************/
-
-#ifdef CONFIG_ELF_DUMPBUFFER
-static void elf_dumpentrypt(FAR struct binary_s *binp,
-                            FAR struct elf_loadinfo_s *loadinfo)
-{
-#ifdef CONFIG_ARCH_ADDRENV
-  int ret;
-
-  /* If CONFIG_ARCH_ADDRENV=y, then the loaded ELF lies in a virtual address
-   * space that may not be in place now.  elf_addrenv_select() will
-   * temporarily instantiate that address space.
-   */
-
-  ret = elf_addrenv_select(loadinfo);
-  if (ret < 0)
-    {
-      berr("ERROR: elf_addrenv_select() failed: %d\n", ret);
-      return;
-    }
-#endif
-
-  elf_dumpbuffer("Entry code", (FAR const uint8_t *)binp->entrypt,
-                 MIN(loadinfo->textsize - loadinfo->ehdr.e_entry, 512));
-
-#ifdef CONFIG_ARCH_ADDRENV
-  /* Restore the original address environment */
-
-  ret = elf_addrenv_restore(loadinfo);
-  if (ret < 0)
-    {
-      berr("ERROR: elf_addrenv_restore() failed: %d\n", ret);
-    }
-#endif
-}
-#else
-#  define elf_dumpentrypt(b,l)
-#endif
 
 /****************************************************************************
  * Name: elf_loadbinary
@@ -237,25 +95,25 @@ static int elf_loadbinary(FAR struct binary_s *binp,
                           FAR const struct symtab_s *exports,
                           int nexports)
 {
-  struct elf_loadinfo_s loadinfo;  /* Contains globals for libelf */
-  int                   ret;
+  struct mod_loadinfo_s loadinfo;
+  int ret;
 
   binfo("Loading file: %s\n", filename);
 
   /* Initialize the ELF library to load the program binary. */
 
-  ret = elf_init(filename, &loadinfo);
-  elf_dumploadinfo(&loadinfo);
+  ret = modlib_initialize(filename, &loadinfo);
+  modlib_dumploadinfo(&loadinfo);
   if (ret != 0)
     {
-      berr("Failed to initialize for load of ELF program: %d\n", ret);
-      goto errout_with_init;
+      berr("Failed to initialize to load ELF program binary: %d\n", ret);
+      return ret;
     }
 
   /* Load the program binary */
 
-  ret = elf_load(&loadinfo);
-  elf_dumploadinfo(&loadinfo);
+  ret = modlib_load_with_addrenv(&loadinfo);
+  modlib_dumploadinfo(&loadinfo);
   if (ret != 0)
     {
       berr("Failed to load ELF program binary: %d\n", ret);
@@ -264,9 +122,9 @@ static int elf_loadbinary(FAR struct binary_s *binp,
 
   /* Bind the program to the exported symbol table */
 
-  if (loadinfo.ehdr.e_type == ET_REL)
+  if (loadinfo.ehdr.e_type == ET_REL || loadinfo.gotindex >= 0)
     {
-      ret = elf_bind(&loadinfo, exports, nexports);
+      ret = modlib_bind(&binp->mod, &loadinfo, exports, nexports);
       if (ret != 0)
         {
           berr("Failed to bind symbols program binary: %d\n", ret);
@@ -317,22 +175,30 @@ static int elf_loadbinary(FAR struct binary_s *binp,
   binp->addrenv = loadinfo.addrenv;
 
 #else
-  binp->alloc[0] = (FAR void *)loadinfo.textalloc;
-  binp->alloc[1] = (FAR void *)loadinfo.dataalloc;
+#  ifdef CONFIG_ARCH_USE_SEPARATED_SECTION
+  if (loadinfo.ehdr.e_type == ET_REL)
+    {
+      binp->mod.sectalloc = (FAR void *)loadinfo.sectalloc;
+      binp->mod.nsect     = loadinfo.ehdr.e_shnum;
+    }
+#  endif
+
+  binp->mod.textalloc = (FAR void *)loadinfo.textalloc;
+  binp->mod.dataalloc = (FAR void *)loadinfo.datastart;
 #  ifdef CONFIG_BINFMT_CONSTRUCTORS
-  binp->alloc[2] = loadinfo.ctoralloc;
-  binp->alloc[3] = loadinfo.dtoralloc;
+  binp->mod.initarr = loadinfo.initarr;
+  binp->mod.finiarr = loadinfo.finiarr;
 #  endif
 #endif
 
 #ifdef CONFIG_BINFMT_CONSTRUCTORS
   /* Save information about constructors and destructors. */
 
-  binp->ctors    = loadinfo.ctors;
-  binp->nctors   = loadinfo.nctors;
+  binp->mod.initarr = loadinfo.initarr;
+  binp->mod.ninit   = loadinfo.ninit;
 
-  binp->dtors    = loadinfo.dtors;
-  binp->ndtors   = loadinfo.ndtors;
+  binp->mod.finiarr = loadinfo.finiarr;
+  binp->mod.nfini   = loadinfo.nfini;
 #endif
 
 #ifdef CONFIG_SCHED_USER_IDENTITY
@@ -343,42 +209,49 @@ static int elf_loadbinary(FAR struct binary_s *binp,
   binp->mode = loadinfo.filemode;
 #endif
 
-  elf_dumpentrypt(binp, &loadinfo);
-  elf_uninit(&loadinfo);
+  modlib_dumpentrypt(&loadinfo);
+#ifdef CONFIG_PIC
+  if (loadinfo.gotindex >= 0)
+    {
+      FAR struct dspace_s *dspaces = kmm_zalloc(sizeof(struct dspace_s));
+
+      if (dspaces == NULL)
+        {
+          ret = -ENOMEM;
+          goto errout_with_load;
+        }
+
+      dspaces->region = (FAR void *)loadinfo.shdr[loadinfo.gotindex].sh_addr;
+      dspaces->crefs = 1;
+      binp->picbase = (FAR void *)dspaces;
+    }
+#endif
+
+  modlib_uninitialize(&loadinfo);
   return OK;
 
 errout_with_load:
-  elf_unload(&loadinfo);
+  modlib_unload(&loadinfo);
 errout_with_init:
-  elf_uninit(&loadinfo);
+  modlib_uninitialize(&loadinfo);
   return ret;
 }
 
 /****************************************************************************
- * Name: elf_dumpbinary
+ * Name: elf_unloadbinary
  *
  * Description:
- *   Generat the core dump stream as ELF structure.
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
+ *   Unload the ELF binary that was loaded into memory by elf_loadbinary.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ELF_COREDUMP
-static int elf_dumpbinary(FAR struct memory_region_s *regions,
-                          FAR struct lib_outstream_s *stream,
-                          pid_t pid)
+static int elf_unloadbinary(FAR struct binary_s *binp)
 {
-  struct elf_dumpinfo_s dumpinfo;
+  binfo("Unloading %p\n", binp);
+  modlib_uninit(&binp->mod);
 
-  dumpinfo.regions = regions;
-  dumpinfo.stream  = stream;
-  dumpinfo.pid     = pid;
-
-  return elf_coredump(&dumpinfo);
+  return OK;
 }
-#endif
 
 /****************************************************************************
  * Public Functions

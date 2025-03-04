@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/xtensa/esp32/common/scripts/esp32_aliases.ld
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -31,7 +33,7 @@ PROVIDE( cache_read_enable = Cache_Read_Enable_rom );
 
 /* Bluetooth needs symbol alias, to be removed after IDF rename it */
 
-#ifdef CONFIG_ESP32_BLE
+#ifdef CONFIG_ESPRESSIF_BLE
   api_vhci_host_check_send_available = API_vhci_host_check_send_available;
   api_vhci_host_send_packet = API_vhci_host_send_packet;
   api_vhci_host_register_callback = API_vhci_host_register_callback;

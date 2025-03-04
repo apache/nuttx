@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/samv7/sam_eefc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -28,9 +30,8 @@
 #include <errno.h>
 
 #include <nuttx/arch.h>
+#include <arch/barriers.h>
 #include <arch/samv7/chip.h>
-
-#include "barriers.h"
 
 #include "hardware/sam_memorymap.h"
 

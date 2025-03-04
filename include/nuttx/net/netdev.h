@@ -1,16 +1,10 @@
 /****************************************************************************
  * include/nuttx/net/netdev.h
- * Defines architecture-specific device driver interfaces to the NuttX
- * network.
  *
- *   Copyright (C) 2007, 2009, 2011-2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * Derived largely from portions of uIP with has a similar BSD-styple
- * license:
- *
- *   Copyright (c) 2001-2003, Adam Dunkels.
- *   All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2007, 2009, 2011-2018 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2001-2003, Adam Dunkels. All rights reserved.
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -120,6 +114,11 @@
        } \
      while (0)
 
+#define _NETDEV_BYTES(dev,name) \
+    do { \
+        (dev)->d_statistics.name += (dev)->d_len; \
+    } while (0)
+
 #  if CONFIG_NETDEV_STATISTICS_LOG_PERIOD > 0
 #    define NETDEV_STATISTICS_WORK LPWORK
 #    define _NETDEV_STATISTIC_LOG(dev,name) \
@@ -139,7 +138,12 @@
 #    define _NETDEV_STATISTIC_LOG(dev,name) _NETDEV_STATISTIC(dev,name)
 #  endif
 
-#  define NETDEV_RXPACKETS(dev)   _NETDEV_STATISTIC_LOG(dev,rx_packets)
+#  define NETDEV_RXPACKETS(dev) \
+    do { \
+        _NETDEV_STATISTIC_LOG(dev,rx_packets); \
+        _NETDEV_BYTES(dev,rx_bytes); \
+    } while (0)
+
 #  define NETDEV_RXFRAGMENTS(dev) _NETDEV_STATISTIC(dev,rx_fragments)
 #  define NETDEV_RXERRORS(dev)    _NETDEV_ERROR(dev,rx_errors)
 #  ifdef CONFIG_NET_IPv4
@@ -159,11 +163,15 @@
 #  endif
 #  define NETDEV_RXDROPPED(dev)   _NETDEV_STATISTIC(dev,rx_dropped)
 
-#  define NETDEV_TXPACKETS(dev)   _NETDEV_STATISTIC_LOG(dev,tx_packets)
+#  define NETDEV_TXPACKETS(dev) \
+    do { \
+        _NETDEV_STATISTIC_LOG(dev,tx_packets); \
+        _NETDEV_BYTES(dev,tx_bytes); \
+    } while (0)
+
 #  define NETDEV_TXDONE(dev)      _NETDEV_STATISTIC(dev,tx_done)
 #  define NETDEV_TXERRORS(dev)    _NETDEV_ERROR(dev,tx_errors)
 #  define NETDEV_TXTIMEOUTS(dev)  _NETDEV_ERROR(dev,tx_timeouts)
-
 #  define NETDEV_ERRORS(dev)      _NETDEV_STATISTIC(dev,errors)
 
 #else
@@ -235,6 +243,7 @@ struct netdev_statistics_s
   uint32_t rx_arp;         /* Number of Rx ARP packets received */
 #endif
   uint32_t rx_dropped;     /* Unsupported Rx packets received */
+  uint64_t rx_bytes;       /* Number of bytes received */
 
   /* Tx Status */
 
@@ -242,6 +251,7 @@ struct netdev_statistics_s
   uint32_t tx_done;        /* Number of packets completed */
   uint32_t tx_errors;      /* Number of receive errors (incl timeouts) */
   uint32_t tx_timeouts;    /* Number of Tx timeout errors */
+  uint64_t tx_bytes;       /* Number of bytes send */
 
   /* Other status */
 

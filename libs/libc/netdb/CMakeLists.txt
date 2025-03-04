@@ -1,6 +1,8 @@
 # ##############################################################################
 # libs/libc/netdb/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -41,7 +43,11 @@ if(CONFIG_LIBC_NETDB)
     lib_gaistrerror.c
     lib_freeaddrinfo.c
     lib_getaddrinfo.c
-    lib_getnameinfo.c)
+    lib_getnameinfo.c
+    lib_rexec.c
+    lib_dn.c
+    lib_proto.c
+    lib_protor.c)
 
   # Add host file support
 

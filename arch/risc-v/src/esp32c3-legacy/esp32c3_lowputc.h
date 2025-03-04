@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/esp32c3-legacy/esp32c3_lowputc.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -28,6 +30,7 @@
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 
 #include <sys/types.h>
 #include <stdint.h>
@@ -100,6 +103,7 @@ struct esp32c3_uart_s
   uint8_t   txsig;          /* TX signal */
   uint8_t   rxpin;          /* RX pin */
   uint8_t   rxsig;          /* RX signal */
+  spinlock_t lock;          /* Spinlock */
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
   uint8_t  rtspin;          /* RTS pin number */
   uint8_t  rtssig;          /* RTS signal */
@@ -431,7 +435,7 @@ void esp32c3_lowputc_enable_sysclk(const struct esp32c3_uart_s *priv);
  *
  ****************************************************************************/
 
-void esp32c3_lowputc_disable_all_uart_int(const struct esp32c3_uart_s *priv,
+void esp32c3_lowputc_disable_all_uart_int(struct esp32c3_uart_s *priv,
                                           uint32_t *current_status);
 
 /****************************************************************************

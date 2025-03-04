@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/mnemofs/mnemofs_fsobj.c
  *
+ * SPDX-License-Identifier: Apache-2.0 or BSD-3-Clause
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -67,6 +69,7 @@
 #include <sys/stat.h>
 
 #include "mnemofs.h"
+#include "fs_heap.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -174,19 +177,31 @@ static mfs_t nobjs_in_path(FAR const char *relpath)
  *
  ****************************************************************************/
 
-static const char *next_child(FAR const char *relpath)
+static const char *next_child(FAR const char *path)
 {
-  while (*relpath != 0)
+  mfs_t           inc = 0;
+  FAR const char *tmp = path;
+
+  MFS_EXTRA_LOG("NEXT_CHILD", "Requested string is \"%s\" (%p),", path,
+                path);
+
+  while (*path != 0)
     {
-      if (*relpath == '/')
+      if (*path == '/')
         {
-          return relpath + 1;
+          MFS_EXTRA_LOG("NEXT_CHILD", "Length is %" PRIu32, inc);
+          DEBUGASSERT(inc == path - tmp);
+          return path + 1;
         }
 
-      relpath++;
+      path++;
+      inc++;
     }
 
-  return relpath;
+  MFS_EXTRA_LOG("NEXT_CHILD", "Length is %" PRIu32, inc);
+  DEBUGASSERT(inc == path - tmp);
+  MFS_EXTRA_LOG("NEXT_CHILD", "Last FS Object in string.");
+  return path;
 }
 
 /****************************************************************************
@@ -324,7 +339,7 @@ int pitr_traverse(FAR struct mfs_sb_s *sb, FAR struct mfs_path_s *path,
     {
       *cap = (*cap * 3) / 2; /* Don't want to double it for memory. */
 
-      path = kmm_realloc(path, (*cap) * sizeof(struct mfs_path_s));
+      path = fs_heap_realloc(path, (*cap) * sizeof(struct mfs_path_s));
       if (predict_false(path == NULL))
         {
           ret = -ENOMEM;
@@ -421,7 +436,7 @@ bool mfs_obj_isempty(FAR struct mfs_sb_s * const sb,
 
 void mfs_free_dirent(FAR struct mfs_dirent_s *dirent)
 {
-  kmm_free(dirent);
+  fs_heap_free(dirent);
 
   finfo("Dirent freed.");
 }
@@ -477,6 +492,8 @@ int mfs_pitr_rm(FAR struct mfs_sb_s * const sb,
   int                      ret    = OK;
   struct mfs_pitr_s        pitr;
   FAR struct mfs_dirent_s *dirent = NULL;
+
+  /* TODO: MFS_LOG */
 
   mfs_pitr_init(sb, path, depth, &pitr, true);
   mfs_pitr_readdirent(sb, path, &pitr, &dirent);
@@ -546,8 +563,8 @@ errout:
 
 void mfs_pitr_free(FAR const struct mfs_pitr_s * const pitr)
 {
-  finfo("Pitr at depth %u with CTZ (%u, %u) freed.",
-        pitr->depth, pitr->p.ctz.idx_e, pitr->p.ctz.pg_e);
+  MFS_EXTRA_LOG("MFS_PITR_FREE", "Parent iterator at %p freed.", pitr);
+  MFS_EXTRA_LOG_PITR(pitr);
 }
 
 void mfs_pitr_adv_off(FAR struct mfs_pitr_s * const pitr,
@@ -574,10 +591,10 @@ void mfs_pitr_adv_tochild(FAR struct mfs_pitr_s * const pitr,
 {
   /* (pitr->depth + 1) - 1 is the child's index. */
 
+  MFS_EXTRA_LOG("MFS_PITR_ADV_TOCHILD", "Advance pitr to child's offset.");
+  MFS_EXTRA_LOG_PITR(pitr);
+  MFS_EXTRA_LOG("MFS_PITR_ADV_TOCHILD", "New offset %" PRIu32, pitr->c_off);
   pitr->c_off = path[pitr->depth].off;
-
-  finfo("Pitr at depth %u with CTZ (%u, %u) advanced to %u offset.",
-        pitr->depth, pitr->p.ctz.idx_e, pitr->p.ctz.pg_e, pitr->c_off);
 }
 
 int mfs_pitr_readdirent(FAR const struct mfs_sb_s * const sb,
@@ -601,7 +618,7 @@ int mfs_pitr_readdirent(FAR const struct mfs_sb_s * const sb,
   *dirent = NULL;
   memset(rd, 0, len);
 
-  d = kmm_zalloc(len);
+  d = fs_heap_zalloc(len);
   if (predict_false(d == NULL))
     {
       ret = -ENOMEM;
@@ -637,7 +654,7 @@ int mfs_pitr_readdirent(FAR const struct mfs_sb_s * const sb,
     }
 
   sz  = MFS_DIRENTSZ(d);
-  tmp = kmm_realloc(d, sz);
+  tmp = fs_heap_realloc(d, sz);
   if (predict_true(tmp != NULL))
     {
       d = tmp;
@@ -653,7 +670,7 @@ int mfs_pitr_readdirent(FAR const struct mfs_sb_s * const sb,
   return ret;
 
 errout_with_d:
-  kmm_free(d);
+  fs_heap_free(d);
 
   if (ret < 0)
     {
@@ -713,7 +730,7 @@ static int search_ctz_by_name(FAR const struct mfs_sb_s * const sb,
     {
       DEBUGASSERT(namelen == 0);
 
-      nd = kmm_zalloc(sizeof(struct mfs_dirent_s));
+      nd = fs_heap_zalloc(sizeof(struct mfs_dirent_s));
       if (predict_false(nd == NULL))
         {
           ret = -ENOMEM;
@@ -736,7 +753,7 @@ static int search_ctz_by_name(FAR const struct mfs_sb_s * const sb,
 
   name_hash = mfs_hash(name, namelen);
 
-  ret = mfs_lru_updatedinfo(sb, path, depth);
+  ret = mfs_lru_getupdatedinfo(sb, path, depth);
   if (predict_false(ret < 0))
     {
       goto errout;
@@ -792,7 +809,7 @@ errout:
 }
 
 int mfs_get_patharr(FAR const struct mfs_sb_s * const sb,
-                    FAR const char * relpath, FAR struct mfs_path_s **path,
+                    FAR const char *relpath, FAR struct mfs_path_s **path,
                     FAR mfs_t *depth)
 {
   int                      ret       = OK;
@@ -808,14 +825,29 @@ int mfs_get_patharr(FAR const struct mfs_sb_s * const sb,
   FAR struct mfs_path_s   *np        = NULL;
   FAR struct mfs_dirent_s *dirent    = NULL;
 
+  MFS_LOG("MFS_GET_PATHARR", "Entry.");
+  MFS_EXTRA_LOG("MFS_GET_PATHARR", "Relpath is \"%s\".", relpath);
+
   *path  = NULL;
+  MFS_EXTRA_LOG("MFS_GET_PATHARR", "Path is %p.", path);
+
   n_objs = nobjs_in_path(relpath);
-  np     = kmm_zalloc(n_objs * sizeof(struct mfs_path_s));
+  MFS_EXTRA_LOG("MFS_GET_PATHARR", "There are %" PRIu32 " objects in path.",
+                n_objs);
+
+  np     = fs_heap_zalloc(n_objs * sizeof(struct mfs_path_s));
   if (predict_false(np == NULL))
     {
+      MFS_EXTRA_LOG("MFS_GET_PATHARR", "Could not allocate Path array.");
       ret = -ENOMEM;
       goto errout;
     }
+  else
+    {
+      MFS_EXTRA_LOG("MFS_GET_PATHARR", "Path array is allocated at %p.", np);
+    }
+
+  DEBUGASSERT(*cur != '/'); /* Relpath should not start with a '/' */
 
   ctz       = MFS_MN(sb).root_ctz;
   sz        = MFS_MN(sb).root_sz;
@@ -824,16 +856,26 @@ int mfs_get_patharr(FAR const struct mfs_sb_s * const sb,
   np[0].off = 0;
   cur       = relpath;
   next      = next_child(cur);
+
+  DEBUGASSERT(*next != 0 || n_objs == 2);
+
   name_len  = *next == 0 ? next - cur : next - cur - 1;
+
+  MFS_EXTRA_LOG("MFS_GET_PATHARR", "Root Master Node.");
+  MFS_EXTRA_LOG("MFS_GET_PATHARR", "\tCTZ is (%" PRIu32 ", %" PRIu32 ")",
+                MFS_MN(sb).root_ctz.idx_e, MFS_MN(sb).root_ctz.pg_e);
+  MFS_EXTRA_LOG("MFS_GET_PATHARR", "\tSize is %" PRIu32, sz);
 
   if (predict_false(n_objs == 1))
     {
+      MFS_EXTRA_LOG("MFS_GET_PATHARR", "There is only one object (root).");
       ret_flags |= MFS_ISDIR | MFS_EXIST;
 
       /* This will not go into the loop. */
     }
   else if (predict_false(n_objs == 2))
     {
+      MFS_EXTRA_LOG("MFS_GET_PATHARR", "There are only 2 objects.");
       ret_flags |= MFS_P_EXIST | MFS_P_ISDIR;
     }
 
@@ -841,6 +883,8 @@ int mfs_get_patharr(FAR const struct mfs_sb_s * const sb,
 
   for (i = 1; i < n_objs; i++)
     {
+      MFS_EXTRA_LOG("MFS_GET_PATHARR", "Looking at depth %" PRIu32, i);
+
       /* np[i] is the fs object at depth i + 1. */
 
       /* Need to update journal for every level in the path as, for eg., the
@@ -848,41 +892,65 @@ int mfs_get_patharr(FAR const struct mfs_sb_s * const sb,
        * by search_ctz_by_name function.
        */
 
+      MFS_EXTRA_LOG("MFS_GET_PATHARR", "Current String is \"%.*s\" (%p)",
+                    name_len, cur, cur);
+      MFS_EXTRA_LOG("MFS_GET_PATHARR", "Name length is %" PRIu32, name_len);
+      MFS_EXTRA_LOG("MFS_GET_PATHARR", "Next String is \"%s\"", next);
+
       ret = search_ctz_by_name(sb, np, i, cur, name_len, &off, &dirent);
       if (predict_false(ret < 0))
         {
+          MFS_EXTRA_LOG("MFS_GET_PATHARR", "Could not find CTZ.");
           goto errout_with_ret_flags;
+        }
+      else
+        {
+          MFS_EXTRA_LOG("MFS_GET_PATHARR", "Found CTZ.");
+          MFS_EXTRA_LOG("MFS_GET_PATHARR", "New Offset is %" PRIu32, off);
+          MFS_EXTRA_LOG_DIRENT(dirent);
         }
 
       if (i < n_objs - 2 && !S_ISDIR(dirent->mode))
         {
+          MFS_EXTRA_LOG("MFS_GET_PATHARR", "Depth %" PRIu32 " contains file",
+                        i);
           ret_flags |= MFS_FINPATH;
           goto errout_with_ret_flags;
         }
       else if (i == n_objs - 2)
         {
+          MFS_EXTRA_LOG("MFS_GET_PATHARR", "Parent exists.");
           ret_flags |= MFS_P_EXIST;
           if (S_ISDIR(dirent->mode))
             {
+              MFS_EXTRA_LOG("MFS_GET_PATHARR", "Parent is a directory.");
               ret_flags |= MFS_P_ISDIR;
             }
           else
             {
+              MFS_EXTRA_LOG("MFS_GET_PATHARR", "Parent is a file.");
               ret_flags |= MFS_FINPATH;
               goto errout_with_ret_flags;
             }
         }
-      else /* if (i == n_objs - 1) */
+      else if (i == n_objs - 1)
         {
+          MFS_EXTRA_LOG("MFS_GET_PATHARR", "Child exists.");
           ret_flags |= MFS_EXIST;
           if (S_ISDIR(dirent->mode))
             {
+              MFS_EXTRA_LOG("MFS_GET_PATHARR", "Child is a directory.");
               ret_flags |= MFS_ISDIR;
             }
           else
             {
+              MFS_EXTRA_LOG("MFS_GET_PATHARR", "Child is a file.");
               ret_flags |= MFS_ISFILE;
             }
+        }
+      else
+        {
+          /* OK */
         }
 
       np[i].ctz = dirent->ctz;
@@ -896,13 +964,17 @@ int mfs_get_patharr(FAR const struct mfs_sb_s * const sb,
       cur       = next;
       next      = next_child(cur);
       name_len  = *next == 0 ? next - cur : next - cur - 1;
+
+      DEBUGASSERT(cur != next);
     }
 
   ret    = ret_flags;
   *depth = n_objs;
   *path  = np;
 
-  finfo("Got path array with flags %u, depth %u.", ret, n_objs);
+  MFS_EXTRA_LOG("MFS_GET_PATHARR", "Child is a file.");
+
+  MFS_LOG("MKDIR", "Exit | Flags: %u, Depth %u.", ret, n_objs);
   return ret;
 
 errout_with_ret_flags:
@@ -915,13 +987,14 @@ errout_with_ret_flags:
    */
 
 errout:
-  finfo("Got path array with flags %u, depth %u.", ret, n_objs);
+  MFS_LOG("MKDIR", "Exit | Flags: %u, Depth %u.", ret, n_objs);
   return ret;
 }
 
 void mfs_free_patharr(FAR struct mfs_path_s *path)
 {
-  kmm_free(path);
+  MFS_EXTRA_LOG("MFS_FREE_PATHARR", "Path array at %p freed.", path);
+  fs_heap_free(path);
 }
 
 void mfs_pitr_reset(FAR struct mfs_pitr_s * const pitr)
@@ -988,7 +1061,7 @@ int mfs_pitr_appendnew(FAR struct mfs_sb_s * const sb,
 
   DEBUGASSERT(depth > 0);
 
-  d = kmm_zalloc(sizeof(struct mfs_dirent_s) + len);
+  d = fs_heap_zalloc(sizeof(struct mfs_dirent_s) + len);
   if (predict_false(d == NULL))
     {
       ret = -ENOMEM;
@@ -1043,7 +1116,7 @@ int mfs_pitr_traversefs(FAR struct mfs_sb_s * sb, const struct mfs_ctz_s ctz,
   FAR struct mfs_path_s *path     = NULL;
 
   capacity = MFS_TRAVERSE_INITSZ;
-  path = kmm_zalloc(capacity * sizeof(struct mfs_path_s));
+  path = fs_heap_zalloc(capacity * sizeof(struct mfs_path_s));
   if (predict_false(path == NULL))
     {
       ret = -ENOMEM;

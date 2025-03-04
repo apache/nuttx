@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/vfs/fs_lseek.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -131,11 +133,11 @@ off_t nx_seek(int fd, off_t offset, int whence)
       return ret;
     }
 
-  DEBUGASSERT(filep != NULL);
-
   /* Then let file_seek do the real work */
 
-  return file_seek(filep, offset, whence);
+  ret = file_seek(filep, offset, whence);
+  fs_putfilep(filep);
+  return ret;
 }
 
 /****************************************************************************

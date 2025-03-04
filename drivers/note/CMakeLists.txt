@@ -1,6 +1,8 @@
 # ##############################################################################
 # drivers/note/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -38,6 +40,14 @@ endif()
 
 if(CONFIG_DRIVERS_NOTESNAP)
   list(APPEND SRCS notesnap_driver.c)
+endif()
+
+if(CONFIG_DRIVERS_NOTERPMSG_SERVER)
+  list(APPEND SRCS noterpmsg_server.c)
+endif()
+
+if(CONFIG_DRIVERS_NOTERPMSG)
+  list(APPEND SRCS noterpmsg_driver.c)
 endif()
 
 target_sources(drivers PRIVATE ${SRCS})

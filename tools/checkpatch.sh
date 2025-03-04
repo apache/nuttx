@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # tools/checkpatch.sh
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.
@@ -61,7 +63,7 @@ is_rust_file() {
 
 is_cmake_file() {
   file_name=$(basename $@)
-  if [ "$file_name" == "CMakeLists.txt" ] || [[ "$file_name" =~ "cmake" ]]; then
+  if [ "$file_name" == "CMakeLists.txt" ] || [[ "$file_name" =~ \.cmake$ ]]; then
     echo 1
   else
     echo 0
@@ -81,9 +83,15 @@ check_file() {
   fi
 
   if [ ${@##*.} == 'py' ]; then
-    black --check $@
-    flake8 --config ${TOOLDIR}/../.github/linters/setup.cfg $@
-    isort $@
+    setupcfg="${TOOLDIR}/../.github/linters/setup.cfg"
+    black --check "$@" || fail=1
+    flake8 --config "${setupcfg}" "$@" || fail=1
+    isort --diff --check-only --settings-path "${setupcfg}" "$@"
+    if [ $? -ne 0 ]; then
+      # Format in place
+      isort --settings-path "${setupcfg}" "$@"
+      fail=1
+    fi
   elif [ "$(is_rust_file $@)" == "1" ]; then
     if ! command -v rustfmt &> /dev/null; then
       fail=1

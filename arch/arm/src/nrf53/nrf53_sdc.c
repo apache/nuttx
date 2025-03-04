@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/nrf53/nrf53_sdc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -38,9 +40,6 @@
 #include <arch/nrf53/nrf5340_irq_cpunet.h>
 #include <nuttx/wqueue.h>
 
-#if defined(CONFIG_UART_BTH4)
-#  include <nuttx/serial/uart_bth4.h>
-#endif
 #ifdef CONFIG_BLUETOOTH_RPMSG_SERVER
 #  include <nuttx/wireless/bluetooth/bt_rpmsghci.h>
 #endif
@@ -910,29 +909,12 @@ int nrf53_sdc_initialize(void)
       return ret;
     }
 
-#ifdef CONFIG_UART_BTH4
-  /* Register UART BT H4 device */
-
-  ret = uart_bth4_register(CONFIG_NRF53_BLE_TTY_NAME, &g_bt_driver);
+  ret = bt_driver_register(&g_bt_driver);
   if (ret < 0)
     {
-      wlerr("bt_bth4_register error: %d\n", ret);
+      wlerr("bt_driver_register error: %d\n", ret);
       return ret;
     }
-#elif defined(CONFIG_NET_BLUETOOTH)
-  /* Register network device */
-
-  ret = bt_netdev_register(&g_bt_driver);
-  if (ret < 0)
-    {
-      wlerr("bt_netdev_register error: %d\n", ret);
-      return ret;
-    }
-#elif defined(CONFIG_BLUETOOTH_RPMSG_SERVER)
-  /* Do nothing here */
-#else
-#  error
-#endif
 
   return ret;
 }

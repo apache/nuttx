@@ -50,7 +50,8 @@
  *
  ****************************************************************************/
 
-static int IRAM_ATTR esp32s3_fromcpu_interrupt(int fromcpu)
+static int IRAM_ATTR esp32s3_fromcpu_interrupt(int irq, void *context,
+                                               void *arg, int fromcpu)
 {
   uintptr_t regaddr;
 
@@ -63,9 +64,9 @@ static int IRAM_ATTR esp32s3_fromcpu_interrupt(int fromcpu)
                              SYSTEM_CPU_INTR_FROM_CPU_1_REG;
   putreg32(0, regaddr);
 
-  /* Call pause handler */
+  /* Smp call handler */
 
-  xtensa_pause_handler();
+  xtensa_smp_call_handler(irq, context, arg);
 
   return OK;
 }
@@ -84,14 +85,12 @@ static int IRAM_ATTR esp32s3_fromcpu_interrupt(int fromcpu)
 
 int IRAM_ATTR esp32s3_fromcpu0_interrupt(int irq, void *context, void *arg)
 {
-  nxsched_smp_call_handler(irq, context, arg);
-  return esp32s3_fromcpu_interrupt(0);
+  return esp32s3_fromcpu_interrupt(irq, context, arg, 0);
 }
 
 int IRAM_ATTR esp32s3_fromcpu1_interrupt(int irq, void *context, void *arg)
 {
-  nxsched_smp_call_handler(irq, context, arg);
-  return esp32s3_fromcpu_interrupt(1);
+  return esp32s3_fromcpu_interrupt(irq, context, arg, 1);
 }
 
 /****************************************************************************

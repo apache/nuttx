@@ -186,8 +186,8 @@
  * Private Functions Declaration
  ****************************************************************************/
 
-static void spiflash_start(void);
-static void spiflash_end(void);
+void spiflash_start(void);
+void spiflash_end(void);
 static void spi_flash_disable_cache(void);
 static void spi_flash_restore_cache(void);
 #ifdef CONFIG_SMP
@@ -252,26 +252,6 @@ static void spiflash_suspend_cache(void)
 }
 
 /****************************************************************************
- * Name: spiflash_resume_cache
- *
- * Description:
- *   Resume CPU cache.
- *
- ****************************************************************************/
-
-static void spiflash_resume_cache(void)
-{
-  int cpu = this_cpu();
-#ifdef CONFIG_SMP
-  int other_cpu = cpu ? 0 : 1;
-#endif
-
-  spi_flash_restore_cache();
-
-  g_spi_flash_cache_suspended = false;
-}
-
-/****************************************************************************
  * Name: spiflash_start
  *
  * Description:
@@ -279,7 +259,7 @@ static void spiflash_resume_cache(void)
  *
  ****************************************************************************/
 
-static void spiflash_start(void)
+void spiflash_start(void)
 {
   struct tcb_s *tcb = this_task();
   int saved_priority = tcb->sched_priority;
@@ -341,7 +321,7 @@ static void spiflash_start(void)
  *
  ****************************************************************************/
 
-static void spiflash_end(void)
+void spiflash_end(void)
 {
   const int cpu = this_cpu();
 #ifdef CONFIG_SMP
@@ -927,6 +907,32 @@ static int spiflash_init_spi_flash_op_block_task(int cpu)
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: spiflash_resume_cache
+ *
+ * Description:
+ *   Resume CPU cache.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void spiflash_resume_cache(void)
+{
+  int cpu = this_cpu();
+#ifdef CONFIG_SMP
+  int other_cpu = cpu ? 0 : 1;
+#endif
+
+  spi_flash_restore_cache();
+
+  g_spi_flash_cache_suspended = false;
+}
+
+/****************************************************************************
  * Name: esp32s3_mmap
  *
  * Description:
@@ -1373,4 +1379,25 @@ bool esp32s3_flash_encryption_enabled(void)
     }
 
   return enabled;
+}
+
+/****************************************************************************
+ * Name: esp32s3_get_flash_address_mapped_as_text
+ *
+ * Description:
+ *   Get flash address which is currently mapped as text
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   flash address which is currently mapped as text
+ *
+ ****************************************************************************/
+
+uint32_t esp32s3_get_flash_address_mapped_as_text(void)
+{
+  uint32_t i = MMU_ADDR2PAGE((uint32_t)_stext) -
+               MMU_ADDR2PAGE(SOC_MMU_IBUS_VADDR_BASE);
+  return (FLASH_MMU_TABLE[i] & MMU_ADDRESS_MASK) * MMU_PAGE_SIZE;
 }

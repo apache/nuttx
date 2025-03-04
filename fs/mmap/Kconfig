@@ -6,6 +6,7 @@
 config FS_RAMMAP
 	bool "File mapping emulation"
 	default n
+	depends on FS_REFCOUNT
 	---help---
 		NuttX operates in a flat open address space and is focused on MCUs that do
 		support Memory Management Units (MMUs).  Therefore, NuttX generally does not

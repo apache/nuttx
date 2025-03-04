@@ -1,0 +1,354 @@
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#  http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+#
+
+# add arch labels
+
+"Arch: arm":
+  - changed-files:
+      - any-glob-to-any-file: 'arch/arm/**'
+
+"Arch: arm64":
+  - changed-files:
+      - any-glob-to-any-file: 'arch/arm64/**'
+
+"Arch: avr":
+  - changed-files:
+      - any-glob-to-any-file: 'arch/avr/**'
+
+"Arch: ceva":
+  - changed-files:
+      - any-glob-to-any-file: 'arch/ceva/**'
+
+"Arch: hc":
+  - changed-files:
+      - any-glob-to-any-file: 'arch/hc/**'
+
+"Arch: mips":
+  - changed-files:
+      - any-glob-to-any-file: 'arch/mips/**'
+
+"Arch: openrisc":
+  - changed-files:
+      - any-glob-to-any-file: 'arch/or1k/**'
+
+"Arch: renesas":
+  - changed-files:
+      - any-glob-to-any-file: 'arch/renesas/**'
+
+"Arch: risc-v":
+  - changed-files:
+      - any-glob-to-any-file: 'arch/risc-v/**'
+
+"Arch: simulator":
+  - changed-files:
+      - any-glob-to-any-file: 'arch/sim/**'
+
+"Arch: sparc":
+  - changed-files:
+      - any-glob-to-any-file: 'arch/sparc/**'
+
+"Arch: tricore":
+  - changed-files:
+      - any-glob-to-any-file: 'arch/tricore/**'
+
+"Arch: x86":
+  - changed-files:
+      - any-glob-to-any-file: 'arch/x86/**'
+
+"Arch: x86_64":
+  - changed-files:
+      - any-glob-to-any-file: 'arch/x86_64/**'
+
+"Arch: xtensa":
+  - changed-files:
+      - any-glob-to-any-file: 'arch/xtensa/**'
+
+"Arch: z16":
+  - changed-files:
+      - any-glob-to-any-file: 'arch/z16/**'
+
+"Arch: z80":
+  - changed-files:
+      - any-glob-to-any-file: 'arch/z80/**'
+
+# add board labels
+
+"Board: arm":
+  - changed-files:
+      - any-glob-to-any-file: 'boards/arm/**'
+
+"Board: arm64":
+  - changed-files:
+      - any-glob-to-any-file: 'boards/arm64/**'
+
+"Board: avr":
+  - changed-files:
+      - any-glob-to-any-file: 'boards/avr/**'
+
+"Board: hc":
+  - changed-files:
+      - any-glob-to-any-file: 'boards/hc/**'
+
+"Board: mips":
+  - changed-files:
+      - any-glob-to-any-file: 'boards/mips/**'
+
+"Board: openrisc":
+  - changed-files:
+      - any-glob-to-any-file: 'boards/or1k/**'
+
+"Board: renesas":
+  - changed-files:
+      - any-glob-to-any-file: 'boards/renesas/**'
+
+"Board: risc-v":
+  - changed-files:
+      - any-glob-to-any-file: 'boards/risc-v/**'
+
+"Board: simulator":
+  - changed-files:
+      - any-glob-to-any-file: 'boards/sim/**'
+
+"Board: sparc":
+  - changed-files:
+      - any-glob-to-any-file: 'boards/sparc/**'
+
+"Board: tricore":
+  - changed-files:
+      - any-glob-to-any-file: 'boards/tricore/**'
+
+"Board: x86":
+  - changed-files:
+      - any-glob-to-any-file: 'boards/x86/**'
+
+"Board: x86_64":
+  - changed-files:
+      - any-glob-to-any-file: 'boards/x86_64/**'
+
+"Board: xtensa":
+  - changed-files:
+      - any-glob-to-any-file: 'boards/xtensa/**'
+
+"Board: z16":
+  - changed-files:
+      - any-glob-to-any-file: 'boards/z16/**'
+
+"Board: z80":
+  - changed-files:
+      - any-glob-to-any-file: 'boards/z80/**'
+
+# add area labels
+
+"Area: Audio":
+  - changed-files:
+      - any-glob-to-any-file: 'audio/**'
+      - any-glob-to-any-file: 'drivers/audio/**'
+      - any-glob-to-any-file: 'include/nuttx/audio/**'
+
+"Area: Binfmt":
+  - changed-files:
+      - any-glob-to-any-file: 'binfmt/**'
+      - any-glob-to-any-file: 'include/nuttx/binfmt/**'
+
+"Area: Bluetooth":
+  - changed-files:
+      - any-glob-to-any-file: 'wireless/bluetooth/**'
+      - any-glob-to-any-file: 'drivers/wireless/bluetooth/**'
+      - any-glob-to-any-file: 'include/nuttx/wireless/bluetooth/**'
+
+"Area: Build system":
+  - changed-files:
+      - any-glob-to-any-file: 'Makefile'
+      - any-glob-to-any-file: 'CMakeLists.txt'
+      - any-glob-to-any-file: 'cmake/**'
+      - any-glob-to-any-file: 'tools/*.mk'
+
+"Area: CI":
+  - changed-files:
+      - any-glob-to-any-file: '.github/**'
+      - any-glob-to-any-file: 'tools/ci/**'
+
+"Area: Crypto":
+  - changed-files:
+      - any-glob-to-any-file: 'crypto/**'
+      - any-glob-to-any-file: 'drivers/crypto/**'
+      - any-glob-to-any-file: 'include/crypto/**'
+      - any-glob-to-any-file: 'include/nuttx/crypto/**'
+
+# someday this should be broken down into more precise categories
+
+"Area: Drivers":
+  - changed-files:
+      - any-glob-to-any-file: 'drivers/1wire/**'
+      - any-glob-to-any-file: 'drivers/bch/**'
+      - any-glob-to-any-file: 'drivers/can/**'
+      - any-glob-to-any-file: 'drivers/devicetree/**'
+      - any-glob-to-any-file: 'drivers/dma/**'
+      - any-glob-to-any-file: 'drivers/dummy/**'
+      - any-glob-to-any-file: 'drivers/eeprom/**'
+      - any-glob-to-any-file: 'drivers/efuse/**'
+      - any-glob-to-any-file: 'drivers/i2c/**'
+      - any-glob-to-any-file: 'drivers/i2s/**'
+      - any-glob-to-any-file: 'drivers/i3c/**'
+      - any-glob-to-any-file: 'drivers/input/**'
+      - any-glob-to-any-file: 'drivers/ioexpander/**'
+      - any-glob-to-any-file: 'drivers/ipcc/**'
+      - any-glob-to-any-file: 'drivers/lcd/**'
+      - any-glob-to-any-file: 'drivers/leds/**'
+      - any-glob-to-any-file: 'drivers/loops/**'
+      - any-glob-to-any-file: 'drivers/math/**'
+      - any-glob-to-any-file: 'drivers/misc/**'
+      - any-glob-to-any-file: 'drivers/mmcsd/**'
+      - any-glob-to-any-file: 'drivers/modem/**'
+      - any-glob-to-any-file: 'drivers/motor/**'
+      - any-glob-to-any-file: 'drivers/mtd/**'
+      - any-glob-to-any-file: 'drivers/note/**'
+      - any-glob-to-any-file: 'drivers/pinctrl/**'
+      - any-glob-to-any-file: 'drivers/pipes/**'
+      - any-glob-to-any-file: 'drivers/power/**'
+      - any-glob-to-any-file: 'drivers/rc/**'
+      - any-glob-to-any-file: 'drivers/regmap/**'
+      - any-glob-to-any-file: 'drivers/reset/**'
+      - any-glob-to-any-file: 'drivers/rf/**'
+      - any-glob-to-any-file: 'drivers/rmt/**'
+      - any-glob-to-any-file: 'drivers/rpmsg/**'
+      - any-glob-to-any-file: 'drivers/rptun/**'
+      - any-glob-to-any-file: 'drivers/segger/**'
+      - any-glob-to-any-file: 'drivers/serial/**'
+      - any-glob-to-any-file: 'drivers/spi/**'
+      - any-glob-to-any-file: 'drivers/syslog/**'
+      - any-glob-to-any-file: 'drivers/thermal/**'
+      - any-glob-to-any-file: 'drivers/timers/**'
+      - any-glob-to-any-file: 'drivers/usrsock/**'
+      - any-glob-to-any-file: 'drivers/vhost/**'
+      - any-glob-to-any-file: 'drivers/virtio/**'
+      - any-glob-to-any-file: 'drivers/wireless/**'
+      - any-glob-to-any-file: 'include/nuttx/1wire/**'
+      - any-glob-to-any-file: 'include/nuttx/aie/**'
+      - any-glob-to-any-file: 'include/nuttx/analog/**'
+      - any-glob-to-any-file: 'include/nuttx/clk/**'
+      - any-glob-to-any-file: 'include/nuttx/contactless/**'
+      - any-glob-to-any-file: 'include/nuttx/coresight/**'
+      - any-glob-to-any-file: 'include/nuttx/fdt.h'
+      - any-glob-to-any-file: 'include/nuttx/dma/**'
+      - any-glob-to-any-file: 'include/nuttx/drivers/**'
+      - any-glob-to-any-file: 'include/nuttx/eeprom/**'
+      - any-glob-to-any-file: 'include/nuttx/efuse/**'
+      - any-glob-to-any-file: 'include/nuttx/i2c/**'
+      - any-glob-to-any-file: 'include/nuttx/i3c/**'
+      - any-glob-to-any-file: 'include/nuttx/input/**'
+      - any-glob-to-any-file: 'include/nuttx/ioexpander/**'
+      - any-glob-to-any-file: 'include/nuttx/ipcc.h'
+      - any-glob-to-any-file: 'include/nuttx/lcd/**'
+      - any-glob-to-any-file: 'include/nuttx/leds/**'
+      - any-glob-to-any-file: 'include/nuttx/math/**'
+      - any-glob-to-any-file: 'include/nuttx/modem/**'
+      - any-glob-to-any-file: 'include/nuttx/motor/**'
+      - any-glob-to-any-file: 'include/nuttx/mtd/**'
+      - any-glob-to-any-file: 'include/nuttx/note/**'
+      - any-glob-to-any-file: 'include/nuttx/pinctrl/**'
+      - any-glob-to-any-file: 'include/nuttx/power/**'
+      - any-glob-to-any-file: 'include/nuttx/rc/**'
+      - any-glob-to-any-file: 'include/nuttx/regmap/**'
+      - any-glob-to-any-file: 'include/nuttx/reset/**'
+      - any-glob-to-any-file: 'include/nuttx/rf/**'
+      - any-glob-to-any-file: 'include/nuttx/rmt/**'
+      - any-glob-to-any-file: 'include/nuttx/rpmsg/**'
+      - any-glob-to-any-file: 'include/nuttx/rptun/**'
+      - any-glob-to-any-file: 'include/nuttx/segger/**'
+      - any-glob-to-any-file: 'include/nuttx/serial/**'
+      - any-glob-to-any-file: 'include/nuttx/spi/**'
+      - any-glob-to-any-file: 'include/nuttx/syslog/**'
+      - any-glob-to-any-file: 'include/nuttx/timers/**'
+      - any-glob-to-any-file: 'include/nuttx/usrsock/**'
+      - any-glob-to-any-file: 'include/nuttx/vhost/**'
+      - any-glob-to-any-file: 'include/nuttx/virtio/**'
+      - any-glob-to-any-file: 'include/nuttx/wireless/**'
+
+"Area: Documentation":
+  - changed-files:
+      - any-glob-to-any-file: 'Documentation/**'
+      - any-glob-to-any-file: 'README.md'
+      - any-glob-to-any-file: 'ReleaseNotes'
+      - any-glob-to-any-file: 'CONTRIBUTING.md'
+      - any-glob-to-any-file: 'INVIOLABLES.md'
+
+"Area: File System":
+  - changed-files:
+      - any-glob-to-any-file: 'fs/**'
+      - any-glob-to-any-file: 'include/nuttx/fs/**'
+
+"Area: Github Actions":
+  - changed-files:
+      - any-glob-to-any-file: '.github/actions/**'
+
+"Area: Graphics":
+  - changed-files:
+      - any-glob-to-any-file: 'graphics/**'
+      - any-glob-to-any-file: 'drivers/lcd/**'
+      - any-glob-to-any-file: 'include/nuttx/lcd/**'
+
+"Area: Memory Management":
+  - changed-files:
+      - any-glob-to-any-file: 'mm/**'
+      - any-glob-to-any-file: 'include/nuttx/mm/**'
+
+"Area: Networking":
+  - changed-files:
+      - any-glob-to-any-file: 'net/**'
+      - any-glob-to-any-file: 'drivers/net/**'
+      - any-glob-to-any-file: 'include/nuttx/net/**'
+
+"Area: OS Components":
+  - changed-files:
+      - any-glob-to-any-file: 'sched/**'
+      - any-glob-to-any-file: 'syscall/**'
+      - any-glob-to-any-file: 'libs/**'
+      - any-glob-to-any-file: 'include/*.h'
+      - any-glob-to-any-file: 'include/nuttx/*.h'
+
+"Area: PCI":
+  - changed-files:
+      - any-glob-to-any-file: 'drivers/pci/**'
+      - any-glob-to-any-file: 'include/nuttx/pci/**'
+
+"Area: Sensors":
+  - changed-files:
+      - any-glob-to-any-file: 'drivers/sensors/**'
+      - any-glob-to-any-file: 'include/nuttx/sensors/**'
+      - any-glob-to-any-file: 'include/nuttx/uorb.h'
+
+"Area: Tooling":
+  - changed-files:
+      - any-glob-to-any-file: 'tools/**'
+
+"Area: USB":
+  - changed-files:
+      - any-glob-to-any-file: 'drivers/usbdev/**'
+      - any-glob-to-any-file: 'drivers/usbhost/**'
+      - any-glob-to-any-file: 'drivers/usbmisc/**'
+      - any-glob-to-any-file: 'drivers/usbmonitor/**'
+      - any-glob-to-any-file: 'include/nuttx/usb/**'
+
+"Area: Video":
+  - changed-files:
+      - any-glob-to-any-file: 'video/**'
+      - any-glob-to-any-file: 'drivers/video/**'
+      - any-glob-to-any-file: 'include/nuttx/video/**'

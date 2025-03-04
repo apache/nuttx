@@ -4,7 +4,7 @@
 #
 
 config LIBC_MODLIB
-	bool
+	bool "Enable module library"
 	default n
 	select LIBC_ARCH_ELF
 	select ARCH_USE_TEXT_HEAP if ARCH_HAVE_TEXT_HEAP
@@ -97,5 +97,23 @@ config MODLIB_SYSTEM_SYMTAB
 	default n
 
 endif # MODLIB_HAVE_SYMTAB
+
+config MODLIB_LOADTO_LMA
+	bool "modlib load sections to LMA"
+	default n
+	---help---
+		Load all section to LMA not VMA, so the startup code(e.g. start.S) need
+		relocate .data section to the final address(VMA) and zero .bss section
+		by self.
+
+config MODLIB_EXIDX_SECTNAME
+	string "ELF Section Name for Exception Index"
+	default ".ARM.exidx"
+	depends on CXX_EXCEPTION && ARCH_ARM
+	---help---
+		Set the name string for the exception index section on the ELF modules to
+		be loaded by the ELF binary loader.
+
+		This is needed to support exception handling on loadable ELF modules.
 
 endmenu # Module library configuration

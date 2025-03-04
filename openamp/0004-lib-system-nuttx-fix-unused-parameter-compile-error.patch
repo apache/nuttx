@@ -1,0 +1,155 @@
+From f003d671f816b319ad0f8d017022c93b438b78b3 Mon Sep 17 00:00:00 2001
+From: Yongrong Wang <wangyongrong@xiaomi.com>
+Date: Mon, 9 Sep 2024 19:46:37 +0800
+Subject: [PATCH 4/5] lib/system/nuttx: fix unused parameter compile error
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+/home/wyr/work/code/project/cardev/nuttx/openamp/libmetal/lib/system/nuttx/device.c:16:22: error: 'io' undeclared (first use in this function)
+   16 |         metal_unused(io);
+/home/wyr/work/code/project/cardev/nuttx/openamp/libmetal/lib/system/nuttx/device.c:14:53: error: unused parameter 'dev' [-Werror=unused-parameter]
+   14 | int metal_generic_dev_sys_open(struct metal_device *dev)
+
+error: unused parameter ‘addr’ [-Werror=unused-parameter]
+   25 | static inline void __metal_cache_flush(void *addr, unsigned int len)
+      |                                        ~~~~~~^~~~
+error: unused parameter ‘len’ [-Werror=unused-parameter]
+   25 | static inline void __metal_cache_flush(void *addr, unsigned int len)
+      |                                                    ~~~~~~~~~~~~~^~~
+
+Signed-off-by: Yongrong Wang <wangyongrong@xiaomi.com>
+---
+ lib/system/nuttx/cache.h  | 5 +++++
+ lib/system/nuttx/device.c | 1 +
+ lib/system/nuttx/init.c   | 1 +
+ lib/system/nuttx/io.c     | 6 ++++++
+ lib/system/nuttx/io.h     | 3 +++
+ 5 files changed, 16 insertions(+)
+
+diff --git a/lib/system/nuttx/cache.h libmetal/lib/system/nuttx/cache.h
+index e3b6052..22b94b4 100644
+--- a/lib/system/nuttx/cache.h
++++ libmetal/lib/system/nuttx/cache.h
+@@ -16,6 +16,7 @@
+ #ifndef __METAL_NUTTX_CACHE__H__
+ #define __METAL_NUTTX_CACHE__H__
+ 
++#include <metal/utilities.h>
+ #include <nuttx/arch.h>
+ 
+ #ifdef __cplusplus
+@@ -24,11 +25,15 @@ extern "C" {
+ 
+ static inline void __metal_cache_flush(void *addr, unsigned int len)
+ {
++	metal_unused(addr);
++	metal_unused(len);
+ 	up_clean_dcache((uintptr_t)addr, (uintptr_t)addr + len);
+ }
+ 
+ static inline void __metal_cache_invalidate(void *addr, unsigned int len)
+ {
++	metal_unused(addr);
++	metal_unused(len);
+ 	up_invalidate_dcache((uintptr_t)addr, (uintptr_t)addr + len);
+ }
+ 
+diff --git a/lib/system/nuttx/device.c libmetal/lib/system/nuttx/device.c
+index 7e66ab3..2c828ab 100644
+--- a/lib/system/nuttx/device.c
++++ libmetal/lib/system/nuttx/device.c
+@@ -13,5 +13,6 @@
+ 
+ int metal_generic_dev_sys_open(struct metal_device *dev)
+ {
++	metal_unused(dev);
+ 	return 0;
+ }
+diff --git a/lib/system/nuttx/init.c libmetal/lib/system/nuttx/init.c
+index 8d59784..2519dc6 100644
+--- a/lib/system/nuttx/init.c
++++ libmetal/lib/system/nuttx/init.c
+@@ -19,6 +19,7 @@ int metal_sys_init(const struct metal_init_params *params)
+ {
+ 	int ret = metal_cntr_irq_init();
+ 
++	metal_unused(params);
+ 	if (ret >= 0)
+ 		ret = metal_bus_register(&metal_generic_bus);
+ 	return ret;
+diff --git a/lib/system/nuttx/io.c libmetal/lib/system/nuttx/io.c
+index ab9bc6a..41697a7 100644
+--- a/lib/system/nuttx/io.c
++++ libmetal/lib/system/nuttx/io.c
+@@ -15,6 +15,7 @@ static uint64_t metal_io_read_(struct metal_io_region *io,
+ {
+ 	uint64_t value = 0;
+ 
++	metal_unused(order);
+ 	metal_io_block_read(io, offset, &value, width);
+ 	return value;
+ }
+@@ -25,6 +26,7 @@ static void metal_io_write_(struct metal_io_region *io,
+ 			    memory_order order,
+ 			    int width)
+ {
++	metal_unused(order);
+ 	metal_io_block_write(io, offset, &value, width);
+ }
+ 
+@@ -36,6 +38,7 @@ static int metal_io_block_read_(struct metal_io_region *io,
+ {
+ 	void *va = metal_io_virt(io, offset);
+ 
++	metal_unused(order);
+ 	metal_cache_invalidate(va, len);
+ 	if (len == 1)
+ 		*(uint8_t *)dst = *(uint8_t *)va;
+@@ -60,6 +63,7 @@ static int metal_io_block_write_(struct metal_io_region *io,
+ {
+ 	void *va = metal_io_virt(io, offset);
+ 
++	metal_unused(order);
+ 	if (len == 1)
+ 		*(uint8_t *)va = *(uint8_t *)src;
+ 	else if (len == 2)
+@@ -85,12 +89,14 @@ static void metal_io_block_set_(struct metal_io_region *io,
+ {
+ 	void *va = metal_io_virt(io, offset);
+ 
++	metal_unused(order);
+ 	memset(va, value, len);
+ 	metal_cache_flush(va, len);
+ }
+ 
+ static void metal_io_close_(struct metal_io_region *io)
+ {
++	metal_unused(io);
+ }
+ 
+ static metal_phys_addr_t metal_io_offset_to_phys_(struct metal_io_region *io,
+diff --git a/lib/system/nuttx/io.h libmetal/lib/system/nuttx/io.h
+index 7f6508d..743b7b1 100644
+--- a/lib/system/nuttx/io.h
++++ libmetal/lib/system/nuttx/io.h
+@@ -16,6 +16,8 @@
+ #ifndef __METAL_NUTTX_IO__H__
+ #define __METAL_NUTTX_IO__H__
+ 
++#include <metal/utilities.h>
++
+ #ifdef __cplusplus
+ extern "C" {
+ #endif
+@@ -39,6 +41,7 @@ struct metal_io_region *metal_io_get_region(void);
+  */
+ static inline void metal_sys_io_mem_map(struct metal_io_region *io)
+ {
++	metal_unused(io);
+ }
+ #endif
+ 
+-- 
+2.34.1
+

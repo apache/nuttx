@@ -1,6 +1,8 @@
 # ##############################################################################
 # drivers/power/battery/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -84,6 +86,10 @@ if(CONFIG_BATTERY_MONITOR)
   if(CONFIG_I2C_BQ769X0)
     list(APPEND SRCS bq769x0.c)
   endif()
+endif()
+
+if(CONFIG_GOLDFISH_BATTERY)
+  list(APPEND SRCS goldfish_battery.c)
 endif()
 
 target_sources(drivers PRIVATE ${SRCS})

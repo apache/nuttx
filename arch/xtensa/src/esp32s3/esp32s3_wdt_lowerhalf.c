@@ -42,6 +42,9 @@
 #include "esp32s3_wdt_lowerhalf.h"
 #include "hardware/esp32s3_soc.h"
 
+#include "soc/periph_defs.h"
+#include "esp_private/periph_ctrl.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -827,6 +830,10 @@ int esp32s3_wdt_initialize(const char *devpath, enum esp32s3_wdt_inst_e wdt)
 
   DEBUGASSERT(devpath);
 
+  /* Timer Group 0 and RTC are initialized on system start.
+   * Timer Group 1 must be initialized for MWDT1.
+   */
+
   switch (wdt)
     {
 #ifdef CONFIG_ESP32S3_MWDT0
@@ -843,6 +850,7 @@ int esp32s3_wdt_initialize(const char *devpath, enum esp32s3_wdt_inst_e wdt)
         {
           lower = &g_esp32s3_mwdt1_lowerhalf;
           lower->peripheral = TIMER;
+          periph_module_enable(PERIPH_TIMG1_MODULE);
           break;
         }
 #endif

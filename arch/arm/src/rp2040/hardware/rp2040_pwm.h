@@ -1,10 +1,8 @@
 /****************************************************************************
  * arch/arm/src/rp2040/hardware/rp2040_pwm.h
  *
- * Generated from rp2040.svd originally provided by
- *   Raspberry Pi (Trading) Ltd.
- *
- * Copyright 2020 (c) 2020 Raspberry Pi (Trading) Ltd.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2020 Raspberry Pi (Trading) Ltd.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -77,7 +75,7 @@
 /* Register bit definitions *************************************************/
 
 #define RP2040_PWM_CSR_PH_ADV        (1 << 7) /* advance phase of counter by one */
-#define RP2040_PWM_CSR_PH_RET        (1 << 5) /* retard phase of counter by one */
+#define RP2040_PWM_CSR_PH_RET        (1 << 6) /* retard phase of counter by one */
 #define RP2040_PWM_CSR_DIVMODE_SHIFT (4)      /* divisor mode */
 #define RP2040_PWM_CSR_DIVMODE_MASK  (0x03 << RP2040_PWM_CSR_DIVMODE_SHIFT)
 #define RP2040_PWM_CSR_B_INV         (1 << 3) /* invert output B */

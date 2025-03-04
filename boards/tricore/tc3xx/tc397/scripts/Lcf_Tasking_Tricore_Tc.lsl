@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/tricore/tc3xx/tc397/scripts/Lcf_Tasking_Tricore_Tc.lsl
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -18,7 +20,7 @@
  *
  ****************************************************************************/
 
-#include "../../../include/nuttx/config.h"
+#include "include/nuttx/config.h"
 
 #define LCF_CSA0_SIZE 40k
 #define LCF_USTACK0_SIZE CONFIG_IDLETHREAD_STACKSIZE

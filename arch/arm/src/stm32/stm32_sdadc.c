@@ -1,12 +1,12 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_sdadc.c
  *
- *   Copyright (C) 2011, 2013, 2015-2017 Gregory Nutt. All rights reserved.
- *   Copyright (C) 2016 Studelec. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
- *            Marc Rechté <mrechte@studelec-sa.com>
- *
- * derived from arch/arm/src/stm32/stm32_adc.c
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2015-2017 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2009, 2011 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2016 Studelec. All rights reserved.
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-FileContributor: Marc Rechté <mrechte@studelec-sa.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

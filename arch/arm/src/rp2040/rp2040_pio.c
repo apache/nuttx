@@ -1,10 +1,8 @@
 /****************************************************************************
  * arch/arm/src/rp2040/rp2040_pio.c
  *
- * Based upon the software originally developed by
- *   Raspberry Pi (Trading) Ltd.
- *
- * Copyright 2020 (c) 2020 Raspberry Pi (Trading) Ltd.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2020 Raspberry Pi (Trading) Ltd.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -61,8 +59,8 @@
 #define hw_claim_lock()         spin_lock_irqsave(&pio_lock)
 #define hw_claim_unlock(save)   spin_unlock_irqrestore(&pio_lock, save)
 #else
-#define hw_claim_lock()         spin_lock_irqsave(NULL)
-#define hw_claim_unlock(save)   spin_unlock_irqrestore(NULL, save)
+#define hw_claim_lock()         up_irq_save()
+#define hw_claim_unlock(save)   up_irq_restore(save)
 #endif
 
 /****************************************************************************

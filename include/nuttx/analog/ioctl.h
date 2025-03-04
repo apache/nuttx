@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/analog/ioctl.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -108,6 +110,11 @@
 
 #define AN_SAMV7_AFEC_FIRST (AN_MCP48XX_FIRST + AN_MCP48XX_NCMDS)
 #define AN_SAMV7_AFEC_NCMDS 1
+
+/* See include/nuttx/analog/mcp3008.h */
+
+#define AN_MCP3008_FIRST (AN_SAMV7_AFEC_FIRST + AN_SAMV7_AFEC_NCMDS)
+#define AN_MCP3008_NCMDS 1
 
 /****************************************************************************
  * Public Function Prototypes

@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/group/group_leave.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -72,6 +74,10 @@
 static inline void
 group_release(FAR struct task_group_s *group, uint8_t ttype)
 {
+  /* Destroy the mutex */
+
+  nxrmutex_destroy(&group->tg_mutex);
+
   task_uninit_info(group);
 
 #if defined(CONFIG_SCHED_HAVE_PARENT) && defined(CONFIG_SCHED_CHILD_STATUS)
@@ -96,7 +102,7 @@ group_release(FAR struct task_group_s *group, uint8_t ttype)
 
   /* Free resources held by the file descriptor list */
 
-  files_releaselist(&group->tg_filelist);
+  files_putlist(&group->tg_filelist);
 
 #ifndef CONFIG_DISABLE_ENVIRON
   /* Release all shared environment variables */
@@ -183,9 +189,9 @@ void group_leave(FAR struct tcb_s *tcb)
       /* Remove the member from group. */
 
 #ifdef HAVE_GROUP_MEMBERS
-      flags = spin_lock_irqsave(NULL);
+      flags = spin_lock_irqsave(&group->tg_lock);
       sq_rem(&tcb->member, &group->tg_members);
-      spin_unlock_irqrestore(NULL, flags);
+      spin_unlock_irqrestore(&group->tg_lock, flags);
 
       /* Have all of the members left the group? */
 

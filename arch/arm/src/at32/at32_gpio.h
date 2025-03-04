@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/at32/at32_gpio.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -48,7 +50,7 @@
 
 /* Bit-encoded input to at32_configgpio() */
 
-#if defined(CONFIG_AT32_AT32F43XX) 
+#if defined(CONFIG_AT32_AT32F43XX)
 /* Each port bit of the general-purpose I/O (GPIO) ports can be
  * individually configured by software in several modes:
  *

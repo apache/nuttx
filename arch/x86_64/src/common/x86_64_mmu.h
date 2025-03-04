@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/x86_64/src/common/x86_64_mmu.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -103,7 +105,7 @@ static inline uintptr_t mmu_pte_to_paddr(uintptr_t pte)
     {
       paddr = pte;
 
-      /* Get page addres - remove flags */
+      /* Get page address - remove flags */
 
       paddr &= 0x0dfffffffffff000;
     }

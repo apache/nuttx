@@ -1,15 +1,10 @@
 /****************************************************************************
  * arch/arm/src/tiva/common/tiva_adclib.c
  *
- *   Copyright (C) 2015 TRD2 Inc. All rights reserved.
- *   Author: Calvin Maguranis <calvin.maguranis@trd2inc.com>
- *
- * The Tivaware sample code has a BSD compatible license that requires this
- * copyright notice:
- *
- * Copyright (c) 2005-2014 Texas Instruments Incorporated.
- * All rights reserved.
- * Software License Agreement
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2015 TRD2 Inc. All rights reserved.
+ * SPDX-FileCopyrightText: 2005-2014 Texas Instruments Incorporated.
+ * SPDX-FileContributor: Calvin Maguranis <calvin.maguranis@trd2inc.com>
  *
  *   Redistribution and use in source and binary forms, with or without
  *   modification, are permitted provided that the following conditions

@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/sixlowpan/sixlowpan_hc06.c
- * 6lowpan HC06 implementation (draft-ietf-6lowpan-hc-06, updated to RFC
- * 6282)
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *
  *   Copyright (C) 2017, 2019-2020 Gregory Nutt, all rights reserved
  *   Author: Gregory Nutt <gnutt@nuttx.org>

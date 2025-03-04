@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/armv7-r/arm_mpu.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -207,7 +209,7 @@ static inline uint32_t mpu_subregion_ls(size_t offset, uint8_t l2size)
  ****************************************************************************/
 
 #if defined(CONFIG_ARM_MPU_RESET) || defined(CONFIG_ARM_MPU_EARLY_RESET)
-static void mpu_reset_internal()
+static void mpu_reset_internal(void)
 {
   int region;
   int regions;
@@ -279,8 +281,7 @@ void mpu_freeregion(unsigned int region)
   mpu_set_dracr(0);
   mpu_set_drsr(0);
   g_mpu_region &= ~(1 << region);
-  ARM_DSB();
-  ARM_ISB();
+  UP_MB();
 }
 
 /****************************************************************************
@@ -570,7 +571,7 @@ void mpu_dump_region(void)
  *
  ****************************************************************************/
 #if defined(CONFIG_ARM_MPU_RESET)
-void mpu_reset()
+void mpu_reset(void)
 {
   mpu_reset_internal();
 }
@@ -591,7 +592,7 @@ void mpu_reset()
  *
  ****************************************************************************/
 #if defined(CONFIG_ARM_MPU_EARLY_RESET)
-void mpu_early_reset()
+void mpu_early_reset(void)
 {
   mpu_reset_internal();
 }

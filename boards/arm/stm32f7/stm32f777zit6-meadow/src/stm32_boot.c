@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32f7/stm32f777zit6-meadow/src/stm32_boot.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -35,7 +37,6 @@
 #include "stm32f777zit6-meadow.h"
 
 #ifdef CONFIG_STM32F7_QUADSPI
-#  include <nuttx/mtd/mtd.h>
 #  include "stm32_qspi.h"
 
 #  ifdef CONFIG_FS_FAT

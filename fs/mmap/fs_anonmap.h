@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/mmap/fs_anonmap.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -42,7 +44,7 @@
  *
  * Input Parameters:
  *   map     Input struct containing user request
- *   kernel  kmm_zalloc or kumm_zalloc
+ *   kernel  fs_heap_zalloc or kumm_zalloc
  *
  * Returned Value:
  *   On success returns 0. Otherwise negated errno is returned appropriately.

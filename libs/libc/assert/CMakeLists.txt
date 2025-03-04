@@ -1,6 +1,8 @@
 # ##############################################################################
 # libs/libc/assert/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -22,8 +24,8 @@ set(SRCS lib_assert.c lib_stackchk.c)
 
 if(CONFIG_ARCH_TOOLCHAIN_GNU AND NOT CONFIG_LTO_NONE)
   set_source_files_properties(lib_assert.c DIRECTORY .. PROPERTIES COMPILE_FLAGS
-                                                                   -fno-lto)
+                                                                   ${NO_LTO})
   set_source_files_properties(lib_stackchk.c DIRECTORY ..
-                              PROPERTIES COMPILE_FLAGS -fno-lto)
+                              PROPERTIES COMPILE_FLAGS ${NO_LTO})
 endif()
 target_sources(c PRIVATE ${SRCS})

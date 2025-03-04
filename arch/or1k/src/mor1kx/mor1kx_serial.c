@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/or1k/src/mor1kx/mor1kx_serial.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -49,6 +51,14 @@
 #define OR1K_SYS_CLK (20000000)
 #define OR1K_BAUD (115200)
 #define OR1K_DIVISOR (OR1K_SYS_CLK / (16*OR1K_BAUD))
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#ifdef HAVE_SERIAL_CONSOLE
+static spinlock_t g_serial_lock = SP_UNLOCKED;
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -106,7 +116,7 @@ void or1k_serialinit(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef HAVE_SERIAL_CONSOLE
   irqstate_t flags;
@@ -115,20 +125,10 @@ int up_putc(int ch)
    * interrupts from firing in the serial driver code.
    */
 
-  flags = spin_lock_irqsave(NULL);
-
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      /* or1k_lowputc('\r'); */
-    }
+  flags = spin_lock_irqsave(&g_serial_lock);
 
   /* or1k_lowputc(ch); */
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&g_serial_lock, flags);
 #endif
-  return ch;
 }

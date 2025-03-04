@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/netlink/netlink_sockif.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -34,6 +36,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/sched.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/wqueue.h>
@@ -672,9 +675,15 @@ static ssize_t netlink_recvmsg(FAR struct socket *psock,
   FAR socklen_t *fromlen = &msg->msg_namelen;
   FAR struct netlink_response_s *entry;
   FAR struct socket_conn_s *conn;
+  int ret = OK;
 
   DEBUGASSERT(from == NULL ||
               (fromlen != NULL && *fromlen >= sizeof(struct sockaddr_nl)));
+
+  if (msg->msg_iovlen != 1)
+    {
+      return -ENOTSUP;
+    }
 
   /* Find the response to this message.  The return value */
 
@@ -683,7 +692,7 @@ static ssize_t netlink_recvmsg(FAR struct socket *psock,
     {
       conn = psock->s_conn;
 
-      /* No response is variable, but presumably, one is expected.  Check
+      /* No response is available, but presumably, one is expected.  Check
        * if the socket has been configured for non-blocking operation.
        */
 
@@ -692,13 +701,15 @@ static ssize_t netlink_recvmsg(FAR struct socket *psock,
           return -EAGAIN;
         }
 
-      /* Wait for the response.  This should always succeed. */
+      /* Wait for the response. */
 
-      entry = netlink_get_response(psock->s_conn);
-      DEBUGASSERT(entry != NULL);
+      ret = netlink_get_response(psock->s_conn, &entry);
+
+      /* If interrupted by signals, return errno */
+
       if (entry == NULL)
         {
-          return -EPIPE;
+          return ret;
         }
     }
 
@@ -739,7 +750,6 @@ static ssize_t netlink_recvmsg(FAR struct socket *psock,
 static int netlink_close(FAR struct socket *psock)
 {
   FAR struct netlink_conn_s *conn = psock->s_conn;
-  int ret = OK;
 
   /* Perform some pre-close operations for the NETLINK socket type. */
 
@@ -753,14 +763,6 @@ static int netlink_close(FAR struct socket *psock)
 
       conn->crefs = 0;
       netlink_free(psock->s_conn);
-
-      if (ret < 0)
-        {
-          /* Return with error code, but free resources. */
-
-          nerr("ERROR: netlink_close failed: %d\n", ret);
-          return ret;
-        }
     }
   else
     {
@@ -769,7 +771,7 @@ static int netlink_close(FAR struct socket *psock)
       conn->crefs--;
     }
 
-  return ret;
+  return OK;
 }
 
 #endif /* CONFIG_NET_NETLINK */

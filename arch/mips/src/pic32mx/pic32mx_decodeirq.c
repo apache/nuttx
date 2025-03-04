@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/mips/src/pic32mx/pic32mx_decodeirq.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -70,11 +72,17 @@
 
 uint32_t *pic32mx_decodeirq(uint32_t *regs)
 {
+  struct tcb_s **running_task = &g_running_tasks[this_cpu()];
 #ifdef CONFIG_PIC32MX_NESTED_INTERRUPTS
   uint32_t *savestate;
 #endif
   uint32_t regval;
   int irq;
+
+  if (*running_task != NULL)
+    {
+      mips_copystate((*running_task)->xcp.regs, regs);
+    }
 
   /* If the board supports LEDs, turn on an LED now to indicate that we are
    * processing an interrupt.
@@ -88,11 +96,11 @@ uint32_t *pic32mx_decodeirq(uint32_t *regs)
    */
 
 #ifdef CONFIG_PIC32MX_NESTED_INTERRUPTS
-  savestate = (uint32_t *)CURRENT_REGS;
+  savestate = up_current_regs();
 #else
-  DEBUGASSERT(CURRENT_REGS == NULL);
+  DEBUGASSERT(up_current_regs() == NULL);
 #endif
-  CURRENT_REGS = regs;
+  up_set_current_regs(regs);
 
   /* Loop while there are pending interrupts with priority greater than
    * zero
@@ -131,7 +139,7 @@ uint32_t *pic32mx_decodeirq(uint32_t *regs)
    * switch occurred during interrupt processing.
    */
 
-  regs = (uint32_t *)CURRENT_REGS;
+  regs = up_current_regs();
 
 #if defined(CONFIG_ARCH_FPU) || defined(CONFIG_ARCH_ADDRENV)
   /* Check for a context switch.  If a context switch occurred, then
@@ -141,12 +149,12 @@ uint32_t *pic32mx_decodeirq(uint32_t *regs)
    * returning from the interrupt.
    */
 
-  if (regs != CURRENT_REGS)
+  if (regs != up_current_regs())
     {
 #ifdef CONFIG_ARCH_FPU
       /* Restore floating point registers */
 
-      up_restorefpu((uint32_t *)CURRENT_REGS);
+      up_restorefpu(up_current_regs());
 #endif
 
 #ifdef CONFIG_ARCH_ADDRENV
@@ -156,7 +164,7 @@ uint32_t *pic32mx_decodeirq(uint32_t *regs)
        * thread at the head of the ready-to-run list.
        */
 
-      addrenv_switch(NULL);
+      addrenv_switch(this_task());
 #endif
     }
 #endif
@@ -171,13 +179,13 @@ uint32_t *pic32mx_decodeirq(uint32_t *regs)
    * of fixing nested context switching.  The logic here is insufficient.
    */
 
-  CURRENT_REGS = savestate;
-  if (CURRENT_REGS == NULL)
+  up_set_current_regs(savestate);
+  if (up_current_regs() == NULL)
     {
       board_autoled_off(LED_INIRQ);
     }
 #else
-  CURRENT_REGS = NULL;
+  up_set_current_regs(NULL);
   board_autoled_off(LED_INIRQ);
 #endif
 

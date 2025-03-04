@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/net/netdev_lowerhalf.h
- * Defines architecture-specific device driver interfaces to the NuttX
- * network.
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -117,7 +117,7 @@ struct netdev_lowerhalf_s
 
   /* Max # of buffer held by driver */
 
-  atomic_int quota[NETPKT_TYPENUM];
+  atomic_t quota[NETPKT_TYPENUM];
 
   /* The structure used by net stack.
    * Note: Do not change its fields unless you know what you are doing.
@@ -320,8 +320,7 @@ void netdev_lower_txdone(FAR struct netdev_lowerhalf_s *dev);
  *
  ****************************************************************************/
 
-int netdev_lower_quota_load(FAR struct netdev_lowerhalf_s *dev,
-                            enum netpkt_type_e type);
+#define netdev_lower_quota_load(dev, type) atomic_read(&dev->quota[type])
 
 /****************************************************************************
  * Name: netpkt_alloc

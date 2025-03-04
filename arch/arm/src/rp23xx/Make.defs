@@ -1,0 +1,90 @@
+############################################################################
+# arch/arm/src/rp23xx/Make.defs
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+include armv8-m/Make.defs
+
+CFLAGS += -Wno-array-bounds
+
+CHIP_CSRCS += rp23xx_idle.c
+CHIP_CSRCS += rp23xx_irq.c
+CHIP_CSRCS += rp23xx_uart.c
+CHIP_CSRCS += rp23xx_serial.c
+CHIP_CSRCS += rp23xx_start.c
+CHIP_CSRCS += rp23xx_timerisr.c
+CHIP_CSRCS += rp23xx_gpio.c
+CHIP_CSRCS += rp23xx_pio.c
+CHIP_CSRCS += rp23xx_clock.c
+CHIP_CSRCS += rp23xx_xosc.c
+CHIP_CSRCS += rp23xx_pll.c
+
+ifeq ($(CONFIG_SMP),y)
+CHIP_CSRCS += rp23xx_cpustart.c
+CHIP_CSRCS += rp23xx_smpcall.c
+CHIP_CSRCS += rp23xx_cpuidlestack.c
+CHIP_CSRCS += rp23xx_testset.c
+CMN_ASRCS  := $(filter-out arm_testset.S,$(CMN_ASRCS))
+endif
+
+ifeq ($(CONFIG_ARCH_HAVE_MULTICPU),y)
+CHIP_CSRCS += rp23xx_cpuindex.c
+endif
+
+ifeq ($(CONFIG_RP23XX_DMAC),y)
+CHIP_CSRCS += rp23xx_dmac.c
+endif
+
+ifeq ($(CONFIG_RP23XX_SPI),y)
+CHIP_CSRCS += rp23xx_spi.c
+endif
+
+ifeq ($(CONFIG_RP23XX_PWM),y)
+CHIP_CSRCS += rp23xx_pwm.c
+endif
+
+ifeq ($(CONFIG_RP23XX_I2C),y)
+CHIP_CSRCS += rp23xx_i2c.c
+endif
+
+ifeq ($(CONFIG_RP23XX_I2C_SLAVE),y)
+CHIP_CSRCS += rp23xx_i2c_slave.c
+endif
+
+ifeq ($(CONFIG_RP23XX_I2S),y)
+CHIP_CSRCS += rp23xx_i2s.c
+CHIP_CSRCS += rp23xx_i2s_pio.c
+endif
+
+ifeq ($(CONFIG_USBDEV),y)
+CHIP_CSRCS += rp23xx_usbdev.c
+endif
+
+ifeq ($(CONFIG_WS2812),y)
+CHIP_CSRCS += rp23xx_ws2812.c
+endif
+
+ifeq ($(CONFIG_ADC),y)
+CHIP_CSRCS += rp23xx_adc.c
+endif
+
+ifeq ($(CONFIG_WATCHDOG),y)
+CHIP_CSRCS += rp23xx_wdt.c
+endif

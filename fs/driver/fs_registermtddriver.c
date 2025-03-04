@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/driver/fs_registermtddriver.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -74,12 +76,7 @@ int register_mtddriver(FAR const char *path, FAR struct mtd_dev_s *mtd,
    * valid data.
    */
 
-  ret = inode_lock();
-  if (ret < 0)
-    {
-      return ret;
-    }
-
+  inode_lock();
   ret = inode_reserve(path, mode, &node);
   if (ret >= 0)
     {

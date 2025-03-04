@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/rp2040/common/src/rp2040_spi.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -68,8 +70,9 @@
  ****************************************************************************/
 
 #ifdef CONFIG_RP2040_SPI0
-void rp2040_spi0select(struct spi_dev_s *dev, uint32_t devid,
-                       bool selected)
+void weak_function rp2040_spi0select(struct spi_dev_s *dev,
+                                     uint32_t devid,
+                                     bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid,
           selected ? "assert" : "de-assert");
@@ -77,7 +80,8 @@ void rp2040_spi0select(struct spi_dev_s *dev, uint32_t devid,
   rp2040_gpio_put(CONFIG_RP2040_SPI0_CS_GPIO, !selected);
 }
 
-uint8_t rp2040_spi0status(struct spi_dev_s *dev, uint32_t devid)
+uint8_t weak_function rp2040_spi0status(struct spi_dev_s *dev,
+                                        uint32_t devid)
 {
   uint8_t ret = 0;
 
@@ -88,7 +92,8 @@ uint8_t rp2040_spi0status(struct spi_dev_s *dev, uint32_t devid)
 }
 
 #ifdef CONFIG_SPI_CMDDATA
-int rp2040_spi0cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
+int weak_function rp2040_spi0cmddata(struct spi_dev_s *dev,
+                                     uint32_t devid, bool cmd)
 {
 #ifdef CONFIG_LCD_ST7789
   if (devid == SPIDEV_DISPLAY(0))
@@ -109,8 +114,9 @@ int rp2040_spi0cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 #endif
 
 #ifdef CONFIG_RP2040_SPI1
-void rp2040_spi1select(struct spi_dev_s *dev, uint32_t devid,
-                       bool selected)
+void weak_function rp2040_spi1select(struct spi_dev_s *dev,
+                                     uint32_t devid,
+                                     bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid,
           selected ? "assert" : "de-assert");
@@ -118,7 +124,8 @@ void rp2040_spi1select(struct spi_dev_s *dev, uint32_t devid,
   rp2040_gpio_put(CONFIG_RP2040_SPI1_CS_GPIO, !selected);
 }
 
-uint8_t rp2040_spi1status(struct spi_dev_s *dev, uint32_t devid)
+uint8_t weak_function rp2040_spi1status(struct spi_dev_s *dev,
+                                        uint32_t devid)
 {
   uint8_t ret = 0;
 
@@ -129,7 +136,8 @@ uint8_t rp2040_spi1status(struct spi_dev_s *dev, uint32_t devid)
 }
 
 #ifdef CONFIG_SPI_CMDDATA
-int rp2040_spi1cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
+int weak_function rp2040_spi1cmddata(struct spi_dev_s *dev,
+                                     uint32_t devid, bool cmd)
 {
 #if defined (CONFIG_LCD_ST7789) || defined (CONFIG_LCD_ST7735) || defined (CONFIG_LCD_GC9A01)
   if (devid == SPIDEV_DISPLAY(0))

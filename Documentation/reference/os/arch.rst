@@ -288,7 +288,7 @@ APIs Exported by Architecture-Specific Logic to NuttX
   architectures, it should be avoided in common implementations
   where possible.
 
-.. c:function::  int up_putc(int ch)
+.. c:function::  void up_putc(int ch)
 
   This is a debug interface exported by the
   architecture-specific logic. Output one character on the console

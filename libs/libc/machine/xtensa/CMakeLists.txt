@@ -1,6 +1,8 @@
 # ##############################################################################
 # libs/libc/machine/xtensa/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -18,5 +20,39 @@
 #
 # ##############################################################################
 if(CONFIG_LIBC_ARCH_ELF)
-  target_sources(c PRIVATE arch_elf.c)
+  list(APPEND CSRCS arch_elf.c)
 endif()
+
+if(CONFIG_XTENSA_MEMCPY)
+  list(APPEND CSRCS arch_memcpy.S)
+endif()
+
+if(CONFIG_XTENSA_MEMMOVE)
+  list(APPEND CSRCS arch_memmove.S)
+endif()
+
+if(CONFIG_XTENSA_MEMSET)
+  list(APPEND CSRCS arch_memset.S)
+endif()
+
+if(CONFIG_ARCH_SETJMP_H)
+  list(APPEND CSRCS arch_setjmp.S)
+endif()
+
+if(CONFIG_XTENSA_STRCPY)
+  list(APPEND CSRCS arch_strcpy.S)
+endif()
+
+if(CONFIG_XTENSA_STRLEN)
+  list(APPEND CSRCS arch_strlen.S)
+endif()
+
+if(CONFIG_XTENSA_STRNCPY)
+  list(APPEND CSRCS arch_strncpy.S)
+endif()
+
+if(CONFIG_XTENSA_STRCMP)
+  list(APPEND CSRCS arch_strcmp.S)
+endif()
+
+target_sources(c PRIVATE ${CSRCS})

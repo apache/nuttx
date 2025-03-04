@@ -1,6 +1,8 @@
 # ##############################################################################
 # drivers/syslog/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -17,11 +19,14 @@
 # the License.
 #
 # ##############################################################################
-# ##############################################################################
 
 # Include SYSLOG Infrastructure
 
-set(SRCS vsyslog.c syslog_channel.c syslog_putc.c syslog_write.c syslog_flush.c)
+set(SRCS)
+
+if(CONFIG_SYSLOG)
+  list(APPEND SRCS vsyslog.c syslog_channel.c syslog_write.c syslog_flush.c)
+endif()
 
 if(CONFIG_SYSLOG_INTBUFFER)
   list(APPEND SRCS syslog_intbuffer.c)
@@ -35,13 +40,21 @@ endif()
 
 if(CONFIG_RAMLOG)
   list(APPEND SRCS ramlog.c)
+  if(CONFIG_RAMLOG_BUFFER_SECTION)
+    target_compile_definitions(
+      drivers PRIVATE -DRAMLOG_BUFFER_SECTION="${CONFIG_RAMLOG_BUFFER_SECTION}")
+  endif()
 endif()
 
 # Include SYSLOG drivers (only one should be enabled)
 
 # System logging to a character device (or file)
 
-list(APPEND SRCS syslog_device.c)
+if(CONFIG_SYSLOG_CONSOLE
+   OR CONFIG_SYSLOG_CHAR
+   OR CONFIG_SYSLOG_FILE)
+  list(APPEND SRCS syslog_device.c)
+endif()
 
 if(CONFIG_SYSLOG_CHAR)
   list(APPEND SRCS syslog_devchannel.c)

@@ -1,7 +1,9 @@
 /****************************************************************************
  * arch/arm64/src/imx9/imx9_flexio_pwm.h
  *
-  * Licensed to the Apache Software Foundation (ASF) under one or more
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
  * ASF licenses this file to you under the Apache License, Version 2.0 (the

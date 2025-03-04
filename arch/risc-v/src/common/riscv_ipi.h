@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/common/riscv_ipi.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -26,6 +28,7 @@
  ****************************************************************************/
 
 #include "riscv_internal.h"
+#include "riscv_sbi.h"
 #include "chip.h"
 
 /****************************************************************************
@@ -35,9 +38,9 @@
 static inline void riscv_ipi_send(int cpu)
 {
 #if defined(CONFIG_ARCH_USE_S_MODE)
-  riscv_sbi_send_ipi(0x1, cpu);
+  riscv_sbi_send_ipi(0x1, riscv_cpuid_to_hartid(cpu));
 #elif defined(RISCV_IPI)
-  putreg32(1, (uintptr_t)RISCV_IPI + (4 * cpu));
+  putreg32(1, (uintptr_t)RISCV_IPI + (4 * riscv_cpuid_to_hartid(cpu)));
 #else
 #  error "No IPI support for this SoC"
 #endif
@@ -45,10 +48,13 @@ static inline void riscv_ipi_send(int cpu)
 
 static inline void riscv_ipi_clear(int cpu)
 {
-#if defined(RISCV_IPI) && !defined(CONFIG_ARCH_USE_S_MODE)
-  putreg32(0, (uintptr_t)RISCV_IPI + (4 * cpu));
-#endif
+#if defined(CONFIG_ARCH_USE_S_MODE)
   CLEAR_CSR(CSR_IP, IP_SIP);
+#elif defined(RISCV_IPI)
+  putreg32(0, (uintptr_t)RISCV_IPI + (4 * riscv_cpuid_to_hartid(cpu)));
+#else
+#  error "No IPI support for this SoC"
+#endif
 }
 
 #endif /* __ARCH_RISCV_SRC_COMMON_RISCV_IPI_H */

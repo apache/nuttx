@@ -439,6 +439,14 @@ menuconfig WATCHDOG_AUTOMONITOR
 
 if WATCHDOG_AUTOMONITOR
 
+config WATCHDOG_TIMEOUT_NOTIFIER
+	bool "Enable watchdog timeout notifier"
+	default n
+	---help---
+		The watchdog timeout notifier chain mechanism supports users registering
+		custom callback functions, which will be called when the watchdog timer
+		managed by Auto-monitor times out.
+
 choice
 	prompt "Auto-monitor keepalive by"
 	default WATCHDOG_AUTOMONITOR_BY_WDOG
@@ -480,8 +488,8 @@ config WATCHDOG_AUTOMONITOR_BY_IDLE
 endchoice
 
 config WATCHDOG_AUTOMONITOR_TIMEOUT
-	int "Auto-monitor reset timeout(second)"
-	default 60
+	int "Auto-monitor reset timeout(millisecond)"
+	default 60000
 
 if !WATCHDOG_AUTOMONITOR_BY_CAPTURE && !WATCHDOG_AUTOMONITOR_BY_IDLE
 
@@ -515,4 +523,13 @@ config CS2100CP_REGDEBUG
 	depends on DEBUG_FEATURES
 
 endif # TIMERS_CS2100CP
+
+config GOLDFISH_TIMER
+	bool "Enable GOLDFISH_TIMER"
+	default n
+	---help---
+		Goldfish timer is a virtual timer device that is used in the Android
+		emulator. It is used to provide a virtual timer to the guest OS.
+		See: https://android.googlesource.com/platform/external/qemu/+/master/docs/GOLDFISH-VIRTUAL-HARDWARE.TXT
+
 endmenu # Timer Driver Support

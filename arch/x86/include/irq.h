@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/x86/include/irq.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -87,26 +89,18 @@ EXTERN volatile uint32_t *g_current_regs;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_cpu_index
- *
- * Description:
- *   Return an index in the range of 0 through (CONFIG_SMP_NCPUS-1) that
- *   corresponds to the currently executing CPU.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   An integer index in the range of 0 through (CONFIG_SMP_NCPUS-1) that
- *   corresponds to the currently executing CPU.
- *
- ****************************************************************************/
-
-#define up_cpu_index() (0)
-
-/****************************************************************************
  * Inline functions
  ****************************************************************************/
+
+static inline_function uint32_t *up_current_regs(void)
+{
+  return (uint32_t *)g_current_regs;
+}
+
+static inline_function void up_set_current_regs(uint32_t *regs)
+{
+  g_current_regs = regs;
+}
 
 /****************************************************************************
  * Name: up_interrupt_context
@@ -117,7 +111,21 @@ EXTERN volatile uint32_t *g_current_regs;
  *
  ****************************************************************************/
 
-#define up_interrupt_context() (g_current_regs != NULL)
+#define up_interrupt_context() (up_current_regs() != NULL)
+
+/****************************************************************************
+ * Name: up_getusrpc
+ ****************************************************************************/
+
+#define up_getusrpc(regs) \
+    (((uint32_t *)((regs) ? (regs) : up_current_regs()))[REG_EIP])
+
+/****************************************************************************
+ * Name: up_getusrsp
+ ****************************************************************************/
+
+#define up_getusrsp(regs) \
+    ((uintptr_t)((uint32_t *)(regs))[REG_ESP])
 
 #undef EXTERN
 #ifdef __cplusplus

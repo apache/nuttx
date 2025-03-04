@@ -1,6 +1,8 @@
 /****************************************************************************
  * audio/audio_comp.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -226,7 +228,7 @@ static int audio_comp_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
  * Name: audio_comp_configure
  *
  * Description:
- *   Configure the audio device for the specified  mode of operation.
+ *   Configure the audio device for the specified mode of operation.
  *
  ****************************************************************************/
 
@@ -601,7 +603,7 @@ static int audio_comp_freebuffer(FAR struct audio_lowerhalf_s *dev,
 /****************************************************************************
  * Name: audio_comp_enqueuebuffer
  *
- * Description: Enqueue an Audio Pipeline Buffer for playback/ processing.
+ * Description: Enqueue an Audio Pipeline Buffer for playback/processing.
  *
  ****************************************************************************/
 
@@ -697,7 +699,7 @@ static int audio_comp_ioctl(FAR struct audio_lowerhalf_s *dev, int cmd,
 /****************************************************************************
  * Name: audio_comp_read
  *
- * Description:  Lower-half logic for read commands.
+ * Description: Lower-half logic for read commands.
  *
  ****************************************************************************/
 
@@ -727,7 +729,7 @@ static int audio_comp_read(FAR struct audio_lowerhalf_s *dev,
 /****************************************************************************
  * Name: audio_comp_write
  *
- * Description:  Lower-half logic for write commands.
+ * Description: Lower-half logic for write commands.
  *
  ****************************************************************************/
 

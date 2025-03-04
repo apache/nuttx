@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/procfs/net_udp.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -186,4 +188,4 @@ ssize_t netprocfs_read_udpstats(FAR struct netprocfs_file_s *priv,
   return len;
 }
 
-#endif /* CONFIG_NET_UDP && !CONFIG_NET_UDP_NO_STACK */
+#endif /* NET_UDP_HAVE_STACK */

@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/misc/lib_openat.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -63,13 +65,21 @@
 
 int openat(int dirfd, FAR const char *path, int oflags, ...)
 {
-  char fullpath[PATH_MAX];
+  FAR char *fullpath;
   mode_t mode = 0;
   int ret;
 
-  ret = lib_getfullpath(dirfd, path, fullpath, sizeof(fullpath));
+  fullpath = lib_get_pathbuffer();
+  if (fullpath == NULL)
+    {
+      set_errno(ENOMEM);
+      return ERROR;
+    }
+
+  ret = lib_getfullpath(dirfd, path, fullpath, PATH_MAX);
   if (ret < 0)
     {
+      lib_put_pathbuffer(fullpath);
       set_errno(-ret);
       return ERROR;
     }
@@ -83,5 +93,7 @@ int openat(int dirfd, FAR const char *path, int oflags, ...)
       va_end(ap);
     }
 
-  return open(fullpath, oflags, mode);
+  ret = open(fullpath, oflags, mode);
+  lib_put_pathbuffer(fullpath);
+  return ret;
 }

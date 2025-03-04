@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/stdio.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -110,12 +112,6 @@
 /* Streams */
 
 typedef struct file_struct FILE;
-
-struct va_format
-{
-  FAR const char *fmt;
-  FAR va_list *va;
-};
 
 /****************************************************************************
  * Public Data
@@ -270,7 +266,15 @@ int       remove(FAR const char *path);
 #ifndef __KERNEL__
 int pclose(FILE *stream);
 FILE *popen(FAR const char *command, FAR const char *mode) popen_like;
+#else
+#define asprintf(p, f, ...) nx_asprintf(p, f, ##__VA_ARGS__)
+#define vasprintf(p, f, a)  nx_vasprintf(p, f, a)
 #endif
+
+int nx_asprintf(FAR char **ptr, FAR const IPTR char *fmt, ...)
+    printf_like(2, 3);
+int nx_vasprintf(FAR char **ptr, FAR const IPTR char *fmt, va_list ap)
+    printf_like(2, 0);
 
 #if CONFIG_FORTIFY_SOURCE > 0
 fortify_function(fgets) FAR char *fgets(FAR char *s, int n, FAR FILE *stream)

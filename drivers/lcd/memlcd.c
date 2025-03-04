@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/lcd/memlcd.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -233,37 +235,6 @@ static struct memlcd_dev_s g_memlcddev =
  ****************************************************************************/
 
 /****************************************************************************
- * __set_bit - Set a bit in memory
- *
- * @nr: the bit to set
- * @addr: the address to start counting from
- *
- * This function is not atomic and may be reordered.  If it's called on the
- * same region of memory simultaneously, the effect may be that only one
- * operation succeeds.
- *
- ****************************************************************************/
-
-static inline void __set_bit(int nr, uint8_t *addr)
-{
-  uint8_t mask = BIT_BYTE_MASK(nr);
-  uint8_t *p = ((FAR uint8_t *)addr) + BIT_BYTE(nr);
-  *p |= mask;
-}
-
-static inline void __clear_bit(int nr, uint8_t *addr)
-{
-  uint8_t mask = BIT_BYTE_MASK(nr);
-  uint8_t *p = ((FAR uint8_t *)addr) + BIT_BYTE(nr);
-  *p &= ~mask;
-}
-
-static inline int __test_bit(int nr, FAR const volatile uint8_t *addr)
-{
-  return 1 & (addr[BIT_BYTE(nr)] >> (nr & (BITS_PER_BYTE - 1)));
-}
-
-/****************************************************************************
  * Name: memlcd_worker
  *
  * Description:
@@ -464,11 +435,11 @@ static int memlcd_putrun(FAR struct lcd_dev_s *dev,
     {
       if ((*buffer & usrmask) != 0)
         {
-          __set_bit(col % 8 + i, p);
+          set_bit(col % 8 + i, p);
         }
       else
         {
-          __clear_bit(col % 8 + i, p);
+          clear_bit(col % 8 + i, p);
         }
 
 #ifdef CONFIG_MEMLCD_BYTE_PER_PIXEL
@@ -557,7 +528,7 @@ static int memlcd_getrun(FAR struct lcd_dev_s *dev,
   p = pfb + (col >> 3);
   for (i = 0; i < npixels; i++)
     {
-      if (__test_bit(col % 8 + i, p))
+      if (test_bit(col % 8 + i, p))
         {
           *buffer |= usrmask;
         }

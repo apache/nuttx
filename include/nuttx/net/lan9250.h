@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/net/lan9250.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -66,7 +68,7 @@ struct lan9250_lower_s
    * driver will not read the MAC from the CPU.
    */
 
-  CODE void (*getmac)(FAR const struct lan9250_lower_s *lower,
+  CODE int (*getmac)(FAR const struct lan9250_lower_s *lower,
                       FAR uint8_t *mac);
 };
 

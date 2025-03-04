@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/sys/socket.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -50,6 +52,7 @@
 #define PF_CAN        29         /* Controller Area Network (SocketCAN) */
 #define PF_BLUETOOTH  31         /* Bluetooth sockets */
 #define PF_IEEE802154 36         /* Low level IEEE 802.15.4 radio frame interface */
+#define PF_VSOCK      40         /* vSockets */
 #define PF_PKTRADIO   64         /* Low level packet radio interface */
 #define PF_RPMSG      65         /* Remote core communication */
 
@@ -68,6 +71,7 @@
 #define AF_CAN         PF_CAN
 #define AF_BLUETOOTH   PF_BLUETOOTH
 #define AF_IEEE802154  PF_IEEE802154
+#define AF_VSOCK       PF_VSOCK
 #define AF_PKTRADIO    PF_PKTRADIO
 #define AF_RPMSG       PF_RPMSG
 
@@ -238,6 +242,8 @@
 #define SOL_SCO         17 /* See options in include/netpacket/bluetooth.h */
 #define SOL_RFCOMM      18 /* See options in include/netpacket/bluetooth.h */
 
+#define SOL_PACKET      19
+
 /* Protocol-level socket options may begin with this value */
 
 #define __SO_PROTOCOL  16
@@ -323,7 +329,7 @@ struct sockaddr_storage
 
   /* Following fields are implementation-defined */
 
-  struct
+  begin_packed_struct struct
   {
     char ss_pad1[SS_PAD1SIZE]; /* 6-byte pad; this is to make implementation-defined
                                 * pad up to alignment field that follows explicit in
@@ -333,7 +339,7 @@ struct sockaddr_storage
                                 * value minus size of ss_family ss_pad1, ss_align
                                 * fields is 112. */
   }
-  ss_data[1];
+  end_packed_struct ss_data[1];
 };
 
 /* The sockaddr structure is used to define a socket address which is used
@@ -385,7 +391,7 @@ struct ucred
  ****************************************************************************/
 
 static inline FAR struct cmsghdr *__cmsg_nxthdr(FAR void *__ctl,
-                                                unsigned int __size,
+                                                unsigned long __size,
                                                 FAR struct cmsghdr *__cmsg)
 {
   size_t len = CMSG_ALIGN(__cmsg->cmsg_len);

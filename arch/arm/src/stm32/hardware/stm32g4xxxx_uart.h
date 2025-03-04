@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32/hardware/stm32g4xxxx_uart.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  *  Licensed to the Apache Software Foundation (ASF) under one or more
  *  contributor license agreements.  See the NOTICE file distributed with
  *  this work for additional information regarding copyright ownership.  The
@@ -49,6 +51,18 @@
 #define STM32_USART_PRESC_OFFSET       0x002c         /* Prescaler Register */
 
 /* Register Addresses *******************************************************/
+#if (STM32_NLPUART > 0)
+#  define STM32_LPUART1_CR1             (STM32_LPUART1_BASE + STM32_USART_CR1_OFFSET)
+#  define STM32_LPUART1_CR2             (STM32_LPUART1_BASE + STM32_USART_CR2_OFFSET)
+#  define STM32_LPUART1_CR3             (STM32_LPUART1_BASE + STM32_USART_CR3_OFFSET)
+#  define STM32_LPUART1_BRR             (STM32_LPUART1_BASE + STM32_USART_BRR_OFFSET)
+#  define STM32_LPUART1_RQR             (STM32_LPUART1_BASE + STM32_USART_RQR_OFFSET)
+#  define STM32_LPUART1_ISR             (STM32_LPUART1_BASE + STM32_USART_ISR_OFFSET)
+#  define STM32_LPUART1_ICR             (STM32_LPUART1_BASE + STM32_USART_ICR_OFFSET)
+#  define STM32_LPUART1_RDR             (STM32_LPUART1_BASE + STM32_USART_RDR_OFFSET)
+#  define STM32_LPUART1_TDR             (STM32_LPUART1_BASE + STM32_USART_TDR_OFFSET)
+#  define STM32_LPUART1_PRESC           (STM32_LPUART1_BASE + STM32_USART_PRESC_OFFSET)
+#endif
 
 #if (STM32_NUSART > 0)
 #  define STM32_USART1_CR1             (STM32_USART1_BASE + STM32_USART_CR1_OFFSET)
@@ -166,6 +180,11 @@
   (USART_CR1_IDLEIE | USART_CR1_RXNEIE | USART_CR1_TCIE | \
    USART_CR1_TXEIE | USART_CR1_PEIE | USART_CR1_CMIE | USART_CR1_RTOIE | \
    USART_CR1_EOBIE | USART_CR1_TXFEIE | USART_CR1_RXFFIE)
+
+#define LPUART_CR1_ALLINTS \
+  (USART_CR1_IDLEIE | USART_CR1_RXNEIE | USART_CR1_TCIE | \
+   USART_CR1_TXEIE | USART_CR1_PEIE | USART_CR1_CMIE | \
+   USART_CR1_TXFEIE | USART_CR1_RXFFIE)
 
 /* Control Register 2 */
 

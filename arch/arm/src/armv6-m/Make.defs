@@ -1,6 +1,8 @@
 ############################################################################
 # arch/arm/src/armv6-m/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -26,9 +28,14 @@ CMN_ASRCS += arm_exception.S arm_saveusercontext.S
 
 CMN_CSRCS += arm_cpuinfo.c arm_doirq.c arm_hardfault.c arm_initialstate.c
 CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c arm_svcall.c
-CMN_CSRCS += arm_systemreset.c arm_tcbinfo.c arm_vectors.c
+CMN_CSRCS += arm_systemreset.c arm_tcbinfo.c
+CMN_CSRCS += arm_trigger_irq.c
 
-ifeq ($(CONFIG_DEBUG_FEATURES),y)
+ifneq ($(CONFIG_ARCH_HAVE_CUSTOM_VECTORS),y)
+  CMN_CSRCS += arm_vectors.c
+endif
+
+ifneq ($(filter y,$(CONFIG_DEBUG_FEATURES)$(CONFIG_ARM_COREDUMP_REGION)),)
   CMN_CSRCS += arm_dumpnvic.c
 endif
 

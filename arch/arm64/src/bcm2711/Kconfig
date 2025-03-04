@@ -1,0 +1,122 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CHIP_BCM2711
+
+comment "BCM2711 configuration options"
+
+#####################################################################
+# Peripheral selection
+#####################################################################
+
+menu "Broadcom BCM2711 Peripheral Selection"
+
+config BCM2711_LOW_PERIPHERAL
+	bool "BCM2711 Low Peripheral Mode"
+	default y
+	---help---
+		Use the Broadcom BCM2711 in low peripheral addressing mode.
+
+#####################################################################
+# I2C Configuration (master)
+#####################################################################
+
+config BCM2711_I2C
+	bool "I2C Master"
+	select I2C
+	---help---
+		Support for I2C in master mode.
+
+if BCM2711_I2C
+
+config BCM2711_I2C0
+	bool "I2C0"
+	default n
+	---help---
+		Enable the I2C0 interface.
+		See board selection menu to configure the pins used by I2C0.
+
+config BCM2711_I2C1
+	bool "I2C1"
+	default n
+	---help---
+		Enable the I2C1 interface.
+		See board selection menu to configure the pins used by I2C1.
+
+config BCM2711_I2C2
+	bool "I2C2"
+	default n
+	---help---
+		Enable the I2C2 interface.
+		See board selection menu to configure the pins used by I2C2.
+
+config BCM2711_I2C3
+	bool "I2C3"
+	default n
+	---help---
+		Enable the I2C3 interface.
+		See board selection menu to configure the pins used by I2C3.
+
+config BCM2711_I2C4
+	bool "I2C4"
+	default n
+	---help---
+		Enable the I2C4 interface.
+		See board selection menu to configure the pins used by I2C4.
+
+config BCM2711_I2C5
+	bool "I2C5"
+	default n
+	---help---
+		Enable the I2C5 interface.
+		See board selection menu to configure the pins used by I2C5.
+
+config BCM2711_I2C6
+	bool "I2C6"
+	default n
+	---help---
+		Enable the I2C6 interface.
+		See board selection menu to configure the pins used by I2C6.
+
+config BCM2711_I2C_DRIVER
+	bool "I2C character driver"
+	default n
+	select I2C_DRIVER
+	---help---
+		Support for the I2C character driver at /dev/i2c[N]. Can be used
+		for I2C bus transfers from application code. This driver is intended
+		for testing, not for use in any real driver application.
+
+endif # BCM2711_I2C
+
+#####################################################################
+# SPI Configuration
+#####################################################################
+
+config BCM2711_SPI
+	bool "SPI support"
+	select SPI
+	---help---
+		Support for SPI interfaces.
+
+if BCM2711_SPI
+
+config BCM2711_SPI1
+	bool "SPI1"
+	default n
+	---help---
+		Enable the SPI1 interface.
+
+config BCM2711_SPI2
+	bool "SPI2"
+	default n
+	---help---
+		Enable the SPI2 interface.
+
+endif # BCM2711_SPI
+
+endmenu # Broadcom BCM2711 Peripheral Selection
+
+endif # ARCH_CHIP_BCM2711

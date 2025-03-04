@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/common/arm_semi_syslog.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -45,10 +47,9 @@
  * Name: up_putc
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
   smh_call(SEMI_SYSLOG_WRITEC, &ch);
-  return ch;
 }
 
 /****************************************************************************

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/armv8-m/arm_ramvec_attach.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -29,10 +31,17 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/spinlock.h>
 
 #include "ram_vectors.h"
 
 #ifdef CONFIG_ARCH_RAMVECTORS
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static spinlock_t g_ramvec_lock = SP_UNLOCKED;
 
 /****************************************************************************
  * Public Functions
@@ -66,7 +75,7 @@ int arm_ramvec_attach(int irq, up_vector_t vector)
        * common exception handler.
        */
 
-      flags = enter_critical_section();
+      flags = spin_lock_irqsave(&g_ramvec_lock);
       if (vector == NULL)
         {
           /* Disable the interrupt if we can before detaching it.  We might
@@ -85,7 +94,7 @@ int arm_ramvec_attach(int irq, up_vector_t vector)
       /* Save the new vector in the vector table */
 
       g_ram_vectors[irq] = vector;
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(&g_ramvec_lock, flags);
       ret = OK;
     }
 

@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/semaphore/sem_post.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -35,11 +37,11 @@
 #include "semaphore/semaphore.h"
 
 /****************************************************************************
- * Public Functions
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxsem_post
+ * Name: nxsem_post_slow
  *
  * Description:
  *   When a kernel thread has finished with a semaphore, it will call
@@ -67,16 +69,14 @@
  *
  ****************************************************************************/
 
-int nxsem_post(FAR sem_t *sem)
+static int nxsem_post_slow(FAR sem_t *sem)
 {
   FAR struct tcb_s *stcb = NULL;
   irqstate_t flags;
-  int16_t sem_count;
-#ifdef CONFIG_PRIORITY_INHERITANCE
-  uint8_t prioinherit;
+  int32_t sem_count;
+#if defined(CONFIG_PRIORITY_INHERITANCE) || defined(CONFIG_PRIORITY_PROTECT)
+  uint8_t proto;
 #endif
-
-  DEBUGASSERT(sem != NULL);
 
   /* The following operations must be performed with interrupts
    * disabled because sem_post() may be called from an interrupt
@@ -85,15 +85,19 @@ int nxsem_post(FAR sem_t *sem)
 
   flags = enter_critical_section();
 
-  sem_count = sem->semcount;
-
   /* Check the maximum allowable value */
 
-  if (sem_count >= SEM_VALUE_MAX)
+  sem_count = atomic_read(NXSEM_COUNT(sem));
+  do
     {
-      leave_critical_section(flags);
-      return -EOVERFLOW;
+      if (sem_count >= SEM_VALUE_MAX)
+        {
+          leave_critical_section(flags);
+          return -EOVERFLOW;
+        }
     }
+  while (!atomic_try_cmpxchg_release(NXSEM_COUNT(sem), &sem_count,
+                                     sem_count + 1));
 
   /* Perform the semaphore unlock operation, releasing this task as a
    * holder then also incrementing the count on the semaphore.
@@ -113,10 +117,8 @@ int nxsem_post(FAR sem_t *sem)
    */
 
   nxsem_release_holder(sem);
-  sem_count++;
-  sem->semcount = sem_count;
 
-#ifdef CONFIG_PRIORITY_INHERITANCE
+#if defined(CONFIG_PRIORITY_INHERITANCE) || defined(CONFIG_PRIORITY_PROTECT)
   /* Don't let any unblocked tasks run until we complete any priority
    * restoration steps.  Interrupts are disabled, but we do not want
    * the head of the ready-to-run list to be modified yet.
@@ -125,8 +127,8 @@ int nxsem_post(FAR sem_t *sem)
    * will do nothing.
    */
 
-  prioinherit = sem->flags & SEM_PRIO_MASK;
-  if (prioinherit == SEM_PRIO_INHERIT)
+  proto = sem->flags & SEM_PRIO_MASK;
+  if (proto != SEM_PRIO_NONE)
     {
       sched_lock();
     }
@@ -136,7 +138,7 @@ int nxsem_post(FAR sem_t *sem)
    * there must be some task waiting for the semaphore.
    */
 
-  if (sem_count <= 0)
+  if (sem_count < 0)
     {
       /* Check if there are any tasks in the waiting for semaphore
        * task list that are waiting for this semaphore.  This is a
@@ -191,10 +193,20 @@ int nxsem_post(FAR sem_t *sem)
    * held the semaphore.
    */
 
-#ifdef CONFIG_PRIORITY_INHERITANCE
-  if (prioinherit == SEM_PRIO_INHERIT)
+#if defined(CONFIG_PRIORITY_INHERITANCE) || defined(CONFIG_PRIORITY_PROTECT)
+  if (proto != SEM_PRIO_NONE)
     {
-      nxsem_restore_baseprio(stcb, sem);
+      if (proto == SEM_PRIO_INHERIT)
+        {
+#ifdef CONFIG_PRIORITY_INHERITANCE
+          nxsem_restore_baseprio(stcb, sem);
+#endif
+        }
+      else if (proto == SEM_PRIO_PROTECT)
+        {
+          nxsem_protect_post(sem);
+        }
+
       sched_unlock();
     }
 #endif
@@ -204,4 +216,59 @@ int nxsem_post(FAR sem_t *sem)
   leave_critical_section(flags);
 
   return OK;
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: nxsem_post
+ *
+ * Description:
+ *   When a kernel thread has finished with a semaphore, it will call
+ *   nxsem_post().  This function unlocks the semaphore referenced by sem
+ *   by performing the semaphore unlock operation on that semaphore.
+ *
+ *   If the semaphore value resulting from this operation is positive, then
+ *   no tasks were blocked waiting for the semaphore to become unlocked; the
+ *   semaphore is simply incremented.
+ *
+ *   If the value of the semaphore resulting from this operation is zero,
+ *   then one of the tasks blocked waiting for the semaphore shall be
+ *   allowed to return successfully from its call to nxsem_wait().
+ *
+ * Input Parameters:
+ *   sem - Semaphore descriptor
+ *
+ * Returned Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *
+ * Assumptions:
+ *   This function may be called from an interrupt handler.
+ *
+ ****************************************************************************/
+
+int nxsem_post(FAR sem_t *sem)
+{
+  DEBUGASSERT(sem != NULL);
+
+  /* If this is a mutex, we can try to unlock the mutex in fast mode,
+   * else try to get it in slow mode.
+   */
+
+#if !defined(CONFIG_PRIORITY_INHERITANCE) && !defined(CONFIG_PRIORITY_PROTECT)
+  if (sem->flags & SEM_TYPE_MUTEX)
+    {
+      int32_t old = 0;
+      if (atomic_try_cmpxchg_release(NXSEM_COUNT(sem), &old, 1))
+        {
+          return OK;
+        }
+    }
+#endif
+
+  return nxsem_post_slow(sem);
 }

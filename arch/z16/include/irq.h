@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/z16/include/irq.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -49,10 +51,6 @@
  * Public Data
  ****************************************************************************/
 
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
 #define EXTERN extern "C"
@@ -66,44 +64,35 @@ extern "C"
 
 chipreg_t up_getsp(void);
 
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
 /* This holds a references to the current interrupt level
  * register storage structure.  It is non-NULL only during
  * interrupt processing.
  */
 
 EXTERN volatile FAR chipreg_t *g_current_regs;
-#endif
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_cpu_index
- *
- * Description:
- *   Return an index in the range of 0 through (CONFIG_SMP_NCPUS-1) that
- *   corresponds to the currently executing CPU.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   An integer index in the range of 0 through (CONFIG_SMP_NCPUS-1) that
- *   corresponds to the currently executing CPU.
- *
- ****************************************************************************/
-
-#define up_cpu_index() (0)
-
-/****************************************************************************
  * Inline functions
  ****************************************************************************/
+
+/* This holds a references to the current interrupt level
+ * register storage structure.  If is non-NULL only during
+ * interrupt processing.
+ */
+
+static inline_function chipreg_t *up_current_regs(void)
+{
+  return (FAR chipreg_t *)g_current_regs;
+}
+
+static inline_function void up_set_current_regs(FAR chipreg_t *regs)
+{
+  g_current_regs = regs;
+}
 
 /****************************************************************************
  * Name: up_interrupt_context
@@ -114,7 +103,21 @@ EXTERN volatile FAR chipreg_t *g_current_regs;
  *
  ****************************************************************************/
 
-#define up_interrupt_context() (g_current_regs != NULL)
+#define up_interrupt_context() (up_current_regs() != NULL)
+
+/****************************************************************************
+ * Name: up_getusrpc
+ ****************************************************************************/
+
+#define up_getusrpc(regs) \
+    (((FAR chipreg_t *)((regs) ? (regs) : up_current_regs()))[REG_PC])
+
+/****************************************************************************
+ * Name: up_getusrsp
+ ****************************************************************************/
+
+#define up_getusrsp(regs) \
+    ((uintptr_t)((FAR uint32_t*)(regs))[REG_SP])
 
 #undef EXTERN
 #ifdef __cplusplus

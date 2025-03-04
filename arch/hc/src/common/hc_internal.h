@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/hc/src/common/hc_internal.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -95,8 +97,8 @@
  * a referenced is passed to get the state from the TCB.
  */
 
-#define hc_savestate(regs)    hc_copystate(regs, (uint8_t*)g_current_regs)
-#define hc_restorestate(regs) (g_current_regs = regs)
+#define hc_savestate(regs)    hc_copystate(regs, up_current_regs())
+#define hc_restorestate(regs) up_set_current_regs(regs)
 
 /****************************************************************************
  * Public Types

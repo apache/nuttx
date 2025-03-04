@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/misc/dev_mem.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -29,21 +31,30 @@
 #include <sys/mman.h>
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Private Data
  ****************************************************************************/
 
-#define DEVMEM_REGION 8
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
+#ifdef CONFIG_BOARD_MEMORY_RANGE
+static const struct memory_region_s g_memory_region[] =
+  {
+    CONFIG_BOARD_MEMORY_RANGE
+  };
+#else
 extern uint8_t _stext[];           /* Start of .text */
 extern uint8_t _etext[];           /* End_1 of .text + .rodata */
 extern uint8_t _sdata[];           /* Start of .data */
 extern uint8_t _edata[];           /* End+1 of .data */
 extern uint8_t _sbss[];            /* Start of .bss */
 extern uint8_t _ebss[];            /* End+1 of .bss */
+
+static const struct memory_region_s g_memory_region[] =
+  {
+    { (uintptr_t)_stext, (uintptr_t)_etext, PROT_EXEC | PROT_READ },
+    { (uintptr_t)_sdata, (uintptr_t)_edata, PROT_WRITE | PROT_READ },
+    { (uintptr_t)_sbss,  (uintptr_t)_ebss,  PROT_WRITE | PROT_READ },
+    { 0, 0, 0 },
+  };
+#endif
 
 /****************************************************************************
  * Private Function Prototypes
@@ -91,21 +102,15 @@ static ssize_t devmem_read(FAR struct file *filep, FAR char *buffer,
   ssize_t len;
   int i;
 
-  DEBUGASSERT(region && src);
-
-  for (i = 0; i < DEVMEM_REGION; i++)
+  for (i = 0; region[i].start != 0 && region[i].end != 0; i++)
     {
-      if (region[i].start == 0 && region[i].end == 0)
-        {
-          break;
-        }
-
       start = MAX(src, region[i].start);
-      end = MIN(src + buflen, region[i].end);
+      end = MIN(start + buflen, region[i].end);
       len = end - start;
       if (len > 0 && (region[i].flags & PROT_READ))
         {
           memcpy(buffer, (FAR const void *)start, len);
+          filep->f_pos = end;
           return len;
         }
     }
@@ -127,21 +132,15 @@ static ssize_t devmem_write(FAR struct file *filep, FAR const char *buffer,
   ssize_t len;
   int i;
 
-  DEBUGASSERT(region && dest);
-
-  for (i = 0; i < DEVMEM_REGION; i++)
+  for (i = 0; region[i].start != 0 && region[i].end != 0; i++)
     {
-      if (region[i].start == 0 && region[i].end == 0)
-        {
-          break;
-        }
-
       start = MAX(dest, region[i].start);
-      end = MIN(dest + buflen, region[i].end);
+      end = MIN(start + buflen, region[i].end);
       len = end - start;
       if (len > 0 && (region[i].flags & PROT_WRITE))
         {
           memcpy((FAR void *)start, buffer, len);
+          filep->f_pos = end;
           return len;
         }
     }
@@ -161,8 +160,6 @@ static int devmem_mmap(FAR struct file *filep,
   uintptr_t end;
   int i;
 
-  DEBUGASSERT(region);
-
   if (map->offset < 0)
     {
       return -EINVAL;
@@ -171,13 +168,8 @@ static int devmem_mmap(FAR struct file *filep,
   start = map->offset;
   end = start + map->length;
 
-  for (i = 0; i < DEVMEM_REGION; i++)
+  for (i = 0; region[i].start != 0 && region[i].end != 0; i++)
     {
-      if (region[i].start == 0 && region[i].end == 0)
-        {
-          break;
-        }
-
       if (start >= region[i].start && end <= region[i].end)
         {
           map->vaddr = (FAR void *)start;
@@ -205,58 +197,6 @@ static int devmem_mmap(FAR struct file *filep,
 
 int devmem_register(void)
 {
-  FAR struct memory_region_s *region;
-  bool merge = (_edata == _sbss);
-  ssize_t len = 0;
-  int ret;
-
-  region = kmm_calloc(DEVMEM_REGION, sizeof(*region));
-  if (region == NULL)
-    {
-      return -ENOMEM;
-    }
-
-#ifdef CONFIG_BOARD_MEMORY_RANGE
-  len = parse_memory_region(CONFIG_BOARD_MEMORY_RANGE, region,
-                            DEVMEM_REGION - 1);
-  if (len < 0)
-    {
-      kmm_free(region);
-      return len;
-    }
-#endif
-
-  if (len + (4 - merge) > DEVMEM_REGION)
-    {
-      len = DEVMEM_REGION - (4 - merge);
-    }
-
-  region[len].flags = PROT_EXEC | PROT_READ;
-  region[len].start = (uintptr_t)_stext;
-  region[len++].end = (uintptr_t)_etext;
-  region[len].flags = PROT_WRITE | PROT_READ;
-  region[len].start = (uintptr_t)_sdata;
-  region[len++].end = (uintptr_t)_edata;
-
-  if (merge)
-    {
-      region[len - 1].end = (uintptr_t)_ebss;
-    }
-  else
-    {
-      region[len].flags = PROT_WRITE | PROT_READ;
-      region[len].start = (uintptr_t)_sbss;
-      region[len++].end = (uintptr_t)_ebss;
-    }
-
-  /* register the new MEM driver */
-
-  ret = register_driver("/dev/mem", &g_devmem_fops, 0666, region);
-  if (ret < 0)
-    {
-      kmm_free(region);
-      return -ENOMEM;
-    }
-
-  return ret;
+  return register_driver("/dev/mem", &g_devmem_fops,
+                         0666, (FAR void *)g_memory_region);
 }

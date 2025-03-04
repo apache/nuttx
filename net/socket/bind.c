@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/socket/bind.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -30,6 +32,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
 
 #include "socket/socket.h"
@@ -149,17 +152,19 @@ int psock_bind(FAR struct socket *psock, const struct sockaddr *addr,
 int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
 {
   FAR struct socket *psock;
+  FAR struct file *filep;
   int ret;
 
   /* Get the underlying socket structure */
 
-  ret = sockfd_socket(sockfd, &psock);
+  ret = sockfd_socket(sockfd, &filep, &psock);
 
   /* Then let psock_bind do all of the work */
 
   if (ret == OK)
     {
       ret = psock_bind(psock, addr, addrlen);
+      fs_putfilep(filep);
     }
 
   if (ret < 0)

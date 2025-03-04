@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/local/local_conn.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -30,6 +32,7 @@
 #include <debug.h>
 #include <unistd.h>
 
+#include <nuttx/sched.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/queue.h>
 
@@ -153,6 +156,7 @@ FAR struct local_conn_s *local_alloc(void)
        */
 
       conn->lc_crefs = 1;
+      conn->lc_rcvsize = CONFIG_DEV_FIFO_SIZE;
 
 #ifdef CONFIG_NET_LOCAL_STREAM
       nxsem_init(&conn->lc_waitsem, 0, 0);
@@ -216,8 +220,18 @@ int local_alloc_accept(FAR struct local_conn_s *server,
   conn->lc_peer   = client;
   client->lc_peer = conn;
 
-  strlcpy(conn->lc_path, client->lc_path, sizeof(conn->lc_path));
+  strlcpy(conn->lc_path, server->lc_path, sizeof(conn->lc_path));
   conn->lc_instance_id = client->lc_instance_id;
+
+  /* Create the FIFOs needed for the connection */
+
+  ret = local_create_fifos(conn, server->lc_rcvsize, client->lc_rcvsize);
+  if (ret < 0)
+    {
+      nerr("ERROR: Failed to create FIFOs for %s: %d\n",
+           client->lc_path, ret);
+      goto err;
+    }
 
   /* Open the server-side write-only FIFO.  This should not
    * block.
@@ -228,7 +242,7 @@ int local_alloc_accept(FAR struct local_conn_s *server,
     {
       nerr("ERROR: Failed to open write-only FIFOs for %s: %d\n",
            conn->lc_path, ret);
-      goto err;
+      goto errout_with_fifos;
     }
 
   /* Do we have a connection?  Is the write-side FIFO opened? */
@@ -245,7 +259,7 @@ int local_alloc_accept(FAR struct local_conn_s *server,
     {
       nerr("ERROR: Failed to open read-only FIFOs for %s: %d\n",
            conn->lc_path, ret);
-      goto err;
+      goto errout_with_fifos;
     }
 
   /* Do we have a connection?  Are the FIFOs opened? */
@@ -253,6 +267,9 @@ int local_alloc_accept(FAR struct local_conn_s *server,
   DEBUGASSERT(conn->lc_infile.f_inode != NULL);
   *accept = conn;
   return OK;
+
+errout_with_fifos:
+  local_release_fifos(conn);
 
 err:
   local_free(conn);
@@ -283,7 +300,7 @@ void local_free(FAR struct local_conn_s *conn)
 
   dq_rem(&conn->lc_conn.node, &g_local_connections);
 
-  if (local_peerconn(conn) && conn->lc_peer)
+  if (conn->lc_peer)
     {
       conn->lc_peer->lc_peer = NULL;
       conn->lc_peer = NULL;

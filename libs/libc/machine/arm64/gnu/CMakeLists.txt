@@ -1,6 +1,8 @@
 # ##############################################################################
 # libs/libc/machine/arm64/gnu/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -74,6 +76,10 @@ endif()
 
 if(CONFIG_ARCH_SETJMP_H)
   list(APPEND SRCS arch_setjmp.S)
+endif()
+
+if(NOT CONFIG_PROFILE_NONE)
+  list(APPEND SRCS mcount.c)
 endif()
 
 target_sources(c PRIVATE ${SRCS})

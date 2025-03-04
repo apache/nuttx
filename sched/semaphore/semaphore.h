@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/semaphore/semaphore.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -29,9 +31,16 @@
 #include <nuttx/compiler.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/sched.h>
+#include <nuttx/atomic.h>
 
 #include <stdint.h>
 #include <stdbool.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define NXSEM_COUNT(s) ((FAR atomic_t *)&(s)->semcount)
 
 /****************************************************************************
  * Public Function Prototypes
@@ -59,9 +68,9 @@ void nxsem_wait_irq(FAR struct tcb_s *wtcb, int errcode);
 
 /* Handle semaphore timer expiration */
 
-void nxsem_timeout(wdparm_t pid);
+void nxsem_timeout(wdparm_t arg);
 
-/* Recover semaphore resources with a task or thread is destroyed  */
+/* Recover semaphore resources with a task or thread is destroyed */
 
 void nxsem_recover(FAR struct tcb_s *tcb);
 
@@ -89,6 +98,16 @@ void nxsem_release_all(FAR struct tcb_s *stcb);
 #  define nxsem_restore_baseprio(stcb,sem)
 #  define nxsem_canceled(stcb,sem)
 #  define nxsem_release_all(stcb)
+#endif
+
+/* Special logic needed only by priority protect */
+
+#ifdef CONFIG_PRIORITY_PROTECT
+int nxsem_protect_wait(FAR sem_t *sem);
+void nxsem_protect_post(FAR sem_t *sem);
+#else
+#  define nxsem_protect_wait(sem)  0
+#  define nxsem_protect_post(sem)
 #endif
 
 #undef EXTERN

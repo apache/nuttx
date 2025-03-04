@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/aio/aio_suspend.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -90,13 +92,6 @@ int aio_suspend(FAR const struct aiocb * const list[], int nent,
 
   DEBUGASSERT(list);
 
-  /* Lock the scheduler so that no I/O events can complete on the worker
-   * thread until we set our wait set up.  Pre-emption will, of course, be
-   * re-enabled while we are waiting for the signal.
-   */
-
-  sched_lock();
-
   /* Check each entry in the list.  Break out of the loop if any entry
    * has completed.
    */
@@ -109,7 +104,6 @@ int aio_suspend(FAR const struct aiocb * const list[], int nent,
         {
           /* Yes, return success */
 
-          sched_unlock();
           return OK;
         }
     }
@@ -126,7 +120,6 @@ int aio_suspend(FAR const struct aiocb * const list[], int nent,
   sigaddset(&set, SIGPOLL);
 
   ret = sigtimedwait(&set, NULL, timeout);
-  sched_unlock();
   return ret >= 0 ? OK : ERROR;
 }
 

@@ -1,0 +1,317 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config 16550_PCI_UART
+	bool "16550 UART PCI support"
+	default n
+	select 16550_UART
+
+if 16550_PCI_UART
+
+config 16550_PCI_UART0
+	bool "16550 UART0 PCI"
+	default n
+	---help---
+		Support for PCI UART0, will be registered as /dev/ttyS0
+
+config 16550_PCI_UART1
+	bool "16550 UART1 PCI"
+	default n
+	---help---
+		Support for PCI UART1, will be registered as /dev/ttyS1
+
+config 16550_PCI_UART2
+	bool "16550 UART2 PCI"
+	default n
+	---help---
+		Support for PCI UART2, will be registered as /dev/ttyS2
+
+config 16550_PCI_UART3
+	bool "16550 UART3 PCI"
+	default n
+	---help---
+		Support for PCI UART3, will be registered as /dev/ttyS3
+
+endif # 16550_PCI_UART
+
+if 16550_PCI_UART0
+
+config 16550_PCI_UART0_VENDOR
+	hex "16550 UART0 PCI vendor"
+	---help---
+		PCI vendor number that will be associated with UART0
+
+config 16550_PCI_UART0_DEVICE
+	hex "16550 UART0 PCI device"
+	---help---
+		PCI device number that will be associated with UART0
+
+config 16550_PCI_UART0_PORT
+	int "16550 UART0 PCI port"
+	default 0
+	---help---
+		Port in multi-port device. Starts from 0.
+		Must be set to 0 for single port devices .
+
+config 16550_PCI_UART0_CLOCK
+	int "16550 UART0 PCI clock"
+
+config 16550_PCI_UART0_BAUD
+	int "16550 UART0 PCI BAUD"
+	default 115200
+
+config 16550_PCI_UART0_PARITY
+	int "16550 UART0 PCI parity"
+	default 0
+	range 0 2
+	---help---
+		16550 UART0 PCI parity.  0=None, 1=Odd, 2=Even.  Default: None
+
+config 16550_PCI_UART0_BITS
+	int "16550 UART0 PCI number of bits"
+	default 8
+	---help---
+		16550 UART0 PCI number of bits.  Default: 8
+
+config 16550_PCI_UART0_2STOP
+	int "16550 UART0 PCI two stop bits"
+	default 0
+	---help---
+		0=1 stop bit, 1=Two stop bits.  Default: 1 stop bit
+
+config 16550_PCI_UART0_RXBUFSIZE
+	int "16550 UART0 PCI Rx buffer size"
+	default 256
+	---help---
+		16550 UART0 PCI Rx buffer size.  Default: 256
+
+config 16550_PCI_UART0_TXBUFSIZE
+	int "16550 UART0 PCI Tx buffer size"
+	default 256
+	---help---
+		16550 UART0 PCI Tx buffer size.  Default: 256
+
+endif # 16550_PCI_UART0
+
+if 16550_PCI_UART1
+
+config 16550_PCI_UART1_VENDOR
+	hex "16550 UART1 PCI vendor"
+	default 16550_PCI_UART0_VENDOR
+	---help---
+		PCI vendor number that will be associated with UART1
+
+config 16550_PCI_UART1_DEVICE
+	hex "16550 UART1 PCI device"
+	default 16550_PCI_UART0_DEVICE
+	---help---
+		PCI device number that will be associated with UART1
+
+config 16550_PCI_UART1_PORT
+	int "16550 UART1 PCI port"
+	default 1
+	---help---
+		Port in multi-port device. Starts from 0.
+		Must be set to 0 for single port devices .
+
+config 16550_PCI_UART1_CLOCK
+	int "16550 UART1 PCI clock"
+	default 16550_PCI_UART0_CLOCK
+
+config 16550_PCI_UART1_BAUD
+	int "16550 UART1 PCI BAUD"
+	default 115200
+
+config 16550_PCI_UART1_PARITY
+	int "16550 UART1 PCI parity"
+	default 0
+	range 0 2
+	---help---
+		16550 UART1 PCI parity.  0=None, 1=Odd, 2=Even.  Default: None
+
+config 16550_PCI_UART1_BITS
+	int "16550 UART1 PCI number of bits"
+	default 8
+	---help---
+		16550 UART1 PCI number of bits.  Default: 8
+
+config 16550_PCI_UART1_2STOP
+	int "16550 UART1 PCI two stop bits"
+	default 0
+	---help---
+		0=1 stop bit, 1=Two stop bits.  Default: 1 stop bit
+
+config 16550_PCI_UART1_RXBUFSIZE
+	int "16550 UART1 PCI Rx buffer size"
+	default 256
+	---help---
+		16550 UART1 PCI Rx buffer size.  Default: 256
+
+config 16550_PCI_UART1_TXBUFSIZE
+	int "16550 UART1 PCI Tx buffer size"
+	default 256
+	---help---
+		16550 UART1 PCI Tx buffer size.  Default: 256
+
+endif # 16550_PCI_UART1
+
+if 16550_PCI_UART2
+
+config 16550_PCI_UART2_VENDOR
+	hex "16550 UART2 PCI vendor"
+	default 16550_PCI_UART1_VENDOR
+	---help---
+		PCI vendor number that will be associated with UART2
+
+config 16550_PCI_UART2_DEVICE
+	hex "16550 UART2 PCI device"
+	default 16550_PCI_UART1_DEVICE
+	---help---
+		PCI device number that will be associated with UART2
+
+config 16550_PCI_UART2_PORT
+	int "16550 UART2 PCI port"
+	default 2
+	---help---
+		Port in multi-port device. Starts from 0.
+		Must be set to 0 for single port devices .
+
+config 16550_PCI_UART2_CLOCK
+	int "16550 UART2 PCI clock"
+	default 16550_PCI_UART1_CLOCK
+
+config 16550_PCI_UART2_BAUD
+	int "16550 UART2 PCI BAUD"
+	default 115200
+
+config 16550_PCI_UART2_PARITY
+	int "16550 UART2 PCI parity"
+	default 0
+	range 0 2
+	---help---
+		16550 UART2 PCI parity.  0=None, 1=Odd, 2=Even.  Default: None
+
+config 16550_PCI_UART2_BITS
+	int "16550 UART2 PCI number of bits"
+	default 8
+	---help---
+		16550 UART2 PCI number of bits.  Default: 8
+
+config 16550_PCI_UART2_2STOP
+	int "16550 UART2 PCI two stop bits"
+	default 0
+	---help---
+		0=1 stop bit, 1=Two stop bits.  Default: 1 stop bit
+
+config 16550_PCI_UART2_RXBUFSIZE
+	int "16550 UART2 PCI Rx buffer size"
+	default 256
+	---help---
+		16550 UART2 PCI Rx buffer size.  Default: 256
+
+config 16550_PCI_UART2_TXBUFSIZE
+	int "16550 UART2 PCI Tx buffer size"
+	default 256
+	---help---
+		16550 UART2 PCI Tx buffer size.  Default: 256
+
+endif # 16550_PCI_UART2
+
+if 16550_PCI_UART3
+
+config 16550_PCI_UART3_VENDOR
+	hex "16550 UART3 PCI vendor"
+	default 16550_PCI_UART2_VENDOR
+	---help---
+		PCI vendor number that will be associated with UART3
+
+config 16550_PCI_UART3_DEVICE
+	hex "16550 UART3 PCI device"
+	default 16550_PCI_UART2_DEVICE
+	---help---
+		PCI device number that will be associated with UART3
+
+config 16550_PCI_UART3_PORT
+	int "16550 UART3 PCI port"
+	default 3
+	---help---
+		Port in multi-port device. Starts from 0.
+		Must be set to 0 for single port devices .
+
+config 16550_PCI_UART3_CLOCK
+	int "16550 UART3 PCI clock"
+	default 16550_PCI_UART2_CLOCK
+
+config 16550_PCI_UART3_BAUD
+	int "16550 UART3 PCI BAUD"
+	default 115200
+
+config 16550_PCI_UART3_PARITY
+	int "16550 UART3 PCI parity"
+	default 0
+	range 0 2
+	---help---
+		16550 UART3 PCI parity.  0=None, 1=Odd, 2=Even.  Default: None
+
+config 16550_PCI_UART3_BITS
+	int "16550 UART3 PCI number of bits"
+	default 8
+	---help---
+		16550 UART3 PCI number of bits.  Default: 8
+
+config 16550_PCI_UART3_2STOP
+	int "16550 UART3 PCI two stop bits"
+	default 0
+	---help---
+		0=1 stop bit, 1=Two stop bits.  Default: 1 stop bit
+
+config 16550_PCI_UART3_RXBUFSIZE
+	int "16550 UART3 PCI Rx buffer size"
+	default 256
+	---help---
+		16550 UART3 PCI Rx buffer size.  Default: 256
+
+config 16550_PCI_UART3_TXBUFSIZE
+	int "16550 UART3 PCI Tx buffer size"
+	default 256
+	---help---
+		16550 UART3 PCI Tx buffer size.  Default: 256
+
+endif # 16550_PCI_UART3
+
+config 16550_PCI_CONSOLE
+	bool
+	depends on 16550_PCI_UART && 16550_NO_SERIAL_CONSOLE
+	select SERIAL_CONSOLE
+
+choice
+	prompt "16550 PCI Serial Console"
+	default 16550_PCI_NO_SERIAL_CONSOLE
+	depends on DEV_CONSOLE && 16550_PCI_UART
+
+config 16550_PCI_UART0_SERIAL_CONSOLE
+	bool "16550 PCI UART0 serial console"
+	depends on 16550_PCI_UART0
+	select 16550_PCI_CONSOLE
+
+config 16550_PCI_UART1_SERIAL_CONSOLE
+	bool "16550 PCI UART1 serial console"
+	depends on 16550_PCI_UART1
+	select 16550_PCI_CONSOLE
+
+config 16550_PCI_UART2_SERIAL_CONSOLE
+	bool "16550 PCI UART2 serial console"
+	depends on 16550_PCI_UART2
+	select 16550_PCI_CONSOLE
+
+config 16550_PCI_UART3_SERIAL_CONSOLE
+	bool "16550 PCI UART3 serial console"
+	depends on 16550_PCI_UART3
+	select 16550_PCI_CONSOLE
+
+config 16550_PCI_NO_SERIAL_CONSOLE
+	bool "No 16550 PCI serial console"
+
+endchoice # 16550 Serial Console

@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/smartfs/smartfs_smart.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -44,7 +46,9 @@
 #include <nuttx/mtd/mtd.h>
 #include <nuttx/fs/smart.h>
 
+#include "inode/inode.h"
 #include "smartfs.h"
+#include "fs_heap.h"
 
 /****************************************************************************
  * Private Types
@@ -143,6 +147,8 @@ const struct mountpt_operations g_smartfs_operations =
   NULL,                  /* mmap */
   smartfs_truncate,      /* truncate */
   NULL,                  /* poll */
+  NULL,                  /* readv */
+  NULL,                  /* writev */
 
   smartfs_sync,          /* sync */
   smartfs_dup,           /* dup */
@@ -181,6 +187,7 @@ static int smartfs_open(FAR struct file *filep, FAR const char *relpath,
   FAR struct smartfs_mountpt_s *fs;
   int                           ret;
   uint16_t                      parentdirsector;
+  size_t                        pathlen;
   FAR const char               *filename;
   FAR struct smartfs_ofile_s   *sf;
 #ifdef CONFIG_SMARTFS_USE_SECTOR_BUFFER
@@ -210,22 +217,29 @@ static int smartfs_open(FAR struct file *filep, FAR const char *relpath,
 
   /* Locate the directory entry for this path */
 
-  sf = kmm_malloc(sizeof *sf);
+  pathlen = strlen(relpath) + 1;
+  sf = fs_heap_malloc(sizeof(*sf) + pathlen - 1);
   if (sf == NULL)
     {
       ret = -ENOMEM;
       goto errout_with_lock;
     }
 
+  /* Save the full path to smartfs_ofile_s stuctrue. This is needed
+   * to FIOC_FILEPATH ioctlc all support.
+   */
+
+  memcpy(sf->path, relpath, pathlen);
+
   /* Allocate a sector buffer if CRC enabled in the MTD layer */
 
 #ifdef CONFIG_SMARTFS_USE_SECTOR_BUFFER
-  sf->buffer = kmm_malloc(fs->fs_llformat.availbytes);
+  sf->buffer = fs_heap_malloc(fs->fs_llformat.availbytes);
   if (sf->buffer == NULL)
     {
       /* Error ... no memory */
 
-      kmm_free(sf);
+      fs_heap_free(sf);
       ret = -ENOMEM;
       goto errout_with_lock;
     }
@@ -386,14 +400,14 @@ errout_with_buffer:
     {
       /* Free the space for the name too */
 
-      kmm_free(sf->entry.name);
+      fs_heap_free(sf->entry.name);
       sf->entry.name = NULL;
     }
 
 #ifdef CONFIG_SMARTFS_USE_SECTOR_BUFFER
-  kmm_free(sf->buffer);
+  fs_heap_free(sf->buffer);
 #endif /* CONFIG_SMARTFS_USE_SECTOR_BUFFER */
-  kmm_free(sf);
+  fs_heap_free(sf);
 
 errout_with_lock:
   nxmutex_unlock(&g_lock);
@@ -491,18 +505,18 @@ static int smartfs_close(FAR struct file *filep)
     {
       /* Free the space for the name too */
 
-      kmm_free(sf->entry.name);
+      fs_heap_free(sf->entry.name);
       sf->entry.name = NULL;
     }
 
 #ifdef CONFIG_SMARTFS_USE_SECTOR_BUFFER
   if (sf->buffer)
     {
-      kmm_free(sf->buffer);
+      fs_heap_free(sf->buffer);
     }
 #endif
 
-  kmm_free(sf);
+  fs_heap_free(sf);
 
 okout:
   nxmutex_unlock(&g_lock);
@@ -997,9 +1011,39 @@ static off_t smartfs_seek(FAR struct file *filep, off_t offset, int whence)
 
 static int smartfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
-  /* We don't use any ioctls */
+  FAR struct smartfs_ofile_s *priv;
+  FAR struct inode *inode;
+  int ret;
 
-  return -ENOSYS;
+  /* Recover our private data from the struct file instance */
+
+  priv  = filep->f_priv;
+  inode = filep->f_inode;
+
+  switch (cmd)
+    {
+      case FIOC_FILEPATH:
+        {
+          FAR char *path = (FAR char *)(uintptr_t)arg;
+          ret = inode_getpath(inode, path, PATH_MAX);
+          if (ret >= 0)
+            {
+              size_t len = strlen(path);
+              if (path[len - 1] != '/')
+                {
+                  path[len++] = '/';
+                }
+
+              strlcat(path, priv->path, PATH_MAX - len);
+            }
+        }
+        break;
+      default:
+        ret = -ENOTTY;
+        break;
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -1221,7 +1265,7 @@ static int smartfs_opendir(FAR struct inode *mountpt,
   /* Recover our private data from the inode instance */
 
   fs = mountpt->i_private;
-  sdir = kmm_zalloc(sizeof(*sdir));
+  sdir = fs_heap_zalloc(sizeof(*sdir));
   if (sdir == NULL)
     {
       return -ENOMEM;
@@ -1261,14 +1305,14 @@ errout_with_lock:
 
   if (entry.name != NULL)
     {
-      kmm_free(entry.name);
+      fs_heap_free(entry.name);
       entry.name = NULL;
     }
 
   nxmutex_unlock(&g_lock);
 
 errout_with_sdir:
-  kmm_free(sdir);
+  fs_heap_free(sdir);
   return ret;
 }
 
@@ -1283,7 +1327,7 @@ static int smartfs_closedir(FAR struct inode *mountpt,
                             FAR struct fs_dirent_s *dir)
 {
   DEBUGASSERT(dir);
-  kmm_free(dir);
+  fs_heap_free(dir);
   return 0;
 }
 
@@ -1494,7 +1538,7 @@ static int smartfs_bind(FAR struct inode *blkdriver, FAR const void *data,
   /* Create an instance of the mountpt state structure */
 
   fs = (FAR struct smartfs_mountpt_s *)
-    kmm_zalloc(sizeof(struct smartfs_mountpt_s));
+    fs_heap_zalloc(sizeof(struct smartfs_mountpt_s));
   if (!fs)
     {
       return -ENOMEM;
@@ -1503,7 +1547,7 @@ static int smartfs_bind(FAR struct inode *blkdriver, FAR const void *data,
   ret = nxmutex_lock(&g_lock);
   if (ret < 0)
     {
-      kmm_free(fs);
+      fs_heap_free(fs);
       return ret;
     }
 
@@ -1521,7 +1565,7 @@ static int smartfs_bind(FAR struct inode *blkdriver, FAR const void *data,
   if (ret != 0)
     {
       nxmutex_unlock(&g_lock);
-      kmm_free(fs);
+      fs_heap_free(fs);
       return ret;
     }
 
@@ -1579,7 +1623,7 @@ static int smartfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
     }
 
   nxmutex_unlock(&g_lock);
-  kmm_free(fs);
+  fs_heap_free(fs);
   return ret;
 }
 
@@ -1699,7 +1743,7 @@ static int smartfs_unlink(FAR struct inode *mountpt, FAR const char *relpath)
 errout_with_lock:
   if (entry.name != NULL)
     {
-      kmm_free(entry.name);
+      fs_heap_free(entry.name);
     }
 
   nxmutex_unlock(&g_lock);
@@ -1786,7 +1830,7 @@ errout_with_lock:
     {
       /* Free the filename space allocation */
 
-      kmm_free(entry.name);
+      fs_heap_free(entry.name);
       entry.name = NULL;
     }
 
@@ -1881,7 +1925,7 @@ int smartfs_rmdir(FAR struct inode *mountpt, FAR const char *relpath)
 errout_with_lock:
   if (entry.name != NULL)
     {
-      kmm_free(entry.name);
+      fs_heap_free(entry.name);
     }
 
   nxmutex_unlock(&g_lock);
@@ -2027,13 +2071,13 @@ int smartfs_rename(FAR struct inode *mountpt, FAR const char *oldrelpath,
 errout_with_lock:
   if (oldentry.name != NULL)
     {
-      kmm_free(oldentry.name);
+      fs_heap_free(oldentry.name);
       oldentry.name = NULL;
     }
 
   if (newentry.name != NULL)
     {
-      kmm_free(newentry.name);
+      fs_heap_free(newentry.name);
       newentry.name = NULL;
     }
 
@@ -2136,7 +2180,7 @@ static int smartfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
 errout_with_lock:
   if (entry.name != NULL)
     {
-      kmm_free(entry.name);
+      fs_heap_free(entry.name);
       entry.name = NULL;
     }
 

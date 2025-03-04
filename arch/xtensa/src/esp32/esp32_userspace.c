@@ -188,6 +188,11 @@ static noinline_function IRAM_ATTR void configure_flash_mmu(void)
                              irom_lma_aligned, 64,
                              (int)irom_page_count) == 0);
 
+#ifdef CONFIG_ESP32_PID
+  extern void esp32_userspace_init_for_pid(void);
+  esp32_userspace_init_for_pid();
+#endif
+
   cache_read_enable(0);
 }
 

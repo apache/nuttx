@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/sim/src/sim/sim_switchcontext.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -32,6 +34,7 @@
 
 #include "clock/clock.h"
 #include "sim_internal.h"
+#include "sched/sched.h"
 
 /****************************************************************************
  * Public Functions
@@ -63,10 +66,10 @@ void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
 
   /* Are we in an interrupt handler? */
 
-  if (CURRENT_REGS)
+  if (up_interrupt_context())
     {
       /* Yes, then we have to do things differently.
-       * Just copy the CURRENT_REGS into the OLD rtcb.
+       * Just copy the current_regs into the OLD rtcb.
        */
 
       sim_savestate(rtcb->xcp.regs);
@@ -77,7 +80,7 @@ void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
 
       /* Restore the cpu lock */
 
-      restore_critical_section();
+      restore_critical_section(tcb, this_cpu());
 
       /* Then switch contexts */
 
@@ -102,7 +105,11 @@ void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
 
       /* Restore the cpu lock */
 
-      restore_critical_section();
+      restore_critical_section(tcb, this_cpu());
+
+      /* Record the new "running" task */
+
+      g_running_tasks[this_cpu()] = tcb;
 
       /* Then switch contexts */
 

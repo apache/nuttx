@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/sim/src/sim/sim_fork.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -99,7 +101,7 @@ pid_t sim_fork(const xcpt_reg_t *context)
   xcpt_reg_t stackutil;
 
   sinfo("fork context [%p]:\n", context);
-  sinfo("  frame pointer:%lx sp:%lx pc:%lx\n",
+  sinfo("  frame pointer:%zx sp:%zx pc:%zx\n",
         context[JB_FP], context[JB_SP], context[JB_PC]);
 
   /* Allocate and initialize a TCB for the child task. */
@@ -124,7 +126,7 @@ pid_t sim_fork(const xcpt_reg_t *context)
   DEBUGASSERT(stacktop > context[JB_SP]);
   stackutil = stacktop - context[JB_SP];
 
-  sinfo("Parent: stackutil:%lu\n", stackutil);
+  sinfo("Parent: stackutil:%zu\n", stackutil);
 
   /* Make some feeble effort to preserve the stack contents.  This is
    * feeble because the stack surely contains invalid pointers and other
@@ -152,9 +154,9 @@ pid_t sim_fork(const xcpt_reg_t *context)
       newfp = context[JB_FP];
     }
 
-  sinfo("Old stack top:%lx SP:%lx FP:%lx\n",
+  sinfo("Old stack top:%zx SP:%zx FP:%zx\n",
         stacktop, context[JB_SP], context[JB_FP]);
-  sinfo("New stack top:%lx SP:%lx FP:%lx\n",
+  sinfo("New stack top:%zx SP:%zx FP:%zx\n",
         newtop, newsp, newfp);
 
   /* Update the stack pointer, frame pointer, and volatile registers.  When

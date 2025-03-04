@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/wqueue.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -347,6 +349,7 @@ int work_usrstart(void);
  * Input Parameters:
  *   name       - Name of the new task
  *   priority   - Priority of the new task
+ *   stack_addr - Stack buffer of the new task
  *   stack_size - size (in bytes) of the stack needed
  *   nthreads   - Number of work thread should be created
  *
@@ -357,6 +360,7 @@ int work_usrstart(void);
 
 FAR struct kwork_wqueue_s *work_queue_create(FAR const char *name,
                                              int priority,
+                                             FAR void *stack_addr,
                                              int stack_size, int nthreads);
 
 /****************************************************************************
@@ -470,8 +474,10 @@ int work_cancel_wq(FAR struct kwork_wqueue_s *wqueue,
  *   work   - The previously queued work structure to cancel
  *
  * Returned Value:
- *   Zero (OK) on success, a negated errno on failure.  This error may be
- *   reported:
+ *   Zero means the work was successfully cancelled.
+ *   One means the work was not cancelled because it is currently being
+ *   processed by work thread, but wait for it to finish.
+ *   A negated errno value is returned on any failure:
  *
  *   -ENOENT - There is no such work queued.
  *   -EINVAL - An invalid work queue was specified

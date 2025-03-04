@@ -1,6 +1,8 @@
 # ##############################################################################
 # net/utils/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -31,8 +33,8 @@ set(SRCS
     net_snoop.c
     net_cmsg.c
     net_iob_concat.c
-    net_getrandom.c
-    net_mask2pref.c)
+    net_mask2pref.c
+    net_bufpool.c)
 
 # IPv6 utilities
 

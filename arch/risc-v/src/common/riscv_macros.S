@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/common/riscv_macros.S
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -340,31 +342,41 @@
 #if CONFIG_ARCH_INTERRUPTSTACK > 15
 #if !defined(CONFIG_SMP) && !defined(CONFIG_ARCH_USE_S_MODE)
 .macro  setintstack tmp0, tmp1
-  la    sp, g_intstacktop
+
+  /* Load g_intstacktop (the start of the interrupt stack) */
+  la    \tmp0, g_intstacktop
+
+  /* Load g_intstackalloc (the end of the interrupt stack) */
+  la    \tmp1, g_intstackalloc
+
+  /* Check if sp is below g_intstackalloc (outside the interrupt stack) */
+  blt   sp, \tmp1, 1f
+
+  /* Check if sp is above g_intstacktop (outside the interrupt stack) */
+  bgt   sp, \tmp0, 1f
+
+  /* If sp is within the interrupt stack boundaries, no action is required */
+  j     2f
+
+1:
+  /* Set sp to g_intstacktop (switch to the interrupt stack) */
+  mv    sp, \tmp0
+
+2:
 .endm
 #endif /* !defined(CONFIG_SMP) && !defined(CONFIG_ARCH_USE_S_MODE) */
 #endif /* CONFIG_ARCH_INTERRUPTSTACK > 15 */
 
 /****************************************************************************
- * Name: riscv_mhartid
- *
- * Description:
- *   Context aware way to query hart id
- *
- * Returned Value:
- *   Hart id
- *
+ * Name: up_cpu_index
  ****************************************************************************/
 
-.macro  riscv_mhartid out
+.macro  up_cpu_index out
 #ifdef CONFIG_RISCV_PERCPU_SCRATCH
   csrr    \out, CSR_SCRATCH
   REGLOAD \out, RISCV_PERCPU_HARTID(\out)
 #else
   csrr    \out, CSR_MHARTID
-#  if CONFIG_ARCH_RV_HARTID_BASE > 0
-  add    \out, \out, - CONFIG_ARCH_RV_HARTID_BASE
-#  endif
 #endif
 .endm
 

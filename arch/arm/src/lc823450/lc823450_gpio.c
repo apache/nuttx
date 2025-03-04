@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/lc823450/lc823450_gpio.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -51,6 +53,8 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+static spinlock_t g_gpio_lock = SP_UNLOCKED;
 
 #ifdef CONFIG_IOEX
 static struct ioex_dev_s *g_ioex_dev;
@@ -227,12 +231,12 @@ int lc823450_gpio_mux(uint16_t gpiocfg)
 
   if (port <= (GPIO_PORT5 >> GPIO_PORT_SHIFT))
     {
-      irqstate_t flags = spin_lock_irqsave(NULL);
+      irqstate_t flags = spin_lock_irqsave(&g_gpio_lock);
       val = getreg32(PMDCNT0 + (port * 4));
       val &= ~(3 << (2 * pin));
       val |= (mux << (2 *pin));
       putreg32(val, PMDCNT0 + (port * 4));
-      spin_unlock_irqrestore(NULL, flags);
+      spin_unlock_irqrestore(&g_gpio_lock, flags);
     }
   else
     {
@@ -275,7 +279,7 @@ int lc823450_gpio_config(uint16_t gpiocfg)
 
       /* Handle the GPIO configuration by the basic mode of the pin */
 
-      flags = spin_lock_irqsave(NULL);
+      flags = spin_lock_irqsave(&g_gpio_lock);
 
       /* pull up/down specified */
 
@@ -300,7 +304,7 @@ int lc823450_gpio_config(uint16_t gpiocfg)
             break;
         }
 
-      spin_unlock_irqrestore(NULL, flags);
+      spin_unlock_irqrestore(&g_gpio_lock, flags);
     }
 #ifdef CONFIG_IOEX
   else if (port <= (GPIO_PORTEX >> GPIO_PORT_SHIFT))
@@ -388,7 +392,7 @@ void lc823450_gpio_write(uint16_t gpiocfg, bool value)
 
       regaddr = lc823450_get_gpio_data(port);
 
-      flags = spin_lock_irqsave(NULL);
+      flags = spin_lock_irqsave(&g_gpio_lock);
 
       /* Write the value (0 or 1).  To the data register */
 
@@ -405,7 +409,7 @@ void lc823450_gpio_write(uint16_t gpiocfg, bool value)
 
       putreg32(regval, regaddr);
 
-      spin_unlock_irqrestore(NULL, flags);
+      spin_unlock_irqrestore(&g_gpio_lock, flags);
     }
 #ifdef CONFIG_IOEX
   else if (port <= (GPIO_PORTEX >> GPIO_PORT_SHIFT))

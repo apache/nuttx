@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/rpmsgfs/rpmsgfs_server.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -29,14 +31,16 @@
 #include <string.h>
 #include <fcntl.h>
 #include <assert.h>
+#include <debug.h>
 #include <errno.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
 #include <nuttx/fs/fs.h>
-#include <nuttx/rptun/openamp.h>
+#include <nuttx/rpmsg/rpmsg.h>
 
 #include "rpmsgfs.h"
+#include "fs_heap.h"
 
 /****************************************************************************
  * Private Types
@@ -129,7 +133,6 @@ static bool rpmsgfs_ns_match(FAR struct rpmsg_device *rdev,
 static void rpmsgfs_ns_bind(FAR struct rpmsg_device *rdev,
                             FAR void *priv_, FAR const char *name,
                             uint32_t dest);
-static void rpmsgfs_ns_unbind(FAR struct rpmsg_endpoint *ept);
 static int  rpmsgfs_ept_cb(FAR struct rpmsg_endpoint *ept,
                            FAR void *data, size_t len, uint32_t src,
                            FAR void *priv);
@@ -168,8 +171,8 @@ static const rpmsg_ept_cb g_rpmsgfs_handler[] =
  * Private Functions
  ****************************************************************************/
 
-static int rpmsgfs_attach_file(FAR struct rpmsgfs_server_s *priv,
-                               FAR struct file *filep)
+static int rpmsgfs_alloc_file(FAR struct rpmsgfs_server_s *priv,
+                              FAR struct file **filep)
 {
   FAR struct file **tmp;
   int ret;
@@ -184,14 +187,12 @@ static int rpmsgfs_attach_file(FAR struct rpmsgfs_server_s *priv,
         {
           if (priv->files[i][j].f_inode == NULL)
             {
-              memcpy(&priv->files[i][j], filep, sizeof(*filep));
-              ret = i * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK + j;
-              goto out;
+              goto found;
             }
         }
     }
 
-  tmp = kmm_realloc(priv->files, sizeof(FAR struct file *) * (i + 1));
+  tmp = fs_heap_realloc(priv->files, sizeof(FAR struct file *) * (i + 1));
   DEBUGASSERT(tmp);
   if (tmp == NULL)
     {
@@ -199,12 +200,12 @@ static int rpmsgfs_attach_file(FAR struct rpmsgfs_server_s *priv,
       goto out;
     }
 
-  tmp[i] = kmm_zalloc(sizeof(struct file) *
+  tmp[i] = fs_heap_zalloc(sizeof(struct file) *
                       CONFIG_NFILE_DESCRIPTORS_PER_BLOCK);
   DEBUGASSERT(tmp[i]);
   if (tmp[i] == NULL)
     {
-      kmm_free(tmp);
+      fs_heap_free(tmp);
       ret = -ENFILE;
       goto out;
     }
@@ -212,32 +213,16 @@ static int rpmsgfs_attach_file(FAR struct rpmsgfs_server_s *priv,
   priv->files = tmp;
   priv->file_rows++;
 
-  memcpy(&priv->files[i][0], filep, sizeof(*filep));
-  ret = i * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK;
+  j = 0;
+
+found:
+  priv->files[i][j].f_inode = (FAR struct inode *)-1;
+  *filep = &priv->files[i][j];
+  ret = i * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK + j;
 
 out:
   nxmutex_unlock(&priv->lock);
   return ret;
-}
-
-static int rpmsgfs_detach_file(FAR struct rpmsgfs_server_s *priv,
-                               int fd, FAR struct file *filep)
-{
-  struct file *tfilep;
-
-  if (fd < 0 || fd >= priv->file_rows * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK)
-    {
-      return -EBADF;
-    }
-
-  nxmutex_lock(&priv->lock);
-  tfilep = &priv->files[fd / CONFIG_NFILE_DESCRIPTORS_PER_BLOCK]
-                       [fd % CONFIG_NFILE_DESCRIPTORS_PER_BLOCK];
-  memcpy(filep, tfilep, sizeof(*filep));
-  memset(tfilep, 0, sizeof(*tfilep));
-  nxmutex_unlock(&priv->lock);
-
-  return 0;
 }
 
 static FAR struct file *rpmsgfs_get_file(
@@ -276,7 +261,7 @@ static int rpmsgfs_attach_dir(FAR struct rpmsgfs_server_s *priv,
         }
     }
 
-  tmp = kmm_realloc(priv->dirs, sizeof(FAR void *) *
+  tmp = fs_heap_realloc(priv->dirs, sizeof(FAR void *) *
                     (priv->dir_nums + CONFIG_NFILE_DESCRIPTORS_PER_BLOCK));
   DEBUGASSERT(tmp);
   if (tmp == NULL)
@@ -333,20 +318,24 @@ static int rpmsgfs_open_handler(FAR struct rpmsg_endpoint *ept,
                                 uint32_t src, FAR void *priv)
 {
   FAR struct rpmsgfs_open_s *msg = data;
-  struct file file;
+  FAR struct file *filep;
   int ret;
+  int fd;
 
-  ret = file_open(&file, msg->pathname, msg->flags, msg->mode);
-  if (ret >= 0)
+  ret = fd = rpmsgfs_alloc_file(priv, &filep);
+  if (ret < 0)
     {
-      ret = rpmsgfs_attach_file(priv, &file);
-      if (ret < 0)
-        {
-          file_close(&file);
-        }
+      goto out;
     }
 
-  msg->header.result = ret;
+  ret = file_open(filep, msg->pathname, msg->flags, msg->mode);
+  if (ret < 0)
+    {
+      filep->f_inode = NULL;
+    }
+
+out:
+  msg->header.result = ret < 0 ? ret : fd;
   return rpmsg_send(ept, msg, sizeof(*msg));
 }
 
@@ -355,13 +344,13 @@ static int rpmsgfs_close_handler(FAR struct rpmsg_endpoint *ept,
                                  uint32_t src, FAR void *priv)
 {
   FAR struct rpmsgfs_close_s *msg = data;
-  struct file file;
-  int ret;
+  FAR struct file *filep;
+  int ret = -ENOENT;
 
-  ret = rpmsgfs_detach_file(priv, msg->fd, &file);
-  if (ret >= 0)
+  filep = rpmsgfs_get_file(priv, msg->fd);
+  if (filep)
     {
-      ret = file_close(&file);
+      ret = file_close(filep);
     }
 
   msg->header.result = ret;
@@ -403,7 +392,11 @@ static int rpmsgfs_read_handler(FAR struct rpmsg_endpoint *ept,
         }
 
       rsp->header.result = ret;
-      rpmsg_send_nocopy(ept, rsp, (ret < 0 ? 0 : ret) + sizeof(*rsp));
+      if (rpmsg_send_nocopy(ept, rsp, (ret < 0 ? 0 : ret) + sizeof(*rsp))
+          < 0)
+        {
+          rpmsg_release_tx_buffer(ept, rsp);
+        }
 
       if (ret <= 0)
         {
@@ -510,25 +503,23 @@ static int rpmsgfs_dup_handler(FAR struct rpmsg_endpoint *ept,
                                uint32_t src, FAR void *priv)
 {
   FAR struct rpmsgfs_dup_s *msg = data;
+  FAR struct file *newfilep = NULL;
   FAR struct file *filep;
-  struct file newfile;
-  int ret = -ENOENT;
+  int ret;
+  int fd;
 
   filep = rpmsgfs_get_file(priv, msg->fd);
-  if (filep != NULL)
+  ret = fd = rpmsgfs_alloc_file(priv, &newfilep);
+  if (filep != NULL && ret >= 0)
     {
-      ret = file_dup2(filep, &newfile);
-      if (ret >= 0)
+      ret = file_dup2(filep, newfilep);
+      if (ret < 0)
         {
-          ret = rpmsgfs_attach_file(priv, &newfile);
-          if (ret < 0)
-            {
-              file_close(&newfile);
-            }
+          file_close(newfilep);
         }
     }
 
-  msg->header.result = ret;
+  msg->header.result = ret < 0 ? ret : fd;
   return rpmsg_send(ept, msg, sizeof(*msg));
 }
 
@@ -626,8 +617,8 @@ static int rpmsgfs_readdir_handler(FAR struct rpmsg_endpoint *ept,
       entry = readdir(dir);
       if (entry)
         {
-          size = MIN(rpmsg_get_tx_buffer_size(ept->rdev),
-                     rpmsg_get_rx_buffer_size(ept->rdev));
+          size = MIN(rpmsg_get_tx_buffer_size(ept),
+                     rpmsg_get_rx_buffer_size(ept));
           size = MIN(size - len, strlen(entry->d_name) + 1);
           msg->type = entry->d_type;
           strlcpy(msg->name, entry->d_name, size);
@@ -898,33 +889,7 @@ static bool rpmsgfs_ns_match(FAR struct rpmsg_device *rdev,
   return !strncmp(name, RPMSGFS_NAME_PREFIX, strlen(RPMSGFS_NAME_PREFIX));
 }
 
-static void rpmsgfs_ns_bind(FAR struct rpmsg_device *rdev,
-                            FAR void *priv_, FAR const char *name,
-                            uint32_t dest)
-{
-  FAR struct rpmsgfs_server_s *priv;
-  int ret;
-
-  priv = kmm_zalloc(sizeof(*priv));
-  if (!priv)
-    {
-      return;
-    }
-
-  priv->ept.priv = priv;
-  nxmutex_init(&priv->lock);
-
-  ret = rpmsg_create_ept(&priv->ept, rdev, name,
-                         RPMSG_ADDR_ANY, dest,
-                         rpmsgfs_ept_cb, rpmsgfs_ns_unbind);
-  if (ret)
-    {
-      nxmutex_destroy(&priv->lock);
-      kmm_free(priv);
-    }
-}
-
-static void rpmsgfs_ns_unbind(FAR struct rpmsg_endpoint *ept)
+static void rpmsgfs_ept_release(FAR struct rpmsg_endpoint *ept)
 {
   FAR struct rpmsgfs_server_s *priv = ept->priv;
   int i;
@@ -940,7 +905,7 @@ static void rpmsgfs_ns_unbind(FAR struct rpmsg_endpoint *ept)
             }
         }
 
-      kmm_free(priv->files[i]);
+      fs_heap_free(priv->files[i]);
     }
 
   for (i = 0; i < priv->dir_nums; i++)
@@ -951,12 +916,38 @@ static void rpmsgfs_ns_unbind(FAR struct rpmsg_endpoint *ept)
         }
     }
 
-  rpmsg_destroy_ept(&priv->ept);
   nxmutex_destroy(&priv->lock);
 
-  kmm_free(priv->files);
-  kmm_free(priv->dirs);
-  kmm_free(priv);
+  fs_heap_free(priv->files);
+  fs_heap_free(priv->dirs);
+  fs_heap_free(priv);
+}
+
+static void rpmsgfs_ns_bind(FAR struct rpmsg_device *rdev,
+                            FAR void *priv_, FAR const char *name,
+                            uint32_t dest)
+{
+  FAR struct rpmsgfs_server_s *priv;
+  int ret;
+
+  priv = fs_heap_zalloc(sizeof(*priv));
+  if (!priv)
+    {
+      return;
+    }
+
+  priv->ept.priv = priv;
+  priv->ept.release_cb = rpmsgfs_ept_release;
+  nxmutex_init(&priv->lock);
+
+  ret = rpmsg_create_ept(&priv->ept, rdev, name,
+                         RPMSG_ADDR_ANY, dest,
+                         rpmsgfs_ept_cb, rpmsg_destroy_ept);
+  if (ret)
+    {
+      nxmutex_destroy(&priv->lock);
+      fs_heap_free(priv);
+    }
 }
 
 static int rpmsgfs_ept_cb(FAR struct rpmsg_endpoint *ept,
@@ -965,13 +956,21 @@ static int rpmsgfs_ept_cb(FAR struct rpmsg_endpoint *ept,
 {
   struct rpmsgfs_header_s *header = data;
   uint32_t command = header->command;
+  int ret;
 
-  if (command < nitems(g_rpmsgfs_handler))
+  if (command >= nitems(g_rpmsgfs_handler))
     {
-      return g_rpmsgfs_handler[command](ept, data, len, src, priv);
+      return -EINVAL;
     }
 
-  return -EINVAL;
+  ret = g_rpmsgfs_handler[command](ept, data, len, src, priv);
+  if (ret < 0)
+    {
+      ferr("ERROR: handle failed, ept=%p cmd=%" PRIu32 " ret=%d\n",
+           ept, command, ret);
+    }
+
+  return ret;
 }
 
 int rpmsgfs_server_init(void)

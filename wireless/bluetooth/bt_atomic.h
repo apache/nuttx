@@ -1,6 +1,7 @@
 /****************************************************************************
  * wireless/bluetooth/bt_atomic.h
- * Linux like atomic operations
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -36,26 +37,20 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define bt_atomic_set(ptr, value)     (*(ptr) = (value))
-#define bt_atomic_get(ptr)            (*(ptr))
-#define bt_atomic_testbit(ptr, bitno) ((*(ptr) & (1 << (bitno))) != 0)
+#define bt_atomic_set(ptr, value)        atomic_set(ptr, value);
+#define bt_atomic_get(ptr)               atomic_read(ptr)
+#define bt_atomic_testbit(ptr, bitno)    ((atomic_read(ptr) & (1 << (bitno))) != 0)
+#define bt_atomic_incr(ptr)              atomic_fetch_add(ptr, 1)
+#define bt_atomic_decr(ptr)              atomic_fetch_sub(ptr, 1)
+#define bt_atomic_setbit(ptr, bitno)     atomic_fetch_or(ptr, (1 << (bitno)))
+#define bt_atomic_clrbit(ptr, bitno)     atomic_fetch_and(ptr, ~(1 << (bitno)))
+#define bt_atomic_testsetbit(ptr, bitno) ((atomic_fetch_or(ptr, (1 << (bitno))) & (1 << (bitno))) != 0)
+#define bt_atomic_testclrbit(ptr, bitno) ((atomic_fetch_and(ptr, ~(1 << (bitno))) & (1 << (bitno))) != 0)
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
-typedef uint8_t bt_atomic_t;
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-bt_atomic_t bt_atomic_incr(FAR bt_atomic_t *ptr);
-bt_atomic_t bt_atomic_decr(FAR bt_atomic_t *ptr);
-bt_atomic_t bt_atomic_setbit(FAR bt_atomic_t *ptr, bt_atomic_t bitno);
-bt_atomic_t bt_atomic_clrbit(FAR bt_atomic_t *ptr, bt_atomic_t bitno);
-
-bool bt_atomic_testsetbit(FAR bt_atomic_t *ptr, bt_atomic_t bitno);
-bool bt_atomic_testclrbit(FAR bt_atomic_t *ptr, bt_atomic_t bitno);
+typedef atomic_t bt_atomic_t;
 
 #endif /* __WIRELESS_BLUETOOTH_BT_ATOMIC_H */

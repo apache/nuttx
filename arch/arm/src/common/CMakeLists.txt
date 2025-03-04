@@ -1,6 +1,8 @@
 # ##############################################################################
 # arch/arm/src/common/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -31,16 +33,14 @@ set(SRCS
     arm_getintstack.c
     arm_initialize.c
     arm_lowputs.c
-    arm_modifyreg8.c
-    arm_modifyreg16.c
-    arm_modifyreg32.c
+    arm_modifyreg.c
     arm_nputs.c
     arm_releasestack.c
     arm_registerdump.c
     arm_stackframe.c
-    arm_switchcontext.c
     arm_usestack.c
     arm_fork.c
+    arm_poweroff.c
     ${ARCH_TOOLCHAIN_PATH}/fork.S)
 
 if(NOT CONFIG_ALARM_ARCH AND NOT CONFIG_TIMER_ARCH)
@@ -90,6 +90,10 @@ endif()
 
 if(CONFIG_ARCH_HAVE_FETCHADD)
   list(APPEND SRCS ${ARCH_TOOLCHAIN_PATH}/arm_fetchadd.S)
+endif()
+
+if(CONFIG_ARCH_TOOLCHAIN_GHS)
+  list(APPEND SRCS ghs/lib_dummy.c)
 endif()
 
 target_sources(arch PRIVATE ${SRCS})

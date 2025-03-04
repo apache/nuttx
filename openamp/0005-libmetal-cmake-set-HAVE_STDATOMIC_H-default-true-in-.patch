@@ -1,0 +1,40 @@
+From 2b9bd97db33d95c4d6d40e6f0ec1fa388fac3ab0 Mon Sep 17 00:00:00 2001
+From: xuxin19 <xuxin19@xiaomi.com>
+Date: Fri, 6 Sep 2024 10:56:49 +0800
+Subject: [PATCH 5/5] libmetal(cmake):set HAVE_STDATOMIC_H default true in
+ NuttX platform
+
+Signed-off-by: xuxin19 <xuxin19@xiaomi.com>
+---
+ cmake/depends.cmake | 10 ++++++++--
+ 1 file changed, 8 insertions(+), 2 deletions(-)
+
+diff --git a/cmake/depends.cmake libmetal/cmake/depends.cmake
+index 60b9739..15683f8 100644
+--- a/cmake/depends.cmake
++++ libmetal/cmake/depends.cmake
+@@ -24,7 +24,13 @@ if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
+   find_package(LibRt REQUIRED)
+   collect (PROJECT_LIB_DEPS "${LIBRT_LIBRARIES}")
+ 
+-else ("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
++elseif ("${CMAKE_SYSTEM_NAME}" STREQUAL "NuttX")
++
++  # there is no need to use cmake include detection
++  # under NuttX platform
++  set(HAVE_STDATOMIC_H true)
++
++else ()
+ 
+   # TODO: fix for find_path() to detect stdatomic.h
+   # find_path (HAVE_STDATOMIC_H stdatomic.h)
+@@ -33,5 +39,5 @@ else ("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
+   check_include_files (stdatomic.h HAVE_STDATOMIC_H)
+   set (CMAKE_REQUIRED_FLAGS ${_saved_cmake_required_flags})
+ 
+-endif ("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
++endif ()
+ 
+-- 
+2.34.1
+

@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/audio/audio_null.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -55,6 +57,7 @@
 struct null_dev_s
 {
   struct audio_lowerhalf_s dev; /* Audio lower half (this device) */
+  bool          playback;       /* True: playback, False: recording */
   uint32_t      scaler;         /* Data bytes to sec scaler (bytes per sec) */
   struct file   mq;             /* Message queue for receiving messages */
   char          mqname[16];     /* Our message queue name */
@@ -209,6 +212,8 @@ static int null_sleep(FAR struct audio_lowerhalf_s *dev,
 static int null_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
                         FAR struct audio_caps_s *caps)
 {
+  FAR struct null_dev_s *priv = (struct null_dev_s *)dev;
+
   audinfo("type=%d\n", type);
 
   /* Validate the structure */
@@ -241,9 +246,9 @@ static int null_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
 
               /* The types of audio units we implement */
 
-              caps->ac_controls.b[0] = AUDIO_TYPE_OUTPUT |
-                                       AUDIO_TYPE_FEATURE |
-                                       AUDIO_TYPE_PROCESSING;
+              caps->ac_controls.b[0] = priv->playback ?
+                                       AUDIO_TYPE_OUTPUT : AUDIO_TYPE_INPUT;
+              caps->ac_format.hw = 1 << (AUDIO_FMT_PCM - 1);
 
               break;
 
@@ -264,6 +269,7 @@ static int null_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
       /* Provide capabilities of our OUTPUT unit */
 
       case AUDIO_TYPE_OUTPUT:
+      case AUDIO_TYPE_INPUT:
 
         caps->ac_channels = 2;
 
@@ -273,13 +279,13 @@ static int null_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
 
               /* Report the Sample rates we support */
 
-             caps->ac_controls.hw[0] = AUDIO_SAMP_RATE_8K |
-                                       AUDIO_SAMP_RATE_11K |
-                                       AUDIO_SAMP_RATE_16K |
-                                       AUDIO_SAMP_RATE_22K |
-                                       AUDIO_SAMP_RATE_32K |
-                                       AUDIO_SAMP_RATE_44K |
-                                       AUDIO_SAMP_RATE_48K;
+              caps->ac_controls.hw[0] = AUDIO_SAMP_RATE_8K |
+                                        AUDIO_SAMP_RATE_11K |
+                                        AUDIO_SAMP_RATE_16K |
+                                        AUDIO_SAMP_RATE_22K |
+                                        AUDIO_SAMP_RATE_32K |
+                                        AUDIO_SAMP_RATE_44K |
+                                        AUDIO_SAMP_RATE_48K;
               break;
 
             case AUDIO_FMT_MP3:
@@ -391,6 +397,32 @@ static int null_configure(FAR struct audio_lowerhalf_s *dev,
   FAR struct null_dev_s *priv = (FAR struct null_dev_s *)dev;
   audinfo("ac_type: %d\n", caps->ac_type);
 
+  if (priv->mqname[0] == '\0')
+    {
+      struct mq_attr attr;
+      int ret;
+
+      /* Create a message queue for the worker thread */
+
+      snprintf(priv->mqname, sizeof(priv->mqname), "/tmp/%" PRIXPTR,
+               (uintptr_t)priv);
+
+      attr.mq_maxmsg  = 16;
+      attr.mq_msgsize = sizeof(struct audio_msg_s);
+      attr.mq_curmsgs = 0;
+      attr.mq_flags   = 0;
+
+      ret = file_mq_open(&priv->mq, priv->mqname,
+                         O_RDWR | O_CREAT, 0644, &attr);
+      if (ret < 0)
+        {
+          /* Error creating message queue! */
+
+          auderr("ERROR: Couldn't allocate message queue\n");
+          return ret;
+        }
+    }
+
   /* Process the configure operation */
 
   switch (caps->ac_type)
@@ -425,10 +457,10 @@ static int null_configure(FAR struct audio_lowerhalf_s *dev,
       break;
 
     case AUDIO_TYPE_OUTPUT:
+    case AUDIO_TYPE_INPUT:
       priv->scaler = caps->ac_channels
                    * caps->ac_controls.hw[0]
                    * caps->ac_controls.b[2] / 8;
-      audinfo("  AUDIO_TYPE_OUTPUT:\n");
       audinfo("    Number of channels: %u\n", caps->ac_channels);
       audinfo("    Sample rate:        %u\n", caps->ac_controls.hw[0]);
       audinfo("    Sample width:       %u\n", caps->ac_controls.b[2]);
@@ -525,6 +557,7 @@ static void *null_workerthread(pthread_addr_t pvarg)
 
   file_mq_close(&priv->mq);
   file_mq_unlink(priv->mqname);
+  priv->mqname[0] = '\0';
   priv->terminate = false;
 
   /* Send an AUDIO_MSG_COMPLETE message to the client */
@@ -555,32 +588,11 @@ static int null_start(FAR struct audio_lowerhalf_s *dev)
 {
   FAR struct null_dev_s *priv = (FAR struct null_dev_s *)dev;
   struct sched_param sparam;
-  struct mq_attr attr;
   pthread_attr_t tattr;
   FAR void *value;
   int ret;
 
   audinfo("Entry\n");
-
-  /* Create a message queue for the worker thread */
-
-  snprintf(priv->mqname, sizeof(priv->mqname), "/tmp/%" PRIXPTR,
-           (uintptr_t)priv);
-
-  attr.mq_maxmsg  = 16;
-  attr.mq_msgsize = sizeof(struct audio_msg_s);
-  attr.mq_curmsgs = 0;
-  attr.mq_flags   = 0;
-
-  ret = file_mq_open(&priv->mq, priv->mqname,
-                     O_RDWR | O_CREAT, 0644, &attr);
-  if (ret < 0)
-    {
-      /* Error creating message queue! */
-
-      auderr("ERROR: Couldn't allocate message queue\n");
-      return ret;
-    }
 
   /* Join any old worker thread we had created to prevent a memory leak */
 
@@ -648,6 +660,12 @@ static int null_stop(FAR struct audio_lowerhalf_s *dev)
 
   pthread_join(priv->threadid, &value);
   priv->threadid = 0;
+
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+  dev->upper(dev->priv, AUDIO_CALLBACK_COMPLETE, NULL, OK, NULL);
+#else
+  dev->upper(dev->priv, AUDIO_CALLBACK_COMPLETE, NULL, OK);
+#endif
 
   audinfo("Return OK\n");
   return OK;
@@ -850,9 +868,8 @@ static int null_release(FAR struct audio_lowerhalf_s *dev)
  *   Initialize the null audio device.
  *
  * Input Parameters:
- *   i2c     - An I2C driver instance
- *   i2s     - An I2S driver instance
- *   lower   - Persistent board configuration data
+ *   playback - True: initialize for playback only
+ *              False: initialize for recording only
  *
  * Returned Value:
  *   A new lower half audio interface for the NULL audio device is returned
@@ -860,7 +877,7 @@ static int null_release(FAR struct audio_lowerhalf_s *dev)
  *
  ****************************************************************************/
 
-FAR struct audio_lowerhalf_s *audio_null_initialize(void)
+FAR struct audio_lowerhalf_s *audio_null_initialize(bool playback)
 {
   FAR struct null_dev_s *priv;
 
@@ -877,6 +894,8 @@ FAR struct audio_lowerhalf_s *audio_null_initialize(void)
       priv->dev.ops = &g_audioops;
       return &priv->dev;
     }
+
+  priv->playback = playback;
 
   auderr("ERROR: Failed to allocate null audio device\n");
   return NULL;

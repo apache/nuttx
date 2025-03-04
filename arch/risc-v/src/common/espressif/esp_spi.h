@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/common/espressif/esp_spi.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -42,13 +44,11 @@ extern "C"
 #define EXTERN extern
 #endif
 
-#ifdef CONFIG_ESPRESSIF_SPI
+#ifdef CONFIG_ESPRESSIF_SPI_PERIPH
 
 #include <nuttx/spi/spi.h>
 
-#ifdef CONFIG_ESPRESSIF_SPI2
-#  define ESPRESSIF_SPI2 2
-#endif
+#define ESPRESSIF_SPI2 2
 
 /****************************************************************************
  * Public Function Prototypes
@@ -159,7 +159,7 @@ struct spi_slave_ctrlr_s *esp_spislave_ctrlr_initialize(int port);
 
 int esp_spislave_ctrlr_uninitialize(struct spi_slave_ctrlr_s *ctrlr);
 
-#endif /* CONFIG_ESPRESSIF_SPI */
+#endif /* CONFIG_ESPRESSIF_SPI_PERIPH */
 
 #ifdef __cplusplus
 }

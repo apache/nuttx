@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/drivers/rpmsgdev.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -63,6 +65,7 @@ extern "C"
 
 #ifdef CONFIG_DEV_RPMSG_SERVER
 int rpmsgdev_server_init(void);
+int rpmsgdev_export(FAR const char *remotecpu, FAR const char *localpath);
 #endif
 
 /****************************************************************************

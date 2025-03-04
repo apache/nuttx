@@ -1,9 +1,10 @@
 /****************************************************************************
  * boards/arm/stm32/olimex-stm32-e407/src/stm32_dac.c
  *
- *   Copyright (C) 2019 Acutronics Robotics All rights reserved.
- *   Authors: Acutronics Robotics (Juan Flores) <juan@erlerobotics.com>
- *   Base on the work of: Juha Niskanen <juha.niskanen@haltian.com>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2019 Acutronics Robotics All rights reserved.
+ * SPDX-FileContributor: Juan Flores <juan@erlerobotics.com>
+ * SPDX-FileContributor: Juha Niskanen <juha.niskanen@haltian.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

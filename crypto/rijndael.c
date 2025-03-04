@@ -1,18 +1,10 @@
 /****************************************************************************
  * crypto/rijndael.c
- * $OpenBSD: rijndael.c,v 1.20 2014/11/17 12:27:47 mikeb Exp $
  *
- * rijndael-alg-fst.c
- *
- * @version 3.0 (December 2000)
- *
- * Optimised ANSI C code for the Rijndael cipher (now AES)
- *
- * @author Vincent Rijmen <vincent.rijmen@esat.kuleuven.ac.be>
- * @author Antoon Bosselaers <antoon.bosselaers@esat.kuleuven.ac.be>
- * @author Paulo Barreto <paulo.barreto@terra.com.br>
- *
- * This code is hereby placed in the public domain.
+ * SPDX-License-Identifier: NuttX-PublicDomain
+ * SPDX-FileContributor: Vincent Rijmen <vincent.rijmen@esat.kuleuven.ac.be>
+ * SPDX-FileContributor: Antoon Bosselaers <antoon.bosselaers@esat.kuleuven.ac.be>
+ * SPDX-FileContributor: Paulo Barreto <paulo.barreto@terra.com.br>
  *
  * THIS SOFTWARE IS PROVIDED BY THE AUTHORS ''AS IS'' AND ANY EXPRESS
  * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED

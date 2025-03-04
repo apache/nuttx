@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/vfs/fs_pread.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -138,11 +140,10 @@ ssize_t pread(int fd, FAR void *buf, size_t nbytes, off_t offset)
       goto errout;
     }
 
-  DEBUGASSERT(filep != NULL);
-
   /* Let file_pread do the real work */
 
   ret = file_pread(filep, buf, nbytes, offset);
+  fs_putfilep(filep);
   if (ret < 0)
     {
       goto errout;

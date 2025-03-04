@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/net/mii.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -393,6 +395,13 @@
 
 #define DP83840_PHYADDR_DUPLEX       (1 << 7)
 #define DP83840_PHYADDR_SPEED        (1 << 6)
+
+/* Davicom DM9161  **********************************************************/
+
+/* DM9161  MII ID1/2 register bits */
+
+#define MII_PHYID1_DM9161            0x0181
+#define MII_PHYID2_DM9161            0xB800
 
 /* National Semiconductor DP83848C ******************************************/
 

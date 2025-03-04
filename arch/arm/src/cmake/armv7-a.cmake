@@ -1,6 +1,8 @@
 # ##############################################################################
 # arch/arm/src/cmake/armv7-a.cmake
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -22,24 +24,43 @@ set(PLATFORM_FLAGS)
 
 if(CONFIG_ARCH_CORTEXA5)
   list(APPEND PLATFORM_FLAGS -mcpu=cortex-a5)
+  set(LLVM_CPUTYPE cortex-a5)
 elseif(CONFIG_ARCH_CORTEXA7)
   list(APPEND PLATFORM_FLAGS -mcpu=cortex-a7)
+  set(LLVM_CPUTYPE cortex-a7)
 elseif(CONFIG_ARCH_CORTEXA8)
   list(APPEND PLATFORM_FLAGS -mcpu=cortex-a8)
+  set(LLVM_CPUTYPE cortex-a8)
 elseif(CONFIG_ARCH_CORTEXA9)
   list(APPEND PLATFORM_FLAGS -mcpu=cortex-a9)
+  set(LLVM_CPUTYPE cortex-a9)
+endif()
+
+if(CONFIG_ARM_THUMB)
+  set(LLVM_ARCHTYPE thumbv7a)
+else()
+  set(LLVM_ARCHTYPE armv7-a)
+endif()
+
+if(CONFIG_ARCH_FPU)
+  set(LLVM_ABITYPE eabihf)
+else()
+  set(LLVM_ABITYPE eabi)
 endif()
 
 if(NOT CONFIG_ARM_DPFPU32)
   set(ARCHFPUD16 -d16)
 endif()
 
-# Cortex-A5  | -mfpu=vfpv4-fp16 | -mfpu=vfpv4-d16-fp16 | -mfpu=neon-fp16
-# Cortex-A7  | -mfpu=vfpv4      | -mfpu=vfpv4-d16      | -mfpu=neon-vfpv4
-# Cortex-A8  | -mfpu=vfpv3      |                      | -mfpu=neon (alias for
-# neon-vfpv3) Cortex-A9  | -mfpu=vfpv3-fp16 | -mfpu=vfpv3-d16-fp16 |
-# -mfpu=neon-fp16 Cortex-A15 | -mfpu=vfpv4      |                      |
-# -mfpu=neon-vfpv4
+# ~~~
+# | Cortex | FPU Option 1       | FPU Option 2           | FPU Option 3          |
+# |--------|--------------------|------------------------|-----------------------|
+# | A5     | -mfpu=vfpv4-fp16   | -mfpu=vfpv4-d16-fp16   | -mfpu=neon-fp16       |
+# | A7     | -mfpu=vfpv4        | -mfpu=vfpv4-d16        | -mfpu=neon-vfpv4      |
+# | A8     | -mfpu=vfpv3        |                        | -mfpu=neon (alias for neon-vfpv3) |
+# | A9     | -mfpu=vfpv3-fp16   | -mfpu=vfpv3-d16-fp16   | -mfpu=neon-fp16       |
+# | A15    | -mfpu=vfpv4        |                        | -mfpu=neon-vfpv4      |
+# ~~~
 
 if(CONFIG_ARCH_FPU)
   if(CONFIG_ARM_FPU_ABI_SOFT)

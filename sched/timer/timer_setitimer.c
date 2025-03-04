@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/timer/timer_setitimer.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -87,10 +89,9 @@
 int setitimer(int which, FAR const struct itimerval *value,
               FAR struct itimerval *ovalue)
 {
-  FAR struct tcb_s *rtcb = this_task();
+  FAR struct tcb_s *rtcb;
   struct itimerspec spec;
   struct itimerspec ospec;
-  irqstate_t flags;
   int ret = OK;
 
   if (which != ITIMER_REAL || !value)
@@ -99,20 +100,20 @@ int setitimer(int which, FAR const struct itimerval *value,
       return ERROR;
     }
 
+  rtcb = this_task();
+
+  nxrmutex_lock(&rtcb->group->tg_mutex);
+
   if (!rtcb->group->itimer)
     {
-      flags = enter_critical_section();
-      if (!rtcb->group->itimer)
-        {
-          ret = timer_create(CLOCK_REALTIME, NULL, &rtcb->group->itimer);
-        }
+      ret = timer_create(CLOCK_REALTIME, NULL, &rtcb->group->itimer);
+    }
 
-      leave_critical_section(flags);
+  nxrmutex_unlock(&rtcb->group->tg_mutex);
 
-      if (ret != OK)
-        {
-          return ret;
-        }
+  if (ret != OK)
+    {
+      return ret;
     }
 
   TIMEVAL_TO_TIMESPEC(&value->it_value, &spec.it_value);

@@ -1,6 +1,8 @@
 ############################################################################
 # arch/arm64/src/goldfish/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -21,7 +23,11 @@
 include common/Make.defs
 
 # qemu-specific C source files
-CHIP_CSRCS = goldfish_boot.c goldfish_serial.c
+CHIP_CSRCS = goldfish_boot.c goldfish_serial.c goldfish_timer.c
+
+ifeq ($(CONFIG_RTC_PL031),y)
+  CHIP_CSRCS += goldfish_rtc.c
+endif
 
 ifeq ($(CONFIG_ARCH_EARLY_PRINT),y)
 CHIP_ASRCS = goldfish_lowputc.S

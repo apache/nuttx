@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/misc/optee.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -27,6 +29,8 @@
 #include <fcntl.h>
 #include <netpacket/rpmsg.h>
 #include <nuttx/drivers/optee.h>
+#include <nuttx/fs/fs.h>
+#include <nuttx/net/net.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
 #include <sys/mman.h>
@@ -291,24 +295,21 @@ static int optee_from_msg_param(FAR struct tee_ioctl_param *params,
   return 0;
 }
 
-static ssize_t optee_recv(FAR struct socket *psock, FAR void *msg,
-                          size_t size)
+static int optee_recv(FAR struct socket *psock, FAR void *msg, size_t size)
 {
-  size_t remain = size;
-
-  while (remain)
+  while (size > 0)
     {
-      ssize_t n = psock_recv(psock, msg, remain, 0);
+      ssize_t n = psock_recv(psock, msg, size, 0);
       if (n <= 0)
         {
-          return remain == size ? n : size - remain;
+          return n < 0 ? n : -EIO;
         }
 
-      remain -= n;
+      size -= n;
       msg = (FAR char *)msg + n;
     }
 
-  return size;
+  return 0;
 }
 
 static int optee_send_recv(FAR struct socket *psocket,
@@ -569,7 +570,7 @@ static int optee_ioctl_cancel(FAR struct socket *psocket,
 static int
 optee_ioctl_shm_alloc(FAR struct tee_ioctl_shm_alloc_data *data)
 {
-  int memfd = memfd_create(OPTEE_SERVER_PATH, O_CREAT);
+  int memfd = memfd_create(OPTEE_SERVER_PATH, O_CREAT | O_CLOEXEC);
 
   if (memfd < 0)
     {

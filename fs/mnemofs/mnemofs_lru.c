@@ -1,6 +1,7 @@
 /****************************************************************************
  * fs/mnemofs/mnemofs_lru.c
- * LRU cache of mnemofs.
+ *
+ * SPDX-License-Identifier: Apache-2.0 or BSD-3-Clause
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -74,6 +75,7 @@
 #include <sys/param.h>
 
 #include "mnemofs.h"
+#include "fs_heap.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -265,8 +267,8 @@ static bool lru_isnodefull(FAR struct mfs_sb_s * const sb,
 
 static void lru_free_delta(FAR struct mfs_delta_s *delta)
 {
-  kmm_free(delta->upd);
-  kmm_free(delta);
+  fs_heap_free(delta->upd);
+  fs_heap_free(delta);
 }
 
 /****************************************************************************
@@ -391,7 +393,7 @@ static int lru_wrtooff(FAR struct mfs_sb_s * const sb, const mfs_t data_off,
 
   if (node == NULL)
     {
-      node = kmm_zalloc(sizeof(*node));
+      node = fs_heap_zalloc(sizeof(*node));
       if (predict_false(node == NULL))
         {
           found = false;
@@ -399,7 +401,7 @@ static int lru_wrtooff(FAR struct mfs_sb_s * const sb, const mfs_t data_off,
           goto errout;
         }
 
-      node->path = kmm_zalloc(depth * sizeof(struct mfs_path_s));
+      node->path = fs_heap_zalloc(depth * sizeof(struct mfs_path_s));
       if (predict_false(node->path == NULL))
         {
           found = false;
@@ -455,7 +457,7 @@ static int lru_wrtooff(FAR struct mfs_sb_s * const sb, const mfs_t data_off,
   /* Add delta to node. */
 
   finfo("Adding delta to the node.");
-  delta = kmm_zalloc(sizeof(*delta));
+  delta = fs_heap_zalloc(sizeof(*delta));
   if (predict_false(delta == NULL))
     {
       ret = -ENOMEM;
@@ -466,7 +468,7 @@ static int lru_wrtooff(FAR struct mfs_sb_s * const sb, const mfs_t data_off,
 
   if (op == MFS_LRU_UPD)
     {
-      delta->upd = kmm_zalloc(bytes);
+      delta->upd = fs_heap_zalloc(bytes);
       if (predict_false(delta->upd == NULL))
         {
           ret = -ENOMEM;
@@ -511,13 +513,13 @@ static int lru_wrtooff(FAR struct mfs_sb_s * const sb, const mfs_t data_off,
 
 errout_with_delta:
   list_delete(&delta->list);
-  kmm_free(delta);
+  fs_heap_free(delta);
 
 errout_with_node:
   if (!found && node != NULL)
     {
       list_delete(&node->list);
-      kmm_free(node);
+      fs_heap_free(node);
     }
 
 errout:
@@ -622,7 +624,7 @@ errout:
 static void lru_node_free(FAR struct mfs_node_s *node)
 {
   mfs_free_patharr(node->path);
-  kmm_free(node);
+  fs_heap_free(node);
 }
 
 static bool lru_sort_cmp(FAR struct mfs_node_s * const node,
@@ -761,7 +763,7 @@ int mfs_lru_flush(FAR struct mfs_sb_s * const sb)
             {
               finfo("Adding parent to LRU");
 
-              tmp = kmm_zalloc(sizeof(struct mfs_node_s));
+              tmp = fs_heap_zalloc(sizeof(struct mfs_node_s));
               if (predict_false(tmp == NULL))
                 {
                   ret = -ENOMEM;
@@ -774,7 +776,7 @@ int mfs_lru_flush(FAR struct mfs_sb_s * const sb)
               /* TODO: Time fields. in tmp. */
 
               tmp->depth = node->depth - 1;
-              tmp->path  = kmm_zalloc((node->depth - 1)
+              tmp->path  = fs_heap_zalloc((node->depth - 1)
                                       * sizeof(struct mfs_path_s));
               if (predict_false(tmp->path == NULL))
                 {
@@ -948,9 +950,9 @@ errout:
   return ret;
 }
 
-int mfs_lru_updatedinfo(FAR const struct mfs_sb_s * const sb,
-                        FAR struct mfs_path_s * const path,
-                        const mfs_t depth)
+int mfs_lru_getupdatedinfo(FAR const struct mfs_sb_s * const sb,
+                           FAR struct mfs_path_s * const path,
+                           const mfs_t depth)
 {
   int                    ret  = OK;
   bool                   found;

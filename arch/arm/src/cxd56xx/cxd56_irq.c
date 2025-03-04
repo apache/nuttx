@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/cxd56xx/cxd56_irq.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -99,6 +101,12 @@ const uint32_t g_cpu_intstack_top[CONFIG_SMP_NCPUS] =
 #endif /* defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7 */
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static spinlock_t g_cxd56_lock = SP_UNLOCKED;
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -115,7 +123,7 @@ static void cxd56_dumpnvic(const char *msg, int irq)
 {
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_cxd56_lock);
   irqinfo("NVIC (%s, irq=%d):\n", msg, irq);
   irqinfo("  INTCTRL:    %08x VECTAB: %08x\n", getreg32(NVIC_INTCTRL),
           getreg32(NVIC_VECTAB));
@@ -144,7 +152,7 @@ static void cxd56_dumpnvic(const char *msg, int irq)
           getreg32(NVIC_IRQ48_51_PRIORITY),
           getreg32(NVIC_IRQ52_55_PRIORITY),
           getreg32(NVIC_IRQ56_59_PRIORITY));
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_cxd56_lock, flags);
 }
 #else
 #  define cxd56_dumpnvic(msg, irq)
@@ -195,7 +203,6 @@ static int cxd56_reserved(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ARMV7M_USEBASEPRI
 static inline void cxd56_prioritize_syscall(int priority)
 {
   uint32_t regval;
@@ -207,7 +214,6 @@ static inline void cxd56_prioritize_syscall(int priority)
   regval |= (priority << NVIC_SYSH_PRIORITY_PR11_SHIFT);
   putreg32(regval, NVIC_SYSH8_11_PRIORITY);
 }
-#endif
 
 static int excinfo(int irq, uintptr_t *regaddr, uint32_t *bit)
 {
@@ -331,9 +337,7 @@ void up_irqinitialize(void)
 
 #endif
 
-#ifdef CONFIG_ARMV7M_USEBASEPRI
   cxd56_prioritize_syscall(NVIC_SYSH_SVCALL_PRIORITY);
-#endif
 
   /* If the MPU is enabled, then attach and enable the Memory Management
    * Fault handler.
@@ -360,21 +364,6 @@ void up_irqinitialize(void)
 #endif
 
   cxd56_dumpnvic("initial", CXD56_IRQ_NIRQS);
-
-  /* If a debugger is connected, try to prevent it from catching hardfaults.
-   * If CONFIG_ARMV7M_USEBASEPRI, no hardfaults are expected in normal
-   * operation.
-   */
-
-#if defined(CONFIG_DEBUG_FEATURES) && !defined(CONFIG_ARMV7M_USEBASEPRI)
-    {
-      uint32_t regval;
-
-      regval  = getreg32(NVIC_DEMCR);
-      regval &= ~NVIC_DEMCR_VCHARDERR;
-      putreg32(regval, NVIC_DEMCR);
-    }
-#endif
 
   /* And finally, enable interrupts */
 
@@ -422,14 +411,14 @@ void up_disable_irq(int irq)
       g_cpu_for_irq[irq] = -1;
 #endif
 
-      irqstate_t flags = spin_lock_irqsave(NULL);
+      irqstate_t flags = spin_lock_irqsave(&g_cxd56_lock);
       irq -= CXD56_IRQ_EXTINT;
       bit  = 1 << (irq & 0x1f);
 
       regval  = getreg32(INTC_EN(irq));
       regval &= ~bit;
       putreg32(regval, INTC_EN(irq));
-      spin_unlock_irqrestore(NULL, flags);
+      spin_unlock_irqrestore(&g_cxd56_lock, flags);
       putreg32(bit, NVIC_IRQ_CLEAR(irq));
     }
   else
@@ -470,21 +459,21 @@ void up_enable_irq(int irq)
 
       /* EXTINT needs to be handled on CPU0 to avoid deadlock */
 
-      if (irq > CXD56_IRQ_EXTINT && irq != CXD56_IRQ_SW_INT && 0 != cpu)
+      if (irq > CXD56_IRQ_EXTINT && irq != CXD56_IRQ_SMP_CALL && 0 != cpu)
         {
           up_send_irqreq(0, irq, 0);
           return;
         }
 #endif
 
-      irqstate_t flags = spin_lock_irqsave(NULL);
+      irqstate_t flags = spin_lock_irqsave(&g_cxd56_lock);
       irq -= CXD56_IRQ_EXTINT;
       bit  = 1 << (irq & 0x1f);
 
       regval  = getreg32(INTC_EN(irq));
       regval |= bit;
       putreg32(regval, INTC_EN(irq));
-      spin_unlock_irqrestore(NULL, flags);
+      spin_unlock_irqrestore(&g_cxd56_lock, flags);
       putreg32(bit, NVIC_IRQ_ENABLE(irq));
     }
   else

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/armv7-a/mpcore.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -73,5 +75,6 @@
 #define MPCORE_GTM_VBASE   (CHIP_MPCORE_VBASE+MPCORE_GTM_OFFSET)
 #define MPCORE_PTM_VBASE   (CHIP_MPCORE_VBASE+MPCORE_PTM_OFFSET)
 #define MPCORE_ICD_VBASE   (CHIP_MPCORE_VBASE+MPCORE_ICD_OFFSET)
+#define MPCORE_V2M_VBASE   (CHIP_MPCORE_VBASE+MPCORE_V2M_OFFSET)
 
 #endif /* __ARCH_ARM_SRC_ARMV7_A_MPCORE_H */

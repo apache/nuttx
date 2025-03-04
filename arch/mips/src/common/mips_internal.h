@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/mips/src/common/mips_internal.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -96,8 +98,8 @@
  * only a referenced is passed to get the state from the TCB.
  */
 
-#define mips_savestate(regs)    mips_copystate(regs, (uint32_t*)CURRENT_REGS)
-#define mips_restorestate(regs) (CURRENT_REGS = regs)
+#define mips_savestate(regs)    mips_copystate(regs, up_current_regs())
+#define mips_restorestate(regs) up_set_current_regs(regs)
 
 /****************************************************************************
  * Public Types

@@ -1,6 +1,8 @@
 /****************************************************************************
  * mm/mm_heap/mm_free.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -30,9 +32,10 @@
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
 #include <nuttx/mm/mm.h>
+#include <nuttx/mm/kasan.h>
+#include <nuttx/sched_note.h>
 
 #include "mm_heap/mm.h"
-#include "kasan/kasan.h"
 
 /****************************************************************************
  * Private Functions
@@ -46,7 +49,7 @@ static void add_delaylist(FAR struct mm_heap_s *heap, FAR void *mem)
 
   /* Delay the deallocation until a more appropriate time. */
 
-  flags = up_irq_save();
+  flags = mm_lock_irq(heap);
 
 #  ifdef CONFIG_DEBUG_ASSERTIONS
   FAR struct mm_freenode_s *node;
@@ -62,7 +65,7 @@ static void add_delaylist(FAR struct mm_heap_s *heap, FAR void *mem)
   heap->mm_delaycount[this_cpu()]++;
 #endif
 
-  up_irq_restore(flags);
+  mm_unlock_irq(heap, flags);
 #endif
 }
 
@@ -97,11 +100,23 @@ void mm_delayfree(FAR struct mm_heap_s *heap, FAR void *mem, bool delay)
       return;
     }
 
+  nodesize = mm_malloc_size(heap, mem);
 #ifdef CONFIG_MM_FILL_ALLOCATIONS
-  memset(mem, MM_FREE_MAGIC, mm_malloc_size(heap, mem));
+#if CONFIG_MM_FREE_DELAYCOUNT_MAX > 0
+  /* If delay free is enabled, a memory node will be freed twice.
+   * The first time is to add the node to the delay list, and the second
+   * time is to actually free the node. Therefore, we only colorize the
+   * memory node the first time, when `delay` is set to true.
+   */
+
+  if (delay)
+#endif
+    {
+      memset(mem, MM_FREE_MAGIC, nodesize);
+    }
 #endif
 
-  kasan_poison(mem, mm_malloc_size(heap, mem));
+  kasan_poison(mem, nodesize);
 
   if (delay)
     {
@@ -112,7 +127,8 @@ void mm_delayfree(FAR struct mm_heap_s *heap, FAR void *mem, bool delay)
 
   /* Map the memory chunk into a free node */
 
-  node = (FAR struct mm_freenode_s *)((FAR char *)mem - MM_SIZEOF_ALLOCNODE);
+  node = (FAR struct mm_freenode_s *)
+         ((FAR char *)kasan_reset_tag(mem) - MM_SIZEOF_ALLOCNODE);
   nodesize = MM_SIZEOF_NODE(node);
 
   /* Sanity check against double-frees */
@@ -124,6 +140,7 @@ void mm_delayfree(FAR struct mm_heap_s *heap, FAR void *mem, bool delay)
   /* Update heap statistics */
 
   heap->mm_curused -= nodesize;
+  sched_note_heap(NOTE_HEAP_FREE, heap, mem, nodesize, heap->mm_curused);
 
   /* Check if the following node is free and, if so, merge it */
 

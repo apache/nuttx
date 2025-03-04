@@ -1,6 +1,7 @@
 /****************************************************************************
  * drivers/sensors/ltr308_uorb.c
- * Character driver for the LTR-308ALS-01 Lite-On ambient light sensor.
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -97,9 +98,11 @@ static const struct sensor_ops_s g_sensor_ops =
   NULL,               /* set_interval */
   NULL,               /* batch */
   NULL,               /* fetch */
+  NULL,               /* flush */
   NULL,               /* selftest */
   NULL,               /* set_calibvalue */
   ltr308_calibrate,   /* calibrate */
+  NULL,               /* get_info */
   NULL                /* control */
 };
 

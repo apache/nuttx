@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/tlsr82/tlsr82_spi_console.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -24,14 +26,12 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
-#include <nuttx/arch.h>
 #include <assert.h>
 #include <debug.h>
 #include <execinfo.h>
 
 #include <nuttx/compiler.h>
 #include <nuttx/board.h>
-#include <nuttx/arch.h>
 #include <nuttx/serial/serial.h>
 #include <arch/board/board.h>
 
@@ -324,17 +324,8 @@ void spi_console_init(void)
  ****************************************************************************/
 
 #ifdef CONFIG_TLSR82_SPI_SYSLOG
-int up_putc(int ch)
+void up_putc(int ch)
 {
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      spi_putc('\r');
-    }
-
   spi_putc((uint8_t)ch);
-
-  return 0;
 }
 #endif

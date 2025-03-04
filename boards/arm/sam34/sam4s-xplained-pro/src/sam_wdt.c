@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/sam34/sam4s-xplained-pro/src/sam_wdt.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -183,8 +185,6 @@ int sam_watchdog_initialize(void)
   /* Start Kicker task */
 
 #if defined(CONFIG_WDT_THREAD)
-  sched_lock();
-
   int taskid = kthread_create(CONFIG_WDT_THREAD_NAME,
                               CONFIG_WDT_THREAD_PRIORITY,
                               CONFIG_WDT_THREAD_STACKSIZE,
@@ -193,7 +193,6 @@ int sam_watchdog_initialize(void)
   DEBUGASSERT(taskid > 0);
   UNUSED(taskid);
 
-  sched_unlock();
 #endif
   return OK;
 errout_with_dev:

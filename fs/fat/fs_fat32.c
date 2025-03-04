@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/fat/fs_fat32.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -132,6 +134,9 @@ const struct mountpt_operations g_fat_operations =
   NULL,              /* mmap */
   fat_truncate,      /* truncate */
   NULL,              /* poll */
+  NULL,              /* readv */
+  NULL,              /* writev */
+
   fat_sync,          /* sync */
   fat_dup,           /* dup */
   fat_fstat,         /* fstat */
@@ -318,7 +323,7 @@ static int fat_open(FAR struct file *filep, FAR const char *relpath,
    * file.
    */
 
-  ff = kmm_zalloc(sizeof(struct fat_file_s));
+  ff = fs_heap_zalloc(sizeof(struct fat_file_s));
   if (!ff)
     {
       ret = -ENOMEM;
@@ -379,7 +384,7 @@ static int fat_open(FAR struct file *filep, FAR const char *relpath,
       off_t offset = fat_seek(filep, ff->ff_size, SEEK_SET);
       if (offset < 0)
         {
-          kmm_free(ff);
+          fs_heap_free(ff);
           return (int)offset;
         }
     }
@@ -391,7 +396,7 @@ static int fat_open(FAR struct file *filep, FAR const char *relpath,
    */
 
 errout_with_struct:
-  kmm_free(ff);
+  fs_heap_free(ff);
 
 errout_with_lock:
   nxmutex_unlock(&fs->fs_lock);
@@ -469,7 +474,7 @@ static int fat_close(FAR struct file *filep)
 
   /* Then free the file structure itself. */
 
-  kmm_free(ff);
+  fs_heap_free(ff);
   filep->f_priv = NULL;
   return ret;
 }
@@ -504,7 +509,7 @@ static int fat_zero_cluster(FAR struct fat_mountpt_s *fs, int cluster,
   off_t end_sec = sector + DIV_ROUND_UP(end, fs->fs_hwsectorsize);
   int ret;
 
-  buf = kmm_malloc(fs->fs_hwsectorsize);
+  buf = fs_heap_malloc(fs->fs_hwsectorsize);
   if (!buf)
     {
       return -ENOMEM;
@@ -543,7 +548,7 @@ static int fat_zero_cluster(FAR struct fat_mountpt_s *fs, int cluster,
   ret = OK;
 
 out:
-  kmm_free(buf);
+  fs_heap_free(buf);
 
   return ret;
 }
@@ -1549,7 +1554,7 @@ static int fat_dup(FAR const struct file *oldp, FAR struct file *newp)
    * dup'ed file.
    */
 
-  newff = kmm_malloc(sizeof(struct fat_file_s));
+  newff = fs_heap_malloc(sizeof(struct fat_file_s));
   if (!newff)
     {
       ret = -ENOMEM;
@@ -1616,7 +1621,7 @@ static int fat_dup(FAR const struct file *oldp, FAR struct file *newp)
    */
 
 errout_with_struct:
-  kmm_free(newff);
+  fs_heap_free(newff);
 
 errout_with_lock:
   nxmutex_unlock(&fs->fs_lock);
@@ -1647,7 +1652,7 @@ static int fat_opendir(FAR struct inode *mountpt, FAR const char *relpath,
 
   fs = mountpt->i_private;
 
-  fdir = kmm_zalloc(sizeof(struct fat_dirent_s));
+  fdir = fs_heap_zalloc(sizeof(struct fat_dirent_s));
   if (fdir == NULL)
     {
       return -ENOMEM;
@@ -1725,7 +1730,7 @@ errout_with_lock:
   nxmutex_unlock(&fs->fs_lock);
 
 errout_with_fdir:
-  kmm_free(fdir);
+  fs_heap_free(fdir);
   return ret;
 }
 
@@ -1740,7 +1745,7 @@ static int fat_closedir(FAR struct inode *mountpt,
                         FAR struct fs_dirent_s *dir)
 {
   DEBUGASSERT(dir);
-  kmm_free(dir);
+  fs_heap_free(dir);
   return 0;
 }
 
@@ -2230,7 +2235,7 @@ static int fat_bind(FAR struct inode *blkdriver, FAR const void *data,
 
   /* Create an instance of the mountpt state structure */
 
-  fs = kmm_zalloc(sizeof(struct fat_mountpt_s));
+  fs = fs_heap_zalloc(sizeof(struct fat_mountpt_s));
   if (!fs)
     {
       return -ENOMEM;
@@ -2252,7 +2257,7 @@ static int fat_bind(FAR struct inode *blkdriver, FAR const void *data,
   if (ret != 0)
     {
       nxmutex_destroy(&fs->fs_lock);
-      kmm_free(fs);
+      fs_heap_free(fs);
       return ret;
     }
 
@@ -2354,7 +2359,7 @@ static int fat_unbind(FAR void *handle, FAR struct inode **blkdriver,
     }
 
   nxmutex_destroy(&fs->fs_lock);
-  kmm_free(fs);
+  fs_heap_free(fs);
   return OK;
 }
 

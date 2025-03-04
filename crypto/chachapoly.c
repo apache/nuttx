@@ -1,8 +1,8 @@
 /****************************************************************************
  * crypto/chachapoly.c
- * $OpenBSD: chachapoly.c,v 1.6 2020/07/22 13:54:30 tobhe Exp $
  *
- * Copyright (c) 2015 Mike Belopuhov
+ * SPDX-License-Identifier: ISC
+ * SPDX-FileCopyrightText: Copyright (c) 2015 Mike Belopuhov
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above

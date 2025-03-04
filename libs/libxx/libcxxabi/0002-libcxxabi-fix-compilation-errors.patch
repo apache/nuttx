@@ -1,0 +1,32 @@
+From b84bcf890c949d248ade97a5e1fbcf2a8e3efcd7 Mon Sep 17 00:00:00 2001
+From: yinshengkai <yinshengkai@xiaomi.com>
+Date: Fri, 5 Jul 2024 16:59:49 +0800
+libcxxabi: fix compilation errors
+
+error: invalid conversion from 'int' to '_Unwind_State' [-fpermissive]
+ 1073 |     state &= ~_US_FORCE_UNWIND;
+      |     ~~~~~~^~~~~~~~~~~~~~~~~~~~
+      |           |
+      |           int
+
+Signed-off-by: yinshengkai <yinshengkai@xiaomi.com>
+---
+ src/cxa_personality.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git libcxxabi/src/cxa_personality.cpp libcxxabi/src/cxa_personality.cpp
+index 5b58037..3e1fd83 100644
+--- libcxxabi/src/cxa_personality.cpp
++++ libcxxabi/src/cxa_personality.cpp
+@@ -1070,7 +1070,7 @@ __gxx_personality_v0(_Unwind_State state,
+ 
+     // Check the undocumented force unwinding behavior
+     bool is_force_unwinding = state & _US_FORCE_UNWIND;
+-    state &= ~_US_FORCE_UNWIND;
++    state = (_Unwind_State)(state & ~_US_FORCE_UNWIND);
+ 
+     scan_results results;
+     switch (state) {
+-- 
+2.34.1
+

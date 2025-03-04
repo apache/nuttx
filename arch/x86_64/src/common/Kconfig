@@ -35,6 +35,38 @@ config ARCH_X86_64_ACPI_BIOS
 
 endif # ARCH_X86_64_ACPI
 
+choice
+	prompt "x86_64 Idle Loop Options"
+	default ARCH_X86_64_IDLE_DEFAULT
+
+config ARCH_X86_64_IDLE_DEFAULT
+	bool "Idle Loop - HLT"
+	---help---
+		Use HLT instruction in IDLE loop.
+
+config ARCH_X86_64_IDLE_NOP
+	bool "Idle Loop - NOP"
+	---help---
+		Use NOP instruction in IDLE loop.
+		This can prevent VM exit in some virtualized environments,
+		thereby improving real-time performance.
+
+config ARCH_X86_64_IDLE_MWAIT
+	bool "Idle Loop - MWAIT"
+	---help---
+		Use MONITOR/MWAIT instruction in IDLE loop.
+
+endchoice # x86_64 Idle Loop Options
+
+config ARCH_X86_64_IDLE_MWAIT_ECX
+	hex "Idle MWAIT ECX value"
+	default 0x0
+	range 0x0 0xF
+	depends on ARCH_X86_64_IDLE_MWAIT
+	---help---
+		MWAIT ECX indicates the C-States
+		(0x0 for C1, 0x1 for C1E and so on).
+
 config ARCH_X86_64_HAVE_XSAVE
 	bool "XSAVE support"
 	default y

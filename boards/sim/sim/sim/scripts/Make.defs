@@ -1,6 +1,8 @@
 ############################################################################
 # boards/sim/sim/sim/scripts/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -18,7 +20,7 @@
 #
 ############################################################################
 
-include $(TOPDIR)/.config
+-include $(TOPDIR)/.config
 include $(TOPDIR)/tools/Config.mk
 
 # NuttX is sometimes built as a native target.
@@ -41,7 +43,7 @@ ARCHDEFINES += -U__NetBSD__ -U__linux__ -U__sun__ -U__unix__
 ARCHDEFINES += -U__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  ARCHOPTIMIZATION += -g
+  ARCHOPTIMIZATION += $(CONFIG_DEBUG_SYMBOLS_LEVEL)
 endif
 
 ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
@@ -72,14 +74,22 @@ ifneq ($(CONFIG_STACK_USAGE_WARNING),0)
   ARCHOPTIMIZATION += -Wstack-usage=$(CONFIG_STACK_USAGE_WARNING)
 endif
 
-ifeq ($(CONFIG_ARCH_COVERAGE_ALL),y)
-  ARCHOPTIMIZATION += -fprofile-generate -ftest-coverage
+ifeq ($(CONFIG_COVERAGE_ALL),y)
+  ifeq ($(CONFIG_ARCH_TOOLCHAIN_GCC),y)
+    ARCHOPTIMIZATION += -fprofile-arcs -ftest-coverage -fno-inline
+  else ifeq ($(CONFIG_ARCH_TOOLCHAIN_CLANG),y)
+    ARCHOPTIMIZATION += -fprofile-instr-generate -fcoverage-mapping
+  endif
+endif
+
+ifneq ($(CONFIG_PROFILE_ALL)$(CONFIG_SIM_PROFILE),)
+  ARCHOPTIMIZATION += -pg
 endif
 
 ifeq ($(CONFIG_SIM_ASAN),y)
   ARCHOPTIMIZATION += -fsanitize=address -fsanitize-address-use-after-scope
   ARCHOPTIMIZATION += -fsanitize=pointer-compare -fsanitize=pointer-subtract
-else ifeq ($(CONFIG_MM_KASAN_ALL),y)
+else ifeq ($(CONFIG_MM_KASAN_INSTRUMENT_ALL),y)
   ARCHOPTIMIZATION += -fsanitize=kernel-address
 endif
 
@@ -138,6 +148,13 @@ endif
 ifeq ($(CONFIG_SIM_M32),y)
   ARCHCFLAGS += -m32
   ARCHCXXFLAGS += -m32
+else
+  ARCHCFLAGS += -fno-pic
+  ARCHCXXFLAGS += -fno-pic
+  ifneq ($(CONFIG_HOST_MACOS),y)
+    ARCHCFLAGS += -mcmodel=medium
+    ARCHCXXFLAGS += -mcmodel=medium
+  endif
 endif
 
 # LLVM style architecture flags
@@ -162,9 +179,9 @@ else ifeq ($(CONFIG_HOST_ARM),y)
 endif
 
 ifeq ($(CONFIG_HOST_LINUX),y)
-  LLVM_ABITYPE := gnu
+  LLVM_ABITYPE := sysv
 else ifeq ($(CONFIG_HOST_MACOS),y)
-  LLVM_ABITYPE := darwin
+  LLVM_ABITYPE := sysv
 endif
 
 ARCHPICFLAGS = -fpic
@@ -231,8 +248,8 @@ ifeq ($(CONFIG_LIBCXX),y)
 endif
 
 # Loadable module definitions
+CMODULEFLAGS = $(CFLAGS) -fvisibility=hidden
 
-CMODULEFLAGS = $(CFLAGS)
 # -fno-pic to avoid GOT relocations
 CMODULEFLAGS += -fno-pic
 ifeq ($(CONFIG_LIBC_ARCH_ELF_64BIT),y)
@@ -249,7 +266,7 @@ endif
 # not available on NuttX.
 CMODULEFLAGS += -fno-stack-protector
 
-LDMODULEFLAGS = -r -e module_initialize --gc-sections
+LDMODULEFLAGS = -r
 LDMODULEFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/modlib/gnu-elf.ld)
 SHMODULEFLAGS = -shared -Bsymbolic -G -Bdynamic
 
@@ -264,8 +281,8 @@ endif
 
 # ELF module definitions
 
-CELFFLAGS = $(CFLAGS)
-CXXELFFLAGS = $(CXXFLAGS)
+CELFFLAGS = $(CFLAGS) -fvisibility=hidden
+CXXELFFLAGS = $(CXXFLAGS) -fvisibility=hidden
 # -fno-pic to avoid GOT relocations
 CELFFLAGS += -fno-pic
 CXXELFFLAGS += -fno-pic
@@ -276,16 +293,16 @@ ifeq ($(CONFIG_LIBC_ARCH_ELF_64BIT),y)
 endif
 
 LDELFFLAGS = -r -e main --gc-sections
-LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/binfmt/libelf/gnu-elf.ld)
+LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/modlib/gnu-elf.ld)
 
 ifeq ($(CONFIG_HOST_MACOS),y)
   LDFLAGS += -Wl,-dead_strip
 else
   LDFLAGS += -Wl,--gc-sections
 
-  # Let the symbol table link from 0x400000
+  # Let the symbol table link from 0x40000000
   # which is more convenient for debugging.
-  LDFLAGS += -Wl,-Ttext-segment=0x400000
+  LDFLAGS += -Wl,-Ttext-segment=0x40000000
 endif
 
 ifeq ($(CONFIG_DEBUG_LINK_MAP),y)
@@ -309,4 +326,25 @@ ifeq ($(CONFIG_SIM_M32),y)
   LDMODULEFLAGS += -melf_i386
   SHMODULEFLAGS += -melf_i386
   LDELFFLAGS += -melf_i386
+else ifeq ($(CONFIG_HOST_MACOS),)
+  # To compile 64-bit Sim, adding no-pie is necessary to prevent linking errors
+  # but this may cause other issues on Ubuntu 20.
+  ARCHCFLAGS += -no-pie
+  ARCHPICFLAGS += -no-pie
+  LDFLAGS += -Wl,-no-pie
+endif
+
+ifeq ($(CONFIG_HOST_LINUX),y)
+  define POSTBUILD
+  	$(Q)echo "Pac SIM with dynamic libs..";
+  	@ rm -rf sim-pac;
+  	@ mkdir -p sim-pac/libs;
+  	@ cp nuttx sim-pac/nuttx;
+  	@ ldd sim-pac/nuttx | grep "=> /" | awk '{print $$3}' | xargs -I '{}' cp -v '{}' sim-pac/libs;
+  	@ readelf -l nuttx | grep "program interpreter" | awk -F':' '{print $$2}'| cut -d"]" -f1 | xargs -I '{}' cp -v '{}' sim-pac;
+  	@ cp $(TOPDIR)/tools/simlaunch.sh sim-pac;
+  	@ tar -czf nuttx.tgz sim-pac;
+  	$(Q)echo "SIM elf with dynamic libs archive in nuttx.tgz"
+  	@ rm -rf sim-pac;
+  endef
 endif

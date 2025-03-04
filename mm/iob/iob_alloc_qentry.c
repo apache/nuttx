@@ -1,6 +1,8 @@
 /****************************************************************************
  * mm/iob/iob_alloc_qentry.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -77,6 +79,32 @@ static FAR struct iob_qentry_s *iob_alloc_qcommitted(void)
   return iobq;
 }
 
+static FAR struct iob_qentry_s *iob_tryalloc_qentry_internal(void)
+{
+  FAR struct iob_qentry_s *iobq;
+
+  /* We don't know what context we are called from so we use extreme measures
+   * to protect the free list:  We disable interrupts very briefly.
+   */
+
+  iobq  = g_iob_freeqlist;
+  if (iobq)
+    {
+      /* Remove the I/O buffer chain container from the free list and
+       * decrement the counting semaphore that tracks the number of free
+       * containers.
+       */
+
+      g_iob_freeqlist = iobq->qe_flink;
+
+      /* Put the I/O buffer in a known state */
+
+      iobq->qe_head = NULL; /* Nothing is contained */
+    }
+
+  return iobq;
+}
+
 /****************************************************************************
  * Name: iob_allocwait_qentry
  *
@@ -99,21 +127,19 @@ static FAR struct iob_qentry_s *iob_allocwait_qentry(void)
    * re-enabled while we are waiting for I/O buffers to become free.
    */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_iob_lock);
 
-  /* Try to get an I/O buffer chain container.  If successful, the semaphore
-   * count will bedecremented atomically.
-   */
+  /* Try to get an I/O buffer chain container. */
 
-  qentry = iob_tryalloc_qentry();
-  while (ret == OK && qentry == NULL)
+  qentry = iob_tryalloc_qentry_internal();
+  if (qentry == NULL)
     {
-      /* If not successful, then the semaphore count was less than or equal
-       * to zero (meaning that there are no free buffers).  We need to wait
-       * for an I/O buffer chain container to be released when the
-       * semaphore count will be incremented.
+      /* If not successful, We need to wait
+       * for an I/O buffer chain container to be released
        */
 
+      g_qentry_wait++;
+      spin_unlock_irqrestore(&g_iob_lock, flags);
       ret = nxsem_wait_uninterruptible(&g_qentry_sem);
       if (ret >= 0)
         {
@@ -125,26 +151,13 @@ static FAR struct iob_qentry_s *iob_allocwait_qentry(void)
 
           qentry = iob_alloc_qcommitted();
           DEBUGASSERT(qentry != NULL);
-
-          if (qentry == NULL)
-            {
-              /* This should not fail, but we allow for that possibility to
-               * handle any potential, non-obvious race condition.  Perhaps
-               * the free IOB ended up in the g_iob_free list?
-               *
-               * We need release our count so that it is available to
-               * iob_tryalloc(), perhaps allowing another thread to take our
-               * count.  In that event, iob_tryalloc() will fail above and
-               * we will have to wait again.
-               */
-
-              nxsem_post(&g_qentry_sem);
-              qentry = iob_tryalloc_qentry();
-            }
         }
+
+      return qentry;
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_iob_lock, flags);
+
   return qentry;
 }
 
@@ -200,31 +213,7 @@ FAR struct iob_qentry_s *iob_tryalloc_qentry(void)
    */
 
   flags = spin_lock_irqsave(&g_iob_lock);
-  iobq  = g_iob_freeqlist;
-  if (iobq)
-    {
-      /* Remove the I/O buffer chain container from the free list and
-       * decrement the counting semaphore that tracks the number of free
-       * containers.
-       */
-
-      g_iob_freeqlist = iobq->qe_flink;
-
-      /* Take a semaphore count.  Note that we cannot do this in
-       * in the orthodox way by calling nxsem_wait() or nxsem_trywait()
-       * because this function may be called from an interrupt
-       * handler. Fortunately we know at at least one free buffer
-       * so a simple decrement is all that is needed.
-       */
-
-      g_qentry_sem.semcount--;
-      DEBUGASSERT(g_qentry_sem.semcount >= 0);
-
-      /* Put the I/O buffer in a known state */
-
-      iobq->qe_head = NULL; /* Nothing is contained */
-    }
-
+  iobq = iob_tryalloc_qentry_internal();
   spin_unlock_irqrestore(&g_iob_lock, flags);
   return iobq;
 }

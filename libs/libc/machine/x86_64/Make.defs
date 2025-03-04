@@ -1,6 +1,8 @@
 ############################################################################
 # libs/libc/machine/x86_64/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -22,6 +24,9 @@ ifeq ($(CONFIG_LIBC_ARCH_ELF),y)
 CSRCS += arch_elf64.c
 endif
 
+ifeq ($(CONFIG_ARCH_SETJMP_H),y)
+ASRCS += arch_setjmp_x86_64.S
+endif
 ifeq ($(CONFIG_X86_64_MEMCMP),y)
 ASRCS += arch_memcmp.S
 endif

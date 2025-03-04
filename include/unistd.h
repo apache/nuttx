@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/unistd.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -387,6 +389,7 @@ unsigned int alarm(unsigned int seconds);
 int     chdir(FAR const char *path);
 int     fchdir(int fd);
 FAR char *getcwd(FAR char *buf, size_t size);
+FAR char *get_current_dir_name(void);
 
 /* File path operations */
 
@@ -463,6 +466,16 @@ int     getentropy(FAR void *buffer, size_t length);
 
 void    sync(void);
 int     syncfs(int fd);
+
+int     profil(FAR unsigned short *buf, size_t bufsiz,
+               size_t offset, unsigned int scale);
+
+FAR char *getpass(FAR const char *prompt);
+#ifdef CONFIG_CRYPTO
+FAR char *crypt(FAR const char *key, FAR const char *salt);
+FAR char *crypt_r(FAR const char *key, FAR const char *salt,
+                  FAR char *output);
+#endif
 
 #if CONFIG_FORTIFY_SOURCE > 0
 fortify_function(getcwd) FAR char *getcwd(FAR char *buf,

@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/power/battery/battery_charger.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -391,13 +393,21 @@ static int bat_charger_ioctl(FAR struct file *filep, int cmd,
           FAR int *ptr = (FAR int *)((uintptr_t)arg);
           if (ptr)
             {
-              ret = dev->ops->get_protocol(dev, ptr);
+              if (dev->ops->get_protocol)
+                {
+                  ret = dev->ops->get_protocol(dev, ptr);
+                }
+              else
+                {
+                  *ptr = BATTERY_PROTOCOL_DEFAULT;
+                  ret = OK;
+                }
             }
         }
         break;
 
       default:
-        _err("ERROR: Unrecognized cmd: %d\n", cmd);
+        batinfo("ERROR: Unrecognized cmd: %d\n", cmd);
         ret = -ENOTTY;
         break;
     }
@@ -521,7 +531,7 @@ int battery_charger_register(FAR const char *devpath,
   ret = register_driver(devpath, &g_batteryops, 0666, dev);
   if (ret < 0)
     {
-      _err("ERROR: Failed to register driver: %d\n", ret);
+      baterr("ERROR: Failed to register driver: %d\n", ret);
     }
 
   return ret;

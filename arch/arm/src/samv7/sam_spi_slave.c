@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/samv7/sam_spi_slave.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -462,6 +464,7 @@ static int spi_interrupt(int irq, void *context, void *arg)
 
           SPIS_DEV_RECEIVE(priv->dev, (const uint16_t *)&data,
                            sizeof(data));
+          SPIS_DEV_NOTIFY(priv->dev, SPISLAVE_RX_COMPLETE);
         }
 
       /* When a transfer starts, the data shifted out is the data present
@@ -509,6 +512,7 @@ static int spi_interrupt(int irq, void *context, void *arg)
 
           regval = spi_dequeue(priv);
           spi_putreg(priv, regval, SAM_SPI_TDR_OFFSET);
+          SPIS_DEV_NOTIFY(priv->dev, SPISLAVE_TX_COMPLETE);
         }
 
       /* The SPI slave hardware provides only an event when NSS rises

@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/vfs/fs_dir.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -32,8 +34,10 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
+#include <nuttx/lib/lib.h>
 
 #include "inode/inode.h"
+#include "fs_heap.h"
 
 /****************************************************************************
  * Private Types
@@ -154,7 +158,7 @@ static int open_pseudodir(FAR struct inode *inode,
 {
   FAR struct fs_pseudodir_s *pdir;
 
-  pdir = kmm_zalloc(sizeof(*pdir));
+  pdir = fs_heap_zalloc(sizeof(*pdir));
   if (pdir == NULL)
     {
       return -ENOMEM;
@@ -216,7 +220,7 @@ static off_t seek_pseudodir(FAR struct file *filep, off_t offset)
     {
       /* Increment the reference count on this next node */
 
-      curr->i_crefs++;
+      atomic_fetch_add(&curr->i_crefs, 1);
     }
 
   inode_unlock();
@@ -383,7 +387,7 @@ static int read_pseudodir(FAR struct fs_dirent_s *dir,
     {
       /* Increment the reference count on this next node */
 
-      pdir->next->i_crefs++;
+      atomic_fetch_add(&pdir->next->i_crefs, 1);
     }
 
   inode_unlock();
@@ -447,13 +451,13 @@ static int dir_close(FAR struct file *filep)
 
       /* Then release the container */
 
-      kmm_free(dir);
+      fs_heap_free(dir);
     }
 
   /* Release our references on the contained 'root' inode */
 
   inode_release(inode);
-  lib_free(relpath);
+  fs_heap_free(relpath);
   return ret;
 }
 
@@ -580,8 +584,14 @@ int dir_allocate(FAR struct file *filep, FAR const char *relpath)
 {
   FAR struct fs_dirent_s *dir;
   FAR struct inode *inode = filep->f_inode;
-  char path_prefix[PATH_MAX];
+  FAR char *path_prefix;
   int ret;
+
+  path_prefix = lib_get_pathbuffer();
+  if (path_prefix == NULL)
+    {
+      return -ENOMEM;
+    }
 
   /* Is this a node in the pseudo filesystem? Or a mountpoint? */
 
@@ -593,6 +603,7 @@ int dir_allocate(FAR struct file *filep, FAR const char *relpath)
       ret = open_mountpoint(inode, relpath, &dir);
       if (ret < 0)
         {
+          lib_put_pathbuffer(path_prefix);
           return ret;
         }
     }
@@ -602,20 +613,23 @@ int dir_allocate(FAR struct file *filep, FAR const char *relpath)
       ret = open_pseudodir(inode, &dir);
       if (ret < 0)
         {
+          lib_put_pathbuffer(path_prefix);
           return ret;
         }
     }
 
-  inode_getpath(inode, path_prefix, sizeof(path_prefix));
-  ret = asprintf(&dir->fd_path, "%s%s/", path_prefix, relpath);
+  inode_getpath(inode, path_prefix, PATH_MAX);
+  ret = fs_heap_asprintf(&dir->fd_path, "%s%s/", path_prefix, relpath);
   if (ret < 0)
     {
       dir->fd_path = NULL;
+      lib_put_pathbuffer(path_prefix);
       return ret;
     }
 
   filep->f_inode = &g_dir_inode;
   filep->f_priv  = dir;
   inode_addref(&g_dir_inode);
+  lib_put_pathbuffer(path_prefix);
   return ret;
 }

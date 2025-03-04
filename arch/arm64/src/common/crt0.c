@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/src/common/crt0.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -72,7 +74,7 @@ static void sig_trampoline(void)
 {
   __asm__ __volatile__
   (
-    " sub sp, sp, #8\n"   /* Create a stack frame to hold LR */
+    " sub sp, sp, #16\n"  /* Create a stack frame to hold LR */
     " str lr, [sp, #0]\n" /* Save LR on the stack */
     " mov ip0, x0\n"      /* IP=sighand */
     " mov x0, x1\n"       /* R0=signo */
@@ -80,7 +82,7 @@ static void sig_trampoline(void)
     " mov x2, x3\n"       /* R2=ucontext */
     " blr ip0\n"          /* Call the signal handler */
     " ldr lr, [sp, #0]\n" /* Recover LR in R2 */
-    " add sp, sp, #8\n"   /* Destroy the stack frame */
+    " add sp, sp, #16\n"  /* Destroy the stack frame */
     " mov x0, %0\n"       /* SYS_signal_handler_return */
     " svc %1\n"           /* Return from the SYSCALL */
     :

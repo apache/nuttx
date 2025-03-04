@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/mqueue/msgsnd.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -40,7 +42,6 @@
 static int msgsnd_wait(FAR struct msgq_s *msgq, int msgflg)
 {
   FAR struct tcb_s *rtcb;
-  bool switch_needed;
 
 #ifdef CONFIG_CANCELLATION_POINTS
   /* msgsnd_wait() is not a cancellation point, but may be called via
@@ -93,21 +94,18 @@ static int msgsnd_wait(FAR struct msgq_s *msgq, int msgflg)
 
       DEBUGASSERT(NULL != rtcb->flink);
 
-      /* Remove the tcb task from the ready-to-run list. */
+      /* Remove the tcb task from the running list. */
 
-      switch_needed = nxsched_remove_readytorun(rtcb, true);
+      nxsched_remove_self(rtcb);
 
       /* Add the task to the specified blocked task list */
 
       rtcb->task_state = TSTATE_WAIT_MQNOTFULL;
       nxsched_add_prioritized(rtcb, MQ_WNFLIST(msgq->cmn));
 
-      /* Now, perform the context switch if one is needed */
+      /* Now, perform the context switch */
 
-      if (switch_needed)
-        {
-          up_switch_context(this_task(), rtcb);
-        }
+      up_switch_context(this_task(), rtcb);
 
       /* When we resume at this point, either (1) the message queue
        * is no longer empty, or (2) the wait has been interrupted by

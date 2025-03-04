@@ -1,6 +1,8 @@
 ############################################################################
 # arch/arm64/src/common/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -39,9 +41,9 @@ CMN_ASRCS += arm64_fork_func.S
 
 # Common C source files ( OS call up_xxx)
 CMN_CSRCS =  arm64_initialize.c arm64_initialstate.c arm64_boot.c
-CMN_CSRCS += arm64_nputs.c arm64_copystate.c arm64_createstack.c
+CMN_CSRCS += arm64_nputs.c arm64_createstack.c
 CMN_CSRCS += arm64_releasestack.c arm64_stackframe.c arm64_usestack.c
-CMN_CSRCS += arm64_exit.c arm64_fork.c arm64_switchcontext.c
+CMN_CSRCS += arm64_exit.c arm64_fork.c
 CMN_CSRCS += arm64_schedulesigaction.c arm64_sigdeliver.c
 CMN_CSRCS += arm64_getintstack.c arm64_registerdump.c
 CMN_CSRCS += arm64_perf.c arm64_tcbinfo.c
@@ -65,14 +67,22 @@ endif
 
 ifeq ($(CONFIG_ARM64_GIC_VERSION),2)
 CMN_CSRCS += arm64_gicv2.c
+ifeq ($(CONFIG_ARM64_GICV2M),y)
+CMN_CSRCS += arm64_gicv2m.c
+endif
 endif
 
 ifeq ($(CONFIG_ARCH_HAVE_MMU),y)
 CMN_CSRCS += arm64_mmu.c
 endif
 
+ifeq ($(CONFIG_ARM64_MTE),y)
+CMN_CSRCS += arm64_mte.c
+endif
+
 ifeq ($(CONFIG_ARCH_HAVE_MPU),y)
 CMN_CSRCS += arm64_mpu.c
+common/arm64_mpu.c_CFLAGS += -fno-sanitize=kernel-address
 endif
 
 ifeq ($(CONFIG_ARM64_PSCI),y)
@@ -81,7 +91,7 @@ endif
 
 ifeq ($(CONFIG_SMP),y)
 CMN_CSRCS += arm64_cpuidlestack.c arm64_cpustart.c
-CMN_CSRCS += arm64_cpupause.c
+CMN_CSRCS += arm64_smpcall.c
 endif
 
 ifeq ($(CONFIG_BUILD_KERNEL),y)

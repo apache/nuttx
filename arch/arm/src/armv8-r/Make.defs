@@ -1,6 +1,8 @@
 ############################################################################
 # arch/arm/src/armv8-r/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -51,4 +53,8 @@ endif
 
 ifeq ($(CONFIG_ARMV8R_L2CC_PL310),y)
   CMN_CSRCS += arm_l2cc_pl310.c
+endif
+
+ifeq ($(CONFIG_ARCH_HIPRI_INTERRUPT),y)
+  CMN_CSRCS += arm_dofiq.c
 endif

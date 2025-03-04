@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/tiva/tm4c/tm4c_ethernet.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -44,6 +46,7 @@
 #include <nuttx/net/mii.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/netdev.h>
+#include <nuttx/spinlock.h>
 
 #ifdef CONFIG_TIVA_PHY_INTERRUPTS
 #  include <nuttx/net/phy.h>
@@ -626,6 +629,7 @@ struct tiva_ethmac_s
   struct wdog_s        txtimeout;   /* TX timeout timer */
   struct work_s        irqwork;     /* For deferring interrupt work to the work queue */
   struct work_s        pollwork;    /* For deferring poll work to the work queue */
+  spinlock_t           lock;        /* Spinlock */
 
 #ifdef CONFIG_TIVA_PHY_INTERRUPTS
   xcpt_t               handler;     /* Attached PHY interrupt handler */
@@ -2248,7 +2252,7 @@ static int tiva_ifdown(struct net_driver_s *dev)
 
   /* Disable the Ethernet interrupt */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
   up_disable_irq(TIVA_IRQ_ETHCON);
 
   /* Cancel the TX timeout timers */
@@ -2265,7 +2269,7 @@ static int tiva_ifdown(struct net_driver_s *dev)
   /* Mark the device "down" */
 
   priv->ifup = false;
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
   return OK;
 }
 
@@ -3178,6 +3182,8 @@ static int tiva_phyinit(struct tiva_ethmac_s *priv)
 #endif
 #endif
 
+  spin_lock_init(&priv->lock);
+
   ninfo("Duplex: %s Speed: %d MBps\n",
         priv->fduplex ? "FULL" : "HALF",
         priv->mbps100 ? 100 : 10);
@@ -4033,7 +4039,7 @@ int arch_phy_irq(const char *intf, xcpt_t handler, void *arg,
    * following operations are atomic.
    */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
 
   /* Save the new interrupt handler information */
 
@@ -4051,7 +4057,7 @@ int arch_phy_irq(const char *intf, xcpt_t handler, void *arg,
       *enable = handler ? tiva_phy_intenable : NULL;
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
   return OK;
 }
 #endif /* CONFIG_TIVA_PHY_INTERRUPTS */

@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/risc-v/esp32c3/common/scripts/esp32c3_flat_memory.ld
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -30,6 +32,7 @@
  ****************************************************************************/
 
 #include "common.ld"
+#include "esp32c3_aliases.ld"
 
 #define SRAM_IRAM_START     0x4037c000
 #define SRAM_DRAM_START     0x3fc7c000

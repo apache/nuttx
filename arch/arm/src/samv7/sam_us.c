@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/samv7/sam_us.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -28,10 +30,10 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/mutex.h>
+#include <arch/barriers.h>
 #include <arch/samv7/chip.h>
 
 #include "arm_internal.h"
-#include "barriers.h"
 
 #include "hardware/sam_memorymap.h"
 
@@ -124,7 +126,7 @@ int sam_write_user_signature(void *buffer, size_t buflen)
       *dest++ = g_page_buffer[i];
 
 #ifdef CONFIG_ARMV7M_DCACHE_WRITETHROUGH
-      ARM_DMB();
+      UP_DMB();
 #endif
     }
 
@@ -177,7 +179,7 @@ int sam_read_user_signature(void *buffer, size_t buflen)
 
   /* sam_eefc_readsequence requires read length in bit words. */
 
-  nwords = (buflen + sizeof(uint32_t) / sizeof(uint32_t));
+  nwords = (buflen + sizeof(uint32_t)) / sizeof(uint32_t);
   sam_eefc_readsequence(FCMD_STUS, FCMD_SPUS, g_page_buffer, nwords);
 
   /* Copy local buffer to void *buffer provided by the user. */

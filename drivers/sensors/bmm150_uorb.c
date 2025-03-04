@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/sensors/bmm150_uorb.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -28,6 +30,7 @@
 #include <stdio.h>
 #include <sys/param.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/mutex.h>
 #include <nuttx/signal.h>
 #include <nuttx/kthread.h>
@@ -134,7 +137,7 @@ struct bmm150_sensor_dev_s
   uint32_t                        freq;
   mutex_t                         lock;
 #ifdef CONFIG_SENSORS_BMM150_POLL
-  unsigned long                   interval;
+  uint32_t                        interval;
   uint64_t                        last_update;
   sem_t                           run;
 #endif
@@ -153,7 +156,7 @@ static int bmm150_fetch(FAR struct sensor_lowerhalf_s *lower,
 #endif
 static int bmm150_set_interval(FAR struct sensor_lowerhalf_s *lower,
                                FAR struct file *filep,
-                               FAR unsigned long *period_us);
+                               FAR uint32_t *period_us);
 
 /* Helpers */
 
@@ -180,9 +183,11 @@ static const struct sensor_ops_s g_bmm150_sensor_ops =
 #else
   bmm150_fetch,
 #endif
+  NULL,                 /* flush */
   NULL,                 /* selftest */
   NULL,                 /* set_calibvalue */
   NULL,                 /* calibrate */
+  NULL,                 /* get_info */
   NULL,                 /* control */
 };
 
@@ -577,7 +582,7 @@ errout:
 
 static int bmm150_set_interval(FAR struct sensor_lowerhalf_s *lower,
                                   FAR struct file *filep,
-                                  FAR unsigned long *interval)
+                                  FAR uint32_t *interval)
 {
 #ifdef CONFIG_SENSORS_BMM150_POLL
   FAR struct bmm150_sensor_dev_s *dev =

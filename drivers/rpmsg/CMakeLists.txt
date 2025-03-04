@@ -1,6 +1,8 @@
 # ##############################################################################
 # drivers/rpmsg/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -27,5 +29,36 @@ if(CONFIG_RPMSG)
     list(APPEND SRCS rpmsg_ping.c)
   endif()
 
+  if(CONFIG_RPMSG_PORT)
+    list(APPEND SRCS rpmsg_port.c)
+    target_include_directories(drivers
+                               PRIVATE ${NUTTX_DIR}/openamp/open-amp/lib)
+  endif()
+
+  if(CONFIG_RPMSG_PORT_SPI)
+    list(APPEND SRCS rpmsg_port_spi.c)
+  endif()
+
+  if(CONFIG_RPMSG_PORT_SPI_SLAVE)
+    list(APPEND SRCS rpmsg_port_spi_slave.c)
+  endif()
+
+  if(CONFIG_RPMSG_PORT_UART)
+    list(APPEND SRCS rpmsg_port_uart.c)
+  endif()
+
+  if(CONFIG_RPMSG_VIRTIO_LITE)
+    list(APPEND SRCS rpmsg_virtio_lite.c)
+  endif()
+
+  if(CONFIG_RPMSG_VIRTIO_IVSHMEM)
+    list(APPEND SRCS rpmsg_virtio_ivshmem.c)
+  endif()
+
+  if(CONFIG_RPMSG_ROUTER)
+    list(APPEND SRCS rpmsg_router_hub.c rpmsg_router_edge.c)
+  endif()
+
+  target_include_directories(drivers PRIVATE ${NUTTX_DIR}/openamp/open-amp/lib)
   target_sources(drivers PRIVATE ${SRCS})
 endif()

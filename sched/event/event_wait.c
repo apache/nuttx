@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/event/event_wait.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -125,16 +127,17 @@ nxevent_mask_t nxevent_tickwait(FAR nxevent_t *event, nxevent_mask_t events,
 
       if (delay == UINT32_MAX)
         {
-          ret = nxsem_wait(&wait.sem);
+          ret = nxsem_wait_uninterruptible(&wait.sem);
         }
       else
         {
-          ret = nxsem_tickwait(&wait.sem, delay);
+          ret = nxsem_tickwait_uninterruptible(&wait.sem, delay);
         }
 
       /* Destroy local variables */
 
       nxsem_destroy(&wait.sem);
+      list_delete(&wait.node);
 
       if (ret == 0)
         {
@@ -142,7 +145,6 @@ nxevent_mask_t nxevent_tickwait(FAR nxevent_t *event, nxevent_mask_t events,
         }
       else
         {
-          list_delete(&wait.node);
           events = 0;
         }
     }

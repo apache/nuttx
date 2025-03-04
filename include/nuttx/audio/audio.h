@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/audio/audio.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -183,6 +185,8 @@
 #define AUDIO_SUBFMT_MIDI_0         0x10
 #define AUDIO_SUBFMT_MIDI_1         0x11
 #define AUDIO_SUBFMT_MIDI_2         0x12
+#define AUDIO_SUBFMT_AMRNB          0x13
+#define AUDIO_SUBFMT_AMRWB          0x14
 
 /* Audio Hardware-Format Types **********************************************/
 
@@ -326,6 +330,7 @@
 #define AUDIO_CALLBACK_IOERR        0x02
 #define AUDIO_CALLBACK_COMPLETE     0x03
 #define AUDIO_CALLBACK_MESSAGE      0x04
+#define AUDIO_CALLBACK_UNDERRUN     0x05
 
 /* Audio Pipeline Buffer (AP Buffer) flags **********************************/
 
@@ -356,6 +361,7 @@
 #define AUDIO_MSG_COMMAND          10
 #define AUDIO_MSG_SLIENCE          11
 #define AUDIO_MSG_UNDERRUN         12
+#define AUDIO_MSG_IOERR            13
 #define AUDIO_MSG_USER             64
 
 /* Audio Pipeline Buffer flags */
@@ -430,10 +436,10 @@ struct audio_caps_desc_s
 
 struct audio_info_s
 {
-  uint8_t samplerate;   /* Sample Rate of the audio data */
-  uint8_t channels;     /* Number of channels (1, 2, 5, 7) */
-  uint8_t format;       /* Audio data format */
-  uint8_t subformat;    /* Audio subformat
+  uint32_t samplerate;   /* Sample Rate of the audio data */
+  uint8_t  channels;     /* Number of channels (1, 2, 5, 7) */
+  uint8_t  format;       /* Audio data format */
+  uint8_t  subformat;    /* Audio subformat
                          * (maybe should be combined with format?
                          */
 };

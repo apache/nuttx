@@ -1,7 +1,8 @@
 /****************************************************************************
  * libs/libc/misc/lib_fdsan.c
- * Copyright (C) 2018 The Android Open Source Project
- * All rights reserved.
+ *
+ * SPDX-License-Identifier: BSD-2-Clause
+ * SPDX-FileCopyrightText: 2018 The Android Open Source Project
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -198,7 +199,7 @@ void android_fdsan_exchange_owner_tag(int fd, uint64_t expected_tag,
            * but expected == actual?
            ******************************************************************/
 
-          ferr("fdsan atomic_compare_exchange_strong failed unexpectedly "
+          ferr("fdsan atomic_cmpxchg failed unexpectedly "
                "while exchanging owner tag\n");
           PANIC();
         }

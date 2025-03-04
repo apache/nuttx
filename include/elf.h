@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/elf.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -189,6 +191,7 @@
 #define SHF_WRITE          1
 #define SHF_ALLOC          2
 #define SHF_EXECINSTR      4
+#define SHF_INFO_LINK      0x40
 #define SHF_MASKPROC       0xf0000000
 
 /* Figure 4-16: Symbol Binding, ELF_ST_BIND */
@@ -208,6 +211,13 @@
 #define STT_FILE           4
 #define STT_LOPROC         13
 #define STT_HIPROC         15
+
+/* Table 7-21 ELF Symbol Visibility */
+
+#define STV_DEFAULT        0
+#define STV_INTERNAL       1
+#define STV_HIDDEN         2
+#define STV_PROTECTED      3
 
 /* Figure 5-2: Segment Types, p_type */
 

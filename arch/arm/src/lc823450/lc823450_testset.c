@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/lc823450/lc823450_testset.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -79,7 +81,7 @@ spinlock_t up_testset(volatile spinlock_t *lock)
     }
   while (getreg32(MUTEX_REG_MUTEX0) != val);
 
-  SP_DMB();
+  UP_DMB();
 
   ret = *lock;
 
@@ -88,7 +90,7 @@ spinlock_t up_testset(volatile spinlock_t *lock)
       *lock = SP_LOCKED;
     }
 
-  SP_DMB();
+  UP_DMB();
 
   val = (this_cpu() << 16) | 0x0;
   putreg32(val, MUTEX_REG_MUTEX0);

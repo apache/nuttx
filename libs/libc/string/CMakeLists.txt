@@ -1,6 +1,8 @@
 # ##############################################################################
 # libs/libc/string/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -28,28 +30,20 @@ set(SRCS
     lib_flsl.c
     lib_flsll.c
     lib_isbasedigit.c
-    lib_memccpy.c
-    lib_memrchr.c
     lib_memmem.c
     lib_popcount.c
     lib_popcountl.c
     lib_popcountll.c
     lib_skipspace.c
-    lib_stpcpy.c
-    lib_stpncpy.c
     lib_strcasecmp.c
-    lib_strcat.c
     lib_strcspn.c
-    lib_strchrnul.c
     lib_strdup.c
     lib_strerror.c
     lib_strncasecmp.c
     lib_strncat.c
-    lib_strncmp.c
     lib_strndup.c
     lib_strcasestr.c
     lib_strpbrk.c
-    lib_strrchr.c
     lib_strspn.c
     lib_strstr.c
     lib_strtok.c
@@ -57,70 +51,69 @@ set(SRCS
     lib_strsep.c
     lib_strerrorr.c
     lib_explicit_bzero.c
-    lib_bzero.c
     lib_strsignal.c
-    lib_timingsafe_bcmp.c
     lib_index.c
-    lib_rindex.c)
+    lib_rindex.c
+    lib_timingsafe_bcmp.c
+    lib_strverscmp.c
+    lib_mempcpy.c
+    lib_rawmemchr.c
+    lib_memmove.c
+    lib_memset.c
+    lib_strlcat.c
+    lib_strlcpy.c
+    lib_strnlen.c)
 
-if(NOT CONFIG_LIBC_ARCH_MEMCHR)
-  list(APPEND SRCS lib_memchr.c)
-endif()
-
-if(NOT CONFIG_LIBC_ARCH_MEMCMP)
-  list(APPEND SRCS lib_memcmp.c)
-endif()
-
-if(NOT CONFIG_LIBC_ARCH_MEMCPY)
-  if(CONFIG_MEMCPY_VIK)
-    list(APPEND SRCS lib_vikmemcpy.c)
-  else()
-    list(APPEND SRCS lib_memcpy.c)
-  endif()
-endif()
-
-if(NOT CONFIG_LIBC_ARCH_MEMMOVE)
-  list(APPEND SRCS lib_memmove.c)
-endif()
-
-if(NOT CONFIG_LIBC_ARCH_MEMSET)
-  list(APPEND SRCS lib_memset.c)
-endif()
-
-if(NOT CONFIG_LIBC_ARCH_STRCHR)
-  list(APPEND SRCS lib_strchr.c)
-endif()
-
-if(NOT CONFIG_LIBC_ARCH_STRCMP)
-  list(APPEND SRCS lib_strcmp.c)
-endif()
-
-if(NOT CONFIG_LIBC_ARCH_STRCPY)
-  list(APPEND SRCS lib_strcpy.c)
-endif()
-
-if(NOT CONFIG_LIBC_ARCH_STRLCAT)
-  list(APPEND SRCS lib_strlcat.c)
-endif()
-
-if(NOT CONFIG_LIBC_ARCH_STRLCPY)
-  list(APPEND SRCS lib_strlcpy.c)
-endif()
-
-if(NOT CONFIG_LIBC_ARCH_STRLEN)
-  list(APPEND SRCS lib_strlen.c)
-endif()
-
-if(NOT CONFIG_LIBC_ARCH_STRNCPY)
-  list(APPEND SRCS lib_strncpy.c)
-endif()
-
-if(NOT CONFIG_LIBC_ARCH_STRNLEN)
-  list(APPEND SRCS lib_strnlen.c)
+if(CONFIG_LIBC_MEMCPY_VIK)
+  list(APPEND SRCS lib_vikmemcpy.c)
+elseif(CONFIG_LIBC_NEWLIB_OPTSPEED)
+  list(APPEND SRCS lib_bsdmemcpy.c)
+else()
+  list(APPEND SRCS lib_memcpy.c)
 endif()
 
 if(CONFIG_LIBC_LOCALE)
   list(APPEND SRCS lib_strcoll.c lib_strxfrm.c)
+endif()
+
+if(CONFIG_LIBC_NEWLIB_OPTSPEED)
+  list(
+    APPEND
+    SRCS
+    lib_bsdmemccpy.c
+    lib_bsdmemcmp.c
+    lib_bsdmemrchr.c
+    lib_bsdstpncpy.c
+    lib_bsdstrchr.c
+    lib_bsdstrcmp.c
+    lib_bsdstrlen.c
+    lib_bsdstrncpy.c
+    lib_bsdmemchr.c
+    lib_bsdstpcpy.c
+    lib_bsdstrcat.c
+    lib_bsdstrchrnul.c
+    lib_bsdstrcpy.c
+    lib_bsdstrncmp.c
+    lib_bsdstrrchr.c)
+else()
+  list(
+    APPEND
+    SRCS
+    lib_memccpy.c
+    lib_memcmp.c
+    lib_memrchr.c
+    lib_stpncpy.c
+    lib_strchr.c
+    lib_strcmp.c
+    lib_strlen.c
+    lib_strncpy.c
+    lib_memchr.c
+    lib_stpcpy.c
+    lib_strcat.c
+    lib_strchrnul.c
+    lib_strcpy.c
+    lib_strncmp.c
+    lib_strrchr.c)
 endif()
 
 target_sources(c PRIVATE ${SRCS})

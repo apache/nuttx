@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/sparc/src/s698pm/s698pm_cpustart.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -32,7 +34,6 @@
 #include <errno.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/spinlock.h>
 #include <nuttx/sched_note.h>
 
 #include "sched/sched.h"
@@ -49,7 +50,7 @@
  * Public Data
  ****************************************************************************/
 
-volatile static spinlock_t g_cpu_boot;
+static volatile bool g_cpu_boot;
 
 /****************************************************************************
  * Public Functions
@@ -77,7 +78,7 @@ void s698pm_cpu_boot(void)
 
   s698pm_cpuint_initialize();
 
-  spin_unlock(&g_cpu_boot);
+  g_cpu_boot = true;
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION
   /* Notify that this CPU has started */
@@ -148,17 +149,13 @@ int up_cpu_start(int cpu)
   regaddr = S698PM_DSU_BASE + (0x1000000 * cpu) + S698PM_DSU_NPC_OFFSET;
   putreg32(0x40001004, regaddr);
 
-  spin_lock(&g_cpu_boot);
-
   /* set 1 to bit n of multiprocessor status register to active cpu n */
 
   putreg32(1 << cpu, S698PM_IRQREG_MPSTATUS);
 
-  spin_lock(&g_cpu_boot);
+  while (!g_cpu_boot);
 
   /* prev cpu boot done */
-
-  spin_unlock(&g_cpu_boot);
 
   return 0;
 }

@@ -733,6 +733,7 @@ static int esp32_wdt_setisr(struct esp32_wdt_dev_s *dev, xcpt_t handler,
               up_disable_irq(wdt->irq);
               esp32_teardown_irq(wdt->cpu, wdt->periph, wdt->cpuint);
               irq_detach(wdt->irq);
+              wdt->cpuint = -ENOMEM;
             }
 
           goto errout;

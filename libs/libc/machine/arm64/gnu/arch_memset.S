@@ -1,8 +1,8 @@
 /****************************************************************************
  * libs/libc/machine/arm64/gnu/arch_memset.S
  *
- * Copyright (c) 2012-2013, Linaro Limited
- *  All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2012-2013, Linaro Limited, 2015 ARM Ltd
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -92,7 +92,7 @@
 \f:
 	.endm
 
-def_fn memset p2align=6
+def_fn ARCH_LIBCFUN(memset) p2align=6
 
 	dup	v0.16B, valw
 	add	dstend, dstin, count
@@ -243,6 +243,6 @@ L(zva_other):
 	sub	dst, dst, 32		/* Bias dst for tail loop.  */
 	b	L(tail64)
 
-	.size	memset, . - memset
+	.size	ARCH_LIBCFUN(memset), . - ARCH_LIBCFUN(memset)
 
 #endif
