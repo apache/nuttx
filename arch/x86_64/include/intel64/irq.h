@@ -792,7 +792,7 @@ static inline_function uint32_t up_getgs(void)
 
 /* Get the current FLAGS register contents */
 
-static inline_function irqstate_t irqflags()
+static inline_function irqstate_t irqflags(void)
 {
   irqstate_t flags;
 
