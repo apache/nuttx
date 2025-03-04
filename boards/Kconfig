@@ -2103,6 +2103,13 @@ config ARCH_BOARD_SG2000_MILKV_DUOS
 		This options selects support for NuttX on Milk-V Duo S based
 		on SOPHGO SG2000 SoC.
 
+config ARCH_BOARD_EIC7700X_STARPRO64
+	bool "PINE64 StarPro64"
+	depends on ARCH_CHIP_EIC7700X
+	---help---
+		This options selects support for NuttX on PINE64 StarPro64 based
+		on ESWIN EIC7700X SoC.
+
 config ARCH_BOARD_S32K118EVB
 	bool "NXP S32K118EVB"
 	depends on ARCH_CHIP_S32K118
@@ -3546,6 +3553,7 @@ config ARCH_BOARD
 	default "canmv230"                  if ARCH_BOARD_K230_CANMV
 	default "ox64"                      if ARCH_BOARD_BL808_OX64
 	default "milkv_duos"                if ARCH_BOARD_SG2000_MILKV_DUOS
+	default "starpro64"                 if ARCH_BOARD_EIC7700X_STARPRO64
 	default "sabre-6quad"               if ARCH_BOARD_SABRE_6QUAD
 	default "tc397"                     if ARCH_BOARD_TC397
 	default "qemu-armv7a"               if ARCH_BOARD_QEMU_ARMV7A
@@ -4536,6 +4544,9 @@ source "boards/risc-v/bl808/ox64/Kconfig"
 endif
 if ARCH_BOARD_SG2000_MILKV_DUOS
 source "boards/risc-v/sg2000/milkv_duos/Kconfig"
+endif
+if ARCH_BOARD_EIC7700X_STARPRO64
+source "boards/risc-v/eic7700x/starpro64/Kconfig"
 endif
 if ARCH_BOARD_ESP32C3_DEVKIT
 source "boards/risc-v/esp32c3-legacy/esp32c3-devkit/Kconfig"
