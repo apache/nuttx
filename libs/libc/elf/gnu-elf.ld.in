@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/modlib/gnu-elf.ld.in
+ * libs/libc/elf/gnu-elf.ld.in
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

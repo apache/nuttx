@@ -30,7 +30,7 @@
 #include <sys/mount.h>
 #include <syslog.h>
 
-#include <nuttx/lib/modlib.h>
+#include <nuttx/lib/elf.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/drivers/ramdisk.h>
 
@@ -116,37 +116,37 @@ int board_boot_image(const char *path, uint32_t hdr_size)
 
   /* Initialize the ELF library to load the program binary. */
 
-  syslog(LOG_INFO, "modlib_init...\n");
+  syslog(LOG_INFO, "libelf_init...\n");
 
-  ret = modlib_initialize(path, &loadinfo);
+  ret = libelf_initialize(path, &loadinfo);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "Failed to modlib_init: %d\n", ret);
+      syslog(LOG_ERR, "Failed to libelf_init: %d\n", ret);
       return ret;
     }
 
   /* Load the program binary */
 
-  syslog(LOG_INFO, "modlib_load...\n");
+  syslog(LOG_INFO, "libelf_load...\n");
 
-  ret = modlib_load(&loadinfo);
+  ret = libelf_load(&loadinfo);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "Failed to modlib_load: %d\n", ret);
+      syslog(LOG_ERR, "Failed to libelf_load: %d\n", ret);
       goto errout_with_init;
     }
 
-  syslog(LOG_INFO, "modlib_bind...\n");
+  syslog(LOG_INFO, "libelf_bind...\n");
 
   memset(&mod, 0, sizeof(struct module_s));
-  ret = modlib_bind(&mod, &loadinfo, NULL, 0);
+  ret = libelf_bind(&mod, &loadinfo, NULL, 0);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "Failed to modlib_bind: %d\n", ret);
+      syslog(LOG_ERR, "Failed to libelf_bind: %d\n", ret);
       goto errout_with_load;
     }
 
-  bss = modlib_findsection(&loadinfo, ".bss");
+  bss = libelf_findsection(&loadinfo, ".bss");
   got = loadinfo.shdr[loadinfo.gotindex].sh_addr;
   msp = loadinfo.shdr[bss].sh_addr + loadinfo.shdr[bss].sh_size +
         CONFIG_IDLETHREAD_STACKSIZE;
@@ -172,9 +172,9 @@ int board_boot_image(const char *path, uint32_t hdr_size)
   ((void (*)(void))loadinfo.ehdr.e_entry + loadinfo.textalloc)();
 
 errout_with_load:
-  modlib_unload(&loadinfo);
+  libelf_unload(&loadinfo);
 errout_with_init:
-  modlib_uninitialize(&loadinfo);
+  libelf_uninitialize(&loadinfo);
   return ret;
 }
 #endif

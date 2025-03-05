@@ -748,14 +748,14 @@ apps/interpreters/minibasic.
 module
 ------
 
-This is a configuration to test CONFIG_LIBC_MODLIB with 64-bit modules.
+This is a configuration to test CONFIG_LIBC_ELF with 64-bit modules.
 This has apps/examples/module enabled.
 This configuration is intended for 64-bit host OS.
 
 module32
 --------
 
-This is a configuration to test CONFIG_LIBC_MODLIB with CONFIG_SIM_M32
+This is a configuration to test CONFIG_LIBC_ELF with CONFIG_SIM_M32
 and 32-bit modules.
 This has apps/examples/module enabled.
 This configuration is intended for 64-bit host OS.
@@ -1353,14 +1353,14 @@ with an MTD RAM driver to simulate the FLASH part.
 sotest
 ------
 
-This is a configuration to test CONFIG_LIBC_MODLIB with 64-bit modules.
+This is a configuration to test CONFIG_LIBC_ELF with 64-bit modules.
 This has apps/examples/sotest enabled.
 This configuration is intended for 64-bit host OS.
 
 sotest32
 --------
 
-This is a configuration to test CONFIG_LIBC_MODLIB with CONFIG_SIM_M32
+This is a configuration to test CONFIG_LIBC_ELF with CONFIG_SIM_M32
 and 32-bit modules.
 This has apps/examples/sotest enabled.
 This configuration is intended for 64-bit host OS.

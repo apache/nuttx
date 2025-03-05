@@ -60,9 +60,9 @@ set(DEQUOTELIST
     "CONFIG_INIT_SYMTAB" # Global symbol table
     "CONFIG_INIT_NEXPORTS" # Global symbol table size
     "CONFIG_INIT_ENTRYPOINT" # Name of entry point function
-    "CONFIG_MODLIB_SYMTAB_ARRAY" # Symbol table array used by modlib functions
-    "CONFIG_MODLIB_NSYMBOLS_VAR" # Variable holding number of symbols in the
-                                 # table
+    "CONFIG_LIBC_ELF_SYMTAB_ARRAY" # Symbol table array used by elf functions
+    "CONFIG_LIBC_ELF_NSYMBOLS_VAR" # Variable holding number of symbols in the
+    # table
     "CONFIG_PASS1_BUILDIR" # Pass1 build directory
     "CONFIG_PASS1_TARGET" # Pass1 build target
     "CONFIG_PASS1_OBJECT" # Pass1 build object
