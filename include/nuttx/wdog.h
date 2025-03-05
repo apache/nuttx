@@ -31,7 +31,7 @@
 
 #include <nuttx/compiler.h>
 #include <nuttx/clock.h>
-#include <nuttx/irq.h>
+#include <errno.h>
 #include <stdint.h>
 
 /****************************************************************************
@@ -88,6 +88,13 @@ struct wdog_s
   FAR void          *picbase;    /* PIC base address */
 #endif
   clock_t            expired;    /* Timer associated with the absoulute time */
+};
+
+struct wdog_period_s
+{
+  struct wdog_s      wdog;       /* Watchdog */
+  clock_t            period;     /* Period time in ticks */
+  wdentry_t          func;       /* Wrapped function to execute when delay expires */
 };
 
 /****************************************************************************
@@ -280,6 +287,34 @@ static inline int wd_start_realtime(FAR struct wdog_s *wdog,
 }
 
 /****************************************************************************
+ * Name: wd_start_period
+ *
+ * Description:
+ *   This function periodically adds a watchdog timer to the active timer.
+ *
+ * Input Parameters:
+ *   wdog     - Pointer of the periodic watchdog.
+ *   delay    - Delayed time in system ticks.
+ *   period   - Period in system ticks.
+ *   wdentry  - Function to call on timeout.
+ *   arg      - Parameter to pass to wdentry.
+ *
+ *   NOTE:  The parameter must be of type wdparm_t.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is return to
+ *   indicate the nature of any failure.
+ *
+ * Assumptions:
+ *   The watchdog routine runs in the context of the timer interrupt handler
+ *   and is subject to all ISR restrictions.
+ *
+ ****************************************************************************/
+
+int wd_start_period(FAR struct wdog_period_s *wdog, sclock_t delay,
+                    clock_t period, wdentry_t wdentry, wdparm_t arg);
+
+/****************************************************************************
  * Name: wd_cancel
  *
  * Description:
@@ -296,6 +331,32 @@ static inline int wd_start_realtime(FAR struct wdog_s *wdog,
  ****************************************************************************/
 
 int wd_cancel(FAR struct wdog_s *wdog);
+
+/****************************************************************************
+ * Name: wd_cancel_period
+ *
+ * Description:
+ *   This function cancels a currently running periodic watchdog timer.
+ *
+ * Input Parameters:
+ *   wdog_period - Pointer of the periodic watchdog.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success;  A negated errno value is returned to
+ *   indicate the nature of any failure.
+ *
+ ****************************************************************************/
+
+static inline int wd_cancel_period(FAR struct wdog_period_s *wdog_period)
+{
+  if (!wdog_period)
+    {
+      return -EINVAL;
+    }
+
+  wdog_period->period = 0;
+  return wd_cancel(&wdog_period->wdog);
+}
 
 /****************************************************************************
  * Name: wd_gettime

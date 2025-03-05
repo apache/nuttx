@@ -82,6 +82,9 @@
 
 #endif
 
+#define wdparm_to_ptr(type, arg) ((type)(uintptr_t)arg)
+#define ptr_to_wdparm(ptr)       wdparm_to_ptr(wdparm_t, ptr)
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -93,6 +96,40 @@ static unsigned int g_wdtimernested;
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: wdentry_period
+ *
+ * Description:
+ *   Periodic watchdog timer callback function.
+ *
+ * Input Parameters:
+ *   arg - The argument of the wdog callback.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void wdentry_period(wdparm_t arg)
+{
+  FAR struct wdog_period_s *wdperiod;
+
+  wdperiod = wdparm_to_ptr(FAR struct wdog_period_s *, arg);
+
+  wdperiod->func(wdperiod->wdog.arg);
+
+  /* Since we set `ticks++` at `wd_start_abstick`,
+   * we need to use `expired - 1` here to avoid time drift.
+   */
+
+  if (wdperiod->period != 0)
+    {
+      wd_start_abstick(&wdperiod->wdog,
+                       wdperiod->wdog.expired + wdperiod->period - 1,
+                       wdentry_period, wdperiod->wdog.arg);
+    }
+}
 
 /****************************************************************************
  * Name: wd_expiration
@@ -112,9 +149,9 @@ static unsigned int g_wdtimernested;
 static inline_function void wd_expiration(clock_t ticks)
 {
   FAR struct wdog_s *wdog;
-  irqstate_t flags;
-  wdentry_t func;
-  wdparm_t arg;
+  irqstate_t         flags;
+  wdentry_t          func;
+  wdparm_t           arg;
 
   flags = spin_lock_irqsave(&g_wdspinlock);
 
@@ -148,8 +185,10 @@ static inline_function void wd_expiration(clock_t ticks)
       /* Indicate that the watchdog is no longer active. */
 
       func = wdog->func;
-      arg = wdog->arg;
       wdog->func = NULL;
+
+      arg = func != wdentry_period ? wdog->arg : ptr_to_wdparm(
+            list_container_of(wdog, struct wdog_period_s, wdog));
 
       /* Execute the watchdog function */
 
@@ -394,6 +433,45 @@ int wd_start(FAR struct wdog_s *wdog, sclock_t delay,
 
   return wd_start_abstick(wdog, clock_systime_ticks() + delay,
                           wdentry, arg);
+}
+
+/****************************************************************************
+ * Name: wd_start_period
+ *
+ * Description:
+ *   This function periodically adds a watchdog timer to the active timer.
+ *
+ * Input Parameters:
+ *   wdog     - Pointer of the periodic watchdog.
+ *   delay    - Delayed time in system ticks.
+ *   period   - Period in system ticks.
+ *   wdentry  - Function to call on timeout.
+ *   arg      - Parameter to pass to wdentry.
+ *
+ *   NOTE:  The parameter must be of type wdparm_t.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is return to
+ *   indicate the nature of any failure.
+ *
+ * Assumptions:
+ *   The watchdog routine runs in the context of the timer interrupt handler
+ *   and is subject to all ISR restrictions.
+ *
+ ****************************************************************************/
+
+int wd_start_period(FAR struct wdog_period_s *wdog, sclock_t delay,
+                    clock_t period, wdentry_t wdentry, wdparm_t arg)
+{
+  if (!wdog || !period || !wdentry)
+    {
+      return -EINVAL;
+    }
+
+  wdog->func   = wdentry;
+  wdog->period = period;
+
+  return wd_start(&wdog->wdog, delay, wdentry_period, arg);
 }
 
 /****************************************************************************
