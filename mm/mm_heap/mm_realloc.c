@@ -393,7 +393,9 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
 
       newmem = kasan_unpoison(newmem, MM_SIZEOF_NODE(oldnode) -
                               MM_ALLOCNODE_OVERHEAD);
-      if (kasan_reset_tag(newmem) != kasan_reset_tag(oldmem))
+
+      oldmem = kasan_set_tag(oldmem, kasan_get_tag(newmem));
+      if (newmem != oldmem)
         {
           /* Now we have to move the user contents 'down' in memory.  memcpy
            * should be safe for this.
