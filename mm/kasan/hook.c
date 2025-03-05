@@ -24,7 +24,6 @@
 
 #include <nuttx/mm/kasan.h>
 #include <nuttx/compiler.h>
-#include <nuttx/irq.h>
 
 #include <assert.h>
 #include <debug.h>
@@ -177,9 +176,6 @@ static void kasan_show_memory(FAR const uint8_t *addr, size_t size,
 static void kasan_report(FAR const void *addr, size_t size,
                          bool is_write, FAR void *return_address)
 {
-  irqstate_t flags;
-
-  flags = enter_critical_section();
   bool dump_only = (is_write && MM_KASAN_DISABLE_WRITE_PANIC) ||
                    (!is_write && MM_KASAN_DISABLE_READ_PANIC);
 
@@ -205,8 +201,6 @@ static void kasan_report(FAR const void *addr, size_t size,
     {
       PANIC();
     }
-
-  leave_critical_section(flags);
 }
 
 #if MM_KASAN_WATCHPOINT > 0
