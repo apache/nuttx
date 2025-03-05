@@ -36,11 +36,73 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
+#include "x86_64_internal.h"
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
 unsigned long g_x86_64_timer_freq;
+
+/****************************************************************************
+ * Inline Functions
+ ****************************************************************************/
+
+static inline uint64_t x86_64_timer_tsc_freq_vmware(void)
+{
+  uint32_t eax_tsc;
+  uint32_t ebx_apic;
+  uint32_t ecx;
+  uint32_t edx;
+
+  /* CPUID Leaf 0x40000010, Timing Information.
+   * Timing information leaf first defined by VMware.
+   * It is also adopted by many hypervisors such as ACRN Hypervisor.
+   * The leaf returns the TSC frequency and APIC frequency.
+   * EAX - TSC frequency in kHz.
+   * EBX - APIC frequency in kHz.
+   */
+
+  x86_64_cpuid(X86_64_CPUID_TSC_VMWARE, 0x0,
+               &eax_tsc, &ebx_apic, &ecx, &edx);
+
+  /* Suppress the warning. */
+
+  UNUSED(ecx);
+  UNUSED(edx);
+  UNUSED(ebx_apic);
+
+  return 1000ul * eax_tsc;
+}
+
+static inline uint64_t x86_64_timer_tsc_freq_15h(void)
+{
+  uint32_t crystal_freq;
+  uint32_t numerator;
+  uint32_t denominator;
+  uint32_t edx;
+
+  /* CPUID Leaf 0x15h, TSC frequency properties.
+   * The leaf returns the TSC frequency properties.
+   * EAX - Denominator.
+   * EBX - Numerator.
+   * ECX - Crystal Frequency.
+   */
+
+  x86_64_cpuid(X86_64_CPUID_TSC, 0x0,
+               &denominator, &numerator, &crystal_freq, &edx);
+
+  /* Suppress the warning. */
+
+  UNUSED(edx);
+
+  if (numerator == 0 || denominator == 0 || crystal_freq == 0)
+    {
+      return 0;
+    }
+
+  return crystal_freq / denominator * numerator;
+}
 
 /****************************************************************************
  * Public Functions
@@ -74,29 +136,24 @@ unsigned long g_x86_64_timer_freq;
 void x86_64_timer_calibrate_freq(void)
 {
 #ifdef CONFIG_ARCH_INTEL64_TSC_DEADLINE
-#  if CONFIG_ARCH_INTEL64_CORE_FREQ_KHZ == 0
-  unsigned long crystal_freq;
-  unsigned long numerator;
-  unsigned long denominator;
+  g_x86_64_timer_freq = CONFIG_ARCH_INTEL64_CORE_FREQ_KHZ * 1000ul;
 
-  __asm__ volatile("cpuid"
-                   : "=c" (crystal_freq), "=b" (numerator),
-                     "=a" (denominator)
-                   : "a" (X86_64_CPUID_TSC)
-                   : "rdx", "memory");
-
-  if (numerator == 0 || denominator == 0 || crystal_freq == 0)
+  if (CONFIG_ARCH_INTEL64_CORE_FREQ_KHZ == 0)
     {
+#  ifndef CONFIG_ARCH_INTEL64_TSC_FREQ_VMWARE
+      g_x86_64_timer_freq = x86_64_timer_tsc_freq_15h();
+#  else
+      g_x86_64_timer_freq = x86_64_timer_tsc_freq_vmware();
+#  endif
+    }
+#elif defined(CONFIG_ARCH_INTEL64_TSC)
+  g_x86_64_timer_freq = CONFIG_ARCH_INTEL64_APIC_FREQ_KHZ * 1000ul;
+#endif
+
+  if (g_x86_64_timer_freq == 0)
+    {
+      /* The TSC frequency is not available */
+
       PANIC();
     }
-  else
-    {
-      g_x86_64_timer_freq = crystal_freq / denominator * numerator;
-    }
-#  else
-  g_x86_64_timer_freq = CONFIG_ARCH_INTEL64_CORE_FREQ_KHZ * 1000L;
-#  endif
-#elif defined(CONFIG_ARCH_INTEL64_TSC)
-  g_x86_64_timer_freq = CONFIG_ARCH_INTEL64_APIC_FREQ_KHZ * 1000L;
-#endif
 }
