@@ -267,6 +267,11 @@ ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   ARCHOPTIMIZATION += $(CONFIG_DEBUG_SYMBOLS_LEVEL)
 endif
 
+# Fix -Wshadow warnings for built-in bitops on mips32
+
+ARCHOPTIMIZATION += -fno-builtin-ffs -fno-builtin-ffsl -fno-builtin-ffsll
+ARCHOPTIMIZATION += -fno-builtin-fls -fno-builtin-flsl -fno-builtin-flsll
+
 ARCHCFLAGS += -fno-common
 ARCHCXXFLAGS += -fno-common
 
