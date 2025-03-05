@@ -507,7 +507,7 @@ static int nvs_flash_direct_cmp(FAR struct nvs_fs *fs, uint32_t addr1,
                                 uint32_t addr2, size_t len)
 {
   uint8_t buf1[nvs_buffer_size(fs)];
-  uint8_t buf2[sizeof(buf1)];
+  uint8_t buf2[nvs_buffer_size(fs)];
   size_t bytes_to_cmp;
   int rc;
 
