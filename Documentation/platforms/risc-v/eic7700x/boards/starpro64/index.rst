@@ -6,6 +6,9 @@ PINE64 StarPro64
 is a RISC-V Single-Board Computer based on the ESWIN EIC7700X RISC-V SoC
 with Quad-Core 64-bit RISC-V CPU, 32 GB LPDDR5 RAM and 100 Mbps Ethernet.
 
+.. figure:: starpro64.jpg
+   :align: center
+
 Features
 ========
 
