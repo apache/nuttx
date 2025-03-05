@@ -292,7 +292,7 @@ You can run the game by using ``brick`` command::
     nsh> brick
 
 Here is the sample wiring diagram that demonstrates how to wire ws2812 with buttons for brickmatch example:
-   
+
 .. figure:: esp32-brickmatch-game-schematic.jpg
     :align: center
 
@@ -404,26 +404,83 @@ It can be tested by executing the ``elf`` application.
 espnow
 ------
 
+WARNING: espnow and wifi are using the same hardware on the esp32. When a
+connection to a accespoint is made while espnow is operational the espnow
+connection will break if the accesspoint wants to use a different wifi
+channel.
+
 A ``espnow`` setup can be used to create a 6lowpan network of esp32 nodes.
 A sample configuration is found in ``esp32-devkitc:espnow``. The node
-address can be changed under ``ESP32 Peripherals`` option ``Espnow``. To
-test the communication using ``udpserver`` and ``udpclient`` two nodes
-need to be prepared using e.g. node address ``0x0a`` and ``0x0b``.
+address can be changed under ``ESP32 Peripherals`` option ``Espnow``. The
+node address is direct related to the ipv6 address of the node. Changing
+the ipv6 address also changes the node address.
 
-On node ``0x0a`` the server can be started using:
+To test the communication using ``udpserver`` and ``udpclient`` two nodes
+need to be prepared with different ipv6 address.
 
-``nsh> ifup wpan0``
-``ifup wpan0..OK``
-``nsh> udpserver &``
+The server node is assigned the node address ``0x000a`` and the udp server
+is started using:
 
-On node ``0x0b`` the client can be started using:
+.. code-block :: bash
 
-``nsh> ifup wpan0``
-``ifup wpan0..OK``
-``nsh> udpclient fe80::ff:fe00:a``
+  nsh> ifconfig wpan0 inet6 fe80::ff:fe00:a
+  nsh> ifup wpan0
+  ifup wpan0..OK
+  nsh> udpserver &
+  udpserver [6:100]
 
-The client node will show that the messages are sent while the server
-shows that messages are received.
+The client node can use the default node address (``0xfffe``) and the
+updclient can be started using:
+
+.. code-block :: bash
+
+  nsh> ifup wpan0
+  ifup wpan0..OK
+  nsh> udpclient fe80::ff:fe00:a
+  client: 0. Sending 96 bytes
+  client: 0. Sent 96 bytes
+  client: 1. Sending 96 bytes
+  client: 1. Sent 96 bytes
+
+The server node will show the incoming messages:
+
+.. code-block :: bash
+
+  nsh> udpserver &
+  udpserver [6:100]
+  nsh> server: 0. Receiving up 1024 bytes
+  server: 0. Received 96 bytes from fe80:0000:0000:0000:0000:00ff:fe00:feff port 5472
+  server: 1. Receiving up 1024 bytes
+  server: 1. Received 96 bytes from fe80:0000:0000:0000:0000:00ff:fe00:feff port 5472
+  server: 2. Receiving up 1024 bytes
+
+The sample configuration also allows a telnet session over espnow:
+
+On the server (node ``0x000a``):
+
+.. code-block :: bash
+
+  nsh> ifconfig wpan0 inet6 fe80::ff:fe00:a
+  nsh> ifup wpan0
+  ifup wpan0..OK
+  nsh> telnetd -6 &
+
+On the client (node ``Oxfffe``):
+
+.. code-block :: bash
+
+  nsh> ifup wpan0
+  ifup wpan0..OK
+  nsh> telnet fe80::ff:fe00:a
+
+  NuttShell (NSH) NuttX-12.8.0
+  nsh> free
+  free
+        total       used       free    maxused    maxfree  nused  nfree name
+       253292      65996     187296      66624     129952    185      3 Umem
+  nsh> exit
+  exit
+  nsh>
 
 i2schar
 -------
