@@ -953,6 +953,7 @@ static int rptun_dev_stop(FAR struct remoteproc *rproc, bool stop_ns)
 {
   FAR struct rptun_priv_s *priv = rproc->priv;
   FAR struct rpmsg_device *rdev = &priv->rvdev.rdev;
+  FAR struct virtio_device *vdev = priv->rvdev.vdev;
 
   if (priv->rproc.state == RPROC_OFFLINE)
     {
@@ -975,7 +976,7 @@ static int rptun_dev_stop(FAR struct remoteproc *rproc, bool stop_ns)
   /* Remote proc remove */
 
   rpmsg_deinit_vdev(&priv->rvdev);
-  remoteproc_remove_virtio(rproc, priv->rvdev.vdev);
+  remoteproc_remove_virtio(rproc, vdev);
 
   /* Remote proc stop and shutdown */
 
