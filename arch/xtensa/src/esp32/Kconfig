@@ -311,7 +311,7 @@ config ESP32_SDMMC
 		No yet implemented
 
 config ESP32_I2S
-	bool "I2S"
+	bool "I2S (legacy implementation)"
 	select I2S
 	---help---
 		See the Board Selection menu to configure the pins used by I2S.

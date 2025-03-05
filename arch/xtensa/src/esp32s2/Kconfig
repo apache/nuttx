@@ -229,7 +229,7 @@ config ESP32S2_RNG
 		ESP32-S2 supports a RNG that passed on Dieharder test suite.
 
 config ESP32S2_I2S
-	bool "I2S"
+	bool "I2S (legacy implementation)"
 	default n
 	select I2S
 	select ARCH_DMA
