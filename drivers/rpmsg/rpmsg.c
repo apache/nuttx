@@ -531,7 +531,7 @@ int rpmsg_register(FAR const char *path, FAR struct rpmsg_s *rpmsg,
   metal_list_init(&rpmsg->bind);
   nxrmutex_init(&rpmsg->lock);
   rpmsg->ops = ops;
-  atomic_store(&rpmsg->signals, RPMSG_SIGNAL_RUNNING);
+  atomic_set(&rpmsg->signals, RPMSG_SIGNAL_RUNNING);
 
   /* Add priv to list */
 
@@ -605,8 +605,8 @@ void rpmsg_modify_signals(FAR struct rpmsg_s *rpmsg,
   FAR struct metal_list *node;
   bool needlock;
 
-  atomic_fetch_and(&rpmsg->signals, ~clrflags);
-  atomic_fetch_or(&rpmsg->signals, setflags);
+  atomic_fetch_and_acquire(&rpmsg->signals, ~clrflags);
+  atomic_fetch_or_acquire(&rpmsg->signals, setflags);
 
   /* Send signal to Router Hub */
 

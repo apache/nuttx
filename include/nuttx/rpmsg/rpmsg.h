@@ -67,7 +67,7 @@ struct rpmsg_s
 #ifdef CONFIG_RPMSG_TEST
   struct rpmsg_endpoint        test;
 #endif
-  atomic_int                   signals;
+  atomic_t                     signals;
 };
 
 struct rpmsg_timestamp_s
