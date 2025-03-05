@@ -32,6 +32,7 @@
 #include <stdint.h>
 
 #include <nuttx/mutex.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/nx/nx.h>
 #include <nuttx/nx/nxtk.h>
@@ -161,6 +162,10 @@ struct nxterm_state_s
 
   FAR struct pollfd *fds[CONFIG_NXTERM_NPOLLWAITERS];
 #endif /* CONFIG_NXTERM_NXKBDIN */
+
+  /* Spinlock */
+
+  spinlock_t spinlock;
 };
 
 /****************************************************************************

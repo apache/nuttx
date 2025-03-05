@@ -34,7 +34,7 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 
 #include "nxterm.h"
 
@@ -55,9 +55,9 @@ static void nxterm_pollnotify(FAR struct nxterm_state_s *priv,
 
   /* This function may be called from an interrupt handler */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave_nopreempt(&priv->spinlock);
   poll_notify(priv->fds, CONFIG_NXTERM_NPOLLWAITERS, eventset);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore_nopreempt(&priv->spinlock, flags);
 }
 
 /****************************************************************************
@@ -224,6 +224,7 @@ int nxterm_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
   FAR struct inode *inode = filep->f_inode;
   FAR struct nxterm_state_s *priv;
   pollevent_t eventset;
+  spinlock_t flags;
   int ret;
   int i;
 
@@ -234,12 +235,7 @@ int nxterm_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
 
   /* Get exclusive access to the driver structure */
 
-  ret = nxmutex_lock(&priv->lock);
-  if (ret < 0)
-    {
-      gerr("ERROR: nxmutex_lock failed\n");
-      return ret;
-    }
+  flags = spin_lock_irqsave_nopreempt(&priv->spinlock);
 
   /* Are we setting up the poll?  Or tearing it down? */
 
@@ -310,7 +306,7 @@ int nxterm_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
     }
 
 errout:
-  nxmutex_unlock(&priv->lock);
+  spin_unlock_irqrestore_nopreempt(&priv->spinlock, flags);
   return ret;
 }
 
