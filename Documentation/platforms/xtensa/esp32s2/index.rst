@@ -92,6 +92,22 @@ These steps are given in the setup guide in
 Building and flashing NuttX
 ===========================
 
+Installing esptool
+------------------
+
+First, make sure that ``esptool.py`` is installed and up-to-date.
+This tool is used to convert the ELF to a compatible ESP32-S2 image and to flash the image into the board.
+
+It can be installed with: ``pip install esptool>=4.8.1``.
+
+.. warning::
+    Installing ``esptool.py`` may required a Python virtual environment on newer systems.
+    This will be the case if the ``pip install`` command throws an error such as:
+    ``error: externally-managed-environment``.
+
+    If you are not familiar with virtual environments, refer to `Managing esptool on virtual environment`_ for instructions on how to install ``esptool.py``.
+
+
 Bootloader and partitions
 -------------------------
 
@@ -120,20 +136,64 @@ Simple Boot is used, for instance)::
 Building and Flashing
 ---------------------
 
-First, make sure that ``esptool.py`` is installed.  This tool is used to convert the ELF to a
-compatible ESP32-S2 image and to flash the image into the board.
-It can be installed with: ``pip install esptool==4.8.dev4``.
-
-It's a two-step process where the first converts the ELF file into an ESP32-S2 compatible binary
-and the second flashes it to the board. These steps are included in the build system and it is
+This is a two-step process where the first step converts the ELF file into an ESP32-S2 compatible binary
+and the second step flashes it to the board. These steps are included in the build system and it is
 possible to build and flash the NuttX firmware simply by running::
 
     $ make flash ESPTOOL_PORT=<port> ESPTOOL_BINDIR=./
 
-where ``<port>`` is typically ``/dev/ttyUSB0`` or similar. ``ESPTOOL_BINDIR=./`` is the path of the
-externally-built 2nd stage bootloader and the partition table (if applicable): when built using the
-``make bootloader``, these files are placed into ``nuttx`` folder. ``ESPTOOL_BAUD`` is able to
-change the flash baud rate if desired.
+where:
+
+* ``ESPTOOL_PORT`` is typically ``/dev/ttyUSB0`` or similar.
+* ``ESPTOOL_BINDIR=./`` is the path of the externally-built 2nd stage bootloader and the partition table (if applicable): when built using the ``make bootloader``, these files are placed into ``nuttx`` folder.
+* ``ESPTOOL_BAUD`` is able to change the flash baud rate if desired.
+
+Flashing NSH Example
+--------------------
+
+This example shows how to build and flash the ``nsh`` defconfig for the ESP32-S2-Saola-1 board::
+
+    $ cd nuttx
+    $ make distclean
+    $ ./tools/configure.sh esp32s2-saola-1:nsh
+    $ make -j$(nproc)
+
+When the build is complete, the firmware can be flashed to the board using the command::
+
+    $ make -j$(nproc) flash ESPTOOL_PORT=<port> ESPTOOL_BINDIR=./
+
+where ``<port>`` is the serial port where the board is connected::
+
+  $ make flash ESPTOOL_PORT=/dev/ttyUSB0 ESPTOOL_BINDIR=./
+  CP: nuttx.hex
+  MKIMAGE: ESP32-S2 binary
+  esptool.py -c esp32s2 elf2image --ram-only-header -fs 4MB -fm dio -ff 40m -o nuttx.bin nuttx
+  esptool.py v4.8.1
+  Creating esp32s2 image...
+  Image has only RAM segments visible. ROM segments are hidden and SHA256 digest is not appended.
+  Merged 1 ELF section
+  Successfully created esp32s2 image.
+  Generated: nuttx.bin
+  esptool.py -c esp32s2 -p /dev/ttyUSB0 -b 921600   write_flash -fs detect -fm dio -ff 40m 0x1000 nuttx.bin
+  esptool.py v4.8.1
+  Serial port /dev/ttyUSB0
+  Connecting....
+  Chip is ESP32-S2 (revision v0.0)
+  [...]
+  Flash will be erased from 0x00001000 to 0x00032fff...
+  Compressed 202280 bytes to 71796...
+  Wrote 202280 bytes (71796 compressed) at 0x00001000 in 2.3 seconds (effective 698.5 kbit/s)...
+  Hash of data verified.
+
+  Leaving...
+  Hard resetting via RTS pin...
+
+Now opening the serial port with a terminal emulator should show the NuttX console::
+
+  $ picocom -b 115200 /dev/ttyUSB0
+  NuttShell (NSH) NuttX-12.8.0
+  nsh> uname -a
+  NuttX 12.8.0 759d37b97c-dirty Mar  5 2025 20:26:00 xtensa esp32s2-saola-1
 
 Debugging
 =========
@@ -319,15 +379,15 @@ Peripheral Support NOTES
 ADC          No
 AES          No
 CAN/TWAI     Yes
+DAC          No
 DMA          Yes
-eFuse        No
-Ethernet     No
+eFuse        Yes
 GPIO         Yes
 I2C          Yes    Master and Slave mode supported
 I2S          Yes
-LED_PWM      No
+LED/PWM      Yes
 Pulse_CNT    Yes
-RMT          No
+RMT          Yes
 RNG          Yes
 RSA          No
 RTC          Yes
@@ -338,8 +398,9 @@ SPIRAM       Yes
 Timers       Yes
 Touch        Yes
 UART         Yes
+USB OTG      No
 Watchdog     Yes
-Wifi         Yes
+Wi-Fi        Yes
 ========== ======= =====
 
 Memory Map
@@ -636,6 +697,71 @@ to ``Application image secondary slot``.
    :menuselection:`System Type --> Application Image Configuration --> UART ROM download mode`
    and change usage mode to ``Release`` in `System Type --> Application Image Configuration --> Enable usage mode`.
    **After disabling UART Download Mode you will not be able to flash other images through UART.**
+
+_`Managing esptool on virtual environment`
+==========================================
+
+This section describes how to install ``esptool``, ``imgtool`` or any other Python packages in a
+proper environment.
+
+Normally, a Linux-based OS would already have Python 3 installed by default. Up to a few years ago,
+you could simply call ``pip install`` to install packages globally. However, this is no longer recommended
+as it can lead to conflicts between packages and versions. The recommended way to install Python packages
+is to use a virtual environment.
+
+A virtual environment is a self-contained directory that contains a Python installation for a particular
+version of Python, plus a number of additional packages. You can create a virtual environment for each
+project you are working on, and install the required packages in that environment.
+
+Two alternatives are explained below, you can select any one of those.
+
+Using pipx (recommended)
+------------------------
+
+``pipx`` is a tool that makes it easy to install Python packages in a virtual environment. To install
+``pipx``, you can run the following command (using apt as example)::
+
+    $ apt install pipx
+
+Once you have installed ``pipx``, you can use it to install Python packages in a virtual environment. For
+example, to install the ``esptool`` package, you can run the following command::
+
+    $ pipx install esptool
+
+This will create a new virtual environment in the ``~/.local/pipx/venvs`` directory, which contains the
+``esptool`` package. You can now use the ``esptool`` command as normal, and so will the build system.
+
+Make sure to run ``pipx ensurepath`` to add the ``~/.local/bin`` directory to your ``PATH``. This will
+allow you to run the ``esptool`` command from any directory.
+
+Using venv (alternative)
+------------------------
+To create a virtual environment, you can use the ``venv`` module, which is included in the Python standard
+library. To create a virtual environment, you can run the following command::
+
+    $ python3 -m venv myenv
+
+This will create a new directory called ``myenv`` in the current directory, which contains a Python
+installation and a copy of the Python standard library. To activate the virtual environment, you can run
+the following command::
+
+    $ source myenv/bin/activate
+
+This will change your shell prompt to indicate that you are now working in the virtual environment. You can
+now install packages using ``pip``. For example, to install the ``esptool`` package, you can run the following
+command::
+
+    $ pip install esptool
+
+This will install the ``esptool`` package in the virtual environment. You can now use the ``esptool`` command as
+normal. When you are finished working in the virtual environment, you can deactivate it by running the following
+command::
+
+    $ deactivate
+
+This will return your shell prompt to its normal state. You can reactivate the virtual environment at any time by
+running the ``source myenv/bin/activate`` command again. You can also delete the virtual environment by deleting
+the directory that contains it.
 
 Supported Boards
 ================
