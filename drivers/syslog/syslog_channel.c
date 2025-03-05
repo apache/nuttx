@@ -47,6 +47,10 @@
 #  include <nuttx/segger/rtt.h>
 #endif
 
+#ifdef CONFIG_SYSLOG_CDCACM
+#  include <nuttx/usb/cdcacm.h>
+#endif
+
 #ifdef CONFIG_ARCH_LOWPUTC
 #  include <nuttx/arch.h>
 #endif
@@ -57,11 +61,18 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-#if defined(CONFIG_SYSLOG_DEFAULT)
+#ifdef CONFIG_SYSLOG_DEFAULT
 static int syslog_default_putc(FAR syslog_channel_t *channel,
                                int ch);
 static ssize_t syslog_default_write(FAR syslog_channel_t *channel,
                                     FAR const char *buffer, size_t buflen);
+#endif
+
+#ifdef CONFIG_SYSLOG_CDCACM
+static int syslog_cdcacm_putc(FAR struct syslog_channel_s *channel,
+                              int ch);
+static ssize_t syslog_cdcacm_write(FAR struct syslog_channel_s *channel,
+                                   FAR const char *buffer, size_t buflen);
 #endif
 
 /****************************************************************************
@@ -130,6 +141,25 @@ static syslog_channel_t g_rtt_channel =
 #  endif
 #  ifdef CONFIG_SYSLOG_CRLF
   , SYSLOG_CHANNEL_DISABLE_CRLF
+#  endif
+};
+#endif
+
+#ifdef CONFIG_SYSLOG_CDCACM
+static const struct syslog_channel_ops_s g_cdcacm_channel_ops =
+{
+  syslog_cdcacm_putc,
+  syslog_cdcacm_putc,
+  NULL,
+  syslog_cdcacm_write,
+  syslog_cdcacm_write
+};
+
+static struct syslog_channel_s g_cdcacm_channel =
+{
+  &g_cdcacm_channel_ops
+#  ifdef CONFIG_SYSLOG_IOCTL
+  , "cdcacm"
 #  endif
 };
 #endif
@@ -207,7 +237,10 @@ g_syslog_channel[CONFIG_SYSLOG_MAX_CHANNELS] =
   &g_rpmsg_channel,
 #endif
 #ifdef CONFIG_SYSLOG_RTT
-  &g_rtt_channel
+  &g_rtt_channel,
+#endif
+#ifdef CONFIG_SYSLOG_CDCACM
+  &g_cdcacm_channel
 #endif
 };
 
@@ -294,6 +327,27 @@ static ssize_t syslog_default_write(FAR syslog_channel_t *channel,
 
   UNUSED(channel);
   return buflen;
+}
+#endif
+
+#ifdef CONFIG_SYSLOG_CDCACM
+static int syslog_cdcacm_putc(FAR struct syslog_channel_s *channel, int ch)
+{
+  char tmp;
+
+  tmp = ch;
+  cdcacm_write(&tmp, 1);
+
+  UNUSED(channel);
+  return ch;
+}
+
+static ssize_t syslog_cdcacm_write(FAR struct syslog_channel_s *channel,
+                                   FAR const char *buffer, size_t buflen)
+{
+  UNUSED(channel);
+
+  return cdcacm_write(buffer, buflen);
 }
 #endif
 

@@ -234,6 +234,10 @@ static ssize_t cdcuart_sendbuf(FAR struct uart_dev_s *dev,
  * Private Data
  ****************************************************************************/
 
+#ifdef CONFIG_SYSLOG_CDCACM
+static FAR struct cdcacm_dev_s *g_syslog_cdcacm;
+#endif
+
 /* USB class device *********************************************************/
 
 static const struct usbdevclass_driverops_s g_driverops =
@@ -2751,6 +2755,76 @@ static void cdcacm_rcvpacket(FAR struct cdcacm_dev_s *priv)
  * Public Functions
  ****************************************************************************/
 
+#ifdef CONFIG_SYSLOG_CDCACM
+/****************************************************************************
+ * Name: cdcacm_write
+ *
+ * Description:
+ *   This provides a cdcacm write method for syslog devices that support
+ *   multiple byte writes
+ *
+ * Input Parameters:
+ *   buffer - The buffer containing the data to be output
+ *   buflen - The number of bytes in the buffer
+ *
+ * Returned Value:
+ *   On success, the number of characters written is returned.  A negated
+ *   errno value is returned on any failure.
+ *
+ ****************************************************************************/
+
+ssize_t cdcacm_write(FAR const char *buffer, size_t buflen)
+{
+  FAR struct cdcacm_dev_s *priv = g_syslog_cdcacm;
+  size_t len = 0;
+
+  while (len < buflen)
+    {
+      irqstate_t flags;
+
+      if (!priv || !priv->ctrlline)
+        {
+          return -EINVAL;
+        }
+
+      flags = enter_critical_section();
+
+      if (cdcuart_txready(&priv->serdev))
+        {
+          ssize_t ret = cdcuart_sendbuf(&priv->serdev,
+                                        buffer + len,
+                                        buflen - len);
+          if (ret < 0)
+            {
+              leave_critical_section(flags);
+              return ret;
+            }
+
+          len += ret;
+        }
+
+      leave_critical_section(flags);
+    }
+
+  return buflen;
+}
+
+/****************************************************************************
+ * Name: cdcacm_disable_syslog
+ *
+ * Description:
+ *   Disable CDCACM syslog channel by clearing the globle pointer.
+ *   This function is used in specific situation, such as must disable
+ *   cdcacm log printing when usb re-enumeration.
+ *
+ ****************************************************************************/
+
+void cdcacm_disable_syslog(void)
+{
+  g_syslog_cdcacm = NULL;
+}
+#endif
+
 /****************************************************************************
  * Name: cdcacm_classobject
  *
@@ -2876,6 +2950,14 @@ int cdcacm_classobject(int minor, FAR struct usbdev_devinfo_s *devinfo,
     }
 
   *classdev = &drvr->drvr;
+
+#ifdef CONFIG_SYSLOG_CDCACM
+  if (minor == CONFIG_SYSLOG_CDCACM_MINOR)
+    {
+      g_syslog_cdcacm = priv;
+    }
+#endif
+
   return OK;
 
 errout_with_class:
@@ -2990,6 +3072,13 @@ void cdcacm_uninitialize(FAR struct usbdevclass_driver_s *classdev)
   FAR struct cdcacm_dev_s    *priv = drvr->dev;
   char devname[CDCACM_DEVNAME_SIZE];
   int ret;
+
+#ifdef CONFIG_SYSLOG_CDCACM
+  if (g_syslog_cdcacm == priv)
+    {
+      g_syslog_cdcacm = NULL;
+    }
+#endif
 
   /* Disconnect in case we are connected */
 
