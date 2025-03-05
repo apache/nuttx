@@ -73,6 +73,21 @@ You can edit your shell's rc files if you don't use bash.
 Building and flashing NuttX
 ===========================
 
+Installing esptool
+------------------
+
+Make sure that ``esptool.py`` is installed and up-to-date.
+This tool is used to convert the ELF to a compatible ESP32-C3 image and to flash the image into the board.
+
+It can be installed with: ``pip install esptool>=4.8.1``.
+
+.. warning::
+    Installing ``esptool.py`` may required a Python virtual environment on newer systems.
+    This will be the case if the ``pip install`` command throws an error such as:
+    ``error: externally-managed-environment``.
+
+    If you are not familiar with virtual environments, refer to `Managing esptool on virtual environment`_ for instructions on how to install ``esptool.py``.
+
 Bootloader and partitions
 -------------------------
 
@@ -101,24 +116,67 @@ Simple Boot is used, for instance)::
 
       $ esptool.py erase_flash
 
-Building and flashing
+Building and Flashing
 ---------------------
 
-First, make sure that ``esptool.py`` is installed.  This tool is used to convert
-the ELF to a compatible ESP32-C3 image and to flash the image into the board.
-It can be installed with: ``pip install esptool==4.8.dev4``.
+This is a two-step process where the first step converts the ELF file into an ESP32-C3 compatible binary
+and the second step flashes it to the board. These steps are included in the build system and it is
+possible to build and flash the NuttX firmware simply by running::
 
-Configure the NuttX project: ``./tools/configure.sh esp32c3-generic:nsh``
-Run ``make`` to build the project.  Note that the conversion mentioned above is
-included in the build process.
-The ``esptool.py`` is used to flash all the binaries. However, this is also
-included in the build process and we can build and flash with::
+    $ make flash ESPTOOL_PORT=<port> ESPTOOL_BINDIR=./
 
-  make flash ESPTOOL_PORT=<port> ESPTOOL_BINDIR=./
+where:
 
-Where ``<port>`` is typically ``/dev/ttyUSB0`` or similar and ``./`` is
-the path to the folder containing the externally-built 2nd stage bootloader for
-the ESP32-C3 as explained above.
+* ``ESPTOOL_PORT`` is typically ``/dev/ttyUSB0`` or similar.
+* ``ESPTOOL_BINDIR=./`` is the path of the externally-built 2nd stage bootloader and the partition table (if applicable): when built using the ``make bootloader``, these files are placed into ``nuttx`` folder.
+* ``ESPTOOL_BAUD`` is able to change the flash baud rate if desired.
+
+Flashing NSH Example 
+--------------------
+
+This example shows how to build and flash the ``nsh`` defconfig for the ESP32-C3-DevKitC-02 board::
+
+    $ cd nuttx
+    $ make distclean
+    $ ./tools/configure.sh esp32c3-generic:nsh
+    $ make -j$(nproc)
+
+When the build is complete, the firmware can be flashed to the board using the command::
+
+    $ make -j$(nproc) flash ESPTOOL_PORT=<port> ESPTOOL_BINDIR=./
+
+where ``<port>`` is the serial port where the board is connected::
+
+  $ make flash ESPTOOL_PORT=/dev/ttyUSB0 ESPTOOL_BINDIR=./
+  CP: nuttx.hex
+  MKIMAGE: NuttX binary
+  esptool.py -c esp32c3 elf2image --ram-only-header -fs 4MB -fm dio -ff 80m -o nuttx.bin nuttx
+  esptool.py v4.8.1
+  Creating esp32c3 image...
+  Image has only RAM segments visible. ROM segments are hidden and SHA256 digest is not appended.
+  Merged 1 ELF section
+  Successfully created esp32c3 image.
+  Generated: nuttx.bin
+  esptool.py -c esp32c3 -p /dev/ttyUSB0 -b 921600  write_flash -fs 4MB -fm dio -ff 80m 0x0000 nuttx.bin
+  esptool.py v4.8.1
+  Serial port /dev/ttyUSB0
+  Connecting....
+  Chip is ESP32-C3 (QFN32) (revision v0.4)
+  [...]
+  Flash will be erased from 0x00000000 to 0x0003afff...
+  Compressed 240768 bytes to 104282...
+  Wrote 240768 bytes (104282 compressed) at 0x00000000 in 3.4 seconds (effective 568.4 kbit/s)...
+  Hash of data verified.
+
+  Leaving...
+  Hard resetting via RTS pin...
+
+Now opening the serial port with a terminal emulator should show the NuttX console::
+
+  $ picocom -b 115200 /dev/ttyUSB0
+  NuttShell (NSH) NuttX-12.8.0
+  nsh> uname -a
+  NuttX 12.8.0 759d37b97c-dirty Mar  5 2025 19:58:56 risc-v esp32c3-generic
 
 Debugging
 =========
@@ -289,23 +347,27 @@ ADC          No
 AES          No
 Bluetooth    Yes
 CAN/TWAI     Yes
-CDC Console  Yes    Rev.3
-DMA          Yes
+DMA          No
+DS           No
 eFuse        Yes    Also virtual mode supported
 GPIO         Yes
+HMAC         No
 I2C          Yes    Master and Slave mode supported
-LED_PWM      Yes
-RNG          No
+I2S          Yes
+LED/PWM      Yes
+RMT          Yes
+RNG          Yes
 RSA          No
 RTC          Yes
 SHA          No
 SPI          Yes
 SPIFLASH     Yes
+SPIRAM       No
 Timers       Yes
-Touch        No
 UART         Yes
+USB Serial   Yes
 Watchdog     Yes     XTWDT supported
-Wifi         Yes     WPA3-SAE supported
+Wi-Fi        Yes     WPA3-SAE supported
 =========== ======= ====================
 
 Secure Boot and Flash Encryption
@@ -410,6 +472,71 @@ to ``Application image secondary slot``.
    and change usage mode to ``Release`` in `System Type --> Application Image Configuration --> Enable usage mode`.
    **After disabling UART Download Mode you will not be able to flash other images through UART.**
 
+
+_`Managing esptool on virtual environment`
+==========================================
+
+This section describes how to install ``esptool``, ``imgtool`` or any other Python packages in a
+proper environment.
+
+Normally, a Linux-based OS would already have Python 3 installed by default. Up to a few years ago,
+you could simply call ``pip install`` to install packages globally. However, this is no longer recommended
+as it can lead to conflicts between packages and versions. The recommended way to install Python packages
+is to use a virtual environment.
+
+A virtual environment is a self-contained directory that contains a Python installation for a particular
+version of Python, plus a number of additional packages. You can create a virtual environment for each
+project you are working on, and install the required packages in that environment.
+
+Two alternatives are explained below, you can select any one of those.
+
+Using pipx (recommended)
+------------------------
+
+``pipx`` is a tool that makes it easy to install Python packages in a virtual environment. To install
+``pipx``, you can run the following command (using apt as example)::
+
+    $ apt install pipx
+
+Once you have installed ``pipx``, you can use it to install Python packages in a virtual environment. For
+example, to install the ``esptool`` package, you can run the following command::
+
+    $ pipx install esptool
+
+This will create a new virtual environment in the ``~/.local/pipx/venvs`` directory, which contains the
+``esptool`` package. You can now use the ``esptool`` command as normal, and so will the build system.
+
+Make sure to run ``pipx ensurepath`` to add the ``~/.local/bin`` directory to your ``PATH``. This will
+allow you to run the ``esptool`` command from any directory.
+
+Using venv (alternative)
+------------------------
+To create a virtual environment, you can use the ``venv`` module, which is included in the Python standard
+library. To create a virtual environment, you can run the following command::
+
+    $ python3 -m venv myenv
+
+This will create a new directory called ``myenv`` in the current directory, which contains a Python
+installation and a copy of the Python standard library. To activate the virtual environment, you can run
+the following command::
+
+    $ source myenv/bin/activate
+
+This will change your shell prompt to indicate that you are now working in the virtual environment. You can
+now install packages using ``pip``. For example, to install the ``esptool`` package, you can run the following
+command::
+
+    $ pip install esptool
+
+This will install the ``esptool`` package in the virtual environment. You can now use the ``esptool`` command as
+normal. When you are finished working in the virtual environment, you can deactivate it by running the following
+command::
+
+    $ deactivate
+
+This will return your shell prompt to its normal state. You can reactivate the virtual environment at any time by
+running the ``source myenv/bin/activate`` command again. You can also delete the virtual environment by deleting
+the directory that contains it.
 
 Supported Boards
 ================
