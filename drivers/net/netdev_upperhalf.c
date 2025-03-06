@@ -1217,13 +1217,15 @@ int netdev_lower_register(FAR struct netdev_lowerhalf_s *dev,
       kmm_free(upper);
       dev->netdev.d_private = NULL;
     }
-
 #ifdef CONFIG_NETDEV_WORK_THREAD
-  for (i = 0; i < NETDEV_THREAD_COUNT; i++)
+  else
     {
-      upper->tid[i] = INVALID_PROCESS_ID;
-      nxsem_init(&upper->sem[i], 0, 0);
-      nxsem_init(&upper->sem_exit[i], 0, 0);
+      for (i = 0; i < NETDEV_THREAD_COUNT; i++)
+        {
+          upper->tid[i] = INVALID_PROCESS_ID;
+          nxsem_init(&upper->sem[i], 0, 0);
+          nxsem_init(&upper->sem_exit[i], 0, 0);
+        }
     }
 #endif
 
