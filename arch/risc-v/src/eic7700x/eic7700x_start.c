@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/sg2000/sg2000_start.c
+ * arch/risc-v/src/eic7700x/eic7700x_start.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -35,9 +35,10 @@
 #include <arch/board/board_memorymap.h>
 
 #include "riscv_internal.h"
+#include "riscv_sbi.h"
 #include "chip.h"
-#include "sg2000_mm_init.h"
-#include "sg2000_memorymap.h"
+#include "eic7700x_mm_init.h"
+#include "eic7700x_memorymap.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -49,22 +50,32 @@
 #define showprogress(c)
 #endif
 
+/* SBI Extension ID and Function ID for Hart Start */
+
+#define SBI_EXT_HSM 0x0048534D
+#define SBI_EXT_HSM_HART_START 0x0
+
 /****************************************************************************
  * Extern Function Declarations
  ****************************************************************************/
 
+extern void __start(void);
 extern void __trap_vec(void);
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
+/* Hart ID that booted NuttX (0 to 3) */
+
+int g_eic7700x_boot_hart = -1;
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sg2000_copy_overlap
+ * Name: eic7700x_copy_overlap
  *
  * Description:
  *   Copy an overlapping memory region.  dest overlaps with src + count.
@@ -76,7 +87,7 @@ extern void __trap_vec(void);
  *
  ****************************************************************************/
 
-static void sg2000_copy_overlap(uint8_t *dest, const uint8_t *src,
+static void eic7700x_copy_overlap(uint8_t *dest, const uint8_t *src,
                                size_t count)
 {
   uint8_t *d = dest + count - 1;
@@ -98,14 +109,14 @@ static void sg2000_copy_overlap(uint8_t *dest, const uint8_t *src,
 }
 
 /****************************************************************************
- * Name: sg2000_copy_ramdisk
+ * Name: eic7700x_copy_ramdisk
  *
  * Description:
  *   Copy the RAM Disk from NuttX Image to RAM Disk Region.
  *
  ****************************************************************************/
 
-static void sg2000_copy_ramdisk(void)
+static void eic7700x_copy_ramdisk(void)
 {
   const char *header = "-rom1fs-";
   const uint8_t *limit = (uint8_t *)g_idle_topstack + (256 * 1024);
@@ -167,7 +178,81 @@ static void sg2000_copy_ramdisk(void)
    * __ramdisk_start overlaps with ramdisk_addr + size.
    */
 
-  sg2000_copy_overlap(__ramdisk_start, ramdisk_addr, size);
+  eic7700x_copy_overlap(__ramdisk_start, ramdisk_addr, size);
+}
+
+/****************************************************************************
+ * Name: sbi_ecall
+ *
+ * Description:
+ *   Make a RISC-V ECALL to OpenSBI.
+ *
+ * Input Parameters:
+ *   extid          - Extension ID
+ *   fid            - Function ID
+ *   parm0 to parm5 - Parameters to be passed
+ *
+ * Returned Value:
+ *   Error and Value returned by OpenSBI.
+ *
+ ****************************************************************************/
+
+static sbiret_t sbi_ecall(unsigned int extid, unsigned int fid,
+                          uintreg_t parm0, uintreg_t parm1,
+                          uintreg_t parm2, uintreg_t parm3,
+                          uintreg_t parm4, uintreg_t parm5)
+{
+  register long r0 asm("a0") = (long)(parm0);
+  register long r1 asm("a1") = (long)(parm1);
+  register long r2 asm("a2") = (long)(parm2);
+  register long r3 asm("a3") = (long)(parm3);
+  register long r4 asm("a4") = (long)(parm4);
+  register long r5 asm("a5") = (long)(parm5);
+  register long r6 asm("a6") = (long)(fid);
+  register long r7 asm("a7") = (long)(extid);
+  sbiret_t ret;
+
+  asm volatile
+    (
+     "ecall"
+     : "+r"(r0), "+r"(r1)
+     : "r"(r2), "r"(r3), "r"(r4), "r"(r5), "r"(r6), "r"(r7)
+     : "memory"
+     );
+
+  ret.error = r0;
+  ret.value = (uintreg_t)r1;
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: boot_secondary
+ *
+ * Description:
+ *   Call OpenSBI to boot the Hart, starting at the specified address.
+ *
+ * Input Parameters:
+ *   hartid - Hart ID
+ *   addr   - Start Address
+ *
+ * Returned Value:
+ *   OK is always returned.
+ *
+ ****************************************************************************/
+
+static int boot_secondary(uintreg_t hartid, uintreg_t addr)
+{
+  sbiret_t ret = sbi_ecall(SBI_EXT_HSM, SBI_EXT_HSM_HART_START,
+                          hartid, addr, 0, 0, 0, 0);
+
+  if (ret.error < 0)
+    {
+      _err("Boot Hart %d failed\n", hartid);
+      PANIC();
+    }
+
+  return 0;
 }
 
 /****************************************************************************
@@ -175,7 +260,7 @@ static void sg2000_copy_ramdisk(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sg2000_clear_bss
+ * Name: eic7700x_clear_bss
  *
  * Description:
  *   Clear .bss.  We'll do this inline (vs. calling memset) just to be
@@ -183,7 +268,7 @@ static void sg2000_copy_ramdisk(void)
  *
  ****************************************************************************/
 
-void sg2000_clear_bss(void)
+void eic7700x_clear_bss(void)
 {
   uint32_t *dest;
 
@@ -194,7 +279,7 @@ void sg2000_clear_bss(void)
 }
 
 /****************************************************************************
- * Name: sg2000_start_s
+ * Name: eic7700x_start_s
  *
  * Description:
  *   Start the NuttX Kernel.  Assume that we are in RISC-V Supervisor Mode.
@@ -204,16 +289,18 @@ void sg2000_clear_bss(void)
  *
  ****************************************************************************/
 
-void sg2000_start_s(int mhartid)
+void eic7700x_start_s(int mhartid)
 {
   /* Configure FPU */
 
   riscv_fpuconfig();
 
-  if (mhartid > 0)
+  if (mhartid != g_eic7700x_boot_hart)
     {
       goto cpux;
     }
+
+  /* Boot Hart starts here. Init the UART Driver. */
 
   showprogress('A');
 
@@ -221,21 +308,19 @@ void sg2000_start_s(int mhartid)
   riscv_earlyserialinit();
 #endif
 
-  showprogress('B');
-
-  /* TODO: Additional initialization */
-
-  showprogress('C');
-
   /* Setup page tables for kernel and enable MMU */
 
-  sg2000_mm_init();
+  showprogress('B');
+  eic7700x_mm_init();
 
-  /* Call nx_start() */
+  /* Start NuttX */
 
+  showprogress('C');
   nx_start();
 
 cpux:
+
+  /* Non-Boot Hart starts here. Init the CPU for the Hart. */
 
 #ifdef CONFIG_SMP
   riscv_cpu_boot(mhartid);
@@ -248,7 +333,7 @@ cpux:
 }
 
 /****************************************************************************
- * Name: sg2000_start
+ * Name: eic7700x_start
  *
  * Description:
  *   Start the NuttX Kernel.  Called by Boot Code.
@@ -258,19 +343,43 @@ cpux:
  *
  ****************************************************************************/
 
-void sg2000_start(int mhartid)
+void eic7700x_start(int mhartid)
 {
-  DEBUGASSERT(mhartid == 0); /* Only Hart 0 supported for now */
+  /* If Boot Hart is not 0, restart with Hart 0 */
 
-  if (0 == mhartid)
+  if (mhartid != 0)
     {
       /* Clear the BSS */
 
-      sg2000_clear_bss();
+      eic7700x_clear_bss();
+
+      /* Restart with Hart 0 */
+
+      boot_secondary(0, (uintptr_t)&__start);
+
+      /* Let this Hart idle forever */
+
+      while (true)
+        {
+          asm("WFI");
+        }
+
+      PANIC(); /* Should not come here */
+    }
+
+  /* Init the globals once only. Remember the Boot Hart. */
+
+  if (g_eic7700x_boot_hart < 0)
+    {
+      g_eic7700x_boot_hart = mhartid;
+
+      /* Clear the BSS */
+
+      eic7700x_clear_bss();
 
       /* Copy the RAM Disk */
 
-      sg2000_copy_ramdisk();
+      eic7700x_copy_ramdisk();
 
       /* Initialize the per CPU areas */
 
@@ -287,7 +396,7 @@ void sg2000_start(int mhartid)
 
   /* Start S-mode */
 
-  sg2000_start_s(mhartid);
+  eic7700x_start_s(mhartid);
 }
 
 /****************************************************************************

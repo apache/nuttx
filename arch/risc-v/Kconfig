@@ -350,6 +350,25 @@ config ARCH_CHIP_SG2000
 	---help---
 		SOPHGO SG2000 SoC.
 
+config ARCH_CHIP_EIC7700X
+	bool "ESWIN EIC7700X"
+	select ARCH_RV64
+	select ARCH_RV_ISA_M
+	select ARCH_RV_ISA_A
+	select ARCH_RV_ISA_C
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DPFPU
+	select ARCH_HAVE_MULTICPU
+	select ARCH_HAVE_MPU
+	select ARCH_MMU_TYPE_SV39
+	select ARCH_HAVE_ADDRENV
+	select ARCH_NEED_ADDRENV_MAPPING
+	select ARCH_HAVE_S_MODE
+	select ONESHOT
+	select ALARM_ARCH
+	---help---
+		ESWIN EIC7700X SoC.
+
 config ARCH_CHIP_RISCV_CUSTOM
 	bool "Custom RISC-V chip"
 	select ARCH_CHIP_CUSTOM
@@ -534,6 +553,7 @@ config ARCH_CHIP
 	default "bl808"                 if ARCH_CHIP_BL808
 	default "k230"                  if ARCH_CHIP_K230
 	default "sg2000"                if ARCH_CHIP_SG2000
+	default "eic7700x"              if ARCH_CHIP_EIC7700X
 
 config ARCH_RISCV_INTXCPT_EXTENSIONS
 	bool "RISC-V Integer Context Extensions"
@@ -773,5 +793,8 @@ source "arch/risc-v/src/k230/Kconfig"
 endif
 if ARCH_CHIP_SG2000
 source "arch/risc-v/src/sg2000/Kconfig"
+endif
+if ARCH_CHIP_EIC7700X
+source "arch/risc-v/src/eic7700x/Kconfig"
 endif
 endif # ARCH_RISCV

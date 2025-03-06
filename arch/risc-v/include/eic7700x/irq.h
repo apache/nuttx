@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/mpfs/chip.h
+ * arch/risc-v/include/eic7700x/irq.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,43 +20,23 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_MPFS_CHIP_H
-#define __ARCH_RISCV_SRC_MPFS_CHIP_H
+#ifndef __ARCH_RISCV_INCLUDE_EIC7700X_IRQ_H
+#define __ARCH_RISCV_INCLUDE_EIC7700X_IRQ_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include "mpfs_memorymap.h"
-
-#include "riscv_internal.h"
-#include "riscv_percpu.h"
-
 /****************************************************************************
- * Macro Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef __ASSEMBLY__
+/* Number of PLIC External Interrupts supported */
 
-/****************************************************************************
- * Name: setintstack
- *
- * Description:
- *   Set the current stack pointer to the "top" of the correct interrupt
- *   stack for the current CPU.
- *
- ****************************************************************************/
+#define EIC7700X_PLIC_IRQS 458
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 15
-#if defined(CONFIG_SMP) || defined(CONFIG_ARCH_USE_S_MODE)
-.macro  setintstack tmp0, tmp1
-  csrr    \tmp0, CSR_SCRATCH
-  REGLOAD sp, RISCV_PERCPU_IRQSTACK(\tmp0)
-.endm
-#endif /* defined(CONFIG_SMP) || defined(CONFIG_ARCH_USE_S_MODE) */
-#endif /* CONFIG_ARCH_INTERRUPTSTACK > 15 */
+/* Map RISC-V exception code to NuttX IRQ */
 
-#endif /* __ASSEMBLY__  */
-#endif /* __ARCH_RISCV_SRC_MPFS_CHIP_H */
+#define NR_IRQS (RISCV_IRQ_SEXT + EIC7700X_PLIC_IRQS)
+
+#endif /* __ARCH_RISCV_INCLUDE_EIC7700X_IRQ_H */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/jh7110/chip.h
+ * arch/risc-v/src/eic7700x/eic7700x_irq_dispatch.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,58 +20,70 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_JH7110_CHIP_H
-#define __ARCH_RISCV_SRC_JH7110_CHIP_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-/* Include the chip capabilities file */
+#include <nuttx/config.h>
 
-#include <arch/jh7110/chip.h>
+#include <stdint.h>
+#include <assert.h>
 
-#include "jh7110_memorymap.h"
-
-#include "hardware/jh7110_memorymap.h"
-#include "hardware/jh7110_plic.h"
+#include <nuttx/irq.h>
+#include <nuttx/arch.h>
+#include <sys/types.h>
 
 #include "riscv_internal.h"
-#include "riscv_percpu.h"
+#include "hardware/eic7700x_memorymap.h"
+#include "hardware/eic7700x_plic.h"
+#include "chip.h"
 
 /****************************************************************************
- * Macro Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef __ASSEMBLY__
+#define RV_IRQ_MASK 59
 
 /****************************************************************************
- * Name: setintstack
- *
- * Description:
- *   Set the current stack pointer to the "top" of the correct interrupt
- *   stack for the current CPU.
- *
+ * Public Functions
  ****************************************************************************/
 
-#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15
-.macro  setintstack tmp0, tmp1
-  up_cpu_index \tmp0
-  li    \tmp1, STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK)
-  mul   \tmp1, \tmp0, \tmp1
-  la    \tmp0, g_intstacktop
-  sub   sp, \tmp0, \tmp1
-.endm
-#endif /* CONFIG_SMP && CONFIG_ARCH_INTERRUPTSTACK > 15 */
+/****************************************************************************
+ * riscv_dispatch_irq
+ ****************************************************************************/
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 15
-#if !defined(CONFIG_SMP) && defined(CONFIG_ARCH_USE_S_MODE)
-.macro  setintstack tmp0, tmp1
-  csrr    \tmp0, CSR_SCRATCH
-  REGLOAD sp, RISCV_PERCPU_IRQSTACK(\tmp0)
-.endm
-#endif /* !defined(CONFIG_SMP) && defined(CONFIG_ARCH_USE_S_MODE) */
-#endif /* CONFIG_ARCH_INTERRUPTSTACK > 15 */
+void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
+{
+  int irq = (vector >> RV_IRQ_MASK) | (vector & 0xf);
+  uintptr_t claim = EIC7700X_PLIC_CLAIM0 +
+                    (g_eic7700x_boot_hart * EIC7700X_PLIC_CLAIM_HART);
 
-#endif /* __ASSEMBLY__  */
-#endif /* __ARCH_RISCV_SRC_JH7110_CHIP_H */
+  /* Firstly, check if the irq is machine external interrupt */
+
+  if (RISCV_IRQ_EXT == irq)
+    {
+      uintptr_t val = getreg32(claim);
+
+      /* Add the value to nuttx irq which is offset to the mext */
+
+      irq += val;
+    }
+
+  /* EXT means no interrupt */
+
+  if (RISCV_IRQ_EXT != irq)
+    {
+      /* Deliver the IRQ */
+
+      regs = riscv_doirq(irq, regs);
+    }
+
+  if (RISCV_IRQ_EXT <= irq)
+    {
+      /* Then write PLIC_CLAIM to clear pending in PLIC */
+
+      putreg32(irq - RISCV_IRQ_EXT, claim);
+    }
+
+  return regs;
+}

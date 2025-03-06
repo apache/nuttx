@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/jh7110/chip.h
+ * arch/risc-v/src/eic7700x/eic7700x_mm_init.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,58 +20,41 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_JH7110_CHIP_H
-#define __ARCH_RISCV_SRC_JH7110_CHIP_H
+#ifndef __ARCH_RISC_V_SRC_EIC7700X_EIC7700X_MM_INIT_H
+#define __ARCH_RISC_V_SRC_EIC7700X_EIC7700X_MM_INIT_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-/* Include the chip capabilities file */
+#include <nuttx/config.h>
 
-#include <arch/jh7110/chip.h>
-
-#include "jh7110_memorymap.h"
-
-#include "hardware/jh7110_memorymap.h"
-#include "hardware/jh7110_plic.h"
-
-#include "riscv_internal.h"
-#include "riscv_percpu.h"
+#include "riscv_mmu.h"
 
 /****************************************************************************
- * Macro Definitions
+ * Public Functions Prototypes
  ****************************************************************************/
 
-#ifdef __ASSEMBLY__
-
 /****************************************************************************
- * Name: setintstack
+ * Name: eic7700x_kernel_mappings
  *
  * Description:
- *   Set the current stack pointer to the "top" of the correct interrupt
- *   stack for the current CPU.
+ *  Setup kernel mappings when using CONFIG_BUILD_KERNEL. Sets up the kernel
+ *  MMU mappings.
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15
-.macro  setintstack tmp0, tmp1
-  up_cpu_index \tmp0
-  li    \tmp1, STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK)
-  mul   \tmp1, \tmp0, \tmp1
-  la    \tmp0, g_intstacktop
-  sub   sp, \tmp0, \tmp1
-.endm
-#endif /* CONFIG_SMP && CONFIG_ARCH_INTERRUPTSTACK > 15 */
+void eic7700x_kernel_mappings(void);
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 15
-#if !defined(CONFIG_SMP) && defined(CONFIG_ARCH_USE_S_MODE)
-.macro  setintstack tmp0, tmp1
-  csrr    \tmp0, CSR_SCRATCH
-  REGLOAD sp, RISCV_PERCPU_IRQSTACK(\tmp0)
-.endm
-#endif /* !defined(CONFIG_SMP) && defined(CONFIG_ARCH_USE_S_MODE) */
-#endif /* CONFIG_ARCH_INTERRUPTSTACK > 15 */
+/****************************************************************************
+ * Name: eic7700x_mm_init
+ *
+ * Description:
+ *  Setup kernel mappings when using CONFIG_BUILD_KERNEL. Sets up kernel MMU
+ *  mappings. Function also sets the first address environment (satp value).
+ *
+ ****************************************************************************/
 
-#endif /* __ASSEMBLY__  */
-#endif /* __ARCH_RISCV_SRC_JH7110_CHIP_H */
+void eic7700x_mm_init(void);
+
+#endif /* __ARCH_RISC_V_SRC_EIC7700X_EIC7700X_MM_INIT_H */

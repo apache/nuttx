@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/jh7110/chip.h
+ * arch/risc-v/src/eic7700x/eic7700x_pgalloc.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,58 +20,36 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_JH7110_CHIP_H
-#define __ARCH_RISCV_SRC_JH7110_CHIP_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-/* Include the chip capabilities file */
-
-#include <arch/jh7110/chip.h>
-
-#include "jh7110_memorymap.h"
-
-#include "hardware/jh7110_memorymap.h"
-#include "hardware/jh7110_plic.h"
-
-#include "riscv_internal.h"
-#include "riscv_percpu.h"
+#include <nuttx/arch.h>
+#include <nuttx/config.h>
+#include <nuttx/pgalloc.h>
+#include <assert.h>
+#include <debug.h>
+#include <arch/board/board_memorymap.h>
 
 /****************************************************************************
- * Macro Definitions
+ * Public Functions
  ****************************************************************************/
 
-#ifdef __ASSEMBLY__
-
 /****************************************************************************
- * Name: setintstack
+ * Name: up_allocate_pgheap
  *
  * Description:
- *   Set the current stack pointer to the "top" of the correct interrupt
- *   stack for the current CPU.
+ *   If there is a page allocator in the configuration, then this function
+ *   must be provided by the platform-specific code.  The OS initialization
+ *   logic will call this function early in the initialization sequence to
+ *   get the page heap information needed to configure the page allocator.
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15
-.macro  setintstack tmp0, tmp1
-  up_cpu_index \tmp0
-  li    \tmp1, STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK)
-  mul   \tmp1, \tmp0, \tmp1
-  la    \tmp0, g_intstacktop
-  sub   sp, \tmp0, \tmp1
-.endm
-#endif /* CONFIG_SMP && CONFIG_ARCH_INTERRUPTSTACK > 15 */
+void up_allocate_pgheap(void **heap_start, size_t *heap_size)
+{
+  DEBUGASSERT(heap_start && heap_size);
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 15
-#if !defined(CONFIG_SMP) && defined(CONFIG_ARCH_USE_S_MODE)
-.macro  setintstack tmp0, tmp1
-  csrr    \tmp0, CSR_SCRATCH
-  REGLOAD sp, RISCV_PERCPU_IRQSTACK(\tmp0)
-.endm
-#endif /* !defined(CONFIG_SMP) && defined(CONFIG_ARCH_USE_S_MODE) */
-#endif /* CONFIG_ARCH_INTERRUPTSTACK > 15 */
-
-#endif /* __ASSEMBLY__  */
-#endif /* __ARCH_RISCV_SRC_JH7110_CHIP_H */
+  *heap_start = (void *)PGPOOL_START;
+  *heap_size  = (size_t)PGPOOL_SIZE;
+}

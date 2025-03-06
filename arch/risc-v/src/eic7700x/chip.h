@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/jh7110/chip.h
+ * arch/risc-v/src/eic7700x/chip.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_JH7110_CHIP_H
-#define __ARCH_RISCV_SRC_JH7110_CHIP_H
+#ifndef __ARCH_RISCV_SRC_EIC7700X_CHIP_H
+#define __ARCH_RISCV_SRC_EIC7700X_CHIP_H
 
 /****************************************************************************
  * Included Files
@@ -29,15 +29,25 @@
 
 /* Include the chip capabilities file */
 
-#include <arch/jh7110/chip.h>
+#include <arch/eic7700x/chip.h>
 
-#include "jh7110_memorymap.h"
+#include "eic7700x_memorymap.h"
 
-#include "hardware/jh7110_memorymap.h"
-#include "hardware/jh7110_plic.h"
+#include "hardware/eic7700x_memorymap.h"
+#include "hardware/eic7700x_plic.h"
 
 #include "riscv_internal.h"
 #include "riscv_percpu.h"
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/* Hart ID that booted NuttX (0 to 3) */
+
+#ifndef __ASSEMBLY__
+extern int g_eic7700x_boot_hart;
+#endif
 
 /****************************************************************************
  * Macro Definitions
@@ -74,4 +84,4 @@
 #endif /* CONFIG_ARCH_INTERRUPTSTACK > 15 */
 
 #endif /* __ASSEMBLY__  */
-#endif /* __ARCH_RISCV_SRC_JH7110_CHIP_H */
+#endif /* __ARCH_RISCV_SRC_EIC7700X_CHIP_H */

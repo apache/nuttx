@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/mpfs/chip.h
+ * arch/risc-v/src/eic7700x/hardware/eic7700x_plic.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_MPFS_CHIP_H
-#define __ARCH_RISCV_SRC_MPFS_CHIP_H
+#ifndef __ARCH_RISCV_SRC_EIC7700X_HARDWARE_EIC7700X_PLIC_H
+#define __ARCH_RISCV_SRC_EIC7700X_HARDWARE_EIC7700X_PLIC_H
 
 /****************************************************************************
  * Included Files
@@ -29,34 +29,27 @@
 
 #include <nuttx/config.h>
 
-#include "mpfs_memorymap.h"
-
-#include "riscv_internal.h"
-#include "riscv_percpu.h"
-
 /****************************************************************************
- * Macro Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef __ASSEMBLY__
+/* Interrupt Priority */
 
-/****************************************************************************
- * Name: setintstack
- *
- * Description:
- *   Set the current stack pointer to the "top" of the correct interrupt
- *   stack for the current CPU.
- *
- ****************************************************************************/
+#define EIC7700X_PLIC_PRIORITY (EIC7700X_PLIC_BASE + 0x000000)
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 15
-#if defined(CONFIG_SMP) || defined(CONFIG_ARCH_USE_S_MODE)
-.macro  setintstack tmp0, tmp1
-  csrr    \tmp0, CSR_SCRATCH
-  REGLOAD sp, RISCV_PERCPU_IRQSTACK(\tmp0)
-.endm
-#endif /* defined(CONFIG_SMP) || defined(CONFIG_ARCH_USE_S_MODE) */
-#endif /* CONFIG_ARCH_INTERRUPTSTACK > 15 */
+/* Hart 0 S-Mode Interrupt Enable */
 
-#endif /* __ASSEMBLY__  */
-#endif /* __ARCH_RISCV_SRC_MPFS_CHIP_H */
+#define EIC7700X_PLIC_ENABLE0     (EIC7700X_PLIC_BASE + 0x002080)
+#define EIC7700X_PLIC_ENABLE_HART 0x100
+
+/* Hart 0 S-Mode Priority Threshold */
+
+#define EIC7700X_PLIC_THRESHOLD0     (EIC7700X_PLIC_BASE + 0x201000)
+#define EIC7700X_PLIC_THRESHOLD_HART 0x2000
+
+/* Hart 0 S-Mode Claim / Complete */
+
+#define EIC7700X_PLIC_CLAIM0     (EIC7700X_PLIC_BASE + 0x201004)
+#define EIC7700X_PLIC_CLAIM_HART 0x2000
+
+#endif /* __ARCH_RISCV_SRC_EIC7700X_HARDWARE_EIC7700X_PLIC_H */

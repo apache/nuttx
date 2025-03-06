@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/jh7110/chip.h
+ * arch/risc-v/src/eic7700x/eic7700x_timerisr.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,58 +20,52 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_JH7110_CHIP_H
-#define __ARCH_RISCV_SRC_JH7110_CHIP_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-/* Include the chip capabilities file */
+#include <nuttx/config.h>
 
-#include <arch/jh7110/chip.h>
+#include <assert.h>
+#include <stdint.h>
+#include <time.h>
+#include <debug.h>
 
-#include "jh7110_memorymap.h"
-
-#include "hardware/jh7110_memorymap.h"
-#include "hardware/jh7110_plic.h"
+#include <nuttx/timers/arch_alarm.h>
 
 #include "riscv_internal.h"
-#include "riscv_percpu.h"
+#include "riscv_mtimer.h"
 
 /****************************************************************************
- * Macro Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef __ASSEMBLY__
+ #define MTIMER_FREQ 1000000ul
 
 /****************************************************************************
- * Name: setintstack
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: up_timer_initialize
  *
  * Description:
- *   Set the current stack pointer to the "top" of the correct interrupt
- *   stack for the current CPU.
+ *   This function is called during start-up to initialize
+ *   the timer interrupt.
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15
-.macro  setintstack tmp0, tmp1
-  up_cpu_index \tmp0
-  li    \tmp1, STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK)
-  mul   \tmp1, \tmp0, \tmp1
-  la    \tmp0, g_intstacktop
-  sub   sp, \tmp0, \tmp1
-.endm
-#endif /* CONFIG_SMP && CONFIG_ARCH_INTERRUPTSTACK > 15 */
+void up_timer_initialize(void)
+{
+  struct oneshot_lowerhalf_s *lower;
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 15
-#if !defined(CONFIG_SMP) && defined(CONFIG_ARCH_USE_S_MODE)
-.macro  setintstack tmp0, tmp1
-  csrr    \tmp0, CSR_SCRATCH
-  REGLOAD sp, RISCV_PERCPU_IRQSTACK(\tmp0)
-.endm
-#endif /* !defined(CONFIG_SMP) && defined(CONFIG_ARCH_USE_S_MODE) */
-#endif /* CONFIG_ARCH_INTERRUPTSTACK > 15 */
+  /* Initialize the OpenSBI Timer. mtime and mtimecmp are unused for
+   * OpenSBI.
+   */
 
-#endif /* __ASSEMBLY__  */
-#endif /* __ARCH_RISCV_SRC_JH7110_CHIP_H */
+  lower = riscv_mtimer_initialize(0, 0, RISCV_IRQ_STIMER, MTIMER_FREQ);
+
+  DEBUGASSERT(lower != NULL);
+
+  up_alarm_set_lowerhalf(lower);
+}

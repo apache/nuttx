@@ -132,7 +132,8 @@ static int rpmsgblk_open_handler(FAR struct rpmsg_endpoint *ept,
       msg->header.result = server->bops->open(server->blknode);
       if (msg->header.result < 0)
         {
-          ferr("block device open failed, ret=%d\n", msg->header.result);
+          ferr("block device open failed, ret=%" PRId32 "\n",
+               msg->header.result);
         }
     }
   else
@@ -167,7 +168,8 @@ static int rpmsgblk_close_handler(FAR struct rpmsg_endpoint *ept,
       msg->header.result = server->bops->close(server->blknode);
       if (msg->header.result < 0)
         {
-          ferr("block device close failed, ret=%d\n", msg->header.result);
+          ferr("block device close failed, ret=%" PRId32 "\n",
+               msg->header.result);
         }
     }
   else

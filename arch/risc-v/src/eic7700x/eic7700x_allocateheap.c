@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/qemu-rv/qemu_rv_allocateheap.c
+ * arch/risc-v/src/eic7700x/eic7700x_allocateheap.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -25,27 +25,17 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
 #include <nuttx/kmalloc.h>
 #include <nuttx/userspace.h>
-
 #include <nuttx/arch.h>
-
-#ifdef CONFIG_MM_KERNEL_HEAP
 #include <arch/board/board_memorymap.h>
-#endif
-
 #include "riscv_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_MM_KERNEL_HEAP
 #define KRAM_END    KSRAM_END
-#else
-#define KRAM_END    CONFIG_RAM_END
-#endif
 
 /****************************************************************************
  * Public Data
@@ -88,64 +78,10 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_BUILD_KERNEL
 void up_allocate_kheap(void **heap_start, size_t *heap_size)
-#else
-void up_allocate_heap(void **heap_start, size_t *heap_size)
-#endif /* CONFIG_BUILD_KERNEL */
 {
-#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
-  /* Get the size and position of the user-space heap.
-   * This heap begins after the user-space .bss section.
-   */
-
-  uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend;
-  size_t    usize = (uintptr_t)USERSPACE->us_heapend - ubase;
-
-  /* Return the user-space heap settings */
-
-  *heap_start = (void *)ubase;
-  *heap_size  = usize;
-
-  /* Allow user-mode access to the user heap memory in PMP
-   * is already done in qemu_rv_userspace().
-   */
-
-#else
   /* Return the heap settings */
 
   *heap_start = (void *)g_idle_topstack;
   *heap_size = KRAM_END - g_idle_topstack;
-#endif /* CONFIG_BUILD_PROTECTED && CONFIG_MM_KERNEL_HEAP */
 }
-
-/****************************************************************************
- * Name: up_allocate_kheap
- *
- * Description:
- *   For the kernel build (CONFIG_BUILD_PROTECTED=y) with both kernel- and
- *   user-space heaps (CONFIG_MM_KERNEL_HEAP=y), this function allocates
- *   (and protects) the kernel-space heap.
- *
- ****************************************************************************/
-
-#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP) && \
-    defined(__KERNEL__)
-void up_allocate_kheap(void **heap_start, size_t *heap_size)
-{
-  /* Return the kernel heap settings. */
-
-  *heap_start = (void *)g_idle_topstack;
-  *heap_size = KRAM_END - g_idle_topstack;
-}
-#endif /* CONFIG_BUILD_PROTECTED && CONFIG_MM_KERNEL_HEAP */
-
-/****************************************************************************
- * Name: riscv_addregion
- ****************************************************************************/
-
-#if CONFIG_MM_REGIONS > 1
-void riscv_addregion(void)
-{
-}
-#endif
