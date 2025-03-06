@@ -1374,7 +1374,7 @@ static int fb_munmap(FAR struct task_group_s *group,
   if (group && entry)
     {
       ginfo("%p, len=%zu\n", entry->vaddr, entry->length);
-      vm_unmap_region(entry->vaddr, entry->length);
+      vm_unmap_region(get_group_mm(group), entry->vaddr, entry->length);
       mm_map_remove(get_current_mm(), entry);
     }
 
@@ -1417,7 +1417,7 @@ static int fb_mmap(FAR struct file *filep, FAR struct mm_map_entry_s *map)
   /* Return the address corresponding to the start of frame buffer. */
 
 #ifdef CONFIG_BUILD_KERNEL
-  map->vaddr = vm_map_region((uintptr_t)addr, map->length);
+  map->vaddr = vm_map_region(get_current_mm(), (uintptr_t)addr, map->length);
   map->munmap = fb_munmap;
   mm_map_add(get_current_mm(), map);
 #else
