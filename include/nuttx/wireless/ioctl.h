@@ -103,13 +103,13 @@
 #define WLIOC_SETCODERATE   _WLCIOC(0x0017)  /* arg: enum, coding rate */
 #define WLIOC_GETCODERATE   _WLCIOC(0x0018)  /* arg: enum pointer, */
                                              /* coding rate */
-#define WLIOC_SETTXPOWERF   _WLCIOC(0x0019)  /* arg: Pointer to flaot, */
+#define WLIOC_SETTXPOWERF   _WLCIOC(0x0019)  /* arg: Pointer to float, */
                                              /* output power (in dBm) */
 #define WLIOC_GETTXPOWERF   _WLCIOC(0x001a)  /* arg: Pointer to float, */
                                              /* output power (in dBm) */
 
 /****************************************************************************
- * LoRa common IOCTL commands
+ * LoRa common IOCTL commands (EXPERIMENTAL)
  ****************************************************************************/
 
 #define WLIOC_LORA_SETSF       _WLCIOC(0x001b) /* arg: Pointer to uint8_t */
@@ -195,11 +195,17 @@ struct wlioc_lora_syncword_s
 
 struct wlioc_rx_hdr_s
 {
-  /* Length of payload in bytes */
+  /* Length of payload in bytes.
+   * The amount written to the
+   * payload buffer
+   */
 
   size_t payload_length;
 
-  /* Pointer to payload bytes */
+  /* Pointer to user buffer
+   * This will be filled in with
+   * the payload
+   */
 
   uint8_t *payload;
 
@@ -211,19 +217,13 @@ struct wlioc_rx_hdr_s
 
   uint8_t error;
 
-  /* RSSI dBm in 8 fractional bits fixed point.
-   * Gives steps of 0.125dB precision
-   * ranging between b8MIN and b8MAX
-   */
+  /* RSSI dBm in 16 fractional bits fixed point. */
 
-  b8_t rssi_dbm;
+  b16_t rssi_dbm;
 
-  /* SNR dB in 8 fractional bits fixed point.
-   * Gives steps of 0.125dB precision
-   * ranging between b8MIN and b8MAX
-   */
+  /* SNR dB in 16 fractional bits fixed point.  */
 
-  b8_t snr_db;
+  b16_t snr_db;
 };
 
 #endif /* CONFIG_DRIVERS_WIRELESS */
