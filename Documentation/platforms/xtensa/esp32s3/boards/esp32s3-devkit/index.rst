@@ -260,6 +260,42 @@ using slave driver:
        close(i2c_slave_fd);
     }
 
+i2schar
+-------
+
+This configuration enables the I2S character device and the i2schar example
+app, which provides an easy-to-use way of testing the I2S peripherals (I2S0
+and I2S1), enabling both the TX and the RX for those peripherals.
+
+**I2S0 pinout**
+
+============= ========== =========================================
+ESP32-S3 Pin  Signal Pin Description
+============= ========== =========================================
+0             MCLK       Master Clock
+4             BCLK       Bit Clock (SCLK)
+5             WS         Word Select (LRCLK)
+18            DOUT       Data Out
+19            DIN        Data IN
+============= ========== =========================================
+
+**I2S1 pinout**
+
+============= ========== =========================================
+ESP32-S3 Pin  Signal Pin Description
+============= ========== =========================================
+22            BCLK       Bit Clock (SCLK)
+23            WS         Word Select (LRCLK)
+25            DOUT       Data Out
+26            DIN        Data IN
+============= ========== =========================================
+
+After successfully built and flashed, run on the boards's terminal::
+
+    i2schar -p /dev/i2schar[0-1]
+
+The corresponding output should show related debug information.
+
 knsh
 ----
 
