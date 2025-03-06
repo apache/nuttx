@@ -89,6 +89,7 @@ struct noteram_driver_s
   FAR uint8_t *ni_buffer;
   size_t ni_bufsize;
   unsigned int ni_overwrite;
+  unsigned int threshold;
   volatile unsigned int ni_head;
   volatile unsigned int ni_tail;
   volatile unsigned int ni_read;
@@ -447,6 +448,8 @@ static int noteram_open(FAR struct file *filep)
       return -ENOMEM;
     }
 
+  drv->threshold = sizeof(struct note_common_s);
+
   filep->f_priv = ctx;
   noteram_dump_init_context(ctx);
   return OK;
@@ -616,6 +619,11 @@ static int noteram_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           }
         break;
 
+      case PIPEIOC_POLLINTHRD:
+        drv->threshold = (uint32_t)arg;
+        ret = OK;
+        break;
+
       default:
           break;
     }
@@ -673,7 +681,7 @@ static int noteram_poll(FAR struct file *filep, FAR struct pollfd *fds,
        * don't wait for RX.
        */
 
-      if (noteram_unread_length(drv) > 0)
+      if (noteram_unread_length(drv) >= drv->threshold)
         {
           spin_unlock_irqrestore_notrace(&drv->lock, flags);
           poll_notify(&drv->pfd, 1, POLLIN);
@@ -758,7 +766,11 @@ static void noteram_add(FAR struct note_driver_s *driver,
   memcpy(drv->ni_buffer, buf + space, notelen - space);
   drv->ni_head = noteram_next(drv, head, NOTE_ALIGN(notelen));
   spin_unlock_irqrestore_notrace(&drv->lock, flags);
-  poll_notify(&drv->pfd, 1, POLLIN);
+
+  if (drv->pfd && (noteram_unread_length(drv) >= drv->threshold))
+    {
+      poll_notify(&drv->pfd, 1, POLLIN);
+    }
 }
 
 /****************************************************************************
