@@ -315,6 +315,11 @@ static void st7789_select(FAR struct spi_dev_s *spi, int bits)
   SPI_SETMODE(spi, CONFIG_LCD_ST7789_SPIMODE);
   SPI_SETBITS(spi, bits);
   SPI_SETFREQUENCY(spi, CONFIG_LCD_ST7789_FREQUENCY);
+#ifdef CONFIG_SPI_DELAY_CONTROL
+  SPI_SETDELAY(spi, CONFIG_LCD_ST7789_START_DELAY,
+               CONFIG_LCD_ST7789_STOP_DELAY, CONFIG_LCD_ST7789_CS_DELAY,
+               CONFIG_LCD_ST7789_IFDELAY);
+#endif
 }
 
 /****************************************************************************

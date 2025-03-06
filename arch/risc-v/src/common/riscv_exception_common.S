@@ -218,26 +218,26 @@ handle_irq:
 
   setintstack t0, t1
 
-  addi       sp, sp, -16
-  REGSTORE   ra, 12(sp)
-  REGSTORE   s0, 8(sp)
-  add	       s0, sp, 16
+  addi       sp, sp, -(INT_REG_SIZE * 2)
+  REGSTORE   ra, INT_REG_SIZE(sp)
+  REGSTORE   s0, 0(sp)
+  add        s0, sp, (INT_REG_SIZE * 2)
 
   /* Call interrupt handler in C */
 
   jal        x1, riscv_dispatch_irq
 
-  REGLOAD    ra, 12(sp)
-  REGLOAD    s0, 8(sp)
-  add	       sp, sp, 16
+  REGLOAD    ra, INT_REG_SIZE(sp)
+  REGLOAD    s0, 0(sp)
+  add        sp, sp, (INT_REG_SIZE * 2)
 
 #else
   /* Reserve some space for current_regs if interrupt stack disabled */
 
-  addi       sp, sp, -16
-  REGSTORE   ra, 12(sp)
-  REGSTORE   s0, 8(sp)
-  add	       s0, sp, 16
+  addi       sp, sp, -(INT_REG_SIZE * 2)
+  REGSTORE   ra, INT_REG_SIZE(sp)
+  REGSTORE   s0, 0(sp)
+  add        s0, sp, (INT_REG_SIZE * 2)
 
   addi       sp, sp, -XCPTCONTEXT_SIZE
 
@@ -245,9 +245,9 @@ handle_irq:
 
   jal        x1, riscv_dispatch_irq
 
-  REGLOAD    ra, 12(sp)
-  REGLOAD    s0, 8(sp)
-  add	sp,sp,16
+  REGLOAD    ra, INT_REG_SIZE(sp)
+  REGLOAD    s0, 0(sp)
+  add        sp, sp, (INT_REG_SIZE * 2)
 
   /* Restore sp */
 

@@ -26,5 +26,6 @@ ifeq ($(CONFIG_DRIVERS_LPWAN),y)
 
 include wireless/lpwan/sx127x/Make.defs
 include wireless/lpwan/sx126x/Make.defs
+include wireless/lpwan/rn2xx3/Make.defs
 
 endif # CONFIG_DRIVERS_LPWAN

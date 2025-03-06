@@ -233,21 +233,21 @@ static int uart_putxmitchar(FAR uart_dev_t *dev, int ch, bool oktoblock)
   int nexthead;
   int ret;
 
-  /* Increment to see what the next head pointer will be.
-   * We need to use the "next" head pointer to determine when the circular
-   *  buffer would overrun
-   */
-
-  nexthead = dev->xmit.head + 1;
-  if (nexthead >= dev->xmit.size)
-    {
-      nexthead = 0;
-    }
-
   /* Loop until we are able to add the character to the TX buffer. */
 
   for (; ; )
     {
+      /* Increment to see what the next head pointer will be.
+       * We need to use the "next" head pointer to determine when the
+       * circular buffer would overrun
+       */
+
+      nexthead = dev->xmit.head + 1;
+      if (nexthead >= dev->xmit.size)
+        {
+          nexthead = 0;
+        }
+
       /* Check if the TX buffer is full */
 
       if (nexthead != dev->xmit.tail)

@@ -14,3 +14,12 @@ ESWIN EIC7700X
 - **Network:** 2 x GMAC, RGMII supported
 - **PCI Express:** 4-lane PCIe 3.0 (RC + EP)
 - **Peripherals:** 2 x USB 3.0 DRD (Host + Device), 12 x I2C, 5 x UART, 2 x SPI, 3 x I2S (Slave + Master)
+
+Supported Boards
+================
+
+.. toctree::
+   :glob:
+   :maxdepth: 1
+
+   boards/*/*
