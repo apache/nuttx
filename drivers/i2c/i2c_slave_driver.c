@@ -506,9 +506,12 @@ static int i2c_slave_callback(FAR void *arg, i2c_slave_complete_t status,
       priv->read_index = 0;
       priv->read_length = length;
 
-      while (nxsem_get_value(&priv->wait, &semcount) >= 0 && semcount <= 0)
+      if (nxsem_get_value(&priv->wait, &semcount) >= 0)
         {
-          nxsem_post(&priv->wait);
+          while (semcount++ <= 0)
+            {
+              nxsem_post(&priv->wait);
+            }
         }
     }
   else
