@@ -272,8 +272,10 @@ rptun_ivshmem_get_resource(FAR struct rptun_dev_s *dev)
       rsc->rpmsg0_vring1.da           = FW_RSC_U32_ADDR_ANY;
       rsc->rpmsg0_config.h2r_buf_size = 0x600;
       rsc->rpmsg0_config.r2h_buf_size = 0x600;
-      memcpy(rsc->rpmsg0_config.host_cpuname, "server", 6);
-      memcpy(rsc->rpmsg0_config.remote_cpuname, "proxy", 5);
+      strlcpy((FAR char *)rsc->rpmsg0_config.host_cpuname,
+              priv->cpuname, VIRTIO_RPMSG_CPUNAME_SIZE);
+      strlcpy((FAR char *)rsc->rpmsg0_config.remote_cpuname,
+              CONFIG_RPMSG_LOCAL_CPUNAME, VIRTIO_RPMSG_CPUNAME_SIZE);
 
       /* Virtio Rpmsg0 share memory buffer */
 
