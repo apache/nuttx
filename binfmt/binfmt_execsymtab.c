@@ -31,6 +31,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/symtab.h>
 #include <nuttx/binfmt/symtab.h>
+#include <nuttx/spinlock.h>
 
 #ifdef CONFIG_LIBC_EXECFUNCS
 
@@ -71,6 +72,7 @@ extern int CONFIG_EXECFUNCS_NSYMBOLS_VAR;
 
 static FAR const struct symtab_s *g_exec_symtab;
 static int g_exec_nsymbols;
+static spinlock_t g_exec_lock = SP_UNLOCKED;
 
 /****************************************************************************
  * Public Functions
@@ -102,7 +104,7 @@ void exec_getsymtab(FAR const struct symtab_s **symtab, FAR int *nsymbols)
    * size are returned as a single atomic operation.
    */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_exec_lock);
 
 #ifdef CONFIG_EXECFUNCS_HAVE_SYMTAB
   /* If a bring-up symbol table has been provided and if the exec symbol
@@ -121,7 +123,7 @@ void exec_getsymtab(FAR const struct symtab_s **symtab, FAR int *nsymbols)
 
   *symtab   = g_exec_symtab;
   *nsymbols = g_exec_nsymbols;
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_exec_lock, flags);
 }
 
 /****************************************************************************
@@ -149,10 +151,10 @@ void exec_setsymtab(FAR const struct symtab_s *symtab, int nsymbols)
    * size are set as a single atomic operation.
    */
 
-  flags           = enter_critical_section();
+  flags           = spin_lock_irqsave(&g_exec_lock);
   g_exec_symtab   = symtab;
   g_exec_nsymbols = nsymbols;
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_exec_lock, flags);
 }
 
 #endif /* CONFIG_LIBC_EXECFUNCS */
