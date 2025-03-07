@@ -354,6 +354,10 @@ int exec_module(FAR struct binary_s *binp,
         }
     }
 
+#ifdef CONFIG_BINFMT_LOADABLE
+  tcb->group->tg_bininfo = binp;
+#endif
+
   /* Then activate the task at the provided priority */
 
   nxtask_activate(tcb);
