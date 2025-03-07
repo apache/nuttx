@@ -47,10 +47,6 @@ ifeq ($(CONFIG_SIG_SIGSTOP_ACTION),y)
 CSRCS += group_suspendchildren.c group_continue.c
 endif
 
-ifeq ($(CONFIG_BINFMT_LOADABLE),y)
-CSRCS += group_exitinfo.c
-endif
-
 ifeq ($(CONFIG_MM_KERNEL_HEAP),y)
 CSRCS += group_malloc.c group_realloc.c group_zalloc.c group_free.c
 endif

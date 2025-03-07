@@ -59,10 +59,6 @@ if(CONFIG_SIG_SIGSTOP_ACTION)
   list(APPEND SRCS group_suspendchildren.c group_continue.c)
 endif()
 
-if(CONFIG_BINFMT_LOADABLE)
-  list(APPEND SRCS group_exitinfo.c)
-endif()
-
 if(CONFIG_MM_KERNEL_HEAP)
   list(APPEND SRCS group_malloc.c group_realloc.c group_zalloc.c group_free.c)
 endif()
