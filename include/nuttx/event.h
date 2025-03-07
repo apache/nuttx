@@ -30,6 +30,7 @@
 #include <nuttx/config.h>
 
 #include <nuttx/list.h>
+#include <nuttx/spinlock.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -60,8 +61,9 @@ typedef unsigned long         nxevent_flags_t;
 
 struct nxevent_s
 {
-  struct list_node         list;    /* Waiting list of nxevent_wait_t */
-  volatile nxevent_mask_t  events;  /* Pending Events */
+  struct list_node         list;   /* Waiting list of nxevent_wait_t */
+  volatile nxevent_mask_t  events; /* Pending Events */
+  spinlock_t               lock;   /* Spinlock */
 };
 
 #ifdef CONFIG_FS_NAMED_EVENTS
