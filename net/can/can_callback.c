@@ -119,20 +119,6 @@ uint16_t can_callback(FAR struct net_driver_s *dev,
 
   if (conn)
     {
-      /* Try to lock the network when successful send data to the listener */
-
-      if (net_trylock() == OK)
-        {
-          flags = devif_conn_event(dev, flags, conn->sconn.list);
-          net_unlock();
-        }
-
-      /* Either we did not get the lock or there is no application listening
-       * If we did not get a lock we store the frame in the read-ahead buffer
-       */
-
-      if ((flags & CAN_NEWDATA) != 0)
-        {
 #ifdef CONFIG_NET_TIMESTAMP
           /* TIMESTAMP sockopt is activated,
            * create timestamp and copy to iob
@@ -150,18 +136,27 @@ uint16_t can_callback(FAR struct net_driver_s *dev,
               len = iob_trycopyin(dev->d_iob, (FAR uint8_t *)&tv,
                                   sizeof(struct timeval),
                                   -CONFIG_NET_LL_GUARDSIZE, false);
-              if (len != sizeof(struct timeval))
-                {
-                  dev->d_len = 0;
-                  return flags & ~CAN_NEWDATA;
-                }
-              else
+              if (len == sizeof(struct timeval))
                 {
                   dev->d_len += len;
                 }
             }
-
 #endif
+
+      /* Try to lock the network when successful send data to the listener */
+
+      if (net_trylock() == OK)
+        {
+          flags = devif_conn_event(dev, flags, conn->sconn.list);
+          net_unlock();
+        }
+
+      /* Either we did not get the lock or there is no application listening
+       * If we did not get a lock we store the frame in the read-ahead buffer
+       */
+
+      if ((flags & CAN_NEWDATA) != 0)
+        {
           /* Data was not handled.. dispose of it appropriately */
 
           flags = can_data_event(dev, conn, flags);
