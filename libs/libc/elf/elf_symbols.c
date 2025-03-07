@@ -640,3 +640,78 @@ void libelf_freesymtab(FAR struct module_s *modp)
       lib_free((FAR void *)symbol);
     }
 }
+
+/****************************************************************************
+ * Name: libelf_findsymbol
+ *
+ * Description:
+ *   Locate a symbol in the ELF symbol table by its name.
+ *
+ * Input Parameters:
+ *   loadinfo - Load state information containing the symbol table
+ *   name     - The name of the symbol to search for
+ *   sym      - Pointer to store the located symbol's table entry
+ *
+ * Returned Value:
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+int libelf_findsymbol(FAR struct mod_loadinfo_s *loadinfo,
+                      FAR const char *name, FAR Elf_Sym *sym)
+{
+  size_t num;
+  int ret;
+  int i;
+
+  if (loadinfo == NULL || name == NULL)
+    {
+      return -EINVAL;
+    }
+
+  if (loadinfo->symtabidx == 0)
+    {
+      ret = libelf_findsymtab(loadinfo);
+      if (ret < 0)
+        {
+          berr("ERROR: Failed to find symbol table\n");
+          return ret;
+        }
+    }
+
+  /* Loop through all symbols in the symbol table */
+
+  num = loadinfo->shdr[loadinfo->symtabidx].sh_size / sizeof(Elf_Sym);
+  for (i = 0; i < num; i++)
+    {
+      /* Read the symbol entry */
+
+      ret = libelf_readsym(loadinfo, i, sym,
+                           &loadinfo->shdr[loadinfo->symtabidx]);
+      if (ret)
+        {
+          berr("ERROR: Failed to read symbol entry\n");
+          return ret;
+        }
+
+      /* Get the symbol name */
+
+      ret = libelf_symname(loadinfo, sym,
+                           loadinfo->shdr[loadinfo->strtabidx].sh_offset);
+      if (ret < 0 && ret != -ESRCH)
+        {
+          berr("ERROR: Failed to get symbol name\n");
+          return ret;
+        }
+
+      /* Compare the symbol name with the given name */
+
+      if (strcmp((FAR const char *)loadinfo->iobuffer, name) == 0)
+        {
+          return ret;
+        }
+    }
+
+  return -ENOENT;
+}

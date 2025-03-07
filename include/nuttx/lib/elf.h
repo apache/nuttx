@@ -780,4 +780,24 @@ FAR void *libelf_gethandle(FAR const char *name);
 #  define libelf_gethandle(n) NULL
 #endif
 
+/****************************************************************************
+ * Name: libelf_findsymbol
+ *
+ * Description:
+ *   Locate a symbol in the ELF symbol table by its name.
+ *
+ * Input Parameters:
+ *   loadinfo - Load state information containing the symbol table
+ *   name     - The name of the symbol to search for
+ *   sym      - Pointer to store the located symbol's table entry
+ *
+ * Returned Value:
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+int libelf_findsymbol(FAR struct mod_loadinfo_s *loadinfo,
+                      FAR const char *name, FAR Elf_Sym *sym);
+
 #endif /* __INCLUDE_NUTTX_LIB_LIBC_ELF_H */
