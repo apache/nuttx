@@ -56,6 +56,10 @@ ifeq ($(STM32H5_FDCAN_CHARDRIVER),y)
 CHIP_CSRCS += stm32_fdcan.c
 endif
 
+ifeq ($(CONFIG_STM32H5_ICACHE),y)
+CHIP_CSRCS += stm32_icache.c
+endif
+
 ifeq ($(CONFIG_STM32H5_SPI),y)
 CHIP_CSRCS += stm32_spi.c
 endif

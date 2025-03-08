@@ -229,6 +229,11 @@ void __start(void)
   stm32_board_initialize();
   showprogress('F');
 
+#ifdef CONFIG_STM32H5_ICACHE
+  stm32_enable_icache();
+#endif
+  showprogress('G');
+
   /* Then start NuttX */
 
   showprogress('\r');
