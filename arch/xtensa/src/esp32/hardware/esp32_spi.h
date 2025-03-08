@@ -2782,6 +2782,8 @@
 #define SPI_DMA_RSTATUS_OFFSET  (0x148)
 #define SPI_DMA_RSTATUS_REG(i)  (REG_SPI_BASE(i) + SPI_DMA_RSTATUS_OFFSET)
 
+#define SPI_DMA_TX_FIFO_EMPTY   (BIT(31))
+
 /* SPI_DMA_OUT_STATUS : RO ;bitpos:[31:0] ;default: 32'b0 ; */
 
 /* Description: spi dma read data from memory status. */
