@@ -360,6 +360,13 @@ disables the NuttShell to get the best possible score.
 .. note:: As the NSH is disabled, the application will start as soon as the
   system is turned on.
 
+crypto
+--------
+
+This configuration enables support for the cryptographic hardware and
+the /dev/crypto device file. Currently, only the hashing operation is
+supported.
+
 cxx
 ---
 

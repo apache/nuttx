@@ -794,6 +794,11 @@ config ESP32_TWAI0
 config ESP32_AES_ACCELERATOR
 	bool "AES Accelerator"
 	default n
+config ESP32_SHA_ACCELERATOR
+	bool "SHA Accelerator"
+	default n
+	---help---
+		Enable ESP32 SHA accelerator support.
 
 config ESP32_PID
 	bool "PID Controller"

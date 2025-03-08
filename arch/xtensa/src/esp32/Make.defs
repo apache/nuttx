@@ -192,6 +192,14 @@ ifeq ($(CONFIG_ESP32_AES_ACCELERATOR),y)
 CHIP_CSRCS += esp32_aes.c
 endif
 
+ifeq ($(CONFIG_ESP32_SHA_ACCELERATOR),y)
+CHIP_CSRCS += esp32_sha.c
+endif
+
+ifeq ($(CONFIG_CRYPTO_CRYPTODEV_HARDWARE),y)
+CHIP_CSRCS += esp32_crypto.c
+endif
+
 ifeq ($(CONFIG_ESP32_RTC),y)
 CHIP_CSRCS += esp32_rtc.c
 ifeq ($(CONFIG_RTC_DRIVER),y)
