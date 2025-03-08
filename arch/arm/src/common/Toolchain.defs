@@ -124,6 +124,11 @@ ifeq ($(CONFIG_UNWINDER_ARM),y)
   endif
 endif
 
+# Fix -Wshadow warnings for built-in bitops on sim
+
+ARCHOPTIMIZATION += -fno-builtin-ffs -fno-builtin-ffsl -fno-builtin-ffsll
+ARCHOPTIMIZATION += -fno-builtin-fls -fno-builtin-flsl -fno-builtin-flsll
+
 # Link Time Optimization
 
 ifeq ($(CONFIG_LTO_THIN),y)
