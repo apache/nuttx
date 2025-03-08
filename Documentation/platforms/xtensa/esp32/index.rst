@@ -347,7 +347,7 @@ RSA          No
 RTC          Yes
 SD/MMC       No
 SDIO         No
-SHA          No
+SHA          Yes
 SPI          Yes
 SPIFLASH     Yes
 SPIRAM       Yes
