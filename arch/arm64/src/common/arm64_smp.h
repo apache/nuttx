@@ -80,6 +80,19 @@ void arm64_cpu_boot(int cpu);
 
 void arm64_enable_smp(int cpu);
 
+/****************************************************************************
+ * Name: arm64_timer_secondary_init
+ *
+ * Description:
+ *   Initialize the ARM timer for secondary CPUs.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void arm64_timer_secondary_init(void);
+
 #endif /* __ASSEMBLY__ */
 #endif /* CONFIG_SMP */
 #endif /* __ARCH_ARM64_SRC_COMMON_ARM64_SMP_H */
