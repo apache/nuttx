@@ -66,6 +66,23 @@
 #define GPIO_BUTTON3 (GPIO_INPUT | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN(8))
 #define GPIO_BUTTON4 (GPIO_INPUT | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN(9))
 
+/* GPIO pins used by the GPIO Subsystem */
+
+#define BOARD_NGPIOIN  2 /* Amount of GPIO input pins */
+#define BOARD_NGPIOINT 2 /* Amount of GPIO input pins with interrupts */
+#define BOARD_NGPIOOUT 4 /* Amount of GPIO output pins */
+
+#define GPIO_OUT1 GPIO_LED1
+#define GPIO_OUT2 GPIO_LED2
+#define GPIO_OUT3 GPIO_LED3
+#define GPIO_OUT4 GPIO_LED4
+
+#define GPIO_IN1 GPIO_BUTTON1
+#define GPIO_IN2 GPIO_BUTTON2
+
+#define GPIO_INT1 GPIO_BUTTON3
+#define GPIO_INT2 GPIO_BUTTON4
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -130,6 +147,21 @@ int nrf53_adc_setup(void);
 
 #ifdef CONFIG_NRF53_QSPI
 int nrf53_mx25_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: nrf53_gpio_initialize
+ *
+ * Description:
+ *   Initialize GPIO drivers for use with /apps/examples/gpio
+ *
+ * Return Value:
+ *   OK on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEV_GPIO
+int nrf53_gpio_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

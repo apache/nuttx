@@ -203,6 +203,16 @@ int nrf53_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_DEV_GPIO
+
+  ret = nrf53_gpio_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize GPIO Driver: %d\n", ret);
+      return ret;
+    }
+#endif /* CONFIG_DEV_GPIO */
+
 #ifdef CONFIG_INPUT_BUTTONS
   /* Register the BUTTON driver */
 

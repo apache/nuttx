@@ -38,6 +38,10 @@ else
 CSRCS += nrf53_userleds.c
 endif
 
+ifeq ($(CONFIG_DEV_GPIO),y)
+CSRCS += nrf53_gpio.c
+endif
+
 ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS += nrf53_buttons.c
 endif
