@@ -38,6 +38,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include <nuttx/atomic.h>
 #include <nuttx/wqueue.h>
 
 #include <arch/arch.h>
@@ -264,7 +265,7 @@ struct addrenv_s
 {
   struct arch_addrenv_s addrenv; /* The address environment page directory  */
   struct work_s         work;    /* Worker to free address environment      */
-  int                   refs;    /* Users of address environment            */
+  atomic_t              refs;    /* Users of address environment            */
 };
 
 typedef struct addrenv_s addrenv_t;
