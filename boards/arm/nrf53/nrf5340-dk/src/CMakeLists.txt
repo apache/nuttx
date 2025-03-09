@@ -36,6 +36,10 @@ else()
   list(APPEND SRCS nrf53_userleds.c)
 endif()
 
+if(CONFIG_DEV_GPIO)
+  list(APPEND SRCS nrf53_gpio.c)
+endif()
+
 if(CONFIG_ARCH_BUTTONS)
   list(APPEND SRCS nrf53_buttons.c)
 endif()
