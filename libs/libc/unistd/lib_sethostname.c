@@ -47,6 +47,7 @@
 #include <unistd.h>
 
 #include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 
 /* Further, in the protected and kernel build modes where kernel and
  * application code are separated, the hostname is a common system property
@@ -67,6 +68,7 @@
 /* This is the system hostname (defined in lib_gethostname). */
 
 extern char g_hostname[HOST_NAME_MAX + 1];
+extern spinlock_t g_hostname_lock;
 
 /****************************************************************************
  * Public Functions
@@ -105,9 +107,9 @@ int sethostname(FAR const char *name, size_t namelen)
    * are setting it.
    */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_hostname_lock);
   strlcpy(g_hostname, name, sizeof(g_hostname));
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_hostname_lock, flags);
 
   return 0;
 }
