@@ -57,6 +57,15 @@
 void up_initial_state(struct tcb_s *tcb)
 {
   struct xcptcontext *xcp = &tcb->xcp;
+  uintptr_t pcxi;
+
+  /* Reclaim possible CSA links */
+
+  pcxi = tricore_addr2csa(xcp->regs);
+  if (pcxi & FCX_FREE)
+    {
+      tricore_reclaim_csa(pcxi);
+    }
 
   /* Initialize the initial exception register context structure */
 
