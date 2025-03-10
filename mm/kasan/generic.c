@@ -230,6 +230,11 @@ FAR void *kasan_unpoison(FAR const void *addr, size_t size)
   return (FAR void *)addr;
 }
 
+bool kasan_bypass(bool state)
+{
+  return false;
+}
+
 void kasan_register(FAR void *addr, FAR size_t *size)
 {
   FAR struct kasan_region_s *region;
