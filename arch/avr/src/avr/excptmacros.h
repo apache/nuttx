@@ -428,6 +428,19 @@
 
   /* Save the return address that we have saved in r18:19 */
 
+  /* Note - this seems backwards for AVR DA/DB family which
+   * states in the docs, chapter 6.4.4: The return address
+   * consists of two bytes and the Least Significant Byte (LSB)
+   * is pushed on the stack first (at the higher address).
+   *
+   * First value is popped into r19 and holds the MSB, store
+   * ordering is reversed here.
+   *
+   * Considering this value is just stored and then restored
+   * with the same discrepancy, it cancels out. No need to branch
+   * the code with ifdefs.
+   */
+
 #if AVR_PC_SIZE > 16
   st x+, r20
 #endif /* AVR_PC_SIZE */
@@ -578,11 +591,32 @@
 
   /* If interrupts shall be enabled go to 'restore remaining and reti' code
    * otherwise just do 'restore remaining and ret'
+   *
+   * See Documentation/platforms/avr/context-switch-notes.rst
+   * for information about context creation and how it interacts
+   * with ways the context is restored
    */
 
   ld r24, x+
   bst r24, SREG_I
   brts go_reti
+
+#ifdef CONFIG_ARCH_CHIP_AVRDX
+  /* Older chips do not care for internal MCU state here but for AVR Dx
+   * family, we need to do different things based on if we came here
+   * from interrupt handler or not.
+   *
+   * We do all branching now because at this point we are about to restore
+   * SREG, don't have free registers to preserve it anymore and branching
+   * would clobber it
+   *
+   * Branch away if we came here from interrupt handler
+   */
+
+  lds r25, CPUINT_STATUS
+  and r25, r25
+  brne .tcbr_avrdx_ret_reti
+#endif
 
   /* Restore the status register, interrupts are disabled */
 
@@ -602,9 +636,68 @@
   pop r26
   ret
 
+#ifdef CONFIG_ARCH_CHIP_AVRDX
+.tcbr_avrdx_ret_reti:
+
+  /* See branch above for more detailed comments */
+
+  out _SFR_IO_ADDR(SREG), r24 /* SREG with I-flag cleared */
+
+  /* Restore r24-r25 - The temporary and IRQ number registers */
+
+  ld r25, x+  /* restore r24-r25 */
+  ld r24, x+
+  pop r27     /* recovering R27 then R26  */
+  pop r26
+
+  /* Returning with I-flag cleared (reti does not change that),
+   * but clearing internal "running in interrupt context" state
+   */
+
+  reti
+#endif
+
 go_reti:
+#ifdef CONFIG_ARCH_CHIP_AVRDX
+  /* In this case, branch away if we did NOT come here
+   * from an interrupt handler
+   */
+
+  lds r25, CPUINT_STATUS
+  and r25, r25
+  breq .tcbr_avrdx_reti_ret
+#endif
+
+#ifdef CONFIG_ARCH_CHIP_AVRDX
+  /* restore Status Register with interrupt enabled. Hardware
+   * knows it is processing an interrupt and will not interrupt
+   * us even with "I"-flag set (With the exception of high
+   * priority interrupts but those are not supported.)
+   */
+#else
+
   /* restore the Status Register with interrupts disabled
    * and exit with reti (that will set the Interrupt Enable)
+   */
+
+  andi r24, ~(1 << SREG_I)
+#endif
+
+  out _SFR_IO_ADDR(SREG), r24
+
+  ld r25, x+
+  ld r24, x+
+
+  pop r27
+  pop r26
+
+  reti
+
+#ifdef CONFIG_ARCH_CHIP_AVRDX
+.tcbr_avrdx_reti_ret:
+
+  /* restore the Status Register with interrupts disabled,
+   * we don't want to be interrupted until done
    */
 
   andi r24, ~(1 << SREG_I)
@@ -616,7 +709,18 @@ go_reti:
   pop r27
   pop r26
 
-  reti
+  /* Now enable interrupts and exit with ret, not messing with internal
+   * state of the interrupt controller because from its point of view,
+   * we are not returning from interrupt (despite the fact that the restored
+   * context was created in an interrupt)
+   *
+   * AVR Instruction Set Manual DS40002198 states: "The instruction
+   * following SEI will be executed before any pending interrupts."
+   */
+
+  sei
+  ret
+#endif
 
   .endm
 
