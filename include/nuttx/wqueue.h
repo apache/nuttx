@@ -257,7 +257,6 @@ struct work_s
       clock_t qtime;             /* Time work queued */
     } s;
     struct wdog_s timer;         /* Delay expiry timer */
-    struct wdog_period_s ptimer; /* Period expiry timer */
   } u;
   worker_t  worker;              /* Work callback */
   FAR void *arg;                 /* Callback argument */
