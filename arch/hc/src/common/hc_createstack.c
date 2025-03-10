@@ -204,7 +204,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
       tcb->stack_base_ptr = tcb->alloc_stack_ptr;
       tcb->adj_stack_size = size_of_stack;
-      tcb->flags |= TCB_FLAG_FREE_STACK;
+      atomic_or(&tcb->flags, TCB_FLAG_FREE_STACK);
 
       board_autoled_on(LED_STACKCREATED);
       return OK;

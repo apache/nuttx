@@ -68,7 +68,7 @@
 void nxtask_start(void)
 {
   FAR struct tcb_s *tcb = this_task();
-  uint8_t ttype = tcb->flags & TCB_FLAG_TTYPE_MASK;
+  uint8_t ttype = atomic_read(&tcb->flags) & TCB_FLAG_TTYPE_MASK;
   int exitcode = EXIT_FAILURE;
   FAR char **argv;
   int argc;

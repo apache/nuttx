@@ -145,7 +145,8 @@ int nxtask_exit(void)
   nxsched_switch_context(dtcb, rtcb);
 
   sched_note_stop(dtcb);
-  ret = nxsched_release_tcb(dtcb, dtcb->flags & TCB_FLAG_TTYPE_MASK);
+  ret = nxsched_release_tcb(dtcb, atomic_read(&dtcb->flags) &
+                            TCB_FLAG_TTYPE_MASK);
 
 #ifdef CONFIG_SMP
   rtcb->irqcount--;

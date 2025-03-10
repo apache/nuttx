@@ -93,7 +93,7 @@ retry:
 #endif
 
   if (!sq_empty(&rtcb->sigpendactionq) &&
-      (rtcb->flags & TCB_FLAG_SIGNAL_ACTION) == 0)
+      (atomic_read(&rtcb->flags) & TCB_FLAG_SIGNAL_ACTION) == 0)
     {
       goto retry;
     }
