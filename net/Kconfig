@@ -457,6 +457,7 @@ source "net/arp/Kconfig"
 source "net/procfs/Kconfig"
 source "net/usrsock/Kconfig"
 source "net/utils/Kconfig"
+source "net/vsock/Kconfig"
 
 config NET_STATISTICS
 	bool "Collect network statistics"

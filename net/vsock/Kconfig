@@ -1,0 +1,39 @@
+#
+# For a description of the syntax of this configuration file,
+# see misc/tools/kconfig-language.txt.
+#
+
+menu "Virtual Socket networking stack API"
+
+config NET_VSOCK
+	bool
+
+if NET_VSOCK
+
+config NET_VSOCK_RX_BUFSIZE
+	int "Virtual Socket rx buffer size"
+	default 2048
+
+config NET_VSOCK_NPOLLWAITERS
+	int "Virtual Socket poll waiter number"
+	default 4
+
+config NET_VSOCK_PKT_BUFSIZE
+	int "Virtual Socket packet tx buffer size"
+	default 2048
+
+config NET_VSOCK_PKT_BUFCOUNT
+	int "Virtual Socket packet virtqueue buf count"
+	default 16
+
+config NET_VSOCK_WORK_PRIORITY
+	int "Virtual Socket work priority"
+	default 223
+
+config NET_VSOCK_WORK_STACKSIZE
+	int "Virtual Socket work stack size"
+	default DEFAULT_TASK_STACKSIZE
+
+endif # NET_VSOCK
+
+endmenu # Virtual Socket networking stack API
