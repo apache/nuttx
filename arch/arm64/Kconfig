@@ -185,6 +185,7 @@ menu "ARMv8.5 architectural features"
 
 config ARM64_MTE
 	bool "Memory Tagging Extension support"
+	select ARCH_HAVE_MEMTAG
 	select ARM64_TBI
 	default y
 

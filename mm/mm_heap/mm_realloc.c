@@ -388,11 +388,12 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
                       heap->mm_curused - newsize);
       sched_note_heap(NOTE_HEAP_ALLOC, heap, newmem, newsize,
                       heap->mm_curused);
+
+      size = MM_SIZEOF_NODE(oldnode);
       mm_unlock(heap);
       MM_ADD_BACKTRACE(heap, (FAR char *)newmem - MM_SIZEOF_ALLOCNODE);
 
-      newmem = kasan_unpoison(newmem, MM_SIZEOF_NODE(oldnode) -
-                              MM_ALLOCNODE_OVERHEAD);
+      newmem = kasan_unpoison(newmem, size - MM_ALLOCNODE_OVERHEAD);
 
       oldmem = kasan_set_tag(oldmem, kasan_get_tag(newmem));
       if (newmem != oldmem)

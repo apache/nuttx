@@ -3067,6 +3067,65 @@ int up_get_legacy_irq(uint32_t devfn, uint8_t line, uint8_t pin);
 
 #endif
 
+#ifdef CONFIG_ARCH_HAVE_SYSCALL
+
+/****************************************************************************
+ * Name: up_assert
+ ****************************************************************************/
+
+void up_assert(FAR const char *filename, int linenum, FAR const char *msg);
+#endif
+
+#ifdef CONFIG_ARCH_HAVE_MEMTAG
+
+/****************************************************************************
+ * Name: up_memtag_bypass
+ *
+ * Description:
+ *   Set MTE state bypass or not
+ *
+ ****************************************************************************/
+
+bool up_memtag_bypass(bool bypass);
+
+/****************************************************************************
+ * Name: up_memtag_get_tag
+ ****************************************************************************/
+
+uint8_t up_memtag_get_tag(const void *addr);
+
+/****************************************************************************
+ * Name: up_memtag_get_random_tag
+ *
+ * Description:
+ *   Get a random label based on the address through the mte register
+ *
+ ****************************************************************************/
+
+uint8_t up_memtag_get_random_tag(const void *addr);
+
+/****************************************************************************
+ * Name: up_memtag_set_tag
+ *
+ * Description:
+ *   Get the address with label
+ *
+ ****************************************************************************/
+
+void *up_memtag_set_tag(const void *addr, uint8_t tag);
+
+/****************************************************************************
+ * Name: up_memtag_tag_mem
+ *
+ * Description:
+ *   Set memory tags for a given memory range
+ *
+ ****************************************************************************/
+
+void up_memtag_tag_mem(const void *addr, size_t size);
+
+#endif /* CONFIG_ARCH_HAVE_MEMTAG */
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
