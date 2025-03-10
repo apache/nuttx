@@ -63,6 +63,7 @@ static uint8_t    g_fdcheck_tag = 0;
 int fdcheck_restore(int val)
 {
   uint8_t tag_store;
+  int ret;
   int fd;
 
   /* If val is a bare fd（0~255）, we should return it directly  */
@@ -73,7 +74,7 @@ int fdcheck_restore(int val)
       return val;
     }
 
-  int ret = ioctl(fd, FIOC_GETTAG_FDCHECK, &tag_store);
+  ret = ioctl(fd, FIOC_GETTAG_FDCHECK, &tag_store);
   if (ret >= 0)
     {
       uint8_t tag_expect = (val >> TAG_SHIFT) & TAG_MASK;
@@ -83,6 +84,12 @@ int fdcheck_restore(int val)
                 tag_expect, tag_store);
           PANIC();
         }
+    }
+  else
+    {
+      ferr("fd is bad, or fd have already been closed, errno:%d",
+           get_errno());
+      PANIC();
     }
 
   return fd;
