@@ -47,6 +47,7 @@
 #include "netlink/netlink.h"
 #include "route/route.h"
 #include "usrsock/usrsock.h"
+#include "vsock/vsock.h"
 
 /****************************************************************************
  * Public Functions
@@ -107,6 +108,10 @@ void net_initialize(void)
   /* Initialize the user-space socket API */
 
   usrsock_initialize();
+#endif
+
+#ifdef CONFIG_NET_VSOCK
+  vsock_initialize();
 #endif
 }
 

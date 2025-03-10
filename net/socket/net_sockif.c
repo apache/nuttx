@@ -42,6 +42,7 @@
 #include "bluetooth/bluetooth.h"
 #include "ieee802154/ieee802154.h"
 #include "socket/socket.h"
+#include "vsock/vsock.h"
 
 /****************************************************************************
  * Private Function Prototypes
@@ -263,6 +264,12 @@ net_sockif(sa_family_t family, int type, int protocol)
 #ifdef CONFIG_NET_RPMSG
       case PF_RPMSG:
         sockif = &g_rpmsg_sockif;
+        break;
+#endif
+
+#ifdef CONFIG_NET_VSOCK
+      case PF_VSOCK:
+        sockif = &g_vsock_sockif;
         break;
 #endif
 
