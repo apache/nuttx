@@ -98,3 +98,14 @@ add_custom_target(
   COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/defconfig
           ${NUTTX_DEFCONFIG}
   WORKING_DIRECTORY ${NUTTX_DIR})
+
+# utility target to update .config with minimal changes to meet dependencies
+add_custom_target(
+  olddefconfig
+  COMMAND ${CMAKE_COMMAND} -E env ${KCONFIG_ENV} olddefconfig
+  COMMAND ${CMAKE_COMMAND} -E remove -f
+          ${CMAKE_BINARY_DIR}/include/nuttx/config.h # invalidate existing
+                                                     # config
+  COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_PARENT_LIST_FILE}
+  WORKING_DIRECTORY ${NUTTX_DIR}
+  USES_TERMINAL)
