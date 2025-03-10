@@ -124,7 +124,8 @@ uint16_t can_callback(FAR struct net_driver_s *dev,
            * create timestamp and copy to iob
            */
 
-          if (_SO_GETOPT(conn->sconn.s_options, SO_TIMESTAMP))
+          if (_SO_GETOPT(conn->sconn.s_options, SO_TIMESTAMP) &&
+            (dev->d_iob != NULL))
             {
               struct timeval tv;
               FAR struct timespec *ts = (FAR struct timespec *)&tv;
