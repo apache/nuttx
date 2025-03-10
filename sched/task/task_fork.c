@@ -220,7 +220,8 @@ FAR struct tcb_s *nxtask_setup_fork(start_t retaddr, bool vfork)
 
   /* Get the type of the fork'ed task (kernel or user) */
 
-  if ((ptcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL)
+  if ((atomic_read(&ptcb->flags) & TCB_FLAG_TTYPE_MASK) ==
+      TCB_FLAG_TTYPE_KERNEL)
     {
       /* Fork'ed from a kernel thread */
 
@@ -232,7 +233,8 @@ FAR struct tcb_s *nxtask_setup_fork(start_t retaddr, bool vfork)
       /* Fork'ed from a user task or pthread */
 
       ttype = TCB_FLAG_TTYPE_TASK;
-      if ((ptcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_TASK)
+      if ((atomic_read(&ptcb->flags) & TCB_FLAG_TTYPE_MASK) ==
+          TCB_FLAG_TTYPE_TASK)
         {
           parent = ptcb;
         }
@@ -257,7 +259,7 @@ FAR struct tcb_s *nxtask_setup_fork(start_t retaddr, bool vfork)
       goto errout;
     }
 
-  child->flags |= TCB_FLAG_FREE_TCB;
+  atomic_or(&child->flags, TCB_FLAG_FREE_TCB);
 
   /* Initialize the task join */
 
@@ -670,6 +672,8 @@ void nxtask_abort_fork(FAR struct tcb_s *child, int errcode)
 
   /* Release the TCB */
 
-  nxsched_release_tcb(child, child->flags & TCB_FLAG_TTYPE_MASK);
+  nxsched_release_tcb(child,
+                      atomic_read(&child->flags) & TCB_FLAG_TTYPE_MASK);
+
   set_errno(errcode);
 }

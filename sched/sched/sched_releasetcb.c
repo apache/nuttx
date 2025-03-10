@@ -183,7 +183,7 @@ int nxsched_release_tcb(FAR struct tcb_s *tcb, uint8_t ttype)
 
       /* And, finally, release the TCB itself */
 
-      if (tcb->flags & TCB_FLAG_FREE_TCB)
+      if (atomic_read(&tcb->flags) & TCB_FLAG_FREE_TCB)
         {
           kmm_free(tcb);
         }

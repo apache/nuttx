@@ -294,7 +294,7 @@ int exec_module(FAR struct binary_s *binp,
 
   /* tcb->flags |= TCB_FLAG_TTYPE_TASK; */
 
-  tcb->flags |= TCB_FLAG_FREE_TCB;
+  atomic_or(&tcb->flags, TCB_FLAG_FREE_TCB);
 
   /* Initialize the task */
 

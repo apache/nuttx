@@ -110,7 +110,7 @@ static int file_lock_get_path(FAR struct file *filep, FAR char *path)
                     INODE_IS_DRIVER(filep->f_inode) ||
                     INODE_IS_SHM(filep->f_inode);
 
-  if (!is_allowed_type || tcb->flags & TCB_FLAG_SIGNAL_ACTION)
+  if (!is_allowed_type || atomic_read(&tcb->flags) & TCB_FLAG_SIGNAL_ACTION)
     {
       return -EBADF;
     }

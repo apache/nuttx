@@ -75,7 +75,7 @@ void nx_pthread_exit(FAR void *exit_value)
 
   DEBUGASSERT(tcb != NULL);
 
-  if (tcb->flags & TCB_FLAG_EXIT_PROCESSING)
+  if ((atomic_read(&tcb->flags) & TCB_FLAG_EXIT_PROCESSING) != 0)
     {
       /* If the TCB is already in the exiting state, we
        * should allow the killing task to execute normally first.
@@ -86,7 +86,7 @@ void nx_pthread_exit(FAR void *exit_value)
     }
   else
     {
-      tcb->flags |= TCB_FLAG_EXIT_PROCESSING;
+      atomic_or(&tcb->flags, TCB_FLAG_EXIT_PROCESSING);
     }
 
   /* Block any signal actions that would awaken us while were

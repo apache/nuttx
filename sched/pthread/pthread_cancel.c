@@ -74,7 +74,7 @@ int pthread_cancel(pthread_t thread)
 
   /* Return ESRCH when thread was in exit processing */
 
-  if ((tcb->flags & TCB_FLAG_EXIT_PROCESSING) != 0)
+  if ((atomic_read(&tcb->flags) & TCB_FLAG_EXIT_PROCESSING) != 0)
     {
       nxsched_put_tcb(tcb);
       return ESRCH;
@@ -82,7 +82,7 @@ int pthread_cancel(pthread_t thread)
 
   /* Only pthreads should use this interface */
 
-  DEBUGASSERT((tcb->flags & TCB_FLAG_TTYPE_MASK) ==
+  DEBUGASSERT((atomic_read(&tcb->flags) & TCB_FLAG_TTYPE_MASK) ==
                TCB_FLAG_TTYPE_PTHREAD);
 
   /* Notify the target if the non-cancelable or deferred cancellation set */

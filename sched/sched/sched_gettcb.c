@@ -152,7 +152,7 @@ void nxsched_put_tcb(FAR struct tcb_s *tcb)
   /* this_task may be killed and in KILL_PROCESSING */
 
   if (atomic_sub(&tcb->refs, 1) == 1 &&
-      (tcb->flags & TCB_FLAG_KILL_PROCESSING))
+      (atomic_read(&tcb->flags) & TCB_FLAG_KILL_PROCESSING))
     {
       nxsem_post(&tcb->exit_sem);
 

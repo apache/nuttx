@@ -200,7 +200,7 @@ int up_create_stack(struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
       arm64_stack_color(tcb->stack_base_ptr, tcb->adj_stack_size);
 #endif /* CONFIG_STACK_COLORATION */
-      tcb->flags |= TCB_FLAG_FREE_STACK;
+      atomic_or(&tcb->flags, TCB_FLAG_FREE_STACK);
 
       return OK;
     }

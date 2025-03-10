@@ -257,7 +257,8 @@ static inline void nxtask_save_parent(FAR struct tcb_s *tcb, uint8_t ttype)
    */
 
 #ifndef CONFIG_DISABLE_PTHREAD
-  if ((tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD)
+  if ((atomic_read(&tcb->flags) & TCB_FLAG_TTYPE_MASK) !=
+      TCB_FLAG_TTYPE_PTHREAD)
 #endif
     {
       /* Get the TCB of the parent task.  In this case, the calling task. */
@@ -422,17 +423,17 @@ static int nxthread_setup_scheduler(FAR struct tcb_s *tcb, int priority,
        */
 
       ttype              &= TCB_FLAG_TTYPE_MASK;
-      tcb->flags         &= ~TCB_FLAG_TTYPE_MASK;
-      tcb->flags         |= ttype;
+      atomic_and(&tcb->flags, ~TCB_FLAG_TTYPE_MASK);
+      atomic_or(&tcb->flags, ttype);
 
       /* Set the appropriate scheduling policy in the TCB */
 
-      tcb->flags         &= ~TCB_FLAG_POLICY_MASK;
+      atomic_and(&tcb->flags, ~TCB_FLAG_POLICY_MASK);
 #if CONFIG_RR_INTERVAL > 0
-      tcb->flags         |= TCB_FLAG_SCHED_RR;
+      atomic_or(&tcb->flags, TCB_FLAG_SCHED_RR);
       tcb->timeslice      = MSEC2TICK(CONFIG_RR_INTERVAL);
 #else
-      tcb->flags         |= TCB_FLAG_SCHED_FIFO;
+      atomic_or(&tcb->flags, TCB_FLAG_SCHED_FIFO);
 #endif
 
       /* Save the task ID of the parent task in the TCB and allocate

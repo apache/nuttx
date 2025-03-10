@@ -171,7 +171,8 @@ static inline void nxtask_sigchild(pid_t ppid, FAR struct tcb_s *ctcb,
    */
 
 #ifndef CONFIG_DISABLE_PTHREAD
-  if ((ctcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD)
+  if ((atomic_read(&ctcb->flags) & TCB_FLAG_TTYPE_MASK) !=
+      TCB_FLAG_TTYPE_PTHREAD)
 #endif
     {
       nxtask_exitstatus(pgrp, ctcb, status);
@@ -223,7 +224,8 @@ static inline void nxtask_sigchild(FAR struct tcb_s *ptcb,
    */
 
 #ifndef CONFIG_DISABLE_PTHREAD
-  if ((ctcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD)
+  if ((atomic_read(&ctcb->flags) & TCB_FLAG_TTYPE_MASK) !=
+      TCB_FLAG_TTYPE_PTHREAD)
 #endif
     {
 #ifdef CONFIG_SCHED_CHILD_STATUS
@@ -343,7 +345,8 @@ static inline void nxtask_exitwakeup(FAR struct tcb_s *tcb, int status)
        */
 
 #ifndef CONFIG_DISABLE_PTHREAD
-      if ((tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD)
+      if ((atomic_read(&tcb->flags) & TCB_FLAG_TTYPE_MASK) !=
+          TCB_FLAG_TTYPE_PTHREAD)
 #endif
         {
           /* Report the exit status.  We do not nullify tg_statloc here
@@ -437,7 +440,7 @@ void nxtask_exithook(FAR struct tcb_s *tcb, int status)
    * called.  If that bit is set, then just exit doing nothing more..
    */
 
-  DEBUGASSERT((tcb->flags & TCB_FLAG_EXIT_PROCESSING) != 0);
+  DEBUGASSERT((atomic_read(&tcb->flags) & TCB_FLAG_EXIT_PROCESSING) != 0);
 
   nxsched_dumponexit();
 
@@ -490,7 +493,8 @@ void nxtask_exithook(FAR struct tcb_s *tcb, int status)
 #endif
 
 #ifdef CONFIG_SCHED_DUMP_LEAK
-  if ((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL)
+  if ((atomic_read(&tcb->flags) & TCB_FLAG_TTYPE_MASK) ==
+      TCB_FLAG_TTYPE_KERNEL)
     {
       kmm_memdump(&dump);
     }

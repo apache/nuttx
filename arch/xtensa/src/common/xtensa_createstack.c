@@ -202,7 +202,7 @@ int up_create_stack(struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
       xtensa_stack_color(tcb->stack_base_ptr, tcb->adj_stack_size);
 #endif
-      tcb->flags |= TCB_FLAG_FREE_STACK;
+      atomic_or(&tcb->flags, TCB_FLAG_FREE_STACK);
 
       board_autoled_on(LED_STACKCREATED);
       return OK;

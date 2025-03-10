@@ -199,7 +199,8 @@ static clock_t nxsched_cpu_scheduler(int cpu, clock_t ticks,
 #if CONFIG_RR_INTERVAL > 0
   /* Check if the currently executing task uses round robin scheduling. */
 
-  if ((rtcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_RR)
+  if ((atomic_read(&rtcb->flags) & TCB_FLAG_POLICY_MASK) ==
+      TCB_FLAG_SCHED_RR)
     {
       /* Yes, check if the currently executing task has exceeded its
        * timeslice.
@@ -213,7 +214,8 @@ static clock_t nxsched_cpu_scheduler(int cpu, clock_t ticks,
 #ifdef CONFIG_SCHED_SPORADIC
   /* Check if the currently executing task uses sporadic scheduling. */
 
-  if ((rtcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC)
+  if ((atomic_read(&rtcb->flags) & TCB_FLAG_POLICY_MASK) ==
+      TCB_FLAG_SCHED_SPORADIC)
     {
       FAR struct sporadic_s *sporadic = rtcb->sporadic;
 

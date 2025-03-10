@@ -249,7 +249,8 @@ static void nxsig_abnormal_termination(int signo)
 #ifndef CONFIG_DISABLE_PTHREAD
   /* Check if the currently running task is actually a pthread */
 
-  if ((rtcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD)
+  if ((atomic_read(&rtcb->flags) & TCB_FLAG_TTYPE_MASK) ==
+      TCB_FLAG_TTYPE_PTHREAD)
     {
       /* Exit the final thread of the task group.
        *

@@ -75,7 +75,7 @@ static int sig_handler(FAR void *cookie)
   tcb = nxsched_get_tcb(arg->pid);
 
   if (!tcb || tcb->task_state == TSTATE_TASK_INVALID ||
-      (tcb->flags & TCB_FLAG_EXIT_PROCESSING) != 0)
+      (atomic_read(&tcb->flags) & TCB_FLAG_EXIT_PROCESSING) != 0)
     {
       /* There is no TCB with this pid or, if there is, it is not a task. */
 
@@ -86,7 +86,7 @@ static int sig_handler(FAR void *cookie)
 
   if (arg->need_restore)
     {
-      tcb->flags &= ~TCB_FLAG_CPU_LOCKED;
+      atomic_and(&tcb->flags, ~TCB_FLAG_CPU_LOCKED);
     }
 
   if (tcb->sigdeliver)
@@ -179,17 +179,18 @@ static int nxsig_queue_action(FAR struct tcb_s *stcb,
                 {
                   struct sig_arg_s arg;
 
-                  if ((stcb->flags & TCB_FLAG_CPU_LOCKED) != 0)
+                  arg.pid = stcb->pid;
+                  if (atomic_or(&stcb->flags, TCB_FLAG_CPU_LOCKED) &
+                      TCB_FLAG_CPU_LOCKED)
                     {
-                      arg.need_restore   = false;
+                      arg.need_restore = false;
                     }
                   else
                     {
                       arg.need_restore   = true;
-                      stcb->flags        |= TCB_FLAG_CPU_LOCKED;
+                      atomic_or(&stcb->flags, TCB_FLAG_CPU_LOCKED);
                     }
 
-                  arg.pid = stcb->pid;
                   nxsched_smp_call_single(stcb->cpu, sig_handler, &arg);
                 }
               else
@@ -615,7 +616,7 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, FAR siginfo_t *info,
 
   /* Return ESRCH when thread was in exit processing */
 
-  if ((stcb->flags & TCB_FLAG_EXIT_PROCESSING) != 0)
+  if ((atomic_read(&stcb->flags) & TCB_FLAG_EXIT_PROCESSING) != 0)
     {
       return -ESRCH;
     }
@@ -706,7 +707,7 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, FAR siginfo_t *info,
    * signal handlers.
    */
 
-  if ((masked == 1) || (stcb->flags & TCB_FLAG_SYSCALL) != 0)
+  if ((masked == 1) || (atomic_read(&stcb->flags) & TCB_FLAG_SYSCALL) != 0)
 #else
   /* Check if the signal is masked. In that case, it will be added to the
    * list of pending signals.

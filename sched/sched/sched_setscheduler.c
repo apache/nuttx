@@ -73,8 +73,8 @@ int process_sporadic(FAR struct tcb_s *tcb,
 
   if (ret >= 0)
     {
-      tcb->flags            &= ~TCB_FLAG_POLICY_MASK;
-      tcb->flags            |= TCB_FLAG_SCHED_SPORADIC;
+      atomic_and(&tcb->flags, ~TCB_FLAG_POLICY_MASK);
+      atomic_or(&tcb->flags, TCB_FLAG_SCHED_SPORADIC);
       tcb->timeslice         = budget_ticks;
 
       sporadic               = tcb->sporadic;
@@ -202,8 +202,8 @@ int nxsched_set_scheduler(pid_t pid, int policy,
 
                 /* Save the FIFO scheduling parameters */
 
-                tcb->flags     &= ~TCB_FLAG_POLICY_MASK;
-                tcb->flags     |= TCB_FLAG_SCHED_FIFO;
+                atomic_and(&tcb->flags, ~TCB_FLAG_POLICY_MASK);
+                atomic_or(&tcb->flags, TCB_FLAG_SCHED_FIFO);
 #if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
                 tcb->timeslice  = 0;
 #endif
@@ -215,7 +215,7 @@ int nxsched_set_scheduler(pid_t pid, int policy,
 #  ifdef CONFIG_SCHED_SPORADIC
                 /* Cancel any on-going sporadic scheduling */
 
-                if ((tcb->flags & TCB_FLAG_POLICY_MASK) ==
+                if ((atomic_read(&tcb->flags) & TCB_FLAG_POLICY_MASK) ==
                     TCB_FLAG_SCHED_SPORADIC)
                   {
                     DEBUGVERIFY(nxsched_stop_sporadic(tcb));
@@ -224,8 +224,8 @@ int nxsched_set_scheduler(pid_t pid, int policy,
 
                 /* Save the round robin scheduling parameters */
 
-                tcb->flags     &= ~TCB_FLAG_POLICY_MASK;
-                tcb->flags     |= TCB_FLAG_SCHED_RR;
+                atomic_and(&tcb->flags, ~TCB_FLAG_POLICY_MASK);
+                atomic_or(&tcb->flags, TCB_FLAG_SCHED_RR);
                 tcb->timeslice  = MSEC2TICK(CONFIG_RR_INTERVAL);
                 break;
 #endif

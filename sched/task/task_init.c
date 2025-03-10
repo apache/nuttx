@@ -91,7 +91,7 @@ int nxtask_init(FAR struct tcb_s *tcb, const char *name, int priority,
                 FAR char * const envp[],
                 FAR const posix_spawn_file_actions_t *actions)
 {
-  uint8_t ttype = tcb->flags & TCB_FLAG_TTYPE_MASK;
+  uint8_t ttype = atomic_read(&tcb->flags) & TCB_FLAG_TTYPE_MASK;
   int ret;
 
   sched_trace_begin();
@@ -302,5 +302,5 @@ void nxtask_uninit(FAR struct tcb_s *tcb)
    * itself.
    */
 
-  nxsched_release_tcb(tcb, tcb->flags & TCB_FLAG_TTYPE_MASK);
+  nxsched_release_tcb(tcb, atomic_read(&tcb->flags) & TCB_FLAG_TTYPE_MASK);
 }

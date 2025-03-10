@@ -96,7 +96,8 @@ int nxtask_delete(pid_t pid)
    * (The semantics of the call should be sufficient to prohibit this).
    */
 
-  DEBUGASSERT((dtcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD);
+  DEBUGASSERT((atomic_read(&dtcb->flags) & TCB_FLAG_TTYPE_MASK) !=
+              TCB_FLAG_TTYPE_PTHREAD);
 
   /* Non-privileged tasks and pthreads may not delete privileged kernel
    * threads.
@@ -105,8 +106,10 @@ int nxtask_delete(pid_t pid)
    * permissions are supported and a user task might also be privileged.
    */
 
-  if (((rtcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL) &&
-      ((dtcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL))
+  if (((atomic_read(&rtcb->flags) & TCB_FLAG_TTYPE_MASK) !=
+      TCB_FLAG_TTYPE_KERNEL) &&
+      ((atomic_read(&dtcb->flags) & TCB_FLAG_TTYPE_MASK) ==
+      TCB_FLAG_TTYPE_KERNEL))
     {
       nxsched_put_tcb(dtcb);
       return -EACCES;

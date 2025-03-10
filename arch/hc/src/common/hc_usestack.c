@@ -97,7 +97,7 @@ int up_use_stack(FAR struct tcb_s *tcb, FAR void *stack, size_t stack_size)
     {
       /* Yes.. Release the old stack allocation */
 
-      up_release_stack(tcb, tcb->flags & TCB_FLAG_TTYPE_MASK);
+      up_release_stack(tcb, atomic_read(&tcb->flags) & TCB_FLAG_TTYPE_MASK);
     }
 
   /* Save the new stack allocation */

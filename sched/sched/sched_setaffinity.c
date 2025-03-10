@@ -109,7 +109,7 @@ int nxsched_set_affinity(pid_t pid, size_t cpusetsize,
    */
 
   flags = enter_critical_section();
-  if ((tcb->flags & TCB_FLAG_CPU_LOCKED) != 0)
+  if ((atomic_read(&tcb->flags) & TCB_FLAG_CPU_LOCKED) != 0)
     {
       ret = -EINVAL;
       goto errout_with_csection;
