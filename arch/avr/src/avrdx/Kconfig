@@ -1,0 +1,90 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CHIP_AVRDX
+comment "AVR DA/DB Configuration Options"
+
+choice
+	prompt "Atmel AVR DA/DB chip selection"
+	default ARCH_CHIP_AVR128DA28
+
+config ARCH_CHIP_AVR128DA28
+	bool "AVR128DA28"
+	select AVR_HAS_RAMPZ
+	---help---
+		Atmel AVR128DA28 8-bit AVR.
+
+endchoice # AVR DA/DB Configuration Options
+
+menu "AVR DA/DB Peripheral Selections"
+
+# TBD
+
+endmenu # AVR DA/DB Peripheral Selections
+
+choice
+	prompt "Internal High-Frequency Oscillator clock speed"
+	default AVRDX_HFO_CLOCK_24MHZ
+
+config AVRDX_HFO_CLOCK_1MHZ
+	bool "1MHz"
+	---help---
+		Internal oscillator set to 1MHz
+
+config AVRDX_HFO_CLOCK_2MHZ
+	bool "2MHz"
+	---help---
+		Internal oscillator set to 2MHz
+
+config AVRDX_HFO_CLOCK_3MHZ
+	bool "3MHz"
+	---help---
+		Internal oscillator set to 3MHz
+
+config AVRDX_HFO_CLOCK_4MHZ
+	bool "4MHz"
+	---help---
+		Internal oscillator set to 4MHz
+
+config AVRDX_HFO_CLOCK_8MHZ
+	bool "8MHz"
+	---help---
+		Internal oscillator set to 8MHz
+
+config AVRDX_HFO_CLOCK_12MHZ
+	bool "12MHz"
+	---help---
+		Internal oscillator set to 12MHz
+
+config AVRDX_HFO_CLOCK_16MHZ
+	bool "16MHz"
+	---help---
+		Internal oscillator set to 16MHz
+
+config AVRDX_HFO_CLOCK_20MHZ
+	bool "20MHz"
+	---help---
+		Internal oscillator set to 20MHz
+
+config AVRDX_HFO_CLOCK_24MHZ
+	bool "24MHz"
+	---help---
+		Internal oscillator set to 24MHz
+
+endchoice
+
+config AVRDX_HFO_CLOCK_FREQ
+	int
+	default 1000000 if AVRDX_HFO_CLOCK_1MHZ
+	default 2000000 if AVRDX_HFO_CLOCK_2MHZ
+	default 3000000 if AVRDX_HFO_CLOCK_3MHZ
+	default 4000000 if AVRDX_HFO_CLOCK_4MHZ
+	default 8000000 if AVRDX_HFO_CLOCK_8MHZ
+	default 12000000 if AVRDX_HFO_CLOCK_12MHZ
+	default 16000000 if AVRDX_HFO_CLOCK_16MHZ
+	default 20000000 if AVRDX_HFO_CLOCK_20MHZ
+	default 24000000 if AVRDX_HFO_CLOCK_24MHZ
+
+endif
