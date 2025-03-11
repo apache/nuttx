@@ -66,7 +66,6 @@
 int env_dup(FAR struct task_group_s *group, FAR char * const *envcp)
 {
   FAR char **envp = NULL;
-  irqstate_t flags;
   size_t envc = 0;
   size_t size;
   int ret = OK;
@@ -81,7 +80,7 @@ int env_dup(FAR struct task_group_s *group, FAR char * const *envcp)
        * environment may be shared.
        */
 
-      flags = enter_critical_section();
+      nxrmutex_lock(&group->tg_mutex);
 
       /* Count the strings */
 
@@ -142,8 +141,7 @@ int env_dup(FAR struct task_group_s *group, FAR char * const *envcp)
       /* Save the child environment allocation. */
 
       group->tg_envp = envp;
-
-      leave_critical_section(flags);
+      nxrmutex_unlock(&group->tg_mutex);
     }
 
   return ret;
