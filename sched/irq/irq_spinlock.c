@@ -38,6 +38,7 @@
 #include <nuttx/spinlock.h>
 
 #include <assert.h>
+#include <debug.h>
 #include <sys/types.h>
 #include <arch/irq.h>
 
@@ -52,5 +53,85 @@
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+#ifdef CONFIG_SPINLOCK_DEBUG
+static void dump_spinlock(FAR sq_queue_t *hold_spinlock)
+{
+  FAR sq_entry_t *entry;
+
+  sq_for_every(hold_spinlock, entry)
+    {
+      FAR spinlock_debug_t *info = (FAR spinlock_debug_t *)entry;
+
+      _alert("Spinlock(%p) has been locked by %p\n", info, info->caller);
+    }
+}
+
+void spinlock_mark_locked(FAR spinlock_debug_t *info)
+{
+  FAR struct tcb_s *rtcb = running_task();
+
+  /* Check if the spinlock has been held. */
+
+  if (info->holder != NULL)
+    {
+      _alert("Detect thread(%d) relocks spinlock(%p)!\n",
+             rtcb->pid, info);
+      dump_spinlock(&rtcb->hold_spinlock);
+      PANIC();
+    }
+
+  /* Set info and enqueue. */
+
+  info->holder = rtcb;
+  info->caller = return_address(0);
+  sq_addlast(info->flink, &rtcb->hold_spinlock);
+}
+
+void spinlock_mark_unlocked(FAR spinlock_debug_t *info)
+{
+  FAR struct tcb_s *rtcb = running_task();
+
+  /* Check if locking and unlocking are the same task. */
+
+  if (info->holder != rtcb)
+    {
+      _alert("Detect thread(%d) unlocks spinlock(%p) which is not held!\n",
+             rtcb->pid, info);
+      dump_spinlock(&rtcb->hold_spinlock);
+      PANIC();
+    }
+
+  /* Currently, NuttX does not support unlock in the reverse order, since
+   * this will pollute flags. So check if unlocking is the reverse order.
+   */
+
+  if (sq_tail(&rtcb->hold_spinlock) != info->flink)
+    {
+      _alert("Detect thread(%d) unlocks spinlock(%p) in the wrong order!\n",
+             rtcb->pid, info);
+      dump_spinlock(&rtcb->hold_spinlock);
+      PANIC();
+    }
+
+  /* Reset info and dequeue. */
+
+  info->holder = NULL;
+  info->caller = NULL;
+  sq_remlast(&rtcb->hold_spinlock);
+}
+
+void spinlock_switch_context(FAR struct tcb_s *from)
+{
+  if (!sq_empty(&from->hold_spinlock))
+    {
+      _alert("Detect thread(%d) switches context while holding spinlock!\n",
+             from->pid);
+      dump_spinlock(&from->hold_spinlock);
+      PANIC();
+    }
+}
+
+#endif /* CONFIG_SPINLOCK_DEBUG */
 
 #endif /* CONFIG_SPINLOCK */

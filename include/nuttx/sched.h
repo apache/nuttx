@@ -684,6 +684,12 @@ struct tcb_s
   FAR struct sporadic_s *sporadic;       /* Sporadic scheduling parameters  */
 #endif
 
+  /* Spinlock debug support *************************************************/
+
+#ifdef CONFIG_SPINLOCK_DEBUG
+  sq_queue_t hold_spinlock;
+#endif
+
   struct wdog_s waitdog;                 /* All timed waits use this timer  */
 
   /* Stack-Related Fields ***************************************************/

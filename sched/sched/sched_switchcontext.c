@@ -28,6 +28,10 @@
 
 #include <nuttx/sched_note.h>
 
+#ifdef CONFIG_SPINLOCK_DEBUG
+#  include <nuttx/spinlock.h>
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -60,6 +64,10 @@ void nxsched_switch_context(FAR struct tcb_s *from, FAR struct tcb_s *to)
     {
       nxsched_suspend_roundrobin(from);
     }
+#endif
+
+#ifdef CONFIG_SPINLOCK_DEBUG
+  spinlock_switch_context(from);
 #endif
 
 #ifdef CONFIG_SCHED_SPORADIC
