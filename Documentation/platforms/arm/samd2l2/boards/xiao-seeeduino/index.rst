@@ -1,5 +1,5 @@
 ========================
-Seeed Studio Xiao SAMD21
+Seeed Studio XIAO SAMD21
 ========================
 
 The `Seeed Studio Xiao SAM21 <https://wiki.seeedstudio.com/Seeeduino-XIAO/>`_ is the first of the XIAO family, and is a
