@@ -362,7 +362,7 @@ static int riscv_mtimer_cancel(struct oneshot_lowerhalf_s *lower,
 
   mtime = riscv_mtimer_get_mtime(priv);
 
-  riscv_mtimer_set_mtimecmp(priv, mtime + UINT64_MAX);
+  riscv_mtimer_set_mtimecmp(priv, UINT64_MAX);
 
   nsec = (alarm - mtime) * NSEC_PER_SEC / priv->freq;
   ts->tv_sec  = nsec / NSEC_PER_SEC;
