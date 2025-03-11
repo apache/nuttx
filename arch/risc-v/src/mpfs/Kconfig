@@ -767,6 +767,13 @@ endchoice # GMAC speed
 
 endif # !MPFS_MAC_AUTONEG
 
+config MPFS_ETHMAC_HPWORK
+	bool "Use HP workqueue"
+	default n
+	depends on MPFS_ETHMAC
+	---help---
+		Select HPWORK workqueue for eth ISR work
+
 config MPFS_ETHMAC_MDC_CLOCK_SOURCE_HZ
 	int "MDC Clock Source (Hz)"
 	default 125000000
