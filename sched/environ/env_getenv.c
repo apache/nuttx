@@ -63,10 +63,7 @@ FAR char *getenv(FAR const char *name)
   FAR struct tcb_s *rtcb;
   FAR struct task_group_s *group;
   FAR char *pvalue = NULL;
-  irqstate_t flags;
   ssize_t ret = OK;
-
-  flags = enter_critical_section();
 
   /* Verify that a string was passed */
 
@@ -83,8 +80,16 @@ FAR char *getenv(FAR const char *name)
 
   /* Check if the variable exists */
 
-  if (group == NULL || (ret = env_findvar(group, name)) < 0)
+  if (group == NULL)
     {
+      goto errout;
+    }
+
+  nxrmutex_lock(&group->tg_mutex);
+  ret = env_findvar(group, name);
+  if (ret < 0)
+    {
+      nxrmutex_unlock(&group->tg_mutex);
       goto errout;
     }
 
@@ -93,6 +98,8 @@ FAR char *getenv(FAR const char *name)
   pvalue = strchr(group->tg_envp[ret], '=');
   if (pvalue == NULL)
     {
+      nxrmutex_unlock(&group->tg_mutex);
+
       /* The name=value string has no '='  This is a bug! */
 
       ret = -EINVAL;
@@ -102,11 +109,10 @@ FAR char *getenv(FAR const char *name)
   /* Adjust the pointer so that it points to the value right after the '=' */
 
   pvalue++;
-  leave_critical_section(flags);
+  nxrmutex_unlock(&group->tg_mutex);
   return pvalue;
 
 errout:
-  leave_critical_section(flags);
   set_errno(-ret);
   return NULL;
 }
