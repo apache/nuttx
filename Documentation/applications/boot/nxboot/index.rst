@@ -6,13 +6,13 @@ NuttX Bootloader (nxboot) can be used to provide update and recovery
 capabilities for NuttX based devices. The bootloader implements an
 algorithm that uses three partitions/areas: primary, secondary and
 tertiary. Primary area is used to run the image and thus is usually
-located in program memory. Secondary and tertiary areas are used
+located in a program memory. Secondary and tertiary areas are used
 to store update image or recovery image and can be located on
 external flash memory for example.
 
-Please note that this bootloader is new and it is possible some of its
-characteristics might be changed/enhanced/fix as it is further used and
-tested. These might include slight changes in API and image format.
+The images for the bootloader have version located in their headers. Note
+that bootloader/image characteristics may differ for different version
+and a portable application should take this into account.
 
 Algorithm Description
 ---------------------
@@ -29,38 +29,38 @@ wear while keeping the recovery/revert possibility.
 Not confirmed image is reverted to recovery image if reboot occurs.
 
 The bootable image consists of a header :c:struct:`nxboot_img_header`
-containing magic, size of the image excluding the header, CRC32 of the
-image excluding the header and firmware version. The header is located
-prior to the image itself and has a configurable size
-``CONFIG_NXBOOT_HEADER_SIZE``. One erase page is also reserved at the
-end of the partition (the entire partition, not the image!). This page
-has two write blocks/pages with each one holding a flag. The first page
-from the end holds image confirmation flag, the second one holds the flag
-informing this image was already updated. These flags are written by the
-bootloader and are used to detect which partition is update/recovery
-and whether the image is confirmed or not.
+containing magic value, header version, header size, CRC32 of the image
+including some parts of the header, size of the image excluding the header,
+platform identifier, pointer to extended headers and and firmware version.
+The header is located prior to the image itself and has a configurable size
+``CONFIG_NXBOOT_HEADER_SIZE``. The CRC is calculated from the entire image
+including header except for magic, header version and header size fields.
+Extended headers are currently not supported, but the header already has
+a reserved space for a pointer to it.
 
-There are two variants of bootable image. The first is the image that is
-expected to be flashed directly into the primary area via physical programmer
-as STlink or JTAG. This image does not use CRC32 for validation and does
-not contain tail with the flags described above. It has an inverted
-magic value compared to the update image. This should not be used
-for OTA update, but only for the initial upload of the software to the
-device.
+The image compatible with nxboot bootloader can be uploaded both directly
+to the primary area via physical programer as STlink or JTAG and to the
+update partition via some external application (over Ethernet, USB, CAN, etc.).
+The update and recovery slots can be located in the the primary flash as
+well, but this halts the program execution during write operations, so it is
+not recommended if external flash can be used. The uploaded image is detected
+by the bootloader during the next boot and update occurs.
 
-The update image has a valid precalculated CRC32 and standard magic value.
-The image is expected to be uploaded to the board either via programmer
-or some protocol (Ethernet, CAN, etc.) to the external flash. The primary
-flash can be used as well, but this halts the program execution during write
-operations, so it is not recommended if external flash can be used. The
-uploaded image is detected by the bootloader during the next boot and update
-occurs. The program responsible for uploading the update image to the
-partition has to erase the last erase page in this partition to ensure
-all flags are unset.
+Bootloader has an internal magic value that is used to detect updated images.
+Once update occurs, the image is copied from update to primary partition with
+the internal magic value and the first erase page of the update slot is erased.
+The image with internal magic value is considered valid only if its recovery
+exists, therefore the image confirmation is done by writing the first erase
+page (copying by write page size from primary) back to the update slot. It is
+recommended to use :c:func:`nxboot_confirm` API to confirm the image. This
+approach wears the first sector of the update partition a bit more, but
+avoids image's tails completely and simplifies both internal and API logic.
 
 The application can use function :c:func:`nxboot_get_state` to determine
 what partition is update and recovery and thus where the update image
-should be stored.
+should be stored. It is also possible to use function :c:func:`nxboot_open_update_partition`
+that determines the correct partition for updates and returns the opened
+file descriptor. This is a recommended approach as it avoids possible mistakes.
 
 Hardware Requirements
 ---------------------
@@ -96,6 +96,11 @@ Following configuration options are available:
 - ``CONFIG_NXBOOT_HEADER_SIZE``:
     Size of the image header. Note that this size should be aligned with the
     program memory write page size!
+- ``CONFIG_NXBOOT_PLATFORM_IDENTIFIER```:
+    64 bits large platform identifier. This is a unique platform identifier
+    used by the bootloader to verify whether the image should be run on a
+    given platform. An update (or even a firmware uploaded via a programmer)
+    is rejected if the value in image's header doesn't match this option.
 - ``CONFIG_NXBOOT_BOOTLOADER``:
     This option builds and links a bootloader application. This application
     should be an entry function for NuttX. It checks for possible
@@ -136,16 +141,13 @@ nxboot compatible image.
   python3 apps/boot/nxboot/tools/nximage.py  \
 		--version "VERSION" \
 		--header_size CONFIG_NXBOOT_HEADER_SIZE \
-		--primary \
+		--identifier CONFIG_NXBOOT_PLATFORM_IDENTIFIER \
 		nuttx.bin image.img
 
-It takes input parameters ``--version`` with your image's version and
-``--header_size`` with the configured size of the header. Option
-``--primary`` generates the primary. This option should be used only
-for image intended to be flashed directly to program memory (with
-flashing tool like STlink). It must not be set for image intended to be used
-as update image. The input file is a binary ``nuttx.bin``, output with added
-header is ``image.img``.
+It takes input parameters ``--version`` with your image's version,
+``--header_size`` with the configured size of the header and ``--identifier``.
+with the platform identifier. The input file is a binary ``nuttx.bin``, output
+with added header is ``image.img``.
 
 Image version adheres to `Semantic Versioning 2.0.0 <https://semver.org/spec/v2.0.0.html>`__
 without the usage of build metadata. The used format is
@@ -166,7 +168,7 @@ Enabling ``CONFIG_BOOT_NXBOOT`` option provides following NXboot API.
 .. c:struct:: nxboot_img_version
 .. code-block:: c
 
-  #define NXBOOT_HEADER_PRERELEASE_MAXLEN 110
+  #define NXBOOT_HEADER_PRERELEASE_MAXLEN 94
 
   struct nxboot_img_version
   {
@@ -180,20 +182,39 @@ Enabling ``CONFIG_BOOT_NXBOOT`` option provides following NXboot API.
     char pre_release[NXBOOT_HEADER_PRERELEASE_MAXLEN];
   };
 
+.. c:struct:: nxboot_hdr_version
+.. code-block:: c
+
+  struct nxboot_hdr_version
+  {
+    /* Header major version */
+    uint8_t major;
+    /* Header minor version */
+    uint8_t minor;
+  };
+
 .. c:struct:: nxboot_img_header
 .. code-block:: c
 
   #define NXBOOT_HEADER_MAGIC     0x534f584e
-  #define NXBOOT_HEADER_MAGIC_INV 0xaca0abb1
+  #define NXBOOT_HEADER_MAGIC_INT 0xaca0abb0
 
   struct nxboot_img_header
   {
     /* Header magic */
     uint32_t magic;
+    /* Version of the header */
+    struct nxboot_hdr_version hdr_version;
+    /* Size of the header */
+    uint16_t header_size;
+    /* CRC of the image, exceluding the previous header fields. */
+    uint32_t crc;
     /* Image size (excluding the header) */
     uint32_t size;
-    /* CRC32 of image (excluding the header) */
-    uint32_t crc32;
+    /* Platform identifier */
+    uint64_t identifier;
+    /* Address of optional extended headers */
+    uint32_t extd_hdr_ptr;
     /* Image version */
     struct nxboot_img_version img_version;
   };
@@ -226,6 +247,8 @@ Enabling ``CONFIG_BOOT_NXBOOT`` option provides following NXboot API.
     int recovery;
     /* True if recovery image contains valid recovery */
     bool recovery_valid;
+    /* True if image in a primary slot has a recovery (even non valid) */
+    bool recovery_present;
     /* True if primary slot is confirmed */
     bool primary_confirmed;
     /* True if update slot has a valid image */
@@ -242,6 +265,15 @@ Enabling ``CONFIG_BOOT_NXBOOT`` option provides following NXboot API.
   :param state: A pointer to ``struct nxboot_state`` structure.
 
   :return: 0 on success, -1 and sets errno on failure.
+
+.. c:function:: int nxboot_open_update_partition(void)
+
+  Gets the current bootloader state and opens the partition to which an
+  update image should be stored. It returns the valid file descriptor to
+  this partition, the user is responsible for writing to it and closing
+  if afterwards.
+
+  :return: Valid file descriptor on success, -1 and sets errno on failure.
 
 .. c:function:: int nxboot_get_confirm(void)
 
