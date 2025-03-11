@@ -20,6 +20,16 @@ config ARCH_CHIP_ESP32S3WROOM1N4
 
 		This chip comes with 4MB SPI Flash (quad).
 
+config ARCH_CHIP_ESP32S3WROOM1N8R2
+	bool "ESP32-S3-WROOM-1-N8R2"
+	select ESP32S3_FLASH_8M
+	select ESP32S3_PSRAM_2M
+	select ARCH_HAVE_I2CRESET
+	---help---
+		Generic module with an embedded ESP32-S3.
+
+		This module comes with 8MB SPI Flash (quad) and 2MB PSRAM (quad).
+
 config ARCH_CHIP_ESP32S3WROOM1N8R8
 	bool "ESP32-S3-WROOM-1-N8R8"
 	select ESP32S3_FLASH_8M
@@ -302,6 +312,10 @@ config ESP32S3_FLASH_DETECT
 	default y
 	---help---
 		Auto detect flash size when flashing.
+
+config ESP32S3_PSRAM_2M
+	bool "ESP32S3 PSRAM 2M"
+	default n
 
 config ESP32S3_PSRAM_8M
 	bool "ESP32S3 PSRAM 8M"
