@@ -72,8 +72,10 @@ static int irq_default_handler(int irq, FAR void *regs, FAR void *arg)
   FAR struct irq_thread_info_s *info = arg;
   int ret = IRQ_WAKE_THREAD;
 
-  DEBUGASSERT(info->handler != NULL);
-  ret = info->handler(irq, regs, info->arg);
+  if (info->handler != NULL)
+    {
+      ret = info->handler(irq, regs, info->arg);
+    }
 
   if (ret == IRQ_WAKE_THREAD)
     {
@@ -133,7 +135,7 @@ static int isr_thread_main(int argc, FAR char *argv[])
  *   irq - Irq num
  *   isr - Function to be called when the IRQ occurs, called in interrupt
  *   context.
- *   If isr is NULL the default handler is installed(irq_default_handler).
+ *   If isr is NULL, isrthread will be called.
  *   isrthread - called in thread context, If the isrthread is NULL,
  *   then the ISR is being detached.
  *   arg - privdate data
