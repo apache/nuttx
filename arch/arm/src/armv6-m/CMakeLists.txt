@@ -47,4 +47,8 @@ if(CONFIG_ARCH_RAMVECTORS)
   list(APPEND SRCS arm_ramvec_initialize.c arm_ramvec_attach.c)
 endif()
 
+if(CONFIG_LIB_SYSCALL)
+  list(APPEND SRCS arm_dispatch_syscall.S)
+endif()
+
 target_sources(arch PRIVATE ${SRCS})

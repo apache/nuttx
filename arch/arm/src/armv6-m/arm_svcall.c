@@ -47,65 +47,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: dispatch_syscall
- *
- * Description:
- *   Call the stub function corresponding to the system call.  NOTE the non-
- *   standard parameter passing:
- *
- *     R0 = SYS_ call number
- *     R1 = parm0
- *     R2 = parm1
- *     R3 = parm2
- *     R4 = parm3
- *     R5 = parm4
- *     R6 = parm5
- *
- *   The values of R4-R5 may be preserved in the proxy called by the user
- *   code if they are used (but otherwise will not be).
- *
- *   Register usage:
- *
- *     R0 - Need not be preserved.
- *     R1-R3 - Need to be preserved until the stub is called.  The values of
- *       R0 and R1 returned by the stub must be preserved.
- *     R4-R11 must be preserved to support the expectations of the user-space
- *       callee.  R4-R6 may have been preserved by the proxy, but don't know
- *       for sure.
- *     R12 - Need not be preserved
- *     R13 - (stack pointer)
- *     R14 - Need not be preserved
- *     R15 - (PC)
- *
- ****************************************************************************/
-
-#ifdef CONFIG_LIB_SYSCALL
-static void dispatch_syscall(void) naked_function;
-static void dispatch_syscall(void)
-{
-  __asm__ __volatile__
-  (
-    " push {r4, r5}\n"                              /* Save R4 and R5 */
-    " sub sp, sp, #12\n"                            /* Create a stack frame to hold 3 parms */
-    " str r4, [sp, #0]\n"                           /* Move parameter 4 (if any) into position */
-    " str r5, [sp, #4]\n"                           /* Move parameter 5 (if any) into position */
-    " str r6, [sp, #8]\n"                           /* Move parameter 6 (if any) into position */
-    " mov r5, lr\n"                                 /* Save lr in R5 */
-    " ldr r4, =g_stublookup\n"                      /* R4=The base of the stub lookup table */
-    " lsl r0, r0, #2\n"                             /* R0=Offset of the stub for this syscall */
-    " ldr r4, [r4, r0]\n"                           /* R4=Address of the stub for this syscall */
-    " blx r4\n"                                     /* Call the stub (modifies lr) */
-    " mov lr, r5\n"                                 /* Restore lr */
-    " add sp, sp, #12\n"                            /* Destroy the stack frame */
-    " pop {r4, r5}\n"                               /* Recover R4 and R5 */
-    " mov r2, r0\n"                                 /* R2=Save return value in R2 */
-    " mov r0, #" STRINGIFY(SYS_syscall_return) "\n" /* R0=SYS_syscall_return */
-    " svc #" STRINGIFY(SYS_syscall) "\n"            /* Return from the SYSCALL */
-  );
-}
-#endif
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -193,7 +134,7 @@ int arm_svcall(int irq, void *context, void *arg)
           regs[REG_CONTROL]    = rtcb->xcp.syscall[index].ctrlreturn;
           rtcb->xcp.nsyscalls  = index;
 
-          /* The return value must be in R0-R1.  dispatch_syscall()
+          /* The return value must be in R0-R1.  arm_dispatch_syscall()
            * temporarily moved the value for R0 into R2.
            */
 
@@ -380,14 +321,20 @@ int arm_svcall(int irq, void *context, void *arg)
 
           DEBUGASSERT(index < CONFIG_SYS_NNEST);
 
-          /* Setup to return to dispatch_syscall in privileged mode. */
+          /* Use ip to create a debug frame.
+           * we can use gdb backtrace from syscall to user space.
+           */
+
+          regs[REG_IP] = regs[REG_PC];
+
+          /* Setup to return to arm_dispatch_syscall in privileged mode. */
 
           rtcb->xcp.syscall[index].sysreturn  = regs[REG_PC];
           rtcb->xcp.syscall[index].excreturn  = regs[REG_EXC_RETURN];
           rtcb->xcp.syscall[index].ctrlreturn = regs[REG_CONTROL];
           rtcb->xcp.nsyscalls  = index + 1;
 
-          regs[REG_PC]         = (uint32_t)dispatch_syscall;
+          regs[REG_PC]         = (uint32_t)arm_dispatch_syscall;
           regs[REG_EXC_RETURN] = EXC_RETURN_THREAD;
 
           /* Return privileged mode */
