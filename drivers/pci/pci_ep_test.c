@@ -548,7 +548,7 @@ static bool pci_ep_test_free_irq(FAR struct pci_ep_test_s *test)
     }
   else if (test->irq_type == PCI_EP_TEST_IRQ_TYPE_LEGACY)
     {
-      pci_disable_irq(dev);
+      pci_disable_irq(test->pdev);
     }
 
   return true;
@@ -631,7 +631,7 @@ static int pci_ep_test_alloc_irq(FAR struct pci_ep_test_s *test,
     }
   else if (irq_type == PCI_EP_TEST_IRQ_TYPE_LEGACY)
     {
-      pci_enable_irq(dev, test->irq);
+      pci_enable_irq(pdev, test->irq);
     }
 
   ret = irq_attach(test->irq, pci_ep_test_handler, test);

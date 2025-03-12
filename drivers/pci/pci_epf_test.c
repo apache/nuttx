@@ -37,6 +37,7 @@
 #include <nuttx/pci/pci_epc.h>
 #include <nuttx/pci/pci_ids.h>
 #include <nuttx/pci/pci.h>
+#include <nuttx/nuttx.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/nuttx.h>
 
