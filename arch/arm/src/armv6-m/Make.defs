@@ -42,3 +42,7 @@ endif
 ifeq ($(CONFIG_ARCH_RAMVECTORS),y)
   CMN_CSRCS += arm_ramvec_initialize.c arm_ramvec_attach.c
 endif
+
+ifeq ($(CONFIG_LIB_SYSCALL),y)
+  CMN_ASRCS += arm_dispatch_syscall.S
+endif

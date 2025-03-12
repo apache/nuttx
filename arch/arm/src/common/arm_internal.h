@@ -328,6 +328,10 @@ EXTERN const void *__vector_table[];
 EXTERN const void * const _vectors[];
 #endif
 
+#ifdef CONFIG_LIB_SYSCALL
+void arm_dispatch_syscall(void);
+#endif
+
 /* Exception Handlers */
 
 int  arm_svcall(int irq, void *context, void *arg);
