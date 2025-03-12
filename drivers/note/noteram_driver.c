@@ -1302,8 +1302,8 @@ static int noteram_dump_one(FAR uint8_t *p, FAR struct lib_outstream_s *s,
             };
 
           ret += noteram_dump_header(s, &nmm->nhp_cmn, ctx);
-          ret += lib_sprintf(s, "tracing_mark_write: C|%d|Heap Usage|%d|%s"
-                             ": heap: %p size:%" PRIiPTR ", address: %p\n",
+          ret += lib_sprintf(s, "tracing_mark_write: C|%d|Heap Usage|%zu|%s"
+                             ": heap: %p size:%zu, address: %p\n",
                              pid, nmm->used,
                              name[note->nc_type - NOTE_HEAP_ADD],
                              nmm->heap, nmm->size, nmm->mem);
