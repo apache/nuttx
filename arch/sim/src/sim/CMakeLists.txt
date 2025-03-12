@@ -264,6 +264,18 @@ if(CONFIG_SIM_USB_HOST)
   endif()
 endif()
 
+if(CONFIG_SIM_CANDEV)
+  list(APPEND HOSTSRCS sim_hostcan.c)
+endif()
+
+if(CONFIG_SIM_CANDEV_CHAR)
+  list(APPEND SRCS sim_canchar.c)
+endif()
+
+if(CONFIG_SIM_CANDEV_SOCK)
+  list(APPEND SRCS sim_cansock.c)
+endif()
+
 list(APPEND HOSTSRCS sim_hostfs.c)
 list(APPEND HOST_DEFINITIONS CONFIG_NAME_MAX=${CONFIG_NAME_MAX})
 
