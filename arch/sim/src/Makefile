@@ -261,6 +261,18 @@ ifeq ($(CONFIG_SIM_LIBUSB),y)
 endif
 endif
 
+ifeq ($(CONFIG_SIM_CANDEV),y)
+  HOSTSRCS += sim_hostcan.c
+endif
+
+ifeq ($(CONFIG_SIM_CANDEV_CHAR),y)
+  CSRCS += sim_canchar.c
+endif
+
+ifeq ($(CONFIG_SIM_CANDEV_SOCK),y)
+  CSRCS += sim_cansock.c
+endif
+
 ifeq ($(CONFIG_RPMSG_VIRTIO_LITE),y)
   CSRCS += sim_rpmsg_virtio.c
 endif

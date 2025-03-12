@@ -227,6 +227,29 @@ config SIM_NETUSRSOCK
 
 endchoice
 
+config SIM_CANDEV
+	bool "Simulated CAN Device"
+	default n
+	---help---
+		Build in support for a simulated CAN device.
+
+if SIM_CANDEV
+
+config SIM_CANDEV_CHAR
+	bool "Simulated CAN Device as CAN character driver"
+	default n
+	depends on CAN
+	select ARCH_HAVE_CAN_ERRORS
+
+config SIM_CANDEV_SOCK
+	bool "Simulated CAN Device as SocketCAN"
+	default n
+	depends on NET_CAN
+	select NET_CAN_HAVE_ERRORS
+	select NET_CAN_HAVE_CANFD
+
+endif # SIM_CANDEV
+
 if SIM_NETDEV
 
 choice
