@@ -487,6 +487,35 @@ static int ipv6_in(FAR struct net_driver_s *dev)
         /* Forward the IPv6 UDP packet */
 
         udp_ipv6_input(dev, iphdrlen);
+
+#if defined(CONFIG_NET_6LOWPAN) && defined(CONFIG_NET_ICMPv6)
+        /* udp_ipv6 processing can return a icmpv6 frame when enabled.
+         * Logic here detects (1) if an attempt to return with d_len > 0 and
+         * (2) that the device is an IEEE802.15.4 MAC or PKTRADIO network
+         * driver.
+         * Under those conditions, 6LoWPAN logic will be called to create the
+         * IEEE80215.4 or PKTRADIO frames.
+         */
+
+        if ((dev->d_len > 0 && dev->d_lltype == NET_LL_IEEE802154) ||
+            (dev->d_len > 0 && dev->d_lltype == NET_LL_PKTRADIO))
+          {
+            /* udp_ipv6_input() might update dev->d_iob. Make sure to use
+             * the correct data by updating ipv6.
+             */
+
+            ipv6 = IPv6BUF;
+
+            /* Let 6LoWPAN handle the udp output */
+
+            sixlowpan_icmpv6_send(dev, dev, ipv6);
+
+            /* Drop the packet in the d_buf */
+
+            goto drop;
+          }
+#endif /* CONFIG_NET_6LOWPAN && CONFIG_NET_ICMPV6 */
+
         break;
 #endif
 
@@ -517,6 +546,12 @@ static int ipv6_in(FAR struct net_driver_s *dev)
         if ((dev->d_len > 0 && dev->d_lltype == NET_LL_IEEE802154) ||
             (dev->d_len > 0 && dev->d_lltype == NET_LL_PKTRADIO))
           {
+            /* icmpv6_input() might update dev->d_iob. Make sure to use the
+             * correct data by updating ipv6.
+             */
+
+            ipv6 = IPv6BUF;
+
             /* Let 6LoWPAN handle the ICMPv6 output */
 
             sixlowpan_icmpv6_send(dev, dev, ipv6);
