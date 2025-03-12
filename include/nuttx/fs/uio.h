@@ -85,10 +85,10 @@ void uio_advance(FAR struct uio *uio, size_t sz);
 int uio_init(FAR struct uio *uio, FAR const struct iovec *iov, int iovcnt);
 
 /****************************************************************************
- * Name: uio_copyto
+ * Name: uio_copyfrom
  *
  * Description:
- *   Copy data to the linear buffer from uio.
+ *   Copy data from the linear buffer to uio.
  *
  ****************************************************************************/
 
