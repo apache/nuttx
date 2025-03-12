@@ -32,7 +32,6 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
-#include <nuttx/mm/kmap.h>
 
 #include "sched/sched.h"
 #include "semaphore/semaphore.h"
@@ -74,10 +73,6 @@ void nxsem_wait_irq(FAR struct tcb_s *wtcb, int errcode)
   FAR struct tcb_s *rtcb = this_task();
   FAR sem_t *sem = wtcb->waitobj;
 
-#ifdef CONFIG_MM_KMAP
-  sem = kmm_map_user(wtcb, sem, sizeof(*sem));
-#endif
-
   /* It is possible that an interrupt/context switch beat us to the punch
    * and already changed the task's state.
    */
@@ -101,10 +96,6 @@ void nxsem_wait_irq(FAR struct tcb_s *wtcb, int errcode)
   /* Remove task from waiting list */
 
   dq_rem((FAR dq_entry_t *)wtcb, SEM_WAITLIST(sem));
-
-#ifdef CONFIG_MM_KMAP
-  kmm_unmap(sem);
-#endif
 
   /* Indicate that the wait is over. */
 

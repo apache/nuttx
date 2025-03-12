@@ -31,6 +31,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
+#include <nuttx/mm/kmap.h>
 
 #include "semaphore/semaphore.h"
 
@@ -100,6 +101,10 @@ void nxsem_recover(FAR struct tcb_s *tcb)
        */
 
       atomic_fetch_add(NXSEM_COUNT(sem), 1);
+
+#ifdef CONFIG_MM_KMAP
+      kmm_unmap(sem);
+#endif
     }
 
   /* Release all semphore holders for the task */
