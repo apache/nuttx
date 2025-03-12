@@ -28,7 +28,7 @@ For example, if the accelerometer sensor has a sampling rate of 50Hz
 and a maximum publication delay of 100ms, the hardware generates an
 interrupt every 100ms, publishing 5 data points each time (100/(1000/50)).
 
-**Two Tpyes**
+**Two Types**
 ^^^^^^^^^^^^^
 
 Additionally, NuttX categorizes topics into two types: 
