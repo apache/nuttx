@@ -211,6 +211,7 @@ int nxsig_action(int signo, FAR const struct sigaction *act,
   FAR struct task_group_s *group;
   FAR sigactq_t *sigact;
   _sa_handler_t handler;
+  irqstate_t flags;
 
   /* Since sigactions can only be installed from the running thread of
    * execution, no special precautions should be necessary.
@@ -306,8 +307,6 @@ int nxsig_action(int signo, FAR const struct sigaction *act,
 
   if (signo == SIGCHLD && (act->sa_flags & SA_NOCLDWAIT) != 0)
     {
-      irqstate_t flags;
-
       /* We do require a critical section to muck with the TCB values that
        * can be modified by the child thread.
        */
@@ -356,7 +355,9 @@ int nxsig_action(int signo, FAR const struct sigaction *act,
         {
           /* Yes.. Remove it from signal action queue */
 
+          flags = spin_lock_irqsave(&group->tg_lock);
           sq_rem((FAR sq_entry_t *)sigact, &group->tg_sigactionq);
+          spin_unlock_irqrestore(&group->tg_lock, flags);
 
           /* And deallocate it */
 
@@ -391,7 +392,9 @@ int nxsig_action(int signo, FAR const struct sigaction *act,
 
           /* Add the new sigaction to signal action queue */
 
+          flags = spin_lock_irqsave(&group->tg_lock);
           sq_addlast((FAR sq_entry_t *)sigact, &group->tg_sigactionq);
+          spin_unlock_irqrestore(&group->tg_lock, flags);
         }
 
       /* Set the new sigaction */
