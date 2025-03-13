@@ -107,18 +107,24 @@
 
 #define EVIOCGEFFECTS     _FFIOC(3)
 
+/* This cmd use to get the duration of the effect.
+ * Arg: pointer to address of struct ff_effect, return the status.
+ */
+
+#define EVIOCGDURATION    _FFIOC(4)
+
 /* This cmd use to calibrate the device and return the calibration value.
  * Arg: pointer to address of integer array value, return the calibration
  * value.
  */
 
-#define EVIOCCALIBRATE    _FFIOC(4)
+#define EVIOCCALIBRATE    _FFIOC(5)
 
 /* This cmd use to set calibration value for the device.
  * Arg: pointer to address of the calibration value which should be set.
  */
 
-#define EVIOCSETCALIBDATA _FFIOC(5)
+#define EVIOCSETCALIBDATA _FFIOC(6)
 
 /****************************************************************************
  * Public Types
@@ -415,6 +421,11 @@ struct ff_lowerhalf_s
   /* Called by ff upper half when device is being destroyed. */
 
   CODE void (*destroy)(FAR struct ff_lowerhalf_s *lower);
+
+  /* Called to get the duration of the effect. */
+
+  CODE int (*get_duration)(FAR struct ff_lowerhalf_s *lower,
+                           FAR struct ff_effect *effect);
 
   /* The calibration value to be written in or the non-volatile memory of the
    * device or dedicated registers. At each power-on, so that the values read
