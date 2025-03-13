@@ -61,7 +61,7 @@ menu "Atmel AVR Toolchain options"
 	depends on AVR_ATMEL_AVR_TOOLCHAIN
 
 config AVR_HAS_MEMX_PTR
-	bool "Enable in-flash static const stings"
+	bool "Enable in-flash static const strings"
 	depends on AVR_ATMEL_AVR_TOOLCHAIN
 	depends on ARCH_DEBUG_H
 	default y
