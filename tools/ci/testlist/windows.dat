@@ -1,0 +1,26 @@
+# Choose a subset of board/configs due to Windows native builds
+
+# ARM
+
+/arm/stm32/nucleo-l152re/configs/nsh,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+
+/arm/stm32/nucleo-f411re/configs/nsh,CONFIG_ARM_TOOLCHAIN_CLANG
+
+# ARM64
+
+# /arm64/qemu/qemu-armv8a/configs/nsh_smp
+
+# RISC-V
+
+/risc-v/qemu-rv/rv-virt/configs/nsh
+
+# The simulator currently builds only with Visual Studio 2022
+
+/sim/sim/sim/configs/windows
+
+# Boards build by CMake
+
+CMake,nucleo-l152re:nsh
+CMake,nucleo-f411re:nsh
+CMake,rv-virt:nsh
+CMake,sim:windows
