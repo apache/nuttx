@@ -100,11 +100,14 @@ static mutex_t g_protect_lock = NXMUTEX_INITIALIZER;
 static int file_lock_get_path(FAR struct file *filep, FAR char *path)
 {
   FAR struct tcb_s *tcb = this_task();
+  bool is_allowed_type;
 
-  /* We only apply file lock on mount points (f_inode won't be NULL). */
+  /* We only apply file lock on mountpt and driver (f_inode won't be NULL). */
 
-  if (!INODE_IS_MOUNTPT(filep->f_inode) ||
-      tcb->flags & TCB_FLAG_SIGNAL_ACTION)
+  is_allowed_type = INODE_IS_MOUNTPT(filep->f_inode) ||
+                    INODE_IS_DRIVER(filep->f_inode);
+
+  if (!is_allowed_type || tcb->flags & TCB_FLAG_SIGNAL_ACTION)
     {
       return -EBADF;
     }
