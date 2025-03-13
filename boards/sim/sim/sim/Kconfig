@@ -63,3 +63,23 @@ config SIM_RNDIS_MACADDR
 		with this selection.
 
 endif
+
+if SIM_CANDEV_CHAR
+
+config SIM_CANDEV_CHAR_IDX
+	int "CAN chardev interface"
+	default 0
+	---help---
+		Host SocketCAN network interface used by simulated CAN character driver
+
+endif
+
+if SIM_CANDEV_SOCK
+
+config SIM_CANDEV_SOCK_IDX
+	int "CAN SocketCAN interface"
+	default 0
+	---help---
+		Host SocketCAN network interface used by simulated SocketCAN
+
+endif

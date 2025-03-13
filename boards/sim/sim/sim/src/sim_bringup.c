@@ -553,5 +553,21 @@ int sim_bringup(void)
   usbdev_rndis_initialize(mac);
 #endif
 
+#ifdef CONFIG_SIM_CANDEV_CHAR
+  ret = sim_canchar_initialize(CONFIG_SIM_CANDEV_CHAR_IDX, 0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: sim_canchar_initialize() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SIM_CANDEV_SOCK
+  ret = sim_cansock_initialize(CONFIG_SIM_CANDEV_SOCK_IDX);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: sim_cansock_initialize() failed: %d\n", ret);
+    }
+#endif
+
   return ret;
 }
