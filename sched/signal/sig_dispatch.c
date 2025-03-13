@@ -228,9 +228,11 @@ static int nxsig_queue_action(FAR struct tcb_s *stcb,
 static FAR sigpendq_t *nxsig_alloc_pendingsignal(void)
 {
   FAR sigpendq_t *sigpend;
+  irqstate_t flags;
 
   /* Try to get the pending signal structure from the free list */
 
+  flags = spin_lock_irqsave(&g_sigspinlock);
   sigpend = (FAR sigpendq_t *)sq_remfirst(&g_sigpendingsignal);
   if (!sigpend && up_interrupt_context())
     {
@@ -242,6 +244,7 @@ static FAR sigpendq_t *nxsig_alloc_pendingsignal(void)
       sigpend = (FAR sigpendq_t *)sq_remfirst(&g_sigpendingirqsignal);
     }
 
+  spin_unlock_irqrestore(&g_sigspinlock, flags);
   return sigpend;
 }
 
@@ -373,13 +376,16 @@ static FAR sigpendq_t *nxsig_add_pendingsignal(FAR struct tcb_s *stcb,
  *   structures are freed after they get used.
  *
  * Assumptions:
- *   Called with g_sigpendingsignal and g_sigpendingaction locked by
- *   critical section.
+ *   Called inside the critical section of nxsig_tcbdispatch(), which
+ *   serializes all consumers of the free lists.  The lists themselves are
+ *   modified under g_sigspinlock; the release paths only add to them, so
+ *   an unlocked sq_empty() check can at worst cause one extra allocation.
  *
  ****************************************************************************/
 
 static int nxsig_alloc_dyn_pending(FAR irqstate_t *flags)
 {
+  irqstate_t lockflags;
   int ret = OK;
   bool alloc_signal = sq_empty(&g_sigpendingsignal);
 #ifdef CONFIG_ENABLE_ALL_SIGNALS
@@ -448,6 +454,7 @@ static int nxsig_alloc_dyn_pending(FAR irqstate_t *flags)
        */
 
       *flags = enter_critical_section();
+      lockflags = spin_lock_irqsave(&g_sigspinlock);
 
       if (alloc_signal)
         {
@@ -476,6 +483,8 @@ static int nxsig_alloc_dyn_pending(FAR irqstate_t *flags)
             }
         }
 #endif
+
+      spin_unlock_irqrestore(&g_sigspinlock, lockflags);
     }
 
   return ret;

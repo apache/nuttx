@@ -93,6 +93,8 @@ sq_queue_t  g_sigpendingsignal;
 
 sq_queue_t  g_sigpendingirqsignal;
 
+spinlock_t g_sigspinlock = SP_UNLOCKED;
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
