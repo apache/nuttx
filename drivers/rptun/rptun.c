@@ -62,6 +62,7 @@ struct rptun_priv_s
   struct rpmsg_virtio_device   rvdev;
   FAR struct rptun_dev_s       *dev;
   struct remoteproc            rproc;
+  struct metal_list            node;
   struct rpmsg_virtio_shm_pool pool[2];
   sem_t                        semtx;
   sem_t                        semrx;
@@ -164,6 +165,9 @@ static const struct rpmsg_ops_s g_rptun_rpmsg_ops =
   rptun_get_local_cpuname,
   rptun_get_cpuname,
 };
+
+static struct metal_list g_rptun_priv = METAL_INIT_LIST(g_rptun_priv);
+static metal_mutex_t g_rptun_lock = METAL_MUTEX_INIT(g_rptun_lock);
 
 /****************************************************************************
  * Private Functions
@@ -1161,6 +1165,9 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
   pm_wakelock_init(&priv->wakelock, name, PM_IDLE_DOMAIN, PM_IDLE);
 #endif
 
+  metal_mutex_acquire(&g_rptun_lock);
+  metal_list_add_tail(&g_rptun_priv, &priv->node);
+  metal_mutex_release(&g_rptun_lock);
   return OK;
 
 err_thread:
@@ -1174,17 +1181,53 @@ err_driver:
   return ret;
 }
 
+static int rptun_ioctl_foreach(FAR const char *cpuname, int cmd,
+                               unsigned long value)
+{
+  FAR struct metal_list *node;
+  bool needlock = !up_interrupt_context() && !sched_idletask();
+  int ret = OK;
+
+  if (needlock)
+    {
+      metal_mutex_acquire(&g_rptun_lock);
+    }
+
+  metal_list_for_each(&g_rptun_priv, node)
+    {
+      FAR struct rptun_priv_s *priv;
+
+      priv = metal_container_of(node, struct rptun_priv_s, node);
+
+      if (!cpuname || !strcmp(RPTUN_GET_CPUNAME(priv->dev), cpuname))
+        {
+          ret = rptun_ioctl(&priv->rpmsg, cmd, value);
+          if (ret < 0)
+            {
+              break;
+            }
+        }
+    }
+
+  if (needlock)
+    {
+      metal_mutex_release(&g_rptun_lock);
+    }
+
+  return ret;
+}
+
 int rptun_boot(FAR const char *cpuname)
 {
-  return rpmsg_ioctl(cpuname, RPTUNIOC_START, 0);
+  return rptun_ioctl_foreach(cpuname, RPTUNIOC_START, 0);
 }
 
 int rptun_poweroff(FAR const char *cpuname)
 {
-  return rpmsg_ioctl(cpuname, RPTUNIOC_STOP, 0);
+  return rptun_ioctl_foreach(cpuname, RPTUNIOC_STOP, 0);
 }
 
 int rptun_reset(FAR const char *cpuname, int value)
 {
-  return rpmsg_ioctl(cpuname, RPTUNIOC_RESET, value);
+  return rptun_ioctl_foreach(cpuname, RPTUNIOC_RESET, value);
 }
