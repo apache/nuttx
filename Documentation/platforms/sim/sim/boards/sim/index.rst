@@ -1886,6 +1886,66 @@ NOTES:
   you will find this annoying.  You can disable the password protection
   by de-selecting CONFIG_NSH_CONSOLE_LOGIN=y.
 
+can
+---
+
+This is a configuration with simulated CAN support. Both CAN character driver
+and SocketCAN are enabled and use the host ``vcan0`` interface.
+The ``vcan0`` host interface must be available when NuttX is started.
+
+For the CAN character device, there is ``examples/can`` application enabled in
+read-only mode.
+
+Additionally, SocketCAN ``candump`` and ``cansend`` utils are enabled.
+
+Below is an example of receiving CAN frames from host to NuttX.
+Requirement: ``cansequence`` tool from ``linux-can/can-utils``
+
+1. Create virtual CAN on host::
+
+     ip link add dev can0 type vcan
+     ifconfig can0 up
+
+2. Run NuttX::
+
+     ./nuttx
+
+3. Bring up can0 on NuttX::
+
+     nsh> ifup can0
+     ifup can0...OK
+
+4. read CAN messages from SocketCAN on NuttX::
+
+     nsh> candump can0
+
+5. send CAN messages from host to NuttX::
+
+     $ cansequence can0
+
+6. frames from host should be received on NuttX::
+
+     nsh> candump can0
+     can0  002   [1]  00
+     can0  002   [1]  01
+     can0  002   [1]  02
+     can0  002   [1]  03
+     can0  002   [1]  04
+     can0  002   [1]  05
+     can0  002   [1]  06
+     can0  002   [1]  07
+     can0  002   [1]  08
+     can0  002   [1]  09
+     can0  002   [1]  0A
+     can0  002   [1]  0B
+     can0  002   [1]  0C
+     can0  002   [1]  0D
+     can0  002   [1]  0E
+     can0  002   [1]  0F
+     can0  002   [1]  10
+     can0  002   [1]  11
+     can0  002   [1]  12
+
 README.txt
 ==========
 
