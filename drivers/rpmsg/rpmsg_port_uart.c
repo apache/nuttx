@@ -78,6 +78,7 @@
 #endif
 
 #define rpmsgerrdump(m,b,s)                lib_dumpbuffer(m, (FAR const uint8_t *)b, s)
+#define rpmsgvbs                           rpmsgerr
 
 /****************************************************************************
  * Private Types
@@ -309,7 +310,7 @@ rpmsg_port_uart_process_rx_conn(FAR struct rpmsg_port_uart_s *rpuart,
 {
   if (ch == RPMSG_PORT_UART_CONNREQ)
     {
-      rpmsgdbg("Connect Request Command %d\n", rpuart->connected);
+      rpmsgvbs("Connect Request Command %d\n", rpuart->connected);
       if (rpuart->connected)
         {
           rpmsg_port_drop_packets(&rpuart->port, RPMSG_PORT_DROP_TXQ);
@@ -326,7 +327,7 @@ rpmsg_port_uart_process_rx_conn(FAR struct rpmsg_port_uart_s *rpuart,
     }
   else if (ch == RPMSG_PORT_UART_CONNACK)
     {
-      rpmsgdbg("Connect Ack Command %d\n", rpuart->connected);
+      rpmsgvbs("Connect Ack Command %d\n", rpuart->connected);
       if (!rpuart->connected)
         {
           rpuart->connected = true;
@@ -397,7 +398,7 @@ static int rpmsg_port_uart_rx_thread(int argc, FAR char *argv[])
             }
           else if (buf[i] == RPMSG_PORT_UART_POWEROFF)
             {
-              rpmsgdbg("Received poweroff command\n");
+              rpmsgvbs("Received poweroff command\n");
               rpmsg_port_drop_packets(&rpuart->port, RPMSG_PORT_DROP_TXQ);
               rpmsg_port_unregister(&rpuart->port);
               DEBUGVERIFY(file_ioctl(&rpuart->file, TIOCVHANGUP, 0) >= 0);
@@ -408,7 +409,7 @@ static int rpmsg_port_uart_rx_thread(int argc, FAR char *argv[])
                    buf[i] > RPMSG_PORT_UART_END &&
                    buf[i] != RPMSG_PORT_UART_ESCAPE)
             {
-              rpmsgdbg("Receive Command %x\n", buf[i]);
+              rpmsgerr("Receive Command %x\n", buf[i]);
               continue;
             }
 
