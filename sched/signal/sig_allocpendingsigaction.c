@@ -57,6 +57,7 @@ FAR sigq_t *nxsig_alloc_pendingsigaction(void)
     {
       /* Try to get the pending signal action structure from the free list */
 
+      flags = spin_lock_irqsave(&g_sigspinlock);
       sigq = (FAR sigq_t *)sq_remfirst(&g_sigpendingaction);
 
       /* If so, then try the special list of structures reserved for
@@ -67,6 +68,8 @@ FAR sigq_t *nxsig_alloc_pendingsigaction(void)
         {
           sigq = (FAR sigq_t *)sq_remfirst(&g_sigpendingirqaction);
         }
+
+      spin_unlock_irqrestore(&g_sigspinlock, flags);
     }
 
   /* If we were not called from an interrupt handler, then we are
@@ -77,9 +80,9 @@ FAR sigq_t *nxsig_alloc_pendingsigaction(void)
     {
       /* Try to get the pending signal action structure from the free list */
 
-      flags = enter_critical_section();
+      flags = spin_lock_irqsave(&g_sigspinlock);
       sigq = (FAR sigq_t *)sq_remfirst(&g_sigpendingaction);
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(&g_sigspinlock, flags);
     }
 
   return sigq;

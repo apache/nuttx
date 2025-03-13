@@ -58,9 +58,9 @@ void nxsig_release_pendingsigaction(FAR sigq_t *sigq)
        * list from interrupt handlers.
        */
 
-      flags = enter_critical_section();
+      flags = spin_lock_irqsave(&g_sigspinlock);
       sq_addlast((FAR sq_entry_t *)sigq, &g_sigpendingaction);
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(&g_sigspinlock, flags);
     }
 
   /* If this is a message pre-allocated for interrupts,
@@ -73,9 +73,9 @@ void nxsig_release_pendingsigaction(FAR sigq_t *sigq)
        * list from interrupt handlers.
        */
 
-      flags = enter_critical_section();
+      flags = spin_lock_irqsave(&g_sigspinlock);
       sq_addlast((FAR sq_entry_t *)sigq, &g_sigpendingirqaction);
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(&g_sigspinlock, flags);
     }
 
   /* Otherwise, deallocate it.  Note:  interrupt handlers
