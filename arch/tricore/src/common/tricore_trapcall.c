@@ -51,7 +51,8 @@
 int tricore_mmutrap(uint32_t tid, void *context, void *arg)
 {
   _alert("PANIC!!! MMU Trap:\n");
-  _alert("\tClass %d TID: %d regs: %p\n", IfxCpu_Trap_Class_memoryManagement,
+  _alert("\tClass %d TID: %" PRId32 " regs: %p\n",
+         IfxCpu_Trap_Class_memoryManagement,
          tid, context);
 
   _alert("MMU Trap Reason:\n");
@@ -73,7 +74,7 @@ int tricore_mmutrap(uint32_t tid, void *context, void *arg)
 int tricore_internalprotrape(uint32_t tid, void *context, void *arg)
 {
   _alert("PANIC!!! Internal Protection Trap:\n");
-  _alert("\tClass %d TID: %d regs: %p\n",
+  _alert("\tClass %d TID: %" PRId32 " regs: %p\n",
         IfxCpu_Trap_Class_internalProtection, tid, context);
 
   _alert("Internal Protection Reason:\n");
@@ -121,7 +122,7 @@ int tricore_internalprotrape(uint32_t tid, void *context, void *arg)
 int tricore_insterrorstrap(uint32_t tid, void *context, void *arg)
 {
   _alert("PANIC!!! Instruction Errors Trap:\n");
-  _alert("\tClass %d TID: %d regs: %p\n",
+  _alert("\tClass %d TID: %" PRId32 " regs: %p\n",
         IfxCpu_Trap_Class_instructionErrors, tid, context);
 
   _alert("Instruction Errors Trap Reason:\n");
@@ -158,7 +159,7 @@ int tricore_insterrorstrap(uint32_t tid, void *context, void *arg)
 int tricore_contexmnttrap(uint32_t tid, void *context, void *arg)
 {
   _alert("PANIC!!! Context Management Trap:\n");
-  _alert("\tClass %d TID: %d regs: %p\n",
+  _alert("\tClass %d TID: %" PRId32 " regs: %p\n",
         IfxCpu_Trap_Class_contextManagement, tid, context);
 
   _alert("Context Management Reason:\n");
@@ -205,7 +206,7 @@ int tricore_contexmnttrap(uint32_t tid, void *context, void *arg)
 int tricore_bustrap(uint32_t tid, void *context, void *arg)
 {
   _alert("PANIC!!! System Bus Trap:\n");
-  _alert("\tClass %d TID: %d regs: %p\n", IfxCpu_Trap_Class_bus,
+  _alert("\tClass %d TID: %" PRId32 " regs: %p\n", IfxCpu_Trap_Class_bus,
          tid, context);
 
   _alert("System Bus Reason:\n");
@@ -252,7 +253,8 @@ int tricore_bustrap(uint32_t tid, void *context, void *arg)
 int tricore_assertiontrap(uint32_t tid, void *context, void *arg)
 {
   _alert("PANIC!!! Assertion Trap:\n");
-  _alert("\tClass %d TID: %d regs: %p\n", IfxCpu_Trap_Class_assertion,
+  _alert("\tClass %d TID: %" PRId32 " regs: %p\n",
+         IfxCpu_Trap_Class_assertion,
          tid, context);
 
   _alert("System Bus Reason:\n");
