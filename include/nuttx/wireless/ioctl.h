@@ -263,18 +263,11 @@ struct wlioc_rx_hdr_s
 
   /* RSSI dBm in 1/100 dBm */
 
-  uint32_t rssi_dbm;
+  int32_t rssi_dbm;
 
   /* SNR dB in 1/100 dB  */
 
-  uint32_t snr_db;
-
-  /* This is a driver specific free space.
-   * In case a driver wants to extend this
-   * header, this pointer can be used.
-   */
-
-  void *private;
+  int32_t snr_db;
 };
 
 #endif /* CONFIG_DRIVERS_WIRELESS */
