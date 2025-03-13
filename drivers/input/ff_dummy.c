@@ -57,6 +57,21 @@ static int ff_dummy_haptics_upload_effect(FAR struct ff_lowerhalf_s *lower,
                                           FAR struct ff_effect *old)
 {
   iinfo("called: effect_id = %d \n", effect->id);
+
+  if (effect->type == FF_PERIODIC)
+    {
+      if (effect->u.periodic.custom_data != NULL &&
+          effect->u.periodic.custom_len >=
+          3 * sizeof(effect->u.periodic.custom_data[0]))
+        {
+          iinfo("custom effect id = %d\n",
+          effect->u.periodic.custom_data[0]);
+
+          effect->u.periodic.custom_data[1] = 5; /* effect id playlength s */
+          effect->u.periodic.custom_data[2] = 0; /* effect id playlength ms */
+        }
+    }
+
   return OK;
 }
 
