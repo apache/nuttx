@@ -745,9 +745,16 @@ static int stm32_rdalarm(struct rtc_lowerhalf_s *lower,
   irqstate_t flags;
 
   DEBUGASSERT(lower != NULL && alarminfo != NULL && alarminfo->time != NULL);
+#if defined(CONFIG_STM32_STM32F4XXX) || defined(CONFIG_STM32_STM32L15XX)
   DEBUGASSERT(alarminfo->id == RTC_ALARMA || alarminfo->id == RTC_ALARMB);
 
   if (alarminfo->id == RTC_ALARMA || alarminfo->id == RTC_ALARMB)
+#else
+  DEBUGASSERT(alarminfo->id >= 0 && alarminfo->id < CONFIG_RTC_NALARMS);
+
+  if (alarminfo != NULL && alarminfo->id >= 0 &&
+      alarminfo->id < CONFIG_RTC_NALARMS)
+#endif
     {
       /* Disable pre-emption while we do this so that we don't have to worry
        * about being suspended and working on an old time.
