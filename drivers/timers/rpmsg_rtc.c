@@ -591,7 +591,12 @@ static int rpmsg_rtc_server_ioctl(FAR struct rtc_lowerhalf_s *lower,
   FAR struct rpmsg_rtc_server_s *server =
                          (FAR struct rpmsg_rtc_server_s *)lower;
 
-  return server->lower->ops->ioctl(server->lower, cmd, arg);
+  if (server->lower->ops->ioctl != NULL)
+    {
+      return server->lower->ops->ioctl(server->lower, cmd, arg);
+    }
+
+  return -ENOTTY;
 }
 #endif
 
