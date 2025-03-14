@@ -212,6 +212,10 @@ __cpu0_start:
 	ldr		r0, =HACTLR_INIT
 	mcr		CP15_HACTLR(r0)  /* Enable EL1 access all IMP DEFINED registers */
 
+#ifdef CONFIG_ARCH_FPU
+	bl		arm_fpuconfig
+#endif
+
 	/* Initialize .bss and .data assumt that RAM that is ready to use. */
 	bl		arm_data_initialize
 
@@ -238,9 +242,6 @@ __cpu0_start:
 	mcr		CP15_VBAR(r0)
 
 	bl		sctlr_initialize
-#ifdef CONFIG_ARCH_FPU
-	bl		arm_fpuconfig
-#endif
 	bl		arm_boot
 
 	mov		lr, #0				/* LR = return address (none) */
