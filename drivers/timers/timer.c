@@ -35,7 +35,7 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/lib/lib.h>
 #include <nuttx/signal.h>
 #include <nuttx/fs/fs.h>
@@ -55,6 +55,7 @@ struct timer_upperhalf_s
 {
   mutex_t lock;            /* Supports mutual exclusion */
   uint8_t crefs;           /* The number of times the device has been opened */
+  spinlock_t spinlock;     /* Spinlock */
   FAR char *path;          /* Registration path */
   FAR struct pollfd *fds;
 
@@ -460,7 +461,7 @@ static int timer_poll(FAR struct file *filep,
 
   DEBUGASSERT(upper != NULL && fds != NULL);
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&upper->spinlock);
 
   if (setup)
     {
@@ -478,7 +479,7 @@ static int timer_poll(FAR struct file *filep,
     }
 
 errout:
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&upper->spinlock, flags);
 
   return ret;
 }
@@ -538,6 +539,7 @@ FAR void *timer_register(FAR const char *path,
 
   upper->lower = lower;
   nxmutex_init(&upper->lock);
+  spin_lock_init(&upper->spinlock);
 
   /* Copy the registration path */
 
