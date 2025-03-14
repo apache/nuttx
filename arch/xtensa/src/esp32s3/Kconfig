@@ -50,6 +50,16 @@ config ARCH_CHIP_ESP32S3WROOM1N16R8
 
 		This module comes with 16MB SPI Flash (quad) and 8MB PSRAM (octal).
 
+config ARCH_CHIP_ESP32S3WROOM1N16R16V
+	bool "ESP32-S3-WROOM-1-N16R16"
+	select ESP32S3_FLASH_16M
+	select ESP32S3_PSRAM_16M
+	select ARCH_HAVE_I2CRESET
+	---help---
+		Generic module with an embedded ESP32-S3.
+
+		This module comes with 16MB SPI Flash (quad) and 16MB PSRAM (octal).
+
 config ARCH_CHIP_ESP32S3WROOM2N16R8V
 	bool "ESP32-S3-WROOM-2-N16R8V"
 	select ESP32S3_FLASH_16M
@@ -319,6 +329,10 @@ config ESP32S3_PSRAM_2M
 
 config ESP32S3_PSRAM_8M
 	bool "ESP32S3 PSRAM 8M"
+	default n
+
+config ESP32S3_PSRAM_16M
+	bool "ESP32S3 PSRAM 16M"
 	default n
 
 config ESP32S3_RUN_IRAM
@@ -1435,12 +1449,16 @@ if ESP32S3_I2C0
 
 config ESP32S3_I2C0_SCLPIN
 	int "I2C0 SCL Pin"
-	default 2
+	default 18 if ARCH_CHIP_ESP32S3WROOM2N16R8V
+	default 48 if ARCH_CHIP_ESP32S3WROOM1N16R16V
+	default 2 if !ARCH_CHIP_ESP32S3WROOM2N16R8V && !ARCH_CHIP_ESP32S3WROOM2N16R8V
 	range 0 48
 
 config ESP32S3_I2C0_SDAPIN
 	int "I2C0 SDA Pin"
-	default 1
+	default 8 if ARCH_CHIP_ESP32S3WROOM2N16R8V
+	default 47 if ARCH_CHIP_ESP32S3WROOM1N16R16V
+	default 1 if !ARCH_CHIP_ESP32S3WROOM2N16R8V && !ARCH_CHIP_ESP32S3WROOM2N16R8V
 	range 0 48
 
 endif # ESP32S3_I2C0
@@ -2290,11 +2308,13 @@ config ESP32S3_LCD_DATA5_PIN
 
 config ESP32S3_LCD_DATA6_PIN
 	int "LCD Parallel Output Data Bit-6 Pin"
-	default 47
+	default 47 if !ESP32S3_LCD_EV_BOARD_V15
+	default 8 if ESP32S3_LCD_EV_BOARD_V15
 
 config ESP32S3_LCD_DATA7_PIN
 	int "LCD Parallel Output Data Bit-7 Pin"
-	default 48
+	default 48 if !ESP32S3_LCD_EV_BOARD_V15
+	default 18 if ESP32S3_LCD_EV_BOARD_V15
 
 config ESP32S3_LCD_DATA8_PIN
 	int "LCD Parallel Output Data Bit-8 Pin"
