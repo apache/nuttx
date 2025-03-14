@@ -5917,16 +5917,17 @@ config BOARD_COREDUMP_MTDDEV
 	---help---
 		Enable save coredump to mtd device when crash.
 
-config BOARD_CRASHDUMP_CUSTOM
-	bool "Enable Core Dump with custom method"
-	---help---
-		Enable save coredump with custom method. only work with
-		board_crashdump api.
-
 config BOARD_CRASHDUMP_NONE
 	bool "No Board level crash dump"
 
 endchoice # BOARD crashdump method
+
+config BOARD_CRASHDUMP_CUSTOM
+	bool "Enable Crash Dump with custom method"
+	default n
+	---help---
+		Enable save crash dump info with custom method. only work with
+		board_crashdump api.
 
 config BOARD_COREDUMP_DEVPATH
 	string "Save Core Dump data with device PATH"

@@ -792,7 +792,9 @@ static void dump_fatal_info(FAR struct tcb_s *rtcb,
 
 #ifdef CONFIG_BOARD_CRASHDUMP_CUSTOM
   board_crashdump(up_getsp(), rtcb, filename, linenum, msg, regs);
-#elif !defined(CONFIG_BOARD_CRASHDUMP_NONE)
+#endif
+
+#ifndef CONFIG_BOARD_CRASHDUMP_NONE
 
   /* Dump core information */
 
