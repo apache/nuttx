@@ -375,15 +375,16 @@ jobs:
           7z x sources.tar.gz -y
           7z x sources.tar -y
 
-      # Build the project using the given CMake commands
-      - name: Configure and build with CMake
+      - name: Run Builds
         run: |
-          cd sources/nuttx
-          cmake -B vs2022 -DBOARD_CONFIG=sim/windows -G"Visual Studio 17 2022" -A Win32
-          cmake --build vs2022
+          "ARTIFACTDIR=${{github.workspace}}\sources\buildartifacts" >> $env:GITHUB_ENV
+          git config --global --add safe.directory ${{github.workspace}}\sources\nuttx
+          git config --global --add safe.directory ${{github.workspace}}\sources\apps
+          cd sources\nuttx\tools\ci
+          .\cibuild.ps1 -n -i -A -C -N testlist\windows.dat
 
       - uses: actions/upload-artifact@v4
         with:
           name: msvc-builds
-          path: buildartifacts/
+          path: ./sources/buildartifacts/
         continue-on-error: true
