@@ -348,28 +348,35 @@ static int udp_input(FAR struct net_driver_s *dev, unsigned int iplen)
            * unless destination address was broadcast/multicast.
            */
 
-#if defined(CONFIG_NET_ICMP) || defined(CONFIG_NET_ICMPv6)
-#  ifdef CONFIG_NET_ICMPv6
-#    ifdef CONFIG_NET_ICMP
-          if (IFF_IS_IPv6(dev->d_flags))
+#if !defined(CONFIG_NET_ICMP) && !defined(CONFIG_NET_ICMPv6)
+          dev->d_len = 0;
+#else
+#  ifdef CONFIG_NET_IPv4
+#    ifdef CONFIG_NET_IPv6
+          if (IFF_IS_IPv4(dev->d_flags))
 #    endif
             {
+#    ifdef CONFIG_NET_ICMP
+              icmp_reply(dev, ICMP_DEST_UNREACHABLE, ICMP_PORT_UNREACH);
+#    else
+              dev->d_len = 0;
+#    endif /* CONFIG_NET_ICMP */
+            }
+#  endif /* CONFIG_NET_IPv4 */
+#  ifdef CONFIG_NET_IPv6
+#    ifdef CONFIG_NET_IPv4
+           else
+#    endif
+            {
+#    ifdef CONFIG_NET_ICMPv6
               icmpv6_reply(dev, ICMPv6_DEST_UNREACHABLE,
                            ICMPv6_PORT_UNREACH, 0);
+#    else
+              dev->d_len = 0;
+#    endif /* CONFIG_NET_ICMPv6 */
             }
-#  endif /* CONFIG_NET_ICMPv6 */
-
-#  ifdef CONFIG_NET_ICMP
-#    ifdef CONFIG_NET_ICMPv6
-          else
-#    endif
-            {
-              icmp_reply(dev, ICMP_DEST_UNREACHABLE, ICMP_PORT_UNREACH);
-            }
-#  endif /* CONFIG_NET_ICMP */
-#else
-          dev->d_len = 0;
-#endif /* CONFIG_NET_ICMP || CONFIG_NET_ICMPv6 */
+#  endif /* CONFIG_NET_IPv6*/
+#endif
         }
     }
 
