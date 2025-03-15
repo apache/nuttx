@@ -156,6 +156,14 @@ static int pkt_in(FAR struct net_driver_s *dev)
     {
       uint16_t flags;
 
+      if (conn->pendiob == dev->d_iob)
+        {
+          /* Do not read back the packet sent by oneself */
+
+          conn->pendiob = NULL;
+          return OK;
+        }
+
 #if defined(CONFIG_NET_TIMESTAMP) && !defined(CONFIG_ARCH_HAVE_NETDEV_TIMESTAMP)
       /* Get system as timestamp if no hardware timestamp */
 
