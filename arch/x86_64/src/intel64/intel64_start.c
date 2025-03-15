@@ -33,6 +33,8 @@
 
 #include <arch/acpi.h>
 
+#include <debug.h>
+
 #include "x86_64_internal.h"
 
 #include "intel64_cpu.h"
@@ -158,15 +160,21 @@ void __nxstart(void)
       *dest++ = 0;
     }
 
+  /* Low-level, pre-OS initialization */
+
+  intel64_lowsetup();
+
 #ifdef CONFIG_ARCH_MULTIBOOT2
   /* Handle multiboot2 info */
 
   x86_64_mb2_config();
 #endif
 
-  /* Low-level, pre-OS initialization */
+#if defined(CONFIG_MULTBOOT2_FB_TERM)
+  x86_64_mb2_fbinitialize(g_mb_fb_tag);
 
-  intel64_lowsetup();
+  lowsyslog("framebuffer initialized\n");
+#endif
 
 #ifdef CONFIG_ARCH_X86_64_ACPI
   /* Initialize ACPI */

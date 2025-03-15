@@ -63,6 +63,11 @@ ifeq ($(CONFIG_ARCH_INTEL64_DISABLE_VECTORIZE),y)
   ARCHOPTIMIZATION += -fno-tree-vectorize
 endif
 
+# Fix -Wshadow warnings for built-in bitops on x86_64
+
+ARCHOPTIMIZATION += -fno-builtin-ffs -fno-builtin-ffsl -fno-builtin-ffsll
+ARCHOPTIMIZATION += -fno-builtin-fls -fno-builtin-flsl -fno-builtin-flsll
+
 ARCHCFLAGS += -fno-common -Wno-attributes
 ARCHCXXFLAGS += -fno-common -Wno-attributes -nostdinc++
 

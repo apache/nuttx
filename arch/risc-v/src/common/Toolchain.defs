@@ -83,6 +83,11 @@ ifneq ($(CONFIG_STACK_USAGE_WARNING),0)
   ARCHOPTIMIZATION += -Wstack-usage=$(CONFIG_STACK_USAGE_WARNING)
 endif
 
+# Fix -Wshadow warnings for built-in bitops on RISC-V
+
+ARCHOPTIMIZATION += -fno-builtin-ffs -fno-builtin-ffsl -fno-builtin-ffsll
+ARCHOPTIMIZATION += -fno-builtin-fls -fno-builtin-flsl -fno-builtin-flsll
+
 ARCHCFLAGS += -fno-common
 ARCHCXXFLAGS += -fno-common
 
