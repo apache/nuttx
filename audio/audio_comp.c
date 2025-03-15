@@ -51,8 +51,8 @@ struct audio_comp_priv_s
 
   /* This is the contained, low-level audio device array and count. */
 
-  FAR struct audio_lowerhalf_s **lower;
   int count;
+  FAR struct audio_lowerhalf_s *lower[1];
 };
 
 /****************************************************************************
@@ -942,30 +942,31 @@ FAR struct audio_lowerhalf_s *audio_comp_initialize(FAR const char *name,
 {
   FAR struct audio_comp_priv_s *priv;
   va_list ap;
-  int ret = -ENOMEM;
-  int i;
+  int ret;
+  int i = 0;
 
-  priv = kmm_zalloc(sizeof(struct audio_comp_priv_s));
+  va_start(ap, name);
+  while (va_arg(ap, FAR void *))
+    {
+      i++;
+    }
+
+  va_end(ap);
+
+  if (i == 0)
+    {
+      return -EINVAL;
+    }
+
+  priv = kmm_zalloc(sizeof(struct audio_comp_priv_s) +
+                    sizeof(FAR void *) * (i - 1));
   if (priv == NULL)
     {
       return NULL;
     }
 
   priv->export.ops = &g_audio_comp_ops;
-
-  va_start(ap, name);
-  while (va_arg(ap, FAR struct audio_lowerhalf_s *))
-    {
-      priv->count++;
-    }
-
-  va_end(ap);
-  priv->lower = kmm_calloc(priv->count,
-                           sizeof(FAR struct audio_lowerhalf_s *));
-  if (priv->lower == NULL)
-    {
-      goto free_priv;
-    }
+  priv->count = i;
 
   va_start(ap, name);
   for (i = 0; i < priv->count; i++)
@@ -980,20 +981,16 @@ FAR struct audio_lowerhalf_s *audio_comp_initialize(FAR const char *name,
     }
 
   va_end(ap);
+
   if (name != NULL)
     {
       ret = audio_register(name, &priv->export);
       if (ret < 0)
         {
-          goto free_lower;
+          kmm_free(priv);
+          return NULL;
         }
     }
 
   return &priv->export;
-
-free_lower:
-  kmm_free(priv->lower);
-free_priv:
-  kmm_free(priv);
-  return NULL;
 }
