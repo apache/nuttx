@@ -694,6 +694,17 @@
 #define SYSCON_ECC_ENABLE_CTRL_RAMB_RAMX_ECC_ENABLE (1 << 1) /* RAMB and RAMX ECC enable */
 #define SYSCON_ECC_ENABLE_CTRL_RAMD_RAMC_ECC_ENABLE (1 << 2) /* RAMD and RAMC ECC enable */
 
+/* Clock Control */
+
+#define SYSCON_CLOCKCTRL                        (NXXX_SYSCON0_BASE + 0xa18)
+
+#define SYSCON_CLOCKCTRL_CLKIN_ENA_FM_USBH_LPT  (1 << 1) /* Enables the clk_in clock for the Frequency Measurement, USB HS and LPTMR0/1 modules. */
+#define SYSCON_CLOCKCTRL_FRO1MHZ_ENA            (1 << 2) /* Enables the FRO_1MHz clock for RTC module and for UTICK */
+#define SYSCON_CLOCKCTRL_FRO12MHZ_ENA           (1 << 3) /* Enables the FRO_12MHz clock for the Flash, LPTMR0/1, and Frequency Measurement modules */
+#define SYSCON_CLOCKCTRL_FRO_HF_ENA             (1 << 4) /* Enables FRO HF clock for the Frequency Measure module */
+#define SYSCON_CLOCKCTRL_CLKIN_ENA              (1 << 5) /* Enables clk_in clock for MICFIL, CAN0/1, I3C0/1, SAI0/1, clkout */
+#define SYSCON_CLOCKCTRL_FRO1MHZ_CLK_ENA        (1 << 6) /* Enables FRO_1MHz clock for clock muxing in clock gen */
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
