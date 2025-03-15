@@ -63,6 +63,8 @@
 #include "hardware/mpfs_ethernet.h"
 #include "hardware/mpfs_mpucfg.h"
 
+#define SIZE_ALIGNED_64(m) (((m) + (0x3f)) & ~0x3f)
+
 #if defined(CONFIG_MPFS_ETH0_PHY_KSZ9477) ||\
     defined(CONFIG_MPFS_ETH1_PHY_KSZ9477)
 #  if !defined(CONFIG_MPFS_MAC_SGMII)
@@ -100,8 +102,6 @@
 
 #  if defined(CONFIG_MPFS_ETHMAC_HPWORK)
 #    define ETHWORK HPWORK
-#  elif defined(CONFIG_MPFS_ETHMAC_LPWORK)
-#    define ETHWORK LPWORK
 #  else
 #    define ETHWORK LPWORK
 #  endif
@@ -131,20 +131,17 @@
 #  define CONFIG_MPFS_ETHMAC_NTXBUFFERS  (8)
 #endif
 
-/* GMAC buffer sizes
- * REVISIT: do we want to make GMAC_RX_UNITSIZE configurable?
- * issue when using the MTU size receive block
- */
-
-#define GMAC_RX_UNITSIZE  (512)                  /* Fixed size for RX buffer */
-#define GMAC_TX_UNITSIZE  CONFIG_NET_ETH_PKTSIZE /* MAX size for Ethernet packet */
-
 /* The MAC can support frame lengths up to 1536 bytes */
 
 #define GMAC_MAX_FRAMELEN (1536)
 #if CONFIG_NET_ETH_PKTSIZE > GMAC_MAX_FRAMELEN
 #  error CONFIG_NET_ETH_PKTSIZE is too large
 #endif
+
+/* Max size of RX and TX buffers */
+
+#define GMAC_RX_UNITSIZE SIZE_ALIGNED_64(GMAC_MAX_FRAMELEN)
+#define GMAC_TX_UNITSIZE SIZE_ALIGNED_64(CONFIG_NET_ETH_PKTSIZE)
 
 /* for DMA dma_rxbuf_size */
 
@@ -172,6 +169,15 @@
 /* TX timeout = 1 minute */
 
 #define MPFS_TXTIMEOUT   (60 * CLK_TCK)
+
+/* RX timeout: Workaround for LAN8742A rev A and B silicon errata
+ * "Cable diagnostics incorrectly returns Open cable connection for
+ *  terminated cable"
+ */
+
+#if CONFIG_MPFS_PHY_RX_TIMEOUT_WA != 0
+#define MPFS_RXTIMEOUT   (CONFIG_MPFS_PHY_RX_TIMEOUT_WA * CLK_TCK)
+#endif
 
 /* PHY reset tim in loop counts */
 
@@ -270,8 +276,12 @@ struct mpfs_ethmac_s
   uint8_t       phyaddr;                         /* PHY address */
 #endif
   struct wdog_s txtimeout;                       /* TX timeout timer */
+#ifdef MPFS_RXTIMEOUT
+  struct wdog_s rxtimeout;                       /* RX timeout timer */
+#endif
   struct work_s irqwork;                         /* For deferring interrupt work to the work queue */
   struct work_s pollwork;                        /* For deferring poll work to the work queue */
+  struct work_s timeoutwork;                     /* For managing timeouts */
 
   /* This holds the information visible to the NuttX network */
 
@@ -391,6 +401,7 @@ static int  mpfs_ethconfig(struct mpfs_ethmac_s *priv);
 static void mpfs_ethreset(struct mpfs_ethmac_s *priv);
 
 static void mpfs_interrupt_work(void *arg);
+static void mpfs_txtimeout_expiry(wdparm_t arg);
 
 /****************************************************************************
  * Private Functions
@@ -471,6 +482,16 @@ static int mpfs_interrupt_0(int irq, void *context, void *arg)
       nwarn("TX complete: cancel timeout\n");
       wd_cancel(&priv->txtimeout);
     }
+
+#ifdef MPFS_RXTIMEOUT
+  if ((isr & INT_RX) != 0)
+    {
+      /* If a RX transfer just completed, restart the timeout */
+
+      wd_start(&priv->rxtimeout, MPFS_RXTIMEOUT,
+               mpfs_txtimeout_expiry, (wdparm_t)priv);
+    }
+#endif
 
   /* Schedule to perform the interrupt processing on the worker thread. */
 
@@ -1560,6 +1581,15 @@ static int mpfs_ifup(struct net_driver_s *dev)
   up_enable_irq(priv->mac_q_int[2]);
   up_enable_irq(priv->mac_q_int[3]);
 
+#ifdef MPFS_RXTIMEOUT
+  /* Set up the RX timeout. If we don't receive anything in time, try
+   * to re-initialize
+   */
+
+  wd_start(&priv->rxtimeout, MPFS_RXTIMEOUT,
+           mpfs_txtimeout_expiry, (wdparm_t)priv);
+#endif
+
   return OK;
 }
 
@@ -1602,6 +1632,12 @@ static int mpfs_ifdown(struct net_driver_s *dev)
   /* Cancel the TX timeout timers */
 
   wd_cancel(&priv->txtimeout);
+
+#ifdef MPFS_RXTIMEOUT
+  /* Cancel the RX timeout timers */
+
+  wd_cancel(&priv->rxtimeout);
+#endif
 
   /* Put the MAC in its reset, non-operational state.  This should be
    * a known configuration that will guarantee the mpfs_ifup() always
@@ -2209,7 +2245,8 @@ static int mpfs_phyfind(struct mpfs_ethmac_s *priv, uint8_t *phyaddr)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_NET) && defined(CONFIG_DEBUG_INFO)
+#if defined(CONFIG_DEBUG_NET) && defined(CONFIG_DEBUG_INFO) && \
+  defined(ETH_HAS_MDIO_PHY)
 static void mpfs_phydump(struct mpfs_ethmac_s *priv)
 {
   uint16_t phyval;
@@ -2564,6 +2601,8 @@ static void mpfs_linkspeed(struct mpfs_ethmac_s *priv)
 
   mac_putreg(priv, NETWORK_CONFIG, regval);
   mac_putreg(priv, NETWORK_CONTROL, ncr);
+
+  mpfs_phydump(priv);
 }
 #endif
 
@@ -2888,7 +2927,7 @@ static void mpfs_txtimeout_expiry(wdparm_t arg)
 
   /* Schedule to perform the TX timeout processing on the worker thread. */
 
-  work_queue(ETHWORK, &priv->irqwork, mpfs_txtimeout_work, priv, 0);
+  work_queue(LPWORK, &priv->timeoutwork, mpfs_txtimeout_work, priv, 0);
 }
 
 /****************************************************************************
@@ -3328,6 +3367,17 @@ static int mpfs_phyinit(struct mpfs_ethmac_s *priv)
 {
   int ret = -EINVAL;
 
+#ifdef CONFIG_MPFS_PHYINIT
+  /* Perform any necessary, board-specific PHY initialization */
+
+  ret = mpfs_phy_boardinitialize(priv->intf);
+  if (ret < 0)
+    {
+      nerr("ERROR: Failed to initialize the PHY: %d\n", ret);
+      return ret;
+    }
+#endif
+
 #ifdef ETH_HAS_MDIO_PHY
 
   /* Configure PHY clocking */
@@ -3478,30 +3528,10 @@ static int mpfs_ethconfig(struct mpfs_ethmac_s *priv)
 
   ninfo("Entry\n");
 
-#ifdef CONFIG_MPFS_PHYINIT
-  /* Perform any necessary, board-specific PHY initialization */
-
-  ret = mpfs_phy_boardinitialize(priv->intf);
-  if (ret < 0)
-    {
-      nerr("ERROR: Failed to initialize the PHY: %d\n", ret);
-      return ret;
-    }
-#endif
-
   /* Reset the Ethernet block */
 
   ninfo("Reset the Ethernet block\n");
   mpfs_ethreset(priv);
-
-  /* Initialize the PHY */
-
-  ninfo("Initialize the PHY\n");
-  ret = mpfs_phyinit(priv);
-  if (ret < 0)
-    {
-      return ret;
-    }
 
   /* Initialize the MAC and DMA */
 
