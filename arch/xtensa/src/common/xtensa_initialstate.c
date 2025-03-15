@@ -235,11 +235,11 @@ void up_initial_state(struct tcb_s *tcb)
   /* Set initial PS to int level 0, user mode. */
 
 #ifdef __XTENSA_CALL0_ABI__
-  xcp->regs[REG_PS] = PS_UM;
+  xcp->regs[REG_PS] = PS_UM | PS_EXCM;
 
 #else
   /* For windowed ABI set WOE and CALLINC (pretend task was 'call4'd). */
 
-  xcp->regs[REG_PS] = PS_UM | PS_WOE | PS_CALLINC(1);
+  xcp->regs[REG_PS] = PS_UM | PS_EXCM | PS_WOE | PS_CALLINC(1);
 #endif
 }

@@ -88,6 +88,13 @@ config ARCH_INTEL64_CORE_FREQ_KHZ
 		to set the TSC deadline timer frequency. If set to 0 we try to get
 		frequency from CPUID.
 
+config ARCH_INTEL64_TSC_FREQ_VMWARE
+	bool "Use CPUID 0x40000010 to get CPU Core frequency"
+	default n
+	depends on ARCH_INTEL64_CORE_FREQ_KHZ = 0
+	---help---
+		Use CPUID 0x40000010 defined by VMware to get CPU Core frequency
+		in virtualized environments.
 endif
 
 if ARCH_INTEL64_TSC
