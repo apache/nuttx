@@ -36,6 +36,10 @@ if(CONFIG_ARCH_BUTTONS)
   list(APPEND SRCS nrf52_buttons.c)
 endif()
 
+if(CONFIG_NRF52840DK_BTNLEDS_GPIO)
+  list(APPEND SRCS nrf52_gpio.c)
+endif()
+
 if(CONFIG_NRF52_SPI_MASTER)
   list(APPEND SRCS nrf52_spi.c)
 endif()
