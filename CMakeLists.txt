@@ -250,8 +250,16 @@ else()
   file(TOUCH ${CMAKE_BINARY_DIR}/boards/dummy/Kconfig)
 endif()
 
+# check if board custom dir points to NuttX upstream board. This is useful when
+# an out-of-tree configuration uses an upstream board directory
+string(FIND "${CONFIG_ARCH_BOARD_CUSTOM_DIR}" "boards/" IS_NUTTX_BOARD)
+
 if(NOT EXISTS ${CMAKE_BINARY_DIR}/boards/dummy/Kconfig)
-  if(CONFIG_ARCH_BOARD_CUSTOM AND EXISTS ${NUTTX_BOARD_ABS_DIR}/Kconfig)
+  # link dummy/Kconfig only if this is not upstream board otherwise the same
+  # Kconfig file is included twice which cause CMake warnings
+  if(CONFIG_ARCH_BOARD_CUSTOM
+     AND EXISTS ${NUTTX_BOARD_ABS_DIR}/Kconfig
+     AND NOT (IS_NUTTX_BOARD EQUAL 0))
     nuttx_create_symlink(${NUTTX_BOARD_ABS_DIR}/Kconfig
                          ${CMAKE_BINARY_DIR}/boards/dummy/Kconfig)
   else()
