@@ -84,42 +84,49 @@
 #  error CONFIG_NET_6LOWPAN=y is required.
 #endif
 
-#if (CONFIG_PKTRADIO_ADDRLEN != 1) && (CONFIG_PKTRADIO_ADDRLEN != 2) && \
-    (CONFIG_PKTRADIO_ADDRLEN != 8)
-#  error No support for CONFIG_PKTRADIO_ADDRLEN other than {1, 2 or 8}.
+#if CONFIG_PKTRADIO_ADDRLEN < 2
+#error Unsupported configuration, for espnow pktradio \
+       CONFIG_PKTRADIO_ADDRLEN needs to be at least 2.
 #endif
 
 #if CONFIG_IOB_BUFSIZE < CONFIG_ESP32_ESPNOW_PKTRADIO_FRAMELEN
-#  error Unsupported configuration: reduce ESP32_ESPNOW_PKTRADIO_FRAMELEN or\
-         increase IOB_BUFSIZE.
+#  error Unsupported configuration: reduce \
+         CONFIG_ESP32_ESPNOW_PKTRADIO_FRAMELEN or increase \
+         CONFIG_IOB_BUFSIZE.
 #endif
 
 /****************************************************************************
- * MAC HDR: 3 byte MAGIC, 2 byte PANID, 1 byte INFO, SRC addr, DST addr
- * INFO: BIT0-1: address size: 00 (2^0) -> 1 BYTE address size
- *                             01 (2^1) -> 2 BYTE address size
- *                             11 (2^3) -> 8 BYTE address size
- * Future expansion: INFO BIT2: cypher info added to MAC HDR
+ * MAC HDR: 3 byte MAGIC, 2 byte PANID, 1 byte FCB, 2 byte SRC addr,
+ *          2 byte DST addr, 4 byte RND (random, optional).
+ *
+ * FCB (Frame Control Byte):
+ *    BIT0-1: frame type: 00 -> advertising frame
+ *                        01 -> data frame
+ *                        10 -> control frame
+ *    BIT2-3: future expansion
+ *    BIT4  : ciphered (when ciphered the 4 byte RND is added)
+ *    BIT5-7: future expansion
  *
  ****************************************************************************/
 
 #define MAC_MAGIC        "6lo"
 #define MAC_PANIDOFFSET  sizeof(MAC_MAGIC) - 1
 #define MAC_PANIDLEN     2
-#define MAC_INFOOFFSET   MAC_PANIDOFFSET + MAC_PANIDLEN
-#define MAC_INFOLEN      1
-#define MAC_ADDRLEN      CONFIG_PKTRADIO_ADDRLEN
-#define MAC_SRCOFFSET    MAC_INFOOFFSET + MAC_INFOLEN
+#define MAC_FCBOFFSET    MAC_PANIDOFFSET + MAC_PANIDLEN
+#define MAC_FCBLEN       1
+#define MAC_SRCOFFSET    MAC_FCBOFFSET + MAC_FCBLEN
+#define MAC_ADDRLEN      2
 #define MAC_DSTOFFSET    MAC_SRCOFFSET + MAC_ADDRLEN
-#define MAC_HDRSIZE      MAC_DSTOFFSET + MAC_ADDRLEN
-#if MAC_ADDRLEN == 1
-#define MAC_INFOADDRLEN  0x0
-#elif MAC_ADDRLEN == 2
-#define MAC_INFOADDRLEN  0x1
-#elif MAC_ADDRLEN == 8
-#define MAC_INFOADDRLEN  0x3
-#endif
-#define MAC_INFOADDRMASK 0x3
+#define MAC_UHDRLEN      MAC_DSTOFFSET + MAC_ADDRLEN  /* Unciphered */
+#define MAC_RNDLEN       4
+#define MAC_CHDRLEN      MAC_UHDRLEN + MAC_RNDLEN     /* Ciphered */
+
+#define MAC_TYPEMASK     0x03
+#define MAC_ADVFCB       0x00
+#define MAC_DATAFCB      0x01
+#define MAC_CTRLFCB      0x02
+
+#define MAC_ENCMASK      0x10
 
 /****************************************************************************
  * Private Types
@@ -135,7 +142,6 @@ struct espnow_driver_s
 {
   bool bifup; /* true:ifup false:ifdown */
 
-  uint8_t mac_address[MAC_ADDRLEN]; /* node address */
   uint8_t panid[MAC_PANIDLEN];      /* network id */
 
   struct sixlowpan_reassbuf_s iobuffer; /* buffer for packet reassembly */
@@ -149,7 +155,8 @@ struct espnow_driver_s
 
   struct wdog_s txtimeout;  /* TX timeout timer */
 
-  struct work_s work;       /* Defer tx and rx work to the work queue */
+  struct work_s rxwork;     /* Defer rx work to the work queue */
+  struct work_s txwork;     /* Defer tx work to the work queue */
   struct work_s pollwork;   /* Defer pollwork to the work queue */
   struct work_s toutwork;   /* Defer driver reset to the work queue */
 
@@ -170,8 +177,8 @@ static struct espnow_driver_s g_espnow;
 
 /* Utility functions */
 
-static void espnow_addr(FAR struct net_driver_s *dev);
 static void espnow_addr2ip(FAR struct net_driver_s *dev);
+static void espnow_ip2addr(FAR struct net_driver_s *dev);
 static inline void espnow_netmask(FAR struct net_driver_s *dev);
 
 /* Queue functions */
@@ -202,7 +209,8 @@ static void espnow_extract_pktmeta(FAR struct iob_s *iob,
 
 /* TX and RX work */
 
-static void espnow_work(FAR void *arg);
+static void espnow_rxwork(FAR void *arg);
+static void espnow_txwork(FAR void *arg);
 
 /* TX polling logic */
 
@@ -241,61 +249,14 @@ static int espnow_properties(FAR struct radio_driver_s *netdev,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: espnow_addr
- *
- * Description:
- *   Set the address based on config values.
- *
- ****************************************************************************/
-
-static void espnow_addr(FAR struct net_driver_s *dev)
-{
-  FAR struct espnow_driver_s *priv =
-    (FAR struct espnow_driver_s *)dev->d_private;
-
-  /* Set the mac panid */
-
-  priv->panid[0] = CONFIG_ESP32_ESPNOW_PKTRADIO_PANID & 0xff;
-  priv->panid[1] = CONFIG_ESP32_ESPNOW_PKTRADIO_PANID >> 8;
-
-#if CONFIG_PKTRADIO_ADDRLEN == 1
-  /* Set the mac address based on the 1 byte address */
-
-  priv->mac_address[0] = CONFIG_ESP32_ESPNOW_PKTRADIO_NODE_ADDR_0;
-
-#elif CONFIG_PKTRADIO_ADDRLEN == 2
-  /* Set the mac address based on the 2 byte address */
-
-  priv->mac_address[0] = CONFIG_ESP32_ESPNOW_PKTRADIO_NODE_ADDR_0;
-  priv->mac_address[1] = CONFIG_ESP32_ESPNOW_PKTRADIO_NODE_ADDR_1;
-
-#elif CONFIG_PKTRADIO_ADDRLEN == 8
-  /* Set the mac address based on the 8 byte address */
-
-  priv->mac_address[0] = CONFIG_ESP32_ESPNOW_PKTRADIO_NODE_ADDR_0;
-  priv->mac_address[1] = CONFIG_ESP32_ESPNOW_PKTRADIO_NODE_ADDR_1;
-  priv->mac_address[2] = CONFIG_ESP32_ESPNOW_PKTRADIO_NODE_ADDR_2;
-  priv->mac_address[3] = CONFIG_ESP32_ESPNOW_PKTRADIO_NODE_ADDR_3;
-  priv->mac_address[4] = CONFIG_ESP32_ESPNOW_PKTRADIO_NODE_ADDR_4;
-  priv->mac_address[5] = CONFIG_ESP32_ESPNOW_PKTRADIO_NODE_ADDR_5;
-  priv->mac_address[6] = CONFIG_ESP32_ESPNOW_PKTRADIO_NODE_ADDR_6;
-  priv->mac_address[7] = CONFIG_ESP32_ESPNOW_PKTRADIO_NODE_ADDR_7;
-
-#endif
-}
-
-/****************************************************************************
  * Name: espnow_addr2ip
  *
  * Description:
- *   Create a MAC-based IP address from the pktradio address assigned to the
- *   node.
+ *   Create a MAC-based IP address from the radio address.
  *
  *  128  112  96   80    64   48   32   16
  * ---- ---- ---- ---- ---- ---- ---- ----
- * fe80 0000 0000 0000 0000 00ff fe00 00xx 1-byte pktradio address
- * fe80 0000 0000 0000 0000 00ff fe00 xxxx 2-byte pktradio address
- * fe80 0000 0000 0000 xxxx xxxx xxxx xxxx 8-byte pktradio address
+ * fe80 0000 0000 0000 0000 00ff fe00 xxxx 2-byte address
  *
  ****************************************************************************/
 
@@ -303,54 +264,55 @@ static void espnow_addr2ip(FAR struct net_driver_s *dev)
 {
   FAR struct espnow_driver_s *priv =
     (FAR struct espnow_driver_s *)dev->d_private;
-  uint8_t mac_addr[MAC_ADDRLEN];
+  uint8_t mac_address[MAC_ADDRLEN];
 
-  /* Copy the MAC address */
+  /* Get the radio address */
 
-  memcpy(mac_addr, priv->mac_address, MAC_ADDRLEN);
+  memcpy(mac_address, dev->d_mac.radio.nv_addr, sizeof(mac_address));
 
-  /* Set the MAC address as the saddr */
-
-  dev->d_mac.radio.nv_addrlen = MAC_ADDRLEN;
-  memcpy(dev->d_mac.radio.nv_addr, mac_addr, MAC_ADDRLEN);
-
-  /* Set the IP address */
+  /* Set the IP address based on the 2 byte radio address */
 
   dev->d_ipv6addr[0] = HTONS(0xfe80);
   dev->d_ipv6addr[1] = 0;
   dev->d_ipv6addr[2] = 0;
   dev->d_ipv6addr[3] = 0;
+  dev->d_ipv6addr[4] = 0;
+  dev->d_ipv6addr[5] = HTONS(0x00ff);
+  dev->d_ipv6addr[6] = HTONS(0xfe00);
+  dev->d_ipv6addr[7] = ((uint16_t)mac_address[0] << 8) + mac_address[1];
+}
 
-#if CONFIG_PKTRADIO_ADDRLEN == 1
-  /* Set the IP address based on the 1 byte address */
+/****************************************************************************
+ * Name: espnow_ip2addr
+ *
+ * Description:
+ *   Create a pktradio address from the IP address assigned to the node.
+ *
+ *  128  112  96   80    64   48   32   16
+ * ---- ---- ---- ---- ---- ---- ---- ----
+ * AAAA 0000 0000 0000 0000 00ff fe00 aabb -> radio address 0xbbaa
+ *
+ ****************************************************************************/
+
+static void espnow_ip2addr(FAR struct net_driver_s *dev)
+{
+  FAR struct espnow_driver_s *priv =
+    (FAR struct espnow_driver_s *)dev->d_private;
+  uint8_t mac_address[2];
+
+  /* Make sure the IP address is correct */
 
   dev->d_ipv6addr[4] = 0;
   dev->d_ipv6addr[5] = HTONS(0x00ff);
   dev->d_ipv6addr[6] = HTONS(0xfe00);
-  dev->d_ipv6addr[7] = (uint16_t)mac_addr[0] << 8;
 
-#elif CONFIG_PKTRADIO_ADDRLEN == 2
-  /* Set the IP address based on the 2 byte address */
+  mac_address[0] = (uint8_t)(dev->d_ipv6addr[7] >> 8);
+  mac_address[1] = (uint8_t)(dev->d_ipv6addr[7] & 0xff);
 
-  dev->d_ipv6addr[4] = 0;
-  dev->d_ipv6addr[5] = HTONS(0x00ff);
-  dev->d_ipv6addr[6] = HTONS(0xfe00);
-  dev->d_ipv6addr[7] = (uint16_t)mac_addr[0] << 8 |
-                       (uint16_t)mac_addr[1];
+  /* Set the radio MAC address as the saddr */
 
-#elif CONFIG_PKTRADIO_ADDRLEN == 8
-  /* Set the IP address based on the 8-byte address */
-
-  dev->d_ipv6addr[4] = (uint16_t)mac_addr[0] << 8 |
-                        (uint16_t)mac_addr[1];
-  dev->d_ipv6addr[5] = (uint16_t)mac_addr[2] << 8 |
-                        (uint16_t)mac_addr[3];
-  dev->d_ipv6addr[6] = (uint16_t)mac_addr[4] << 8 |
-                        (uint16_t)mac_addr[5];
-  dev->d_ipv6addr[7] = (uint16_t)mac_addr[6] << 8 |
-                        (uint16_t)mac_addr[7];
-
-#endif
+  dev->d_mac.radio.nv_addrlen = MAC_ADDRLEN;
+  memcpy(dev->d_mac.radio.nv_addr, mac_address, sizeof(mac_address));
 }
 
 /****************************************************************************
@@ -361,9 +323,7 @@ static void espnow_addr2ip(FAR struct net_driver_s *dev)
  *
  *  128  112   96   80   64   48   32   16
  * ---- ---- ---- ---- ---- ---- ---- ----
- * ffff ffff ffff ffff ffff ffff ffff ff00 1-byte pktradio address
- * ffff ffff ffff ffff ffff ffff ffff 0000 2-byte pktradio address
- * ffff ffff ffff ffff 0000 0000 0000 0000 8-byte pktradio address
+ * ffff ffff ffff ffff ffff ffff ffff 0000 2-byte address
  *
  ****************************************************************************/
 
@@ -373,25 +333,10 @@ static inline void espnow_netmask(FAR struct net_driver_s *dev)
   dev->d_ipv6netmask[1] = 0xffff;
   dev->d_ipv6netmask[2] = 0xffff;
   dev->d_ipv6netmask[3] = 0xffff;
-
-#if CONFIG_PKTRADIO_ADDRLEN == 1
-  dev->d_ipv6netmask[4] = 0xffff;
-  dev->d_ipv6netmask[5] = 0xffff;
-  dev->d_ipv6netmask[6] = 0xffff;
-  dev->d_ipv6netmask[7] = HTONS(0xff00);
-
-#elif CONFIG_PKTRADIO_ADDRLEN == 2
   dev->d_ipv6netmask[4] = 0xffff;
   dev->d_ipv6netmask[5] = 0xffff;
   dev->d_ipv6netmask[6] = 0xffff;
   dev->d_ipv6netmask[7] = 0;
-
-#elif CONFIG_PKTRADIO_ADDRLEN == 8
-  dev->d_ipv6netmask[4] = 0;
-  dev->d_ipv6netmask[5] = 0;
-  dev->d_ipv6netmask[6] = 0;
-  dev->d_ipv6netmask[7] = 0;
-#endif
 }
 
 /****************************************************************************
@@ -414,11 +359,11 @@ static void espnow_add_header(struct espnow_driver_s *priv,
                               FAR struct pktradio_metadata_s *pktmeta,
                               FAR struct iob_s *iob)
 {
-  uint8_t info = MAC_INFOADDRLEN;
+  uint8_t fcb = MAC_DATAFCB;
 
   memcpy(&iob->io_data[0], MAC_MAGIC, sizeof(MAC_MAGIC) - 1);
   memcpy(&iob->io_data[MAC_PANIDOFFSET], priv->panid, MAC_PANIDLEN);
-  memcpy(&iob->io_data[MAC_INFOOFFSET], &info, sizeof(info));
+  memcpy(&iob->io_data[MAC_FCBOFFSET], &fcb, sizeof(fcb));
   memcpy(&iob->io_data[MAC_SRCOFFSET], pktmeta->pm_src.pa_addr, MAC_ADDRLEN);
   memcpy(&iob->io_data[MAC_DSTOFFSET], pktmeta->pm_dest.pa_addr,
          MAC_ADDRLEN);
@@ -448,7 +393,8 @@ static void espnow_extract_pktmeta(FAR struct iob_s *iob,
   memcpy(pktmeta->pm_src.pa_addr, &iob->io_data[MAC_SRCOFFSET], MAC_ADDRLEN);
   memcpy(pktmeta->pm_dest.pa_addr, &iob->io_data[MAC_DSTOFFSET],
          MAC_ADDRLEN);
-  iob->io_offset = MAC_HDRSIZE;
+
+  iob->io_offset = MAC_UHDRLEN;
 }
 
 /****************************************************************************
@@ -470,6 +416,8 @@ static void espnow_txtailadd(FAR struct espnow_driver_s *priv,
                              FAR struct iob_s *iob)
 {
   irqstate_t flags;
+
+  iob->io_flink = NULL;
 
   flags = spin_lock_irqsave(&priv->lock);
 
@@ -595,6 +543,8 @@ static void espnow_rxtailadd(FAR struct espnow_driver_s *priv,
                              FAR struct iob_s *iob)
 {
   irqstate_t flags;
+
+  iob->io_flink = NULL;
 
   flags = spin_lock_irqsave(&priv->lock);
 
@@ -761,7 +711,6 @@ static void espnow_recv_cb(const esp_now_recv_info_t * esp_now_info,
 {
   FAR struct espnow_driver_s *priv = &g_espnow;
   FAR struct iob_s *iob;
-  uint8_t info;
   irqstate_t flags;
 
   /* Drop received data if interface not up */
@@ -773,7 +722,7 @@ static void espnow_recv_cb(const esp_now_recv_info_t * esp_now_info,
 
   /* Drop received data if header is too small */
 
-  if (data_len < (MAC_DSTOFFSET + MAC_ADDRLEN))
+  if (data_len < MAC_UHDRLEN)
     {
       return;
     }
@@ -790,15 +739,6 @@ static void espnow_recv_cb(const esp_now_recv_info_t * esp_now_info,
    */
 
   if (memcmp(&data[MAC_PANIDOFFSET], priv->panid, MAC_PANIDLEN))
-    {
-      return;
-    }
-
-  /* Drop received data if different address length is used */
-
-  memcpy(&info, &data[MAC_INFOOFFSET], 1);
-
-  if ((info & MAC_INFOADDRMASK) != MAC_INFOADDRLEN)
     {
       return;
     }
@@ -825,9 +765,9 @@ static void espnow_recv_cb(const esp_now_recv_info_t * esp_now_info,
 
   /* Schedule work to queue */
 
-  if (work_available(&priv->work))
+  if (work_available(&priv->rxwork))
     {
-      work_queue(LPBKWORK, &priv->work, espnow_work, priv, 0);
+      work_queue(LPBKWORK, &priv->rxwork, espnow_rxwork, priv, 0);
     }
 }
 
@@ -853,7 +793,7 @@ static void espnow_send_cb(const uint8_t *mac_address,
 
   wd_cancel(&priv->txtimeout);
 
-  /* If TX has been blocked reschedule espnow_work */
+  /* If TX has been blocked reschedule espnow_txwork */
 
   if (priv->txblocked)
     {
@@ -861,9 +801,9 @@ static void espnow_send_cb(const uint8_t *mac_address,
 
       /* Schedule the work on the worker thread. */
 
-      if (work_available(&priv->work))
+      if (work_available(&priv->txwork))
         {
-          work_queue(LPBKWORK, &priv->work, espnow_work, priv, 0);
+          work_queue(LPBKWORK, &priv->txwork, espnow_txwork, priv, 0);
         }
     }
 }
@@ -890,6 +830,8 @@ static void espnow_transmit(FAR struct espnow_driver_s *priv)
 
   while ((iob = espnow_txheadget(priv)))
     {
+      ninfo("Sending IOB %p [%d]\n", iob, iob->io_len);
+
       ret = espnow_send(iob);
 
       /* Increment statistics */
@@ -921,7 +863,26 @@ static void espnow_transmit(FAR struct espnow_driver_s *priv)
 }
 
 /****************************************************************************
- * Name: espnow_work
+ * Name: espnow_txwork
+ *
+ * Description:
+ *   Call espnow_transmit to send available packets to espnow.
+ *
+ * Input Parameters:
+ * priv - Reference to the driver state structure
+ *
+ *
+ ****************************************************************************/
+
+static void espnow_txwork(void *arg)
+{
+  FAR struct espnow_driver_s *priv = (FAR struct espnow_driver_s *)arg;
+
+  espnow_transmit(priv);
+}
+
+/****************************************************************************
+ * Name: espnow_rxwork
  *
  * Description:
  *   Call espnow_transmit to send available packets to espnow, process
@@ -934,7 +895,7 @@ static void espnow_transmit(FAR struct espnow_driver_s *priv)
  *
  ****************************************************************************/
 
-static void espnow_work(void *arg)
+static void espnow_rxwork(void *arg)
 {
   FAR struct espnow_driver_s *priv = (FAR struct espnow_driver_s *)arg;
   struct pktradio_metadata_s pktmeta;
@@ -942,8 +903,6 @@ static void espnow_work(void *arg)
   int ret;
 
   /* Send available packets */
-
-  espnow_transmit(priv);
 
   /* Loop while there are frames to be processed, send them to sixlowpan */
 
@@ -977,10 +936,6 @@ static void espnow_work(void *arg)
           NETDEV_ERRORS(&priv->espnow_radio.r_dev);
         }
     }
-
-  /* Send response packets */
-
-  espnow_transmit(priv);
 
   net_unlock();
 }
@@ -1131,26 +1086,15 @@ static int espnow_ifup(FAR struct net_driver_s *dev)
       return -ENOSYS;
     }
 
+  espnow_ip2addr(dev);
+
   ninfo("Bringing up: IPv6 %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
         dev->d_ipv6addr[0], dev->d_ipv6addr[1], dev->d_ipv6addr[2],
         dev->d_ipv6addr[3], dev->d_ipv6addr[4], dev->d_ipv6addr[5],
         dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
-
-#if CONFIG_PKTRADIO_ADDRLEN == 1
-  ninfo("Node: %02x\n",
-         dev->d_mac.radio.nv_addr[0]);
-
-#elif CONFIG_PKTRADIO_ADDRLEN == 2
-  ninfo("Node: %02x:%02x\n",
-         dev->d_mac.radio.nv_addr[0], dev->d_mac.radio.nv_addr[1]);
-
-#elif CONFIG_PKTRADIO_ADDRLEN == 8
-  ninfo("Node: %02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x PANID=%02x:%02x\n",
-         dev->d_mac.radio.nv_addr[0], dev->d_mac.radio.nv_addr[1],
-         dev->d_mac.radio.nv_addr[2], dev->d_mac.radio.nv_addr[3],
-         dev->d_mac.radio.nv_addr[4], dev->d_mac.radio.nv_addr[5],
-         dev->d_mac.radio.nv_addr[6], dev->d_mac.radio.nv_addr[7]);
-#endif
+  ninfo("Pan id: %02x:%02x, Pan address: %02x:%02x\n",
+        priv->panid[0], priv->panid[1],
+        dev->d_mac.radio.nv_addr[0], dev->d_mac.radio.nv_addr[1]);
 
   priv->txblocked = false;
   priv->bifup = true;
@@ -1275,8 +1219,6 @@ static int espnow_txavail(FAR struct net_driver_s *dev)
 {
   FAR struct espnow_driver_s *priv = (FAR struct espnow_driver_s *)
                                      dev->d_private;
-
-  ninfo("Available: %u\n", work_available(&priv->pollwork));
 
   /* Is our single work structure available?  It may not be if there are
    * pending actions and we will have to ignore the Tx availability
@@ -1412,7 +1354,7 @@ static int espnow_ioctl(FAR struct net_driver_s *dev, int cmd,
           FAR const struct pktradio_addr_s *newaddr =
             (FAR const struct pktradio_addr_s *)&cmddata->pifr_hwaddr;
 
-          if (newaddr->pa_addrlen != 1)
+          if (newaddr->pa_addrlen != MAC_ADDRLEN)
             {
               ret = -EINVAL;
             }
@@ -1420,11 +1362,14 @@ static int espnow_ioctl(FAR struct net_driver_s *dev, int cmd,
            {
               FAR struct netdev_varaddr_s *devaddr = &dev->d_mac.radio;
 
-              devaddr->nv_addrlen = 1;
+              devaddr->nv_addrlen = MAC_ADDRLEN;
               devaddr->nv_addr[0] = newaddr->pa_addr[0];
-#if CONFIG_PKTRADIO_ADDRLEN > 1
-              memset(&devaddr->pa_addr[1], 0, CONFIG_PKTRADIO_ADDRLEN - 1);
-#endif
+              devaddr->nv_addr[1] = newaddr->pa_addr[1];
+
+              /* Update the ip address */
+
+              espnow_addr2ip(dev);
+
               ret = OK;
             }
         }
@@ -1446,9 +1391,8 @@ static int espnow_ioctl(FAR struct net_driver_s *dev, int cmd,
 
           retaddr->pa_addrlen = devaddr->nv_addrlen;
           retaddr->pa_addr[0] = devaddr->nv_addr[0];
-#if CONFIG_PKTRADIO_ADDRLEN > 1
-          memset(&addr->pa_addr[1], 0, CONFIG_PKTRADIO_ADDRLEN - 1);
-#endif
+          retaddr->pa_addr[1] = devaddr->nv_addr[1];
+
           ret = OK;
         }
         break;
@@ -1483,7 +1427,7 @@ static int espnow_ioctl(FAR struct net_driver_s *dev, int cmd,
 static int espnow_get_mhrlen(FAR struct radio_driver_s *netdev,
                              FAR const void *meta)
 {
-  return MAC_HDRSIZE;
+  return MAC_UHDRLEN;
 }
 
 /****************************************************************************
@@ -1510,7 +1454,8 @@ static int espnow_req_data(FAR struct radio_driver_s *netdev,
   FAR struct espnow_driver_s *priv;
   FAR struct iob_s *iob;
   struct pktradio_metadata_s *pktmeta = (struct pktradio_metadata_s *)meta;
-  uint8_t mac[CONFIG_PKTRADIO_ADDRLEN];
+  uint8_t src[MAC_ADDRLEN];
+  uint8_t dst[MAC_ADDRLEN];
 
   DEBUGASSERT(netdev != NULL && netdev->r_dev.d_private != NULL);
   priv = (FAR struct espnow_driver_s *)netdev->r_dev.d_private;
@@ -1526,29 +1471,10 @@ static int espnow_req_data(FAR struct radio_driver_s *netdev,
       framelist     = iob->io_flink;
       iob->io_flink = NULL;
 
-      ninfo("Queuing frame IOB %p\n", iob);
-      memcpy(mac, pktmeta->pm_dest.pa_addr, CONFIG_PKTRADIO_ADDRLEN);
-#if CONFIG_PKTRADIO_ADDRLEN == 1
-      ninfo("MAC: %02x\n", mac[0]);
-
-#elif CONFIG_PKTRADIO_ADDRLEN == 2
-      ninfo("MAC: %02x:%02x\n", mac[0], mac[1]);
-
-#elif CONFIG_PKTRADIO_ADDRLEN == 8
-      ninfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x\n",
-            mac[0], mac[1], mac[2], mac[3], mac[4], mac[5], mac[6], mac[7]);
-#endif
-      memcpy(mac, pktmeta->pm_src.pa_addr, CONFIG_PKTRADIO_ADDRLEN);
-#if CONFIG_PKTRADIO_ADDRLEN == 1
-      ninfo("MAC: %02x\n", mac[0]);
-
-#elif CONFIG_PKTRADIO_ADDRLEN == 2
-      ninfo("MAC: %02x:%02x\n", mac[0], mac[1]);
-
-#elif CONFIG_PKTRADIO_ADDRLEN == 8
-      ninfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x\n",
-            mac[0], mac[1], mac[2], mac[3], mac[4], mac[5], mac[6], mac[7]);
-#endif
+      memcpy(src, pktmeta->pm_src.pa_addr, MAC_ADDRLEN);
+      memcpy(dst, pktmeta->pm_dest.pa_addr, MAC_ADDRLEN);
+      ninfo("Queuing frame %p size %d: %02x:%02x --> %02x:%02x\n", iob,
+            iob->io_len, src[0], src[1], dst[0], dst[1]);
 
       /* Add the MAC header */
 
@@ -1559,11 +1485,11 @@ static int espnow_req_data(FAR struct radio_driver_s *netdev,
       espnow_txtailadd(priv, iob);
     }
 
-  /* Schedule the work on the worker thread. */
+  /* Schedule the txwork on the worker thread. */
 
-  if (work_available(&priv->work))
+  if (work_available(&priv->txwork))
     {
-      work_queue(LPBKWORK, &priv->work, espnow_work, priv, 0);
+      work_queue(LPBKWORK, &priv->txwork, espnow_txwork, priv, 0);
     }
 
   return OK;
@@ -1598,7 +1524,7 @@ static int espnow_properties(FAR struct radio_driver_s *netdev,
 
   /* Length of an address */
 
-  properties->sp_addrlen  = CONFIG_PKTRADIO_ADDRLEN;
+  properties->sp_addrlen  = MAC_ADDRLEN;
 
   /* Fixed frame length */
 
@@ -1606,13 +1532,13 @@ static int espnow_properties(FAR struct radio_driver_s *netdev,
 
   /* Multicast address */
 
-  properties->sp_mcast.nv_addrlen = CONFIG_PKTRADIO_ADDRLEN;
-  memset(properties->sp_mcast.nv_addr, 0xee, RADIO_MAX_ADDRLEN);
+  properties->sp_mcast.nv_addrlen = MAC_ADDRLEN;
+  memset(properties->sp_mcast.nv_addr, 0xee, MAC_ADDRLEN);
 
   /* Broadcast address */
 
-  properties->sp_bcast.nv_addrlen = CONFIG_PKTRADIO_ADDRLEN;
-  memset(properties->sp_mcast.nv_addr, 0xff, RADIO_MAX_ADDRLEN);
+  properties->sp_bcast.nv_addrlen = MAC_ADDRLEN;
+  memset(properties->sp_mcast.nv_addr, 0xff, MAC_ADDRLEN);
 
   return OK;
 }
@@ -1642,6 +1568,7 @@ int pktradio_espnow(void)
   FAR struct espnow_driver_s *priv;
   FAR struct radio_driver_s *radio;
   FAR struct net_driver_s *dev;
+  uint8_t mac_address[MAC_ADDRLEN];
 
   ninfo("Initializing\n");
 
@@ -1667,11 +1594,23 @@ int pktradio_espnow(void)
 #endif
   dev->d_private      = priv;                 /* Link private state to dev */
 
-  /* Set the network mask and MAC-based IP address */
+  /* Set the PANID */
 
-  espnow_netmask(dev);
-  espnow_addr(dev);
+  priv->panid[0] = CONFIG_ESP32_ESPNOW_PKTRADIO_PANID >> 8;
+  priv->panid[1] = CONFIG_ESP32_ESPNOW_PKTRADIO_PANID & 0xff;
+
+  /* Set the PANADDRESS */
+
+  mac_address[0] = CONFIG_ESP32_ESPNOW_PKTRADIO_PANADDR >> 8;
+  mac_address[1] = CONFIG_ESP32_ESPNOW_PKTRADIO_PANADDR & 0xff;
+
+  dev->d_mac.radio.nv_addrlen = MAC_ADDRLEN;
+  memcpy(dev->d_mac.radio.nv_addr, mac_address, sizeof(mac_address));
+
+  /* Set the MAC-based IP address */
+
   espnow_addr2ip(dev);
+  espnow_netmask(dev);
 
   /* Initialize the Network frame-related callbacks */
 

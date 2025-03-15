@@ -726,17 +726,23 @@ config ESP32_UART2
 	select ARCH_HAVE_SERIAL_TERMIOS
 
 config ESP32_ESPNOW_PKTRADIO
-	bool "ESPNOW packet radio support"
-	select ESP32_WIRELESS
+	bool "ESPNOW pktradio support"
+	depends on ESPRESSIF_WIFI
 	depends on WIRELESS_PKTRADIO
 	default n
 	---help---
-		Enable using espnow for packet radio
+		Enable using espnow for pktradio, the addressing of nodes is
+		based on a PANID and PANADDRESS. Node communication is limited
+		to nodes with the same PANID. There is a direct relation
+		between the PANADDRESS and the ipv6 address of a node:
+		  PANADDRESS: 0xaabb
+		  ipv6 address: AAAA 0000 0000 0000 0000 00ff fe00 bbaa
+		For local link AAAA is fe80.
 
 if ESP32_ESPNOW_PKTRADIO
 
 config ESP32_ESPNOW_PKTRADIO_FRAMELEN
-	int "ESPNOW frame length"
+	int "ESPNOW pktradio frame length"
 	range 127 250
 	default 196
 	---help---
@@ -744,86 +750,18 @@ config ESP32_ESPNOW_PKTRADIO_FRAMELEN
 		set equal for all nodes.
 
 config ESP32_ESPNOW_PKTRADIO_PANID
-	hex "ESPNOW node panid"
+	hex "ESPNOW pktradio node panid"
 	range 0x0 0xffff
 	default 0x0
 	---help---
-		PANID for espnow packet radio
+		PANID for espnow pktradio.
 
-if PKTRADIO_ADDRLEN = 1
-
-config ESP32_ESPNOW_PKTRADIO_NODE_ADDR_0
-	hex "ESPNOW node address"
-	range 0x0 0xff
-	default 0x0
-	---help---
-		Node address for espnow packet radio
-
-endif #PKTRADIO_ADDRLEN = 1
-
-if PKTRADIO_ADDRLEN > 1
-
-config ESP32_ESPNOW_PKTRADIO_NODE_ADDR_0
-	hex "ESPNOW node address[0]"
-	range 0x0 0xff
-	default 0x0
-	---help---
-		Node address for espnow packet radio
-
-config ESP32_ESPNOW_PKTRADIO_NODE_ADDR_1
-	hex "ESPNOW node address[1]"
-	range 0x0 0xff
-	default 0x0
-	---help---
-		Node address for espnow packet radio
-
-if PKTRADIO_ADDRLEN > 2
-
-config ESP32_ESPNOW_PKTRADIO_NODE_ADDR_2
-	hex "ESPNOW node address[2]"
-	range 0x0 0xff
-	default 0x0
-	---help---
-		Node address for espnow packet radio
-
-config ESP32_ESPNOW_PKTRADIO_NODE_ADDR_3
-	hex "ESPNOW node address[3]"
-	range 0x0 0xff
-	default 0x0
-	---help---
-		Node address for espnow packet radio
-
-config ESP32_ESPNOW_PKTRADIO_NODE_ADDR_4
-	hex "ESPNOW node address[4]"
-	range 0x0 0xff
-	default 0x0
-	---help---
-		Node address for espnow packet radio
-
-config ESP32_ESPNOW_PKTRADIO_NODE_ADDR_5
-	hex "ESPNOW node address[5]"
-	range 0x0 0xff
-	default 0x0
-	---help---
-		Node address for espnow packet radio
-
-config ESP32_ESPNOW_PKTRADIO_NODE_ADDR_6
-	hex "ESPNOW node address[6]"
-	range 0x0 0xff
-	default 0x0
-	---help---
-		Node address for espnow packet radio
-
-config ESP32_ESPNOW_PKTRADIO_NODE_ADDR_7
-	hex "ESPNOW node address[7]"
-	range 0x0 0xff
-	default 0x0
-	---help---
-		Node address for espnow packet radio
-
-endif #PKTRADIO_ADDRLEN > 2
-
-endif #PKTRADIO_ADDRLEN > 1
+config ESP32_ESPNOW_PKTRADIO_PANADDR
+       hex "ESPNOW pktradio node address"
+       range 0x0 0xffff
+       default 0xfffe
+       ---help---
+                PANADDRESS for espnow pktradio.
 
 endif #ESP32_ESPNOW_PKTRADIO
 
