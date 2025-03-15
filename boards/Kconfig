@@ -80,6 +80,14 @@ config ARCH_BOARD_AVR32DEV1
 		Atmel website.  STATUS: This port is functional but very basic.  There
 		are configurations for NSH and the OS test.
 
+config ARCH_BOARD_AVRDX_BREADXAVR
+	bool "AVR Dx chip on breadboard"
+	depends on ARCH_CHIP_AVRDX
+	select ARCH_HAVE_LEDS
+	---help---
+		This is a board used to make something use an AVRnDx core
+		so it can be developed and tested.
+
 config ARCH_BOARD_AXOLOTI
 	bool "Axoloti board"
 	depends on ARCH_CHIP_STM32F427I
@@ -3407,6 +3415,7 @@ config ARCH_BOARD
 	default "arduino-nano-33ble-rev2"   if ARCH_BOARD_ARDUINO_NANO_33BLE_REV2
 	default "arty_a7"                   if ARCH_BOARD_ARTY_A7
 	default "avr32dev1"                 if ARCH_BOARD_AVR32DEV1
+	default "breadxavr"                 if ARCH_BOARD_AVRDX_BREADXAVR
 	default "axoloti"                   if ARCH_BOARD_AXOLOTI
 	default "bambino-200e"              if ARCH_BOARD_BAMBINO_200E
 	default "bl602evb"                  if ARCH_BOARD_BL602EVB
@@ -4542,6 +4551,9 @@ source "boards/arm/mx8mp/verdin-mx8mp/Kconfig"
 endif
 if ARCH_BOARD_AVR32DEV1
 source "boards/avr/at32uc3/avr32dev1/Kconfig"
+endif
+if ARCH_BOARD_AVRDX_BREADXAVR
+source "boards/avr/avrdx/breadxavr/Kconfig"
 endif
 if ARCH_BOARD_MIZAR32A
 source "boards/avr/at32uc3/mizar32a/Kconfig"
