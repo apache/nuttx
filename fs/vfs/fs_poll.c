@@ -272,6 +272,7 @@ void poll_default_cb(FAR struct pollfd *fds)
  *
  ****************************************************************************/
 
+noinstrument_function
 void poll_notify(FAR struct pollfd **afds, int nfds, pollevent_t eventset)
 {
   int i;
