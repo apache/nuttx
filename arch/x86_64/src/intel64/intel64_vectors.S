@@ -793,80 +793,8 @@ irq_common:
 
 	/* The common return point for irq_handler */
 
-.Lreturn:
-
-	/* Check if full context switch is required for signal handling */
-
-	movq    (8*REG_AUX)(%rax), %rcx
-	cmp     $(REG_AUX_FULLCONTEXT), %rcx
-	je      .Lfullswitch
-
-	/* EAX may possibly hold a pointer to a different register save area on
-	 * return.  Are we switching to a new context?
-	 */
-
-	cmp     %rax, %rdi
-	je      .Lnoswitch
-
-.Lfullswitch:
-	/* Reset flag */
-
-	movq    $0x0, (8*REG_AUX)(%rdi)
-
-	/* A context switch will be performed. RAX holds the address of the new
-	 * register save structure.
-	 *
-	 * Jump to x86_64_fullcontextrestore().  We perform a call here, but that function
-	 * never returns.  The address of the new register save block is the argument
-	 * to the x86_64_fullcontextrestore().
-	 */
-
 	movq    %rax, %rdi
 	call    x86_64_fullcontextrestore
-
-.Lnoswitch:
-#ifndef CONFIG_ARCH_X86_64_HAVE_XSAVE
-	fxrstorq (%rdi)
-#else
-	movl $XSAVE_STATE_COMPONENTS, %eax
-	xor     %edx, %edx
-	xrstor  (%rdi)
-#endif
-
-	movq    (8*REG_FS)(%rdi), %rax
-	mov     %fs, %ax
-	movq    (8*REG_GS)(%rdi), %rax
-	mov     %gs, %ax
-	movq    (8*REG_ES)(%rdi), %rax
-	mov     %es, %ax
-	movq    (8*REG_DS)(%rdi), %rax
-	mov     %ds, %ax
-
-	movq    (8*REG_RAX)(%rdi), %rax
-	movq    (8*REG_RBX)(%rdi), %rbx
-	movq    (8*REG_RBP)(%rdi), %rbp
-	movq    (8*REG_R10)(%rdi), %r10
-	movq    (8*REG_R11)(%rdi), %r11
-	movq    (8*REG_R12)(%rdi), %r12
-	movq    (8*REG_R13)(%rdi), %r13
-	movq    (8*REG_R14)(%rdi), %r14
-	movq    (8*REG_R15)(%rdi), %r15
-
-	movq    (8*REG_R9)(%rdi), %r9
-	movq    (8*REG_R8)(%rdi), %r8
-	movq    (8*REG_RCX)(%rdi), %rcx
-	movq    (8*REG_RDX)(%rdi), %rdx
-
-	/* Pop RDI and RSI pushed on interrupt entry */
-
-	popq   %rsi
-	popq   %rdi
-
-	/* Cleans up the pushed error code */
-
-	add     $8, %rsp
-
-	iretq                /* Pops 5 things at once: RIP, CS, RFLAGS RSP and SS */
 	.size	irq_common, . - irq_common
 	.end
 
