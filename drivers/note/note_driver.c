@@ -2118,7 +2118,7 @@ void note_get_taskname(pid_t pid, FAR char *buf, size_t len)
 
       if (ti != NULL)
         {
-          strlcpy(buf, tcb->name, len);
+          strlcpy(buf, ti->name, len);
         }
       else
         {
