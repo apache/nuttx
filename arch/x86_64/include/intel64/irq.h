@@ -468,10 +468,6 @@
 
 #define XMMAREA_REGS                (26)
 
-/* Aux register used by implementation */
-
-#define REG_AUX                     (27 + XMMAREA_REG_OFFSET)
-
 /* NOTE 2: This is not really state data.  Rather, this is just a convenient
  *   way to pass parameters from the interrupt handler to C code.
  */
@@ -489,10 +485,6 @@
 #define XCP_ALIGN_MASK              (XCPTCONTEXT_ALIGN - 1)
 #define XCP_ALIGN_DOWN(a)           ((a) & ~XCP_ALIGN_MASK)
 #define XCP_ALIGN_UP(a)             (((a) + XCP_ALIGN_MASK) & ~XCP_ALIGN_MASK)
-
-/* Aux register flags */
-
-#define REG_AUX_FULLCONTEXT         (1 << 0) /* Force full context switch */
 
 /****************************************************************************
  * Public Types
