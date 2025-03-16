@@ -25,6 +25,7 @@
  ****************************************************************************/
 
 #include <nuttx/instrument.h>
+#include <nuttx/sched.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -56,9 +57,20 @@ __cyg_profile_func_enter(FAR void *this_fn, FAR void *call_site)
 {
   FAR struct instrument_s *instrument;
   FAR sq_entry_t *entry;
+  FAR struct tcb_s *tcb;
+  irqstate_t flags;
 
   if (g_magic != MAIGC_NUMBMER)
     {
+      return;
+    }
+
+  flags = enter_critical_section();
+  tcb = nxsched_self();
+
+  if (atomic_fetch_add(&tcb->instr_level_enter, 1) != 0)
+    {
+      leave_critical_section(flags);
       return;
     }
 
@@ -70,6 +82,9 @@ __cyg_profile_func_enter(FAR void *this_fn, FAR void *call_site)
           instrument->enter(this_fn, call_site, instrument->arg);
         }
     }
+
+  atomic_set(&tcb->instr_level_enter, 0);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -81,9 +96,20 @@ __cyg_profile_func_exit(FAR void *this_fn, FAR void *call_site)
 {
   FAR struct instrument_s *instrument;
   FAR sq_entry_t *entry;
+  FAR struct tcb_s *tcb;
+  irqstate_t flags;
 
   if (g_magic != MAIGC_NUMBMER)
     {
+      return;
+    }
+
+  flags = enter_critical_section();
+  tcb = nxsched_self();
+
+  if (atomic_fetch_add(&tcb->instr_level_exit, 1) != 0)
+    {
+      leave_critical_section(flags);
       return;
     }
 
@@ -95,6 +121,9 @@ __cyg_profile_func_exit(FAR void *this_fn, FAR void *call_site)
           instrument->leave(this_fn, call_site, instrument->arg);
         }
     }
+
+  atomic_set(&tcb->instr_level_exit, 0);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************

@@ -717,6 +717,9 @@ struct tcb_s
 #ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
   spinlock_t mutex_lock;
 #endif
+
+  atomic_t instr_level_enter;
+  atomic_t instr_level_exit;
 };
 
 /* struct task_tcb_s ********************************************************/
