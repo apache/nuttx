@@ -48,7 +48,9 @@
  * - If RAMPZ is not present, support for LPMX is assumed
  */
 
-#define HAVE_RAMPZ 1
+#ifdef AVR_HAS_RAMPZ
+#  define HAVE_RAMPZ 1
+#endif
 
 /****************************************************************************
  * External Symbols

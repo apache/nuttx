@@ -91,5 +91,10 @@ void up_dump_register(void *dumpregs)
              regs[REG_PC2], regs[REG_SPH],
              regs[REG_SPL], regs[REG_SREG]);
 #endif
+
+#if defined(REG_RAMPZ)
+      _alert("RAMPZ:  %02x\n",
+             regs[REG_RAMPZ]);
+#endif
     }
 }

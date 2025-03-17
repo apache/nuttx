@@ -73,4 +73,8 @@ config AVR_HAS_MEMX_PTR
 		of RAM needed to hold this static data.
 
 endmenu # Atmel AVR Toolchain options
+
+config AVR_HAS_RAMPZ
+	bool
+
 endif # ARCH_FAMILY_AVR
