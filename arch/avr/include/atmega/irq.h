@@ -81,7 +81,13 @@
 
 #  define NR_IRQS                34
 #  define AVR_PC_SIZE            16
-#  define XCPTCONTEXT_REGS       37 /* Size of the register state save array (in bytes) */
+#  define XCPTCONTEXT_REGS       38 /* Size of the register state save array (in bytes) */
+
+#  if defined(CONFIG_AVR_HAS_RAMPZ)
+#    define AVR_HAS_RAMPZ
+#  else
+#    error CONFIG_AVR_HAS_RAMPZ is supposed to be set for this chip
+#  endif
 
 #elif defined(CONFIG_ARCH_CHIP_ATMEGA1284P)
 
@@ -122,7 +128,13 @@
 
 #  define NR_IRQS                34
 #  define AVR_PC_SIZE            16
-#  define XCPTCONTEXT_REGS       37 /* Size of the register state save array (in bytes) */
+#  define XCPTCONTEXT_REGS       38 /* Size of the register state save array (in bytes) */
+
+#  if defined(CONFIG_AVR_HAS_RAMPZ)
+#    define AVR_HAS_RAMPZ
+#  else
+#    error CONFIG_AVR_HAS_RAMPZ is supposed to be set for this chip
+#  endif
 
 #elif defined(CONFIG_ARCH_CHIP_ATMEGA2560)
 
@@ -185,7 +197,13 @@
 
 #  define NR_IRQS                58
 #  define AVR_PC_SIZE            24
-#  define XCPTCONTEXT_REGS       38 /* Size of the register state save array (in bytes) */
+#  define XCPTCONTEXT_REGS       39 /* Size of the register state save array (in bytes) */
+
+#  if defined(CONFIG_AVR_HAS_RAMPZ)
+#    define AVR_HAS_RAMPZ
+#  else
+#    error CONFIG_AVR_HAS_RAMPZ is supposed to be set for this chip
+#  endif
 
 #else
   #error "Unrecognized chip"

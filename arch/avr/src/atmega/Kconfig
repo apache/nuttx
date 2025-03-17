@@ -12,16 +12,19 @@ choice
 
 config ARCH_CHIP_ATMEGA128
 	bool "ATMega128"
+	select AVR_HAS_RAMPZ
 	---help---
 		Atmel ATMega128 8-bit AVR.
 
 config ARCH_CHIP_ATMEGA1284P
 	bool "ATMega1284P"
+	select AVR_HAS_RAMPZ
 	---help---
 		Atmel ATMega1284P 8-bit AVR.
 
 config ARCH_CHIP_ATMEGA2560
 	bool "ATMega2560"
+	select AVR_HAS_RAMPZ
 	---help---
 		Atmel ATMega2560 8-bit AVR.
 

@@ -104,6 +104,9 @@ void avr_sigdeliver(void)
 #if defined(REG_PC2)
   regs[REG_PC2] = rtcb->xcp.saved_pc2;
 #endif
+#if defined(REG_RAMPZ)
+  regs[REG_RAMPZ] = rtcb->xcp.saved_rampz;
+#endif
   regs[REG_SREG] = rtcb->xcp.saved_sreg;
 
   /* Allows next handler to be scheduled */

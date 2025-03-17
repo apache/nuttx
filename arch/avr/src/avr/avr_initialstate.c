@@ -107,6 +107,12 @@ void up_initial_state(struct tcb_s *tcb)
   xcp->regs[REG_PC2]  = (uint8_t)((uintptr_t)tcb->start & 0xff);
 #endif
 
+  /* Set RAMPZ to zero, the default value (if the MCU has one) */
+
+#if defined(REG_RAMPZ)
+  xcp->regs[REG_RAMPZ] = 0;
+#endif
+
   /* Enable or disable interrupts, based on user configuration */
 
 #ifdef CONFIG_SUPPRESS_INTERRUPTS

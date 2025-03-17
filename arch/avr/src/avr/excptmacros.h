@@ -148,6 +148,13 @@
   ori r25, (1 << SREG_I)     /* Interrupts re-enabled on restore */
   push r25
 
+  /* Save RAMPZ if the MCU has it */
+
+#ifdef AVR_HAS_RAMPZ
+  in r25, _SFR_IO_ADDR(RAMPZ)
+  push r25
+#endif
+
   /* Save R0 -- the scratch register and the zero register
    * (which may not be zero).  R1 must be zero for our purposes
    */
@@ -296,6 +303,13 @@
   pop r1
   pop r0
 
+  /* Restore RAMPZ if the MCU has it */
+
+#ifdef AVR_HAS_RAMPZ
+  pop r24
+  out _SFR_IO_ADDR(RAMPZ), r24
+#endif
+
   /* Restore the status register (probably enabling interrupts) */
 
   pop r24                  /* Restore the status register */
@@ -391,6 +405,13 @@
   /* Skip over r0 -- the scratch register */
 
   adiw r26, 1
+
+#ifdef AVR_HAS_RAMPZ
+  /* Save RAMPZ if the MCU has it */
+
+  in r0, _SFR_IO_ADDR(RAMPZ)
+  st X+, r0
+#endif
 
   /* Save the status register
    * (probably not necessary since interrupts are disabled)
@@ -543,6 +564,13 @@
   /* Restore r0 - the scratch register */
 
   ld r0, x+
+
+#ifdef AVR_HAS_RAMPZ
+  /* Restore RAMPZ if the MCU has it */
+
+  ld r24, X+
+  out _SFR_IO_ADDR(RAMPZ), r24
+#endif
 
   /* The following control flow split is required to eliminate non-atomic
    * interrupt_enable - return sequence.
