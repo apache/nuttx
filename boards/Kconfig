@@ -2319,6 +2319,14 @@ config ARCH_BOARD_IMX93_EVK
 		This options selects support for NuttX on the NXP i.MX93 CPUs EVK
 		board with ARM Cortex-A55.
 
+config ARCH_BOARD_AVAOTA_A1
+	bool "PINE64 Yuzuki Avaota-A1"
+	depends on ARCH_CHIP_SUNXI_A527
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This option selects support for NuttX on PINE64 Yuzuki Avaota-A1
+		based on Allwinner A527 SoC with ARM Cortex-A55.
+
 config ARCH_BOARD_ZCU111
 	bool "XilinX ZCU111 development board"
 	depends on ARCH_CHIP_ZYNQ_MPSOC
@@ -3574,6 +3582,7 @@ config ARCH_BOARD
 	default "fvp-armv8r-aarch32"        if ARCH_BOARD_FVP_ARMV8R_AARCH32
 	default "imx8qm-mek"                if ARCH_BOARD_IMX8QM_MEK
 	default "imx93-evk"                 if ARCH_BOARD_IMX93_EVK
+	default "avaota-a1"                 if ARCH_BOARD_AVAOTA_A1
 	default "zcu111"                    if ARCH_BOARD_ZCU111
 	default "sama5d2-xult"              if ARCH_BOARD_SAMA5D2_XULT
 	default "giant-board"               if ARCH_BOARD_GIANT_BOARD
@@ -3808,6 +3817,9 @@ source "boards/arm64/imx8/imx8qm-mek/Kconfig"
 endif
 if ARCH_BOARD_IMX93_EVK
 source "boards/arm64/imx9/imx93-evk/Kconfig"
+endif
+if ARCH_BOARD_AVAOTA_A1
+source "boards/arm64/a527/avaota-a1/Kconfig"
 endif
 if ARCH_BOARD_ZCU111
 source "boards/arm64/zynq-mpsoc/zcu111/Kconfig"
