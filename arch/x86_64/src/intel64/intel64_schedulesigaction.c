@@ -77,38 +77,20 @@ void up_schedule_sigaction(struct tcb_s *tcb)
   sinfo("tcb=%p, rtcb=%p current_regs=%p\n", tcb,
         this_task(), this_task()->xcp.regs);
 
-  /* First, handle some special cases when the signal is being delivered
-   * to task that is currently executing on any CPU.
+  /* Save the return lr and cpsr and one scratch register
+   * These will be restored by the signal trampoline after
+   * the signals have been delivered.
    */
 
-  if (tcb == this_task() && !up_interrupt_context())
-    {
-      (tcb->sigdeliver)(tcb);
-      tcb->sigdeliver = NULL;
-    }
+  tcb->xcp.saved_rip        = tcb->xcp.regs[REG_RIP];
+  tcb->xcp.saved_rsp        = tcb->xcp.regs[REG_RSP];
+  tcb->xcp.saved_rflags     = tcb->xcp.regs[REG_RFLAGS];
 
-  /* Otherwise, we are (1) signaling a task is not running from an
-   * interrupt handler or (2) we are not in an interrupt handler and the
-   * running task is signaling some other non-running task.
+  /* Then set up to vector to the trampoline with interrupts
+   * disabled
    */
 
-  else
-    {
-      /* Save the return lr and cpsr and one scratch register
-       * These will be restored by the signal trampoline after
-       * the signals have been delivered.
-       */
-
-      tcb->xcp.saved_rip        = tcb->xcp.regs[REG_RIP];
-      tcb->xcp.saved_rsp        = tcb->xcp.regs[REG_RSP];
-      tcb->xcp.saved_rflags     = tcb->xcp.regs[REG_RFLAGS];
-
-      /* Then set up to vector to the trampoline with interrupts
-       * disabled
-       */
-
-      tcb->xcp.regs[REG_RIP]    = (uint64_t)x86_64_sigdeliver;
-      tcb->xcp.regs[REG_RSP]    = tcb->xcp.regs[REG_RSP] - 8;
-      tcb->xcp.regs[REG_RFLAGS] = 0;
-    }
+  tcb->xcp.regs[REG_RIP]    = (uint64_t)x86_64_sigdeliver;
+  tcb->xcp.regs[REG_RSP]    = tcb->xcp.regs[REG_RSP] - 8;
+  tcb->xcp.regs[REG_RFLAGS] = 0;
 }

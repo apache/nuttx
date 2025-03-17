@@ -126,30 +126,14 @@ void up_schedule_sigaction(struct tcb_s *tcb)
   sinfo("tcb=%p, rtcb=%p current_regs=%p\n", tcb, this_task(),
         this_task()->xcp.regs);
 
-  /* First, handle some special cases when the signal is
-   * being delivered to the currently executing task.
+  /* Save the return lr and cpsr and one scratch register.  These
+   * will be restored by the signal trampoline after the signals
+   * have been delivered.
    */
 
-  if (tcb == this_task() && !up_interrupt_context())
-    {
-      /* In this case just deliver the signal now.
-       * REVISIT:  Signal handler will run in a critical section!
-       */
+  tcb->xcp.saved_regs = tcb->xcp.regs;
 
-      (tcb->sigdeliver)(tcb);
-      tcb->sigdeliver = NULL;
-    }
-  else
-    {
-      /* Save the return lr and cpsr and one scratch register.  These
-       * will be restored by the signal trampoline after the signals
-       * have been delivered.
-       */
+  /* create signal process context */
 
-      tcb->xcp.saved_regs = tcb->xcp.regs;
-
-      /* create signal process context */
-
-      arm64_init_signal_process(tcb, NULL);
-    }
+  arm64_init_signal_process(tcb, NULL);
 }
