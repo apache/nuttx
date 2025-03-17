@@ -28,6 +28,11 @@ define_property(
   BRIEF_DOCS "NuttX application libs"
   FULL_DOCS "List of all NuttX application libraries")
 
+# Create a directory for the application binaries
+if(NOT EXISTS ${CMAKE_BINARY_DIR}/bin)
+  file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+endif()
+
 # ~~~
 # nuttx_add_application
 #

@@ -235,7 +235,8 @@ function(nuttx_add_cromfs)
             copy_directory ${PATH} cromfs_${NAME} \; fi
     COMMAND if \[ \"${FILES}\" != \"\" \]; then ${CMAKE_COMMAND} -E copy
             ${FILES} cromfs_${NAME} \; fi
-    COMMAND ${CMAKE_BINARY_DIR}/bin/gencromfs cromfs_${NAME} cromfs_${NAME}.c
+    COMMAND ${CMAKE_BINARY_DIR}/bin_host/gencromfs cromfs_${NAME}
+            cromfs_${NAME}.c
     DEPENDS ${DEPENDS})
 
   add_library(cromfs_${NAME} OBJECT cromfs_${NAME}.c)
