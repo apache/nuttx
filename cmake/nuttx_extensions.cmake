@@ -321,3 +321,22 @@ add_custom_target(
     ${CMAKE_COMMAND} -E echo
     "'$<TARGET_PROPERTY:nuttx_target_interface,ALL_TARGETS>'" >> target_dump
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+
+# Generate host tools CMake binary directory
+execute_process(COMMAND ${CMAKE_COMMAND} -B ${CMAKE_BINARY_DIR}/bin_host -S
+                        ${CMAKE_SOURCE_DIR}/tools)
+
+# Function: nuttx_build_host_target
+#
+# generate build common tools host target
+#
+# Usage: nuttx_build_host_target(mkdeps)
+function(nuttx_build_host_target target)
+  if(TARGET ${target})
+    return()
+  endif()
+  add_custom_target(
+    ${target}
+    COMMAND cmake --build ${CMAKE_BINARY_DIR}/bin_host --target ${target}
+    SOURCES ${ARGN})
+endfunction()
