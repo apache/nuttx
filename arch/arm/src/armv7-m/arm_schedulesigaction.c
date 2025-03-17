@@ -91,16 +91,7 @@ void up_schedule_sigaction(struct tcb_s *tcb)
    * being delivered to the currently executing task.
    */
 
-  if (tcb == rtcb && ipsr == 0)
-    {
-      /* In this case just deliver the signal now.
-       * REVISIT:  Signal handle will run in a critical section!
-       */
-
-      (tcb->sigdeliver)(tcb);
-      tcb->sigdeliver = NULL;
-    }
-  else if (tcb == rtcb && ipsr != NVIC_IRQ_PENDSV)
+  if (tcb == rtcb && ipsr != NVIC_IRQ_PENDSV)
     {
       /* Context switch should be done in pendsv, for exception directly
        * last regs is not saved tcb->xcp.regs.

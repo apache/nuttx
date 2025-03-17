@@ -185,7 +185,17 @@ static int nxsig_queue_action(FAR struct tcb_s *stcb,
 #endif
                 {
                   stcb->sigdeliver = nxsig_deliver;
-                  up_schedule_sigaction(stcb);
+                  if (stcb == this_task() && !up_interrupt_context())
+                    {
+                      /* In this case just deliver the signal now. */
+
+                      (stcb->sigdeliver)(stcb);
+                      stcb->sigdeliver = NULL;
+                    }
+                  else
+                    {
+                      up_schedule_sigaction(stcb);
+                    }
                 }
             }
         }

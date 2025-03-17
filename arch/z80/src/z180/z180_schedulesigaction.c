@@ -114,38 +114,17 @@ void up_schedule_sigaction(FAR struct tcb_s *tcb)
 
   if (tcb == this_task())
     {
-      /* CASE 1:  We are not in an interrupt handler and a task is
-       * signalling itself for some reason.
+      /* Set up to vector to the trampoline with interrupts
+       * disabled.
        */
 
-      if (!IN_INTERRUPT())
-        {
-          /* In this case just deliver the signal now. */
+      z180_sigsetup(tcb, IRQ_STATE());
 
-          (tcb->sigdeliver)(tcb);
-          tcb->sigdeliver = NULL;
-        }
-
-      /* CASE 2:  We are in an interrupt handler AND the interrupted task
-       * is the same as the one that must receive the signal, then we
-       * will have to modify the return state as well as the state in
-       * the TCB.
+      /* And make sure that the saved context in the TCB
+       * is the same as the interrupt return context.
        */
 
-      else
-        {
-          /* Set up to vector to the trampoline with interrupts
-           * disabled.
-           */
-
-          z180_sigsetup(tcb, IRQ_STATE());
-
-          /* And make sure that the saved context in the TCB
-           * is the same as the interrupt return context.
-           */
-
-          SAVE_IRQCONTEXT(tcb);
-        }
+      SAVE_IRQCONTEXT(tcb);
     }
 
   /* Otherwise, we are (1) signaling a task is not running

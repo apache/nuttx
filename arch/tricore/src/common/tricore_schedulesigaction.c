@@ -80,81 +80,19 @@
 
 void up_schedule_sigaction(struct tcb_s *tcb)
 {
-  /* First, handle some special cases when the signal is
-   * being delivered to the currently executing task.
+  /* Save the context registers.  These will be
+   * restored by the signal trampoline after the signals have
+   * been delivered.
    */
 
-  if (tcb == this_task())
-    {
-      /* CASE 1:  We are not in an interrupt handler and
-       * a task is signalling itself for some reason.
-       */
+  tcb->xcp.saved_regs = tcb->xcp.regs;
 
-      if (!up_interrupt_context())
-        {
-          /* In this case just deliver the signal now. */
-
-          (tcb->sigdeliver)(tcb);
-          tcb->sigdeliver = NULL;
-        }
-
-      /* CASE 2:  We are in an interrupt handler AND the
-       * interrupted task is the same as the one that
-       * must receive the signal, then we will have to modify
-       * the return state as well as the state in the TCB.
-       *
-       * Hmmm... there looks like a latent bug here: The following
-       * logic would fail in the strange case where we are in an
-       * interrupt handler, the thread is signalling itself, but
-       * a context switch to another task has occurred so that
-       * g_current_regs does not refer to the thread of this_task()!
-       */
-
-      else
-        {
-          /* Save the context registers.  These will be
-           * restored by the signal trampoline after the signals have
-           * been delivered.
-           */
-
-          tcb->xcp.saved_regs = tcb->xcp.regs;
-
-          /* Create a new CSA for signal delivery. The new context
-           * will borrow the process stack of the current tcb.
-           */
-
-          tcb->xcp.regs =
-            tricore_alloc_csa((uintptr_t)tricore_sigdeliver,
-                              STACKFRAME_ALIGN_DOWN
-                              (up_getusrsp(tcb->xcp.regs)),
-                              PSW_IO_SUPERVISOR | PSW_CDE, true);
-        }
-    }
-
-  /* Otherwise, we are (1) signaling a task is not running
-   * from an interrupt handler or (2) we are not in an
-   * interrupt handler and the running task is signalling
-   * some non-running task.
+  /* Create a new CSA for signal delivery. The new context
+   * will borrow the process stack of the current tcb.
    */
 
-  else
-    {
-      /* Save the return EPC and STATUS registers.  These will be
-       * restored by the signal trampoline after the signals have
-       * been delivered.
-       */
-
-      /* Save the current register context location */
-
-      tcb->xcp.saved_regs = tcb->xcp.regs;
-
-      /* Create a new CSA for signal delivery. The new context
-       * will borrow the process stack of the current tcb.
-       */
-
-      tcb->xcp.regs =
-        tricore_alloc_csa((uintptr_t)tricore_sigdeliver,
-                          STACKFRAME_ALIGN_DOWN(up_getusrsp(tcb->xcp.regs)),
-                          PSW_IO_SUPERVISOR | PSW_CDE, true);
-    }
+  tcb->xcp.regs = tricore_alloc_csa((uintptr_t)tricore_sigdeliver,
+                                    STACKFRAME_ALIGN_DOWN
+                                    (up_getusrsp(tcb->xcp.regs)),
+                                    PSW_IO_SUPERVISOR | PSW_CDE, true);
 }

@@ -87,50 +87,29 @@ void up_schedule_sigaction(FAR struct tcb_s *tcb)
 
   if (tcb == this_task())
     {
-      /* CASE 1:  We are not in an interrupt handler and
-       * a task is signalling itself for some reason.
+      FAR uint32_t *current_pc  =
+        (FAR uint32_t *)&up_current_regs()[REG_PC];
+
+      /* Save the return address and interrupt state. These will be
+       * restored by the signal trampoline after the signals have
+       * been delivered.
        */
 
-      if (!up_current_regs())
-        {
-          /* In this case just deliver the signal now. */
+      tcb->xcp.saved_pc = *current_pc;
+      tcb->xcp.saved_i  = up_current_regs()[REG_FLAGS];
 
-          (tcb->sigdeliver)(tcb);
-          tcb->sigdeliver = NULL;
-        }
-
-      /* CASE 2:  We are in an interrupt handler AND the interrupted
-       * task is the same as the one that must receive the signal, then
-       * we will have to modify the return state as well as the state
-       * in the TCB.
+      /* Then set up to vector to the trampoline with interrupts
+       * disabled
        */
 
-      else
-        {
-          FAR uint32_t *current_pc  =
-            (FAR uint32_t *)&up_current_regs()[REG_PC];
+      *current_pc = (uint32_t)z16_sigdeliver;
+      up_current_regs()[REG_FLAGS] = 0;
 
-          /* Save the return address and interrupt state. These will be
-           * restored by the signal trampoline after the signals have
-           * been delivered.
-           */
+      /* And make sure that the saved context in the TCB is the
+       * same as the interrupt return context.
+       */
 
-          tcb->xcp.saved_pc = *current_pc;
-          tcb->xcp.saved_i  = up_current_regs()[REG_FLAGS];
-
-          /* Then set up to vector to the trampoline with interrupts
-           * disabled
-           */
-
-         *current_pc = (uint32_t)z16_sigdeliver;
-          up_current_regs()[REG_FLAGS] = 0;
-
-          /* And make sure that the saved context in the TCB is the
-           * same as the interrupt return context.
-           */
-
-          z16_copystate(tcb->xcp.regs, up_current_regs());
-        }
+      z16_copystate(tcb->xcp.regs, up_current_regs());
     }
 
   /* Otherwise, we are (1) signaling a task is not running from an
