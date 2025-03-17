@@ -9,3 +9,12 @@ Allwinner A527
 - **Interrupt Controller:** ARM GIC-600 (Generic Interrupt Controller v3)
 - **RAM:** Up to 4GB LPDDR4 SDRAM
 - **I/O:** UART, SPI, I2C, USB 3.0 OTG, SDIO, Dual Gigabit Ethernet
+
+Supported Boards
+================
+
+.. toctree::
+   :glob:
+   :maxdepth: 1
+
+   boards/*/*
