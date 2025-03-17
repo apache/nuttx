@@ -51,6 +51,23 @@
 #include "hal/uart_hal.h"
 #include "periph_ctrl.h"
 #include "soc/gpio_sig_map.h"
+#ifdef CONFIG_ESPRESSIF_LP_UART
+#  include "lp_core_uart.h"
+#  include "soc/uart_pins.h"
+#  include "hal/rtc_io_hal.h"
+#  include "soc/uart_periph.h"
+#endif
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifdef CONFIG_ESPRESSIF_LP_UART
+#  define ESP_LP_UART0_ID     LP_UART_NUM_0
+#  define RTCIO_RCC_ATOMIC()  PERIPH_RCC_ATOMIC()
+#else
+#  define ESP_LP_UART0_ID     UART_NUM_MAX
+#endif /* CONFIG_ESPRESSIF_LP_UART */
 
 /****************************************************************************
  * Private Types
@@ -110,6 +127,7 @@ struct esp_uart_s g_uart0_config =
   .rs485_dir_polarity = true,
 #endif
 #endif
+  .clk_src = UART_SCLK_DEFAULT,
   .hal = &g_uart0_hal,
   .lock = SP_UNLOCKED
 };
@@ -164,12 +182,116 @@ struct esp_uart_s g_uart1_config =
   .rs485_dir_polarity = true,
 #endif
 #endif
+  .clk_src = UART_SCLK_DEFAULT,
   .hal = &g_uart1_hal,
   .lock = SP_UNLOCKED
 };
 
 #endif /* CONFIG_ESPRESSIF_UART1 */
+
+#ifdef CONFIG_ESPRESSIF_LP_UART0
+
+static uart_hal_context_t g_lp_uart0_hal =
+{
+  .dev = (hal_uart_dev_t *)&LP_UART
+};
+
+struct esp_uart_s g_lp_uart0_config =
+{
+  .source = LP_UART_INTR_SOURCE,
+  .cpuint = -ENOMEM,
+  .int_pri = ESP_IRQ_PRIORITY_DEFAULT,
+  .id = ESP_LP_UART0_ID,
+  .irq = ESP_IRQ_LP_UART,
+  .baud = CONFIG_LPUART0_BAUD,
+  .stop_b2 = CONFIG_LPUART0_2STOP,
+  .bits = CONFIG_LPUART0_BITS,
+  .parity = CONFIG_LPUART0_PARITY,
+  .txpin = LP_UART_DEFAULT_TX_GPIO_NUM,
+  .txsig = LP_U0TXD_MUX_FUNC,
+  .rxpin = LP_UART_DEFAULT_RX_GPIO_NUM,
+  .rxsig = LP_U0RXD_MUX_FUNC,
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+  .rtspin = LP_UART_DEFAULT_RTS_GPIO_NUM,
+  .rtssig = LP_U0RTS_MUX_FUNC,
+#ifdef CONFIG_LPUART0_IFLOWCONTROL
+  .iflow  = true,    /* input flow control (RTS) enabled */
+#else
+  .iflow  = false,   /* input flow control (RTS) disabled */
+#endif
+#endif
+#ifdef CONFIG_SERIAL_OFLOWCONTROL
+  .ctspin = LP_UART_DEFAULT_CTS_GPIO_NUM,
+  .ctssig = LP_U0CTS_MUX_FUNC,
+#ifdef CONFIG_LPUART0_OFLOWCONTROL
+  .oflow  = true,    /* output flow control (CTS) enabled */
+#else
+  .oflow  = false,   /* output flow control (CTS) disabled */
+#endif
+#endif
+  .clk_src = LP_UART_SCLK_DEFAULT,
+  .hal = &g_lp_uart0_hal,
+  .lock = SP_UNLOCKED
+};
+
+#endif /* CONFIG_ESPRESSIF_LP_UART0 */
+
 #endif /* HAVE_UART_DEVICE */
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+#ifdef CONFIG_ESPRESSIF_LP_UART
+/****************************************************************************
+ * Name: esp_lowputc_lp_uart_config_io
+ *
+ * Description:
+ *   Configures LP UART pin.
+ *
+ * Parameters:
+ *   priv      - Pointer to the private driver struct.
+ *   pin       - Pin number to configure.
+ *   direction - Pin direction to configure.
+ *   idx       - Pin idx to configure.
+ *
+ * Return Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+static void esp_lowputc_lp_uart_config_io(const struct esp_uart_s *priv,
+                                          int8_t pin,
+                                          rtc_gpio_mode_t direction,
+                                          uint32_t idx)
+{
+  irqstate_t flags = spin_lock_irqsave(&priv->lock);
+  int lp_pin = rtc_io_num_map[pin];
+
+  DEBUGASSERT(lp_pin != -1);
+
+#if SOC_LP_IO_CLOCK_IS_INDEPENDENT
+  RTCIO_RCC_ATOMIC()
+    {
+      rtcio_ll_enable_io_clock(true);
+    }
+
+#endif
+  rtcio_hal_function_select(lp_pin, RTCIO_LL_FUNC_RTC);
+  rtcio_hal_set_direction(pin, direction);
+
+  const uart_periph_sig_t *upin =
+    &uart_periph_signal[LP_UART_NUM_0].pins[idx];
+#if !SOC_LP_GPIO_MATRIX_SUPPORTED
+  rtcio_hal_iomux_func_sel(lp_pin, upin->iomux_func);
+#else
+  /* ToDo: Add LP UART for LP GPIO Matrix supported devices (e.g ESP32-P4) */
+#endif /* SOC_LP_GPIO_MATRIX_SUPPORTED */
+
+  spin_unlock_irqrestore(&priv->lock, flags);
+}
+
+#endif /* CONFIG_ESPRESSIF_LP_UART */
 
 /****************************************************************************
  * Public Functions
@@ -206,7 +328,10 @@ void esp_lowputc_send_byte(const struct esp_uart_s *priv, char byte)
 
 void esp_lowputc_enable_sysclk(const struct esp_uart_s *priv)
 {
-  periph_module_enable(PERIPH_UART0_MODULE + priv->id);
+  if (priv->id < ESP_LP_UART0_ID)
+    {
+      periph_module_enable(PERIPH_UART0_MODULE + priv->id);
+    }
 }
 
 /****************************************************************************
@@ -284,26 +409,28 @@ void esp_lowputc_config_pins(const struct esp_uart_s *priv)
 {
   /* Configure the pins */
 
-  esp_configgpio(priv->rxpin, INPUT | PULLUP);
-  esp_gpio_matrix_in(priv->rxpin, priv->rxsig, 0);
+  if (priv->id < ESP_LP_UART0_ID)
+    {
+      esp_configgpio(priv->rxpin, INPUT | PULLUP);
+      esp_gpio_matrix_in(priv->rxpin, priv->rxsig, 0);
 
-  esp_configgpio(priv->txpin, OUTPUT);
-  esp_gpio_matrix_out(priv->txpin, priv->txsig, 0, 0);
+      esp_configgpio(priv->txpin, OUTPUT);
+      esp_gpio_matrix_out(priv->txpin, priv->txsig, 0, 0);
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-  if (priv->iflow)
-    {
-      esp_configgpio(priv->rtspin, OUTPUT);
-      esp_gpio_matrix_out(priv->rtspin, priv->rtssig, 0, 0);
-    }
+      if (priv->iflow)
+        {
+          esp_configgpio(priv->rtspin, OUTPUT);
+          esp_gpio_matrix_out(priv->rtspin, priv->rtssig, 0, 0);
+        }
 
 #endif
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
-  if (priv->oflow)
-    {
-      esp_configgpio(priv->ctspin, INPUT | PULLUP);
-      esp_gpio_matrix_in(priv->ctspin, priv->ctssig, 0);
-    }
+      if (priv->oflow)
+        {
+          esp_configgpio(priv->ctspin, INPUT | PULLUP);
+          esp_gpio_matrix_in(priv->ctspin, priv->ctssig, 0);
+        }
 #endif
 
 #ifdef HAVE_RS485
@@ -314,6 +441,41 @@ void esp_lowputc_config_pins(const struct esp_uart_s *priv)
       esp_gpiowrite(priv->rs485_dir_gpio, !priv->rs485_dir_polarity);
     }
 #endif
+    }
+#ifdef CONFIG_ESPRESSIF_LP_UART
+  else
+    {
+      esp_lowputc_lp_uart_config_io(priv,
+                                    priv->rxpin,
+                                    RTC_GPIO_MODE_INPUT_ONLY,
+                                    SOC_UART_RX_PIN_IDX);
+
+      esp_lowputc_lp_uart_config_io(priv,
+                                    priv->txpin,
+                                    RTC_GPIO_MODE_OUTPUT_ONLY,
+                                    SOC_UART_TX_PIN_IDX);
+
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+      if (priv->iflow)
+        {
+          esp_lowputc_lp_uart_config_io(priv,
+                                        priv->rtspin,
+                                        RTC_GPIO_MODE_OUTPUT_ONLY,
+                                        SOC_UART_RTS_PIN_IDX);
+        }
+#endif
+
+#ifdef CONFIG_SERIAL_OFLOWCONTROL
+      if (priv->oflow)
+        {
+          esp_lowputc_lp_uart_config_io(priv,
+                                        priv->ctspin,
+                                        RTC_GPIO_MODE_INPUT_ONLY,
+                                        SOC_UART_CTS_PIN_IDX);
+        }
+#endif
+    }
+#endif /* CONFIG_ESPRESSIF_LP_UART */
 }
 
 /****************************************************************************
@@ -357,6 +519,8 @@ void riscv_lowputc(char ch)
   struct esp_uart_s *priv = &g_uart0_config;
 #  elif defined (CONFIG_UART1_SERIAL_CONSOLE)
   struct esp_uart_s *priv = &g_uart1_config;
+#  elif defined (CONFIG_LPUART0_SERIAL_CONSOLE)
+  struct esp_uart_s *priv = &g_lp_uart0_config;
 #  endif
 
   /* Wait until the TX FIFO has space to insert new char */
@@ -391,6 +555,11 @@ void esp_lowsetup(void)
 #ifdef CONFIG_ESPRESSIF_UART1
   esp_lowputc_enable_sysclk(&g_uart1_config);
   esp_lowputc_config_pins(&g_uart1_config);
+#endif
+
+#ifdef CONFIG_ESPRESSIF_LP_UART0
+  esp_lowputc_enable_sysclk(&g_lp_uart0_config);
+  esp_lowputc_config_pins(&g_lp_uart0_config);
 #endif
 
 #endif /* !CONFIG_SUPPRESS_UART_CONFIG */

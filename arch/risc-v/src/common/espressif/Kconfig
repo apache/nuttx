@@ -261,6 +261,10 @@ config ESPRESSIF_UART
 	bool
 	default n
 
+config ESPRESSIF_LP_UART
+	bool
+	default n
+
 config ESPRESSIF_UART0
 	bool "UART0"
 	default y
@@ -273,6 +277,15 @@ config ESPRESSIF_UART1
 	default n
 	select ESPRESSIF_UART
 	select UART1_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config ESPRESSIF_LP_UART0
+	bool "LP UART0"
+	default n
+	depends on ARCH_CHIP_ESP32C6
+	select ESPRESSIF_UART
+	select ESPRESSIF_LP_UART
+	select LPUART0_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
 config ESPRESSIF_TWAI

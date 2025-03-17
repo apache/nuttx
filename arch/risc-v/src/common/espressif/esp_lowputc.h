@@ -80,12 +80,14 @@ struct esp_uart_s
   uint8_t  rs485_dir_gpio;     /* UART RS-485 DIR GPIO pin cfg */
   bool     rs485_dir_polarity; /* UART RS-485 DIR TXEN polarity */
 #endif
+  soc_module_clk_t    clk_src;   /* Clock source */
   uart_hal_context_t *hal;       /* HAL context */
   spinlock_t          lock;      /* Spinlock */
 };
 
 extern struct esp_uart_s g_uart0_config;
 extern struct esp_uart_s g_uart1_config;
+extern struct esp_uart_s g_lp_uart0_config;
 
 /****************************************************************************
  * Public Function Prototypes
