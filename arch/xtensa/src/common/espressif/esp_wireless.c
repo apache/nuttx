@@ -1074,8 +1074,8 @@ int esp_phy_update_country_info(const char *country)
  *
  ****************************************************************************/
 
-int32_t esp_timer_create(const esp_timer_create_args_t *create_args,
-                         esp_timer_handle_t *out_handle)
+int esp_timer_create(const esp_timer_create_args_t *create_args,
+                     esp_timer_handle_t *out_handle)
 {
   int ret;
   struct rt_timer_args_s rt_timer_args;
@@ -1111,7 +1111,7 @@ int32_t esp_timer_create(const esp_timer_create_args_t *create_args,
  *
  ****************************************************************************/
 
-int32_t esp_timer_start_once(esp_timer_handle_t timer, uint64_t timeout_us)
+int esp_timer_start_once(esp_timer_handle_t timer, uint64_t timeout_us)
 {
   struct rt_timer_s *rt_timer = (struct rt_timer_s *)timer;
 
@@ -1135,7 +1135,7 @@ int32_t esp_timer_start_once(esp_timer_handle_t timer, uint64_t timeout_us)
  *
  ****************************************************************************/
 
-int32_t esp_timer_start_periodic(esp_timer_handle_t timer, uint64_t period)
+int esp_timer_start_periodic(esp_timer_handle_t timer, uint64_t period)
 {
   struct rt_timer_s *rt_timer = (struct rt_timer_s *)timer;
 
@@ -1158,7 +1158,7 @@ int32_t esp_timer_start_periodic(esp_timer_handle_t timer, uint64_t period)
  *
  ****************************************************************************/
 
-int32_t esp_timer_stop(esp_timer_handle_t timer)
+int esp_timer_stop(esp_timer_handle_t timer)
 {
   struct rt_timer_s *rt_timer = (struct rt_timer_s *)timer;
 
@@ -1181,7 +1181,7 @@ int32_t esp_timer_stop(esp_timer_handle_t timer)
  *
  ****************************************************************************/
 
-int32_t esp_timer_delete(esp_timer_handle_t timer)
+int esp_timer_delete(esp_timer_handle_t timer)
 {
   struct rt_timer_s *rt_timer = (struct rt_timer_s *)timer;
 
@@ -1499,7 +1499,7 @@ int esp_wireless_deinit(void)
  *
  ****************************************************************************/
 
-int32_t esp_wifi_init(const wifi_init_config_t *config)
+int esp_wifi_init(const wifi_init_config_t *config)
 {
   int32_t ret;
 
@@ -1520,7 +1520,7 @@ int32_t esp_wifi_init(const wifi_init_config_t *config)
   ret = coex_init();
   if (ret)
     {
-      wlerr("ERROR: Failed to initialize coex error=%d\n", ret);
+      wlerr("ERROR: Failed to initialize coex error=%ld\n", ret);
       return ret;
     }
 #endif
@@ -1534,7 +1534,7 @@ int32_t esp_wifi_init(const wifi_init_config_t *config)
   ret = esp_wifi_init_internal(config);
   if (ret)
     {
-      wlerr("Failed to initialize Wi-Fi error=%d\n", ret);
+      wlerr("Failed to initialize Wi-Fi error=%ld\n", ret);
       return ret;
     }
 
@@ -1551,7 +1551,7 @@ int32_t esp_wifi_init(const wifi_init_config_t *config)
   ret = esp_supplicant_init();
   if (ret)
     {
-      wlerr("Failed to initialize WPA supplicant error=%d\n", ret);
+      wlerr("Failed to initialize WPA supplicant error=%ld\n", ret);
       esp_wifi_deinit_internal();
       return ret;
     }
@@ -1573,7 +1573,7 @@ int32_t esp_wifi_init(const wifi_init_config_t *config)
  *
  ****************************************************************************/
 
-int32_t esp_wifi_deinit(void)
+int esp_wifi_deinit(void)
 {
   int ret;
 

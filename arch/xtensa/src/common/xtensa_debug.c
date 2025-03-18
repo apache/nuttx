@@ -462,7 +462,7 @@ uint32_t *xtensa_debug_handler(uint32_t *regs)
     }
   else
     {
-      _alert("Unhandled debug cause 0x%x\n", cause);
+      _alert("Unhandled debug cause 0x%" PRIx32 "\n", cause);
     }
 
   return regs;

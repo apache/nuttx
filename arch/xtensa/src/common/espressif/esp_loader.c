@@ -209,7 +209,8 @@ int map_rom_segments(uint32_t app_drom_start, uint32_t app_drom_vaddr,
           ram_segments++;
         }
 
-      ets_printf("%s: lma 0x%08x vma 0x%08x len 0x%-6x (%u)\n",
+      ets_printf("%s: lma 0x%08x vma 0x%08" PRIx32 " len 0x%-6" PRIx32 ""
+                 " (%" PRIu32 ")\n",
           IS_NONE(segment_hdr.load_addr) ? "???" :
             IS_RTC_FAST_IRAM(segment_hdr.load_addr) ||
             IS_RTC_FAST_DRAM(segment_hdr.load_addr) ||
@@ -266,12 +267,14 @@ int map_rom_segments(uint32_t app_drom_start, uint32_t app_drom_vaddr,
 #if defined (CONFIG_ESP32S2_APP_FORMAT_MCUBOOT) || \
     defined (CONFIG_ESP32S3_APP_FORMAT_MCUBOOT) || \
     defined (CONFIG_ESP32_APP_FORMAT_MCUBOOT)
-  ets_printf("IROM segment aligned lma 0x%08x vma 0x%08x len 0x%06x (%u)\n",
-      app_irom_start_aligned, app_irom_vaddr_aligned,
-      app_irom_size, app_irom_size);
-  ets_printf("DROM segment aligned lma 0x%08x vma 0x%08x len 0x%06x (%u)\n",
-      app_drom_start_aligned, app_drom_vaddr_aligned,
-      app_drom_size, app_drom_size);
+  ets_printf("IROM segment aligned lma 0x%08" PRIx32 " vma 0x%08" PRIx32 ""
+             " len 0x%06" PRIx32 " "\
+             "(%" PRIu32 ")\n", app_irom_start_aligned,
+             app_irom_vaddr_aligned, app_irom_size, app_irom_size);
+  ets_printf("DROM segment aligned lma 0x%08" PRIx32 " vma 0x%08" PRIx32 ""
+             " len 0x%06" PRIx32 " "\
+             "(%" PRIu32 ")\n", app_drom_start_aligned,
+              app_drom_vaddr_aligned, app_drom_size, app_drom_size);
 #endif
 
 #ifdef CONFIG_ARCH_CHIP_ESP32

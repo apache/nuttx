@@ -410,14 +410,14 @@ static int esp32_wdt_getstatus(struct watchdog_lowerhalf_s *lower,
  ****************************************************************************/
 
 static int esp32_wdt_settimeout(struct watchdog_lowerhalf_s *lower,
-                            uint32_t timeout)
+                                uint32_t timeout)
 {
   struct esp32_wdt_lowerhalf_s *priv =
     (struct esp32_wdt_lowerhalf_s *)lower;
   uint16_t rtc_cycles = 0;
   uint32_t rtc_ms_max = 0;
 
-  wdinfo("Entry: timeout=%d\n", timeout);
+  wdinfo("Entry: timeout=%" PRIx32 "\n", timeout);
   DEBUGASSERT(priv);
 
   /* Unlock WDT */
@@ -436,7 +436,7 @@ static int esp32_wdt_settimeout(struct watchdog_lowerhalf_s *lower,
 
       if (timeout == 0 || timeout > MAX_MWDT_TIMEOUT_MS)
         {
-          wderr("ERROR: Cannot represent timeout=%d > %d\n",
+          wderr("ERROR: Cannot represent timeout=%" PRIu32 " > %d\n",
                 timeout, MAX_MWDT_TIMEOUT_MS);
           return -ERANGE;
         }
@@ -458,7 +458,8 @@ static int esp32_wdt_settimeout(struct watchdog_lowerhalf_s *lower,
 
       if (timeout == 0 || timeout > rtc_ms_max)
         {
-          wderr("ERROR: Cannot represent timeout=%d > %d\n",
+          wderr("ERROR: Cannot represent timeout=%" PRIu32 ""
+                " > %" PRIu32 "\n",
                 timeout, rtc_ms_max);
           return -ERANGE;
         }

@@ -53,7 +53,7 @@ typedef enum
  *  - other efuse component errors.
  */
 
-typedef int (*efuse_func_proc_t) (unsigned int num_reg,
+typedef int (*efuse_func_proc_t) (uint32_t num_reg,
                                   int starting_bit_num_in_reg,
                                   int num_bits_used_in_reg,
                                   void *arr, int *bits_counter);
