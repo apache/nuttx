@@ -104,7 +104,11 @@ CMN_ASRCS += riscv_vpu.S
 endif
 
 ifeq ($(CONFIG_ARCH_RV_HAVE_APLIC),y)
-CMN_CSRCS += riscv_aia.c
+CMN_CSRCS += riscv_aplic.c
+endif
+
+ifeq ($(CONFIG_ARCH_RV_HAVE_IMSIC),y)
+CMN_CSRCS += riscv_imsic.c
 endif
 
 ifeq ($(CONFIG_RISCV_SEMIHOSTING_HOSTFS),y)
