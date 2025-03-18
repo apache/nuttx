@@ -235,6 +235,13 @@ static int cfi_mtd_ioctl(FAR struct mtd_dev_s *dev, int cmd,
         }
         break;
 
+      case MTDIOC_ERASESTATE:
+        {
+          FAR uint8_t *result = (FAR uint8_t *)arg;
+          *result = 0xff;
+          break;
+        }
+
       default:
         ret = -ENOTTY;
         break;
