@@ -626,7 +626,7 @@ static int esp32_part_ioctl(struct mtd_dev_s *dev, int cmd,
   int ret = OK;
   struct mtd_dev_priv *mtd_priv = (struct mtd_dev_priv *)dev;
 
-  finfo("INFO: cmd=%d(%x) arg=%lx\n", cmd, cmd, arg);
+  finfo("INFO: cmd=%d(%x) arg=%" PRIx32 "\n", cmd, cmd, arg);
 
   switch (_IOC_NR(cmd))
     {
@@ -771,9 +771,9 @@ static int partition_create_dev(const struct partition_info_priv *info,
   finfo("INFO: [label]:   %s\n", info->label);
   finfo("INFO: [type]:    %d\n", info->type);
   finfo("INFO: [subtype]: %d\n", info->subtype);
-  finfo("INFO: [offset]:  0x%08x\n", info->offset);
-  finfo("INFO: [size]:    0x%08x\n", info->size);
-  finfo("INFO: [flags]:   0x%08x\n", info->flags);
+  finfo("INFO: [offset]:  0x0x08%" PRIx32 "\n", info->offset);
+  finfo("INFO: [size]:    0x0x08%" PRIx32 "\n", info->size);
+  finfo("INFO: [flags]:   0x0x08%" PRIx32 "\n", info->flags);
   finfo("INFO: [mount]:   %s\n", path);
   if (flags & PARTITION_FLAG_ENCRYPTED)
     {

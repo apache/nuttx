@@ -1568,7 +1568,7 @@ psram_enable(int mode, int vaddrmode)   /* psram init */
             }
           else
             {
-              merr("Not a valid or known package id: %d", pkg_ver);
+              merr("Not a valid or known package id: %" PRIu32 "", pkg_ver);
               PANIC();
             }
         }
@@ -1678,7 +1678,7 @@ psram_enable(int mode, int vaddrmode)   /* psram init */
   psram_gpio_config(&psram_io, mode);
   psram_read_id(&s_psram_id);
 
-  minfo("psram ID = 0x%x\n", (uint32_t)s_psram_id);
+  minfo("psram ID = 0x%" PRIx32 "\n", (uint32_t)s_psram_id);
 
   if (!PSRAM_IS_VALID(s_psram_id))
     {

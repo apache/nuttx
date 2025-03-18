@@ -301,7 +301,7 @@ static void twai_printreg(uint32_t addr, uint32_t value)
 
   /* Show the register value read */
 
-  caninfo("%08x->%08x\n", addr, value);
+  caninfo("0x08%" PRIx32 "->0x08%" PRIx32 "\n", addr, value);
 }
 #endif
 
@@ -356,7 +356,7 @@ static void twai_putreg(uint32_t addr, uint32_t value)
 {
   /* Show the register value being written */
 
-  caninfo("%08x<-%08x\n", addr, value);
+  caninfo("0x08%" PRIx32 "<-0x08%" PRIx32 "\n", addr, value);
 
   /* Write the value */
 
@@ -659,7 +659,7 @@ static int esp32twai_ioctl(struct can_dev_s *dev, int cmd,
   struct twai_dev_s *priv = (struct twai_dev_s *)dev->cd_priv;
   int ret = -ENOTTY;
 
-  caninfo("TWAI%" PRIu8 " cmd=%04x arg=%lu\n", priv->port, cmd, arg);
+  caninfo("TWAI%" PRIu8 " cmd=%04x arg=%" PRIu32 "\n", priv->port, cmd, arg);
 
   /* Handle the command */
 

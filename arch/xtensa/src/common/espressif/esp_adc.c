@@ -565,7 +565,7 @@ static int esp_adc_oneshot_new_unit(struct adc_dev_s *dev)
 
   spin_unlock_irqrestore(&g_adc_common.esp_adc_spinlock, flags);
 
-  ainfo("unit %d freq %u\n", priv->unit, clk_src_freq_hz);
+  ainfo("unit %d freq %" PRIu32 "\n", priv->unit, clk_src_freq_hz);
   return OK;
 }
 

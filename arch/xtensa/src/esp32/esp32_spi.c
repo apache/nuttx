@@ -659,7 +659,8 @@ static uint32_t esp32_spi_setfrequency(struct spi_dev_s *dev,
 
   putreg32(reg_val, SPI_CLOCK_REG(priv->config->id));
 
-  spiinfo("frequency=%d, actual=%d\n", priv->frequency, priv->actual);
+  spiinfo("frequency=%" PRIu32 ", actual=%" PRIu32 "\n",
+          priv->frequency, priv->actual);
 
   return priv->actual;
 }
@@ -1113,7 +1114,7 @@ static void esp32_spi_poll_exchange(struct esp32_spi_priv_s *priv,
 
           putreg32(w_wd, data_buf_reg);
 
-          spiinfo("send=0x%" PRIx32 " data_reg=0x%" PRIx32 "\n",
+          spiinfo("send=0x%" PRIx32 " data_reg=0x%" PRIxPTR "\n",
                   w_wd, data_buf_reg);
 
           /* Update data_buf_reg to point to the next data buffer register. */
@@ -1160,7 +1161,7 @@ static void esp32_spi_poll_exchange(struct esp32_spi_priv_s *priv,
             {
               uint32_t r_wd = getreg32(data_buf_reg);
 
-              spiinfo("recv=0x%" PRIx32 " data_reg=0x%" PRIx32 "\n",
+              spiinfo("recv=0x%" PRIx32 " data_reg=0x%" PRIxPTR "\n",
                       r_wd, data_buf_reg);
 
               memcpy(rp, &r_wd, sizeof(uint32_t));

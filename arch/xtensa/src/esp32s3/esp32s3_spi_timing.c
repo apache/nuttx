@@ -1013,11 +1013,11 @@ static void sweep_for_success_sample_points(const uint8_t *reference_data,
       if (memcmp(reference_data, read_data, sizeof(read_data)) == 0)
         {
           out_array[config_idx] = 1;
-          minfo("%d, good\n", config_idx);
+          minfo("%" PRIu32 ", good\n", config_idx);
         }
       else
         {
-          minfo("%d, bad\n", config_idx);
+          minfo("%" PRIu32 ", bad\n", config_idx);
         }
     }
 }
@@ -1156,7 +1156,7 @@ static uint32_t select_best_tuning_config_dtr(tuning_config_s *config,
       /* tuning is FAIL, select default point, and generate a warning */
 
       best_point = config->default_config_id;
-      minfo("tuning fail, best point is fallen back to index %d\n",
+      minfo("tuning fail, best point is fallen back to index %" PRIu32 "\n",
             best_point);
     }
   else if (consecutive_length <= 4)
@@ -1164,14 +1164,14 @@ static uint32_t select_best_tuning_config_dtr(tuning_config_s *config,
       /* consecutive length :  3 or 4 */
 
       best_point = end - 1;
-      minfo("tuning success, best point is index %d\n", best_point);
+      minfo("tuning success, best point is index %" PRIu32 "\n", best_point);
     }
   else
     {
       /* consecutive point list length equals 5 */
 
       best_point = end - 2;
-      minfo("tuning success, best point is index %d\n", best_point);
+      minfo("tuning success, best point is index %" PRIu32 "\n", best_point);
     }
 
   return best_point;
@@ -1216,7 +1216,7 @@ static void select_best_tuning_config(tuning_config_s *config,
                                                  end);
 #endif
       g_flash_timing_tuning_config = config->config_table[best_point];
-      minfo("Flash timing tuning index: %d\n", best_point);
+      minfo("Flash timing tuning index: %" PRIu32 "\n", best_point);
     }
   else
     {
@@ -1228,7 +1228,7 @@ static void select_best_tuning_config(tuning_config_s *config,
                                                  end);
 #endif
       g_psram_timing_tuning_config = config->config_table[best_point];
-      minfo("PSRAM timing tuning index: %d\n", best_point);
+      minfo("PSRAM timing tuning index: %" PRIu32 "\n", best_point);
     }
 }
 
