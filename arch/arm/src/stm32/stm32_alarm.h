@@ -43,6 +43,14 @@
 
 typedef void (*alarmcb_t)(void);
 
+/* Structure used to pass parameters to query an alarm */
+
+struct alm_rdalarm_s
+{
+  int ar_id;                    /* enum alm_id_e */
+  FAR struct rtc_time *ar_time; /* Argument for storing ALARM RTC time */
+};
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -89,6 +97,22 @@ int stm32_rtc_setalarm(const struct timespec *tp, alarmcb_t callback);
  ****************************************************************************/
 
 int stm32_rtc_cancelalarm(void);
+
+/****************************************************************************
+ * Name: stm32_rtc_rdalarm
+ *
+ * Description:
+ *   Query an alarm configured in hardware.
+ *
+ * Input Parameters:
+ *  alminfo - Information about the alarm configuration.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+int stm32_rtc_rdalarm(FAR struct alm_rdalarm_s *alminfo);
 
 #undef EXTERN
 #if defined(__cplusplus)

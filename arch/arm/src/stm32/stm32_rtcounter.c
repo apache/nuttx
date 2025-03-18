@@ -53,7 +53,10 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <assert.h>
 #include <errno.h>
+#include <debug.h>
+#include <time.h>
 
 #include "arm_internal.h"
 #include "stm32_pwr.h"
@@ -793,6 +796,52 @@ int stm32_rtc_cancelalarm(void)
     }
 
   spin_unlock_irqrestore(&g_rtc_lock, flags);
+
+  return ret;
+}
+#endif
+
+/****************************************************************************
+ * Name: stm32_rtc_rdalarm
+ *
+ * Description:
+ *   Query an alarm configured in hardware.
+ *
+ * Input Parameters:
+ *  alminfo - Information about the alarm configuration.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RTC_ALARM
+int stm32_rtc_rdalarm(FAR struct alm_rdalarm_s *alminfo)
+{
+  struct rtc_regvals_s regvals;
+  FAR struct timespec tp;
+  int ret = -EINVAL;
+
+  DEBUGASSERT(alminfo != NULL);
+  DEBUGASSERT(alminfo->ar_id == 0);
+
+  switch (alminfo->ar_id)
+    {
+      case 0:
+        {
+          regvals.cnth = getreg16(STM32_RTC_ALRH);
+          regvals.cntl = getreg16(STM32_RTC_ALRL);
+          tp.tv_sec    = regvals.cnth << 16 | regvals.cntl;
+          memcpy(alminfo->ar_time, (FAR struct tm *)gmtime(&tp.tv_sec),
+                 sizeof(FAR struct tm));
+          ret = OK;
+        }
+        break;
+
+      default:
+        rtcerr("ERROR: Invalid ALARM%d\n", alminfo->ar_id);
+        break;
+    }
 
   return ret;
 }
