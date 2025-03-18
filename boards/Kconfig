@@ -5098,6 +5098,7 @@ config BOARDCTL_ROMDISK
 config BOARDCTL_APP_SYMTAB
 	bool "Enable application symbol table interfaces"
 	default n
+	depends on LIBC_EXECFUNCS
 	---help---
 		Enables support for the BOARDIOC_APP_SYMTAB boardctl() command.
 
