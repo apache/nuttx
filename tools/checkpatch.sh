@@ -21,6 +21,11 @@
 
 TOOLDIR=$(dirname $0)
 
+case "$OSTYPE" in
+  *bsd*) MAKECMD=gmake;;
+  *) MAKECMD=make;;
+esac
+
 check=check_patch
 fail=0
 range=0
@@ -189,7 +194,7 @@ check_commit() {
   check_ranges <<< "$diffs"
 }
 
-make -C $TOOLDIR -f Makefile.host nxstyle 1>/dev/null
+$MAKECMD -C $TOOLDIR -f Makefile.host nxstyle 1>/dev/null
 
 if [ -z "$1" ]; then
   usage
