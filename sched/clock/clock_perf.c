@@ -43,6 +43,7 @@ struct perf_s
   spinlock_t lock;
   unsigned long last;
   unsigned long overflow;
+  clock_t timeout;
 };
 
 /****************************************************************************
@@ -61,10 +62,10 @@ static struct perf_s g_perf;
 
 static void perf_update(wdparm_t arg)
 {
-  clock_t tick = (clock_t)LONG_MAX * TICK_PER_SEC / up_perf_getfreq();
+  FAR struct perf_s *perf = &g_perf;
 
   perf_gettime();
-  wd_start_next((FAR struct wdog_s *)arg, tick, perf_update, arg);
+  wd_start_next((FAR struct wdog_s *)arg, perf->timeout, perf_update, arg);
 }
 
 /****************************************************************************
@@ -78,13 +79,14 @@ static void perf_update(wdparm_t arg)
 void perf_init(void)
 {
   FAR struct perf_s *perf = &g_perf;
-  clock_t tick = (clock_t)LONG_MAX * TICK_PER_SEC / up_perf_getfreq();
 
+  perf->timeout = (((clock_t)1 << (CONFIG_ARCH_PERF_COUNT_BITWIDTH - 1)) - 1)
+                  * TICK_PER_SEC / up_perf_getfreq();
   perf->last = up_perf_gettime();
 
   /* Periodic check for overflow */
 
-  wd_start(&perf->wdog, tick, perf_update, (wdparm_t)perf);
+  wd_start(&perf->wdog, perf->timeout, perf_update, (wdparm_t)perf);
 }
 
 /****************************************************************************
@@ -106,7 +108,8 @@ clock_t perf_gettime(void)
     }
 
   perf->last = now;
-  result = (clock_t)now | (clock_t)perf->overflow << 32;
+  result = (clock_t)now | \
+           (clock_t)perf->overflow << CONFIG_ARCH_PERF_COUNT_BITWIDTH;
   spin_unlock_irqrestore(&perf->lock, flags);
   return result;
 }

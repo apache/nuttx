@@ -614,6 +614,15 @@ config ARCH_PERF_EVENTS
 		Enable hardware performance counter support for perf events. If
 		disabled, perf events will use software events only.
 
+config ARCH_PERF_COUNT_BITWIDTH
+	int "Bit width of the perf count"
+	default 31 if ARCH_TRICORE
+	default 32 if !ARCH_TRICORE
+	depends on PERF_OVERFLOW_CORRECTION
+	---help---
+		Bit width of the perf count. When arch is tricore, the value is 31.
+		When arch is not tricore, the value is 32.
+
 config ARCH_HAVE_BOOTLOADER
 	bool
 	default n
