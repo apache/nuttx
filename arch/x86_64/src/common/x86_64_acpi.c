@@ -835,10 +835,13 @@ void acpi_dump(void)
           break;
         }
 
-      acpi_info("Found LAPIC for CPU %d %p", i, lapic);
-      acpi_info("    ACPI ID %d", lapic->acpi_id);
-      acpi_info("    APIC ID %d", lapic->apic_id);
-      acpi_info("    flags %d", lapic->flags);
+      if (lapic != NULL)
+        {
+          acpi_info("Found LAPIC for CPU %d %p", i, lapic);
+          acpi_info("    ACPI ID %d", lapic->acpi_id);
+          acpi_info("    APIC ID %d", lapic->apic_id);
+          acpi_info("    flags %d", lapic->flags);
+        }
 
       /* IO_APIC */
 
