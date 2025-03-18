@@ -404,7 +404,7 @@ __irq:
 	tjl		tc32_exception
 
 ASMEND:
-	.section	.bss
+	.section	.bss, "aw"
 	.global	g_intstackalloc
 	.global	g_intstacktop
 	.align	4

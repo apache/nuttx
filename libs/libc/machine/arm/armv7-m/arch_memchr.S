@@ -136,7 +136,7 @@
  */
 
 	.text
-	.section .text.memchr
+	.section .text.memchr, "ax"
 	.thumb_func
 	.align 4
 	.p2align 4,,15
