@@ -81,8 +81,27 @@ int rpmsgblk_register(FAR const char *remotecpu, FAR const char *remotepath,
                       FAR const char *localpath);
 #endif
 
+/****************************************************************************
+ * Name: rpmsgblk_unregister
+ *
+ * Description:
+ *   Rpmsg-device client uninitialize function, the client cpu should call
+ *   this function in the board uninitialize process.
+ *
+ * Parameters:
+ *   localpath  - the device path
+ *
+ * Returned Values:
+ *   OK on success; A negated errno value is returned on any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BLK_RPMSG
+int rpmsgblk_unregister(FAR const char *localpath);
+#endif
+
 #if defined(__cplusplus)
 }
 #endif
 
-#endif /* __INCLUDE_NUTTX_DRIVERS_RPMSGDEV_H */
+#endif /* __INCLUDE_NUTTX_DRIVERS_RPMSGBLK_H */

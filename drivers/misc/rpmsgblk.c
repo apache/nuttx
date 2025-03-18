@@ -24,6 +24,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <sys/mount.h>
 #include <sys/types.h>
 
 #include <stdio.h>
@@ -1324,6 +1325,63 @@ fail_with_rpmsg:
                             NULL);
 
 fail:
+  nxsem_destroy(&dev->wait);
+  nxmutex_destroy(&dev->lock);
+  kmm_free(dev);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: rpmsgblk_unregister
+ *
+ * Description:
+ *   Rpmsg-blk client uninitialize function, the client cpu should call
+ *   this function in the board uninitialize process.
+ *
+ * Parameters:
+ *   localpath - the device you want to unregister in the local cpu
+ *
+ * Returned Values:
+ *   OK on success; A negated errno value is returned on any failure.
+ *
+ ****************************************************************************/
+
+int rpmsgblk_unregister(FAR const char *localpath)
+{
+  FAR struct rpmsgblk_s *dev;
+  FAR struct inode *inode;
+  int ret;
+
+  ret = find_blockdriver(localpath, MS_RDONLY, &inode);
+  if (ret < 0)
+    {
+      ferr("ERROR: Failed to find blkdriver, ret=%d\n", ret);
+      return ret;
+    }
+
+  dev = inode->i_private;
+  ret = close_blockdriver(inode);
+  if (ret < 0)
+    {
+      ferr("ERROR: Failed to close blkdriver, ret=%d\n", ret);
+      return ret;
+    }
+
+  ret = unregister_blockdriver(localpath);
+  if (ret < 0)
+    {
+      ferr("ERROR: unregister driver failed, ret=%d\n", ret);
+      return ret;
+    }
+
+  /* Unregister the rpmsg callback */
+
+  rpmsg_unregister_callback(dev,
+                            rpmsgblk_device_created,
+                            rpmsgblk_device_destroy,
+                            NULL,
+                            NULL);
+
   nxsem_destroy(&dev->wait);
   nxmutex_destroy(&dev->lock);
   kmm_free(dev);
