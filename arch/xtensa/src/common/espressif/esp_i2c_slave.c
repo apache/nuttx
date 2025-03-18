@@ -38,6 +38,7 @@
 #include <debug.h>
 #include <time.h>
 #include <sys/time.h>
+#include <sys/param.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
@@ -133,6 +134,7 @@
 #define I2C_SLAVE_TIMEOUT_DEFAULT     32000                /* I2C slave timeout value, APB clock cycle number */
 #define I2C_SLAVE_SDA_SAMPLE_DEFAULT  10                   /* I2C slave sample time after scl positive edge default value */
 #define I2C_SLAVE_SDA_HOLD_DEFAULT    10                   /* I2C slave hold time after scl negative edge default value */
+#define I2C_SLAVE_BUFF_SIZE           1024
 #ifdef CONFIG_I2C_POLLED
 #define I2C_SLAVE_POLL_RATE           10
 #endif
@@ -180,16 +182,16 @@ struct esp_i2c_priv_s
   bool enabled;
 #endif
 
-  uint32_t error;                   /* I2C transform error */
-  i2c_hal_context_t *ctx;           /* Common layer struct */
-  int addr;                         /* Slave device address */
-  int nbits;                        /* Slave device address bit count */
-  i2c_slave_callback_t *cb;         /* Callback function when interrupt happens */
-  void *cb_arg;                     /* Argument of callback function */
-  uint32_t tx_length;               /* Location of next TX value */
-  uint8_t *tx_buffer;               /* I2C Slave TX queue buffer */
-  uint32_t rx_length;               /* Location of next RX value */
-  uint8_t *rx_buffer;               /* I2C Slave RX queue buffer */
+  uint32_t error;                         /* I2C transform error */
+  i2c_hal_context_t *ctx;                 /* Common layer struct */
+  int addr;                               /* Slave device address */
+  int nbits;                              /* Slave device address bit count */
+  i2c_slave_callback_t *cb;               /* Callback function when interrupt happens */
+  void *cb_arg;                           /* Argument of callback function */
+  uint32_t tx_length;                     /* Location of next TX value */
+  uint8_t tx_buffer[I2C_SLAVE_BUFF_SIZE]; /* I2C Slave TX queue buffer */
+  uint32_t rx_length;                     /* Location of next RX value */
+  uint8_t rx_buffer[I2C_SLAVE_BUFF_SIZE]; /* I2C Slave RX queue buffer */
 };
 
 /****************************************************************************
@@ -275,9 +277,15 @@ static struct esp_i2c_priv_s esp_i2c0_priv =
   .cb         = NULL,
   .cb_arg     = NULL,
   .tx_length  = 0,
-  .tx_buffer  = NULL,
+  .tx_buffer  =
+  {
+    0
+  },
   .rx_length  = 0,
-  .rx_buffer  = NULL
+  .rx_buffer  =
+  {
+    0
+  },
 };
 #endif
 
@@ -325,9 +333,15 @@ static struct esp_i2c_priv_s esp_i2c1_priv =
   .cb         = NULL,
   .cb_arg     = NULL,
   .tx_length  = 0,
-  .tx_buffer  = NULL,
+  .tx_buffer  =
+  {
+    0
+  },
   .rx_length  = 0,
-  .rx_buffer  = NULL
+  .rx_buffer  =
+  {
+    0
+  },
 };
 #endif /* CONFIG_ESPRESSIF_I2C1 */
 
@@ -439,10 +453,11 @@ static int esp_i2c_slave_write(struct i2c_slave_s *dev,
 
   /* Update the registered buffer and length */
 
-  priv->tx_buffer = buffer;
-  priv->tx_length = buflen;
+  cnt = MIN(I2C_SLAVE_BUFF_SIZE - priv->tx_length, buflen);
+  memcpy(priv->tx_buffer + priv->tx_length, buffer, cnt);
+  priv->tx_length += cnt;
 
-  if (buflen > 0)
+  if (priv->tx_length > 0)
     {
       i2c_ll_slave_enable_tx_it(priv->ctx->dev);
     }
@@ -482,16 +497,20 @@ static int esp_i2c_slave_read(struct i2c_slave_s *dev,
 {
   struct esp_i2c_priv_s *priv = (struct esp_i2c_priv_s *)dev;
   irqstate_t flags = enter_critical_section();
+  int read_len = ERROR;
 
   /* Update the registered buffer and length */
 
   i2c_ll_slave_enable_rx_it(priv->ctx->dev);
-  priv->rx_buffer  = buffer;
-  priv->rx_length = buflen;
+
+  read_len = MIN(priv->rx_length, buflen);
+  memcpy(buffer, priv->rx_buffer, read_len);
+  memmove(priv->rx_buffer, priv->rx_buffer + read_len, read_len);
+  priv->rx_length -= read_len;
 
   leave_critical_section(flags);
 
-  return OK;
+  return read_len;
 }
 
 /****************************************************************************
@@ -792,8 +811,10 @@ static void esp_i2c_process(struct esp_i2c_priv_s *priv,
       evt_type == I2C_INTR_EVENT_RXFIFO_FULL)
     {
       i2c_ll_get_rxfifo_cnt(priv->ctx->dev, &rx_fifo_cnt);
-      i2c_ll_read_rxfifo(priv->ctx->dev, priv->rx_buffer, rx_fifo_cnt);
-      priv->rx_length -= rx_fifo_cnt;
+      rx_fifo_cnt = MIN(I2C_SLAVE_BUFF_SIZE - priv->rx_length, rx_fifo_cnt);
+      i2c_ll_read_rxfifo(priv->ctx->dev, priv->rx_buffer + priv->rx_length,
+                         rx_fifo_cnt);
+      priv->rx_length += rx_fifo_cnt;
 
       /* Code closed for temporary time due to upper layer function issues */
 
@@ -807,9 +828,12 @@ static void esp_i2c_process(struct esp_i2c_priv_s *priv,
   else if (evt_type == I2C_INTR_EVENT_TXFIFO_EMPTY)
     {
       i2c_ll_get_txfifo_len(priv->ctx->dev, &tx_fifo_rem);
+      tx_fifo_rem = MIN(priv->tx_length, tx_fifo_rem);
       if (tx_fifo_rem != 0)
         {
           i2c_ll_write_txfifo(priv->ctx->dev, priv->tx_buffer, tx_fifo_rem);
+          memmove(priv->tx_buffer, priv->tx_buffer + tx_fifo_rem,
+                  tx_fifo_rem);
         }
       else
         {
