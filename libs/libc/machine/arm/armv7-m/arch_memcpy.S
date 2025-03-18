@@ -94,7 +94,7 @@
 
 	.syntax unified
 	.text
-	.section .text.memcpy
+	.section .text.memcpy, "ax"
 	.align	2
 	.global	ARCH_LIBCFUN(memcpy)
 	.thumb
