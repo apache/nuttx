@@ -1693,7 +1693,7 @@ static uint32_t i2s_set_clock(struct esp32s2_i2s_s *priv)
 
   mclk_div = sclk / mclk;
 
-  i2sinfo("Clock division info: [sclk]%" PRIu32 " Hz [mdiv] %d "
+  i2sinfo("Clock division info: [sclk]%" PRIu32 " Hz [mdiv] %" PRIu32
           "[mclk] %" PRIu32 " Hz [bdiv] %d [bclk] %" PRIu32 " Hz\n",
           sclk, mclk_div, mclk, bclk_div, bclk);
 

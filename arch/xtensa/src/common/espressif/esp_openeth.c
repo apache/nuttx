@@ -250,7 +250,7 @@ static IRAM_ATTR int openeth_isr_handler(int irq, void *context, void *arg)
 
   if (status & OPENETH_INT_BUSY)
     {
-      ninfo("RX frame dropped (0x%x)", status);
+      ninfo("RX frame dropped (0x%" PRIx32 ")", status);
     }
 
   /* Clear interrupt */

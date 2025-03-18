@@ -173,7 +173,7 @@ static int esp32_max_lh_delay(struct oneshot_lowerhalf_s *lower,
   ts->tv_nsec = NSEC_PER_SEC - 1;
 
   tmrinfo("max sec=%" PRIu32 "\n", ts->tv_sec);
-  tmrinfo("max nsec=%ld\n", ts->tv_nsec);
+  tmrinfo("max nsec=%" PRId32 "\n", ts->tv_nsec);
 
   return OK;
 }

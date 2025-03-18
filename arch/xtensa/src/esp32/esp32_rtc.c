@@ -700,7 +700,7 @@ static void esp32_select_rtc_slow_clk(enum esp32_slow_clk_sel_e slow_clk)
         }
     }
   while (cal_val == 0);
-  rtcinfo("RTC_SLOW_CLK calibration value: %d\n", cal_val);
+  rtcinfo("RTC_SLOW_CLK calibration value: %" PRIu32 "\n", cal_val);
   putreg32((uint32_t)cal_val, RTC_SLOW_CLK_CAL_REG);
 }
 
