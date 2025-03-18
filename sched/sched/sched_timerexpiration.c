@@ -348,8 +348,9 @@ static clock_t nxsched_process_scheduler(clock_t ticks, clock_t elapsed,
 static clock_t nxsched_timer_process(clock_t ticks, clock_t elapsed,
                                      bool noswitches)
 {
-  clock_t rettime = 0;
-  clock_t tmp;
+  clock_t sched_next_time;
+  clock_t wdog_next_time;
+  clock_t next_time;
 
 #ifdef CONFIG_CLOCK_TIMEKEEPING
   /* Process wall time */
@@ -361,21 +362,21 @@ static clock_t nxsched_timer_process(clock_t ticks, clock_t elapsed,
    * active task.
    */
 
-  tmp = nxsched_process_scheduler(ticks, elapsed, noswitches);
-  if (tmp > 0)
-    {
-      rettime = tmp;
-    }
+  sched_next_time = nxsched_process_scheduler(ticks, elapsed, noswitches);
 
   /* Process watchdogs */
 
-  tmp = wd_timer(ticks, noswitches);
-  if (tmp > 0 && (rettime == 0 || tmp < rettime))
-    {
-      rettime = tmp;
-    }
+  wdog_next_time = wd_timer(ticks, noswitches);
 
-  return rettime;
+  /* If sched_next_time or wdog_next_time is 0,
+   * then subtracting 1 overflows to the maximum value,
+   * which is never selected.
+   */
+
+  next_time  = MIN(sched_next_time - 1, wdog_next_time - 1);
+  next_time += 1;
+
+  return next_time;
 }
 
 /****************************************************************************
