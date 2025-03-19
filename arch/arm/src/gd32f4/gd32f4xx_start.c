@@ -33,6 +33,7 @@
 #include <nuttx/init.h>
 
 #include "arm_internal.h"
+#include "itm_syslog.h"
 #include "nvic.h"
 #include "mpu.h"
 
