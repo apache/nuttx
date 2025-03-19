@@ -53,83 +53,129 @@
  * RF common IOCTL commands
  ****************************************************************************/
 
-#define WLIOC_SETRADIOFREQ  _WLCIOC(0x0001)  /* arg: Pointer to uint32_t, */
-                                             /* frequency value (in Hz) */
-#define WLIOC_GETRADIOFREQ  _WLCIOC(0x0002)  /* arg: Pointer to uint32_t, */
-                                             /* frequency value (in Hz) */
+/* Offsets */
 
-#define WLIOC_SETADDR       _WLCIOC(0x0003)  /* arg: Pointer to address value, format
-                                              * of the address is driver specific */
-#define WLIOC_GETADDR       _WLCIOC(0x0004)  /* arg: Pointer to address value, format
-                                              * of the address is driver specific */
+#define _WLIOC_COM_OFFS 1
+#define _WLIOC_COM(x)   _WLCIOC(_WLIOC_COM_OFFS+x)
 
-#define WLIOC_SETTXPOWER    _WLCIOC(0x0005)  /* arg: Pointer to int32_t, */
-                                             /* output power (in 0.01 dBm) */
-#define WLIOC_GETTXPOWER    _WLCIOC(0x0006)  /* arg: Pointer to int32_t, */
-                                             /* output power (in 0.01 dBm) */
+#define WLIOC_SETRADIOFREQ  _WLIOC_COM(0)  /* arg: Pointer to uint32_t, */
+                                           /* frequency value (in Hz) */
+#define WLIOC_GETRADIOFREQ  _WLIOC_COM(1)  /* arg: Pointer to uint32_t, */
+                                           /* frequency value (in Hz) */
 
-#define WLIOC_SETMOD        _WLCIOC(0x0007)     /* arg: Pointer to enum wlioc_modulation_e.
-                                              * This sets the modulation technology. */
-#define WLIOC_GETMOD        _WLCIOC(0x0008)     /* arg: Pointer to enum wlioc_modulation_e.
-                                              * Get current modulation technology. */
+#define WLIOC_SETADDR       _WLIOC_COM(2)  /* arg: Pointer to address value, format
+                                            * of the address is driver specific */
+#define WLIOC_GETADDR       _WLIOC_COM(3)  /* arg: Pointer to address value, format
+                                            * of the address is driver specific */
 
+#define WLIOC_SETTXPOWER    _WLIOC_COM(4)  /* arg: Pointer to int32_t, */
+                                           /* Set output power in dBm */
+#define WLIOC_GETTXPOWER    _WLIOC_COM(5)  /* arg: Pointer to int32_t, */
+                                           /* Get output power in dBm */
+
+#define WLIOC_SETFINEPOWER  _WLIOC_COM(6)  /* arg: Pointer to int32_t,
+                                            * Set power in steps of 0.01 dBm */
+#define WLIOC_GETFINEPOWER  _WLIOC_COM(7)  /* arg: Pointer to int32_t,
+                                            * Get power in steps of 0.01 dBm */
+
+#define WLIOC_SETMOD        _WLIOC_COM(8)  /* arg: Pointer to enum wlioc_modulation_e.
+                                            * This sets the modulation technology. */
+#define WLIOC_GETMOD        _WLIOC_COM(9)  /* arg: Pointer to enum wlioc_modulation_e.
+                                            * Get current modulation technology. */
+
+/* Number of commands */
+
+#define _WLIOC_COM_COMMANDS 10 /* ! Must be corrected after changes to commands.
+                                * ! Equal to the amount of commands above. */
 
 /****************************************************************************
  * LoRa common IOCTL commands (EXPERIMENTAL)
  ****************************************************************************/
 
-#define WLIOC_LORA_SETSF        _WLCIOC(0x0009) /* arg: Pointer to uint8_t */
-                                                /* Spreading factor */
-#define WLIOC_LORA_GETSF        _WLCIOC(0x000a) /* arg: Pointer to uint8_t */
-                                                /* Spreading factor */
+/* Offsets */
 
-#define WLIOC_LORA_SETBW        _WLCIOC(0x000b) /* arg: Pointer to uint32_t */
-                                                /* Bandwidth Hz */
-#define WLIOC_LORA_GETBW        _WLCIOC(0x000c) /* arg: Pointer to uint32_t */
-                                                /* Bandwidth Hz */
+#define _WLIOC_LORA_OFFS _WLIOC_COM_OFFS+_WLIOC_COM_COMMANDS
+#define _WLIOC_LORA(x)   _WLCIOC(_WLIOC_LORA_OFFS+x)
 
-#define WLIOC_LORA_SETCR        _WLCIOC(0x000d) /* arg: Pointer to wlioc_lora_cr_e */
-                                                /* Coding rate */
-#define WLIOC_LORA_GETCR        _WLCIOC(0x000e) /* arg: Pointer to wlioc_lora_cr_e */
-                                                /* Coding rate */
+/* Commands */
 
-#define WLIOC_LORA_SETCRC       _WLCIOC(0x000f) /* arg: Pointer to uint8_t */ 
-                                                /* Enable/disable CRC */
-#define WLIOC_LORA_GETCRC       _WLCIOC(0x0010) /* arg: Pointer to uint8_t */ 
-                                                /* Enabled/disabled CRC */
+#define WLIOC_LORA_SETSF        _WLIOC_LORA(0) /* arg: Pointer to uint8_t */
+                                               /* Spreading factor */
+#define WLIOC_LORA_GETSF        _WLIOC_LORA(1) /* arg: Pointer to uint8_t */
+                                               /* Spreading factor */
 
-#define WLIOC_LORA_SETFIXEDHDR  _WLCIOC(0x0011) /* arg: Pointer to uint8_t */
-                                                /* Enable/disable length byte */
-#define WLIOC_LORA_GETFIXEDHDR  _WLCIOC(0x0012) /* arg: Pointer to uint8_t */
-                                                /* Enabled/disabled length byte */
+#define WLIOC_LORA_SETBW        _WLIOC_LORA(2) /* arg: Pointer to uint32_t */
+                                               /* Bandwidth Hz */
+#define WLIOC_LORA_GETBW        _WLIOC_LORA(3) /* arg: Pointer to uint32_t */
+                                               /* Bandwidth Hz */
 
-#define WLIOC_LORA_SETSYNCWORD  _WLCIOC(0x0013) /* arg: Pointer to wlioc_lora_syncword_s */
+#define WLIOC_LORA_SETCR        _WLIOC_LORA(4) /* arg: Pointer to wlioc_lora_cr_e */
+                                               /* Coding rate */
+#define WLIOC_LORA_GETCR        _WLIOC_LORA(5) /* arg: Pointer to wlioc_lora_cr_e */
+                                               /* Coding rate */
+
+#define WLIOC_LORA_SETCRC       _WLIOC_LORA(6) /* arg: Pointer to uint8_t */ 
+                                               /* Enable/disable CRC */
+#define WLIOC_LORA_GETCRC       _WLIOC_LORA(7) /* arg: Pointer to uint8_t */ 
+                                               /* Enabled/disabled CRC */
+
+#define WLIOC_LORA_SETFIXEDHDR  _WLIOC_LORA(8) /* arg: Pointer to uint8_t */
+                                               /* Enable/disable length byte */
+#define WLIOC_LORA_GETFIXEDHDR  _WLIOC_LORA(9) /* arg: Pointer to uint8_t */
+                                               /* Enabled/disabled length byte */
+
+#define WLIOC_LORA_SETSYNCWORD  _WLIOC_LORA(10) /* arg: Pointer to wlioc_lora_syncword_s */
                                                 /* Sets custom length syncword */
-#define WLIOC_LORA_GETSYNCWORD  _WLCIOC(0x0014) /* arg: Pointer to wlioc_lora_syncword_s */
+#define WLIOC_LORA_GETSYNCWORD  _WLIOC_LORA(11) /* arg: Pointer to wlioc_lora_syncword_s */
                                                 /* Gets custom length syncword */
+
+/* Number of commands */
+
+#define _WLIOC_LORA_COMMANDS 12 /* ! Must be corrected after changes to commands.
+                                 * ! Equal to the amount of commands above. */
 
 /****************************************************************************
  * FSK common IOCTL commands (Including GFSK and similar) (EXPERIMENTAL)
  ****************************************************************************/
 
-#define WLIOC_FSK_SETBITRATE    _WLCIOC(0x0015) /* arg: uint32_t ptr */
-                                                /* In bits per second */
-#define WLIOC_FSK_GETBITRATE    _WLCIOC(0x0016) /* arg: uint32_t ptr */
-                                                /* In bits per second */
+/* Offsets. Must follow WLIOC_LORA */
 
-#define WLIOC_FSK_SETFDEV       _WLCIOC(0x0017) /* arg: uint32_t ptr */
-                                                /* Frequency deviation Hz */
-#define WLIOC_FSK_GETFDEV       _WLCIOC(0x0018) /* arg: uint32_t ptr */
-                                                /* Frequency deviation Hz */
+#define _WLIOC_FSK_OFFS _WLIOC_LORA_OFFS+_WLIOC_LORA_COMMANDS
+#define _WLIOC_FSK(x)   _WLCIOC(_WLIOC_FSK_OFFS+x)
+
+#define WLIOC_FSK_SETBITRATE    _WLIOC_FSK(0) /* arg: uint32_t ptr */
+                                              /* In bits per second */
+#define WLIOC_FSK_GETBITRATE    _WLIOC_FSK(1) /* arg: uint32_t ptr */
+                                              /* In bits per second */
+
+#define WLIOC_FSK_SETFDEV       _WLIOC_FSK(2) /* arg: uint32_t ptr */
+                                              /* Frequency deviation Hz */
+#define WLIOC_FSK_GETFDEV       _WLIOC_FSK(3) /* arg: uint32_t ptr */
+                                              /* Frequency deviation Hz */
+
+/* Number of commands */
+
+#define _WLIOC_FSK_COMMANDS 4   /* ! Must be corrected after changes to commands.
+                                 * ! Equal to the amount of commands above. */
 
 /****************************************************************************
- * OOK/ASK common IOCTL commands (EXPERIMENTAL)
+ * OOK (Also called "binary" ASK) common IOCTL commands (EXPERIMENTAL)
  ****************************************************************************/
 
-#define WLIOC_OOK_SETBITRATE    _WLCIOC(0x0019) /* arg: uint32_t ptr */
-                                                /* In bits per second */
-#define WLIOC_OOK_GETBITRATE    _WLCIOC(0x001a) /* arg: uint32_t ptr */
-                                                /* In bits per second */
+/* Offsets. Must follow WLIOC_FSK */
+
+#define _WLIOC_OOK_OFFS _WLIOC_FSK_OFFS+_WLIOC_FSK_COMMANDS
+#define _WLIOC_OOK(x)   _WLCIOC(_WLIOC_OOK_OFFS+x)
+
+#define WLIOC_OOK_SETBITRATE    _WLIOC_OOK(0) /* arg: uint32_t ptr */
+                                              /* In bits per second */
+#define WLIOC_OOK_GETBITRATE    _WLIOC_OOK(1) /* arg: uint32_t ptr */
+                                              /* In bits per second */
+
+/* Number of commands */
+
+#define _WLIOC_OOK_COMMANDS 2   /* ! Must be corrected after changes to commands.
+                                 * ! Equal to the amount of commands above. */
 
 /****************************************************************************
  * Device-specific IOCTL commands
@@ -140,47 +186,69 @@
  * LoRa API. These commands are currently only used by the RN2XX3 driver.
  */
 
-#define WLIOC_SETBANDWIDTH  _WLCIOC(0x001b)  /* arg: Pointer to uint32_t, */
+/* Offsets. Must follow WLIOC_OOK */
+
+#define _WLIOC_RN2XX3_OFFS _WLIOC_OOK_OFFS+_WLIOC_OOK_COMMANDS
+#define _WLIOC_RN2XX3(x)   _WLCIOC(_WLIOC_RN2XX3_OFFS+x)
+
+#define WLIOC_SETBANDWIDTH  _WLIOC_RN2XX3(0) /* arg: Pointer to uint32_t, */
                                              /* bandwidth in Hz */
-#define WLIOC_GETBANDWIDTH  _WLCIOC(0x001c)  /* arg: Pointer to uint32_t, */
+#define WLIOC_GETBANDWIDTH  _WLIOC_RN2XX3(1) /* arg: Pointer to uint32_t, */
                                              /* bandwidth in Hz */
-#define WLIOC_SETSPREAD     _WLCIOC(0x001d)  /* arg: Pointer to uint8_t, */
+
+#define WLIOC_SETSPREAD     _WLIOC_RN2XX3(2) /* arg: Pointer to uint8_t, */
                                              /* spread factor */
-#define WLIOC_GETSPREAD     _WLCIOC(0x001e)  /* arg: Pointer to uint8_t, */
+#define WLIOC_GETSPREAD     _WLIOC_RN2XX3(3) /* arg: Pointer to uint8_t, */
                                              /* spread factor */
-#define WLIOC_GETSNR        _WLCIOC(0x001f)  /* arg: Pointer to int8_t, */
+
+#define WLIOC_GETSNR        _WLIOC_RN2XX3(4) /* arg: Pointer to int8_t, */
                                              /* signal to noise ratio */
-#define WLIOC_SETPRLEN      _WLCIOC(0x0020)  /* arg: uint16_t, */
+
+#define WLIOC_SETPRLEN      _WLIOC_RN2XX3(5) /* arg: uint16_t, */
                                              /* preamble length */
-#define WLIOC_GETPRLEN      _WLCIOC(0x0021)  /* arg: Pointer to uint16_t, */
+#define WLIOC_GETPRLEN      _WLIOC_RN2XX3(6) /* arg: Pointer to uint16_t, */
                                              /* preamble length */
-#define WLIOC_SETMOD        _WLCIOC(0x0022)  /* arg: enum, */
+
+#define WLIOC_SETMOD        _WLIOC_RN2XX3(7) /* arg: enum, */
                                              /* modulation type */
-#define WLIOC_GETMOD        _WLCIOC(0x0023)  /* arg: enum pointer, */
+#define WLIOC_GETMOD        _WLIOC_RN2XX3(8) /* arg: enum pointer, */
                                              /* modulation type */
-#define WLIOC_RESET         _WLCIOC(0x0024)  /* arg: none */
-#define WLIOC_SETSYNC       _WLCIOC(0x0025)  /* arg: uint64_t pointer */
-                                             /* sync word */
-#define WLIOC_GETSYNC       _WLCIOC(0x0026)  /* arg: uint64_t pointer, */
-                                             /* sync word */
-#define WLIOC_SETBITRATE    _WLCIOC(0x0027)  /* arg: uint32_t */
-                                             /* sync word */
-#define WLIOC_GETBITRATE    _WLCIOC(0x0028)  /* arg: uint32_t pointer, */
-                                             /* sync word */
-#define WLIOC_IQIEN         _WLCIOC(0x0029)  /* arg: bool, enable invert IQ */
-#define WLIOC_CRCEN         _WLCIOC(0x002a)  /* arg: bool, enable CRC */
-#define WLIOC_SETCODERATE   _WLCIOC(0x002b)  /* arg: enum, coding rate */
-#define WLIOC_GETCODERATE   _WLCIOC(0x002c)  /* arg: enum pointer, */
-                                             /* coding rate */
-#define WLIOC_SETTXPOWERF   _WLCIOC(0x002d)  /* arg: Pointer to float, */
-                                             /* output power (in dBm) */
-#define WLIOC_GETTXPOWERF   _WLCIOC(0x002e)  /* arg: Pointer to float, */
-                                             /* output power (in dBm) */
+
+#define WLIOC_RESET         _WLIOC_RN2XX3(9) /* arg: none */
+
+#define WLIOC_SETSYNC       _WLIOC_RN2XX3(10) /* arg: uint64_t pointer */
+                                              /* sync word */
+#define WLIOC_GETSYNC       _WLIOC_RN2XX3(11) /* arg: uint64_t pointer, */
+                                              /* sync word */
+
+#define WLIOC_SETBITRATE    _WLIOC_RN2XX3(12) /* arg: uint32_t */
+                                              /* sync word */
+#define WLIOC_GETBITRATE    _WLIOC_RN2XX3(13) /* arg: uint32_t pointer, */
+                                              /* sync word */
+
+#define WLIOC_IQIEN         _WLIOC_RN2XX3(14) /* arg: bool, enable invert IQ */
+#define WLIOC_CRCEN         _WLIOC_RN2XX3(15) /* arg: bool, enable CRC */
+
+#define WLIOC_SETCODERATE   _WLIOC_RN2XX3(16) /* arg: enum, coding rate */
+#define WLIOC_GETCODERATE   _WLIOC_RN2XX3(17) /* arg: enum pointer, */
+                                              /* coding rate */
+
+#define WLIOC_SETTXPOWERF   _WLIOC_RN2XX3(18) /* arg: Pointer to float, */
+                                              /* output power (in dBm) */
+#define WLIOC_GETTXPOWERF   _WLIOC_RN2XX3(19) /* arg: Pointer to float, */
+                                              /* output power (in dBm) */
+
+/* Number of commands */
+
+#define _WLIOC_RN2XX3_COMMANDS 20 /* ! Must be corrected after changes to commands.
+                                   * ! Equal to the amount of commands above. */
 
 /* End of warning */
 
-#define WL_FIRST            0x0001          /* First common command */
-#define WL_NCMDS            0x002e          /* Number of common commands */
+/* Offsets */
+
+#define WL_FIRST            0x0001 /* First common command */
+#define WL_NCMDS            _WLIOC_RN2XX3_OFFS+_WLIOC_RN2XX3_COMMANDS
 
 /* User defined ioctl commands are also supported. These will be forwarded
  * by the upper-half driver to the lower-half driver via the ioctl()
