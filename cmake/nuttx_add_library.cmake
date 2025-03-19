@@ -258,12 +258,10 @@ function(nuttx_add_extra_library)
         set_property(GLOBAL APPEND PROPERTY NUTTX_USER_EXTRA_LIBRARIES
                                             ${extra_target})
       endif()
-      if(CONFIG_BUILD_KERNEL)
-        set_property(
-          TARGET nuttx_global
-          APPEND
-          PROPERTY NUTTX_ELF_LINK_LIBRARIES $<TARGET_FILE:${extra_target}>)
-      endif()
+      set_property(
+        TARGET nuttx_global
+        APPEND
+        PROPERTY NUTTX_ELF_LINK_EXTRA_LIBRARIES $<TARGET_FILE:${extra_target}>)
     endif()
   endforeach()
 endfunction()

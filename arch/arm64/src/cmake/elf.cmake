@@ -1,7 +1,5 @@
 # ##############################################################################
-# libs/libc/elf/CMakeLists.txt
-#
-# SPDX-License-Identifier: Apache-2.0
+# arch/arm/src/cmake/elf.cmake
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
@@ -20,42 +18,10 @@
 #
 # ##############################################################################
 
-if(CONFIG_LIBC_ELF)
+# Loadable and ELF module settings
 
-  list(
-    APPEND
-    SRCS
-    elf_addrenv.c
-    elf_bind.c
-    elf_depend.c
-    elf_init.c
-    elf_iobuffer.c
-    elf_load.c
-    elf_loadhdrs.c
-    elf_verify.c
-    elf_read.c
-    elf_registry.c
-    elf_sections.c
-    elf_symbols.c
-    elf_symtab.c
-    elf_uninit.c
-    elf_unload.c
-    elf_gethandle.c
-    elf_getsymbol.c
-    elf_insert.c
-    elf_remove.c)
+nuttx_elf_compile_options(-fvisibility=hidden)
 
-  list(APPEND SRCS elf_globals.S)
+nuttx_elf_link_options_ifdef(CONFIG_BINFMT_ELF_RELOCATABLE -r)
 
-  target_sources(c PRIVATE ${SRCS})
-
-  set(ELF_LD_SCRIPT_TMP "${CMAKE_BINARY_DIR}/gnu-elf.ld")
-
-  nuttx_generate_preprocess_target(
-    SOURCE_FILE ${NUTTX_DIR}/libs/libc/elf/gnu-elf.ld.in TARGET_FILE
-    ${ELF_LD_SCRIPT_TMP})
-
-  add_custom_target(elfldscript_tmp DEPENDS ${ELF_LD_SCRIPT_TMP})
-  add_dependencies(nuttx elfldscript_tmp)
-  add_dependencies(apps_post elfldscript_tmp)
-endif()
+nuttx_elf_link_options_ifdef(CONFIG_BUILD_KERNEL -Bstatic)
