@@ -79,6 +79,7 @@ void __start(void) noinstrument_function;
  *
  ****************************************************************************/
 
+osentry_function
 void __start(void)
 {
   const uint32_t *src;

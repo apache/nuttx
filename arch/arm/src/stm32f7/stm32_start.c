@@ -170,6 +170,7 @@ static inline void stm32_tcmenable(void)
  *
  ****************************************************************************/
 
+osentry_function
 void __start(void)
 {
   const uint32_t *src;

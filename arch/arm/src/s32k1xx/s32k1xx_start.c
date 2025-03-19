@@ -184,6 +184,7 @@ static inline void s32k1xx_mpu_config(void)
  *
  ****************************************************************************/
 
+osentry_function
 void __start(void)
 {
 #ifdef CONFIG_BOOT_RUNFROMFLASH

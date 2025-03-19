@@ -165,6 +165,7 @@ static inline void xmc4_flash_waitstates(void)
  *
  ****************************************************************************/
 
+osentry_function
 void __start(void)
 {
   const uint32_t *src;
