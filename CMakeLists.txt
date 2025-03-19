@@ -463,6 +463,11 @@ if(EXISTS ${NUTTX_BOARD_ABS_DIR}/cmake
   include(${NUTTX_BOARD_ABS_DIR}/cmake/Toolchain.cmake)
 endif()
 
+# Support loadable and kernel options by specific arch
+if(EXISTS ${CMAKE_SOURCE_DIR}/arch/${CONFIG_ARCH}/src/cmake/elf.cmake)
+  include(${CMAKE_SOURCE_DIR}/arch/${CONFIG_ARCH}/src/cmake/elf.cmake)
+endif()
+
 include(platform)
 
 if(CONFIG_ARCH_TOOLCHAIN_TASKING)
