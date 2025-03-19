@@ -37,6 +37,7 @@
 
 #include "chip.h"
 #include "arm_internal.h"
+#include "itm_syslog.h"
 #include "init/init.h"
 
 #include "cxd32_uart.h"
