@@ -405,6 +405,7 @@ struct mpfs_dev_s g_emmcsd_dev =
   },
   .hw_base           = MPFS_EMMC_SD_BASE,
   .plic_irq          = MPFS_IRQ_MMC_MAIN,
+  .lock              = SP_UNLOCKED,
 #ifdef CONFIG_MPFS_EMMCSD_MUX_EMMC
   .emmc              = true,
 #else
@@ -616,13 +617,13 @@ static void mpfs_configwaitints(struct mpfs_dev_s *priv, uint32_t waitmask,
    * operation.
    */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
 
   priv->waitevents = waitevents;
   priv->wkupevent  = wkupevent;
   priv->waitmask   = waitmask;
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************
@@ -644,14 +645,12 @@ static void mpfs_configxfrints(struct mpfs_dev_s *priv, uint32_t xfrmask)
 {
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
   priv->xfrmask = xfrmask;
-
-  mcinfo("Mask: %08" PRIx32 "\n", priv->xfrmask | priv->waitmask);
 
   putreg32(priv->xfrmask | priv->waitmask, MPFS_EMMCSD_SRS14);
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************
@@ -1408,7 +1407,6 @@ static void mpfs_emmc_card_init(struct mpfs_dev_s *priv)
 static bool mpfs_device_reset(struct sdio_dev_s *dev)
 {
   struct mpfs_dev_s *priv = (struct mpfs_dev_s *)dev;
-  irqstate_t flags;
   uint32_t regval;
   uint32_t cap;
 #ifdef CONFIG_MPFS_EMMCSD_CD
@@ -1416,8 +1414,6 @@ static bool mpfs_device_reset(struct sdio_dev_s *dev)
 #endif
   bool retval = true;
   int status = MPFS_EMMCSD_INITIALIZED;
-
-  flags = enter_critical_section();
 
   up_disable_irq(priv->plic_irq);
 
@@ -1646,8 +1642,6 @@ static bool mpfs_device_reset(struct sdio_dev_s *dev)
   priv->widebus    = false;
 
   mpfs_reset_lines(priv);
-
-  leave_critical_section(flags);
 
   return retval;
 }
@@ -2773,7 +2767,6 @@ static sdio_eventset_t mpfs_eventwait(struct sdio_dev_s *dev)
 {
   struct mpfs_dev_s *priv = (struct mpfs_dev_s *)dev;
   sdio_eventset_t wkupevent = 0;
-  irqstate_t flags;
   int ret;
 
   mcinfo("wait\n");
@@ -2782,8 +2775,6 @@ static sdio_eventset_t mpfs_eventwait(struct sdio_dev_s *dev)
    * we get here.  In this case waitevents will be zero, but wkupevents will
    * be non-zero (and, hopefully, the semaphore count will also be non-zero.
    */
-
-  flags = enter_critical_section();
 
   DEBUGASSERT(priv->waitevents != 0 || priv->wkupevent != 0);
 
@@ -2832,7 +2823,6 @@ static sdio_eventset_t mpfs_eventwait(struct sdio_dev_s *dev)
 errout_with_waitints:
   mpfs_configwaitints(priv, 0, 0, 0);
 
-  leave_critical_section(flags);
   return wkupevent;
 }
 
@@ -3053,7 +3043,7 @@ void mpfs_emmcsd_sdio_mediachange(struct sdio_dev_s *dev, bool cardinslot)
 
   /* Update card status */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
   cdstatus = priv->cdstatus;
   if (cardinslot)
     {
@@ -3064,7 +3054,7 @@ void mpfs_emmcsd_sdio_mediachange(struct sdio_dev_s *dev, bool cardinslot)
       priv->cdstatus &= ~SDIO_STATUS_PRESENT;
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 
   mcinfo("cdstatus OLD: %02" PRIx8 " NEW: %02" PRIx8 "\n",
          cdstatus, priv->cdstatus);
@@ -3100,7 +3090,7 @@ void mpfs_emmcsd_sdio_wrprotect(struct sdio_dev_s *dev, bool wrprotect)
 
   /* Update card status */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
   if (wrprotect)
     {
       priv->cdstatus |= SDIO_STATUS_WRPROTECTED;
@@ -3110,7 +3100,5 @@ void mpfs_emmcsd_sdio_wrprotect(struct sdio_dev_s *dev, bool wrprotect)
       priv->cdstatus &= ~SDIO_STATUS_WRPROTECTED;
     }
 
-  mcinfo("cdstatus: %02" PRIx8 "\n", priv->cdstatus);
-
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
