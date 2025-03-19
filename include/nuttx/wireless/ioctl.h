@@ -58,6 +58,8 @@
 #define _WLIOC_COM_OFFS 1
 #define _WLIOC_COM(x)   _WLCIOC(_WLIOC_COM_OFFS+x)
 
+/* Commands */
+
 #define WLIOC_SETRADIOFREQ  _WLIOC_COM(0)  /* arg: Pointer to uint32_t, */
                                            /* frequency value (in Hz) */
 #define WLIOC_GETRADIOFREQ  _WLIOC_COM(1)  /* arg: Pointer to uint32_t, */
@@ -89,7 +91,7 @@
                                 * ! Equal to the amount of commands above. */
 
 /****************************************************************************
- * LoRa common IOCTL commands (EXPERIMENTAL)
+ * LoRa common IOCTL commands
  ****************************************************************************/
 
 /* Offsets */
@@ -135,13 +137,15 @@
                                  * ! Equal to the amount of commands above. */
 
 /****************************************************************************
- * FSK common IOCTL commands (Including GFSK and similar) (EXPERIMENTAL)
+ * FSK common IOCTL commands (Including GFSK and similar)
  ****************************************************************************/
 
 /* Offsets. Must follow WLIOC_LORA */
 
 #define _WLIOC_FSK_OFFS _WLIOC_LORA_OFFS+_WLIOC_LORA_COMMANDS
 #define _WLIOC_FSK(x)   _WLCIOC(_WLIOC_FSK_OFFS+x)
+
+/* Commands */
 
 #define WLIOC_FSK_SETBITRATE    _WLIOC_FSK(0) /* arg: uint32_t ptr */
                                               /* In bits per second */
@@ -159,13 +163,15 @@
                                  * ! Equal to the amount of commands above. */
 
 /****************************************************************************
- * OOK (Also called "binary" ASK) common IOCTL commands (EXPERIMENTAL)
+ * OOK (Also called "binary" ASK) common IOCTL commands
  ****************************************************************************/
 
 /* Offsets. Must follow WLIOC_FSK */
 
 #define _WLIOC_OOK_OFFS _WLIOC_FSK_OFFS+_WLIOC_FSK_COMMANDS
 #define _WLIOC_OOK(x)   _WLCIOC(_WLIOC_OOK_OFFS+x)
+
+/* Commands */
 
 #define WLIOC_OOK_SETBITRATE    _WLIOC_OOK(0) /* arg: uint32_t ptr */
                                               /* In bits per second */
@@ -190,6 +196,8 @@
 
 #define _WLIOC_RN2XX3_OFFS _WLIOC_OOK_OFFS+_WLIOC_OOK_COMMANDS
 #define _WLIOC_RN2XX3(x)   _WLCIOC(_WLIOC_RN2XX3_OFFS+x)
+
+/* Commands */
 
 #define WLIOC_SETBANDWIDTH  _WLIOC_RN2XX3(0) /* arg: Pointer to uint32_t, */
                                              /* bandwidth in Hz */
@@ -243,7 +251,7 @@
 #define _WLIOC_RN2XX3_COMMANDS 20 /* ! Must be corrected after changes to commands.
                                    * ! Equal to the amount of commands above. */
 
-/* End of warning */
+/* End of RN2XX3 experimental warning */
 
 /* Offsets */
 
