@@ -251,6 +251,7 @@ struct mpfs_dev_s g_coremmc_dev =
   },
   .hw_base           = CONFIG_MPFS_COREMMC_BASE,
   .plic_irq          = MPFS_IRQ_FABRIC_F2H_0 + CONFIG_MPFS_COREMMC_IRQNUM,
+  .lock              = SP_UNLOCKED,
 #ifdef CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE
   .wrcomplete_irq    = MPFS_IRQ_FABRIC_F2H_0 +
                        CONFIG_MPFS_COREMMC_WRCOMPLETE_IRQNUM,
@@ -484,7 +485,7 @@ static void mpfs_configwaitints(struct mpfs_dev_s *priv, uint32_t waitmask,
    * operation.
    */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
 
 #ifdef CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE
   if ((waitevents & SDIOWAIT_WRCOMPLETE) != 0)
@@ -501,7 +502,7 @@ static void mpfs_configwaitints(struct mpfs_dev_s *priv, uint32_t waitmask,
   priv->wkupevent  = wkupevent;
   priv->waitmask   = waitmask;
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************
@@ -525,12 +526,9 @@ static void mpfs_configxfrints(struct mpfs_dev_s *priv, uint32_t xfrmask,
 {
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
   priv->xfrmask = xfrmask;
   priv->xfr_blkmask = xfr_blkmask;
-
-  mcinfo("Mask: %08" PRIx32 "\n", priv->xfrmask | priv->waitmask);
-  mcinfo("blkmask: %08" PRIx32 "\n", priv->xfr_blkmask);
 
   mpfs_putreg8(priv, priv->xfrmask | priv->waitmask, MPFS_COREMMC_IMR);
 
@@ -543,7 +541,7 @@ static void mpfs_configxfrints(struct mpfs_dev_s *priv, uint32_t xfrmask,
       mpfs_putreg8(priv, priv->xfr_blkmask, MPFS_COREMMC_SBIMR);
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************
@@ -2352,7 +2350,7 @@ void mpfs_coremmc_sdio_mediachange(struct sdio_dev_s *dev, bool cardinslot)
 
   /* Update card status */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
   cdstatus = priv->cdstatus;
   if (cardinslot)
     {
@@ -2363,7 +2361,7 @@ void mpfs_coremmc_sdio_mediachange(struct sdio_dev_s *dev, bool cardinslot)
       priv->cdstatus &= ~SDIO_STATUS_PRESENT;
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 
   mcinfo("cdstatus OLD: %02" PRIx8 " NEW: %02" PRIx8 "\n",
          cdstatus, priv->cdstatus);
@@ -2399,7 +2397,7 @@ void mpfs_coremmc_sdio_wrprotect(struct sdio_dev_s *dev, bool wrprotect)
 
   /* Update card status */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
   if (wrprotect)
     {
       priv->cdstatus |= SDIO_STATUS_WRPROTECTED;
@@ -2409,7 +2407,5 @@ void mpfs_coremmc_sdio_wrprotect(struct sdio_dev_s *dev, bool wrprotect)
       priv->cdstatus &= ~SDIO_STATUS_WRPROTECTED;
     }
 
-  mcinfo("cdstatus: %02" PRIx8 "\n", priv->cdstatus);
-
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
