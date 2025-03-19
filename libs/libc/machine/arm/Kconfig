@@ -31,3 +31,10 @@ endif
 if ARCH_ARMV8R
 source "libs/libc/machine/arm/armv8-r/Kconfig"
 endif
+
+config LIBC_ARCH_CRC32
+	bool "Enable optimized crc32 for ARM"
+	default n
+	depends on ARCH_HAVE_CRC32
+	---help---
+		Enable optimized arm neon specific crc32 library function

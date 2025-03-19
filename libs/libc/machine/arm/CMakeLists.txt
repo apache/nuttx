@@ -68,4 +68,8 @@ if(CONFIG_PROFILE_MINI)
   list(APPEND SRCS gnu/mcount.S)
 endif()
 
+if(CONFIG_LIBC_ARCH_CRC32)
+  list(APPEND SRCS arch_crc32.c)
+endif()
+
 target_sources(c PRIVATE ${SRCS})
