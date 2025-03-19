@@ -338,6 +338,25 @@ rpmsg_port_uart_process_rx_conn(FAR struct rpmsg_port_uart_s *rpuart,
 }
 
 /****************************************************************************
+ * Name: rpmsg_port_uart_process_rx_data
+ ****************************************************************************/
+
+static void
+rpmsg_port_uart_process_rx_data(FAR struct rpmsg_port_uart_s *rpuart)
+{
+  FAR struct rpmsg_port_queue_s *rxq = &rpuart->port.rxq;
+  FAR struct rpmsg_port_header_s *hdr;
+
+  DEBUGASSERT(rpuart->rx_cb != NULL);
+
+  while ((hdr = rpmsg_port_queue_get_buffer(rxq, false)) != NULL)
+    {
+      rpmsgdbg("Received data hdr=%p len=%u\n", hdr, hdr->len);
+      rpuart->rx_cb(&rpuart->port, hdr);
+    }
+}
+
+/****************************************************************************
  * Name: rpmsg_port_uart_rx_thread
  ****************************************************************************/
 
@@ -455,9 +474,11 @@ static int rpmsg_port_uart_rx_thread(int argc, FAR char *argv[])
                         rpmsgerrdump("Recv hdr:", hdr, hdr->len);
                       }
 
-                    DEBUGASSERT(rpuart->rx_cb != NULL);
-
-                    rpuart->rx_cb(&rpuart->port, hdr);
+                    rpmsg_port_queue_add_buffer(rxq, hdr);
+                    if (rpmsg_port_queue_navail(rxq) == 0)
+                      {
+                        rpmsg_port_uart_process_rx_data(rpuart);
+                      }
 
                     state = RPMSG_PORT_UART_RX_WAIT_START;
                     hdr = NULL;
@@ -496,6 +517,8 @@ static int rpmsg_port_uart_rx_thread(int argc, FAR char *argv[])
                 PANIC();
             }
         }
+
+      rpmsg_port_uart_process_rx_data(rpuart);
     }
 
   return 0;
