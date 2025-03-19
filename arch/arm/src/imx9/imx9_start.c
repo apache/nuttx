@@ -144,6 +144,7 @@ static inline void imx9_tcmenable(void)
  *
  ****************************************************************************/
 
+osentry_function
 void __start(void)
 {
   register const uint32_t *src;

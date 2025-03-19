@@ -115,6 +115,7 @@ void __start(void) noinstrument_function;
  *
  ****************************************************************************/
 
+osentry_function
 void __start(void)
 {
 #if defined(CONFIG_BOOT_RUNFROMFLASH) || defined(CONFIG_ARCH_RAMFUNCS)

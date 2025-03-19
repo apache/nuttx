@@ -1226,6 +1226,14 @@
 #  undef CONFIG_HAVE_LONG_DOUBLE
 #endif
 
+/* Decorators */
+
+#ifdef CONFIG_ARCH_RAMFUNCS
+#  define osentry_function no_builtin("memcpy") no_builtin("memset")
+#else
+#  define osentry_function
+#endif
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/

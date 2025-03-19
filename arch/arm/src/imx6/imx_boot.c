@@ -361,6 +361,7 @@ static inline void imx_wdtdisable(void)
  *
  ****************************************************************************/
 
+osentry_function
 void arm_boot(void)
 {
 #if defined(CONFIG_ARCH_RAMFUNCS)
