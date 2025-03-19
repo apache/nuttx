@@ -434,6 +434,12 @@ config ARCH_HAVE_FORK
 	bool
 	default n
 
+config ARCH_HAVE_CRC32
+	bool
+	default n
+	---help---
+		Architecture supports CRC32 instruction
+
 config ARCH_HAVE_FPU
 	bool
 	default n

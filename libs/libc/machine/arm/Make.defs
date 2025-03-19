@@ -66,6 +66,10 @@ ifeq ($(CONFIG_PROFILE_MINI),y)
 ASRCS += mcount.S
 endif
 
+ifeq ($(CONFIG_LIBC_ARCH_CRC32),y)
+CSRCS += arch_crc32.c
+endif
+
 ifeq ($(CONFIG_ARCH_TOOLCHAIN_GNU),y)
 DEPPATH += --dep-path machine/arm/gnu
 VPATH += :machine/arm/gnu
