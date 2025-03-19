@@ -409,6 +409,7 @@ union wb_u
 
 struct mpfs_rqhead_s
 {
+  spinlock_t            qlock;         /* Lock to protect access to the queue */
   struct mpfs_req_s     *head;         /* Requests are added to the head of the list */
   struct mpfs_req_s     *tail;         /* Requests are removed from the tail of the list */
 };
@@ -417,6 +418,7 @@ struct mpfs_ep_s
 {
   struct usbdev_ep_s    ep;           /* Standard endpoint structure */
 
+  spinlock_t            eplock;       /* Lock for endpoint access */
   struct mpfs_usbdev_s  *dev;         /* Reference to private driver data */
   struct mpfs_rqhead_s  reqq;         /* Read/write request queue */
   struct mpfs_rqhead_s  pendq;        /* Write requests pending stall sent */
@@ -446,6 +448,10 @@ struct mpfs_usbdev_s
   /* The bound device class driver */
 
   struct usbdevclass_driver_s *driver;
+
+  /* Device specific fields */
+
+  spinlock_t           lock;          /* Device lock */
 
   /* USB-specific fields */
 
