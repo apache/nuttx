@@ -43,6 +43,7 @@
 #include <nuttx/wqueue.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/signal.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/net/mii.h>
 #include <nuttx/net/gmii.h>
 #include <nuttx/net/ip.h>
@@ -269,6 +270,7 @@ struct mpfs_mac_queue_s
 struct mpfs_ethmac_s
 {
   uintptr_t     regbase;                         /* mac base address */
+  spinlock_t    lock;                            /* lock for device access */
   irq_t         mac_q_int[MPFS_MAC_QUEUE_COUNT]; /* irq numbers */
   uint8_t       ifup : 1;                        /* true:ifup false:ifdown */
   uint8_t       intf;                            /* Ethernet interface number */
@@ -1618,7 +1620,7 @@ static int mpfs_ifdown(struct net_driver_s *dev)
 
   /* Disable the Ethernet interrupt */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
   up_disable_irq(priv->mac_q_int[0]);
   up_disable_irq(priv->mac_q_int[1]);
   up_disable_irq(priv->mac_q_int[2]);
@@ -1649,7 +1651,7 @@ static int mpfs_ifdown(struct net_driver_s *dev)
   /* Mark the device "down" */
 
   priv->ifup = false;
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
   return OK;
 }
 
@@ -3602,6 +3604,7 @@ int mpfs_ethinitialize(int intf)
   priv->dev.d_private = priv;           /* Used to recover private state */
   priv->intf          = intf;           /* Remember the interface number */
   priv->regbase       = g_regbases[intf];
+  priv->lock          = SP_UNLOCKED;
   priv->mac_q_int[0]  = g_irq_numbers[intf][0];
   priv->mac_q_int[1]  = g_irq_numbers[intf][1];
   priv->mac_q_int[2]  = g_irq_numbers[intf][2];
