@@ -368,6 +368,7 @@ static inline void sam_wdtdisable(void)
  *
  ****************************************************************************/
 
+no_builtin("memcpy")
 void arm_boot(void)
 {
 #ifdef CONFIG_ARCH_RAMFUNCS

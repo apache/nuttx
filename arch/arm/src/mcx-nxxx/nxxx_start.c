@@ -83,6 +83,8 @@ const uintptr_t g_idle_topstack = IDLE_STACK;
  *
  ****************************************************************************/
 
+no_builtin("memcpy")
+no_builtin("memset")
 void __start(void)
 {
   register const uint32_t *src;

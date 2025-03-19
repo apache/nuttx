@@ -115,6 +115,8 @@ void __start(void) noinstrument_function;
  *
  ****************************************************************************/
 
+no_builtin("memcpy")
+no_builtin("memset")
 void __start(void)
 {
 #if defined(CONFIG_BOOT_RUNFROMFLASH) || defined(CONFIG_ARCH_RAMFUNCS)
