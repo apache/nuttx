@@ -524,7 +524,7 @@ static int gd55_command_address(FAR struct gd55_dev_s *priv, uint8_t cmd,
 static int gd55_read_bytes(FAR struct gd55_dev_s *priv, FAR uint8_t *buffer,
                            off_t address, size_t buflen)
 {
-  bool                  mode_4byte_addr;
+  bool                  mode_4byte_addr = false;
   int                   ret;
   struct qspi_meminfo_s meminfo;
 
@@ -580,7 +580,7 @@ static int gd55_write_page(FAR struct gd55_dev_s *priv,
   struct qspi_meminfo_s meminfo;
   uint8_t               status;
   unsigned int          npages;
-  int                   ret;
+  int                   ret = OK;
   int                   i;
 
   npages = (buflen >> GD55_PAGE_SHIFT);
