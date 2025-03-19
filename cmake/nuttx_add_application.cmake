@@ -117,7 +117,7 @@ function(nuttx_add_application)
       # non-elf output
       if(NOT CMAKE_C_ELF_COMPILER)
         add_library(${TARGET} ${SRCS})
-        add_dependencies(${TARGET} nuttx_post)
+        add_dependencies(${TARGET} apps_post)
         add_custom_command(
           TARGET ${TARGET}
           POST_BUILD
