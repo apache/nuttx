@@ -1402,7 +1402,10 @@ int arm64_gic_initialize(void)
 
   /* CPU0-specific initialization for GIC */
 
-  arm_gic0_initialize();
+  if (sched_getcpu() == 0)
+    {
+      arm_gic0_initialize();
+    }
 
   /* CPU-generic initialization for GIC */
 
