@@ -97,7 +97,14 @@ int arm_addrenv_create_region(uintptr_t **list, unsigned int listlen,
   nmapped = 0;
   for (i = 0; i < nlist; i++)
     {
-      /* Allocate one physical page for the L2 page table */
+      /* Allocate one physical page for the L2 page table
+       * Makesure physical page is contiguous, alloc all l2 table first.
+       *
+       * REVISIT: Drivers should not expect the physical page is contiguous
+       *          after up_addrenv_va_to_pa, alloc l2 table first just a
+       *          workaround solution, mm_pgalloc it self will not contiguous
+       *          according to physical memory fragmentation.
+       */
 
       paddr = mm_pgalloc(1);
       binfo("a new l2 page table (paddr=%x)\n", paddr);
@@ -108,6 +115,13 @@ int arm_addrenv_create_region(uintptr_t **list, unsigned int listlen,
 
       DEBUGASSERT(MM_ISALIGNED(paddr));
       list[i] = (uintptr_t *)paddr;
+    }
+
+  for (i = 0; i < nlist; i++)
+    {
+      /* Get the L2 page table from list */
+
+      paddr = (uintptr_t)list[i];
 
       flags = enter_critical_section();
 
