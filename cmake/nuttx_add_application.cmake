@@ -28,9 +28,14 @@ define_property(
   BRIEF_DOCS "NuttX application libs"
   FULL_DOCS "List of all NuttX application libraries")
 
-# Create a directory for the application binaries
+# Create a directories for the application binaries `bin` for stripped binaries
+# `bin_debug` for debug binaries
 if(NOT EXISTS ${CMAKE_BINARY_DIR}/bin)
   file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+endif()
+
+if(NOT EXISTS ${CMAKE_BINARY_DIR}/bin_debug)
+  file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/bin_debug)
 endif()
 
 # ~~~
@@ -131,7 +136,11 @@ function(nuttx_add_application)
             $<$<BOOL:${CONFIG_BUILD_KERNEL}>:$<GENEX_EVAL:$<TARGET_PROPERTY:nuttx_global,NUTTX_ELF_LINK_LIBRARIES>>>
             $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx_global,NUTTX_ELF_LINK_EXTRA_LIBRARIES>>
             $<TARGET_FILE:${TARGET}> --end-group -o
+            ${CMAKE_BINARY_DIR}/bin_debug/${ELF_NAME}
+          COMMAND
+            ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/bin_debug/${ELF_NAME}
             ${CMAKE_BINARY_DIR}/bin/${ELF_NAME}
+          COMMAND ${CMAKE_STRIP} ${CMAKE_BINARY_DIR}/bin/${ELF_NAME}
           COMMENT "Building ELF:${ELF_NAME}"
           COMMAND_EXPAND_LISTS)
       else()
