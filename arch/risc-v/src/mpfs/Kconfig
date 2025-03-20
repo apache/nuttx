@@ -813,6 +813,12 @@ config MPFS_MPUCFG
 	---help---
 		Enable driver to set MPUCFG entries.
 
+config MPFS_RCC
+	bool "Enable Reset and Clock Controller (RCC) driver"
+	default y
+	---help---
+		Enable driver for reset / clock controller.
+
 config MPFS_HAVE_CORERMII
 	bool "CoreRMII FPGA IP block configured"
 	default n
