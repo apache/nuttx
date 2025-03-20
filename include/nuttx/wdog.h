@@ -282,10 +282,10 @@ int wd_start_realtime(FAR struct wdog_s *wdog,
   clock_t ticks;
   int ret;
 
-  flags = enter_critical_section();
+  flags = up_irq_save();
   clock_abstime2ticks(CLOCK_REALTIME, realtime, &ticks);
   ret = wd_start(wdog, ticks, wdentry, arg);
-  leave_critical_section(flags);
+  up_irq_restore(flags);
 
   return ret;
 #else
