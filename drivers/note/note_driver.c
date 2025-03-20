@@ -290,7 +290,7 @@ static inline int note_isenabled_switch(FAR struct note_driver_s *driver)
 
   return true;
 }
-#endif
+#endif /* CONFIG_SCHED_INSTRUMENTATION_SWITCH */
 
 /****************************************************************************
  * Name: note_isenabled_syscall
@@ -441,9 +441,8 @@ static inline int note_isenabled_dump(FAR struct note_driver_s *driver,
 }
 #endif
 
-#ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
-#if CONFIG_DRIVERS_NOTE_TASKNAME_BUFSIZE > 0
-
+#if defined(CONFIG_SCHED_INSTRUMENTATION_SWITCH) && \
+    (CONFIG_DRIVERS_NOTE_TASKNAME_BUFSIZE > 0)
 /****************************************************************************
  * Name: note_find_taskname
  *
@@ -617,6 +616,7 @@ void sched_note_add(FAR const void *data, size_t len)
 }
 #endif
 
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
 /****************************************************************************
  * Name: sched_note_*
  *
