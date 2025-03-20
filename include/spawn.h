@@ -208,7 +208,9 @@ int posix_spawnattr_getstacksize(FAR const posix_spawnattr_t *attr,
                                  FAR size_t *stacksize);
 int posix_spawnattr_setstacksize(FAR posix_spawnattr_t *attr,
                                  size_t stacksize);
-
+int posix_spawnattr_setpriority(FAR posix_spawnattr_t *attr,
+                                uint8_t priority);
+uint8_t posix_spawnattr_getpriority(FAR posix_spawnattr_t *attr);
 #ifndef CONFIG_BUILD_KERNEL
 int posix_spawnattr_getstackaddr(FAR const posix_spawnattr_t *attr,
                                  FAR void **stackaddr);
