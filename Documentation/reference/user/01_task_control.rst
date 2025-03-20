@@ -78,10 +78,12 @@ Standard ``posix_spawn`` interfaces:
   - :c:func:`posix_spawnattr_getflags`
   - :c:func:`posix_spawnattr_getschedparam`
   - :c:func:`posix_spawnattr_getschedpolicy`
+  - :c:func:`posix_spawnattr_getpriority`
   - :c:func:`posix_spawnattr_getsigmask`
   - :c:func:`posix_spawnattr_setflags`
   - :c:func:`posix_spawnattr_setschedparam`
   - :c:func:`posix_spawnattr_setschedpolicy`
+  - :c:func:`posix_spawnattr_setpriority`
   - :c:func:`posix_spawnattr_setsigmask`
 
 Non-standard task control interfaces inspired by ``posix_spawn``:
@@ -735,6 +737,17 @@ Functions
   :return: On success, this function returns 0; on failure it
     will return an error number from ``<errno.h>``
 
+.. c:function:: uint8_t posix_spawnattr_getpriority(FAR posix_spawnattr_t *attr)
+
+  The ``posix_spawnattr_getpriority()`` function will obtain
+  the value of the *spawn-priority* attribute from the attributes object
+  referenced by ``attr``.
+
+  This is a non-standard helper API.
+
+  :param attr: The address spawn attributes to be queried.
+  :return: The priority value stored in the attributes object.
+
 .. c:function:: int posix_spawnattr_getsigmask(FAR const posix_spawnattr_t *attr, FAR sigset_t *sigmask)
 
   ``posix_spawnattr_getsigdefault()`` function will
@@ -776,6 +789,19 @@ Functions
 
   :param attr: The address spawn attributes to be used.
   :param policy: The new value of the *spawn-schedpolicy* attribute.
+  :return: On success, this function returns 0; on failure it
+    will return an error number from ``<errno.h>``
+
+.. c:function:: int posix_spawnattr_setpriority(FAR posix_spawnattr_t *attr, uint8_t priority)
+
+  The ``posix_spawnattr_setpriority()`` function will set
+  the *spawn-priority* attribute in an initialized attributes object
+  referenced by ``attr``.
+
+  This is a non-standard helper API.
+
+  :param attr: The address spawn attributes to be used.
+  :param priority: The new priority value to set.
   :return: On success, this function returns 0; on failure it
     will return an error number from ``<errno.h>``
 
