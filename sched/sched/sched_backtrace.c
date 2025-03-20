@@ -101,11 +101,10 @@ static int sched_backtrace_handler(FAR void *cookie)
       atomic_and(&tcb->shared_flags, ~TCB_FLAG_CPU_LOCKED);
     }
 
-  nxsched_put_tcb(tcb);
-
   leave_critical_section(flags);
 
   arg->stacksize = up_backtrace(tcb, arg->buffer, arg->size, arg->skip);
+  nxsched_put_tcb(tcb);
 
   return OK;
 }
