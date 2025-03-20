@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/sched/clock_getres.c
+ * sched/clock/clock_getres.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -24,14 +24,14 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
 #include <stdint.h>
 #include <time.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <nuttx/clock.h>
+#include <nuttx/fs/fs.h>
+#include <nuttx/timers/ptp_clock.h>
 
 /****************************************************************************
  * Public Functions
@@ -74,6 +74,23 @@ int clock_getres(clockid_t clock_id, struct timespec *res)
         sinfo("Returning res=(%d,%d)\n", (int)res->tv_sec,
                                          (int)res->tv_nsec);
         break;
+
+#ifdef CONFIG_PTP_CLOCK
+      case CLOCK_FD:
+        {
+          FAR struct file *filep;
+
+          ret = ptp_clockid_to_filep(clock_id, &filep);
+          if (ret < 0)
+            {
+              return ret;
+            }
+
+          ret = file_ioctl(filep, PTP_CLOCK_GETRES, res);
+          fs_putfilep(filep);
+        }
+        break;
+#endif
     }
 
   return ret;
