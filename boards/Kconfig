@@ -518,6 +518,13 @@ config ARCH_BOARD_ESP32S3_MEADOW
 		The ESP32-S3-Meadow is a small-sized board produced by WildernessLabs
 		featuring the ESP32-S3 CPU with 32MiB Octal SPI PSRAM and 64 MiB flash.
 
+config ARCH_BOARD_ESP32S3_LCKFB_SZPI
+	bool "LCKFB SZPI ESP32-S3"
+	depends on ARCH_CHIP_ESP32S3WROOM1N16R8
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS if ESP32S3_GPIO_IRQ
+
 config ARCH_BOARD_ESP32C6_DEVKITC
 	bool "Espressif ESP32-C6-DevKitC-1"
 	depends on ARCH_CHIP_ESP32C6WROOM1
@@ -3388,6 +3395,7 @@ config ARCH_BOARD
 	default "esp32s3-lhcbit"            if ARCH_BOARD_ESP32S3_LHCBIT
 	default "esp32s3-box"               if ARCH_BOARD_ESP32S3_BOX
 	default "esp32s3-korvo-2"           if ARCH_BOARD_ESP32S3_KORVO_2
+	default "lckfb-szpi-esp32s3"        if ARCH_BOARD_ESP32S3_LCKFB_SZPI
 	default "esp32c6-devkitc"           if ARCH_BOARD_ESP32C6_DEVKITC
 	default "esp32c6-devkitm"           if ARCH_BOARD_ESP32C6_DEVKITM
 	default "esp32h2-devkit"            if ARCH_BOARD_ESP32H2_DEVKIT
@@ -4609,6 +4617,9 @@ source "boards/xtensa/esp32s3/esp32s3-box/Kconfig"
 endif
 if ARCH_BOARD_ESP32S3_KORVO_2
 source "boards/xtensa/esp32s3/esp32s3-korvo-2/Kconfig"
+endif
+if ARCH_BOARD_ESP32S3_LCKFB_SZPI
+source "boards/xtensa/esp32s3/lckfb-szpi-esp32s3/Kconfig"
 endif
 #if ARCH_BOARD_ESP32C6_DEVKITC
 #source "boards/risc-v/esp32c6/esp32c6-devkitc/Kconfig"
