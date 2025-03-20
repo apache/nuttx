@@ -188,13 +188,16 @@ config ARCH_HAVE_ADJTIME
 config CLOCK_ADJTIME
 	bool "Support adjtime function"
 	default n
-	depends on ARCH_HAVE_ADJTIME || RTC_ADJTIME
+	depends on ARCH_HAVE_ADJTIME || RTC_ADJTIME || PTP_CLOCK
 	---help---
 		Enables usage of adjtime() interface used to correct the system time
 		clock. This requires specific architecture support.
 
 		Adjustment can affect system timer period and/or high-resolution RTC.
 		These are implemented by interfaces up_adjtime() and up_rtc_adjtime().
+
+		Enables usage of clock_adjtime() interface used to correct the system
+		and other ptp time clock. This requires ptp clock support.
 
 		This is not a POSIX interface but derives from 4.3BSD, System V.
 		It is also supported for Linux compatibility.
