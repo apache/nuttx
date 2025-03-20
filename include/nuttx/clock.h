@@ -29,6 +29,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/timex.h>
 #include <sys/types.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -838,6 +839,18 @@ int nxclock_settime(clockid_t clock_id, FAR const struct timespec *tp);
  ****************************************************************************/
 
 int nxclock_gettime(clockid_t clock_id, FAR struct timespec *tp);
+
+/****************************************************************************
+ * Name: nxclock_adjtime
+ *
+ * Description:
+ *   Adjust the frequency and/or phase of a clock.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_CLOCK_ADJTIME
+int nxclock_adjtime(clockid_t clock_id, FAR struct timex *buf);
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus

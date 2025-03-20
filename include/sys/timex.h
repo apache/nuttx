@@ -90,6 +90,37 @@ extern "C"
 #define EXTERN extern
 #endif
 
+/****************************************************************************
+ * Name: clock_adjtime
+ *
+ * Description:
+ *   Adjust the frequency and/or phase of a clock.
+ *   This function allows the adjustment of the frequency and/or phase of a
+ *   specified clock. It can be used to synchronize the clock with an
+ *   external time source or to apply a frequency offset.
+ *
+ * Input Parameters:
+ *   clk_id - The identifier of the clock to be adjusted. This is typically
+ *            one of the predefined clock IDs such as CLOCK_REALTIME,
+ *            CLOCK_MONOTONIC, or CLOCK_BOOTTIME.
+ *
+ *   buf    - A pointer to a `timex` structure that specifies the adjustment
+ *            parameters. This structure includes fields for the frequency
+ *            adjustment (`freq`), the maximum frequency error (`maxerror`),
+ *            the estimated error (`esterror`), the phase offset (`offset`),
+ *            and flags to indicate the type of adjustment (`status`).
+ *
+ * Returned Value:
+ *            Return On success, the function returns 0. On error, it returns
+ *            -1 and sets 'errno` to indicate the specific error that
+ *            occurred.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_CLOCK_ADJTIME
+int clock_adjtime(clockid_t clk_id, FAR struct timex *buf);
+#endif
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
