@@ -827,7 +827,7 @@ unsigned long perf_getfreq(void);
  *
  ****************************************************************************/
 
-void nxclock_settime(clockid_t clock_id, FAR const struct timespec *tp);
+int nxclock_settime(clockid_t clock_id, FAR const struct timespec *tp);
 
 /****************************************************************************
  * Name: nxclock_gettime
@@ -837,7 +837,7 @@ void nxclock_settime(clockid_t clock_id, FAR const struct timespec *tp);
  *
  ****************************************************************************/
 
-void nxclock_gettime(clockid_t clock_id, FAR struct timespec *tp);
+int nxclock_gettime(clockid_t clock_id, FAR struct timespec *tp);
 
 #undef EXTERN
 #ifdef __cplusplus
