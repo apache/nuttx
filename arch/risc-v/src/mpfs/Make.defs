@@ -122,3 +122,6 @@ ifeq ($(CONFIG_MPFS_MPUCFG),y)
 CHIP_CSRCS += mpfs_mpu.c
 endif
 
+ifeq ($(CONFIG_MPFS_RCC),y)
+CHIP_CSRCS += mpfs_rcc.c
+endif
