@@ -110,7 +110,6 @@ struct rpmsg_port_spi_s
   volatile uint8_t               state;
   spinlock_t                     lock;
 #ifdef CONFIG_PM
-  struct pm_callback_s           pmcb;
   spinlock_t                     pmlock;
   struct wdog_s                  wdog;
   struct pm_wakelock_s           wakelock;
@@ -224,43 +223,6 @@ rpmsg_port_spi_pm_action(FAR struct rpmsg_port_spi_s *rpspi, bool stay)
     }
 
   spin_unlock_irqrestore(&rpspi->pmlock, flags);
-}
-
-/****************************************************************************
- * Name: rpmsg_port_spi_prepare
- ****************************************************************************/
-
-static int rpmsg_port_spi_prepare(FAR struct pm_callback_s *cb, int domain,
-                                  enum pm_state_e pmstate)
-{
-  FAR struct rpmsg_port_spi_s *rpspi =
-    container_of(cb, struct rpmsg_port_spi_s, pmcb);
-  enum pm_state_e oldstate;
-
-  oldstate = pm_querystate(PM_IDLE_DOMAIN);
-  switch (oldstate)
-    {
-      case PM_NORMAL:
-      case PM_IDLE:
-      case PM_STANDBY:
-        if (pmstate == PM_SLEEP)
-          {
-            if (atomic_load(&rpspi->transferring) ||
-                rpmsg_port_queue_nused(&rpspi->port.rxq) > 0 ||
-                rpmsg_port_queue_nused(&rpspi->port.txq) > 0)
-              {
-                rpmsgerr("rpmsg port spi busy\n");
-                return -EBUSY;
-              }
-          }
-        break;
-
-      case PM_SLEEP:
-      default:
-        break;
-    }
-
-  return 0;
 }
 
 #else
@@ -874,8 +836,6 @@ rpmsg_port_spi_slave_initialize(FAR const struct rpmsg_port_config_s *cfg,
     }
 
 #ifdef CONFIG_PM
-  rpspi->pmcb.prepare = rpmsg_port_spi_prepare;
-  pm_register(&rpspi->pmcb);
   spin_lock_init(&rpspi->pmlock);
   pm_wakelock_init(&rpspi->wakelock, cfg->remotecpu,
                    PM_IDLE_DOMAIN, PM_NORMAL);
