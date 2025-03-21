@@ -49,7 +49,8 @@ endif()
 # Support CMake to define additional configuration options
 
 if(EXTRA_FLAGS)
-  add_compile_options(${EXTRA_FLAGS})
+  separate_arguments(EXTRA_FLAGS_LIST UNIX_COMMAND "${EXTRA_FLAGS}")
+  add_compile_options(${EXTRA_FLAGS_LIST})
 endif()
 
 # ~~~
