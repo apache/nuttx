@@ -59,6 +59,54 @@
      {(c), (f), SEM_WAITLIST_INITIALIZER}
 #endif /* CONFIG_PRIORITY_INHERITANCE */
 
+/* Fast mutex lock/unlock path */
+
+#ifndef CONFIG_LIBC_ARCH_ATOMIC
+
+#  if defined(CONFIG_PRIORITY_PROTECT) || defined(CONFIG_PRIORITY_INHERITANCE)
+#    define NXSEM_IS_FASTMUTEX(sem)                                       \
+      (((sem)->flags & (SEM_TYPE_MUTEX | SEM_PRIO_MASK)) ==               \
+       (SEM_TYPE_MUTEX | SEM_PRIO_NONE))
+#  else
+#    define NXSEM_IS_FASTMUTEX(sem) ((sem)->flags & SEM_TYPE_MUTEX)
+#  endif
+
+/* Try wait; sets ret to OK or -EAGAIN when success,
+ * -EPERM when fast locking can't be performed
+ */
+
+#  define NXSEM_TRYWAIT_FAST(sem, ret)                                    \
+    {                                                                     \
+      (ret) = -EPERM;                                                     \
+      if (NXSEM_IS_FASTMUTEX(sem))                                        \
+        {                                                                 \
+          int32_t old = 1;                                                \
+          (ret) = atomic_try_cmpxchg_acquire(NXSEM_COUNT(sem), &old, 0) ? \
+            OK : -EAGAIN;                                                 \
+        }                                                                 \
+    }
+
+/* Post; sets ret to OK when success and -EPERM when
+ * fast posting can't be performed
+ */
+
+#  define NXSEM_POST_FAST(sem, ret)                                       \
+    {                                                                     \
+      (ret) = -EPERM;                                                     \
+      if (NXSEM_IS_FASTMUTEX(sem))                                        \
+        {                                                                 \
+          int32_t old = 0;                                                \
+          if (atomic_try_cmpxchg_release(NXSEM_COUNT(sem), &old, 1))      \
+            {                                                             \
+              (ret) = OK;                                                 \
+            }                                                             \
+        }                                                                 \
+    }
+#else /* ifndef CONFIG_LIBC_ARCH_ATOMIC */
+#  define NXSEM_TRYWAIT_FAST(sem, ret) (ret) = -EPERM
+#  define NXSEM_POST_FAST(sem, ret) (ret) = -EPERM
+#endif
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
