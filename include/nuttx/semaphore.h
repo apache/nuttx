@@ -107,6 +107,8 @@
 #  define NXSEM_POST_FAST(sem, ret) (ret) = -EPERM
 #endif
 
+#define NXSEM_COUNT(s) ((FAR atomic_t *)&(s)->semcount)
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/

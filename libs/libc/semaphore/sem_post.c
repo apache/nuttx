@@ -29,6 +29,7 @@
 #include <errno.h>
 
 #include <nuttx/semaphore.h>
+#include <nuttx/atomic.h>
 
 /****************************************************************************
  * Public Functions
@@ -75,7 +76,12 @@ int sem_post(FAR sem_t *sem)
       return ERROR;
     }
 
-  ret = nxsem_post(sem);
+  NXSEM_POST_FAST(sem, ret);
+  if (ret != OK)
+    {
+      ret = nxsem_post(sem);
+    }
+
   if (ret < 0)
     {
       set_errno(-ret);
