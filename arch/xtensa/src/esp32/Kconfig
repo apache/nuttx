@@ -2032,6 +2032,15 @@ config ESP32_SPIRAM_IGNORE_NOTFOUND
 		panic. If this is enabled, booting will complete but no PSRAM
 		will be available.
 
+config ESP32_SPIRAM_MEMTEST
+	bool "Run write-read test on SPIRAM during startup"
+	default y
+	depends on ESP32_SPIRAM_BOOT_INIT
+	---help---
+		If enabled, SPI RAM will be tested during initial boot.
+		Disabling this test will reduce startup time at the expense
+		of testing the external memory.
+
 config ESP32_SPIRAM_2T_MODE
 	bool "Enable SPI PSRAM 2T mode"
 	depends on ESP32_SPIRAM
