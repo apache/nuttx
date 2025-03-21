@@ -27,9 +27,14 @@
 #include <nuttx/config.h>
 
 #include <errno.h>
+#include <assert.h>
+#include <sched.h>
 
+#include <nuttx/init.h>
 #include <nuttx/cancelpt.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/atomic.h>
+#include <nuttx/irq.h>
 
 /****************************************************************************
  * Public Functions
@@ -97,4 +102,68 @@ errout_with_cancelpt:
   set_errno(errcode);
   leave_cancellation_point();
   return ERROR;
+}
+
+/****************************************************************************
+ * Name: nxsem_wait
+ *
+ * Description:
+ *   This function attempts to lock the semaphore referenced by 'sem'.  If
+ *   the semaphore value is (<=) zero, then the calling task will not return
+ *   until it successfully acquires the lock.
+ *
+ *   This is an internal OS interface.  It is functionally equivalent to
+ *   sem_wait except that:
+ *
+ *   - It is not a cancellation point, and
+ *   - It does not modify the errno value.
+ *
+ * Input Parameters:
+ *   sem - Semaphore descriptor.
+ *
+ * Returned Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *   Possible returned errors:
+ *
+ *   - EINVAL:  Invalid attempt to get the semaphore
+ *   - EINTR:   The wait was interrupted by the receipt of a signal.
+ *
+ ****************************************************************************/
+
+int nxsem_wait(FAR sem_t *sem)
+{
+  DEBUGASSERT(sem != NULL);
+
+  /* This API should not be called from the idleloop or interrupt */
+
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+  DEBUGASSERT(!OSINIT_IDLELOOP() || !sched_idletask() ||
+              up_interrupt_context());
+#endif
+
+  /* We don't do atomic fast path in case of LIBC_ARCH_ATOMIC because that
+   * uses spinlocks, which can't be called from userspace. Also in the kernel
+   * taking the slow path directly is faster than locking first in here
+   */
+
+#ifndef CONFIG_LIBC_ARCH_ATOMIC
+
+  if ((sem->flags & SEM_TYPE_MUTEX)
+#  if defined(CONFIG_PRIORITY_PROTECT) || defined(CONFIG_PRIORITY_INHERITANCE)
+      && (sem->flags & SEM_PRIO_MASK) == SEM_PRIO_NONE
+#  endif
+      )
+    {
+      int32_t old = 1;
+      if (atomic_try_cmpxchg_acquire(NXSEM_COUNT(sem), &old, 0))
+        {
+          return OK;
+        }
+    }
+
+#endif
+
+  return nxsem_wait_slow(sem);
 }

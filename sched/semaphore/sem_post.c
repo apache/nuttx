@@ -37,7 +37,7 @@
 #include "semaphore/semaphore.h"
 
 /****************************************************************************
- * Private Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -69,7 +69,7 @@
  *
  ****************************************************************************/
 
-static int nxsem_post_slow(FAR sem_t *sem)
+int nxsem_post_slow(FAR sem_t *sem)
 {
   FAR struct tcb_s *stcb = NULL;
   irqstate_t flags;
@@ -216,61 +216,4 @@ static int nxsem_post_slow(FAR sem_t *sem)
   leave_critical_section(flags);
 
   return OK;
-}
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: nxsem_post
- *
- * Description:
- *   When a kernel thread has finished with a semaphore, it will call
- *   nxsem_post().  This function unlocks the semaphore referenced by sem
- *   by performing the semaphore unlock operation on that semaphore.
- *
- *   If the semaphore value resulting from this operation is positive, then
- *   no tasks were blocked waiting for the semaphore to become unlocked; the
- *   semaphore is simply incremented.
- *
- *   If the value of the semaphore resulting from this operation is zero,
- *   then one of the tasks blocked waiting for the semaphore shall be
- *   allowed to return successfully from its call to nxsem_wait().
- *
- * Input Parameters:
- *   sem - Semaphore descriptor
- *
- * Returned Value:
- *   This is an internal OS interface and should not be used by applications.
- *   It follows the NuttX internal error return policy:  Zero (OK) is
- *   returned on success.  A negated errno value is returned on failure.
- *
- * Assumptions:
- *   This function may be called from an interrupt handler.
- *
- ****************************************************************************/
-
-int nxsem_post(FAR sem_t *sem)
-{
-  DEBUGASSERT(sem != NULL);
-
-  /* If this is a mutex, we can try to unlock the mutex in fast mode,
-   * else try to get it in slow mode.
-   */
-
-  if ((sem->flags & SEM_TYPE_MUTEX)
-#if defined(CONFIG_PRIORITY_PROTECT) || defined(CONFIG_PRIORITY_INHERITANCE)
-      && (sem->flags & SEM_PRIO_MASK) == SEM_PRIO_NONE
-#endif
-      )
-    {
-      int32_t old = 0;
-      if (atomic_try_cmpxchg_release(NXSEM_COUNT(sem), &old, 1))
-        {
-          return OK;
-        }
-    }
-
-  return nxsem_post_slow(sem);
 }

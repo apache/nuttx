@@ -59,6 +59,10 @@
      {(c), (f), SEM_WAITLIST_INITIALIZER}
 #endif /* CONFIG_PRIORITY_INHERITANCE */
 
+/* Macro to retrieve sem count */
+
+#define NXSEM_COUNT(s) ((FAR atomic_t *)&(s)->semcount)
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
@@ -153,7 +157,7 @@ int nxsem_init(FAR sem_t *sem, int pshared, unsigned int value);
 int nxsem_destroy(FAR sem_t *sem);
 
 /****************************************************************************
- * Name: nxsem_wait
+ * Name: nxsem_wait / nxsem_wait_slow
  *
  * Description:
  *   This function attempts to lock the semaphore referenced by 'sem'.  If
@@ -181,9 +185,10 @@ int nxsem_destroy(FAR sem_t *sem);
  ****************************************************************************/
 
 int nxsem_wait(FAR sem_t *sem);
+int nxsem_wait_slow(FAR sem_t *sem);
 
 /****************************************************************************
- * Name: nxsem_trywait
+ * Name: nxsem_trywait / nxsem_trywait_slow
  *
  * Description:
  *   This function locks the specified semaphore only if the semaphore is
@@ -207,6 +212,7 @@ int nxsem_wait(FAR sem_t *sem);
  ****************************************************************************/
 
 int nxsem_trywait(FAR sem_t *sem);
+int nxsem_trywait_slow(FAR sem_t *sem);
 
 /****************************************************************************
  * Name: nxsem_timedwait
@@ -328,7 +334,7 @@ int nxsem_clockwait(FAR sem_t *sem, clockid_t clockid,
 int nxsem_tickwait(FAR sem_t *sem, uint32_t delay);
 
 /****************************************************************************
- * Name: nxsem_post
+ * Name: nxsem_post / nxsem_post_slow
  *
  * Description:
  *   When a kernel thread has finished with a semaphore, it will call
@@ -357,6 +363,7 @@ int nxsem_tickwait(FAR sem_t *sem, uint32_t delay);
  ****************************************************************************/
 
 int nxsem_post(FAR sem_t *sem);
+int nxsem_post_slow(FAR sem_t *sem);
 
 /****************************************************************************
  * Name:  nxsem_get_value

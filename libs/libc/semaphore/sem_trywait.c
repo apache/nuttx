@@ -27,8 +27,13 @@
 #include <nuttx/config.h>
 
 #include <errno.h>
+#include <assert.h>
+#include <sched.h>
 
+#include <nuttx/init.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/atomic.h>
+#include <nuttx/irq.h>
 
 /****************************************************************************
  * Public Functions
@@ -75,4 +80,60 @@ int sem_trywait(FAR sem_t *sem)
     }
 
   return ret;
+}
+
+/****************************************************************************
+ * Name: nxsem_trywait
+ *
+ * Description:
+ *   This function locks the specified semaphore only if the semaphore is
+ *   currently not locked.  In either case, the call returns without
+ *   blocking.
+ *
+ * Input Parameters:
+ *   sem - the semaphore descriptor
+ *
+ * Returned Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *   Possible returned errors:
+ *
+ *     - EINVAL - Invalid attempt to get the semaphore
+ *     - EAGAIN - The semaphore is not available.
+ *
+ ****************************************************************************/
+
+int nxsem_trywait(FAR sem_t *sem)
+{
+  DEBUGASSERT(sem != NULL);
+
+  /* This API should not be called from the idleloop or interrupt */
+
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+  DEBUGASSERT(!OSINIT_IDLELOOP() || !sched_idletask() ||
+              up_interrupt_context());
+#endif
+
+  /* We don't do atomic fast path in case of LIBC_ARCH_ATOMIC because that
+   * uses spinlocks, which can't be called from userspace. Also in the kernel
+   * taking the slow path directly is faster than locking first in here
+   */
+
+#ifndef CONFIG_LIBC_ARCH_ATOMIC
+
+  if ((sem->flags & SEM_TYPE_MUTEX)
+#if defined(CONFIG_PRIORITY_PROTECT) || defined(CONFIG_PRIORITY_INHERITANCE)
+      && (sem->flags & SEM_PRIO_MASK) == SEM_PRIO_NONE
+#endif
+      )
+    {
+      int32_t old = 1;
+      return atomic_try_cmpxchg_acquire(NXSEM_COUNT(sem), &old, 0) ?
+        OK : -EAGAIN;
+    }
+
+#endif
+
+  return nxsem_trywait_slow(sem);
 }
