@@ -39,7 +39,7 @@
 #include "semaphore/semaphore.h"
 
 /****************************************************************************
- * Private Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -60,7 +60,7 @@
  *
  ****************************************************************************/
 
-static int nxsem_trywait_slow(FAR sem_t *sem)
+int nxsem_trywait_slow(FAR sem_t *sem)
 {
   irqstate_t flags;
   int32_t semcount;
@@ -102,62 +102,4 @@ static int nxsem_trywait_slow(FAR sem_t *sem)
 
   leave_critical_section(flags);
   return ret;
-}
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: nxsem_trywait
- *
- * Description:
- *   This function locks the specified semaphore only if the semaphore is
- *   currently not locked.  In either case, the call returns without
- *   blocking.
- *
- * Input Parameters:
- *   sem - the semaphore descriptor
- *
- * Returned Value:
- *   This is an internal OS interface and should not be used by applications.
- *   It follows the NuttX internal error return policy:  Zero (OK) is
- *   returned on success.  A negated errno value is returned on failure.
- *   Possible returned errors:
- *
- *     EINVAL - Invalid attempt to get the semaphore
- *     EAGAIN - The semaphore is not available.
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-int nxsem_trywait(FAR sem_t *sem)
-{
-  /* This API should not be called from the idleloop */
-
-  DEBUGASSERT(sem != NULL);
-  DEBUGASSERT(!OSINIT_IDLELOOP() || !sched_idletask() ||
-              up_interrupt_context());
-
-  /* If this is a mutex, we can try to get the mutex in fast mode,
-   * else try to get it in slow mode.
-   */
-
-  if ((sem->flags & SEM_TYPE_MUTEX)
-#if defined(CONFIG_PRIORITY_PROTECT) || defined(CONFIG_PRIORITY_INHERITANCE)
-      && (sem->flags & SEM_PRIO_MASK) == SEM_PRIO_NONE
-#endif
-      )
-    {
-      int32_t old = 1;
-      if (atomic_try_cmpxchg_acquire(NXSEM_COUNT(sem), &old, 0))
-        {
-          return OK;
-        }
-
-      return -EAGAIN;
-    }
-
-  return nxsem_trywait_slow(sem);
 }
