@@ -43,6 +43,14 @@ config ARCH_BOARD_ARDUINO_R4_MINIMA
 		This options selects the Arduino R4 Minima board featuring the Renesas
 		R7FA4M1 MCU running at 48 MHz.
 
+config ARCH_BOARD_XIAO_RA4M1
+	bool "Seeed Studio XIAO RA4M1"
+	depends on ARCH_CHIP_RA4
+	select ARCH_HAVE_LEDS
+	---help---
+		This options selects the Seeed Studio XIAO RA4M1 board featuring the Renesas
+		R7FA4M1 MCU running at 48 MHz.
+
 config ARCH_BOARD_ARDUINO_M0
 	bool "Arduino M0"
 	depends on ARCH_CHIP_SAMD21G18A
@@ -3526,6 +3534,7 @@ config ARCH_BOARD
 	default "pic32mz-starterkit"        if ARCH_BOARD_PIC32MZ_STARTERKIT
 	default "qemu-i486"                 if ARCH_BOARD_QEMU_I486
 	default "qemu-intel64"              if ARCH_BOARD_INTEL64_QEMU
+	default "xiao-ra4m1"                if ARCH_BOARD_XIAO_RA4M1
 	default "raspberrypi-pico"          if ARCH_BOARD_RASPBERRYPI_PICO
 	default "raspberrypi-4b"            if ARCH_BOARD_RASPBERRYPI_4B
 	default "raspberrypi-pico-w"        if ARCH_BOARD_RASPBERRYPI_PICO_W
@@ -4030,6 +4039,9 @@ source "boards/arm/sam34/arduino-due/Kconfig"
 endif
 if ARCH_BOARD_ARDUINO_R4_MINIMA
 source "boards/arm/ra4/arduino-r4-minima/Kconfig"
+endif
+if ARCH_BOARD_XIAO_RA4M1
+source "boards/arm/ra4/xiao-ra4m1/Kconfig"
 endif
 if ARCH_BOARD_ARDUINO_M0
 source "boards/arm/samd2l2/arduino-m0/Kconfig"
