@@ -40,10 +40,10 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tricore_upcsa_register
+ * Name: tricore_dump_upcsa
  ****************************************************************************/
 
-void tricore_upcsa_register(volatile uint32_t *regs)
+void tricore_dump_upcsa(volatile uint32_t *regs)
 {
   _alert("UPCXI:%08x  PSW:%08x  SP:%08x   PC:%08x\n",
          regs[REG_UPCXI], regs[REG_PSW], regs[REG_A10], regs[REG_UA11]);
@@ -56,10 +56,10 @@ void tricore_upcsa_register(volatile uint32_t *regs)
 }
 
 /****************************************************************************
- * Name: tricore_lowcsa_register
+ * Name: tricore_dump_lowcsa
  ****************************************************************************/
 
-void tricore_lowcsa_register(volatile uint32_t *regs)
+void tricore_dump_lowcsa(volatile uint32_t *regs)
 {
   _alert("LPCXI:%08x  A11:%08x   A2:%08x  A3:%08x\n",
          regs[REG_LPCXI] | PCXI_UL, regs[REG_LA11],
@@ -73,6 +73,18 @@ void tricore_lowcsa_register(volatile uint32_t *regs)
 }
 
 /****************************************************************************
+ * Name: tricore_dump_trapctrl
+ ****************************************************************************/
+
+void tricore_dump_trapctrl(void)
+{
+  _alert("PSTR:%-14.8" PRIX32 "DSTR:%-14.8" PRIX32
+         "DATR:%-14.8" PRIX32 "DEADD:%-13.8" PRIX32 "\n\n",
+         __mfcr(CPU_PSTR), __mfcr(CPU_DSTR),
+         __mfcr(CPU_DATR), __mfcr(CPU_DEADD));
+}
+
+/****************************************************************************
  * Name: tricore_csachain_dump
  ****************************************************************************/
 
@@ -82,11 +94,11 @@ void tricore_csachain_dump(uintptr_t pcxi)
     {
       if (pcxi & PCXI_UL)
         {
-          tricore_upcsa_register(tricore_csa2addr(pcxi));
+          tricore_dump_upcsa(tricore_csa2addr(pcxi));
         }
       else
         {
-          tricore_lowcsa_register(tricore_csa2addr(pcxi));
+          tricore_dump_lowcsa(tricore_csa2addr(pcxi));
         }
 
         pcxi = tricore_csa2addr(pcxi)[0];
@@ -103,9 +115,11 @@ void up_dump_register(void *dumpregs)
 
   /* enter this funtion means that the regs is lowcsa */
 
-  tricore_lowcsa_register(regs);
+  tricore_dump_lowcsa(regs);
 
-  tricore_upcsa_register(regs + TC_CONTEXT_REGS);
+  tricore_dump_upcsa(regs + TC_CONTEXT_REGS);
+
+  tricore_dump_trapctrl();
 }
 
 /****************************************************************************
