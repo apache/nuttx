@@ -2131,12 +2131,177 @@ static void cdcuart_detach(FAR struct uart_dev_s *dev)
 
 static int cdcuart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
-  struct inode        *inode  = filep->f_inode;
-  struct cdcacm_dev_s *priv   = inode->i_private;
-  int                  ret    = OK;
+  FAR struct inode        *inode  = filep->f_inode;
+  FAR struct cdcacm_dev_s *priv   = inode->i_private;
+  FAR struct uart_dev_s   *serdev = &priv->serdev;
+  int                      ret    = OK;
 
   switch (cmd)
     {
+    /* Get the number of bytes that may be read from the RX buffer
+     * (without waiting)
+     */
+
+    case FIONREAD:
+      {
+        FAR struct cdcacm_rdreq_s *rdcontainer;
+        FAR sq_entry_t *entry;
+        int count;
+
+        irqstate_t flags = enter_critical_section();
+
+        /* Determine the number of bytes available in the RX buffer */
+
+        count = serdev->recv.head - serdev->recv.tail;
+
+        sq_for_every(&priv->rxpending, entry)
+          {
+            rdcontainer = (FAR struct cdcacm_rdreq_s *)entry;
+            count += rdcontainer->req->xfrd;
+          }
+
+        leave_critical_section(flags);
+
+        *(FAR int *)((uintptr_t)arg) = count;
+      }
+      break;
+
+    /* Get the number of bytes that have been written to the TX
+     * buffer.
+     */
+
+    case FIONWRITE:
+      {
+        FAR struct cdcacm_wrreq_s *wrcontainer;
+        FAR sq_entry_t *entry;
+        int count;
+        int i;
+
+        irqstate_t flags = enter_critical_section();
+
+        /* Determine the number of bytes waiting in the TX buffer */
+
+        count = serdev->xmit.head - serdev->xmit.tail;
+
+        if (priv->nwrq < (CONFIG_CDCACM_NWRREQS - 1))
+          {
+            for (i = 0; i < CONFIG_CDCACM_NWRREQS; i++)
+              {
+                sq_for_every(&priv->txfree, entry)
+                  {
+                    wrcontainer = (FAR struct cdcacm_wrreq_s *)entry;
+                    if (&priv->wrreqs[i] == wrcontainer)
+                      {
+                        continue;
+                      }
+                    else if (&priv->wrreqs[i] != priv->wrcontainer)
+                      {
+                        count += priv->wrreqs[i].req->len;
+                      }
+                  }
+              }
+          }
+
+        leave_critical_section(flags);
+
+        *(FAR int *)((uintptr_t)arg) = count;
+      }
+      break;
+
+    /* Get the number of free bytes in the TX buffer */
+
+    case FIONSPACE:
+      {
+        FAR sq_entry_t *entry;
+        int count = 0;
+
+        irqstate_t flags = enter_critical_section();
+
+        /* Determine the number of bytes free in the TX buffer */
+
+        if (serdev->xmit.head == 0)
+          {
+            count = serdev->xmit.size - 1;
+          }
+
+        sq_for_every(&priv->txfree, entry)
+          {
+            count += serdev->xmit.size - 1;
+          }
+
+        leave_critical_section(flags);
+
+        *(FAR int *)((uintptr_t)arg) = count;
+      }
+      break;
+
+    case TCFLSH:
+      {
+        /* Empty the tx/rx buffers */
+
+        irqstate_t flags = enter_critical_section();
+
+        if (arg == TCIFLUSH || arg == TCIOFLUSH)
+          {
+            FAR struct cdcacm_rdreq_s *rdcontainer;
+
+            if (priv->rdcontainer)
+              {
+                sq_addlast((FAR sq_entry_t *)priv->rdcontainer,
+                           &priv->rxpending);
+                priv->rdcontainer = NULL;
+              }
+
+            while (!sq_empty(&priv->rxpending))
+              {
+                 rdcontainer = (FAR struct cdcacm_rdreq_s *)
+                               sq_remfirst(&priv->rxpending);
+                 ret = cdcacm_requeue_rdrequest(priv, rdcontainer);
+              }
+
+            serdev->recv.head = 0;
+            serdev->recv.tail = 0;
+
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+            /* De-activate RX flow control. */
+
+            uart_rxflowcontrol(serdev, 0, false);
+#endif
+          }
+
+        if (arg == TCOFLUSH || arg == TCIOFLUSH)
+          {
+            if (priv->wrcontainer)
+              {
+                serdev->xmit.head = 0;
+                serdev->xmit.tail = 0;
+
+                /* Inform any waiters there is space available. */
+
+                uart_datasent(serdev);
+              }
+            else if(priv->nwrq > 0)
+              {
+                priv->wrcontainer = (FAR struct cdcacm_wrreq_s *)
+                                    sq_remfirst(&priv->txfree);
+                serdev->xmit.buffer =
+                         (FAR char *)priv->wrcontainer->req->buf;
+                priv->nwrq--;
+                serdev->xmit.head = 0;
+                serdev->xmit.tail = 0;
+
+                uart_datasent(serdev);
+              }
+            else
+              {
+                ret = -EBUSY;
+              }
+          }
+
+        leave_critical_section(flags);
+      }
+      break;
+
     /* CAICO_REGISTERCB
      *   Register a callback for serial event notification. Argument:
      *   cdcacm_callback_t.  See cdcacm_callback_t type definition below.
