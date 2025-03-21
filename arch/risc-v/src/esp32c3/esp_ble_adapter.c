@@ -1054,6 +1054,7 @@ static int semphr_take_wrapper(void *semphr, uint32_t block_time_ms)
 {
   int ret;
   struct bt_sem_s *bt_sem = (struct bt_sem_s *)semphr;
+  uint32_t tick = MSEC2TICK(block_time_ms);
 
   if (block_time_ms == OSI_FUNCS_TIME_BLOCKING)
     {
@@ -1063,7 +1064,7 @@ static int semphr_take_wrapper(void *semphr, uint32_t block_time_ms)
     {
       if (block_time_ms > 0)
         {
-          ret = nxsem_tickwait(&bt_sem->sem, MSEC2TICK(block_time_ms));
+          ret = nxsem_tickwait(&bt_sem->sem, tick);
         }
       else
         {
@@ -1073,8 +1074,7 @@ static int semphr_take_wrapper(void *semphr, uint32_t block_time_ms)
 
   if (ret)
     {
-      wlerr("ERROR: Failed to wait sem in %lu ticks. Error=%d\n",
-            MSEC2TICK(block_time_ms), ret);
+      wlerr("ERROR: Failed to wait sem in %lu ticks. Error=%d\n", tick, ret);
     }
 
   return esp_errno_trans(ret);
