@@ -90,6 +90,15 @@ void IRAM_ATTR spi_disable_cache(int cpu)
       regval  = getreg32(DPORT_PRO_CACHE_CTRL_REG);
       regval &= ~DPORT_PRO_CACHE_ENABLE_M;
       putreg32(regval, DPORT_PRO_CACHE_CTRL_REG);
+
+#ifdef CONFIG_ESP32_SPI_FLASH_MMAP
+
+      /* Disable IRAM1 section to avoid some issue */
+
+      regval  = getreg32(DPORT_PRO_CACHE_CTRL1_REG);
+      regval &= ~DPORT_PRO_CACHE_MASK_IRAM1_M;
+      putreg32(regval, DPORT_PRO_CACHE_CTRL1_REG);
+#endif
     }
 #ifdef CONFIG_SMP
   else
@@ -104,6 +113,15 @@ void IRAM_ATTR spi_disable_cache(int cpu)
       regval  = getreg32(DPORT_APP_CACHE_CTRL_REG);
       regval &= ~DPORT_APP_CACHE_ENABLE_M;
       putreg32(regval, DPORT_APP_CACHE_CTRL_REG);
+
+#ifdef CONFIG_ESP32_SPI_FLASH_MMAP
+
+      /* Disable IRAM1 section to avoid some issue */
+
+      regval  = getreg32(DPORT_APP_CACHE_CTRL1_REG);
+      regval &= ~DPORT_APP_CACHE_MASK_IRAM1_M;
+      putreg32(regval, DPORT_APP_CACHE_CTRL1_REG);
+#endif
     }
 
 #endif
