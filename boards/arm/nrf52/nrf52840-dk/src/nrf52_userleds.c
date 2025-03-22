@@ -36,7 +36,7 @@
 #include "arm_internal.h"
 #include "nrf52840-dk.h"
 
-#ifndef CONFIG_ARCH_LEDS
+#if !defined(CONFIG_ARCH_LEDS) && !defined(CONFIG_NRF52840DK_LEDS_GPIO)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -147,4 +147,4 @@ void board_userled_all(uint32_t ledset)
     }
 }
 
-#endif /* !CONFIG_ARCH_LEDS */
+#endif /* !defined(CONFIG_ARCH_LEDS) && !defined(CONFIG_NRF52840DK_LEDS_GPIO) */

@@ -38,6 +38,10 @@ ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS += nrf52_buttons.c
 endif
 
+ifeq ($(CONFIG_NRF52840DK_BTNLEDS_GPIO),y)
+CSRCS += nrf52_gpio.c
+endif
+
 ifeq ($(CONFIG_NRF52_SPI_MASTER),y)
 CSRCS += nrf52_spi.c
 endif

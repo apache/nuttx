@@ -203,5 +203,17 @@ int nrf52_adc_setup(void);
 int nrf52_mx25_initialize(void);
 #endif
 
+/****************************************************************************
+ * Name: nrf52_gpioleds_initialize
+ *
+ * Description:
+ *   Initialize GPIO devices with board LEDS and buttons.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NRF52840DK_BTNLEDS_GPIO
+int nrf52_gpioleds_initialize(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_NRF52_NRF52840_DK_SRC_NRF52840_DK_H */
