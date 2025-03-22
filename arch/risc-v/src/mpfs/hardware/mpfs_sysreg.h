@@ -137,6 +137,11 @@
 #define MPFS_SYSREG_SPARE_PERIM_RW_OFFSET              0x02DC /* Spare signal back to G5C */
 #define MPFS_SYSREG_SPARE_FIC_OFFSET                   0x02E0 /* Unused FIC resets */
 
+#define MPFS_SYSREG_SOFT_RESET_CR     (MPFS_SYSREG_BASE + \
+                                       MPFS_SYSREG_SOFT_RESET_CR_OFFSET)
+#define MPFS_SYSREG_SUBBLK_CLOCK_CR   (MPFS_SYSREG_BASE + \
+                                       MPFS_SYSREG_SUBBLK_CLOCK_CR_OFFSET)
+
 /* Register bit field definitions *******************************************/
 
 /* CLOCK_CONFIG_CR:

@@ -44,6 +44,7 @@
 
 #include "mpfs_gpio.h"
 #include "mpfs_corespi.h"
+#include "mpfs_rcc.h"
 #include "hardware/mpfs_corespi.h"
 #include "hardware/mpfs_sysreg.h"
 #include "riscv_internal.h"
@@ -1512,6 +1513,11 @@ static void mpfs_spi_init(struct spi_dev_s *dev)
   const struct mpfs_spi_config_s *config = priv->config;
 
   up_disable_irq(priv->plic_irq);
+
+  /* Toggle peripheral reset */
+
+  mpfs_set_reset(MPFS_RCC_SPI, priv->id, 1);
+  mpfs_set_reset(MPFS_RCC_SPI, priv->id, 0);
 
   /* Release FIC reset and enable clocks */
 

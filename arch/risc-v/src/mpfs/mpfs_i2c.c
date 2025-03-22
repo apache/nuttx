@@ -48,6 +48,7 @@
 
 #include "mpfs_gpio.h"
 #include "mpfs_i2c.h"
+#include "mpfs_rcc.h"
 #include "riscv_internal.h"
 #include "hardware/mpfs_i2c.h"
 
@@ -369,6 +370,11 @@ static int mpfs_i2c_init(struct mpfs_i2c_priv_s *priv)
 
       if (priv->fpga)
         {
+          /* Toggle peripheral reset */
+
+          mpfs_set_reset(MPFS_RCC_I2C, priv->id, 1);
+          mpfs_set_reset(MPFS_RCC_I2C, priv->id, 0);
+
           /* FIC3 is used by many, don't reset it here, or many
            * FPGA based modules will stop working right here. Just
            * bring out of reset instead.
