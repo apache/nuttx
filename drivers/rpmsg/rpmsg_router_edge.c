@@ -346,6 +346,7 @@ static void rpmsg_router_edge_unbind(FAR struct rpmsg_endpoint *ept)
       return;
     }
 
+  usr_ept->dest_addr = RPMSG_ADDR_ANY;
   if (usr_ept->ns_unbind_cb)
     {
       usr_ept->ns_unbind_cb(usr_ept);
