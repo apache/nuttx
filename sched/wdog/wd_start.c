@@ -82,9 +82,6 @@
 
 #endif
 
-#define wdparm_to_ptr(type, arg) ((type)(uintptr_t)arg)
-#define ptr_to_wdparm(ptr)       wdparm_to_ptr(wdparm_t, ptr)
-
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -98,7 +95,7 @@ static unsigned int g_wdtimernested;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: wdentry_period
+ * Name: wd_period_callback
  *
  * Description:
  *   Periodic watchdog timer callback function.
@@ -111,23 +108,20 @@ static unsigned int g_wdtimernested;
  *
  ****************************************************************************/
 
-static void wdentry_period(wdparm_t arg)
+static void wd_period_callback(wdparm_t arg)
 {
-  FAR struct wdog_period_s *wdperiod;
+  FAR struct wdog_s *wdog = ((FAR struct wdog_s *)(uintptr_t)arg);
 
-  wdperiod = wdparm_to_ptr(FAR struct wdog_period_s *, arg);
-
-  wdperiod->func(wdperiod->wdog.arg);
+  wdog->pfunc(wdog->arg);
 
   /* Since we set `ticks++` at `wd_start_abstick`,
    * we need to use `expired - 1` here to avoid time drift.
    */
 
-  if (wdperiod->period != 0)
+  if (wdog->period != 0)
     {
-      wd_start_abstick(&wdperiod->wdog,
-                       wdperiod->wdog.expired + wdperiod->period - 1,
-                       wdentry_period, wdperiod->wdog.arg);
+      wd_start_abstick(wdog, wdog->expired + wdog->period - 1,
+                       wd_period_callback, wdog->arg);
     }
 }
 
@@ -187,8 +181,7 @@ static inline_function void wd_expiration(clock_t ticks)
       func = wdog->func;
       wdog->func = NULL;
 
-      arg = func != wdentry_period ? wdog->arg : ptr_to_wdparm(
-            list_container_of(wdog, struct wdog_period_s, wdog));
+      arg = wdog->arg;
 
       /* Execute the watchdog function */
 
@@ -460,7 +453,7 @@ int wd_start(FAR struct wdog_s *wdog, sclock_t delay,
  *
  ****************************************************************************/
 
-int wd_start_period(FAR struct wdog_period_s *wdog, sclock_t delay,
+int wd_start_period(FAR struct wdog_s *wdog, sclock_t delay,
                     clock_t period, wdentry_t wdentry, wdparm_t arg)
 {
   if (!wdog || !period || !wdentry)
@@ -468,10 +461,10 @@ int wd_start_period(FAR struct wdog_period_s *wdog, sclock_t delay,
       return -EINVAL;
     }
 
-  wdog->func   = wdentry;
+  wdog->pfunc  = wdentry;
   wdog->period = period;
 
-  return wd_start(&wdog->wdog, delay, wdentry_period, arg);
+  return wd_start(wdog, delay, wd_period_callback, arg);
 }
 
 /****************************************************************************
