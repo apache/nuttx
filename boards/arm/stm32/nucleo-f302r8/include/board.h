@@ -206,10 +206,31 @@
 #define GPIO_USART2_RX GPIO_USART2_RX_2 /* PA3 */
 #define GPIO_USART2_TX GPIO_USART2_TX_2 /* PA2 */
 
-/* USART1 */
+/* USART1
+ *
+ * At default use:
+ *   USART1_RX - PB7
+ *   USART1_TX - PB6
+ *
+ * If CONFIG_NUCLEOF302R8_RS485_WAVESHARE=y use configuration to match RS485
+ * shield from Waveshare:
+ *
+ *   USART1_RX - PA10
+ *   USART1_TX - PA9
+ *   RS485_DIR - PA8 (arduino D7)
+ *
+ */
 
-#define GPIO_USART1_RX GPIO_USART1_RX_2 /* PB7 */
-#define GPIO_USART1_TX GPIO_USART1_TX_2 /* PB6 */
+#ifdef CONFIG_NUCLEOF302R8_RS485_WAVESHARE
+#  define GPIO_USART1_RX GPIO_USART1_RX_1 /* PA10 */
+#  define GPIO_USART1_TX GPIO_USART1_TX_1 /* PA9 */
+#  define GPIO_USART1_RS485_DIR (GPIO_OUTPUT | GPIO_PUSHPULL |          \
+                                 GPIO_SPEED_50MHz | GPIO_OUTPUT_CLEAR | \
+                                 GPIO_PORTA | GPIO_PIN8)
+#else
+#  define GPIO_USART1_RX GPIO_USART1_RX_2 /* PB7 */
+#  define GPIO_USART1_TX GPIO_USART1_TX_2 /* PB6 */
+#endif
 
 /* CAN */
 

@@ -9,6 +9,10 @@ config NUCLEOF302R8_HIGHPRI
 	bool "High priority interrupt test"
 	default n
 
+config NUCLEOF302R8_RS485_WAVESHARE
+	bool "Map USART1 pins to match RS485 CAN Waveshare shield"
+	default n
+
 if SENSORS_QENCODER
 
 config NUCLEO_F302R8_QETIMER
