@@ -259,16 +259,12 @@ int nxsem_post(FAR sem_t *sem)
    * else try to get it in slow mode.
    */
 
-#if !defined(CONFIG_PRIORITY_INHERITANCE) && !defined(CONFIG_PRIORITY_PROTECT)
-  if (sem->flags & SEM_TYPE_MUTEX)
+  int ret;
+  NXSEM_POST_FAST(sem, ret);
+  if (ret == OK)
     {
-      int32_t old = 0;
-      if (atomic_try_cmpxchg_release(NXSEM_COUNT(sem), &old, 1))
-        {
-          return OK;
-        }
+      return OK;
     }
-#endif
 
   return nxsem_post_slow(sem);
 }

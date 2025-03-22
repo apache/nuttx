@@ -265,16 +265,12 @@ int nxsem_wait(FAR sem_t *sem)
    * else try to get it in slow mode.
    */
 
-#if !defined(CONFIG_PRIORITY_INHERITANCE) && !defined(CONFIG_PRIORITY_PROTECT)
-  if (sem->flags & SEM_TYPE_MUTEX)
+  int ret;
+  NXSEM_TRYWAIT_FAST(sem, ret);
+  if (ret == OK)
     {
-      int32_t old = 1;
-      if (atomic_try_cmpxchg_acquire(NXSEM_COUNT(sem), &old, 0))
-        {
-          return OK;
-        }
+      return OK;
     }
-#endif
 
   return nxsem_wait_slow(sem);
 }
