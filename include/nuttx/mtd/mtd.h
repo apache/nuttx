@@ -510,12 +510,13 @@ void rammtd_uninitialize(FAR struct mtd_dev_s *dev);
  *   Create and initialize a Ramtron MTD device instance.
  *
  * Input Parameters:
- *   start - Address of the beginning of the allocated RAM regions.
- *   size  - The size in bytes of the allocated RAM region.
+ *   dev  - Pointer to the SPI device instance.
+ *   spi_devid - SPI device ID to manage CS lines in board
  *
  ****************************************************************************/
 
-FAR struct mtd_dev_s *ramtron_initialize(FAR struct spi_dev_s *dev);
+FAR struct mtd_dev_s *ramtron_initialize(FAR struct spi_dev_s *dev,
+                                         uint16_t spi_devid);
 
 /****************************************************************************
  * Name: sst25_initialize
