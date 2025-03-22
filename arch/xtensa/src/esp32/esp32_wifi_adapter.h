@@ -212,7 +212,7 @@ int esp_wifi_sta_stop(void);
  *
  ****************************************************************************/
 
-int esp_wifi_sta_send_data(void *pbuf, uint32_t len);
+int esp_wifi_sta_send_data(void *pbuf, size_t len);
 
 /****************************************************************************
  * Name: esp_wifi_sta_register_recv_cb
@@ -550,7 +550,7 @@ int esp_wifi_softap_stop(void);
  *
  ****************************************************************************/
 
-int esp_wifi_softap_send_data(void *pbuf, uint32_t len);
+int esp_wifi_softap_send_data(void *pbuf, size_t len);
 
 /****************************************************************************
  * Name: esp_wifi_softap_register_recv_cb

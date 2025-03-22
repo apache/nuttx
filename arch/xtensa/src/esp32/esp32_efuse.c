@@ -379,7 +379,8 @@ static int esp_efuse_fill_buff(uint32_t num_reg, int bit_offset,
   int sum_shift = 0;
   int shift_bit = (*bits_counter) % 8;
 
-  minfo("block = %d | num_reg = %d | bit_start = %d | bit_count = %d\n",
+  minfo("block = %" PRIu32 " | num_reg = %" PRIu32 ""
+        " | bit_start = %" PRIu32 " | bit_count = %d\n",
         efuse_block, num_reg, bit_start, bit_count);
 
   if (shift_bit != 0)

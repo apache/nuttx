@@ -638,7 +638,7 @@ void up_enable_irq(int irq)
 
       if (isr_in_iram && handler && !esp32s3_ptr_iram(handler))
         {
-          irqerr("Interrupt handler isn't in IRAM (%08" PRIx32 ")",
+          irqerr("Interrupt handler isn't in IRAM (%08" PRIxPTR ")",
                  (intptr_t)handler);
           PANIC();
         }
