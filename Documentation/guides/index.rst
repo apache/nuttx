@@ -9,45 +9,32 @@ Guides
   nfs.rst
   usbtrace.rst
   simulator.rst
-  qemugdb.rst
   rndis.rst
   drivers.rst
-  tasktrace.rst
   cpp_cmake.rst
   pysimcoder.rst
   customboards.rst
   customapps.rst
   citests.rst
   zerolatencyinterrupts.rst
-  kasan.rst
   fortify.rst
   nestedinterrupts.rst
-  cortexmhardfaults.rst
-  coredump.rst
-  coresight.rst
-  gdbserver.rst
-  gdbwithpython.rst
   ofloader.rst
   testingtcpip.rst
   automounter.rst
   stm32nullpointer.rst
   stm32ccm.rst
-  stackcheck.rst
-  stackrecord.rst
   etcromfs.rst
   thread_local_storage.rst
   devicetree.rst
-  debuggingflash_nuttxonarm.rst
   changing_systemclockconfig.rst
   usingkernelthreads.rst
   armv7m_runtimestackcheck.rst
-  disabling_stackdumpdebug.rst
   include_files_board_h.rst
   specialstuff_in_nuttxheaderfiles.rst
   kernel_threads_with_custom_stacks.rst
   versioning_and_task_names.rst
   logging_rambuffer.rst
-  mte.rst
   ipv6.rst
   integrate_newlib.rst
   protected_build.rst
@@ -65,7 +52,6 @@ Guides
   building_nuttx_with_app_out_of_src_tree.rst
   building_uclibcpp.rst
   custom_app_directories.rst
-  debugging_elf_loadable_modules.rst
   multiple_nsh_sessions.rst
   nsh_network_link_management.rst
   ram_rom_disks.rst
