@@ -1031,6 +1031,24 @@
 #  define csinfo     _none
 #endif
 
+#ifdef CONFIG_DEBUG_PTP_ERROR
+#  define ptperr     _err
+#else
+#  define ptperr     _none
+#endif
+
+#ifdef CONFIG_DEBUG_PTP_WARN
+#  define ptpwarn    _warn
+#else
+#  define ptpwarn    _none
+#endif
+
+#ifdef CONFIG_DEBUG_PTP_INFO
+#  define ptpinfo    _info
+#else
+#  define ptpinfo    _none
+#endif
+
 /* Buffer dumping macros do not depend on varargs */
 
 #ifdef CONFIG_DEBUG_ERROR

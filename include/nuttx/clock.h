@@ -91,11 +91,15 @@
  * CLOCK_PROCESS_CPUTIME_ID - 2
  * CLOCK_THREAD_CPUTIME_ID  - 3
  * CLOCK_BOOTTIME           - 4
- * bit 3~32: the pid or tid value
+ * CLOCK_FD                 - 5
+ *
+ * if the clockid value exceeds CLOCK_MASK, it indicates a dynamic clockid.
+ * bit 3~32: the fd, pid or tid value
  *
  * The CLOCK_MASK are using to extract the clock_type from the clockid_t
  */
 
+#define CLOCK_FD              5
 #define CLOCK_MASK            7
 #define CLOCK_SHIFT           3
 

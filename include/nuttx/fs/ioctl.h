@@ -112,6 +112,7 @@
 #define _I2SOCBASE      (0x4400) /* I2S driver ioctl commands */
 #define _1WIREBASE      (0x4500) /* 1WIRE ioctl commands */
 #define _EEPIOCBASE     (0x4600) /* EEPROM driver ioctl commands */
+#define _PTPBASE        (0x4700) /* PTP ioctl commands */
 #define _WLIOCBASE      (0x8b00) /* Wireless modules ioctl network commands */
 
 /* boardctl() commands share the same number space */
@@ -798,6 +799,13 @@
 
 #define _EEPIOCVALID(c)    (_IOC_TYPE(c)==_EEPIOCBASE)
 #define _EEPIOC(nr)        _IOC(_EEPIOCBASE,nr)
+
+/* PTP driver ioctl definitions *********************************************/
+
+/* see nuttx/include/ptp_clock.h */
+
+#define _PTPIOCVALID(c)       (_IOC_TYPE(c)==_PTPBASE)
+#define _PTPIOC(nr)           _IOC(_PTPBASE,nr)
 
 /****************************************************************************
  * Public Type Definitions
