@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/common/espressif/esp_i2c_slave.h
+ * arch/xtensa/src/common/espressif/esp_i2c_slave.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_COMMON_ESPRESSIF_ESP_I2C_SLAVE_H
-#define __ARCH_RISCV_SRC_COMMON_ESPRESSIF_ESP_I2C_SLAVE_H
+#ifndef __ARCH_XTENSA_SRC_COMMON_ESPRESSIF_ESP_I2C_SLAVE_H
+#define __ARCH_XTENSA_SRC_COMMON_ESPRESSIF_ESP_I2C_SLAVE_H
 
 /****************************************************************************
  * Included Files
@@ -37,11 +37,11 @@
 
 #ifndef __ASSEMBLY__
 
-#ifdef CONFIG_ESPRESSIF_I2C0_SLAVE_MODE
+#ifdef CONFIG_ESPRESSIF_I2C0_SLAVE
 #  define ESPRESSIF_I2C0_SLAVE 0
 #endif
 
-#ifdef CONFIG_ESPRESSIF_I2C1_SLAVE_MODE
+#ifdef CONFIG_ESPRESSIF_I2C1_SLAVE
 #  define ESPRESSIF_I2C1_SLAVE 1
 #endif
 
@@ -89,4 +89,4 @@ int esp_i2cbus_slave_uninitialize(struct i2c_slave_s *dev);
 #endif /* CONFIG_ESPRESSIF_I2C_PERIPH_SLAVE_MODE */
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_RISCV_SRC_COMMON_ESPRESSIF_ESP_I2C_SLAVE_H */
+#endif /* __ARCH_XTENSA_SRC_COMMON_ESPRESSIF_ESP_I2C_SLAVE_H */
