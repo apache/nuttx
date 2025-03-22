@@ -257,6 +257,109 @@ config ADC_MCP3008_DIFFERENTIAL
 
 endif # ADC_MCP3008
 
+config ADC_ADS1115
+	bool "ADS1115 support"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the Texas Instruments ADS1115 16-bit ADC.
+		Currently support is experimental, especially the comparator and ALRT/RDY
+		pin functions. 
+
+if ADC_ADS1115 
+
+config ADC_ADS1115_I2C_FREQUENCY
+	int "ADS1115 I2C frequency"
+	default 100000
+	---help---
+		ADS1115 I2C frequency. 
+
+config ADC_ADS1115_ADDR
+	hex "ADS1115 I2C address"
+	default 0x48
+	---help---
+		ADS1115 I2C address. Default is 0x48.
+
+config ADC_ADS1115_CHANNEL
+	int "ADS1115 channel"
+	default 0
+	range 0 7
+	---help---
+		Default ADS1115 channel/mux configuration. 
+		0-3 are the differential channels. 
+		4-7 are the single ended channels for A0 to A3
+		See the datasheet or ads1115.h for more info.
+
+config ADC_ADS1115_PGA 
+	int "ADS1115 PGA"
+	default 2
+	range 0 7
+	---help---
+		ADS1115 PGA configuration.
+		0 is +/-6.144V, 1 is +/-4.096V, 2 is +/-2.048V, 3 is +/-1.024V,
+		4 is +/-0.512V, 5 is +/-0.256V, 6 is +/-0.256V, 7 is +/-0.256V.
+
+config ADC_ADS1115_CONTINOUS 
+	bool "ADS1115 continuous mode"
+	default n
+	---help---
+		ADS1115 continuous mode. The ADS1115 will repeatedly take conversions.
+		If changing channels in this mode, there is a chance of old data being
+		read. To avoid this, use one shot mode or use the ALERT/RDY pin.
+
+config ADC_ADS1115_DR
+	int "ADS1115 data rate"
+	default 4
+	range 0 7
+	---help---
+		ADS1115 data rate. 
+		0 is 8sps, 1 is 16sps, 2 is 32sps, 3 is 64sps,
+		4 is 128sps, 5 is 250sps, 6 is 475sps, 7 is 860sps.
+
+config ADC_ADS1115_COMP_MODE
+	bool "ADS1115 window comparator mode"
+	default n
+	---help---
+		ADS1115 window comparator mode. 
+
+config ADC_ADS1115_COMP_POL
+	bool "ADS1115 comparator polarity"
+	default n
+	---help---
+		ADS1115 comparator polarity. n is active low, y is active high.
+
+config ADC_ADS1115_COMP_LAT
+	bool "ADS1115 comparator latching"
+	default n
+	---help---
+		ADS1115 comparator latching. n is non-latching, y is latching.
+		Note that this is cleared when reading from the conversion register.
+
+config ADC_ADS1115_COMP_QUE
+	int "ADS1115 comparator queue"
+	default 3
+	range 0 3
+	---help---
+		ADS1115 comparator queue. 0 is assert after 1 conversion, 1, is 
+		assert after 2 conversions, 2 is assert after 4 conversions, 3 
+		is disable comparator, and set ALERT/RDY to high-impedence. 
+
+config ADC_ADS1115_HI_THRESH
+	int "ADS1115 high threshold"
+	default 32767
+	range 0 65536
+	---help---
+		ADS1115 high threshold.
+
+config ADC_ADS1115_LO_THRESH
+	int "ADS1115 low threshold"
+	range 0 65536
+	default 32768
+	---help---
+		ADS1115 low threshold.
+
+endif # ADC_ADS1115
+
 endif # ADC
 
 config COMP
