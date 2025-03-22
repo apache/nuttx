@@ -113,6 +113,10 @@ endif
 ifeq ($(CONFIG_ADC_MCP3008),y)
   CSRCS += mcp3008.c
 endif
+
+ifeq ($(CONFIG_ADC_ADS1115),y)
+  CSRCS += ads1115.c 
+endif
 endif
 
 ifeq ($(CONFIG_LMP92001),y)
