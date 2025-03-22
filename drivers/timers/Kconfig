@@ -565,4 +565,11 @@ config PTP_CLOCK
 		devices. If you want to use a PTP clock, then you should
 		also enable at least one clock driver as well.
 
+config PTP_CLOCK_DUMMY
+	bool "the dummy test driver for ptp clock"
+	default n
+	select PTP_CLOCK
+	---help---
+		The dummy test driver.
+
 endmenu # Timer Driver Support

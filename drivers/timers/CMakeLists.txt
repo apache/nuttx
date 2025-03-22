@@ -94,4 +94,8 @@ if(CONFIG_PTP_CLOCK)
   list(APPEND SRCS ptp_clock.c)
 endif()
 
+if(CONFIG_PTP_CLOCK_DUMMY)
+  list(APPEND SRCS ptp_clock_dummy.c)
+endif()
+
 target_sources(drivers PRIVATE ${SRCS})
