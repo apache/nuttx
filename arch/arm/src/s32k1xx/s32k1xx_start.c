@@ -184,6 +184,8 @@ static inline void s32k1xx_mpu_config(void)
  *
  ****************************************************************************/
 
+no_builtin("memcpy")
+no_builtin("memset")
 void __start(void)
 {
 #ifdef CONFIG_BOOT_RUNFROMFLASH

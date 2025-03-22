@@ -144,6 +144,8 @@ static inline void imxrt_tcmenable(void)
  *
  ****************************************************************************/
 
+no_builtin("memcpy")
+no_builtin("memset")
 void __start(void)
 {
   const register uint32_t *src;

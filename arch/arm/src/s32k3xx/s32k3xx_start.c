@@ -133,6 +133,8 @@ extern uint8_t FLASH_END_ADDR[];
  *
  ****************************************************************************/
 
+no_builtin("memcpy")
+no_builtin("memset")
 void s32k3xx_start(void)
 {
   register uint64_t *src;

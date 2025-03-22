@@ -144,6 +144,8 @@ static inline void imx9_tcmenable(void)
  *
  ****************************************************************************/
 
+no_builtin("memcpy")
+no_builtin("memset")
 void __start(void)
 {
   register const uint32_t *src;

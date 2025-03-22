@@ -170,6 +170,8 @@ static inline void stm32_tcmenable(void)
  *
  ****************************************************************************/
 
+no_builtin("memcpy")
+no_builtin("memset")
 void __start(void)
 {
   const uint32_t *src;
