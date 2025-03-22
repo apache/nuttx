@@ -48,6 +48,10 @@ endif
 
 ifeq ($(CONFIG_BOARD_STM32_IHM07M1),y)
 CSRCS += stm32_foc_ihm07m1.c
+else
+ifeq ($(CONFIG_ADC),y)
+CSRCS += stm32_adc.c
+endif
 endif
 
 ifeq ($(CONFIG_STM32_CAN),y)
