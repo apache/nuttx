@@ -29,6 +29,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
+#include <nuttx/streams.h>
 
 #ifdef CONFIG_ARCH_DEBUG_H
 #  include <arch/debug.h>
@@ -1317,6 +1318,26 @@
 #  define reseterrdumpbuffer(m,b,n)
 #  define resetinfodumpbuffer(m,b,n)
 #endif
+
+/****************************************************************************
+ * Name: lowsyslog
+ *
+ * Description:
+ *   lowsyslog() is used for output debug information at early boot-stage.
+ *
+ *   The NuttX implementation does not support any special formatting
+ *   characters beyond those supported by printf.
+ *
+ ****************************************************************************/
+
+#define lowsyslog(...) \
+  do \
+    { \
+       struct lib_outstream_s stream; \
+       lib_lowoutstream(&stream); \
+       lib_sprintf(&stream, __VA_ARGS__); \
+    } \
+  while (0)
 
 /****************************************************************************
  * Public Function Prototypes
