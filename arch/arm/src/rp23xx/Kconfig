@@ -741,14 +741,6 @@ config RP23XX_ADC
 
 if RP23XX_ADC
 
-config ADC
-	bool "Include ADC device driver"
-	default n
-	---help---
-		Additional ADC device drivers can be set under the
-		"Analog-to-Digital Conversion" item in the
-		"Device Driver/Analog Device Support" menu.
-
 if ADC
 
 config RP23XX_ADC_CHANNEL0
