@@ -27,6 +27,7 @@ config ARCH_CHIP_AVRDX
 	bool "AVR 32/64/128 DA/DB core"
 	select ARCH_FAMILY_AVR
 	select MM_SMALL
+	select ARCH_HAVE_TICKLESS
 	---help---
 		Atmel/Microchip AVR 32/64/128 DA/DB core family.
 
