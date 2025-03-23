@@ -18,6 +18,13 @@ System timer is provided by RTC peripheral and takes over it. (In theory,
 the Periodic Interrupt - PIT - component of it can be still used
 but they share single clock.)
 
+Tickless OS mode is supported in alarm mode. Configure it
+in :menuselection:`RTOS Features --> Clocks and Timers --> Support tick-less OS`
+:menuselection:`Tickless alarm` must be set, timer mode is not supported.
+:menuselection:`System timer tick period (microseconds)` also needs to be
+changed to value of at least 300. Higher value is recommended though,
+300us is not going to be precise at all.
+
 Supported Boards
 ================
 
