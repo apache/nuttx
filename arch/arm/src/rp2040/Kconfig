@@ -617,14 +617,6 @@ config RP2040_ADC
 
 if RP2040_ADC
 
-config ADC
-	bool "Include ADC device driver"
-	default n
-	---help---
-		Additional ADC device drivers can be set under the
-		"Analog-to-Digital Conversion" item in the
-		"Device Driver/Analog Device Support" menu.
-
 if ADC
 
 config RPC2040_ADC_CHANNEL0
