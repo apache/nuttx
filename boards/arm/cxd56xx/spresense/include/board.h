@@ -69,6 +69,7 @@
 #include "cxd56_scd41.h"
 #include "cxd56_sensors.h"
 #include "cxd56_gnss_addon.h"
+#include "cxd56_cxd5602pwbimu.h"
 
 #ifdef CONFIG_VIDEO_ISX012
 #  include "cxd56_isx012.h"

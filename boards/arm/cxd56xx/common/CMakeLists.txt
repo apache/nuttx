@@ -189,5 +189,9 @@ if(CONFIG_ARCH_BOARD_COMMON)
     list(APPEND SRCS src/cxd56_gnss_addon.c)
   endif()
 
+  if(CONFIG_SENSORS_CXD5602PWBIMU)
+    list(APPEND SRCS src/cxd56_cxd5602pwbimu.c)
+  endif()
+
   target_sources(board PRIVATE ${SRCS})
 endif()

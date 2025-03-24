@@ -450,5 +450,11 @@ if(CONFIG_SENSORS)
     list(APPEND SRCS hdc1008.c)
   endif()
 
+  # SONY CXD5602PWBIMU
+
+  if(CONFIG_SENSORS_CXD5602PWBIMU)
+    list(APPEND SRCS cxd5602pwbimu.c)
+  endif()
+
   target_sources(drivers PRIVATE ${SRCS})
 endif()

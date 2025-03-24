@@ -432,6 +432,61 @@ config SENSORS_BMM150_THREAD_STACKSIZE
 
 endif # SENSORS_BMM150
 
+config SENSORS_CXD5602PWBIMU
+	bool "SONY CXD5602PWBIMU Inertial Measurement Sensor support"
+	default n
+	select SPI
+	select I2C
+	---help---
+		Enable driver support for the SONY CXD5602PWBIMU Inertial
+		Measurement sensor
+
+if SENSORS_CXD5602PWBIMU
+
+config SENSORS_CXD5602PWBIMU_NR_BUFFERS
+	int "Number of buffers to retrieve sensing data"
+	default 16
+
+config SENSORS_CXD5602PWBIMU_OVERWRITE
+	bool "Overwrite circular buffer"
+	default y
+
+config SENSORS_CXD5602PWBIMU_NPOLLWAITERS
+	int "Number of waiters to poll"
+	default 1
+	---help---
+		Number of waiters to poll
+
+config SENSORS_CXD5602PWBIMU_I2C_ADDRS_AUTO
+	bool "I2C address auto detection"
+	default y
+	---help---
+		Number of waiters to poll
+
+if !SENSORS_CXD5602PWBIMU_I2C_ADDRS_AUTO
+
+choice
+	prompt "I2C address selection"
+	default SENSORS_CXD5602PWBIMU_I2C_ADDRS_PRIMARY
+
+config SENSORS_CXD5602PWBIMU_I2C_ADDRS_PRIMARY
+	bool "Primary address series"
+	---help---
+		DipSW[2] -> off
+		Using address: 0x10, 0x11, 0x12, 0x13
+
+config SENSORS_CXD5602PWBIMU_I2C_ADDRS_SECONDARY
+	bool "Secondary address series"
+	---help---
+		DipSW[2] -> on
+		Using address: 0x30, 0x31, 0x32, 0x33
+
+endchoice
+
+endif # !SENSORS_CXD5602PWBIMU_I2C_ADDRS_AUTO
+
+endif # SENSORS_CXD5602PWBIMU
+
 config SENSORS_BMP180
 	bool "Bosch BMP180 Barometer Sensor support"
 	default n
