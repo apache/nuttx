@@ -190,6 +190,10 @@ ifeq ($(CONFIG_CXD56_GNSS_ADDON),y)
   CSRCS += cxd56_gnss_addon.c
 endif
 
+ifeq ($(CONFIG_SENSORS_CXD5602PWBIMU),y)
+  CSRCS += cxd56_cxd5602pwbimu.c
+endif
+
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src

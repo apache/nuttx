@@ -267,6 +267,15 @@ int cxd56_bringup(void)
   scu_initialize();
 #endif
 
+#if defined(CONFIG_SENSORS_CXD5602PWBIMU) && \
+    !defined(CONFIG_CXD56_CXD5602PWBIMU_LATE_INITIALIZE)
+  ret = board_cxd5602pwbimu_initialize(5);
+  if (ret < 0)
+    {
+      _err("ERROR: Failed to initialize CXD5602PWBIMU.\n");
+    }
+#endif
+
 #ifdef CONFIG_CXD56_I2C_DRIVER
   #ifdef CONFIG_CXD56_I2C0
   ret = board_i2cdev_initialize(0);

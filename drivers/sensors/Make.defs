@@ -450,6 +450,12 @@ ifeq ($(CONFIG_SENSORS_MAX31865),y)
   CSRCS += max31865.c
 endif
 
+# SONY CXD5602PWBIMU
+
+ifeq ($(CONFIG_SENSORS_CXD5602PWBIMU),y)
+  CSRCS += cxd5602pwbimu.c
+endif
+
 # Include sensor driver build support
 
 DEPPATH += --dep-path sensors
