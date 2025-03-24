@@ -30,6 +30,7 @@
 #include <nuttx/list.h>
 #include <nuttx/clock.h>
 #include <nuttx/clock_notifier.h>
+#include <nuttx/debug.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/rpmsg/rpmsg.h>
 #include <nuttx/mutex.h>
@@ -301,6 +302,8 @@ static int rpmsg_rtc_ept_cb(FAR struct rpmsg_endpoint *ept, FAR void *data,
       case RPMSG_RTC_SYNC:
         {
           struct rpmsg_rtc_set_s *msg = data;
+
+          _info("rpmsg rtc client sync time:%"PRIi64"\n", msg->sec);
 
 #ifdef CONFIG_RTC_RPMSG_SYNC_BASETIME
           struct timespec ts;
@@ -683,6 +686,8 @@ static int rpmsg_rtc_server_ept_cb(FAR struct rpmsg_endpoint *ept,
           gmtime_r(&time, (FAR struct tm *)&rtctime);
           rtctime.tm_nsec = msg->nsec;
 
+          _info("rpmsg rtc server set time:%"PRIi64"\n", msg->sec);
+
           header->result = rpmsg_rtc_server_settime(priv, &rtctime);
           return rpmsg_send(ept, msg, sizeof(*msg));
         }
@@ -750,6 +755,8 @@ static void rpmsg_rtc_server_sync(FAR struct rpmsg_rtc_server_s *server,
       msg.nsec = rtctime.tm_nsec;
       msg.base_sec = g_basetime.tv_sec;
       msg.base_nsec = g_basetime.tv_nsec;
+
+      _info("rpmsg rtc server sync time:%"PRIi64"\n", msg.sec);
 
       msg.header.command = RPMSG_RTC_SYNC;
       rpmsg_send(&client->ept, &msg, sizeof(msg));
