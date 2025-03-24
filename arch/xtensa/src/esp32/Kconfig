@@ -727,7 +727,7 @@ config ESP32_UART2
 
 config ESP32_ESPNOW_PKTRADIO
 	bool "ESPNOW pktradio support"
-	depends on ESPRESSIF_WIFI
+	select ESPRESSIF_WIRELESS
 	depends on WIRELESS_PKTRADIO
 	default n
 	---help---

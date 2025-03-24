@@ -49,7 +49,8 @@
 #include "xtensa.h"
 #include "xtensa_attr.h"
 #include "esp_now.h"
-#include "esp_mac.h"
+#include "espressif/esp_wireless.h"
+#include "esp32_rt_timer.h"
 #include "esp32_espnow_pktradio.h"
 
 #ifdef CONFIG_ESP32_ESPNOW_PKTRADIO
@@ -1066,6 +1067,13 @@ static int espnow_ifup(FAR struct net_driver_s *dev)
       iob_free(iob);
     }
 
+#ifndef CONFIG_ESPRESSIF_WIFI
+  if (esp_wifi_start() != ESP_OK)
+    {
+      return -ENOSYS;
+    }
+#endif
+
   if (esp_now_init() != ESP_OK)
     {
       return -ENOSYS;
@@ -1143,6 +1151,10 @@ static int espnow_ifdown(FAR struct net_driver_s *dev)
   (void)esp_now_unregister_send_cb();
 
   (void)esp_now_deinit();
+
+#ifndef CONFIG_ESPRESSIF_WIFI
+  (void)esp_wifi_stop();
+#endif
 
   /* Mark the device "down" */
 
@@ -1569,8 +1581,40 @@ int pktradio_espnow(void)
   FAR struct radio_driver_s *radio;
   FAR struct net_driver_s *dev;
   uint8_t mac_address[MAC_ADDRLEN];
+#ifndef CONFIG_ESPRESSIF_WIFI
+  wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+  int rc;
+#endif
 
   ninfo("Initializing\n");
+
+#ifndef CONFIG_ESPRESSIF_WIFI
+  rc = esp_wifi_init(&cfg);
+  if (rc != ESP_OK)
+    {
+      nerr("Failed to initialize Wi-Fi, error=%d\n", rc);
+      rc = esp_wifi_to_errno(rc);
+      return rc;
+    }
+
+  /* Add set channel */
+
+  rc = esp_wifi_set_storage(WIFI_STORAGE_RAM);
+  if (rc != ESP_OK)
+    {
+      nerr("Failed to set Wi-Fi storage, error=%d\n", rc);
+      rc = esp_wifi_to_errno(rc);
+      return rc;
+    }
+
+  rc = esp_wifi_set_mode(WIFI_MODE_STA);
+  if (rc != ESP_OK)
+    {
+      nerr("Failed to set Wi-Fi mode, error=%d\n", rc);
+      rc = esp_wifi_to_errno(rc);
+      return rc;
+    }
+#endif
 
   /* Get the interface structure associated with this interface number. */
 
