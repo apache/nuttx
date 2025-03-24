@@ -48,3 +48,7 @@ ifeq ($(CONFIG_TXTABLE_PARTITION),y)
 RCRAWS  = etc/txtable.txt
 endif # CONFIG_TXTABLE_PARTITION
 endif
+
+ifeq ($(CONFIG_IOEXPANDER_PCA9557),y)
+CSRCS += esp32s3_pca9557.c
+endif

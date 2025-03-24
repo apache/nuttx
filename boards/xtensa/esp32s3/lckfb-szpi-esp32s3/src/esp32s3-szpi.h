@@ -177,5 +177,9 @@ int esp32s3_cs4344_initialize(int port);
 int esp_openeth_initialize(void);
 #endif
 
+#ifdef CONFIG_IOEXPANDER_PCA9557
+int esp32s3_pca9557_initialize(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_XTENSA_ESP32S3_LCKFB_SZPI_ESP32S3_SRC_ESP32S3_DEVKIT_H */
