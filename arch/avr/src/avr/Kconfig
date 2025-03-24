@@ -57,22 +57,32 @@ config AVR_BUILDROOT_TOOLCHAIN
 
 endchoice # Toolchain
 
-menu "Atmel AVR Toolchain options"
-	depends on AVR_ATMEL_AVR_TOOLCHAIN
-
 config AVR_HAS_MEMX_PTR
 	bool "Enable in-flash static const strings"
-	depends on AVR_ATMEL_AVR_TOOLCHAIN
-	depends on ARCH_DEBUG_H
-	default y
+	depends on AVR_ATMEL_AVR_TOOLCHAIN || AVR_LINUXGCC_TOOLCHAIN
+	default y if ARCH_DEBUG_H
+	default n
 	---help---
-		Enabling this option (recommended) will place all constant
-		strings used for debugging and assertion in program memory
-		and allow the corresponding routines to get the strings
-		directly from there. This will dramatically decrease amount
-		of RAM needed to hold this static data.
+		Enabling this option activates IOBJ and IPTR qualifiers
+		for pointers in the source code. Compiler will then be allowed
+		to place constants into program memory without copying it to RAM,
+		reducing amount of RAM needed to hold static data.
 
-endmenu # Atmel AVR Toolchain options
+		The compiler then extends pointers with these qualifiers enabled
+		to 24bit length with highest bit set for data that reside in RAM.
+		Based on this bit, it will then read the data using instructions
+		appropriate for the underlying storage. As such, there is
+		a performance tradeoff.
+
+		Additionally, if this is enabled, all constant strings used
+		for debugging and assertion are placed into program memory,
+		corresponding routines are then able to get them directly
+		from there.
+
+		Note that this doesn't allow the application to use program memory
+		pointers in arbitrary interaction with the kernel. Not all API
+		functions have these qualifiers added to their parameters.
+
 
 config AVR_HAS_RAMPZ
 	bool
