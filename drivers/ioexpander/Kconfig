@@ -312,6 +312,37 @@ config PCA9538_RETRY
 
 endif # IOEXPANDER_PCA9538
 
+config IOEXPANDER_PCA9557
+	bool "PCA9557 I2C IO expander"
+	default n
+	depends on I2C
+	---help---
+		Enable support for the NXP PCA9557 IO Expander
+
+if IOEXPANDER_PCA9557
+
+config PCA9557_SHADOW_MODE
+	bool "Use Shadow Mode instead of Read-Modify-Write Operations"
+	default n
+	---help---
+		This setting enables a mode where the output and pin
+		configuration registers are held in RAM.
+		With this for example we do not need to read back the
+		output-register every time we want to change one pin.
+		We do instead change the bit in the internal register
+		and then just write this register to the IO-Expander.
+		This reduces bus traffic and eliminates the problem of
+		EMC-caused toggling of output pins.
+
+config PCA9557_RETRY
+	bool "Retry to send commands and data at I2C communication errors"
+	default n
+	---help---
+		Retry to send commands and data if a I2C-communication
+		error occurs (eg. caused by EMC).
+
+endif # IOEXPANDER_PCA9557
+
 config IOEXPANDER_TCA64XX
 	bool "TCA64XX I2C IO expander"
 	default n
