@@ -103,7 +103,7 @@
 
 #define NSEC_PER_SEC          1000000000L /* Seconds */
 #define USEC_PER_SEC             1000000L
-#define MSEC_PER_SEC                1000
+#define MSEC_PER_SEC                1000L
 #define DSEC_PER_SEC                  10
 #define HSEC_PER_SEC                   2
 
@@ -117,9 +117,9 @@
 #define MSEC_PER_DSEC                100
 
 #define NSEC_PER_MSEC            1000000L /* Milliseconds */
-#define USEC_PER_MSEC               1000
+#define USEC_PER_MSEC               1000L
 
-#define NSEC_PER_USEC               1000  /* Microseconds */
+#define NSEC_PER_USEC               1000L /* Microseconds */
 
 #define SEC_PER_MIN                   60
 #define NSEC_PER_MIN           (NSEC_PER_SEC * SEC_PER_MIN)
