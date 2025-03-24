@@ -437,7 +437,37 @@
 #    if defined(CONFIG_AVR_HAS_MEMX_PTR)
 /* I-space access qualifiers needed by Harvard architecture */
 
-#      define IOBJ __flash
+#      if defined(CONFIG_AVR_HAS_RAMPZ)
+#        define IOBJ __memx
+/* Compiler will not copy const variables declared with this qualifier
+ * to RAM, they will be kept in .progmemx.data section and read from there.
+ * This is used for chips with more than 64kB program memory, the compiler
+ * will use 24 bit pointers when accessing such variables. 16 bit pointer
+ * register "Z" is extended using additional "RAMPZ" register. All of this
+ * happens automatically.
+ *
+ * When working with these variables - passing pointers to them as function
+ * parameters for example, the same qualifier needs to be used (see IPTR
+ * below.) IPTR (__memx) linearizes flash and RAM and allows using generic
+ * pointer to both. Underlying memory for such access is then determined
+ * in runtime, with some impact on performance.
+ *
+ * To alleviate this, avr-gcc introduces __flashx qualifier which still
+ * provides 24 bit access to the variable but only allows program memory
+ * access. The check for pointer's underlying memory can then be skipped.
+ *
+ * This is currently not in use, it was introduced in avr-gcc 15 which
+ * is still fairly fresh. Can be considered at later time.
+ */
+#      else
+#        define IOBJ __flash
+/* Compiler will not copy variables declared with this qualifier to RAM.
+ * Instead, it will read them using LPM (Load from Program Memory.)
+ * Only first 64kB of program memory can be accessed this way so for
+ * chips with more memory than that, __memx is preferred
+ */
+#      endif
+
 #      define IPTR __memx
 
 #    else
