@@ -466,7 +466,7 @@ int esp32s3_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_DEV_GPIO
+#if defined(CONFIG_DEV_GPIO) && !defined(CONFIG_GPIO_LOWER_HALF)
   ret = esp32s3_gpio_init();
   if (ret < 0)
     {
