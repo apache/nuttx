@@ -333,6 +333,14 @@ static int init_storage_partition(void)
       return ret;
     }
 
+  ret = ftl_initialize(0, mtd);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize the FTL layer: %d\n",
+              ret);
+      return ret;
+    }
+
 #ifdef CONFIG_MTD_PARTITION
   ret = parse_mtd_partition(mtd, NULL, NULL);
   if (ret < 0)
