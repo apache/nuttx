@@ -54,6 +54,7 @@ struct xtensa_debug_trigger
 
 static struct xtensa_debug_trigger g_code_trigger_map[XCHAL_NUM_IBREAK];
 static struct xtensa_debug_trigger g_data_trigger_map[XCHAL_NUM_DBREAK];
+static struct xtensa_debug_trigger g_singlestep_trigger;
 
 /****************************************************************************
  * Private Functions
@@ -133,6 +134,40 @@ static void xtensa_disable_ibreak(int index)
     "isync\n"
     :
     : "r"(ibreakenable)
+  );
+}
+
+/****************************************************************************
+ * Name: xtensa_enable_singlestep
+ *
+ * Description:
+ *   Enable or disable the single step mode.
+ *
+ ****************************************************************************/
+
+static void xtensa_enable_singlestep(bool enable)
+{
+  uint32_t icountlevel;
+  uint32_t icount;
+
+  if (enable)
+    {
+      icountlevel = XCHAL_EXCM_LEVEL;
+      icount = 0xfffffffe;
+    }
+  else
+    {
+      icountlevel = 0;
+      icount = 0;
+    }
+
+  __asm__ __volatile__
+  (
+    "wsr %0, ICOUNT\n"
+    "wsr %1, ICOUNTLEVEL\n"
+    "isync\n"
+    :
+    : "r"(icount), "r"(icountlevel)
   );
 }
 
@@ -304,6 +339,25 @@ static void xtensa_breakpoint_handler(uint32_t pc)
 }
 
 /****************************************************************************
+ * Name: xtensa_singlestep_handler
+ *
+ * Description:
+ *   This function is called when a singlestep is triggered.
+ *
+ ****************************************************************************/
+
+static void xtensa_singlestep_handler(void)
+{
+  if (g_singlestep_trigger.callback != NULL)
+    {
+      g_singlestep_trigger.callback(g_singlestep_trigger.type,
+                                    g_singlestep_trigger.address,
+                                    g_singlestep_trigger.size,
+                                    g_singlestep_trigger.arg);
+    }
+}
+
+/****************************************************************************
  * Name: xtensa_watchpoint_handler
  *
  * Description:
@@ -374,6 +428,14 @@ int up_debugpoint_add(int type, void *addr, size_t size,
         g_data_trigger_map[slot].callback = callback;
         g_data_trigger_map[slot].arg      = arg;
         break;
+      case DEBUGPOINT_STEPPOINT:
+        xtensa_enable_singlestep(true);
+        g_singlestep_trigger.type     = type;
+        g_singlestep_trigger.address  = addr;
+        g_singlestep_trigger.size     = size;
+        g_singlestep_trigger.callback = callback;
+        g_singlestep_trigger.arg      = arg;
+        break;
       default:
         return -EINVAL;
     }
@@ -419,6 +481,11 @@ int up_debugpoint_remove(int type, void *addr, size_t size)
         memset(&g_data_trigger_map[slot], 0,
                sizeof(struct xtensa_debug_trigger));
         break;
+      case DEBUGPOINT_STEPPOINT:
+        xtensa_enable_singlestep(false);
+        memset(&g_singlestep_trigger, 0,
+               sizeof(struct xtensa_debug_trigger));
+        break;
       default:
         return -EINVAL;
   }
@@ -438,8 +505,22 @@ int up_debugpoint_remove(int type, void *addr, size_t size)
 
 uint32_t *xtensa_debug_handler(uint32_t *regs)
 {
+  struct tcb_s **running_task = &g_running_tasks[this_cpu()];
+  bool irq = up_interrupt_context();
+  uint32_t *saved_regs = NULL;
   uint32_t cause;
   uint32_t dbnum;
+
+  if (!irq)
+    {
+      up_set_interrupt_context(true);
+    }
+  else
+    {
+      saved_regs = (*running_task)->xcp.regs;
+    }
+
+  (*running_task)->xcp.regs = regs;
 
   __asm__ __volatile__
   (
@@ -451,7 +532,7 @@ uint32_t *xtensa_debug_handler(uint32_t *regs)
     {
       xtensa_breakpoint_handler(regs[REG_PC]);
     }
-  else if(cause & XCHAL_DEBUGCAUSE_DBREAK_MASK)
+  else if (cause & XCHAL_DEBUGCAUSE_DBREAK_MASK)
     {
       /* The DBNUM field of the DEBUGCAUSE register records which of the
        * possible DBREAK registers raised the exception
@@ -460,9 +541,23 @@ uint32_t *xtensa_debug_handler(uint32_t *regs)
       dbnum = ((cause & 0x0f00) >> 8);
       xtensa_watchpoint_handler(dbnum);
     }
+  else if (cause & XCHAL_DEBUGCAUSE_ICOUNT_MASK)
+    {
+      xtensa_singlestep_handler();
+    }
   else
     {
       _alert("Unhandled debug cause 0x%x\n", cause);
+    }
+
+  if (!irq)
+    {
+      up_set_interrupt_context(false);
+      (*running_task)->xcp.regs = NULL;
+    }
+  else
+    {
+      (*running_task)->xcp.regs = saved_regs;
     }
 
   return regs;

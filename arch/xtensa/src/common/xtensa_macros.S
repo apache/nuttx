@@ -106,9 +106,17 @@
 	 * supported.
 	 */
 
+	.ifgt	\level - XCHAL_EXCM_LEVEL
+	movi	\tmp, PS_INTLEVEL(\level) | PS_UM
+	.else
 	movi	\tmp, PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM
+	.endif
 #  else
+	.ifgt	\level - XCHAL_EXCM_LEVEL
+	movi	\tmp, PS_INTLEVEL(\level) | PS_UM | PS_WOE
+	.else
 	movi	\tmp, PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM | PS_WOE
+	.endif
 #  endif
 #endif
 
