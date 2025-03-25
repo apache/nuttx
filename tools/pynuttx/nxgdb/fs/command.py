@@ -24,6 +24,7 @@ import argparse
 
 import gdb
 import nxgdb.autocompeletion as autocompeletion
+import nxgdb.fs.fatfs as fatfs
 import nxgdb.fs.littlefs as littlefs
 import nxgdb.fs.romfs as romfs
 import nxgdb.fs.yaffs as yaffs
@@ -385,3 +386,54 @@ class InfoYaffs(gdb.Command):
             if args and args.path and path != args.path:
                 continue
             yaffs.dump_yaffs_cache(node, path)
+
+
+class InfoFatfs(gdb.Command):
+    """Show fatfs information"""
+
+    def __init__(self):
+        if utils.get_symbol_value("CONFIG_FS_FATFS"):
+            super().__init__("info fatfs", gdb.COMMAND_USER)
+
+    def parse_arguments(self, argv):
+        parser = argparse.ArgumentParser(description=gdb.__doc__)
+        parser.add_argument(
+            "-P",
+            "--path",
+            type=str,
+            default=None,
+            help="set the fatfs path to be dumped",
+        )
+        parser.add_argument(
+            "-F",
+            "--filep",
+            type=str,
+            default=None,
+            help="Show file information",
+        )
+        try:
+            args = parser.parse_args(argv)
+        except SystemExit:
+            return None
+        return args
+
+    def diagnose(self, *args, **kwargs):
+        output = gdb.execute("info fatfs", to_string=True)
+        return {
+            "title": "Fatfs information",
+            "summary": "Fatfs information dump",
+            "command": "info fatfs",
+            "result": "info",
+            "message": output or "No fatfs information",
+        }
+
+    def invoke(self, args, from_tty):
+        args = self.parse_arguments(gdb.string_to_argv(args))
+        nodes = filter(fstype_filter("fatfs"), foreach_inode())
+        if args and args.filep:
+            fatfs.dump_fatfs_file(utils.Value(utils.parse_arg(args.filep)))
+            return
+        for node, path in nodes:
+            if args and args.path and path != args.path:
+                continue
+            fatfs.dump_fatfs_cache(node, path)
