@@ -228,4 +228,8 @@ fi
 
 echo "  Refreshing..."
 
+if [ "X$wenv" == "Xmsys" ]; then
+${MAKECMD} olddefconfig || { echo "ERROR: failed to refresh"; exit 1; }
+else
 ${MAKECMD} olddefconfig $* || { echo "ERROR: failed to refresh"; exit 1; }
+fi

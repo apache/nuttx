@@ -20,9 +20,9 @@
 # under the License.
 #
 ############################################################################
+
 set -e
 set -o xtrace
-
 
 CID=$(cd "$(dirname "$0")" && pwd)
 CIWORKSPACE=$(cd "${CID}"/../../../ && pwd -P)
@@ -144,11 +144,7 @@ function run_builds {
     ncpus=$(grep -c ^processor /proc/cpuinfo)
   fi
 
-  if [ "X$osname" == "Xmsys2" ]; then
-    export MAKEFLAGS="-j"
-  else
-    options+="-j ${ncpus}"
-  fi
+  options+="-j ${ncpus}"
 
   for build in "${builds[@]}"; do
     "${nuttx}"/tools/testbuild.sh ${options} -e "-Wno-cpp -Werror" "${build}"
