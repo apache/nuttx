@@ -333,25 +333,46 @@ typedef struct pthread_mutex_s pthread_mutex_t;
 #  endif
 #endif
 
+#ifdef CONFIG_PTHREAD_MUTEX_DEFAULT_PRIO_INHERIT
+#  define PTHREAD_MUTEX_DEFAULT_PRIO_INHERIT SEM_PRIO_INHERIT
+#else
+#  define PTHREAD_MUTEX_DEFAULT_PRIO_INHERIT 0
+#endif
+
+#ifdef CONFIG_PTHREAD_MUTEX_DEFAULT_PRIO_PROTECT
+#  define PTHREAD_MUTEX_DEFAULT_PRIO_PROTECT SEM_PRIO_PROTECT
+#else
+#  define PTHREAD_MUTEX_DEFAULT_PRIO_PROTECT 0
+#endif
+
+#define PTHREAD_MUTEX_DEFAULT_PRIO_FLAGS (PTHREAD_MUTEX_DEFAULT_PRIO_INHERIT | \
+                                          PTHREAD_MUTEX_DEFAULT_PRIO_PROTECT)
+
+#define PTHREAD_NXMUTEX_INITIALIZER { \
+    NXSEM_INITIALIZER(1, SEM_TYPE_MUTEX | PTHREAD_MUTEX_DEFAULT_PRIO_FLAGS), \
+    NXMUTEX_NO_HOLDER}
+#define PTHREAD_NXRMUTEX_INITIALIZER {PTHREAD_NXMUTEX_INITIALIZER, 0}
+
 #if defined(CONFIG_PTHREAD_MUTEX_TYPES) && !defined(CONFIG_PTHREAD_MUTEX_UNSAFE)
 #  define PTHREAD_MUTEX_INITIALIZER {NULL, __PTHREAD_MUTEX_DEFAULT_FLAGS, \
                                      PTHREAD_MUTEX_DEFAULT, \
-                                     NXRMUTEX_INITIALIZER}
+                                     PTHREAD_NXRMUTEX_INITIALIZER}
+
 #  define PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP \
                                     {NULL, __PTHREAD_MUTEX_DEFAULT_FLAGS, \
                                      PTHREAD_MUTEX_RECURSIVE, \
-                                     NXRMUTEX_INITIALIZER,}
+                                     PTHREAD_NXRMUTEX_INITIALIZER,}
 #elif defined(CONFIG_PTHREAD_MUTEX_TYPES)
 #  define PTHREAD_MUTEX_INITIALIZER {PTHREAD_MUTEX_DEFAULT, \
-                                     NXRMUTEX_INITIALIZER,}
+                                     PTHREAD_NXRMUTEX_INITIALIZER,}
 #  define PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP \
                                     {PTHREAD_MUTEX_RECURSIVE, \
-                                     NXRMUTEX_INITIALIZER}
+                                     PTHREAD_NXRMUTEX_INITIALIZER}
 #elif !defined(CONFIG_PTHREAD_MUTEX_UNSAFE)
 #  define PTHREAD_MUTEX_INITIALIZER {NULL, __PTHREAD_MUTEX_DEFAULT_FLAGS,\
-                                     NXMUTEX_INITIALIZER}
+                                     PTHREAD_NXMUTEX_INITIALIZER}
 #else
-#  define PTHREAD_MUTEX_INITIALIZER {NXMUTEX_INITIALIZER}
+#  define PTHREAD_MUTEX_INITIALIZER {PTHREAD_NXMUTEX_INITIALIZER}
 #endif
 
 struct pthread_barrierattr_s
