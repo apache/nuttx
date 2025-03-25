@@ -36,6 +36,7 @@
 #define VIRTIO_VSOCK_F_STREAM            0 /* SOCK_STREAM supported */
 #define VIRTIO_VSOCK_F_SEQPACKET         1 /* SOCK_SEQPACKET supported */
 #define VIRTIO_VSOCK_F_NO_IMPLIED_STREAM 2 /* SOCK_STREAM is not implied */
+#define VIRTIO_VSOCK_F_HOST_CID          3 /* Remote CID is supported */
 
 /****************************************************************************
  * Public Type Definitions
@@ -44,6 +45,7 @@
 begin_packed_struct struct virtio_vsock_config_s
 {
   uint64_t guest_cid;
+  uint64_t host_cid;
 } end_packed_struct;
 
 #endif /* __INCLUDE_NUTTX_VIRTIO_VIRTIO_VSOCK_H */
