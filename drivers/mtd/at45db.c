@@ -587,10 +587,12 @@ static inline void at45db_pgwrite(FAR struct at45db_dev_s *priv,
 
   /* We assume that sectors are not write protected */
 
-  wrcmd[0] = AT45DB_MNTHRUBF1;      /* To main memory through buffer 1 */
-  wrcmd[1] = (offset >> 16) & 0xff; /* 24-bit address MS byte */
-  wrcmd[2] = (offset >>  8) & 0xff; /* 24-bit address middle byte */
-  wrcmd[3] =  offset        & 0xff; /* 24-bit address LS byte */
+  /* Write data do SRAM buffer 1, byte offset 0 */
+
+  wrcmd[0] = AT45DB_WRBF1;      /* Buffer 1 write */
+  wrcmd[1] = 0;                 /* 24-bit address MS byte */
+  wrcmd[2] = 0;                 /* 24-bit address middle byte */
+  wrcmd[3] = 0;                 /* 24-bit address LS byte */
 
   /* Higher performance write logic:  We leave the chip busy after write and
    * erase operations.  This improves write and erase performance because we
@@ -606,6 +608,21 @@ static inline void at45db_pgwrite(FAR struct at45db_dev_s *priv,
   SPI_SELECT(priv->spi, SPIDEV_FLASH(0), true);
   SPI_SNDBLOCK(priv->spi, wrcmd, 4);
   SPI_SNDBLOCK(priv->spi, buffer, 1 << priv->pageshift);
+  SPI_SELECT(priv->spi, SPIDEV_FLASH(0), false);
+
+  /* Write SRAM buffer 1 to flash page */
+
+  wrcmd[0] = AT45DB_BF1TOMN;            /* Buffer 1 to Main Memory Page Program without built-in erase */
+  wrcmd[1] = (offset >> 16) & 0xff;     /* 24-bit address MS byte */
+  wrcmd[2] = (offset >>  8) & 0xff;     /* 24-bit address middle byte */
+  wrcmd[3] = offset         & 0xff;     /* 24-bit address LS byte */
+
+#ifdef CONFIG_AT45DB_PREWAIT
+  at45db_waitbusy(priv);
+#endif
+
+  SPI_SELECT(priv->spi, SPIDEV_FLASH(0), true);
+  SPI_SNDBLOCK(priv->spi, wrcmd, 4);
   SPI_SELECT(priv->spi, SPIDEV_FLASH(0), false);
 
   /* Wait for any erase to complete if we are not trying to improve write
