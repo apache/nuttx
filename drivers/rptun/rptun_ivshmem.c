@@ -301,7 +301,7 @@ rptun_ivshmem_get_resource(FAR struct rptun_dev_s *dev)
       rsc->vsock.type                 = RSC_VDEV;
       rsc->vsock.id                   = VIRTIO_ID_VSOCK;
       rsc->vsock.notifyid             = RSC_NOTIFY_ID_ANY;
-      rsc->vsock.dfeatures            = 0;
+      rsc->vsock.dfeatures            = 1 << VIRTIO_VSOCK_F_HOST_CID;
       rsc->vsock.config_len           = sizeof(struct virtio_vsock_config_s);
       rsc->vsock.num_of_vrings        = 3;
       rsc->vsock.reserved[0]          = VIRTIO_DEV_DRIVER;
@@ -319,6 +319,7 @@ rptun_ivshmem_get_resource(FAR struct rptun_dev_s *dev)
       rsc->vsock_vring2.notifyid      = RSC_NOTIFY_ID_ANY;
       rsc->vsock_vring2.da            = FW_RSC_U32_ADDR_ANY;
       rsc->vsock_config.guest_cid     = 3;
+      rsc->vsock_config.host_cid      = 2;
 
       /* Virtio Vsock share memory buffer */
 
