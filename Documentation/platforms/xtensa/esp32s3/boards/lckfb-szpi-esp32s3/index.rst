@@ -224,3 +224,27 @@ To test it, just run the following (**Default is host side**):
     0050: 44 ff c9 3b 55 51 93 b3 fb 1e 88 9e e9 2d 69 36 D..;UQ.......-i6
     0060: 10 d0 70 27 92 91 32 25 f5 cc 1f 59 ea 39 31 24 ..p'..2%...Y.91$
     0070: 3f 2e b0 fe ef 87 df 9b d4 7d 79 2e de 64 f6 ed ?........}y..d..
+
+pca9557
+-------
+
+Basic NuttShell configuration console and I/O expander driver PCA9557 enabled.
+
+You can run the configuration and compilation procedure::
+
+  $ ./tools/configure.sh lckfb-szpi-esp32s3:pca9557
+  $ make flash -j$(nproc) ESPTOOL_PORT=/dev/ttyUSB0
+
+Then test gpio2(pin9(P2) of PCA9557)::
+
+  # With hardware check, the pin levels meet the expected requirements.
+
+  # Output low
+  nsh> echo 0 > /dev/gpio2
+  nsh> cat /dev/gpio2
+  0
+
+  # Output high
+  nsh> echo 1 > /dev/gpio2
+  nsh> cat /dev/gpio2
+  1
