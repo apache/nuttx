@@ -77,15 +77,15 @@ int pthread_mutex_init(FAR pthread_mutex_t *mutex,
   /* Were attributes specified?  If so, use them */
 
 #ifdef CONFIG_PTHREAD_MUTEX_TYPES
-      mutex->type  = attr ? attr->type : PTHREAD_MUTEX_DEFAULT;
+  mutex->type = attr ? attr->type : PTHREAD_MUTEX_DEFAULT;
 #endif
 #ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
-      mutex->flink = NULL;
+  mutex->flink = NULL;
 #  ifdef CONFIG_PTHREAD_MUTEX_BOTH
-      mutex->flags = attr && attr->robust == PTHREAD_MUTEX_ROBUST ?
-                     _PTHREAD_MFLAGS_ROBUST : 0;
+  mutex->flags = attr && attr->robust == PTHREAD_MUTEX_ROBUST ?
+                 _PTHREAD_MFLAGS_ROBUST : 0;
 #  else
-      mutex->flags = 0;
+  mutex->flags = 0;
 #  endif
 #endif
 
@@ -110,6 +110,15 @@ int pthread_mutex_init(FAR pthread_mutex_t *mutex,
             }
         }
 #  endif
+    }
+  else
+    {
+      /* Set the default priority inheritance and protect flags according to
+       * config flags.
+       */
+
+      mutex_set_protocol(&mutex->mutex,
+                         SEM_TYPE_MUTEX | PTHREAD_MUTEX_DEFAULT_PRIO_FLAGS);
     }
 #endif
 

@@ -879,7 +879,7 @@ endchoice # Default NORMAL mutex robustness
 
 choice
 	prompt "Default pthread mutex protocol"
-	default PTHREAD_MUTEX_DEFAULT_PRIO_NONE
+	default PTHREAD_MUTEX_DEFAULT_PRIO_INHERIT
 
 config PTHREAD_MUTEX_DEFAULT_PRIO_NONE
 	bool "PTHREAD_PRIO_NONE default"
