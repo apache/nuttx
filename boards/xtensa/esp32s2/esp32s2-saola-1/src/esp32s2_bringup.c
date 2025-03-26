@@ -109,6 +109,10 @@
 #  include "espressif/esp_nxdiag.h"
 #endif
 
+#ifdef CONFIG_ESPRESSIF_ADC
+#  include "esp32s2_board_adc.h"
+#endif
+
 #include "esp32s2-saola-1.h"
 
 /****************************************************************************
@@ -444,6 +448,14 @@ int esp32s2_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: esp_nxdiag_initialize failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_ESPRESSIF_ADC
+  ret = board_adc_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_adc_init failed: %d\n", ret);
     }
 #endif
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32s3/common/src/esp32s3_board_adc.c
+ * boards/xtensa/esp32s2/common/src/esp32s2_board_adc.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -32,7 +32,7 @@
 
 #include "espressif/esp_adc.h"
 
-#include "esp32s3_board_adc.h"
+#include "esp32s2_board_adc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
