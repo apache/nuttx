@@ -71,9 +71,14 @@ struct net_rpmsg_drv_cookie_s
 
 struct net_rpmsg_drv_s
 {
-  FAR const char        *cpuname;
-  FAR const char        *devname;
+  char                  cpuname[RPMSG_NAME_SIZE];
   netpkt_queue_t        rxqueue; /* RX packet queue */
+  FAR void             *priv;    /* Private data for upper layer */
+  net_rpmsg_drv_cb_t    cb;      /* IFUP/DOWN Callback function */
+  sem_t                 wait;    /* Wait sem, used for preventing any
+                                  * operation until the connection
+                                  * between two cpu established.
+                                  */
   struct rpmsg_endpoint ept;
 
   /* This holds the information visible to the NuttX network */
@@ -92,6 +97,12 @@ struct net_rpmsg_drv_s
 static int net_rpmsg_drv_default_handler(FAR struct rpmsg_endpoint *ept,
                                          FAR void *data, size_t len,
                                          uint32_t src, FAR void *priv);
+static int net_rpmsg_drv_ifup_handler(FAR struct rpmsg_endpoint *ept,
+                                      FAR void *data, size_t len,
+                                      uint32_t src, FAR void *priv);
+static int net_rpmsg_drv_ifdown_handler(FAR struct rpmsg_endpoint *ept,
+                                        FAR void *data, size_t len,
+                                        uint32_t src, FAR void *priv);
 static int net_rpmsg_drv_sockioctl_handler(FAR struct rpmsg_endpoint *ept,
                                            FAR void *data, size_t len,
                                            uint32_t src, FAR void *priv);
@@ -147,8 +158,8 @@ static int  net_rpmsg_drv_ioctl(FAR struct netdev_lowerhalf_s *dev, int cmd,
 
 static const rpmsg_ept_cb g_net_rpmsg_drv_handler[] =
 {
-  [NET_RPMSG_IFUP]      = net_rpmsg_drv_default_handler,
-  [NET_RPMSG_IFDOWN]    = net_rpmsg_drv_default_handler,
+  [NET_RPMSG_IFUP]      = net_rpmsg_drv_ifup_handler,
+  [NET_RPMSG_IFDOWN]    = net_rpmsg_drv_ifdown_handler,
   [NET_RPMSG_ADDMCAST]  = net_rpmsg_drv_default_handler,
   [NET_RPMSG_RMMCAST]   = net_rpmsg_drv_default_handler,
   [NET_RPMSG_DEVIOCTL]  = net_rpmsg_drv_default_handler,
@@ -277,6 +288,42 @@ static int net_rpmsg_drv_default_handler(FAR struct rpmsg_endpoint *ept,
     {
       rpmsg_send_response(ept, header, sizeof(*header), -EOPNOTSUPP);
     }
+
+  return 0;
+}
+
+static int net_rpmsg_drv_ifup_handler(FAR struct rpmsg_endpoint *ept,
+                                        FAR void *data, size_t len,
+                                        uint32_t src, FAR void *priv_)
+{
+  FAR struct net_rpmsg_drv_s *priv = priv_;
+  FAR struct net_rpmsg_header_s *header = data;
+
+  netdev_lower_carrier_on(&priv->dev);
+  if (priv->cb != NULL)
+    {
+      priv->cb(&priv->dev, NET_RPMSG_EVENT_CARRIER_ON);
+    }
+
+  rpmsg_send_response(ept, header, sizeof(*header), 0);
+
+  return 0;
+}
+
+static int net_rpmsg_drv_ifdown_handler(FAR struct rpmsg_endpoint *ept,
+                                        FAR void *data, size_t len,
+                                        uint32_t src, FAR void *priv_)
+{
+  FAR struct net_rpmsg_drv_s *priv = priv_;
+  FAR struct net_rpmsg_header_s *header = data;
+
+  netdev_lower_carrier_off(&priv->dev);
+  if (priv->cb != NULL)
+    {
+      priv->cb(&priv->dev, NET_RPMSG_EVENT_CARRIER_OFF);
+    }
+
+  rpmsg_send_response(ept, header, sizeof(*header), 0);
 
   return 0;
 }
@@ -438,6 +485,44 @@ static int net_rpmsg_drv_default_response(FAR struct rpmsg_endpoint *ept,
   return 0;
 }
 
+/****************************************************************************
+ * Name: net_rpmsg_drv_ept_release
+ ****************************************************************************/
+
+static void net_rpmsg_drv_ept_release(FAR struct rpmsg_endpoint *ept)
+{
+  FAR struct net_rpmsg_drv_s *priv = ept->priv;
+
+  netdev_lower_carrier_off(&priv->dev);
+  rpmsg_wait(&priv->ept, &priv->wait);
+}
+
+/****************************************************************************
+ * Name: net_rpmsg_drv_ns_bound
+ *
+ * Description:
+ *   Rpmsg device end point service bound callback function , called when
+ *   remote end point address is received.
+ *
+ * Parameters:
+ *   ept  - The rpmsg-device end point
+ *
+ * Returned Values:
+ *   None
+ *
+ ****************************************************************************/
+
+static void net_rpmsg_drv_ns_bound(FAR struct rpmsg_endpoint *ept)
+{
+  FAR struct net_rpmsg_drv_s *priv = ept->priv;
+
+  rpmsg_post(&priv->ept, &priv->wait);
+}
+
+/****************************************************************************
+ * Name: net_rpmsg_drv_device_created
+ ****************************************************************************/
+
 static void net_rpmsg_drv_device_created(FAR struct rpmsg_device *rdev,
                                          FAR void *priv_)
 {
@@ -448,13 +533,17 @@ static void net_rpmsg_drv_device_created(FAR struct rpmsg_device *rdev,
     {
       priv->ept.priv = priv;
       snprintf(eptname, sizeof(eptname),
-               NET_RPMSG_EPT_NAME, priv->devname);
+               NET_RPMSG_EPT_PREFIX "%s", priv->dev.netdev.d_ifname);
 
       rpmsg_create_ept(&priv->ept, rdev, eptname,
                        RPMSG_ADDR_ANY, RPMSG_ADDR_ANY,
                        net_rpmsg_drv_ept_cb, NULL);
     }
 }
+
+/****************************************************************************
+ * Name: net_rpmsg_drv_device_destroy
+ ****************************************************************************/
 
 static void net_rpmsg_drv_device_destroy(FAR struct rpmsg_device *rdev,
                                          FAR void *priv_)
@@ -496,7 +585,15 @@ static int net_rpmsg_drv_send_recv(FAR struct netdev_lowerhalf_s *dev,
                               container_of(dev, struct net_rpmsg_drv_s, dev);
   FAR struct net_rpmsg_header_s *header = header_;
   FAR struct net_rpmsg_drv_cookie_s cookie;
+  int sval = 0;
   int ret;
+
+  nxsem_get_value(&priv->wait, &sval);
+  if (sval <= 0)
+    {
+      rpmsg_wait(&priv->ept, &priv->wait);
+      rpmsg_post(&priv->ept, &priv->wait);
+    }
 
   nxsem_init(&cookie.sem, 0, 0);
 
@@ -540,6 +637,8 @@ out:
 
 static int net_rpmsg_drv_ifup(FAR struct netdev_lowerhalf_s *dev)
 {
+  FAR struct net_rpmsg_drv_s *priv =
+                              container_of(dev, struct net_rpmsg_drv_s, dev);
   struct net_rpmsg_ifup_s msg =
   {
   };
@@ -639,6 +738,11 @@ static int net_rpmsg_drv_ifup(FAR struct netdev_lowerhalf_s *dev)
 #  endif
 #endif
 
+  if (priv->cb != NULL)
+    {
+      priv->cb(dev, NET_RPMSG_EVENT_IF_UP);
+    }
+
   return OK;
 }
 
@@ -661,14 +765,26 @@ static int net_rpmsg_drv_ifup(FAR struct netdev_lowerhalf_s *dev)
 
 static int net_rpmsg_drv_ifdown(FAR struct netdev_lowerhalf_s *dev)
 {
-  FAR struct net_rpmsg_ifdown_s msg;
+  FAR struct net_rpmsg_drv_s *priv =
+                              container_of(dev, struct net_rpmsg_drv_s, dev);
+  struct net_rpmsg_ifdown_s msg =
+  {
+  };
 
-  /* Put the EMAC in its reset, non-operational state.  This should be
-   * a known configuration that will guarantee the net_rpmsg_drv_ifup()
-   * always successfully brings the interface back up.
-   */
+  int ret;
 
-  return net_rpmsg_drv_send_recv(dev, &msg, NET_RPMSG_IFDOWN, sizeof(msg));
+  ret = net_rpmsg_drv_send_recv(dev, &msg, NET_RPMSG_IFDOWN, sizeof(msg));
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  if (priv->cb != NULL)
+    {
+      priv->cb(dev, NET_RPMSG_EVENT_IF_DOWN);
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -784,6 +900,45 @@ static int net_rpmsg_drv_ioctl(FAR struct netdev_lowerhalf_s *dev, int cmd,
 #endif
 
 /****************************************************************************
+ * Name: net_rpmsg_drv_alloc
+ ****************************************************************************/
+
+static FAR struct net_rpmsg_drv_s *
+net_rpmsg_drv_alloc(FAR const char *devname, enum net_lltype_e lltype)
+{
+  FAR struct net_rpmsg_drv_s *priv = kmm_zalloc(sizeof(*priv));
+  FAR struct netdev_lowerhalf_s *netdev;
+
+  if (!priv)
+    {
+      return NULL;
+    }
+
+  netdev = &priv->dev;
+  netdev->quota[NETPKT_RX] = CONFIG_IOB_NBUFFERS /
+                             NET_RPMSG_DRV_MAX_NIOB / 4;
+  netdev->quota[NETPKT_TX] = 1;
+  netdev->ops = &g_net_rpmsg_drv_ops;
+
+  priv->ept.priv = priv;
+  priv->ept.release_cb = net_rpmsg_drv_ept_release;
+  priv->ept.ns_bound_cb = net_rpmsg_drv_ns_bound;
+
+  nxsem_init(&priv->wait, 0, 0);
+
+  /* Init a random MAC address, the caller can override it. */
+
+  arc4random_buf(&netdev->netdev.d_mac.ether.ether_addr_octet,
+                 sizeof(netdev->netdev.d_mac.ether.ether_addr_octet));
+
+  strlcpy(netdev->netdev.d_ifname, devname, IFNAMSIZ);
+
+  netdev_lower_register(netdev, lltype);
+
+  return priv;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -791,52 +946,44 @@ static int net_rpmsg_drv_ioctl(FAR struct netdev_lowerhalf_s *dev, int cmd,
  * Name: net_rpmsg_drv_init
  *
  * Description:
- *   Initialize the net rpmsg driver
+ *   Allocate a new network device instance for the RPMSG network and
+ *   register it with the network device manager.  This is the client side of
+ *   the RPMSG driver.  The RPMSG driver is the server side of the driver.
  *
  * Parameters:
- *   name - Specify the netdev name
- *   lltype - Identify the link type
+ *   cpuname    - Remote CPU name
+ *   devname    - Local and remote network device name
+ *   lltype     - Link layer type
  *
  * Returned Value:
- *   OK on success; Negated errno on failure.
- *
- * Assumptions:
- *   Called early in initialization before multi-tasking is initiated.
+ *   A pointer to the allocated network device instance.  NULL is returned on
+ *   failure.
  *
  ****************************************************************************/
 
-int net_rpmsg_drv_init(FAR const char *cpuname,
-                       FAR const char *devname,
-                       enum net_lltype_e lltype)
+FAR struct netdev_lowerhalf_s *
+net_rpmsg_drv_init(FAR const char *cpuname, FAR const char *devname,
+                   enum net_lltype_e lltype)
 {
-  FAR struct net_rpmsg_drv_s *priv;
+  FAR struct net_rpmsg_drv_s *drv;
   FAR struct netdev_lowerhalf_s *dev;
   int ret;
 
   /* Allocate the interface structure */
 
-  priv = kmm_zalloc(sizeof(*priv));
-  if (priv == NULL)
+  if (!devname || !cpuname ||
+      !(drv = net_rpmsg_drv_alloc(devname, lltype)))
     {
-      return -ENOMEM;
+      return NULL;
     }
 
-  dev = &priv->dev;
+  strlcpy(drv->cpuname, cpuname, RPMSG_NAME_SIZE);
 
-  priv->cpuname = cpuname;
-  priv->devname = devname;
-
-  /* Initialize the driver structure */
-
-  strlcpy(dev->netdev.d_ifname, devname, IFNAMSIZ);
-
-  dev->quota[NETPKT_RX] = CONFIG_IOB_NBUFFERS / NET_RPMSG_DRV_MAX_NIOB / 4;
-  dev->quota[NETPKT_TX] = 1;
-  dev->ops = &g_net_rpmsg_drv_ops;
+  dev = &drv->dev;
 
   /* Register the device with the openamp */
 
-  ret = rpmsg_register_callback(priv,
+  ret = rpmsg_register_callback(drv,
                                 net_rpmsg_drv_device_created,
                                 net_rpmsg_drv_device_destroy,
                                 NULL,
@@ -844,22 +991,37 @@ int net_rpmsg_drv_init(FAR const char *cpuname,
 
   if (ret < 0)
     {
-      kmm_free(priv);
-      return ret;
+      netdev_lower_unregister(dev);
+      nxsem_destroy(&drv->wait);
+      kmm_free(drv);
+      return NULL;
     }
 
-  /* Register the device with the OS so that socket IOCTLs can be performed */
+  return dev;
+}
 
-  ret = netdev_lower_register(dev, lltype);
-  if (ret < 0)
-    {
-      rpmsg_unregister_callback(dev,
-                                net_rpmsg_drv_device_created,
-                                net_rpmsg_drv_device_destroy,
-                                NULL,
-                                NULL);
-      kmm_free(priv);
-    }
+/****************************************************************************
+ * Name: net_rpmsg_drv_priv
+ ****************************************************************************/
 
-  return ret;
+FAR void *net_rpmsg_drv_priv(FAR struct netdev_lowerhalf_s *dev)
+{
+  FAR struct net_rpmsg_drv_s *priv =
+                              container_of(dev, struct net_rpmsg_drv_s, dev);
+
+  return priv->priv;
+}
+
+/****************************************************************************
+ * Name: net_rpmsg_drv_set_callback
+ ****************************************************************************/
+
+void net_rpmsg_drv_set_callback(FAR struct netdev_lowerhalf_s *dev,
+                                net_rpmsg_drv_cb_t cb, FAR void *priv)
+{
+  FAR struct net_rpmsg_drv_s *priv =
+                              container_of(dev, struct net_rpmsg_drv_s, dev);
+
+  priv->cb = cb;
+  priv->priv = priv;
 }
