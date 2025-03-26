@@ -88,6 +88,10 @@ EXTRA_LIBS += -lespnow
 endif
 endif
 
+ifeq ($(CONFIG_ESPRESSIF_ADC),y)
+CHIP_CSRCS += esp_adc.c
+endif
+
 ifeq ($(CONFIG_ESPRESSIF_WIRELESS),y)
 include common$(DELIM)espressif$(DELIM)Wireless.mk
 endif
