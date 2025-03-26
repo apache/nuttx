@@ -87,6 +87,11 @@ struct inotify_event
  * Public Function Prototypes
  ****************************************************************************/
 
+#if defined(__cplusplus)
+extern "C"
+{
+#endif
+
 /****************************************************************************
  * Name: inotify_init
  *
@@ -168,4 +173,8 @@ int inotify_add_watch(int fd, FAR const char *pathname, uint32_t mask);
 
 int inotify_rm_watch(int fd, int wd);
 
+#if defined(__cplusplus)
+}
 #endif
+
+#endif /* __INCLUDE_SYS_INOTIFY_H */
