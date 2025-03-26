@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/esp32s3/esp32s3_adc.h
+ * arch/xtensa/src/common/espressif/esp_adc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_ADC_H
-#define __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_ADC_H
+#ifndef __ARCH_XTENSA_SRC_COMMON_ESPRESSI_ESP_ADC_H
+#define __ARCH_XTENSA_SRC_COMMON_ESPRESSI_ESP_ADC_H
 
 /****************************************************************************
  * Included Files
@@ -35,25 +35,13 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define ESP_ADC_MAX_CHANNELS 10
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
-
-#ifdef CONFIG_ESP32S3_ADC
-#  define ESP32S3_ADC1 1
-#  define ESP32S3_ADC1_CHANNEL0 0
-#  define ESP32S3_ADC1_CHANNEL1 1
-#  define ESP32S3_ADC1_CHANNEL2 2
-#  define ESP32S3_ADC1_CHANNEL3 3
-#  define ESP32S3_ADC1_CHANNEL4 4
-#  define ESP32S3_ADC1_CHANNEL5 5
-#  define ESP32S3_ADC1_CHANNEL6 6
-#  define ESP32S3_ADC1_CHANNEL7 7
-#  define ESP32S3_ADC1_CHANNEL8 8
-#  define ESP32S3_ADC1_CHANNEL9 9
-#endif
 
 /****************************************************************************
  * Public Data
@@ -69,20 +57,24 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: esp32s3_adc_init
+ * Name: esp_adc_initialize
  *
  * Description:
- *   Initialize the ADC.
+ *   This function initializes the specified ADC device with the provided
+ *   configuration.
  *
  * Input Parameters:
- *   channel - ADC channel number
+ *   adc_num      - The ADC unit number.
+ *   channel_list - List of channels to be configured for the ADC unit.
  *
  * Returned Value:
- *   ADC device structure reference on success; a NULL on failure
+ *   Returns a valid pointer to the ADC device structure on success; NULL on
+ *   any failure.
  *
  ****************************************************************************/
 
-void esp32s3_adc_init(int adc_index, struct adc_dev_s *dev);
+struct adc_dev_s *esp_adc_initialize(int adc_num,
+                                     const uint8_t *channel_list);
 
 #ifdef __cplusplus
 }
@@ -90,4 +82,4 @@ void esp32s3_adc_init(int adc_index, struct adc_dev_s *dev);
 #undef EXTERN
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_ADC_H */
+#endif /* __ARCH_XTENSA_SRC_COMMON_ESPRESSI_ESP_ADC_H */
