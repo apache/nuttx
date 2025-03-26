@@ -408,7 +408,7 @@ The following list indicates the state of peripherals' support in NuttX:
 ========== ======= =====
 Peripheral Support NOTES
 ========== ======= =====
-ADC          Yes
+ADC          Yes   Oneshot
 AES          Yes
 Bluetooth    Yes
 Camera       No
@@ -442,6 +442,40 @@ Wi-Fi        Yes   WPA3-SAE supported
 ========== ======= =====
 
 .. _esp32s3_peripheral_support:
+
+Analog-to-digital converter (ADC)
+---------------------------------
+
+Two ADC units are available for the ESP32-S3, each with 10 channels.
+
+Those units are independent and can be used simultaneously. During bringup, GPIOs for selected channels are
+configured automatically to be used as ADC inputs.
+If available, ADC calibration is automatically applied (see
+`this page <https://docs.espressif.com/projects/esp-idf/en/v5.1/esp32s3/api-reference/peripherals/adc_calibration.html>`__ for more details).
+Otherwise, a simple conversion is applied based on the attenuation and resolution.
+
+Each ADC unit is accessible using the ADC character driver, which returns data for the enabled channels.
+
+The ADC unit can be enabled in the menu :menuselection:`System Type --> ESP32-S3 Peripheral Selection --> Analog-to-digital converter (ADC)`.
+
+Then, it can be customized in the menu :menuselection:`System Type --> ADC Configuration`, which includes operating mode, gain and channels.
+
+========== =========== ===========
+ Channel    ADC1 GPIO   ADC2 GPIO
+========== =========== ===========
+0           1           11
+1           2           12
+2           3           13
+3           4           14
+4           5           15
+5           6           16
+6           7           17
+7           8           18
+8           9           19
+9           10          20
+========== =========== ===========
+
+.. warning:: Minimum and maximum measurable voltages may saturate around 100 mV and 3000 mV, respectively.
 
 Wi-Fi
 -----

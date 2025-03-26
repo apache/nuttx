@@ -6,7 +6,7 @@ ESP32-H2-DevKitM-1 is an entry-level development board based on Bluetooth® Low 
 IEEE 802.15.4 combo module ESP32-H2-MINI-1 or ESP32-H2-MINI-1U. You can find the board schematic
 `here <https://espressif-docs.readthedocs-hosted.com/projects/esp-dev-kits/en/latest/_static/esp32-h2-devkitm-1/esp32-h2-devkitm-1_v1.2_schematics_20230306.pdf>`_.
 
-Most of the I/O pins on the ESP32-H2-MINI-1/1U module are broken out to the pin headers on 
+Most of the I/O pins on the ESP32-H2-MINI-1/1U module are broken out to the pin headers on
 both sides of this board for easy interfacing. Developers can either connect peripherals with
 jumper wires or mount ESP32-H2-DevKitM-1 on a breadboard.
 
@@ -86,6 +86,27 @@ All of the configurations presented below can be tested by running the following
 
 Where <config_name> is the name of board configuration you want to use, i.e.: nsh, buttons, wifi...
 Then use a serial console terminal like ``picocom`` configured to 115200 8N1.
+
+adc
+---
+
+The ``adc`` configuration enables the ADC driver and the ADC example application.
+ADC Unit 1 is registered to ``/dev/adc0`` with channels 0, 1, 2 and 3 enabled by default.
+Currently, the ADC operates in oneshot mode.
+
+More ADC channels can be enabled or disabled in ``ADC Configuration`` menu.
+
+This example shows channels 0 and 1 connected to 3.3 V and channels 2 and 3 to GND (all readings
+show in units of mV)::
+
+    nsh> adc -n 1
+    adc_main: g_adcstate.count: 1
+    adc_main: Hardware initialized. Opening the ADC device: /dev/adc0
+    Sample:
+    1: channel: 0 value: 3713
+    2: channel: 1 value: 3714
+    3: channel: 2 value: 1
+    4: channel: 3 value: 0
 
 bmp180
 ------
