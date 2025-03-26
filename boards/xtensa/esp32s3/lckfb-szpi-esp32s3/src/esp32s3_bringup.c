@@ -84,6 +84,10 @@
 #  include "esp32s3_efuse.h"
 #endif
 
+#ifdef CONFIG_ESP32S3_LEDC
+#  include "esp32s3_board_ledc.h"
+#endif
+
 #ifdef CONFIG_ESP32S3_PARTITION_TABLE
 #  include "esp32s3_partition.h"
 #endif
@@ -215,6 +219,14 @@ int esp32s3_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: Failed to mount tmpfs at %s: %d\n",
              CONFIG_LIBC_TMPDIR, ret);
+    }
+#endif
+
+#ifdef CONFIG_ESP32S3_LEDC
+  ret = esp32s3_pwm_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: esp32s3_pwm_setup() failed: %d\n", ret);
     }
 #endif
 
