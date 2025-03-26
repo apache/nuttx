@@ -22,6 +22,10 @@
 
 ifeq ($(CONFIG_ARCH_BOARD_COMMON),y)
 
+ifeq ($(CONFIG_ESPRESSIF_ADC),y)
+  CSRCS += esp_board_adc.c
+endif
+
 ifeq ($(CONFIG_ESPRESSIF_LEDC),y)
   CSRCS += esp_board_ledc.c
 endif
