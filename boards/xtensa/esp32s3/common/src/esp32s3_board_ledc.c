@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32s3/esp32s3-devkit/src/esp32s3_ledc.c
+ * boards/xtensa/esp32s3/common/src/esp32s3_board_ledc.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
