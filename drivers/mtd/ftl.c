@@ -80,6 +80,7 @@ struct ftl_struct_s
   uint16_t              blkper;   /* R/W blocks per erase block */
   uint16_t              refs;     /* Number of references */
   bool                  unlinked; /* The driver has been unlinked */
+  bool                  direct_write;
   FAR uint8_t          *eblock;   /* One, in-memory erase block */
 
   /* The nand block map between logic block and physical block */
@@ -107,6 +108,9 @@ static ssize_t ftl_write(FAR struct inode *inode,
                          FAR const unsigned char *buffer,
                          blkcnt_t start_sector,
                          unsigned int nsectors);
+static ssize_t ftl_flush_direct(FAR struct ftl_struct_s *dev,
+                                FAR const char *buffer,
+                                off_t startblock, size_t nblocks);
 static int     ftl_geometry(FAR struct inode *inode,
                             FAR struct geometry *geometry);
 static int     ftl_ioctl(FAR struct inode *inode, int cmd,
@@ -278,6 +282,7 @@ static int ftl_char_open(FAR struct file *filep)
   dev = inode->i_private;
   DEBUGASSERT(dev->bch);
   dev->bch->readonly = ((filep->f_oflags & O_WROK) == 0);
+  dev->direct_write = ((filep->f_oflags & O_DIRECT) != 0);
   return bchlib_open((void *)dev->bch);
 }
 
@@ -423,7 +428,7 @@ static ssize_t ftl_char_write(FAR struct file *filep, FAR const char *buffer,
           return ret;
         }
 
-      ret = bchlib_write(bch, buffer, filep->f_pos, len);
+      ret = bchlib_write((void *)bch, buffer, filep->f_pos, len);
       if (ret > 0)
         {
           filep->f_pos += ret;
@@ -688,6 +693,14 @@ static ssize_t ftl_flush(FAR void *priv, FAR const uint8_t *buffer,
   int    nbytes;
   int    ret;
 
+  if (dev->direct_write)
+    {
+      /* Direct write mode, write the data directly */
+
+      return ftl_flush_direct(dev, (FAR const char *)buffer, startblock,
+                              nblocks);
+    }
+
   /* Get the aligned block.  Here is is assumed: (1) The number of R/W blocks
    * per erase block is a power of 2, and (2) the erase begins with that same
    * alignment.
@@ -843,6 +856,75 @@ static ssize_t ftl_flush(FAR void *priv, FAR const uint8_t *buffer,
         {
           return -EIO;
         }
+    }
+
+  return nblocks;
+}
+
+/****************************************************************************
+ * Name: ftl_flush_direct
+ *
+ * Description: Write the specified number of sectors without cache
+ *
+ ****************************************************************************/
+
+static ssize_t ftl_flush_direct(FAR struct ftl_struct_s *dev,
+                                FAR const char *buffer,
+                                off_t startblock, size_t nblocks)
+{
+  size_t blocksize = dev->geo.blocksize;
+  off_t starteraseblock;
+  off_t offset;
+  ssize_t ret;
+  size_t count;
+
+  while (nblocks)
+    {
+      starteraseblock = startblock / dev->blkper;
+      offset = startblock & (dev->blkper - 1);
+      count = MIN(dev->blkper - offset, nblocks);
+
+      if (offset == 0)
+        {
+          ret = ftl_mtd_erase(dev, starteraseblock);
+          if (ret < 0)
+            {
+              return ret;
+            }
+        }
+
+      if (dev->lptable == NULL)
+        {
+          ret = MTD_BWRITE(dev->mtd, startblock, count,
+                           (FAR const uint8_t *)buffer);
+          if (ret != count)
+            {
+              ferr("ERROR: Write block %"PRIdOFF" failed: %zd\n",
+                   startblock, ret);
+              return ret;
+            }
+        }
+      else
+        {
+          if (starteraseblock >= dev->lpcount)
+            {
+              return -ENOSPC;
+            }
+
+          ret = MTD_BWRITE(dev->mtd,
+                           dev->lptable[starteraseblock] * dev->blkper
+                           + offset, count, (FAR const uint8_t *)buffer);
+          if (ret != count)
+            {
+              MTD_MARKBAD(dev->mtd, dev->lptable[starteraseblock]);
+              ftl_update_map(dev, starteraseblock);
+              continue;
+            }
+        }
+
+      nblocks -= count;
+      startblock += count;
+      buffer += count * blocksize;
     }
 
   return nblocks;
