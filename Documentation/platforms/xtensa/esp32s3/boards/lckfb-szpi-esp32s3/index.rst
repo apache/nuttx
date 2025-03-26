@@ -248,3 +248,30 @@ Then test gpio2(pin9(P2) of PCA9557)::
   nsh> echo 1 > /dev/gpio2
   nsh> cat /dev/gpio2
   1
+
+pwm
+---
+
+Basic NuttShell configuration console and LEDC(PWM) enabled.
+
+You can run the configuration and compilation procedure::
+
+  $ ./tools/configure.sh lckfb-szpi-esp32s3:pwm
+  $ make flash -j$(nproc) ESPTOOL_PORT=/dev/ttyUSB0
+
+Then test LEDC(PWM) with pin42(backlight of LCD)::
+
+  # Backlight 0%
+  nsh> pwm -d 100
+  pwm_main: starting output with frequency: 100 duty: 0000ffff
+  pwm_main: stopping output
+
+  # Backlight 10%
+  nsh> pwm -d 90
+  pwm_main: starting output with frequency: 100 duty: 0000e666
+  pwm_main: stopping output
+
+  # Backlight 100%
+  nsh> pwm -d 0
+  pwm_main: starting output with frequency: 100 duty: 00000000
+  pwm_main: stopping output
