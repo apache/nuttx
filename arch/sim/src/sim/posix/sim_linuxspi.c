@@ -194,27 +194,10 @@ static int linux_spi_lock(struct spi_dev_s *dev, bool lock)
 static void linux_spi_select(struct spi_dev_s *dev, uint32_t devid,
                              bool selected)
 {
-  if (!selected)
-    {
-      struct linux_spi_dev_s *priv = (struct linux_spi_dev_s *)dev;
-
-      /* Some members of struct spi_ioc_transfer transfer_data is default 0:
-       * @speed_hz = 0, thus it's ignored, MAX_SEPPD_HZ will be used.
-       * @bits_per_word = 0, thus it's ignored, BITS_PER_WORD will be used.
-       * @delay_usecs = 0, thus thers's no delay before next transfer.
-       */
-
-      struct spi_ioc_transfer transfer_data =
-        {
-          .tx_buf = (unsigned long)NULL,
-          .rx_buf = (unsigned long)NULL,
-          .len = 0,
-          .cs_change = false,
-        };
-
-      host_uninterruptible(ioctl, priv->file, SPI_IOC_MESSAGE(1),
-                           &transfer_data);
-    }
+  /**
+   * linux kernel not supported cs changed command, so the map is not fitting
+   * and it will send len zero to impact transmission, now we delete it
+   * */
 }
 
 /****************************************************************************
