@@ -38,6 +38,7 @@
 
 #include "arm_internal.h"
 #include "sam_gpio.h"
+#include "sam_periphclks.h"
 #include "hardware/sam_pio.h"
 #include "hardware/sam_matrix.h"
 
@@ -471,17 +472,31 @@ static inline int sam_configperiph(uintptr_t base, uint32_t pin,
  *
  ****************************************************************************/
 
-#if !defined(CONFIG_SAMV7_ERASE_ENABLE) || \
-    !defined(CONFIG_SAMV7_JTAG_FULL_ENABLE)
 void sam_gpioinit(void)
 {
+#if !defined(CONFIG_SAMV7_ERASE_ENABLE) || \
+    !defined(CONFIG_SAMV7_JTAG_FULL_ENABLE)
   uint32_t regval;
 
   regval  = getreg32(SAM_MATRIX_CCFG_SYSIO);
   regval |= (SYSIO_ERASE_BIT | SYSIO_BITS);
   putreg32(regval, SAM_MATRIX_CCFG_SYSIO);
-}
 #endif
+
+  sam_pioa_enableclk();
+#if SAMV7_NPIO > 1
+  sam_piob_enableclk();
+#endif
+#if SAMV7_NPIO > 2
+  sam_pioc_enableclk();
+#endif
+#if SAMV7_NPIO > 3
+  sam_piod_enableclk();
+#endif
+#if SAMV7_NPIO > 4
+  sam_pioe_enableclk();
+#endif
+}
 
 /****************************************************************************
  * Name: sam_configgpio

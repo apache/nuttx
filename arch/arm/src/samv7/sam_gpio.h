@@ -265,12 +265,7 @@ static inline int sam_gpio_pinmask(gpio_pinset_t cfgset)
  *
  ****************************************************************************/
 
-#if !defined(CONFIG_SAMV7_ERASE_ENABLE) || \
-    !defined(CONFIG_SAMV7_JTAG_FULL_ENABLE)
 void sam_gpioinit(void);
-#else
-#  define sam_gpioinit()
-#endif
 
 /****************************************************************************
  * Name: sam_gpioirqinitialize
