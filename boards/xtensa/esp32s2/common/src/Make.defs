@@ -22,6 +22,10 @@
 
 ifeq ($(CONFIG_ARCH_BOARD_COMMON),y)
 
+ifeq ($(CONFIG_ESPRESSIF_ADC),y)
+  CSRCS += esp32s2_board_adc.c
+endif
+
 ifeq ($(CONFIG_WATCHDOG),y)
   CSRCS += esp32s2_board_wdt.c
 endif

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32s3/common/src/esp32s3_board_adc.c
+ * boards/xtensa/esp32/common/src/esp32_board_adc.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -32,7 +32,7 @@
 
 #include "espressif/esp_adc.h"
 
-#include "esp32s3_board_adc.h"
+#include "esp32_board_adc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -40,7 +40,8 @@
 
 /* The number of channels for each ADC */
 
-#define ADC_MAX_CHANNELS 10
+#define ADC_1_MAX_CHANNELS 8
+#define ADC_2_MAX_CHANNELS 10
 
 /****************************************************************************
  * Private Data
@@ -51,19 +52,19 @@
  * GPIOs are fixed for each channel and configured in the lower-half driver.
  *
  *               ADC 1
- * Channel: 0 1 2 3 4 5 6 7 8 9
- * GPIO:    1 2 3 4 5 6 7 8 9 10
+ * Channel: 0  1  2  3  4  5  6  7
+ * GPIO:    36 37 38 39 32 33 34 35
  *
  *               ADC 2
  * Channel: 0  1  2  3  4  5  6  7  8  9
- * GPIO:    11 12 13 14 15 16 17 18 19 20
-
+ * GPIO:    4  0  2  15 13 12 14 27 25 26
+ *
  * On the chanlist arrays below, channels are added +1. Do not change.
  * Important: if using more than 8 channels, edit CONFIG_ADC_FIFOSIZE.
  */
 
 #ifdef CONFIG_ESPRESSIF_ADC_1
-static const uint8_t g_chanlist_adc1[ADC_MAX_CHANNELS] =
+static const uint8_t g_chanlist_adc1[ADC_1_MAX_CHANNELS] =
 {
 #ifdef CONFIG_ESPRESSIF_ADC_1_CH0
   1,
@@ -89,17 +90,11 @@ static const uint8_t g_chanlist_adc1[ADC_MAX_CHANNELS] =
 #ifdef CONFIG_ESPRESSIF_ADC_1_CH7
   8,
 #endif
-#ifdef CONFIG_ESPRESSIF_ADC_1_CH8
-  9,
-#endif
-#ifdef CONFIG_ESPRESSIF_ADC_1_CH9
-  10
-#endif
 };
 #endif
 
 #ifdef CONFIG_ESPRESSIF_ADC_2
-static const uint8_t g_chanlist_adc2[ADC_MAX_CHANNELS] =
+static const uint8_t g_chanlist_adc2[ADC_2_MAX_CHANNELS] =
 {
 #ifdef CONFIG_ESPRESSIF_ADC_2_CH0
   1,

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32s3/common/include/esp32s3_board_adc.h
+ * boards/xtensa/esp32s2/common/include/esp32s2_board_adc.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_XTENSA_ESP32S3_COMMON_INCLUDE_ESP32S3_BOARD_ADC_H
-#define __BOARDS_XTENSA_ESP32S3_COMMON_INCLUDE_ESP32S3_BOARD_ADC_H
+#ifndef __BOARDS_XTENSA_ESP32S2_COMMON_INCLUDE_ESP32S2_BOARD_ADC_H
+#define __BOARDS_XTENSA_ESP32S2_COMMON_INCLUDE_ESP32S2_BOARD_ADC_H
 
 /****************************************************************************
  * Included Files
@@ -76,4 +76,4 @@ int board_adc_init(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_XTENSA_ESP32S3_COMMON_INCLUDE_ESP32S3_BOARD_ADC_H */
+#endif /* __BOARDS_XTENSA_ESP32S2_COMMON_INCLUDE_ESP32S2_BOARD_ADC_H */

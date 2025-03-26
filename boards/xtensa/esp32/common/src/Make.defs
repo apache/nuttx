@@ -26,6 +26,10 @@ ifeq ($(CONFIG_WATCHDOG),y)
   CSRCS += esp32_board_wdt.c
 endif
 
+ifeq ($(CONFIG_ESPRESSIF_ADC),y)
+  CSRCS += esp32_board_adc.c
+endif
+
 ifeq ($(CONFIG_ONESHOT),y)
   CSRCS += esp32_oneshot.c
 endif
