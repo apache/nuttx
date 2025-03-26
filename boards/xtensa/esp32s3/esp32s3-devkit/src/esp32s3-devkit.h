@@ -216,18 +216,6 @@ int esp32s3_cs4344_initialize(int port);
 int esp32s3_djoy_initialize(void);
 #endif
 
-/****************************************************************************
- * Name: esp32s3_ledc_setup
- *
- * Description:
- *   Initialize LEDC PWM and register the PWM device.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_ESP32S3_LEDC
-int esp32s3_pwm_setup(void);
-#endif
-
 #ifdef CONFIG_ESP32S3_TWAI
 int esp32s3_twai_setup(void);
 #endif

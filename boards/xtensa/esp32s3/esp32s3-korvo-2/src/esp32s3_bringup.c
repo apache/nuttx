@@ -86,7 +86,7 @@
 #endif
 
 #ifdef CONFIG_ESP32S3_LEDC
-#  include "esp32s3_ledc.h"
+#  include "esp32s3_board_ledc.h"
 #endif
 
 #ifdef CONFIG_ESP32S3_PARTITION_TABLE
