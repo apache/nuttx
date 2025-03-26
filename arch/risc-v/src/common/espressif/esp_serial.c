@@ -48,6 +48,7 @@
 #include "esp_config.h"
 #include "esp_irq.h"
 #include "esp_lowputc.h"
+#include "esp_gpio.h"
 
 #ifdef CONFIG_ESPRESSIF_USBSERIAL
 #  include "esp_usbserial.h"
@@ -273,6 +274,19 @@ static int uart_handler(int irq, void *context, void *arg)
   uint32_t rx_mask = UART_INTR_RXFIFO_TOUT | UART_INTR_RXFIFO_FULL;
   uint32_t int_status = uart_hal_get_intsts_mask(priv->hal);
 
+#ifdef HAVE_RS485
+  if ((int_status & UART_INTR_TX_BRK_IDLE) != 0 &&
+      esp_txempty(dev))
+    {
+      uart_hal_clr_intsts_mask(priv->hal, UART_INTR_TX_BRK_IDLE);
+      if (dev->xmit.tail == dev->xmit.head)
+        {
+          esp_gpiowrite(priv->rs485_dir_gpio,
+                        !priv->rs485_dir_polarity);
+        }
+    }
+#endif
+
   /* Tx fifo empty interrupt or UART tx done int */
 
   if ((int_status & tx_mask) != 0)
@@ -437,6 +451,17 @@ static int esp_setup(uart_dev_t *dev)
   uart_hal_set_hw_flow_ctrl(priv->hal, flow_ctrl, rx_thrs);
 #endif /* CONFIG_SERIAL_IFLOWCONTROL || CONFIG_SERIAL_OFLOWCONTROL */
 
+#ifdef HAVE_RS485
+
+  /* Configure the idle time between transfers */
+
+  if (priv->rs485_dir_gpio != 0)
+    {
+      uart_hal_set_tx_idle_num(priv->hal, 1);
+    }
+  else
+#endif
+
   /* Clear FIFOs */
 
   uart_hal_rxfifo_rst(priv->hal);
@@ -575,6 +600,16 @@ static void esp_txint(uart_dev_t *dev, bool enable)
 
   if (enable)
     {
+      /* After all bytes physically transmitted in the RS485 bus
+       * the TX_BRK_IDLE will indicate we can disable the TX pin.
+       */
+#ifdef HAVE_RS485
+      if (priv->rs485_dir_gpio != 0)
+        {
+          uart_hal_ena_intr_mask(priv->hal, UART_INTR_TX_BRK_IDLE);
+        }
+
+#endif
       /* Set to receive an interrupt when the TX holding register register
        * is empty
        */
@@ -711,7 +746,16 @@ static bool esp_txempty(uart_dev_t *dev)
 
 static void esp_send(uart_dev_t *dev, int ch)
 {
-  esp_lowputc_send_byte(dev->priv, ch);
+  struct esp_uart_s *priv = dev->priv;
+
+#ifdef HAVE_RS485
+  if (priv->rs485_dir_gpio != 0)
+    {
+      esp_gpiowrite(priv->rs485_dir_gpio, priv->rs485_dir_polarity);
+    }
+#endif
+
+  esp_lowputc_send_byte(priv, ch);
 }
 
 /****************************************************************************
@@ -1058,7 +1102,7 @@ static bool esp_rxflowcontrol(uart_dev_t *dev, unsigned int nbuffered,
  *
  * Description:
  *   Performs the low level UART initialization early in debug so that the
- *   serial console will be available during bootup. This must be called
+ *   serial console will be available during boot-up. This must be called
  *   before riscv_serialinit.
  *   NOTE: This function depends on GPIO pin configuration performed in
  *   in up_consoleinit() and main clock initialization performed in
@@ -1089,7 +1133,7 @@ void riscv_earlyserialinit(void)
 #endif
 
   /* Configure console in early step.
-   * Setup for other serials will be perfomed when the serial driver is
+   * Setup for other serials will be performed when the serial driver is
    * open.
    */
 

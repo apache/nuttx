@@ -102,6 +102,14 @@ struct esp_uart_s g_uart0_config =
   .oflow  = false,   /* output flow control (CTS) disabled */
 #endif
 #endif
+#ifdef CONFIG_ESPRESSIF_UART0_RS485
+  .rs485_dir_gpio = CONFIG_ESPRESSIF_UART0_RS485_DIR_PIN,
+#if (CONFIG_ESPRESSIF_UART0_RS485_DIR_POLARITY == 0)
+  .rs485_dir_polarity = false,
+#else
+  .rs485_dir_polarity = true,
+#endif
+#endif
   .hal = &g_uart0_hal,
   .lock = SP_UNLOCKED
 };
@@ -146,6 +154,14 @@ struct esp_uart_s g_uart1_config =
   .oflow  = true,    /* output flow control (CTS) enabled */
 #else
   .oflow  = false,   /* output flow control (CTS) disabled */
+#endif
+#endif
+#ifdef CONFIG_ESPRESSIF_UART1_RS485
+  .rs485_dir_gpio = CONFIG_ESPRESSIF_UART1_RS485_DIR_PIN,
+#if (CONFIG_ESPRESSIF_UART1_RS485_DIR_POLARITY == 0)
+  .rs485_dir_polarity = false,
+#else
+  .rs485_dir_polarity = true,
 #endif
 #endif
   .hal = &g_uart1_hal,
@@ -287,6 +303,15 @@ void esp_lowputc_config_pins(const struct esp_uart_s *priv)
     {
       esp_configgpio(priv->ctspin, INPUT | PULLUP);
       esp_gpio_matrix_in(priv->ctspin, priv->ctssig, 0);
+    }
+#endif
+
+#ifdef HAVE_RS485
+  if (priv->rs485_dir_gpio != 0)
+    {
+      esp_configgpio(priv->rs485_dir_gpio, OUTPUT);
+      esp_gpio_matrix_out(priv->rs485_dir_gpio, SIG_GPIO_OUT_IDX, 0, 0);
+      esp_gpiowrite(priv->rs485_dir_gpio, !priv->rs485_dir_polarity);
     }
 #endif
 }

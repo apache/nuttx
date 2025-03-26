@@ -76,6 +76,10 @@ struct esp_uart_s
   uint8_t             ctssig;    /* CTS signal */
   bool                oflow;     /* Output flow control (CTS) enabled */
 #endif
+#ifdef HAVE_RS485
+  uint8_t  rs485_dir_gpio;     /* UART RS-485 DIR GPIO pin cfg */
+  bool     rs485_dir_polarity; /* UART RS-485 DIR TXEN polarity */
+#endif
   uart_hal_context_t *hal;       /* HAL context */
   spinlock_t          lock;      /* Spinlock */
 };
