@@ -1090,7 +1090,7 @@ config ESPRESSIF_WIFI_RX_BA_WIN
 		Set the size of WiFi Block Ack RX window. Generally a bigger value means higher throughput and better
 		compatibility but more memory. Most of time we should NOT change the default value unless special
 		reason, e.g. test the maximum UDP RX throughput with iperf etc. For iperf test in shieldbox, the
-		recommended value is 9~12. If PSRAM is used and WiFi memory is prefered to allocat in PSRAM first,
+		recommended value is 9~12. If PSRAM is used and WiFi memory is preferred to allocate in PSRAM first,
 		the default and minimum value should be 16 to achieve better throughput and compatibility with both
 		stations and APs.
 
@@ -1193,6 +1193,31 @@ menu "UART Configuration"
 
 if ESPRESSIF_UART0
 
+config ESPRESSIF_UART0_RS485
+	bool "RS-485 on UART0"
+	default n
+	---help---
+		Enable RS-485 interface on UART0. Your board config will have to
+		provide GPIO_UART0_RS485_DIR pin definition.
+
+config ESPRESSIF_UART0_RS485_DIR_PIN
+	int "UART0 RS-485 DIR pin"
+	default 10
+	range 0 46
+	depends on ESPRESSIF_UART0_RS485
+	---help---
+		DIR pin for RS-485 on UART0. This pin will control the RS485 enable
+		TX of the RS485 transceiver.
+
+config ESPRESSIF_UART0_RS485_DIR_POLARITY
+	int "UART0 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on ESPRESSIF_UART0_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on UART0. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
 config ESPRESSIF_UART0_TXPIN
 	int "UART0 TX Pin"
 	default 21 if ESPRESSIF_ESP32C3
@@ -1234,6 +1259,31 @@ config ESPRESSIF_UART0_CTSPIN
 endif # ESPRESSIF_UART0
 
 if ESPRESSIF_UART1
+
+config ESPRESSIF_UART1_RS485
+	bool "RS-485 on UART1"
+	default n
+	---help---
+		Enable RS-485 interface on UART1. Your board config will have to
+		provide GPIO_UART1_RS485_DIR pin definition.
+
+config ESPRESSIF_UART1_RS485_DIR_PIN
+	int "UART1 RS-485 DIR pin"
+	default 4
+	range 0 46
+	depends on ESPRESSIF_UART1_RS485
+	---help---
+		DIR pin for RS-485 on UART1. This pin will control the RS485 enable
+		TX of the RS485 transceiver.
+
+config ESPRESSIF_UART1_RS485_DIR_POLARITY
+	int "UART1 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on ESPRESSIF_UART1_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on UART1. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
 
 config ESPRESSIF_UART1_TXPIN
 	int "UART1 TX Pin"
