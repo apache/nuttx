@@ -345,7 +345,7 @@ int nx_mount(FAR const char *source, FAR const char *target,
           else
             {
               inode_release(drvr_inode);
-              ret = mtd_proxy(source, mountflags, &drvr_inode);
+              ret = mtd_block_proxy(source, mountflags, &drvr_inode);
               if (ret < 0)
                 {
                   goto errout_with_inode;

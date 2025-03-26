@@ -39,12 +39,15 @@
 #include <assert.h>
 #include <debug.h>
 #include <errno.h>
+#include <fcntl.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/mtd/mtd.h>
 #include <nuttx/drivers/rwbuffer.h>
+#include <nuttx/drivers/drivers.h>
+#include <bch.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -68,10 +71,11 @@
 
 struct ftl_struct_s
 {
-  FAR struct mtd_dev_s *mtd;      /* Contained MTD interface */
-  struct mtd_geometry_s geo;      /* Device geometry */
+  FAR struct mtd_dev_s *mtd; /* Contained MTD interface */
+  FAR struct bchlib_s  *bch; /* BCH library interface */
+  struct mtd_geometry_s geo; /* Device geometry */
 #ifdef FTL_HAVE_RWBUFFER
-  struct rwbuffer_s     rwb;      /* Read-ahead/write buffer support */
+  struct rwbuffer_s     rwb;  /* Read-ahead/write buffer support */
 #endif
   uint16_t              blkper;   /* R/W blocks per erase block */
   uint16_t              refs;     /* Number of references */
@@ -88,39 +92,77 @@ struct ftl_struct_s
  * Private Function Prototypes
  ****************************************************************************/
 
+/* Block operations */
+
 static int     ftl_open(FAR struct inode *inode);
 static int     ftl_close(FAR struct inode *inode);
 static ssize_t ftl_reload(FAR void *priv, FAR uint8_t *buffer,
-                 off_t startblock, size_t nblocks);
-static ssize_t ftl_read(FAR struct inode *inode, FAR unsigned char *buffer,
-                 blkcnt_t start_sector, unsigned int nsectors);
+                          off_t startblock, size_t nblocks);
+static ssize_t ftl_read(FAR struct inode *inode,
+                        FAR unsigned char *buffer,
+                        blkcnt_t start_sector, unsigned int nsectors);
 static ssize_t ftl_flush(FAR void *priv, FAR const uint8_t *buffer,
-                 off_t startblock, size_t nblocks);
+                         off_t startblock, size_t nblocks);
 static ssize_t ftl_write(FAR struct inode *inode,
-                 FAR const unsigned char *buffer, blkcnt_t start_sector,
-                 unsigned int nsectors);
+                         FAR const unsigned char *buffer,
+                         blkcnt_t start_sector,
+                         unsigned int nsectors);
 static int     ftl_geometry(FAR struct inode *inode,
-                 FAR struct geometry *geometry);
+                            FAR struct geometry *geometry);
 static int     ftl_ioctl(FAR struct inode *inode, int cmd,
-                 unsigned long arg);
+                         unsigned long arg);
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int     ftl_unlink(FAR struct inode *inode);
+#endif
+
+/* File operations */
+
+static int     ftl_char_open(FAR struct file *filep);
+static int     ftl_char_close(FAR struct file *filep);
+static off_t   ftl_char_seek(FAR struct file *filep, off_t offset,
+                             int whence);
+static ssize_t ftl_char_read(FAR struct file *filep, FAR char *buffer,
+                             size_t buflen);
+static ssize_t ftl_char_write(FAR struct file *filep, FAR const char *buffer,
+                              size_t buflen);
+static int     ftl_char_ioctl(FAR struct file *filep, int cmd,
+                              unsigned long arg);
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+static int     ftl_char_unlink(FAR struct inode *inode);
 #endif
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static const struct block_operations g_bops =
+static const struct block_operations g_ftl_bops =
 {
-  ftl_open,     /* open     */
-  ftl_close,    /* close    */
-  ftl_read,     /* read     */
-  ftl_write,    /* write    */
-  ftl_geometry, /* geometry */
-  ftl_ioctl     /* ioctl    */
+  ftl_open,     /* blk open     */
+  ftl_close,    /* blk close    */
+  ftl_read,     /* blk read     */
+  ftl_write,    /* blk write    */
+  ftl_geometry, /* blk geometry */
+  ftl_ioctl     /* blk ioctl    */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , ftl_unlink  /* unlink   */
+  , ftl_unlink  /* blk unlink   */
+#endif
+};
+
+static const struct file_operations g_ftl_fops =
+{
+  ftl_char_open,    /* open */
+  ftl_char_close,   /* close */
+  ftl_char_read,    /* read */
+  ftl_char_write,   /* write */
+  ftl_char_seek,    /* seek */
+  ftl_char_ioctl,   /* ioctl */
+  NULL,             /* mmap */
+  NULL,             /* truncate */
+  NULL,             /* poll */
+  NULL,             /* readv */
+  NULL              /* writev */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , ftl_char_unlink /* unlink */
 #endif
 };
 
@@ -221,6 +263,25 @@ static int ftl_open(FAR struct inode *inode)
 }
 
 /****************************************************************************
+ * Name: ftl_char_open
+ *
+ * Description: Open the ftl char device
+ *
+ ****************************************************************************/
+
+static int ftl_char_open(FAR struct file *filep)
+{
+  FAR struct inode *inode = filep->f_inode;
+  FAR struct ftl_struct_s *dev;
+
+  DEBUGASSERT(inode->i_private);
+  dev = inode->i_private;
+  DEBUGASSERT(dev->bch);
+  dev->bch->readonly = ((filep->f_oflags & O_WROK) == 0);
+  return bchlib_open((void *)dev->bch);
+}
+
+/****************************************************************************
  * Name: ftl_close
  *
  * Description: close the block device
@@ -243,15 +304,154 @@ static int ftl_close(FAR struct inode *inode)
 #ifdef FTL_HAVE_RWBUFFER
       rwb_uninitialize(&dev->rwb);
 #endif
+
+      /* Free the erase block buffer */
+
       if (dev->eblock)
         {
           kmm_free(dev->eblock);
+        }
+
+      /* Free the logical to physical mapping table */
+
+      if (dev->lptable)
+        {
+          kmm_free(dev->lptable);
         }
 
       kmm_free(dev);
     }
 
   return OK;
+}
+
+/****************************************************************************
+ * Name: ftl_char_close
+ *
+ * Description: close the char device
+ *
+ ****************************************************************************/
+
+static int ftl_char_close(FAR struct file *filep)
+{
+  FAR struct inode *inode = filep->f_inode;
+  FAR struct ftl_struct_s *dev;
+
+  DEBUGASSERT(inode->i_private);
+  dev = inode->i_private;
+  DEBUGASSERT(dev->bch);
+  return bchlib_close((void *)dev->bch);
+}
+
+/****************************************************************************
+ * Name: ftl_char_seek
+ *
+ * Description: ftl char driver seek
+ *
+ ****************************************************************************/
+
+static off_t ftl_char_seek(FAR struct file *filep, off_t offset, int whence)
+{
+  FAR struct inode *inode = filep->f_inode;
+  FAR struct ftl_struct_s *dev;
+
+  DEBUGASSERT(inode->i_private);
+  dev = inode->i_private;
+  DEBUGASSERT(dev->bch);
+  return bchlib_seek((void *)dev->bch, offset, whence,
+                     &filep->f_pos);
+}
+
+/****************************************************************************
+ * Name: ftl_char_read
+ *
+ * Description: ftl char driver read
+ ****************************************************************************/
+
+static ssize_t ftl_char_read(FAR struct file *filep, FAR char *buffer,
+                             size_t len)
+{
+  FAR struct inode *inode = filep->f_inode;
+  FAR struct ftl_struct_s *dev;
+  FAR struct bchlib_s *bch;
+  ssize_t ret;
+
+  DEBUGASSERT(inode->i_private);
+  dev = inode->i_private;
+  DEBUGASSERT(dev->bch);
+  bch = dev->bch;
+  ret = nxmutex_lock(&bch->lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = bchlib_read(bch, buffer, filep->f_pos, len);
+  if (ret > 0)
+    {
+      filep->f_pos += ret;
+    }
+
+  nxmutex_unlock(&bch->lock);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: ftl_char_write
+ *
+ * Description: ftl char driver write
+ ****************************************************************************/
+
+static ssize_t ftl_char_write(FAR struct file *filep, FAR const char *buffer,
+                              size_t len)
+{
+  FAR struct inode *inode = filep->f_inode;
+  FAR struct bchlib_s *bch;
+  FAR struct ftl_struct_s *dev;
+  ssize_t ret = -EACCES;
+
+  DEBUGASSERT(inode->i_private);
+  dev = inode->i_private;
+  DEBUGASSERT(dev->bch);
+  bch = dev->bch;
+
+  if (!bch->readonly)
+    {
+      ret = nxmutex_lock(&bch->lock);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      ret = bchlib_write(bch, buffer, filep->f_pos, len);
+      if (ret > 0)
+        {
+          filep->f_pos += ret;
+        }
+
+      nxmutex_unlock(&bch->lock);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: ftl_char_ioctl
+ *
+ * Description:
+ *   Handle ftl char IOCTL commands
+ *
+ ****************************************************************************/
+
+static int ftl_char_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
+{
+  FAR struct inode *inode = filep->f_inode;
+  FAR struct ftl_struct_s *dev;
+
+  DEBUGASSERT(inode->i_private);
+  dev = inode->i_private;
+  DEBUGASSERT(dev->bch);
+  return bchlib_ioctl((void *)dev->bch, cmd, arg);
 }
 
 /****************************************************************************
@@ -495,10 +695,10 @@ static ssize_t ftl_flush(FAR void *priv, FAR const uint8_t *buffer,
 
   mask         = dev->blkper - 1;
   alignedblock = (startblock + mask) & ~mask;
+  remaining = nblocks;
 
   /* Handle partial erase blocks before the first unaligned block */
 
-  remaining = nblocks;
   if (alignedblock > startblock)
     {
       /* Check if the write is shorter than to the end of the erase block */
@@ -757,7 +957,7 @@ static int ftl_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
 /****************************************************************************
  * Name: ftl_unlink
  *
- * Description: Unlink the device
+ * Description: Unlink the ftl block device
  *
  ****************************************************************************/
 
@@ -775,9 +975,19 @@ static int ftl_unlink(FAR struct inode *inode)
 #ifdef FTL_HAVE_RWBUFFER
       rwb_uninitialize(&dev->rwb);
 #endif
+
+      /* Free the erase block buffer */
+
       if (dev->eblock)
         {
           kmm_free(dev->eblock);
+        }
+
+      /* Free the logical to physical mapping table */
+
+      if (dev->lptable)
+        {
+          kmm_free(dev->lptable);
         }
 
       kmm_free(dev);
@@ -788,11 +998,209 @@ static int ftl_unlink(FAR struct inode *inode)
 #endif
 
 /****************************************************************************
+ * Name: ftl_char_unlink
+ *
+ * Description: Unlink the ftl char device
+ *
+ ****************************************************************************/
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+static int ftl_char_unlink(FAR struct inode *inode)
+{
+  struct ftl_struct_s *dev = inode->i_private;
+  DEBUGASSERT(dev);
+  DEBUGASSERT(dev->bch);
+
+  /* Get exclusive access to the BCH device */
+
+  return bchlib_unlink((void *)dev->bch);
+}
+#endif
+
+/****************************************************************************
+ * Name: ftl_setup
+ *
+ * Description:
+ *   Initialize to provide a block driver wrapper around an MTD interface
+ *
+ * Input Parameters:
+ *   mtd  - The MTD device that supports the FLASH interface.
+ *
+ ****************************************************************************/
+
+static int ftl_setup(struct ftl_struct_s **ftl, FAR struct mtd_dev_s *mtd)
+{
+  struct ftl_struct_s *dev;
+  int ret = -ENOMEM;
+
+  /* Allocate a FTL device structure */
+
+  dev = kmm_zalloc(sizeof(struct ftl_struct_s));
+  if (!dev)
+    {
+      ferr("ERROR: Failed to allocate FTL device structure\n");
+      return -ENOMEM;
+    }
+
+  /* Initialize the FTL device structure */
+
+  dev->mtd = mtd;
+
+  /* Get the device geometry. (casting to uintptr_t first eliminates
+   * complaints on some architectures where the sizeof long is different
+   * from the size of a pointer).
+   */
+
+  ret = MTD_IOCTL(mtd, MTDIOC_GEOMETRY,
+                  (unsigned long)((uintptr_t)&dev->geo));
+  if (ret < 0)
+    {
+      ferr("ERROR: MTD ioctl(MTDIOC_GEOMETRY) failed: %d\n", ret);
+      kmm_free(dev);
+      return ret;
+    }
+
+  /* Get the number of R/W blocks per erase block */
+
+  dev->blkper = dev->geo.erasesize / dev->geo.blocksize;
+  DEBUGASSERT(dev->blkper * dev->geo.blocksize == dev->geo.erasesize);
+
+  /* Configure read-ahead/write buffering */
+
+#ifdef FTL_HAVE_RWBUFFER
+  dev->rwb.blocksize     = dev->geo.blocksize;
+  dev->rwb.nblocks       = dev->geo.neraseblocks * dev->blkper;
+  dev->rwb.dev           = (FAR void *)dev;
+  dev->rwb.wrflush       = ftl_flush;
+  dev->rwb.rhreload      = ftl_reload;
+
+#if defined(CONFIG_FTL_WRITEBUFFER)
+  dev->rwb.wrmaxblocks   = dev->blkper;
+  dev->rwb.wralignblocks = dev->blkper;
+#endif
+
+#ifdef CONFIG_FTL_READAHEAD
+  dev->rwb.rhmaxblocks   = dev->blkper;
+#endif
+
+  ret = rwb_initialize(&dev->rwb);
+  if (ret < 0)
+    {
+      ferr("ERROR: rwb_initialize failed: %d\n", ret);
+      kmm_free(dev);
+      return ret;
+    }
+#endif
+
+  if (MTD_ISBAD(dev->mtd, 0) != -ENOSYS)
+    {
+      ret = ftl_init_map(dev);
+      if (ret < 0)
+        {
+#ifdef FTL_HAVE_RWBUFFER
+          rwb_uninitialize(&dev->rwb);
+#endif
+          kmm_free(dev);
+          return ret;
+        }
+    }
+
+  /* Inode private data is a reference to the FTL device structure */
+
+  *ftl = dev;
+  return ret;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: ftl_initialize_by_path
+ * Name: ftl_uninitialize
+ *
+ * Description:
+ *   Uninitialize the FTL device
+ *
+ * Input Parameters:
+ *   dev  - pointer of a pointer of FTL device structure.
+ *
+ ****************************************************************************/
+
+static void ftl_uninitialize(struct ftl_struct_s *dev)
+{
+  if (dev)
+    {
+      if (dev->eblock)
+        {
+          kmm_free(dev->eblock);
+        }
+
+      if (dev->lptable)
+        {
+          kmm_free(dev->lptable);
+        }
+
+#ifdef FTL_HAVE_RWBUFFER
+      rwb_uninitialize(&dev->rwb);
+#endif
+      if (dev->bch)
+        {
+          if (dev->bch->buffer)
+            {
+              kmm_free(dev->bch->buffer);
+            }
+
+          kmm_free(dev->bch);
+        }
+
+      kmm_free(dev);
+    }
+}
+
+/****************************************************************************
+ * Name: ftl_initialize_common
+ *
+ * Description:
+ *   Common initialization function for ftl
+ *
+ * Input Parameters:
+ *   dev  - pointer of a pointer of FTL device structure.
+ *   path - The block device path.
+ *   mtd  - The MTD device that supports the FLASH interface.
+ *
+ ****************************************************************************/
+
+static int ftl_initialize_common(struct ftl_struct_s **dev,
+                                 FAR const char *path,
+                                 FAR struct mtd_dev_s *mtd)
+{
+  int ret = -ENOMEM;
+
+  if (path == NULL || mtd == NULL)
+    {
+      *dev = NULL;
+      return -EINVAL;
+    }
+
+  ret = ftl_setup(dev, mtd);
+  if (ret < 0)
+    {
+      ferr("ERROR: ftl setup failed: %d\n", ret);
+      *dev = NULL;
+      return ret;
+    }
+
+  ret = register_blockdriver(path, &g_ftl_bops, 0, *dev);
+  if (ret < 0)
+    {
+      *dev = NULL;
+      ferr("ERROR: register blockdriver failed: %d\n", -ret);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: ftl_initialize_to_block
  *
  * Description:
  *   Initialize to provide a block driver wrapper around an MTD interface
@@ -803,97 +1211,88 @@ static int ftl_unlink(FAR struct inode *inode)
  *
  ****************************************************************************/
 
-int ftl_initialize_by_path(FAR const char *path, FAR struct mtd_dev_s *mtd)
+int ftl_initialize_to_block(FAR const char *path, FAR struct mtd_dev_s *mtd)
 {
-  struct ftl_struct_s *dev;
-  int ret = -ENOMEM;
-
-  /* Sanity check */
+  struct ftl_struct_s *dev = NULL;
+  int ret;
 
   if (path == NULL || mtd == NULL)
     {
       return -EINVAL;
     }
 
-  finfo("path=\"%s\"\n", path);
-
-  /* Allocate a FTL device structure */
-
-  dev = kmm_zalloc(sizeof(struct ftl_struct_s));
-  if (dev)
+  ret = ftl_initialize_common(&dev, path, mtd);
+  if (ret < 0)
     {
-      /* Initialize the FTL device structure */
+      ferr("ERROR: ftl setup failed: %d\n", ret);
+      ftl_uninitialize(dev);
+      return ret;
+    }
 
-      dev->mtd = mtd;
+  return ret;
+}
 
-      /* Get the device geometry. (casting to uintptr_t first eliminates
-       * complaints on some architectures where the sizeof long is different
-       * from the size of a pointer).
-       */
+/****************************************************************************
+ * Name: ftl_initialize_by_path
+ *
+ * Description:
+ *   Initialize to provide a char driver wrapper around an MTD interface
+ *
+ * Input Parameters:
+ *   path - The char device path.
+ *   mtd  - The MTD device that supports the FLASH interface.
+ *
+ ****************************************************************************/
 
-      ret = MTD_IOCTL(mtd, MTDIOC_GEOMETRY,
-                      (unsigned long)((uintptr_t)&dev->geo));
-      if (ret < 0)
-        {
-          ferr("ERROR: MTD ioctl(MTDIOC_GEOMETRY) failed: %d\n", ret);
-          kmm_free(dev);
-          return ret;
-        }
+int ftl_initialize_by_path(FAR const char *path, FAR struct mtd_dev_s *mtd)
+{
+  struct ftl_struct_s *dev = NULL;
+  char blkdev[32];
+  int ret;
 
-      /* Get the number of R/W blocks per erase block */
+  if (path == NULL || mtd == NULL)
+    {
+      return -EINVAL;
+    }
 
-      dev->blkper = dev->geo.erasesize / dev->geo.blocksize;
-      DEBUGASSERT(dev->blkper * dev->geo.blocksize == dev->geo.erasesize);
+  /* Create a unique temporary file name for the block device */
 
-      /* Configure read-ahead/write buffering */
+  ret = unique_dev("tmpb", blkdev, sizeof(blkdev));
+  if (ret != OK)
+    {
+      ferr("ERROR: Failed to create temporary device name\n");
+      return ret;
+    }
 
-#ifdef FTL_HAVE_RWBUFFER
-      dev->rwb.blocksize     = dev->geo.blocksize;
-      dev->rwb.nblocks       = dev->geo.neraseblocks * dev->blkper;
-      dev->rwb.dev           = (FAR void *)dev;
-      dev->rwb.wrflush       = ftl_flush;
-      dev->rwb.rhreload      = ftl_reload;
+  ret = ftl_initialize_common(&dev, blkdev, mtd);
+  if (ret < 0)
+    {
+      ferr("ERROR: ftl setup failed: %d\n", ret);
+      ftl_uninitialize(dev);
+      return ret;
+    }
 
-#if defined(CONFIG_FTL_WRITEBUFFER)
-      dev->rwb.wrmaxblocks   = dev->blkper;
-      dev->rwb.wralignblocks = dev->blkper;
-#endif
+  ret = bchlib_setup(blkdev, false, (void **)&dev->bch);
+  if (ret < 0)
+    {
+      ferr("ERROR: bchlib setup failed: %d\n", -ret);
+      ftl_uninitialize(dev);
+      return ret;
+    }
 
-#ifdef CONFIG_FTL_READAHEAD
-      dev->rwb.rhmaxblocks   = dev->blkper;
-#endif
+  ret = nx_unlink(blkdev);
+  if (ret < 0)
+    {
+      ferr("ERROR: Failed to unlink blk %s: %d\n", blkdev, ret);
+      ftl_uninitialize(dev);
+      return ret;
+    }
 
-      ret = rwb_initialize(&dev->rwb);
-      if (ret < 0)
-        {
-          ferr("ERROR: rwb_initialize failed: %d\n", ret);
-          kmm_free(dev);
-          return ret;
-        }
-#endif
-
-      if (MTD_ISBAD(dev->mtd, 0) != -ENOSYS)
-        {
-          ret = ftl_init_map(dev);
-          if (ret < 0)
-            {
-              goto out;
-            }
-        }
-
-      /* Inode private data is a reference to the FTL device structure */
-
-      ret = register_blockdriver(path, &g_bops, 0, dev);
-      if (ret < 0)
-        {
-          ferr("ERROR: register_blockdriver failed: %d\n", -ret);
-          kmm_free(dev->lptable);
-out:
-#ifdef FTL_HAVE_RWBUFFER
-          rwb_uninitialize(&dev->rwb);
-#endif
-          kmm_free(dev);
-        }
+  ret = register_driver(path, &g_ftl_fops, 0666, dev);
+  if (ret < 0)
+    {
+      ferr("ERROR: register driver failed: %d\n", -ret);
+      ftl_uninitialize(dev);
     }
 
   return ret;
@@ -903,7 +1302,7 @@ out:
  * Name: ftl_initialize
  *
  * Description:
- *   Initialize to provide a block driver wrapper around an MTD interface
+ *   Initialize to provide a char driver wrapper around an MTD interface
  *
  * Input Parameters:
  *   minor - The minor device number.  The MTD block device will be

@@ -21,7 +21,7 @@
 # ##############################################################################
 
 if(CONFIG_MTD)
-  set(SRCS ftl.c)
+  set(SRCS ftl.c unique_dev.c)
 
   if(CONFIG_MTD_CONFIG_FAIL_SAFE)
     list(APPEND SRCS mtd_config_fs.c)

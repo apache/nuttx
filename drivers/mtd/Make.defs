@@ -30,6 +30,7 @@
 ifeq ($(CONFIG_MTD),y)
 
 CSRCS += ftl.c
+CSRCS += unique_dev.c
 
 ifeq ($(CONFIG_MTD_CONFIG_FAIL_SAFE),y)
 CSRCS += mtd_config_fs.c

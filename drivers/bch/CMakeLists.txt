@@ -36,4 +36,7 @@ if(CONFIG_BCH)
             bchdev_register.c
             bchdev_unregister.c
             bchdev_driver.c)
+
+  target_include_directories(drivers PRIVATE ${CMAKE_CURRENT_LIST_DIR})
+
 endif()
