@@ -163,6 +163,27 @@ All of the configurations presented below can be tested by running the following
 Where <config_name> is the name of board configuration you want to use, i.e.: nsh, buttons, wifi...
 Then use a serial console terminal like ``picocom`` configured to 115200 8N1.
 
+adc
+---
+
+The ``adc`` configuration enables the ADC driver and the ADC example application.
+ADC Unit 1 is registered to ``/dev/adc0`` with channels 0, 3 and 4 enabled by default.
+Currently, the ADC operates in oneshot mode.
+
+More ADC channels can be enabled or disabled in ``ADC Configuration`` menu.
+
+This example shows channels 0 and 4 connected to GND and channel 3 to 3.3 V (all readings
+show in units of mV)::
+
+    nsh> adc -n 1
+    adc_main: g_adcstate.count: 1
+    adc_main: Hardware initialized. Opening the ADC device: /dev/adc0
+    Sample:
+    1: channel: 0 value: 142
+    2: channel: 3 value: 3441
+    3: channel: 4 value: 142
+
+
 audio
 -----
 

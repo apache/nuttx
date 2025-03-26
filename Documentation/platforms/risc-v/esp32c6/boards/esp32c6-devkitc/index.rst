@@ -88,6 +88,27 @@ All of the configurations presented below can be tested by running the following
 Where <config_name> is the name of board configuration you want to use, i.e.: nsh, buttons, wifi...
 Then use a serial console terminal like ``picocom`` configured to 115200 8N1.
 
+adc
+---
+
+The ``adc`` configuration enables the ADC driver and the ADC example application.
+ADC Unit 1 is registered to ``/dev/adc0`` with channels 0, 1, 2 and 3 enabled by default.
+Currently, the ADC operates in oneshot mode.
+
+More ADC channels can be enabled or disabled in ``ADC Configuration`` menu.
+
+This example shows channels 0 and 1 connected to 3.3 V and channels 2 and 3 to GND (all readings
+show in units of mV)::
+
+    nsh> adc -n 1
+    adc_main: g_adcstate.count: 1
+    adc_main: Hardware initialized. Opening the ADC device: /dev/adc0
+    Sample:
+    1: channel: 0 value: 3611
+    2: channel: 1 value: 3611
+    3: channel: 2 value: 103
+    4: channel: 3 value: 104
+
 bmp180
 ------
 
@@ -110,10 +131,10 @@ the following output is expected::
     nsh> cap
     cap_main: Hardware initialized. Opening the capture device: /dev/capture0
     cap_main: Number of samples: 0
-    pwm duty cycle: 50 % 
-    pwm frequence: 50 Hz 
-    pwm duty cycle: 50 % 
-    pwm frequence: 50 Hz 
+    pwm duty cycle: 50 %
+    pwm frequence: 50 Hz
+    pwm duty cycle: 50 %
+    pwm frequence: 50 Hz
 
 coremark
 --------

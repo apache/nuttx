@@ -332,7 +332,7 @@ The following list indicates the state of peripherals' support in NuttX:
 ==============  ======= ====================
 Peripheral      Support NOTES
 ==============  ======= ====================
-ADC              No     Supports internal temperature sensor
+ADC              Yes     Oneshot and internal temperature sensor
 AES              No
 Bluetooth        No
 CAN/TWAI         Yes
@@ -362,6 +362,32 @@ Watchdog         Yes
 Wifi             No
 XTS              No
 ==============  ======= ====================
+
+Analog-to-digital converter (ADC)
+---------------------------------
+
+One ADC unit is available for the ESP32-H2, with 5 channels.
+
+During bringup, GPIOs for selected channels are configured automatically to be used as ADC inputs.
+If available, ADC calibration is automatically applied (see
+`this page <https://docs.espressif.com/projects/esp-idf/en/v5.1/esp32h2/api-reference/peripherals/adc_calibration.html>`__ for more details).
+Otherwise, a simple conversion is applied based on the attenuation and resolution.
+
+The ADC unit is accessible using the ADC character driver, which returns data for the enabled channels.
+
+The ADC unit can be enabled in the menu :menuselection:`System Type --> Peripheral Support --> Analog-to-digital converter (ADC)`.
+
+Then, it can be customized in the menu :menuselection:`System Type --> ADC Configuration`, which includes operating mode, gain and channels.
+
+========== ===========
+ Channel    ADC1 GPIO
+========== ===========
+0           1
+1           2
+2           3
+3           4
+4           5
+========== ===========
 
 _`Managing esptool on virtual environment`
 ==========================================
