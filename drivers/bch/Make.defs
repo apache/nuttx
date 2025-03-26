@@ -27,6 +27,7 @@ ifeq ($(CONFIG_BCH),y)
 CSRCS += bchlib_setup.c bchlib_teardown.c bchlib_read.c bchlib_write.c
 CSRCS += bchlib_cache.c bchdev_register.c bchdev_unregister.c
 CSRCS += bchdev_driver.c
+CSRCS += bchlib_close.c bchlib_open.c bchlib_seek.c bchlib_unlink.c bchlib_ioctl.c
 
 # Include BCH driver build support
 
