@@ -33,7 +33,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define NET_RPMSG_EPT_NAME              "rpmsg-%s"
+#define NET_RPMSG_EPT_PREFIX            "rpmsg-net-"
 
 #define NET_RPMSG_IFUP                  0 /* IP-->LINK */
 #define NET_RPMSG_IFDOWN                1 /* IP-->LINK */
