@@ -79,8 +79,24 @@ static inline void poll_teardown(FAR struct pollfd *fds, nfds_t nfds,
     {
       if (fds[i].fd >= 0)
         {
-          int status = poll_fdsetup(fds[i].fd, &fds[i], false);
-          if (status < 0)
+          FAR struct file *filep;
+          int ret;
+
+          ret = fs_getfilep(fds[i].fd, &filep);
+          if (ret >= 0)
+            {
+              ret = file_poll(filep, &fds[i], false);
+
+              /* Calling putfilep twice to ensure reference counting
+               * for filep remains consistent with its state for
+               * before the poll.
+               */
+
+              fs_putfilep(filep);
+              fs_putfilep(filep);
+            }
+
+          if (ret < 0)
             {
               fds[i].revents |= POLLERR;
             }
@@ -144,10 +160,26 @@ static inline int poll_setup(FAR struct pollfd *fds, nfds_t nfds,
 
       if (fds[i].fd >= 0)
         {
-          ret = poll_fdsetup(fds[i].fd, &fds[i], true);
+          FAR struct file *filep;
+          int num = i;
+
+          ret = fs_getfilep(fds[i].fd, &filep);
           if (ret < 0)
             {
-              poll_teardown(fds, i, &count);
+              num -= 1;
+            }
+          else
+            {
+              ret = file_poll(filep, &fds[i], true);
+            }
+
+          if (ret < 0)
+            {
+              if (num >= 0)
+                {
+                  poll_teardown(fds, num, &count);
+                }
+
               fds[i].revents |= POLLERR;
               fds[i].arg = NULL;
               fds[i].cb = NULL;
@@ -191,38 +223,6 @@ static void poll_cleanup(FAR void *arg)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: poll_fdsetup
- *
- * Description:
- *   Configure (or unconfigure) one file/socket descriptor for the poll
- *   operation.  If fds and sem are non-null, then the poll is being setup.
- *   if fds and sem are NULL, then the poll is being torn down.
- *
- ****************************************************************************/
-
-int poll_fdsetup(int fd, FAR struct pollfd *fds, bool setup)
-{
-  FAR struct file *filep;
-  int ret;
-
-  /* Get the file pointer corresponding to this file descriptor */
-
-  ret = fs_getfilep(fd, &filep);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  DEBUGASSERT(filep != NULL);
-
-  /* Let file_poll() do the rest */
-
-  ret = file_poll(filep, fds, setup);
-  fs_putfilep(filep);
-  return ret;
-}
 
 /****************************************************************************
  * Name: poll_default_cb
@@ -309,9 +309,8 @@ void poll_notify(FAR struct pollfd **afds, int nfds, pollevent_t eventset)
  * Name: file_poll
  *
  * Description:
- *   Low-level poll operation based on struct file.  This is used both to (1)
- *   support detached file, and also (2) by poll_fdsetup() to perform all
- *   normal operations on file descriptors.
+ *   Low-level poll operation based on struct file.  This is used to
+ *   support detached file.
  *
  * Input Parameters:
  *   file     File structure instance
