@@ -125,7 +125,10 @@ int weak_function up_rtc_gettime(FAR struct timespec *tp)
 
   if (g_rtc_lower != NULL)
     {
-      struct rtc_time rtctime;
+      struct rtc_time rtctime =
+        {
+          0
+        };
 
       ret = g_rtc_lower->ops->rdtime(g_rtc_lower, &rtctime);
       if (ret == 0)
