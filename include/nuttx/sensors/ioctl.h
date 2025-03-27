@@ -480,6 +480,24 @@
 
 #define SNIOC_LPF                     _SNIOC(0x00A0)
 
+/* Command:      SNIOC_SET_GAIN
+ * Description:  Sets the gain of the sensor.
+ */
+
+#define SNIOC_SET_GAIN                _SNIOC(0x00A1)
+
+/* Command:      SNIOC_SET_LDO
+ * Description:  Sets the LDO voltage of the sensor.
+ */
+
+#define SNIOC_SET_LDO                 _SNIOC(0x00A2)
+
+/* Command:      SNIOC_GET_CALIBVALUE
+ * Description:  Get the gain calibration value of the sensor.
+ */
+
+#define SNIOC_GET_CALIBVALUE          _SNIOC(0x00A3)
+
 /****************************************************************************
  * Public types
  ****************************************************************************/

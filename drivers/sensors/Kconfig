@@ -194,6 +194,13 @@ config SENSORS_BH1750FVI
 	---help---
 		Enable driver support for the Rohm BH1750FVI light sensor.
 
+config SENSORS_NAU7802
+	bool "Adafruit NAU7802 ADC sensor support"
+	default n
+	select I2C 
+	---help---
+		Enable driver support for the Adafruit NAU7802 sensor.
+
 config BH1750FVI_I2C_FREQUENCY
 	int "BH1750FVI I2C frequency"
 	default 400000
