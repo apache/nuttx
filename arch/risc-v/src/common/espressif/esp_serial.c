@@ -1056,16 +1056,20 @@ static bool esp_rxflowcontrol(uart_dev_t *dev, unsigned int nbuffered,
 {
   bool ret = false;
   struct esp_uart_s *priv = dev->priv;
+  uart_hw_flowcontrol_t flow_ctrl;
+
+  uart_hal_get_hw_flow_ctrl(priv->hal, &flow_ctrl);
   if (priv->iflow)
     {
+      flow_ctrl |= UART_HW_FLOWCTRL_RTS;
       if (nbuffered == 0 || !upper)
         {
           /* Empty buffer, RTS should be de-asserted and logic in above
            * layers should re-enable RX interrupt.
            */
 
-          esp_lowputc_set_iflow(priv, (uint8_t)(UART_RX_FIFO_SIZE / 2),
-                                true);
+          uart_hal_set_hw_flow_ctrl(priv->hal, flow_ctrl,
+                                    (uint8_t)(SOC_UART_FIFO_LEN / 2));
           esp_rxint(dev, true);
           ret = false;
         }
@@ -1080,7 +1084,7 @@ static bool esp_rxflowcontrol(uart_dev_t *dev, unsigned int nbuffered,
            * SW RX FIFO.
            */
 
-          esp_lowputc_set_iflow(priv, 0 , true);
+          uart_hal_set_hw_flow_ctrl(priv->hal, flow_ctrl, 0);
           esp_rxint(dev, false);
           ret = true;
         }
