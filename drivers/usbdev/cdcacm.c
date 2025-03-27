@@ -130,7 +130,11 @@ struct cdcacm_dev_s
 
   /* Serial I/O req container */
 
+#ifdef CONFIG_CDCACM_DISABLE_RXBUF
   FAR struct cdcacm_rdreq_s *rdcontainer;
+#else
+  char rxbuffer[CONFIG_CDCACM_RXBUFSIZE];
+#endif
   FAR struct cdcacm_wrreq_s *wrcontainer;
 };
 
@@ -157,7 +161,9 @@ struct cdcacm_alloc_s
 /* Transfer helpers *********************************************************/
 
 static int     cdcacm_sndpacket(FAR struct cdcacm_dev_s *priv);
+#ifdef CONFIG_CDCACM_DISABLE_RXBUF
 static void    cdcacm_rcvpacket(FAR struct cdcacm_dev_s *priv);
+#endif
 static int     cdcacm_requeue_rdrequest(FAR struct cdcacm_dev_s *priv,
                  FAR struct cdcacm_rdreq_s *rdcontainer);
 static int     cdcacm_release_rxpending(FAR struct cdcacm_dev_s *priv);
@@ -229,6 +235,9 @@ static ssize_t cdcuart_recvbuf(FAR struct uart_dev_s *dev,
 static bool    cdcuart_txready(FAR struct uart_dev_s *dev);
 static ssize_t cdcuart_sendbuf(FAR struct uart_dev_s *dev,
                                FAR const void *buf, size_t len);
+#ifndef CONFIG_CDCACM_DISABLE_RXBUF
+static void    cdcuart_dmareceive(FAR struct uart_dev_s *dev);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -274,7 +283,11 @@ static const struct uart_ops_s g_uartops =
   NULL,                  /* dmasend */
 #endif
 #ifdef CONFIG_SERIAL_RXDMA
+#ifndef CONFIG_CDCACM_DISABLE_RXBUF
+  cdcuart_dmareceive,    /* dmareceive */
+#else
   NULL,                  /* dmareceive */
+#endif
   NULL,                  /* dmarxfree */
 #endif
 #ifdef CONFIG_SERIAL_TXDMA
@@ -607,7 +620,14 @@ static int cdcacm_release_rxpending(FAR struct cdcacm_dev_s *priv)
 
       ret = OK;
 
+#ifndef CONFIG_CDCACM_DISABLE_RXBUF
+      if (!sq_empty(&priv->rxpending))
+        {
+          uart_recvchars_dma(&priv->serdev);
+        }
+#else
       cdcacm_rcvpacket(priv);
+#endif
     }
 
   /* Restart the RX failsafe timer if there are RX packets in
@@ -2138,6 +2158,7 @@ static int cdcuart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   switch (cmd)
     {
+#ifdef CONFIG_CDCACM_DISABLE_RXBUF
     /* Get the number of bytes that may be read from the RX buffer
      * (without waiting)
      */
@@ -2165,6 +2186,7 @@ static int cdcuart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         *(FAR int *)((uintptr_t)arg) = count;
       }
       break;
+#endif
 
     /* Get the number of bytes that have been written to the TX
      * buffer.
@@ -2237,13 +2259,17 @@ static int cdcuart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
     case TCFLSH:
       {
+        ret = -ENOTTY;
+
         /* Empty the tx/rx buffers */
 
-        irqstate_t flags = enter_critical_section();
-
+#ifdef CONFIG_CDCACM_DISABLE_RXBUF
         if (arg == TCIFLUSH || arg == TCIOFLUSH)
           {
             FAR struct cdcacm_rdreq_s *rdcontainer;
+            ret = OK;
+
+            irqstate_t flags = enter_critical_section();
 
             if (priv->rdcontainer)
               {
@@ -2267,10 +2293,15 @@ static int cdcuart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
             uart_rxflowcontrol(serdev, 0, false);
 #endif
+            leave_critical_section(flags);
           }
+#endif
 
         if (arg == TCOFLUSH || arg == TCIOFLUSH)
           {
+            irqstate_t flags = enter_critical_section();
+            ret = OK;
+
             if (priv->wrcontainer)
               {
                 serdev->xmit.head = 0;
@@ -2296,9 +2327,9 @@ static int cdcuart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               {
                 ret = -EBUSY;
               }
-          }
 
-        leave_critical_section(flags);
+            leave_critical_section(flags);
+          }
       }
       break;
 
@@ -2872,6 +2903,66 @@ static int cdcuart_release(FAR struct uart_dev_s *dev)
   return OK;
 }
 
+#ifndef CONFIG_CDCACM_DISABLE_RXBUF
+
+/****************************************************************************
+ * Name: cdcuart_dmareceive
+ *
+ * Description:
+ *   Set up to receive bytes into the RX circular buffer.
+ *
+ ****************************************************************************/
+
+static void cdcuart_dmareceive(FAR struct uart_dev_s *dev)
+{
+  FAR struct uart_dmaxfer_s *xfer = &dev->dmarx;
+  FAR struct cdcacm_dev_s *priv = dev->priv;
+  FAR struct cdcacm_rdreq_s *rdcontainer;
+  FAR struct usbdev_req_s *req;
+  FAR uint8_t *reqbuf;
+  size_t nbytes = 0;
+  size_t reqlen;
+
+  /* Process each packet in the priv->rxpending list */
+
+  rdcontainer = (FAR struct cdcacm_rdreq_s *)
+    sq_peek(&priv->rxpending);
+  DEBUGASSERT(rdcontainer != NULL);
+
+  req = rdcontainer->req;
+  DEBUGASSERT(req != NULL);
+
+  reqbuf = &req->buf[rdcontainer->offset];
+  reqlen = req->xfrd - rdcontainer->offset;
+
+  nbytes = MIN(reqlen, xfer->length);
+  memcpy(xfer->buffer, reqbuf, nbytes);
+  rdcontainer->offset += nbytes;
+  xfer->nbytes = nbytes;
+
+  if (xfer->nbuffer)
+    {
+      nbytes = MIN(reqlen - nbytes, xfer->nlength);
+      memcpy(xfer->nbuffer, reqbuf + xfer->nbytes, nbytes);
+      rdcontainer->offset += nbytes;
+      xfer->nbytes += nbytes;
+    }
+
+  uart_recvchars_done(dev);
+
+  /* The entire packet was processed and may be removed from the
+   * pending RX list.
+   */
+
+  if (rdcontainer->offset >= rdcontainer->req->xfrd)
+    {
+      sq_remfirst(&priv->rxpending);
+      cdcacm_requeue_rdrequest(priv, rdcontainer);
+    }
+}
+
+#else
+
 /****************************************************************************
  * Name: cdcacm_rcvpacket
  *
@@ -2915,6 +3006,8 @@ static void cdcacm_rcvpacket(FAR struct cdcacm_dev_s *priv)
       uart_datareceived(dev);
     }
 }
+
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -3071,6 +3164,10 @@ int cdcacm_classobject(int minor, FAR struct usbdev_devinfo_s *devinfo,
 
 #ifdef CONFIG_SERIAL_REMOVABLE
   priv->serdev.disconnected = true;
+#endif
+#ifndef CONFIG_CDCACM_DISABLE_RXBUF
+  priv->serdev.recv.size    = CONFIG_CDCACM_RXBUFSIZE;
+  priv->serdev.recv.buffer  = priv->rxbuffer;
 #endif
   priv->serdev.ops          = &g_uartops;
   priv->serdev.priv         = priv;
