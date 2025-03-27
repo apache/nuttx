@@ -1099,63 +1099,6 @@ static ssize_t uart_readv(FAR struct file *filep, FAR struct uio *uio)
             }
         }
 
-#ifdef CONFIG_DEV_SERIAL_FULLBLOCKS
-      /* No... then we would have to wait to get receive more data.
-       * If the user has specified the O_NONBLOCK option, then just
-       * return what we have.
-       */
-
-      else if ((filep->f_oflags & O_NONBLOCK) != 0)
-        {
-          /* If nothing was transferred, then return the -EAGAIN
-           * error (not zero which means end of file).
-           */
-
-          if (recvd < 1)
-            {
-              recvd = -EAGAIN;
-            }
-
-          break;
-        }
-#else
-      /* No... the circular buffer is empty.  Have we returned anything
-       * to the caller?
-       */
-
-      else if (recvd > 0 && !(dev->tc_lflag & ICANON))
-        {
-          /* Yes.. break out of the loop and return the number of bytes
-           * received up to the wait condition.
-           */
-
-          break;
-        }
-
-      else if (filep->f_inode == 0)
-        {
-          /* File has been closed.
-           * Descriptor is not valid.
-           */
-
-          recvd = -EBADFD;
-          break;
-        }
-
-      /* No... then we would have to wait to get receive some data.
-       * If the user has specified the O_NONBLOCK option, then do not
-       * wait.
-       */
-
-      else if ((filep->f_oflags & O_NONBLOCK) != 0)
-        {
-          /* Break out of the loop returning -EAGAIN */
-
-          recvd = -EAGAIN;
-          break;
-        }
-#endif
-
       /* Otherwise we are going to have to wait for data to arrive */
 
       else
@@ -1206,6 +1149,67 @@ static ssize_t uart_readv(FAR struct file *filep, FAR struct uio *uio)
                   leave_critical_section(flags);
                   continue;
                 }
+
+#ifdef CONFIG_DEV_SERIAL_FULLBLOCKS
+              /* No... then we would have to wait to get receive more data.
+               * If the user has specified the O_NONBLOCK option, then just
+               * return what we have.
+               */
+
+              else if ((filep->f_oflags & O_NONBLOCK) != 0)
+                {
+                  /* If nothing was transferred, then return the -EAGAIN
+                   * error (not zero which means end of file).
+                   */
+
+                  if (recvd < 1)
+                    {
+                      recvd = -EAGAIN;
+                    }
+
+                  leave_critical_section(flags);
+                  break;
+                }
+#else
+              /* No... the circular buffer is empty.  Have we returned
+               * anything to the caller?
+               */
+
+              else if (recvd > 0 && !(dev->tc_lflag & ICANON))
+                {
+                  /* Yes.. break out of the loop and return the number
+                   * of bytes received up to the wait condition.
+                   */
+
+                  leave_critical_section(flags);
+                  break;
+                }
+
+              else if (filep->f_inode == 0)
+                {
+                  /* File has been closed.
+                   * Descriptor is not valid.
+                   */
+
+                  recvd = -EBADFD;
+                  leave_critical_section(flags);
+                  break;
+                }
+
+              /* No... then we would have to wait to get receive some data.
+               * If the user has specified the O_NONBLOCK option, then do not
+               * wait.
+               */
+
+              else if ((filep->f_oflags & O_NONBLOCK) != 0)
+                {
+                  /* Break out of the loop returning -EAGAIN */
+
+                  recvd = -EAGAIN;
+                  leave_critical_section(flags);
+                  break;
+                }
+#endif
 
 #ifdef CONFIG_SERIAL_REMOVABLE
               /* Check again if the removable device is still connected
