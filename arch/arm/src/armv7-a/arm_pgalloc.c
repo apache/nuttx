@@ -56,7 +56,6 @@
 
 static uintptr_t alloc_pgtable(void)
 {
-  irqstate_t flags;
   uintptr_t paddr;
   uint32_t *l2table;
 
@@ -67,8 +66,6 @@ static uintptr_t alloc_pgtable(void)
   if (paddr)
     {
       DEBUGASSERT(MM_ISALIGNED(paddr));
-
-      flags = enter_critical_section();
 
       /* Get the virtual address corresponding to the physical page address */
 
@@ -84,8 +81,6 @@ static uintptr_t alloc_pgtable(void)
 
       up_flush_dcache((uintptr_t)l2table,
                       (uintptr_t)l2table + MM_PGSIZE);
-
-      leave_critical_section(flags);
     }
 
   return paddr;
@@ -105,7 +100,6 @@ static int get_pgtable(arch_addrenv_t *addrenv, uintptr_t vaddr)
   uint32_t l1entry;
   uintptr_t paddr;
   unsigned int hpoffset;
-  unsigned int hpndx;
 
   /* The current implementation only supports extending the user heap
    * region as part of the implementation of user sbrk().
@@ -121,8 +115,7 @@ static int get_pgtable(arch_addrenv_t *addrenv, uintptr_t vaddr)
       return 0;
     }
 
-  hpndx   = hpoffset >> 20;
-  l1entry = (uintptr_t)addrenv->heap[hpndx];
+  l1entry = (uintptr_t)mmu_l1_getentry(vaddr);
   if (l1entry == 0)
     {
       /* No page table has been allocated... allocate one now */
@@ -135,7 +128,6 @@ static int get_pgtable(arch_addrenv_t *addrenv, uintptr_t vaddr)
            */
 
           l1entry = paddr | MMU_L1_PGTABFLAGS;
-          addrenv->heap[hpndx] = (uintptr_t *)l1entry;
 
           /* And instantiate the modified environment */
 
@@ -188,7 +180,6 @@ uintptr_t pgalloc(uintptr_t brkaddr, unsigned int npages)
   struct tcb_s *tcb = this_task();
   struct arch_addrenv_s *addrenv;
   uint32_t *l2table;
-  irqstate_t flags;
   uintptr_t paddr;
   unsigned int index;
 
@@ -225,8 +216,6 @@ uintptr_t pgalloc(uintptr_t brkaddr, unsigned int npages)
           return 0;
         }
 
-      flags = enter_critical_section();
-
       /* Get the virtual address corresponding to the physical page address */
 
       l2table = (uint32_t *)arm_pgvaddr(paddr);
@@ -237,7 +226,6 @@ uintptr_t pgalloc(uintptr_t brkaddr, unsigned int npages)
       binfo("a new page (paddr=%x)\n", paddr);
       if (paddr == 0)
         {
-          leave_critical_section(flags);
           return 0;
         }
 
@@ -260,8 +248,6 @@ uintptr_t pgalloc(uintptr_t brkaddr, unsigned int npages)
 
       up_flush_dcache((uintptr_t)&l2table[index],
                       (uintptr_t)&l2table[index] + sizeof(uint32_t));
-
-      leave_critical_section(flags);
     }
 
   return brkaddr;

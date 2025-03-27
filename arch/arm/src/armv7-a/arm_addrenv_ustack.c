@@ -129,24 +129,20 @@
 
 int up_addrenv_ustackalloc(struct tcb_s *tcb, size_t stacksize)
 {
+  arch_addrenv_t *addrenv;
   int ret;
 
   binfo("tcb=%p stacksize=%lu\n", tcb, (unsigned long)stacksize);
 
   DEBUGASSERT(tcb);
 
-  /* Initialize the address environment list to all zeroes */
+  addrenv = tcb->addrenv_own;
 
-  memset(tcb->xcp.ustack, 0, ARCH_STACK_NSECTS * sizeof(uintptr_t *));
-
-  /* Back the allocation up with physical pages and set up the level 2
-   * mapping (which of course does nothing until the L2 page table is hooked
-   * into the L1 page table).
+  /* Create a mmu page and store entry in task l1 table.
+   * Page will be enable once task addrenv/mmu l1 table selected.
    */
 
-  /* Allocate .text space pages */
-
-  ret = arm_addrenv_create_region(tcb->xcp.ustack, ARCH_STACK_NSECTS,
+  ret = arm_addrenv_create_region(addrenv->l1table, ARCH_STACK_NSECTS,
                                   CONFIG_ARCH_STACK_VBASE, stacksize,
                                   MMU_L2_UDATAFLAGS);
   if (ret < 0)
@@ -155,6 +151,8 @@ int up_addrenv_ustackalloc(struct tcb_s *tcb, size_t stacksize)
       up_addrenv_ustackfree(tcb);
       return ret;
     }
+
+  tcb->xcp.ustackbase = CONFIG_ARCH_STACK_VBASE;
 
   return OK;
 }
@@ -178,15 +176,20 @@ int up_addrenv_ustackalloc(struct tcb_s *tcb, size_t stacksize)
 
 int up_addrenv_ustackfree(struct tcb_s *tcb)
 {
+  arch_addrenv_t *addrenv;
+
   binfo("tcb=%p\n", tcb);
   DEBUGASSERT(tcb);
 
+  addrenv = tcb->addrenv_own;
+
   /* Destroy the stack region */
 
-  arm_addrenv_destroy_region(tcb->xcp.ustack, ARCH_STACK_NSECTS,
+  arm_addrenv_destroy_region(addrenv->l1table, ARCH_STACK_NSECTS,
                              CONFIG_ARCH_STACK_VBASE, false);
 
-  memset(tcb->xcp.ustack, 0, ARCH_STACK_NSECTS * sizeof(uintptr_t *));
+  tcb->xcp.ustackbase = 0;
+
   return OK;
 }
 
