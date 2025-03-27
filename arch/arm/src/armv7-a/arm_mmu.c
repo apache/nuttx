@@ -52,10 +52,10 @@
  ****************************************************************************/
 
 #ifndef CONFIG_ARCH_ROMPGTABLE
-void mmu_l1_setentry(uintptr_t paddr, uintptr_t vaddr, uint32_t mmuflags)
+void mmu_l1table_setentry(uintptr_t *l1table, uintptr_t paddr,
+                          uintptr_t vaddr, uint32_t mmuflags)
 {
-  uintptr_t *l1table = mmu_l1_getpgtable();
-  uint32_t   index   = vaddr >> 20;
+  uint32_t index = vaddr >> 20;
 
   /* Save the page table entry */
 
@@ -70,6 +70,11 @@ void mmu_l1_setentry(uintptr_t paddr, uintptr_t vaddr, uint32_t mmuflags)
   /* Invalidate the TLB cache associated with virtual address range */
 
   mmu_invalidate_region(vaddr, SECTION_SIZE);
+}
+
+void mmu_l1_setentry(uintptr_t paddr, uintptr_t vaddr, uint32_t mmuflags)
+{
+  mmu_l1table_setentry(mmu_l1_getpgtable(), paddr, vaddr, mmuflags);
 }
 #endif
 

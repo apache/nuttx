@@ -87,7 +87,7 @@ extern "C"
  *
  ****************************************************************************/
 
-int arm_addrenv_create_region(uintptr_t **list, unsigned int listlen,
+int arm_addrenv_create_region(uintptr_t *l1table, unsigned int listlen,
                               uintptr_t vaddr, size_t regionsize,
                               uint32_t mmuflags);
 
@@ -99,8 +99,10 @@ int arm_addrenv_create_region(uintptr_t **list, unsigned int listlen,
  *
  ****************************************************************************/
 
-void arm_addrenv_destroy_region(uintptr_t **list, unsigned int listlen,
+void arm_addrenv_destroy_region(uintptr_t *l1table, unsigned int listlen,
                                 uintptr_t vaddr, bool keep);
+
+uintptr_t arm_addrenv_va_to_pa(uintptr_t *l1table, uintptr_t va);
 
 #undef EXTERN
 #ifdef __cplusplus

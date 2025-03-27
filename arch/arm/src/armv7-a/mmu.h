@@ -1353,7 +1353,7 @@ static inline void cp15_wrttb(uint32_t ttb)
 #ifndef CONFIG_ARCH_ROMPGTABLE
 static inline uintptr_t *mmu_l1_getpgtable(void)
 {
-#if defined(CONFIG_SMP) && defined(CONFIG_ARCH_ADDRENV)
+#ifdef CONFIG_ARCH_ADDRENV
   uint32_t ttbr0;
   uint32_t pgtable;
 
@@ -1488,6 +1488,8 @@ extern "C"
 
 #ifndef CONFIG_ARCH_ROMPGTABLE
 void mmu_l1_setentry(uintptr_t paddr, uintptr_t vaddr, uint32_t mmuflags);
+void mmu_l1table_setentry(uintptr_t *l1table, uintptr_t paddr,
+                          uintptr_t vaddr, uint32_t mmuflags);
 #endif
 
 /****************************************************************************
