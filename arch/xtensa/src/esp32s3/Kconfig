@@ -1163,7 +1163,7 @@ config ESP32S3_SPI_SLAVE_BUFSIZE
 config ESP32S3_SPI2_CSPIN
 	int "SPI2 CS Pin"
 	default 10
-	range 0 48
+	range -1 48
 
 config ESP32S3_SPI2_CLKPIN
 	int "SPI2 CLK Pin"
@@ -1173,12 +1173,12 @@ config ESP32S3_SPI2_CLKPIN
 config ESP32S3_SPI2_MOSIPIN
 	int "SPI2 MOSI Pin"
 	default 11
-	range 0 48
+	range -1 48
 
 config ESP32S3_SPI2_MISOPIN
 	int "SPI2 MISO Pin"
 	default 13
-	range 0 48
+	range -1 48
 
 config ESP32S3_SPI2_IO2PIN
 	int "SPI2 IO2 Pin"
@@ -1195,7 +1195,7 @@ config ESP32S3_SPI2_IO3PIN
 config ESP32S3_SPI3_CSPIN
 	int "SPI3 CS Pin"
 	default 10
-	range 0 48
+	range -1 48
 
 config ESP32S3_SPI3_CLKPIN
 	int "SPI3 CLK Pin"
@@ -1205,12 +1205,12 @@ config ESP32S3_SPI3_CLKPIN
 config ESP32S3_SPI3_MOSIPIN
 	int "SPI3 MOSI Pin"
 	default 7
-	range 0 48
+	range -1 48
 
 config ESP32S3_SPI3_MISOPIN
 	int "SPI3 MISO Pin"
 	default 2
-	range 0 48
+	range -1 48
 
 config ESP32S3_SPI3_IO2PIN
 	int "SPI3 IO2 Pin"
