@@ -303,13 +303,15 @@ struct xcptcontext
 
 #ifdef CONFIG_ARCH_ADDRENV
 #ifdef CONFIG_ARCH_STACK_DYNAMIC
-  /* This array holds the physical address of the level 2 page table used
+  /* Experimental support for dynamically sized stacks.  We using per-task
+   * l1entry, so only record the ustack virtual address base.
+   * This array holds the physical address of the level 2 page table used
    * to map the thread's stack memory.  This array will be initially of
    * zeroed and would be back-up up with pages during page fault exception
    * handling to support dynamically sized stacks for each thread.
    */
 
-  uintptr_t *ustack[ARCH_STACK_NSECTS];
+  uintptr_t ustackbase;
 #endif
 
 #ifdef CONFIG_ARCH_KERNEL_STACK
