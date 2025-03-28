@@ -1520,6 +1520,7 @@ void sched_note_event_ip(uint32_t tag, uintptr_t ip, uint8_t event,
 
           note_common(tcb, &note->nev_cmn, length, event);
           note->nev_ip = ip;
+          note->nev_tag = tag;
           if (buf != NULL)
             {
               memcpy(note->nev_data, buf, length - SIZEOF_NOTE_EVENT(0));
@@ -1799,6 +1800,7 @@ void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
           length = SIZEOF_NOTE_PRINTF(next);
           note_common(tcb, &note->npt_cmn, length, NOTE_DUMP_PRINTF);
           note->npt_ip = ip;
+          note->npt_tag = tag;
           note->npt_fmt = fmt;
           note->npt_type = type;
         }
