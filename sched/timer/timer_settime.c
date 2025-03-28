@@ -328,7 +328,16 @@ int timer_settime(timer_t timerid, int flags,
        */
 
       delay = clock_time2ticks(&value->it_value);
-      timer->pt_expected = clock_systime_ticks() + delay;
+
+      /* delay+1 is to prevent the insufficient sleep time if we are
+       * currently near the boundary to the next tick.
+       * | current_tick | current_tick + 1 | current_tick + 2 | .... |
+       * |           ^ Here we get the current tick
+       * In this case we delay 1 tick, timer will be triggered at
+       * current_tick + 1, which is not enough for at least 1 tick.
+       */
+
+      timer->pt_expected = clock_systime_ticks() + delay + 1;
     }
 
   /* Then start the watchdog */
