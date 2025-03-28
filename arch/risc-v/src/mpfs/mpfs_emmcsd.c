@@ -2769,6 +2769,17 @@ static sdio_eventset_t mpfs_eventwait(struct sdio_dev_s *dev)
   sdio_eventset_t wkupevent = 0;
   int ret;
 
+#if defined(CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE)
+  if ((priv->waitevents & SDIOWAIT_WRCOMPLETE) != 0)
+    {
+      /* Do not wait for SDIOWAIT_WRCOMPLETE as the SDIOWAIT_TRANSFERDONE
+       * event has already taken care of that part also.
+       */
+
+      return SDIOWAIT_WRCOMPLETE;
+    }
+#endif
+
   mcinfo("wait\n");
 
   /* There is a race condition here... the event may have completed before
