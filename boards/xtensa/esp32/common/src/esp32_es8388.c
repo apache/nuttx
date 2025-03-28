@@ -43,9 +43,9 @@
 
 #include "esp32_board_i2c.h"
 #include "esp32_i2c.h"
-#include "esp32_i2s.h"
+#include "espressif/esp_i2s.h"
 
-#if defined(CONFIG_ESP32_I2S) && defined(CONFIG_AUDIO_ES8388)
+#if defined(CONFIG_ESPRESSIF_I2S) && defined(CONFIG_AUDIO_ES8388)
 
 /****************************************************************************
  * Private Data
@@ -104,7 +104,7 @@ int esp32_es8388_initialize(int i2c_port, uint8_t i2c_addr, int i2c_freq,
     {
       /* Get an instance of the I2S interface for the ES8388 data channel */
 
-      i2s = esp32_i2sbus_initialize(i2s_port);
+      i2s = esp_i2sbus_initialize(i2s_port);
       if (i2s == NULL)
         {
           auderr("ERROR: Failed to initialize I2S%d\n", i2s_port);
@@ -219,4 +219,4 @@ errout:
   return ret;
 }
 
-#endif /* CONFIG_ESP32_I2S && CONFIG_AUDIO_ES8388 */
+#endif /* CONFIG_ESPRESSIF_I2S && CONFIG_AUDIO_ES8388 */

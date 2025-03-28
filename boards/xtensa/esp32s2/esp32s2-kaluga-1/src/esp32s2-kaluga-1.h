@@ -164,7 +164,7 @@ int board_i2c_init(void);
  *
  ****************************************************************************/
 
-#if (defined(CONFIG_ESP32S2_I2S) && !defined(CONFIG_AUDIO_ES8311)) || \
+#if (defined(CONFIG_ESPRESSIF_I2S) && !defined(CONFIG_AUDIO_ES8311)) || \
     defined(CONFIG_ESPRESSIF_I2S)
 int board_i2sdev_initialize(void);
 #endif

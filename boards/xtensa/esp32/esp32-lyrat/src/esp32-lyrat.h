@@ -143,8 +143,8 @@ int esp32_es8388_initialize(int i2c_port, uint8_t i2c_addr, int i2c_freq,
  *
  ****************************************************************************/
 
-#if defined CONFIG_ESP32_I2S0 && !defined CONFIG_AUDIO_ES8388 || \
-    defined CONFIG_ESP32_I2S1
+#if defined CONFIG_ESPRESSIF_I2S0 && !defined CONFIG_AUDIO_ES8388 || \
+    defined CONFIG_ESPRESSIF_I2S1
 int board_i2sdev_initialize(int port);
 #endif
 

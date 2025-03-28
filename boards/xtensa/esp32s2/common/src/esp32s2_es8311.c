@@ -42,9 +42,9 @@
 #include <arch/board/board.h>
 
 #include "esp32s2_i2c.h"
-#include "esp32s2_i2s.h"
+#include "espressif/esp_i2s.h"
 
-#if defined(CONFIG_ESP32S2_I2S) && defined(CONFIG_AUDIO_ES8311)
+#if defined(CONFIG_ESPRESSIF_I2S) && defined(CONFIG_AUDIO_ES8311)
 
 /****************************************************************************
  * Private Data
@@ -97,7 +97,7 @@ int esp32s2_es8311_initialize(int i2c_port, uint8_t i2c_addr, int i2c_freq)
     {
       /* Get an instance of the I2S interface for the ES8311 data channel */
 
-      i2s = esp32s2_i2sbus_initialize();
+      i2s = esp_i2sbus_initialize(0);
       if (i2s == NULL)
         {
           auderr("ERROR: Failed to initialize I2S\n");
@@ -211,4 +211,4 @@ errout:
   return ret;
 }
 
-#endif /* CONFIG_ESP32S2_I2S && CONFIG_AUDIO_ES8311 */
+#endif /* CONFIG_ESPRESSIF_I2S && CONFIG_AUDIO_ES8311 */

@@ -179,7 +179,7 @@ int board_bmp180_initialize(int devno, int busno);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_ESP32S3_I2S) || defined(CONFIG_ESPRESSIF_I2S)
+#if defined(CONFIG_ESPRESSIF_I2S)
 int board_i2sdev_initialize(int port, bool enable_tx, bool enable_rx);
 #endif
 
