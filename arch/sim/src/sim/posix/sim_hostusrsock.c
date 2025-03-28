@@ -267,6 +267,10 @@ int host_usrsock_socket(int domain, int type, int protocol)
     {
       type = SOCK_DGRAM;
     }
+  else if (type == NUTTX_SOCK_RAW)
+    {
+      type = SOCK_RAW;
+    }
   else
     {
       return -EINVAL;
