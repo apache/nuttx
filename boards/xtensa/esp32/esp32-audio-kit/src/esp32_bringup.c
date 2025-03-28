@@ -76,8 +76,8 @@
 #  include "esp32_board_i2c.h"
 #endif
 
-#ifdef CONFIG_ESP32_I2S
-#  include "esp32_i2s.h"
+#ifdef CONFIG_ESPRESSIF_I2S
+#  include "espressif/esp_i2s.h"
 #endif
 
 #ifdef CONFIG_SENSORS_BMP180
@@ -334,9 +334,9 @@ int esp32_bringup(void)
 
 #endif
 
-#ifdef CONFIG_ESP32_I2S
+#ifdef CONFIG_ESPRESSIF_I2S
 
-#ifdef CONFIG_ESP32_I2S0
+#ifdef CONFIG_ESPRESSIF_I2S0
 
   /* Configure I2S0 */
 
@@ -361,13 +361,13 @@ int esp32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize I2S%d driver: %d\n",
-             CONFIG_ESP32_I2S0, ret);
+             CONFIG_ESPRESSIF_I2S0, ret);
     }
 #endif /* CONFIG_AUDIO_ES8388 */
 
-#endif /* CONFIG_ESP32_I2S0 */
+#endif /* CONFIG_ESPRESSIF_I2S0 */
 
-#ifdef CONFIG_ESP32_I2S1
+#ifdef CONFIG_ESPRESSIF_I2S1
 
   /* Configure I2S generic audio on I2S1 */
 
@@ -375,12 +375,12 @@ int esp32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize I2S%d driver: %d\n",
-             CONFIG_ESP32_I2S0, ret);
+             CONFIG_ESPRESSIF_I2S0, ret);
     }
 
-#endif /* CONFIG_ESP32_I2S1 */
+#endif /* CONFIG_ESPRESSIF_I2S1 */
 
-#endif /* CONFIG_ESP32_I2S */
+#endif /* CONFIG_ESPRESSIF_I2S */
 
 #ifdef CONFIG_SENSORS_BMP180
   /* Try to register BMP180 device in I2C0 */

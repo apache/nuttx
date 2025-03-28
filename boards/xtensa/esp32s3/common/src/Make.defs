@@ -46,10 +46,6 @@ ifeq ($(CONFIG_I2C_DRIVER),y)
   CSRCS += esp32s3_board_i2c.c
 endif
 
-ifeq ($(CONFIG_ESP32S3_I2S),y)
-  CSRCS += esp32s3_board_i2s.c
-endif
-
 ifeq ($(CONFIG_ESPRESSIF_I2S),y)
   CSRCS += esp32s3_board_i2s.c
 endif

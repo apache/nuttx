@@ -86,8 +86,8 @@
 #  include "esp32_board_i2c.h"
 #endif
 
-#ifdef CONFIG_ESP32_I2S
-#  include "esp32_i2s.h"
+#ifdef CONFIG_ESPRESSIF_I2S
+#  include "espressif/esp_i2s.h"
 #endif
 
 #ifdef CONFIG_ESPRESSIF_I2S
@@ -554,15 +554,15 @@ int esp32_bringup(void)
     }
 #endif
 
-#if defined(CONFIG_ESP32_I2S) || defined(CONFIG_ESPRESSIF_I2S)
+#if defined(CONFIG_ESPRESSIF_I2S) || defined(CONFIG_ESPRESSIF_I2S)
 
-#if defined(CONFIG_ESP32_I2S0) && !defined(CONFIG_AUDIO_CS4344) || \
-    defined(CONFIG_ESP32_I2S1) || defined(CONFIG_ESPRESSIF_I2S)
+#if defined(CONFIG_ESPRESSIF_I2S0) && !defined(CONFIG_AUDIO_CS4344) || \
+    defined(CONFIG_ESPRESSIF_I2S1)
   bool i2s_enable_tx;
   bool i2s_enable_rx;
 #endif
 
-#if defined(CONFIG_ESP32_I2S0) || defined(CONFIG_ESPRESSIF_I2S0)
+#if defined(CONFIG_ESPRESSIF_I2S0) || defined(CONFIG_ESPRESSIF_I2S0)
 
   /* Configure I2S0 */
 
@@ -577,17 +577,17 @@ int esp32_bringup(void)
     }
 #else
 
-#if defined(CONFIG_ESP32_I2S0_TX) || defined (CONFIG_ESPRESSIF_I2S0_TX)
+#if defined(CONFIG_ESPRESSIF_I2S0_TX) || defined (CONFIG_ESPRESSIF_I2S0_TX)
   i2s_enable_tx = true;
 #else
   i2s_enable_tx = false;
-#endif /* CONFIG_ESP32_I2S0_TX || CONFIG_ESPRESSIF_I2S0_TX */
+#endif /* CONFIG_ESPRESSIF_I2S0_TX || CONFIG_ESPRESSIF_I2S0_TX */
 
-#if defined(CONFIG_ESP32_I2S0_RX) || defined (CONFIG_ESPRESSIF_I2S0_RX)
+#if defined(CONFIG_ESPRESSIF_I2S0_RX) || defined (CONFIG_ESPRESSIF_I2S0_RX)
     i2s_enable_rx = true;
 #else
     i2s_enable_rx = false;
-#endif /* CONFIG_ESP32_I2S0_RX || CONFIG_ESPRESSIF_I2S0_RX */
+#endif /* CONFIG_ESPRESSIF_I2S0_RX || CONFIG_ESPRESSIF_I2S0_RX */
 
   /* Configure I2S generic audio on I2S0 */
 
@@ -600,21 +600,21 @@ int esp32_bringup(void)
 
 #endif /* CONFIG_AUDIO_CS4344 */
 
-#endif /* CONFIG_ESP32_I2S0 || CONFIG_ESPRESSIF_I2S0 */
+#endif /* CONFIG_ESPRESSIF_I2S0 || CONFIG_ESPRESSIF_I2S0 */
 
-#if defined(CONFIG_ESP32_I2S1) || defined(CONFIG_ESPRESSIF_I2S1)
+#if defined(CONFIG_ESPRESSIF_I2S1) || defined(CONFIG_ESPRESSIF_I2S1)
 
-#if defined(CONFIG_ESP32_I2S1_TX) || defined (CONFIG_ESPRESSIF_I2S1_TX)
+#if defined(CONFIG_ESPRESSIF_I2S1_TX) || defined (CONFIG_ESPRESSIF_I2S1_TX)
   i2s_enable_tx = true;
 #else
   i2s_enable_tx = false;
-#endif /* CONFIG_ESP32_I2S1_TX || CONFIG_ESPRESSIF_I2S1_TX */
+#endif /* CONFIG_ESPRESSIF_I2S1_TX || CONFIG_ESPRESSIF_I2S1_TX */
 
-#if defined(CONFIG_ESP32_I2S1_RX) || defined (CONFIG_ESPRESSIF_I2S1_RX)
+#if defined(CONFIG_ESPRESSIF_I2S1_RX) || defined (CONFIG_ESPRESSIF_I2S1_RX)
     i2s_enable_rx = true;
 #else
     i2s_enable_rx = false;
-#endif /* CONFIG_ESP32_I2S1_RX || CONFIG_ESPRESSIF_I2S1_RX */
+#endif /* CONFIG_ESPRESSIF_I2S1_RX || CONFIG_ESPRESSIF_I2S1_RX */
 
   /* Configure I2S generic audio on I2S1 */
 
@@ -625,9 +625,9 @@ int esp32_bringup(void)
              ESP32_I2S1, ret);
     }
 
-#endif /* CONFIG_ESP32_I2S1 || CONFIG_ESPRESSIF_I2S1 */
+#endif /* CONFIG_ESPRESSIF_I2S1 || CONFIG_ESPRESSIF_I2S1 */
 
-#endif /* CONFIG_ESP32_I2S || CONFIG_ESPRESSIF_I2S */
+#endif /* CONFIG_ESPRESSIF_I2S || CONFIG_ESPRESSIF_I2S */
 
 #ifdef CONFIG_SENSORS_SHT3X
   /* Try to register SHT3x device in I2C0 */

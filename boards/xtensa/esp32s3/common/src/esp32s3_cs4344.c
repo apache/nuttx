@@ -39,9 +39,9 @@
 
 #include <arch/board/board.h>
 
-#include "esp32s3_i2s.h"
+#include "espressif/esp_i2s.h"
 
-#if defined(CONFIG_ESP32S3_I2S) && defined(CONFIG_AUDIO_CS4344)
+#if defined(CONFIG_ESPRESSIF_I2S) && defined(CONFIG_AUDIO_CS4344)
 
 /****************************************************************************
  * Public Functions
@@ -80,7 +80,7 @@ int esp32s3_cs4344_initialize(int port)
     {
       /* Get an instance of the I2S interface for the CS4344 data channel */
 
-      i2s = esp32s3_i2sbus_initialize(port);
+      i2s = esp_i2sbus_initialize(port);
       if (!i2s)
         {
           auderr("ERROR: Failed to initialize I2S%d\n", port);
@@ -150,4 +150,4 @@ errout:
   return ret;
 }
 
-#endif /* CONFIG_ESP32S3_I2S && CONFIG_AUDIO_CS4344 */
+#endif /* CONFIG_ESPRESSIF_I2S && CONFIG_AUDIO_CS4344 */
