@@ -40,33 +40,28 @@
 #include "esp32s3_gpio.h"
 #include "hardware/esp32s3_gpio_sigmap.h"
 
-#if defined(CONFIG_DEV_GPIO) && !defined(CONFIG_GPIO_LOWER_HALF)
+#if defined(CONFIG_DEV_GPIO)
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if !defined(CONFIG_ESP32S3_GPIO_IRQ) && BOARD_NGPIOINT > 0
-#  error "NGPIOINT is > 0 and GPIO interrupts aren't enabled"
-#endif
-
-/* Output pins. GPIO15 is used as an example, any other outputs could be
- * used.
+/* Output pins. GPIO_LCD_DC(GPIO39) is used for LCD D/C.
  */
 
-#define GPIO_OUT1    15
+#define GPIO_OUT1       GPIO_LCD_DC
 
-/* Input pins. GPIO18 is used as an example, any other inputs could be
- * used.
+/* Input pins. GPIO10 is used as an example at GP1.25-5P expansion
+ * interface 1 (left side, near the speaker)
  */
 
-#define GPIO_IN1     18
+#define GPIO_IN1        (10)
 
-/* Interrupt pins. GPIO21 is used as an example, any other inputs could be
- * used.
+/* Interrupt pins. GPIO11 is used as an example at GP1.25-5P expansion
+ * interface 1 (left side, near the speaker)
  */
 
-#define GPIO_IRQPIN1 21
+#define GPIO_IRQPIN1    (11)
 
 /****************************************************************************
  * Private Types
@@ -97,7 +92,7 @@ static int gpout_write(struct gpio_dev_s *dev, bool value);
 static int gpin_read(struct gpio_dev_s *dev, bool *value);
 #endif
 
-#if BOARD_NGPIOINT > 0
+#if defined(CONFIG_ESP32S3_GPIO_IRQ) && BOARD_NGPIOINT > 0
 static int gpint_read(struct gpio_dev_s *dev, bool *value);
 static int gpint_attach(struct gpio_dev_s *dev,
                         pin_interrupt_t callback);
@@ -146,7 +141,7 @@ static const uint32_t g_gpioinputs[BOARD_NGPIOIN] =
 static struct esp32s3gpio_dev_s g_gpin[BOARD_NGPIOIN];
 #endif
 
-#if BOARD_NGPIOINT > 0
+#if defined(CONFIG_ESP32S3_GPIO_IRQ) && BOARD_NGPIOINT > 0
 static const struct gpio_operations_s gpint_ops =
 {
   .go_read   = gpint_read,
@@ -225,7 +220,7 @@ static int gpin_read(struct gpio_dev_s *dev, bool *value)
  * Name: esp32s3gpio_interrupt
  ****************************************************************************/
 
-#if BOARD_NGPIOINT > 0
+#if defined(CONFIG_ESP32S3_GPIO_IRQ) && BOARD_NGPIOINT > 0
 static int esp32s3gpio_interrupt(int irq, void *context, void *arg)
 {
   struct esp32s3gpint_dev_s *esp32s3gpint = (struct esp32s3gpint_dev_s *)arg;
@@ -325,7 +320,6 @@ static int gpint_enable(struct gpio_dev_s *dev, bool enable)
 
 int esp32s3_gpio_init(void)
 {
-  int pincount = 0;
   int i;
 
 #if BOARD_NGPIOOUT > 0
@@ -336,7 +330,7 @@ int esp32s3_gpio_init(void)
       g_gpout[i].gpio.gp_pintype = GPIO_OUTPUT_PIN;
       g_gpout[i].gpio.gp_ops     = &gpout_ops;
       g_gpout[i].id              = i;
-      gpio_pin_register(&g_gpout[i].gpio, pincount);
+      gpio_pin_register(&g_gpout[i].gpio, g_gpiooutputs[i]);
 
       /* Configure the pins that will be used as output */
 
@@ -344,8 +338,6 @@ int esp32s3_gpio_init(void)
       esp32s3_configgpio(g_gpiooutputs[i], OUTPUT_FUNCTION_2 |
                          INPUT_FUNCTION_2);
       esp32s3_gpiowrite(g_gpiooutputs[i], 0);
-
-      pincount++;
     }
 #endif
 
@@ -357,17 +349,15 @@ int esp32s3_gpio_init(void)
       g_gpin[i].gpio.gp_pintype = GPIO_INPUT_PIN;
       g_gpin[i].gpio.gp_ops     = &gpin_ops;
       g_gpin[i].id              = i;
-      gpio_pin_register(&g_gpin[i].gpio, pincount);
+      gpio_pin_register(&g_gpin[i].gpio, g_gpioinputs[i]);
 
       /* Configure the pins that will be used as INPUT */
 
       esp32s3_configgpio(g_gpioinputs[i], INPUT_FUNCTION_2);
-
-      pincount++;
     }
 #endif
 
-#if BOARD_NGPIOINT > 0
+#if defined(CONFIG_ESP32S3_GPIO_IRQ) && BOARD_NGPIOINT > 0
   for (i = 0; i < BOARD_NGPIOINT; i++)
     {
       /* Setup and register the GPIO pin */
@@ -375,16 +365,14 @@ int esp32s3_gpio_init(void)
       g_gpint[i].esp32s3gpio.gpio.gp_pintype = GPIO_INTERRUPT_PIN;
       g_gpint[i].esp32s3gpio.gpio.gp_ops     = &gpint_ops;
       g_gpint[i].esp32s3gpio.id              = i;
-      gpio_pin_register(&g_gpint[i].esp32s3gpio.gpio, pincount);
+      gpio_pin_register(&g_gpint[i].esp32s3gpio.gpio, g_gpiointinputs[i]);
 
       /* Configure the pins that will be used as interrupt input */
 
       esp32s3_configgpio(g_gpiointinputs[i], INPUT_FUNCTION_2 | PULLDOWN);
-
-      pincount++;
     }
 #endif
 
   return OK;
 }
-#endif /* CONFIG_DEV_GPIO && !CONFIG_GPIO_LOWER_HALF */
+#endif /* CONFIG_DEV_GPIO */
