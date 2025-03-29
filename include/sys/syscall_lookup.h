@@ -78,11 +78,11 @@ SYSCALL_LOOKUP(sethostname,                2)
 /* Semaphores */
 
 SYSCALL_LOOKUP(nxsem_destroy,              1)
-SYSCALL_LOOKUP(nxsem_post,                 1)
+SYSCALL_LOOKUP(nxsem_post_slow,            1)
 SYSCALL_LOOKUP(nxsem_clockwait,            3)
 SYSCALL_LOOKUP(nxsem_timedwait,            2)
-SYSCALL_LOOKUP(nxsem_trywait,              1)
-SYSCALL_LOOKUP(nxsem_wait,                 1)
+SYSCALL_LOOKUP(nxsem_trywait_slow,         1)
+SYSCALL_LOOKUP(nxsem_wait_slow,            1)
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
   SYSCALL_LOOKUP(nxsem_set_protocol,       2)

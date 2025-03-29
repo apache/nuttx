@@ -27,8 +27,10 @@
 #include <nuttx/config.h>
 
 #include <errno.h>
+#include <assert.h>
 
 #include <nuttx/semaphore.h>
+#include <nuttx/atomic.h>
 
 /****************************************************************************
  * Public Functions
@@ -83,4 +85,62 @@ int sem_post(FAR sem_t *sem)
     }
 
   return ret;
+}
+
+/****************************************************************************
+ * Name: nxsem_post
+ *
+ * Description:
+ *   When a kernel thread has finished with a semaphore, it will call
+ *   nxsem_post().  This function unlocks the semaphore referenced by sem
+ *   by performing the semaphore unlock operation on that semaphore.
+ *
+ *   If the semaphore value resulting from this operation is positive, then
+ *   no tasks were blocked waiting for the semaphore to become unlocked; the
+ *   semaphore is simply incremented.
+ *
+ *   If the value of the semaphore resulting from this operation is zero,
+ *   then one of the tasks blocked waiting for the semaphore shall be
+ *   allowed to return successfully from its call to nxsem_wait().
+ *
+ * Input Parameters:
+ *   sem - Semaphore descriptor
+ *
+ * Returned Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *
+ * Assumptions:
+ *   This function may be called from an interrupt handler.
+ *
+ ****************************************************************************/
+
+int nxsem_post(FAR sem_t *sem)
+{
+  DEBUGASSERT(sem != NULL);
+
+  /* We don't do atomic fast path in case of LIBC_ARCH_ATOMIC because that
+   * uses spinlocks, which can't be called from userspace. Also in the kernel
+   * taking the slow path directly is faster than locking first in here
+   */
+
+#ifndef CONFIG_LIBC_ARCH_ATOMIC
+
+  if ((sem->flags & SEM_TYPE_MUTEX)
+#  if defined(CONFIG_PRIORITY_PROTECT) || defined(CONFIG_PRIORITY_INHERITANCE)
+      && (sem->flags & SEM_PRIO_MASK) == SEM_PRIO_NONE
+#  endif
+      )
+    {
+      int32_t old = 0;
+      if (atomic_try_cmpxchg_release(NXSEM_COUNT(sem), &old, 1))
+        {
+          return OK;
+        }
+    }
+
+#endif
+
+  return nxsem_post_slow(sem);
 }
