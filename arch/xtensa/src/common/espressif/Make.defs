@@ -74,8 +74,8 @@ endif
 
 ifeq ($(CONFIG_ESPRESSIF_WIRELESS),y)
 CHIP_CSRCS += esp_wireless.c
-ifeq ($(CONFIG_ESPRESSIF_WIFI),y)
 CHIP_CSRCS += esp_wifi_utils.c
+ifeq ($(CONFIG_ESPRESSIF_WLAN),y)
 CHIP_CSRCS += esp_wlan.c
 endif
 endif
