@@ -297,3 +297,35 @@ Then comparing memory size with the basic "nsh" config::
   nsh> free
         total       used       free    maxused    maxfree  nused  nfree name
       8785268     161516    8623752     161888    8388592     41      2 Umem
+
+gpio
+----
+
+Basic NuttShell configuration console and GPIO enabled.
+
+===== ========== ===============
+Num   Type       Func / Location
+===== ========== ===============
+IO39  Output     LCD SPI D/C
+IO10  Input      GP1.25-5P expansion interface 1 (left side, near the speaker)
+IO11  Interrupt  GP1.25-5P expansion interface 1 (left side, near the speaker)
+===== ========== ===============
+
+You can run the configuration and compilation procedure::
+
+  $ ./tools/configure.sh lckfb-szpi-esp32s3:gpio
+  $ make flash -j$(nproc) ESPTOOL_PORT=/dev/ttyUSB0
+
+Then test gpio39(IO39)::
+
+  # With hardware check, the pin levels meet the expected requirements.
+
+  # Output high
+  nsh> echo 1 > /dev/gpio39
+  nsh> cat /dev/gpio39
+  1
+
+  # Output low
+  nsh> echo 0 > /dev/gpio39
+  nsh> cat /dev/gpio39
+  0
