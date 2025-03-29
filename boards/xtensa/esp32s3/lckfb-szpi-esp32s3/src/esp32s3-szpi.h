@@ -27,6 +27,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/board.h>
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 #include <stdint.h>
@@ -34,6 +35,10 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#define GPIO_LCD_DC         (39)
+#define GPIO_LCD_RST        (-1)
+#define SZPI_LCD_CS_PATH    "/dev/gpio0"
 
 /****************************************************************************
  * Public Types

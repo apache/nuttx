@@ -275,3 +275,72 @@ Then test LEDC(PWM) with pin42(backlight of LCD)::
   nsh> pwm -d 0
   pwm_main: starting output with frequency: 100 duty: 00000000
   pwm_main: stopping output
+
+gpio
+----
+
+Basic NuttShell configuration console and GPIO enabled.
+
+===== ========== ===============
+Num   Type       Func / Location
+===== ========== ===============
+IO39  Output     LCD SPI D/C
+IO10  Input      GP1.25-5P expansion interface 1 (left side, near the speaker)
+IO11  Interrupt  GP1.25-5P expansion interface 1 (left side, near the speaker)
+===== ========== ===============
+
+You can run the configuration and compilation procedure::
+
+  $ ./tools/configure.sh lckfb-szpi-esp32s3:gpio
+  $ make flash -j$(nproc) ESPTOOL_PORT=/dev/ttyUSB0
+
+Then test gpio39(IO39)::
+
+  # With hardware check, the pin levels meet the expected requirements.
+
+  # Output high
+  nsh> echo 1 > /dev/gpio39
+  nsh> cat /dev/gpio39
+  1
+
+  # Output low
+  nsh> echo 0 > /dev/gpio39
+  nsh> cat /dev/gpio39
+  0
+
+lcd
+---
+
+Basic NuttShell configuration console and LCD enabled.
+
+.. figure:: lckfb-szpi-esp32s3-lcd.jpg
+   :align: center
+
+You can run the configuration and compilation procedure::
+
+  $ ./tools/configure.sh lckfb-szpi-esp32s3:lcd
+  $ make flash -j$(nproc) ESPTOOL_PORT=/dev/ttyUSB0
+
+Then run the fb command::
+
+  nsh> fb
+  VideoInfo:
+        fmt: 11
+       xres: 240
+       yres: 320
+    nplanes: 1
+  PlaneInfo (plane 0):
+      fbmem: 0x3fc8e9f8
+      fblen: 153600
+     stride: 480
+    display: 0
+        bpp: 16
+  Mapped FB: 0x3fc8e9f8
+   0: (  0,  0) (240,320)
+   1: ( 21, 29) (198,262)
+   2: ( 42, 58) (156,204)
+   3: ( 63, 87) (114,146)
+   4: ( 84,116) ( 72, 88)
+   5: (105,145) ( 30, 30)
+  Test finished
+  nsh>
