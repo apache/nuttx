@@ -52,3 +52,7 @@ endif
 ifeq ($(CONFIG_IOEXPANDER_PCA9557),y)
 CSRCS += esp32s3_pca9557.c
 endif
+
+ifeq ($(CONFIG_LCD),y)
+CSRCS += esp32s3_board_lcd.c
+endif
