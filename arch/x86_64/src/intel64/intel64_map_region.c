@@ -38,6 +38,54 @@
  * Private Functions
  ****************************************************************************/
 
+static inline_function
+void map_region_lowmem(void *base, size_t size, int flags)
+{
+  uint64_t bb;
+  uint64_t num_of_pages;
+  uint64_t entry;
+  uint64_t curr;
+  int i;
+
+  /* Round to page boundary */
+
+  bb = (uint64_t)base & ~(PAGE_SIZE - 1);
+
+  /* Increase size if the base address is rounded off */
+
+  size += (uint64_t)base - bb;
+  num_of_pages = (size + PAGE_SIZE - 1) / PAGE_SIZE;
+
+  curr = bb;
+  for (i = 0; i < num_of_pages; i++)
+    {
+      entry = (curr >> 12) & 0x7ffffff;
+
+      g_pt[entry] = curr | flags;
+      curr += PAGE_SIZE;
+    }
+}
+
+static inline_function
+void map_region_highmem_1g(void *base, size_t size, int flags)
+{
+  uint64_t curr;
+  uint64_t num_of_pages;
+  uint64_t entry;
+  int i;
+
+  flags |= X86_PAGE_HUGE;
+  curr   = (uint64_t)base & HUGE_PAGE_MASK_1G;
+  num_of_pages = (size + (HUGE_PAGE_SIZE_1G - 1)) / HUGE_PAGE_SIZE_1G;
+
+  for (i = 0; i < num_of_pages; i++)
+    {
+      entry = (curr >> 30) & 0x7ffffff;
+      g_pdpt[entry] = curr | flags;
+      curr += HUGE_PAGE_SIZE_1G;
+    }
+}
+
 /****************************************************************************
  * Name: up_map_region_higmem
  *
@@ -47,7 +95,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_MM_PGALLOC
-static int up_map_region_highmem(void *base, size_t size, int flags)
+static int map_region_highmem(void *base, size_t size, int flags)
 {
   uintptr_t bb;
   int       ptlevel;
@@ -131,40 +179,29 @@ static int up_map_region_highmem(void *base, size_t size, int flags)
 
 int up_map_region(void *base, size_t size, int flags)
 {
-  uint64_t bb;
-  uint64_t num_of_pages;
-  uint64_t entry;
-  uint64_t curr;
-  int i;
-
-  /* Round to page boundary */
-
-  bb = (uint64_t)base & ~(PAGE_SIZE - 1);
-
-  /* Increase size if the base address is rounded off */
-
-  size += (uint64_t)base - bb;
-  num_of_pages = (size + PAGE_SIZE - 1) / PAGE_SIZE;
-
-  if (bb > 0xffffffff)
+  if ((uintptr_t)base > 0xffffffff)
     {
+      /* More than 4GB only the 1G huge pages can be mapped.
+       * Others can't be mapped without CONFIG_MM_PGALLOC.
+       */
+
+      if (((uintptr_t)base < 512ul * HUGE_PAGE_SIZE_1G) &&
+          (size & (HUGE_PAGE_SIZE_1G - 1)) == 0)
+        {
+          map_region_highmem_1g(base, size, flags);
+          return 0;
+        }
+      else
+        {
 #ifdef CONFIG_MM_PGALLOC
-      return up_map_region_highmem(base, size, flags);
+          return map_region_highmem(base, size, flags);
 #else
-      /* More than 4GB can't be mapped without CONFIG_MM_PGALLOC */
-
-      PANIC();
+          PANIC();
 #endif
+        }
     }
 
-  curr = bb;
-  for (i = 0; i < num_of_pages; i++)
-    {
-      entry = (curr >> 12) & 0x7ffffff;
-
-      g_pt[entry] = curr | flags;
-      curr += PAGE_SIZE;
-    }
+  map_region_lowmem(base, size, flags);
 
   return 0;
 }

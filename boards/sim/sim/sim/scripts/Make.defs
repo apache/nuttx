@@ -113,6 +113,11 @@ ifeq ($(CONFIG_ARCH_INSTRUMENT_ALL),y)
   ARCHOPTIMIZATION += -finstrument-functions
 endif
 
+# Fix -Wshadow warnings for built-in bitops on sim
+
+ARCHOPTIMIZATION += -fno-builtin-ffs -fno-builtin-ffsl -fno-builtin-ffsll
+ARCHOPTIMIZATION += -fno-builtin-fls -fno-builtin-flsl -fno-builtin-flsll
+
 # Add -fno-common because macOS "ld -r" doesn't seem to pick objects
 # for common symbols.
 ARCHCFLAGS += -fno-common
