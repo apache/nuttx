@@ -130,6 +130,8 @@
 #define MPFS_MIN_EP_FIFO_SIZE 8
 #define MPFS_USB_REG_MAX      0x2000
 
+#define LINKDEAD_THRESHOLD    20
+
 /* Request queue operations *************************************************/
 
 #define mpfs_rqempty(q)      ((q)->head == NULL)
@@ -224,10 +226,12 @@ static void   mpfs_epset_reset(struct mpfs_usbdev_s *priv, uint16_t epset);
  * Private Data
  ****************************************************************************/
 
-static spinlock_t g_mpfs_modifyreg_lock = SP_UNLOCKED;
-
 static struct mpfs_usbdev_s g_usbd;
-static uint8_t g_clkrefs;
+
+static spinlock_t g_mpfs_modifyreg_lock = SP_UNLOCKED;
+static spinlock_t g_clklock = SP_UNLOCKED;
+static uint8_t    g_clkrefs;
+static bool       g_linkdead;
 
 static const struct usbdev_epops_s g_epops =
 {
@@ -435,7 +439,7 @@ static void mpfs_enableclk(void)
 {
   /* Handle the counter atomically */
 
-  irqstate_t flags = enter_critical_section();
+  irqstate_t flags = spin_lock_irqsave(&g_clklock);
 
   if (g_clkrefs == 0)
     {
@@ -444,7 +448,7 @@ static void mpfs_enableclk(void)
     }
 
   g_clkrefs++;
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_clklock, flags);
 }
 
 /****************************************************************************
@@ -465,7 +469,7 @@ static void mpfs_disableclk(void)
 {
   /* Handle the counter atomically */
 
-  irqstate_t flags = enter_critical_section();
+  irqstate_t flags = spin_lock_irqsave(&g_clklock);
 
   g_clkrefs--;
   if (g_clkrefs == 0)
@@ -474,7 +478,7 @@ static void mpfs_disableclk(void)
                   0);
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_clklock, flags);
 }
 
 /****************************************************************************
@@ -497,6 +501,7 @@ static void mpfs_disableclk(void)
 
 static struct mpfs_req_s *mpfs_req_dequeue(struct mpfs_rqhead_s *queue)
 {
+  irqstate_t flags = spin_lock_irqsave(&queue->qlock);
   struct mpfs_req_s *ret = queue->head;
 
   if (ret != NULL)
@@ -510,6 +515,7 @@ static struct mpfs_req_s *mpfs_req_dequeue(struct mpfs_rqhead_s *queue)
       ret->flink = NULL;
     }
 
+  spin_unlock_irqrestore(&queue->qlock, flags);
   return ret;
 }
 
@@ -531,6 +537,8 @@ static struct mpfs_req_s *mpfs_req_dequeue(struct mpfs_rqhead_s *queue)
 static void mpfs_req_enqueue(struct mpfs_rqhead_s *queue,
                              struct mpfs_req_s *req)
 {
+  irqstate_t flags = spin_lock_irqsave(&queue->qlock);
+
   req->flink = NULL;
 
   if (queue->head == NULL)
@@ -543,6 +551,8 @@ static void mpfs_req_enqueue(struct mpfs_rqhead_s *queue,
       queue->tail->flink = req;
       queue->tail        = req;
     }
+
+  spin_unlock_irqrestore(&queue->qlock, flags);
 }
 
 /****************************************************************************
@@ -563,14 +573,10 @@ static void mpfs_req_enqueue(struct mpfs_rqhead_s *queue,
 static void mpfs_req_complete(struct mpfs_ep_s *privep, int16_t result)
 {
   struct mpfs_req_s *privreq;
-  irqstate_t flags;
 
   /* Remove the completed request at the head of the endpoint request list */
 
-  flags = enter_critical_section();
   privreq = mpfs_req_dequeue(&privep->reqq);
-  leave_critical_section(flags);
-
   if (privreq)
     {
       /* Save the result in the request structure */
@@ -771,11 +777,26 @@ static int mpfs_req_wrsetup(struct mpfs_usbdev_s *priv,
 
   if (nbytes > packetsize)
     {
-      ret = mpfs_write_tx_fifo(buf, packetsize, epno);
-      if (ret != OK)
+      if (privep->linkdead < LINKDEAD_THRESHOLD)
         {
-          privep->epstate = USB_EPSTATE_IDLE;
-          return ret;
+          ret = mpfs_write_tx_fifo(buf, packetsize, epno);
+          if (ret != OK)
+            {
+              privep->linkdead++;
+              privep->epstate = USB_EPSTATE_IDLE;
+              return ret;
+            }
+          else
+            {
+              privep->linkdead = 0;
+            }
+        }
+      else
+        {
+          /* We're in trouble, remote has likely closed */
+
+          g_linkdead = true;
+          return -EIO;
         }
 
       if (epno == EP0)
@@ -796,11 +817,26 @@ static int mpfs_req_wrsetup(struct mpfs_usbdev_s *priv,
     }
   else
     {
-      ret = mpfs_write_tx_fifo(buf, nbytes, epno);
-      if (ret != OK)
+      if (privep->linkdead < LINKDEAD_THRESHOLD)
         {
-          privep->epstate = USB_EPSTATE_IDLE;
-          return ret;
+          ret = mpfs_write_tx_fifo(buf, nbytes, epno);
+          if (ret != OK)
+            {
+              privep->linkdead++;
+              privep->epstate = USB_EPSTATE_IDLE;
+              return ret;
+            }
+          else
+            {
+              privep->linkdead = 0;
+            }
+        }
+      else
+        {
+          /* We're in trouble, remote has likely closed */
+
+          g_linkdead = true;
+          return -EIO;
         }
     }
 
@@ -853,7 +889,7 @@ static int mpfs_ep_stall(struct mpfs_ep_s *privep)
 
   /* Check that endpoint is enabled and not already in Halt state */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&privep->eplock);
   if ((privep->epstate != USB_EPSTATE_DISABLED) &&
       (privep->epstate != USB_EPSTATE_STALLED))
     {
@@ -899,7 +935,7 @@ static int mpfs_ep_stall(struct mpfs_ep_s *privep)
         }
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&privep->eplock, flags);
 
   return OK;
 }
@@ -1629,14 +1665,14 @@ static int mpfs_ep_disable(struct usbdev_ep_s *ep)
 
   /* Reset the endpoint and cancel any ongoing activity */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&privep->eplock);
   priv  = privep->dev;
   mpfs_ep_reset(priv, epno);
 
   /* Revert to the addressed-but-not-configured state */
 
   mpfs_setdevaddr(priv, priv->devaddr);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&privep->eplock, flags);
 
   return OK;
 }
@@ -1782,7 +1818,7 @@ static int mpfs_ep_submit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   req->xfrd         = 0;
   privreq->inflight = 0;
 
-  flags             = enter_critical_section();
+  flags             = spin_lock_irqsave(&privep->eplock);
 
   /* Handle IN (device-to-host) requests.  NOTE:  If the class device is
    * using the bi-directional EP0, then we assume that they intend the EP0
@@ -1851,7 +1887,7 @@ static int mpfs_ep_submit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
         }
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&privep->eplock, flags);
 
   return ret;
 }
@@ -1874,13 +1910,9 @@ static int mpfs_ep_submit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
 static int mpfs_ep_cancel(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
 {
   struct mpfs_ep_s *privep = (struct mpfs_ep_s *)ep;
-  irqstate_t flags;
 
   usbtrace(TRACE_EPCANCEL, USB_EPNO(ep->eplog));
-
-  flags = enter_critical_section();
   mpfs_req_cancel(privep, -EAGAIN);
-  leave_critical_section(flags);
 
   return OK;
 }
@@ -1912,7 +1944,7 @@ static int mpfs_ep_resume(struct mpfs_ep_s *privep)
 
   usbtrace(TRACE_EPRESUME, USB_EPNO(privep->ep.eplog));
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&privep->eplock);
 
   /* Check if the endpoint is stalled */
 
@@ -1975,7 +2007,7 @@ static int mpfs_ep_resume(struct mpfs_ep_s *privep)
         }
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&privep->eplock, flags);
   return OK;
 }
 
@@ -2019,7 +2051,7 @@ static int mpfs_ep_stallresume(struct usbdev_ep_s *ep, bool resume)
        * requests before sending the stall.
        */
 
-      flags = enter_critical_section();
+      flags = spin_lock_irqsave(&privep->eplock);
       epno = USB_EPNO(ep->eplog);
       if (epno != 0 && USB_ISEPIN(ep->eplog))
         {
@@ -2035,7 +2067,7 @@ static int mpfs_ep_stallresume(struct usbdev_ep_s *ep, bool resume)
                */
 
               privep->pending = true;
-              leave_critical_section(flags);
+              spin_unlock_irqrestore(&privep->eplock, flags);
               return OK;
             }
         }
@@ -2044,8 +2076,8 @@ static int mpfs_ep_stallresume(struct usbdev_ep_s *ep, bool resume)
        * Stall the endpoint now.
        */
 
+      spin_unlock_irqrestore(&privep->eplock, flags);
       ret = mpfs_ep_stall(privep);
-      leave_critical_section(flags);
     }
 
   return ret;
@@ -2078,7 +2110,7 @@ mpfs_ep_reserve(struct mpfs_usbdev_s *priv, uint16_t epset, bool in)
   irqstate_t flags;
   int epndx = 0;
 
-  flags  = enter_critical_section();
+  flags  = spin_lock_irqsave(&priv->lock);
   epset &= priv->epavail;
 
   if (epset != 0)
@@ -2126,7 +2158,7 @@ mpfs_ep_reserve(struct mpfs_usbdev_s *priv, uint16_t epset, bool in)
 
   DEBUGASSERT(privep != NULL);
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
   return privep;
 }
 
@@ -2216,9 +2248,9 @@ static struct usbdev_ep_s *mpfs_allocep(struct usbdev_s *dev, uint8_t epno,
 static inline void
 mpfs_ep_unreserve(struct mpfs_usbdev_s *priv, struct mpfs_ep_s *privep)
 {
-  irqstate_t flags = enter_critical_section();
+  irqstate_t flags = spin_lock_irqsave(&priv->lock);
   priv->epavail   |= MPFS_EP_BIT(USB_EPNO(privep->ep.eplog));
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************
@@ -2350,13 +2382,13 @@ static int mpfs_wakeup(struct usbdev_s *dev)
 
   /* Resume normal operation */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
 
   mpfs_resume(priv);
 
   /* Device is always self-powered. Remote wakeup is not supported */
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
   return OK;
 }
 
@@ -2442,6 +2474,8 @@ static void mpfs_reset(struct mpfs_usbdev_s *priv)
        */
 
       mpfs_req_cancel(privep, -ESHUTDOWN);
+
+      privep->linkdead  = 0;
 
       /* Reset endpoint status */
 
@@ -3455,11 +3489,28 @@ static int mpfs_usb_interrupt(int irq, void *context, void *arg)
     {
       for (i = 0; i < MPFS_USB_NENDPOINTS; i++)
         {
+          /* Check if dead connections are back in business */
+
+          if (g_linkdead)
+            {
+              /* This releases all, which is a problem if only some
+               * endpoints are closed on the remote; whereas some
+               * are functioning; for example ACM and mass storage;
+               * now the functioning one likely marks the closed ones
+               * as no longer dead.
+               */
+
+              struct mpfs_ep_s *privep = &priv->eplist[i];
+              privep->linkdead = 0;
+            }
+
           if ((pending_rx_ep & (1 << i)) != 0)
             {
               mpfs_ep_rx_interrupt(priv, i);
             }
         }
+
+      g_linkdead = false;
     }
 
   if ((isr & SUSPEND_IRQ_MASK) != 0)
@@ -3925,15 +3976,15 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
   struct mpfs_usbdev_s *priv = &g_usbd;
   irqstate_t flags;
 
+  /* Unbind the class driver */
+
+  CLASS_UNBIND(driver, &priv->usbdev);
+
   /* Reset the hardware and cancel all requests.  All requests must be
    * canceled while the class driver is still bound.
    */
 
-  flags = enter_critical_section();
-
-  /* Unbind the class driver */
-
-  CLASS_UNBIND(driver, &priv->usbdev);
+  flags = spin_lock_irqsave(&priv->lock);
 
   mpfs_hw_shutdown(priv);
   mpfs_sw_shutdown(priv);
@@ -3941,7 +3992,7 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
   /* Unhook the driver */
 
   priv->driver = NULL;
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 
   return OK;
 }

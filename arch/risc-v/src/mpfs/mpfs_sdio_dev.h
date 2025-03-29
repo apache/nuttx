@@ -29,6 +29,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/sdio.h>
+#include <nuttx/spinlock.h>
 #include <stdbool.h>
 #include <sys/types.h>
 
@@ -48,6 +49,7 @@ struct mpfs_dev_s
   const int wrcomplete_irq; /* Card write complete interrupt */
 #endif
   bool clk_enabled;        /* Clk state */
+  spinlock_t lock;         /* Lock for device access */
 
   /* eMMC / SD and HW parameters */
 
