@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/modlib/modlib_globals.S
+ * libs/libc/elf/elf_globals.S
  *
  * SPDX-License-Identifier: Apache-2.0
  *

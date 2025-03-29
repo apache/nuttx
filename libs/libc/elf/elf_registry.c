@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/modlib/modlib_registry.c
+ * libs/libc/elf/elf_registry.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -32,7 +32,7 @@
 #include <errno.h>
 
 #include <nuttx/mutex.h>
-#include <nuttx/lib/modlib.h>
+#include <nuttx/lib/elf.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -54,7 +54,7 @@ static FAR struct module_s *g_mod_registry;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: modlib_registry_lock
+ * Name: libelf_registry_lock
  *
  * Description:
  *   Get exclusive access to the module registry.
@@ -67,13 +67,13 @@ static FAR struct module_s *g_mod_registry;
  *
  ****************************************************************************/
 
-void modlib_registry_lock(void)
+void libelf_registry_lock(void)
 {
   nxrmutex_lock(&g_modlock);
 }
 
 /****************************************************************************
- * Name: modlib_registry_unlock
+ * Name: libelf_registry_unlock
  *
  * Description:
  *   Relinquish the lock on the module registry
@@ -86,13 +86,13 @@ void modlib_registry_lock(void)
  *
  ****************************************************************************/
 
-void modlib_registry_unlock(void)
+void libelf_registry_unlock(void)
 {
   nxrmutex_unlock(&g_modlock);
 }
 
 /****************************************************************************
- * Name: modlib_registry_add
+ * Name: libelf_registry_add
  *
  * Description:
  *   Add a new entry to the module registry.
@@ -108,7 +108,7 @@ void modlib_registry_unlock(void)
  *
  ****************************************************************************/
 
-void modlib_registry_add(FAR struct module_s *modp)
+void libelf_registry_add(FAR struct module_s *modp)
 {
   DEBUGASSERT(modp);
   modp->flink = g_mod_registry;
@@ -116,7 +116,7 @@ void modlib_registry_add(FAR struct module_s *modp)
 }
 
 /****************************************************************************
- * Name: modlib_registry_del
+ * Name: libelf_registry_del
  *
  * Description:
  *   Remove a module entry from the registry
@@ -133,7 +133,7 @@ void modlib_registry_add(FAR struct module_s *modp)
  *
  ****************************************************************************/
 
-int modlib_registry_del(FAR struct module_s *modp)
+int libelf_registry_del(FAR struct module_s *modp)
 {
   FAR struct module_s *prev;
   FAR struct module_s *curr;
@@ -162,7 +162,7 @@ int modlib_registry_del(FAR struct module_s *modp)
 }
 
 /****************************************************************************
- * Name: modlib_registry_find
+ * Name: libelf_registry_find
  *
  * Description:
  *   Find an entry in the module registry using the name of the module.
@@ -179,13 +179,14 @@ int modlib_registry_del(FAR struct module_s *modp)
  *
  ****************************************************************************/
 
-#ifdef HAVE_MODLIB_NAMES
-FAR struct module_s *modlib_registry_find(FAR const char *modname)
+#ifdef HAVE_LIBC_ELF_NAMES
+FAR struct module_s *libelf_registry_find(FAR const char *modname)
 {
   FAR struct module_s *modp;
 
   for (modp = g_mod_registry;
-       modp != NULL && strncmp(modp->modname, modname, MODLIB_NAMEMAX) != 0;
+       modp != NULL &&
+       strncmp(modp->modname, modname, LIBC_ELF_NAMEMAX) != 0;
        modp = modp->flink);
 
   return modp;
@@ -193,7 +194,7 @@ FAR struct module_s *modlib_registry_find(FAR const char *modname)
 #endif
 
 /****************************************************************************
- * Name: modlib_registry_verify
+ * Name: libelf_registry_verify
  *
  * Description:
  *   Verify that a module handle is valid by traversing the module list and
@@ -211,7 +212,7 @@ FAR struct module_s *modlib_registry_find(FAR const char *modname)
  *
  ****************************************************************************/
 
-int modlib_registry_verify(FAR struct module_s *modp)
+int libelf_registry_verify(FAR struct module_s *modp)
 {
   FAR struct module_s *node;
 
@@ -227,7 +228,7 @@ int modlib_registry_verify(FAR struct module_s *modp)
 }
 
 /****************************************************************************
- * Name: modlib_registry_foreach
+ * Name: libelf_registry_foreach
  *
  * Description:
  *   Visit each module in the registry
@@ -244,14 +245,14 @@ int modlib_registry_verify(FAR struct module_s *modp)
  *
  ****************************************************************************/
 
-int modlib_registry_foreach(mod_callback_t callback, FAR void *arg)
+int libelf_registry_foreach(mod_callback_t callback, FAR void *arg)
 {
   FAR struct module_s *modp;
   int ret = OK;
 
   /* Get exclusive access to the module registry */
 
-  modlib_registry_lock();
+  libelf_registry_lock();
 
   /* Visit each installed module */
 
@@ -266,6 +267,6 @@ int modlib_registry_foreach(mod_callback_t callback, FAR void *arg)
         }
     }
 
-  modlib_registry_unlock();
+  libelf_registry_unlock();
   return ret;
 }
