@@ -32,7 +32,7 @@ if(CONFIG_SYSLOG_INTBUFFER)
   list(APPEND SRCS syslog_intbuffer.c)
 endif()
 
-if(NOT CONFIG_ARCH_SYSLOG)
+if(CONFIG_SYSLOG)
   list(APPEND SRCS syslog_initialize.c)
 endif()
 

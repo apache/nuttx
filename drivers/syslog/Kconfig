@@ -27,6 +27,16 @@ config SYSLOG_TO_SCHED_NOTE
 	---help---
 		If this option is enabled, syslog will be redirected to sched_note,
 		It uses the sched_note_printf macro to replace syslog
+
+config SYSLOG_NONE
+	bool "Disable system logging"
+	---help---
+		System logging is disabled and all calls to syslog() are replaced with
+		an empty function. This option can be useful for small systems when we don't
+		have any logging support, so we can get rid of unused logic.
+		This way the final image also won't contain the strings that are present
+		in syslog().
+
 endchoice
 
 config SYSLOG_CHARDEV
