@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32s3/lckfb-szpi-esp32s3/src/esp32s3_board_spi.c
+ * boards/xtensa/esp32s3/lckfb-szpi-esp32s3/src/esp32s3_board_lcd.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -26,128 +26,142 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
+#include <stdio.h>
 #include <stdbool.h>
 #include <fcntl.h>
 #include <debug.h>
+#include <errno.h>
 
+#include <nuttx/arch.h>
+#include <nuttx/board.h>
+#include <nuttx/signal.h>
 #include <nuttx/spi/spi.h>
+#include <nuttx/lcd/lcd.h>
+#include <nuttx/lcd/st7789.h>
 #include <nuttx/fs/fs.h>
 
+#include <arch/board/board.h>
+
 #include "esp32s3_gpio.h"
+#include "esp32s3_spi.h"
+#include "hardware/esp32s3_gpio_sigmap.h"
+
 #include "esp32s3-szpi.h"
 
 /****************************************************************************
- * Private Functions
+ * Pre-processor Definitions
  ****************************************************************************/
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static struct spi_dev_s *g_spidev;
+static struct lcd_dev_s *g_lcd;
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp32s3_spi2_status
+ * Name:  board_lcd_initialize
+ *
+ * Description:
+ *   Initialize the LCD video hardware.  The initial state of the LCD is
+ *   fully initialized, display memory cleared, and the LCD ready to use, but
+ *   with the power setting at 0 (full off).
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
  ****************************************************************************/
 
-#ifdef CONFIG_ESP32S3_SPI2
-
-uint8_t esp32s3_spi2_status(struct spi_dev_s *dev, uint32_t devid)
-{
-  uint8_t status = 0;
-
-  return status;
-}
-
-#endif
-
-/****************************************************************************
- * Name: esp32s3_spi2_cmddata
- ****************************************************************************/
-
-#if defined(CONFIG_ESP32S3_SPI2) && defined(CONFIG_SPI_CMDDATA)
-
-int esp32s3_spi2_cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
-{
-  if (devid == SPIDEV_DISPLAY(0))
-    {
-      /*  This is the Data/Command control pad which determines whether the
-       *  data bits are data or a command.
-       */
-
-      esp32s3_gpiowrite(GPIO_LCD_DC, !cmd);
-
-      return OK;
-    }
-
-  spiinfo("devid: %" PRIu32 " CMD: %s\n", devid, cmd ? "command" :
-          "data");
-
-  return -ENODEV;
-}
-
-#endif
-
-#if defined(CONFIG_ESP32S3_SPI2) && defined(CONFIG_ESP32S3_SPI_UDCS)
-void esp32s3_spi2_select(struct spi_dev_s *dev, uint32_t devid, bool select)
+int board_lcd_initialize(void)
 {
   ssize_t n;
   int fd;
+
+  /* Pull down C/S */
 
   fd = nx_open(SZPI_LCD_CS_PATH, O_RDWR);
   if (fd < 0)
     {
       spierr("open C/S pin failed\n");
-      return;
+      return -ENODEV;
     }
 
-  n = nx_write(fd, select ? "0" : "1", 1);
+  n = nx_write(fd, "1", 1);
+  nx_close(fd);
   if (n != 1)
     {
       spierr("write C/S pin failed\n");
+      return -EIO;
     }
 
-  nx_close(fd);
-}
-#endif
+  /* Turn on LCD backlight */
 
-/****************************************************************************
- * Name: esp32s3_spi3_status
- ****************************************************************************/
-
-#ifdef CONFIG_ESP32S3_SPI3
-
-uint8_t esp32s3_spi3_status(struct spi_dev_s *dev, uint32_t devid)
-{
-  uint8_t status = 0;
-
-  return status;
-}
-
-#endif
-
-/****************************************************************************
- * Name: esp32s3_spi3_cmddata
- ****************************************************************************/
-
-#if defined(CONFIG_ESP32S3_SPI3) && defined(CONFIG_SPI_CMDDATA)
-
-int esp32s3_spi3_cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
-{
-  if (devid == SPIDEV_DISPLAY(0))
+  g_spidev = esp32s3_spibus_initialize(ESP32S3_SPI2);
+  if (!g_spidev)
     {
-      /*  This is the Data/Command control pad which determines whether the
-       *  data bits are data or a command.
-       */
-
-      esp32s3_gpiowrite(CONFIG_ESP32S3_SPI3_MISOPIN, !cmd);
-
-      return OK;
+      lcderr("ERROR: Failed to initialize SPI port %d\n", ESP32S3_SPI2);
+      return -ENODEV;
     }
 
-  spiinfo("devid: %" PRIu32 " CMD: %s\n", devid, cmd ? "command" :
-          "data");
+  g_lcd = st7789_lcdinitialize(g_spidev);
+  if (!g_lcd)
+    {
+      lcderr("ERROR: st7789_lcdinitialize() failed\n");
+      return -ENODEV;
+    }
 
-  return -ENODEV;
+  return OK;
 }
 
-#endif
+/****************************************************************************
+ * Name:  board_lcd_getdev
+ *
+ * Description:
+ *   Return a a reference to the LCD object for the specified LCD.  This
+ *   allows support for multiple LCD devices.
+ *
+ * Input Parameters:
+ *   devno - LCD device nmber
+ *
+ * Returned Value:
+ *   LCD device pointer if success or NULL if failed.
+ *
+ ****************************************************************************/
+
+struct lcd_dev_s *board_lcd_getdev(int devno)
+{
+  if (!g_lcd)
+    {
+      lcderr("ERROR: Failed to bind SPI port %d to LCD %d\n",
+             ESP32S3_SPI2, devno);
+    }
+  else
+    {
+      lcdinfo("SPI port %d bound to LCD %d\n", ESP32S3_SPI2, devno);
+      return g_lcd;
+    }
+
+  return NULL;
+}
+
+/****************************************************************************
+ * Name:  board_lcd_uninitialize
+ *
+ * Description:
+ *   Uninitialize the LCD support
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void board_lcd_uninitialize(void)
+{
+  /* Turn the display off */
+
+  g_lcd->setpower(g_lcd, 0);
+}
