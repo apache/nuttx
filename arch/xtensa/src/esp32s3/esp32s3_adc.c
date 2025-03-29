@@ -473,7 +473,7 @@ static uint16_t adc_read(void)
   while (!(regval & SENS_MEAS1_DONE_SAR_M));
 
   regval = getreg32(SENS_SAR_MEAS1_CTRL2_REG) & ADC_VAL_MASK;
-  ainfo("SENS_MEAS1_DATA_SAR adc_read: %d\n", regval);
+  ainfo("SENS_MEAS1_DATA_SAR adc_read: %" PRIu32 "\n", regval);
 
   /* Disable ADC sampling */
 

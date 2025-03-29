@@ -227,8 +227,8 @@ static uint32_t esp_event_group_set_bits(void *event, uint32_t bits);
 static uint32_t esp_event_group_clear_bits(void *event, uint32_t bits);
 static uint32_t esp_event_group_wait_bits(void *event,
                                           uint32_t bits_to_wait_for,
-                                          int32_t clear_on_exit,
-                                          int32_t wait_for_all_bits,
+                                          int clear_on_exit,
+                                          int wait_for_all_bits,
                                           uint32_t block_time_tick);
 static int32_t esp_task_create_pinned_to_core(void *task_func,
                                               const char *name,
@@ -245,7 +245,7 @@ static void esp_task_delay(uint32_t tick);
 static int32_t esp_task_ms_to_tick(uint32_t ms);
 static void *esp_task_get_current_task(void);
 static int32_t esp_task_get_max_priority(void);
-static void *esp_malloc(uint32_t size);
+static void *esp_malloc(size_t size);
 static void esp_free(void *ptr);
 static uint32_t esp_get_free_heap_size(void);
 static uint32_t esp_rand(void);
@@ -254,7 +254,7 @@ static void wifi_apb80m_release(void);
 static void IRAM_ATTR esp_empty_wrapper(void);
 static void esp_phy_enable_wrapper(void);
 static void esp_phy_disable_wrapper(void);
-static int32_t esp_wifi_read_mac(uint8_t *mac, uint32_t type);
+static int esp_wifi_read_mac(uint8_t *mac, unsigned int type);
 static void esp_timer_arm(void *timer, uint32_t tmout, bool repeat);
 static void esp_timer_disarm(void *timer);
 static void esp32s2_timer_done(void *timer);
@@ -264,35 +264,40 @@ static void wifi_reset_mac(void);
 static void wifi_clock_enable(void);
 static void wifi_clock_disable(void);
 static int64_t esp32s2_timer_get_time(void);
-static int32_t esp_nvs_set_i8(uint32_t handle, const char *key,
-                              int8_t value);
-static int32_t esp_nvs_get_i8(uint32_t handle, const char *key,
-                              int8_t *out_value);
-static int32_t esp_nvs_set_u8(uint32_t handle, const char *key,
-                              uint8_t value);
-static int32_t esp_nvs_get_u8(uint32_t handle, const char *key,
-                              uint8_t *out_value);
-static int32_t esp_nvs_set_u16(uint32_t handle, const char *key,
-                               uint16_t value);
-static int32_t esp_nvs_get_u16(uint32_t handle, const char *key,
-                               uint16_t *out_value);
-static int32_t esp_nvs_open(const char *name, uint32_t open_mode,
-                            uint32_t *out_handle);
+static int esp_nvs_set_i8(uint32_t handle, const char *key,
+                          int8_t value);
+static int esp_nvs_get_i8(uint32_t handle, const char *key,
+                          int8_t *out_value);
+static int esp_nvs_set_u8(uint32_t handle, const char *key,
+                          uint8_t value);
+static int esp_nvs_get_u8(uint32_t handle, const char *key,
+                          uint8_t *out_value);
+static int esp_nvs_set_u16(uint32_t handle, const char *key,
+                           uint16_t value);
+static int esp_nvs_get_u16(uint32_t handle, const char *key,
+                           uint16_t *out_value);
+static int esp_nvs_open(const char *name, unsigned int open_mode,
+                        uint32_t *out_handle);
 static void esp_nvs_close(uint32_t handle);
-static int32_t esp_nvs_commit(uint32_t handle);
-static int32_t esp_nvs_set_blob(uint32_t handle, const char *key,
-                                const void *value, size_t length);
-static int32_t esp_nvs_get_blob(uint32_t handle, const char *key,
-                                void *out_value, size_t *length);
-static int32_t esp_nvs_erase_key(uint32_t handle, const char *key);
-static int32_t esp_get_random(uint8_t *buf, size_t len);
-static int32_t esp_get_time(void *t);
+static int esp_nvs_commit(uint32_t handle);
+static int esp_nvs_set_blob(uint32_t handle, const char *key,
+                            const void *value, size_t length);
+static int esp_nvs_get_blob(uint32_t handle, const char *key,
+                            void *out_value, size_t *length);
+static int esp_nvs_erase_key(uint32_t handle, const char *key);
+static int esp_get_random(uint8_t *buf, size_t len);
+static int esp_get_time(void *t);
 static uint32_t esp_clk_slowclk_cal_get_wrapper(void);
-static void esp_log_writev_wrapper(uint32_t level, const char *tag,
+static void esp_log_writev_wrapper(unsigned int level, const char *tag,
                                    const char *format, va_list args);
-static void esp_log_write_wrapper(uint32_t level,
+static void esp_log_write_wrapper(unsigned int level,
                                   const char *tag,
                                   const char *format, ...);
+int32_t esp32s2_event_post(esp_event_base_t event_base,
+                           int32_t event_id,
+                           void *event_data,
+                           size_t event_data_size,
+                           uint32_t ticks);
 static void *esp_malloc_internal(size_t size);
 static void *esp_realloc_internal(void *ptr, size_t size);
 static void *esp_calloc_internal(size_t n, size_t size);
@@ -301,16 +306,16 @@ static void *esp_wifi_malloc(size_t size);
 static void *esp_wifi_realloc(void *ptr, size_t size);
 static void *esp_wifi_calloc(size_t n, size_t size);
 static void *esp_wifi_zalloc(size_t size);
-static void *esp_wifi_create_queue(int32_t queue_len, int32_t item_size);
+static void *esp_wifi_create_queue(int queue_len, int item_size);
 static void esp_wifi_delete_queue(void *queue);
 static int coex_init_wrapper(void);
 static void coex_deinit_wrapper(void);
 static int coex_enable_wrapper(void);
 static void coex_disable_wrapper(void);
 static uint32_t coex_status_get_wrapper(void);
-static int32_t coex_wifi_request_wrapper(uint32_t event, uint32_t latency,
+static int coex_wifi_request_wrapper(uint32_t event, uint32_t latency,
                                      uint32_t duration);
-static int32_t coex_wifi_release_wrapper(uint32_t event);
+static int coex_wifi_release_wrapper(uint32_t event);
 static unsigned long esp_random_ulong(void);
 static int coex_wifi_channel_set_wrapper(uint8_t primary, uint8_t secondary);
 static int coex_event_duration_get_wrapper(uint32_t event,
@@ -442,7 +447,7 @@ wifi_osi_funcs_t g_wifi_osi_funcs =
   ._task_get_max_priority = esp_task_get_max_priority,
   ._malloc = esp_malloc,
   ._free = esp_free,
-  ._event_post = esp_event_post,
+  ._event_post = esp32s2_event_post,
   ._get_free_heap_size = esp_get_free_heap_size,
   ._rand = esp_rand,
   ._dport_access_stall_other_cpu_start_wrap = esp_empty_wrapper,
@@ -746,7 +751,7 @@ static void esp_set_isr(int32_t n, void *f, void *arg)
   struct irq_adpt *adapter;
   int irq = n + XTENSA_IRQ_FIRSTPERIPH;
 
-  wlinfo("n=%d f=%p arg=%p", n, f, arg);
+  wlinfo("n=%ld f=%p arg=%p", n, f, arg);
 
   if (g_irqvector[irq].handler &&
       g_irqvector[irq].handler != irq_unexpected_isr)
@@ -760,7 +765,7 @@ static void esp_set_isr(int32_t n, void *f, void *arg)
   adapter = kmm_malloc(tmp);
   if (!adapter)
     {
-      wlerr("Failed to alloc %d memory\n", tmp);
+      wlerr("Failed to alloc %" PRIu32 " memory\n", tmp);
       PANIC();
       return;
     }
@@ -803,7 +808,7 @@ static void esp32s2_ints_on(uint32_t mask)
 {
   int irq = __builtin_ffs(mask) - 1;
 
-  wlinfo("INFO mask=%08x irq=%d\n", mask, irq);
+  wlinfo("INFO mask=%08lx irq=%d\n", mask, irq);
 
   up_enable_irq(ESP32S2_IRQ_MAC);
   up_enable_irq(ESP32S2_IRQ_PWR);
@@ -827,7 +832,7 @@ static void esp32s2_ints_off(uint32_t mask)
 {
   uint32_t irq = __builtin_ffs(mask) - 1;
 
-  wlinfo("INFO mask=%08x irq=%d\n", mask, irq);
+  wlinfo("INFO mask=%08" PRIu32 " irq=%" PRIu32 "\n", mask, irq);
 
   up_disable_irq(ESP32S2_IRQ_MAC);
   up_disable_irq(ESP32S2_IRQ_PWR);
@@ -1068,7 +1073,7 @@ static int32_t esp_semphr_take(void *semphr, uint32_t block_time_tick)
 
   if (ret)
     {
-      wlerr("ERROR: Failed to wait sem in %u ticks. Error=%d\n",
+      wlerr("ERROR: Failed to wait sem in %" PRIu32 " ticks. Error=%d\n",
             block_time_tick, ret);
     }
 
@@ -1711,8 +1716,8 @@ static uint32_t esp_event_group_clear_bits(void *event, uint32_t bits)
 
 static uint32_t esp_event_group_wait_bits(void *event,
                                           uint32_t bits_to_wait_for,
-                                          int32_t clear_on_exit,
-                                          int32_t wait_for_all_bits,
+                                          int clear_on_exit,
+                                          int wait_for_all_bits,
                                           uint32_t block_time_tick)
 {
   DEBUGPANIC();
@@ -1936,7 +1941,7 @@ static int32_t esp_task_get_max_priority(void)
  *
  ****************************************************************************/
 
-static void *esp_malloc(uint32_t size)
+static void *esp_malloc(size_t size)
 {
   return kmm_malloc(size);
 }
@@ -2204,7 +2209,7 @@ static void esp_evt_work_cb(void *arg)
                                    SI_QUEUE, &notify->work);
           if (ret < 0)
             {
-              wlwarn("nxsig_notification event ID=%d failed: %d\n",
+              wlwarn("nxsig_notification event ID=%ld failed: %d\n",
                      evt_adpt->id, ret);
             }
         }
@@ -2271,7 +2276,7 @@ static void IRAM_ATTR wifi_clear_intr(uint32_t intr_source,
 }
 
 /****************************************************************************
- * Name: esp_event_post
+ * Name: esp32s2_event_post
  *
  * Description:
  *   Active work queue and let the work to process the cached event
@@ -2288,24 +2293,25 @@ static void IRAM_ATTR wifi_clear_intr(uint32_t intr_source,
  *
  ****************************************************************************/
 
-int32_t esp_event_post(esp_event_base_t event_base,
-                       int32_t event_id,
-                       void *event_data,
-                       size_t event_data_size,
-                       uint32_t ticks)
+int32_t esp32s2_event_post(esp_event_base_t event_base,
+                           int32_t event_id,
+                           void *event_data,
+                           size_t event_data_size,
+                           uint32_t ticks)
 {
   size_t size;
   int32_t id;
   irqstate_t flags;
   struct evt_adpt *evt_adpt;
 
-  wlinfo("Event: base=%s id=%d data=%p data_size=%d ticks=%u\n", event_base,
-         event_id, event_data, event_data_size, ticks);
+  wlinfo("Event: base=%s id=%" PRId32 " data=%p data_size=%d "
+         "ticks=%" PRIu32 "\n",
+         event_base, event_id, event_data, event_data_size, ticks);
 
   id = esp_event_id_map(event_id);
   if (id < 0)
     {
-      wlinfo("No process event %d\n", event_id);
+      wlinfo("No process event %ld\n", event_id);
       return -1;
     }
 
@@ -2454,7 +2460,7 @@ static void esp_phy_disable_wrapper(void)
  *
  ****************************************************************************/
 
-static int32_t esp_wifi_read_mac(uint8_t *mac, uint32_t type)
+static int esp_wifi_read_mac(uint8_t *mac, unsigned int type)
 {
   return esp_read_mac(mac, type);
 }
@@ -2717,9 +2723,9 @@ int64_t esp32s2_timer_get_time(void)
  *
  ****************************************************************************/
 
-static int32_t esp_nvs_set_i8(uint32_t handle,
-                              const char *key,
-                              int8_t value)
+static int esp_nvs_set_i8(uint32_t handle,
+                          const char *key,
+                          int8_t value)
 {
   DEBUGPANIC();
 
@@ -2742,9 +2748,9 @@ static int32_t esp_nvs_set_i8(uint32_t handle,
  *
  ****************************************************************************/
 
-static int32_t esp_nvs_get_i8(uint32_t handle,
-                              const char *key,
-                              int8_t *out_value)
+static int esp_nvs_get_i8(uint32_t handle,
+                          const char *key,
+                          int8_t *out_value)
 {
   DEBUGPANIC();
 
@@ -2767,9 +2773,9 @@ static int32_t esp_nvs_get_i8(uint32_t handle,
  *
  ****************************************************************************/
 
-static int32_t esp_nvs_set_u8(uint32_t handle,
-                              const char *key,
-                              uint8_t value)
+static int esp_nvs_set_u8(uint32_t handle,
+                          const char *key,
+                          uint8_t value)
 {
   DEBUGPANIC();
 
@@ -2792,9 +2798,9 @@ static int32_t esp_nvs_set_u8(uint32_t handle,
  *
  ****************************************************************************/
 
-static int32_t esp_nvs_get_u8(uint32_t handle,
-                              const char *key,
-                              uint8_t *out_value)
+static int esp_nvs_get_u8(uint32_t handle,
+                          const char *key,
+                          uint8_t *out_value)
 {
   DEBUGPANIC();
 
@@ -2817,9 +2823,9 @@ static int32_t esp_nvs_get_u8(uint32_t handle,
  *
  ****************************************************************************/
 
-static int32_t esp_nvs_set_u16(uint32_t handle,
-                               const char *key,
-                               uint16_t value)
+static int esp_nvs_set_u16(uint32_t handle,
+                           const char *key,
+                           uint16_t value)
 {
   DEBUGPANIC();
 
@@ -2842,9 +2848,9 @@ static int32_t esp_nvs_set_u16(uint32_t handle,
  *
  ****************************************************************************/
 
-static int32_t esp_nvs_get_u16(uint32_t handle,
-                               const char *key,
-                               uint16_t *out_value)
+static int esp_nvs_get_u16(uint32_t handle,
+                          const char *key,
+                          uint16_t *out_value)
 {
   DEBUGPANIC();
 
@@ -2867,9 +2873,9 @@ static int32_t esp_nvs_get_u16(uint32_t handle,
  *
  ****************************************************************************/
 
-static int32_t esp_nvs_open(const char *name,
-                            uint32_t open_mode,
-                            uint32_t *out_handle)
+static int esp_nvs_open(const char *name,
+                        unsigned int open_mode,
+                        uint32_t *out_handle)
 {
   DEBUGPANIC();
 
@@ -2903,7 +2909,7 @@ static void esp_nvs_close(uint32_t handle)
  *
  ****************************************************************************/
 
-static int32_t esp_nvs_commit(uint32_t handle)
+static int esp_nvs_commit(uint32_t handle)
 {
   return 0;
 }
@@ -2925,10 +2931,10 @@ static int32_t esp_nvs_commit(uint32_t handle)
  *
  ****************************************************************************/
 
-static int32_t esp_nvs_set_blob(uint32_t handle,
-                                const char *key,
-                                const void *value,
-                                size_t length)
+static int esp_nvs_set_blob(uint32_t handle,
+                            const char *key,
+                            const void *value,
+                            size_t length)
 {
   DEBUGPANIC();
 
@@ -2952,10 +2958,10 @@ static int32_t esp_nvs_set_blob(uint32_t handle,
  *
  ****************************************************************************/
 
-static int32_t esp_nvs_get_blob(uint32_t handle,
-                                const char *key,
-                                void *out_value,
-                                size_t *length)
+static int esp_nvs_get_blob(uint32_t handle,
+                            const char *key,
+                            void *out_value,
+                            size_t *length)
 {
   DEBUGPANIC();
 
@@ -2977,7 +2983,7 @@ static int32_t esp_nvs_get_blob(uint32_t handle,
  *
  ****************************************************************************/
 
-static int32_t esp_nvs_erase_key(uint32_t handle, const char *key)
+static int esp_nvs_erase_key(uint32_t handle, const char *key)
 {
   DEBUGPANIC();
 
@@ -2999,7 +3005,7 @@ static int32_t esp_nvs_erase_key(uint32_t handle, const char *key)
  *
  ****************************************************************************/
 
-static int32_t esp_get_random(uint8_t *buf, size_t len)
+static int esp_get_random(uint8_t *buf, size_t len)
 {
   esp_fill_random(buf, len);
 
@@ -3020,7 +3026,7 @@ static int32_t esp_get_random(uint8_t *buf, size_t len)
  *
  ****************************************************************************/
 
-static int32_t esp_get_time(void *t)
+static int esp_get_time(void *t)
 {
   int ret;
   struct timeval tv;
@@ -3109,7 +3115,7 @@ static uint32_t esp_clk_slowclk_cal_get_wrapper(void)
  *
  ****************************************************************************/
 
-static void esp_log_writev_wrapper(uint32_t level, const char *tag,
+static void esp_log_writev_wrapper(unsigned int level, const char *tag,
                                    const char *format, va_list args)
 {
   esp_log_level_t max_level;
@@ -3146,7 +3152,7 @@ static void esp_log_writev_wrapper(uint32_t level, const char *tag,
  *
  ****************************************************************************/
 
-static void esp_log_write_wrapper(uint32_t level,
+static void esp_log_write_wrapper(unsigned int level,
                                   const char *tag,
                                   const char *format, ...)
 {
@@ -3422,7 +3428,7 @@ static void *esp_wifi_zalloc(size_t size)
  *
  ****************************************************************************/
 
-static void *esp_wifi_create_queue(int32_t queue_len, int32_t item_size)
+static void *esp_wifi_create_queue(int queue_len, int item_size)
 {
   wifi_static_queue_t *wifi_queue;
 
@@ -3579,8 +3585,8 @@ static IRAM_ATTR uint32_t coex_status_get_wrapper(void)
  *
  ****************************************************************************/
 
-static int32_t coex_wifi_request_wrapper(uint32_t event, uint32_t latency,
-                                         uint32_t duration)
+static int coex_wifi_request_wrapper(uint32_t event, uint32_t latency,
+                                     uint32_t duration)
 {
   return 0;
 }
@@ -3600,7 +3606,7 @@ static int32_t coex_wifi_request_wrapper(uint32_t event, uint32_t latency,
  *
  ****************************************************************************/
 
-static IRAM_ATTR int32_t coex_wifi_release_wrapper(uint32_t event)
+static IRAM_ATTR int coex_wifi_release_wrapper(uint32_t event)
 {
   return 0;
 }
@@ -4008,7 +4014,8 @@ static int esp_wifi_auth_trans(uint32_t wifi_auth)
         break;
 
       default:
-        wlerr("Failed to transfer wireless authmode: %d", wifi_auth);
+        wlerr("Failed to transfer wireless authmode: %" PRIu32 "",
+              wifi_auth);
         break;
     }
 
@@ -4061,7 +4068,7 @@ static int esp_wifi_cipher_trans(uint32_t wifi_cipher)
         break;
 
       default:
-        wlerr("Failed to transfer wireless authmode: %d",
+        wlerr("Failed to transfer wireless authmode: %" PRIu32 "",
                wifi_cipher);
         break;
     }
@@ -4256,8 +4263,8 @@ int32_t esp_event_send_internal(esp_event_base_t event_base,
 {
   int32_t ret;
 
-  ret = esp_event_post(event_base, event_id, event_data,
-                       event_data_size, ticks_to_wait);
+  ret = esp32s2_event_post(event_base, event_id, event_data,
+                           event_data_size, ticks_to_wait);
 
   return ret;
 }
@@ -4606,7 +4613,7 @@ errout:
  *
  ****************************************************************************/
 
-int esp_wifi_sta_send_data(void *pbuf, uint32_t len)
+int esp_wifi_sta_send_data(void *pbuf, size_t len)
 {
   int ret;
 

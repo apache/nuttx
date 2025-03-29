@@ -510,7 +510,7 @@ static void setup_timer(struct esp32s3_ledc_s *priv)
   if (integral_prescaler == 0) integral_prescaler = 1;
 
   pwminfo("PWM timer%" PRIu8 " frequency=%0.4f reload=%" PRIu32 " shift=%"
-          PRIu32 " prescaler=%0.4f\n",
+          PRIu8 " prescaler=%0.4f\n",
           priv->num, (float)pwmclk / reload / ((float)prescaler),
           reload, shift, (float)prescaler);
 

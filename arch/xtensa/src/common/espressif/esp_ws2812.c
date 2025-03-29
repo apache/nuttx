@@ -471,7 +471,7 @@ static ssize_t esp_write(struct file *filep, const char *data, size_t len)
       if (((position + len) / WS2812_RW_PIXEL_SIZE) > dev->nleds)
         {
           ledwarn("esp_ws2812 write truncated:\n\t\tLED position: %d\n"
-                  "\t\tLED requested to be written: %d\n"
+                  "\t\tLED requested to be written: %" PRIu32 "\n"
                   "\t\tLED strip LED count: %d\n"
                   "\t\tLED being written: %d\n",
                   position / WS2812_RW_PIXEL_SIZE,
