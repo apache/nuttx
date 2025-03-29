@@ -58,7 +58,9 @@
 #ifdef RISCV_SAVE_GP
   REGSTORE   x3,  REG_X3(\in)    /* gp */
 #endif
+#ifdef CONFIG_SCHED_THREAD_LOCAL
   REGSTORE   x4,  REG_X4(\in)    /* tp */
+#endif
   REGSTORE   x5,  REG_X5(\in)    /* t0 */
   REGSTORE   x6,  REG_X6(\in)    /* t1 */
   REGSTORE   x7,  REG_X7(\in)    /* t2 */
@@ -201,7 +203,9 @@
 #ifdef RISCV_SAVE_GP
   REGLOAD    x3,  REG_X3(\out)   /* gp */
 #endif
+#ifdef CONFIG_SCHED_THREAD_LOCAL
   REGLOAD    x4,  REG_X4(\out)   /* tp */
+#endif
   REGLOAD    x5,  REG_X5(\out)   /* t0 */
   REGLOAD    x6,  REG_X6(\out)   /* t1 */
   REGLOAD    x7,  REG_X7(\out)   /* t2 */
