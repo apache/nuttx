@@ -36,35 +36,9 @@
 
 static const uint16_t g_reg_offs[] =
 {
+  /* In the same order as gdb command "maintenance print remote-registers" */
+
   TCB_REG_OFF(REG_PC),
-  TCB_REG_OFF(REG_PS),
-#if XCHAL_HAVE_LOOPS != 0
-  TCB_REG_OFF(REG_LBEG),
-  TCB_REG_OFF(REG_LEND),
-  TCB_REG_OFF(REG_LCOUNT),
-#else
-  UINT16_MAX,
-  UINT16_MAX,
-  UINT16_MAX,
-#endif
-  TCB_REG_OFF(REG_SAR),
-  UINT16_MAX, /* windowstart */
-  UINT16_MAX, /* windowbase */
-  UINT16_MAX, /* threadptr */
-  UINT16_MAX, UINT16_MAX, UINT16_MAX,
-  UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX,
-  UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX,
-  UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX,
-  UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX,
-  UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX,
-  UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX,
-  UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX,
-  UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX,
-  UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX,
-  UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX,
-  UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX,
-  UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX,
-  UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX, /* reserved[7 + 48] */
   TCB_REG_OFF(REG_A0),
   TCB_REG_OFF(REG_A1),
   TCB_REG_OFF(REG_A2),
@@ -93,6 +67,22 @@ static const uint16_t g_reg_offs[] =
   UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX,
   UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX,
   UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX, /* ar[16:63] */
+#if XCHAL_HAVE_LOOPS != 0
+  TCB_REG_OFF(REG_LBEG),
+  TCB_REG_OFF(REG_LEND),
+  TCB_REG_OFF(REG_LCOUNT),
+#else
+  UINT16_MAX,
+  UINT16_MAX,
+  UINT16_MAX,
+#endif
+  TCB_REG_OFF(REG_SAR),
+  UINT16_MAX, /* windowbase */
+  UINT16_MAX, /* windowstart */
+  UINT16_MAX, /* configid0 */
+  UINT16_MAX, /* configid1 */
+  TCB_REG_OFF(REG_PS),
+  UINT16_MAX, /* threadptr */
 };
 
 /****************************************************************************
@@ -108,7 +98,7 @@ const struct tcbinfo_s g_tcbinfo used_data =
   .stack_off      = TCB_STACK_OFF,
   .stack_size_off = TCB_STACK_SIZE_OFF,
   .regs_off       = TCB_REGS_OFF,
-  .regs_num       = COMMON_CTX_REGS,
+  .regs_num       = sizeof(g_reg_offs) / sizeof(g_reg_offs[0]),
   {
     .p = g_reg_offs,
   },
