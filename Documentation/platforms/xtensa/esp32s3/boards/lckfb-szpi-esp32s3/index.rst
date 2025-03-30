@@ -275,3 +275,25 @@ Then test LEDC(PWM) with pin42(backlight of LCD)::
   nsh> pwm -d 0
   pwm_main: starting output with frequency: 100 duty: 00000000
   pwm_main: stopping output
+
+psram
+-----
+
+Basic NuttShell configuration console and PSRAM(Pseudo Static Random Access Memory) enabled.
+
+You can run the configuration and compilation procedure::
+
+  $ ./tools/configure.sh lckfb-szpi-esp32s3:psram
+  $ make flash -j$(nproc) ESPTOOL_PORT=/dev/ttyUSB0
+
+Then comparing memory size with the basic "nsh" config::
+
+  # lckfb-szpi-esp32s3:nsh
+  nsh> free
+     total       used       free    maxused    maxfree  nused  nfree name
+       332948     161500     171448     178280     171448     39      1 Umem
+
+  # lckfb-szpi-esp32s3:psram
+  nsh> free
+        total       used       free    maxused    maxfree  nused  nfree name
+      8785268     161516    8623752     161888    8388592     41      2 Umem
