@@ -354,7 +354,6 @@
                                               /* (always 1 in XEA1;
                                                * levels 2 .. EXCM_LEVEL are
                                                * "medium priority") */
-#define XCHAL_SYSCALL_LEVEL              2
 
 /* Masks of interrupts at each interrupt level: */
 
