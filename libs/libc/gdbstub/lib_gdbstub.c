@@ -671,22 +671,51 @@ static int gdb_recv_ack(FAR struct gdb_state_s *state)
 static ssize_t gdb_bin2hex(FAR void *buf, size_t buf_len,
                            FAR const void *data, size_t data_len)
 {
-  FAR const char *in = data;
+  size_t skip = (uintptr_t)data % 4;
+  size_t ret = data_len * 2;
   FAR char *out = buf;
-  size_t pos;
+  size_t total;
+  uint32_t in;
 
   if (buf_len < data_len * 2)
     {
       return -EOVERFLOW; /* Buffer too small */
     }
 
-  for (pos = 0; pos < data_len; pos++)
+  if (skip != 0)
     {
-      itoa(in[pos] >> 4 & 0xf, out++, 16);
-      itoa(in[pos] & 0xf, out++, 16);
+      data = (FAR const void *)((uintptr_t)data & ~3);
+      data_len += skip;
     }
 
-  return data_len * 2;
+  total = data_len;
+
+  for (size_t i = 0; i < (data_len + 3) / 4; i++)
+    {
+      in = *((FAR uint32_t *)data + i);
+
+      for (size_t j = 0; j < 4; j++)
+        {
+          if (skip == 0)
+            {
+              itoa(in >> 4 & 0xf, out++, 16);
+              itoa(in & 0xf, out++, 16);
+            }
+          else
+            {
+              skip--;
+            }
+
+          in >>= 8;
+
+          if (--total == 0)
+            {
+              break;
+            }
+        }
+    }
+
+  return ret;
 }
 
 /****************************************************************************
