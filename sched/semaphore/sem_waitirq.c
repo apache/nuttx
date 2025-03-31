@@ -77,21 +77,25 @@ void nxsem_wait_irq(FAR struct tcb_s *wtcb, int errcode)
    * and already changed the task's state.
    */
 
-  DEBUGASSERT(sem != NULL && atomic_read(NXSEM_COUNT(sem)) < 0);
+  DEBUGASSERT(sem != NULL &&
+              (NXSEM_IS_MUTEX(sem) ||
+               atomic_read(NXSEM_COUNT(sem)) < 0) &&
+              (!NXSEM_IS_MUTEX(sem) ||
+               (atomic_read(NXMUTEX_HOLDER(sem)) & NXMUTEX_BLOCKS_BIT)));
+
+  /* Mutex is never interrupted by a signal */
+
+  if (NXSEM_IS_MUTEX(sem) && errcode == EINTR)
+    {
+      return;
+    }
 
   /* Restore the correct priority of all threads that hold references
-   * to this semaphore.
+   * to this semaphore. And release the semaphore value to the one it was
+   * before the wait.
    */
 
   nxsem_canceled(wtcb, sem);
-
-  /* And increment the count on the semaphore.  This releases the count
-   * that was taken by sem_post().  This count decremented the semaphore
-   * count to negative and caused the thread to be blocked in the first
-   * place.
-   */
-
-  atomic_fetch_add(NXSEM_COUNT(sem), 1);
 
   /* Remove task from waiting list */
 

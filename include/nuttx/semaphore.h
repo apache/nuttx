@@ -45,23 +45,35 @@
 /* semcount, flags, waitlist, hhead */
 
 #    define NXSEM_INITIALIZER(c, f) \
-       {(c), (f), SEM_WAITLIST_INITIALIZER, NULL}
+       {{c}, (f), SEM_WAITLIST_INITIALIZER, NULL}
 #  else
 /* semcount, flags, waitlist, holder[2] */
 
 #    define NXSEM_INITIALIZER(c, f) \
-       {(c), (f), SEM_WAITLIST_INITIALIZER, SEMHOLDER_INITIALIZER}
+       {{(c)}, (f), SEM_WAITLIST_INITIALIZER, SEMHOLDER_INITIALIZER}
 #  endif
 #else /* CONFIG_PRIORITY_INHERITANCE */
 /* semcount, flags, waitlist */
 
 #  define NXSEM_INITIALIZER(c, f) \
-     {(c), (f), SEM_WAITLIST_INITIALIZER}
+     {{(c)}, (f), SEM_WAITLIST_INITIALIZER}
 #endif /* CONFIG_PRIORITY_INHERITANCE */
 
-/* Macro to retrieve sem count */
+/* Macros to retrieve sem count and to check if nxsem is mutex */
 
-#define NXSEM_COUNT(s) ((FAR atomic_t *)&(s)->semcount)
+#define NXSEM_COUNT(s)        ((FAR atomic_t *)&(s)->val.semcount)
+#define NXSEM_IS_MUTEX(s)     (((s)->flags & SEM_TYPE_MUTEX) != 0)
+
+/* Mutex related helper macros */
+
+#define NXMUTEX_BLOCKS_BIT    (((uint32_t)1) << 31)
+
+#define NXMUTEX_NO_HOLDER     ((uint32_t)0x7ffffffe)
+#define NXMUTEX_RESET         ((uint32_t)0x7fffffff)
+
+#define NXMUTEX_HOLDER(s)     ((FAR atomic_t *)&(s)->val.mholder)
+#define NXMUTEX_HOLDER_TID(s) (atomic_read(NXMUTEX_HOLDER(s)) &         \
+                               (~NXMUTEX_BLOCKS_BIT))
 
 /****************************************************************************
  * Public Type Definitions
@@ -128,7 +140,7 @@ extern "C"
  *
  ****************************************************************************/
 
-int nxsem_init(FAR sem_t *sem, int pshared, unsigned int value);
+int nxsem_init(FAR sem_t *sem, int pshared, int32_t value);
 
 /****************************************************************************
  * Name: nxsem_destroy

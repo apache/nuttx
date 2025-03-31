@@ -29,6 +29,7 @@
 #include <errno.h>
 #include <assert.h>
 
+#include <nuttx/sched.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/atomic.h>
 
@@ -133,8 +134,9 @@ int nxsem_post(FAR sem_t *sem)
 #  endif
       )
     {
-      int32_t old = 0;
-      if (atomic_try_cmpxchg_release(NXSEM_COUNT(sem), &old, 1))
+      int32_t old = _SCHED_GETTID();
+      if (atomic_try_cmpxchg_release(NXMUTEX_HOLDER(sem), &old,
+                                     NXMUTEX_NO_HOLDER))
         {
           return OK;
         }

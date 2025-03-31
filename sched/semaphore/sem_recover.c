@@ -86,21 +86,17 @@ void nxsem_recover(FAR struct tcb_s *tcb)
   if (tcb->task_state == TSTATE_WAIT_SEM)
     {
       FAR sem_t *sem = tcb->waitobj;
-      DEBUGASSERT(sem != NULL && atomic_read(NXSEM_COUNT(sem)) < 0);
+      DEBUGASSERT(sem != NULL &&
+                  (NXSEM_IS_MUTEX(sem) ||
+                   atomic_read(NXSEM_COUNT(sem)) < 0) &&
+                  (!NXSEM_IS_MUTEX(sem) ||
+                   atomic_read(NXMUTEX_HOLDER(sem)) != NXMUTEX_NO_HOLDER));
 
       /* Restore the correct priority of all threads that hold references
-       * to this semaphore.
+       * to this semaphore and restore the sem value.
        */
 
       nxsem_canceled(tcb, sem);
-
-      /* And increment the count on the semaphore.  This releases the count
-       * that was taken by sem_wait().  This count decremented the semaphore
-       * count to negative and caused the thread to be blocked in the first
-       * place.
-       */
-
-      atomic_fetch_add(NXSEM_COUNT(sem), 1);
 
 #ifdef CONFIG_MM_KMAP
       kmm_unmap(sem);
