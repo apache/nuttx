@@ -63,7 +63,7 @@
 
 int nxsem_get_value(FAR sem_t *sem, FAR int *sval)
 {
-  if (sem != NULL && sval != NULL)
+  if (sem != NULL && sval != NULL && !NXSEM_IS_MUTEX(sem))
     {
       *sval = atomic_read(NXSEM_COUNT(sem));
       return OK;

@@ -86,7 +86,8 @@ void nxsem_recover(FAR struct tcb_s *tcb)
   if (tcb->task_state == TSTATE_WAIT_SEM)
     {
       FAR sem_t *sem = tcb->waitobj;
-      DEBUGASSERT(sem != NULL && atomic_read(NXSEM_COUNT(sem)) < 0);
+
+      DEBUGASSERT(sem != NULL);
 
       /* Restore the correct priority of all threads that hold references
        * to this semaphore.
@@ -104,14 +105,29 @@ void nxsem_recover(FAR struct tcb_s *tcb)
        * place.
        */
 
-      atomic_fetch_add(NXSEM_COUNT(sem), 1);
+      if (NXSEM_IS_MUTEX(sem))
+        {
+          /* Clear the blocking bit, if not blocked any more */
+
+          if (dq_empty(SEM_WAITLIST(sem)))
+            {
+              uint32_t mholder =
+                atomic_fetch_and(NXSEM_MHOLDER(sem), ~NXSEM_MBLOCKING_BIT);
+              DEBUGASSERT(NXSEM_MBLOCKING(mholder));
+            }
+        }
+      else
+        {
+          DEBUGASSERT(atomic_read(NXSEM_COUNT(sem)) < 0);
+          atomic_fetch_add(NXSEM_COUNT(sem), 1);
+        }
 
 #ifdef CONFIG_MM_KMAP
       kmm_unmap(sem);
 #endif
     }
 
-  /* Release all semphore holders for the task */
+  /* Release all semaphore holders for the task */
 
   nxsem_release_all(tcb);
 

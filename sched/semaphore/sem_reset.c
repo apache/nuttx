@@ -46,6 +46,11 @@
  *   tasks waiting on a count.  This kind of operation is sometimes required
  *   within the OS (only) for certain error handling conditions.
  *
+ *   Mutex is simply posted until it is not blocking any tasks. If the
+ *   requested count is 0, a single running holder is left. If the requested
+ *   count is 1, the mutex is set to "reset". Other requested counts are not
+ *   allowed for mutex.
+ *
  * Input Parameters:
  *   sem   - Semaphore descriptor to be reset
  *   count - The requested semaphore count
@@ -76,38 +81,65 @@ int nxsem_reset(FAR sem_t *sem, int16_t count)
 
   flags = enter_critical_section();
 
-  /* A negative count indicates that the negated number of threads are
-   * waiting to take a count from the semaphore.  Loop here, handing
-   * out counts to any waiting threads.
-   */
-
-  while (atomic_read(NXSEM_COUNT(sem)) < 0 && count > 0)
+  if (NXSEM_IS_MUTEX(sem))
     {
-      /* Give out one counting, waking up one of the waiting threads
-       * and, perhaps, kicking off a lot of priority inheritance
-       * logic (REVISIT).
+      /* Support only resetting mutex by removing one waiter */
+
+      DEBUGASSERT(count == 1);
+
+      /* Post the mutex once with holder value set to RESET | BLOCKS
+       * so we know that it is ok in this case to call the post from
+       * another thread.
        */
 
-      DEBUGVERIFY(nxsem_post(sem));
-      count--;
-    }
+      atomic_set(NXSEM_MHOLDER(sem),
+                 NXSEM_MRESET | NXSEM_MBLOCKING_BIT);
 
-  /* We exit the above loop with either (1) no threads waiting for the
-   * (i.e., with sem->semcount >= 0).  In this case, 'count' holds the
-   * the new value of the semaphore count.  OR (2) with threads still
-   * waiting but all of the semaphore counts exhausted:  The current
-   * value of sem->semcount is already correct in this case.
-   */
-
-  semcount = atomic_read(NXSEM_COUNT(sem));
-  do
-    {
-      if (semcount < 0)
+      if (!dq_empty(SEM_WAITLIST(sem)))
         {
-          break;
+          DEBUGVERIFY(nxsem_post(sem));
+        }
+      else
+        {
+          atomic_set(NXSEM_MHOLDER(sem), NXSEM_MRESET);
         }
     }
-  while (!atomic_try_cmpxchg_release(NXSEM_COUNT(sem), &semcount, count));
+  else
+    {
+      /* A negative count indicates that the negated number of threads are
+       * waiting to take a count from the semaphore.  Loop here, handing
+       * out counts to any waiting threads.
+       */
+
+      while (atomic_read(NXSEM_COUNT(sem)) < 0 && count > 0)
+        {
+          /* Give out one counting, waking up one of the waiting threads
+           * and, perhaps, kicking off a lot of priority inheritance
+           * logic (REVISIT).
+           */
+
+          DEBUGVERIFY(nxsem_post(sem));
+          count--;
+        }
+
+      /* We exit the above loop with either (1) no threads waiting for the
+       * (i.e., with sem->semcount >= 0).  In this case, 'count' holds the
+       * the new value of the semaphore count.  OR (2) with threads still
+       * waiting but all of the semaphore counts exhausted:  The current
+       * value of sem->semcount is already correct in this case.
+       */
+
+      semcount = atomic_read(NXSEM_COUNT(sem));
+      do
+        {
+          if (semcount < 0)
+            {
+              break;
+            }
+        }
+      while (!atomic_try_cmpxchg_release(NXSEM_COUNT(sem), &semcount,
+                                         count));
+    }
 
   /* Allow any pending context switches to occur now */
 
