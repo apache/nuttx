@@ -311,10 +311,11 @@ config ESP32_SDMMC
 		No yet implemented
 
 config ESP32_I2S
-	bool "I2S (legacy implementation)"
+	bool "I2S (legacy implementation: read help)"
 	select I2S
 	---help---
-		See the Board Selection menu to configure the pins used by I2S.
+		This is a deprecated Kconfig macro. Its kept for retrocompatibility only.
+		Use "CONFIG_ESPRESSIF_I2S" instead.
 
 if ESP32_I2S
 
@@ -323,6 +324,7 @@ config ESP32_I2S0
 	default n
 	select ARCH_DMA
 	select ESP32_GPIO_IRQ
+	select ESPRESSIF_I2S0
 
 if ESP32_I2S0
 
@@ -452,6 +454,7 @@ config ESP32_I2S1
 	default n
 	select ARCH_DMA
 	select ESP32_GPIO_IRQ
+	select ESPRESSIF_I2S1
 
 if ESP32_I2S1
 
