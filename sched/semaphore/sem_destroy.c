@@ -61,6 +61,9 @@
 int nxsem_destroy(FAR sem_t *sem)
 {
   int32_t old;
+  int32_t new;
+  FAR atomic_t *plock;
+  bool mutex = NXSEM_IS_MUTEX(sem);
 
   DEBUGASSERT(sem != NULL);
 
@@ -74,15 +77,27 @@ int nxsem_destroy(FAR sem_t *sem)
    * leave the count unchanged but still return OK.
    */
 
-  old = atomic_read(NXSEM_COUNT(sem));
+  if (mutex)
+    {
+      plock = NXSEM_MHOLDER(sem);
+      new = NXSEM_NO_MHOLDER;
+    }
+  else
+    {
+      plock = NXSEM_COUNT(sem);
+      new = 1;
+    }
+
+  old = atomic_read(plock);
   do
     {
-      if (old < 0)
+      if ((mutex && NXSEM_MBLOCKS(old)) ||
+          (!mutex && old < 0))
         {
           break;
         }
     }
-  while (!atomic_try_cmpxchg_release(NXSEM_COUNT(sem), &old, 1));
+  while (!atomic_try_cmpxchg_release(plock, &old, new));
 
   /* Release holders of the semaphore */
 

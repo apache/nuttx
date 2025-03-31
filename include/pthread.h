@@ -348,8 +348,9 @@ typedef struct pthread_mutex_s pthread_mutex_t;
 #define PTHREAD_MUTEX_DEFAULT_PRIO_FLAGS (PTHREAD_MUTEX_DEFAULT_PRIO_INHERIT | \
                                           PTHREAD_MUTEX_DEFAULT_PRIO_PROTECT)
 
-#define PTHREAD_NXMUTEX_INITIALIZER { \
-    NXSEM_INITIALIZER(1, SEM_TYPE_MUTEX | PTHREAD_MUTEX_DEFAULT_PRIO_FLAGS), \
+#define PTHREAD_NXMUTEX_INITIALIZER  {                                    \
+    NXSEM_INITIALIZER(NXSEM_NO_MHOLDER,                                   \
+                      SEM_TYPE_MUTEX | PTHREAD_MUTEX_DEFAULT_PRIO_FLAGS), \
     NXMUTEX_NO_HOLDER}
 #define PTHREAD_NXRMUTEX_INITIALIZER {PTHREAD_NXMUTEX_INITIALIZER, 0}
 

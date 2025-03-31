@@ -86,7 +86,8 @@ void nxsem_recover(FAR struct tcb_s *tcb)
   if (tcb->task_state == TSTATE_WAIT_SEM)
     {
       FAR sem_t *sem = tcb->waitobj;
-      DEBUGASSERT(sem != NULL && atomic_read(NXSEM_COUNT(sem)) < 0);
+
+      DEBUGASSERT(sem != NULL);
 
       /* Restore the correct priority of all threads that hold references
        * to this semaphore.
@@ -100,7 +101,40 @@ void nxsem_recover(FAR struct tcb_s *tcb)
        * place.
        */
 
-      atomic_fetch_add(NXSEM_COUNT(sem), 1);
+      if (NXSEM_IS_MUTEX(sem))
+        {
+          FAR dq_entry_t *wtcb;
+          uint32_t mholder;
+          uint32_t blocks = 0;
+
+          /* The TID of the mutex holder is correct but we need to
+           * update the blocking bit. Count the remaining tcbs in the
+           * blocking list (ignoring the one that is being cancelled).
+           */
+
+          for (wtcb = dq_peek(SEM_WAITLIST(sem)); wtcb; wtcb = dq_next(wtcb))
+            {
+              if (tcb->pid != ((FAR struct tcb_s *)wtcb)->pid)
+                {
+                  /* Found one */
+
+                  blocks = NXSEM_MBLOCKS_BIT;
+                  break;
+                }
+            }
+
+          /* Clear the blocking bit, if not blocked any more */
+
+          mholder = nxsem_get_mholder_reserve(sem);
+          DEBUGASSERT(NXSEM_MBLOCKS(mholder));
+          atomic_set_release(NXSEM_MHOLDER(sem), mholder & (~blocks));
+        }
+      else
+        {
+          DEBUGASSERT(atomic_read(NXSEM_COUNT(sem)) < 0);
+
+          atomic_fetch_add(NXSEM_COUNT(sem), 1);
+        }
 
 #ifdef CONFIG_MM_KMAP
       kmm_unmap(sem);
