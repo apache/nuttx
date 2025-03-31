@@ -38,6 +38,7 @@
 #include <errno.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/himem/himem.h>
+#include <nuttx/lcd/lcd_dev.h>
 #include <arch/board/board.h>
 
 #ifdef CONFIG_ESP32S3_TIMER
@@ -439,6 +440,14 @@ int esp32s3_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize LCD.\n");
+    }
+#endif
+
+#ifdef CONFIG_LCD_DEV
+  ret = lcddev_register(0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: lcddev_register() failed: %d\n", ret);
     }
 #endif
 
