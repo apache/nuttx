@@ -815,6 +815,12 @@ config LCD_ST7789_IFDELAY
 	---help---
 		The delay between consecutive frames. In ns.
 
+config LCD_ST7789_DATA_ENDIAN_LITTLE
+	bool "ST7789 RGB data endian little"
+	default n
+	---help---
+		The RGB data endian, MSB first by default(n).
+
 endif # LCD_ST7789
 
 config LCD_GC9A01
