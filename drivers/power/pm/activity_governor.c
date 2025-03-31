@@ -470,20 +470,12 @@ static enum pm_state_e governor_checkstate(int domain)
   FAR struct pm_domain_s *pdom;
   clock_t now;
   clock_t elapsed;
-  irqstate_t flags;
   int index;
 
   /* Get a convenience pointer to minimize all of the indexing */
 
   pdomstate = &g_pm_activity_governor.domain_states[domain];
   pdom      = &g_pmdomains[domain];
-
-  /* Check for the end of the current time slice.  This must be performed
-   * with interrupts disabled so that it does not conflict with the similar
-   * logic in governor_activity().
-   */
-
-  flags = pm_domain_lock(domain);
 
   /* Check the elapsed time.  In periods of low activity, time slicing is
    * controlled by IDLE loop polling; in periods of higher activity, time
@@ -521,8 +513,6 @@ static enum pm_state_e governor_checkstate(int domain)
           break;
         }
     }
-
-  pm_domain_unlock(domain, flags);
 
   return pdomstate->recommended;
 }
