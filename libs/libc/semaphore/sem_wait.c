@@ -30,6 +30,7 @@
 #include <assert.h>
 #include <sched.h>
 
+#include <nuttx/sched.h>
 #include <nuttx/init.h>
 #include <nuttx/cancelpt.h>
 #include <nuttx/semaphore.h>
@@ -156,8 +157,9 @@ int nxsem_wait(FAR sem_t *sem)
 #  endif
       )
     {
-      int32_t old = 1;
-      if (atomic_try_cmpxchg_acquire(NXSEM_COUNT(sem), &old, 0))
+      int32_t tid = _SCHED_GETTID();
+      int32_t old = NXSEM_NO_MHOLDER;
+      if (atomic_try_cmpxchg_acquire(NXSEM_MHOLDER(sem), &old, tid))
         {
           return OK;
         }

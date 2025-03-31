@@ -113,7 +113,7 @@ static void nxmutex_add_backtrace(FAR mutex_t *mutex)
 
 int nxmutex_init(FAR mutex_t *mutex)
 {
-  int ret = nxsem_init(&mutex->sem, 0, 1);
+  int ret = nxsem_init(&mutex->sem, 0, NXSEM_NO_MHOLDER);
 
   if (ret < 0)
     {
@@ -217,12 +217,7 @@ int nxmutex_get_holder(FAR mutex_t *mutex)
 
 bool nxmutex_is_locked(FAR mutex_t *mutex)
 {
-  int cnt;
-  int ret;
-
-  ret = nxsem_get_value(&mutex->sem, &cnt);
-
-  return ret >= 0 && cnt < 1;
+  return NXSEM_MACQUIRED(mutex->sem.val.mholder);
 }
 
 /****************************************************************************
