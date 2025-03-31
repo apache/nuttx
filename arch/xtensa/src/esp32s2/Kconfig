@@ -229,13 +229,15 @@ config ESP32S2_RNG
 		ESP32-S2 supports a RNG that passed on Dieharder test suite.
 
 config ESP32S2_I2S
-	bool "I2S (legacy implementation)"
+	bool "I2S (legacy implementation: read help)"
 	default n
 	select I2S
 	select ARCH_DMA
 	select ESP32S2_GPIO_IRQ
+	select ESPRESSIF_I2S0
 	---help---
-		See the Board Selection menu to configure the pins used by I2S.
+		This is a deprecated Kconfig macro. Its kept for retrocompatibility only.
+		Use "CONFIG_ESPRESSIF_I2S" instead.
 
 if ESP32S2_I2S
 

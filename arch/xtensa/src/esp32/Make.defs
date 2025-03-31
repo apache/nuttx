@@ -80,9 +80,6 @@ CHIP_CSRCS += esp32_i2c.c
 endif
 endif
 
-ifeq ($(CONFIG_ESP32_I2S),y)
-CHIP_CSRCS += esp32_i2s.c
-endif
 
 ifeq ($(CONFIG_ESP32_TWAI),y)
 CHIP_CSRCS += esp32_twai.c
