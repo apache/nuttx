@@ -80,7 +80,7 @@ struct aligned_data(8) rptun_ivshmem_rsc_s
   struct fw_rsc_vdev_vring     vsock_vring2;
   struct virtio_vsock_config_s vsock_config;
   struct fw_rsc_carveout       vsock_carveout;
-  char                         vsock_shm[2 * RPTUN_IVSHMEM_SHMEM_SIZE];
+  char                         vsock_shm[8 * RPTUN_IVSHMEM_SHMEM_SIZE];
 };
 
 struct rptun_ivshmem_mem_s
