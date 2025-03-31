@@ -430,7 +430,6 @@ void __gcov_init(FAR struct gcov_info *info)
                tm_info);
 
       setenv("GCOV_PREFIX_STRIP", CONFIG_COVERAGE_DEFAULT_PREFIX_STRIP, 1);
-      setenv("GCOV_DUMP_ONEFILE", "1", 1);
       setenv("GCOV_PREFIX", path, 1);
 
 #ifdef CONFIG_COVERAGE_GCOV_DUMP_REBOOT
@@ -473,8 +472,8 @@ pid_t __gcov_fork(void)
 void __gcov_dump(void)
 {
   int ret = -1;
-  bool onefile;
   FAR char *prefix;
+  struct stat state;
   struct dump_args args =
   {
     0
@@ -493,8 +492,8 @@ void __gcov_dump(void)
       return;
     }
 
-  onefile = strcmp(getenv("GCOV_DUMP_ONEFILE"), "1") == 0;
-  if (onefile)
+  if (stat(prefix, &state) ||
+      S_ISREG(state.st_mode) || S_ISCHR(state.st_mode))
     {
       struct lib_rawoutstream_s stream;
       int fd = _NX_OPEN(prefix, O_WRONLY | O_CREAT | O_TRUNC, 0666);
@@ -511,7 +510,7 @@ void __gcov_dump(void)
 
       _NX_CLOSE(fd);
     }
-  else
+  else if(S_ISDIR(state.st_mode))
     {
       args.mkdir = gcov_mkdir;
       args.strip = atoi(getenv("GCOV_PREFIX_STRIP"));
@@ -520,6 +519,10 @@ void __gcov_dump(void)
                                        GCOV_PATH_MAX_TOKENS);
 
       ret = gcov_dump_foreach(gcov_standard_dump, &args);
+    }
+  else
+    {
+      ret = -ENOTDIR;
     }
 
 exit:
