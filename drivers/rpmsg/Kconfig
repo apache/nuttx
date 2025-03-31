@@ -64,7 +64,7 @@ config RPMSG_PORT_SPI_THREAD_PRIORITY
 
 config RPMSG_PORT_SPI_THREAD_STACKSIZE
 	int "Rpmsg SPI Port Stack Size"
-	default DEFAULT_TASK_STACKSIZE
+	default 4096
 
 config RPMSG_PORT_SPI_CRC
 	bool "Rpmsg SPI Port Use CRC Check"
