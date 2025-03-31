@@ -366,3 +366,25 @@ Then run the fb command::
    5: (105,145) ( 30, 30)
   Test finished
   nsh>
+
+lvgl
+----
+
+Basic NuttShell configuration console and LVGL(Light and Versatile Graphics Library) enabled.
+
+.. figure:: lckfb-szpi-esp32s3-lvgl.jpg
+   :align: center
+
+You can run the configuration and compilation procedure::
+
+  $ ./tools/configure.sh -l lckfb-szpi-esp32s3:lvgl
+  $ make flash -j$(nproc) ESPTOOL_PORT=/dev/ttyUSB0
+
+Then run the lvgldemo command::
+
+ nsh> lvgldemo
+ [LVGL] [User]   (6.560, +6560)   check_stack_size: tid: 2, Stack size : 16328 lv_nuttx_entry.c:297
+ [LVGL] [User]   (6.560, +0)      lv_nuttx_lcd_create: lcd /dev/lcd0 opening lv_nuttx_lcd.c:77
+ [LVGL] [User]   (6.560, +0)      lv_nuttx_lcd_create: lcd /dev/lcd0 open success lv_nuttx_lcd.c:84
+ [LVGL] [Warn]   (6.570, +10)     lv_demo_widgets: LV_FONT_MONTSERRAT_18 is not enabled for the widgets demo. Using LV_FONT_DEFAULT instead. lv_demo_widgets.c:156
+ [LVGL] [Warn]   (6.580, +10)     lv_demo_widgets: LV_FONT_MONTSERRAT_12 is not enabled for the widgets demo. Using LV_FONT_DEFAULT instead. lv_demo_widgets.c:161
