@@ -150,6 +150,16 @@ config USEC_PER_TICK
 		This value should never be less than the underlying resolution of
 		the timer.  Error may ensue.
 
+config TIMER_ADJUST_USEC
+	int "System timer tick adjustment (microseconds)"
+	default 0
+	---help---
+		This value is added to the absolute tick set to the system timer.
+		This is used to compensate for interrupt latency in real-time
+		systems where the event required to be triggered on exact time.
+		The default value of 0 means that no adjustment is made. E.g.
+		5 means for each timer being set will be fired 5 microseconds earlier.
+
 if !SCHED_TICKLESS
 
 config SYSTEMTICK_EXTCLK
