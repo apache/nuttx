@@ -65,10 +65,10 @@
  *
  ****************************************************************************/
 
-spinlock_t up_testset(volatile spinlock_t *lock)
+_spinlock_t up_testset(volatile _spinlock_t *lock)
 {
   uint32_t val;
-  spinlock_t ret;
+  _spinlock_t ret;
   irqstate_t flags;
 
   flags = up_irq_save();
@@ -85,9 +85,9 @@ spinlock_t up_testset(volatile spinlock_t *lock)
 
   ret = *lock;
 
-  if (ret == SP_UNLOCKED)
+  if (ret == UP_SP_UNLOCKED)
     {
-      *lock = SP_LOCKED;
+      *lock = UP_SP_LOCKED;
     }
 
   UP_DMB();

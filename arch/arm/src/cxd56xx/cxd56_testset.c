@@ -47,7 +47,7 @@
  * Name: up_testset2
  ****************************************************************************/
 
-spinlock_t up_testset2(volatile spinlock_t *lock)
+_spinlock_t up_testset2(volatile _spinlock_t *lock)
 {
   register uintptr_t ret asm("r0") = (uintptr_t)(lock);
 
@@ -92,10 +92,10 @@ spinlock_t up_testset2(volatile spinlock_t *lock)
  *
  ****************************************************************************/
 
-spinlock_t up_testset(volatile spinlock_t *lock)
+_spinlock_t up_testset(volatile _spinlock_t *lock)
 {
 #ifdef CONFIG_CXD56_TESTSET_WITH_HWSEM
-  spinlock_t ret;
+  _spinlock_t ret;
   uint32_t sphlocked = ((this_cpu() + 2) << 16) | 0x1;
 
   /* Lock hardware semaphore */
@@ -108,9 +108,9 @@ spinlock_t up_testset(volatile spinlock_t *lock)
 
   ret = *lock;
 
-  if (ret == SP_UNLOCKED)
+  if (ret == UP_SP_UNLOCKED)
     {
-      *lock = SP_LOCKED;
+      *lock = UP_SP_LOCKED;
       UP_DMB();
     }
 
@@ -118,7 +118,7 @@ spinlock_t up_testset(volatile spinlock_t *lock)
 
   putreg32(REQ_UNLOCK, CXD56_SPH_REQ(SPH_SMP));
 #else
-  spinlock_t ret = up_testset2(lock);
+  _spinlock_t ret = up_testset2(lock);
 #endif
 
   return ret;

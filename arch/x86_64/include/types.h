@@ -41,10 +41,10 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Spinlock states */
+/* Raw spinlock states */
 
-#define SP_UNLOCKED 0  /* The Un-locked state */
-#define SP_LOCKED   1  /* The Locked state */
+#define UP_SP_UNLOCKED 0  /* The Un-locked state */
+#define UP_SP_LOCKED   1  /* The Locked state */
 
 /****************************************************************************
  * Type Declarations
@@ -54,8 +54,8 @@
 
 /* The Type of a spinlock */
 
-#ifdef CONFIG_SPINLOCK
-typedef _size_t spinlock_t;
+#ifdef CONFIG_ARCH_HAVE_TESTSET
+typedef _size_t _spinlock_t;
 #endif
 
 #endif /* __ASSEMBLY__ */

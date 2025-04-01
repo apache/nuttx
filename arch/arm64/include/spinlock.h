@@ -61,10 +61,10 @@
 #ifndef __ASSEMBLY__
 
 #if defined(CONFIG_ARCH_HAVE_TESTSET)
-static inline_function spinlock_t up_testset(volatile spinlock_t *lock)
+static inline_function _spinlock_t up_testset(volatile _spinlock_t *lock)
 {
-  spinlock_t ret = SP_LOCKED;
-  spinlock_t tmp = 0;
+  _spinlock_t ret = UP_SP_LOCKED;
+  _spinlock_t tmp = 0;
 
   __asm__ __volatile__
   (
@@ -76,7 +76,7 @@ static inline_function spinlock_t up_testset(volatile spinlock_t *lock)
     "cbnz     %w1, 1b       \n"
     "2:                     \n"
     : "=r" (ret)
-    :  "r" (tmp), "r" (SP_LOCKED), "r" (lock)
+    :  "r" (tmp), "r" (UP_SP_LOCKED), "r" (lock)
     : "memory"
   );
 

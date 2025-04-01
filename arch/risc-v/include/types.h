@@ -35,10 +35,10 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Spinlock states */
+/* Raw spinlock states */
 
-#define SP_UNLOCKED 0  /* The Un-locked state */
-#define SP_LOCKED   1  /* The Locked state */
+#define UP_SP_UNLOCKED 0  /* The Un-locked state */
+#define UP_SP_LOCKED   1  /* The Locked state */
 
 /****************************************************************************
  * Type Declarations
@@ -155,8 +155,8 @@ typedef unsigned int       irqstate_t;
  * RISC-V architecture supports fence instruction to ensure memory ordering
  */
 
-#ifdef CONFIG_SPINLOCK
-typedef _size_t            spinlock_t;
+#ifdef CONFIG_ARCH_HAVE_TESTSET
+typedef _size_t            _spinlock_t;
 #endif
 
 #endif /* __ASSEMBLY__ */

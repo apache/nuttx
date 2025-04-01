@@ -62,10 +62,10 @@
  *
  ****************************************************************************/
 
-static inline spinlock_t up_testset(volatile spinlock_t *lock)
+static inline _spinlock_t up_testset(volatile _spinlock_t *lock)
 {
   irqstate_t flags;
-  spinlock_t old;
+  _spinlock_t old;
 
   /* Disable the interrupt */
 
@@ -88,7 +88,7 @@ static inline spinlock_t up_testset(volatile spinlock_t *lock)
 
       /* Is it already locked by other? */
 
-      if (old == SP_LOCKED)
+      if (old == UP_SP_LOCKED)
         {
           break; /* Yes, exit */
         }
@@ -101,7 +101,7 @@ static inline spinlock_t up_testset(volatile spinlock_t *lock)
         "mov modc.ui, %0.ui\n"
         "nop"
         : "=r"(modc)
-        : "r"(lock), "r"(SP_LOCKED)
+        : "r"(lock), "r"(UP_SP_LOCKED)
         : "memory"
       );
 

@@ -37,8 +37,8 @@
 
 /* Must match definitions in up_testset.c */
 
-#define SP_UNLOCKED 0 /* The Un-locked state */
-#define SP_LOCKED   1 /* The Locked state */
+#define UP_SP_UNLOCKED 0 /* The Un-locked state */
+#define UP_SP_LOCKED   1 /* The Locked state */
 
 /****************************************************************************
  * Type Declarations
@@ -136,8 +136,8 @@ typedef unsigned int       _size_t;
 
 /* Must match definitions in up_testset.c */
 
-#ifdef CONFIG_SPINLOCK
-typedef _uint8_t           spinlock_t;
+#ifdef CONFIG_ARCH_HAVE_TESTSET
+typedef _uint8_t           _spinlock_t;
 #endif
 
 /* This is the size of the interrupt state save returned by

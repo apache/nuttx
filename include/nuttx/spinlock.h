@@ -98,20 +98,20 @@ void nxsched_critmon_busywait(bool state, FAR void *caller);
  ****************************************************************************/
 
 #if defined(CONFIG_ARCH_HAVE_TESTSET)
-spinlock_t up_testset(FAR volatile spinlock_t *lock);
+_spinlock_t up_testset(FAR volatile _spinlock_t *lock);
 #else
-static inline spinlock_t up_testset(FAR volatile spinlock_t *lock)
+static inline _spinlock_t up_testset(FAR volatile _spinlock_t *lock)
 {
   irqstate_t flags;
-  spinlock_t ret;
+  _spinlock_t ret;
 
   flags = up_irq_save();
 
   ret = *lock;
 
-  if (ret == SP_UNLOCKED)
+  if (ret == UP_SP_UNLOCKED)
     {
-      *lock = SP_LOCKED;
+      *lock = UP_SP_LOCKED;
     }
 
   up_irq_restore(flags);
@@ -187,7 +187,7 @@ static inline_function void spin_lock_notrace(FAR volatile spinlock_t *lock)
   int ticket = atomic_fetch_add(&lock->next, 1);
   while (atomic_read(&lock->owner) != ticket)
 #else /* CONFIG_TICKET_SPINLOCK */
-  while (up_testset(lock) == SP_LOCKED)
+  while (up_testset(lock) == UP_SP_LOCKED)
 #endif
     {
       UP_DSB();
@@ -280,7 +280,7 @@ spin_trylock_notrace(FAR volatile spinlock_t *lock)
   if (!atomic_cmpxchg(&lock->next, &lock->owner,
                       atomic_read(&lock->next) + 1))
 #else /* CONFIG_TICKET_SPINLOCK */
-  if (up_testset(lock) == SP_LOCKED)
+  if (up_testset(lock) == UP_SP_LOCKED)
 #endif /* CONFIG_TICKET_SPINLOCK */
     {
       UP_DSB();
@@ -432,7 +432,7 @@ static inline_function void spin_unlock(FAR volatile spinlock_t *lock)
 #  define spin_is_locked(l) \
     (atomic_read(&(*l).owner) != atomic_read(&(*l).next))
 #else
-#  define spin_is_locked(l) (*(l) == SP_LOCKED)
+#  define spin_is_locked(l) (*(l) == UP_SP_LOCKED)
 #endif
 
 /****************************************************************************
