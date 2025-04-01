@@ -5609,6 +5609,15 @@ config STM32H7_LTDC_FB_SIZE
 	---help---
 		Must be the whole size of the active LTDC layer.
 
+config STM32H7_LTDC_FB_DOUBLE_BUFFER
+	bool "Enable double buffering"
+	default n
+	---help---
+		Enable double buffering to allow updates to the framebuffer while the display is being refreshed.
+		This configuration requires two framebuffers: one active and one inactive.
+		When the display refreshes, the active and inactive framebuffers are swapped,
+		enabling smooth and flicker-free updates.
+
 config STM32H7_LTDC_L1_CHROMAKEYEN
 	bool "Enable chromakey support for layer 1"
 	default y
