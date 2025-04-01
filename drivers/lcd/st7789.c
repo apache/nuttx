@@ -477,7 +477,11 @@ static void st7789_setorientation(FAR struct st7789_dev_s *dev)
 
 #endif
 
-  /* Mirror X/Y for current setting */
+  /* Mirror X/Y/V for current setting */
+
+#ifdef CONFIG_LCD_ST7789_MIRRORV
+  madctl ^= 0x20;
+#endif
 
 #ifdef CONFIG_LCD_ST7789_MIRRORX
   madctl ^= 0x40;
