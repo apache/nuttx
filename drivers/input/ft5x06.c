@@ -481,7 +481,7 @@ static ssize_t ft5x06_sample(FAR struct ft5x06_dev_s *priv, FAR char *buffer,
                   deltay = -deltay;
                 }
 
-              if (deltax < CONFIG_FT5X06_THRESHX)
+              if (deltay < CONFIG_FT5X06_THRESHY)
                 {
                   /* Ignore... no significant change in Y either */
 
