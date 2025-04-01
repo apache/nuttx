@@ -497,6 +497,7 @@ static void st7789_setorientation(FAR struct st7789_dev_s *dev)
 }
 #endif
 
+#ifdef CONFIG_LCD_ST7789_DATA_ENDIAN_LITTLE
 static void st7789_ramctl(FAR struct st7789_dev_s *dev)
 {
   /* ============ ==== ==== ====== ====== ======== ===== ====== ======
@@ -522,13 +523,12 @@ static void st7789_ramctl(FAR struct st7789_dev_s *dev)
 
   /* Set RGB data endian */
 
-#ifdef CONFIG_LCD_ST7789_DATA_ENDIAN_LITTLE
   ramctl |= 0x800;
-#endif
 
   SPI_SEND(dev->spi, LCD_ST7789_DATA_PREFIX | ramctl);
   st7789_deselect(dev->spi);
 }
+#endif
 
 /****************************************************************************
  * Name: st7789_setarea
@@ -1032,7 +1032,9 @@ FAR struct lcd_dev_s *st7789_lcdinitialize(FAR struct spi_dev_s *spi)
 #else
   st7789_setorientation(priv);
 #endif
+#ifdef CONFIG_LCD_ST7789_DATA_ENDIAN_LITTLE
   st7789_ramctl(priv);
+#endif
   st7789_display(priv, true);
   st7789_fill(priv, CONFIG_LCD_ST7789_DEFAULT_COLOR);
 
