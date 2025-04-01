@@ -56,11 +56,11 @@
  ****************************************************************************/
 
 #if defined(CONFIG_SPINLOCK)
-static inline_function spinlock_t up_testset(volatile spinlock_t *lock)
+static inline_function _spinlock_t up_testset(volatile _spinlock_t *lock)
 {
   /* Perform the 32-bit compare and set operation */
 
-  spinlock_t ret;
+  _spinlock_t ret;
 
   __asm__ __volatile__
   (
@@ -68,7 +68,7 @@ static inline_function spinlock_t up_testset(volatile spinlock_t *lock)
     "S32C1I %0, %1, 0\n"     /* Store the compare value into the lock,
                               * if the lock is the same as compare1.
                               * Otherwise, no write-access */
-    : "=r"(ret) : "r"(lock), "r"(SP_UNLOCKED), "0"(SP_LOCKED)
+    : "=r"(ret) : "r"(lock), "r"(UP_SP_UNLOCKED), "0"(UP_SP_LOCKED)
   );
 
   return ret;

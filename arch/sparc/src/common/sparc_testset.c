@@ -95,12 +95,12 @@ static inline uint32_t sparc_compareset(volatile uint32_t *addr,
  *
  ****************************************************************************/
 
-spinlock_t up_testset(volatile spinlock_t *lock)
+_spinlock_t up_testset(volatile _spinlock_t *lock)
 {
   /* Perform the 32-bit compare and set operation */
 
   return sparc_compareset((volatile uint32_t *)lock,
-                           SP_UNLOCKED, SP_LOCKED);
+                           UP_SP_UNLOCKED, UP_SP_LOCKED);
 }
 
 #endif /* CONFIG_SPINLOCK */

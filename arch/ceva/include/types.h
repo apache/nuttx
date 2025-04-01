@@ -37,10 +37,10 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Spinlock states */
+/* Raw spinlock states */
 
-#define SP_UNLOCKED 0  /* The Unlocked state */
-#define SP_LOCKED   1  /* The Locked state */
+#define UP_SP_UNLOCKED 0  /* The Unlocked state */
+#define UP_SP_LOCKED   1  /* The Locked state */
 
 /****************************************************************************
  * Type Declarations
@@ -92,8 +92,8 @@ typedef unsigned int       _size_t;
 
 /* The Type of a spinlock. */
 
-#ifdef CONFIG_SPINLOCK
-typedef _uint32_t          spinlock_t;
+#ifdef CONFIG_ARCH_HAVE_TESTSET
+typedef _uint32_t          _spinlock_t;
 #endif
 
 /* This is the size of the interrupt state save returned by up_irq_save(). */

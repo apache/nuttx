@@ -73,10 +73,11 @@
  *
  ****************************************************************************/
 
-#if defined(CONFIG_ARCH_HAVE_TESTSET) && !defined(CONFIG_ARCH_HAVE_CUSTOM_TESTSET)
-static inline_function spinlock_t up_testset(volatile spinlock_t *lock)
+#if defined(CONFIG_ARCH_HAVE_TESTSET) && \
+    !defined(CONFIG_ARCH_HAVE_CUSTOM_TESTSET)
+static inline_function _spinlock_t up_testset(volatile _spinlock_t *lock)
 {
-  spinlock_t ret = SP_UNLOCKED;
+  _spinlock_t ret = UP_SP_UNLOCKED;
 
   __asm__ __volatile__
   (
@@ -90,7 +91,7 @@ static inline_function spinlock_t up_testset(volatile spinlock_t *lock)
     "dmb                   \n"
     "2:                    \n"
     : "+r" (ret)
-    : "r" (SP_LOCKED), "r" (lock)
+    : "r" (UP_SP_LOCKED), "r" (lock)
     : "memory"
   );
 

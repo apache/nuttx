@@ -54,10 +54,11 @@
  *
  ****************************************************************************/
 
-spinlock_t up_testset(volatile spinlock_t *lock)
+_spinlock_t up_testset(volatile _spinlock_t *lock)
 {
   /* Perform the compare and set operation */
 
-  return Ifx__cmpAndSwap((volatile void *)lock, SP_LOCKED, SP_UNLOCKED);
+  return Ifx__cmpAndSwap((volatile void *)lock,
+                          UP_SP_LOCKED, UP_SP_UNLOCKED);
 }
 

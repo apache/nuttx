@@ -53,9 +53,9 @@
  *
  * Returned Value:
  *   The spinlock is always locked upon return.  The previous value of the
- *   spinlock variable is returned, either SP_LOCKED if the spinlock was
+ *   spinlock variable is returned, either UP_SP_LOCKED if the spinlock was
  *   previously locked (meaning that the test-and-set operation failed to
- *   obtain the lock) or SP_UNLOCKED if the spinlock was previously unlocked
+ *   obtain the lock) or UP_SP_UNLOCKED if the spinlock was previously unlocked
  *   (meaning that we successfully obtained the lock).
  *
  ****************************************************************************/
@@ -63,9 +63,9 @@
 	.globl   up_testset
 	.type    up_testset, @function
 up_testset:
-	/* Set the value to be written (SP_LOCKED for test-and-set) */
+	/* Set the value to be written (UP_SP_LOCKED for test-and-set) */
 
-	movq     $SP_LOCKED, %rax
+	movq     $UP_SP_LOCKED, %rax
 
 	/* Atomic exchange, the old value is returned in rax */
 
