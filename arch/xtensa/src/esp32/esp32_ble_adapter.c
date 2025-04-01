@@ -1134,7 +1134,7 @@ static int semphr_take_wrapper(void *semphr, uint32_t block_time_ms)
 
   if (ret)
     {
-      wlerr("ERROR: Failed to wait sem in %u ticks. Error=%d\n",
+      wlerr("ERROR: Failed to wait sem in %lu ticks. Error=%d\n",
             MSEC2TICK(block_time_ms), ret);
     }
 
