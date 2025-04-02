@@ -34,4 +34,13 @@ config BCH_DEVICE_READONLY
 	---help---
 		Set bch devices read-only
 
+config BCH_FORCE_INDIRECT
+	bool "Force indirect transfers in BCH"
+	default n
+	---help---
+		Force all data transfers in BCH to be indirect,
+		using an intermediate buffer.
+		This is needed because in some use cases (e.g. when CONFIG_BUILD_KERNEL)
+		it is not possible to write directly from user buffer.
+
 endif # BCH
