@@ -351,7 +351,7 @@ static int esp_pcnt_ioctl(struct cap_lowerhalf_s *dev, int cmd,
         ret = esp_pcnt_unit_register_event_callback(dev, handler);
         if (ret != OK)
           {
-            cperr("Could not register callback-%x to pcnt-%d!\n",
+            cperr("Could not register callback-%" PRIx32 " to pcnt-%d!\n",
                   (uint32_t)handler, priv->unit_id);
           }
 

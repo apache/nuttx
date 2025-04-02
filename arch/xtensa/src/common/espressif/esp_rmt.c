@@ -1437,7 +1437,7 @@ static int IRAM_ATTR rmt_driver_isr_default(int irq, void *context,
 
           rmt_ll_rx_reset_pointer(g_rmtdev_common.hal.regs, channel);
           rmtinfo("RMT RX channel %d error", channel);
-          rmtinfo("status: 0x%08x",
+          rmtinfo("status: 0x%08" PRIx32 "",
                   rmt_ll_rx_get_status_word(g_rmtdev_common.hal.regs,
                                             channel));
         }
@@ -1462,7 +1462,7 @@ static int IRAM_ATTR rmt_driver_isr_default(int irq, void *context,
 
           rmt_ll_tx_reset_pointer(g_rmtdev_common.hal.regs, channel);
           rmtinfo("RMT TX channel %d error", channel);
-          rmtinfo("status: 0x%08x",
+          rmtinfo("status: 0x%08" PRIx32 "",
                   rmt_ll_tx_get_status_word(g_rmtdev_common.hal.regs,
                                             channel));
         }

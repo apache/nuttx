@@ -1166,14 +1166,14 @@ static int IRAM_ATTR esp32_writedata_encrypted(
 
   if (addr % SPI_FLASH_ENCRYPT_UNIT_SIZE)
     {
-      ferr("ERROR: address=0x%x is not %d-byte align\n",
+      ferr("ERROR: address=0x%" PRIx32 " is not %d-byte align\n",
            addr, SPI_FLASH_ENCRYPT_UNIT_SIZE);
       return -EINVAL;
     }
 
   if (size % SPI_FLASH_ENCRYPT_UNIT_SIZE)
     {
-      ferr("ERROR: size=%u is not %d-byte align\n",
+      ferr("ERROR: size=%" PRIu32 " is not %d-byte align\n",
            size, SPI_FLASH_ENCRYPT_UNIT_SIZE);
       return -EINVAL;
     }
@@ -1200,7 +1200,8 @@ static int IRAM_ATTR esp32_writedata_encrypted(
                             SPI_FLASH_ENCRYPT_UNIT_SIZE);
       if (ret)
         {
-          ferr("ERROR: Failed to write encrypted data @ 0x%x\n", addr);
+          ferr("ERROR: Failed to write encrypted data @ 0x%" PRIx32 "\n",
+               addr);
           goto exit;
         }
 
@@ -2322,7 +2323,8 @@ static int esp32_ioctl(struct mtd_dev_s *dev, int cmd,
               geo->neraseblocks = MTD_SIZE(priv) / MTD_ERASESIZE(priv);
               ret               = OK;
 
-              finfo("blocksize: %d erasesize: %d neraseblocks: %d\n",
+              finfo("blocksize: %" PRIu32 " erasesize: %" PRIu32 ""
+                    " neraseblocks: %" PRIu32 "\n",
                     geo->blocksize, geo->erasesize, geo->neraseblocks);
             }
         }
@@ -2400,7 +2402,8 @@ static int esp32_ioctl_encrypt(struct mtd_dev_s *dev, int cmd,
               geo->neraseblocks = MTD_SIZE(priv) / geo->erasesize;
               ret               = OK;
 
-              finfo("blocksize: %d erasesize: %d neraseblocks: %d\n",
+              finfo("blocksize: %" PRIu32 " erasesize: %" PRIu32 ""
+                    " neraseblocks: %" PRIu32 "\n",
                     geo->blocksize, geo->erasesize, geo->neraseblocks);
             }
         }
@@ -2714,12 +2717,12 @@ struct mtd_dev_s *esp32_spiflash_alloc_mtdpart(uint32_t mtd_offset,
   chip = priv->chip;
 
   finfo("ESP32 SPI Flash information:\n");
-  finfo("\tID = 0x%x\n", chip->device_id);
-  finfo("\tStatus mask = %x\n", chip->status_mask);
-  finfo("\tChip size = %d KB\n", chip->chip_size / 1024);
-  finfo("\tPage size = %d B\n", chip->page_size);
-  finfo("\tSector size = %d KB\n", chip->sector_size / 1024);
-  finfo("\tBlock size = %d KB\n", chip->block_size / 1024);
+  finfo("\tID = 0x%" PRIx32 "\n", chip->device_id);
+  finfo("\tStatus mask = %" PRIx32 "\n", chip->status_mask);
+  finfo("\tChip size = %" PRIu32 " KB\n", chip->chip_size / 1024);
+  finfo("\tPage size = %" PRIu32 " B\n", chip->page_size);
+  finfo("\tSector size = %" PRIu32 " KB\n", chip->sector_size / 1024);
+  finfo("\tBlock size = %" PRIu32 " KB\n", chip->block_size / 1024);
 
   ASSERT((mtd_offset + mtd_size) <= chip->chip_size);
   ASSERT((mtd_offset % chip->sector_size) == 0);
@@ -2734,8 +2737,8 @@ struct mtd_dev_s *esp32_spiflash_alloc_mtdpart(uint32_t mtd_offset,
       size = mtd_size;
     }
 
-  finfo("\tMTD offset = 0x%x\n", mtd_offset);
-  finfo("\tMTD size = 0x%x\n", size);
+  finfo("\tMTD offset = 0x%" PRIx32 "\n", mtd_offset);
+  finfo("\tMTD size = 0x%" PRIx32 "\n", size);
 
   startblock = MTD_SIZE2BLK(priv, mtd_offset);
   blocks = MTD_SIZE2BLK(priv, size);

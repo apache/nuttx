@@ -258,7 +258,7 @@ static ssize_t esp_nxdiag_read(struct file *filep,
     }
   else
     {
-      snprintf(tmp, tmp_arr_size, "Flash status: 0x%lx\n\n",
+      snprintf(tmp, tmp_arr_size, "Flash status: 0x%" PRIx32 "\n\n",
                (long unsigned int)flash_status);
       strcat(buffer, tmp);
     }

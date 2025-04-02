@@ -859,7 +859,7 @@ static void esp32s3_lcd_enableclk(void)
     clk_b = clk_a = 0;
 #endif
 
-  lcdinfo("PCLK=%d/(%d + %d/%d)\n", ESP32S3_LCD_CLK_MHZ,
+  lcdinfo("PCLK=%d/(%d + %" PRIu32 "/%" PRIu32 ")\n", ESP32S3_LCD_CLK_MHZ,
           ESP32S3_LCD_CLK_N, clk_b, clk_a);
 
   periph_module_enable(PERIPH_LCD_CAM_MODULE);
