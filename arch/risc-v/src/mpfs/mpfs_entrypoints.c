@@ -270,7 +270,7 @@ bool mpfs_get_use_sbi(uint64_t hartid)
 
 int mpfs_cpus_booted(void)
 {
-  return atomic_load(&g_cpus_booted);
+  return atomic_read(&g_cpus_booted);
 }
 
 #endif /* CONFIG_MPFS_BOOTLOADER */
