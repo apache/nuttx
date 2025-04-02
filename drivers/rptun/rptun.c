@@ -32,8 +32,10 @@
 #include <stdbool.h>
 #include <sys/boardctl.h>
 #include <sys/param.h>
+#include <sys/wait.h>
 
 #include <metal/utilities.h>
+#include <nuttx/clock.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/kthread.h>
 #include <nuttx/mm/mm.h>
@@ -46,6 +48,12 @@
 #include <openamp/remoteproc_loader.h>
 #include <openamp/remoteproc_virtio.h>
 #include <openamp/rsc_table_parser.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define RPTUN_RETRY_PERIOD_US  1000000
 
 /****************************************************************************
  * Private Types
@@ -65,6 +73,8 @@ struct rptun_priv_s
   struct metal_list           node;
   struct notifier_block       nbpanic;
   bool                        rpanic;
+  bool                        stop;
+  pid_t                       pid;
 };
 
 struct rptun_store_s
@@ -94,7 +104,7 @@ rptun_get_mem(FAR struct remoteproc *rproc,
               FAR void *va, size_t size,
               FAR struct remoteproc_mem *buf);
 
-static int rptun_dev_start(FAR struct remoteproc *rproc);
+static int rptun_dev_start(FAR struct rptun_priv_s *priv);
 static int rptun_dev_stop(FAR struct remoteproc *rproc);
 static int rptun_dev_ioctl(FAR struct file *filep, int cmd,
                            unsigned long arg);
@@ -382,10 +392,13 @@ rptun_get_carveout_memory(FAR struct rptun_priv_s *priv,
 static int rptun_create_device(FAR struct rptun_priv_s *priv,
                                FAR struct virtio_device **vdev_, int index)
 {
+  FAR struct remoteproc *rproc = &priv->rproc;
   FAR struct fw_rsc_carveout *carveout_rsc;
   FAR struct fw_rsc_vdev *vdev_rsc;
+  FAR struct remoteproc_virtio *rvdev;
   FAR struct virtio_device *vdev;
-  FAR char *rsc = priv->rproc.rsc_table;
+  FAR struct metal_list *node;
+  FAR char *rsc = rproc->rsc_table;
   FAR char *shmbase;
   unsigned int role;
   size_t shmlen;
@@ -414,6 +427,25 @@ static int rptun_create_device(FAR struct rptun_priv_s *priv,
   role = RPTUN_IS_MASTER(priv->dev) ^
          (vdev_rsc->reserved[0] == VIRTIO_DEV_DRIVER);
 
+  if (role == VIRTIO_DEV_DEVICE &&
+      !(vdev_rsc->status & VIRTIO_CONFIG_STATUS_DRIVER_OK))
+    {
+      return -EAGAIN;
+    }
+
+  metal_mutex_acquire(&rproc->lock);
+  metal_list_for_each(&rproc->vdevs, node)
+    {
+      rvdev = metal_container_of(node, struct remoteproc_virtio, node);
+      if (rvdev->vdev_rsc == vdev_rsc)
+        {
+          metal_mutex_release(&rproc->lock);
+          return -EEXIST;
+        }
+    }
+
+  metal_mutex_release(&rproc->lock);
+
   /* Get share memory from carveout resource table */
 
   shmbase = rptun_get_carveout_memory(priv, carveout_rsc, &shmlen);
@@ -431,7 +463,7 @@ static int rptun_create_device(FAR struct rptun_priv_s *priv,
       vring_sz = ALIGN_UP(vring_size(vring->num, vring->align),
                           vring->align);
       vring_pa = metal_io_virt_to_phys(metal_io_get_region(), shmbase);
-      remoteproc_mmap(&priv->rproc, &vring_pa, &vring_da, vring_sz, 0, NULL);
+      remoteproc_mmap(rproc, &vring_pa, &vring_da, vring_sz, 0, NULL);
 
       rptuninfo("vr[%u] shm=%p len=%zu, da=0x%lx pa=0x%lx sz=%" PRIu32 "\n",
                 i, shmbase, shmlen, vring_da, vring_pa, vring_sz);
@@ -445,7 +477,7 @@ static int rptun_create_device(FAR struct rptun_priv_s *priv,
         }
     }
 
-  vdev = remoteproc_create_virtio(&priv->rproc, index, role, NULL);
+  vdev = remoteproc_create_virtio(rproc, index, role, NULL);
   if (vdev == NULL)
     {
       return -ENOMEM;
@@ -468,7 +500,7 @@ static int rptun_create_device(FAR struct rptun_priv_s *priv,
   return OK;
 
 err:
-  remoteproc_remove_virtio(&priv->rproc, vdev);
+  remoteproc_remove_virtio(rproc, vdev);
   return ret;
 }
 
@@ -587,6 +619,7 @@ static void rptun_remove_devices(FAR struct rptun_priv_s *priv)
 static int rptun_create_devices(FAR struct rptun_priv_s *priv)
 {
   FAR struct virtio_device *vdev;
+  bool remain = false;
   int ret;
   int i;
 
@@ -595,8 +628,16 @@ static int rptun_create_devices(FAR struct rptun_priv_s *priv)
       ret = rptun_create_device(priv, &vdev, i);
       if (ret == -ENODEV)
         {
-          rptuninfo("No more virtio devices, i=%d\n", i);
-          return OK;
+          return remain ? -EAGAIN : OK;
+        }
+      else if (ret == -EEXIST)
+        {
+          continue;
+        }
+      else if (ret == -EAGAIN)
+        {
+          remain = true;
+          continue;
         }
       else if (ret < 0)
         {
@@ -608,13 +649,10 @@ static int rptun_create_devices(FAR struct rptun_priv_s *priv)
       if (ret < 0)
         {
           rptunerr("rptun_register_device failed, ret=%d i=%d\n", ret, i);
-          goto err_create;
+          break;
         }
     }
 
-  return ret;
-
-err_create:
   rptun_remove_device(priv, vdev);
 err:
   rptun_remove_devices(priv);
@@ -719,7 +757,7 @@ static int rptun_callback(FAR void *arg, uint32_t vqid)
   return remoteproc_get_notification(&priv->rproc, vqid);
 }
 
-static int rptun_dev_start(FAR struct remoteproc *rproc)
+static int rptun_do_start(FAR struct remoteproc *rproc)
 {
   FAR struct rptun_priv_s *priv = rproc->priv;
   FAR struct resource_table *rsc;
@@ -769,21 +807,11 @@ static int rptun_dev_start(FAR struct remoteproc *rproc)
         }
     }
 
-  /* Create the virtio devices according to resource table */
-
-  ret = rptun_create_devices(priv);
-  if (ret < 0)
-    {
-      rptunerr("rptun_create_devices failed, ret=%d\n", ret);
-      return ret;
-    }
-
   /* Remote proc start */
 
   ret = remoteproc_start(rproc);
   if (ret < 0)
     {
-      rptun_remove_devices(priv);
       remoteproc_shutdown(rproc);
       rptunerr("remoteproc_start failed, ret=%d\n", ret);
       return ret;
@@ -793,7 +821,66 @@ static int rptun_dev_start(FAR struct remoteproc *rproc)
 
   RPTUN_REGISTER_CALLBACK(priv->dev, rptun_callback, priv);
 
-  return 0;
+  return ret;
+}
+
+static int rptun_start_thread(int argc, FAR char *argv[])
+{
+  FAR struct rptun_priv_s *priv =
+  (FAR struct rptun_priv_s *)((uintptr_t)strtoul(argv[2], NULL, 16));
+  int ret;
+
+  ret = rptun_do_start(&priv->rproc);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  while (!priv->stop)
+    {
+      ret = rptun_create_devices(priv);
+      if (ret != -EAGAIN)
+        {
+          break;
+        }
+
+      nxsig_usleep(RPTUN_RETRY_PERIOD_US);
+    }
+
+  return ret;
+}
+
+static int rptun_dev_start(FAR struct rptun_priv_s *priv)
+{
+  FAR struct rptun_dev_s *dev = priv->dev;
+  FAR char *argv[3];
+  char arg1[32];
+
+  /* Create a thread to register the virtio and vhost devices */
+
+  snprintf(arg1, sizeof(arg1), "%p", priv);
+  argv[0] = (FAR char *)RPTUN_GET_CPUNAME(dev);
+  argv[1] = arg1;
+  argv[2] = NULL;
+
+  if (dev->stack != NULL && dev->stack_size != 0)
+    {
+      priv->pid = kthread_create_with_stack("rptun",
+                                            CONFIG_RPTUN_PRIORITY,
+                                            dev->stack,
+                                            dev->stack_size,
+                                            rptun_start_thread, argv);
+    }
+  else
+    {
+      priv->pid = kthread_create("rptun",
+                                 CONFIG_RPTUN_PRIORITY,
+                                 CONFIG_RPTUN_STACKSIZE,
+                                 rptun_start_thread,
+                                 argv);
+    }
+
+  return priv->pid;
 }
 
 static int rptun_dev_stop(FAR struct remoteproc *rproc)
@@ -808,6 +895,15 @@ static int rptun_dev_stop(FAR struct remoteproc *rproc)
            priv->rproc.state == RPROC_READY)
     {
       return -EBUSY;
+    }
+
+  if (priv->pid >= 0)
+    {
+      priv->stop = true;
+      nxsig_kill(priv->pid, SIGKILL);
+      nxsched_waitpid(priv->pid, NULL, WEXITED);
+      priv->stop = false;
+      priv->pid = -EINVAL;
     }
 
   RPTUN_UNREGISTER_CALLBACK(priv->dev);
@@ -861,14 +957,14 @@ static int rptun_do_ioctl(FAR struct rptun_priv_s *priv, int cmd,
       case RPTUNIOC_START:
         if (priv->rproc.state == RPROC_OFFLINE)
           {
-            ret = rptun_dev_start(&priv->rproc);
+            ret = rptun_dev_start(priv);
           }
         else
           {
             ret = rptun_dev_stop(&priv->rproc);
             if (ret == OK)
               {
-                ret = rptun_dev_start(&priv->rproc);
+                ret = rptun_dev_start(priv);
               }
           }
         break;
@@ -1060,19 +1156,6 @@ static metal_phys_addr_t rptun_da_to_pa(FAR struct rptun_dev_s *dev,
   return da;
 }
 
-static int rptun_start_thread(int argc, FAR char *argv[])
-{
-  FAR struct rptun_priv_s *priv =
-    (FAR struct rptun_priv_s *)((uintptr_t)strtoul(argv[2], NULL, 16));
-
-  if (priv->rproc.state == RPROC_OFFLINE)
-    {
-      rptun_dev_start(&priv->rproc);
-    }
-
-  return 0;
-}
-
 static int rptun_panic_notifier(FAR struct notifier_block *block,
                                 unsigned long action, void *data)
 {
@@ -1096,9 +1179,7 @@ static int rptun_panic_notifier(FAR struct notifier_block *block,
 int rptun_initialize(FAR struct rptun_dev_s *dev)
 {
   FAR struct rptun_priv_s *priv;
-  FAR char *argv[3];
   char name[32];
-  char arg1[32];
   int ret;
 
   priv = kmm_zalloc(sizeof(struct rptun_priv_s));
@@ -1108,6 +1189,7 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
     }
 
   priv->dev = dev;
+  priv->pid = -EINVAL;
   remoteproc_init(&priv->rproc, &g_rptun_ops, priv);
 
   snprintf(name, sizeof(name), "/dev/rptun/%s", RPTUN_GET_CPUNAME(dev));
@@ -1118,36 +1200,13 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
       goto err_driver;
     }
 
-  /* Create a thread to register the virtio and vhost devices */
-
-  snprintf(arg1, sizeof(arg1), "%p", priv);
-  argv[0] = (FAR char *)RPTUN_GET_CPUNAME(dev);
-  argv[1] = arg1;
-  argv[2] = NULL;
-
-  if (RPTUN_IS_AUTOSTART(dev))
+  if (RPTUN_IS_AUTOSTART(priv->dev))
     {
-      if (dev->stack != NULL && dev->stack_size != 0)
-        {
-          ret = kthread_create_with_stack("rptun",
-                                          CONFIG_RPTUN_PRIORITY,
-                                          dev->stack,
-                                          dev->stack_size,
-                                          rptun_start_thread, argv);
-        }
-      else
-        {
-          ret = kthread_create("rptun",
-                               CONFIG_RPTUN_PRIORITY,
-                               CONFIG_RPTUN_STACKSIZE,
-                               rptun_start_thread,
-                               argv);
-        }
-
+      ret = rptun_dev_start(priv);
       if (ret < 0)
         {
-          rptunerr("rptun thread create failed %d\n", ret);
-          goto err_thread;
+          rptunerr("rptun start failed %d\n", ret);
+          goto err_start;
         }
     }
 
@@ -1159,7 +1218,7 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
   metal_mutex_release(&g_rptun_lock);
   return OK;
 
-err_thread:
+err_start:
   unregister_driver(name);
 err_driver:
   kmm_free(priv);
