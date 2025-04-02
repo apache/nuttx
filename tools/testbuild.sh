@@ -379,7 +379,7 @@ function build_default {
     makefunc
   fi
 
-  if [ ${SAVEARTIFACTS} -eq 1 ]; then
+  if [ ${SAVEARTIFACTS} -eq 1 ] && [ ${fail} -eq 0 ]; then
     artifactconfigdir=$ARTIFACTDIR/$(echo $config | sed "s/:/\//")/
     mkdir -p $artifactconfigdir
     xargs -I "{}" cp "{}" $artifactconfigdir < $nuttx/nuttx.manifest
@@ -394,7 +394,7 @@ function build_cmake {
     fail=1
   fi
 
-  if [ ${SAVEARTIFACTS} -eq 1 ]; then
+  if [ ${SAVEARTIFACTS} -eq 1 ] && [ ${fail} -eq 0 ]; then
     artifactconfigdir=$ARTIFACTDIR/$(echo $config | sed "s/:/\//")/
     mkdir -p $artifactconfigdir
     cd $nuttx/build
