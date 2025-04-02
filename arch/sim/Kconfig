@@ -284,16 +284,38 @@ config SIM_NETDEV_NUMBER
 		Note that only one network device will be brought up by netinit automatically,
 		others will be kept in DOWN state by default.
 
+if SIM_NETDEV && DRIVERS_IEEE80211 && NETDEV_WIRELESS_HANDLER
+
 config SIM_WIFIDEV_NUMBER
 	int "Number of Simulated WiFi Device"
 	default 0
 	range 0 SIM_NETDEV_NUMBER
-	depends on SIM_NETDEV && DRIVERS_IEEE80211 && NETDEV_WIRELESS_HANDLER
 	---help---
 		The number of simulated wifi network devices.
 
 		Note that only one network device will be brought up by netinit automatically,
 		others will be kept in DOWN state by default.
+
+choice
+	prompt "Select SimWiFi Platform"
+	depends on SIM_WIFIDEV_NUMBER != 0
+	default SIM_WIFIDEV_HOST
+
+config SIM_WIFIDEV_HOST
+	bool "Use the host Wi-Fi interfaces"
+	---help---
+		Use the host Wi-Fi interfaces, which are either simulated by
+		hwsim or the real wireless network cards.
+
+config SIM_WIFIDEV_PSEUDO
+	bool "Use the Simulated Wi-Fi devices"
+	depends on DRIVERS_WIFI_SIM
+	---help---
+		Use the the Simulated Wi-Fi devices, which are supported by the bss file.
+endchoice
+
+endif
+
 endif
 
 config SIM_NETDEV_VPNKIT_PATH
