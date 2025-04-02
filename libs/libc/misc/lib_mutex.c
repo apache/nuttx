@@ -308,6 +308,56 @@ int nxmutex_trylock(FAR mutex_t *mutex)
 }
 
 /****************************************************************************
+ * Name: nxmutex_ticklock
+ *
+ * Description:
+ *   This function attempts to lock the mutex referenced by 'mutex'.  If the
+ *   mutex value is (<=) zero, then the calling task will not return until it
+ *   successfully acquires the lock or timed out
+ *
+ * Input Parameters:
+ *   mutex   - Mutex object
+ *   delay   - Ticks to wait from the start time until the semaphore is
+ *             posted.  If ticks is zero, then this function is equivalent
+ *             to sem_trywait().
+ *
+ * Returned Value:
+ *   OK        The mutex successfully acquires
+ *   EINVAL    The mutex argument does not refer to a valid mutex.  Or the
+ *             thread would have blocked, and the abstime parameter specified
+ *             a nanoseconds field value less than zero or greater than or
+ *             equal to 1000 million.
+ *   ETIMEDOUT The mutex could not be locked before the specified timeout
+ *             expired.
+ *   EDEADLK   A deadlock condition was detected.
+ *
+ ****************************************************************************/
+
+int nxmutex_ticklock(FAR mutex_t *mutex, uint32_t delay)
+{
+  int ret;
+
+  /* Wait until we get the lock or until the timeout expires */
+
+  if (delay)
+    {
+      ret = nxsem_tickwait(&mutex->sem, delay);
+    }
+  else
+    {
+      ret = nxsem_trywait(&mutex->sem);
+    }
+
+  if (ret >= 0)
+    {
+      mutex->holder = _SCHED_GETTID();
+      nxmutex_add_backtrace(mutex);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
  * Name: nxmutex_clocklock
  *
  * Description:
@@ -795,6 +845,50 @@ int nxrmutex_trylock(FAR rmutex_t *rmutex)
   if (!nxrmutex_is_hold(rmutex))
     {
       ret = nxmutex_trylock(&rmutex->mutex);
+    }
+
+  if (ret >= 0)
+    {
+      DEBUGASSERT(rmutex->count < UINT_MAX);
+      ++rmutex->count;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: nxrmutex_ticklock
+ *
+ * Description:
+ *   This function attempts to lock the mutex referenced by 'mutex'.  If the
+ *   mutex value is (<=) zero, then the calling task will not return until it
+ *   successfully acquires the lock or timed out
+ *
+ * Input Parameters:
+ *   rmutex  - Rmutex object
+ *   delay   - Ticks to wait from the start time until the semaphore is
+ *             posted.  If ticks is zero, then this function is equivalent
+ *             to nxrmutex_trylock().
+ *
+ * Returned Value:
+ *   OK        The mutex successfully acquires
+ *   EINVAL    The mutex argument does not refer to a valid mutex.  Or the
+ *             thread would have blocked, and the abstime parameter specified
+ *             a nanoseconds field value less than zero or greater than or
+ *             equal to 1000 million.
+ *   ETIMEDOUT The mutex could not be locked before the specified timeout
+ *             expired.
+ *   EDEADLK   A deadlock condition was detected.
+ *
+ ****************************************************************************/
+
+int nxrmutex_ticklock(FAR rmutex_t *rmutex, uint32_t delay)
+{
+  int ret = 0;
+
+  if (!nxrmutex_is_hold(rmutex))
+    {
+      ret = nxmutex_ticklock(&rmutex->mutex, delay);
     }
 
   if (ret >= 0)
