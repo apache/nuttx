@@ -327,7 +327,7 @@ static struct imx_uart_s g_uart2priv =
   .baud           = CONFIG_UART2_BAUD,
   .irq            = IMX_IRQ_UART2,
   .parity         = CONFIG_UART2_PARITY,
-  .lock           = SP_UNLOCKED
+  .lock           = SP_UNLOCKED,
   .bits           = CONFIG_UART2_BITS,
   .stopbits2      = CONFIG_UART2_2STOP,
 };
@@ -356,7 +356,7 @@ static struct imx_uart_s g_uart3priv =
   .baud           = IMX_UART3_VBASE,
   .irq            = IMX_IRQ_UART3,
   .parity         = CONFIG_UART3_PARITY,
-  .lock           = SP_UNLOCKED
+  .lock           = SP_UNLOCKED,
   .bits           = CONFIG_UART3_BITS,
   .stopbits2      = CONFIG_UART3_2STOP,
 };
@@ -385,7 +385,7 @@ static struct imx_uart_s g_uart4priv =
   .baud           = IMX_UART4_VBASE,
   .irq            = IMX_IRQ_UART4,
   .parity         = CONFIG_UART4_PARITY,
-  .lock           = SP_UNLOCKED
+  .lock           = SP_UNLOCKED,
   .bits           = CONFIG_UART4_BITS,
   .stopbits2      = CONFIG_UART4_2STOP,
 };
@@ -414,7 +414,7 @@ static struct imx_uart_s g_uart5priv =
   .baud           = IMX_UART5_VBASE,
   .irq            = IMX_IRQ_UART5,
   .parity         = CONFIG_UART5_PARITY,
-  .lock           = SP_UNLOCKED
+  .lock           = SP_UNLOCKED,
   .bits           = CONFIG_UART5_BITS,
   .stopbits2      = CONFIG_UART5_2STOP,
 };
