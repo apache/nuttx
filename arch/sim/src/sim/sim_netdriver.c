@@ -70,6 +70,7 @@
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev_lowerhalf.h>
 #include <nuttx/net/pkt.h>
+#include <nuttx/net/wifi_sim.h>
 
 #include "sim_internal.h"
 #include "sim_wifihost.h"
@@ -99,8 +100,10 @@
 
 struct sim_netdev_s
 {
-#if CONFIG_SIM_WIFIDEV_NUMBER != 0
+#if defined(CONFIG_SIM_WIFIDEV_HOST)
   struct sim_wifihost_lowerhalf_s dev;
+#elif defined(CONFIG_SIM_WIFIDEV_PSEUDO)
+  struct wifi_sim_lowerhalf_s dev;
 #else
   struct netdev_lowerhalf_s dev;
 #endif
@@ -214,7 +217,11 @@ static int netdriver_ifup(struct netdev_lowerhalf_s *dev)
 #if CONFIG_SIM_WIFIDEV_NUMBER != 0
   if (DEVIDX(dev) < CONFIG_SIM_WIFIDEV_NUMBER)
     {
+#  if defined(CONFIG_SIM_WIFIDEV_HOST)
       if (sim_wifihost_connected((struct sim_wifihost_lowerhalf_s *)dev))
+#  elif defined(CONFIG_SIM_WIFIDEV_PSEUDO)
+      if (wifi_sim_connected((struct wifi_sim_lowerhalf_s *)dev))
+#  endif
         {
           netdev_lower_carrier_on(dev);
         }
@@ -303,8 +310,17 @@ int sim_netdriver_init(void)
 #if CONFIG_SIM_WIFIDEV_NUMBER != 0
       if (devidx < CONFIG_SIM_WIFIDEV_NUMBER)
         {
+          int ret =
+#  if defined(CONFIG_SIM_WIFIDEV_HOST)
           sim_wifihost_init((struct sim_wifihost_lowerhalf_s *)dev,
                             devidx);
+#  elif defined(CONFIG_SIM_WIFIDEV_PSEUDO)
+          wifi_sim_init((struct wifi_sim_lowerhalf_s *)dev);
+#  endif
+          if (ret < 0)
+            {
+              return ret;
+            }
         }
 #endif
 
