@@ -661,6 +661,38 @@ config SIM_SPIDEV_NAME
 
 endif
 
+config SIM_GPIOCHIP
+	bool "Simulated gpiochip"
+	default n
+	depends on IOEXPANDER
+	---help---
+		Build in support for simulated gpiochip
+
+if SIM_GPIOCHIP
+
+choice
+	prompt "Simulated GPIOCHIP Type"
+	default SIM_GPIOCHIP_LINUX
+
+config SIM_GPIOCHIP_LINUX
+	bool "Linux Gpiochip Character Dev"
+	depends on HOST_LINUX
+	---help---
+		Attach a Linux Gpiochip via the character device
+		interface. To achieve a SPI port on Linux host, it is
+		recommended to use a USB<>GPIO device such as CH341A/B.
+
+endchoice
+
+config SIM_GPIOCHIP_NAME
+	string "the name of host gpiochip dev to attach to simulator"
+	default "/dev/gpiochip0"
+	---help---
+		This is the name of the gpiochip device on the host implementation to
+		attach to the simulator driver.
+
+endif
+
 menu "Simulated UART"
 
 config SIM_UART_DMA
