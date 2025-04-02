@@ -87,6 +87,7 @@
 "nx_pthread_exit","nuttx/pthread.h","!defined(CONFIG_DISABLE_PTHREAD)","noreturn","pthread_addr_t"
 "nx_vsyslog","nuttx/syslog/syslog.h","","int","int","FAR const IPTR char *","FAR va_list *"
 "nxsched_get_stackinfo","nuttx/sched.h","","int","pid_t","FAR struct stackinfo_s *"
+"nxsem_tickwait","nuttx/semaphore.h","","int","FAR sem_t *","uint32_t"
 "nxsem_clockwait","nuttx/semaphore.h","","int","FAR sem_t *","clockid_t","FAR const struct timespec *"
 "nxsem_close","nuttx/semaphore.h","defined(CONFIG_FS_NAMED_SEMAPHORES)","int","FAR sem_t *"
 "nxsem_destroy","nuttx/semaphore.h","","int","FAR sem_t *"
