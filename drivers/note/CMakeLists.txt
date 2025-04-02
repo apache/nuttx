@@ -31,6 +31,12 @@ if(CONFIG_DRIVERS_NOTEFILE OR CONFIG_DRIVERS_NOTELOWEROUT)
 endif()
 
 if(CONFIG_DRIVERS_NOTERAM)
+  if(NOT "${CONFIG_DRIVERS_NOTERAM_SECTION}" STREQUAL "")
+    target_compile_definitions(
+      drivers
+      PRIVATE -DDRIVERS_NOTERAM_SECTION="${CONFIG_DRIVERS_NOTERAM_SECTION}")
+  endif()
+
   list(APPEND SRCS noteram_driver.c)
 endif()
 
