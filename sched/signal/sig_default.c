@@ -303,6 +303,8 @@ static void nxsig_stop_task(int signo)
 
   if ((group->tg_waitflags & WUNTRACED) != 0)
     {
+      int semvalue;
+
       /* Return zero for exit status (we are not exiting, however) */
 
       if (group->tg_statloc != NULL)
@@ -319,11 +321,13 @@ static void nxsig_stop_task(int signo)
 
       /* Wakeup any tasks waiting for this task to exit or stop. */
 
-      while (group->tg_exitsem.semcount < 0)
+      nxsem_get_value(&group->tg_exitsem, &semvalue);
+      while (semvalue < 0)
         {
           /* Wake up the thread */
 
           nxsem_post(&group->tg_exitsem);
+          nxsem_get_value(&group->tg_exitsem, &semvalue);
         }
     }
 #endif
