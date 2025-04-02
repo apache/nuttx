@@ -65,7 +65,7 @@ build_mcuboot() {
     mcuboot_flashmode="dio"
   fi
 
-  mcuboot_flashfreq=$(sed -n 's/^CONFIG_ESPTOOLPY_FLASHFREQ_\(.*\)M=1/\1m/p' "${mcuboot_config}")
+  mcuboot_flashfreq=$(grep -oP '^CONFIG_ESPTOOLPY_FLASHFREQ=\K.*' "${mcuboot_config}")
   if [ -z "${mcuboot_flashfreq}" ]; then
     mcuboot_flashfreq="40m"
   fi
