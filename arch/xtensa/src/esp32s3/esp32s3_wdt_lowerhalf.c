@@ -494,7 +494,7 @@ static int wdt_lh_settimeout(struct watchdog_lowerhalf_s *lower,
 
       if (timeout == 0 || timeout > MWDT_MAX_TIMEOUT_MS)
         {
-          wderr("Cannot represent timeout=%" PRIu32 " > %" PRIu32 "\n",
+          wderr("Cannot represent timeout=%" PRIu32 " > %lu\n",
                 timeout, MWDT_MAX_TIMEOUT_MS);
           return -ERANGE;
         }
