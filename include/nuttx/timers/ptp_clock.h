@@ -148,16 +148,16 @@ struct ptp_ops_s
    *   Adjusts the frequency of the hardware clock.
    *
    * Input Parameters:
-   *   lower      - The instance of lower half ptp driver
-   *   scaled_ppm - Desired frequency offset from nominal frequency in parts
-   *                per million, but with a 16 bit binary fractional field.
+   *   lower - The instance of lower half ptp driver
+   *   ppb   - Desired frequency offset from nominal frequency in parts
+   *           per billion.
    *
    * Returned Value:
    *   Zero (OK) or positive on success; a negated errno value on failure.
    *
    **************************************************************************/
 
-  CODE int (*adjfine)(FAR struct ptp_lowerhalf_s *lower, long scaled_ppm);
+  CODE int (*adjfine)(FAR struct ptp_lowerhalf_s *lower, long ppb);
 
   /**************************************************************************
    * Name: adjphase
