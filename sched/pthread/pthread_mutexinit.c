@@ -92,7 +92,8 @@ int pthread_mutex_init(FAR pthread_mutex_t *mutex,
 #if defined(CONFIG_PRIORITY_INHERITANCE) || defined(CONFIG_PRIORITY_PROTECT)
   if (attr)
     {
-      status = mutex_set_protocol(&mutex->mutex, attr->proto);
+      status = mutex_set_protocol(&mutex->mutex,
+                                  SEM_TYPE_MUTEX | attr->proto);
       if (status < 0)
         {
           mutex_destroy(&mutex->mutex);
