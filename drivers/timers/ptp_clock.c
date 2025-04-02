@@ -139,7 +139,7 @@ static int ptp_clock_adjtime(FAR struct ptp_lowerhalf_s *lower,
           return -ERANGE;
         }
 
-      ret = lower->ops->adjfine(lower, tx->freq);
+      ret = lower->ops->adjfine(lower, ppb);
       upper->adj_freq = tx->freq;
     }
   else if ((tx->modes & ADJ_OFFSET) &&
