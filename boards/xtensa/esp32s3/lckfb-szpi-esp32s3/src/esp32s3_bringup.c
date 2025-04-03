@@ -315,6 +315,14 @@ int esp32s3_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_INPUT_FT5X06
+  ret = esp32s3_ft5x06_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize FT5X06 driver: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_SENSORS_BMP180
   /* Try to register BMP180 device in I2C0 */
 
