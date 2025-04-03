@@ -82,6 +82,14 @@ struct littlefs_mountpt_s
   struct lfs            lfs;
 };
 
+/* NuttX specific file attributes.
+ *
+ * If CONFIG_FS_LITTLEFS_ATTR_UPDATE is enabled, we store this structure
+ * on-disk as a littlefs user attribute with type=0.
+ *
+ * Note: the fields of this structure are in the host-endian, even on-disk.
+ */
+
 struct littlefs_attr_s
 {
   uint32_t at_ver;     /* For the later extension */
