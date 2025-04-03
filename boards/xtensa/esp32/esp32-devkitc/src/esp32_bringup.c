@@ -179,8 +179,8 @@
 #  include "espressif/esp_nxdiag.h"
 #endif
 
-#ifdef CONFIG_ESP32_ESPNOW_PKTRADIO
-#  include "esp32_espnow_pktradio.h"
+#ifdef CONFIG_ESPRESSIF_ESPNOW_PKTRADIO
+#  include "espressif/esp_espnow_pktradio.h"
 #endif
 
 #include "esp32-devkitc.h"
@@ -366,7 +366,7 @@ int esp32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_ESP32_ESPNOW_PKTRADIO
+#ifdef CONFIG_ESPRESSIF_ESPNOW_PKTRADIO
   ret = pktradio_espnow();
   if (ret < 0)
     {
