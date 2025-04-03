@@ -673,13 +673,15 @@ static void gnss_push_data(FAR void *priv, FAR const void *data,
     }
 
   circbuf_overwrite(&upper->buffer, data, bytes);
+  nxmutex_unlock(&upper->bufferlock);
 
+  nxmutex_lock(&upper->lock);
   list_for_every_entry(&upper->userlist, user, struct gnss_user_s, node)
     {
       poll_notify(&user->fds, 1, POLLIN);
     }
 
-  nxmutex_unlock(&upper->bufferlock);
+  nxmutex_unlock(&upper->lock);
 
   nxsem_get_value(&upper->buffersem, &semcount);
   while (semcount++ <= 0)
