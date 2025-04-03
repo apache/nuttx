@@ -42,6 +42,10 @@ ifeq ($(CONFIG_SENSORS_L86_XXX),y)
   CSRCS += l86xxx_uorb.c
 endif
 
+ifeq ($(CONFIG_SENSORS_MONITOR),y)
+CSRCS += sensor_monitor.c
+endif
+
 ifeq ($(CONFIG_SENSORS_GNSS),y)
   CSRCS += gnss_uorb.c
 endif
