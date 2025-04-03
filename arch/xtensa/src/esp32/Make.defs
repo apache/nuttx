@@ -215,11 +215,6 @@ CHIP_CSRCS += esp32_ble_adapter.c esp32_ble.c
 EXTRA_LIBS += -lbtdm_app
 endif
 
-ifeq ($(CONFIG_ESP32_ESPNOW_PKTRADIO),y)
-CHIP_CSRCS += esp32_espnow_pktradio.c
-EXTRA_LIBS += -lespnow
-endif
-
 #############################################################################
 # Espressif HAL for 3rd Party Platforms
 #############################################################################
