@@ -1831,6 +1831,12 @@ config ARCH_BOARD_STM32H745I_DISCO
 		STMicro STM32H745I-DISCO board based on the STMicro
 		STM32H745XI MCU.
 
+config ARCH_BOARD_STM32H750B_DK
+	bool "STM32H750B-DK board"
+	depends on ARCH_CHIP_STM32H750B
+	---help---
+		STMicro STM32H750B-DK board based on the STMicro STM32H750B MCU.
+
 config ARCH_BOARD_LINUM_STM32H753BI
 	bool "Linum (STM32H753BI) board"
 	depends on ARCH_CHIP_STM32H753BI
@@ -3512,6 +3518,7 @@ config ARCH_BOARD
 	default "nucleo-h743zi2"            if ARCH_BOARD_NUCLEO_H743ZI2
 	default "nucleo-h745zi"             if ARCH_BOARD_NUCLEO_H745ZI
 	default "stm32h745i-disco"          if ARCH_BOARD_STM32H745I_DISCO
+	default "stm32h750b-dk"             if ARCH_BOARD_STM32H750B_DK
 	default "linum-stm32h753bi"         if ARCH_BOARD_LINUM_STM32H753BI
 	default "openh743i"                 if ARCH_BOARD_OPENH743I
 	default "nucleo-l073rz"             if ARCH_BOARD_NUCLEO_L073RZ
@@ -4221,6 +4228,9 @@ source "boards/arm/stm32h7/nucleo-h745zi/Kconfig"
 endif
 if ARCH_BOARD_STM32H745I_DISCO
 source "boards/arm/stm32h7/stm32h745i-disco/Kconfig"
+endif
+if ARCH_BOARD_STM32H750B_DB
+source "boards/arm/stm32h7/stm32h750b-dk/Kconfig"
 endif
 if ARCH_BOARD_LINUM_STM32H753BI
 source "boards/arm/stm32h7/linum-stm32h753bi/Kconfig"
