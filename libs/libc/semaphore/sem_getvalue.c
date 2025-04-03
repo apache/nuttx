@@ -29,6 +29,7 @@
 #include <errno.h>
 
 #include <nuttx/semaphore.h>
+#include <nuttx/atomic.h>
 
 /****************************************************************************
  * Public Functions
@@ -64,7 +65,7 @@ int nxsem_get_value(FAR sem_t *sem, FAR int *sval)
 {
   if (sem != NULL && sval != NULL)
     {
-      *sval = sem->semcount;
+      *sval = atomic_read(NXSEM_COUNT(sem));
       return OK;
     }
 
