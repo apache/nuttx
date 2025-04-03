@@ -754,6 +754,46 @@ config ESPRESSIF_WIFI_WLAN_BUFFER_OPTIMIZATION
 
 endmenu # ESPRESSIF_WIFI
 
+config ESPRESSIF_ESPNOW_PKTRADIO
+	bool "ESPNOW pktradio support"
+	depends on ESPRESSIF_WLAN
+	depends on WIRELESS_PKTRADIO
+	default n
+	---help---
+		Enable using espnow for pktradio, the addressing of nodes is
+		based on a PANID and PANADDRESS. Node communication is limited
+		to nodes with the same PANID. There is a direct relation
+		between the PANADDRESS and the ipv6 address of a node:
+		  PANADDRESS: 0xaabb
+		  ipv6 address: AAAA 0000 0000 0000 0000 00ff fe00 bbaa
+		For local link AAAA is fe80.
+
+if ESPRESSIF_ESPNOW_PKTRADIO
+
+config ESPRESSIF_ESPNOW_PKTRADIO_FRAMELEN
+	int "ESPNOW pktradio frame length"
+	range 127 250
+	default 196
+	---help---
+		Frame size used for espnow transmitions. Ensure that this is
+		set equal for all nodes.
+
+config ESPRESSIF_ESPNOW_PKTRADIO_PANID
+	hex "ESPNOW pktradio node panid"
+	range 0x0 0xffff
+	default 0x0
+	---help---
+		PANID for espnow pktradio.
+
+config ESPRESSIF_ESPNOW_PKTRADIO_PANADDR
+       hex "ESPNOW pktradio node address"
+       range 0x0 0xffff
+       default 0xfffe
+       ---help---
+                PANADDRESS for espnow pktradio.
+
+endif #ESPRESSIF_ESPNOW_PKTRADIO
+
 config ESP_PHY_IRQSTATE_FLAGS_NUMBER
 	int "Number of IRQ status lists for PHY initialization"
 	default 3
