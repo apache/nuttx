@@ -189,11 +189,13 @@ MEMORY
    * A dummy section is used to avoid overlap. See `.ext_ram.dummy` in `esp32s3_sections.ld
    */
 
-#ifdef CONFIG_ESP32S3_APP_FORMAT_MCUBOOT
+#ifdef CONFIG_XTENSA_EXTMEM_BSS
+#  ifdef CONFIG_ESP32S3_APP_FORMAT_MCUBOOT
   extern_ram_seg(RWX) :               org = 0x3c000000 + ORIGIN(ROM),
                                       len = 0x2000000 - ORIGIN(ROM)
-#else
+#  else
   extern_ram_seg(RWX) :               org = 0x3c000020 , len = 0x2000000-0x20
+#  endif
 #endif
 }
 

@@ -303,8 +303,12 @@ SECTIONS
     . = ALIGN(8);
     _bss_start = ABSOLUTE(.);
     _sbss = ABSOLUTE(.);
-
+#ifdef CONFIG_XTENSA_EXTMEM_BSS
+    *(EXCLUDE_FILE(*libnet80211.a *libpp.a *libpython3.13.a) .bss EXCLUDE_FILE(*libnet80211.a *libpp.a *libpython3.13.a) .bss.*)
+    *(EXCLUDE_FILE(*libnet80211.a *libpp.a *libpython3.13.a) .bss EXCLUDE_FILE(*libnet80211.a *libpp.a *libpython3.13.a) COMMON)
+#else
     *(.bss .bss.*)
+#endif
     *(COMMON)
     *(.dynsbss)
     *(.sbss)
@@ -602,6 +606,7 @@ SECTIONS
    * Because to `extern_ram_seg` and `drom0_0_seg` are on the same bus
    */
 
+#ifdef CONFIG_XTENSA_EXTMEM_BSS
   .ext_ram.dummy (NOLOAD):
   {
     . = ORIGIN(extern_ram_seg);
@@ -615,12 +620,18 @@ SECTIONS
   {
     _ext_ram_bss_start = ABSOLUTE(.);
 
+    *(.extmem.bss .extmem.bss.*)
     *(.ext_ram.bss .ext_ram.bss.*)
+    *libpp.a:(.bss .bss.*)
+    *libpp.a:(COMMON)
+    *libnet80211.a:(.bss .bss.*)
+    *libnet80211.a:(COMMON)
     *libpython3.13.a:(*.PyRuntime)
-
+    *libpython3.13.a:(.bss .bss.*)
     . = ALIGN(4);
     _ext_ram_bss_end = ABSOLUTE(.);
   } > extern_ram_seg
+#endif
 
   .rtc.text :
   {
