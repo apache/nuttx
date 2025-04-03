@@ -78,6 +78,10 @@ CHIP_CSRCS += esp_wifi_utils.c
 ifeq ($(CONFIG_ESPRESSIF_WLAN),y)
 CHIP_CSRCS += esp_wlan.c
 endif
+ifeq ($(CONFIG_ESPRESSIF_ESPNOW_PKTRADIO), y)
+CHIP_CSRCS += esp_espnow_pktradio.c
+EXTRA_LIBS += -lespnow
+endif
 endif
 
 ifeq ($(CONFIG_ESPRESSIF_WIRELESS),y)
