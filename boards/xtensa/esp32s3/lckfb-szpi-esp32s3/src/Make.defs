@@ -56,3 +56,7 @@ endif
 ifeq ($(CONFIG_LCD),y)
 CSRCS += esp32s3_board_lcd.c
 endif
+
+ifeq ($(CONFIG_INPUT_FT5X06),y)
+CSRCS += esp32s3_ft5x06.c
+endif

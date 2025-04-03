@@ -40,6 +40,9 @@
 #define GPIO_LCD_RST        (-1)
 #define SZPI_LCD_CS_PATH    "/dev/gpio0"
 
+#define FT5X06_I2C_ADDRESS  (0x38)
+#define FT5X06_FREQUENCY    (400000)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -184,6 +187,10 @@ int esp_openeth_initialize(void);
 
 #ifdef CONFIG_IOEXPANDER_PCA9557
 int esp32s3_pca9557_initialize(void);
+#endif
+
+#ifdef CONFIG_INPUT_FT5X06
+int esp32s3_ft5x06_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
