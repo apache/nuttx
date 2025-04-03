@@ -537,7 +537,7 @@ static void composite_unbind(FAR struct usbdevclass_driver_s *driver,
 
       /* Unbind the constituent class drivers */
 
-      flags = enter_critical_section();
+      flags = spin_lock_irqsave_nopreempt(&priv->lock);
       for (i = 0; i < priv->ndevices; i++)
         {
           CLASS_UNBIND(priv->device[i].dev, dev);
@@ -552,7 +552,7 @@ static void composite_unbind(FAR struct usbdevclass_driver_s *driver,
           priv->ctrlreq = NULL;
         }
 
-      leave_critical_section(flags);
+      spin_unlock_irqrestore_nopreempt(&priv->lock, flags);
     }
 }
 
@@ -864,7 +864,7 @@ static void composite_disconnect(FAR struct usbdevclass_driver_s *driver,
    * the disconnection.
    */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave_nopreempt(&priv->lock);
 
   for (i = 0; i < priv->ndevices; i++)
     {
@@ -872,7 +872,7 @@ static void composite_disconnect(FAR struct usbdevclass_driver_s *driver,
     }
 
   priv->config = COMPOSITE_CONFIGIDNONE;
-  leave_critical_section(flags);
+  spin_unlock_irqrestore_nopreempt(&priv->lock, flags);
 
   /* Perform the soft connect function so that we will we can be
    * re-enumerated.
@@ -920,14 +920,14 @@ static void composite_suspend(FAR struct usbdevclass_driver_s *driver,
 
   /* Forward the suspend event to the constituent devices */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave_nopreempt(&priv->lock);
 
   for (i = 0; i < priv->ndevices; i++)
     {
       CLASS_SUSPEND(priv->device[i].dev, priv->usbdev);
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore_nopreempt(&priv->lock, flags);
 }
 
 /****************************************************************************
@@ -967,14 +967,14 @@ static void composite_resume(FAR struct usbdevclass_driver_s *driver,
 
   /* Forward the resume event to the constituent devices */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave_nopreempt(&priv->lock);
 
   for (i = 0; i < priv->ndevices; i++)
     {
       CLASS_RESUME(priv->device[i].dev, priv->usbdev);
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore_nopreempt(&priv->lock, flags);
 }
 
 /****************************************************************************
@@ -1040,6 +1040,7 @@ FAR void *composite_initialize(FAR const struct usbdev_devdescs_s *devdescs,
   priv->descs       = devdescs;
   priv->cfgdescsize = USB_SIZEOF_CFGDESC;
   priv->ninterfaces = 0;
+  spin_lock_init(&priv->lock);
 
   /* Get the constituent class driver objects */
 
