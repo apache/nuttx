@@ -163,6 +163,11 @@ extern uint8_t _instruction_reserved_end[];
 extern uint8_t _rodata_reserved_start[];
 extern uint8_t _rodata_reserved_end[];
 
+#ifdef CONFIG_XTENSA_EXTMEM_BSS
+extern uintptr_t _ext_ram_bss_start;
+extern uintptr_t _ext_ram_bss_end;
+#endif
+
 /* Address of the CPU0 IDLE thread */
 
 uint32_t g_idlestack[IDLETHREAD_STACKWORDS]
@@ -415,6 +420,11 @@ noinstrument_function void noreturn_function IRAM_ATTR __esp32s3_start(void)
         }
 #  endif  // CONFIG_ESP32S3_SPIRAM_MEMTEST
     }
+#endif
+
+#ifdef CONFIG_XTENSA_EXTMEM_BSS
+  memset(&_ext_ram_bss_start, 0,
+         (&_ext_ram_bss_end - &_ext_ram_bss_start) * sizeof(uintptr_t));
 #endif
 
   /* Setup the syscall table needed by the ROM code */

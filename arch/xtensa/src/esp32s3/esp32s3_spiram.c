@@ -123,8 +123,10 @@ static struct smp_call_data_s g_call_data =
 SMP_CALL_INITIALIZER(pause_cpu_handler, NULL);
 #endif
 
+#ifdef CONFIG_XTENSA_EXTMEM_BSS
 extern uint8_t _ext_ram_bss_start;
 extern uint8_t _ext_ram_bss_end;
+#endif
 
 /****************************************************************************
  * ROM Function Prototypes
@@ -397,7 +399,7 @@ int IRAM_ATTR esp_spiram_init_cache(void)
   uint32_t mapped_vaddr_size;
   uint32_t target_mapped_vaddr_start;
   uint32_t target_mapped_vaddr_end;
-  uint32_t ext_bss_size;
+  uint32_t ext_bss_size = 0;
 
   int ret = psram_get_available_size(&psram_size);
   if (ret != OK)
@@ -478,8 +480,10 @@ int IRAM_ATTR esp_spiram_init_cache(void)
 
   cache_resume_dcache(0);
 
+#ifdef CONFIG_XTENSA_EXTMEM_BSS
   ext_bss_size = ((intptr_t)&_ext_ram_bss_end -
                   (intptr_t)&_ext_ram_bss_start);
+#endif
 
   g_allocable_vaddr_start = g_mapped_vaddr_start + ext_bss_size;
   g_allocable_vaddr_end = g_mapped_vaddr_start + g_mapped_size -
