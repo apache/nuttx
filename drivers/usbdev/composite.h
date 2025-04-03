@@ -36,6 +36,7 @@
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbdev.h>
 #include <nuttx/usb/usbdev_trace.h>
+#include <nuttx/spinlock.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -88,6 +89,7 @@ struct composite_dev_s
   uint8_t                             ndevices;                      /* Num devices in this composite device */
   struct composite_devobj_s           device[NUM_DEVICES_TO_HANDLE]; /* Device class object */
   FAR const struct usbdev_devdescs_s *descs;                         /* Device descriptors */
+  spinlock_t                          lock;
 };
 
 #endif /* __DRIVERS_USBDEV_COMPOSITE_H */
