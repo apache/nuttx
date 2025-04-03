@@ -1084,12 +1084,9 @@ int ft5x06_register(FAR struct i2c_master_s *i2c,
   /* Debug-only sanity checks */
 
   DEBUGASSERT(i2c != NULL && config != NULL && minor >= 0 && minor < 100);
-#ifdef CONFIG_FT5X06_POLLMODE
-  DEBUGASSERT(config->wakeup != NULL && config->nreset != NULL);
-#else
+#ifndef CONFIG_FT5X06_POLLMODE
   DEBUGASSERT(config->attach != NULL && config->enable != NULL &&
-              config->clear  != NULL && config->wakeup != NULL &&
-              config->nreset != NULL);
+              config->clear  != NULL);
 #endif
 
   /* Create and initialize a FT5x06 device driver instance */
