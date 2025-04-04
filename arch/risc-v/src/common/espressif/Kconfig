@@ -303,6 +303,16 @@ config ESPRESSIF_USBSERIAL
 	select OTHER_UART_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
+config ESPRESSIF_DEDICATED_GPIO
+	bool "Dedicated GPIO"
+	default n
+	---help---
+		Enable dedicated GPIO support for faster response time.
+		Dedicated GPIO is suitable for faster response times required
+		applications like simulate serial/parallel interfaces in a bit-banging way.
+		It can work as pin grouping and you can use any pin up to 8 pins for
+		input and 8 pins for output for dedicated gpio in total.
+
 config ESPRESSIF_GPIO_IRQ
 	bool "GPIO pin interrupts"
 	default n

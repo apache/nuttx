@@ -107,6 +107,10 @@ ifeq ($(CONFIG_ESP_SDM),y)
 	CHIP_CSRCS += esp_sdm.c
 endif
 
+ifeq ($(CONFIG_ESPRESSIF_DEDICATED_GPIO),y)
+	CHIP_CSRCS += esp_dedic_gpio.c
+endif
+
 ifeq ($(CONFIG_ESPRESSIF_TEMP),y)
 	CHIP_CSRCS += esp_temperature_sensor.c
 endif
