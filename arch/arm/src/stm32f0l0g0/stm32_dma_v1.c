@@ -52,7 +52,7 @@
  */
 
 #ifdef CONFIG_STM32F0L0G0_HAVE_DMAMUX
-#  error DMAMUX not supported yet
+#  error DMAMUX not supported here. Look at stm32_dma_v1mux.c
 #endif
 
 /****************************************************************************

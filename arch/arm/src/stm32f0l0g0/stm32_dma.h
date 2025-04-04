@@ -32,6 +32,10 @@
 
 #include "hardware/stm32_dma_v1.h"
 
+#ifdef CONFIG_STM32F0L0G0_HAVE_DMAMUX
+#  include "hardware/stm32_dmamux.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/

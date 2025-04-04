@@ -59,6 +59,8 @@
 #    include "hardware/stm32l0_pinmap.h"
 #  elif defined(CONFIG_ARCH_CHIP_STM32G0)
 #    include "hardware/stm32g0_pinmap.h"
+#  elif defined(CONFIG_ARCH_CHIP_STM32C0)
+#    include "hardware/stm32c0_pinmap.h"
 #  else
 #    error "Unsupported STM32 M0 pin map"
 #  endif

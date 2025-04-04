@@ -29,13 +29,16 @@ list(
   stm32_gpio.c
   stm32_exti_gpio.c
   stm32_irq.c
-  stm32_lse.c
   stm32_lowputc.c
   stm32_serial.c
   stm32_rcc.c)
 
+if(CONFIG_STM32F0L0G0_RTC_LSECLOCK OR CONFIG_LCD_LSECLOCK)
+  list(APPEND SRCS stm32_lse.c)
+endif()
+
 if(CONFIG_STM32F0L0G0_DMA)
-  list(APPEND SRCS stm32_dma_v1.c)
+  list(APPEND SRCS stm32_dma.c)
 endif()
 
 if(CONFIG_STM32F0L0G0_PWR)

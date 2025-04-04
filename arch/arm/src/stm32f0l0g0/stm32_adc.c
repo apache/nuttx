@@ -59,8 +59,8 @@
 
 #if defined(CONFIG_STM32F0L0G0_ADC1)
 
-#if !defined(CONFIG_STM32F0L0G0_STM32L0)
-#  error Only L0 supported for now
+#if defined(CONFIG_STM32F0L0G0_STM32F0) || defined(CONFIG_STM32F0L0G0_STM32G0)
+#  error Not tested
 #endif
 
 /* At the moment there is no proper implementation for timers external
@@ -116,8 +116,13 @@
 #endif
 
 #if defined(ADC_HAVE_DMA) || (ADC_MAX_SAMPLES == 1)
-#  define ADC_SMP1_DEFAULT    ADC_SMPR_13p5
-#  define ADC_SMP2_DEFAULT    ADC_SMPR_13p5
+#  ifdef ADC_SMPR_13p5
+#    define ADC_SMP1_DEFAULT  ADC_SMPR_13p5
+#    define ADC_SMP2_DEFAULT  ADC_SMPR_13p5
+#  else
+#    define ADC_SMP1_DEFAULT  ADC_SMPR_12p5
+#    define ADC_SMP2_DEFAULT  ADC_SMPR_12p5
+#  endif
 #else /* Slow down sampling frequency */
 #  define ADC_SMP1_DEFAULT    ADC_SMPR_239p5
 #  define ADC_SMP2_DEFAULT    ADC_SMPR_239p5
@@ -134,7 +139,9 @@
  *       (ST manual)
  */
 
-#if defined(CONFIG_STM32F0L0G0_STM32F0) || defined(CONFIG_STM32F0L0G0_STM32L0)
+#if defined(CONFIG_STM32F0L0G0_STM32F0) || \
+    defined(CONFIG_STM32F0L0G0_STM32L0) || \
+    defined(CONFIG_STM32F0L0G0_STM32C0)
 #  define ADC_CHANNELS_NUMBER 19
 #else
 #  error "Not supported"

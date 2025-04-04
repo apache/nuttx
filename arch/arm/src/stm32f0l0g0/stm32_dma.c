@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32f0l0g0/hardware/stm32_flash.h
+ * arch/arm/src/stm32f0l0g0/stm32_dma.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,26 +20,20 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32_FLASH_H
-#define __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32_FLASH_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include "chip.h"
 
-#if defined(CONFIG_ARCH_CHIP_STM32F0)
-#  include "hardware/stm32f0_flash.h"
-#elif defined(CONFIG_ARCH_CHIP_STM32L0)
-#  include "hardware/stm32l0_flash.h"
-#elif defined(CONFIG_ARCH_CHIP_STM32G0)
-#  include "hardware/stm32g0_flash.h"
-#elif defined(CONFIG_ARCH_CHIP_STM32C0)
-#  include "hardware/stm32c0_flash.h"
+#if defined(CONFIG_STM32F0L0G0_HAVE_DMAMUX)
+#  include "stm32_dma_v1mux.c"
 #else
-#  error "Unsupported STM32 M0 FLASH"
+#  include "stm32_dma_v1.c"
 #endif
 
-#endif /* __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32_FLASH_H */
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
