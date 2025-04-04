@@ -1,5 +1,5 @@
 # ##############################################################################
-# boards/arm/stm32f7/stm32f746g-disco/src/CMakeLists.txt
+# boards/arm/stm32l4/nucleo-l476rg/src/CMakeLists.txt
 #
 # SPDX-License-Identifier: Apache-2.0
 #

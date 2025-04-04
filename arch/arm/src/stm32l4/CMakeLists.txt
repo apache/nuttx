@@ -1,5 +1,5 @@
 # ##############################################################################
-# arch/arm/src/stm32f7/CMakeLists.txt
+# arch/arm/src/stm32l4/CMakeLists.txt
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -105,7 +105,6 @@ if(CONFIG_USBHOST)
   endif()
 endif()
 
-
 if(CONFIG_USBHOST)
   if(CONFIG_USBHOST_TRACE)
     list(APPEND SRCS stm32l4_usbhost_trace.c)
@@ -117,14 +116,8 @@ if(CONFIG_USBHOST)
 endif()
 
 if(CONFIG_PM)
-  list(
-    APPEND
-    SRCS
-    stm32l4_pmlpr.c
-    stm32l4_pmsleep.c
-    stm32l4_pmstandby.c
-    stm32l4_pmstop.c
-  )
+  list(APPEND SRCS stm32l4_pmlpr.c stm32l4_pmsleep.c stm32l4_pmstandby.c
+       stm32l4_pmstop.c)
 
   if(NOT CONFIG_ARCH_CUSTOM_PMINIT)
     list(APPEND SRCS stm32l4_pminitialize.c)
@@ -136,15 +129,15 @@ if(CONFIG_STM32L4_PWR)
 endif()
 
 if(CONFIG_STM32L4_RTC)
-if(CONFIG_RTC_ALARM)
-  list(APPEND SRCS stm32l4_exti_alarm.c)
-endif()
-if(CONFIG_RTC_PERIODIC)
-  list(APPEND SRCS stm32l4_exti_wakeup.c)
-endif()
-if(CONFIG_RTC_DRIVER)
-  list(APPEND SRCS stm32l4_rtc_lowerhalf.c stm32l4_rtc.c)
-endif()
+  if(CONFIG_RTC_ALARM)
+    list(APPEND SRCS stm32l4_exti_alarm.c)
+  endif()
+  if(CONFIG_RTC_PERIODIC)
+    list(APPEND SRCS stm32l4_exti_wakeup.c)
+  endif()
+  if(CONFIG_RTC_DRIVER)
+    list(APPEND SRCS stm32l4_rtc_lowerhalf.c stm32l4_rtc.c)
+  endif()
 endif()
 
 if(CONFIG_DEBUG_FEATURES)
