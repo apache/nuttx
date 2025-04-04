@@ -281,15 +281,6 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
     }
 #endif
 
-  /* Initialize thread local storage */
-
-  ret = tls_init_info(&ptcb->cmn);
-  if (ret != OK)
-    {
-      errcode = -ret;
-      goto errout_with_tcb;
-    }
-
   /* Should we use the priority and scheduler specified in the pthread
    * attributes?  Or should we use the current thread's priority and
    * scheduler?
@@ -394,6 +385,15 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
   if (ret != OK)
     {
       errcode = EBUSY;
+      goto errout_with_tcb;
+    }
+
+  /* Initialize thread local storage */
+
+  ret = tls_init_info(&ptcb->cmn);
+  if (ret != OK)
+    {
+      errcode = -ret;
       goto errout_with_tcb;
     }
 
