@@ -1029,18 +1029,16 @@ static void adc_watchdog_cfg(struct stm32_dev_s *priv)
 
 static void adc_calibrate(struct stm32_dev_s *priv)
 {
-#if 0 /* Doesn't work */
-  /* Calibrate the ADC */
+  /* Calibrate the ADC.
+   *   1. ADC must be disabled
+   *   2. the voltage regulater must be enabled
+   */
 
-  adc_modifyreg(priv, STM32_ADC_CR_OFFSET, ADC_CR_ADCALDIF, AD_CR_ADCAL);
+  adc_modifyreg(priv, STM32_ADC_CR_OFFSET, 0, ADC_CR_ADCAL);
 
   /* Wait for the calibration to complete */
 
   while ((adc_getreg(priv, STM32_ADC_CR_OFFSET) & ADC_CR_ADCAL) != 0);
-
-#else
-  UNUSED(priv);
-#endif
 }
 
 /****************************************************************************
@@ -1072,7 +1070,13 @@ static void adc_mode_cfg(struct stm32_dev_s *priv)
 
 static void adc_voltreg_cfg(struct stm32_dev_s *priv)
 {
-  UNUSED(priv);
+  /* Enable voltage regulator - required by ADC calibration */
+
+  adc_putreg(priv, STM32_ADC_CR_OFFSET, ADC_CR_ADVREGEN);
+
+  /* Wait for ADC voltage regulator start-up */
+
+  up_udelay(50);
 }
 
 /****************************************************************************
