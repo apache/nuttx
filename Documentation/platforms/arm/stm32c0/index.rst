@@ -1,16 +1,18 @@
 ==========
-ST STM32G0
+ST STM32C0
 ==========
 
 Supported MCUs
 ==============
 
-=========  ======= ================
+=========  ======= =======================
 MCU        Support Note
-=========  ======= ================
-STM32G0x0  Yes     Value line
-STM32G0x1  Yes     Access line
-=========  ======= ================
+=========  ======= =======================
+STM32C051  Yes     
+STM32C071  Yes     USB not supported yet
+STM32C091  Yes     
+STM32C092  Yes     FDCAN not supported yet
+=========  ======= =======================
 
 Peripheral Support
 ==================
@@ -25,31 +27,21 @@ PM          No
 RCC         Yes      
 CSR         No
 GPIO        Yes
-SYSCFG      Yes      
+SYSCFG      No
 DMA         Yes
 DMAMUX      Yes
 EXTI        Yes
 CRC         No
 ADC         Yes
-DAC         No
-VREFBUF     ?
-COMP        No
-RNG         Yes
-AES         Yes
 TIM         Yes
-LPTIM       No
 IRTIM       No
 IWDG        No
 WWDG        No
-RTC         No
-TAMP        No
 I2C         Yes
 USART       Yes
-LPUSART     No
 SPI         Yes
-UCPD        No
-USB         ?
-HDIM_CEC    No
+FDCAN       No
+USB         No
 ==========  =======  =====
 
 Supported Boards
