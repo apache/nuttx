@@ -185,14 +185,25 @@
 
 /* ADC sample time register */
 
-#define ADC_SMPR_1p5                (0)       /* 000: 1.5 cycles */
-#define ADC_SMPR_7p5                (1)       /* 001: 7.5 cycles */
-#define ADC_SMPR_13p5               (2)       /* 010: 13.5 cycles */
-#define ADC_SMPR_28p5               (3)       /* 011: 28.5 cycles */
-#define ADC_SMPR_41p5               (4)       /* 100: 41.5 cycles */
-#define ADC_SMPR_55p5               (5)       /* 101: 55.5 cycles */
-#define ADC_SMPR_71p5               (6)       /* 110: 71.5 cycles */
-#define ADC_SMPR_239p5              (7)       /* 111: 239.5 cycles */
+#ifdef CONFIG_ARCH_CHIP_STM32C0
+#  define ADC_SMPR_1p5              (0)       /* 000: 1.5 cycles */
+#  define ADC_SMPR_3p5              (1)       /* 001: 3.5 cycles */
+#  define ADC_SMPR_7p5              (2)       /* 010: 7.5 cycles */
+#  define ADC_SMPR_12p5             (3)       /* 011: 12.5 cycles */
+#  define ADC_SMPR_19p5             (4)       /* 100: 19.5 cycles */
+#  define ADC_SMPR_39p5             (5)       /* 101: 39.5 cycles */
+#  define ADC_SMPR_79p5             (6)       /* 110: 79.5 cycles */
+#  define ADC_SMPR_160p5            (7)       /* 111: 160.5 cycles */
+#else
+#  define ADC_SMPR_1p5              (0)       /* 000: 1.5 cycles */
+#  define ADC_SMPR_7p5              (1)       /* 001: 7.5 cycles */
+#  define ADC_SMPR_13p5             (2)       /* 010: 13.5 cycles */
+#  define ADC_SMPR_28p5             (3)       /* 011: 28.5 cycles */
+#  define ADC_SMPR_41p5             (4)       /* 100: 41.5 cycles */
+#  define ADC_SMPR_55p5             (5)       /* 101: 55.5 cycles */
+#  define ADC_SMPR_71p5             (6)       /* 110: 71.5 cycles */
+#  define ADC_SMPR_239p5            (7)       /* 111: 239.5 cycles */
+#endif
 
 #define ADC_SMPR_SMP1_SHIFT         (0)       /* Bits 0-2: Sampling time selection 1 */
 #define ADC_SMPR_SMP1_MASK          (7 << ADC_SMPR_SMP_SHIFT)

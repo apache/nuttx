@@ -36,6 +36,8 @@
 #  include "hardware/stm32l0_exti.h"
 #elif defined(CONFIG_ARCH_CHIP_STM32G0)
 #  include "hardware/stm32g0_exti.h"
+#elif defined(CONFIG_ARCH_CHIP_STM32C0)
+#  include "hardware/stm32c0_exti.h"
 #else
 #  error "Unrecognized STM32 M0 EXTI"
 #endif

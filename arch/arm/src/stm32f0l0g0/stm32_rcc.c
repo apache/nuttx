@@ -73,6 +73,8 @@
 #  include "stm32l0_rcc.c"
 #elif defined(CONFIG_ARCH_CHIP_STM32G0)
 #  include "stm32g0_rcc.c"
+#elif defined(CONFIG_ARCH_CHIP_STM32C0)
+#  include "stm32c0_rcc.c"
 #else
 #  error "Unsupported STM32F0/L0 RCC"
 #endif

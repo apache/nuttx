@@ -152,9 +152,11 @@
 /* Import DMAMUX map */
 
 #if defined(CONFIG_STM32F0L0G0_STM32G0)
-#  include "chip/stm32g0_dmamux.h"
+#  include "hardware/stm32g0_dmamux.h"
+#elif defined(CONFIG_STM32F0L0G0_STM32C0)
+#  include "hardware/stm32c0_dmamux.h"
 #else
-#  error "Unsupported STM32 F0/L0/G0 sub family"
+#  error "Unsupported STM32 M0 sub family"
 #endif
 
 #endif /* __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32_DMAMUX_H */

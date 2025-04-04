@@ -33,6 +33,8 @@
 #  define STM32_GPIO_VERY_LOW_SPEED  1      /* Have very low speed operation (400KHz) */
 #elif defined(CONFIG_ARCH_CHIP_STM32G0)
 #  define STM32_GPIO_VERY_LOW_SPEED  1      /* Have very low speed operation */
+#elif defined(CONFIG_ARCH_CHIP_STM32C0)
+#  define STM32_GPIO_VERY_LOW_SPEED  1      /* Have very low speed operation */
 #else
 #  error "Unsupported STM32 M0 family"
 #endif

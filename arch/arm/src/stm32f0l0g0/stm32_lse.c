@@ -80,6 +80,18 @@ void stm32_rcc_enablelse(void)
     {
     }
 
+#elif defined(CONFIG_ARCH_CHIP_STM32C0)
+  /* Enable the External Low-Speed (LSE) oscillator by setting the LSEON bit
+   * the RCC CSR1 register.
+   */
+
+  modifyreg32(STM32_RCC_CSR1, 0, RCC_CSR1_LSEON);
+
+  /* Wait for the LSE clock to be ready */
+
+  while ((getreg32(STM32_RCC_CSR1) & RCC_CSR1_LSERDY) == 0)
+    {
+    }
 #endif
 
   /* Disable backup domain access if it was disabled on entry */

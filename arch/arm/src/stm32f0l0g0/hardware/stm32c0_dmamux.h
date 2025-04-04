@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32f0l0g0/hardware/stm32_flash.h
+ * arch/arm/src/stm32f0l0g0/hardware/stm32c0_dmamux.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32_FLASH_H
-#define __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32_FLASH_H
+#ifndef __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32C0_DMAMUX_H
+#define __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32C0_DMAMUX_H
 
 /****************************************************************************
  * Included Files
@@ -30,16 +30,28 @@
 #include <nuttx/config.h>
 #include "chip.h"
 
-#if defined(CONFIG_ARCH_CHIP_STM32F0)
-#  include "hardware/stm32f0_flash.h"
-#elif defined(CONFIG_ARCH_CHIP_STM32L0)
-#  include "hardware/stm32l0_flash.h"
-#elif defined(CONFIG_ARCH_CHIP_STM32G0)
-#  include "hardware/stm32g0_flash.h"
-#elif defined(CONFIG_ARCH_CHIP_STM32C0)
-#  include "hardware/stm32c0_flash.h"
-#else
-#  error "Unsupported STM32 M0 FLASH"
-#endif
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32_FLASH_H */
+/* DMAMUX1 mapping **********************************************************/
+
+/* NOTE: DMAMUX1 channels 0 to 7 are connected to DMA1 channels 0 to 7 */
+
+#define DMAMUX1_REQ_GEN0       (1)
+#define DMAMUX1_REQ_GEN1       (2)
+#define DMAMUX1_REQ_GEN2       (3)
+#define DMAMUX1_REQ_GEN3       (4)
+#define DMAMUX1_ADC1           (5)
+
+/* TODO: ... */
+
+/* DMAP for DMA1 */
+
+#define DMAMAP_DMA1_REQGEN0     DMAMAP_MAP(DMA1, DMAMUX1_REQ_GEN0)
+#define DMAMAP_DMA1_REQGEN1     DMAMAP_MAP(DMA1, DMAMUX1_REQ_GEN1)
+#define DMAMAP_DMA1_REQGEN2     DMAMAP_MAP(DMA1, DMAMUX1_REQ_GEN2)
+#define DMAMAP_DMA1_REQGEN3     DMAMAP_MAP(DMA1, DMAMUX1_REQ_GEN3)
+#define DMAMAP_DMA1_ADC1        DMAMAP_MAP(DMA1, DMAMUX1_ADC1)
+
+#endif /* __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32C0_DMAMUX_H */
