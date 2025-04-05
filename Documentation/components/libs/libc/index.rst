@@ -43,7 +43,7 @@ functions.  So we have::
   inttypes  - inttypes.h
   machine   - Various architecture-specific implementations.
   math      - math.h
-  modlib    - Part of module and shared library logic: nuttx/lib/modlib.h
+  elf    - Part of module and shared library logic: nuttx/lib/elf.h
   net       - Various network-related header files: netinet/ether.h, arpa/inet.h
   pthread   - pthread.h
   pwd       - pwd.h

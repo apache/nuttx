@@ -27,7 +27,7 @@
 #include <nuttx/config.h>
 
 #include <nuttx/module.h>
-#include <nuttx/lib/modlib.h>
+#include <nuttx/lib/elf.h>
 
 #ifdef CONFIG_MODULE
 
@@ -55,7 +55,7 @@
 
 FAR void *modhandle(FAR const char *name)
 {
-  return modlib_gethandle(name);
+  return libelf_gethandle(name);
 }
 
 #endif /* CONFIG_MODULE */
