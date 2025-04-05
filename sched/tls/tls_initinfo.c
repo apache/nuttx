@@ -73,5 +73,10 @@ int tls_init_info(FAR struct tcb_s *tcb)
   /* Attach per-task info in group to TLS */
 
   info->tl_task = tcb->group->tg_info;
+
+  /* Thread ID */
+
+  info->tl_tid = tcb->pid;
+
   return OK;
 }

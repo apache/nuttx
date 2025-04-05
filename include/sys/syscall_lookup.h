@@ -29,7 +29,6 @@
 SYSCALL_LOOKUP1(_exit,                     1)
 SYSCALL_LOOKUP(_assert,                    4)
 SYSCALL_LOOKUP(getpid,                     0)
-SYSCALL_LOOKUP(gettid,                     0)
 SYSCALL_LOOKUP(prctl,                      2)
 
 #ifdef CONFIG_SCHED_HAVE_PARENT
