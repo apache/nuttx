@@ -31,6 +31,7 @@
 #include <fcntl.h>
 #include <debug.h>
 #include <errno.h>
+#include <sys/ioctl.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
@@ -39,6 +40,7 @@
 #include <nuttx/lcd/lcd.h>
 #include <nuttx/lcd/st7789.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/timers/pwm.h>
 
 #include <arch/board/board.h>
 
@@ -58,6 +60,7 @@
 
 static struct spi_dev_s *g_spidev;
 static struct lcd_dev_s *g_lcd;
+int g_pwm_pid;
 
 /****************************************************************************
  * Public Functions
@@ -78,6 +81,7 @@ static struct lcd_dev_s *g_lcd;
 
 int board_lcd_initialize(void)
 {
+  struct pwm_info_s pwm;
   ssize_t n;
   int fd;
 
@@ -98,7 +102,34 @@ int board_lcd_initialize(void)
       return -EIO;
     }
 
-  /* Turn on LCD backlight */
+  /* Turn on LCD backlight (10% brightness) */
+
+  pwm.frequency = SZPI_LCD_PWM_FREQ;
+  pwm.duty = SZPI_LCD_PWM_DUTY;
+
+  g_pwm_pid = nx_open(SZPI_LCD_PWM_PATH, O_RDONLY);
+  if (g_pwm_pid < 0)
+    {
+      pwmerr("Open PWM failed\n");
+      return -ENODEV;
+    }
+
+  fd = ioctl(g_pwm_pid, PWMIOC_SETCHARACTERISTICS,
+             (unsigned long)((uintptr_t)&pwm));
+  if (fd < 0)
+    {
+      pwmerr("Set PWM failed\n");
+      nx_close(g_pwm_pid);
+      return -ENOTTY;
+    }
+
+  fd = ioctl(g_pwm_pid, PWMIOC_START, 0);
+  if (fd < 0)
+    {
+      pwmerr("Start PWM failed\n");
+      nx_close(g_pwm_pid);
+      return -ENOTTY;
+    }
 
   g_spidev = esp32s3_spibus_initialize(ESP32S3_SPI2);
   if (!g_spidev)
@@ -164,4 +195,8 @@ void board_lcd_uninitialize(void)
   /* Turn the display off */
 
   g_lcd->setpower(g_lcd, 0);
+
+  /* Close backlight PWM */
+
+  nx_close(g_pwm_pid);
 }
