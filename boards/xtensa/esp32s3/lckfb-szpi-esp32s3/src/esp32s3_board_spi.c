@@ -90,23 +90,24 @@ int esp32s3_spi2_cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 #if defined(CONFIG_ESP32S3_SPI2) && defined(CONFIG_ESP32S3_SPI_UDCS)
 void esp32s3_spi2_select(struct spi_dev_s *dev, uint32_t devid, bool select)
 {
+  struct file f;
   ssize_t n;
-  int fd;
+  int ret;
 
-  fd = nx_open(SZPI_LCD_CS_PATH, O_RDWR);
-  if (fd < 0)
+  ret = file_open(&f, SZPI_LCD_CS_PATH, O_RDWR);
+  if (ret < 0)
     {
       spierr("open C/S pin failed\n");
       return;
     }
 
-  n = nx_write(fd, select ? "0" : "1", 1);
+  n = file_write(&f, select ? "0" : "1", 1);
   if (n != 1)
     {
       spierr("write C/S pin failed\n");
     }
 
-  nx_close(fd);
+  file_close(&f);
 }
 #endif
 

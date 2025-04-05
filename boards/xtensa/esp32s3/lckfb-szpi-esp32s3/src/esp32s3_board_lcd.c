@@ -31,6 +31,7 @@
 #include <fcntl.h>
 #include <debug.h>
 #include <errno.h>
+#include <sys/ioctl.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
@@ -39,6 +40,7 @@
 #include <nuttx/lcd/lcd.h>
 #include <nuttx/lcd/st7789.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/timers/pwm.h>
 
 #include <arch/board/board.h>
 
@@ -58,6 +60,7 @@
 
 static struct spi_dev_s *g_spidev;
 static struct lcd_dev_s *g_lcd;
+static struct file g_pwm_file;
 
 /****************************************************************************
  * Public Functions
@@ -78,27 +81,56 @@ static struct lcd_dev_s *g_lcd;
 
 int board_lcd_initialize(void)
 {
+  struct pwm_info_s pwm;
+  struct file f;
   ssize_t n;
-  int fd;
+  int ret;
 
   /* Pull down C/S */
 
-  fd = nx_open(SZPI_LCD_CS_PATH, O_RDWR);
-  if (fd < 0)
+  ret = file_open(&f, SZPI_LCD_CS_PATH, O_RDWR);
+  if (ret < 0)
     {
       spierr("open C/S pin failed\n");
       return -ENODEV;
     }
 
-  n = nx_write(fd, "1", 1);
-  nx_close(fd);
+  n = file_write(&f, "1", 1);
+  file_close(&f);
   if (n != 1)
     {
       spierr("write C/S pin failed\n");
       return -EIO;
     }
 
-  /* Turn on LCD backlight */
+  /* Turn on LCD backlight (10% brightness) */
+
+  pwm.frequency = SZPI_LCD_PWM_FREQ;
+  pwm.duty = SZPI_LCD_PWM_DUTY;
+
+  ret = file_open(&g_pwm_file, SZPI_LCD_PWM_PATH, O_RDONLY);
+  if (ret < 0)
+    {
+      pwmerr("Open PWM failed\n");
+      return -ENODEV;
+    }
+
+  ret = file_ioctl(&g_pwm_file, PWMIOC_SETCHARACTERISTICS,
+                   (unsigned long)((uintptr_t)&pwm));
+  if (ret < 0)
+    {
+      pwmerr("Set PWM failed\n");
+      file_close(&g_pwm_file);
+      return -ENOTTY;
+    }
+
+  ret = file_ioctl(&g_pwm_file, PWMIOC_START, 0);
+  if (ret < 0)
+    {
+      pwmerr("Start PWM failed\n");
+      file_close(&g_pwm_file);
+      return -ENOTTY;
+    }
 
   g_spidev = esp32s3_spibus_initialize(ESP32S3_SPI2);
   if (!g_spidev)
@@ -161,7 +193,19 @@ struct lcd_dev_s *board_lcd_getdev(int devno)
 
 void board_lcd_uninitialize(void)
 {
+  int ret;
+
   /* Turn the display off */
 
   g_lcd->setpower(g_lcd, 0);
+
+  /* Close backlight PWM */
+
+  ret = file_ioctl(&g_pwm_file, PWMIOC_STOP, 0);
+  if (ret < 0)
+    {
+      pwmerr("Stop PWM failed\n");
+    }
+
+  file_close(&g_pwm_file);
 }
