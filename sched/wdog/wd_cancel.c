@@ -65,6 +65,8 @@ int wd_cancel(FAR struct wdog_s *wdog)
 
   flags = spin_lock_irqsave(&g_wdspinlock);
 
+  wdog->period = 0;
+
   /* Make sure that the watchdog is valid and still active. */
 
   if (wdog == NULL || !WDOG_ISACTIVE(wdog))
