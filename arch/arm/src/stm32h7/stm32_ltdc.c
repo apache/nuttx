@@ -906,6 +906,8 @@ static struct stm32_ltdcdev_s g_vtable =
 #else
       .yres_virtual    = STM32_LTDC_HEIGHT,
 #endif
+      .xoffset = 0,
+      .yoffset = 0
     },
   .vinfo =
     {
@@ -1491,6 +1493,10 @@ static int stm32_ltdcirq(int irq, void *context, void *arg)
       reginfo("Register reloaded\n");
       putreg32(LTDC_ICR_CRRIF, STM32_LTDC_ICR);
       priv->error = OK;
+
+#if defined(CONFIG_STM32H7_LTDC_FB_DOUBLE_BUFFER)
+      fb_remove_paninfo(&g_vtable.vtable, FB_NO_OVERLAY);
+#endif
     }
   else if (regval & LTDC_IER_LIE)
     {
@@ -2560,7 +2566,6 @@ static int stm32_waitforvsync(struct fb_vtable_s *vtable)
 static int stm32_pandisplay(struct fb_vtable_s *vtable,
                             struct fb_planeinfo_s *pinfo)
 {
-  int ret = 0;
   DEBUGASSERT(vtable != NULL && vtable == &g_vtable.vtable);
   DEBUGASSERT(pinfo != NULL);
 
