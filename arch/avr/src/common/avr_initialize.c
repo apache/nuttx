@@ -63,6 +63,15 @@
 #  define USE_SERIALDRIVER 1
 #endif
 
+/* For AVR DA/DB devices, the decision making is altered - serial driver
+ * is compiled in based on its actual use, not based on if the /dev/console
+ * is enabled.
+ */
+#if !defined(USE_SERIALDRIVER) && \
+     (defined(CONFIG_ARCH_CHIP_AVRDX) && defined(CONFIG_MCU_SERIAL))
+#  define USE_SERIALDRIVER 1
+#endif
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/

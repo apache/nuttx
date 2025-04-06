@@ -51,7 +51,11 @@ endif
 # Required AVRnDx files
 
 CHIP_ASRCS = avrdx_exceptions.S
-CHIP_CSRCS = avrdx_lowconsole.c avrdx_lowinit.c avrdx_serial.c
+CHIP_CSRCS = avrdx_lowconsole.c avrdx_lowinit.c
+CHIP_CSRCS += avrdx_serial.c avrdx_serial_early.c
+CHIP_CSRCS += avrdx_peripherals.c
+
+# Configuration-dependent files
 
 ifeq ($(CONFIG_SCHED_TICKLESS),y)
 CHIP_CSRCS += avrdx_timerisr_tickless_alarm.c

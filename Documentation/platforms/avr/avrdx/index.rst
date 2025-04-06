@@ -25,6 +25,29 @@ in :menuselection:`RTOS Features --> Clocks and Timers --> Support tick-less OS`
 changed to value of at least 300. Higher value is recommended though,
 300us is not going to be precise at all.
 
+Peripheral Support
+==================
+
+The following list indicates peripherals supported in NuttX:
+
+==========  ================
+Peripheral  Notes
+==========  ================
+UART        See below
+==========  ================
+
+UART
+----
+
+UART is implemented using interrupts. The chip doesn't support DMA.
+From some initial testing done using simple echo (read/write) loop
+it seems the driver cannot handle sustained data transmission
+with baud rate higher than 57600 even with the chip running at its
+highest speed. With baud rate 57600, performance was dependent
+on read/write buffer size. With buffer size of 8 there were still
+some missed bytes.
+
+
 Supported Boards
 ================
 
