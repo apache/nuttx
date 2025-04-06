@@ -89,6 +89,10 @@
 #include "stm32_ws2812.h"
 #endif
 
+#ifdef CONFIG_SENSORS_BMP180
+#include "stm32_bmp180.h"
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -351,6 +355,17 @@ int stm32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: stm32_gpio_initialize() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_BMP180
+  /* Initialize the BMP180 pressure sensor. */
+
+  ret = board_bmp180_initialize(0, 1);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize BMP180, error %d\n", ret);
+      return ret;
     }
 #endif
 

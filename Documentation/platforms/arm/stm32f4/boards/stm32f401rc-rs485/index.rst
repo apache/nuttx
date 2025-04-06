@@ -770,5 +770,93 @@ NSH commands::
        NuttShell (NSH) NuttX-12.7.0-RC0
        nsh> ws2812
 
+bmp180
+======
 
-       
+The BMP180 is a digital barometric pressure sensor that provides pressure and temperature readings
+over I2C. It is commonly used in weather monitoring, altimetry, and embedded sensor applications.
+
+This guide describes how to configure and use the BMP180 sensor in NuttX with two available drivers:
+the **regular driver** and the **UORB driver**. It also includes example NSH commands and the required
+hardware pin configuration.
+
+Initial Setup
+-------------
+
+Ensure the NuttShell (NSH) is configured either over USB Serial (configure ``usbnsh``) or via UART
+(configure ``nsh``) to perform board-level configuration.
+
+Regular Driver
+--------------
+
+This driver offers basic access to the BMP180 sensor values directly through a command-line utility.
+
+**Enable the following options using ``make menuconfig``:**
+
+::
+
+    CONFIG_ARCH_BOARD_COMMON=y
+    CONFIG_STM32_I2C1=y
+    CONFIG_EXAMPLES_BMP180=y
+    CONFIG_SENSORS=y
+    CONFIG_SENSORS_BMP180=y
+
+**NSH usage:**
+
+::
+
+    NuttShell (NSH) NuttX-12.8.0
+    nsh> bmp180
+    Pressure value = 93592
+    Pressure value = 93591
+    Pressure value = 93595
+
+This output shows raw pressure values (in Pascals).
+
+UORB Driver
+-----------
+
+This driver integrates the sensor into the UORB publish/subscribe system. It supports high-level
+features such as scheduling and multi-sensor handling.
+
+**Enable the following options using ``make menuconfig``:**
+
+::
+
+    CONFIG_ARCH_BOARD_COMMON=y
+    CONFIG_STM32_I2C1=y
+    CONFIG_LIBC_FLOATINGPOINT=y
+    CONFIG_SENSORS=y
+    CONFIG_SENSORS_BMP180=y
+    CONFIG_SENSORS_BMP180_UORB=y
+    CONFIG_SYSTEM_SENSORTEST=y
+    CONFIG_SYSTEM_SENSORTEST_PROGNAME="sensor"
+    CONFIG_SCHED_WORKQUEUE=y
+    CONFIG_SCHED_LPWORK=y
+
+**NSH usage:**
+
+::
+
+    NuttShell (NSH) NuttX-12.8.0
+    nsh> sensor baro0
+    SensorTest: Test /dev/uorb/sensor_baro0 with interval(1000000us), latency(0us)
+    baro0: timestamp:2170620000 value1:935.92 value2:224.00
+    baro0: timestamp:2171630000 value1:935.92 value2:224.00
+    baro0: timestamp:2172640000 value1:935.89 value2:224.00
+
+- ``value1`` corresponds to pressure in hPa (hectopascals).
+- ``value2`` corresponds to temperature in tenths of degrees Celsius (e.g., 224.00 = 22.4°C).
+
+Hardware Connections
+--------------------
+
+Connect the BMP180 sensor to the STM32 board using the I2C interface.
+
++--------+------+
+| SENSOR | PIN  |
++========+======+
+| SDA    | PB7  |
++--------+------+
+| SCL    | PB8  |
++--------+------+
