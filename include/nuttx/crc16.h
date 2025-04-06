@@ -77,6 +77,16 @@ uint16_t crc16(FAR const uint8_t *src, size_t len);
  *   Continue 16-bit CRC-CCITT calculation on a part of the buffer using the
  *   polynomial x^16+x^12+x^5+1.
  *
+ *   This function is able to calculate any CRC that uses 0x1021 as it
+ *   polynomial and requires reflecting both the input and the output.
+ *   The following checksums can, among others, be calculated by this
+ *   function, depending on the value provided for the initial seed and the
+ *   value the final calculated CRC is XORed with:
+ *
+ *   - CRC-16/CCITT, CRC-16/CCITT-TRUE, CRC-16/KERMIT
+ *   https://reveng.sourceforge.io/crc-catalogue/16.htm#crc.cat.crc-16-kermit
+ *   initial seed: 0x0000, xor output: 0x0000
+ *
  ****************************************************************************/
 
 uint16_t crc16ccittpart(FAR const uint8_t *src, size_t len,
@@ -88,6 +98,16 @@ uint16_t crc16ccittpart(FAR const uint8_t *src, size_t len,
  * Description:
  *   Return a 16-bit CRC-CCITT of the contents of the 'src' buffer, length
  *   'len' using the polynomial x^16+x^12+x^5+1.
+ *
+ *   This function is able to calculate any CRC that uses 0x1021 as it
+ *   polynomial and requires reflecting both the input and the output.
+ *   The following checksums can, among others, be calculated by this
+ *   function, depending on the value provided for the initial seed and the
+ *   value the final calculated CRC is XORed with:
+ *
+ *   - CRC-16/CCITT, CRC-16/CCITT-TRUE, CRC-16/KERMIT
+ *   https://reveng.sourceforge.io/crc-catalogue/16.htm#crc.cat.crc-16-kermit
+ *   initial seed: 0x0000, xor output: 0x0000
  *
  ****************************************************************************/
 
