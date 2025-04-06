@@ -487,6 +487,16 @@ config ARCH_BOARD_ESP32S3_LHCBIT
 	---help---
 		The ESP32-S3 LHCBit features the ESP32-S3 CPU with dual Xtensa LX7 cores.
 
+config ARCH_BOARD_ESP32S3_XIAO
+	bool "Seeed Studio XIAO ESP32-S3"
+	depends on ARCH_CHIP_ESP32S3WROOM1N16R8 || ARCH_CHIP_ESP32S3WROOM1N8R8
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS if ESP32S3_GPIO_IRQ
+	---help---
+		The XIAO-ESP32S3 from Seeed Studio features the ESP32-S3 CPU with dual Xtensa LX7 cores,
+		with 8MiB Octal SPI PSRAM and 8MiB or 16MiB flash.
+
 config ARCH_BOARD_ESP32S3_BOX
 	bool "Espressif ESP32-S3-BOX"
 	depends on ARCH_CHIP_ESP32S3WROOM2N16R8V || ARCH_CHIP_ESP32S3WROOM2N32R8V || ARCH_CHIP_ESP32S3CUSTOM
@@ -3401,6 +3411,7 @@ config ARCH_BOARD
 	default "esp32s3-meadow"            if ARCH_BOARD_ESP32S3_MEADOW
 	default "esp32s3-lcd-ev"            if ARCH_BOARD_ESP32S3_LCD_EV
 	default "esp32s3-lhcbit"            if ARCH_BOARD_ESP32S3_LHCBIT
+	default "esp32s3-xiao"              if ARCH_BOARD_ESP32S3_XIAO
 	default "esp32s3-box"               if ARCH_BOARD_ESP32S3_BOX
 	default "esp32s3-korvo-2"           if ARCH_BOARD_ESP32S3_KORVO_2
 	default "lckfb-szpi-esp32s3"        if ARCH_BOARD_ESP32S3_LCKFB_SZPI
@@ -4623,6 +4634,9 @@ source "boards/xtensa/esp32s3/esp32s3-lcd-ev/Kconfig"
 endif
 if ARCH_BOARD_ESP32S3_LHCBIT
 source "boards/xtensa/esp32s3/esp32s3-lhcbit/Kconfig"
+endif
+if ARCH_BOARD_ESP32S3_XIAO
+source "boards/xtensa/esp32s3/esp32s3-xiao/Kconfig"
 endif
 if ARCH_BOARD_ESP32S3_BOX
 source "boards/xtensa/esp32s3/esp32s3-box/Kconfig"
