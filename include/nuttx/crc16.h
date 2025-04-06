@@ -113,6 +113,51 @@ uint16_t crc16ccittpart(FAR const uint8_t *src, size_t len,
 
 uint16_t crc16ccitt(FAR const uint8_t *src, size_t len);
 
+/****************************************************************************
+ * Name: crc16ibm
+ *
+ * Description:
+ *   Return a 16-bit CRC-ANSI of the contents of the 'src' buffer, length
+ *   'len' using the polynomial 0x8005 (x^16 + x^15 + x^2 + 1).
+ *
+ *   The ANSI variant of CRC-16 uses 0x8005 (0xA001 reflected) as its
+ *   polynomial with the initial * value set to 0x0000.
+ *
+ *   The following checksums can, among others, be calculated by this
+ *   function, depending on the value provided for the initial seed and
+ *   the value the final calculated CRC is XORed with:
+ *
+ *   - ARC, CRC-16, CRC-16/LHA, CRC-IBM
+ *   https://reveng.sourceforge.io/crc-catalogue/16.htm#crc.cat.crc-16-arc
+ *   poly: 0x8005 (0xA001) initial seed: 0x0000, xor output: 0x0000
+ *
+ ****************************************************************************/
+
+uint16_t crc16ibmpart(FAR const uint8_t *src, size_t len,
+                       uint16_t crc16val);
+
+/****************************************************************************
+ * Name: crc16ibm
+ *
+ * Description:
+ *   Return a 16-bit CRC-ANSI of the contents of the 'src' buffer, length
+ *   'len' using the polynomial 0x8005 (x^16 + x^15 + x^2 + 1).
+ *
+ *   The ANSI variant of CRC-16 uses 0x8005 (0xA001 reflected) as its
+ *   polynomial with the initial * value set to 0x0000.
+ *
+ *   The following checksums can, among others, be calculated by this
+ *   function, depending on the value provided for the initial seed and
+ *   the value the final calculated CRC is XORed with:
+ *
+ *   - ARC, CRC-16, CRC-16/LHA, CRC-IBM
+ *     https://reveng.sourceforge.io/crc-catalogue/16.htm#crc.cat.crc-16-arc
+ *     poly: 0x8005 (0xA001) initial seed: 0x0000, xor output: 0x0000
+ *
+ ****************************************************************************/
+
+uint16_t crc16ibm(FAR const uint8_t *src, size_t len);
+
 #undef EXTERN
 #ifdef __cplusplus
 }
