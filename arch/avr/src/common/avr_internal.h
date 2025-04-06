@@ -143,9 +143,13 @@ void avr_addregion(void);
 
 void avr_lowinit(void);
 
-/* Defined in chip/xxx_serial.c */
+/* Defined in chip/xxx_serial.c except for AVR Dx family
+ * which has avr_earlyserialinit in avrdx/avrdx_serial_early.c
+ * This family also allows to build serial drivers even without
+ * console being enabled
+ */
 
-#ifdef CONFIG_DEV_CONSOLE
+#if defined(CONFIG_DEV_CONSOLE) || defined(CONFIG_ARCH_CHIP_AVRDX)
 void avr_earlyserialinit(void);
 void avr_serialinit(void);
 #endif

@@ -6,6 +6,20 @@
 if ARCH_CHIP_AVRDX
 comment "AVR DA/DB Configuration Options"
 
+# Hidden configuration options selected by specific chip
+# Available serial ports
+config AVR_HAS_USART_2
+	bool
+	default n
+
+config AVR_HAS_USART_4
+	bool
+	default n
+
+config AVR_HAS_USART_5
+	bool
+	default n
+
 choice
 	prompt "Atmel AVR DA/DB chip selection"
 	default ARCH_CHIP_AVR128DA28
@@ -13,6 +27,7 @@ choice
 config ARCH_CHIP_AVR128DA28
 	bool "AVR128DA28"
 	select AVR_HAS_RAMPZ
+	select AVR_HAS_USART_2
 	---help---
 		Atmel AVR128DA28 8-bit AVR.
 
@@ -20,7 +35,101 @@ endchoice # AVR DA/DB Configuration Options
 
 menu "AVR DA/DB Peripheral Selections"
 
-# TBD
+config AVR_USART0
+	bool "Enable serial driver for USART0"
+	select USART0_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	depends on AVR_HAS_USART_2
+	depends on SERIAL
+	---help---
+		Enable serial driver on USART0
+
+config AVR_USART0_ALT
+	bool "Activate USART0 alternative pinout"
+	depends on AVR_USART0
+	---help---
+		Board is wired to use alternative I/O pins,
+		4-5 instead of 0-1 for TxD/RxD
+
+config AVR_USART1
+	bool "Enable serial driver for USART1"
+	select USART1_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	depends on AVR_HAS_USART_2
+	depends on SERIAL
+	---help---
+		Enable serial driver on USART1
+
+config AVR_USART1_ALT
+	bool "Activate USART1 alternative pinout"
+	depends on AVR_USART1
+	---help---
+		Board is wired to use alternative I/O pins,
+		4-5 instead of 0-1 for TxD/RxD
+
+config AVR_USART2
+	bool "Enable serial driver for USART2"
+	select USART2_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	depends on AVR_HAS_USART_2
+	depends on SERIAL
+	---help---
+		Enable serial driver on USART2
+
+config AVR_USART2_ALT
+	bool "Activate USART2 alternative pinout"
+	depends on AVR_USART2
+	---help---
+		Board is wired to use alternative I/O pins,
+		4-5 instead of 0-1 for TxD/RxD
+
+config AVR_USART3
+	bool "Enable serial driver for USART3"
+	select USART3_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	depends on AVR_HAS_USART_4
+	depends on SERIAL
+	---help---
+		Enable serial driver on USART3
+
+config AVR_USART3_ALT
+	bool "Activate USART3 alternative pinout"
+	depends on AVR_USART3
+	---help---
+		Board is wired to use alternative I/O pins,
+		4-5 instead of 0-1 for TxD/RxD
+
+config AVR_USART4
+	bool "Enable serial driver for USART4"
+	select USART4_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	depends on AVR_HAS_USART_4
+	depends on SERIAL
+	---help---
+		Enable serial driver on USART1
+
+config AVR_USART4_ALT
+	bool "Activate USART4 alternative pinout"
+	depends on AVR_USART4
+	---help---
+		Board is wired to use alternative I/O pins,
+		4-5 instead of 0-1 for TxD/RxD
+
+config AVR_USART5
+	bool "Enable serial driver for USART5"
+	select USART5_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	depends on AVR_HAS_USART_5
+	depends on SERIAL
+	---help---
+		Enable serial driver on USART5
+
+config AVR_USART5_ALT
+	bool "Activate USART5 alternative pinout"
+	depends on AVR_USART5
+	---help---
+		Board is wired to use alternative I/O pins,
+		4-5 instead of 0-1 for TxD/RxD
 
 endmenu # AVR DA/DB Peripheral Selections
 

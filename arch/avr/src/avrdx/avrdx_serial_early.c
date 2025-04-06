@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/avr/src/avrdx/avrdx_config.h
+ * arch/avr/src/avrdx/avrdx_serial_early.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,62 +20,57 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_AVR_SRC_AVRDX_AVRDX_CONFIG_H
-#define __ARCH_AVR_SRC_AVRDX_AVRDX_CONFIG_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include "avrdx_config.h"
+
+#include <stdint.h>
+#include <avr/io.h>
+
+#include "avrdx.h"
+#include "avrdx_serial.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* USARTs *******************************************************************/
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
 
-/* Is there a serial console? There should be at most one defined (Kconfig
- * takes care of that) and it can be on any enabled USARTn
- */
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
 
-#if defined(CONFIG_USART0_SERIAL_CONSOLE)
-#  define AVRDX_SERIAL_CONSOLE_USART_N 0
-#elif defined(CONFIG_USART1_SERIAL_CONSOLE)
-#  define AVRDX_SERIAL_CONSOLE_USART_N 1
-#elif defined(CONFIG_USART2_SERIAL_CONSOLE)
-#  define AVRDX_SERIAL_CONSOLE_USART_N 2
-#elif defined(CONFIG_USART3_SERIAL_CONSOLE)
-#  define AVRDX_SERIAL_CONSOLE_USART_N 3
-#elif defined(CONFIG_USART4_SERIAL_CONSOLE)
-#  define AVRDX_SERIAL_CONSOLE_USART_N 4
-#elif defined(CONFIG_USART5_SERIAL_CONSOLE)
-#  define AVRDX_SERIAL_CONSOLE_USART_N 5
-#else
-  /* For a good measure, should not be set anywhere else */
-#  undef AVRDX_SERIAL_CONSOLE_USART_N
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+#ifdef CONFIG_DEV_CONSOLE
+
+/****************************************************************************
+ * Name: avr_earlyserialinit
+ *
+ * Description:
+ *   Not doing anything but common code expects this to exist. (Serial code
+ *   is modeled after ATmega and that family has call to up_consoleinit
+ *   which calls usartN_configure ifdef HAVE_SERIAL_CONSOLE. Then, there is
+ *   avr_earlyserialinit() which disables interrupts ("early" - they are
+ *   not enabled) and calls usartN_setup, which in turns calls
+ *   usartN_configure. Does not seem necessary to do it twice so that
+ *   part of ATmega code's behaviour is not mirrored.)
+ *
+ ****************************************************************************/
+
+void avr_earlyserialinit(void)
+{
+}
+
 #endif
-
-/* If some other device is used as the console, then the serial driver may
- * still be needed.  Let's assume that if the upper half serial driver is
- * built, then the lower half will also be needed.  There is no need for
- * the early serial initialization in this case.
- */
-
-#if defined(CONFIG_MCU_SERIAL) || defined(CONFIG_STANDARD_SERIAL)
-#  define USE_SERIALDRIVER 1
-#endif
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions Prototypes Prototypes
- ****************************************************************************/
-
-#endif /* __ARCH_AVR_SRC_AVRDX_AVRDX_CONFIG_H */

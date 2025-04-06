@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/avr/src/avrdx/avrdx.h
+ * arch/avr/src/avrdx/avrdx_serial.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,44 +20,57 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_AVR_SRC_AVRDX_AVRDX_H
-#define __ARCH_AVR_SRC_AVRDX_AVRDX_H
+#ifndef __ARCH_AVR_SRC_AVRDX_AVRDX_SERIAL_H
+#define __ARCH_AVR_SRC_AVRDX_AVRDX_SERIAL_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-#include "avrdx_config.h"
-
-#include <stdint.h>
-#include <stdbool.h>
 #include "avrdx_iodefs.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Base address of PORTn peripheral. Not all chip variants have all
- * I/O ports but the gaps are not in order (as in all chips have eg. PORT F,
- * but some don't have eg. PORT B.) To make the array addressable with
- * direct A == 0, B == 1 etc. conversion regardless of the chip, missing
- * ports are not skipped
+/* Base address of USARTn peripheral. USART index corresponds to the location
+ * of its I/O registers in memory
  */
 
-#define AVRDX_PORT(n) (*(PORT_t *) (0x0400 + n * 0x20))
+#define AVRDX_USART(n) (*(avr_usart_t *) (0x0800 + n * 0x20))
 
-/* Same thing as above but doesn't return PORT_t. Needed for compile-time
- * assignments into program memory. (Which avr-gcc cannot handle.)
+#ifdef CONFIG_MCU_SERIAL
+
+/* Mapping of USART to corresponding I/O port. Uses avrdx_usart_ports
+ * referenced below and defined in avr_peripherals.c
  */
 
-#define AVRDX_PORT_ADDR(n) (0x0400 + n * 0x20)
+#  define AVRDX_USART_PORT(n) (AVRDX_PORT(avrdx_usart_ports[n]))
+
+/* Macro that retrieves priv member of uart_dev_s and casts it
+ * to pointer to avrdx_uart_priv_s
+ */
+
+#  define AVRDX_USART_DEV_PRIV(dev) ((struct avrdx_uart_priv_s *)dev->priv)
+
+#endif
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
+
+/* This struct is used in struct uart_dev_s as its priv member. */
+
+struct avrdx_uart_priv_s
+{
+  /* uart_dev_s instance holding this struct is connected to USARTn
+   * peripheral recorded in usart_n
+   */
+
+  uint8_t usart_n;
+};
 
 /****************************************************************************
  * Public Data
@@ -72,6 +85,13 @@ extern "C"
 #define EXTERN extern
 #endif
 
+#ifdef CONFIG_MCU_SERIAL
+
+EXTERN const IOBJ uint8_t avrdx_usart_ports[];
+EXTERN const IOBJ uint8_t avrdx_usart_tx_pins[];
+
+#endif
+
 /****************************************************************************
  * Inline Functions
  ****************************************************************************/
@@ -81,55 +101,35 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_clkinit
+ * Name: avrdx_usart_reset
  *
  * Description:
- *   Initialize clock/PLL settings per the definitions in the board.h file.
+ *   Reset USARTn.
+ *
+ * Input Parameters:
+ *   struct avrdx_uart_priv_s identifying which peripheral is to be reset
  *
  ****************************************************************************/
 
-void up_clkinitialize(void);
+#ifdef CONFIG_MCU_SERIAL
+void avrdx_usart_reset(struct avrdx_uart_priv_s *priv);
+#endif
 
 /****************************************************************************
- * Name: avrdx_current_freq_per
+ * Name: avrdx_usart_configure
  *
  * Description:
- *   Calculate and return current f_per
+ *   Configure USARTn
  *
- * Assumptions:
- *   Main clock source is internal oscillator
+ * Input Parameters:
+ *   struct avrdx_uart_priv_s identifying which peripheral
+ *   is to be configured
  *
  ****************************************************************************/
 
-uint32_t avrdx_current_freq_per(void);
-
-/****************************************************************************
- * Name: up_consoleinit
- *
- * Description:
- *   Initialize a console for debug output.  This function is called very
- *   early in the initialization sequence to configure the serial console
- *   uart (only).
- *
- ****************************************************************************/
-
-void up_consoleinit(void);
-
-/****************************************************************************
- * Name: avrdx_boardinitialize
- *
- * Description:
- *   This function must be provided by the board-specific logic in the
- *   directory boards/avr/avrdx/<board-name>/src.
- *
- ****************************************************************************/
-
-void avrdx_boardinitialize(void);
-
-#undef EXTERN
-#if defined(__cplusplus)
-}
+#ifdef CONFIG_MCU_SERIAL
+void avrdx_usart_configure(struct avrdx_uart_priv_s *priv);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_AVR_SRC_AVRDX_AVRDX_H */
+#endif /* __ARCH_AVR_SRC_AVRDX_AVRDX_SERIAL_H */

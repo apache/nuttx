@@ -110,6 +110,15 @@ void avr_lowinit(void)
 # error Unsupported frequency
 #endif
 
+  /* Initialize a console (only try if any serial port is configured).
+   * If any serial peripheral is configured to be a serial console,
+   * it is set up early
+   */
+
+#ifdef CONFIG_MCU_SERIAL
+  up_consoleinit();
+#endif
+
   /* Perform board-level initialization */
 
   avrdx_boardinitialize();
