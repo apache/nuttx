@@ -27,7 +27,7 @@ compliant interface to the NuttX scheduler:
   - :c:func:`sched_yield`
   - :c:func:`sched_get_priority_max`
   - :c:func:`sched_get_priority_min`
-  - :c:func:`sched_get_rr_interval`
+  - :c:func:`sched_rr_get_interval`
 
 Functions
 =========
@@ -157,7 +157,7 @@ Functions
   **POSIX Compatibility:** Comparable to the POSIX interface of the same
   name.
 
-.. c:function:: int sched_get_rr_interval (pid_t pid, struct timespec *interval)
+.. c:function:: int sched_rr_get_interval (pid_t pid, struct timespec *interval)
 
   ``sched_rr_get_interval()`` writes the timeslice
   interval for task identified by ``pid`` into the timespec structure
