@@ -83,8 +83,8 @@ struct pca9557_config_s g_pca9557_config =
 
 int esp32s3_pca9557_initialize(void)
 {
-  FAR struct ioexpander_dev_s *ioe;
-  FAR struct i2c_master_s *i2c;
+  struct ioexpander_dev_s *ioe;
+  struct i2c_master_s *i2c;
   int ret;
 
   i2c = esp32s3_i2cbus_initialize(ESP32S3_PCA9557_I2C_PORT);
