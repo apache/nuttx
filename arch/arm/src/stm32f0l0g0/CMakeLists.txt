@@ -31,6 +31,7 @@ list(
   stm32_irq.c
   stm32_lowputc.c
   stm32_serial.c
+  stm32_lsi.c
   stm32_rcc.c)
 
 if(CONFIG_STM32F0L0G0_RTC_LSECLOCK OR CONFIG_LCD_LSECLOCK)
@@ -99,6 +100,14 @@ endif()
 
 if(CONFIG_STM32F0L0G0_TIM)
   list(APPEND SRCS stm32_tim.c stm32_tim_lowerhalf.c)
+endif()
+
+if(CONFIG_STM32F0L0G0_IWDG)
+  list(APPEND SRCS stm32_iwdg.c)
+endif()
+
+if(CONFIG_STM32F0L0G0_WWDG)
+  list(APPEND SRCS stm32_wwdg.c)
 endif()
 
 target_sources(arch PRIVATE ${SRCS})

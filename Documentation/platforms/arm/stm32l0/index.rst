@@ -34,8 +34,8 @@ AES         Yes
 RNG         Yes
 TIM         Yes
 LPTIM       No
-IWDG        No
-WWDG        No
+IWDG        Yes
+WWDG        Yes
 RTC         No
 I2C         Yes
 USART       Yes

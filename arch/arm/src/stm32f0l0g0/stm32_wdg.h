@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32f0l0g0/stm32_rcc.h
+ * arch/arm/src/stm32f0l0g0/stm32_wdg.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32F0L0G0_STM32_RCC_H
-#define __ARCH_ARM_SRC_STM32F0L0G0_STM32_RCC_H
+#ifndef __ARCH_ARM_SRC_STM32F0L0G0_STM32_WDG_H
+#define __ARCH_ARM_SRC_STM32F0L0G0_STM32_WDG_H
 
 /****************************************************************************
  * Included Files
@@ -29,62 +29,76 @@
 
 #include <nuttx/config.h>
 
-#include "arm_internal.h"
 #include "chip.h"
+#include "hardware/stm32_wdg.h"
 
-#include "hardware/stm32_rcc.h"
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifndef __ASSEMBLY__
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_clockconfig
+ * Name: stm32_iwdginitialize
  *
  * Description:
- *   Called to initialize the STM32F0XX.
- *   This does whatever setup is needed to put the MCU in a usable state.
- *   This includes the initialization of clocking using the settings
- *   in board.h.
- *
- ****************************************************************************/
-
-void stm32_clockconfig(void);
-
-/****************************************************************************
- * Name: stm32_rcc_enablelse
- *
- * Description:
- *   Enable the External Low-Speed (LSE) Oscillator.
+ *   Initialize the IWDG watchdog time.  The watchdog timer is initialized
+ *   and registers as 'devpath.  The initial state of the watchdog time is
+ *   disabled.
  *
  * Input Parameters:
- *   None
+ *   devpath - The full path to the watchdog.  This should be of the form
+ *     /dev/watchdog0
+ *   lsifreq - The calibrated LSI clock frequency
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-void stm32_rcc_enablelse(void);
+#ifdef CONFIG_STM32F0L0G0_IWDG
+void stm32_iwdginitialize(const char *devpath, uint32_t lsifreq);
+#endif
 
 /****************************************************************************
- * Name: stm32_rcc_enablelsi
+ * Name: stm32_wwdginitialize
  *
  * Description:
- *   Enable the Internal Low-Speed (LSI) RC Oscillator.
+ *   Initialize the WWDG watchdog time.  The watchdog timer is initializeed
+ *   and registers as 'devpath.  The initial state of the watchdog time is
+ *   disabled.
+ *
+ * Input Parameters:
+ *   devpath - The full path to the watchdog.  This should be of the form
+ *     /dev/watchdog0
+ *
+ * Returned Value:
+ *   None
  *
  ****************************************************************************/
 
-void stm32_rcc_enablelsi(void);
+#ifdef CONFIG_STM32F0L0G0_WWDG
+void stm32_wwdginitialize(const char *devpath);
+#endif
 
-/****************************************************************************
- * Name: stm32_rcc_disablelsi
- *
- * Description:
- *   Disable the Internal Low-Speed (LSI) RC Oscillator.
- *
- ****************************************************************************/
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
 
-void stm32_rcc_disablelsi(void);
+#endif /* __ASSEMBLY__ */
 
-#endif /* __ARCH_ARM_SRC_STM32F0L0G0_STM32_RCC_H */
+#endif /* __ARCH_ARM_SRC_STM32F0L0G0_STM32_WDG_H */

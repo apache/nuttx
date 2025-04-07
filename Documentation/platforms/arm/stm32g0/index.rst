@@ -39,8 +39,8 @@ AES         Yes
 TIM         Yes
 LPTIM       No
 IRTIM       No
-IWDG        No
-WWDG        No
+IWDG        Yes
+WWDG        Yes
 RTC         No
 TAMP        No
 I2C         Yes
