@@ -38,7 +38,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define VHOST_DEFERED_PROBE_PERIOD 100
+#define VHOST_DEFERED_PROBE_PERIOD MSEC2TICK(100)
 
 /****************************************************************************
  * Private Types
