@@ -34,6 +34,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define HAVE_PWR_DBP         1
 #undef HAVE_PWR_WKUP2
 #undef HAVE_PWR_WKUP3
 

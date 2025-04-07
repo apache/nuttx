@@ -35,8 +35,8 @@ CRC         No
 ADC         Yes
 TIM         Yes
 IRTIM       No
-IWDG        No
-WWDG        No
+IWDG        Yes
+WWDG        Yes
 I2C         Yes
 USART       Yes
 SPI         Yes

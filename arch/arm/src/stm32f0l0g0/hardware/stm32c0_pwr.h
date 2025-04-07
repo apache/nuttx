@@ -34,6 +34,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#undef HAVE_PWR_DBP /* No Disable backup write protection bit */
+
 /* Register Offsets *********************************************************/
 
 #define STM32_PWR_CR1_OFFSET   0x0000  /* Power control register 1 */
@@ -100,17 +102,9 @@
 #  define PWR_CR1_LPMS_STANDBY   (3 << PWR_CR1_LPMS_SHIFT) /* 011: Standby mode */
 #  define PWR_CR1_LPMS_SHUTDOWN  (4 << PWR_CR1_LPMS_SHIFT) /* 1xx: Shutdown mode */
 
-#define PWR_CR1_FPDSTOP          (1 << 3) /* Bit 3: Flash memory powered down during Stop mode */
                                           /* Bit 4: Reserved */
 #define PWR_CR1_FPDLPSLP         (1 << 5) /* Bit 5: Flash memory powered down during Low-power sleep mode */
                                           /* Bits 6-31: Reserved */
-#define PWR_CR1_DBP              (1 << 8) /* Bit 8: Disable Backup domain write protection */
-#define PWR_CR1_VOS_SHIFT        (9)      /* Bits 9-10: Voltage scaling range selection */
-#define PWR_CR1_VOS_MASK         (3 << PWR_CR1_VOS_SHIFT)
-#  define PWR_CR1_VOS_RANGE1     (1 << PWR_CR1_VOS_SHIFT) /* 01: Range 1 */
-#  define PWR_CR1_VOS_RANGE2     (2 << PWR_CR1_VOS_SHIFT) /* 10: Range 2 */
-
-#define PWR_CR1_LPR              (1 << 14) /* Bit 14: Low-power run */
 
 /* Power control register 2 */
 

@@ -34,6 +34,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define HAVE_PWR_DBP           1
+
 /* Register Offsets *********************************************************/
 
 #define STM32_PWR_CR1_OFFSET   0x0000  /* Power control register 1 */

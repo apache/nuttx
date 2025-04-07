@@ -36,6 +36,7 @@
 
 #define HAVE_PWR_WKUP2         1
 #define HAVE_PWR_WKUP3         1
+#define HAVE_PWR_DBP           1
 
 /* Register Offsets *********************************************************/
 

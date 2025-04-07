@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32f0l0g0/stm32_rcc.h
+ * arch/arm/src/stm32f0l0g0/stm32_lsi.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,9 +20,6 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32F0L0G0_STM32_RCC_H
-#define __ARCH_ARM_SRC_STM32F0L0G0_STM32_RCC_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -30,42 +27,31 @@
 #include <nuttx/config.h>
 
 #include "arm_internal.h"
-#include "chip.h"
-
-#include "hardware/stm32_rcc.h"
+#include "stm32_rcc.h"
 
 /****************************************************************************
- * Public Function Prototypes
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* STM32C0 use the second CSR register for LSI */
+
+#ifdef CONFIG_ARCH_CHIP_STM32C0
+#  define STM32_RCC_CSR STM32_RCC_CSR2
+#  define RCC_CSR_LSION RCC_CSR2_LSION
+#  define RCC_CSR_LSIRDY RCC_CSR2_LSIRDY
+#endif
+
+/****************************************************************************
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_clockconfig
- *
- * Description:
- *   Called to initialize the STM32F0XX.
- *   This does whatever setup is needed to put the MCU in a usable state.
- *   This includes the initialization of clocking using the settings
- *   in board.h.
- *
+ * Private Functions
  ****************************************************************************/
-
-void stm32_clockconfig(void);
 
 /****************************************************************************
- * Name: stm32_rcc_enablelse
- *
- * Description:
- *   Enable the External Low-Speed (LSE) Oscillator.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
+ * Public Functions
  ****************************************************************************/
-
-void stm32_rcc_enablelse(void);
 
 /****************************************************************************
  * Name: stm32_rcc_enablelsi
@@ -75,7 +61,18 @@ void stm32_rcc_enablelse(void);
  *
  ****************************************************************************/
 
-void stm32_rcc_enablelsi(void);
+void stm32_rcc_enablelsi(void)
+{
+  /* Enable the Internal Low-Speed (LSI) RC Oscillator by setting the LSION
+   * bit in the RCC CSR register.
+   */
+
+  modifyreg32(STM32_RCC_CSR, 0, RCC_CSR_LSION);
+
+  /* Wait for the internal RC 40 kHz oscillator to be stable. */
+
+  while ((getreg32(STM32_RCC_CSR) & RCC_CSR_LSIRDY) == 0);
+}
 
 /****************************************************************************
  * Name: stm32_rcc_disablelsi
@@ -85,6 +82,13 @@ void stm32_rcc_enablelsi(void);
  *
  ****************************************************************************/
 
-void stm32_rcc_disablelsi(void);
+void stm32_rcc_disablelsi(void)
+{
+  /* Enable the Internal Low-Speed (LSI) RC Oscillator by setting the LSION
+   * bit in the RCC CSR register.
+   */
 
-#endif /* __ARCH_ARM_SRC_STM32F0L0G0_STM32_RCC_H */
+  modifyreg32(STM32_RCC_CSR, RCC_CSR_LSION, 0);
+
+  /* LSIRDY should go low after 3 LSI clock cycles */
+}
