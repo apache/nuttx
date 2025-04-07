@@ -63,7 +63,7 @@ static const struct ft5x06_config_s g_ft5x06_config =
 
 int esp32s3_ft5x06_initialize(void)
 {
-  FAR struct i2c_master_s *i2c;
+  struct i2c_master_s *i2c;
   int ret;
 
   i2c = esp32s3_i2cbus_initialize(ESP32S3_FT5X06_I2C_PORT);
