@@ -73,7 +73,7 @@
 #define STM32_PWR_BASE       0x40007000     /* 0x40007000-0x400073ff PWR */
 #define STM32_USBRAM_BASE    0x40009800     /* 0x40009800-0x40008fff USBRAM */
 #define STM32_FDCANSRAM_BASE 0x4000b800     /* 0x4000b800-0x4000cbff FDCAN scratch RAM */
-#define STM32_FDCANMRAM_BASE 0x4000b400     /* 0x4000b400-0x4000b7ff FDCAN message RAM */
+#define STM32_CANRAM_BASE    0x4000b400     /* 0x4000b400-0x4000b7ff FDCAN message RAM */
 #define STM32_SYSCFG_BASE    0x40010000     /* 0x40010000-0x400103ff SYSCFG */
                                             /* EXTI ??? */
 #define STM32_ADC1_BASE      0x40012400     /* 0x40012400-0x400127ff ADC1 */

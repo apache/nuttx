@@ -236,10 +236,10 @@
 #define RCC_APB1RSTR_TIM2RST        (1 << 0)  /* Bit 0:  Timer 2 reset */
 #define RCC_APB1RSTR_TIM3RST        (1 << 1)  /* Bit 1:  Timer 3 reset */
                                               /* Bits 2-11: Reserved */
-#define RCC_APB1RSTR_FDCANRST       (1 << 11) /* Bit 11: FDCAN reset */
-                                              /* Bit 12: Reserved */
+#define RCC_APB1RSTR_FDCANRST       (1 << 12) /* Bit 12: FDCAN reset */
+#define RCC_APB1RSTR_USBRST         (1 << 13) /* Bit 13: USB reset */
 #define RCC_APB1RSTR_SPI2RST        (1 << 14) /* Bit 14: SPI 2 reset */
-#define RCC_APB1RSTR_USBRST         (1 << 15) /* Bit 15: USB reset */
+                                              /* Bit 15: Reserved */
 #define RCC_APB1RSTR_CRCRST         (1 << 16) /* Bit 15: CRC reset */
 #define RCC_APB1RSTR_USART2RST      (1 << 17) /* Bit 17: USART 2 reset */
 #define RCC_APB1RSTR_USART3RST      (1 << 18) /* Bit 18: USART 3 reset */
@@ -289,11 +289,11 @@
 #define RCC_APB1ENR_TIM2EN           (1 << 0)  /* Bit 0:  Timer 2 clock enable */
 #define RCC_APB1ENR_TIM3EN           (1 << 1)  /* Bit 1:  Timer 3 clock enable */
                                                /* Bits 2-11: Reserved */
-#define RCC_APB1ENR_FDCANEN          (1 << 11) /* Bit 11: FDCAN clock enable */
-                                               /* Bit 12: Reserved */
+#define RCC_APB1ENR_FDCANEN          (1 << 12) /* Bit 12: FDCAN clock enable */
+#define RCC_APB1ENR_USBEN            (1 << 13) /* Bit 13: USB clock enable */
 #define RCC_APB1ENR_SPI2EN           (1 << 14) /* Bit 14: SPI 2 clock enable */
-#define RCC_APB1ENR_USBEN            (1 << 15) /* Bit 15: USB clock enable */
-#define RCC_APB1ENR_CRCEN            (1 << 16) /* Bit 15: CRC clock enable */
+                                               /* Bit 15: Reserved */
+#define RCC_APB1ENR_CRCEN            (1 << 16) /* Bit 16: CRC clock enable */
 #define RCC_APB1ENR_USART2EN         (1 << 17) /* Bit 17: USART 2 clock enable */
 #define RCC_APB1ENR_USART3EN         (1 << 18) /* Bit 18: USART 3 clock enable */
 #define RCC_APB1ENR_USART4EN         (1 << 19) /* Bit 19: USART 4 clock enable */
@@ -325,6 +325,35 @@
 /* TODO: AHB peripheral clock enable in Sleep mode register */
 
 /* TODO: APB1 peripheral clock enable in Sleep mode register */
+
+/* RCC peripherals independent clock configuration register 1 */
+
+#define RCC_CCIPR1_USART1SEL_SHIFT    (0) /* Bits 0-1: USART1 clock source selection */
+#  define RCC_CCIPR1_USART1SEL_PCLK   (0 << RCC_CCIPR1_USART1SEL_SHIFT)
+#  define RCC_CCIPR1_USART1SEL_SYSCLK (1 << RCC_CCIPR1_USART1SEL_SHIFT)
+#  define RCC_CCIPR1_USART1SEL_HSIKER (2 << RCC_CCIPR1_USART1SEL_SHIFT)
+#  define RCC_CCIPR1_USART1SEL_LSE    (3 << RCC_CCIPR1_USART1SEL_SHIFT)
+#define RCC_CCIPR1_FDCAN1SEL_SHIFT    (8) /* Bits 8-9: FDCAN1 clock source selection */
+#  define RCC_CCIPR1_FDCAN1SEL_PCLK   (0 << RCC_CCIPR1_FDCAN1SEL_SHIFT)
+#  define RCC_CCIPR1_FDCAN1SEL_SYSCLK (1 << RCC_CCIPR1_FDCAN1SEL_SHIFT)
+#  define RCC_CCIPR1_FDCAN1SEL_HSIKER (2 << RCC_CCIPR1_FDCAN1SEL_SHIFT)
+#define RCC_CCIPR1_I2C1SEL_SHIFT      (12) /* Bits 12-13: I2C1 clock source selection */
+#  define RCC_CCIPR1_I2C1SEL_PCLK     (0 << RCC_CCIPR1_I2C1SEL_SHIFT)
+#  define RCC_CCIPR1_I2C1SEL_SYSCLK   (1 << RCC_CCIPR1_I2C1SEL_SHIFT)
+#  define RCC_CCIPR1_I2C1SEL_HSIKER   (2 << RCC_CCIPR1_I2C1SEL_SHIFT)
+#define RCC_CCIPR1_I2S1SEL_SHIFT      (14) /* Bits 14-15: I2S1 clock source selection */
+#  define RCC_CCIPR1_I2S1SEL_PCLK     (0 << RCC_CCIPR1_I2S1SEL_SHIFT)
+#  define RCC_CCIPR1_I2S1SEL_HSIKER   (2 << RCC_CCIPR1_I2S1SEL_SHIFT)
+#  define RCC_CCIPR1_I2S1SEL_I2S      (3 << RCC_CCIPR1_I2S1SEL_SHIFT)
+#define RCC_CCIPR1_ADC1SEL_SHIFT      (30) /* Bits 30-31: ADC1 clock source selection */
+#  define RCC_CCIPR1_ADC1SEL_SYSCLK   (0 << RCC_CCIPR1_ADC1SEL_SHIFT)
+#  define RCC_CCIPR1_ADC1SEL_HSIKER   (2 << RCC_CCIPR1_ADC1SEL_SHIFT)
+
+/* RCC peripherals independent clock configuration register 2 */
+
+#define RCC_CCIPR2_USBSEL_SHIFT       (12) /* Bit 12: SB clock source selection */
+#define RCC_CCIPR2_USBSEL_HSIUSB48    (0 << RCC_CCIPR2_USBSEL_SHIFT)
+#define RCC_CCIPR2_USBSEL_HSE         (1 << RCC_CCIPR2_USBSEL_SHIFT)
 
 /* Clock configuration register 1 */
 
