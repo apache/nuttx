@@ -1,10 +1,10 @@
 ================
-ST Nucleo C071RB
+ST Nucleo C092RC
 ================
 
-The Nucleo C071RB is a member of the Nucleo-64 board family.
+The Nucleo C092RC is a member of the Nucleo-64 board family.
 
-USB not supported yet.
+CANFD not supported yet.
 
 Buttons
 =======
