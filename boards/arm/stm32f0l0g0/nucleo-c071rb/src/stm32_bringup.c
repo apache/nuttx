@@ -38,6 +38,12 @@
 #  include <nuttx/leds/userled.h>
 #endif
 
+#ifdef CONFIG_STM32F0L0G0_IWDG
+#  include <stm32_wdg.h>
+#endif
+
+#include <arch/board/board.h>
+
 #include "nucleo-c071rb.h"
 
 /****************************************************************************
@@ -65,6 +71,12 @@
 int stm32_bringup(void)
 {
   int ret;
+
+#ifdef CONFIG_STM32F0L0G0_IWDG
+  /* Initialize the watchdog timer */
+
+  stm32_iwdginitialize("/dev/watchdog0", STM32_LSI_FREQUENCY);
+#endif
 
 #ifdef HAVE_LEDS
   /* Register the LED driver */
