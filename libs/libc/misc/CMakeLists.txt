@@ -83,6 +83,8 @@ list(
   lib_crc32.c
   lib_crc16.c
   lib_crc16ccitt.c
+  lib_crc16ibm.c
+  lib_crc16xmodem.c
   lib_crc8.c
   lib_crc8ccitt.c
   lib_crc8rohc.c
