@@ -104,3 +104,12 @@ endif
 ifeq ($(CONFIG_STM32F0L0G0_WWDG),y)
 CHIP_CSRCS += stm32_wwdg.c
 endif
+
+ifeq ($(CONFIG_STM32F0L0G0_FDCAN),y)
+ifeq ($(CONFIG_STM32F0L0G0_FDCAN_CHARDRIVER),y)
+CHIP_CSRCS += stm32_fdcan.c
+endif
+ifeq ($(CONFIG_STM32F0L0G0_FDCAN_SOCKET),y)
+CHIP_CSRCS += stm32_fdcan_sock.c
+endif
+endif

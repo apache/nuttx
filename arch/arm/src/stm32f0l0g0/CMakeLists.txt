@@ -111,4 +111,13 @@ if(CONFIG_STM32F0L0G0_WWDG)
   list(APPEND SRCS stm32_wwdg.c)
 endif()
 
+if(CONFIG_STM32F0L0G0_FDCAN)
+  if(CONFIG_STM32F0L0G0_FDCAN_CHARDRIVER)
+    list(APPEND SRCS stm32_fdcan.c)
+  endif()
+  if(CONFIG_STM32F0L0G0_FDCAN_SOCKET)
+    list(APPEND SRCS stm32_fdcan_sock.c)
+  endif()
+endif()
+
 target_sources(arch PRIVATE ${SRCS})

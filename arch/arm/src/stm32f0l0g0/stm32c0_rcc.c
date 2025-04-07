@@ -176,7 +176,7 @@ static inline void rcc_enableapb1(void)
 #endif
 #endif
 
-#ifdef CONFIG_STM32F0L0G0_FDCAN
+#ifdef CONFIG_STM32F0L0G0_FDCAN1
   /* FDCAN1 clock enable */
 
   regval |= RCC_APB1ENR_FDCANEN;
@@ -475,6 +475,14 @@ static void stm32_stdclockconfig(void)
   /* Wait until the selected source is used as the system clock source */
 
   while ((getreg32(STM32_RCC_CFGR) & RCC_CFGR_SWS_MASK) != STM32_SYSCLK_SWS);
+
+#ifdef CONFIG_STM32F0L0G0_FDCAN1
+  /* Configure FDCAN1 clock source */
+
+  regval  = getreg32(STM32_RCC_CCIPR1);
+  regval |= STM32_FDCAN1_SEL;
+  putreg32(regval, STM32_RCC_CCIPR1);
+#endif
 }
 #endif
 
