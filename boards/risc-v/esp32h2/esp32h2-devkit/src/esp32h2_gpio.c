@@ -44,6 +44,9 @@
 /* Arch */
 
 #include "espressif/esp_gpio.h"
+#ifdef CONFIG_ESPRESSIF_DEDICATED_GPIO
+#include "espressif/esp_dedic_gpio.h"
+#endif
 
 /* Board */
 
@@ -74,6 +77,14 @@
  */
 
 #define GPIO_IRQPIN  9
+
+/* Dedicated GPIO pins. GPIO4 and GPIO5 is used as an example, any other
+ * GPIOs could be used.
+ */
+
+#define GPIO_DEDIC1       4
+#define GPIO_DEDIC2       5
+#define GPIO_DEDIC_COUNT  2
 
 /****************************************************************************
  * Private Types
@@ -153,6 +164,33 @@ static const uint32_t g_gpiointinputs[BOARD_NGPIOINT] =
 };
 
 static struct espgpint_dev_s g_gpint[BOARD_NGPIOINT];
+#endif
+
+/* This array maps the GPIO pins used as Dedicated GPIO */
+
+#ifdef CONFIG_ESPRESSIF_DEDICATED_GPIO
+static const int g_gpioidedic[GPIO_DEDIC_COUNT] =
+{
+  GPIO_DEDIC1, GPIO_DEDIC2
+};
+
+static struct esp_dedic_gpio_flags_s dedic_gpio_flags =
+{
+  .input_enable = 1,
+  .invert_input_enable = 0,
+  .output_enable = 1,
+  .invert_output_enable = 0
+};
+
+struct esp_dedic_gpio_config_s dedic_gpio_conf =
+{
+  .gpio_array = g_gpioidedic,
+  .array_size = GPIO_DEDIC_COUNT,
+  .flags = &dedic_gpio_flags,
+  .path = "/dev/dedic_gpio0"
+};
+
+struct file *dedicated_gpio = NULL;
 #endif
 
 /****************************************************************************
@@ -507,6 +545,12 @@ int esp_gpio_init(void)
 
       pincount++;
     }
+#endif
+
+#ifdef CONFIG_ESPRESSIF_DEDICATED_GPIO
+  dedicated_gpio = esp_dedic_gpio_new_bundle(&dedic_gpio_conf);
+
+  pincount++;
 #endif
 
   return OK;
