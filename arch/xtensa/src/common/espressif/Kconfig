@@ -109,6 +109,20 @@ config ESPRESSIF_SPIFLASH
 	depends on ARCH_CHIP_ESP32S2
 	default n
 
+config ESPRESSIF_DEDICATED_GPIO
+	bool "Dedicated GPIO"
+	depends on !ARCH_CHIP_ESP32
+	default n
+	---help---
+		Enable dedicated GPIO support for faster response time
+
+config ESPRESSIF_DEDICATED_GPIO_IRQ
+	bool "Dedicated GPIO IRQ"
+	depends on ESPRESSIF_DEDICATED_GPIO && ARCH_CHIP_ESP32S2
+	default n
+	---help---
+		Enable dedicated GPIO IRQ support
+
 menu "Pulse Counter (PCNT) Configuration"
 	depends on ESP_PCNT
 
