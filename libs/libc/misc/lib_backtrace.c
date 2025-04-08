@@ -464,7 +464,7 @@ void backtrace_dump(void)
   FAR struct backtrace_pool_s *bp = &g_backtrace_pool;
   FAR struct backtrace_entry_s *entry;
   size_t conflict = 0;
-  uint32_t slot;
+  size_t slot;
 
   syslog(LOG_INFO, "%-8s %-8s %s", "slot", "refcount", "backtrace");
   for (slot = 0; slot < bp->capacity; slot++)
@@ -473,13 +473,13 @@ void backtrace_dump(void)
       while (entry)
         {
           backtrace_format(buf, sizeof(buf), entry->stack, entry->depth);
-          syslog(LOG_INFO, "%-8zu %-8u %s\n", slot, entry->ref, buf);
+          syslog(LOG_INFO, "%-8zu %-8d %s\n", slot, (int)entry->ref, buf);
           conflict += entry->next != NULL;
           entry = entry->next;
         }
     }
 
-  syslog(LOG_INFO, "capacity: %u, used: %u, conflict: %zu\n",
+  syslog(LOG_INFO, "capacity: %zu, used: %zu, conflict: %zu\n",
          bp->capacity, bp->used, conflict);
 }
 #endif
