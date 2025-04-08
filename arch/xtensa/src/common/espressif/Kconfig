@@ -135,6 +135,24 @@ config ESPRESSIF_SPIFLASH
 	depends on ARCH_CHIP_ESP32S2
 	default n
 
+config ESPRESSIF_DEDICATED_GPIO
+	bool "Dedicated GPIO"
+	depends on !ARCH_CHIP_ESP32
+	default n
+	---help---
+		Enable dedicated GPIO support for faster response time.
+		Dedicated GPIO is suitable for faster response times required
+		applications like simulate serial/parallel interfaces in a bit-banging way.
+		It can work as pin grouping and you can use any pin up to 8 pins for
+		input and 8 pins for output for dedicated gpio in total.
+
+config ESPRESSIF_DEDICATED_GPIO_IRQ
+	bool "Dedicated GPIO IRQ"
+	depends on ESPRESSIF_DEDICATED_GPIO && ARCH_CHIP_ESP32S2
+	default n
+	---help---
+		Enable dedicated GPIO IRQ support
+
 menu "Pulse Counter (PCNT) Configuration"
 	depends on ESP_PCNT
 
