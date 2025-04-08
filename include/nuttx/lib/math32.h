@@ -315,39 +315,32 @@ extern "C"
       } \
     while (0)
 
-#if defined(CONFIG_HAVE_EXPRESSION_STATEMENT)
-#  define div64_const(n, base) \
-    ({ \
-      uint64_t __n = (n); \
-      uint32_t __base = (base); \
-      if (IS_POWER_OF_2(__base)) \
-        { \
-          (__n) >>= LOG2_FLOOR(__base); \
-        } \
-      else if (UINTPTR_MAX == UINT32_MAX) \
-        { \
-          div64_const32(__n, __base); \
-        } \
-      else \
-        { \
-          __n /= __base; \
-        } \
-        __n; \
-      })
+static inline_function uint64_t div64_const(uint64_t n, uint32_t base)
+{
+  if (IS_POWER_OF_2(base))
+    {
+      n >>= LOG2_FLOOR(base);
+    }
+  else if (UINTPTR_MAX == UINT32_MAX)
+    {
+      div64_const32(n, base);
+    }
+  else
+    {
+      n /= base;
+    }
 
-#  define div_const(n, base) \
-    ((sizeof(typeof(n)) == sizeof(uint64_t)) ? div64_const(n, base) : ((n) / (base)))
-#  define div_const_roundup(n, base) \
-    ((sizeof(typeof(n)) == sizeof(uint64_t)) ? div64_const((n) + (base) - 1, base) : \
-     (((n) + (base) - 1) / (base)))
-#  define div_const_roundnearest(n, base) \
-    ((sizeof(typeof(n)) == sizeof(uint64_t)) ? div64_const((n) + ((base) / 2), base) : \
-     (((n) + ((base) / 2)) / (base)))
-#else
-#  define div_const(n, base) ((n) / (base))
-#  define div_const_roundup(n, base) (((n) + (base) - 1) / (base))
-#  define div_const_roundnearest(n, base) (((n) + ((base) / 2)) / (base))
-#endif
+  return n;
+}
+
+#define div_const(n, base) \
+  ((sizeof(typeof(n)) == sizeof(uint64_t)) ? div64_const(n, base) : ((n) / (base)))
+#define div_const_roundup(n, base) \
+  ((sizeof(typeof(n)) == sizeof(uint64_t)) ? div64_const((n) + (base) - 1, base) : \
+   (((n) + (base) - 1) / (base)))
+#define div_const_roundnearest(n, base) \
+  ((sizeof(typeof(n)) == sizeof(uint64_t)) ? div64_const((n) + ((base) / 2), base) : \
+   (((n) + ((base) / 2)) / (base)))
 
 /* Division optimizing method proposed by T. Granlund and L. Montgomery.
  * This method converts the runtime-invariant integer division
