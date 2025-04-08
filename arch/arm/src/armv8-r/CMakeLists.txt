@@ -59,4 +59,8 @@ if(CONFIG_ARCH_HIPRI_INTERRUPT)
   list(APPEND SRCS arm_dofiq.c)
 endif()
 
+if(CONFIG_LIB_SYSCALL)
+  list(APPEND SRCS arm_dispatch_syscall.S)
+endif()
+
 target_sources(arch PRIVATE ${SRCS})

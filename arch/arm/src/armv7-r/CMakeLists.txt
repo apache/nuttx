@@ -80,6 +80,10 @@ if(CONFIG_SMP)
     arm_scu.c)
 endif()
 
+if(CONFIG_LIB_SYSCALL)
+  list(APPEND SRCS arm_dispatch_syscall.S)
+endif()
+
 target_sources(arch PRIVATE ${SRCS})
 
 if(NOT CONFIG_BUILD_FLAT AND CONFIG_ARCH_HAVE_PERF_EVENTS_USER_ACCESS)

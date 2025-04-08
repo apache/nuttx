@@ -83,64 +83,6 @@ static void dump_syscall(const char *tag, uint32_t cmd, const uint32_t *regs)
 }
 
 /****************************************************************************
- * Name: dispatch_syscall
- *
- * Description:
- *   Call the stub function corresponding to the system call.  NOTE the non-
- *   standard parameter passing:
- *
- *     R0 = SYS_ call number
- *     R1 = parm0
- *     R2 = parm1
- *     R3 = parm2
- *     R4 = parm3
- *     R5 = parm4
- *     R6 = parm5
- *
- *   The values of R4-R5 may be preserved in the proxy called by the user
- *   code if they are used (but otherwise will not be).
- *
- *   WARNING: There are hard-coded values in this logic!
- *
- *   Register usage:
- *
- *     R0 - Need not be preserved.
- *     R1-R3 - Need to be preserved until the stub is called.  The values of
- *       R0 and R1 returned by the stub must be preserved.
- *     R4-R11 must be preserved to support the expectations of the user-space
- *       callee.  R4-R6 may have been preserved by the proxy, but don't know
- *       for sure.
- *     R12 - Need not be preserved
- *     R13 - (stack pointer)
- *     R14 - Need not be preserved
- *     R15 - (PC)
- *
- ****************************************************************************/
-
-#ifdef CONFIG_LIB_SYSCALL
-static void dispatch_syscall(void) naked_function;
-static void dispatch_syscall(void)
-{
-  __asm__ __volatile__
-  (
-    " sub sp, sp, #16\n"                            /* Create a stack frame to hold 3 parms + lr */
-    " str r4, [sp, #0]\n"                           /* Move parameter 4 (if any) into position */
-    " str r5, [sp, #4]\n"                           /* Move parameter 5 (if any) into position */
-    " str r6, [sp, #8]\n"                           /* Move parameter 6 (if any) into position */
-    " str lr, [sp, #12]\n"                          /* Save lr in the stack frame */
-    " ldr ip, =g_stublookup\n"                      /* R12=The base of the stub lookup table */
-    " ldr ip, [ip, r0, lsl #2]\n"                   /* R12=The address of the stub for this SYSCALL */
-    " blx ip\n"                                     /* Call the stub (modifies lr) */
-    " ldr lr, [sp, #12]\n"                          /* Restore lr */
-    " add sp, sp, #16\n"                            /* Destroy the stack frame */
-    " mov r2, r0\n"                                 /* R2=Save return value in R2 */
-    " mov r0, #" STRINGIFY(SYS_syscall_return) "\n" /* R0=SYS_syscall_return */
-    " svc #" STRINGIFY(SYS_syscall) "\n"            /* Return from the SYSCALL */
-  );
-}
-#endif
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -229,7 +171,7 @@ uint32_t *arm_syscall(uint32_t *regs)
 #ifdef CONFIG_BUILD_PROTECTED
           regs[REG_CPSR]      = rtcb->xcp.syscall[index].cpsr;
 #endif
-          /* The return value must be in R0-R1.  dispatch_syscall()
+          /* The return value must be in R0-R1.  arm_dispatch_syscall()
            * temporarily moved the value for R0 into R2.
            */
 
@@ -500,14 +442,20 @@ uint32_t *arm_syscall(uint32_t *regs)
 
           DEBUGASSERT(index < CONFIG_SYS_NNEST);
 
-          /* Setup to return to dispatch_syscall in privileged mode. */
+          /* Use ip to create a debug frame.
+           * we can use gdb backtrace from syscall to user space.
+           */
+
+          regs[REG_IP] = regs[REG_PC];
+
+          /* Setup to return to arm_dispatch_syscall in privileged mode. */
 
           rtcb->xcp.syscall[index].sysreturn = regs[REG_PC];
 #ifdef CONFIG_BUILD_PROTECTED
           rtcb->xcp.syscall[index].cpsr      = regs[REG_CPSR];
 #endif
 
-          regs[REG_PC]   = (uint32_t)dispatch_syscall;
+          regs[REG_PC]   = (uint32_t)arm_dispatch_syscall;
 #ifdef CONFIG_BUILD_PROTECTED
           cpsr           = regs[REG_CPSR] & ~PSR_MODE_MASK;
           regs[REG_CPSR] = cpsr | PSR_MODE_SYS;
