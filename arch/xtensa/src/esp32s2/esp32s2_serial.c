@@ -301,6 +301,8 @@ static int esp32s2_setup(struct uart_dev_s *dev)
 
   /* Initialize UART module */
 
+  esp32s2_lowputc_enable_sysclk(priv);
+
   /* Discard corrupt RX data */
 
   modifyreg32(UART_CONF0_REG(priv->id), 0, UART_ERR_WR_MASK_M);

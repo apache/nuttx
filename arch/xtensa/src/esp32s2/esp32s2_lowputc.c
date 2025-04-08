@@ -817,6 +817,7 @@ void esp32s2_lowsetup(void)
 
 #ifdef CONFIG_ESP32S2_UART1
 
+  esp32s2_lowputc_rst_peripheral(&g_uart1_config);
   esp32s2_lowputc_config_pins(&g_uart1_config);
 
 #endif
