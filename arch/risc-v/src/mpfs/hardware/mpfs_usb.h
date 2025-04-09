@@ -455,6 +455,7 @@ struct mpfs_usbdev_s
 
   /* USB-specific fields */
 
+  aligned_data(4)
   struct usb_ctrlreq_s ctrl;          /* Last EP0 request */
   uint8_t              devstate;      /* State of the device (see enum mpfs_devstate_e) */
   uint8_t              prevstate;     /* Previous state of the device before SUSPEND */
