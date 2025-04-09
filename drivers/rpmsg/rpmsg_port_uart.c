@@ -57,7 +57,7 @@
 
 #ifdef CONFIG_RPMSG_PORT_UART_CRC
 #  define rpmsg_port_uart_crc16(hdr)       \
-  crc16((FAR uint8_t *)&(hdr)->cmd, (hdr)->len - sizeof((hdr)->crc))
+  crc16ibm((FAR uint8_t *)&(hdr)->cmd, (hdr)->len - sizeof((hdr)->crc))
 #else
 #  define rpmsg_port_uart_crc16(hdr)       0
 #endif
