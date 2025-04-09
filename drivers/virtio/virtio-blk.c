@@ -33,6 +33,7 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/virtio/virtio.h>
+#include <nuttx/init.h>
 
 #include "virtio-blk.h"
 
@@ -197,7 +198,7 @@ static void virtio_blk_wait_complete(FAR struct virtqueue *vq,
   FAR struct virtio_blk_priv_s *priv = vq->vq_dev->priv;
   FAR sem_t *sem;
 
-  if (up_interrupt_context())
+  if (up_interrupt_context() || OSINIT_IS_PANIC())
     {
       for (; ; )
         {
