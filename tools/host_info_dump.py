@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# tools/host_sysinfo.py
+# tools/host_info_dump.py
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -462,13 +462,12 @@ def generate_header(args):
         )[-1]
         if "esp" in arch_chip:
             vendor_specific_module_path = os.path.abspath("./tools/espressif")
-
-        sys.path.append(os.path.abspath(vendor_specific_module_path))
-        vendor_specific_module = importlib.import_module("chip_info")
-        get_vendor_info = getattr(vendor_specific_module, "get_vendor_info")
-        vendor_output, vendor_build_output = get_vendor_info(info["NUTTX_CONFIG"])
-        output += vendor_output
-        build_output += vendor_build_output
+            sys.path.append(os.path.abspath(vendor_specific_module_path))
+            vendor_specific_module = importlib.import_module("chip_info")
+            get_vendor_info = getattr(vendor_specific_module, "get_vendor_info")
+            vendor_output, vendor_build_output = get_vendor_info(info["NUTTX_CONFIG"])
+            output += vendor_output
+            build_output += vendor_build_output
 
     verbose(info, build_output)
 
