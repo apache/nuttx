@@ -153,12 +153,14 @@ int file_mq_unlink(FAR const char *mq_name)
 
   ret = inode_remove(fullpath);
 
-  /* inode_remove() should always fail with -EBUSY because we hae a reference
-   * on the inode.  -EBUSY means that the inode was, indeed, unlinked but
-   * thatis could not be freed because there are references.
+  /* The inode may has been unlinked from the tree in other core,
+   * but it is not yet freed.
    */
 
-  DEBUGASSERT(ret >= 0 || ret == -EBUSY);
+  if (ret < 0 && ret != -EBUSY)
+    {
+      goto errout_with_lock;
+    }
 
   /* Now we do not release the reference count in the normal way (by calling
    * inode release.  Rather, we call mq_inode_release().  mq_inode_release
