@@ -57,30 +57,26 @@ SECTIONS
         _etext = ABSOLUTE(.);
     } > flash
 
-    .init_section :
-    {
+    .init_section : ALIGN(4) {
         _sinit = ABSOLUTE(.);
         KEEP(*(SORT_BY_INIT_PRIORITY(.init_array.*) SORT_BY_INIT_PRIORITY(.ctors.*)))
         KEEP(*(.init_array EXCLUDE_FILE(*crtbegin.o *crtbegin?.o *crtend.o *crtend?.o) .ctors))
         _einit = ABSOLUTE(.);
     } > flash
 
-    .ARM.extab :
-    {
+    .ARM.extab ALIGN(4): {
         *(.ARM.extab*)
     } > flash
 
-    __exidx_start = ABSOLUTE(.);
-    .ARM.exidx :
-    {
+    .ARM.exidx : ALIGN(4) {
+        __exidx_start = ABSOLUTE(.);
         *(.ARM.exidx*)
+        __exidx_end = ABSOLUTE(.);
     } > flash
-    __exidx_end = ABSOLUTE(.);
 
     _eronly = ABSOLUTE(.);
 
-    .data :
-    {
+    .data : ALIGN(4) {
         _sdata = ABSOLUTE(.);
         *(.data .data.*)
         *(.gnu.linkonce.d.*)
@@ -89,8 +85,7 @@ SECTIONS
         _edata = ABSOLUTE(.);
     } > sram AT > flash
 
-    .bss :
-    {
+    .bss : ALIGN(4) {
         _sbss = ABSOLUTE(.);
         *(.bss .bss.*)
         *(.gnu.linkonce.b.*)
