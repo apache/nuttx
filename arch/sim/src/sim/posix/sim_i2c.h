@@ -73,6 +73,8 @@ struct i2c_ops_s
 #ifdef CONFIG_I2C_RESET
   int (*reset)(struct i2c_master_s *dev);
 #endif
+  int (*setup)(struct i2c_master_s *dev);
+  int (*shutdown)(struct i2c_master_s *dev);
 };
 
 /****************************************************************************
