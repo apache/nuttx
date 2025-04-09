@@ -388,7 +388,7 @@ CAN/TWAI     Yes
 DAC          No
 DMA          Yes
 eFuse        Yes
-GPIO         Yes
+GPIO         Yes    Dedicated GPIO supported
 I2C          Yes    Master and Slave mode supported
 I2S          Yes
 LED/PWM      Yes
