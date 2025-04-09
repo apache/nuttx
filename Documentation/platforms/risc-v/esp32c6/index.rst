@@ -344,7 +344,7 @@ CAN/TWAI         Yes
 DMA              Yes
 ECC              No
 eFuse            Yes
-GPIO             Yes
+GPIO             Yes     Dedicated GPIO supported
 HMAC             No
 I2C              Yes     Master and Slave mode supported
 I2S              Yes
