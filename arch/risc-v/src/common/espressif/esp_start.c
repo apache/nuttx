@@ -39,6 +39,7 @@
 #include "esp_lowputc.h"
 #include "esp_start.h"
 
+#include "esp_rom_sys.h"
 #include "esp_clk_internal.h"
 #include "esp_private/rtc_clk.h"
 #include "esp_cpu.h"
@@ -61,7 +62,6 @@
 #ifdef CONFIG_ESPRESSIF_SIMPLE_BOOT
 #include "bootloader_flash_priv.h"
 #include "esp_rom_uart.h"
-#include "esp_rom_sys.h"
 #include "esp_app_format.h"
 #endif
 
@@ -70,7 +70,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_FEATURES
-#  define showprogress(c)     riscv_lowputc(c)
+#  define showprogress(c)     esp_rom_printf(c)
 #else
 #  define showprogress(c)
 #endif
@@ -478,13 +478,13 @@ void __esp_start(void)
   riscv_earlyserialinit();
 #endif
 
-  showprogress('A');
+  showprogress("A");
 
   /* Setup the syscall table needed by the ROM code */
 
   esp_setup_syscall_table();
 
-  showprogress('B');
+  showprogress("B");
 
   /* The 2nd stage bootloader enables RTC WDT to monitor any issues that may
    * prevent the startup sequence from finishing correctly. Hence disable it
@@ -501,7 +501,7 @@ void __esp_start(void)
 
   esp_board_initialize();
 
-  showprogress('C');
+  showprogress("C");
 
   /* Bring up NuttX */
 
