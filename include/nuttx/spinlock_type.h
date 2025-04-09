@@ -50,10 +50,18 @@ typedef atomic_t rwlock_t;
 #endif
 
 #ifndef CONFIG_SPINLOCK
-#  define SP_UNLOCKED 0  /* The Un-locked state */
-#  define SP_LOCKED   1  /* The Locked state */
+#  define SP_LOCKED      SP_UNLOCKED
+#  define SP_UNLOCKED    \
+     (struct spinlock_s) \
+     {                   \
+       .lock = {}        \
+     }
 
-typedef uint8_t spinlock_t;
+struct spinlock_s
+{
+  uint8_t lock[0];
+};
+typedef struct spinlock_s spinlock_t;
 #elif defined(CONFIG_TICKET_SPINLOCK)
 
 typedef struct spinlock_s
