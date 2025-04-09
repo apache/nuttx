@@ -53,6 +53,16 @@
 /* Representation of a packet socket connection */
 
 struct devif_callback_s; /* Forward reference */
+struct pollfd;           /* Forward reference */
+
+/* This is a container that holds the poll-related information */
+
+struct pkt_poll_s
+{
+  FAR struct pkt_conn_s       *conn; /* Needed to handle loss of connection */
+  FAR struct pollfd           *fds;  /* Needed to handle poll events */
+  FAR struct devif_callback_s *cb;   /* Needed to teardown the poll */
+};
 
 struct pkt_conn_s
 {
@@ -76,6 +86,12 @@ struct pkt_conn_s
   struct iob_queue_s readahead;   /* Read-ahead buffering */
 
   FAR struct iob_s  *pendiob;     /* The iob currently being sent */
+
+  /* The following is a list of poll structures of threads waiting for
+   * socket events.
+   */
+
+  struct pkt_poll_s  pollinfo[CONFIG_NET_PKT_NPOLLWAITERS];
 };
 
 /****************************************************************************
@@ -271,6 +287,42 @@ FAR struct net_driver_s *pkt_find_device(FAR struct pkt_conn_s *conn);
  ****************************************************************************/
 
 void pkt_poll(FAR struct net_driver_s *dev, FAR struct pkt_conn_s *conn);
+
+/****************************************************************************
+ * Name: pkt_pollsetup
+ *
+ * Description:
+ *   Setup to monitor events on one PKT socket
+ *
+ * Input Parameters:
+ *   psock - The PKT socket of interest
+ *   fds   - The structure describing the events to be monitored, OR NULL if
+ *           this is a request to stop monitoring events.
+ *
+ * Returned Value:
+ *  0: Success; Negated errno on failure
+ *
+ ****************************************************************************/
+
+int pkt_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds);
+
+/****************************************************************************
+ * Name: pkt_pollteardown
+ *
+ * Description:
+ *   Teardown monitoring of events on an PKT socket
+ *
+ * Input Parameters:
+ *   psock - The PKT socket of interest
+ *   fds   - The structure describing the events to be monitored, OR NULL if
+ *           this is a request to stop monitoring events.
+ *
+ * Returned Value:
+ *  0: Success; Negated errno on failure
+ *
+ ****************************************************************************/
+
+int pkt_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds);
 
 /****************************************************************************
  * Name: pkt_sendmsg

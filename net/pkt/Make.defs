@@ -36,6 +36,7 @@ NET_CSRCS += pkt_conn.c
 NET_CSRCS += pkt_input.c
 NET_CSRCS += pkt_callback.c
 NET_CSRCS += pkt_poll.c
+NET_CSRCS += pkt_netpoll.c
 NET_CSRCS += pkt_finddev.c
 
 # Include packet socket build support

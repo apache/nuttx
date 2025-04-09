@@ -53,7 +53,10 @@ static int        pkt_setup(FAR struct socket *psock);
 static sockcaps_t pkt_sockcaps(FAR struct socket *psock);
 static void       pkt_addref(FAR struct socket *psock);
 static int        pkt_bind(FAR struct socket *psock,
-                    FAR const struct sockaddr *addr, socklen_t addrlen);
+                           FAR const struct sockaddr *addr,
+                           socklen_t addrlen);
+static int        pkt_netpoll(FAR struct socket *psock,
+                              FAR struct pollfd *fds, bool setup);
 static int        pkt_close(FAR struct socket *psock);
 
 /****************************************************************************
@@ -71,7 +74,7 @@ const struct sock_intf_s g_pkt_sockif =
   NULL,            /* si_listen */
   NULL,            /* si_connect */
   NULL,            /* si_accept */
-  NULL,            /* si_poll */
+  pkt_netpoll,     /* si_poll */
   pkt_sendmsg,     /* si_sendmsg */
   pkt_recvmsg,     /* si_recvmsg */
   pkt_close        /* si_close */
@@ -261,6 +264,42 @@ static int pkt_bind(FAR struct socket *psock,
   else
     {
       return -EBADF;
+    }
+}
+
+/****************************************************************************
+ * Name: pkt_netpoll
+ *
+ * Description:
+ *   The standard poll() operation redirects operations on pkt socket
+ *
+ * Input Parameters:
+ *   psock - An instance of the internal socket structure.
+ *   fds   - The structure describing the events to be monitored, OR NULL if
+ *           this is a request to stop monitoring events.
+ *   setup - true: Setup up the poll; false: Teardown the poll
+ *
+ * Returned Value:
+ *  0: Success; Negated errno on failure
+ *
+ ****************************************************************************/
+
+static int pkt_netpoll(FAR struct socket *psock, FAR struct pollfd *fds,
+                       bool setup)
+{
+  /* Check if we are setting up or tearing down the poll */
+
+  if (setup)
+    {
+      /* Perform the PKT poll() setup */
+
+      return pkt_pollsetup(psock, fds);
+    }
+  else
+    {
+      /* Perform the PKT poll() teardown */
+
+      return pkt_pollteardown(psock, fds);
     }
 }
 
