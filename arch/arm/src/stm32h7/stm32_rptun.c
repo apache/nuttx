@@ -108,7 +108,7 @@ struct stm32_rptun_dev_s
  ****************************************************************************/
 
 static const char *stm32_rptun_get_cpuname(struct rptun_dev_s *dev);
-static struct rptun_rsc_s *
+static struct resource_table *
 stm32_rptun_get_resource(struct rptun_dev_s *dev);
 static bool stm32_rptun_is_autostart(struct rptun_dev_s *dev);
 static bool stm32_rptun_is_master(struct rptun_dev_s *dev);
@@ -173,7 +173,7 @@ static const char *stm32_rptun_get_cpuname(struct rptun_dev_s *dev)
  * Name: stm32_rptun_get_resource
  ****************************************************************************/
 
-static struct rptun_rsc_s *
+static struct resource_table *
 stm32_rptun_get_resource(struct rptun_dev_s *dev)
 {
   struct stm32_rptun_dev_s *priv = container_of(dev,
@@ -182,7 +182,7 @@ stm32_rptun_get_resource(struct rptun_dev_s *dev)
 
   if (priv->shmem != NULL)
     {
-      return &priv->shmem->rsc;
+      return &priv->shmem->rsc.rsc_tbl_hdr;
     }
 
 #ifdef CONFIG_ARCH_CHIP_STM32H7_CORTEXM7
@@ -197,7 +197,7 @@ stm32_rptun_get_resource(struct rptun_dev_s *dev)
 
       rsc = &priv->shmem->rsc;
       rsc->rsc_tbl_hdr.ver          = 1;
-      rsc->rsc_tbl_hdr.num          = 1;
+      rsc->rsc_tbl_hdr.num          = 2;
       rsc->rsc_tbl_hdr.reserved[0]  = 0;
       rsc->rsc_tbl_hdr.reserved[1]  = 0;
       rsc->offset[0]                = offsetof(struct rptun_rsc_s,
@@ -220,6 +220,18 @@ stm32_rptun_get_resource(struct rptun_dev_s *dev)
       rsc->config.r2h_buf_size      = VRING_SIZE;
       rsc->config.h2r_buf_size      = VRING_SIZE;
 
+      /* Carveout, reserved 0x1000 for vrings and memory management header */
+
+      rsc->offset[1]                = offsetof(struct rptun_rsc_s,
+                                               carveout);
+      rsc->carveout.type            = RSC_CARVEOUT;
+      rsc->carveout.da              = (uintptr_t)rsc + ALIGN_UP(sizeof
+                                      (struct rptun_rsc_s), VRING_ALIGN);
+      rsc->carveout.pa              = FW_RSC_U32_ADDR_ANY;
+      rsc->carveout.len             = VRING_SIZE * VRING_NR * VRINGS +
+                                      0x1000;
+      memcpy(rsc->carveout.name, "rpmsg_shm", 10);
+
       priv->shmem->base             = (uintptr_t)priv->shmem;
     }
   else
@@ -232,7 +244,7 @@ stm32_rptun_get_resource(struct rptun_dev_s *dev)
         }
     }
 
-  return &priv->shmem->rsc;
+  return &priv->shmem->rsc.rsc_tbl_hdr;
 }
 
 /****************************************************************************
