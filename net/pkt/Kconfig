@@ -61,5 +61,9 @@ config NET_PKT_MAX_CONNS
 		This is useful in case the system is under very heavy load (or
 		under attack), ensuring that the heap will not be exhausted.
 
+config NET_PKT_NPOLLWAITERS
+	int "Number of PKT poll waiters"
+	default 2
+
 endif # NET_PKT
 endmenu # Raw Socket Support

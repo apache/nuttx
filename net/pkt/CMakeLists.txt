@@ -34,5 +34,6 @@ if(CONFIG_NET_PKT)
             pkt_input.c
             pkt_callback.c
             pkt_poll.c
+            pkt_netpoll.c
             pkt_finddev.c)
 endif()
