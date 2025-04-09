@@ -126,6 +126,7 @@ void sched_note_spinlock_unlock(FAR volatile spinlock_t *spinlock);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_SPINLOCK
 #if defined(CONFIG_ARCH_HAVE_TESTSET)
 spinlock_t up_testset(FAR volatile spinlock_t *lock);
 #else
@@ -147,6 +148,7 @@ static inline spinlock_t up_testset(FAR volatile spinlock_t *lock)
 
   return ret;
 }
+#endif
 #endif
 
 /****************************************************************************
