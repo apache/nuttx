@@ -102,7 +102,7 @@ struct nrf53_rptun_dev_s
  ****************************************************************************/
 
 static const char *nrf53_rptun_get_cpuname(struct rptun_dev_s *dev);
-static struct rptun_rsc_s *
+static struct resource_table *
 nrf53_rptun_get_resource(struct rptun_dev_s *dev);
 static bool nrf53_rptun_is_autostart(struct rptun_dev_s *dev);
 static bool nrf53_rptun_is_master(struct rptun_dev_s *dev);
@@ -167,7 +167,7 @@ static const char *nrf53_rptun_get_cpuname(struct rptun_dev_s *dev)
  * Name: nrf53_rptun_get_resource
  ****************************************************************************/
 
-static struct rptun_rsc_s *
+static struct resource_table *
 nrf53_rptun_get_resource(struct rptun_dev_s *dev)
 {
   struct nrf53_rptun_dev_s *priv = container_of(dev,
@@ -176,7 +176,7 @@ nrf53_rptun_get_resource(struct rptun_dev_s *dev)
 
   if (priv->shmem != NULL)
     {
-      return &priv->shmem->rsc;
+      return &priv->shmem->rsc.rsc_tbl_hdr;
     }
 
 #ifdef CONFIG_NRF53_APPCORE
@@ -194,7 +194,7 @@ nrf53_rptun_get_resource(struct rptun_dev_s *dev)
       priv->shmem->base             = (uintptr_t)priv->shmem;
 
       rsc->rsc_tbl_hdr.ver          = 1;
-      rsc->rsc_tbl_hdr.num          = 1;
+      rsc->rsc_tbl_hdr.num          = 2;
       rsc->rsc_tbl_hdr.reserved[0]  = 0;
       rsc->rsc_tbl_hdr.reserved[1]  = 0;
       rsc->offset[0]                = offsetof(struct rptun_rsc_s,
@@ -204,7 +204,8 @@ nrf53_rptun_get_resource(struct rptun_dev_s *dev)
       rsc->rpmsg_vdev.id            = VIRTIO_ID_RPMSG;
       rsc->rpmsg_vdev.dfeatures     = 1 << VIRTIO_RPMSG_F_NS
                                     | 1 << VIRTIO_RPMSG_F_ACK
-                                    | 1 << VIRTIO_RPMSG_F_BUFSZ;
+                                    | 1 << VIRTIO_RPMSG_F_BUFSZ
+                                    | 1 << VIRTIO_RPMSG_F_CPUNAME;
       rsc->rpmsg_vdev.config_len    = sizeof(struct fw_rsc_config);
       rsc->rpmsg_vdev.num_of_vrings = VRINGS;
 
@@ -216,6 +217,23 @@ nrf53_rptun_get_resource(struct rptun_dev_s *dev)
       rsc->rpmsg_vring1.notifyid    = VRING1_NOTIFYID;
       rsc->config.r2h_buf_size      = VRING_SIZE;
       rsc->config.h2r_buf_size      = VRING_SIZE;
+      strlcpy((char *)rsc->config.host_cpuname, "appcore",
+              VIRTIO_RPMSG_CPUNAME_SIZE);
+      strlcpy((char *)rsc->config.remote_cpuname, "netcore",
+              VIRTIO_RPMSG_CPUNAME_SIZE);
+
+      /* Carveout, reserved 512 for vring descriptors and memory
+       * management header
+       */
+
+      rsc->offset[1]                = offsetof(struct rptun_rsc_s,
+                                               carveout);
+      rsc->carveout.type            = RSC_CARVEOUT;
+      rsc->carveout.da              = (uintptr_t)rsc + ALIGN_UP(sizeof
+                                      (struct rptun_rsc_s), VRING_ALIGN);
+      rsc->carveout.pa              = FW_RSC_U32_ADDR_ANY;
+      rsc->carveout.len             = VRING_SIZE * VRING_NR * VRINGS + 512;
+      memcpy(rsc->carveout.name, "vdev0buffer", 11);
     }
   else
     {
@@ -227,7 +245,7 @@ nrf53_rptun_get_resource(struct rptun_dev_s *dev)
         }
     }
 
-  return &priv->shmem->rsc;
+  return &priv->shmem->rsc.rsc_tbl_hdr;
 }
 
 /****************************************************************************
