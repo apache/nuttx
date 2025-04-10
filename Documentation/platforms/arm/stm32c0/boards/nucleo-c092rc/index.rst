@@ -20,6 +20,13 @@ At default USART2 connected to "Virtual COM Port" is used as serial console.
 Configurations
 ==============
 
+nsh
+---
+
+Configures the NuttShell (nsh) located at apps/examples/nsh.  The
+Configuration enables the serial interfaces on USART2.  Support for
+builtin applications is disabled.
+
 jumbo
 -----
 
