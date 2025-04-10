@@ -78,19 +78,18 @@
 arm_dispatch_syscall:
 	.cfi_sections	.debug_frame
 	.cfi_startproc
-	mov r11, sp
-	.cfi_register sp, r11
 	sub	sp, sp, #32
+	.cfi_def_cfa_offset 32
 	str	r4, [sp, #0]
-	.cfi_offset r4, 0
+	.cfi_offset r4, -32
 	str	r5, [sp, #4]
-	.cfi_offset r5, 4
+	.cfi_offset r5, -28
 	str	r6, [sp, #8]
-	.cfi_offset r6, 8
+	.cfi_offset r6, -24
 	str	lr, [sp, #12]
-	.cfi_offset lr, 12
+	.cfi_offset lr, -20
 	str	ip, [sp, #16]
-	.cfi_offset pc, 16
+	.cfi_offset pc, -16
 	ldr	ip, =g_stublookup
 	ldr	ip, [ip, r0, lsl #2]
 	blx	ip
