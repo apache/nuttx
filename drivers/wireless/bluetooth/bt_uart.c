@@ -162,6 +162,14 @@ static void btuart_rxwork(FAR void *arg)
       else if (data[0] == H4_ACL)
         {
           pktlen = hdr->acl.len;
+
+          if (pktlen + H4_HEADER_SIZE + hdrlen >
+              CONFIG_BLUETOOTH_UART_RXBUFSIZE)
+            {
+              wlwarn("WARNING: H4 packet is too long\n");
+              break;
+            }
+
           type = BT_ACL_IN;
         }
       else
