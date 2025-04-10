@@ -536,7 +536,7 @@ A macOS port is available at: <https://github.com/discoteq/flock>
 
   * Xcode (the native compiler and the rest of the toolchain)
 
-  * ELF toolchain (if you want to build modules for CONFIG_LIBC_MODLIB)
+  * ELF toolchain (if you want to build modules for CONFIG_LIBC_ELF)
 
     brew install x86_64-elf-gcc
 

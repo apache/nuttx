@@ -1438,11 +1438,11 @@ other NSH configurations include these additions to the configuration file::
       CONFIG_FS_ROMFS=y
       CONFIG_LIBC_ARCH_ELF=y
       CONFIG_MODULE=y
-      CONFIG_LIBC_MODLIB=y
-      CONFIG_MODLIB_MAXDEPEND=2
-      CONFIG_MODLIB_ALIGN_LOG2=2
-      CONFIG_MODLIB_BUFFERSIZE=128
-      CONFIG_MODLIB_BUFFERINCR=32
+      CONFIG_LIBC_ELF=y
+      CONFIG_LIBC_ELF_MAXDEPEND=2
+      CONFIG_LIBC_ELF_ALIGN_LOG2=2
+      CONFIG_LIBC_ELF_BUFFERSIZE=128
+      CONFIG_LIBC_ELF_BUFFERINCR=32
 
 The could be followed may be added for testing shared libraries in the
 FLAT build using apps/examples/sotest (assuming that you also have SD

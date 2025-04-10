@@ -267,7 +267,7 @@ endif
 CMODULEFLAGS += -fno-stack-protector
 
 LDMODULEFLAGS = -r
-LDMODULEFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/modlib/gnu-elf.ld)
+LDMODULEFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/elf/gnu-elf.ld)
 SHMODULEFLAGS = -shared -Bsymbolic -G -Bdynamic
 
 # NuttX modules are ELF binaries.
@@ -293,7 +293,7 @@ ifeq ($(CONFIG_LIBC_ARCH_ELF_64BIT),y)
 endif
 
 LDELFFLAGS = -r -e main --gc-sections
-LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/modlib/gnu-elf.ld)
+LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/elf/gnu-elf.ld)
 
 ifeq ($(CONFIG_HOST_MACOS),y)
   LDFLAGS += -Wl,-dead_strip

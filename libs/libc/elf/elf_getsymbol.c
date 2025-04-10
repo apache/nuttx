@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/modlib/modlib_getsymbol.c
+ * libs/libc/elf/elf_getsymbol.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -27,7 +27,7 @@
 #include <debug.h>
 #include <errno.h>
 
-#include <nuttx/lib/modlib.h>
+#include <nuttx/lib/elf.h>
 #include <nuttx/symtab.h>
 
 /****************************************************************************
@@ -35,28 +35,28 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: modlib_getsymbol
+ * Name: libelf_getsymbol
  *
  * Description:
- *   modlib_getsymbol() returns the address of a symbol defined within the
- *   object that was previously made accessible through a modlib_getsymbol()
- *   call.  handle is the value returned from a call to modlib_insert() (and
- *   which has not since been released via a call to modlib_remove()),
+ *   libelf_getsymbol() returns the address of a symbol defined within the
+ *   object that was previously made accessible through a libelf_getsymbol()
+ *   call.  handle is the value returned from a call to libelf_insert() (and
+ *   which has not since been released via a call to libelf_remove()),
  *   name is the symbol's name as a character string.
  *
- *   The returned symbol address will remain valid until modlib_remove() is
+ *   The returned symbol address will remain valid until libelf_remove() is
  *   called.
  *
  * Input Parameters:
  *   handle - The opaque, non-NULL value returned by a previous successful
- *            call to modlib_insert().
+ *            call to libelf_insert().
  *   name   - A pointer to the symbol name string.
  *
  * Returned Value:
  *   The address associated with the symbol is returned on success.
- *   If handle does not refer to a valid module opened by modlib_insert(),
- *   or if the named modlib_symbol cannot be found within any of the objects
- *   associated with handle, modlib_getsymbol() will return NULL and the
+ *   If handle does not refer to a valid module opened by libelf_insert(),
+ *   or if the named libelf_symbol cannot be found within any of the objects
+ *   associated with handle, libelf_getsymbol() will return NULL and the
  *   errno variable will be set appropriately.
  *
  *   NOTE: This means that the address zero can never be a valid return
@@ -64,7 +64,7 @@
  *
  ****************************************************************************/
 
-FAR const void *modlib_getsymbol(FAR void *handle, FAR const char *name)
+FAR const void *libelf_getsymbol(FAR void *handle, FAR const char *name)
 {
   FAR struct module_s *modp = handle;
   FAR const struct symtab_s *symbol;
@@ -73,8 +73,8 @@ FAR const void *modlib_getsymbol(FAR void *handle, FAR const char *name)
 
   /* Verify that the module is in the registry */
 
-  modlib_registry_lock();
-  ret = modlib_registry_verify(modp);
+  libelf_registry_lock();
+  ret = libelf_registry_verify(modp);
   if (ret < 0)
     {
       berr("ERROR: Failed to verify module: %d\n", ret);
@@ -96,7 +96,7 @@ FAR const void *modlib_getsymbol(FAR void *handle, FAR const char *name)
   symbol = symtab_findbyname(modp->modinfo.exports, name,
                              modp->modinfo.nexports);
 
-  modlib_registry_unlock();
+  libelf_registry_unlock();
   if (symbol == NULL)
     {
       berr("ERROR: Failed to find symbol in symbol \"%s\" in table\n", name);
@@ -110,7 +110,7 @@ FAR const void *modlib_getsymbol(FAR void *handle, FAR const char *name)
   return symbol->sym_value;
 
 errout_with_lock:
-  modlib_registry_unlock();
+  libelf_registry_unlock();
   set_errno(err);
   return NULL;
 }

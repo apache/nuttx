@@ -61,7 +61,7 @@ AFLAGS := $(CFLAGS) -D__ASSEMBLY__
 CMODULEFLAGS = $(CFLAGS) -mtext-section-literals
 
 LDMODULEFLAGS = -r -e module_initialize
-LDMODULEFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/modlib/gnu-elf.ld)
+LDMODULEFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/elf/gnu-elf.ld)
 
 # ELF module definitions
 
@@ -69,4 +69,4 @@ CELFFLAGS = $(CFLAGS) -mtext-section-literals
 CXXELFFLAGS = $(CXXFLAGS) -mtext-section-literals
 
 LDELFFLAGS = -r -e main
-LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/binfmt/libelf/gnu-elf.ld)
+LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/binfmt/elf/gnu-elf.ld)

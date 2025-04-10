@@ -44,11 +44,11 @@
  ****************************************************************************/
 
 /* CONFIG_DEBUG_FEATURES, CONFIG_DEBUG_INFO, and CONFIG_DEBUG_BINFMT
- * have to be defined or CONFIG_MODLIB_DUMPBUFFER does nothing.
+ * have to be defined or CONFIG_LIBC_ELF_DUMPBUFFER does nothing.
  */
 
 #if !defined(CONFIG_DEBUG_INFO) || !defined(CONFIG_DEBUG_BINFMT)
-#  undef CONFIG_MODLIB_DUMPBUFFER
+#  undef CONFIG_LIBC_ELF_DUMPBUFFER
 #endif
 
 #ifndef CONFIG_ELF_STACKSIZE
@@ -102,8 +102,8 @@ static int elf_loadbinary(FAR struct binary_s *binp,
 
   /* Initialize the ELF library to load the program binary. */
 
-  ret = modlib_initialize(filename, &loadinfo);
-  modlib_dumploadinfo(&loadinfo);
+  ret = libelf_initialize(filename, &loadinfo);
+  libelf_dumploadinfo(&loadinfo);
   if (ret != 0)
     {
       berr("Failed to initialize to load ELF program binary: %d\n", ret);
@@ -112,8 +112,8 @@ static int elf_loadbinary(FAR struct binary_s *binp,
 
   /* Load the program binary */
 
-  ret = modlib_load_with_addrenv(&loadinfo);
-  modlib_dumploadinfo(&loadinfo);
+  ret = libelf_load_with_addrenv(&loadinfo);
+  libelf_dumploadinfo(&loadinfo);
   if (ret != 0)
     {
       berr("Failed to load ELF program binary: %d\n", ret);
@@ -124,7 +124,7 @@ static int elf_loadbinary(FAR struct binary_s *binp,
 
   if (loadinfo.ehdr.e_type == ET_REL || loadinfo.gotindex >= 0)
     {
-      ret = modlib_bind(&binp->mod, &loadinfo, exports, nexports);
+      ret = libelf_bind(&binp->mod, &loadinfo, exports, nexports);
       if (ret != 0)
         {
           berr("Failed to bind symbols program binary: %d\n", ret);
@@ -209,7 +209,7 @@ static int elf_loadbinary(FAR struct binary_s *binp,
   binp->mode = loadinfo.filemode;
 #endif
 
-  modlib_dumpentrypt(&loadinfo);
+  libelf_dumpentrypt(&loadinfo);
 #ifdef CONFIG_PIC
   if (loadinfo.gotindex >= 0)
     {
@@ -227,13 +227,13 @@ static int elf_loadbinary(FAR struct binary_s *binp,
     }
 #endif
 
-  modlib_uninitialize(&loadinfo);
+  libelf_uninitialize(&loadinfo);
   return OK;
 
 errout_with_load:
-  modlib_unload(&loadinfo);
+  libelf_unload(&loadinfo);
 errout_with_init:
-  modlib_uninitialize(&loadinfo);
+  libelf_uninitialize(&loadinfo);
   return ret;
 }
 
@@ -248,7 +248,7 @@ errout_with_init:
 static int elf_unloadbinary(FAR struct binary_s *binp)
 {
   binfo("Unloading %p\n", binp);
-  modlib_uninit(&binp->mod);
+  libelf_uninit(&binp->mod);
 
   return OK;
 }

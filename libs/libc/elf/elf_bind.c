@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/modlib/modlib_bind.c
+ * libs/libc/elf/elf_bind.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -34,10 +34,10 @@
 
 #include <nuttx/cache.h>
 #include <nuttx/elf.h>
-#include <nuttx/lib/modlib.h>
+#include <nuttx/lib/elf.h>
 
 #include "libc.h"
-#include "modlib/modlib.h"
+#include "elf/elf.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -87,14 +87,14 @@ struct
  ****************************************************************************/
 
 /****************************************************************************
- * Name: modlib_readrels
+ * Name: libelf_readrels
  *
  * Description:
  *   Read the (ELF_Rel structure * buffer count) into memory.
  *
  ****************************************************************************/
 
-static inline int modlib_readrels(FAR struct mod_loadinfo_s *loadinfo,
+static inline int libelf_readrels(FAR struct mod_loadinfo_s *loadinfo,
                                   FAR const Elf_Shdr *relsec,
                                   int index, FAR Elf_Rel *rels,
                                   int count)
@@ -121,19 +121,19 @@ static inline int modlib_readrels(FAR struct mod_loadinfo_s *loadinfo,
 
   /* And, finally, read the symbol table entry into memory */
 
-  return modlib_read(loadinfo, (FAR uint8_t *)rels, size,
+  return libelf_read(loadinfo, (FAR uint8_t *)rels, size,
                      relsec->sh_offset + offset);
 }
 
 /****************************************************************************
- * Name: modlib_readrelas
+ * Name: libelf_readrelas
  *
  * Description:
  *   Read the (ELF_Rela structure * buffer count) into memory.
  *
  ****************************************************************************/
 
-static inline int modlib_readrelas(FAR struct mod_loadinfo_s *loadinfo,
+static inline int libelf_readrelas(FAR struct mod_loadinfo_s *loadinfo,
                                    FAR const Elf_Shdr *relsec,
                                    int index, FAR Elf_Rela *relas,
                                    int count)
@@ -160,12 +160,12 @@ static inline int modlib_readrelas(FAR struct mod_loadinfo_s *loadinfo,
 
   /* And, finally, read the symbol table entry into memory */
 
-  return modlib_read(loadinfo, (FAR uint8_t *)relas, size,
+  return libelf_read(loadinfo, (FAR uint8_t *)relas, size,
                      relsec->sh_offset + offset);
 }
 
 /****************************************************************************
- * Name: modlib_relocate and modlib_relocateadd
+ * Name: libelf_relocate and libelf_relocateadd
  *
  * Description:
  *   Perform all relocations associated with a section.
@@ -176,7 +176,7 @@ static inline int modlib_readrelas(FAR struct mod_loadinfo_s *loadinfo,
  *
  ****************************************************************************/
 
-static int modlib_relocate(FAR struct module_s *modp,
+static int libelf_relocate(FAR struct module_s *modp,
                            FAR struct mod_loadinfo_s *loadinfo, int relidx,
                            FAR const struct symtab_s *exports, int nexports)
 {
@@ -198,7 +198,8 @@ static int modlib_relocate(FAR struct module_s *modp,
 
   ARCH_ELFDATA_DEF;
 
-  rels = lib_malloc(CONFIG_MODLIB_RELOCATION_BUFFERCOUNT * sizeof(Elf_Rel));
+  rels = lib_malloc(CONFIG_LIBC_ELF_RELOCATION_BUFFERCOUNT *
+                    sizeof(Elf_Rel));
   if (!rels)
     {
       berr("Failed to allocate memory for elf relocation rels\n");
@@ -216,12 +217,12 @@ static int modlib_relocate(FAR struct module_s *modp,
     {
       /* Read the relocation entry into memory */
 
-      rel = &rels[i % CONFIG_MODLIB_RELOCATION_BUFFERCOUNT];
+      rel = &rels[i % CONFIG_LIBC_ELF_RELOCATION_BUFFERCOUNT];
 
-      if (!(i % CONFIG_MODLIB_RELOCATION_BUFFERCOUNT))
+      if (!(i % CONFIG_LIBC_ELF_RELOCATION_BUFFERCOUNT))
         {
-          ret = modlib_readrels(loadinfo, relsec, i, rels,
-                                CONFIG_MODLIB_RELOCATION_BUFFERCOUNT);
+          ret = libelf_readrels(loadinfo, relsec, i, rels,
+                                CONFIG_LIBC_ELF_RELOCATION_BUFFERCOUNT);
           if (ret < 0)
             {
               berr("ERROR: Section %d reloc %d: "
@@ -258,7 +259,7 @@ static int modlib_relocate(FAR struct module_s *modp,
 
       if (sym == NULL)
         {
-          if (j < CONFIG_MODLIB_SYMBOL_CACHECOUNT)
+          if (j < CONFIG_LIBC_ELF_SYMBOL_CACHECOUNT)
             {
               cache = lib_malloc(sizeof(Elf_SymCache));
               if (!cache)
@@ -279,7 +280,7 @@ static int modlib_relocate(FAR struct module_s *modp,
 
           /* Read the symbol table entry into memory */
 
-          ret = modlib_readsym(loadinfo, symidx, sym,
+          ret = libelf_readsym(loadinfo, symidx, sym,
                                &loadinfo->shdr[loadinfo->symtabidx]);
           if (ret < 0)
             {
@@ -292,7 +293,7 @@ static int modlib_relocate(FAR struct module_s *modp,
 
           /* Get the value of the symbol (in sym.st_value) */
 
-          ret = modlib_symvalue(modp, loadinfo, sym,
+          ret = libelf_symvalue(modp, loadinfo, sym,
                   loadinfo->shdr[loadinfo->strtabidx].sh_offset,
                   exports, nexports);
           if (ret < 0)
@@ -425,7 +426,7 @@ static int modlib_relocate(FAR struct module_s *modp,
   return ret;
 }
 
-static int modlib_relocateadd(FAR struct module_s *modp,
+static int libelf_relocateadd(FAR struct module_s *modp,
                               FAR struct mod_loadinfo_s *loadinfo,
                               int relidx,
                               FAR const struct symtab_s *exports,
@@ -449,7 +450,7 @@ static int modlib_relocateadd(FAR struct module_s *modp,
 
   ARCH_ELFDATA_DEF;
 
-  relas = lib_malloc(CONFIG_MODLIB_RELOCATION_BUFFERCOUNT *
+  relas = lib_malloc(CONFIG_LIBC_ELF_RELOCATION_BUFFERCOUNT *
                      sizeof(Elf_Rela));
   if (!relas)
     {
@@ -468,12 +469,12 @@ static int modlib_relocateadd(FAR struct module_s *modp,
     {
       /* Read the relocation entry into memory */
 
-      rela = &relas[i % CONFIG_MODLIB_RELOCATION_BUFFERCOUNT];
+      rela = &relas[i % CONFIG_LIBC_ELF_RELOCATION_BUFFERCOUNT];
 
-      if (!(i % CONFIG_MODLIB_RELOCATION_BUFFERCOUNT))
+      if (!(i % CONFIG_LIBC_ELF_RELOCATION_BUFFERCOUNT))
         {
-          ret = modlib_readrelas(loadinfo, relsec, i, relas,
-                                 CONFIG_MODLIB_RELOCATION_BUFFERCOUNT);
+          ret = libelf_readrelas(loadinfo, relsec, i, relas,
+                                 CONFIG_LIBC_ELF_RELOCATION_BUFFERCOUNT);
           if (ret < 0)
             {
               berr("ERROR: Section %d reloc %d: "
@@ -510,7 +511,7 @@ static int modlib_relocateadd(FAR struct module_s *modp,
 
       if (sym == NULL)
         {
-          if (j < CONFIG_MODLIB_SYMBOL_CACHECOUNT)
+          if (j < CONFIG_LIBC_ELF_SYMBOL_CACHECOUNT)
             {
               cache = lib_malloc(sizeof(Elf_SymCache));
               if (!cache)
@@ -531,7 +532,7 @@ static int modlib_relocateadd(FAR struct module_s *modp,
 
           /* Read the symbol table entry into memory */
 
-          ret = modlib_readsym(loadinfo, symidx, sym,
+          ret = libelf_readsym(loadinfo, symidx, sym,
                                &loadinfo->shdr[loadinfo->symtabidx]);
           if (ret < 0)
             {
@@ -544,7 +545,7 @@ static int modlib_relocateadd(FAR struct module_s *modp,
 
           /* Get the value of the symbol (in sym.st_value) */
 
-          ret = modlib_symvalue(modp, loadinfo, sym,
+          ret = libelf_symvalue(modp, loadinfo, sym,
                            loadinfo->shdr[loadinfo->strtabidx].sh_offset,
                            exports, nexports);
           if (ret < 0)
@@ -622,7 +623,7 @@ static int modlib_relocateadd(FAR struct module_s *modp,
 }
 
 /****************************************************************************
- * Name: modlib_relocatedyn
+ * Name: libelf_relocatedyn
  *
  * Description:
  *   Perform all relocations associated with a dynamic section.
@@ -633,7 +634,7 @@ static int modlib_relocateadd(FAR struct module_s *modp,
  *
  ****************************************************************************/
 
-static int modlib_relocatedyn(FAR struct module_s *modp,
+static int libelf_relocatedyn(FAR struct module_s *modp,
                               FAR struct mod_loadinfo_s *loadinfo,
                               int relidx)
 {
@@ -662,7 +663,7 @@ static int modlib_relocatedyn(FAR struct module_s *modp,
       return -ENOMEM;
     }
 
-  ret = modlib_read(loadinfo, (FAR uint8_t *)dyn, shdr->sh_size,
+  ret = libelf_read(loadinfo, (FAR uint8_t *)dyn, shdr->sh_size,
                     shdr->sh_offset);
   if (ret < 0)
     {
@@ -673,7 +674,8 @@ static int modlib_relocatedyn(FAR struct module_s *modp,
 
   /* Assume DT_RELA to get maximum size required */
 
-  rels = lib_zalloc(CONFIG_MODLIB_RELOCATION_BUFFERCOUNT * sizeof(Elf_Rela));
+  rels = lib_zalloc(CONFIG_LIBC_ELF_RELOCATION_BUFFERCOUNT *
+                    sizeof(Elf_Rela));
   if (!rels)
     {
       berr("Failed to allocate memory for elf relocation rels\n");
@@ -734,7 +736,7 @@ static int modlib_relocatedyn(FAR struct module_s *modp,
       return -ENOMEM;
     }
 
-  ret = modlib_read(loadinfo, (FAR uint8_t *)sym, symhdr->sh_size,
+  ret = libelf_read(loadinfo, (FAR uint8_t *)sym, symhdr->sh_size,
                     symhdr->sh_offset);
   if (ret < 0)
     {
@@ -771,26 +773,26 @@ static int modlib_relocatedyn(FAR struct module_s *modp,
 
           if (reldata.relrela[idx_rel] == 0)
             {
-              rel = &rels[i % CONFIG_MODLIB_RELOCATION_BUFFERCOUNT];
+              rel = &rels[i % CONFIG_LIBC_ELF_RELOCATION_BUFFERCOUNT];
               rela = (Elf_Rela *)rel;  /* Just to keep the compiler happy */
             }
           else
             {
-              rela = &relas[i % CONFIG_MODLIB_RELOCATION_BUFFERCOUNT];
+              rela = &relas[i % CONFIG_LIBC_ELF_RELOCATION_BUFFERCOUNT];
               rel = (Elf_Rel *)rela;
             }
 
-          if (!(i % CONFIG_MODLIB_RELOCATION_BUFFERCOUNT))
+          if (!(i % CONFIG_LIBC_ELF_RELOCATION_BUFFERCOUNT))
             {
               size_t relsize = (sizeof(Elf_Rela) *
-                               CONFIG_MODLIB_RELOCATION_BUFFERCOUNT);
+                               CONFIG_LIBC_ELF_RELOCATION_BUFFERCOUNT);
 
               if (reldata.relsz[idx_rel] < relsize)
                 {
                   relsize = reldata.relsz[idx_rel];
                 }
 
-              ret = modlib_read(loadinfo, (FAR uint8_t *)rels,
+              ret = libelf_read(loadinfo, (FAR uint8_t *)rels,
                                 relsize,
                                 reldata.reloff[idx_rel] +
                                 i * sizeof(Elf_Rel));
@@ -814,7 +816,7 @@ static int modlib_relocatedyn(FAR struct module_s *modp,
                 {
                     FAR void *ep;
 
-                    ep = modlib_findglobal(modp, loadinfo, symhdr,
+                    ep = libelf_findglobal(modp, loadinfo, symhdr,
                                            &sym[idx_sym]);
                     if ((ep == NULL) && (ELF_ST_BIND(sym[idx_sym].st_info)
                         != STB_WEAK))
@@ -890,12 +892,12 @@ static int modlib_relocatedyn(FAR struct module_s *modp,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: modlib_bind
+ * Name: libelf_bind
  *
  * Description:
  *   Bind the imported symbol names in the loaded module described by
  *   'loadinfo' using the exported symbol values provided by
- *   modlib_setsymtab().
+ *   libelf_setsymtab().
  *
  * Input Parameters:
  *   modp     - Module state information
@@ -909,7 +911,7 @@ static int modlib_relocatedyn(FAR struct module_s *modp,
  *
  ****************************************************************************/
 
-int modlib_bind(FAR struct module_s *modp,
+int libelf_bind(FAR struct module_s *modp,
                 FAR struct mod_loadinfo_s *loadinfo,
                 FAR const struct symtab_s *exports, int nexports)
 {
@@ -918,16 +920,16 @@ int modlib_bind(FAR struct module_s *modp,
 
 #ifdef CONFIG_ARCH_ADDRENV
   /* If CONFIG_ARCH_ADDRENV=y, then the loaded ELF lies in a virtual address
-   * space that may not be in place now.  modlib_addrenv_select() will
+   * space that may not be in place now.  libelf_addrenv_select() will
    * temporarily instantiate that address space.
    */
 
   if (loadinfo->addrenv != NULL)
     {
-      ret = modlib_addrenv_select(loadinfo);
+      ret = libelf_addrenv_select(loadinfo);
       if (ret < 0)
         {
-          berr("ERROR: modlib_addrenv_select() failed: %d\n", ret);
+          berr("ERROR: libelf_addrenv_select() failed: %d\n", ret);
           return ret;
         }
     }
@@ -935,7 +937,7 @@ int modlib_bind(FAR struct module_s *modp,
 
   /* Find the symbol and string tables */
 
-  ret = modlib_findsymtab(loadinfo);
+  ret = libelf_findsymtab(loadinfo);
   if (ret < 0)
     {
       goto errout_with_addrenv;
@@ -959,7 +961,7 @@ int modlib_bind(FAR struct module_s *modp,
           switch (loadinfo->shdr[i].sh_type)
             {
               case SHT_DYNAMIC:
-                ret = modlib_relocatedyn(modp, loadinfo, i);
+                ret = libelf_relocatedyn(modp, loadinfo, i);
                 break;
               case SHT_DYNSYM:
                 loadinfo->dsymtabidx = i;
@@ -1016,7 +1018,7 @@ int modlib_bind(FAR struct module_s *modp,
                     continue;
                   }
 
-                ret = modlib_relocate(modp, loadinfo, i, exports, nexports);
+                ret = libelf_relocate(modp, loadinfo, i, exports, nexports);
                 break;
               case SHT_RELA:
                 if ((loadinfo->shdr[infosec].sh_flags & SHF_ALLOC) == 0)
@@ -1024,7 +1026,7 @@ int modlib_bind(FAR struct module_s *modp,
                     continue;
                   }
 
-                ret = modlib_relocateadd(modp, loadinfo, i, exports,
+                ret = libelf_relocateadd(modp, loadinfo, i, exports,
                                          nexports);
                 break;
               case SHT_INIT_ARRAY:
@@ -1081,10 +1083,10 @@ errout_with_addrenv:
 #ifdef CONFIG_ARCH_ADDRENV
   if (loadinfo->addrenv != NULL)
     {
-      int status = modlib_addrenv_restore(loadinfo);
+      int status = libelf_addrenv_restore(loadinfo);
       if (status < 0)
         {
-          berr("ERROR: modlib_addrenv_restore() failed: %d\n", status);
+          berr("ERROR: libelf_addrenv_restore() failed: %d\n", status);
           if (ret == OK)
             {
               ret = status;

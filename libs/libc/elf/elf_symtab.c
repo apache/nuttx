@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/modlib/modlib_symtab.c
+ * libs/libc/elf/elf_symtab.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -29,23 +29,23 @@
 #include <assert.h>
 
 #include <nuttx/symtab.h>
-#include <nuttx/lib/modlib.h>
+#include <nuttx/lib/elf.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_MODLIB_HAVE_SYMTAB
+#ifdef CONFIG_LIBC_ELF_HAVE_SYMTAB
   /* Symbol table used by dlsym */
 
-#  ifndef CONFIG_MODLIB_SYMTAB_ARRAY
-#    error "CONFIG_MODLIB_SYMTAB_ARRAY must be defined"
+#  ifndef CONFIG_LIBC_ELF_SYMTAB_ARRAY
+#    error "CONFIG_LIBC_ELF_SYMTAB_ARRAY must be defined"
 #  endif
 
   /* Number of Symbols in the Table */
 
-#  ifndef CONFIG_MODLIB_NSYMBOLS_VAR
-#    error "CONFIG_MODLIB_NSYMBOLS_VAR must be defined"
+#  ifndef CONFIG_LIBC_ELF_NSYMBOLS_VAR
+#    error "CONFIG_LIBC_ELF_NSYMBOLS_VAR must be defined"
 #  endif
 #endif
 
@@ -53,24 +53,24 @@
  * Public Data
  ****************************************************************************/
 
-#ifdef CONFIG_MODLIB_HAVE_SYMTAB
-extern const struct symtab_s CONFIG_MODLIB_SYMTAB_ARRAY[];
-extern int CONFIG_MODLIB_NSYMBOLS_VAR;
+#ifdef CONFIG_LIBC_ELF_HAVE_SYMTAB
+extern const struct symtab_s CONFIG_LIBC_ELF_SYMTAB_ARRAY[];
+extern int CONFIG_LIBC_ELF_NSYMBOLS_VAR;
 #endif
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static FAR const struct symtab_s *g_modlib_symtab;
-static int g_modlib_nsymbols;
+static FAR const struct symtab_s *g_libelf_symtab;
+static int g_libelf_nsymbols;
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: modlib_getsymtab
+ * Name: libelf_getsymtab
  *
  * Description:
  *   Get the current kernel symbol table selection as an atomic operation.
@@ -85,28 +85,28 @@ static int g_modlib_nsymbols;
  *
  ****************************************************************************/
 
-void modlib_getsymtab(FAR const struct symtab_s **symtab, FAR int *nsymbols)
+void libelf_getsymtab(FAR const struct symtab_s **symtab, FAR int *nsymbols)
 {
   DEBUGASSERT(symtab != NULL && nsymbols != NULL);
 
   /* Borrow the registry lock to assure atomic access */
 
-  modlib_registry_lock();
-#ifdef CONFIG_MODLIB_HAVE_SYMTAB
-  if (g_modlib_symtab == NULL)
+  libelf_registry_lock();
+#ifdef CONFIG_LIBC_ELF_HAVE_SYMTAB
+  if (g_libelf_symtab == NULL)
     {
-      g_modlib_symtab = CONFIG_MODLIB_SYMTAB_ARRAY;
-      g_modlib_nsymbols = CONFIG_MODLIB_NSYMBOLS_VAR;
+      g_libelf_symtab = CONFIG_LIBC_ELF_SYMTAB_ARRAY;
+      g_libelf_nsymbols = CONFIG_LIBC_ELF_NSYMBOLS_VAR;
     }
 #endif
 
-  *symtab   = g_modlib_symtab;
-  *nsymbols = g_modlib_nsymbols;
-  modlib_registry_unlock();
+  *symtab   = g_libelf_symtab;
+  *nsymbols = g_libelf_nsymbols;
+  libelf_registry_unlock();
 }
 
 /****************************************************************************
- * Name: modlib_setsymtab
+ * Name: libelf_setsymtab
  *
  * Description:
  *   Select a new kernel symbol table selection as an atomic operation.
@@ -120,12 +120,12 @@ void modlib_getsymtab(FAR const struct symtab_s **symtab, FAR int *nsymbols)
  *
  ****************************************************************************/
 
-void modlib_setsymtab(FAR const struct symtab_s *symtab, int nsymbols)
+void libelf_setsymtab(FAR const struct symtab_s *symtab, int nsymbols)
 {
   /* Borrow the registry lock to assure atomic access */
 
-  modlib_registry_lock();
-  g_modlib_symtab   = symtab;
-  g_modlib_nsymbols = nsymbols;
-  modlib_registry_unlock();
+  libelf_registry_lock();
+  g_libelf_symtab   = symtab;
+  g_libelf_nsymbols = nsymbols;
+  libelf_registry_unlock();
 }

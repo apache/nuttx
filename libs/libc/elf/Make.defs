@@ -1,5 +1,5 @@
 ############################################################################
-# libs/libc/modlib/Makefile
+# libs/libc/elf/Make.defs
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -20,21 +20,22 @@
 #
 ############################################################################
 
-include $(TOPDIR)/Make.defs
+ifeq ($(CONFIG_LIBC_ELF),y)
 
-# Generate gnu-elf.ld from gnu-elf.ld.in
+# Add the nuttx/lib/elf.h files to the build
 
-gnu-elf.ld: gnu-elf.ld.in
-	$(call PREPROCESS, $<, $@)
+CSRCS += elf_addrenv.c elf_bind.c elf_depend.c elf_init.c
+CSRCS += elf_iobuffer.c elf_load.c elf_loadhdrs.c elf_verify.c
+CSRCS += elf_read.c elf_registry.c elf_sections.c
+CSRCS += elf_symbols.c elf_symtab.c elf_uninit.c elf_unload.c
+CSRCS += elf_gethandle.c elf_getsymbol.c elf_insert.c
+CSRCS += elf_remove.c
 
-# Create initial context
+# Add the elf directory to the build
 
-context: gnu-elf.ld
+ASRCS += elf_globals.S
 
-.PHONY: context clean distclean
+DEPPATH += --dep-path elf
+VPATH += :elf
 
-clean:
-	$(call CLEAN)
-
-distclean: clean
-	$(call DELFILE, gnu-elf.ld)
+endif

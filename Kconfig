@@ -801,7 +801,7 @@ endif # DEBUG_AUDIO
 config DEBUG_BINFMT
 	bool "Binary Loader Debug Features"
 	default n
-	depends on !BINFMT_DISABLE || LIBC_MODLIB
+	depends on !BINFMT_DISABLE || LIBC_ELF
 	---help---
 		Enable binary loader debug features.
 

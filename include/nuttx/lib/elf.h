@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/lib/modlib.h
+ * include/nuttx/lib/elf.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_LIB_MODLIB_H
-#define __INCLUDE_NUTTX_LIB_MODLIB_H
+#ifndef __INCLUDE_NUTTX_LIB_LIBC_ELF_H
+#define __INCLUDE_NUTTX_LIB_LIBC_ELF_H
 
 /****************************************************************************
  * Included Files
@@ -40,34 +40,34 @@
 
 /* Configuration ************************************************************/
 
-#ifndef CONFIG_MODLIB_MAXDEPEND
-#  define CONFIG_MODLIB_MAXDEPEND  0
+#ifndef CONFIG_LIBC_ELF_MAXDEPEND
+#  define CONFIG_LIBC_ELF_MAXDEPEND  0
 #endif
 
-#ifndef CONFIG_MODLIB_ALIGN_LOG2
-#  define CONFIG_MODLIB_ALIGN_LOG2 2
+#ifndef CONFIG_LIBC_ELF_ALIGN_LOG2
+#  define CONFIG_LIBC_ELF_ALIGN_LOG2 2
 #endif
 
-#ifndef CONFIG_MODLIB_BUFFERSIZE
-#  define CONFIG_MODLIB_BUFFERSIZE 32
+#ifndef CONFIG_LIBC_ELF_BUFFERSIZE
+#  define CONFIG_LIBC_ELF_BUFFERSIZE 32
 #endif
 
-#ifndef CONFIG_MODLIB_BUFFERINCR
-#  define CONFIG_MODLIB_BUFFERINCR 32
+#ifndef CONFIG_LIBC_ELF_BUFFERINCR
+#  define CONFIG_LIBC_ELF_BUFFERINCR 32
 #endif
 
-/* CONFIG_DEBUG_INFO, and CONFIG_LIBC_MODLIB have to be defined or
- * CONFIG_MODLIB_DUMPBUFFER does nothing.
+/* CONFIG_DEBUG_INFO, and CONFIG_LIBC_ELF have to be defined or
+ * CONFIG_LIBC_ELF_DUMPBUFFER does nothing.
  */
 
-#if !defined(CONFIG_DEBUG_INFO) || !defined(CONFIG_LIBC_MODLIB)
-#  undef CONFIG_MODLIB_DUMPBUFFER
+#if !defined(CONFIG_DEBUG_INFO) || !defined(CONFIG_LIBC_ELF)
+#  undef CONFIG_LIBC_ELF_DUMPBUFFER
 #endif
 
-#ifdef CONFIG_MODLIB_DUMPBUFFER
-#  define modlib_dumpbuffer(m,b,n) sinfodumpbuffer(m,b,n)
+#ifdef CONFIG_LIBC_ELF_DUMPBUFFER
+#  define libelf_dumpbuffer(m,b,n) sinfodumpbuffer(m,b,n)
 #else
-#  define modlib_dumpbuffer(m,b,n)
+#  define libelf_dumpbuffer(m,b,n)
 #endif
 
 /* Module names.  These are only used by the kernel module and will be
@@ -80,8 +80,8 @@
  */
 
 #if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
-#  define HAVE_MODLIB_NAMES
-#  define MODLIB_NAMEMAX NAME_MAX
+#  define HAVE_LIBC_ELF_NAMES
+#  define LIBC_ELF_NAMEMAX NAME_MAX
 #endif
 
 /****************************************************************************
@@ -143,7 +143,7 @@ struct mod_info_s
 typedef CODE int (*mod_initializer_t)(FAR struct mod_info_s *modinfo);
 
 /* This is the type of the callback function used by
- * modlib_registry_foreach()
+ * libelf_registry_foreach()
  */
 
 struct module_s;
@@ -154,8 +154,8 @@ typedef CODE int (*mod_callback_t)(FAR struct module_s *modp, FAR void *arg);
 struct module_s
 {
   FAR struct module_s *flink;          /* Supports a singly linked list */
-#ifdef HAVE_MODLIB_NAMES
-  char modname[MODLIB_NAMEMAX];        /* Module name */
+#ifdef HAVE_LIBC_ELF_NAMES
+  char modname[LIBC_ELF_NAMEMAX];        /* Module name */
 #endif
   struct mod_info_s modinfo;           /* Module information */
   FAR void *textalloc;                 /* Allocated kernel text memory */
@@ -174,14 +174,14 @@ struct module_s
   size_t datasize;                     /* Size of the kernel .bss/.data memory allocation */
 #endif
 
-#if CONFIG_MODLIB_MAXDEPEND > 0
+#if CONFIG_LIBC_ELF_MAXDEPEND > 0
   uint8_t dependents;                  /* Number of modules that depend on this module */
 
   /* This is an upacked array of pointers to other modules that this module
    * depends upon.
    */
 
-  FAR struct module_s *dependencies[CONFIG_MODLIB_MAXDEPEND];
+  FAR struct module_s *dependencies[CONFIG_LIBC_ELF_MAXDEPEND];
 #endif
   uintptr_t initarr;                     /* .init_array */
   uint16_t  ninit;                       /* Number of entries in .init_array */
@@ -262,7 +262,7 @@ struct mod_loadinfo_s
  ****************************************************************************/
 
 /****************************************************************************
- * Name: modlib_initialize
+ * Name: libelf_initialize
  *
  * Description:
  *   This function is called to configure the library to process an kernel
@@ -274,15 +274,15 @@ struct mod_loadinfo_s
  *
  ****************************************************************************/
 
-int modlib_initialize(FAR const char *filename,
+int libelf_initialize(FAR const char *filename,
                       FAR struct mod_loadinfo_s *loadinfo);
 
 /****************************************************************************
- * Name: modlib_uninitialize
+ * Name: libelf_uninitialize
  *
  * Description:
- *   Releases any resources committed by modlib_initialize().  This
- *   essentially undoes the actions of modlib_initialize.
+ *   Releases any resources committed by libelf_initialize().  This
+ *   essentially undoes the actions of libelf_initialize.
  *
  * Returned Value:
  *   0 (OK) is returned on success and a negated errno is returned on
@@ -290,10 +290,10 @@ int modlib_initialize(FAR const char *filename,
  *
  ****************************************************************************/
 
-int modlib_uninitialize(FAR struct mod_loadinfo_s *loadinfo);
+int libelf_uninitialize(FAR struct mod_loadinfo_s *loadinfo);
 
 /****************************************************************************
- * Name: modlib_getsymtab
+ * Name: libelf_getsymtab
  *
  * Description:
  *   Get the current symbol table selection as an atomic operation.
@@ -308,10 +308,10 @@ int modlib_uninitialize(FAR struct mod_loadinfo_s *loadinfo);
  *
  ****************************************************************************/
 
-void modlib_getsymtab(FAR const struct symtab_s **symtab, FAR int *nsymbols);
+void libelf_getsymtab(FAR const struct symtab_s **symtab, FAR int *nsymbols);
 
 /****************************************************************************
- * Name: modlib_setsymtab
+ * Name: libelf_setsymtab
  *
  * Description:
  *   Select a new symbol table selection as an atomic operation.
@@ -325,10 +325,10 @@ void modlib_getsymtab(FAR const struct symtab_s **symtab, FAR int *nsymbols);
  *
  ****************************************************************************/
 
-void modlib_setsymtab(FAR const struct symtab_s *symtab, int nsymbols);
+void libelf_setsymtab(FAR const struct symtab_s *symtab, int nsymbols);
 
 /****************************************************************************
- * Name: modlib_load
+ * Name: libelf_load
  *
  * Description:
  *   Loads the binary into memory, allocating memory, performing relocations
@@ -340,10 +340,10 @@ void modlib_setsymtab(FAR const struct symtab_s *symtab, int nsymbols);
  *
  ****************************************************************************/
 
-int modlib_load(FAR struct mod_loadinfo_s *loadinfo);
+int libelf_load(FAR struct mod_loadinfo_s *loadinfo);
 
 /****************************************************************************
- * Name: modlib_load_with_addrenv
+ * Name: libelf_load_with_addrenv
  *
  * Description:
  *   Loads the binary into memory, use the address environment to load the
@@ -356,18 +356,18 @@ int modlib_load(FAR struct mod_loadinfo_s *loadinfo);
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_ADDRENV
-int modlib_load_with_addrenv(FAR struct mod_loadinfo_s *loadinfo);
+int libelf_load_with_addrenv(FAR struct mod_loadinfo_s *loadinfo);
 #else
-#  define modlib_load_with_addrenv(l) modlib_load(l)
+#  define libelf_load_with_addrenv(l) libelf_load(l)
 #endif
 
 /****************************************************************************
- * Name: modlib_bind
+ * Name: libelf_bind
  *
  * Description:
  *   Bind the imported symbol names in the loaded module described by
  *   'loadinfo' using the exported symbol values provided by
- *   modlib_setsymtab().
+ *   libelf_setsymtab().
  *
  * Input Parameters:
  *   modp     - Module state information
@@ -381,16 +381,16 @@ int modlib_load_with_addrenv(FAR struct mod_loadinfo_s *loadinfo);
  *
  ****************************************************************************/
 
-int modlib_bind(FAR struct module_s *modp,
+int libelf_bind(FAR struct module_s *modp,
                 FAR struct mod_loadinfo_s *loadinfo,
                 FAR const struct symtab_s *exports, int nexports);
 
 /****************************************************************************
- * Name: modlib_unload
+ * Name: libelf_unload
  *
  * Description:
  *   This function unloads the object from memory. This essentially undoes
- *   the actions of modlib_load.  It is called only under certain error
+ *   the actions of libelf_load.  It is called only under certain error
  *   conditions after the module has been loaded but not yet started.
  *
  * Input Parameters:
@@ -403,10 +403,10 @@ int modlib_bind(FAR struct module_s *modp,
  *
  ****************************************************************************/
 
-int modlib_unload(struct mod_loadinfo_s *loadinfo);
+int libelf_unload(struct mod_loadinfo_s *loadinfo);
 
 /****************************************************************************
- * Name: modlib_depend
+ * Name: libelf_depend
  *
  * Description:
  *   Set up module dependencies between the exporter and the importer of a
@@ -422,13 +422,13 @@ int modlib_unload(struct mod_loadinfo_s *loadinfo);
  *
  ****************************************************************************/
 
-#if CONFIG_MODLIB_MAXDEPEND > 0
-int modlib_depend(FAR struct module_s *importer,
+#if CONFIG_LIBC_ELF_MAXDEPEND > 0
+int libelf_depend(FAR struct module_s *importer,
                   FAR struct module_s *exporter);
 #endif
 
 /****************************************************************************
- * Name: modlib_undepend
+ * Name: libelf_undepend
  *
  * Description:
  *   Tear down module dependencies between the exporters and the importer of
@@ -444,12 +444,12 @@ int modlib_depend(FAR struct module_s *importer,
  *
  ****************************************************************************/
 
-#if CONFIG_MODLIB_MAXDEPEND > 0
-int modlib_undepend(FAR struct module_s *importer);
+#if CONFIG_LIBC_ELF_MAXDEPEND > 0
+int libelf_undepend(FAR struct module_s *importer);
 #endif
 
 /****************************************************************************
- * Name: modlib_read
+ * Name: libelf_read
  *
  * Description:
  *   Read 'readsize' bytes from the object file at 'offset'.  The data is
@@ -461,11 +461,11 @@ int modlib_undepend(FAR struct module_s *importer);
  *
  ****************************************************************************/
 
-int modlib_read(FAR struct mod_loadinfo_s *loadinfo, FAR uint8_t *buffer,
+int libelf_read(FAR struct mod_loadinfo_s *loadinfo, FAR uint8_t *buffer,
                 size_t readsize, off_t offset);
 
 /****************************************************************************
- * Name: modlib_findsection
+ * Name: libelf_findsection
  *
  * Description:
  *   A section by its name.
@@ -480,11 +480,11 @@ int modlib_read(FAR struct mod_loadinfo_s *loadinfo, FAR uint8_t *buffer,
  *
  ****************************************************************************/
 
-int modlib_findsection(FAR struct mod_loadinfo_s *loadinfo,
+int libelf_findsection(FAR struct mod_loadinfo_s *loadinfo,
                        FAR const char *sectname);
 
 /****************************************************************************
- * Name: modlib_registry_lock
+ * Name: libelf_registry_lock
  *
  * Description:
  *   Get exclusive access to the module registry.
@@ -497,10 +497,10 @@ int modlib_findsection(FAR struct mod_loadinfo_s *loadinfo,
  *
  ****************************************************************************/
 
-void modlib_registry_lock(void);
+void libelf_registry_lock(void);
 
 /****************************************************************************
- * Name: modlib_registry_unlock
+ * Name: libelf_registry_unlock
  *
  * Description:
  *   Relinquish the lock on the module registry
@@ -513,10 +513,10 @@ void modlib_registry_lock(void);
  *
  ****************************************************************************/
 
-void modlib_registry_unlock(void);
+void libelf_registry_unlock(void);
 
 /****************************************************************************
- * Name: modlib_registry_add
+ * Name: libelf_registry_add
  *
  * Description:
  *   Add a new entry to the module registry.
@@ -532,10 +532,10 @@ void modlib_registry_unlock(void);
  *
  ****************************************************************************/
 
-void modlib_registry_add(FAR struct module_s *modp);
+void libelf_registry_add(FAR struct module_s *modp);
 
 /****************************************************************************
- * Name: modlib_registry_del
+ * Name: libelf_registry_del
  *
  * Description:
  *   Remove a module entry from the registry
@@ -552,10 +552,10 @@ void modlib_registry_add(FAR struct module_s *modp);
  *
  ****************************************************************************/
 
-int modlib_registry_del(FAR struct module_s *modp);
+int libelf_registry_del(FAR struct module_s *modp);
 
 /****************************************************************************
- * Name: modlib_registry_find
+ * Name: libelf_registry_find
  *
  * Description:
  *   Find an entry in the module registry using the name of the module.
@@ -572,12 +572,12 @@ int modlib_registry_del(FAR struct module_s *modp);
  *
  ****************************************************************************/
 
-#ifdef HAVE_MODLIB_NAMES
-FAR struct module_s *modlib_registry_find(FAR const char *modname);
+#ifdef HAVE_LIBC_ELF_NAMES
+FAR struct module_s *libelf_registry_find(FAR const char *modname);
 #endif
 
 /****************************************************************************
- * Name: modlib_registry_verify
+ * Name: libelf_registry_verify
  *
  * Description:
  *   Verify that a module handle is valid by traversing the module list and
@@ -595,10 +595,10 @@ FAR struct module_s *modlib_registry_find(FAR const char *modname);
  *
  ****************************************************************************/
 
-int modlib_registry_verify(FAR struct module_s *modp);
+int libelf_registry_verify(FAR struct module_s *modp);
 
 /****************************************************************************
- * Name: modlib_registry_foreach
+ * Name: libelf_registry_foreach
  *
  * Description:
  *   Visit each module in the registry.  This is an internal OS interface and
@@ -619,10 +619,10 @@ int modlib_registry_verify(FAR struct module_s *modp);
  *
  ****************************************************************************/
 
-int modlib_registry_foreach(mod_callback_t callback, FAR void *arg);
+int libelf_registry_foreach(mod_callback_t callback, FAR void *arg);
 
 /****************************************************************************
- * Name: modlib_freesymtab
+ * Name: libelf_freesymtab
  *
  * Description:
  *   Free a symbol table for the current module.
@@ -632,10 +632,10 @@ int modlib_registry_foreach(mod_callback_t callback, FAR void *arg);
  *
  ****************************************************************************/
 
-void modlib_freesymtab(FAR struct module_s *modp);
+void libelf_freesymtab(FAR struct module_s *modp);
 
 /****************************************************************************
- * Name: modlib_dumploadinfo
+ * Name: libelf_dumploadinfo
  *
  * Description:
  *  Dump the load information to debug output.
@@ -643,39 +643,39 @@ void modlib_freesymtab(FAR struct module_s *modp);
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_BINFMT_INFO
-void modlib_dumploadinfo(FAR struct mod_loadinfo_s *loadinfo);
+void libelf_dumploadinfo(FAR struct mod_loadinfo_s *loadinfo);
 #else
-#  define modlib_dumploadinfo(i)
+#  define libelf_dumploadinfo(i)
 #endif
 
 /****************************************************************************
- * Name: modlib_dumpmodule
+ * Name: libelf_dumpmodule
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_BINFMT_INFO
-void modlib_dumpmodule(FAR struct module_s *modp);
+void libelf_dumpmodule(FAR struct module_s *modp);
 #else
-#  define modlib_dumpmodule(m)
+#  define libelf_dumpmodule(m)
 #endif
 
 /****************************************************************************
  * Name: elf_dumpentrypt
  ****************************************************************************/
 
-#ifdef CONFIG_MODLIB_DUMPBUFFER
-void modlib_dumpentrypt(FAR struct mod_loadinfo_s *loadinfo);
+#ifdef CONFIG_LIBC_ELF_DUMPBUFFER
+void libelf_dumpentrypt(FAR struct mod_loadinfo_s *loadinfo);
 #else
-#  define modlib_dumpentrypt(l)
+#  define libelf_dumpentrypt(l)
 #endif
 
 /****************************************************************************
- * Name: modlib_insert
+ * Name: libelf_insert
  *
  * Description:
  *   Verify that the file is an ELF module binary and, if so, load the
  *   module into kernel memory and initialize it for use.
  *
- *   NOTE: modlib_setsymtab() had to have been called in board-specific OS
+ *   NOTE: libelf_setsymtab() had to have been called in board-specific OS
  *   logic prior to calling this function from application logic (perhaps via
  *   boardctl(BOARDIOC_OS_SYMTAB).  Otherwise, insmod will be unable to
  *   resolve symbols in the OS module.
@@ -688,37 +688,37 @@ void modlib_dumpentrypt(FAR struct mod_loadinfo_s *loadinfo);
  *
  * Returned Value:
  *   A non-NULL module handle that can be used on subsequent calls to other
- *   module interfaces is returned on success.  If modlib_insert() was
- *   unable to load the module modlib_insert() will return a NULL handle
+ *   module interfaces is returned on success.  If libelf_insert() was
+ *   unable to load the module libelf_insert() will return a NULL handle
  *   and the errno variable will be set appropriately.
  *
  ****************************************************************************/
 
-FAR void *modlib_insert(FAR const char *filename, FAR const char *modname);
+FAR void *libelf_insert(FAR const char *filename, FAR const char *modname);
 
 /****************************************************************************
- * Name: modlib_getsymbol
+ * Name: libelf_getsymbol
  *
  * Description:
- *   modlib_getsymbol() returns the address of a symbol defined within the
- *   object that was previously made accessible through a modlib_getsymbol()
- *   call.  handle is the value returned from a call to modlib_insert() (and
- *   which has not since been released via a call to modlib_remove()),
+ *   libelf_getsymbol() returns the address of a symbol defined within the
+ *   object that was previously made accessible through a libelf_getsymbol()
+ *   call.  handle is the value returned from a call to libelf_insert() (and
+ *   which has not since been released via a call to libelf_remove()),
  *   name is the symbol's name as a character string.
  *
- *   The returned symbol address will remain valid until modlib_remove() is
+ *   The returned symbol address will remain valid until libelf_remove() is
  *   called.
  *
  * Input Parameters:
  *   handle - The opaque, non-NULL value returned by a previous successful
- *            call to modlib_insert().
+ *            call to libelf_insert().
  *   name   - A pointer to the symbol name string.
  *
  * Returned Value:
  *   The address associated with the symbol is returned on success.
- *   If handle does not refer to a valid module opened by modlib_insert(),
- *   or if the named modlib_symbol cannot be found within any of the objects
- *   associated with handle, modlib_getsymbol() will return NULL and the
+ *   If handle does not refer to a valid module opened by libelf_insert(),
+ *   or if the named libelf_symbol cannot be found within any of the objects
+ *   associated with handle, libelf_getsymbol() will return NULL and the
  *   errno variable will be set appropriately.
  *
  *   NOTE: This means that the address zero can never be a valid return
@@ -726,26 +726,26 @@ FAR void *modlib_insert(FAR const char *filename, FAR const char *modname);
  *
  ****************************************************************************/
 
-FAR const void *modlib_getsymbol(FAR void *handle, FAR const char *name);
+FAR const void *libelf_getsymbol(FAR void *handle, FAR const char *name);
 
 /****************************************************************************
- * Name: modlib_uninit
+ * Name: libelf_uninit
  *
  * Description:
  *   Uninitialize module resources.
  *
  ****************************************************************************/
 
-int modlib_uninit(FAR struct module_s *modp);
+int libelf_uninit(FAR struct module_s *modp);
 
 /****************************************************************************
- * Name: modlib_remove
+ * Name: libelf_remove
  *
  * Description:
  *   Remove a previously installed module from memory.
  *
  * Input Parameters:
- *   handle - The module handler previously returned by modlib_insert().
+ *   handle - The module handler previously returned by libelf_insert().
  *
  * Returned Value:
  *   Zero (OK) on success.  On any failure, -1 (ERROR) is returned the
@@ -753,13 +753,13 @@ int modlib_uninit(FAR struct module_s *modp);
  *
  ****************************************************************************/
 
-int modlib_remove(FAR void *handle);
+int libelf_remove(FAR void *handle);
 
 /****************************************************************************
- * Name: modlib_modhandle
+ * Name: libelf_modhandle
  *
  * Description:
- *   modlib_modhandle() returns the module handle for the installed
+ *   libelf_modhandle() returns the module handle for the installed
  *   module with the provided name.  A secondary use of this function is to
  *   determine if a module has been loaded or not.
  *
@@ -767,17 +767,17 @@ int modlib_remove(FAR void *handle);
  *   name   - A pointer to the module name string.
  *
  * Returned Value:
- *   The non-NULL module handle previously returned by modlib_insert() is
+ *   The non-NULL module handle previously returned by libelf_insert() is
  *   returned on success.  If no module with that name is installed,
- *   modlib_modhandle() will return a NULL handle and the errno variable
+ *   libelf_modhandle() will return a NULL handle and the errno variable
  *   will be set appropriately.
  *
  ****************************************************************************/
 
-#ifdef HAVE_MODLIB_NAMES
-FAR void *modlib_gethandle(FAR const char *name);
+#ifdef HAVE_LIBC_ELF_NAMES
+FAR void *libelf_gethandle(FAR const char *name);
 #else
-#  define modlib_gethandle(n) NULL
+#  define libelf_gethandle(n) NULL
 #endif
 
-#endif /* __INCLUDE_NUTTX_LIB_MODLIB_H */
+#endif /* __INCLUDE_NUTTX_LIB_LIBC_ELF_H */

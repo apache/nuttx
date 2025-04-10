@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/modlib/modlib_symbols.c
+ * libs/libc/elf/elf_symbols.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -34,10 +34,10 @@
 #include <debug.h>
 
 #include <nuttx/symtab.h>
-#include <nuttx/lib/modlib.h>
+#include <nuttx/lib/elf.h>
 
 #include "libc.h"
-#include "modlib/modlib.h"
+#include "elf/elf.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -77,7 +77,7 @@ extern int nglobals;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: modlib_symname
+ * Name: libelf_symname
  *
  * Description:
  *   Get the symbol name in loadinfo->iobuffer[].
@@ -92,7 +92,7 @@ extern int nglobals;
  *
  ****************************************************************************/
 
-static int modlib_symname(FAR struct mod_loadinfo_s *loadinfo,
+static int libelf_symname(FAR struct mod_loadinfo_s *loadinfo,
                           FAR const Elf_Sym *sym, Elf_Off sh_offset)
 {
   FAR uint8_t *buffer;
@@ -115,10 +115,10 @@ static int modlib_symname(FAR struct mod_loadinfo_s *loadinfo,
    * accumulate the variable length symbol name.
    */
 
-  ret = modlib_allocbuffer(loadinfo);
+  ret = libelf_allocbuffer(loadinfo);
   if (ret < 0)
     {
-      berr("ERROR: modlib_allocbuffer failed: %d\n", ret);
+      berr("ERROR: libelf_allocbuffer failed: %d\n", ret);
       return -ENOMEM;
     }
 
@@ -147,10 +147,10 @@ static int modlib_symname(FAR struct mod_loadinfo_s *loadinfo,
       /* Read that number of bytes into the array */
 
       buffer = &loadinfo->iobuffer[bytesread];
-      ret = modlib_read(loadinfo, buffer, readlen, offset);
+      ret = libelf_read(loadinfo, buffer, readlen, offset);
       if (ret < 0)
         {
-          berr("ERROR: modlib_read failed: %d\n", ret);
+          berr("ERROR: libelf_read failed: %d\n", ret);
           return ret;
         }
 
@@ -167,14 +167,14 @@ static int modlib_symname(FAR struct mod_loadinfo_s *loadinfo,
 
       /* No.. then we have to read more */
 
-      ret = modlib_reallocbuffer(loadinfo, CONFIG_MODLIB_BUFFERINCR);
+      ret = libelf_reallocbuffer(loadinfo, CONFIG_LIBC_ELF_BUFFERINCR);
       if (ret < 0)
         {
           berr("ERROR: mod_reallocbuffer failed: %d\n", ret);
           return ret;
         }
 
-      offset += CONFIG_MODLIB_BUFFERINCR;
+      offset += CONFIG_LIBC_ELF_BUFFERINCR;
     }
 
   /* We will not get here */
@@ -183,10 +183,10 @@ static int modlib_symname(FAR struct mod_loadinfo_s *loadinfo,
 }
 
 /****************************************************************************
- * Name: modlib_symcallback
+ * Name: libelf_symcallback
  *
  * Description:
- *   modlib_registry_foreach() callback function.  Test if the provided
+ *   libelf_registry_foreach() callback function.  Test if the provided
  *   module, modp, exports the symbol of interest.  If so, return that symbol
  *   value and setup the module dependency relationship.
  *
@@ -196,7 +196,7 @@ static int modlib_symname(FAR struct mod_loadinfo_s *loadinfo,
  *
  ****************************************************************************/
 
-static int modlib_symcallback(FAR struct module_s *modp, FAR void *arg)
+static int libelf_symcallback(FAR struct module_s *modp, FAR void *arg)
 {
   FAR struct mod_exportinfo_s *exportinfo = (FAR struct mod_exportinfo_s *)
                                             arg;
@@ -213,11 +213,11 @@ static int modlib_symcallback(FAR struct module_s *modp, FAR void *arg)
        * stop the traversal.
        */
 
-#if CONFIG_MODLIB_MAXDEPEND > 0
-      int ret = modlib_depend(exportinfo->modp, modp);
+#if CONFIG_LIBC_ELF_MAXDEPEND > 0
+      int ret = libelf_depend(exportinfo->modp, modp);
       if (ret < 0)
         {
-          berr("ERROR: modlib_depend failed: %d\n", ret);
+          berr("ERROR: libelf_depend failed: %d\n", ret);
           return ret;
         }
 #endif
@@ -233,7 +233,7 @@ static int modlib_symcallback(FAR struct module_s *modp, FAR void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: modlib_findsymtab
+ * Name: libelf_findsymtab
  *
  * Description:
  *   Find the symbol table section.
@@ -244,7 +244,7 @@ static int modlib_symcallback(FAR struct module_s *modp, FAR void *arg)
  *
  ****************************************************************************/
 
-int modlib_findsymtab(FAR struct mod_loadinfo_s *loadinfo)
+int libelf_findsymtab(FAR struct mod_loadinfo_s *loadinfo)
 {
   int i;
 
@@ -272,7 +272,7 @@ int modlib_findsymtab(FAR struct mod_loadinfo_s *loadinfo)
 }
 
 /****************************************************************************
- * Name: modlib_readsym
+ * Name: libelf_readsym
  *
  * Description:
  *   Read the ELF symbol structure at the specified index into memory.
@@ -288,7 +288,7 @@ int modlib_findsymtab(FAR struct mod_loadinfo_s *loadinfo)
  *
  ****************************************************************************/
 
-int modlib_readsym(FAR struct mod_loadinfo_s *loadinfo, int index,
+int libelf_readsym(FAR struct mod_loadinfo_s *loadinfo, int index,
                    FAR Elf_Sym *sym, FAR Elf_Shdr *symtab)
 {
   off_t offset;
@@ -307,11 +307,11 @@ int modlib_readsym(FAR struct mod_loadinfo_s *loadinfo, int index,
 
   /* And, finally, read the symbol table entry into memory */
 
-  return modlib_read(loadinfo, (FAR uint8_t *)sym, sizeof(Elf_Sym), offset);
+  return libelf_read(loadinfo, (FAR uint8_t *)sym, sizeof(Elf_Sym), offset);
 }
 
 /****************************************************************************
- * Name: modlib_symvalue
+ * Name: libelf_symvalue
  *
  * Description:
  *   Get the value of a symbol.  The updated value of the symbol is returned
@@ -337,7 +337,7 @@ int modlib_readsym(FAR struct mod_loadinfo_s *loadinfo, int index,
  *
  ****************************************************************************/
 
-int modlib_symvalue(FAR struct module_s *modp,
+int libelf_symvalue(FAR struct module_s *modp,
                     FAR struct mod_loadinfo_s *loadinfo, FAR Elf_Sym *sym,
                     Elf_Off sh_offset,
                     FAR const struct symtab_s *exports, int nexports)
@@ -369,7 +369,7 @@ int modlib_symvalue(FAR struct module_s *modp,
       {
         /* Get the name of the undefined symbol */
 
-        ret = modlib_symname(loadinfo, sym, sh_offset);
+        ret = libelf_symname(loadinfo, sym, sh_offset);
         if (ret < 0)
           {
             /* There are a few relocations for a few architectures that do
@@ -392,11 +392,11 @@ int modlib_symvalue(FAR struct module_s *modp,
         exportinfo.modp   = modp;
         exportinfo.symbol = NULL;
 
-        ret = modlib_registry_foreach(modlib_symcallback,
+        ret = libelf_registry_foreach(libelf_symcallback,
                                       (FAR void *)&exportinfo);
         if (ret < 0)
           {
-            berr("ERROR: modlib_symcallback failed: %d\n", ret);
+            berr("ERROR: libelf_symcallback failed: %d\n", ret);
             return ret;
           }
 
@@ -457,7 +457,7 @@ int modlib_symvalue(FAR struct module_s *modp,
 }
 
 /****************************************************************************
- * Name: modlib_insertsymtab
+ * Name: libelf_insertsymtab
  *
  * Description:
  *   Insert a symbol into the modules exportinfo array.
@@ -477,7 +477,7 @@ int modlib_symvalue(FAR struct module_s *modp,
  *
  ****************************************************************************/
 
-int modlib_insertsymtab(FAR struct module_s *modp,
+int libelf_insertsymtab(FAR struct module_s *modp,
                         struct mod_loadinfo_s *loadinfo,
                         FAR Elf_Shdr *shdr, FAR Elf_Sym *sym)
 {
@@ -492,7 +492,7 @@ int modlib_insertsymtab(FAR struct module_s *modp,
   if (modp->modinfo.exports != NULL)
     {
       bwarn("Module export information already present - replacing");
-      modlib_freesymtab((FAR void *)modp);
+      libelf_freesymtab((FAR void *)modp);
     }
 
   /* Count the "live" symbols */
@@ -526,7 +526,7 @@ int modlib_insertsymtab(FAR struct module_s *modp,
                   ELF_ST_TYPE(sym[i].st_info) != STT_NOTYPE &&
                   ELF_ST_VISIBILITY(sym[i].st_other) == STV_DEFAULT)
                 {
-                  ret = modlib_symname(loadinfo, &sym[i], strtab->sh_offset);
+                  ret = libelf_symname(loadinfo, &sym[i], strtab->sh_offset);
                   if (ret < 0)
                     {
                       lib_free((FAR void *)modp->modinfo.exports);
@@ -576,7 +576,7 @@ static int findep(FAR const void *c1, FAR const void *c2)
 }
 
 /****************************************************************************
- * Name: modlib_findglobal
+ * Name: libelf_findglobal
  *
  * Description:
  *   Find a symbol in our library entry point table
@@ -586,7 +586,7 @@ static int findep(FAR const void *c1, FAR const void *c2)
  *
  ****************************************************************************/
 
-void *modlib_findglobal(FAR struct module_s *modp,
+void *libelf_findglobal(FAR struct module_s *modp,
                         FAR struct mod_loadinfo_s *loadinfo,
                         FAR Elf_Shdr *shdr, FAR Elf_Sym *sym)
 {
@@ -595,7 +595,7 @@ void *modlib_findglobal(FAR struct module_s *modp,
   struct eptable_s key;
   FAR struct eptable_s *res;
 
-  ret = modlib_symname(loadinfo, sym, strtab->sh_offset);
+  ret = libelf_symname(loadinfo, sym, strtab->sh_offset);
   if (ret < 0)
     {
       return NULL;
@@ -615,7 +615,7 @@ void *modlib_findglobal(FAR struct module_s *modp,
 }
 
 /****************************************************************************
- * Name: modlib_freesymtab
+ * Name: libelf_freesymtab
  *
  * Description:
  *   Free a symbol table
@@ -625,7 +625,7 @@ void *modlib_findglobal(FAR struct module_s *modp,
  *
  ****************************************************************************/
 
-void modlib_freesymtab(FAR struct module_s *modp)
+void libelf_freesymtab(FAR struct module_s *modp)
 {
   FAR const struct symtab_s *symbol;
   int i;

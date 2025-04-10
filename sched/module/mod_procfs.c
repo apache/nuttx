@@ -39,7 +39,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/module.h>
-#include <nuttx/lib/modlib.h>
+#include <nuttx/lib/elf.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/procfs.h>
 
@@ -240,7 +240,7 @@ static ssize_t modprocfs_read(FAR struct file *filep, FAR char *buffer,
   priv->buflen    = buflen;
   priv->offset    = filep->f_pos;
 
-  ret = modlib_registry_foreach(modprocfs_callback, priv);
+  ret = libelf_registry_foreach(modprocfs_callback, priv);
   if (ret >= 0)
     {
       filep->f_pos += priv->totalsize;

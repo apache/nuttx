@@ -188,7 +188,7 @@ APPLD=gnu-elf.ld
 if [ -f "${BOARDDIR}/scripts/${APPLD}" ]; then
   cp -f "${BOARDDIR}/scripts/${APPLD}" "${EXPORTDIR}/scripts/."
 else
-  cp -f "${TOPDIR}/libs/libc/modlib/${APPLD}" "${EXPORTDIR}/scripts/."
+  cp -f "${TOPDIR}/libs/libc/elf/${APPLD}" "${EXPORTDIR}/scripts/."
 fi
 
 if [ "${NUTTX_BUILD}" = "kernel" ]; then
@@ -231,7 +231,7 @@ if [ "X${USRONLY}" != "Xy" ]; then
   done
 fi
 
-# Drop kernel folder modlib/gnu-elf.ld as the exported script shall suffice
+# Drop kernel folder elf/gnu-elf.ld as the exported script shall suffice
 
 LDELFFLAGS=$(echo "$LDELFFLAGS" | sed -e 's:-T.*ld::')
 

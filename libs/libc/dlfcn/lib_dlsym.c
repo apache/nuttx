@@ -31,7 +31,7 @@
 #include <dlfcn.h>
 #include <errno.h>
 
-#include <nuttx/lib/modlib.h>
+#include <nuttx/lib/elf.h>
 #include <nuttx/symtab.h>
 
 /****************************************************************************
@@ -87,7 +87,7 @@ FAR void *dlsym(FAR void *handle, FAR const char *name)
    * dlgetsem() is essentially a clone of modsym().
    */
 
-  return (FAR void *)modlib_getsymbol(handle, name);
+  return (FAR void *)libelf_getsymbol(handle, name);
 
 #else /* if defined(CONFIG_BUILD_KERNEL) */
   /* The KERNEL build is considerably more complex:  In order to be shared,
