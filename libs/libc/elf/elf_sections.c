@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/modlib/modlib_sections.c
+ * libs/libc/elf/elf_sections.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -32,14 +32,14 @@
 #include <debug.h>
 
 #include "libc.h"
-#include "modlib/modlib.h"
+#include "elf/elf.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: modlib_sectname
+ * Name: libelf_sectname
  *
  * Description:
  *   Get the symbol name in loadinfo->iobuffer[].
@@ -50,7 +50,7 @@
  *
  ****************************************************************************/
 
-int modlib_sectname(FAR struct mod_loadinfo_s *loadinfo,
+int libelf_sectname(FAR struct mod_loadinfo_s *loadinfo,
                     FAR const Elf_Shdr *shdr)
 {
   FAR Elf_Shdr *shstr;
@@ -71,14 +71,14 @@ int modlib_sectname(FAR struct mod_loadinfo_s *loadinfo,
       return -EINVAL;
     }
 
-  /* Allocate an I/O buffer.  This buffer is used by modlib_sectname() to
+  /* Allocate an I/O buffer.  This buffer is used by libelf_sectname() to
    * accumulate the variable length symbol name.
    */
 
-  ret = modlib_allocbuffer(loadinfo);
+  ret = libelf_allocbuffer(loadinfo);
   if (ret < 0)
     {
-      berr("ERROR: modlib_allocbuffer failed: %d\n", ret);
+      berr("ERROR: libelf_allocbuffer failed: %d\n", ret);
       return -ENOMEM;
     }
 
@@ -119,7 +119,7 @@ int modlib_sectname(FAR struct mod_loadinfo_s *loadinfo,
 
       /* Read that number of bytes into the array */
 
-      ret = modlib_read(loadinfo, buffer, readlen, offset + bytesread);
+      ret = libelf_read(loadinfo, buffer, readlen, offset + bytesread);
       if (ret < 0)
         {
           berr("ERROR: Failed to read section name: %d\n", ret);
@@ -139,7 +139,7 @@ int modlib_sectname(FAR struct mod_loadinfo_s *loadinfo,
 
       /* No.. then we have to read more */
 
-      ret = modlib_reallocbuffer(loadinfo, CONFIG_MODLIB_BUFFERINCR);
+      ret = libelf_reallocbuffer(loadinfo, CONFIG_LIBC_ELF_BUFFERINCR);
       if (ret < 0)
         {
           berr("ERROR: mod_reallocbuffer failed: %d\n", ret);
@@ -153,7 +153,7 @@ int modlib_sectname(FAR struct mod_loadinfo_s *loadinfo,
 }
 
 /****************************************************************************
- * Name: modlib_findsection
+ * Name: libelf_findsection
  *
  * Description:
  *   A section by its name.
@@ -168,7 +168,7 @@ int modlib_sectname(FAR struct mod_loadinfo_s *loadinfo,
  *
  ****************************************************************************/
 
-int modlib_findsection(FAR struct mod_loadinfo_s *loadinfo,
+int libelf_findsection(FAR struct mod_loadinfo_s *loadinfo,
                        FAR const char *sectname)
 {
   int i;
@@ -183,10 +183,10 @@ int modlib_findsection(FAR struct mod_loadinfo_s *loadinfo,
 
       /* Get the name of this section */
 
-      int ret = modlib_sectname(loadinfo, shdr);
+      int ret = libelf_sectname(loadinfo, shdr);
       if (ret < 0)
         {
-          berr("ERROR: modlib_sectname failed: %d\n", ret);
+          berr("ERROR: libelf_sectname failed: %d\n", ret);
           return ret;
         }
 

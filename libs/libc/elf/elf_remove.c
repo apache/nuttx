@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/modlib/modlib_remove.c
+ * libs/libc/elf/elf_remove.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -29,27 +29,27 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/lib/lib.h>
-#include <nuttx/lib/modlib.h>
+#include <nuttx/lib/elf.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: modlib_uninit
+ * Name: libelf_uninit
  *
  * Description:
  *   Uninitialize module resources.
  *
  ****************************************************************************/
 
-int modlib_uninit(FAR struct module_s *modp)
+int libelf_uninit(FAR struct module_s *modp)
 {
   FAR void (**array)(void);
   int ret = OK;
   int i;
 
-#if CONFIG_MODLIB_MAXDEPEND > 0
+#if CONFIG_LIBC_ELF_MAXDEPEND > 0
   /* Refuse to remove any module that other modules may depend upon. */
 
   if (modp->dependents > 0)
@@ -81,7 +81,7 @@ int modlib_uninit(FAR struct module_s *modp)
           return ret;
         }
 
-      modlib_freesymtab(modp);
+      libelf_freesymtab(modp);
 
       /* Nullify so that the uninitializer cannot be called again */
 
@@ -161,23 +161,23 @@ int modlib_uninit(FAR struct module_s *modp)
 #endif
     }
 
-#if CONFIG_MODLIB_MAXDEPEND > 0
+#if CONFIG_LIBC_ELF_MAXDEPEND > 0
   /* Eliminate any dependencies that this module has on other modules */
 
-  modlib_undepend(modp);
+  libelf_undepend(modp);
 #endif
 
   return ret;
 }
 
 /****************************************************************************
- * Name: modlib_remove
+ * Name: libelf_remove
  *
  * Description:
  *   Remove a previously installed module from memory.
  *
  * Input Parameters:
- *   handle - The module handler previously returned by modlib_insert().
+ *   handle - The module handler previously returned by libelf_insert().
  *
  * Returned Value:
  *   Zero (OK) on success.  On any failure, -1 (ERROR) is returned the
@@ -185,7 +185,7 @@ int modlib_uninit(FAR struct module_s *modp)
  *
  ****************************************************************************/
 
-int modlib_remove(FAR void *handle)
+int libelf_remove(FAR void *handle)
 {
   FAR struct module_s *modp = (FAR struct module_s *)handle;
   int ret;
@@ -194,18 +194,18 @@ int modlib_remove(FAR void *handle)
 
   /* Get exclusive access to the module registry */
 
-  modlib_registry_lock();
+  libelf_registry_lock();
 
   /* Verify that the module is in the registry */
 
-  ret = modlib_registry_verify(modp);
+  ret = libelf_registry_verify(modp);
   if (ret < 0)
     {
       berr("ERROR: Failed to verify module: %d\n", ret);
       goto errout_with_lock;
     }
 
-  ret = modlib_uninit(modp);
+  ret = libelf_uninit(modp);
   if (ret < 0)
     {
       berr("ERROR: Failed to uninitialize module %d\n", ret);
@@ -214,7 +214,7 @@ int modlib_remove(FAR void *handle)
 
   /* Remove the module from the registry */
 
-  ret = modlib_registry_del(modp);
+  ret = libelf_registry_del(modp);
   if (ret < 0)
     {
       berr("ERROR: Failed to remove the module from the registry: %d\n",
@@ -222,14 +222,14 @@ int modlib_remove(FAR void *handle)
       goto errout_with_lock;
     }
 
-  modlib_registry_unlock();
+  libelf_registry_unlock();
 
   /* And free the registry entry */
 
   return ret;
 
 errout_with_lock:
-  modlib_registry_unlock();
+  libelf_registry_unlock();
   set_errno(-ret);
   return ERROR;
 }

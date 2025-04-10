@@ -211,7 +211,7 @@ set_property(
   TARGET nuttx
   APPEND
   PROPERTY NUTTX_ELF_MODULE_LINK_OPTIONS -r -e module_initialize -T
-           ${NUTTX_DIR}/libs/libc/modlib/gnu-elf.ld)
+           ${NUTTX_DIR}/libs/libc/elf/gnu-elf.ld)
 
 # ELF module definitions
 

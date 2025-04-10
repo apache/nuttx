@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/modlib/modlib_uninit.c
+ * libs/libc/elf/elf_iobuffer.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -26,25 +26,24 @@
 
 #include <nuttx/config.h>
 
-#include <unistd.h>
 #include <debug.h>
 #include <errno.h>
 
-#include <nuttx/lib/modlib.h>
+#include <nuttx/lib/elf.h>
 
 #include "libc.h"
-#include "modlib/modlib.h"
+#include "elf/elf.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: modlib_uninitialize
+ * Name: libelf_allocbuffer
  *
  * Description:
- *   Releases any resources committed by modlib_initialize().  This
- *   essentially undoes the actions of modlib_initialize.
+ *   Perform the initial allocation of the I/O buffer, if it has not already
+ *   been allocated.
  *
  * Returned Value:
  *   0 (OK) is returned on success and a negated errno is returned on
@@ -52,28 +51,33 @@
  *
  ****************************************************************************/
 
-int modlib_uninitialize(FAR struct mod_loadinfo_s *loadinfo)
+int libelf_allocbuffer(FAR struct mod_loadinfo_s *loadinfo)
 {
-  /* Free all working buffers */
+  /* Has a buffer been allocated> */
 
-  modlib_freebuffers(loadinfo);
-
-  /* Close the ELF file */
-
-  if (loadinfo->filfd >= 0)
+  if (!loadinfo->iobuffer)
     {
-      _NX_CLOSE(loadinfo->filfd);
-      loadinfo->filfd = -1;
+      /* No.. allocate one now */
+
+      loadinfo->iobuffer = (FAR uint8_t *)
+                           lib_malloc(CONFIG_LIBC_ELF_BUFFERSIZE);
+      if (!loadinfo->iobuffer)
+        {
+          berr("ERROR: Failed to allocate an I/O buffer\n");
+          return -ENOMEM;
+        }
+
+      loadinfo->buflen = CONFIG_LIBC_ELF_BUFFERSIZE;
     }
 
   return OK;
 }
 
 /****************************************************************************
- * Name: modlib_freebuffers
+ * Name: libelf_reallocbuffer
  *
  * Description:
- *  Release all working buffers.
+ *   Increase the size of I/O buffer by the specified buffer increment.
  *
  * Returned Value:
  *   0 (OK) is returned on success and a negated errno is returned on
@@ -81,28 +85,28 @@ int modlib_uninitialize(FAR struct mod_loadinfo_s *loadinfo)
  *
  ****************************************************************************/
 
-int modlib_freebuffers(FAR struct mod_loadinfo_s *loadinfo)
+int libelf_reallocbuffer(FAR struct mod_loadinfo_s *loadinfo,
+                         size_t increment)
 {
-  /* Release all working allocations  */
+  FAR void *buffer;
+  size_t newsize;
 
-  if (loadinfo->shdr != NULL)
+  /* Get the new size of the allocation */
+
+  newsize = loadinfo->buflen + increment;
+
+  /* And perform the reallocation */
+
+  buffer = lib_realloc(loadinfo->iobuffer, newsize);
+  if (!buffer)
     {
-      lib_free(loadinfo->shdr);
-      loadinfo->shdr = NULL;
+      berr("ERROR: Failed to reallocate the I/O buffer\n");
+      return -ENOMEM;
     }
 
-  if (loadinfo->phdr != NULL)
-    {
-      lib_free(loadinfo->phdr);
-      loadinfo->phdr = NULL;
-    }
+  /* Save the new buffer info */
 
-  if (loadinfo->iobuffer != NULL)
-    {
-      lib_free(loadinfo->iobuffer);
-      loadinfo->iobuffer = NULL;
-      loadinfo->buflen   = 0;
-    }
-
+  loadinfo->iobuffer = buffer;
+  loadinfo->buflen   = newsize;
   return OK;
 }

@@ -1,5 +1,5 @@
 ############################################################################
-# libs/libc/modlib/Make.defs
+# libs/libc/elf/Makefile
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -20,22 +20,21 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_LIBC_MODLIB),y)
+include $(TOPDIR)/Make.defs
 
-# Add the nuttx/lib/modlib.h files to the build
+# Generate gnu-elf.ld from gnu-elf.ld.in
 
-CSRCS += modlib_addrenv.c modlib_bind.c modlib_depend.c modlib_init.c
-CSRCS += modlib_iobuffer.c modlib_load.c modlib_loadhdrs.c modlib_verify.c
-CSRCS += modlib_read.c modlib_registry.c modlib_sections.c
-CSRCS += modlib_symbols.c modlib_symtab.c modlib_uninit.c modlib_unload.c
-CSRCS += modlib_gethandle.c modlib_getsymbol.c modlib_insert.c
-CSRCS += modlib_remove.c
+gnu-elf.ld: gnu-elf.ld.in
+	$(call PREPROCESS, $<, $@)
 
-# Add the modlib directory to the build
+# Create initial context
 
-ASRCS += modlib_globals.S
+context: gnu-elf.ld
 
-DEPPATH += --dep-path modlib
-VPATH += :modlib
+.PHONY: context clean distclean
 
-endif
+clean:
+	$(call CLEAN)
+
+distclean: clean
+	$(call DELFILE, gnu-elf.ld)

@@ -1732,7 +1732,7 @@ endmenu # POSIX Message Queue Options
 config MODULE
 	bool "Enable loadable OS modules"
 	default n
-	select LIBC_MODLIB
+	select LIBC_ELF
 	---help---
 		Enable support for loadable OS modules.  Default: n
 

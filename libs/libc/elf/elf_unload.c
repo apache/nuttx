@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/modlib/modlib_unload.c
+ * libs/libc/elf/elf_unload.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -30,21 +30,21 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/lib/modlib.h>
+#include <nuttx/lib/elf.h>
 
 #include "libc.h"
-#include "modlib/modlib.h"
+#include "elf/elf.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: modlib_unload
+ * Name: libelf_unload
  *
  * Description:
  *   This function unloads the object from memory. This essentially undoes
- *   the actions of modlib_load().  It is called only under certain error
+ *   the actions of libelf_load().  It is called only under certain error
  *   conditions after the module has been loaded but not yet started.
  *
  * Returned Value:
@@ -53,16 +53,16 @@
  *
  ****************************************************************************/
 
-int modlib_unload(FAR struct mod_loadinfo_s *loadinfo)
+int libelf_unload(FAR struct mod_loadinfo_s *loadinfo)
 {
   /* Free all working buffers */
 
-  modlib_freebuffers(loadinfo);
+  libelf_freebuffers(loadinfo);
 
 #ifdef CONFIG_ARCH_ADDRENV
   if (loadinfo->addrenv != NULL)
     {
-      modlib_addrenv_free(loadinfo);
+      libelf_addrenv_free(loadinfo);
     }
   else
 #endif

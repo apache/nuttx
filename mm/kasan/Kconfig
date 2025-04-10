@@ -99,7 +99,7 @@ config MM_KASAN_DISABLE_WRITE_PANIC
 
 config MM_KASAN_SKIP_ZERO_TAGS
 	bool "Enable skip check zero tags"
-	default LIBC_MODLIB
+	default LIBC_ELF
 	---help---
 		This option disables checking for zero tags.
 

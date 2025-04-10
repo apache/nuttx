@@ -27,7 +27,7 @@
 #include <nuttx/config.h>
 
 #include <nuttx/module.h>
-#include <nuttx/lib/modlib.h>
+#include <nuttx/lib/elf.h>
 
 #ifdef CONFIG_MODULE
 
@@ -52,7 +52,7 @@
 
 int rmmod(FAR void *handle)
 {
-  return modlib_remove(handle);
+  return libelf_remove(handle);
 }
 
 #endif /* CONFIG_MODULE */

@@ -42,7 +42,7 @@ include locale/Make.defs
 include lzf/Make.defs
 include machine/Make.defs
 include misc/Make.defs
-include modlib/Make.defs
+include elf/Make.defs
 include net/Make.defs
 include netdb/Make.defs
 include obstack/Make.defs
@@ -122,14 +122,14 @@ CSRCS += exec_symtab.c
 
 endif
 
-ifeq ($(CONFIG_MODLIB_SYSTEM_SYMTAB),y)
+ifeq ($(CONFIG_LIBC_ELF_SYSTEM_SYMTAB),y)
 
-modlib_sys_symtab.c : $(CSVFILES) $(MKSYMTAB)
+elf_sys_symtab.c : $(CSVFILES) $(MKSYMTAB)
 	$(Q) cat $(CSVFILES) | LC_ALL=C sort >$@.csv
-	$(Q) $(MKSYMTAB) $@.csv $@ $(CONFIG_MODLIB_SYMTAB_ARRAY) $(CONFIG_MODLIB_NSYMBOLS_VAR)
+	$(Q) $(MKSYMTAB) $@.csv $@ $(CONFIG_LIBC_ELF_SYMTAB_ARRAY) $(CONFIG_LIBC_ELF_NSYMBOLS_VAR)
 	$(Q) rm -f $@.csv
 
-CSRCS += modlib_sys_symtab.c
+CSRCS += elf_sys_symtab.c
 
 endif
 
@@ -183,8 +183,8 @@ context:: bin kbin
 ifeq ($(CONFIG_LIBC_ZONEINFO_ROMFS),y)
 	$(Q) $(MAKE) -C zoneinfo context BIN=$(BIN)
 endif
-ifeq ($(CONFIG_LIBC_MODLIB),y)
-	$(Q) $(MAKE) -C modlib context
+ifeq ($(CONFIG_LIBC_ELF),y)
+	$(Q) $(MAKE) -C elf context
 endif
 
 
@@ -214,7 +214,7 @@ depend:: .depend
 
 clean::
 	$(Q) $(MAKE) -C zoneinfo clean BIN=$(BIN)
-	$(Q) $(MAKE) -C modlib clean
+	$(Q) $(MAKE) -C elf clean
 	$(call DELFILE, $(BIN))
 	$(call DELFILE, $(KBIN))
 	$(call CLEAN)
@@ -223,7 +223,7 @@ clean::
 
 distclean:: clean
 	$(Q) $(MAKE) -C zoneinfo distclean BIN=$(BIN)
-	$(Q) $(MAKE) -C modlib distclean
+	$(Q) $(MAKE) -C elf distclean
 	$(call DELFILE, exec_symtab.c)
 	$(call DELFILE, .depend)
 	$(call DELDIR, bin)

@@ -41,7 +41,7 @@
 #endif
 
 #ifdef CONFIG_MODULE
-#  include <nuttx/lib/modlib.h>
+#  include <nuttx/lib/elf.h>
 #endif
 
 #ifdef CONFIG_STM32_OTGFS
@@ -102,7 +102,7 @@ int stm32_bringup(void)
 #ifdef HAVE_MODSYMS
   /* Install the module symbol table */
 
-  modlib_setsymtab(MODSYMS_SYMTAB_ARRAY, MODSYMS_NSYMBOLS_VAR);
+  libelf_setsymtab(MODSYMS_SYMTAB_ARRAY, MODSYMS_NSYMBOLS_VAR);
 #endif
 
 #ifdef HAVE_MMCSD

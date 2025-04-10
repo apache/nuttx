@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/modlib/modlib_verify.c
+ * libs/libc/elf/elf_verify.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -32,7 +32,7 @@
 
 #include <nuttx/elf.h>
 
-#include "modlib/modlib.h"
+#include "elf/elf.h"
 
 /****************************************************************************
  * Private Constant Data
@@ -45,7 +45,7 @@ static const char g_modmagic[EI_MAGIC_SIZE] = EI_MAGIC;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: modlib_verifyheader
+ * Name: libelf_verifyheader
  *
  * Description:
  *   Given the header from a possible ELF executable, verify that it
@@ -61,7 +61,7 @@ static const char g_modmagic[EI_MAGIC_SIZE] = EI_MAGIC;
  *
  ****************************************************************************/
 
-int modlib_verifyheader(FAR const Elf_Ehdr *ehdr)
+int libelf_verifyheader(FAR const Elf_Ehdr *ehdr)
 {
   if (!ehdr)
     {

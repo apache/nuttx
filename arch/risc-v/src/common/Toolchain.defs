@@ -426,7 +426,7 @@ endif
 # Loadable module definitions
 
 CMODULEFLAGS = $(CFLAGS) -fvisibility=hidden
-LDMODULEFLAGS = -r -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/modlib/gnu-elf.ld)
+LDMODULEFLAGS = -r -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/elf/gnu-elf.ld)
 
 # ELF module definitions
 
@@ -445,7 +445,7 @@ else
   LDELFFLAGS += --oformat elf64-littleriscv
 endif
 
-LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/modlib/gnu-elf.ld)
+LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/elf/gnu-elf.ld)
 
 # Zig toolchain
 

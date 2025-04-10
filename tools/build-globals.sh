@@ -21,14 +21,14 @@
 #
 ############################################################################
 #
-# Script to create modlib_global.S which contains a structure define 
+# Script to create elf_global.S which contains a structure define 
 # the API names and addresses we will export for resolving symbols in
 # dynamic loaded shared objects. Typically these are libc APIs.
 
 #
 # Symbols to ignore within the NuttX libraries
 #
-FILTER="^lib_low|^FUNCTION|^STUB|^__start|^_vect|^arm_|^arp_|^bch|^binfmt|^blake|^block_|^cdcacm|^chksum|^clock_|^close_|^crypto_|^devif_|^devnull|^devuran|^devzero|^emerg|^epoll_|^elf_|^_dbgR|^dq_|^env_|^file_|^files_|^fs_|^ftl_|^g_|^get_|^group_|^global|^hcom|^i2c_|^inode_|^iob_|^irq_|^kmm_|^lfs_|^lib_|^local_|^mm_|^modlib_|^mpu_|^mq_|^nglobals|^net_|^netdev_|^nx|^pipecommon|^posix_spawn_file|^psock_|^ramlog|^rammap|^readline_|^register_|^sched_|^sockfd|^spawn_|^sq_|^stm32|^symtab_|^syslog_|^syslogstream|^task_|^tcp_|^timer_|^uart_|^ub[12]|^udp_|^umm_|^umount|^unload_|^unregister|^up_|^usb|^usrsock_|^watchdog|^wd_|globalNames$|nglobals$|global_table$|^\.l"
+FILTER="^lib_low|^FUNCTION|^STUB|^__start|^_vect|^arm_|^arp_|^bch|^binfmt|^blake|^block_|^cdcacm|^chksum|^clock_|^close_|^crypto_|^devif_|^devnull|^devuran|^devzero|^emerg|^epoll_|^elf_|^_dbgR|^dq_|^env_|^file_|^files_|^fs_|^ftl_|^g_|^get_|^group_|^global|^hcom|^i2c_|^inode_|^iob_|^irq_|^kmm_|^lfs_|^lib_|^local_|^mm_|^elf_|^mpu_|^mq_|^nglobals|^net_|^netdev_|^nx|^pipecommon|^posix_spawn_file|^psock_|^ramlog|^rammap|^readline_|^register_|^sched_|^sockfd|^spawn_|^sq_|^stm32|^symtab_|^syslog_|^syslogstream|^task_|^tcp_|^timer_|^uart_|^ub[12]|^udp_|^umm_|^umount|^unload_|^unregister|^up_|^usb|^usrsock_|^watchdog|^wd_|globalNames$|nglobals$|global_table$|^\.l"
 
 if [ -z "${NM}" ]; then
 	NM="nm"
@@ -39,10 +39,10 @@ fi
 #
 SYMS=`cat System.map | awk '{print $3}' | sort | grep -Ev ${FILTER}`
 SYM=(${SYMS})
-GLOBALS="libs/libc/modlib/modlib_globals.S"
+GLOBALS="libs/libc/elf/elf_globals.S"
 
 #
-# Generate the modlib_xxxx_globals.S file
+# Generate the elf_xxxx_globals.S file
 #
 cat >${GLOBALS} <<__EOF__
 #ifdef __CYGWIN__

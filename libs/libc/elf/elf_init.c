@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/modlib/modlib_init.c
+ * libs/libc/elf/elf_init.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -35,16 +35,16 @@
 #include <errno.h>
 
 #include <nuttx/fs/fs.h>
-#include <nuttx/lib/modlib.h>
+#include <nuttx/lib/elf.h>
 
-#include "modlib/modlib.h"
+#include "elf/elf.h"
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: modlib_fileinfo
+ * Name: libelf_fileinfo
  *
  * Description:
  *  Get the info of the ELF file
@@ -55,7 +55,7 @@
  *
  ****************************************************************************/
 
-static inline int modlib_fileinfo(FAR struct mod_loadinfo_s *loadinfo)
+static inline int libelf_fileinfo(FAR struct mod_loadinfo_s *loadinfo)
 {
   struct stat buf;
   int ret;
@@ -84,7 +84,7 @@ static inline int modlib_fileinfo(FAR struct mod_loadinfo_s *loadinfo)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: modlib_initialize
+ * Name: libelf_initialize
  *
  * Description:
  *   This function is called to configure the library to process an ELF
@@ -96,7 +96,7 @@ static inline int modlib_fileinfo(FAR struct mod_loadinfo_s *loadinfo)
  *
  ****************************************************************************/
 
-int modlib_initialize(FAR const char *filename,
+int libelf_initialize(FAR const char *filename,
                       FAR struct mod_loadinfo_s *loadinfo)
 {
   int ret;
@@ -119,16 +119,16 @@ int modlib_initialize(FAR const char *filename,
 
   /* Get some stats info of the file. */
 
-  ret = modlib_fileinfo(loadinfo);
+  ret = libelf_fileinfo(loadinfo);
   if (ret < 0)
     {
-      berr("ERROR: modlib_fileinfo failed: %d\n", ret);
+      berr("ERROR: libelf_fileinfo failed: %d\n", ret);
       return ret;
     }
 
   /* Read the ELF ehdr from offset 0 */
 
-  ret = modlib_read(loadinfo, (FAR uint8_t *)&loadinfo->ehdr,
+  ret = libelf_read(loadinfo, (FAR uint8_t *)&loadinfo->ehdr,
                     sizeof(Elf_Ehdr), 0);
   if (ret < 0)
     {
@@ -136,18 +136,18 @@ int modlib_initialize(FAR const char *filename,
       return ret;
     }
 
-  modlib_dumpbuffer("ELF header", (FAR const uint8_t *)&loadinfo->ehdr,
+  libelf_dumpbuffer("ELF header", (FAR const uint8_t *)&loadinfo->ehdr,
                     sizeof(Elf_Ehdr));
 
   /* Verify the ELF header */
 
-  ret = modlib_verifyheader(&loadinfo->ehdr);
+  ret = libelf_verifyheader(&loadinfo->ehdr);
   if (ret < 0)
     {
       /* This may not be an error because we will be called to attempt
-       * loading EVERY binary.  If modlib_verifyheader() does not recognize
+       * loading EVERY binary.  If libelf_verifyheader() does not recognize
        * the ELF header, it will -ENOEXEC which simply informs the system
-       * that the file is not an ELF file.  modlib_verifyheader() will return
+       * that the file is not an ELF file.  libelf_verifyheader() will return
        * other errors if the ELF header is not correctly formed.
        */
 

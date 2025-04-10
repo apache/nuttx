@@ -28,7 +28,7 @@
 
 #include <dlfcn.h>
 
-#include <nuttx/lib/modlib.h>
+#include <nuttx/lib/elf.h>
 
 /****************************************************************************
  * Private Functions
@@ -93,7 +93,7 @@ int dlclose(FAR void *handle)
    * dlremove() is essentially a clone of rmmod().
    */
 
-  return modlib_remove(handle);
+  return libelf_remove(handle);
 
 #else /* if defined(CONFIG_BUILD_KERNEL) */
   /* The KERNEL build is considerably more complex:  In order to be shared,

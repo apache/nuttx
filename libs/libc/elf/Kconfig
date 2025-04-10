@@ -3,16 +3,16 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-config LIBC_MODLIB
+config LIBC_ELF
 	bool "Enable module library"
 	default n
 	select LIBC_ARCH_ELF
 	select ARCH_USE_TEXT_HEAP if ARCH_HAVE_TEXT_HEAP
 
 menu "Module library configuration"
-	depends on LIBC_MODLIB
+	depends on LIBC_ELF
 
-config MODLIB_MAXDEPEND
+config LIBC_ELF_MAXDEPEND
 	int "Max dependencies"
 	default 2
 	---help---
@@ -24,16 +24,16 @@ config MODLIB_MAXDEPEND
 		current design because it uses some very simple, pre-allocated data
 		structures.
 
-		All dependencies logic my be eliminated by set CONFIG_MODLIB_MAXDEPEND
+		All dependencies logic my be eliminated by set CONFIG_LIBC_ELF_MAXDEPEND
 		to zero.
 
-config MODLIB_ALIGN_LOG2
+config LIBC_ELF_ALIGN_LOG2
 	int "Log2 Section Alignment"
 	default 2
 	---help---
 		Align all sections to this Log2 value:  0->1, 1->2, 2->4, etc.
 
-config MODLIB_BUFFERSIZE
+config LIBC_ELF_BUFFERSIZE
 	int "Module I/O Buffer Size"
 	default 32
 	---help---
@@ -42,7 +42,7 @@ config MODLIB_BUFFERSIZE
 		This is really just this initial size of the buffer; it will be
 		reallocated as necessary to hold large symbol names).  Default: 32
 
-config MODLIB_BUFFERINCR
+config LIBC_ELF_BUFFERINCR
 	int "Module I/O Buffer Realloc Increment"
 	default 32
 	---help---
@@ -51,14 +51,14 @@ config MODLIB_BUFFERINCR
 		This value specifies the size increment to use each time the
 		buffer is reallocated.  Default: 32
 
-config MODLIB_DUMPBUFFER
+config LIBC_ELF_DUMPBUFFER
 	bool "Dump module buffers"
 	default n
 	depends on DEBUG_INFO
 	---help---
 		Dump various module buffers for debug purposes
 
-config MODLIB_HAVE_SYMTAB
+config LIBC_ELF_HAVE_SYMTAB
 	bool "Have symbol table"
 	default n
 	---help---
@@ -66,47 +66,47 @@ config MODLIB_HAVE_SYMTAB
 		option in order to use it.  Symbol tables are required in most
 		cases in order to link executable programs to the base code.
 
-config MODLIB_RELOCATION_BUFFERCOUNT
-	int "MODLIB Relocation Table Buffer Count"
+config LIBC_ELF_RELOCATION_BUFFERCOUNT
+	int "LIBELF Relocation Table Buffer Count"
 	default 256
 	---help---
 		This is an cache buffer that is used to store elf relocation table to
 		reduce access fs. Default: 256
 
-config MODLIB_SYMBOL_CACHECOUNT
-	int "MODLIB SYMBOL Table Cache Count"
+config LIBC_ELF_SYMBOL_CACHECOUNT
+	int "LIBELF SYMBOL Table Cache Count"
 	default 256
 	---help---
 		This is an cache that is used to store elf symbol table to
 		reduce access fs. Default: 256
 
-if MODLIB_HAVE_SYMTAB
+if LIBC_ELF_HAVE_SYMTAB
 
-config MODLIB_SYMTAB_ARRAY
+config LIBC_ELF_SYMTAB_ARRAY
 	string "Symbol table name used by dlsym"
 	default "g_mod_symtab" if !EXECFUNCS_HAVE_SYMTAB
 	default EXECFUNCS_SYMTAB_ARRAY if EXECFUNCS_HAVE_SYMTAB
 
-config MODLIB_NSYMBOLS_VAR
+config LIBC_ELF_NSYMBOLS_VAR
 	string "Name of variable holding the number of symbols"
 	default "g_mod_nsymbols" if !EXECFUNCS_HAVE_SYMTAB
 	default EXECFUNCS_NSYMBOLS_VAR if EXECFUNCS_HAVE_SYMTAB
 
-config MODLIB_SYSTEM_SYMTAB
+config LIBC_ELF_SYSTEM_SYMTAB
 	bool "Generate the system symbol table"
 	default n
 
-endif # MODLIB_HAVE_SYMTAB
+endif # LIBC_ELF_HAVE_SYMTAB
 
-config MODLIB_LOADTO_LMA
-	bool "modlib load sections to LMA"
+config LIBC_ELF_LOADTO_LMA
+	bool "elf load sections to LMA"
 	default n
 	---help---
 		Load all section to LMA not VMA, so the startup code(e.g. start.S) need
 		relocate .data section to the final address(VMA) and zero .bss section
 		by self.
 
-config MODLIB_EXIDX_SECTNAME
+config LIBC_ELF_EXIDX_SECTNAME
 	string "ELF Section Name for Exception Index"
 	default ".ARM.exidx"
 	depends on CXX_EXCEPTION && ARCH_ARM
