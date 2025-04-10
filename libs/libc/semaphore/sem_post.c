@@ -128,9 +128,9 @@ int nxsem_post(FAR sem_t *sem)
 
 #ifndef CONFIG_LIBC_ARCH_ATOMIC
 
-  if ((sem->flags & SEM_TYPE_MUTEX)
-#  if defined(CONFIG_PRIORITY_PROTECT) || defined(CONFIG_PRIORITY_INHERITANCE)
-      && (sem->flags & SEM_PRIO_MASK) == SEM_PRIO_NONE
+  if (NXSEM_IS_MUTEX(sem)
+#  ifdef CONFIG_PRIORITY_PROTECT
+      && (sem->flags & SEM_PRIO_MASK) != SEM_PRIO_PROTECT
 #  endif
       )
     {
