@@ -14,6 +14,7 @@ choice
 
 config ARCH_CHIP_STM32H563ZI
 	bool "STM32H563ZI"
+	select ARCH_CORTEXM33
 	select STM32H5_STM32H5XXXX
 	select STM32H5_STM32H56XXX
 	select STM32H5_STM32H563XX
@@ -135,7 +136,7 @@ config STM32H5_FLASH_CONFIG_E
 config STM32H5_FLASH_CONFIG_G
 	bool
 	default n
-	depends on STM32H5_STM32H6XXX
+	depends on STM32H5_STM32H56XXX
 
 config STM32H5_FLASH_CONFIG_I
 	bool
@@ -199,6 +200,13 @@ config STM32H5_SRAM2_INIT
 		this may be undesirable (because it will destroy the contents).  In that
 		case, the board should handle the initialization itself at the appropriate
 		time.
+
+config STM32H5_PROGMEM
+	bool "Flash progmem support"
+	default n
+	---help---
+		Add progmem support, start block and end block options are provided to
+		obtain a uniform flash memory mapping.
 
 comment "STM32H5 Peripherals"
 

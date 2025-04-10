@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32h5/stm32_flash.h
+ * arch/arm/src/stm32h5/stm32_flash.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,47 +20,18 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32H5_STM32_FLASH_H
-#define __ARCH_ARM_SRC_STM32H5_STM32_FLASH_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include "hardware/stm32_flash.h"
+
+#if defined(CONFIG_STM32H5_STM32H563XX)
+#  include "stm32h563xx_flash.c"
+#else
+#  error "Unsupported STM32 H5 chip"
+#endif
 
 /****************************************************************************
- * Public Function Prototypes
+ * Private Functions
  ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
-void stm32h5_flash_getopt(uint32_t *opt1, uint32_t *opt2);
-
-int stm32h5_flash_optmodify(uint32_t clear1, uint32_t set1,
-                            uint32_t clear2, uint32_t set2);
-
-int stm32h5_flash_swapbanks(void);
-
-void stm32h5_flash_lock(void);
-
-void stm32h5_flash_unlock(void);
-
-#undef EXTERN
-#if defined(__cplusplus)
-}
-#endif
-
-#endif /* __ASSEMBLY__ */
-
-#endif /* __ARCH_ARM_SRC_STM32H5_STM32_FLASH_H */
