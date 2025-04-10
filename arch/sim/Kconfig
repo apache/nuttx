@@ -519,6 +519,13 @@ endchoice
 endif # SIM_X11FB
 
 if INPUT
+config SIM_X11EVENT_INTERVAL
+	int "X11 event interval in ms"
+	default 8
+	depends on SIM_X11FB
+	---help---
+		 X11 event sleep time
+
 choice
 	prompt "Input Device"
 	default SIM_NOINPUT
