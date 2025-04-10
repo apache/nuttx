@@ -33,71 +33,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Flash size is known from the chip selection:
- *
- *   When CONFIG_STM32H5_FLASH_OVERRIDE_DEFAULT is set the
- *   CONFIG_STM32H5_FLASH_CONFIG_x selects the default FLASH size based on
- *   the chip part number.  This value can be overridden with
- *   CONFIG_STM32H5_FLASH_OVERRIDE_x
- *
- *   Parts STM32H552xC and STM32H562xC have 256Kb of FLASH
- *   Parts STM32H552xE and STM32H562xE have 512Kb of FLASH
- *
- *   N.B. Only Single bank mode is supported
- */
-
-#if !defined(CONFIG_STM32H5_FLASH_OVERRIDE_DEFAULT) && \
-    !defined(CONFIG_STM32H5_FLASH_OVERRIDE_B) && \
-    !defined(CONFIG_STM32H5_FLASH_OVERRIDE_C) && \
-    !defined(CONFIG_STM32H5_FLASH_OVERRIDE_E) && \
-    !defined(CONFIG_STM32H5_FLASH_OVERRIDE_G) && \
-    !defined(CONFIG_STM32H5_FLASH_OVERRIDE_I) && \
-    !defined(CONFIG_STM32H5_FLASH_CONFIG_B) && \
-    !defined(CONFIG_STM32H5_FLASH_CONFIG_C) && \
-    !defined(CONFIG_STM32H5_FLASH_CONFIG_E) && \
-    !defined(CONFIG_STM32H5_FLASH_CONFIG_G) && \
-    !defined(CONFIG_STM32H5_FLASH_CONFIG_I)
-#  define CONFIG_STM32H5_FLASH_OVERRIDE_E
-#  warning "Flash size not defined defaulting to 512KiB (E)"
-#endif
-
-/* Override of the Flash has been chosen */
-
-#if !defined(CONFIG_STM32H5_FLASH_OVERRIDE_DEFAULT)
-#  undef CONFIG_STM32H5_FLASH_CONFIG_C
-#  undef CONFIG_STM32H5_FLASH_CONFIG_E
-#  if defined(CONFIG_STM32H5_FLASH_OVERRIDE_C)
-#    define CONFIG_STM32H5_FLASH_CONFIG_C
-#  elif defined(CONFIG_STM32H5_FLASH_OVERRIDE_E)
-#    define CONFIG_STM32H5_FLASH_CONFIG_E
-#  endif
-#endif
-
-/* Define the valid configuration  */
-
-#if defined(CONFIG_STM32H5_FLASH_CONFIG_B) /* 128 kB */
-#  define STM32_FLASH_NPAGES      32
-#  define STM32_FLASH_PAGESIZE    4096
-#elif defined(CONFIG_STM32H5_FLASH_CONFIG_C) /* 256 kB */
-#  define STM32_FLASH_NPAGES      64
-#  define STM32_FLASH_PAGESIZE    4096
-#elif defined(CONFIG_STM32H5_FLASH_CONFIG_E) /* 512 kB */
-#  define STM32_FLASH_NPAGES      128
-#  define STM32_FLASH_PAGESIZE    4096
-#elif defined(CONFIG_STM32H5_FLASH_CONFIG_G) /* 1 MB */
-#  define STM32_FLASH_NPAGES      256
-#  define STM32_FLASH_PAGESIZE    4096
-#elif defined(CONFIG_STM32H5_FLASH_CONFIG_I) /* 2 MB */
-#  define STM32_FLASH_NPAGES      512
-#  define STM32_FLASH_PAGESIZE    4096
-#else
-#  error "unknown flash configuration!"
-#endif
-
-#ifdef STM32_FLASH_PAGESIZE
-#  define STM32_FLASH_SIZE        (STM32_FLASH_NPAGES * STM32_FLASH_PAGESIZE)
-#endif
-
 /* Register Offsets *********************************************************/
 
 #define STM32_FLASH_ACR_OFFSET           0x0000
@@ -316,7 +251,7 @@
 #define FLASH_NSCR_FW              (1 << 4)
 #define FLASH_NSCR_STRT            (1 << 5)
 
-#define FLASH_NSCR_SNB_SHIFT       (1 << 6)
+#define FLASH_NSCR_SNB_SHIFT       (6)
 #define FLASH_NSCR_SNB_MASK        (0x7f << FLASH_NSCR_SNB_SHIFT)
 #  define FLASH_NSCR_SNB(n)        ((n) << FLASH_NSCR_SNB_SHIFT)
 
@@ -340,7 +275,7 @@
 #define FLASH_SECCR_FW               (1 << 4)
 #define FLASH_SECCR_STRT             (1 << 5)
 
-#define FLASH_SECCR_SNB_SHIFT        (1 << 6)
+#define FLASH_SECCR_SNB_SHIFT        (6)
 #define FLASH_SECCR_SNB_MASK         (0x7f << FLASH_SECCR_SNB_SHIFT)
 #  define FLASH_SECCR_SNB(n)         ((n) << FLASH_SECCR_SNB_SHIFT)
 
