@@ -80,11 +80,15 @@
 	.type	arm_dispatch_syscall, function
 arm_dispatch_syscall:
 	sub sp, sp, #32                            /* Create a stack frame to hold 3 parms */
+	.cfi_def_cfa_offset 32
 	str r4, [sp, #0]                           /* Move parameter 4 (if any) into position */
+	.cfi_offset r4, -32
 	str r5, [sp, #4]                           /* Move parameter 5 (if any) into position */
+	.cfi_offset r5, -28
 	str r6, [sp, #8]                           /* Move parameter 6 (if any) into position */
+	.cfi_offset r6, -24
 	str ip, [sp, #12]                          /* Save ip is pc backup */
-	.cfi_offset pc, 12
+	.cfi_offset pc, -20
 	ldr r4, =g_stublookup                      /* R4=The base of the stub lookup table */
 	lsl r0, r0, #2                             /* R0=Offset of the stub for this syscall */
 	ldr r4, [r4, r0]                           /* R4=Address of the stub for this syscall */
