@@ -1802,6 +1802,12 @@ int bt_receive(FAR struct bt_driver_s *btdev, enum bt_buf_type_e type,
   struct bt_buf_s *buf;
   int ret;
 
+  if (len + BLUETOOTH_H4_HDRLEN > CONFIG_IOB_BUFSIZE)
+    {
+      wlerr("ERROR: Data too long\n");
+      return -EINVAL;
+    }
+
   wlinfo("data %p len %zu\n", data, len);
 
   /* Critical command complete/status events use the high priority work
