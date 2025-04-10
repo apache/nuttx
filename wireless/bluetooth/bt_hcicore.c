@@ -2017,6 +2017,12 @@ int bt_hci_cmd_send_sync(uint16_t opcode, FAR struct bt_buf_s *buf,
           ret = 0;
         }
     }
+  else
+    {
+      wlerr("ERROR:  Failed get response\n");
+      nxsem_destroy(&sync_sem);
+      return -EIO;
+    }
 
   /* Note: if ret < 0 the packet might just be delayed and could still
    * be sent.  We cannot decrease the ref count since it if it was sent
