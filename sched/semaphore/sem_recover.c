@@ -127,7 +127,8 @@ void nxsem_recover(FAR struct tcb_s *tcb)
 
           mholder = nxsem_get_mholder_reserve(sem);
           DEBUGASSERT(NXSEM_MBLOCKS(mholder));
-          atomic_set_release(NXSEM_MHOLDER(sem), mholder & (~blocks));
+          atomic_set_release(NXSEM_MHOLDER(sem),
+                             (mholder & (~NXSEM_MBLOCKS_BIT)) | blocks);
         }
       else
         {
