@@ -40,6 +40,21 @@
 #include "sim_hostusrsock.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define SIM_X11EVENT_PERIOD    MSEC2TICK(CONFIG_SIM_X11EVENT_INTERVAL)
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#if defined(CONFIG_SIM_TOUCHSCREEN) || defined(CONFIG_SIM_AJOYSTICK) || \
+    defined(CONFIG_SIM_BUTTONS)
+static struct wdog_s g_x11event_wdog;   /* Watchdog for event loop */
+#endif
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -56,6 +71,24 @@ static void sim_init_cmdline(void)
     }
 
   setenv("CMDLINE", cmdline, true);
+}
+#endif
+
+/****************************************************************************
+ * Name: sim_x11event_interrupt
+ *
+ * Description:
+ *   interrupts event process function
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_SIM_TOUCHSCREEN) || defined(CONFIG_SIM_AJOYSTICK) || \
+    defined(CONFIG_SIM_BUTTONS)
+static void sim_x11event_interrupt(wdparm_t arg)
+{
+  sim_x11events();
+  wd_start_next((FAR struct wdog_s *)arg, SIM_X11EVENT_PERIOD,
+                sim_x11event_interrupt, arg);
 }
 #endif
 
@@ -168,13 +201,6 @@ static int sim_loop_task(int argc, char **argv)
       irqstate_t flags = up_irq_save();
 
       sched_lock();
-
-#if defined(CONFIG_SIM_TOUCHSCREEN) || defined(CONFIG_SIM_AJOYSTICK) || \
-    defined(CONFIG_SIM_BUTTONS)
-      /* Drive the X11 event loop */
-
-      sim_x11events();
-#endif
 
 #if defined(CONFIG_SIM_LCDDRIVER) || defined(CONFIG_SIM_FRAMEBUFFER)
       sim_x11loop();
@@ -321,6 +347,12 @@ void up_initialize(void)
 
 #ifdef CONFIG_SIM_VIDEO_ENCODER
   sim_encoder_initialize();
+#endif
+
+#if defined(CONFIG_SIM_TOUCHSCREEN) || defined(CONFIG_SIM_AJOYSTICK) || \
+    defined(CONFIG_SIM_BUTTONS)
+  wd_start(&g_x11event_wdog, 0, sim_x11event_interrupt,
+           (wdparm_t)&g_x11event_wdog);
 #endif
 
   kthread_create("loop_task", CONFIG_SIM_LOOPTASK_PRIORITY,
