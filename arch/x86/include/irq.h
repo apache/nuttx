@@ -55,6 +55,13 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* The initial stack point is aligned at word (4 byte) boundaries. If
+ * necessary frame_size must be rounded up to the next boundary to retain
+ * this alignment.
+ */
+
+#define STACK_ALIGNMENT     4
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/

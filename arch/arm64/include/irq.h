@@ -243,6 +243,10 @@
 
 #define IRQ_SPSR_MASK       (IRQ_DAIF_MASK << 6)
 
+/* AArch64 the stack-pointer must be 128-bit aligned */
+
+#define STACK_ALIGNMENT     16
+
 #ifndef __ASSEMBLY__
 
 #ifdef __cplusplus

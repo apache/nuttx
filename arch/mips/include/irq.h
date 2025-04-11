@@ -56,6 +56,16 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* MIPS requires at least a 4-byte stack alignment.  For floating point use,
+ * however, the stack must be aligned to 8-byte addresses.
+ */
+
+#ifdef CONFIG_LIBC_FLOATINGPOINT
+#  define STACK_ALIGNMENT   8
+#else
+#  define STACK_ALIGNMENT   4
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/

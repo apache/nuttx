@@ -93,10 +93,6 @@
 #define STACK_COLOR    0xdeaddead
 #define HEAP_COLOR     'h'
 
-/* AArch64 the stack-pointer must be 128-bit aligned */
-
-#define STACK_ALIGNMENT     16
-
 /* Stack alignment macros */
 
 #define STACK_ALIGN_MASK    (STACK_ALIGNMENT - 1)

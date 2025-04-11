@@ -84,10 +84,6 @@
 #  define INTSTACK_SIZE         INTSTACK_ALIGNUP(CONFIG_ARCH_INTERRUPTSTACK)
 #endif
 
-/* XTENSA requires at least a 16-byte stack alignment. */
-
-#define STACK_ALIGNMENT     16
-
 /* Stack alignment macros */
 
 #define STACK_ALIGN_MASK    (STACK_ALIGNMENT - 1)

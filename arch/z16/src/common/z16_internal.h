@@ -72,12 +72,6 @@
 #  define USE_SERIALDRIVER 1
 #endif
 
-/* Align the stack to word (4 byte) boundaries.  This is probablya greater
- * alignment than is required.
- */
-
-#define STACK_ALIGNMENT     4
-
 /* Stack alignment macros */
 
 #define STACK_ALIGN_MASK    (STACK_ALIGNMENT - 1)

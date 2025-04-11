@@ -80,12 +80,6 @@
 #  define USE_SERIALDRIVER 1
 #endif
 
-/* For use with EABI and floating point, the stack must be aligned to 8-byte
- * addresses.
- */
-
-#define STACK_ALIGNMENT     8
-
 /* Stack alignment macros */
 
 #define STACK_ALIGN_MASK    (STACK_ALIGNMENT - 1)

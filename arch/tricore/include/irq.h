@@ -60,6 +60,12 @@
 #define tricore_addr2csa(addr) ((uintptr_t)(((((uintptr_t)(addr)) & 0xF0000000) >> 12) \
                                             | (((uintptr_t)(addr) & 0x003FFFC0) >> 6)))
 
+/* For use with EABI and floating point, the stack must be aligned to 8-byte
+ * addresses.
+ */
+
+#define STACK_ALIGNMENT     8
+
 #ifndef __ASSEMBLY__
 
 #ifdef __cplusplus

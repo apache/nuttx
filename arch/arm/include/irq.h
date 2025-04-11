@@ -94,6 +94,12 @@
   } while (0)
 #endif
 
+/* For use with EABI and floating point, the stack must be aligned to 8-byte
+ * addresses.
+ */
+
+#define STACK_ALIGNMENT     8
+
 #ifdef __cplusplus
 #define EXTERN extern "C"
 extern "C"
