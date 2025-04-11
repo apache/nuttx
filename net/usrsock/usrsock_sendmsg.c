@@ -36,6 +36,7 @@
 #include <arch/irq.h>
 
 #include <sys/socket.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/usrsock.h>
 
@@ -142,8 +143,17 @@ static int do_sendto_request(FAR struct usrsock_conn_s *conn,
   {
   };
 
-  struct iovec bufs[2 + msg->msg_iovlen];
+  struct iovec *bufs;
+  size_t iovlen;
+  int ret;
   int i;
+
+  iovlen = 2 + msg->msg_iovlen;
+  bufs = kmm_malloc(sizeof(*bufs) * iovlen);
+  if (bufs == NULL)
+    {
+      return -ENOMEM;
+    }
 
   if (msg->msg_namelen > UINT16_MAX)
     {
@@ -174,7 +184,9 @@ static int do_sendto_request(FAR struct usrsock_conn_s *conn,
 
   memcpy(&bufs[2], msg->msg_iov, sizeof(struct iovec) * msg->msg_iovlen);
 
-  return usrsock_do_request(conn, bufs, nitems(bufs));
+  ret = usrsock_do_request(conn, bufs, iovlen);
+  kmm_free(bufs);
+  return ret;
 }
 
 /****************************************************************************
