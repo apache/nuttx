@@ -63,6 +63,12 @@ config DRIVERS_VIRTIO_BLK
 	default n
 	select DRIVERS_VIRTIO
 
+config DRIVERS_VIRTIO_CRYPTO
+	bool "Virtio Crypto support"
+	depends on CRYPTO_CRYPTODEV
+	default n
+	select DRIVERS_VIRTIO
+
 config DRIVERS_VIRTIO_GPU
 	bool "Virtio gpu support"
 	default n

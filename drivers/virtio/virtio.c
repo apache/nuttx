@@ -38,6 +38,7 @@
 #include <nuttx/virtio/virtio.h>
 
 #include "virtio-blk.h"
+#include "virtio-crypto.h"
 #include "virtio-gpio.h"
 #include "virtio-gpu.h"
 #include "virtio-i2c.h"
@@ -371,6 +372,14 @@ void virtio_register_drivers(void)
   if (ret < 0)
     {
       vrterr("virtio_register_rpmb_driver failed, ret=%d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_DRIVERS_VIRTIO_CRYPTO
+  ret = virtio_register_crypto_driver();
+  if (ret < 0)
+    {
+      vrterr("virtio_register_crypto_driver failed, ret=%d\n", ret);
     }
 #endif
 

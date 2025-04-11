@@ -37,6 +37,10 @@ if(CONFIG_DRIVERS_VIRTIO_BLK)
   list(APPEND SRCS virtio-blk.c)
 endif()
 
+if(CONFIG_DRIVERS_VIRTIO_CRYPTO)
+  list(APPEND SRCS virtio-crypto.c)
+endif()
+
 if(CONFIG_DRIVERS_VIRTIO_GPU)
   list(APPEND SRCS virtio-gpu.c)
 endif()
