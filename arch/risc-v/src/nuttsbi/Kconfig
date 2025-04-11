@@ -1,3 +1,8 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
 
 # S-mode requires a Supervisor Binary Interface (SBI) in order to access
 # M-mode ISA. A minimalistic SBI is provided here natively.
