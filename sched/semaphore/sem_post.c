@@ -73,10 +73,11 @@ int nxsem_post_slow(FAR sem_t *sem)
 {
   FAR struct tcb_s *stcb = NULL;
   irqstate_t flags;
-  int32_t sem_count;
 #if defined(CONFIG_PRIORITY_INHERITANCE) || defined(CONFIG_PRIORITY_PROTECT)
   uint8_t proto;
 #endif
+  bool sem_blocks = false;
+  const bool mutex = NXSEM_IS_MUTEX(sem);
 
   /* The following operations must be performed with interrupts
    * disabled because sem_post() may be called from an interrupt
@@ -85,19 +86,64 @@ int nxsem_post_slow(FAR sem_t *sem)
 
   flags = enter_critical_section();
 
-  /* Check the maximum allowable value */
-
-  sem_count = atomic_read(NXSEM_COUNT(sem));
-  do
+  if (mutex)
     {
-      if (sem_count >= SEM_VALUE_MAX)
+      uint32_t mholder;
+
+      /* Mutex post from interrupt context is not allowed */
+
+      DEBUGASSERT(!up_interrupt_context());
+
+      /* Lock the mutex for us by setting the blocking bit */
+
+      do
         {
+          mholder = atomic_read(NXMUTEX_HOLDER(sem));
+        }
+      while (!atomic_try_cmpxchg(NXMUTEX_HOLDER(sem), &mholder,
+                                 mholder | NXMUTEX_BLOCKS_BIT));
+
+      /* If the mutex is reset, just return with OK. if this task is not
+       * the holder, return -EINVAL
+       */
+
+      if (mholder == NXMUTEX_RESET ||
+          this_task()->pid != (mholder & (~NXMUTEX_BLOCKS_BIT)))
+        {
+          atomic_store(NXMUTEX_HOLDER(sem), mholder);
           leave_critical_section(flags);
-          return -EOVERFLOW;
+          return mholder == NXMUTEX_RESET ? OK : -EINVAL;
+        }
+
+      /* If there are no other tasks waiting for the mutex, release
+       * it and return
+       */
+
+      sem_blocks = (mholder & NXMUTEX_BLOCKS_BIT) != 0;
+      if (!sem_blocks)
+        {
+          atomic_store(NXMUTEX_HOLDER(sem), NXMUTEX_NO_HOLDER);
         }
     }
-  while (!atomic_try_cmpxchg_release(NXSEM_COUNT(sem), &sem_count,
-                                     sem_count + 1));
+  else
+    {
+      int32_t sem_count;
+
+      /* Check the maximum allowable value */
+
+      sem_count = atomic_read(NXSEM_COUNT(sem));
+      do
+        {
+          if (sem_count >= SEM_VALUE_MAX)
+            {
+              leave_critical_section(flags);
+              return -EOVERFLOW;
+            }
+        }
+      while (!atomic_try_cmpxchg_release(NXSEM_COUNT(sem), &sem_count,
+                                         sem_count + 1));
+      sem_blocks = sem_count < 0;
+    }
 
   /* Perform the semaphore unlock operation, releasing this task as a
    * holder then also incrementing the count on the semaphore.
@@ -116,7 +162,10 @@ int nxsem_post_slow(FAR sem_t *sem)
    * initialized if the semaphore is to used for signaling purposes.
    */
 
-  nxsem_release_holder(sem);
+  if (!mutex || sem_blocks)
+    {
+      nxsem_release_holder(sem);
+    }
 
 #if defined(CONFIG_PRIORITY_INHERITANCE) || defined(CONFIG_PRIORITY_PROTECT)
   /* Don't let any unblocked tasks run until we complete any priority
@@ -138,7 +187,7 @@ int nxsem_post_slow(FAR sem_t *sem)
    * there must be some task waiting for the semaphore.
    */
 
-  if (sem_count < 0)
+  if (sem_blocks)
     {
       /* Check if there are any tasks in the waiting for semaphore
        * task list that are waiting for this semaphore.  This is a
@@ -147,7 +196,6 @@ int nxsem_post_slow(FAR sem_t *sem)
        */
 
       stcb = (FAR struct tcb_s *)dq_remfirst(SEM_WAITLIST(sem));
-
       if (stcb != NULL)
         {
           FAR struct tcb_s *rtcb = this_task();
@@ -156,7 +204,14 @@ int nxsem_post_slow(FAR sem_t *sem)
            * it is awakened.
            */
 
-          nxsem_add_holder_tcb(stcb, sem);
+          if (mutex)
+            {
+              nxsem_set_mholder(stcb, sem);
+            }
+          else
+            {
+              nxsem_add_holder_tcb(stcb, sem);
+            }
 
           /* Stop the watchdog timer */
 
@@ -178,14 +233,6 @@ int nxsem_post_slow(FAR sem_t *sem)
               up_switch_context(stcb, rtcb);
             }
         }
-#if 0 /* REVISIT:  This can fire on IOB throttle semaphore */
-      else
-        {
-          /* This should not happen. */
-
-          DEBUGPANIC();
-        }
-#endif
     }
 
   /* Check if we need to drop the priority of any threads holding

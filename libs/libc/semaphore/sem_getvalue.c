@@ -50,6 +50,9 @@
  *   be zero or a negative number whose absolute value represents the number
  *   of tasks waiting for the semaphore.
  *
+ *   For a mutex, this returns 1 for a non-acquired mutex and 0 for an
+ *   acquired mutex
+ *
  * Input Parameters:
  *   sem - Semaphore descriptor
  *   sval - Buffer by which the value is returned
@@ -65,7 +68,16 @@ int nxsem_get_value(FAR sem_t *sem, FAR int *sval)
 {
   if (sem != NULL && sval != NULL)
     {
-      *sval = atomic_read(NXSEM_COUNT(sem));
+      if (NXSEM_IS_MUTEX(sem))
+        {
+          *sval = atomic_read(NXMUTEX_HOLDER(sem)) ==
+            NXMUTEX_NO_HOLDER ? 1 : 0;
+        }
+      else
+        {
+          *sval = atomic_read(NXSEM_COUNT(sem));
+        }
+
       return OK;
     }
 

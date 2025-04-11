@@ -62,15 +62,16 @@
  *
  ****************************************************************************/
 
-int nxsem_init(FAR sem_t *sem, int pshared, unsigned int value)
+int nxsem_init(FAR sem_t *sem, int pshared, int32_t value)
 {
   UNUSED(pshared);
 
-  DEBUGASSERT(sem != NULL && value <= SEM_VALUE_MAX);
+  DEBUGASSERT(sem != NULL && (!NXSEM_IS_MUTEX(sem) ||
+                              value <= SEM_VALUE_MAX));
 
-  /* Initialize the semaphore count */
+  /* Initialize the semaphore count or mutex holder */
 
-  sem->semcount = (int32_t)value;
+  sem->val.semcount = value;
 
   /* Initialize semaphore wait list */
 

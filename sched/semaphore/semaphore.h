@@ -31,6 +31,7 @@
 #include <nuttx/compiler.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/sched.h>
+#include <nuttx/atomic.h>
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -106,6 +107,48 @@ void nxsem_protect_post(FAR sem_t *sem);
 #  define nxsem_protect_wait(sem)  0
 #  define nxsem_protect_post(sem)
 #endif
+
+/****************************************************************************
+ * Inline functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: nxsem_set_mholder
+ *
+ * Description:
+ *   Constructs a mutex holder word with the given tcb's TID and sets the
+ *   blocking bit according to semaphore wait queue
+ *
+ * Input Parameters:
+ *   htcb - Holder task's tcb
+ *   sem  - Semaphore descriptor
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   The semaphore is locked
+ *
+ ****************************************************************************/
+
+static inline void nxsem_set_mholder(FAR struct tcb_s *htcb, FAR sem_t *sem)
+{
+  uint32_t mholder;
+
+  if (htcb)
+    {
+      uint32_t blocks = dq_peek(SEM_WAITLIST(sem)) == NULL ? 0 :
+        NXMUTEX_BLOCKS_BIT;
+
+      mholder = ((uint32_t)htcb->pid) | blocks;
+    }
+  else
+    {
+      mholder = NXMUTEX_NO_HOLDER;
+    }
+
+  atomic_store(NXMUTEX_HOLDER(sem), mholder);
+}
 
 #undef EXTERN
 #ifdef __cplusplus
