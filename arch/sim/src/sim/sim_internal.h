@@ -84,12 +84,6 @@
 #  define CONFIG_SIM_FB_INTERVAL_LINE 0
 #endif
 
-/* Use a stack alignment of 16 bytes.  If necessary frame_size must be
- * rounded up to the next boundary
- */
-
-#define STACK_ALIGNMENT     16
-
 /* Stack alignment macros */
 
 #define STACK_ALIGN_MASK    (STACK_ALIGNMENT - 1)

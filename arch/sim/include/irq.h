@@ -43,6 +43,12 @@
 
 #define NR_IRQS 64
 
+/* Use a stack alignment of 16 bytes.  If necessary frame_size must be
+ * rounded up to the next boundary
+ */
+
+#define STACK_ALIGNMENT     16
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/

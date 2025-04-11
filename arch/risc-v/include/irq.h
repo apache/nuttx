@@ -52,6 +52,10 @@
 #endif
 #define __XSTR(s)   __STR(s)
 
+/* RISC-V requires a 16-byte stack alignment. */
+
+#define STACK_ALIGNMENT     16
+
 /****************************************************************************
  * Map RISC-V exception code to NuttX IRQ,
  * the exception that code > 19 is reserved or custom exception.

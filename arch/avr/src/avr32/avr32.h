@@ -38,12 +38,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* The AVR32 stack must be aligned at word (4 byte) boundaries. If necessary
- * frame_size must be rounded up to the next boundary
- */
-
-#define STACK_ALIGNMENT     4
-
 /* Stack alignment macros */
 
 #define STACK_ALIGN_MASK    (STACK_ALIGNMENT - 1)
