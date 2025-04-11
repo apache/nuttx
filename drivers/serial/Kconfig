@@ -264,6 +264,7 @@ config SERIAL_TERMIOS
 
 config TTY_LAUNCH
 	bool "Enable feature TTY launch program"
+	depends on SCHED_HPWORK
 	default n
 	---help---
 		If select this, then user can launch a program with a special input.
