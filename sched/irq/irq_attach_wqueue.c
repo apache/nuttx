@@ -72,11 +72,12 @@ static mutex_t g_irq_wqueue_lock = NXMUTEX_INITIALIZER;
 static FAR struct kwork_wqueue_s *g_irq_wqueue[CONFIG_IRQ_NWORKS];
 
 #ifdef IRQ_WORK_SECTION
-static uint8_t g_irq_work_stack[CONFIG_IRQ_NWORKS][CONFIG_IRQ_WORK_STACKSIZE]
+static aligned_data(STACK_ALIGNMENT) uint8_t
+g_irq_work_stack[CONFIG_IRQ_NWORKS][CONFIG_IRQ_WORK_STACKSIZE]
 locate_data(IRQ_WORK_SECTION);
 #else
-static uint8_t g_irq_work_stack[CONFIG_IRQ_NWORKS]
-                               [CONFIG_IRQ_WORK_STACKSIZE];
+static aligned_data(STACK_ALIGNMENT) uint8_t
+g_irq_work_stack[CONFIG_IRQ_NWORKS][CONFIG_IRQ_WORK_STACKSIZE];
 #endif
 
 /****************************************************************************
