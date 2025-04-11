@@ -1,5 +1,5 @@
 # ##############################################################################
-# boards/arm/nrf52/thingy91-nrf52/src/CMakeLists.txt
+# boards/arm/ra4/arduino-r4-minima/src/CMakeLists.txt
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for

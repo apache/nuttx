@@ -1,5 +1,5 @@
 # ##############################################################################
-# boards/arm/n23x/frdm-mcxn236/src/CMakeLists.txt
+# boards/arm/mcx-nxxx/frdm-mcxn236/src/CMakeLists.txt
 #
 # SPDX-License-Identifier: Apache-2.0
 #
