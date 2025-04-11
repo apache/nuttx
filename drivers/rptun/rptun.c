@@ -311,9 +311,10 @@ static int rptun_init_carveout(FAR struct rptun_priv_s *priv,
 
   carveout->base = shmbase;
   carveout->size = shmlen;
-  carveout->heap = mm_initialize(shmname, shmbase, shmlen);
+  carveout->heap = mm_initialize_heap(KRN_HEAP, shmname, shmbase, shmlen);
   if (carveout->heap == NULL)
     {
+      rptunerr("ERROR: Failed to initialize heap\n");
       kmm_free(carveout);
       return -ENOMEM;
     }
