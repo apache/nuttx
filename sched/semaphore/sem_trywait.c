@@ -74,9 +74,9 @@ int nxsem_trywait_slow(FAR sem_t *sem)
 
   /* If the semaphore is available, give it to the requesting task */
 
-  semcount = atomic_read(NXSEM_COUNT(sem));
   do
     {
+      semcount = atomic_read(NXSEM_COUNT(sem));
       if (semcount <= 0)
         {
           leave_critical_section(flags);

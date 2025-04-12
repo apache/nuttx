@@ -74,9 +74,9 @@ int nxsem_destroy(FAR sem_t *sem)
    * leave the count unchanged but still return OK.
    */
 
-  old = atomic_read(NXSEM_COUNT(sem));
   do
     {
+      old = atomic_read(NXSEM_COUNT(sem));
       if (old < 0)
         {
           break;

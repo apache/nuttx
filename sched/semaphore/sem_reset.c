@@ -99,9 +99,9 @@ int nxsem_reset(FAR sem_t *sem, int16_t count)
    * value of sem->semcount is already correct in this case.
    */
 
-  semcount = atomic_read(NXSEM_COUNT(sem));
   do
     {
+      semcount = atomic_read(NXSEM_COUNT(sem));
       if (semcount < 0)
         {
           break;

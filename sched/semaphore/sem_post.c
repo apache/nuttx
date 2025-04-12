@@ -87,9 +87,9 @@ int nxsem_post_slow(FAR sem_t *sem)
 
   /* Check the maximum allowable value */
 
-  sem_count = atomic_read(NXSEM_COUNT(sem));
   do
     {
+      sem_count = atomic_read(NXSEM_COUNT(sem));
       if (sem_count >= SEM_VALUE_MAX)
         {
           leave_critical_section(flags);
