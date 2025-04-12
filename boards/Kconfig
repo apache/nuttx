@@ -410,6 +410,15 @@ config ARCH_BOARD_ESP32C3_GENERIC
 		The ESP32-C3-DevKitM-1 version contains the ESP32-C3-MINI-1 module and the
 		ESP32-C3-DevKitC-02 version the ESP32-C3-WROOM-02.
 
+config ARCH_BOARD_ESP32C3_XIAO
+	bool "Seeed Studio XIAO ESP32-C3"
+	depends on ESPRESSIF_ESP32C3
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+	    The XIAO-ESP32C3 from Seeed Studio features the ESP32-C3 CPU with a RISC-V core,
+	    supporting IEEE 802.11 b/g/n WiFi, and Bluetooth 5 (BLE) protocols.
+
 config ARCH_BOARD_ESP32S2_KALUGA_1
 	bool "Espressif ESP32-S2-Kaluga-1 V1.3"
 	depends on ARCH_CHIP_ESP32S2WROVER
@@ -3427,6 +3436,7 @@ config ARCH_BOARD
 	default "esp32c3-devkit"            if ARCH_BOARD_ESP32C3_DEVKIT
 	default "esp32c3-devkit-rust-1"     if ARCH_BOARD_ESP32C3_DEVKIT_RUST1
 	default "esp32c3-generic"           if ARCH_BOARD_ESP32C3_GENERIC
+	default "esp32c3-xiao"              if ARCH_BOARD_ESP32C3_XIAO
 	default "esp32s2-kaluga-1"          if ARCH_BOARD_ESP32S2_KALUGA_1
 	default "esp32s2-saola-1"           if ARCH_BOARD_ESP32S2_SAOLA_1
 	default "franzininho-wifi"          if ARCH_BOARD_FRANZININHO_WIFI
@@ -4646,6 +4656,9 @@ source "boards/risc-v/esp32c3-legacy/esp32c3-devkit-rust-1/Kconfig"
 endif
 if ARCH_BOARD_ESP32C3_GENERIC
 source "boards/risc-v/esp32c3/esp32c3-generic/Kconfig"
+endif
+if ARCH_BOARD_ESP32C3_XIAO
+source "boards/risc-v/esp32c3/esp32c3-xiao/Kconfig"
 endif
 if ARCH_BOARD_ESP32S2_KALUGA_1
 source "boards/xtensa/esp32s2/esp32s2-kaluga-1/Kconfig"
