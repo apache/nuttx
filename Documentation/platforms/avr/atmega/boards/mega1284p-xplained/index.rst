@@ -46,6 +46,15 @@ nsh
 
 Basic NuttShell configuration (console enabled in USART0, pins PD0 (RXD0) and PD1 (TXD0), at 115200 bps).
 
+Compile
+=======
+
+Note that build with GCC disables CONFIG_DEBUG_OPT_UNUSED_SECTIONS
+by default. This is because the linker script was not checked
+to determine if it properly prevents removal of sections which
+the linker considers unreferenced but which must be present
+in the binary.
+
 Flash & Debug
 =============
 

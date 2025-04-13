@@ -37,9 +37,20 @@ config AVR_ATMEL_AVR_TOOLCHAIN
 config AVR_LINUXGCC_TOOLCHAIN
 	bool "Linux GCC"
 	depends on HOST_LINUX
+	select ARCH_TOOLCHAIN_GCC
 	---help---
 		For Linux, there are widely available avr-gcc packages. On
 		Ubuntu, use: sudo apt-get install gcc-avr gdb-avr avr-libc
+
+		Note that unlike other toolchains, this one is marked
+		with ARCH_TOOLCHAIN_GCC which in turn enables other GCC-
+		and GNU-specific optimizations. One of them is removal
+		of unused code sections by the linker.
+
+		Linker script for the board must take this into account
+		and flag unreferenced sections that need to be present
+		in the compiled binary with a KEEP statement. Most notably,
+		this applies to .vectors section.
 
 config AVR_CROSSPACK_TOOLCHAIN
 	bool "CrossPack-AVR"
@@ -56,26 +67,6 @@ config AVR_BUILDROOT_TOOLCHAIN
 		the following section for details on building this toolchain.
 
 endchoice # Toolchain
-
-config AVR_LINUXGCC_TOOLCHAIN_IS_GCC
-	bool "Mark the toolchain as a GCC toolchain"
-	default n
-	depends on AVR_LINUXGCC_TOOLCHAIN
-	select ARCH_TOOLCHAIN_GCC
-	---help---
-		This option marks the toolchain as a GCC toolchain. Enabling
-		this will in turn enable other configuration option. Among
-		them, there is DEBUG_OPT_UNUSED_SECTIONS which will instruct
-		the compiler and linker to remove unused sections from the final
-		binary, saving flash space.
-
-		There is, however, a catch to this. Linker script for the board
-		in use must mark unreferenced sections as "KEEP". Most notably,
-		this applies to .vectors section which is not referenced anywhere
-		but must be present. If not marked to be kept, the resulting
-		binary will be faulty.
-
-		Consult linker script of your board before enabling this option.
 
 config AVR_HAS_MEMX_PTR
 	bool "Enable in-flash static const strings"
