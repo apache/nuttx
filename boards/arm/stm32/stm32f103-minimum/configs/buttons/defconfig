@@ -8,7 +8,6 @@
 # CONFIG_ARCH_LEDS is not set
 # CONFIG_DISABLE_OS_API is not set
 # CONFIG_NSH_DISABLESCRIPT is not set
-# CONFIG_NSH_DISABLE_DD is not set
 # CONFIG_NSH_DISABLE_EXEC is not set
 # CONFIG_NSH_DISABLE_EXIT is not set
 # CONFIG_NSH_DISABLE_GET is not set

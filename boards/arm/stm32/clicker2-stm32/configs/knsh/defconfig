@@ -5,6 +5,7 @@
 # You can then do "make savedefconfig" to generate a new defconfig file that includes your
 # modifications.
 #
+# CONFIG_SYSTEM_DD is not set
 CONFIG_ARCH="arm"
 CONFIG_ARCH_BOARD="clicker2-stm32"
 CONFIG_ARCH_BOARD_CLICKER2_STM32=y
@@ -25,7 +26,6 @@ CONFIG_HAVE_CXXINITIALIZE=y
 CONFIG_INIT_ENTRYPOINT="nsh_main"
 CONFIG_INTELHEX_BINARY=y
 CONFIG_LINE_MAX=64
-CONFIG_NSH_DISABLE_DD=y
 CONFIG_NSH_DISABLE_GET=y
 CONFIG_NSH_DISABLE_IFUPDOWN=y
 CONFIG_NSH_DISABLE_MKRD=y
