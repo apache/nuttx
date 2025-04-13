@@ -57,6 +57,26 @@ config AVR_BUILDROOT_TOOLCHAIN
 
 endchoice # Toolchain
 
+config AVR_LINUXGCC_TOOLCHAIN_IS_GCC
+	bool "Mark the toolchain as a GCC toolchain"
+	default n
+	depends on AVR_LINUXGCC_TOOLCHAIN
+	select ARCH_TOOLCHAIN_GCC
+	---help---
+		This option marks the toolchain as a GCC toolchain. Enabling
+		this will in turn enable other configuration option. Among
+		them, there is DEBUG_OPT_UNUSED_SECTIONS which will instruct
+		the compiler and linker to remove unused sections from the final
+		binary, saving flash space.
+
+		There is, however, a catch to this. Linker script for the board
+		in use must mark unreferenced sections as "KEEP". Most notably,
+		this applies to .vectors section which is not referenced anywhere
+		but must be present. If not marked to be kept, the resulting
+		binary will be faulty.
+
+		Consult linker script of your board before enabling this option.
+
 config AVR_HAS_MEMX_PTR
 	bool "Enable in-flash static const strings"
 	depends on AVR_ATMEL_AVR_TOOLCHAIN || AVR_LINUXGCC_TOOLCHAIN

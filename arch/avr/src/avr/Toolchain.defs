@@ -90,6 +90,13 @@ else ifeq ($(CONFIG_DEBUG_FULLOPT),y)
   ARCHOPTIMIZATION += -O2
 endif
 
+# Optimization of unused sections
+
+ifeq ($(CONFIG_DEBUG_OPT_UNUSED_SECTIONS),y)
+  LDFLAGS          += --gc-sections
+  ARCHOPTIMIZATION += -ffunction-sections -fdata-sections
+endif
+
 ifneq ($(CONFIG_DEBUG_NOOPT),y)
   ARCHOPTIMIZATION += -fno-strict-aliasing
 endif
