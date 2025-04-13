@@ -5,6 +5,7 @@
 # You can then do "make savedefconfig" to generate a new defconfig file that includes your
 # modifications.
 #
+# CONFIG_SYSTEM_DD is not set
 CONFIG_ADC=y
 CONFIG_ANALOG=y
 CONFIG_ARCH="arm"
@@ -49,7 +50,6 @@ CONFIG_NSH_DISABLE_CAT=y
 CONFIG_NSH_DISABLE_CD=y
 CONFIG_NSH_DISABLE_CMP=y
 CONFIG_NSH_DISABLE_CP=y
-CONFIG_NSH_DISABLE_DD=y
 CONFIG_NSH_DISABLE_DF=y
 CONFIG_NSH_DISABLE_DIRNAME=y
 CONFIG_NSH_DISABLE_ECHO=y
