@@ -69,6 +69,11 @@ Configurations
         CONFIG_WINDOWS_CYGWIN=y
         CONFIG_AVR_BUILDROOT_TOOLCHAIN=y
 
+  4. Build with GCC disables CONFIG_DEBUG_OPT_UNUSED_SECTIONS by default.
+     This is because the linker script was not checked to determine
+     if it properly prevents removal of sections which the linker considers
+     unreferenced but which must be present in the binary.
+
   Configuration Sub-Directories
   -----------------------------
   hello:
