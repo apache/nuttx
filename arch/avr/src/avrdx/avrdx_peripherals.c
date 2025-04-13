@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 #include "avrdx.h"
+#include "avrdx_gpio.h"
 #include <avr/io.h>
 
 /****************************************************************************
@@ -77,13 +78,16 @@ static const IOBJ uint8_t avrdx_main_pdiv[] = \
 const IOBJ uint8_t avrdx_usart_ports[] =
 {
 #  ifdef CONFIG_AVR_HAS_USART_2
-  0, 2, 5 /* A, C, F */
+  AVRDX_GPIO_PORTA_IDX,   /* A, C, F */
+  AVRDX_GPIO_PORTC_IDX,
+  AVRDX_GPIO_PORTF_IDX
 #  endif
 #  ifdef CONFIG_AVR_HAS_USART_4
-  , 1, 4 /* B, E */
+  , AVRDX_GPIO_PORTB_IDX  /* B, E */
+  , AVRDX_GPIO_PORTE_IDX
 #  endif
 #  ifdef CONFIG_AVR_HAS_USART_5
-  , 6 /* port G */
+  , AVRDX_GPIO_PORTG_IDX  /* port G */
 #  endif
 };
 
