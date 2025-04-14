@@ -1363,6 +1363,7 @@ static void stm32_i2c_setclock(struct stm32_i2c_priv_s *priv,
           break;
 #endif
         default:
+          break;
         }
 
       /* Set i2c_ker_ck period ti2cclk in nanoseconds */
@@ -2470,6 +2471,7 @@ static int stm32_i2c_init(struct stm32_i2c_priv_s *priv)
       break;
 #endif
       default:
+        break;
     }
 
   /* Force a frequency update */
