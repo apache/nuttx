@@ -1,0 +1,116 @@
+=======
+KTD2052
+=======
+
+This is a driver for the Kinetic Technologies KTD2052, a 4-module (12-channel)
+RGB LED driver with an I2C interface. This driver exposes the KTD2052's
+functionality as a standard NuttX character device.
+
+Driver Configuration
+====================
+
+This driver depends on I2C being enabled and configured for your board.
+To use the driver, enable the following option in menuconfig:
+
+- ``Device Drivers -> LED Support -> KTD2052 I2C LED Driver``
+  (``CONFIG_KTD2052``)
+
+Driver Usage
+============
+
+The driver is registered as a character device, typically at a path like
+``/dev/leds0``.
+
+Initialization
+--------------
+
+To use the driver, board-specific logic must call ``ktd2052_register``
+during the board initialization sequence. This function takes the device path,
+an I2C master instance, the I2C address of the device, and the I2C frequency.
+
+.. code-block:: c
+
+    #include <nuttx/leds/ktd2052.h>
+
+    /* In your board's initialization logic */
+    FAR struct i2c_master_s *i2c; /* I2C bus instance */
+    /* ... */
+    ktd2052_register("/dev/leds0", i2c, 0x74, 400000);
+
+
+Application Interface
+---------------------
+
+An application can interact with the device by opening the device path and
+using standard ``read()``, ``write()``, and ``ioctl()`` calls. The device will
+automatically be taken out of shutdown mode as soon as it is opened.
+
+**write()**
+
+The ``write()`` call provides a simple way to set the raw current
+values for one or more connected RGB modules. The buffer should contain a
+sequence of Red, Green, and Blue current values for each module, starting with
+module 1. The device's output current is linear between values of 0 (no current)
+and 192 (full scale current). Setting a value above 192 will result in full
+scale current output. Full scale current is either 24mA in normal mode or 1.5mA
+in night mode. Writes to the device using the ``write()`` call will always start
+at module 1. The entire string can be updated by repeatedly calling ``write()``
+without needing to first seek back to 0. Partial writes are supported.
+
+- **Buffer Format**: ``[R1, G1, B1, R2, G2, B2, R3, G3, B3, R4, G4, B4]``
+- **Buffer Length**: 1 to 12 bytes.
+
+.. code-block:: c
+
+    /* Example: Set module 1 to red and module 2 to blue */
+    uint8_t colors[6] = { 0xc0, 0x00, 0x00, 0x00, 0x00, 0xc0 };
+    int fd = open("/dev/leds0", O_WRONLY);
+    write(fd, colors, sizeof(colors));
+    close(fd);
+
+**read()**
+
+The ``read()`` call retrieves status information from the device.
+
+- Reading 1 byte returns the contents of the MONITOR Register.
+- Reading 2 bytes returns the MONITOR Register followed by the CONTROL Register.
+
+The MONITOR register bits are defined in ``nuttx/leds/ktd2052.h``.
+
+**ioctl()**
+
+For more advanced control, the driver implements several ``ioctl`` commands,
+defined in ``nuttx/leds/ktd2052.h``.
+
+- ``KTDIOSETRGB``
+  Set the color for a single RGB module.
+
+  - **Argument**: A pointer to a ``uint8_t[4]`` array:
+    ``{module number [1-4], r, g, b}``.
+
+- ``KTDIOSETMODE``
+  Configure the operating mode of the device. See the CONTROL register in the
+  device datasheet for additional information on available modes.
+
+  - **Argument**: A pointer to a ``struct ktd2052_mode_s``.
+
+- ``KTDIOSETPATTERN``
+  Configure the hardware pattern generator. See the device datasheet for
+  additional information on using the hardware pattern generator.
+
+  - **Argument**: A pointer to a ``struct ktd2052_pattern_s``.
+
+- ``KTDIOSETSLOTS``
+  Configure which RGB modules are active in each pattern slot.
+
+  - **Argument**: A pointer to a ``struct ktd2052_slots_s``.
+
+- ``KTDIOGETMONITOR``
+  Read the MONITOR register.
+
+  - **Argument**: A pointer to a ``uint8_t`` to store the result.
+
+- ``KTDIOSETWDOG``
+  Feed the pattern generator watchdog timer.
+
+  - **Argument**: A ``uint8_t`` value for the watchdog cycle count to set.
