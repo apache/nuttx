@@ -224,10 +224,6 @@ static int sim_loop_task(int argc, char **argv)
 
       sched_lock();
 
-#ifdef CONFIG_SIM_SOUND
-      sim_audio_loop();
-#endif
-
 #ifdef CONFIG_SIM_CAMERA
       sim_camera_loop();
 #endif
