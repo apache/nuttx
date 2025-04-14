@@ -52,6 +52,7 @@
  ****************************************************************************/
 
 #define SIM_USBHOST_BUFSIZE     256
+#define SIM_USBHOST_PERIOD      MSEC2TICK(CONFIG_SIM_LOOP_INTERVAL)
 
 #define RHPNDX(rh)              ((rh)->hport.hport.port)
 #define RHPORT(rh)              (RHPNDX(rh)+1)
@@ -110,6 +111,7 @@ struct sim_usbhost_s
   sem_t                         pscsem;             /* Semaphore to wait for port status change events */
 
   struct usbhost_devaddr_s      devgen;              /* Address generation data */
+  struct wdog_s                 wdog;
 };
 
 /****************************************************************************
@@ -658,6 +660,79 @@ static void sim_usbhost_rqcomplete(struct sim_usbhost_s *drvr)
 }
 
 /****************************************************************************
+ * Name: sim_usbhost_interrupt
+ ****************************************************************************/
+
+static void sim_usbhost_interrupt(wdparm_t arg)
+{
+  struct sim_usbhost_s *priv = (struct sim_usbhost_s *)arg;
+  struct usbhost_hubport_s *hport;
+  bool connect;
+
+  /* Handle root hub status change on each root port */
+
+  connect = host_usbhost_getconnstate();
+
+  /* Check current connect status */
+
+  if (connect)
+    {
+      /* Connected ... Did we just become connected? */
+
+      if (!priv->connected)
+        {
+          host_usbhost_open();
+
+          /* Yes.. connected. */
+
+          priv->connected = true;
+
+          /* Notify any waiters */
+
+          nxsem_post(&priv->pscsem);
+          priv->pscwait = false;
+        }
+
+      sim_usbhost_rqcomplete(priv);
+    }
+  else
+    {
+      /* Disconnected... Did we just become disconnected? */
+
+      if (priv->connected)
+        {
+          sim_usbhost_rqcomplete(priv);
+
+          host_usbhost_close();
+
+          /* Yes.. disconnect the device */
+
+          priv->connected = false;
+
+          /* Are we bound to a class instance? */
+
+          hport = &priv->hport.hport;
+          if (hport->devclass)
+            {
+              /* Yes.. Disconnect the class */
+
+              CLASS_DISCONNECTED(hport->devclass);
+              hport->devclass = NULL;
+            }
+
+          /* Notify any waiters for the Root Hub Status change
+           * event.
+           */
+
+          nxsem_post(&priv->pscsem);
+          priv->pscwait = false;
+        }
+    }
+
+  wd_start_next(&priv->wdog, SIM_USBHOST_PERIOD, sim_usbhost_interrupt, arg);
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -724,82 +799,7 @@ int sim_usbhost_initialize(void)
       return -ENODEV;
     }
 
-  return OK;
-}
-
-/****************************************************************************
- * Name: sim_usbhost_loop
- *
- * Description:
- *   USB host loop process.
- *
- ****************************************************************************/
-
-int sim_usbhost_loop(void)
-{
-  struct sim_usbhost_s *priv = &g_sim_usbhost;
-  struct usbhost_hubport_s *hport;
-  bool connect;
-
-  /* Handle root hub status change on each root port */
-
-  connect = host_usbhost_getconnstate();
-
-  /* Check current connect status */
-
-  if (connect)
-    {
-      /* Connected ... Did we just become connected? */
-
-      if (!priv->connected)
-        {
-          host_usbhost_open();
-
-          /* Yes.. connected. */
-
-          priv->connected = true;
-
-          /* Notify any waiters */
-
-          nxsem_post(&priv->pscsem);
-          priv->pscwait = false;
-        }
-
-      sim_usbhost_rqcomplete(priv);
-    }
-  else
-    {
-      /* Disconnected... Did we just become disconnected? */
-
-      if (priv->connected)
-        {
-          sim_usbhost_rqcomplete(priv);
-
-          host_usbhost_close();
-
-          /* Yes.. disconnect the device */
-
-          priv->connected = false;
-
-          /* Are we bound to a class instance? */
-
-          hport = &priv->hport.hport;
-          if (hport->devclass)
-            {
-              /* Yes.. Disconnect the class */
-
-              CLASS_DISCONNECTED(hport->devclass);
-              hport->devclass = NULL;
-            }
-
-          /* Notify any waiters for the Root Hub Status change
-           * event.
-           */
-
-          nxsem_post(&priv->pscsem);
-          priv->pscwait = false;
-        }
-    }
+  wd_start(&priv->wdog, 0, sim_usbhost_interrupt, (wdparm_t)priv);
 
   return OK;
 }
