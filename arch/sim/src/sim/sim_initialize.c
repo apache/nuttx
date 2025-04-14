@@ -44,6 +44,7 @@
  ****************************************************************************/
 
 #define SIM_X11EVENT_PERIOD    MSEC2TICK(CONFIG_SIM_X11EVENT_INTERVAL)
+#define SIM_X11UPDATE_PERIOD   MSEC2TICK(CONFIG_SIM_X11UPDATE_INTERVAL)
 
 /****************************************************************************
  * Private Data
@@ -52,6 +53,10 @@
 #if defined(CONFIG_SIM_TOUCHSCREEN) || defined(CONFIG_SIM_AJOYSTICK) || \
     defined(CONFIG_SIM_BUTTONS)
 static struct wdog_s g_x11event_wdog;   /* Watchdog for event loop */
+#endif
+
+#ifdef CONFIG_SIM_X11FB
+static struct wdog_s g_x11update_wdog;  /* Watchdog for update loop */
 #endif
 
 /****************************************************************************
@@ -89,6 +94,23 @@ static void sim_x11event_interrupt(wdparm_t arg)
   sim_x11events();
   wd_start_next((FAR struct wdog_s *)arg, SIM_X11EVENT_PERIOD,
                 sim_x11event_interrupt, arg);
+}
+#endif
+
+/****************************************************************************
+ * Name: sim_x11update_interrupt
+ *
+ * Description:
+ *   interrupts event process function
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SIM_X11FB
+static void sim_x11update_interrupt(wdparm_t arg)
+{
+  sim_x11loop();
+  wd_start_next((FAR struct wdog_s *)arg, SIM_X11UPDATE_PERIOD,
+                sim_x11update_interrupt, arg);
 }
 #endif
 
@@ -201,10 +223,6 @@ static int sim_loop_task(int argc, char **argv)
       irqstate_t flags = up_irq_save();
 
       sched_lock();
-
-#if defined(CONFIG_SIM_LCDDRIVER) || defined(CONFIG_SIM_FRAMEBUFFER)
-      sim_x11loop();
-#endif
 
 #ifdef CONFIG_SIM_NETDEV
       /* Run the network if enabled */
@@ -353,6 +371,11 @@ void up_initialize(void)
     defined(CONFIG_SIM_BUTTONS)
   wd_start(&g_x11event_wdog, 0, sim_x11event_interrupt,
            (wdparm_t)&g_x11event_wdog);
+#endif
+
+#ifdef CONFIG_SIM_X11FB
+  wd_start(&g_x11update_wdog, 0, sim_x11update_interrupt,
+           (wdparm_t)&g_x11update_wdog);
 #endif
 
   kthread_create("loop_task", CONFIG_SIM_LOOPTASK_PRIORITY,
