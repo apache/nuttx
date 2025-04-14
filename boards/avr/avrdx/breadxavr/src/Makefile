@@ -28,4 +28,12 @@ ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += avr_leds.c
 endif
 
+ifeq ($(CONFIG_BOARD_EARLY_INITIALIZE),y)
+CSRCS += avrdx_init.c
+endif
+
+ifeq ($(CONFIG_BREADXAVR_BUTTONS_DRIVER),y)
+CSRCS += avrdx_buttons.c
+endif
+
 include $(TOPDIR)/boards/Board.mk
