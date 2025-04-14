@@ -1634,15 +1634,13 @@ static int imx9_ioctl(struct net_driver_s *dev, int cmd,
 
           if (ret == OK)
             {
-              /* Reset CAN controller and start with new timings */
+              /* Apply the new timings (interface is guaranteed to be down) */
 
               priv->arbi_timing = arbi_timing;
               if (priv->canfd_capable)
               {
                 priv->data_timing = data_timing;
               }
-
-              imx9_ifup(dev);
             }
         }
         break;
