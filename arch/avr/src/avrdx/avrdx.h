@@ -126,6 +126,15 @@ void up_consoleinit(void);
 
 void avrdx_boardinitialize(void);
 
+/****************************************************************************
+ * Name: avrdx_up_initialize
+ *
+ * Description:
+ *   Extension of up_initialize for AVR DA/DB cores
+ ****************************************************************************/
+
+void avrdx_up_initialize(void);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
