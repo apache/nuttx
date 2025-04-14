@@ -424,7 +424,6 @@ void sim_vpnkit_send(unsigned char *buf, unsigned int buflen);
 int sim_netdriver_init(void);
 void sim_netdriver_setmacaddr(int devidx, unsigned char *macaddr);
 void sim_netdriver_setmtu(int devidx, int mtu);
-void sim_netdriver_loop(void);
 
 /* sim_rptun.c **************************************************************/
 

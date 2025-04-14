@@ -224,12 +224,6 @@ static int sim_loop_task(int argc, char **argv)
 
       sched_lock();
 
-#ifdef CONFIG_SIM_NETDEV
-      /* Run the network if enabled */
-
-      sim_netdriver_loop();
-#endif
-
 #ifdef CONFIG_SIM_NETUSRSOCK
       host_usrsock_loop();
 #endif

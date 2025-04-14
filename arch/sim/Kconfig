@@ -182,6 +182,12 @@ config SIM_LOOPTASK_INTERVAL
 	---help---
 		Looptask sleep time
 
+config SIM_LOOP_INTERVAL
+	int "loop interval in ms"
+	default 10
+	---help---
+		Loop event sleep time
+
 config SIM_STACKSIZE_ADJUSTMENT
 	int "The adjustment of stack size for sim"
 	default 65536
