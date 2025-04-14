@@ -100,8 +100,6 @@
                              (ADC_SMPR_DEFAULT << ADC_SMPR2_SMP18_SHIFT) | \
                              (ADC_SMPR_DEFAULT << ADC_SMPR2_SMP19_SHIFT))
 
-#define ADC_EXTERNAL_CHAN_MAX  18
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -983,27 +981,42 @@ static bool adc_internal(struct stm32_dev_s * priv, uint32_t *adc_ccr)
   int i;
   bool internal = false;
 
-  if (priv->intf == 3)
+  if (priv->intf == 1)
     {
       for (i = 0; i < priv->nchannels; i++)
         {
-          if (priv->chanlist[i] > ADC_EXTERNAL_CHAN_MAX)
+            switch (priv->chanlist[i])
+              {
+                case 16:
+                  *adc_ccr |= ADC_CCR_TSEN;
+                  internal = true;
+                  break;
+
+                case 17:
+                  *adc_ccr |= ADC_CCR_VREFEN;
+                  internal = true;
+                  break;
+              }
+        }
+    }
+  else if (priv->intf == 2)
+    {
+      for (i = 0; i < priv->nchannels; i++)
+        {
+          switch (priv->chanlist[i])
             {
-              internal = true;
-              switch (priv->chanlist[i])
-                {
-                  case 17:
-                    *adc_ccr |= ADC_CCR_VBATEN;
-                    break;
+              case 16:
+                *adc_ccr |= ADC_CCR_VBATEN;
+                internal = true;
+                break;
 
-                  case 18:
-                    *adc_ccr |= ADC_CCR_TSEN;
-                    break;
+              case 17:
 
-                  case 19:
-                     *adc_ccr |= ADC_CCR_VREFEN;
-                    break;
-                }
+                /* Measuring VDDCORE requires option bit to be set */
+
+                adc_putreg(priv, STM32_ADC_OR_OFFSET, ADC_OR_OP0);
+                internal = true;
+                break;
             }
         }
     }
