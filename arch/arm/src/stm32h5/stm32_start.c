@@ -154,6 +154,28 @@ void __start(void)
     ("sub r10, sp, %0" : : "r" (CONFIG_IDLETHREAD_STACKSIZE - 64) :);
 #endif
 
+  /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
+   * certain that there are no issues with the state of global variables.
+   */
+
+  for (dest = (uint32_t *)_sbss; dest < (uint32_t *)_ebss; )
+    {
+      *dest++ = 0;
+    }
+
+  /* Move the initialized data section from his temporary holding spot in
+   * FLASH into the correct place in SRAM.  The correct place in SRAM is
+   * give by _sdata and _edata.  The temporary location is in FLASH at the
+   * end of all of the other read-only data (.text, .rodata) at _eronly.
+   */
+
+  for (src = (const uint32_t *)_eronly,
+       dest = (uint32_t *)_sdata; dest < (uint32_t *)_edata;
+      )
+    {
+      *dest++ = *src++;
+    }
+
 #ifdef CONFIG_STM32H5_SRAM2_INIT
   /* NOTE:  this is optional because this may be inappropriate, especially
    * if the memory is being used for it's battery backed purpose.  In that
@@ -183,32 +205,6 @@ void __start(void)
   stm32_gpioinit();
   showprogress('A');
 
-  /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
-   * certain that there are no issues with the state of global variables.
-   */
-
-  for (dest = (uint32_t *)_sbss; dest < (uint32_t *)_ebss; )
-    {
-      *dest++ = 0;
-    }
-
-  showprogress('B');
-
-  /* Move the initialized data section from his temporary holding spot in
-   * FLASH into the correct place in SRAM.  The correct place in SRAM is
-   * give by _sdata and _edata.  The temporary location is in FLASH at the
-   * end of all of the other read-only data (.text, .rodata) at _eronly.
-   */
-
-  for (src = (const uint32_t *)_eronly,
-       dest = (uint32_t *)_sdata; dest < (uint32_t *)_edata;
-      )
-    {
-      *dest++ = *src++;
-    }
-
-  showprogress('C');
-
 #ifdef CONFIG_ARMV8M_STACKCHECK
   arm_stack_check_init();
 #endif
@@ -222,12 +218,12 @@ void __start(void)
 #ifdef USE_EARLYSERIALINIT
   arm_earlyserialinit();
 #endif
-  showprogress('D');
+  showprogress('B');
 
   /* Initialize onboard resources */
 
   stm32_board_initialize();
-  showprogress('F');
+  showprogress('C');
 
 #ifdef CONFIG_STM32H5_ICACHE
   stm32_enable_icache();
