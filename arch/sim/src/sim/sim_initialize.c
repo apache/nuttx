@@ -224,10 +224,6 @@ static int sim_loop_task(int argc, char **argv)
 
       sched_lock();
 
-#ifdef CONFIG_SIM_USB_DEV
-      sim_usbdev_loop();
-#endif
-
 #ifdef CONFIG_MOTOR_FOC_DUMMY
       /* Update simulated FOC device */
 
