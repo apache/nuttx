@@ -134,12 +134,13 @@ errout_with_cancelpt:
 
 int nxsem_wait(FAR sem_t *sem)
 {
+  DEBUGASSERT(sem != NULL);
+
   /* This API should not be called from the idleloop or interrupt */
 
 #if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
-  DEBUGASSERT(sem != NULL);
-  DEBUGASSERT(!up_interrupt_context());
-  DEBUGASSERT(!OSINIT_IDLELOOP() || !sched_idletask());
+  DEBUGASSERT(!OSINIT_IDLELOOP() || !sched_idletask() ||
+              up_interrupt_context());
 #endif
 
   /* We don't do atomic fast path in case of LIBC_ARCH_ATOMIC because that
