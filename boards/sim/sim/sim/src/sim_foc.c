@@ -33,11 +33,32 @@
 
 #include <arch/board/board.h>
 
+#include <nuttx/wdog.h>
 #include <nuttx/motor/foc/foc_dummy.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#define SIM_FOC_PERIOD    MSEC2TICK(CONFIG_SIM_LOOP_INTERVAL)
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static struct wdog_s g_foc_wdog;   /* Watchdog for event loop */
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+static void sim_foc_interrupt(wdparm_t arg)
+{
+  foc_dummy_update();
+
+  wd_start_next((FAR struct wdog_s *)arg, SIM_FOC_PERIOD,
+                sim_foc_interrupt, arg);
+}
 
 /****************************************************************************
  * Public Functions
@@ -101,6 +122,8 @@ int sim_foc_setup(void)
             }
         }
 
+      wd_start(&g_foc_wdog, 0,
+               sim_foc_interrupt, (wdparm_t)&g_foc_wdog);
       initialized = true;
     }
 
