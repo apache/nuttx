@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/avr/avrdx/breadxavr/include/board.h
+ * boards/avr/avrdx/breadxavr/src/avrdx_init.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,84 +20,72 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_AVR_AVRDX_BREADXAVR_INCLUDE_BOARD_H
-#define __BOARDS_AVR_AVRDX_BREADXAVR_INCLUDE_BOARD_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/irq.h>
+#include <arch/board/board.h>
+
+#ifdef CONFIG_BREADXAVR_BUTTONS_DRIVER
+#  include <nuttx/input/buttons.h>
+#endif
+
+#include <avr/io.h>
+
+#include "avrdx_gpio.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Configuration ************************************************************/
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
 
-/* Clocking *****************************************************************/
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
 
-/* Variables similar to what Atmega1284-xplained sets,
- * taken from menuconfig.
- */
-#define BOARD_XTAL_FREQ        CONFIG_AVRDX_HFO_CLOCK_FREQ
-#define BOARD_CPU_CLOCK        BOARD_XTAL_FREQ
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
 
-/* LED definitions **********************************************************/
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
 
-/* The breadboard has one LED dedicated to displaying OS operation.
- */
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
-#define LED_STARTED            0
-#define LED_HEAPALLOCATE       1
-#define LED_IRQSENABLED        2
-#define LED_STACKCREATED       3
-#define LED_INIRQ              4
-#define LED_SIGNAL             5
-#define LED_ASSERTION          6
-#define LED_PANIC              7
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
-/* Button definitions
+/****************************************************************************
+ * Name: board_early_initialize
  *
- * The breadboard has 4 buttons connected to port A pins 2, 3 and port C
- * pins 2, 3
- */
+ * Description:
+ *  Function called by the OS when BOARD_EARLY_INITIALIZE is set.
+ *  Called after up_initialize, OS has been initialized at this point
+ *  and it is okay to initialize drivers. No waiting for events though.
+ *
+ ****************************************************************************/
 
-enum breadboard_buttons_e
+#ifdef CONFIG_BOARD_EARLY_INITIALIZE
+void board_early_initialize(void)
 {
-  BBRD_BUTTON_1 = 0,
-  BBRD_BUTTON_2 = 1,
-  BBRD_BUTTON_3 = 2,
-  BBRD_BUTTON_4 = 3,
-  BBRD_NUM_BUTTONS
-};
+  int ret = OK;
 
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-/****************************************************************************
- * Inline Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
-#undef EXTERN
-#ifdef __cplusplus
+#  ifdef CONFIG_BREADXAVR_BUTTONS_DRIVER
+  ret = btn_lower_initialize("/dev/buttons");
+  if (ret != OK)
+    {
+      return;
+    }
+#  endif
 }
-#endif
 
-#endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_AVR_AVRDX_BREADXAVR_INCLUDE_BOARD_H */
+#endif /* CONFIG_BOARD_EARLY_INITIALIZE */

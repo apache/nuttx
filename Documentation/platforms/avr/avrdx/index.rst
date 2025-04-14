@@ -33,8 +33,21 @@ The following list indicates peripherals supported in NuttX:
 ==========  ================
 Peripheral  Notes
 ==========  ================
+GPIO        In board code
 UART        See below
 ==========  ================
+
+GPIO
+----
+
+For the most part, there is no need for any specific support for GPIO
+in architecture code. For example, NuttX button input driver should only
+need functions defined in the board code to work.
+
+The architecture code provides means to share single interrupt vector
+if the board needs to have multiple peripherals connected to a single
+I/O port. See gpio_intr_mux.rst for details and breadxavr board
+for example usage.
 
 UART
 ----

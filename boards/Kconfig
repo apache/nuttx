@@ -84,6 +84,8 @@ config ARCH_BOARD_AVRDX_BREADXAVR
 	bool "AVR Dx chip on breadboard"
 	depends on ARCH_CHIP_AVRDX
 	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		This is a board used to make something use an AVRnDx core
 		so it can be developed and tested.
