@@ -106,6 +106,7 @@ struct sensor_rpmsg_ept_s
   struct list_node               node;
   struct rpmsg_endpoint          ept;
   struct work_s                  work;
+  struct work_s                  bound_work;
   rmutex_t                       lock;
   FAR void                      *buffer;
   uint64_t                       expire;
@@ -1404,18 +1405,10 @@ static int sensor_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept,
   return -EINVAL;
 }
 
-static void sensor_rpmsg_device_ns_bound(FAR struct rpmsg_endpoint *ept)
+static void sensor_rpmsg_bound_worker(FAR void *arg)
 {
-  FAR struct sensor_rpmsg_ept_s *sre;
+  FAR struct sensor_rpmsg_ept_s *sre = arg;
   FAR struct sensor_rpmsg_dev_s *dev;
-
-  sre = container_of(ept, struct sensor_rpmsg_ept_s, ept);
-
-  down_write(&g_ept_lock);
-  list_add_tail(&g_eptlist, &sre->node);
-  up_write(&g_ept_lock);
-
-  /* Broadcast all device to ready ept */
 
   down_read(&g_dev_lock);
   list_for_every_entry(&g_devlist, dev,
@@ -1424,18 +1417,33 @@ static void sensor_rpmsg_device_ns_bound(FAR struct rpmsg_endpoint *ept)
       sensor_rpmsg_lock(dev);
       if (dev->nadvertisers > 0)
         {
-          sensor_rpmsg_advsub_one(dev, ept, SENSOR_RPMSG_ADVERTISE);
+          sensor_rpmsg_advsub_one(dev, &sre->ept, SENSOR_RPMSG_ADVERTISE);
         }
 
       if (dev->nsubscribers > 0)
         {
-          sensor_rpmsg_advsub_one(dev, ept, SENSOR_RPMSG_SUBSCRIBE);
+          sensor_rpmsg_advsub_one(dev, &sre->ept, SENSOR_RPMSG_SUBSCRIBE);
         }
 
       sensor_rpmsg_unlock(dev);
     }
 
   up_read(&g_dev_lock);
+}
+
+static void sensor_rpmsg_device_ns_bound(FAR struct rpmsg_endpoint *ept)
+{
+  FAR struct sensor_rpmsg_ept_s *sre;
+
+  sre = container_of(ept, struct sensor_rpmsg_ept_s, ept);
+
+  down_write(&g_ept_lock);
+  list_add_tail(&g_eptlist, &sre->node);
+  up_write(&g_ept_lock);
+
+  /* Broadcast all device to ready ept in work context */
+
+  work_queue(HPWORK, &sre->bound_work, sensor_rpmsg_bound_worker, sre, 0);
 }
 
 static void sensor_rpmsg_ept_release(FAR struct rpmsg_endpoint *ept)
