@@ -514,9 +514,9 @@
 #if defined(CONFIG_LPUART1_RS485) || defined(CONFIG_USART1_RS485) || \
     defined(CONFIG_USART2_RS485)  || defined(CONFIG_USART3_RS485) || \
     defined(CONFIG_UART4_RS485)   || defined(CONFIG_UART5_RS485)  || \
-    defined(CONFIG_USART6_RS485)   || defined(CONFIG_UART7_RS485) || \
+    defined(CONFIG_USART6_RS485)  || defined(CONFIG_UART7_RS485) || \
     defined(CONFIG_UART8_RS485)   || defined(CONFIG_UART9_RS485) || \
-    defined(CONFIG_USART10_RS485)  || defined(CONFIG_USART11_RS485) || \
+    defined(CONFIG_USART10_RS485) || defined(CONFIG_USART11_RS485) || \
     defined(CONFIG_UART12_RS485)
 #  define HAVE_RS485 1
 #endif
