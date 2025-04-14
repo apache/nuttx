@@ -489,7 +489,6 @@ int sim_encoder_initialize(void);
 
 #ifdef CONFIG_SIM_USB_DEV
 void sim_usbdev_initialize(void);
-int sim_usbdev_loop(void);
 #endif
 
 /* sim_usbhost.c ************************************************************/
