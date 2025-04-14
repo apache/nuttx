@@ -4264,6 +4264,18 @@ config UART5_RS485_DIR_POLARITY
 
 endif # UART5_SERIALDRIVER
 
+choice
+	prompt "USART6 Driver Configuration"
+	default STM32H5_USART6_SERIALDRIVER
+	depends on STM32H5_USART6
+
+config STM32H5_USART6_SERIALDRIVER
+	bool "Standard serial driver"
+	select USART6_SERIALDRIVER
+	select STM32H5_SERIALDRIVER
+
+endchoice # USART6 Driver Configuration
+
 if USART6_SERIALDRIVER
 
 config USART6_RS485
