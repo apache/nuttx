@@ -215,18 +215,6 @@ static void sim_init_smartfs(void)
 }
 #endif
 
-static int sim_loop_task(int argc, char **argv)
-{
-  while (1)
-    {
-      /* Sleep minimal time, let the idle run */
-
-      usleep(CONFIG_SIM_LOOPTASK_INTERVAL);
-    }
-
-  return 0;
-}
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -337,8 +325,4 @@ void up_initialize(void)
   wd_start(&g_x11update_wdog, 0, sim_x11update_interrupt,
            (wdparm_t)&g_x11update_wdog);
 #endif
-
-  kthread_create("loop_task", CONFIG_SIM_LOOPTASK_PRIORITY,
-                 CONFIG_DEFAULT_TASK_STACKSIZE,
-                 sim_loop_task, NULL);
 }
