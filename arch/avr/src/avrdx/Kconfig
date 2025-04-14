@@ -20,6 +20,19 @@ config AVR_HAS_USART_5
 	bool
 	default n
 
+# Available I/O ports (only those not common for all devices)
+config AVR_HAS_PORTB
+	bool
+	default n
+
+config AVR_HAS_PORTE
+	bool
+	default n
+
+config AVR_HAS_PORTG
+	bool
+	default n
+
 choice
 	prompt "Atmel AVR DA/DB chip selection"
 	default ARCH_CHIP_AVR128DA28
@@ -32,6 +45,17 @@ config ARCH_CHIP_AVR128DA28
 		Atmel AVR128DA28 8-bit AVR.
 
 endchoice # AVR DA/DB Configuration Options
+
+config AVR_AVRDX_GPIO_ISR_MUX
+	bool "GPIO ISR multiplexer"
+	default n
+	---help---
+		Compile ISR multiplexer code for GPIO. It can be used
+		instead of direct call of irq_attach when multiple
+		users (eg. drivers) want to use the same interrupt
+		vector with different pins on the same port.
+
+		Say Y if your board needs this.
 
 menu "AVR DA/DB Peripheral Selections"
 

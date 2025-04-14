@@ -37,6 +37,10 @@
 #  error "Do not include this file directly, use avrdx_iodefs.h instead"
 #endif
 
+/* PORT.PINCONFIG */
+
+#define PORT_ISC_GM ( PORT_ISC_0_bm | PORT_ISC_1_bm | PORT_ISC_2_bm )
+
 /* CLKCTRL.MCLKCTRLB */
 
 #define CLKCTRL_PDIV_GM ( CLKCTRL_PDIV_0_bm | CLKCTRL_PDIV_1_bm | \

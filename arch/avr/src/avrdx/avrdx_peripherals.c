@@ -28,6 +28,7 @@
 #include "avrdx.h"
 #include "avrdx_gpio.h"
 #include <avr/io.h>
+#include <arch/irq.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -140,6 +141,39 @@ const IOBJ uint8_t avrdx_usart_tx_pins[] =
 };
 
 #endif
+
+/* Interrupt vector numbers for pin change interrupts
+ * indexed by port number (with port A being indexed as 0,
+ * port B as 1 etc.) Does not skip vectors that the chip
+ * does not have to keep the index identical for all chips.
+ */
+
+const IOBJ uint8_t avrdx_gpio_irq_vectors[] =
+{
+  AVRDX_IRQ_PORTA_PORT,
+
+#ifdef CONFIG_AVR_HAS_PORTB
+  AVRDX_IRQ_PORTB_PORT,
+#else
+  0,
+#endif
+
+  AVRDX_IRQ_PORTC_PORT,
+  AVRDX_IRQ_PORTD_PORT,
+#ifdef CONFIG_AVR_HAS_PORTE
+  AVRDX_IRQ_PORTE_PORT,
+#else
+  0,
+#endif
+
+  AVRDX_IRQ_PORTF_PORT
+
+#ifdef CONFIG_AVR_HAS_PORTG
+  , AVRDX_IRQ_PORTG_PORT
+#else
+  , 0
+#endif
+};
 
 /****************************************************************************
  * Private Functions

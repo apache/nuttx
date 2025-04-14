@@ -30,6 +30,10 @@
 
 #include "avr_internal.h"
 
+#ifdef CONFIG_ARCH_CHIP_AVRDX
+#  include "avrdx.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -151,6 +155,10 @@ void up_initialize(void)
    */
 
   up_pminitialize();
+#endif
+
+#ifdef CONFIG_ARCH_CHIP_AVRDX
+  avrdx_up_initialize();
 #endif
 
 #ifdef CONFIG_ARCH_DMA
