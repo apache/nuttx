@@ -475,7 +475,12 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
 #ifdef CONFIG_NET_MLD
       /* Configure the device for MLD support */
 
-      mld_devinit(dev);
+      if ((flags & IFF_MULTICAST) != 0)
+        {
+          /* MLD is only supported on multicast capable devices */
+
+          mld_devinit(dev);
+        }
 #endif
 
 #ifdef NET_ICMPv6_HAVE_STACK
