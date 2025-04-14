@@ -219,17 +219,6 @@ static int sim_loop_task(int argc, char **argv)
 {
   while (1)
     {
-      irqstate_t flags = up_irq_save();
-
-      sched_lock();
-
-      sched_unlock();
-      up_irq_restore(flags);
-
-#ifdef CONFIG_SIM_USB_HOST
-      sim_usbhost_loop();
-#endif
-
       /* Sleep minimal time, let the idle run */
 
       usleep(CONFIG_SIM_LOOPTASK_INTERVAL);
