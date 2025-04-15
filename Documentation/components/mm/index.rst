@@ -232,3 +232,9 @@ available for usage by drivers.  The I/O buffers have these properties:
    it is removed from the free list; when a buffer is freed it is
    returned to the free list.
 #. The calling application will wait if there are not free buffers.
+#. IOBs can be chained together to form larger buffers.
+#. The extension interface ``iob_init_with_data`` supports external
+   buffer init as iob structure when CONFIG_IOB_ALLOC is enabled. This
+   interface allows different protocol modules to use their own unique
+   I/O buffer sources and allocation strategies without interfering with
+   each other.
