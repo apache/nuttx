@@ -51,7 +51,7 @@ static ssize_t fileoutstream_puts(FAR struct lib_outstream_s *self,
 
   do
     {
-      nwritten = file_write(stream->file, buf, len);
+      nwritten = file_write(&stream->file, buf, len);
       if (nwritten >= 0)
         {
           self->nput += nwritten;
@@ -85,28 +85,65 @@ static void fileoutstream_putc(FAR struct lib_outstream_s *self, int ch)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lib_fileoutstream
+ * Name: lib_fileoutstream_open
  *
  * Description:
  *   Initializes a stream for use with a file descriptor.
+ *   This function sets up the stream structure to enable writing to a file
+ *   specified by the provide path. It initializes the necessary function
+ *   pointers for character and string output, as well as the flush behavior.
  *
  * Input Parameters:
  *   stream - User allocated, uninitialized instance of struct
  *            lib_rawoutstream_s to be initialized.
- *   file   - User provided FILE instance (must have been opened for
- *            write access).
+ *   path   - Path to file to open.
+ *   oflag  - Open flags.
+ *   mode   - Mode flags.
+ *
+ * Returned Value:
+ *   0 on success, negative error code in failuer.
+ *
+ ****************************************************************************/
+
+int lib_fileoutstream_open(FAR struct lib_fileoutstream_s *stream,
+                           FAR const char *path, int oflag, mode_t mode)
+{
+  int ret;
+
+  ret = file_open(&stream->file, path, oflag, mode);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  stream->common.putc  = fileoutstream_putc;
+  stream->common.puts  = fileoutstream_puts;
+  stream->common.flush = lib_noflush;
+  stream->common.nput  = 0;
+
+  return 0;
+}
+
+/****************************************************************************
+ * Name: lib_fileoutstream_close
+ *
+ * Description:
+ *   Closes the file associated with the stream.
+ *
+ * Input Parameters:
+ *   stream - User allocated, uninitialized instance of struct
+ *            lib_rawoutstream_s to be initialized.
  *
  * Returned Value:
  *   None (User allocated instance initialized).
  *
  ****************************************************************************/
 
-void lib_fileoutstream(FAR struct lib_fileoutstream_s *stream,
-                       FAR struct file *file)
+void lib_fileoutstream_close(FAR struct lib_fileoutstream_s *stream)
 {
-  stream->common.putc  = fileoutstream_putc;
-  stream->common.puts  = fileoutstream_puts;
-  stream->common.flush = lib_noflush;
-  stream->common.nput  = 0;
-  stream->file         = file;
+  if (stream != NULL)
+    {
+      file_close(&stream->file);
+      stream->common.nput = 0;
+    }
 }
