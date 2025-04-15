@@ -1279,6 +1279,26 @@ config ARM_FPU_ABI_SOFT
 	---help---
 		Pass float value via integer register (-mfloat-abi=softfp)
 
+config ARM_BUSY_WAIT
+	bool "Busy wait when boot"
+	default n
+	depends on ARCH_HAVE_MULTICPU
+	---help---
+		On a system with multiple CPU cores, when the system is powered on,
+		multiple cores may start running simultaneously. In this case, software
+		is required to handle the startup logic for multi-core synchronization.
+		One approach is to use global variables.
+		however, the global variable region may not have been initialized yet.
+		In such scenarios, we can use a busywait flag to
+		implement the synchronization strategy.
+
+config ARM_BUSY_WAIT_FLAG_ADDR
+	hex "Busy wait flag address"
+	depends on ARM_BUSY_WAIT
+	---help---
+		The busywait address is typically a region that is initialized to 0
+		during the boot phase.
+
 config ARM_DPFPU32
 	bool "FPU with 32 double-precision register"
 	default y

@@ -187,8 +187,8 @@ __start:
 	cmp		r0, #0
 	beq		__cpu0_start
 
-#ifdef CONFIG_ARMV7A_SMP_BUSY_WAIT
-	ldr		r2, =CONFIG_ARMV7A_SMP_BUSY_WAIT_FLAG_ADDR
+#ifdef CONFIG_ARM_BUSY_WAIT
+	ldr		r2, =CONFIG_ARM_BUSY_WAIT_FLAG_ADDR
 1:
 	ldr		r1, [r2, #0]
 	cmp		r1, #0
@@ -690,8 +690,8 @@ __cpu0_start:
 
 	/* finish busy wait */
 
-#ifdef CONFIG_ARMV7A_SMP_BUSY_WAIT
-	ldr		r0, =CONFIG_ARMV7A_SMP_BUSY_WAIT_FLAG_ADDR
+#ifdef CONFIG_ARM_BUSY_WAIT
+	ldr		r0, =CONFIG_ARM_BUSY_WAIT_FLAG_ADDR
 	mov		r1, #1
 	str		r1, [r0]
 	dsb		sy
