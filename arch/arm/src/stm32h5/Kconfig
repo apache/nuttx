@@ -55,6 +55,7 @@ config STM32H5_STM32H56XXX
 	select STM32H5_HAVE_SPI4
 	select STM32H5_HAVE_SPI5
 	select STM32H5_HAVE_SPI6
+	select STM32H5_HAVE_I2C4
 	select STM32H5_HAVE_USBFS
 	select STM32H5_HAVE_HSI48
 	select STM32H5_HAVE_ICACHE_REMAP
@@ -215,7 +216,6 @@ menu "STM32H5 Peripheral Selection"
 # These "hidden" settings determine if a peripheral option is available
 # for the selected MCU
 
-
 config STM32H5_HAVE_ETHERNET
 	bool
 	default n
@@ -237,6 +237,10 @@ config STM32H5_HAVE_HSI48
 	default n
 
 config STM32H5_HAVE_ICACHE
+	bool
+	default n
+
+config STM32H5_HAVE_I2C4
 	bool
 	default n
 
@@ -307,11 +311,11 @@ config STM32H5_HAVE_USBFS
 # These "hidden" settings are the OR of individual peripheral selections
 # indicating that the general capability is required.
 
-config STM32H5_USART
+config STM32H5_ADC
 	bool
 	default n
 
-config STM32H5_ADC
+config STM32H5_DMA
 	bool
 	default n
 
@@ -327,6 +331,10 @@ config STM32H5_TIM
 	bool
 	default n
 
+config STM32H5_USART
+	bool
+	default n
+
 # These are the peripheral selections proper
 
 config STM32H5_ADC1
@@ -338,6 +346,18 @@ config STM32H5_ADC2
 	bool "ADC2"
 	default n
 	select STM32H5_ADC
+
+config STM32H5_DMA1
+	bool "DMA1"
+	default n
+	select STM32H5_DMA
+	select ARCH_DMA
+
+config STM32H5_DMA2
+	bool "DMA2"
+	default n
+	select STM32H5_DMA
+	select ARCH_DMA
 
 config STM32H5_ETHMAC
 	bool "Ethernet MAC"
@@ -356,19 +376,7 @@ config STM32H5_QSPI1
 	bool "QSPI1"
 	default n
 
-config STM32H5_USART2
-	bool "USART2"
-	default n
-	depends on STM32H5_HAVE_USART2
-	select ARCH_HAVE_SERIAL_TERMIOS
-	select STM32H5_USART
-
-config STM32H5_USART3
-	bool "USART3"
-	default n
-	depends on STM32H5_HAVE_USART3
-	select ARCH_HAVE_SERIAL_TERMIOS
-	select STM32H5_USART
+menu "U[S]ART/LPUART Selection"
 
 config STM32H5_UART4
 	bool "UART4"
@@ -384,13 +392,6 @@ config STM32H5_UART5
 	select ARCH_HAVE_SERIAL_TERMIOS
 	select STM32H5_USART
 
-config STM32H5_USART6
-	bool "USART6"
-	default n
-	depends on STM32H5_HAVE_USART6
-	select ARCH_HAVE_SERIAL_TERMIOS
-	select STM32H5_USART
-
 config STM32H5_UART7
 	bool "UART7"
 	default n
@@ -402,20 +403,6 @@ config STM32H5_UART8
 	bool "UART8"
 	default n
 	depends on STM32H5_HAVE_UART8
-	select ARCH_HAVE_SERIAL_TERMIOS
-	select STM32H5_USART
-
-config STM32H5_USART10
-	bool "USART10"
-	default n
-	depends on STM32H5_HAVE_USART10
-	select ARCH_HAVE_SERIAL_TERMIOS
-	select STM32H5_USART
-
-config STM32H5_USART11
-	bool "USART11"
-	default n
-	depends on STM32H5_HAVE_USART11
 	select ARCH_HAVE_SERIAL_TERMIOS
 	select STM32H5_USART
 
@@ -440,12 +427,51 @@ config STM32H5_USART1
 	select ARCH_HAVE_SERIAL_TERMIOS
 	select STM32H5_USART
 
+config STM32H5_USART2
+	bool "USART2"
+	default n
+	depends on STM32H5_HAVE_USART2
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32H5_USART
+
+config STM32H5_USART3
+	bool "USART3"
+	default n
+	depends on STM32H5_HAVE_USART3
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32H5_USART
+
+config STM32H5_USART6
+	bool "USART6"
+	default n
+	depends on STM32H5_HAVE_USART6
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32H5_USART
+
+config STM32H5_USART10
+	bool "USART10"
+	default n
+	depends on STM32H5_HAVE_USART10
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32H5_USART
+
+config STM32H5_USART11
+	bool "USART11"
+	default n
+	depends on STM32H5_HAVE_USART11
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32H5_USART
+
 config STM32H5_LPUART1
 	bool "LPUART1"
 	default n
 	depends on STM32H5_HAVE_LPUART1
 	select ARCH_HAVE_SERIAL_TERMIOS
 	select STM32H5_USART
+
+endmenu # U[S]ART/LPUART Selection
+
+menu "I2C Selection"
 
 config STM32H5_I2C
 	bool
@@ -469,7 +495,12 @@ config STM32H5_I2C3
 config STM32H5_I2C4
 	bool "I2C4"
 	default n
+	depends on STM32H5_HAVE_I2C4
 	select STM32H5_I2C
+
+endmenu # I2C Selection
+
+menu "SPI Selection"
 
 config STM32H5_SPI1
 	bool "SPI1"
@@ -509,6 +540,8 @@ config STM32H5_SPI6
 	depends on STM32H5_HAVE_SPI6
 	select SPI
 	select STM32H5_SPI
+
+endmenu # SPI Selection
 
 menu "STM32H5 Timer Selection"
 
@@ -590,7 +623,7 @@ config STM32H5_USBFS
 	depends on STM32H5_HAVE_USBFS
 	select USBDEV
 
-endmenu
+endmenu # STM32H5 Peripheral Selection
 
 config STM32H5_FLASH_PREFETCH
 	bool "Enable FLASH Pre-fetch"
