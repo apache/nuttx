@@ -211,6 +211,7 @@ endif
 
 ifneq ($(CONFIG_SIM_WIFIDEV_NUMBER),0)
   CFLAGS += -DTOPDIR=\"$(TOPDIR)\"
+  CSRCS += sim_wifihost.c
 endif
 
 ifeq ($(CONFIG_SIM_NETDEV_TAP),y)
