@@ -466,11 +466,11 @@ int up_prioritize_irq(int irq, int priority)
 
   if (irq >= RP23XX_IRQ_EXTINT && irq < RP23XX_IRQ_EXTINT + 32)
     {
-      /* ARMV6M_NVIC_IPR() maps register IPR0-IPR7 with four settings per
+      /* NVIC_IRQ_PRIORITY maps register IPR0-IPR7 with four settings per
        * register.
        */
 
-      regaddr = ARMV6M_NVIC_IPR(irq >> 2);
+      regaddr = NVIC_IRQ_PRIORITY(irq);
       shift   = (irq & 3) << 3;
     }
 
@@ -481,13 +481,13 @@ int up_prioritize_irq(int irq, int priority)
 
   else if (irq == RP23XX_IRQ_PENDSV)
     {
-      regaddr = ARMV6M_SYSCON_SHPR2;
-      shift   = SYSCON_SHPR3_PRI_14_SHIFT;
+      regaddr = NVIC_SYSH12_15_PRIORITY;
+      shift   = NVIC_SYSH_PRIORITY_PR14_SHIFT;
     }
   else if (irq == RP23XX_IRQ_SYSTICK)
     {
-      regaddr = ARMV6M_SYSCON_SHPR2;
-      shift   = SYSCON_SHPR3_PRI_15_SHIFT;
+      regaddr = NVIC_SYSH12_15_PRIORITY;
+      shift   = NVIC_SYSH_PRIORITY_PR15_SHIFT;
     }
   else
     {
