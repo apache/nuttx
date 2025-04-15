@@ -39,6 +39,10 @@ if(CONFIG_NET_CAN)
     list(APPEND SRCS can_setsockopt.c can_getsockopt.c)
   endif()
 
+  if(CONFIG_NET_CAN_NBUFFERS GREATER 0)
+    list(APPEND SRCS can_bufpool.c)
+  endif()
+
   list(APPEND SRCS can_conn.c can_input.c can_callback.c can_poll.c)
 
   target_sources(net PRIVATE ${SRCS})

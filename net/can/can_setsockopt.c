@@ -199,9 +199,7 @@ int can_setsockopt(FAR struct socket *psock, int level, int option,
 #if CONFIG_NET_MAX_RECV_BUFSIZE > 0
           buffersize = MIN(buffersize, CONFIG_NET_MAX_RECV_BUFSIZE);
 #endif
-
-          conn->recv_buffnum = (buffersize + CONFIG_IOB_BUFSIZE - 1)
-                              / CONFIG_IOB_BUFSIZE;
+          conn->rcvbufs = buffersize;
 
           break;
         }
