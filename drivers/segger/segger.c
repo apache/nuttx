@@ -31,6 +31,7 @@
  ****************************************************************************/
 
 struct rspinlock_s g_segger_lock = RSPINLOCK_INITIALIZER;
+ptrdiff_t g_segger_offset = PTRDIFF_MAX;
 
 /****************************************************************************
  * Public Functions

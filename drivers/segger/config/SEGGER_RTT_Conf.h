@@ -41,6 +41,10 @@
 extern struct rspinlock_s g_segger_lock;
 #endif
 
+#ifdef CONFIG_SEGGER_RTT_UNCACHED_OFF_VARIABLE
+extern ptrdiff_t g_segger_offset;
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -53,7 +57,11 @@ extern struct rspinlock_s g_segger_lock;
 
 /* Address alias where RTT CB and buffers can be accessed uncached */
 
-#define SEGGER_RTT_UNCACHED_OFF         CONFIG_SEGGER_RTT_UNCACHED_OFF
+#ifdef CONFIG_SEGGER_RTT_UNCACHED_OFF_VARIABLE
+#  define SEGGER_RTT_UNCACHED_OFF         g_segger_offset
+#else
+#  define SEGGER_RTT_UNCACHED_OFF         CONFIG_SEGGER_RTT_UNCACHED_OFF
+#endif
 
 /* Number of up-buffers (T->H) available on this target */
 
