@@ -42,7 +42,6 @@ Command                Depends on Configuration                    Can Be Disabl
 :ref:`cmdcmp`          ``CONFIG_NSH_DISABLE_CMP``                  .
 :ref:`cmdcp`           ``CONFIG_NSH_DISABLE_CP``                   .
 :ref:`cmddate`         ``CONFIG_NSH_DISABLE_DATE``                 .
-:ref:`cmddd`           ``CONFIG_NSH_DISABLE_DD``                   .
 :ref:`cmddelroute`     ``CONFIG_NET`` && ``CONFIG_NET_ROUTE``      ``CONFIG_NSH_DISABLE_DELROUTE``
 :ref:`cmddf`           ! ``CONFIG_DISABLE_MOUNTPOINT``             ``CONFIG_NSH_DISABLE_DF``
 :ref:`cmddirname`      ``CONFIG_NSH_DISABLE_DIRNAME``              .

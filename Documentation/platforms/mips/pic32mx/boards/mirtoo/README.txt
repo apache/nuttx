@@ -929,7 +929,6 @@ Where <subdir> is one of the following:
        CONFIG_NSH_DISABLESCRIPT=y
        CONFIG_NSH_DISABLEBG=y
 
-       CONFIG_NSH_DISABLE_DD=y
        CONFIG_NSH_DISABLE_EXEC=y
        CONFIG_NSH_DISABLE_EXIT=y
        CONFIG_NSH_DISABLE_GET=y
