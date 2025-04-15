@@ -33,6 +33,18 @@
 
 /* Color Creation and Conversion Macros *************************************/
 
+/* This macro creates RGB24 from 8:8:8:8 RGB */
+
+#define ARGBTO32(a,r,g,b) \
+  ((uint32_t)((a) & 0xff) << 24 | (uint32_t)((r) & 0xff) << 16 | (uint32_t)((g) & 0xff) << 8  | (uint32_t)((b) & 0xff))
+
+/* And these macros perform the inverse transformation */
+
+#define RGB32ALPHA(argb) (((argb) >> 24) & 0xff)
+#define RGB32RED(argb)   (((argb) >> 16) & 0xff)
+#define RGB32GREEN(argb) (((argb) >> 8)  & 0xff)
+#define RGB32BLUE(argb)  ( (argb)        & 0xff)
+
 /* This macro creates RGB24 from 8:8:8 RGB */
 
 #define RGBTO24(r,g,b) \

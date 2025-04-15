@@ -33,6 +33,9 @@
 #include <stdint.h>
 #include <errno.h>
 #include <debug.h>
+#ifdef CONFIG_VIDEO_FB_SPLASHSCREEN
+#  include <nuttx/video/rgbcolors.h>
+#endif
 
 #include <nuttx/compiler.h>
 #include <nuttx/fs/ioctl.h>
@@ -484,6 +487,18 @@
 #define FB_ROTATE_UD                 2
 #define FB_ROTATE_CCW                3
 
+#ifdef CONFIG_VIDEO_FB_SPLASHSCREEN
+#  if defined(CONFIG_VIDEO_FB_SPLASHSCREEN_BPP32)
+#    define MKRGB ARGBTO32
+#  elif defined(CONFIG_VIDEO_FB_SPLASHSCREEN_BPP24)
+#    define MKRGB RGBTO24
+#  elif defined(CONFIG_VIDEO_FB_SPLASHSCREEN_BPP16)
+#    define MKRGB RGBTO16
+#  elif defined(CONFIG_VIDEO_FB_SPLASHSCREEN_BPP8)
+#    define MKRGB RGBTO8
+#  endif /* CONFIG_VIDEO_FB_SPLASHSCREEN_BPP32 */
+#endif /* CONFIG_VIDEO_FB_SPLASHSCREEN */
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -932,6 +947,53 @@ struct fb_var_screeninfo
   uint32_t colorspace;       /* Colorspace for FOURCC-based modes */
   uint32_t reserved[4];      /* Reserved for future compatibility */
 };
+
+#ifdef CONFIG_VIDEO_FB_SPLASHSCREEN
+#  if defined(CONFIG_VIDEO_FB_SPLASHSCREEN_BPP8) || \
+      defined(CONFIG_VIDEO_FB_SPLASHSCREEN_MONO) || \
+      defined(CONFIG_VIDEO_FB_SPLASHSCREEN_GREY)
+  typedef uint8_t fb_pixel_t;
+#  elif defined(CONFIG_VIDEO_FB_SPLASHSCREEN_BPP16)
+  typedef uint16_t fb_pixel_t;
+  #elif defined(CONFIG_VIDEO_FB_SPLASHSCREEN_BPP24)
+  typedef uint32_t fb_pixel_t;
+#  elif defined(CONFIG_VIDEO_FB_SPLASHSCREEN_BPP32)
+  typedef uint32_t fb_pixel_t;
+#  else
+#    error "Pixel depth is unknown"
+#endif
+
+/* Describes a point on the display */
+
+struct fb_point_s
+{
+  fb_coord_t x;         /* X position, range: 0 to screen width - 1 */
+  fb_coord_t y;         /* Y position, range: 0 to screen height - 1 */
+};
+
+struct fb_rect_s
+{
+  struct fb_point_s pt1; /* Upper, left-hand corner */
+  struct fb_point_s pt2; /* Lower, right-hand corner */
+};
+
+/* This structure describes the splashscreen */
+
+struct splscr_bitmap_s
+{
+  uint8_t          npixels;     /* Number of pixels                          */
+  uint8_t          lookup;      /* Pixel RGB lookup index                    */
+};
+
+struct palette_bitmap_s
+{
+  fb_coord_t            width;  /* Width in pixels                           */
+  fb_coord_t            height; /* Height in rows                            */
+  FAR const fb_pixel_t *lut;    /* Pointer to the palette (LUT)              */
+  FAR const struct
+       splscr_bitmap_s *data;   /* The RLE data                              */
+};
+#endif
 
 /****************************************************************************
  * Public Data
