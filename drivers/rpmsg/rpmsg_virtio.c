@@ -49,7 +49,8 @@
 #define RPMSG_VIRTIO_FEATURES        (1 << VIRTIO_RPMSG_F_NS | \
                                       1 << VIRTIO_RPMSG_F_ACK | \
                                       1 << VIRTIO_RPMSG_F_BUFSZ | \
-                                      1 << VIRTIO_RPMSG_F_CPUNAME)
+                                      1 << VIRTIO_RPMSG_F_CPUNAME | \
+                                      1 << VIRTIO_RPMSG_F_BUFADDR)
 
 #ifdef CONFIG_OPENAMP_CACHE
 #  define RPMSG_VIRTIO_INVALIDATE(x) metal_cache_invalidate(&x, sizeof(x))
@@ -541,10 +542,57 @@ static int rpmsg_virtio_notify_wait(FAR struct rpmsg_device *rdev,
 static int rpmsg_virtio_start(FAR struct rpmsg_virtio_priv_s *priv)
 {
   FAR struct virtio_device *vdev = priv->vdev;
+  struct rpmsg_virtio_config config =
+  {
+    RPMSG_BUFFER_SIZE,
+    RPMSG_BUFFER_SIZE,
+    false,
+  };
+
   int ret;
 
-  ret = rpmsg_init_vdev(&priv->rvdev, vdev, rpmsg_ns_bind,
-                        metal_io_get_region(), priv->pool);
+  if (virtio_has_feature(vdev, VIRTIO_RPMSG_F_BUFSZ))
+    {
+      virtio_read_config_member(vdev, struct fw_rsc_config, h2r_buf_size,
+                                &config.h2r_buf_size)
+      virtio_read_config_member(vdev, struct fw_rsc_config, r2h_buf_size,
+                                &config.r2h_buf_size);
+    }
+
+  if (vdev->role == VIRTIO_DEV_DRIVER &&
+      virtio_has_feature(vdev, VIRTIO_RPMSG_F_BUFADDR))
+    {
+      FAR void *shmbuf_va0;
+      FAR void *shmbuf_va1;
+      uint64_t shmbuf_pa0;
+      uint64_t shmbuf_pa1;
+
+      /* In OpenAMP, priv->pool[0] is the RX share memory pool, should use
+       * r2h_buf_addr and r2h_buf_size
+       */
+
+      virtio_read_config_member(vdev, struct fw_rsc_config, r2h_buf_addr,
+                                &shmbuf_pa0);
+      shmbuf_va0 = up_addrenv_pa_to_va((uintptr_t)shmbuf_pa0);
+      rpmsg_virtio_init_shm_pool(&priv->pool[0], shmbuf_va0,
+              config.r2h_buf_size * vdev->vrings_info[0].info.num_descs);
+
+      /* In OpenAMP, priv->pool[1] is the TX share memory pool, should use
+       * h2r_buf_addr and h2r_buf_size
+       */
+
+      virtio_read_config_member(vdev, struct fw_rsc_config, h2r_buf_addr,
+                                &shmbuf_pa1);
+      shmbuf_va1 = up_addrenv_pa_to_va((uintptr_t)shmbuf_pa1);
+      rpmsg_virtio_init_shm_pool(&priv->pool[1], shmbuf_va1,
+              config.h2r_buf_size * vdev->vrings_info[1].info.num_descs);
+
+      config.split_shpool = true;
+    }
+
+  ret = rpmsg_init_vdev_with_config(&priv->rvdev, vdev, rpmsg_ns_bind,
+                                    metal_io_get_region(),
+                                    priv->pool, &config);
   if (ret < 0)
     {
       rpmsgerr("rpmsg_init_vdev failed, ret=%d\n", ret);
