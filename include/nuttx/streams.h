@@ -220,7 +220,7 @@ struct lib_fileinstream_s
 struct lib_fileoutstream_s
 {
   struct lib_outstream_s common;
-  FAR struct file       *file;
+  struct file            file;
 };
 
 struct lib_rawsistream_s
