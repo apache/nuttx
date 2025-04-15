@@ -213,6 +213,11 @@ if(CONFIG_SIM_X11FB)
   endif()
 endif()
 
+if(NOT ${CONFIG_SIM_WIFIDEV_NUMBER} EQUAL 0)
+  add_compile_options(-DTOPDIR=$(TOPDIR))
+  list(APPEND SRCS sim_wifihost.c)
+endif()
+
 if(CONFIG_SIM_NETDEV_TAP)
   list(APPEND SRCS sim_netdriver.c)
 
