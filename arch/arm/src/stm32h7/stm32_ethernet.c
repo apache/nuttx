@@ -3699,9 +3699,10 @@ static inline void stm32_ethgpioconfig(struct stm32_ethmac_s *priv)
 #if defined(CONFIG_STM32H7_MII) || defined(CONFIG_STM32H7_RMII)
 
   /* MDC and MDIO are common to both modes */
-
+# ifndef CONFIG_STM32H7_NO_PHY
   stm32_configgpio(GPIO_ETH_MDC);
   stm32_configgpio(GPIO_ETH_MDIO);
+# endif
 
   /* Set up the MII interface */
 
