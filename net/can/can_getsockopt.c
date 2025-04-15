@@ -180,7 +180,7 @@ int can_getsockopt(FAR struct socket *psock, int level, int option,
             return -EINVAL;
           }
 
-        *(FAR int *)value = conn->recv_buffnum * CONFIG_IOB_BUFSIZE;
+        *(FAR int *)value = conn->rcvbufs;
 
         break;
 #endif

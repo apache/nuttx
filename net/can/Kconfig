@@ -156,5 +156,14 @@ config NET_CAN_NOTIFIER
 		purpose notifier, but was developed specifically to support poll()
 		logic where the poll must wait for these events.
 
+config NET_CAN_NBUFFERS
+	int "Number of CAN buffers"
+	depends on IOB_ALLOC
+	default 0
+	---help---
+		Each CAN packet is represented by a CAN buffers.
+		This setting determines the number of preallocated CAN buffers
+		available for packet data.
+
 endif # NET_CAN
 endmenu # CAN Socket Support

@@ -228,8 +228,7 @@ static int can_setup(FAR struct socket *psock)
        */
 
 #if CONFIG_NET_RECV_BUFSIZE > 0
-      conn->recv_buffnum = (CONFIG_NET_RECV_BUFSIZE + CONFIG_IOB_BUFSIZE - 1)
-                            / CONFIG_IOB_BUFSIZE;
+      conn->rcvbufs = CONFIG_NET_RECV_BUFSIZE;
 #endif
 
 #if CONFIG_NET_SEND_BUFSIZE > 0
