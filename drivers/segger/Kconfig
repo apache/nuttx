@@ -33,9 +33,16 @@ config SEGGER_RTT_CPU_CACHE_LINE_SIZE
 	---help---
 		Largest cache line size (in bytes) in the target system.
 
+config SEGGER_RTT_UNCACHED_OFF_VARIABLE
+	bool
+	default n
+	---help---
+		Converting the macro for Segger RTT uncached offset to variable representation
+
 config SEGGER_RTT_UNCACHED_OFF
 	int "Segger RTT uncached offset"
 	default 0
+	depends on !SEGGER_RTT_UNCACHED_OFF_VARIABLE
 	---help---
 		Address alias where RTT CB and buffers can be accessed uncached
 
