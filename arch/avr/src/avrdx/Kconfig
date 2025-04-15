@@ -44,6 +44,30 @@ config ARCH_CHIP_AVR128DA28
 	---help---
 		Atmel AVR128DA28 8-bit AVR.
 
+config ARCH_CHIP_AVR128DA64
+	bool "AVR128DA64"
+	select AVR_HAS_RAMPZ
+	select AVR_HAS_USART_2
+	select AVR_HAS_USART_4
+	select AVR_HAS_USART_5
+	select AVR_HAS_PORTB
+	select AVR_HAS_PORTE
+	select AVR_HAS_PORTG
+	---help---
+		Atmel AVR128DA64 8-bit AVR.
+
+config ARCH_CHIP_AVR128DB64
+	bool "AVR128DB64"
+	select AVR_HAS_RAMPZ
+	select AVR_HAS_USART_2
+	select AVR_HAS_USART_4
+	select AVR_HAS_USART_5
+	select AVR_HAS_PORTB
+	select AVR_HAS_PORTE
+	select AVR_HAS_PORTG
+	---help---
+		Atmel AVR128DB64 8-bit AVR.
+
 endchoice # AVR DA/DB Configuration Options
 
 config AVR_AVRDX_GPIO_ISR_MUX

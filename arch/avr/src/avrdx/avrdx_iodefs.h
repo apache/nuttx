@@ -32,6 +32,10 @@
 
 #if defined(CONFIG_ARCH_CHIP_AVR128DA28)
 #  include "iodefs/avr128da28.h"
+#elif defined(CONFIG_ARCH_CHIP_AVR128DA64)
+#  include "iodefs/avr128da64.h"
+#elif defined(CONFIG_ARCH_CHIP_AVR128DB64)
+#  include "iodefs/avr128db64.h"
 #else
 #  error "I/O register definitions for this chip are missing"
 #endif
