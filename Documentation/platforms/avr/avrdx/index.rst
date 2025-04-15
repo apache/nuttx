@@ -4,6 +4,27 @@ Microchip DA/DB family
 
 This is an attempt to support AVR DA/DB family of MCUs
 
+Supported chips
+===============
+
+The code was developed using AVR128DA28 MCU on a breadboard. Currently,
+all testing was done with that chip. The chips in DA family are quite
+similar, the main differences are pin count and flash size. (Pin count
+also corresponds to supported peripherals, chips with more pins have
+more instances of the same peripheral, eg. more USARTs.)
+
+Chips in DB family are fairly similar to DA as well,
+some peripherals are missing, some features are added.
+
+This means that support for other chips is fairly easy to add,
+all that is needed is to provide interrupt vector definitions
+and similar data describing the chip. All architecture code should
+otherwise be written in a way to automatically support the chip.
+
+Currently, ``AVR128DA64`` and ``AVR128DB64`` chips are supported
+this way (ie. definitions describing the chip are provided
+but there is no board.)
+
 Clock Configuration
 ===================
 
@@ -69,3 +90,4 @@ Supported Boards
    :maxdepth: 1
 
    boards/*/*
+
