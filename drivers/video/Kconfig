@@ -56,6 +56,102 @@ config VIDEO_FB_NPOLLWAITERS
 	depends on VIDEO_FB
 	default 2
 
+config VIDEO_FB_SPLASHSCREEN
+  bool "Enable Splashscreen when Framebuffer Driver is registered"
+	depends on VIDEO_FB
+	default n
+	---help---
+		This feature allows a splashscreen image to be displayed during the
+		Framebuffer	device driver register function. It provides the following
+		functionality:
+		- Choice of 80x80, 160x160 or 320x320 default "NX" logos
+		- Alternative "out-of-tree" image as splashscreen
+		- Configurable background colour (default black)
+		- Bit-per-pixel choice (32/24/16/8/Greyscale/Mono) to suit the LCD used
+		- Splashscreen can be set to remain displayed for 'n' seconds ('n' can be 0)
+		- Splashscreen can be cleared (to black) once framebuffer device register is
+		  complete
+		- Python "splashscreen_converter.py" tool (in NuttX tools directory) can be used
+		  to create custom splashscreens - note the tool restricts the number of colours
+		  to 256.
+
+
+if VIDEO_FB_SPLASHSCREEN
+
+menu "Splashscreen Image Selection and Configuration"
+
+choice
+	prompt "Select Splashscreen Image Source"
+	default VIDEO_FB_SPLASHSCREEN_NXLOGO
+
+config VIDEO_FB_SPLASHSCREEN_NXLOGO
+	bool "Use default NuttX NX Logo"
+
+config VIDEO_FB_SPLASHSCREEN_CUSTOM
+	bool "Use Custom file as splashscreen"
+	---help---
+		This must be a compiled C source file, such as fb_splash.o, created
+		as a c src file using the splashscreen_converter.py Python script,
+		available in the nuttx/tools directory, and compiled as part of the
+		build.
+		Typically this would be a source file of an out-of-tree custom board.
+
+endchoice
+
+choice
+	prompt "Select NXlogo bitmap size to use"
+	default VIDEO_FB_SPLASHSCREEN_NXLOGO_160
+	depends on VIDEO_FB_SPLASHSCREEN_NXLOGO
+
+config VIDEO_FB_SPLASHSCREEN_NXLOGO_320
+	bool "320x320 pixels"
+
+config VIDEO_FB_SPLASHSCREEN_NXLOGO_160
+	bool "160x160 pixels"
+
+config VIDEO_FB_SPLASHSCREEN_NXLOGO_80
+	bool "80x80 pixels"
+endchoice
+
+choice
+	prompt "Select Splashscreen Bits-per-pixel (BPP)"
+	default VIDEO_FB_SPLASHSCREEN_BPP32
+
+config VIDEO_FB_SPLASHSCREEN_BPP32
+	bool "32BPP (ARGB)"
+
+config VIDEO_FB_SPLASHSCREEN_BPP24
+	bool "24BPP (RGB)"
+
+config VIDEO_FB_SPLASHSCREEN_BPP16
+	bool "16BPP (RGB565)"
+
+config VIDEO_FB_SPLASHSCREEN_MONO
+	bool "Monochrome"
+
+config VIDEO_FB_SPLASHSCREEN_GREY
+	bool "Greyscale (8BPP)"
+
+endchoice
+
+config VIDEO_FB_SPLASHSCREEN_BG_COLOUR
+	hex "Hex (A)RGB background colour for splashscreen"
+	default 0
+	---help---
+		default is black
+
+config VIDEO_FB_SPLASHSCREEN_DISP_TIME
+	int "Time to sleep once Splashscreen displayed"
+	default 1
+
+config VIDEO_FB_SPLASHSCREEN_CLR_ON_EXIT
+	bool "Clear Framebuffer memory when driver registration is complete"
+	default y
+
+endmenu # "Splashscreen Image Selection and Configuration"
+
+endif # VIDEO_FB_SPLASHSCREEN
+
 config VIDEO_STREAM
 	bool "Video Stream Support"
 	default n

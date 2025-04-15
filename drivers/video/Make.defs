@@ -32,6 +32,18 @@ ifeq ($(CONFIG_VIDEO_STREAM),y)
   CSRCS += v4l2_core.c video_framebuff.c v4l2_cap.c v4l2_m2m.c
 endif
 
+ifeq ($(CONFIG_VIDEO_FB_SPLASHSCREEN),y)
+  ifeq ($(CONFIG_VIDEO_FB_SPLASHSCREEN_NXLOGO),y)
+    ifeq ($(CONFIG_VIDEO_FB_SPLASHSCREEN_NXLOGO_320),y)
+      CSRCS += nxlogo320.c
+    else ifeq ($(CONFIG_VIDEO_FB_SPLASHSCREEN_NXLOGO_160),y)
+      CSRCS += nxlogo160.c
+    else
+      CSRCS += nxlogo80.c
+    endif
+  endif
+endif
+
 # These video drivers depend on I2C support
 
 ifeq ($(CONFIG_I2C),y)
