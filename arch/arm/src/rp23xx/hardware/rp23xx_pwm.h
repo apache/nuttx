@@ -35,11 +35,11 @@
 
 /* Register offsets *********************************************************/
 
-#define RP23XX_PWM_CSR_OFFSET(n)  (0x000000 + (n) * 14) /* PWM control and status register */
-#define RP23XX_PWM_DIV_OFFSET(n)  (0x000004 + (n) * 14) /* PWM clock divisor register */
-#define RP23XX_PWM_CTR_OFFSET(n)  (0x000008 + (n) * 14) /* PWM counter register */
-#define RP23XX_PWM_CC_OFFSET(n)   (0x00000c + (n) * 14) /* PWM compare register */
-#define RP23XX_PWM_TOP_OFFSET(n)  (0x000010 + (n) * 14) /* PWM wrap value register */
+#define RP23XX_PWM_CSR_OFFSET(n)  (0x000000 + (n) * 20) /* PWM control and status register */
+#define RP23XX_PWM_DIV_OFFSET(n)  (0x000004 + (n) * 20) /* PWM clock divisor register */
+#define RP23XX_PWM_CTR_OFFSET(n)  (0x000008 + (n) * 20) /* PWM counter register */
+#define RP23XX_PWM_CC_OFFSET(n)   (0x00000c + (n) * 20) /* PWM compare register */
+#define RP23XX_PWM_TOP_OFFSET(n)  (0x000010 + (n) * 20) /* PWM wrap value register */
 #define RP23XX_PWM_EN_OFFSET     0x0000f0               /* PWM enable register */
 #define RP23XX_PWM_INTR_OFFSET    0x0000f4              /* PWM raw interrupt register */
 #define RP23XX_PWM_IRQ0_INTE_OFFSET    0x0000f8         /* PWM interrupt enable register */
