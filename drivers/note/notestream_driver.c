@@ -39,7 +39,6 @@ struct notestream_file_s
 {
   struct notestream_driver_s driver;
   struct lib_fileoutstream_s filestream;
-  struct file file;
 };
 #endif
 
@@ -131,15 +130,15 @@ int notefile_register(FAR const char *filename)
 #endif
 
   notefile->driver.stream = &notefile->filestream.common;
-  ret = file_open(&notefile->file, filename, O_WRONLY);
+  notefile->driver.driver.ops = &g_notestream_ops;
+  ret = lib_fileoutstream_open(&notefile->filestream,
+                               filename, O_WRONLY, 0666);
   if (ret < 0)
     {
       kmm_free(notefile);
       return ret;
     }
 
-  notefile->driver.driver.ops = &g_notestream_ops;
-  lib_fileoutstream(&notefile->filestream, &notefile->file);
   return note_driver_register(&notefile->driver.driver);
 }
 #endif
