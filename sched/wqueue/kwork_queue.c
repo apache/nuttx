@@ -33,7 +33,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
-#include <nuttx/queue.h>
+#include <nuttx/list.h>
 #include <nuttx/wqueue.h>
 
 #include "wqueue/wqueue.h"
@@ -47,7 +47,7 @@
 #define queue_work(wqueue, work) \
   do \
     { \
-      dq_addlast((FAR dq_entry_t *)(work), &(wqueue)->q); \
+      list_add_tail(&(wqueue)->q, &(work)->node); \
       if ((wqueue)->wait_count > 0) /* There are threads waiting for sem. */ \
         { \
           (wqueue)->wait_count--; \
@@ -165,10 +165,8 @@ int work_queue_period_wq(FAR struct kwork_wqueue_s *wqueue,
 
       work->worker = NULL;
       wd_cancel(&work->u.timer);
-      if (dq_inqueue((FAR dq_entry_t *)work, &wqueue->q))
-        {
-          dq_rem((FAR dq_entry_t *)work, &wqueue->q);
-        }
+
+      list_delete(&work->node);
     }
 
   if (work_is_canceling(wqueue->worker, wqueue->nthreads, work))
