@@ -287,3 +287,40 @@ int hsearch_r(ENTRY item, ACTION action, FAR ENTRY **retval,
   *retval = &ie->ent;
   return 1;
 }
+
+/****************************************************************************
+ * Name: hforeach_r
+ *
+ * Description:
+ *   Iterate over the entries in a hash table.
+ *
+ * Input Parameters:
+ *   handle - The function to call for each entry.
+ *   data - The data to pass to the function.
+ *   htab - The hash table to be iterated.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void hforeach_r(hforeach_t handle, FAR void *data,
+                FAR struct hsearch_data *htab)
+{
+  FAR struct internal_head *head;
+  FAR struct internal_entry *ie;
+  size_t len;
+
+  for (len = 0; len < htab->htablesize; len++)
+    {
+      head = &htab->htable[len];
+
+      SLIST_FOREACH(ie, head, link)
+        {
+          if (ie != NULL && ie->ent.key != NULL)
+            {
+              handle(&ie->ent, data);
+            }
+        }
+    }
+}
