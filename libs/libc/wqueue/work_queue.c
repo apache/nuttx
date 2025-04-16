@@ -32,7 +32,7 @@
 #include <errno.h>
 
 #include <nuttx/clock.h>
-#include <nuttx/queue.h>
+#include <nuttx/list.h>
 #include <nuttx/wqueue.h>
 
 #include "wqueue/wqueue.h"
@@ -76,9 +76,7 @@ static int work_qqueue(FAR struct usr_wqueue_s *wqueue,
                        FAR struct work_s *work, worker_t worker,
                        FAR void *arg, clock_t delay)
 {
-  FAR dq_entry_t *prev = NULL;
-  FAR dq_entry_t *curr;
-  sclock_t delta;
+  FAR struct work_s *curr;
   int semcount;
 
   /* Get exclusive access to the work queue */
@@ -91,55 +89,35 @@ static int work_qqueue(FAR struct usr_wqueue_s *wqueue,
   work->arg    = arg;             /* Callback argument */
   work->qtime  = clock() + delay; /* Delay until work performed */
 
-  /* Do the easy case first -- when the work queue is empty. */
+  /* Insert the work into the wait queue sorted by the expired time. */
 
-  if (wqueue->q.head == NULL)
+  list_for_every_entry(&wqueue->q, curr, struct work_s, node)
     {
-      /* Add the watchdog to the head == tail of the queue. */
-
-      dq_addfirst(&work->dq, &wqueue->q);
-      nxsem_post(&wqueue->wake);
+      if (!clock_compare(curr->qtime, work->qtime))
+        {
+          break;
+        }
     }
 
-  /* There are other active watchdogs in the timer queue */
+  /* After the insertion, we do not violate the invariant that
+   * the wait queue is sorted by the expired time. Because
+   * curr->qtime > work->qtime.
+   * In the case of the wqueue is empty, we insert
+   * the work at the head of the wait queue.
+   */
 
-  else
+  list_add_before(&curr->node, &work->node);
+
+  /* If the current work is the head of the wait queue.
+   * We should wake up the worker thread.
+   */
+
+  if (list_is_head(&wqueue->q, &work->node))
     {
-      curr = wqueue->q.head;
-
-      /* Check if the new work must be inserted before the curr. */
-
-      do
+      nxsem_get_value(&wqueue->wake, &semcount);
+      if (semcount < 1)
         {
-          delta = work->qtime - ((FAR struct work_s *)curr)->qtime;
-          if (delta < 0)
-            {
-              break;
-            }
-
-          prev = curr;
-          curr = curr->flink;
-        }
-      while (curr != NULL);
-
-      /* Insert the new watchdog in the list */
-
-      if (prev == NULL)
-        {
-          /* Insert the watchdog at the head of the list */
-
-          dq_addfirst(&work->dq, &wqueue->q);
-          nxsem_get_value(&wqueue->wake, &semcount);
-          if (semcount < 1)
-            {
-              nxsem_post(&wqueue->wake);
-            }
-        }
-      else
-        {
-          /* Insert the watchdog in mid- or end-of-queue */
-
-          dq_addafter(prev, &work->dq, &wqueue->q);
+          nxsem_post(&wqueue->wake);
         }
     }
 
