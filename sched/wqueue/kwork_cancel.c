@@ -67,10 +67,7 @@ static int work_qcancel(FAR struct kwork_wqueue_s *wqueue, bool sync,
 
       work->worker = NULL;
       wd_cancel(&work->u.timer);
-      if (dq_inqueue((FAR dq_entry_t *)work, &wqueue->q))
-        {
-          dq_rem((FAR dq_entry_t *)work, &wqueue->q);
-        }
+      list_delete(&work->u.s.node);
 
       ret = OK;
     }

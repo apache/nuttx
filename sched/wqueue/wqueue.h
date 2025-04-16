@@ -33,7 +33,7 @@
 #include <stdbool.h>
 
 #include <nuttx/clock.h>
-#include <nuttx/queue.h>
+#include <nuttx/list.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/spinlock.h>
 
@@ -66,7 +66,7 @@ struct kworker_s
 
 struct kwork_wqueue_s
 {
-  struct dq_queue_s q;         /* The queue of pending work */
+  struct list_node  q;         /* The queue of pending work */
   sem_t             sem;       /* The counting semaphore of the wqueue */
   sem_t             exsem;     /* Sync waiting for thread exit */
   spinlock_t        lock;      /* Spinlock */
@@ -83,7 +83,7 @@ struct kwork_wqueue_s
 #ifdef CONFIG_SCHED_HPWORK
 struct hp_wqueue_s
 {
-  struct dq_queue_s q;         /* The queue of pending work */
+  struct list_node  q;         /* The queue of pending work */
   sem_t             sem;       /* The counting semaphore of the wqueue */
   sem_t             exsem;     /* Sync waiting for thread exit */
   spinlock_t        lock;      /* Spinlock */
@@ -104,7 +104,7 @@ struct hp_wqueue_s
 #ifdef CONFIG_SCHED_LPWORK
 struct lp_wqueue_s
 {
-  struct dq_queue_s q;         /* The queue of pending work */
+  struct list_node  q;         /* The queue of pending work */
   sem_t             sem;       /* The counting semaphore of the wqueue */
   sem_t             exsem;     /* Sync waiting for thread exit */
   spinlock_t        lock;      /* Spinlock */

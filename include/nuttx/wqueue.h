@@ -33,7 +33,7 @@
 #include <stdint.h>
 
 #include <nuttx/clock.h>
-#include <nuttx/queue.h>
+#include <nuttx/list.h>
 #include <nuttx/wdog.h>
 
 /****************************************************************************
@@ -253,7 +253,7 @@ struct work_s
   {
     struct
     {
-      struct dq_entry_s dq;      /* Implements a double linked list */
+      struct list_node node;     /* Implements a double linked list */
       clock_t qtime;             /* Time work queued */
     } s;
     struct wdog_s timer;         /* Delay expiry timer */
