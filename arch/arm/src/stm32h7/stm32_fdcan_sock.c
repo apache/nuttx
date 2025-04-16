@@ -1972,6 +1972,7 @@ static int fdcan_netdev_ioctl(struct net_driver_s *dev, int cmd,
 #ifdef CONFIG_NET_CAN_CANFD
           priv->data_timing.bitrate = req->data_bitrate * 1000;
 #endif
+          ret = OK;
         }
         break;
 #endif /* CONFIG_NETDEV_CAN_BITRATE_IOCTL */
