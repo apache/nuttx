@@ -464,6 +464,10 @@ void __gcov_execv(void)
 {
 }
 
+void __gcov_execle(void)
+{
+}
+
 pid_t __gcov_fork(void)
 {
   return fork();
