@@ -241,7 +241,13 @@ described for the :ref:`ESP32-DevKitC <platforms/xtensa/esp32/boards/esp32-devki
 
 OpenOCD can then be used::
 
-  openocd -c 'set ESP_RTOS hwthread; set ESP_FLASH_SIZE 0' -f board/esp32-wrover-kit-1.8v.cfg
+  openocd -s <tcl_scripts_path> -c 'set ESP_RTOS hwthread' -f board/esp32-wrover-kit-3.3v.cfg -c 'init; reset halt; esp appimage_offset 0x1000'
+
+.. note::
+  - ``appimage_offset`` should be set to ``0x1000`` when ``Simple Boot`` is used. For MCUboot, this value should be set to
+    ``CONFIG_ESP32_OTA_PRIMARY_SLOT_OFFSET`` value (``0x10000`` by default).
+  - ``-s <tcl_scripts_path>`` defines the path to the OpenOCD scripts. Usually set to `tcl` if running openocd from its source directory.
+    It can be omitted if `openocd-esp32` were installed in the system with `sudo make install`.
 
 Once OpenOCD is running, you can use GDB to connect to it and debug your application::
 
