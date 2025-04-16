@@ -918,7 +918,7 @@ struct usbhost_driver_s
                      usbhost_asynch_t callback, FAR void *arg);
 #endif
 
-  /* Cancel any pending syncrhonous or asynchronous transfer on an
+  /* Cancel any pending synchronous or asynchronous transfer on an
    * endpoint
    */
 
