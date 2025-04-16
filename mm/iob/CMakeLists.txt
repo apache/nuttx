@@ -58,7 +58,7 @@ if(CONFIG_MM_IOB)
   endif()
 
   if(CONFIG_IOB_SECTION)
-    target_compile_options(mm PRIVATE -DIOB_SECTION=CONFIG_IOB_SECTION)
+    target_compile_options(mm PRIVATE -DIOB_SECTION="${CONFIG_IOB_SECTION}")
   endif()
   target_sources(mm PRIVATE ${SRCS})
 
