@@ -113,6 +113,10 @@
 #  include "esp_board_pcnt.h"
 #endif
 
+#ifdef CONFIG_SENSORS_MPU60X0
+#  include "esp_board_mpu60x0.h"
+#endif
+
 #ifdef CONFIG_SYSTEM_NXDIAG_ESPRESSIF_CHIP_WO_TOOL
 #  include "espressif/esp_nxdiag.h"
 #endif
@@ -307,6 +311,18 @@ int esp_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize BMP180 "
+             "Driver for I2C0: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_MPU60X0
+  /* Try to register MPU60x0 device in I2C0 */
+
+  ret = board_mpu60x0_initialize(0);
+
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize MPU60x0 "
              "Driver for I2C0: %d\n", ret);
     }
 #endif
