@@ -970,9 +970,10 @@ static void ctucanfd_chardev_interrupt(FAR struct ctucanfd_driver_s *priv)
 
       ctucanfd_putreg(&priv->devs[i], CTUCANFD_INTSTAT, stat);
 
-      /* Re-enable RX interrupts */
+      /* Re-enable RX/TX interrupts */
 
       ctucanfd_rxint(&priv->devs[i], true);
+      ctucanfd_txint(&priv->devs[i], true);
     }
 }
 #endif  /* CONFIG_CAN_CTUCANFD_CHARDEV */
@@ -1680,9 +1681,10 @@ static void ctucanfd_sock_interrupt_work(FAR void *arg)
 
       ctucanfd_putreg(&priv->devs[i], CTUCANFD_INTSTAT, stat);
 
-      /* Re-enable RX interrupts */
+      /* Re-enable RX/TX interrupts */
 
       ctucanfd_rxint(&priv->devs[i], true);
+      ctucanfd_txint(&priv->devs[i], true);
     }
 }
 #endif    /* CONFIG_CAN_CTUCANFD_SOCKET */
@@ -1711,9 +1713,10 @@ static int ctucanfd_interrupt(int irq, FAR void *context, FAR void *arg)
 
       if (regval != 0)
         {
-          /* Disable RX interrupts until we handle all interrupts */
+          /* Disable RX/TX interrupts until we are done */
 
           ctucanfd_rxint(&priv->devs[i], false);
+          ctucanfd_txint(&priv->devs[i], false);
 
           break;
         }
