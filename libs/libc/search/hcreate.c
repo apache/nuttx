@@ -133,3 +133,24 @@ FAR ENTRY *hsearch(ENTRY item, ACTION action)
 
   return retval;
 }
+
+/****************************************************************************
+ * Name: hforeach
+ *
+ * Description:
+ *   The hforeach() function iterates over the entries in the hashing table
+ *   specified by htab. The function is called for each entry in the
+ *   table.  The function fn is called with the entry and the data argument.
+ *   The data argument is passed to the function.
+ *
+ *   The hforeach_r() function is the reentrant version of hforeach().
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void hforeach(hforeach_t handle, FAR void *data)
+{
+  hforeach_r(handle, data, &g_htab);
+}

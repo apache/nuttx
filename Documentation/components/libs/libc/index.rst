@@ -49,6 +49,7 @@ functions.  So we have::
   pwd       - pwd.h
   queue     - queue.h
   sched     - sched.h
+  search    - search.h
   semaphore - semaphore.h
   stdio     - stdio.h
   stdlib    - stdlib.h
@@ -153,5 +154,6 @@ Implementation Details
    :maxdepth: 1
    :caption: Contents:
    
+   search.rst
    stream.rst
    zoneinfo.rst
