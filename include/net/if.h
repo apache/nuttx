@@ -178,9 +178,9 @@ struct mii_ioctl_data_s
 
 struct can_ioctl_data_s
 {
-  uint16_t arbi_bitrate; /* Classic CAN / Arbitration phase bitrate kbit/s */
+  uint32_t arbi_bitrate; /* Classic CAN / Arbitration phase bitrate bit/s */
   uint16_t arbi_samplep; /* Classic CAN / Arbitration phase input % */
-  uint16_t data_bitrate; /* Data phase bitrate kbit/s */
+  uint32_t data_bitrate; /* Data phase bitrate bit/s */
   uint16_t data_samplep; /* Data phase sample point % */
 };
 
