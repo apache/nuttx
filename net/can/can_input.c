@@ -219,6 +219,13 @@ static int can_in(FAR struct net_driver_s *dev)
   FAR struct can_conn_s *conn = can_active(dev, NULL);
   FAR struct can_conn_s *nextconn;
 
+  if (conn == NULL)
+    {
+      /* There is no listener on the dev.  Just drop the packet. */
+
+      return OK;
+    }
+
   /* Do we have second connection that can hold this packet? */
 
   while ((nextconn = can_active(dev, conn)) != NULL)
