@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/mount.h>
 #include <sys/types.h>
 #include <sys/ioctl.h>
 #include <inttypes.h>
@@ -489,4 +490,46 @@ int ramdisk_register(int minor, FAR uint8_t *buffer, uint32_t nsectors,
   config.mode     = 0;
   config.rdflags  = rdflags;
   return ramdisk_register_with_config(&config);
+}
+
+/****************************************************************************
+ * Name: ramdisk_unregister or romdisk_unregister
+ *
+ * Description:
+ *   Non-standard function to unregister a ramdisk or a romdisk
+ ****************************************************************************/
+
+int ramdisk_unregister(FAR const char *path)
+{
+  FAR struct inode *inode;
+  FAR struct rd_struct_s *dev;
+  int ret;
+
+  ret = open_blockdriver(path, MS_RDONLY, &inode);
+  if (ret < 0)
+    {
+      ferr("ERROR: Failed to open %s: %d\n", path, -ret);
+      return ret;
+    }
+
+  dev = inode->i_private;
+  ret = close_blockdriver(inode);
+  if (ret < 0)
+    {
+      ferr("ERROR: Failed to close blockdriver, ret=%d\n", ret);
+      return ret;
+    }
+
+  ret = unregister_blockdriver(path);
+  if (ret < 0)
+    {
+      ferr("ERROR: unregister driver failed, ret=%d\n", ret);
+      return ret;
+    }
+
+  /* Release the driver space */
+
+  kmm_free(dev);
+
+  return ret;
 }
