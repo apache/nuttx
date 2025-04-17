@@ -41,6 +41,7 @@
 #include <nuttx/input/keyboard.h>
 #include <nuttx/net/net.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/spinlock.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -210,6 +211,8 @@ struct vnc_session_s
   volatile bool bigendian;     /* True: Remote expect data in big-endian format */
   volatile bool rre;           /* True: Remote supports RRE encoding */
   FAR uint8_t *fb;             /* Allocated local frame buffer */
+
+  spinlock_t lock;             /* Lock for vnc updating */
 
   /* VNC client input support */
 
