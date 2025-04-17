@@ -31,7 +31,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
-#include <nuttx/queue.h>
+#include <nuttx/list.h>
 #include <nuttx/wqueue.h>
 
 #include "wqueue/wqueue.h"
@@ -46,7 +46,9 @@ static int work_qcancel(FAR struct kwork_wqueue_s *wqueue, bool sync,
                         FAR struct work_s *work)
 {
   irqstate_t flags;
-  int ret = -ENOENT;
+  worker_t   worker;
+  FAR void  *arg;
+  bool       run_myself = false;
 
   if (wqueue == NULL || work == NULL)
     {
@@ -59,37 +61,36 @@ static int work_qcancel(FAR struct kwork_wqueue_s *wqueue, bool sync,
    */
 
   flags = spin_lock_irqsave(&wqueue->lock);
-  if (work->worker != NULL)
-    {
-      /* Remove the entry from the work queue and make sure that it is
-       * marked as available (i.e., the worker field is nullified).
-       */
 
+  /* Check whether we own the work structure. */
+
+  if (!work_available(work))
+    {
+      /* Seize the ownership from the work thread. */
+
+      worker = work->worker;
+      arg    = work->arg;
+
+      run_myself   = sync;
       work->worker = NULL;
-      wd_cancel(&work->u.timer);
-      list_delete(&work->u.s.node);
 
-      ret = OK;
-    }
-  else if (!up_interrupt_context() && !sched_idletask() && sync)
-    {
-      int wndx;
-
-      for (wndx = 0; wndx < wqueue->nthreads; wndx++)
-        {
-          if (wqueue->worker[wndx].work == work &&
-              wqueue->worker[wndx].pid != nxsched_gettid())
-            {
-              wqueue->worker[wndx].wait_count++;
-              spin_unlock_irqrestore(&wqueue->lock, flags);
-              nxsem_wait_uninterruptible(&wqueue->worker[wndx].wait);
-              return 1;
-            }
-        }
+      list_delete(&work->node);
     }
 
   spin_unlock_irqrestore(&wqueue->lock, flags);
-  return ret;
+
+  if (run_myself)
+    {
+      /* If the work has not been executed by the work thread,
+       * then we must execute the work ourself.
+       * In this case, we have the ownership of the work structure.
+       * So we can execute it without any synchronization.
+       */
+
+      worker(arg);
+    }
+
+  return OK;
 }
 
 /****************************************************************************

@@ -87,9 +87,9 @@ static int work_qqueue(FAR struct usr_wqueue_s *wqueue,
 
   /* Initialize the work structure */
 
-  work->worker = worker;             /* Work callback. non-NULL means queued */
-  work->arg    = arg;                /* Callback argument */
-  work->u.s.qtime = clock() + delay; /* Delay until work performed */
+  work->worker = worker;          /* Work callback. non-NULL means queued */
+  work->arg    = arg;             /* Callback argument */
+  work->qtime  = clock() + delay; /* Delay until work performed */
 
   /* Do the easy case first -- when the work queue is empty. */
 
