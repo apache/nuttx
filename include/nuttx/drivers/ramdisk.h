@@ -107,6 +107,16 @@ int ramdisk_register(int minor, FAR uint8_t *buffer, uint32_t nsectors,
 #define romdisk_register(m,b,n,s) ramdisk_register(m,(FAR uint8_t *)b,n,s,0)
 
 /****************************************************************************
+ * Name: ramdisk_unregister
+ *
+ * Description:
+ *   Non-standard function to unregister a ramdisk or a romdisk
+ ****************************************************************************/
+
+int ramdisk_unregister(FAR const char *path);
+#define romdisk_unregister(p) ramdisk_unregister(p)
+
+/****************************************************************************
  * Name: mkrd
  *
  * Description:
