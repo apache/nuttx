@@ -928,7 +928,10 @@ int coredump_add_memory_region(FAR const void *ptr, size_t size,
       return -ENOMEM;
     }
 
-  memcpy(region, g_regions, sizeof(struct memory_region_s) * count);
+  if (g_regions != NULL)
+    {
+      memcpy(region, g_regions, sizeof(struct memory_region_s) * count);
+    }
 
   if (g_regions != NULL
 #ifdef CONFIG_BOARD_MEMORY_RANGE
