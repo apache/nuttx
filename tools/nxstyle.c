@@ -223,7 +223,9 @@ static const char *g_white_prefix[] =
   "Http",    /* Ref:  apps/netutils/xedge/BAS/examples/xedge/src/xedge.h */
   "Disk",    /* Ref:  apps/netutils/xedge/BAS/examples/xedge/src/xedge.h */
   "Xedge",   /* Ref:  apps/netutils/xedge/BAS/examples/xedge/src/xedge.h */
+  "tAddr",   /* Ref:  arch/tricore/src */
   "tClass",  /* Ref:  arch/tricore/src */
+  "tCpu",    /* Ref:  arch/tricore/src */
   "tId",     /* Ref:  arch/tricore/src */
   NULL
 };

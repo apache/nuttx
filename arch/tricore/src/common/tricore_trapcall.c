@@ -34,6 +34,7 @@
 
 #include <arch/irq.h>
 #include <sched/sched.h>
+#include <nuttx/coredump.h>
 #include <nuttx/sched.h>
 
 #include "tricore_internal.h"
@@ -41,8 +42,24 @@
 #include "IfxCpu_Trap.h"
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static IfxCpu_Trap g_trapinfo;
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+static void tricore_trapinfo(volatile void *trap)
+{
+  IfxCpu_Trap *ctrap = (IfxCpu_Trap *)trap;
+
+  g_trapinfo.tCpu   = ctrap->tCpu;
+  g_trapinfo.tClass = ctrap->tClass;
+  g_trapinfo.tId    = ctrap->tId;
+  g_trapinfo.tAddr  = ctrap->tAddr;
+}
 
 /****************************************************************************
  * Public Functions
@@ -290,6 +307,8 @@ void tricore_trapcall(volatile void *trap)
   IfxCpu_Trap_Class tclass = (IfxCpu_Trap_Class)ctrap->tClass;
   unsigned int tid = ctrap->tId;
 
+  tricore_trapinfo(trap);
+
   /* enter this funtion means that the regs is upcsa */
 
   regs = tricore_csa2addr(__mfcr(CPU_PCXI));
@@ -343,4 +362,20 @@ void tricore_trapcall(volatile void *trap)
 
   up_irq_save();
   PANIC_WITH_REGS("Trap", regs);
+}
+
+/****************************************************************************
+ * Function:  tricore_trapinit
+ *
+ * Description:
+ *   Trap init for tricore arch.
+ *
+ ****************************************************************************/
+
+void tricore_trapinit(void)
+{
+#ifdef CONFIG_COREDUMP
+  coredump_add_memory_region(&g_trapinfo, sizeof(g_trapinfo),
+                             PF_REGISTER);
+#endif
 }
