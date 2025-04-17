@@ -77,6 +77,7 @@ config FDSAN
 config FDCHECK
 	bool "Enable fdcheck"
 	default n
+	depends on LIBC_OPEN_MAX <= 256
 	---help---
 		Enable the fdcheck support
 
