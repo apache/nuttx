@@ -94,7 +94,7 @@ static void work_process(FAR struct usr_wqueue_s *wqueue)
   FAR struct work_s *work;
   worker_t worker;
   FAR void *arg;
-  sclock_t elapsed;
+  clock_t tick;
   clock_t next;
   int ret;
 
@@ -126,18 +126,18 @@ static void work_process(FAR struct usr_wqueue_s *wqueue)
        * zero will always execute immediately.
        */
 
-      elapsed = clock() - work->qtime;
+      tick = clock();
 
       /* Is this delay work ready? */
 
-      if (elapsed >= 0)
+      if (clock_compare(work->qtime, tick))
         {
           /* Remove the ready-to-execute work from the list */
 
           list_delete(&work->node);
 
           /* Extract the work description from the entry (in case the work
-           * instance by the re-used after it has been de-queued).
+           * instance by the reused after it has been de-queued).
            */
 
           worker = work->worker;

@@ -249,16 +249,11 @@ typedef CODE void (*worker_t)(FAR void *arg);
 
 struct work_s
 {
-  struct list_node node;         /* Implements a double linked list */
-  clock_t qtime;                 /* Time work queued */
-  union
-  {
-    struct wdog_s timer;         /* Delay expiry timer */
-    struct wdog_period_s ptimer; /* Period expiry timer */
-  } u;
-  worker_t  worker;              /* Work callback */
-  FAR void *arg;                 /* Callback argument */
-  FAR struct kwork_wqueue_s *wq; /* Work queue */
+  struct list_node node;   /* Implements a double linked list */
+  clock_t          qtime;  /* Time work queued */
+  clock_t          period; /* Periodical delay ticks */
+  worker_t         worker; /* Work callback */
+  FAR void        *arg;    /* Callback argument */
 };
 
 /* This is an enumeration of the various events that may be

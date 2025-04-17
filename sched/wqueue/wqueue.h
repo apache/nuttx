@@ -66,14 +66,15 @@ struct kworker_s
 
 struct kwork_wqueue_s
 {
-  struct list_node  q;         /* The queue of pending work */
-  sem_t             sem;       /* The counting semaphore of the wqueue */
-  sem_t             exsem;     /* Sync waiting for thread exit */
-  spinlock_t        lock;      /* Spinlock */
-  uint8_t           nthreads;  /* Number of worker threads */
-  bool              exit;      /* A flag to request the thread to exit */
-  int16_t           wait_count;
-  struct kworker_s  worker[0]; /* Describes a worker thread */
+  struct list_node expired;   /* The queue of expired work. */
+  struct list_node pending;   /* The queue of pending work. */
+  sem_t            sem;       /* The counting semaphore of the wqueue */
+  sem_t            exsem;     /* Sync waiting for thread exit */
+  spinlock_t       lock;      /* Spinlock */
+  uint8_t          nthreads;  /* Number of worker threads */
+  bool             exit;      /* A flag to request the thread to exit */
+  struct wdog_s    timer;     /* Timer to pending. */
+  struct kworker_s worker[0]; /* Describes a worker thread */
 };
 
 /* This structure defines the state of one high-priority work queue.  This
@@ -83,17 +84,11 @@ struct kwork_wqueue_s
 #ifdef CONFIG_SCHED_HPWORK
 struct hp_wqueue_s
 {
-  struct list_node  q;         /* The queue of pending work */
-  sem_t             sem;       /* The counting semaphore of the wqueue */
-  sem_t             exsem;     /* Sync waiting for thread exit */
-  spinlock_t        lock;      /* Spinlock */
-  uint8_t           nthreads;  /* Number of worker threads */
-  bool              exit;      /* A flag to request the thread to exit */
-  int16_t           wait_count;
+  struct kwork_wqueue_s wq;
 
   /* Describes each thread in the high priority queue's thread pool */
 
-  struct kworker_s  worker[CONFIG_SCHED_HPNTHREADS];
+  struct kworker_s      worker[CONFIG_SCHED_HPNTHREADS];
 };
 #endif
 
@@ -104,17 +99,11 @@ struct hp_wqueue_s
 #ifdef CONFIG_SCHED_LPWORK
 struct lp_wqueue_s
 {
-  struct list_node  q;         /* The queue of pending work */
-  sem_t             sem;       /* The counting semaphore of the wqueue */
-  sem_t             exsem;     /* Sync waiting for thread exit */
-  spinlock_t        lock;      /* Spinlock */
-  uint8_t           nthreads;  /* Number of worker threads */
-  bool              exit;      /* A flag to request the thread to exit */
-  int16_t           wait_count;
+  struct kwork_wqueue_s wq;
 
   /* Describes each thread in the low priority queue's thread pool */
 
-  struct kworker_s  worker[CONFIG_SCHED_LPNTHREADS];
+  struct kworker_s      worker[CONFIG_SCHED_LPNTHREADS];
 };
 #endif
 
@@ -158,6 +147,65 @@ static inline_function FAR struct kwork_wqueue_s *work_qid2wq(int qid)
       return NULL;
     }
 }
+
+/****************************************************************************
+ * Name: work_insert_pending
+ *
+ * Description:
+ *   Internal public function to insert the work to the workqueue.
+ *   Require wqueue != NULL and work != NULL.
+ *
+ * Input Parameters:
+ *   wqueue - The work queue.
+ *   work   - The work to be inserted.
+ *
+ * Returned Value:
+ *   Return whether the work is inserted at the head of the pending queue.
+ *
+ ****************************************************************************/
+
+static inline_function
+bool work_insert_pending(FAR struct kwork_wqueue_s *wqueue,
+                         FAR struct work_s         *work)
+{
+  struct work_s *curr;
+
+  DEBUGASSERT(wqueue != NULL && work != NULL);
+
+  /* Insert the work into the wait queue sorted by the expired time. */
+
+  list_for_every_entry(&wqueue->pending, curr, struct work_s, node)
+    {
+      if (!clock_compare(curr->qtime, work->qtime))
+        {
+          break;
+        }
+    }
+
+  /* After the insertion, we do not violate the invariant that
+   * the wait queue is sorted by the expired time. Because
+   * curr->qtime > work->qtime.
+   * In the case of the wqueue is empty, we insert
+   * the work at the head of the wait queue.
+   */
+
+  list_add_before(&curr->node, &work->node);
+
+  return list_is_head(&wqueue->pending, &work->node);
+}
+
+/****************************************************************************
+ * Name: work_timer_expired
+ *
+ * Description:
+ *   The wqueue timer callback.
+ *
+ * Input Parameters:
+ *   arg  - The work queue.
+ *
+ ****************************************************************************/
+
+void work_timer_expired(wdparm_t arg);
 
 /****************************************************************************
  * Name: work_start_highpri
