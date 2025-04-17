@@ -201,6 +201,7 @@ void tricore_sigdeliver(void);
 
 void tricore_svcall(volatile void *trap);
 void tricore_trapcall(volatile void *trap);
+void tricore_trapinit(void);
 
 /* Context Save Areas *******************************************************/
 

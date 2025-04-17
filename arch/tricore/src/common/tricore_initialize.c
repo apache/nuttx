@@ -61,6 +61,8 @@ volatile bool g_interrupt_context[CONFIG_SMP_NCPUS];
 
 void up_initialize(void)
 {
+  tricore_trapinit();
+
   /* Initialize the serial device driver */
 
 #ifdef USE_SERIALDRIVER
