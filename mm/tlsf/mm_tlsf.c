@@ -991,38 +991,51 @@ bool mm_heapmember(FAR struct mm_heap_s *heap, FAR void *mem)
 }
 
 /****************************************************************************
- * Name: mm_initialize
+ * Name: mm_initialize_heap
  *
  * Description:
  *   Initialize the selected heap data structures, providing the initial
  *   heap region.
  *
  * Input Parameters:
- *   heap      - The selected heap
+ *   heap      - If heap is NULL, will use heapstart initialize heap context,
+ *               otherwise, will use heap alloc a heap context, caller need
+ *               free it after mm_uninitialize.
+ *   name      - The heap procfs name
  *   heapstart - Start of the initial heap region
  *   heapsize  - Size of the initial heap region
  *
  * Returned Value:
- *   None
+ *   Return the address of a new heap instance.
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-FAR struct mm_heap_s *mm_initialize(FAR const char *name,
-                                    FAR void *heapstart, size_t heapsize)
+FAR struct mm_heap_s *
+mm_initialize_heap(FAR struct mm_heap_s *heap, FAR const char *name,
+                   FAR void *heapstart, size_t heapsize)
 {
-  FAR struct mm_heap_s *heap;
-
   minfo("Heap: name=%s start=%p size=%zu\n", name, heapstart, heapsize);
+  if (heap == NULL)
+    {
+      /* Reserve a block space for mm_heap_s context */
 
-  /* Reserve a block space for mm_heap_s context */
+      DEBUGASSERT(heapsize > sizeof(struct mm_heap_s));
+      heap = (FAR struct mm_heap_s *)heapstart;
+      heapstart += sizeof(struct mm_heap_s);
+      heapsize -= sizeof(struct mm_heap_s);
+    }
+  else
+    {
+      heap = mm_memalign(heap, MM_ALIGN, sizeof(struct mm_heap_s));
+      if (heap == NULL)
+        {
+          return NULL;
+        }
+    }
 
-  DEBUGASSERT(heapsize > sizeof(struct mm_heap_s));
-  heap = (FAR struct mm_heap_s *)heapstart;
   memset(heap, 0, sizeof(struct mm_heap_s));
-  heapstart += sizeof(struct mm_heap_s);
-  heapsize -= sizeof(struct mm_heap_s);
 
   /* Allocate and create TLSF context */
 
@@ -1057,12 +1070,11 @@ FAR struct mm_heap_s *mm_initialize(FAR const char *name,
 
 #ifdef CONFIG_MM_HEAP_MEMPOOL
 FAR struct mm_heap_s *
-mm_initialize_pool(FAR const char *name,
+mm_initialize_pool(FAR struct mm_heap_s *heap,
+                   FAR const char *name,
                    FAR void *heap_start, size_t heap_size,
                    FAR const struct mempool_init_s *init)
 {
-  FAR struct mm_heap_s *heap;
-
 #if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD > 0
   size_t poolsize[MEMPOOL_NPOOLS];
   struct mempool_init_s def;
@@ -1093,7 +1105,7 @@ mm_initialize_pool(FAR const char *name,
     }
 #endif
 
-  heap = mm_initialize(name, heap_start, heap_size);
+  heap = mm_initialize_heap(heap, name, heap_start, heap_size);
 
   /* Initialize the multiple mempool in heap */
 

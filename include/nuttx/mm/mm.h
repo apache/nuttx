@@ -133,8 +133,10 @@
 #endif
 
 #ifdef CONFIG_MM_KERNEL_HEAP
+#  define KRN_HEAP               g_kmmheap
 #  define MM_INTERNAL_HEAP(heap) ((heap) == USR_HEAP || (heap) == g_kmmheap)
 #else
+#  define KRN_HEAP               USR_HEAP
 #  define MM_INTERNAL_HEAP(heap) ((heap) == USR_HEAP)
 #endif
 
@@ -250,18 +252,21 @@ EXTERN FAR struct mm_heap_s *g_kmmheap;
 
 /* Functions contained in mm_initialize.c ***********************************/
 
-FAR struct mm_heap_s *mm_initialize(FAR const char *name,
-                                    FAR void *heap_start, size_t heap_size);
-
+FAR struct mm_heap_s *
+mm_initialize_heap(FAR struct mm_heap_s *heap, FAR const char *name,
+                   FAR void *heapstart, size_t heapsize);
+#define mm_initialize(name, heapstart, heapsize) \
+        mm_initialize_heap(NULL, name, heapstart, heapsize)
 #ifdef CONFIG_MM_HEAP_MEMPOOL
 FAR struct mm_heap_s *
-mm_initialize_pool(FAR const char *name,
+mm_initialize_pool(FAR struct mm_heap_s *heap,
+                   FAR const char *name,
                    FAR void *heap_start, size_t heap_size,
                    FAR const struct mempool_init_s *init);
 
 #else
-#  define mm_initialize_pool(name, heap_start, heap_size, init) \
-          mm_initialize(name, heap_start, heap_size)
+#  define mm_initialize_pool(heap, name, heap_start, heap_size, init) \
+          mm_initialize_heap(heap, name, heap_start, heap_size)
 #endif
 
 void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,

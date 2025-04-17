@@ -60,7 +60,7 @@ FAR struct mm_heap_s *g_kmmheap;
 
 void kmm_initialize(FAR void *heap_start, size_t heap_size)
 {
-  g_kmmheap = mm_initialize_pool("Kmem", heap_start, heap_size, NULL);
+  g_kmmheap = mm_initialize_pool(NULL, "Kmem", heap_start, heap_size, NULL);
 }
 
 #endif /* CONFIG_MM_KERNEL_HEAP */
