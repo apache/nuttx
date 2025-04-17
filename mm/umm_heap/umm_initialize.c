@@ -87,9 +87,9 @@
 void umm_initialize(FAR void *heap_start, size_t heap_size)
 {
 #ifdef CONFIG_BUILD_KERNEL
-  USR_HEAP = mm_initialize_pool(NULL, heap_start, heap_size, NULL);
+  USR_HEAP = mm_initialize_pool(NULL, NULL, heap_start, heap_size, NULL);
 #else
-  USR_HEAP = mm_initialize_pool("Umem", heap_start, heap_size, NULL);
+  USR_HEAP = mm_initialize_pool(NULL, "Umem", heap_start, heap_size, NULL);
 #endif
 }
 

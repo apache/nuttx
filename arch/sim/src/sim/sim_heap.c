@@ -198,31 +198,44 @@ static void mm_delayfree(struct mm_heap_s *heap, void *mem, bool delay)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mm_initialize
+ * Name: mm_initialize_heap
  *
  * Description:
  *   Initialize the selected heap data structures, providing the initial
  *   heap region.
  *
  * Input Parameters:
- *   heap      - The selected heap
+ *   heap      - If heap is NULL, will use heapstart initialize heap context,
+ *               otherwise, will use heap alloc a heap context, caller need
+ *               free it after mm_uninitialize.
+ *   name      - The heap procfs name
  *   heapstart - Start of the initial heap region
  *   heapsize  - Size of the initial heap region
  *
  * Returned Value:
- *   None
+ *   Return the address of a new heap instance.
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-struct mm_heap_s *mm_initialize(const char *name,
-                                void *heap_start, size_t heap_size)
+struct mm_heap_s *
+mm_initialize_heap(struct mm_heap_s *heap, const char *name,
+                   void *heapstart, size_t heapsize)
 {
-  struct mm_heap_s *heap;
+  if (heap == NULL)
+    {
+      heap = host_memalign(sizeof(void *), sizeof(*heap));
+    }
+  else
+    {
+      heap = mm_memalign(heap, MM_ALIGN, sizeof(struct mm_heap_s));
+    }
 
-  heap = host_memalign(sizeof(void *), sizeof(*heap));
-  DEBUGASSERT(heap);
+  if (heap == NULL)
+    {
+      return NULL;
+    }
 
   memset(heap, 0, sizeof(struct mm_heap_s));
 
