@@ -70,6 +70,20 @@
  * Description: Set the GPIO pin type.
  * Argument:    The enum gpio_pintype_e type.
  *
+ * Command:     GPIOC_BUNDLE_RD
+ * Description: Read the value of a bundle (a set of) input GPIO.
+ *              This call can be used to read more than one GPIO
+ *              at the same time which is not possible on `GPIOC_READ`
+ *              command.
+ * Argument:    A pointer to a int value to receive the result.
+ *
+ * Command:     GPIOC_BUNDLE_WR
+ * Description: Set the value of a bundle (a set of) output GPIO.
+ *              This call can be used to read more than one GPIO
+ *              at the same time which is not possible on `GPIOC_READ`
+ *              command.
+ * Argument:    A pointer to a gpio_bundle_wr_arg_s to set pins.
+ *
  */
 
 #define GPIOC_WRITE      _GPIOC(1)
@@ -78,6 +92,8 @@
 #define GPIOC_REGISTER   _GPIOC(4)
 #define GPIOC_UNREGISTER _GPIOC(5)
 #define GPIOC_SETPINTYPE _GPIOC(6)
+#define GPIOC_BUNDLE_RD  _GPIOC(7)
+#define GPIOC_BUNDLE_WR  _GPIOC(8)
 
 /****************************************************************************
  * Public Types
@@ -128,6 +144,7 @@ typedef CODE int (*pin_interrupt_t)(FAR struct gpio_dev_s *dev, uint8_t pin);
  */
 
 struct gpio_dev_s;
+struct gpio_bundle_wr_arg_s;
 struct gpio_operations_s
 {
   /* Interface methods */
@@ -139,6 +156,9 @@ struct gpio_operations_s
   CODE int (*go_enable)(FAR struct gpio_dev_s *dev, bool enable);
   CODE int (*go_setpintype)(FAR struct gpio_dev_s *dev,
                             enum gpio_pintype_e pintype);
+  CODE int (*go_bundle_read)(FAR struct gpio_dev_s *dev, FAR int *value);
+  CODE int (*go_bundle_write)(FAR struct gpio_dev_s *dev,
+                              FAR struct gpio_bundle_wr_arg_s *value);
 };
 
 /* Signal information */
@@ -185,6 +205,16 @@ struct gpio_dev_s
 #endif
 
   /* Device specific, lower-half information may follow. */
+};
+
+/* Structs with the parameters passed to the IOCTL
+ * for bundle write operation.
+ */
+
+struct gpio_bundle_wr_arg_s
+{
+  uint32_t mask;  /* Mask of the GPIOs to be written */
+  uint32_t value; /* Value to write */
 };
 
 /****************************************************************************

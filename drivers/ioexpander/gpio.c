@@ -576,6 +576,50 @@ static int gpio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
+      /* Command:     GPIOC_BUNDLE_WR
+       * Description: Set the value of a bundle (a set of) output GPIO.
+       *              This call can be used to read more than one GPIO
+       *              at the same time which is not possible on `GPIOC_READ`
+       *              command.
+       * Argument:    A pointer to a gpio_bundle_wr_arg_s to set pins.
+       */
+
+      case GPIOC_BUNDLE_WR:
+        if (dev->gp_pintype == GPIO_OUTPUT_PIN ||
+            dev->gp_pintype == GPIO_OUTPUT_PIN_OPENDRAIN)
+          {
+            FAR struct gpio_bundle_wr_arg_s *ptr =
+              (FAR struct gpio_bundle_wr_arg_s *)((uintptr_t)arg);
+            DEBUGASSERT(ptr != NULL);
+            DEBUGASSERT(dev->gp_ops->go_bundle_write != NULL);
+            ret = dev->gp_ops->go_bundle_write(dev, ptr);
+          }
+        else
+          {
+            ret = -EACCES;
+          }
+        break;
+
+      /* Command:     GPIOC_BUNDLE_RD
+       * Description: Read the value of a bundle (a set of) input GPIO.
+       *              This call can be used to read more than one GPIO
+       *              at the same time which is not possible on `GPIOC_READ`
+       *              command.
+       * Argument:    A pointer to a int value to receive the result.
+       */
+
+      case GPIOC_BUNDLE_RD:
+        {
+          FAR int *ptr = (FAR int *)((uintptr_t)arg);
+          DEBUGASSERT(ptr != NULL);
+
+          filep->f_priv = (FAR void *)dev->int_count;
+
+          DEBUGASSERT(dev->gp_ops->go_bundle_read != NULL);
+          ret = dev->gp_ops->go_bundle_read(dev, ptr);
+        }
+        break;
+
       /* Unrecognized command */
 
       default:
@@ -730,15 +774,18 @@ int gpio_pin_register_byname(FAR struct gpio_dev_s *dev,
       case GPIO_INPUT_PIN_PULLUP:
       case GPIO_INPUT_PIN_PULLDOWN:
         {
-          DEBUGASSERT(dev->gp_ops->go_read != NULL);
+          DEBUGASSERT(dev->gp_ops->go_read != NULL ||
+                      dev->gp_ops->go_bundle_read != NULL);
         }
         break;
 
       case GPIO_OUTPUT_PIN:
       case GPIO_OUTPUT_PIN_OPENDRAIN:
         {
-          DEBUGASSERT(dev->gp_ops->go_read != NULL &&
-                      dev->gp_ops->go_write != NULL);
+          DEBUGASSERT((dev->gp_ops->go_read != NULL &&
+                      dev->gp_ops->go_write != NULL) ||
+                      (dev->gp_ops->go_bundle_read != NULL &&
+                      dev->gp_ops->go_bundle_write != NULL));
         }
         break;
 

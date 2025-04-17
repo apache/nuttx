@@ -201,6 +201,36 @@ At the nsh, we can turn the GPIO output on and off with the following::
     nsh> gpio -o 1 /dev/gpio0
     nsh> gpio -o 0 /dev/gpio0
 
+To use dedicated gpio, you need to enable `CONFIG_ESPRESSIF_DEDICATED_GPIO` option.
+After this option enabled GPIO6 and GPIO5 pins are ready to used as dedicated GPIO pins
+as input/output mode. To write and read data from dedicated gpio, you need to use
+`GPIOC_BUNDLE_WR` and `GPIOC_BUNDLE_RD` commands.
+
+The following snippet demonstrates how to read/write to dedicated GPIO pins:
+
+.. code-block:: C
+
+    int fd; = open("/dev/gpio3", O_RDWR);
+    int rd_val = 0;
+    struct gpio_bundle_wr_arg_s wr_arg;
+
+    wr_arg.mask = 0xffff;
+    wr_arg.value = 0;
+    while(1)
+      {
+        ioctl(fd, GPIOC_BUNDLE_WR, &wr_arg);
+        if (toggle == 0)
+          {
+            wr_arg.value = 3;
+          }
+        else
+          {
+            wr_arg.value = 0;
+          }
+        ioctl(fd, GPIOC_BUNDLE_RD, &rd_val);
+        printf("rd_val: %d", rd_val);
+      }
+
 i2c
 ---
 

@@ -303,6 +303,12 @@ config ESPRESSIF_USBSERIAL
 	select OTHER_UART_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
+config ESPRESSIF_DEDICATED_GPIO
+	bool "Dedicated GPIO"
+	default n
+	---help---
+		Enable dedicated GPIO support for faster response time
+
 config ESPRESSIF_GPIO_IRQ
 	bool "GPIO pin interrupts"
 	default n
