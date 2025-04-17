@@ -63,6 +63,7 @@ struct rpmsgdev_device_s
   struct pollfd_s             fd;        /* The poll fd */
   uint64_t                    cfd;       /* The client poll fd pointer */
   struct list_node            node;      /* The double-linked list node */
+  struct work_s               work;      /* Poll notify work */
   struct rpmsgdev_read_pend_s readpend;
 };
 
@@ -82,7 +83,6 @@ struct rpmsgdev_server_s
   mutex_t               lock;  /* The mutex used to protect the list
                                 * operation
                                 */
-  struct work_s         work;  /* Poll notify work */
   FAR struct rpmsgdev_export_s *export;
 };
 
@@ -213,6 +213,7 @@ static int rpmsgdev_close_handler(FAR struct rpmsg_endpoint *ept,
     {
       nxmutex_lock(&server->lock);
       list_delete(&dev->node);
+      work_cancel_sync_wq(g_rpmsgdev_wqueue, &dev->work);
       work_cancel_sync_wq(g_rpmsgdev_wqueue, &dev->readpend.work);
       nxmutex_unlock(&server->lock);
 
@@ -441,12 +442,12 @@ static void rpmsgdev_poll_worker(FAR void *arg)
 
 static void rpmsgdev_poll_cb(FAR struct pollfd_s *fds)
 {
-  FAR struct rpmsgdev_server_s *server;
+  FAR struct rpmsgdev_device_s *dev =
+    container_of(fds, FAR struct rpmsgdev_device_s, fd);
 
   DEBUGASSERT(fds != NULL);
 
-  server = fds->arg;
-  work_queue_wq(g_rpmsgdev_wqueue, &server->work, rpmsgdev_poll_worker,
+  work_queue_wq(g_rpmsgdev_wqueue, &dev->work, rpmsgdev_poll_worker,
                 fds, 0);
 }
 
