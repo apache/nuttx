@@ -31,6 +31,7 @@ debug=n
 defaults=n
 prompt=y
 nocopy=n
+cmake=n
 
 while [ ! -z "$1" ]; do
   case $1 in
@@ -50,6 +51,9 @@ while [ ! -z "$1" ]; do
   --nocopy )
     nocopy=y
     ;;
+  --cmake )
+    cmake=y
+    ;;
   --help )
     echo "$0 is a tool for refreshing board configurations"
     echo ""
@@ -68,6 +72,8 @@ while [ ! -z "$1" ]; do
     echo "     Do not prompt for new default selections; accept all recommended default values"
     echo "  --nocopy"
     echo "     Do not copy defconfig from nuttx/boards/<board>/configs to nuttx/.config"
+    echo "  --cmake"
+    echo "     Use CMake refresh target instead of make refresh to refresh the defconfig"
     echo "  --help"
     echo "     Show this help message and exit"
     echo "  <board>"
@@ -204,72 +210,103 @@ for i in ${!CONFIGS[@]}; do
     exit 1
   fi
 
-  if [ -r $MAKEDEFS2 ]; then
-    MAKEDEFS=$MAKEDEFS2
-  else
-    if [ -r $MAKEDEFS1 ]; then
-      MAKEDEFS=$MAKEDEFS1
-    else
-      if [ -r $MAKEDEFS3 ]; then
-        MAKEDEFS=$MAKEDEFS3
-      else
-        echo "No readable Make.defs file at $MAKEDEFS1 or $MAKEDEFS2 or $MAKEDEFS3"
-        exit 1
-      fi
-    fi
-  fi
-
   # skip refresh if defconfig contains `#include`
   if grep -q "#include" $DEFCONFIG; then
     echo "Note: skipping refresh for debug defconfig."
     continue
   fi
 
-  # Copy the .config and Make.defs to the toplevel directory
+  # do CMake refresh check
+  if [ "X${cmake}" != "Xn" ]; then
 
-  rm -f SAVEconfig
-  rm -f SAVEMake.defs
+    CMAKE_BINARY_DIR=${PWD}/refresh
 
-  if [ "X${nocopy}" != "Xy" ]; then
-    if [ -e .config ]; then
-      mv .config SAVEconfig || \
-        { echo "ERROR: Failed to move .config to SAVEconfig"; exit 1; }
+    if [ -d $CMAKE_BINARY_DIR ]; then
+      rm -rf $CMAKE_BINARY_DIR
     fi
 
-    cp -a $DEFCONFIG .config || \
-      { echo "ERROR: Failed to copy $DEFCONFIG to .config"; exit 1; }
-
-    if [ -e Make.defs ]; then
-      mv Make.defs SAVEMake.defs || \
-        { echo "ERROR: Failed to move Make.defs to SAVEMake.defs"; exit 1; }
+    CONFIG=${CONFIGS[$i]}
+    if [ -d ../${CONFIG} ] ; then
+      CONFIG="../${CONFIG}"
     fi
 
-    cp -a $MAKEDEFS Make.defs || \
-      { echo "ERROR: Failed to copy $MAKEDEFS to Make.defs"; exit 1; }
-
-    # Then run oldconfig or oldefconfig
-
-    if [ "X${defaults}" == "Xy" ]; then
-      if [ "X${debug}" == "Xy" ]; then
-        make olddefconfig V=1
-      else
-        make olddefconfig 1>/dev/null
-      fi
-    else
-      if [ "X${debug}" == "Xy" ]; then
-        make oldconfig V=1
-      else
-        make oldconfig
-      fi
+    if ! cmake -B ${CMAKE_BINARY_DIR} -DBOARD_CONFIG=${CONFIG} -GNinja; then
+      echo "Error: config ${CONFIG} generate fail"
+      exit 1
     fi
-  fi
 
-  # Run savedefconfig to create the new defconfig file
+    if ! cmake --build ${CMAKE_BINARY_DIR} -t refreshsilent ; then
+      echo "Error: CMake -t refreshsilent fail"
+      exit 1
+    fi
 
-  if [ "X${debug}" == "Xy" ]; then
-    make savedefconfig V=1
+    cp ${CMAKE_BINARY_DIR}/defconfig defconfig
+
+    rm -rf $CMAKE_BINARY_DIR
+
   else
-    make savedefconfig 1>/dev/null
+
+    if [ -r $MAKEDEFS2 ]; then
+      MAKEDEFS=$MAKEDEFS2
+    else
+      if [ -r $MAKEDEFS1 ]; then
+        MAKEDEFS=$MAKEDEFS1
+      else
+        if [ -r $MAKEDEFS3 ]; then
+          MAKEDEFS=$MAKEDEFS3
+        else
+          echo "No readable Make.defs file at $MAKEDEFS1 or $MAKEDEFS2 or $MAKEDEFS3"
+          exit 1
+        fi
+      fi
+    fi
+
+    # Copy the .config and Make.defs to the toplevel directory
+
+    rm -f SAVEconfig
+    rm -f SAVEMake.defs
+
+    if [ "X${nocopy}" != "Xy" ]; then
+      if [ -e .config ]; then
+        mv .config SAVEconfig || \
+          { echo "ERROR: Failed to move .config to SAVEconfig"; exit 1; }
+      fi
+
+      cp -a $DEFCONFIG .config || \
+        { echo "ERROR: Failed to copy $DEFCONFIG to .config"; exit 1; }
+
+      if [ -e Make.defs ]; then
+        mv Make.defs SAVEMake.defs || \
+          { echo "ERROR: Failed to move Make.defs to SAVEMake.defs"; exit 1; }
+      fi
+
+      cp -a $MAKEDEFS Make.defs || \
+        { echo "ERROR: Failed to copy $MAKEDEFS to Make.defs"; exit 1; }
+
+      # Then run oldconfig or oldefconfig
+
+      if [ "X${defaults}" == "Xy" ]; then
+        if [ "X${debug}" == "Xy" ]; then
+          make olddefconfig V=1
+        else
+          make olddefconfig 1>/dev/null
+        fi
+      else
+        if [ "X${debug}" == "Xy" ]; then
+          make oldconfig V=1
+        else
+          make oldconfig
+        fi
+      fi
+    fi
+
+    # Run savedefconfig to create the new defconfig file
+
+    if [ "X${debug}" == "Xy" ]; then
+      make savedefconfig V=1
+    else
+      make savedefconfig 1>/dev/null
+    fi
   fi
 
   # Show differences
