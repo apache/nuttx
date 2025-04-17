@@ -146,6 +146,7 @@ enum WLAN_STA_STATE_E
   WLAN_STA_STATE_INIT,
   WLAN_STA_STATE_CONNECTING,
   WLAN_STA_STATE_CONNECTED,
+  WLAN_STA_STATE_DISCONNECTED,
 };
 
 enum WLAN_STA_CONNERR_E
@@ -915,6 +916,8 @@ static int wifidriver_start_disconnect(FAR struct wifi_sim_s *wifidev)
         {
           if (wifidev->state == WLAN_STA_STATE_CONNECTED)
             {
+              wifidev->state = WLAN_STA_STATE_DISCONNECTED;
+
               /* free the connected_ap */
 
               free(wifidev->connected_ap);
