@@ -29,6 +29,7 @@
 #include <nuttx/video/fb.h>
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/spinlock.h>
 
 /****************************************************************************
  * Pre-processor definitions
@@ -82,6 +83,7 @@ struct goldfish_fb_s
   struct fb_videoinfo_s videoinfo;
   FAR void *base;
   int irq;
+  spinlock_t lock;                  /* Lock for this framebuffer */
 };
 
 /****************************************************************************
@@ -166,7 +168,7 @@ static int goldfish_fb_interrupt(int irq, FAR void *dev_id, FAR void *arg)
   irqstate_t flags;
   uint32_t status;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&fb->lock);
   status = getreg32(fb->base + GOLDFISH_FB_INT_STATUS);
   if (status & GOLDFISH_FB_INT_VSYNC)
     {
@@ -178,7 +180,7 @@ static int goldfish_fb_interrupt(int irq, FAR void *dev_id, FAR void *arg)
       goldfish_fb_framedone_irq(fb);
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&fb->lock, flags);
   return OK;
 }
 
