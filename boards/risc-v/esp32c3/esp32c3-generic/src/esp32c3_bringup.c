@@ -114,6 +114,10 @@
 #  include "espressif/esp_nxdiag.h"
 #endif
 
+#ifdef CONFIG_ESP_SDM
+#  include "espressif/esp_sdm.h"
+#endif
+
 #include "esp32c3-generic.h"
 
 /****************************************************************************
@@ -355,6 +359,23 @@ int esp_bringup(void)
     {
       syslog(LOG_ERR, "Failed to initialize BMP180 "
              "Driver for I2C0: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_ESP_SDM
+  struct esp_sdm_chan_config_s config =
+  {
+    .gpio_num = 5,
+    .sample_rate_hz = 1000 * 1000,
+    .flags = 0,
+  };
+
+  struct dac_dev_s *dev = esp_sdminitialize(config);
+  ret = dac_register("/dev/dac0", dev);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize DAC driver: %d\n",
+             ret);
     }
 #endif
 
