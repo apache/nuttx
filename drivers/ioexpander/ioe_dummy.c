@@ -710,8 +710,7 @@ static ioe_pinset_t ioe_dummy_int_update(FAR struct ioe_dummy_dev_s *priv)
             }
         }
 
-      diff  >>= 1;
-      input >>= 1;
+      diff >>= 1;
     }
 
   return intstat;
