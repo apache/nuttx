@@ -116,6 +116,7 @@ SECTIONS
         *(.init)
         *(.handlers)
         *(.progmem .progmem.*)
+        . = ALIGN(2);
         *(.text)
         *(.text.*)
         _etext = . ;

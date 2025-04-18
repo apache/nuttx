@@ -114,6 +114,7 @@ SECTIONS
     *(.vectors)
     *(.progmem.gcc*)
     *(.progmem*)
+    . = ALIGN(2);
     *(.init)
     *(.handlers)
     *(.text)
