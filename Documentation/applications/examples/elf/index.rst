@@ -4,9 +4,16 @@
 
 This example builds a small ELF loader test case. This includes several test
 programs under ``examples/elf`` tests. These tests are build using the relocatable
-ELF format and installed in a ROMFS file system. At run time, each program in
-the ROMFS file system is executed. Requires ``CONFIG_ELF``. Other configuration
-options:
+ELF format and installed in a configurable file system. At run time, the file system
+is mounted and each program is executed. Requires ``CONFIG_ELF``.
+Two distinct types of file systems are supported: internal (included in the NuttX binary)
+and external (not included in the binary). The external file systems need to be uploaded
+manually. For the internal file systems the sample supports the ``romfs`` and ``cromfs``
+filesystems. For the external file systems any of the provided file systems can be used
+(``vfat``, ...), but also the ``romfs`` filesystem for which the image (``romfs.img``) is
+automatically generated.
+
+Configuration options:
 
 - ``CONFIG_EXAMPLES_ELF_DEVMINOR`` – The minor device number of the ROMFS block
   driver. For example, the ``N`` in ``/dev/ramN``. Used for registering the RAM
@@ -35,24 +42,19 @@ options:
 
    If you use GCC to link, you make also need to include ``-nostdlib``.
 
-3. This example also requires ``genromfs``. ``genromfs`` can be build as part of the
-   nuttx toolchain. Or can built from the ``genromfs`` sources that can be found
-   in the NuttX tools repository (``genromfs-0.5.2.tar.gz``). In any event, the
-   ``PATH`` variable must include the path to the genromfs executable.
-
-4. ELF size: The ELF files in this example are, be default, quite large because
+3. ELF size: The ELF files in this example are, be default, quite large because
    they include a lot of build garbage. You can greatly reduce the size of the
    ELF binaries are using the ``objcopy --strip-unneeded`` command to remove
    un-necessary information from the ELF files.
 
-5. Simulator. You cannot use this example with the NuttX simulator on Cygwin.
+4. Simulator. You cannot use this example with the NuttX simulator on Cygwin.
    That is because the Cygwin GCC does not generate ELF file but rather some
    Windows-native binary format.
 
    If you really want to do this, you can create a NuttX x86 buildroot toolchain
    and use that be build the ELF executables for the ROMFS file system.
 
-6. Linker scripts. You might also want to use a linker scripts to combine
+5. Linker scripts. You might also want to use a linker scripts to combine
    sections better. An example linker script is at
    ``nuttx/binfmt/elf/gnu-elf.ld``. That example might have to be tuned for
    your particular linker output to position additional sections correctly. The
@@ -60,3 +62,6 @@ options:
 
      LDELFFLAGS = -r -e main -T$(TOPDIR)/binfmt/elf/gnu-elf.ld
 
+6. When generating the ``romfs.img`` for external filesystem the image (``romfs.img``)
+   needs to be manually copied to the start of the configured ``CONFIG_EXAMPLES_ELF_DEVPATH``
+   using ``openocd`` or your preferred programmer.
