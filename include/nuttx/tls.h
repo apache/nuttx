@@ -199,7 +199,7 @@ struct tls_cleanup_s
 
 struct tls_info_s
 {
-  FAR struct task_info_s * tl_task;
+  FAR struct task_info_s *tl_task;
 
 #if defined(CONFIG_TLS_NELEM) && CONFIG_TLS_NELEM > 0
   uintptr_t tl_elem[CONFIG_TLS_NELEM]; /* TLS elements */
@@ -224,6 +224,7 @@ struct tls_info_s
   uint16_t tl_size;                    /* Actual size with alignments */
   int tl_errno;                        /* Per-thread error number */
   pid_t tl_tid;                        /* Thread ID */
+  FAR char **tl_argv;                  /* Arguments first string */
 };
 
 /****************************************************************************
