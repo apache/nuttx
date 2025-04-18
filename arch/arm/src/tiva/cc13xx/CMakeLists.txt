@@ -1,5 +1,5 @@
 # ##############################################################################
-# boards/arm/tiva/tm4c123g-launchpad/src/CMakeLists.txt
+# arch/arm/src/tiva/cc13xx/CMakeLists.txt
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -20,43 +20,41 @@
 #
 # ##############################################################################
 
-set(SRCS tm4c_boot.c tm4c_bringup.c tm4c_ssi.c)
+if((CONFIG_ARCH_CHIP_CC13X0) OR (CONFIG_ARCH_CHIP_CC13X2))
+  set(SRCS)
 
-if(CONFIG_ARCH_LEDS)
-  list(APPEND SRCS tm4c_autoleds.c)
-endif()
-
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS tm4c_appinit.c)
-endif()
-
-if(CONFIG_TIVA_TIMER)
-  list(APPEND SRCS tm4c_timer.c)
-endif()
-
-if(CONFIG_TIVA_ADC)
-  list(APPEND SRCS tm4c_adc.c)
-endif()
-
-if(CONFIG_TIVA_CAN)
-  list(APPEND SRCS tm4c_can.c)
-endif()
-
-if(CONFIG_CAN_MCP2515)
-  list(APPEND SRCS tm4c_mcp2515.c)
-endif()
-
-if(CONFIG_MTD_AT24XX)
-  if(CONFIG_TIVA_I2C0)
-    list(APPEND SRCS tm4c_at24.c)
+  if(CONFIG_ARCH_CHIP_CC13X0)
+    list(
+      APPEND
+      SRCS
+      cc13xx_start.c
+      cc13xx_prcm.c
+      cc13xx_chipinfo.c
+      cc13xx_gpio.c
+      cc13xx_gpioirq.c
+      cc13xx_enableclks.c
+      cc13xx_enablepwr.c
+      cc13x0_trim.c
+      cc13x0_rom.c)
+  elseif(CONFIG_ARCH_CHIP_CC13X2)
+    list(
+      APPEND
+      SRCS
+      cc13xx_start.c
+      cc13xx_prcm.c
+      cc13xx_chipinfo.c
+      cc13xx_gpio.c
+      cc13xx_gpioirq.c
+      cc13xx_enableclks.c
+      cc13xx_enablepwr.c
+      cc13x2_aux_sysif.c)
+    if(CONFIG_ARCH_CHIP_CC13XX_V1)
+      list(APPEND SRCS cc13x2_v1_trim.c cc13x2_cc26x2_v1_rom.c)
+    else()
+      list(APPEND SRCS cc13x2_v2_trim.c)
+    endif()
   endif()
+
+  target_sources(arch PRIVATE ${SRCS})
+
 endif()
-
-if(CONFIG_ARCH_BUTTONS)
-  list(APPEND SRCS tm4c_buttons.c)
-endif()
-
-target_sources(board PRIVATE ${SRCS})
-
-set_property(GLOBAL PROPERTY LD_SCRIPT
-                             "${NUTTX_BOARD_DIR}/scripts/tm4c123g-launchpad.ld")
