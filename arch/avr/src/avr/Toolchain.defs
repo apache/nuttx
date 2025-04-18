@@ -97,6 +97,10 @@ ifeq ($(CONFIG_DEBUG_OPT_UNUSED_SECTIONS),y)
   ARCHOPTIMIZATION += -ffunction-sections -fdata-sections
 endif
 
+ifeq ($(CONFIG_DEBUG_LINK_MAP),y)
+  LDFLAGS += -Map=$(call CONVERT_PATH,$(TOPDIR)$(DELIM)nuttx.map)
+endif
+
 ifneq ($(CONFIG_DEBUG_NOOPT),y)
   ARCHOPTIMIZATION += -fno-strict-aliasing
 endif
