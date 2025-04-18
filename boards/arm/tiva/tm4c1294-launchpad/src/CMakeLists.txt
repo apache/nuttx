@@ -1,5 +1,5 @@
 # ##############################################################################
-# boards/arm/tiva/tm4c123g-launchpad/src/CMakeLists.txt
+# boards/arm/tiva/tm4c1294-launchpad/src/CMakeLists.txt
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -20,43 +20,44 @@
 #
 # ##############################################################################
 
-set(SRCS tm4c_boot.c tm4c_bringup.c tm4c_ssi.c)
+set(SRCS tm4c_boot.c tm4c_bringup.c)
 
 if(CONFIG_ARCH_LEDS)
   list(APPEND SRCS tm4c_autoleds.c)
-endif()
-
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS tm4c_appinit.c)
-endif()
-
-if(CONFIG_TIVA_TIMER)
-  list(APPEND SRCS tm4c_timer.c)
-endif()
-
-if(CONFIG_TIVA_ADC)
-  list(APPEND SRCS tm4c_adc.c)
-endif()
-
-if(CONFIG_TIVA_CAN)
-  list(APPEND SRCS tm4c_can.c)
-endif()
-
-if(CONFIG_CAN_MCP2515)
-  list(APPEND SRCS tm4c_mcp2515.c)
-endif()
-
-if(CONFIG_MTD_AT24XX)
-  if(CONFIG_TIVA_I2C0)
-    list(APPEND SRCS tm4c_at24.c)
-  endif()
+else()
+  list(APPEND SRCS tm4c_userleds.c)
 endif()
 
 if(CONFIG_ARCH_BUTTONS)
   list(APPEND SRCS tm4c_buttons.c)
 endif()
 
+if(CONFIG_TIVA_ETHERNET)
+  list(APPEND SRCS tm4c_ethernet.c)
+endif()
+
+if(CONFIG_TIVA_CAN)
+  list(APPEND SRCS tm4c_can.c)
+endif()
+
+if(CONFIG_DK_TM4C129X_TIMER)
+  list(APPEND SRCS tm4c_timer.c)
+endif()
+
+if(CONFIG_BOARDCTL)
+  list(APPEND SRCS tm4c_appinit.c)
+endif()
+
+if(CONFIG_TIVA_HCIUART)
+  if(CONFIG_BLUETOOTH_UART)
+    list(APPEND SRCS tm4c_hciuart.c)
+  endif()
+endif()
+
+if(CONFIG_BOARDCTL_RESET)
+  list(APPEND SRCS tm4c_reset.c)
+endif()
+
 target_sources(board PRIVATE ${SRCS})
 
-set_property(GLOBAL PROPERTY LD_SCRIPT
-                             "${NUTTX_BOARD_DIR}/scripts/tm4c123g-launchpad.ld")
+set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/ld.script")
