@@ -89,11 +89,14 @@ size_t nxtask_argvstr(FAR struct tcb_s *tcb, FAR char *args, size_t size)
   else
 #endif
     {
-      FAR char **argv = nxsched_get_stackargs(tcb) + 1;
+      FAR char **argv = nxsched_get_stackargs(tcb);
 
-      while (*argv != NULL && n < size)
+      if (argv++)
         {
-          n += snprintf(args + n, size - n, " %s", *argv++);
+          while (*argv != NULL && n < size)
+            {
+              n += snprintf(args + n, size - n, " %s", *argv++);
+            }
         }
     }
 
