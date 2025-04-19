@@ -88,13 +88,8 @@ struct wdog_s
   FAR void          *picbase;    /* PIC base address */
 #endif
   clock_t            expired;    /* Timer associated with the absoulute time */
-};
-
-struct wdog_period_s
-{
-  struct wdog_s      wdog;       /* Watchdog */
   clock_t            period;     /* Period time in ticks */
-  wdentry_t          func;       /* Wrapped function to execute when delay expires */
+  wdentry_t          pfunc;      /* Period Function to execute when delay expires */
 };
 
 /****************************************************************************
@@ -311,7 +306,7 @@ static inline int wd_start_realtime(FAR struct wdog_s *wdog,
  *
  ****************************************************************************/
 
-int wd_start_period(FAR struct wdog_period_s *wdog, sclock_t delay,
+int wd_start_period(FAR struct wdog_s *wdog, sclock_t delay,
                     clock_t period, wdentry_t wdentry, wdparm_t arg);
 
 /****************************************************************************
@@ -331,32 +326,6 @@ int wd_start_period(FAR struct wdog_period_s *wdog, sclock_t delay,
  ****************************************************************************/
 
 int wd_cancel(FAR struct wdog_s *wdog);
-
-/****************************************************************************
- * Name: wd_cancel_period
- *
- * Description:
- *   This function cancels a currently running periodic watchdog timer.
- *
- * Input Parameters:
- *   wdog_period - Pointer of the periodic watchdog.
- *
- * Returned Value:
- *   Zero (OK) is returned on success;  A negated errno value is returned to
- *   indicate the nature of any failure.
- *
- ****************************************************************************/
-
-static inline int wd_cancel_period(FAR struct wdog_period_s *wdog_period)
-{
-  if (!wdog_period)
-    {
-      return -EINVAL;
-    }
-
-  wdog_period->period = 0;
-  return wd_cancel(&wdog_period->wdog);
-}
 
 /****************************************************************************
  * Name: wd_gettime
