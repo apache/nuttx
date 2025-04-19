@@ -688,12 +688,17 @@ static int rpmsgdev_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       return arglen;
     }
 
-  msglen = sizeof(*msg) + arglen - 1;
-
   msg = rpmsgdev_get_tx_payload_buffer(dev, &space);
   if (msg == NULL)
     {
       return -ENOMEM;
+    }
+
+  msglen = sizeof(*msg) + arglen - 1;
+  if (space < msglen)
+    {
+      rpmsg_release_tx_buffer(&dev->ept, msg);
+      return -EMSGSIZE;
     }
 
   msg->filep   = priv->filep;
