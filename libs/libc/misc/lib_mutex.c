@@ -113,7 +113,7 @@ static void nxmutex_add_backtrace(FAR mutex_t *mutex)
 
 int nxmutex_init(FAR mutex_t *mutex)
 {
-  int ret = nxsem_init(&mutex->sem, 0, 1);
+  int ret = nxsem_init(&mutex->sem, 0, NXSEM_NO_MHOLDER);
 
   if (ret < 0)
     {

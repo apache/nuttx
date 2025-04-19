@@ -63,7 +63,6 @@
 int nxsem_trywait_slow(FAR sem_t *sem)
 {
   irqstate_t flags;
-  int32_t semcount;
   int ret;
 
   /* The following operations must be performed with interrupts disabled
@@ -74,29 +73,58 @@ int nxsem_trywait_slow(FAR sem_t *sem)
 
   /* If the semaphore is available, give it to the requesting task */
 
-  semcount = atomic_read(NXSEM_COUNT(sem));
-  do
+  if (NXSEM_IS_MUTEX(sem))
     {
-      if (semcount <= 0)
+      uint32_t expected = NXSEM_NO_MHOLDER;
+      uint32_t mholder = atomic_read(NXSEM_MHOLDER(sem));
+      do
         {
-          leave_critical_section(flags);
-          return -EAGAIN;
+          if (NXSEM_MACQUIRED(mholder))
+            {
+              leave_critical_section(flags);
+              return -EAGAIN;
+            }
         }
+      while (!atomic_try_cmpxchg_acquire(NXSEM_MHOLDER(sem), &expected,
+                                         (uint32_t)nxsched_gettid()));
     }
-  while (!atomic_try_cmpxchg_acquire(NXSEM_COUNT(sem),
-                                     &semcount, semcount - 1));
+  else
+    {
+      int32_t semcount = atomic_read(NXSEM_COUNT(sem));
+      do
+        {
+          if (semcount <= 0)
+            {
+              leave_critical_section(flags);
+              return -EAGAIN;
+            }
+        }
+      while (!atomic_try_cmpxchg_acquire(NXSEM_COUNT(sem),
+                                         &semcount, semcount - 1));
+    }
 
   /* It is, let the task take the semaphore */
 
   ret = nxsem_protect_wait(sem);
   if (ret < 0)
     {
-      atomic_fetch_add(NXSEM_COUNT(sem), 1);
+      if (NXSEM_IS_MUTEX(sem))
+        {
+          atomic_set_release(NXSEM_MHOLDER(sem), NXSEM_NO_MHOLDER);
+        }
+      else
+        {
+          atomic_fetch_add(NXSEM_COUNT(sem), 1);
+        }
+
       leave_critical_section(flags);
       return ret;
     }
 
-  nxsem_add_holder(sem);
+  if (!NXSEM_IS_MUTEX(sem))
+    {
+      nxsem_add_holder(sem);
+    }
 
   /* Interrupts may now be enabled. */
 

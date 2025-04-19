@@ -30,6 +30,7 @@
 #include <assert.h>
 #include <sched.h>
 
+#include <nuttx/sched.h>
 #include <nuttx/init.h>
 #include <nuttx/cancelpt.h>
 #include <nuttx/semaphore.h>
@@ -150,14 +151,15 @@ int nxsem_wait(FAR sem_t *sem)
 
 #ifndef CONFIG_LIBC_ARCH_ATOMIC
 
-  if ((sem->flags & SEM_TYPE_MUTEX)
-#  if defined(CONFIG_PRIORITY_PROTECT) || defined(CONFIG_PRIORITY_INHERITANCE)
-      && (sem->flags & SEM_PRIO_MASK) == SEM_PRIO_NONE
+  if (NXSEM_IS_MUTEX(sem)
+#  if defined(CONFIG_PRIORITY_PROTECT)
+      && (sem->flags & SEM_PRIO_MASK) != SEM_PRIO_PROTECT
 #  endif
       )
     {
-      int32_t old = 1;
-      if (atomic_try_cmpxchg_acquire(NXSEM_COUNT(sem), &old, 0))
+      const int32_t tid = _SCHED_GETTID();
+      int32_t old = NXSEM_NO_MHOLDER;
+      if (atomic_try_cmpxchg_acquire(NXSEM_MHOLDER(sem), &old, tid))
         {
           return OK;
         }

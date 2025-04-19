@@ -66,7 +66,7 @@ int pthread_mutex_init(FAR pthread_mutex_t *mutex,
       return EINVAL;
     }
 
-  /* Initialize the mutex like a semaphore with initial count = 1 */
+  /* Initialize the semaphore of type mutex */
 
   status = mutex_init(&mutex->mutex);
   if (status < 0)

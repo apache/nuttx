@@ -72,12 +72,23 @@ void nxsem_wait_irq(FAR struct tcb_s *wtcb, int errcode)
 {
   FAR struct tcb_s *rtcb = this_task();
   FAR sem_t *sem = wtcb->waitobj;
+  const bool mutex = NXSEM_IS_MUTEX(sem);
 
   /* It is possible that an interrupt/context switch beat us to the punch
    * and already changed the task's state.
    */
 
-  DEBUGASSERT(sem != NULL && atomic_read(NXSEM_COUNT(sem)) < 0);
+  DEBUGASSERT(sem != NULL &&
+              (mutex || atomic_read(NXSEM_COUNT(sem)) < 0) &&
+              (!mutex ||
+               (atomic_read(NXSEM_MHOLDER(sem)) & NXSEM_MBLOCKS_BIT)));
+
+  /* Mutex is never interrupted by a signal */
+
+  if (mutex && errcode == EINTR)
+    {
+      return;
+    }
 
   /* Restore the correct priority of all threads that hold references
    * to this semaphore.
@@ -85,17 +96,31 @@ void nxsem_wait_irq(FAR struct tcb_s *wtcb, int errcode)
 
   nxsem_canceled(wtcb, sem);
 
-  /* And increment the count on the semaphore.  This releases the count
-   * that was taken by sem_post().  This count decremented the semaphore
-   * count to negative and caused the thread to be blocked in the first
-   * place.
-   */
-
-  atomic_fetch_add(NXSEM_COUNT(sem), 1);
-
   /* Remove task from waiting list */
 
   dq_rem((FAR dq_entry_t *)wtcb, SEM_WAITLIST(sem));
+
+  /* This restores the value to what it was before the previous sem_wait.
+   * This caused the thread to be blocked in the first place.
+   */
+
+  if (mutex)
+    {
+      /* The TID of the mutex holder is correct but we need to
+       * update the blocking bit. The mutex is still blocking if there are
+       * any items left in the wait queue.
+       */
+
+      uint32_t mholder = nxsem_get_mholder_reserve(sem);
+      uint32_t blocks =
+        dq_peek(SEM_WAITLIST(sem)) != 0 ? NXSEM_MBLOCKS_BIT : 0;
+      atomic_set_release(NXSEM_MHOLDER(sem),
+                         (mholder & (~NXSEM_MBLOCKS_BIT)) | blocks);
+    }
+  else
+    {
+      atomic_fetch_add(NXSEM_COUNT(sem), 1);
+    }
 
   /* Indicate that the wait is over. */
 
