@@ -44,7 +44,7 @@ To compile:
 
 .. code-block:: bash
 
-    $ cp boards/sim/sim/sim/configs/tcpblaster/defconfig .config
+    $ ./tools/configure.sh sim:tcpblaster
     $ make menuconfig  # optional, to adjust configuration
     $ make clean; make
 
