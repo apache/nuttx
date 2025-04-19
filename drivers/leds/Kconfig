@@ -57,6 +57,13 @@ config LEDS_APA102
 	---help---
 		Enable support for the APA102 LED Strip driver.
 
+config KTD2052
+	bool "KTD2052 I2C LED Driver"
+	default n
+	select I2C
+	---help---
+		Enable support for the KTD2052 LED driver
+
 config LEDS_MAX7219
 	bool "MAX7219 Numeric Display"
 	default n
