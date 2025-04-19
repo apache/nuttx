@@ -604,7 +604,6 @@ static ssize_t rpmsgdev_ioctl_arglen(int cmd, unsigned long arg)
 {
   switch (cmd)
     {
-      case FIONBIO:
       case FIONWRITE:
       case FIONREAD:
       case FIONSPACE:
@@ -657,16 +656,29 @@ static int rpmsgdev_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct rpmsgdev_s *dev;
   FAR struct rpmsgdev_priv_s *priv;
   FAR struct rpmsgdev_ioctl_s *msg;
+  FAR void *argp = (FAR void *)(uintptr_t)arg;
   uint32_t space;
   ssize_t arglen;
   size_t msglen;
-  int ret;
 
   /* Recover our private data from the struct file instance */
 
   dev  = filep->f_inode->i_private;
   priv = filep->f_priv;
   DEBUGASSERT(dev != NULL && priv != NULL);
+
+  /* Always handle FIONBIO locally since the remote side
+   * must always be in non-blocking mode to avoid blocking
+   * the rpmsg work thread.
+   */
+
+  if (cmd == FIONBIO)
+    {
+      FAR int *nonblock = (FAR int *)argp;
+
+      priv->nonblock = *nonblock;
+      return 0;
+    }
 
   /* Call our internal routine to perform the ioctl */
 
@@ -691,19 +703,11 @@ static int rpmsgdev_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   if (arglen > 0)
     {
-      memcpy(msg->buf, (FAR void *)(uintptr_t)arg, arglen);
+      memcpy(msg->buf, argp, arglen);
     }
 
-  ret = rpmsgdev_send_recv(dev, RPMSGDEV_IOCTL, false, &msg->header,
-                           msglen, arglen > 0 ? (FAR void *)arg : NULL);
-  if (cmd == FIONBIO && ret >= 0)
-    {
-      FAR int *nonblock = (FAR int *)(uintptr_t)arg;
-
-      priv->nonblock = *nonblock;
-    }
-
-  return ret;
+  return rpmsgdev_send_recv(dev, RPMSGDEV_IOCTL, false, &msg->header,
+                            msglen, arglen > 0 ? argp : NULL);
 }
 
 /****************************************************************************
