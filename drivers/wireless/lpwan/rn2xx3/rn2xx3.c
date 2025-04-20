@@ -1165,7 +1165,7 @@ static int rn2xx3_setsync(FAR struct rn2xx3_dev_s *priv, uint64_t sync)
 
   /* Write actual parameter and end command */
 
-  length = snprintf(syncstr, sizeof(syncstr), "%016llX\r\n", sync);
+  length = snprintf(syncstr, sizeof(syncstr), "%llX\r\n", sync);
   length = file_write(&priv->uart, syncstr, length);
   if (length < 0)
     {
