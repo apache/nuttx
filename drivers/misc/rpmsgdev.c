@@ -76,7 +76,6 @@ struct rpmsgdev_s
                                       * operation until the connection
                                       * between two cpu established.
                                       */
-  uint32_t              flags;       /* Read and write special handle flags */
 };
 
 /* Rpmsg device cookie used to handle the response from the remote cpu */
@@ -156,7 +155,6 @@ static const rpmsg_ept_cb g_rpmsgdev_handler[] =
   [RPMSGDEV_OPEN]        = rpmsgdev_default_handler,
   [RPMSGDEV_CLOSE]       = rpmsgdev_default_handler,
   [RPMSGDEV_READ]        = rpmsgdev_read_handler,
-  [RPMSGDEV_READ_NOFRAG] = rpmsgdev_read_handler,
   [RPMSGDEV_WRITE]       = rpmsgdev_default_handler,
   [RPMSGDEV_LSEEK]       = rpmsgdev_default_handler,
   [RPMSGDEV_IOCTL]       = rpmsgdev_ioctl_handler,
@@ -166,7 +164,7 @@ static const rpmsg_ept_cb g_rpmsgdev_handler[] =
 
 /* File operations */
 
-const struct file_operations g_rpmsgdev_ops =
+static const struct file_operations g_rpmsgdev_ops =
 {
   rpmsgdev_open,          /* open */
   rpmsgdev_close,         /* close */
@@ -233,12 +231,11 @@ static int rpmsgdev_open(FAR struct file *filep)
     }
 
   priv->filep    = msg.filep;
-  priv->nonblock = (filep->f_oflags & O_NONBLOCK) != 0;
+  priv->nonblock = !!(filep->f_oflags & O_NONBLOCK);
 
-  /* Attach the private date to the struct file instance */
+  /* Attach the private data to the struct file instance */
 
   filep->f_priv = priv;
-
   return ret;
 }
 
@@ -392,9 +389,7 @@ static ssize_t rpmsgdev_read(FAR struct file *filep, FAR char *buffer,
   FAR struct rpmsgdev_s *dev;
   FAR struct rpmsgdev_priv_s *priv;
   struct rpmsgdev_read_s msg;
-  struct iovec read;
-  uint32_t command;
-  ssize_t ret;
+  int ret;
 
   if (buffer == NULL)
     {
@@ -409,21 +404,16 @@ static ssize_t rpmsgdev_read(FAR struct file *filep, FAR char *buffer,
 
   /* Call the host to perform the read */
 
-  read.iov_base = buffer;
-  read.iov_len  = 0;
-
   msg.filep = priv->filep;
   msg.count = buflen;
-  command   = dev->flags & RPMSGDEV_NOFRAG_READ ?
-              RPMSGDEV_READ_NOFRAG : RPMSGDEV_READ;
 
   for (; ; )
     {
-      ret = rpmsgdev_send_recv(dev, command, true, &msg.header,
-                               sizeof(msg) - 1, &read);
-      if (ret != -EAGAIN || read.iov_len > 0 || priv->nonblock)
+      ret = rpmsgdev_send_recv(dev, RPMSGDEV_READ, true, &msg.header,
+                               sizeof(msg) - 1, buffer);
+      if (ret != -EAGAIN || priv->nonblock)
         {
-          break;
+          return ret;
         }
 
       /* If open with block mode and return -EAGAIN, should wait the
@@ -435,11 +425,9 @@ static ssize_t rpmsgdev_read(FAR struct file *filep, FAR char *buffer,
       if (ret < 0)
         {
           rpmsgdeverr("read wait failed, ret=%d\n", ret);
-          break;
+          return ret;
         }
     }
-
-  return read.iov_len ? read.iov_len : ret;
 }
 
 /****************************************************************************
@@ -468,8 +456,7 @@ static ssize_t rpmsgdev_write(FAR struct file *filep, const char *buffer,
   FAR struct rpmsgdev_priv_s *priv;
   FAR struct rpmsgdev_write_s *msg;
   uint32_t space;
-  size_t written = 0;
-  int ret = 0;
+  int ret;
 
   if (buffer == NULL)
     {
@@ -484,42 +471,30 @@ static ssize_t rpmsgdev_write(FAR struct file *filep, const char *buffer,
 
   /* Perform the rpmsg write */
 
-  while (written < buflen)
+  for (; ; )
     {
       msg = rpmsgdev_get_tx_payload_buffer(dev, &space);
       if (msg == NULL)
         {
-          ret = -ENOMEM;
-          break;
+          return -ENOMEM;
         }
 
       space -= sizeof(*msg) - 1;
-      if (space >= buflen - written)
-        {
-          space = buflen - written;
-        }
-      else if ((dev->flags & RPMSGDEV_NOFRAG_WRITE) != 0)
+      if (space < buflen)
         {
           rpmsg_release_tx_buffer(&dev->ept, msg);
-          ret = -EMSGSIZE;
-          break;
+          return -EMSGSIZE;
         }
 
       msg->filep = priv->filep;
-      msg->count = space;
-      memcpy(msg->buf, buffer + written, space);
+      msg->count = buflen;
+      memcpy(msg->buf, buffer, buflen);
 
       ret = rpmsgdev_send_recv(dev, RPMSGDEV_WRITE, false, &msg->header,
-                               sizeof(*msg) - 1 + space, NULL);
-      if (ret >= 0)
+                               sizeof(*msg) - 1 + buflen, NULL);
+      if (ret != -EAGAIN || priv->nonblock)
         {
-          written += ret;
-          continue;
-        }
-
-      if (ret != -EAGAIN || priv->nonblock || written != 0)
-        {
-          break;
+          return ret;
         }
 
       /* If open with block mode and return -EAGAIN and no data
@@ -531,11 +506,9 @@ static ssize_t rpmsgdev_write(FAR struct file *filep, const char *buffer,
       if (ret < 0)
         {
           rpmsgerr("write wait failed, ret=%d\n", ret);
-          break;
+          return ret;
         }
     }
-
-  return written != 0 ? written : ret;
 }
 
 /****************************************************************************
@@ -930,21 +903,14 @@ static int rpmsgdev_read_handler(FAR struct rpmsg_endpoint *ept,
   FAR struct rpmsgdev_cookie_s *cookie =
       (FAR struct rpmsgdev_cookie_s *)(uintptr_t)header->cookie;
   FAR struct rpmsgdev_read_s *rsp = data;
-  FAR struct iovec *read = cookie->data;
 
   cookie->result = header->result;
   if (cookie->result > 0)
     {
-      memcpy(read->iov_base + read->iov_len, rsp->buf, cookie->result);
-      read->iov_len += cookie->result;
+      memcpy(cookie->data, rsp->buf, cookie->result);
     }
 
-  if (header->command == RPMSGDEV_READ_NOFRAG ||
-      cookie->result <= 0 || read->iov_len >= rsp->count)
-    {
-      rpmsg_post(ept, &cookie->sem);
-    }
-
+  rpmsg_post(ept, &cookie->sem);
   return 0;
 }
 
@@ -979,7 +945,7 @@ static int rpmsgdev_ioctl_handler(FAR struct rpmsg_endpoint *ept,
   cookie->result = header->result;
   if (cookie->result >= 0 && rsp->arglen > 0)
     {
-      memcpy(cookie->data, (FAR void *)(uintptr_t)rsp->buf, rsp->arglen);
+      memcpy(cookie->data, rsp->buf, rsp->arglen);
     }
 
   rpmsg_post(ept, &cookie->sem);
@@ -1151,9 +1117,6 @@ static int rpmsgdev_ept_cb(FAR struct rpmsg_endpoint *ept,
  *   localpath  - the device path in local cpu, if NULL, the localpath is
  *                same as the remotepath, provide this argument to support
  *                custom device path
- *   flags      - RPMSGDEV_NOFRAG_READ and RPMSGDEV_NOFRAG_WRITE can be set
- *                to indicates that the read and write data of the device
- *                cannot be split or aggregated
  *
  * Returned Values:
  *   OK on success; A negated errno value is returned on any failure.
@@ -1161,7 +1124,7 @@ static int rpmsgdev_ept_cb(FAR struct rpmsg_endpoint *ept,
  ****************************************************************************/
 
 int rpmsgdev_register(FAR const char *remotecpu, FAR const char *remotepath,
-                      FAR const char *localpath, uint32_t flags)
+                      FAR const char *localpath)
 {
   FAR struct rpmsgdev_s *dev;
   int ret;
@@ -1186,7 +1149,6 @@ int rpmsgdev_register(FAR const char *remotecpu, FAR const char *remotepath,
 
   dev->remotecpu  = remotecpu;
   dev->remotepath = remotepath;
-  dev->flags      = flags;
 
   nxsem_init(&dev->wait, 0, 0);
 

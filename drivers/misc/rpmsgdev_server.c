@@ -129,7 +129,6 @@ static const rpmsg_ept_cb g_rpmsgdev_handler[] =
   [RPMSGDEV_OPEN]        = rpmsgdev_open_handler,
   [RPMSGDEV_CLOSE]       = rpmsgdev_close_handler,
   [RPMSGDEV_READ]        = rpmsgdev_read_handler,
-  [RPMSGDEV_READ_NOFRAG] = rpmsgdev_read_handler,
   [RPMSGDEV_WRITE]       = rpmsgdev_write_handler,
   [RPMSGDEV_LSEEK]       = rpmsgdev_lseek_handler,
   [RPMSGDEV_IOCTL]       = rpmsgdev_ioctl_handler,
@@ -219,39 +218,31 @@ static int rpmsgdev_read_handler(FAR struct rpmsg_endpoint *ept,
   FAR struct rpmsgdev_read_s *msg = data;
   FAR struct rpmsgdev_read_s *rsp;
   FAR struct file *filep = (FAR struct file *)(uintptr_t)msg->filep;
-  int ret = -ENOENT;
-  size_t read = 0;
   uint32_t space;
+  ssize_t ret;
 
-  while (read < msg->count)
+  rsp = rpmsg_get_tx_payload_buffer(ept, &space, true);
+  if (rsp == NULL)
     {
-      rsp = rpmsg_get_tx_payload_buffer(ept, &space, true);
-      if (rsp == NULL)
-        {
-          return -ENOMEM;
-        }
-
-      *rsp = *msg;
-
-      space -= sizeof(*msg) - 1;
-      if (space > msg->count - read)
-        {
-          space = msg->count - read;
-        }
-
-      ret = file_read(filep, rsp->buf, space);
-
-      rsp->header.result = ret;
-      rpmsg_send_nocopy(ept, rsp, (ret < 0 ? 0 : ret) + sizeof(*rsp) - 1);
-      if (ret <= 0 || msg->header.command == RPMSGDEV_READ_NOFRAG)
-        {
-          break;
-        }
-
-      read += ret;
+      return -ENOMEM;
     }
 
-  return 0;
+  *rsp = *msg;
+
+  space -= sizeof(*msg) - 1;
+  if (space > msg->count)
+    {
+      space = msg->count;
+    }
+
+  ret = file_read(filep, rsp->buf, space);
+  rsp->header.result = ret;
+  if (ret < 0)
+    {
+      ret = 0;
+    }
+
+  return rpmsg_send_nocopy(ept, rsp, sizeof(*rsp) - 1 + ret);
 }
 
 /****************************************************************************
@@ -288,9 +279,7 @@ static int rpmsgdev_write_handler(FAR struct rpmsg_endpoint *ept,
       msg->header.result = ret;
     }
 
-  rpmsg_send(ept, msg, sizeof(*msg) - 1);
-
-  return 0;
+  return rpmsg_send(ept, msg, sizeof(*msg) - 1);
 }
 
 /****************************************************************************
