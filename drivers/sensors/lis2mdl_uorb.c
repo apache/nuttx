@@ -1140,7 +1140,7 @@ static int lis2mdl_control(FAR struct sensor_lowerhalf_s *lower,
 
     default:
       err = -EINVAL;
-      snerr("Unknown command for LIS2MDL: lu\n", cmd);
+      snerr("Unknown command for LIS2MDL: %d\n", cmd);
       break;
     }
 
