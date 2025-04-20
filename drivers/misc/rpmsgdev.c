@@ -342,19 +342,19 @@ static int rpmsgdev_wait(FAR struct file *filep, pollevent_t events)
   fds.cb      = rpmsgdev_wait_cb;
   events     |= POLLERR | POLLHUP;
 
-  while (1)
+  for (; ; )
     {
       ret = rpmsgdev_poll(filep, &fds, true);
       if (ret < 0)
         {
-          return ret;
+          break;
         }
 
       ret = nxsem_wait(&sem);
       rpmsgdev_poll(filep, &fds, false);
       if (ret < 0)
         {
-          return ret;
+          break;
         }
 
       if ((fds.revents & events) != 0)
@@ -363,6 +363,7 @@ static int rpmsgdev_wait(FAR struct file *filep, pollevent_t events)
         }
     }
 
+  nxsem_destroy(&sem);
   return ret;
 }
 
@@ -748,7 +749,7 @@ static int rpmsgdev_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
 static FAR void *rpmsgdev_get_tx_payload_buffer(FAR struct rpmsgdev_s *priv,
                                                 FAR uint32_t *len)
 {
-  int sval;
+  int sval = 0;
 
   nxsem_get_value(&priv->wait, &sval);
   if (sval <= 0)
@@ -819,7 +820,7 @@ static int rpmsgdev_send_recv(FAR struct rpmsgdev_s *priv,
 
   if (ret < 0)
     {
-      if (copy == false)
+      if (!copy)
         {
           rpmsg_release_tx_buffer(&priv->ept, msg);
         }
@@ -1062,6 +1063,7 @@ static void rpmsgdev_device_destroy(FAR struct rpmsg_device *rdev,
 
   if (strcmp(priv->remotecpu, rpmsg_get_cpuname(rdev)) == 0)
     {
+      rpmsg_wait(&priv->ept, &priv->wait);
       rpmsg_destroy_ept(&priv->ept);
     }
 }
@@ -1179,7 +1181,7 @@ int rpmsgdev_register(FAR const char *remotecpu, FAR const char *remotepath,
       goto fail_with_rpmsg;
     }
 
-  return OK;
+  return 0;
 
 fail_with_rpmsg:
   rpmsg_unregister_callback(dev,
