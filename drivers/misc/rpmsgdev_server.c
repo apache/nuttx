@@ -315,8 +315,8 @@ static int rpmsgdev_ioctl_handler(FAR struct rpmsg_endpoint *ept,
   FAR struct file *filep = (FAR struct file *)(uintptr_t)msg->filep;
 
   msg->header.result = file_ioctl(filep, msg->request,
-                                  msg->arglen > 0 ? (unsigned long)msg->buf :
-                                  msg->arg);
+                                  msg->arglen == 0 ? msg->arg :
+                                  (unsigned long)msg->buf);
 
   return rpmsg_send(ept, msg, len);
 }
@@ -401,14 +401,14 @@ static int rpmsgdev_poll_handler(FAR struct rpmsg_endpoint *ept,
       if (dev->cfd != 0)
         {
           msg->header.result = file_poll(&dev->file, &dev->fd, false);
-          if (msg->header.result == OK)
+          if (msg->header.result >= 0)
             {
               dev->cfd = 0;
             }
         }
     }
 
-  return msg->header.cookie ? rpmsg_send(ept, msg, len) : OK;
+  return msg->header.cookie ? rpmsg_send(ept, msg, len) : 0;
 }
 
 /****************************************************************************
@@ -452,8 +452,7 @@ static void rpmsgdev_ept_release(FAR struct rpmsg_endpoint *ept)
     }
 
   nxmutex_unlock(&server->lock);
-
-  server->export = NULL;
+  nxmutex_destroy(&server->lock);
   kmm_free(server);
 }
 
@@ -509,6 +508,10 @@ static int rpmsgdev_ept_cb(FAR struct rpmsg_endpoint *ept,
   return -EINVAL;
 }
 
+/****************************************************************************
+ * Name: rpmsgdev_server_created
+ ****************************************************************************/
+
 static void rpmsgdev_server_created(FAR struct rpmsg_device *rdev,
                                     FAR void *priv)
 {
@@ -524,6 +527,22 @@ static void rpmsgdev_server_created(FAR struct rpmsg_device *rdev,
 }
 
 /****************************************************************************
+ * Name: rpmsgdev_init_wqueue
+ ****************************************************************************/
+
+static int rpmsgdev_init_wqueue(void)
+{
+  if (g_rpmsgdev_wqueue == NULL)
+    {
+      g_rpmsgdev_wqueue = work_queue_create("rpmsgdev_server",
+        CONFIG_DEV_RPMSG_SERVER_WORK_PRIORITY, NULL,
+        CONFIG_DEV_RPMSG_SERVER_WORK_STACKSIZE, 1);
+    }
+
+  return g_rpmsgdev_wqueue ? 0 : -ENOMEM;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -532,6 +551,13 @@ int rpmsgdev_export_with_prefix(FAR const char *remotecpu,
                                 FAR const char *localpath)
 {
   FAR struct rpmsgdev_export_s *export;
+  int ret;
+
+  ret = rpmsgdev_init_wqueue();
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   export = kmm_zalloc(sizeof(*export));
   if (export == NULL)
@@ -574,15 +600,12 @@ int rpmsgdev_export(FAR const char *remotecpu, FAR const char *localpath)
 
 int rpmsgdev_server_init(void)
 {
-  if (g_rpmsgdev_wqueue == NULL)
+  int ret;
+
+  ret = rpmsgdev_init_wqueue();
+  if (ret < 0)
     {
-      g_rpmsgdev_wqueue = work_queue_create("rpmsgdev_server",
-        CONFIG_DEV_RPMSG_SERVER_WORK_PRIORITY, NULL,
-        CONFIG_DEV_RPMSG_SERVER_WORK_STACKSIZE, 1);
-      if (g_rpmsgdev_wqueue == NULL)
-        {
-          return -ENOENT;
-        }
+      return ret;
     }
 
   return rpmsg_register_callback(NULL,
