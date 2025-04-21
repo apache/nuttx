@@ -40,7 +40,8 @@
 
 #define RPMSGDEV_OPEN            1
 #define RPMSGDEV_CLOSE           2
-#define RPMSGDEV_READ            3
+#define RPMSGDEV_READ_NONBLOCK   3
+#define RPMSGDEV_READ            4
 #define RPMSGDEV_WRITE           5
 #define RPMSGDEV_LSEEK           6
 #define RPMSGDEV_IOCTL           7

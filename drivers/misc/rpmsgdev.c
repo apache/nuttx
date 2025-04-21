@@ -65,6 +65,7 @@ struct rpmsgdev_priv_s
 {
   uint64_t filep;    /* store server file pointer */
   bool     nonblock; /* true: open with O_NONBLOCK */
+  mutex_t  lock;     /* Mutex used to protect the file operation */
 };
 
 struct rpmsgdev_s
@@ -152,14 +153,15 @@ static void    rpmsgdev_ns_bound(struct rpmsg_endpoint *ept);
 
 static const rpmsg_ept_cb g_rpmsgdev_handler[] =
 {
-  [RPMSGDEV_OPEN]        = rpmsgdev_default_handler,
-  [RPMSGDEV_CLOSE]       = rpmsgdev_default_handler,
-  [RPMSGDEV_READ]        = rpmsgdev_read_handler,
-  [RPMSGDEV_WRITE]       = rpmsgdev_default_handler,
-  [RPMSGDEV_LSEEK]       = rpmsgdev_default_handler,
-  [RPMSGDEV_IOCTL]       = rpmsgdev_ioctl_handler,
-  [RPMSGDEV_POLL]        = rpmsgdev_default_handler,
-  [RPMSGDEV_NOTIFY]      = rpmsgdev_notify_handler,
+  [RPMSGDEV_OPEN]          = rpmsgdev_default_handler,
+  [RPMSGDEV_CLOSE]         = rpmsgdev_default_handler,
+  [RPMSGDEV_READ_NONBLOCK] = rpmsgdev_read_handler,
+  [RPMSGDEV_READ]          = rpmsgdev_read_handler,
+  [RPMSGDEV_WRITE]         = rpmsgdev_default_handler,
+  [RPMSGDEV_LSEEK]         = rpmsgdev_default_handler,
+  [RPMSGDEV_IOCTL]         = rpmsgdev_ioctl_handler,
+  [RPMSGDEV_POLL]          = rpmsgdev_default_handler,
+  [RPMSGDEV_NOTIFY]        = rpmsgdev_notify_handler,
 };
 
 /* File operations */
@@ -232,6 +234,7 @@ static int rpmsgdev_open(FAR struct file *filep)
 
   priv->filep    = msg.filep;
   priv->nonblock = !!(filep->f_oflags & O_NONBLOCK);
+  nxmutex_init(&priv->lock);
 
   /* Attach the private data to the struct file instance */
 
@@ -278,6 +281,7 @@ static int rpmsgdev_close(FAR struct file *filep)
     }
 
   filep->f_priv = NULL;
+  nxmutex_destroy(&priv->lock);
   kmm_free(priv);
 
   return ret;
@@ -390,7 +394,8 @@ static ssize_t rpmsgdev_read(FAR struct file *filep, FAR char *buffer,
   FAR struct rpmsgdev_s *dev;
   FAR struct rpmsgdev_priv_s *priv;
   struct rpmsgdev_read_s msg;
-  int ret;
+  uint32_t command;
+  ssize_t ret;
 
   if (buffer == NULL)
     {
@@ -408,27 +413,19 @@ static ssize_t rpmsgdev_read(FAR struct file *filep, FAR char *buffer,
   msg.filep = priv->filep;
   msg.count = buflen;
 
-  for (; ; )
+  command = priv->nonblock ? RPMSGDEV_READ_NONBLOCK : RPMSGDEV_READ;
+
+  ret = nxmutex_lock(&priv->lock);
+  if (ret < 0)
     {
-      ret = rpmsgdev_send_recv(dev, RPMSGDEV_READ, true, &msg.header,
-                               sizeof(msg) - 1, buffer);
-      if (ret != -EAGAIN || priv->nonblock)
-        {
-          return ret;
-        }
-
-      /* If open with block mode and return -EAGAIN, should wait the
-       * perr device ready and try again until read success or some
-       * other errors occur.
-       */
-
-      ret = rpmsgdev_wait(filep, POLLIN);
-      if (ret < 0)
-        {
-          rpmsgdeverr("read wait failed, ret=%d\n", ret);
-          return ret;
-        }
+      return ret;
     }
+
+  ret = rpmsgdev_send_recv(dev, command, true, &msg.header,
+                           sizeof(msg) - 1, buffer);
+  nxmutex_unlock(&priv->lock);
+
+  return ret;
 }
 
 /****************************************************************************
