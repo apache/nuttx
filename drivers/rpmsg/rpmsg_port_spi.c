@@ -410,7 +410,7 @@ static void rpmsg_port_spi_complete_handler(FAR void *arg)
       if (rpspi->rxhdr->cmd == RPMSG_PORT_SPI_CMD_SHUTDOWN)
         {
           rpspi->state = RPMSG_PORT_SPI_STATE_DISCONNECTING;
-          rpmsg_port_spi_drop_packets(rpspi, RPMSG_PORT_SPI_DROP_ALL);
+          rpmsg_port_drop_packets(&rpspi->port, RPMSG_PORT_DROP_ALL);
         }
 
       rpmsg_port_queue_add_buffer(&rpspi->port.rxq, rpspi->rxhdr);
