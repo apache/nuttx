@@ -143,6 +143,7 @@ endif()
 list(
   APPEND
   HOSTSRCS
+  sim_hosterrno.c
   sim_hostirq.c
   sim_hostmemory.c
   sim_hostmisc.c
