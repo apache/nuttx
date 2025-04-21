@@ -36,7 +36,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define SIM_RPTUN_WORK_DELAY 1
+#define SIM_RPTUN_SHMEM_SIZE         0x10000
+#define SIM_RPTUN_WORK_DELAY         MSEC2TICK(1)
 
 /* Status byte for master/slave to report progress */
 
