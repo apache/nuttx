@@ -21,11 +21,11 @@ Peripheral       Status        Notes
 ==============   ============  =====
 GPIO             Working       See Supported Boards documentation for available pins.
 UART             Working       GPIO 0 (UART0 TX) and GPIO 1 (UART0 RX) are used for the console.
-I2C              Untested
+I2C              Working
 SPI Master       Working
 SPI Slave        Untested
 DMAC             Untested
-PWM              Untested
+PWM              Working
 USB              Experimental  usbnsh configuration is somewhat working with some data corruption
 PIO              Working
 IRQs             Working
