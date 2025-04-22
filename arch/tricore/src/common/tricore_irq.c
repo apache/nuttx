@@ -87,6 +87,8 @@ static void tricore_gpsrinitialize(void)
   volatile Ifx_SRC_SRCR *src = &SRC_GPSR00 + up_cpu_index();
   int i;
 
+  /* Cpux gpsr init */
+
   for (i = 0; i < 6; i++)
     {
 #ifdef CONFIG_ARCH_TC3XX
@@ -100,6 +102,15 @@ static void tricore_gpsrinitialize(void)
 
       src += TRICORE_SRCNUM_PER_GPSR;
     }
+
+  /* Cpucs gpsr init */
+
+#ifndef CONFIG_ARCH_TC3XX
+  src = &SRC_GPSR6_SR0 + up_cpu_index();
+  IfxSrc_init(src, IfxSrc_Tos_cpu0 + up_cpu_index(),
+              IRQ_TO_NDX(TRICORE_SRC2IRQ(src)),
+              IfxSrc_VmId_none);
+#endif
 }
 #endif
 
