@@ -483,6 +483,7 @@ netdev_upper_vlan_foreach(FAR struct netdev_upperhalf_s *upper,
 {
   int i;
 
+  net_lock();
   for (i = 0; i < CONFIG_NET_VLAN_COUNT; i++)
     {
       if (upper->vlan[i].dev)
@@ -490,6 +491,8 @@ netdev_upper_vlan_foreach(FAR struct netdev_upperhalf_s *upper,
           cb(upper->vlan[i].dev);
         }
     }
+
+  net_unlock();
 }
 #endif
 
