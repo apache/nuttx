@@ -57,6 +57,13 @@ config MM_KASAN_INSTRUMENT_ALL
 		to check. Enabling this option will get image size increased
 		and performance decreased significantly.
 
+config MM_KASAN_MARK_LOCATION
+	string "Kasan's mark storage location"
+	---help---
+		The section where KASan mark is located. It can prevent
+		variables located in non-chip memory, and crashes
+		caused by instrumentation access
+
 if MM_KASAN_INSTRUMENT
 
 config MM_KASAN_REGIONS
