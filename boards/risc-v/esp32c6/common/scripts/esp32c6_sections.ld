@@ -118,6 +118,8 @@ SECTIONS
     *(.iram1)
     *(.iram1.*)
 
+    *libcoexist.a:(.coexiram .coexiram.*)
+
     *libsched.a:irq_dispatch.*(.text .text.* .literal .literal.*)
     *libsched.a:sched_lock.*(.text .text.* .literal .literal.*)
     *libsched.a:sched_unlock.*(.text .text.* .literal .literal.*)
