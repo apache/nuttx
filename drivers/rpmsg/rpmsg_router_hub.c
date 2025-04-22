@@ -101,7 +101,9 @@ static int rpmsg_router_hub_cb(FAR struct rpmsg_endpoint *ept,
       return -EINVAL;
     }
 
-  return rpmsg_send(dst_ept, data, len);
+  rpmsg_send_offchannel_raw(dst_ept, dst_ept->addr,
+                            dst_ept->dest_addr, data, len, true);
+  return 0;
 }
 
 /****************************************************************************
