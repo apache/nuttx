@@ -55,4 +55,8 @@ if(CONFIG_XTENSA_STRCMP)
   list(APPEND CSRCS arch_strcmp.S)
 endif()
 
+if(NOT CONFIG_PROFILE_NONE)
+  list(APPEND CSRCS arch_mcount.c)
+endif()
+
 target_sources(c PRIVATE ${CSRCS})
