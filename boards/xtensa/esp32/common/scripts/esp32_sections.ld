@@ -153,6 +153,7 @@ SECTIONS
     _iram_text_start = ABSOLUTE(.);
     *(.iram1 .iram1.*)
     esp32_start.*(.literal .text .literal.* .text.*)
+    *libcoexist.a:(.coexiram .coexiram.*)
     *libphy.a:(.literal .text .literal.* .text.*)
     *librtc.a:(.literal .text .literal.* .text.*)
     *libpp.a:(.literal .text .literal.* .text.*)

@@ -158,7 +158,7 @@ SECTIONS
     *(.iram1 .iram1.*)
     esp32s3_start.*(.literal .text .literal.* .text.*)
     esp32s3_region.*(.literal .text .literal.* .text.*)
-
+    *libcoexist.a:(.coexiram .coexiram.*)
     *libarch.a:*esp_loader.*(.literal .text .literal.* .text.*)
     *libarch.a:esp32s3_cpuindex.*(.literal .text .literal.* .text.*)
     *libarch.a:esp32s3_irq.*(.literal .text .literal.* .text.*)
