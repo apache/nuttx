@@ -120,7 +120,11 @@ static struct kasan_watchpoint_s g_watchpoint[MM_KASAN_WATCHPOINT];
 #endif
 
 #ifdef CONFIG_MM_KASAN
+#  ifdef MM_KASAN_MARK_LOCATION
+static uint32_t g_region_init locate_data(MM_KASAN_MARK_LOCATION);
+#  else
 static uint32_t g_region_init;
+#  endif
 #endif
 
 /****************************************************************************
