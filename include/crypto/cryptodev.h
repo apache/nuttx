@@ -152,6 +152,7 @@ struct cryptoini
   int cri_klen;      /* Key length, in bits */
   int cri_rnd;       /* Algorithm rounds, where relevant */
   int cri_sid;
+  int cri_op;
   caddr_t cri_key;   /* key to use */
   union
   {
@@ -363,6 +364,7 @@ struct cryptocap
 struct session_op
 {
   uint32_t cipher;    /* ie. CRYPTO_AES_EBC */
+  uint16_t op;        /* i.e. COP_ENCRYPT */
   uint32_t mac;
   uint32_t keylen;    /* cipher key */
   caddr_t key;
@@ -396,6 +398,7 @@ struct crypt_op
 
   uint16_t flags;
   unsigned len;
+  unsigned olen;
   unsigned aadlen;
   caddr_t src, dst;   /* become iov[] inside kernel */
   caddr_t mac;        /* must be big enough for chosen MAC */

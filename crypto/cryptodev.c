@@ -277,6 +277,7 @@ static int cryptof_ioctl(FAR struct file *filep,
           {
             crie.cri_alg = sop->cipher;
             crie.cri_klen = sop->keylen * 8;
+            crie.cri_op = sop->op;
 
             crie.cri_key = kmm_malloc(crie.cri_klen / 8);
             if (crie.cri_key == NULL)
@@ -461,6 +462,7 @@ static int cryptodev_op(FAR struct csession *cse,
     }
 
   crp->crp_ilen = cop->len;
+  crp->crp_olen = cop->olen;
   crp->crp_buf = cop->src;
   crp->crp_sid = cse->sid;
   crp->crp_opaque = cse;
