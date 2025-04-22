@@ -25,16 +25,16 @@
 
 /* NVIC priority levels *****************************************************/
 
-/* Each priority field holds a priority value, 0-7. The lower the value,
- * the greater the priority of the corresponding interrupt. The processor
- * implements only bits[7:5] of each field, bits[4:0] read as zero and ignore
- * writes.
+/* Each priority field holds an 8-bit value, but only the upper 4 bits [7:4]
+ * are implemented by the processor (NVIC_PRIO_BITS = 4). The lower
+ * 4 bits [3:0] are read as zero and ignore writes. A lower numeric value
+ * indicates a higher interrupt priority.
  */
 
-#define NVIC_SYSH_PRIORITY_MIN     0xe0 /* All bits[7:5] set is minimum priority */
-#define NVIC_SYSH_PRIORITY_DEFAULT 0x40 /* Midpoint is the default */
-#define NVIC_SYSH_PRIORITY_MAX     0x00 /* Zero is maximum priority */
-#define NVIC_SYSH_PRIORITY_STEP    0x20 /* Five bits of interrupt priority used */
+#define NVIC_SYSH_PRIORITY_MIN     0xf0 /* All bits [7:4] set: lowest priority (15) */
+#define NVIC_SYSH_PRIORITY_DEFAULT 0x80 /* Midpoint: priority level 8 */
+#define NVIC_SYSH_PRIORITY_MAX     0x00 /* All bits [7:4] cleared: highest priority (0) */
+#define NVIC_SYSH_PRIORITY_STEP    0x10 /* One step per priority level */
 
 #define ARMV8M_PERIPHERAL_INTERRUPTS 52
 
