@@ -1212,11 +1212,30 @@ static int noteram_dump_one(FAR uint8_t *p, FAR struct lib_outstream_s *s,
       break;
     case NOTE_DUMP_MARK:
       {
-        int len = note->nc_length - sizeof(struct note_event_s);
         FAR struct note_event_s *nbi = (FAR struct note_event_s *)p;
+        int len = note->nc_length - SIZEOF_NOTE_EVENT(0);
+
         ret += noteram_dump_header(s, &nbi->nev_cmn, ctx);
         ret += lib_sprintf(s, "tracing_mark_write: I|%d|%.*s\n",
                            pid, len, (FAR const char *)nbi->nev_data);
+      }
+      break;
+      case NOTE_DUMP_BINARY:
+      {
+        FAR struct note_event_s *nbi = (FAR struct note_event_s *)p;
+        int len = note->nc_length - SIZEOF_NOTE_EVENT(0);
+        int i;
+
+        ret += noteram_dump_header(s, &nbi->nev_cmn, ctx);
+        ret += lib_sprintf(s, "tracing_mark_write: I|%d|", pid);
+
+        for (i = 0; i < len; i++)
+          {
+            ret += lib_sprintf(s, "%02x ", nbi->nev_data[i]);
+          }
+
+        lib_stream_putc(s, '\n');
+        ret++;
       }
       break;
     case NOTE_DUMP_COUNTER:

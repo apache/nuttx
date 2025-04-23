@@ -271,6 +271,7 @@ enum note_type_e
   NOTE_DUMP_BEGIN,
   NOTE_DUMP_END,
   NOTE_DUMP_MARK,
+  NOTE_DUMP_BINARY,
   NOTE_DUMP_COUNTER,
 
   /* Always last */
