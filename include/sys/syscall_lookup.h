@@ -170,7 +170,8 @@ SYSCALL_LOOKUP(clock_nanosleep,            4)
 SYSCALL_LOOKUP(clock,                      0)
 SYSCALL_LOOKUP(clock_gettime,              2)
 SYSCALL_LOOKUP(clock_settime,              2)
-#ifdef CONFIG_CLOCK_TIMEKEEPING
+#ifdef CONFIG_CLOCK_ADJTIME
+  SYSCALL_LOOKUP(clock_adjtime,            2)
   SYSCALL_LOOKUP(adjtime,                  2)
 #endif
 
