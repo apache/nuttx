@@ -100,8 +100,8 @@ static void collect_deadlock(FAR struct tcb_s *tcb, FAR void *arg)
       pid_t holder;
       size_t i;
 
-      holder = mutex->holder;
-      if (holder == NXMUTEX_NO_HOLDER)
+      holder = nxmutex_get_holder(mutex);
+      if (holder < 0)
         {
           break;
         }

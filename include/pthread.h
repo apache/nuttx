@@ -350,8 +350,7 @@ typedef struct pthread_mutex_s pthread_mutex_t;
 
 #define PTHREAD_NXMUTEX_INITIALIZER  {                                    \
     NXSEM_INITIALIZER(NXSEM_NO_MHOLDER,                                   \
-                      SEM_TYPE_MUTEX | PTHREAD_MUTEX_DEFAULT_PRIO_FLAGS), \
-    NXMUTEX_NO_HOLDER}
+                      SEM_TYPE_MUTEX | PTHREAD_MUTEX_DEFAULT_PRIO_FLAGS)}
 #define PTHREAD_NXRMUTEX_INITIALIZER {PTHREAD_NXMUTEX_INITIALIZER, 0}
 
 #if defined(CONFIG_PTHREAD_MUTEX_TYPES) && !defined(CONFIG_PTHREAD_MUTEX_UNSAFE)
