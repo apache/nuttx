@@ -227,8 +227,6 @@ class Backtrace:
 
 def lookup_type(name, block=None) -> gdb.Type:
     """Return the type object of a type name"""
-    global g_type_cache
-
     key = (name, block)
     if key not in g_type_cache:
         try:
@@ -287,7 +285,6 @@ long_type = lookup_type("long")
 
 def get_long_type():
     """Return the cached long type object"""
-    global long_type
     return long_type
 
 
