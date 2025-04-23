@@ -253,7 +253,7 @@ int settimeofday(FAR const struct timeval *tv,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_CLOCK_TIMEKEEPING) || defined(CONFIG_CLOCK_ADJTIME)
+#ifdef CONFIG_CLOCK_ADJTIME
 int adjtime(FAR const struct timeval *delta, FAR struct timeval *olddelta);
 #endif
 
