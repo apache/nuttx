@@ -1272,7 +1272,7 @@ void mpu_modify_region(unsigned int set, unsigned int region,
     {
       if (size != 0)
         {
-          mpu_modify_code_region(region, base, base + size);
+          mpu_modify_code_region(region, base, size);
         }
 
       mpu_modify_code_set(set, region, flags);
@@ -1281,7 +1281,7 @@ void mpu_modify_region(unsigned int set, unsigned int region,
     {
       if (size != 0)
         {
-          mpu_modify_data_region(region, base, base + size);
+          mpu_modify_data_region(region, base, size);
         }
 
       mpu_modify_data_set(set, region, flags);
