@@ -91,6 +91,10 @@ void arm64_new_task(struct tcb_s * tcb)
   xcp->regs[REG_SCTLR_EL1] |= SCTLR_TCF1_BIT;
 #endif
 
+#ifndef CONFIG_ARM64_DECODEFIQ
+  xcp->regs[REG_SPSR]     |= DAIF_FIQ_BIT;
+#endif
+
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   xcp->regs[REG_SPSR]     |= (DAIF_IRQ_BIT | DAIF_FIQ_BIT);
 #endif /* CONFIG_SUPPRESS_INTERRUPTS */
