@@ -495,6 +495,26 @@ SECTIONS
     _sheap = ABSOLUTE(.);
   } >dram0_0_seg AT>ROM
 
+  /* This section will be used by the debugger and disassembler to get more
+   * information about raw data present in the code.
+   * Indeed, it may be required to add some padding at some points in the
+   * code in order to align a branch/jump destination on a particular bound.
+   * Padding these instructions will generate null bytes that shall be
+   * interpreted as data, and not code by the debugger or disassembler.
+   * This section will only be present in the ELF file, not in the final
+   * binary.
+   */
+
+  .xt.prop 0 :
+  {
+    KEEP (*(.xt.prop .gnu.linkonce.prop.*))
+  }
+
+  .xt.lit 0 :
+  {
+    KEEP (*(.xt.lit .gnu.linkonce.p.*))
+  }
+
   /* The alignment of the ".flash.text" output section is forced to
    * 0x00010000 (64KB) to ensure that it will be allocated at the beginning
    * of the next available Flash block.
