@@ -42,6 +42,12 @@
 #define ICJX_CTRL_WORD_PULLUP_600U    6   /* 600 uA pull up */
 #define ICJX_CTRL_WORD_PULLUP_2M      7   /* 2 mA pull up*/
 
+#define ICJX_CTRL_WORD_FILTER_1 0         /* 14.5 * 1/CLK */
+#define ICJX_CTRL_WORD_FILTER_2 1         /* 896.5 * 1/CLK */
+#define ICJX_CTRL_WORD_FILTER_3 2         /* 3584.5 * 1/CLK */
+#define ICJX_CTRL_WORD_FILTER_4 3         /* 7168.5 * 1/CLK */
+#define ICJX_CTRL_WORD_FILTER_DISABLED 8  /* Filters are bypassed */
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -65,6 +71,9 @@ struct icjx_config_s
   uint8_t verification; /* True if data verification on MISO line is used */
   uint8_t current_src;  /* Current sources for pin nibbles (pull up,
                          * pull down) - see Control Word 2 register
+                         */
+  uint8_t filters;      /* Filters configuration for pin nibbles - see
+                         * Control Word 1 register.
                          */
   uint8_t addr;         /* Device address (set by A(1:0) pins) */
   uint8_t mode;         /* SPI mode */
