@@ -29,6 +29,7 @@
 
 #include <nuttx/config.h>
 
+#include <debug.h>
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -160,6 +161,26 @@
  */
 
 #define SENSOR_BODY_COORDINATE_P7                   7
+
+#ifdef CONFIG_SENSORS_MONITOR
+#  define smlog(level, name, fmt, ...) \
+    do  \
+      { \
+        if (level <= sensor_monitor_level(name)) \
+          { \
+            sninfo("[topic: %s] "fmt, name, ##__VA_ARGS__); \
+          } \
+      } \
+    while (0)
+#else
+#  define smlog(log_level, name, fmt,...)
+#endif
+
+#define smerr(name, fmt, ...)    smlog(LOG_ERR, name, fmt, ##__VA_ARGS__)
+#define smwarn(name, fmt, ...)   smlog(LOG_WARN, name, fmt, ##__VA_ARGS__)
+#define smnotice(name, fmt, ...) smlog(LOG_NOTICE, name, fmt, ##__VA_ARGS__)
+#define sminfo(name, fmt, ...)   smlog(LOG_INFO, name, fmt, ##__VA_ARGS__)
+#define smdebug(name, fmt, ...)  smlog(LOG_DEBUG, name, fmt, ##__VA_ARGS__)
 
 /****************************************************************************
  * Inline Functions

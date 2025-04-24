@@ -28,6 +28,7 @@
 
 #include <fcntl.h>
 #include <debug.h>
+#include <libgen.h>
 
 #include <nuttx/nuttx.h>
 #include <nuttx/list.h>
@@ -96,6 +97,7 @@ struct sensor_rpmsg_dev_s
   uint8_t                        nsubscribers;
   FAR void                      *upper;
   sensor_push_event_t            push_event;
+  FAR const char                *name;
   char                           path[1];
 };
 
@@ -542,6 +544,7 @@ sensor_rpmsg_alloc_proxy(FAR struct sensor_rpmsg_dev_s *dev,
       sensor_rpmsg_ioctl(dev, SNIOC_BATCH, state.min_latency, 0, false);
     }
 
+  sminfo(dev->name, "create proxy:%p", proxy);
   return proxy;
 }
 
@@ -626,10 +629,12 @@ sensor_rpmsg_alloc_stub(FAR struct sensor_rpmsg_dev_s *dev,
 
   if (dev->lower.persist)
     {
+      sminfo(dev->name, "push event persist:%p", stub);
       sensor_rpmsg_push_event_persist(dev, stub);
     }
 
   sensor_rpmsg_unlock(dev);
+  sminfo(dev->name, "create stub:%p", stub);
 
   return stub;
 }
@@ -637,6 +642,7 @@ sensor_rpmsg_alloc_stub(FAR struct sensor_rpmsg_dev_s *dev,
 static void sensor_rpmsg_free_proxy(FAR struct sensor_rpmsg_dev_s *dev,
                                     FAR struct sensor_rpmsg_proxy_s *proxy)
 {
+  sminfo(dev->name, "free proxy:%p name:%s", proxy, proxy->ept->name);
   list_delete(&proxy->node);
   kmm_free(proxy);
   if (list_is_empty(&dev->proxylist))
@@ -1000,6 +1006,10 @@ static void sensor_rpmsg_push_event_one(FAR struct sensor_rpmsg_dev_s *dev,
             }
         }
 
+      smdebug(dev->name, "rpmsg push event, "
+              "readcount:%d to remote:%s i:%" PRIu32 ", l:%" PRIu32,
+              ret, rpmsg_get_cpuname(sre->ept.rdev),
+              state.interval, state.latency);
       cell->len     = ret;
       cell->cookie  = stub->cookie;
       cell->nbuffer = dev->lower.nbuffer;
@@ -1108,7 +1118,7 @@ static int sensor_rpmsg_adv_handler(FAR struct rpmsg_endpoint *ept,
   proxy = sensor_rpmsg_alloc_proxy(dev, ept, msg);
   if (!proxy)
     {
-      snerr("ERROR: adv alloc proxy failed:%s\n", dev->path);
+      snerr("ERROR: adv create proxy failed:%s\n", dev->path);
     }
   else
     {
@@ -1123,6 +1133,9 @@ static int sensor_rpmsg_adv_handler(FAR struct rpmsg_endpoint *ept,
           snerr("ERROR: adv rpmsg send failed:%s, %d, %s\n",
                 dev->path, ret, rpmsg_get_cpuname(ept->rdev));
         }
+
+      sminfo(dev->name, "rpmsg adv proxy success, remote:%s",
+             rpmsg_get_cpuname(ept->rdev));
     }
 
   return 0;
@@ -1167,6 +1180,8 @@ static int sensor_rpmsg_unadv_handler(FAR struct rpmsg_endpoint *ept,
       if (proxy->ept == ept && proxy->cookie == msg->cookie)
         {
           sensor_rpmsg_free_proxy(dev, proxy);
+          sminfo(dev->name, "rpmsg unadv free proxy success, "
+                 "remote:%s", rpmsg_get_cpuname(ept->rdev));
           break;
         }
     }
@@ -1228,6 +1243,11 @@ static int sensor_rpmsg_suback_handler(FAR struct rpmsg_endpoint *ept,
     {
       sensor_rpmsg_advsub_one(dev, ept, SENSOR_RPMSG_UNSUBSCRIBE);
       snerr("ERROR: suback failed:%s\n", dev->path);
+    }
+  else
+    {
+      sminfo(dev->name, "rpmsg suback success, remote:%s",
+             rpmsg_get_cpuname(ept->rdev));
     }
 
   return 0;
@@ -1314,6 +1334,8 @@ static int sensor_rpmsg_publish_handler(FAR struct rpmsg_endpoint *ept,
 
       sensor_rpmsg_unlock(dev);
 
+      smdebug(dev->name, "rpmsg receive data: cnt:%" PRIu32 ", "
+              "from remote:%s", cell->len, rpmsg_get_cpuname(ept->rdev));
       written += sizeof(*cell) + cell->len + 0x7;
       written &= ~0x7;
     }
@@ -1574,6 +1596,7 @@ sensor_rpmsg_register(FAR struct sensor_lowerhalf_s *lower,
   list_initialize(&dev->proxylist);
   strlcpy(dev->path, path, size + 1);
 
+  dev->name           = basename(dev->path);
   dev->nadvertisers   = !!lower->ops->activate;
   dev->push_event     = lower->push_event;
   dev->upper          = lower->priv;
