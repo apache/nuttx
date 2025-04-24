@@ -80,6 +80,12 @@ ifeq ($(CONFIG_FDCHECK),y)
 CSRCS += lib_fdcheck.c
 endif
 
+# Note support
+
+ifeq ($(CONFIG_SCHED_INSTRUMENTATION_DUMP),y)
+CSRCS += lib_note.c
+endif
+
 # To ensure uname information is newest,
 # add lib_utsname.o to phony target for force rebuild
 

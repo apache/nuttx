@@ -185,7 +185,7 @@
 #define sched_note_event(tag, event, buf, len) \
         sched_note_event_ip(tag, SCHED_NOTE_IP, event, buf, len)
 #define sched_note_vprintf(tag, fmt, va) \
-        sched_note_vprintf_ip(tag, SCHED_NOTE_IP, fmt, 0, va)
+        sched_note_vprintf_ip(tag, SCHED_NOTE_IP, fmt, 0, &(va))
 
 #ifdef CONFIG_DRIVERS_NOTE_STRIP_FORMAT
 #  define sched_note_printf(tag, fmt, ...) \
@@ -670,7 +670,7 @@ void sched_note_heap(uint8_t event, FAR void *heap, FAR void *mem,
 void sched_note_event_ip(uint32_t tag, uintptr_t ip, uint8_t event,
                          FAR const void *buf, size_t len);
 void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
-                           uint32_t type, va_list va) printf_like(3, 0);
+                           uint32_t type, va_list *va) printf_like(3, 0);
 void sched_note_printf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
                           uint32_t type, ...) printf_like(3, 5);
 #else
