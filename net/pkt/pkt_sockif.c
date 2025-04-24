@@ -39,6 +39,7 @@
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 
+#include "devif/devif.h"
 #include "netdev/netdev.h"
 #include <socket/socket.h>
 #include "pkt/pkt.h"
@@ -77,7 +78,14 @@ const struct sock_intf_s g_pkt_sockif =
   pkt_netpoll,     /* si_poll */
   pkt_sendmsg,     /* si_sendmsg */
   pkt_recvmsg,     /* si_recvmsg */
-  pkt_close        /* si_close */
+  pkt_close,       /* si_close */
+  NULL,            /* si_ioctl */
+  NULL,            /* si_socketpair */
+  NULL             /* si_shutdown */
+#if defined(CONFIG_NET_SOCKOPTS) && defined(CONFIG_NET_PKTPROTO_OPTIONS)
+  , pkt_getsockopt /* si_getsockopt */
+  , pkt_setsockopt /* si_setsockopt */
+#endif
 };
 
 /****************************************************************************
@@ -116,6 +124,11 @@ static int pkt_sockif_alloc(FAR struct socket *psock)
   /* Save the protocol in the connection structure */
 
   conn->type = psock->s_proto;
+
+#if defined(CONFIG_NET_PKT_WRITE_BUFFERS) && CONFIG_NET_SEND_BUFSIZE > 0
+  conn->sndbufs = CONFIG_NET_SEND_BUFSIZE;
+  nxsem_init(&conn->sndsem, 0, 0);
+#endif
 
   /* Save the pre-allocated connection in the socket structure */
 
@@ -346,6 +359,31 @@ static int pkt_close(FAR struct socket *psock)
               /* Yes... free any read-ahead data */
 
               iob_free_queue(&conn->readahead);
+
+#ifdef CONFIG_NET_PKT_WRITE_BUFFERS
+              /* Free write buffer callback. */
+
+              if (conn->sndcb != NULL)
+                {
+                  FAR struct net_driver_s *dev;
+                  int ret;
+
+                  while (iob_get_queue_entry_count(&conn->write_q) != 0)
+                    {
+                      ret = net_sem_timedwait_uninterruptible(&conn->sndsem,
+                            _SO_TIMEOUT(conn->sconn.s_sndtimeo));
+                      if (ret < 0)
+                        {
+                          break;
+                        }
+                    }
+
+                  dev = pkt_find_device(conn);
+
+                  pkt_callback_free(dev, conn, conn->sndcb);
+                  conn->sndcb = NULL;
+                }
+#endif
 
               /* Then free the connection structure */
 

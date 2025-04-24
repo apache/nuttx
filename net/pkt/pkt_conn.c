@@ -140,6 +140,12 @@ void pkt_free(FAR struct pkt_conn_s *conn)
 
   dq_rem(&conn->sconn.node, &g_active_pkt_connections);
 
+#ifdef CONFIG_NET_CAN_WRITE_BUFFERS
+  /* Free the write queue */
+
+  iob_free_queue(&conn->write_q);
+#endif
+
   /* Free the connection. */
 
   NET_BUFPOOL_FREE(g_pkt_connections, conn);

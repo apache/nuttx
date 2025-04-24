@@ -20,6 +20,18 @@ config NET_PKT
 
 if NET_PKT
 
+config NET_PKT_WRITE_BUFFERS
+	bool  "Enable PKT write buffering"
+	default n
+	select NET_WRITE_BUFFERS
+	select NET_PKTPROTO_OPTIONS
+	---help---
+		Write buffers allows buffering of ongoing PKT packets, providing
+		for higher performance, nonblocking output.
+
+		You might want to disable PKT write buffering on a highly memory
+		memory constrained system where there are no performance issues.
+
 config NET_PKT_PREALLOC_CONNS
 	int "Preallocated packet sockets"
 	default 1
