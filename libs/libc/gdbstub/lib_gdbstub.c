@@ -116,7 +116,7 @@ static const struct memory_region_s g_memory_region[] =
 };
 #endif
 
-#ifdef CONFIG_SMP
+#if defined(CONFIG_SMP) && defined(CONFIG_ARCH_HAVE_DEBUG)
 static struct smp_call_data_s g_call_data;
 #endif
 
