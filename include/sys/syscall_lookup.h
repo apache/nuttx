@@ -402,3 +402,7 @@ SYSCALL_LOOKUP(settimeofday,               2)
 /* ANSI C signal handling */
 
 SYSCALL_LOOKUP(signal,                     2)
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_DUMP
+  SYSCALL_LOOKUP(sched_note_vprintf_ip,    5)
+#endif

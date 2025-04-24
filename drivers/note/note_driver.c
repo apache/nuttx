@@ -1533,7 +1533,7 @@ void sched_note_event_ip(uint32_t tag, uintptr_t ip, uint8_t event,
 }
 
 void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
-                           uint32_t type, va_list va)
+                           uint32_t type, va_list *va)
 {
   FAR struct note_printf_s *note;
   FAR struct note_driver_s **driver;
@@ -1549,7 +1549,7 @@ void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
           continue;
         }
 
-      if (note_vprintf(*driver, ip, fmt, va))
+      if (note_vprintf(*driver, ip, fmt, *va))
         {
           continue;
         }
@@ -1601,7 +1601,7 @@ void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
                     {
                       case NOTE_PRINTF_UINT32:
                         {
-                          var->i = va_arg(va, int);
+                          var->i = va_arg(*va, int);
                           if (next + sizeof(var->i) > length)
                             {
                               break;
@@ -1617,14 +1617,14 @@ void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
                               break;
                             }
 
-                          var->ll = va_arg(va, long long);
+                          var->ll = va_arg(*va, long long);
                           next += sizeof(var->ll);
                         }
                       break;
                       case NOTE_PRINTF_STRING:
                         {
                           size_t len;
-                          var->s = va_arg(va, FAR const char *);
+                          var->s = va_arg(*va, FAR const char *);
                           len = strlen(var->s) + 1;
                           if (next + len > length)
                             {
@@ -1637,7 +1637,7 @@ void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
                       break;
                       case NOTE_PRINTF_DOUBLE:
                         {
-                          var->d = va_arg(va, double);
+                          var->d = va_arg(*va, double);
                           if (next + sizeof(var->d) > length)
                             {
                               break;
@@ -1675,7 +1675,7 @@ void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
                               break;
                             }
 
-                          var->im = va_arg(va, intmax_t);
+                          var->im = va_arg(*va, intmax_t);
                           next += sizeof(var->im);
                         }
 #ifdef CONFIG_HAVE_LONG_LONG
@@ -1686,7 +1686,7 @@ void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
                               break;
                             }
 
-                          var->ll = va_arg(va, long long);
+                          var->ll = va_arg(*va, long long);
                           next += sizeof(var->ll);
                         }
 #endif
@@ -1697,7 +1697,7 @@ void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
                               break;
                             }
 
-                          var->l = va_arg(va, long);
+                          var->l = va_arg(*va, long);
                           next += sizeof(var->l);
                         }
                       else if (*(p - 2) == 'z')
@@ -1707,7 +1707,7 @@ void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
                               break;
                             }
 
-                          var->sz = va_arg(va, size_t);
+                          var->sz = va_arg(*va, size_t);
                           next += sizeof(var->sz);
                         }
                       else if (*(p - 2) == 't')
@@ -1717,7 +1717,7 @@ void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
                               break;
                             }
 
-                          var->ptr = va_arg(va, ptrdiff_t);
+                          var->ptr = va_arg(*va, ptrdiff_t);
                           next += sizeof(var->ptr);
                         }
                       else
@@ -1727,7 +1727,7 @@ void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
                               break;
                             }
 
-                          var->i = va_arg(va, int);
+                          var->i = va_arg(*va, int);
                           next += sizeof(var->i);
                         }
 
@@ -1745,7 +1745,7 @@ void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
                               break;
                             }
 
-                          var->ld = va_arg(va, long double);
+                          var->ld = va_arg(*va, long double);
                           next += sizeof(var->ld);
                         }
                       else
@@ -1756,7 +1756,7 @@ void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
                               break;
                             }
 
-                          var->d = va_arg(va, double);
+                          var->d = va_arg(*va, double);
                           next += sizeof(var->d);
                         }
 #endif
@@ -1765,13 +1765,13 @@ void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
                     }
                   else if (c == '*')
                     {
-                      var->i = va_arg(va, int);
+                      var->i = va_arg(*va, int);
                       next += sizeof(var->i);
                     }
                   else if (c == 's')
                     {
                       size_t len;
-                      var->s = va_arg(va, FAR char *);
+                      var->s = va_arg(*va, FAR char *);
                       len = strlen(var->s) + 1;
                       if (next + len > length)
                         {
@@ -1789,7 +1789,7 @@ void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
                           break;
                         }
 
-                      var->p = va_arg(va, FAR void *);
+                      var->p = va_arg(*va, FAR void *);
                       next += sizeof(var->p);
                       infmt = false;
                     }
@@ -1808,16 +1808,6 @@ void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
       note_add(*driver, note, length);
     }
 }
-
-void sched_note_printf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
-                          uint32_t type, ...)
-{
-  va_list va;
-  va_start(va, type);
-  sched_note_vprintf_ip(tag, ip, fmt, type, va);
-  va_end(va);
-}
-
 #endif /* CONFIG_SCHED_INSTRUMENTATION_DUMP */
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_FILTER
