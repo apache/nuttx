@@ -65,6 +65,8 @@ endif()
 set(CMAKE_CXX_EXTENSIONS OFF)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_USER_MAKE_RULES_OVERRIDE
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/nuttx_overrides.cmake)
 
 # Setup build type (Debug Release RelWithDebInfo MinSizeRel Coverage). Default
 # to minimum size release
