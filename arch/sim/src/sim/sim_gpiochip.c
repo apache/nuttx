@@ -93,6 +93,8 @@ static struct ioexpander_ops_s g_sim_gpiochip_ops =
 #endif
 };
 
+struct ioexpander_dev_s *g_gpiochip = NULL;
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -450,5 +452,26 @@ int sim_gpiochip_initialize(const char *path)
   wd_start(&priv->wdog, SIM_GPIOCHIP_WDOG_DELAY,
            sim_gpiochip_interrupt, (wdparm_t)priv);
 
+  g_gpiochip = (struct ioexpander_dev_s *)priv;
+
   return 0;
+}
+
+/****************************************************************************
+ * Name: sim_gpiochip_get_ioe
+ *
+ * Description:
+ *   Get the ioexpander pointer of gpiochip device
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   The pointer to the instance of sim gpiochip device.
+ *
+ ****************************************************************************/
+
+struct ioexpander_dev_s *sim_gpiochip_get_ioe(void)
+{
+  return g_gpiochip;
 }
