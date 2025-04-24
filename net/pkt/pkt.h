@@ -76,6 +76,25 @@ struct pkt_conn_s
   uint8_t    crefs;    /* Reference counts on this instance */
   uint16_t   type;     /* The Ethernet type of the packet */
 
+#ifdef CONFIG_NET_PKT_WRITE_BUFFERS
+  /* Write buffering
+   *
+   *   write_q   - The queue of unsent I/O buffers.  The head of this
+   *               list may be partially sent.  FIFO ordering.
+   */
+
+  struct iob_queue_s write_q;     /* Write buffering for pkt messages */
+
+  /* Callback instance for pkt send */
+
+  FAR struct devif_callback_s *sndcb;
+#  if CONFIG_NET_SEND_BUFSIZE > 0
+  int32_t  sndbufs;               /* Maximum amount of bytes queued in send */
+  sem_t    sndsem;                /* Semaphore signals send completion */
+#  endif
+
+#endif
+
   /* Read-ahead buffering.
    *
    *   readahead - A singly linked list of type struct iob_qentry_s
@@ -346,6 +365,69 @@ int pkt_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds);
 
 ssize_t pkt_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
                     int flags);
+
+#ifdef CONFIG_NET_PKTPROTO_OPTIONS
+/****************************************************************************
+ * Name: pkt_getsockopt
+ *
+ * Description:
+ *   pkt_getsockopt() retrieves the value for the option specified by the
+ *   'option' argument for the socket specified by the 'psock' argument.  If
+ *   the size of the option value is greater than 'value_len', the value
+ *   stored in the object pointed to by the 'value' argument will be silently
+ *   truncated. Otherwise, the length pointed to by the 'value_len' argument
+ *   will be modified to indicate the actual length of the 'value'.
+ *
+ *   See <sys/socket.h> a complete list of values for the socket-level
+ *   'option' argument.  Protocol-specific options are are protocol specific
+ *   header files (such as nuttx/pkt.h for the case of the PKT protocol).
+ *
+ * Input Parameters:
+ *   psock     Socket structure of the socket to query
+ *   level     Protocol level to set the option
+ *   option    identifies the option to get
+ *   value     Points to the argument value
+ *   value_len The length of the argument value
+ *
+ * Returned Value:
+ *   Returns zero (OK) on success.  On failure, it returns a negated errno
+ *   value to indicate the nature of the error.  See psock_getsockopt() for
+ *   the complete list of appropriate return error codes.
+ *
+ ****************************************************************************/
+
+int pkt_getsockopt(FAR struct socket *psock, int level, int option,
+                   FAR void *value, FAR socklen_t *value_len);
+
+/****************************************************************************
+ * Name: pkt_setsockopt
+ *
+ * Description:
+ *   pkt_setsockopt() sets the PKT-protocol option specified by the
+ *   'option' argument to the value pointed to by the 'value' argument for
+ *   the socket specified by the 'psock' argument.
+ *
+ *   See <nuttx/pkt.h> for the a complete list of values of PKT protocol
+ *   options.
+ *
+ * Input Parameters:
+ *   psock     Socket structure of socket to operate on
+ *   level     Protocol level to set the option
+ *   option    identifies the option to set
+ *   value     Points to the argument value
+ *   value_len The length of the argument value
+ *
+ * Returned Value:
+ *   Returns zero (OK) on success.  On failure, it returns a negated errno
+ *   value to indicate the nature of the error.  See psock_setcockopt() for
+ *   the list of possible error values.
+ *
+ ****************************************************************************/
+
+int pkt_setsockopt(FAR struct socket *psock, int level, int option,
+                   FAR const void *value, socklen_t value_len);
+
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus

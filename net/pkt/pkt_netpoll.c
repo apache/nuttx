@@ -65,6 +65,15 @@
 
 static int psock_pkt_cansend(FAR struct pkt_conn_s *conn)
 {
+  if (iob_navail(false) <= 0
+#if defined(CONFIG_NET_PKT_WRITE_BUFFERS) && CONFIG_NET_SEND_BUFSIZE > 0
+      || iob_get_queue_size(&conn->write_q) >= conn->sndbufs
+#endif
+     )
+    {
+      return -EWOULDBLOCK;
+    }
+
   return OK;
 }
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/pkt/pkt_sendmsg.c
+ * net/pkt/pkt_sendmsg_unbuffered.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
