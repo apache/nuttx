@@ -33,6 +33,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
+#include <libgen.h>
 
 #include <poll.h>
 #include <fcntl.h>
@@ -121,6 +122,7 @@ struct sensor_upperhalf_s
   struct circbuf_s   buffer;             /* The circular buffer of data */
   rmutex_t           lock;               /* Manages exclusive access to file operations */
   struct list_node   userlist;           /* List of users */
+  char               name[NAME_MAX];     /* Upper topic name */
 };
 
 /****************************************************************************
@@ -308,6 +310,7 @@ again:
             }
 
           nxrmutex_lock(&upper->lock);
+          sminfo(upper->name, "update interval %" PRIu32, min_interval);
 
           /* The upper min_interval is updated by other threads, set to
            * driver again to avoid race condition.
@@ -344,6 +347,7 @@ again:
 
           if (ret >= 0)
             {
+              sminfo(upper->name, "update batch %" PRIu32, min_latency);
               upper->state.min_latency = min_latency;
             }
         }
@@ -421,6 +425,7 @@ update:
           return ret;
         }
 
+      sminfo(upper->name, "update batch %" PRIu32, min_latency);
       nxrmutex_lock(&upper->lock);
 
       /* The upper min_latency is updated by other threads, set to
@@ -467,6 +472,7 @@ static void sensor_update_nonwakeup(FAR struct file *filep,
   if (nonwakeup != upper->state.nonwakeup)
     {
       upper->state.nonwakeup = nonwakeup;
+      sminfo(upper->name, "update nonwakeup %d", nonwakeup);
       nxrmutex_unlock(&upper->lock);
       if (lower->ops->set_nonwakeup)
         {
@@ -582,6 +588,9 @@ static ssize_t sensor_do_samples(FAR struct sensor_upperhalf_s *upper,
       circbuf_peekat(&upper->timing,
                      (user->bufferpos - 1) * TIMING_BUF_ESIZE,
                      &user->state.generation, TIMING_BUF_ESIZE);
+      smdebug(upper->name, "do sample interval:%" PRIu32 ", "
+              "user.generation:%" PRIu32 ", ret:%zd",
+              upper->state.generation, user->state.generation, ret);
       return ret;
     }
 
@@ -623,6 +632,10 @@ static ssize_t sensor_do_samples(FAR struct sensor_upperhalf_s *upper,
 
       delta = next_generation + generation -
               ((user->state.generation + user->state.interval) << 1);
+      smdebug(upper->name, "do sample interval:%" PRIu32 ", "
+              "generation:%" PRIu32 ", user generation:% "PRIu32 ", "
+              "next generation:%" PRIu32, user->state.interval,
+              generation, user->state.generation, next_generation);
       if (delta >= 0)
         {
           if (buffer != NULL)
@@ -751,6 +764,13 @@ static int sensor_open(FAR struct file *filep)
       user->bufferpos = upper->timing.head / TIMING_BUF_ESIZE;
     }
 
+  sminfo(upper->name, "user address: %p, role type: %d, "
+         "user generation: %" PRIu32 ", upper generation: %" PRIu32 ", "
+         "nsubscribers: %" PRIu32 ", nadvertisers: %" PRIu32 ", persist: %d",
+         user, user->role, user->state.generation,
+         upper->state.generation, upper->state.nsubscribers,
+         upper->state.nadvertisers, lower->persist);
+
   user->state.interval = UINT32_MAX;
   user->state.esize = upper->state.esize;
   user->state.nonwakeup = true;
@@ -819,6 +839,9 @@ static int sensor_close(FAR struct file *filep)
 
   /* The user is closed, notify to other users */
 
+  sminfo(upper->name, "user address: %p, "
+         "close subscriber: %" PRIu32 ", close advertiser:%" PRIu32,
+         user, upper->state.nsubscribers, upper->state.nadvertisers);
   sensor_pollnotify(upper, POLLPRI, SENSOR_ROLE_WR);
   nxrmutex_unlock(&upper->lock);
 
@@ -895,6 +918,12 @@ static ssize_t sensor_read(FAR struct file *filep, FAR char *buffer,
       ret = -ENODATA;
     }
 
+  if (ret > 0)
+    {
+      smdebug(upper->name, "the number of read event is:%zd",
+              ret / upper->state.esize);
+    }
+
 out:
   nxrmutex_unlock(&upper->lock);
   return ret;
@@ -919,6 +948,7 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   uint32_t arg1 = (uint32_t)arg;
   int ret = 0;
 
+  smdebug(upper->name, "sensor ioctl start, cmd:%d", cmd);
   switch (cmd)
     {
       case SNIOC_GET_STATE:
@@ -1120,6 +1150,7 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         break;
     }
 
+  smdebug(upper->name, "sensor ioctl end, ret:%d", ret);
   return ret;
 }
 
@@ -1244,6 +1275,7 @@ static ssize_t sensor_push_event(FAR void *priv, FAR const void *data,
         }
     }
 
+  smdebug(upper->name, "the number of write event is:%lu", envcount);
   circbuf_overwrite(&upper->buffer, data, bytes);
   sensor_generate_timing(upper, envcount);
   list_for_every_entry(&upper->userlist, user, struct sensor_user_s, node)
@@ -1456,9 +1488,10 @@ int sensor_custom_register(FAR struct sensor_lowerhalf_s *lower,
     }
 #endif
 
+  strlcpy(upper->name, basename((char *)path), sizeof(upper->name));
   upper->state.nbuffer = lower->nbuffer;
   upper->lower = lower;
-  sninfo("Registering %s\n", path);
+  sminfo(upper->name, "Registering %s", path);
   ret = register_driver(path, &g_sensor_fops, 0666, upper);
   if (ret)
     {
@@ -1537,7 +1570,7 @@ void sensor_custom_unregister(FAR struct sensor_lowerhalf_s *lower,
 
   upper = lower->priv;
 
-  sninfo("UnRegistering %s\n", path);
+  sminfo(upper->name, "UnRegistering");
   unregister_driver(path);
 
 #ifdef CONFIG_SENSORS_RPMSG
