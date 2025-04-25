@@ -100,6 +100,11 @@
 #define ICJX_CTRL_WORD_2_NIOL   (1 << 3)
 #define ICJX_CTRL_WORD_2_NIOH   (1 << 7)
 
+/* Control Word 3 */
+
+#define ICJX_CTRL_WORD_3_ICLK   (1 << 2)
+#define ICJX_CTRL_WORD_3_DIS    (1 << 3)
+
 /* Control Word 4 */
 
 #define ICJX_CTRL_WORD_4_EOI    (1 << 7)

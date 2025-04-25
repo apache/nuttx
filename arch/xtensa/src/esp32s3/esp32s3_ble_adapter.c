@@ -1062,7 +1062,7 @@ static int semphr_take_wrapper(void *semphr, uint32_t block_time_ms)
 
   if (ret)
     {
-      wlerr("ERROR: Failed to wait sem in %lu ticks. Error=%d\n",
+      wlerr("ERROR: Failed to wait sem in %" PRIu32 " ticks. Error=%d\n",
             MSEC2TICK(block_time_ms), ret);
     }
 
@@ -1261,7 +1261,8 @@ static void *queue_create_wrapper(uint32_t queue_len, uint32_t item_size)
   else
     {
       wlerr("Failed to create queue cache."
-            " Please incresase BLE_TASK_EVENT_QUEUE_LEN to, at least, %d",
+            " Please incresase BLE_TASK_EVENT_QUEUE_LEN to, at least, "
+            "%" PRIu32 "",
             queue_len);
       return NULL;
     }

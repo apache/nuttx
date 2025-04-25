@@ -22,6 +22,8 @@
 
 # The start-up, "head", file.  May be either a .S or a .c file.
 
+STARTUP_ELF_OBJS = crt0$(OBJEXT)
+
 HEAD_ASRC  = xtensa_vectors.S xtensa_window_vector.S xtensa_windowspill.S
 HEAD_ASRC += xtensa_int_handlers.S xtensa_user_handler.S
 

@@ -572,7 +572,7 @@ static inline void set_enabled(struct rp23xx_pwm_lowerhalf_s  * priv)
 {
   irqstate_t flags = enter_critical_section();
 
-  modreg32(1 << priv->num, 1 << priv->num,  RP23XX_PWM_ENA);
+  modreg32(1 << priv->num, 1 << priv->num,  RP23XX_PWM_EN);
 
   leave_critical_section(flags);
 }
@@ -592,7 +592,7 @@ static inline void clear_enabled(struct rp23xx_pwm_lowerhalf_s  * priv)
 {
   irqstate_t flags = enter_critical_section();
 
-  modreg32(0, 1 << priv->num, RP23XX_PWM_ENA);
+  modreg32(0, 1 << priv->num, RP23XX_PWM_EN);
 
   leave_critical_section(flags);
 }

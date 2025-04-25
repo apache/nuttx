@@ -158,6 +158,10 @@ ifeq ($(CONFIG_SYSTEM_NXDIAG_ESPRESSIF_CHIP_WO_TOOL),y)
 	CHIP_CSRCS += esp_nxdiag.c
 endif
 
+ifeq ($(CONFIG_ESPRESSIF_ADC),y)
+CHIP_CSRCS += esp_adc.c
+endif
+
 #############################################################################
 # Espressif HAL for 3rd Party Platforms
 #############################################################################
@@ -166,7 +170,7 @@ endif
 
 ESP_HAL_3RDPARTY_REPO   = esp-hal-3rdparty
 ifndef ESP_HAL_3RDPARTY_VERSION
-	ESP_HAL_3RDPARTY_VERSION = e23f3131b564068a5033b765017a494c9553ce65
+	ESP_HAL_3RDPARTY_VERSION = 0b15e1a642d7005ad11c3c0394c784959f478f5f
 endif
 
 ifndef ESP_HAL_3RDPARTY_URL

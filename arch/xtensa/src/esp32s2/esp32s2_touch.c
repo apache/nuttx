@@ -562,7 +562,7 @@ uint32_t esp32s2_touchreadraw(enum touch_pad_e tp)
   uint32_t value = touch_lh_read_raw_data(tp);
 #endif
 
-  iinfo("Touch pad %d value: %u\n", tp, value);
+  iinfo("Touch pad %d value: %" PRIu32 "\n", tp, value);
 
   return value;
 }
@@ -593,7 +593,7 @@ uint32_t esp32s2_touchbenchmark(enum touch_pad_e tp)
 
   leave_critical_section(flags);
 
-  iinfo("Touch pad %d benchmark value: %u\n", tp, value);
+  iinfo("Touch pad %d benchmark value: %" PRIu32 "\n", tp, value);
 
   return value;
 }
@@ -624,7 +624,7 @@ void esp32s2_touchsetthreshold(enum touch_pad_e tp, uint32_t threshold)
 
   leave_critical_section(flags);
 
-  iinfo("Touch pad %d threshold set to: %u\n", tp, threshold);
+  iinfo("Touch pad %d threshold set to: %" PRIu32 "\n", tp, threshold);
 }
 
 /****************************************************************************

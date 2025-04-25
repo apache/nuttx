@@ -95,7 +95,7 @@ ssize_t up_show_cpuinfo(char *buf, size_t buf_size, off_t file_off)
 
   procfs_sprintf(buf, buf_size, &file_off,
                  "core ID\t\t: " XCHAL_CORE_ID "\n"
-                 "build ID\t: 0x%x\n"
+                 "build ID\t: %08x\n"
                  "config ID\t: %08" PRIx32 ":%08" PRIx32 "\n",
                  XCHAL_BUILD_UNIQUE_ID,
                  xtensa_getconfig0(), xtensa_getconfig1());

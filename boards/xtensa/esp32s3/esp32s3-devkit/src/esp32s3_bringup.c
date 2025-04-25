@@ -124,7 +124,7 @@
 #  include "esp32s3_aes.h"
 #endif
 
-#ifdef CONFIG_ESP32S3_ADC
+#ifdef CONFIG_ESPRESSIF_ADC
 #include "esp32s3_board_adc.h"
 #endif
 
@@ -522,7 +522,7 @@ int esp32s3_bringup(void)
 #endif
 #endif
 
-#ifdef CONFIG_ESP32S3_ADC
+#ifdef CONFIG_ESPRESSIF_ADC
   /* Configure ADC */
 
   ret = board_adc_init();

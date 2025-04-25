@@ -131,7 +131,7 @@ where:
 * ``ESPTOOL_BINDIR=./`` is the path of the externally-built 2nd stage bootloader and the partition table (if applicable): when built using the ``make bootloader``, these files are placed into ``nuttx`` folder.
 * ``ESPTOOL_BAUD`` is able to change the flash baud rate if desired.
 
-Flashing NSH Example 
+Flashing NSH Example
 --------------------
 
 This example shows how to build and flash the ``nsh`` defconfig for the ESP32-C3-DevKitC-02 board::
@@ -209,7 +209,13 @@ GND          Ground
 
 OpenOCD can then be used::
 
-  openocd -c 'set ESP_RTOS hwthread; set ESP_FLASH_SIZE 0' -f board/esp32c3-builtin.cfg
+  openocd -s <tcl_scripts_path> -c 'set ESP_RTOS hwthread' -f board/esp32c3-builtin.cfg -c 'init; reset halt; esp appimage_offset 0x0'
+
+.. note::
+  - ``appimage_offset`` should be set to ``0x0`` when ``Simple Boot`` is used. For MCUboot, this value should be set to
+    ``CONFIG_ESPRESSIF_OTA_PRIMARY_SLOT_OFFSET`` value (``0x10000`` by default).
+  - ``-s <tcl_scripts_path>`` defines the path to the OpenOCD scripts. Usually set to `tcl` if running openocd from its source directory.
+    It can be omitted if `openocd-esp32` were installed in the system with `sudo make install`.
 
 If you want to debug with an external JTAG adapter it can
 be connected as follows:
@@ -343,7 +349,7 @@ The following list indicates the state of peripherals' support in NuttX:
 =========== ======= ====================
 Peripheral  Support NOTES
 =========== ======= ====================
-ADC          No
+ADC          Yes    Oneshot
 AES          No
 Bluetooth    Yes
 CAN/TWAI     Yes
@@ -369,6 +375,38 @@ USB Serial   Yes
 Watchdog     Yes     XTWDT supported
 Wi-Fi        Yes     WPA3-SAE supported
 =========== ======= ====================
+
+Analog-to-digital converter (ADC)
+---------------------------------
+
+Two ADC units are available for the ESP32-C3:
+
+* ADC1 with 5 channels.
+* ADC2 with 1 channel and internal voltage reading. **This unit is not implemented.**
+
+Those units are independent and can be used simultaneously. During bringup, GPIOs for selected channels are
+configured automatically to be used as ADC inputs.
+If available, ADC calibration is automatically applied (see
+`this page <https://docs.espressif.com/projects/esp-idf/en/v5.1/esp32c3/api-reference/peripherals/adc_calibration.html>`__ for more details).
+Otherwise, a simple conversion is applied based on the attenuation and resolution.
+
+The ADC unit is accessible using the ADC character driver, which returns data for the enabled channels.
+
+The ADC1 unit can be enabled in the menu :menuselection:`System Type --> Peripheral Support --> Analog-to-digital converter (ADC)`.
+
+Then, it can be customized in the menu :menuselection:`System Type --> ADC Configuration`, which includes operating mode, gain and channels.
+
+========== ===========
+ Channel    ADC1 GPIO
+========== ===========
+0           0
+1           1
+2           2
+3           3
+4           4
+========== ===========
+
+.. warning:: Maximum measurable voltage may saturate around 2900 mV.
 
 Secure Boot and Flash Encryption
 ================================

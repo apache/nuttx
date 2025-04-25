@@ -1,5 +1,7 @@
 /****************************************************************************
- * arch/xtensa/src/esp32s3/esp32s3_adc.h
+ * boards/risc-v/esp32c3/common/include/esp_board_adc.h
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_ADC_H
-#define __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_ADC_H
+#ifndef __BOARDS_RISCV_ESP32C3_COMMON_INCLUDE_ESP32C3_BOARD_ADC_H
+#define __BOARDS_RISCV_ESP32C3_COMMON_INCLUDE_ESP32C3_BOARD_ADC_H
 
 /****************************************************************************
  * Included Files
@@ -27,37 +29,11 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/arch.h>
-#include <nuttx/analog/adc.h>
-#include <nuttx/analog/ioctl.h>
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
 #ifndef __ASSEMBLY__
-
-#ifdef CONFIG_ESP32S3_ADC
-#  define ESP32S3_ADC1 1
-#  define ESP32S3_ADC1_CHANNEL0 0
-#  define ESP32S3_ADC1_CHANNEL1 1
-#  define ESP32S3_ADC1_CHANNEL2 2
-#  define ESP32S3_ADC1_CHANNEL3 3
-#  define ESP32S3_ADC1_CHANNEL4 4
-#  define ESP32S3_ADC1_CHANNEL5 5
-#  define ESP32S3_ADC1_CHANNEL6 6
-#  define ESP32S3_ADC1_CHANNEL7 7
-#  define ESP32S3_ADC1_CHANNEL8 8
-#  define ESP32S3_ADC1_CHANNEL9 9
-#endif
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -69,25 +45,35 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: esp32s3_adc_init
+ * Public Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: board_adc_init
  *
  * Description:
- *   Initialize the ADC.
+ *   This function configures and initializes the ADC driver for the board.
+ *   It allocates memory for the ADC device structure, sets up the ADC
+ *   hardware, and registers the ADC device with the system.
  *
  * Input Parameters:
- *   channel - ADC channel number
+ *   None.
  *
  * Returned Value:
- *   ADC device structure reference on success; a NULL on failure
+ *   Returns zero (OK) on successful initialization and registration of the
+ *   ADC device; a negated errno value is returned to indicate the nature
+ *   of any failure.
  *
  ****************************************************************************/
 
-void esp32s3_adc_init(int adc_index, struct adc_dev_s *dev);
+#ifdef CONFIG_ESPRESSIF_ADC
+int board_adc_init(void);
+#endif
 
-#ifdef __cplusplus
+#undef EXTERN
+#if defined(__cplusplus)
 }
 #endif
-#undef EXTERN
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_ADC_H */
+#endif /* __BOARDS_RISCV_ESP32C3_COMMON_INCLUDE_ESP32C3_BOARD_ADC_H */

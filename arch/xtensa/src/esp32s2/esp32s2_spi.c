@@ -1276,7 +1276,7 @@ static void esp32s2_spi_poll_exchange(struct esp32s2_spi_priv_s *priv,
             {
               uintptr_t r_wd = getreg32(data_buf_reg);
 
-              spiinfo("recv=0x%" PRIx32 " data_reg=0x%" PRIxPTR "\n",
+              spiinfo("recv=0x%" PRIxPTR " data_reg=0x%" PRIxPTR "\n",
                       r_wd, data_buf_reg);
 
               memcpy(rp, &r_wd, sizeof(uintptr_t));

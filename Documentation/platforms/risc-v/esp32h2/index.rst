@@ -201,7 +201,13 @@ USB-to-JTAG adapter.
 
 OpenOCD can then be used::
 
-  openocd -c 'set ESP_RTOS hwthread; set ESP_FLASH_SIZE 0' -f board/esp32h2-builtin.cfg
+  openocd -s <tcl_scripts_path> -c 'set ESP_RTOS hwthread' -f board/esp32c3-builtin.cfg -c 'init; reset halt; esp appimage_offset 0x0'
+
+.. note::
+  - ``appimage_offset`` should be set to ``0x0`` when ``Simple Boot`` is used. For MCUboot, this value should be set to
+    ``CONFIG_ESPRESSIF_OTA_PRIMARY_SLOT_OFFSET`` value (``0x10000`` by default).
+  - ``-s <tcl_scripts_path>`` defines the path to the OpenOCD scripts. Usually set to `tcl` if running openocd from its source directory.
+    It can be omitted if `openocd-esp32` were installed in the system with `sudo make install`.
 
 If you want to debug with an external JTAG adapter it can
 be connected as follows:
@@ -332,7 +338,7 @@ The following list indicates the state of peripherals' support in NuttX:
 ==============  ======= ====================
 Peripheral      Support NOTES
 ==============  ======= ====================
-ADC              No     Supports internal temperature sensor
+ADC              Yes     Oneshot and internal temperature sensor
 AES              No
 Bluetooth        No
 CAN/TWAI         Yes
@@ -362,6 +368,32 @@ Watchdog         Yes
 Wifi             No
 XTS              No
 ==============  ======= ====================
+
+Analog-to-digital converter (ADC)
+---------------------------------
+
+One ADC unit is available for the ESP32-H2, with 5 channels.
+
+During bringup, GPIOs for selected channels are configured automatically to be used as ADC inputs.
+If available, ADC calibration is automatically applied (see
+`this page <https://docs.espressif.com/projects/esp-idf/en/v5.1/esp32h2/api-reference/peripherals/adc_calibration.html>`__ for more details).
+Otherwise, a simple conversion is applied based on the attenuation and resolution.
+
+The ADC unit is accessible using the ADC character driver, which returns data for the enabled channels.
+
+The ADC unit can be enabled in the menu :menuselection:`System Type --> Peripheral Support --> Analog-to-digital converter (ADC)`.
+
+Then, it can be customized in the menu :menuselection:`System Type --> ADC Configuration`, which includes operating mode, gain and channels.
+
+========== ===========
+ Channel    ADC1 GPIO
+========== ===========
+0           1
+1           2
+2           3
+3           4
+4           5
+========== ===========
 
 _`Managing esptool on virtual environment`
 ==========================================

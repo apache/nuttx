@@ -52,18 +52,21 @@ extern "C"
  * Name: board_adc_init
  *
  * Description:
- *   Configure the ADC driver.
+ *   Initialize and configuree the ADC driver for the board.
+ *   It registers the ADC channels specified in the configuration and ensures
+ *   that the ADC hardware is properly set up for use.
  *
  * Input Parameters:
  *   None.
  *
  * Returned Value:
- *   Zero (OK) is returned on success; A negated errno value is returned
- *   to indicate the nature of any failure.
+ *   Returns zero (OK) on successful initialization and registration of the
+ *   ADC channels; a negated errno value is returned to indicate the nature
+ *   of any failure.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ESP32S3_ADC
+#ifdef CONFIG_ESPRESSIF_ADC
 int board_adc_init(void);
 #endif
 

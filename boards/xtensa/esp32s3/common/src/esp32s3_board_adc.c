@@ -27,16 +27,112 @@
 #include <nuttx/config.h>
 #include <stdio.h>
 #include <syslog.h>
-#include <debug.h>
-#include <sys/types.h>
 
-#include "esp32s3_adc.h"
+#include <nuttx/analog/adc.h>
+
+#include "espressif/esp_adc.h"
 
 #include "esp32s3_board_adc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* The number of channels for each ADC */
+
+#define ADC_MAX_CHANNELS 10
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/* Select channels to be used for each ADC.
+ *
+ * GPIOs are fixed for each channel and configured in the lower-half driver.
+ *
+ *               ADC 1
+ * Channel: 0 1 2 3 4 5 6 7 8 9
+ * GPIO:    1 2 3 4 5 6 7 8 9 10
+ *
+ *               ADC 2
+ * Channel: 0  1  2  3  4  5  6  7  8  9
+ * GPIO:    11 12 13 14 15 16 17 18 19 20
+
+ * On the chanlist arrays below, channels are added +1. Do not change.
+ * Important: if using more than 8 channels, edit CONFIG_ADC_FIFOSIZE.
+ */
+
+#ifdef CONFIG_ESPRESSIF_ADC_1
+static const uint8_t g_chanlist_adc1[ADC_MAX_CHANNELS] =
+{
+#ifdef CONFIG_ESPRESSIF_ADC_1_CH0
+  1,
+#endif
+#ifdef CONFIG_ESPRESSIF_ADC_1_CH1
+  2,
+#endif
+#ifdef CONFIG_ESPRESSIF_ADC_1_CH2
+  3,
+#endif
+#ifdef CONFIG_ESPRESSIF_ADC_1_CH3
+  4,
+#endif
+#ifdef CONFIG_ESPRESSIF_ADC_1_CH4
+  5,
+#endif
+#ifdef CONFIG_ESPRESSIF_ADC_1_CH5
+  6,
+#endif
+#ifdef CONFIG_ESPRESSIF_ADC_1_CH6
+  7,
+#endif
+#ifdef CONFIG_ESPRESSIF_ADC_1_CH7
+  8,
+#endif
+#ifdef CONFIG_ESPRESSIF_ADC_1_CH8
+  9,
+#endif
+#ifdef CONFIG_ESPRESSIF_ADC_1_CH9
+  10
+#endif
+};
+#endif
+
+#ifdef CONFIG_ESPRESSIF_ADC_2
+static const uint8_t g_chanlist_adc2[ADC_MAX_CHANNELS] =
+{
+#ifdef CONFIG_ESPRESSIF_ADC_2_CH0
+  1,
+#endif
+#ifdef CONFIG_ESPRESSIF_ADC_2_CH1
+  2,
+#endif
+#ifdef CONFIG_ESPRESSIF_ADC_2_CH2
+  3,
+#endif
+#ifdef CONFIG_ESPRESSIF_ADC_2_CH3
+  4,
+#endif
+#ifdef CONFIG_ESPRESSIF_ADC_2_CH4
+  5,
+#endif
+#ifdef CONFIG_ESPRESSIF_ADC_2_CH5
+  6,
+#endif
+#ifdef CONFIG_ESPRESSIF_ADC_2_CH6
+  7,
+#endif
+#ifdef CONFIG_ESPRESSIF_ADC_2_CH7
+  8,
+#endif
+#ifdef CONFIG_ESPRESSIF_ADC_2_CH8
+  9,
+#endif
+#ifdef CONFIG_ESPRESSIF_ADC_2_CH9
+  10
+#endif
+};
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -46,18 +142,20 @@
  * Name: board_adc_register
  *
  * Description:
- *   Register the ADC driver.
+ *   This function registers the ADC driver for the specified ADC channel.
+ *   It initializes the ADC hardware, creates the device name, and registers
+ *   the ADC device with the system.
  *
  * Input Parameters:
- *   channel - ADC channel number.
+ *   adc_num - The ADC channel number to register.
  *
  * Returned Value:
- *   Zero (OK) is returned on success; A negated errno value is returned
- *   to indicate the nature of any failure.
+ *   Returns zero (OK) on successful registration; a negated errno value is
+ *   returned to indicate the nature of any failure.
  *
  ****************************************************************************/
 
-static int board_adc_register(int channel)
+static int board_adc_register(int adc_num)
 {
   int ret;
   char devname[12];
@@ -66,16 +164,38 @@ static int board_adc_register(int channel)
   adcdev = kmm_malloc(sizeof(struct adc_dev_s));
   if (adcdev == NULL)
     {
-      aerr("ERROR: Failed to allocate adc_dev_s instance\n");
+      syslog(LOG_ERR, "ERROR: Failed to allocate adc_dev_s instance\n");
       return -ENOMEM;
     }
 
   memset(adcdev, 0, sizeof(struct adc_dev_s));
-  esp32s3_adc_init(channel, adcdev);
-  snprintf(devname, sizeof(devname), "/dev/adc%d", channel);
 
-  /* Register the ADC driver at "/dev/adcx_x" */
+  switch (adc_num)
+    {
+      case 1:
+#ifdef CONFIG_ESPRESSIF_ADC_1
+        adcdev = esp_adc_initialize(adc_num, g_chanlist_adc1);
+        break;
+#endif
+      case 2:
+#ifdef CONFIG_ESPRESSIF_ADC_2
+        adcdev = esp_adc_initialize(adc_num, g_chanlist_adc2);
+        break;
+#endif
+      default:
+        syslog(LOG_ERR, "ERROR: Unsupported ADC number: %d\n", adc_num);
+        return ERROR;
+    }
 
+  if (adcdev == NULL)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize ADC %d\n", adc_num);
+      return -ENODEV;
+    }
+
+  /* Register the ADC driver at "/dev/adcx" */
+
+  snprintf(devname, sizeof(devname), "/dev/adc%d", adc_num - 1);
   ret = adc_register(devname, adcdev);
   if (ret < 0)
     {
@@ -95,14 +215,17 @@ static int board_adc_register(int channel)
  * Name: board_adc_init
  *
  * Description:
- *   Configure the ADC driver.
+ *   Initialize and configuree the ADC driver for the board.
+ *   It registers the ADC channels specified in the configuration and ensures
+ *   that the ADC hardware is properly set up for use.
  *
  * Input Parameters:
  *   None.
  *
  * Returned Value:
- *   Zero (OK) is returned on success; A negated errno value is returned
- *   to indicate the nature of any failure.
+ *   Returns zero (OK) on successful initialization and registration of the
+ *   ADC channels; a negated errno value is returned to indicate the nature
+ *   of any failure.
  *
  ****************************************************************************/
 
@@ -110,80 +233,16 @@ int board_adc_init(void)
 {
   int ret;
 
-#ifdef CONFIG_ESP32S3_ADC1_CHANNEL0
-  ret = board_adc_register(ESP32S3_ADC1_CHANNEL0);
+#ifdef CONFIG_ESPRESSIF_ADC_1
+  ret = board_adc_register(1);
   if (ret != OK)
     {
       return ret;
     }
 #endif
 
-#ifdef CONFIG_ESP32S3_ADC1_CHANNEL1
-  ret = board_adc_register(ESP32S3_ADC1_CHANNEL1);
-  if (ret != OK)
-    {
-      return ret;
-    }
-#endif
-
-#ifdef CONFIG_ESP32S3_ADC1_CHANNEL2
-  ret = board_adc_register(ESP32S3_ADC1_CHANNEL2);
-  if (ret != OK)
-    {
-      return ret;
-    }
-#endif
-
-#ifdef CONFIG_ESP32S3_ADC1_CHANNEL3
-  ret = board_adc_register(ESP32S3_ADC1_CHANNEL3);
-  if (ret != OK)
-    {
-      return ret;
-    }
-#endif
-
-#ifdef CONFIG_ESP32S3_ADC1_CHANNEL4
-  ret = board_adc_register(ESP32S3_ADC1_CHANNEL4);
-  if (ret != OK)
-    {
-      return ret;
-    }
-#endif
-
-#ifdef CONFIG_ESP32S3_ADC1_CHANNEL5
-  ret = board_adc_register(ESP32S3_ADC1_CHANNEL5);
-  if (ret != OK)
-    {
-      return ret;
-    }
-#endif
-
-#ifdef CONFIG_ESP32S3_ADC1_CHANNEL6
-  ret = board_adc_register(ESP32S3_ADC1_CHANNEL6);
-  if (ret != OK)
-    {
-      return ret;
-    }
-#endif
-
-#ifdef CONFIG_ESP32S3_ADC1_CHANNEL7
-  ret = board_adc_register(ESP32S3_ADC1_CHANNEL7);
-  if (ret != OK)
-    {
-      return ret;
-    }
-#endif
-
-#ifdef CONFIG_ESP32S3_ADC1_CHANNEL8
-  ret = board_adc_register(ESP32S3_ADC1_CHANNEL8);
-  if (ret != OK)
-    {
-      return ret;
-    }
-#endif
-
-#ifdef CONFIG_ESP32S3_ADC1_CHANNEL9
-  ret = board_adc_register(ESP32S3_ADC1_CHANNEL9);
+#ifdef CONFIG_ESPRESSIF_ADC_2
+  ret = board_adc_register(2);
   if (ret != OK)
     {
       return ret;

@@ -319,7 +319,8 @@ int esp_spiram_test(void)
 
           if (errct < 4)
             {
-              merr("SPI SRAM error@%p:%08x/%08x \n", &spiram[p], spiram[p],
+              merr("SPI SRAM error@%p:0x08%" PRIxPTR "/0x08%" PRIxPTR " \n",
+                   &spiram[p], spiram[p],
                    p ^ 0xaaaaaaaa);
             }
         }

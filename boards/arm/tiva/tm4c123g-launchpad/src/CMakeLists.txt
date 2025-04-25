@@ -20,45 +20,43 @@
 #
 # ##############################################################################
 
-set(SRCS tm4c_boot.c tm4c_bringup.c)
+set(SRCS tm4c_boot.c tm4c_bringup.c tm4c_ssi.c)
 
 if(CONFIG_ARCH_LEDS)
   list(APPEND SRCS tm4c_autoleds.c)
-else()
-  list(APPEND SRCS tm4c_userleds.c)
-endif()
-
-if(CONFIG_ARCH_BUTTONS)
-  list(APPEND SRCS tm4c_buttons.c)
 endif()
 
 if(CONFIG_BOARDCTL)
   list(APPEND SRCS tm4c_appinit.c)
 endif()
 
-if(CONFIG_TIVA_ADC)
-  list(APPEND SRCS tm4c_adc.c)
-endif()
-
-if(CONFIG_TIVA_AT24)
-  list(APPEND SRCS tm4c_at24.c)
-endif()
-
-if(CONFIG_TIVA_CAN)
-  list(APPEND SRCS tm4c_can.c)
-  if(CONFIG_TIVA_MCP2515)
-    list(APPEND SRCS tm4c_mcp2515.c)
-  endif()
-endif()
-
-if(CONFIG_TIVA_SSI)
-  list(APPEND SRCS tm4c_ssi.c)
-endif()
-
 if(CONFIG_TIVA_TIMER)
   list(APPEND SRCS tm4c_timer.c)
 endif()
 
+if(CONFIG_TIVA_ADC)
+  list(APPEND SRCS tm4c_adc.c)
+endif()
+
+if(CONFIG_TIVA_CAN)
+  list(APPEND SRCS tm4c_can.c)
+endif()
+
+if(CONFIG_CAN_MCP2515)
+  list(APPEND SRCS tm4c_mcp2515.c)
+endif()
+
+if(CONFIG_MTD_AT24XX)
+  if(CONFIG_TIVA_I2C0)
+    list(APPEND SRCS tm4c_at24.c)
+  endif()
+endif()
+
+if(CONFIG_ARCH_BUTTONS)
+  list(APPEND SRCS tm4c_buttons.c)
+endif()
+
 target_sources(board PRIVATE ${SRCS})
 
-set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/ld.script")
+set_property(GLOBAL PROPERTY LD_SCRIPT
+                             "${NUTTX_BOARD_DIR}/scripts/tm4c123g-launchpad.ld")

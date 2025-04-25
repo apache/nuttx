@@ -21,6 +21,26 @@ config ESP_PCNT
 	default n
 	select CAPTURE
 
+config ESPRESSIF_ADC
+	bool "Analog-to-digital converter (ADC)"
+	default n
+	select ANALOG
+	select ADC
+	---help---
+		Enable support for analog-to-digital converter (ADC) peripheral.
+
+if ESPRESSIF_ADC
+
+config ESPRESSIF_ADC_1
+	default y
+	bool "Enable SAR ADC 1"
+
+config ESPRESSIF_ADC_2
+	default n
+	bool "Enable SAR ADC 2"
+
+endif # ESPRESSIF_ADC
+
 config ESPRESSIF_TEMP
 	bool "Internal Temperature Sensor"
 	default n

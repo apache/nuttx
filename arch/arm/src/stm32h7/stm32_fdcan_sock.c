@@ -1951,9 +1951,9 @@ static int fdcan_netdev_ioctl(struct net_driver_s *dev, int cmd,
         {
           struct can_ioctl_data_s *req =
               (struct can_ioctl_data_s *)((uintptr_t)arg);
-          req->arbi_bitrate = priv->arbi_timing.bitrate / 1000; /* kbit/s */
+          req->arbi_bitrate = priv->arbi_timing.bitrate;
 #ifdef CONFIG_NET_CAN_CANFD
-          req->data_bitrate = priv->data_timing.bitrate / 1000; /* kbit/s */
+          req->data_bitrate = priv->data_timing.bitrate;
 #else
           req->data_bitrate = 0;
 #endif
@@ -1968,10 +1968,11 @@ static int fdcan_netdev_ioctl(struct net_driver_s *dev, int cmd,
 
           /* Apply the new timings (interface is guaranteed to be down) */
 
-          priv->arbi_timing.bitrate = req->arbi_bitrate * 1000;
+          priv->arbi_timing.bitrate = req->arbi_bitrate;
 #ifdef CONFIG_NET_CAN_CANFD
-          priv->data_timing.bitrate = req->data_bitrate * 1000;
+          priv->data_timing.bitrate = req->data_bitrate;
 #endif
+          ret = OK;
         }
         break;
 #endif /* CONFIG_NETDEV_CAN_BITRATE_IOCTL */

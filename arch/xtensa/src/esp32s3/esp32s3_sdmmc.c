@@ -526,7 +526,7 @@ static int esp32s3_ciu_sendcmd(uint32_t cmd, uint32_t arg)
     {
       if (watchtime - clock_systime_ticks() > SDCARD_CMDTIMEOUT)
         {
-          mcerr("TMO Timed out (%08X)\n",
+          mcerr("TMO Timed out (%08" PRIX32 ")\n",
                 esp32s3_getreg(ESP32S3_SDMMC_CMD));
           return 1;
         }
@@ -539,7 +539,7 @@ static int esp32s3_ciu_sendcmd(uint32_t cmd, uint32_t arg)
   esp32s3_putreg(arg, ESP32S3_SDMMC_CMDARG);
   esp32s3_putreg(cmd, ESP32S3_SDMMC_CMD);
 
-  mcinfo("cmd=0x%x arg=0x%x\n", cmd, arg);
+  mcinfo("cmd=0x%" PRIx32 " arg=0x%" PRIx32 "\n", cmd, arg);
 
   return 0;
 }
@@ -971,7 +971,8 @@ static int esp32s3_interrupt(int irq, void *context, void *arg)
             {
               /* Terminate the transfer with an error */
 
-              mcerr("ERROR: Data CRC failure, pending=%08x remaining: %d\n",
+              mcerr("ERROR: Data CRC failure, pending=%08" PRIx32 " "
+                    "remaining: %d\n",
                     pending, priv->remaining);
 
               esp32s3_endtransfer(priv,
@@ -984,7 +985,8 @@ static int esp32s3_interrupt(int irq, void *context, void *arg)
             {
               /* Terminate the transfer with an error */
 
-              mcerr("ERROR: Data timeout, pending=%08x remaining: %d\n",
+              mcerr("ERROR: Data timeout, pending=%08" PRIx32 " "
+                    "remaining: %d\n",
                     pending, priv->remaining);
 
               esp32s3_endtransfer(priv,
@@ -997,7 +999,8 @@ static int esp32s3_interrupt(int irq, void *context, void *arg)
             {
               /* Terminate the transfer with an error */
 
-              mcerr("ERROR: RX FIFO overrun, pending=%08x remaining: %d\n",
+              mcerr("ERROR: RX FIFO overrun, pending=%08" PRIx32 " "
+                    "remaining: %d\n",
                     pending, priv->remaining);
 
               esp32s3_endtransfer(priv,
@@ -1010,7 +1013,8 @@ static int esp32s3_interrupt(int irq, void *context, void *arg)
             {
               /* Terminate the transfer with an error */
 
-              mcerr("ERROR: TX FIFO underrun, pending=%08x remaining: %d\n",
+              mcerr("ERROR: TX FIFO underrun, pending=%08" PRIx32 " "
+                    "remaining: %d\n",
                     pending, priv->remaining);
 
               esp32s3_endtransfer(priv,
@@ -1023,7 +1027,8 @@ static int esp32s3_interrupt(int irq, void *context, void *arg)
             {
               /* Terminate the transfer with an error */
 
-              mcerr("ERROR: Start bit, pending=%08x remaining: %d\n",
+              mcerr("ERROR: Start bit, pending=%08" PRIx32 " "
+                    "remaining: %d\n",
                     pending, priv->remaining);
 
               esp32s3_endtransfer(priv,
@@ -1061,7 +1066,8 @@ static int esp32s3_interrupt(int irq, void *context, void *arg)
 
               /* Wake the thread up */
 
-              mcerr("ERROR: Response error, pending=%08x\n", pending);
+              mcerr("ERROR: Response error, pending=%08" PRIx32 "\n",
+                    pending);
               esp32s3_endwait(priv, SDIOWAIT_RESPONSEDONE | SDIOWAIT_ERROR);
             }
 
@@ -1096,7 +1102,7 @@ static int esp32s3_interrupt(int irq, void *context, void *arg)
   pending = esp32s3_getreg(ESP32S3_SDMMC_IDSTS);
   if ((pending & priv->dmamask) != 0)
     {
-      mcerr("ERROR: IDTS=%08lx\n", (unsigned long)pending);
+      mcerr("ERROR: IDTS=%08" PRIx32 "\n", (unsigned long)pending);
 
       /* Clear the pending interrupts */
 
@@ -1684,7 +1690,7 @@ static int esp32s3_sendcmd(struct sdio_dev_s *dev, uint32_t cmd,
   struct esp32s3_dev_s *priv = (struct esp32s3_dev_s *)dev;
   uint32_t regval = 0;
 
-  mcinfo("cmd=%04x arg=%04x\n", cmd, arg);
+  mcinfo("cmd=%04lx arg=%04lx\n", cmd, arg);
 
   if (cmd == MMCSD_CMD12)
     {
@@ -1814,7 +1820,7 @@ static int esp32s3_recvsetup(struct sdio_dev_s *dev, uint8_t *buffer,
   uint32_t regval;
 #endif
 
-  mcinfo("nbytes=%ld\n", (long) nbytes);
+  mcinfo("nbytes=%" PRId32 "\n", (long) nbytes);
 
   DEBUGASSERT(priv != NULL && buffer != NULL && nbytes > 0);
   DEBUGASSERT(((uint32_t)buffer & 3) == 0);
@@ -1880,7 +1886,7 @@ static int esp32s3_sendsetup(struct sdio_dev_s *dev, const uint8_t *buffer,
   uint32_t regval;
 #endif
 
-  mcinfo("nbytes=%ld\n", (long)nbytes);
+  mcinfo("nbytes=%" PRId32 "\n", (long)nbytes);
 
   DEBUGASSERT(priv != NULL && buffer != NULL && nbytes > 0);
   DEBUGASSERT(((uint32_t)buffer & 3) == 0);
@@ -1990,7 +1996,7 @@ static int esp32s3_waitresponse(struct sdio_dev_s *dev, uint32_t cmd)
   volatile int32_t timeout;
   clock_t watchtime;
 
-  mcinfo("cmd=%04x\n", cmd);
+  mcinfo("cmd=%04lx\n", cmd);
 
   switch (cmd & MMCSD_RESPONSE_MASK)
     {
@@ -2021,7 +2027,7 @@ static int esp32s3_waitresponse(struct sdio_dev_s *dev, uint32_t cmd)
     {
       if (clock_systime_ticks() - watchtime > timeout)
         {
-          mcerr("ERROR: Timeout cmd: %04x STA: %08x RINTSTS: %08x\n",
+          mcerr("ERROR: Timeout cmd: %04lx STA: %08lx RINTSTS: %08lx\n",
                 cmd, esp32s3_getreg(ESP32S3_SDMMC_STATUS),
                 esp32s3_getreg(ESP32S3_SDMMC_RINTSTS));
 
@@ -2033,7 +2039,7 @@ static int esp32s3_waitresponse(struct sdio_dev_s *dev, uint32_t cmd)
 
   if (esp32s3_getreg(ESP32S3_SDMMC_RINTSTS) & SDCARD_INT_RESPERR)
     {
-      mcerr("ERROR: SDMMC failure cmd: %04x STA: %08x RINTSTS: %08x\n",
+      mcerr("ERROR: SDMMC failure cmd: %04lx STA: %08lx RINTSTS: %08lx\n",
             cmd, esp32s3_getreg(ESP32S3_SDMMC_STATUS),
             esp32s3_getreg(ESP32S3_SDMMC_RINTSTS));
       ret = -EIO;
@@ -2071,7 +2077,7 @@ static int esp32s3_recvshortcrc(struct sdio_dev_s *dev, uint32_t cmd,
   uint32_t regval;
   int ret = OK;
 
-  mcinfo("cmd=%04x\n", cmd);
+  mcinfo("cmd=%04lx\n", cmd);
 
   /* R1  Command response (48-bit)
    *     47        0               Start bit
@@ -2108,7 +2114,7 @@ static int esp32s3_recvshortcrc(struct sdio_dev_s *dev, uint32_t cmd,
            (cmd & MMCSD_RESPONSE_MASK) != MMCSD_R1B_RESPONSE &&
            (cmd & MMCSD_RESPONSE_MASK) != MMCSD_R6_RESPONSE)
     {
-      mcerr("ERROR: Wrong response CMD=%04x\n", cmd);
+      mcerr("ERROR: Wrong response CMD=%04lx\n", cmd);
       ret = -EINVAL;
     }
   else
@@ -2119,12 +2125,12 @@ static int esp32s3_recvshortcrc(struct sdio_dev_s *dev, uint32_t cmd,
       regval = esp32s3_getreg(ESP32S3_SDMMC_RINTSTS);
       if ((regval & SDMMC_INT_RTO) != 0)
         {
-          mcerr("ERROR: Command timeout: %08x\n", regval);
+          mcerr("ERROR: Command timeout: %08lx\n", regval);
           ret = -ETIMEDOUT;
         }
       else if ((regval & SDMMC_INT_RCRC) != 0)
         {
-          mcerr("ERROR: CRC failure: %08x\n", regval);
+          mcerr("ERROR: CRC failure: %08lx\n", regval);
           ret = -EIO;
         }
     }
@@ -2136,7 +2142,7 @@ static int esp32s3_recvshortcrc(struct sdio_dev_s *dev, uint32_t cmd,
   esp32s3_putreg(SDCARD_RESPDONE_CLEAR | SDCARD_CMDDONE_CLEAR,
                  ESP32S3_SDMMC_RINTSTS);
   *rshort = esp32s3_getreg(ESP32S3_SDMMC_RESP0);
-  mcinfo("CRC=%04x\n", *rshort);
+  mcinfo("CRC=%04lx\n", *rshort);
 
   return ret;
 }
@@ -2169,7 +2175,7 @@ static int esp32s3_recvlong(struct sdio_dev_s *dev, uint32_t cmd,
   uint32_t regval;
   int ret = OK;
 
-  mcinfo("cmd=%04x\n", cmd);
+  mcinfo("cmd=%04lx\n", cmd);
 
   /* R2  CID, CSD register (136-bit)
    *     135       0               Start bit
@@ -2185,7 +2191,7 @@ static int esp32s3_recvlong(struct sdio_dev_s *dev, uint32_t cmd,
 
   if ((cmd & MMCSD_RESPONSE_MASK) != MMCSD_R2_RESPONSE)
     {
-      mcerr("ERROR: Wrong response CMD=%04x\n", cmd);
+      mcerr("ERROR: Wrong response CMD=%04lx\n", cmd);
       ret = -EINVAL;
     }
   else
@@ -2196,12 +2202,12 @@ static int esp32s3_recvlong(struct sdio_dev_s *dev, uint32_t cmd,
       regval = esp32s3_getreg(ESP32S3_SDMMC_RINTSTS);
       if (regval & SDMMC_INT_RTO)
         {
-          mcerr("ERROR: Timeout STA: %08x\n", regval);
+          mcerr("ERROR: Timeout STA: %08lx\n", regval);
           ret = -ETIMEDOUT;
         }
       else if (regval & SDMMC_INT_RCRC)
         {
-          mcerr("ERROR: CRC fail STA: %08x\n", regval);
+          mcerr("ERROR: CRC fail STA: %08lx\n", regval);
           ret = -EIO;
         }
     }
@@ -2249,7 +2255,7 @@ static int esp32s3_recvshort(struct sdio_dev_s *dev, uint32_t cmd,
   uint32_t regval;
   int ret = OK;
 
-  mcinfo("cmd=%04x\n", cmd);
+  mcinfo("cmd=%04lx\n", cmd);
 
   /* R3  OCR (48-bit)
    *     47        0               Start bit
@@ -2266,7 +2272,7 @@ static int esp32s3_recvshort(struct sdio_dev_s *dev, uint32_t cmd,
   if ((cmd & MMCSD_RESPONSE_MASK) != MMCSD_R3_RESPONSE &&
       (cmd & MMCSD_RESPONSE_MASK) != MMCSD_R7_RESPONSE)
     {
-      mcerr("ERROR: Wrong response CMD=%04x\n", cmd);
+      mcerr("ERROR: Wrong response CMD=%04lx\n", cmd);
       ret = -EINVAL;
     }
   else
@@ -2279,7 +2285,7 @@ static int esp32s3_recvshort(struct sdio_dev_s *dev, uint32_t cmd,
       regval = esp32s3_getreg(ESP32S3_SDMMC_RINTSTS);
       if (regval & SDMMC_INT_RTO)
         {
-          mcerr("ERROR: Timeout STA: %08x\n", regval);
+          mcerr("ERROR: Timeout STA: %08lx\n", regval);
           ret = -ETIMEDOUT;
         }
     }
@@ -2742,7 +2748,7 @@ static int esp32s3_dmasendsetup(struct sdio_dev_s *dev,
 
   DEBUGASSERT(priv != NULL);
 
-  mcinfo("buflen=%lu\n", (unsigned long)buflen);
+  mcinfo("buflen=%" PRIu32 "\n", (unsigned long)buflen);
   DEBUGASSERT(buffer != NULL && buflen > 0 && ((uint32_t)buffer & 3) == 0);
 
   /* Save the destination buffer information for use by the interrupt

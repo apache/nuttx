@@ -1084,31 +1084,47 @@ FAR struct ioexpander_dev_s *icjx_initialize(FAR struct spi_dev_s *spi,
   ret = icjx_write(priv, ICJX_CTRL_WORD_2_A, regval, ICJX_NOB1);
   if (ret < 0)
     {
-      gpioerr("ERROR: Could write to ICJX_CTRL_WORD_2_A: %d!\n", ret);
+      gpioerr("ERROR: Couldn't write to ICJX_CTRL_WORD_2_A: %d!\n", ret);
       goto err;
     }
 
   ret = icjx_write(priv, ICJX_CTRL_WORD_2_B, regval, ICJX_NOB1);
   if (ret < 0)
     {
-      gpioerr("ERROR: Could write to ICJX_CTRL_WORD_2_B: %d!\n", ret);
+      gpioerr("ERROR: Couldn't write to ICJX_CTRL_WORD_2_B: %d!\n", ret);
       goto err;
     }
 
   /* Bypass filters as those are not yet supported. */
 
-  regval = ICJX_CTRL_WORD_1_BYP0 | ICJX_CTRL_WORD_1_BYP1;
+  if (config->filters != ICJX_CTRL_WORD_FILTER_DISABLED)
+    {
+      regval = ICJX_CTRL_WORD_3_ICLK;
+    }
+  else
+    {
+      regval = ICJX_CTRL_WORD_3_DIS;
+    }
+
+  ret = icjx_write(priv, ICJX_CTRL_WORD_3_B, regval, ICJX_NOB1);
+  if (ret < 0)
+    {
+      gpioerr("ERROR: Couldn't write to ICJX_CTRL_WORD_3_B: %d!\n", ret);
+      goto err;
+    }
+
+  regval = (config->filters << 4) | config->filters;
   ret = icjx_write(priv, ICJX_CTRL_WORD_1_A, regval, ICJX_NOB1);
   if (ret < 0)
     {
-      gpioerr("ERROR: Could write to ICJX_CTRL_WORD_1_A: %d!\n", ret);
+      gpioerr("ERROR: Couldn't write to ICJX_CTRL_WORD_1_A: %d!\n", ret);
       goto err;
     }
 
   ret = icjx_write(priv, ICJX_CTRL_WORD_1_B, regval, ICJX_NOB1);
   if (ret < 0)
     {
-      gpioerr("ERROR: Could write to ICJX_CTRL_WORD_1_B: %d!\n", ret);
+      gpioerr("ERROR: Couldn't write to ICJX_CTRL_WORD_1_B: %d!\n", ret);
       goto err;
     }
 

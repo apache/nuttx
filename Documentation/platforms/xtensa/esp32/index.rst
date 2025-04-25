@@ -241,7 +241,13 @@ described for the :ref:`ESP32-DevKitC <platforms/xtensa/esp32/boards/esp32-devki
 
 OpenOCD can then be used::
 
-  openocd -c 'set ESP_RTOS hwthread; set ESP_FLASH_SIZE 0' -f board/esp32-wrover-kit-1.8v.cfg
+  openocd -s <tcl_scripts_path> -c 'set ESP_RTOS hwthread' -f board/esp32-wrover-kit-3.3v.cfg -c 'init; reset halt; esp appimage_offset 0x1000'
+
+.. note::
+  - ``appimage_offset`` should be set to ``0x1000`` when ``Simple Boot`` is used. For MCUboot, this value should be set to
+    ``CONFIG_ESP32_OTA_PRIMARY_SLOT_OFFSET`` value (``0x10000`` by default).
+  - ``-s <tcl_scripts_path>`` defines the path to the OpenOCD scripts. Usually set to `tcl` if running openocd from its source directory.
+    It can be omitted if `openocd-esp32` were installed in the system with `sudo make install`.
 
 Once OpenOCD is running, you can use GDB to connect to it and debug your application::
 
@@ -389,7 +395,7 @@ The following list indicates the state of peripherals' support in NuttX:
 ========== ======= =====
 Peripheral Support NOTES
 ========== ======= =====
-ADC          No
+ADC          Yes    Oneshot
 AES          Yes
 Bluetooth    Yes
 Camera       No
@@ -687,6 +693,43 @@ audio subsystem and develop specific usages of the I2S peripheral.
    reception configured at the same time on the same peripheral.
 
 Please check for usage examples using the :doc:`ESP32 DevKitC </platforms/xtensa/esp32/boards/esp32-devkitc/index>`.
+
+Analog-to-digital converter (ADC)
+=================================
+
+Two ADC units are available for the ESP32:
+
+* ADC1 with 8 channels
+* ADC2 with 10 channels
+
+Those units are independent and can be used simultaneously. During bringup, GPIOs for selected channels are
+configured automatically to be used as ADC inputs.
+If available, ADC calibration is automatically applied (see
+`this page <https://docs.espressif.com/projects/esp-idf/en/v5.1/esp32/api-reference/peripherals/adc_calibration.html>`__ for more details).
+Otherwise, a simple conversion is applied based on the attenuation and resolution.
+
+Each ADC unit is accessible using the ADC character driver, which returns data for the enabled channels.
+
+The ADC unit can be enabled in the menu :menuselection:`System Type --> ESP32 Peripheral Selection --> Analog-to-digital converter (ADC)`.
+
+Then, it can be customized in the menu :menuselection:`System Type --> ADC Configuration`, which includes operating mode, gain and channels.
+
+========== =========== ===========
+ Channel    ADC1 GPIO   ADC2 GPIO
+========== =========== ===========
+0           36          4
+1           37          0
+2           38          2
+3           39          15
+4           32          13
+5           33          12
+6           34          14
+7           35          27
+8                       25
+9                       26
+========== =========== ===========
+
+.. warning:: ADC2 channels 1, 2 and 3 are used as strapping pins and can present undefined behavior.
 
 Using QEMU
 ==========

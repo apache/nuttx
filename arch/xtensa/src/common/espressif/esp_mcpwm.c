@@ -1143,7 +1143,7 @@ static int esp_motor_fault_configure(struct mcpwm_motor_lowerhalf_s *lower,
 
 #ifdef CONFIG_ESP_MCPWM_MOTOR
 static int esp_motor_set_duty_cycle(struct mcpwm_motor_lowerhalf_s *lower,
-  float duty)
+                                    float duty)
 {
   DEBUGASSERT(lower != NULL);
 
@@ -1158,7 +1158,7 @@ static int esp_motor_set_duty_cycle(struct mcpwm_motor_lowerhalf_s *lower,
   uint32_t pwm_count = -1 * lower->counter_peak * (duty - 1.0);
   mcpwm_ll_operator_set_compare_value(hal->dev, lower->operator_id,
                                       MCPWM_GENERATOR_0, pwm_count);
-  mtrinfo("Duty %f compare value set: %u\n", duty, pwm_count);
+  mtrinfo("Duty %f compare value set: %" PRIu32 "\n", duty, pwm_count);
 
   return OK;
 }
@@ -1924,7 +1924,7 @@ struct motor_lowerhalf_s *esp_motor_bdc_initialize(int channel,
       return NULL;
     }
 
-  mtrinfo("Channel %d initialized. GPIO: PWM_A: %d | PWM_B: %d | Freq: %d\n",
+  mtrinfo("Ch %d initialized GPIO: PWM_A %d | PWM_B %d | Freq %" PRIu32 "\n",
           lower->channel_id, lower->generator_pins[MCPWM_GENERATOR_0],
           lower->generator_pins[MCPWM_GENERATOR_1], lower->pwm_frequency);
   return (struct motor_lowerhalf_s *) lower;

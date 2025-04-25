@@ -227,18 +227,19 @@ static noreturn_function void __esp32_start(void)
 
   chip_rev = esp_efuse_hal_chip_revision();
 
-  _info("ESP32 chip revision is v%d.%01d\n", chip_rev / 100, chip_rev % 100);
+  _info("ESP32 chip revision is v%" PRId32 ".%01ld\n",
+        chip_rev / 100, chip_rev % 100);
 
   if (chip_rev < 300)
     {
 #ifndef ESP32_IGNORE_CHIP_REVISION_CHECK
       ets_printf("ERROR: NuttX supports ESP32 chip revision >= v3.0"
-                 " (chip revision is v%d.%01d)\n",
+                 " (chip revision is v%" PRId32 ".%01ld)\n",
                  chip_rev / 100, chip_rev % 100);
       PANIC();
 #endif
       ets_printf("WARNING: NuttX supports ESP32 chip revision >= v3.0"
-                 " (chip is v%d.%01d).\n"
+                 " (chip is v%" PRId32 ".%01ld).\n"
                  "Ignoring this error and continuing because "
                  "`ESP32_IGNORE_CHIP_REVISION_CHECK` is set...\n"
                  "THIS MAY NOT WORK! DON'T USE THIS CHIP IN PRODUCTION!\n",
