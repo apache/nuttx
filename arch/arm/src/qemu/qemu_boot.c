@@ -136,6 +136,14 @@ int up_cpu_start(int cpu)
   sched_note_cpu_start(this_task(), cpu);
 #endif
 
+#ifdef CONFIG_ARCH_ADDRENV
+  /* Copy cpu0 page table to target cpu. */
+
+  memcpy((uint32_t *)(PGTABLE_BASE_VADDR + PGTABLE_SIZE * cpu),
+          (uint32_t *)PGTABLE_BASE_VADDR, PGTABLE_SIZE);
+  UP_DSB();
+#endif
+
   return psci_cpu_on(cpu, (uintptr_t)__start);
 }
 #endif
