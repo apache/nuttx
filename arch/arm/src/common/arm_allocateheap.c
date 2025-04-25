@@ -171,6 +171,10 @@ void weak_function up_allocate_kheap(void **heap_start, size_t *heap_size)
 
   uintptr_t base = g_idle_topstack;
   uintptr_t size = CONFIG_ARCH_PGPOOL_PBASE - g_idle_topstack;
+
+  /* Reserved space for mmu kernel table */
+
+  size -= PGTABLE_SIZE * CONFIG_SMP_NCPUS;
 # else
   /* CONFIG_BUILD_KERNEL && !CONFIG_ARCH_PGPOOL_PBASE */
 
