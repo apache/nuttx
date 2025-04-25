@@ -37,6 +37,7 @@
 #include "qemu_userspace.h"
 #include "smp.h"
 #include "gic.h"
+#include "scu.h"
 
 #ifdef CONFIG_DEVICE_TREE
 #  include <nuttx/fdt.h>
@@ -85,6 +86,12 @@ void arm_boot(void)
   /* Set the page table for section */
 
   qemu_setupmappings();
+#endif
+
+#ifdef CONFIG_SMP
+  /* Enable SMP cache coherency for CPU0 */
+
+  arm_enable_smp(0);
 #endif
 
   arm_fpuconfig();
