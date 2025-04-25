@@ -162,10 +162,6 @@ int file_close(FAR struct file *filep)
   ret = file_close_without_clear(filep);
   if (ret >= 0 && filep->f_inode)
     {
-      /* Reset the user file struct instance so that it cannot be reused. */
-
-      filep->f_inode = NULL;
-
 #ifdef CONFIG_FDCHECK
       filep->f_tag_fdcheck = 0;
 #endif
@@ -173,6 +169,10 @@ int file_close(FAR struct file *filep)
 #ifdef CONFIG_FDSAN
       filep->f_tag_fdsan = 0;
 #endif
+
+      /* Reset the user file struct instance so that it cannot be reused. */
+
+      filep->f_inode = NULL;
     }
 
   return ret;
