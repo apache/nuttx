@@ -690,7 +690,7 @@ static inline uintptr_t ebics3_virtramaddr(uintptr_t physramaddr)
  *
  ****************************************************************************/
 
-#ifndef CONFIG_ARCH_PGPOOL_MAPPING
+#if defined(CONFIG_ARCH_ADDRENV) && !defined(CONFIG_ARCH_PGPOOL_MAPPING)
 static inline uintptr_t sam_virtpgaddr(uintptr_t paddr)
 {
   uintptr_t poolstart;
