@@ -333,7 +333,7 @@ static int ota_set_bootseq(struct mtd_dev_priv *dev, int num)
           }
         else if (ret == OTA_IMG_BOOT_FACTORY)
           {
-            next_seq = 1;
+            next_seq = (uint32_t)num;
           }
         else
           {
