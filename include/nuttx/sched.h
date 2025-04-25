@@ -515,8 +515,11 @@ struct task_group_s
 
   /* POSIX Signal Control Fields ********************************************/
 
+#ifndef CONFIG_DISABLE_SIGNALS
   sq_queue_t tg_sigactionq;         /* List of actions for signals              */
   sq_queue_t tg_sigpendingq;        /* List of pending signals                  */
+#endif /* !CONFIG_DISABLE_SIGNALS */
+
 #ifdef CONFIG_SIG_DEFAULT
   sigset_t tg_sigdefault;           /* Set of signals set to the default action */
 #endif
@@ -663,8 +666,17 @@ struct tcb_s
 
   sigset_t   sigprocmask;                /* Signals that are blocked        */
   sigset_t   sigwaitmask;                /* Waiting for pending signals     */
+#ifndef CONFIG_DISABLE_SIGNALS
+
+  /* The following function pointer is non-zero if there are pending signals
+   * to be processed.
+   */
+
+  sig_deliver_t sigdeliver;
+
   sq_queue_t sigpendactionq;             /* List of pending signal actions  */
   sq_queue_t sigpostedq;                 /* List of posted signals          */
+#endif
   siginfo_t  *sigunbinfo;                /* Signal info when task unblocked */
 
   /* Robust mutex support ***************************************************/
@@ -708,11 +720,6 @@ struct tcb_s
 
   struct xcptcontext xcp;                /* Interrupt register save area    */
 
-  /* The following function pointer is non-zero if there are pending signals
-   * to be processed.
-   */
-
-  sig_deliver_t sigdeliver;
 #if CONFIG_TASK_NAME_SIZE > 0
   char name[CONFIG_TASK_NAME_SIZE + 1];  /* Task name (with NUL terminator) */
 #endif

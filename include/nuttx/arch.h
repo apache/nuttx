@@ -570,7 +570,9 @@ int up_backtrace(FAR struct tcb_s *tcb,
  *
  ****************************************************************************/
 
+#ifndef CONFIG_DISABLE_SIGNALS
 void up_schedule_sigaction(FAR struct tcb_s *tcb);
+#endif
 
 /****************************************************************************
  * Name: up_task_start
@@ -662,7 +664,8 @@ void up_pthread_start(pthread_trampoline_t startup,
  *
  ****************************************************************************/
 
-#if !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__)
+#if !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__) && \
+    !defined(CONFIG_DISABLE_SIGNALS)
 void up_signal_dispatch(_sa_sigaction_t sighand, int signo,
                         FAR siginfo_t *info, FAR void *ucontext);
 #endif

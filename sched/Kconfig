@@ -44,6 +44,10 @@ config DISABLE_ENVIRON
 	bool "Disable environment variable support"
 	default DEFAULT_SMALL
 
+config DISABLE_SIGNALS
+	bool "Disable signal support"
+	default DEFAULT_SMALL
+
 endif # DISABLE_OS_API
 
 config DISABLE_IDLE_LOOP
@@ -1563,6 +1567,7 @@ endif # BOARD_LATE_INITIALIZE
 endmenu # RTOS hooks
 
 menu "Signal Configuration"
+	depends on !DISABLE_SIGNALS
 
 config SIG_PREALLOC_ACTIONS
 	int "Number of pre-allocated sigactions"
