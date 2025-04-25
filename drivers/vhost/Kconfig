@@ -6,6 +6,7 @@
 config DRIVERS_VHOST
 	bool
 	select OPENAMP
+	select SCHED_WORKQUEUE
 	default n
 
 config DRIVERS_VHOST_RNG
