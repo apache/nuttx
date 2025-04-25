@@ -158,7 +158,11 @@ struct task_group_s;
 
 /* sig_initializee.c */
 
+#ifndef CONFIG_DISABLE_SIGNALS
 void               nxsig_initialize(void);
+#else
+#  define          nxsig_initialize()
+#endif
 
 /* sig_action.c */
 
@@ -184,8 +188,13 @@ int                nxsig_dispatch(pid_t pid, FAR siginfo_t *info,
 
 /* sig_cleanup.c */
 
+#ifndef CONFIG_DISABLE_SIGNALS
 void               nxsig_cleanup(FAR struct tcb_s *stcb);
 void               nxsig_release(FAR struct task_group_s *group);
+#else
+#  define          nxsig_cleanup(stcb)
+#  define          nxsig_release(group)
+#endif
 
 /* sig_timedwait.c */
 
@@ -203,6 +212,13 @@ void               nxsig_release_pendingsigaction(FAR sigq_t *sigq);
 void               nxsig_release_pendingsignal(FAR sigpendq_t *sigpend);
 FAR sigpendq_t    *nxsig_remove_pendingsignal(FAR struct tcb_s *stcb,
                                               int signo);
+#ifndef CONFIG_DISABLE_SIGNALS
 bool               nxsig_unmask_pendingsignal(void);
+#else
+static inline bool nxsig_unmask_pendingsignal(void)
+{
+  return false;
+}
+#endif
 
 #endif /* __SCHED_SIGNAL_SIGNAL_H */
