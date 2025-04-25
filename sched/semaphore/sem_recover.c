@@ -94,6 +94,10 @@ void nxsem_recover(FAR struct tcb_s *tcb)
 
       nxsem_canceled(tcb, sem);
 
+      /* Remove the tcb from the semaphore wait list if it exists there */
+
+      dq_rem((FAR dq_entry_t *)tcb, SEM_WAITLIST(sem));
+
       /* And increment the count on the semaphore.  This releases the count
        * that was taken by sem_wait().  This count decremented the semaphore
        * count to negative and caused the thread to be blocked in the first
