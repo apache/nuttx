@@ -130,6 +130,7 @@ int sched_backtrace(pid_t tid, FAR void **buffer, int size, int skip)
                   arg.need_restore = true;
 
                   tcb->flags |= TCB_FLAG_CPU_LOCKED;
+                  CPU_ZERO(&tcb->affinity);
                   CPU_SET(tcb->cpu, &tcb->affinity);
                 }
 

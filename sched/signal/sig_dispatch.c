@@ -181,6 +181,7 @@ static int nxsig_queue_action(FAR struct tcb_s *stcb, siginfo_t *info)
                       arg.need_restore   = true;
 
                       stcb->flags        |= TCB_FLAG_CPU_LOCKED;
+                      CPU_ZERO(&stcb->affinity);
                       CPU_SET(stcb->cpu, &stcb->affinity);
                     }
 
