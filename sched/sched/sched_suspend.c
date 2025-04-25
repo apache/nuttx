@@ -161,6 +161,7 @@ void nxsched_suspend(FAR struct tcb_s *tcb)
               arg.need_restore = true;
 
               tcb->flags |= TCB_FLAG_CPU_LOCKED;
+              CPU_ZERO(&tcb->affinity);
               CPU_SET(tcb->cpu, &tcb->affinity);
             }
 

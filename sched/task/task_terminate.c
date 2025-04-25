@@ -144,6 +144,7 @@ int nxtask_terminate(pid_t pid)
       tcb_flags = dtcb->flags;
       dtcb->flags |= TCB_FLAG_CPU_LOCKED;
       affinity = dtcb->affinity;
+      CPU_ZERO(&dtcb->affinity);
       CPU_SET(dtcb->cpu, &dtcb->affinity);
 
       ret = nxsched_smp_call_single(dtcb->cpu, terminat_handler,
