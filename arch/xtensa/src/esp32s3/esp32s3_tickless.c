@@ -194,6 +194,10 @@ static void IRAM_ATTR tickless_setcounter(uint64_t ticks)
 {
   uint64_t alarm_ticks = tickless_getcounter() + ticks;
 
+  /* Select unit0 to comp0 */
+
+  modifyreg32(SYSTIMER_TARGET0_CONF_REG, SYSTIMER_TARGET0_TIMER_UNIT_SEL, 0);
+
   /* Select alarm mode */
 
   modifyreg32(SYSTIMER_TARGET0_CONF_REG, SYSTIMER_TARGET0_PERIOD_MODE, 0);
@@ -239,6 +243,17 @@ static int IRAM_ATTR tickless_isr(int irq, void *context, void *arg)
   g_timer_started = false;
 
   modifyreg32(SYSTIMER_INT_CLR_REG, 0, SYSTIMER_TARGET0_INT_CLR);
+
+  uint64_t unit_ticks = tickless_getcounter();
+  uint64_t alarm_ticks = tickless_getalarmvalue();
+  if (unit_ticks < alarm_ticks)
+    {
+      modifyreg32(SYSTIMER_CONF_REG, 0, SYSTIMER_TARGET0_WORK_EN);
+      modifyreg32(SYSTIMER_INT_ENA_REG, 0, SYSTIMER_TARGET0_INT_ENA);
+      g_timer_started = true;
+
+      return OK;
+    }
 
   nxsched_timer_expiration();
 
@@ -371,7 +386,7 @@ int IRAM_ATTR up_timer_cancel(struct timespec *ts)
 
   modifyreg32(SYSTIMER_CONF_REG, SYSTIMER_TARGET0_WORK_EN, 0);
   modifyreg32(SYSTIMER_INT_ENA_REG, SYSTIMER_TARGET0_INT_ENA, 0);
-  modifyreg32(SYSTIMER_INT_CLR_REG, SYSTIMER_TARGET0_INT_CLR, 0);
+  modifyreg32(SYSTIMER_INT_CLR_REG, 0, SYSTIMER_TARGET0_INT_CLR);
 
   leave_critical_section(flags);
 
@@ -474,6 +489,8 @@ void up_timer_initialize(void)
 
   modifyreg32(SYSTEM_PERIP_CLK_EN0_REG, 0, SYSTEM_SYSTIMER_CLK_EN);
   modifyreg32(SYSTEM_PERIP_RST_EN0_REG, SYSTEM_SYSTIMER_RST, 0);
+  modifyreg32(SYSTIMER_UNIT0_LOAD_REG, 0, SYSTIMER_TIMER_UNIT0_LOAD);
+  modifyreg32(SYSTIMER_CONF_REG, 0, SYSTIMER_TIMER_UNIT0_WORK_EN);
   modifyreg32(SYSTIMER_CONF_REG, 0, SYSTIMER_CLK_EN);
 
   /* Stall systimer 0 when CPU stalls, e.g., when using JTAG to debug */
