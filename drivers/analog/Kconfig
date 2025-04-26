@@ -411,6 +411,34 @@ config DAC7554
 	---help---
 		Enable driver support for the Texas Instruments DAC7554 dac.
 
+config MCP47X6
+	bool "MCP4706/4716/4726 support"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the Microchip MCP4706/4716/4726 DAC.
+
+choice
+	prompt "MCP47X6 variant"
+	default MCP4706
+	depends on MCP47X6
+
+config MCP4706
+	bool "MCP4706 (8-bit) DAC"
+
+config MCP4716
+	bool "MCP4716 (10-bit) DAC"
+
+config MCP4726
+	bool "MCP4726 (12-bit) DAC"
+
+endchoice # MCP47X6 variant
+
+config MCP47X6_I2C_FREQUENCY
+	int "MCP47X6 I2C frequency"
+	default 400000
+	depends on MCP47X6
+
 config MCP48XX
 	bool "MCP4802/4812/4822 support"
 	default n

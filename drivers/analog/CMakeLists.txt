@@ -40,6 +40,10 @@ if(CONFIG_DAC)
     list(APPEND SRCS dac7554.c)
   endif()
 
+  if(CONFIG_MCP47X6)
+    list(APPEND SRCS mcp47x6.c)
+  endif()
+
   if(CONFIG_MCP48XX)
     list(APPEND SRCS mcp48xx.c)
   endif()
