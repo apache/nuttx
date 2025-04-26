@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/stm32f401rc-rs485/src/stm32_lcd_ssd1306.c
+ * boards/arm/stm32/stm32f401rc-rs485/src/stm32_lcd_st7735.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -35,71 +35,87 @@
 #include <nuttx/board.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/lcd/lcd.h>
-#include <nuttx/lcd/ssd1306.h>
+#include <nuttx/lcd/st7735.h>
 
-#include "stm32.h"
+#include "arm_internal.h"
+#include "stm32_gpio.h"
+#include "stm32_spi.h"
 #include "stm32f401rc-rs485.h"
-
-#include "stm32_ssd1306.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define OLED_SPI_PORT         1 /* OLED display connected to SPI1 */
+#define LCD_SPI_PORTNO 1
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+static struct spi_dev_s *g_spidev;
+static struct lcd_dev_s *g_lcd = NULL;
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_lcd_initialize
+ * Name:  board_lcd_initialize
+ *
+ * Description:
+ *   Initialize the LCD video hardware.  The initial state of the LCD is
+ *   fully initialized, display memory cleared, and the LCD ready to use, but
+ *   with the power setting at 0 (full off).
+ *
  ****************************************************************************/
 
 int board_lcd_initialize(void)
 {
-  int ret;
-
-  /* Initialize the RESET and DC pins */
-
   stm32_configgpio(GPIO_LCD_RESET);
   stm32_configgpio(GPIO_LCD_DC);
 
-  /* Reset the OLED display */
+  g_spidev = stm32_spibus_initialize(LCD_SPI_PORTNO);
+  if (!g_spidev)
+    {
+      lcderr("ERROR: Failed to initialize SPI port %d\n", LCD_SPI_PORTNO);
+      return -ENODEV;
+    }
 
   stm32_gpiowrite(GPIO_LCD_RESET, 0);
   up_mdelay(1);
   stm32_gpiowrite(GPIO_LCD_RESET, 1);
   up_mdelay(120);
 
-  ret = board_ssd1306_initialize(OLED_SPI_PORT);
-  if (ret < 0)
-    {
-      lcderr("ERROR: Failed to initialize SSD1306\n");
-      return ret;
-    }
+  g_lcd = st7735_lcdinitialize(g_spidev);
 
   return OK;
 }
 
 /****************************************************************************
- * Name: board_lcd_getdev
+ * Name:  board_lcd_getdev
+ *
+ * Description:
+ *   Return a a reference to the LCD object for the specified LCD.  This
+ *   allows support for multiple LCD devices.
+ *
  ****************************************************************************/
 
 struct lcd_dev_s *board_lcd_getdev(int devno)
 {
-  return board_ssd1306_getdev();
+  return g_lcd;
 }
 
 /****************************************************************************
- * Name: board_lcd_uninitialize
+ * Name:  board_lcd_uninitialize
+ *
+ * Description:
+ *   Uninitialize the LCD support
+ *
  ****************************************************************************/
 
 void board_lcd_uninitialize(void)
 {
-  /* TO-FIX */
+  /* Turn the display off */
+
+  g_lcd->setpower(g_lcd, 0);
 }

@@ -848,9 +848,6 @@ features such as scheduling and multi-sensor handling.
 - ``value1`` corresponds to pressure in hPa (hectopascals).
 - ``value2`` corresponds to temperature in tenths of degrees Celsius (e.g., 224.00 = 22.4°C).
 
-Hardware Connections
---------------------
-
 Connect the BMP180 sensor to the STM32 board using the I2C interface.
 
 +--------+------+
@@ -860,3 +857,87 @@ Connect the BMP180 sensor to the STM32 board using the I2C interface.
 +--------+------+
 | SCL    | PB8  |
 +--------+------+
+
+ST7735
+======
+
+This example shows how to bring up and use a ST7735-based TFT LCD display in NuttX.
+
+How to add support for the ST7735 display to a new board in NuttX:
+
+1. **LCD Initialization:**
+   Implement LCD initialization/uninitialization in `stm32_lcd_st7735.c`
+   to handle the display. You can copy this from another board that
+   supports ST7735.
+
+2. **Update CMakeLists.txt and Make.defs:**
+   Add `stm32_lcd_st7735.c` if `CONFIG_LCD_ST7735` is enabled.
+
+3. **SPI Initialization:**
+   Ensure SPI is configured in `stm32_spi.c` for the ST7735.
+
+4. **Board Setup:**
+   Configure GPIO pins for RESET, DC, and CS.
+
+You can wire the display to your board this way:
+
++------------+---------+
+| LCD        | PIN     |
++============+=========+
+| CS         | PB7     |
++------------+---------+
+| DC         | PB8     |
++------------+---------+
+| RESET      | PB6     |
++------------+---------+
+| SDA (MOSI) | PA7     |
++------------+---------+
+| SCK (SCLK) | PA5     |
++------------+---------+
+
+.. note::
+
+   The ST7735 uses the SPI interface.
+   ``SDA`` corresponds to SPI ``MOSI`` (Master Out Slave In),
+   and ``SCK`` corresponds to SPI ``SCLK`` (Serial Clock).
+
+Enable the following options using ``make menuconfig``:
+--------------------------------------------------------
+
+::
+
+    CONFIG_DRIVERS_VIDEO=y
+    CONFIG_EXAMPLES_FB=y
+    CONFIG_LCD=y
+    CONFIG_LCD_FRAMEBUFFER=y
+    CONFIG_LCD_ST7735=y
+    CONFIG_SPI_CMDDATA=y
+    CONFIG_STM32_SPI1=y
+    CONFIG_VIDEO_FB=y
+
+NSH usage
+---------
+
+::
+
+    NuttShell (NSH) NuttX-12.9.0
+    nsh> fb
+    VideoInfo:
+          fmt: 11
+         xres: 160
+         yres: 128
+      nplanes: 1
+    PlaneInfo (plane 0):
+        fbmem: 0x20003598
+        fblen: 40960
+       stride: 320
+      display: 0
+          bpp: 16
+    Mapped FB: 0x20003598
+     0: (  0,  0) (160,128)
+     1: ( 14, 11) (132,106)
+     2: ( 28, 22) (104, 84)
+     3: ( 42, 33) ( 76, 62)
+     4: ( 56, 44) ( 48, 40)
+     5: ( 70, 55) ( 20, 18)
+    Test finished
