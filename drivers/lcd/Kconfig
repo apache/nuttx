@@ -1450,6 +1450,18 @@ config LCD_ILI9341_IFACE0
 		Configure first LCD Display.
 
 if LCD_ILI9341_IFACE0
+config LCD_ILI9341_IFACE0_WIDTH
+	int "Width of the display"
+	default 240
+	---help---
+		Define the width of the display.
+
+config LCD_ILI9341_IFACE0_HEIGHT
+	int "Height of the display"
+	default 320
+	---help---
+		Define the the height of the display.
+
 choice
 	prompt "LCD Orientation"
 	default LCD_ILI9341_IFACE0_LANDSCAPE
@@ -1499,6 +1511,18 @@ config LCD_ILI9341_IFACE1
 		Configure second LCD Display.
 
 if LCD_ILI9341_IFACE1
+config LCD_ILI9341_IFACE1_WIDTH
+	int "Width of the display"
+	default 240
+	---help---
+		Define the width of the display.
+
+config LCD_ILI9341_IFACE1_HEIGHT
+	int "Height of the display"
+	default 320
+	---help---
+		Define the the height of the display.
+
 choice
 	prompt "LCD Orientation"
 	default LCD_ILI9341_IFACE1_LANDSCAPE
