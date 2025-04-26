@@ -40,7 +40,7 @@ WWDG        Yes
 I2C         Yes
 USART       Yes
 SPI         Yes
-FDCAN       No
+FDCAN       Yes
 USB         No
 ==========  =======  =====
 

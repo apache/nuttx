@@ -44,3 +44,15 @@ Enabled features:
 - ADC with DMA enabled using A0 and A1 pins
 
 - button with software debouncing enabled (no RC filter on the board)
+
+can
+---
+
+Configuration with FDCAN enabled as character driver and
+``examples/can`` included as builtin application.
+
+cansock
+-------
+
+Configuration with FDCAN enabled as SocketCAN interface with ``candump``
+and ``cansend`` utils included as builtin applications.

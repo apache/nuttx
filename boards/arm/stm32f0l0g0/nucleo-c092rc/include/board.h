@@ -72,6 +72,11 @@
 #define STM32_RCC_CFGR_PPRE     RCC_CFGR_PPRE_HCLK
 #define STM32_PCLK1_FREQUENCY   STM32_HCLK_FREQUENCY
 
+/* FDCAN1 clock is PCLK (48 MHz) */
+
+#define STM32_FDCAN1_SEL       RCC_CCIPR1_FDCAN1SEL_PCLK
+#define STM32_FDCAN_FREQUENCY  STM32_PCLK1_FREQUENCY
+
 /* LED definitions **********************************************************/
 
 /* LED index values for use with board_userled() */
@@ -152,6 +157,11 @@
 
 #define GPIO_USART2_RX      (GPIO_USART2_RX_1|GPIO_SPEED_HIGH)    /* PA3 */
 #define GPIO_USART2_TX      (GPIO_USART2_TX_1|GPIO_SPEED_HIGH)    /* PA2 */
+
+/* FDCAN */
+
+#define GPIO_FDCAN1_RX      (GPIO_FDCAN1_RX_8|GPIO_SPEED_HIGH)    /* PD0 */
+#define GPIO_FDCAN1_TX      (GPIO_FDCAN1_TX_9|GPIO_SPEED_HIGH)    /* PD1 */
 
 /* DMA channels *************************************************************/
 
