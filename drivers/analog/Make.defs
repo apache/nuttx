@@ -44,6 +44,10 @@ ifeq ($(CONFIG_DAC7554),y)
   CSRCS += dac7554.c
 endif
 
+ifeq ($(CONFIG_MCP47X6),y)
+  CSRCS += mcp47x6.c
+endif
+
 ifeq ($(CONFIG_MCP48XX),y)
   CSRCS += mcp48xx.c
 endif

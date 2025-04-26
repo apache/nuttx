@@ -225,6 +225,24 @@ FAR struct dac_dev_s *lmp92001_dac_initialize(FAR struct i2c_master_s *i2c,
                                               uint8_t addr);
 
 /****************************************************************************
+ * Name: mcp47x6_initialize
+ *
+ * Description:
+ *   Initialize DAC
+ *
+ * Input Parameters:
+ *   I2C Port number
+ *   Device address
+ *
+ * Returned Value:
+ *   Valid MCP47X6 device structure reference on success; a NULL on failure
+ *
+ ****************************************************************************/
+
+FAR struct dac_dev_s *mcp47x6_initialize(FAR struct i2c_master_s *i2c,
+                                         uint8_t addr);
+
+/****************************************************************************
  * Name: mcp48xx_initialize
  *
  * Description:
