@@ -358,7 +358,9 @@ Functions
      NOTE: ``vfork()`` is not an independent NuttX feature, but is
      implemented in architecture-specific logic (using only helper
      functions from the NuttX core logic). As a result, ``vfork()`` may
-     not be available on all architectures.
+     not be available on all architectures. The current implementation in
+     NuttX arm64 only guarantees that ``vfork()`` works when
+     CONFIG_BUILD_FLAT=y.
 
   :return: Upon successful completion, ``vfork()`` returns 0 to
     the child process and returns the process ID of the child process to the
