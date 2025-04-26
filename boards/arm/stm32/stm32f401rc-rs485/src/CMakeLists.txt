@@ -69,6 +69,15 @@ if(CONFIG_DEV_GPIO)
   list(APPEND SRCS stm32_gpio.c)
 endif()
 
+if(CONFIG_VIDEO_FB)
+  if(CONFIG_LCD_SSD1306)
+    list(APPEND SRCS stm32_lcd_ssd1306.c)
+  endif()
+  if(CONFIG_LCD_ST7735)
+    list(APPEND SRCS stm32_lcd_st7735.c)
+  endif()
+endif()
+
 target_sources(board PRIVATE ${SRCS})
 
 if(CONFIG_ARCH_CHIP_STM32F401RC)
