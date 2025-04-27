@@ -265,13 +265,13 @@ uint64_t *arm64_syscall(uint64_t *regs)
 
               /* Create a frame for info and copy the kernel info */
 
-              rtcb->xcp.ustkptr = (uintptr_t *)read_sysreg(sp_el0);
+              rtcb->xcp.ustkptr = (uintptr_t *)regs[REG_SP_EL0];
               usp = (uintptr_t)rtcb->xcp.ustkptr - sizeof(siginfo_t);
               memcpy((void *)usp, (void *)regs[REG_X2], sizeof(siginfo_t));
 
               /* Now set the updated SP and user copy of "info" to R2 */
 
-              write_sysreg(usp, sp_el0);
+              regs[REG_SP_EL0] = usp;
               regs[REG_X2] = usp;
             }
 #endif
