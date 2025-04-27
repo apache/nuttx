@@ -578,6 +578,13 @@ config ARCH_BOARD_ESP32C6_DEVKITM
 	---help---
 		The ESP32-C6 DevKitM-1 features the ESP32-C6 CPU with a RISC-V core.
 
+config ARCH_BOARD_ESP32C6_XIAO
+		bool "Seeed Studio XIAO ESP32C6"
+		depends on ARCH_CHIP_ESP32C6WROOM1
+		---help---
+		The XIAO-ESP32C6 from Seeed Studio features the ESP32-C6 CPU with two RISC-V cores,
+		supporting IEEE 802.11 b/g/n/ax WiFi, and Bluetooth 5 (BLE) protocols.
+
 config ARCH_BOARD_ESP32H2_DEVKIT
 	bool "Espressif ESP32-H2 Generic DevKit"
 	depends on ESPRESSIF_ESP32H2
@@ -3472,6 +3479,7 @@ config ARCH_BOARD
 	default "lckfb-szpi-esp32s3"        if ARCH_BOARD_ESP32S3_LCKFB_SZPI
 	default "esp32c6-devkitc"           if ARCH_BOARD_ESP32C6_DEVKITC
 	default "esp32c6-devkitm"           if ARCH_BOARD_ESP32C6_DEVKITM
+	default "esp32c6-xiao"              if ARCH_BOARD_ESP32C6_XIAO
 	default "esp32h2-devkit"            if ARCH_BOARD_ESP32H2_DEVKIT
 	default "et-stm32-stamp"            if ARCH_BOARD_ET_STM32_STAMP
 	default "tlsr8278adk80d"            if ARCH_BOARD_TLSR8278ADK80D
@@ -4729,6 +4737,9 @@ endif
 #endif
 #if ARCH_BOARD_ESP32C6_DEVKITM
 #source "boards/risc-v/esp32c6/esp32c6-devkitm/Kconfig"
+#endif
+#if ARCH_BOARD_ESP32C6_XIAO
+#source "boards/risc-v/esp32c6/esp32c6-xiao/Kconfig"
 #endif
 if ARCH_BOARD_ESP32H2_DEVKIT
 source "boards/risc-v/esp32h2/esp32h2-devkit/Kconfig"
