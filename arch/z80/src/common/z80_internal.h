@@ -63,12 +63,6 @@
 #  define USE_SERIALDRIVER 1
 #endif
 
-/* Stack alignment macros */
-
-#define STACK_ALIGN_MASK    (STACK_ALIGNMENT - 1)
-#define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
-#define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
-
 /* Register access macros ***************************************************
  *
  * The register access mechanism provided in ez8.h differs from the useful in

@@ -51,12 +51,6 @@
 #  error x86_64 stack canaries requires TLS support !
 #endif
 
-/* Aligned size of the kernel stack */
-
-#ifdef CONFIG_ARCH_KERNEL_STACK
-#  define ARCH_KERNEL_STACKSIZE STACK_ALIGN_UP(CONFIG_ARCH_KERNEL_STACKSIZE)
-#endif
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/

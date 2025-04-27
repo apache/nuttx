@@ -98,6 +98,18 @@
   while (0)
 #endif
 
+/* Stack alignment macros */
+
+#define STACK_ALIGN_MASK    (STACK_ALIGNMENT - 1)
+#define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
+#define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
+
+/* Aligned size of the kernel stack */
+
+#ifdef CONFIG_ARCH_KERNEL_STACK
+#  define ARCH_KERNEL_STACKSIZE STACK_ALIGN_UP(CONFIG_ARCH_KERNEL_STACKSIZE)
+#endif
+
 /* Interrupt was handled by this device */
 
 #define IRQ_HANDLED     0

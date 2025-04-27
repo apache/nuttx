@@ -77,12 +77,6 @@
 #  define CONFIG_ARCH_INTERRUPTSTACK 0
 #endif
 
-/* Stack alignment macros */
-
-#define STACK_ALIGN_MASK    (STACK_ALIGNMENT - 1)
-#define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
-#define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
-
 #define renesas_savestate(regs)  renesas_copystate(regs, up_current_regs())
 
 #define getreg8(a)          (*(volatile uint8_t *)(a))

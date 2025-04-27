@@ -94,12 +94,6 @@
 #  define CONFIG_ARCH_INTERRUPTSTACK 0
 #endif
 
-/* Stack alignment macros */
-
-#define STACK_ALIGN_MASK    (STACK_ALIGNMENT - 1)
-#define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
-#define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
-
 /* This is the value used to mark the stack for subsequent stack monitoring
  * logic.
  */

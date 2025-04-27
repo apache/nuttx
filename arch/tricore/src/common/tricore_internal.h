@@ -85,12 +85,6 @@
 #  define USE_SERIALDRIVER 1
 #endif
 
-/* Stack alignment macros */
-
-#define STACK_ALIGN_MASK    (STACK_ALIGNMENT - 1)
-#define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
-#define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
-
 /* Check if an interrupt stack size is configured */
 
 #ifndef CONFIG_ARCH_INTERRUPTSTACK
