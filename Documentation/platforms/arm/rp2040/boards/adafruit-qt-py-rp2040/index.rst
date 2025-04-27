@@ -2,6 +2,8 @@
 Adafruit QT Py RP2040
 =======================
 
+.. tags:: chip:rp2040
+
 The QT Py RP2040 is a tiny general purpose RP2040 board supplied by 
 Adafruit.
 

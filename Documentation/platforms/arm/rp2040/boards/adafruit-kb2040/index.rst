@@ -2,6 +2,8 @@
 Adafruit KB2040 Kee Boar
 ========================
 
+.. tags:: chip:rp2040
+
 The KB2040 Kee Boar is a general purpose RP2040 board supplied by 
 Adafruit.
 

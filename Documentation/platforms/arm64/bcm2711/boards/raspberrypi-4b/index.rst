@@ -2,6 +2,8 @@
 Raspberry Pi 4B
 ===============
 
+.. tags:: experimental
+
 The `Raspberry Pi 4B <https://www.raspberrypi.com/products/raspberry-pi-4-model-b/specifications/>`_ is an ARM64
 hobbyist board created by Raspberry Pi.
 

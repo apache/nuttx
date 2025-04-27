@@ -2,6 +2,8 @@
 Waveshare RP2040 Zero
 ===============================
 
+.. tags:: chip:rp2040
+
 The `Waveshare RP2040 Zero <https://www.waveshare.com/wiki/RP2040-Zero>`_ is a general purpose board supplied by
 Waveshare.
 

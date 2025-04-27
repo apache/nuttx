@@ -2,6 +2,8 @@
 Seeed Studio XIAO RP2040
 ========================
 
+.. tags:: chip:rp2040
+
 The `Seeed Studio Xiao RP2040 <https://wiki.seeedstudio.com/XIAO-RP2040/>`_ is a general purpose board supplied by
 Seeed Studio and it is compatible with the Raspberry Pi RP2040 ecosystem as they share the same RP2040 chip.
 

@@ -2,6 +2,8 @@
 Pimoroni Tiny2040
 =================
 
+.. tags:: chip:rp2040
+
 The Tiny2040 is a general purpose RP2040 board supplied by Pimoroni. 
 
 .. figure:: Tiny2040.png
