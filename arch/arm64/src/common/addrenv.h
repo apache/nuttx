@@ -40,12 +40,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Aligned size of the kernel stack */
-
-#ifdef CONFIG_ARCH_KERNEL_STACK
-#  define ARCH_KERNEL_STACKSIZE STACK_ALIGN_UP(CONFIG_ARCH_KERNEL_STACKSIZE)
-#endif
-
 /* Base address for address environment */
 
 #if CONFIG_ARCH_TEXT_VBASE != 0

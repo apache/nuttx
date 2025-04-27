@@ -72,12 +72,6 @@
 #  define USE_SERIALDRIVER 1
 #endif
 
-/* Stack alignment macros */
-
-#define STACK_ALIGN_MASK    (STACK_ALIGNMENT - 1)
-#define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
-#define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
-
 /* Macros for portability */
 
 #define IN_INTERRUPT             (up_current_regs() != NULL)
