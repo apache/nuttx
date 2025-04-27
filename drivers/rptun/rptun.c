@@ -422,10 +422,9 @@ static int rptun_create_device(FAR struct rptun_priv_s *priv,
           role == VIRTIO_DEV_DRIVER)
         {
           vring->da = vring_da;
+          shmbase  += vring_sz;
+          shmlen   -= vring_sz;
         }
-
-      shmbase += vring_sz;
-      shmlen  -= vring_sz;
     }
 
   vdev = remoteproc_create_virtio(&priv->rproc, index, role, NULL);
