@@ -59,6 +59,8 @@ extensions = [
     "sphinx_tabs.tabs",
     "sphinx_copybutton",
     "warnings_filter",
+    "sphinx_tags",
+    "sphinx_design",
 ]
 
 source_suffix = [".rst", ".md"]
@@ -77,7 +79,7 @@ templates_path = ["_templates"]
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "legacy_README.md"]
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "legacy_README.md", "venv"]
 
 # list of documentation versions to offer (besides latest). this will be
 # overridden by command line option but we can provide a sane default
@@ -132,3 +134,16 @@ copybutton_exclude = ".linenos, .gp, .go"
 # -- Options for warnings_filter ------------------------------------------
 
 warnings_filter_config = "known-warnings.txt"
+
+# -- Options for sphinx_tags ----------------------------------------------
+
+tags_create_tags = True
+tags_page_title = "Tags"
+tags_page_header = "Pages with this tag"
+tags_overview_title = "Tags"
+
+tags_create_badges = True
+tags_badge_colors = {
+    "chip:*": "secondary",
+    "experimental": "warning",
+}
