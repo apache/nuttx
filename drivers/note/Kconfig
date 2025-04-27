@@ -39,7 +39,7 @@ config DRIVERS_NOTECTL
 config DRIVERS_NOTERAM
 	bool "Note RAM driver"
 	select DRIVERS_NOTE
-	default n
+	default SCHED_INSTRUMENTATION
 	---help---
 		If this option is selected, then in-memory buffering logic is
 		enabled to capture scheduler instrumentation data.  This has
