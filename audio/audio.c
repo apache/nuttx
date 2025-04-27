@@ -1754,6 +1754,12 @@ int audio_register(FAR const char *name, FAR struct audio_lowerhalf_s *dev)
   FAR char *pathptr;
 #endif
 
+  if (!name || !dev)
+    {
+      auderr("ERROR: Invalid arguments\n");
+      return -EINVAL;
+    }
+
   /* Allocate the upper-half data structure */
 
   upper = kmm_zalloc(sizeof(struct audio_upperhalf_s));

@@ -335,11 +335,11 @@ static int sim_audio_getcaps(struct audio_lowerhalf_s *dev, int type,
                                        AUDIO_TYPE_PROCESSING;
               if (priv->offload)
                 {
-                   caps->ac_format.hw = (1 << (AUDIO_FMT_MP3 - 1));
+                  caps->ac_format.hw = (1 << (AUDIO_FMT_MP3 - 1));
                 }
               else
                 {
-                   caps->ac_format.hw = (1 << (AUDIO_FMT_PCM - 1));
+                  caps->ac_format.hw = (1 << (AUDIO_FMT_PCM - 1));
                 }
               break;
             case AUDIO_FMT_MP3:
@@ -374,7 +374,7 @@ static int sim_audio_getcaps(struct audio_lowerhalf_s *dev, int type,
 
               /* Report the Sample rates we support */
 
-             caps->ac_controls.hw[0] = AUDIO_SAMP_RATE_8K |
+              caps->ac_controls.hw[0] = AUDIO_SAMP_RATE_8K |
                                        AUDIO_SAMP_RATE_11K |
                                        AUDIO_SAMP_RATE_12K |
                                        AUDIO_SAMP_RATE_16K |
@@ -392,6 +392,11 @@ static int sim_audio_getcaps(struct audio_lowerhalf_s *dev, int type,
         break;
 
       case AUDIO_TYPE_FEATURE:
+
+        if (priv->volume == NULL)
+          {
+            return -ENOTTY;
+          }
 
         switch (caps->ac_format.hw)
           {
@@ -445,6 +450,12 @@ static int sim_audio_configure(struct audio_lowerhalf_s *dev,
   switch (caps->ac_type)
     {
       case AUDIO_TYPE_FEATURE:
+        if (priv->volume == NULL)
+          {
+            ret = -ENOTTY;
+            break;
+          }
+
         switch (caps->ac_format.hw)
           {
             case AUDIO_FU_VOLUME:
@@ -754,31 +765,31 @@ static int sim_audio_ioctl(struct audio_lowerhalf_s *dev, int cmd,
         }
         break;
 
-        case AUDIOIOC_SETPARAMTER:
-          {
-            audinfo("%s , arg: %s\n", __func__, (char *)arg);
-          }
-          break;
+      case AUDIOIOC_SETPARAMTER:
+        {
+          audinfo("%s , arg: %s\n", __func__, (char *)arg);
+        }
+        break;
 
-        case AUDIOIOC_GETLATENCY:
-          {
-            ret = sim_alsa_get_latency(dev, arg);
-            if (ret < 0)
-              {
-                return ret;
-              }
-          }
-          break;
+      case AUDIOIOC_GETLATENCY:
+        {
+          ret = sim_alsa_get_latency(dev, arg);
+          if (ret < 0)
+            {
+              return ret;
+            }
+        }
+        break;
 
-        case AUDIOIOC_FLUSH:
-          {
-            ret = sim_audio_flush(dev);
-          }
-          break;
+      case AUDIOIOC_FLUSH:
+        {
+          ret = sim_audio_flush(dev);
+        }
+        break;
 
-        default:
-          ret = -ENOTTY;
-          break;
+      default:
+        ret = -ENOTTY;
+        break;
     }
 
   return ret;
@@ -837,10 +848,10 @@ static int sim_audio_process_playback(struct sim_audio_s *priv,
 
       if (ret == -ENODATA)
         {
-            memmove(aux->samp, in, insize);
-            aux->curbyte = 0;
-            aux->nbytes  = insize;
-            *dequeue     = true;
+          memmove(aux->samp, in, insize);
+          aux->curbyte = 0;
+          aux->nbytes  = insize;
+          *dequeue     = true;
         }
       else
         {
@@ -1093,6 +1104,9 @@ static int sim_mixer_open(struct sim_audio_s *priv)
       host_uninterruptible_no_return(snd_mixer_selem_id_free, sid);
       if (!priv->volume)
         {
+          /* No volume control; the device works without it */
+
+          ret = 0;
           goto fail;
         }
 
@@ -1114,6 +1128,9 @@ static int sim_mixer_open(struct sim_audio_s *priv)
       host_uninterruptible_no_return(snd_mixer_selem_id_free, sid);
       if (!priv->volume)
         {
+          /* No volume control; the device works without it */
+
+          ret = 0;
           goto fail;
         }
 
@@ -1129,7 +1146,7 @@ static int sim_mixer_open(struct sim_audio_s *priv)
 fail:
   host_uninterruptible(snd_mixer_close, priv->mixer);
   priv->mixer = NULL;
-  return 0;
+  return ret;
 }
 
 static void sim_audio_work(FAR void *arg)
