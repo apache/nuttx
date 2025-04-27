@@ -73,7 +73,7 @@
  * regions.
  */
 
-static unsigned int g_mpu_region;
+static unsigned int g_mpu_region[CONFIG_SMP_NCPUS];
 
 /****************************************************************************
  * Private Functions
@@ -153,12 +153,12 @@ static void mpu_init(void)
 unsigned int mpu_allocregion(void)
 {
   unsigned int num_regions = get_num_regions();
-  unsigned int i = ffs(~g_mpu_region) - 1;
+  unsigned int i = ffs(~g_mpu_region[this_cpu()]) - 1;
 
   /* There are not enough regions to apply */
 
   DEBUGASSERT(i < num_regions);
-  g_mpu_region |= 1 << i;
+  g_mpu_region[this_cpu()] |= 1 << i;
   return i;
 }
 
@@ -191,7 +191,7 @@ void mpu_freeregion(unsigned int region)
 
   write_sysreg(0, prbar_el1);
   write_sysreg(0, prlar_el1);
-  g_mpu_region &= ~(1 << region);
+  g_mpu_region[this_cpu()] &= ~(1 << region);
   UP_MB();
 }
 
@@ -275,7 +275,7 @@ void mpu_modify_region(unsigned int region,
 
   /* Check that the region is valid */
 
-  DEBUGASSERT(g_mpu_region & (1 << region));
+  DEBUGASSERT(g_mpu_region[this_cpu()] & (1 << region));
 
   rbar |= table->attr.rbar &
           (MPU_RBAR_XN_MSK | MPU_RBAR_AP_MSK | MPU_RBAR_SH_MSK);
