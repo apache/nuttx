@@ -199,8 +199,8 @@ int board_pcnt_initialize(void)
   chan0_cfg.flags = ESP_PCNT_CHAN_IO_LOOPBACK;
 #endif
 
-  chan1_cfg.edge_gpio_num = CONFIG_ESP_PCNT_U0_CH1_LEVEL_PIN;
-  chan1_cfg.level_gpio_num = CONFIG_ESP_PCNT_U0_CH1_EDGE_PIN;
+  chan1_cfg.edge_gpio_num = CONFIG_ESP_PCNT_U0_CH1_EDGE_PIN;
+  chan1_cfg.level_gpio_num = CONFIG_ESP_PCNT_U0_CH1_LEVEL_PIN;
 #ifndef CONFIG_ESP_PCNT_U0_FILTER_EN
   glitch_threshold = 0;
 #else
