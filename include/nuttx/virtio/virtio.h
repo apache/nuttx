@@ -248,6 +248,12 @@ void virtio_addrenv_unmap(FAR struct virtio_device *vdev, FAR void *buf,
                           FAR void *mapped);
 #endif
 
+FAR void *virtio_get_next_buffer(FAR struct virtqueue *vq, uint16_t idx,
+                                 FAR uint16_t *next_idx,
+                                 FAR uint32_t *next_len);
+ssize_t virtio_get_buffers(FAR struct virtqueue *vq,
+                           FAR struct virtqueue_buf *vb, size_t vbcnt);
+
 #ifdef __cplusplus
 }
 #endif

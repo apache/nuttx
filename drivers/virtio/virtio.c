@@ -201,6 +201,66 @@ static int virtio_dev_ioctl(FAR struct file *filep, int cmd,
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: virtio_get_next_buffer
+ ****************************************************************************/
+
+FAR void *virtio_get_next_buffer(FAR struct virtqueue *vq, uint16_t idx,
+                                 FAR uint16_t *next_idx,
+                                 FAR uint32_t *next_len)
+{
+  uint16_t next;
+
+  return virtqueue_get_next_avail_buffer(vq, idx,
+                                         next_idx ? next_idx : &next,
+                                         next_len);
+}
+
+/****************************************************************************
+ * Name: virtio_get_buffers
+ ****************************************************************************/
+
+ssize_t virtio_get_buffers(FAR struct virtqueue *vq,
+                           FAR struct virtqueue_buf *vb, size_t vbcnt)
+{
+  FAR void *buf;
+  uint16_t head;
+  uint16_t idx;
+  uint32_t len;
+  size_t i;
+
+  DEBUGASSERT(vb != NULL && vbcnt >= 1);
+
+  buf = virtqueue_get_buffer(vq, &len, &idx);
+  if (buf == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  vb[0].buf = buf;
+  vb[0].len = len;
+
+  head = vq->vq_ring.used->ring[idx].id;
+  for (i = 1, idx = head; ; i++)
+    {
+      buf = virtio_get_next_buffer(vq, idx, &idx, &len);
+      if (buf == NULL)
+        {
+          break;
+        }
+      else if (i >= vbcnt)
+        {
+          vrterr("vbcnt %zu is not enough\n", vbcnt);
+          return -EINVAL;
+        }
+
+      vb[i].buf = buf;
+      vb[i].len = len;
+    }
+
+  return i;
+}
+
+/****************************************************************************
  * Name: virtio_register_drivers
  ****************************************************************************/
 
