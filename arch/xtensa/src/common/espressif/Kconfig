@@ -48,6 +48,12 @@ config ESPRESSIF_TEMP
 	---help---
 		A built-in sensor used to measure the chip's internal temperature.
 
+config ESP_SDM
+	bool "Sigma-Delta Modulation (SDM) Module"
+	default n
+	select ANALOG
+	select DAC
+
 config ESPRESSIF_I2S
 	bool
 	default n
@@ -1153,7 +1159,7 @@ config ESPRESSIF_ESPNOW_PKTRADIO_FRAMELEN
 	range 127 250
 	default 196
 	---help---
-		Frame size used for espnow transmitions. Ensure that this is
+		Frame size used for espnow transmissions. Ensure that this is
 		set equal for all nodes.
 
 config ESPRESSIF_ESPNOW_PKTRADIO_PANID
