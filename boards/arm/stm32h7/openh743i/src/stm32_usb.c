@@ -51,7 +51,7 @@
 #endif
 
 #define USBHOST_PRIO      (100)
-#define USBHOST_STACKSIZE (1024)
+#define USBHOST_STACKSIZE (2048)
 
 /****************************************************************************
  * Private Data

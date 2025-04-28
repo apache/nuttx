@@ -63,7 +63,7 @@
 #endif
 
 #ifndef CONFIG_NUCLEOH743ZI_USBHOST_STACKSIZE
-#  define CONFIG_NUCLEOH743ZI_USBHOST_STACKSIZE 1024
+#  define CONFIG_NUCLEOH743ZI_USBHOST_STACKSIZE 2048
 #endif
 
 /****************************************************************************

@@ -63,7 +63,7 @@
 #endif
 
 #ifndef CONFIG_STM32H747XI_DISCO_USBHOST_STACKSIZE
-#  define CONFIG_STM32H747XI_DISCO_USBHOST_STACKSIZE 1024
+#  define CONFIG_STM32H747XI_DISCO_USBHOST_STACKSIZE 2048
 #endif
 
 /****************************************************************************
