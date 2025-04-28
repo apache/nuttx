@@ -66,10 +66,10 @@
 
 /* GPIO interrupt modes *****************************************************/
 
-#define RP2040_GPIO_INTR_LEVEL_LOW  0
-#define RP2040_GPIO_INTR_LEVEL_HIGH 1
-#define RP2040_GPIO_INTR_EDGE_LOW   2
-#define RP2040_GPIO_INTR_EDGE_HIGH  3
+#define RP2040_GPIO_INTR_LEVEL_LOW  (0x1)
+#define RP2040_GPIO_INTR_LEVEL_HIGH (0x2)
+#define RP2040_GPIO_INTR_EDGE_LOW   (0x4)
+#define RP2040_GPIO_INTR_EDGE_HIGH  (0x8)
 
 /****************************************************************************
  * Public Types
