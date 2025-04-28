@@ -55,10 +55,6 @@ uint8_t g_syslog_mask = CONFIG_SYSLOG_DEFAULT_MASK;
  *   to a priority p is LOG_MASK(p); LOG_UPTO(p) provides the mask of all
  *   priorities in the above list up to and including p.
  *
- *   Per OpenGroup.org "If the maskpri argument is 0, the current log mask
- *   is not modified."  In this implementation, the value zero is permitted
- *   in order to disable all syslog levels.
- *
  *   NOTE:  setlogmask is not a thread-safe, re-entrant function.  Concurrent
  *   use of setlogmask() will have undefined behavior.
  *
@@ -80,8 +76,13 @@ int setlogmask(int mask)
 {
   uint8_t oldmask;
 
-  oldmask       = g_syslog_mask;
-  g_syslog_mask = (uint8_t)mask;
+  oldmask = g_syslog_mask;
+  if (mask != 0)
+    {
+      /* If the mask argument is 0, the current logmask is not modified. */
+
+      g_syslog_mask = (uint8_t)mask;
+    }
 
   return oldmask;
 }
