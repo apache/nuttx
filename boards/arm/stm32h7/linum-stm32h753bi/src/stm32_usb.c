@@ -63,7 +63,7 @@
 #endif
 
 #ifndef CONFIG_LINUM_STM32H753BI_USBHOST_STACKSIZE
-#  define CONFIG_LINUM_STM32H753BI_USBHOST_STACKSIZE 1024
+#  define CONFIG_LINUM_STM32H753BI_USBHOST_STACKSIZE 2048
 #endif
 
 /****************************************************************************

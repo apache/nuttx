@@ -63,7 +63,7 @@
 #endif
 
 #ifndef CONFIG_WEACT_STM32H743_USBHOST_STACKSIZE
-#  define CONFIG_WEACT_STM32H743_USBHOST_STACKSIZE 1024
+#  define CONFIG_WEACT_STM32H743_USBHOST_STACKSIZE 2048
 #endif
 
 /****************************************************************************
