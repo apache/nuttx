@@ -520,13 +520,14 @@ struct xcpt_syscall_s
 
 struct xcptcontext
 {
-#ifdef CONFIG_BUILD_KERNEL
+#ifndef CONFIG_DISABLE_SIGNALS
+#  ifdef CONFIG_BUILD_KERNEL
   /* This is the saved address to use when returning from a user-space
    * signal handler.
    */
 
   uintptr_t sigreturn;
-#endif
+#  endif
 
   /* These are saved copies of instruction pointer and EFLAGS used during
    * signal processing.
@@ -535,6 +536,7 @@ struct xcptcontext
   uint64_t saved_rip;
   uint64_t saved_rflags;
   uint64_t saved_rsp;
+#endif
 
 #ifdef CONFIG_ARCH_KERNEL_STACK
   /* For kernel stack enabled we can't use tcb->xcp.regs[REG_RSP] as it may
