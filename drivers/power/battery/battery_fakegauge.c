@@ -182,7 +182,6 @@ static int battery_fake_data_charged(FAR struct battery_fake_gauge_s *priv)
   int capacity;
   int voltage;
   int current;
-  int temp;
   int ret;
 
   /* capacity */
@@ -205,9 +204,7 @@ static int battery_fake_data_charged(FAR struct battery_fake_gauge_s *priv)
 
   /* temperature */
 
-  temp = BATTERY_FAKE_TEMP_MIN +
-    rand() % (BATTERY_FAKE_TEMP_MAX - BATTERY_FAKE_TEMP_MIN + 1);
-  data->temperature = temp;
+  data->temperature = 250;
 
   if (data->capacity > 10 && data->capacity < 95)
     {
