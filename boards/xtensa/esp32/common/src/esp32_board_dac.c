@@ -32,6 +32,10 @@
 #include <nuttx/arch.h>
 #include <esp32_dac.h>
 
+#ifdef CONFIG_ESP_SDM
+#  include "espressif/esp_sdm.h"
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -44,7 +48,7 @@
  * Name: board_dac_initialize
  *
  * Description:
- *   Initialize and register the Digital to Analog Convertor (DAC) driver.
+ *   Initialize and register the Digital to Analog Converter (DAC) driver.
  *
  * Input Parameters:
  *   path - The device number, used to build the device path as
@@ -61,7 +65,18 @@ int board_dac_initialize(const char *path)
 
   /* Initialize DAC */
 
+#ifdef CONFIG_ESP_SDM
+  struct esp_sdm_chan_config_s config =
+  {
+    .gpio_num = 5,
+    .sample_rate_hz = 1000 * 1000,
+    .flags = 0,
+  };
+
+  struct dac_dev_s *dev = esp_sdminitialize(config);
+#else
   struct dac_dev_s *dev = esp32_dac_initialize();
+#endif
   if (dev != NULL)
     {
       /* Try to register the DAC */
