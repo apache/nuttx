@@ -33,7 +33,7 @@ config NET_CAN_HAVE_ERRORS
 config NET_CAN_WRITE_BUFFERS
 	bool  "Enable CAN write buffering"
 	default n
-	select NTE_WRITE_BUFFERS
+	select NET_WRITE_BUFFERS
 	---help---
 		Write buffers allows buffering of ongoing CAN packets, providing
 		for higher performance, nonblocking output.
