@@ -41,8 +41,8 @@
  ****************************************************************************/
 
 #if CONFIG_MM_BACKTRACE >= 0
-#define MEMPOOL_MAGIC_FREE  0xAAAAAAAA
-#define MEMPOOL_MAGIC_ALLOC 0x55555555
+#define MEMPOOL_MAGIC_FREE  0x55555555
+#define MEMPOOL_MAGIC_ALLOC 0xAAAAAAAA
 
 /****************************************************************************
  * Private Types
