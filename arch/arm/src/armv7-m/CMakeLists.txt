@@ -35,8 +35,6 @@ set(SRCS
     arm_itm.c
     arm_memfault.c
     arm_perf.c
-    arm_schedulesigaction.c
-    arm_sigdeliver.c
     arm_svcall.c
     arm_systemreset.c
     arm_tcbinfo.c
@@ -44,6 +42,10 @@ set(SRCS
     arm_usagefault.c
     arm_vectors.c
     arm_dbgmonitor.c)
+
+if(NOT CONFIG_DISABLE_SIGNALS)
+  list(APPEND SRCS arm_schedulesigaction.c arm_sigdeliver.c)
+endif()
 
 if(CONFIG_ARMV7M_SYSTICK)
   list(APPEND SRCS arm_systick.c)

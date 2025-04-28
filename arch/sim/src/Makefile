@@ -81,10 +81,13 @@ AOBJS = $(ASRCS:.S=$(OBJEXT))
 
 CSRCS  = sim_initialize.c sim_idle.c sim_doirq.c sim_initialstate.c
 CSRCS += sim_createstack.c sim_usestack.c sim_releasestack.c sim_stackframe.c
-CSRCS += sim_exit.c sim_schedulesigaction.c sim_switchcontext.c sim_heap.c
-CSRCS += sim_uart.c sim_copyfullstate.c sim_sigdeliver.c sim_tcbinfo.c sim_cpuinfo.c
-CSRCS += sim_registerdump.c sim_saveusercontext.c sim_sectionheap.c
-CSRCS += sim_checkhostfstypes.c
+CSRCS += sim_exit.c sim_switchcontext.c sim_heap.c sim_uart.c
+CSRCS += sim_copyfullstate.c sim_tcbinfo.c sim_cpuinfo.c sim_registerdump.c
+CSRCS += sim_saveusercontext.c sim_sectionheap.c sim_checkhostfstypes.c
+
+ifneq ($(CONFIG_DISABLE_SIGNALS),y)
+CSRCS += sim_schedulesigaction.c sim_sigdeliver.c
+endif
 
 ifeq ($(CONFIG_SCHED_BACKTRACE),y)
 CSRCS += sim_backtrace.c

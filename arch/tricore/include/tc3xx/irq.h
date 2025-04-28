@@ -118,11 +118,13 @@
 #ifndef __ASSEMBLY__
 struct xcptcontext
 {
+#ifndef CONFIG_DISABLE_SIGNALS
   /* These are saved copies of the context used during
    * signal processing.
    */
 
   uintptr_t *saved_regs;
+#endif
 
   /* Register save area with XCPTCONTEXT_SIZE, only valid when:
    * 1.The task isn't running or

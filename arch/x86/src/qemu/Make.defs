@@ -34,8 +34,7 @@ CMN_CSRCS += x86_getintstack.c x86_initialize.c
 CMN_CSRCS += x86_modifyreg8.c x86_modifyreg16.c x86_modifyreg32.c
 CMN_CSRCS += x86_nputs.c x86_switchcontext.c x86_tcbinfo.c
 CMN_CSRCS += i486_irq.c i486_regdump.c i486_releasestack.c
-CMN_CSRCS += i486_savestate.c i486_sigdeliver.c i486_stackframe.c
-CMN_CSRCS += i486_schedulesigaction.c i486_usestack.c
+CMN_CSRCS += i486_savestate.c i486_stackframe.c i486_usestack.c
 
 # Required QEMU files
 
@@ -44,6 +43,10 @@ CHIP_CSRCS  = qemu_handlers.c qemu_idle.c qemu_lowputc.c qemu_lowsetup.c
 CHIP_CSRCS += qemu_serial.c
 
 # Configuration-dependent QEMU files
+
+ifneq ($(CONFIG_DISABLE_SIGNALS),y)
+CMN_CSRCS += i486_schedulesigaction.c i486_sigdeliver.c
+endif
 
 ifneq ($(CONFIG_SCHED_TICKLESS),y)
 CHIP_CSRCS += qemu_timerisr.c

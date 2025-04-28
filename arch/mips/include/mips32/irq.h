@@ -323,6 +323,7 @@ struct xcpt_syscall_s
 
 struct xcptcontext
 {
+#ifndef CONFIG_DISABLE_SIGNALS
   /* These additional register save locations are used to implement the
    * signal delivery trampoline.
    *
@@ -343,6 +344,7 @@ struct xcptcontext
   uint32_t sigreturn;
 
 #endif
+#endif /* !CONFIG_DISABLE_SIGNALS */
 
 #ifdef CONFIG_BUILD_KERNEL
   /* The following array holds information needed to return from each nested

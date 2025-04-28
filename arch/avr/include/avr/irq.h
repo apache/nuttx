@@ -103,6 +103,7 @@
 #ifndef __ASSEMBLY__
 struct xcptcontext
 {
+#ifndef CONFIG_DISABLE_SIGNALS
   /* These are saved copies of PC and SR used during signal processing.
    *
    * REVISIT:  Because there is only one copy of these save areas,
@@ -120,6 +121,7 @@ struct xcptcontext
   uint8_t saved_rampz;
 #endif
   uint8_t saved_sreg;
+#endif /* !CONFIG_DISABLE_SIGNALS */
 
   /* Register save area */
 

@@ -27,9 +27,12 @@ include common/Make.defs
 HEAD_ASRC  = arm_head.S
 
 CMN_CSRCS += arm_dataabort.c arm_doirq.c arm_initialstate.c
-CMN_CSRCS += arm_prefetchabort.c arm_schedulesigaction.c
-CMN_CSRCS += arm_sigdeliver.c arm_syscall.c arm_tcbinfo.c
+CMN_CSRCS += arm_prefetchabort.c arm_syscall.c arm_tcbinfo.c
 CMN_CSRCS += arm_undefinedinsn.c
+
+ifneq ($(CONFIG_DISABLE_SIGNALS),y)
+  CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c
+endif
 
 CMN_ASRCS += arm_cache.S arm_vectors.S arm_vectortab.S
 CMN_ASRCS += arm_saveusercontext.S
