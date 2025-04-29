@@ -104,7 +104,7 @@ With export package, we can then build the apps and ROMFS:
    $ cd apps
    $ # import the nuttx-export-*.gz package from kernel
    $ tools/mkimport.sh -z -x ../nuttx/nuttx-export-*.gz
-   $ make import)  # build the apps
+   $ make import  # build the apps
    $ # generate ROMFS image for contents in apps/bin folder
    $ tools/mkromfsimg.sh ../nuttx/arch/risc-v/src/board/romfs_boot.c
 
