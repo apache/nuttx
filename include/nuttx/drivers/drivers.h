@@ -28,6 +28,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/memoryregion.h>
 
 #include <sys/types.h>
 #include <stdbool.h>
@@ -165,6 +166,19 @@ void crypto_backends_init(void);
 
 #ifdef CONFIG_DEV_MEM
 int devmem_register(void);
+#endif
+
+/****************************************************************************
+ * Name: devmem_register_region
+ *
+ * Description:
+ *   Register devmem driver
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEV_MEM
+int devmem_register_region(FAR const char *path,
+                           FAR const struct memory_region_s *region);
 #endif
 
 /****************************************************************************
