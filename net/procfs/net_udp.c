@@ -95,13 +95,13 @@ static ssize_t netprocfs_udpstats(FAR struct netprocfs_file_s *priv,
       len += snprintf(buffer + len, buflen - len,
                       "    %2" PRIu8
                       ": %3" PRIx8
-#if CONFIG_NET_SEND_BUFSIZE > 0
+#ifdef CONFIG_NET_UDP_WRITE_BUFFERS
                       " %6" PRIu32
 #endif
                       " %6u",
                       priv->offset++,
                       conn->sconn.s_flags,
-#if CONFIG_NET_SEND_BUFSIZE > 0
+#ifdef CONFIG_NET_UDP_WRITE_BUFFERS
                       udp_wrbuffer_inqueue_size(conn),
 #endif
                       (conn->readahead) ? conn->readahead->io_pktlen : 0);
