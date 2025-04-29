@@ -51,9 +51,9 @@ logic to support, configurable, smaller buffers for PTYs.
 * SYSLOG/Debug Output:
 
 - SYSLOG: Consolidated all SYSLOG logic in drivers/syslog. Added an
-abstraction layer that supports: (1) redirection of SYSLOG outpout.
+abstraction layer that supports: (1) redirection of SYSLOG output.
 This is usually so that you can boot with one SYSLOG output but
-transition to another SYSLOG output when the OS has initialialized,
+transition to another SYSLOG output when the OS has initialized,
 (2) adds common serialization of interrupt output as a configuration
 option. Without this configuration setting, interrupt level output
 will be asynchronous. And (3) vsyslog is now a system call and is
@@ -574,7 +574,7 @@ LSE during RTC initialization. From Alan Carvalho de Assis.
 - STM32 F1-F4: When configuring a GPIO via stm32_configgpio() the
 function will first set the mode to output and then set the initial
 state of the gpio later on. If you have an application with an
-externaly pulled-up pin, this would lead to a glitch on the line
+externally pulled-up pin, this would lead to a glitch on the line
 that may be dangerous in some applications (e.G. Reset Line for
 other chips, etc). This changes sets the output state before
 configuring the pin as an output. From Pascal Speck .

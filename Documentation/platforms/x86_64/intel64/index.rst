@@ -32,7 +32,7 @@ Hardware acceleration
 Configurable hardware acceleration: SSE, AVX2, AVX512 support.
 
 FMA, AVX and AVX512 support requires ``XSAVE`` instructions support which is
-controled with ``CONFIG_ARCH_X86_64_HAVE_XSAVE`` option.
+controlled with ``CONFIG_ARCH_X86_64_HAVE_XSAVE`` option.
 
 IRQs
 ----
@@ -47,7 +47,7 @@ TSC DEADLINE timer, APIC timer or HPET can be used as system clock.
 SMP
 ---
 
-SMP is supported up to 4 cores now (BSP + 3 AP), but can be easly extended.
+SMP is supported up to 4 cores now (BSP + 3 AP), but can be easily extended.
 
 HPET
 ----
@@ -65,15 +65,15 @@ PCI bus
 
 PCI bus is supported with legacy interrupts, MSI and MSI-X.
 
-Multiboot Framebufer
---------------------
+Multiboot Framebuffer
+---------------------
 
 Multiboot2 framebuffer is supported with ``CONFIG_MULTBOOT2_FB_TERM=y``.
 
 It is very possible that the framebuffer is mapped in a memory region above 4GB,
 so you may also need to set ``CONFIG_MM_PGALLOC=y``.
 
-To enable framebuffer support in QEMU, ommit the ``-nographic`` argument
+To enable framebuffer support in QEMU, omit the ``-nographic`` argument
 and use ``-cdrom boot.iso`` (multiboot2 framebuffer doesn't work with
 ``-kernel`` option).
 
@@ -92,7 +92,7 @@ Kernel build is supported.
 Creating a bootable disk
 ========================
 
-This build supports multiboot2, which means that usual multiboot2 bootlaoders,
+This build supports multiboot2, which means that usual multiboot2 bootloaders,
 e.g. grub can be used. To create a bootable disk with grub2, create a directory
 named ``iso`` with grub configuration file and the compiled ``nuttx.elf``.
 

@@ -99,7 +99,7 @@ Psci and debug
 
 Default exception level is EL1 for the NuttX OS. However, if we debug NuttX by JTAG
 the XSCT of Vivado SDK will set the Zynq MPSoC to EL3. so have to config NuttX to run on
-EL3. Other levels are not supported at the moment. And in this operating conditon
+EL3. Other levels are not supported at the moment. And in this operating condition
 we can't use SMC for there's no ATF support.
 
 Supported Boards

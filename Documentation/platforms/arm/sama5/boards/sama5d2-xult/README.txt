@@ -867,7 +867,7 @@ Configurations
 
          b. Write the DRAMBOOT program binary (nuttx.bin) to a microSD
             card as "boot.bin".  Insert the microSD card into the boar;
-            The ROM Booloader should now boot DRAMBOOT on reset and you
+            The ROM Bootloader should now boot DRAMBOOT on reset and you
             should see this message:
 
               Send Intel HEX file now

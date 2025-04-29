@@ -82,7 +82,7 @@ Work-around
 -----------
 
 If you keep the RESET button pressed and run OpenOCD command to connected to 
-it, then it will connect sucessful. After connecting you need to keep the 
+it, then it will connect successful. After connecting you need to keep the
 reset button pressed until you open the telnet connection 
 (telnet 127.0.0.1 4444) and execute "reset halt":
 

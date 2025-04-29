@@ -18,7 +18,7 @@ Features
     - On-Chip Memory
         - 1376kB SRAM (ECC)
     - External Memory
-        - Up to 6.4GT/s x32 LPDDR5/LPDDR4X (with Inline ECC & Inline Encrpytion)
+        - Up to 6.4GT/s x32 LPDDR5/LPDDR4X (with Inline ECC & Inline Encryption)
         - 1x Octal SPI, including support for SPI NOR and SPI NAND memories
 - Connectivity
     - CAN FD

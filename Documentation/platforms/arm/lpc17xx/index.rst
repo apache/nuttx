@@ -109,7 +109,7 @@ boards.
    An fully verified board configuration is included in NuttX-6.2. The
    Code Red toolchain is supported under either Linux or Windows.
    Verified configurations include DHCPD, the NuttShell (NSH), NuttX
-   graphis (NX), THTTPD, and USB mass storage device. Refer to the NuttX
+   graphics (NX), THTTPD, and USB mass storage device. Refer to the NuttX
    board
    `README <https://github.com/apache/nuttx/blob/master/Documentation/platforms/arm/lpc17xx/boards/lpcxpresso-lpc1768/README.txt>`__
    file for further information.
@@ -118,7 +118,7 @@ boards.
 
    Zilogic System's ARM development Kit, ZKIT-ARM-1769. This board is
    based on the NXP LPC1769. The initial release was included
-   NuttX-6.26. The NuttX Buildroot toolchain is used by default. Verifed
+   NuttX-6.26. The NuttX Buildroot toolchain is used by default. Verified
    configurations include the "Hello, World!" example application and a
    THTTPD demonstration. Refer to the NuttX board
    `README <https://github.com/apache/nuttx/blob/master/Documentation/platforms/arm/lpc17xx/boards/zkit-arm-1769/README.txt>`__
@@ -128,7 +128,7 @@ boards.
 
    This board configuration was contributed and made available in
    NuttX-6.20. As contributed board support, I am unsure of what all has
-   been verfied and what has not. See the Microment website
+   been verified and what has not. See the Microment website
    and the NuttX board
    `README <https://github.com/apache/nuttx/blob/master/Documentation/platforms/arm/lpc17xx/boards/lincoln60/README.txt>`__
    file for further information about the Lincoln board.

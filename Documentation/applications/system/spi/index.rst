@@ -96,7 +96,7 @@ and a more detailed summary of the command SPI command options::
 
 - An environment variable like $PATH may be used for any argument.
 - Arguments are _sticky_. For example, once the SPI bus is specified, that
-  bus will be re-used until it is changed.
+  bus will be reused until it is changed.
 
 **Warning**:
 

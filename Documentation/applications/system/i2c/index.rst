@@ -88,7 +88,7 @@ and a more detailed summary of the command I2C command options::
 
 - An environment variable like ``$PATH`` may be used for any argument.
 - Arguments are _sticky_. For example, once the I2C address is specified, that
-  address will be re-used until it is changed.
+  address will be reused until it is changed.
 
 **Warning**:
 

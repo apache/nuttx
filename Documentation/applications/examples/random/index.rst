@@ -5,7 +5,7 @@
 This is a very simply test of ``/dev/random``. It simple collects random numbers
 and displays them on the console.
 
-Prerequistes:
+Prerequisites:
 
 - ``CONFIG_DEV_RANDOM`` – Support for ``/dev/random`` must be enabled in order to
   select this example.

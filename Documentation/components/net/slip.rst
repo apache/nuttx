@@ -8,7 +8,7 @@ SLIP Configuration
 #. Configure and build NuttX with SLIP enabled in the configuration. Load this
    into FLASH and start the device.
 
-#. Connect to a Linux box using a serial cable. This dicussion assumes that the
+#. Connect to a Linux box using a serial cable. This discussion assumes that the
    serial device is ``/dev/ttyS0`` on both the target and the Linux box.
 
 #. Reset on the target side and attach SLIP on the Linux side:

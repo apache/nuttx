@@ -23,7 +23,7 @@ Using the cwnd, together with snd_wnd, controls the number of bytes sent to the 
  + If yes, increase the dupack counts. If the dupack exceeds the Fast Retransmission Threshold 3, after retransmitting the lost segments (Fast Retransmission), enter to  the Fast Recovery state.
  + If no, receive the new ack.
 
-   * If the current ackno is bigger than fr_ack which is the snd_seq when Fast Retransmission ocurrs, exit the Fast Recovery state and enter to congestion avoidance.
+   * If the current ackno is bigger than fr_ack which is the snd_seq when Fast Retransmission occurs, exit the Fast Recovery state and enter to congestion avoidance.
    * If the cwnd is less than ssthresh, increase the cwnd on slow start state.
    * If the cwnd is greater than or equal to ssthresh, the increased cwnd can not exceed max_cwnd.
 

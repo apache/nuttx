@@ -322,7 +322,7 @@ Where <subdir> is one of the following:
 
        It is possible to configure NSH to use a USB serial console instead
        of an RS-232 serial console.  However, that configuration has not
-       been impelmented as of this writing.
+       been implemented as of this writing.
 
     4. Memory Usage.  The size command gives us the static memory usage.
        This is what I get:

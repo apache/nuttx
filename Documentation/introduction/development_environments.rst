@@ -85,7 +85,7 @@ This build:
 #. A few extensions from GNUWin32
 
 This capability first appeared in NuttX-6.24 and should still be
-considered a work in progress because: (1) it has not been verfied on
+considered a work in progress because: (1) it has not been verified on
 all targets and tools, and (2) still lacks some of the creature-comforts
 of the more mature environments. The windows native build logic
 initiated if ``CONFIG_WINDOWS_NATIVE=y`` is defined in the NuttX

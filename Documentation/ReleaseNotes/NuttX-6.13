@@ -23,7 +23,7 @@ contributed by Laurent Latil
 * PIC32. The port to the Microchip PIC32MX is finally functional and
 reliable. The NuttX PIC32 port has verified configurations for
 the OS test and the NuttShell (NSH) both exist.
-* Tests: New re-usable tests (in apps/examples) for PWM, ADC, and
+* Tests: New reusable tests (in apps/examples) for PWM, ADC, and
 CAN loopback. Several existing tests can now be built as NSH built-in
 applications (dhcpd, nettest, and all of the new tests).
 

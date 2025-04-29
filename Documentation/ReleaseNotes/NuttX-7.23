@@ -80,7 +80,7 @@ application and belongs in apps, not in the OS.
 replacing the NSH df command. Also implements procfs /proc/fs/mount
 file, replacing the NSH mount command when there are no arguments.
 - procfs: Add /proc/meminfo. This is an alternative way to get the
-information that was previoulsy available in apps/system/free.
+information that was previously available in apps/system/free.
 apps/system/free was removed because it made illegal calls into the
 OS violating the portable interface. This new procfs entry provides
 the same information with no such violation. it also provides
@@ -477,7 +477,7 @@ of NX.
 - tools/configure.sh: Add special support so that you can start with a
 windows native configuration and install on a different host (and
 vice versa).
-- tools/configure.c: Duplicate new functionaity added to configure.sh.
+- tools/configure.c: Duplicate new functionality added to configure.sh.
 - tools/configure.sh: This commit adds a -m option for macOS. For
 anyone not aware, Apple renamed OSX to macOS recently; thus the 'm'
 instead of 'o'. This does not change the other uses of *_OSX to
@@ -893,7 +893,7 @@ CAN driver (via can_write) and order frames are sent on bus can be
 different (and I experience this in wild). Since CAN driver API
 pretends to be "file like" I expect data to be read from fd the same
 order it is written. So I consider described behaviour to be a bug.
-Fixed by settin the TXFP bit in the CAN_MCR register (FIFO
+Fixed by setting the TXFP bit in the CAN_MCR register (FIFO
 transmit order). From comments by Alexey T, in Bitbucket Issue 73.
 - STM32 HRTIM: Fix pclk calculation. From Mateusz Szafoni.
 - STM32 HRTIM: Fix burst mode prescaler update. From Mateusz Szafoni.

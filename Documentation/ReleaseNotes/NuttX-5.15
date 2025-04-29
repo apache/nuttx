@@ -24,7 +24,7 @@ And feature enhancements:
 
 * The LPC176x Ethernet driver was using all of AHB SRAM Bank0 for
 Ethernet packet buffers (16K). An option was added to limit
-the amount of SRAM used for packet buffering and to re-use any
+the amount of SRAM used for packet buffering and to reuse any
 extra Bank0 memory for heap.
 
 * Enabled networking and SD/MMC card support in the Olimex

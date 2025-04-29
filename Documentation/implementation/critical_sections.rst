@@ -383,7 +383,7 @@ And can be stopped with:
 IRQ Monitor and Worst Case Response Time
 ========================================
 
-The IRQ Monitor is additional OS instrumentation. A full discusssion of the
+The IRQ Monitor is additional OS instrumentation. A full discussion of the
 IRQ Monitor is beyond the scope of this page. Suffice it to say:
 
 * The IRQ Monitor is enabled with ``CONFIG_SCHED_IRQMONITOR=y``.

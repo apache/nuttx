@@ -191,7 +191,7 @@ Status
 ======
 
 2023-2-18:
-1. Release the frist version for ARMv8-R, Single Core and SMP is supported
+1. Release the first version for ARMv8-R, Single Core and SMP is supported
    OS test is passed.
 
 Platform Features

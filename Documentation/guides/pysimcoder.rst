@@ -19,7 +19,7 @@ on NuttX and also keeps the track of peripherals that are supported by pysimCode
 Peripheral Support
 ==================
 
-The following list shows the peripherals and fuctionalities supported in pysimCoder for NuttX RTOS.
+The following list shows the peripherals and functionalities supported in pysimCoder for NuttX RTOS.
 
 ==========  =======================
 Peripheral  Notes
@@ -37,7 +37,7 @@ UDP
 ==========  =======================
 
 Please note that the actual support for NuttX peripherals can be wider that what is mentioned here
-in case this documentation was not updated when new fuctionalities were added to pysimCoder.
+in case this documentation was not updated when new functionalities were added to pysimCoder.
 
 NuttX Configuration
 ===================

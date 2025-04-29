@@ -295,7 +295,7 @@ Symbol Table Header Files
 
 The interface to the symbol table logic is described in the header file
 ``include/nuttx/binfmt/symtab.h``.
-A brief summary of the data structurs and interfaces prototyped in that
+A brief summary of the data structures and interfaces prototyped in that
 header file are listed below.
 
 Symbol Table Data Structures

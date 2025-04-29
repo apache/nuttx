@@ -27,7 +27,7 @@ Sched
 * [#14954](https://github.com/apache/nuttx/pull/14954) sched: replace up_cpu_index with this_cpu
 * [#14051](https://github.com/apache/nuttx/pull/14051) sched: support backtrace record
 * [#14048](https://github.com/apache/nuttx/pull/14048) sched: There is no need to use sched_[un]lock
-* [#14340](https://github.com/apache/nuttx/pull/14340) sched: Use spinlock repalce sched_[un]lock in some place
+* [#14340](https://github.com/apache/nuttx/pull/14340) sched: Use spinlock replace sched_[un]lock in some place
 * [#14863](https://github.com/apache/nuttx/pull/14863) sched/addrenv.c: Fix usage of atomic_fetch_sub
 * [#14061](https://github.com/apache/nuttx/pull/14061) sched/cpuload: fix SMP situation CPULOAD statistics are inaccurate
 * [#14504](https://github.com/apache/nuttx/pull/14504) sched/cpuload: move g_cpuload_wdog to private chapter
@@ -212,7 +212,7 @@ Improvements
 * [#14946](https://github.com/apache/nuttx/pull/14946) gcov: Add usage documentation
 * [#14538](https://github.com/apache/nuttx/pull/14538) gcov: Fix typographical errors
 * [#14557](https://github.com/apache/nuttx/pull/14557) gcov: Support for the most streamlined profile of LLVM-embedded-toolchain-for-Arm
-* [#13965](https://github.com/apache/nuttx/pull/13965) gcov:adjust gcov configuration name and delete non-existent dependencie
+* [#13965](https://github.com/apache/nuttx/pull/13965) gcov:adjust gcov configuration name and delete non-existent dependency
 * [#14251](https://github.com/apache/nuttx/pull/14251) cmake: add newly added sources to cmake
 * [#14615](https://github.com/apache/nuttx/pull/14615) cmake: don't include syslog files if CONFIG_SYSLOG=n
 * [#14404](https://github.com/apache/nuttx/pull/14404) cmake: fix the fdiagnostics-color handle issue
@@ -329,7 +329,7 @@ ARM64
 * [#14991](https://github.com/apache/nuttx/pull/14991) arm64: change some format
 * [#14829](https://github.com/apache/nuttx/pull/14829) arm64: fix compile failed 'tpidr_el1' undeclared
 * [#14628](https://github.com/apache/nuttx/pull/14628) arm64: fix compile failed when build ELF apps
-* [#14476](https://github.com/apache/nuttx/pull/14476) arm64: fix fvp smp faild to boot
+* [#14476](https://github.com/apache/nuttx/pull/14476) arm64: fix fvp smp failed to boot
 * [#14171](https://github.com/apache/nuttx/pull/14171) arm64: fix the cmake break in kernel mode
 * [#14980](https://github.com/apache/nuttx/pull/14980) arm64: remove g_running_tasks[this_cpu()] = NULL
 * [#14824](https://github.com/apache/nuttx/pull/14824) arm64: remove unused code
@@ -417,7 +417,7 @@ SIM
 * [#14119](https://github.com/apache/nuttx/pull/14119) Revert "sim/note: add note related configuration"
 * [#13878](https://github.com/apache/nuttx/pull/13878) sim bug fix
 * [#14361](https://github.com/apache/nuttx/pull/14361) sim_camera: modify sim camera init videosize using imgsensor extend p…
-* [#14449](https://github.com/apache/nuttx/pull/14449) sim_uart: rm LF to CRLF convertion
+* [#14449](https://github.com/apache/nuttx/pull/14449) sim_uart: rm LF to CRLF conversion
 * [#14693](https://github.com/apache/nuttx/pull/14693) sim: add defconfig for testing cmake compilation of quickjs
 * [#14587](https://github.com/apache/nuttx/pull/14587) sim: add note related configuration
 * [#13966](https://github.com/apache/nuttx/pull/13966) sim: disable sim uart output processing
@@ -508,7 +508,7 @@ New Driver Support
 * [#14895](https://github.com/apache/nuttx/pull/14895) draft driver for STUSB4500
 Drivers With Improvements
 * [#13925](https://github.com/apache/nuttx/pull/13925) driver: add GOLDFISH_GPU_FB_PRIORITY for goldfish_gpu_fb_vsync_thread
-* [#14194](https://github.com/apache/nuttx/pull/14194) driver/i2c/ipcc: Post sempahore only when it's value is smaller than one
+* [#14194](https://github.com/apache/nuttx/pull/14194) driver/i2c/ipcc: Post semaphore only when it's value is smaller than one
 * [#14510](https://github.com/apache/nuttx/pull/14510) driver/serial: remove return value of up_putc()
 * [#14603](https://github.com/apache/nuttx/pull/14603) drivers: Fix the missing headers.
 * [#14817](https://github.com/apache/nuttx/pull/14817) drivers/adc: Rename up_ads1255initialize to ads1255_initialize
@@ -523,7 +523,7 @@ Drivers With Improvements
 * [#14729](https://github.com/apache/nuttx/pull/14729) drivers/misc: fix rpmsgdev read overflow
 * [#15047](https://github.com/apache/nuttx/pull/15047) drivers/net: change netdev_lower_quota_load to macro
 * [#13860](https://github.com/apache/nuttx/pull/13860) drivers/net: Register "/dev/net/tun" as tun node too
-* [#13872](https://github.com/apache/nuttx/pull/13872) drivers/note: suport rpmsg transfer channel for notesome note api
+* [#13872](https://github.com/apache/nuttx/pull/13872) drivers/note: support rpmsg transfer channel for notesome note api
 * [#14185](https://github.com/apache/nuttx/pull/14185) drivers/optee: Return error if optee_recv return prematurely
 * [#14165](https://github.com/apache/nuttx/pull/14165) drivers/pci: fix pci framework warning in 32bit chip
 * [#14248](https://github.com/apache/nuttx/pull/14248) drivers/rpmsgdev: support get more battery info by rpmsgdev
@@ -568,7 +568,7 @@ Drivers With Improvements
 * [#13853](https://github.com/apache/nuttx/pull/13853) Rpmsg syslog: update rpmsg syslog
 * [#14077](https://github.com/apache/nuttx/pull/14077) Rpmsg virtio: update rpmsg virtio and add sim config to verify rpmsg virtio
 * [#14106](https://github.com/apache/nuttx/pull/14106) rpmsg_port_spi_slave: fix compile error when enable RPMSG_PORT_SPI_SL…
-* [#14118](https://github.com/apache/nuttx/pull/14118) rpmsg_sockif: add some modifaction for rpsocket
+* [#14118](https://github.com/apache/nuttx/pull/14118) rpmsg_sockif: add some modification for rpsocket
 * [#13854](https://github.com/apache/nuttx/pull/13854) rpmsgblk.c: fix compile warning
 * [#13851](https://github.com/apache/nuttx/pull/13851) rptun: Remove include/nuttx/rptun/openamp.h
 * [#15008](https://github.com/apache/nuttx/pull/15008) video/fb: fix integer overflow issue
@@ -745,7 +745,7 @@ Unsorted
 * [#14378](https://github.com/apache/nuttx/pull/14378) Discourage the use of LIBC_PRINT_EXTENSION
 * [#14094](https://github.com/apache/nuttx/pull/14094) dump more information when CONFIG_MM_DUMP_DETAILS_ON_FAILURE enabled flush log before coredump
 * [#13902](https://github.com/apache/nuttx/pull/13902) e1000: add polling mode support for tx/rx
-* [#14646](https://github.com/apache/nuttx/pull/14646) Enable DEV_PIPE_NPOLLWAITERS default value 4 for adapte APP
+* [#14646](https://github.com/apache/nuttx/pull/14646) Enable DEV_PIPE_NPOLLWAITERS default value 4 for adapter APP
 * [#14318](https://github.com/apache/nuttx/pull/14318) Expand samplerate bits from 8 to 32 enchance encode capacity in sim offload.
 * [#14310](https://github.com/apache/nuttx/pull/14310) external/ffmpeg: add offloding audio recording with amr format.
 * [#13867](https://github.com/apache/nuttx/pull/13867) Fdt mmio: add common fdt mmio virtio device register function
@@ -841,7 +841,7 @@ Unsorted
 * [#14334](https://github.com/apache/nuttx/pull/14334) modify for set conn status with connected when receive event USRSOCK_EVENT_SENDTO_READY
 * [#14205](https://github.com/apache/nuttx/pull/14205) modlib:bug fixallow 64bit elf load and if sym is NULL not load symbol
 * [#14732](https://github.com/apache/nuttx/pull/14732) modlib:need add ctors to init_array and dtors to fini_array
-* [#14383](https://github.com/apache/nuttx/pull/14383) modlib/modlib_symbols.c: Fix usage of void* arithmetics
+* [#14383](https://github.com/apache/nuttx/pull/14383) modlib/modlib_symbols.c: Fix usage of void* arithmetic
 * [#14990](https://github.com/apache/nuttx/pull/14990) mps3an547 doc update
 * [#13927](https://github.com/apache/nuttx/pull/13927) mq: correct inode release in mq_inode_release()
 * [#14654](https://github.com/apache/nuttx/pull/14654) msys2: fix make[3]: warning: jobserver unavailable: using -j1.
@@ -849,7 +849,7 @@ Unsorted
 * [#14053](https://github.com/apache/nuttx/pull/14053) nuttx-names.in: add feof
 * [#14468](https://github.com/apache/nuttx/pull/14468) nuttx: Add LIBSUPCXX_TOOLCHAIN to link the prebuilt library provide by toolchain.
 * [#14543](https://github.com/apache/nuttx/pull/14543) nuttx: Fix build warning with can't found xt-g++
-* [#14721](https://github.com/apache/nuttx/pull/14721) nuttx/qemu: Fix funciton up_idle multiple definition
+* [#14721](https://github.com/apache/nuttx/pull/14721) nuttx/qemu: Fix function up_idle multiple definition
 * [#13923](https://github.com/apache/nuttx/pull/13923) Pci bugfix
 * [#13963](https://github.com/apache/nuttx/pull/13963) Pci fixbugs
 * [#14969](https://github.com/apache/nuttx/pull/14969) Pci io
@@ -916,7 +916,7 @@ Unsorted
 * [#14283](https://github.com/apache/nuttx/pull/14283) update defconfig
 * [#14120](https://github.com/apache/nuttx/pull/14120) Update esptool version on docs and build system
 * [#14794](https://github.com/apache/nuttx/pull/14794) update Intel64 and PCI documentation
-* [#14778](https://github.com/apache/nuttx/pull/14778) update stream relative fix mtd&blk stream readback before block update. decrese int use in stream to handle FS_LARGEFILE
+* [#14778](https://github.com/apache/nuttx/pull/14778) update stream relative fix mtd&blk stream readback before block update. decrease int use in stream to handle FS_LARGEFILE
 * [#13889](https://github.com/apache/nuttx/pull/13889) update the mm dump relative add orphan & biggest dump feature.
 * [#13913](https://github.com/apache/nuttx/pull/13913) Upgrade openamp and libmetal to last commit
 * [#14255](https://github.com/apache/nuttx/pull/14255) Use BACKTRACE_BUFFER_SIZE to declare backtrace buffer

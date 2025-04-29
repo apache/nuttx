@@ -2,7 +2,7 @@
 Run NuttX on Renode
 ===================
 
-Renode (https://renode.io/) is and open source virutal development
+Renode (https://renode.io/) is and open source virtual development
 framework dedicated for complex embedded systems.
 
 This page contains notes on running some of NuttX boards on Renode.
@@ -138,4 +138,4 @@ Renode script::
 
   runMacro $reset
 
-Tested wtih ``nucleo-h743zi/nsh``.
+Tested with ``nucleo-h743zi/nsh``.

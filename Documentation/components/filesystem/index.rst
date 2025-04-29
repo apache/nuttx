@@ -98,12 +98,12 @@ belonging to a unified interface:
     specific data that represents an open file.
   :param FAR const char * relpath: Relative path of the file from the root of
     the mounted file system.
-  :param int oflags: Flags in a bit field that specify the mode for openning
+  :param int oflags: Flags in a bit field that specify the mode for opening
     the file (eg. ``O_RDONLY``, ``O_RDWR``, etc. defined in
     ``include/fcntl.h``).
   :param mode_t mode: Specifies the mode (permissions). If ``oflags`` include
     ``O_CREAT``, then this contains the mode for the file to be created.
-  :returns: Status of openning a file.
+  :returns: Status of opening a file.
   :retval OK (0): Success.
   :retval < 0: Error.
 
@@ -199,7 +199,7 @@ belonging to a unified interface:
   in the virtual address space of the calling process.
 
   :param FAR struct file * filep: Open file's file structure pointer.
-  :param FAR struct mm_map_entry_s * map: mmap entry strucutre pointer, which
+  :param FAR struct mm_map_entry_s * map: mmap entry structure pointer, which
     includes the virtual address.
   :returns: Status of mmap operation.
   :retval OK (0): Success.
@@ -305,7 +305,7 @@ belonging to a unified interface:
     * ``CH_STAT_MTIME``
     
     This describes what needs to be updated.
-  :returns: Status of changin open file's stats.
+  :returns: Status of changing open file's stats.
   :retval OK (0): Success.
   :retval < 0: Error.
 
@@ -324,14 +324,14 @@ belonging to a unified interface:
   :param FAR struct fs_dirent_s ** dir: A directory stream structure pointer
     which needs to be populated with the required fields (defined in
     ``include/nuttx/fs/fs.h``).
-  :returns: Status of openning the directory.
+  :returns: Status of opening the directory.
   :retval OK (0): Success.
   :retval < 0: Error.
 
 .. c:function:: int closedir(FAR struct inode *mountpt, FAR struct fs_dirent_s *dir)
 
   Closes a directory stream, as well as deallocates any memory used while
-  while openning a directory stream.
+  while opening a directory stream.
 
   :param FAR struct inode * mountpt: Mount point inode of the file system.
   :param FAR struct fs_dirent_s ** dir: A directory stream structure pointer
@@ -356,7 +356,7 @@ belonging to a unified interface:
 .. c:function:: int rewinddir(FAR struct inode *mountpt, FAR struct fs_dirent_s *dir)
 
   Resets the directory stream back to the first entry, like it was after
-  openning.
+  opening.
 
   :param FAR struct inode * mountpt: Mount point inode of the file system.
   :param FAR struct fs_dirent_s ** dir: A directory stream structure pointer.

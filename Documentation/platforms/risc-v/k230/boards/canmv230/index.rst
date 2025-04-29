@@ -4,7 +4,7 @@ CanMV K230
 
 The `CanMV K230 <https://developer.canaan-creative.com/k230/dev/zh/CanMV_K230_%E6%95%99%E7%A8%8B.html>`_ is a raspberry-pi sized single board computer with 512MB DRAM and a microSD card slot for booting. It comes with serial console, Ethernet, HDMI and USB/OTG ports. Unfortuunately it doesn't support JTAG alike debugging interfaces.
 
-The `K230 SDK <https://github.com/kendryte/k230_sdk>`_ contains source code, libraries and user guides for booting up an AMP enviroment with Linux on CPU0 and RT-Thread on CPU1. 
+The `K230 SDK <https://github.com/kendryte/k230_sdk>`_ contains source code, libraries and user guides for booting up an AMP environment with Linux on CPU0 and RT-Thread on CPU1.
 
 K230 boots from CPU0 and loads U-Boot SPL into DRAM first, then U-Boot kicks off OpenSBI wrapped Linux/RTT OS images on respective CPU cores accordingly.
 

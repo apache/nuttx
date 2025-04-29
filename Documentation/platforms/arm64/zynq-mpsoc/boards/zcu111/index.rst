@@ -150,7 +150,7 @@ The second way is install Vivado SDK or Vitis development environment which incl
 
 You can edit your .profile files if you don't use bash.
 
-Note: nuttx.elf build by toolchain install in first way can't be debuged by Vivado SDK which use
+Note: nuttx.elf build by toolchain install in first way can't be debugged by Vivado SDK which use
 toolchain of second way for gdb version incompatibility.
 
 Check the ARM64 Toolchain:

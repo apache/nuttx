@@ -236,7 +236,7 @@ Soft Registers
        on every interrupt and context switch.
 
   2. Lowering the optimization level by dropping -Os to -O2 or, more likely,
-     by removing -fomit-frame-pointer.  Also not desirable becauase 99% of the
+     by removing -fomit-frame-pointer.  Also not desirable because 99% of the
      files that do not have this problem also increase in size.  Special case
      compilation with reduced optimization levels just for the files that need
      it could be done, but this would complicate the make system.

@@ -1,9 +1,9 @@
 .. warning:: This interface is not commonly used in NuttX and is not
-             recomended for implementing new sensors. It should be removed
+             recommended for implementing new sensors. It should be removed
              in the future.
 
 =========================
-Sensor Cluster (Obsolote)
+Sensor Cluster (Obsolete)
 =========================
 
 Common Sensor Register Interface

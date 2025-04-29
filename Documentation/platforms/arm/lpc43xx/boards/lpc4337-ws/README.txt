@@ -611,7 +611,7 @@ Where <subdir> is one of the following:
        b. Execute 'make menuconfig' in nuttx/ in order to start the
           reconfiguration process.
 
-    2. The project can exucute directly from SRAM with NuttX loaded by a debugger
+    2. The project can execute directly from SRAM with NuttX loaded by a debugger
        by setting the following configuration options.
 
          CONFIG_LPC43_BOOT_SRAM=y            : Executing in SRAM

@@ -142,7 +142,7 @@ Debugging
 =========
 
   And, at this point, I don't know how to debug the board.  There is no
-  way to connect a JTAG SWD debuggger, at least not without cutting leads
+  way to connect a JTAG SWD debugger, at least not without cutting leads
   to the MINI54TAN device:
 
     See: http://mcuoneclipse.com/2014/08/09/hacking-the-teensy-v3-1-for-swd-debugging/

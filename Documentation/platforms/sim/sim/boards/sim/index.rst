@@ -13,7 +13,7 @@ for the NuttX "sim" target.  The sim target is a NuttX port that runs as a
 user-space program under Linux, Cygwin, or macOS.  It is a very "low fidelity"
 embedded system simulation:  This environment does not support any kind of
 asynchronous events -- there are nothing like interrupts in this context.
-Therefore, there can be no pre-empting events.
+Therefore, there can be no preempting events.
 
 Fake Interrupts
 ---------------
@@ -1860,7 +1860,7 @@ This is a configuration with sim usbhost support.
 
     $ ./tools/configure.sh sim:usbhost
 
-   Configure the device you want to connet::
+   Configure the device you want to connect::
 
     CONFIG_SIM_USB_PID=0x0042
     CONFIG_SIM_USB_VID=0x1630

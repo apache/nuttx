@@ -994,7 +994,7 @@ in included system files. From Jeff.
 Makefile. Hopefully this will end awkward problems when you Control-C
 out of a build and libapps.a is deleted.
 - platform/Makefile: More attempts to fix for Windows native build.
-Backslash as a delimiter causes problems in pattern subsitutions.
+Backslash as a delimiter causes problems in pattern substitutions.
 
 * NSH: apps/nshlib:
 

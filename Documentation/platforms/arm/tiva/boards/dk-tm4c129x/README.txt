@@ -746,7 +746,7 @@ Where <subdir> is one of the following:
 
     2. This configuration can be modified to that both IPv4 and IPv6
        are support.  Here is a summary of the additional configuration
-       settings requird to support both IPv4 and IPv6:
+       settings required to support both IPv4 and IPv6:
 
          CONFIG_NET_IPv4=y
          CONFIG_NET_ARP=y

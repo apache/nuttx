@@ -212,7 +212,7 @@ to run on a bare metal Intel hardware with PCI serial port support.
 lvgl
 ----
 
-LVGL demo example that demonstrates x86_64 framebufer feature.
+LVGL demo example that demonstrates x86_64 framebuffer feature.
 
 fb
 ---

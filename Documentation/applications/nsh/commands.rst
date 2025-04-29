@@ -1677,7 +1677,7 @@ The reported time is the elapsed time from starting of the command to
 completion of the command. This elapsed time may not necessarily be just
 the processing time for the command. It may included interrupt level
 processing, for example. In a busy system, command processing could be
-delayed if pre-empted by other, higher priority threads competing for
+delayed if preempted by other, higher priority threads competing for
 CPU time. So the reported time includes all CPU processing from the
 start of the command to its finish possibly including unrelated
 processing time during that interval.

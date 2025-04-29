@@ -13,9 +13,9 @@ Currently in NuttX we have 3 different approaches to sensor interfaces:
 
 The preferred way for implementing new sensors is
 the :ref:`New sensor framework <new_sensor_framework>`, which provides the most
-general interafce.
+general interface.
 
-.. attach files to avoid warinigs, but don't show them here !
+.. attach files to avoid warnings, but don't show them here !
 
 .. toctree::
     :hidden:

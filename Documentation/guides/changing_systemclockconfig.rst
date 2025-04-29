@@ -29,7 +29,7 @@ The ``configs/vsn/`` configuration does something like you say. It skips the
 initial clock configuration by defining 
 ``CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG=y``. Then the normal clock 
 configuration logic in ``arch/arm/src/stm32/stm32_rcc.c`` is not executed.
-Instead, the "custom" clock initialization at ``confgs/vsn/src/sysclock.c``
+Instead, the "custom" clock initialization at ``configs/vsn/src/sysclock.c``
 is called:
 
 .. code-block:: c

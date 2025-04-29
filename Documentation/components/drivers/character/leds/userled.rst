@@ -59,7 +59,7 @@ Files supporting USERLED can be found in the following locations:
 
 Something important to note is that your board initialization code (normally named ``<arch>_bringup.c`` should call the function to register the driver.
 
-For stm32f4discovery board this initialization code is placed at ``boards/arm/stm32/stm32f4discovery/src/stm32_bringup.c`` and this is the block responsible to initialize the subsytem:
+For stm32f4discovery board this initialization code is placed at ``boards/arm/stm32/stm32f4discovery/src/stm32_bringup.c`` and this is the block responsible to initialize the subsystem:
 
 .. code-block:: C
 

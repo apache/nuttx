@@ -12,7 +12,7 @@ organization, and OS configuration options.
 .. figure:: NuttXScreenShot.jpg
   :align: center
 
-  **Figure 1**. This screnshot shows the final frame for the NuttX example
+  **Figure 1**. This screenshot shows the final frame for the NuttX example
   at ``apps/examples/nx`` running on the simulated, Linux x86 platform with
   simulated framebuffer output to an X window. This picture shows to framed window
   with (blank) toolbars. Each window has displayed text as received from the

@@ -33,7 +33,7 @@ size, the spare area may have different structures (schemes). All the
 required schemes are defined in ``/drivers/mtd/mtd_nandscheme.c`` (in
 the ``g_nand_sparescheme*`` structures).
 
-Due to the nature of NAND flash, upon testing, a manufaturer may decide that
+Due to the nature of NAND flash, upon testing, a manufacturer may decide that
 a certain block fails some test(s), and mark it as a **bad block** by
 writing a certain value in a certain position in the spare area (depends on
 data area's size, and thus, the spare area's scheme) of every page in it.

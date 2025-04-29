@@ -238,7 +238,7 @@ Improvements
 * [#10546](https://github.com/apache/nuttx/pull/10546) mkdeps: increase MAX_BUFFER:MAX_EXPAND:MAX_SHQUOTE to 16384
 * [#10540](https://github.com/apache/nuttx/pull/10540) mkexport: copy full library directly if library without path
 * [#9618](https://github.com/apache/nuttx/pull/9618) mkexport: Allow boards to supply custom gnu-elf.ld.
-* [#10511](https://github.com/apache/nuttx/pull/10511) prasetrace: remvoe function name filter
+* [#10511](https://github.com/apache/nuttx/pull/10511) prasetrace: remove function name filter
 * [#10774](https://github.com/apache/nuttx/pull/10774) parsememdump.py: support the sequence number parse
 * [#10335](https://github.com/apache/nuttx/pull/10335) refresh.sh: Add option to refresh custom board
 * [#10619](https://github.com/apache/nuttx/pull/10619) Remove archive lock file in make distclean
@@ -581,7 +581,7 @@ Drivers With Improvements
 * [#10738](https://github.com/apache/nuttx/pull/10738) modem: alt1250: Fix bug that errno was not converted correctly
 * [#10737](https://github.com/apache/nuttx/pull/10737) modem: alt1250: Fix bug that modem version could not be taken
 * [#10161](https://github.com/apache/nuttx/pull/10161) mtd: Add new functions part_isbad and part_markbad in mtd partition.
-* [#10332](https://github.com/apache/nuttx/pull/10332) mtd: add dhara compatiblity layer
+* [#10332](https://github.com/apache/nuttx/pull/10332) mtd: add dhara compatibility layer
 * [#10518](https://github.com/apache/nuttx/pull/10518) mtd: dhara: add dhara folder in gitignore
 * [#9958](https://github.com/apache/nuttx/pull/9958) mtd: ftl: Modify erasure result processing error issue
 * [#9931](https://github.com/apache/nuttx/pull/9931) mtd: ftl: support to skip bad block for earse:bread:bwrite
@@ -602,14 +602,14 @@ Drivers With Improvements
 * [#10506](https://github.com/apache/nuttx/pull/10506) note: fix sched_note declaration inconsistency
 * [#10424](https://github.com/apache/nuttx/pull/10424) note: fix trace dump: dump failed
 * [#10124](https://github.com/apache/nuttx/pull/10124) note: move the note formatting code from trace_dump into noteram_drivers.c
-* [#10088](https://github.com/apache/nuttx/pull/10088) noteram: Remove the unnessary inclusion and declaration from header file
+* [#10088](https://github.com/apache/nuttx/pull/10088) noteram: Remove the unnecessary inclusion and declaration from header file
 * [#10784](https://github.com/apache/nuttx/pull/10784) power: pm: check the domain in pm_querystate
 * [#10585](https://github.com/apache/nuttx/pull/10585) power: pm: fix issue that system crash when passed invalid relpath value
 * [#10049](https://github.com/apache/nuttx/pull/10049) power: pm: fix second time add wakelock dq caused error
 * [#10601](https://github.com/apache/nuttx/pull/10601) power: pm: support pm runtime function
 * [#10427](https://github.com/apache/nuttx/pull/10427) power: supply: Regulator: check the id when register
 * [#10651](https://github.com/apache/nuttx/pull/10651) power: supply: regulator: Refine rpmsg regulator
-* [#10745](https://github.com/apache/nuttx/pull/10745) power: supply: regulator: fix some issues about rpmsg regualtor
+* [#10745](https://github.com/apache/nuttx/pull/10745) power: supply: regulator: fix some issues about rpmsg regulator
 * [#10123](https://github.com/apache/nuttx/pull/10123) pipes: use circbuf to refine buffer model
 * [#10330](https://github.com/apache/nuttx/pull/10330) pipes: fix busyloop issue when circbuf is full
 * [#10270](https://github.com/apache/nuttx/pull/10270) pty: Support get and set local mode of pty
@@ -724,7 +724,7 @@ Boards With Improvements
 * [#10099](https://github.com/apache/nuttx/pull/10099) arm: cxd56xx: Disable NET_ARP from lte defconfig
 * [#10389](https://github.com/apache/nuttx/pull/10389) arm: cxd56xx: Fix charger and gauge initialize functions
 * [#10101](https://github.com/apache/nuttx/pull/10101) arm: cxd56xx: Fix duplicate make target
-* [#9966](https://github.com/apache/nuttx/pull/9966) arm: cxd56xx: Fix issue that GPO is not iniitalized by watchdog
+* [#9966](https://github.com/apache/nuttx/pull/9966) arm: cxd56xx: Fix issue that GPO is not initialized by watchdog
 * [#9692](https://github.com/apache/nuttx/pull/9692) arm: cxd56xx: Fix system clock to HV mode for video drivers
 * [#10407](https://github.com/apache/nuttx/pull/10407) arm: cxd56xx: lte: use mbedtls version configured
 
@@ -774,7 +774,7 @@ Boards With Improvements
 * [#9884](https://github.com/apache/nuttx/pull/9884) xtensa: esp32: esp32-devkitc: Refresh wifi_smp_rmt config
 * [#9709](https://github.com/apache/nuttx/pull/9709) xtensa: esp32: esp32-devkitc: wamr_wasi_debug: enable wasi-threads
 * [#9752](https://github.com/apache/nuttx/pull/9752) xtensa: esp32s2: Add basic support to SPIFLASH
-* [#9868](https://github.com/apache/nuttx/pull/9868) xtensa: esp32s3: Do not include specific board in commom
+* [#9868](https://github.com/apache/nuttx/pull/9868) xtensa: esp32s3: Do not include specific board in common
 * [#9870](https://github.com/apache/nuttx/pull/9870) xtensa: esp32s3: Some follow-up changes for ESP32s3 32M flash support
 * [#10748](https://github.com/apache/nuttx/pull/10748) xtensa: esp32s3: esp32s3-devkit:disable esp32s3-devkit:ksta_softap spinlock config
 * [#10588](https://github.com/apache/nuttx/pull/10588) xtensa: esp32s3: esp32s3-devkit:Add board GPIO support
@@ -822,7 +822,7 @@ Improvements
 * [#10075](https://github.com/apache/nuttx/pull/10075) remove (flags & MAP_PRIVATE) == 0.
 * [#9905](https://github.com/apache/nuttx/pull/9905) semaphore: modify or remove sched_[un]lock
 * [#9924](https://github.com/apache/nuttx/pull/9924) semaphore: fix sem_open
-* [#10343](https://github.com/apache/nuttx/pull/10343) shmfs: Fix illegal usage of void* arithmetics
+* [#10343](https://github.com/apache/nuttx/pull/10343) shmfs: Fix illegal usage of void* arithmetic
 * [#10039](https://github.com/apache/nuttx/pull/10039) tmpfs: fix tmpfs_read overwrite after seek over tfo_size
 * [#9910](https://github.com/apache/nuttx/pull/9910) unionfs: Remove unionfs_mount function
 * [#10295](https://github.com/apache/nuttx/pull/10295) vfs: add nxsched_foreach to sched_lock avoid crash
@@ -884,14 +884,14 @@ Improvements
 * [#9928](https://github.com/apache/nuttx/pull/9928) rpmsg: get credentials between client and server
 * [#9952](https://github.com/apache/nuttx/pull/9952) rpmsg: read receiving data after unbind
 * [#10046](https://github.com/apache/nuttx/pull/10046) rpmsg: rpmsg_socket update
-* [#10289](https://github.com/apache/nuttx/pull/10289) rpmsg: rpmsg_sockif: block poll shoud not set POLLERR
+* [#10289](https://github.com/apache/nuttx/pull/10289) rpmsg: rpmsg_sockif: block poll should not set POLLERR
 * [#10661](https://github.com/apache/nuttx/pull/10661) rpmsg: set conn->backlog=-1 only when socket listening
 * [#10669](https://github.com/apache/nuttx/pull/10669) rpmsg: socket: add return value check.
 * [#10537](https://github.com/apache/nuttx/pull/10537) rpmsg_sockif: add recvlock for conn->sendsize in connect
 * [#9879](https://github.com/apache/nuttx/pull/9879) setsockopt: Add IP_TTL support
 * [#10437](https://github.com/apache/nuttx/pull/10437) socket: bind: make sure that an address was provided
 * [#10309](https://github.com/apache/nuttx/pull/10309) tcp: Added tcp zero window probe timer support
-* [#10218](https://github.com/apache/nuttx/pull/10218) tcp: Fix the sack byte aligment error.
+* [#10218](https://github.com/apache/nuttx/pull/10218) tcp: Fix the sack byte alignment error.
 * [#10324](https://github.com/apache/nuttx/pull/10324) tcp: Fix unreadable error when doing poll operation on tcp socket.
 * [#10022](https://github.com/apache/nuttx/pull/10022) tcp: return -EINVAL if bind is called more than once
 * [#10608](https://github.com/apache/nuttx/pull/10608) tcp: Set SO_ERROR for poll error in setup

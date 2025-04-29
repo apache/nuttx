@@ -8,7 +8,7 @@ Running CI Test Locally
 NuttX automatically runs continuous integration (CI) tests on 
 `simulator <https://nuttx.apache.org/docs/latest/guides/simulator.html>`__
 target when new pull request is submitted. To avoid the tests failing you can
-also run them locally on your computer prior to submiting new pull request.
+also run them locally on your computer prior to submitting new pull request.
 This page describes the step by step manual to do so.
 
 Configuring NuttX

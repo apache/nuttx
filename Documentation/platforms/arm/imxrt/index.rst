@@ -176,7 +176,7 @@ as a slave. The lower-half of this driver is initialize by calling :c:func:`imxr
 PWM
 ---
 
-Pulse width modulator supported in i.MX RT1010 and higher. Multiple channels option is evailable.
+Pulse width modulator supported in i.MX RT1010 and higher. Multiple channels option is available.
 Output on pin B is currently supported only as a complementary option to pin A.
 The lower-half of this driver is initialize by calling :c:func:`imxrt_pwminitialize`.
 

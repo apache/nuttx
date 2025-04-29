@@ -153,14 +153,14 @@ to set the polarities:
 
 .. code-block:: c
 
-   /* Not defined, the default output state is arch dependant */
+   /* Not defined, the default output state is arch dependent */
    #define PWM_CPOL_NDEF             0
    /* Logical zero */
    #define PWM_CPOL_LOW              1
    /* Logical one */
    #define PWM_CPOL_HIGH             2
 
-   /* Not defined, the default output state is arch dependant */
+   /* Not defined, the default output state is arch dependent */
    #define PWM_DCPOL_NDEF            0
     /* Logical zero */
    #define PWM_DCPOL_LOW             1

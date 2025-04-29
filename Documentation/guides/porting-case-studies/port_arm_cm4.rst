@@ -177,7 +177,7 @@ and retry to build, the build system will teach that you have to implement some 
 Step6 : Implement
 -----------------
 
-There are some implementation items, major items are bellow listed. To pass the Linking,
+There are some implementation items, major items are below listed. To pass the Linking,
 try to implement these symbols.
 
 +-----------------+------------------------+--------------------------------------------------------------------+
@@ -258,12 +258,12 @@ see `apache/nuttx/pull/12441`_
       pre = cxd32_timerget();
       sleep(1);
       post = cxd32_timerget();
-      printf("pre:%lu post:%lu exptect:1sec\n", pre, post);
+      printf("pre:%lu post:%lu expect:1sec\n", pre, post);
 
       pre = cxd32_timerget();
       sleep(10);
       post = cxd32_timerget();
-      printf("pre:%lu post:%lu exptect:10sec\n", pre, post);
+      printf("pre:%lu post:%lu expect:10sec\n", pre, post);
     }
 
 .. _out-of-tree:
@@ -484,12 +484,12 @@ Appendix : out-of-tree code
   +  pre = cxd32_timerget();
   +  sleep(1);
   +  post = cxd32_timerget();
-  +  printf("pre:%lu post:%lu exptect:1sec\n", pre, post);
+  +  printf("pre:%lu post:%lu expect:1sec\n", pre, post);
   +
   +  pre = cxd32_timerget();
   +  sleep(10);
   +  post = cxd32_timerget();
-  +  printf("pre:%lu post:%lu exptect:10sec\n", pre, post);
+  +  printf("pre:%lu post:%lu expect:10sec\n", pre, post);
   +
   +  return 0;
   +}

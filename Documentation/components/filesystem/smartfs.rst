@@ -23,7 +23,7 @@ The FS includes support for:
 - Directory support.
 - Support for multiple mount points on a single volume / partition (see details
   below).
-- Selectable FLASH Wear leveling algorithym
+- Selectable FLASH Wear leveling algorithm
 - Selectable CRC-8 or CRC-16 error detection for sector data
 - Reduced RAM model for FLASH geometries with large number of sectors (16K-64K)
 

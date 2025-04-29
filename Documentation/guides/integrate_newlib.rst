@@ -56,7 +56,7 @@ Here are a few:
   the reference to ``wint_t``.
 
 * Add the following to ``nuttx/libc/stdio/lib_libvsprintf.c``. I 
-  especially dislike this solution because it involves modication 
+  especially dislike this solution because it involves modification
   to a NuttX header file that cannot be accepted upstream.
 
 .. code-block:: c

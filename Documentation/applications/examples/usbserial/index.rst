@@ -53,7 +53,7 @@ This will generate a small program called ``host``. Usage:
      dmesg
 
    At the end of the dmesg output, you should see the serial device was
-   successfully idenfied and assigned to a tty device, probably ``/dev/ttyUSB0``
+   successfully identified and assigned to a tty device, probably ``/dev/ttyUSB0``
    or ``/dev/ttyACM0`` (depending on the configured USB serial driver).
 
 3. Then start the host application::

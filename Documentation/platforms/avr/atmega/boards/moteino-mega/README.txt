@@ -1,7 +1,7 @@
 README
 ^^^^^^
 
-This port conributed by jeditekunum.
+This port was contributed by jeditekunum.
 
 This is the README file for the port of NuttX to the MoteinoMEGA from
 LowPowerLab (http://www.lowpowerlab.com).  The MoteinoMEGA is based

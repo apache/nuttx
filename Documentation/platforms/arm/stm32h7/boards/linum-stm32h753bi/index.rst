@@ -383,7 +383,7 @@ usbnsh
 
 Configures the NuttShell (nsh) located at apps/examples/nsh. This configuration enables a serial console over USB.
 
-After flasing and reboot your board you should see in your dmesg logs::
+After flashing and reboot your board you should see in your dmesg logs::
 
     $ sudo dmesg | tail
     [ 9180.937813] usb 3-1.1.2: SerialNumber: 0
@@ -533,7 +533,7 @@ Sending files to target::
     /tmp:
     -rw-rw-rw-        1942 nuttx_logo.txt
 
-Transmiting a file to PC::
+Transmitting a file to PC::
 
     # Sending the file nuttx_logo.txt to PC
     nsh> sz -x 1 /tmp/nuttx_logo.txt

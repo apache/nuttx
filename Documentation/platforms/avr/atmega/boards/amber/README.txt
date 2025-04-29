@@ -339,7 +339,7 @@ Build Notes:
 
      I am using avr-lib-1.7.1.tar.bz2
 
-  2. Upack the tarball and cd into the
+  2. Unpack the tarball and cd into the
 
      tar jxf avr-lib-1.7.1.tar.bz2
      cd avr-lib-1.7.1

@@ -40,7 +40,7 @@ properties include:
    cancellation points and specific in the fact that it is
    prohibited for any OS operation other than those listed in the
    specification to generate cancellation points. If internal OS
-   logic were to re-use application OS interfaces directly then it
+   logic were to reuse application OS interfaces directly then it
    could very easily violate this POSIX requirement by incorrectly
    generating cancellation points on inappropriate OS operations
    and could result in very difficult to analyze application

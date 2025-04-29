@@ -121,7 +121,7 @@ Uses all Windows style paths, (2) Uses primarily Windows batch
 commands from cmd.exe, with (3) a few extensions from GNUWin32.
 
 This capability should still be considered a work in progress
-because: (1) it has not been verfied on all targets and tools,
+because: (1) it has not been verified on all targets and tools,
 and (2) still lacks some of the creature-comforts of the more
 mature environments (like a function configure.sh script and
 'make menuconfig' support).

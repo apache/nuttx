@@ -69,7 +69,7 @@ Status
 
   At this point, I would say that the basic NSH port is complete.
 
-2016-05-18: Started looking at the SMP configuration.  Initially, I verfied
+2016-05-18: Started looking at the SMP configuration.  Initially, I verified
   that the NSH configuration works with CONFIG_SMP_NCPUS=1.  Not a very
   interesting case, but this does exercise a lot of the basic SMP logic.
 

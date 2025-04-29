@@ -6,7 +6,7 @@ The old sensors implementation where the character device interface is not
 standardized in any way.
 
 This approach is not recommended for new drivers, because without a
-standarized interface, creating portable application is imposible.
+standardized interface, creating portable application is impossible.
 
 Implemented Drivers
 ===================

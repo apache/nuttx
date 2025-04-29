@@ -288,7 +288,7 @@ architectures. From Gregory Nutt.
 - syslog: Channel configuration. Decouple SYSLOG_SERIAL_CONSOLE and
 ARCH_LOWPUTC. Since some hardware can output log to the special
 debug channel not serial. From anchao.
-- syslog: Support pre-pending a prefix string to log output if
+- syslog: Support prepending a prefix string to log output if
 enabled. This very useful to identify which CPU send out the log
 in AMP SoC. From anchao.
 - Serial: Add Ctrl-C/Ctrl-X support. From ligd.
@@ -643,7 +643,7 @@ FOC. From Mateusz Szafoni.
 if the compiler supports anonymous structures and unions. From
 Gregory Nutt.
 - include/nuttx/mutex.h: Add inline wrapper functions to more
-clearly support semaphores when used as mutexs. From QianWenfa.
+clearly support semaphores when used as mutexes. From QianWenfa.
 - include/nuttx/nuttx.h: Added nuttx.h header file which is
 analogous to the linux.h header file. Currently, it contains on
 the definition of the container_of() macro. From zhuyanlin.
