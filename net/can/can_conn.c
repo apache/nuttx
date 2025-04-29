@@ -203,7 +203,8 @@ FAR struct can_conn_s *can_active(FAR struct net_driver_s *dev,
 {
   while ((conn = can_nextconn(conn)) != NULL)
     {
-      if (conn->dev == NULL || conn->dev == dev)
+      if ((conn->dev == NULL && _SS_ISBOUND(conn->sconn.s_flags)) ||
+          conn->dev == dev)
         {
           break;
         }
