@@ -125,8 +125,10 @@ static int pkt_sockif_alloc(FAR struct socket *psock)
 
   conn->type = psock->s_proto;
 
-#if defined(CONFIG_NET_PKT_WRITE_BUFFERS) && CONFIG_NET_SEND_BUFSIZE > 0
+#ifdef CONFIG_NET_PKT_WRITE_BUFFERS
+#  if CONFIG_NET_SEND_BUFSIZE > 0
   conn->sndbufs = CONFIG_NET_SEND_BUFSIZE;
+#  endif
   nxsem_init(&conn->sndsem, 0, 0);
 #endif
 
