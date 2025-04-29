@@ -164,7 +164,7 @@ int work_queue_period_wq(FAR struct kwork_wqueue_s *wqueue,
        */
 
       work->worker = NULL;
-      wd_cancel(&work->u.timer);
+      wd_cancel(&work->timer);
       if (dq_inqueue((FAR dq_entry_t *)work, &wqueue->q))
         {
           dq_rem((FAR dq_entry_t *)work, &wqueue->q);
@@ -190,12 +190,12 @@ int work_queue_period_wq(FAR struct kwork_wqueue_s *wqueue,
     }
   else if (period == 0)
     {
-      ret = wd_start(&work->u.timer, delay,
+      ret = wd_start(&work->timer, delay,
                      work_timer_expiry, (wdparm_t)work);
     }
   else
     {
-      ret = wd_start_period(&work->u.ptimer, delay, period,
+      ret = wd_start_period(&work->ptimer, delay, period,
                             work_timer_expiry, (wdparm_t)work);
     }
 

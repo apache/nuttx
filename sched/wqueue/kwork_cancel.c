@@ -66,7 +66,7 @@ static int work_qcancel(FAR struct kwork_wqueue_s *wqueue, bool sync,
        */
 
       work->worker = NULL;
-      wd_cancel(&work->u.timer);
+      wd_cancel(&work->timer);
       if (dq_inqueue((FAR dq_entry_t *)work, &wqueue->q))
         {
           dq_rem((FAR dq_entry_t *)work, &wqueue->q);

@@ -87,9 +87,9 @@ static int work_qqueue(FAR struct usr_wqueue_s *wqueue,
 
   /* Initialize the work structure */
 
-  work->worker = worker;             /* Work callback. non-NULL means queued */
-  work->arg    = arg;                /* Callback argument */
-  work->u.s.qtime = clock() + delay; /* Delay until work performed */
+  work->worker  = worker;           /* Work callback. non-NULL means queued */
+  work->arg     = arg;              /* Callback argument */
+  work->s.qtime = clock() + delay;  /* Delay until work performed */
 
   /* Do the easy case first -- when the work queue is empty. */
 
@@ -97,7 +97,7 @@ static int work_qqueue(FAR struct usr_wqueue_s *wqueue,
     {
       /* Add the watchdog to the head == tail of the queue. */
 
-      dq_addfirst(&work->u.s.dq, &wqueue->q);
+      dq_addfirst(&work->s.dq, &wqueue->q);
       nxsem_post(&wqueue->wake);
     }
 
@@ -111,7 +111,7 @@ static int work_qqueue(FAR struct usr_wqueue_s *wqueue,
 
       do
         {
-          delta = work->u.s.qtime - ((FAR struct work_s *)curr)->u.s.qtime;
+          delta = work->s.qtime - ((FAR struct work_s *)curr)->qtime;
           if (delta < 0)
             {
               break;
@@ -128,7 +128,7 @@ static int work_qqueue(FAR struct usr_wqueue_s *wqueue,
         {
           /* Insert the watchdog at the head of the list */
 
-          dq_addfirst(&work->u.s.dq, &wqueue->q);
+          dq_addfirst(&work->dq, &wqueue->q);
           nxsem_get_value(&wqueue->wake, &semcount);
           if (semcount < 1)
             {
@@ -139,7 +139,7 @@ static int work_qqueue(FAR struct usr_wqueue_s *wqueue,
         {
           /* Insert the watchdog in mid- or end-of-queue */
 
-          dq_addafter(prev, &work->u.s.dq, &wqueue->q);
+          dq_addafter(prev, &work->dq, &wqueue->q);
         }
     }
 

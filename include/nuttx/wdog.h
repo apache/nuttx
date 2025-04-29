@@ -72,12 +72,7 @@ struct wdlist_node
   FAR struct wdlist_node *next;
 };
 
-/* This is the internal representation of the watchdog timer structure.
- * Notice !!!
- * Carefully with the struct wdog_s order, you may not directly modify
- * this. This struct will combine in struct work_s in union type, and,
- * wqueue will modify/check this struct in kwork work_qcancel().
- */
+/* Support a doubly linked list of watchdog timers */
 
 struct wdog_s
 {
