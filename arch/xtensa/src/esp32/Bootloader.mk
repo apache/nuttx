@@ -35,8 +35,14 @@ BOOTLOADER_CONFIG  = $(BOOTLOADER_DIR)/bootloader.conf
 
 MCUBOOT_SRCDIR     = $(BOOTLOADER_DIR)/mcuboot
 MCUBOOT_ESPDIR     = $(MCUBOOT_SRCDIR)/boot/espressif
-MCUBOOT_URL        = https://github.com/mcu-tools/mcuboot
 MCUBOOT_TOOLCHAIN  = $(TOPDIR)/tools/esp32/mcuboot_toolchain_esp32.cmake
+ifndef MCUBOOT_VERSION
+	MCUBOOT_VERSION = $(CONFIG_ESP32_MCUBOOT_VERSION)
+endif
+
+ifndef MCUBOOT_URL
+	MCUBOOT_URL = https://github.com/mcu-tools/mcuboot
+endif
 
 # Helpers for creating the configuration file
 
@@ -128,7 +134,7 @@ BOOTLOADER_SIGNED_BIN = $(TOPDIR)/mcuboot-esp32.signed.bin
 $(MCUBOOT_SRCDIR):
 	$(Q) echo "Cloning MCUboot"
 	$(Q) git clone --quiet $(MCUBOOT_URL) $(MCUBOOT_SRCDIR)
-	$(Q) git -C "$(MCUBOOT_SRCDIR)" checkout --quiet $(CONFIG_ESP32_MCUBOOT_VERSION)
+	$(Q) git -C "$(MCUBOOT_SRCDIR)" checkout --quiet $(MCUBOOT_VERSION)
 	$(Q) git -C "$(MCUBOOT_SRCDIR)" submodule --quiet update --init --recursive ext/mbedtls
 
 $(BOOTLOADER_BIN): chip/$(ESP_HAL_3RDPARTY_REPO) $(MCUBOOT_SRCDIR) $(BOOTLOADER_CONFIG)
