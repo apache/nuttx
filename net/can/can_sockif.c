@@ -340,7 +340,7 @@ static int can_bind(FAR struct socket *psock,
   conn->dev = netdev_findbyname((const char *)&netdev_name);
 #endif
 
-  return conn->dev == NULL ? -ENODEV : OK;
+  return conn->dev == NULL && canaddr->can_ifindex != 0 ? -ENODEV : OK;
 }
 
 /****************************************************************************
