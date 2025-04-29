@@ -63,7 +63,6 @@ NET_BUFPOOL_DECLARE(g_usrsock_connections, sizeof(struct usrsock_conn_s),
                     CONFIG_NET_USRSOCK_PREALLOC_CONNS,
                     CONFIG_NET_USRSOCK_ALLOC_CONNS,
                     CONFIG_NET_USRSOCK_MAX_CONNS);
-static mutex_t g_free_lock = NXMUTEX_INITIALIZER;
 
 /* A list of all allocated usrsock connections */
 
@@ -88,7 +87,7 @@ FAR struct usrsock_conn_s *usrsock_alloc(void)
 
   /* The free list is protected by a a mutex. */
 
-  nxmutex_lock(&g_free_lock);
+  NET_BUFPOLL_LOCK(g_usrsock_connections);
 
   conn = NET_BUFPOOL_TRYALLOC(g_usrsock_connections);
   if (conn)
@@ -104,7 +103,7 @@ FAR struct usrsock_conn_s *usrsock_alloc(void)
       dq_addlast(&conn->sconn.node, &g_active_usrsock_connections);
     }
 
-  nxmutex_unlock(&g_free_lock);
+  NET_BUFPOLL_UNLOCK(g_usrsock_connections);
   return conn;
 }
 
@@ -123,7 +122,7 @@ void usrsock_free(FAR struct usrsock_conn_s *conn)
 
   DEBUGASSERT(conn->crefs == 0);
 
-  nxmutex_lock(&g_free_lock);
+  NET_BUFPOLL_LOCK(g_usrsock_connections);
 
   /* Remove the connection from the active list */
 
@@ -137,7 +136,7 @@ void usrsock_free(FAR struct usrsock_conn_s *conn)
 
   NET_BUFPOOL_FREE(g_usrsock_connections, conn);
 
-  nxmutex_unlock(&g_free_lock);
+  NET_BUFPOLL_UNLOCK(g_usrsock_connections);
 }
 
 /****************************************************************************

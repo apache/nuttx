@@ -66,7 +66,6 @@
 NET_BUFPOOL_DECLARE(g_pkt_connections, sizeof(struct pkt_conn_s),
                     CONFIG_NET_PKT_PREALLOC_CONNS,
                     CONFIG_NET_PKT_ALLOC_CONNS, CONFIG_NET_PKT_MAX_CONNS);
-static mutex_t g_free_lock = NXMUTEX_INITIALIZER;
 
 /* A list of all allocated packet socket connections */
 
@@ -104,7 +103,7 @@ FAR struct pkt_conn_s *pkt_alloc(void)
 
   /* The free list is protected by a mutex. */
 
-  nxmutex_lock(&g_free_lock);
+  NET_BUFPOLL_LOCK(g_pkt_connections);
 
   conn = NET_BUFPOOL_TRYALLOC(g_pkt_connections);
   if (conn)
@@ -114,7 +113,7 @@ FAR struct pkt_conn_s *pkt_alloc(void)
       dq_addlast(&conn->sconn.node, &g_active_pkt_connections);
     }
 
-  nxmutex_unlock(&g_free_lock);
+  NET_BUFPOLL_UNLOCK(g_pkt_connections);
   return conn;
 }
 
@@ -133,7 +132,7 @@ void pkt_free(FAR struct pkt_conn_s *conn)
 
   DEBUGASSERT(conn->crefs == 0);
 
-  nxmutex_lock(&g_free_lock);
+  NET_BUFPOLL_LOCK(g_pkt_connections);
 
   /* Remove the connection from the active list */
 
@@ -143,7 +142,7 @@ void pkt_free(FAR struct pkt_conn_s *conn)
 
   NET_BUFPOOL_FREE(g_pkt_connections, conn);
 
-  nxmutex_unlock(&g_free_lock);
+  NET_BUFPOLL_UNLOCK(g_pkt_connections);
 }
 
 /****************************************************************************
