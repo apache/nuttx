@@ -262,7 +262,6 @@ void udp_wrbuffer_release(FAR struct udp_wrbuffer_s *wrb)
  *
  ****************************************************************************/
 
-#if CONFIG_NET_SEND_BUFSIZE > 0
 uint32_t udp_wrbuffer_inqueue_size(FAR struct udp_conn_s *conn)
 {
   FAR struct udp_wrbuffer_s *wrb;
@@ -280,7 +279,6 @@ uint32_t udp_wrbuffer_inqueue_size(FAR struct udp_conn_s *conn)
 
   return total;
 }
-#endif /* CONFIG_NET_SEND_BUFSIZE */
 
 /****************************************************************************
  * Name: udp_wrbuffer_test
