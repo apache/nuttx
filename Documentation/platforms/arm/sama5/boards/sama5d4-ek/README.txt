@@ -2451,7 +2451,7 @@ NAND Support
     2. First, each NAND write access will cause a 256KB data transfer:  It
        will read the entire 128KB erase block, modify it and write it back
        to memory.  There is some caching logic so that this cached erase
-       block can be re-used if possible and writes will be deferred as long
+       block can be reused if possible and writes will be deferred as long
        as possible.
 
     3. If you hit a bad block, then FAT is finished.  There is no mechanism
@@ -2565,7 +2565,7 @@ I2C Tool
 
     NOTES:
     o Arguments are "sticky".  For example, once the I2C address is
-      specified, that address will be re-used until it is changed.
+      specified, that address will be reused until it is changed.
 
     WARNING:
     o The I2C dev command may have bad side effects on your I2C devices.
@@ -2780,7 +2780,7 @@ SAMA5 PWM Support
     Usage: pwm [OPTIONS]
 
     Arguments are "sticky".  For example, once the PWM frequency is
-    specified, that frequency will be re-used until it is changed.
+    specified, that frequency will be reused until it is changed.
 
     "sticky" OPTIONS include:
       [-p devpath] selects the PWM device.  Default: /dev/pwm0 Current: /dev/pwm0
@@ -3893,7 +3893,7 @@ Configurations
 
     2. This configuration can be modified to that both IPv4 and IPv6
        are support.  Here is a summary of the additional configuration
-       settings requird to support both IPv4 and IPv6:
+       settings required to support both IPv4 and IPv6:
 
          CONFIG_NET_IPv4=y
          CONFIG_NET_ARP=y
@@ -4284,7 +4284,7 @@ Configurations
 
          b. Write the DRAMBOOT program binary (nuttx.bin) to a microSD
             card as "boot.bin".  Insert the microSD card into the boar;
-            The ROM Booloader should now boot DRAMBOOT on reset and you
+            The ROM Bootloader should now boot DRAMBOOT on reset and you
             should see this message:
 
               Send Intel HEX file now

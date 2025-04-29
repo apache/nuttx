@@ -231,7 +231,7 @@ usbnsh
 Configures the NuttShell (nsh) located at apps/examples/nsh. This
 configuration enables a serial console over USB.
 
-After flasing and reboot your board you should see in your dmesg logs::
+After flashing and reboot your board you should see in your dmesg logs::
 
        [ 2638.948089] usb 1-1.4: new full-speed USB device number 16 using xhci_hcd
        [ 2639.054432] usb 1-1.4: New USB device found, idVendor=0525, idProduct=a4a7, bcdDevice= 1.01
@@ -262,7 +262,7 @@ modbus_slave
 
 Configures the NuttShell (nsh) and enables modbus in slave mode. This
 configuration enables a serial console on USART6. The RS-485 is connected
-to USART2. Follow below precedure to use modbus test aplication, you will
+to USART2. Follow below procedure to use modbus test application, you will
 need a USB to RS-485 converter to connect the board to a PC via RS-485.
 
 NuttShell configuration:
@@ -283,7 +283,7 @@ Run modbus application at NSH::
 
 PC Configuration:
 
-Download and install mbpoll aplication::
+Download and install mbpoll application::
 
        sudo apt install mbpoll
 
@@ -340,12 +340,12 @@ modbus_master
 
 Configures the NuttShell (nsh) and enables modbus in master mode. This
 configuration enables a serial console on USART6. The RS-485 is connected
-to USART2. Follow below precedure to use modbusmaster test aplication, you will
+to USART2. Follow below procedure to use modbusmaster test application, you will
 need a USB to RS-485 converter to connect the board to a PC via RS-485.
 
 PC Configuration:
 
-Download and install diagslave aplication from https://www.modbusdriver.com/diagslave.html.
+Download and install diagslave application from https://www.modbusdriver.com/diagslave.html.
 
 Check which TTY USB port is being used by you USB to RS-485 converter::
 
@@ -427,7 +427,7 @@ NSH commands::
        Usage: adc [OPTIONS]
 
        Arguments are "sticky".  For example, once the ADC device is
-       specified, that device will be re-used until it is changed.
+       specified, that device will be reused until it is changed.
 
        "sticky" OPTIONS include:
          [-p devpath] selects the ADC device.  Default: /dev/adc0 Current: /dev/adc0
@@ -454,7 +454,7 @@ NSH commands::
        Usage: pwm [OPTIONS]
 
        Arguments are "sticky".  For example, once the PWM frequency is
-       specified, that frequency will be re-used until it is changed.
+       specified, that frequency will be reused until it is changed.
 
        "sticky" OPTIONS include:
          [-p devpath] selects the PWM device.  Default: /dev/pwm0 Current: NONE
@@ -659,7 +659,7 @@ DIN     PA7
 Clk     PA5
 ======= ====
 
-As this LED matrix can be combined either horizontally or vetically,
+As this LED matrix can be combined either horizontally or vertically,
 you can configure this using menuconfig::
 
        Number of 8x8 LEDs matrices in the horizontal (width)

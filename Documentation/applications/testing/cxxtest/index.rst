@@ -16,7 +16,7 @@ The uClibc++ test includes simple test of:
 
 ### Example Configuration Options
 
-- ``CONFIG_TESTING_CXXTEST=y`` – Eanbles the example
+- ``CONFIG_TESTING_CXXTEST=y`` – Enables the example
 
 ### Other Required Configuration Settings
 

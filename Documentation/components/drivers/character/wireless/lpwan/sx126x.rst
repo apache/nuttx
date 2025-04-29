@@ -28,7 +28,7 @@ See ``nuttx/wireless/lpwan/sx126x.h`` : ``SX126XIOC_x`` for the commands.
 
 * The packet type is set using ``SX126XIOC_PACKETTYPESET`` which takes ``sx126x_packet_type_e`` enums. **Currently only LoRa packet type is supported.**
 
-* LoRa modulation and LoRa packets are configured using ``SX126XIOC_LORACONFIGSET`` which takes a pointer to a ``sx126x_lora_config_s`` struct. This struct contains two seperate structures for modulation and packet config. It is recommended to follow the SX126x datasheet at https://www.semtech.com/products/wireless-rf/lora-connect/sx1262 that gives more details about each parameter.
+* LoRa modulation and LoRa packets are configured using ``SX126XIOC_LORACONFIGSET`` which takes a pointer to a ``sx126x_lora_config_s`` struct. This struct contains two separate structures for modulation and packet config. It is recommended to follow the SX126x datasheet at https://www.semtech.com/products/wireless-rf/lora-connect/sx1262 that gives more details about each parameter.
 
 Reading / Writing
 -----------------
@@ -58,7 +58,7 @@ It takes the following parameters:
 * ``-p`` sets the power in dBm. The range is board depended. Also PA setting depended.
 * ``-t`` perform transmit. Transmit the following bytes.
 * ``-r`` perform receive. Receives and print.
-* ``-x`` perform transmit and receive. Transmits following bytes and attempts to receives immidiately. To be used with ``-e`` echo
+* ``-x`` perform transmit and receive. Transmits following bytes and attempts to receives immediately. To be used with ``-e`` echo
 * ``-e`` perform echo. Listen and repeat.
 
 .. figure:: command_run0.jpg

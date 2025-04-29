@@ -736,7 +736,7 @@ Executing
 ---------
 
 The ltdc is initialized during boot up.  Interaction with NSH is via the serial
-console at 115200 8N1 baud.  From the nsh comandline execute the fb example::
+console at 115200 8N1 baud.  From the nsh commandline execute the fb example::
 
   nsh> fb
 

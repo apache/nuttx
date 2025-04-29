@@ -6,7 +6,7 @@ The ABNT CODI is an old energy meter standard used in Brazil.
 
 This code interprets the end user serial output existent in the energy meter.
 That output externalizes its data blinking an LED as a serial protocol at the
-baudrate of ``110 BPS`` and uses ``8`` octects:
+baudrate of ``110 BPS`` and uses ``8`` octets:
 
 =======   =======   =================================================================
 Octet     Bits      Description
@@ -27,5 +27,5 @@ Octet     Bits      Description
 ``006``   ``0-7``   Number of pulses for reactive energy of cur dem interv (``LSB``)
 ``007``   ``0-6``   Number of pulses for reactive energy of cur dem interv (``MSB``)
           ``7``     Not used
-``008``   ``0-7``   Inverted bits of _xor_ from previous octects
+``008``   ``0-7``   Inverted bits of _xor_ from previous octets
 =======   =======   =================================================================

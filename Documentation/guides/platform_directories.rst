@@ -194,7 +194,7 @@ Above I said that all of the devices drivers for the board-specific
 resources should go in your ``configs/<board>/src`` directory. However 
 if your board is loaded with standard external parts that require 
 device drivers – such as an lcd, a touchscreen, serial FLASH, 
-accelerometers, etc. – then you will want to re-use or implement 
+accelerometers, etc. – then you will want to reuse or implement
 standard drivers for these parts that can be shared by different 
 boards. In that case the ``drivers/`` directory is the correct place 
 for those implementations. Header files associated with these 

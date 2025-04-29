@@ -639,7 +639,7 @@ without sockets (CONFIG_NSOCKET_DESCRIPTORS == 0). That is not the
 case; if the network is enabled, sockets must be provided. From
 Gregory Nutt.
 - Networking: The value ERROR should never be returned from internal
-OS functions. That is reserved for returning values to appliations
+OS functions. That is reserved for returning values to applications
 with the errno value set. Within the OS, errors are returned with
 a negated errno value ALWAYS. From Gregory Nutt.
 - Networking: The struct in_addr doesn't have the member sin_addr.
@@ -1021,7 +1021,7 @@ Gregory Nutt.
 - tools/nxstyle.c: Was confusing hex constants with strings staring
 with 'x'. Added logic to complain about hex constants containing
 upper case characters. From Gregory Nutt.
-- tools/nxstyle.c: Fix logic error that prevent detecion of '/' and
+- tools/nxstyle.c: Fix logic error that prevent detection of '/' and
 '/=' as operators. net/: Minor updates resulting from testing
 tools/nxstyle. From Gregory Nutt.
 

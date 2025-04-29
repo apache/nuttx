@@ -54,7 +54,7 @@ NOTE:  See the toolchain issues above -- you may not want to waste your time.
 
      Check out the buildroot module. GIT checkout instructions:
 
-        git clone hhttps://patacongo@bitbucket.org/nuttx/buildroot.git buildroot
+        git clone https://patacongo@bitbucket.org/nuttx/buildroot.git buildroot
 
      Make the archive directory:
 

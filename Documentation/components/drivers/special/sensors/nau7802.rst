@@ -129,7 +129,7 @@ A workaround would be to do a manual calibration by placing a smaller known weig
 
     imu = orb_subscribe(imu_meta);
     if (imu < 0) {
-        fprintf(stderr, "Could not subsribe to %s: %d\n", name, errno);
+        fprintf(stderr, "Could not subscribe to %s: %d\n", name, errno);
         return EXIT_FAILURE;
     }
 
@@ -156,7 +156,7 @@ A workaround would be to do a manual calibration by placing a smaller known weig
     }
     printf("Zero point: %ld\n", zero_point);
 
-    printf("Place weigth on the sensor... you have 5 seconds from when you see this message\n");
+    printf("Place weight on the sensor... you have 5 seconds from when you see this message\n");
     usleep(5000000);
     printf("Starting gain calibration\n");
 

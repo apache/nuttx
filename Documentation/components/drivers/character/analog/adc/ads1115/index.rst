@@ -106,7 +106,7 @@ Configuration
    * - CONFIG_ADC_ADS1115_PGA
      - Gain of the ADS1115
    * - CONFIG_ADC_ADS1115_CONTINOUS
-     - Continous mode of the ADS1115
+     - Continuous mode of the ADS1115
    * - CONFIG_ADC_ADS1115_DR
      - Data rate of the ADS1115
    * - CONFIG_ADC_ADS1115_COMP_MODE
@@ -197,7 +197,7 @@ be of type ads1115_pga_e, which corresponds to the gain seen above.
 
 .. c:macro:: ANIOC_ADS1115_SET_MODE
 
-This command changes the ADS1115 to operate in continous or single-shot mode. 
+This command changes the ADS1115 to operate in continuous or single-shot mode.
 
 .. c:macro:: ANIOC_ADS1115_SET_DR
 

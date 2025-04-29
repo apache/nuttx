@@ -130,7 +130,7 @@ When we switch back to this thread, or course, it will appear as another return 
 
 The threading is a little mind-bending.  The signal handler needs to run in the context on the main thread.  The main thread is actually using the allocation NuttX stack and is executed the NuttX code.  When the signal handler executes, it should execute on a stack frame added to the stack of the currently executing NuttX task.
 
-When ``up_longjmp()`` is executing, operation will continue under the main thread, but the context including the stack are different for the new NuttX thread.  When the context finally switches back to this thread, it will appear as an appear return from ``up_setjmp()`` with a non-zero return value.  In that case, the signal handler will just return and the normal execution of the pre-empted NuttX task will resume.
+When ``up_longjmp()`` is executing, operation will continue under the main thread, but the context including the stack are different for the new NuttX thread.  When the context finally switches back to this thread, it will appear as an appear return from ``up_setjmp()`` with a non-zero return value.  In that case, the signal handler will just return and the normal execution of the preempted NuttX task will resume.
 
 **Issues**.  My only real technical questions involve signal masking.  When the ``SIGUSER`` signal handler executes, the ``SIGUSER`` interrupt will be masked.  That would prevent any further context switches until the signal handler returns.  Can we simply *unmask* ``SIGUSER`` signal to get more context switches?  I would need to experiment to know for sure.
 
@@ -140,7 +140,7 @@ Supported Devices
 Serial Console
 --------------
 
-The simulation's serial console is provided by wrapping host *stdin* and *stdout* so that it appears to be ``/dev/console``.  Serial data from the host *stdin* is sampled in the IDLE loop.  If serial data is available, the IDLE loop will *post* simulated UART activity.  The fidelity of this simulation could be improved with simulated interrupts when UART data is avaiable.
+The simulation's serial console is provided by wrapping host *stdin* and *stdout* so that it appears to be ``/dev/console``.  Serial data from the host *stdin* is sampled in the IDLE loop.  If serial data is available, the IDLE loop will *post* simulated UART activity.  The fidelity of this simulation could be improved with simulated interrupts when UART data is available.
 
 Host File System Access
 -----------------------

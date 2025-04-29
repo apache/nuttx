@@ -160,7 +160,7 @@ and the system is very busy, the a pthread may be blocked at
 a critical point when trying to exit. Blocking at this critical
 point would cause crashes. All entire task/thread exit logic
 paths were reviewed and failsafe mechanisms were put in place
-to assure that exitting tasks never block after task teardown
+to assure that exiting tasks never block after task teardown
 has been started.
 
 * ARMv6-M:

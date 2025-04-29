@@ -13,14 +13,14 @@ Supported features:
 * frame reception and filtering
 * immediate ACK (incoming and outgoing)
 * promiscuous mode
-* delayed transmision
+* delayed transmission
 * radio events trace
 * setting pending bit for all incoming Data Request frames
 * un-slotted CSMA-CA
 
-Work in progres features (some logic is present, but they require more work):
-    
-* beacon transmision (periodic transmition works, but requires verification)
+Work in progress features (some logic is present, but they require more work):
+
+* beacon transmission (periodic transmission works, but requires verification)
 * slotted CSMA-CA
 * GTS
 

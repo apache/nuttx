@@ -132,9 +132,9 @@ the following output is expected::
     cap_main: Hardware initialized. Opening the capture device: /dev/capture0
     cap_main: Number of samples: 0
     pwm duty cycle: 50 %
-    pwm frequence: 50 Hz
+    pwm frequency: 50 Hz
     pwm duty cycle: 50 %
-    pwm frequence: 50 Hz
+    pwm frequency: 50 Hz
 
 coremark
 --------
@@ -295,7 +295,7 @@ To test it, just execute the ``pwm`` application::
 qencoder
 ---
 
-This configuration demostrates the use of Quadrature Encoder connected to pins
+This configuration demonstrates the use of Quadrature Encoder connected to pins
 GPIO10 and GPIO11. You can start measurement of pulses using the following
 command (by default, it will open ``\dev\qe0`` device and print 20 samples
 using 1 second delay)::

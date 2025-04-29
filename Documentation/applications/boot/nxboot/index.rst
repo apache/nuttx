@@ -39,7 +39,7 @@ Extended headers are currently not supported, but the header already has
 a reserved space for a pointer to it.
 
 The image compatible with nxboot bootloader can be uploaded both directly
-to the primary area via physical programer as STlink or JTAG and to the
+to the primary area via physical programmer as STlink or JTAG and to the
 update partition via some external application (over Ethernet, USB, CAN, etc.).
 The update and recovery slots can be located in the the primary flash as
 well, but this halts the program execution during write operations, so it is
@@ -65,7 +65,7 @@ file descriptor. This is a recommended approach as it avoids possible mistakes.
 Hardware Requirements
 ---------------------
 
-As mentioned above, the bootlaoder utilizes three partitions with the
+As mentioned above, the bootloader utilizes three partitions with the
 first one typically located in program flash.
 
 The bootloader itself requires the minimal knowledge about characteristics
@@ -131,7 +131,7 @@ Following configuration options are available:
 Image Creation
 --------------
 
-The image intended to be booted by nxboot bootlaoder must have prepended header
+The image intended to be booted by nxboot bootloader must have prepended header
 to be recognized and worked with correctly. A Python script ``nximage.py``
 located in ``apps/boot/nxboot/tools`` directory can be used to generate
 nxboot compatible image.

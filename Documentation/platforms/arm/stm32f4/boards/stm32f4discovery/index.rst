@@ -975,7 +975,7 @@ demonstrating PCM audio using the CS43L22 stereo DAC/amplifier on board
 the STM32F4 Discovery and the STM32 I2S DMA interface.  It uses the
 file player at apps/system/nxplayer.  The serial console is on USART2.
 
-The original CS43L22 and STM32 I2S drivers were contribued by Taras
+The original CS43L22 and STM32 I2S drivers were contributed by Taras
 Drozdovsky in May of 2017.  The audio configuration was contributed by
 Alan Carvalho de Assis and derives, in part, from the work of Taras at
 https://github.com/tdrozdovskiy/CS43L22-Audio-driver.

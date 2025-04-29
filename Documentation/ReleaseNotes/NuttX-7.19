@@ -303,7 +303,7 @@ it. From Alan Carvalho de Assis.
 
 * Applications: apps/system:
 
-- apps/system/sched_note: Extend to include additions to instumentation
+- apps/system/sched_note: Extend to include additions to instrumentation
 for SMP.
 - apps/system/sched_note: Add support for spinlock notes.
 - apps/system/sched_note: Add support for new scheduler instrumentation.

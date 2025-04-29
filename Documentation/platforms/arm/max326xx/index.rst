@@ -2,7 +2,7 @@
 Maxim Integrated MAX32660
 =========================
 
-Architectural upport for the MAX32660 was added (along with partial
+Architectural support for the MAX32660 was added (along with partial
 support for other members of the MAX326xx family) in NuttX 7.28.
 
 **MAX32660-EVSYS**. Basic support for the Maxim Integrated MAC3X660

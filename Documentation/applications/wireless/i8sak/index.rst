@@ -48,7 +48,7 @@ This will tell the MAC layer that it should now act as a PAN coordinator using
 PAN ID CD:AB. For now, this function assumes that we are operating a non-beacon
 enabled PAN, since, as of this writing, beacon-enabled networks are unfinished.
 
-Configure PAN coordinator short address and EP short addres::
+Configure PAN coordinator short address and EP short address::
 
   i8 set saddr 0A:00
   i8 set ep_saddr 0B:00

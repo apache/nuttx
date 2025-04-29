@@ -6,7 +6,7 @@ DAC Drivers
    to work with DAtC drivers are provided in this header file. This
    header file includes:
 
-   #. Structures and inerface descriptions needed to develop a
+   #. Structures and interface descriptions needed to develop a
       low-level, architecture-specific, DAC driver.
    #. To register the DAC driver with a common DAC character
       driver.

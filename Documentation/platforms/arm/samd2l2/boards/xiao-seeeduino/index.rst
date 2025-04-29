@@ -124,7 +124,7 @@ can choose from one of the following:
    .. todo::
       The ``bossac`` utility doesn't actually work for programming in my testing
       yet. It is what the Arduino IDE uses but I haven't managed to get the
-      commmand line working. Using the commands listed above does actually
+      command line working. Using the commands listed above does actually
       detect the board but the programming itself fails with "Flash command
       failed". This needs more debugging.
 

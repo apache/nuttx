@@ -1740,7 +1740,7 @@ Configuration sub-directories
          nuttx.hex         - The pass2 Intel HEX file (selected in defconfig)
          System.map        - Symbols in the kernel-space ELF file
 
-       The J-Link programmer will except files in .hex, .mot, .srec, and .bin
+       The J-Link programmer will accept files in .hex, .mot, .srec, and .bin
        formats.
 
     2. Combining .hex files.  If you plan to use the .hex files with your
@@ -2016,7 +2016,7 @@ Configuration sub-directories
          CONFIG_SAMV7_XDMAC=y             : XDMAC support
 
     6. The appx/examples/nxlines is enabled as a built-in application.
-       This is a test that displays some simple graphis and can be
+       This is a test that displays some simple graphics and can be
        executed from the NSH command line like:
 
          nsh> nxlines
@@ -2096,7 +2096,7 @@ Configuration sub-directories
        Application Configuration:
          CONFIG_NSH_BUILTIN_APPS=y  : Enable starting apps from NSH command line
 
-    4. The network initialization thread and the NSH network montior are
+    4. The network initialization thread and the NSH network monitor are
        enabled in this configuration. As a result, networking initialization
        is performed asynchronously with NSH bring-up.  For more information,
        see the paragraphs above entitled "Network Initialization Thread" and
@@ -2284,7 +2284,7 @@ Configuration sub-directories
          NOTES:
          o An environment variable like $PATH may be used for any argument.
          o Arguments are "sticky".  For example, once the I2C address is
-           specified, that address will be re-used until it is changed.
+           specified, that address will be reused until it is changed.
 
          WARNING:
          o The I2C dev command may have bad side effects on your I2C devices.

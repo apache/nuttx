@@ -8,7 +8,7 @@ This guide explains "How to port NuttX".
 At this guide, the scope of porting is adding a new SoC or board directory,
 which can be built and has a working example that boots to the NuttShell (NSH).
 
-The goal of porting is to comfirm the booting NuttShell(NSH), the pass of "ostest"
+The goal of porting is to confirm the booting NuttShell(NSH), the pass of "ostest"
 and the timer.
 
 Porting a new SoC and board to NuttX requires modifications on arch,
@@ -37,7 +37,7 @@ Porting procedure
 =================
 
 At first, you have to read and execute :doc:`/quickstart/install` and :doc:`/quickstart/compiling_make`.
-After that, try follwoing procedure.
+After that, try following procedure.
 
 +------+---------------+--------------------------------------------------------------------+
 | Step | Process       | Comment                                                            |

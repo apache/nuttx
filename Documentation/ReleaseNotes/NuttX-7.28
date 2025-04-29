@@ -1056,7 +1056,7 @@ none).
 at a time by calling the vi_putch() function, causing slow
 performance, especially in telnet or USBCDC sessions where there is
 a lot of overhead per packet. Fixed by calling vi_write() instead
-with a block of characters with breaks as needed for TAB exansion.
+with a block of characters with breaks as needed for TAB expansion.
 12. The forward delete 'x' operation allowed deletion through '\n'
 characters causing lines to be joined. This is different from
 standard vi where 'x' at the end of a line performs a delete

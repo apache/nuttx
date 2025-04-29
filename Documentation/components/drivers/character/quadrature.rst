@@ -87,13 +87,13 @@ pointer to ``qe_index_s`` structure.
       int32_t qenc_pos;
       /* Index last position */
       int32_t indx_pos;
-      /* Number of index occurances */
+      /* Number of index occurrences */
       int16_t indx_cnt;
    };
 
 The pointer to this structure is used as an argument to ``QEIOC_GETINDEX``
 ioctl command. It gets the current encoder position, the last position of
-index and the number of index occurances.
+index and the number of index occurrences.
 
 Application Example
 ~~~~~~~~~~~~~~~~~~~

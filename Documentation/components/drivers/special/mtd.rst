@@ -196,7 +196,7 @@ I am currently using nand with a 128KB erase block size and 2K page size
 so each write can cause a 256KB data transfer!
 
 NOTE that there is some caching logic within FAT and FTL so that this
-cached erase block can be re-used if possible and writes will be
+cached erase block can be reused if possible and writes will be
 deferred as long as possible.
 
 SMART FS
@@ -216,5 +216,5 @@ perform bad block detection and sparing so that FAT works transparently
 on top of the NAND.
 
 Another, less general, option would be support bad blocks within FAT.
-Such a solution migh be possible for SLC NAND, but would not be
+Such a solution might be possible for SLC NAND, but would not be
 sufficiently general for all NAND types.

@@ -27,9 +27,9 @@ Sched
 * [#12553](https://github.com/apache/nuttx/pull/12553) sched/tcb: amend pull/12320
 MM
 * [#12550](https://github.com/apache/nuttx/pull/12550) mm: add mm_initialize_pool, make pool more flexible
-* [#12556](https://github.com/apache/nuttx/pull/12556) mm: mm_threshold perfer from init
+* [#12556](https://github.com/apache/nuttx/pull/12556) mm: mm_threshold prefer from init
 * [#12501](https://github.com/apache/nuttx/pull/12501) mm/iob: Simplify IOB alloc/free logic
-* [#12923](https://github.com/apache/nuttx/pull/12923) mm/map/vm_region.c: Fix usage of void* arithmetics
+* [#12923](https://github.com/apache/nuttx/pull/12923) mm/map/vm_region.c: Fix usage of void* arithmetic
 * [#12946](https://github.com/apache/nuttx/pull/12946) mm/mempool: rename the mempool_alloc and mempool_free function
 * [#12659](https://github.com/apache/nuttx/pull/12659) mm_ubsan: add dummy to bypass runtime actions
 * [#12646](https://github.com/apache/nuttx/pull/12646) mm_ubsan: add implement for dynamic_type_cache_miss
@@ -113,7 +113,7 @@ New Features
 * [#12910](https://github.com/apache/nuttx/pull/12910) [cmake] add_application supports only registration but not compilation
 * [#12964](https://github.com/apache/nuttx/pull/12964) [cmake] split the archive process to avoid parameter too long problems
 * [#13019](https://github.com/apache/nuttx/pull/13019) [cmake] add nuttx_post and app_context inter targets for timing control
-* [#12908](https://github.com/apache/nuttx/pull/12908) [Win32 sim] enable win32 native platfrom sim compilation by CMake fix compilation error
+* [#12908](https://github.com/apache/nuttx/pull/12908) [Win32 sim] enable win32 native platform sim compilation by CMake fix compilation error
 * [#12900](https://github.com/apache/nuttx/pull/12900) arch/sim/src/cmake/Toolchain.cmake: macOS fix unknown options: --gc-sections
 * [#12856](https://github.com/apache/nuttx/pull/12856) build: Fix libc/pwd CMakeLists.txt
 * [#13347](https://github.com/apache/nuttx/pull/13347) build: fix memory manager compile options for CMake
@@ -134,7 +134,7 @@ New Features
 * [#12608](https://github.com/apache/nuttx/pull/12608) cmake/add_library: enable library install by default
 * [#12714](https://github.com/apache/nuttx/pull/12714) cmake/boards: fix build break on custom board
 * [#13085](https://github.com/apache/nuttx/pull/13085) CMakeLists.txt: warning D9002 on Windows + msvc
-* [#13253](https://github.com/apache/nuttx/pull/13253) cmake/nuttx_kconfig.cmake: fixed the correct .config path in the buid folder
+* [#13253](https://github.com/apache/nuttx/pull/13253) cmake/nuttx_kconfig.cmake: fixed the correct .config path in the build folder
 * [#13276](https://github.com/apache/nuttx/pull/13276) cmake/tricore: filter out nostdlib in linker phase to avoid build break
 * [#13499](https://github.com/apache/nuttx/pull/13499) libc: add missing preadv/pwritev in CMakeLists.txt
 * [#12700](https://github.com/apache/nuttx/pull/12700) riscv/cmake: fix Toolchain.cmake
@@ -161,7 +161,7 @@ unsorted
 * [#13200](https://github.com/apache/nuttx/pull/13200) arch: cxd56xx: Add logic for i2c reset
 * [#13496](https://github.com/apache/nuttx/pull/13496) arch: cxd56xx: Fix issue by update of inode reference
 * [#13201](https://github.com/apache/nuttx/pull/13201) arch: cxd56xx: Fix SCU sensor data format
-* [#12962](https://github.com/apache/nuttx/pull/12962) arch: inline this_task to improve performence
+* [#12962](https://github.com/apache/nuttx/pull/12962) arch: inline this_task to improve performance
 * [#13270](https://github.com/apache/nuttx/pull/13270) arch: remove unused up_cpu_pausereq waiting
 * [#13423](https://github.com/apache/nuttx/pull/13423) arch: use up_current_regs/up_set_current_regs replace CURRENT_REGS
 * [#13041](https://github.com/apache/nuttx/pull/13041) arch/EXTRA_LIBS: link all staging library.
@@ -468,7 +468,7 @@ Drivers Improvements
 * [#12914](https://github.com/apache/nuttx/pull/12914) usbdev: add USB cdcncm device driver
 * [#12745](https://github.com/apache/nuttx/pull/12745) usbdev: delete unsigned comparison with 0
 * [#13216](https://github.com/apache/nuttx/pull/13216) usbdev: extend the usb req len to unit32_t
-* [#13190](https://github.com/apache/nuttx/pull/13190) USB 3.0 device side suppor
+* [#13190](https://github.com/apache/nuttx/pull/13190) USB 3.0 device side support
 
 Board Support
 New Boards
@@ -495,7 +495,7 @@ Boards Improvements
 * [#12593](https://github.com/apache/nuttx/pull/12593) boards/stm32: DRV8825 driver
 * [#12673](https://github.com/apache/nuttx/pull/12673) boards/esp32[c3|c6|h2|s2|s3]: Ignore etctmp in common board
 * [#13124](https://github.com/apache/nuttx/pull/13124) boards/esp32s3_lan9250: deinitialize the ethernet device lan9250
-* [#12716](https://github.com/apache/nuttx/pull/12716) boards/esp32s3: Increse the default stack size for usbnsh
+* [#12716](https://github.com/apache/nuttx/pull/12716) boards/esp32s3: Increase the default stack size for usbnsh
 * [#12763](https://github.com/apache/nuttx/pull/12763) boards/imx93-evk: add sdimage cleanup
 * [#12876](https://github.com/apache/nuttx/pull/12876) boards/lm3s6965-ek: fix memory.ld for PROTECTED
 * [#12598](https://github.com/apache/nuttx/pull/12598) boards/MIMXRT1020-EVK: Fix board I2C code to adapt to last IMXRT I2C/pi…
@@ -535,7 +535,7 @@ FS Improvements
 * [#12863](https://github.com/apache/nuttx/pull/12863) Fix the location of tmpfs pwrite write and Fixed some code check warnings
 * [#13500](https://github.com/apache/nuttx/pull/13500) fs.h: fix a comment in file_operations
 * [#12532](https://github.com/apache/nuttx/pull/12532) fs: add backtrace to where file opens
-* [#13150](https://github.com/apache/nuttx/pull/13150) fs: add fs_heap, support shm/tmpfs/pseudofile with indepent heap
+* [#13150](https://github.com/apache/nuttx/pull/13150) fs: add fs_heap, support shm/tmpfs/pseudofile with independent heap
 * [#12587](https://github.com/apache/nuttx/pull/12587) Fs: backtrace tweak
 * [#13512](https://github.com/apache/nuttx/pull/13512) fs: Dump the list of files when the file description runs out
 * [#13194](https://github.com/apache/nuttx/pull/13194) fs: nfs: Fix nfsmount error
@@ -584,7 +584,7 @@ Improvements
 * [#13385](https://github.com/apache/nuttx/pull/13385) Fix the bug that netlink receive wait does not hang up
 * [#13053](https://github.com/apache/nuttx/pull/13053) icmp:add net_lock to protect icmp connection
 * [#13336](https://github.com/apache/nuttx/pull/13336) local_socket: add SO_SNDBUF & SO_RCVBUF support
-* [#13045](https://github.com/apache/nuttx/pull/13045) localsocket improvment
+* [#13045](https://github.com/apache/nuttx/pull/13045) localsocket improvement
 * [#12639](https://github.com/apache/nuttx/pull/12639) net: Enable ICMP by default if IPv4 is enabled
 * [#13028](https://github.com/apache/nuttx/pull/13028) net_chksum.c:mod process of generating sum to solve checksum error
 * [#12991](https://github.com/apache/nuttx/pull/12991) net/icmpv6/icmpv6_input.c: fix undefined build error
@@ -683,11 +683,11 @@ Improvements
 * [#13073](https://github.com/apache/nuttx/pull/13073) inode: call inode_release when close success
 * [#13198](https://github.com/apache/nuttx/pull/13198) Introduce new PCI framework
 * [#13442](https://github.com/apache/nuttx/pull/13442) input/ff: modify FF_MAX to support 64-bit machine
-* [#13387](https://github.com/apache/nuttx/pull/13387) ipfrag: fix warnig
+* [#13387](https://github.com/apache/nuttx/pull/13387) ipfrag: fix warning
 * [#13163](https://github.com/apache/nuttx/pull/13163) ipfrag: remove assert for actual product reasons
 * [#13012](https://github.com/apache/nuttx/pull/13012) irq: add [enter|leave]_critical_section_nonirq
 * [#13018](https://github.com/apache/nuttx/pull/13018) irq: add isr thread
-* [#13242](https://github.com/apache/nuttx/pull/13242) irq: dynaminc create g_irqmap
+* [#13242](https://github.com/apache/nuttx/pull/13242) irq: dynamic create g_irqmap
 * [#13256](https://github.com/apache/nuttx/pull/13256) irq: irq with the same priority share the same wqueue
 * [#12595](https://github.com/apache/nuttx/pull/12595) irq: remove g_cpu_nestcount in restore_critical_section
 * [#12935](https://github.com/apache/nuttx/pull/12935) irq: remove restore_critical_section in irq
@@ -727,7 +727,7 @@ Improvements
 * [#13072](https://github.com/apache/nuttx/pull/13072) pm: update document, add pm_idle interface for not-smp case
 * [#13279](https://github.com/apache/nuttx/pull/13279) poll: fix thread_cancel() caused poll used after free
 * [#13074](https://github.com/apache/nuttx/pull/13074) Private requirement for wapi
-* [#13168](https://github.com/apache/nuttx/pull/13168) protected build: userspace threads will unexpectly work in privileged mode after syscall
+* [#13168](https://github.com/apache/nuttx/pull/13168) protected build: userspace threads will unexpectedly work in privileged mode after syscall
 * [#13153](https://github.com/apache/nuttx/pull/13153) pty: use mutex to protect alloc minor
 * [#13295](https://github.com/apache/nuttx/pull/13295) psram_cache_init: remove cosmetic differences between PRO/APP
 * [#13438](https://github.com/apache/nuttx/pull/13438) ramlog bug fix
@@ -737,7 +737,7 @@ Improvements
 * [#13309](https://github.com/apache/nuttx/pull/13309) Restore ASSERT/VERIFY semantics
 * [#13485](https://github.com/apache/nuttx/pull/13485) Revert "irq: add [enter|leave]_critical_section_nonirq"
 * [#12607](https://github.com/apache/nuttx/pull/12607) Revert "irq: remove restore_critical_section in irq"
-* [#13432](https://github.com/apache/nuttx/pull/13432) Rpmsg VirtIO Transport support and releated patches
+* [#13432](https://github.com/apache/nuttx/pull/13432) Rpmsg VirtIO Transport support and related patches
 * [#13183](https://github.com/apache/nuttx/pull/13183) rpmsg_rtc:Update g_basetime from rpmsg.
 * [#13169](https://github.com/apache/nuttx/pull/13169) rpmsg.c: move onceinit judge logic to common part
 * [#13404](https://github.com/apache/nuttx/pull/13404) rpmsgblk: split multi_cmd only when it is too large to be placed into…
@@ -751,7 +751,7 @@ Improvements
 * [#12837](https://github.com/apache/nuttx/pull/12837) spinlock: add support of spin_trylock_irqsave()
 * [#12836](https://github.com/apache/nuttx/pull/12836) spinlock: inline no trace implement to remove duplicate logic
 * [#13272](https://github.com/apache/nuttx/pull/13272) spinlock: spin_initialize should add memory barrier
-* [#13457](https://github.com/apache/nuttx/pull/13457) stack recored bug fix
+* [#13457](https://github.com/apache/nuttx/pull/13457) stack recorded bug fix
 * [#13386](https://github.com/apache/nuttx/pull/13386) stream/syslograw: remove support for iob buffer in syslog
 * [#13511](https://github.com/apache/nuttx/pull/13511) Support msync
 * [#13196](https://github.com/apache/nuttx/pull/13196) support rss/arfs with device

@@ -159,12 +159,12 @@ using writeback cache.
 
 This also simplifies the sdmmc driver when the IDMA is in use. There
 is no need to mix IDMA and interrupt based transfers; instead, when
-making unaligned data tranfers, just make IDMA into an internal
+making unaligned data transfers, just make IDMA into an internal
 aligned buffer and then copy the data. This method also enables
 multiblock transfers, and transfers from/to data buffers which are not
 aligned on cache boundary.
 - PR-1042 STM32H7: Resolve multiple limitations and bugs with progmem
-especailly for partial memory writes
+especially for partial memory writes
 - PR-1045 STM32H7: This gives possibility to send arbitrary number of
 bytes from memory to peripheral using DMA also when using write-back
 cache
@@ -176,7 +176,7 @@ buffers to the cache line.
 could cause SDMMC and ETH to fail in some configurations
 - PR-1104 STM32H7: Use UUID for Ethernet MAC. This is inline with the
 behaviour of STM32F7
-- PR-1110 STM32H7: Use FDCANSEL to determin FDCAN clock source if
+- PR-1110 STM32H7: Use FDCANSEL to determine FDCAN clock source if
 possible - PR-1165 STM32H7: SPI transaction appears to be completed
 before the data has actually been flushed
 TX DMA completes before the data has been actually sent out from the
@@ -207,11 +207,11 @@ Byte transfer anomaly - PR-1130 imxrt: Resolve WFI issue by setting
 the low power mode to remain in run mode
 - PR-1197 cxd56: Fix locking issue in Spresense audio driver causes by
 using semaphore in DMA buffer handling code
-- PR-1221 Add INTx_C macro defintion
+- PR-1221 Add INTx_C macro definition
 
 * Driver Support:
 * Bug Fixes:
-- PR-1206 PR-1207 PR-1210 ioctl function should retun ENOTTY when the
+- PR-1206 PR-1207 PR-1210 ioctl function should return ENOTTY when the
 command is not recognized.
 
 * New Driver Support:
@@ -300,7 +300,7 @@ data since it must be on a 8 byte boundary
 - PR-1143 Report correct stats for proxied block and MTD drivers
 
 * Significant Improvements:
-- PR-793 Allow use of genromfs to geneate ROMFS
+- PR-793 Allow use of genromfs to generate ROMFS
 - PR-851 Upgrade littlefs to v2.2.1
 - PR-1154 FATFS: Do not rewrite the root directory if it has not been
 changed.

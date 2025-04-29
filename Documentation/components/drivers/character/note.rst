@@ -48,7 +48,7 @@ Notectl Device (``/dev/notectl``)
 
     .. c:macro:: NOTE_FILTER_MODE_FLAG_IRQ
 
-      Enable IRQ instrumentaiton
+      Enable IRQ instrumentation
 
   - ``cpuset`` : (SMP only) Monitor only CPUs in the bitset. Bit 0=CPU0, Bit1=CPU1, etc.
 

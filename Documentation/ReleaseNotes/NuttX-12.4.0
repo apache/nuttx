@@ -29,7 +29,7 @@ sched
 * [#11252](https://github.com/apache/nuttx/pull/11252) sched: sigaction: Expand si_user for non-kernel signals
 * [#10970](https://github.com/apache/nuttx/pull/10970) sched: smp call exit immediately when cpuset change to 0.
 * [#10861](https://github.com/apache/nuttx/pull/10861) sched: spinlock: Add spin_lock_init and spin_is_locked macro
-* [#11348](https://github.com/apache/nuttx/pull/11348) sched: Stack recored:Add maximum stack statistics when the task is running
+* [#11348](https://github.com/apache/nuttx/pull/11348) sched: Stack recorded:Add maximum stack statistics when the task is running
 * [#9163](https://github.com/apache/nuttx/pull/9163) sched: Stop the sched timer when possible to save the power in tickless mode
 * [#10934](https://github.com/apache/nuttx/pull/10934) sched: support smp function call
 * [#11032](https://github.com/apache/nuttx/pull/11032) sched: task: [posix]spawn: Simplify how spawn attributes are handled
@@ -74,7 +74,7 @@ libs
 * [#10992](https://github.com/apache/nuttx/pull/10992) libc: stdio: Change FILE buffer field from "unsigned char *" to "char *"
 * [#11063](https://github.com/apache/nuttx/pull/11063) libc: stdlib/lib_exit.c: fix multiple definition of __dso_handle and sethost.sh: add MSYS environmen for msys2
 * [#11447](https://github.com/apache/nuttx/pull/11447) libc: stream: add stream interface
-* [#11350](https://github.com/apache/nuttx/pull/11350) libc: Support gdbstub kernal debugging
+* [#11350](https://github.com/apache/nuttx/pull/11350) libc: Support gdbstub kernel debugging
 * [#11346](https://github.com/apache/nuttx/pull/11346) libc: Supports storing coredump into block devices
 * [#10862](https://github.com/apache/nuttx/pull/10862) libc: memfd: shm_unlink or unlink anonymous file
 * [#10891](https://github.com/apache/nuttx/pull/10891) libc: memfd: turn a runtime error into a linker error
@@ -238,7 +238,7 @@ sim
 * [#11381](https://github.com/apache/nuttx/pull/11381) sim_lcd: add open & close
 * [#11122](https://github.com/apache/nuttx/pull/11122) sim_netdriver: some sim defconfig have problems when using the network
 * [#11246](https://github.com/apache/nuttx/pull/11246) sim support 16bbp
-* [#11237](https://github.com/apache/nuttx/pull/11237) simwifi: Connect the wifi whose ssid contains the special charaters.
+* [#11237](https://github.com/apache/nuttx/pull/11237) simwifi: Connect the wifi whose ssid contains the special characters.
 * [#11235](https://github.com/apache/nuttx/pull/11235) simwifi: Escapes the special characters of ssid in the scan results.
 * [#11069](https://github.com/apache/nuttx/pull/11069) simwifi: Fix the error of the need length for scan bssinfo.
 * [#11112](https://github.com/apache/nuttx/pull/11112) simwifi: For scan results, parse and translate the Chinese ssid encoded by the wpa_cli.
@@ -331,7 +331,7 @@ Drivers Improvements
 * [#10890](https://github.com/apache/nuttx/pull/10890) syslog: ramlog: remove sched_[un]lock and rl_nwaiters
 * [#11186](https://github.com/apache/nuttx/pull/11186) timers: Rewrite adjtime() implementation to work for RTC and tickless kernel
 * [#11356](https://github.com/apache/nuttx/pull/11356) usbdev: Add callback for CONFIG_USBDEV_SOFINTERRUPT
-* [#11042](https://github.com/apache/nuttx/pull/11042) usbdev: config USBDEV_TRACE_INITIALIDSET when disbale USBDEV_TRACE
+* [#11042](https://github.com/apache/nuttx/pull/11042) usbdev: config USBDEV_TRACE_INITIALIDSET when disable USBDEV_TRACE
 * [#11161](https://github.com/apache/nuttx/pull/11161) usbdev: Solve some problems of USB hotplug
 * [#10985](https://github.com/apache/nuttx/pull/10985) usrsock: Make the field of usrsock_request native alignment
 * [#11103](https://github.com/apache/nuttx/pull/11103) usrsock: rpmsg_server: Keep msg order in recursive call
@@ -339,7 +339,7 @@ Drivers Improvements
 * [#10874](https://github.com/apache/nuttx/pull/10874) video: fb: Add fb_register_device
 * [#10812](https://github.com/apache/nuttx/pull/10812) video: goldfish: Remove the vsync residual code
 * [#11380](https://github.com/apache/nuttx/pull/11380) video: goldfish: optimize goldfish fb register
-* [#11249](https://github.com/apache/nuttx/pull/11249) video: video.c: modify set_buf call seqence in start_capture function.
+* [#11249](https://github.com/apache/nuttx/pull/11249) video: video.c: modify set_buf call sequence in start_capture function.
 * [#11224](https://github.com/apache/nuttx/pull/11224) video: wait when the vsync queue is full in FBIO_WAITFORVSYNC
 * [#11382](https://github.com/apache/nuttx/pull/11382) virtio: Support for setting MAC addresses of the virtio-net interfaces
 * [#11385](https://github.com/apache/nuttx/pull/11385) virtio: virtio-gpu: convert virito-gpu fb_register to virtio_gpu_fb_register
@@ -384,7 +384,7 @@ arm
 * [#11117](https://github.com/apache/nuttx/pull/11117) stm32: b-g431b-esc1: don't use CONFIG_STM32_USE_LEGACY_PINMAP=y
 * [#11306](https://github.com/apache/nuttx/pull/11306) stm32h7: fix config conflict
 * [#11214](https://github.com/apache/nuttx/pull/11214) stm32h7: linum-stm32h753bi: Add support to RTC and alarm
-* [#11167](https://github.com/apache/nuttx/pull/11167) stm32h7: linum-stm32h753bi: Added suport to userlerds library.
+* [#11167](https://github.com/apache/nuttx/pull/11167) stm32h7: linum-stm32h753bi: Added support to userled library.
 * [#11265](https://github.com/apache/nuttx/pull/11265) stm32f4: stm32f401rc-rs485: Add sdcard support
 * [#11217](https://github.com/apache/nuttx/pull/11217) stm32f4: stm32f401rc-rs485: Add buttons support
 * [#11169](https://github.com/apache/nuttx/pull/11169) stm32f4: stm32f401rc-rs485: add support to userleds
@@ -400,7 +400,7 @@ sim
 * [#11290](https://github.com/apache/nuttx/pull/11290) nxscope: remove CONFIG_ALLSYMS=y
 xtensa
 * [#11142](https://github.com/apache/nuttx/pull/11142) esp32: Add LVGL defconfig
-* [#11229](https://github.com/apache/nuttx/pull/11229) esp32: Add support enconder to ESP32-2432S028
+* [#11229](https://github.com/apache/nuttx/pull/11229) esp32: Add support encoder to ESP32-2432S028
 * [#10961](https://github.com/apache/nuttx/pull/10961) esp32: Add wifishare board config and documentation
 * [#10996](https://github.com/apache/nuttx/pull/10996) esp32: Rename Shift game to Brickmatch and add an board example to esp32-devkitc
 * [#11417](https://github.com/apache/nuttx/pull/11417) esp32<|s2|s3>_board_spiflash: Fix error message about SmartFS init

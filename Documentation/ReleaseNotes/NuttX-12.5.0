@@ -48,7 +48,7 @@ misc
 * [#11989](https://github.com/apache/nuttx/pull/11989) audio: libsrc
 * [#11464](https://github.com/apache/nuttx/pull/11464) binfmt/libelf: adjust log levels of a few binfmt logs
 * [#11904](https://github.com/apache/nuttx/pull/11904) binfmt/loadmodule: replace kmm_free() to lib_free()
-* [#11862](https://github.com/apache/nuttx/pull/11862) binfmt/task/member: remove invaild membership reverse
+* [#11862](https://github.com/apache/nuttx/pull/11862) binfmt/task/member: remove invalid membership reverse
 * [#11733](https://github.com/apache/nuttx/pull/11733) include/rpmsg/rpmsg.h: remove temporary define
 * [#11640](https://github.com/apache/nuttx/pull/11640) include/threads.h: Fix typo in mtx_timedlock
 * [#11466](https://github.com/apache/nuttx/pull/11466) include/types.h: make 64-bit time_t back to unsigned
@@ -305,7 +305,7 @@ Drivers With Improvements
 * [#11719](https://github.com/apache/nuttx/pull/11719) drivers/rptun: should initialize the vring da when da == 0 || da == -1
 * [#11874](https://github.com/apache/nuttx/pull/11874) drivers/sensors: add uorb support for lsm9ds1
 * [#11628](https://github.com/apache/nuttx/pull/11628) drivers/sensors: delete warning about argument type in bmi160
-* [#11792](https://github.com/apache/nuttx/pull/11792) drivers/sensors: Remove duplicated defnitions from bmi160.h
+* [#11792](https://github.com/apache/nuttx/pull/11792) drivers/sensors: Remove duplicated definitions from bmi160.h
 * [#11789](https://github.com/apache/nuttx/pull/11789) drivers/sensors/bmi160: fix compilation errors
 * [#11923](https://github.com/apache/nuttx/pull/11923) drivers/sensors/bmi270: fix accel and gyro data position
 * [#11525](https://github.com/apache/nuttx/pull/11525) drivers/serial/pl011: add support of uart0/2/3 port
@@ -401,7 +401,7 @@ xtrensa
 * [#11844](https://github.com/apache/nuttx/pull/11844) boards/xtensa/esp32c6: Remove sotest config for esp32c6
 File System
 improvements
-* [#11841](https://github.com/apache/nuttx/pull/11841) fs: enhance file_allocate_from_tcb() mulit-threads saftey & remove memcpy when close the fd
+* [#11841](https://github.com/apache/nuttx/pull/11841) fs: enhance file_allocate_from_tcb() mulit-threads safety & remove memcpy when close the fd
 * [#11896](https://github.com/apache/nuttx/pull/11896) fs: revise comments and harden nx_mount logic
 * [#11892](https://github.com/apache/nuttx/pull/11892) fs/driver: using nx_unlink to call unlink ops to release some resource
 * [#11723](https://github.com/apache/nuttx/pull/11723) fs/fat: fs_fat32: fix default return value of fat_ioctl().

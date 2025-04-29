@@ -95,7 +95,7 @@ usbnsh
 
 Configures the NuttShell (nsh) located at apps/examples/nsh. This configuration enables a serial console over USB.
 
-After flasing and reboot your board you should see in your dmesg logs::
+After flashing and reboot your board you should see in your dmesg logs::
 
     $ sudo dmesg | tail
     [ 3315.687219] usb 3-1.1.1: new full-speed USB device number 10 using xhci_hcd

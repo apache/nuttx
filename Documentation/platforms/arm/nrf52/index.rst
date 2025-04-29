@@ -150,7 +150,7 @@ and TASKs to trigger, both for individual and grouped channels.
 When using channels, you should consider that some peripherals may use PPI internally
 and some may be unavailable for further use. As a helper, if debug assertions are
 enabled, calls to PPI API will check for a channel to actually be disabled when being
-enabled and viceversa. This may help catch collisions in PPI use.
+enabled and vice-versa. This may help catch collisions in PPI use.
 
 PWM
 ---

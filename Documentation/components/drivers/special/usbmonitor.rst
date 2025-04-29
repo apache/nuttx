@@ -14,9 +14,9 @@ Linux
     sudo apt update
     sudo apt install wireshark
 
-2. (Optional) Configurate Wireshark
+2. (Optional) Configure Wireshark
 
-  Wireshark offical documentation: https://wiki.wireshark.org/CaptureSetup/USB
+  Wireshark official documentation: https://wiki.wireshark.org/CaptureSetup/USB
 
 3. Load the usbmon kernel module and run Wireshark::
 

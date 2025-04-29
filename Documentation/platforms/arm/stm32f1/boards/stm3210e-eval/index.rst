@@ -8,8 +8,8 @@ STMicro STM3210E-EVAL development board.
 DFU and JTAG
 ============
 
-Enbling Support for the DFU Bootloader
---------------------------------------
+Enabling Support for the DFU Bootloader
+---------------------------------------
 
 The linker files in these projects can be configured to indicate that you
 will be loading code using STMicro built-in USB Device Firmware Upgrade (DFU)
@@ -481,7 +481,7 @@ STM3210E-EVAL-specific Configuration Options
    CONFIG_STM3210E_LCD_BACKLIGHT - Define to support a backlight.
    CONFIG_STM3210E_LCD_PWM - If CONFIG_STM32_TIM1 is also defined, then an
    adjustable backlight will be provided using timer 1 to generate
-   various pulse widthes.  The granularity of the settings is
+   various pulse widths.  The granularity of the settings is
    determined by CONFIG_LCD_MAXPOWER.  If CONFIG_STM3210E_LCD_PWM (or
    CONFIG_STM32_TIM1) is not defined, then a simple on/off backlight
    is provided.

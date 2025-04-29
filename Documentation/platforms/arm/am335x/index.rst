@@ -11,7 +11,7 @@ AM335x are supported by NuttX:
    CPU running 1GHz.
 
    -  **NuttX-7.28**. This initial port in NuttX-7.28 is very sparse.
-      While not ready for prodcution use, the Beaglebone Black port is
+      While not ready for production use, the Beaglebone Black port is
       functional and will be the basis for a more extensive development.
       Additional work in progress to extend this port and more capable
       is anticipated in NuttX-7.29.

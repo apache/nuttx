@@ -33,7 +33,7 @@ Logic Design Description
 
 When an application is being loaded ``up_addrenv_create`` is called to create
 the process's address environment. This includes mapping the commonly used
-``text``, ``data`` and ``heap`` sections withing the virtual memory space.
+``text``, ``data`` and ``heap`` sections within the virtual memory space.
 Without on-demand paging, the physical memory is then allocated and mapped
 accordingly, before the process is started. When on-demand paging is enabled,
 usually only one single page for each section is allocated and mapped.

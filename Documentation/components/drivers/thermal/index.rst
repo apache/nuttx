@@ -74,7 +74,7 @@ Device Driver
         .raising = true,
       };
 
-#. Testing / Debuging
+#. Testing / Debugging
     - Disable Zone Device: ``echo 0 > /proc/thermal/cpu-thermal``
     - Get binding info::
 

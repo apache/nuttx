@@ -224,7 +224,7 @@ apps/examples/wlan: Remove non-functional example.
 apps/examples/ostest: Added a test of vfork(). Extend signal
 handler test to catch death-of-child signals (SIGCHLD). Add a
 test for waitpid(), waitid(), and wait().
-apps/exampes/posix_spawn: Added a test of posix_spawn().
+apps/examples/posix_spawn: Added a test of posix_spawn().
 
 - NSH:
 
@@ -237,7 +237,7 @@ executed once when NSH starts; the .nshrc script will be executed
 for each session: Once for serial, once for each USB connection,
 once for each Telnet session.
 
-- Supports a new daemon that can be used to monitor USB trace outpout.
+- Supports a new daemon that can be used to monitor USB trace output.
 - Removed non-functional wlan example.
 
 Bugfixes (see the ChangeLog for details). Some of these are very important:

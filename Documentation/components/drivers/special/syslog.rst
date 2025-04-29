@@ -507,7 +507,7 @@ RAMLOG Configuration options
 
 Other miscellaneous settings
 
--  ``CONFIG_RAMLOG_CRLF``: Pre-pend a carriage return before every
+-  ``CONFIG_RAMLOG_CRLF``: Prepend a carriage return before every
    linefeed that goes into the RAM log.
 
 -  ``CONFIG_RAMLOG_NONBLOCKING``: Reading from the RAMLOG will

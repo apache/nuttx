@@ -49,7 +49,7 @@ loopback devices if they arein the configuration.
 - The simulation now runs under Cygwin64. Modern Cygwin X86_64
 machines follow the Microsoft ABI for parameter passing. The Linux
 System 5 ABI would not work on X86_64-based Cygwin machines. Newer
-Cygwin tool chains do nor pre-pend symbol names with the underscore
+Cygwin tool chains do nor prepend symbol names with the underscore
 character.
 
 * Atmel SAMA5Dx:

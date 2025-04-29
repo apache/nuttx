@@ -12,7 +12,7 @@ Status
 
 2017-03-21:   The XMC4500 Relax boots into NSH, provides the NSH prompt,
 and the LEDs are working.  But there is a problem with serial input.
-The most likely reason for this is there are no serial RX interripts.
+The most likely reason for this is there are no serial RX interrupts.
 
 Serial Console
 ==============

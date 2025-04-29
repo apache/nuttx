@@ -356,7 +356,7 @@ ARM/LPC-H3131-specific Configuration Options
 
     CONFIG_RAM_SIZE - For most ARM9 architectures, this describes the
       size of installed DRAM.  For the LPC313X, it is used only to
-      deterimine how to map the executable regions.  It is SDRAM size
+      determine how to map the executable regions.  It is SDRAM size
       only if you are executing out of the external SDRAM; or it could
       be NOR FLASH size, external SRAM size, or internal SRAM size.
 
@@ -466,7 +466,7 @@ Configurations
      converter.
 
   3. Unless otherwise stated, the configurations are setup for
-     Windows undery Cygwin.  This can, however, be easilty reconfigured.
+     Windows undery Cygwin.  This can, however, be easily reconfigured.
 
   4. All of these configurations use the Code Sourcery for Windows toolchain
      (unless stated otherwise in the description of the configuration).  That
