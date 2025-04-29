@@ -142,14 +142,29 @@ if MTD_PROGMEM
 
 endif #MTD_PROGMEM
 
+choice
+	prompt "Select MTD config solution"
+	default MTD_CONFIG_NONE
+
 config MTD_CONFIG
 	bool "Enable Dev Config (MTD based) device"
-	default n
 	---help---
 		Provides a /dev/config device for saving / restoring application
 		configuration data to a standard MTD device or partition.
 
-if MTD_CONFIG
+config MTD_CONFIG_NVS
+	bool "NVS"
+	---help---
+		NVS is a lightweight KV storage mechanism which supports classical
+		on-chip NorFlash, it implements basic KV write, read, and delete
+		functions, and supports power down protection.
+
+config MTD_CONFIG_NONE
+	bool "None MTD config"
+
+endchoice
+
+if !MTD_CONFIG_NONE
 
 config MTD_CONFIG_RAM_CONSOLIDATE
 	bool "Always use RAM consolidation method (work in progress)"
@@ -186,30 +201,22 @@ config MTD_CONFIG_NAME_LEN
 	---help---
 		Sets the maximum length of config item names.
 
-config MTD_CONFIG_FAIL_SAFE
-	bool "Enable Fail Safe MTD Config"
-	default n
-	---help---
-		Enable the new storage layout to support the resilient to power loss.
-		This replaces the drivers/mtd/mtd_config, which
-		is resilient to power loss.
-
 config MTD_CONFIG_BLOCKSIZE_MULTIPLE
 	int "Set NVS blocksize multiple"
 	default 1
-	depends on MTD_CONFIG_FAIL_SAFE
+	depends on MTD_CONFIG_NVS
 	---help---
 		The size of a multiple of blocksize compared to erasize
 
 config MTD_CONFIG_CACHE_SIZE
 	int "Non-volatile Storage lookup cache size"
 	default 0
-	depends on MTD_CONFIG_FAIL_SAFE
+	depends on MTD_CONFIG_NVS
 	help
 	  Number of entries in Non-volatile Storage lookup cache.
 	  It is recommended that it be a power of 2.
 
-endif # MTD_CONFIG
+endif
 
 comment "MTD Device Drivers"
 

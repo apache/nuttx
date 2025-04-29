@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/mtd/mtd_config_fs.c
+ * drivers/mtd/mtd_config_nvs.c
  *
  * SPDX-License-Identifier: Apache-2.0
  * SPDX-FileCopyrightText: 2018 Laczen

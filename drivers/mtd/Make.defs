@@ -31,8 +31,8 @@ ifeq ($(CONFIG_MTD),y)
 
 CSRCS += ftl.c
 
-ifeq ($(CONFIG_MTD_CONFIG_FAIL_SAFE),y)
-CSRCS += mtd_config_fs.c
+ifeq ($(CONFIG_MTD_CONFIG_NVS),y)
+CSRCS += mtd_config_nvs.c
 else ifeq ($(CONFIG_MTD_CONFIG),y)
 CSRCS += mtd_config.c
 endif
