@@ -25,6 +25,7 @@
  ****************************************************************************/
 
 #include <nuttx/drivers/drivers.h>
+#include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/memoryregion.h>
 #include <sys/param.h>
