@@ -66,7 +66,6 @@
  *
  ****************************************************************************/
 
-#if CONFIG_NET_SEND_BUFSIZE > 0
 static void pkt_sendbuffer_notify(FAR struct pkt_conn_s *conn)
 {
   int val = 0;
@@ -77,7 +76,6 @@ static void pkt_sendbuffer_notify(FAR struct pkt_conn_s *conn)
       nxsem_post(&conn->sndsem);
     }
 }
-#endif
 
 /****************************************************************************
  * Name: psock_send_eventhandler
@@ -175,9 +173,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
 
       flags &= ~PKT_POLL;
 
-#if CONFIG_NET_SEND_BUFSIZE > 0
       pkt_sendbuffer_notify(conn);
-#endif
     }
 
   return flags;

@@ -90,9 +90,8 @@ struct pkt_conn_s
   FAR struct devif_callback_s *sndcb;
 #  if CONFIG_NET_SEND_BUFSIZE > 0
   int32_t  sndbufs;               /* Maximum amount of bytes queued in send */
-  sem_t    sndsem;                /* Semaphore signals send completion */
 #  endif
-
+  sem_t    sndsem;                /* Semaphore signals send completion */
 #endif
 
   /* Read-ahead buffering.
