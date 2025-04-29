@@ -198,6 +198,27 @@ static int devmem_mmap(FAR struct file *filep,
 
 int devmem_register(void)
 {
-  return register_driver("/dev/mem", &g_devmem_fops,
-                         0600, (FAR void *)g_memory_region);
+  return devmem_register_region("/dev/mem", g_memory_region);
+}
+
+/****************************************************************************
+ * Name: devmem_register_region
+ *
+ * Description:
+ *   Create an MEM driver with customize region.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; A negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int devmem_register_region(FAR const char *path,
+                           FAR const struct memory_region_s *region)
+{
+  if (path == NULL || region == NULL)
+    {
+      return -EINVAL;
+    }
+
+  return register_driver(path, &g_devmem_fops, 0600, (FAR void *)region);
 }
