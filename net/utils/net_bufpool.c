@@ -98,6 +98,7 @@ FAR void *net_bufpool_timedalloc(FAR struct net_bufpool_s *pool,
                                  unsigned int timeout)
 {
   FAR struct net_bufnode_s *node;
+  FAR void *buf;
   int ret;
   int i;
 
@@ -121,6 +122,8 @@ FAR void *net_bufpool_timedalloc(FAR struct net_bufpool_s *pool,
       return NULL;
     }
 
+  nxrmutex_lock(&pool->lock);
+
   /* If we get here, then we didn't exceed maxalloc. */
 
   if (pool->dynalloc > 0 && sq_peek(&pool->freebuffers) == NULL)
@@ -128,7 +131,8 @@ FAR void *net_bufpool_timedalloc(FAR struct net_bufpool_s *pool,
       node = kmm_zalloc(pool->nodesize * pool->dynalloc);
       if (node == NULL)
         {
-          return NULL;
+          buf = NULL;
+          goto out;
         }
 
       /* Now initialize each connection structure */
@@ -141,7 +145,11 @@ FAR void *net_bufpool_timedalloc(FAR struct net_bufpool_s *pool,
         }
     }
 
-  return sq_remfirst(&pool->freebuffers);
+  buf = sq_remfirst(&pool->freebuffers);
+
+out:
+  nxrmutex_unlock(&pool->lock);
+  return buf;
 }
 
 /****************************************************************************
@@ -170,12 +178,16 @@ void net_bufpool_free(FAR struct net_bufpool_s *pool, FAR void *node)
     {
       FAR struct net_bufnode_s *net_bufnode = node;
 
+      net_bufpool_lock(pool);
+
       /* Set the buffer to zero, to make sure all nodes in the free buffer
        * pool are zeroed.
        */
 
       memset(net_bufnode, 0, pool->nodesize);
       sq_addlast(&net_bufnode->node, &pool->freebuffers);
+
+      net_bufpool_unlock(pool);
     }
 
   nxsem_post(&pool->sem);
@@ -204,4 +216,61 @@ int net_bufpool_test(FAR struct net_bufpool_s *pool)
     }
 
   return ret;
+}
+
+/****************************************************************************
+ * Name: net_bufpool_navail
+ *
+ * Description:
+ *   Return the number of available buffers in the buffer pool.
+ *
+ * Assumptions:
+ *   None.
+ *
+ ****************************************************************************/
+
+int net_bufpool_navail(FAR struct net_bufpool_s *pool)
+{
+  int val = 0;
+  int ret;
+
+  ret = nxsem_get_value(&pool->sem, &val);
+  if (ret >= 0)
+    {
+      ret = val;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: net_bufpool_lock
+ *
+ * Description:
+ *   Use the bufpool lock to protect the node of the buffer pool.
+ *
+ * Input Parameters:
+ *   pool - The lock of pool to be locked.
+ *
+ ****************************************************************************/
+
+void net_bufpool_lock(FAR struct net_bufpool_s *pool)
+{
+  nxrmutex_lock(&pool->lock);
+}
+
+/****************************************************************************
+ * Name: net_bufpool_unlock
+ *
+ * Description:
+ *   Finish using the bufpool lock to protect the node of the buffer pool.
+ *
+ * Input Parameters:
+ *   pool - The lock of pool to be unlocked.
+ *
+ ****************************************************************************/
+
+void net_bufpool_unlock(FAR struct net_bufpool_s *pool)
+{
+  nxrmutex_unlock(&pool->lock);
 }

@@ -62,7 +62,6 @@
 NET_BUFPOOL_DECLARE(g_icmp_connections, sizeof(struct icmp_conn_s),
                     CONFIG_NET_ICMP_PREALLOC_CONNS,
                     CONFIG_NET_ICMP_ALLOC_CONNS, CONFIG_NET_ICMP_MAX_CONNS);
-static mutex_t g_free_lock = NXMUTEX_INITIALIZER;
 
 /* A list of all allocated IPPROTO_ICMP socket connections */
 
@@ -85,23 +84,20 @@ static dq_queue_t g_active_icmp_connections;
 FAR struct icmp_conn_s *icmp_alloc(void)
 {
   FAR struct icmp_conn_s *conn = NULL;
-  int ret;
 
   /* The free list is protected by a mutex. */
 
-  ret = nxmutex_lock(&g_free_lock);
-  if (ret >= 0)
+  NET_BUFPOLL_LOCK(g_icmp_connections);
+
+  conn = NET_BUFPOOL_TRYALLOC(g_icmp_connections);
+  if (conn != NULL)
     {
-      conn = NET_BUFPOOL_TRYALLOC(g_icmp_connections);
-      if (conn != NULL)
-        {
-          /* Enqueue the connection into the active list */
+      /* Enqueue the connection into the active list */
 
-          dq_addlast(&conn->sconn.node, &g_active_icmp_connections);
-        }
-
-      nxmutex_unlock(&g_free_lock);
+      dq_addlast(&conn->sconn.node, &g_active_icmp_connections);
     }
+
+  NET_BUFPOLL_UNLOCK(g_icmp_connections);
 
   return conn;
 }
@@ -123,7 +119,7 @@ void icmp_free(FAR struct icmp_conn_s *conn)
 
   /* Take the mutex (perhaps waiting) */
 
-  nxmutex_lock(&g_free_lock);
+  NET_BUFPOLL_LOCK(g_icmp_connections);
 
   /* Is this the last reference on the connection?  It might not be if the
    * socket was cloned.
@@ -146,7 +142,7 @@ void icmp_free(FAR struct icmp_conn_s *conn)
       NET_BUFPOOL_FREE(g_icmp_connections, conn);
     }
 
-  nxmutex_unlock(&g_free_lock);
+  NET_BUFPOLL_UNLOCK(g_icmp_connections);
 }
 
 /****************************************************************************
