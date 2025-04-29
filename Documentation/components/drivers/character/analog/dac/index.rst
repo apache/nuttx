@@ -3,10 +3,10 @@ DAC Drivers
 ===========
 
 -  ``include/nuttx/analog/dac.h``. All structures and APIs needed
-   to work with DAtC drivers are provided in this header file. This
+   to work with DAC drivers are provided in this header file. This
    header file includes:
 
-   #. Structures and inerface descriptions needed to develop a
+   #. Structures and interface descriptions needed to develop a
       low-level, architecture-specific, DAC driver.
    #. To register the DAC driver with a common DAC character
       driver.
@@ -50,7 +50,7 @@ Application Example
 
 An example application can be found in ``nuttx-apps`` repository under
 path ``examples/dac``. It provides command line interface to write data
-to DAC channels.s
+to DAC channels.
 
 Configuration
 =============
@@ -62,14 +62,24 @@ The peripheral is enabled by ``CONFIG_ANALOG``  and ``CONFIG_DAC`` options,
 respectively. The FIFO queue size is configurable with ``CONFIG_DAC_FIFOSIZE``.
 This size is limited to ``255`` to fit into ``uint8_t``.
 
-External Devices
-================
+Supported External DACs (I2C/SPI)
+=================================
 
 NuttX also provides support for various external DAC devices. These usually
-communicates with MCU with I2C or SPI peripherals.
+communicate with the MCU via I2C or SPI interfaces.
+
+I2C-based DACs:
 
 .. toctree::
   :maxdepth: 1
-  :glob:
 
-  */*
+  dac7571/index.rst
+  mcp47x6/index.rst
+
+SPI-based DACs:
+
+.. toctree::
+  :maxdepth: 1
+
+  dac7554/index.rst
+  mcp48xx/index.rst
