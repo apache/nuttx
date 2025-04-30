@@ -27,6 +27,7 @@
 #include <nuttx/config.h>
 #include <nuttx/list.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/mm/kasan.h>
 
 #include <string.h>
 
@@ -94,7 +95,7 @@ uintptr_t up_addrenv_va_to_pa(FAR void *va_)
 {
   FAR struct simple_addrenv_node_s *node;
   FAR const struct simple_addrenv_s *addrenv;
-  uintptr_t va = (uintptr_t)va_;
+  uintptr_t va = (uintptr_t)kasan_clear_tag(va_);
   uint32_t i;
 
   list_for_every_entry(&g_addrenv_list, node,
