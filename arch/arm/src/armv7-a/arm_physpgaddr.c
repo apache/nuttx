@@ -57,9 +57,9 @@
 uintptr_t up_addrenv_va_to_pa(void *va)
 {
   uintptr_t vaddr = (uintptr_t)va;
-  uint32_t *l2table;
+  uintptr_t *l2table;
   uintptr_t paddr;
-  uint32_t l1entry;
+  uintptr_t l1entry;
   int index;
 
   /* Check if this address is within the range of one of the virtualized user
@@ -79,11 +79,11 @@ uintptr_t up_addrenv_va_to_pa(void *va)
            * level 1 page table entry.
            */
 
-          paddr = ((uintptr_t)l1entry & PMD_PTE_PADDR_MASK);
+          paddr = (l1entry & PMD_PTE_PADDR_MASK);
 
           /* Get the virtual address of the base of level 2 page table */
 
-          l2table = (uint32_t *)arm_pgvaddr(paddr);
+          l2table = (uintptr_t *)arm_pgvaddr(paddr);
 
           if (l2table)
             {
@@ -101,7 +101,7 @@ uintptr_t up_addrenv_va_to_pa(void *va)
                * containing the mapping of the virtual address.
                */
 
-              paddr = ((uintptr_t)l2table[index] & PTE_SMALL_PADDR_MASK);
+              paddr = l2table[index] & PTE_SMALL_PADDR_MASK;
 
               /* Add the correct offset and return the physical address
                * corresponding to the virtual address.
