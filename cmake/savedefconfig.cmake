@@ -35,6 +35,7 @@ foreach(NameAndValue ${ConfigContents})
      OR "${NameAndValue}" MATCHES "^CONFIG_ARCH_CHIP_"
      OR "${NameAndValue}" MATCHES "CONFIG_ARCH_CHIP="
      OR "${NameAndValue}" MATCHES "CONFIG_ARCH_BOARD="
+     OR "${NameAndValue}" MATCHES "CONFIG_ARCH_BOARD_COMMON="
      OR "${NameAndValue}" MATCHES "^CONFIG_ARCH_CUSTOM"
      OR "${NameAndValue}" MATCHES "^CONFIG_ARCH_BOARD_CUSTOM")
     decode_semicolon(Value)

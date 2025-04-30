@@ -753,6 +753,7 @@ savedefconfig: apps_preconfig
 	$(Q) grep "^CONFIG_ARCH_CHIP_" .config >> defconfig.tmp; true
 	$(Q) grep "CONFIG_ARCH_CHIP=" .config >> defconfig.tmp; true
 	$(Q) grep "CONFIG_ARCH_BOARD=" .config >> defconfig.tmp; true
+	$(Q) grep "CONFIG_ARCH_BOARD_COMMON=" .config >> defconfig.tmp; true
 	$(Q) grep "^CONFIG_ARCH_CUSTOM" .config >> defconfig.tmp; true
 	$(Q) grep "^CONFIG_ARCH_BOARD_CUSTOM" .config >> defconfig.tmp; true
 	$(Q) export LC_ALL=C; cat defconfig.tmp | sort | uniq > sortedconfig.tmp
