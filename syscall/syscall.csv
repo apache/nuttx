@@ -136,6 +136,7 @@
 "sched_getscheduler","sched.h","","int","pid_t"
 "sched_lock","sched.h","","void"
 "sched_lockcount","sched.h","","int"
+"sched_note_event_ip","nuttx/sched_note.h","defined(CONFIG_SCHED_INSTRUMENTATION_DUMP)","void","uint32_t","uintptr_t","uint8_t","FAR const void *","size_t"
 "sched_note_vprintf_ip","nuttx/sched_note.h","defined(CONFIG_SCHED_INSTRUMENTATION_DUMP)","void","uint32_t","uintptr_t","FAR const IPTR char *","uint32_t","FAR va_list *"
 "sched_rr_get_interval","sched.h","","int","pid_t","struct timespec *"
 "sched_setaffinity","sched.h","defined(CONFIG_SMP)","int","pid_t","size_t","FAR const cpu_set_t*"
