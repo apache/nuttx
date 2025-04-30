@@ -64,26 +64,26 @@
 
 /* LZF headers */
 
-struct lzf_header_s         /* Common data header */
+begin_packed_struct struct lzf_header_s         /* Common data header */
 {
   uint8_t lzf_magic[2];     /* [0]='Z', [1]='V' */
   uint8_t lzf_type;         /* LZF_TYPE0_HDR or LZF_TYPE1_HDR */
-};
+} end_packed_struct;
 
-struct lzf_type0_header_s   /* Uncompressed data header */
+begin_packed_struct struct lzf_type0_header_s   /* Uncompressed data header */
 {
   uint8_t lzf_magic[2];     /* [0]='Z', [1]='V' */
   uint8_t lzf_type;         /* LZF_TYPE0_HDR */
   uint8_t lzf_len[2];       /* Data length (big-endian) */
-};
+} end_packed_struct;
 
-struct lzf_type1_header_s   /* Compressed data header */
+begin_packed_struct struct lzf_type1_header_s   /* Compressed data header */
 {
   uint8_t lzf_magic[2];     /* [0]='Z', [1]='V' */
   uint8_t lzf_type;         /* LZF_TYPE1_HDR */
   uint8_t lzf_clen[2];      /* Compressed data length (big-endian) */
   uint8_t lzf_ulen[2];      /* Uncompressed data length (big-endian) */
-};
+} end_packed_struct;
 
 /* LZF hash table */
 
