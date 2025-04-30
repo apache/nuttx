@@ -63,7 +63,7 @@ int arm_addrenv_create_region(uintptr_t **list, unsigned int listlen,
 {
   irqstate_t flags;
   uintptr_t paddr;
-  uint32_t *l2table;
+  uintptr_t *l2table;
   size_t nmapped;
   unsigned int npages;
   unsigned int nlist;
@@ -113,11 +113,11 @@ int arm_addrenv_create_region(uintptr_t **list, unsigned int listlen,
 
       /* Get the virtual address corresponding to the physical page address */
 
-      l2table = (uint32_t *)arm_pgvaddr(paddr);
+      l2table = (uintptr_t *)arm_pgvaddr(paddr);
 
       /* Initialize the page table */
 
-      memset(l2table, 0, ENTRIES_PER_L2TABLE * sizeof(uint32_t));
+      memset(l2table, 0, ENTRIES_PER_L2TABLE * sizeof(uintptr_t));
 
       /* Back up L2 entries with physical memory */
 
@@ -146,7 +146,7 @@ int arm_addrenv_create_region(uintptr_t **list, unsigned int listlen,
 
       up_flush_dcache((uintptr_t)l2table,
                       (uintptr_t)l2table +
-                      ENTRIES_PER_L2TABLE * sizeof(uint32_t));
+                      ENTRIES_PER_L2TABLE * sizeof(uintptr_t));
 
       leave_critical_section(flags);
     }

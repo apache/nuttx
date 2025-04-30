@@ -52,10 +52,10 @@
  ****************************************************************************/
 
 #ifndef CONFIG_ARCH_ROMPGTABLE
-void mmu_l1_setentry(uint32_t paddr, uint32_t vaddr, uint32_t mmuflags)
+void mmu_l1_setentry(uintptr_t paddr, uintptr_t vaddr, uint32_t mmuflags)
 {
-  uint32_t *l1table = mmu_l1_getpgtable();
-  uint32_t  index   = vaddr >> 20;
+  uintptr_t *l1table = mmu_l1_getpgtable();
+  uint32_t   index   = vaddr >> 20;
 
   /* Save the page table entry */
 
@@ -87,10 +87,10 @@ void mmu_l1_setentry(uint32_t paddr, uint32_t vaddr, uint32_t mmuflags)
  ****************************************************************************/
 
 #if !defined(CONFIG_ARCH_ROMPGTABLE) && defined(CONFIG_ARCH_ADDRENV)
-void mmu_l1_restore(uintptr_t vaddr, uint32_t l1entry)
+void mmu_l1_restore(uintptr_t vaddr, uintptr_t l1entry)
 {
-  uint32_t *l1table = mmu_l1_getpgtable();
-  uint32_t  index   = vaddr >> 20;
+  uintptr_t *l1table = mmu_l1_getpgtable();
+  uint32_t  index    = vaddr >> 20;
 
   /* Set the encoded page table entry */
 
@@ -126,11 +126,11 @@ void mmu_l1_restore(uintptr_t vaddr, uint32_t l1entry)
  ****************************************************************************/
 
 #ifndef CONFIG_ARCH_ROMPGTABLE
-void mmu_l2_setentry(uint32_t l2vaddr, uint32_t paddr, uint32_t vaddr,
+void mmu_l2_setentry(uintptr_t l2vaddr, uintptr_t paddr, uintptr_t vaddr,
                      uint32_t mmuflags)
 {
-  uint32_t *l2table  = (uint32_t *)l2vaddr;
-  uint32_t  index;
+  uintptr_t *l2table  = (uintptr_t *)l2vaddr;
+  uint32_t index;
 
   /* The table divides a 1Mb address space up into 256 entries, each
    * corresponding to 4Kb of address space.  The page table index is
@@ -227,8 +227,8 @@ void mmu_l1_map_regions(const struct section_mapping_s *mappings,
 #ifndef CONFIG_ARCH_ROMPGTABLE
 void mmu_l1_map_page(const struct section_mapping_s *mapping)
 {
-  uint32_t virtaddr = mapping->virtbase;
-  uint32_t l2table = mapping->physbase;
+  uintptr_t virtaddr = mapping->virtbase;
+  uintptr_t l2table = mapping->physbase;
   uint32_t i;
 
   for (i = 0; i < mapping->nsections; i++)
@@ -352,7 +352,7 @@ void mmu_l2_map_pages(const struct page_mapping_s *mappings,
  ****************************************************************************/
 
 #ifndef CONFIG_ARCH_ROMPGTABLE
-void mmu_invalidate_region(uint32_t vstart, size_t size)
+void mmu_invalidate_region(uintptr_t vstart, size_t size)
 {
   uint32_t vaddr = vstart & 0xfffff000;
   uint32_t vend  = vstart + size;

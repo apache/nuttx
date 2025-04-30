@@ -207,7 +207,7 @@ static void am335x_vectorpermissions(uint32_t mmuflags)
    * table
    */
 
-  uint32_t pte = mmu_l2_getentry(PG_L2_VECT_VADDR, 0);
+  uintptr_t pte = mmu_l2_getentry(PG_L2_VECT_VADDR, 0);
 
   /* Mask out the old MMU flags from the page table entry.
    *

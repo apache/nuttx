@@ -914,24 +914,24 @@
 
 struct section_mapping_s
 {
-  uint32_t physbase;   /* Physical address of the region to be mapped */
-  uint32_t virtbase;   /* Virtual address of the region to be mapped */
-  uint32_t mmuflags;   /* MMU settings for the region (e.g., cache-able) */
-  uint32_t nsections;  /* Number of mappings in the region */
+  uintptr_t physbase;  /* Physical address of the region to be mapped */
+  uintptr_t virtbase;  /* Virtual address of the region to be mapped */
+  uint32_t  mmuflags;  /* MMU settings for the region (e.g., cache-able) */
+  uint32_t  nsections; /* Number of mappings in the region */
 };
 
 struct page_entry_s
 {
-  uint32_t physbase;        /* Physical address of the region to be mapped */
-  uint32_t virtbase;        /* Virtual address of the region to be mapped */
-  uint32_t mmuflags;        /* MMU settings for the region (e.g., cache-able) */
-  uint32_t npages;          /* Number of mappings in the region */
+  uintptr_t physbase; /* Physical address of the region to be mapped */
+  uintptr_t virtbase; /* Virtual address of the region to be mapped */
+  uint32_t  mmuflags; /* MMU settings for the region (e.g., cache-able) */
+  uint32_t  npages;   /* Number of mappings in the region */
 };
 
 struct page_mapping_s
 {
-  uint32_t l2table;                 /* Virtual address of l2 table */
-  uint32_t entrynum;                /* Page entry number */
+  uintptr_t l2table;                /* Virtual address of l2 table */
+  uint32_t  entrynum;               /* Page entry number */
   const struct page_entry_s *entry; /* Page entry */
 };
 #endif
@@ -1351,7 +1351,7 @@ static inline void cp15_wrttb(uint32_t ttb)
  ****************************************************************************/
 
 #ifndef CONFIG_ARCH_ROMPGTABLE
-static inline uint32_t *mmu_l1_getpgtable(void)
+static inline uintptr_t *mmu_l1_getpgtable(void)
 {
 #if defined(CONFIG_SMP) && defined(CONFIG_ARCH_ADDRENV)
   uint32_t ttbr0;
@@ -1359,9 +1359,9 @@ static inline uint32_t *mmu_l1_getpgtable(void)
 
   ttbr0 = CP15_GET(TTBR0);
   pgtable = ttbr0 & TTBR0_BASE_MASK(0);
-  return (uint32_t *)(pgtable - PGTABLE_BASE_PADDR + PGTABLE_BASE_VADDR);
+  return (uintptr_t *)(pgtable - PGTABLE_BASE_PADDR + PGTABLE_BASE_VADDR);
 #else
-  return (uint32_t *)PGTABLE_BASE_VADDR;
+  return (uintptr_t *)PGTABLE_BASE_VADDR;
 #endif
 }
 #endif
@@ -1404,7 +1404,7 @@ static inline void mmu_l1_setpgtable(uintptr_t *ttb)
 
 #ifndef CONFIG_ARCH_ROMPGTABLE
 static inline
-uint32_t mmu_l1table_getentry(uint32_t *l1table, uint32_t vaddr)
+uintptr_t mmu_l1table_getentry(uintptr_t *l1table, uintptr_t vaddr)
 {
   uint32_t index = vaddr >> 20;
 
@@ -1413,7 +1413,7 @@ uint32_t mmu_l1table_getentry(uint32_t *l1table, uint32_t vaddr)
   return l1table[index];
 }
 
-static inline uint32_t mmu_l1_getentry(uint32_t vaddr)
+static inline uintptr_t mmu_l1_getentry(uintptr_t vaddr)
 {
   return mmu_l1table_getentry(mmu_l1_getpgtable(), vaddr);
 }
@@ -1433,10 +1433,10 @@ static inline uint32_t mmu_l1_getentry(uint32_t vaddr)
  ****************************************************************************/
 
 #ifndef CONFIG_ARCH_ROMPGTABLE
-static inline uint32_t mmu_l2_getentry(uint32_t l2vaddr, uint32_t vaddr)
+static inline uintptr_t mmu_l2_getentry(uintptr_t l2vaddr, uintptr_t vaddr)
 {
-  uint32_t *l2table  = (uint32_t *)l2vaddr;
-  uint32_t  index;
+  uintptr_t *l2table  = (uintptr_t *)l2vaddr;
+  uint32_t index;
 
   /* The table divides a 1Mb address space up into 256 entries, each
    * corresponding to 4Kb of address space.  The page table index is
@@ -1487,7 +1487,7 @@ extern "C"
  ****************************************************************************/
 
 #ifndef CONFIG_ARCH_ROMPGTABLE
-void mmu_l1_setentry(uint32_t paddr, uint32_t vaddr, uint32_t mmuflags);
+void mmu_l1_setentry(uintptr_t paddr, uintptr_t vaddr, uint32_t mmuflags);
 #endif
 
 /****************************************************************************
@@ -1504,7 +1504,7 @@ void mmu_l1_setentry(uint32_t paddr, uint32_t vaddr, uint32_t mmuflags);
  ****************************************************************************/
 
 #if !defined(CONFIG_ARCH_ROMPGTABLE) && defined(CONFIG_ARCH_ADDRENV)
-void mmu_l1_restore(uintptr_t vaddr, uint32_t l1entry);
+void mmu_l1_restore(uintptr_t vaddr, uintptr_t l1entry);
 #endif
 
 /****************************************************************************
@@ -1541,7 +1541,7 @@ void mmu_l1_restore(uintptr_t vaddr, uint32_t l1entry);
  ****************************************************************************/
 
 #ifndef CONFIG_ARCH_ROMPGTABLE
-void mmu_l2_setentry(uint32_t l2vaddr, uint32_t paddr, uint32_t vaddr,
+void mmu_l2_setentry(uintptr_t l2vaddr, uintptr_t paddr, uintptr_t vaddr,
                      uint32_t mmuflags);
 #endif
 
@@ -1660,7 +1660,7 @@ void mmu_l2_map_pages(const struct page_mapping_s *mappings,
  ****************************************************************************/
 
 #ifndef CONFIG_ARCH_ROMPGTABLE
-void mmu_invalidate_region(uint32_t vstart, size_t size);
+void mmu_invalidate_region(uintptr_t vstart, size_t size);
 #endif
 
 #undef EXTERN
