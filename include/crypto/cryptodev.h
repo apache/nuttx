@@ -355,6 +355,7 @@ struct cryptocap
   CODE int (*cc_process)(FAR struct cryptop *);
   CODE int (*cc_freesession)(uint64_t);
   CODE int (*cc_kprocess)(FAR struct cryptkop *);
+  FAR void *priv;
 };
 
 /* ioctl parameter to request creation of a session. */
@@ -437,6 +438,8 @@ int crypto_get_driverid(uint8_t);
 int crypto_invoke(FAR struct cryptop *);
 int crypto_kinvoke(FAR struct cryptkop *);
 int crypto_getfeat(FAR int *);
+int crypto_driver_set_priv(uint32_t, FAR void *);
+FAR void *crypto_driver_get_priv(uint32_t);
 
 FAR struct cryptop *crypto_getreq(int);
 void crypto_freereq(FAR struct cryptop *);
