@@ -719,14 +719,14 @@ SECTIONS
      */
 
     . = SIZEOF(.rtc.text);
-  } >rtc_data_seg
+  } >rtc_slow_seg
 
   /* RTC BSS section. */
 
   .rtc.bss (NOLOAD) :
   {
     *(.rtc.bss)
-  } >rtc_data_seg
+  } >rtc_slow_seg
 
   .rtc.data :
   {
@@ -738,7 +738,7 @@ SECTIONS
    /* Whatever is left from the RTC memory is used as a special heap. */
 
     . = ALIGN (4);
-  } >rtc_data_seg AT>ROM
+  } >rtc_slow_seg AT>ROM
 
   .rtc.heap : ALIGN(4)
   {
