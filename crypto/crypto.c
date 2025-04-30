@@ -724,6 +724,32 @@ out:
   return 0;
 }
 
+int crypto_driver_set_priv(uint32_t driverid, FAR void *priv)
+{
+  if (driverid >= crypto_drivers_num || crypto_drivers == NULL)
+    {
+      return -EINVAL;
+    }
+
+  nxmutex_lock(&g_crypto_lock);
+
+  crypto_drivers[driverid].priv = priv;
+
+  nxmutex_unlock(&g_crypto_lock);
+
+  return 0;
+}
+
+FAR void *crypto_driver_get_priv(uint32_t driverid)
+{
+  if (driverid >= crypto_drivers_num || crypto_drivers == NULL)
+    {
+      return NULL;
+    }
+
+  return crypto_drivers[driverid].priv;
+}
+
 int up_cryptoinitialize(void)
 {
 #ifdef CONFIG_CRYPTO_ALGTEST
