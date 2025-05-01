@@ -85,6 +85,7 @@ You have four options:
 2 - Load via gdb
 3 - Load via JLink
 4 - Run from SD-card, without u-boot
+5 - Kernel build, via AHAB boot
 
 ==========================================
 
@@ -167,3 +168,37 @@ Option 4: Run from SD-card, without u-boot
 3. Insert the SD-card into the imx93-evk, make sure BMODE switch is [1,2,3,4] = [Off, On, Off, Off] so that it boots from the SD-card.
 
   This should boot into NuttShell in EL3 level.
+
+==========================================
+
+Option 5: Kernel build, via AHAB boot
+
+==========================================
+
+1. Follow the instructions at: https://spsdk.readthedocs.io/en/latest/examples/ahab/imx93/imx93_ahab_uboot.html
+   to create an eMMC-bootable image (latest version of instructions tested is v2.6.1). We will be replacing the u-boot binary in step 2.3 with NuttX.
+
+2. Clone both NuttX and NuttX-Apps in same level directories `nuttx` and `apps` respectively.
+
+3. Configure and build NuttX:
+
+  cd nuttx
+  tools/configure.sh imx93-evk:knsh
+  make
+  make export
+
+4. Build NuttX apps and prepare the /bin ROMFS image:
+
+  pushd ../apps
+  tools/mkimport.sh -z -x ../nuttx/nuttx-export-*.tar.gz
+  make import
+  tools/mkromfsimg.sh
+  mv boot_romfsimg.h ../nuttx/boards/arm64/imx9/imx93-evk/include/bin_romfsimg.h
+  popd
+
+5. Re-build NuttX embedding the generated /bin ROMFS image:
+
+  make clean clean_context
+  make
+
+6. Replace the value of the `u-boot:` entry in workspace/ahab_template.yaml created in step 1 above with the path to nuttx.bin.

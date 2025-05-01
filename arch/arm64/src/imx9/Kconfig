@@ -27,6 +27,14 @@ endchoice # i.MX9 Chip Selection
 
 endmenu # "i.MX9 Chip Selection"
 
+config IMX9_BIN_ROMFS
+	bool "Register the /bin ROMFS file system at /dev/ram0"
+	depends on FS_ROMFS
+	default n
+	---help---
+		Register a ROMFS image at /dev/ram0 for use with CONFIG_INIT_MOUNT*.
+		The image must be placed into <arch/board/bin_romfsimg.h>.
+
 config IMX9_DMA_ALLOC
 	bool "Enable DMA capable memory allocator"
 	depends on GRAN
