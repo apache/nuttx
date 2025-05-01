@@ -740,7 +740,8 @@ static int procfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
           /* Test for a sub-string match (e.g. "ls /proc/fs") */
 
           else if (strncmp(g_procfs_entries[x].pathpattern, relpath,
-                           len) == 0)
+                           len) == 0 &&
+                   g_procfs_entries[x].pathpattern[len] == '/')
             {
               FAR struct procfs_level1_s *level1;
 
@@ -1166,7 +1167,8 @@ static int procfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
           /* Test for an internal subdirectory stat */
 
           else if (strncmp(g_procfs_entries[x].pathpattern, relpath,
-                           len) == 0)
+                           len) == 0 &&
+                   g_procfs_entries[x].pathpattern[len] == '/')
             {
               /* It's an internal subdirectory */
 
