@@ -281,6 +281,39 @@
 #  define STM32_NCAP            0  /* No Capacitive sensing channels */
 #  define STM32_NPORTS          6  /* Six GPIO ports, GPIOA-F */
 
+#elif defined(CONFIG_ARCH_CHIP_STM32G0B1KB) || defined(CONFIG_ARCH_CHIP_STM32G0B1CB) || \
+      defined(CONFIG_ARCH_CHIP_STM32G0B1RB) || defined(CONFIG_ARCH_CHIP_STM32G0B1MB) || \
+      defined(CONFIG_ARCH_CHIP_STM32G0B1VB) || defined(CONFIG_ARCH_CHIP_STM32G0B1KC) || \
+      defined(CONFIG_ARCH_CHIP_STM32G0B1CC) || defined(CONFIG_ARCH_CHIP_STM32G0B1RC) || \
+      defined(CONFIG_ARCH_CHIP_STM32G0B1MC) || defined(CONFIG_ARCH_CHIP_STM32G0B1VC) || \
+      defined(CONFIG_ARCH_CHIP_STM32G0B1KE) || defined(CONFIG_ARCH_CHIP_STM32G0B1CE) || \
+      defined(CONFIG_ARCH_CHIP_STM32G0B1RE) || defined(CONFIG_ARCH_CHIP_STM32G0B1NE) || \
+      defined(CONFIG_ARCH_CHIP_STM32G0B1ME) || defined(CONFIG_ARCH_CHIP_STM32G0B1VE)
+
+#  define STM32_NATIM           1  /* One advanced timer TIM1 */
+#  define STM32_NGTIM16         6  /* 16-bit general purpose timers */
+#  define STM32_NGTIM32         1  /* TIM2 */
+#  define STM32_NBTIM           2  /* Two basic timers: TIM6, TIM7 with DMA */
+                                   /* One LPTIMER */
+#  define STM32_NSPI            3  /* Two SPI modules SPI1-2 */
+#  define STM32_NI2C            3  /* Two I2C (2 with SMBus/PMBus) */
+#  define STM32_NDMA            2  /* DMA1 7-channels, DMA2 5-channels DMA1 */
+#  define STM32_NUSART          6  /* Six USART modules, USART1-6 */
+                                   /* Two LPUART */
+#  define STM32_NCAN            1  /* One FDCAN controller */
+#  define STM32_NLCD            0  /* No LCD */
+#  define STM32_NUSBDEV         1  /* One USB full-speed controller */
+#  define STM32_NUSBOTG         0  /* No USB OTG */
+#  define STM32_NCEC            1  /* One HDMI-CEC controller */
+#  define STM32_NADC            1  /* (1) ADC1, 12-channels */
+
+#  define STM32_NDAC            2  /* Two DAC channels */
+#  define STM32_NCOMP           3  /* Three Analog Comparators */
+#  define STM32_NCRC            0  /* No CRC module */
+#  define STM32_NRNG            1  /* One Random number generator (RNG) */
+#  define STM32_NCAP            0  /* No Capacitive sensing channels */
+#  define STM32_NPORTS          6  /* Six GPIO ports, GPIOA-F */
+
 /* STM32L EnergyLite Line ***************************************************/
 
 /* STM32L073XX  - With LCD
