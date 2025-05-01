@@ -27,6 +27,8 @@ include $(TOPDIR)/arch/arm64/src/Toolchain.defs
 
 ifeq ($(CONFIG_IMX9_BOOTLOADER),y)
   LDSCRIPT = ocramboot.ld
+else ifeq ($(CONFIG_BUILD_KERNEL),y)
+  LDSCRIPT = kernel.ld
 else
   LDSCRIPT = dramboot.ld
 endif
