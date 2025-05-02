@@ -2097,6 +2097,9 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
 
   g_usbdev.usbdev.speed = USB_SPEED_FULL;
 
+  modreg32(0, RP23XX_USBCTRL_REGS_MAIN_CTRL_PHY_ISO,
+    RP23XX_USBCTRL_REGS_MAIN_CTRL);
+
   putreg32(RP23XX_USBCTRL_REGS_MAIN_CTRL_CONTROLLER_EN,
            RP23XX_USBCTRL_REGS_MAIN_CTRL);
 
