@@ -1,0 +1,14 @@
+/* Bit fields for LESENSE CURCH */
+  CURCH,
+  Linix,
+Linix 45ZWN24-40           2  0.5 Ohm    0.400 mH  2.34A   24V
+* Linix 45ZWN24-40 (PMSM motor dedicated for NXP FRDM-MC-LVMTR kit)
+          DUE SCHEM. PIN MAPPING    SAM3X       DUE SCHEM. BOARD LABEL
+  SCHEM,
+               * ADDR -> BTC & TBE - Send one more byte
+  TBE,
+      /* All even touch pads have the same position for the THN bits.
+      /* All odd touch pads have the same position for the THN bits.
+  THN,
+#  define AES_ISR_URAT_WORRDACC      (5 << AES_ISR_URAT_SHIFT) /* WRONLY register read access */
+  WRONLY,
