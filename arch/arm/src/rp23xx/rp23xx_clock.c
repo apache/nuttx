@@ -55,7 +55,7 @@
 #include "rp23xx_pll.h"
 #include "hardware/rp23xx_clocks.h"
 #include "hardware/rp23xx_resets.h"
-#include "hardware/rp23xx_watchdog.h"
+#include "hardware/rp23xx_ticks.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -70,6 +70,12 @@ static uint32_t rp23xx_clock_freq[RP23XX_CLOCKS_NDX_MAX];
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+static void tick_start(int tick, int cycles)
+{
+  putreg32(cycles, RP23XX_TICKS_CYCLES(tick));
+  putreg32(RP23XX_TICKS_WATCHDOG_CTRL_EN, RP23XX_TICKS_CTRL(tick));
+}
 
 static inline bool has_glitchless_mux(int clk_index)
 {
@@ -202,11 +208,6 @@ bool rp23xx_clock_configure(int clk_index,
 
 void clocks_init(void)
 {
-  /* Start tick in watchdog */
-
-  putreg32((BOARD_REF_FREQ / MHZ) | RP23XX_WATCHDOG_CTRL_ENABLE,
-           RP23XX_WATCHDOG_CTRL);
-
   /* Disable resus that may be enabled from previous software */
 
   putreg32(0, RP23XX_CLOCKS_CLK_SYS_RESUS_CTRL);
@@ -451,6 +452,13 @@ void rp23xx_clockconfig(void)
    */
 
   clocks_init();
+
+  /* Configure all TICK blocks */
+
+  for (int i = 0; i < (int)RP23XX_TICK_NUM; ++i)
+    {
+      tick_start(i, (BOARD_REF_FREQ / MHZ));
+    }
 
   /* Peripheral clocks should now all be running */
 
