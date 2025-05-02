@@ -639,19 +639,19 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
       size = size * 2;
     }
 
-  int transfered = 0;
-  while (transfered < size)
+  int transferred = 0;
+  while (transferred < size)
     {
       int ret = mx8mp_spi_transfer(priv,
-                                  (const uint8_t *)txbuffer + transfered,
-                                        (uint8_t *)rxbuffer + transfered,
-                                    size - transfered);
+                                  (const uint8_t *)txbuffer + transferred,
+                                        (uint8_t *)rxbuffer + transferred,
+                                    size - transferred);
       if (ret < 0)
         {
           break;
         }
 
-      transfered += ret;
+      transferred += ret;
     }
 }
 

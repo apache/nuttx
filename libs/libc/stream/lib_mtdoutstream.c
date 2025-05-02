@@ -101,15 +101,15 @@ static ssize_t mtdoutstream_puts(FAR struct lib_sostream_s *self,
 
       if (offset > 0)
         {
-          size_t copyin = offset + remain > erasesize ?
-                          erasesize - offset : remain;
+          size_t copying = offset + remain > erasesize ?
+                           erasesize - offset : remain;
 
-          memcpy(stream->cache + offset, ptr, copyin);
+          memcpy(stream->cache + offset, ptr, copying);
 
-          ptr        += copyin;
-          offset     += copyin;
-          self->nput += copyin;
-          remain     -= copyin;
+          ptr        += copying;
+          offset     += copying;
+          self->nput += copying;
+          remain     -= copying;
 
           if (offset == erasesize)
             {
@@ -143,7 +143,7 @@ static ssize_t mtdoutstream_puts(FAR struct lib_sostream_s *self,
       else
         {
           size_t nblock = remain / erasesize;
-          size_t copyin = nblock * erasesize;
+          size_t copying = nblock * erasesize;
 
           ret = MTD_ERASE(i_mtd, sblock, nblock);
           if (ret < 0)
@@ -158,9 +158,9 @@ static ssize_t mtdoutstream_puts(FAR struct lib_sostream_s *self,
               return ret;
             }
 
-          ptr        += copyin;
-          self->nput += copyin;
-          remain     -= copyin;
+          ptr        += copying;
+          self->nput += copying;
+          remain     -= copying;
         }
     }
 

@@ -145,14 +145,14 @@ int pmsm_model_elec_b16(FAR struct pmsm_model_b16_s *model,
 
 int pmsm_model_mech_b16(FAR struct pmsm_model_b16_s *model, b16_t load)
 {
-  b16_t angle = 0;
-  b16_t dir   = 0;
-  b16_t te    = 0;
-  b16_t tmp1  = 0;
-  b16_t tmp2  = 0;
-  b16_t tmp3  = 0;
-  b16_t tmp4  = 0;
-  b16_t tmp5  = 0;
+  b16_t angle  = 0;
+  b16_t dir    = 0;
+  b16_t torque = 0;
+  b16_t tmp1   = 0;
+  b16_t tmp2   = 0;
+  b16_t tmp3   = 0;
+  b16_t tmp4   = 0;
+  b16_t tmp5   = 0;
 
   DEBUGASSERT(model);
 
@@ -164,11 +164,11 @@ int pmsm_model_mech_b16(FAR struct pmsm_model_b16_s *model, b16_t load)
   tmp4 = b16mulb16((b16ONE + b16HALF), itob16(model->phy.motor.p));
   tmp5 = b16mulb16(tmp4, model->state.i_dq.q);
 
-  te = b16mulb16(tmp5, tmp3);
+  torque = b16mulb16(tmp5, tmp3);
 
   /* Get new mechanical velocity */
 
-  tmp1 = te - load;
+  tmp1 = torque - load;
   tmp2 = b16mulb16(model->per, tmp1);
   tmp3 = b16mulb16(tmp2, model->phy.one_by_iner);
 

@@ -491,18 +491,18 @@ int clefiakeyset(unsigned char *rk, const unsigned char *skey)
 void clefiaencrypt(unsigned char *ct, const unsigned char *pt,
                    const unsigned char *rk, const int r)
 {
-  unsigned char rin[16];
-  unsigned char  rout[16];
+  unsigned char r_in[16];
+  unsigned char  r_out[16];
 
-  bytecpy(rin, pt, 16);
+  bytecpy(r_in, pt, 16);
 
-  bytexor(rin + 4, rin + 4, rk + 0, 4); /* initial key whitening */
-  bytexor(rin + 12, rin + 12, rk + 4, 4);
+  bytexor(r_in + 4, r_in + 4, rk + 0, 4); /* initial key whitening */
+  bytexor(r_in + 12, r_in + 12, rk + 4, 4);
   rk += 8;
 
-  clefiagfn4(rout, rin, rk, r); /* GFN_{4,r} */
+  clefiagfn4(r_out, r_in, rk, r); /* GFN_{4,r} */
 
-  bytecpy(ct, rout, 16);
+  bytecpy(ct, r_out, 16);
   bytexor(ct + 4, ct + 4, rk + r * 8 + 0, 4);   /* final key whitening */
   bytexor(ct + 12, ct + 12, rk + r * 8 + 4, 4);
 }

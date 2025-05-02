@@ -1230,7 +1230,7 @@ void mm_memdump(FAR struct mm_heap_s *heap,
         }
       else
         {
-          name = "Unkown";
+          name = "Unknown";
           tcb  = nxsched_get_tcb(pid);
         }
 
