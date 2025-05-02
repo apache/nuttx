@@ -16,4 +16,4 @@ repos:
     -   id: nxstyle
         name: nxstyle
         language: script
-        entry: ./tools/checkpatch.sh -f
+        entry: ./tools/checkpatch.sh -c -f
