@@ -231,8 +231,8 @@ void clocks_init(void)
 
   /* Configure PLLs
    *                   REF     FBDIV VCO     POSTDIV
-   * PLL SYS: 12 / 1 = 12MHz * 125 = 1500MHZ / 5 / 2 = 150MHz
-   * PLL USB: 12 / 1 = 12MHz * 40  = 480 MHz / 5 / 2 =  48MHz
+   * PLL SYS: 12 / 1 = 12MHz * 125 = 1500MHz / 5 / 2 = 150MHz
+   * PLL USB: 12 / 1 = 12MHz * 100 = 1200MHz / 5 / 5 =  48MHz
    */
 
   setbits_reg32(RP23XX_RESETS_RESET_PLL_SYS | RP23XX_RESETS_RESET_PLL_USB,
@@ -244,7 +244,7 @@ void clocks_init(void)
     ;
 
   rp23xx_pll_init(RP23XX_PLL_SYS_BASE, 1, 1500 * MHZ, 5, 2);
-  rp23xx_pll_init(RP23XX_PLL_USB_BASE, 1, 480 * MHZ, 5, 2);
+  rp23xx_pll_init(RP23XX_PLL_USB_BASE, 1, 1200 * MHZ, 5, 5);
 
   /* Configure clocks */
 
