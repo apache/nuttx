@@ -111,7 +111,7 @@ class Stack(object):
 
         return self.check_max_usage()
 
-    def avalaible(self):
+    def available(self):
         cur_usage = self.cur_usage()
         return self._stack_size - cur_usage
 

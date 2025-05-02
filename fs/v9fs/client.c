@@ -323,7 +323,7 @@ begin_packed_struct struct v9fs_stat_s
 begin_packed_struct struct v9fs_rstat_s
 {
   struct v9fs_header_s header;
-  uint64_t vaild;
+  uint64_t valid;
   struct v9fs_qid_s qid;
   uint32_t mode;
   uint32_t uid;
