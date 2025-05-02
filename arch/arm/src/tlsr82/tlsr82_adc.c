@@ -72,7 +72,7 @@ struct adc_info_s
   uint32_t   vbat_vref;    /* The reference voltage (mV) for vbat mode */
   bool       base_two;     /* Base/Gpio mode two-point calibration or not */
   bool       registered;   /* Have registered a adc device */
-  bool       configed;     /* Adc has been configured or not */
+  bool       configured;   /* Adc has been configured or not */
   uint8_t    channel;      /* Adc current channel */
   uint8_t    channeltype;  /* Adc current channel type */
 };
@@ -123,7 +123,7 @@ static struct adc_info_s g_adc_module0_info =
   .vbat_vref    = ADC_DEFAULT_VREF,
   .base_two     = false,
   .registered   = false,
-  .configed     = false,
+  .configured   = false,
   .channel      = ADC_CHAN_NONE,
   .channeltype  = ADC_CHAN_TYPE_NONE,
 };
@@ -1014,7 +1014,7 @@ static int adc_setup(struct adc_dev_s *dev)
 
   /* The same one adc device should be configgured only once */
 
-  if (priv->info->configed)
+  if (priv->info->configured)
     {
       return OK;
     }
@@ -1038,7 +1038,7 @@ static int adc_setup(struct adc_dev_s *dev)
 
   /* The ADC device is ready */
 
-  priv->info->configed = true;
+  priv->info->configured = true;
   priv->ref++;
 
   return OK;
@@ -1147,9 +1147,9 @@ static void adc_shutdown(struct adc_dev_s *dev)
 
           tlsr82_adc_clk_ctrl(false);
 
-          /* Clear the configed flag */
+          /* Clear the configured flag */
 
-          priv->info->configed = false;
+          priv->info->configured = false;
         }
     }
 }

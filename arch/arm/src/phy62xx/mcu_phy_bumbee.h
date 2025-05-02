@@ -166,7 +166,7 @@ typedef struct
 {
     __IO uint32_t  CTRL0;                /* 0x40 */
     __IO uint32_t  CTRL1;                /* 0x44 */
-    uint32_t  reserverd[13];
+    uint32_t reserved[13];
     __IO uint32_t REMAP_TABLE;           /* 0x7c */
     __IO uint32_t REMAP_CTRL[32];        /* 0x80 */
 } AP_CACHE_TypeDef;
@@ -179,9 +179,9 @@ typedef struct
     __O  uint32_t CCVR;                  /* 0x8 */
     __IO uint32_t CRR;                   /* 0xc */
     uint8_t  STAT;                       /* 0x10 */
-    uint8_t  reserverd1[3];
+    uint8_t reserved1[3];
     __IO uint8_t  EOI;                   /* 0x14 */
-    uint8_t  reserverd2[3];
+    uint8_t reserved2[3];
 } AP_WDT_TypeDef;
 
 typedef struct

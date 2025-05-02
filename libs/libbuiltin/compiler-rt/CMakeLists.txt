@@ -68,13 +68,13 @@ list(APPEND INCDIR ${CMAKE_CURRENT_LIST_DIR}/compiler-rt/include)
 
 if(CONFIG_BUILTIN_COMPILER_RT)
 
-  nuttx_add_system_library(rt.buitlins)
+  nuttx_add_system_library(rt.builtins)
 
   target_include_directories(
-    rt.buitlins PRIVATE ${INCDIR}
+    rt.builtins PRIVATE ${INCDIR}
                         ${CMAKE_CURRENT_LIST_DIR}/compiler-rt/lib/builtins)
 
-  target_compile_options(rt.buitlins PRIVATE -Wno-undef -Wno-macro-redefined)
+  target_compile_options(rt.builtins PRIVATE -Wno-undef -Wno-macro-redefined)
 
   set(SRCSTMP)
   set(RT_BUILTINS_SRCS)
@@ -97,11 +97,11 @@ if(CONFIG_BUILTIN_COMPILER_RT)
   endif()
 
   if(NOT CONFIG_COVERAGE_NONE)
-    target_compile_options(rt.buitlins -fno-profile-instr-generate
+    target_compile_options(rt.builtins -fno-profile-instr-generate
                            -fno-coverage-mapping)
   endif()
 
-  target_sources(rt.buitlins PRIVATE ${RT_BUILTINS_SRCS})
+  target_sources(rt.builtins PRIVATE ${RT_BUILTINS_SRCS})
 
 endif()
 
