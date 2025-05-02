@@ -107,6 +107,9 @@ int sem_trywait(FAR sem_t *sem)
 
 int nxsem_trywait(FAR sem_t *sem)
 {
+  bool mutex;
+  bool fastpath = true;
+
   DEBUGASSERT(sem != NULL);
 
   /* This API should not be called from the idleloop or interrupt */
@@ -123,18 +126,68 @@ int nxsem_trywait(FAR sem_t *sem)
 
 #ifndef CONFIG_LIBC_ARCH_ATOMIC
 
-  if (NXSEM_IS_MUTEX(sem)
+  mutex = NXSEM_IS_MUTEX(sem);
+
+  /* Disable fast path if priority protection is enabled on the semaphore */
+
 #  ifdef CONFIG_PRIORITY_PROTECT
-      && (sem->flags & SEM_PRIO_MASK) != SEM_PRIO_PROTECT
-#  endif
-      )
+  if ((sem->flags & SEM_PRIO_MASK) == SEM_PRIO_PROTECT)
     {
-      int32_t tid = _SCHED_GETTID();
-      int32_t old = NXSEM_NO_MHOLDER;
-      return atomic_try_cmpxchg_acquire(NXSEM_MHOLDER(sem), &old, tid) ?
-        OK : -EAGAIN;
+      fastpath = false;
+    }
+#  endif
+
+  /* Disable fast path on a counting semaphore with priority inheritance */
+
+#  ifdef CONFIG_PRIORITY_INHERITANCE
+  if (!mutex && (sem->flags & SEM_PRIO_MASK) != SEM_PRIO_NONE)
+    {
+      fastpath = false;
+    }
+#  endif
+
+  if (fastpath)
+    {
+      bool ret = false;
+      int32_t old;
+      int32_t new;
+      FAR atomic_t *val = mutex ? NXSEM_MHOLDER(sem) : NXSEM_COUNT(sem);
+
+      if (mutex)
+        {
+          old = NXSEM_NO_MHOLDER;
+        }
+      else
+        {
+          old = atomic_read(val);
+        }
+
+      do
+        {
+          if (!mutex)
+            {
+              if (old < 1)
+                {
+                  break;
+                }
+
+              new = old - 1;
+            }
+          else
+            {
+              new = _SCHED_GETTID();
+            }
+
+          ret = atomic_try_cmpxchg_acquire(NXSEM_MHOLDER(sem), &old, new);
+        }
+      while (!mutex && !ret);
+
+      return ret ? OK : -EAGAIN;
     }
 
+#else
+  UNUSED(mutex);
+  UNUSED(fastpath);
 #endif
 
   return nxsem_trywait_slow(sem);
