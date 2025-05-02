@@ -35,6 +35,7 @@
 
 #include <arch/chip/watchdog.h>
 
+#include <hardware/rp23xx_ticks.h>
 #include <hardware/rp23xx_watchdog.h>
 #include <hardware/rp23xx_psm.h>
 
@@ -48,32 +49,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define WD_RESETS_BITS   (RP23XX_PSM_RESETS              \
-                        | RP23XX_PSM_CLOCKS              \
-                        | RP23XX_PSM_PSM_READY           \
-                        | RP23XX_PSM_BUSFABRIC           \
-                        | RP23XX_PSM_ROM                 \
-                        | RP23XX_PSM_BOOTRAM             \
-                        | RP23XX_PSM_SRAM0               \
-                        | RP23XX_PSM_SRAM1               \
-                        | RP23XX_PSM_SRAM2               \
-                        | RP23XX_PSM_SRAM3               \
-                        | RP23XX_PSM_SRAM4               \
-                        | RP23XX_PSM_SRAM5               \
-                        | RP23XX_PSM_SRAM6               \
-                        | RP23XX_PSM_SRAM7               \
-                        | RP23XX_PSM_SRAM8               \
-                        | RP23XX_PSM_SRAM9               \
-                        | RP23XX_PSM_XIP                 \
-                        | RP23XX_PSM_SIO                 \
-                        | RP23XX_PSM_ACCESSCTRL          \
-                        | RP23XX_PSM_PROC0               \
-                        | RP23XX_PSM_PROC1)
-
 #define WD_ENABLE_BITS   (RP23XX_WATCHDOG_CTRL_ENABLE     \
                         | RP23XX_WATCHDOG_CTRL_PAUSE_DBG0 \
                         | RP23XX_WATCHDOG_CTRL_PAUSE_DBG1 \
                         | RP23XX_WATCHDOG_CTRL_PAUSE_JTAG)
+
+#define WDT_MAX_TIMEOUT (0xffffff)  /* 16777215 ~ 16 sec */
 
 /****************************************************************************
  * Private Types
@@ -100,14 +81,14 @@ typedef struct rp23xx_watchdog_lowerhalf_s
 
 /* "Lower half" driver methods **********************************************/
 
-static int  my_wdt_start      (struct watchdog_lowerhalf_s *lower);
-static int  my_wdt_stop       (struct watchdog_lowerhalf_s *lower);
-static int  my_wdt_keepalive  (struct watchdog_lowerhalf_s *lower);
-static int  my_wdt_getstatus  (struct watchdog_lowerhalf_s *lower,
+static int  rp23xx_wdt_start      (struct watchdog_lowerhalf_s *lower);
+static int  rp23xx_wdt_stop       (struct watchdog_lowerhalf_s *lower);
+static int  rp23xx_wdt_keepalive  (struct watchdog_lowerhalf_s *lower);
+static int  rp23xx_wdt_getstatus  (struct watchdog_lowerhalf_s *lower,
                                struct watchdog_status_s    *status);
-static int  my_wdt_settimeout (struct watchdog_lowerhalf_s *lower,
+static int  rp23xx_wdt_settimeout (struct watchdog_lowerhalf_s *lower,
                                uint32_t                     timeout);
-static int  my_wdt_ioctl      (struct watchdog_lowerhalf_s *lower,
+static int  rp23xx_wdt_ioctl      (struct watchdog_lowerhalf_s *lower,
                                int                          cmd,
                                unsigned long                arg);
 
@@ -119,13 +100,13 @@ static int  my_wdt_ioctl      (struct watchdog_lowerhalf_s *lower,
 
 static const struct watchdog_ops_s g_rp23xx_wdg_ops =
 {
-  .start      = my_wdt_start,
-  .stop       = my_wdt_stop,
-  .keepalive  = my_wdt_keepalive,
-  .getstatus  = my_wdt_getstatus,
-  .settimeout = my_wdt_settimeout,
+  .start      = rp23xx_wdt_start,
+  .stop       = rp23xx_wdt_stop,
+  .keepalive  = rp23xx_wdt_keepalive,
+  .getstatus  = rp23xx_wdt_getstatus,
+  .settimeout = rp23xx_wdt_settimeout,
   .capture    = NULL,
-  .ioctl      = my_wdt_ioctl,
+  .ioctl      = rp23xx_wdt_ioctl,
 };
 
 static watchdog_lowerhalf_t g_rp23xx_watchdog_lowerhalf =
@@ -138,105 +119,122 @@ static watchdog_lowerhalf_t g_rp23xx_watchdog_lowerhalf =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: my_wdt_start
+ * Name: rp23xx_wdt_start
  ****************************************************************************/
 
-int my_wdt_start(struct watchdog_lowerhalf_s *lower)
+int rp23xx_wdt_start(struct watchdog_lowerhalf_s *lower)
 {
   watchdog_lowerhalf_t *priv = (watchdog_lowerhalf_t *)lower;
 
-  /* Convert millisecond input to microseconds
-   * Extra times 2 per errata RP23XX-E1
-   */
+  wdinfo("Entry\n");
 
-  putreg32(priv->timeout * 2000,  RP23XX_WATCHDOG_LOAD);
+  if (priv->started == true)
+    {
+      /* Return EBUSY to indicate that the timer was already running */
+
+      return -EBUSY;
+    }
+
+  putreg32(priv->timeout * USEC_PER_MSEC,  RP23XX_WATCHDOG_LOAD);
+
+  putreg32(RP23XX_PSM_WDSEL_BITS & ~(RP23XX_PSM_XOSC | RP23XX_PSM_ROSC),
+           RP23XX_PSM_WDSEL);
 
   modreg32(WD_ENABLE_BITS, WD_ENABLE_BITS, RP23XX_WATCHDOG_CTRL);
 
-  modreg32(WD_RESETS_BITS, WD_RESETS_BITS, RP23XX_PSM_WDSEL);
-
+  priv->started = true;
   return OK;
 }
 
 /****************************************************************************
- * Name: my_wdt_stop
+ * Name: rp23xx_wdt_stop
  ****************************************************************************/
 
-int my_wdt_stop(struct watchdog_lowerhalf_s *lower)
-{
-  modreg32(0, RP23XX_WATCHDOG_CTRL_ENABLE, RP23XX_WATCHDOG_CTRL);
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: my_wdt_keepalive
- ****************************************************************************/
-
-int my_wdt_keepalive(struct watchdog_lowerhalf_s *lower)
+int rp23xx_wdt_stop(struct watchdog_lowerhalf_s *lower)
 {
   watchdog_lowerhalf_t *priv = (watchdog_lowerhalf_t *)lower;
 
-  /* Convert millisecond input to microseconds
-   * Extra times 2 per errata RP23XX-E1
-   */
+  wdinfo("Entry\n");
 
-  putreg32(priv->timeout * 2000,  RP23XX_WATCHDOG_LOAD);
+  modreg32(0, RP23XX_WATCHDOG_CTRL_ENABLE, RP23XX_WATCHDOG_CTRL);
+
+  priv->started = false;
+  return OK;
+}
+
+/****************************************************************************
+ * Name: rp23xx_wdt_keepalive
+ ****************************************************************************/
+
+int rp23xx_wdt_keepalive(struct watchdog_lowerhalf_s *lower)
+{
+  watchdog_lowerhalf_t *priv = (watchdog_lowerhalf_t *)lower;
+
+  wdinfo("Entry\n");
+
+  putreg32(priv->timeout * USEC_PER_MSEC,  RP23XX_WATCHDOG_LOAD);
 
   return OK;
 }
 
 /****************************************************************************
- * Name: my_wdt_getstatus
+ * Name: rp23xx_wdt_getstatus
  ****************************************************************************/
 
-int my_wdt_getstatus(struct watchdog_lowerhalf_s  *lower,
+int rp23xx_wdt_getstatus(struct watchdog_lowerhalf_s  *lower,
                      struct watchdog_status_s     *status)
 {
   watchdog_lowerhalf_t *priv = (watchdog_lowerhalf_t *)lower;
   uint32_t              ctrl = getreg32(RP23XX_WATCHDOG_CTRL);
+
+  wdinfo("Entry\n");
 
   status->flags    =  (ctrl & RP23XX_WATCHDOG_CTRL_ENABLE) ? WDFLAGS_ACTIVE
                                                            : 0;
 
   status->timeout  =  priv->timeout;
 
-  /* Convert microseconds to output microseconds.
-   * Extra divide by 2 per errata RP23XX-E1.
-   */
-
-  status->timeleft =  (ctrl & RP23XX_WATCHDOG_CTRL_TIME_MASK) / 2000;
-
-  /* WARNING: On (at least) version 2 RP23XX chips, the timeleft does
-   *          not seem to be reliable.
-   */
-
+  status->timeleft =  (ctrl & RP23XX_WATCHDOG_CTRL_TIME_MASK) /
+                       USEC_PER_MSEC;
+  wdinfo("Status     :\n");
+  wdinfo("  flags    : %08" PRIx32 "\n", status->flags);
+  wdinfo("  timeout  : %" PRId32 "\n", status->timeout);
+  wdinfo("  timeleft : %" PRId32 "\n", status->timeleft);
   return OK;
 }
 
 /****************************************************************************
- * Name: my_wdt_settimeout
+ * Name: rp23xx_wdt_settimeout
  ****************************************************************************/
 
-int my_wdt_settimeout (struct watchdog_lowerhalf_s *lower, uint32_t timeout)
+int rp23xx_wdt_settimeout (struct watchdog_lowerhalf_s *lower,
+                           uint32_t timeout)
 {
   watchdog_lowerhalf_t *priv  = (watchdog_lowerhalf_t *)lower;
 
-  priv->timeout = timeout > (0x7fffff / 1000) ? 0x7fffff : timeout;
+  wdinfo("Entry: timeout=%" PRId32 "\n", timeout);
 
-  /* Convert millisecond input to microseconds
-   * Extra times 2 per errata RP23XX-E1
+  if ((timeout == 0) || (timeout > (WDT_MAX_TIMEOUT / USEC_PER_MSEC)))
+    {
+      return -EINVAL;
+    }
+
+  /* Load the watchdog timer. The maximum setting is 0xffffff which
+   * corresponds to approximately 16 seconds
    */
 
-  putreg32(priv->timeout * 2000,  RP23XX_WATCHDOG_LOAD);
+  priv->timeout = timeout;
+
+  putreg32(priv->timeout * USEC_PER_MSEC,  RP23XX_WATCHDOG_LOAD);
+
   return OK;
 }
 
 /****************************************************************************
- * Name: my_wdt_ioctl
+ * Name: rp23xx_wdt_ioctl
  ****************************************************************************/
 
-int my_wdt_ioctl(struct watchdog_lowerhalf_s *lower,
+int rp23xx_wdt_ioctl(struct watchdog_lowerhalf_s *lower,
                  int                          cmd,
                  unsigned long                arg)
 {
@@ -282,6 +280,7 @@ int rp23xx_wdt_init(void)
       goto errout;
     }
 
+  putreg32(WDT_MAX_TIMEOUT,  RP23XX_WATCHDOG_LOAD);
   modreg32(0, RP23XX_WATCHDOG_CTRL_ENABLE, RP23XX_WATCHDOG_CTRL);
 
 errout:

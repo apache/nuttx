@@ -75,4 +75,6 @@
 #define RP23XX_PSM_OTP                   (1 << 1)
 #define RP23XX_PSM_PROC_COLD             (1 << 0)
 
+#define RP23XX_PSM_WDSEL_BITS            0x01ffffff
+
 #endif /* __ARCH_ARM_SRC_RP23XX_HARDWARE_RP23XX_PSM_H */
