@@ -72,21 +72,21 @@ static ssize_t lzfoutstream_puts(FAR struct lib_outstream_s *self,
   FAR struct lzf_header_s *header;
   FAR const char *ptr = buf;
   size_t total = len;
-  size_t copyin;
+  size_t copying;
   size_t outlen;
   ssize_t ret;
 
   while (total > 0)
     {
-      copyin = stream->offset + total > LZF_STREAM_BLOCKSIZE ?
-               LZF_STREAM_BLOCKSIZE - stream->offset : total;
+      copying = stream->offset + total > LZF_STREAM_BLOCKSIZE ?
+                LZF_STREAM_BLOCKSIZE - stream->offset : total;
 
-      memcpy(stream->in + stream->offset, ptr, copyin);
+      memcpy(stream->in + stream->offset, ptr, copying);
 
-      ptr            += copyin;
-      stream->offset += copyin;
-      self->nput     += copyin;
-      total          -= copyin;
+      ptr            += copying;
+      stream->offset += copying;
+      self->nput     += copying;
+      total          -= copying;
 
       if (stream->offset == LZF_STREAM_BLOCKSIZE)
         {

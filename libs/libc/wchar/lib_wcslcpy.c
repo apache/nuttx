@@ -47,17 +47,17 @@
  * Name: wcslen
  *
  * Description:
- *   Copy src to string dst of size siz.  At most siz-1 characters
- *   will be copied.  Always NUL terminates (unless siz == 0).
- *   Returns wcslen(src); if retval >= siz, truncation occurred.
+ *   Copy src to string dst of size "size".  At most size-1 characters
+ *   will be copied.  Always NUL terminates (unless size == 0).
+ *   Returns wcslen(src); if retval >= size, truncation occurred.
  *
  ****************************************************************************/
 
-size_t wcslcpy(FAR wchar_t *dst, FAR const wchar_t *src, size_t siz)
+size_t wcslcpy(FAR wchar_t *dst, FAR const wchar_t *src, size_t size)
 {
   FAR wchar_t *d = dst;
   FAR const wchar_t *s = src;
-  size_t n = siz;
+  size_t n = size;
 
   /* Copy as many bytes as will fit */
 
@@ -77,7 +77,7 @@ size_t wcslcpy(FAR wchar_t *dst, FAR const wchar_t *src, size_t siz)
 
   if (n == 0)
     {
-      if (siz != 0)
+      if (size != 0)
         {
           *d = '\0';            /* NUL-terminate dst */
         }

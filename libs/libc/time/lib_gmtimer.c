@@ -155,7 +155,7 @@ static void clock_utc2calendar(time_t days, FAR int *year, FAR int *month,
   int  min;
   int  max;
   int  tmp;
-  bool leapyear;
+  bool leap_year;
 
   /* There is one leap year every four years, so we can get close with the
    * following:
@@ -170,11 +170,11 @@ static void clock_utc2calendar(time_t days, FAR int *year, FAR int *month,
    * Is this year a leap year? (we'll need this later too)
    */
 
-  leapyear = clock_isleapyear(value + EPOCH_YEAR);
+  leap_year = clock_isleapyear(value + EPOCH_YEAR);
 
   /* Get the number of days in the year */
 
-  tmp = (leapyear ? DAYSPERLYEAR : DAYSPERNYEAR);
+  tmp = (leap_year ? DAYSPERLYEAR : DAYSPERNYEAR);
 
   /* Do we have that many days left to account for? */
 
@@ -187,15 +187,15 @@ static void clock_utc2calendar(time_t days, FAR int *year, FAR int *month,
 
       /* Is the next year a leap year? */
 
-      leapyear = clock_isleapyear(value + EPOCH_YEAR);
+      leap_year = clock_isleapyear(value + EPOCH_YEAR);
 
       /* Get the number of days in the next year */
 
-      tmp = (leapyear ? DAYSPERLYEAR : DAYSPERNYEAR);
+      tmp = (leap_year ? DAYSPERLYEAR : DAYSPERNYEAR);
     }
 
   /* At this point, 'value' has the years since 1970 and 'days' has number
-   * of days into that year.  'leapyear' is true if the year in 'value' is
+   * of days into that year.  'leap_year' is true if the year in 'value' is
    * a leap year.
    */
 
@@ -216,7 +216,7 @@ static void clock_utc2calendar(time_t days, FAR int *year, FAR int *month,
        * month following the midpoint.
        */
 
-      tmp = clock_daysbeforemonth(value + 1, leapyear);
+      tmp = clock_daysbeforemonth(value + 1, leap_year);
 
       /* Does the number of days before this month that equal or exceed the
        * number of days we have remaining?
@@ -228,7 +228,7 @@ static void clock_utc2calendar(time_t days, FAR int *year, FAR int *month,
            * midpoint, 'value'.  Could it be the midpoint?
            */
 
-          tmp = clock_daysbeforemonth(value, leapyear);
+          tmp = clock_daysbeforemonth(value, leap_year);
           if (tmp > days)
             {
               /* No... The one we want is somewhere between min and value-1 */
@@ -261,7 +261,7 @@ static void clock_utc2calendar(time_t days, FAR int *year, FAR int *month,
    * the selected month
    */
 
-  days -= clock_daysbeforemonth(value, leapyear);
+  days -= clock_daysbeforemonth(value, leap_year);
 
   /* At this point, value has the month into this year (zero based) and days
    * has number of days into this month (zero based)

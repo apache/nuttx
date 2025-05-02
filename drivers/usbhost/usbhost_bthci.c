@@ -683,7 +683,7 @@ static inline int usbhci_cfgdesc(FAR struct usbhost_state_s *priv,
 
 static int usbhost_ctrl_cmd(FAR struct usbhost_state_s *priv,
                             uint8_t type, uint8_t req, uint16_t value,
-                            uint16_t indx, FAR uint8_t *payload,
+                            uint16_t index, FAR uint8_t *payload,
                             uint16_t len)
 {
   FAR struct usbhost_hubport_s *hport;
@@ -697,7 +697,7 @@ static int usbhost_ctrl_cmd(FAR struct usbhost_state_s *priv,
   ctrlreq->req  = req;
 
   usbhost_putle16(ctrlreq->value, value);
-  usbhost_putle16(ctrlreq->index, indx);
+  usbhost_putle16(ctrlreq->index, index);
   usbhost_putle16(ctrlreq->len,   len);
 
   if (type & USB_REQ_DIR_IN)

@@ -95,7 +95,7 @@ typedef enum altmdm_state_e
   ALTMDM_STATE_SETSUSTIMER,      /* Start TX suspend timer state */
   ALTMDM_STATE_SETSUSTIMERSLEEP, /* Start TX suspend timer when sleep
                                   * state */
-  ALTMDM_STATE_DESTORY,          /* State to be destroyed */
+  ALTMDM_STATE_DESTROY,          /* State to be destroyed */
 } altmdm_state_t;
 
 typedef enum version_phase_e
@@ -261,7 +261,7 @@ static const struct state_func_s g_state_func[] =
   TABLE_CONTENT(DELAYNEXT,        common,      delaynext, delaynext),
   TABLE_CONTENT(SETSUSTIMER,      common,      common,    setsustimer),
   TABLE_CONTENT(SETSUSTIMERSLEEP, common,      common,    setsustimersleep),
-  TABLE_CONTENT(DESTORY,          destroy,     common,    common),
+  TABLE_CONTENT(DESTROY,          destroy,     common,    common),
 };
 
 static struct altmdm_dev_s g_altmdm_dev;
@@ -483,7 +483,7 @@ static altmdm_state_t process_state_poweroff(uint32_t event,
   if (event & EVENT_DESTROY)
     {
       altmdm_event_clear(&g_altmdm_dev.event, EVENT_DESTROY);
-      state = ALTMDM_STATE_DESTORY;
+      state = ALTMDM_STATE_DESTROY;
     }
   else if (event & (EVENT_POWERON | EVENT_SUSPEND | EVENT_RESUME))
     {
@@ -546,7 +546,7 @@ static altmdm_state_t process_state_sleep(uint32_t event,
   if (event & EVENT_DESTROY)
     {
       altmdm_event_clear(&g_altmdm_dev.event, EVENT_DESTROY);
-      state = ALTMDM_STATE_DESTORY;
+      state = ALTMDM_STATE_DESTROY;
     }
   else if (event & EVENT_POWEROFF)
     {
@@ -610,7 +610,7 @@ static altmdm_state_t process_state_sleepwotx(uint32_t event,
   if (event & EVENT_DESTROY)
     {
       altmdm_event_clear(&g_altmdm_dev.event, EVENT_DESTROY);
-      state = ALTMDM_STATE_DESTORY;
+      state = ALTMDM_STATE_DESTROY;
     }
   else if (event & EVENT_POWEROFF)
     {
@@ -685,7 +685,7 @@ static altmdm_state_t process_state_idle4rst(uint32_t event,
   if (event & EVENT_DESTROY)
     {
       altmdm_event_clear(&g_altmdm_dev.event, EVENT_DESTROY);
-      state = ALTMDM_STATE_DESTORY;
+      state = ALTMDM_STATE_DESTROY;
     }
   else if (event & EVENT_POWEROFF)
     {
@@ -746,7 +746,7 @@ static altmdm_state_t process_state_idlewto(uint32_t event,
   if (event & EVENT_DESTROY)
     {
       altmdm_event_clear(&g_altmdm_dev.event, EVENT_DESTROY);
-      state = ALTMDM_STATE_DESTORY;
+      state = ALTMDM_STATE_DESTROY;
     }
   else if (event & EVENT_POWEROFF)
     {
@@ -814,7 +814,7 @@ static altmdm_state_t process_state_idlewoto(uint32_t event,
   if (event & EVENT_DESTROY)
     {
       altmdm_event_clear(&g_altmdm_dev.event, EVENT_DESTROY);
-      state = ALTMDM_STATE_DESTORY;
+      state = ALTMDM_STATE_DESTROY;
     }
   else if (event & EVENT_POWEROFF)
     {
@@ -874,7 +874,7 @@ static altmdm_state_t process_state_idlewotx(uint32_t event,
   if (event & EVENT_DESTROY)
     {
       altmdm_event_clear(&g_altmdm_dev.event, EVENT_DESTROY);
-      state = ALTMDM_STATE_DESTORY;
+      state = ALTMDM_STATE_DESTROY;
     }
   else if (event & EVENT_POWEROFF)
     {
@@ -1026,7 +1026,7 @@ static altmdm_state_t process_state_hdrsreq(uint32_t event,
   if (event & EVENT_DESTROY)
     {
       altmdm_event_clear(&g_altmdm_dev.event, EVENT_DESTROY);
-      state = ALTMDM_STATE_DESTORY;
+      state = ALTMDM_STATE_DESTROY;
     }
   else if (event & EVENT_POWEROFF)
     {
@@ -1133,7 +1133,7 @@ static altmdm_state_t process_state_bodysreq(uint32_t event,
   if (event & EVENT_DESTROY)
     {
       altmdm_event_clear(&g_altmdm_dev.event, EVENT_DESTROY);
-      state = ALTMDM_STATE_DESTORY;
+      state = ALTMDM_STATE_DESTROY;
     }
   else if (event & EVENT_POWEROFF)
     {
@@ -1481,7 +1481,7 @@ static altmdm_state_t process_state_setsustimersleep(uint32_t event,
 }
 
 /****************************************************************************
- * DESTORY state
+ * DESTROY state
  ****************************************************************************/
 
 static int next_state_destroy(altmdm_state_t state)
@@ -1589,7 +1589,7 @@ int altmdm_poweron(void)
   /* Is in POWERON state? */
 
   if ((g_altmdm_dev.current_state != ALTMDM_STATE_POWEROFF) &&
-      (g_altmdm_dev.current_state != ALTMDM_STATE_DESTORY))
+      (g_altmdm_dev.current_state != ALTMDM_STATE_DESTROY))
     {
       if (!(evt & EVENT_POWEROFF))
         {
@@ -1633,7 +1633,7 @@ int altmdm_poweroff(void)
   /* Is in POWEROFF state? */
 
   if ((g_altmdm_dev.current_state == ALTMDM_STATE_POWEROFF) ||
-      (g_altmdm_dev.current_state == ALTMDM_STATE_DESTORY))
+      (g_altmdm_dev.current_state == ALTMDM_STATE_DESTROY))
     {
       if (!(evt & EVENT_POWERON))
         {

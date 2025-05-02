@@ -352,10 +352,10 @@ def parse_and_eval(expression: str, global_context: bool = False):
     return Value(gdb_value)
 
 
-def gdb_eval_or_none(expresssion):
+def gdb_eval_or_none(expression):
     """Evaluate an expression and return None if it fails"""
     try:
-        return parse_and_eval(expresssion)
+        return parse_and_eval(expression)
     except gdb.error:
         return None
 
