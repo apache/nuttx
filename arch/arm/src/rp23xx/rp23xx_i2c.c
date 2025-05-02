@@ -590,6 +590,7 @@ static int rp23xx_i2c_transfer(struct i2c_master_s *dev,
       if (priv->error != OK)
         {
           ret = priv->error;
+          wostop = 0;
           break;
         }
 
@@ -829,7 +830,8 @@ static void rp23xx_i2c_init(struct rp23xx_i2cdev_s *priv)
   i2c_reg_write(priv, RP23XX_I2C_IC_SDA_HOLD_OFFSET, 1);
 
   i2c_reg_write(priv, RP23XX_I2C_IC_CON_OFFSET,
-                (RP23XX_I2C_IC_CON_IC_SLAVE_DISABLE |
+                (RP23XX_I2C_IC_CON_IC_RESTART_EN |
+                 RP23XX_I2C_IC_CON_IC_SLAVE_DISABLE |
                  RP23XX_I2C_IC_CON_MASTER_MODE |
                  RP23XX_I2C_IC_CON_TX_EMPTY_CTRL));
 }
