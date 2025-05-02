@@ -223,6 +223,14 @@ static const char *g_white_suffix[] =
   "kHz",
   "kbps",
   "us",
+
+  /* Ref:  arch/avr/src/avrdx/avrdx_serial.c (and others
+   * in arch/avr/src/avrdx.) I/O register constants
+   * for AVR DA/DB chips.
+   */
+
+  "bm",
+  "bp",
   NULL
 };
 
@@ -1123,7 +1131,7 @@ int main(int argc, char **argv, char **envp)
 {
   FILE *instream;       /* File input stream */
   char line[LINE_SIZE]; /* The current line being examined */
-  char buffer[100];     /* Localy format error strings */
+  char buffer[100];     /* Locally format error strings */
   char *lptr;           /* Temporary pointer into line[] */
   char *ext;            /* Temporary file extension */
   bool btabs;           /* True: TAB characters found on the line */
