@@ -62,6 +62,6 @@
  * Name: tlsr82_adc_init
  ****************************************************************************/
 
-int tlsr82_adc_init(const char *devpath, int miror);
+int tlsr82_adc_init(const char *devpath, int minor);
 
 #endif /* __ARCH_ARM_SRC_TLSR82_TLSR82_ADC_H */

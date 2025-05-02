@@ -75,7 +75,7 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-int tlsr82_pwminitialize(const char *devpath, int miror);
+int tlsr82_pwminitialize(const char *devpath, int minor);
 
 #undef EXTERN
 #if defined(__cplusplus)

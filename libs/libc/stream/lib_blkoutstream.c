@@ -153,15 +153,15 @@ static ssize_t blkoutstream_puts(FAR struct lib_sostream_s *self,
 
       if (offset > 0)
         {
-          size_t copyin = offset + remain > sectorsize ?
-                          sectorsize - offset : remain;
+          size_t copying = offset + remain > sectorsize ?
+                           sectorsize - offset : remain;
 
-          memcpy(stream->cache + offset, ptr, copyin);
+          memcpy(stream->cache + offset, ptr, copying);
 
-          ptr        += copyin;
-          offset     += copyin;
-          self->nput += copyin;
-          remain     -= copyin;
+          ptr        += copying;
+          offset     += copying;
+          self->nput += copying;
+          remain     -= copying;
 
           if (offset == sectorsize)
             {
@@ -189,7 +189,7 @@ static ssize_t blkoutstream_puts(FAR struct lib_sostream_s *self,
       else
         {
           size_t nsector = remain / sectorsize;
-          size_t copyin = nsector * sectorsize;
+          size_t copying = nsector * sectorsize;
 
           ret = inode->u.i_bops->write(inode, ptr, sector, nsector);
           if (ret < 0)
@@ -197,9 +197,9 @@ static ssize_t blkoutstream_puts(FAR struct lib_sostream_s *self,
               return ret;
             }
 
-          ptr        += copyin;
-          self->nput += copyin;
-          remain     -= copyin;
+          ptr        += copying;
+          self->nput += copying;
+          remain     -= copying;
         }
     }
 

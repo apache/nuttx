@@ -82,7 +82,7 @@ static void adjust(FAR int *tenx, FAR int *x, int base)
 
 static void normalize(FAR struct tm *tm)
 {
-  bool leapyear = false;
+  bool leap_year = false;
   int year;
 
   for (; ; )
@@ -97,7 +97,7 @@ static void normalize(FAR struct tm *tm)
 
       /* Is this a leap year? */
 
-      leapyear = clock_isleapyear(year);
+      leap_year = clock_isleapyear(year);
 
       /* Adjust mday field */
 
@@ -106,11 +106,11 @@ static void normalize(FAR struct tm *tm)
           tm->tm_mon--;
           if (tm->tm_mon < 0)
             {
-              tm->tm_mday += g_mon_lengths[leapyear][TM_DECEMBER];
+              tm->tm_mday += g_mon_lengths[leap_year][TM_DECEMBER];
               break;
             }
 
-          tm->tm_mday += g_mon_lengths[leapyear][tm->tm_mon];
+          tm->tm_mday += g_mon_lengths[leap_year][tm->tm_mon];
         }
 
       if (tm->tm_mon < 0)
@@ -118,9 +118,9 @@ static void normalize(FAR struct tm *tm)
           continue;
         }
 
-      while (tm->tm_mday > g_mon_lengths[leapyear][tm->tm_mon])
+      while (tm->tm_mday > g_mon_lengths[leap_year][tm->tm_mon])
         {
-          tm->tm_mday -= g_mon_lengths[leapyear][tm->tm_mon];
+          tm->tm_mday -= g_mon_lengths[leap_year][tm->tm_mon];
           tm->tm_mon++;
           if (tm->tm_mon > (MONSPERYEAR - 1))
             {
@@ -164,13 +164,13 @@ static void normalize(FAR struct tm *tm)
           tm->tm_hour -= HOURSPERDAY;
           tm->tm_mday++;
 
-          if (tm->tm_mday > g_mon_lengths[leapyear][tm->tm_mon])
+          if (tm->tm_mday > g_mon_lengths[leap_year][tm->tm_mon])
             {
               break;
             }
         }
 
-      if (tm->tm_mday > g_mon_lengths[leapyear][tm->tm_mon])
+      if (tm->tm_mday > g_mon_lengths[leap_year][tm->tm_mon])
         {
           continue;
         }
@@ -185,7 +185,7 @@ static void normalize(FAR struct tm *tm)
   /* Determine the day of the year; -1 because the mday is 1-indexed */
 
   tm->tm_yday = tm->tm_mday - 1 + clock_daysbeforemonth(tm->tm_mon,
-                                                        leapyear);
+                                                        leap_year);
 
   /* Finally calculate the weekday */
 

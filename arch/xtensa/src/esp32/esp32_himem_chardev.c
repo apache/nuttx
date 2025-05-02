@@ -361,7 +361,7 @@ int himem_chardev_register(char *name, size_t size)
 int himem_chardev_unregister(char *name)
 {
   int ret = 0;
-  int successed = 0;
+  int success = 0;
   struct himem_chardev_s *dev;
   struct himem_chardev_s *tmp;
   nxmutex_lock(&lock);
@@ -379,7 +379,7 @@ int himem_chardev_unregister(char *name)
               if (ret != 0)
                 {
                   merr("Failed to unmap himem.\n");
-                  successed = -1;
+                  success = -1;
                 }
 
               g_ram_offset = HIMEM_UNMAPPED;
@@ -390,20 +390,20 @@ int himem_chardev_unregister(char *name)
           if (ret != 0)
             {
               merr("Failed to free himem.\n");
-              successed = -1;
+              success = -1;
             }
 
           ret = unregister_driver(dev->name);
           if (ret != 0)
             {
               merr("Failed to unregister driver. dev=%s\n", dev->name);
-              successed = -1;
+              success = -1;
             }
 
           list_delete(&dev->node);
           kmm_free(dev);
           nxmutex_unlock(&lock);
-          return successed;
+          return success;
         }
     }
 

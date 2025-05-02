@@ -61,7 +61,7 @@ int devif_file_send(FAR struct net_driver_s *dev, FAR struct file *file,
                     unsigned int target_offset)
 {
   FAR struct iob_s *iob;
-  unsigned int copyin;
+  unsigned int copying;
   unsigned int remain;
   int ret;
 
@@ -122,18 +122,18 @@ int devif_file_send(FAR struct net_driver_s *dev, FAR struct file *file,
           iob = iob->io_flink;
         }
 
-      copyin = CONFIG_IOB_BUFSIZE -
-               (iob->io_len + iob->io_offset);
-      if (copyin > remain)
+      copying = CONFIG_IOB_BUFSIZE -
+                (iob->io_len + iob->io_offset);
+      if (copying > remain)
         {
-          copyin = remain;
+          copying = remain;
         }
 
-      if (copyin > 0)
+      if (copying > 0)
         {
           ret = file_read(file, iob->io_data +
                           (iob->io_len + iob->io_offset),
-                          copyin);
+                          copying);
           if (ret < 0)
             {
               goto errout;
