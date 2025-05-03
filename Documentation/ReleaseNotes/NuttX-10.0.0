@@ -30,7 +30,7 @@ interface has also been removed, but more care will need to be exercised:
 `wd_delete()` also cancels any running timer so, in many case, calls to
 `wd_delete()` should be replaced with calls to `wd_cancel()`. If you are certain
 that the timer has never been started, then you must remove the call to
-`wd_delete()` altogether. Calling `wd_cancel()` with an un-initialized s`truct
+`wd_delete()` altogether. Calling `wd_cancel()` with an un-initialized `struct
 wdog_s` instance may well cause a fatal crash. *   Replace the first parameter
 of all remaining wdog function calls from. For example, replace a call like `ret
 = wd_cancel(priv->wdog)` where `priv->wdog` was type `WDOG_ID` with the call
@@ -210,7 +210,7 @@ error for ::setbuf if CONFIG\_STDIO\_DISABLE\_BUFFERING is set
 errno in mq\_open
 
 * [PR-1595](https://github.com/apache/nuttx/pull/1595) epoll\_wait()
-must loop until "maxevents" to fille output evs array
+must loop until "maxevents" to fill the output evs array
 
 * [PR-1519](https://github.com/apache/nuttx/pull/1519) libc: Replace
 index/rindex from macro to function to protect against side effects with

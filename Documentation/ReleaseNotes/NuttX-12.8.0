@@ -518,7 +518,7 @@ Drivers With Improvements
 * [#13947](https://github.com/apache/nuttx/pull/13947) drivers/devicetree/fdt: get 'reg' property
 * [#13916](https://github.com/apache/nuttx/pull/13916) drivers/fb: use ENOTTY to replace assert
 * [#14790](https://github.com/apache/nuttx/pull/14790) Drivers/input
-* [#14177](https://github.com/apache/nuttx/pull/14177) drivers/input: fix complie err about undefined
+* [#14177](https://github.com/apache/nuttx/pull/14177) drivers/input: fix compile err about undefined
 * [#14728](https://github.com/apache/nuttx/pull/14728) drivers/misc: fix rpmsg dev poll assert crash
 * [#14729](https://github.com/apache/nuttx/pull/14729) drivers/misc: fix rpmsgdev read overflow
 * [#15047](https://github.com/apache/nuttx/pull/15047) drivers/net: change netdev_lower_quota_load to macro
@@ -697,7 +697,7 @@ Improvements
 * [#14554](https://github.com/apache/nuttx/pull/14554) DNS: Implement TCP fallback
 * [#14867](https://github.com/apache/nuttx/pull/14867) IPV6 macro
 * [#13906](https://github.com/apache/nuttx/pull/13906) local_sock: fix accept use-after-free
-* [#14103](https://github.com/apache/nuttx/pull/14103) local_socket: corrent send/recv return value after shutdown
+* [#14103](https://github.com/apache/nuttx/pull/14103) local_socket: correct send/recv return value after shutdown
 * [#14574](https://github.com/apache/nuttx/pull/14574) tcp_input: if tcp->req > recvreq send ack only when state is TCP_ESTABLISHED
 * [#14698](https://github.com/apache/nuttx/pull/14698) tcp: fix tcp can not retransmit timely when ACK with TCP_NEWDATA
 * [#14595](https://github.com/apache/nuttx/pull/14595) sys/socket: fix struct sockaddr_storage alignment issue
@@ -746,7 +746,7 @@ Unsorted
 * [#14094](https://github.com/apache/nuttx/pull/14094) dump more information when CONFIG_MM_DUMP_DETAILS_ON_FAILURE enabled flush log before coredump
 * [#13902](https://github.com/apache/nuttx/pull/13902) e1000: add polling mode support for tx/rx
 * [#14646](https://github.com/apache/nuttx/pull/14646) Enable DEV_PIPE_NPOLLWAITERS default value 4 for adapter APP
-* [#14318](https://github.com/apache/nuttx/pull/14318) Expand samplerate bits from 8 to 32 enchance encode capacity in sim offload.
+* [#14318](https://github.com/apache/nuttx/pull/14318) Expand samplerate bits from 8 to 32 enhance encode capacity in sim offload.
 * [#14310](https://github.com/apache/nuttx/pull/14310) external/ffmpeg: add offloding audio recording with amr format.
 * [#13867](https://github.com/apache/nuttx/pull/13867) Fdt mmio: add common fdt mmio virtio device register function
 * [#14591](https://github.com/apache/nuttx/pull/14591) Feature/esp i2c bitbang
@@ -885,7 +885,7 @@ Unsorted
 * [#14180](https://github.com/apache/nuttx/pull/14180) sdio_probe: set voltage use CMD5
 * [#14802](https://github.com/apache/nuttx/pull/14802) segger/stream_rtt: fix warning after stream update
 * [#14465](https://github.com/apache/nuttx/pull/14465) sem: change sem wait to atomic operation
-* [#14152](https://github.com/apache/nuttx/pull/14152) setjmp: fix setjmp returns 0 when calling longjmp with 0 as the secon…
+* [#14152](https://github.com/apache/nuttx/pull/14152) setjmp: fix setjmp returns 0 when calling longjmp with 0 as the second…
 * [#14276](https://github.com/apache/nuttx/pull/14276) shm:fix build error
 * [#14524](https://github.com/apache/nuttx/pull/14524) Shmfs bug fix
 * [#14822](https://github.com/apache/nuttx/pull/14822) Simplify PCI driver configuration

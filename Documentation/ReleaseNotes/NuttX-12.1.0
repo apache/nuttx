@@ -331,7 +331,7 @@ Improvements
 * [#8817](https://github.com/apache/nuttx/pull/8817) arm: nrf52: improvements for GPIOTE and buttons example for boards
 * [#8923](https://github.com/apache/nuttx/pull/8923) arm: nrf52: initial support for USBDEV
 * [#8725](https://github.com/apache/nuttx/pull/8725) arm: nrf52: minor fixes for SoftDevice
-* [#8702](https://github.com/apache/nuttx/pull/8702) arm: nrf52: use the lates SoftDevice release (v2.3.0)
+* [#8702](https://github.com/apache/nuttx/pull/8702) arm: nrf52: use the latest SoftDevice release (v2.3.0)
 * [#8793](https://github.com/apache/nuttx/pull/8793) arm: nrf52/nrf53: various fixes
 * [#8804](https://github.com/apache/nuttx/pull/8804) arm: nrf53: add ADC support
 * [#8909](https://github.com/apache/nuttx/pull/8909) arm: nrf53: add GPIOTE support (GPIO interrupts)
@@ -475,7 +475,7 @@ Improvements
 * [#8076](https://github.com/apache/nuttx/pull/8076) sim: move some i2c,spi configs from board to arch
 * [#8469](https://github.com/apache/nuttx/pull/8469) sim: realize sim timer tickless
 * [#7911](https://github.com/apache/nuttx/pull/7911) sim: Refine arch/sim implementation
-* [#7946](https://github.com/apache/nuttx/pull/7946) sim: remove unused variale in sim_saveusercontext()
+* [#7946](https://github.com/apache/nuttx/pull/7946) sim: remove unused variable in sim_saveusercontext()
 * [#8849](https://github.com/apache/nuttx/pull/8849) sim: sim_linuxi2c: fix snprintf parameter
 * [#8472](https://github.com/apache/nuttx/pull/8472) sim: sim_saveusercontext & sim_fullcontextrestore update
 * [#7928](https://github.com/apache/nuttx/pull/7928) sim: take timer irq as real timer with WALL_SIGNAL

@@ -427,7 +427,7 @@ longer available.
 
 - apps/system/lzf: Added the test case from Marc Alexander Lehmann's
 LIBLZF3.6 library From Boris Astardzhiev.
-- apps/system/embedlog: Support for embedlog data loggin package from
+- apps/system/embedlog: Support for embedlog data logging package from
 https://embedlog.kurwinet.pl/ From Michal Lyszczek.
 - apps/system/zmodem: Added an option to enable hardware flow control
 via termios. Allow stack size and priority to be configured.

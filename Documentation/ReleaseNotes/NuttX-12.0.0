@@ -163,7 +163,7 @@ NuttX-12.0.0
  * [#6961](https://github.com/apache/incubator-nuttx/pull/6961) Fixed format specifier in various prints.
  * [#7532](https://github.com/apache/incubator-nuttx/pull/7532) hwspinlock: add hwspinlock driver for multi CPU
  * [#7472](https://github.com/apache/incubator-nuttx/pull/7472) Initialize global mutext/sem by NXMUTEX_INITIALIZER and SEM_INITIALIZER
- * [#6926](https://github.com/apache/incubator-nuttx/pull/6926) list.h: Change inline function to macro as much as possbile
+ * [#6926](https://github.com/apache/incubator-nuttx/pull/6926) list.h: Change inline function to macro as much as possible
  * [#7517](https://github.com/apache/incubator-nuttx/pull/7517) nxmutex: minor fix for mutex lock mismatch
  * [#6965](https://github.com/apache/incubator-nuttx/pull/6965) nxmutex: replace nxsem when used as a lock
  * [#6966](https://github.com/apache/incubator-nuttx/pull/6966) queue: Change some queue function to macro
@@ -260,7 +260,7 @@ NuttX-12.0.0
  * [#7155](https://github.com/apache/incubator-nuttx/pull/7155) arch: arm: armv7-r: remove incorrect include header "addrenv.h"
  * [#7773](https://github.com/apache/incubator-nuttx/pull/7773) arch: arm: armv7-r: sync ARM_THUMB support from cortex-a
  * [#7513](https://github.com/apache/incubator-nuttx/pull/7513) arch: arm: armv7-a/r: add isb after CACHE and TLB operations.
- * [#7195](https://github.com/apache/incubator-nuttx/pull/7195) arch: arm: armv7-a/r: SMP hande all cores start at same time
+ * [#7195](https://github.com/apache/incubator-nuttx/pull/7195) arch: arm: armv7-a/r: SMP handle all cores start at same time
  * [#7338](https://github.com/apache/incubator-nuttx/pull/7338) arch: arm: armv7-a/r: Don't define fiq stack if CONFIG_ARMV7A_DECODEFIQ=n
  * [#7751](https://github.com/apache/incubator-nuttx/pull/7751) arch: arm: armv7-a/r: thumb: force assembler files to be interpreted as Thumb code
  * [#7129](https://github.com/apache/incubator-nuttx/pull/7129) arch: arm: armv7-a/r: Implement up_affinity_irq
@@ -421,7 +421,7 @@ NuttX-12.0.0
  * [#6883](https://github.com/apache/incubator-nuttx/pull/6883) arch: sim: set CMDLINE env to the argument user pass to nuttx
  * [#7717](https://github.com/apache/incubator-nuttx/pull/7717) arch: sim: sim_alsa.c: add mp3 offload playback on sim
  * [#7282](https://github.com/apache/incubator-nuttx/pull/7282) arch: sim: support multiple tapdev for sim
- * [#7655](https://github.com/apache/incubator-nuttx/pull/7655) arch: sim: Unify the host soruce file naming
+ * [#7655](https://github.com/apache/incubator-nuttx/pull/7655) arch: sim: Unify the host source file naming
  * [#6908](https://github.com/apache/incubator-nuttx/pull/6908) arch: sim: wchar_t: fix visual studio Compiler Error C2371
  * [#7335](https://github.com/apache/incubator-nuttx/pull/7335) arch: sparc: add support of spin_lock for LEON3 and LEON4
  * [#7292](https://github.com/apache/incubator-nuttx/pull/7292) arch: sparc: dismiss non-Unicode characters issue

@@ -40,7 +40,7 @@ NuttX-11.0.0
 * [#6392](https://github.com/apache/nuttx/pull/6392) sched/mqueue: remove sched_lock to improve performance
 * [#6377](https://github.com/apache/nuttx/pull/6377) sched/tls: Shouldn't get tls info directly from sp in kernel space
 * [#6365](https://github.com/apache/nuttx/pull/6365) sched/tls: Wrap up_info_size into tls_info_size
-* [#6340](https://github.com/apache/nuttx/pull/6340) Change dpends on SCHED_[L|H]PWORK to SCHED_WORKQUEUE
+* [#6340](https://github.com/apache/nuttx/pull/6340) Change depends on SCHED_[L|H]PWORK to SCHED_WORKQUEUE
 * [#6250](https://github.com/apache/nuttx/pull/6250) sched: Remove task_restart in case of CONFIG_BUILD_KERNEL
 * [#6236](https://github.com/apache/nuttx/pull/6236) sched: Remove task_delete in case of CONFIG_BUILD_KERNEL
 * [#5822](https://github.com/apache/nuttx/pull/5822) sched/dumpstack: Print "backtrace:" only in the first iteration
@@ -65,7 +65,7 @@ NuttX-11.0.0
 * [#6120](https://github.com/apache/nuttx/pull/6120) Implement execle, execve, execvp, execlp and execvpe
 * [#5814](https://github.com/apache/nuttx/pull/5814) env_dup: Allocate memory from the correct memory pool
 
-* [#5914](https://github.com/apache/nuttx/pull/5914) mm/mm_heap: place alloc-bit at the LSB of node->preceeding
+* [#5914](https://github.com/apache/nuttx/pull/5914) mm/mm_heap: place alloc-bit at the LSB of node->preceding
 * [#6685](https://github.com/apache/nuttx/pull/6685) mm/mm_heap: update MM_BACKTRACE and malloc failed output
 * [#6658](https://github.com/apache/nuttx/pull/6658) mm: Fixed the usage of CONFIG_MM_BACKTRACE & CONFIG_DEBUG_MM
 * [#5906](https://github.com/apache/nuttx/pull/5906) mm_heap: heapsize align with MM_MIN_CHUNK

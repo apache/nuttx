@@ -90,7 +90,7 @@ libs
 * [#9835](https://github.com/apache/nuttx/pull/9835) libc: basename: Change len type from int to size_t
 * [#10417](https://github.com/apache/nuttx/pull/10417) libc: change the default NETDB_DNSCLIENT_MAXRESPONSE to the standard length
 * [#10021](https://github.com/apache/nuttx/pull/10021) libc: compatible with Android for htonq:ntohq
-* [#10708](https://github.com/apache/nuttx/pull/10708) libc: currect usage of getpid:gettid in library
+* [#10708](https://github.com/apache/nuttx/pull/10708) libc: correct usage of getpid:gettid in library
 * [#10121](https://github.com/apache/nuttx/pull/10121) libc: fdt: add libfdt support
 * [#10405](https://github.com/apache/nuttx/pull/10405) libc: fdt: modify makefile
 * [#10519](https://github.com/apache/nuttx/pull/10519) libc: fix a fatal bug in fread
@@ -127,7 +127,7 @@ libs
 * [#9708](https://github.com/apache/nuttx/pull/9708) libc: pthread: add the implementation of pthread_getcpuclockid
 * [#9903](https://github.com/apache/nuttx/pull/9903) libc: pthread: fix the incorrect description in comments
 * [#10752](https://github.com/apache/nuttx/pull/10752) libc: pthread: g_lock may lead deadlock
-* [#9771](https://github.com/apache/nuttx/pull/9771) libc: pthread: remove unsed compare code in pthread_rwlock_init()
+* [#9771](https://github.com/apache/nuttx/pull/9771) libc: pthread: remove unused compare code in pthread_rwlock_init()
 * [#9948](https://github.com/apache/nuttx/pull/9948) libc: rand_r: support rand_r api
 * [#9773](https://github.com/apache/nuttx/pull/9773) libc: set CONFIG_PTHREAD_STACK_MIN as DEFAULT_MM_PGSIZE`s default value and
 * [#10064](https://github.com/apache/nuttx/pull/10064) libc: stdio: changed LIBC_NL_ARGMAX default value to 9
@@ -514,7 +514,7 @@ New Driver Support
 * [#10725](https://github.com/apache/nuttx/pull/10725) sensors: goldfish: add goldfish gps driver
 * [#9954](https://github.com/apache/nuttx/pull/9954) sensors: gps: Implement the GPS driver framework
 * [#10152](https://github.com/apache/nuttx/pull/10152) power: Regulator:add new features
-* [#10167](https://github.com/apache/nuttx/pull/10167) reset: Add resest driver framework
+* [#10167](https://github.com/apache/nuttx/pull/10167) reset: Add reset driver framework
 * [#10001](https://github.com/apache/nuttx/pull/10001) timers: qemu: add qemu rtc driver.
 * [#10171](https://github.com/apache/nuttx/pull/10171) video: add NuttX Goldfish-FB driver
 * [#10118](https://github.com/apache/nuttx/pull/10118) video: add NuttX goldfish camera driver
@@ -637,7 +637,7 @@ Drivers With Improvements
 * [#10673](https://github.com/apache/nuttx/pull/10673) serial: Add ram uart driver
 * [#10170](https://github.com/apache/nuttx/pull/10170) serial: filter out control character in pty echo
 * [#10443](https://github.com/apache/nuttx/pull/10443) serial: fix error echo about VT100 escape sequence
-* [#10442](https://github.com/apache/nuttx/pull/10442) serial: fix race condition about calling rxflowcontrol in mutli thread
+* [#10442](https://github.com/apache/nuttx/pull/10442) serial: fix race condition about calling rxflowcontrol in multiple thread
 * [#9799](https://github.com/apache/nuttx/pull/9799) serial: serial.c fix logic error
 * [#9980](https://github.com/apache/nuttx/pull/9980) serial: Simplify the echo process
 * [#10019](https://github.com/apache/nuttx/pull/10019) serial: uart_16550: Wait before setting Line Control Register (Synopsys DesignWare 8250)

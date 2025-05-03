@@ -24,7 +24,7 @@ Work in progress features (some logic is present, but they require more work):
 * slotted CSMA-CA
 * GTS
 
-Fetures not implemented:
+Features not implemented:
 
 * enhanced ACK (Enh-ACK)
 * enhanced beacon
@@ -40,5 +40,5 @@ This implementation reserves the following peripherals:
 
 * ``TIMER0`` - used as high resolution timer for ACK, IFS and other radio delays
 
-* ``RTC0`` - if superframe support is enabled, used as low power timer to hande
+* ``RTC0`` - if superframe support is enabled, used as low power timer to handle
   superframe events

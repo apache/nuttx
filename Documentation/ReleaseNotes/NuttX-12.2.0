@@ -289,7 +289,7 @@ Improvements
 * [#9020](https://github.com/apache/nuttx/pull/9020) arch/xtensa/esp32: ESP32 not use IMEM in user heap mode
 * [#9408](https://github.com/apache/nuttx/pull/9408) arch/xtensa/esp32: Fix build issues for SoftAP mode
 * [#9236](https://github.com/apache/nuttx/pull/9236) arch/xtensa/esp32: Fix himem driver crash in SMP mode
-* [#8926](https://github.com/apache/nuttx/pull/8926) arch/xtensa/esp32: fix signal deliver when task is running on ther CPU
+* [#8926](https://github.com/apache/nuttx/pull/8926) arch/xtensa/esp32: fix signal deliver when task is running on other CPU
 * [#8963](https://github.com/apache/nuttx/pull/8963) arch/xtensa/esp32: Fix Wi-Fi driver parameter settings
 * [#8974](https://github.com/apache/nuttx/pull/8974) arch/xtensa/esp32: Make asprintf and lib_free corresponding
 * [#9077](https://github.com/apache/nuttx/pull/9077) arch/xtensa/esp32: Ssd1306
@@ -405,7 +405,7 @@ Improvements
 * [#8907](https://github.com/apache/nuttx/pull/#8907) drivers/video/fb: add vsync offset support
 * [#9101](https://github.com/apache/nuttx/pull/#9101) drivers/video/fb: fix pollnotify calling crash in advance
 * [#9328](https://github.com/apache/nuttx/pull/#9328) drivers/video/fb_driver: add fb_open and fb_close
-* [#9388](https://github.com/apache/nuttx/pull/#9388) drivers/video/vnc_server: Fix that vnc_updater thread exited caused by readed a null data
+* [#9388](https://github.com/apache/nuttx/pull/#9388) drivers/video/vnc_server: Fix that vnc_updater thread exited caused by reading a null data
 * [#9329](https://github.com/apache/nuttx/pull/#9329) drivers/video/vnc_server: set touch.maxpoint to 1 for circbuf_init
 * [#9447](https://github.com/apache/nuttx/pull/#9447) drivers/virtio: Fix virtnet_transmit() in virtio-mmio-net.c
 * [#9457](https://github.com/apache/nuttx/pull/#9457) drivers/virtio: Fix virtio-mmio-net
