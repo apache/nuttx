@@ -339,14 +339,14 @@ static struct fb_vtable_s g_base_vtable =
  * Name: max_common_divisor
  *
  * Description:
- *   Calculate maxium common divisor.
+ *   Calculate maximum common divisor.
  *
  * Input Parameters:
  *   a - Calculation parameter a
  *   b - Calculation parameter b
  *
  * Returned Value:
- *   Maxium common divisor.
+ *   Maximum common divisor.
  *
  ****************************************************************************/
 
@@ -377,7 +377,7 @@ static inline uint32_t max_common_divisor(uint32_t a, uint32_t b)
  *
  * Returned Value:
  *   true:  This is the first register access of this type.
- *   flase: This is the same as the preceding register access.
+ *   false: This is the same as the preceding register access.
  *
  ****************************************************************************/
 
@@ -429,10 +429,10 @@ static bool esp32s3_lcd_checkreg(bool wr,
  *  Read any 32-bit register using an absolute
  *
  * Input Parameters:
- *  address - Regster address
+ *  address - Register address
  *
  * Returned Value:
- *  Regster value.
+ *  Register value.
  *
  ****************************************************************************/
 
@@ -457,8 +457,8 @@ static uint32_t esp32s3_lcd_getreg(uintptr_t address)
  *  Write to any 32-bit register using an absolute address
  *
  * Input Parameters:
- *  address - Regster address
- *  regval  - Regster value
+ *  address - Register address
+ *  regval  - Register value
  *
  * Returned Value:
  *  None
@@ -900,8 +900,8 @@ static int esp32s3_lcd_config(void)
   regval |= LCD_CAM_LCD_VSYNC_INT_ENA_M;
   esp32s3_lcd_putreg(LCD_CAM_LC_DMA_INT_ENA_REG, regval);
 
-  /* Set LCD screem parameters:
-   *    1. RGB mode, ouput VSYNC/HSYNC/DE signal
+  /* Set LCD screen parameters:
+   *    1. RGB mode, output VSYNC/HSYNC/DE signal
    *    2. VT height
    *    3. VA height
    *    4. HB front

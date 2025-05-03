@@ -1118,7 +1118,7 @@ static bool flexus_txempty(struct uart_dev_s *dev)
  *
  * Description:
  *   Performs the low level Flexcom USART initialization early so that the
- *   Flexcom serial console will be available during bootup.  This must be
+ *   Flexcom serial console will be available during boot up.  This must be
  *   called before flexus_serialinit.
  *
  ****************************************************************************/

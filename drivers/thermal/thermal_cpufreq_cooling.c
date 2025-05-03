@@ -207,7 +207,7 @@ FAR struct thermal_cooling_device_s *thermal_cpufreq_cooling_register(void)
  *   Unregister cpufreq cooling device
  *
  * Input Parameters:
- *   cdev - Addr of cpufre cooling devcie entry
+ *   cdev - Addr of cpufre cooling device entry
  *
  * Returned Value:
  *   None

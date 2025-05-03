@@ -69,7 +69,7 @@ static spinlock_t g_serial_lock = SP_UNLOCKED;
  *
  * Description:
  *   Performs the low level USART initialization early in debug so that the
- *   serial console will be available during bootup.  This must be called
+ *   serial console will be available during boot up.  This must be called
  *   before sam_serialinit.
  *
  ****************************************************************************/

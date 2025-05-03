@@ -1185,7 +1185,7 @@ static int romfs_bind(FAR struct inode *blkdriver, FAR const void *data,
     }
 #endif
 
-  /* Then complete the mount by getting the ROMFS configuratrion from
+  /* Then complete the mount by getting the ROMFS configuration from
    * the ROMF header
    */
 

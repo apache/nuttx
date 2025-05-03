@@ -549,7 +549,7 @@ static void bmi160_gyro_worker(FAR void *arg)
  *
  * Input Parameters:
  *   devno   - Sensor device number.
- *   config  - Interrupt fuctions.
+ *   config  - Interrupt functions.
  *
  * Returned Value:
  *   Description of the value returned by this function (if any),
@@ -640,7 +640,7 @@ static int bmi160_register_accel(int devno,
  *
  * Input Parameters:
  *   devno   - Sensor device number.
- *   config  - Interrupt fuctions.
+ *   config  - Interrupt functions.
  *
  * Returned Value:
  *   Description of the value returned by this function (if any),

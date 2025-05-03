@@ -177,7 +177,7 @@ void arm64_chip_boot(void)
   /* Default exception level is EL1 for the NuttX OS. However, if we debug
    * NuttX by JTAG, The XSCT of Vivado SDK will set the Zynq MPSoC
    * to EL3. Other levels are not supported at the moment. And in this
-   * operating conditon, we can't use SMC for there's no ATF support.
+   * operating condition, we can't use SMC for there's no ATF support.
    */
 
 #if CONFIG_ARCH_ARM64_EXCEPTION_LEVEL < 3

@@ -526,7 +526,7 @@ static struct sam_pwm_chan_s g_pwm_chan3 =
  *
  * Returned Value:
  *   true:  This is the first register access of this type.
- *   flase: This is the same as the preceding register access.
+ *   false: This is the same as the preceding register access.
  *
  ****************************************************************************/
 

@@ -132,7 +132,7 @@ FAR void *vm_map_region(uintptr_t paddr, size_t size)
 error:
   if (i)
     {
-      /* Undo alway mapped pages */
+      /* Undo always mapped pages */
 
       up_shmdt((uintptr_t)vaddr, i);
     }

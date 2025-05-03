@@ -108,7 +108,7 @@
 #define EXTI2_HSE32CSS     (1 << 12)  /* EXTI line 43: RCC HSE32 CSS interrupt */
 #define EXTI2_RADIOIRQ     (1 << 13)  /* EXTI line 44: Radio interrupt */
 #define EXTI2_RADIOBSY     (1 << 14)  /* EXTI line 45: Radio busy wakeup */
-#define EXTI2_CDBGPWRUPREQ (1 << 15)  /* EXTI line 46: Debug power-up request wakup */
+#define EXTI2_CDBGPWRUPREQ (1 << 15)  /* EXTI line 46: Debug power-up request wakeup */
 
 /* Rising Trigger selection register */
 

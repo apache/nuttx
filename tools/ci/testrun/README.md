@@ -7,7 +7,7 @@ sudo apt-get install minicom
 cd env
 pip3 install -r requirements.txt
 ```
-# Pytest Original Parameter useage refer to help
+# Pytest Original Parameter usage refer to help
 # Customized Parameters
 ```bash
 pytest

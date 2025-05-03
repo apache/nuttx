@@ -301,7 +301,7 @@ int32_t altcom_smsreportrecv_pkt_parse(FAR struct alt1250_dev_s *dev,
              &in->msg.u.delivery_report.discharge_time,
              sizeof(report->status_report.discharge_time));
 
-      m_info("[staus report] msg size: %u\n", *msg_sz);
+      m_info("[status report] msg size: %u\n", *msg_sz);
       m_info("           msgtype: %u\n", msgheader->msgtype);
       m_info("           datalen: %u\n", msgheader->datalen);
       m_info("           refid: %u\n", report->status_report.refid);

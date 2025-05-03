@@ -50,7 +50,7 @@
 #define LPC54_GPIO_B_OFFSET(p)      (0x0000 + (p))
 #define LPC54_GPIO_W_OFFSET(p)      (0x1000 + ((p) << 2))
 
-/* Word access to individual port regisers */
+/* Word access to individual port registers */
 
 #define LPC54_GPIO_PORT_OFFSET(n)   ((n) << 2)
 #define LPC54_GPIO_DIR_OFFSET(n)    (0x2000 + LPC54_GPIO_PORT_OFFSET(n))
@@ -71,7 +71,7 @@
 #define LPC54_GPIO_B(p)             (LPC54_GPIO_BASE + LPC54_GPIO_B_OFFSET(p))
 #define LPC54_GPIO_W(p)             (LPC54_GPIO_BASE + LPC54_GPIO_W_OFFSET(p))
 
-/* Word access to individual port regisers */
+/* Word access to individual port registers */
 
 #define LPC54_GPIO_PORT(n)          (LPC54_GPIO_BASE + LPC54_GPIO_PORT_OFFSET(n))
 #define LPC54_GPIO_DIR(n)           (LPC54_GPIO_BASE + LPC54_GPIO_DIR_OFFSET(n))

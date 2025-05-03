@@ -706,7 +706,7 @@ static int bcm2711_miniuart_irq_handler(int irq, void *context, void *arg)
  * Description:
  *   Performs the low level UART initialization early in
  *   debug so that the serial console will be available
- *   during bootup.  This must be called before arm64_serialinit.
+ *   during boot up.  This must be called before arm64_serialinit.
  *
  * Returned Value:
  *   None

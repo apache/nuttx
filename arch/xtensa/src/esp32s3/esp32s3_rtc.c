@@ -563,7 +563,7 @@ static uint32_t IRAM_ATTR esp32s3_rtc_clk_cal_internal(
   clks_state &= clks_mask;
 
   /* On ESP32S3, choosing RTC_CAL_RTC_MUX results in calibration of
-   * the 150k RTC clock regardless of the currenlty selected SLOW_CLK.
+   * the 150k RTC clock regardless of the currently selected SLOW_CLK.
    * The following code emulates ESP32 behavior
    */
 
@@ -957,7 +957,7 @@ static void IRAM_ATTR esp32s3_rtc_clk_cpu_freq_to_pll_mhz(
                                              int cpu_freq_mhz)
 {
   /* There are totally 6 LDO slaves(all on by default). At the moment of
-   * swithing LDO slave, LDO voltage will also change instantaneously.
+   * switching LDO slave, LDO voltage will also change instantaneously.
    * LDO slave can reduce the voltage change caused by switching frequency.
    * CPU frequency <= 40M : just open 3 LDO slaves; CPU frequency = 80M :
    * open 4 LDO slaves; CPU frequency = 160M : open 5 LDO slaves;

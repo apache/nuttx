@@ -80,7 +80,7 @@ static const uint8_t g_pinirq[MAX_PININT] =
  *
  * Description:
  *   Initialize logic to support interrupting GPIO pins.  This function is
- *   called by the OS inialization logic and is not a user interface.
+ *   called by the OS initialization logic and is not a user interface.
  *
  ****************************************************************************/
 
@@ -120,7 +120,7 @@ static int lpc54_alloc_pinint(lpc54_pinset_t pinset)
  *
  * Description:
  *   Initialize logic to support interrupting GPIO pins.  This function is
- *   called by the OS inialization logic and is not a user interface.
+ *   called by the OS initialization logic and is not a user interface.
  *
  ****************************************************************************/
 

@@ -105,7 +105,7 @@
  *
  * CAN_INT_CERR      YES    Bit 24: Mailbox CRC Error
  * CAN_INT_SERR      YES    Bit 25: Mailbox Stuffing Error
- * CAN_INT_AERR      NO     Bit 26: Acknowledgment Error (usally means no
+ * CAN_INT_AERR      NO     Bit 26: Acknowledgment Error (usually means no
  *                                  CAN bus)
  * CAN_INT_FERR      YES    Bit 27: Form Error
  *
@@ -141,7 +141,7 @@ struct sam_filter_s
 struct sam_config_s
 {
   uint8_t port;             /* CAN port number (1 or 2) */
-  uint8_t pid;              /* CAN periperal ID/IRQ number */
+  uint8_t pid;              /* CAN peripheral ID/IRQ number */
   uint8_t nrecvmb;          /* Number of receive mailboxes */
   uintptr_t base;           /* Base address of the CAN control registers */
   uint32_t baud;            /* Configured baud */
@@ -1287,7 +1287,7 @@ static inline void can_rxinterrupt(struct can_dev_s *dev, int mbndx,
   md[0] = can_getreg(priv, SAM_CAN_MNDH_OFFSET(mbndx));
   md[1] = can_getreg(priv, SAM_CAN_MNDL_OFFSET(mbndx));
 
-  /* Get the ID associated with the newly received message: )nce a new
+  /* Get the ID associated with the newly received message: once a new
    * message is received, its ID is masked with the CAN_MAMx value and
    * compared with the CAN_MIDx value. If accepted, the message ID is
    * copied to the CAN_MIDx register.

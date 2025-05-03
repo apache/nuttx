@@ -57,7 +57,8 @@
  *
  *   SYSCLK = BOARD_OSCCLK_FREQUENCY = 12MHz  -> Select Main oscillator for
  *                                               source
- *   PLL0CLK = (12 * SYSCLK) / 1 = 144MHz -> PLL0 multipler=12, pre-divider=1
+ *   PLL0CLK = (12 * SYSCLK) / 1 = 144MHz -> PLL0 multiplier=12,
+ *                                           pre-divider=1
  *   CCLCK = 72MHz  -> CCLK divider = 2
  */
 

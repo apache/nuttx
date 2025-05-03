@@ -118,7 +118,7 @@
 
 	clr 	HCS12_CRG_CLKSEL
 
-	/* Set the multipler and divider and enable the PLL */
+	/* Set the multiplier and divider and enable the PLL */
 
 	bclr	*HCS12_CRG_PLLCTL #CRG_PLLCTL_PLLON
 	ldab	#HCS12_SYNR_VALUE

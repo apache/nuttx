@@ -89,7 +89,7 @@ void up_irqinitialize(void)
 
   /* And finally, enable interrupts */
 
-  /* Interrupts are enabled by setting the te bit in the psr status
+  /* Interrupts are enabled by setting the the bit in the psr status
    * register
    */
 

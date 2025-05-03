@@ -101,7 +101,7 @@
 #define TCB_FLAG_CPU_LOCKED        (1 << 4)                      /* Bit 4: Locked to this CPU */
 #define TCB_FLAG_SIGNAL_ACTION     (1 << 5)                      /* Bit 5: In a signal handler */
 #define TCB_FLAG_SYSCALL           (1 << 6)                      /* Bit 6: In a system call */
-#define TCB_FLAG_EXIT_PROCESSING   (1 << 7)                      /* Bit 7: Exitting */
+#define TCB_FLAG_EXIT_PROCESSING   (1 << 7)                      /* Bit 7: Exiting */
 #define TCB_FLAG_FREE_STACK        (1 << 8)                      /* Bit 8: Free stack after exit */
 #define TCB_FLAG_HEAP_CHECK        (1 << 9)                      /* Bit 9: Heap check */
 #define TCB_FLAG_HEAP_DUMP         (1 << 10)                     /* Bit 10: Heap dump */
@@ -914,7 +914,7 @@ FAR struct tcb_s *nxsched_get_tcb(pid_t pid);
  *
  * Description:
  *   When a task is destroyed, this function must be called to make its
- *   process ID available for re-use.
+ *   process ID available for reuse.
  *
  ****************************************************************************/
 

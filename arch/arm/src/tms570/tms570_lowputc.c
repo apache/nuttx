@@ -299,7 +299,7 @@ int tms570_sci_configure(uint32_t base,
    * STOP=?        Depends on configuration settings
    * CLOCK=1       The internal SCICLK is the clock source
    * LIN=0         LIN mode is disabled
-   * SWRST=0       SCI is initiailized and held in reset state
+   * SWRST=0       SCI is initialized and held in reset state
    * SLEEP=0       Sleep mode is disabled
    * ADAPT=0       Automatic baud rate adjustment is disabled
    * MBUF=0        The multi-buffer mode is disabled.

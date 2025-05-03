@@ -90,7 +90,7 @@
 #define SUPC_SMMR_SMSMPL_MASK           (7 << SUPC_SMMR_SMSMPL_SHIFT)
 #  define SUPC_SMMR_SMSMPL_SMD          (0 << SUPC_SMMR_SMSMPL_SHIFT) /* Supply Monitor disabled */
 #  define SUPC_SMMR_SMSMPL_CSM          (1 << SUPC_SMMR_SMSMPL_SHIFT) /* Continuous Supply Monitor */
-#  define SUPC_SMMR_SMSMPL_32SLCK       (2 << SUPC_SMMR_SMSMPL_SHIFT) /* Eevery 32 SLCK periods */
+#  define SUPC_SMMR_SMSMPL_32SLCK       (2 << SUPC_SMMR_SMSMPL_SHIFT) /* Every 32 SLCK periods */
 #  define SUPC_SMMR_SMSMPL_256SLCK      (3 << SUPC_SMMR_SMSMPL_SHIFT) /* Every 256 SLCK periods */
 #  define SUPC_SMMR_SMSMPL_2048SLCK     (4 << SUPC_SMMR_SMSMPL_SHIFT) /* Every 2,048 SLCK periods */
 

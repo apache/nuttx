@@ -319,7 +319,7 @@
 #define ADC_CR_ADCALDIF                (1 << 30)                      /* Bit 30: Differential mode for calibration */
 #define ADC_CR_ADCAL                   (1 << 31)                      /* Bit 31: ADC calibration */
 
-/* For complaince with the ADC driver we also define ADVREGEN like
+/* For compliance with the ADC driver we also define ADVREGEN like
  * for previous chips. For new chips ST decided to better describe
  * the mechanism behind ADVREGEN bits.
  */

@@ -853,7 +853,7 @@ static struct sim_ep_s *sim_ep_reserve(struct sim_usbdev_s *priv,
  *
  * Description:
  *   The endpoint is no long in-used.  It will be un-reserved and can be
- *   re-used if needed.
+ *   reused if needed.
  *
  ****************************************************************************/
 

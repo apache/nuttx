@@ -92,7 +92,7 @@ void sam_boardinitialize(void)
    * 1) the HS host or device controller is in the configuration and
    * 2) the weak function sam_usbinitialize() has been brought
    * into the build.
-   * Presumeably either CONFIG_USBDEV or CONFIG_USBHOST is also selected.
+   * Presumably either CONFIG_USBDEV or CONFIG_USBHOST is also selected.
    */
 
 #if defined(CONFIG_SAMA5_UHPHS) || defined(CONFIG_SAMA5_UDPHS)

@@ -319,7 +319,7 @@ int up_addrenv_destroy(FAR arch_addrenv_t *addrenv)
 
   gran_free(g_physhandle, (FAR void *)cbr->cbr, cbr->pages);
 
-  /* And make the CBR structure available for re-use */
+  /* And make the CBR structure available for reuse */
 
   z180_mmu_freecbr(cbr);
   return OK;

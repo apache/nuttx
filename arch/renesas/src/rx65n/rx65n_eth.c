@@ -1057,7 +1057,7 @@ static int rx65n_txpoll(struct net_driver_s *dev)
 
   /* Check if the next TX descriptor is owned by the Ethernet DMA or
    * CPU. We cannot perform the TX poll if we are unable to accept
-   * another packet fo transmission.
+   * another packet for transmission.
    *
    * In a race condition, TACT may be cleared BUT still not available
    * because rx65n_freeframe() has not yet run. If rx65n_freeframe()
@@ -1324,7 +1324,7 @@ static int rx65n_recvframe(struct rx65n_ethmac_s *priv)
    *   3) All of the TX descriptors are in flight.
    *
    * This last case is obscure.  It is due to that fact that each packet
-   * that we receive can generate an unstoppable transmisson.  So we have
+   * that we receive can generate an unstoppable transmission.  So we have
    * to stop receiving when we can not longer transmit.  In this case, the
    * transmit logic should also have disabled further RX interrupts.
    */
@@ -1602,7 +1602,7 @@ static void rx65n_receive(struct rx65n_ethmac_s *priv)
         }
 
       /* We are finished with the RX buffer.  NOTE:  If the buffer is
-       * re-used for transmission, the dev->d_buf field will have been
+       * reused for transmission, the dev->d_buf field will have been
        * nullified.
        */
 

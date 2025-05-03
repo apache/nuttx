@@ -434,7 +434,7 @@ static void imxrt_pll2_pfd(void)
 
   putreg32(reg, IMXRT_ANADIG_PLL_SYS_PLL2_UPDATE);
 
-  /* Wait for stablizing */
+  /* Wait for stabilizing */
 
   reg = 0;
 
@@ -604,7 +604,7 @@ static void imxrt_pll3_pfd(void)
 
   putreg32(reg, IMXRT_ANADIG_PLL_SYS_PLL3_UPDATE);
 
-  /* Wait for stablizing */
+  /* Wait for stabilizing */
 
   reg = 0;
 

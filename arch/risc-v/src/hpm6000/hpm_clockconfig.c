@@ -132,7 +132,7 @@ void hpm_clockconfig(void)
   putreg32(value, HPM_PLLCTLV2_PLL1_DIV0);
   while (getreg32(HPM_PLLCTLV2_PLL1_DIV0) & 0x80000000);
 #endif
-  /* Configure PLL1 clock frequencey */
+  /* Configure PLL1 clock frequency */
 
   value = PLL1_FREQ / PLLCTLV2_PLL_XTAL_FREQ - 1;
   putreg32(value, HPM_PLLCTLV2_PLL1_MFI);

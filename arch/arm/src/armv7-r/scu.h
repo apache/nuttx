@@ -53,7 +53,7 @@
 #define SCU_DEBUGRAM_OFFSET          0x0070           /* SCU Debug Tag RAM Operation Register */
 #define SCU_DEBUGRAMDATA_OFFSET      0x0074           /* SCU Debug Tag RAM Data Value Register */
 #define SCU_DEBUGRAMECC_OFFSET       0x0078           /* SCU Debug Tag RAM ECC Chunk Register */
-#define SCU_ECCERR_OFFSET            0x007c           /* ECC Fatal Error Registe */
+#define SCU_ECCERR_OFFSET            0x007c           /* ECC Fatal Error Register */
 #define SCU_FPPFILTERSTART_OFFSET(n) (0x0080 + (n)*8) /* FPP Filtering Start Address Register for core n */
 #define SCU_FPPFILTEREND_OFFSET(n)   (0x0084 + (n)*8) /* FPP Filtering End Address Register for core n */
 

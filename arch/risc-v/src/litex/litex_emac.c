@@ -1174,7 +1174,7 @@ static void litex_phydump(struct litex_emac_s *priv)
  *
  * Input Parameters:
  *   priv    - Reference to the private driver state structure
- *   phyaddr - MDIO address to try and find confgiured PHY IC
+ *   phyaddr - MDIO address to try and find configured PHY IC
  *
  * Returned Value:
  *   OK on success; Negated errno on failure.
@@ -1255,7 +1255,7 @@ static int litex_phyfind(struct litex_emac_s *priv, uint8_t phyaddr)
  *   priv - A reference to the private driver state structure
  *
  * Returned Value:
- *   Can currenly only return OK
+ *   Can currently only return OK
  *
  ****************************************************************************/
 

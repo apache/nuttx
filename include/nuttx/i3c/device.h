@@ -441,7 +441,7 @@ FAR const struct i3c_device *i3c_master_find_i3c_dev(
  *   cmd - The buf of ccc commands to transfer, only one frame at a time
  *
  * Returned Value:
- *   0 or positive if Success, nagative otherwise.
+ *   0 or positive if Success, negative otherwise.
  ****************************************************************************/
 
 int i3c_device_send_ccc_cmd(FAR const struct i3c_device *dev,

@@ -3,7 +3,7 @@ From: zhuyanlin <zhuyanlin1@xiaomi.com>
 Date: Mon, 27 Sep 2021 21:47:41 +0800
 Subject: [PATCH] uclibxx: use overload constructor of filebuf & ostream
 
-Instead of set valiable in Init, use overload constructor in
+Instead of set available in Init, use overload constructor in
 filebuf & stream class
 
 ---

@@ -1297,7 +1297,7 @@ static int imx9_dma_setup(struct uart_dev_s *dev)
       modifyreg32(priv->uartbase + IMX9_LPUART_BAUD_OFFSET,
                   0, LPUART_BAUD_RDMAE);
 
-      /* Enable interrupt on idle and erros */
+      /* Enable interrupt on idle and errors */
 
       modifyreg32(priv->uartbase + IMX9_LPUART_CTRL_OFFSET, 0,
                   LPUART_CTRL_PEIE       |
@@ -2565,7 +2565,7 @@ static int up_pm_prepare(struct pm_callback_s *cb, int domain,
  *
  * Description:
  *   Performs the low level UART initialization early in debug so that the
- *   serial console will be available during bootup.  This must be called
+ *   serial console will be available during boot up.  This must be called
  *   before arm_serialinit.
  *
  ****************************************************************************/

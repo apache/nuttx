@@ -188,7 +188,7 @@ uint16_t ipv6_upperlayer_header_chksum(FAR struct net_driver_s *dev,
   DEBUGASSERT(dev != NULL && iplen >= IPv6_HDRLEN);
 
   /* The length reported in the IPv6 header is the length of the payload
-   * that follows the header.  If extension heders are present, then this
+   * that follows the header.  If extension headers are present, then this
    * size includes the size of the IPv6 extension headers.
    */
 

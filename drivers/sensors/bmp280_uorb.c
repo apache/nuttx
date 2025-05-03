@@ -427,13 +427,13 @@ static int bmp280_initialize(FAR struct bmp280_dev_s *priv)
  * Name: bmp280_compensate
  *
  * Description:
- *   calculate compensate tempreture
+ *   calculate compensate temperature
  *
  * Input Parameters:
- *   temp - uncompensate value of tempreture.
+ *   temp - uncompensate value of temperature.
  *
  * Returned Value:
- *   calculate result of compensate tempreture.
+ *   calculate result of compensate temperature.
  *
  ****************************************************************************/
 

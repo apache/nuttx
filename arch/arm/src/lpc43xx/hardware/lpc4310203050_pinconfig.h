@@ -39,8 +39,8 @@
  *    not be applicable to any other family members.
  *
  * 2. Settings taken from the data sheet include only function, pin set, and
- *    pin number.  Additional settings must be verfied before using these pin
- *    configurations (like pull-ups, open-drain, drive strength, input
+ *    pin number.  Additional settings must be verified before using these
+ *    pin configurations (like pull-ups, open-drain, drive strength, input
  *    buffering, etc.).
  *
  * 3. Alternative pin selections are provided with a numeric suffix like _1,

@@ -257,7 +257,7 @@ void sam_sdram_config(void)
            MPDDRC_CR_OCD_EXIT | /* Off-chip Driver */
            MPDDRC_CR_8BANKS |   /* Number of Banks */
            MPDDRC_CR_NDQS |     /* Not DQS */
-           MPDDRC_CR_UNAL;      /* upport Unaligned Access */
+           MPDDRC_CR_UNAL;      /* support Unaligned Access */
 
 #elif defined(CONFIG_SAMA5D3XEK_MT47H64M16HR)
   /* For MT47H64M16HR
@@ -284,7 +284,7 @@ void sam_sdram_config(void)
            MPDDRC_CR_OCD_EXIT | /* Off-chip Driver */
            MPDDRC_CR_8BANKS |   /* Number of Banks */
            MPDDRC_CR_NDQS |     /* Not DQS */
-           MPDDRC_CR_UNAL;      /* upport Unaligned Access */
+           MPDDRC_CR_UNAL;      /* support Unaligned Access */
 
 #else
 #  error Unknown SDRAM type

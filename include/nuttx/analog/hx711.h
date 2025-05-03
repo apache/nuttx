@@ -55,7 +55,7 @@
 
 #define HX711_SET_GAIN 2
 
-/* Set what value coresponds to 1 unit. Takes integer.
+/* Set what value corresponds to 1 unit. Takes integer.
  * If set to 0 (default) driver will return raw readings from
  * hx711 instead of calculated units.
  */
@@ -180,7 +180,7 @@ struct hx711_lower_s
    *   arg - private data for handler, should be passed to handler
    *
    * Returned Value:
-   *   On successfull interrupt initialization 0 should be returned,
+   *   On successful interrupt initialization 0 should be returned,
    *   when there was failure initializing interrupt -1 shall be returned.
    *
    **************************************************************************/
@@ -204,7 +204,7 @@ struct hx711_lower_s
  * Input Parameters:
  *   minor - unique number identifying hx711 chip.
  *   lower - provided by platform code to manipulate hx711 with platform
- *           dependant functions>
+ *           dependent functions>
  *
  * Returned Value:
  *   OK on success, or negated errno on failure

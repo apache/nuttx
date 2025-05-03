@@ -132,7 +132,9 @@ static uint32_t rpc_vers;
 static uint32_t rpc_auth_null;
 static uint32_t rpc_auth_unix;
 
-/* Global statics for all client instances.  Cleared by NuttX on boot-up. */
+/* Global statistics for all client instances.
+ * Cleared by NuttX on boot-up.
+ */
 
 #ifdef CONFIG_NFS_STATISTICS
 static struct rpcstats rpcstats;

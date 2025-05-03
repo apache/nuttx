@@ -154,7 +154,7 @@ static int nrf53_gpiote_isr(int irq, void *context, void *arg)
   int      j      = 0;
 #endif
 
-  /* Get GPIOTE instnace */
+  /* Get GPIOTE instance */
 
 #ifdef CONFIG_NRF53_HAVE_GPIOTE1
   inst = (irq == NRF53_IRQ_GPIOTE0) ? 0 : 1;
@@ -397,7 +397,7 @@ void nrf53_gpiote_set_ch_event(uint32_t pinset, int channel,
 
   DEBUGASSERT(channel < GPIOTE_CHANNELS);
 
-  /* Get GPIOTE instnace */
+  /* Get GPIOTE instance */
 
 #ifdef CONFIG_NRF53_HAVE_GPIOTE1
   inst = (channel < GPIOTE_PER_CHANNEL) ? 0 : 1;
@@ -479,7 +479,7 @@ void nrf53_gpiote_set_ch_event(uint32_t pinset, int channel,
  *
  * Description:
  *   Configures a GPIOTE channel in EVENT mode, assigns it to a given pin
- *   and sets a handler for the first availalbe GPIOTE channel
+ *   and sets a handler for the first available GPIOTE channel.
  *
  * Input Parameters:
  *  - pinset:      GPIO pin configuration
@@ -559,7 +559,7 @@ void nrf53_gpiote_set_task(uint32_t pinset, int channel,
   int port;
   int inst;
 
-  /* Get GPIOTE instnace */
+  /* Get GPIOTE instance */
 
 #ifdef CONFIG_NRF53_HAVE_GPIOTE1
   inst = (channel < GPIOTE_PER_CHANNEL) ? 0 : 1;

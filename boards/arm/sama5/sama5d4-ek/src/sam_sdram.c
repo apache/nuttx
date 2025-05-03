@@ -419,7 +419,7 @@ void sam_sdram_config(void)
            MPDDRC_CR_ZQ_INIT  |
            MPDDRC_CR_8BANKS   | /* Number of Banks */
            MPDDRC_CR_NDQS     | /* Not DQS */
-           MPDDRC_CR_UNAL;      /* upport Unaligned Access */
+           MPDDRC_CR_UNAL;      /* support Unaligned Access */
 
 #else
 #  error Unknown SDRAM type

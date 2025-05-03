@@ -304,7 +304,7 @@
 
 /* SMT (RW)
  *
- * schmitt trigger enable, only avaiable in high-speed IO
+ * schmitt trigger enable, only available in high-speed IO
  * 0: disable
  * 1: enable
  */

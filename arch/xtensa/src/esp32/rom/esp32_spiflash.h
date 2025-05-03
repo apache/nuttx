@@ -351,7 +351,7 @@ esp_rom_spiflash_read_statushigh(esp32_spiflash_chip_t *spi,
  * Name: esp32_spiflash_write_status
  *
  * Description:
- *   Write status to Falsh status register.
+ *   Write status to Flash status register.
  *
  *   Please do not call this function in SDK.
  *

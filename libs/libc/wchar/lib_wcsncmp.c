@@ -52,7 +52,7 @@
  *   string.
  *   Return value greater than 0 if the first character that does not match
  *   has a greater value in "l" than in "r"
- *   Reutrn value less than 0 otherswise
+ *   Return value less than 0 otherswise
  *
  ****************************************************************************/
 

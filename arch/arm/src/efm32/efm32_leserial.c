@@ -765,7 +765,7 @@ static bool efm32_txempty(struct uart_dev_s *dev)
  *
  * Description:
  *   Performs the low level UART initialization early in debug so that the
- *   serial console will be available during bootup.  This must be called
+ *   serial console will be available during boot up.  This must be called
  *   before arm_serialinit.  NOTE:  This function depends on GPIO pin
  *   configuration performed in efm32_consoleinit() and main clock
  *   initialization performed in efm32_clkinitialize().

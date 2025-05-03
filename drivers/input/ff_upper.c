@@ -550,7 +550,7 @@ int ff_register(FAR struct ff_lowerhalf_s *lower, FAR const char *path,
  *   release the occupied resources.
  *
  * Arguments:
- *   lower - A pointer to an insatnce of force feedback lower half driver.
+ *   lower - A pointer to an instance of force feedback lower half driver.
  *   path  - The path of force feedback device. such as "/dev/input0"
  *
  ****************************************************************************/

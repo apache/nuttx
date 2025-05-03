@@ -229,7 +229,7 @@ gpt_alloc_verify_entries(FAR struct partition_state_s *state,
   crc = crc32part((FAR const uint8_t *)pte, size, ~0l) ^ ~0l;
   if (crc != le32toh(gpt->partition_entry_array_crc32))
     {
-      ferr("GUID Partitition Entry Array CRC check failed.\n");
+      ferr("GUID Partition Entry Array CRC check failed.\n");
       fs_heap_free(pte);
       return NULL;
     }

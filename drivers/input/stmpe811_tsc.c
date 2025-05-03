@@ -916,7 +916,7 @@ int stmpe811_register(STMPE811_HANDLE handle, int minor)
 
   stmpe811_tscinitialize(priv);
 
-  /* Inidicate that the touchscreen controller was successfully initialized */
+  /* Indicate that the touchscreen controller was successfully initialized */
 
   priv->inuse |= TSC_PIN_SET;                    /* Pins 4-7 are now in-use */
   priv->flags |= STMPE811_FLAGS_TSC_INITIALIZED; /* TSC function is initialized */

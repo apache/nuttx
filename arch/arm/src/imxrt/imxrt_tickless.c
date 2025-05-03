@@ -43,7 +43,7 @@
  *
  * NOTE
  * Only alarm option selected by CONFIG_SCHED_TICKLESS_ALARM is currently
- * suported for iMXRT.
+ * supported for iMXRT.
  *
  ****************************************************************************/
 
@@ -98,7 +98,7 @@
  * PRECLK_CLOCK_ROOT = IPG_CLOCK_ROOT / IMXRT_PERCLK_PODF_DIVIDER
  * where IPG_CLOCK_ROOT = 150 MHz and IMXRT_PERCLK_PODF_DIVIDER = 9
  *
- * Those clocks are set in imxrt_clockconfig, but makros are defined in
+ * Those clocks are set in imxrt_clockconfig, but macros are defined in
  * board level section (file board.h) so clock settings may actually vary
  * when using different boards.
  *
@@ -373,7 +373,7 @@ void up_timer_initialize(void)
   regval |= GPT_CR_ENMOD;
   putreg32(regval, g_tickless.base + IMXRT_GPT_CR_OFFSET);
 
-  /* Eneable the timer */
+  /* Enable the timer */
 
   regval = getreg32(g_tickless.base + IMXRT_GPT_CR_OFFSET);
   regval |= GPT_CR_EN;

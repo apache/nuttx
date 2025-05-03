@@ -61,7 +61,7 @@
 
 /* PLLA configuration.
  *
- *   Multipler = 64: PLLACK = 64 * 12MHz = 768MHz
+ *   Multiplier = 64: PLLACK = 64 * 12MHz = 768MHz
  */
 
 #define BOARD_CKGR_PLLAR_COUNT     (63 << PMC_CKGR_PLLAR_COUNT_SHIFT)

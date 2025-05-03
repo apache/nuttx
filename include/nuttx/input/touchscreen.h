@@ -334,7 +334,7 @@ int touch_register(FAR struct touch_lowerhalf_s *lower,
  *   release the occupied resources.
  *
  * Arguments:
- *   lower     - A pointer to an insatnce of touchscreen lower half driver.
+ *   lower     - A pointer to an instance of touchscreen lower half driver.
  *   path      - The path of touchscreen device. such as "/dev/input0"
  ****************************************************************************/
 

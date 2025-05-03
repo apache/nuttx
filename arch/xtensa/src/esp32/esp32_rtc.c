@@ -498,7 +498,7 @@ static uint32_t IRAM_ATTR esp32_rtc_clk_cal_internal(
 
   modifyreg32(RTC_CNTL_CLK_CONF_REG, clks_mask, clks_state);
 
-  /* Verify if this calibration occured within the timeout */
+  /* Verify if this calibration occurred within the timeout */
 
   if (timeout_us == 0)
     {

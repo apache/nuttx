@@ -54,8 +54,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Asserions ****************************************************************/
-
 #ifndef CONFIG_ARCH_CHIP_STM32F334R8
 #  warning "This only have been verified with CONFIG_ARCH_CHIP_STM32F334R8"
 #endif
@@ -635,7 +633,7 @@ static int spwm_hrtim_start(struct spwm_s *spwm)
       outputs |= (1 << (i * 2));
     }
 
-  /* Enable HRTIM outpus */
+  /* Enable HRTIM outputs */
 
   HRTIM_OUTPUTS_ENABLE(hrtim, outputs, true);
 
@@ -675,7 +673,7 @@ static int spwm_hrtim_stop(struct spwm_s *spwm)
       outputs |= (1 << (i * 2));
     }
 
-  /* Disable HRTIM outpus */
+  /* Disable HRTIM outputs */
 
   HRTIM_OUTPUTS_ENABLE(hrtim, outputs, false);
 

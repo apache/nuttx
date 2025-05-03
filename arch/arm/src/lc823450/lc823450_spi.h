@@ -94,7 +94,7 @@
 #define SPI_ISR_OVE         (1 << 1)   /* Bit  1: overrun */
 #define SPI_ISR_SPIF        (1 << 0)   /* Bit  0: Frame transfer completion */
 
-/* SPI FIFO contorl Register */
+/* SPI FIFO control Register */
 
 #define SPI_TXFF_EN         (1 << 0)
 #define SPI_TXFF_WL2        (0 << 4)

@@ -50,7 +50,7 @@
 #define SAM_SUPC_STATUS_OFFSET     0x000c  /* Status */
 #define SAM_SUPC_BOD33_OFFSET      0x0010  /* 3.3V brown-out detector control */
 
-#define SAM_SUPC_BOD12_OFFSET      0x0014  /* 1.2V brown-out detctor control */
+#define SAM_SUPC_BOD12_OFFSET      0x0014  /* 1.2V brown-out detector control */
 #define SAM_SUPC_VREG_OFFSET       0x0018  /* Voltage regulator system control */
 
 #define SAM_SUPC_VREF_OFFSET       0x001c  /* Voltage references system control */
@@ -135,7 +135,7 @@
 #define SUPC_BOD33_BKUPLEVEL_MASK  (0x3f << SUPC_BOD33_BKUPLEVEL_SHIFT)
 #  define SUPC_BOD33_BKUPLEVEL(n)  ((uint32_t)(n) << SUPC_BOD33_BKUPLEVEL_SHIFT)
 
-/* 1.2V brown-out detctor control */
+/* 1.2V brown-out detector control */
 
 #define SUPC_BOD12_ENABLE          (1 << 1)  /* Bit 1: Enable */
 #define SUPC_BOD12_HYST            (1 << 2)  /* Bit 2: Hysteresis */

@@ -45,10 +45,10 @@
 
 /* CPU to CPU and Directed Interrupts */
 
-#define S32K3XX_IRQ_CPU_TO_CPU1    (S32K3XX_IRQ_EXTINT +   0) /*   0: CPU to CPU interupt 0 (Core 0 --> Core 1) */
-#define S32K3XX_IRQ_CPU_TO_CPU2    (S32K3XX_IRQ_EXTINT +   1) /*   1: CPU to CPU interupt 1 (Core 0 --> Core 1) */
-#define S32K3XX_IRQ_CPU_TO_CPU3    (S32K3XX_IRQ_EXTINT +   2) /*   2: CPU to CPU interupt 2 (Core 0 <-- Core 1) */
-#define S32K3XX_IRQ_CPU_TO_CPU4    (S32K3XX_IRQ_EXTINT +   3) /*   3: CPU to CPU interupt 3 (Core 0 <-- Core 1) */
+#define S32K3XX_IRQ_CPU_TO_CPU1    (S32K3XX_IRQ_EXTINT +   0) /*   0: CPU to CPU interrupt 0 (Core 0 --> Core 1) */
+#define S32K3XX_IRQ_CPU_TO_CPU2    (S32K3XX_IRQ_EXTINT +   1) /*   1: CPU to CPU interrupt 1 (Core 0 --> Core 1) */
+#define S32K3XX_IRQ_CPU_TO_CPU3    (S32K3XX_IRQ_EXTINT +   2) /*   2: CPU to CPU interrupt 2 (Core 0 <-- Core 1) */
+#define S32K3XX_IRQ_CPU_TO_CPU4    (S32K3XX_IRQ_EXTINT +   3) /*   3: CPU to CPU interrupt 3 (Core 0 <-- Core 1) */
 
 /* Shared Peripheral Interrupts - On-Platform Vectors */
 

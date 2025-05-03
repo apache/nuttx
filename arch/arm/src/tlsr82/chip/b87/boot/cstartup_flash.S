@@ -23,7 +23,7 @@
 #include <nuttx/config.h>
 #include <arch/chip/irq.h>
 
-#define SRAM_SIZE_32K_EN				0 /* defaut sram size=64k */
+#define SRAM_SIZE_32K_EN				0 /* default sram size=64k */
 
 #define FLL_STK_EN					1
 #define ZERO_IC_TAG_EN					1

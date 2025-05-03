@@ -100,7 +100,7 @@
  ****************************************************************************/
 
 /* This structure encapsulates the global variable used in this file and
- * reduces the probability of name collistions.
+ * reduces the probability of name collisions.
  */
 
 #ifdef NSH_HAVEMMCSD

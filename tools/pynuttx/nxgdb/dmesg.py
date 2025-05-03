@@ -56,7 +56,7 @@ class Dmesg(gdb.Command):
 
     def _get_rpmsg_syslog(self):
         if not (priv := utils.gdb_eval_or_none("g_syslog_rpmsg")):
-            return "RPMsg syslog not avaliable"
+            return "RPMsg syslog not available"
 
         buffer = bytes(gdb.selected_inferior().read_memory(priv.buffer, priv.size))
         buf = buffer.replace(b"\0", "␀".encode("utf-8"))

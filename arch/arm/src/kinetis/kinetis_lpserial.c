@@ -1788,7 +1788,7 @@ static void kinetis_dma_rxcallback(DMACH_HANDLE handle, void *arg, bool done,
  *
  * Description:
  *   Performs the low level LPUART initialization early in debug so that the
- *   serial console will be available during bootup.  This must be called
+ *   serial console will be available during boot up.  This must be called
  *   before arm_serialinit.  NOTE:  This function depends on GPIO pin
  *   configuration performed in kinetis_lowsetup() and main clock
  *   initialization performed in up_clkinitialize().

@@ -50,10 +50,10 @@
 #define HCS12_CCR_S (1 << 7) /* Bit 7: STOP instruction control bit */
 
 /****************************************************************************
- * Register state save strucure
+ * Register state save structure
  *   Low Address        <-- SP after state save
  *                [PPAGE]
- *                [soft regisers]
+ *                [soft registers]
  *                XYH
  *                XYL
  *                ZH

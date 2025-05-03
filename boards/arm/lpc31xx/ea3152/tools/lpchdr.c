@@ -73,7 +73,7 @@ static void parse_args(int argc, char **argv)
             break;
 
           case ':':
-            fprintf(stderr, "Missing option argumen\n");
+            fprintf(stderr, "Missing option argument\n");
             show_usage(argv[0], 1);
 
           case '?':

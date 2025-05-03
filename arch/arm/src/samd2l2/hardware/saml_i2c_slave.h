@@ -134,7 +134,7 @@
 #  define I2C_CTRLA_SDAHOLD_600NS  (3 << I2C_CTRLA_SDAHOLD_SHIFT) /* 400-800ns hold time */
 
 #define I2C_CTRLA_SEXTTOEN         (1 << 23) /* Bit 23: Slave SCL low extend time-out */
-#define I2C_CTRLA_SPEED_SHIFT      (24)      /* Bits 24-25: Trnasfer speed */
+#define I2C_CTRLA_SPEED_SHIFT      (24)      /* Bits 24-25: Transfer speed */
 #define I2C_CTRLA_SPEED_MASK       (3 << I2C_CTRLA_SPEED_SHIFT)
 #  define I2C_CTRLA_SPEED_STD      (0 << I2C_CTRLA_SPEED_SHIFT) /* Standard (<=100KHz) fast <=400KHz */
 #  define I2C_CTRLA_SPEED_FAST     (1 << I2C_CTRLA_SPEED_SHIFT) /* Fast-mode please (<=1MHz) */

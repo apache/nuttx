@@ -53,12 +53,12 @@
  *
  * Description:
  *   The pthread_setcanceltype() function atomically both sets the calling
- *   thread's cancelability type to the indicated type and returns the
- *   previous cancelability type at the location referenced by oldtype
+ *   thread's cancellability type to the indicated type and returns the
+ *   previous cancellability type at the location referenced by oldtype
  *   Legal values for type are PTHREAD_CANCEL_DEFERRED and
  *   PTHREAD_CANCEL_ASYNCHRONOUS.
  *
- *   The cancelability state and type of any newly created threads,
+ *   The cancellability state and type of any newly created threads,
  *   including the thread in which main() was first invoked, are
  *   PTHREAD_CANCEL_ENABLE and PTHREAD_CANCEL_DEFERRED respectively.
  *

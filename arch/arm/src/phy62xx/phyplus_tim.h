@@ -67,7 +67,7 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/* register informations... */
+/* register information... */
 
 #define TIM_COUNT_OFFSET                  0x0000
 #define TIM_CURRENT_OFFSET                0x0004

@@ -101,7 +101,7 @@ static uint32_t execute_ftfc_command(void)
   if (retval & (FTTC_FSTAT_MGSTAT0 | FTTC_FSTAT_FPVIOL |
                 FTTC_FSTAT_ACCERR | FTTC_FSTAT_RDCOLERR))
     {
-      return retval; /* Error has occured */
+      return retval; /* Error has occurred */
     }
   else
     {
@@ -261,7 +261,7 @@ ssize_t up_progmem_eraseblock(size_t block)
   if (execute_ftfc_command() & (FTTC_FSTAT_MGSTAT0 | FTTC_FSTAT_FPVIOL |
       FTTC_FSTAT_ACCERR | FTTC_FSTAT_RDCOLERR))
     {
-      return -EIO; /* Error has occured */
+      return -EIO; /* Error has occurred */
     }
 
   return (ssize_t)S32K1XX_PROGMEM_BLOCK_SECTOR_SIZE;
@@ -388,7 +388,7 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
       if (execute_ftfc_command() & (FTTC_FSTAT_MGSTAT0 | FTTC_FSTAT_FPVIOL |
           FTTC_FSTAT_ACCERR | FTTC_FSTAT_RDCOLERR))
         {
-          return -EIO; /* Error has occured */
+          return -EIO; /* Error has occurred */
         }
 
       dest.addr = dest.addr + S32K1XX_PROGMEM_DFLASH_WRITE_UNIT_SIZE;

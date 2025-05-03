@@ -126,8 +126,8 @@
 #define b8addi(a,i)     ((a)+itob8(i))                      /* Add integer from b16 */
 #define b8subb8(a,b)    ((a)-(b))                           /* Subtraction */
 #define b8subi(a,i)     ((a)-itob8(i))                      /* Subtract integer from b8 */
-#define b8mulb8(a,b)    (b16tob8((b16_t)(a)*(b16_t)(b))     /* Muliplication */
-#define ub8mulub8(a,b)  (ub16toub8((ub16_t)(a)*(ub16_t)(b)) /* Muliplication */
+#define b8mulb8(a,b)    (b16tob8((b16_t)(a)*(b16_t)(b))     /* Multiplication */
+#define ub8mulub8(a,b)  (ub16toub8((ub16_t)(a)*(ub16_t)(b)) /* Multiplication */
 #define b8muli(a,i)     ((a)*(i))                           /* Simple multiplication by integer */
 #define b8sqr(a)        b8mulb8(a,a)                        /* Square */
 #define ub8sqr(a)       ub8mulub8(a,a)                      /* Square */

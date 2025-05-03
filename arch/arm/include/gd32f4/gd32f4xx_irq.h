@@ -209,7 +209,7 @@
 #define GD32_IRQ_FPU                        (GD32_IRQ_EXINT+81) /* 81: FPU interrupt */
 
 #else
-    #error "Unkonwn GD32F4xx chip."
+    #error "Unknown GD32F4xx chip."
 #endif /* CONFIG_GD32F4_GD32F450 */
 
 #if defined(CONFIG_GD32F4_GD32F450) || defined(CONFIG_GD32F4_GD32F470)

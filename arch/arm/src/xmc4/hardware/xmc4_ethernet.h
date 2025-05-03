@@ -191,7 +191,7 @@
 #define XMC4_ETH_TRANSMIT_POLL_DEMAND_OFFSET                 0x1004    /* Transmit Poll Demand Register */
 #define XMC4_ETH_RECEIVE_POLL_DEMAND_OFFSET                  0x1008    /* Receive Poll Demand Register */
 #define XMC4_ETH_RECEIVE_DESCRIPTOR_LIST_ADDRESS_OFFSET      0x100c    /* Receive Descriptor Address Register */
-#define XMC4_ETH_TRANSMIT_DESCRIPTOR_LIST_ADDRESS_OFFSET     0x1010    /* Transmit descripter Address Register */
+#define XMC4_ETH_TRANSMIT_DESCRIPTOR_LIST_ADDRESS_OFFSET     0x1010    /* Transmit descriptor Address Register */
 #define XMC4_ETH_STATUS_OFFSET                               0x1014    /* Status Register */
 #define XMC4_ETH_OPERATION_MODE_OFFSET                       0x1018    /* Operation Mode Register */
 #define XMC4_ETH_INTERRUPT_ENABLE_OFFSET                     0x101c    /* Interrupt Enable Register */
@@ -732,7 +732,7 @@
 /* Receive Descriptor Address Register */
 #define ETH_RECEIVE_DESCRIPTOR_LIST_ADDRESS_
 
-/* Transmit descripter Address Register */
+/* Transmit descriptor Address Register */
 #define ETH_TRANSMIT_DESCRIPTOR_LIST_ADDRESS_
 
 /* Status Register */

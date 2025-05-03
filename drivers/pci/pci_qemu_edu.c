@@ -48,13 +48,13 @@
 #define PCI_QEMU_EDU_REG_LIVE       0x04  /* Liveness Check */
 #define PCI_QEMU_EDU_REG_FAC        0x08  /* Factorial Computation */
 #define PCI_QEMU_EDU_REG_STATUS     0x20  /* Status */
-#define PCI_QEMU_EDU_REG_INT_STATUS 0x24  /* Interupt Status */
+#define PCI_QEMU_EDU_REG_INT_STATUS 0x24  /* Interrupt Status */
 #define PCI_QEMU_EDU_REG_INT_RAISE  0x60  /* Raise an interrupt */
 #define PCI_QEMU_EDU_REG_INT_ACK    0x64  /* Acknowledge interrupt */
 #define PCI_QEMU_EDU_REG_DMA_SOURCE 0x80  /* Source address for DMA transfer */
 #define PCI_QEMU_EDU_REG_DMA_DEST   0x88  /* Destination address for DMA transfer */
 #define PCI_QEMU_EDU_REG_DMA_COUNT  0x90  /* Size of area to transfer with DMA */
-#define PCI_QEMU_EDU_REG_DMA_CMD    0x98  /* Control DMA tranfer */
+#define PCI_QEMU_EDU_REG_DMA_CMD    0x98  /* Control DMA transfer */
 
 /* One 4096 bytes long buffer at offset 0x40000 is available in the
  * EDU device

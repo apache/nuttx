@@ -53,7 +53,7 @@
 #define STM32_HSE_FREQUENCY     STM32_BOARD_XTAL
 #define STM32_LSE_FREQUENCY     32768            /* X2 on board */
 
-/* PLL source is HSE/1, PLL multipler is 9:
+/* PLL source is HSE/1, PLL multiplier is 9:
  *   PLL frequency is 8MHz (XTAL) x 9 = 72MHz
  */
 
@@ -202,8 +202,8 @@
  *   - Reset HRTIM TIMC output 1 on HRTIM EEV2.
  *   - HRTIM EEV2 is connected to COMP4 output which works as current limit.
  *   - COMP4 inverting input is connected to DAC1CH1 output.
- *   - COMP4 non-inverting input (PB1) is connceted to current sense
- *     resitor (1 Ohm).
+ *   - COMP4 non-inverting input (PB1) is connected to current sense
+ *     resistor (1 Ohm).
  *   - DAC1CH1 DMA transfer is triggered by HRTIM TIMC events, which is used
  *     to provide slope compensation.
  */

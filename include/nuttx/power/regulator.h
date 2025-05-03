@@ -116,7 +116,7 @@ struct regulator_desc_s
   unsigned int   pulldown;          /* Enable pulldown when disabled */
   unsigned int   pulldown_reg;      /* Device register, for pulldown enable */
   unsigned int   pulldown_mask;     /* Register mask, for pulldown enable */
-  unsigned int   apply_uv;          /* If true, the voltage specifed (between)
+  unsigned int   apply_uv;          /* If true, the voltage specified (between)
                                      * min_uv and max_uv will be applied during
                                      * initialisation.
                                      */

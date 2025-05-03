@@ -193,7 +193,7 @@ static inline void up_tmr_sync_down(void)
  *   when clockid is CLOCK_MONOTONIC.
  *
  *   This function provides the basis for reporting the current time and
- *   also is used to eliminate error build-up from small erros in interval
+ *   also is used to eliminate error build-up from small errors in interval
  *   time calculations.
  *
  *   Provided by platform-specific code and called from the RTOS base code.

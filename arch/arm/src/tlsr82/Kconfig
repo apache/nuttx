@@ -125,7 +125,7 @@ config TLSR82_WATCHDOG
 	default n
 
 config TLSR82_WDOG_DEFTIMOUT
-	int "Tlsr82 Watchdog deafult timeout time (ms)"
+	int "Tlsr82 Watchdog default timeout time (ms)"
 	default 5000
 	depends on TLSR82_WATCHDOG
 	---help---
@@ -236,7 +236,7 @@ config TLSR82_SPI_CONSOLE
 	---help---
 		This configuration will enable the spi as the console output
 		(printf), input function is not implemented in current code.
-		This is a useful debug option, beacause some tc32 archtecture chips
+		This is a useful debug option, because some tc32 architecture chips
 		only have one uart, another debug log output channel is needed
 		when the only uart is used for doing other things.
 
@@ -245,8 +245,8 @@ config TLSR82_SPI_SYSLOG
 	default n
 	---help---
 		This configuration will enable the spi as the syslog output
-		channel (syslog). This is a useful debug option, beacause some tc32
-		archtecture chips only have one uart, another debug log output
+		channel (syslog). This is a useful debug option, because some tc32
+		architecture chips only have one uart, another debug log output
 		channel is needed when the only uart is used for doing other things.
 
 endif
@@ -329,7 +329,7 @@ config TLSR82_ADC_CALI
 	default n
 	---help---
 		When enable the adc calibration, adc driver will read the calibration
-		parameters stored in the falsh during initialization and use these
+		parameters stored in the flash during initialization and use these
 		parameters to calibrate the sample value.
 
 config TLSR82_ADC_CALI_PARA_ADDR
@@ -416,7 +416,7 @@ config TLSR82_FLASH_WRITE_BUFFER
 	default n
 	depends on MTD_BYTE_WRITE
 	---help---
-		When enable this config, the flash byte write opreation will write the
+		When enable this config, the flash byte write operation will write the
 		data to a middle buffer and then write the flash using this buffer to
 		avoid the data buffer passed by apps is at flash. The flash not support
 		read during writing.
@@ -440,11 +440,11 @@ config TLSR82_FLASH_PROTECT
 		if the application has performance requirements.
 
 config TLSR82_FLASH_CALI
-	bool "Flash volatge calibration enable"
+	bool "Flash voltage calibration enable"
 	default n
 	---help---
 		When enable the flash calibration, flash driver will read the calibration
-		parameters stored in the falsh during initialization and use these
+		parameters stored in the flash during initialization and use these
 		parameters to calibrate the flash voltage.
 
 config TLSR82_FLASH_CALI_PARA_ADDR
@@ -456,7 +456,7 @@ config TLSR82_FLASH_CALI_PARA_ADDR
 		equal to the address defined in production tools.
 
 config TLSR82_FLASH_TEST
-	bool "Enable the falsh test when initializing"
+	bool "Enable the flash test when initializing"
 	default n
 	---help---
 		When enable this config, the flash test function will execute when

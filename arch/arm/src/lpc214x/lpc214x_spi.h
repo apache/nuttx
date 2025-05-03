@@ -110,7 +110,7 @@
 #define LPC214X_SPI1CR0_FRFMW    (0x0020) /*   Microwire */
 #define LPC214X_SPI1CR0_CPOL     (0x0040) /* Bit 6: Clock polarity control */
 #define LPC214X_SPI1CR0_CPHA     (0x0080) /* Bit 7: Clock phase control */
-#define LPC214X_SPI1CR0_SCR      (0xff00) /* Bits 8-15: Serial clock reate */
+#define LPC214X_SPI1CR0_SCR      (0xff00) /* Bits 8-15: Serial clock rate */
 
 /* Control Register 1 (CR1) */
 

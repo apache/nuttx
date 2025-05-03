@@ -91,7 +91,7 @@
 #define I3CIOC_FREE_IBI         _I3CIOC(0x0005)
 
 /* Command:      I3CIOC_GET_DEVINFO
- * Description:  Get an I3C bus dev infomation
+ * Description:  Get an I3C bus dev information
  *
  * Argument:     None
  * Dependencies:

@@ -105,8 +105,8 @@
 
 /* Synchronization busy register */
 
-#define EIC_SYNCBUSY_SWRST           (1 << 0)  /* Bit 0:  Software reset syncrhonization busy */
-#define EIC_SYNCBUSY_ENABLE          (1 << 1)  /* Bit 1:  Enable syncrhonization busy */
+#define EIC_SYNCBUSY_SWRST           (1 << 0)  /* Bit 0:  Software reset synchronization busy */
+#define EIC_SYNCBUSY_ENABLE          (1 << 1)  /* Bit 1:  Enable synchronization busy */
 
 /* Event control, Interrupt enable clear, interrupt enable set register,
  * interrupt flag status and clear, and External interrupt asynchronous

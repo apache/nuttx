@@ -184,7 +184,7 @@ static ssize_t virtio_rng_read(FAR struct file *filep, FAR char *buffer,
   virtqueue_kick(vq);
   spin_unlock_irqrestore(&priv->lock, flags);
 
-  /* Wait fot completion */
+  /* Wait for completion */
 
   nxsem_wait_uninterruptible(&cookie.sem);
   memcpy(buffer, vb.buf, cookie.len);

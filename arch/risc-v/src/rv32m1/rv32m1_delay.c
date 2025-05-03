@@ -191,7 +191,7 @@ void up_mdelay(unsigned int milliseconds)
 
   /* When Timer Service is up, and its frequency isn't less than 1KHz,
    * the granularity of Timer Service can provide 1 ms accuracy. In
-   * other cases, sofware delay timer is preferred.
+   * other cases, software delay timer is preferred.
    */
 
   if (!rv32m1_timersvc_up() || freq < 1000u || !period)
@@ -224,7 +224,7 @@ void up_udelay(useconds_t microseconds)
 
   /* When Timer Service is up, and its frequency isn't less than 1MHz,
    * the granularity of Timer Service can provide 1 us accuracy. In
-   * other cases, sofware delay timer is preferred.
+   * other cases, software delay timer is preferred.
    */
 
   if (!rv32m1_timersvc_up() || freq < 1000000u || !period)

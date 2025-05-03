@@ -106,7 +106,7 @@ static esp_vhci_host_callback_t vhci_host_cb =
  * Name: esp_ble_send_ready
  *
  * Description:
- *   If the controller could send HCI comand will callback this function.
+ *   If the controller could send HCI command will callback this function.
  *
  * Input Parameters:
  *   None

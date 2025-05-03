@@ -771,7 +771,7 @@ static void dm320_disable(void)
 {
   /* Disable all planes */
 
-  ginfo("Inactivate OSD:\n");
+  ginfo("Deactivate OSD:\n");
 
   putreg16(0, DM320_OSD_OSDWIN0MD); /* Win0 mode = 0 (1:active) */
   putreg16(0, DM320_OSD_OSDWIN1MD); /* Win1 mode = 0 (1:active) */

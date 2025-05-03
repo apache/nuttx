@@ -678,7 +678,7 @@ static int sam_carddetect_handler(int irq, void *context,
  *
  * Returned Value:
  *   true:  This is the first register access of this type.
- *   flase: This is the same as the preceding register access.
+ *   false: This is the same as the preceding register access.
  *
  ****************************************************************************/
 

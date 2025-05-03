@@ -5374,7 +5374,7 @@ config STM32L4_ADC1_EXTSEL
 	depends on STM32L4_ADC1
 	---help---
 		 Select the external event used to trigger the start of conversion of
-		 a regular group. See Reference Manual for mor information.
+		 a regular group. See Reference Manual for more information.
 
 endif
 
@@ -5398,7 +5398,7 @@ config STM32L4_ADC2_EXTSEL
 	depends on STM32L4_ADC2
 	---help---
 		 Select the external event used to trigger the start of conversion of
-		 a regular group. See Reference Manual for mor information.
+		 a regular group. See Reference Manual for more information.
 
 endif
 
@@ -5422,7 +5422,7 @@ config STM32L4_ADC3_EXTSEL
 	depends on STM32L4_ADC3
 	---help---
 		 Select the external event used to trigger the start of conversion of
-		 a regular group. See Reference Manual for mor information.
+		 a regular group. See Reference Manual for more information.
 
 endif
 

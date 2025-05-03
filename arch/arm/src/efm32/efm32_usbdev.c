@@ -2121,7 +2121,7 @@ static inline void efm32_ep0out_testmode(struct efm32_usbdev_s *priv,
  * Name: efm32_ep0out_stdrequest
  *
  * Description:
- *   Handle a stanard request on EP0.  Pick off the things of interest to
+ *   Handle a standard request on EP0.  Pick off the things of interest to
  *   the USB device controller driver; pass what is left to the class driver.
  *
  ****************************************************************************/
@@ -5591,7 +5591,7 @@ void arm_usbinitialize(void)
 
   arm_usbuninitialize();
 
-  /* Initialie the driver data structure */
+  /* Initialize the driver data structure */
 
   efm32_swinitialize(priv);
 

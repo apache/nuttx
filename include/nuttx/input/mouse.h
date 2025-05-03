@@ -229,7 +229,7 @@ int mouse_register(FAR struct mouse_lowerhalf_s *lower,
  *   release the occupied resources.
  *
  * Arguments:
- *   lower     - A pointer to an insatnce of mouse lower half driver.
+ *   lower     - A pointer to an instance of mouse lower half driver.
  *   path      - The path of mouse device. such as "/dev/mouse0"
  ****************************************************************************/
 

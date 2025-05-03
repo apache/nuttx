@@ -45,7 +45,7 @@
 #define A64_TWI_STAT_OFFSET         (0x10)  /* 28 interrupt types + 0xF8 normal type = 29 */
 #define A64_TWI_CCR_OFFSET          (0x14)  /* 31:7 bit reserved,6-3bit,CLK_M,2-0bit CLK_N */
 #define A64_TWI_SRST_OFFSET         (0x18)  /* 31:1 bit reserved;0bit,write 1 to clear 0. */
-#define A64_TWI_EFR_OFFSET          (0x1c)  /* 31:2 bit reserved,1:0 bit data byte follow read comand */
+#define A64_TWI_EFR_OFFSET          (0x1c)  /* 31:2 bit reserved,1:0 bit data byte follow read command */
 #define A64_TWI_LCR_OFFSET          (0x20)  /* 31:6 bits reserved  5:0 bit for sda&scl control*/
 #define A64_TWI_DVFS_OFFSET         (0x24)  /* 31:3 bits reserved  2:0 bit for dvfs control. only A10 support */
 

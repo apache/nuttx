@@ -237,7 +237,7 @@ enum flash_misc_feature_e
   FLEXSPIMISC_OFFSET_WORD_ADDRESSABLE_EN = 3,      /* Bit for Word Addressable enable */
   FLEXSPIMISC_OFFSET_SAFECONFIG_FREQ_EN = 4,       /* Bit for Safe Configuration Frequency enable */
   FLEXSPIMISC_OFFSET_PAD_SETTING_OVERRIDE_EN = 5,  /* Bit for Pad setting override enable */
-  FLEXSPIMISC_OFFSET_DDR_MODE_EN = 6,              /* Bit for DDR clock confiuration indication. */
+  FLEXSPIMISC_OFFSET_DDR_MODE_EN = 6,              /* Bit for DDR clock configuration indication. */
 };
 
 /* Flash Type Definition */

@@ -343,7 +343,7 @@ errout_with_lock:
  * Name: zc_read
  *
  * Description:
- *   A dummy read method.  This is provided only to satsify the VFS layer.
+ *   A dummy read method.  This is provided only to satisfy the VFS layer.
  *
  ****************************************************************************/
 
@@ -359,7 +359,7 @@ static ssize_t zc_read(FAR struct file *filep, FAR char *buffer,
  * Name: zc_write
  *
  * Description:
- *   A dummy write method.  This is provided only to satsify the VFS layer.
+ *   A dummy write method.  This is provided only to satisfy the VFS layer.
  *
  ****************************************************************************/
 

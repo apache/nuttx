@@ -76,7 +76,7 @@
 #define XMC_I2C_CMD_READ (1U)
 
 #define I2C_WORDLENGTH (7U) /* 8 bits word length */
-#define I2C_TRM_MODE (3U)   /* Shift and transfert config */
+#define I2C_TRM_MODE (3U)   /* Shift and transfer config */
 
 #define I2C_TDV_SET (1U) /* A transmission of data in TBUF \
                           * can be started if TDV = 1 */
@@ -546,7 +546,7 @@ static bool i2c_get_status_flag(struct xmc4_i2cdev_s *priv,
  * Name: i2c_clear_status_flag
  *
  * Description:
- *   Clear the flags from PSR register by writting in PSCR register.
+ *   Clear the flags from PSR register by writing in PSCR register.
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure
@@ -633,7 +633,7 @@ static void i2c_fill_transmit_buffer(struct xmc4_i2cdev_s *priv,
  *   Get the data word from receive buffer.
  *
  * Returned Value:
- *   Recived data word in uint8_t.
+ *   Received data word in uint8_t.
  *
  *****************************************************************************/
 
@@ -660,7 +660,7 @@ static uint8_t i2c_get_receive_buffer(struct xmc4_i2cdev_s *priv)
  * Name: i2c_start
  *
  * Description:
- *   Start and send an I2C frame with the given slave adress.
+ *   Start and send an I2C frame with the given slave address.
  *   Send the following on bus : [START/RESTART A6 A5 A4 A3 A2 A1 A0 R/W]
  *
  *****************************************************************************/
@@ -815,7 +815,7 @@ static int i2c_transfer(struct i2c_master_s *dev,
 
   nxmutex_lock(&priv->lock);
 
-  /* Enter critical section to avoid interrupts during i2c transfert */
+  /* Enter critical section to avoid interrupts during i2c transfer */
 
   irqstate_t state = enter_critical_section();
 
@@ -914,7 +914,7 @@ static int i2c_transfer(struct i2c_master_s *dev,
 
       bool should_stop = !(message_has_no_stop || next_message_has_no_start);
 
-      /* TODO : Should you stop when last msg and overide flags ? */
+      /* TODO : Should you stop when last msg and override flags ? */
 
       if (should_stop)
         {

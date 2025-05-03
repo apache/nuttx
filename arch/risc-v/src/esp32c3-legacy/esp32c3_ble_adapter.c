@@ -1263,7 +1263,7 @@ static bool IRAM_ATTR is_in_isr_wrapper(void)
  *   Malloc buffer
  *
  * Input Parameters:
- *  szie - buffer size
+ *  size - buffer size
  *
  * Returned Value:
  *   None
@@ -1287,7 +1287,7 @@ static void *malloc_wrapper(size_t size)
  *   Malloc buffer in DRAM
  *
  * Input Parameters:
- *  szie - buffer size
+ *  size - buffer size
  *
  * Returned Value:
  *   None
@@ -1649,7 +1649,7 @@ static void coex_schm_status_bit_set_wrapper(uint32_t type, uint32_t status)
  * Description:
  *
  * Input Parameters:
- *  szie
+ *  size
  *  status
  *
  * Returned Value:

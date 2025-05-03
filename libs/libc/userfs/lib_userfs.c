@@ -859,7 +859,7 @@ static inline int userfs_destroy_dispatch(FAR struct userfs_info_s *info,
       return ret;
     }
 
-  /* Speical case of resp.ret indicates an error, the destruction was
+  /* Special case of resp.ret indicates an error, the destruction was
    * refused.  So we need to return success in this case so that we
    * continue processing requests.
    */

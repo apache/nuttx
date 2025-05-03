@@ -72,15 +72,15 @@ typedef uint32_t l2ndx_t;
 /* Free pages in memory are managed by indices ranging from up to
  * CONFIG_PAGING_NPAGED.  Initially all pages are free so the page can be
  * simply allocated in order: 0, 1, 2, ... .  After all CONFIG_PAGING_NPAGED
- * pages have be filled, then they are blindly freed and re-used in the
+ * pages have be filled, then they are blindly freed and reused in the
  * same order 0, 1, 2, ... because we don't know any better.  No smart "least
  * recently used" kind of logic is supported.
  */
 
 static pgndx_t g_pgndx;
 
-/* After CONFIG_PAGING_NPAGED have been allocated, the pages will be re-used.
- * In order to re-used the page, we will have un-map the page from its
+/* After CONFIG_PAGING_NPAGED have been allocated, the pages will be reused.
+ * In order to reused the page, we will have un-map the page from its
  * previous mapping.  In order to that, we need to be able to map a physical
  * address to to an index into the PTE where it was mapped.  The following
  * table supports this backward lookup - it is indexed by the page number

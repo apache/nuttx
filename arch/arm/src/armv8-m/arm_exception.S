@@ -188,7 +188,7 @@ exception_common:
 	mrs		r0, ipsr
 
 #if CONFIG_ARCH_INTERRUPTSTACK < 7
-	/* If CONFIG_ARCH_INTERRUPTSTACK is not defined, we will re-use the
+	/* If CONFIG_ARCH_INTERRUPTSTACK is not defined, we will reuse the
 	 * interrupted thread's stack.  That may mean using either MSP or PSP
 	 * stack for interrupt level processing (in kernel mode).
 	 */

@@ -150,7 +150,7 @@
  * Interrupt mode relies on the following interrupt events:
  *
  *   TXIS  - Transmit interrupt
- *           (data transmitted to bus and acknowedged)
+ *           (data transmitted to bus and acknowledged)
  *   NACKF - Not Acknowledge Received
  *           (data transmitted to bus and NOT acknowledged)
  *   RXNE  - Receive interrupt
@@ -2807,7 +2807,7 @@ static int stm32l4_i2c_reset(struct i2c_master_s *dev)
 
 out:
 
-  /* Release the port for re-use by other clients */
+  /* Release the port for reuse by other clients */
 
   nxmutex_unlock(&priv->lock);
   return ret;

@@ -7,7 +7,7 @@
 ; in "arch/arm/src/rp23xx/rp23xx_ws2812.c".  This file is
 ; supplied for documentation purposes only
 ;
-; Each bit of the input word generaes one of two patterns for output:
+; Each bit of the input word generates one of two patterns for output:
 ;
 ;  clock    +-----+-----+-----+-----+-----+-----+-----+-----+-----+
 ;           |    T1     |          T2           |       T3        |

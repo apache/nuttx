@@ -128,7 +128,7 @@
 #define ILI9225_DISP_CTRL1_D(n)                (((uint16_t)(n) << ILI9225_DISP_CTRL1_D_SHIFT) & ILI9225_DISP_CTRL1_D_MASK)
 #define ILI9225_DISP_CTRL1_REV                 (1 << 2)  /* Invert grayscale levels */
 #define ILI9225_DISP_CTRL1_CL                  (1 << 3)  /* Select 8-color display mode */
-#define ILI9225_DISP_CTRL1_GON                 (1 << 4)  /* Set the output leve of gate driver */
+#define ILI9225_DISP_CTRL1_GON                 (1 << 4)  /* Set the output level of gate driver */
 #define ILI9225_DISP_CTRL1_TEMON               (1 << 12) /* Enable the frame flag output signal */
 
 /* ILI9225_DISP_CTRL2, Display Control 2, Offset: 0x08 */
@@ -160,7 +160,7 @@
 #define ILI9225_RGB_DISP_INT_CTRL1_RIM_MASK    (3 << ILI9225_RGB_DISP_INT_CTRL1_RIM_SHIFT)
 #define ILI9225_RGB_DISP_INT_CTRL1_RIM(n)      (((uint16_t)(n) << ILI9225_RGB_DISP_INT_CTRL1_RIM_SHIFT) & ILI9225_RGB_DISP_INT_CTRL1_RIM_MASK)
 #define ILI9225_RGB_DISP_INT_CTRL1_DM          (1 << 4) /* Select RGB interface */
-#define ILI9225_RGB_DISP_INT_CTRL1_RM          (1 << 8) /* Select RGB interface acces to GRAM */
+#define ILI9225_RGB_DISP_INT_CTRL1_RM          (1 << 8) /* Select RGB interface access to GRAM */
 
 /* ILI9225_OSC_CTRL, Frame Maker Position, Offset: 0x0f */
 
@@ -188,7 +188,7 @@
 #define ILI9225_POWER_CTRL2_PON1               (1 << 9)  /* Operation starting bit for booster circuit 2 (VGH) */
 #define ILI9225_POWER_CTRL2_PON2               (1 << 10) /* Operation starting bit for booster circuit 2 (VGL) */
 #define ILI9225_POWER_CTRL2_PON3               (1 << 11) /* Operation starting bit for booster circout 3 (VCL) */
-#define ILI9225_POWER_CTRL2_APON               (1 << 12) /* Automatic boosting operatio starting bit */
+#define ILI9225_POWER_CTRL2_APON               (1 << 12) /* Automatic boosting operation starting bit */
 
 /* ILI9225_POWER_CTRL3, Power Control 3, Offset: 0x12 */
 

@@ -523,7 +523,7 @@
 /* I2S_TX_STOP_EN : R/W ;bitpos:[13] ;default: 1'h1 ; */
 
 /* Description: Set this bit to stop disable output BCK signal and WS
- * signal when tx FIFO is emtpy.
+ * signal when tx FIFO is empty.
  */
 
 #define I2S_TX_STOP_EN    (BIT(13))

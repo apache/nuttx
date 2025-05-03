@@ -87,7 +87,7 @@
 /* LED definitions **********************************************************/
 
 /* The Sure DB_DP11215 PIC32 Storage Demo Board board has five LEDs.  One
- * (D4, lablel "Power") is not controllable by software.  Four are
+ * (D4, labeled "Power") is not controllable by software.  Four are
  * controllable by software:
  *
  * D7  "USB"    Yellow  RD7 Low illuminates

@@ -83,7 +83,7 @@ static uint16_t ipv6_fragout_getunfraginfo(FAR struct iob_s *iob,
  * Name: ipv6_fragin_getinfo
  *
  * Description:
- *   Polulate fragment information from the input ipv6 packet data.
+ *   Populate fragment information from the input ipv6 packet data.
  *
  * Input Parameters:
  *   iob      - An IPv6 fragment
@@ -293,7 +293,7 @@ static uint32_t ipv6_fragin_reassemble(FAR struct ip_fragsnode_s *node)
  *   ref    - The reference IPv6 Header
  *   ipv6   - The pointer of the newly generated IPv6 Header
  *   hdrlen - Including the length of IPv6 basic header and all
- *            extention headers
+ *            extension headers
  *   datalen   - The data length follows the IPv6 basic header
  *   nxthdroff - The offset of 'next header' to be updated
  *   nxtprot   - The value of 'next header' to be updated
@@ -401,7 +401,7 @@ static uint16_t ipv6_fragout_getunfraginfo(FAR struct iob_s *iob,
   *hdrtype = ipv6->proto;
 
   /* Traverse up to three extension headers, if the Destination Options
-   * Header appears repeatedly, ingore the secondary one and end the search.
+   * Header appears repeatedly, ignore the secondary one and end the search.
    * refer to rfc2460, section-4.1
    */
 
@@ -483,7 +483,7 @@ int32_t ipv6_fragin(FAR struct net_driver_s *dev)
       return -ENOMEM;
     }
 
-  /* Polulate fragment information from input packet data */
+  /* Populate fragment information from input packet data */
 
   ipv6_fragin_getinfo(dev->d_iob, fraginfo);
 

@@ -228,7 +228,7 @@ void arp_ipin(FAR struct net_driver_s *dev);
  *   If the destination IPv4 address is in the local network (determined
  *   by logical ANDing of netmask and our IPv4 address), the function
  *   checks the ARP cache to see if an entry for the destination IPv4
- *   address is found.  If so, an Ethernet header is pre-pended at the
+ *   address is found.  If so, an Ethernet header is prepended at the
  *   beginning of the packet and the function returns.
  *
  *   If no ARP cache entry is found for the destination IIPv4P address, the

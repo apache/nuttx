@@ -48,7 +48,7 @@ SECTIONS
 
         /* RF and system timer interrupt handler may call the libgcc
          * functions, to make sure the RF and system timer interrupt
-         * handler do not execute falsh code, copy all the libgcc code
+         * handler do not execute flash code, copy all the libgcc code
          * to ram (exclude _divdi3, _udivdi3 and _umoddi3).
          */
 
@@ -56,7 +56,7 @@ SECTIONS
 
         /* Copy some scheduler related functions and read only data to ram
          * to improve the performance and make sure the RF and system timer
-         * interrupt handler do not execute falsh code.
+         * interrupt handler do not execute flash code.
          */
 
         *libarch.a:arm_interruptcontext.o(.text .text.*)

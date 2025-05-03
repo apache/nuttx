@@ -806,7 +806,7 @@ void stm32_stdclockconfig(void)
       putreg32(regval, STM32_RCC_CFGR);
 #endif
 
-      /* Configure PLL123 clock source and multipiers */
+      /* Configure PLL123 clock source and multipliers */
 
 #ifdef STM32_BOARD_USEHSI
       regval = (RCC_PLLCKSELR_PLLSRC_HSI |

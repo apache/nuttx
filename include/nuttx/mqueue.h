@@ -292,7 +292,7 @@ int nxmq_send(mqd_t mqdes, FAR const char *msg, size_t msglen,
  *   msg     - Message to send
  *   msglen  - The length of the message in bytes
  *   prio    - The priority of the message
- *   abstime - the absolute time to wait until a timeout is decleared
+ *   abstime - the absolute time to wait until a timeout is declared
  *
  * Returned Value:
  *   This is an internal OS interface and should not be used by applications.
@@ -568,7 +568,7 @@ int file_mq_send(FAR struct file *mq, FAR const char *msg, size_t msglen,
  *   msg     - Message to send
  *   msglen  - The length of the message in bytes
  *   prio    - The priority of the message
- *   abstime - the absolute time to wait until a timeout is decleared
+ *   abstime - the absolute time to wait until a timeout is declared
  *
  * Returned Value:
  *   This is an internal OS interface and should not be used by applications.

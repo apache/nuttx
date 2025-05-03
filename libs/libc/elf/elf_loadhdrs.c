@@ -109,7 +109,7 @@ int libelf_loadhdrs(FAR struct mod_loadinfo_s *loadinfo)
                  (size_t)loadinfo->ehdr.e_phnum;
       if (loadinfo->ehdr.e_phoff + phdrsize > loadinfo->filelen)
         {
-          berr("ERROR: Insufficent space for program header table\n");
+          berr("ERROR: Insufficient space for program header table\n");
           return -ESPIPE;
         }
 

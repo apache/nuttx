@@ -33,7 +33,7 @@ config IMXRT_FLEXCAN3_AS_CAN0
 config NET_USE_OTP_ETHERNET_MAC
 	bool "Use Ethernet MAC address stored in OCOTP_MAC0 and OCOTP_MAC1"
 	---help---
-		The teensy 4.1 board has an "offical" unique MAC address stored in OCOTP (One-Time-Programmable) memory.
+		The teensy 4.1 board has an "official" unique MAC address stored in OCOTP (One-Time-Programmable) memory.
 		When enabling this option, it is read and used when the ethernet peripheral is initialized.
 		If so, the 'ifconfig eth0' HWaddr should start with 04:e9:e5:...
 		(the vendor ID of 'PJRC.COM, LLC') when this feature is enabled.
@@ -44,7 +44,7 @@ if TEENSY_41
 config TEENSY_41_PIKRON_BB
 	bool "Base board for Teensy 4.1 configuration"
 	---help---
-		Configuration pikron-bb contains setup for open hardware based board fo Teensy 4.1. This option
+		Configuration pikron-bb contains setup for open hardware based board for Teensy 4.1. This option
 		sets up HW pinout as ADC channels for example.
 
 endif

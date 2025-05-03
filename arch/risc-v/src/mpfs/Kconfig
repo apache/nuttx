@@ -51,7 +51,7 @@ config MPFS_CLKINIT
 	depends on MPFS_BOOTLOADER
 	default y
 	---help---
-		This initilizes the system clocks at mpfs_start.c file. The option may be also turned off
+		This initializes the system clocks at mpfs_start.c file. The option may be also turned off
 		if some other entity has already set them up.
 
 config MPFS_L2_CLEAR

@@ -40,18 +40,18 @@
 
 /* Register Offsets *********************************************************/
 
-#define GD32_GPIO_CTL_OFFSET             0x0000 /* GPIO port control register offfset */
-#define GD32_GPIO_OMODE_OFFSET           0x0004 /* GPIO port output mode register offfset */
-#define GD32_GGPIO_OSPD_OFFSET           0x0008 /* GPIO port output speed register offfset */
-#define GD32_GPIO_PUD_OFFSET             0x000c /* GPIO port pull-up/pull-down register offfset */
-#define GD32_GPIO_ISTAT_OFFSET           0x0010 /* GPIO port input status register offfset */
-#define GD32_GPIO_OCTL_OFFSET            0x0014 /* GPIO port output control register offfset */
-#define GD32_GPIO_BOP_OFFSET             0x0018 /* GPIO port bit operation register offfset */
-#define GD32_GPIO_LOCK_OFFSET            0x001c /* GPIO port configuration lock register offfset */
-#define GD32_GPIO_AFSEL0_OFFSET          0x0020 /* GPIO alternate function selected register 0 offfset */
-#define GD32_GPIO_AFSEL1_OFFSET          0x0024 /* GPIO alternate function selected register 1 offfset */
-#define GD32_GPIO_BC_OFFSET              0x0028 /* GPIO bit clear register offfset */
-#define GD32_GPIO_TG_OFFSET              0x002c /* GPIO port bit toggle register offfset */
+#define GD32_GPIO_CTL_OFFSET             0x0000 /* GPIO port control register offset */
+#define GD32_GPIO_OMODE_OFFSET           0x0004 /* GPIO port output mode register offset */
+#define GD32_GGPIO_OSPD_OFFSET           0x0008 /* GPIO port output speed register offset */
+#define GD32_GPIO_PUD_OFFSET             0x000c /* GPIO port pull-up/pull-down register offset */
+#define GD32_GPIO_ISTAT_OFFSET           0x0010 /* GPIO port input status register offset */
+#define GD32_GPIO_OCTL_OFFSET            0x0014 /* GPIO port output control register offset */
+#define GD32_GPIO_BOP_OFFSET             0x0018 /* GPIO port bit operation register offset */
+#define GD32_GPIO_LOCK_OFFSET            0x001c /* GPIO port configuration lock register offset */
+#define GD32_GPIO_AFSEL0_OFFSET          0x0020 /* GPIO alternate function selected register 0 offset */
+#define GD32_GPIO_AFSEL1_OFFSET          0x0024 /* GPIO alternate function selected register 1 offset */
+#define GD32_GPIO_BC_OFFSET              0x0028 /* GPIO bit clear register offset */
+#define GD32_GPIO_TG_OFFSET              0x002c /* GPIO port bit toggle register offset */
 
 /* Register Addresses *******************************************************/
 

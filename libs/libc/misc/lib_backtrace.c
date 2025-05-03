@@ -238,7 +238,7 @@ static void backtrace_free(FAR struct backtrace_pool_s *bp, int index)
  *
  * Returned Value:
  *   Return the index of the backtrace record if success, otherwise return
- *   a negtive value.
+ *   a negative value.
  ****************************************************************************/
 
 int backtrace_record(int skip)
@@ -303,7 +303,7 @@ int backtrace_record(int skip)
  *   index - The index of the backtrace record
  *
  * Returned Value:
- *   Return 0 if success, otherwise return a negtive value.
+ *   Return 0 if success, otherwise return a negative value.
  ****************************************************************************/
 
 int backtrace_remove(int index)

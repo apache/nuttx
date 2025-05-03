@@ -3521,7 +3521,7 @@ static int32_t xqueue_send_adapter(void *queue,
  *   Create and initialize semaphore
  *
  * Input Parameters:
- *   max  - No meanining for NuttX
+ *   max  - No meaning for NuttX
  *   init - semaphore initialization value
  *
  * Returned Value:

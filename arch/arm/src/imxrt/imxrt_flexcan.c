@@ -713,9 +713,9 @@ static int imxrt_transmit(struct imxrt_driver_s *priv)
   mb->cs = cs; /* Go. */
 
   /* Errata ER005829 step 8: Write twice into the first TX MB
-   * Errata mentions writng 0x8 value, but this one couses
+   * Errata mentions writing 0x8 value, but this one causes
    * the ESR2_LPTM register to choose the reserved MB for
-   * transmiting the package, hence we write 0x3
+   * transmitting the package, hence we write 0x3.
    */
 
   struct mb_s *buffer = flexcan_get_mb(priv, RXMBCOUNT);
@@ -1750,9 +1750,9 @@ static int imxrt_initialize(struct imxrt_driver_s *priv)
     }
 
   /*  Errata ER005829 step 7: Reserve first TX MB
-   *  Errata mentions writng 0x8 value, but this one couses
+   *  Errata mentions writing 0x8 value, but this one causes
    *  the ESR2_LPTM register to choose the reserved MB for
-   *  transmiting the package, hence we write 0x3
+   *  transmitting the package, hence we write 0x3.
    */
 
       struct mb_s *buffer = flexcan_get_mb(priv, RXMBCOUNT);

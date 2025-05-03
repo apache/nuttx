@@ -39,7 +39,7 @@
  * Name:  wcswidth
  *
  * Description:
- *    Determine columns needed for a fixed-size wide charcater string
+ *    Determine columns needed for a fixed-size wide character string
  *
  * Input Parameters:
  *   wcs - the wide character string need to calculate

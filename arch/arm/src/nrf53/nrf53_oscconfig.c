@@ -42,7 +42,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_NRF53_NETCORE
-#  error Oscillators configuration availalbe only for the App core
+#  error Oscillators configuration available only for the App core
 #endif
 
 /* LFXO pins */

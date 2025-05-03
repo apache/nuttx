@@ -50,7 +50,7 @@
 #define XSRAM_SIZE              (CONFIG_ARCH_CHIP_SAMV7_MEM_RAM - KSRAM_SIZE - USRAM_SIZE)
 
 /* The SAMV7 can have up to 2048Kb of FLASH beginning at address 0x0040:0000
- * and up to 384Kb of SRAM beginining at 0x2040:0000 or 0x2000:0000
+ * and up to 384Kb of SRAM beginning at 0x2040:0000 or 0x2000:0000
  *
  * When booting from FLASH, FLASH memory is aliased to address 0x0000:0000
  * where the code expects to begin execution by jumping to the entry point in

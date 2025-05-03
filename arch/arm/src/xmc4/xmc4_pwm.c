@@ -395,7 +395,7 @@ static int pwm_set_period_match(struct xmc4_pwm_s *priv, uint16_t period_val)
  * Name: pwm_set_compare_match
  *
  * Description:
- *   Set the comapre match register (CC4yCRS.CRS).
+ *   Set the compare match register (CC4yCRS.CRS).
  *   Must call pwm_shadow_transfert() after.
  *
  * Returned Value:
@@ -452,7 +452,7 @@ static int pwm_set_passive_level(struct xmc4_pwm_s *priv, uint8_t level)
  * Name: pwm_shadow_transfert
  *
  * Description:
- *   Enable the transfert of the CRS, PRS and PSL registers for the next
+ *   Enable the transfer of the CRS, PRS and PSL registers for the next
  *   period. Must be called if one of these register is changed.
  *   Must call pwm_shadow_transfert() after.
  *
@@ -915,7 +915,7 @@ static int pwm_timer(struct xmc4_pwm_s *priv, const struct pwm_info_s *info)
 
           if (new_prescaler == priv->prescaler)
             {
-              /* Prescaller doesn't change, update shadow transfert */
+              /* Prescaller doesn't change, update shadow transfer */
 
               pwm_set_period_match(priv, prs);
               pwm_set_compare_match(priv, crs);
@@ -960,7 +960,7 @@ static int pwm_timer(struct xmc4_pwm_s *priv, const struct pwm_info_s *info)
     }
   else
     {
-      /* Frequency doesn't change, update shadow transfert */
+      /* Frequency doesn't change, update shadow transfer */
 
       pwm_set_compare_match(priv, crs);
       pwm_set_passive_level(priv, info->cpol);

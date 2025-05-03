@@ -1637,7 +1637,7 @@ static int vs1053_resume(FAR struct audio_lowerhalf_s *lower)
       return OK;
     }
 
-  /* Enable interrupts to allow suppling data */
+  /* Enable interrupts to allow supplying data */
 
   dev->paused = false;
   vs1053_feeddata(dev);

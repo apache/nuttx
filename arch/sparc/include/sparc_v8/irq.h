@@ -162,28 +162,28 @@
 #define REG_Y               (18)
 #define REG_FSR             (19)
 
-/* %l0: loacal 0 */
+/* %l0: local 0 */
 #define REG_L0              (52)
 
-/* %l1: loacal 1 */
+/* %l1: local 1 */
 #define REG_L1              (53)
 
-/* %l2: loacal 2 */
+/* %l2: local 2 */
 #define REG_L2              (54)
 
-/* %l3: loacal 3 */
+/* %l3: local 3 */
 #define REG_L3              (55)
 
-/* %l4: loacal 4 */
+/* %l4: local 4 */
 #define REG_L4              (56)
 
-/* %l5: loacal 5 */
+/* %l5: local 5 */
 #define REG_L5              (57)
 
-/* %l6: loacal 6 */
+/* %l6: local 6 */
 #define REG_L6              (58)
 
-/* %l7: loacal 7 */
+/* %l7: local 7 */
 #define REG_L7              (59)
 
 /* %o0: outgoing param 0, incoming return value */
@@ -503,7 +503,7 @@ struct xcptcontext
  */
 #define sparc_get_tbr( _tbr ) \
   do { \
-     (_tbr) = 0; /* to avoid unitialized warnings */ \
+     (_tbr) = 0; /* to avoid uninitialized warnings */ \
      __asm__ volatile( "rd %%tbr, %0" :  "=r" (_tbr) : "0" (_tbr) ); \
   } while ( 0 )
 
@@ -555,7 +555,7 @@ struct xcptcontext
  */
 #define sparc_get_asr17( _asr17 ) \
   do { \
-     (_asr17) = 0; /* to avoid unitialized warnings */ \
+     (_asr17) = 0; /* to avoid uninitialized warnings */ \
      __asm__ volatile( "rd %%asr17, %0" :  "=r" (_asr17) : "0" (_asr17) ); \
   } while ( 0 )
 

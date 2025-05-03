@@ -30,7 +30,7 @@
 #include "spirit_types.h"
 
 /****************************************************************************
- * Pre-processor Defintiions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* SPIRIT1 SPI Headers */

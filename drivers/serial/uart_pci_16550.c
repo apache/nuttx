@@ -75,7 +75,7 @@ struct pci_u16550_type_s
   uint8_t  portincr;            /* Port address increment */
 };
 
-/* Extend default UART 16550 strucutre */
+/* Extend default UART 16550 structure */
 
 struct pci_u16550_priv_s
 {

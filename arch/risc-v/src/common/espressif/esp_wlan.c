@@ -1285,7 +1285,7 @@ static int esp_net_initialize(int devno, uint8_t *mac_addr,
  *
  * Description:
  *   Wi-Fi station RX done callback function. If this is called, it means
- *   station receiveing packet.
+ *   station receiving packet.
  *
  * Input Parameters:
  *   buffer - Wi-Fi received packet buffer
@@ -1339,7 +1339,7 @@ static void wlan_sta_tx_done(uint8_t ifidx,
  *
  * Description:
  *   Wi-Fi softAP RX done callback function. If this is called, it means
- *   softAP receiveing packet.
+ *   softAP receiving packet.
  *
  * Input Parameters:
  *   buffer - Wi-Fi received packet buffer
@@ -1694,7 +1694,7 @@ int esp_wlan_softap_initialize(void)
  *   ifidx    - The interface id that the tx callback has been triggered from
  *   data     - Pointer to the data transmitted
  *   data_len - Length of the data transmitted
- *   txstatus - True:if the data was transmitted sucessfully False: if data
+ *   txstatus - True:if the data was transmitted successfully False: if data
  *              transmission failed
  *
  * Returned Value:

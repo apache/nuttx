@@ -454,7 +454,7 @@ static bool g_softap_started;
 static wifi_txdone_cb_t g_softap_txdone_cb;
 #endif
 
-/* Wi-Fi and BT coexistance OS adapter data */
+/* Wi-Fi and BT coexistence OS adapter data */
 
 #ifdef CONFIG_ESP32C3_WIFI_BT_COEXIST
 coex_adapter_funcs_t g_coex_adapter_funcs =
@@ -3351,7 +3351,7 @@ static uint32_t esp_rand(void)
    * faster than it is added, this function needs to wait for at least 16 APB
    * clock cycles after reading previous word. This implementation may
    * actually wait a bit longer due to extra time spent in arithmetic and
-   * branch statements. As a (probably unncessary) precaution to avoid
+   * branch statements. As a (probably unnecessary) precaution to avoid
    * returning the RNG state as-is, the result is XORed with additional
    * WDEV_RND_REG reads while waiting.
    * This code does not run in a critical section, so CPU frequency switch
@@ -6883,7 +6883,7 @@ int esp_wifi_softap_rssi(struct iwreq *iwr, bool set)
  * Name: esp32c3_wifi_bt_coexist_init
  *
  * Description:
- *   Initialize ESP32-C3 Wi-Fi and BT coexistance module.
+ *   Initialize ESP32-C3 Wi-Fi and BT coexistence module.
  *
  * Input Parameters:
  *   None

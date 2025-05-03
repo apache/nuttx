@@ -358,7 +358,7 @@ UARTINSTS_CTO		EQU	00ch         ;   110: Character timeout *
 UARTINSTS_TC		EQU	00ah         ;   101: Transmission complete *
 UARTINSTS_RLS		EQU	006h         ;   011: Receiver line status *
 UARTINSTS_RDR		EQU	004h         ;   010: Receive data ready or trigger level *
-UARTINSTS_TBE		EQU	002h         ;   001: Transmisson buffer empty *
+UARTINSTS_TBE		EQU	002h         ;   001: Transmission buffer empty *
 UARTINSTS_MS		EQU	000h         ;   000: Modem status *
 UARTIIR_INTBIT		EQU	001h         ; Bit 0: Active interrupt source *
 UARTIIR_CAUSEMASK	EQU	00fh

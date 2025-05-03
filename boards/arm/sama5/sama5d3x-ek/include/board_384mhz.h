@@ -62,7 +62,7 @@
 /* PLLA configuration.
  *
  *   Divider = 1
- *   Multipler = 64
+ *   Multiplier = 64
  */
 
 #define BOARD_CKGR_PLLAR_COUNT     (63 << PMC_CKGR_PLLAR_COUNT_SHIFT)

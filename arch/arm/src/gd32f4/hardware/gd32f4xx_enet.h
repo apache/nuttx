@@ -50,7 +50,7 @@
 #define GD32_ENET_MAC_FCTL_OFFSET            0x0018 /* MAC flow control register offset */
 #define GD32_ENET_MAC_VLT_OFFSET             0x001C /* MAC VLAN tag register offset */
 #define GD32_ENET_MAC_RWFF_OFFSET            0x0028 /* MAC remote wakeup frame filter register offset */
-#define GD32_ENET_MAC_WUM_OFFSET             0x002C /* MAC wakeup managenment register offset */
+#define GD32_ENET_MAC_WUM_OFFSET             0x002C /* MAC wakeup management register offset */
 
 #define GD32_ENET_MAC_DBG_OFFSET             0x0034 /* MAC debug register offset */
 #define GD32_ENET_MAC_INTF_OFFSET            0x0038 /* MAC interrupt flag register offset */
@@ -75,7 +75,7 @@
 #define GD32_ENET_MSC_TINTMSK_OFFSET         0x0110 /* MSC transmit interrupt mask register offset */
 
 #define GD32_ENET_MSC_SCCNT_OFFSET           0x014C /* MSC transmitted good frames after a single collision counter register offset */
-#define GD32_ENET_MSC_MSCCNT_OFFSET          0x0150 /* MSC transmitted good frames after more than a signle collision counter register offset */
+#define GD32_ENET_MSC_MSCCNT_OFFSET          0x0150 /* MSC transmitted good frames after more than a single collision counter register offset */
 
 #define GD32_ENET_MSC_TGFCNT_OFFSET          0x0168 /* MSC transmitted good frames counter register offset */
 
@@ -438,7 +438,7 @@
 #define ENET_MAC_FCTH_RFA_SHIFT         (0)                               /* Bits 0-2 threshold of active flow control */
 #define ENET_MAC_FCTH_RFA_MASK          (7 << ENET_MAC_FCTH_RFA_SHIFT)
 
-#define ENET_MAC_FCTH_RFD_SHIFT         (4)                               /* Bits 4-6 threshold of deactive flow control */
+#define ENET_MAC_FCTH_RFD_SHIFT         (4)                               /* Bits 4-6 threshold of deactivate flow control */
 #define ENET_MAC_FCTH_RFD_MASK          (7 << ENET_MAC_FCTH_RFD_SHIFT)
 
 /* MSC Registers */
@@ -647,7 +647,7 @@
 #define ENET_RX_STATE_WAITING           (3 << ENET_DMA_STAT_RP_SHIFT)        /* 011: waiting for receive packet */
 #define ENET_RX_STATE_SUSPENDED         (4 << ENET_DMA_STAT_RP_SHIFT)        /* 100: Rx descriptor unavailable */
 #define ENET_RX_STATE_CLOSING           (5 << ENET_DMA_STAT_RP_SHIFT)        /* 101: closing receive descriptor */
-#define ENET_RX_STATE_QUEUING           (6 << ENET_DMA_STAT_RP_SHIFT)        /* 111: transferring the receive packet data from recevie buffer to host memory */
+#define ENET_RX_STATE_QUEUING           (6 << ENET_DMA_STAT_RP_SHIFT)        /* 111: transferring the receive packet data from receive buffer to host memory */
 
 #define ENET_DMA_STAT_TP_SHIFT          (20)                                 /* Bits 20-22: transmit process state */
 #define ENET_DMA_STAT_TP_MASK           (7 << ENET_DMA_STAT_TP_SHIFT)

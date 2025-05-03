@@ -1779,7 +1779,7 @@ static void ctucanfd_init(FAR struct ctucanfd_driver_s *priv)
  * Name: ctucanfd_ctucanfd_probe
  *
  * Description:
- *   Probe CTUCANFD devices on board and return the number of vailalbe chips.
+ *   Probe CTUCANFD devices on board and return the number of available chips.
  *
  *****************************************************************************/
 

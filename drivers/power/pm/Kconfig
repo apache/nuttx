@@ -38,7 +38,7 @@ config PM_RUNTIME
 	---help---
 		Enable PM runtime that can suspend/resume device by driver
 		when system is running. If the device is not used, you can use
-		PM rutime interface to suspend the device. When the device is
+		PM runtime interface to suspend the device. When the device is
 		needed again, the driver can call the framework to wake up
 		the device.
 

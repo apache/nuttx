@@ -419,7 +419,7 @@ void xbee_set_saddr(FAR struct xbee_priv_s *priv, FAR const uint8_t *saddr);
  *
  * Description:
  *   Sends API frame with AT command request in order to set the RF channel
- *   (Operatin Channel) of the device.
+ *   (Operation Channel) of the device.
  *
  ****************************************************************************/
 

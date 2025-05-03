@@ -240,7 +240,7 @@ void up_timer_initialize(void)
 
   /* Initialize Interval Timer
    *
-   * Ths timer is configured to be a oneshot timer, that has
+   * The timer is configured to be a oneshot timer, that has
    * a resolution that matches the USEC_PER_TICK, and
    * will be started in up_timer_start and uses its period
    * (not compare value) to trigger an interrupt.

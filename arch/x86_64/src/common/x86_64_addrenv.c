@@ -92,7 +92,7 @@
       (CONFIG_ARCH_DATA_VBASE & 0xffffffffffe00000)) || \
      ((CONFIG_ARCH_TEXT_VBASE & 0xffffffffffe00000) !=  \
       (CONFIG_ARCH_HEAP_VBASE & 0xffffffffffe00000)))
-#  error VBASE address must use the same PML4, PDT adn PD
+#  error VBASE address must use the same PML4, PDT and PD
 #endif
 
 /****************************************************************************

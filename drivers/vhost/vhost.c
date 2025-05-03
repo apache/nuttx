@@ -47,9 +47,9 @@ struct vhost_bus_s
 {
   mutex_t          lock;           /* Lock for the list */
   struct list_node device;         /* Wait match vhost device list */
-  struct list_node defered_device; /* Defered vhost device list */
+  struct list_node defered_device; /* Deferred vhost device list */
   struct list_node driver;         /* Vhost driver list */
-  struct work_s    defered_work;   /* Defered probe work */
+  struct work_s    defered_work;   /* Deferred probe work */
 };
 
 struct vhost_device_item_s
@@ -275,7 +275,7 @@ int vhost_register_device(FAR struct vhost_device *device)
       return ret;
     }
 
-  /* 1. Add device to defered device list if virtio driver not OK;
+  /* 1. Add device to deferred device list if virtio driver not OK;
    * 2. Add device to the normal device list and try to probe the driver
    *    if virtio driver has been OK.
    */

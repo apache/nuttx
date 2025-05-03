@@ -157,7 +157,7 @@ static int nrf52_radioi8_rtc(struct nrf52_radioi8_dev_s *dev,
   dev->rtc->rtc_timeslot = NRF52_RTC_TIMESLOT_CC;
   NRF52_RTC_SETCC(dev->rtc->rtc, NRF52_RTC_TIMESLOT, dev->rtc->rtc_timeslot);
 
-  /* Configure interupts */
+  /* Configure interrupts */
 
   NRF52_RTC_ENABLEINT(dev->rtc->rtc, NRF52_RTC_BI);
   NRF52_RTC_ENABLEINT(dev->rtc->rtc, NRF52_RTC_SD);
@@ -328,7 +328,7 @@ static int nrf52_radioi8_isr_rtc(int irq, void *context, void *arg)
     {
       nrf52_radioi8_trace_put(RADIO_TRACE_IRQ_RTCTIMESLOT, 0);
 
-      /* TODO: how to sync transmition with timeslot ?
+      /* TODO: how to sync transmission with timeslot ?
        *       do we need count every timeslot here ?
        *       or wait for the timeslot we are interested in ?
        *       or just use txdelay ?
@@ -357,7 +357,7 @@ static int nrf52_radioi8_isr_rtc(int irq, void *context, void *arg)
  * Name: nrf52_radioi8_rtc_init
  *
  * Description:
- *   Initialize low resoluton, low power timer for IEEE802154 operations.
+ *   Initialize low resolution, low power timer for IEEE802154 operations.
  *   Used to handle superframe timings.
  *
  ****************************************************************************/
@@ -376,7 +376,7 @@ nrf52_radioi8_rtc_init(struct nrf52_radioi8_dev_s *dev)
       return NULL;
     }
 
-  /* Atach RTC interrupt */
+  /* Attach RTC interrupt */
 
   NRF52_RTC_SETISR(rtc, nrf52_radioi8_isr_rtc, dev);
 

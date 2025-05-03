@@ -129,7 +129,7 @@ _net_timedwait(FAR sem_t *sem, bool interruptible, unsigned int timeout)
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on
- *   failured (probably -ECANCELED).
+ *   failure (probably -ECANCELED).
  *
  ****************************************************************************/
 
@@ -151,7 +151,7 @@ int net_lock(void)
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on
- *   failured (probably -EAGAIN).
+ *   failure (probably -EAGAIN).
  *
  ****************************************************************************/
 
@@ -202,7 +202,7 @@ int net_breaklock(FAR unsigned int *count)
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on
- *   failured (probably -ECANCELED).
+ *   failure (probably -ECANCELED).
  *
  ****************************************************************************/
 

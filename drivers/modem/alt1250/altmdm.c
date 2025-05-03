@@ -83,7 +83,7 @@ typedef enum altmdm_state_e
                                   * state */
   ALTMDM_STATE_BODYTRX,          /* SPI body transaction state */
   ALTMDM_STATE_GOTRX,            /* Received normal body state */
-  ALTMDM_STATE_GOTRST,           /* Received reset pakcet body state */
+  ALTMDM_STATE_GOTRST,           /* Received reset packet body state */
   ALTMDM_STATE_GOTSLEEP,         /* Received sleep packet body state */
   ALTMDM_STATE_BACKTOIDLE,       /* Back to Idle state */
   ALTMDM_STATE_RETRECV,          /* Return state */

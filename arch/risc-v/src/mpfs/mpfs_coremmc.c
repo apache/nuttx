@@ -1843,7 +1843,7 @@ static int mpfs_check_recverror(struct mpfs_dev_s *priv)
  * Input Parameters:
  *   dev    - An instance of the SDIO device interface
  *   cmd    - Command
- *   rshort - Buffer for reveiving the response
+ *   rshort - Buffer for receiving the response
  *
  * Returned Value:
  *   OK on success; a negated errno on failure.
@@ -1887,7 +1887,7 @@ static int mpfs_recvshortcrc(struct sdio_dev_s *dev, uint32_t cmd,
  * Input Parameters:
  *   dev    - An instance of the SDIO device interface
  *   cmd    - Command
- *   rshort - Buffer for reveiving the response
+ *   rshort - Buffer for receiving the response
  *
  * Returned Value:
  *   OK on success; a negated errno on failure.
@@ -1931,7 +1931,7 @@ static int mpfs_recvshort(struct sdio_dev_s *dev, uint32_t cmd,
  * Input Parameters:
  *   dev    - An instance of the SDIO device interface
  *   cmd    - Command
- *   rlong  - Buffer for reveiving the response
+ *   rlong  - Buffer for receiving the response
  *
  * Returned Value:
  *   OK on success; a negated errno on failure.

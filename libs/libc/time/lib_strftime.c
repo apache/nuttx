@@ -93,7 +93,7 @@ static const char * const g_monthname[12] =
  * Input Parameters:
  *  year - a year value
  *
- * Returnd value:
+ * Returned value:
  *  true if current is leap year, false is not a leap year
  */
 
@@ -111,8 +111,8 @@ static bool is_leap(int year)
  * Input Parameters:
  *  time - the specified time
  *
- * Returnd value:
- *  the week numer in a year
+ * Returned value:
+ *  the week number in a year
  */
 
 static int get_week_num(FAR const struct tm *time)
@@ -173,7 +173,7 @@ static int get_week_num(FAR const struct tm *time)
  * Input Parameters:
  *  time - the specified time
  *
- * Returnd value:
+ * Returned value:
  *  the year that calculated based on week number
  */
 

@@ -2850,7 +2850,7 @@ static sdio_eventset_t imx9_eventwait(struct sdio_dev_s *dev)
     }
 
   /* In case of timeout or task cancellation, we need to reset the semaphore;
-   * it might have been double-posted if interrupt occured at the same time
+   * it might have been double-posted if interrupt occurred at the same time.
    */
 
   if (ret < 0 ||

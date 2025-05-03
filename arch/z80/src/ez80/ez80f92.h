@@ -212,7 +212,7 @@
 #  define EZ80_UARTINSTS_TC    0x0a         /*   101: Transmission complete */
 #  define EZ80_UARTINSTS_RLS   0x06         /*   011: Receiver line status */
 #  define EZ80_UARTINSTS_RDR   0x04         /*   010: Receive data ready or trigger level */
-#  define EZ80_UARTINSTS_TBE   0x02         /*   001: Transmisson buffer empty */
+#  define EZ80_UARTINSTS_TBE   0x02         /*   001: Transmission buffer empty */
 #  define EZ80_UARTINSTS_MS    0x00         /*   000: Modem status */
 #define EZ80_UARTIIR_INTBIT    0x01         /* Bit 0: (NOT) Active interrupt source */
 #define EZ80_UARTIIR_CAUSEMASK 0x0f

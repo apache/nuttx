@@ -3,7 +3,7 @@ From: Xiang Xiao <xiaoxiang@xiaomi.com>
 Date: Mon, 7 Jan 2019 02:15:42 +0800
 Subject: [PATCH 01/14] ns: acknowledge the received creation message
 
-the two phase handsake make the client could initiate the transfer
+the two phase handshake make the client could initiate the transfer
 immediately without the server side send any dummy message first.
 
 Signed-off-by: Xiang Xiao <xiaoxiang@xiaomi.com>
@@ -69,7 +69,7 @@ index 27b0f0d..1011b42 100644
  	RPMSG_NS_CREATE = 0,
  	/** A known remote service was just destroyed */
  	RPMSG_NS_DESTROY = 1,
-+	/** Aknowledge the previous creation message*/
++	/** Acknowledge the previous creation message*/
 +	RPMSG_NS_CREATE_ACK = 2,
  };
  

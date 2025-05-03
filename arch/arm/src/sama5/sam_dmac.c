@@ -1486,7 +1486,7 @@ static int sam_txbuffer(struct sam_dmach_s *dmach, uint32_t paddr,
   uint32_t ctrla;
   uint32_t ctrlb;
 
-  /* If we are appending a buffer to a linklist, then re-use the CTRLA/B
+  /* If we are appending a buffer to a linklist, then reuse the CTRLA/B
    * values.  Otherwise, create them from the properties of the transfer.
    */
 
@@ -1535,7 +1535,7 @@ static int sam_rxbuffer(struct sam_dmach_s *dmach, uint32_t paddr,
   uint32_t ctrla;
   uint32_t ctrlb;
 
-  /* If we are appending a buffer to a linklist, then re-use the CTRLA/B
+  /* If we are appending a buffer to a linklist, then reuse the CTRLA/B
    * values.  Otherwise, create them from the properties of the transfer.
    */
 
@@ -2254,7 +2254,7 @@ int sam_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
 
   if (dmach->llhead)
     {
-      /* Save the callback info.  This will be invoked whent the DMA
+      /* Save the callback info.  This will be invoked when the DMA
        * completes
        */
 

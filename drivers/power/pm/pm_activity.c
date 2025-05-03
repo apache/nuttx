@@ -197,7 +197,7 @@ void pm_relax(int domain, enum pm_state_e state)
  *   This function is called by a device driver to indicate that it is
  *   performing meaningful activities (non-idle), needs the power kept at
  *   the last the specified level.
- *   And this will timeout after time (ms), menas auto pm_relax
+ *   And this will timeout after time (ms), means auto pm_relax
  *
  * Input Parameters:
  *   domain - The domain of the PM activity
@@ -423,7 +423,7 @@ void pm_wakelock_relax(FAR struct pm_wakelock_s *wakelock)
  *   This function is called by a device driver to indicate that it is
  *   performing meaningful activities (non-idle), needs the power at kept
  *   last the specified level.
- *   And this will be timeout after time (ms), menas auto pm_wakelock_relax
+ *   And this will be timeout after time (ms), means auto pm_wakelock_relax
  *
  * Input Parameters:
  *   wakelock - wakelock ID

@@ -93,7 +93,7 @@ static const struct ili9342c_config_data g_lcd_config[] =
     }
   },
   {
-    /* Power contorl B, power control = 0, DC_ENA = 1 */
+    /* Power control B, power control = 0, DC_ENA = 1 */
 
     ILI9341_POWER_CONTROL_B, 3,
     {
@@ -173,7 +173,7 @@ static const struct ili9342c_config_data g_lcd_config[] =
     }
   },
   {
-    /* Memory access contorl, MX=MY=0, MV=1, ML=0, BGR=1, MH=0 */
+    /* Memory access control, MX=MY=0, MV=1, ML=0, BGR=1, MH=0 */
 
     ILI9341_MEMORY_ACCESS_CONTROL, 1,
     {
@@ -604,7 +604,7 @@ int board_lcd_initialize(void)
  *   allows support for multiple LCD devices.
  *
  * Input Parameters:
- *   devno - LCD device nmber
+ *   devno - LCD device number
  *
  * Returned Value:
  *   LCD device pointer if success or NULL if failed.

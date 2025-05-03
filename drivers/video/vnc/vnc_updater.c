@@ -152,7 +152,7 @@ static void vnc_sem_debug(FAR struct vnc_session_s *session,
       syslog(LOG_INFO, "    semcount:     %d\n", freecount);
       syslog(LOG_INFO, "    queued nodes: %u\n", nfree);
       syslog(LOG_INFO, "    waiting:      %u\n", freewaiting);
-      syslog(LOG_INFO, "  Qeued Updates:\n");
+      syslog(LOG_INFO, "  Queued Updates:\n");
       syslog(LOG_INFO, "    semcount:     %d\n", queuecount);
       syslog(LOG_INFO, "    queued nodes: %u\n", nqueued);
       syslog(LOG_INFO, "    waiting:      %u\n", queuewaiting);

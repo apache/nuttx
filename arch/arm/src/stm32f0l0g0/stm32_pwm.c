@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  * SPDX-FileCopyrightText: 2019 Fundação CERTI. All rights reserved.
  * SPDX-FileContributor: Daniel Pereira Volpato <dpo@certi.org.br>
- * SPDX-FileContributor: Guillherme da Silva amaral <gvr@certi.org.br>
+ * SPDX-FileContributor: Guillherme da Silva Amaral <gvr@certi.org.br>
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  * SPDX-FileContributor: Paul Alexander Patience <paul-a.patience@polymtl.ca>
  * SPDX-FileContributor: Mateusz Szafoni <raiden00@railab.me>

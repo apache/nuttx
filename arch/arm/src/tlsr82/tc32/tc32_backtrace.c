@@ -37,7 +37,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Macro and definitions for simple decoding of instuctions.
+/* Macro and definitions for simple decoding of instructions.
  * To check an instruction, it is ANDed with the IMASK_ and
  * the result is compared with the IOP_. The macro INSTR_IS
  * does this and returns !0 to indicate a match.
@@ -89,7 +89,7 @@ static inline uint32_t tc32_getsp(void)
  * Name: getlroffset
  *
  * Description:
- *  getlroffset()  returns the currect link address offset.
+ *  getlroffset()  returns the current link address offset.
  *
  * Input Parameters:
  *   lr    - Link register address
@@ -164,13 +164,13 @@ static bool in_code_region(void *pc)
  * Name: backtrace_push_internal
  *
  * Description:
- *  backtrace_push_internal()  returns the currect link address from
+ *  backtrace_push_internal()  returns the current link address from
  *  program counter and stack pointer
  *
  * Input Parameters:
- *   psp    - Double poninter to the SP, this parameter will be changed if
+ *   psp    - Double pointer to the SP, this parameter will be changed if
  *            the corresponding LR address is successfully found.
- *   ppc    - Double poninter to the PC, this parameter will be changed if
+ *   ppc    - Double pointer to the PC, this parameter will be changed if
  *            the corresponding LR address is successfully found.
  *
  * Returned Value:
@@ -402,7 +402,7 @@ static int backtrace_branch(void *limit, void *sp,
  *  The up call up_backtrace_init_code_regions() will set the start
  *  and end addresses of the customized program sections, this method
  *  will help the different boards to configure the current text
- *  sections for some complicate platfroms
+ *  sections for some complicate platforms.
  *
  * Input Parameters:
  *   regions  The start and end address of the text segment

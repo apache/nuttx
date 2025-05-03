@@ -141,7 +141,7 @@ def get_inode_name(inode: p.Inode):
 
 
 def inode_getpath(inode: p.Inode):
-    """get path fron inode"""
+    """get path from inode"""
     try:
         if not inode:
             return ""

@@ -542,7 +542,7 @@ int board_reset(int status)
 {
   board_power_control(PMIC_TYPE_GPO | g_reset_gpo_targets, false);
 
-  /* Restore the original state for bootup after power cycle  */
+  /* Restore the original state for boot up after power cycle  */
 
   if (!up_interrupt_context())
     {

@@ -662,8 +662,9 @@ void spin_unlock_irqrestore(FAR volatile spinlock_t *lock, irqstate_t flags)
  *
  *   This implementation is non-reentrant and set a bit of lock.
  *
- *  The priority of reader is higher than writter if a reader hold the
- *  lock, a new reader can get its lock but writer can't get this lock.
+ *  The reader's priority is higher than the writer's priority.  If a reader
+ *  holds the lock, a new reader can get its lock but a writer can't get this
+ *  lock.
  *
  * Input Parameters:
  *   lock - A reference to the spinlock object to lock.
@@ -706,8 +707,9 @@ static inline_function void read_lock(FAR volatile rwlock_t *lock)
  *
  *   This implementation is non-reentrant and set a bit of lock.
  *
- *  The priority of reader is higher than writter if a reader hold the
- *  lock, a new reader can get its lock but writer can't get this lock.
+ *  The reader's priority is higher than the writer's priority.  If a reader
+ *  holds the lock, a new reader can get its lock but a writer can't get this
+ *  lock.
  *
  * Input Parameters:
  *   lock - A reference to the spinlock object to lock.
@@ -778,8 +780,9 @@ static inline_function void read_unlock(FAR volatile rwlock_t *lock)
  *   This implementation is non-reentrant and set all bit on lock to avoid
  *   readers and writers.
  *
- *  The priority of reader is higher than writter if a reader hold the
- *  lock, a new reader can get its lock but writer can't get this lock.
+ *  The reader's priority is higher than the writer's priority.  If a reader
+ *  holds the lock, a new reader can get its lock but a writer can't get this
+ *  lock.
  *
  * Input Parameters:
  *   lock - A reference to the spinlock object to lock.
@@ -816,8 +819,9 @@ static inline_function void write_lock(FAR volatile rwlock_t *lock)
  *   This implementation is non-reentrant and set all bit on lock to avoid
  *   readers and writers.
  *
- *  The priority of reader is higher than writter if a reader hold the
- *  lock, a new reader can get its lock but writer can't get this lock.
+ *  The reader's priority is higher than the writer's priority.  If a reader
+ *  holds the lock, a new reader can get its lock but a writer can't get this
+ *  lock.
  *
  * Input Parameters:
  *   lock - A reference to the spinlock object to lock.

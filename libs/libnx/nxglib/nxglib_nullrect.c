@@ -38,7 +38,7 @@
  * Name: nxgl_nullrect
  *
  * Description:
- *   Return true if the area of the retangle is <= 0.
+ *   Return true if the area of the rectangle is <= 0.
  *
  ****************************************************************************/
 

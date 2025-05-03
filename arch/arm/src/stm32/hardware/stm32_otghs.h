@@ -100,7 +100,7 @@
 #define STM32_OTGHS_HCCHAR7_OFFSET      0x05e0 /* Host channel-7 characteristics register */
 #define STM32_OTGHS_HCCHAR8_OFFSET      0x0600 /* Host channel-8 characteristics register */
 #define STM32_OTGHS_HCCHAR9_OFFSET      0x0620 /* Host channel-9 characteristics register */
-#define STM32_OTGHS_HCCHAR10_OFFSET     0x0640 /* Host channel-10 caracteristics register */
+#define STM32_OTGHS_HCCHAR10_OFFSET     0x0640 /* Host channel-10 characteristics register */
 #define STM32_OTGHS_HCCHAR11_OFFSET     0x0660 /* Host channel-11 characteristics register */
 
 #define STM32_OTGHS_HCINT_OFFSET(n)     (0x508 + ((n) << 5))

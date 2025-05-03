@@ -1104,10 +1104,10 @@ FAR char *mfs_ser_str(FAR const char * const str, const mfs_t len,
  * Name: mfs_deser_str
  *
  * Description:
- *   Deserialize a string from intput.
+ *   Deserialize a string from input.
  *
  * Input Parameters:
- *   in  - Intput array from where to deserialize.
+ *   in  - Input array from where to deserialize.
  *   str - String to deserialize
  *   len - Length of string
  *
@@ -1360,7 +1360,7 @@ int mfs_ctz_wrtnode(FAR struct mfs_sb_s * const sb,
  *   number of index `idx_dest`.
  *
  *   The source is preferably the last CTZ block in the CTZ list, but it can
- *   realistically be any CTZ block in the CTZ list whos position is known.
+ *   realistically be any CTZ block in the CTZ list whose position is known.
  *   However, `idx_dest <= idx_src` has to be followed. Takes O(log(n))
  *   complexity to travel.
  *
@@ -1571,7 +1571,7 @@ int mfs_mn_fmt(FAR struct mfs_sb_s * const sb, const mfs_t blk1,
  * Input Parameters:
  *   sb      - Superblock instance of the device.
  *   root    - New location of the root of the file system.
- *   root_sz - New size of the CTZ list of the root of the file syste.
+ *   root_sz - New size of the CTZ list of the root of the file system.
  *
  * Returned Value:
  *   0   - OK
@@ -1652,8 +1652,8 @@ mfs_t mfs_get_fsz(FAR struct mfs_sb_s * const sb,
  *
  * Assumptions/Limitations:
  *   This allocates the `path` array in heap, and transfers the ownership
- *   of this array to the caller. It's the caller's reponsibility to use this
- *   with `mfs_free_patharr`.
+ *   of this array to the caller. It's the caller's responsibility to use
+ *   this with `mfs_free_patharr`.
  *
  ****************************************************************************/
 

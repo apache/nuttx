@@ -270,7 +270,7 @@ start32:
 	movl    %eax, g_mb_magic
 #endif
 
-	/* Jump to 64 bit initialiation if this is AP core */
+	/* Jump to 64 bit initialization if this is AP core */
 	mov     bsp_done, %eax
 	cmp     $0, %eax
 	jne     start64_init
@@ -373,7 +373,7 @@ start64_init:
 	.code64
 
 start64:
-	/* Set Segement Registers for proper iret, etc. operation */
+	/* Set Segment Registers for proper iret, etc. operation */
 	mov     $(X86_GDT_DATA_SEL),  %ax
 	mov     %ax,    %ss
 	mov     %ax,    %ds
@@ -611,7 +611,7 @@ no_kstack_switch:
 #else
 #  ifdef CONFIG_ARCH_CHIP_INTEL64_QEMU
 	/* BUGFIX for QEMU: make sure that xsave header is zeroed!
-	 * QEMU desn't clear these fields during xsave, so if the memory region
+	 * QEMU doesn't clear these fields during xsave, so if the memory region
 	 * for xsave state was not cleared before use, there may be junk data there,
 	 * that cause xrstor to crash later.
 	 */

@@ -143,7 +143,7 @@
 #define SX127X_LRM_PAYLOADMAX             0x23 /* LORA: LORA maximum payload length */
 #define SX127X_LRM_HOPPER                 0x24 /* LORA: FHSS Hop period */
 #define SX127X_LRM_RXFIFOADDR             0x25 /* LORA: Address of last byte written in FIFO */
-#define SX127X_LRM_MODEMCFG3              0x26 /* LORA: Modem PHY confgi 3*/
+#define SX127X_LRM_MODEMCFG3              0x26 /* LORA: Modem PHY config 3*/
 #define SX127X_LRM_FEIMSB                 0x28 /* LORA: Estimated frequency error MSB */
 #define SX127X_LRM_FEIMID                 0x29 /* LORA: Estimated frequency error, MID */
 #define SX127X_LRM_FEILSB                 0x2a /* LORA: Estimated frequency error, LSB*/
@@ -760,7 +760,7 @@
 
 #define SX127X_LRM_HOPPER_DEFAULT         (0x00)
 
-/* LORA: Modem PHY confgi 3 */
+/* LORA: Modem PHY config 3 */
 
 #define SX127X_LRM_MODEMCFG3_AGCAUTOON    (1 << 2) /* Bit 2: AGC auto ON */
 #define SX127X_LRM_MODEMCFG3_LOWDRATEOPT  (1 << 3) /* Bit 3: Low data rate optimize enable */

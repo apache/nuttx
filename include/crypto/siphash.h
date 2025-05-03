@@ -37,7 +37,7 @@
  * optimized for speed on short messages returning a 64bit hash/digest value.
  *
  * The number of rounds is defined during the initialization:
- *  siphash24_init() for the fast and resonable strong version
+ *  siphash24_init() for the fast and reasonable strong version
  *  siphash48_init() for the strong version (half as fast)
  *
  * struct SIPHASH_CTX ctx;

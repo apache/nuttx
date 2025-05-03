@@ -252,7 +252,7 @@
  *
  * Input Parameters:
  *   dev  - SPI Slave device interface instance
- *   data - Pointer to the data buffer pointer to be shifed out.
+ *   data - Pointer to the data buffer pointer to be shifted out.
  *          The device will set the data buffer pointer to the actual data
  *
  * Returned Value:

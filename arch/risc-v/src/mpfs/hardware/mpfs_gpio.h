@@ -33,7 +33,7 @@
 #if defined(CONFIG_ARCH_CHIP_MPFS250T_FCVG484) || defined(CONFIG_ARCH_CHIP_MPFS250T_FCG484)
 #include "hardware/mpfs250t_484_pinmap.h"
 #else
-#error The selected MPFS variant is not impelemented
+#error The selected MPFS variant is not implemented
 #endif
 
 /****************************************************************************
@@ -76,7 +76,7 @@
 #define MPFS_GPIO_CONFIG_31_OFFSET    0x007C /* GPIO Config 31 */
 #define MPFS_GPIO_INTR_OFFSET         0x0080 /* GPIO Irq state */
 #define MPFS_GPIO_GPIN_OFFSET         0x0084 /* GPIO Input states */
-#define MPFS_GPIO_GPOUT_OFFSET        0x0088 /* GPIO Ouput states */
+#define MPFS_GPIO_GPOUT_OFFSET        0x0088 /* GPIO Output states */
 #define MPFS_GPIO_CONFIG_ALL_OFFSET   0x008C /* GPIO set all configs */
 #define MPFS_GPIO_CONFIG_BYTE0_OFFSET 0x0090 /* GPIO set all configs in byte-0 */
 #define MPFS_GPIO_CONFIG_BYTE1_OFFSET 0x0094 /* GPIO set all configs in byte-1 */

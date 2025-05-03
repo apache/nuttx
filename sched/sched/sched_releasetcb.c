@@ -46,7 +46,7 @@
  * Name:  nxsched_releasepid
  *
  * Description:  When a task is destroyed, this function must
- * be called to make its process ID available for re-use.
+ * be called to make its process ID available for reuse.
  ****************************************************************************/
 
 static void nxsched_releasepid(pid_t pid)

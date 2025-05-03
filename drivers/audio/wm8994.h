@@ -866,7 +866,7 @@
 /* R76 (0x4C) - Charge Pump (1) */
 
 #define WM8994_CP_ENA                             (1 << 15)                                   /* Bit 15: Enable charge-pump digits */
-#define   WM8994_CP_ENA_DISABLE                   (0)                                         /* Diable */
+#define   WM8994_CP_ENA_DISABLE                   (0)                                         /* Disable */
 #define   WM8994_CP_ENA_ENABLE                    (WM8994_CP_ENA)                             /* Enable */
 
 /* R77 (0x4D) - Charge Pump (2) */
@@ -877,7 +877,7 @@
 
 /* R81 (0x51) - Class W (1) */
 
-#define WM8994_CP_DYN_SRC_SEL_SHIFT               8                                           /* Bits 8-9: Selects the digitial audio source for
+#define WM8994_CP_DYN_SRC_SEL_SHIFT               8                                           /* Bits 8-9: Selects the digital audio source for
                                                                                                * envelope tracking */
 #define   WM8994_CP_DYN_SRC_SEL_MASK              (3 << WM8994_CP_DYN_SRC_SEL_SHIFT)
 #define   WM8994_CP_DYN_SRC_SEL_AIF1_TS0          (0 << WM8994_CP_DYN_SRC_SEL_SHIFT)          /* AIF1, DAC Timeslot 0 */
@@ -931,10 +931,10 @@
                                                                                                * in progress
                                                                                                */
 #define WM8994_DCS_ENA_CHAN_1                     (1 << 1)                                    /* Bit 1: DC Servo enable for HPOUT1R */
-#define   WM8994_DCS_ENA_CHAN_1_DISABLE           (0)                                         /* Diable */
+#define   WM8994_DCS_ENA_CHAN_1_DISABLE           (0)                                         /* Disable */
 #define   WM8994_DCS_ENA_CHAN_1_ENABLE            (WM8994_DCS_ENA_CHAN_1)                     /* Enable */
 #define WM8994_DCS_ENA_CHAN_0                     (1 << 0)                                    /* Bit 0: DC Servo enable for HPOUT1L */
-#define   WM8994_DCS_ENA_CHAN_0_DISABLE           (0)                                         /* Diable */
+#define   WM8994_DCS_ENA_CHAN_0_DISABLE           (0)                                         /* Disable */
 #define   WM8994_DCS_ENA_CHAN_0_ENABLE            (WM8994_DCS_ENA_CHAN_0)                     /* Enable */
 
 /* R85 (0x55) - DC Servo (2) */
@@ -946,22 +946,22 @@
 /* R96 (0x60) - Analogue HP (1) */
 
 #define WM8994_HPOUT1L_RMV_SHORT                  (1 << 7)                                    /* Bit 7: Removes HPOUT1L short */
-#define   WM8994_HPOUT1L_RMV_SHORT_DISABLE        (0)                                         /* HPOUT1L short diabled */
+#define   WM8994_HPOUT1L_RMV_SHORT_DISABLE        (0)                                         /* HPOUT1L short disabled */
 #define   WM8994_HPOUT1L_RMV_SHORT_ENABLE         (WM8994_HPOUT1L_RMV_SHORT)                  /* HPOUT1L short enabled */
 #define WM8994_HPOUT1L_OUTP                       (1 << 6)                                    /* Bit 6: Enables HPOUT1L output stage */
-#define   WM8994_HPOUT1L_OUTP_DISABLE             (0)                                         /* Diable */
+#define   WM8994_HPOUT1L_OUTP_DISABLE             (0)                                         /* Disable */
 #define   WM8994_HPOUT1L_OUTP_ENABLE              (WM8994_HPOUT1L_OUTP)                       /* Enable */
 #define WM8994_HPOUT1L_DLY                        (1 << 5)                                    /* Bit 5: Enables HPOUT1L intermediate stage */
-#define   WM8994_HPOUT1L_DLY_DISABLE              (0)                                         /* Diable */
+#define   WM8994_HPOUT1L_DLY_DISABLE              (0)                                         /* Disable */
 #define   WM8994_HPOUT1L_DLY_ENABLE               (WM8994_HPOUT1L_DLY)                        /* Enable */
 #define WM8994_HPOUT1R_RMV_SHORT                  (1 << 3)                                    /* Bit 3: Removes HPOUT1R short */
-#define   WM8994_HPOUT1R_RMV_SHORT_DISABLE        (0)                                         /* HPOUT1R short diabled */
+#define   WM8994_HPOUT1R_RMV_SHORT_DISABLE        (0)                                         /* HPOUT1R short disabled */
 #define   WM8994_HPOUT1R_RMV_SHORT_ENABLE         (WM8994_HPOUT1R_RMV_SHORT)                  /* HPOUT1R short enabled */
 #define WM8994_HPOUT1R_OUTP                       (1 << 2)                                    /* Bit 2: Enables HPOUT1R output stage */
-#define   WM8994_HPOUT1R_OUTP_DISABLE             (0)                                         /* Diable */
+#define   WM8994_HPOUT1R_OUTP_DISABLE             (0)                                         /* Disable */
 #define   WM8994_HPOUT1R_OUTP_ENABLE              (WM8994_HPOUT1R_OUTP)                       /* Enable */
 #define WM8994_HPOUT1R_DLY                        (1 << 1)                                    /* Bit 1: Enables HPOUT1R intermediate stage */
-#define   WM8994_HPOUT1R_DLY_DISABLE              (0)                                         /* Diable */
+#define   WM8994_HPOUT1R_DLY_DISABLE              (0)                                         /* Disable */
 #define   WM8994_HPOUT1R_DLY_ENABLE               (WM8994_HPOUT1R_DLY)                        /* Enable */
 
 /* R208 (0xD0) - Mic Detect 1 */
@@ -977,7 +977,7 @@
 /* R272 (0x110) - Write Sequencer Ctrl (1) */
 
 #define WM8994_WSEQ_ENA                           (1 << 15)                                   /* Bit 15: Write Sequencer Enable */
-#define   WM8994_WSEQ_ENA_DISABLE                 (0)                                         /* Diable */
+#define   WM8994_WSEQ_ENA_DISABLE                 (0)                                         /* Disable */
 #define   WM8994_WSEQ_ENA_ENABLE                  (WM8994_WSEQ_ENA)                           /* Enable */
 #define WM8994_WSEQ_ABORT                         (1 << 9)                                    /* Bit 9: Writing 1 to this bit aborts the current seq. */
 #define WM8994_WSEQ_START                         (1 << 8)                                    /* Bit 8: Writing 1 to this bit starts the seq. */

@@ -44,7 +44,7 @@
 #define CLK_PROCFS_LINELEN                  80
 
 /****************************************************************************
- * Private Datas
+ * Private Data
  ****************************************************************************/
 
 static rmutex_t g_clk_list_lock = NXRMUTEX_INITIALIZER;

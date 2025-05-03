@@ -43,7 +43,7 @@
  *
  * Description:
  *   Performs the low level serial initialization early so that the serial
- *   console will be available during bootup.  This must be called
+ *   console will be available during boot up.  This must be called
  *   before arm_serialinit.
  *
  ****************************************************************************/

@@ -176,7 +176,7 @@ target_sources(board PRIVATE ${SRCS})
 # TODO: make this the default and then allow boards to redefine
 set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/ld.script")
 
-# TODO:move this to apropriate arch/toolchain level
+# TODO:move this to appropriate arch/toolchain level
 set_property(
   GLOBAL APPEND
   PROPERTY COMPILE_OPTIONS $<$<CONFIG:Release>:-fno-strict-aliasing

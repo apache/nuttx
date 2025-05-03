@@ -1137,7 +1137,7 @@ struct ieee802154_disassoc_conf_s
 
   enum ieee802154_status_e status;
 
-  /* Address of device either requesting or being intructed to disassociate */
+  /* Address of device either requesting or being instructed to disassociate */
 
   struct ieee802154_addr_s dev_addr;
 };

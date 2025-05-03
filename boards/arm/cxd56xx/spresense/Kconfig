@@ -409,7 +409,7 @@ endmenu
 endif # CXD56_AUDIO_ALC_SPC_SEL_ALC
 
 if CXD56_AUDIO_ALC_SPC_SEL_SPC
-menu "Sound Pressure Conter setting"
+menu "Sound Pressure Counter setting"
 config CXD56_AUDIO_SPC_LIMIT
 	int "Limit levels of Sound Pressure Counter.[(1/10)dB]"
 	default 0

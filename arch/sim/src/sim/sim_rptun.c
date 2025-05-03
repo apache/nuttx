@@ -172,7 +172,7 @@ sim_rptun_get_resource(struct rptun_dev_s *dev)
 
       priv->shmem->boots = SIM_RPTUN_STATUS_BOOT;
 
-      /* Wait untils master is ready */
+      /* Wait until master is ready */
 
       while (!(priv->shmem->bootm & SIM_RPTUN_STATUS_OK))
         {

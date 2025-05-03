@@ -37,7 +37,7 @@ include(nuttx_parse_function_args)
 #   nuttx_add_dependencies( TARGET <string> DEPENDS <list>)
 #
 # Parameters:
-#   TARGET            : target needs to add dependencie
+#   TARGET            : target needs to add dependency
 #   DEPENDS           : targets which depends on
 # ~~~
 

@@ -235,7 +235,7 @@
  *
  *   ------ --------- ---------
  *   SAME70 SAME70    Ethernet
- *   Pin    Function  Functio
+ *   Pin    Function  Function
  *   ------ --------- ---------
  *   PD0    GTXCK     REF_CLK
  *   PD1    GTXEN     TXEN

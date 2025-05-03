@@ -566,7 +566,7 @@ static int syslog_dev_putc(FAR syslog_channel_t *channel, int ch)
       return ret;
     }
 
-  /* Pre-pend a newline with a carriage return. */
+  /* Prepend a newline with a carriage return. */
 
   if (ch == '\n')
     {

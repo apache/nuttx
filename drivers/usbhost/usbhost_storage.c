@@ -687,7 +687,7 @@ static inline int usbhost_testunitready(FAR struct usbhost_state_s *priv)
   DEBUGASSERT(priv->usbclass.hport);
   hport = priv->usbclass.hport;
 
-  /* Initialize a CBW (re-using the allocated transfer buffer) */
+  /* Initialize a CBW (reusing the allocated transfer buffer) */
 
   cbw = usbhost_cbwalloc(priv);
   if (!cbw)
@@ -725,7 +725,7 @@ static inline int usbhost_requestsense(FAR struct usbhost_state_s *priv)
   DEBUGASSERT(priv->usbclass.hport);
   hport = priv->usbclass.hport;
 
-  /* Initialize a CBW (re-using the allocated transfer buffer) */
+  /* Initialize a CBW (reusing the allocated transfer buffer) */
 
   cbw = usbhost_cbwalloc(priv);
   if (!cbw)
@@ -771,7 +771,7 @@ static inline int usbhost_readcapacity(FAR struct usbhost_state_s *priv)
   DEBUGASSERT(priv->usbclass.hport);
   hport = priv->usbclass.hport;
 
-  /* Initialize a CBW (re-using the allocated transfer buffer) */
+  /* Initialize a CBW (reusing the allocated transfer buffer) */
 
   cbw = usbhost_cbwalloc(priv);
   if (!cbw)
@@ -823,7 +823,7 @@ static inline int usbhost_inquiry(FAR struct usbhost_state_s *priv)
   DEBUGASSERT(priv->usbclass.hport);
   hport = priv->usbclass.hport;
 
-  /* Initialize a CBW (re-using the allocated transfer buffer) */
+  /* Initialize a CBW (reusing the allocated transfer buffer) */
 
   cbw = usbhost_cbwalloc(priv);
   if (!cbw)
@@ -1000,7 +1000,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
   configdesc += cfgdesc->len;
   remaining  -= cfgdesc->len;
 
-  /* Loop where there are more dscriptors to examine */
+  /* Loop where there are more descriptors to examine */
 
   while (remaining >= sizeof(struct usb_desc_s))
     {
@@ -1614,7 +1614,7 @@ static inline int usbhost_tfree(FAR struct usbhost_state_s *priv)
  * Name: usbhost_cbwalloc
  *
  * Description:
- *   Initialize a CBW (re-using the allocated transfer buffer). Upon
+ *   Initialize a CBW (reusing the allocated transfer buffer). Upon
  *   successful return, the CBW is cleared and has the CBW signature in
  *   place.
  *
@@ -2023,7 +2023,7 @@ static ssize_t usbhost_read(FAR struct inode *inode, unsigned char *buffer,
 
       nbytes = -ENOMEM;
 
-      /* Initialize a CBW (re-using the allocated transfer buffer) */
+      /* Initialize a CBW (reusing the allocated transfer buffer) */
 
       cbw = usbhost_cbwalloc(priv);
       if (cbw)
@@ -2135,7 +2135,7 @@ static ssize_t usbhost_write(FAR struct inode *inode,
 
       nbytes = -ENOMEM;
 
-      /* Initialize a CBW (re-using the allocated transfer buffer) */
+      /* Initialize a CBW (reusing the allocated transfer buffer) */
 
       cbw = usbhost_cbwalloc(priv);
       if (cbw)

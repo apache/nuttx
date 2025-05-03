@@ -912,7 +912,7 @@ config PAGING
 	default n
 	depends on BUILD_KERNEL && ARCH_USE_MMU && !ARCH_ROMPGTABLE && !LEGACY_PAGING
 	---help---
-		If set =y in your configation file, this setting will enable on-demand
+		If set =y in your configuration file, this setting will enable on-demand
 		paging, which relies on a MMU to enable larger virtual memory spaces
 		and map it to physical memory on-demand (usually during a page-fault
 		exception).
@@ -922,7 +922,7 @@ menuconfig LEGACY_PAGING
 	default n
 	depends on EXPERIMENTAL && ARCH_USE_MMU && !ARCH_ROMPGTABLE
 	---help---
-		If set =y in your configation file, this setting will enable lazy loading
+		If set =y in your configuration file, this setting will enable lazy loading
 		backed up by the experimental on-demand paging feature as described in
 		https://nuttx.apache.org/docs/latest/components/paging.html.
 
@@ -1186,7 +1186,7 @@ config ARCH_MINIMAL_VECTORTABLE
 		if it occurs will result in an unexpected interrupt crash.
 
 config ARCH_MINIMAL_VECTORTABLE_DYNAMIC
-	bool "Dynaminc Minimal RAM usage for vector table"
+	bool "Dynamic Minimal RAM usage for vector table"
 	default n
 	depends on ARCH_MINIMAL_VECTORTABLE
 	---help---

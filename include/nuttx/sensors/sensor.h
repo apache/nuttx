@@ -654,7 +654,7 @@ void sensor_remap_vector_raw16(FAR const int16_t *in, FAR int16_t *out,
  *           instance is bound to the sensor driver and must persist as long
  *           as the driver persists.
  *   devno - The user specifies which device of this type, from 0. If the
- *           devno alerady exists, -EEXIST will be returned.
+ *           devno already exists, -EEXIST will be returned.
  *
  * Returned Value:
  *   OK if the driver was successfully register; A negated errno value is
@@ -732,7 +732,7 @@ void sensor_custom_unregister(FAR struct sensor_lowerhalf_s *dev,
  * Description:
  *   This function registers usensor character node "/dev/usensor", so that
  *   application can register user sensor by this node. The node will
- *   manager all user sensor in this character dirver.
+ *   manage all user sensor in this character driver.
  *
  ****************************************************************************/
 
@@ -784,7 +784,7 @@ void sensor_rpmsg_unregister(FAR struct sensor_lowerhalf_s *lower);
  *
  * Description:
  *   This function initializes the context of sensor rpmsg, registers
- *   rpmsg callback and prepares enviroment to intercat with remote sensor.
+ *   rpmsg callback and prepares environment to interact with remote sensor.
  *
  * Returned Value:
  *   OK on success; A negated errno value is returned on any failure.

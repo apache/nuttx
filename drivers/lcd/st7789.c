@@ -359,7 +359,7 @@ static inline void st7789_sendcmd(FAR struct st7789_dev_s *dev, uint8_t cmd)
 #ifdef CONFIG_LCD_ST7789_3WIRE
   uint16_t txbuf;
 
-  /* Add command prefix (9th bit shoudl be 0 ) */
+  /* Add command prefix (9th bit should be 0 ) */
 
   txbuf = LCD_ST7789_CMD_PREFIX | cmd;
 
@@ -777,7 +777,7 @@ static int st7789_putrun(FAR struct lcd_dev_s *dev,
  *   buffer    - The buffer containing the area to be written to the LCD
  *   stride    - Length of a line in bytes. This parameter may be necessary
  *               to allow the LCD driver to calculate the offset for partial
- *               writes when the buffer needs to be splited for row-by-row
+ *               writes when the buffer needs to be split for row-by-row
  *               writing.
  *
  ****************************************************************************/

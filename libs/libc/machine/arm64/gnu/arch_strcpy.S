@@ -136,7 +136,7 @@ def_fn ARCH_LIBCFUN(strcpy) p2align=6
 	   (profiling shows this is the most common case), it's worth
 	   swapping the bytes now to save having to recalculate the
 	   termination syndrome later.  We preserve data1 and data2
-	   so that we can re-use the values later on.  */
+	   so that we can reuse the values later on.  */
 	rev	tmp2, data1
 	sub	tmp1, tmp2, zeroones
 	orr	tmp2, tmp2, #REP8_7f

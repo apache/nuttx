@@ -243,7 +243,7 @@ static int sam_gpio_enc_setup(struct qe_lowerhalf_s *lower)
   new = (state_b << 1 | (state_a ^ state_b));
   config->position_base = config->position = new;
 
-  /* Setup interrups for ENC_A and ENC_B pins. */
+  /* Setup interrupts for ENC_A and ENC_B pins. */
 
   ret = board_gpio_enc_irqx(config->enca, config->enca_irq,
                             sam_gpio_enc_interrupt, priv);

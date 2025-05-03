@@ -109,7 +109,7 @@
 #define SEC_NSECTORS(r,o)    ((o) / (r)->rm_hwsectorsize)
 #define SEC_ALIGN(r,o)       ((o) & ~SEC_NDXMASK(r))
 
-/* Maximum numbr of links that will be followed before we decide that there
+/* Maximum number of links that will be followed before we decide that there
  * is a problem.
  */
 

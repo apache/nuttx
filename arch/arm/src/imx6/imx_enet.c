@@ -2510,7 +2510,7 @@ int imx_netinitialize(int intf)
 
   memset(priv, 0, sizeof(struct imx_driver_s));
 
-  priv->base = IMX_ENET_VBASE;        /* Assigne base address */
+  priv->base = IMX_ENET_VBASE;        /* Assign base address */
 
   priv->dev.d_ifup    = imx_ifup;     /* I/F up (new IP address) callback */
   priv->dev.d_ifdown  = imx_ifdown;   /* I/F down callback */

@@ -74,7 +74,7 @@
 #define MARK(a) { asm(" .globl M.a"); asm("M.a:"); }
 
 #ifndef IBUFSIZ
-#  define IBUFSIZ BUFSIZ        /* Defailt input buffer size */
+#  define IBUFSIZ BUFSIZ        /* Default input buffer size */
 #endif
 #ifndef OBUFSIZ
 #  define OBUFSIZ BUFSIZ        /* Default output buffer size */

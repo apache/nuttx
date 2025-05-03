@@ -154,7 +154,7 @@ int procfs_snprintf(FAR char *buf, size_t size,
  * Name: procfs_sprintf
  *
  * Description:
- *   This function used to continous format string and copy it to buffer.
+ *   This function used to continuous format string and copy it to buffer.
  *   Every single string length must be smaller then LINEBUF_SIZE.
  *
  * Input Parameters:

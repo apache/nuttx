@@ -76,7 +76,7 @@ struct ramlog_user_s
 {
   struct list_node  rl_node;       /* The list_node of reader */
   volatile uint32_t rl_tail;       /* The tail index (where data is removed) */
-  uint32_t          rl_threashold; /* The threashold of the reader to read log */
+  uint32_t          rl_threashold; /* The threshold of the reader to read log */
 #ifndef CONFIG_RAMLOG_NONBLOCKING
   sem_t             rl_waitsem;    /* Used to wait for data */
 #endif
@@ -417,7 +417,7 @@ static ssize_t ramlog_file_read(FAR struct file *filep, FAR char *buffer,
               break;
             }
 
-          /* We may now be pre-empted!  But that should be okay because we
+          /* We may now be preempted!  But that should be okay because we
            * have already incremented nwaiters.  Pre-emptions is disabled
            * but will be re-enabled while we are waiting.
            */

@@ -573,7 +573,7 @@ int esp_himem_unmap(esp_himem_rangehandle_t range, void *ptr,
   /* Note: doesn't actually unmap, just clears cache and marks blocks as
    * unmapped.
    * Future optimization: could actually lazy-unmap here: essentially, do
-   * nothing and only clear the cache when we re-use the block for a
+   * nothing and only clear the cache when we reuse the block for a
    * different physical address.
    */
 

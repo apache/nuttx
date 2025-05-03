@@ -1920,7 +1920,7 @@ static inline enum touch_pad_e touch_lh_waterproof_get_guard_pad(void)
  * Name: touch_lh_waterproof_set_sheild_driver
  *
  * Description:
- *   Set max equivalent capacitance for sheild channel.
+ *   Set max equivalent capacitance for shield channel.
  *   The equivalent capacitance of the shielded channel can be calculated
  *   from the reading of denoise channel.
  *
@@ -1944,7 +1944,7 @@ static inline void
  * Name: touch_lh_waterproof_get_sheild_driver
  *
  * Description:
- *   Set max equivalent capacitance for sheild channel.
+ *   Set max equivalent capacitance for shield channel.
  *   The equivalent capacitance of the shielded channel can be calculated
  *   from the reading of denoise channel.
  *

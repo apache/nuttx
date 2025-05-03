@@ -351,7 +351,7 @@
 #define GPC_CPU_MODE_CTRL_CM_NON_IRQ_WAKEUP_STAT_DEBUG_WAKEUP_STAT  (1 << 1)  /* Bit 1: Debug wakeup status */
 
 /* CM sleep SSAR control (CM_SLEEP_SSAR_CTRL) */
-#define GPC_CPU_MODE_CTRL_CM_SLEEP_SSAR_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, useage is depending on CNT_MODE. */
+#define GPC_CPU_MODE_CTRL_CM_SLEEP_SSAR_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, usage is depending on CNT_MODE. */
 #define GPC_CPU_MODE_CTRL_CM_SLEEP_SSAR_CTRL_STEP_CNT_MASK   (0xFFFF << GPC_CPU_MODE_CTRL_CM_SLEEP_SSAR_CTRL_STEP_CNT_SHIFT)
 #define GPC_CPU_MODE_CTRL_CM_SLEEP_SSAR_CTRL_STEP_CNT(n)     (((n) << GPC_CPU_MODE_CTRL_CM_SLEEP_SSAR_CTRL_STEP_CNT_SHIFT) & GPC_CPU_MODE_CTRL_CM_SLEEP_SSAR_CTRL_STEP_CNT_MASK)
 #define GPC_CPU_MODE_CTRL_CM_SLEEP_SSAR_CTRL_CNT_MODE_SHIFT  (28)       /* Bits 28-30: Count mode */
@@ -360,7 +360,7 @@
 #define GPC_CPU_MODE_CTRL_CM_SLEEP_SSAR_CTRL_DISABLE         (1 << 31)  /* Bit 31: Disable this step */
 
 /* CM sleep LPCG control (CM_SLEEP_LPCG_CTRL) */
-#define GPC_CPU_MODE_CTRL_CM_SLEEP_LPCG_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, useage is depending on CNT_MODE */
+#define GPC_CPU_MODE_CTRL_CM_SLEEP_LPCG_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, usage is depending on CNT_MODE */
 #define GPC_CPU_MODE_CTRL_CM_SLEEP_LPCG_CTRL_STEP_CNT_MASK   (0xFFFF << GPC_CPU_MODE_CTRL_CM_SLEEP_LPCG_CTRL_STEP_CNT_SHIFT)
 #define GPC_CPU_MODE_CTRL_CM_SLEEP_LPCG_CTRL_STEP_CNT(n)     (((n) << GPC_CPU_MODE_CTRL_CM_SLEEP_LPCG_CTRL_STEP_CNT_SHIFT) & GPC_CPU_MODE_CTRL_CM_SLEEP_LPCG_CTRL_STEP_CNT_MASK)
 #define GPC_CPU_MODE_CTRL_CM_SLEEP_LPCG_CTRL_CNT_MODE_SHIFT  (28)       /* Bits 28-30: Count mode */
@@ -369,7 +369,7 @@
 #define GPC_CPU_MODE_CTRL_CM_SLEEP_LPCG_CTRL_DISABLE         (1 << 31)  /* Bit 31: Disable this step */
 
 /* CM sleep PLL control (CM_SLEEP_PLL_CTRL) */
-#define GPC_CPU_MODE_CTRL_CM_SLEEP_PLL_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, useage is depending on CNT_MODE */
+#define GPC_CPU_MODE_CTRL_CM_SLEEP_PLL_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, usage is depending on CNT_MODE */
 #define GPC_CPU_MODE_CTRL_CM_SLEEP_PLL_CTRL_STEP_CNT_MASK   (0xFFFF << GPC_CPU_MODE_CTRL_CM_SLEEP_PLL_CTRL_STEP_CNT_SHIFT)
 #define GPC_CPU_MODE_CTRL_CM_SLEEP_PLL_CTRL_STEP_CNT(n)     (((n) << GPC_CPU_MODE_CTRL_CM_SLEEP_PLL_CTRL_STEP_CNT_SHIFT) & GPC_CPU_MODE_CTRL_CM_SLEEP_PLL_CTRL_STEP_CNT_MASK)
 #define GPC_CPU_MODE_CTRL_CM_SLEEP_PLL_CTRL_CNT_MODE_SHIFT  (28)       /* Bits 28-30: Count mode */
@@ -378,7 +378,7 @@
 #define GPC_CPU_MODE_CTRL_CM_SLEEP_PLL_CTRL_DISABLE         (1 << 31)  /* Bit 31: Disable this step */
 
 /* CM sleep isolation control (CM_SLEEP_ISO_CTRL) */
-#define GPC_CPU_MODE_CTRL_CM_SLEEP_ISO_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, useage is depending on CNT_MODE */
+#define GPC_CPU_MODE_CTRL_CM_SLEEP_ISO_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, usage is depending on CNT_MODE */
 #define GPC_CPU_MODE_CTRL_CM_SLEEP_ISO_CTRL_STEP_CNT_MASK   (0xFFFF << GPC_CPU_MODE_CTRL_CM_SLEEP_ISO_CTRL_STEP_CNT_SHIFT)
 #define GPC_CPU_MODE_CTRL_CM_SLEEP_ISO_CTRL_STEP_CNT(n)     (((n) << GPC_CPU_MODE_CTRL_CM_SLEEP_ISO_CTRL_STEP_CNT_SHIFT) & GPC_CPU_MODE_CTRL_CM_SLEEP_ISO_CTRL_STEP_CNT_MASK)
 #define GPC_CPU_MODE_CTRL_CM_SLEEP_ISO_CTRL_CNT_MODE_SHIFT  (28)       /* Bits 28-30: Count mode */
@@ -387,7 +387,7 @@
 #define GPC_CPU_MODE_CTRL_CM_SLEEP_ISO_CTRL_DISABLE         (1 << 31)  /* Bit 31: Disable this step */
 
 /* CM sleep reset control (CM_SLEEP_RESET_CTRL) */
-#define GPC_CPU_MODE_CTRL_CM_SLEEP_RESET_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, useage is depending on CNT_MODE */
+#define GPC_CPU_MODE_CTRL_CM_SLEEP_RESET_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, usage is depending on CNT_MODE */
 #define GPC_CPU_MODE_CTRL_CM_SLEEP_RESET_CTRL_STEP_CNT_MASK   (0xFFFF << GPC_CPU_MODE_CTRL_CM_SLEEP_RESET_CTRL_STEP_CNT_SHIFT)
 #define GPC_CPU_MODE_CTRL_CM_SLEEP_RESET_CTRL_STEP_CNT(n)     (((n) << GPC_CPU_MODE_CTRL_CM_SLEEP_RESET_CTRL_STEP_CNT_SHIFT) & GPC_CPU_MODE_CTRL_CM_SLEEP_RESET_CTRL_STEP_CNT_MASK)
 #define GPC_CPU_MODE_CTRL_CM_SLEEP_RESET_CTRL_CNT_MODE_SHIFT  (28)       /* Bits 28-30: Count mode */
@@ -396,7 +396,7 @@
 #define GPC_CPU_MODE_CTRL_CM_SLEEP_RESET_CTRL_DISABLE         (1 << 31)  /* Bit 31: Disable this step */
 
 /* CM sleep power control (CM_SLEEP_POWER_CTRL) */
-#define GPC_CPU_MODE_CTRL_CM_SLEEP_POWER_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, useage is depending on CNT_MODE */
+#define GPC_CPU_MODE_CTRL_CM_SLEEP_POWER_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, usage is depending on CNT_MODE */
 #define GPC_CPU_MODE_CTRL_CM_SLEEP_POWER_CTRL_STEP_CNT_MASK   (0xFFFF << GPC_CPU_MODE_CTRL_CM_SLEEP_POWER_CTRL_STEP_CNT_SHIFT)
 #define GPC_CPU_MODE_CTRL_CM_SLEEP_POWER_CTRL_STEP_CNT(n)     (((n) << GPC_CPU_MODE_CTRL_CM_SLEEP_POWER_CTRL_STEP_CNT_SHIFT) & GPC_CPU_MODE_CTRL_CM_SLEEP_POWER_CTRL_STEP_CNT_MASK)
 #define GPC_CPU_MODE_CTRL_CM_SLEEP_POWER_CTRL_CNT_MODE_SHIFT  (28)       /* Bits 28-30: Count mode */
@@ -405,7 +405,7 @@
 #define GPC_CPU_MODE_CTRL_CM_SLEEP_POWER_CTRL_DISABLE         (1 << 31)  /* Bit 31: Disable this step */
 
 /* CM wakeup power control (CM_WAKEUP_POWER_CTRL) */
-#define GPC_CPU_MODE_CTRL_CM_WAKEUP_POWER_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, useage is depending on CNT_MODE */
+#define GPC_CPU_MODE_CTRL_CM_WAKEUP_POWER_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, usage is depending on CNT_MODE */
 #define GPC_CPU_MODE_CTRL_CM_WAKEUP_POWER_CTRL_STEP_CNT_MASK   (0xFFFF << GPC_CPU_MODE_CTRL_CM_WAKEUP_POWER_CTRL_STEP_CNT_SHIFT)
 #define GPC_CPU_MODE_CTRL_CM_WAKEUP_POWER_CTRL_STEP_CNT(n)     (((n) << GPC_CPU_MODE_CTRL_CM_WAKEUP_POWER_CTRL_STEP_CNT_SHIFT) & GPC_CPU_MODE_CTRL_CM_WAKEUP_POWER_CTRL_STEP_CNT_MASK)
 #define GPC_CPU_MODE_CTRL_CM_WAKEUP_POWER_CTRL_CNT_MODE_SHIFT  (28)       /* Bits 28-30: Count mode */
@@ -414,7 +414,7 @@
 #define GPC_CPU_MODE_CTRL_CM_WAKEUP_POWER_CTRL_DISABLE         (1 << 31)  /* Bit 31: Disable this step */
 
 /* CM wakeup reset control (CM_WAKEUP_RESET_CTRL) */
-#define GPC_CPU_MODE_CTRL_CM_WAKEUP_RESET_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, useage is depending on CNT_MODE */
+#define GPC_CPU_MODE_CTRL_CM_WAKEUP_RESET_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, usage is depending on CNT_MODE */
 #define GPC_CPU_MODE_CTRL_CM_WAKEUP_RESET_CTRL_STEP_CNT_MASK   (0xFFFF << GPC_CPU_MODE_CTRL_CM_WAKEUP_RESET_CTRL_STEP_CNT_SHIFT)
 #define GPC_CPU_MODE_CTRL_CM_WAKEUP_RESET_CTRL_STEP_CNT(n)     (((n) << GPC_CPU_MODE_CTRL_CM_WAKEUP_RESET_CTRL_STEP_CNT_SHIFT) & GPC_CPU_MODE_CTRL_CM_WAKEUP_RESET_CTRL_STEP_CNT_MASK)
 #define GPC_CPU_MODE_CTRL_CM_WAKEUP_RESET_CTRL_CNT_MODE_SHIFT  (28)       /* Bits 28-30: Count mode */
@@ -423,7 +423,7 @@
 #define GPC_CPU_MODE_CTRL_CM_WAKEUP_RESET_CTRL_DISABLE         (1 << 31)  /* Bit 31: Disable this step */
 
 /* CM wakeup isolation control (CM_WAKEUP_ISO_CTRL) */
-#define GPC_CPU_MODE_CTRL_CM_WAKEUP_ISO_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, useage is depending on CNT_MODE */
+#define GPC_CPU_MODE_CTRL_CM_WAKEUP_ISO_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, usage is depending on CNT_MODE */
 #define GPC_CPU_MODE_CTRL_CM_WAKEUP_ISO_CTRL_STEP_CNT_MASK   (0xFFFF << GPC_CPU_MODE_CTRL_CM_WAKEUP_ISO_CTRL_STEP_CNT_SHIFT)
 #define GPC_CPU_MODE_CTRL_CM_WAKEUP_ISO_CTRL_STEP_CNT(n)     (((n) << GPC_CPU_MODE_CTRL_CM_WAKEUP_ISO_CTRL_STEP_CNT_SHIFT) & GPC_CPU_MODE_CTRL_CM_WAKEUP_ISO_CTRL_STEP_CNT_MASK)
 #define GPC_CPU_MODE_CTRL_CM_WAKEUP_ISO_CTRL_CNT_MODE_SHIFT  (28)       /* Bits 28-30: Count mode */
@@ -432,7 +432,7 @@
 #define GPC_CPU_MODE_CTRL_CM_WAKEUP_ISO_CTRL_DISABLE         (1 << 31)  /* Bit 31: Disable this step */
 
 /* CM wakeup PLL control (CM_WAKEUP_PLL_CTRL) */
-#define GPC_CPU_MODE_CTRL_CM_WAKEUP_PLL_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, useage is depending on CNT_MODE */
+#define GPC_CPU_MODE_CTRL_CM_WAKEUP_PLL_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, usage is depending on CNT_MODE */
 #define GPC_CPU_MODE_CTRL_CM_WAKEUP_PLL_CTRL_STEP_CNT_MASK   (0xFFFF << GPC_CPU_MODE_CTRL_CM_WAKEUP_PLL_CTRL_STEP_CNT_SHIFT)
 #define GPC_CPU_MODE_CTRL_CM_WAKEUP_PLL_CTRL_STEP_CNT(n)     (((n) << GPC_CPU_MODE_CTRL_CM_WAKEUP_PLL_CTRL_STEP_CNT_SHIFT) & GPC_CPU_MODE_CTRL_CM_WAKEUP_PLL_CTRL_STEP_CNT_MASK)
 #define GPC_CPU_MODE_CTRL_CM_WAKEUP_PLL_CTRL_CNT_MODE_SHIFT  (28)       /* Bits 28-30: Count mode */
@@ -441,7 +441,7 @@
 #define GPC_CPU_MODE_CTRL_CM_WAKEUP_PLL_CTRL_DISABLE         (1 << 31)  /* Bit 31: Disable this step */
 
 /* CM wakeup LPCG control (CM_WAKEUP_LPCG_CTRL) */
-#define GPC_CPU_MODE_CTRL_CM_WAKEUP_LPCG_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, useage is depending on CNT_MODE */
+#define GPC_CPU_MODE_CTRL_CM_WAKEUP_LPCG_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, usage is depending on CNT_MODE */
 #define GPC_CPU_MODE_CTRL_CM_WAKEUP_LPCG_CTRL_STEP_CNT_MASK   (0xFFFF << GPC_CPU_MODE_CTRL_CM_WAKEUP_LPCG_CTRL_STEP_CNT_SHIFT)
 #define GPC_CPU_MODE_CTRL_CM_WAKEUP_LPCG_CTRL_STEP_CNT(n)     (((n) << GPC_CPU_MODE_CTRL_CM_WAKEUP_LPCG_CTRL_STEP_CNT_SHIFT) & GPC_CPU_MODE_CTRL_CM_WAKEUP_LPCG_CTRL_STEP_CNT_MASK)
 #define GPC_CPU_MODE_CTRL_CM_WAKEUP_LPCG_CTRL_CNT_MODE_SHIFT  (28)       /* Bits 28-30: Count mode */
@@ -450,7 +450,7 @@
 #define GPC_CPU_MODE_CTRL_CM_WAKEUP_LPCG_CTRL_DISABLE         (1 << 31)  /* Bit 31: Disable this step */
 
 /* CM wakeup SSAR control (CM_WAKEUP_SSAR_CTRL) */
-#define GPC_CPU_MODE_CTRL_CM_WAKEUP_SSAR_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, useage is depending on CNT_MODE */
+#define GPC_CPU_MODE_CTRL_CM_WAKEUP_SSAR_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, usage is depending on CNT_MODE */
 #define GPC_CPU_MODE_CTRL_CM_WAKEUP_SSAR_CTRL_STEP_CNT_MASK   (0xFFFF << GPC_CPU_MODE_CTRL_CM_WAKEUP_SSAR_CTRL_STEP_CNT_SHIFT)
 #define GPC_CPU_MODE_CTRL_CM_WAKEUP_SSAR_CTRL_STEP_CNT(n)     (((n) << GPC_CPU_MODE_CTRL_CM_WAKEUP_SSAR_CTRL_STEP_CNT_SHIFT) & GPC_CPU_MODE_CTRL_CM_WAKEUP_SSAR_CTRL_STEP_CNT_MASK)
 #define GPC_CPU_MODE_CTRL_CM_WAKEUP_SSAR_CTRL_CNT_MODE_SHIFT  (28)       /* Bits 28-30: Count mode */
@@ -471,7 +471,7 @@
 #define GPC_CPU_MODE_CTRL_CM_SP_CTRL_CPU_SP_WAKEUP_SHIFT  (11)       /* Bits 11-15: The Setpoint that CPU want the system to transit to on next CPU platform wakeup sequence */
 #define GPC_CPU_MODE_CTRL_CM_SP_CTRL_CPU_SP_WAKEUP_MASK   (0xF << GPC_CPU_MODE_CTRL_CM_SP_CTRL_CPU_SP_WAKEUP_SHIFT)
 #define GPC_CPU_MODE_CTRL_CM_SP_CTRL_CPU_SP_WAKEUP(n)     (((n) << GPC_CPU_MODE_CTRL_CM_SP_CTRL_CPU_SP_WAKEUP_SHIFT) & GPC_CPU_MODE_CTRL_CM_SP_CTRL_CPU_SP_WAKEUP_MASK)
-#define GPC_CPU_MODE_CTRL_CM_SP_CTRL_CPU_SP_WAKEUP_SEL    (1 << 15)  /* Bit 15: Select the Setpoint transiton on the next CPU platform wakeup sequence */
+#define GPC_CPU_MODE_CTRL_CM_SP_CTRL_CPU_SP_WAKEUP_SEL    (1 << 15)  /* Bit 15: Select the Setpoint transition on the next CPU platform wakeup sequence */
 
 /* CM Setpoint Status (CM_SP_STAT) */
 #define GPC_CPU_MODE_CTRL_CM_SP_STAT_CPU_SP_CURRENT_SHIFT   (0)  /* Bits 0-4: The current Setpoint of the system */
@@ -771,7 +771,7 @@
 #define GPC_SET_POINT_CTRL_SP_PRIORITY_8_15_SYS_SP15_PRIORITY(n)     (((n) << GPC_SET_POINT_CTRL_SP_PRIORITY_8_15_SYS_SP15_PRIORITY_SHIFT) & GPC_SET_POINT_CTRL_SP_PRIORITY_8_15_SYS_SP15_PRIORITY_MASK)
 
 /* SP SSAR save control (SP_SSAR_SAVE_CTRL) */
-#define GPC_SET_POINT_CTRL_SP_SSAR_SAVE_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, useage is depending on CNT_MODE */
+#define GPC_SET_POINT_CTRL_SP_SSAR_SAVE_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, usage is depending on CNT_MODE */
 #define GPC_SET_POINT_CTRL_SP_SSAR_SAVE_CTRL_STEP_CNT_MASK   (0xFFFF << GPC_SET_POINT_CTRL_SP_SSAR_SAVE_CTRL_STEP_CNT_SHIFT)
 #define GPC_SET_POINT_CTRL_SP_SSAR_SAVE_CTRL_STEP_CNT(n)     (((n) << GPC_SET_POINT_CTRL_SP_SSAR_SAVE_CTRL_STEP_CNT_SHIFT) & GPC_SET_POINT_CTRL_SP_SSAR_SAVE_CTRL_STEP_CNT_MASK)
 #define GPC_SET_POINT_CTRL_SP_SSAR_SAVE_CTRL_CNT_MODE_SHIFT  (28)       /* Bits 28-30: Count mode */
@@ -780,7 +780,7 @@
 #define GPC_SET_POINT_CTRL_SP_SSAR_SAVE_CTRL_DISABLE         (1 << 31)  /* Bit 31: Disable this step */
 
 /* SP LPCG off control (SP_LPCG_OFF_CTRL) */
-#define GPC_SET_POINT_CTRL_SP_LPCG_OFF_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, useage is depending on CNT_MODE */
+#define GPC_SET_POINT_CTRL_SP_LPCG_OFF_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, usage is depending on CNT_MODE */
 #define GPC_SET_POINT_CTRL_SP_LPCG_OFF_CTRL_STEP_CNT_MASK   (0xFFFF << GPC_SET_POINT_CTRL_SP_LPCG_OFF_CTRL_STEP_CNT_SHIFT)
 #define GPC_SET_POINT_CTRL_SP_LPCG_OFF_CTRL_STEP_CNT(n)     (((n) << GPC_SET_POINT_CTRL_SP_LPCG_OFF_CTRL_STEP_CNT_SHIFT) & GPC_SET_POINT_CTRL_SP_LPCG_OFF_CTRL_STEP_CNT_MASK)
 #define GPC_SET_POINT_CTRL_SP_LPCG_OFF_CTRL_CNT_MODE_SHIFT  (28)       /* Bits 28-30: Count mode */
@@ -789,7 +789,7 @@
 #define GPC_SET_POINT_CTRL_SP_LPCG_OFF_CTRL_DISABLE         (1 << 31)  /* Bit 31: Disable this step */
 
 /* SP group down control (SP_GROUP_DOWN_CTRL) */
-#define GPC_SET_POINT_CTRL_SP_GROUP_DOWN_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, useage is depending on CNT_MODE */
+#define GPC_SET_POINT_CTRL_SP_GROUP_DOWN_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, usage is depending on CNT_MODE */
 #define GPC_SET_POINT_CTRL_SP_GROUP_DOWN_CTRL_STEP_CNT_MASK   (0xFFFF << GPC_SET_POINT_CTRL_SP_GROUP_DOWN_CTRL_STEP_CNT_SHIFT)
 #define GPC_SET_POINT_CTRL_SP_GROUP_DOWN_CTRL_STEP_CNT(n)     (((n) << GPC_SET_POINT_CTRL_SP_GROUP_DOWN_CTRL_STEP_CNT_SHIFT) & GPC_SET_POINT_CTRL_SP_GROUP_DOWN_CTRL_STEP_CNT_MASK)
 #define GPC_SET_POINT_CTRL_SP_GROUP_DOWN_CTRL_CNT_MODE_SHIFT  (28)       /* Bits 28-30: Count mode */
@@ -798,7 +798,7 @@
 #define GPC_SET_POINT_CTRL_SP_GROUP_DOWN_CTRL_DISABLE         (1 << 31)  /* Bit 31: Disable this step */
 
 /* SP root down control (SP_ROOT_DOWN_CTRL) */
-#define GPC_SET_POINT_CTRL_SP_ROOT_DOWN_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, useage is depending on CNT_MODE */
+#define GPC_SET_POINT_CTRL_SP_ROOT_DOWN_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, usage is depending on CNT_MODE */
 #define GPC_SET_POINT_CTRL_SP_ROOT_DOWN_CTRL_STEP_CNT_MASK   (0xFFFF << GPC_SET_POINT_CTRL_SP_ROOT_DOWN_CTRL_STEP_CNT_SHIFT)
 #define GPC_SET_POINT_CTRL_SP_ROOT_DOWN_CTRL_STEP_CNT(n)     (((n) << GPC_SET_POINT_CTRL_SP_ROOT_DOWN_CTRL_STEP_CNT_SHIFT) & GPC_SET_POINT_CTRL_SP_ROOT_DOWN_CTRL_STEP_CNT_MASK)
 #define GPC_SET_POINT_CTRL_SP_ROOT_DOWN_CTRL_CNT_MODE_SHIFT  (28)       /* Bits 28-30: Count mode */
@@ -807,7 +807,7 @@
 #define GPC_SET_POINT_CTRL_SP_ROOT_DOWN_CTRL_DISABLE         (1 << 31)  /* Bit 31: Disable this step */
 
 /* SP PLL off control (SP_PLL_OFF_CTRL) */
-#define GPC_SET_POINT_CTRL_SP_PLL_OFF_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, useage is depending on CNT_MODE */
+#define GPC_SET_POINT_CTRL_SP_PLL_OFF_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, usage is depending on CNT_MODE */
 #define GPC_SET_POINT_CTRL_SP_PLL_OFF_CTRL_STEP_CNT_MASK   (0xFFFF << GPC_SET_POINT_CTRL_SP_PLL_OFF_CTRL_STEP_CNT_SHIFT)
 #define GPC_SET_POINT_CTRL_SP_PLL_OFF_CTRL_STEP_CNT(n)     (((n) << GPC_SET_POINT_CTRL_SP_PLL_OFF_CTRL_STEP_CNT_SHIFT) & GPC_SET_POINT_CTRL_SP_PLL_OFF_CTRL_STEP_CNT_MASK)
 #define GPC_SET_POINT_CTRL_SP_PLL_OFF_CTRL_CNT_MODE_SHIFT  (28)       /* Bits 28-30: Count mode */
@@ -816,7 +816,7 @@
 #define GPC_SET_POINT_CTRL_SP_PLL_OFF_CTRL_DISABLE         (1 << 31)  /* Bit 31: Disable this step */
 
 /* SP ISO on control (SP_ISO_ON_CTRL) */
-#define GPC_SET_POINT_CTRL_SP_ISO_ON_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, useage is depending on CNT_MODE */
+#define GPC_SET_POINT_CTRL_SP_ISO_ON_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, usage is depending on CNT_MODE */
 #define GPC_SET_POINT_CTRL_SP_ISO_ON_CTRL_STEP_CNT_MASK   (0xFFFF << GPC_SET_POINT_CTRL_SP_ISO_ON_CTRL_STEP_CNT_SHIFT)
 #define GPC_SET_POINT_CTRL_SP_ISO_ON_CTRL_STEP_CNT(n)     (((n) << GPC_SET_POINT_CTRL_SP_ISO_ON_CTRL_STEP_CNT_SHIFT) & GPC_SET_POINT_CTRL_SP_ISO_ON_CTRL_STEP_CNT_MASK)
 #define GPC_SET_POINT_CTRL_SP_ISO_ON_CTRL_CNT_MODE_SHIFT  (28)       /* Bits 28-30: Count mode */
@@ -825,7 +825,7 @@
 #define GPC_SET_POINT_CTRL_SP_ISO_ON_CTRL_DISABLE         (1 << 31)  /* Bit 31: Disable this step */
 
 /* SP reset early control (SP_RESET_EARLY_CTRL) */
-#define GPC_SET_POINT_CTRL_SP_RESET_EARLY_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, useage is depending on CNT_MODE */
+#define GPC_SET_POINT_CTRL_SP_RESET_EARLY_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, usage is depending on CNT_MODE */
 #define GPC_SET_POINT_CTRL_SP_RESET_EARLY_CTRL_STEP_CNT_MASK   (0xFFFF << GPC_SET_POINT_CTRL_SP_RESET_EARLY_CTRL_STEP_CNT_SHIFT)
 #define GPC_SET_POINT_CTRL_SP_RESET_EARLY_CTRL_STEP_CNT(n)     (((n) << GPC_SET_POINT_CTRL_SP_RESET_EARLY_CTRL_STEP_CNT_SHIFT) & GPC_SET_POINT_CTRL_SP_RESET_EARLY_CTRL_STEP_CNT_MASK)
 #define GPC_SET_POINT_CTRL_SP_RESET_EARLY_CTRL_CNT_MODE_SHIFT  (28)       /* Bits 28-30: Count mode */
@@ -834,7 +834,7 @@
 #define GPC_SET_POINT_CTRL_SP_RESET_EARLY_CTRL_DISABLE         (1 << 31)  /* Bit 31: Disable this step */
 
 /* SP power off control (SP_POWER_OFF_CTRL) */
-#define GPC_SET_POINT_CTRL_SP_POWER_OFF_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, useage is depending on CNT_MODE */
+#define GPC_SET_POINT_CTRL_SP_POWER_OFF_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, usage is depending on CNT_MODE */
 #define GPC_SET_POINT_CTRL_SP_POWER_OFF_CTRL_STEP_CNT_MASK   (0xFFFF << GPC_SET_POINT_CTRL_SP_POWER_OFF_CTRL_STEP_CNT_SHIFT)
 #define GPC_SET_POINT_CTRL_SP_POWER_OFF_CTRL_STEP_CNT(n)     (((n) << GPC_SET_POINT_CTRL_SP_POWER_OFF_CTRL_STEP_CNT_SHIFT) & GPC_SET_POINT_CTRL_SP_POWER_OFF_CTRL_STEP_CNT_MASK)
 #define GPC_SET_POINT_CTRL_SP_POWER_OFF_CTRL_CNT_MODE_SHIFT  (28)       /* Bits 28-30: Count mode */
@@ -843,7 +843,7 @@
 #define GPC_SET_POINT_CTRL_SP_POWER_OFF_CTRL_DISABLE         (1 << 31)  /* Bit 31: Disable this step */
 
 /* SP bias off control (SP_BIAS_OFF_CTRL) */
-#define GPC_SET_POINT_CTRL_SP_BIAS_OFF_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, useage is depending on CNT_MODE */
+#define GPC_SET_POINT_CTRL_SP_BIAS_OFF_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, usage is depending on CNT_MODE */
 #define GPC_SET_POINT_CTRL_SP_BIAS_OFF_CTRL_STEP_CNT_MASK   (0xFFFF << GPC_SET_POINT_CTRL_SP_BIAS_OFF_CTRL_STEP_CNT_SHIFT)
 #define GPC_SET_POINT_CTRL_SP_BIAS_OFF_CTRL_STEP_CNT(n)     (((n) << GPC_SET_POINT_CTRL_SP_BIAS_OFF_CTRL_STEP_CNT_SHIFT) & GPC_SET_POINT_CTRL_SP_BIAS_OFF_CTRL_STEP_CNT_MASK)
 #define GPC_SET_POINT_CTRL_SP_BIAS_OFF_CTRL_CNT_MODE_SHIFT  (28)       /* Bits 28-30: Count mode */
@@ -852,7 +852,7 @@
 #define GPC_SET_POINT_CTRL_SP_BIAS_OFF_CTRL_DISABLE         (1 << 31)  /* Bit 31: Disable this step */
 
 /* SP bandgap and PLL_LDO off control (SP_BG_PLDO_OFF_CTRL) */
-#define GPC_SET_POINT_CTRL_SP_BG_PLDO_OFF_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, useage is depending on CNT_MODE */
+#define GPC_SET_POINT_CTRL_SP_BG_PLDO_OFF_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, usage is depending on CNT_MODE */
 #define GPC_SET_POINT_CTRL_SP_BG_PLDO_OFF_CTRL_STEP_CNT_MASK   (0xFFFF << GPC_SET_POINT_CTRL_SP_BG_PLDO_OFF_CTRL_STEP_CNT_SHIFT)
 #define GPC_SET_POINT_CTRL_SP_BG_PLDO_OFF_CTRL_STEP_CNT(n)     (((n) << GPC_SET_POINT_CTRL_SP_BG_PLDO_OFF_CTRL_STEP_CNT_SHIFT) & GPC_SET_POINT_CTRL_SP_BG_PLDO_OFF_CTRL_STEP_CNT_MASK)
 #define GPC_SET_POINT_CTRL_SP_BG_PLDO_OFF_CTRL_CNT_MODE_SHIFT  (28)       /* Bits 28-30: Count mode */
@@ -861,7 +861,7 @@
 #define GPC_SET_POINT_CTRL_SP_BG_PLDO_OFF_CTRL_DISABLE         (1 << 31)  /* Bit 31: Disable this step */
 
 /* SP LDO pre control (SP_LDO_PRE_CTRL) */
-#define GPC_SET_POINT_CTRL_SP_LDO_PRE_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, useage is depending on CNT_MODE */
+#define GPC_SET_POINT_CTRL_SP_LDO_PRE_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, usage is depending on CNT_MODE */
 #define GPC_SET_POINT_CTRL_SP_LDO_PRE_CTRL_STEP_CNT_MASK   (0xFFFF << GPC_SET_POINT_CTRL_SP_LDO_PRE_CTRL_STEP_CNT_SHIFT)
 #define GPC_SET_POINT_CTRL_SP_LDO_PRE_CTRL_STEP_CNT(n)     (((n) << GPC_SET_POINT_CTRL_SP_LDO_PRE_CTRL_STEP_CNT_SHIFT) & GPC_SET_POINT_CTRL_SP_LDO_PRE_CTRL_STEP_CNT_MASK)
 #define GPC_SET_POINT_CTRL_SP_LDO_PRE_CTRL_CNT_MODE_SHIFT  (28)       /* Bits 28-30: Count mode */
@@ -870,7 +870,7 @@
 #define GPC_SET_POINT_CTRL_SP_LDO_PRE_CTRL_DISABLE         (1 << 31)  /* Bit 31: Disable this step */
 
 /* SP DCDC down control (SP_DCDC_DOWN_CTRL) */
-#define GPC_SET_POINT_CTRL_SP_DCDC_DOWN_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, useage is depending on CNT_MODE */
+#define GPC_SET_POINT_CTRL_SP_DCDC_DOWN_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, usage is depending on CNT_MODE */
 #define GPC_SET_POINT_CTRL_SP_DCDC_DOWN_CTRL_STEP_CNT_MASK   (0xFFFF << GPC_SET_POINT_CTRL_SP_DCDC_DOWN_CTRL_STEP_CNT_SHIFT)
 #define GPC_SET_POINT_CTRL_SP_DCDC_DOWN_CTRL_STEP_CNT(n)     (((n) << GPC_SET_POINT_CTRL_SP_DCDC_DOWN_CTRL_STEP_CNT_SHIFT) & GPC_SET_POINT_CTRL_SP_DCDC_DOWN_CTRL_STEP_CNT_MASK)
 #define GPC_SET_POINT_CTRL_SP_DCDC_DOWN_CTRL_CNT_MODE_SHIFT  (28)       /* Bits 28-30: Count mode */
@@ -879,7 +879,7 @@
 #define GPC_SET_POINT_CTRL_SP_DCDC_DOWN_CTRL_DISABLE         (1 << 31)  /* Bit 31: Disable this step */
 
 /* SP DCDC up control (SP_DCDC_UP_CTRL) */
-#define GPC_SET_POINT_CTRL_SP_DCDC_UP_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, useage is depending on CNT_MODE */
+#define GPC_SET_POINT_CTRL_SP_DCDC_UP_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, usage is depending on CNT_MODE */
 #define GPC_SET_POINT_CTRL_SP_DCDC_UP_CTRL_STEP_CNT_MASK   (0xFFFF << GPC_SET_POINT_CTRL_SP_DCDC_UP_CTRL_STEP_CNT_SHIFT)
 #define GPC_SET_POINT_CTRL_SP_DCDC_UP_CTRL_STEP_CNT(n)     (((n) << GPC_SET_POINT_CTRL_SP_DCDC_UP_CTRL_STEP_CNT_SHIFT) & GPC_SET_POINT_CTRL_SP_DCDC_UP_CTRL_STEP_CNT_MASK)
 #define GPC_SET_POINT_CTRL_SP_DCDC_UP_CTRL_CNT_MODE_SHIFT  (28)       /* Bits 28-30: Count mode */
@@ -888,7 +888,7 @@
 #define GPC_SET_POINT_CTRL_SP_DCDC_UP_CTRL_DISABLE         (1 << 31)  /* Bit 31: Disable this step */
 
 /* SP LDO post control (SP_LDO_POST_CTRL) */
-#define GPC_SET_POINT_CTRL_SP_LDO_POST_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, useage is depending on CNT_MODE */
+#define GPC_SET_POINT_CTRL_SP_LDO_POST_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, usage is depending on CNT_MODE */
 #define GPC_SET_POINT_CTRL_SP_LDO_POST_CTRL_STEP_CNT_MASK   (0xFFFF << GPC_SET_POINT_CTRL_SP_LDO_POST_CTRL_STEP_CNT_SHIFT)
 #define GPC_SET_POINT_CTRL_SP_LDO_POST_CTRL_STEP_CNT(n)     (((n) << GPC_SET_POINT_CTRL_SP_LDO_POST_CTRL_STEP_CNT_SHIFT) & GPC_SET_POINT_CTRL_SP_LDO_POST_CTRL_STEP_CNT_MASK)
 #define GPC_SET_POINT_CTRL_SP_LDO_POST_CTRL_CNT_MODE_SHIFT  (28)       /* Bits 28-30: Count mode */
@@ -897,7 +897,7 @@
 #define GPC_SET_POINT_CTRL_SP_LDO_POST_CTRL_DISABLE         (1 << 31)  /* Bit 31: Disable this step */
 
 /* SP bandgap and PLL_LDO on control (SP_BG_PLDO_ON_CTRL) */
-#define GPC_SET_POINT_CTRL_SP_BG_PLDO_ON_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, useage is depending on CNT_MODE */
+#define GPC_SET_POINT_CTRL_SP_BG_PLDO_ON_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, usage is depending on CNT_MODE */
 #define GPC_SET_POINT_CTRL_SP_BG_PLDO_ON_CTRL_STEP_CNT_MASK   (0xFFFF << GPC_SET_POINT_CTRL_SP_BG_PLDO_ON_CTRL_STEP_CNT_SHIFT)
 #define GPC_SET_POINT_CTRL_SP_BG_PLDO_ON_CTRL_STEP_CNT(n)     (((n) << GPC_SET_POINT_CTRL_SP_BG_PLDO_ON_CTRL_STEP_CNT_SHIFT) & GPC_SET_POINT_CTRL_SP_BG_PLDO_ON_CTRL_STEP_CNT_MASK)
 #define GPC_SET_POINT_CTRL_SP_BG_PLDO_ON_CTRL_CNT_MODE_SHIFT  (28)       /* Bits 28-30: Count mode */
@@ -906,7 +906,7 @@
 #define GPC_SET_POINT_CTRL_SP_BG_PLDO_ON_CTRL_DISABLE         (1 << 31)  /* Bit 31: Disable this step */
 
 /* SP bias on control (SP_BIAS_ON_CTRL) */
-#define GPC_SET_POINT_CTRL_SP_BIAS_ON_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, useage is depending on CNT_MODE */
+#define GPC_SET_POINT_CTRL_SP_BIAS_ON_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, usage is depending on CNT_MODE */
 #define GPC_SET_POINT_CTRL_SP_BIAS_ON_CTRL_STEP_CNT_MASK   (0xFFFF << GPC_SET_POINT_CTRL_SP_BIAS_ON_CTRL_STEP_CNT_SHIFT)
 #define GPC_SET_POINT_CTRL_SP_BIAS_ON_CTRL_STEP_CNT(n)     (((n) << GPC_SET_POINT_CTRL_SP_BIAS_ON_CTRL_STEP_CNT_SHIFT) & GPC_SET_POINT_CTRL_SP_BIAS_ON_CTRL_STEP_CNT_MASK)
 #define GPC_SET_POINT_CTRL_SP_BIAS_ON_CTRL_CNT_MODE_SHIFT  (28)       /* Bits 28-30: Count mode */
@@ -915,7 +915,7 @@
 #define GPC_SET_POINT_CTRL_SP_BIAS_ON_CTRL_DISABLE         (1 << 31)  /* Bit 31: Disable this step */
 
 /* SP power on control (SP_POWER_ON_CTRL) */
-#define GPC_SET_POINT_CTRL_SP_POWER_ON_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, useage is depending on CNT_MODE */
+#define GPC_SET_POINT_CTRL_SP_POWER_ON_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, usage is depending on CNT_MODE */
 #define GPC_SET_POINT_CTRL_SP_POWER_ON_CTRL_STEP_CNT_MASK   (0xFFFF << GPC_SET_POINT_CTRL_SP_POWER_ON_CTRL_STEP_CNT_SHIFT)
 #define GPC_SET_POINT_CTRL_SP_POWER_ON_CTRL_STEP_CNT(n)     (((n) << GPC_SET_POINT_CTRL_SP_POWER_ON_CTRL_STEP_CNT_SHIFT) & GPC_SET_POINT_CTRL_SP_POWER_ON_CTRL_STEP_CNT_MASK)
 #define GPC_SET_POINT_CTRL_SP_POWER_ON_CTRL_CNT_MODE_SHIFT  (28)       /* Bits 28-30: Count mode */
@@ -924,7 +924,7 @@
 #define GPC_SET_POINT_CTRL_SP_POWER_ON_CTRL_DISABLE         (1 << 31)  /* Bit 31: Disable this step */
 
 /* SP reset late control (SP_RESET_LATE_CTRL) */
-#define GPC_SET_POINT_CTRL_SP_RESET_LATE_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, useage is depending on CNT_MODE */
+#define GPC_SET_POINT_CTRL_SP_RESET_LATE_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, usage is depending on CNT_MODE */
 #define GPC_SET_POINT_CTRL_SP_RESET_LATE_CTRL_STEP_CNT_MASK   (0xFFFF << GPC_SET_POINT_CTRL_SP_RESET_LATE_CTRL_STEP_CNT_SHIFT)
 #define GPC_SET_POINT_CTRL_SP_RESET_LATE_CTRL_STEP_CNT(n)     (((n) << GPC_SET_POINT_CTRL_SP_RESET_LATE_CTRL_STEP_CNT_SHIFT) & GPC_SET_POINT_CTRL_SP_RESET_LATE_CTRL_STEP_CNT_MASK)
 #define GPC_SET_POINT_CTRL_SP_RESET_LATE_CTRL_CNT_MODE_SHIFT  (28)       /* Bits 28-30: Count mode */
@@ -933,7 +933,7 @@
 #define GPC_SET_POINT_CTRL_SP_RESET_LATE_CTRL_DISABLE         (1 << 31)  /* Bit 31: Disable this step */
 
 /* SP ISO off control (SP_ISO_OFF_CTRL) */
-#define GPC_SET_POINT_CTRL_SP_ISO_OFF_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, useage is depending on CNT_MODE */
+#define GPC_SET_POINT_CTRL_SP_ISO_OFF_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, usage is depending on CNT_MODE */
 #define GPC_SET_POINT_CTRL_SP_ISO_OFF_CTRL_STEP_CNT_MASK   (0xFFFF << GPC_SET_POINT_CTRL_SP_ISO_OFF_CTRL_STEP_CNT_SHIFT)
 #define GPC_SET_POINT_CTRL_SP_ISO_OFF_CTRL_STEP_CNT(n)     (((n) << GPC_SET_POINT_CTRL_SP_ISO_OFF_CTRL_STEP_CNT_SHIFT) & GPC_SET_POINT_CTRL_SP_ISO_OFF_CTRL_STEP_CNT_MASK)
 #define GPC_SET_POINT_CTRL_SP_ISO_OFF_CTRL_CNT_MODE_SHIFT  (28)       /* Bits 28-30: Count mode */
@@ -942,7 +942,7 @@
 #define GPC_SET_POINT_CTRL_SP_ISO_OFF_CTRL_DISABLE         (1 << 31)  /* Bit 31: Disable this step */
 
 /* SP PLL on control (SP_PLL_ON_CTRL) */
-#define GPC_SET_POINT_CTRL_SP_PLL_ON_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, useage is depending on CNT_MODE */
+#define GPC_SET_POINT_CTRL_SP_PLL_ON_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, usage is depending on CNT_MODE */
 #define GPC_SET_POINT_CTRL_SP_PLL_ON_CTRL_STEP_CNT_MASK   (0xFFFF << GPC_SET_POINT_CTRL_SP_PLL_ON_CTRL_STEP_CNT_SHIFT)
 #define GPC_SET_POINT_CTRL_SP_PLL_ON_CTRL_STEP_CNT(n)     (((n) << GPC_SET_POINT_CTRL_SP_PLL_ON_CTRL_STEP_CNT_SHIFT) & GPC_SET_POINT_CTRL_SP_PLL_ON_CTRL_STEP_CNT_MASK)
 #define GPC_SET_POINT_CTRL_SP_PLL_ON_CTRL_CNT_MODE_SHIFT  (28)       /* Bits 28-30: Count mode */
@@ -951,7 +951,7 @@
 #define GPC_SET_POINT_CTRL_SP_PLL_ON_CTRL_DISABLE         (1 << 31)  /* Bit 31: Disable this step */
 
 /* SP root up control (SP_ROOT_UP_CTRL) */
-#define GPC_SET_POINT_CTRL_SP_ROOT_UP_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, useage is depending on CNT_MODE */
+#define GPC_SET_POINT_CTRL_SP_ROOT_UP_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, usage is depending on CNT_MODE */
 #define GPC_SET_POINT_CTRL_SP_ROOT_UP_CTRL_STEP_CNT_MASK   (0xFFFF << GPC_SET_POINT_CTRL_SP_ROOT_UP_CTRL_STEP_CNT_SHIFT)
 #define GPC_SET_POINT_CTRL_SP_ROOT_UP_CTRL_STEP_CNT(n)     (((n) << GPC_SET_POINT_CTRL_SP_ROOT_UP_CTRL_STEP_CNT_SHIFT) & GPC_SET_POINT_CTRL_SP_ROOT_UP_CTRL_STEP_CNT_MASK)
 #define GPC_SET_POINT_CTRL_SP_ROOT_UP_CTRL_CNT_MODE_SHIFT  (28)       /* Bits 28-30: Count mode */
@@ -960,7 +960,7 @@
 #define GPC_SET_POINT_CTRL_SP_ROOT_UP_CTRL_DISABLE         (1 << 31)  /* Bit 31: Disable this step */
 
 /* SP group up control (SP_GROUP_UP_CTRL) */
-#define GPC_SET_POINT_CTRL_SP_GROUP_UP_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, useage is depending on CNT_MODE */
+#define GPC_SET_POINT_CTRL_SP_GROUP_UP_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, usage is depending on CNT_MODE */
 #define GPC_SET_POINT_CTRL_SP_GROUP_UP_CTRL_STEP_CNT_MASK   (0xFFFF << GPC_SET_POINT_CTRL_SP_GROUP_UP_CTRL_STEP_CNT_SHIFT)
 #define GPC_SET_POINT_CTRL_SP_GROUP_UP_CTRL_STEP_CNT(n)     (((n) << GPC_SET_POINT_CTRL_SP_GROUP_UP_CTRL_STEP_CNT_SHIFT) & GPC_SET_POINT_CTRL_SP_GROUP_UP_CTRL_STEP_CNT_MASK)
 #define GPC_SET_POINT_CTRL_SP_GROUP_UP_CTRL_CNT_MODE_SHIFT  (28)       /* Bits 28-30: Count mode */
@@ -969,7 +969,7 @@
 #define GPC_SET_POINT_CTRL_SP_GROUP_UP_CTRL_DISABLE         (1 << 31)  /* Bit 31: Disable this step */
 
 /* SP LPCG on control (SP_LPCG_ON_CTRL) */
-#define GPC_SET_POINT_CTRL_SP_LPCG_ON_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, useage is depending on CNT_MODE */
+#define GPC_SET_POINT_CTRL_SP_LPCG_ON_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, usage is depending on CNT_MODE */
 #define GPC_SET_POINT_CTRL_SP_LPCG_ON_CTRL_STEP_CNT_MASK   (0xFFFF << GPC_SET_POINT_CTRL_SP_LPCG_ON_CTRL_STEP_CNT_SHIFT)
 #define GPC_SET_POINT_CTRL_SP_LPCG_ON_CTRL_STEP_CNT(n)     (((n) << GPC_SET_POINT_CTRL_SP_LPCG_ON_CTRL_STEP_CNT_SHIFT) & GPC_SET_POINT_CTRL_SP_LPCG_ON_CTRL_STEP_CNT_MASK)
 #define GPC_SET_POINT_CTRL_SP_LPCG_ON_CTRL_CNT_MODE_SHIFT  (28)       /* Bits 28-30: Count mode */
@@ -978,7 +978,7 @@
 #define GPC_SET_POINT_CTRL_SP_LPCG_ON_CTRL_DISABLE         (1 << 31)  /* Bit 31: Disable this step */
 
 /* SP SSAR restore control (SP_SSAR_RESTORE_CTRL) */
-#define GPC_SET_POINT_CTRL_SP_SSAR_RESTORE_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, useage is depending on CNT_MODE */
+#define GPC_SET_POINT_CTRL_SP_SSAR_RESTORE_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, usage is depending on CNT_MODE */
 #define GPC_SET_POINT_CTRL_SP_SSAR_RESTORE_CTRL_STEP_CNT_MASK   (0xFFFF << GPC_SET_POINT_CTRL_SP_SSAR_RESTORE_CTRL_STEP_CNT_SHIFT)
 #define GPC_SET_POINT_CTRL_SP_SSAR_RESTORE_CTRL_STEP_CNT(n)     (((n) << GPC_SET_POINT_CTRL_SP_SSAR_RESTORE_CTRL_STEP_CNT_SHIFT) & GPC_SET_POINT_CTRL_SP_SSAR_RESTORE_CTRL_STEP_CNT_MASK)
 #define GPC_SET_POINT_CTRL_SP_SSAR_RESTORE_CTRL_CNT_MODE_SHIFT  (28)       /* Bits 28-30: Count mode */
@@ -1038,7 +1038,7 @@
 #define GPC_STBY_CTRL_STBY_MISC_FORCE_CPU3_STBY  (1 << 3)  /* Bit 3: Force CPU3 requesting standby mode */
 
 /* STBY lpcg_in control (STBY_LPCG_IN_CTRL) */
-#define GPC_STBY_CTRL_STBY_LPCG_IN_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, useage is depending on CNT_MODE */
+#define GPC_STBY_CTRL_STBY_LPCG_IN_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, usage is depending on CNT_MODE */
 #define GPC_STBY_CTRL_STBY_LPCG_IN_CTRL_STEP_CNT_MASK   (0xFFFF << GPC_STBY_CTRL_STBY_LPCG_IN_CTRL_STEP_CNT_SHIFT)
 #define GPC_STBY_CTRL_STBY_LPCG_IN_CTRL_STEP_CNT(n)     (((n) << GPC_STBY_CTRL_STBY_LPCG_IN_CTRL_STEP_CNT_SHIFT) & GPC_STBY_CTRL_STBY_LPCG_IN_CTRL_STEP_CNT_MASK)
 #define GPC_STBY_CTRL_STBY_LPCG_IN_CTRL_CNT_MODE_SHIFT  (28)       /* Bits 28-30: Count mode */
@@ -1047,7 +1047,7 @@
 #define GPC_STBY_CTRL_STBY_LPCG_IN_CTRL_DISABLE         (1 << 31)  /* Bit 31: Disable this step */
 
 /* STBY pll_in control (STBY_PLL_IN_CTRL) */
-#define GPC_STBY_CTRL_STBY_PLL_IN_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, useage is depending on CNT_MODE */
+#define GPC_STBY_CTRL_STBY_PLL_IN_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, usage is depending on CNT_MODE */
 #define GPC_STBY_CTRL_STBY_PLL_IN_CTRL_STEP_CNT_MASK   (0xFFFF << GPC_STBY_CTRL_STBY_PLL_IN_CTRL_STEP_CNT_SHIFT)
 #define GPC_STBY_CTRL_STBY_PLL_IN_CTRL_STEP_CNT(n)     (((n) << GPC_STBY_CTRL_STBY_PLL_IN_CTRL_STEP_CNT_SHIFT) & GPC_STBY_CTRL_STBY_PLL_IN_CTRL_STEP_CNT_MASK)
 #define GPC_STBY_CTRL_STBY_PLL_IN_CTRL_CNT_MODE_SHIFT  (28)       /* Bits 28-30: Count mode */
@@ -1056,7 +1056,7 @@
 #define GPC_STBY_CTRL_STBY_PLL_IN_CTRL_DISABLE         (1 << 31)  /* Bit 31: Disable this step */
 
 /* STBY bias_in control (STBY_BIAS_IN_CTRL) */
-#define GPC_STBY_CTRL_STBY_BIAS_IN_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, useage is depending on CNT_MODE */
+#define GPC_STBY_CTRL_STBY_BIAS_IN_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, usage is depending on CNT_MODE */
 #define GPC_STBY_CTRL_STBY_BIAS_IN_CTRL_STEP_CNT_MASK   (0xFFFF << GPC_STBY_CTRL_STBY_BIAS_IN_CTRL_STEP_CNT_SHIFT)
 #define GPC_STBY_CTRL_STBY_BIAS_IN_CTRL_STEP_CNT(n)     (((n) << GPC_STBY_CTRL_STBY_BIAS_IN_CTRL_STEP_CNT_SHIFT) & GPC_STBY_CTRL_STBY_BIAS_IN_CTRL_STEP_CNT_MASK)
 #define GPC_STBY_CTRL_STBY_BIAS_IN_CTRL_CNT_MODE_SHIFT  (28)       /* Bits 28-30: Count mode */
@@ -1065,7 +1065,7 @@
 #define GPC_STBY_CTRL_STBY_BIAS_IN_CTRL_DISABLE         (1 << 31)  /* Bit 31: Disable this step */
 
 /* STBY pldo_in control (STBY_PLDO_IN_CTRL) */
-#define GPC_STBY_CTRL_STBY_PLDO_IN_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, useage is depending on CNT_MODE */
+#define GPC_STBY_CTRL_STBY_PLDO_IN_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, usage is depending on CNT_MODE */
 #define GPC_STBY_CTRL_STBY_PLDO_IN_CTRL_STEP_CNT_MASK   (0xFFFF << GPC_STBY_CTRL_STBY_PLDO_IN_CTRL_STEP_CNT_SHIFT)
 #define GPC_STBY_CTRL_STBY_PLDO_IN_CTRL_STEP_CNT(n)     (((n) << GPC_STBY_CTRL_STBY_PLDO_IN_CTRL_STEP_CNT_SHIFT) & GPC_STBY_CTRL_STBY_PLDO_IN_CTRL_STEP_CNT_MASK)
 #define GPC_STBY_CTRL_STBY_PLDO_IN_CTRL_CNT_MODE_SHIFT  (28)       /* Bits 28-30: Count mode */
@@ -1074,7 +1074,7 @@
 #define GPC_STBY_CTRL_STBY_PLDO_IN_CTRL_DISABLE         (1 << 31)  /* Bit 31: Disable this step */
 
 /* STBY bandgap_in control (STBY_BANDGAP_IN_CTRL) */
-#define GPC_STBY_CTRL_STBY_BANDGAP_IN_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, useage is depending on CNT_MODE */
+#define GPC_STBY_CTRL_STBY_BANDGAP_IN_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, usage is depending on CNT_MODE */
 #define GPC_STBY_CTRL_STBY_BANDGAP_IN_CTRL_STEP_CNT_MASK   (0xFFFF << GPC_STBY_CTRL_STBY_BANDGAP_IN_CTRL_STEP_CNT_SHIFT)
 #define GPC_STBY_CTRL_STBY_BANDGAP_IN_CTRL_STEP_CNT(n)     (((n) << GPC_STBY_CTRL_STBY_BANDGAP_IN_CTRL_STEP_CNT_SHIFT) & GPC_STBY_CTRL_STBY_BANDGAP_IN_CTRL_STEP_CNT_MASK)
 #define GPC_STBY_CTRL_STBY_BANDGAP_IN_CTRL_CNT_MODE_SHIFT  (28)       /* Bits 28-30: Count mode */
@@ -1083,7 +1083,7 @@
 #define GPC_STBY_CTRL_STBY_BANDGAP_IN_CTRL_DISABLE         (1 << 31)  /* Bit 31: Disable this step */
 
 /* STBY ldo_in control (STBY_LDO_IN_CTRL) */
-#define GPC_STBY_CTRL_STBY_LDO_IN_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, useage is depending on CNT_MODE */
+#define GPC_STBY_CTRL_STBY_LDO_IN_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, usage is depending on CNT_MODE */
 #define GPC_STBY_CTRL_STBY_LDO_IN_CTRL_STEP_CNT_MASK   (0xFFFF << GPC_STBY_CTRL_STBY_LDO_IN_CTRL_STEP_CNT_SHIFT)
 #define GPC_STBY_CTRL_STBY_LDO_IN_CTRL_STEP_CNT(n)     (((n) << GPC_STBY_CTRL_STBY_LDO_IN_CTRL_STEP_CNT_SHIFT) & GPC_STBY_CTRL_STBY_LDO_IN_CTRL_STEP_CNT_MASK)
 #define GPC_STBY_CTRL_STBY_LDO_IN_CTRL_CNT_MODE_SHIFT  (28)       /* Bits 28-30: Count mode */
@@ -1092,7 +1092,7 @@
 #define GPC_STBY_CTRL_STBY_LDO_IN_CTRL_DISABLE         (1 << 31)  /* Bit 31: Disable this step */
 
 /* STBY dcdc_in control (STBY_DCDC_IN_CTRL) */
-#define GPC_STBY_CTRL_STBY_DCDC_IN_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, useage is depending on CNT_MODE */
+#define GPC_STBY_CTRL_STBY_DCDC_IN_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, usage is depending on CNT_MODE */
 #define GPC_STBY_CTRL_STBY_DCDC_IN_CTRL_STEP_CNT_MASK   (0xFFFF << GPC_STBY_CTRL_STBY_DCDC_IN_CTRL_STEP_CNT_SHIFT)
 #define GPC_STBY_CTRL_STBY_DCDC_IN_CTRL_STEP_CNT(n)     (((n) << GPC_STBY_CTRL_STBY_DCDC_IN_CTRL_STEP_CNT_SHIFT) & GPC_STBY_CTRL_STBY_DCDC_IN_CTRL_STEP_CNT_MASK)
 #define GPC_STBY_CTRL_STBY_DCDC_IN_CTRL_CNT_MODE_SHIFT  (28)       /* Bits 28-30: Count mode */
@@ -1101,7 +1101,7 @@
 #define GPC_STBY_CTRL_STBY_DCDC_IN_CTRL_DISABLE         (1 << 31)  /* Bit 31: Disable this step */
 
 /* STBY PMIC in control (STBY_PMIC_IN_CTRL) */
-#define GPC_STBY_CTRL_STBY_PMIC_IN_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, useage is depending on CNT_MODE */
+#define GPC_STBY_CTRL_STBY_PMIC_IN_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, usage is depending on CNT_MODE */
 #define GPC_STBY_CTRL_STBY_PMIC_IN_CTRL_STEP_CNT_MASK   (0xFFFF << GPC_STBY_CTRL_STBY_PMIC_IN_CTRL_STEP_CNT_SHIFT)
 #define GPC_STBY_CTRL_STBY_PMIC_IN_CTRL_STEP_CNT(n)     (((n) << GPC_STBY_CTRL_STBY_PMIC_IN_CTRL_STEP_CNT_SHIFT) & GPC_STBY_CTRL_STBY_PMIC_IN_CTRL_STEP_CNT_MASK)
 #define GPC_STBY_CTRL_STBY_PMIC_IN_CTRL_CNT_MODE_SHIFT  (28)       /* Bits 28-30: Count mode */
@@ -1110,7 +1110,7 @@
 #define GPC_STBY_CTRL_STBY_PMIC_IN_CTRL_DISABLE         (1 << 31)  /* Bit 31: Disable this step */
 
 /* STBY PMIC out control (STBY_PMIC_OUT_CTRL) */
-#define GPC_STBY_CTRL_STBY_PMIC_OUT_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, useage is depending on CNT_MODE */
+#define GPC_STBY_CTRL_STBY_PMIC_OUT_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, usage is depending on CNT_MODE */
 #define GPC_STBY_CTRL_STBY_PMIC_OUT_CTRL_STEP_CNT_MASK   (0xFFFF << GPC_STBY_CTRL_STBY_PMIC_OUT_CTRL_STEP_CNT_SHIFT)
 #define GPC_STBY_CTRL_STBY_PMIC_OUT_CTRL_STEP_CNT(n)     (((n) << GPC_STBY_CTRL_STBY_PMIC_OUT_CTRL_STEP_CNT_SHIFT) & GPC_STBY_CTRL_STBY_PMIC_OUT_CTRL_STEP_CNT_MASK)
 #define GPC_STBY_CTRL_STBY_PMIC_OUT_CTRL_CNT_MODE_SHIFT  (28)       /* Bits 28-30: Count mode */
@@ -1119,7 +1119,7 @@
 #define GPC_STBY_CTRL_STBY_PMIC_OUT_CTRL_DISABLE         (1 << 31)  /* Bit 31: Disable this step */
 
 /* STBY DCDC out control (STBY_DCDC_OUT_CTRL) */
-#define GPC_STBY_CTRL_STBY_DCDC_OUT_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, useage is depending on CNT_MODE */
+#define GPC_STBY_CTRL_STBY_DCDC_OUT_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, usage is depending on CNT_MODE */
 #define GPC_STBY_CTRL_STBY_DCDC_OUT_CTRL_STEP_CNT_MASK   (0xFFFF << GPC_STBY_CTRL_STBY_DCDC_OUT_CTRL_STEP_CNT_SHIFT)
 #define GPC_STBY_CTRL_STBY_DCDC_OUT_CTRL_STEP_CNT(n)     (((n) << GPC_STBY_CTRL_STBY_DCDC_OUT_CTRL_STEP_CNT_SHIFT) & GPC_STBY_CTRL_STBY_DCDC_OUT_CTRL_STEP_CNT_MASK)
 #define GPC_STBY_CTRL_STBY_DCDC_OUT_CTRL_CNT_MODE_SHIFT  (28)       /* Bits 28-30: Count mode */
@@ -1128,7 +1128,7 @@
 #define GPC_STBY_CTRL_STBY_DCDC_OUT_CTRL_DISABLE         (1 << 31)  /* Bit 31: Disable this step */
 
 /* STBY LDO out control (STBY_LDO_OUT_CTRL) */
-#define GPC_STBY_CTRL_STBY_LDO_OUT_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, useage is depending on CNT_MODE */
+#define GPC_STBY_CTRL_STBY_LDO_OUT_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, usage is depending on CNT_MODE */
 #define GPC_STBY_CTRL_STBY_LDO_OUT_CTRL_STEP_CNT_MASK   (0xFFFF << GPC_STBY_CTRL_STBY_LDO_OUT_CTRL_STEP_CNT_SHIFT)
 #define GPC_STBY_CTRL_STBY_LDO_OUT_CTRL_STEP_CNT(n)     (((n) << GPC_STBY_CTRL_STBY_LDO_OUT_CTRL_STEP_CNT_SHIFT) & GPC_STBY_CTRL_STBY_LDO_OUT_CTRL_STEP_CNT_MASK)
 #define GPC_STBY_CTRL_STBY_LDO_OUT_CTRL_CNT_MODE_SHIFT  (28)       /* Bits 28-30: Count mode */
@@ -1137,7 +1137,7 @@
 #define GPC_STBY_CTRL_STBY_LDO_OUT_CTRL_DISABLE         (1 << 31)  /* Bit 31: Disable this step */
 
 /* STBY bandgap out control (STBY_BANDGAP_OUT_CTRL) */
-#define GPC_STBY_CTRL_STBY_BANDGAP_OUT_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, useage is depending on CNT_MODE */
+#define GPC_STBY_CTRL_STBY_BANDGAP_OUT_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, usage is depending on CNT_MODE */
 #define GPC_STBY_CTRL_STBY_BANDGAP_OUT_CTRL_STEP_CNT_MASK   (0xFFFF << GPC_STBY_CTRL_STBY_BANDGAP_OUT_CTRL_STEP_CNT_SHIFT)
 #define GPC_STBY_CTRL_STBY_BANDGAP_OUT_CTRL_STEP_CNT(n)     (((n) << GPC_STBY_CTRL_STBY_BANDGAP_OUT_CTRL_STEP_CNT_SHIFT) & GPC_STBY_CTRL_STBY_BANDGAP_OUT_CTRL_STEP_CNT_MASK)
 #define GPC_STBY_CTRL_STBY_BANDGAP_OUT_CTRL_CNT_MODE_SHIFT  (28)       /* Bits 28-30: Count mode */
@@ -1146,7 +1146,7 @@
 #define GPC_STBY_CTRL_STBY_BANDGAP_OUT_CTRL_DISABLE         (1 << 31)  /* Bit 31: Disable this step */
 
 /* STBY pldo out control (STBY_PLDO_OUT_CTRL) */
-#define GPC_STBY_CTRL_STBY_PLDO_OUT_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, useage is depending on CNT_MODE */
+#define GPC_STBY_CTRL_STBY_PLDO_OUT_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, usage is depending on CNT_MODE */
 #define GPC_STBY_CTRL_STBY_PLDO_OUT_CTRL_STEP_CNT_MASK   (0xFFFF << GPC_STBY_CTRL_STBY_PLDO_OUT_CTRL_STEP_CNT_SHIFT)
 #define GPC_STBY_CTRL_STBY_PLDO_OUT_CTRL_STEP_CNT(n)     (((n) << GPC_STBY_CTRL_STBY_PLDO_OUT_CTRL_STEP_CNT_SHIFT) & GPC_STBY_CTRL_STBY_PLDO_OUT_CTRL_STEP_CNT_MASK)
 #define GPC_STBY_CTRL_STBY_PLDO_OUT_CTRL_CNT_MODE_SHIFT  (28)       /* Bits 28-30: Count mode */
@@ -1155,7 +1155,7 @@
 #define GPC_STBY_CTRL_STBY_PLDO_OUT_CTRL_DISABLE         (1 << 31)  /* Bit 31: Disable this step */
 
 /* STBY bias out control (STBY_BIAS_OUT_CTRL) */
-#define GPC_STBY_CTRL_STBY_BIAS_OUT_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, useage is depending on CNT_MODE */
+#define GPC_STBY_CTRL_STBY_BIAS_OUT_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, usage is depending on CNT_MODE */
 #define GPC_STBY_CTRL_STBY_BIAS_OUT_CTRL_STEP_CNT_MASK   (0xFFFF << GPC_STBY_CTRL_STBY_BIAS_OUT_CTRL_STEP_CNT_SHIFT)
 #define GPC_STBY_CTRL_STBY_BIAS_OUT_CTRL_STEP_CNT(n)     (((n) << GPC_STBY_CTRL_STBY_BIAS_OUT_CTRL_STEP_CNT_SHIFT) & GPC_STBY_CTRL_STBY_BIAS_OUT_CTRL_STEP_CNT_MASK)
 #define GPC_STBY_CTRL_STBY_BIAS_OUT_CTRL_CNT_MODE_SHIFT  (28)       /* Bits 28-30: Count mode */
@@ -1164,7 +1164,7 @@
 #define GPC_STBY_CTRL_STBY_BIAS_OUT_CTRL_DISABLE         (1 << 31)  /* Bit 31: Disable this step */
 
 /* STBY PLL out control (STBY_PLL_OUT_CTRL) */
-#define GPC_STBY_CTRL_STBY_PLL_OUT_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, useage is depending on CNT_MODE */
+#define GPC_STBY_CTRL_STBY_PLL_OUT_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, usage is depending on CNT_MODE */
 #define GPC_STBY_CTRL_STBY_PLL_OUT_CTRL_STEP_CNT_MASK   (0xFFFF << GPC_STBY_CTRL_STBY_PLL_OUT_CTRL_STEP_CNT_SHIFT)
 #define GPC_STBY_CTRL_STBY_PLL_OUT_CTRL_STEP_CNT(n)     (((n) << GPC_STBY_CTRL_STBY_PLL_OUT_CTRL_STEP_CNT_SHIFT) & GPC_STBY_CTRL_STBY_PLL_OUT_CTRL_STEP_CNT_MASK)
 #define GPC_STBY_CTRL_STBY_PLL_OUT_CTRL_CNT_MODE_SHIFT  (28)       /* Bits 28-30: Count mode */
@@ -1173,7 +1173,7 @@
 #define GPC_STBY_CTRL_STBY_PLL_OUT_CTRL_DISABLE         (1 << 31)  /* Bit 31: Disable this step */
 
 /* STBY LPCG out control (STBY_LPCG_OUT_CTRL) */
-#define GPC_STBY_CTRL_STBY_LPCG_OUT_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, useage is depending on CNT_MODE */
+#define GPC_STBY_CTRL_STBY_LPCG_OUT_CTRL_STEP_CNT_SHIFT  (0)        /* Bits 0-16: Step count, usage is depending on CNT_MODE */
 #define GPC_STBY_CTRL_STBY_LPCG_OUT_CTRL_STEP_CNT_MASK   (0xFFFF << GPC_STBY_CTRL_STBY_LPCG_OUT_CTRL_STEP_CNT_SHIFT)
 #define GPC_STBY_CTRL_STBY_LPCG_OUT_CTRL_STEP_CNT(n)     (((n) << GPC_STBY_CTRL_STBY_LPCG_OUT_CTRL_STEP_CNT_SHIFT) & GPC_STBY_CTRL_STBY_LPCG_OUT_CTRL_STEP_CNT_MASK)
 #define GPC_STBY_CTRL_STBY_LPCG_OUT_CTRL_CNT_MODE_SHIFT  (28)       /* Bits 28-30: Count mode */

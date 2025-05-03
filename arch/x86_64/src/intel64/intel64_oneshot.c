@@ -219,7 +219,7 @@ int intel64_oneshot_initialize(struct intel64_oneshot_s *oneshot, int chan,
   oneshot->arg        = NULL;
 
 #ifdef CONFIG_INTEL64_HPET_FSB
-  /* IMPORTENT: HPET in edge triggered mode is broken on some hardware
+  /* IMPORTANT: HPET in edge triggered mode is broken on some hardware
    * and generate spurious interrupts when we enable timer. On the other
    * hand FSB works only with edge triggered mode.
    *
@@ -318,7 +318,7 @@ int intel64_oneshot_start(struct intel64_oneshot_s *oneshot,
   usec = (uint64_t)ts->tv_sec * USEC_PER_SEC +
          (uint64_t)(ts->tv_nsec / NSEC_PER_USEC);
 
-  /* HPET use free runnin up-counter and a comparators which generate events
+  /* HPET use free running up-counter and a comparators which generate events
    * only on a equal event. This can results in event miss if we set too
    * small delay. In that case we just set a minimum value for delay that
    * seem to work.
@@ -346,7 +346,7 @@ int intel64_oneshot_start(struct intel64_oneshot_s *oneshot,
                      oneshot, false);
 #endif
 
-  /* Set comparator ahed of the current counter */
+  /* Set comparator ahead of the current counter */
 
   compare += INTEL64_TIM_GETCOUNTER(oneshot->tch);
   INTEL64_TIM_SETCOMPARE(oneshot->tch, oneshot->chan, compare);

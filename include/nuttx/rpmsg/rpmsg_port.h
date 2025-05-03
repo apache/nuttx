@@ -160,7 +160,7 @@ rpmsg_port_spi_slave_initialize(FAR const struct rpmsg_port_config_s *cfg,
  * Name: rpmsg_port_uart_initialize
  *
  * Description:
- *   Initialze a rpmsg_port_uart device to communicate between two chips.
+ *   Initialize a rpmsg_port_uart device to communicate between two chips.
  *
  * Input Parameters:
  *   cfg      - Configuration of buffers needed for communication.

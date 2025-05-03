@@ -122,7 +122,7 @@ static int usbhost_waiter(int argc, char *argv[])
  * Name: at32_usbinitialize
  *
  * Description:
- *   Called from at32_usbinitialize very early in inialization to setup
+ *   Called from at32_usbinitialize very early in initialization to setup
  *   USB-related GPIO pins for the AT32F407_MINIvery board.
  *
  ****************************************************************************/

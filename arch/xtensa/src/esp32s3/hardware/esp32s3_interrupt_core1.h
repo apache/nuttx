@@ -184,7 +184,7 @@
 #define INTERRUPT_CORE1_RWBT_NMI_MAP_REG (DR_REG_INTERRUPT_CORE1_BASE + 0x24)
 
 /* INTERRUPT_CORE1_RWBT_NMI_MAP : R/W; bitpos: [4:0]; default: 16;
- * this register used to map rwbt_nmi interupt to one of core1's external
+ * this register used to map rwbt_nmi interrupt to one of core1's external
  * interrupt
  */
 
@@ -1700,7 +1700,7 @@
 #define INTERRUPT_CORE1_CLOCK_GATE_REG (DR_REG_INTERRUPT_CORE1_BASE + 0x19c)
 
 /* INTERRUPT_CORE1_REG_CLK_EN : R/W; bitpos: [0]; default: 1;
- * this register uesd to control clock-gating interupt martrix
+ * this register used to control clock-gating interrupt martrix
  */
 
 #define INTERRUPT_CORE1_REG_CLK_EN    (BIT(0))

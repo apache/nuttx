@@ -144,7 +144,7 @@
 #elif defined(CONFIG_AT32_UART8_HCIUART)
 #  define HCIUART_SERDEV HCIUART8
 #else
-#  error No HCI UART specifified
+#  error No HCI UART specified
 #endif
 
 /* AT32F4 Mini GPIOs ********************************************************/

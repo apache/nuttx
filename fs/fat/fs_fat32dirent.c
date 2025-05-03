@@ -1831,8 +1831,8 @@ static inline int fat_getsfname(FAR uint8_t *direntry, FAR char *buffer,
 
       /* In this version, we never write 0xe5 in the directory filenames
        * (because we do not handle any character sets where 0xe5 is valid
-       * in a filaname), but we could eencounter this in a filesystem
-       * written by some other system
+       * in a filename), but we could eencounter this in a filesystem
+       * written by some other system.
        */
 
       if (ndx == 0 && ch == DIR0_E5)

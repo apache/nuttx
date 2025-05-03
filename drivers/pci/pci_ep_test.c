@@ -656,7 +656,7 @@ pci_ep_test_set_irq(struct pci_ep_test_s *test, int req_irq_type)
   if (req_irq_type < PCI_EP_TEST_IRQ_TYPE_LEGACY ||
       req_irq_type > PCI_EP_TEST_COMMAND_MSIX_IRQ)
     {
-      pcierr("invaild irq option\n");
+      pcierr("invalid irq option\n");
       return false;
     }
 
@@ -702,7 +702,7 @@ static int pci_ep_test_ioctl(FAR struct file *filep,
         bar = arg;
         if (bar > PCI_STD_NUM_BARS || bar < 0)
           {
-            pcierr("bar num %d is invaild\n", bar);
+            pcierr("bar num %d is invalid\n", bar);
             break;
           }
 
@@ -775,7 +775,7 @@ static int pci_ep_test_probe(FAR struct pci_device_s *dev)
   test = kmm_zalloc(sizeof(*test));
   if (NULL == test)
     {
-      pcierr("malloc ptest memory faild\n");
+      pcierr("malloc ptest memory failed\n");
       return -ENOMEM;
     }
 

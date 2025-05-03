@@ -110,7 +110,7 @@ static void oneshot_callback(FAR struct oneshot_lowerhalf_s *lower,
 #else
   /* Start the next tick first, in order to minimize latency. Ideally
    * the ONESHOT_TICK_START would also return the current tick so that
-   * the retriving the current tick and starting the new one could be done
+   * the retrieving the current tick and starting the new one could be done
    * atomically w. respect to a HW timer
    */
 

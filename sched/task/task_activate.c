@@ -82,7 +82,7 @@ void nxtask_activate(FAR struct tcb_s *tcb)
   sched_note_start(tcb);
 #endif
 
-  /* Remove the task from waitting list */
+  /* Remove the task from waiting list */
 
   nxsched_remove_blocked(tcb);
 

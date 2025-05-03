@@ -302,7 +302,7 @@ enum board_power_device
  * supply current value.
  * signal returns "usbdev_notify_s" struct pointer in sival_ptr.
  *
- * Arg: Value of sinal number
+ * Arg: Value of signal number
  */
 
 #define BOARDIOC_USBDEV_SETNOTIFYSIG      (BOARDIOC_USER+0x0001)

@@ -155,7 +155,7 @@ rptun_ivshmem_get_resource(FAR struct rptun_dev_s *dev)
     {
       priv->raddrenv[0].pa = (uintptr_t)priv->shmem;
 
-      /* Wait untils salve is ready */
+      /* Wait until slave is ready */
 
       while (RPTUN_GET_CMD(cmd->cmd_slave) != RPTUN_CMD_READY)
         {
@@ -197,7 +197,7 @@ rptun_ivshmem_get_resource(FAR struct rptun_dev_s *dev)
       cmd->cmd_master               = 0;
       cmd->cmd_slave                = RPTUN_CMD(RPTUN_CMD_READY, 0);
 
-      /* Wait untils master is ready, salve need use master base to
+      /* Wait until master is ready, slave needs to use master base to
        * initialize addrenv.
        */
 

@@ -81,7 +81,7 @@
 #define DS18B20_RES_VAL(x)             (((x) >> 5) & 0x3)
 #define DS18B20_RES_CONV(x)            (((x) & 0x3) << 5)
 
-/* Measurement timneout offset */
+/* Measurement timeout offset */
 
 #define DS18B20_TIMEOUT_OFFSET(x)      (DS18B20_RESMAX - (x))
 
@@ -631,7 +631,7 @@ static int ds18b20_measure_read(FAR struct ds18b20_dev_s *dev,
 /****************************************************************************
  * Name: ds18b20_fetch
  *
- * Description: Performs a measuremnt cylce and data read with data
+ * Description: Performs a measuremnt cycle and data read with data
  *              conversion.
  *
  * Parameter:
@@ -876,7 +876,7 @@ static int ds18b20_thread(int argc, char** argv)
         }
       else
         {
-          /* Default nofitication when temperature has been changed */
+          /* Default notification when temperature has been changed */
 
           ret = ds18b20_measure_read(priv, &data);
           if (!ret)

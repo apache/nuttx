@@ -103,7 +103,7 @@ int setvbuf(FAR FILE *stream, FAR char *buffer, int mode, size_t size)
 
   /* My assumption is that if size is zero for modes {_IOFBF, _IOLBF} the
    * caller is only attempting to change the buffering mode.  In this case,
-   * the existing buffer should be re-used (if there is one).  If there is no
+   * the existing buffer should be reused (if there is one).  If there is no
    * existing buffer, then I suppose we should allocate one of the default
    * size?
    */
@@ -196,7 +196,7 @@ int setvbuf(FAR FILE *stream, FAR char *buffer, int mode, size_t size)
           }
         else
           {
-            /* Re-use the existing buffer and retain some existing flags.
+            /* Reuse the existing buffer and retain some existing flags.
              * This supports changing the buffering mode without changing
              * the buffer.
              */

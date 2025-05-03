@@ -409,7 +409,7 @@ static ssize_t esp32c3_bread_decrypt(struct mtd_dev_s *dev,
  *   buffer - data buffer pointer
  *
  * Returned Value:
- *   Writen bytes if success or a negative value if fail.
+ *   Written bytes if success or a negative value if fail.
  *
  ****************************************************************************/
 
@@ -463,7 +463,7 @@ static ssize_t esp32c3_write(struct mtd_dev_s *dev, off_t offset,
  *   buffer     - data buffer pointer
  *
  * Returned Value:
- *   Writen block number if success or a negative value if fail.
+ *   Written block number if success or a negative value if fail.
  *
  ****************************************************************************/
 
@@ -512,7 +512,7 @@ static ssize_t esp32c3_bwrite(struct mtd_dev_s *dev, off_t startblock,
  *   buffer     - data buffer pointer
  *
  * Returned Value:
- *   Writen block number if success or a negative value if fail.
+ *   Written block number if success or a negative value if fail.
  *
  ****************************************************************************/
 

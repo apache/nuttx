@@ -37,7 +37,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Trap Hook defination */
+/* Trap Hook definition */
 
 /* Trap Call */
 

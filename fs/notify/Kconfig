@@ -19,7 +19,7 @@ config FS_NOTIFY_MAX_EVENTS
 	default 1024
 
 config FS_NOTIFY_FD_POLLWAITERS
-	int "Max pollwaiters in one notify devcie"
+	int "Max pollwaiters in one notify device"
 	default 2
 
 endif # FS_NOTIFY

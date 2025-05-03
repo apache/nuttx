@@ -25,7 +25,7 @@
  *  Revised:
  *  Revision:
  *
- *  Description:    Jump table that holds function pointers and veriables
+ *  Description:    Jump table that holds function pointers and variables
  *  used in ROM code.
  ****************************************************************************/
 

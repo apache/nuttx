@@ -130,7 +130,7 @@
 #define LPUART_STAT_RXEDGIF             (1 << 30) /* Bit30: RXD Pin Active Edge Interrupt Flag */
 #define LPUART_STAT_MSBF                (1 << 29) /* Bit29: MSB First */
 #define LPUART_STAT_RXINV               (1 << 28) /* Bit28: Receive Data Inversion */
-#define LPUART_STAT_RWUID               (1 << 27) /* Bit27: Receive Wake Up Idel Detect */
+#define LPUART_STAT_RWUID               (1 << 27) /* Bit27: Receive Wake Up Idle Detect */
 #define LPUART_STAT_BRK13               (1 << 26) /* Bit26: Break Character Generation Length */
 #define LPUART_STAT_LBKDE               (1 << 25) /* Bit25: Lin Break Detection Enable */
 #define LPUART_STAT_RAF                 (1 << 24) /* Bit24: Receiver Active Flag */

@@ -95,8 +95,8 @@ enum mac802154_operation_e
 };
 
 /* The privmac structure holds the internal state of the MAC and is the
- * underlying represention of the opaque MACHANDLE.  It contains storage for
- * the IEEE802.15.4 MIB attributes.
+ * underlying representation of the opaque MACHANDLE.  It contains storage
+ * for the IEEE802.15.4 MIB attributes.
  */
 
 struct ieee802154_privmac_s
@@ -200,7 +200,7 @@ struct ieee802154_privmac_s
 
   /****************** Fields related to offloading work *********************/
 
-  /* Work structures for offloading aynchronous work */
+  /* Work structures for offloading asynchronous work */
 
   struct work_s txdone_work;
   struct work_s rx_work;

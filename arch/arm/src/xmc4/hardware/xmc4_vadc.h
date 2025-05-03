@@ -190,7 +190,7 @@ typedef struct                                   /* (@ 0x40004400) */
   volatile uint32_t  RESD[16];                   /* (@ 0x40004780) Result Register, Debug */
 } vadc_group_t;
 
-/* Define pointers for VADC global and group stuctures */
+/* Define pointers for VADC global and group structures */
 #define VADC      ((vadc_global_t *) XMC4_VADC_BASE)
 #define VADC_G0   ((vadc_group_t *) XMC4_VADC_G0_BASE)
 #define VADC_G1   ((vadc_group_t *) XMC4_VADC_G1_BASE)

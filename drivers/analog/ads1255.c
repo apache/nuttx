@@ -481,7 +481,7 @@ static int adc_interrupt(int irq, FAR void *context, FAR void *arg)
 
   up_disable_irq(priv->irq);
 
-  /* Schedule the ADC work for the worker thread.  Whent he sample has been
+  /* Schedule the ADC work for the worker thread.  When the sample has been
    * processed, the ADC interrupt will be re-enabled.
    */
 

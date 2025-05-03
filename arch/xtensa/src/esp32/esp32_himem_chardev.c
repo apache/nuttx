@@ -408,7 +408,7 @@ int himem_chardev_unregister(char *name)
     }
 
   nxmutex_unlock(&lock);
-  merr("dev=%s is not registerd.\n", name);
+  merr("dev=%s is not registered.\n", name);
 
   return -1;
 }

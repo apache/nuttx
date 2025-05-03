@@ -167,7 +167,7 @@ struct emc_static_chip_config_s
                           * emc_static_special_config_e settings */
   uint32_t waitwriteen;  /* The delay form chip select to write enable in
                           * units of nanoseconds */
-  uint32_t waitouten;    /* The delay from chip selcet to output enable in
+  uint32_t waitouten;    /* The delay from chip select to output enable in
                           * units of nanoseconds */
   uint32_t waitread;     /* In No-page mode, the delay from chip select to
                           * read access in units of nanoseconds */

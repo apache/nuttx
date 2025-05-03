@@ -106,7 +106,7 @@ void ipcc_txfree_notify(FAR struct ipcc_driver_s *priv)
  *
  * Description:
  *   Writes data to IPCC memory so that another CPU can read the contents.
- *   Will block untill whole buffer is copied unless signal is received
+ *   Will block until whole buffer is copied unless signal is received
  *   or O_NONBLOCK flag is set.
  *
  * Input Parameters:

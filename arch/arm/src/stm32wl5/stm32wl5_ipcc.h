@@ -130,7 +130,7 @@
  *  +----------+
  */
 
-/* IPCC needs continous memory of known address that is shared
+/* IPCC needs continuous memory of known address that is shared
  * between CPUs. Because of that we reserve memory at beginning
  * of SRAM2. SRAM2 region will be right after IPCC reserved memory
  */
