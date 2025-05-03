@@ -56,12 +56,14 @@
  * The following definitions assume the default Solder Bridges are installed.
  */
 
-#define GPIO_LD1       (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | GPIO_OUTPUT_CLEAR | \
-                        GPIO_PORTB | GPIO_PIN0)
-#define GPIO_LD2       (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | GPIO_OUTPUT_CLEAR | \
-                        GPIO_PORTB | GPIO_PIN7)
-#define GPIO_LD3       (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | GPIO_OUTPUT_CLEAR | \
-                        GPIO_PORTB | GPIO_PIN14)
+#define GPIO_LD1       (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
+                        GPIO_OUTPUT_CLEAR | GPIO_PORTB | GPIO_PIN0)
+
+#define GPIO_LD2       (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
+                        GPIO_OUTPUT_CLEAR | GPIO_PORTB | GPIO_PIN7)
+
+#define GPIO_LD3       (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
+                        GPIO_OUTPUT_CLEAR | GPIO_PORTB | GPIO_PIN14)
 
 #define GPIO_LED_GREEN GPIO_LD1
 #define GPIO_LED_BLUE  GPIO_LD2
@@ -72,6 +74,11 @@
 /* BUTTONS
  *
  * The Blue pushbutton B1, labeled "User", is connected to GPIO PC13.
+ * On this context, this button is called 'GPIO_BTN_BUILT_IN'.
+ *
+ * The other buttons (GPIO_BNT_EXERN_X) are the external buttons already
+ * available for the user.
+ *
  * A high value will be sensed when the button is depressed.
  * Note:
  *    1) That the EXTI is included in the definition to enable an interrupt
@@ -80,7 +87,26 @@
  *       installed.
  */
 
-#define GPIO_BTN_USER  (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI | GPIO_PORTC | GPIO_PIN13)
+#define GPIO_BTN_BUILT_IN  (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI | \
+                            GPIO_PORTC | GPIO_PIN13)
+
+#define GPIO_BTN_EXTERN_1  (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI | \
+                            GPIO_PORTF | GPIO_PIN15)
+
+#define GPIO_BTN_EXTERN_2  (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI | \
+                            GPIO_PORTG | GPIO_PIN14)
+
+#define GPIO_BTN_EXTERN_3  (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI | \
+                            GPIO_PORTG | GPIO_PIN9)
+
+#define GPIO_BTN_EXTERN_4  (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI | \
+                            GPIO_PORTE | GPIO_PIN0)
+
+#define MIN_IRQBUTTON  BUTTON_BUILT_IN
+#define MAX_IRQBUTTON  BUTTON_EXTERN_4
+#define NUM_IRQBUTTONS (MIN_IRQBUTTON - MAX_IRQBUTTON + 1)
+
+#define BUTTONS_DRIVER_PATH "/dev/buttons"
 
 /* SPI **********************************************************************/
 
@@ -278,7 +304,7 @@ int stm32_sdio_initialize(void);
  * Name: stm32_usbinitialize
  *
  * Description:
- *   Called from stm32_usbinitialize very early in inialization to setup
+ *   Called from stm32_usbinitialize very early in initialization to setup
  *   USB-related GPIO pins for the nucleo-f767zi board.
  *
  ****************************************************************************/

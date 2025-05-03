@@ -40,6 +40,28 @@
 #ifdef CONFIG_ARCH_BUTTONS
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#if defined(CONFIG_INPUT_BUTTONS) && !defined(CONFIG_ARCH_IRQBUTTONS)
+#  error "The NuttX Buttons Driver depends on IRQ support to work!\n"
+#endif
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/* Pin configuration for each STM32F3Discovery button.  This array is indexed
+ * by the BUTTON_* definitions in board.h
+ */
+
+static const uint32_t g_buttons[NUM_BUTTONS] =
+{
+  GPIO_BTN_BUILT_IN, GPIO_BTN_EXTERN_1, GPIO_BTN_EXTERN_2, GPIO_BTN_EXTERN_3,
+  GPIO_BTN_EXTERN_4
+};
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -56,7 +78,17 @@
 
 uint32_t board_button_initialize(void)
 {
-  stm32_configgpio(GPIO_BTN_USER);
+  int i;
+
+  /* Configure the GPIO pins as inputs.  NOTE that EXTI interrupts are
+   * configured for all pins.
+   */
+
+  for (i = 0; i < NUM_BUTTONS; i++)
+    {
+      stm32_configgpio(g_buttons[i]);
+    }
+
   return NUM_BUTTONS;
 }
 
@@ -66,7 +98,26 @@ uint32_t board_button_initialize(void)
 
 uint32_t board_buttons(void)
 {
-  return stm32_gpioread(GPIO_BTN_USER) ? 1 : 0;
+  uint32_t ret = 0;
+  int i;
+
+  /* Check that state of each key */
+
+  for (i = 0; i < NUM_BUTTONS; i++)
+    {
+      /* A LOW value means that the key is pressed. */
+
+      bool released = stm32_gpioread(g_buttons[i]);
+
+      /* Accumulate the set of depressed (released) keys */
+
+      if (released)
+        {
+           ret |= (1 << i);
+        }
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -96,13 +147,16 @@ int board_button_irq(int id, xcpt_t irqhandler, void *arg)
 {
   int ret = -EINVAL;
 
-  if (id == BUTTON_USER)
+  /* The following should be atomic */
+
+  if (id >= MIN_IRQBUTTON && id <= MAX_IRQBUTTON)
     {
-      ret = stm32_gpiosetevent(GPIO_BTN_USER, true, true, true,
-                               irqhandler, arg);
+      ret = stm32_gpiosetevent(g_buttons[id], true, true, true, irqhandler,
+                               arg);
     }
 
   return ret;
 }
 #endif
+
 #endif /* CONFIG_ARCH_BUTTONS */
