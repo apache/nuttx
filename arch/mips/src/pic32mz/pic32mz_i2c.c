@@ -1200,7 +1200,7 @@ static int pic32mz_i2c_isr_process(struct pic32mz_i2c_priv_s *priv)
     }
 #endif
 
-  /* If an error interrupt has accured. */
+  /* If an error interrupt has occurred. */
 
 #ifndef CONFIG_I2C_POLLED
   if (mips_pending_irq(priv->config->er_irq))
@@ -1756,7 +1756,7 @@ static int pic32mz_i2c_reset(struct i2c_master_s *dev)
 
 out:
 
-  /* Release the port for re-use by other clients */
+  /* Release the port for reuse by other clients */
 
   nxmutex_unlock(&priv->lock);
 }

@@ -663,7 +663,7 @@ void thermal_cooling_device_update(FAR struct thermal_cooling_device_s *cdev)
  * Input Parameters:
  *   name    - Name of zone.
  *   devdata - Device driver data.
- *   ops     - Operations of zone deivce.
+ *   ops     - Operations of zone device.
  *   params  - Parameter of zone device.
  *
  * Returned Value:

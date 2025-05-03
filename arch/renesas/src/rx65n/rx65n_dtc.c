@@ -56,7 +56,7 @@
 #define DTC_IP_VER_DTCa     (1)
 #define DTC_IP_VER_DTCb     (2)
 
-/* Supportted DTC IP version and channel number */
+/* Supported DTC IP version and channel number */
 
 #if defined(CONFIG_ARCH_BOARD_RX65N_RSK2MB) || defined(CONFIG_ARCH_BOARD_RX65N_GRROSE)
 #define DTC_IP_VER DTC_IP_VER_DTCb
@@ -1789,7 +1789,7 @@ void rx65n_dtc_initialize(void)
 
 #endif
 
-      /* Configure read skip enable/disbale */
+      /* Configure read skip enable/disable */
 #if defined(CONFIG_RX65N_DTC_TRANSFER_DATA_READ_SKIP) /* Read-Skip Enable*/
       rx65n_dtc_readskip_enable(dtchandle);
 #else /* Read-Skip disable*/

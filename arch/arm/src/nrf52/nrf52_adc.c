@@ -936,7 +936,7 @@ struct adc_dev_s *nrf52_adcinitialize(
 #ifdef CONFIG_NRF52_SAADC_TIMER
   if (channels > 1)
     {
-      aerr("ERORR: timer trigger works only for 1 channel!\n");
+      aerr("ERROR: timer trigger works only for 1 channel!\n");
       goto errout;
     }
 #endif

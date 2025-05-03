@@ -355,7 +355,7 @@ static ssize_t stm32wl5_ipcc_write(struct ipcc_lower_s *ipcc,
 
   modifyreg32(STM32WL5_IPCC_C1SCR, 0, STM32WL5_IPCC_SCR_CHNS(ipcc->chan));
 
-  /* Reenable interrupts */
+  /* Re-enable interrupts */
 
   modifyreg32(STM32WL5_IPCC_C1MR, STM32WL5_IPCC_MR_CHNFM(ipcc->chan), 0);
   up_enable_irq(STM32WL5_IRQ_IPCC_C1_TX_IT);
@@ -460,7 +460,7 @@ static int stm32wl5_ipcc_rx_isr(int irq, void *context, void *arg)
  *   Function will copy requests number of bytes to buffer. If there is not
  *   enough data in IPCC memory, less bytes than requests will be copied.
  *   Buflen does not have to be bigger than IPCC memory - function can be
- *   called multiple times and only new data will be transfered. If we don't
+ *   called multiple times and only new data will be transferred. If we don't
  *   have control over IPCC memory (CHnF is 0 - second CPU is writing data
  *   to memory) then it's assumed no data is there to read and 0 is returned.
  *
@@ -533,7 +533,7 @@ static ssize_t stm32wl5_ipcc_read(struct ipcc_lower_s *ipcc,
       modifyreg32(STM32WL5_IPCC_C1MR, STM32WL5_IPCC_MR_CHNOM(ipcc->chan), 0);
     }
 
-  /* Reenable interrupt */
+  /* Re-enable interrupt */
 
   up_enable_irq(STM32WL5_IRQ_IPCC_C1_RX_IT);
 
@@ -671,7 +671,7 @@ static ssize_t stm32wl5_ipcc_buffer_data(struct ipcc_lower_s *ipcc,
 
   ret = stm32wl5_ipcc_copy_to_buffer(ipcc->chan, rxbuf);
 
-  /* Reenable interrupt */
+  /* Re-enable interrupt */
 
   up_enable_irq(STM32WL5_IRQ_IPCC_C1_RX_IT);
 
@@ -755,7 +755,7 @@ static int stm32wl5_ipcc_cleanup(struct ipcc_lower_s *ipcc)
  *   chan - channel to initialize
  *
  * Returned Value:
- *   Structure to link lower and upper halfs of the driver, or NULL on
+ *   Structure to link lower and upper halves of the driver, or NULL on
  *   initialization failure.
  *
  * Assumptions/Limitations:

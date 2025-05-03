@@ -85,7 +85,7 @@ int stm32_bringup(void)
   i2c = stm32_i2cbus_initialize(1);
   if (i2c == NULL)
     {
-      i2cerr("ERROR: Inialize I2C1: %d\n", ret);
+      i2cerr("ERROR: Initialize I2C1: %d\n", ret);
     }
   else
     {

@@ -110,7 +110,7 @@ FAR void *kasan_unpoison(FAR const void *addr, size_t size);
  *   None.
  *
  * Note:
- *   The size is shrinked for the shadow region
+ *   The size is shrunk for the shadow region
  *
  ****************************************************************************/
 
@@ -166,7 +166,7 @@ void kasan_start(void);
  *
  * Description:
  *   Stop kasan check, setup g_region_init variable.
- *   This used for some platfroms clear bss late, and error use kasan before
+ *   This used for some platforms clear bss late, and error use kasan before
  *   called kasan_register().
  *
  * Input Parameters:

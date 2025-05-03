@@ -422,7 +422,7 @@
 #define CAN2TDA3_OFFSET             0x58
 #define CAN2TDB3_OFFSET             0x5C
 
-/* MultiMedia Card Interface(MCI) ontroller */
+/* MultiMedia Card Interface(MCI) controller */
 
 /* MCI_BASE_ADDR                   0xE008C000 */
 #define MCI_POWER_OFFSET            0x00

@@ -44,7 +44,7 @@
  * Name: nrf52_mx25_initialize
  *
  * Description:
- *   Initialize the MX25RXX QSPI memeory
+ *   Initialize the MX25RXX QSPI memory
  *
  ****************************************************************************/
 

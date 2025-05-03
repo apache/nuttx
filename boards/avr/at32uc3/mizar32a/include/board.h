@@ -123,7 +123,7 @@
 #define AVR32_CPU_CLOCK       66000000
 #define AVR32_PBA_CLOCK       16500000
 
-/* Pin muliplexing selecion *************************************************/
+/* Pin muliplexing selection ************************************************/
 
 #define PINMUX_USART1_RXD     PINMUX_USART1_RXD_0
 #define PINMUX_USART1_TXD     PINMUX_USART1_TXD_0

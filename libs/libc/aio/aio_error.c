@@ -63,7 +63,7 @@
  *
  * Description:
  *   The aio_error() function returns the error status associated with the
- *   aiocb structure referenced by the aiocbp argument. The error status fo
+ *   aiocb structure referenced by the aiocbp argument. The error status for
  *   an asynchronous I/O operation is the errno value that would be set by
  *   the corresponding read(), write(), fdatasync(), or fsync() operation. If
  *   the operation has not yet completed, then the error status will be equal

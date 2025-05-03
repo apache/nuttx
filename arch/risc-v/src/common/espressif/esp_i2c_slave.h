@@ -61,7 +61,7 @@
  *
  * Input Parameters:
  *   port - Port number (for hardware that has multiple I2C interfaces)
- *   addr - Adress of the slave device
+ *   addr - Address of the slave device
  *
  * Returned Value:
  *   Valid I2C device structure reference on success; a NULL on failure

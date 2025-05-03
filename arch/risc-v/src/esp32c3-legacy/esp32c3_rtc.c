@@ -1952,7 +1952,7 @@ static uint32_t esp32c3_get_rtc_dbias_by_efuse(uint8_t chip_version,
 
 static void esp32c3_set_rtc_dig_dbias(void)
 {
-  /* A reasonable dig_dbias which by scaning pvt to make 160 CPU run
+  /* A reasonable dig_dbias which by scanning pvt to make 160 CPU run
    * successful stored in efuse, we store some value in efuse, include:
    * k_rtc_ldo (slope of rtc voltage & rtc_dbias);
    * k_dig_ldo (slope of digital voltage & digital_dbias);

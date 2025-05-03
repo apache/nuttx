@@ -276,7 +276,7 @@ static bool tcp_snd_wnd_update(FAR struct tcp_conn_s *conn,
  * Input Parameters:
  *   conn   - The TCP connection of interest
  *   ofoseg - Pointer to incoming out-of-order segment
- *   start  - Index of start postion of segment pool
+ *   start  - Index of start position of segment pool
  *
  * Returned Value:
  *   True if incoming data has been consumed

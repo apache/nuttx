@@ -557,7 +557,7 @@
 #  define DMAC_CHDR_DIS6               (1 << (DMAC_CHDR_DIS_SHIFT+6))
 #  define DMAC_CHDR_DIS7               (1 << (DMAC_CHDR_DIS_SHIFT+7))
 #  define DMAC_CHDR_DIS_ALL            DMAC_CHDR_DIS_MASK
-#define DMAC_CHDR_RES_SHIFT            (8)       /* Bits 8-15:  Resume trasnfer, restoring context */
+#define DMAC_CHDR_RES_SHIFT            (8)       /* Bits 8-15:  Resume transfer, restoring context */
 #define DMAC_CHDR_RES_MASK             (0xff << DMAC_CHDR_RES_SHIFT)
 #  define DMAC_CHDR_RES(n)             (1 << (DMAC_CHDR_RES_SHIFT+(n)))
 #  define DMAC_CHDR_RES0               (1 << (DMAC_CHDR_RES_SHIFT+0))

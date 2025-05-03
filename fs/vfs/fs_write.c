@@ -100,7 +100,7 @@ static ssize_t file_writev_compat(FAR struct file *filep,
 
       ntotal += nwritten;
 
-      /* Check for a parital success condition */
+      /* Check for a partial success condition */
 
       if (nwritten < iov[i].iov_len)
         {

@@ -521,7 +521,7 @@ struct adc_dev_s *lc823450_adcinitialize(void)
           return NULL;
         }
 
-      /* enable clock & unreset (include exitting standby mode) */
+      /* enable clock & unreset (include exiting standby mode) */
 
       modifyreg32(MCLKCNTAPB, 0, MCLKCNTAPB_ADC_CLKEN);
       modifyreg32(MRSTCNTAPB, MRSTCNTAPB_ADC_RSTB, 0);

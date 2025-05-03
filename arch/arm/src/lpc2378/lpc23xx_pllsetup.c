@@ -244,7 +244,7 @@ void configure_pll(void)
 
   while ((SCB_PLLSTAT & (1 << 25)) == 0);
 
-  /* Set memory accelerater module */
+  /* Set memory accelerator module */
 
   SCB_MAMCR = 0;
   SCB_MAMTIM = CONFIG_LPC2378_MAMTIM_VALUE;

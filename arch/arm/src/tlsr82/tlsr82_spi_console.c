@@ -318,7 +318,7 @@ void spi_console_init(void)
  *
  * Description:
  *   Provide priority, low-level access to support OS debug
- *   writes. When the SPI is used for syslog ouput, the up_putc() should be
+ *   writes. When the SPI is used for syslog output, the up_putc() should be
  *   implemented by spi.
  *
  ****************************************************************************/

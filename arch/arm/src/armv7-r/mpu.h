@@ -337,7 +337,7 @@ unsigned int mpu_configure_region(uintptr_t base, size_t size,
  *   Configure a region for privileged, strongly ordered memory
  *
  * Input Parameters:
- *   table - MPU Initiaze table.
+ *   table - MPU Initialize table.
  *   count - Initialize the number of entries in the region table.
  *
  * Returned Value:
@@ -690,7 +690,7 @@ static inline void mpu_control(bool enable)
  * Name: mpu_peripheral
  *
  * Description:
- *   Configure a region as privileged periperal address space
+ *   Configure a region as privileged peripheral address space
  *
  ****************************************************************************/
 

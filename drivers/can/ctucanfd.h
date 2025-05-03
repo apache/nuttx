@@ -156,7 +156,7 @@
                                       CTUCANFD_TXSTAT_MASK)
 #define CTUCANFD_TXSTAT_NOTEXIST     (0)   /* TXT buffer doesn't exist */
 #define CTUCANFD_TXSTAT_RDY          (1)   /* "Ready" state */
-#define CTUCANFD_TXSTAT_TRAN         (2)   /* "TX in porgress" state */
+#define CTUCANFD_TXSTAT_TRAN         (2)   /* "TX in progress" state */
 #define CTUCANFD_TXSTAT_ABTP         (3)   /* "Abort in progress" state */
 #define CTUCANFD_TXSTAT_TOK          (4)   /* "TX OK" state */
 #define CTUCANFD_TXSTAT_ERR          (6)   /* "Failed" state */
@@ -210,7 +210,7 @@ begin_packed_struct struct ctucanfd_frame_fmt_s
   uint32_t esi_rsv:1;           /* Error state indicator */
   uint32_t rwcnt:4;             /* Size without FRAME_FORMAT WORD */
   uint32_t erf_pos:4;           /* Error frame position */
-  uint32_t erf_erp:1;           /* Error pasive state */
+  uint32_t erf_erp:1;           /* Error passive state */
   uint32_t erf_type:3;          /* Error frame type */
   uint32_t ivld:1;              /* Valid identifier */
   uint32_t lbtbi:3;             /* Loop-back TXT index */

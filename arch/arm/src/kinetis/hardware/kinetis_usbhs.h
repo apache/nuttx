@@ -760,7 +760,7 @@
 
 #define USBPHY_CTRLN_SFTRST               (1 << 31) /* Bit 31: Soft-reset the USBPHY_PWD, USBPHY_TX, USBPHY_RX, and USBPHY_CTRL */
 #define USBPHY_CTRLN_CLKGATE              (1 << 30) /* Bit 30: Gate UTMI Clocks */
-#define USBPHY_CTRLN_UTMI_SUSPENDM        (1 << 29) /* Bit 29: Indicats powered-down state */
+#define USBPHY_CTRLN_UTMI_SUSPENDM        (1 << 29) /* Bit 29: Indicates powered-down state */
 #define USBPHY_CTRLN_HOST_FORCE_LS_SE0    (1 << 28) /* Bit 28: Forces next FS packet tohave a EOP with low-speed timing */
 #define USBPHY_CTRLN_OTG_ID_VALUE         (1 << 27) /* Bit 27: Indicates the results of USB_ID pin  */
                                                     /* Bit 25-26: Reserved */

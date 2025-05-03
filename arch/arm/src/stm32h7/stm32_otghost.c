@@ -2785,7 +2785,7 @@ static inline void stm32_gint_hcoutisr(struct stm32_usbhost_s *priv,
 
   else if ((pending & OTG_HCINT_STALL) != 0)
     {
-      /* Clear the pending the STALL response receiv (STALL) interrupt */
+      /* Clear the pending STALL response receive (STALL) interrupt */
 
       stm32_putreg(STM32_OTG_HCINT(chidx), OTG_HCINT_STALL);
 

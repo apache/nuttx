@@ -597,7 +597,7 @@ static void litex_clock(struct sdio_dev_s *dev, enum sdio_clock_e rate)
 
   switch (rate)
     {
-      /* Return early - SDPHY doesnt support clock disabling */
+      /* Return early - SDPHY does not support clock disabling */
 
       default:
       case CLOCK_SDIO_DISABLED:

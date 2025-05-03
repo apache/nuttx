@@ -84,7 +84,7 @@ menuconfig REGULATOR_ACT8945A
 		TAKE GREAT CARE - BOARD DAMAGE MAY RESULT FROM INNAPPROPIATE CHANGES
 		-----------------------------------------------------------------------
 
-		The ACT8945A regulator driver implements the lower regulator ops thats
+		The ACT8945A regulator driver implements the lower regulator ops that
 		use I2C to control the regulator functions.
 
 if REGULATOR_ACT8945A

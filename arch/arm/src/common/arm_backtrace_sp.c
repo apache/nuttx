@@ -35,7 +35,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Macro and definitions for simple decoding of instuctions.
+/* Macro and definitions for simple decoding of instructions.
  * To check an instruction, it is ANDed with the IMASK_ and
  * the result is compared with the IOP_. The macro INSTR_IS
  * does this and returns !0 to indicate a match.

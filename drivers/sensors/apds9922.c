@@ -120,7 +120,7 @@
 #define APDS9922_PS_DATA0       (0x08) /* LSB of measured PS data          */
 #define APDS9922_ALS_DATA0      (0x0d) /* LSB of measured ALS data         */
 #define APDS9922_INT_CFG        (0x19) /* Interrupt configuration          */
-#define APDS9922_INT_PERSIST    (0x1a) /* Interrupt persistance            */
+#define APDS9922_INT_PERSIST    (0x1a) /* Interrupt persistence            */
 #define APDS9922_PS_THRESHU     (0x1b) /* PS threshold, upper limit        */
 #define APDS9922_PS_THRESHL     (0x1d) /* PS threshold, lower limit        */
 #define APDS9922_CANCEL_LVLL    (0x1f) /* Intelligent Cancellation level   */
@@ -1000,7 +1000,7 @@ static int apds9922_als_variance(FAR struct apds9922_dev_s *priv,
  *
  * Input Parameters:
  *  priv        - pointer to device structure
- *  persistance - number of values to be out of range before int asserted
+ *  persistence - number of values to be out of range before int asserted
  *
  * Returned Value:
  *   Success or failure

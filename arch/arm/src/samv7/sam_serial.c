@@ -2400,7 +2400,7 @@ static void sam_dma_txcallback(DMA_HANDLE handle, void *arg, int status)
 
   if (status != OK)
     {
-      /* This means some error occured during DMA transfer. This is most
+      /* This means some error occurred during DMA transfer. This is most
        * likely just rare error so schedule work again. Note that this is not
        * ideal and we could end in an infinite loop. Better approach would be
        * to use some error counter and report error to serial driver if
@@ -2476,7 +2476,7 @@ static void sam_dma_txcallback(DMA_HANDLE handle, void *arg, int status)
  *
  *   This function should be called from a timer or other periodic context.
  *
- *   This polling also in not neccessary if CONFIG_SAMV7_SERIAL_DMA_TIMEOUT
+ *   This polling also in not necessary if CONFIG_SAMV7_SERIAL_DMA_TIMEOUT
  *   is defined as sam_dma_rxcallback() is called each time idle bus is
  *   detected. This however only applies to USART peripherals, UART has to
  *   be polled in any case.
@@ -2555,7 +2555,7 @@ void sam_serial_dma_poll(void)
  *
  * Description:
  *   Performs the low level USART initialization early in debug so that the
- *   serial console will be available during bootup.  This must be called
+ *   serial console will be available during boot up.  This must be called
  *   before arm_serialinit.
  *
  ****************************************************************************/

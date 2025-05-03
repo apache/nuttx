@@ -49,7 +49,7 @@
  * Returned Value:
  *   Return the character read is returned,
  *   Return WEOF is the sequence of bytes that read cannot be interpreted as
- *   a valid wide characted, and sets the errno to EILSEQ
+ *   a valid wide character, and sets the errno to EILSEQ
  *
  ****************************************************************************/
 

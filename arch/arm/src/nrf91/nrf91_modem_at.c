@@ -296,7 +296,7 @@ static void nrf91_modem_at_send(struct uart_dev_s *dev, int ch)
   priv->txbuf[priv->tx_i] = (char)ch;
   priv->tx_i += 1;
 
-  /* Special formating Nordic AT interface (escape charactes) */
+  /* Special formatting Nordic AT interface (escape characters) */
 
   if (ch == '%')
     {

@@ -55,7 +55,7 @@
  *           pkt/ipv[4|6]_input()/...
  *                     |
  *                     |
- *     NICs io vector receive(Orignal flat buffer)
+ *     NICs io vector receive(Original flat buffer)
  *
  * Input Parameters:
  *   NULL

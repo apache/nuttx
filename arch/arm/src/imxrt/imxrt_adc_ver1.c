@@ -225,7 +225,7 @@ static void adc_modifyreg(struct imxrt_dev_s *priv, uint32_t offset,
  * Name: adc_reset_etc
  *
  * Description:
- *   Setup registers and channels/triggers for external trigering of ADC
+ *   Setup registers and channels/triggers for external triggering of ADC
  *   conversion. This functions also takes care of connecting XBARs.
  *
  ****************************************************************************/
@@ -525,7 +525,7 @@ static int adc_setup(struct adc_dev_s *dev)
 
   if (priv->trig_src != -1)
     {
-      /* Atach and enable ADCETC interrupt */
+      /* Attach and enable ADCETC interrupt */
 
       ret = irq_attach(priv->irq_etc, adc_interrupt, dev);
       if (ret < 0)

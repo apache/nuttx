@@ -87,7 +87,7 @@ uint32_t *minerva_decodeirq(uint32_t intstat, uint32_t * regs)
 
   /* Return the final task register save area.  This will typically be the
    * same as the value of regs on input.  In the event of a context switch,
-   * however, it will differ.  It will refere to the register save are in
+   * however, it will differ.  It will refer to the register save are in
    * the TCB of the new thread.
    */
 

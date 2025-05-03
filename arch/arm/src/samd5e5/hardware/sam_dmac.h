@@ -167,7 +167,7 @@
 #  define DMAC_PRICTRL0_QOS00_MEDIUM     (2 << DMAC_PRICTRL0_QOS00_SHIFT) /* Sensitive to latency */
 #  define DMAC_PRICTRL0_QOS00_CRITICAL   (3 << DMAC_PRICTRL0_QOS00_SHIFT) /* Latency critical */
 
-#define DMAC_PRICTRL0_RRLVLEN0           (1 << 7)  /* Bit 7:  Level 0 round-robin arbitrarion enable */
+#define DMAC_PRICTRL0_RRLVLEN0           (1 << 7)  /* Bit 7:  Level 0 round-robin arbitration enable */
 #define DMAC_PRICTRL0_LVLPRI1_SHIFT      (8)       /* Bits 8-12: Level 1 channel priority number */
 #define DMAC_PRICTRL0_LVLPRI1_MASK       (31 << DMAC_PRICTRL0_LVLPRI1_SHIFT)
 #  define DMAC_PRICTRL0_LVLPRI1(n)       ((uint32_t)(n) << DMAC_PRICTRL0_LVLPRI1_SHIFT)
@@ -178,7 +178,7 @@
 #  define DMAC_PRICTRL0_QOS01_MEDIUM     (2 << DMAC_PRICTRL0_QOS01_SHIFT) /* Sensitive to latency */
 #  define DMAC_PRICTRL0_QOS01_CRITICAL   (3 << DMAC_PRICTRL0_QOS01_SHIFT) /* Latency critical */
 
-#define DMAC_PRICTRL0_RRLVLEN1           (1 << 15) /* Bit 15:  Level 1 round-robin arbitrarion enable */
+#define DMAC_PRICTRL0_RRLVLEN1           (1 << 15) /* Bit 15:  Level 1 round-robin arbitration enable */
 #define DMAC_PRICTRL0_LVLPRI2_SHIFT      (16)      /* Bits 16-20: Level 2 channel priority number */
 #define DMAC_PRICTRL0_LVLPRI2_MASK       (31 << DMAC_PRICTRL0_LVLPRI2_SHIFT)
 #  define DMAC_PRICTRL0_LVLPRI2(n)       ((uint32_t)(n) << DMAC_PRICTRL0_LVLPRI2_SHIFT)
@@ -189,7 +189,7 @@
 #  define DMAC_PRICTRL0_QOS02_MEDIUM     (2 << DMAC_PRICTRL0_QOS02_SHIFT) /* Sensitive to latency */
 #  define DMAC_PRICTRL0_QOS02_CRITICAL   (3 << DMAC_PRICTRL0_QOS02_SHIFT) /* Latency critical */
 
-#define DMAC_PRICTRL0_RRLVLEN2           (1 << 23) /* Bit 23:  Level 2 round-robin arbitrarion enable */
+#define DMAC_PRICTRL0_RRLVLEN2           (1 << 23) /* Bit 23:  Level 2 round-robin arbitration enable */
 #define DMAC_PRICTRL0_LVLPRI3_SHIFT      (24)      /* Bits 24-28: Level 2 channel priority number */
 #define DMAC_PRICTRL0_LVLPRI3_MASK       (31 << DMAC_PRICTRL0_LVLPRI3_SHIFT)
 #  define DMAC_PRICTRL0_LVLPRI3(n)       ((uint32_t)(n) << DMAC_PRICTRL0_LVLPRI3_SHIFT)
@@ -200,7 +200,7 @@
 #  define DMAC_PRICTRL0_QOS03_MEDIUM     (2 << DMAC_PRICTRL0_QOS03_SHIFT) /* Sensitive to latency */
 #  define DMAC_PRICTRL0_QOS03_CRITICAL   (3 << DMAC_PRICTRL0_QOS03_SHIFT) /* Latency critical */
 
-#define DMAC_PRICTRL0_RRLVLEN3           (1 << 23) /* Bit 21:  Level 3 round-robin arbitrarion enable */
+#define DMAC_PRICTRL0_RRLVLEN3           (1 << 23) /* Bit 21:  Level 3 round-robin arbitration enable */
 
 /* Interrupt Pending Register */
 

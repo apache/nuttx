@@ -124,7 +124,7 @@ void x86_64_cpu_tss_init(int cpu)
 
   tss = x86_64_cpu_tss_get(cpu);
 
-  /* Setup IST pointer */
+  /* Setup Interrupt Stack Table pointer */
 
   ist64 = &tss->ist;
 
@@ -133,7 +133,7 @@ void x86_64_cpu_tss_init(int cpu)
   memset(&tss_l, 0, sizeof(tss_l));
   memset(&tss_h, 0, sizeof(tss_h));
 
-  /* Segment limit = IST size - 1 */
+  /* Segment limit = Interrupt Stack Table size - 1 */
 
   tss_l.limit_low = ((X86_IST_SIZE - 1) & 0xffff);
 
@@ -146,7 +146,7 @@ void x86_64_cpu_tss_init(int cpu)
   tss_l.base_high = (((uintptr_t)ist64 & 0xff000000) >> 24);
   tss_l.P = 1;
 
-  /* Set type as IST */
+  /* Set type as Interrupt Stack Table */
 
   tss_l.AC = 1;
   tss_l.EX = 1;
@@ -260,7 +260,7 @@ void x86_64_cpu_init(void)
       else
         {
           /* We want to fail early when NCPUS doesn't match the number
-           * of availalbe CPUs
+           * of available CPUs
            */
 
           /* Panic if not found */

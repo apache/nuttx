@@ -617,7 +617,7 @@ static int at86rf23x_set_trxstate(FAR struct at86rf23x_dev_s *dev,
       break;
 
     default:
-      wlerr("ERRPR: %s\n", EINVAL_STR);
+      wlerr("ERROR: %s\n", EINVAL_STR);
       init_status = 0;  /* Placed this here to keep compiler if no debug */
       return -EINVAL;
     }

@@ -37,7 +37,7 @@ typedef enum
 {
   LDO_MODE      = 0x40, /* LDO mode */
   DCDC_LDO_MODE = 0x41, /* DCDC_LDO mode */
-  DCDC_MODE     = 0x43, /* DCDC mode (16pin chip not suported) */
+  DCDC_MODE     = 0x43, /* DCDC mode (16pin chip not supported) */
 } power_mode_t;
 
 typedef enum

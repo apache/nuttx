@@ -629,7 +629,7 @@ void stm32_dmastart(DMA_HANDLE handle, dma_callback_t callback,
 
   DEBUGASSERT(handle != NULL);
 
-  /* Save the callback info.  This will be invoked whent the DMA completes */
+  /* Save the callback info.  This will be invoked when the DMA completes. */
 
   dmach->callback = callback;
   dmach->arg      = arg;

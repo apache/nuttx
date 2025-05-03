@@ -113,7 +113,7 @@ void up_dump_register(void *dumpregs)
                     ::"m"(cr2):"memory", "rax");
 
   _alert("----------------CUT HERE-----------------\n");
-  _alert("Gerneral Informations:\n");
+  _alert("General Information:\n");
   _alert("CPL: %" PRId64 ", RPL: %" PRId64 "\n",
          regs[REG_CS] & 0x3, regs[REG_DS] & 0x3);
   _alert("RIP: %016" PRIx64 ", RSP: %016" PRIx64 "\n",

@@ -268,7 +268,7 @@ extern void weak_function k28_usbdev_initialize(void);
  * Name: k28_usbhost_initialize
  *
  * Description:
- *   Inititialize USB High Speed Host
+ *   Initialize USB High Speed Host
  *
  ****************************************************************************/
 
@@ -282,7 +282,7 @@ int k28_usbhost_initialize(void);
  * Name: k28_sdhc_initialize
  *
  * Description:
- *   Inititialize the SDHC SD card slot
+ *   Initialize the SDHC SD card slot
  *
  ****************************************************************************/
 

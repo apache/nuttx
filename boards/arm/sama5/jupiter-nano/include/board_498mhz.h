@@ -57,7 +57,7 @@
 
 /* PLLA configuration.
  *
- *   Multipler = 43+1: PLLACK = 44 * 12MHz = 498MHz
+ *   Multiplier = 43+1: PLLACK = 44 * 12MHz = 498MHz
  */
 
 #define BOARD_CKGR_PLLAR_COUNT     (63 << PMC_CKGR_PLLAR_COUNT_SHIFT)

@@ -2111,7 +2111,7 @@ static ssize_t esp32_write(struct mtd_dev_s *dev, off_t offset,
  *   buffer - data buffer pointer
  *
  * Returned Value:
- *   Writen bytes if success or a negative value if fail.
+ *   Written bytes if success or a negative value if fail.
  *
  ****************************************************************************/
 
@@ -2451,7 +2451,7 @@ static int esp32_ioctl_encrypt(struct mtd_dev_s *dev, int cmd,
  *   Disable the non-IRAM interrupts on the other core (the one that isn't
  *   handling the SPI flash operation) and notify that the SPI flash
  *   operation can start. Wait on a busy loop until it's finished and then
- *   reenable the non-IRAM interrups.
+ *   re-enable the non-IRAM interrupts.
  *
  * Input Parameters:
  *   argc          - Not used.

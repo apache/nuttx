@@ -219,7 +219,7 @@ void cxd32_uart_reset(int ch)
 
 void cxd32_uart_setup(int ch)
 {
-  /* XXX: enabling uart contrller */
+  /* XXX: enabling uart controller */
 }
 
 /****************************************************************************

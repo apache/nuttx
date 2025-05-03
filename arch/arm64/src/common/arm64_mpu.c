@@ -180,7 +180,7 @@ void mpu_freeregion(unsigned int region)
 {
   unsigned int num_regions = get_num_regions();
 
-  /* Check region vaild */
+  /* Check region valid */
 
   DEBUGASSERT(region < num_regions);
 

@@ -257,7 +257,7 @@ void i3c_device_free_ibi(FAR const struct i3c_device *dev)
  *   cmd  - The buf of ccc commands to transfer, only one frame at a time
  *
  * Returned Value:
- *   0 or positive if Success, nagative otherwise.
+ *   0 or positive if Success, negative otherwise.
  ****************************************************************************/
 
 int i3c_device_send_ccc_cmd(FAR const struct i3c_device *dev,

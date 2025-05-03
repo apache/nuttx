@@ -220,7 +220,7 @@ config ARCH_HAVE_EL3
 	---help---
 		Some ARM aarch64 Cortex-family processors only supports
 		EL0~El2(eg. Cortex-R82). For these Processors, the code
-		runing at EL3 is not necessary and system register for EL3
+		running at EL3 is not necessary and system register for EL3
 		is not accessible
 
 config ARCH_HAVE_CLUSTER_PMU
@@ -267,7 +267,7 @@ config ARCH_EARLY_PRINT
 		The aarch64 have EL0~El3 execute level and NS/S (security state),
 		the NuttX should be execute at EL1 in NS(ARmv8-A) or S(ARmv8-R)
 		state. but booting NuttX have different ELs and state while with
-		different platform, if NuttX runing at wrong ELs or state it will
+		different platform, if NuttX running at wrong ELs or state it will
 		not normal anymore. So we need to print something in arm64_head.S
 		to debug this situation.
 		Enabling this option will need to implement arm64_earlyprintinit and
@@ -466,7 +466,7 @@ config ARM64_SEMIHOSTING_HOSTFS_CACHE_COHERENCE
 	bool "Cache coherence in semihosting hostfs"
 	depends on ARCH_DCACHE
 	---help---
-		Flush & Invalidte cache before & after bkpt instruction.
+		Flush & Invalidate cache before & after bkpt instruction.
 
 endif # ARM64_SEMIHOSTING_HOSTFS
 

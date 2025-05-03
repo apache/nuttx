@@ -1164,7 +1164,7 @@ static void sam_lin_errinterrupt_work(void *arg)
 
       if ((priv->sr & UART_INT_LINBE) != 0)
         {
-          /* Buss error */
+          /* Bus error */
 
           errbits |= CAN_ERR_BUSERROR;
         }

@@ -39,15 +39,15 @@
 
 #define STM32_DAC1_CR_OFFSET        0x0000  /* control register */
 #define STM32_DAC1_SWTRGR_OFFSET    0x0004  /* software trigger register */
-#define STM32_DAC1_DHR12R1_OFFSET   0x0008  /* ch1 12-bit right alinged data hold register */
-#define STM32_DAC1_DHR12L1_OFFSET   0x000C  /* ch1 12-bit left alinged data hold register */
-#define STM32_DAC1_DHR8R1_OFFSET    0x0010  /* ch1 8-bit right alinged data hold register */
-#define STM32_DAC1_DHR12R2_OFFSET   0x0014  /* ch2 12-bit right alinged data hold register */
-#define STM32_DAC1_DHR12L2_OFFSET   0x0018  /* ch2 12-bit left alinged data hold register */
-#define STM32_DAC1_DHR8R2_OFFSET    0x001C  /* ch2 8-bit right alinged data hold register */
-#define STM32_DAC1_DHR12RD_OFFSET   0x0020  /* dual 12-bit right alinged data hold register */
-#define STM32_DAC1_DHR12LD_OFFSET   0x0024  /* dual 2 12-bit left alinged data hold register */
-#define STM32_DAC1_DHR8RD_OFFSET    0x0028  /* dual 2 8-bit right alinged data hold register */
+#define STM32_DAC1_DHR12R1_OFFSET   0x0008  /* ch1 12-bit right aligned data hold register */
+#define STM32_DAC1_DHR12L1_OFFSET   0x000C  /* ch1 12-bit left aligned data hold register */
+#define STM32_DAC1_DHR8R1_OFFSET    0x0010  /* ch1 8-bit right aligned data hold register */
+#define STM32_DAC1_DHR12R2_OFFSET   0x0014  /* ch2 12-bit right aligned data hold register */
+#define STM32_DAC1_DHR12L2_OFFSET   0x0018  /* ch2 12-bit left aligned data hold register */
+#define STM32_DAC1_DHR8R2_OFFSET    0x001C  /* ch2 8-bit right aligned data hold register */
+#define STM32_DAC1_DHR12RD_OFFSET   0x0020  /* dual 12-bit right aligned data hold register */
+#define STM32_DAC1_DHR12LD_OFFSET   0x0024  /* dual 2 12-bit left aligned data hold register */
+#define STM32_DAC1_DHR8RD_OFFSET    0x0028  /* dual 2 8-bit right aligned data hold register */
 #define STM32_DAC1_DOR1_OFFSET      0x002C  /* ch1 data output register */
 #define STM32_DAC1_DOR2_OFFSET      0x0030  /* ch2 data output register */
 #define STM32_DAC1_SR_OFFSET        0x0034  /* status register */
@@ -87,7 +87,7 @@
 
 #define DAC_CR_EN1                  (1 << 0)  /* Bit 0: ch1 enable */
 #define DAC_CR_TEN1                 (1 << 1)  /* Bit 1: ch1 trigger enable */
-#define DAC_CR_TSEL1_SHIFT          (1 << 2)  /* Bits 5-2: ch1 triger sel */
+#define DAC_CR_TSEL1_SHIFT          (1 << 2)  /* Bits 5-2: ch1 trigger sel */
 #define DAC_CR_TSEL1_MASK           (15 << DAC_CR_TSEL1_SHIFT)
 #define DAC_CR_WAVE1_SHIFT          (1 << 6)  /* Bits 7-6: ch1 wave enable */
 #define DAC_CR_WAVE1_MASK           (3 << DAC_CR_WAVE1_SHIFT)
@@ -98,7 +98,7 @@
 #define DAC_CR_CEN1                 (1 << 14)  /* Bit 14: ch1 calibration enable */
 #define DAC_CR_EN2                  (1 << 16)  /* Bit 16: ch2 enable */
 #define DAC_CR_TEN2                 (1 << 17)  /* Bit 17: ch2 trigger enable */
-#define DAC_CR_TSEL2_SHIFT          (1 << 18)  /* Bits 28-21: ch2 triger sel */
+#define DAC_CR_TSEL2_SHIFT          (1 << 18)  /* Bits 28-21: ch2 trigger sel */
 #define DAC_CR_TSEL2_MASK           (15 << DAC_CR_TSEL2_SHIFT)
 #define DAC_CR_WAVE2_SHIFT          (1 << 22)  /* Bits 23-22: ch2 wave enable */
 #define DAC_CR_WAVE2_MASK           (3 << DAC_CR_WAVE2_SHIFT)

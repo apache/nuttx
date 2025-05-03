@@ -719,7 +719,7 @@ static ssize_t cdcmbim_write(FAR struct file *filep, FAR const char *buffer,
   if (ret < 0)
     {
       iob_free_chain(iob);
-      uerr("CDCMBIM copyin failed: %d\n", ret);
+      uerr("CDCMBIM copying failed: %d\n", ret);
       goto errout;
     }
 
@@ -1786,7 +1786,7 @@ static int cdcncm_setinterface(FAR struct cdcncm_driver_s *self,
     }
   else
     {
-      uerr("invailid interface %d\n", interface);
+      uerr("invalid interface %d\n", interface);
       return -EINVAL;
     }
 
@@ -2791,7 +2791,7 @@ static int cdcncm_setup(FAR struct usbdevclass_driver_s *driver,
               if (ret < 0)
                 {
                   iob_free_chain(iob);
-                  uerr("CDCMBIM copyin failed: %d\n", ret);
+                  uerr("CDCMBIM copying failed: %d\n", ret);
                   return ret;
                 }
 

@@ -52,7 +52,7 @@
  *   filep - pointer to a file structure to close.
  *
  * Returned Value:
- *   OK on successfull close, or negated errno on failure.
+ *   OK on successful close, or negated errno on failure.
  *
  * Assumptions/Limitations:
  *

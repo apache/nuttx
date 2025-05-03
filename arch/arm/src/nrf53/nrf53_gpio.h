@@ -277,7 +277,7 @@ int nrf53_gpio_dump(nrf53_pinset_t pinset, const char *msg);
  *
  * Description:
  *  Allow GPIO to be used by the net core.
- *  Can be used only with te app core.
+ *  Can be used only with the app core.
  *
  ****************************************************************************/
 

@@ -44,7 +44,7 @@
 
 #define SRFLAG_AVAILABLE 0        /* Available if no flag bits set */
 #define SRFLAG_INUSE     (1 << 0) /* Bit 0: Region is in use */
-#define SRFLAG_UNLINKED  (1 << 1) /* Bit 1: Region perists while references */
+#define SRFLAG_UNLINKED  (1 << 1) /* Bit 1: Region persists while references */
 
 #ifndef CONFIG_ARCH_ADDRENV
 #  error CONFIG_ARCH_ADDRENV must be selected with CONFIG_MM_SHM

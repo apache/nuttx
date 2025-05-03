@@ -83,7 +83,7 @@
  *     i mxrt_dmach_stop(handle);
  *
  * 7. The callback will be received when the DMA completes (or an error
- *    occurs). After that, you may free  the DMA channel, or re-use it on
+ *    occurs).  After that, you may free the DMA channel, or reuse it on
  *    subsequent DMAs.
  *
  *      imx9_dmach_free(handle);

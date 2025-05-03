@@ -43,7 +43,7 @@
  * addressing instructions within a 1GB region. To convert the return address
  * to a valid PC, we need to add the base address of the instruction region.
  * The following macro is used to define the base address of the 1GB region,
- * which may not start in 0x00000000. This macro can be overriden in
+ * which may not start in 0x00000000. This macro can be overridden in
  * `chip_memory.h` of the chip directory.
  */
 

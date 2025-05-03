@@ -215,7 +215,7 @@ static int board_adc_register(int adc_num)
  * Name: board_adc_init
  *
  * Description:
- *   Initialize and configuree the ADC driver for the board.
+ *   Initialize and configure the ADC driver for the board.
  *   It registers the ADC channels specified in the configuration and ensures
  *   that the ADC hardware is properly set up for use.
  *

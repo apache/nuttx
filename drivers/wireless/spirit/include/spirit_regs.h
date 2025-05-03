@@ -290,7 +290,7 @@
  *   Read Write
  *   Default value: 0x00
  *   7   Reserved.
- *   6:5 CLOCK_TAIL[1:0]: Specifies the number of extra cylces provided
+ *   6:5 CLOCK_TAIL[1:0]: Specifies the number of extra cycles provided
  *                        before entering in STANDBY state.
  *
  *       CLOCK_TAIL1   |   CLOCK_TAIL0    |  Number of Extra Cycles
@@ -1589,7 +1589,7 @@
 
 #define PROTOCOL0_PERS_TX_MASK          ((uint8_t)0x01)  /* Enables persistent transmission */
 #define PROTOCOL0_PERS_RX_MASK          ((uint8_t)0x02)  /* Enables persistent reception */
-#define PROTOCOL0_AUTO_ACK_MASK         ((uint8_t)0x04)  /* Enables auto acknowlegment */
+#define PROTOCOL0_AUTO_ACK_MASK         ((uint8_t)0x04)  /* Enables auto acknowledgment */
 #define PROTOCOL0_NACK_TX_MASK          ((uint8_t)0x08)  /* Writes field NO_ACK=1 on
                                                           * transmitted packet */
 #define PROTOCOL0_NMAX_RETX_MASK        ((uint8_t)0xf0)  /* Retransmission mask */

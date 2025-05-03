@@ -502,7 +502,7 @@ void arm64_lowputc(char ch)
     }
 
   /* If the character to output is a newline,
-   * then pre-pend a carriage return
+   * then prepend a carriage return.
    */
 
   if (ch == '\n')

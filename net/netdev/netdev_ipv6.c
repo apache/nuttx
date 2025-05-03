@@ -387,7 +387,7 @@ netdev_ipv6_srcifaddr(FAR struct net_driver_s *dev, const net_ipv6addr_t dst)
   FAR struct netdev_ifaddr6_s *best = &dev->d_ipv6[0]; /* Don't be NULL */
 #ifdef CONFIG_NETDEV_MULTIPLE_IPv6
   uint8_t scope_dst  = netdev_ipv6_get_scope(dst);
-  uint8_t scope_best = 0; /* All scope is larget than 0 */
+  uint8_t scope_best = 0; /* All scopes are greater than 0 */
   uint8_t pref_best  = 0;
   int i;
 

@@ -43,7 +43,7 @@
 struct nand_wrapper_dev_s
 {
   struct nand_dev_s wrapper; /* Wrapper device */
-  struct nand_dev_s under;   /* Underlying actuall upper half device */
+  struct nand_dev_s under;   /* Underlying the upper half device */
 };
 
 /****************************************************************************

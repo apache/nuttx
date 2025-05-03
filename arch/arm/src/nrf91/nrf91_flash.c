@@ -220,8 +220,8 @@ ssize_t up_progmem_eraseblock(size_t block)
 
   UP_MB();
 
-  /* Erase the page by writting 0xffffffff into the first 32-bit word of
-   * the flash page
+  /* Erase the page by writing 0xffffffff into the first 32-bit word of
+   * the flash page.
    */
 
   putreg32(0xffffffff, page_address);

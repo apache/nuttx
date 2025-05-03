@@ -1087,7 +1087,7 @@
 #define PCNT_FILTER_EN_U4_S  10
 
 /* PCNT_FILTER_THRES_U4 : R/W ;bitpos:[9:0] ;default: 10'h10 ;
- * Description: This register is used to filter pluse whose width is smaller
+ * Description: This register is used to filter pulses whose width is smaller
  * than this value for unit4.
  */
 
@@ -1119,7 +1119,7 @@
 #define PCNT_U4_CONF2_REG          (DR_REG_PCNT_BASE + 0x0038)
 
 /* PCNT_CNT_L_LIM_U4 : R/W ;bitpos:[31:16] ;default: 10'h0 ;
- * Description: This register is used to confiugre thr_l_lim value for unit4.
+ * Description: This register is used to configure thr_l_lim value for unit4.
  */
 
 #define PCNT_CNT_L_LIM_U4  0x0000FFFF
@@ -1304,7 +1304,7 @@
 #define PCNT_FILTER_EN_U5_S  10
 
 /* PCNT_FILTER_THRES_U5 : R/W ;bitpos:[9:0] ;default: 10'h10 ;
- * Description: This register is used to filter pluse whose width is smaller
+ * Description: This register is used to filter pulses whose width is smaller
  * than this value for unit5.
  */
 
@@ -1336,7 +1336,7 @@
 #define PCNT_U5_CONF2_REG          (DR_REG_PCNT_BASE + 0x0044)
 
 /* PCNT_CNT_L_LIM_U5 : R/W ;bitpos:[31:16] ;default: 10'h0 ;
- * Description: This register is used to confiugre thr_l_lim value for unit5.
+ * Description: This register is used to configure thr_l_lim value for unit5.
  */
 
 #define PCNT_CNT_L_LIM_U5  0x0000FFFF
@@ -1519,7 +1519,7 @@
 #define PCNT_FILTER_EN_U6_S  10
 
 /* PCNT_FILTER_THRES_U6 : R/W ;bitpos:[9:0] ;default: 10'h10 ;
- * Description: This register is used to filter pluse whose width is
+ * Description: This register is used to filter pulses whose width is
  * smaller than this value for unit6.
  */
 
@@ -1551,7 +1551,7 @@
 #define PCNT_U6_CONF2_REG          (DR_REG_PCNT_BASE + 0x0050)
 
 /* PCNT_CNT_L_LIM_U6 : R/W ;bitpos:[31:16] ;default: 10'h0 ;
- * Description: This register is used to confiugre thr_l_lim value for unit6.
+ * Description: This register is used to configure thr_l_lim value for unit6.
  */
 
 #define PCNT_CNT_L_LIM_U6  0x0000FFFF
@@ -1737,7 +1737,7 @@
 #define PCNT_FILTER_EN_U7_S  10
 
 /* PCNT_FILTER_THRES_U7 : R/W ;bitpos:[9:0] ;default: 10'h10 ;
- * Description: This register is used to filter pluse whose width is smaller
+ * Description: This register is used to filter pulses whose width is smaller
  * than this value for unit7.
  */
 
@@ -1769,7 +1769,7 @@
 #define PCNT_U7_CONF2_REG          (DR_REG_PCNT_BASE + 0x005c)
 
 /* PCNT_CNT_L_LIM_U7 : R/W ;bitpos:[31:16] ;default: 10'h0 ;
- * Description: This register is used to confiugre thr_l_lim value for unit7.
+ * Description: This register is used to configure thr_l_lim value for unit7.
  */
 
 #define PCNT_CNT_L_LIM_U7  0x0000FFFF

@@ -2394,7 +2394,7 @@ static int fdcan_send(struct can_dev_s *dev, struct can_msg_s *msg)
    * Format word T1:
    *   Data Length Code (DLC)            - Value from message structure
    *   Bit Rate Switch (BRS)             - Bit rate switching for CAN FD
-   *   FD format (FDF)                   - Frame transmited in CAN FD format
+   *   FD format (FDF)                   - Frame transmitted in CAN FD format
    *   Event FIFO Control (EFC)          - Do not store events.
    *   Message Marker (MM)               - Always zero
    */
@@ -2965,10 +2965,10 @@ static int fdcan_interrupt(int irq, void *context, void *arg)
           canerr("ERROR: Common %08" PRIx32 "\n",
                  pending & FDCAN_CMNERR_INTS);
 
-          /* When a protocol error ocurrs, the problem is recorded in
+          /* When a protocol error occurs, the problem is recorded in
            * the LEC/DLEC fields of the PSR register. In lieu of
-           * seprate interrupt flags for each error, the hardware
-           * groups procotol errors under a single interrupt each for
+           * separate interrupt flags for each error, the hardware
+           * groups protocol errors under a single interrupt each for
            * arbitration and data phases.
            *
            * These errors have a tendency to flood the system with
@@ -2983,7 +2983,7 @@ static int fdcan_interrupt(int irq, void *context, void *arg)
               canerr("ERROR: PSR %08" PRIx32 "\n", psr);
               ie &= ~(FDCAN_INT_PEA | FDCAN_INT_PED);
               fdcan_putreg(priv, STM32_FDCAN_IE_OFFSET, ie);
-              caninfo("disabled protocol error intterupts\n");
+              caninfo("disabled protocol error interrupts\n");
             }
 
           /* Clear the error indications */
@@ -3058,7 +3058,7 @@ static int fdcan_interrupt(int irq, void *context, void *arg)
         {
           ie |= (FDCAN_INT_PEA | FDCAN_INT_PED);
           fdcan_putreg(priv, STM32_FDCAN_IE_OFFSET, ie);
-          caninfo("Renabled protocol error intterupts\n");
+          caninfo("Re-enabled protocol error interrupts\n");
         }
 
       /* Clear the pending TX completion interrupt (and all
@@ -3227,7 +3227,7 @@ static int fdcan_hw_initialize(struct stm32_fdcan_s *priv)
   stm32_configgpio(config->rxpinset);
   stm32_configgpio(config->txpinset);
 
-  /* Renable device if previosuly disabled in fdcan_shutdown() */
+  /* Re-enable device if previously disabled in fdcan_shutdown() */
 
   if (priv->state == FDCAN_STATE_DISABLED)
     {

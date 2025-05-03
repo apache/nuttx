@@ -204,7 +204,7 @@
 /* ***************  Bit definition for FDCAN_ENDN register  *****************/
 #define FDCAN_ENDN_ETV_SHIFT      (0U)
 #define FDCAN_ENDN_ETV_MASK       (0xFFFFFFFFU << FDCAN_ENDN_ETV_SHIFT)         /* 0xFFFFFFFF */
-#define FDCAN_ENDN_ETV            FDCAN_ENDN_ETV_MASK                           /* Endiannes Test Value                    */
+#define FDCAN_ENDN_ETV            FDCAN_ENDN_ETV_MASK                           /* Endianness Test Value                    */
 
 /* ***************  Bit definition for FDCAN_DBTP register  *****************/
 #define FDCAN_DBTP_DSJW_SHIFT     (0U)

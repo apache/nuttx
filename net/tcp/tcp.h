@@ -90,7 +90,7 @@
 #  endif
 #endif
 
-/* 32-bit modular arithmetics for tcp sequence numbers */
+/* 32-bit modular arithmetic for tcp sequence numbers */
 
 #define TCP_SEQ_LT(a, b)    ((int32_t)((a) - (b)) < 0)
 #define TCP_SEQ_GT(a, b)    TCP_SEQ_LT(b, a)
@@ -200,7 +200,7 @@ struct tcp_conn_s
    *                 attempted.
    *   TCP_SNDACK  - If TCP_NEWDATA is cleared, then TCP_SNDACK may be set to
    *                 indicate that an ACK should be included in the response.
-   *                 (In TCP_NEWDATA is cleared bu TCP_SNDACK is not set,
+   *                 (In TCP_NEWDATA is cleared but TCP_SNDACK is not set,
    *                 then dev->d_len should also be cleared).
    */
 
@@ -243,7 +243,7 @@ struct tcp_conn_s
   uint16_t user_mss;      /* Configured maximum segment size for the
                            * connection */
 #endif
-  uint32_t rcv_adv;       /* The right edge of the recv window advertized */
+  uint32_t rcv_adv;       /* The right edge of the recv window advertised */
 #ifdef CONFIG_NET_TCP_CC_NEWRENO
   uint32_t last_ackno;    /* The ack number at the last receive ack */
   uint32_t dupacks;       /* The number of duplicate ack */
@@ -282,7 +282,7 @@ struct tcp_conn_s
   sclock_t ltimeout;      /* Linger timeout expiration */
 #endif
 #ifdef CONFIG_NETDEV_RSS
-  int      rcvcpu;        /* Currect cpu id */
+  int      rcvcpu;        /* Current cpu id */
 #endif
   /* If the TCP socket is bound to a local address, then this is
    * a reference to the device that routes traffic on the corresponding
@@ -1196,7 +1196,7 @@ void tcp_reset(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn);
  * Name: tcp_rx_mss
  *
  * Description:
- *   Return the MSS to advertize to the peer.
+ *   Return the MSS to advertise to the peer.
  *
  * Input Parameters:
  *   dev  - The device driver structure
@@ -1730,7 +1730,7 @@ uint32_t tcp_get_recvwindow(FAR struct net_driver_s *dev,
  * Name: tcp_should_send_recvwindow
  *
  * Description:
- *   Determine if we should advertize the new recv window to the peer.
+ *   Determine if we should advertise the new recv window to the peer.
  *
  * Input Parameters:
  *   conn - The TCP connection structure holding connection information.
@@ -2272,7 +2272,7 @@ void tcp_cc_init(FAR struct tcp_conn_s *conn);
  * Name: tcp_cc_update
  *
  * Description:
- *   Update the congestion control variables when recieve the SYNACK/ACK
+ *   Update the congestion control variables when receive the SYNACK/ACK
  *   packet from the peer in the connection phase.
  *
  * Input Parameters:

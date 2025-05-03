@@ -163,7 +163,7 @@
 #define OC_CON_OC32                (1 << 5)  /* Bit 5:  32-bit compare more */
 #define OC_CON_SIDL                (1 << 13) /* Bit 13: Stop in idle mode */
 #define OC_CON_FRZ                 (1 << 14) /* Bit 14: Freeze in debug exception mode */
-#define OC_CON_ON                  (1 << 15) /* Bit 15: Output compare periperal on */
+#define OC_CON_ON                  (1 << 15) /* Bit 15: Output compare peripheral on */
 
 /* Output compare data register -- 32-bit data register */
 

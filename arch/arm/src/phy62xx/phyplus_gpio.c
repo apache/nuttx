@@ -272,7 +272,7 @@ static int phyplus_gpint_attach(struct gpio_dev_s *dev,
                                 pin_interrupt_t callback)
 {
 #if 0
-  /* do the regist callback things... */
+  /* do the register callback things... */
 
   struct stm32gpint_dev_s *stm32gpint =
                              (struct stm32gpint_dev_s *)dev;

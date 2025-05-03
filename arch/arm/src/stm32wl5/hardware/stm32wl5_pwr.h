@@ -147,7 +147,7 @@
 #define PWR_CR4_WP3              (1 <<  2) /* Bit  2: Wakeup pin WKUP3 polarity */
 #define PWR_CR4_VBE              (1 <<  8) /* Bit  8: Vbat battery charging enable */
 #define PWR_CR4_VBRS             (1 <<  9) /* Bit  9: Vbat battery charging resistor selection */
-#define PWR_CR4_WRFBUSYP         (1 << 11) /* Bit 11: Radio event detection on failling edge */
+#define PWR_CR4_WRFBUSYP         (1 << 11) /* Bit 11: Radio event detection on failing edge */
 #define PWR_CR4_C2BOOT           (1 << 15) /* Bit 15: Boot cpu2 after reset if event is available */
 
 #  define PWR_CR4_VBRS_5k        0            /*     0: 5k  resistor */
@@ -163,8 +163,8 @@
 #define PWR_SR1_WUF1             (1 <<  0) /* Bit  0: Wakeup flag 1 */
 #define PWR_SR1_WUF2             (1 <<  1) /* Bit  1: Wakeup flag 2 */
 #define PWR_SR1_WUF3             (1 <<  2) /* Bit  2: Wakeup flag 3 */
-#define PWR_SR1_WPVDF            (1 <<  8) /* Bit  8: Wakup PVD flag */
-#define PWR_SR1_WRFBUSYF         (1 << 11) /* Bit 11: Radio busy wakup flag */
+#define PWR_SR1_WPVDF            (1 <<  8) /* Bit  8: Wakeup PVD flag */
+#define PWR_SR1_WRFBUSYF         (1 << 11) /* Bit 11: Radio busy wakeup flag */
 #define PWR_SR1_C2HF             (1 << 14) /* Bit 14: Cpu2 hold interrupt flag */
 #define PWR_SR1_WUFI             (1 << 15) /* Bit 15: Wakeup internal flag */
 

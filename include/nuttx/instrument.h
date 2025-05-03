@@ -60,7 +60,7 @@ struct instrument_s
  *   entry - instrument entry structure.
  * Notice:
  *  use CONFIG_ARCH_INSTRUMENT_ALL must mark _start or entry
- *  noinstrument_function, becuase bss not set.
+ *  noinstrument_function, because bss not set.
  *  Make sure your callbacks are not instrumented recursively.
  *
  ****************************************************************************/

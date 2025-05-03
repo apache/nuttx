@@ -272,7 +272,7 @@ int cordic_calc(struct cordic_lowerhalf_s *lower,
     }
 
   /* Read results - blocking.
-   * NOTE: We don't need to wait for RRDY flag as wait sates are
+   * NOTE: We don't need to wait for RRDY flag as wait states are
    *       inserted automatically on RDATA read.
    */
 

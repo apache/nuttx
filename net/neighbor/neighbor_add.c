@@ -101,7 +101,7 @@ void neighbor_add(FAR struct net_driver_s *dev, FAR net_ipv6addr_t ipaddr,
         }
     }
 
-  /* When overwite old entry, need to notify RTM_DELNEIGH */
+  /* When overwrite old entry, need to notify RTM_DELNEIGH */
 
   if (!found && g_neighbors[oldest_ndx].ne_time != 0)
     {

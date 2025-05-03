@@ -4827,7 +4827,7 @@ choice
 config STM32H5_FDCAN1_CLASSIC
 	bool "Classic CAN"
 	---help---
-		Enable Clasic CAN mode
+		Enable Classic CAN mode
 
 config STM32H5_FDCAN1_FD
 	bool "CAN FD"
@@ -4954,7 +4954,7 @@ choice
 config STM32H5_FDCAN2_CLASSIC
 	bool "Classic CAN"
 	---help---
-		Enable Clasic CAN mode
+		Enable Classic CAN mode
 
 config STM32H5_FDCAN2_FD
 	bool "CAN FD"

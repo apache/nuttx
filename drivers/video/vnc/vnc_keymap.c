@@ -587,7 +587,7 @@ void vnc_key_map(FAR struct vnc_session_s *session, uint16_t keysym,
       keych = vnc_kbd_lookup(g_modifiers, G_MODIFIERS_NELEM, keysym);
       if (keych >= 0)
         {
-          /* Encode the speical character */
+          /* Encode the special character */
 
           if (keydown)
             {

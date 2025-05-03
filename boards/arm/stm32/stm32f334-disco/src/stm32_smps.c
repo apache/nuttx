@@ -683,7 +683,7 @@ static int smps_state_get(struct smps_dev_s *dev,
 {
   struct smps_s *smps = (struct smps_s *)dev->priv;
 
-  /* Copy localy stored feedbacks data to status structure */
+  /* Copy locally stored feedbacks data to status structure */
 
   smps->state.fb.v_in  = g_smps_priv.v_in;
   smps->state.fb.v_out = g_smps_priv.v_out;

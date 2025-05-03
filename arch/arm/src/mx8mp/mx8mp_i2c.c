@@ -707,7 +707,7 @@ static int mx8mp_i2c_reset(struct i2c_master_s *dev)
 
   mx8mp_i2c_reset_bus(priv);
 
-  /* Release the port for re-use by other clients */
+  /* Release the port for reuse by other clients */
 
   nxmutex_unlock(&priv->lock);
 

@@ -346,7 +346,7 @@
 #define USBDEV_INT_CCEMPTY                  (1 << 4)  /* Bit 4:  Command code register empty */
 #define USBDEV_INT_CDFULL                   (1 << 5)  /* Bit 5:  Command data register full */
 #define USBDEV_INT_RXENDPKT                 (1 << 6)  /* Bit 6:  RX endpoint data transferred */
-#define USBDEV_INT_TXENDPKT                 (1 << 7)  /* Bit 7:  TX endpoint data tansferred */
+#define USBDEV_INT_TXENDPKT                 (1 << 7)  /* Bit 7:  TX endpoint data transferred */
 #define USBDEV_INT_EPRLZED                  (1 << 8)  /* Bit 8:  Endpoints realized */
 #define USBDEV_INT_ERRINT                   (1 << 9)  /* Bit 9:  Error Interrupt */
                                                       /* Bits 10-31: Reserved */

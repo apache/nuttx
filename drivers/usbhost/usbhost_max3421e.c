@@ -1083,7 +1083,7 @@ static void max3421e_sndblock(FAR struct max3421e_usbhost_s *priv,
 
   SPI_SELECT(spi, SPIDEV_USBHOST(lower->devid), true);
 
-  /* Send the wrte command byte */
+  /* Send the write command byte */
 
   cmd = max3421e_fmtcmd(priv, addr, MAX3421E_DIR_WRITE);
   SPI_SEND(spi, cmd);

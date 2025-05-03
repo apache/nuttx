@@ -112,7 +112,7 @@ static dq_queue_t g_active_udp_connections;
  *   ipaddr - The IP address to use in the lookup
  *   portno - The port to use in the lookup
  *   opt    - The option from another conn to match the conflict conn
- *              SO_REUSEADDR: If both sockets have this, they never confilct.
+ *              SO_REUSEADDR: If both sockets have this, they never conflict.
  *
  * Assumptions:
  *   This function must be called with the network locked.

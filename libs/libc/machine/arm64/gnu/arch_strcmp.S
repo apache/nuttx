@@ -152,7 +152,7 @@ L(end):
 L(mutual_align):
 	/* Sources are mutually aligned, but are not currently at an
 	   alignment boundary.  Round down the addresses and then mask off
-	   the bytes that preceed the start point.  */
+	   the bytes that preceded the start point.  */
 	bic	src1, src1, #7
 	bic	src2, src2, #7
 	lsl	tmp1, tmp1, #3		/* Bytes beyond alignment -> bits.  */

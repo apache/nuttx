@@ -446,7 +446,7 @@ static int esp32s3_setup(struct uart_dev_s *dev)
 
 #endif
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
-  /* Configure the ouput flow control */
+  /* Configure the output flow control */
 
   if (priv->oflow)
     {
@@ -901,7 +901,7 @@ static int esp32s3_ioctl(struct file *filep, int cmd, unsigned long arg)
         termiosp->c_cflag |=  priv->iflow != 0 ? CRTS_IFLOW : 0;
 #endif
 
-        /* Set the baud rate in ther termiosp using the
+        /* Set the baud rate in the termiosp using the
          * cfsetispeed interface.
          */
 
@@ -1131,7 +1131,7 @@ static bool esp32s3_rxflowcontrol(struct uart_dev_s *dev,
  *
  * Description:
  *   Performs the low level UART initialization early in debug so that the
- *   serial console will be available during bootup.  This must be called
+ *   serial console will be available during boot up.  This must be called
  *   before xtensa_serialinit.  NOTE:  This function depends on GPIO pin
  *   configuration performed in xtensa_consoleinit() and main clock
  *   initialization performed in up_clkinitialize().
@@ -1159,7 +1159,7 @@ void xtensa_earlyserialinit(void)
 #endif
 
   /* Configure console in early step.
-   * Setup for other serials will be perfomed when the serial driver is
+   * Setup for other serials will be performed when the serial driver is
    * open.
    */
 

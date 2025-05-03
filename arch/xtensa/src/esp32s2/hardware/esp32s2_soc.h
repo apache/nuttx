@@ -460,7 +460,7 @@ static inline bool IRAM_ATTR esp32s2_ptr_exec(const void *p)
  *   Check if the buffer comes from the RTC RAM.
  *
  * Parameters:
- *   p - Adress of the buffer.
+ *   p - Address of the buffer.
  *
  * Return Value:
  *   True if given buffer comes from RTC RAM. False if not.

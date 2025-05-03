@@ -682,7 +682,7 @@ void s32k3xx_lowputc(int ch)
     }
 
   /* If the character to output is a newline,
-   * then pre-pend a carriage return
+   * then prepend a carriage return.
    */
 
   if (ch == '\n')

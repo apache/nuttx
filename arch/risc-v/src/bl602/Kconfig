@@ -106,7 +106,7 @@ config BL602_WIRELESS_DEBUG
 	default n
 
 config BL602_WIRELESS_CONTRY_CODE
-	string "WiFi Contry Code"
+	string "WiFi Country Code"
 	depends on BL602_WIRELESS
 	default "CN"
 

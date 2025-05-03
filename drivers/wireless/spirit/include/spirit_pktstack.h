@@ -50,7 +50,7 @@
  * configure the link layer protocol features like autoack,
  * autoretransmission or piggybacking.
  *
- * In addiiton, functions to set the payload length and the destination
+ * In addition, functions to set the payload length and the destination
  * address are provided.
  *
  * Example:

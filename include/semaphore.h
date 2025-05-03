@@ -71,8 +71,8 @@ struct semholder_s
   FAR struct semholder_s *flink;  /* List of semaphore's holder            */
 #endif
   FAR struct semholder_s *tlink;  /* List of task held semaphores          */
-  FAR struct sem_s *sem;          /* This corresponding semaphore          */
-  FAR struct tcb_s *htcb;         /* This corresponding TCB                */
+  FAR struct sem_s *sem;          /* The corresponding semaphore           */
+  FAR struct tcb_s *htcb;         /* The corresponding TCB                 */
   int32_t counts;                 /* Number of counts owned by this holder */
 };
 

@@ -350,7 +350,7 @@ int spi_flash_read_encrypted(uint32_t addr, void *buffer, uint32_t size)
  *   func - Function pointer
  *
  * Returned Value:
- *   Absolute address if success or negtive value if failed.
+ *   Absolute address if success or negative value if failed.
  *
  ****************************************************************************/
 

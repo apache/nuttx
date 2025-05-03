@@ -59,7 +59,7 @@
 #define LTC4151_VALUE_MSB_MASK  0x00ff
 #define LTC4151_VALUE_LSB_MASK  0x0f00
 
-/* NOTE: When meassurement values are read, they are return as b16_t, fixed
+/* NOTE: When measurement values are read, they are return as b16_t, fixed
  * precision integer values (see include/fixedmath.h).
  */
 

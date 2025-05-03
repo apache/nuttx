@@ -21,7 +21,7 @@
  ****************************************************************************/
 
 /* The TMS570LS0432PZ has 384KB of FLASH beginning at address 0x0000:0000 and
- * 32Kb of SRAM beginining at 0x0800:0000
+ * 32Kb of SRAM beginning at 0x0800:0000
  */
 
 MEMORY

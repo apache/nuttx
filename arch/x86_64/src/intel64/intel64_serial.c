@@ -35,7 +35,7 @@
 #include "chip.h"
 #include "x86_64_internal.h"
 
-/* This is a "stub" file to suppport up_putc if no real serial driver is
+/* This is a "stub" file to support up_putc if no real serial driver is
  * configured.  Normally, drivers/serial/uart_16550.c provides the serial
  * driver for this platform.
  */

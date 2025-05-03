@@ -183,7 +183,7 @@ int s32k3xx_bringup(void)
 #  ifdef CONFIG_FS_LITTLEFS
   else
     {
-      _info("register_mtddriver() succesful\n");
+      _info("register_mtddriver() successful\n");
 
       ret = nx_mount("/dev/progmem0", "/mnt/progmem", "littlefs", 0, NULL);
 
@@ -198,7 +198,7 @@ int s32k3xx_bringup(void)
             }
           else
             {
-              _info("nx_mount() succesful\n");
+              _info("nx_mount() successful\n");
             }
         }
     }

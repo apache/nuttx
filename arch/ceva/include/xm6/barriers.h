@@ -52,7 +52,7 @@ static inline void up_dsb(void)
         : "r"(MSS_BARRIER)
       );
 
-      /* Wait unitl the barrier operation complete */
+      /* Wait until the barrier operation complete */
     }
   while ((barrier & 0x80) != 0);
 #undef MSS_BARRIER

@@ -36,7 +36,7 @@
 
 #define LBLOCKSIZE (sizeof(long))
 
-/* Threshhold for punting to the bytewise iterator. */
+/* Threshold for punting to the bytewise iterator. */
 
 #define TOO_SMALL(len) ((len) < LBLOCKSIZE)
 

@@ -968,7 +968,7 @@ struct ieee80211_sec_chan_offs_ie
 
 /* struct ieee80211_mesh_chansw_params_ie - mesh channel switch parameters IE
  *
- * This structure represents the "Mesh Channel Switch Paramters element"
+ * This structure represents the "Mesh Channel Switch Parameters element"
  */
 
 struct ieee80211_mesh_chansw_params_ie
@@ -1932,7 +1932,7 @@ struct ieee80211_ht_operation
  * If this field is 0 this value should not be used to
  * consider the highest TX data rate supported.
  * The top 2 bits of this field are reserved, the
- * 3rd bit from the top indiciates VHT Extended NSS BW
+ * 3rd bit from the top indicates VHT Extended NSS BW
  * Capability.
  */
 

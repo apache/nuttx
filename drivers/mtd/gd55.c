@@ -911,7 +911,7 @@ static int gd55_erase_chip(FAR struct gd55_dev_s *priv)
  * Name: gd55_write_enable
  *
  * Description:
- *   Enable the device for writing by setting the wriet enable latch bit
+ *   Enable the device for writing by setting the write enable latch bit
  *
  * Input Parameters:
  *   priv         - a reference to the device structure

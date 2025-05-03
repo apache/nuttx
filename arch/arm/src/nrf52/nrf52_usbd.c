@@ -698,8 +698,8 @@ static bool nrf52_req_addlast(struct nrf52_ep_s *privep,
  * Name: nrf52_ep0out_stdrequest
  *
  * Description:
- *   Handle a stanard request on EP0.  Pick off the things of interest to the
- *   USB device controller driver; pass what is left to the class driver.
+ *   Handle a standard request on EP0.  Pick off the things of interest to
+ *   the USB device controller driver; pass what is left to the class driver.
  *
  ****************************************************************************/
 
@@ -1060,7 +1060,7 @@ static void nrf52_epin_transfer(struct nrf52_ep_s *privep, uint8_t *buf,
  * Name: nrf52_epout_allow
  *
  * Description:
- *   Allow OUT trafic on this endpoint
+ *   Allow OUT traffic on this endpoint
  *
  ****************************************************************************/
 
@@ -1623,7 +1623,7 @@ static void nrf52_usbreset(struct nrf52_usbdev_s *priv)
 
       privep->stalled = false;
 
-      /* Stop EPIN taks */
+      /* Stop EPIN task */
 
       nrf52_epin_stop(priv, i);
 
@@ -1636,7 +1636,7 @@ static void nrf52_usbreset(struct nrf52_usbdev_s *priv)
 
       privep->stalled = false;
 
-      /* Stop EPOUT taks */
+      /* Stop EPOUT task */
 
       nrf52_epout_stop(priv, i);
     }
@@ -2572,7 +2572,7 @@ static int nrf52_ep_submit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
             {
               usbtrace(TRACE_OUTREQQUEUED(privep->epphy), privreq->req.len);
 
-              /* Allow OUT trafic on this endpoint */
+              /* Allow OUT traffic on this endpoint */
 
               nrf52_epout_allow(privep);
             }
@@ -2635,7 +2635,7 @@ static int nrf52_ep_setstall(struct nrf52_ep_s *privep)
       regval |= USBD_EPSTALL_IO_OUT;
     }
 
-  /* Unstall a given EP */
+  /* Un-stall a given EP */
 
   regval |= USBD_EPSTALL_EP(privep->epphy) | USBD_EPSTALL_IO_STALL;
   nrf52_putreg(regval, NRF52_USBD_EPSTALL);
@@ -2669,7 +2669,7 @@ static int nrf52_ep_clrstall(struct nrf52_ep_s *privep)
       regval |= USBD_EPSTALL_IO_OUT;
     }
 
-  /* Unstall a given EP */
+  /* Un-stall a given EP */
 
   regval |= USBD_EPSTALL_EP(privep->epphy) | USBD_EPSTALL_IO_UNSTALL;
   nrf52_putreg(regval, NRF52_USBD_EPSTALL);
@@ -3105,7 +3105,7 @@ void arm_usbinitialize(void)
 
   arm_usbuninitialize();
 
-  /* Initialie the driver data structure */
+  /* Initialize the driver data structure */
 
   nrf52_swinitialize(priv);
 

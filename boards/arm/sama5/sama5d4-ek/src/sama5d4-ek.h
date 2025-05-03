@@ -1058,7 +1058,7 @@ bool sam_writeprotected(int slotno);
  * Name: sam_usbinitialize
  *
  * Description:
- *   Called from sam_usbinitialize very early in inialization to setup
+ *   Called from sam_usbinitialize very early in initialization to setup
  *   USB-related PIO pins for the SAMA5D4-EK board.
  *
  ****************************************************************************/

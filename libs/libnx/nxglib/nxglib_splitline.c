@@ -64,7 +64,7 @@ static b16_t nxgl_interpolate(b16_t x, b16_t dy, b16_t dxdy)
  * Description:
  *   In the general case, a line with width can be represented as a
  *   parallelogram with a triangle at the top and bottom.  Triangles and
- *   parallelograms are both degenerate versions of a trapeziod.  This
+ *   parallelograms are both degenerate versions of a trapezoid.  This
  *   function breaks a wide line into triangles and trapezoids.  This
  *   function also detects other degenerate cases:
  *
@@ -276,7 +276,7 @@ int nxgl_splitline(FAR struct nxgl_vector_s *vector,
    *   Angle of line:      angle      = atan2(iheight, iwidth)
    *   Y offset from line: b16yoffset = linewidth * cos(angle)
    *
-   * For near verical lines, b16yoffset is be nearly zero.  For near
+   * For near vertical lines, b16yoffset is be nearly zero.  For near
    * horizontal lines, b16yOffset is be about the same as linewidth.
    */
 

@@ -58,7 +58,7 @@
  *
  * Master nodes sit at the very end of the journal. The last two blocks of
  * the journal are called master blocks, and they are filled with a new
- * entry for a master node everytime it is updated. They are filled in a
+ * entry for a master node every time it is updated. They are filled in a
  * sequential manner, and thus, the latest master node can be found easily.
  * The two master blocks contain identical information, and exist to be as a
  * backup.

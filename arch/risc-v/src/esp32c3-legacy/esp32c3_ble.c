@@ -107,7 +107,7 @@ static esp_vhci_host_callback_t vhci_host_cb =
  * Name: esp32c3_ble_send_ready
  *
  * Description:
- *   If the controller could send HCI comand will callback this function.
+ *   If the controller could send HCI command will callback this function.
  *
  * Input Parameters:
  *   None
@@ -191,8 +191,8 @@ static int esp32c3_ble_recv_cb(uint8_t *data, uint16_t len)
  * Input Parameters:
  *   drv  - BT driver pointer
  *   type - BT packet type
- *   data - BT packte data buffer pointer
- *   len  - BT packte length
+ *   data - BT packet data buffer pointer
+ *   len  - BT packet length
  *
  * Returned Value:
  *   Sent bytes on success or a negated value on failure.

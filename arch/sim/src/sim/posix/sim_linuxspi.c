@@ -112,7 +112,7 @@ static int linux_spi_transfer(struct spi_dev_s *dev, const void *txbuffer,
 static struct spi_ops_s spi_linux_ops =
 {
   /* The operations below are the same as those in nuttx/spi/spi.h.
-   * Some perations are dummy, merely for compatiablity with nuttx spi.
+   * Some operations are dummy, merely for compatibility with nuttx spi.
    */
 
   .lock             = linux_spi_lock,          /* Dummy for compatibility. */
@@ -221,14 +221,14 @@ static void linux_spi_select(struct spi_dev_s *dev, uint32_t devid,
  * Description:
  *   Provide spi setfrequency, used for set SPI clock frequency.
  *   Note that only MAX_SPEED_HZ could be configured out of a transfer for a
- *   Linux SPI port. The Linux SPI may set a exact frequecy using the value
+ *   Linux SPI port. The Linux SPI may set a exact frequency using the value
  *   of spi_ioc_transfer.speed_hz when transferring. If the
  *   spi_ioc_transfer.speed_hz is 0, the MAX_SPEED_HZ is used. In practice,
- *   the real frequecy on the CLK wire will be affected by the hardware.
+ *   the real frequency on the CLK wire will be affected by the hardware.
  *
  * Input Parameters:
  *   dev - A pointer to instance of Linux SPI device.
- *   frequency - The frequencey of SPI clock in Hz.
+ *   frequency - The frequency of SPI clock in Hz.
  *
  * Returned Value:
  *   Returns the actual frequency in Hz.
@@ -288,7 +288,7 @@ static int linux_spi_setdelay(struct spi_dev_s *dev, uint32_t startdelay,
  *
  * Description:
  *   Provide spi setmode.
- *   SPI mode defination in nuttx is almost the same to that in Linux.
+ *   SPI mode definition in nuttx is almost the same to that in Linux.
  *
  * Input Parameters:
  *   dev - A pointer to instance of Linux SPI device.
@@ -416,7 +416,7 @@ static int linux_spi_hwfeatures(struct spi_dev_s *dev,
    * Among them, features on bit 1, 2, 4 is supported.
    * And CS_ACTIVE/INACTIVE can not be set immediately until calling
    * linux_spi_transfer. Here it's recorded in linux_spi_dev_s.hwfeatures
-   * for furture use.
+   * for future use.
    */
 
   priv->hwfeatures = features;

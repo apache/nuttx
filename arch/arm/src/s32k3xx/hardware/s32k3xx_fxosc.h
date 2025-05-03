@@ -81,7 +81,7 @@
 /* Oscillator Status Register (STAT) */
 
                                               /* Bits 0-30: Reserved */
-#define FXOSC_STAT_OSC_STAT         (1 << 31) /* Bit 31: Crystal oscilator status (OSC_STAT) */
+#define FXOSC_STAT_OSC_STAT         (1 << 31) /* Bit 31: Crystal oscillator status (OSC_STAT) */
 #  define FXOSC_STAT_OSC_STAT_OFF   (0 << 31) /*         Crystal oscillator is off or not stable */
 #  define FXOSC_STAT_OSC_STAT_ON    (1 << 31) /*         Crystal oscillator is on and providing a stable clock */
 

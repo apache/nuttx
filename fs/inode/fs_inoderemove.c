@@ -46,7 +46,7 @@
  *   path refers to.  This is normally done in preparation to removing or
  *   moving an inode.
  *
- *   In symbolic links in the pseduo file system are enabled, then this
+ *   In symbolic links in the pseudo file system are enabled, then this
  *   logic will follow the symbolic links up until the terminal node.  Then
  *   that link in removed. So if this the terminal node is a symbolic link,
  *   the symbolic link node will be removed, not the target of the link.

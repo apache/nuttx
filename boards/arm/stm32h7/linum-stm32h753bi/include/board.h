@@ -530,7 +530,7 @@
  * FMC_SDTR_TRCD - SDRAM common row cycle delay
  * FMC_SDTR_TWR  - Write recovery time
  * FMC_SDTR_TRP  - SDRAM common row percharge delay
- * FMC_SDTR_TRC  - Row to collumn delay
+ * FMC_SDTR_TRC  - Row to column delay
  */
 
  #define BOARD_FMC_SDTR1  (FMC_SDTR_TMRD(2)| /* tMRD     = 2CLK */ \

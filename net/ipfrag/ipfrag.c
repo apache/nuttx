@@ -941,7 +941,7 @@ int32_t ip_fragout_slice(FAR struct iob_s *iob, uint8_t domain, uint16_t mtu,
 
       UPDATE_IOB(reorg, CONFIG_NET_LL_GUARDSIZE, unfraglen);
 
-      /* Copy L3 header(include unfragmentable extention header if present)
+      /* Copy L3 header (include unfragmentable extension header if present)
        * from original I/O buffer
        */
 
@@ -1066,7 +1066,7 @@ int32_t ip_frag_uninit(void)
 {
   FAR struct net_driver_s *dev;
 
-  ninfo("Uninitialize frag proccessing module\n");
+  ninfo("Uninitialize frag processing module\n");
 
   /* Stop work queue */
 

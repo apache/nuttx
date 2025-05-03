@@ -62,7 +62,7 @@
 #define RP23XX_USBCTRL_REGS_INTF_OFFSET                    0x000094  /* Interrupt Force */
 #define RP23XX_USBCTRL_REGS_INTS_OFFSET                    0x000098  /* Interrupt status after masking & forcing */
 #define RP23XX_USBCTRL_REGS_SOF_TIMESTAMP_RAW_OFFSET       0x000100  /* Device only. Raw value of free-running PHY clock counter @48MHz. Used to calculate time between SOF events */
-#define RP23XX_USBCTRL_REGS_SOF_TIMESTAMP_LAST_OFFSET      0x000104  /* Device only. Value of free-running PHY clock counter @48MHz when last SOF event occured */
+#define RP23XX_USBCTRL_REGS_SOF_TIMESTAMP_LAST_OFFSET      0x000104  /* Device only. Value of free-running PHY clock counter @48MHz when last SOF event occurred */
 #define RP23XX_USBCTRL_REGS_SM_STATE_OFFSET                0x000108
 #define RP23XX_USBCTRL_REGS_EP_TX_ERROR_OFFSET             0x00010c  /* TX error count for each endpoint. Write to each field to reset the counter to 0 */
 #define RP23XX_USBCTRL_REGS_EP_RX_ERROR_OFFSET             0x000110  /* RX error count for each endpoint. Write to each field to reset the counter to 0 */
@@ -158,12 +158,12 @@
 #define RP23XX_USBCTRL_REGS_SIE_STATUS_RX_OVERFLOW             (1 << 26)  /* RX overflow is raised by the Serial RX engine if the incoming data is too fast. */
 #define RP23XX_USBCTRL_REGS_SIE_STATUS_BIT_STUFF_ERROR         (1 << 25)  /* Bit Stuff Error. Raised by the Serial RX engine. */
 #define RP23XX_USBCTRL_REGS_SIE_STATUS_CRC_ERROR               (1 << 24)  /* CRC Error. Raised by the Serial RX engine. */
-#define RP23XX_USBCTRL_REGS_SIE_STATUS_ENDPOINT_ERROR          (1 << 23)  /* An endpoint has encounted an error. Read the ep_rx_error and ep_tx_error registers to find out which endpoint had an error */
+#define RP23XX_USBCTRL_REGS_SIE_STATUS_ENDPOINT_ERROR          (1 << 23)  /* An endpoint has encountered an error. Read the ep_rx_error and ep_tx_error registers to find out which endpoint had an error */
 #define RP23XX_USBCTRL_REGS_SIE_STATUS_BUS_RESET               (1 << 19)  /* Device: bus reset received */
 #define RP23XX_USBCTRL_REGS_SIE_STATUS_TRANS_COMPLETE          (1 << 18)  /* Transaction complete. */
 #define RP23XX_USBCTRL_REGS_SIE_STATUS_SETUP_REC               (1 << 17)  /* Device: Setup packet received */
 #define RP23XX_USBCTRL_REGS_SIE_STATUS_CONNECTED               (1 << 16)  /* Device: connected */
-#define RP23XX_USBCTRL_REGS_SIE_STATUS_RX_SHORT_PACKET         (1 << 12)  /* Device or Host has received a short packet. This is when the data recieved is less than configured in the buffer control register. Device: If using double buffered mode on device the buffer select will not be toggled after writing status back to the buffer control register. This is to prevent any further transactions on that endpoint until the user has reset the buffer control registers. Host: the current transfer will be stopped early */
+#define RP23XX_USBCTRL_REGS_SIE_STATUS_RX_SHORT_PACKET         (1 << 12)  /* Device or Host has received a short packet. This is when the data received is less than configured in the buffer control register. Device: If using double buffered mode on device the buffer select will not be toggled after writing status back to the buffer control register. This is to prevent any further transactions on that endpoint until the user has reset the buffer control registers. Host: the current transfer will be stopped early */
 #define RP23XX_USBCTRL_REGS_SIE_STATUS_RESUME                  (1 << 11)  /* Host: Device has initiated a remote resume. Device: host has initiated a resume. */
 #define RP23XX_USBCTRL_REGS_SIE_STATUS_VBUS_OVER_CURR          (1 << 10)  /* VBUS over current detected */
 #define RP23XX_USBCTRL_REGS_SIE_STATUS_SPEED_SHIFT             (8)        /* Host: device speed. Disconnected = 00, LS = 01, FS = 10 */
@@ -511,7 +511,7 @@
 #define RP23XX_USBCTRL_REGS_INTS_HOST_CONN_DIS                 (1 << 0)   /* Host: raised when a device is connected or disconnected (i.e. when SIE_STATUS.SPEED changes). Cleared by writing to SIE_STATUS.SPEED */
 
 #define RP23XX_USBCTRL_REGS_SOF_TIMESTAMP_RAW_MASK             (0x1fffff) /* Device only. Raw value of free-running PHY clock counter @48MHz. Used to calculate time between SOF events */
-#define RP23XX_USBCTRL_REGS_SOF_TIMESTAMP_LAST_MASK            (0x1fffff) /* Device only. Value of free-running PHY clock counter @48MHz when last SOF event occured */
+#define RP23XX_USBCTRL_REGS_SOF_TIMESTAMP_LAST_MASK            (0x1fffff) /* Device only. Value of free-running PHY clock counter @48MHz when last SOF event occurred */
 #define RP23XX_USBCTRL_REGS_SM_STATE_RX_DASM_SHIFT             (8)
 #define RP23XX_USBCTRL_REGS_SM_STATE_RX_DASM_MASK              (0xf << RP23XX_USBCTRL_REGS_SM_STATE_RX_DASM_SHIFT)
 #define RP23XX_USBCTRL_REGS_SM_STATE_BC_STATE_SHIFT            (5)

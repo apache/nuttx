@@ -104,7 +104,7 @@ struct foc_params_s
   foc_duty_t duty[CONFIG_MOTOR_FOC_PHASES]; /* PWM duty cycle for phases */
 };
 
-/* Hardware specific informations */
+/* Hardware specific information */
 
 struct foc_info_hw_s
 {
@@ -123,7 +123,7 @@ struct foc_info_hw_s
    */
 
   int32_t    iphase_scale;              /* Current phase scale [x100000] */
-  int32_t    iphase_max;                /* Maximum phase curretn [x1000] */
+  int32_t    iphase_max;                /* Maximum phase current [x1000] */
 
   /* ADC configuration for BEMF sampling */
 
@@ -136,7 +136,7 @@ struct foc_info_hw_s
 
 struct foc_info_s
 {
-  struct foc_info_hw_s hw_cfg; /* Hardware specific informations  */
+  struct foc_info_hw_s hw_cfg; /* Hardware specific information  */
 };
 
 /* FOC board-specific configuration */

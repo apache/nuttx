@@ -229,7 +229,7 @@ int up_cpu_start(int cpu)
   sched_note_cpu_start(this_task(), cpu);
 #endif
 
-  /* Unstall the APP CPU */
+  /* Un-stall the APP CPU */
 
   regval  = getreg32(RTC_CNTL_SW_CPU_STALL_REG);
   regval &= ~RTC_CNTL_SW_STALL_APPCPU_C1_M;

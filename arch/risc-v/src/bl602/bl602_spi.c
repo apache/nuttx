@@ -1029,7 +1029,7 @@ static void bl602_spi_dma_exchange(struct bl602_spi_priv_s *priv,
 
   if (err < 0)
     {
-      spierr("Failed to initalize DMA LLI\n");
+      spierr("Failed to initialize DMA LLI\n");
       return;
     }
 

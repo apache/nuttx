@@ -132,7 +132,7 @@
 
 #define REG_EPC_NDX         0
 
-/* General pupose registers
+/* General purpose registers
  * $0: Zero register does not need to be saved
  * $1: ra (return address)
  */

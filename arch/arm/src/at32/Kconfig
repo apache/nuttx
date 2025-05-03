@@ -4431,10 +4431,10 @@ config AT32_TIM1_CHANNEL
 		channel {1,..,4}
 
 config AT32_TIM1_CLOCK
-	int "TIM1 work frequence for capture"
+	int "TIM1 work frequency for capture"
 	default 1000000
 	---help---
-		This clock frequence limiting the count rate at the expense of resolution.
+		This clock frequency limiting the count rate at the expense of resolution.
 
 endif # AT32_TIM1_CAP
 
@@ -4460,10 +4460,10 @@ config AT32_TIM2_CHANNEL
 		channel {1,..,4}
 
 config AT32_TIM2_CLOCK
-	int "TIM2 work frequence for capture"
+	int "TIM2 work frequency for capture"
 	default 1000000
 	---help---
-		This clock frequence limiting the count rate at the expense of resolution.
+		This clock frequency limiting the count rate at the expense of resolution.
 
 endif # AT32_TIM2_CAP
 
@@ -4489,10 +4489,10 @@ config AT32_TIM3_CHANNEL
 		channel {1,..,4}
 
 config AT32_TIM3_CLOCK
-	int "TIM3 work frequence for capture"
+	int "TIM3 work frequency for capture"
 	default 1000000
 	---help---
-		This clock frequence limiting the count rate at the expense of resolution.
+		This clock frequency limiting the count rate at the expense of resolution.
 
 endif # AT32_TIM3_CAP
 
@@ -4518,10 +4518,10 @@ config AT32_TIM4_CHANNEL
 		channel {1,..,4}
 
 config AT32_TIM4_CLOCK
-	int "TIM4 work frequence for capture"
+	int "TIM4 work frequency for capture"
 	default 1000000
 	---help---
-		This clock frequence limiting the count rate at the expense of resolution.
+		This clock frequency limiting the count rate at the expense of resolution.
 
 endif # AT32_TIM4_CAP
 
@@ -4547,10 +4547,10 @@ config AT32_TIM5_CHANNEL
 		channel {1,..,4}
 
 config AT32_TIM5_CLOCK
-	int "TIM5 work frequence for capture"
+	int "TIM5 work frequency for capture"
 	default 1000000
 	---help---
-		This clock frequence limiting the count rate at the expense of resolution.
+		This clock frequency limiting the count rate at the expense of resolution.
 
 endif # AT32_TIM5_CAP
 
@@ -4576,10 +4576,10 @@ config AT32_TIM8_CHANNEL
 		channel {1,..,4}
 
 config AT32_TIM8_CLOCK
-	int "TIM8 work frequence for capture"
+	int "TIM8 work frequency for capture"
 	default 1000000
 	---help---
-		This clock frequence limiting the count rate at the expense of resolution.
+		This clock frequency limiting the count rate at the expense of resolution.
 
 endif # AT32_TIM8_CAP
 
@@ -4605,10 +4605,10 @@ config AT32_TIM9_CHANNEL
 		channel {1,..,4}
 
 config AT32_TIM9_CLOCK
-	int "TIM9 work frequence for capture"
+	int "TIM9 work frequency for capture"
 	default 1000000
 	---help---
-		This clock frequence limiting the count rate at the expense of resolution.
+		This clock frequency limiting the count rate at the expense of resolution.
 
 endif # AT32_TIM9_CAP
 
@@ -4634,10 +4634,10 @@ config AT32_TIM10_CHANNEL
 		channel {1,..,4}
 
 config AT32_TIM10_CLOCK
-	int "TIM10 work frequence for capture"
+	int "TIM10 work frequency for capture"
 	default 1000000
 	---help---
-		This clock frequence limiting the count rate at the expense of resolution.
+		This clock frequency limiting the count rate at the expense of resolution.
 
 endif # AT32_TIM10_CAP
 
@@ -4663,10 +4663,10 @@ config AT32_TIM11_CHANNEL
 		channel {1,..,4}
 
 config AT32_TIM11_CLOCK
-	int "TIM11 work frequence for capture"
+	int "TIM11 work frequency for capture"
 	default 1000000
 	---help---
-		This clock frequence limiting the count rate at the expense of resolution.
+		This clock frequency limiting the count rate at the expense of resolution.
 
 endif # AT32_TIM11_CAP
 
@@ -4692,10 +4692,10 @@ config AT32_TIM12_CHANNEL
 		channel {1,..,4}
 
 config AT32_TIM12_CLOCK
-	int "TIM12 work frequence for capture"
+	int "TIM12 work frequency for capture"
 	default 1000000
 	---help---
-		This clock frequence limiting the count rate at the expense of resolution.
+		This clock frequency limiting the count rate at the expense of resolution.
 
 endif # AT32_TIM12_CAP
 
@@ -4721,10 +4721,10 @@ config AT32_TIM13_CHANNEL
 		channel {1,..,4}
 
 config AT32_TIM13_CLOCK
-	int "TIM13 work frequence for capture"
+	int "TIM13 work frequency for capture"
 	default 1000000
 	---help---
-		This clock frequence limiting the count rate at the expense of resolution.
+		This clock frequency limiting the count rate at the expense of resolution.
 
 endif # AT32_TIM13_CAP
 
@@ -4750,10 +4750,10 @@ config AT32_TIM14_CHANNEL
 		channel {1,..,4}
 
 config AT32_TIM14_CLOCK
-	int "TIM14 work frequence for capture"
+	int "TIM14 work frequency for capture"
 	default 1000000
 	---help---
-		This clock frequence limiting the count rate at the expense of resolution.
+		This clock frequency limiting the count rate at the expense of resolution.
 
 endif # AT32_TIM14_CAP
 

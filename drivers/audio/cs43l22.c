@@ -1238,7 +1238,7 @@ static int cs43l22_pause(FAR struct audio_lowerhalf_s *dev)
 
   if (priv->running && !priv->paused)
     {
-      /* Disable interrupts to prevent us from suppling any more data */
+      /* Disable interrupts to prevent us from supplying any more data */
 
       priv->paused = true;
       cs43l22_setvolume(priv, priv->volume, true);

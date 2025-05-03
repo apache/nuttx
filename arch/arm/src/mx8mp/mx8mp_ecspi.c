@@ -332,7 +332,7 @@ static int mx8mp_spi_transfer(struct mx8mp_spi_s *priv,
       return ret;
     }
 
-  /* 6. Unload RX FIFO (even if an error occured to empty the queue) */
+  /* 6. Unload RX FIFO (even if an error occurred to empty the queue) */
 
   if (remaining_bytes)
     {

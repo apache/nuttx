@@ -179,7 +179,7 @@
 
 #define MSCM_CPXCFG3_FPU                  (1 << 0)  /* Bit 0: Floating Point Unit (FPU) */
 #define MSCM_CPXCFG3_SIMD                 (1 << 1)  /* Bit 1: SIMD/NEON Instruction Support (SIMD) */
-#define MSCM_CPXCFG3_MMU                  (1 << 2)  /* Bit 2: Memory Mangement Unit (MMU) */
+#define MSCM_CPXCFG3_MMU                  (1 << 2)  /* Bit 2: Memory Management Unit (MMU) */
 #define MSCM_CPXCFG3_CMP                  (1 << 3)  /* Bit 3: Core Memory Protection Unit (CMP) */
 #define MSCM_CPXCFG3_CPY                  (1 << 4)  /* Bit 4: Cryptography (CPY) */
                                                     /* Bits 5-31: Reserved */

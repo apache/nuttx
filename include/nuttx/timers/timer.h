@@ -412,7 +412,7 @@ FAR void *timer_register(FAR const char *path,
 void timer_unregister(FAR void *handle);
 
 /****************************************************************************
- * Kernel internal interfaces.  Thse may not be used by application logic
+ * Kernel internal interfaces.  These may not be used by application logic.
  ****************************************************************************/
 
 /****************************************************************************

@@ -135,8 +135,8 @@ static int ksz9477_reg_write16(uint16_t reg, uint16_t data)
   uint32_t data32;
 
   /* Errata: 16-bit writes to registers 0xN120-0xN13f will corrupt the
-   * adjacent regsters. Workaround: perform only 32-bit writes to this
-   * area
+   * adjacent registers. Workaround: perform only 32-bit writes to this
+   * area.
    */
 
   if ((reg & 0xfff) >= 0x120 && (reg & 0xfff) <= 0x13f)

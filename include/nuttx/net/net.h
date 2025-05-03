@@ -229,7 +229,7 @@ struct socket_conn_s
   /* Definitions of IPv4 TOS and IPv6 Traffic Class */
 
   uint8_t       s_tos;       /* IPv4 Type of Service */
-#define s_tclass s_tos       /* IPv6 traffic class defination */
+#define s_tclass s_tos       /* IPv6 traffic class definition */
 #if defined(CONFIG_NET_IPv4) || defined(CONFIG_NET_IPv6)
   uint8_t       s_ttl;       /* Default time-to-live */
 #endif
@@ -339,7 +339,7 @@ ssize_t net_ioctl_arglen(uint8_t domain, int cmd);
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on
- *   failured (probably -ECANCELED).
+ *   failure (probably -ECANCELED).
  *
  ****************************************************************************/
 
@@ -358,7 +358,7 @@ int net_lock(void);
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on
- *   failured (probably -EAGAIN).
+ *   failure (probably -EAGAIN).
  *
  ****************************************************************************/
 

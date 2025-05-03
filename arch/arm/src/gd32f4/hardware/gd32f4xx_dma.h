@@ -189,7 +189,7 @@
 /* DMA_CHxCTL,x=0..7 */
 #define DMA_CHXCTL_CHEN                (1 << 0)                        /* Bit 0: channel x enable */
 #define DMA_CHXCTL_SDEIE               (1 << 1)                        /* Bit 1: enable bit for channel x single data mode exception interrupt */
-#define DMA_CHXCTL_TAEIE               (1 << 2)                        /* Bit 2: enable bit for channel x tranfer access error interrupt */
+#define DMA_CHXCTL_TAEIE               (1 << 2)                        /* Bit 2: enable bit for channel x transfer access error interrupt */
 #define DMA_CHXCTL_HTFIE               (1 << 3)                        /* Bit 3: enable bit for channel x half transfer finish interrupt */
 #define DMA_CHXCTL_FTFIE               (1 << 4)                        /* Bit 4: enable bit for channel x full transfer finish interrupt */
 #define DMA_CHXCTL_TFCS                (1 << 5)                        /* Bit 5: transfer flow controller select */

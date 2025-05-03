@@ -603,7 +603,7 @@ static uint8_t phy_find_bin_type_according_country(const char *country)
   if (i == num)
     {
       phy_init_data_type = ESP_PHY_INIT_DATA_TYPE_DEFAULT;
-      wlerr("Use the default certification code beacuse %c%c doesn't "
+      wlerr("Use the default certification code because %c%c doesn't "
             "have a certificate\n", country[0], country[1]);
     }
 
@@ -618,7 +618,7 @@ static uint8_t phy_find_bin_type_according_country(const char *country)
  *
  * Input Parameters:
  *   output_data    - Output data buffer pointer
- *   control_info   - PHY init data control infomation
+ *   control_info   - PHY init data control information
  *   input_data     - Input data buffer pointer
  *   init_data_type - PHY init data type
  *

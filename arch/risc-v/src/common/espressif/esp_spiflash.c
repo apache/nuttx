@@ -265,7 +265,7 @@ static IRAM_ATTR void esp_spi_trans(uint32_t command,
                                     uint32_t rx_bytes,
                                     uint32_t dummy_bits)
 {
-  /* Initiliaze SPI user register */
+  /* Initialize SPI user register */
 
   spi_flash_ll_reset(dev);
 
@@ -313,7 +313,7 @@ static IRAM_ATTR void esp_spi_trans(uint32_t command,
 
   spimem_flash_ll_suspend_cmd_setup(dev, 0);
 
-  /* Start transmision */
+  /* Start transmission */
 
   spi_flash_ll_user_start(dev);
 

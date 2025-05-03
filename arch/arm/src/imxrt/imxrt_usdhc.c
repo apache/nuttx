@@ -3003,11 +3003,11 @@ static int imxrt_dmarecvsetup(struct sdio_dev_s *dev,
   struct imxrt_dev_s *priv = (struct imxrt_dev_s *)dev;
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
 #if defined(CONFIG_ARCH_HAVE_SDIO_PREFLIGHT)
-  /* Normaly imxrt_dmapreflight is called prior to imxrt_dmarecvsetup
-   * except for the case where the CSR read is done at initalization
+  /* Normally imxrt_dmapreflight is called prior to imxrt_dmarecvsetup
+   * except for the case where the CSR read is done at initialization.
    *
    * With a total read  size of less then priv->rxbuffer we can
-   * handel the unaligned case herein, using the rxbuffer.
+   * handle the unaligned case herein, using the rxbuffer.
    *
    * Any other case is a falult.
    */

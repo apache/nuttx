@@ -778,7 +778,7 @@ redo:
       p = realloc(*rbuf, size);
       if (p == NULL)
         {
-          nerr("read bss faied in realloc!\n");
+          nerr("read bss failed in realloc!\n");
           free(*rbuf);
           *rbuf = NULL;
           return -ENOMEM;
@@ -813,7 +813,7 @@ static int wifidriver_start_connect(FAR struct wifi_sim_s *wifidev)
     {
       case IW_MODE_INFRA:
         {
-          /* If wlan is connected, should be disconnect before connectting. */
+          /* If wlan is connected, should be disconnect before connecting. */
 
           /* 1. check and disconnect */
 

@@ -343,7 +343,7 @@
 #define RCC_PLL1CFGR_PLL1RGE_SHIFT        (2)                               /* Bits 2-3: PLL1 input frequency range */
 #define RCC_PLL1CFGR_PLL1RGE_MASK         (3 << RCC_PLL1CFGR_PLL1RGE_SHIFT)
 #define RCC_PLL1CFGR_PLL1RGE_4_TO_8MHZ    (0 << RCC_PLL1CFGR_PLL1RGE_SHIFT) /* 00-01-10: PLL1 input (ref1_ck) clock range frequency between 4 and 8 MHz */
-#define RCC_PLL1CFGR_PLL1RGE_8_TO_16MHZ   (3 << RCC_PLL1CFGR_PLL1RGE_SHIFT) /* 11: PLL1 input (ref1_ck) clock range frequeny between 8 and 16 MHz */
+#define RCC_PLL1CFGR_PLL1RGE_8_TO_16MHZ   (3 << RCC_PLL1CFGR_PLL1RGE_SHIFT) /* 11: PLL1 input (ref1_ck) clock range frequency between 8 and 16 MHz */
 #define RCC_PLL1CFGR_PLL1FRACEN           (1 << 4)                          /* Bit 4: PLL1 fractional latch enable */
 #define RCC_PLL1CFGR_PLL1M_SHIFT          (8)                               /* Bits 8-11: Prescaler for PLL1 */
 #define RCC_PLL1CFGR_PLL1M_MASK           (0xf << RCC_PLL1CFGR_PLL1M_SHIFT)

@@ -4145,8 +4145,8 @@ static unsigned long esp_random_ulong(void)
  *   ifidx    - The interface id that the tx callback has been triggered from
  *   data     - Pointer to the data transmitted
  *   data_len - Length of the data transmitted
- *   txstatus - True:if the data was transmitted sucessfully False: if data
- *              transmission failed
+ *   txstatus - True: if the data was transmitted successfully, False: if
+ *              data transmission failed.
  *
  * Returned Value:
  *   none
@@ -6688,7 +6688,7 @@ int esp_wifi_softap_rssi(struct iwreq *iwr, bool set)
  * Name: esp32_wifi_bt_coexist_init
  *
  * Description:
- *   Initialize ESP32 Wi-Fi and BT coexistance module.
+ *   Initialize ESP32 Wi-Fi and BT coexistence module.
  *
  * Input Parameters:
  *   None

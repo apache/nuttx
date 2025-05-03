@@ -478,7 +478,7 @@ struct stmpe811_config_s
   int irq;             /* IRQ number received by interrupt handler. */
 #endif
 
-  /* These are the timing valuses for ADC CTRL1 and CTRL2.  These values
+  /* These are the timing values for ADC CTRL1 and CTRL2.  These values
    * are only used if either the TSC or the ADC are enabled.  These values
    * determine the characteristics of sampling.
    */

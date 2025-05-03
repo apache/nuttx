@@ -577,7 +577,7 @@ static void mpfs_ihc_rx_message(ihc_channel_t channel, uint32_t mhartid,
  *
  * Description:
  *   This is called from the interrupt handler. This figures out the actions
- *   based on the information retieved from the subsequent functions.
+ *   based on the information retrieved from the subsequent functions.
  *
  * Input Parameters:
  *   None
@@ -1175,7 +1175,7 @@ static int mpfs_echo_ping_init(struct rpmsg_device *rdev,
  *
  * Description:
  *   Callback that is called when the underlying rpmsg device has been
- *   created. This is used to initialize the ping enpoint at the proper
+ *   created. This is used to initialize the ping endpoint at the proper
  *   time.
  *
  * Input Parameters:

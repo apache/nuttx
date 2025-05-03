@@ -212,7 +212,7 @@ static void lis3dsh_read_measurement_data(FAR struct lis3dsh_dev_s *dev)
   uint16_t z_acc = 0;
   int ret;
 
-  /* Read acclerometer data */
+  /* Read accelerometer data */
 
   lis3dsh_read_acclerometer_data(dev, &x_acc, &y_acc, &z_acc);
 

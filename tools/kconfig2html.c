@@ -378,7 +378,7 @@ static void show_usage(const char *progname, int exitcode)
   error("       %s [-h]\n\n", progname);
   error("Where:\n\n");
   error("\t-a : Select relative path to the apps/ directory."
-        " Theis path is relative\n");
+        " This path is relative\n");
   error("\t     to the <Kconfig directory>.  Default: ../apps\n");
   error("\t-o : Send output to <out file>.  "
         "Default: Output goes to stdout\n");
@@ -2720,7 +2720,7 @@ int main(int argc, char **argv, char **envp)
          "Appendix A: Hidden Configuration Variables</a></li>\n");
   output("</ul>\n");
 
-  /* Close the HMTL body file and copy it to the output file */
+  /* Close the HTML body file and copy it to the output file */
 
   fclose(g_bodyfile);
   append_file(BODYFILE_NAME);

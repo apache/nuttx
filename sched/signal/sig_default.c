@@ -511,7 +511,7 @@ bool nxsig_iscatchable(int signo)
  *   defaction - True: the default action is in place
  *
  * Returned Value:
- *   The address of the default signal action handler is return on success.
+ *   The address of the default signal action handler is returned on success.
  *   SIG_IGN is returned if there is no default action.
  *
  ****************************************************************************/

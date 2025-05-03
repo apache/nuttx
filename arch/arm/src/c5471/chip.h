@@ -62,7 +62,7 @@
 #define ENET0_FLWCONTROL       0xffff0110 /* Flow control register */
 #define ENET0_VTYPE            0xffff0114 /* VTYPE tag register */
 #define ENET0_SEISR            0xffff0118 /* System error int status register */
-#define ENET0_TXBUFRDY         0xffff011c /* TX descripter buffer ready */
+#define ENET0_TXBUFRDY         0xffff011c /* TX descriptor buffer ready */
 #define ENET0_TDBA             0xffff0120 /* TX descriptor base address */
 #define ENET0_RDBA             0xffff0124 /* RX descriptor base address */
 #define ENET0_PARHI            0xffff0128 /* Dest phys address match (HI) */

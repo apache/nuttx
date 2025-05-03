@@ -170,7 +170,7 @@ class SymbolTables(object):
         index = bisect.bisect(self.addr_list, addr)
         if index != -1:
             return self.symbol_dict[self.addr_list[index - 1]]
-        return "<%#x>: unknow function" % addr
+        return "<%#x>: unknown function" % addr
 
 
 class OtherModel(BaseModel):

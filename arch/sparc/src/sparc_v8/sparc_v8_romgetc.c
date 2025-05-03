@@ -52,7 +52,7 @@
  *
  * Description:
  *   In Harvard architectures, data accesses and instruction accesses occur
- *   on different busses, perhaps concurrently.  All data accesses are
+ *   on different buses, perhaps concurrently.  All data accesses are
  *   performed on the data bus unless special  machine instructions are
  *   used to read data from the instruction address space.  Also, in the
  *   typical MCU, the available SRAM data memory is much smaller that the

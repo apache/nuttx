@@ -114,7 +114,7 @@ void sbi_start(void) noreturn_function;
  *   Send an inter-processor interrupt to all the harts defined
  *
  * Input Parameters:
- *   hmask - Mask fo CPU to send IPI
+ *   hmask - Mask for CPU to send IPI
  *   hbase - The firset CPU id to send
  *
  ****************************************************************************/

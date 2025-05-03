@@ -1038,7 +1038,7 @@ static void adc_calibrate(struct stm32_dev_s *priv)
 {
   /* Calibrate the ADC.
    *   1. ADC must be disabled
-   *   2. the voltage regulater must be enabled
+   *   2. the voltage regulator must be enabled
    */
 
   adc_modifyreg(priv, STM32_ADC_CR_OFFSET, 0, ADC_CR_ADCAL);

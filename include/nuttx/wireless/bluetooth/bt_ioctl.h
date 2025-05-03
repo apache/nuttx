@@ -183,7 +183,7 @@
 #define SIOCBTGATTRD           _BLUETOOTHIOC(18)
 #define SIOCBTGATTWR           _BLUETOOTHIOC(19)
 
-/* Connect/diconnect from a peer */
+/* Connect/disconnect from a peer */
 
 #define SIOCBTCONNECT          _BLUETOOTHIOC(24)
 #define SIOCBTDISCONNECT       _BLUETOOTHIOC(25)

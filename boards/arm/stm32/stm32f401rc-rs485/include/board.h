@@ -38,7 +38,7 @@
 
 /* Clocking *****************************************************************/
 
-/* The STM32F401RC-RS485 uses an external 32kHz cristal (X2) to enable HSE
+/* The STM32F401RC-RS485 uses an external 32kHz crystal (X2) to enable HSE
  * clock.
  *
  *   System Clock source           : PLL (HSI)

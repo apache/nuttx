@@ -27,7 +27,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Granule arithmetics */
+/* Granule arithmetic */
 
 #define GRANSIZE(g)         (1 << g->log2gran)
 #define GRANMASK(g)         (GRANSIZE(g) - 1)

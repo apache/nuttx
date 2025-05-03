@@ -203,7 +203,7 @@
 #elif defined(CONFIG_STM32_UART8_HCIUART)
 #  define HCIUART_SERDEV HCIUART8
 #else
-#  error No HCI UART specifified
+#  error No HCI UART specified
 #endif
 
 /* STM32F4 Discovery GPIOs **************************************************/

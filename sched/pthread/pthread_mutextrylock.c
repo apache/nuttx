@@ -100,7 +100,7 @@ int pthread_mutex_trylock(FAR pthread_mutex_t *mutex)
           /* The calling thread does not hold the semaphore.  The correct
            * behavior for the 'robust' mutex is to verify that the holder of
            * the mutex is still valid.  This is protection from the case
-           * where the holder of the mutex has exitted without unlocking it.
+           * where the holder of the mutex has exited without unlocking it.
            */
 
 #ifdef CONFIG_PTHREAD_MUTEX_BOTH

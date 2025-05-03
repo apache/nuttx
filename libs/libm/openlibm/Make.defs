@@ -74,7 +74,7 @@ else
   ARCH = $(CONFIG_ARCH)
 endif
 
-# Get source code lits from Make.files,and append to variable SRCS
+# Get source code list from Make.files and append to variable SRCS
 # (1) Override CUR_SRCS to xxx_SRCS(for example src_SRCS etc.), then in xxx/Make.files CUR_SRCS is changed to xxx_SRCS.
 # (2) Include Make.files
 # (3) Get variable xxx_SRCS from Make.files, and append it to variable SRCS

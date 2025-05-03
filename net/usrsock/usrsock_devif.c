@@ -54,7 +54,7 @@ struct usrsock_req_s
   mutex_t  lock;              /* Request mutex (only one outstanding
                                * request) */
   sem_t    acksem;            /* Request acknowledgment notification */
-  uint32_t newxid;            /* New transcation Id */
+  uint32_t newxid;            /* New transaction Id */
   uint32_t ackxid;            /* Exchange id for which waiting ack */
   uint16_t nbusy;             /* Number of requests blocked from different
                                * threads */

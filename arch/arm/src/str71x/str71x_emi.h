@@ -35,14 +35,14 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* External Memory Interfac (EMI) register offset ***************************/
+/* External Memory Interface (EMI) register offset **************************/
 
 #define STR71X_EMI_BCON0_OFFSET     (0x0000) /* 16-bits wide */
 #define STR71X_EMI_BCON1_OFFSET     (0x0004) /* 16-bits wide */
 #define STR71X_EMI_BCON2_OFFSET     (0x0008) /* 16-bits wide */
 #define STR71X_EMI_BCON3_OFFSET     (0x000c) /* 16-bits wide */
 
-/* External Memory Interfac (EMI) register addresses ************************/
+/* External Memory Interface (EMI) register addresses ***********************/
 
 #define STR71X_EMI_BCON0            (STR71X_EMI_BASE + STR71X_EMI_BCON0_OFFSET)
 #define STR71X_EMI_BCON1            (STR71X_EMI_BASE + STR71X_EMI_BCON1_OFFSET)

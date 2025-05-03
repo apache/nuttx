@@ -85,7 +85,7 @@
 #define CLOCK_HFCLKSTAT_SRC_SHIFT       (0)                              /* Bit 0: Source of HFCLK */
 #define CLOCK_HFCLKSTAT_SRC_MASK        (1 << CLOCK_HFCLKSTAT_SRC_SHIFT)
 #  define CLOCK_HFCLKSTAT_SRC_HFINT     (0 << CLOCK_HFCLKSTAT_SRC_SHIFT) /* 0b0: 128 MHz internal oscillator (HFINT) */
-#  define CLOCK_HFCLKSTAT_SRC_HFXO      (1 << CLOCK_HFCLKSTAT_SRC_SHIFT) /* 0b1: 128 MHz crystal oscilator (HFXO) */
+#  define CLOCK_HFCLKSTAT_SRC_HFXO      (1 << CLOCK_HFCLKSTAT_SRC_SHIFT) /* 0b1: 128 MHz crystal oscillator (HFXO) */
 #define CLOCK_HFCLKSTAT_STATE           (1 << 16)                        /* Bit 16: HFCLK state */
 
 /* LFCLKRUN Register */

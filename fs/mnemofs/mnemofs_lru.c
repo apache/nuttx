@@ -442,7 +442,7 @@ static int lru_wrtooff(FAR struct mfs_sb_s * const sb, const mfs_t data_off,
     }
   else if (found && lru_isnodefull(sb, node))
     {
-      /* This can be optimized further if needed, but for now, for saftey of
+      /* This can be optimized further if needed, but for now, for safety of
        * the data, I think it's better to flush the entire thing. It won't
        * flush ALL of it, just, whatever's required.
        */
@@ -725,7 +725,7 @@ int mfs_lru_flush(FAR struct mfs_sb_s * const sb)
  * However, since passing the mode all the way requires a lot of change, and
  * is a redundant piece of information in most cases, the quick sort can
  * simply be done on the basis of depth, and this adventure can be left as a
- * TOOD.
+ * TODO.
  *
  * This involves recursion, but given the LRU size is a constant, the depth
  * of recursion will be log2(n). For an LRU size of even 128 (which is quite

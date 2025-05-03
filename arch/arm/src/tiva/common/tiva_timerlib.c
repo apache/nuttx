@@ -432,7 +432,7 @@ static struct tiva_gptmstate_s g_gptm7_state;
  *
  * Returned Value:
  *   true:  This is the first register access of this type.
- *   flase: This is the same as the preceding register access.
+ *   false: This is the same as the preceding register access.
  *
  ****************************************************************************/
 

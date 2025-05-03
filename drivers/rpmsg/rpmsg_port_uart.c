@@ -430,7 +430,7 @@ static int rpmsg_port_uart_tx_thread(int argc, FAR char *argv[])
  * Name: rpmsg_port_uart_initialize
  *
  * Description:
- *   Initialze a rpmsg_port_uart device to communicate between two chips.
+ *   Initialize a rpmsg_port_uart device to communicate between two chips.
  *
  * Input Parameters:
  *   cfg      - Configuration of buffers needed for communication.

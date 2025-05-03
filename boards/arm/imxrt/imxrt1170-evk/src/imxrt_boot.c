@@ -79,7 +79,7 @@ void imxrt_ocram_initialize(void)
  * Name: imxrt_flexram_partition
  *
  * Description:
- *   Sets FlexRAM paritioning
+ *   Sets FlexRAM partitioning
  *
  ****************************************************************************/
 

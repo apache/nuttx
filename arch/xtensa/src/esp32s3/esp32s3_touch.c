@@ -172,7 +172,7 @@ static void touch_restore_irq(void *arg)
 {
   if (touch_last_irq > 0 && touch_release_cb != NULL)
     {
-      /* Call the button interrup handler again so we can detect touch pad
+      /* Call the button interrupt handler again so we can detect touch pad
        * releases
        */
 

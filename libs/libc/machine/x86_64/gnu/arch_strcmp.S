@@ -120,7 +120,7 @@ ENTRY (STRCMP)
 	jnz	L(less16bytes)	/* If not, find different value or null char */
 #ifdef USE_AS_STRNCMP
 	sub	$16, %r11
-	jbe	L(strcmp_exitz)	/* finish comparision */
+	jbe	L(strcmp_exitz)	/* finish comparison */
 #endif
 	add	$16, %rsi		/* prepare to search next 16 bytes */
 	add	$16, %rdi		/* prepare to search next 16 bytes */
@@ -317,7 +317,7 @@ L(nibble_ashr_1):
 #endif
 
 	pxor	%xmm0, %xmm0
-	sub	$0x1000, %r10		/* substract 4K from %r10 */
+	sub	$0x1000, %r10		/* subtract 4K from %r10 */
 	jmp	L(gobble_ashr_1)
 
 	/*

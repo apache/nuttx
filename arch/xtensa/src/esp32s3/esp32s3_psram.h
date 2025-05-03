@@ -85,7 +85,7 @@ int psram_get_physical_size(uint32_t *out_size_bytes);
  * Note: For now ECC is only enabled on ESP32S3 Octal PSRAM
  *
  * Input Parameters:
- *   out_size_bytes - availabe physical psram size in bytes.
+ *   out_size_bytes - available physical psram size in bytes.
  *
  * Returned Value:
  *   0 if success or a negative value if fail.

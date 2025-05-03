@@ -70,13 +70,13 @@ enum mpsoc_clk
  * Function: mpsoc_clk_rate_get
  *
  * Description:
- *  Get controller running frequence
+ *  Get controller running frequency
  *
  * Input Parameters:
  *   clk - peripheral clock ID
  *
  * Returned Value:
- *   Running frequence.
+ *   Running frequency.
  *
  ****************************************************************************/
 
@@ -86,14 +86,14 @@ uintptr_t mpsoc_clk_rate_get(enum mpsoc_clk clk);
  * Function: mpsoc_clk_rate_set
  *
  * Description:
- *  Set running frequence
+ *  Set running frequency
  *
  * Input Parameters:
  *   clk - peripheral clock ID
  *   rate - clock freq
  *
  * Returned Value:
- *   peripheral running frequence.
+ *   peripheral running frequency.
  *
  ****************************************************************************/
 

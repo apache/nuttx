@@ -568,7 +568,7 @@ static int mio283qt2_getrun(FAR struct lcd_dev_s *dev,
 
   lcd->select(lcd);
 
-  /* Red the run fram GRAM. */
+  /* Read the run from GRAM. */
 
   mio283qt2_setarea(lcd, col, row, col + npixels - 1, row);
   mio283qt2_gramselect(lcd);

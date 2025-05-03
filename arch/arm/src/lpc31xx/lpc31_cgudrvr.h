@@ -717,7 +717,7 @@ enum lpc31_domainid_e lpc31_clkdomain(enum lpc31_clockid_e clkid);
  *   Given a clock ID, return the index of the corresponding ESR register
  *   (or ESRNDX_INVALID if there is no ESR associated with this clock ID).
  *   Indexing of ESRs differs slightly from the clock ID:
- *   There are 92 clock IDs but only 89 ESR regisers. There are no ESR
+ *   There are 92 clock IDs but only 89 ESR registers. There are no ESR
  *   registers for :
  *
  *

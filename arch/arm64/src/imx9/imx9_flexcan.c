@@ -1070,7 +1070,7 @@ static void imx9_txdone(struct imx9_driver_s *priv, uint32_t flags)
             {
               /* Received something in this buffer?
                * This should only happen if we sent RTR and then did
-               * run out of RX MBs (which are at lower indecies).
+               * run out of RX MBs (which are at lower indices).
                * Or perhaps this shouldn't happen at all when AEN=1. This
                * is unclear in the RM.
                */
@@ -1081,7 +1081,7 @@ static void imx9_txdone(struct imx9_driver_s *priv, uint32_t flags)
 
           /* Only possible TX codes after transmission are ABORT or
            * INACTIVE. If it transitioned to RX MB after RTR sent,
-           * inactivate it.
+           * deactivate it.
            */
 
           if (code != CAN_TXMB_ABORT && code != CAN_TXMB_INACTIVE)

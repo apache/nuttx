@@ -61,7 +61,7 @@
 #define STM32L4_SYSCLK_FREQUENCY  120000000ul
 #define BOARD_AHB_FREQUENCY       STM32L4_SYSCLK_FREQUENCY
 
-/* Higher SYSCLK reguires more flash wait states. */
+/* Higher SYSCLK requires more flash wait states. */
 
 #define BOARD_FLASH_WAITSTATES    5
 

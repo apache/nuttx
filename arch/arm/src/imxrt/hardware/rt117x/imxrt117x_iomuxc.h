@@ -3373,7 +3373,7 @@
 #  define GPR_GPR59_MIPI_CSI_RX_RCAL_15PL (0x02 << GPR_GPR59_MIPI_CSI_RX_RCAL_SHIFT) /* 15% lower than mid range */
 #  define GPR_GPR59_MIPI_CSI_RX_RCAL_25PL (0x03 << GPR_GPR59_MIPI_CSI_RX_RCAL_SHIFT) /* 25% lower than mid range */
 
-#define GPR_GPR59_MIPI_CSI_RXCDRP_SHIFT   (8)       /* Bits 8-9:   Programming bits that adjust the treshold voltage of LP-CD (MIPI_CSI_RXCDRP) */
+#define GPR_GPR59_MIPI_CSI_RXCDRP_SHIFT   (8)       /* Bits 8-9:   Programming bits that adjust the threshold voltage of LP-CD (MIPI_CSI_RXCDRP) */
 #define GPR_GPR59_MIPI_CSI_RXCDRP_MASK    (0x03 << GPR_GPR59_MIPI_CSI_RXCDRP_SHIFT)
 #  define GPR_GPR59_MIPI_CSI_RXCDRP_344MV (0x00 << GPR_GPR59_MIPI_CSI_RXCDRP_SHIFT) /* 344 mV */
 #  define GPR_GPR59_MIPI_CSI_RXCDRP_325MV (0x01 << GPR_GPR59_MIPI_CSI_RXCDRP_SHIFT) /* 325 mV */
@@ -3382,10 +3382,10 @@
 
 #define GPR_GPR59_MIPI_CSI_RXLPRP_SHIFT   (10)      /* Bits 10-11:   Programming bits that adjust the threshold voltage of LP-RX (MIPI_CSI_RXLPRP) */
 #define GPR_GPR59_MIPI_CSI_RXLPRP_MASK    (0x03 << GPR_GPR59_MIPI_CSI_RXLPRP_SHIFT)
-#  define GPR_GPR59_MIPI_CSI_RXLPRP_B00   (0x00 << GPR_GPR59_MIPI_CSI_RXLPRP_SHIFT) /* High treshold: 782 mV, low treshold: 730 mV */
-#  define GPR_GPR59_MIPI_CSI_RXLPRP_B01   (0x01 << GPR_GPR59_MIPI_CSI_RXLPRP_SHIFT) /* High treshold: 745 mV, low treshold: 692 mV */
-#  define GPR_GPR59_MIPI_CSI_RXLPRP_B10   (0x02 << GPR_GPR59_MIPI_CSI_RXLPRP_SHIFT) /* High treshold: 708 mV, low treshold: 655 mV */
-#  define GPR_GPR59_MIPI_CSI_RXLPRP_B11   (0x03 << GPR_GPR59_MIPI_CSI_RXLPRP_SHIFT) /* High treshold: invalid, low treshold: invalid */
+#  define GPR_GPR59_MIPI_CSI_RXLPRP_B00   (0x00 << GPR_GPR59_MIPI_CSI_RXLPRP_SHIFT) /* High threshold: 782 mV, low threshold: 730 mV */
+#  define GPR_GPR59_MIPI_CSI_RXLPRP_B01   (0x01 << GPR_GPR59_MIPI_CSI_RXLPRP_SHIFT) /* High threshold: 745 mV, low threshold: 692 mV */
+#  define GPR_GPR59_MIPI_CSI_RXLPRP_B10   (0x02 << GPR_GPR59_MIPI_CSI_RXLPRP_SHIFT) /* High threshold: 708 mV, low threshold: 655 mV */
+#  define GPR_GPR59_MIPI_CSI_RXLPRP_B11   (0x03 << GPR_GPR59_MIPI_CSI_RXLPRP_SHIFT) /* High threshold: invalid, low threshold: invalid */
 
 #define GPR_GPR59_MIPI_CSI_S_PRG_RXHS_SETTLE_SHIFT (12) /* Bits 12-17: Bits used to program T_HS_SETTLE (MIPI_CSI_S_PRG_RXHS_SETTLE) */
 #define GPR_GPR59_MIPI_CSI_S_PRG_RXHS_SETTLE_MASK  (0x3f << GPR_GPR59_MIPI_CSI_S_PRG_RXHS_SETTLE_SHIFT)

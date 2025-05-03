@@ -437,7 +437,7 @@ reset_controller_get_by_name(FAR const char *name)
  *   name     - The reset controller name
  *   index    - The reset controller in reset controller device
  *   shared   - Is this a shared (1), or an exclusive (0) reset_control
- *   acquired - Flags that used to get a exculsive reset control
+ *   acquired - Flags that used to get a exclusive reset control
  *
  * Returned Value:
  *   Return reset_control if success, others return NULL if failed
@@ -827,7 +827,7 @@ int reset_control_acquire(FAR struct reset_control *rstc)
 /****************************************************************************
  * Name: reset_control_release()
  *
- * Discription:
+ * Description:
  *   Releases exclusive access to a reset control.
  *
  *   Releases exclusive access right to a reset control previously obtained
@@ -982,7 +982,7 @@ int reset_control_device_reset(FAR const char *name)
 }
 
 /****************************************************************************
- * Nmae: reset_controller_register
+ * Name: reset_controller_register
  *
  * Description:
  *   Register a reset controller device

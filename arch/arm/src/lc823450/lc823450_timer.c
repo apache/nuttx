@@ -198,7 +198,7 @@ static void hrt_queue_refresh(void)
 
 cont:
 
-  /* serch for expired */
+  /* search for expired */
 
   for (pent = hrt_timer_queue.head; pent; pent = dq_next(pent))
     {
@@ -707,7 +707,7 @@ int up_rtc_gettime(struct timespec *tp)
 
   elapsed = NSEC_PER_TICK * (uint64_t)g_system_ticks;
 
-  /* Add the tiemr fraction in nanoseconds */
+  /* Add the timer fraction in nanoseconds */
 
   f = up_get_timer_fraction();
   elapsed += f;

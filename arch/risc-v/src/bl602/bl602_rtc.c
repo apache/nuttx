@@ -90,7 +90,7 @@ void bl602_hbn_sel(uint8_t clk_type)
 
 void bl602_hbn_clear_rtc_int(void)
 {
-  /* Clear RTC commpare:bit1-3 for clearing Delayed RTC IRQ */
+  /* Clear RTC compare:bit1-3 for clearing Delayed RTC IRQ */
 
   modifyreg32(BL602_HBN_CTL, 0x7 << 1, 0);
 }
@@ -103,9 +103,9 @@ void bl602_hbn_clear_rtc_int(void)
  *
  * Input Parameters:
  *   delay: RTC interrupt delay 32 clocks
- *   compval_low: RTC interrupt commpare value low 32 bits
- *   compval_high: RTC interrupt commpare value high 32 bits
- *   comp_mode: RTC interrupt commpare
+ *   compval_low: RTC interrupt compare value low 32 bits
+ *   compval_high: RTC interrupt compare value high 32 bits
+ *   comp_mode: RTC interrupt compare
  *
  * Returned Value:
  *   None.

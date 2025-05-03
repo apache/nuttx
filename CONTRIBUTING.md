@@ -37,7 +37,7 @@ standardized pull requests processing, as well as long term self-compatibility
 and maintenance of the project.
 
 Because every change may affect users, products, or services around the world,
-all rules apply equally to all authors, reviewers, committers and maintainters.
+all rules apply equally to all authors, reviewers, committers and maintainers.
 
 This is our Check-List for processing every incoming pull request.
 Also, we filter out breaking changes and handle them accordingly.
@@ -282,7 +282,7 @@ We avoid breaking changes unless absolutely necessary and unavoidable
     **mandatory**. Help of the community is welcome.
  7. Breaking change requires at least 4 independent positive PR reviews
     (see 1.16), all discussions resolved, and zero "request changes".
- 8. Change must be well documented (buid / runtime test logs, pr, git
+ 8. Change must be well documented (build / runtime test logs, pr, git
     commit, documentation, release notes, etc) with clear notes on how to
     fix the introduced problems.
  9. Breaking Change must be clearly marked with a `[BREAKING]` tag in the
@@ -306,7 +306,7 @@ verification and minimizes possible negative impact on various users.
 See: https://github.com/apache/nuttx/blob/master/INVIOLABLES.md
 
 
-### 1.15. Reviews reuqirements.
+### 1.15. Review requirements.
 
 Before PR can be merged to the master repository it requires:
 
@@ -409,7 +409,7 @@ as described in requirement 1.7.
 
   * Is new feature added? Is existing feature changed? NO / YES (please describe if yes).
   * Impact on user (will user need to adapt to change)? NO / YES (please describe if yes).
-  * Impact on build (will build process change)? NO / YES (please descibe if yes).
+  * Impact on build (will build process change)? NO / YES (please describe if yes).
   * Impact on hardware (will arch(s) / board(s) / driver(s) change)? NO / YES (please describe if yes).
   * Impact on documentation (is update required / provided)? NO / YES (please describe if yes).
   * Impact on security (any sort of implications)? NO / YES (please describe if yes).

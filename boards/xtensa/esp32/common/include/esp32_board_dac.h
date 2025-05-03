@@ -65,7 +65,7 @@ extern "C"
  * Name: board_dac_initialize
  *
  * Description:
- *   Initialize and register the Digital to Analog Convertor (DAC) driver.
+ *   Initialize and register the Digital to Analog Converter (DAC) driver.
  *
  * Input Parameters:
  *   path - The device number, used to build the device path as

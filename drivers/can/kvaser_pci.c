@@ -1593,7 +1593,7 @@ static void kvaser_init(FAR struct kvaser_driver_s *priv)
  * Name: kvaser_count_sja
  *
  * Description:
- *   Probe SJA1000 devices on board and return the number of vailalbe chips.
+ *   Probe SJA1000 devices on board and return the number of available chips.
  *
  *****************************************************************************/
 

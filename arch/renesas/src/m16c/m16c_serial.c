@@ -1028,7 +1028,7 @@ static bool up_txready(struct uart_dev_s *dev)
  * Description:
  *   Performs the low level UART initialization early in
  *   debug so that the serial console will be available
- *   during bootup.  This must be called before renesas_consoleinit.
+ *   during boot up.  This must be called before renesas_consoleinit.
  *
  ****************************************************************************/
 

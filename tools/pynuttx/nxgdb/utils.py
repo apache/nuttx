@@ -688,7 +688,7 @@ def is_target_arch(arch, exact=False):
 
 
 def is_target_smp():
-    """Return Ture if the target use smp"""
+    """Return True if the target use smp"""
 
     if gdb.lookup_global_symbol("g_assignedtasks"):
         return True

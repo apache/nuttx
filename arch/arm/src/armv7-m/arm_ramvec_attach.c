@@ -71,7 +71,7 @@ int arm_ramvec_attach(int irq, up_vector_t vector)
       irqstate_t flags;
 
       /* If the new vector is NULL, then the vector is being detached. In
-       * this case, disable the itnerrupt and direct any interrupts to the
+       * this case, disable the interrupt and direct any interrupts to the
        * common exception handler.
        */
 

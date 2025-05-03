@@ -542,7 +542,7 @@ static void sam_tsd_bottomhalf(void *arg)
   /* Check the pen state. Down if:
    *   - Pen status is down OR
    *   - Pen down interrupt seen, but NOT if
-   *   - Pen up interrrupt occurred as we need to deal with that
+   *   - Pen up interrupt occurred as we need to deal with that
    */
 
   pendown = ((((pending & ADC_SR_PENS) != 0) ||
@@ -1471,7 +1471,7 @@ static void sam_tsd_trigperiod(struct sam_tsd_s *priv, uint32_t period)
   uint32_t regval;
   uint32_t div;
 
-  /* Divide trigger period avoid overflows.  Division by ten is awkard, but
+  /* Divide trigger period avoid overflows.  Division by ten is awkward, but
    * appropriate here because times are specified in decimal with lots of
    * zeroes.
    */
@@ -1547,7 +1547,7 @@ static void sam_tsd_debounce(struct sam_tsd_s *priv, uint32_t time)
 
   DEBUGASSERT(time > 0);
 
-  /* Divide time and ADCCLK to avoid overflows.  Division by ten is awkard,
+  /* Divide time and ADCCLK to avoid overflows.  Division by ten is awkward,
    * but appropriate here because times are specified in decimal with lots of
    * zeroes.
    */

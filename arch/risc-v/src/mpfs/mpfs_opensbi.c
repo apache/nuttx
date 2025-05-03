@@ -431,7 +431,7 @@ static int mpfs_early_init(bool cold_boot)
    *   2. MPFS_IRQ_MTIMER
    *
    * U-boot will reuse eMMC and loads the kernel from there. OpenSBI will
-   * use CLINT timer.  Upstream u-boot doesn't turn the clocks on itsef.
+   * use CLINT timer.  Upstream u-boot doesn't turn the clocks on itself.
    */
 
   if (!cold_boot)

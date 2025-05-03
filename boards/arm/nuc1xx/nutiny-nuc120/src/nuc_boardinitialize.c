@@ -72,7 +72,7 @@ void nuc_boardinitialize(void)
   /* Initialize USB if the 1) USB device controller is in the configuration
    * and 2) disabled, and 3) the weak function nuc_usbinitialize() has been
    * brought into the build.
-   * Presumeably either CONFIG_USBDEV is also selected.
+   * Presumably either CONFIG_USBDEV is also selected.
    */
 
 #ifdef CONFIG_NUC1XX_USB

@@ -133,7 +133,7 @@ static int nrf52_radioi8_tim(struct nrf52_radioi8_dev_s *dev, uint8_t chan,
 
   NRF52_TIM_SETCC(tim->tim, chan, val);
 
-  /* Configure interupt */
+  /* Configure interrupt */
 
   NRF52_TIM_ENABLEINT(tim->tim, chan);
 
@@ -311,9 +311,9 @@ static int nrf52_radioi8_isr_tim(int irq, void *context, void *arg)
  * Name: nrf52_radioi8_tim_init
  *
  * Description:
- *   Initialize high resoluton timer for IEEE802154 operations.
+ *   Initialize high resolution timer for IEEE802154 operations.
  *   Used to handle short radio timeouts like ACK, IFS or delayed
- *   transmitions.
+ *   transmissions.
  *
  ****************************************************************************/
 
@@ -331,7 +331,7 @@ nrf52_radioi8_tim_init(struct nrf52_radioi8_dev_s *dev)
       return NULL;
     }
 
-  /* Atach TIMER interrupt */
+  /* Attach TIMER interrupt */
 
   NRF52_TIM_SETISR(tim, nrf52_radioi8_isr_tim, dev);
 

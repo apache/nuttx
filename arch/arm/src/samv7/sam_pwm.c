@@ -631,7 +631,7 @@ static void pwm_set_comparison(struct pwm_lowerhalf_s *dev)
 
       if (pwm_getreg(priv, SAMV7_PWM_CMPMX + COMP_OFFSET * i) & CMPM_CEN)
         {
-          /* Use update register if comparision unit is used */
+          /* Use update register if comparison unit is used */
 
           pwm_putreg(priv, SAMV7_PWM_CMPVUPDX + COMP_OFFSET * i, width);
           pwm_putreg(priv, SAMV7_PWM_CMPMUPDX + COMP_OFFSET * i, CMPM_CEN);
@@ -697,9 +697,9 @@ static void pwm_set_deadtime(struct pwm_lowerhalf_s *dev, uint8_t channel,
    * and not 16 as duty cycle or period counter. Therefore a 12 bits recount
    * is necessary to set the dead time value corresponding to selected
    * frequency. This expects the dead time value selected in the application
-   * is moved left by 12 and devided by 100. For example:
+   * is moved left by 12 and divided by 100. For example:
    *      dead_time_a = (selected_dead_time_duty << 12) / 100
-   * This aproach is the same as with duty cycle setup in the application
+   * This approach is the same as with duty cycle setup in the application
    * but with 12 bits.
    *
    * Also note that it might not be possible to get correct delay on lower

@@ -42,7 +42,7 @@
  * etc.  Drivers, however, will use the pin selection without the numeric
  * suffix.  Additional definitions are required in the board.h file.  For
  * example, if FDCAN1_RX connects via PA11 on some board, then the following
- * definitions should appear inthe board.h header file for that board:
+ * definitions should appear in the board.h header file for that board:
  *
  * #define GPIO_FDCAN1_RX GPIO_FDCAN1_RX_1
  *

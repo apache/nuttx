@@ -56,7 +56,7 @@
  *
  * Description:
  *   The symlink() function will create a new link (directory entry) for the
- *   existing file, path2.  This implementation is simplied for use with
+ *   existing file, path2.  This implementation is simplified for use with
  *   NuttX in these ways:
  *
  *   - Links may be created only within the NuttX top-level, pseudo file

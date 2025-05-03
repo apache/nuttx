@@ -165,8 +165,8 @@
 #define OCOTP_OUT_STATUS_FLAGSTATE_SHIFT  (15)       /* Bits 15-19: Flag state */
 #define OCOTP_OUT_STATUS_FLAGSTATE_MASK   (0xF << OCOTP_OUT_STATUS_FLAGSTATE_SHIFT)
 #define OCOTP_OUT_STATUS_FLAGSTATE(n)     (((n) << OCOTP_OUT_STATUS_FLAGSTATE_SHIFT) & OCOTP_OUT_STATUS_FLAGSTATE_MASK)
-#define OCOTP_OUT_STATUS_SEC_RELOAD       (1 << 19)  /* Bit 19: Indicates single error correction occured on reload */
-#define OCOTP_OUT_STATUS_DED_RELOAD       (1 << 20)  /* Bit 20: Indicates double error detection occured on reload */
+#define OCOTP_OUT_STATUS_SEC_RELOAD       (1 << 19)  /* Bit 19: Indicates single error correction occurred on reload */
+#define OCOTP_OUT_STATUS_DED_RELOAD       (1 << 20)  /* Bit 20: Indicates double error detection occurred on reload */
 #define OCOTP_OUT_STATUS_CALIBRATED       (1 << 21)  /* Bit 21: Calibrated status */
 #define OCOTP_OUT_STATUS_READ_DONE_INTR   (1 << 22)  /* Bit 22: Read fuse done */
 #define OCOTP_OUT_STATUS_READ_ERROR_INTR  (1 << 23)  /* Bit 23: Fuse read error */
@@ -185,8 +185,8 @@
 #define OCOTP_OUT_STATUS_SET_FLAGSTATE_SHIFT  (15)       /* Bits 15-19: Flag state */
 #define OCOTP_OUT_STATUS_SET_FLAGSTATE_MASK   (0xF << OCOTP_OUT_STATUS_SET_FLAGSTATE_SHIFT)
 #define OCOTP_OUT_STATUS_SET_FLAGSTATE(n)     (((n) << OCOTP_OUT_STATUS_SET_FLAGSTATE_SHIFT) & OCOTP_OUT_STATUS_SET_FLAGSTATE_MASK)
-#define OCOTP_OUT_STATUS_SET_SEC_RELOAD       (1 << 19)  /* Bit 19: Indicates single error correction occured on reload */
-#define OCOTP_OUT_STATUS_SET_DED_RELOAD       (1 << 20)  /* Bit 20: Indicates double error detection occured on reload */
+#define OCOTP_OUT_STATUS_SET_SEC_RELOAD       (1 << 19)  /* Bit 19: Indicates single error correction occurred on reload */
+#define OCOTP_OUT_STATUS_SET_DED_RELOAD       (1 << 20)  /* Bit 20: Indicates double error detection occurred on reload */
 #define OCOTP_OUT_STATUS_SET_CALIBRATED       (1 << 21)  /* Bit 21: Calibrated status */
 #define OCOTP_OUT_STATUS_SET_READ_DONE_INTR   (1 << 22)  /* Bit 22: Read fuse done */
 #define OCOTP_OUT_STATUS_SET_READ_ERROR_INTR  (1 << 23)  /* Bit 23: Fuse read error */
@@ -205,8 +205,8 @@
 #define OCOTP_OUT_STATUS_CLR_FLAGSTATE_SHIFT  (15)       /* Bits 15-19: Flag state */
 #define OCOTP_OUT_STATUS_CLR_FLAGSTATE_MASK   (0xF << OCOTP_OUT_STATUS_CLR_FLAGSTATE_SHIFT)
 #define OCOTP_OUT_STATUS_CLR_FLAGSTATE(n)     (((n) << OCOTP_OUT_STATUS_CLR_FLAGSTATE_SHIFT) & OCOTP_OUT_STATUS_CLR_FLAGSTATE_MASK)
-#define OCOTP_OUT_STATUS_CLR_SEC_RELOAD       (1 << 19)  /* Bit 19: Indicates single error correction occured on reload */
-#define OCOTP_OUT_STATUS_CLR_DED_RELOAD       (1 << 20)  /* Bit 20: Indicates double error detection occured on reload */
+#define OCOTP_OUT_STATUS_CLR_SEC_RELOAD       (1 << 19)  /* Bit 19: Indicates single error correction occurred on reload */
+#define OCOTP_OUT_STATUS_CLR_DED_RELOAD       (1 << 20)  /* Bit 20: Indicates double error detection occurred on reload */
 #define OCOTP_OUT_STATUS_CLR_CALIBRATED       (1 << 21)  /* Bit 21: Calibrated status */
 #define OCOTP_OUT_STATUS_CLR_READ_DONE_INTR   (1 << 22)  /* Bit 22: Read fuse done */
 #define OCOTP_OUT_STATUS_CLR_READ_ERROR_INTR  (1 << 23)  /* Bit 23: Fuse read error */
@@ -225,8 +225,8 @@
 #define OCOTP_OUT_STATUS_TOG_FLAGSTATE_SHIFT  (15)       /* Bits 15-19: Flag state */
 #define OCOTP_OUT_STATUS_TOG_FLAGSTATE_MASK   (0xF << OCOTP_OUT_STATUS_TOG_FLAGSTATE_SHIFT)
 #define OCOTP_OUT_STATUS_TOG_FLAGSTATE(n)     (((n) << OCOTP_OUT_STATUS_TOG_FLAGSTATE_SHIFT) & OCOTP_OUT_STATUS_TOG_FLAGSTATE_MASK)
-#define OCOTP_OUT_STATUS_TOG_SEC_RELOAD       (1 << 19)  /* Bit 19: Indicates single error correction occured on reload */
-#define OCOTP_OUT_STATUS_TOG_DED_RELOAD       (1 << 20)  /* Bit 20: Indicates double error detection occured on reload */
+#define OCOTP_OUT_STATUS_TOG_SEC_RELOAD       (1 << 19)  /* Bit 19: Indicates single error correction occurred on reload */
+#define OCOTP_OUT_STATUS_TOG_DED_RELOAD       (1 << 20)  /* Bit 20: Indicates double error detection occurred on reload */
 #define OCOTP_OUT_STATUS_TOG_CALIBRATED       (1 << 21)  /* Bit 21: Calibrated status */
 #define OCOTP_OUT_STATUS_TOG_READ_DONE_INTR   (1 << 22)  /* Bit 22: Read fuse done */
 #define OCOTP_OUT_STATUS_TOG_READ_ERROR_INTR  (1 << 23)  /* Bit 23: Fuse read error */

@@ -47,12 +47,12 @@
  *
  * Input Parameters:
  *   f - Pointer to a FILE object that identifies an input stream, during
- *   the read operaiton, the stream will not be locked
+ *   the read operation, the stream will not be locked
  *
  * Returned Value:
  *   Return the character read is returned,
  *   Return WEOF is the sequence of bytes that read cannot be interpreted as
- *   a valid wide characted, and sets the errno to EILSEQ
+ *   a valid wide character, and sets the errno to EILSEQ
  *
  ****************************************************************************/
 
@@ -107,7 +107,7 @@ wint_t fgetwc_unlocked(FAR FILE *f)
  * Returned Value:
  *   Return the character read is returned,
  *   Return WEOF is the sequence of bytes that read cannot be interpreted as
- *   a valid wide characted, and sets the errno to EILSEQ
+ *   a valid wide character, and sets the errno to EILSEQ
  *
  ****************************************************************************/
 

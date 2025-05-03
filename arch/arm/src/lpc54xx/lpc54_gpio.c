@@ -376,7 +376,7 @@ int lpc54_gpio_config(lpc54_pinset_t cfgset)
           break;
 #endif
 
-        case GPIO_OUTPUT:  /* GPIO outpout pin */
+        case GPIO_OUTPUT:  /* GPIO output pin */
           lpc54_gpio_output(cfgset, port, pin);
           break;
 

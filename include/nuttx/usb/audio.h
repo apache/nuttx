@@ -852,7 +852,7 @@ struct adc_srconverter_desc_s
   uint8_t sr_srcid;             /* 4: ID of unit/terminal to which unit is connected */
   uint8_t sr_csrcinid;          /* 5: ID of clock entity to which unit input is connected */
   uint8_t sr_csrcoutid;         /* 6: ID of clock entity to which unit output is connected */
-  uint8_t sr_converter;         /* 7: String index to the name fo the SRC unit */
+  uint8_t sr_converter;         /* 7: String index to the name for the SRC unit */
 };
 #define USB_SIZEOF_ADC_SRCCONVERTER_DESC (8)
 

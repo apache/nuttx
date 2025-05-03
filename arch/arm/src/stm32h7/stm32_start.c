@@ -307,7 +307,7 @@ void __start(void)
     defined(CONFIG_ARCH_CHIP_STM32H7_CORTEXM7) && \
     defined(CONFIG_STM32H7_CORTEXM4_ENABLED)
 
-  /* Start CM4 core after clock configration is done */
+  /* Start CM4 core after clock configuration is done */
 
   stm32h7_start_cm4();
 #endif

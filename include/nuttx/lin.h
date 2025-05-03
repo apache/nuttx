@@ -40,9 +40,9 @@
 #define LIN_ID_MASK               ((1 << LIN_ID_BITS) - 1)
 #define LIN_ID_MAX                LIN_ID_MASK
 
-#define LIN_CTRL_FLAG             CAN_EFF_FLAG  /* Describe control information(such as wirte et.) */
+#define LIN_CTRL_FLAG             CAN_EFF_FLAG  /* Describe control information (such as write etc.) */
 #define LIN_RTR_FLAG              CAN_RTR_FLAG  /* Describe the direction of sending and receiving */
-#define LIN_ERR_FLAG              CAN_ERR_FLAG  /* The flag indicate  this is LIN err_frame */
+#define LIN_ERR_FLAG              CAN_ERR_FLAG  /* The flag indicates this is LIN err_frame */
 
 /* Bit flags on can_frame.types
  *
@@ -95,8 +95,8 @@
  *              define in bit 29 of can_id(CAN_ERR_FLAG) in can_frame.
  * ERR_CLASS  : Indicate at what stage or where the error occurred,
  *              define in data[0] in can_frame.
- * ERR_REASON ：Indicate the error reson(timeout,error in the frame, etc.),
- *              define in data[0] ~ data[4] in can_frame.
+ * ERR_REASON ：Indicate the error reason (timeout, error in the frame,
+ *              etc.), define in data[0] ~ data[4] in can_frame.
  */
 
 /* ERR_CLASS in  data[0] */
@@ -150,7 +150,7 @@
 
 #define LIN_EVT_UNSPEC           0x00     /* Unspecified state event */
 #define LIN_EVT_WAKEUP           (1 << 0) /* Already send a wake-up command to lin_bus */
-#define LIN_EVT_WAKEUP_PASSIVE   (1 << 1) /* Wake up when detecte low level signal of bus a for a period of time(such as 250us-5ms) */
+#define LIN_EVT_WAKEUP_PASSIVE   (1 << 1) /* Wake up when detected low level signal of bus a for a period of time (such as 250us-5ms) */
 #define LIN_EVT_SLEEP            (1 << 2) /* Send a sleep command(0x3c) to the bus, only Master */
 #define LIN_EVT_SLEEP_PASSIVE    (1 << 3) /* Receive a sleep command from bus */
 #define LIN_EVT_SLEEP_IDLE       (1 << 4) /* Go to sleep when bus keep in the inactive for a period of time(such as 4s) */

@@ -888,7 +888,7 @@ void bcmf_wl_scan_event_handler(FAR struct bcmf_dev_s *priv,
           ie_offset += ie_buffer[ie_offset + 1] + 2;
         }
 
-      /* Check if AP is configured for WEP or unsupport privacy */
+      /* Check if AP is configured for WEP or unsupported privacy */
 
       if ((vaild_bss && (bss->capability & DOT11_CAP_PRIVACY)) || !vaild_bss)
         {
@@ -1784,7 +1784,7 @@ int bcmf_wl_get_rate(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
  * Name: bcmf_wl_get_txpower
  *
  * Description:
- *   Get the tranmit power for the device
+ *   Get the transmit power for the device
  ****************************************************************************/
 
 int bcmf_wl_get_txpower(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)

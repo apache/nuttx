@@ -579,8 +579,8 @@ void imx_lowputc(int ch)
   while ((getreg32(IMX_CONSOLE_VBASE + UART_USR2_OFFSET) &
           UART_USR2_TXFE) == 0);
 
-  /* If the character to output is a newline, then pre-pend a carriage
-   * return
+  /* If the character to output is a newline, then prepend a carriage
+   * return.
    */
 
   /* Send the character by writing it into the UART_TXD register. */

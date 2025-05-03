@@ -586,7 +586,7 @@ static uint32_t IRAM_ATTR esp32s2_rtc_clk_cal_internal(
   clks_state &= clks_mask;
 
   /* On ESP32S2, choosing RTC_CAL_RTC_MUX results in calibration of
-   * the 150k RTC clock regardless of the currenlty selected SLOW_CLK.
+   * the 150k RTC clock regardless of the currently selected SLOW_CLK.
    * The following code emulates ESP32 behavior
    */
 

@@ -2651,7 +2651,7 @@ static void lpc54_phy_write(struct lpc54_ethdriver_s *priv,
  * Name: lpc54_phy_linkstatus
  *
  * Description:
- *   Read the MII status register and return tru if the link is up.
+ *   Read the MII status register and return true if the link is up.
  *
  * Input Parameters:
  *   priv - Reference to the driver state structure
@@ -2663,7 +2663,7 @@ static void lpc54_phy_write(struct lpc54_ethdriver_s *priv,
 
 static inline bool lpc54_phy_linkstatus(struct lpc54_ethdriver_s *priv)
 {
-  /* Read the status register and return tru of the linkstatus bit is set. */
+  /* Read the status register and return true if the linkstatus bit is set. */
 
   return ((lpc54_phy_read(priv, MII_MSR) & MII_MSR_LINKSTATUS) != 0);
 }

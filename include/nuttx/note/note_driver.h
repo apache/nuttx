@@ -192,7 +192,7 @@ int note_initialize(void);
  *   PID - Task ID
  *
  * Returned Value:
- *   Retrun name if task name can be retrieved, otherwise NULL
+ *   Return name if task name can be retrieved, otherwise NULL
  *
  ****************************************************************************/
 

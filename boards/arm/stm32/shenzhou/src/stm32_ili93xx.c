@@ -1400,7 +1400,7 @@ static void stm32_lcd9300init(struct stm32_dev_s *priv,
 
   stm32_writereg(priv, LCD_REG_96,  0x2700); /* Driver Output Control */
   stm32_writereg(priv, LCD_REG_97,  0x0001); /* Driver Output Control */
-  stm32_writereg(priv, LCD_REG_106, 0x0000); /* Vertical Srcoll Control */
+  stm32_writereg(priv, LCD_REG_106, 0x0000); /* Vertical Scroll Control */
 
   stm32_writereg(priv, LCD_REG_128, 0x0000); /* Display Position? Partial Display 1 */
   stm32_writereg(priv, LCD_REG_129, 0x0000); /* RAM Address Start? Partial Display 1 */

@@ -209,7 +209,7 @@ static off_t seek_pseudodir(FAR struct file *filep, off_t offset)
 
   for (; curr != NULL && pos != offset; pos++, curr = curr->i_peer);
 
-  /* Now get the inode to vist next time that readdir() is called */
+  /* Now get the inode to visit next time that readdir() is called */
 
   prev = pdir->next;
 

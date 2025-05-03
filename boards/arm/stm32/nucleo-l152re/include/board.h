@@ -71,7 +71,7 @@
 /* PLL Configuration
  *
  *   - PLL source is HSE      -> 8MHz
- *   - PLL multipler is 12    -> 96MHz PLL VCO clock output
+ *   - PLL multiplier is 12   -> 96MHz PLL VCO clock output
  *   - PLL output divider 3   -> 32MHz divided down PLL VCO clock output
  *
  * Resulting SYSCLK frequency is 8MHz x 12 / 3 = 32MHz

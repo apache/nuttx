@@ -3219,7 +3219,7 @@ sam_ep_reserve(struct sam_usbdev_s *priv, uint8_t epset)
  *
  * Description:
  *   The endpoint is no long in-used.  It will be un-reserved and can be
- *   re-used if needed.
+ *   reused if needed.
  *
  ****************************************************************************/
 

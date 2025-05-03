@@ -1,7 +1,7 @@
 From be043f1f50a0b30c3817c262d516083e409283d7 Mon Sep 17 00:00:00 2001
 From: Juan Carrano <j.carrano@fu-berlin.de>
 Date: Mon, 23 Apr 2018 13:55:42 +0200
-Subject: [PATCH 5/8] Fix warnining on implicit pointer conversion.
+Subject: [PATCH 5/8] Fix warning on implicit pointer conversion.
 
 Change-Id: I2a208a0a4c835e752fe827acd3d5adb1aa2be626
 ---

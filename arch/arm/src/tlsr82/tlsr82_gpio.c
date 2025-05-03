@@ -144,7 +144,7 @@ static void tlsr82_gpio_dumpregs(const char *msg)
  * Name: tlsr82_gpio_ds_ctrl
  *
  * Description:
- *   Configurate the gpio drive strength be high/low.
+ *   Configure the gpio drive strength be high/low.
  *
  * Input Parameters:
  *   gpio_cfg_t - GPIO config information
@@ -200,7 +200,7 @@ static void tlsr82_gpio_ds_ctrl(gpio_cfg_t cfg, uint8_t ds)
  * Name: tlsr82_gpio_pol_ctrl
  *
  * Description:
- *   Configurate the gpio interrupt polarity (interruot trigger edge).
+ *   Configure the gpio interrupt polarity (interrupt trigger edge).
  *
  * Input Parameters:
  *   gpio_cfg_t - GPIO config information
@@ -481,7 +481,7 @@ void tlsr82_gpio_output_ctrl(gpio_cfg_t cfg, bool enable)
  * Name: tlsr82_gpio_pupd_ctrl
  *
  * Description:
- *   Configurate the gpio pull-up/pull-down.
+ *   Configure the gpio pull-up/pull-down.
  *
  * Input Parameters:
  *   gpio_cfg_t - GPIO config information
@@ -779,7 +779,7 @@ int tlsr82_gpioirqconfig(gpio_cfg_t cfg, xcpt_t func, void *arg)
     }
   else
     {
-      /* Find an approprite callback object */
+      /* Find an appropriate callback object */
 
       for (i = 0; i < CONFIG_GPIO_IRQ_MAX_NUM; ++i)
         {
@@ -787,7 +787,7 @@ int tlsr82_gpioirqconfig(gpio_cfg_t cfg, xcpt_t func, void *arg)
               gpio_irq_cbs[i].callback == NULL)
             {
               /* 1. Re-config the same pin before unconfig it, just direct
-               *    use pervious callback object.
+               *    use previous callback object.
                * 2. New pinset, use a new callback object.
                */
 
@@ -875,19 +875,19 @@ void tlsr82_gpioirqenable(gpio_cfg_t cfg)
     }
   else if (irqmode == GPIO_IRQ_M0_VAL)
     {
-      /* Set M0, the timer interrupt is controled by timer */
+      /* Set M0, the timer interrupt is controlled by timer */
 
       BM_SET(GPIO_IRQ_M0_REG(group), BIT(pin));
     }
   else if (irqmode == GPIO_IRQ_M1_VAL)
     {
-      /* Set M1, the timer interrupt is controled by timer */
+      /* Set M1, the timer interrupt is controlled by timer */
 
       BM_SET(GPIO_IRQ_M1_REG(group), BIT(pin));
     }
   else if (irqmode == GPIO_IRQ_M2_VAL)
     {
-      /* Set M2, the timer interrupt is controled by timer */
+      /* Set M2, the timer interrupt is controlled by timer */
 
       BM_SET(GPIO_IRQ_M2_REG(group), BIT(pin));
     }

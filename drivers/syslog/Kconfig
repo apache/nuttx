@@ -63,7 +63,7 @@ config SYSLOG_CRLF
 	bool "Syslog convert LF to CRLF"
 	default y
 	---help---
-		Pre-pend a carriage return before every linefeed that goes into the
+		Prepend a carriage return before every linefeed that goes into the
 		syslog.
 
 config SYSLOG_MAX_CHANNELS

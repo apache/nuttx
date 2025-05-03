@@ -57,7 +57,7 @@
  * most updated data, which includes data from the flash, the updates from
  * the journal and the LRU deltas as well.
  *
- * TODO: The above menetioned concept.
+ * TODO: The above mentioned concept.
  ****************************************************************************/
 
 /****************************************************************************
@@ -546,7 +546,7 @@ int mfs_pitr_init(FAR const struct mfs_sb_s * const sb,
     }
   else
     {
-      /* 0 or gabage value is fine for master node, not required. */
+      /* 0 or garbage value is fine for master node, not required. */
 
       pitr->p.ctz.idx_e = 0;
       pitr->p.ctz.pg_e  = 0;

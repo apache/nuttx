@@ -173,7 +173,7 @@ static int ieee802154_setup(FAR struct socket *psock)
  *           queried.
  *
  * Returned Value:
- *   The set of socket cababilities is returned.
+ *   The set of socket capabilities is returned.
  *
  ****************************************************************************/
 

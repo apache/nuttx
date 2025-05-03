@@ -254,7 +254,7 @@ static int convert_freq2period(uint32_t freq, ub16_t duty, uint32_t *param,
       return -1;
     }
 
-  /* calcurate prescale */
+  /* calculate prescale */
 
   if ((freq << 8) < (pwmfreq >> 8))
     {

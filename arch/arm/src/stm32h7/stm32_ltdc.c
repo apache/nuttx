@@ -204,7 +204,7 @@
 #  error Undefined or unrecognized base resolution
 #endif
 
-/* LTDC only supports 8 bit per pixel overal */
+/* LTDC only supports 8 bit per pixel overall */
 
 #define STM32_LTDC_LX_BYPP(n)       ((n) / 8)
 
@@ -671,7 +671,7 @@ struct stm32_interrupt_s
  * Private Function Prototypes
  ****************************************************************************/
 
-/* Overal LTDC helper */
+/* Overall LTDC helper */
 
 static void stm32_ltdc_enable(bool enable);
 static void stm32_ltdc_gpioconfig(void);

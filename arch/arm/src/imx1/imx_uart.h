@@ -136,8 +136,8 @@
 #define UART2_UCR3_INVT       (1 << 1)  /* Bit 1: Inverted Infrared Transmission */
 #define UART2_UCR3_REF30      (1 << 2)  /* Bit 2: Reference frequency 30 mhz */
 #define UART2_UCR3_REF25      (1 << 3)  /* Bit 3: Reference frequency 25 mhz */
-#define UART2_UCR3_AWAKEN     (1 << 4)  /* Bit 4: Asychronous WAKE Interrupt Enable */
-#define UART2_UCR3_AIRINTEN   (1 << 5)  /* Bit 5: Asychronous IR WAKE Interrupt Enable */
+#define UART2_UCR3_AWAKEN     (1 << 4)  /* Bit 4: Asynchronous WAKE Interrupt Enable */
+#define UART2_UCR3_AIRINTEN   (1 << 5)  /* Bit 5: Asynchronous IR WAKE Interrupt Enable */
 #define UART2_UCR3_RXDSEN     (1 << 6)  /* Bit 6: Receive Status Interrupt Enable */
 #define UART2_UCR3_RI         (1 << 7)  /* Bit 7: Ring Indicator */
 #define UART2_UCR3_Reserved2  (1 << 8)  /* Bit 8: Reserved */

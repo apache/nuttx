@@ -708,7 +708,7 @@ config RISCV_SEMIHOSTING_HOSTFS_CACHE_COHERENCE
 	bool "Cache coherence in semihosting hostfs"
 	depends on ARCH_DCACHE
 	---help---
-		Flush & Invalidte cache before & after bkpt instruction.
+		Flush & Invalidate cache before & after bkpt instruction.
 
 endif # RISCV_SEMIHOSTING_HOSTFS
 

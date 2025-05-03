@@ -67,7 +67,7 @@ struct lpc31_header_s
                                *    image is built. Note, this field is not used
                                *    by boot ROM but is provided to track the image
                                *    versions. */
-  uint32_t sbzbootparameter;  /* 0x2c    hould be zero. */
+  uint32_t sbzbootparameter;  /* 0x2c    Should be zero. */
   uint32_t cust_reserved[15]; /* 0x30-0x68: Reserved for customer use (60 bytes) */
   uint32_t header_crc32;      /* 0x6c CRC32 value of the header (bytes 0x00 to 0x6C
                                *    of the image). If the 'image_type' is set

@@ -1236,7 +1236,7 @@ static void IRAM_ATTR i2s_tx_schedule(struct esp_i2s_s *priv,
 
       /* Check if the DMA descriptor that generated an EOF interrupt is the
        * last descriptor of the current buffer container's DMA outlink.
-       * REVISIT: what to do if we miss syncronization and the descriptor
+       * REVISIT: what to do if we miss synchronization and the descriptor
        * that generated the interrupt is different from the expected (the
        * oldest of the list containing active transmissions)?
        */
@@ -2923,7 +2923,7 @@ static int i2s_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
         }
 
       i2sinfo("Prepared %d bytes to receive DMA buffers\n", apb->nmaxbytes);
-      i2s_dump_buffer("Recieved Audio pipeline buffer:",
+      i2s_dump_buffer("Received Audio pipeline buffer:",
                       &apb->samp[apb->curbyte],
                       apb->nbytes - apb->curbyte);
 
@@ -3191,7 +3191,7 @@ struct i2s_dev_s *esp_i2sbus_initialize(int port)
 
   i2sinfo("port: %d\n", port);
 
-  /* Statically allocated I2S' device strucuture */
+  /* Statically allocated I2S' device structure */
 
   switch (port)
     {

@@ -690,7 +690,7 @@ static int sam_process(struct sam_1wire_s *priv,
   ret = priv->result;
   leave_critical_section(irqs);
 
-  /* Release the port for re-use by other clients */
+  /* Release the port for reuse by other clients */
 
   nxmutex_unlock(&priv->lock);
   return ret;

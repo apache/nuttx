@@ -46,8 +46,8 @@
 #define CAPIOC_DUTYCYCLE _CAPIOC(1)
 
 /* Command:     CAPIOC_FREQUENCE
- * Description: Get the pulse frequence from the capture.
- * Arguments:   int32_t pointer to the location to return the frequence.
+ * Description: Get the pulse frequency from the capture.
+ * Arguments:   int32_t pointer to the location to return the frequency.
  * Return:      Zero (OK) on success.  Minus one will be returned on failure
  *              with the errno value set appropriately.
  */
@@ -64,7 +64,7 @@
 #define CAPIOC_EDGES     _CAPIOC(3)
 
 /* Command:     CAPIOC_ALL
- * Description: Get the pwm duty, pulse frequence, pwm edges, from
+ * Description: Get the pwm duty, pulse frequency, pwm edges, from
  *              the capture.
  * Arguments:   A reference to struct cap_all_s.
  * Return:      Zero (OK) on success.  Minus one will be returned on failure
@@ -148,7 +148,7 @@ struct cap_ops_s
   CODE int (*getduty)(FAR struct cap_lowerhalf_s *lower,
                       FAR uint8_t *duty);
 
-  /* Get the result pwm capture frequence value */
+  /* Get the result pwm capture frequency value */
 
   CODE int (*getfreq)(FAR struct cap_lowerhalf_s *lower,
                       FAR uint32_t *freq);

@@ -745,7 +745,7 @@ int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback);
  *   If the destination IPv6 address is in the local network (determined
  *   by logical ANDing of netmask and our IPv6 address), the function
  *   checks the Neighbor Table to see if an entry for the destination IPv6
- *   address is found.  If so, an L2 header is pre-pended at the beginning
+ *   address is found.  If so, an L2 header is prepended at the beginning
  *   of the packet and the function returns.
  *
  *   If no Neighbor Table entry is found for the destination IPv6 address,

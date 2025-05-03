@@ -1678,7 +1678,7 @@ static int mpfs_ep_disable(struct usbdev_ep_s *ep)
  *   ep        - USB device endpoint (unused)
  *
  * Returned Value:
- *   New allocated request struct or NULL if no mempry
+ *   New allocated request struct or NULL if no memory
  *
  ****************************************************************************/
 
@@ -2225,7 +2225,7 @@ static struct usbdev_ep_s *mpfs_allocep(struct usbdev_s *dev, uint8_t epno,
  *
  * Description:
  *   The endpoint is no longer in use.  It will be unreserved and can be
- *   re-used if needed.
+ *   reused if needed.
  *
  * Input Parameters:
  *   priv       - USB device abstraction

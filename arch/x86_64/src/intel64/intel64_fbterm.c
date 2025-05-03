@@ -96,7 +96,7 @@ static struct fb_term_s g_fb_term;
  * Name: fb_draw_pixel
  *
  * Description:
- *   Draw a pixel on the framebuffer.  Note that the color paramter must
+ *   Draw a pixel on the framebuffer.  Note that the color parameter must
  *   be in the format specified by the bpp of the framebuffer.
  *
  ****************************************************************************/

@@ -2099,7 +2099,7 @@
 /* RTC_IO_TOUCH_PAD1_TO_GPIO : R/W ;bitpos:[12] ;default: 1'd0 ; */
 
 /* Description: connect the rtc pad input to digital pad input
- * '0' is availbale.GPIO0
+ * '0' is available.GPIO0
  */
 
 #define RTC_IO_TOUCH_PAD1_TO_GPIO    (BIT(12))
@@ -2250,7 +2250,7 @@
 /* RTC_IO_TOUCH_PAD2_TO_GPIO : R/W ;bitpos:[12] ;default: 1'd0 ; */
 
 /* Description: connect the rtc pad input to digital pad input
- * '0' is availbale.GPIO2
+ * '0' is available.GPIO2
  */
 
 #define RTC_IO_TOUCH_PAD2_TO_GPIO    (BIT(12))
@@ -2401,7 +2401,7 @@
 /* RTC_IO_TOUCH_PAD3_TO_GPIO : R/W ;bitpos:[12] ;default: 1'd0 ; */
 
 /* Description: connect the rtc pad input to digital pad input
- * '0' is availbale. MTDO
+ * '0' is available. MTDO
  */
 
 #define RTC_IO_TOUCH_PAD3_TO_GPIO    (BIT(12))
@@ -2552,7 +2552,7 @@
 /* RTC_IO_TOUCH_PAD4_TO_GPIO : R/W ;bitpos:[12] ;default: 1'd0 ; */
 
 /* Description: connect the rtc pad input to digital pad input
- * '0' is availbale.MTCK
+ * '0' is available.MTCK
  */
 
 #define RTC_IO_TOUCH_PAD4_TO_GPIO    (BIT(12))
@@ -2703,7 +2703,7 @@
 /* RTC_IO_TOUCH_PAD5_TO_GPIO : R/W ;bitpos:[12] ;default: 1'd0 ; */
 
 /* Description: connect the rtc pad input to digital pad input
- * '0' is availbale.MTDI
+ * '0' is available.MTDI
  */
 
 #define RTC_IO_TOUCH_PAD5_TO_GPIO    (BIT(12))
@@ -2854,7 +2854,7 @@
 /* RTC_IO_TOUCH_PAD6_TO_GPIO : R/W ;bitpos:[12] ;default: 1'd0 ; */
 
 /* Description: connect the rtc pad input to digital pad input
- * '0' is availbale.MTMS
+ * '0' is available.MTMS
  */
 
 #define RTC_IO_TOUCH_PAD6_TO_GPIO    (BIT(12))
@@ -3005,7 +3005,7 @@
 /* RTC_IO_TOUCH_PAD7_TO_GPIO : R/W ;bitpos:[12] ;default: 1'd0 ; */
 
 /* Description: connect the rtc pad input to digital pad input
- * '0' is availbale.GPIO27
+ * '0' is available.GPIO27
  */
 
 #define RTC_IO_TOUCH_PAD7_TO_GPIO    (BIT(12))
@@ -3113,7 +3113,7 @@
 /* RTC_IO_TOUCH_PAD9_TO_GPIO : R/W ;bitpos:[19] ;default: 1'd0 ; */
 
 /* Description: connect the rtc pad input to digital pad input
- * '0' is availbale
+ * '0' is available
  */
 
 #define RTC_IO_TOUCH_PAD9_TO_GPIO    (BIT(19))

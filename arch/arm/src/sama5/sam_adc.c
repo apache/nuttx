@@ -539,7 +539,7 @@ static struct adc_dev_s g_adcdev =
  *
  * Returned Value:
  *   true:  This is the first register access of this type.
- *   flase: This is the same as the preceding register access.
+ *   false: This is the same as the preceding register access.
  *
  ****************************************************************************/
 
@@ -865,7 +865,7 @@ static void sam_adc_trigperiod(struct sam_adc_s *priv, uint32_t period)
   uint32_t regval;
   uint32_t div;
 
-  /* Divide trigger period avoid overflows.  Division by ten is awkard, but
+  /* Divide trigger period avoid overflows.  Division by ten is awkward, but
    * appropriate here because times are specified in decimal with lots of
    * zeroes.
    */
@@ -1644,7 +1644,7 @@ static int sam_adc_trigger(struct sam_adc_s *priv)
     }
 
   /* Configure to trigger using Timer/counter 0, channel 1, 2, or 3.
-   * NOTE: This trigger option depends on having properly configuer
+   * NOTE: This trigger option depends on having properly configured
    * timer/counter 0 to provide this output.  That is done independently
    * the timer/counter driver.
    */

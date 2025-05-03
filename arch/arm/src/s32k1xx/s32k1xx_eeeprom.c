@@ -140,7 +140,7 @@ static uint32_t execute_ftfc_command()
   if (retval & (FTTC_FSTAT_MGSTAT0 | FTTC_FSTAT_FPVIOL |
                 FTTC_FSTAT_ACCERR | FTTC_FSTAT_RDCOLERR))
     {
-      return retval; /* Error has occured */
+      return retval; /* Error has occurred */
     }
 
   return retval;

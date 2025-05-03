@@ -692,7 +692,7 @@ static int esp_i2c_slave_irq(int cpuint, void *context, void *arg)
  *   priv - Pointer to the internal driver state structure.
  *
  * Returned Values:
- *   Zero (OK) is returned on successfull transfer. -ETIMEDOUT is returned
+ *   Zero (OK) is returned on successful transfer. -ETIMEDOUT is returned
  *   in case a transfer didn't finish within the timeout interval.
  *
  ****************************************************************************/
@@ -868,7 +868,7 @@ static void esp_i2c_process(struct esp_i2c_priv_s *priv,
  *
  * Parameters:
  *   port - Port number of the I2C interface to be initialized.
- *   addr - Adress of the slave device
+ *   addr - Address of the slave device
  *
  * Returned Value:
  *   Pointer to valid I2C device structure is returned on success.

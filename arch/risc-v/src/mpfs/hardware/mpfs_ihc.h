@@ -65,7 +65,7 @@ struct ihc_sbi_rx_msg_s
 #  error Harts misconfigured. Cannot use the same harts.
 #endif
 
-/* Contex A and B hart ID's used in this system. Context A is the master. */
+/* Context A and B hart ID's used in this system. Context A is the master. */
 
 #if CONFIG_MPFS_IHC_LINUX_ON_HART1 == 1
 #define CONTEXTA_HARTID 0x01

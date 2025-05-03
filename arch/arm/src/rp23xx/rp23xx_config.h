@@ -42,8 +42,8 @@
 #  define HAVE_UART 1
 #endif
 
-/* Make sure all features are disabled for diabled U[S]ARTs.  This simplifies
- * checking later.
+/* Make sure all features are disabled for disabled U[S]ARTs.
+ * This simplifies checking later.
  */
 
 #ifndef CONFIG_RP23XX_UART0

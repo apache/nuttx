@@ -1974,7 +1974,7 @@ static int imx9_lpi2c_dma_transfer(struct imx9_lpi2c_priv_s *priv)
                                                  LPI2C_MSR_ALF |
                                                  LPI2C_MSR_FEF);
 
-  /* Enable the Iterrupts */
+  /* Enable the Interrupts */
 
   imx9_lpi2c_putreg(priv, IMX9_LPI2C_MIER_OFFSET,
                     LPI2C_MIER_NDIE | LPI2C_MIER_ALIE |
@@ -2291,7 +2291,7 @@ static int imx9_lpi2c_reset(struct i2c_master_s *dev)
 
 out:
 
-  /* Release the port for re-use by other clients */
+  /* Release the port for reuse by other clients */
 
   nxmutex_unlock(&priv->lock);
   return ret;

@@ -354,7 +354,7 @@ int up_rtc_initialize(void)
 
       putreg32(0, KINETIS_RTC_SR);
 
-      /* Enable oscilator - must have Vbat else hard fault */
+      /* Enable oscillator - must have Vbat else hard fault */
 
       putreg32((BOARD_RTC_CAP | RTC_CR_OSCE), KINETIS_RTC_CR);
 

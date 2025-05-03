@@ -2633,7 +2633,7 @@ config IMXRT_SRAM_HEAPOFFSET
 endmenu # i.MX RT Heap Configuration
 
 config IMXRT_FLEXRAM_PARTITION
-	bool "Set FlexRAM Paritioning"
+	bool "Set FlexRAM Partitioning"
 	depends on ARCH_FAMILY_IMXRT117x
 
 endmenu # Memory Configuration
@@ -2656,7 +2656,7 @@ config IMXRT_LPI2C_DMA_MAXMSG
 	default 8
 	depends on IMXRT_LPI2C_DMA
 	---help---
-		This option set the mumber of mesg that can be in a transfer.
+		This option set the number of mesg that can be in a transfer.
 		It is used to allocate space for the 16 bit LPI2C commands
 		that will be DMA-ed to the LPI2C device.
 

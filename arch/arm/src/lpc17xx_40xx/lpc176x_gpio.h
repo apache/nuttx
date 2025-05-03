@@ -53,7 +53,7 @@
 #  define GPIO_INTFE           (1 << GPIO_FUNC_SHIFT) /* 001 GPIO interrupt falling edge */
 #  define GPIO_INTRE           (2 << GPIO_FUNC_SHIFT) /* 010 GPIO interrupt rising edge */
 #  define GPIO_INTBOTH         (3 << GPIO_FUNC_SHIFT) /* 011 GPIO interrupt both edges */
-#  define GPIO_OUTPUT          (4 << GPIO_FUNC_SHIFT) /* 100 GPIO outpout pin */
+#  define GPIO_OUTPUT          (4 << GPIO_FUNC_SHIFT) /* 100 GPIO output pin */
 #  define GPIO_ALT1            (5 << GPIO_FUNC_SHIFT) /* 101 Alternate function 1 */
 #  define GPIO_ALT2            (6 << GPIO_FUNC_SHIFT) /* 110 Alternate function 2 */
 #  define GPIO_ALT3            (7 << GPIO_FUNC_SHIFT) /* 111 Alternate function 3 */

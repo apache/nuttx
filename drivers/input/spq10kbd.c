@@ -425,7 +425,7 @@ static int spq10kbd_interrupt(int irq, FAR void *context, FAR void *arg)
   int                        ret;
 
   /* Let the event worker know that it has an interrupt event to handle
-   * It is possbile that we will already have work scheduled from a
+   * It is possible that we will already have work scheduled from a
    * previous interrupt event.  That is OK we will service all the events
    * in the same work job.
    */

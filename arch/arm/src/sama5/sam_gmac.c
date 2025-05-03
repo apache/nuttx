@@ -386,7 +386,7 @@ static int  sam_gmac_configure(struct sam_gmac_s *priv);
  *
  * Returned Value:
  *   true:  This is the first register access of this type.
- *   flase: This is the same as the preceding register access.
+ *   false: This is the same as the preceding register access.
  *
  ****************************************************************************/
 
@@ -1482,7 +1482,7 @@ static void sam_interrupt_work(void *arg)
   /* Check for the receipt of an RX packet.
    *
    * RXCOMP indicates that a packet has been received and stored in memory.
-   *   The RXCOMP bit is cleared whent he interrupt status register was read.
+   *   The RXCOMP bit is cleared when the interrupt status register was read.
    * RSR:REC indicates that one or more frames have been received and placed
    *   in memory. This indication is cleared by writing a one to this bit.
    */

@@ -535,7 +535,7 @@ static const efuse_desc_t FLASH_TPUW[] =
 static const efuse_desc_t DIS_DOWNLOAD_MODE[] =
 {
   {
-    128, 1  /* Disble download mode include boot_mode[3:0] is 0 1 2 3 6 7, */
+    128, 1  /* Disable download mode include boot_mode[3:0] is 0 1 2 3 6 7, */
   },
 };
 
@@ -1213,7 +1213,7 @@ const efuse_desc_t *ESP_EFUSE_FLASH_TPUW[] =
 
 const efuse_desc_t *ESP_EFUSE_DIS_DOWNLOAD_MODE[] =
 {
-  &DIS_DOWNLOAD_MODE[0],  /* Disble download mode include boot_mode[3:0] is 0 1 2 3 6 7 */
+  &DIS_DOWNLOAD_MODE[0],  /* Disable download mode include boot_mode[3:0] is 0 1 2 3 6 7 */
   NULL
 };
 

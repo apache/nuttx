@@ -318,7 +318,7 @@ int gd32_gpio_config(uint32_t cfgset)
 
   port_base = g_gpio_base[port];
 
-  /* Eable the GPIO port clock */
+  /* Enable the GPIO port clock */
 
   gd32_gpio_clock_enable(port_base);
 

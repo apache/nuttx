@@ -42,7 +42,7 @@
 #define SAM_SUPC_INTFLAG_OFFSET    0x0008  /* Interrupt flag status and clear */
 #define SAM_SUPC_STATUS_OFFSET     0x000c  /* Status */
 #define SAM_SUPC_BOD33_OFFSET      0x0010  /* 3.3V brown-out detector control */
-#define SAM_SUPC_BOD12_OFFSET      0x0014  /* 1.2V brown-out detctor control */
+#define SAM_SUPC_BOD12_OFFSET      0x0014  /* 1.2V brown-out detector control */
 #define SAM_SUPC_VREG_OFFSET       0x0018  /* Voltage regulator system control */
 #define SAM_SUPC_VREF_OFFSET       0x001c  /* Voltage references system control */
 #define SAM_SUPC_BBPS_OFFSET       0x0020  /* Battery backup power switch control */

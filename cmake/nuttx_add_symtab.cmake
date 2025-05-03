@@ -93,7 +93,7 @@ function(nuttx_add_symtab)
   add_library(symtab_${NAME} OBJECT
               ${CMAKE_CURRENT_BINARY_DIR}/symtab_${NAME}.c)
 
-  # Make the dependance between .c and .h explicit. This is necessary since
+  # Make the dependence between .c and .h explicit. This is necessary since
   # using configure_file() does not seem to allow this to be automatically
   # guessed by CMake
   set_property(

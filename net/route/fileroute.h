@@ -84,7 +84,7 @@ int net_openroute_ipv6(int oflags, FAR struct file *filep);
  *   route - Location to return the next route read from the file
  *
  * Returned Value:
- *   The number of bytes read on success.  The special return valud of zero
+ *   The number of bytes read on success.  The special return value of zero
  *   indicates that the endof of file was encountered (and nothing was read).
  *   A negated errno value is returned on any failure.
  *

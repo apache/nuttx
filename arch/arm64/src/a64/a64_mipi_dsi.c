@@ -723,9 +723,9 @@ int a64_mipi_dsi_enable(void)
 
   /* DSI Pixel Package Register 3 (A31 Page 849)
    * Set CRC_Init_LineN (Bits 16 to 31) to 0xffff
-   *   (CRC initial to this value in transmitions except 1st one)
+   *   (CRC initial to this value in transmissions except 1st one)
    * Set CRC_Init_Line0 (Bits 0 to 15) to 0xffff
-   *   (CRC initial to this value in 1st transmition every frame)
+   *   (CRC initial to this value in 1st transmission every frame)
    */
 
   dsi_pixel_pf1 = CRC_INIT_LINEN(0XFFFF) | CRC_INIT_LINE0(0XFFFF);

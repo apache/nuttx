@@ -489,7 +489,7 @@ static void setup_timer(struct esp32s3_ledc_s *priv)
         }
   }
 
-  /* Caculate the prescaler */
+  /* Calculate the prescaler */
 
   prescaler = (float)pwmclk / priv->frequency / reload;
 

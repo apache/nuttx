@@ -345,7 +345,7 @@ static inline void nxbe_move_pwfb(FAR struct nxbe_window_s *wnd,
 
   /* Construct the destination bounding box in relative window
    * coordinates.  This derives from the source bounding box with
-   * an offset distination.
+   * an offset destination.
    */
 
   nxgl_rectoffset(&destrect, &srcrect, offset->x, offset->y);

@@ -43,8 +43,8 @@ typedef struct
   uint32_t addr_bit_len;       /* !< Address byte length */
   uint32_t *tx_data;           /* !< Point to send data buffer */
   uint32_t tx_data_bit_len;    /* !< Send data byte length. */
-  uint32_t *rx_data;           /* !< Point to recevie data buffer */
-  uint32_t rx_data_bit_len;    /* !< Recevie Data byte length. */
+  uint32_t *rx_data;           /* !< Point to receive data buffer */
+  uint32_t rx_data_bit_len;    /* !< Receive Data byte length. */
   uint32_t dummy_bit_len;
 } esp_rom_spi_cmd_t;
 

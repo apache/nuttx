@@ -71,7 +71,7 @@
 
 #define TIMCTR_LOAD_COUNTER                 (1 << 2)
 
-/* Bit 3: Set 1, will triger underflow interrupt each underflow */
+/* Bit 3: Set 1, will trigger underflow interrupt each underflow */
 
 #define TIMCTR_ENABLE_INT                   (1 << 3)
 

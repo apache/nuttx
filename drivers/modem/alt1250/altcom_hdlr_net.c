@@ -349,7 +349,7 @@ static int parse_simd(FAR struct apicmd_cmddat_repevt_simd_s *simd,
 
       default:
         {
-          m_err("Unsupport SIMD status. status:%d\n", simd->status);
+          m_err("Unsupported SIMD status. status:%d\n", simd->status);
           return -EILSEQ;
         }
         break;
@@ -392,7 +392,7 @@ static int parse_simstate(
 
       default:
         {
-          m_err("Unsupport SIM state. status:%d\n", simstate->state);
+          m_err("Unsupported SIM state. status:%d\n", simstate->state);
           ret = -EILSEQ;
         }
         break;
@@ -1197,7 +1197,7 @@ int32_t altcom_repevt_pkt_parse(FAR struct alt1250_dev_s *dev,
 
           default:
             {
-              m_err("Unsupport event type. type:%d\n", in->type);
+              m_err("Unsupported event type. type:%d\n", in->type);
               ret = -EILSEQ;
             }
             break;
@@ -1247,7 +1247,7 @@ int32_t altcom_repevt_pkt_parse(FAR struct alt1250_dev_s *dev,
 
           default:
             {
-              m_err("Unsupport event type. type:%d\n",
+              m_err("Unsupported event type. type:%d\n",
                 ntohs(in->type));
               ret = -EILSEQ;
             }

@@ -1785,7 +1785,7 @@ void usbmsc_uninitialize(FAR void *handle)
 
   priv = &alloc->dev;
 
-  /* If the thread hasn't already exitted, tell it to exit now */
+  /* If the thread hasn't already exited, tell it to exit now */
 
   if (priv->thstate != USBMSC_STATE_NOTSTARTED)
     {

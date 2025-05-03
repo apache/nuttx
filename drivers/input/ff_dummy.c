@@ -93,7 +93,7 @@ static void ff_dummy_haptics_set_gain(FAR struct ff_lowerhalf_s *lower,
  *
  * Input Parameters:
  *   devno - The user specifies device number, from 0. If the
- *           devno alerady exists, -EEXIST will be returned.
+ *           devno already exists, -EEXIST will be returned.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.

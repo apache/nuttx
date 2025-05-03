@@ -132,7 +132,7 @@ void xtensa_panic(int xptcode, uint32_t *regs)
  *   17 InstTLBMultiHitCause
  *      Multiple instruction TLB entries matched
  *   18 InstFetchPrivilegeCause
- *      An instruction fetch referenced a virtual address at a ring leve
+ *      An instruction fetch referenced a virtual address at a ring level
  *      less than CRING.
  *   19 Reserved for Cadence
  *   20 InstFetchProhibitedCause

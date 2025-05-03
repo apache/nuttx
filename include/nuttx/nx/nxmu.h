@@ -122,7 +122,7 @@ enum nxmsg_e
   NX_SVRMSG_OPENWINDOW,       /* Create a new window */
   NX_SVRMSG_CLOSEWINDOW,      /* Close an existing window */
   NX_SVRMSG_BLOCKED,          /* The window is blocked */
-  NX_SVRMSG_SYNCH,            /* Window syncrhonization request */
+  NX_SVRMSG_SYNCH,            /* Window synchronization request */
   NX_SVRMSG_CURSOR_ENABLE,    /* Enable/disablel cursor presentation */
   NX_SVRMSG_CURSOR_IMAGE,     /* Set cursor image */
   NX_SVRMSG_CURSOR_SETPOS,    /* Set cursor position */

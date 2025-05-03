@@ -78,10 +78,10 @@
 #define PCA9635PW_MODE_1_AI1       (1<<6)                     /* auto increment bit 1 */
 #define PCA9635PW_MODE_1_AI0       (1<<5)                     /* auto increment bit 0 */
 #define PCA9635PW_MODE_1_SLEEP     (1<<4)                     /* low power mode/sleep enable/disable */
-#define PCA9635PW_MODE_1_SUB1      (1<<3)                     /* PCA9635PW reponds to I2C subaddress 1 enable/disable */
-#define PCA9635PW_MODE_1_SUB2      (1<<2)                     /* PCA9635PW reponds to I2C subaddress 2 enable/disable */
-#define PCA9635PW_MODE_1_SUB3      (1<<1)                     /* PCA9635PW reponds to I2C subaddress 3 enable/disable */
-#define PCA9635PW_MODE_1_ALLCALL   (1<<0)                     /* PCA9635PW reponds to led all call I2C address enable/disable */
+#define PCA9635PW_MODE_1_SUB1      (1<<3)                     /* PCA9635PW responds to I2C subaddress 1 enable/disable */
+#define PCA9635PW_MODE_1_SUB2      (1<<2)                     /* PCA9635PW responds to I2C subaddress 2 enable/disable */
+#define PCA9635PW_MODE_1_SUB3      (1<<1)                     /* PCA9635PW responds to I2C subaddress 3 enable/disable */
+#define PCA9635PW_MODE_1_ALLCALL   (1<<0)                     /* PCA9635PW responds to led all call I2C address enable/disable */
 
 /* PCA9635PW_MODE_2 bit definitions */
 

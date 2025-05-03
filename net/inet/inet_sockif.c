@@ -339,7 +339,7 @@ static int inet_setup(FAR struct socket *psock)
  *           queried.
  *
  * Returned Value:
- *   The non-negative set of socket cababilities is returned.
+ *   The non-negative set of socket capabilities is returned.
  *
  ****************************************************************************/
 

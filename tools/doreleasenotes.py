@@ -51,7 +51,7 @@ def doreleasenotes(release, gh_token):
 
         print(str(br.name) + " " + str(commiter_date.isoformat()))
 
-    # Generate ther release notes
+    # Generate the release notes
     print("\n")
     print("Please select a range for release notes generation")
     print("Date times should be in the GitHub format as listed here:")

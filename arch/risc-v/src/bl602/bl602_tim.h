@@ -266,7 +266,7 @@ void bl602_timer_setcountmode(uint32_t timer_ch, uint8_t count_mode);
  *
  * Input Parameters:
  *   timer_ch - TIMER channel type.
- *   cmp_no   - TIMER macth comparator ID type.
+ *   cmp_no   - TIMER match comparator ID type.
  *
  * Returned Value:
  *   None.
