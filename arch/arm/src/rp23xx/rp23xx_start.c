@@ -156,6 +156,10 @@ void __start(void)
       putreg32(0, RP23XX_SIO_SPINLOCK(safe_spinlocks[i]));
     }
 
+  /* Initialize the FPU */
+
+  arm_fpuconfig();
+
   /* Configure the uart so that we can get debug output as soon as possible */
 
   rp23xx_lowsetup();
