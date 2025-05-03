@@ -328,9 +328,9 @@ Header File Installation
 
 Build Notes:
 
-  It may not necessary to have a built version of avr-lib; only header files
-  are required.  Bu if you choose to use the optimized libraru functions of
-  the flowing point library, then you may have to build avr-lib from sources.
+  It may not be necessary to have a built version of avr-lib; only header files
+  are required.  But if you choose to use the optimized library functions of
+  the floating point library, then you may have to build avr-lib from sources.
   Below are instructions for building avr-lib from fresh sources:
 
   1. Download the avr-libc package from:

@@ -69,7 +69,7 @@ multiple low-priority work queues are used.
 * Other Common Device Drivers:
 
 - Add capabilities() method to SDIO interface. Remove
-CONFIG_SDIO_WIDTH_D1_ONLY. That should not be a global propertie,
+CONFIG_SDIO_WIDTH_D1_ONLY. That should not be a global property,
 but rather a capability/limitation of single slot when there may be
 multiple slots.
 - Removed dmasupported() method from the SDIO interface. That is now

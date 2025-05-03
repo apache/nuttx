@@ -635,7 +635,7 @@ Load NuttX with U-Boot on AT91 boards
 
           saveenv
 
-     4. If Ethernet Phy has not been detected during former bootup, reset
+     4. If Ethernet Phy has not been detected during former boot up, reset
         the board to reload U-Boot : the Ethernet address and Phy
         initialization shall be ok, now
 

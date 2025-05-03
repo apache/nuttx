@@ -1635,7 +1635,7 @@ tools.  There are, however, complexities in doing that because those tools
 depend on the shell environment and use DLLs that are not found (at least
 not without the correct setup).
 
-Host Compiler:  I use the MingGW GCC compiler which can be downloaded from
+Host Compiler:  I use the MinGW GCC compiler which can be downloaded from
 <http://www.mingw.org/>.  If you are using GNUWin32, then it is recommended
 the you not install the optional MSYS components as there may be conflicts.
 

@@ -572,8 +572,8 @@ Function                  Special Setup/Notes                                   
 ``nx_lower()``            Change to ``CONFIG_EXAMPLES_NX_RAWWINDOWS=y`` in the             YES
                           ``<NuttX-Directory>/.config`` file
 ``nx_modal()``            .                                                                NO
-``nx_setvisibility()``    Exercized using Twm4Nx                                           YES, Informally
-``nx_ishidden()``         Exercized using Twm4Nx                                           YES, Informally
+``nx_setvisibility()``    Exercised using Twm4Nx                                           YES, Informally
+``nx_ishidden()``         Exercised using Twm4Nx                                           YES, Informally
 ``nx_fill()``             Change to ``CONFIG_EXAMPLES_NX_RAWWINDOWS=y`` in the             YES
                           ``<NuttX-Directory>/.config`` file
 ``nx_getrectangle()``     .                                                                YES
@@ -604,8 +604,8 @@ Function                     Special Setup/Notes       Verified
 ``nxtk_raise()``             .                         YES
 ``nxtk_lower()``             .                         YES
 ``nxtk_modal()``             .                         NO
-``nxtk_setvisibility()``     Exercized using Twm4Nx    YES, informally
-``nxtk_ishidden()``          Exercized using Twm4Nx    YES, informally
+``nxtk_setvisibility()``     Exercised using Twm4Nx    YES, informally
+``nxtk_ishidden()``          Exercised using Twm4Nx    YES, informally
 ``nxtk_fillwindow()``        .                         YES
 ``nxtk_getwindow()``         .                         NO
 ``nxtk_filltrapwindow()``    .                         NO

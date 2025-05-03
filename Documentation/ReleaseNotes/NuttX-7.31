@@ -274,7 +274,7 @@ LCD, add a new configuration to support an LCD. From Alin
 Jerpelea.
 - WiFi: Improve performance for webserver: (1) Enable SPI DMA for
 both TX and RX, (2) Increase SPI clock speed from 4MHz to 10MHz,
-(3) Increase buffer size for sendfile() from 512B to 1KBm abd (4)
+(3) Increase buffer size for sendfile() from 512B to 1KBm and (4)
 Enable sendfile() for webserver. From Masayuki Ishikawa.
 - MPY: Add MPY defconfig. From Alin Jerpelea.
 - Update defconfigs rndis and wifi: Enable RTC and webserver with
@@ -496,7 +496,7 @@ Gregory Nutt.
 SPresence and other boards based on the CXD56 arch. To enable this
 binary format set in your config CONFIG_CXD56_BINARY=y. From Alin
 Jerpelea.
-- tools/: Add flash_writer for CXD56 boards. This flash writter is
+- tools/: Add flash_writer for CXD56 boards. This flash writer is
 using the xmodem for firmware transfer for flashing please use:
 'tools/flash_writer.py -s -c /dev/ttyUSB0 -d -b 115200 -n nuttx.spk'.
 From Alin Jerpelea.
@@ -613,7 +613,7 @@ re-inserted. From Anthony Merlino.
 usrsockdev_do_request(). In a client mode, socket() will be the
 first request for usrsockdev_do_request(). However, in a server
 mode, the first request to accepted sockets will be recv() or other
-which depend on applications. So I think we should remove thi
+which depend on applications. So I think we should remove the
 DEBUGASSERT from usrsockdev_do_request(). From Masayuki Ishikawa.
 - ICMPV6 Autoconfig: Use ntohs() to convert IPv6 address from
 network to host order int network debug output. From Bernd Walter.

@@ -12,3 +12,7 @@ Linix 45ZWN24-40           2  0.5 Ohm    0.400 mH  2.34A   24V
   THN,
 #  define AES_ISR_URAT_WORRDACC      (5 << AES_ISR_URAT_SHIFT) /* WRONLY register read access */
   WRONLY,
+* [#14540](https://github.com/apache/nuttx/pull/14540) CMake/preprocess: fix typo PREPROCES -> PREPROCESS
+* [#14927](https://github.com/apache/nuttx/pull/14927) spelling: fix spelling typo premption -> preemption
+* [#15520](https://github.com/apache/nuttx/pull/15520) drivers/note: fix typo falgs and align local name to irq_mask
+        ans init
