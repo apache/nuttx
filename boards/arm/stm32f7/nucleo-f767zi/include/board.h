@@ -312,14 +312,45 @@
 
 /* Button definitions *******************************************************/
 
-/* The STM32F7 Discovery supports one button:  Pushbutton B1, labeled "User",
- * is connected to GPIO PI11.
- * A high value will be sensed when the button is depressed.
+/* The STM32F7 Discovery has just one user_button natively, which one is
+ * connected to GPIO PC13. This button, in this context, named as BUILT_IN,
+ * is connected in a pulldown resistor. Thus, when it changes from default
+ * value (LOW) to HIGH value, it is considered as 'pressed'.
+ *
+ * Plus, we can use the same strategy like in stm32103-minimun (bluepill) to
+ * provide more freedom to the users. Hence, four additional buttons will be
+ * available now and, then, five buttons can be directly handled.
+ *
+ * Please, make sure to also use your external buttons with a pulldown
+ * resistor as well, otherwise it will not work as expected.
+ *
+ * For this example we'll use the availables pin at ST Zio connector CN10,
+ * as listed below:
+ *
+ *   -------------------|----------|------------|-----------------
+ *      button_name     | pin_name | pin_number |  stm32_gpio_pin
+ *   -------------------|----------|------------|-----------------
+ *     BUTTON_EXTERN_1  |    D2    |     12     |     PF_15
+ *     BUTTON_EXTERN_2  |    D1    |     14     |     PG_14
+ *     BUTTON_EXTERN_3  |    D0    |     16     |     PG_9
+ *     BUTTON_EXTERN_4  |    D34   |     33     |     PE_0
+ *   -------------------------------------------------------------
+ *
  */
 
-#define BUTTON_USER        0
-#define NUM_BUTTONS        1
-#define BUTTON_USER_BIT    (1 << BUTTON_USER)
+#define BUTTON_BUILT_IN        0
+#define BUTTON_EXTERN_1        1
+#define BUTTON_EXTERN_2        2
+#define BUTTON_EXTERN_3        3
+#define BUTTON_EXTERN_4        4
+
+#define BUTTON_BUILT_IN_BIT    (1 << BUTTON_BUILT_IN)
+#define BUTTON_EXTERN_1_BIT    (1 << BUTTON_EXTERN_1)
+#define BUTTON_EXTERN_2_BIT    (1 << BUTTON_EXTERN_2)
+#define BUTTON_EXTERN_3_BIT    (1 << BUTTON_EXTERN_3)
+#define BUTTON_EXTERN_4_BIT    (1 << BUTTON_EXTERN_4)
+
+#define NUM_BUTTONS            5
 
 /* DMA channels *************************************************************/
 
