@@ -772,11 +772,11 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 #endif
           priv->baud = cfgetispeed(termiosp);
 
+          spin_unlock_irqrestore(&priv->lock, flags);
+
           /* Configure the UART line format and speed. */
 
           up_set_format(dev);
-
-          spin_unlock_irqrestore(&priv->lock, flags);
         }
         break;
 #endif
@@ -903,7 +903,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
   if (enable)
     {
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
@@ -914,7 +914,13 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
        * interrupts disabled (note this may recurse).
        */
 
+#  ifdef CONFIG_SMP
+      spin_unlock_irqrestore(&priv->lock, flags);
+#  endif
       uart_xmitchars(dev);
+#  ifdef CONFIG_SMP
+      flags = spin_lock_irqsave(&priv->lock);
+#  endif
 #endif
     }
   else
@@ -922,8 +928,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
       priv->ier &= ~RP23XX_UART_UARTICR_TXIC;
       up_serialout(priv, RP23XX_UART_UARTIMSC_OFFSET, priv->ier);
     }
-
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************
@@ -967,7 +972,7 @@ static bool up_txempty(struct uart_dev_s *dev)
  *
  * Description:
  *   Performs the low level UART initialization early in debug so that the
- *   serial console will be available during bootup.  This must be called
+ *   serial console will be available during boot up.  This must be called
  *   before arm_serialinit.
  *
  *   NOTE: Configuration of the CONSOLE UART was performed by up_lowsetup()
