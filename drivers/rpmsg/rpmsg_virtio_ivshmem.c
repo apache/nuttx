@@ -156,7 +156,7 @@ rpmsg_virtio_ivshmem_get_resource(FAR struct rpmsg_virtio_lite_s *dev)
     }
   else
     {
-      /* Wait untils master is ready, salve need use master base to
+      /* Wait until master is ready, slave needs to use master base to
        * initialize addrenv.
        */
 

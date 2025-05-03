@@ -147,7 +147,7 @@ goto :End
 
 :ShowUsage
 echo %progname% is a tool for flexible generation of command line pre-processor
-echo definitions arguments for a variety of diffent ccpaths in a variety of
+echo definitions arguments for a variety of different ccpaths in a variety of
 echo compilation environments"
 echo USAGE:%progname% [-h] ^<compiler-path^> ^<def1^>[=^<val1^>] [^<def2^>[=^<val2^>] [^<def3^>[=^<val3^>] ...]]
 echo Where:"

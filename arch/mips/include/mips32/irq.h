@@ -67,7 +67,7 @@
 #define REG_EPC_NDX         2
 #define REG_STATUS_NDX      3
 
-/* General pupose registers */
+/* General purpose registers */
 
 /* $0: Zero register does not need to be saved */
 

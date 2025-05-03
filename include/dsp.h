@@ -191,7 +191,7 @@ typedef struct float_sat_f32_s float_sat_f32_t;
 struct pid_controller_f32_s
 {
   bool            aw_en;       /* Integral part decay if saturated */
-  bool            ireset_en;   /* Intergral part reset if saturated */
+  bool            ireset_en;   /* Integral part reset if saturated */
   bool            pisat_en;    /* PI saturation enabled */
   bool            pidsat_en;   /* PID saturation enabled */
   bool            _res;        /* Reserved */
@@ -237,7 +237,7 @@ typedef struct ab_frame_f32_s ab_frame_f32_t;
 
 struct dq_frame_f32_s
 {
-  float d;                     /* Driect component */
+  float d;                     /* Direct component */
   float q;                     /* Quadrature component */
 };
 
@@ -323,7 +323,7 @@ struct motor_aobserver_smo_f32_s
   float emf_lp_filter1; /* Adaptive first low pass EMF filter */
   float emf_lp_filter2; /* Adaptive second low pass EMF filter */
   ab_frame_f32_t emf;   /* Estimated back-EMF */
-  ab_frame_f32_t emf_f; /* Fitlered estimated back-EMF */
+  ab_frame_f32_t emf_f; /* Filtered estimated back-EMF */
   ab_frame_f32_t z;     /* Correction factor */
   ab_frame_f32_t i_est; /* Estimated idq current */
   ab_frame_f32_t v_err; /* v_err = v_ab - emf */

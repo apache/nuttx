@@ -357,7 +357,7 @@
 #define SYSTEM_SPI4_CLK_EN_S  31
 
 /* SYSTEM_ADC2_ARB_CLK_EN : R/W; bitpos: [30]; default: 1;
- * Set this bit to enable clock of aribiter of ADC2.
+ * Set this bit to enable clock of arbiter of ADC2.
  */
 
 #define SYSTEM_ADC2_ARB_CLK_EN    (BIT(30))
@@ -711,7 +711,7 @@
 #define SYSTEM_SPI4_RST_S  31
 
 /* SYSTEM_ADC2_ARB_RST : R/W; bitpos: [30]; default: 0;
- * Set this bit to reset aribiter of ADC2.
+ * Set this bit to reset arbiter of ADC2.
  */
 
 #define SYSTEM_ADC2_ARB_RST    (BIT(30))

@@ -763,8 +763,8 @@ config NRF91_MODEM_PREFERENCE
 		0 - No preference. Initial system selection is based on history data and USIM
 		1 - LTE-M preferred
 		2 - NB-IoT preferred
-		3 - Network selection priorities override system priority, but LTE-M is prefered
-		4 - Network selection priorities override system priority, but NB-IoT is prefered
+		3 - Network selection priorities override system priority, but LTE-M is preferred
+		4 - Network selection priorities override system priority, but NB-IoT is preferred
 
 		For details look at "nRF9160 AT Commands Command Reference Guid" from Nordic,
 		section "5.27 System mode"

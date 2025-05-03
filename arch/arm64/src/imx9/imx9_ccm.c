@@ -51,7 +51,7 @@
  * Name: ccm_clk_src_tz_access
  *
  * Description:
- *   Clock source access contol enable.
+ *   Clock source access control enable.
  *
  * Input Parameters:
  *   pscll      -  Clock source

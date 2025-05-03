@@ -806,8 +806,8 @@ errout:
  *   The new offset may be beyond the current file size. If that's the case,
  *   then on any subsequent writes, it will be such that there are bytes with
  *   '\0' in the gap/hole. In mnemofs, the whole hole situation is that the
- *   LRU doesn't know about the existence of holes, but comitting a file from
- *   LRU to the journal does write all the holes to the flash.
+ *   LRU doesn't know about the existence of holes, but committing a file
+ *   from LRU to the journal does write all the holes to the flash.
  *
  * Input Parameters:
  *   filep   - File pointer.
@@ -1489,7 +1489,7 @@ static int mnemofs_readdir(FAR struct inode *mountpt,
       MFS_EXTRA_LOG("READDIR", "Mutex acquired.");
     }
 
-  MFS_EXTRA_LOG("READDIR", "Curretn direntry index is %" PRIu8,
+  MFS_EXTRA_LOG("READDIR", "Current direntry index is %" PRIu8,
                 fsdirent->idx);
 
   if (fsdirent->idx == 0)
@@ -2629,7 +2629,7 @@ int mnemofs_flush(FAR struct mfs_sb_s *sb)
   int  ret    = OK;
   bool change;
 
-  /* Emtpy the LRU, and maybe the journal as well. */
+  /* Empty the LRU, and maybe the journal as well. */
 
   finfo("Flush operation started.");
 

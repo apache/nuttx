@@ -139,7 +139,7 @@ def main():
         # write content
         for file, r_full_path in files:
             write_f_data(fd, file, r_full_path, args.add_progmem)
-            fd.write("\n")  # Add empty line beetween files
+            fd.write("\n")  # Add empty line between files
 
         # write list of files
         prev_file = None

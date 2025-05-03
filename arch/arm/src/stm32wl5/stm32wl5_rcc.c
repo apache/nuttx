@@ -676,7 +676,7 @@ void stm32wl5_stdclockconfig(void)
 
 #if defined(STM32WL5_BOARD_USETCXO)
   /* nucleo-wl55jc uses TCXO crystal, which needs to be first
-   * powered up with PB0 pin - or more convinently by setting
+   * powered up with PB0 pin - or more conveniently by setting
    * HSEBYPPWR register. This has to be done before HSE is enabled
    */
 

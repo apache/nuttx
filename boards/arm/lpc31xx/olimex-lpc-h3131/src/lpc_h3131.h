@@ -168,7 +168,7 @@ void weak_function lpc31_usbdev_initialize(void);
  * Name: lpc31_usbhost_bootinitialize
  *
  * Description:
- *   Called from lpc31_boardinitialize very early in inialization to setup
+ *   Called from lpc31_boardinitialize very early in initialization to setup
  *   USB host-related GPIO pins for the LPC-H3131 board.
  *
  ****************************************************************************/

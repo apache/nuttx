@@ -154,7 +154,7 @@
 #define UART_SW_XOFF_INT_RAW_S  10
 
 /* UART_SW_XON_INT_RAW : R/WTC/SS; bitpos: [9]; default: 0;
- * This interrupt raw bit turns to high level when receiver recevies Xon
+ * This interrupt raw bit turns to high level when receiver receives Xon
  * char when uart_sw_flow_con_en is set to 1.
  */
 
@@ -320,7 +320,7 @@
 #define UART_TX_DONE_INT_ST_S  14
 
 /* UART_TX_BRK_IDLE_DONE_INT_ST : RO; bitpos: [13]; default: 0;
- * This is the stauts bit for tx_brk_idle_done_int_raw when
+ * This is the status bit for tx_brk_idle_done_int_raw when
  * tx_brk_idle_done_int_ena is set to 1.
  */
 
@@ -1148,7 +1148,7 @@
 #define UART_IRDA_DPLX_S  9
 
 /* UART_TXD_BRK : R/W; bitpos: [8]; default: 0;
- * Set this bit to enbale transmitter to  send NULL when the process of
+ * Set this bit to enable transmitter to send NULL when the process of
  * sending data is done.
  */
 
@@ -1220,7 +1220,7 @@
 #define UART_CONF1_REG(i) (REG_UART_BASE(i) + 0x24)
 
 /* UART_RX_TOUT_EN : R/W; bitpos: [23]; default: 0;
- * This is the enble bit for uart receiver's timeout function.
+ * This is the enable bit for uart receiver's timeout function.
  */
 
 #define UART_RX_TOUT_EN    (BIT(23))

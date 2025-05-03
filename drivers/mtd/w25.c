@@ -543,7 +543,7 @@ static uint8_t w25_waitwritecomplete(struct w25_dev_s *priv)
   uint8_t status;
 
   /* Loop as long as the memory is busy with a write cycle. Device sets BUSY
-   * flag to a 1 state whhen previous write or erase command is still
+   * flag to a 1 state when previous write or erase command is still
    * executing and during this time, device will ignore further instructions
    * except for "Read Status Register" and "Erase/Program Suspend"
    * instructions.

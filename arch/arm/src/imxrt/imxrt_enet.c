@@ -2263,7 +2263,7 @@ static int imxrt_determine_phy(struct imxrt_driver_s *priv)
  *
  * Input Parameters:
  *   priv - Reference to the private ENET driver state structure
- *   name - a pointer to comapre to.
+ *   name - a pointer to compare to.
  *
  * Returned Value:
  *   1 on match, a 0 on no match.
@@ -2286,7 +2286,7 @@ static int imxrt_phy_is(struct imxrt_driver_s *priv, const char *name)
  *   phydata - last read phy data - may be ignored if there is no
  *             status register defined by the current PHY.
  *   mask - A value to and with phydata if a status register is
- *          defined. Or the value retunred if no status register is
+ *          defined. Or the value returned if no status register is
  *          defined.
  *
  * Returned Value:
@@ -3088,7 +3088,7 @@ int imxrt_netinitialize(int intf)
 
   memset(priv, 0, sizeof(struct imxrt_driver_s));
 
-  priv->base = IMXRT_ENETN_BASE;        /* Assigne base address */
+  priv->base = IMXRT_ENETN_BASE;        /* Assign base address */
 
   priv->dev.d_ifup    = imxrt_ifup;     /* I/F up (new IP address) callback */
   priv->dev.d_ifdown  = imxrt_ifdown;   /* I/F down callback */

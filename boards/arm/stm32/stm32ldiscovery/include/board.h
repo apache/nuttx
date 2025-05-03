@@ -74,7 +74,7 @@
 /* PLL Configuration
  *
  *   - PLL source is HSI      -> 16MHz input (nominal)
- *   - PLL multipler is 6     -> 96MHz PLL VCO clock output (for USB)
+ *   - PLL multiplier is 6    -> 96MHz PLL VCO clock output (for USB)
  *   - PLL output divider 3   -> 32MHz divided down PLL VCO clock output
  *
  * Resulting SYSCLK frequency is 16MHz x 6 / 3 = 32MHz
@@ -114,9 +114,9 @@
 #define STM32_SYSCLK_SW          RCC_CFGR_SW_PLL         /* Use the PLL as the SYSCLK */
 #define STM32_SYSCLK_SWS         RCC_CFGR_SWS_PLL
 #ifdef CONFIG_STM32_USB
-#  define STM32_SYSCLK_FREQUENCY (STM32_PLL_FREQUENCY/3) /* SYSCLK frequence is 96MHz/PLLDIV = 32MHz */
+#  define STM32_SYSCLK_FREQUENCY (STM32_PLL_FREQUENCY/3) /* SYSCLK frequency is 96MHz/PLLDIV = 32MHz */
 #else
-#  define STM32_SYSCLK_FREQUENCY (STM32_PLL_FREQUENCY/2) /* SYSCLK frequence is 64MHz/PLLDIV = 32MHz */
+#  define STM32_SYSCLK_FREQUENCY (STM32_PLL_FREQUENCY/2) /* SYSCLK frequency is 64MHz/PLLDIV = 32MHz */
 #endif
 
 /* AHB clock (HCLK) is SYSCLK (32MHz) */
@@ -256,7 +256,7 @@
 #  define GPIO_USART2_RX         GPIO_USART2_RX_1 /* PA3 */
 #  define GPIO_USART2_TX         GPIO_USART2_TX_1 /* PA2 */
 
-/* Arbirtrarily select PB10 and PB11 */
+/* Arbitrarily select PB10 and PB11 */
 
 #  define GPIO_USART3_RX         GPIO_USART3_RX_1 /* PB11 */
 #  define GPIO_USART3_TX         GPIO_USART3_TX_1 /* PB10 */

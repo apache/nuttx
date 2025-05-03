@@ -490,8 +490,8 @@ struct i3c_bus
  *        This method is mandatory only if ->request_ibi is not NULL.
  * @recycle_ibi_slot: recycle an IBI slot. Called every time an IBI has been
  *        processed by its handler. The IBI slot should be put back
- *        in the IBI slot pool so that the controller can re-use it
- *        for a future IBI
+ *        in the IBI slot pool so that the controller can reuse it
+ *        for a future IBI.
  *        This method is mandatory only if ->request_ibi is not
  *        NULL.
  */
@@ -584,7 +584,7 @@ struct i3c_generic_ibi_slot
 /* struct i3c_generic_ibi_pool - I3C master controller object
  * @lock: used to protect share resource.
  * @num_slots: the number of struct i3c_generic_ibi_slot.
- * @slots: the general slot used to manager payload infomation in pool.
+ * @slots: the general slot used to manager payload information in pool.
  * @payload_buf: pending process messages from IBI handler.
  * @free_slots: a free slot list from a generic IBI pool.
  * @pending: a pending slots list from a generic IBI pool.
@@ -904,8 +904,8 @@ FAR struct i3c_ibi_slot *i3c_master_get_free_ibi_slot(
  *
  *   This function takes care of everything for you:
  *     - Creates and initializes the I3C bus.
- *     - Registers all I3C charactor driver that supports I3C transfer.
- *     - Registers the I2C charactor driver that supports I2C transfer.
+ *     - Registers all I3C character driver that supports I3C transfer.
+ *     - Registers the I2C character driver that supports I2C transfer.
  *
  * Input Parameters:
  *   master - Master used to send frames on the bus.

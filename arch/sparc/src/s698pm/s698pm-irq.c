@@ -230,10 +230,10 @@ int s698pm_setup_irq(int cpu, int irq, int priority)
     }
   else if (irq > S698PM_IRQ_LAST && irq < NR_IRQS)
     {
-      /* Second level interrupt share a IRQ and connnect to a interrupt 14
+      /* Second level interrupt share a IRQ and connect to a interrupt 14
        * of first level interrupt(that is IRQ 0x1E), We extend Second level
        * interrupt to IRQ 0x100~0x10F. because first level interrupt in the
-       * interrupt reister is bit 0~15 and second level interrupt is bit 16
+       * interrupt register is bit 0~15 and second level interrupt is bit 16
        * ~31, so cpuint of second level interrupt is irq - 256 +
        * S698PM_EXTENDED_START
        */

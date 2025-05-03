@@ -124,7 +124,7 @@ sim_rpmsg_virtio_get_resource(struct rpmsg_virtio_lite_s *dev)
     }
   else
     {
-      /* Wait untils master is ready */
+      /* Wait until master is ready */
 
       while (priv->shmem->base == 0)
         {

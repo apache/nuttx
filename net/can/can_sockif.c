@@ -222,7 +222,7 @@ static int can_setup(FAR struct socket *psock)
 
       conn->crefs = 1;
 
-      /* If Can Socket Stack recive can frame and pending on the readahead,
+      /* If Can Socket Stack receive can frame and pending on the readahead,
        * but the application layer did not read the frame. This will cause
        * a memory leak, and it is necessary to limit the readahead.
        */

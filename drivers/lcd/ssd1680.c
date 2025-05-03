@@ -279,7 +279,7 @@ static const struct lcd_dev_s g_lcd_epaper_dev =
   .setpower     = ssd1680_setpower,
 
   /* setcontrast could be implemented in future by changing
-   * dispalys voltage and LUT table
+   * displays voltage and LUT table
    */
 };
 

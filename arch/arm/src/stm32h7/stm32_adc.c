@@ -2107,7 +2107,7 @@ static int adc_interrupt(struct adc_dev_s *dev, uint32_t adcisr)
         }
       while ((adc_getreg(priv, STM32_ADC_ISR_OFFSET) & ADC_INT_EOC) != 0);
 
-      /* We dont't add EOC to the bits to clear. It will cause a race
+      /* We don't add EOC to the bits to clear. It will cause a race
        * condition.  EOC should only be cleared by reading the ADC_DR
        */
     }

@@ -243,7 +243,7 @@ int cxd56_bringup(void)
   ret = cxd56_pm_bootup();
   if (ret < 0)
     {
-      _err("ERROR: Failed to powermgr bootup.\n");
+      _err("ERROR: Failed to powermgr boot up.\n");
     }
 #endif
 

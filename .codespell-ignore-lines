@@ -15,4 +15,158 @@ Linix 45ZWN24-40           2  0.5 Ohm    0.400 mH  2.34A   24V
 * [#14540](https://github.com/apache/nuttx/pull/14540) CMake/preprocess: fix typo PREPROCES -> PREPROCESS
 * [#14927](https://github.com/apache/nuttx/pull/14927) spelling: fix spelling typo premption -> preemption
 * [#15520](https://github.com/apache/nuttx/pull/15520) drivers/note: fix typo falgs and align local name to irq_mask
+* [#4526](https://github.com/apache/nuttx/pull/4526) Rearch video
+* [#6447](https://github.com/apache/nuttx/pull/6447) bcm43xxx: Remove bcmf_txavail_work and resue bcmf_tx_poll_work
         ans init
+   *   CAF        : Depends on CONFIG_NET_PROMISCUOUS
+           * been lost).  If ORE is set along with RXNE then it tells you
+  /* GIR bits must be masked! */
+#define MU_GIER_GIE(n)          (1 << (n)) /* Bit n: MUA/MUB General Purpose Interrupt Enable n (GIEn) */
+	tloadr		r1, DEBUG_GPIO		@0x80058a  PB oen
+	.word	(0x80058a)				@ PBx oen
+ * FLASH_STATUS_WEL: The Write Enable Latch (WEL) bit indicates the
+   * 1. Enable the SPI and I2C for GroupA and GroupD;
+/* HALP - Hall Current and Expected patterns */
+#define USIC_TCSR_FLEMD             (1 << 2)  /* Bit 2:  FLE Mode */
+ *  (due to CALL or RCALL instruction).
+/* Selete the SCIBR register value */
+	addd	#(TOTALFRAME_SIZE-INTFRAME_SIZE)
+	addd	#INTFRAME_SIZE
+  unsigned short ATTCH:1;
+  unsigned long ACEND:1;
+  unsigned long ENDE:1;
+ * Description     : Clear the specified port's ATTCH-bit; "ATTCH Interrupt
+ * Description     : Enable ATTCH (attach) interrupt of the specified USB
+ * Description     : Disable ATTCH (attach) interrupt of the specified USB
+ * Description     : Disable USB Bus Interrupts OVRCR, ATTCH, DTCH, and BCHG.
+  /* ATTCH status Clear */
+  /* ATTCH Clear */
+  /* ATTCH interrupt disable */
+  /* ATTCH interrupt enable */
+                  /* The previous command is not accepted, leaving the WEL
+ * as long as the following conditions are aheared to.
+ as long as the following conditions are aheared to.
+ * The licence and distribution terms for any publically available version or
+ The licence and distribution terms for any publically available version or
+ * The licence and distribution terms for any publically
+ The licence and distribution terms for any publically
+		(WEL bit) and in AAI mode (AAI bit).
+#define W25QXXXJV_READ_STATUS_1   0x05 /* SRP|SEC|TB |BP2|BP1|BP0|WEL|BUSY       */
+#define W25QXXXJV_WRITE_STATUS_1  0x01 /* SRP|SEC|TB |BP2|BP1|BP0|WEL|BUSY       */
+ *                                     WEL=1.
+ *                                     instruction, WEL=1.
+  ret = apds9960_i2c_write8(priv, APDS9960_GCONFIG4, (GMODE | GIEN));
+  uint32_t allo          = 0;
+              allo++;
+  spiffs_gcinfo("Wipe pallo=%" PRIu32 " pdele=%" PRIu32 "\n", allo,  dele);
+  fs->alloc_pages   -= allo;
+#define XK_Arabic_tehmarbuta             0x05c9  /* U+0629 ARABIC LETTER TEH MARBUTA */
+#define XK_Arabic_teh                    0x05ca  /* U+062A ARABIC LETTER TEH */
+#define XK_Greek_LAMDA                   0x07cb  /* U+039B GREEK CAPITAL LETTER LAMDA */
+#define XK_Greek_LAMBDA                  0x07cb  /* U+039B GREEK CAPITAL LETTER LAMDA */
+#define XK_Greek_lamda                   0x07eb  /* U+03BB GREEK SMALL LETTER LAMDA */
+#define XK_Greek_lambda                  0x07eb  /* U+03BB GREEK SMALL LETTER LAMDA */
+#define XK_Armenian_SE                0x100054d  /* U+054D ARMENIAN CAPITAL LETTER SEH */
+#define XK_Armenian_se                0x100057d  /* U+057D ARMENIAN SMALL LETTER SEH */
+#define XK_Armenian_VEV               0x100054e  /* U+054E ARMENIAN CAPITAL LETTER VEW */
+#define XK_Armenian_vev               0x100057e  /* U+057E ARMENIAN SMALL LETTER VEW */
+#define XK_Sinh_o2            0x1000ddc  /* U+0DDC SINHALA KOMBUVA HAA AELA-PILLA*/
+#define XK_Sinh_oo2           0x1000ddd  /* U+0DDD SINHALA KOMBUVA HAA DIGA AELA-PILLA*/
+#define XK_Sinh_au2           0x1000dde  /* U+0DDE SINHALA KOMBUVA HAA GAYANUKITTA */
+#define GIEN                 (1 << 1) /* Bit 1: Gesture Interrupt Enable */
+/* See also http://vektor.theorem.ca/graphics/ycbcr/ */
+                     * is in froms[] array which points to tos[] array
+           " + ofo %d"
+                % ("txbuf", "rxbuf", "ofo", "local_address", "remote_address")
+              FAR int_fast32_t *offsetp);
+                                 FAR int_fast32_t *offsetp)
+      ans = (FAR struct dns_answer_s *)nameptr;
+       * been lost).  If ORE is set along with RXNE then it tells you
+#  define WR9_INTACKEN       (0x20) /* Bit 5: Software INTACK Enable */
+  FAR struct dns_answer_s *ans;
+   * We use RUNSTALL and RESETING signals to ensure that the App core stops
+                /* Reply with a WONT, that means we will not work in
+            /* Reply with a WONT */
+  exten = (extcfg & ADC_CFGR_EXTEN_MASK);
+  exten = (extcfg & ADC_EXTREG_EXTEN_MASK);
+  exten = extcfg & ADC_EXTREG_EXTEN_MASK;
+  if (exten > 0)
+      setbits = (extsel | exten);
+      setbits = extsel | exten;
+  uint32_t exten  = 0;
+ * SPDX-FileContributor: Daniel Pereira Volpato <dpo@certi.org.br>
+ * SPDX-FileContributor: Guillherme da Silva Amaral <gvr@certi.org.br>
+ * SPDX-FileCopyrightText: 2019 Fundação CERTI. All rights reserved.
+  Copyright (C) 2019 Fundação CERTI. All rights reserved.
+ * SPDX-FileCopyrightText: Fundação CERTI. All rights reserved.
+	/* TSS (IST) for 64 bit long mode will be filled in up_irq. */
+/* IST data structures ******************************************************
+  /* NOE, NWE, NE1, NBL1 */
+  /* NOE, NWE, and NE1 */
+  /* NOE, NWE, and NE3  */
+  /* NOE, NWE */
+ *               PD4:     FSMC NOE     PE2:    FSMC A23
+           *   SCL High Time:  Thi = divider * SCLhi
+           *                   Fscl = Finput / (Thi + Tlo)
+           * If Thi == TloL:   Fscl = Finput / (divider * SCL * 2)
+       *   Thi = Tspi * CLKCFG.high
+       *   Fbaud = 1 / (Thi + Tlow)
+       * If we assume that Thi == Tlow, then:
+       *   Thi   = Tspi * CLKCFG.high
+       *   Fbaud = 1 / (2 * Thi)
+ *   Te = (3/2) * p * (lambda_d * i_q - lambda_q * i_d)
+ *   Te = (3/2) * p * (lambda_m * i_q + (L_d - L_q) * i_q * i_d)
+ *   Te = (3/2) * p * i_q * (lambda_m  + (L_d - L_q) * i_d)
+ *   Pem = wm * Te
+ *   Te = Tl + Td + B * wm + J * (d/dt) * wm
+ *     Te = Tl + J * (d/dt) * wm
+ *     (d/dt) * wm = (Te - Tl) / J
+ *   Te       - electromagnetic torque
+ *   R0 = saveregs = pinter saved array
+  /* Get EXTEN and EXTSEL from input */
+  set(SRCS regcomp.c regexec.c regerror.c tre-mem.c)
+CSRCS += regcomp.c regexec.c regerror.c tre-mem.c
+#include "tre.h"
+/* from tre-compile.h
+/* from tre-ast.c and tre-ast.h
+/* from tre-stack.c and tre-stack.h
+/* from tre-parse.c and tre-parse.h
+/* from tre-compile.c
+/* from tre-mem.h: */
+ * libs/libc/regex/tre.h
+ * libs/libc/regex/tre-mem.c
+libs/libc/tre.h
+libs/libc/tre-mem.c
+#define EDMA_ES_NCE                       (1 << 3)  /* Bit 3: NBYTES/CITER Configuration Error (NCE) */
+#define EDMA_CH_ES_NCE                    (1 << 3)  /* Bit 3: NBYTES/CITER Configuration Error (NCE) */
+#define CAN_RERRAR_NCE                (1 << 24) /* Bit 24: Non-Correctable Error (NCE) */
+#define PINT_PMCTRL_SELPMATCH     (1 << 0)   /* Bit 0:  Rin interrupts interrupt or pattern match function */
+#define STR71X_IRQ_T0TOI      (29) /* IRQ 29: T0.TOI Timer 0 Overflow interrupt */
+#define CP0_CONFIG_KU_SHIFT         (25)      /* Bits 25-27: KUSEG and USEG cacheability */
+#define NT_PPC_TM_CFPR     0x109  /* TM checkpointed FPR Registers */
+#define FT08X_EFFECT_CHACK             0x58      /* Chack */
+#define XK_Thai_fofa                     0x0dbd  /* U+0E1D THAI CHARACTER FO FA */
+ *     ODER              -> disabled
+  gpioinfo("   ODER: %08x   OVR: %08x   PVR:  %08x  PUER: %08x\n",
+  uint32_t fpr;
+  fpr = getreg32(STM32_EXTI_FPR1);
+      if (((rpr & mask) != 0) || ((fpr & mask) != 0))
+          *   (SPOFF Bits 0-7 = 0xA5) */
+          * (SPOFF Bits 8-9 = 0); (SPON Bits 8-9 = 0) */
+  [ESR_ELX_EC_SME]         = "SME",
+  [ESR_ELX_EC_SME] = "SME",
+                  IS_PADD(segment_hdr.load_addr) ? "padd" :
+  ret = register_mtddriver("/dev/fram", mtd_dev, 0755, NULL);
+  ret = nx_mount("/dev/fram", "/mnt/lfs", "littlefs", 0,
+                                           * TWRITE/TREAD
+  /* size[4] Tread tag[2] fid[4] offset[8] count[4]
+ *   (see http://csrc.nist.gov/cryptval/shs/sha256-384-512.pdf) uses this
+ *   PERIPHERAL  10AA AAS. IIII IIII  MMMM MMMM MMMM MMMM
+	leas	2, sp
+   * To initialize the nCE, configure any PIO as an output pin (refer to Tips
+   * and Tricks for the supported nCE connection types)
+ * PCM Clock = (Crystal * (ND + 1 + FRACR/2^22) / (QDPMC + 1)) / 8
+  /* The Figure of Merit (FoM) characterizing the ranging measurement */
+ * | 0  | 1  | x  | EXT  |  RIN    |   IN    |     off       |
+   * FIFO mode, INT1 , THS 0
+ *   REG03[3] ITERM Termination Current Limit  128-1024mA Default: 256mA

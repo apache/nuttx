@@ -66,7 +66,7 @@
  * Name: cpuindex
  *
  * Description:
- *   Return an index idenifying the current CPU.
+ *   Return an index identifying the current CPU.
  *
  ****************************************************************************/
 

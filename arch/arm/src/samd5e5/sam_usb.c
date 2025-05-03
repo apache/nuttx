@@ -1050,7 +1050,7 @@ static const struct usb_epdesc_s g_ep0desc =
 };
 #endif
 
-/* Device error strings that may be enabled for more desciptive USB trace
+/* Device error strings that may be enabled for more descriptive USB trace
  * output.
  */
 
@@ -1090,7 +1090,7 @@ const struct trace_msg_t g_usb_trace_strings_deverror[] =
 };
 #endif
 
-/* Interrupt event strings that may be enabled for more desciptive USB trace
+/* Interrupt event strings that may be enabled for more descriptive USB trace
  * output.
  */
 
@@ -1776,7 +1776,7 @@ static int sam_req_write(struct sam_usbdev_s *priv, struct sam_ep_s *privep)
        * (2) called with a request packet that has len == 0
        *
        * len == 0 means that it is requested to send a zero length packet
-       * required by protocoll
+       * required by protocol.
        */
 
       else if ((privreq->req.len == 0) && !privep->zlpsent)
@@ -2190,7 +2190,7 @@ sam_ep_reserve(struct sam_usbdev_s *priv, uint8_t epset)
  *
  * Description:
  *   The endpoint is no long in-used.  It will be unreserved and can be
- *   re-used if needed.
+ *   reused if needed.
  *
  ****************************************************************************/
 
@@ -3927,7 +3927,7 @@ static int sam_usb_interrupt(int irq, void *context, void *arg)
   regval  = sam_getreg16(SAM_USBDEV_INTENSET);
   pending = isr & regval;
 
-  /* Get the set of pending enpoint interrupts */
+  /* Get the set of pending endpoint interrupts */
 
   pendingep = sam_getreg16(SAM_USBDEV_EPINTSMRY);
 
@@ -3998,7 +3998,7 @@ static int sam_usb_interrupt(int irq, void *context, void *arg)
       sam_putreg16(USBDEV_INT_WAKEUP | USBDEV_INT_EORSM |
                    USBDEV_INT_SUSPEND, SAM_USBDEV_INTFLAG);
 
-      /* Disable wakup and endofresume Enable suspend interrupt */
+      /* Disable wakeup and endofresume. Enable suspend interrupt */
 
       sam_putreg16(USBDEV_INT_WAKEUP |
                    USBDEV_INT_EORSM, SAM_USBDEV_INTENCLR);
@@ -8392,7 +8392,7 @@ static void sam_hostreset(struct sam_usbhost_s *priv)
  * Description:
  *   Initialize/re-initialize hardware for host mode operation.  At present,
  *   this function is called only from sam_hw_initialize().  But if OTG mode
- *   were supported, this function would also be called to swtich between
+ *   were supported, this function would also be called to switch between
  *   host and device modes on a connector ID change interrupt.
  *
  * Input Parameters:
@@ -8503,7 +8503,7 @@ static inline void sam_sw_initialize(struct sam_usbhost_s *priv)
  * Name: sam_hw_initialize
  *
  * Description:
- *   One-time setup of the host controller harware for normal operations.
+ *   One-time setup of the host controller hardware for normal operations.
  *
  * Input Parameters:
  *   priv -- USB host driver private data structure.

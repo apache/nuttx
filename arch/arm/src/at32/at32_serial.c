@@ -246,7 +246,7 @@ struct up_dev_s
 
 #ifdef SERIAL_HAVE_TXDMA
   const unsigned int txdma_channel; /* DMA channel assigned */
-  DMA_HANDLE        txdma;          /* currently-open trasnmit DMA stream */
+  DMA_HANDLE        txdma;          /* currently-open transmit DMA stream */
 #endif
 
 #ifdef SERIAL_HAVE_RXDMA
@@ -2824,7 +2824,7 @@ uart_dev_t *at32_serial_get_uart(int uart_num)
  *
  * Description:
  *   Performs the low level USART initialization early in debug so that the
- *   serial console will be available during bootup.  This must be called
+ *   serial console will be available during boot up.  This must be called
  *   before arm_serialinit.
  *
  ****************************************************************************/

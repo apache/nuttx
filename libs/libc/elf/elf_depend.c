@@ -69,7 +69,7 @@ int libelf_depend(FAR struct module_s *importer,
    * exporting module.  In that case, the module would already be in the
    * list of dependencies.
    *
-   * The list dependency list is a a dumb, upacked array of pointers.  This
+   * The list dependency list is a a dumb, unpacked array of pointers.  This
    * should not be too inefficient if the number of CONFIG_LIBC_ELF_MAXDEPEND
    * is small.  Otherwise, a more dynamic data structure would be in order.
    */
@@ -157,7 +157,7 @@ int libelf_undepend(FAR struct module_s *importer)
   DEBUGASSERT(importer != NULL && importer->dependents == 0);
 
   /* Decrement the dependency count on each of exporters of symbols used by
-   * this importer module.  This is an upacked array of pointers.  This
+   * this importer module.  This is an unpacked array of pointers.  This
    * should not be too inefficient if the number of CONFIG_LIBC_ELF_MAXDEPEND
    * is small.  Otherwise, a more dynamic data structure would be in order.
    */

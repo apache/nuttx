@@ -157,7 +157,7 @@ retry:
       return -ENOMEM;
     }
 
-  /* Handle conner case: context siwtch happened when kmm_malloc */
+  /* Handle conner case: context switch happened when kmm_malloc */
 
   flags = enter_critical_section();
   if (temp != g_pidhash)

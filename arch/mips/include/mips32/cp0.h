@@ -283,7 +283,7 @@
 
 #define CP0_CAUSE_WP                (1 << 22) /* Watch exception was deferred */
 #define CP0_CAUSE_IV                (1 << 23) /* Bit 23:  Interrupt exception uses special interrupt vector */
-#define CP0_CAUSE_CE_SHIFT          (28)      /* Bits 28-29: Coprocessor unit number fo Coprocessor Unusable exception */
+#define CP0_CAUSE_CE_SHIFT          (28)      /* Bits 28-29: Coprocessor unit number for Coprocessor Unusable exception */
 #define CP0_CAUSE_CE_MASK           (3 << CP0_CAUSE_CE_SHIFT)
 #define CP0_CAUSE_BD                (1 << 31) /* Bit 31:  Last exception occurred in a branch delay slot */
 

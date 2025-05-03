@@ -52,7 +52,7 @@ typedef int (*lis2mdl_attach)(xcpt_t, FAR void *arg);
  *   devno   - The device number to use for the topic (i.e. /dev/mag0)
  *   attach  - A function which is called by this driver to attach the
  *             LIS2MDL interrupt handler to an IRQ. Pass NULL to operate
- *             in polling mode. This function should return 0 on succes
+ *             in polling mode. This function should return 0 on success
  *             and a negated error code otherwise.
  *
  * Returned Value:

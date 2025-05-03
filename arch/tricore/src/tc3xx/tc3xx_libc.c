@@ -72,7 +72,7 @@ void _doexit(void)
 {
 }
 
-/* BUG, Workaroud for tasking compiler:
+/* BUG, Workaround for tasking compiler:
  *
  * ltc E106: unresolved external: regulator_gpio_init -
  *                                (drivers_initialize.o)

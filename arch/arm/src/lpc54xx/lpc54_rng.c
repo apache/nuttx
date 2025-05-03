@@ -97,7 +97,7 @@ static ssize_t lpc54_read(struct file *filep, char *buffer, size_t buflen)
       return ret;
     }
 
-  /* Copy the requested number of randome bytes. */
+  /* Copy the requested number of random bytes. */
 
   for (remaining = buflen;
        remaining > 0;

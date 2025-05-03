@@ -62,7 +62,7 @@
  *   Assumes the context to return is already set up
  *
  * Returned Value:
- *   Return value of system call is returned into contex
+ *   Return value of system call is returned into context
  *
  * Assumptions:
  *   Task is running in privileged mode

@@ -74,7 +74,7 @@
 #if defined(CONFIG_GD32F4_GD32F4XX)
 #  include <arch/gd32f4/gd32f4xx_irq.h>
 #else
-#  error "Uknown GD32 chip"
+#  error "Unknown GD32 chip"
 #endif
 
 /****************************************************************************

@@ -48,7 +48,7 @@
  *
  * Description:
  *   Performs the low level UART and LPUART initialization early in debug
- *   so that the serial console will be available during bootup.  This must
+ *   so that the serial console will be available during boot up.  This must
  *   be called before arm_serialinit.  NOTE:  This function depends on GPIO
  *   pin configuration performed in up_consoleinit() and main clock
  *   initialization performed in up_clkinitialize().

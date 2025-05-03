@@ -519,7 +519,7 @@ static void sam_regdump(struct sam_chan_s *chan, const char *msg)
  *
  * Returned Value:
  *   true:  This is the first register access of this type.
- *   flase: This is the same as the preceding register access.
+ *   false: This is the same as the preceding register access.
  *
  ****************************************************************************/
 

@@ -2992,7 +2992,7 @@ static int s32k3xx_dma_setup(struct uart_dev_s *dev)
       modifyreg32(priv->uartbase + S32K3XX_LPUART_BAUD_OFFSET,
                   0, LPUART_BAUD_RDMAE);
 
-      /* Enable itnerrupt on Idel and erros */
+      /* Enable interrupt on Idle and errors */
 
       modifyreg32(priv->uartbase + S32K3XX_LPUART_CTRL_OFFSET, 0,
                   LPUART_CTRL_PEIE       |
@@ -4363,7 +4363,7 @@ static int up_pm_prepare(struct pm_callback_s *cb, int domain,
  *
  * Description:
  *   Performs the low level UART initialization early in debug so that the
- *   serial console will be available during bootup.  This must be called
+ *   serial console will be available during boot up.  This must be called
  *   before arm_serialinit.
  *
  ****************************************************************************/

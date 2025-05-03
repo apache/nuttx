@@ -100,4 +100,4 @@ void up_timer_initialize(void)
   up_enable_irq(LITEX_IRQ_TIMER0);
 }
 
-#endif /* !defind(CONFIG_SCHED_TICKLESS) */
+#endif /* !defined(CONFIG_SCHED_TICKLESS) */

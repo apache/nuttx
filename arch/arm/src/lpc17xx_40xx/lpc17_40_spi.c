@@ -217,7 +217,7 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev,
 
   DEBUGASSERT(priv && frequency <= SPI_CLOCK / 2);
 
-  /* Check if the requested frequence is the same as the frequency
+  /* Check if the requested frequency is the same as the frequency
    * selection.
    */
 

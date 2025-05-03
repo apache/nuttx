@@ -94,7 +94,7 @@ int ceva_svcall(int irq, void *context, void *arg)
        *   A0 = SYS_save_context
        *   A1 = saveregs
        *
-       * In this case, we simply need to copy the current regsters to the
+       * In this case, we simply need to copy the current registers to the
        * save register space references in the saved A1 and return.
        */
 
@@ -116,7 +116,7 @@ int ceva_svcall(int irq, void *context, void *arg)
        *
        * In this case, we simply need to set current_regs to restore register
        * area referenced in the saved A1. context == current_regs is the
-       * noraml exception return.  By setting current_regs = context[A1],
+       * normal exception return.  By setting current_regs = context[A1],
        * we force the return to the saved context referenced in A1.
        */
 

@@ -919,7 +919,7 @@ struct usbhost_driver_s
 #endif
 
   /* Cancel any pending synchronous or asynchronous transfer on an
-   * endpoint
+   * endpoint.
    */
 
   CODE int (*cancel)(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep);

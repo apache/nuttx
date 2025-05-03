@@ -225,7 +225,7 @@
 #define SCI_INT_TIMEOUT               (1 << 4)  /* Bit 4:  Timeout interrupt */
 #define SCI_INT_TOAWUS                (1 << 6)  /* Bit 6:  Timeout after wakeup signal interrupt */
 #define SCI_INT_TOA3WUS               (1 << 7)  /* Bit 7:  Timeout after 2 Wakeup signls interrupt */
-#define SCI_INT_TX                    (1 << 8)  /* Bit 8:  Tranmitter interrupt */
+#define SCI_INT_TX                    (1 << 8)  /* Bit 8:  Transmitter interrupt */
 #define SCI_INT_RX                    (1 << 9)  /* Bit 9:  Receiver interrupt */
 #define SCI_INT_ID                    (1 << 13) /* Bit 13: Identification interrupt */
 #define SCI_INT_PE                    (1 << 24) /* Bit 24: Parity error interrupt */
@@ -282,7 +282,7 @@
 #  define SCI_INTVECT_OE              (9)       /*   Overrun error interrupt */
 #  define SCI_INTVECT_BE              (10)      /*   Bit error interrupt */
 #  define SCI_INTVECT_RX              (11)      /*   Receive interrupt */
-#  define SCI_INTVECT_TX              (12)      /*   Tranmit interrupt */
+#  define SCI_INTVECT_TX              (12)      /*   Transmit interrupt */
 #  define SCI_INTVECT_NRE             (13)      /*   No response error interrupt */
 #  define SCI_INTVECT_TOAWUS          (14)      /*   Timeout after wakeup signal interrupt */
 #  define SCI_INTVECT_TOA3WUS         (15)      /*   Timeout after 2 Wakeup signls interrupt */

@@ -2774,7 +2774,7 @@ static inline void at32_gint_hcoutisr(struct at32_usbhost_s *priv,
 
   else if ((pending & OTGFS_HCINT_STALL) != 0)
     {
-      /* Clear the pending the STALL response receiv (STALL) interrupt */
+      /* Clear the pending the STALL response receive (STALL) interrupt */
 
       at32_putreg(AT32_OTGFS_HCINT(chidx), OTGFS_HCINT_STALL);
 

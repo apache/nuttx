@@ -582,7 +582,7 @@ int cxd56_rtc_setalarm(struct alm_setalarm_s *alminfo)
 
       count -= g_rtc_save->offset;
 
-      /* clear previsous setting */
+      /* clear previous setting */
 
       mask = RTCREG_ALM0_ERR_FLAG_MASK | RTCREG_ALM0_FLAG_MASK;
       mask <<= id;

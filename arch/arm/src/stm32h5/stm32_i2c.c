@@ -1234,7 +1234,7 @@ static void stm32_i2c_setclock(struct stm32_i2c_priv_s *priv,
   if (frequency != priv->frequency)
     {
       /* Set timing specs based on i2c frequency
-       * Specifications pulled from secion 6.1 in
+       * Specifications pulled from section 6.1 in
        * UM10204 (NXP I2C Spec). Time in nanoseconds.
        */
 
@@ -1448,7 +1448,7 @@ static void stm32_i2c_setclock(struct stm32_i2c_priv_s *priv,
 
       /* Note: It is possible to exit this loop with invalid settings when
        * using an improper i2c_ker_ck. Choose i2c_ker_ck wisely.
-       * Addtionally, take care setting the digital and analog filters.
+       * Additionally, take care setting the digital and analog filters.
        */
 
       /* I2C peripheral must be disabled to update clocking configuration.
@@ -2915,7 +2915,7 @@ static int stm32_i2c_reset(struct i2c_master_s *dev)
 
 out:
 
-  /* Release the port for re-use by other clients */
+  /* Release the port for reuse by other clients */
 
   nxmutex_unlock(&priv->lock);
   return ret;

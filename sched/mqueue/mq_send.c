@@ -251,7 +251,7 @@ static void nxmq_add_queue(FAR struct mqueue_inode_s *msgq,
  *   msg     - Message to send
  *   msglen  - The length of the message in bytes
  *   prio    - The priority of the message
- *   abstime - the absolute time to wait until a timeout is decleared
+ *   abstime - the absolute time to wait until a timeout is declared
  *   ticks   - Ticks to wait from the start time until the semaphore is
  *             posted.
  *
@@ -397,7 +397,7 @@ out:
  *   msg     - Message to send
  *   msglen  - The length of the message in bytes
  *   prio    - The priority of the message
- *   abstime - the absolute time to wait until a timeout is decleared
+ *   abstime - the absolute time to wait until a timeout is declared
  *
  * Returned Value:
  *   This is an internal OS interface and should not be used by applications.
@@ -495,7 +495,7 @@ int file_mq_ticksend(FAR struct file *mq, FAR const char *msg,
  *   msg     - Message to send
  *   msglen  - The length of the message in bytes
  *   prio    - The priority of the message
- *   abstime - the absolute time to wait until a timeout is decleared
+ *   abstime - the absolute time to wait until a timeout is declared
  *
  * Returned Value:
  *   This is an internal OS interface and should not be used by applications.
@@ -563,7 +563,7 @@ int nxmq_timedsend(mqd_t mqdes, FAR const char *msg, size_t msglen,
  *   msg     - Message to send
  *   msglen  - The length of the message in bytes
  *   prio    - The priority of the message
- *   abstime - the absolute time to wait until a timeout is decleared
+ *   abstime - the absolute time to wait until a timeout is declared
  *
  * Returned Value:
  *   On success, mq_send() returns 0 (OK); on error, -1 (ERROR)

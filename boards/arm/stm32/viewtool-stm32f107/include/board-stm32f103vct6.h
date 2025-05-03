@@ -44,7 +44,7 @@
 #define STM32_BOARD_XTAL        8000000ul
 
 /* PLL source is HSE/1,
- * PLL multipler is 9:
+ * PLL multiplier is 9:
  * PLL frequency is 8MHz (XTAL) x 9 = 72MHz
  */
 

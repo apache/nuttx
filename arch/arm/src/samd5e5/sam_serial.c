@@ -1007,7 +1007,7 @@ static bool sam_txempty(struct uart_dev_s *dev)
  *
  * Description:
  *   Performs the low level USART initialization early in debug so that the
- *   serial console will be available during bootup.  This must be called
+ *   serial console will be available during boot up.  This must be called
  *   before sam_serialinit.
  *
  *   NOTE: On this platform arm_earlyserialinit() does not really do

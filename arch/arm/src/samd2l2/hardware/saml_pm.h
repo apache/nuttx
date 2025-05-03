@@ -90,7 +90,7 @@
  * and Interrupt flag status and clear registers
  */
 
-#define PM_INT_PLRDY                       (1 << 0)  /* Bit 0: Performanc level ready */
+#define PM_INT_PLRDY                       (1 << 0)  /* Bit 0: Performance level ready */
 
 /* Standby configuration */
 

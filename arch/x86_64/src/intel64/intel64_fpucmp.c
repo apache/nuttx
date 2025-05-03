@@ -64,7 +64,7 @@ bool up_fpucmp(const void *saveregs1, const void *saveregs2)
 
   /* IMPORTANT:
    *
-   *   With aggresive optimization enabled (-O2/-O3), ostest FPU test will
+   *   With aggressive optimization enabled (-O2/-O3), ostest FPU test will
    *   fail. This is because the compiler will generate additional vector
    *   instructions between subsequent up_fpucmp() calls (loop vectorization
    *   somewhere in usleep() call), which will consequently overwrite

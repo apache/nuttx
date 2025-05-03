@@ -191,8 +191,8 @@ uint8 pplus_ble_recv_msg(uint8 destination_task, uint8 *msg_ptr)
  * Input Parameters:
  *   drv  - BT driver pointer
  *   type - BT packet type
- *   data - BT packte data buffer pointer
- *   len  - BT packte length
+ *   data - BT packet data buffer pointer
+ *   len  - BT packet length
  *
  * Returned Value:
  *   Sent bytes on success or a negated value on failure.

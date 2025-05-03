@@ -141,7 +141,7 @@
 #endif
 
 /* The full SMR setting also includes internal clocking with no divisor,
- * aysnchronous operation and multiprocessor disabled:
+ * asynchronous operation and multiprocessor disabled:
  */
 
 #define RX_SMR_VALUE (RX_SMR_MODE|RX_SMR_PARITY|RX_SMR_STOP)

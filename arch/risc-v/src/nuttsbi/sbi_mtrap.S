@@ -147,7 +147,7 @@ machine_trap:
  *  Description:
  *    Allocate separate stack(s) for machine mode interrupts, only if kernel
  *    runs in S-mode. Separate stacks are needed as M-mode interrupts can
- *    pre-empt S-mode interrupts.
+ *    preempt S-mode interrupts.
  *
  ****************************************************************************/
 

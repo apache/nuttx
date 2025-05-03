@@ -384,7 +384,7 @@
  * Name: riscv_set_inital_sp
  *
  * Description:
- *   Set inital sp for riscv core. This function should be only called
+ *   Set initial sp for riscv core. This function should be only called
  *   when initing.
  *
  *   sp (stack top) = sp base + idle stack size * hart id

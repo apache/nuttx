@@ -309,7 +309,7 @@
 #define ENET_TXIC_ICFT_SHIFT         (20)      /* Bits 0-15: Interrupt coalescing timer threshold */
 #define ENET_TXIC_ICFT_SHIFT_MASK    (0xff << ENET_TXIC_ICFT_SHIFT)
 #define ENET_TXIC_ICTT_ICCS          (1 << 30) /* Bit 30: Interrupt Coalescing Timer Clock Source Select */
-#define ENET_TXIC_ICTT_ICEN          (1 << 31) /* Bit 31: Eable/disabel Interrupt Coalescing */
+#define ENET_TXIC_ICTT_ICEN          (1 << 31) /* Bit 31: Enable/disable Interrupt Coalescing */
 
 /* Receive Interrupt Coalescing Register */
 
@@ -319,7 +319,7 @@
 #define ENET_RXIC_ICFT_SHIFT         (20)      /* Bits 0-15: Interrupt coalescing timer threshold */
 #define ENET_RXIC_ICFT_SHIFT_MASK    (0xff << ENET_TXIC_ICFT_SHIFT)
 #define ENET_RXIC_ICTT_ICCS          (1 << 30) /* Bit 30: Interrupt Coalescing Timer Clock Source Select */
-#define ENET_RXIC_ICTT_ICEN          (1 << 31) /* Bit 31: Eable/disabel Interrupt Coalescing */
+#define ENET_RXIC_ICTT_ICEN          (1 << 31) /* Bit 31: Enable/disable Interrupt Coalescing */
 
 #endif /* if 0 */
 

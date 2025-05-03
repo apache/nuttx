@@ -792,7 +792,7 @@ void etm4_disclaim_device(FAR struct coresight_etm4_dev_s *etmdev)
     }
   else
     {
-      cserr("current device is not claimed or something wrong happend\n");
+      cserr("current device is not claimed or something wrong happened\n");
     }
 }
 

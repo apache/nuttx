@@ -69,7 +69,7 @@
                                             STM32_DMA2D_CR_MODE_BLEND   | \
                                             STM32_DMA2D_CR_MODE_COLOR
 
-/* Only 8 bit per pixel overal supported */
+/* Only 8 bit per pixel overall supported */
 
 #define DMA2D_PF_BYPP(n)                    ((n) / 8)
 

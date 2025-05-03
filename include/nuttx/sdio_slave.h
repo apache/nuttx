@@ -41,11 +41,11 @@
  * Description:
  *   Set callback to hardware, when the buffer have received or send
  *   completed, hardware should call the callback to tell user transfer
- *   finshed.
+ *   finished.
  *
  * Input Parameters:
  *   dev - An instance of the SDIO Slave device interface
- *   callback - User defined that recived transfer finshed
+ *   callback - User defined that received transfer finished
  *   arg - The context for setcallback
  *
  * Returned Value:
@@ -122,7 +122,7 @@
  *   recvbuffer/sendbuffer again.
  *
  * Input Parameters:
- *   recv - true on recive finshed; false on send finshed.
+ *   recv - true on receive finished; false on send finished.
  *   buf - Address of the transfer buffer.
  *   result - negated errno on failure; the size received.
  *   arg - the context of setcallback.

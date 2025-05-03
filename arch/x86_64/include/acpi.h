@@ -176,7 +176,7 @@ begin_packed_struct struct acpi_rsdt_s
   uint32_t          table_ptrs;
 } end_packed_struct;
 
-/* Extended System Descriptior Table */
+/* Extended System Descriptor Table */
 
 begin_packed_struct struct acpi_xsdt_s
 {
@@ -269,7 +269,7 @@ int acpi_init(uintptr_t rsdp);
  * Name: acpi_madt_get
  *
  * Description:
- *   Find the n'th occurence of a MADT entry with a given type.
+ *   Find the n'th occurrence of a MADT entry with a given type.
  *
  ****************************************************************************/
 

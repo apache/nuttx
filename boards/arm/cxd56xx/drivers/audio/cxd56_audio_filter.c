@@ -65,7 +65,7 @@ void cxd56_audio_filter_set_dnc(cxd56_audio_dnc_id_t id,
                                 bool en,
                                 cxd56_audio_dnc_bin_t *bin)
 {
-  /* Desable DNC. */
+  /* Disable DNC. */
 
   cxd56_audio_ac_reg_disable_dnc(id);
 

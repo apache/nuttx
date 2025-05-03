@@ -154,7 +154,7 @@ static ssize_t shmfs_write(FAR struct file *filep, FAR const char *buffer,
   nwritten = buflen;
   endpos   = startpos + buflen;
 
-  /* Desn't support shm auto expand, truncate first */
+  /* Doesn't support shm auto expand, truncate first */
 
   if (endpos > sho->length)
     {

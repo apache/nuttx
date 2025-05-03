@@ -39,9 +39,9 @@
 #define NRF53_USBREG_EVENTS_USBDETECTED_OFFSET 0x000100  /* Voltage supply detected on VBUS */
 #define NRF53_USBREG_EVENTS_USBREMOVED_OFFSET  0x000104  /* Voltage supply removed from VBUS*/
 #define NRF53_USBREG_EVENTS_USBPWRRDY_OFFSET   0x000108  /* USB 3.3 V supply ready */
-#define NRF53_USBREG_INTEN_OFFSET              0x000300  /* Enable or disable interrrupt */
-#define NRF53_USBREG_INTENSET_OFFSET           0x000304  /* Enable interrrupt */
-#define NRF53_USBREG_INTENCLR_OFFSET           0x000308  /* Disable interrrupt */
+#define NRF53_USBREG_INTEN_OFFSET              0x000300  /* Enable or disable interrupt */
+#define NRF53_USBREG_INTENSET_OFFSET           0x000304  /* Enable interrupt */
+#define NRF53_USBREG_INTENCLR_OFFSET           0x000308  /* Disable interrupt */
 #define NRF53_USBREG_USBREGSTATUS_OFFSET       0x000400  /* USB supply status */
 
 /* Register definitions *****************************************************/

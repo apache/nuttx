@@ -165,7 +165,7 @@ static int virtio_rpmb_transact(FAR struct virtio_rpmb_priv_s *priv,
   virtqueue_kick(vq);
   spin_unlock_irqrestore(&priv->lock, flags);
 
-  /* Wait fot completion */
+  /* Wait for completion */
 
   nxsem_wait_uninterruptible(&cookie.sem);
   return cookie.len;

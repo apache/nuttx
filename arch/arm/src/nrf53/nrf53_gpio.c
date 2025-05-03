@@ -371,7 +371,7 @@ int nrf53_gpio_config(nrf53_pinset_t cfgset)
           nrf53_gpio_sense(cfgset, port, pin);
           break;
 
-        case GPIO_OUTPUT:  /* GPIO outpout pin */
+        case GPIO_OUTPUT:  /* GPIO output pin */
           nrf53_gpio_output(cfgset, port, pin);
           break;
 
@@ -515,7 +515,7 @@ void nrf53_gpio_detectmode(int port, enum nrf53_gpio_detectmode_e mode)
  *
  * Description:
  *  Allow GPIO to be used by the net core.
- *  Can be used only with te app core.
+ *  Can be used only with the app core.
  *
  ****************************************************************************/
 

@@ -245,7 +245,7 @@ static int axp202_health(FAR struct battery_charger_dev_s *dev,
 
   /*  Only a few of the possible states are supported by this driver:
    *   BATTERY_HEALTH_UNKNOWN       - health state is not known
-   *   BATTERY_HEALTH_GOOD          - is in good condiction
+   *   BATTERY_HEALTH_GOOD          - is in good condition
    *   BATTERY_HEALTH_DEAD          - is dead, nothing we can do
    *   BATTERY_HEALTH_OVERHEAT      - is over recommended temperature
    *   BATTERY_HEALTH_OVERVOLTAGE   - voltage is over recommended level

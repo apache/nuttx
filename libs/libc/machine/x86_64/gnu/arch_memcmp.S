@@ -1581,7 +1581,7 @@ L(32bytes):
 	ret
 
 /*
- * Aligned 8 bytes to avoid 2 branch "taken" in one 16 alinged code block.
+ * Aligned 8 bytes to avoid 2 branch "taken" in one 16 aligned code block.
  */
 	ALIGN (3)
 L(less16bytes):

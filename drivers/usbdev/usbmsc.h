@@ -227,7 +227,7 @@
 #define USBMSC_STATE_CMDWRITE         (5)  /* Processing a SCSI write command */
 #define USBMSC_STATE_CMDFINISH        (6)  /* Finish command processing */
 #define USBMSC_STATE_CMDSTATUS        (7)  /* Processing the final status of the command */
-#define USBMSC_STATE_TERMINATED       (8)  /* Thread has exitted */
+#define USBMSC_STATE_TERMINATED       (8)  /* Thread has exited */
 
 /* Event communicated to worker thread */
 

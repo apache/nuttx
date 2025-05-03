@@ -731,7 +731,7 @@ void stm32wb_mboxenable(void)
 
   stm32wb_ipcc_unmaskrxo(STM32WB_MBOX_SYSEVT_CHANNEL);
 
-  /* Enable IPCC hardware and bootup CPU2 */
+  /* Enable IPCC hardware and boot up CPU2 */
 
   stm32wb_ipccenable();
 }

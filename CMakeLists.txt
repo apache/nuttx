@@ -158,7 +158,7 @@ if(NOT EXISTS "${NUTTX_DEFCONFIG}")
   message(FATAL_ERROR "No config file found at ${NUTTX_DEFCONFIG}")
 endif()
 
-# Generate inital .config ###################################################
+# Generate initial .config ###################################################
 # This is needed right before any other configure step so that we can source
 # Kconfig variables into CMake variables
 
@@ -267,7 +267,7 @@ if(NOT EXISTS ${CMAKE_BINARY_DIR}/boards/dummy/Kconfig)
   endif()
 endif()
 
-# board platfrom driver
+# board platform driver
 
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/drivers)
 
@@ -314,7 +314,7 @@ if(NOT EXISTS ${CMAKE_BINARY_DIR}/arch/${CONFIG_ARCH}/src/chip)
                        ${CMAKE_BINARY_DIR}/arch/${CONFIG_ARCH}/src/chip)
 endif()
 
-# Unsupport custom board/chips yet, workaround
+# Unsupported custom board/chips yet, workaround
 
 if(NOT EXISTS ${NUTTX_APPS_BINDIR}/platform/board/Kconfig)
   file(MAKE_DIRECTORY ${NUTTX_APPS_BINDIR}/platform/board)
@@ -381,7 +381,7 @@ include(nuttx_generate_headers)
 include(nuttx_generate_outputs)
 include(nuttx_add_library)
 
-# add NuttX CMake extenstion after nuttx_add_library
+# add NuttX CMake extension after nuttx_add_library
 include(nuttx_extensions)
 
 include(nuttx_add_application)

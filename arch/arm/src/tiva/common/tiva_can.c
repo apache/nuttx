@@ -79,7 +79,7 @@
  * not by the mailbox used to send the remote frame. (The Tiva hardware uses
  * the mailbox with the lowest number first.)
  *
- * This number is zero-indexed, althought the Command Request Register isn't.
+ * This number is zero-indexed, although the Command Request Register isn't.
  */
 #define TIVA_CAN_TX_FIFO_START (TIVA_CAN_NUM_MBOXES - CONFIG_TIVA_CAN_TX_FIFO_DEPTH)
 
@@ -355,7 +355,7 @@ static void tivacan_reset(struct can_dev_s *dev)
 #endif
   if (modnum > 1)
     {
-      canerr("ERROR: tried to reset nonexistant module CAN%d\n",
+      canerr("ERROR: tried to reset nonexistent module CAN%d\n",
              canmod->modnum);
     }
 
@@ -952,7 +952,7 @@ static int tivacan_ioctl(struct can_dev_s *dev, int cmd,
 
       case CANIOC_SET_BITTIMING:
         {
-          /* REVIST: This is VERY crude--there's no guarantees that rounding
+          /* REVISIT: This is VERY crude--there's no guarantees that rounding
            * won't cause problems with the prescaler selection.
            * However, NuttX's interface here is kinda sub-optimal anyway--
            * the choice of TSEG1, TSEG2, and SJW depend on the system clock
@@ -1082,7 +1082,7 @@ static int tivacan_ioctl(struct can_dev_s *dev, int cmd,
         {
           /* RX default fifo pointer removed when a filter is added. Do not
            * allow filters to be "removed" before they're added. Also do not
-           * allow unusued filter FIFOs to be added.
+           * allow unused filter FIFOs to be added.
            */
 
           if (arg < 0

@@ -202,8 +202,8 @@ uint16_t can_datahandler(FAR struct net_driver_s *dev,
 
   if (iob_get_queue_entry_count(&conn->readahead) >= conn->recv_buffnum)
     {
-      nwarn("WARNNING: There are no free recive buffer to retain the data. "
-            "Recive buffer number:%"PRId32", recived frames:%"PRIuPTR" \n",
+      nwarn("WARNING: There are no free receive buffer to retain the data. "
+            "Receive buffer number:%"PRId32", received frames:%"PRIuPTR" \n",
             conn->recv_buffnum, iob_get_queue_entry_count(&conn->readahead));
       goto errout;
     }

@@ -579,7 +579,7 @@ static void mpfs_set_ddr_rpc_regs(struct mpfs_ddr_priv_s *priv)
 
   putreg32(0, MPFS_CFG_DDR_SGMII_PHY_RPC20);
 
-  /* Each lane has its own FIFO. This paramater adjusts offset for
+  /* Each lane has its own FIFO. This parameter adjusts offset for
    * all lanes.
    */
 

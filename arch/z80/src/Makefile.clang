@@ -50,7 +50,7 @@ AOBJS = $(ASRCS:$(ASMEXT)=$(OBJEXT))
 CSRCS = $(CHIP_CSRCS) $(CMN_CSRCS)
 COBJS = $(CSRCS:.c=$(OBJEXT))
 
-# All sources and objcts
+# All sources and objects
 
 SRCS = $(ASRCS) $(CSRCS)
 OBJS = $(AOBJS) $(COBJS)

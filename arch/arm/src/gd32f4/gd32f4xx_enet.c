@@ -839,7 +839,7 @@ static void gd32_enet_clock_enable(void)
 
   regaddr = GD32_RCU_AHB1EN;
 
-  /* Check clock if alreay enable. */
+  /* Check clock if already enable. */
 
   if (rcu_en != (rcu_en & getreg32(regaddr)))
     {
@@ -1492,7 +1492,7 @@ static int gd32_receive_frame(struct gd32_enet_mac_s *priv)
    *   3) All of the TX descriptors are in flight.
    *
    * This last case is obscure.  It is due to that fact that each packet
-   * that we receive can generate an unstoppable transmisson.  So we have
+   * that we receive can generate an unstoppable transmission.  So we have
    * to stop receiving when we can not longer transmit.  In this case, the
    * transmit logic should also have disabled further RX interrupts.
    */
@@ -1730,7 +1730,7 @@ static void gd32_receive(struct gd32_enet_mac_s *priv)
         }
 
       /* We are finished with the RX buffer.  NOTE:  If the buffer is
-       * re-used for transmission, the dev->d_buf field will have been
+       * reused for transmission, the dev->d_buf field will have been
        * nullified.
        */
 
@@ -1965,11 +1965,11 @@ static void gd32_interrupt_work(void *arg)
       gd32_reg_write(ENET_DMA_INTEN_NIE, GD32_ENET_DMA_STAT);
     }
 
-  /* Handle error interrupt only if CONFIG_DEBUG_NET is eanbled */
+  /* Handle error interrupt only if CONFIG_DEBUG_NET is enabled */
 
 #ifdef CONFIG_DEBUG_NET
 
-  /* Check if there are pending "anormal" interrupts */
+  /* Check if there are pending "abnormal" interrupts */
 
   if ((dma_reg & ENET_DMA_STAT_AI) != 0)
     {

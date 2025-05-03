@@ -1,7 +1,7 @@
 From b88abc9c31c450c44c384feaf2e2653c8c4c69e4 Mon Sep 17 00:00:00 2001
 From: p-szafonimateusz <p-szafonimateusz@xiaomi.com>
 Date: Fri, 24 May 2024 09:19:03 +0200
-Subject: [PATCH] newlib: disable optmisation for sincos
+Subject: [PATCH] newlib: disable optimisation for sincos
 
 Signed-off-by: p-szafonimateusz <p-szafonimateusz@xiaomi.com>
 ---

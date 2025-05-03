@@ -469,7 +469,7 @@ static int tms570_interrupt(int irq, void *context, void *arg)
             }
             break;
 
-          case SCI_INTVECT_TX:      /* Tranmit interrupt */
+          case SCI_INTVECT_TX:      /* Transmit interrupt */
             {
               /* Transmit data register available ...
                * process outgoing bytes

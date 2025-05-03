@@ -69,7 +69,7 @@ extern "C"
  *
  * Description:
  *   Performs the low level DBGU initialization early in debug so that the
- *   DBGU console will be available during bootup.
+ *   DBGU console will be available during boot up.
  *
  ****************************************************************************/
 

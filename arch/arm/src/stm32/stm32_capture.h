@@ -153,7 +153,7 @@ typedef enum
   STM32_CAP_TS_TI2FP2           = (6 << GTIM_SMCR_TS_SHIFT),
   STM32_CAP_TS_ETRF             = (7 << GTIM_SMCR_TS_SHIFT),
 
-  /* Master/Slave mode seting */
+  /* Master/Slave mode setting */
 
   STM32_CAP_MSM_MASK            = (1 << 7)
 } stm32_cap_smc_cfg_t;

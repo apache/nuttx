@@ -1141,7 +1141,7 @@ static int spiffs_lucheck_callback(FAR struct spiffs_s *fs, int16_t objid,
  *
  * Returned Value:
  *   The index associated with the objid is returned on success.  -ENOENT
- *   is resutled if the objid was not found.
+ *   is resulted if the objid was not found.
  *
  ****************************************************************************/
 

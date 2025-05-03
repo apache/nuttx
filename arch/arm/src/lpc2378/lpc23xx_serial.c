@@ -269,7 +269,7 @@ static inline void up_waittxready(struct up_dev_s *priv)
 
   for (tmp = 1000; tmp > 0; tmp--)
     {
-      /* Check if the tranmitter holding register (THR) is empty */
+      /* Check if the transmitter holding register (THR) is empty */
 
       if ((up_serialin(priv, UART_LSR_OFFSET) & LSR_THRE) != 0)
         {
@@ -865,7 +865,7 @@ static bool up_txempty(struct uart_dev_s *dev)
  * Description:
  *   Performs the low level UART initialization early in
  *   debug so that the serial console will be available
- *   during bootup.  This must be called before arm_serialinit.
+ *   during boot up.  This must be called before arm_serialinit.
  *
  ****************************************************************************/
 

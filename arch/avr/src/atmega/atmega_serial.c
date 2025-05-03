@@ -799,7 +799,7 @@ static bool usart1_txready(struct uart_dev_s *dev)
  * Name: usart0/1_txempty
  *
  * Description:
- *   Return true if the tranmsit data register and shift reqister are both
+ *   Return true if the tranmsit data register and shift register are both
  *   empty
  *
  ****************************************************************************/
@@ -829,7 +829,7 @@ static bool usart1_txempty(struct uart_dev_s *dev)
  *
  * Description:
  *   Performs the low level USART initialization early in debug so that the
- *   serial console will be available during bootup.  This must be called
+ *   serial console will be available during boot up.  This must be called
  *   before avr_serialinit.
  *
  ****************************************************************************/

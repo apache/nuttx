@@ -353,12 +353,12 @@ int pthread_mutex_restorelock(FAR struct pthread_mutex_s *mutex,
  * Description:
  *   This function is called when a pthread is terminated via either
  *   pthread_exit() or pthread_cancel().  It will check for any mutexes
- *   held by exitting thread.  It will mark them as inconsistent and
+ *   held by exiting thread.  It will mark them as inconsistent and
  *   then wake up the highest priority waiter for the mutex.  That
  *   instance of pthread_mutex_lock() will then return EOWNERDEAD.
  *
  * Input Parameters:
- *   tcb -- a reference to the TCB of the exitting pthread.
+ *   tcb -- a reference to the TCB of the exiting pthread.
  *
  * Returned Value:
  *   None.

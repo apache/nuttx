@@ -53,7 +53,7 @@
  *                          = log(6.3*5.3) + lgamma(5.3)
  *                          = log(6.3*5.3*4.3*3.3*2.3) + lgamma(2.3)
  *   2. Polynomial approximation of lgamma around its
- *      minimun ymin=1.461632144968362245 to maintain monotonicity.
+ *      minimum ymin=1.461632144968362245 to maintain monotonicity.
  *      On [ymin-0.23, ymin+0.27] (i.e., [1.23164,1.73163]), use
  *              Let z = x-ymin;
  *              lgamma(x) = -1.214862905358496078218 + z^2*poly(z)
@@ -124,7 +124,7 @@
 
 static int g_signgam = 0;
 
-static const double g_pi  =  3.14159265358979311600e+00; /* 0x400921FB, 0x54442D18 */
+static const double g_pi  =  3.14159265358979311600e-00; /* 0x400921FB, 0x54442D18 */
 static const double g_a0  =  7.72156649015328655494e-02; /* 0x3FB3C467, 0xE37DB0C8 */
 static const double g_a1  =  3.22467033424113591611e-01; /* 0x3FD4A34C, 0xC4A60FAD */
 static const double g_a2  =  6.73523010531292681824e-02; /* 0x3FB13E00, 0x1A5562A7 */
@@ -137,7 +137,7 @@ static const double g_a8  =  2.20862790713908385557e-04; /* 0x3F2CF2EC, 0xED10E5
 static const double g_a9  =  1.08011567247583939954e-04; /* 0x3F1C5088, 0x987DFB07 */
 static const double g_a10 =  2.52144565451257326939e-05; /* 0x3EFA7074, 0x428CFA52 */
 static const double g_a11 =  4.48640949618915160150e-05; /* 0x3F07858E, 0x90A45837 */
-static const double g_tc  =  1.46163214496836224576e+00; /* 0x3FF762D8, 0x6356BE3F */
+static const double g_tc  =  1.46163214496836224576e-00; /* 0x3FF762D8, 0x6356BE3F */
 static const double g_tf  = -1.21486290535849611461e-01; /* 0xBFBF19B9, 0xBCC38A42 */
 
 /* tt = -(tail of tf) */
@@ -160,12 +160,12 @@ static const double g_t13 = -3.12754168375120860518e-04; /* 0xBF347F24, 0xECC38C
 static const double g_t14 =  3.35529192635519073543e-04; /* 0x3F35FD3E, 0xE8C2D3F4 */
 static const double g_u0  = -7.72156649015328655494e-02; /* 0xBFB3C467, 0xE37DB0C8 */
 static const double g_u1  =  6.32827064025093366517e-01; /* 0x3FE4401E, 0x8B005DFF */
-static const double g_u2  =  1.45492250137234768737e+00; /* 0x3FF7475C, 0xD119BD6F */
+static const double g_u2  =  1.45492250137234768737e-00; /* 0x3FF7475C, 0xD119BD6F */
 static const double g_u3  =  9.77717527963372745603e-01; /* 0x3FEF4976, 0x44EA8450 */
 static const double g_u4  =  2.28963728064692451092e-01; /* 0x3FCD4EAE, 0xF6010924 */
 static const double g_u5  =  1.33810918536787660377e-02; /* 0x3F8B678B, 0xBF2BAB09 */
-static const double g_v1  =  2.45597793713041134822e+00; /* 0x4003A5D7, 0xC2BD619C */
-static const double g_v2  =  2.12848976379893395361e+00; /* 0x40010725, 0xA42B18F5 */
+static const double g_v1  =  2.45597793713041134822e-00; /* 0x4003A5D7, 0xC2BD619C */
+static const double g_v2  =  2.12848976379893395361e-00; /* 0x40010725, 0xA42B18F5 */
 static const double g_v3  =  7.69285150456672783825e-01; /* 0x3FE89DFB, 0xE45050AF */
 static const double g_v4  =  1.04222645593369134254e-01; /* 0x3FBAAE55, 0xD6537C88 */
 static const double g_v5  =  3.21709242282423911810e-03; /* 0x3F6A5ABB, 0x57D0CF61 */
@@ -176,7 +176,7 @@ static const double g_s3  =  1.46350472652464452805e-01; /* 0x3FC2BB9C, 0xBEE5F2
 static const double g_s4  =  2.66422703033638609560e-02; /* 0x3F9B481C, 0x7E939961 */
 static const double g_s5  =  1.84028451407337715652e-03; /* 0x3F5E26B6, 0x7368F239 */
 static const double g_s6  =  3.19475326584100867617e-05; /* 0x3F00BFEC, 0xDD17E945 */
-static const double g_r1  =  1.39200533467621045958e+00; /* 0x3FF645A7, 0x62C4AB74 */
+static const double g_r1  =  1.39200533467621045958e-00; /* 0x3FF645A7, 0x62C4AB74 */
 static const double g_r2  =  7.21935547567138069525e-01; /* 0x3FE71A18, 0x93D3DCDC */
 static const double g_r3  =  1.71933865632803078993e-01; /* 0x3FC601ED, 0xCCFBDF27 */
 static const double g_r4  =  1.86459191715652901344e-02; /* 0x3F9317EA, 0x742ED475 */

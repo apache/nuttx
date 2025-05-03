@@ -104,7 +104,7 @@ def_fn ARCH_LIBCFUN(strnlen)
 	   especially on cores with a high number of issue slots per
 	   cycle, as we get much better parallelism out of the operations.  */
 
-	/* Start of critial section -- keep to one 64Byte cache line.  */
+	/* Start of critical section -- keep to one 64Byte cache line.  */
 .Lloop:
 	ldp	data1, data2, [src], #16
 .Lrealigned:

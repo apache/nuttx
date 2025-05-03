@@ -202,8 +202,8 @@
 #define IMX9_IRQ_RESERVED208            (IMX9_IRQ_EXT + 176)   /* LCDIF Sync Interrupt */
 #define IMX9_IRQ_DSI                    (IMX9_IRQ_EXT + 177)   /* MIPI DSI Interrupt Request */
 #define IMX9_IRQ_RESERVED210            (IMX9_IRQ_EXT + 178)   /* Machine learning processor interrupt */
-#define IMX9_IRQ_ENET_MAC0_RX_TX_D ONE1 (IMX9_IRQ_EXT + 179)   /* MAC 0 Receive/ Trasmit Frame/ Buffer Done */
-#define IMX9_IRQ_ENET_MAC0_RX_TX_D ONE2 (IMX9_IRQ_EXT + 180)   /* MAC 0 Receive/ Trasmit Frame/ Buffer Done */
+#define IMX9_IRQ_ENET_MAC0_RX_TX_D ONE1 (IMX9_IRQ_EXT + 179)   /* MAC 0 Receive/ Transmit Frame/ Buffer Done */
+#define IMX9_IRQ_ENET_MAC0_RX_TX_D ONE2 (IMX9_IRQ_EXT + 180)   /* MAC 0 Receive/ Transmit Frame/ Buffer Done */
 #define IMX9_IRQ_ENET                   (IMX9_IRQ_EXT + 181)   /* MAC 0 IRQ */
 #define IMX9_IRQ_ENET_1588              (IMX9_IRQ_EXT + 182)   /* MAC 0 1588 Timer Interrupt - synchronous */
 #define IMX9_IRQ_ENET_QOS_PMT           (IMX9_IRQ_EXT + 183)   /* ENET QOS PMT interrupt */

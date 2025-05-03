@@ -220,7 +220,7 @@ struct nx_callback_s
    *   NXEVENT_SYNCHED - Synchronization handshake
    *
    *     This completes the handshake started by nx_synch().  nx_synch()
-   *     sends a syncrhonization messages to the NX server which responds
+   *     sends a synchronization messages to the NX server which responds
    *     with this event.  The sleeping client is awakened and continues
    *     graphics processing, completing the handshake.
    *

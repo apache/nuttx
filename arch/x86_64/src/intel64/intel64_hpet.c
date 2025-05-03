@@ -557,7 +557,7 @@ struct intel64_tim_dev_s *intel64_hpet_init(uint64_t base)
           /* Configure legacy mode.
            *
            * There is no way to disable PIT interrupts (?) other than enable
-           * legacy mode for HPET. Otherwise unwanted PIT interupts will
+           * legacy mode for HPET. Otherwise unwanted PIT interrupts will
            * interfere with HPET interrupts, making them useless.
            */
 

@@ -213,7 +213,7 @@ static temperature_sensor_attribute_t
  *
  * Input Parameters:
  *   p1 - First value to compare with other value
- *   p2 - Second value to compare with outher value
+ *   p2 - Second value to compare with other value
  *
  * Returned Value:
  *   Returns -1 if the first value has smaller error rate; 1 otherwise
@@ -260,7 +260,7 @@ static int temperature_sensor_attribute_table_sort(void)
  *
  * Description:
  *   This function selects least error rated temperature sensor attribute
- *   for given mesurement range.
+ *   for given measurement range.
  *
  * Input Parameters:
  *   priv - Pointer to the internal driver state structure.

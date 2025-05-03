@@ -204,7 +204,7 @@ void foc_init(FAR struct foc_data_f32_s *foc,
 
   pi_controller_init(&foc->iq_pid, init->iq_kp, init->iq_ki);
 
-  /* Disable PI intergral part reset when saturated */
+  /* Disable PI integral part reset when saturated */
 
   pi_ireset_enable(&foc->iq_pid, false);
   pi_ireset_enable(&foc->id_pid, false);

@@ -67,7 +67,7 @@
  * Name: stm32l4_usbinitialize
  *
  * Description:
- *   Called from stm32l4_usbinitialize very early in inialization to setup
+ *   Called from stm32l4_usbinitialize very early in initialization to setup
  *   USB-related GPIO pins for the board.
  *
  ****************************************************************************/

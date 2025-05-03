@@ -22,7 +22,7 @@ config FS_HOSTFS
 		The backend implementation is arch-dependent.
 		As of writing this, it's implemented for sim, arm and xtensa.
 
-		Note: depending on the backend implementions, hostfs might
+		Note: depending on the backend implementations, hostfs might
 		only provide very restricted subset of filesystem operations.
 
 		Sim: It's implemented with direct calls to the host OS API.

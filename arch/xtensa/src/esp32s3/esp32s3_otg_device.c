@@ -2167,8 +2167,8 @@ static void esp32s3_ep0out_testmode(struct esp32s3_usbdev_s *priv,
  * Name: esp32s3_ep0out_stdrequest
  *
  * Description:
- *   Handle a stanard request on EP0.  Pick off the things of interest to the
- *   USB device controller driver; pass what is left to the class driver.
+ *   Handle a standard request on EP0.  Pick off the things of interest to
+ *   the USB device controller driver; pass what is left to the class driver.
  *
  ****************************************************************************/
 
@@ -5636,7 +5636,7 @@ void xtensa_usbinitialize(void)
 
   xtensa_usbuninitialize();
 
-  /* Initialie the driver data structure */
+  /* Initialize the driver data structure */
 
   esp32s3_swinitialize(priv);
 

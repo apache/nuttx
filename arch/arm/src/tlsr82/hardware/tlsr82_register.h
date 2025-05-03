@@ -64,7 +64,7 @@
 #define RESET_RST2_REG          REG_ADDR8(0x62)
 #define RESET_PWDNEN_REG        REG_ADDR8(0x6f)
 
-/* Reset reson definition */
+/* Reset reason definition */
 
 #define RESET_RST0_SPI          BIT(0)
 #define RESET_RST0_I2C          BIT(1)

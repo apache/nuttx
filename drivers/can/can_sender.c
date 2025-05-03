@@ -191,7 +191,7 @@ FAR struct can_msg_s *can_get_msg(FAR struct can_txcache_s *cd_sender)
  * Name: can_revert_msg
  *
  * Description:
- *   Rever msg in sender, because sending failed.
+ *   Revert msg in sender, because sending failed.
  *
  ****************************************************************************/
 

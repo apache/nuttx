@@ -596,7 +596,7 @@ config S32K3XX_FS26
 	bool "FS26 SBC Disable watchdog"
 	default n
 	---help---
-		Disables the FS26 watchdog so that the S32K3XX MCU does not get resetted.
+		Disables the FS26 watchdog so that the S32K3XX MCU does not get reset.
 		Engineering development purpose only, not for use in production.
 		Please refer to the FS26 Datasheet.
 
@@ -1235,7 +1235,7 @@ config S32K3XX_LPI2C_DMA_MAXMSG
 	default 8
 	depends on S32K3XX_LPI2C_DMA
 	---help---
-		This option set the mumber of mesg that can be in a transfer.
+		This option set the number of mesg that can be in a transfer.
 		It is used to allocate space for the 16 bit LPI2C commands
 		that will be DMA-ed to the LPI2C device.
 

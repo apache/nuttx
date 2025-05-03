@@ -177,7 +177,7 @@ int stm32_bringup(void);
  * Name: stm32_usbinitialize
  *
  * Description:
- *   Called from stm32_usbinitialize very early in inialization to setup
+ *   Called from stm32_usbinitialize very early in initialization to setup
  *   USB-related GPIO pins for the stm32h750b-dk board.
  *
  ****************************************************************************/

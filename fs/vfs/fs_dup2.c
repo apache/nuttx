@@ -84,7 +84,7 @@ int file_dup3(FAR struct file *filep1, FAR struct file *filep2, int flags)
 
   /* If there is already an inode contained in the new file structure,
    * close the file and release the inode.
-   * But we need keep the filep2->f_inode, incase of realloced by others.
+   * But we need keep the filep2->f_inode, in case of realloced by others.
    */
 
   ret = file_close_without_clear(filep2);

@@ -130,7 +130,7 @@ static int bmi088_gyro_open(FAR struct file *filep)
   FAR struct inode        *inode = filep->f_inode;
   FAR struct bmi088_dev_s *priv  = inode->i_private;
 
-  /* emable and config acc */
+  /* enable and config acc */
 
   bmi088_put_gyro_reg8(priv, BMI088_GYRO_LPM1     , BMI088_GYRO_PM_NORMAL);
   bmi088_put_gyro_reg8(priv, BMI088_GYRO_RANGE    , gyro_range);
@@ -212,7 +212,7 @@ static ssize_t bmi088_acc_read(FAR struct file *filep, FAR char *buffer,
       return 0;
     }
 
-  /* read and caculate acc */
+  /* read and calculate acc */
 
   bmi088_get_acc_regs(priv, BMI088_ACC_X_LSB, (uint8_t *)&p->acc_source, 6);
   p->accel.x = p->acc_source.x / 32768.0 * ((1 << (acc_range)) * 3.0);

@@ -912,7 +912,7 @@ static uint8_t g_emac_nqueues = EMAC_NQUEUES_REVA; /* Assume Rev A */
  *
  * Returned Value:
  *   true:  This is the first register access of this type.
- *   flase: This is the same as the preceding register access.
+ *   false: This is the same as the preceding register access.
  *
  ****************************************************************************/
 

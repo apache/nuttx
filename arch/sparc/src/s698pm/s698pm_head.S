@@ -31,7 +31,7 @@
 #define RTRAP(_vector, _handler)  mov   %g0, %l0 ; sethi %hi(_handler), %l4 ; jmp %l4+%lo(_handler); mov _vector, %l3
 #define TRAP(_vector, _handler)   mov   %psr, %l0; sethi %hi(_handler), %l4 ; jmp %l4+%lo(_handler); mov _vector, %l3
 
-/* Unexcpected trap will halt the processor by forcing it to error state */
+/* Unexpected trap will halt the processor by forcing it to error state */
 #define BAD_TRAP          ta 0; nop; nop; nop;
 #define SOFT_TRAP         BAD_TRAP   /* Software trap. Treat as BAD_TRAP */
 

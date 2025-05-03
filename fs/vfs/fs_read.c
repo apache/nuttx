@@ -118,7 +118,7 @@ static ssize_t file_readv_compat(FAR struct file *filep,
 
       ntotal += nread;
 
-      /* Check for a parital success condition, including an end-of-file */
+      /* Check for a partial success condition, including an end-of-file */
 
       if (nread < iov[i].iov_len)
         {

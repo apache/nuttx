@@ -979,7 +979,7 @@ static int sam_txbuffer(struct sam_dma_s *dmach, uint32_t paddr,
   uint32_t ctrla;
   uint32_t ctrlb;
 
-  /* If we are appending a buffer to a linklist, then re-use the CTRLA/B
+  /* If we are appending a buffer to a linklist, then reuse the CTRLA/B
    * values.  Otherwise, create them from the properties of the transfer.
    */
 
@@ -1028,7 +1028,7 @@ static int sam_rxbuffer(struct sam_dma_s *dmach, uint32_t paddr,
   uint32_t ctrla;
   uint32_t ctrlb;
 
-  /* If we are appending a buffer to a linklist, then re-use the CTRLA/B
+  /* If we are appending a buffer to a linklist, then reuse the CTRLA/B
    * values.  Otherwise, create them from the properties of the transfer.
    */
 

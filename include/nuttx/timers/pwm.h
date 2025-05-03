@@ -143,11 +143,11 @@
 /* PWM disabled channel polarity ********************************************/
 
 /* The output of the PWM disabled channel may depend on the platform
- * dependant peripheral. These helper definitions can be used for setting
+ * dependent peripheral. These helper definitions can be used for setting
  * the disabled channel's output state.
  */
 
-#define PWM_DCPOL_NDEF           0   /* Not defined, the default output state is arch dependant */
+#define PWM_DCPOL_NDEF           0   /* Not defined, the default output state is arch dependent */
 #define PWM_DCPOL_LOW            1   /* Logical zero */
 #define PWM_DCPOL_HIGH           2   /* Logical one  */
 

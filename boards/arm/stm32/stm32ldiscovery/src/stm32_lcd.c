@@ -605,7 +605,7 @@ static inline uint16_t slcd_mapch(uint8_t ch)
       return 0x0000;
     }
 
-  /* Handle space and the first block of puncutation */
+  /* Handle space and the first block of punctuation */
 
   if (ch < ASCII_0)
     {
@@ -619,7 +619,7 @@ static inline uint16_t slcd_mapch(uint8_t ch)
       return g_slcdnummap[(int)ch - ASCII_0];
     }
 
-  /* Handle the next block of puncutation */
+  /* Handle the next block of punctuation */
 
   else if (ch < ASCII_A)
     {
@@ -633,7 +633,7 @@ static inline uint16_t slcd_mapch(uint8_t ch)
       return g_slcdalphamap[(int)ch - ASCII_A];
     }
 
-  /* Handle the next block of puncutation */
+  /* Handle the next block of punctuation */
 
   else if (ch < ASCII_a)
     {
@@ -647,7 +647,7 @@ static inline uint16_t slcd_mapch(uint8_t ch)
       return g_slcdalphamap[(int)ch - ASCII_a];
     }
 
-  /* Handle the final block of puncutation */
+  /* Handle the final block of punctuation */
 
   else if (ch < ASCII_DEL)
     {

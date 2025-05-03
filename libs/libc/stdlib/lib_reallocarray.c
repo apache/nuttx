@@ -67,7 +67,7 @@ FAR void *reallocarray(FAR void *ptr, size_t nmemb, size_t size)
   if (nmemb != 0 && (nmemb >= CHECK_OVERFLOW_LIMIT ||
       size >= CHECK_OVERFLOW_LIMIT))
     {
-      /* Do division only if at least one element is larget than limit */
+      /* Do division only if at least one element is greater than limit */
 
       if ((SIZE_MAX / nmemb) < size)
         {

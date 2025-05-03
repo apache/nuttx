@@ -622,8 +622,8 @@ static void sai_dump_regs(struct stm32f7_sai_s *priv, const char *msg)
 
   uint32_t cpl = cr2 & SAI_CR2_CPL;
   i2sinfo("\t\tCR2: CPL[13] = %s\n",
-          cpl ? "1's complement represention"
-              : "2's complement represention");
+          cpl ? "1's complement representation"
+              : "2's complement representation");
   uint32_t comp = (cr2 & SAI_CR2_COMP_MASK) >> SAI_CR2_COMP_SHIFT;
   const char *comp_string[] =
   { "No companding algorithm",

@@ -117,7 +117,7 @@ def parse_macro(line, macros, pattern):
         # for now I think it's ok just overwrite the old value
         pass
 
-    # emplace, for all undefined macros we evalute it to zero
+    # emplace, for all undefined macros we evaluate it to zero
     macros[name] = value if value else "0"
 
     return True

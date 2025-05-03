@@ -114,7 +114,7 @@ static int getopt_long_option(FAR struct getopt_s *go,
     }
 
   /* Search the list of long options for a matching name.
-   * The last element of the option arry must be filled with zeroes.
+   * The last element of the option array must be filled with zeroes.
    */
 
   for (ndx = 0; longopts[ndx].name != NULL; ndx++)

@@ -3112,7 +3112,7 @@ struct mtd_dev_s *sam_nand_initialize(int cs)
  *
  * Returned Value:
  *   true:  This is the first register access of this type.
- *   flase: This is the same as the preceding register access.
+ *   false: This is the same as the preceding register access.
  *
  ****************************************************************************/
 

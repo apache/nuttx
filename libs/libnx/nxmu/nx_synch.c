@@ -97,7 +97,7 @@ int nx_synch(NXWINDOW hwnd, FAR void *arg)
     }
 #endif
 
-  /* Send the syncrhonization request message. */
+  /* Send the synchronization request message. */
 
   outmsg.msgid = NX_SVRMSG_SYNCH;
   outmsg.wnd   = (FAR struct nxbe_window_s *)hwnd;

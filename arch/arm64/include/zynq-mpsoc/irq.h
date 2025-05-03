@@ -54,7 +54,7 @@
 #define ZYNQ_MPSOC_IRQ_CAN1            56  /*  CAN1 controller IRQ          */
 #define ZYNQ_MPSOC_IRQ_LPD_APM         57  /*  LPD and OCM APM IRQ          */
 #define ZYNQ_MPSOC_IRQ_RTC_ALARM       58  /*  RTC alarm IRQ                */
-#define ZYNQ_MPSOC_IRQ_RTC_SECONDS     59  /*  RTC sceond IRQ               */
+#define ZYNQ_MPSOC_IRQ_RTC_SECONDS     59  /*  RTC second IRQ               */
 #define ZYNQ_MPSOC_IRQ_CLKMON          60  /*  LPD clock test IRQ           */
 #define ZYNQ_MPSOC_IRQ_IPI_CH7         61  /*  IPI channel 7 IRQ            */
 #define ZYNQ_MPSOC_IRQ_IPI_CH8         62  /*  IPI channel 8 IRQ            */

@@ -89,7 +89,7 @@
 #define SPI_CTRL_REG(i) (REG_SPI_BASE(i) + 0x8)
 
 /* SPI_WR_BIT_ORDER : R/W; bitpos: [26:25]; default: 0;
- * In command address write-data (MOSI) phases 1: LSB firs 0: MSB first. Can
+ * In command address write-data (MOSI) phases 1: LSB first 0: MSB first. Can
  * be configured in CONF state.
  */
 
@@ -256,7 +256,7 @@
 #define SPI_CLOCK_REG(i) (REG_SPI_BASE(i) + 0xc)
 
 /* SPI_CLK_EQU_SYSCLK : R/W; bitpos: [31]; default: 1;
- * In the master mode 1: spi_clk is eqaul to system 0: spi_clk is divided
+ * In the master mode 1: spi_clk is equal to system 0: spi_clk is divided
  * from system clock. Can be configured in CONF state.
  */
 
@@ -2581,7 +2581,7 @@
 /* SPI_CLK_MODE : R/W; bitpos: [1:0]; default: 0;
  * SPI clock mode bits. 0: SPI clock is off when CS inactive 1: SPI clock is
  * delayed one cycle after CS inactive 2: SPI clock is delayed two cycles
- * after CS inactive 3: SPI clock is alwasy on. Can be configured in CONF
+ * after CS inactive 3: SPI clock is always on. Can be configured in CONF
  * state.
  */
 

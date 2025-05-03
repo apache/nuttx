@@ -1569,7 +1569,7 @@ static int stm32l4can_txinterrupt(int irq, void *context, void *arg)
 
       if ((regval & CAN_TSR_TXOK0) != 0)
         {
-          /* Tell the upper half that the tansfer is finished. */
+          /* Tell the upper half that the transfer is finished. */
 
           can_txdone(dev);
         }
@@ -1589,7 +1589,7 @@ static int stm32l4can_txinterrupt(int irq, void *context, void *arg)
 
       if ((regval & CAN_TSR_TXOK1) != 0)
         {
-          /* Tell the upper half that the tansfer is finished. */
+          /* Tell the upper half that the transfer is finished. */
 
           can_txdone(dev);
         }
@@ -1609,7 +1609,7 @@ static int stm32l4can_txinterrupt(int irq, void *context, void *arg)
 
       if ((regval & CAN_TSR_TXOK2) != 0)
         {
-          /* Tell the upper half that the tansfer is finished. */
+          /* Tell the upper half that the transfer is finished. */
 
           can_txdone(dev);
         }

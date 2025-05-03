@@ -152,7 +152,7 @@ pid_t mips_fork(const struct fork_s *context)
 
   sinfo("Parent: stackutil:%" PRIu32 "\n", stackutil);
 
-  /* Make some feeble effort to perserve the stack contents.  This is
+  /* Make some feeble effort to preserve the stack contents.  This is
    * feeble because the stack surely contains invalid pointers and other
    * content that will not work in the child context.  However, if the
    * user follows all of the caveats of fork() usage, even this feeble

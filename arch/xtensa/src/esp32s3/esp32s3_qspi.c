@@ -212,8 +212,8 @@ struct esp32s3_qspi_priv_s
   uint8_t nbits;          /* Actual QSPI send/receive bits once transmission */
 
   uint8_t dummies;        /* Number of dummy cycles of command transfer */
-  uint8_t addr_lines;     /* Number of address transmiting I/O pins */
-  uint8_t data_lines;     /* Number of data transmiting I/O pins */
+  uint8_t addr_lines;     /* Number of address transmitting I/O pins */
+  uint8_t data_lines;     /* Number of data transmitting I/O pins */
 };
 
 /****************************************************************************
@@ -723,7 +723,7 @@ static int esp32s3_qspi_command(struct qspi_dev_s *dev,
         }
     }
 
-  /* Initiliaze QSPI user register */
+  /* Initialize QSPI user register */
 
 #ifdef CONFIG_ESP32S3_SPI_DMA
 
@@ -858,7 +858,7 @@ static int esp32s3_qspi_command(struct qspi_dev_s *dev,
       ;
     }
 
-  /* Start transmision */
+  /* Start transmission */
 
   regval = getreg32(SPI_CMD_REG(id));
   regval |= SPI_USR_M;
@@ -931,7 +931,7 @@ static int esp32s3_qspi_memory(struct qspi_dev_s *dev,
   regval &= ~QSPI_DMA_RESET_MASK;
   putreg32(regval, SPI_DMA_CONF_REG(id));
 
-  /* Initiliaze QSPI user register */
+  /* Initialize QSPI user register */
 
   user_reg &= ~(SPI_USR_MOSI_M |
                 SPI_USR_MISO_M |
@@ -1075,13 +1075,13 @@ static int esp32s3_qspi_memory(struct qspi_dev_s *dev,
       ;
     }
 
-  /* Start transmision */
+  /* Start transmission */
 
   regval = getreg32(SPI_CMD_REG(id));
   regval |= SPI_USR_M;
   putreg32(regval, SPI_CMD_REG(id));
 
-  /* Wait for transmision done */
+  /* Wait for transmission done */
 
   esp32s3_qspi_wait_sem(priv);
 
@@ -1486,8 +1486,8 @@ static int esp32s3_qspi_interrupt(int irq, void *context, void *arg)
  *   dev        - Device-specific state data
  *   dummies    - Number of dummy cycles, this only works in command
  *                transfer, not works in memory transfer
- *   addr_lines - Number of address transmiting I/O pins
- *   data_lines - Number of data transmiting I/O pins
+ *   addr_lines - Number of address transmitting I/O pins
+ *   data_lines - Number of data transmitting I/O pins
  *
  * Returned Value:
  *   Zero (OK) is returned on success.  Otherwise -1 (ERROR).

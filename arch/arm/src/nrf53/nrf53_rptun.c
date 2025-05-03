@@ -48,7 +48,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_NRF53_FLASH_PREFETCH
-#  warning rptun doesnt seem to work correctly with FLASH cache enabled
+#  warning rptun does not seem to work correctly with FLASH cache enabled
 #endif
 
 /* Vring configuration parameters */

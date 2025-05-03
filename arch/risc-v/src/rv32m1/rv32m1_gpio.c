@@ -344,7 +344,7 @@ static int rv32m1_gpio_interrupt(int irq, void *context, void *arg)
     {
       priv = container_of(e, const struct rv32m1_isr_s, link);
 
-      /* Dispatch services to whom has subcribed(registered) the
+      /* Dispatch services to whom has subscribed(registered) the
        * corresponding pin.
        */
 
@@ -422,7 +422,7 @@ int rv32m1_gpio_config(uint32_t cfgset)
       rv32m1_pcc_clock_enable(g_ctrlbase[port].gpiogate);
     }
 
-  /* Cofigure Open Drain, Pull Up/Down, Filter and Slew Rate abilities */
+  /* Configure Open Drain, Pull Up/Down, Filter and Slew Rate abilities */
 
   rv32m1_gpio_portconfig(cfgset);
 

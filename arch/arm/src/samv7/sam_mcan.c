@@ -991,18 +991,18 @@ static const struct can_ops_s g_mcanops =
 
 #ifdef CONFIG_SAMV7_MCAN0
 
-/* MCAN0 message RAM allocation. The RAM is initalized to zeroes to ensure
+/* MCAN0 message RAM allocation. The RAM is initialized to zeroes to ensure
  * valid parity/ECC checksums. This should avoid possible BEC or BEU
  * interrupts according to MCAN manual.
  *
  * The message RAM is also located in .mcan section that should be placed
- * at the begining of .data section in linker script. The CAN controller
+ * at the beginning of .data section in linker script. The CAN controller
  * seems to incorrectly handle lower 16 bits address overflow. For example
  * message RAM starting at 0x2040fc20 would not work for buffers that
  * go beyond 0x20410000. The same issue would occur even if TX buffers
  * would start directly at 0x20410000. The upper 16 bits would still have
  * 0x2040 value because of RX buffers located in 0x2040ffff range. The
- * section ensures the RAM starts at the begining of the data section and
+ * section ensures the RAM starts at the beginning of the data section and
  * thus overflow should not occur.
  */
 
@@ -1106,18 +1106,18 @@ static struct can_dev_s g_mcan0dev =
 
 #ifdef CONFIG_SAMV7_MCAN1
 
-/* MCAN1 message RAM allocation. The RAM is initalized to zeroes to ensure
+/* MCAN1 message RAM allocation. The RAM is initialized to zeroes to ensure
  * valid parity/ECC checksums. This should avoid possible BEC or BEU
  * interrupts according to MCAN manual.
  *
  * The message RAM is also located in .mcan section that should be placed
- * at the begining of .data section in linker script. The CAN controller
+ * at the beginning of .data section in linker script. The CAN controller
  * seems to incorrectly handle lower 16 bits address overflow. For example
  * message RAM starting at 0x2040fc20 would not work for buffers that
  * go beyond 0x20410000. The same issue would occur even if TX buffers
  * would start directly at 0x20410000. The upper 16 bits would still have
  * 0x2040 value because of RX buffers located in 0x2040ffff range. The
- * section ensures the RAM starts at the begining of the data section and
+ * section ensures the RAM starts at the beginning of the data section and
  * thus overflow should not occur.
  */
 

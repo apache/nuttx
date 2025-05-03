@@ -6275,7 +6275,7 @@ libs/libc/stdlib/lib_ldiv.c
 libs/libc/stdlib/lib_lldiv.c
 =============================
 
-A direct leverage of the div() inplement by:
+A direct leverage of the div() implemented by:
 
   Copyright (C) 2015 Stavros Polymenis. All rights reserved.
 

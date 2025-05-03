@@ -181,7 +181,7 @@ typedef struct float_sat_b16_s float_sat_b16_t;
 struct pid_controller_b16_s
 {
   bool            aw_en;       /* Integral part decay if saturated */
-  bool            ireset_en;   /* Intergral part reset if saturated */
+  bool            ireset_en;   /* Integral part reset if saturated */
   bool            pisat_en;    /* PI saturation enabled */
   bool            pidsat_en;   /* PID saturation enabled */
   bool            _res;        /* Reserved */
@@ -227,7 +227,7 @@ typedef struct ab_frame_b16_s ab_frame_b16_t;
 
 struct dq_frame_b16_s
 {
-  b16_t  d;                       /* Driect component */
+  b16_t  d;                       /* Direct component */
   b16_t  q;                       /* Quadrature component */
 };
 
@@ -313,7 +313,7 @@ struct motor_aobserver_smo_b16_s
   b16_t emf_lp_filter1; /* Adaptive first low pass EMF filter */
   b16_t emf_lp_filter2; /* Adaptive second low pass EMF filter */
   ab_frame_b16_t emf;   /* Estimated back-EMF */
-  ab_frame_b16_t emf_f; /* Fitlered estimated back-EMF */
+  ab_frame_b16_t emf_f; /* Filtered estimated back-EMF */
   ab_frame_b16_t z;     /* Correction factor */
   ab_frame_b16_t i_est; /* Estimated idq current */
   ab_frame_b16_t v_err; /* v_err = v_ab - emf */
@@ -383,7 +383,7 @@ struct motor_phy_params_b16_s
   b16_t   one_by_p;            /* Inverse number of motor pole pairs */
 };
 
-/* PMSM motor physcial parameters */
+/* PMSM motor physical parameters */
 
 struct pmsm_phy_params_b16_s
 {

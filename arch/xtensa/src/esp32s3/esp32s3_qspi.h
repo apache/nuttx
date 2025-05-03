@@ -71,8 +71,8 @@ extern "C"
  *   dev        - Device-specific state data
  *   dummies    - Number of dummy cycles, this only works in command
  *                transfer, not works in memory transfer
- *   addr_lines - Number of address transmiting I/O pins
- *   data_lines - Number of data transmiting I/O pins
+ *   addr_lines - Number of address transmitting I/O pins
+ *   data_lines - Number of data transmitting I/O pins
  *
  * Returned Value:
  *   Zero (OK) is returned on success.  Otherwise -1 (ERROR).

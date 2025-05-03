@@ -120,7 +120,7 @@
 #define ICMPv6_PRFX_FLAG_L    (1 << 7) /* On-link flag */
 #define ICMPv6_PRFX_FLAG_A    (1 << 6) /* Autonomous address-configuration flag */
 
-/* Return with size of an option (in full octects) using the size of a link
+/* Return with size of an option (in full octets) using the size of a link
  * layer address taking into account a header of the two-bytes.
  */
 

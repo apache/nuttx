@@ -95,9 +95,9 @@ struct nrf52_radioi8_tim_s
  * Name: nrf52_radioi8_tim_init
  *
  * Description:
- *   Initialize high resoluton timer for IEEE802154 operations.
+ *   Initialize high resolution timer for IEEE802154 operations.
  *   Used to handle short radio timeouts like ACK, IFS or delayed
- *   transmitions.
+ *   transmissions.
  *
  ****************************************************************************/
 

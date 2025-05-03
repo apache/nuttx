@@ -883,7 +883,7 @@ static int tun_dev_init(FAR struct tun_device_s *priv,
 #endif
   priv->dev.d_private = priv;         /* Used to recover private state from dev */
 
-  /* Initialize the mutual exlcusion and wait semaphore */
+  /* Initialize the mutual exclusion and wait semaphore */
 
   nxmutex_init(&priv->lock);
   nxsem_init(&priv->read_wait_sem, 0, 0);

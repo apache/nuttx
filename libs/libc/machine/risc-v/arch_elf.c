@@ -581,7 +581,7 @@ int up_relocateadd(const Elf_Rela *rel, const Elf_Sym *sym,
                 addr, _get_val((uint16_t *)addr),
                 sym, (uintptr_t)sym->st_value);
 
-          /* P.21 Unconditinal Jumps : UJ type (imm=20bit) */
+          /* P.21 Unconditional Jumps : UJ type (imm=20bit) */
 
           offset = (long)sym->st_value + (long)rel->r_addend - (long)addr;
           uint32_t val = _get_val((uint16_t *)addr) & 0xfffff000;

@@ -40,7 +40,7 @@
 #include <stdbool.h>
 
 /****************************************************************************
- * Defintions
+ * Definitions
  ****************************************************************************/
 
 #define SX126X_RX_PAYLOAD_SIZE              0xff
@@ -346,7 +346,7 @@ struct sx126x_lower_s
   /* This controls which DIO reacts to interrupts
    * Depended on the pinout of the board / module.
    * Note that DIO 2 and DIO 3 can be already in use
-   * by the module and setting them might intefere
+   * by the module and setting them might interfere
    * with the operation or even damage them.
    */
 

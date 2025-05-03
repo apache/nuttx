@@ -215,7 +215,7 @@
 #  define CRM_CFG_CLKOUT2DIV1_1_4           (6 << CRM_CFG_CLKOUT2DIV1_SHIFT) /* CLKOUT2/4 */
 #  define CRM_CFG_CLKOUT2DIV1_1_5           (7 << CRM_CFG_CLKOUT2DIV1_SHIFT) /* CLKOUT2/5 */
 
-#define CRM_CFG_CLKOUT2_SEL1_SHIFT           (30) /* clock output2 selecction 1 */
+#define CRM_CFG_CLKOUT2_SEL1_SHIFT           (30) /* clock output2 selection 1 */
 #define CRM_CFG_CLKOUT2_SEL1_MASK            (3 << CRM_CFG_CLKOUT2_SEL1_SHIFT)
 #  define CRM_CFG_CLKOUT2_SEL1_SCLK          (0 << CRM_CFG_CLKOUT2_SEL1_SHIFT) /* Output from SCLK */
 #  define CRM_CFG_CLKOUT2_SEL1_2             (1 << CRM_CFG_CLKOUT2_SEL1_SHIFT) /* Output determine from CRM_MISC1 */

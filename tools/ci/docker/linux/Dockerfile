@@ -16,7 +16,7 @@
 # under the License.
 
 FROM ubuntu:22.04 AS builder-base
-# NOTE WE ARE NOT REMOVEING APT CACHE.
+# NOTE WE ARE NOT REMOVING APT CACHE.
 # This should only be used for temp build images that artifacts will be copied from
 RUN apt-get update -qq && apt-get install -y -qq \
   curl \

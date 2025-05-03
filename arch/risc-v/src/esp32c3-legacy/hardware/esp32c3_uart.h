@@ -505,7 +505,7 @@
 #define UART_TX_BRK_DONE_INT_ST_S  12
 
 /* UART_TX_BRK_IDLE_DONE_INT_ST : RO; bitpos: [13]; default: 0;
- * This is the stauts bit for tx_brk_idle_done_int_raw when
+ * This is the status bit for tx_brk_idle_done_int_raw when
  * tx_brk_idle_done_int_ena is set to
  * 1.
  */
@@ -1120,7 +1120,7 @@
 #define UART_SW_DTR_S  7
 
 /* UART_TXD_BRK : R/W; bitpos: [8]; default: 0;
- * Set this bit to enable transmitter to  send NULL when the process of
+ * Set this bit to enable transmitter to send NULL when the process of
  * sending data is
  * done.
  */

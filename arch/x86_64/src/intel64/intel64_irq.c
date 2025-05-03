@@ -245,7 +245,7 @@ static void up_apic_init(void)
   write_msr(MSR_X2APIC_LINT0, MSR_X2APIC_MASKED);
   write_msr(MSR_X2APIC_LINT1, MSR_X2APIC_MASKED);
 
-  /* Disable performance counter overflow interrupts on machines tha
+  /* Disable performance counter overflow interrupts on machines which
    * provide that interrupt entry.
    */
 
@@ -349,7 +349,7 @@ static void up_idtentry(unsigned int index, uint64_t base, uint16_t sel,
   entry->zero    = 0;
 
   /* We don't use software interrupts from user-space (INT) so DPL level
-   * can be set to privilage level 0. DPL bits have no effect on hardware
+   * can be set to privilege level 0. DPL bits have no effect on hardware
    * interrupts.
    */
 

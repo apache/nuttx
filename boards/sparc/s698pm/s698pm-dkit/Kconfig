@@ -18,7 +18,7 @@ config S698PM_DKIT_WDG_TIMEOUT
 
 if S698PM_DKIT_WDG
 config S698PM_DKIT_WDG_THREAD
-	bool "Watchdog Deamon Thread"
+	bool "Watchdog Daemon Thread"
 
 if S698PM_DKIT_WDG_THREAD
 config S698PM_DKIT_WDG_THREAD_NAME

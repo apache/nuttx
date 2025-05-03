@@ -2071,7 +2071,7 @@
 #define EMAC_MAC_PPS1_WIDTH_PPSWIDTH1_MASK   (0xffffffff << EMAC_MAC_PPS1_WIDTH_PPSWIDTH1_SHIFT)
 #define EMAC_MAC_PPS1_WIDTH_PPSWIDTH1(n)     (((n) << EMAC_MAC_PPS1_WIDTH_PPSWIDTH1_SHIFT) & EMAC_MAC_PPS1_WIDTH_PPSWIDTH1_MASK)
 
-/* MAC PPS2 Taget Time In Seconds (MAC_PPS2_TARGET_TIME_SECONDS) */
+/* MAC PPS2 Target Time In Seconds (MAC_PPS2_TARGET_TIME_SECONDS) */
 #define EMAC_MAC_PPS2_TARGET_TIME_SECONDS_TSTRH2_SHIFT  (0) /* Bits 0-32: PPS Target Time In Seconds 2 */
 #define EMAC_MAC_PPS2_TARGET_TIME_SECONDS_TSTRH2_MASK   (0xffffffff << EMAC_MAC_PPS2_TARGET_TIME_SECONDS_TSTRH2_SHIFT)
 #define EMAC_MAC_PPS2_TARGET_TIME_SECONDS_TSTRH2(n)     (((n) << EMAC_MAC_PPS2_TARGET_TIME_SECONDS_TSTRH2_SHIFT) & EMAC_MAC_PPS2_TARGET_TIME_SECONDS_TSTRH2_MASK)
@@ -2345,7 +2345,7 @@
 #define EMAC_MTL_ECC_CONTROL_MRXPEE  (1 << 3) /* Bit 3: MTL Rx Parser ECC Enable */
 #define EMAC_MTL_ECC_CONTROL_MEEAO   (1 << 8) /* Bit 8: MTL ECC Error Address Status Over-ride */
 
-/* MTL Safety Interript Status (MTL_SAFETY_INTERRUPT_STATUS) */
+/* MTL Safety Interrupt Status (MTL_SAFETY_INTERRUPT_STATUS) */
 #define EMAC_MTL_SAFETY_INTERRUPT_STATUS_MECIS  (1 << 0) /* Bit 0: MTL ECC Correctable Error Interrupt Status */
 #define EMAC_MTL_SAFETY_INTERRUPT_STATUS_MEUIS  (1 << 1) /* Bit 1: MTL ECC Uncorrectable Error Interrupt Status */
 
@@ -2377,7 +2377,7 @@
 #define EMAC_MTL_ECC_ERR_STS_RCTL_CCES       (1 << 4) /* Bit 4: Clear Correctable Error Status */
 #define EMAC_MTL_ECC_ERR_STS_RCTL_CUES       (1 << 5) /* Bit 5: Clear Uncorrectable Error Status */
 
-/* MTL ECC Error Adress Status (MTL_ECC_ERR_ADDR_STATUS) */
+/* MTL ECC Error Address Status (MTL_ECC_ERR_ADDR_STATUS) */
 #define EMAC_MTL_ECC_ERR_ADDR_STATUS_ECEAS_SHIFT  (0) /* Bits 0-16: MTL ECC Correctable Error Address Status */
 #define EMAC_MTL_ECC_ERR_ADDR_STATUS_ECEAS_MASK   (0xffff << EMAC_MTL_ECC_ERR_ADDR_STATUS_ECEAS_SHIFT)
 #define EMAC_MTL_ECC_ERR_ADDR_STATUS_ECEAS(n)     (((n) << EMAC_MTL_ECC_ERR_ADDR_STATUS_ECEAS_SHIFT) & EMAC_MTL_ECC_ERR_ADDR_STATUS_ECEAS_MASK)
@@ -2846,7 +2846,7 @@
 #define EMAC_DMA_CH0_STATUS_REB(n)     (((n) << EMAC_DMA_CH0_STATUS_REB_SHIFT) & EMAC_DMA_CH0_STATUS_REB_MASK)
 
 /* DMA Channel 0 Miss Frame Counter (DMA_CH0_MISS_FRAME_CNT) */
-#define EMAC_DMA_CH0_MISS_FRAME_CNT_MFC_SHIFT  (0) /* Bits 0-11: Dropped Packet Counters Indicates the number of packet counters that DMA drops either because of bus error or because of programing RPF field in DMA_CH${i}_Rx_Control register */
+#define EMAC_DMA_CH0_MISS_FRAME_CNT_MFC_SHIFT  (0) /* Bits 0-11: Dropped Packet Counters Indicates the number of packet counters that DMA drops either because of bus error or because of programming RPF field in DMA_CH${i}_Rx_Control register */
 #define EMAC_DMA_CH0_MISS_FRAME_CNT_MFC_MASK   (0x7ff << EMAC_DMA_CH0_MISS_FRAME_CNT_MFC_SHIFT)
 #define EMAC_DMA_CH0_MISS_FRAME_CNT_MFC(n)     (((n) << EMAC_DMA_CH0_MISS_FRAME_CNT_MFC_SHIFT) & EMAC_DMA_CH0_MISS_FRAME_CNT_MFC_MASK)
 #define EMAC_DMA_CH0_MISS_FRAME_CNT_MFCO       (1 << 15) /* Bit 15: Overflow status of the MFC Counter */

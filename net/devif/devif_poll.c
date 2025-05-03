@@ -79,7 +79,7 @@ enum devif_packet_type
  *   other non-standard packet radios) for now but this is a point where
  *   support for other conversions may be provided.
  *
- *   TCP output comes through three different mechansims.  Either from:
+ *   TCP output comes through three different mechanisms.  Either from:
  *
  *   1. TCP socket output.  For the case of TCP output to a radio,
  *      the TCP output is caught in the socket send()/sendto() logic and

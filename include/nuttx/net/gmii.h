@@ -91,7 +91,7 @@
 #define GMII_RTL8211F_PHYSR_A43       26      /* PHY Specific Status Register */
 #define GMII_RTL8211F_INSR_A43        29      /* Interrupt Status Register */
 #define GMII_RTL8211F_PAGSR           31      /* Page Select Register */
-#define GMII_RTL8211F_PHYSCR_A46      20      /* PHY Special Cofig Register */
+#define GMII_RTL8211F_PHYSCR_A46      20      /* PHY Special Config Register */
 #define GMII_RTL8211F_LCR_D04         16      /* LED Control Register */
 #define GMII_RTL8211F_EEELCR_D04      17      /* EEE LED Control Register */
 #define GMII_RTL8211F_MIICR_D08       21      /* MII Control Register */

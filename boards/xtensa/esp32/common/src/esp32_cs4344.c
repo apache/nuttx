@@ -95,7 +95,7 @@ int esp32_cs4344_initialize(int port)
           goto errout;
         }
 
-      /* Check wheter to enable a simple character driver that supports I2S
+      /* Check whether to enable a simple character driver that supports I2S
        * transfers via a read() and write().  The intent of this driver is to
        * support I2S testing.  It is not an audio driver but does conform to
        * some of the buffer management heuristics of an audio driver.  It is

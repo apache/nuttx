@@ -180,15 +180,15 @@
 #define DMAC_PRICTRL0_LVLPRI0_SHIFT      (0)       /* Bits 0-3: Level 0 channel priority number */
 #define DMAC_PRICTRL0_LVLPRI0_MASK       (15 << DMAC_PRICTRL0_LVLPRI0_SHIFT)
 #  define DMAC_PRICTRL0_LVLPRI0(n)       ((uint32_t)(n) << DMAC_PRICTRL0_LVLPRI0_SHIFT)
-#define DMAC_PRICTRL0_RRLVLEN0           (1 << 7)  /* Bit 7:  Level 0 round-robin arbitrarion enable */
+#define DMAC_PRICTRL0_RRLVLEN0           (1 << 7)  /* Bit 7:  Level 0 round-robin arbitration enable */
 #define DMAC_PRICTRL0_LVLPRI1_SHIFT      (8)       /* Bits 8-11: Level 1 channel priority number */
 #define DMAC_PRICTRL0_LVLPRI1_MASK       (15 << DMAC_PRICTRL0_LVLPRI1_SHIFT)
 #  define DMAC_PRICTRL0_LVLPRI1(n)       ((uint32_t)(n) << DMAC_PRICTRL0_LVLPRI1_SHIFT)
-#define DMAC_PRICTRL0_RRLVLEN1           (1 << 15) /* Bit 15:  Level 1 round-robin arbitrarion enable */
+#define DMAC_PRICTRL0_RRLVLEN1           (1 << 15) /* Bit 15:  Level 1 round-robin arbitration enable */
 #define DMAC_PRICTRL0_LVLPRI2_SHIFT      (16)      /* Bits 16-18: Level 2 channel priority number */
 #define DMAC_PRICTRL0_LVLPRI2_MASK       (7 << DMAC_PRICTRL0_LVLPRI2_SHIFT)
 #  define DMAC_PRICTRL0_LVLPRI2(n)       ((uint32_t)(n) << DMAC_PRICTRL0_LVLPRI2_SHIFT)
-#define DMAC_PRICTRL0_RRLVLEN2           (1 << 23) /* Bit 23:  Level 2 round-robin arbitrarion enable */
+#define DMAC_PRICTRL0_RRLVLEN2           (1 << 23) /* Bit 23:  Level 2 round-robin arbitration enable */
 
 /* Interrupt Pending Register */
 

@@ -1129,7 +1129,7 @@ static void mpfs_interrupt_work(void *arg)
           *priv->queue[queue].int_status = 0xffffffff;
           mac_putreg(priv, RECEIVE_STATUS, 0xffffffff);
 
-          /* rxreset disables reveiver so re-enable it */
+          /* rxreset disables receiver so re-enable it */
 
           regval = mac_getreg(priv, NETWORK_CONTROL);
           regval |= NETWORK_CONTROL_ENABLE_RECEIVE;

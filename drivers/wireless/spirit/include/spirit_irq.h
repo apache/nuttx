@@ -55,7 +55,7 @@
  * microcontroller EXTI line.  Then, the user can check which IRQ has been
  * raised using two different ways.
  *
- * On the ISR of the EXTI line phisically linked to the Spirit pin
+ * On the ISR of the EXTI line physically linked to the Spirit pin
  * configured for IRQ:
  *
  * Check only one Spirit IRQ (because the Spirit IRQ status register

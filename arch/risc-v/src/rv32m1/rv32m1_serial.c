@@ -998,7 +998,7 @@ static bool up_txempty(struct uart_dev_s *dev)
  *
  * Description:
  *   Performs the low level UART initialization early in debug so that the
- *   serial console will be available during bootup.  This must be called
+ *   serial console will be available during boot up.  This must be called
  *   before riscv_serialinit.  NOTE:  This function depends on GPIO pin
  *   configuration performed in up_consoleinit() and main clock
  *   initialization performed in up_clkinitialize().
@@ -1064,7 +1064,7 @@ void riscv_serialinit(void)
 
   /* Place a dummy One as a Place holder to avoid uartdevs
    * to be empty when All above uart devices are undefined,
-   * in which case a complier error will raise.
+   * in which case a compiler error will raise.
    */
 
     {

@@ -1511,7 +1511,7 @@ psram_enable(int mode, int vaddrmode)   /* psram init */
 {
   struct rtc_vddsdio_config_s cfg;
 
-  /* Let's assume we are not worring about OTA issue and ignore for now */
+  /* Let's assume we are not worrying about OTA issue and ignore for now */
 
   psram_io_t psram_io =
                         {

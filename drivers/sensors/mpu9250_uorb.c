@@ -1675,7 +1675,7 @@ static int write_ak8963_reg(FAR struct mpu9250_dev_s *dev,
       return ret;
     }
 
-  /* Continuously check I2C_MST_STATUS regsiter value for the completion
+  /* Continuously check I2C_MST_STATUS register value for the completion
    * of I2C transfer until timeout.
    */
 

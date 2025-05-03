@@ -519,7 +519,7 @@ static inline unsigned int bm3823_r32_no_cache(uintptr_t addr)
  * Name: up_clkinit
  *
  * Description:
- *   Initialiaze clock/PLL settings per the definitions in the board.h file.
+ *   Initialize clock/PLL settings per the definitions in the board.h file.
  *
  ****************************************************************************/
 

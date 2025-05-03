@@ -1709,7 +1709,7 @@ static int dm320_ctlrinterrupt(int irq, void *context, void *arg)
  * Name: dm320_attachinterrupt
  *
  * Description:
- *   Attach GIO interrtup handler
+ *   Attach GIO interrupt handler
  *
  ****************************************************************************/
 
@@ -2485,7 +2485,7 @@ void arm_usbinitialize(void)
   GIO_OUTPUT(CONFIG_DM320_GIO_USBDPPULLUP);
   GIO_SET_OUTPUT(CONFIG_DM320_GIO_USBDPPULLUP);
 
-  /* Initilialize USB attach GIO */
+  /* Initialize USB attach GIO */
 
   GIO_INTERRUPT(CONFIG_DM320_GIO_USBATTACH);
   GIO_BOTHEDGES(CONFIG_DM320_GIO_USBATTACH);

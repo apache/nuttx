@@ -65,12 +65,12 @@
 
 /* Clean-up can either mean packing files together toward the end of the file
  * or, if file are deleted at the end of the file, clean up can simply mean
- * erasing the end of FLASH memory so that it can be re-used again.  However,
+ * erasing the end of FLASH memory so that it can be reused again.  However,
  * doing this can also harm the life of the FLASH part because it can mean
- * that the tail end of the FLASH is re-used too often.
+ * that the tail end of the FLASH is reused too often.
  *
  * This threshold determines if/when it is worth erased the tail end of FLASH
- * and making it available for re-use (and possible over-wear).
+ * and making it available for reuse (and possible over-wear).
  */
 
 #ifndef CONFIG_NXFFS_TAILTHRESHOLD

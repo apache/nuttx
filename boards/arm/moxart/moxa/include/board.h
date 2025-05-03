@@ -64,7 +64,7 @@
 /* PLLA configuration.
  *
  *   Divider = 1
- *   Multipler = 14
+ *   Multiplier = 14
  */
 
 #define BOARD_CKGR_PLLAR_MUL       (13 << PMC_CKGR_PLLAR_MUL_SHIFT)

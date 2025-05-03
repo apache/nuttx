@@ -66,8 +66,8 @@
  *
  *   POLLALWAYS
  *     Indicate that should ALWAYS call the poll callback whether the
- *     drvier notified the user expected event or not, and this value is
- *     used inside kernal only (events only).
+ *     driver notified the user expected event or not, and this value is
+ *     used inside kernel only (events only).
  */
 
 #define POLLIN       (0x01)  /* NuttX does not make priority distinctions */

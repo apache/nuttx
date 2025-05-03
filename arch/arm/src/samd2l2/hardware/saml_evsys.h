@@ -161,7 +161,7 @@
 #  define EVSYS_CHANNEL_EVGEN_TC1_MC0      (0x39 << EVSYS_CHANNEL_EVGEN_SHIFT) /* TC1 match/capture 0 */
 #  define EVSYS_CHANNEL_EVGEN_TC1_MC1      (0x3a << EVSYS_CHANNEL_EVGEN_SHIFT) /* TC1 match/capture 1 */
 #  define EVSYS_CHANNEL_EVGEN_TC2_OVF      (0x3b << EVSYS_CHANNEL_EVGEN_SHIFT) /* TC2 Overflow */
-#  define EVSYS_CHANNEL_EVGEN_TC2_MC0      (0x3c << EVSYS_CHANNEL_EVGEN_SHIFT) /* TC2 match/captue 0 */
+#  define EVSYS_CHANNEL_EVGEN_TC2_MC0      (0x3c << EVSYS_CHANNEL_EVGEN_SHIFT) /* TC2 match/capture 0 */
 #  define EVSYS_CHANNEL_EVGEN_TC2_MC1      (0x3d << EVSYS_CHANNEL_EVGEN_SHIFT) /* TC2 match/capture 1 */
 #  define EVSYS_CHANNEL_EVGEN_TC3_OVF      (0x3e << EVSYS_CHANNEL_EVGEN_SHIFT) /* TC3 Overflow */
 #  define EVSYS_CHANNEL_EVGEN_TC3_MC0      (0x3f << EVSYS_CHANNEL_EVGEN_SHIFT) /* TC3 match/capture 0 */
@@ -191,7 +191,7 @@
 #  define EVSYS_CHANNEL_PATH_RESYNCH       (1 << EVSYS_CHANNEL_PATH_SHIFT) /* Resynchronized path */
 #  define EVSYS_CHANNEL_PATH_ASYNCH        (2 << EVSYS_CHANNEL_PATH_SHIFT) /* Asynchronous path */
 
-#define EVSYS_CHANNEL_EDGESEL_SHIFT        (10)      /* Bits 10-11: Edge dection selection */
+#define EVSYS_CHANNEL_EDGESEL_SHIFT        (10)      /* Bits 10-11: Edge detection selection */
 #define EVSYS_CHANNEL_EDGESEL_MASK         (3 << EVSYS_CHANNEL_EDGESEL_SHIFT)
 #  define EVSYS_CHANNEL_EDGESEL_NONE       (0 << EVSYS_CHANNEL_EDGESEL_SHIFT) /* No event output */
 #  define EVSYS_CHANNEL_EDGESEL_RISING     (1 << EVSYS_CHANNEL_EDGESEL_SHIFT) /* Detect on rising edge */

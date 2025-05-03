@@ -67,7 +67,7 @@
  *
  * Description:
  *   Performs the low level UART initialization early in  debug so that the
- *   serial console will be available during bootup.
+ *   serial console will be available during boot up.
  *   This must be called before up_consoleinit.
  *
  ****************************************************************************/

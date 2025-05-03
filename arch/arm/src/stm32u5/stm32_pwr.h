@@ -109,7 +109,7 @@ void stm32_pwr_adjustvcore(unsigned sysclock);
  * Name stm32_pwr_enable_smps
  *
  * Description:
- *   Select between the Low-Drop Out (LDO) or Switched Mode Power Suppy
+ *   Select between the Low-Drop Out (LDO) or Switched Mode Power Supply
  *   (SMPS) regulator.  Compare [RM0456], section 10.5.1 SMPS and LDO
  *   embedded regulators.
  *

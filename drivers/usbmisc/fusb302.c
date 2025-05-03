@@ -632,7 +632,7 @@ void enableccmeas(struct fusb302_dev_s *priv, enum cc_meas_e measure,
  *
  * Input Parameters:
  *  priv      - pointer to device structure
- *  threhold  - MDAC threshold value
+ *  threshold - MDAC threshold value
  *
  * Returned Value:
  *   none

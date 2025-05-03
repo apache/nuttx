@@ -450,7 +450,7 @@ class Ps(gdb.Command):
     def __init__(self):
         super().__init__("ps", gdb.COMMAND_USER)
         self._fmt_wxl = "{0: <{width}}"
-        # By default we align to the right, whcih respects the nuttx foramt
+        # By default we align to the right, which respects the nuttx format
         self._fmt_wx = "{0: >{width}}"
 
     def parse_and_show_info(self, tcb):

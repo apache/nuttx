@@ -1625,7 +1625,7 @@ static void *malloc_wrapper(size_t size)
  *   Malloc buffer in DRAM
  *
  * Input Parameters:
- *  szie - buffer size
+ *  size - buffer size
  *
  * Returned Value:
  *   None
@@ -2905,7 +2905,7 @@ int esp32_bt_controller_init(void)
     }
 
   /* Initialize list of interrupt flags to enable chained critical sections
-   * to return sucessfully.
+   * to return successfully.
    */
 
   sq_init(&g_ble_int_flags_free);
@@ -3179,7 +3179,7 @@ int esp32_bt_controller_enable(esp_bt_mode_t mode)
 
   sdk_config_set_bt_pll_track_enable(true);
 
-  /* inititalize bluetooth baseband */
+  /* initialize bluetooth baseband */
 
   btdm_check_and_init_bb();
 

@@ -48,7 +48,7 @@ icmpv6_linkipaddr_0(FAR struct net_driver_s *dev, net_ipv6addr_t ipaddr)
 
   if (!net_ipv6addr_cmp(current, g_ipv6_unspecaddr))
     {
-      /* Keep current interface indentifier */
+      /* Keep current interface identifier */
 
       ipaddr[4]  = current[4];
       ipaddr[5]  = current[5];

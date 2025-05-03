@@ -866,7 +866,7 @@ static int hx711_close(FAR struct file *filep)
  *
  * Description:
  *   Action to take upon file unlinking. Function will free resources if
- *   noone is using the driver when unlinking occured. If driver is still
+ *   no one is using the driver when unlinking occurred. If driver is still
  *   in use, it will be marked as unlinked and resource freeing will take
  *   place in hx711_close() function instead, once last reference is closed.
  *
@@ -874,7 +874,7 @@ static int hx711_close(FAR struct file *filep)
  *   inode - driver inode that is being unlinked.
  *
  * Returned Value:
- *   OK on successfull close, or negated errno on failure.
+ *   OK on successful close, or negated errno on failure.
  *
  ****************************************************************************/
 
@@ -929,7 +929,7 @@ static int hx711_unlink(FAR struct inode *inode)
  * Input Parameters:
  *   minor - unique number identifying hx711 chip.
  *   lower - provided by platform code to manipulate hx711 with platform
- *           dependant functions>
+ *           dependent functions>
  *
  * Returned Value:
  *   OK on success, or negated errno on failure

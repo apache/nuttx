@@ -250,7 +250,7 @@ static int stm32_mrf24j40_devsetup(struct stm32_priv_s *priv)
 
 #ifdef CONFIG_IEEE802154_NETDEV
   /* Use the IEEE802.15.4 MAC interface instance to create a 6LoWPAN
-   * network interface by wrapping the MAC intrface instance in a
+   * network interface by wrapping the MAC interface instance in a
    * network device driver via mac802154dev_register().
    */
 

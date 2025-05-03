@@ -351,8 +351,8 @@
 #define E1000_IVAR_TXQ0_EN          (1 << 11)  /* Bit 11: Enable bit for TxQ0 */
 #define E1000_IVAR_TXQ1_SHIFT       (12)       /* Bits 12-14: MSI-X vector assigned to TxQ1 */
 #define E1000_IVAR_TXQ1_EN          (1 << 15)  /* Bit 15: Enable bit for TxQ1 */
-#define E1000_IVAR_OTHER_SHIFT      (16)       /* Bits 16-18: MSI-X vector assigned to Ohter Cause */
-#define E1000_IVAR_OTHER_EN         (1 << 19)  /* Bit 19: Enable bit for Ohter Cause */
+#define E1000_IVAR_OTHER_SHIFT      (16)       /* Bits 16-18: MSI-X vector assigned to Other Cause */
+#define E1000_IVAR_OTHER_EN         (1 << 19)  /* Bit 19: Enable bit for Other Cause */
                                                /* Bits 20-30: Reserved */
 #define E1000_IVAR_ONALLWB          (1 << 31)  /* Bit 31: Tx interrupts occur on every write back */
 

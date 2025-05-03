@@ -399,7 +399,7 @@ static inline void uart_reset(int uart_num)
  * Name: uart_get_rxfifo_num
  *
  * Description:
- *   Get the recieved data numbers in the rx fifo.
+ *   Get the received data numbers in the rx fifo.
  *
  * Parameters:
  *   uart_num  - the uart hardware index
@@ -447,8 +447,8 @@ static inline uint8_t uart_get_txfifo_num(int uart_num)
  *                                   UART_IRQ_RXBUF
  *
  * Returned Values:
- *   interrupt status: 0, interrupt not occured
- *                     1, interrupt occured
+ *   interrupt status: 0, interrupt not occurred
+ *                     1, interrupt occurred
  *
  ****************************************************************************/
 
@@ -806,7 +806,7 @@ static void uart_baudrate_config(uint32_t baudrate)
   int tmp;
   int min;
 
-  /* Caculate the uart clkdiv and bit width
+  /* Calculate the uart clkdiv and bit width
    *     baudrate = CPU_CLK / ((clkdiv + 1) * (bwpc + 1)), 3 <= bwpc <= 15
    */
 
@@ -827,10 +827,10 @@ static void uart_baudrate_config(uint32_t baudrate)
           tmp = CPU_CLK / clkdivp1_arr[j];
           tmp = abs(tmp / (i + 1) - baudrate);
 
-          /* Get the clkdiv and bwpc that make the smallest difference
-           * between expected baudrate and real baudrate, mealwhile the
-           * clkdiv should be smaller as soon as possible to get a larger
-           * uart clock, whick leads more precise baudrate.
+          /* Get the clkdiv and bwpc that causes the smallest difference
+           * between expected baudrate and real baudrate, meanwhile the
+           * clkdiv should be as small as possible to get a larger
+           * UART clock, which leads to a more precise baudrate.
            */
 
           if ((tmp == min && i > bwpc) || (tmp < min))
@@ -906,7 +906,7 @@ static void uart_parity_config(int parity)
  *
  * Parameters:
  *   stopbits  - 0, one stop bit
- *             - 1, one and a halp stop bit
+ *             - 1, one and a half stop bit
  *             - 2, two stop bits
  *
  * Returned Values:
@@ -1033,7 +1033,7 @@ static int tlsr82_uart_setup(struct uart_dev_s *dev)
   uart_parity_config(priv->parity);
   uart_stopbits_config(priv->stopbits);
 
-  /* Diable uart rx_buff and tx_buff irq */
+  /* Disable uart rx_buff and tx_buff irq */
 
   uart_irq_rx_enable(false);
   uart_irq_tx_enable(false);
@@ -1630,7 +1630,7 @@ void arm_serialinit(void)
  * Description:
  *   Performs the low level UART initialization early in
  *   debug so that the serial console will be available
- *   during bootup.  This must be called before arm_serialinit.
+ *   during boot up.  This must be called before arm_serialinit.
  *
  ****************************************************************************/
 

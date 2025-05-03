@@ -326,9 +326,9 @@ class start:
     def startSerial(self, dev, board, log_path, core, rate):
         self.log = "{}/{}_{}.cap".format(log_path, dev[-4:], self.start_time)
         self.logFile = open(self.log, "ab+")
-        self.ser = serial.Serial(port=dev, baudrate=int(rate))
+        self.set = serial.Serial(port=dev, baudrate=int(rate))
         self.process = pexpect.fdpexpect.fdspawn(
-            self.ser, "wb", maxread=20000, logfile=self.logFile
+            self.set, "wb", maxread=20000, logfile=self.logFile
         )
         self.switch_to_original_core()
 

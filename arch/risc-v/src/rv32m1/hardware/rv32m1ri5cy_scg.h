@@ -39,7 +39,7 @@
 #define RV32M1_SCG_SIRCCSR_OFFSET     0x0200 /* Slow IRC Control Status */
 #define RV32M1_SCG_SIRCDIV_OFFSET     0x0204 /* Slow IRC Divider */
 #define RV32M1_SCG_SIRCCFG_OFFSET     0x0208 /* Slow IRC Configuration */
-#define RV32M1_SCG_FIRCCSR_OFFSET     0x0300 /* Fast IRC Constrol Status */
+#define RV32M1_SCG_FIRCCSR_OFFSET     0x0300 /* Fast IRC Control Status */
 #define RV32M1_SCG_FIRCDIV_OFFSET     0x0304 /* Fast IRC Divider */
 #define RV32M1_SCG_FIRCCFG_OFFSET     0x0308 /* Fast IRC Configuration */
 #define RV32M1_SCG_FIRCTCFG_OFFSET    0x030c /* Fast IRC Trim Configuration */
@@ -483,7 +483,7 @@
 
 /* FIRC Trim Configuration */
 
-#define SCG_FIRCTCFG_TRIMDIV_SHIFT      (8) /* Divide the System OSC down for Fast IRC Triming */
+#define SCG_FIRCTCFG_TRIMDIV_SHIFT      (8) /* Divide the System OSC down for Fast IRC Trimming */
 #define SCG_FIRCTCFG_TRIMDIV_MASK       (7 << SCG_FIRCTCFG_TRIMDIV_SHIFT)
 #define SCG_FIRCTCFG_TRIMDIV_DIVBY1     (0 << SCG_FIRCTCFG_TRIMDIV_SHIFT)
 #define SCG_FIRCTCFG_TRIMDIV_DIVBY128   (1 << SCG_FIRCTCFG_TRIMDIV_SHIFT)

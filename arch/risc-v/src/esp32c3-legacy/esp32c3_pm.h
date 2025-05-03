@@ -195,7 +195,7 @@ void esp32c3_sleep_enable_wifi_wakeup(void);
  * Name:  esp32c3_should_skip_light_sleep
  *
  * Description:
- *   Indicates if light sleep shoule be skipped.
+ *   Indicates if light sleep should be skipped.
  *
  * Input Parameters:
  *   None

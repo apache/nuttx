@@ -914,7 +914,7 @@ static int imx9_flexspi_nor_ioctl(struct mtd_dev_s *dev,
                * necessary to make it appear so.
                */
 
-              /* We report 4k blocksize, that is more convient for upper
+              /* We report 4k blocksize, that is more convenient for upper
                * layers
                */
 

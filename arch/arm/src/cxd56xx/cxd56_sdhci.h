@@ -221,7 +221,7 @@ extern "C"
 #define SDHCI_SYSCTL_ICLKEN              (1 << 0)  /* Bit 0:  Internal Clock Enable */
 #define SDHCI_SYSCTL_ICLKSTA             (1 << 1)  /* Bit 1:  Internal Clock Stable */
 #define SDHCI_SYSCTL_SDCLKEN             (1 << 2)  /* Bit 2:  SD Clock Enable */
-#define SDHCI_SYSCTL_GENSEL              (1 << 5)  /* Bit 5:  Clock Generetor Select */
+#define SDHCI_SYSCTL_GENSEL              (1 << 5)  /* Bit 5:  Clock Generator Select */
 #define SDHCI_SYSCTL_SDCLKFSUP_SHIFT     (6)       /* Bits 6-7: Divisor */
 #define SDHCI_SYSCTL_SDCLKFSUP_MASK      (3 << SDHCI_SYSCTL_SDCLKFSUP_SHIFT)
 #define SDHCI_SYSCTL_SDCLKFS_SHIFT       (8)       /* Bits 8-15: SDCLK Frequency Select */

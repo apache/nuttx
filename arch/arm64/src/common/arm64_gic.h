@@ -336,7 +336,7 @@ int arm64_gic_v2m_initialize(void);
  *
  *   1. It saves the current task state at the head of the current assigned
  *      task list.
- *   2. It porcess g_delivertasks
+ *   2. It processes g_delivertasks
  *   3. Returns from interrupt, restoring the state of the new task at the
  *      head of the ready to run list.
  *

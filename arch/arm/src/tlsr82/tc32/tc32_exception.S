@@ -156,14 +156,14 @@ tc32_exception:
 	 * Restore all the register according to R0
 	 */
 
-	/* Dsiable interrupt to protect the SVC mode */
+	/* Disable interrupt to protect the SVC mode */
 
 	tloadr		r2, _REG_IRQ_EN 		/* disable irq */
 	tmov		r3, #0				/* disable irq */
 	tstorerb	r3, [r2]			/* disable irq */
 
 	/* Restore SVC mode SP (R13), SVC mode LR (R14, based saved PC)
-	 * PC is not need to retore */
+	 * PC is not need to restore */
 
 	tloadr		r2, [r0, #(4 * REG_SP)]
 	tloadr		r3, [r0, #(4 * REG_PC)]

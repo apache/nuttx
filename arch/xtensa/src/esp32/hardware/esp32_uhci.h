@@ -1194,7 +1194,7 @@
 #define UHCI_AHB_TESTADDR_S  4
 
 /* UHCI_AHB_TESTMODE : RW; bitpos: [2:0]; default: 0;
- * bit2 is ahb bus test enable ,bit1 is used to choose wrtie(1) or read(0)
+ * bit2 is ahb bus test enable ,bit1 is used to choose write(1) or read(0)
  * mode. bit0 is used to choose test only once(1) or continue(0)
  */
 
@@ -1669,7 +1669,7 @@
 #define UHCI_ESC_CONF0_REG(i) (REG_UHCI_BASE(i) + 0xb0)
 
 /* UHCI_SEPER_ESC_CHAR1 : RW; bitpos: [23:16]; default: 220;
- * This register stores the second char used to replace seperator char in
+ * This register stores the second char used to replace separator char in
  * data . 0xdc 0xdb replace 0xc0 by default.
  */
 
@@ -1679,7 +1679,7 @@
 #define UHCI_SEPER_ESC_CHAR1_S  16
 
 /* UHCI_SEPER_ESC_CHAR0 : RW; bitpos: [15:8]; default: 219;
- * This register stores thee first char used to replace seperator char in
+ * This register stores thee first char used to replace separator char in
  * data.
  */
 
@@ -1689,8 +1689,8 @@
 #define UHCI_SEPER_ESC_CHAR0_S  8
 
 /* UHCI_SEPER_CHAR : RW; bitpos: [7:0]; default: 192;
- * This register stores the seperator char  seperator char is used to
- * seperate the data frame.
+ * This register stores the separator char  separator char is used to
+ * separate the data frame.
  */
 
 #define UHCI_SEPER_CHAR    0x000000FF
@@ -1723,7 +1723,7 @@
 
 /* UHCI_ESC_SEQ0 : RW; bitpos: [7:0]; default: 219;
  * This register stores the first substitute char used to replace the
- * seperator char.
+ * separator char.
  */
 
 #define UHCI_ESC_SEQ0    0x000000FF

@@ -84,7 +84,7 @@ enum rx65n_i2c_event_e
 {
   RIIC_EV_NONE = 0,
   RIIC_EV_GEN_START_COND,  /* Called function of Start condition generation */
-  RIIC_EV_INT_START,       /* Interrupted start codition generation */
+  RIIC_EV_INT_START,       /* Interrupted start condition generation */
   RIIC_EV_INT_ADD,         /* Interrupted address sending */
   RIIC_EV_INT_SEND,        /* Interrupted data sending */
   RIIC_EV_INT_RECEIVE,     /* Interrupted data receiving */
@@ -483,7 +483,7 @@ static void rx65n_riic_setclock(struct rx65n_i2c_priv_s *priv,
       i2cinfo("Fast Plus Mode Selected - Transmission Rate: 1 Mbps\n");
       if (l_time < 0.5E-6)
         {
-          /* Wnen L width less than 0.5us, subtract Rise up and down
+          /* If L width is less than 0.5us, subtract rise up and down
            * time for SCL from H/L width
            */
 
@@ -506,7 +506,7 @@ static void rx65n_riic_setclock(struct rx65n_i2c_priv_s *priv,
       i2cinfo("Fast Mode Selected - Transmission Rate: 400 kbps\n");
       if (l_time < 1.3E-6)
         {
-          /* Wnen L width less than 1.3us, subtract Rise up and down
+          /* If L width is less than 1.3us, subtract rise up and down
            * time for SCL from H/L width
            */
 
@@ -1951,7 +1951,7 @@ static uint8_t rx65n_riic_read_data(struct rx65n_i2c_priv_s *priv)
  * Name: rx65n_riic_wait_set
  *
  * Description:
- *  Receive "last byte - 2bytes" Setting Proccesing.
+ *  Receive "last byte - 2bytes" Setting Processing.
  *  Sets ICMR3.WAIT bit.
  *
  ****************************************************************************/

@@ -231,7 +231,7 @@ float pi_controller(FAR pid_controller_f32_t *pid, float err)
 
   pid->part[0] = pid->KP * err;
 
-  /* Get intergral part */
+  /* Get integral part */
 
   pid->part[1] += pid->KI * (err - pid->aw);
 

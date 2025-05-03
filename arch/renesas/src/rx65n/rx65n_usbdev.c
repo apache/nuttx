@@ -5508,7 +5508,7 @@ void usb_pstd_brdy_pipe(uint16_t bitsts, struct rx65n_usbdev_s *priv,
        * which further, unblocks the semaphore waiting
        * on read()
        * Failing to invoke this function will result,
-       * in failiure of application specific read
+       * in failure of application specific read.
        *
        */
 
@@ -5970,7 +5970,7 @@ static int rx65n_usbinterrupt(int irq, void *context, void *arg)
       }
     else
       {
-        /* Vender Specific */
+        /* Vendor Specific */
 
         type = LSBYTE(rx65n_getreg16(RX65N_USB_USBREQ));
         rx65n_ep0setup(priv);

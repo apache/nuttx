@@ -41,7 +41,7 @@
 
 /* Configuration ************************************************************/
 
-/* Nx Console prerequistes */
+/* Nx Console prerequisites */
 
 #ifndef CONFIG_NX
 #  warning "NX is not enabled (CONFIG_NX)
@@ -371,7 +371,7 @@ NXTERM nxtool_register(NXTKWINDOW hfwnd, FAR struct nxterm_window_s *wndo,
  *
  * NOTE:  We don't need driver context here because the NXTERM handle
  * provided within each of the NXTERM IOCTL command data.  Mutual
- * exclusion is similar managed by the IOCTL cmmand handler.
+ * exclusion is similar managed by the IOCTL command handler.
  *
  * This permits the IOCTL to be called in abnormal context (such as
  * from boardctl())

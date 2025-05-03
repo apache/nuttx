@@ -420,7 +420,7 @@ struct ff_lowerhalf_s
    * device or dedicated registers. At each power-on, so that the values read
    * from the device are already corrected. When the device is calibrated,
    * the absolute accuracy will be better than before.
-   * Note: the parameters associated with calibration value, maxinum 32-byte.
+   * Note: the parameters associated with calibration value, maximum 32-byte.
    */
 
   CODE int (*set_calibvalue)(FAR struct ff_lowerhalf_s *lower,
@@ -434,7 +434,7 @@ struct ff_lowerhalf_s
    * calibration value of the device needs to be obtained and backed up,
    * so that the last calibration value can be directly obtained after
    * power-on.
-   * Note: the parameters associated with calibration value, maxinum 32-byte.
+   * Note: the parameters associated with calibration value, maximum 32-byte.
    */
 
   CODE int (*calibrate)(FAR struct ff_lowerhalf_s *lower,
@@ -514,7 +514,7 @@ int ff_register(FAR struct ff_lowerhalf_s *lower, FAR const char *path,
  *   release the occupied resources.
  *
  * Arguments:
- *   lower - A pointer to an insatnce of force feedback lower half driver.
+ *   lower - A pointer to an instance of force feedback lower half driver.
  *   path  - The path of force feedback device. such as "/dev/input0"
  *
  ****************************************************************************/

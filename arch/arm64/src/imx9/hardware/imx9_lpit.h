@@ -37,7 +37,7 @@
 #define IMX9_LPIT_PARAM_OFFSET        0x0004 /* Parameter */
 #define IMX9_LPIT_MCR_OFFSET          0x0008 /* Module Control */
 #define IMX9_LPIT_MSR_OFFSET          0x000c /* Module Status Register */
-#define IMX9_LPIT_MIER_OFFSET         0x0010 /* Moduel Interrupt Enable */
+#define IMX9_LPIT_MIER_OFFSET         0x0010 /* Module Interrupt Enable */
 #define IMX9_LPIT_SETTEN_OFFSET       0x0014 /* Set Timer Enable */
 #define IMX9_LPIT_CLRTEN_OFFSET       0x0018 /* Clear Timer Enable */
 #define IMX9_LPIT_TVAL0_OFFSET        0x0020 /* Timer Channel 0 Value */

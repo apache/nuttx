@@ -38,7 +38,7 @@
 # Example:
 #   nuttx_remove_compile_options(-march -mabi)
 #
-#   befor: CFLAGS = -O2 -g -march=rv32if -mabi=ilp32f -mcpu=e907fp
+#   before: CFLAGS = -O2 -g -march=rv32if -mabi=ilp32f -mcpu=e907fp
 #   after: CFLAGS = -O2 -g -mcpu=e907fp
 #
 # ~~~

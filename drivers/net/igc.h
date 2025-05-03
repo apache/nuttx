@@ -430,9 +430,9 @@
 #define IGC_IVARMSC_TCPTIM        (0)        /* Bits 0-5: MSI-X vectorassigned to TCP timer interrupt */
                                              /* Bits 5-6: Reserved */
 #define IGC_IVARMSC_TCPTIM_VAL    (1 << 7)   /* Bit 7: Enable bit for TCP timer interrupt */
-#define IGC_IVARMSC_OTHER_SHIFT   (8)        /* Bits 8-12: MSI-X vector assigned to Ohter Cause */
+#define IGC_IVARMSC_OTHER_SHIFT   (8)        /* Bits 8-12: MSI-X vector assigned to Other Cause */
                                              /* Bits 13-14: Reserved */
-#define IGC_IVARMSC_OTHER_VAL     (1 << 15)  /* Bit 15: Enable bit for Ohter Cause */
+#define IGC_IVARMSC_OTHER_VAL     (1 << 15)  /* Bit 15: Enable bit for Other Cause */
                                              /* Bits 20-30: Reserved */
 
 /* General Purpose Interrupt Enable */

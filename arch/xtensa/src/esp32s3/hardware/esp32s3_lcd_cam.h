@@ -763,7 +763,7 @@
 #define LCD_CAM_LCD_VFK_CYCLELEN_S  6
 
 /* LCD_CAM_LCD_AFIFO_THRESHOLD_NUM : R/W; bitpos: [5:1]; default: 11;
- * The awfull threshold number of lcd_afifo.
+ * The awful threshold number of lcd_afifo.
  */
 
 #define LCD_CAM_LCD_AFIFO_THRESHOLD_NUM    0x0000001f

@@ -400,7 +400,7 @@ struct ieee695_lheadr_s
   uint8_t name[1];         /* Name string data begins here */
 };
 
-/* 88H COMENT - Comment Record */
+/* 88H COMMENT - Comment Record */
 
 struct ieee695_coment_s
 {

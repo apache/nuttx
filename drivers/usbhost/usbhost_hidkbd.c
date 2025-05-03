@@ -1932,7 +1932,7 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
 
   if (priv->epin)
     {
-      /* Use interrupt tranfers to get reports. */
+      /* Use interrupt transfers to get reports. */
 
       uinfo("Start waiting for key reports\n");
       ret = DRVR_ASYNCH(hport->drvr, priv->epin,
@@ -1964,7 +1964,7 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
 
   uinfo("Start poll task\n");
 
-  /* The inputs to a task started by kthread_create() are very awkard for
+  /* The inputs to a task started by kthread_create() are very awkward for
    * this purpose.  They are really designed for command line tasks
    * (argc/argv).  So the following is kludge pass binary data when the
    * keyboard poll task is started.

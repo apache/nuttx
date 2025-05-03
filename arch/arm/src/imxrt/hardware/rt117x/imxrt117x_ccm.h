@@ -726,7 +726,7 @@
 #define CCM_CR_CKO2        78 /* CLOCK ROOT CKO2. */
 
 /* Note IMXRT7 uses the definition LPCG instead of CCGR as the clock gate
- * register but for compatiblity we define them as LPCG
+ * register but for compatibility we define them as LPCG.
  */
 
 #define CCM_CG_OFF                               (0)  /* Clock is off during all modes */
@@ -756,7 +756,7 @@
 #define CCM_CCGR_MU_A                        20
 #define CCM_CCGR_MU_B                        21
 #define CCM_CCGR_EDMA                        22
-#define CCM_CCGR_DMA                         22 /* Note Added CTRL for compatiblity */
+#define CCM_CCGR_DMA                         22 /* Note Added CTRL for compatibility */
 #define CCM_CCGR_EDMA_LPSR                   23
 #define CCM_CCGR_ROMCP                       24
 #define CCM_CCGR_OCRAM                       25
@@ -772,10 +772,10 @@
 #define CCM_CCGR_IEE                         35
 #define CCM_CCGR_KEY_MANAGER                 36
 #define CCM_CCGR_PUF                         36
-#define CCM_CCGR_OCOTP_CTRL                  37 /* Note Added CTRL for compatiblity */
+#define CCM_CCGR_OCOTP_CTRL                  37 /* Note Added CTRL for compatibility */
 #define CCM_CCGR_SNVS_HP                     38
 #define CCM_CCGR_SNVS                        39
-#define CCM_CCGR_SNVS_LP                     39 /* Note Added CTRL for compatiblity */
+#define CCM_CCGR_SNVS_LP                     39 /* Note Added CTRL for compatibility */
 #define CCM_CCGR_CAAM                        40
 #define CCM_CCGR_JTAG_MUX                    41
 #define CCM_CCGR_CSTRACE                     42

@@ -205,7 +205,7 @@ void leave_cancellation_point(void)
         }
       else
         {
-          /* We are not at the outermost nesting level.  Just decrment the
+          /* We are not at the outermost nesting level.  Just decrement the
            * nesting level count.
            */
 

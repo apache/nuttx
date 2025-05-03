@@ -120,7 +120,7 @@ config LIBC_PRINT_EXTENSION
 		the standard semantics. For that reason, in the future versions
 		of NuttX, this extension might be removed, or changed in an
 		API-incompatible way to avoid conflicts with the standards.
-		(Eg. use different characters for converions specifiers,
+		(Eg. use different characters for conversions specifiers,
 		or switch to a completely separate API, say "nuttx_printf".)
 
 endmenu #Standard C I/O

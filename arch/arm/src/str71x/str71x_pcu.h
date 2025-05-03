@@ -100,7 +100,7 @@
 #define STR71X_PCUPPL2CR_PLLEN      (0x0080) /* Bit 7: PLL2 enable */
 #define STR71X_PCUPPL2CR_USBEN      (0x0100) /* Bit 8: Enable PLL clock to USB */
 #define STR71X_PCUPPL2CR_IRQMASK    (0x0200) /* Bit 9: Enable interrupt request CPU on lock transition */
-#define STR71X_PCUPPL2CR_IRQPEND    (0x0400) /* Bit 10: Interrtup request to CPU on lock transition pending */
+#define STR71X_PCUPPL2CR_IRQPEND    (0x0400) /* Bit 10: Interrupt request to CPU on lock transition pending */
 #define STR71X_PCUPPL2CR_LOCK       (0x8000) /* Bit 15: PLL2 locked */
 
 /* PCU BOOTCR register bit definitions */

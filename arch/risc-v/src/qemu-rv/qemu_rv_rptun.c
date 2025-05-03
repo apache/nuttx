@@ -174,12 +174,12 @@ int rp_init_ipi(void)
 
       while (*ptr != '\0' && *ptr != ',')
         {
-          ptr++;                     /* seek delimeter */
+          ptr++;                     /* seek delimiter */
         }
 
       if (*ptr)
         {
-          ptr++;                     /* skip delimeter */
+          ptr++;                     /* skip delimiter */
         }
 
       i++;

@@ -44,7 +44,7 @@
 #define PCD8544_MODEV               (1 << 1) /* Enable Vertical Addressing */
 #define PCD8544_MODEH               (1 << 0) /* Enable extended instruction set */
 
-/* Command with Instructon Set H = 0 */
+/* Command with Instruction Set H = 0 */
 
 #define PCD8544_DISP_CTRL           (1 << 3) /* sets display configuration */
 #define PCD8544_DISP_BLANK          0x00     /* display blank */
@@ -55,7 +55,7 @@
 #define PCD8544_SET_Y_ADDR          (1 << 6) /* Set the Y bank 0-5 */
 #define PCD8544_SET_X_ADDR          (1 << 7) /* Set the X bank 0-83 */
 
-/* Command with Instructon Set H = 1 */
+/* Command with Instruction Set H = 1 */
 
 #define PCD8544_TEMP_COEF           (1 << 2) /* set Temperature Coefficient */
 #define PCD8544_BIAS_SYSTEM         (1 << 4) /* set Bias System */

@@ -60,7 +60,7 @@
 #define BCM_ARMT_BASEADDR                                                    \
   (BCM_PERIPHERAL_BASEADDR + 0x0000b000) /* ARM timer */
 #define BCM_AUX_BASEADDR                                                     \
-  (BCM_PERIPHERAL_BASEADDR + 0x000215000) /* Auxilliary */
+  (BCM_PERIPHERAL_BASEADDR + 0x000215000) /* Auxiliary */
 #define BCM_GPCLK_BASEADDR                                                   \
   (BCM_PERIPHERAL_BASEADDR + 0x000101000) /* General purpose clock */
 #define BCM_GPIO_BASEADDR                                                    \

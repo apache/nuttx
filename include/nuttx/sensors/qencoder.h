@@ -59,7 +59,7 @@
  * QEIOC_GETINDEX - Get the index position and count of the encoder.
  *   The structure also contains current position so QEIOC_POSITION
  *   is not required when QEIOC_GETINDEX is used.
- *   Argment: qe_index_s structure (refer below)
+ *   Argument: qe_index_s structure (refer below)
  */
 
 #define QEIOC_POSITION     _QEIOC(0x0001) /* Arg: int32_t* pointer */
@@ -147,14 +147,14 @@ struct qe_ops_s
 
 /* Structure qe_index_s is used for QEIOC_GETINDEX call. This call returns
  * current encoder position, the last index position and number of index
- * occurances.
+ * occurrences.
  */
 
 struct qe_index_s
 {
   int32_t qenc_pos;     /* Qencoder actual position */
   int32_t indx_pos;     /* Index last position */
-  int16_t indx_cnt;     /* Number of index occurances */
+  int16_t indx_cnt;     /* Number of index occurrences */
 };
 
 /* This is the interface between the lower half quadrature encoder driver

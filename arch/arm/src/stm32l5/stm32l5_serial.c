@@ -3023,7 +3023,7 @@ static int stm32l5serial_pmprepare(struct pm_callback_s *cb, int domain,
  *
  * Description:
  *   Performs the low level USART initialization early in debug so that the
- *   serial console will be available during bootup.  This must be called
+ *   serial console will be available during boot up.  This must be called
  *   before arm_serialinit.
  *
  ****************************************************************************/

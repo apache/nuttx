@@ -250,13 +250,13 @@ static uint32_t  mpsoc_clk_register_get(enum mpsoc_clk clk_pll)
  * Function: mpsoc_clk_pll_get
  *
  * Description:
- *  Get clock source post frequence
+ *  Get clock source post frequency
  *
  * Input Parameters:
  *   clk_ctrl - Ctrl register value of clock source.
  *
  * Returned Value:
- *   Clock source post frequence.
+ *   Clock source post frequency.
  *
  ****************************************************************************/
 
@@ -265,7 +265,7 @@ static uintptr_t  mpsoc_clk_pll_get(uintptr_t  clk_ctrl)
   uint32_t  src_sel;
 
   src_sel = (clk_ctrl & PLLCTRL_POST_SRC_MASK) >>
-             PLLCTRL_POST_SRC_SHFT; /* get pass-thru clock source */
+             PLLCTRL_POST_SRC_SHFT; /* get pass-through clock source */
 
   switch (src_sel)
     {
@@ -290,13 +290,13 @@ static uintptr_t  mpsoc_clk_pll_get(uintptr_t  clk_ctrl)
  * Function: mpsoc_clk_pll_rate_get
  *
  * Description:
- *  Get clock source pll output frequence
+ *  Get clock source pll output frequency
  *
  * Input Parameters:
  *   clk_pll - clock source pll.
  *
  * Returned Value:
- *   Pll output frequence.
+ *   Pll output frequency.
  *
  ****************************************************************************/
 
@@ -433,13 +433,13 @@ static enum mpsoc_clk mpsoc_peripheral_clk_pll_set(uint32_t  clkctrl)
  * Function: mpsoc_cpu_clk_get
  *
  * Description:
- *  Get ARM CPU running frequence
+ *  Get ARM CPU running frequency
  *
  * Input Parameters:
  *   none.
  *
  * Returned Value:
- *   ARM CPU running frequence.
+ *   ARM CPU running frequency.
  *
  ****************************************************************************/
 
@@ -466,13 +466,13 @@ static uint32_t mpsoc_cpu_clk_get(void)
  * Function: mpsoc_ddr_clk_get
  *
  * Description:
- *  Get DDR running frequence
+ *  Get DDR running frequency
  *
  * Input Parameters:
  *   none.
  *
  * Returned Value:
- *   DDR running frequence.
+ *   DDR running frequency.
  *
  ****************************************************************************/
 
@@ -499,13 +499,13 @@ static uint32_t mpsoc_ddr_clk_get(void)
  * Function: mpsoc_peripheral_clk_get
  *
  * Description:
- *  Get peripheral running frequence
+ *  Get peripheral running frequency
  *
  * Input Parameters:
  *   peripheral clock ID.
  *
  * Returned Value:
- *   peripheral running frequence.
+ *   peripheral running frequency.
  *
  ****************************************************************************/
 
@@ -541,7 +541,7 @@ static uint32_t mpsoc_peripheral_clk_get(enum mpsoc_clk clk)
  * Function: mpsoc_peripheral_clk_two_divs_calc
  *
  * Description:
- *  Get peripheral running frequence
+ *  Get peripheral running frequency
  *
  * Input Parameters:
  *   rate - clock freq
@@ -550,7 +550,7 @@ static uint32_t mpsoc_peripheral_clk_get(enum mpsoc_clk clk)
  *   div1 - divisor1
  *
  * Returned Value:
- *   best running frequence.
+ *   best running frequency.
  *
  ****************************************************************************/
 
@@ -591,14 +591,14 @@ static uintptr_t mpsoc_peripheral_clk_two_divs_calc(uintptr_t rate,
  * Function: mpsoc_peripheral_clk_set
  *
  * Description:
- *  Set peripheral running frequence
+ *  Set peripheral running frequency
  *
  * Input Parameters:
  *   clk - peripheral clock ID
  *   rate - clock freq
  *
  * Returned Value:
- *   New peripheral running frequence.
+ *   New peripheral running frequency.
  *
  ****************************************************************************/
 
@@ -644,13 +644,13 @@ static uint32_t mpsoc_peripheral_clk_set(enum mpsoc_clk clk, uintptr_t rate)
  * Function: mpsoc_ttc_clk_get
  *
  * Description:
- *  Get ttc controller running frequence
+ *  Get ttc controller running frequency
  *
  * Input Parameters:
  *   clk - peripheral clock ID
  *
  * Returned Value:
- *   PLL frequence.
+ *   PLL frequency.
  *
  ****************************************************************************/
 
@@ -714,13 +714,13 @@ static uint32_t mpsoc_ttc_clk_get(enum mpsoc_clk clk)
  * Function: mpsoc_clk_rate_get
  *
  * Description:
- *  Get controller running frequence
+ *  Get controller running frequency
  *
  * Input Parameters:
  *   clk - peripheral clock ID
  *
  * Returned Value:
- *   Running frequence.
+ *   Running frequency.
  *
  ****************************************************************************/
 
@@ -753,14 +753,14 @@ uintptr_t mpsoc_clk_rate_get(enum mpsoc_clk clk)
  * Function: mpsoc_clk_rate_set
  *
  * Description:
- *  Set running frequence
+ *  Set running frequency
  *
  * Input Parameters:
  *   clk - peripheral clock ID
  *   rate - clock freq
  *
  * Returned Value:
- *   peripheral running frequence.
+ *   peripheral running frequency.
  *
  ****************************************************************************/
 

@@ -827,7 +827,7 @@
 #define RTC_CNTL_INT_ENA_RTC_REG (DR_REG_RTCCNTL_BASE + 0x40)
 
 /* RTC_CNTL_GLITCH_DET_INT_ENA : R/W; bitpos: [19]; default: 0;
- * enbale gitch det interrupt
+ * enable gitch det interrupt
  */
 
 #define RTC_CNTL_GLITCH_DET_INT_ENA    (BIT(19))
@@ -3411,7 +3411,7 @@
 #define RTC_CNTL_SWD_AUTO_FEED_EN_S  31
 
 /* RTC_CNTL_SWD_DISABLE : R/W; bitpos: [30]; default: 0;
- * disabel SWD
+ * disable SWD
  */
 
 #define RTC_CNTL_SWD_DISABLE    (BIT(30))
@@ -4268,7 +4268,7 @@
 #define RTC_CNTL_XTAL32K_RESTART_WAIT_S  4
 
 /* RTC_CNTL_XTAL32K_RETURN_WAIT : R/W; bitpos: [3:0]; default: 0;
- * cycles to wait to return noral xtal 32k
+ * cycles to wait to return normal xtal 32k
  */
 
 #define RTC_CNTL_XTAL32K_RETURN_WAIT    0x0000000F

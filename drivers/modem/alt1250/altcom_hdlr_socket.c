@@ -121,7 +121,7 @@ static void altstorage2sockaddr(
       memcpy(&in6addr_to->sin6_addr, &in6addr_from->sin6_addr,
         sizeof(struct in6_addr));
 
-      /* LwIP does not use thease members, so it should be set to 0 */
+      /* LwIP does not use these members, so it should be set to 0 */
 
       in6addr_to->sin6_flowinfo = 0;
       in6addr_to->sin6_scope_id = 0;

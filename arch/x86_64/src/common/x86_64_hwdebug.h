@@ -39,7 +39,7 @@
  * Name: x86_64_hwdebug_init
  *
  * Description:
- *   One-time initializtion for hardware debug interface.
+ *   One-time initialization for hardware debug interface.
  *
  ****************************************************************************/
 

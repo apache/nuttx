@@ -426,7 +426,7 @@ FAR uint8_t *netpkt_getbase(FAR netpkt_t *pkt);
  * Description:
  *   Set the length of data in netpkt, used when data is written into
  *   netpkt by data/base pointer, no need to set this length after
- *   copyin.
+ *   copying.
  *
  * Input Parameters:
  *   dev    - The lower half device driver structure

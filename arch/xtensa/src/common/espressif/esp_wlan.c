@@ -876,7 +876,7 @@ static void wlan_rxpoll(void *arg)
         }
 
       /* We are finished with the RX buffer.  NOTE:  If the buffer is
-       * re-used for transmission, the dev->d_buf field will have been
+       * reused for transmission, the dev->d_buf field will have been
        * nullified.
        */
 
@@ -1609,7 +1609,7 @@ static int esp_net_initialize(int devno, uint8_t *mac_addr,
  *
  * Description:
  *   Wi-Fi station RX done callback function. If this is called, it means
- *   station receiveing packet.
+ *   station receiving packet.
  *
  * Input Parameters:
  *   buffer - Wi-Fi received packet buffer
@@ -1659,7 +1659,7 @@ static void wlan_sta_tx_done(uint8_t *data, uint16_t *len, bool status)
  *
  * Description:
  *   Wi-Fi softAP RX done callback function. If this is called, it means
- *   softAP receiveing packet.
+ *   softAP receiving packet.
  *
  * Input Parameters:
  *   buffer - Wi-Fi received packet buffer

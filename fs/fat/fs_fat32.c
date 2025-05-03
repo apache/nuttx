@@ -1585,7 +1585,7 @@ static int fat_dup(FAR const struct file *oldp, FAR struct file *newp)
    *    file structure.  Then, instead of dup'ing the whole structure
    *    as is done here, just increment the reference count on the
    *    structure.  The would have to be integrated with open logic as
-   *    well, however, so that the same file structure is re-used if the
+   *    well, however, so that the same file structure is reused if the
    *    file is re-opened.
    */
 

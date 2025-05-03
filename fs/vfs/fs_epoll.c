@@ -322,7 +322,7 @@ static int epoll_setup(FAR epoll_head_t *eph)
  * Name: epoll_teardown
  *
  * Description:
- *   Teardown all the notifed fd and check the notified fd's event with user
+ *   Teardown all the notified fd and check the notified fd's event with user
  *   expected event.
  *
  * Input Parameters:
@@ -331,7 +331,7 @@ static int epoll_setup(FAR epoll_head_t *eph)
  *   maxevents - The epoll events array size
  *
  * Returned Value:
- *   Return the number of fd that notifed and the events is also user
+ *   Return the number of fd that notified and the events is also user
  *   expected.
  *
  ****************************************************************************/
@@ -347,7 +347,7 @@ static int epoll_teardown(FAR epoll_head_t *eph, FAR struct epoll_event *evs,
 
   list_for_every_entry_safe(&eph->setup, epn, tepn, epoll_node_t, node)
     {
-      /* Only check the notifed fd */
+      /* Only check the notified fd */
 
       if (!epn->notified)
         {

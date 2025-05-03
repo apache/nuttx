@@ -233,7 +233,7 @@ static unsigned long unwind_get_byte(struct unwind_ctrl_s *ctrl)
  * Name: unwind_pop_register
  *
  * Description:
- *  Before poping a register check whether it is feasible or not
+ *  Before popping a register check whether it is feasible or not
  *
  ****************************************************************************/
 

@@ -98,7 +98,7 @@ struct lcd_planeinfo_s
    *  buffer    - The buffer containing the area to be written to the LCD
    *  stride    - Length of a line in bytes. This parameter may be necessary
    *              to allow the LCD driver to calculate the offset for partial
-   *              writes when the buffer needs to be splited for row-by-row
+   *              writes when the buffer needs to be split for row-by-row
    *              writing.
    *
    * NOTE: this operation may not be supported by the device, in which case
@@ -150,7 +150,7 @@ struct lcd_planeinfo_s
    *
    *  dev       - LCD interface to redraw its memory content
    *
-   * NOTE: In case of non e-ink dispalys redrawing is cheap and can be done
+   * NOTE: In case of non e-ink displays redrawing is cheap and can be done
    * after each memory modification. Redrawing e-ink display is time and
    * energy consuming.
    * In order to avoid such operation (time and energy consumption) we can

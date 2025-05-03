@@ -349,7 +349,7 @@ int board_switch_boot(FAR const char *system);
  * Input Parameters:
  *   path     - Path to the new application firmware image to be booted.
  *   hdr_size - Image header size in bytes. This value may be useful for
- *              skipping metadata information preprended to the application
+ *              skipping metadata information prepended to the application
  *              image.
  *
  * Returned Value:

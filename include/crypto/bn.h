@@ -63,8 +63,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* This macro defines the word size in bytes of the array that constitues the
- * big-number data structure.
+/* This macro defines the word size in bytes of the array that constitutes
+ * the big-number data structure.
  */
 
 #define WORD_SIZE             1

@@ -40,7 +40,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Only one channel supported if TIMER triger enabled */
+/* Only one channel supported if TIMER trigger enabled */
 
 #ifdef CONFIG_NRF53_SAADC_TIMER
 #  define ADC_NCHANNELS (1)

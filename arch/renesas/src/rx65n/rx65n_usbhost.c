@@ -817,7 +817,7 @@ void hw_usb_hwrite_dcpctr(uint16_t data)
 
 /****************************************************************************
  * Function Name   : hw_usb_hset_sureq
- * Description     : Set te SUREQ-bit in the DCPCTR register
+ * Description     : Set the SUREQ-bit in the DCPCTR register
  *                 : (Set SETUP packet send when HostController function
  *                                 : is selected)
  * Arguments       : none
@@ -2186,7 +2186,7 @@ uint16_t usb_hstd_write_data_control_pipe(uint8_t * buf_add,
 
   /* Check data count to remain */
 
-  /* Check if this affects any of the standard requrest commands... */
+  /* Check if this affects any of the standard request commands... */
 
   if (buf_size <= (uint32_t) size)
     {
@@ -2535,7 +2535,7 @@ uint16_t usb_hstd_read_data_control_pipe(void)
     }
   else
     {
-      /* Continus Receive data */
+      /* Continuous Receive data */
 
       count = dtln;
 
@@ -2634,7 +2634,7 @@ uint16_t usb_hstd_read_data(uint16_t pipe, uint16_t pipemode)
     }
   else
     {
-      /* Continus Receive data */
+      /* Continuous Receive data */
 
       count = dtln;
 
@@ -2834,7 +2834,7 @@ void usb_hstd_brdy_pipe_process(uint16_t bitsts)
                     }
 
                   /* If still data is present - let the data
-                   * transfer coninue
+                   * transfer continue
                    *
                    */
 
@@ -5284,7 +5284,7 @@ static inline int rx65n_usbhost_addbulked(struct rx65n_usbhost_s *priv,
   g_usb_pipe_table[pipe_no].pipe_maxp = pipe_maxp;
   g_usb_pipe_table[pipe_no].pipe_peri = 0;
 
-  /* Now update these values in the requried pipe */
+  /* Now update these values in the required pipe */
 
   usb_cstd_pipe_init(pipe_no);
   leave_critical_section(flags);
@@ -5508,7 +5508,7 @@ static inline int rx65n_usbhost_addinted(struct rx65n_usbhost_s *priv,
   g_usb_pipe_table[pipe_no].pipe_maxp = pipe_maxp;
   g_usb_pipe_table[pipe_no].pipe_peri = pipe_peri;
 
-  /* Now update these values in the requried pipe */
+  /* Now update these values in the required pipe */
 
   usb_cstd_pipe_init(pipe_no);
 
@@ -6641,7 +6641,7 @@ static int rx65n_usbhost_epalloc(struct usbhost_driver_s *drvr,
 
   /* Take the ED descriptor from the list of ED Array - based on pipe num
    * Also note it down as part of ED structurie itself
-   * for futer use - if needed
+   * for futere use - if needed.
    * Take the next ED from the beginning of the free list
    */
 
@@ -6790,7 +6790,7 @@ static int rx65n_usbhost_epalloc(struct usbhost_driver_s *drvr,
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the
  *      call to the class create() method.
- *   ep - The endpint to be freed.
+ *   ep - The endpoint to be freed.
  *
  * Returned Value:
  *   On success, zero (OK) is returned. On a failure, a negated errno
@@ -6818,7 +6818,7 @@ static int rx65n_usbhost_epfree(struct usbhost_driver_s *drvr,
 
   nxmutex_lock(&priv->lock);
 
-  /* Remove the ED to the correct list depending on the trasfer type */
+  /* Remove the ED to the correct list depending on the transfer type */
 
   switch (ed->xfrtype)
     {
@@ -7337,7 +7337,7 @@ static int rx65n_usbhost_dma_alloc(struct rx65n_usbhost_s *priv,
 {
   syslog(LOG_INFO, "Debug : %s(): Line : %d\n", __func__, __LINE__);
 
-  /* This need to be impemented if DMA is used */
+  /* This need to be implemented if DMA is used */
 
   return OK;
 }
@@ -7434,7 +7434,7 @@ static ssize_t rx65n_usbhost_transfer(struct usbhost_driver_s *drvr,
 
   if (nrdy_retries[ed->pipenum] != 0)
     {
-      /* nRdy has occured alreday - just return with -ve value,
+      /* nRdy has occurred already - just return with -ve value,
        * so that file close is also completes with this error
        *
        */

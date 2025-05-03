@@ -150,7 +150,7 @@ extern "C"
  * Description:
  *   This is mostly a wrapper around the early board initialization code
  *   common to all boards based on the RP2040.  This implementation does
- *   additionaly set the board's status LED.
+ *   additionally set the board's status LED.
  *
  ****************************************************************************/
 

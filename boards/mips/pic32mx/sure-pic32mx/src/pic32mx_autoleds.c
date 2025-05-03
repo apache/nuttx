@@ -47,7 +47,7 @@
 
 /* LED Configuration ********************************************************/
 
-/* The Sure PIC32MX board has five LEDs.  One (D4, lablel "Power") is not
+/* The Sure PIC32MX board has five LEDs.  One (D4, labeled "Power") is not
  * controllable by software.  Four are controllable by software:
  *
  * D7  "USB"    Yellow  RD7 Low illuminates

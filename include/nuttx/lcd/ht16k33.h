@@ -55,7 +55,7 @@
 /* HT16K33 register addresses */
 
 #define HT16K33_DISP_DATA_ADDR         0x00 /* Display Data Address Pointer: 0x00-0x0f */
-#define HT16K33_SYSTEM_SETUP           0x20 /* System Setup: bit 0 = System Oscilator */
+#define HT16K33_SYSTEM_SETUP           0x20 /* System Setup: bit 0 = System Oscillator */
 #define HT16K33_KEY_DATA_ADDR          0x40 /* Key Data Address Pointer: 0x00-0x07 */
 #define HT16K33_INT_FLAG_ADDR          0x60 /* INT Flag Address */
 #define HT16K33_DISPLAY_SETUP          0x80 /* DISPLAY Setup */

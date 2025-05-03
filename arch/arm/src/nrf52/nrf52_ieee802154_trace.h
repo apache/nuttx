@@ -50,7 +50,7 @@ struct radio_trace_s
 
 enum radio_trace_type_e
 {
-  /* Radio interupts */
+  /* Radio interrupts */
 
   RADIO_TRACE_IRQ_RADIO,
   RADIO_TRACE_IRQ_RXDONE,

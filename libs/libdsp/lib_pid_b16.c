@@ -234,7 +234,7 @@ b16_t pi_controller_b16(FAR pid_controller_b16_t *pid, b16_t err)
 
   pid->part[0] = b16mulb16(pid->KP, err);
 
-  /* Get intergral part */
+  /* Get integral part */
 
   pid->part[1] += b16mulb16(pid->KI, (err - pid->aw));
 
