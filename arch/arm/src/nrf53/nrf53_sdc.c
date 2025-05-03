@@ -909,12 +909,14 @@ int nrf53_sdc_initialize(void)
       return ret;
     }
 
+#ifndef CONFIG_BLUETOOTH_RPMSG_SERVER
   ret = bt_driver_register(&g_bt_driver);
   if (ret < 0)
     {
       wlerr("bt_driver_register error: %d\n", ret);
       return ret;
     }
+#endif
 
   return ret;
 }
