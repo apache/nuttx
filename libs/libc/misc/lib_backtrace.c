@@ -267,14 +267,14 @@ int backtrace_record(int skip)
 
       entry = &bp->pool[index];
       entry->count++;
-      spin_unlock_irqrestore(&pool->lock, flags);
+      spin_unlock_irqrestore(&bp->lock, flags);
       return index;
     }
 
   index = backtrace_alloc(bp);
   if (index < 0)
     {
-      spin_unlock_irqrestore(&pool->lock, flags);
+      spin_unlock_irqrestore(&bp->lock, flags);
       return index;
     }
 
@@ -289,7 +289,7 @@ int backtrace_record(int skip)
 
   entry->next = bp->bucket[slot];
   bp->bucket[slot] = index;
-  spin_unlock_irqrestore(&pool->lock, flags);
+  spin_unlock_irqrestore(&bp->lock, flags);
   return index;
 }
 
@@ -323,7 +323,7 @@ int backtrace_remove(int index)
   if (entry->count > 1)
     {
       entry->count--;
-      spin_unlock_irqrestore(&pool->lock, flags);
+      spin_unlock_irqrestore(&bp->lock, flags);
       return OK;
     }
 
@@ -367,7 +367,7 @@ int backtrace_remove(int index)
     }
 
   backtrace_free(bp, index);
-  spin_unlock_irqrestore(&pool->lock, flags);
+  spin_unlock_irqrestore(&bp->lock, flags);
   return OK;
 }
 
