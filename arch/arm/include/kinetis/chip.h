@@ -1302,8 +1302,8 @@
 #  define KINETIS_NUSBDEV         1            /* One USB device controller */
 #  define KINETIS_NSDHC           1            /* SD host controller */
 #  define KINETIS_NI2C            3            /* Three I2C modules */
-#  define KINETIS_NUART           6            /* Six UART modues */
-#  define KINETIS_NSPI            3             Three SPI modules
+#  define KINETIS_NUART           6            /* Six UART modules */
+#  define KINETIS_NSPI            3            /* Three SPI modules */
 #  define KINETIS_NCAN            1            /* One CAN controllers */
 #  define KINETIS_NI2S            1            /* One I2S modules */
 #  define KINETIS_NSLCD           1            /* One segment LCD interface (up to 36x8/40x4) */
@@ -1341,8 +1341,8 @@
 #  define KINETIS_NUSBDEV         1            /* One USB device controller */
 #  define KINETIS_NSDHC           1            /* SD host controller */
 #  define KINETIS_NI2C            3            /* Three I2C modules */
-#  define KINETIS_NUART           6            /* Six UART modues */
-#  define KINETIS_NSPI            3             Three SPI modules
+#  define KINETIS_NUART           6            /* Six UART modules */
+#  define KINETIS_NSPI            3            /* Three SPI modules */
 #  define KINETIS_NCAN            1            /* One CAN controllers */
 #  define KINETIS_NI2S            1            /* One I2S modules */
 #  define KINETIS_NSLCD           1            /* One segment LCD interface (up to 36x8/40x4) */
