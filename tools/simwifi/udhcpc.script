@@ -39,7 +39,7 @@ case $1 in
         [ ".$subnet" = .255.255.255.255 ] \
             && onlink=onlink || onlink=
         busybox ip -4 route add default via $router dev $interface $onlink
-        log info "udhcpc add router $router on $interfac"
+        log info "udhcpc add router $router on $interface"
     fi
 
     DEF_NS="nameserver 8.8.8.8"
