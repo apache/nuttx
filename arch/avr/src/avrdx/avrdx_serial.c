@@ -607,7 +607,7 @@ static bool avrdx_usart_txempty(struct uart_dev_s *dev)
  * Name: avrdx_initialize_port
  *
  * Description:
- *   DRY method for USARTn initialization. Allocated data structures
+ *   DRY method for USARTn initialization. Allocates data structures
  *   for USARTn peripheral and assigns into g_usart_ports array
  *
  * Input Parameters:
