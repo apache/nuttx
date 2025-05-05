@@ -62,6 +62,12 @@ config DEV_OPTEE_RPMSG
 	depends on LIBC_MEMFD_SHMFS
 	depends on ALLOW_BSD_COMPONENTS
 
+config DEV_OPTEE_SMC
+	bool "OP-TEE SMC CC Support"
+	depends on ARCH_ARM || ARCH_ARM64
+	depends on LIBC_MEMFD_SHMFS
+	depends on ALLOW_BSD_COMPONENTS
+
 config DEV_OPTEE_NONE
 	bool "Disable OP-TEE driver"
 
@@ -74,6 +80,26 @@ config OPTEE_REMOTE_CPU_NAME
 	default "tee"
 
 endif # DEV_OPTEE_RPMSG
+
+if DEV_OPTEE_SMC
+
+choice
+	prompt "Select OP-TEE conduit method"
+	default DEV_OPTEE_SMC_CONDUIT_SMC
+	---help---
+		Select between the 2 supported conduit methods for invoking the secure
+		world: SMC (when running at EL1) and HVC (when running at EL2, which is
+		not supported by NuttX yet).
+
+config DEV_OPTEE_SMC_CONDUIT_SMC
+	bool "Use SMC calls to invoke OP-TEE"
+
+config DEV_OPTEE_SMC_CONDUIT_HVC
+	bool "Use HVC calls to invoke OP-TEE"
+
+endchoice
+
+endif # DEV_OPTEE_SMC
 
 config DRVR_MKRD
 	bool "RAM disk wrapper (mkrd)"

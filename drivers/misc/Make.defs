@@ -77,7 +77,11 @@ endif
 
 ifneq ($(CONFIG_DEV_OPTEE_NONE),y)
   CSRCS += optee.c
-  CSRCS += optee_socket.c
+  ifeq ($(CONFIG_DEV_OPTEE_SMC),y)
+    CSRCS += optee_smc.c
+  else
+    CSRCS += optee_socket.c
+  endif
 endif
 
 ifeq ($(CONFIG_GOLDFISH_PIPE),y)
