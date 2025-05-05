@@ -2,6 +2,8 @@
 PINE64 PinePhone
 ================
 
+.. tags:: chip:a64
+
 `PinePhone <https://wiki.pine64.org/index.php/PinePhone>`_ is an ARM64 smartphone created by PINE64.
 
 Features
