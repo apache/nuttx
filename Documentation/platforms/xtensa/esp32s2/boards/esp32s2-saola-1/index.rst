@@ -2,6 +2,8 @@
 ESP32-S2-Saola-1
 ================
 
+.. tags:: chip:esp32, chip:esp32s2
+
 The `ESP32-S2-Saola-1 <https://docs.espressif.com/projects/esp-idf/en/latest/esp32s2/hw-reference/esp32s2/user-guide-saola-1-v1.2.html>`_
 is a development board for the ESP32-S2 SoC from Espressif, based on the following modules:
 

@@ -2,6 +2,8 @@
 ESP32-2432S028
 ==============
 
+.. tags:: chip:esp32, chip:esp32wrover32
+
 The ESP32-2432S028 is a development board based on an ESP32-WROVER-32 module. It is designed for a 
 wide range of applications, particularly in the field of the Internet of Things (IoT).
 
