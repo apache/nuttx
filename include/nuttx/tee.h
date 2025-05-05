@@ -378,6 +378,13 @@ struct tee_iocl_supp_send_arg
 
 #define TEE_IOC_SUPPL_SEND _IOC(TEE_IOC_MAGIC << 8, TEE_IOC_BASE + 7)
 
+/* Shared memory specific defines */
+
+#define TEE_SHM_REGISTER     (1 << 0) /* In list of shared memory */
+#define TEE_SHM_SEC_REGISTER (1 << 1) /* TEE notified of this memory */
+#define TEE_SHM_ALLOC        (1 << 2) /* The memory is malloced() and must
+                                       * be freed() */
+
 /* struct tee_ioctl_shm_register_data - Shared memory register argument
  * addr:      [in] Start address of shared memory to register
  * length:    [in/out] Length of shared memory to register

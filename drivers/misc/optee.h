@@ -30,6 +30,8 @@
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 #include <nuttx/tee.h>
+#include <nuttx/list.h>
+#include <nuttx/spinlock.h>
 
 #include "optee_msg.h"
 
@@ -44,8 +46,17 @@
  * Public Types
  ****************************************************************************/
 
+struct optee_shm_entry
+{
+  struct list_node node;
+  struct tee_ioctl_shm_register_data shm;
+};
+
 struct optee_priv_data
 {
+  uintptr_t alignment;        /* Transport-specified message alignment */
+  struct list_node shm_list;  /* A list of all shm registered */
+  spinlock_t lock;            /* Lock used to guard list accesses */
 };
 
 /****************************************************************************
@@ -61,6 +72,16 @@ extern "C"
 #define EXTERN extern
 #endif
 
+#ifdef CONFIG_ARCH_ADDRENV
+uintptr_t optee_va_to_pa(FAR const void *va);
+#else
+#  define optee_va_to_pa(va) ((uintptr_t)va)
+#endif
+int optee_shm_alloc(FAR struct optee_priv_data *priv, FAR void *addr,
+                    size_t size, uint32_t flags,
+                    FAR struct optee_shm_entry **shmep);
+void optee_shm_free(FAR struct optee_priv_data *priv,
+                    FAR struct optee_shm_entry *shme);
 int optee_transport_init(void);
 int optee_transport_open(FAR struct optee_priv_data **priv);
 void optee_transport_close(FAR struct optee_priv_data *priv);
