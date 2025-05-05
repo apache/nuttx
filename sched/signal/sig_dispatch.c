@@ -214,49 +214,17 @@ static FAR sigpendq_t *nxsig_alloc_pendingsignal(void)
 {
   FAR sigpendq_t *sigpend;
 
-  /* Check if we were called from an interrupt handler. */
+  /* Try to get the pending signal structure from the free list */
 
-  if (up_interrupt_context())
+  sigpend = (FAR sigpendq_t *)sq_remfirst(&g_sigpendingsignal);
+  if (!sigpend && up_interrupt_context())
     {
-      /* Try to get the pending signal structure from the free list */
+      /* If no pending signal structure is available in the free list,
+       * then try the special list of structures reserved for
+       * interrupt handlers
+       */
 
-      sigpend = (FAR sigpendq_t *)sq_remfirst(&g_sigpendingsignal);
-      if (!sigpend)
-        {
-          /* If no pending signal structure is available in the free list,
-           * then try the special list of structures reserved for
-           * interrupt handlers
-           */
-
-          sigpend = (FAR sigpendq_t *)sq_remfirst(&g_sigpendingirqsignal);
-        }
-    }
-
-  /* If we were not called from an interrupt handler, then we are
-   * free to allocate pending action structures if necessary.
-   */
-
-  else
-    {
-      /* Try to get the pending signal structure from the free list */
-
-      sigpend = (FAR sigpendq_t *)sq_remfirst(&g_sigpendingsignal);
-
-      /* Check if we got one. */
-
-      if (!sigpend)
-        {
-          /* No... Allocate the pending signal */
-
-          sigpend = kmm_malloc(sizeof(sigpendq_t));
-
-          /* Check if we got an allocated message */
-
-          if (sigpend)
-            {
-              sigpend->type = SIG_ALLOC_DYN;
-            }
-        }
+      sigpend = (FAR sigpendq_t *)sq_remfirst(&g_sigpendingirqsignal);
     }
 
   return sigpend;
@@ -372,6 +340,80 @@ static FAR sigpendq_t *nxsig_add_pendingsignal(FAR struct tcb_s *stcb,
 }
 
 /****************************************************************************
+ * Name: nxsig_alloc_dyn_pending
+ *
+ * Description:
+ *   Dynamically allocate more pending signal and pending sigaction
+ *   structures, if there are no more left. Note that this leaves the
+ *   the critical section for the allocation. During that time it is
+ *   it is possible that structures are freed, or another signalling thread
+ *   allocates more structures. This is not an issue, any extra pending
+ *   structures are freed after they get used.
+ *
+ * Assumptions:
+ *   Called with g_sigpendingsignal and g_sigpendingaction locked by
+ *   critical section.
+ *
+ ****************************************************************************/
+
+static irqstate_t nxsig_alloc_dyn_pending(irqstate_t flags)
+{
+  if (!up_interrupt_context())
+    {
+      bool alloc_signal = sq_empty(&g_sigpendingsignal);
+      bool alloc_sigact = sq_empty(&g_sigpendingaction);
+
+      /* Signals are not dispatched from the idle task */
+
+      DEBUGASSERT(!sched_idletask());
+
+      if (alloc_signal || alloc_sigact)
+        {
+          FAR sigpendq_t *sigpend = NULL;
+          FAR sigq_t *sigq = NULL;
+
+          /* Leave critical section for the duration of heap operations */
+
+          leave_critical_section(flags);
+
+          /* Allocate more pending signals if there are no more */
+
+          if (alloc_signal)
+            {
+              sigpend = kmm_malloc(sizeof(sigpendq_t));
+            }
+
+          /* Allocate more pending signal actions if there are no more */
+
+          if (alloc_sigact)
+            {
+              sigq = kmm_malloc(sizeof(sigq_t));
+            }
+
+          /* Restore critical section and add the allocated structures to
+           * the free pending queues
+           */
+
+          flags = enter_critical_section();
+
+          if (sigpend)
+            {
+              sigpend->type = SIG_ALLOC_DYN;
+              sq_addfirst((sq_entry_t *)sigpend, &g_sigpendingsignal);
+            }
+
+          if (sigq)
+            {
+              sigq->type = SIG_ALLOC_DYN;
+              sq_addfirst((sq_entry_t *)sigq, &g_sigpendingaction);
+            }
+        }
+    }
+
+  return flags;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -434,6 +476,14 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
   sigact = nxsig_find_action(stcb->group, info->si_signo);
 
   flags = enter_critical_section();
+
+  /* Make sure that there is always at least one sigpednq and sigq structure
+   * available, in case one needs to be queued later. Note that this breaks
+   * the critical section if it needs to allocate any new structures. So it
+   * needs to be done here before using the task state or sigprocmask.
+   */
+
+  flags = nxsig_alloc_dyn_pending(flags);
 
   masked = nxsig_ismember(&stcb->sigprocmask, info->si_signo);
 
