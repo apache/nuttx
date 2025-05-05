@@ -2,6 +2,8 @@
 nRF52832-DK
 ===========
 
+.. tags:: chip:nrf52, chip:nrf52832
+
 The `NRF52832-DK (PCA10040) <https://www.nordicsemi.com/Products/Development-hardware/nrf52-dk>`_
 is a development board for the nRF52832 SoC from Nordic.
 

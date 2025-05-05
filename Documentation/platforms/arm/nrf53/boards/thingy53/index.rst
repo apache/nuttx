@@ -2,6 +2,8 @@
 Nordic Thingy:53
 ================
 
+.. tags:: chip:nrf53, chip:nrf5340
+
 The `Thingy:53 (PCA20053) <https://www.nordicsemi.com/Products/Development-hardware/Nordic-Thingy-53>`_
 is a prototyping platform build around the nRF5340 from Nordic.
 
