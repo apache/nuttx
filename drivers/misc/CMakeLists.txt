@@ -80,6 +80,7 @@ endif()
 
 if(NOT CONFIG_DEV_OPTEE_NONE)
   list(APPEND SRCS optee.c)
+  list(APPEND SRCS optee_socket.c)
 endif()
 
 if(CONFIG_GOLDFISH_PIPE)

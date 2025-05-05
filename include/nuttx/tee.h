@@ -198,6 +198,10 @@ struct tee_ioctl_shm_register_fd_data
 
 #define TEE_IOCTL_LOGIN_REE_KERNEL              0x80000000
 
+/* Macro to help calculate the total size of n params */
+
+#define TEE_IOCTL_PARAM_SIZE(x)                 (sizeof(struct tee_ioctl_param) * (x))
+
 /* struct tee_ioctl_param - parameter
  * attr: attributes
  * a: if a memref, offset into the shared memory object, else a value

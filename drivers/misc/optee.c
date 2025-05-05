@@ -27,24 +27,20 @@
 #include <nuttx/tee.h>
 
 #include <fcntl.h>
-#include <netpacket/rpmsg.h>
 #include <nuttx/drivers/optee.h>
 #include <nuttx/fs/fs.h>
-#include <nuttx/net/net.h>
 #include <nuttx/kmalloc.h>
-#include <nuttx/mutex.h>
 #include <sys/mman.h>
 #include <sys/param.h>
-#include <sys/un.h>
 
-#include "optee_msg.h"
+#include "optee.h"
 
 /****************************************************************************
- *   The driver's main purpose is to support the porting of the open source
+ * The driver's main purpose is to support the porting of the open source
  * component optee_client (https://github.com/OP-TEE/optee_client) to NuttX.
- *   The basic function of the driver module is to convert
- * the REE application layer data and send it to the TEE through rpmsg.
- * TEE implementation is optee_os(https://github.com/OP-TEE/optee_os).
+ * The basic function of the driver module is to convert the REE application
+ * layer data and send it to the TEE through rpmsg or SMCs. TEE
+ * implementation is optee_os(https://github.com/OP-TEE/optee_os).
  ****************************************************************************/
 
 /****************************************************************************
@@ -63,13 +59,7 @@
 
 #define TEE_ORIGIN_COMMS               0x00000002
 
-#define TEE_IOCTL_PARAM_SIZE(x)        (sizeof(struct tee_ioctl_param) * (x))
-
-#define OPTEE_MAX_IOVEC_NUM             7
-#define OPTEE_MAX_PARAM_NUM             6
-
-#define OPTEE_SERVER_PATH               "optee"
-#define OPTEE_DEV_PATH                  "/dev/tee0"
+#define OPTEE_DEV_PATH                 "/dev/tee0"
 
 /****************************************************************************
  * Private Types
@@ -125,52 +115,16 @@ static const struct file_operations g_optee_ops =
 
 static int optee_open(FAR struct file *filep)
 {
-  FAR struct socket *psock;
-#ifdef CONFIG_DEV_OPTEE_LOCAL
-  struct sockaddr_un addr;
-#else
-  struct sockaddr_rpmsg addr;
-#endif
+  FAR struct optee_priv_data *priv;
   int ret;
 
-  psock = (FAR struct socket *)kmm_zalloc(sizeof(struct socket));
-  if (psock == NULL)
-    {
-      return -ENOMEM;
-    }
-
-#ifdef CONFIG_DEV_OPTEE_LOCAL
-  ret = psock_socket(AF_UNIX, SOCK_STREAM, 0, psock);
-#else
-  ret = psock_socket(AF_RPMSG, SOCK_STREAM, 0, psock);
-#endif
+  ret = optee_transport_open(&priv);
   if (ret < 0)
     {
-      kmm_free(psock);
       return ret;
     }
 
-  memset(&addr, 0, sizeof(addr));
-
-#ifdef CONFIG_DEV_OPTEE_LOCAL
-  addr.sun_family = AF_UNIX;
-  strlcpy(addr.sun_path, OPTEE_SERVER_PATH, sizeof(addr.sun_path));
-#else
-  addr.rp_family = AF_RPMSG;
-  strlcpy(addr.rp_name, OPTEE_SERVER_PATH, sizeof(addr.rp_name));
-  strlcpy(addr.rp_cpu, CONFIG_OPTEE_REMOTE_CPU_NAME, sizeof(addr.rp_cpu));
-#endif
-
-  ret = psock_connect(psock, (FAR const struct sockaddr *)&addr,
-                      sizeof(addr));
-  if (ret < 0)
-    {
-      psock_close(psock);
-      kmm_free(psock);
-      return ret;
-    }
-
-  filep->f_priv = psock;
+  filep->f_priv = priv;
   return 0;
 }
 
@@ -190,10 +144,9 @@ static int optee_open(FAR struct file *filep)
 
 static int optee_close(FAR struct file *filep)
 {
-  FAR struct socket *psock = filep->f_priv;
+  FAR struct optee_priv_data *priv = filep->f_priv;
 
-  psock_close(psock);
-  kmm_free(psock);
+  optee_transport_close(priv);
   return 0;
 }
 
@@ -295,102 +248,7 @@ static int optee_from_msg_param(FAR struct tee_ioctl_param *params,
   return 0;
 }
 
-static int optee_recv(FAR struct socket *psock, FAR void *msg, size_t size)
-{
-  while (size > 0)
-    {
-      ssize_t n = psock_recv(psock, msg, size, 0);
-      if (n <= 0)
-        {
-          return n < 0 ? n : -EIO;
-        }
-
-      size -= n;
-      msg = (FAR char *)msg + n;
-    }
-
-  return 0;
-}
-
-static int optee_send_recv(FAR struct socket *psocket,
-                           FAR struct optee_msg_arg *arg)
-{
-  /* iov[0]: struct opteee_msg_arg + struct optee_msg_param[n]
-   * iov[1 - n+1]: shm_mem
-   * 0 <= n <= 6
-   */
-
-  size_t arg_size = OPTEE_MSG_GET_ARG_SIZE(arg->num_params);
-  size_t shm_size[OPTEE_MAX_PARAM_NUM];
-  size_t shm_addr[OPTEE_MAX_PARAM_NUM];
-  struct iovec iov[OPTEE_MAX_IOVEC_NUM];
-  struct msghdr msghdr;
-  unsigned long iovlen = 1;
-  unsigned long i;
-  int ret;
-
-  memset(iov, 0, sizeof(iov));
-  memset(shm_size, 0, sizeof(shm_size));
-
-  iov[0].iov_base = arg;
-  iov[0].iov_len = arg_size;
-
-  for (i = 0; i < arg->num_params; i++)
-    {
-      if (arg->params[i].attr == OPTEE_MSG_ATTR_TYPE_RMEM_INPUT ||
-          arg->params[i].attr == OPTEE_MSG_ATTR_TYPE_RMEM_INOUT)
-        {
-          iov[iovlen].iov_base =
-            (FAR void *)(uintptr_t)arg->params[i].u.rmem.shm_ref;
-          iov[iovlen].iov_len = arg->params[i].u.rmem.size;
-          shm_size[i] = arg->params[i].u.rmem.size;
-          shm_addr[i] = arg->params[i].u.rmem.shm_ref;
-          iovlen++;
-        }
-      else if (arg->params[i].attr == OPTEE_MSG_ATTR_TYPE_RMEM_OUTPUT)
-        {
-          shm_size[i] = arg->params[i].u.rmem.size;
-          shm_addr[i] = arg->params[i].u.rmem.shm_ref;
-        }
-    }
-
-  memset(&msghdr, 0, sizeof(struct msghdr));
-  msghdr.msg_iov = iov;
-  msghdr.msg_iovlen = iovlen;
-
-  ret = psock_sendmsg(psocket, &msghdr, 0);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  ret = optee_recv(psocket, arg, arg_size);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  for (i = 0; i < arg->num_params; i++)
-    {
-      if (arg->params[i].attr == OPTEE_MSG_ATTR_TYPE_RMEM_OUTPUT ||
-          arg->params[i].attr == OPTEE_MSG_ATTR_TYPE_RMEM_INOUT)
-        {
-          size_t size = MIN(arg->params[i].u.rmem.size, shm_size[i]);
-          arg->params[i].u.rmem.shm_ref = shm_addr[i];
-          ret = optee_recv(psocket,
-                           (FAR void *)(uintptr_t)
-                           arg->params[i].u.rmem.shm_ref, size);
-          if (ret < 0)
-            {
-              return ret;
-            }
-        }
-    }
-
-  return 0;
-}
-
-static int optee_ioctl_open_session(FAR struct socket *psocket,
+static int optee_ioctl_open_session(FAR struct optee_priv_data *priv,
                                     FAR struct tee_ioctl_buf_data *buf)
 {
   char msg_buf[OPTEE_MSG_GET_ARG_SIZE(OPTEE_MAX_PARAM_NUM)];
@@ -450,7 +308,7 @@ static int optee_ioctl_open_session(FAR struct socket *psocket,
       return ret;
     }
 
-  ret = optee_send_recv(psocket, msg);
+  ret = optee_transport_call(priv, msg);
   if (ret < 0)
     {
       return ret;
@@ -466,11 +324,10 @@ static int optee_ioctl_open_session(FAR struct socket *psocket,
   arg->session = msg->session;
   arg->ret = msg->ret;
   arg->ret_origin = msg->ret_origin;
-
   return ret;
 }
 
-static int optee_ioctl_invoke(FAR struct socket *psocket,
+static int optee_ioctl_invoke(FAR struct optee_priv_data *priv,
                               FAR struct tee_ioctl_buf_data *buf)
 {
   char msg_buf[OPTEE_MSG_GET_ARG_SIZE(OPTEE_MAX_PARAM_NUM)];
@@ -515,7 +372,7 @@ static int optee_ioctl_invoke(FAR struct socket *psocket,
       return ret;
     }
 
-  ret = optee_send_recv(psocket, msg);
+  ret = optee_transport_call(priv, msg);
   if (ret < 0)
     {
       return ret;
@@ -529,12 +386,11 @@ static int optee_ioctl_invoke(FAR struct socket *psocket,
 
   arg->ret = msg->ret;
   arg->ret_origin = msg->ret_origin;
-
   return ret;
 }
 
 static int
-optee_ioctl_close_session(FAR struct socket *psocket,
+optee_ioctl_close_session(FAR struct optee_priv_data *priv,
                           FAR struct tee_ioctl_close_session_arg *arg)
 {
   struct optee_msg_arg msg;
@@ -543,8 +399,7 @@ optee_ioctl_close_session(FAR struct socket *psocket,
   msg.cmd = OPTEE_MSG_CMD_CLOSE_SESSION;
   msg.session = arg->session;
   msg.num_params = 0;
-
-  return optee_send_recv(psocket, &msg);
+  return optee_transport_call(priv, &msg);
 }
 
 static int optee_ioctl_version(FAR struct tee_ioctl_version_data *vers)
@@ -555,7 +410,7 @@ static int optee_ioctl_version(FAR struct tee_ioctl_version_data *vers)
   return 0;
 }
 
-static int optee_ioctl_cancel(FAR struct socket *psocket,
+static int optee_ioctl_cancel(FAR struct optee_priv_data *priv,
                               FAR struct tee_ioctl_cancel_arg *arg)
 {
   struct optee_msg_arg msg;
@@ -564,7 +419,7 @@ static int optee_ioctl_cancel(FAR struct socket *psocket,
   msg.cmd = OPTEE_MSG_CMD_CANCEL;
   msg.session = arg->session;
   msg.cancel_id = arg->cancel_id;
-  return optee_send_recv(psocket, &msg);
+  return optee_transport_call(priv, &msg);
 }
 
 static int
@@ -611,7 +466,7 @@ optee_ioctl_shm_alloc(FAR struct tee_ioctl_shm_alloc_data *data)
 
 static int optee_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
-  FAR struct socket *psock = filep->f_priv;
+  FAR struct optee_priv_data *priv = filep->f_priv;
   FAR void *parg = (FAR void *)arg;
 
   switch (cmd)
@@ -619,13 +474,13 @@ static int optee_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case TEE_IOC_VERSION:
         return optee_ioctl_version(parg);
       case TEE_IOC_OPEN_SESSION:
-        return optee_ioctl_open_session(psock, parg);
+        return optee_ioctl_open_session(priv, parg);
       case TEE_IOC_INVOKE:
-        return optee_ioctl_invoke(psock, parg);
+        return optee_ioctl_invoke(priv, parg);
       case TEE_IOC_CLOSE_SESSION:
-        return optee_ioctl_close_session(psock, parg);
+        return optee_ioctl_close_session(priv, parg);
       case TEE_IOC_CANCEL:
-        return optee_ioctl_cancel(psock, parg);
+        return optee_ioctl_cancel(priv, parg);
       case TEE_IOC_SHM_ALLOC:
         return optee_ioctl_shm_alloc(parg);
       default:
@@ -653,5 +508,13 @@ static int optee_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
 int optee_register(void)
 {
+  int ret;
+
+  ret = optee_transport_init();
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   return register_driver(OPTEE_DEV_PATH, &g_optee_ops, 0666, NULL);
 }

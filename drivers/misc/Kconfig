@@ -43,20 +43,23 @@ choice
 	prompt "Select OP-TEE dev implementation"
 	default DEV_OPTEE_NONE
 	---help---
-		There are two implementations of optee server,
+		There are three implementations of optee server,
 		one is soft tee server which does not distinguish
 		between secure and non-secure states and uses socket communication,
-		and the other is teeos which runs in the secure state of
-		the cpu and uses rpmsg cross-core communication.
+		and the other two is teeos which runs in the secure state of
+		the cpu and uses either RPMsg cross-core communication or arm SMCs.
+		Warning: SMC implementation has only been tested on arm64.
 
 config DEV_OPTEE_LOCAL
 	bool "OPTEE Local Socket Support"
 	depends on NET_LOCAL
+	depends on LIBC_MEMFD_SHMFS
 	depends on ALLOW_BSD_COMPONENTS
 
 config DEV_OPTEE_RPMSG
 	bool "OP-TEE RPMSG Socket Support"
 	depends on NET_RPMSG
+	depends on LIBC_MEMFD_SHMFS
 	depends on ALLOW_BSD_COMPONENTS
 
 config DEV_OPTEE_NONE
@@ -64,10 +67,13 @@ config DEV_OPTEE_NONE
 
 endchoice
 
+if DEV_OPTEE_RPMSG
+
 config OPTEE_REMOTE_CPU_NAME
 	string "The cpuname on which the OP-TEE server runs"
 	default "tee"
-	depends on DEV_OPTEE_RPMSG
+
+endif # DEV_OPTEE_RPMSG
 
 config DRVR_MKRD
 	bool "RAM disk wrapper (mkrd)"
