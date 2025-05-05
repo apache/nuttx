@@ -249,7 +249,7 @@ if(CONFIG_SENSORS)
     endif()
 
     if(CONFIG_SENSORS_HTS221)
-      list(APPEND SRCS hts221.c)
+      list(APPEND SRCS hts221_uorb.c)
     endif()
 
     if(CONFIG_SENSORS_LIS2MDL)

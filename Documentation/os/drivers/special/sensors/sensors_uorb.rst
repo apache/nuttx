@@ -559,6 +559,7 @@ Implemented Drivers
 - gnss
 - goldfish_gnss
 - goldfish_sensor
+- :doc:`hts221`
 - hyt271
 - l3gd20
 - :doc:`lis2mdl`
