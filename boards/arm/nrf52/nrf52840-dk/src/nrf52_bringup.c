@@ -210,7 +210,7 @@ int nrf52_bringup(void)
 #endif /* CONFIG_SENSORS_LSM303AGR */
 
 #ifdef CONFIG_SENSORS_HTS221
-  ret = nrf52_hts221_initialize("/dev/hts2210");
+  ret = nrf52_hts221_initialize(0);
   if (ret < 0)
     {
       syslog(LOG_ERR,

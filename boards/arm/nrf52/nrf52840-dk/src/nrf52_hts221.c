@@ -51,8 +51,6 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static int nrf52_hts221_irq_attach(struct hts221_config_s *state,
-                                   xcpt_t isr, void *arg);
 static void nrf52_hts221_irq_enable(const struct hts221_config_s *state,
                                     bool enable);
 static void nrf52_hts221_irq_clear(const struct hts221_config_s *state);
@@ -65,7 +63,7 @@ static int nrf52_hts221_set_power(const struct hts221_config_s *state,
 
 static hts221_config_t g_hts221_config =
 {
-  .irq_attach = nrf52_hts221_irq_attach,
+  .irq_attach = NULL,   /* DRDY not wired, the driver polls */
   .irq_enable = nrf52_hts221_irq_enable,
   .irq_clear  = nrf52_hts221_irq_clear,
   .set_power  = nrf52_hts221_set_power
@@ -74,22 +72,6 @@ static hts221_config_t g_hts221_config =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: nrf52_hts221_irq_attach
- ****************************************************************************/
-
-static int nrf52_hts221_irq_attach(struct hts221_config_s *state,
-                                   xcpt_t isr, void *arg)
-{
-  sinfo("Attach HTS221 IRQ\n");
-
-  /* TODO: IRQ on rising edge */
-
-  /* nrf52_gpiosetevent(GPIO_HTS221_IRQ, true, false, false, isr, arg); */
-
-  return OK;
-}
 
 /****************************************************************************
  * Name: nrf52_hts221_irq_enable
@@ -130,32 +112,30 @@ static int nrf52_hts221_set_power(const struct hts221_config_s *state,
  *
  ****************************************************************************/
 
-int nrf52_hts221_initialize(char *devpath)
+int nrf52_hts221_initialize(int devno)
 {
   struct i2c_master_s *i2c;
-  int ret = OK;
+  int ret;
 
   sninfo("Initializing HTS221!\n");
 
-#ifdef CONFIG_NRF52_I2C0_MASTER
   i2c = nrf52_i2cbus_initialize(0);
   if (i2c == NULL)
     {
       return -ENODEV;
     }
 
-  sninfo("INFO: Initializing HTS221 hum-temp sensor over I2C%d\n", ret);
+  sninfo("INFO: Initializing HTS221 hum-temp sensor over I2C0\n");
 
-  ret = hts221_register(devpath, i2c, HTS221HUM_ADDR, &g_hts221_config);
+  ret = hts221_register_uorb(devno, i2c, HTS221HUM_ADDR, &g_hts221_config);
   if (ret < 0)
     {
-      snerr("ERROR: Failed to initialize HTS221 hum-temp driver %s\n",
-            devpath);
-      return -ENODEV;
+      snerr("ERROR: Failed to initialize HTS221 hum-temp driver: %d\n",
+            ret);
+      return ret;
     }
 
   sninfo("INFO: HTS221 sensor has been initialized successfully\n");
-#endif
 
-  return ret;
+  return OK;
 }

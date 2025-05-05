@@ -243,7 +243,7 @@ ifeq ($(CONFIG_SENSORS_ISL29023),y)
 endif
 
 ifeq ($(CONFIG_SENSORS_HTS221),y)
-  CSRCS += hts221.c
+  CSRCS += hts221_uorb.c
 endif
 
 ifeq ($(CONFIG_SENSORS_LIS2MDL),y)

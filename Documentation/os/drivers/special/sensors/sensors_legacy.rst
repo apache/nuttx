@@ -35,7 +35,6 @@ Drivers that are available also with the new sensor framework are marked with ``
 - hall3ph
 - hc_sr04
 - hdc1008
-- hts221
 - ina219
 - ina226
 - ina3221

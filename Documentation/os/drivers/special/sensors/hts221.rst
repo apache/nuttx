@@ -1,0 +1,28 @@
+======
+HTS221
+======
+
+STMicroelectronics HTS221 humidity and temperature sensor on I2C,
+:doc:`uORB </os/drivers/special/sensors/sensors_uorb>` interface.
+
+Configuration
+=============
+
+- ``CONFIG_SENSORS_HTS221``
+- ``CONFIG_HTS221_I2C_FREQUENCY``
+
+Usage
+=====
+
+.. code-block:: c
+
+   #include <nuttx/sensors/hts221.h>
+
+   int hts221_register_uorb(int devno, FAR struct i2c_master_s *i2c,
+                            uint8_t addr, FAR hts221_config_t *config);
+
+Registers ``sensor_ambient_temp<devno>`` (°C) and ``sensor_humi<devno>``
+(%rH). ``config`` holds the optional data-ready interrupt and power
+callbacks; with the interrupt the interval selects the 1, 7 or 12.5 Hz
+output data rate, without it the sensor is polled in one-shot mode.
+``SNIOC_OVERSAMPLING`` sets the number of averaged samples per topic.

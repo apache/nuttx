@@ -149,7 +149,7 @@ int nrf52_lsm303agr_initialize(char *devpath);
  ****************************************************************************/
 
 #ifdef CONFIG_SENSORS_HTS221
-int nrf52_hts221_initialize(char *devpath);
+int nrf52_hts221_initialize(int devno);
 #endif
 
 /****************************************************************************
