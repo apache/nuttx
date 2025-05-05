@@ -2,6 +2,8 @@
 Adafruit NRF52 Feather
 ======================
 
+.. tags:: chip:nrf52, chip:nrf52832
+
 The `Adafruit NRF52 Feather <https://www.adafruit.com/product/3406>`_
 is a development board for the nRF52832 SoC from Nordic.
 

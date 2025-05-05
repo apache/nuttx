@@ -2,6 +2,8 @@
 Nordic nRF5340 DK
 =================
 
+.. tags:: chip:nrf53, chip:nrf5340
+
 The `nRF5340-DK (PCA10092) <https://www.nordicsemi.com/Products/Development-hardware/nrf5340-dk>`_
 is a development board based on the nRF5340 from Nordic.
 
