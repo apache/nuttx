@@ -161,6 +161,7 @@ int optee_transport_open(FAR struct optee_priv_data **priv_)
       return ret;
     }
 
+  priv->base.alignment = 0;
   *priv_ = (FAR struct optee_priv_data *)priv;
   return 0;
 }
