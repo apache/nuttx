@@ -2,6 +2,8 @@
 Raspberry Pi Pico 2
 ===============================
 
+.. tags:: chip:rp2350
+
 The `Raspberry Pi Pico 2 <https://www.raspberrypi.com/products/raspberry-pi-pico-2/>`_ is a general purpose board supplied by
 the Raspberry Pi Foundation.
 
