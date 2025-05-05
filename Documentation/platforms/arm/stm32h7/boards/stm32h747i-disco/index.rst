@@ -2,6 +2,8 @@
 ST STM32H747I-DISCO
 ===================
 
+.. tags:: chip:stm32, chip:stm32h7, chip:stm32h747
+
 This page discusses issues unique to NuttX configurations for the
 STMicro STM32H747I-DISCO development board featuring the STM32H747I
 MCU. The STM32H747I is a Cortex-M7 and -M4 dual core with 2MBytes Flash

@@ -2,6 +2,8 @@
 Waveshare OpenH743I
 ===================
 
+.. tags:: chip:stm32, chip:stm32h7, chip:stm32h743
+
 The OpenH743I-C is an STM32 development board with STM32H743IIT6.
 It comes with a rich expansion interface to support access to various
 peripheral modules.

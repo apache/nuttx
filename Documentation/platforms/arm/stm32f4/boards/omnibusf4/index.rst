@@ -2,6 +2,8 @@
 OMNIBUSF4
 =========
 
+.. tags:: chip:stm32, chip:stm32f4, chip:stm32f405
+
 "OmnibusF4" is not a product name per se, but rather a design spec
 that many product vendors within the drone flight management unit
 (FMU) community adhere to. The spec defines the major components, and

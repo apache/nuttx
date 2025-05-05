@@ -2,6 +2,8 @@
 ST Nucleo C092RC
 ================
 
+.. tags:: chip:stm32, chip:stm32c0, chip:stm32c092
+
 The Nucleo C092RC is a member of the Nucleo-64 board family.
 
 CANFD not supported yet.

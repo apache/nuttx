@@ -2,6 +2,8 @@
 ST STM32F4-Discovery
 ====================
 
+.. tags:: chip:stm32, chip:stm32f4, chip:stm32f407
+
 This page discusses issues unique to NuttX configurations for the
 STMicro STM32F4Discovery development board featuring the STM32F407VGT6
 MCU. The STM32F407VGT6 is a 168MHz Cortex-M4 operation with 1Mbit Flash

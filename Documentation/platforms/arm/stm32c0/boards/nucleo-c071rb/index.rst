@@ -2,6 +2,8 @@
 ST Nucleo C071RB
 ================
 
+.. tags:: chip:stm32, chip:stm32c0, chip:stm32c071
+
 The Nucleo C071RB is a member of the Nucleo-64 board family.
 
 USB not supported yet.

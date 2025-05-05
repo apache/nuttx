@@ -2,6 +2,8 @@
 ST Nucleo H745ZI
 ================
 
+.. tags:: chip:stm32, chip:stm32h7, chip:stm32h745
+
 Dual core support
 -----------------
 

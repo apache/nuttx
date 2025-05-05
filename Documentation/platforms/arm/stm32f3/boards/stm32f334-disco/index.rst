@@ -2,6 +2,8 @@
 32F3348DISCOVERY
 ================
 
+.. tags:: chip:stm32, chip:stm32f3, chip:stm32f334
+
 This README discusses issues unique to NuttX configurations for the
 STMicro 32F3348DISCOVERY development board featuring the STM32F334C8
 MCU. The STM32F334C8 is a 72MHz Cortex-M4 operation with 64kB Flash

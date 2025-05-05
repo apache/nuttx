@@ -2,6 +2,8 @@
 ST STM32F051-DISCOVERY
 ======================
 
+.. tags:: chip:stm32, chip:stm32f0, chip:stm32f051
+
 STATUS
 ======
 

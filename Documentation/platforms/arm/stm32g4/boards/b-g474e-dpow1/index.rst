@@ -2,6 +2,8 @@
 ST B-G474E-DPOW1
 ================
 
+.. tags:: chip:stm32, chip:stm32g4, chip:stm32g474
+
 This page is for a port of NuttX to the ST Micro B-G474E-DPOW1
 Discovery kit with STM32G474RE MCU. For more information about this board,
 see:

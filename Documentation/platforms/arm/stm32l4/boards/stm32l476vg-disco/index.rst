@@ -2,6 +2,8 @@
 ST STM32L476VG-DISCO
 ====================
 
+.. tags:: chip:stm32, chip:stm32l4, chip:stm32l476
+
 XXX all this needs review and update
 
 This page discusses issues unique to NuttX configurations for the ST

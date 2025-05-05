@@ -2,6 +2,8 @@
 Mikroe Clicker2 STM32
 =====================
 
+.. tags:: chip:stm32, chip:stm32f4, chip:stm32f407
+
 This is the page file for the port of NuttX to the Mikroe Clicker2 STM32
 board based on the STMicro STM32F407VGT6 MCU.
 

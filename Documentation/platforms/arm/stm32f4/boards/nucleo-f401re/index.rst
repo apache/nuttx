@@ -2,6 +2,8 @@
 ST Nucleo F401RE
 ================
 
+.. tags:: chip:stm32, chip:stm32f4, chip:stm32f401
+
 This page discusses issues unique to NuttX configurations for the ST
 NucleoF401RE boards from ST Micro.  See
 

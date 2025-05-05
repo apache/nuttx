@@ -2,6 +2,8 @@
 ST Nucleo F302R8
 ================
 
+.. tags:: chip:stm32, chip:stm32f3, chip:stm32f302
+
 The Nucleo F302R8 is a member of the Nucleo-64 board family.
 
 Configurations
