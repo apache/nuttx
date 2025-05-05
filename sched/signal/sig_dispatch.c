@@ -110,17 +110,14 @@ static int sig_handler(FAR void *cookie)
  *
  ****************************************************************************/
 
-static int nxsig_queue_action(FAR struct tcb_s *stcb, siginfo_t *info)
+static int nxsig_queue_action(FAR struct tcb_s *stcb,
+                              FAR sigactq_t *sigact,
+                              FAR siginfo_t *info)
 {
-  FAR sigactq_t *sigact;
   FAR sigq_t    *sigq;
   int            ret = OK;
 
   DEBUGASSERT(stcb != NULL && stcb->group != NULL);
-
-  /* Find the group sigaction associated with this signal */
-
-  sigact = nxsig_find_action(stcb->group, info->si_signo);
 
   /* Check if a valid signal handler is available and if the signal is
    * unblocked. NOTE: There is no default action.
@@ -403,6 +400,7 @@ static FAR sigpendq_t *nxsig_add_pendingsignal(FAR struct tcb_s *stcb,
 int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
 {
   FAR struct tcb_s *rtcb = this_task();
+  FAR sigactq_t *sigact;
   irqstate_t flags;
   int masked;
   int ret = OK;
@@ -430,6 +428,10 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
     }
 
   /************************** MASKED SIGNAL ACTIONS *************************/
+
+  /* Find if there is a group sigaction associated with this signal */
+
+  sigact = nxsig_find_action(stcb->group, info->si_signo);
 
   flags = enter_critical_section();
 
@@ -529,7 +531,7 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
     {
       /* Queue any sigaction's requested by this task. */
 
-      ret = nxsig_queue_action(stcb, info);
+      ret = nxsig_queue_action(stcb, sigact, info);
 
       /* Deliver of the signal must be performed in a critical section */
 
