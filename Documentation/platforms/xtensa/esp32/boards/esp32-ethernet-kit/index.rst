@@ -41,6 +41,19 @@ The block diagram below presents main components of the ESP32-Ethernet-Kit.
 
     ESP32-Ethernet-Kit V1.2 Electrical Block Diagram
 
+
+The ESP32 is a dual-core system from Espressif with two Harvard architecture
+Xtensa LX6 CPUs. All embedded memory, external memory and peripherals are
+located on the data bus and/or the instruction bus of these CPUs. With some
+minor exceptions, the address mapping of two CPUs is symmetric, meaning they use
+the same addresses to access the same memory. Multiple peripherals in the system
+can access embedded memory via DMA.
+
+The ESP32-Ethernet-Kit is an Ethernet-to-Wi-Fi development board that enables
+Ethernet devices to be interconnected over Wi-Fi. At the same time, to provide
+more flexible power supply options, the ESP32-Ethernet-Kit also supports power
+over Ethernet (PoE).
+
 Features
 ========
 
@@ -175,6 +188,43 @@ Board LEDs
 There are several on-board LEDs for that indicate the presence of power
 and USB activity. None of these are available for use by software.
 
+Ethernet Peripherals
+====================
+
+ESP32 has a 802.11 hardware MAC, so just connects to external PHY chip.
+Due to the limited number of GPIOs in ESP32, it's recommended to use RMII to
+connect to an external PHY chip. Current driver also only supports RMII option.
+
+The RMII GPIO pins are fixed, but the SMI and functional GPIO pins are optional.
+
+RMII GPIO pins are as following:
+
+.. csv-table::
+   :header: ESP32 GPIO,PHY Chip GPIO
+
+   IO25,RXD[0]
+   IO26,RXD[1]
+   IO27,CRS_DV
+   IO0,REF_CLK
+   IO19,TXD[0]
+   IO21,TX_EN
+   IO22,TXD[1]
+
+SMI GPIO pins (default option) are as following:
+
+.. csv-table::
+   :header: ESP32 GPIO,PHY Chip GPIO
+
+   IO18,MDIO
+   IO23,MDC
+
+Functional GPIO pins(default option) are as following:
+
+.. csv-table::
+   :header: ESP32 GPIO,PHY Chip GPIO
+
+   IO5,Reset_N
+
 Pin Mapping
 ===========
 
@@ -219,6 +269,26 @@ Pin Mapping
     For a reference design please see `ESP32-Ethernet-Kit V1.2 Ethernet board (A) schematic <https://dl.espressif.com/dl/schematics/SCH_ESP32-Ethernet-Kit_A_V1.2_20200528.pdf>`_.
 
     2. The ESP32 pins GPIO16 and GPIO17 are not broken out to the ESP32-WROVER-E module and therefore not available for use.
+
+Using QEMU:
+===========
+
+1. First follow the instructions at https://github.com/espressif/qemu/wiki to build QEMU.
+
+2. Enable the ``ESP32_QEMU_IMAGE`` config found in "Board Selection -> ESP32 binary image for QEMU".
+
+3. Download the bootloader and the partition table from https://github.com/espressif/esp-nuttx-bootloader/releases
+   and place them in a directory, say ``../esp-bins``.
+
+4. Build and generate the QEMU image: ``make ESPTOOL_BINDIR=../esp-bins``
+
+5. A new image "esp32_qemu_image.bin" will be created. It can be run as:
+
+   .. code:: console
+
+      ~/PATH_TO_QEMU/qemu/build/xtensa-softmmu/qemu-system-xtensa -nographic \
+         -machine esp32 \
+         -drive file=esp32_qemu_image.bin,if=mtd,format=raw
 
 Configurations
 ==============
@@ -323,10 +393,3 @@ at runtime::
 
 .. tip:: Please refer to :ref:`ESP32 Wi-Fi Station Mode <esp32_wi-fi_sta>`
   for more information.
-
-
-README.txt
-==========
-
-.. include:: README.txt
-   :literal:
