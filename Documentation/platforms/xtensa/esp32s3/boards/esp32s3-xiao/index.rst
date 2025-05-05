@@ -2,6 +2,8 @@
 Seeed Studio XIAO ESP32S3
 =========================
 
+.. tags:: chip:esp32, chip:esp32s3
+
 The `Seeed Studio XIAO ESP32S3 <https://wiki.seeedstudio.com/xiao_esp32s3_getting_started/>`_ is a general purpose board supplied by
 Seeed Studio and it is compatible with the Espressif ESP32S3 ecosystem, sharing the same MCU as ESP32-S3-DevKitC.
 

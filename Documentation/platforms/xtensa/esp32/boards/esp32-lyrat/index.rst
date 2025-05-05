@@ -5,6 +5,8 @@
 ESP32-LyraT V4.3
 ================
 
+.. tags:: chip:esp32, chip:esp32wrover32
+
 The ESP32-LyraT development board is a hardware platform designed for the
 dual-core ESP32 audio applications, e.g., Wi-Fi or BT audio speakers,
 speech-based remote controllers, smart-home appliances with audio
