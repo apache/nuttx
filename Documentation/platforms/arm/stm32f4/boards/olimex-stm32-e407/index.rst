@@ -2,6 +2,8 @@
 Olimex STM32-E407
 =================
 
+.. tags:: chip:stm32, chip:stm32f4, chip:stm32f407
+
 The Olimex STM32-E407 configuration is based on the configuration
 olimex-stm32-h407 and stm32f4discovery.
 

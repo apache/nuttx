@@ -2,6 +2,8 @@
 ST STM3220G-EVAL
 ================
 
+.. tags:: chip:stm32, chip:stm32f2, chip:stm32f207, ethernet
+
 This page discusses issues unique to NuttX configurations for the
 STMicro STM3220G-EVAL development board.
 

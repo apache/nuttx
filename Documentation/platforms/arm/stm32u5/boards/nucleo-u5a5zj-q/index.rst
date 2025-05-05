@@ -2,6 +2,8 @@
 ST Nucleo U5A5ZJ-Q
 ==================
 
+.. tags:: chip:stm32, chip:stm32u5, chip:stm32u5a5
+
 This page file discusses the port of NuttX to the STMicroelectronics
 NUCLEO-U5A5ZJ-Q board. That board features the STM32U5A5ZJT6Q MCU with 4MiB
 of Flash and 2500KiB of SRAM.

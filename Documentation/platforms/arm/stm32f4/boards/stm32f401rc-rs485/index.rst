@@ -2,6 +2,8 @@
 stm32f401rc-rs485
 =================
 
+.. tags:: chip:stm32, chip:stm32f4, chip:stm32f401
+
 This page discusses issues unique to NuttX configurations for the
 NuttX STM32F4-RS485 development board.
 

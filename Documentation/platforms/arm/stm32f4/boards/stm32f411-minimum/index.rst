@@ -2,6 +2,8 @@
 stm32f411-minimum
 =================
 
+.. tags:: chip:stm32, chip:stm32f4, chip:stm32f411
+
 This page discusses issues unique to NuttX configurations for the
 WeAct Studio MiniF4 minimum system development board.
 

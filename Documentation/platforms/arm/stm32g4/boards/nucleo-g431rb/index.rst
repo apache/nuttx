@@ -2,6 +2,8 @@
 ST Nucleo G431RB
 ================
 
+.. tags:: chip:stm32, chip:stm32g4, chip:stm32g431
+
 The Nucleo G431RB is a member of the Nucleo-64 board family.
 
 Configurations
