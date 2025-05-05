@@ -248,6 +248,17 @@ static int optee_from_msg_param(FAR struct tee_ioctl_param *params,
   return 0;
 }
 
+static int optee_close_session(FAR struct optee_priv_data *priv,
+                               uint32_t session)
+{
+  struct optee_msg_arg msg;
+
+  memset(&msg, 0, sizeof(struct optee_msg_arg));
+  msg.cmd = OPTEE_MSG_CMD_CLOSE_SESSION;
+  msg.session = session;
+  return optee_transport_call(priv, &msg);
+}
+
 static int optee_ioctl_open_session(FAR struct optee_priv_data *priv,
                                     FAR struct tee_ioctl_buf_data *buf)
 {
@@ -318,6 +329,7 @@ static int optee_ioctl_open_session(FAR struct optee_priv_data *priv,
                              msg->params + 2);
   if (ret < 0)
     {
+      optee_close_session(priv, msg->session);
       return ret;
     }
 
@@ -393,13 +405,7 @@ static int
 optee_ioctl_close_session(FAR struct optee_priv_data *priv,
                           FAR struct tee_ioctl_close_session_arg *arg)
 {
-  struct optee_msg_arg msg;
-
-  memset(&msg, 0, sizeof(struct optee_msg_arg));
-  msg.cmd = OPTEE_MSG_CMD_CLOSE_SESSION;
-  msg.session = arg->session;
-  msg.num_params = 0;
-  return optee_transport_call(priv, &msg);
+  return optee_close_session(priv, arg->session);
 }
 
 static int optee_ioctl_version(FAR struct tee_ioctl_version_data *vers)
