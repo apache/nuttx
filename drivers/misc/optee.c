@@ -33,6 +33,11 @@
 #include <sys/mman.h>
 #include <sys/param.h>
 
+#ifdef CONFIG_ARCH_ADDRENV
+#  include <nuttx/sched.h>
+#  include <nuttx/arch.h>
+#endif
+
 #include "optee.h"
 
 /****************************************************************************
@@ -98,6 +103,56 @@ static const struct file_operations g_optee_ops =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: optee_is_valid_range
+ *
+ * Description:
+ *   Check whether provided virtual address is not NULL and the address
+ *   range belongs to user-owned memory. If this function is called from a
+ *   kernel thread, it returns true. If this function is called in a build
+ *   without CONFIG_ARCH_ADDRENV it always returns true.
+ *
+ * Parameters:
+ *   va    - Beginning of address range to check.
+ *   size  - Size of memory to check.
+ *
+ * Returned Values:
+ *   True if the provided address range is not NULL and belongs to the user
+ *   or the caller is a kernel thread. False otherwise.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_ADDRENV
+static bool optee_is_valid_range(FAR const void *va, size_t size)
+{
+  FAR struct tcb_s *tcb;
+  uint8_t ttype;
+
+  if (va == NULL)
+    {
+      return false;
+    }
+
+  tcb = nxsched_self();
+  ttype = tcb->flags & TCB_FLAG_TTYPE_MASK;
+
+  if (ttype == TCB_FLAG_TTYPE_KERNEL)
+    {
+      return true;
+    }
+
+  if (up_addrenv_user_vaddr((uintptr_t)va) &&
+      up_addrenv_user_vaddr((uintptr_t)va + size - 1))
+    {
+      return true;
+    }
+
+  return false;
+}
+#else
+#  define optee_is_valid_range(addr, size) (true)
+#endif
 
 /****************************************************************************
  * Name: optee_open
@@ -267,6 +322,11 @@ static int optee_ioctl_open_session(FAR struct optee_priv_data *priv,
   FAR struct optee_msg_arg *msg;
   int ret;
 
+  if (!optee_is_valid_range(buf, sizeof(*buf)))
+    {
+      return -EINVAL;
+    }
+
   if (buf->buf_len > TEE_MAX_ARG_SIZE ||
       buf->buf_len < sizeof(struct tee_ioctl_open_session_arg))
     {
@@ -274,6 +334,11 @@ static int optee_ioctl_open_session(FAR struct optee_priv_data *priv,
     }
 
   arg = (FAR struct tee_ioctl_open_session_arg *)(uintptr_t)buf->buf_ptr;
+
+  if (!optee_is_valid_range(arg, buf->buf_len))
+    {
+      return -EINVAL;
+    }
 
   if (sizeof(*arg) + TEE_IOCTL_PARAM_SIZE(arg->num_params) !=
       buf->buf_len)
@@ -347,6 +412,11 @@ static int optee_ioctl_invoke(FAR struct optee_priv_data *priv,
   FAR struct optee_msg_arg *msg;
   int ret;
 
+  if (!optee_is_valid_range(buf, sizeof(*buf)))
+    {
+      return -EINVAL;
+    }
+
   if (buf->buf_len > TEE_MAX_ARG_SIZE ||
       buf->buf_len < sizeof(struct tee_ioctl_invoke_arg))
     {
@@ -354,6 +424,11 @@ static int optee_ioctl_invoke(FAR struct optee_priv_data *priv,
     }
 
   arg = (FAR struct tee_ioctl_invoke_arg *)(uintptr_t)buf->buf_ptr;
+
+  if (!optee_is_valid_range(arg, buf->buf_len))
+    {
+      return -EINVAL;
+    }
 
   if (sizeof(*arg) + TEE_IOCTL_PARAM_SIZE(arg->num_params) !=
       buf->buf_len)
@@ -405,6 +480,11 @@ static int
 optee_ioctl_close_session(FAR struct optee_priv_data *priv,
                           FAR struct tee_ioctl_close_session_arg *arg)
 {
+  if (!optee_is_valid_range(arg, sizeof(*arg)))
+    {
+      return -EINVAL;
+    }
+
   return optee_close_session(priv, arg->session);
 }
 
@@ -421,6 +501,11 @@ static int optee_ioctl_cancel(FAR struct optee_priv_data *priv,
 {
   struct optee_msg_arg msg;
 
+  if (!optee_is_valid_range(arg, sizeof(*arg)))
+    {
+      return -EINVAL;
+    }
+
   memset(&msg, 0, sizeof(struct optee_msg_arg));
   msg.cmd = OPTEE_MSG_CMD_CANCEL;
   msg.session = arg->session;
@@ -431,8 +516,14 @@ static int optee_ioctl_cancel(FAR struct optee_priv_data *priv,
 static int
 optee_ioctl_shm_alloc(FAR struct tee_ioctl_shm_alloc_data *data)
 {
-  int memfd = memfd_create(OPTEE_SERVER_PATH, O_CREAT | O_CLOEXEC);
+  int memfd;
 
+  if (!optee_is_valid_range(data, sizeof(*data)))
+    {
+      return -EINVAL;
+    }
+
+  memfd = memfd_create(OPTEE_SERVER_PATH, O_CREAT | O_CLOEXEC);
   if (memfd < 0)
     {
       return get_errno();
@@ -440,18 +531,21 @@ optee_ioctl_shm_alloc(FAR struct tee_ioctl_shm_alloc_data *data)
 
   if (ftruncate(memfd, data->size) < 0)
     {
-      close(memfd);
-      return get_errno();
+      goto err;
     }
 
   data->id = (uintptr_t)mmap(NULL, data->size, PROT_READ | PROT_WRITE,
                              MAP_SHARED, memfd, 0);
   if (data->id == (uintptr_t)MAP_FAILED)
     {
-      return get_errno();
+      goto err;
     }
 
   return memfd;
+
+err:
+  close(memfd);
+  return get_errno();
 }
 
 /****************************************************************************
