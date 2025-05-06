@@ -124,6 +124,7 @@ uintreg_t *riscv_doirq(int irq, uintreg_t *regs)
        */
 
       addrenv_switch(tcb);
+      tcb = this_task();
 #endif
 
       /* Update scheduler parameters */
