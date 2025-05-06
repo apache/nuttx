@@ -28,7 +28,7 @@ Low power accelerometer (ADXL362)  Yes     SPI
 IMU (BMI270)                       Yes     SPI or I2C 0x68
 Magnetometer (BMM150)              Yes     I2C 0x10
 Color sensor (BH1749NUC)           Yes     I2C 0x38
-Air quality sensor (BME688)        No      I2C 0x76
+Air quality sensor (BME688)        Yes     I2C 0x76
 ================================== ======= =============
 
 Serial Console
