@@ -211,6 +211,12 @@ struct lib_rawoutstream_s
   int                    fd;
 };
 
+struct lib_fileinstream_s
+{
+  struct lib_instream_s  common;
+  struct file            file;
+};
+
 struct lib_fileoutstream_s
 {
   struct lib_outstream_s common;
@@ -400,6 +406,36 @@ void lib_stdsostream(FAR struct lib_stdsostream_s *stream,
                      FAR FILE *handle);
 
 /****************************************************************************
+ * Name: lib_fileinstream_open, lib_fileinstream_close,
+ *       lib_fileoutstream_open, lib_fileoutstream_close
+ *
+ * Description:
+ *   Initializes or release a file-based stream instance.
+ *   Defined in lib_fileinstream.c and lib/lib_fileoutstream.c
+ *
+ * Input Parameters:
+ *  For open:
+ *    stream  - User allocated, uninitialized instance of stream struct
+ *             to be initialized.
+ *    path    - Path to the file to be opened.
+ *    oflag   - File open flags.
+ *    mode    - File access mode.
+ *  For close:
+ *    stream  - User allocated, initialized instance of stream struct
+ * Returned Value:
+ *  open: Zero on success; a negated errno value on failure.
+ *  close: None (resource cleanup only).
+ *
+ ****************************************************************************/
+
+int lib_fileinstream_open(FAR struct lib_fileinstream_s *stream,
+                          FAR const char *path, int oflag, mode_t mode);
+void lib_fileinstream_close(FAR struct lib_fileinstream_s *stream);
+int lib_fileoutstream_open(FAR struct lib_fileoutstream_s *stream,
+                           FAR const char *path, int oflag, mode_t mode);
+void lib_fileoutstream_close(FAR struct lib_fileoutstream_s *stream);
+
+/****************************************************************************
  * Name: lib_rawinstream, lib_rawoutstream, lib_rawsistream, and
  *       lib_rawsostream,
  *
@@ -424,8 +460,6 @@ void lib_rawinstream(FAR struct lib_rawinstream_s *stream, int fd);
 void lib_rawoutstream(FAR struct lib_rawoutstream_s *stream, int fd);
 void lib_rawsistream(FAR struct lib_rawsistream_s *stream, int fd);
 void lib_rawsostream(FAR struct lib_rawsostream_s *stream, int fd);
-void lib_fileoutstream(FAR struct lib_fileoutstream_s *stream,
-                       FAR struct file *file);
 
 /****************************************************************************
  * Name: lib_bufferedoutstream
