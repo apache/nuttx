@@ -462,6 +462,7 @@ struct file
   int               f_oflags;   /* Open mode flags */
 #ifdef CONFIG_FS_REFCOUNT
   atomic_t          f_refs;     /* Reference count */
+  sem_t             f_closem;   /* Free: file is fully closed */
 #endif
   off_t             f_pos;      /* File position */
   FAR struct inode *f_inode;    /* Driver or file system interface */

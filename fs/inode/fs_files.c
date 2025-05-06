@@ -63,6 +63,20 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: file_close_wait
+ ****************************************************************************/
+
+#ifdef CONFIG_FS_REFCOUNT
+static int file_close_wait(FAR struct file *filep)
+{
+  fs_putfilep(filep);
+  return nxsem_wait_uninterruptible(&filep->f_closem);
+}
+#else
+#  define file_close_wait(f)
+#endif
+
+/****************************************************************************
  * Name: files_fget_by_index
  ****************************************************************************/
 
@@ -317,10 +331,35 @@ static int nx_dup3_from_tcb(FAR struct tcb_s *tcb, int fd1, int fd2,
       return -EBADF;
     }
 
+  /* dup3() and dup2() dictate that fd2 must be closed prior to reuse */
+
+  filep = files_fget(list, fd2);
+  if (filep)
+    {
+      /* The file exists and is open, close it here */
+
+      fs_putfilep(filep);
+      file_close_wait(filep);
+    }
+
+  /* This should not fail now */
+
   filep = files_fget_by_index(list,
                               fd2 / CONFIG_NFILE_DESCRIPTORS_PER_BLOCK,
                               fd2 % CONFIG_NFILE_DESCRIPTORS_PER_BLOCK,
                               &new);
+
+  /* If return value is NULL, it means the file is partially open. This means
+   * the userspace is racing against itself. To prevent the kernel from
+   * crashing due to access to invalid file pointer, just make the user try
+   * this again.
+   */
+
+  if (filep == NULL)
+    {
+      fs_putfilep(filep1);
+      return -EBUSY;
+    }
 
 #ifdef CONFIG_FDSAN
   f_tag_fdsan = filep->f_tag_fdsan;
@@ -593,6 +632,7 @@ int file_allocate_from_tcb(FAR struct tcb_s *tcb, FAR struct inode *inode,
               filep->f_priv        = priv;
 #ifdef CONFIG_FS_REFCOUNT
               atomic_set(&filep->f_refs, 1);
+              nxsem_init(&filep->f_closem, 0, 0);
 #endif
 #ifdef CONFIG_FDSAN
               filep->f_tag_fdsan   = 0;
@@ -853,6 +893,8 @@ int fs_putfilep(FAR struct file *filep)
         {
           ferr("ERROR: fs putfilep file_close() failed: %d\n", ret);
         }
+
+      nxsem_post(&filep->f_closem);
     }
 
   return ret;
