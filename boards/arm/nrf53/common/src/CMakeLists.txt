@@ -54,6 +54,10 @@ if(CONFIG_ARCH_BOARD_COMMON)
     list(APPEND SRCS nrf53_bmm150.c)
   endif()
 
+  if(CONFIG_SENSORS_BME688)
+    list(APPEND SRCS nrf53_bme688.c)
+  endif()
+
   target_sources(board PRIVATE ${SRCS})
 
 endif()

@@ -46,6 +46,10 @@
 #  include "nrf53_bmm150.h"
 #endif
 
+#ifdef CONFIG_SENSORS_BME688
+#  include "nrf53_bme688.h"
+#endif
+
 #include "arm_internal.h"
 
 #include "thingy53.h"
@@ -132,6 +136,16 @@ int nrf53_sensors_init(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: nrf53_adxl362_init failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_BME688
+  /* Initialize BME688 */
+
+  ret = nrf53_bme688_init(0, BME688_I2C_BUS, BME688_I2C_ADDR);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: nrf53_bme688_init failed: %d\n", ret);
     }
 #endif
 
