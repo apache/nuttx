@@ -104,7 +104,8 @@ bool nxsig_unmask_pendingsignal(void)
                * other than this thread.
                */
 
-              nxsig_tcbdispatch(rtcb, &pendingsig->info);
+              nxsig_tcbdispatch(rtcb, &pendingsig->info,
+                                pendingsig->tcb == NULL);
 
               /* Then remove it from the pending signal list */
 

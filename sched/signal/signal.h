@@ -80,6 +80,7 @@ typedef struct sigactq  sigactq_t;
 struct sigpendq
 {
   FAR struct sigpendq *flink;    /* Forward link */
+  FAR struct tcb_s *tcb;         /* TCB of thread to deliver to */
   siginfo_t info;                /* Signal information */
   uint8_t   type;                /* (Used to manage allocations) */
 };
@@ -168,7 +169,8 @@ int                nxsig_default_initialize(FAR struct tcb_s *tcb);
 /* sig_dispatch.c */
 
 int                nxsig_tcbdispatch(FAR struct tcb_s *stcb,
-                                     FAR siginfo_t *info);
+                                     FAR siginfo_t *info,
+                                     bool group_dispatch);
 int                nxsig_dispatch(pid_t pid, FAR siginfo_t *info,
                                   bool thread);
 

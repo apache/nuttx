@@ -297,7 +297,8 @@ static void nxsig_dispatch_kernel_action(FAR struct tcb_s *stcb,
  ****************************************************************************/
 
 static FAR sigpendq_t *nxsig_add_pendingsignal(FAR struct tcb_s *stcb,
-                                               FAR siginfo_t *info)
+                                               FAR siginfo_t *info,
+                                               bool group_dispatch)
 {
   FAR struct task_group_s *group;
   FAR sigpendq_t *sigpend;
@@ -327,6 +328,12 @@ static FAR sigpendq_t *nxsig_add_pendingsignal(FAR struct tcb_s *stcb,
           /* Put the signal information into the allocated structure */
 
           memcpy(&sigpend->info, info, sizeof(siginfo_t));
+
+          /* Mark the tcb which need to receive the signal. If any
+           * thread in the group may receive it, set it to NULL
+           */
+
+          sigpend->tcb = group_dispatch ? NULL : stcb;
 
           /* Add the structure to the group pending signal list */
 
@@ -439,7 +446,8 @@ static irqstate_t nxsig_alloc_dyn_pending(irqstate_t flags)
  *
  ****************************************************************************/
 
-int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
+int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info,
+                      bool group_dispatch)
 {
   FAR struct tcb_s *rtcb = this_task();
   FAR sigactq_t *sigact;
@@ -560,7 +568,7 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
 
           if (masked == 0)
             {
-              sigpend = nxsig_add_pendingsignal(stcb, info);
+              sigpend = nxsig_add_pendingsignal(stcb, info, group_dispatch);
             }
 #endif
         }
@@ -571,7 +579,7 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
 
       else
         {
-          sigpend = nxsig_add_pendingsignal(stcb, info);
+          sigpend = nxsig_add_pendingsignal(stcb, info, group_dispatch);
         }
     }
 
@@ -768,7 +776,7 @@ int nxsig_dispatch(pid_t pid, FAR siginfo_t *info, bool thread)
 
           if (stcb != NULL && group == this_task()->group)
             {
-              return nxsig_tcbdispatch(stcb, info);
+              return nxsig_tcbdispatch(stcb, info, false);
             }
         }
       else
@@ -794,7 +802,7 @@ int nxsig_dispatch(pid_t pid, FAR siginfo_t *info, bool thread)
       return -ESRCH;
     }
 
-  return nxsig_tcbdispatch(stcb, info);
+  return nxsig_tcbdispatch(stcb, info, false);
 
 #endif
 }
