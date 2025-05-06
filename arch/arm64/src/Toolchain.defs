@@ -100,6 +100,13 @@ ifeq ($(CONFIG_MM_KASAN_DISABLE_WRITES_CHECK),y)
   ARCHOPTIMIZATION += --param asan-instrument-writes=0
 endif
 
+# If we don't use MMU, all memory is treated as device memory and can't handle
+# alignment faults. Some compiler builtins like memset() can introduce
+# alignment faults. We need to disable them in that case.
+ifneq ($(CONFIG_ARCH_USE_MMU),y)
+  ARCHOPTIMIZATION += -fno-builtin
+endif
+
 # Instrumentation options
 
 ifeq ($(CONFIG_ARCH_INSTRUMENT_ALL),y)
