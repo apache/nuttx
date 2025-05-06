@@ -94,6 +94,7 @@ void up_switch_context(FAR struct tcb_s *tcb, FAR struct tcb_s *rtcb)
        */
 
       addrenv_switch(tcb);
+      tcb = this_task();
 #endif
 
       /* Update scheduler parameters */

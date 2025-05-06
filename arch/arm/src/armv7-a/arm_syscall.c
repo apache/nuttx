@@ -274,6 +274,14 @@ uint32_t *arm_syscall(uint32_t *regs)
 
       case SYS_restore_context:
 
+#ifdef CONFIG_ARCH_ADDRENV
+        /* The addrenv_switch may change this_task, for example addrenv drop
+         * will post sem to hpwork, so we have to call before restore context
+         */
+
+        addrenv_switch(tcb);
+        tcb = this_task();
+#endif
         /* No context switch occurs in SYS_restore_context, or the
          * context switch has been completed, so there is no
          * need to update scheduler parameters.
@@ -285,9 +293,6 @@ uint32_t *arm_syscall(uint32_t *regs)
 
         restore_critical_section(tcb, cpu);
         regs = tcb->xcp.regs;
-#ifdef CONFIG_ARCH_ADDRENV
-        addrenv_switch(tcb);
-#endif
         break;
 
       /* R0=SYS_task_start:  This a user task start

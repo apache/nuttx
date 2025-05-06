@@ -89,6 +89,7 @@ IFX_INTERRUPT_INTERNAL(tricore_doirq, 0, 255)
        */
 
       addrenv_switch(tcb);
+      tcb = this_task();
 #endif
 
       /* Update scheduler parameters */

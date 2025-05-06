@@ -196,10 +196,17 @@ uint64_t *arm64_syscall(uint64_t *regs)
         restore_critical_section(tcb, cpu);
 #ifdef CONFIG_ARCH_ADDRENV
         addrenv_switch(tcb);
+        tcb = this_task();
+        *running_task = tcb;
 #endif
         break;
 
       case SYS_switch_context:
+
+#ifdef CONFIG_ARCH_ADDRENV
+        addrenv_switch(tcb);
+        tcb = this_task();
+#endif
 
         /* Update scheduler parameters */
 
@@ -209,9 +216,6 @@ uint64_t *arm64_syscall(uint64_t *regs)
         /* Restore the cpu lock */
 
         restore_critical_section(tcb, cpu);
-#ifdef CONFIG_ARCH_ADDRENV
-        addrenv_switch(tcb);
-#endif
         break;
 
 #ifdef CONFIG_BUILD_KERNEL
