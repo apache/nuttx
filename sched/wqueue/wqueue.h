@@ -168,11 +168,14 @@ static inline_function
 bool work_insert_pending(FAR struct kwork_wqueue_s *wqueue,
                          FAR struct work_s         *work)
 {
-  struct work_s *curr;
+  FAR struct work_s *curr;
+  FAR struct work_s *head;
 
   DEBUGASSERT(wqueue != NULL && work != NULL);
 
   /* Insert the work into the wait queue sorted by the expired time. */
+
+  head = list_first_entry(&wqueue->pending, struct work_s, node);
 
   list_for_every_entry(&wqueue->pending, curr, struct work_s, node)
     {
@@ -191,7 +194,13 @@ bool work_insert_pending(FAR struct kwork_wqueue_s *wqueue,
 
   list_add_before(&curr->node, &work->node);
 
-  return list_is_head(&wqueue->pending, &work->node);
+  /* Return list_is_head(&wqueue->pending, &work->node)
+   * However, there is fast path that we can check if `curr`
+   * is the `head` we cached before, which is cache-friendly and
+   * can reduce one memory access.
+   */
+
+  return curr == head;
 }
 
 /****************************************************************************

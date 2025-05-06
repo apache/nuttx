@@ -77,6 +77,7 @@ static int work_qqueue(FAR struct usr_wqueue_s *wqueue,
                        FAR void *arg, clock_t delay)
 {
   FAR struct work_s *curr;
+  FAR struct work_s *head;
   int semcount;
 
   /* Get exclusive access to the work queue */
@@ -101,6 +102,8 @@ static int work_qqueue(FAR struct usr_wqueue_s *wqueue,
 
   /* Insert the work into the wait queue sorted by the expired time. */
 
+  head = list_first_entry(&wqueue->q, struct work_s, node);
+
   list_for_every_entry(&wqueue->q, curr, struct work_s, node)
     {
       if (!clock_compare(curr->qtime, work->qtime))
@@ -122,7 +125,7 @@ static int work_qqueue(FAR struct usr_wqueue_s *wqueue,
    * We should wake up the worker thread.
    */
 
-  if (list_is_head(&wqueue->q, &work->node))
+  if (curr == head)
     {
       nxsem_get_value(&wqueue->wake, &semcount);
       if (semcount < 1)
