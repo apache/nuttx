@@ -49,6 +49,10 @@ ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CHIP_CSRCS += stm32_userspace.c
 endif
 
+ifeq ($(CONFIG_STM32F0L0G0_PROGMEM),y)
+CHIP_CSRCS += stm32_flash.c
+endif
+
 ifeq ($(CONFIG_STM32F0L0G0_GPIOIRQ),y)
 CHIP_CSRCS += stm32_gpioint.c
 endif

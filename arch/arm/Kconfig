@@ -517,6 +517,7 @@ config ARCH_CHIP_STM32L0
 config ARCH_CHIP_STM32G0
 	bool "STMicro STM32 G0"
 	select ARCH_CORTEXM0
+	select ARCH_HAVE_PROGMEM
 	---help---
 		STMicro STM32G0 architectures (ARM Cortex-M0+).
 
@@ -1487,7 +1488,7 @@ config ARM_SEMIHOSTING_HOSTFS_CACHE_COHERENCE
 	bool "Cache coherence in semihosting hostfs"
 	depends on ARCH_DCACHE
 	---help---
-		Flush & Invalidte cache before & after bkpt instruction.
+		Flush & Invalidate cache before & after bkpt instruction.
 
 endif # ARM_SEMIHOSTING_HOSTFS
 
