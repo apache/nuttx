@@ -454,81 +454,193 @@ config ARCH_CHIP_STM32F098VC
 config ARCH_CHIP_STM32G070CB
 	bool "STM32G070CB"
 	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_FLASH_CONFIG_B
 	depends on ARCH_CHIP_STM32G0
 
 config ARCH_CHIP_STM32G070KB
 	bool "STM32G070KB"
 	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_FLASH_CONFIG_B
 	depends on ARCH_CHIP_STM32G0
 
 config ARCH_CHIP_STM32G070RB
 	bool "STM32G070RB"
 	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_FLASH_CONFIG_B
 	depends on ARCH_CHIP_STM32G0
 
 config ARCH_CHIP_STM32G071EB
 	bool "STM32G071EB"
 	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_FLASH_CONFIG_B
 	depends on ARCH_CHIP_STM32G0
 
 config ARCH_CHIP_STM32G071G8
 	bool "STM32G071G8"
 	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_FLASH_CONFIG_8
 	depends on ARCH_CHIP_STM32G0
 
 config ARCH_CHIP_STM32G071GB
 	bool "STM32G071GB"
 	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_FLASH_CONFIG_B
 	depends on ARCH_CHIP_STM32G0
 
 config ARCH_CHIP_STM32G071G8XN
 	bool "STM32G071G8XN"
 	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_FLASH_CONFIG_8
 	depends on ARCH_CHIP_STM32G0
 
 config ARCH_CHIP_STM32G071GBXN
 	bool "STM32G071GBXN"
 	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_FLASH_CONFIG_B
 	depends on ARCH_CHIP_STM32G0
 
 config ARCH_CHIP_STM32G071K8
 	bool "STM32G071K8"
 	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_FLASH_CONFIG_8
 	depends on ARCH_CHIP_STM32G0
 
 config ARCH_CHIP_STM32G071KB
 	bool "STM32G071KB"
 	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_FLASH_CONFIG_B
 	depends on ARCH_CHIP_STM32G0
 
 config ARCH_CHIP_STM32G071K8XN
 	bool "STM32G071K8XN"
 	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_FLASH_CONFIG_8
 	depends on ARCH_CHIP_STM32G0
 
 config ARCH_CHIP_STM32G071KBXN
 	bool "STM32G071KBXN"
 	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_FLASH_CONFIG_B
 	depends on ARCH_CHIP_STM32G0
 
 config ARCH_CHIP_STM32G071C8
 	bool "STM32G071C8"
 	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_FLASH_CONFIG_8
 	depends on ARCH_CHIP_STM32G0
 
 config ARCH_CHIP_STM32G071CB
 	bool "STM32G071CB"
 	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_FLASH_CONFIG_B
 	depends on ARCH_CHIP_STM32G0
 
 config ARCH_CHIP_STM32G071R8
 	bool "STM32G071R8"
 	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_FLASH_CONFIG_8
 	depends on ARCH_CHIP_STM32G0
 
 config ARCH_CHIP_STM32G071RB
 	bool "STM32G071RB"
 	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_FLASH_CONFIG_B
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G0B1KB
+	bool "STM32G0B1KB"
+	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_FLASH_CONFIG_B
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G0B1CB
+	bool "STM32G0B1CB"
+	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_FLASH_CONFIG_B
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G0B1RB
+	bool "STM32G0B1RB"
+	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_FLASH_CONFIG_B
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G0B1MB
+	bool "STM32G0B1MB"
+	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_FLASH_CONFIG_B
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G0B1VB
+	bool "STM32G0B1VB"
+	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_FLASH_CONFIG_B
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G0B1KC
+	bool "STM32G0B1KC"
+	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_FLASH_CONFIG_C
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G0B1CC
+	bool "STM32G0B1CC"
+	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_FLASH_CONFIG_C
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G0B1RC
+	bool "STM32G0B1RC"
+	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_FLASH_CONFIG_C
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G0B1MC
+	bool "STM32G0B1MC"
+	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_FLASH_CONFIG_C
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G0B1VC
+	bool "STM32G0B1VC"
+	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_FLASH_CONFIG_C
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G0B1KE
+	bool "STM32G0B1KE"
+	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_FLASH_CONFIG_E
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G0B1CE
+	bool "STM32G0B1CE"
+	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_FLASH_CONFIG_E
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G0B1RE
+	bool "STM32G0B1RE"
+	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_FLASH_CONFIG_E
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G0B1NE
+	bool "STM32G0B1NE"
+	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_FLASH_CONFIG_E
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G0B1ME
+	bool "STM32G0B1ME"
+	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_FLASH_CONFIG_E
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G0B1VE
+	bool "STM32G0B1VE"
+	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_FLASH_CONFIG_E
 	depends on ARCH_CHIP_STM32G0
 
 config ARCH_CHIP_STM32G0B1KB
@@ -960,10 +1072,56 @@ config ARCH_CHIP_STM32C092RC
 
 endchoice # ST STM32F0/L0/G0/C0 Chip Selection
 
+# Flash configurations
+
+config STM32F0L0G0_FLASH_CONFIG_4
+	bool
+	default n
+
+config STM32F0L0G0_FLASH_CONFIG_6
+	bool
+	default n
+
+config STM32F0L0G0_FLASH_CONFIG_8
+	bool
+	default n
+
+config STM32F0L0G0_FLASH_CONFIG_B
+	bool
+	default n
+
+config STM32F0L0G0_FLASH_CONFIG_C
+	bool
+	default n
+
+config STM32F0L0G0_FLASH_CONFIG_D
+	bool
+	default n
+
+config STM32F0L0G0_FLASH_CONFIG_E
+	bool
+	default n
+
+config STM32F0L0G0_FLASH_CONFIG_F
+	bool
+	default n
+
+config STM32F0L0G0_FLASH_CONFIG_G
+	bool
+	default n
+
+config STM32F0L0G0_FLASH_CONFIG_I
+	bool
+	default n
+
+config STM32F0L0G0_FLASH_OVERRIDE
+	bool "Override Flash Designator"
+	default n
+
 choice
 	prompt "Override Flash Size Designator"
-	default STM32F0L0G0_FLASH_CONFIG_DEFAULT
-	depends on ARCH_CHIP_STM32
+	depends on STM32F0L0G0_FLASH_OVERRIDE
+	default STM32F0L0G0_FLASH_OVERRIDE_B
 	---help---
 		STM32F series parts numbering (sans the package type) ends with a number or letter
 		that designates the FLASH size.
@@ -985,44 +1143,38 @@ choice
 		STM32 Chip Selection.
 
 		Examples:
-			If the STM32F407VE is chosen, the Flash configuration would be 'E', if a variant of
+			If the STM32G071RB is chosen, the Flash configuration would be 'B', if a variant of
 			the part with a  2048 KiB Flash is released in the future one could simply select
 			the 'I' designator here.
 
-			If an STM32F42xxx or  Series parts is chosen the default Flash configuration will be 'G'
-			and can be set herein to 'I' to choose the larger FLASH part.
-
-config STM32F0L0G0_FLASH_CONFIG_DEFAULT
-	bool "Default"
-
-config STM32F0L0G0_FLASH_CONFIG_4
+config STM32F0L0G0_FLASH_OVERRIDE_4
 	bool "4 16KiB"
 
-config STM32F0L0G0_FLASH_CONFIG_6
+config STM32F0L0G0_FLASH_OVERRIDE_6
 	bool "6 32KiB"
 
-config STM32F0L0G0_FLASH_CONFIG_8
+config STM32F0L0G0_FLASH_OVERRIDE_8
 	bool "8 64KiB"
 
-config STM32F0L0G0_FLASH_CONFIG_B
+config STM32F0L0G0_FLASH_OVERRIDE_B
 	bool "B 128KiB"
 
-config STM32F0L0G0_FLASH_CONFIG_C
+config STM32F0L0G0_FLASH_OVERRIDE_C
 	bool "C 256KiB"
 
-config STM32F0L0G0_FLASH_CONFIG_D
+config STM32F0L0G0_FLASH_OVERRIDE_D
 	bool "D 384KiB"
 
-config STM32F0L0G0_FLASH_CONFIG_E
+config STM32F0L0G0_FLASH_OVERRIDE_E
 	bool "E 512KiB"
 
-config STM32F0L0G0_FLASH_CONFIG_F
+config STM32F0L0G0_FLASH_OVERRIDE_F
 	bool "F 768KiB"
 
-config STM32F0L0G0_FLASH_CONFIG_G
+config STM32F0L0G0_FLASH_OVERRIDE_G
 	bool "G 1024KiB"
 
-config STM32F0L0G0_FLASH_CONFIG_I
+config STM32F0L0G0_FLASH_OVERRIDE_I
 	bool "I 2048KiB"
 
 endchoice
@@ -1203,6 +1355,16 @@ config STM32F0L0G0_DFU
 	---help---
 		Configure and position code for use with the STMicro DFU bootloader.  Do
 		not select this option if you will load code using JTAG/SWM.
+
+config STM32F0L0G0_PROGMEM
+	bool "Flash PROGMEM support"
+	default n
+	depends on ARCH_HAVE_PROGMEM
+	select MTD
+	select MTD_PROGMEM
+	---help---
+		Add progmem support, start block and end block options are provided to
+		obtain a uniform flash memory mapping.
 
 choice
 	prompt "SysTick clock source"
