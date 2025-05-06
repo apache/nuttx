@@ -38,6 +38,7 @@ ignore-words-list =
   NWE,
   OEN,
   PRES,
+  RCALL,
   REGONS,
   SAIs,
   SER,
