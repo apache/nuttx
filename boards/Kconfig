@@ -1806,6 +1806,16 @@ config ARCH_BOARD_NUCLEO_G071RB
 		This is a minimal configuration that supports low-level test of the
 		Nucleo G071RB in the NuttX source tree.
 
+config ARCH_BOARD_NUCLEO_G0B1RE
+	bool "STM32G0B1 Nucleo G0B1RE"
+	depends on ARCH_CHIP_STM32G0B1RE
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This is a minimal configuration that supports low-level test of the
+		Nucleo G0B1RE in the NuttX source tree.
+
 config ARCH_BOARD_WEACT_STM32H743
 	bool "WeAct Studio STM32H743"
 	depends on ARCH_CHIP_STM32H743VI
@@ -3552,6 +3562,7 @@ config ARCH_BOARD
 	default "stm32g071b-disco"          if ARCH_BOARD_STM32G071B_DISCO
 	default "nucleo-g070rb"             if ARCH_BOARD_NUCLEO_G070RB
 	default "nucleo-g071rb"             if ARCH_BOARD_NUCLEO_G071RB
+	default "nucleo-g0b1re"             if ARCH_BOARD_NUCLEO_G0B1RE
 	default "weact-stm32h743"           if ARCH_BOARD_WEACT_STM32H743
 	default "nucleo-h743zi"             if ARCH_BOARD_NUCLEO_H743ZI
 	default "nucleo-h743zi2"            if ARCH_BOARD_NUCLEO_H743ZI2
@@ -4215,6 +4226,9 @@ source "boards/arm/stm32f0l0g0/nucleo-g070rb/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_G071RB
 source "boards/arm/stm32f0l0g0/nucleo-g071rb/Kconfig"
+endif
+if ARCH_BOARD_NUCLEO_G0B1RE
+source "boards/arm/stm32f0l0g0/nucleo-g0b1re/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_L073RZ
 source "boards/arm/stm32f0l0g0/nucleo-l073rz/Kconfig"
