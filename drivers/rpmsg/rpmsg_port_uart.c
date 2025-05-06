@@ -60,6 +60,7 @@
 #define RPMSG_PORT_UART_ESCAPE_MASK        0x20
 
 #define RPMSG_PORT_UART_BUFLEN             256
+#define RPMSG_PORT_UART_DBG_BUFLEN         4096
 
 #define RPMSG_PORT_UART_RX_WAIT_START      1
 #define RPMSG_PORT_UART_RX_RECV_NORMAL     2
@@ -100,6 +101,8 @@ struct rpmsg_port_uart_s
   struct file            file;     /* Indicate uart device */
   char                   localcpu[RPMSG_NAME_SIZE];
   rpmsg_port_rx_cb_t     rx_cb;
+  uint8_t                rx_dbg_buf[RPMSG_PORT_UART_DBG_BUFLEN];
+  int                    rx_dbg_idx;
   nxevent_t              event;
   struct notifier_block  nb;       /* Reboot notifier block */
 #ifdef CONFIG_PM
@@ -458,6 +461,12 @@ static int rpmsg_port_uart_rx_thread(int argc, FAR char *argv[])
 
       for (i = 0; i < ret; i++)
         {
+          rpuart->rx_dbg_buf[rpuart->rx_dbg_idx++] = buf[i];
+          if (rpuart->rx_dbg_idx >= RPMSG_PORT_UART_DBG_BUFLEN)
+            {
+              rpuart->rx_dbg_idx = 0;
+            }
+
           if (buf[i] == RPMSG_PORT_UART_CONNREQ ||
               buf[i] == RPMSG_PORT_UART_CONNACK)
             {
@@ -574,9 +583,12 @@ static int rpmsg_port_uart_rx_thread(int argc, FAR char *argv[])
               case RPMSG_PORT_UART_RX_RECV_NORMAL:
                 if (buf[i] == RPMSG_PORT_UART_START)
                   {
-                    rpmsgerr("Recv dup start char, len=%u next=%u i=%zd\n",
-                             hdr->len, next, i);
-                    rpmsgerrdump("Recv error data:", buf, ret);
+                    rpmsgerr("Recv dup start char, len=%u next=%u i=%zd "
+                             "dbg_i=%d\n", hdr->len, next, i,
+                             rpuart->rx_dbg_idx);
+                    rpmsgerrdump("Recv dbg:", rpuart->rx_dbg_buf,
+                                 sizeof(rpuart->rx_dbg_buf));
+                    rpmsgerrdump("Recv error:", buf, ret);
                     rpmsgerrdump("Recv hdr:", hdr, hdr->len);
                     state = RPMSG_PORT_UART_RX_WAIT_START;
                     next = 0;
@@ -586,9 +598,12 @@ static int rpmsg_port_uart_rx_thread(int argc, FAR char *argv[])
                     if (hdr->len != next || (hdr->crc != 0 &&
                         hdr->crc != rpmsg_port_uart_crc16(hdr)))
                       {
-                        rpmsgerr("Recv error crc=%u len=%u next=%u i=%zd\n",
-                                 hdr->crc, hdr->len, next, i);
-                        rpmsgerrdump("Recv error data:", buf, ret);
+                        rpmsgerr("Recv error crc=%u len=%u next=%u i=%zd "
+                                 "dbg_i=%d\n", hdr->crc, hdr->len, next, i,
+                                 rpuart->rx_dbg_idx);
+                        rpmsgerrdump("Recv dbg:", rpuart->rx_dbg_buf,
+                                     sizeof(rpuart->rx_dbg_buf));
+                        rpmsgerrdump("Recv error:", buf, ret);
                         rpmsgerrdump("Recv hdr:", hdr, hdr->len);
                       }
 
