@@ -123,7 +123,7 @@ def convert_board_makedefs(path):
     content = ""
     with open(mdpath, "r") as fm:
         content = fm.read()
-        content = content.replace(mdpath, cpath)
+        content = content.replace("src/Make.defs", "src/CMakeLists.txt")
         content = convert_board_common(path, content)
 
     if content:
@@ -140,7 +140,7 @@ def convert_board_makefile(path):
     content = ""
     with open(mpath, "r") as fm:
         content = fm.read()
-        content = content.replace(mpath, cpath)
+        content = content.replace("src/Make.defs", "src/CMakeLists.txt")
         content = convert_board_common(path, content)
 
     if content:
