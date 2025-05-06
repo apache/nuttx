@@ -2982,8 +2982,12 @@ static void cdcuart_dmasend(FAR struct uart_dev_s *dev)
   req->len = nbytes;
 
   nbytes = MIN(reqlen - nbytes, xfer->nlength);
-  memcpy(req->buf + req->len, xfer->nbuffer, nbytes);
-  req->len += nbytes;
+  if (nbytes)
+    {
+      memcpy(req->buf + req->len, xfer->nbuffer, nbytes);
+      req->len += nbytes;
+    }
+
   xfer->nbytes = req->len;
 
   uart_xmitchars_done(dev);
