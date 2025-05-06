@@ -195,6 +195,10 @@ if(CONFIG_DEBUG_SYMBOLS)
   add_compile_options(${CONFIG_DEBUG_SYMBOLS_LEVEL})
 endif()
 
+if(NOT CONFIG_ARCH_USE_MMU)
+  add_compile_options(-fno-builtin)
+endif()
+
 if(CONFIG_ARCH_TOOLCHAIN_GNU AND NOT CONFIG_ARCH_TOOLCHAIN_CLANG)
   if(NOT GCCVER)
     execute_process(COMMAND ${CMAKE_C_COMPILER} --version
