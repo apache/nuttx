@@ -72,12 +72,7 @@ struct wdlist_node
   FAR struct wdlist_node *next;
 };
 
-/* This is the internal representation of the watchdog timer structure.
- * Notice !!!
- * Carefully with the struct wdog_s order, you may not directly modify
- * this. This struct will combine in struct work_s in union type, and,
- * wqueue will modify/check this struct in kwork work_qcancel().
- */
+/* Support a doubly linked list of watchdog timers */
 
 struct wdog_s
 {
@@ -87,7 +82,7 @@ struct wdog_s
 #ifdef CONFIG_PIC
   FAR void          *picbase;    /* PIC base address */
 #endif
-  clock_t            expired;    /* Timer associated with the absoulute time */
+  clock_t            expired;    /* Timer associated with the absolute time */
 };
 
 struct wdog_period_s
@@ -168,7 +163,7 @@ int wd_start(FAR struct wdog_s *wdog, sclock_t delay,
  *
  * Input Parameters:
  *   wdog     - Watchdog ID
- *   ticks    - Absoulute time in clock ticks
+ *   ticks    - Absolute time in clock ticks
  *   wdentry  - Function to call on timeout
  *   arg      - Parameter to pass to wdentry.
  *
