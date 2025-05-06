@@ -85,6 +85,8 @@ config ARCH_CHIP_FVP_ARMV8R
 	select ARCH_CORTEX_R82
 	select ARCH_HAVE_IRQTRIGGER
 	select ARCH_HAVE_IRQPRIO
+	select ARCH_HAVE_ADDRENV
+	select ARCH_NEED_ADDRENV_MAPPING
 	---help---
 		ARM FVP virt platform (ARMv8r)
 

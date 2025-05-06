@@ -35,7 +35,6 @@
 #include <nuttx/addrenv.h>
 #include <nuttx/arch.h>
 
-#include "addrenv.h"
 #include "arm64_internal.h"
 
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_ARCH_KERNEL_STACK)

@@ -43,7 +43,6 @@
 #include <nuttx/power/pm.h>
 #include <arch/chip/chip.h>
 
-#include "addrenv.h"
 #include "arm64_arch.h"
 #include "arm64_internal.h"
 #include "chip.h"
