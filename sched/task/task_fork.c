@@ -147,19 +147,6 @@ FAR struct tcb_s *nxtask_setup_fork(start_t retaddr)
 
   child->flags |= TCB_FLAG_FREE_TCB;
 
-#if defined(CONFIG_ARCH_ADDRENV)
-  /* Join the parent address environment (REVISIT: vfork() only) */
-
-  if (ttype != TCB_FLAG_TTYPE_KERNEL)
-    {
-      ret = addrenv_join(parent, child);
-      if (ret < 0)
-        {
-          goto errout_with_tcb;
-        }
-    }
-#endif
-
   /* Initialize the task join */
 
   nxtask_joininit(child);
@@ -175,6 +162,19 @@ FAR struct tcb_s *nxtask_setup_fork(start_t retaddr)
     {
       goto errout_with_tcb;
     }
+
+#if defined(CONFIG_ARCH_ADDRENV)
+  /* Join the parent address environment */
+
+  if (ttype != TCB_FLAG_TTYPE_KERNEL)
+    {
+      ret = addrenv_join(parent, child);
+      if (ret < 0)
+        {
+          goto errout_with_tcb;
+        }
+    }
+#endif
 
   /* Duplicate the parent tasks environment */
 
