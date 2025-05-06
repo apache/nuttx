@@ -240,17 +240,6 @@ int exec_module(FAR struct binary_s *binp,
   umm_initialize(vheap, up_addrenv_heapsize(addrenv));
 #endif
 
-#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_ARCH_KERNEL_STACK)
-  /* Allocate the kernel stack */
-
-  ret = up_addrenv_kstackalloc(tcb);
-  if (ret < 0)
-    {
-      berr("ERROR: up_addrenv_kstackalloc() failed: %d\n", ret);
-      goto errout_with_addrenv;
-    }
-#endif
-
   /* Note that tcb->flags are not modified.  0=normal task */
 
   /* tcb->flags |= TCB_FLAG_TTYPE_TASK; */
