@@ -907,7 +907,7 @@ endif # ARCH_STACK_DYNAMIC
 config ARCH_KERNEL_STACK
 	bool "Kernel process stack"
 	default LIBC_EXECFUNCS
-	depends on BUILD_KERNEL
+	depends on BUILD_KERNEL || BUILD_PROTECTED
 	---help---
 		It this option is selected, then every user process will have two
 		stacks:  A large, potentially dynamically sized user stack and small
