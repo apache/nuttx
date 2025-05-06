@@ -86,10 +86,13 @@ sigset_t nxsig_pendingset(FAR struct tcb_s *stcb)
 
   if (stcb == NULL)
     {
-      stcb = this_task();
+      group = this_task()->group;
+    }
+  else
+    {
+      group = stcb->group;
     }
 
-  group = stcb->group;
   DEBUGASSERT(group);
 
   sigemptyset(&sigpendset);
@@ -98,7 +101,10 @@ sigset_t nxsig_pendingset(FAR struct tcb_s *stcb)
   for (sigpend = (FAR sigpendq_t *)group->tg_sigpendingq.head;
        (sigpend); sigpend = sigpend->flink)
     {
-      nxsig_addset(&sigpendset, sigpend->info.si_signo);
+      if (stcb == NULL || sigpend->tcb == NULL || stcb == sigpend->tcb)
+        {
+          nxsig_addset(&sigpendset, sigpend->info.si_signo);
+        }
     }
 
   leave_critical_section(flags);

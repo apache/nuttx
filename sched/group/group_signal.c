@@ -109,7 +109,7 @@ static int group_signal_handler(pid_t pid, FAR void *arg)
        * receive the signal.
        */
 
-      ret = nxsig_tcbdispatch(tcb, info->siginfo);
+      ret = nxsig_tcbdispatch(tcb, info->siginfo, true);
       if (ret < 0)
         {
           return ret;
@@ -150,7 +150,7 @@ static int group_signal_handler(pid_t pid, FAR void *arg)
            * blocking the signal will receive the signal.
            */
 
-          ret = nxsig_tcbdispatch(tcb, info->siginfo);
+          ret = nxsig_tcbdispatch(tcb, info->siginfo, true);
           if (ret < 0)
             {
               return ret;
@@ -257,7 +257,7 @@ int group_signal(FAR struct task_group_s *group, FAR siginfo_t *siginfo)
 
       /* Now deliver the signal to the selected group member */
 
-      ret = nxsig_tcbdispatch(tcb, siginfo);
+      ret = nxsig_tcbdispatch(tcb, siginfo, true);
     }
 
 errout:
