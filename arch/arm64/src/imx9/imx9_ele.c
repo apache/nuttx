@@ -267,7 +267,7 @@ int imx9_ele_get_events(uint32_t *buffer, size_t buffer_size)
   msg.header.version = AHAB_VERSION;
   msg.header.tag = AHAB_CMD_TAG;
   msg.header.size = 1;
-  msg.header.command = ELE_GET_EVENTS;
+  msg.header.command = ELE_GET_EVENTS_REQ;
 
   imx9_ele_sendmsg(&msg);
   imx9_ele_receivemsg(&msg);
@@ -298,7 +298,7 @@ int imx9_ele_close_device(void)
   msg.header.version = AHAB_VERSION;
   msg.header.tag = AHAB_CMD_TAG;
   msg.header.size = 2;
-  msg.header.command = ELE_FWD_LIFECYCLE_UP;
+  msg.header.command = ELE_FWD_LIFECYCLE_UP_REQ;
   msg.data[0] = 0x08;
 
   imx9_ele_sendmsg(&msg);
@@ -317,3 +317,73 @@ uint32_t imx9_ele_get_lifecycle(void)
   return (getreg32(FSB_LC_REG) & 0x3ff);
 }
 
+int imx9_ele_auth_oem_ctnr(unsigned long ctnr_addr, uint32_t *response)
+{
+  msg.header.version = AHAB_VERSION;
+  msg.header.tag = AHAB_CMD_TAG;
+  msg.header.size = 3;
+  msg.header.command = ELE_OEM_CNTN_AUTH_REQ;
+  msg.data[0] = upper_32_bits(ctnr_addr);
+  msg.data[1] = lower_32_bits(ctnr_addr);
+
+  imx9_ele_sendmsg(&msg);
+  imx9_ele_receivemsg(&msg);
+  if (response)
+    {
+      *response = msg.data[0];
+    }
+
+  if ((msg.data[0] & 0xff) == ELE_OK)
+    {
+      return 0;
+    }
+
+  return -EIO;
+}
+
+int imx9_ele_release_container(uint32_t *response)
+{
+  msg.header.version = AHAB_VERSION;
+  msg.header.tag = AHAB_CMD_TAG;
+  msg.header.size = 1;
+  msg.header.command = ELE_RELEASE_CONTAINER_REQ;
+
+  imx9_ele_sendmsg(&msg);
+  imx9_ele_receivemsg(&msg);
+
+  if (response)
+    {
+      *response = msg.data[0];
+    }
+
+  if ((msg.data[0] & 0xff) == ELE_OK)
+    {
+      return 0;
+    }
+
+  return -EIO;
+}
+
+int imx9_ele_verify_image(uint32_t img_id, uint32_t *response)
+{
+  msg.header.version = AHAB_VERSION;
+  msg.header.tag = AHAB_CMD_TAG;
+  msg.header.size = 2;
+  msg.header.command = ELE_VERIFY_IMAGE_REQ;
+  msg.data[0] = 1 << img_id;
+
+  imx9_ele_sendmsg(&msg);
+  imx9_ele_receivemsg(&msg);
+
+  if (response)
+    {
+      *response = msg.data[0];
+    }
+
+  if ((msg.data[0] & 0xff) == ELE_OK)
+    {
+      return 0;
+    }
+
+  return -EIO;
+}
