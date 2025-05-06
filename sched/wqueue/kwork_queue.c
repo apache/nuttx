@@ -195,7 +195,7 @@ int work_queue_period_wq(FAR struct kwork_wqueue_s *wqueue,
     }
   else
     {
-      ret = wd_start_period(&work->u.ptimer, delay, period,
+      ret = wd_start_period(&work->u.timer, delay, period,
                             work_timer_expiry, (wdparm_t)work);
     }
 
