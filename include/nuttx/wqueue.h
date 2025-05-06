@@ -249,13 +249,10 @@ typedef CODE void (*worker_t)(FAR void *arg);
 
 struct work_s
 {
+  struct dq_entry_s dq;          /* Implements a double linked list */
+  clock_t qtime;                 /* Time work queued */
   union
   {
-    struct
-    {
-      struct dq_entry_s dq;      /* Implements a double linked list */
-      clock_t qtime;             /* Time work queued */
-    } s;
     struct wdog_s timer;         /* Delay expiry timer */
     struct wdog_period_s ptimer; /* Period expiry timer */
   } u;
@@ -560,11 +557,7 @@ int work_cancel_sync_wq(FAR struct kwork_wqueue_s *wqueue,
  *
  ****************************************************************************/
 
-#ifdef __KERNEL__
-#  define work_timeleft(work) wd_gettime(&((work)->u.timer))
-#else
-#  define work_timeleft(work) ((sclock_t)((work)->u.s.qtime - clock()))
-#endif
+#define work_timeleft(work) ((sclock_t)((work)->qtime - clock()))
 
 /****************************************************************************
  * Name: lpwork_boostpriority

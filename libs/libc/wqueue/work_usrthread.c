@@ -125,7 +125,7 @@ static void work_process(FAR struct usr_wqueue_s *wqueue)
        * zero will always execute immediately.
        */
 
-      elapsed = clock() - work->u.s.qtime;
+      elapsed = clock() - work->qtime;
 
       /* Is this delay work ready? */
 
@@ -180,7 +180,7 @@ static void work_process(FAR struct usr_wqueue_s *wqueue)
         }
       else
         {
-          next = work->u.s.qtime - clock();
+          next = work->qtime - clock();
           break;
         }
     }
