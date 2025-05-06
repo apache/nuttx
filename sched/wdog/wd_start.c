@@ -226,17 +226,20 @@ static inline_function void wd_expiration(clock_t ticks)
  *   wdog and wdentry is not NULL.
  *
  * Returned Value:
- *   None.
+ *   Whether the head of the watchdog list has changed.
  *
  ****************************************************************************/
 
 static inline_function
-void wd_insert(FAR struct wdog_s *wdog, clock_t expired,
+bool wd_insert(FAR struct wdog_s *wdog, clock_t expired,
                wdentry_t wdentry, wdparm_t arg)
 {
   FAR struct wdog_s *curr;
+  FAR struct wdog_s *head;
 
   /* Traverse the watchdog list */
+
+  head = list_first_entry(&g_wdactivelist, struct wdog_s, node);
 
   list_for_every_entry(&g_wdactivelist, curr, struct wdog_s, node)
     {
@@ -261,6 +264,10 @@ void wd_insert(FAR struct wdog_s *wdog, clock_t expired,
   up_getpicbase(&wdog->picbase);
   wdog->arg = arg;
   wdog->expired = expired;
+
+  /* Return whether the head of the watchdog list has changed. */
+
+  return head == curr;
 }
 
 /****************************************************************************
@@ -287,7 +294,7 @@ void wd_insert(FAR struct wdog_s *wdog, clock_t expired,
  *
  * Input Parameters:
  *   wdog     - Watchdog ID
- *   ticks    - Absoulute time in clock ticks
+ *   ticks    - Absolute time in clock ticks
  *   wdentry  - Function to call on timeout
  *   arg      - Parameter to pass to wdentry.
  *
@@ -349,10 +356,9 @@ int wd_start_abstick(FAR struct wdog_s *wdog, clock_t ticks,
       wdog->func = NULL;
     }
 
-  wd_insert(wdog, ticks, wdentry, arg);
+  reassess |= wd_insert(wdog, ticks, wdentry, arg);
 
-  if (!g_wdtimernested &&
-      (reassess || list_is_head(&g_wdactivelist, &wdog->node)))
+  if (!g_wdtimernested && reassess)
     {
       /* Resume the interval timer that will generate the next
        * interval event. If the timer at the head of the list changed,
