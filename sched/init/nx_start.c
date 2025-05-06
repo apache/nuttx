@@ -508,6 +508,7 @@ void nx_start(void)
   /* Boot up is complete */
 
   g_nx_initstate = OSINIT_BOOT;
+  sched_trace_mark("BOOT");
 
   /* Initialize task list table *********************************************/
 
@@ -520,6 +521,7 @@ void nx_start(void)
   /* Task lists are initialized */
 
   g_nx_initstate = OSINIT_TASKLISTS;
+  sched_trace_mark("TASKLISTS");
 
   /* Initialize RTOS Data ***************************************************/
 
@@ -613,6 +615,7 @@ void nx_start(void)
   /* The memory manager is available */
 
   g_nx_initstate = OSINIT_MEMORY;
+  sched_trace_mark("MEMORY");
 
   /* Initialize tasking data structures */
 
@@ -682,12 +685,15 @@ void nx_start(void)
    * that cannot wait until board_late_initialize.
    */
 
+  boards_trace_begin();
   board_early_initialize();
+  boards_trace_end();
 #endif
 
   /* Hardware resources are now available */
 
   g_nx_initstate = OSINIT_HARDWARE;
+  sched_trace_mark("HARDWARE");
 
   /* Setup for Multi-Tasking ************************************************/
 
@@ -734,6 +740,7 @@ void nx_start(void)
   /* The OS is fully initialized and we are beginning multi-tasking */
 
   g_nx_initstate = OSINIT_OSREADY;
+  sched_trace_mark("OSREADY");
 
   /* Create initial tasks and bring-up the system */
 
@@ -742,6 +749,7 @@ void nx_start(void)
   /* Enter to idleloop */
 
   g_nx_initstate = OSINIT_IDLELOOP;
+  sched_trace_mark("IDLELOOP");
 
   /* Let other threads have access to the memory manager */
 

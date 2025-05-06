@@ -357,3 +357,41 @@ If no command parameters are specified, display the current filter settings as t
     11
     15
 
+System Startup and Board Initialization Trace
+=============================================
+
+NuttX has trace points during system startup and board initialization.
+
+These trace points include:
+- System startup phases (e.g., BOOT, TASKLISTS, MEMORY, HARDWARE, OSREADY, IDLELOOP)
+- Entry and exit of board_early_initialize() and board_late_initialize()
+- System RESET and PANIC events
+
+This information helps analyze the boot process and locate issues related to board initialization or early system failures.
+
+How to capture startup and board initialization trace
+-----------------------------------------------------
+1. **Ensure trace-related kernel configs are enabled** (see configuration section above).
+2. **Boot the system normally**; the trace driver will automatically record these early trace points.
+3. After boot, export the trace data with:
+
+.. code-block::
+
+   nsh> trace dump boot_trace.txt
+
+4. Open boot_trace.txt in Trace Compass. You will see the timeline of each phase, board early/late init boundaries, and RESET/PANIC events.
+
+Common trace events during the startup
+--------------------------------------
+- ``sched_trace_mark("BOOT")``        : Entering BOOT phase
+- ``sched_trace_mark("TASKLISTS")``   : Initializing task lists
+- ``sched_trace_mark("MEMORY")``      : Memory manager available
+- ``sched_trace_mark("HARDWARE")``    : Hardware resources initialized
+- ``sched_trace_mark("OSREADY")``     : Multitasking ready
+- ``sched_trace_mark("IDLELOOP")``    : Entering idle loop
+- ``boards_trace_begin/end()``         : Entry/exit of board_early_initialize/board_late_initialize
+- ``sched_trace_mark("RESET")``       : System reset
+- ``sched_trace_mark("PANIC")``       : System panic
+
+**Tip:** If you need to analyze boot or board initialization issues, always export and review the boot phase trace data first. This can help you quickly locate the problematic stage.
+
