@@ -318,7 +318,9 @@ static inline void nx_start_application(void)
    * configured.
    */
 
+  boards_trace_begin();
   board_late_initialize();
+  boards_trace_end();
 #endif
 
 #ifdef CONFIG_COREDUMP
