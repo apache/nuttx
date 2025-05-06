@@ -74,10 +74,11 @@ def file_update_path(s, oldpath, newpath):
 
 def convert_make_conditional(content):
     content = content.replace(",y)", "")
+    content = content.replace("else ifeq ($", "elseif")
     content = content.replace("ifeq ($", "if")
     content = content.replace("ifneq ($(", "if(NOT ")
-    content = content.replace("else", "else()")
-    content = content.replace("endif", "endif()")
+    content = content.replace("else\n", "else()\n")
+    content = content.replace("endif\n", "endif()\n")
     content = content.replace("CHIP_CSRCS = ", "set(SRCS ")
     content = content.replace("CHIP_CSRCS += ", "  list(APPEND SRCS ")
     content = content.replace("CSRCS = ", "set(SRCS ")
