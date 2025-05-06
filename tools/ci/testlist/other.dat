@@ -14,3 +14,6 @@
 # Sparc-gaisler-elf toolchain doesn't provide macOS binaries
 /sparc
 -xx3823:nsh
+
+# AVR DA/DB doesn't have working toolchain yet
+-,breadxavr:.+
