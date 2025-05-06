@@ -596,6 +596,65 @@ config SENSORS_BME680_THREAD_STACKSIZE
 
 endif # SENSORS_BME680
 
+config SENSORS_BME688
+	bool "Bosch BME688 Temperature, Gas, Humidity and Pressure Sensor"
+	default n
+	select I2C
+	---help---
+		Enable driver for the Bosch BME688 sensor.
+
+if SENSORS_BME688
+
+config BME688_I2C_FREQUENCY
+	int "BME688 I2C frequency"
+	default 400000
+
+config BME688_DISABLE_TEMP_MEAS
+	bool "Disable Temperature Measurement"
+	default n
+	---help---
+		If enabled, the sensor will not measure temperature.
+
+config BME688_DISABLE_PRESS_MEAS
+	bool "Disable Pressure Measurement"
+	default n
+	---help---
+		If enabled, the sensor will not measure pressure.
+
+config BME688_DISABLE_HUM_MEAS
+	bool "Disable Humidity Measurement"
+	default n
+	---help---
+		If enabled, the sensor will not measure humidity.
+
+config BME688_DISABLE_GAS_MEAS
+	bool "Disable Gas Measurement"
+	default n
+	---help---
+		If enabled, the sensor will not measure gas.
+
+config BME688_ENABLE_IIR_FILTER
+	bool "Enable IIR Filter"
+	default n
+	---help---
+		Enable IIR filtering for temperature and pressure
+		measurements.
+
+config SENSORS_BME688_POLL_INTERVAL
+	int "Polling interval in microseconds, default 3 sec"
+	default 3000000
+	range 0 4294967295
+	---help---
+		The interval until a new sensor measurement will be triggered.
+
+config SENSORS_BME688_THREAD_STACKSIZE
+	int "Worker thread stack size"
+	default 1024
+	---help---
+		The stack size for the worker thread.
+
+endif # SENSORS_BME688
+
 config SENSORS_DHTXX
 	bool "DHTxx humidity/temperature Sensor support"
 	default n
