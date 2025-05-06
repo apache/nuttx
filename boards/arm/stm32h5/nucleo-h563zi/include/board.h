@@ -251,16 +251,6 @@
 #define STM32_RCC_CCIPR5_ADCDACSEL RCC_CCIPR5_ADCDACSEL_PLL2RCK
 #define STM32_ADC_CLK_FREQUENCY    STM32_PLL2R_FREQUENCY
 
-#define GPIO_ADC1_IN3   (GPIO_ADC1_IN3_0)
-#define GPIO_ADC1_IN10  (GPIO_ADC1_IN10_0)
-
-/* USART3: Connected to Arduino connector D0/D1 (or to STLink VCP if solder
- * bridges SB123 to SB130 are re-worked accordingly).
- */
-
-#define GPIO_USART3_RX   GPIO_USART3_RX_4    /* PD9 */
-#define GPIO_USART3_TX   GPIO_USART3_TX_4    /* PD8 */
-
 /* LED definitions **********************************************************/
 
 /* The Nucleo board has numerous LEDs but only three, LD1 a Green LED,
@@ -324,6 +314,26 @@
 #define BUTTON_USER        0
 #define NUM_BUTTONS        1
 #define BUTTON_USER_BIT    (1 << BUTTON_USER)
+
+/* Alternate function pin selections ****************************************/
+
+/* ADC */
+
+#define GPIO_ADC1_IN3   (GPIO_ADC1_IN3_0)
+#define GPIO_ADC1_IN10  (GPIO_ADC1_IN10_0)
+
+/* USART3 (Nucleo Virtual Console): Default board solder bridge configuration
+ * has USART3 going to the on board ST-Link to provide a VCP. Refer to
+ * STMicro user manual [UM3115] for more info on solder bridge configuration.
+ */
+
+#define GPIO_USART3_RX   GPIO_USART3_RX_4    /* PD9 */
+#define GPIO_USART3_TX   GPIO_USART3_TX_4    /* PD8 */
+
+/* USART2 */
+
+#define GPIO_USART2_RX   GPIO_USART2_RX_2    /* PD6 */
+#define GPIO_USART2_TX   GPIO_USART2_TX_2    /* PD5 */
 
 /****************************************************************************
  * Public Data
