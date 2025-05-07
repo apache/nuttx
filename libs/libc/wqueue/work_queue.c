@@ -32,7 +32,7 @@
 #include <errno.h>
 
 #include <nuttx/clock.h>
-#include <nuttx/queue.h>
+#include <nuttx/list.h>
 #include <nuttx/wqueue.h>
 
 #include "wqueue/wqueue.h"
@@ -76,9 +76,8 @@ static int work_qqueue(FAR struct usr_wqueue_s *wqueue,
                        FAR struct work_s *work, worker_t worker,
                        FAR void *arg, clock_t delay)
 {
-  FAR dq_entry_t *prev = NULL;
-  FAR dq_entry_t *curr;
-  sclock_t delta;
+  FAR struct work_s *curr;
+  FAR struct work_s *head;
   int semcount;
 
   /* Get exclusive access to the work queue */
@@ -87,59 +86,51 @@ static int work_qqueue(FAR struct usr_wqueue_s *wqueue,
 
   /* Initialize the work structure */
 
-  work->worker = worker;             /* Work callback. non-NULL means queued */
-  work->arg    = arg;                /* Callback argument */
-  work->u.s.qtime = clock() + delay; /* Delay until work performed */
+  work->worker = worker;          /* Work callback. non-NULL means queued */
+  work->arg    = arg;             /* Callback argument */
+  work->qtime  = clock() + delay; /* Delay until work performed */
 
-  /* Do the easy case first -- when the work queue is empty. */
+  /* delay+1 is to prevent the insufficient sleep time if we are
+   * currently near the boundary to the next tick.
+   * | current_tick | current_tick + 1 | current_tick + 2 | .... |
+   * |           ^ Here we get the current tick
+   * In this case we delay 1 tick, timer will be triggered at
+   * current_tick + 1, which is not enough for at least 1 tick.
+   */
 
-  if (wqueue->q.head == NULL)
+  work->qtime += 1;
+
+  /* Insert the work into the wait queue sorted by the expired time. */
+
+  head = list_first_entry(&wqueue->q, struct work_s, node);
+
+  list_for_every_entry(&wqueue->q, curr, struct work_s, node)
     {
-      /* Add the watchdog to the head == tail of the queue. */
-
-      dq_addfirst(&work->u.s.dq, &wqueue->q);
-      nxsem_post(&wqueue->wake);
+      if (!clock_compare(curr->qtime, work->qtime))
+        {
+          break;
+        }
     }
 
-  /* There are other active watchdogs in the timer queue */
+  /* After the insertion, we do not violate the invariant that
+   * the wait queue is sorted by the expired time. Because
+   * curr->qtime > work->qtime.
+   * In the case of the wqueue is empty, we insert
+   * the work at the head of the wait queue.
+   */
 
-  else
+  list_add_before(&curr->node, &work->node);
+
+  /* If the current work is the head of the wait queue.
+   * We should wake up the worker thread.
+   */
+
+  if (curr == head)
     {
-      curr = wqueue->q.head;
-
-      /* Check if the new work must be inserted before the curr. */
-
-      do
+      nxsem_get_value(&wqueue->wake, &semcount);
+      if (semcount < 1)
         {
-          delta = work->u.s.qtime - ((FAR struct work_s *)curr)->u.s.qtime;
-          if (delta < 0)
-            {
-              break;
-            }
-
-          prev = curr;
-          curr = curr->flink;
-        }
-      while (curr != NULL);
-
-      /* Insert the new watchdog in the list */
-
-      if (prev == NULL)
-        {
-          /* Insert the watchdog at the head of the list */
-
-          dq_addfirst(&work->u.s.dq, &wqueue->q);
-          nxsem_get_value(&wqueue->wake, &semcount);
-          if (semcount < 1)
-            {
-              nxsem_post(&wqueue->wake);
-            }
-        }
-      else
-        {
-          /* Insert the watchdog in mid- or end-of-queue */
-
-          dq_addafter(prev, &work->u.s.dq, &wqueue->q);
+          nxsem_post(&wqueue->wake);
         }
     }
 

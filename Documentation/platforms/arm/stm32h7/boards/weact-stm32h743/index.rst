@@ -2,6 +2,8 @@
 weact-stm32h743
 ===============
 
+.. tags:: chip:stm32, chip:stm32h7, chip:stm32h743
+
 This page discusses issues unique to NuttX configurations for the
 WeAct STM32H743 board.
 

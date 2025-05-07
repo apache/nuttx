@@ -2,6 +2,8 @@
 Olimex STM32-P207
 =================
 
+.. tags:: chip:stm32, chip:stm32f4, chip:stm32f407
+
 The NuttX configuration for the Olimex STM32-P407 is derives more or less
 directly from the Olimex STM32-P207 board support.  The P207 and P407 seem
 to share the same board design.  Other code comes from the STM3240G board

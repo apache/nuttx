@@ -31,7 +31,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
-#include <nuttx/queue.h>
+#include <nuttx/list.h>
 #include <nuttx/wqueue.h>
 
 #include "wqueue/wqueue.h"
@@ -46,7 +46,7 @@ static int work_qcancel(FAR struct kwork_wqueue_s *wqueue, bool sync,
                         FAR struct work_s *work)
 {
   irqstate_t flags;
-  int ret = -ENOENT;
+  int        ret = OK;
 
   if (wqueue == NULL || work == NULL)
     {
@@ -59,20 +59,37 @@ static int work_qcancel(FAR struct kwork_wqueue_s *wqueue, bool sync,
    */
 
   flags = spin_lock_irqsave(&wqueue->lock);
-  if (work->worker != NULL)
+
+  /* Check whether we own the work structure. */
+
+  if (!work_available(work))
     {
-      /* Remove the entry from the work queue and make sure that it is
-       * marked as available (i.e., the worker field is nullified).
-       */
+      bool is_head = list_is_head(&wqueue->pending, &work->node);
+
+      /* Seize the ownership from the work thread. */
 
       work->worker = NULL;
-      wd_cancel(&work->u.timer);
-      if (dq_inqueue((FAR dq_entry_t *)work, &wqueue->q))
-        {
-          dq_rem((FAR dq_entry_t *)work, &wqueue->q);
-        }
 
-      ret = OK;
+      list_delete(&work->node);
+
+      /* If the head of the pending queue has changed, we should reset
+       * the wqueue timer.
+       */
+
+      if (is_head)
+        {
+          if (!list_is_empty(&wqueue->pending))
+            {
+              work = list_first_entry(&wqueue->pending, struct work_s, node);
+
+              ret = wd_start_abstick(&wqueue->timer, work->qtime,
+                                     work_timer_expired, (wdparm_t)wqueue);
+            }
+          else
+            {
+              wd_cancel(&wqueue->timer);
+            }
+        }
     }
   else if (!up_interrupt_context() && !sched_idletask() && sync)
     {

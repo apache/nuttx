@@ -33,7 +33,7 @@
 #include <stdint.h>
 
 #include <nuttx/clock.h>
-#include <nuttx/queue.h>
+#include <nuttx/list.h>
 #include <nuttx/wdog.h>
 
 /****************************************************************************
@@ -249,19 +249,11 @@ typedef CODE void (*worker_t)(FAR void *arg);
 
 struct work_s
 {
-  union
-  {
-    struct
-    {
-      struct dq_entry_s dq;      /* Implements a double linked list */
-      clock_t qtime;             /* Time work queued */
-    } s;
-    struct wdog_s timer;         /* Delay expiry timer */
-    struct wdog_period_s ptimer; /* Period expiry timer */
-  } u;
-  worker_t  worker;              /* Work callback */
-  FAR void *arg;                 /* Callback argument */
-  FAR struct kwork_wqueue_s *wq; /* Work queue */
+  struct list_node node;   /* Implements a double linked list */
+  clock_t          qtime;  /* Time work queued */
+  clock_t          period; /* Periodical delay ticks */
+  worker_t         worker; /* Work callback */
+  FAR void        *arg;    /* Callback argument */
 };
 
 /* This is an enumeration of the various events that may be
@@ -560,11 +552,7 @@ int work_cancel_sync_wq(FAR struct kwork_wqueue_s *wqueue,
  *
  ****************************************************************************/
 
-#ifdef __KERNEL__
-#  define work_timeleft(work) wd_gettime(&((work)->u.timer))
-#else
-#  define work_timeleft(work) ((sclock_t)((work)->u.s.qtime - clock()))
-#endif
+#define work_timeleft(work) ((sclock_t)((work)->qtime - clock()))
 
 /****************************************************************************
  * Name: lpwork_boostpriority

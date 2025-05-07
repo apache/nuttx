@@ -2,6 +2,8 @@
 ST STM32L562E-DK
 ================
 
+.. tags:: chip:stm32, chip:stm32l5, chip:stm32l562
+
 This page discusses the port of NuttX to the STMicro STM32L562E-DK
 board.  That board features the STM32L562QEI6QU MCU with 512KiB of FLASH
 and 256KiB of SRAM.

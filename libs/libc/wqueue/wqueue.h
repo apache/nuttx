@@ -33,6 +33,7 @@
 
 #include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/list.h>
 #include <nuttx/wqueue.h>
 
 #if defined(CONFIG_LIBC_USRWORK) && !defined(__KERNEL__)
@@ -49,9 +50,9 @@
 
 struct usr_wqueue_s
 {
-  struct dq_queue_s q;      /* The queue of pending work */
-  mutex_t           lock;   /* exclusive access to user-mode work queue */
-  sem_t             wake;   /* The wake-up semaphore of the  usrthread */
+  struct list_node q;    /* The queue of pending work */
+  mutex_t          lock; /* exclusive access to user-mode work queue */
+  sem_t            wake; /* The wake-up semaphore of the  usrthread */
 };
 
 /****************************************************************************

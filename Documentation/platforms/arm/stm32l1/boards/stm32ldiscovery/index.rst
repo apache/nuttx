@@ -2,6 +2,8 @@
  ST STM32L Discovery
 =====================
 
+.. tags:: chip:stm32, chip:stm32l1, chip:stm32l152
+
 This page discusses issues unique to NuttX configurations for the
 STMicro STM32L-Discovery development board.  The STM32L-Discovery board
 is based on the STM32L152RBT6 MCU (128KB FLASH and 16KB of SRAM).

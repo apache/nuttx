@@ -33,73 +33,12 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
-#include <nuttx/queue.h>
+#include <nuttx/list.h>
 #include <nuttx/wqueue.h>
 
 #include "wqueue/wqueue.h"
 
 #ifdef CONFIG_SCHED_WORKQUEUE
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define queue_work(wqueue, work) \
-  do \
-    { \
-      dq_addlast((FAR dq_entry_t *)(work), &(wqueue)->q); \
-      if ((wqueue)->wait_count > 0) /* There are threads waiting for sem. */ \
-        { \
-          (wqueue)->wait_count--; \
-          nxsem_post(&(wqueue)->sem); \
-        } \
-    } \
-  while (0)
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: work_timer_expiry
- ****************************************************************************/
-
-static void work_timer_expiry(wdparm_t arg)
-{
-  FAR struct work_s *work = (FAR struct work_s *)arg;
-
-  irqstate_t flags = spin_lock_irqsave(&work->wq->lock);
-  sched_lock();
-
-  /* We have being canceled */
-
-  if (work->worker != NULL)
-    {
-      queue_work(work->wq, work);
-    }
-
-  spin_unlock_irqrestore(&work->wq->lock, flags);
-  sched_unlock();
-}
-
-static bool work_is_canceling(FAR struct kworker_s *kworkers, int nthreads,
-                              FAR struct work_s *work)
-{
-  int wndx;
-
-  for (wndx = 0; wndx < nthreads; wndx++)
-    {
-      if (kworkers[wndx].work == work)
-        {
-          if (kworkers[wndx].wait_count > 0)
-            {
-              return true;
-            }
-        }
-    }
-
-  return false;
-}
 
 /****************************************************************************
  * Public Functions
@@ -141,67 +80,67 @@ int work_queue_period_wq(FAR struct kwork_wqueue_s *wqueue,
                          FAR void *arg, clock_t delay, clock_t period)
 {
   irqstate_t flags;
-  int ret = OK;
+  clock_t    expected;
+  bool wake = false;
+  int  ret  = OK;
 
   if (wqueue == NULL || work == NULL || worker == NULL)
     {
       return -EINVAL;
     }
 
+  /* Ensure the work has been canceled. */
+
+  work_cancel_wq(wqueue, work);
+
+  /* delay+1 is to prevent the insufficient sleep time if we are
+   * currently near the boundary to the next tick.
+   * | current_tick | current_tick + 1 | current_tick + 2 | .... |
+   * |           ^ Here we get the current tick
+   * In this case we delay 1 tick, timer will be triggered at
+   * current_tick + 1, which is not enough for at least 1 tick.
+   */
+
+  expected = clock_systime_ticks() + delay + 1;
+
   /* Interrupts are disabled so that this logic can be called from with
    * task logic or from interrupt handling logic.
    */
 
   flags = spin_lock_irqsave(&wqueue->lock);
-  sched_lock();
-
-  /* Remove the entry from the timer and work queue. */
-
-  if (work->worker != NULL)
-    {
-      /* Remove the entry from the work queue and make sure that it is
-       * marked as available (i.e., the worker field is nullified).
-       */
-
-      work->worker = NULL;
-      wd_cancel(&work->u.timer);
-      if (dq_inqueue((FAR dq_entry_t *)work, &wqueue->q))
-        {
-          dq_rem((FAR dq_entry_t *)work, &wqueue->q);
-        }
-    }
-
-  if (work_is_canceling(wqueue->worker, wqueue->nthreads, work))
-    {
-      goto out;
-    }
 
   /* Initialize the work structure. */
 
-  work->worker = worker;           /* Work callback. non-NULL means queued */
-  work->arg    = arg;              /* Callback argument */
-  work->wq     = wqueue;           /* Work queue */
+  work->worker = worker;   /* Work callback. non-NULL means queued */
+  work->arg    = arg;      /* Callback argument */
+  work->qtime  = expected; /* Expected time */
+  work->period = period;   /* Periodical delay */
 
-  /* Queue the new work */
+  /* Insert to the pending list of the wqueue. */
 
-  if (!delay)
+  if (delay)
     {
-      queue_work(wqueue, work);
-    }
-  else if (period == 0)
-    {
-      ret = wd_start(&work->u.timer, delay,
-                     work_timer_expiry, (wdparm_t)work);
+      if (work_insert_pending(wqueue, work))
+        {
+          /* Start the timer if the work is the earliest expired work. */
+
+          ret = wd_start_abstick(&wqueue->timer, work->qtime,
+                                 work_timer_expired, (wdparm_t)wqueue);
+        }
     }
   else
     {
-      ret = wd_start_period(&work->u.ptimer, delay, period,
-                            work_timer_expiry, (wdparm_t)work);
+      list_add_tail(&wqueue->expired, &work->node);
+      wake = true;
     }
 
-out:
   spin_unlock_irqrestore(&wqueue->lock, flags);
-  sched_unlock();
+
+  if (wake)
+    {
+      nxsem_post(&wqueue->sem);
+    }
+
   return ret;
 }
 

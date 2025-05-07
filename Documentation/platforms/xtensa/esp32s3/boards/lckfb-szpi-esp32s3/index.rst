@@ -2,6 +2,8 @@
 LCKFB SZPI ESP32-S3
 ===================
 
+.. tags:: chip:esp32, chip:esp32s3
+
 The `LCKFB SZPI ESP32-S3 <https://wiki.lckfb.com/zh-hans/szpi-esp32s3/>`_ is a development board for the ESP32-S3 SoC from Jialichuang, based on a ESP32-S3-WROOM-1 module.
 
 .. list-table::

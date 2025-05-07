@@ -35,7 +35,7 @@
 #include <assert.h>
 #include <debug.h>
 
-#include <nuttx/queue.h>
+#include <nuttx/list.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/kthread.h>
 #include <nuttx/semaphore.h>
@@ -83,11 +83,14 @@
 
 struct hp_wqueue_s g_hpwork =
 {
-  {NULL, NULL},
-  SEM_INITIALIZER(0),
-  SEM_INITIALIZER(0),
-  SP_UNLOCKED,
-  CONFIG_SCHED_HPNTHREADS,
+  {
+    LIST_INITIAL_VALUE(g_hpwork.wq.expired),
+    LIST_INITIAL_VALUE(g_hpwork.wq.pending),
+    SEM_INITIALIZER(0),
+    SEM_INITIALIZER(0),
+    SP_UNLOCKED,
+    CONFIG_SCHED_HPNTHREADS,
+  }
 };
 
 #endif /* CONFIG_SCHED_HPWORK */
@@ -97,11 +100,14 @@ struct hp_wqueue_s g_hpwork =
 
 struct lp_wqueue_s g_lpwork =
 {
-  {NULL, NULL},
-  SEM_INITIALIZER(0),
-  SEM_INITIALIZER(0),
-  SP_UNLOCKED,
-  CONFIG_SCHED_LPNTHREADS,
+  {
+    LIST_INITIAL_VALUE(g_lpwork.wq.expired),
+    LIST_INITIAL_VALUE(g_lpwork.wq.pending),
+    SEM_INITIALIZER(0),
+    SEM_INITIALIZER(0),
+    SP_UNLOCKED,
+    CONFIG_SCHED_LPNTHREADS,
+  }
 };
 
 #endif /* CONFIG_SCHED_LPWORK */
@@ -109,6 +115,51 @@ struct lp_wqueue_s g_lpwork =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+static inline_function
+void work_dispatch(FAR struct kwork_wqueue_s *wq)
+{
+  FAR struct work_s *work;
+  FAR struct work_s *next;
+  unsigned int count = 0;
+  clock_t      ticks = clock_systime_ticks();
+
+  /* Wake up the worker thread once there is expired work.
+   * If some worker threads are busy, here the callback will
+   * wake up another waiting work thread.
+   *
+   * Becareful of the special case that the pending work
+   * has been canceled but the timer is expired.
+   * In this case we should not wake up any worker thread.
+   */
+
+  list_for_every_entry_safe(&wq->pending, work, next, struct work_s, node)
+    {
+      /* Check whether the work has expired. */
+
+      if (!clock_compare(work->qtime, ticks))
+        {
+          wd_start_abstick(&wq->timer, work->qtime,
+                           work_timer_expired, (wdparm_t)wq);
+          break;
+        }
+
+      /* Expired work will be moved to tail of the expired queue. */
+
+      list_delete(&work->node);
+      list_add_tail(&wq->expired, &work->node);
+
+      /* Note that the thread execution this function is also
+       * a worker thread, which has already been woken up by the timer.
+       * So only `count - 1` semaphore will be posted.
+       */
+
+      if (count++ > 0)
+        {
+          nxsem_post(&wq->sem);
+        }
+    }
+}
 
 /****************************************************************************
  * Name: work_thread
@@ -135,11 +186,11 @@ struct lp_wqueue_s g_lpwork =
 static int work_thread(int argc, FAR char *argv[])
 {
   FAR struct kwork_wqueue_s *wqueue;
-  FAR struct kworker_s *kworker;
-  FAR struct work_s *work;
-  worker_t worker;
-  irqstate_t flags;
-  FAR void *arg;
+  FAR struct kworker_s      *kworker;
+  FAR struct work_s         *work;
+  worker_t      worker;
+  irqstate_t    flags;
+  FAR void     *arg;
 
   /* Get the handle from argv */
 
@@ -148,29 +199,38 @@ static int work_thread(int argc, FAR char *argv[])
   kworker = (FAR struct kworker_s *)
             ((uintptr_t)strtoul(argv[2], NULL, 16));
 
-  flags = spin_lock_irqsave(&wqueue->lock);
-  sched_lock();
-
-  /* Loop forever */
+  /* Loop until wqueue->exit != 0.
+   * Since the only way to set wqueue->exit is to call work_queue_free(),
+   * there is no need for entering the critical section.
+   */
 
   while (!wqueue->exit)
     {
-      /* And check each entry in the work queue.  Since we have disabled
+      /* And check first entry in the work queue. Since we have disabled
        * interrupts we know:  (1) we will not be suspended unless we do
        * so ourselves, and (2) there will be no changes to the work queue
        */
 
-      /* Remove the ready-to-execute work from the list */
+      flags = spin_lock_irqsave(&wqueue->lock);
+      sched_lock();
 
-      while ((work = (FAR struct work_s *)dq_remfirst(&wqueue->q)) != NULL)
+      /* If the wqueue timer is expired and non-active, it indicates that
+       * there might be expired work in the pending queue.
+       */
+
+      if (!WDOG_ISACTIVE(&wqueue->timer))
         {
-          if (work->worker == NULL)
-            {
-              continue;
-            }
+          work_dispatch(wqueue);
+        }
 
-          /* Extract the work description from the entry (in case the work
-           * instance will be re-used after it has been de-queued).
+      if (!list_is_empty(&wqueue->expired))
+        {
+          work = list_first_entry(&wqueue->expired, struct work_s, node);
+
+          list_delete(&work->node);
+
+          /* Extract the work description from the entry (in case the
+           * work instance will be reused after it has been de-queued).
            */
 
           worker = work->worker;
@@ -179,20 +239,41 @@ static int work_thread(int argc, FAR char *argv[])
 
           arg = work->arg;
 
-          /* Mark the work as no longer being queued */
+          /* Check whether the work is periodic. */
 
-          work->worker = NULL;
+          if (work->period != 0)
+            {
+              /* Calculate next expiration qtime. */
+
+              work->qtime += work->period;
+
+              /* Enqueue to the waiting queue */
+
+              if (work_insert_pending(wqueue, work))
+                {
+                  /* We should reset timer if the work is the earliest. */
+
+                  wd_start_abstick(&wqueue->timer, work->qtime,
+                                   work_timer_expired, (wdparm_t)wqueue);
+                }
+            }
+          else
+            {
+              /* Return the work structure ownership to the work owner. */
+
+              work->worker = NULL;
+            }
 
           /* Mark the thread busy */
 
           kworker->work = work;
 
+          spin_unlock_irqrestore(&wqueue->lock, flags);
+          sched_unlock();
+
           /* Do the work.  Re-enable interrupts while the work is being
            * performed... we don't have any idea how long this will take!
            */
-
-          spin_unlock_irqrestore(&wqueue->lock, flags);
-          sched_unlock();
 
           CALL_WORKER(worker, arg);
           flags = spin_lock_irqsave(&wqueue->lock);
@@ -211,22 +292,13 @@ static int work_thread(int argc, FAR char *argv[])
             }
         }
 
-      /* Then process queued work.  work_process will not return until: (1)
-       * there is no further work in the work queue, and (2) semaphore is
-       * posted.
-       */
-
-      wqueue->wait_count++;
       spin_unlock_irqrestore(&wqueue->lock, flags);
       sched_unlock();
 
-      nxsem_wait_uninterruptible(&wqueue->sem);
-      flags = spin_lock_irqsave(&wqueue->lock);
-      sched_lock();
-    }
+      /* Wait for the semaphore to be posted by the wqueue timer. */
 
-  spin_unlock_irqrestore(&wqueue->lock, flags);
-  sched_unlock();
+      nxsem_wait_uninterruptible(&wqueue->sem);
+    }
 
   nxsem_post(&wqueue->exsem);
   return OK;
@@ -300,6 +372,27 @@ static int work_thread_create(FAR const char *name, int priority,
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: work_timer_expired
+ *
+ * Description:
+ *   The wqueue timer callback.
+ *
+ * Input Parameters:
+ *   arg  - The work queue.
+ *
+ ****************************************************************************/
+
+void work_timer_expired(wdparm_t arg)
+{
+  /* The work time expired callback will wake up at least one worker thread
+   * to dispatch the expired work.
+   */
+
+  FAR struct kwork_wqueue_s *wq = (FAR struct kwork_wqueue_s *)arg;
+  nxsem_post(&wq->sem);
+}
+
+/****************************************************************************
  * Name: work_queue_create
  *
  * Description:
@@ -345,7 +438,9 @@ FAR struct kwork_wqueue_s *work_queue_create(FAR const char *name,
 
   /* Initialize the work queue structure */
 
-  dq_init(&wqueue->q);
+  list_initialize(&wqueue->expired);
+  list_initialize(&wqueue->pending);
+  wqueue->timer.func = NULL;
   nxsem_init(&wqueue->sem, 0, 0);
   nxsem_init(&wqueue->exsem, 0, 0);
   wqueue->nthreads = nthreads;
@@ -387,6 +482,8 @@ int work_queue_free(FAR struct kwork_wqueue_s *wqueue)
     {
       return -EINVAL;
     }
+
+  wd_cancel(&wqueue->timer);
 
   /* Mark the work queue as exiting */
 

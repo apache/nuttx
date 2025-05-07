@@ -34,7 +34,7 @@
 #include <assert.h>
 
 #include <nuttx/clock.h>
-#include <nuttx/queue.h>
+#include <nuttx/list.h>
 #include <nuttx/wqueue.h>
 
 #include "wqueue/wqueue.h"
@@ -63,7 +63,7 @@
 
 struct usr_wqueue_s g_usrwork =
 {
-  {NULL, NULL},
+  LIST_INITIAL_VALUE(g_usrwork.q),
   NXMUTEX_INITIALIZER,
   SEM_INITIALIZER(0),
 };
@@ -91,10 +91,10 @@ struct usr_wqueue_s g_usrwork =
 
 static void work_process(FAR struct usr_wqueue_s *wqueue)
 {
-  volatile FAR struct work_s *work;
+  FAR struct work_s *work;
   worker_t worker;
   FAR void *arg;
-  sclock_t elapsed;
+  clock_t tick;
   clock_t next;
   int ret;
 
@@ -116,27 +116,28 @@ static void work_process(FAR struct usr_wqueue_s *wqueue)
    * so ourselves, and (2) there will be no changes to the work queue
    */
 
-  work = (FAR struct work_s *)wqueue->q.head;
-  while (work)
+  while (!list_is_empty(&wqueue->q))
     {
+      work = list_first_entry(&wqueue->q, struct work_s, node);
+
       /* Is this work ready? It is ready if there is no delay or if
        * the delay has elapsed.  is the time that the work was added
        * to the work queue. Therefore a delay of equal or less than
        * zero will always execute immediately.
        */
 
-      elapsed = clock() - work->u.s.qtime;
+      tick = clock();
 
       /* Is this delay work ready? */
 
-      if (elapsed >= 0)
+      if (clock_compare(work->qtime, tick))
         {
           /* Remove the ready-to-execute work from the list */
 
-          dq_remfirst(&wqueue->q);
+          list_delete(&work->node);
 
           /* Extract the work description from the entry (in case the work
-           * instance by the re-used after it has been de-queued).
+           * instance by the reused after it has been de-queued).
            */
 
           worker = work->worker;
@@ -175,12 +176,10 @@ static void work_process(FAR struct usr_wqueue_s *wqueue)
                   return;
                 }
             }
-
-          work = (FAR struct work_s *)wqueue->q.head;
         }
       else
         {
-          next = work->u.s.qtime - clock();
+          next = work->qtime - clock();
           break;
         }
     }
@@ -287,7 +286,7 @@ int work_usrstart(void)
 
   /* Initialize the work queue */
 
-  dq_init(&g_usrwork.q);
+  list_initialize(&g_usrwork.q);
 
 #ifdef CONFIG_BUILD_PROTECTED
 

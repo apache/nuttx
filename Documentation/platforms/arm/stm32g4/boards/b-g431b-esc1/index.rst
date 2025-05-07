@@ -2,6 +2,8 @@
 ST B-G431B-ESC
 ==============
 
+.. tags:: chip:stm32, chip:stm32g4, chip:stm32g431
+
 The B-G431B-ESC board is based on the STM32G431CB microcontroller,
 the L6387 driver and STL180N6F7 power MOSFETs.
 

@@ -1,0 +1,8 @@
+#
+# For a description of the syntax of this configuration file,
+# see the kconfig-language reference.
+#
+
+if ARCH_BOARD_NUCLEO_G0B1RE
+
+endif

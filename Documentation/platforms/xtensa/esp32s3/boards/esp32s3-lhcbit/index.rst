@@ -2,6 +2,8 @@
 esp32s3-lhcbit
 =================
 
+.. tags:: chip:esp32, chip:esp32s3
+
 This page discusses issues unique to NuttX configurations for the
 ESP32S3-LHCBit board.
 

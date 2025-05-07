@@ -65,8 +65,6 @@
 static int work_qcancel(FAR struct usr_wqueue_s *wqueue,
                         FAR struct work_s *work)
 {
-  FAR dq_entry_t *prev = NULL;
-  FAR dq_entry_t *curr;
   int ret = -ENOENT;
   int semcount;
 
@@ -83,37 +81,16 @@ static int work_qcancel(FAR struct usr_wqueue_s *wqueue,
 
   if (work->worker != NULL)
     {
-      /* Search the work activelist for the target work. We can't
-       * use dq_rem to do this because there are additional operations that
-       * need to be done.
-       */
-
-      curr = wqueue->q.head;
-      while (curr && curr != &work->u.s.dq)
-        {
-          prev = curr;
-          curr = curr->flink;
-        }
-
-      /* Check if the work was found in the list.  If not, then an OS
-       * error has occurred because the work is marked active!
-       */
-
-      DEBUGASSERT(curr);
+      bool is_head = list_is_head(&wqueue->q, &work->node);
 
       /* Now, remove the work from the work queue */
 
-      if (prev)
-        {
-          /* Remove the work from mid- or end-of-queue */
+      list_delete(&work->node);
 
-          dq_remafter(prev, &wqueue->q);
-        }
-      else
+      if (is_head)
         {
           /* Remove the work at the head of the queue */
 
-          dq_remfirst(&wqueue->q);
           nxsem_get_value(&wqueue->wake, &semcount);
           if (semcount < 1)
             {

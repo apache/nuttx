@@ -2,6 +2,8 @@
 CloudController
 ===============
 
+.. tags:: chip:stm32, chip:stm32f1, chip:stm32f107
+
 This page discusses issues unique to NuttX configurations for the CloudController
 development board featuring the STMicro STM32F107VCT MCU.
 

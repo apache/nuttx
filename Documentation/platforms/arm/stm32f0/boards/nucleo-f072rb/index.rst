@@ -2,6 +2,8 @@
 ST Nucleo F072RB
 ================
 
+.. tags:: chip:stm32, chip:stm32f0, chip:stm32f072
+
 That board features the STM32F072RBT6 MCU with 128KiB of FLASH
 and 16KiB of SRAM.
 
