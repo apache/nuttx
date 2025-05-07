@@ -63,12 +63,12 @@
     } \
   while (0)
 
-#define dq_insert_mid(pre, mid, next) \
+#define dq_insert_mid(prev, mid, next) \
   do \
     { \
       mid->flink = next; \
       mid->blink = prev; \
-      pre->flink = mid; \
+      prev->flink = mid; \
       next->blink = mid; \
     } \
   while (0)
