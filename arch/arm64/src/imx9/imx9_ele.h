@@ -126,7 +126,7 @@ int imx9_ele_get_key(uint8_t *key, size_t key_size,
  *   buffer_size   -  Event buffer size
  *
  * Returned Value:
- *  Zero (OK) is returned if no envents success. A negated errno value
+ *  Zero (OK) is returned if no events success. A negated errno value
  *  is returned on failure. Positive value is number of events read.
  *
  ****************************************************************************/
@@ -143,7 +143,7 @@ int imx9_ele_get_events(uint32_t *buffer, size_t buffer_size);
  *   OEM close state. This operation is irreversible.
  *
  * Returned Value:
- *  Zero (OK) is returned if no envents success. A negated errno value
+ *  Zero (OK) is returned if no events success. A negated errno value
  *  is returned on failure.
  *
  ****************************************************************************/
