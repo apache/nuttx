@@ -28,6 +28,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
 
 #include <stdlib.h>
 
@@ -88,7 +89,7 @@
   (dynalloc) <= 0 ? (prealloc) : ((maxalloc) > 0 ? (maxalloc) : INT16_MAX)
 
 #define NET_BUFPOOL_DECLARE(pool, nodesize, prealloc, dynalloc, maxalloc) \
-  static char pool##_buffer[prealloc][nodesize]; \
+  static char pool##_buffer[prealloc][nodesize] aligned_data(sizeof(uintptr_t)); \
   static struct net_bufpool_s pool = \
     { \
       pool##_buffer[0], \
