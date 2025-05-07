@@ -22,9 +22,9 @@ The SAM4S Xplained features:
 PIO Muliplexing
 ===============
 
-===   =========================
+===== =========================
 PIN   FUNCTION
-===   =========================
+===== =========================
 PA0   SMC_A17                
 PA1   SMC_A18                
 PA2   J3.7 default           
@@ -104,7 +104,7 @@ PC28  SMC_A10
 PC29  SMC_A11
 PC30  SMC_A12
 PC31  SMC_A13
-===   =========================
+===== =========================
 
 Buttons and LEDs
 ================
@@ -209,7 +209,7 @@ PA10  TX_UART0  RX_3U  PA11
 ============== ==============
 
 SAM4S Xplained-specific Configuration Options
-============================================
+=============================================
 
 * ``CONFIG_ARCH``: Identifies the ``arch/`` subdirectory.  This should be set
   to:
