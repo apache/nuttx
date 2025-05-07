@@ -144,6 +144,8 @@ static void core1_boot(void)
   arm_initialize_stack();
 #endif
 
+  arm_fpuconfig();
+
   fifo_drain();
 
   /* Setup NVIC */
