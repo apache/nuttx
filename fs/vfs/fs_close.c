@@ -32,9 +32,11 @@
 #include <errno.h>
 #include <fcntl.h>
 
+#include <nuttx/cancelpt.h>
 #include <nuttx/fs/fs.h>
 
 #include "notify/notify.h"
+#include "sched/sched.h"
 #include "inode/inode.h"
 #include "vfs/lock.h"
 
@@ -175,5 +177,78 @@ int file_close(FAR struct file *filep)
       filep->f_inode = NULL;
     }
 
+  return ret;
+}
+
+/****************************************************************************
+ * Name: nx_close
+ *
+ * Description:
+ *   nx_close() is similar to the standard 'close' interface except that is
+ *   not a cancellation point and it does not modify the errno variable.
+ *
+ *   nx_close() is an internal NuttX interface and should not be called from
+ *   applications.
+ *
+ *   Close an inode (if open)
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned on
+ *   on any failure.
+ *
+ * Assumptions:
+ *   Caller holds the list mutex because the file descriptor will be
+ *   freed.
+ *
+ ****************************************************************************/
+
+int nx_close(int fd)
+{
+  return nx_close_from_tcb(this_task(), fd);
+}
+
+/****************************************************************************
+ * Name: close
+ *
+ * Description:
+ *   close() closes a file descriptor, so that it no longer refers to any
+ *   file and may be reused. Any record locks (see fcntl(2)) held on the file
+ *   it was associated with, and owned by the process, are removed
+ *   (regardless of the file descriptor that was used to obtain the lock).
+ *
+ *   If fd is the last copy of a particular file descriptor the resources
+ *   associated with it are freed; if the descriptor was the last reference
+ *   to a file which has been removed using unlink(2) the file is deleted.
+ *
+ * Input Parameters:
+ *   fd   file descriptor to close
+ *
+ * Returned Value:
+ *   0 on success; -1 on error with errno set appropriately.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+int close(int fd)
+{
+  int ret;
+
+#ifdef CONFIG_FDSAN
+  android_fdsan_exchange_owner_tag(fd, 0, 0);
+#endif
+
+  /* close() is a cancellation point */
+
+  enter_cancellation_point();
+
+  ret = nx_close(fd);
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      ret = ERROR;
+    }
+
+  leave_cancellation_point();
   return ret;
 }
