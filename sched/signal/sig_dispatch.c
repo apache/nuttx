@@ -542,7 +542,7 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
               wd_cancel(&stcb->waitdog);
             }
 
-          /* Remove the task from waitting list */
+          /* Remove the task from waiting list */
 
           dq_rem((FAR dq_entry_t *)stcb, list_waitingforsignal());
 
@@ -604,7 +604,7 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
               wd_cancel(&stcb->waitdog);
             }
 
-          /* Remove the task from waitting list */
+          /* Remove the task from waiting list */
 
           dq_rem((FAR dq_entry_t *)stcb, list_waitingforsignal());
 
@@ -664,7 +664,7 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
 #ifdef HAVE_GROUP_MEMBERS
           group_continue(stcb);
 #else
-          /* Remove the task from waitting list */
+          /* Remove the task from waiting list */
 
           dq_rem((FAR dq_entry_t *)stcb, list_stoppedtasks());
 
