@@ -7,6 +7,9 @@
 # clang doesn't -fsanitize=kernel-address
 -Darwin,sim:citest
 
+# macOS can compilation is not currently supported
+-Darwin,sim:can
+
 # Boards build by CMake
 CMake,sim:alsa
 CMake,sim:bluetooth
