@@ -278,10 +278,8 @@ void up_invalidate_dcache(uintptr_t start, uintptr_t end)
 void up_invalidate_dcache_all(void)
 {
 #ifdef CONFIG_ARCH_L2CACHE
-  irqstate_t flags = enter_critical_section();
   cp15_invalidate_dcache_all();
   l2cc_invalidate_all();
-  leave_critical_section(flags);
 #else
   cp15_invalidate_dcache_all();
 #endif
