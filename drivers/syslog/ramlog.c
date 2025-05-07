@@ -161,7 +161,7 @@ static const struct file_operations g_ramlogfops =
 #ifdef CONFIG_RAMLOG_SYSLOG
 #  ifdef RAMLOG_BUFFER_SECTION
 static uint32_t g_sysbuffer[CONFIG_RAMLOG_BUFSIZE / 4]
-                       locate_data(RAMLOG_BUFFER_SECTION);
+                       locate_data(CONFIG_RAMLOG_BUFFER_SECTION);
 #  else
 static uint32_t g_sysbuffer[CONFIG_RAMLOG_BUFSIZE / 4];
 #  endif
