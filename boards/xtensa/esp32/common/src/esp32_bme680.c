@@ -74,7 +74,7 @@ int board_bme680_initialize(int devno, int busno)
        * available controllers.
        */
 
-      ret = bme680_register(devno, i2c);
+      ret = bme680_register(devno, i2c, NULL);
       if (ret < 0)
         {
           snerr("ERROR: Error registering BME680 in I2C%d\n", busno);
