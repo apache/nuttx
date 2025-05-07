@@ -1028,6 +1028,27 @@ int file_dup(FAR struct file *filep, int minfd, int flags);
 int file_dup2(FAR struct file *filep1, FAR struct file *filep2);
 
 /****************************************************************************
+ * Name: nx_dup3_from_tcb
+ *
+ * Description:
+ *   nx_dup3_from_tcb() is similar to the standard 'dup3' interface
+ *   except that is not a cancellation point and it does not modify the
+ *   errno variable.
+ *
+ *   nx_dup3_from_tcb() is an internal NuttX interface and should not be
+ *   called from applications.
+ *
+ *   Clone a file descriptor to a specific descriptor number.
+ *
+ * Returned Value:
+ *   fd2 is returned on success; a negated errno value is return on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+int nx_dup3_from_tcb(FAR struct tcb_s *tcb, int fd1, int fd2, int flags);
+
+/****************************************************************************
  * Name: nx_dup2_from_tcb
  *
  * Description:
@@ -1046,7 +1067,7 @@ int file_dup2(FAR struct file *filep1, FAR struct file *filep2);
  *
  ****************************************************************************/
 
-int nx_dup2_from_tcb(FAR struct tcb_s *tcb, int fd1, int fd2);
+#define nx_dup2_from_tcb(tcb, fd1, fd2) nx_dup3_from_tcb(tcb, fd1, fd2, 0)
 
 /****************************************************************************
  * Name: nx_dup2
