@@ -40,7 +40,8 @@
  ****************************************************************************/
 
 #ifdef SEGGER_RTT_BUFFER_SECTION
-#  define SERIAL_RTT_BUFFER_SECTION locate_data(SEGGER_RTT_BUFFER_SECTION)
+#  define SERIAL_RTT_BUFFER_SECTION \
+    locate_data(CONFIG_SEGGER_RTT_BUFFER_SECTION)
 #else
 #  define SERIAL_RTT_BUFFER_SECTION
 #endif

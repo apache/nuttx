@@ -59,7 +59,8 @@
  */
 
 #ifdef IOB_SECTION
-static uint8_t g_iob_buffer[IOB_BUFFER_SIZE] locate_data(IOB_SECTION);
+static uint8_t g_iob_buffer[IOB_BUFFER_SIZE]
+  locate_data(CONFIG_IOB_SECTION);
 #else
 static uint8_t g_iob_buffer[IOB_BUFFER_SIZE];
 #endif
