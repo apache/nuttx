@@ -281,7 +281,7 @@ pid_t nxsched_waitpid(pid_t pid, int *stat_loc, int options)
 
 #else /* CONFIG_SCHED_CHILD_STATUS */
 
-  if (rtcb->group->tg_nchildren == 0)
+  if (atomic_read(&rtcb->group->tg_nchildren) == 0)
     {
       /* There are no children */
 
@@ -406,7 +406,7 @@ pid_t nxsched_waitpid(pid_t pid, int *stat_loc, int options)
        * instead).
        */
 
-      if (rtcb->group->tg_nchildren == 0 ||
+      if (atomic_read(&rtcb->group->tg_nchildren) == 0 ||
           (pid != INVALID_PROCESS_ID && nxsig_kill(pid, 0) < 0))
         {
           /* We know that the child task was running okay when we started,

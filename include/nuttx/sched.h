@@ -481,7 +481,7 @@ struct task_group_s
 #ifdef CONFIG_SCHED_CHILD_STATUS
   FAR struct child_status_s *tg_children; /* Head of a list of child status     */
 #else
-  uint16_t tg_nchildren;                  /* This is the number active children */
+  atomic_t tg_nchildren;                  /* This is the number active children */
 #endif
   /* Group exit status ******************************************************/
 

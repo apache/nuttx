@@ -180,10 +180,15 @@ int task_reparent(pid_t ppid, pid_t chpid)
 #else /* CONFIG_SCHED_CHILD_STATUS */
   /* Child task exit status is not retained */
 
-  DEBUGASSERT(ogrp->tg_nchildren > 0);
+  DEBUGASSERT(atomic_read(&ogrp->tg_nchildren) > 0);
 
-  ogrp->tg_nchildren--;  /* The original parent now has one few children */
-  pgrp->tg_nchildren++;  /* The new parent has one additional child */
+  /* The original parent now has one few children */
+
+  atomic_fetch_sub(&ogrp->tg_nchildren, 1);
+
+  /* The new parent has one additional child */
+
+  atomic_fetch_add(&pgrp->tg_nchildren, 1);
   ret = OK;
 
 #endif /* CONFIG_SCHED_CHILD_STATUS */
@@ -296,10 +301,16 @@ int task_reparent(pid_t ppid, pid_t chpid)
 #else /* CONFIG_SCHED_CHILD_STATUS */
   /* Child task exit status is not retained */
 
-  DEBUGASSERT(otcb->group != NULL && otcb->group->tg_nchildren > 0);
+  DEBUGASSERT(otcb->group != NULL &&
+              atomic_read(&otcb->group->tg_nchildren) > 0);
 
-  otcb->group->tg_nchildren--;  /* The original parent now has one few children */
-  ptcb->group->tg_nchildren++;  /* The new parent has one additional child */
+  /* The original parent now has one few children */
+
+  atomic_fetch_sub(&otcb->group->tg_nchildren, 1);
+
+  /* The new parent has one additional child */
+
+  atomic_fetch_add(&ptcb->group->tg_nchildren, 1);
   ret = OK;
 
 #endif /* CONFIG_SCHED_CHILD_STATUS */

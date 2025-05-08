@@ -81,7 +81,7 @@ static void exec_swap(FAR struct tcb_s *ptcb, FAR struct tcb_s *chtcb)
 #  ifdef CONFIG_SCHED_CHILD_STATUS
   FAR struct child_status_s *tg_children;
 #  else
-  uint16_t   tg_nchildren;
+  uint32_t   nchildren;
 #  endif
 #endif
 
@@ -123,9 +123,10 @@ static void exec_swap(FAR struct tcb_s *ptcb, FAR struct tcb_s *chtcb)
   chtcb->group->tg_children = ptcb->group->tg_children;
   ptcb->group->tg_children = tg_children;
 #  else
-  tg_nchildren = chtcb->group->tg_nchildren;
-  chtcb->group->tg_nchildren = ptcb->group->tg_nchildren;
-  ptcb->group->tg_nchildren = tg_nchildren;
+  nchildren = atomic_read(&chtcb->group->tg_nchildren);
+  atomic_set(&chtcb->group->tg_nchildren,
+             atomic_read(&ptcb->group->tg_nchildren));
+  atomic_set(&ptcb->group->tg_nchildren, nchildren);
 #  endif
 #endif
 

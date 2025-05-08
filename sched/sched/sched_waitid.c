@@ -255,7 +255,7 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
 #else
   /* Child status is not retained. */
 
-  if (rtcb->group->tg_nchildren == 0)
+  if (atomic_read(&rtcb->group->tg_nchildren) == 0)
     {
       /* There are no children */
 
@@ -355,7 +355,7 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
        * instead).
        */
 
-      if (rtcb->group->tg_nchildren == 0 ||
+      if (atomic_read(&rtcb->group->tg_nchildren) == 0 ||
           (idtype == P_PID && (ret = nxsig_kill((pid_t)id, 0)) < 0))
         {
           /* We know that the child task was running okay we started,

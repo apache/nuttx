@@ -325,8 +325,7 @@ static inline void nxtask_save_parent(FAR struct tcb_s *tcb, uint8_t ttype)
        * child tasks created.
        */
 
-      DEBUGASSERT(rtcb->group->tg_nchildren < UINT16_MAX);
-      rtcb->group->tg_nchildren++;
+      atomic64_fetch_add(&rtcb->group->tg_nchildren, 1);
 
 #endif /* CONFIG_SCHED_CHILD_STATUS */
     }
