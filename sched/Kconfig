@@ -1179,7 +1179,7 @@ config SCHED_PROFILE_TICKSPERSEC
 	int "Profile sampling rate"
 	default 1000
 	---help---
-		This is the frequency at which the profil functon will sample the
+		This is the frequency at which the profil function will sample the
 		running program. The default is 1000Hz.
 
 menuconfig SCHED_INSTRUMENTATION
@@ -2000,11 +2000,11 @@ config SCHED_EVENTS
 		events to event objects.
 
 config ASSERT_PAUSE_CPU_TIMEOUT
-	int "Timeout in milisecond to pause another CPU when assert"
+	int "Timeout in millisecond to pause another CPU when assert"
 	default 2000
 	depends on SMP
 	---help---
-		Timeout in milisecond to pause another CPU when assert. Only available
+		Timeout in millisecond to pause another CPU when assert. Only available
 		when SMP is enabled.
 		Enable to support perf events.
 
