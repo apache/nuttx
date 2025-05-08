@@ -1788,10 +1788,19 @@ static int tmpfs_mmap(FAR struct file *filep, FAR struct mm_map_entry_s *map)
   if (map->offset >= 0 && map->offset < tfo->tfo_size &&
       map->length && map->offset + map->length <= tfo->tfo_size)
     {
+      FAR struct mm_map_s *mm = get_current_mm();
       map->vaddr = tfo->tfo_data + map->offset;
-      map->priv.p = tfo;
-      map->munmap = tmpfs_unmap;
-      ret = mm_map_add(get_current_mm(), map);
+
+      if (mm_map_find(mm, map->vaddr, map->length))
+        {
+          ret = 0;
+        }
+      else
+        {
+          map->priv.p = tfo;
+          map->munmap = tmpfs_unmap;
+          ret = mm_map_add(mm, map);
+        }
 
       if (ret >= 0)
         {
