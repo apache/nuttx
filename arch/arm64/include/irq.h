@@ -424,7 +424,7 @@ static inline_function void up_irq_restore(irqstate_t flags)
 
 #define write_sysreg(__val, reg)                    \
   ({                                                \
-    __asm__ volatile ("msr " STRINGIFY(reg) ", %0"  \
+    __asm__ volatile ("msr " STRINGIFY(reg) ", %x0"  \
                       : : "r" (__val) : "memory");  \
   })
 
