@@ -85,17 +85,6 @@
     __asm__ volatile ("ic " op ", %0" : : "r" (val) : "memory"); \
   })
 
-/* IC IALLUIS, Instruction Cache Invalidate All to PoU, Inner Shareable
- * Purpose
- * Invalidate all instruction caches in the Inner Shareable domain of
- * the PE executing the instruction to the Point of Unification.
- */
-
-static inline void __ic_iallu(void)
-{
-  __asm__ volatile ("ic  iallu" : : : "memory");
-}
-
 /* IC IALLU, Instruction Cache Invalidate All to PoU
  * Purpose
  * Invalidate all instruction caches of the PE executing
