@@ -13,8 +13,8 @@ Features
 Configurations
 ==============
 
-hello
------
+nsh
+---
 
 Basic testing configuration
 
