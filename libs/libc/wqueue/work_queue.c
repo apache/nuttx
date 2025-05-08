@@ -90,16 +90,6 @@ static int work_qqueue(FAR struct usr_wqueue_s *wqueue,
   work->arg    = arg;             /* Callback argument */
   work->qtime  = clock() + delay; /* Delay until work performed */
 
-  /* delay+1 is to prevent the insufficient sleep time if we are
-   * currently near the boundary to the next tick.
-   * | current_tick | current_tick + 1 | current_tick + 2 | .... |
-   * |           ^ Here we get the current tick
-   * In this case we delay 1 tick, timer will be triggered at
-   * current_tick + 1, which is not enough for at least 1 tick.
-   */
-
-  work->qtime += 1;
-
   /* Insert the work into the wait queue sorted by the expired time. */
 
   head = list_first_entry(&wqueue->q, struct work_s, node);
