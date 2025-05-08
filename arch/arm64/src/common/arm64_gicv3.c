@@ -118,20 +118,6 @@ static inline unsigned long gic_get_rdist(void)
   return g_gic_rdists[this_cpu()];
 }
 
-static inline uint32_t read_gicd_wait_rwp(void)
-{
-  uint32_t value;
-
-  value = getreg32(GICD_CTLR);
-
-  while (value & BIT(GICD_CTLR_RWP))
-    {
-      value = getreg32(GICD_CTLR);
-    }
-
-  return value;
-}
-
 /* Wait for register write pending
  * TODO: add timed wait
  */
