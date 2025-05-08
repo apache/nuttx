@@ -726,8 +726,13 @@ mempool_info_task(FAR struct mempool_s *pool,
     }
   else if (task->pid == PID_MM_ALLOC)
     {
-      info.aordblks += pool->nalloc;
-      info.uordblks += pool->nalloc * blocksize;
+      irqstate_t flags = spin_lock_irqsave(&pool->lock);
+      size_t nalloc = pool->nalloc;
+
+      spin_unlock_irqrestore(&pool->lock, flags);
+
+      info.aordblks += nalloc;
+      info.uordblks += nalloc * blocksize;
     }
 #if CONFIG_MM_BACKTRACE >= 0
   else
