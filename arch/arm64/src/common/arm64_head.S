@@ -392,7 +392,7 @@ arm64_data_initialize:
     /* Zero BSS */
 
     adrp    x0, .Linitparms
-    add     x0, x0, .Linitparms
+    add     x0, x0, #:lo12:.Linitparms
     ldp     x1, x2, [x0], #8
 
     mov     x0, #0
