@@ -410,7 +410,7 @@ static clock_t nxsched_timer_start(clock_t ticks, clock_t interval)
       /* Normally, timer event cannot triggered on exact time
        * due to the existence of interrupt latency.
        * Assuming that the interrupt latency is distributed within
-       * [Best-Case Execution Time, Worst-Case Excution Time],
+       * [Best-Case Execution Time, Worst-Case Execution Time],
        * we can set the timer adjustment value to the BCET to
        * reduce the latency.
        * After the adjustment, the timer interrupt latency will be

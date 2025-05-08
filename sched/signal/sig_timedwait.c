@@ -113,7 +113,7 @@ static void nxsig_timeout(wdparm_t arg)
 #endif
         }
 
-      /* Remove the task from waitting list */
+      /* Remove the task from waiting list */
 
       dq_rem((FAR dq_entry_t *)wtcb, list_waitingforsignal());
 
@@ -183,7 +183,7 @@ void nxsig_wait_irq(FAR struct tcb_s *wtcb, int errcode)
 #endif
         }
 
-      /* Remove the task from waitting list */
+      /* Remove the task from waiting list */
 
       dq_rem((FAR dq_entry_t *)wtcb, list_waitingforsignal());
 
