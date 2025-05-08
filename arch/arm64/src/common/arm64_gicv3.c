@@ -29,6 +29,7 @@
 #include <assert.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/compiler.h>
 #include <arch/barriers.h>
 #include <arch/irq.h>
 #include <arch/chip/chip.h>
@@ -87,7 +88,8 @@ static unsigned long g_gic_rdists[CONFIG_SMP_NCPUS];
  * Private Functions
  ***************************************************************************/
 
-static inline void sys_set_bit(unsigned long addr, unsigned int bit)
+unused_code static inline void sys_set_bit(unsigned long addr,
+                                           unsigned int bit)
 {
   uint32_t temp;
 
@@ -105,7 +107,8 @@ static inline void sys_clear_bit(unsigned long addr, unsigned int bit)
   putreg32(temp, addr);
 }
 
-static inline int sys_test_bit(unsigned long addr, unsigned int bit)
+unused_code static inline int sys_test_bit(unsigned long addr,
+                                           unsigned int bit)
 {
   uint32_t temp;
 
