@@ -282,6 +282,14 @@ config VIDEO_SCENE_TEXT
 	default y
 	---help---
 		Enable text scene
+
+config VIDEO_COMPAT_OLD_APIS
+	bool "Use old API symbols for keeping compatibility"
+	default n
+	---help---
+		The video_initialize() is re-named capture_initialize() in newest.
+		This options restore it to older one.
+
 endif
 
 config VIDEO_MAX7456

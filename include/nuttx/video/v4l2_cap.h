@@ -26,8 +26,14 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
 #include <nuttx/video/imgdata.h>
 #include <nuttx/video/imgsensor.h>
+
+#ifdef CONFIG_VIDEO_COMPAT_OLD_APIS
+#  define capture_initialize   video_initialize
+#  define capture_uninitialize video_uninitialize
+#endif
 
 #ifdef __cplusplus
 extern "C"
