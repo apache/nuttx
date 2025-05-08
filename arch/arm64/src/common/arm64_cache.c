@@ -77,7 +77,7 @@
 
 #define dc_ops(op, val)                                          \
   ({                                                             \
-    __asm__ volatile ("dc " op ", %0" : : "r" (val) : "memory"); \
+    __asm__ volatile ("dc " op ", %x0" : : "r" (val) : "memory"); \
   })
 
 #define ic_ops(op, val)                                          \
