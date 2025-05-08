@@ -450,9 +450,19 @@ static void rpmsg_port_rx_callback(FAR struct rpmsg_port_s *port,
 
   if (ept != NULL)
     {
+      metal_mutex_acquire(&rdev->lock);
       if (ept->dest_addr == RPMSG_ADDR_ANY)
         {
           ept->dest_addr = rphdr->src;
+          metal_mutex_release(&rdev->lock);
+          if (ept->ns_bound_cb != NULL)
+            {
+              ept->ns_bound_cb(ept);
+            }
+        }
+      else
+        {
+          metal_mutex_release(&rdev->lock);
         }
 
       rpmsg_trace(ept->name, false, rphdr, len,
