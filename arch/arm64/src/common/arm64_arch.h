@@ -491,7 +491,7 @@ void arm64_cpu_enable(void);
 #ifdef CONFIG_SMP
 uint64_t arm64_get_mpid(int cpu);
 #else
-#  define arm64_get_mpid(cpu) (GET_MPIDR() & MPIDR_ID_MASK)
+#  define arm64_get_mpid(cpu) ((void)(cpu), (GET_MPIDR() & MPIDR_ID_MASK))
 #endif /* CONFIG_SMP */
 
 /****************************************************************************
