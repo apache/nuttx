@@ -377,11 +377,11 @@ int up_addrenv_mprot(arch_addrenv_t *addrenv, uintptr_t addr, size_t len,
 
 int up_addrenv_ustackswitch(struct tcb_s *tcb)
 {
-  struct tls_info_s *tls = nxsched_get_tls(tcb);
   struct mpu_region_s conf;
 
   conf.base = (uintptr_t)tcb->stack_alloc_ptr;
-  conf.size = tcb->adj_stack_size + tls->tl_size;
+  conf.size = (uintptr_t)tcb->stack_base_ptr + tcb->adj_stack_size -
+              (uintptr_t)tcb->stack_alloc_ptr;
   conf.flags[PSW_PRS_KERNEL_SET] = REGION_TYPE_DATA | REGION_ATTR_RW;
   conf.flags[PSW_PRS_USER_SET] = REGION_TYPE_DATA | REGION_ATTR_RW;
 
@@ -390,6 +390,7 @@ int up_addrenv_ustackswitch(struct tcb_s *tcb)
       g_addrenv_stack_region = mpu_allocdataregion();
     }
 
+  mpu_control(false);
   mpu_modify_region(PSW_PRS_KERNEL_SET, g_addrenv_stack_region,
                     conf.base, conf.size,
                     conf.flags[PSW_PRS_KERNEL_SET]);
@@ -398,7 +399,7 @@ int up_addrenv_ustackswitch(struct tcb_s *tcb)
                     conf.base, conf.size,
                     conf.flags[PSW_PRS_USER_SET]);
 #endif
-
+  mpu_control(true);
   return OK;
 }
 
@@ -424,11 +425,11 @@ int up_addrenv_ustackswitch(struct tcb_s *tcb)
 
 int up_addrenv_kstackswitch(struct tcb_s *tcb)
 {
-  struct tls_info_s *tls = nxsched_get_tls(tcb);
   struct mpu_region_s conf;
 
   conf.base = (uintptr_t)tcb->stack_alloc_ptr;
-  conf.size = tcb->adj_stack_size + tls->tl_size;
+  conf.size = (uintptr_t)tcb->stack_base_ptr + tcb->adj_stack_size -
+              (uintptr_t)tcb->stack_alloc_ptr;
   conf.flags[PSW_PRS_KERNEL_SET] = REGION_TYPE_DATA | REGION_ATTR_RW;
   conf.flags[PSW_PRS_USER_SET] = REGION_TYPE_DATA | REGION_ATTR_RO;
 
@@ -437,6 +438,7 @@ int up_addrenv_kstackswitch(struct tcb_s *tcb)
       g_addrenv_stack_region = mpu_allocdataregion();
     }
 
+  mpu_control(false);
   mpu_modify_region(PSW_PRS_KERNEL_SET, g_addrenv_stack_region,
                     conf.base, conf.size,
                     conf.flags[PSW_PRS_KERNEL_SET]);
@@ -445,7 +447,7 @@ int up_addrenv_kstackswitch(struct tcb_s *tcb)
                     conf.base, conf.size,
                     conf.flags[PSW_PRS_USER_SET]);
 #endif
-
+  mpu_control(true);
   return OK;
 }
 #endif
