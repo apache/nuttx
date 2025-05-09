@@ -63,6 +63,8 @@ int file_dup(FAR struct file *filep, int minfd, int flags)
 
 #ifdef CONFIG_FDCHECK
   uint8_t f_tag_fdcheck; /* File owner fdcheck tag, init to 0 */
+
+  minfd = fdcheck_restore(minfd);
 #endif
 
   fd2 = file_allocate(g_root_inode, 0, 0, NULL, minfd, true);
