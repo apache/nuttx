@@ -1554,7 +1554,7 @@ void mmu_l1_map_regions(const struct section_mapping_s *mappings,
  * Name: mmu_l1_map_page
  *
  * Description:
- *   Set level 1 page entrie in order to map a region
+ *   Set level 1 page entry in order to map a region
  *   array of memory.
  *
  * Input Parameters:
@@ -1588,7 +1588,7 @@ void mmu_l1_map_pages(const struct section_mapping_s *mappings,
  * Name: mmu_l2_map_page
  *
  * Description:
- *   Set level 2 page entrie in order to map a region
+ *   Set level 2 page entry in order to map a region
  *   array of memory.
  *
  * Input Parameters:
