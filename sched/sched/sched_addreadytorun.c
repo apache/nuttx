@@ -43,7 +43,7 @@
  * Description:
  *   This function adds a TCB to the ready to run list.  If the currently
  *   active task has preemption disabled and the new TCB would cause this
- *   task to be pre-empted, the new task is added to the g_pendingtasks list
+ *   task to be preempted, the new task is added to the g_pendingtasks list
  *   instead.  The pending tasks will be made ready-to-run when preemption is
  *   unlocked.
  *
@@ -73,7 +73,7 @@ bool nxsched_add_readytorun(FAR struct tcb_s *btcb)
 
   /* Check if pre-emption is disabled for the current running task and if
    * the new ready-to-run task would cause the current running task to be
-   * pre-empted.  NOTE that IRQs disabled implies that pre-emption is
+   * preempted.  NOTE that IRQs disabled implies that pre-emption is
    * also disabled.
    */
 
@@ -129,7 +129,7 @@ bool nxsched_add_readytorun(FAR struct tcb_s *btcb)
  *      assigned to a CPU.
  *
  *   If the currently active task has preemption disabled and the new TCB
- *   would cause this task to be pre-empted, the new task is added to the
+ *   would cause this task to be preempted, the new task is added to the
  *   g_pendingtasks list instead.  The pending tasks will be made
  *   ready-to-run when preemption isunlocked.
  *
