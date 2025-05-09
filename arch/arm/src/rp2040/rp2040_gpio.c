@@ -302,7 +302,7 @@ int rp2040_gpio_irq_attach(uint32_t gpio, uint32_t intrmode,
     }
 
   DEBUGASSERT(gpio < RP2040_GPIO_NUM);
-  DEBUGASSERT(intrmode <= RP2040_GPIO_INTR_EDGE_HIGH);
+  DEBUGASSERT(intrmode <= 0xf);
 
   /* Save handler information */
 
