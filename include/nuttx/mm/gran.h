@@ -201,6 +201,29 @@ FAR void *gran_reserve(GRAN_HANDLE handle, uintptr_t start, size_t size);
 FAR void *gran_alloc(GRAN_HANDLE handle, size_t size);
 
 /****************************************************************************
+ * Name: gran_alloc_align
+ *
+ * Description:
+ *   Allocate memory from the granule heap.
+ *
+ *   NOTE: The current implementation also restricts the maximum allocation
+ *   size to 32 granules.  That restriction could be eliminated with some
+ *   additional coding effort.
+ *
+ * Input Parameters:
+ *   handle - The handle previously returned by gran_initialize
+ *   size   - The size of the memory region to allocate.
+ *   align  - The size of the memory region to align.
+ *
+ * Returned Value:
+ *   On success, a non-NULL pointer to the allocated memory is returned;
+ *   NULL is returned on failure.
+ *
+ ****************************************************************************/
+
+FAR void *gran_alloc_align(GRAN_HANDLE handle, size_t size, size_t align);
+
+/****************************************************************************
  * Name: gran_free
  *
  * Description:
