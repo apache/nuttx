@@ -47,7 +47,7 @@ int vfscanf(FAR FILE *stream, FAR const IPTR char *fmt, va_list ap)
       lib_stdinstream(&stdinstream, stream);
 
       /* Hold the stream semaphore throughout the lib_vscanf call so that
-       * this thread can get its entire message out before being pre-empted
+       * this thread can get its entire message out before being preempted
        * by the next thread.
        */
 

@@ -43,7 +43,7 @@ int vfprintf(FAR FILE *stream, FAR const IPTR char *fmt, va_list ap)
 
   /* Hold the stream semaphore throughout the lib_vsprintf
    * call so that this thread can get its entire message out
-   * before being pre-empted by the next thread.
+   * before being preempted by the next thread.
    */
 
   flockfile(stream);

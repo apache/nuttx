@@ -129,7 +129,7 @@ ssize_t nxterm_read(FAR struct file *filep, FAR char *buffer, size_t len)
           priv->nwaiters++;
           nxmutex_unlock(&priv->lock);
 
-          /* We may now be pre-empted!  But that should be okay because we
+          /* We may now be preempted!  But that should be okay because we
            * have already incremented nwaiters.  Pre-emption is disabled
            * but will be re-enabled while we are waiting.
            */
