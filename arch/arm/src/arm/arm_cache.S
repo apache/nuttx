@@ -69,9 +69,9 @@
  * Wait for interrupt SBZ                              MCR p15, 0, <Rd>, c7, c0, 4
  */
 
-/* Esure coherency between the Icache and the Dcache in the region described
- * by r0=start and r1=end.  Cleans the corresponding D-cache lines and invalidates
- * the corresponding I-Cache lines.
+/* Ensure coherency between the Icache and the Dcache in the region described
+ * by r0=start and r1=end.  Cleans the corresponding Dcache lines and invalidates
+ * the corresponding ICache lines.
  */
 
 	.globl	up_get_dcache_linesize
