@@ -903,7 +903,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   irqstate_t flags;
 
-  flags = spin_lock_irqsave(&priv->lock);
+  flags = enter_critical_section();
   if (enable)
     {
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
@@ -914,13 +914,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
        * interrupts disabled (note this may recurse).
        */
 
-#  ifdef CONFIG_SMP
-      spin_unlock_irqrestore(&priv->lock, flags);
-#  endif
       uart_xmitchars(dev);
-#  ifdef CONFIG_SMP
-      flags = spin_lock_irqsave(&priv->lock);
-#  endif
 #endif
     }
   else
@@ -928,7 +922,8 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
       priv->ier &= ~RP23XX_UART_UARTICR_TXIC;
       up_serialout(priv, RP23XX_UART_UARTIMSC_OFFSET, priv->ier);
     }
-  spin_unlock_irqrestore(&priv->lock, flags);
+
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
