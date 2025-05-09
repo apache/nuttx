@@ -752,7 +752,7 @@ static int sensor_open(FAR struct file *filep)
   user->state.esize = upper->state.esize;
   nxsem_init(&user->buffersem, 0, 0);
   list_add_tail(&upper->userlist, &user->node);
-  sensor_update_nonwakeup(filep, upper, user, false);
+  sensor_update_nonwakeup(filep, upper, user, true);
 
   /* The new user generation, notify to other users */
 
@@ -784,7 +784,7 @@ static int sensor_close(FAR struct file *filep)
 
   sensor_update_interval(filep, upper, user, UINT32_MAX);
   sensor_update_latency(filep, upper, user, UINT32_MAX);
-  sensor_update_nonwakeup(filep, upper, user, false);
+  sensor_update_nonwakeup(filep, upper, user, true);
 
   nxrmutex_lock(&upper->lock);
 
