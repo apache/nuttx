@@ -663,7 +663,7 @@ static int optee_ioctl_open_session(FAR struct optee_priv_data *priv,
 
   if (!optee_is_valid_range(buf, sizeof(*buf)))
     {
-      return -EINVAL;
+      return -EFAULT;
     }
 
   if (buf->buf_len > TEE_MAX_ARG_SIZE ||
@@ -676,7 +676,7 @@ static int optee_ioctl_open_session(FAR struct optee_priv_data *priv,
 
   if (!optee_is_valid_range(arg, buf->buf_len))
     {
-      return -EINVAL;
+      return -EFAULT;
     }
 
   if (sizeof(*arg) + TEE_IOCTL_PARAM_SIZE(arg->num_params) !=
@@ -757,7 +757,7 @@ static int optee_ioctl_invoke(FAR struct optee_priv_data *priv,
 
   if (!optee_is_valid_range(buf, sizeof(*buf)))
     {
-      return -EINVAL;
+      return -EFAULT;
     }
 
   if (buf->buf_len > TEE_MAX_ARG_SIZE ||
@@ -770,7 +770,7 @@ static int optee_ioctl_invoke(FAR struct optee_priv_data *priv,
 
   if (!optee_is_valid_range(arg, buf->buf_len))
     {
-      return -EINVAL;
+      return -EFAULT;
     }
 
   if (sizeof(*arg) + TEE_IOCTL_PARAM_SIZE(arg->num_params) !=
@@ -830,7 +830,7 @@ optee_ioctl_close_session(FAR struct optee_priv_data *priv,
 {
   if (!optee_is_valid_range(arg, sizeof(*arg)))
     {
-      return -EINVAL;
+      return -EFAULT;
     }
 
   return optee_close_session(priv, arg->session);
@@ -854,7 +854,7 @@ static int optee_ioctl_cancel(FAR struct optee_priv_data *priv,
 
   if (!optee_is_valid_range(arg, sizeof(*arg)))
     {
-      return -EINVAL;
+      return -EFAULT;
     }
 
   optee_msg_alloc(priv, 0, msg);
@@ -879,7 +879,7 @@ optee_ioctl_shm_alloc(FAR struct tee_ioctl_shm_alloc_data *data)
 
   if (!optee_is_valid_range(data, sizeof(*data)))
     {
-      return -EINVAL;
+      return -EFAULT;
     }
 
   memfd = memfd_create(OPTEE_SERVER_PATH, O_CREAT | O_CLOEXEC);
@@ -916,13 +916,13 @@ optee_ioctl_shm_register(FAR struct optee_priv_data *priv,
 
   if (!optee_is_valid_range(rdata, sizeof(*rdata)))
     {
-      return -EACCES;
+      return -EFAULT;
     }
 
   if (!optee_is_valid_range((FAR void *)(uintptr_t)
                             rdata->addr, rdata->length))
     {
-      return -EACCES;
+      return -EFAULT;
     }
 
   if (rdata->flags & TEE_SHM_ALLOC)
