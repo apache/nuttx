@@ -331,7 +331,7 @@ int timer_settime(timer_t timerid, int flags,
       timer->pt_expected = clock_systime_ticks() + delay;
     }
 
-  /* delay+1 is to prevent the insufficient sleep time if we are
+  /* This is to prevent the insufficient sleep time if we are
    * currently near the boundary to the next tick.
    * | current_tick | current_tick + 1 | current_tick + 2 | .... |
    * |           ^ Here we get the current tick

@@ -395,7 +395,7 @@ int oneshot_tick_current(FAR struct oneshot_lowerhalf_s *lower,
     }
 
   ret = lower->ops->current(lower, &ts);
-  *ticks = clock_time2ticks(&ts);
+  *ticks = clock_time2ticks_floor(&ts);
 
   return ret;
 }

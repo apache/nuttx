@@ -353,6 +353,10 @@ EXTERN volatile clock_t g_system_ticks;
 #define clock_time2ticks(ts) \
   ((clock_t)(ts)->tv_sec * TICK_PER_SEC + NSEC2TICK((uint32_t)(ts)->tv_nsec))
 
+#define clock_time2ticks_floor(ts) \
+  ((clock_t)(ts)->tv_sec * TICK_PER_SEC + \
+   div_const((uint32_t)(ts)->tv_nsec, NSEC_PER_TICK))
+
 #define clock_usec2time(ts, usec) \
   do \
     { \
