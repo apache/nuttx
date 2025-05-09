@@ -31,6 +31,7 @@
 #include <debug.h>
 #include <errno.h>
 
+#include <nuttx/drivers/block_cache.h>
 #include <nuttx/sdio.h>
 #include <nuttx/mmcsd.h>
 
@@ -127,7 +128,22 @@ int litex_sdio_initialize(void)
 
   sdio_mediachange(sdio_dev, litex_sdio_get_card_detect());
 
-  return OK;
+#if defined(CONFIG_LITEX_SDIO_USE_CACHE)
+  ret = block_cache_initialize(
+      "/dev/mmcsd0",
+      CONFIG_LITEX_SDIO_MOUNT_BLKDEV,
+      CONFIG_LITEX_SDIO_CACHE_WIDTH,          /* cache width */
+      CONFIG_LITEX_SDIO_CACHE_COUNT,          /* cache sections */
+      CONFIG_LITEX_SDIO_CACHE_MULTIPLIER      /* block multiple. */
+  );
+
+  if (ret != OK)
+    {
+      ferr("ERROR: Failed to bind the buffered MMC/SD driver: %d\n", ret);
+    }
+#endif
+
+  return ret;
 }
 
 #endif /* HAVE_SDMMC */
