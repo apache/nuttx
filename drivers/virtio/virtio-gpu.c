@@ -560,7 +560,7 @@ static int virtio_gpu_probe(FAR struct virtio_device *vdev)
       goto err_init_fb;
     }
 
-  ent.addr = (uintptr_t)priv->fbmem;
+  ent.addr = up_addrenv_va_to_pa(priv->fbmem);
   ent.length = priv->fblen;
   ret = virtio_gpu_attach_backing(priv, 1, &ent, 1);
   if (ret < 0)
