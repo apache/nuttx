@@ -1094,6 +1094,7 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
           if (upper->state.nsubscribers == 0)
             {
+              sminfo(upper->name, "sensor not activated");
               return -EINVAL;
             }
 
@@ -1108,6 +1109,7 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               ret = lower->ops->flush(lower, filep);
               if (ret >= 0)
                 {
+                  sminfo(upper->name, "flushing start");
                   user->flushing = true;
                 }
             }
@@ -1130,6 +1132,8 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
                 {
                   ret = 0;
                 }
+
+              sminfo(upper->name, "flush complete with result:%d", ret);
             }
         }
         break;
@@ -1239,6 +1243,7 @@ static ssize_t sensor_push_event(FAR void *priv, FAR const void *data,
               user->flushing = false;
               user->event |= SENSOR_EVENT_FLUSH_COMPLETE;
               sensor_pollnotify_one(user, POLLPRI, user->role);
+              sminfo(upper->name, "flush complete, poll notify");
             }
         }
 

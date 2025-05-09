@@ -806,7 +806,9 @@ static int sensor_rpmsg_flush(FAR struct sensor_lowerhalf_s *lower,
     }
   else
     {
+      sminfo(dev->name, "rpmsg flushing");
       ret = sensor_rpmsg_ioctl(dev, SNIOC_FLUSH, 0, 0, true);
+      sminfo(dev->name, "rpmsg flush send done, ret:%d", ret);
     }
 
   return ret;
@@ -1366,6 +1368,7 @@ static int sensor_rpmsg_ioctl_handler(FAR struct rpmsg_endpoint *ept,
           msg->result = file_ioctl(&stub->file, msg->request, arg);
           if (msg->result >= 0 && msg->request == SNIOC_FLUSH)
             {
+              sminfo(dev->name, "receiving flush request");
               stub->flushing = true;
             }
 
