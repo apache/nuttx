@@ -416,23 +416,7 @@ int wd_start(FAR struct wdog_s *wdog, sclock_t delay,
       return -EINVAL;
     }
 
-  /* Calculate delay+1, forcing the delay into a range that we can handle.
-   *
-   * NOTE that one is added to the delay.  This is correct and must not be
-   * changed:  The contract for the use wdog_start is that the wdog will
-   * delay FOR AT LEAST as long as requested, but may delay longer due to
-   * variety of factors.  The wdog logic has no knowledge of the the phase
-   * of the system timer when it is started:  The next timer interrupt may
-   * occur immediately or may be delayed for almost a full cycle. In order
-   * to meet the contract requirement, the requested time is also always
-   * incremented by one so that the delay is always at least as long as
-   * requested.
-   *
-   * There is extensive documentation about this time issue elsewhere.
-   */
-
-  return wd_start_abstick(wdog, clock_systime_ticks() + delay + 1,
-                          wdentry, arg);
+  return wd_start_abstick(wdog, clock_delay2abstick(delay), wdentry, arg);
 }
 
 /****************************************************************************
