@@ -64,8 +64,8 @@ config IMX9_HAVE_ATF_FIRMWARE
 	select ARM64_HAVE_PSCI
 	---help---
 		Configure this n if using Nuttx bootloader that does not
-		implemet EL3 services, by default this is y when using uboot as
-		a booloader
+		implement EL3 services, by default this is y when using uboot as
+		a bootloader
 
 config IMX9_BOOTLOADER
 	bool "Bootloader"
@@ -90,6 +90,30 @@ config IMX9_DDR_TRAINING
 	default n
 	---help---
 		Perform DDR training to prepare the external memory for use.
+
+config IMX9_ROMAPI
+	bool "ROM API functionality"
+	depends on IMX9_BOOTLOADER
+	default n
+	---help---
+		Enable wrappers that call the on‑chip ROM API for image download
+		and boot‑information queries. Required for AHAB secure boot
+		unless an alternative generic device loader is supplied.
+
+config IMX9_AHAB_BOOT
+	bool "Support i.MX9 AHAB features"
+	depends on IMX9_BOOTLOADER
+	select IMX9_ROMAPI  # AHAB needs a loader; ROMAPI is the default
+	default n
+	---help---
+		Enable AHAB functionality
+
+config IMX_AHAB_CNTR_ADDR
+	hex "Load address of the AHAB container in RAM"
+	depends on IMX9_AHAB_BOOT
+	default 0x80000000
+	---help---
+		Physical address where the AHAB container header is loaded into memory.
 
 menu "i.MX9 Peripheral Selection"
 
@@ -815,7 +839,7 @@ config IMX9_LPI2C_DMA_MAXMSG
 	default 8
 	depends on IMX9_LPI2C_DMA
 	---help---
-		This option set the mumber of mesg that can be in a transfer.
+		This option set the number of mesg that can be in a transfer.
 		It is used to allocate space for the 16 bit LPI2C commands
 		that will be DMA-ed to the LPI2C device.
 

@@ -559,6 +559,12 @@ config ESP_RMT
 		format, RMT can be extended to a versatile and general-purpose
 		transceiver, transmitting or receiving many other types of signals.
 
+config ESP_SDM
+	bool "Sigma-Delta Modulation (SDM) Module"
+	default n
+	select ANALOG
+	select DAC
+
 config ESPRESSIF_TEMP
 	bool "Internal Temperature Sensor"
 	default n

@@ -142,9 +142,11 @@ void arm64_chip_boot(void)
 #endif
 #endif
 
+#ifdef CONFIG_ARCH_USE_MMU
   /* MAP IO and DRAM, enable MMU. */
 
   arm64_mmu_init(true);
+#endif
 
   /* Do UART early initialization & pin muxing */
 

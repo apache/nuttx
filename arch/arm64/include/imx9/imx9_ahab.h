@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32/common/src/esp32_board_dac.c
+ * arch/arm64/include/imx9/imx9_ahab.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,77 +20,52 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_ARM64_INCLUDE_IMX9_IMX9_AHAB_H
+#define __ARCH_ARM64_INCLUDE_IMX9_IMX9_AHAB_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-#include <nuttx/analog/dac.h>
-#include <stdio.h>
-#include <debug.h>
-
-#include <nuttx/arch.h>
-#include <esp32_dac.h>
-
-#ifdef CONFIG_ESP_SDM
-#  include "espressif/esp_sdm.h"
-#endif
+#include <imx_container.h>
 
 /****************************************************************************
- * Private Data
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: board_dac_initialize
+ * Name: ahab_auth_release
  *
  * Description:
- *   Initialize and register the Digital to Analog Converter (DAC) driver.
- *
- * Input Parameters:
- *   path - The device number, used to build the device path as
- *           /dev/dacN
+ *   Release the current container used by ELE for AHAB.
  *
  * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
+ *   Zero (OK) is returned for success. A negated errno value is returned on
+ *   failure.
  *
  ****************************************************************************/
 
-int board_dac_initialize(const char *path)
-{
-  int ret;
+int ahab_auth_release(void);
 
-  /* Initialize DAC */
+/****************************************************************************
+ * Name: ahab_read_auth_image
+ *
+ * Description:
+ *   Copy to RAM, then authenticate the image_index image of the container.
+ *
+ * Input Parameters:
+ *   container - Pointer to a copy of the AHAB container header in RAM.
+ *   image_index - The index of the image in the current container.
+ *   container_offset - Offset of the container in the boot device.
+ *
+ * Returned Value:
+ *   NULL pointer for failure, otherwise a pointer to the beginning of the
+ *   authenticated, image's header.
+ *
+ ****************************************************************************/
 
-#ifdef CONFIG_ESP_SDM
-  struct esp_sdm_chan_config_s config =
-  {
-    .gpio_num = 5,
-    .sample_rate_hz = 1000 * 1000,
-    .flags = 0,
-  };
+struct boot_img_hdr *ahab_read_auth_image(struct container_hdr *container,
+                                          int image_index,
+                                          unsigned long container_offset);
 
-  struct dac_dev_s *dev = esp_sdminitialize(config);
-#else
-  struct dac_dev_s *dev = esp32_dac_initialize();
-#endif
-  if (dev != NULL)
-    {
-      /* Try to register the DAC */
-
-      ret = dac_register(path, dev);
-      if (ret < 0)
-        {
-          snerr("ERROR: Error registering DAC\n");
-        }
-    }
-  else
-    {
-      ret = -ENODEV;
-    }
-
-  return ret;
-}
+#endif /* __ARCH_ARM64_INCLUDE_IMX9_IMX9_AHAB_H */
