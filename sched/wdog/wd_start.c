@@ -431,9 +431,7 @@ int wd_start(FAR struct wdog_s *wdog, sclock_t delay,
    * There is extensive documentation about this time issue elsewhere.
    */
 
-  delay++;
-
-  return wd_start_abstick(wdog, clock_systime_ticks() + delay,
+  return wd_start_abstick(wdog, clock_systime_ticks() + delay + 1,
                           wdentry, arg);
 }
 
