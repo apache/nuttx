@@ -91,18 +91,19 @@ typedef uint64_t spinlock_t;
 static inline_function spinlock_t up_testset(volatile spinlock_t *lock)
 {
   spinlock_t ret = SP_LOCKED;
+  spinlock_t tmp = 0;
 
   __asm__ __volatile__
   (
     "1:                     \n"
-    "ldaxr    %0, [%2]      \n"
-    "cmp      %0, %1        \n"
+    "ldaxr    %0, [%3]      \n"
+    "cmp      %0, %2        \n"
     "beq      2f            \n"
-    "stxr     %w0, %1, [%2] \n"
-    "cbnz     %w0, 1b       \n"
+    "stxr     %w1, %2, [%3] \n"
+    "cbnz     %w1, 1b       \n"
     "2:                     \n"
-    : "+r" (ret)
-    :  "r" (SP_LOCKED), "r" (lock)
+    : "=r" (ret)
+    :  "r" (tmp), "r" (SP_LOCKED), "r" (lock)
     : "memory"
   );
 
