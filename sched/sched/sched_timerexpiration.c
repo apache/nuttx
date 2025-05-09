@@ -130,7 +130,7 @@ int up_timer_gettick(FAR clock_t *ticks)
   struct timespec ts;
   int ret;
   ret = up_timer_gettime(&ts);
-  *ticks = clock_time2ticks(&ts);
+  *ticks = clock_time2ticks_floor(&ts);
   return ret;
 }
 #endif
@@ -149,7 +149,7 @@ int up_alarm_tick_cancel(FAR clock_t *ticks)
   struct timespec ts;
   int ret;
   ret = up_alarm_cancel(&ts);
-  *ticks = clock_time2ticks(&ts);
+  *ticks = clock_time2ticks_floor(&ts);
   return ret;
 }
 #  else
@@ -165,7 +165,7 @@ int up_timer_tick_cancel(FAR clock_t *ticks)
   struct timespec ts;
   int ret;
   ret = up_timer_cancel(&ts);
-  *ticks = clock_time2ticks(&ts);
+  *ticks = clock_time2ticks_floor(&ts);
   return ret;
 }
 #  endif
@@ -494,7 +494,7 @@ void nxsched_alarm_expiration(FAR const struct timespec *ts)
 
   DEBUGASSERT(ts);
 
-  ticks = clock_time2ticks(ts);
+  ticks = clock_time2ticks_floor(ts);
   nxsched_alarm_tick_expiration(ticks);
 }
 #endif
