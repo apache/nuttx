@@ -88,15 +88,7 @@ int work_queue_period_wq(FAR struct kwork_wqueue_s *wqueue,
       return -EINVAL;
     }
 
-  /* delay+1 is to prevent the insufficient sleep time if we are
-   * currently near the boundary to the next tick.
-   * | current_tick | current_tick + 1 | current_tick + 2 | .... |
-   * |           ^ Here we get the current tick
-   * In this case we delay 1 tick, timer will be triggered at
-   * current_tick + 1, which is not enough for at least 1 tick.
-   */
-
-  expected = clock_systime_ticks() + delay + 1;
+  expected = clock_delay2abstick(delay);
 
   /* Interrupts are disabled so that this logic can be called from with
    * task logic or from interrupt handling logic.

@@ -384,6 +384,28 @@ EXTERN volatile clock_t g_system_ticks;
 #define clock_time2nsec(ts) \
   ((uint64_t)(ts)->tv_sec * NSEC_PER_SEC + (uint64_t)(ts)->tv_nsec)
 
+/* Calculate delay+1, forcing the delay into a range that we can handle.
+ *
+ * NOTE that one is added to the delay.  This is correct and must not be
+ * changed:  The contract for the use wdog_start is that the wdog will
+ * delay FOR AT LEAST as long as requested, but may delay longer due to
+ * variety of factors.  The wdog logic has no knowledge of the the phase
+ * of the system timer when it is started:  The next timer interrupt may
+ * occur immediately or may be delayed for almost a full cycle. In order
+ * to meet the contract requirement, the requested time is also always
+ * incremented by one so that the delay is always at least as long as
+ * requested.
+ *
+ * E.g. delay+1 can prevent the insufficient sleep time if we are
+ * currently near the boundary to the next tick.
+ * | current_tick | current_tick + 1 | current_tick + 2 | .... |
+ * |           ^ Here we get the current tick
+ * In this case we delay 1 tick, timer will be triggered at
+ * current_tick + 1, which is not enough for at least 1 tick.
+ */
+
+#define clock_delay2abstick(delay) (clock_systime_ticks() + (delay) + 1)
+
 /****************************************************************************
  * Name:  clock_timespec_add
  *
