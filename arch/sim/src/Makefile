@@ -120,6 +120,10 @@ endif
 HOSTSRCS  = sim_hostirq.c sim_hostmemory.c sim_hostmisc.c sim_hosttime.c sim_hostuart.c
 HOSTSRCS += sim_hostfs.c
 
+ifneq ($(CONFIG_WINDOWS_NATIVE),y)
+HOSTSRCS += sim_hosterrno.c
+endif
+
 hostfs.h: $(TOPDIR)/include/nuttx/fs/hostfs.h
 	@echo "CP:  $<"
 	$(Q) cp $< $@
