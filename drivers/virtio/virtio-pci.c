@@ -115,6 +115,16 @@ static void virtio_pci_vq_callback(FAR struct virtio_pci_device_s *vpdev)
 static int virtio_pci_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   FAR struct virtio_pci_device_s *vpdev = arg;
+  uint8_t isr;
+
+  if (vpdev->intx)
+    {
+      pci_read_io_byte(vpdev->dev, (uintptr_t)vpdev->isr, &isr);
+      if (isr == 0)
+        {
+          return OK;
+        }
+    }
 
   virtio_pci_vq_callback(vpdev);
   return OK;
@@ -227,8 +237,17 @@ static int virtio_pci_probe(FAR struct pci_device_s *dev)
   ret = pci_connect_irq(vpdev->dev, &vpdev->irq, 1);
   if (ret < 0)
     {
-      vrterr("Failed to connect MSI %d\n", ret);
-      goto err_with_irq;
+      vrterr("Failed to connect MSI %d, try legacy irq mode\n", ret);
+      pci_release_irq(vpdev->dev, &vpdev->irq, 1);
+      ret = pci_get_irq(vpdev->dev);
+      if (ret < 0)
+        {
+          vrterr("Failed to get legacy irq %d\n", ret);
+          goto err_with_enable;
+        }
+
+      vpdev->irq = ret;
+      vpdev->intx = true;
     }
 
   irq_attach(vpdev->irq, virtio_pci_interrupt, vpdev);
@@ -251,8 +270,11 @@ static int virtio_pci_probe(FAR struct pci_device_s *dev)
 err_with_attach:
 #if CONFIG_DRIVERS_VIRTIO_PCI_POLLING_PERIOD <= 0
   irq_detach(vpdev->irq);
-err_with_irq:
-  pci_release_irq(vpdev->dev, &vpdev->irq, 1);
+  if (!vpdev->intx)
+    {
+      pci_release_irq(vpdev->dev, &vpdev->irq, 1);
+    }
+
 #endif
 err_with_enable:
   pci_clear_master(dev);
@@ -274,7 +296,10 @@ static void virtio_pci_remove(FAR struct pci_device_s *dev)
 
 #if CONFIG_DRIVERS_VIRTIO_PCI_POLLING_PERIOD <= 0
   irq_detach(vpdev->irq);
-  pci_release_irq(vpdev->dev, &vpdev->irq, 1);
+  if (!vpdev->intx)
+    {
+      pci_release_irq(vpdev->dev, &vpdev->irq, 1);
+    }
 #endif
 
   pci_clear_master(dev);

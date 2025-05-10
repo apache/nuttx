@@ -81,9 +81,12 @@ struct virtio_pci_device_s
                                                */
 #if CONFIG_DRIVERS_VIRTIO_PCI_POLLING_PERIOD <= 0
   int                                irq;
+  bool                               intx;    /* INTX irq mode */
 #else
   struct wdog_s                      wdog;
 #endif
+
+  FAR void                          *isr;
 
   /* for modern */
 

@@ -204,6 +204,11 @@ virtio_pci_legacy_create_virtqueue(FAR struct virtio_pci_device_s *vpdev,
                      VIRTIO_PCI_QUEUE_ADDR_SHIFT);
 
 #if CONFIG_DRIVERS_VIRTIO_PCI_POLLING_PERIOD <= 0
+  if (vpdev->intx)
+    {
+      return OK;
+    }
+
   pci_write_io_word(vpdev->dev,
                     (uintptr_t)(vpdev->ioaddr + VIRTIO_MSI_QUEUE_VECTOR),
                     0);
@@ -241,14 +246,17 @@ void virtio_pci_legacy_delete_virtqueue(FAR struct virtio_device *vdev,
                     index);
 
 #if CONFIG_DRIVERS_VIRTIO_PCI_POLLING_PERIOD <= 0
-  pci_write_io_word(vpdev->dev,
-                    (uintptr_t)(vpdev->ioaddr + VIRTIO_MSI_QUEUE_VECTOR),
-                    VIRTIO_PCI_MSI_NO_VECTOR);
+  if (!vpdev->intx)
+    {
+      pci_write_io_word(vpdev->dev,
+                        (uintptr_t)(vpdev->ioaddr + VIRTIO_MSI_QUEUE_VECTOR),
+                        VIRTIO_PCI_MSI_NO_VECTOR);
 
-  /* Flush the write out to device */
+      /* Flush the write out to device */
 
-  pci_read_io_byte(vpdev->dev,
-                   (uintptr_t)(vpdev->ioaddr + VIRTIO_PCI_ISR), &isr);
+      pci_read_io_byte(vpdev->dev,
+                       (uintptr_t)(vpdev->ioaddr + VIRTIO_PCI_ISR), &isr);
+    }
 #endif
 
   /* Select and deactivate the queue */
@@ -411,6 +419,7 @@ virtio_pci_legacy_init_device(FAR struct virtio_pci_device_s *vpdev)
       return -EINVAL;
     }
 
+  vpdev->isr = vpdev->ioaddr + VIRTIO_PCI_ISR;
   vdev->id.vendor = dev->subsystem_vendor;
   vdev->id.device = dev->subsystem_device;
 
