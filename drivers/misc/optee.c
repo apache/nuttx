@@ -476,8 +476,13 @@ static int optee_shm_close(FAR struct file *filep)
 {
   FAR struct optee_shm *shm = filep->f_priv;
 
-  optee_shm_free(shm);
-  filep->f_priv = NULL;
+  if (shm != NULL && shm->id > -1)
+    {
+      filep->f_priv = NULL;
+      shm->fd = -1;
+      optee_shm_free(shm);
+    }
+
   return 0;
 }
 
@@ -529,10 +534,21 @@ static int optee_close(FAR struct file *filep)
 {
   FAR struct optee_priv_data *priv = filep->f_priv;
   FAR struct optee_shm *shm;
+  FAR struct file *shm_filep;
   int id = 0;
 
   idr_for_each_entry(priv->shms, shm, id)
     {
+      if (shm->fd > -1 && fs_getfilep(shm->fd, &shm_filep) >= 0)
+        {
+          /* The user did not call close(), prevent vfs auto-close from
+           * double-freeing our SHM
+           */
+
+          shm_filep->f_priv = NULL;
+          fs_putfilep(shm_filep);
+        }
+
       optee_shm_free(shm);
     }
 
@@ -1009,6 +1025,7 @@ optee_ioctl_shm_register(FAR struct optee_priv_data *priv,
       return ret;
     }
 
+  shm->fd = ret;
   rdata->id = shm->id;
   return ret;
 }
@@ -1169,6 +1186,7 @@ int optee_shm_alloc(FAR struct optee_priv_data *priv, FAR void *addr,
       goto err;
     }
 
+  shm->fd = -1;
   shm->priv = priv;
   shm->addr = (uintptr_t)ptr;
   shm->length = size;
@@ -1221,7 +1239,7 @@ err:
 
 void optee_shm_free(FAR struct optee_shm *shm)
 {
-  if (!shm)
+  if (!shm || !shm->priv)
     {
       return;
     }

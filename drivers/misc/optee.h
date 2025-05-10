@@ -54,6 +54,7 @@ struct optee_priv_data
 struct optee_shm
 {
   FAR struct optee_priv_data *priv;
+  int fd;
   int32_t id;
   uint64_t addr;
   uint64_t length;
