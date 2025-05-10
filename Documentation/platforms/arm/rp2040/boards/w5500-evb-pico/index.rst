@@ -30,45 +30,6 @@ Features
 * 8 × Programmable IO (PIO) state machines for custom peripheral support
 * Ethernet port via WIZnet W5500, hardwired to SPI0 and two GPIO pins.
 
-Supported RP2040 capabilities
-=============================
-
-* UART  (console port)
-
-  * GPIO 0 (UART0 TX) and GPIO 1 (UART0 RX) are used for the console.
-
-* I2C
-* SPI (master only)
-* DMAC
-* PWM
-* ADC
-* Watchdog
-* USB device
-
-  * MSC, CDC/ACM serial and these composite device are supported.
-  * CDC/ACM serial device can be used for the console.
-
-* PIO (RP2040 Programmable I/O)
-* Flash ROM Boot
-* SRAM Boot
-
-  * If Pico SDK is available, nuttx.uf2 file which can be used in
-    BOOTSEL mode will be created.
-  * Persistent flash filesystem in unused flash ROM
-
-Currently unsupported RP2040 capabilities
-=========================================
-
-* SPI Slave Mode
-* SSI
-* RTC
-* Timers
-
-Serial Console
-==============
-
-The board is configured to use the USB connection as the serial console.
-
 Buttons and LEDs
 ================
 
@@ -160,71 +121,26 @@ in PFM mode which provides the best efficiency, but may be
 switched to PWM mode for improved ripple by outputting a one
 on GPIO23.
 
-Installation
-============
+Installation & Build
+====================
 
-1. Download Raspberry Pi Pico SDK
-
-::
-
-  $ git clone -b 2.0.0 https://github.com/raspberrypi/pico-sdk.git
-
-2. Set PICO_SDK_PATH environment variable
-
-::
-
-  $ export PICO_SDK_PATH=<absolute_path_to_pico-sdk_directory>
-
-3. Configure and build NuttX
-
-::
-
-  $ git clone https://github.com/apache/nuttx.git nuttx
-  $ git clone https://github.com/apache/nuttx-apps.git apps
-  $ cd nuttx
-  $ make distclean
-  $ ./tools/configure.sh w5500-evb-pico:usbnsh
-  $ make V=1
-
-4. Connect W5500-EVB-Pico board to USB port while pressing BOOTSEL.
-   The board will be detected as USB Mass Storage Device.
-   Then copy "nuttx.uf2" into the device.
-   (Same manner as the standard Pico SDK applications installation.)
-
-5. `usbnsh` configuration provides the console access by USB CDC/ACM serial
-   devcice.  The console is available by using a terminal software on the USB
-   host.
+For instructions on how to to install the build dependencies and create a NuttX
+image for this board, consult the main :doc:`RP2040 documentation
+<../../index>`.
 
 Configurations
 ==============
+
+All configurations listed below can be configured using the following command in
+the ``nuttx`` directory (again, consult the main :doc:`RP2040 documentation
+<../../index>`):
+
+.. code:: console
+
+   $ ./tools/configure.sh w5500-evb-pico:<configname>
 
 usbnsh
 ------
 
 USB CDC/ACM serial console with NuttShell.  TCP/IPv4 & IPv6 networking is
 supported via the Ethernet port.
-
-License exceptions
-==================
-
-The following files are originated from the files in Pico SDK.
-So, the files are licensed under 3-Clause BSD same as Pico SDK.
-
-Created by referring to the Pico SDK clock initialization
----------------------------------------------------------
-
-* arch/arm/src/rp2040/rp2040_clock.c
-* arch/arm/src/rp2040/rp2040_pll.c
-* arch/arm/src/rp2040/rp2040_xosc.c
-
-Providing an API similar to the Pico SDK's hardware_pio API
------------------------------------------------------------
-
-* arch/arm/src/rp2040/rp2040_pio.c
-* arch/arm/src/rp2040/rp2040_pio.h
-* arch/arm/src/rp2040/rp2040_pio_instructions.h
-
-Generated from rp2040.svd originally provided in Pico SDK
----------------------------------------------------------
-
-* arch/arm/src/rp2040/hardware/\*.h
