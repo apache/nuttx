@@ -51,7 +51,7 @@ struct optee_priv_data
   FAR struct idr_s *shms;     /* An RB tree of all shm entries */
 };
 
-struct optee_shm_entry
+struct optee_shm
 {
   FAR struct optee_priv_data *priv;
   int32_t id;
@@ -80,8 +80,8 @@ uintptr_t optee_va_to_pa(FAR const void *va);
 #endif
 int optee_shm_alloc(FAR struct optee_priv_data *priv, FAR void *addr,
                     size_t size, uint32_t flags,
-                    FAR struct optee_shm_entry **shmep);
-void optee_shm_free(FAR struct optee_shm_entry *shme);
+                    FAR struct optee_shm **shmp);
+void optee_shm_free(FAR struct optee_shm *shm);
 int optee_transport_init(void);
 int optee_transport_open(FAR struct optee_priv_data **priv);
 void optee_transport_close(FAR struct optee_priv_data *priv);

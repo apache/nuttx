@@ -284,11 +284,10 @@ static bool optee_is_valid_range(FAR const void *va, size_t size)
  *   physical address returned in `list_pa`.
  *
  * Parameters:
- *   shme        - Shared memory entry to create a page list for.
- *   list_pa     - If not NULL, will be set to the page list's physical
- *                 address (which is aligned to
- *                 OPTEE_MSG_NONCONTIG_PAGE_SIZE) added with shared memory
- *                 page offset.
+ *   shm     - Shared memory object to create a page list for.
+ *   list_pa - If not NULL, will be set to the page list's physical address
+ *             (which is aligned to OPTEE_MSG_NONCONTIG_PAGE_SIZE) added
+ *             with shared memory page offset.
  *
  * Returned Values:
  *   A pointer to the kernel virtual address of the page list on success.
@@ -298,8 +297,7 @@ static bool optee_is_valid_range(FAR const void *va, size_t size)
  ****************************************************************************/
 
 static FAR void *
-optee_shm_to_page_list(FAR struct optee_shm_entry *shme,
-                       FAR uintptr_t *list_pa)
+optee_shm_to_page_list(FAR struct optee_shm *shm, FAR uintptr_t *list_pa)
 {
   FAR struct optee_page_list_entry *list_entry;
   size_t pgsize = OPTEE_MSG_NONCONTIG_PAGE_SIZE;
@@ -310,8 +308,8 @@ optee_shm_to_page_list(FAR struct optee_shm_entry *shme,
   uint32_t list_size;
   uint32_t i = 0;
 
-  pgoff = shme->addr & (pgsize - 1);
-  total_pages = (uint32_t)div_round_up(pgoff + shme->length, pgsize);
+  pgoff = shm->addr & (pgsize - 1);
+  total_pages = (uint32_t)div_round_up(pgoff + shm->length, pgsize);
   list_size = div_round_up(total_pages, OPTEE_PAGES_ARRAY_LEN)
               * sizeof(struct optee_page_list_entry);
 
@@ -327,7 +325,7 @@ optee_shm_to_page_list(FAR struct optee_shm_entry *shme,
     }
 
   list_entry = (FAR struct optee_page_list_entry *)list;
-  page = ALIGN_DOWN(shme->addr, pgsize);
+  page = ALIGN_DOWN(shm->addr, pgsize);
   while (total_pages)
     {
       list_entry->pages_array[i++] = optee_va_to_pa((FAR const void *)page);
@@ -354,13 +352,12 @@ optee_shm_to_page_list(FAR struct optee_shm_entry *shme,
  * Name: optee_shm_register
  *
  * Description:
- *   Register specified shared memory entry with OP-TEE.
+ *   Register specified shared memory object with OP-TEE.
  *
  * Parameters:
- *   priv  - The driver's private data structure
- *   shme  - Pointer to shared memory entry to register. The entry, the
- *           contained shared memory object, or the referenced shared buffer
- *           cannot be NULL.
+ *   priv - The driver's private data structure
+ *   shm  - Pointer to shared memory object to register. Neither the shm
+ *          object, nor the referenced shared buffer pointer can be NULL.
  *
  * Returned Values:
  *   0 on success, negative error code otherwise.
@@ -368,7 +365,7 @@ optee_shm_to_page_list(FAR struct optee_shm_entry *shme,
  ****************************************************************************/
 
 static int optee_shm_register(FAR struct optee_priv_data *priv,
-                              FAR struct optee_shm_entry *shme)
+                              FAR struct optee_shm *shm)
 {
   FAR struct optee_msg_arg *msg;
   uintptr_t page_list_pa;
@@ -381,7 +378,7 @@ static int optee_shm_register(FAR struct optee_priv_data *priv,
       return -ENOMEM;
     }
 
-  page_list = optee_shm_to_page_list(shme, &page_list_pa);
+  page_list = optee_shm_to_page_list(shm, &page_list_pa);
   if (page_list == NULL)
     {
       goto errout_with_msg;
@@ -391,8 +388,8 @@ static int optee_shm_register(FAR struct optee_priv_data *priv,
   msg->params[0].attr = OPTEE_MSG_ATTR_TYPE_TMEM_OUTPUT |
                         OPTEE_MSG_ATTR_NONCONTIG;
   msg->params[0].u.tmem.buf_ptr = page_list_pa;
-  msg->params[0].u.tmem.shm_ref = (uintptr_t)shme;
-  msg->params[0].u.tmem.size = shme->length;
+  msg->params[0].u.tmem.shm_ref = (uintptr_t)shm;
+  msg->params[0].u.tmem.size = shm->length;
 
   ret = optee_transport_call(priv, msg);
   if (ret < 0)
@@ -416,13 +413,13 @@ errout_with_msg:
  * Name: optee_shm_unregister
  *
  * Description:
- *   Unregister specified shared memory entry with OP-TEE.
+ *   Unregister specified shared memory object from OP-TEE.
  *
  * Parameters:
- *   priv  - the driver's private data structure
- *   shme  - Pointer to shared memory entry to unregister. The shared
- *           memory entry must have been previously registered previously
- *           with the OP-TEE and cannot be NULL.
+ *   priv - the driver's private data structure
+ *   shm  - Pointer to shared memory object to unregister. The shared memory
+ *          entry must have been previously registered previously with the
+ *          OP-TEE OS and cannot be NULL.
  *
  * Returned Values:
  *   0 on success, negative error code otherwise.
@@ -430,7 +427,7 @@ errout_with_msg:
  ****************************************************************************/
 
 static int optee_shm_unregister(FAR struct optee_priv_data *priv,
-                                FAR struct optee_shm_entry *shme)
+                                FAR struct optee_shm *shm)
 {
   FAR struct optee_msg_arg *msg;
   int ret = 0;
@@ -443,7 +440,7 @@ static int optee_shm_unregister(FAR struct optee_priv_data *priv,
 
   msg->cmd = OPTEE_MSG_CMD_UNREGISTER_SHM;
   msg->params[0].attr = OPTEE_MSG_ATTR_TYPE_RMEM_INPUT;
-  msg->params[0].u.rmem.shm_ref = (uintptr_t)shme;
+  msg->params[0].u.rmem.shm_ref = (uintptr_t)shm;
 
   ret = optee_transport_call(priv, msg);
   if (ret < 0)
@@ -477,9 +474,9 @@ errout_with_msg:
 
 static int optee_shm_close(FAR struct file *filep)
 {
-  FAR struct optee_shm_entry *shme = filep->f_priv;
+  FAR struct optee_shm *shm = filep->f_priv;
 
-  optee_shm_free(shme);
+  optee_shm_free(shm);
   filep->f_priv = NULL;
   return 0;
 }
@@ -531,12 +528,12 @@ static int optee_open(FAR struct file *filep)
 static int optee_close(FAR struct file *filep)
 {
   FAR struct optee_priv_data *priv = filep->f_priv;
-  FAR struct optee_shm_entry *shme;
+  FAR struct optee_shm *shm;
   int id = 0;
 
-  idr_for_each_entry(priv->shms, shme, id)
+  idr_for_each_entry(priv->shms, shm, id)
     {
-      optee_shm_free(shme);
+      optee_shm_free(shm);
     }
 
   idr_destroy(priv->shms);
@@ -548,7 +545,7 @@ static int optee_memref_to_msg_param(FAR struct optee_priv_data *priv,
                                      FAR struct optee_msg_param *mp,
                                      FAR const struct tee_ioctl_param *p)
 {
-  FAR struct optee_shm_entry *shme;
+  FAR struct optee_shm *shm;
 
   /* Warning: the case for non-registered memrefs below is a hack to work
    * with openvela. Normally, non-registered memory should be specified as
@@ -567,21 +564,21 @@ static int optee_memref_to_msg_param(FAR struct optee_priv_data *priv,
              TEE_IOCTL_PARAM_ATTR_TYPE_MEMREF_INPUT;
   if (p->c != TEE_MEMREF_NULL)
     {
-      shme = idr_find(priv->shms, p->c);
-      if (shme == NULL)
+      shm = idr_find(priv->shms, p->c);
+      if (shm == NULL)
         {
           return -EINVAL;
         }
 
-      if (shme->flags & TEE_SHM_REGISTER)
+      if (shm->flags & TEE_SHM_REGISTER)
         {
-          mp->u.rmem.shm_ref = (uintptr_t)shme;
+          mp->u.rmem.shm_ref = (uintptr_t)shm;
         }
       else
         {
           /* hack to comply with openvela */
 
-          mp->u.rmem.shm_ref = shme->addr;
+          mp->u.rmem.shm_ref = shm->addr;
         }
     }
   else
@@ -929,7 +926,7 @@ static int
 optee_ioctl_shm_alloc(FAR struct optee_priv_data *priv,
                       FAR struct tee_ioctl_shm_alloc_data *data)
 {
-  FAR struct optee_shm_entry *shme;
+  FAR struct optee_shm *shm;
   FAR void *addr;
   int memfd;
   int ret;
@@ -959,13 +956,13 @@ optee_ioctl_shm_alloc(FAR struct optee_priv_data *priv,
       goto err;
     }
 
-  ret = optee_shm_alloc(priv, addr, data->size, 0, &shme);
+  ret = optee_shm_alloc(priv, addr, data->size, 0, &shm);
   if (ret < 0)
     {
       goto err_with_mmap;
     }
 
-  data->id = shme->id;
+  data->id = shm->id;
   return memfd;
 
 err_with_mmap:
@@ -979,7 +976,7 @@ static int
 optee_ioctl_shm_register(FAR struct optee_priv_data *priv,
                          FAR struct tee_ioctl_shm_register_data *rdata)
 {
-  FAR struct optee_shm_entry *shme;
+  FAR struct optee_shm *shm;
   int ret;
 
   if (!optee_is_valid_range(rdata, sizeof(*rdata)))
@@ -999,20 +996,20 @@ optee_ioctl_shm_register(FAR struct optee_priv_data *priv,
     }
 
   ret = optee_shm_alloc(priv, (FAR void *)(uintptr_t)rdata->addr,
-                        rdata->length, TEE_SHM_REGISTER, &shme);
+                        rdata->length, TEE_SHM_REGISTER, &shm);
   if (ret < 0)
     {
       return ret;
     }
 
-  ret = file_allocate(&g_optee_shm_inode, O_CLOEXEC, 0, shme, 0, true);
+  ret = file_allocate(&g_optee_shm_inode, O_CLOEXEC, 0, shm, 0, true);
   if (ret < 0)
     {
-      optee_shm_free(shme);
+      optee_shm_free(shm);
       return ret;
     }
 
-  rdata->id = shme->id;
+  rdata->id = shm->id;
   return ret;
 }
 
@@ -1107,10 +1104,9 @@ uintptr_t optee_va_to_pa(FAR const void *va)
  *
  * Description:
  *   Allocate and/or register shared memory with the OP-TEE OS.
- *   Shared memory entry suitable for use in shared memory linked list
- *   returned in pass-by-reference `shmep` pointer. This function always
- *   allocates a shared memory entry, regardless of flags. The rest of this
- *   function's behaviour is largely determined by `flags`:
+ *   This function always allocates a shared memory object and adds it
+ *   to the tree maintained by the driver, regardless of flags. The rest of
+ *   this function's behaviour is determined by `flags`:
  *   - If `TEE_SHM_ALLOC` is specified, then a buffer of length `size` will
  *     be allocated. In this case `addr` will be ignored. The allocated
  *     buffer will be aligned to `priv->alignment`. `TEE_SHM_ALLOC` flag
@@ -1119,9 +1115,9 @@ uintptr_t optee_va_to_pa(FAR const void *va)
  *     `addr` or allocated through `TEE_SHM_ALLOC`, will be registered with
  *     OP-TEE as dynamic shared memory.
  *
- *   Use `optee_shm_free()` to undo this operation, i.e. to free,
- *   unregister, and/or remove from the list the entry returned in `shmep`
- *   and the contained buffer.
+ *   Use `optee_shm_free()` to undo this operation, i.e. to remove the
+ *   shared memory boject from driver, and/or free, and/or unregister it
+ *   from the OP-TEE OS.
  *
  * Parameters:
  *   priv  - The driver's private data structure
@@ -1130,7 +1126,7 @@ uintptr_t optee_va_to_pa(FAR const void *va)
  *   size  - The size of the shared memory buffer to allocate/add/register.
  *   flags - Flags specifying the behaviour of this function. Supports
  *           combinations of `TEE_SHM_{ALLOC,REGISTER,SEC_REGISTER}`.
- *   shmep - Pass-by-reference pointer to return the shared memory entry
+ *   shmp  - Pass-by-reference pointer to return the shared memory object
  *           allocated. Cannot be NULL.
  *
  * Returned Values:
@@ -1140,14 +1136,14 @@ uintptr_t optee_va_to_pa(FAR const void *va)
 
 int optee_shm_alloc(FAR struct optee_priv_data *priv, FAR void *addr,
                     size_t size, uint32_t flags,
-                    FAR struct optee_shm_entry **shmep)
+                    FAR struct optee_shm **shmp)
 {
-  FAR struct optee_shm_entry *shme;
+  FAR struct optee_shm *shm;
   FAR void *ptr;
   int ret = -ENOMEM;
 
-  shme = kmm_zalloc(sizeof(struct optee_shm_entry));
-  if (shme == NULL)
+  shm = kmm_zalloc(sizeof(struct optee_shm));
+  if (shm == NULL)
     {
       return ret;
     }
@@ -1173,33 +1169,33 @@ int optee_shm_alloc(FAR struct optee_priv_data *priv, FAR void *addr,
       goto err;
     }
 
-  shme->priv = priv;
-  shme->addr = (uintptr_t)ptr;
-  shme->length = size;
-  shme->flags = flags;
-  shme->id = idr_alloc(priv->shms, shme, 0, 0);
+  shm->priv = priv;
+  shm->addr = (uintptr_t)ptr;
+  shm->length = size;
+  shm->flags = flags;
+  shm->id = idr_alloc(priv->shms, shm, 0, 0);
 
-  if (shme->id < 0)
+  if (shm->id < 0)
     {
       goto err;
     }
 
   if (flags & TEE_SHM_REGISTER)
     {
-      ret = optee_shm_register(priv, shme);
+      ret = optee_shm_register(priv, shm);
       if (ret < 0)
         {
           goto err_with_idr;
         }
     }
 
-  *shmep = shme;
+  *shmp = shm;
   return 0;
 
 err_with_idr:
-  idr_remove(priv->shms, shme->id);
+  idr_remove(priv->shms, shm->id);
 err:
-  kmm_free(shme);
+  kmm_free(shm);
   if (flags & TEE_SHM_ALLOC)
     {
       kmm_free(ptr);
@@ -1215,40 +1211,40 @@ err:
  *   Free and/or unregister shared memory allocated by `optee_shm_alloc()`.
  *
  * Parameters:
- *   shme  - Pointer to shared memory entry to free. Can be NULL, in which
- *           case, this is a no-op.
+ *   shm  - Pointer to shared memory object to free. Can be NULL, in which
+ *          case, this is a no-op.
  *
  * Returned Values:
  *   None
  *
  ****************************************************************************/
 
-void optee_shm_free(FAR struct optee_shm_entry *shme)
+void optee_shm_free(FAR struct optee_shm *shm)
 {
-  if (!shme)
+  if (!shm)
     {
       return;
     }
 
-  if (shme->flags & TEE_SHM_REGISTER)
+  if (shm->flags & TEE_SHM_REGISTER)
     {
-      optee_shm_unregister(shme->priv, shme);
+      optee_shm_unregister(shm->priv, shm);
     }
 
-  if (shme->flags & TEE_SHM_ALLOC)
+  if (shm->flags & TEE_SHM_ALLOC)
     {
-      kmm_free((FAR void *)(uintptr_t)shme->addr);
+      kmm_free((FAR void *)(uintptr_t)shm->addr);
     }
 
-  if (!(shme->flags & (TEE_SHM_ALLOC | TEE_SHM_REGISTER)))
+  if (!(shm->flags & (TEE_SHM_ALLOC | TEE_SHM_REGISTER)))
     {
       /* allocated by optee_ioctl_shm_alloc(), need to unmap */
 
-      munmap((FAR void *)(uintptr_t)shme->addr, shme->length);
+      munmap((FAR void *)(uintptr_t)shm->addr, shm->length);
     }
 
-  idr_remove(shme->priv->shms, shme->id);
-  kmm_free(shme);
+  idr_remove(shm->priv->shms, shm->id);
+  kmm_free(shm);
 }
 
 /****************************************************************************

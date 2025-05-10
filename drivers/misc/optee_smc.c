@@ -95,9 +95,9 @@ union optee_smc_exchg_caps
  * Private Functions
  ****************************************************************************/
 
-static inline uintptr_t reg_pair_to_uintptr(uint64_t reg0, uint64_t reg1)
+static inline FAR void *reg_pair_to_ptr(uint64_t reg0, uint64_t reg1)
 {
-  return (uintptr_t)(reg0 << 32 | (reg1 & UINT32_MAX));
+  return (FAR void *)(uintptr_t)(reg0 << 32 | (reg1 & UINT32_MAX));
 }
 
 static inline void reg_pair_from_64(uint64_t val, uint64_t *reg0,
@@ -177,8 +177,8 @@ static bool optee_smc_is_compatible(optee_smc_fn smc_fn)
 static void optee_smc_handle_rpc(FAR struct optee_priv_data *priv_,
                                  FAR smccc_res_t *par)
 {
-  FAR struct optee_shm_entry *shme;
-  uintptr_t shme_pa;
+  FAR struct optee_shm *shm;
+  uintptr_t shm_pa;
   uint32_t rpc_func;
 
   rpc_func = OPTEE_SMC_RETURN_GET_RPC_FUNC(par->a0);
@@ -187,11 +187,11 @@ static void optee_smc_handle_rpc(FAR struct optee_priv_data *priv_,
   switch (rpc_func)
     {
       case OPTEE_SMC_RPC_FUNC_ALLOC:
-        if (!optee_shm_alloc(priv_, NULL, par->a1, TEE_SHM_ALLOC, &shme))
+        if (!optee_shm_alloc(priv_, NULL, par->a1, TEE_SHM_ALLOC, &shm))
           {
-            shme_pa = optee_va_to_pa((FAR void *)(uintptr_t)shme->addr);
-            reg_pair_from_64(shme_pa, &par->a1, &par->a2);
-            reg_pair_from_64((uintptr_t)shme, &par->a4, &par->a5);
+            shm_pa = optee_va_to_pa((FAR void *)(uintptr_t)shm->addr);
+            reg_pair_from_64(shm_pa, &par->a1, &par->a2);
+            reg_pair_from_64((uintptr_t)shm, &par->a4, &par->a5);
           }
         else
           {
@@ -201,9 +201,8 @@ static void optee_smc_handle_rpc(FAR struct optee_priv_data *priv_,
         break;
 
       case OPTEE_SMC_RPC_FUNC_FREE:
-        shme = (FAR struct optee_shm_entry *)
-                  reg_pair_to_uintptr(par->a1, par->a2);
-        optee_shm_free(shme);
+        shm = reg_pair_to_ptr(par->a1, par->a2);
+        optee_shm_free(shm);
         break;
 
       case OPTEE_SMC_RPC_FUNC_FOREIGN_INTR:
