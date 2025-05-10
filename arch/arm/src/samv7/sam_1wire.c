@@ -594,7 +594,7 @@ static int sam_process(struct sam_1wire_s *priv,
                        const struct sam_1wire_msg_s *msgs, int count)
 {
   irqstate_t irqs;
-  uint8_t indx;
+  uint8_t index;
   int ret;
 
   /* Lock out other clients */
@@ -607,9 +607,9 @@ static int sam_process(struct sam_1wire_s *priv,
 
   priv->result = ERROR;
 
-  for (indx = 0; indx < count; indx++)
+  for (index = 0; index < count; index++)
     {
-      switch (msgs[indx].task)
+      switch (msgs[index].task)
         {
         case ONEWIRETASK_NONE:
           priv->result = OK;
@@ -624,7 +624,7 @@ static int sam_process(struct sam_1wire_s *priv,
           /* Atomic */
 
           irqs = enter_critical_section();
-          priv->msgs = &msgs[indx];
+          priv->msgs = &msgs[index];
           sam_send(priv, RESET_TX);
           leave_critical_section(irqs);
 
@@ -643,7 +643,7 @@ static int sam_process(struct sam_1wire_s *priv,
           /* Atomic */
 
           irqs = enter_critical_section();
-          priv->msgs = &msgs[indx];
+          priv->msgs = &msgs[index];
           priv->byte = priv->msgs->buffer;
           priv->bit = 0;
           sam_send(priv, (*priv->byte & (1 << priv->bit)) ?
@@ -665,7 +665,7 @@ static int sam_process(struct sam_1wire_s *priv,
           /* Atomic */
 
           irqs = enter_critical_section();
-          priv->msgs = &msgs[indx];
+          priv->msgs = &msgs[index];
           priv->byte = priv->msgs->buffer;
           priv->bit = 0;
           sam_send(priv, READ_TX);

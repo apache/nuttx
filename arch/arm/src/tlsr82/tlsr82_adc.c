@@ -1172,14 +1172,14 @@ static void adc_shutdown(struct adc_dev_s *dev)
  *
  ****************************************************************************/
 
-int tlsr82_adc_init(const char *devpath, int miror)
+int tlsr82_adc_init(const char *devpath, int minor)
 {
   int ret = OK;
   struct adc_dev_s *dev;
 
-  ainfo("ADC channel: %" PRIu8 "\n", miror);
+  ainfo("ADC channel: %" PRIu8 "\n", minor);
 
-  switch (miror)
+  switch (minor)
     {
 #ifdef CONFIG_TLSR82_ADC_CHAN0
       case ADC_CHAN_0:

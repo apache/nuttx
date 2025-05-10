@@ -767,7 +767,7 @@ static int pwm_ioctl(struct pwm_lowerhalf_s *dev, int cmd,
  *
  ****************************************************************************/
 
-int tlsr82_pwminitialize(const char *devpath, int miror)
+int tlsr82_pwminitialize(const char *devpath, int minor)
 {
   struct tlsr82_pwmtimer_s *lower;
   int ret = OK;
@@ -798,9 +798,9 @@ int tlsr82_pwminitialize(const char *devpath, int miror)
       up_enable_irq(NR_SW_PWM_IRQ);
     }
 
-  pwminfo("PWM%u\n", miror);
+  pwminfo("PWM%u\n", minor);
 
-  switch (miror)
+  switch (minor)
     {
 #ifdef CONFIG_TLSR82_PWM0
       case 0:

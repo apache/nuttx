@@ -52,19 +52,19 @@ static const uint16_t g_daysbeforemonth[13] =
  *    month.
  *
  * Input Parameters:
- *    month    - The month in the form of tm_mon, that is a range of 0-11.
- *    leapyear - True if leap year and there are 29 days in February.
- *               NOTE the month=1 is February.
+ *    month     - The month in the form of tm_mon, that is a range of 0-11.
+ *    leap_year - True if leap year and there are 29 days in February.
+ *                NOTE the month=1 is February.
  *
  * Returned Value:
  *    The number of days that occurred before the month
  *
  ****************************************************************************/
 
-int clock_daysbeforemonth(int month, bool leapyear)
+int clock_daysbeforemonth(int month, bool leap_year)
 {
   int retval = g_daysbeforemonth[month];
-  if (month >= 2 && leapyear)
+  if (month >= 2 && leap_year)
     {
       retval++;
     }
