@@ -67,7 +67,7 @@ static int group_continue_handler(pid_t pid, FAR void *arg)
   rtcb = nxsched_get_tcb(pid);
   if (rtcb != NULL)
     {
-      /* Remove the task from waitting list */
+      /* Remove the task from waiting list */
 
       nxsched_remove_blocked(rtcb);
 

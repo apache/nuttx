@@ -101,25 +101,25 @@
 
 /* Timing constants *********************************************************/
 
-#define NSEC_PER_SEC          1000000000L /* Seconds */
-#define USEC_PER_SEC             1000000L
-#define MSEC_PER_SEC                1000L
+#define NSEC_PER_SEC          1000000000UL /* Seconds */
+#define USEC_PER_SEC             1000000UL
+#define MSEC_PER_SEC                1000UL
 #define DSEC_PER_SEC                  10
 #define HSEC_PER_SEC                   2
 
-#define NSEC_PER_HSEC          500000000L /* Half seconds */
-#define USEC_PER_HSEC             500000L
+#define NSEC_PER_HSEC          500000000UL /* Half seconds */
+#define USEC_PER_HSEC             500000UL
 #define MSEC_PER_HSEC                500
 #define DSEC_PER_HSEC                  5
 
-#define NSEC_PER_DSEC          100000000L /* Deciseconds */
-#define USEC_PER_DSEC             100000L
+#define NSEC_PER_DSEC          100000000UL /* Deciseconds */
+#define USEC_PER_DSEC             100000UL
 #define MSEC_PER_DSEC                100
 
-#define NSEC_PER_MSEC            1000000L /* Milliseconds */
-#define USEC_PER_MSEC               1000L
+#define NSEC_PER_MSEC            1000000UL /* Milliseconds */
+#define USEC_PER_MSEC               1000UL
 
-#define NSEC_PER_USEC               1000L /* Microseconds */
+#define NSEC_PER_USEC               1000UL /* Microseconds */
 
 #define SEC_PER_MIN                   60
 #define NSEC_PER_MIN           (NSEC_PER_SEC * SEC_PER_MIN)
@@ -351,7 +351,11 @@ EXTERN volatile clock_t g_system_ticks;
   while (0)
 
 #define clock_time2ticks(ts) \
-  ((clock_t)(ts)->tv_sec * TICK_PER_SEC + NSEC2TICK((ts)->tv_nsec))
+  ((clock_t)(ts)->tv_sec * TICK_PER_SEC + NSEC2TICK((uint32_t)(ts)->tv_nsec))
+
+#define clock_time2ticks_floor(ts) \
+  ((clock_t)(ts)->tv_sec * TICK_PER_SEC + \
+   div_const((uint32_t)(ts)->tv_nsec, NSEC_PER_TICK))
 
 #define clock_usec2time(ts, usec) \
   do \
@@ -364,7 +368,8 @@ EXTERN volatile clock_t g_system_ticks;
   while (0)
 
 #define clock_time2usec(ts) \
-  ((uint64_t)(ts)->tv_sec * USEC_PER_SEC + div_const((ts)->tv_nsec, NSEC_PER_USEC))
+  ((uint64_t)(ts)->tv_sec * USEC_PER_SEC + \
+   div_const((uint32_t)(ts)->tv_nsec, NSEC_PER_USEC))
 
 #define clock_nsec2time(ts, nsec) \
   do \
@@ -377,7 +382,29 @@ EXTERN volatile clock_t g_system_ticks;
   while (0)
 
 #define clock_time2nsec(ts) \
-  ((uint64_t)(ts)->tv_sec * NSEC_PER_SEC + (ts)->tv_nsec)
+  ((uint64_t)(ts)->tv_sec * NSEC_PER_SEC + (uint64_t)(ts)->tv_nsec)
+
+/* Calculate delay+1, forcing the delay into a range that we can handle.
+ *
+ * NOTE that one is added to the delay.  This is correct and must not be
+ * changed:  The contract for the use wdog_start is that the wdog will
+ * delay FOR AT LEAST as long as requested, but may delay longer due to
+ * variety of factors.  The wdog logic has no knowledge of the the phase
+ * of the system timer when it is started:  The next timer interrupt may
+ * occur immediately or may be delayed for almost a full cycle. In order
+ * to meet the contract requirement, the requested time is also always
+ * incremented by one so that the delay is always at least as long as
+ * requested.
+ *
+ * E.g. delay+1 can prevent the insufficient sleep time if we are
+ * currently near the boundary to the next tick.
+ * | current_tick | current_tick + 1 | current_tick + 2 | .... |
+ * |           ^ Here we get the current tick
+ * In this case we delay 1 tick, timer will be triggered at
+ * current_tick + 1, which is not enough for at least 1 tick.
+ */
+
+#define clock_delay2abstick(delay) (clock_systime_ticks() + (delay) + 1)
 
 /****************************************************************************
  * Name:  clock_timespec_add

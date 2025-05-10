@@ -130,7 +130,7 @@ int up_timer_gettick(FAR clock_t *ticks)
   struct timespec ts;
   int ret;
   ret = up_timer_gettime(&ts);
-  *ticks = clock_time2ticks(&ts);
+  *ticks = clock_time2ticks_floor(&ts);
   return ret;
 }
 #endif
@@ -149,7 +149,7 @@ int up_alarm_tick_cancel(FAR clock_t *ticks)
   struct timespec ts;
   int ret;
   ret = up_alarm_cancel(&ts);
-  *ticks = clock_time2ticks(&ts);
+  *ticks = clock_time2ticks_floor(&ts);
   return ret;
 }
 #  else
@@ -165,7 +165,7 @@ int up_timer_tick_cancel(FAR clock_t *ticks)
   struct timespec ts;
   int ret;
   ret = up_timer_cancel(&ts);
-  *ticks = clock_time2ticks(&ts);
+  *ticks = clock_time2ticks_floor(&ts);
   return ret;
 }
 #  endif
@@ -348,8 +348,9 @@ static clock_t nxsched_process_scheduler(clock_t ticks, clock_t elapsed,
 static clock_t nxsched_timer_process(clock_t ticks, clock_t elapsed,
                                      bool noswitches)
 {
-  clock_t rettime = 0;
-  clock_t tmp;
+  clock_t sched_next_time;
+  clock_t wdog_next_time;
+  clock_t next_time;
 
 #ifdef CONFIG_CLOCK_TIMEKEEPING
   /* Process wall time */
@@ -361,21 +362,21 @@ static clock_t nxsched_timer_process(clock_t ticks, clock_t elapsed,
    * active task.
    */
 
-  tmp = nxsched_process_scheduler(ticks, elapsed, noswitches);
-  if (tmp > 0)
-    {
-      rettime = tmp;
-    }
+  sched_next_time = nxsched_process_scheduler(ticks, elapsed, noswitches);
 
   /* Process watchdogs */
 
-  tmp = wd_timer(ticks, noswitches);
-  if (tmp > 0 && (rettime == 0 || tmp < rettime))
-    {
-      rettime = tmp;
-    }
+  wdog_next_time = wd_timer(ticks, noswitches);
 
-  return rettime;
+  /* If sched_next_time or wdog_next_time is 0,
+   * then subtracting 1 overflows to the maximum value,
+   * which is never selected.
+   */
+
+  next_time  = MIN(sched_next_time - 1, wdog_next_time - 1);
+  next_time += 1;
+
+  return next_time;
 }
 
 /****************************************************************************
@@ -405,6 +406,23 @@ static clock_t nxsched_timer_start(clock_t ticks, clock_t interval)
           interval = g_oneshot_maxticks;
         }
 #endif
+
+      /* Normally, timer event cannot triggered on exact time
+       * due to the existence of interrupt latency.
+       * Assuming that the interrupt latency is distributed within
+       * [Best-Case Execution Time, Worst-Case Execution Time],
+       * we can set the timer adjustment value to the BCET to
+       * reduce the latency.
+       * After the adjustment, the timer interrupt latency will be
+       * [0, WCET - BCET].
+       * Please use this carefully, if the timer adjustment value is not
+       * the best-case interrupt latency, it will immediately fired
+       * another timer interrupt, which may result in a much larger timer
+       * interrupt latency.
+       */
+
+      interval = interval <= (CONFIG_TIMER_ADJUST_USEC / USEC_PER_TICK) ? 0 :
+                 interval - (CONFIG_TIMER_ADJUST_USEC / USEC_PER_TICK);
 
 #ifdef CONFIG_SCHED_TICKLESS_ALARM
       /* Convert the delay to a time in the future (with respect
@@ -476,7 +494,7 @@ void nxsched_alarm_expiration(FAR const struct timespec *ts)
 
   DEBUGASSERT(ts);
 
-  ticks = clock_time2ticks(ts);
+  ticks = clock_time2ticks_floor(ts);
   nxsched_alarm_tick_expiration(ticks);
 }
 #endif

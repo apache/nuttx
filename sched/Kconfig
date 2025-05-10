@@ -150,6 +150,16 @@ config USEC_PER_TICK
 		This value should never be less than the underlying resolution of
 		the timer.  Error may ensue.
 
+config TIMER_ADJUST_USEC
+	int "System timer tick adjustment (microseconds)"
+	default 0
+	---help---
+		This value is added to the absolute tick set to the system timer.
+		This is used to compensate for interrupt latency in real-time
+		systems where the event required to be triggered on exact time.
+		The default value of 0 means that no adjustment is made. E.g.
+		5 means for each timer being set will be fired 5 microseconds earlier.
+
 if !SCHED_TICKLESS
 
 config SYSTEMTICK_EXTCLK
@@ -1169,7 +1179,7 @@ config SCHED_PROFILE_TICKSPERSEC
 	int "Profile sampling rate"
 	default 1000
 	---help---
-		This is the frequency at which the profil functon will sample the
+		This is the frequency at which the profil function will sample the
 		running program. The default is 1000Hz.
 
 menuconfig SCHED_INSTRUMENTATION
@@ -1990,11 +2000,11 @@ config SCHED_EVENTS
 		events to event objects.
 
 config ASSERT_PAUSE_CPU_TIMEOUT
-	int "Timeout in milisecond to pause another CPU when assert"
+	int "Timeout in millisecond to pause another CPU when assert"
 	default 2000
 	depends on SMP
 	---help---
-		Timeout in milisecond to pause another CPU when assert. Only available
+		Timeout in millisecond to pause another CPU when assert. Only available
 		when SMP is enabled.
 		Enable to support perf events.
 

@@ -150,7 +150,7 @@ out:
 
 int nxsem_tickwait_uninterruptible(FAR sem_t *sem, uint32_t delay)
 {
-  clock_t end = clock_systime_ticks() + delay + 1;
+  clock_t end = clock_delay2abstick(delay);
   int ret;
 
   for (; ; )

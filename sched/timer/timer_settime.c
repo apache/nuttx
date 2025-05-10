@@ -316,9 +316,7 @@ int timer_settime(timer_t timerid, int flags,
     {
       /* Calculate a delay corresponding to the absolute time in 'value' */
 
-      clock_abstime2ticks(timer->pt_clock, &value->it_value,
-                          &timer->pt_expected);
-      timer->pt_expected += clock_systime_ticks();
+      clock_abstime2ticks(timer->pt_clock, &value->it_value, &delay);
     }
   else
     {
@@ -328,8 +326,9 @@ int timer_settime(timer_t timerid, int flags,
        */
 
       delay = clock_time2ticks(&value->it_value);
-      timer->pt_expected = clock_systime_ticks() + delay;
     }
+
+  timer->pt_expected = clock_delay2abstick(delay);
 
   /* Then start the watchdog */
 
