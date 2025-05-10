@@ -204,6 +204,39 @@ bool work_insert_pending(FAR struct kwork_wqueue_s *wqueue,
 }
 
 /****************************************************************************
+ * Name: work_remove
+ *
+ * Description:
+ *   Internal public function to remove the work from the workqueue.
+ *   Require wqueue != NULL and work != NULL.
+ *
+ * Input Parameters:
+ *   wqueue - The work queue.
+ *   work   - The work to be inserted.
+ *
+ * Returned Value:
+ *   Return whether the head of the pending queue has changed.
+ *
+ ****************************************************************************/
+
+static inline_function
+bool work_remove(FAR struct kwork_wqueue_s *wqueue,
+                 FAR struct work_s         *work)
+{
+  FAR struct work_s *head;
+
+  head = list_first_entry(&wqueue->pending, struct work_s, node);
+
+  /* Seize the ownership from the work thread. */
+
+  work->worker = NULL;
+
+  list_delete(&work->node);
+
+  return head == work;
+}
+
+/****************************************************************************
  * Name: work_timer_expired
  *
  * Description:
@@ -215,6 +248,39 @@ bool work_insert_pending(FAR struct kwork_wqueue_s *wqueue,
  ****************************************************************************/
 
 void work_timer_expired(wdparm_t arg);
+
+/****************************************************************************
+ * Name: work_timer_reset
+ *
+ * Description:
+ *   Internal public function to reset the timer of the workqueue.
+ *   Require wqueue != NULL.
+ *
+ * Input Parameters:
+ *   wqueue - The work queue.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+static inline_function
+void work_timer_reset(FAR struct kwork_wqueue_s *wqueue)
+{
+  if (!list_is_empty(&wqueue->pending))
+    {
+      FAR struct work_s *work;
+
+      work = list_first_entry(&wqueue->pending, struct work_s, node);
+
+      wd_start_abstick(&wqueue->timer, work->qtime,
+                       work_timer_expired, (wdparm_t)wqueue);
+    }
+  else
+    {
+      wd_cancel(&wqueue->timer);
+    }
+}
 
 /****************************************************************************
  * Name: work_start_highpri

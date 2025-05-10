@@ -46,7 +46,7 @@ static int work_qcancel(FAR struct kwork_wqueue_s *wqueue, bool sync,
                         FAR struct work_s *work)
 {
   irqstate_t flags;
-  int        ret = OK;
+  FAR sem_t *sync_wait = NULL;
 
   if (wqueue == NULL || work == NULL)
     {
@@ -60,56 +60,49 @@ static int work_qcancel(FAR struct kwork_wqueue_s *wqueue, bool sync,
 
   flags = spin_lock_irqsave(&wqueue->lock);
 
-  /* Check whether we own the work structure. */
-
   if (!work_available(work))
     {
-      bool is_head = list_is_head(&wqueue->pending, &work->node);
-
-      /* Seize the ownership from the work thread. */
-
-      work->worker = NULL;
-
-      list_delete(&work->node);
-
       /* If the head of the pending queue has changed, we should reset
        * the wqueue timer.
        */
 
-      if (is_head)
+      if (work_remove(wqueue, work))
         {
-          if (!list_is_empty(&wqueue->pending))
-            {
-              work = list_first_entry(&wqueue->pending, struct work_s, node);
-
-              ret = wd_start_abstick(&wqueue->timer, work->qtime,
-                                     work_timer_expired, (wdparm_t)wqueue);
-            }
-          else
-            {
-              wd_cancel(&wqueue->timer);
-            }
+          work_timer_reset(wqueue);
         }
     }
-  else if (!up_interrupt_context() && !sched_idletask() && sync)
+
+  /* Note that cancel_sync can not be called in the interrupt
+   * context and the idletask context.
+   */
+
+  if (sync)
     {
       int wndx;
+      pid_t pid = nxsched_gettid();
+
+      /* Wait until the worker thread finished the work. */
 
       for (wndx = 0; wndx < wqueue->nthreads; wndx++)
         {
           if (wqueue->worker[wndx].work == work &&
-              wqueue->worker[wndx].pid != nxsched_gettid())
+              wqueue->worker[wndx].pid != pid)
             {
               wqueue->worker[wndx].wait_count++;
-              spin_unlock_irqrestore(&wqueue->lock, flags);
-              nxsem_wait_uninterruptible(&wqueue->worker[wndx].wait);
-              return 1;
+              sync_wait = &wqueue->worker[wndx].wait;
+              break;
             }
         }
     }
 
   spin_unlock_irqrestore(&wqueue->lock, flags);
-  return ret;
+
+  if (sync_wait)
+    {
+      nxsem_wait_uninterruptible(sync_wait);
+    }
+
+  return 0;
 }
 
 /****************************************************************************
@@ -163,8 +156,6 @@ int work_cancel_wq(FAR struct kwork_wqueue_s *wqueue,
  *
  * Returned Value:
  *   Zero means the work was successfully cancelled.
- *   One means the work was not cancelled because it is currently being
- *   processed by work thread, but wait for it to finish.
  *   A negated errno value is returned on any failure:
  *
  *   -ENOENT - There is no such work queued.
