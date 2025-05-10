@@ -148,7 +148,7 @@ of it was written properly. This helps in making it power loss resilient.
 
 The journal, when combined with CoW, plays another important role. In pure
 CoW, any update to a CTZ file will result in it having a new location. This
-new location wil need to be updated in the parent, which itself will have a
+new location will need to be updated in the parent, which itself will have a
 new location after the update, and so on till it reaches the root. The
 journal stops this propagation immediately. When the journal is full above
 a certain limit, it will flush, and apply all of these changes to the FS

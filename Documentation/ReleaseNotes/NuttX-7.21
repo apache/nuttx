@@ -493,7 +493,7 @@ sem_restorebaseprio needed to take the tcb from the holder prior to
 the holder being freed. In the failure case where sched_verifytcb
 fails it added the overhead of looking up the holder. There is also
 the additional thunking on the foreach to get from holer to
-holder->tcb. An alternate approach could be to leve the interface
+holder->tcb. An alternate approach could be to leave the interface
 the same and allocate a holder on the stack of sem_restoreholderprioB
 copy the sem's holder to it, free it as is done in this pr and
 then pass that address sem_restoreholderprio as the holder. It could

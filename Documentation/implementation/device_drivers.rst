@@ -60,7 +60,7 @@ The I2C Tool
 
 Of course, like most rules, there are lots of violations. I2C is another bus and
 the the I2C "driver" is another transport similar in many ways to SPI. For I2C,
-there is an application at ``apps/system/i2c`` alled the "I2C tool" that will allow
+there is an application at ``apps/system/i2c`` called the "I2C tool" that will allow
 you access I2C devices from the command line. This is not really just a test tool
 and not a real part of an application.
 

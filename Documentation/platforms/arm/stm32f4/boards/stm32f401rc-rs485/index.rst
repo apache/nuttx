@@ -614,7 +614,7 @@ NSH commands::
 
 Get the ip address assigned to eth0 and convert to hexadecimal, for example 192.168.1.2
 becomes 0xC0A80102, than configure CONFIG_NETINIT_IPADDR and CONFIG_EXAMPLES_TELNETD_IPADDR,
-also configure the router address, in this example it woukd be 0xC0A80101. After theses changes
+also configure the router address, in this example it would be 0xC0A80101. After these changes
 rebuild and load the new firmware on your board::
 
        nsh> mount -t procfs /proc

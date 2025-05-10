@@ -255,7 +255,7 @@ arm
 * [#12873](https://github.com/apache/nuttx/pull/12873) arm/lm3s6965-ek: Disable NTPC for lm3s6965 to fix maximum flash space…
 * [#13557](https://github.com/apache/nuttx/pull/13557) arm/qemu: Add mounting of tmpfs
 * [#13117](https://github.com/apache/nuttx/pull/13117) arm/qemu: enable WFI in `up_idle`
-* [#13131](https://github.com/apache/nuttx/pull/13131) arm/spinlock: up_testset() sould not depends on SMP
+* [#13131](https://github.com/apache/nuttx/pull/13131) arm/spinlock: up_testset() should not depend on SMP
 * [#12879](https://github.com/apache/nuttx/pull/12879) arm/stm32f401rc-rs485: Add support to BMP280 sensor
 * [#13565](https://github.com/apache/nuttx/pull/13565) arm/stm32f401rc-rs485: Add support to LCD 16x2 with I2C Backpack
 * [#12839](https://github.com/apache/nuttx/pull/12839) arm/stm32f401rc-rs485: Add support to RFID MFRC522

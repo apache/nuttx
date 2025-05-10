@@ -730,7 +730,7 @@ Configuration sub-directories
          CONFIG_EXAMPLES_NXHELLO_BPP=1            : One bit per pixel
          CONFIG_EXAMPLES_NXHELLO_EXTERNINIT=y     : Special initialization is required.
 
-        * The OLED is monochrome so the only "colors" are blacka nd white.
+        * The OLED is monochrome so the only "colors" are black and white.
           The default "colors" will give you while text on a black background.
           You can override the faults it you want black text on a while background.
 

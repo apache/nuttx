@@ -787,7 +787,7 @@ Running NuttX from SDRAM
 
           saveenv
 
-     4. If Ethernet Phy has not been detected during former bootup, reset
+     4. If Ethernet Phy has not been detected during former boot up, reset
         the board to reload U-Boot : the Ethernet address and Phy
         initialization shall be ok, now
 
@@ -4131,7 +4131,7 @@ Configurations
         $ make menuconfig
 
           Enable the ROMFS file system and board-specific "ROMFS boot mount"
-          support to auto-mount the ROMFS file system on bootup.
+          support to auto-mount the ROMFS file system on boot up.
 
         $ tools/configure.sh sama5d4-ek:knsh  : Establish this configuration
         $ export PATH=???:$PATH             : Set up the PATH variable
@@ -4608,7 +4608,7 @@ Configurations
             display.
          b. nximage.  Displays the NuttX logo in the center of the display.
          c. nxlines.  Shows many fat lines.  This generally looks like a
-            "clock" with a cicle and a rotating line in the center.
+            "clock" with a circle and a rotating line in the center.
          d. nxtext.  This demonstrates scrolling text with pop-up windows on
             top of the test.  The pop-up windows come and go without
             corrupting the scrolling text.

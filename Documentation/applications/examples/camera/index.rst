@@ -7,7 +7,7 @@ the command is as below.::
 
   nsh> camera ([-jpg]) ([capture num])
 
-  -jpg        : this option is set for storing JPEG file into a strage.
+  -jpg        : this option is set for storing JPEG file into a storage.
               : If this option isn't set capturing raw RGB565 data in a file.
               : raw RGB565 is default.
 

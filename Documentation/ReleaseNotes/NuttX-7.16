@@ -182,7 +182,7 @@ than 1. From David Sidrane.
 - fs/Kconfig: Allow CONFIG_FS_WRITABLE to be manually selectable. This
 is needed when there are no writable file systems, but write support
 is still needed in BCH or FTL.
-- arch/*/Makefile: Add definitions that can be overrided to use GCC
+- arch/*/Makefile: Add definitions that can be overridden to use GCC
 instead of LD in the final link. From Paul Alexander Patience .
 
 * Applications: apps/netutils:

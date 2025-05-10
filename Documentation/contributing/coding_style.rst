@@ -1228,8 +1228,8 @@ Structures
    defining a structure within a type definition is discouraged. It is
    preferred that the structure definition and the type definition be
    separate definitions. In general, the NuttX coding style discourages
-   any ``typdef``-ing of structures; normally the full structure name is
-   used as types throughout the code. The reason for this is that is
+   any ``typedef``-ing of structures; normally the full structure name
+   is used as types throughout the code. The reason for this is that is
    structure pointers may be forward referenced in header files without
    having to include the file the provides the type definition. This
    greatly reduces header file coupling.

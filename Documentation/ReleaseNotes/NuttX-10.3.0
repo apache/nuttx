@@ -106,7 +106,7 @@ NuttX-10.3.0
 * [#5527](https://github.com/apache/nuttx/pull/5527) libnx: handle the bad message correctly 
 * [#5321](https://github.com/apache/nuttx/pull/5321) libxx: uclibxx: add patch use overload constructor of filebuf & ostream 
 * [#4747](https://github.com/apache/nuttx/pull/4747) Revert "libc: Implement fesetround & fegetround for arm" 
-* [#4739](https://github.com/apache/nuttx/pull/4739) Revert "lib/netdb: Change the default NETDB_DNSCLIENT_NAMESIZE to NAM… 
+* [#4739](https://github.com/apache/nuttx/pull/4739) Revert "lib/netdb: Change the default NETDB_DNSCLIENT_NAMESIZE to NAME… 
 
 * [#5459](https://github.com/apache/nuttx/pull/5459) mm: mm_heap: add mm_foreach to run handler for every memory node
 * [#5504](https://github.com/apache/nuttx/pull/5504) mm: handle take mm sem in IRQ 
@@ -531,7 +531,7 @@ NuttX-10.3.0
 * [#5636](https://github.com/apache/nuttx/pull/5636) arch: risc-v/qemu-rv: Set FS bits in mstatus 
 * [#5529](https://github.com/apache/nuttx/pull/5529) arch: risc-v/qemu-rv: Supports SMP up to 8 cores and other minor changes 
 * [#4825](https://github.com/apache/nuttx/pull/4825) arch: risc-v/xtensa: Kconfig: Some cleanup and improvements to arch versions of C library functions. 
-* [#5683](https://github.com/apache/nuttx/pull/5683) arch: risc-v/xtensa: corrent dumpstate xcp size 
+* [#5683](https://github.com/apache/nuttx/pull/5683) arch: risc-v/xtensa: correct dumpstate xcp size 
 * [#5717](https://github.com/apache/nuttx/pull/5717) Revert "arch: risc-v: Correct FPU register save area in riscv_copystate" 
 
 #### SPARC

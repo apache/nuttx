@@ -54,7 +54,7 @@ NuttX-10.2.0
 * [#4450](https://github.com/apache/nuttx/pull/4450) libxx:uClibc++: disable new_handler.cpp when use libsupc++
 * [#4456](https://github.com/apache/nuttx/pull/4456) libc/gettext: Initialize path field when creating mofile struct.
 * [#4466](https://github.com/apache/nuttx/pull/4466) sched/wdog/wd_start.c: prevent accessing watch-dog lag if head is NULL
-* [#4499](https://github.com/apache/nuttx/pull/4499) uClibc++:remove typeinfo.cpp that confict with libsupc++
+* [#4499](https://github.com/apache/nuttx/pull/4499) uClibc++:remove typeinfo.cpp that conflict with libsupc++
 * [#3698](https://github.com/apache/nuttx/pull/3698) sched/task: Simplify the syscall handling of task_spawn
 * [#3813](https://github.com/apache/nuttx/pull/3813) syscall/syscall.csv: Correct ordering of entries
 * [#4020](https://github.com/apache/nuttx/pull/4020) SMP should depends on ARCH_INTERRUPTSTACK
@@ -650,7 +650,7 @@ NuttX-10.2.0
 * [#4061](https://github.com/apache/nuttx/pull/4061) FAT32 kconfig entry to enforce computation of free clusters at mount
 * [#4079](https://github.com/apache/nuttx/pull/4079) fs/procfs: layout the output of meminfo correctly
 * [#4093](https://github.com/apache/nuttx/pull/4093) fs: Move the default ioctl handle from nx_vioctl to file_vioctl
-* [#4097](https://github.com/apache/nuttx/pull/4097) fs: Remove the inernal st_count field from struct stat
+* [#4097](https://github.com/apache/nuttx/pull/4097) fs: Remove the internal st_count field from struct stat
 * [#4101](https://github.com/apache/nuttx/pull/4101) fs: pseudorename should call inode_release in the error path
 * [#4118](https://github.com/apache/nuttx/pull/4118) fs: Support the root file system attributes(mode, uid, gid and time)
 * [#4119](https://github.com/apache/nuttx/pull/4119) fs: fstat shouldn't follow the symbol link

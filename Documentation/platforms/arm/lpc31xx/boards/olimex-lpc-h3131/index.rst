@@ -854,7 +854,7 @@ configuration:
 
       Since SDRAM is not currently working (see above) and NAND support
       has not be integrated, the only really option is to put NSH "on a
-      diet" to reduct the size so that it will fit into memory.
+      diet" to reduce the size so that it will fit into memory.
 
       Here are a few things you can do:
 

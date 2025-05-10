@@ -130,7 +130,7 @@ Using pysimCoder to design NuttX application
 After running pysimCoder, separate blocks can be selected from the library menu on the left hand side. The menu contains
 several libraries, NuttX specific blocks can be found in library "NuttX". It is also possible to use blocks from other
 libraries like "input", "output", "math" and so on. Several blocks can have specific parameter options and various number
-of inputs/outputs. Double left click on the block openes parameter settings while single right click on the block leads
+of inputs/outputs. Double left click on the block opens parameter settings while single right click on the block leads
 to number of inputs/outputs setup. The pysimCoder interface can be seen in the picture below.
 
 .. figure:: image/interface.png

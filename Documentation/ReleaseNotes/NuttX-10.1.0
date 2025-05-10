@@ -358,7 +358,7 @@ NuttX-10.1.0
 * [#1968](https://github.com/apache/nuttx/pull/1968) arm: kinetis: freedom-k64f: Declare missing NUM_BUTTONS
 * [#1990](https://github.com/apache/nuttx/pull/1990) arm: kinetis: flexcan fixed compile error
 * [#2120](https://github.com/apache/nuttx/pull/2120) arm: stm32h7: Fix missing 'ret' reported by Frank-Christian Kruegel
-* [#2159](https://github.com/apache/nuttx/pull/2159) xtensa: esp32: Fix SPI master DMA RX buffer memcpy size erro
+* [#2159](https://github.com/apache/nuttx/pull/2159) xtensa: esp32: Fix SPI master DMA RX buffer memcpy size error
 * [#2160](https://github.com/apache/nuttx/pull/2160) arm: stm32l4/stm32l4_adc.c: fix copy-paste mistake with CONFI
 * [#2210](https://github.com/apache/nuttx/pull/2210) arm: stm32/stm32_adc.c: do not allow negative ref count
 * [#2214](https://github.com/apache/nuttx/pull/2214) xtensa: esp32: Fix rt-timer issues

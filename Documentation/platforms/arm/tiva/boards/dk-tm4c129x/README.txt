@@ -725,7 +725,7 @@ Where <subdir> is one of the following:
        [80.6 F in January.  I love living in Costa Rica1]
 
        The default units is degrees Fahrenheit, but that is easily
-       reconfigured.  See the discussin above in the paragraph entitled
+       reconfigured.  See the discussion above in the paragraph entitled
        "Temperature Sensor".
 
   ipv6:

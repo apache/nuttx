@@ -34,7 +34,7 @@ AVR ATMega2560
 --------------
 
 Extension of the AVR architecture to support the
-ATMega2560 and specifi support for the Arduion MEGA2560 board were
+ATMega2560 and specific support for the Arduion MEGA2560 board were
 contributed by Dimitry Kloper and first released in NuttX-7.14.
 
 

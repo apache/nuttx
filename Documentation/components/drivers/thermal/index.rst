@@ -18,7 +18,7 @@ Brief
     - ``HOT``: When the device temperature reaches this trip point, stricter temperature control (such as resource limiting) is required. If the current temperature is equals to OR greater than temperature obtained last time, the temperature control level is increased.
     - ``CRITICAL``: Shut down / restart the device.
 
-#. ProcFS node supported, used for debugging, and we can get the binding info between "Zone", "Cooling Decice", "Trip" and "Governor", temperature value and cooling state; (for example, "Zone Device"(temperature sensor): ``/proc/thermal/cpu_thermal``), and write 0 or 1 to turn off or on the "Zone Device";
+#. ProcFS node supported, used for debugging, and we can get the binding info between "Zone", "Cooling Device", "Trip" and "Governor", temperature value and cooling state; (for example, "Zone Device"(temperature sensor): ``/proc/thermal/cpu_thermal``), and write 0 or 1 to turn off or on the "Zone Device";
 
 Device Driver
 =============

@@ -227,7 +227,7 @@ Where <subdir> is one of the following:
 
          The persistent network monitor thread is enabled.  It monitors
          changes in link status, takes the network down when the link is
-         lost (e.g., cable disconnected), abd brings the network back up
+         lost (e.g., cable disconnected), and brings the network back up
          when the link becomes available again (e.g., cable connected).
 
          The Ethernet MAC address is factory-programmed into the non-volatile

@@ -249,7 +249,7 @@ the buffers to the Cortex-M7 D-Cache line size:
 
 .. code-block:: c
 
-    /* Buffers use fro DMA access must begin on an address aligned with the
+   /* Buffers used for DMA access must begin on an address aligned with the
    * D-Cache line and must be an even multiple of the D-Cache line size.
    * These size/alignment requirements are necessary so that D-Cache flush
    * and invalidate operations will not have any additional effects.

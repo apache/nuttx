@@ -2,7 +2,7 @@
 TMPFS
 =====
 
-NuttX TMPFS file system is a tiny dyamic RAM based file system. 
+NuttX TMPFS file system is a tiny dynamic RAM based file system.
 
 It can be enabled by adding ``CONFIG_FS_TMPFS=y`` to the configuration at build time. 
 
