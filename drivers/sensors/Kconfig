@@ -617,6 +617,12 @@ config BME680_I2C_FREQUENCY
 	int "BME680 I2C frequency"
 	default 400000
 
+config BME680_DISABLE_TEMP_MEAS
+	bool "Disable Temperature Measurement"
+	default n
+	---help---
+		If enabled, the sensor will not measure temperature.
+
 config BME680_DISABLE_PRESS_MEAS
 	bool "Disable Pressure Measurement"
 	default n
