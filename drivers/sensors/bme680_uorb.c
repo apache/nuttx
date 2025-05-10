@@ -61,7 +61,7 @@
 
 /* Sub-sensor definitions */
 
-#ifdef CONFIG_BME680_DISABLE_PRESS_MEAS
+#ifndef CONFIG_BME680_DISABLE_TEMP_MEAS
 #  define BME680_TEMP_IDX (0)
 #else
 #  define BME680_TEMP_IDX (-1)
@@ -373,12 +373,14 @@ static int bme680_putreg8(FAR struct bme680_dev_s *priv, uint8_t regaddr,
 static int bme680_getregs(FAR struct bme680_dev_s *priv, uint8_t regaddr,
                           uint8_t *rxbuffer, uint8_t length);
 
+#ifndef CONFIG_BME680_DISABLE_TEMP_MEAS
+static int bme680_push_temp_data(FAR struct bme680_dev_s *priv,
+                                 FAR struct bme680_data_s *data);
+#endif
+
 #ifndef CONFIG_BME680_DISABLE_PRESS_MEAS
 static int bme680_push_press_data(FAR struct bme680_dev_s *priv,
                                   FAR struct bme680_data_s *data);
-#else
-static int bme680_push_temp_data(FAR struct bme680_dev_s *priv,
-                                 FAR struct bme680_data_s *data);
 #endif
 
 #ifndef CONFIG_BME680_DISABLE_HUM_MEAS
@@ -409,18 +411,20 @@ static int bme680_control(FAR struct sensor_lowerhalf_s *lower,
 
 static const push_data_func deliver_data[BME680_SENSORS_COUNT] =
 {
+#ifndef CONFIG_BME680_DISABLE_TEMP_MEAS
+  bme680_push_temp_data,
+#endif
+
 #ifndef CONFIG_BME680_DISABLE_PRESS_MEAS
-  bme680_push_press_data
-#else
-  bme680_push_temp_data
+  bme680_push_press_data,
 #endif
 
 #ifndef CONFIG_BME680_DISABLE_HUM_MEAS
-  , bme680_push_hum_data
+  bme680_push_hum_data,
 #endif
 
 #ifndef CONFIG_BME680_DISABLE_GAS_MEAS
-  , bme680_push_gas_data
+  bme680_push_gas_data,
 #endif
 };
 
@@ -791,6 +795,34 @@ static int bme680_set_oversamp(FAR struct bme680_dev_s *priv)
   return OK;
 }
 
+#ifndef CONFIG_BME680_DISABLE_TEMP_MEAS
+/****************************************************************************
+ * Name: bme680_push_temp_data
+ ****************************************************************************/
+
+static int bme680_push_temp_data(FAR struct bme680_dev_s *priv,
+                                 FAR struct bme680_data_s *data)
+{
+  struct sensor_temp temp_data;
+  int ret;
+
+  struct sensor_lowerhalf_s lower = priv->dev.lower[BME680_TEMP_IDX];
+
+  temp_data.timestamp = data->timestamp;
+  temp_data.temperature = data->temperature;
+
+  ret = lower.push_event(lower.priv, &temp_data, sizeof(struct sensor_temp));
+
+  if (ret < 0)
+    {
+      snerr("Pushing temperature data failed\n");
+      return ret;
+    }
+
+  return OK;
+}
+#endif /* !CONFIG_BME680_DISABLE_TEMP_MEAS */
+
 #ifndef CONFIG_BME680_DISABLE_PRESS_MEAS
 /****************************************************************************
  * Name: bme680_push_press_data
@@ -814,32 +846,6 @@ static int bme680_push_press_data(FAR struct bme680_dev_s *priv,
   if (ret < 0)
     {
       snerr("Pushing baro data failed\n");
-      return ret;
-    }
-
-  return OK;
-}
-#else
-/****************************************************************************
- * Name: bme680_push_temp_data
- ****************************************************************************/
-
-static int bme680_push_temp_data(FAR struct bme680_dev_s *priv,
-                                 FAR struct bme680_data_s *data)
-{
-  struct sensor_temp temp_data;
-  int ret;
-
-  struct sensor_lowerhalf_s lower = priv->dev.lower[BME680_TEMP_IDX];
-
-  temp_data.timestamp = data->timestamp;
-  temp_data.temperature = data->temperature;
-
-  ret = lower.push_event(lower.priv, &temp_data, sizeof(struct sensor_temp));
-
-  if (ret < 0)
-    {
-      snerr("Pushing temperature data failed\n");
       return ret;
     }
 
@@ -1752,6 +1758,22 @@ int bme680_register(int devno, FAR struct i2c_master_s *i2c,
         }
     }
 
+#ifndef CONFIG_BME680_DISABLE_TEMP_MEAS
+  /* Register the temperature driver */
+
+  lower = &priv->dev.lower[BME680_TEMP_IDX];
+  lower->ops = &g_sensor_ops;
+  lower->type = SENSOR_TYPE_AMBIENT_TEMPERATURE;
+
+  ret = sensor_register(lower, devno);
+  if (ret < 0)
+    {
+      snerr("ERROR: Failed to register temperature driver (err = %d)\n",
+            ret);
+      goto err_init;
+    }
+#endif
+
 #ifndef CONFIG_BME680_DISABLE_PRESS_MEAS
   /* Register the barometer driver */
 
@@ -1763,20 +1785,6 @@ int bme680_register(int devno, FAR struct i2c_master_s *i2c,
   if (ret < 0)
     {
       snerr("ERROR: Failed to register barometer driver (err = %d)\n",
-            ret);
-      goto err_init;
-    }
-#else
-  /* Register the temperature driver */
-
-  lower = &priv->dev.lower[BME680_TEMP_IDX];
-  lower->ops = &g_sensor_ops;
-  lower->type = SENSOR_TYPE_AMBIENT_TEMPERATURE;
-
-  ret = sensor_register(lower, devno);
-  if (ret < 0)
-    {
-      snerr("ERROR: Failed to register temperature driver (err = %d)\n",
             ret);
       goto err_init;
     }
