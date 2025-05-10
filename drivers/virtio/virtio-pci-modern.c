@@ -340,13 +340,16 @@ virtio_pci_modern_create_virtqueue(FAR struct virtio_pci_device_s *vpdev,
                      up_addrenv_va_to_pa(vq->vq_ring.used));
 
 #if CONFIG_DRIVERS_VIRTIO_PCI_POLLING_PERIOD <= 0
-  pci_write_io_word(vpdev->dev, (uintptr_t)&cfg->queue_msix_vector, 0);
-  pci_read_io_word(vpdev->dev, (uintptr_t)&cfg->queue_msix_vector,
-                   &msix_vector);
-  if (msix_vector == VIRTIO_PCI_MSI_NO_VECTOR)
+  if (!vpdev->intx)
     {
-      vrterr("Msix_vector is no vector\n");
-      return -EBUSY;
+      pci_write_io_word(vpdev->dev, (uintptr_t)&cfg->queue_msix_vector, 0);
+      pci_read_io_word(vpdev->dev, (uintptr_t)&cfg->queue_msix_vector,
+                       &msix_vector);
+      if (msix_vector == VIRTIO_PCI_MSI_NO_VECTOR)
+        {
+          vrterr("Msix_vector is no vector\n");
+          return -EBUSY;
+        }
     }
 #endif
 
@@ -383,8 +386,11 @@ void virtio_pci_modern_delete_virtqueue(FAR struct virtio_device *vdev,
   pci_write_io_word(vpdev->dev, (uintptr_t)&cfg->queue_select, index);
 
 #if CONFIG_DRIVERS_VIRTIO_PCI_POLLING_PERIOD <= 0
-  pci_write_io_word(vpdev->dev, (uintptr_t)&cfg->queue_msix_vector,
-                    VIRTIO_PCI_MSI_NO_VECTOR);
+  if (!vpdev->intx)
+    {
+      pci_write_io_word(vpdev->dev, (uintptr_t)&cfg->queue_msix_vector,
+                        VIRTIO_PCI_MSI_NO_VECTOR);
+    }
 #endif
 }
 
@@ -598,6 +604,7 @@ static int virtio_pci_init_device(FAR struct virtio_pci_device_s *vpdev)
   uint8_t common;
   uint8_t notify;
   uint8_t device;
+  uint8_t isr;
 
   if (dev->device < 0x1040)
     {
@@ -626,11 +633,19 @@ static int virtio_pci_init_device(FAR struct virtio_pci_device_s *vpdev)
       return -ENODEV;
     }
 
+  isr = virtio_pci_find_capability(dev, VIRTIO_PCI_CAP_ISR_CFG,
+                                   PCI_RESOURCE_MEM);
+  if (isr == 0)
+    {
+      vrterr("Missing isr capabilities\n");
+      return -EINVAL;
+    }
+
   notify = virtio_pci_find_capability(dev, VIRTIO_PCI_CAP_NOTIFY_CFG,
                                       PCI_RESOURCE_MEM);
   if (notify == 0)
     {
-      vrterr("Missing capabilities %d %d\n", common, notify);
+      vrterr("Missing capabilities %d %d %d\n", isr, common, notify);
       return -EINVAL;
     }
 
@@ -642,6 +657,12 @@ static int virtio_pci_init_device(FAR struct virtio_pci_device_s *vpdev)
   vpdev->common = virtio_pci_map_capability(vpdev, common,
                                             &vpdev->common_len);
   if (vpdev->common == NULL)
+    {
+      return -EINVAL;
+    }
+
+  vpdev->isr = virtio_pci_map_capability(vpdev, isr, NULL);
+  if (vpdev->isr == NULL)
     {
       return -EINVAL;
     }
