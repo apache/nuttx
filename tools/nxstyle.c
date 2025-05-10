@@ -188,6 +188,7 @@ static const char *g_white_prefix[] =
   "ASCII_",  /* Ref:  include/nuttx/ascii.h */
   "Dl_info", /* Ref:  include/dlfcn.h */
   "Elf",     /* Ref:  include/elf.h, include/elf32.h, include/elf64.h */
+  "Ifx",     /* Ref:  arch/tricore/src */
   "PRId",    /* Ref:  inttypes.h */
   "PRIi",    /* Ref:  inttypes.h */
   "PRIo",    /* Ref:  inttypes.h */
@@ -200,6 +201,8 @@ static const char *g_white_prefix[] =
   "SCNx",    /* Ref:  inttypes.h */
   "SYS_",    /* Ref:  include/sys/syscall.h */
   "STUB_",   /* Ref:  syscall/syscall_lookup.h, syscall/sycall_stublookup.c */
+  "TEEC_",   /* Ref:  apps/tee/libteec/optee_client/libteec/include/tee_client_api.h */
+  "V4L2_",   /* Ref:  include/sys/video_controls.h */
   "XK_",     /* Ref:  include/input/X11_keysymdef.h */
   "b8",      /* Ref:  include/fixedmath.h */
   "b16",     /* Ref:  include/fixedmath.h */
@@ -210,8 +213,6 @@ static const char *g_white_prefix[] =
   "ub32",    /* Ref:  include/fixedmath.h */
   "lua_",    /* Ref:  apps/interpreters/lua/lua-5.x.x/src/lua.h */
   "luaL_",   /* Ref:  apps/interpreters/lua/lua-5.x.x/src/lauxlib.h */
-  "V4L2_",   /* Ref:  include/sys/video_controls.h */
-  "Ifx",     /* Ref:  arch/tricore/src */
   NULL
 };
 
@@ -635,6 +636,16 @@ static const char *g_white_content_list[] =
   "inflateInit",
   "inflateEnd",
   "zError",
+
+  /* Ref:
+   * apps/tee/libteec/optee_client/libteec/include/tee_client_api.h
+   */
+
+  "clockSeqAndNode",
+  "paramTypes",
+  "timeLow",
+  "timeMid",
+  "timeHiAndVersion",
 
   NULL
 };
