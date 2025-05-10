@@ -100,8 +100,8 @@ on success unless otherwise specified (see ``TEE_IOC_SHM_ALLOC``).
     future, but until then, please refer to ``include/nuttx/tee.h`` for details.
     In short, for shared memory references, ``.a`` is the offset into the
     shared memory buffer, ``.b`` is the size of the buffer, and ``.c`` is the
-    the shared memory identifier (``.addr`` field used in
-    ``TEE_IOC_SHM_REGISTER``).
+    the shared memory identifier (``.id`` field returned by
+    ``TEE_IOC_SHM_ALLOC`` or ``TEE_IOC_SHM_REGISTER``).
 
 - ``TEE_IOC_CANCEL`` : Cancel a currently invoked command.
 
@@ -113,8 +113,8 @@ on success unless otherwise specified (see ``TEE_IOC_SHM_ALLOC``).
   - Expects a ``struct tee_ioctl_shm_alloc_data`` pointer with the ``.size``
     field set, and ignoring the ``.flags`` field. Upon successful return,
     it returns the memory file descriptor one can use ``mmap()`` on (with
-    ``MAP_SHARED``). It also returns an identifier for the allocation
-    in ``.id``.
+    ``MAP_SHARED``). It also returns an identifier for use in memory references
+    (``tee_ioctl_param.c`` field) in ``.id``.
 
 - ``TEE_IOC_SHM_REGISTER`` : Register a shared memory reference with the secure OS.
 
@@ -126,10 +126,9 @@ on success unless otherwise specified (see ``TEE_IOC_SHM_ALLOC``).
     ``TEE_SHM_SEC_REGISTER`` registers the memory with the secure OS for later
     use in memrefs and is automatically de-registered during driver close if
     ``TEE_SHM_REGISTER`` is also specified. ``.addr`` shall point to the (user)
-    memory to register and ``.size`` shall indicate its size. The identifier
-    used to register shared memory with the secure OS is the value of the
-    ``.addr`` field (what one needs to specify in ``tee_ioctl_param.c``
-    during a ``TEE_IOC_INVOKE``).
+    memory to register and ``.size`` shall indicate its size. One may use the
+    returned ``.id`` field when specifying shared memory references
+    (``tee_ioctl_param.c`` field).
 
 Typical usage
 =============
@@ -167,7 +166,7 @@ Typical usage
          return ret;
        }
 
-     [...check ioc_ver accordingly...]
+     /* check ioc_ver accordingly */
 
 #. Open a session with a Trusted Application
 
@@ -188,7 +187,7 @@ Typical usage
          return ret;
        }
 
-     [...use ioc_opn.session returned...]
+     /* use ioc_opn.session returned */
 
 #. Invoke a function of the Trusted Application
 
@@ -222,7 +221,7 @@ Typical usage
          goto err_with_args;
        }
 
-     [...use result (if any) in ioc_args->params...]
+     /* use result (if any) in ioc_args->params */
 
 #. Allocate shared memory through the driver
 
@@ -253,21 +252,24 @@ Typical usage
    .. code-block:: c
 
      /* The following will fail if TEE_GEN_CAP_REG_MEM is not reported in
-      * the returned `ioc_ver.gen_caps` in step 1 above */
+      * the returned `ioc_ver.gen_caps` in step 1 above
+      * Note: user memory used does not have to be allocated through IOCTL
+      */
 
      struct tee_ioctl_shm_register_data ioc_reg = { 0 };
 
-     ioc_reg.addr = (uintptr_t)ptr;
-     ioc_reg.length = ioc_alloc.size;
-     ioc_reg.flags = TEE_SHM_REGISTER | TEE_SHM_SEC_REGISTER;
+     ioc_reg.addr = (uintptr_t)<some user memory ptr>;
+     ioc_reg.length = <user memory size>;
 
-     ret = ioctl(fd, TEE_IOC_SHM_REGISTER, (unsigned long)&ioc_reg);
-     if (ret < 0)
+     memfd = ioctl(fd, TEE_IOC_SHM_REGISTER, (unsigned long)&ioc_reg);
+     if (memfd < 0)
        {
-         munmap(shm, ioc_alloc.size);
-         close(memfd);
          return ret;
        }
+
+     /* use ioc_reg.id returned in OP-TEE parameters (e.g. open, invoke) */
+
+     close(memfd);
 
 #. Use the registered shared memory in an invocation
 
@@ -292,8 +294,8 @@ Typical usage
      ioc_args->num_params = num_params;
      ioc_args->params[0].attr = TEE_IOCTL_PARAM_ATTR_TYPE_MEMREF_OUTPUT;
      ioc_args->params[0].a = 0;
-     ioc_args->params[0].b = ioc_alloc.size;
-     ioc_args->params[0].a = (uintptr_t)shm;
+     ioc_args->params[0].b = ioc_reg.length;
+     ioc_args->params[0].c = ioc_reg.id;
 
      ioc_buf.buf_ptr = (uintptr_t)ioc_args;
      ioc_buf.buf_len = ioc_args_len;
@@ -304,4 +306,4 @@ Typical usage
          goto err_with_args;
        }
 
-     [...use result (if any) in ioc_args->params...]
+     /* use result (if any) in ioc_args->params */
