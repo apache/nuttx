@@ -31,12 +31,14 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/timers/arch_timer.h>
 #include <arch/board/board.h>
 
 #include "nvic.h"
 #include "clock/clock.h"
 #include "arm_internal.h"
 #include "chip.h"
+#include "systick.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -74,7 +76,7 @@
  *   of the systems.
  *
  ****************************************************************************/
-
+#ifndef CONFIG_RP23XX_SYSTIMER_SYSTICK
 static int rp23xx_timerisr(int irq, uint32_t *regs, void *arg)
 {
   /* Process timer interrupt */
@@ -82,6 +84,7 @@ static int rp23xx_timerisr(int irq, uint32_t *regs, void *arg)
   nxsched_process_timer();
   return 0;
 }
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -107,10 +110,14 @@ void up_timer_initialize(void)
   regval |= (NVIC_SYSH_PRIORITY_DEFAULT << NVIC_SYSH_PRIORITY_PR15_SHIFT);
   putreg32(regval, NVIC_SYSH12_15_PRIORITY);
 
+#ifdef CONFIG_RP23XX_SYSTIMER_SYSTICK
+  up_timer_set_lowerhalf(systick_initialize(true, SYSTICK_CLOCK, -1));
+#else
+
   /* Configure SysTick to interrupt at the requested rate */
 
   putreg32(SYSTICK_RELOAD, NVIC_SYSTICK_RELOAD);
-  putreg32(0, NVIC_SYSTICK_CURRENT_OFFSET);
+  putreg32(0, NVIC_SYSTICK_CURRENT);
 
   /* Attach the timer interrupt vector */
 
@@ -126,4 +133,5 @@ void up_timer_initialize(void)
   /* And enable the timer interrupt */
 
   up_enable_irq(RP23XX_IRQ_SYSTICK);
+#endif
 }

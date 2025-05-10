@@ -14,6 +14,15 @@ config RP23XX_DMAC
 	default y
 	select ARCH_DMA
 
+config RP23XX_SYSTIMER_SYSTICK
+	bool "SysTick System Timer"
+	default n
+	select TIMER_ARCH
+	select TIMER
+	select ARMV8M_SYSTICK
+	---help---
+		Use ARM SysTick.
+
 #####################################################################
 #  UART Configuration
 #####################################################################
