@@ -25,16 +25,15 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/addrenv.h>
+#include <nuttx/arch.h>
 
 #include <inttypes.h>
 #include <stdint.h>
 #include <assert.h>
 #include <debug.h>
 
-#include <nuttx/addrenv.h>
-
 #include "chip.h"
-#include "sam_pgalloc.h"
 #include "sam_memories.h"
 
 /****************************************************************************
@@ -684,6 +683,41 @@ static inline uintptr_t ebics3_virtramaddr(uintptr_t physramaddr)
 #endif
 
 /****************************************************************************
+ * Name: sam_virtpgaddr
+ *
+ * Description:
+ *   Check if the physical address lies in the page pool and, if so
+ *   get the mapping to the virtual address in the user data area.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_ADDRENV) && !defined(CONFIG_ARCH_PGPOOL_MAPPING)
+static inline uintptr_t sam_virtpgaddr(uintptr_t paddr)
+{
+  uintptr_t poolstart;
+  uintptr_t poolend;
+
+  /* REVISIT: Not implemented correctly.  The reverse lookup from physical
+   * to virtual.  This will return a kernel accessible virtual address, but
+   * not an address usable by the user code.
+   *
+   * The correct solutions is complex and, perhaps, will never be needed.
+   */
+
+  poolstart = ((uintptr_t)SAM_DDRCS_PSECTION +
+                CONFIG_SAMA5_DDRCS_PGHEAP_OFFSET);
+  poolend   = poolstart + CONFIG_SAMA5_DDRCS_PGHEAP_SIZE;
+
+  if (paddr >= poolstart && paddr < poolend)
+    {
+      return paddr - SAM_DDRCS_PSECTION + SAM_DDRCS_VSECTION;
+    }
+
+  return paddr;
+}
+#endif /* !CONFIG_ARCH_PGPOOL_MAPPING */
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -900,11 +934,7 @@ uintptr_t sam_physramaddr(uintptr_t virtramaddr)
 
   else
     {
-      uintptr_t paddr = sam_physpgaddr(virtramaddr);
-      if (paddr != 0)
-        {
-          return paddr;
-        }
+      return up_addrenv_va_to_pa((FAR void *)virtramaddr);
     }
 #endif
 
@@ -1033,11 +1063,11 @@ uintptr_t sam_virtramaddr(uintptr_t physramaddr)
 
   else
     {
-      uintptr_t vaddr = sam_virtpgaddr(physramaddr);
-      if (vaddr != 0)
-        {
-          return vaddr;
-        }
+#  ifdef CONFIG_ARCH_PGPOOL_MAPPING
+      return (uintptr_t)up_addrenv_pa_to_va(physramaddr);
+#  else
+      return sam_virtpgaddr(physramaddr);
+#  endif
     }
 #endif
 

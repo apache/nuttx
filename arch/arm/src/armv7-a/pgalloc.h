@@ -109,7 +109,7 @@ static inline bool arm_uservaddr(uintptr_t vaddr)
  *
  ****************************************************************************/
 
-static inline void set_l2_entry(uint32_t *l2table, uintptr_t paddr,
+static inline void set_l2_entry(uintptr_t *l2table, uintptr_t paddr,
                                 uintptr_t vaddr, uint32_t mmuflags)
 {
   uint32_t index;
@@ -134,7 +134,7 @@ static inline void set_l2_entry(uint32_t *l2table, uintptr_t paddr,
  *
  ****************************************************************************/
 
-static inline void clr_l2_entry(uint32_t *l2table, uintptr_t vaddr)
+static inline void clr_l2_entry(uintptr_t *l2table, uintptr_t vaddr)
 {
   uint32_t index;
 
@@ -159,7 +159,7 @@ static inline void clr_l2_entry(uint32_t *l2table, uintptr_t vaddr)
  *
  ****************************************************************************/
 
-static inline uintptr_t get_l2_entry(uint32_t *l2table, uintptr_t vaddr)
+static inline uintptr_t get_l2_entry(uintptr_t *l2table, uintptr_t vaddr)
 {
   uint32_t index;
 
@@ -178,28 +178,6 @@ static inline uintptr_t get_l2_entry(uint32_t *l2table, uintptr_t vaddr)
 /****************************************************************************
  * Public Functions Prototypes
  ****************************************************************************/
-
-/****************************************************************************
- * Name: arm_physpgaddr
- *
- * Description:
- *   Check if the virtual address lies in the user data area and, if so
- *   get the mapping to the physical address in the page pool.
- *
- ****************************************************************************/
-
-uintptr_t arm_physpgaddr(uintptr_t vaddr);
-
-/****************************************************************************
- * Name: arm_virtpgaddr
- *
- * Description:
- *   Check if the physical address lies in the page pool and, if so
- *   get the mapping to the virtual address in the user data area.
- *
- ****************************************************************************/
-
-uintptr_t arm_virtpgaddr(uintptr_t paddr);
 
 #endif /* CONFIG_MM_PGALLOC */
 #endif /* __ARCH_ARM_SRC_ARMV7_A_PGALLOC_H */

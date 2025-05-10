@@ -244,7 +244,7 @@ size_t up_get_dcache_size(void)
  * Assumptions:
  *   This operation is not atomic.  This function assumes that the caller
  *   has exclusive access to the address range so that no harm is done if
- *   the operation is pre-empted.
+ *   the operation is preempted.
  *
  ****************************************************************************/
 
@@ -274,10 +274,8 @@ void up_invalidate_dcache(uintptr_t start, uintptr_t end)
 void up_invalidate_dcache_all(void)
 {
 #ifdef CONFIG_ARCH_L2CACHE
-  irqstate_t flags = enter_critical_section();
   cp15_invalidate_dcache_all();
   l2cc_invalidate_all();
-  leave_critical_section(flags);
 #else
   cp15_invalidate_dcache_all();
 #endif
@@ -300,7 +298,7 @@ void up_invalidate_dcache_all(void)
  * Assumptions:
  *   This operation is not atomic.  This function assumes that the caller
  *   has exclusive access to the address range so that no harm is done if
- *   the operation is pre-empted.
+ *   the operation is preempted.
  *
  ****************************************************************************/
 
@@ -341,7 +339,7 @@ void up_clean_dcache(uintptr_t start, uintptr_t end)
  * Assumptions:
  *   This operation is not atomic.  This function assumes that the caller
  *   has exclusive access to the address range so that no harm is done if
- *   the operation is pre-empted.
+ *   the operation is preempted.
  *
  ****************************************************************************/
 
@@ -368,7 +366,7 @@ void up_clean_dcache_all(void)
  * Assumptions:
  *   This operation is not atomic.  This function assumes that the caller
  *   has exclusive access to the address range so that no harm is done if
- *   the operation is pre-empted.
+ *   the operation is preempted.
  *
  ****************************************************************************/
 
@@ -408,7 +406,7 @@ void up_flush_dcache(uintptr_t start, uintptr_t end)
  * Assumptions:
  *   This operation is not atomic.  This function assumes that the caller
  *   has exclusive access to the address range so that no harm is done if
- *   the operation is pre-empted.
+ *   the operation is preempted.
  *
  ****************************************************************************/
 

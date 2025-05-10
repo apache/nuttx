@@ -649,7 +649,7 @@ static bool z16f_txempty(struct uart_dev_s *dev)
  *
  * Description:
  *   Performs the low level UART initialization early in debug so that the
- *   serial console will be available during bootup.  This must be called
+ *   serial console will be available during boot-up.  This must be called
  *   before z16f_serialinit.
  *
  ****************************************************************************/
@@ -769,7 +769,7 @@ void up_putc(int ch)
   /* Keep interrupts disabled so that we do not interfere with normal
    * driver operation.
    *
-   * REVISIT:  I can imagine scenarios where the follow logic gets pre-empted
+   * REVISIT:  I can imagine scenarios where the follow logic gets preempted
    * and the UART interrupts get left in a bad state.
    */
 

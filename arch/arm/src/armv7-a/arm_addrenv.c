@@ -134,63 +134,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_addrenv_initdata
- *
- * Description:
- *   Initialize the region of memory at the beginning of the .bss/.data
- *   region that is shared between the user process and the kernel.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_BUILD_KERNEL
-static int up_addrenv_initdata(uintptr_t l2table)
-{
-  irqstate_t flags;
-  uint32_t *virtptr;
-  uintptr_t paddr;
-
-  DEBUGASSERT(l2table);
-  flags = enter_critical_section();
-
-  /* Get the virtual address corresponding to the physical page table
-   * address
-   */
-
-  virtptr = (uint32_t *)arm_pgvaddr(l2table);
-
-  /* Invalidate D-Cache so that we read from the physical memory */
-
-  up_invalidate_dcache((uintptr_t)virtptr,
-                       (uintptr_t)virtptr + sizeof(uint32_t));
-
-  /* Get the physical address of the first page of .bss/.data */
-
-  paddr = (uintptr_t)(*virtptr) & PTE_SMALL_PADDR_MASK;
-  DEBUGASSERT(paddr);
-
-  /* Get the virtual address corresponding to the physical page address */
-
-  virtptr = (uint32_t *)arm_pgvaddr(paddr);
-
-  /* Finally, after of all of that, we can initialize the tiny region at
-   * the beginning of .bss/.data by setting it to zero.
-   */
-
-  binfo("*** clear .bss/data (virtptr=%p, size=%d)\n",
-        virtptr, ARCH_DATA_RESERVE_SIZE);
-  memset(virtptr, 0, ARCH_DATA_RESERVE_SIZE);
-
-  /* Make sure that the initialized data is flushed to physical memory. */
-
-  up_flush_dcache((uintptr_t)virtptr,
-                  (uintptr_t)virtptr + ARCH_DATA_RESERVE_SIZE);
-
-  leave_critical_section(flags);
-  return OK;
-}
-#endif /* CONFIG_BUILD_KERNEL */
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -224,6 +167,7 @@ static int up_addrenv_initdata(uintptr_t l2table)
 int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize,
                       arch_addrenv_t *addrenv)
 {
+  size_t npage = MM_NPAGES(PGTABLE_SIZE);
   int ret;
 
   binfo("addrenv=%p textsize=%lu datasize=%lu heapsize=%lu\n",
@@ -238,6 +182,15 @@ int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize,
 
   memset(addrenv, 0, sizeof(arch_addrenv_t));
 
+  addrenv->l1table = (uintptr_t *)mm_pgalloc_align(npage, npage);
+  if (addrenv->l1table == NULL)
+    {
+      ret = -ENOMEM;
+      goto errout;
+    }
+
+  memcpy(addrenv->l1table, (void *)PGTABLE_BASE_VADDR, PGTABLE_SIZE);
+
   /* Back the allocation up with physical pages and set up the level 2
    * mapping (which of course does nothing until the L2 page table is hooked
    * into the L1 page table).
@@ -245,7 +198,14 @@ int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize,
 
   /* Allocate .text space pages */
 
-  ret = arm_addrenv_create_region(addrenv->text, ARCH_TEXT_NSECTS,
+  addrenv->textvbase = CONFIG_ARCH_TEXT_VBASE;
+  addrenv->datavbase = CONFIG_ARCH_DATA_VBASE;
+  addrenv->heapvbase = CONFIG_ARCH_HEAP_VBASE;
+#ifdef CONFIG_ARCH_VMA_MAPPING
+  addrenv->shmvbase  = CONFIG_ARCH_SHM_VBASE;
+#endif
+
+  ret = arm_addrenv_create_region(addrenv->l1table, ARCH_TEXT_NSECTS,
                                   CONFIG_ARCH_TEXT_VBASE, textsize,
                                   MMU_L2_UTEXTFLAGS);
   if (ret < 0)
@@ -259,7 +219,7 @@ int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize,
    * used when reporting the virtual data address in up_addrenv_vdata().
    */
 
-  ret = arm_addrenv_create_region(addrenv->data, ARCH_DATA_NSECTS,
+  ret = arm_addrenv_create_region(addrenv->l1table, ARCH_DATA_NSECTS,
                                   CONFIG_ARCH_DATA_VBASE,
                                   datasize + ARCH_DATA_RESERVE_SIZE,
                                   MMU_L2_UDATAFLAGS);
@@ -270,23 +230,9 @@ int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize,
     }
 
 #ifdef CONFIG_BUILD_KERNEL
-  /* Initialize the shared data are at the beginning of the .bss/.data
-   * region.
-   */
-
-  ret = up_addrenv_initdata((uintptr_t)addrenv->data[0] &
-                            PMD_PTE_PADDR_MASK);
-  if (ret < 0)
-    {
-      berr("ERROR: Failed to initialize .bss/.data region: %d\n", ret);
-      goto errout;
-    }
-#endif
-
-#ifdef CONFIG_BUILD_KERNEL
   /* Allocate heap space pages */
 
-  ret = arm_addrenv_create_region(addrenv->heap, ARCH_HEAP_NSECTS,
+  ret = arm_addrenv_create_region(addrenv->l1table, ARCH_HEAP_NSECTS,
                                   CONFIG_ARCH_HEAP_VBASE, heapsize,
                                   MMU_L2_UDATAFLAGS);
   if (ret < 0)
@@ -332,28 +278,36 @@ int up_addrenv_destroy(arch_addrenv_t *addrenv)
 
   /* Destroy the .text region */
 
-  arm_addrenv_destroy_region(addrenv->text, ARCH_TEXT_NSECTS,
+  if (addrenv->l1table == NULL)
+    {
+      memset(addrenv, 0, sizeof(arch_addrenv_t));
+      return OK;
+    }
+
+  arm_addrenv_destroy_region(addrenv->l1table, ARCH_TEXT_NSECTS,
                              CONFIG_ARCH_TEXT_VBASE, false);
 
   /* Destroy the .bss/.data region */
 
-  arm_addrenv_destroy_region(addrenv->data, ARCH_DATA_NSECTS,
+  arm_addrenv_destroy_region(addrenv->l1table, ARCH_DATA_NSECTS,
                              CONFIG_ARCH_DATA_VBASE, false);
 
 #ifdef CONFIG_BUILD_KERNEL
   /* Destroy the heap region */
 
-  arm_addrenv_destroy_region(addrenv->heap, ARCH_HEAP_NSECTS,
+  arm_addrenv_destroy_region(addrenv->l1table, ARCH_HEAP_NSECTS,
                              CONFIG_ARCH_HEAP_VBASE, false);
 #ifdef CONFIG_ARCH_VMA_MAPPING
   /* Destroy the shared memory region (without freeing the physical page
    * data).
    */
 
-  arm_addrenv_destroy_region(addrenv->heap, ARCH_SHM_NSECTS,
+  arm_addrenv_destroy_region(addrenv->l1table, ARCH_SHM_NSECTS,
                              CONFIG_ARCH_SHM_VBASE, true);
 #endif
 #endif
+
+  mm_pgfree((uintptr_t)addrenv->l1table, MM_NPAGES(PGTABLE_SIZE));
 
   memset(addrenv, 0, sizeof(arch_addrenv_t));
   return OK;
@@ -498,92 +452,10 @@ ssize_t up_addrenv_heapsize(const arch_addrenv_t *addrenv)
 
 int up_addrenv_select(const arch_addrenv_t *addrenv)
 {
-  uintptr_t vaddr;
-  uintptr_t paddr;
-  int i;
-
   binfo("addrenv=%p\n", addrenv);
   DEBUGASSERT(addrenv);
 
-  for (vaddr = CONFIG_ARCH_TEXT_VBASE, i = 0;
-       i < ARCH_TEXT_NSECTS;
-       vaddr += SECTION_SIZE, i++)
-    {
-      /* Set (or clear) the new page table entry */
-
-      paddr = (uintptr_t)addrenv->text[i];
-      if (paddr)
-        {
-          binfo("text: set l1 entry (paddr=%x vaddr=%x)\n", paddr, vaddr);
-          mmu_l1_setentry(paddr, vaddr, MMU_L1_PGTABFLAGS);
-        }
-      else
-        {
-          binfo("text: clear l1 (vaddr=%x)\n", vaddr);
-          mmu_l1_clrentry(vaddr);
-        }
-    }
-
-  for (vaddr = CONFIG_ARCH_DATA_VBASE, i = 0;
-       i < ARCH_DATA_NSECTS;
-       vaddr += SECTION_SIZE, i++)
-    {
-      /* Set (or clear) the new page table entry */
-
-      paddr = (uintptr_t)addrenv->data[i];
-      if (paddr)
-        {
-          binfo("data: set l1 entry (paddr=%x vaddr=%x)\n", paddr, vaddr);
-          mmu_l1_setentry(paddr, vaddr, MMU_L1_PGTABFLAGS);
-        }
-      else
-        {
-          binfo("data: clear l1 (vaddr=%x)\n", vaddr);
-          mmu_l1_clrentry(vaddr);
-        }
-    }
-
-#ifdef CONFIG_BUILD_KERNEL
-  for (vaddr = CONFIG_ARCH_HEAP_VBASE, i = 0;
-       i < ARCH_HEAP_NSECTS;
-       vaddr += SECTION_SIZE, i++)
-    {
-      /* Set (or clear) the new page table entry */
-
-      paddr = (uintptr_t)addrenv->heap[i];
-      if (paddr)
-        {
-          binfo("heap: set l1 entry (paddr=%x vaddr=%x)\n", paddr, vaddr);
-          mmu_l1_setentry(paddr, vaddr, MMU_L1_PGTABFLAGS);
-        }
-      else
-        {
-          binfo("heap: clear l1 (vaddr=%x)\n", vaddr);
-          mmu_l1_clrentry(vaddr);
-        }
-    }
-
-#ifdef CONFIG_ARCH_VMA_MAPPING
-  for (vaddr = CONFIG_ARCH_SHM_VBASE, i = 0;
-       i < ARCH_SHM_NSECTS;
-       vaddr += SECTION_SIZE, i++)
-    {
-      /* Set (or clear) the new page table entry */
-
-      paddr = (uintptr_t)addrenv->shm[i];
-      if (paddr)
-        {
-          mmu_l1_setentry(paddr, vaddr, MMU_L1_PGTABFLAGS);
-        }
-      else
-        {
-          mmu_l1_clrentry(vaddr);
-        }
-    }
-
-#endif
-#endif
-
+  mmu_l1_setpgtable(addrenv->l1table);
   return OK;
 }
 
@@ -611,27 +483,9 @@ int up_addrenv_coherent(const arch_addrenv_t *addrenv)
 
   up_invalidate_icache_all();
 
-  /* Clean D-Cache in each region.
-   * REVISIT:  Cause crashes when trying to clean unmapped memory.  In order
-   * for this to work, we need to know the exact size of each region (as we
-   * do now for the heap region).
-   */
+  /* Flush D-Cache */
 
-#warning REVISIT... causes crashes
-#if 0
-  up_clean_dcache(CONFIG_ARCH_TEXT_VBASE,
-                  CONFIG_ARCH_TEXT_VBASE +
-                  CONFIG_ARCH_TEXT_NPAGES * MM_PGSIZE - 1);
-
-  up_clean_dcache(CONFIG_ARCH_DATA_VBASE,
-                  CONFIG_ARCH_DATA_VBASE +
-                  CONFIG_ARCH_DATA_NPAGES * MM_PGSIZE - 1);
-#endif
-
-#ifdef CONFIG_BUILD_KERNEL
-  up_clean_dcache(CONFIG_ARCH_HEAP_VBASE,
-                  CONFIG_ARCH_HEAP_VBASE + addrenv->heapsize);
-#endif
+  up_flush_dcache_all();
 
   return OK;
 }

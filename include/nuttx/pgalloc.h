@@ -167,6 +167,25 @@ void mm_pgreserve(uintptr_t start, size_t size);
 uintptr_t mm_pgalloc(unsigned int npages);
 
 /****************************************************************************
+ * Name: mm_pgalloc_align
+ *
+ * Description:
+ *   Allocate page memory from the page memory pool.
+ *
+ * Input Parameters:
+ *   npages - The number of pages to allocate, each of size CONFIG_MM_PGSIZE.
+ *   align  - The number of pages to align, each of size CONFIG_MM_PGSIZE.
+ *
+ * Returned Value:
+ *   On success, a non-zero, physical address of the allocated page memory
+ *   is returned.  Zero is returned on failure.  NOTE:  This is an unmapped
+ *   physical address and cannot be used until it is appropriately mapped.
+ *
+ ****************************************************************************/
+
+uintptr_t mm_pgalloc_align(unsigned int npages, unsigned int align);
+
+/****************************************************************************
  * Name: mm_pgfree
  *
  * Description:
