@@ -167,6 +167,8 @@ config ESP_PCNT_TEST_MODE
 config ESP_PCNT_AS_QE
 	bool
 	default n
+	select SENSORS
+	select SENSORS_QENCODER
 
 config ESP_PCNT_U0
 	bool "Enable PCNT Unit 0"
