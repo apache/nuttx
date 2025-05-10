@@ -562,48 +562,53 @@ static int optee_memref_to_msg_param(FAR struct optee_priv_data *priv,
                                      FAR const struct tee_ioctl_param *p)
 {
   FAR struct optee_shm *shm;
+  uintptr_t page_list_pa;
 
-  /* Warning: the case for non-registered memrefs below is a hack to work
-   * with openvela. Normally, non-registered memory should be specified as
-   * OPTEE_MSG_ATTR_TYPE_TMEM_* (note the 'T') and `buf_ptr` should be set
-   * to the physical address of buffer.
-   *
-   * Related openvela patches:
-   *  - external_optee_optee_os@1a29df42 core/tee/entry_std.c#L160
-   *  - frameworks_security_optee_vela@54b377d5c compat/mobj_dyn_shm.c#L25
-   *
-   * Ideally, in the future, this should be wrapped around some
-   * CONFIG_OPTEE_OPENVELA_COMPAT guard.
-   */
-
-  mp->attr = OPTEE_MSG_ATTR_TYPE_RMEM_INPUT + p->attr -
-             TEE_IOCTL_PARAM_ATTR_TYPE_MEMREF_INPUT;
-  if (p->c != TEE_MEMREF_NULL)
+  if (p->c == TEE_MEMREF_NULL)
     {
-      shm = idr_find(priv->shms, p->c);
-      if (shm == NULL)
-        {
-          return -EINVAL;
-        }
+      mp->attr = OPTEE_MSG_ATTR_TYPE_TMEM_INPUT + p->attr -
+                 TEE_IOCTL_PARAM_ATTR_TYPE_MEMREF_INPUT;
+      mp->u.tmem.buf_ptr = 0;
+      mp->u.tmem.shm_ref = 0;
+      mp->u.tmem.size = p->b;
+      return 0;
+    }
 
-      if (shm->flags & TEE_SHM_REGISTER)
-        {
-          mp->u.rmem.shm_ref = (uintptr_t)shm;
-        }
-      else
-        {
-          /* hack to comply with openvela */
+  shm = idr_find(priv->shms, p->c);
+  if (shm == NULL)
+    {
+      return -EINVAL;
+    }
 
-          mp->u.rmem.shm_ref = shm->addr;
-        }
+  if (shm->flags & TEE_SHM_REGISTER)
+    {
+      /* registered memory */
+
+      mp->attr = OPTEE_MSG_ATTR_TYPE_RMEM_INPUT + p->attr -
+                 TEE_IOCTL_PARAM_ATTR_TYPE_MEMREF_INPUT;
+      mp->u.rmem.offs = p->a;
+      mp->u.rmem.size = p->b;
+      mp->u.rmem.shm_ref = (uintptr_t)shm;
     }
   else
     {
-      mp->u.rmem.shm_ref = 0;
+      /* non-registered memory (temporary) */
+
+      mp->attr = OPTEE_MSG_ATTR_TYPE_TMEM_INPUT + p->attr -
+                 TEE_IOCTL_PARAM_ATTR_TYPE_MEMREF_INPUT;
+      mp->attr |= OPTEE_MSG_ATTR_NONCONTIG;
+
+      shm->page_list = optee_shm_to_page_list(shm, &page_list_pa);
+      if (shm->page_list == NULL)
+        {
+          return -ENOMEM;
+        }
+
+      mp->u.tmem.buf_ptr = page_list_pa;
+      mp->u.tmem.shm_ref = (uintptr_t)shm;
+      mp->u.tmem.size = shm->length;
     }
 
-  mp->u.rmem.size = p->b;
-  mp->u.rmem.offs = p->a;
   return 0;
 }
 
@@ -666,6 +671,7 @@ static int optee_from_msg_param(FAR struct tee_ioctl_param *params,
     {
       FAR const struct optee_msg_param *mp = mparams + n;
       FAR struct tee_ioctl_param *p = params + n;
+      FAR struct optee_shm *shm;
 
       switch (mp->attr & OPTEE_MSG_ATTR_TYPE_MASK)
         {
@@ -683,6 +689,20 @@ static int optee_from_msg_param(FAR struct tee_ioctl_param *params,
             p->a = mp->u.value.a;
             p->b = mp->u.value.b;
             p->c = mp->u.value.c;
+            break;
+          case OPTEE_MSG_ATTR_TYPE_TMEM_INPUT:
+          case OPTEE_MSG_ATTR_TYPE_TMEM_OUTPUT:
+          case OPTEE_MSG_ATTR_TYPE_TMEM_INOUT:
+            p->attr = TEE_IOCTL_PARAM_ATTR_TYPE_MEMREF_INPUT +
+                      mp->attr - OPTEE_MSG_ATTR_TYPE_TMEM_INPUT;
+            p->b = mp->u.tmem.size;
+
+            shm = (FAR struct optee_shm *)(uintptr_t)mp->u.tmem.shm_ref;
+            if (shm && shm->page_list)
+              {
+                kmm_free(shm->page_list);
+                shm->page_list = NULL;
+              }
             break;
           case OPTEE_MSG_ATTR_TYPE_RMEM_INPUT:
           case OPTEE_MSG_ATTR_TYPE_RMEM_OUTPUT:
