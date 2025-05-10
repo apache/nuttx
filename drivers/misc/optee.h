@@ -58,6 +58,7 @@ struct optee_shm
   int32_t id;
   uint64_t addr;
   uint64_t length;
+  FAR void *page_list;
   uint32_t flags;
 };
 
