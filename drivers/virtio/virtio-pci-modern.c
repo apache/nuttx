@@ -714,6 +714,7 @@ int virtio_pci_modern_probe(FAR struct pci_device_s *dev)
 
   if (dev->device < 0x1000 || dev->device > 0x107f)
     {
+      vrtwarn("Device id 0x%04x not supported\n", dev->device);
       return -ENODEV;
     }
 
@@ -722,12 +723,9 @@ int virtio_pci_modern_probe(FAR struct pci_device_s *dev)
   vdev->role = VIRTIO_DEV_DRIVER;
 
   ret = virtio_pci_init_device(vpdev);
-  if (ret < 0)
+  if (ret < 0 && ret != -ENODEV)
     {
-      if (ret != -ENODEV)
-        {
-          pcierr("Virtio pci modern device init failed, ret=%d\n", ret);
-        }
+      vrterr("Virtio pci modern device init failed, ret=%d\n", ret);
     }
 
   return ret;
