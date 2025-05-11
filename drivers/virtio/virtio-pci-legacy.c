@@ -177,7 +177,7 @@ virtio_pci_legacy_get_queue_len(FAR struct virtio_pci_device_s *vpdev,
                    (uintptr_t)(vpdev->ioaddr + VIRTIO_PCI_QUEUE_NUM), &num);
   if (num == 0)
     {
-      pcierr("Queue is not available num=%d\n", num);
+      vrterr("Queue is not available num=%d\n", num);
     }
 
   return num;
@@ -430,7 +430,7 @@ virtio_pci_legacy_init_device(FAR struct virtio_pci_device_s *vpdev)
 
   if (dev->revision != VIRTIO_PCI_ABI_VERSION)
     {
-      pcierr("Virtio_pci: expected ABI version %d, got %u\n",
+      vrterr("Virtio_pci: expected ABI version %d, got %u\n",
               VIRTIO_PCI_ABI_VERSION, dev->revision);
       return -ENODEV;
     }
@@ -458,10 +458,11 @@ int virtio_pci_legacy_probe(FAR struct pci_device_s *dev)
   FAR struct virtio_device *vdev = &vpdev->vdev;
   int ret;
 
-  /* We only own devices >= 0x1000 and <= 0x107f: leave the rest. */
+  /* We only own devices >= 0x1000 and <= 0x103f: leave the rest. */
 
   if (dev->device < 0x1000 || dev->device > 0x103f)
     {
+      vrtwarn("Device id 0x%04x not supported\n", dev->device);
       return -ENODEV;
     }
 
@@ -472,7 +473,7 @@ int virtio_pci_legacy_probe(FAR struct pci_device_s *dev)
   ret = virtio_pci_legacy_init_device(vpdev);
   if (ret < 0)
     {
-      pcierr("Virtio pci legacy device init failed, ret=%d\n", ret);
+      vrterr("Virtio pci legacy device init failed, ret=%d\n", ret);
     }
 
   return ret;

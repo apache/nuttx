@@ -182,7 +182,7 @@ static int virtio_pci_probe(FAR struct pci_device_s *dev)
 
   if (dev->device < 0x1000 || dev->device > 0x107f)
     {
-      pcierr("Pci device id err, id=%d\n", dev->device);
+      vrterr("Pci device id err, id=%d\n", dev->device);
       return -ENODEV;
     }
 
@@ -217,7 +217,7 @@ static int virtio_pci_probe(FAR struct pci_device_s *dev)
       ret = virtio_pci_legacy_probe(dev);
       if (ret < 0)
         {
-          vrterr("Virtio pci legacy probe failed\n");
+          vrterr("Virtio pci legacy probe failed %d\n", ret);
           goto err_with_enable;
         }
     }
@@ -421,7 +421,7 @@ int virtio_pci_create_virtqueues(FAR struct virtio_device *vdev,
                 (wdparm_t)vpdev);
   if (ret < 0)
     {
-      pcierr("Wd_start failed: %d\n", ret);
+      vrterr("Wd_start failed: %d\n", ret);
       goto err;
     }
 #endif
