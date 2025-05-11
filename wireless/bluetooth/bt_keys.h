@@ -62,6 +62,7 @@ struct bt_ltk_s
   uint64_t rand;
   uint16_t ediv;
   uint8_t val[16];
+  enum bt_security_e level;
   FAR struct bt_keys_s *next;
 };
 
