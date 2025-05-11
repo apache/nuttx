@@ -108,10 +108,6 @@ virtio_pci_legacy_get_queue_len(FAR struct virtio_pci_device_s *vpdev,
 static int
 virtio_pci_legacy_create_virtqueue(FAR struct virtio_pci_device_s *vpdev,
                                    FAR struct virtqueue *vq);
-static int
-virtio_pci_legacy_config_vector(FAR struct virtio_pci_device_s *vpdev,
-                                bool enable);
-
 static void
 virtio_pci_legacy_delete_virtqueue(FAR struct virtio_device *vdev,
                                    int index);
@@ -152,7 +148,6 @@ static const struct virtio_dispatch g_virtio_pci_dispatch =
 static const struct virtio_pci_ops_s g_virtio_pci_legacy_ops =
 {
   virtio_pci_legacy_get_queue_len,       /* get_queue_len */
-  virtio_pci_legacy_config_vector,       /* config_vector */
   virtio_pci_legacy_create_virtqueue,    /* create_virtqueue */
   virtio_pci_legacy_delete_virtqueue,    /* delete_virtqueue */
 };
@@ -211,7 +206,7 @@ virtio_pci_legacy_create_virtqueue(FAR struct virtio_pci_device_s *vpdev,
 #if CONFIG_DRIVERS_VIRTIO_PCI_POLLING_PERIOD <= 0
   pci_write_io_word(vpdev->dev,
                     (uintptr_t)(vpdev->ioaddr + VIRTIO_MSI_QUEUE_VECTOR),
-                    VIRTIO_PCI_INT_VQ);
+                    0);
   pci_read_io_word(vpdev->dev,
                    (uintptr_t)(vpdev->ioaddr + VIRTIO_MSI_QUEUE_VECTOR),
                    &msix_vector);
@@ -224,32 +219,6 @@ virtio_pci_legacy_create_virtqueue(FAR struct virtio_pci_device_s *vpdev,
       return -EBUSY;
     }
 #endif
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: virtio_pci_legacy_config_vector
- ****************************************************************************/
-
-static int
-virtio_pci_legacy_config_vector(FAR struct virtio_pci_device_s *vpdev,
-                                bool enable)
-{
-  uint16_t vector = enable ? 0 : VIRTIO_PCI_MSI_NO_VECTOR;
-  uint16_t rvector;
-
-  pci_write_io_word(vpdev->dev,
-                    (uintptr_t)(vpdev->ioaddr + VIRTIO_MSI_CONFIG_VECTOR),
-                    vector);
-  pci_read_io_word(vpdev->dev,
-                   (uintptr_t)(vpdev->ioaddr + VIRTIO_MSI_CONFIG_VECTOR),
-                   &rvector);
-
-  if (rvector != vector)
-    {
-      return -EINVAL;
-    }
 
   return OK;
 }
