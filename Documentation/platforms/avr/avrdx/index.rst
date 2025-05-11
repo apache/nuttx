@@ -81,6 +81,25 @@ highest speed. With baud rate 57600, performance was dependent
 on read/write buffer size. With buffer size of 8 there were still
 some missed bytes.
 
+To be able to use standard serial driver, it is needed to enable
+the peripheral in MCU-specific configuration in
+:menuselection:`System Type --> AVR DA/DB Peripheral Selections`
+UART peripherals are enabled using
+:menuselection:`Enable serial driver for USARTn` options. When enabled,
+additional option :menuselection:`Activate USART0 alternative pinout`
+is provided. See the chip datasheet for pinout information.
+
+Other UART settings are then configured in driver configuration
+:menuselection:`Device Drivers --> Serial Driver Support`
+For every enabled peripheral, there is a corresponding
+:menuselection:`USARTn Configuration` section. RTS/CTS and DMA support
+must NOT be enabled here, neither of those is supported.
+
+Each enabled peripheral is automatically registered as ``/dev/ttySn``
+device file. File name corresponds to the peripheral related to it.
+This for example means that ``USART1`` peripheral will always
+be accessed through ``/dev/ttyS1`` regardless of what other ``USART``
+peripherals are enabled (if any.)
 
 Supported Boards
 ================
