@@ -161,9 +161,6 @@ static uint16_t
 virtio_pci_modern_get_queue_len(FAR struct virtio_pci_device_s *vpdev,
                                 int idx);
 static int
-virtio_pci_modern_config_vector(FAR struct virtio_pci_device_s *vpdev,
-                                bool enable);
-static int
 virtio_pci_modern_create_virtqueue(FAR struct virtio_pci_device_s *vpdev,
                                    FAR struct virtqueue *vq);
 static void
@@ -206,7 +203,6 @@ static const struct virtio_dispatch g_virtio_pci_dispatch =
 static const struct virtio_pci_ops_s g_virtio_pci_modern_ops =
 {
   virtio_pci_modern_get_queue_len,      /* get_queue_len */
-  virtio_pci_modern_config_vector,      /* config_vector */
   virtio_pci_modern_create_virtqueue,   /* create_virtqueue */
   virtio_pci_modern_delete_virtqueue,   /* delete_virtqueue */
 };
@@ -344,8 +340,7 @@ virtio_pci_modern_create_virtqueue(FAR struct virtio_pci_device_s *vpdev,
                      up_addrenv_va_to_pa(vq->vq_ring.used));
 
 #if CONFIG_DRIVERS_VIRTIO_PCI_POLLING_PERIOD <= 0
-  pci_write_io_word(vpdev->dev, (uintptr_t)&cfg->queue_msix_vector,
-                    VIRTIO_PCI_INT_VQ);
+  pci_write_io_word(vpdev->dev, (uintptr_t)&cfg->queue_msix_vector, 0);
   pci_read_io_word(vpdev->dev, (uintptr_t)&cfg->queue_msix_vector,
                    &msix_vector);
   if (msix_vector == VIRTIO_PCI_MSI_NO_VECTOR)
@@ -370,30 +365,6 @@ virtio_pci_modern_create_virtqueue(FAR struct virtio_pci_device_s *vpdev,
 
   vrinfo = &vpdev->vdev.vrings_info[vq->vq_queue_index];
   vrinfo->notifyid = off * vpdev->notify_off_multiplier;
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: virtio_pci_modern_config_vector
- ****************************************************************************/
-
-static int
-virtio_pci_modern_config_vector(FAR struct virtio_pci_device_s *vpdev,
-                                bool enable)
-{
-  FAR struct virtio_pci_common_cfg_s *cfg = vpdev->common;
-  uint16_t vector = enable ? 0 : VIRTIO_PCI_MSI_NO_VECTOR;
-  uint16_t rvector;
-
-  pci_write_io_word(vpdev->dev, (uintptr_t)&cfg->config_msix_vector,
-                    vector);
-  pci_read_io_word(vpdev->dev, (uintptr_t)&cfg->config_msix_vector,
-                   &rvector);
-  if (rvector != vector)
-    {
-      return -EINVAL;
-    }
 
   return OK;
 }
