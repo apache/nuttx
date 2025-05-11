@@ -163,6 +163,29 @@ begin_packed_struct struct bt_smp_security_request_s
   uint8_t auth_req;
 } end_packed_struct;
 
+struct bt_smp_auth_cb_s
+{
+  /* Callback for Passkey display */
+
+  void (*passkey_display)(FAR struct bt_conn_s *conn, unsigned int passkey);
+
+  /* Callback for notification of pairing cancellation */
+
+  void (*pairing_cancel)(FAR struct bt_conn_s *conn);
+
+  /* Callback for notification of pairing success
+   * 'bonded' is true if bonding keys were generated/stored
+   */
+
+  void (*pairing_complete)(FAR struct bt_conn_s *conn, bool bonded);
+
+  /* Callback for notification of pairing failure
+   * 'reason' is the SMP error code (BT_SMP_ERR_*)
+   */
+
+  void (*pairing_failed)(FAR struct bt_conn_s *conn, uint8_t reason);
+};
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -172,5 +195,6 @@ bool bt_smp_irk_matches(FAR const uint8_t irk[16],
 int  bt_smp_send_pairing_req(FAR struct bt_conn_s *conn);
 int  bt_smp_send_security_req(FAR struct bt_conn_s *conn);
 int  bt_smp_initialize(void);
+FAR void bt_smp_auth_cb_register(const struct bt_smp_auth_cb_s *cb);
 
 #endif /* __WIRELESS_BLUETOOTH_BT_SMP_H */
