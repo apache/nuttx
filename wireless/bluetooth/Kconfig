@@ -174,6 +174,22 @@ config BLUETOOTH_CNTRL_HOST_FLOW_DISABLE
 		indicate to the Host when its buffers are nearly full, allowing the Host to
 		stop sending data until buffer space becomes available.
 
+config BLUETOOTH_SMP_IO_CAPABILITY
+	int "Bluetooth SMP I/O Capability"
+	default 3
+	range 0 4
+	---help---
+		Defines the Input/Output capabilities of this device
+		for SMP pairing purposes.
+		Values based on Bluetooth Core Spec v4.2, Vol 3, Part H, Section 2.3.2:
+		  0: DisplayOnly       (Can display a 6-digit code)
+		  1: DisplayYesNo    (Can display a 6-digit code and has Yes/No input)
+		  2: KeyboardOnly    (Has numeric keyboard input, no display)
+		  3: NoInputNoOutput (Cannot display or input codes, e.g., headset)
+		  4: KeyboardDisplay (Has both display and keyboard)
+
+		NOTE: Current implementation supports NoInputNoOutput and DisplayOnly.
+
 menu "Kernel Thread Configuration"
 
 config BLUETOOTH_TXCMD_STACKSIZE
