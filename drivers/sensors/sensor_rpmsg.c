@@ -135,6 +135,7 @@ struct sensor_rpmsg_proxy_s
   struct list_node               node;
   FAR struct rpmsg_endpoint     *ept;
   uint64_t                       cookie;
+  bool                           wakeup;
 };
 
 /* Remote message structure */
@@ -358,7 +359,50 @@ static void sensor_rpmsg_advsub(FAR struct sensor_rpmsg_dev_s *dev,
   list_for_every_entry(&g_eptlist, sre, struct sensor_rpmsg_ept_s,
                        node)
     {
-      sensor_rpmsg_advsub_one(dev, &sre->ept, command);
+      FAR struct sensor_rpmsg_proxy_s *proxy = NULL;
+      bool find = false;
+
+      if (command == SENSOR_RPMSG_SUBSCRIBE ||
+          command == SENSOR_RPMSG_UNSUBSCRIBE)
+        {
+          /* If it has been bound before, do not send. */
+
+          list_for_every_entry(&dev->proxylist, proxy,
+                               struct sensor_rpmsg_proxy_s, node)
+            {
+              if (proxy->ept == &sre->ept)
+                {
+                  find = true;
+                  break;
+                }
+            }
+        }
+
+      /* There are several scenarios that require broadcasting:
+       * 1. If the proxy corresponding to the EPT (Endpoint) did not
+       *    exist previously, this constitutes the first broadcast.
+       * 2. If the proxy previously had a wakeup attribute, it should
+       *    be broadcast every time.
+       * 3. If the proxy does not have the wakeup attribute and the
+       *    target core is in the running state, we should still broadcast
+       *    it.
+       *
+       * In summary, Let's avoid broadcasting non-wakeup sensors when the
+       * target core is in a sleep state to prevent unnecessary wakeups.
+       */
+
+      if (rpmsg_is_running(sre->ept.rdev) || (find && proxy->wakeup))
+        {
+          sensor_rpmsg_advsub_one(dev, &sre->ept, command);
+        }
+      else
+        {
+          sninfo("INFO: advsub:%d %s ignore broadcast to %s, "
+                 "as %d, %d, %d\n",
+                 command, dev->path, rpmsg_get_cpuname(sre->ept.rdev),
+                 find, proxy ? proxy->wakeup : 0,
+                 rpmsg_is_running(sre->ept.rdev));
+        }
     }
 
   up_read(&g_ept_lock);
@@ -411,6 +455,15 @@ static int sensor_rpmsg_ioctl(FAR struct sensor_rpmsg_dev_s *dev,
   list_for_every_entry_safe(&dev->proxylist, proxy, ptmp,
                             struct sensor_rpmsg_proxy_s, node)
     {
+      /* Check whether the proxy has been set to the wakeup state
+       * before. If it has, record it.
+       */
+
+      if (cmd == SNIOC_SET_WAKEUP)
+        {
+          proxy->wakeup = arg;
+        }
+
       ept = proxy->ept;
       pcookie = proxy->cookie;
       msg = rpmsg_get_tx_payload_buffer(ept, &space, true);
@@ -509,6 +562,7 @@ sensor_rpmsg_alloc_proxy(FAR struct sensor_rpmsg_dev_s *dev,
 
   proxy->ept = ept;
   proxy->cookie = msg->cookie;
+  proxy->wakeup = false;
   ret = file_open(&file, dev->path, SENSOR_REMOTE | O_CLOEXEC);
   if (ret < 0)
     {
@@ -723,11 +777,8 @@ static int sensor_rpmsg_close(FAR struct sensor_lowerhalf_s *lower,
 {
   FAR struct sensor_rpmsg_dev_s *dev = lower->priv;
   FAR struct sensor_lowerhalf_s *drv = dev->drv;
-  FAR struct sensor_rpmsg_proxy_s *proxy;
-  FAR struct sensor_rpmsg_proxy_s *ptmp;
   FAR struct sensor_rpmsg_stub_s *stub;
   FAR struct sensor_rpmsg_stub_s *stmp;
-  bool unadv = false;
   bool unsub = false;
   int ret = 0;
 
@@ -746,7 +797,6 @@ static int sensor_rpmsg_close(FAR struct sensor_lowerhalf_s *lower,
     {
       if (dev->nadvertisers == 1)
         {
-          unadv = true;
           list_for_every_entry_safe(&dev->stublist, stub, stmp,
                                     struct sensor_rpmsg_stub_s, node)
             {
@@ -759,33 +809,20 @@ static int sensor_rpmsg_close(FAR struct sensor_lowerhalf_s *lower,
 
   if (filep->f_oflags & O_RDOK)
     {
-      if (dev->nsubscribers == 1)
+      /* Send broadcast unsubscribed info if dev isn't
+       * physical sensor to avoid waking up remote core.
+       */
+
+      if (dev->nsubscribers == 1 &&
+          drv->ops->activate == NULL)
         {
-          /* Send broadcast unsubscribed info if dev isn't
-           * physical sensor to avoid waking up remote core.
-           */
-
-          if (drv->ops->activate == NULL)
-            {
-              unsub = true;
-            }
-
-          list_for_every_entry_safe(&dev->proxylist, proxy, ptmp,
-                                    struct sensor_rpmsg_proxy_s, node)
-            {
-              sensor_rpmsg_free_proxy(dev, proxy);
-            }
+          unsub = true;
         }
 
       dev->nsubscribers--;
     }
 
   sensor_rpmsg_unlock(dev);
-
-  if (unadv)
-    {
-      sensor_rpmsg_advsub(dev, SENSOR_RPMSG_UNADVERTISE);
-    }
 
   if (unsub)
     {
@@ -1170,9 +1207,6 @@ static int sensor_rpmsg_adv_handler(FAR struct rpmsg_endpoint *ept,
       ret = rpmsg_send(ept, msg, len);
       if (ret < 0)
         {
-          sensor_rpmsg_lock(dev);
-          sensor_rpmsg_free_proxy(dev, proxy);
-          sensor_rpmsg_unlock(dev);
           snerr("ERROR: adv rpmsg send failed:%s, %d, %s\n",
                 dev->path, ret, rpmsg_get_cpuname(ept->rdev));
         }
@@ -1194,7 +1228,6 @@ static int sensor_rpmsg_advack_handler(FAR struct rpmsg_endpoint *ept,
   dev = sensor_rpmsg_find_dev(msg->path);
   if (dev && !sensor_rpmsg_alloc_stub(dev, ept, msg->cookie))
     {
-      sensor_rpmsg_advsub_one(dev, ept, SENSOR_RPMSG_UNADVERTISE);
       snerr("ERROR: advack failed:%s, %s\n", dev->path,
             rpmsg_get_cpuname(ept->rdev));
     }
@@ -1206,30 +1239,6 @@ static int sensor_rpmsg_unadv_handler(FAR struct rpmsg_endpoint *ept,
                                       FAR void *data, size_t len,
                                       uint32_t src, FAR void *priv)
 {
-  FAR struct sensor_rpmsg_advsub_s *msg = data;
-  FAR struct sensor_rpmsg_proxy_s *proxy;
-  FAR struct sensor_rpmsg_dev_s *dev;
-
-  dev = sensor_rpmsg_find_dev(msg->path);
-  if (!dev)
-    {
-      return 0;
-    }
-
-  sensor_rpmsg_lock(dev);
-  list_for_every_entry(&dev->proxylist, proxy,
-                       struct sensor_rpmsg_proxy_s, node)
-    {
-      if (proxy->ept == ept && proxy->cookie == msg->cookie)
-        {
-          sensor_rpmsg_free_proxy(dev, proxy);
-          sminfo(dev->name, "rpmsg unadv free proxy success, "
-                 "remote:%s", rpmsg_get_cpuname(ept->rdev));
-          break;
-        }
-    }
-
-  sensor_rpmsg_unlock(dev);
   return 0;
 }
 
