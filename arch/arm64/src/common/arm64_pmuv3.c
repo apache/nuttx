@@ -242,7 +242,7 @@ static inline bool cpumask_test_cpu(int cpu, int cpumask)
 static inline bool test_and_set_bit(unsigned long nr,
                                     volatile unsigned long *addr)
 {
-  unsigned long mask = BIT_WORD_MASK(nr);
+  unsigned long mask = BIT_MASK(nr);
   unsigned long *p = ((unsigned long *)addr) + BIT_WORD(nr);
   unsigned long old = *p;
 

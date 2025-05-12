@@ -530,7 +530,7 @@ static FAR struct pmu_s *perf_get_pmu(FAR struct perf_event_s *event)
 
 static void perf_init_context(FAR struct perf_event_context_s *ctx)
 {
-  spin_initialize(&ctx->lock, SP_UNLOCKED);
+  spin_lock_init(&ctx->lock);
   list_initialize(&ctx->event_list);
   list_initialize(&ctx->group_list);
   list_initialize(&ctx->pmu_ctx_list);
@@ -2313,7 +2313,7 @@ static int perf_mmap(FAR struct file *filep,
       event->buf->ref_count = 1;
       circbuf_init(&event->buf->rb, buf + sizeof(struct perf_buffer_s),
                    buf_size);
-      spin_initialize(&event->buf->lock, SP_UNLOCKED);
+      spin_lock_init(&event->buf->lock);
     }
 
   map->vaddr = event->buf;
@@ -2619,7 +2619,7 @@ int perf_event_init(void)
     {
       perf_init_context(&g_perf_cpu_ctx[i]);
       list_initialize(&g_swevent[i].list_swevent);
-      spin_initialize(&g_swevent[i].lock, SP_UNLOCKED);
+      spin_lock_init(&g_swevent[i].lock);
     }
 
   /* Register clock event */
@@ -2652,7 +2652,7 @@ int perf_event_open(FAR struct perf_event_attr_s *attr, pid_t pid,
                     int cpu, int group_fd, unsigned long flags)
 {
   FAR struct perf_event_s *group_leader = NULL;
-  FAR struct perf_event_s *event;
+  FAR struct perf_event_s *event = NULL;
   FAR struct tcb_s *tcb = NULL;
   FAR struct perf_event_context_s *ctx;
   FAR struct pmu_event_context_s *pmu_ctx;
