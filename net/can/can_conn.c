@@ -169,6 +169,10 @@ void can_free(FAR struct can_conn_s *conn)
   nxsem_destroy(&conn->sndsem);
 #endif
 
+  /* Free the readahead queue */
+
+  iob_free_queue(&conn->readahead);
+
   /* Free the connection. */
 
   NET_BUFPOOL_FREE(g_can_connections, conn);
