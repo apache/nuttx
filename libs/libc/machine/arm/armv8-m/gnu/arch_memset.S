@@ -72,6 +72,8 @@
 	.global ARCH_LIBCFUN(memset)
 	.type	ARCH_LIBCFUN(memset), %function
 ARCH_LIBCFUN(memset):
+	.cfi_sections .debug_frame
+	.cfi_startproc
 #if __ARM_FEATURE_PAC_DEFAULT
 #  if __ARM_FEATURE_BTI_DEFAULT
 	pacbti	ip, lr, sp
@@ -82,6 +84,7 @@ ARCH_LIBCFUN(memset):
 #ifdef __ARM_FEATURE_MVE
 	vdup.8	q0, r1
 	mov	r3, lr
+	.cfi_register lr,r3
 	mov	r1, r0
 	wlstp.8	lr, r2, 2f
 1:
@@ -166,6 +169,7 @@ ARCH_LIBCFUN(memset):
 	ldmfd	sp!, {r0, r4-r7, pc}
 #  endif /* __ARM_FEATURE_PAC_DEFAULT */
 #endif
+	.cfi_endproc
 	.size ARCH_LIBCFUN(memset), . - ARCH_LIBCFUN(memset)
 
 #endif
