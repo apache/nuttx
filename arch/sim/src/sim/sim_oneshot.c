@@ -309,15 +309,15 @@ static int sim_start(struct oneshot_lowerhalf_s *lower,
 {
   struct sim_oneshot_lowerhalf_s *priv =
     (struct sim_oneshot_lowerhalf_s *)lower;
-  struct timespec current;
   irqstate_t flags;
 
   DEBUGASSERT(priv != NULL && callback != NULL && ts != NULL);
 
   flags = enter_critical_section();
 
-  sim_timer_current(&current);
-  clock_timespec_add(&current, ts, &priv->alarm);
+  clock_ticks2time(&priv->alarm,
+                   host_gettime(false) / NSEC_PER_TICK +
+                   clock_time2ticks(ts));
 
   priv->callback = callback;
   priv->arg      = arg;
