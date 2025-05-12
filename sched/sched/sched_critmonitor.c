@@ -87,6 +87,14 @@
 #endif
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION >= 0
+static spinlock_t g_crimonitor_lock = SP_UNLOCKED;
+#endif
+
+/****************************************************************************
  * Public Data
  ****************************************************************************/
 
@@ -175,6 +183,9 @@ void nxsched_critmon_preemption(FAR struct tcb_s *tcb, bool state,
                                 FAR void *caller)
 {
   clock_t current = perf_gettime();
+  irqstate_t flags;
+
+  flags = spin_lock_irqsave_notrace(&g_crimonitor_lock);
 
   /* Are we enabling or disabling pre-emption */
 
@@ -206,6 +217,8 @@ void nxsched_critmon_preemption(FAR struct tcb_s *tcb, bool state,
           g_preemp_max[cpu] = elapsed;
         }
     }
+
+  spin_unlock_irqrestore_notrace(&g_crimonitor_lock, flags);
 }
 #endif /* CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION >= 0 */
 
