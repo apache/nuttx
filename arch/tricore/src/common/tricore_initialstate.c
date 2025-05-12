@@ -94,5 +94,5 @@ void up_initial_state(struct tcb_s *tcb)
   xcp->regs = tricore_alloc_csa((uintptr_t)tcb->start,
                                 (uintptr_t)tcb->stack_base_ptr +
                                            tcb->adj_stack_size,
-                                PSW_IO_SUPERVISOR | PSW_IS | PSW_CDE, false);
+                                PSW_IO_SUPERVISOR | PSW_CDE, false);
 }
