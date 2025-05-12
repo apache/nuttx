@@ -113,6 +113,8 @@ ARCH_LIBCFUN(memcpy):
 	@ r0: dst
 	@ r1: src
 	@ r2: len
+	.cfi_sections .debug_frame
+	.cfi_startproc
 #if __ARM_FEATURE_PAC_DEFAULT
 #  if __ARM_FEATURE_BTI_DEFAULT
 	pacbti	ip, lr, sp
@@ -123,6 +125,7 @@ ARCH_LIBCFUN(memcpy):
 #endif /* __ARM_FEATURE_PAC_DEFAULT */
 #ifdef __ARM_FEATURE_MVE
 	mov	r3, lr
+	.cfi_register lr,r3
 	wlstp.8	lr, r2, 2f
 	mov	r2, r0
 1:
@@ -395,6 +398,7 @@ ARCH_LIBCFUN(memcpy):
 #endif /* __ARM_FEATURE_PAC_DEFAULT */
 	bx	lr
 #endif
+	.cfi_endproc
 	.size	ARCH_LIBCFUN(memcpy), .-ARCH_LIBCFUN(memcpy)
 
 #endif
