@@ -493,6 +493,7 @@ int pseudofile_create(FAR struct inode **node, FAR const char *path,
   (*node)->i_flags = 1;
   (*node)->u.i_ops = &g_pseudofile_ops;
   (*node)->i_private = pf;
+  atomic_fetch_add(&(*node)->i_crefs, 1);
 
   inode_unlock();
 #ifdef CONFIG_FS_NOTIFY
