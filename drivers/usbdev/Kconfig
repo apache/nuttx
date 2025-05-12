@@ -32,7 +32,7 @@ config USBDEV_SUPERSPEED
 		Hardware handles super speed operation (USB 3.2)
 
 config USBDEV_EPBUFFER_ALIGNMENT
-	int "The usbdev ep req bffer aligned bytes"
+	int "The usbdev ep req buffer aligned bytes"
 	default 0
 	---help---
 		The aligned bytes of usbdev ep req buffer
@@ -232,7 +232,7 @@ config COMPOSITE_VENDORID
 	default 0x0000
 
 config COMPOSITE_VENDORSTR
-	string "Composite vendor ID"
+	string "Composite vendor string"
 	default "NuttX"
 	---help---
 		The vendor ID code/string
