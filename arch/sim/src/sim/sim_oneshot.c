@@ -137,7 +137,7 @@ static inline void sim_reset_alarm(struct timespec *alarm)
  * Name: sim_update_hosttimer
  *
  * Description:
- *   Ths function is called periodically to deliver the tick events to the
+ *   This function is called periodically to deliver the tick events to the
  *   NuttX simulation.
  *
  ****************************************************************************/
@@ -183,7 +183,7 @@ static void sim_update_hosttimer(void)
  * Name: sim_timer_update_internal
  *
  * Description:
- *   Ths function is called periodically to deliver the tick events to the
+ *   This function is called periodically to deliver the tick events to the
  *   NuttX simulation.
  *
  ****************************************************************************/
