@@ -181,6 +181,11 @@ Basic command to run the image without additional PCI devices attached::
   qemu-system-x86_64 -m 2G -cpu host -smp 4 -enable-kvm \
   -kernel nuttx -nographic -serial mon:stdio
 
+Command to run the image with some xHCI devices attached::
+
+  qemu-system-x86_64 -m 4G -smp 4 -cpu host -enable-kvm \
+  -kernel nuttx -serial mon:stdio -chardev pty,id=ch1 \
+  -device qemu-xhci -device usb-mouse -device usb-kbd
 
 knsh_romfs
 ----------
