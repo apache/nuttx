@@ -125,7 +125,7 @@ struct sensor_rpmsg_stub_s
   uint64_t                       cookie;
   struct file                    file;
   bool                           flushing;
-  bool                           nonwakeup;
+  bool                           wakeup;
 };
 
 /* This structure describes the proxy info about remote advertisers. */
@@ -230,9 +230,9 @@ static int sensor_rpmsg_calibrate(FAR struct sensor_lowerhalf_s *lower,
 static int sensor_rpmsg_get_info(FAR struct sensor_lowerhalf_s *lower,
                                  FAR struct file *filep,
                                  FAR struct sensor_device_info_s *info);
-static int sensor_rpmsg_set_nonwakeup(FAR struct sensor_lowerhalf_s *lower,
-                                      FAR struct file *filep,
-                                      bool nonwakeup);
+static int sensor_rpmsg_set_wakeup(FAR struct sensor_lowerhalf_s *lower,
+                                   FAR struct file *filep,
+                                   bool wakeup);
 static int sensor_rpmsg_control(FAR struct sensor_lowerhalf_s *lower,
                                 FAR struct file *filep,
                                 int cmd, unsigned long arg);
@@ -280,7 +280,7 @@ static const struct sensor_ops_s g_sensor_rpmsg_ops =
   .set_calibvalue = sensor_rpmsg_set_calibvalue,
   .calibrate      = sensor_rpmsg_calibrate,
   .get_info       = sensor_rpmsg_get_info,
-  .set_nonwakeup  = sensor_rpmsg_set_nonwakeup,
+  .set_wakeup     = sensor_rpmsg_set_wakeup,
   .control        = sensor_rpmsg_control
 };
 
@@ -814,24 +814,24 @@ static int sensor_rpmsg_flush(FAR struct sensor_lowerhalf_s *lower,
   return ret;
 }
 
-static int sensor_rpmsg_set_nonwakeup(FAR struct sensor_lowerhalf_s *lower,
-                                      FAR struct file *filep,
-                                      bool nonwakeup)
+static int sensor_rpmsg_set_wakeup(FAR struct sensor_lowerhalf_s *lower,
+                                   FAR struct file *filep,
+                                   bool wakeup)
 {
   FAR struct sensor_rpmsg_dev_s *dev = lower->priv;
   FAR struct sensor_lowerhalf_s *drv = dev->drv;
   int ret = -ENOTTY;
 
-  if (drv->ops->set_nonwakeup)
+  if (drv->ops->set_wakeup)
     {
-      ret = drv->ops->set_nonwakeup(drv, filep, nonwakeup);
+      ret = drv->ops->set_wakeup(drv, filep, wakeup);
     }
   else if ((filep->f_oflags & SENSOR_REMOTE) ||
            dev->nadvertisers > 0)
     {
-      /* If the driver (drv) does not support the nonwakeup operation,
+      /* If the driver (drv) does not support the wakeup operation,
        * and the caller is a remote invocation or the current device
-       * is an advertiser, then you can still consider the nonwakeup
+       * is an advertiser, then you can still consider the wakeup
        * operation as unsupported and therefore return ENOTSUP
        */
 
@@ -839,8 +839,8 @@ static int sensor_rpmsg_set_nonwakeup(FAR struct sensor_lowerhalf_s *lower,
     }
   else
     {
-      ret = sensor_rpmsg_ioctl(dev, SNIOC_SET_NONWAKEUP,
-                               nonwakeup, 0, true);
+      ret = sensor_rpmsg_ioctl(dev, SNIOC_SET_WAKEUP,
+                               wakeup, 0, true);
     }
 
   return ret;
@@ -929,7 +929,7 @@ static void sensor_rpmsg_push_event_one(FAR struct sensor_rpmsg_dev_s *dev,
    */
 
   sre = container_of(stub->ept, struct sensor_rpmsg_ept_s, ept);
-  if (stub->nonwakeup && !rpmsg_is_running(sre->ept.rdev))
+  if (!stub->wakeup && !rpmsg_is_running(sre->ept.rdev))
     {
       return;
     }
@@ -1372,9 +1372,9 @@ static int sensor_rpmsg_ioctl_handler(FAR struct rpmsg_endpoint *ept,
               stub->flushing = true;
             }
 
-          if (msg->request == SNIOC_SET_NONWAKEUP)
+          if (msg->request == SNIOC_SET_WAKEUP)
             {
-              stub->nonwakeup = arg;
+              stub->wakeup = arg;
             }
 
           if (msg->cookie)

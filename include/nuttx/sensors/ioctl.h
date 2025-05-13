@@ -502,12 +502,12 @@
 #define SNIOC_COLD_START              _SNIOC(0X00A7)
 #define SNIOC_FULL_COLD_START         _SNIOC(0X00A8)
 
-/* Command:      SNIOC_SET_NONWAKEUP
- * Description:  Set non-wakeup flag for user.
- * Argument:     True is non-wakeup, false is wakeup.
+/* Command:      SNIOC_SET_WAKEUP
+ * Description:  Set wakeup flag for user.
+ * Argument:     True is wakeup, false is non-wakeup.
  */
 
-#define SNIOC_SET_NONWAKEUP           _SNIOC(0x00A9)
+#define SNIOC_SET_WAKEUP              _SNIOC(0x00A9)
 
 /****************************************************************************
  * Public types

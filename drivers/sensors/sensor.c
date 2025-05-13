@@ -445,38 +445,38 @@ update:
   return ret;
 }
 
-static void sensor_update_nonwakeup(FAR struct file *filep,
-                                    FAR struct sensor_upperhalf_s *upper,
-                                    FAR struct sensor_user_s *user,
-                                    bool nonwakeup)
+static void sensor_update_wakeup(FAR struct file *filep,
+                                 FAR struct sensor_upperhalf_s *upper,
+                                 FAR struct sensor_user_s *user,
+                                 bool wakeup)
 {
   FAR struct sensor_lowerhalf_s *lower = upper->lower;
 
-  if (nonwakeup == user->state.nonwakeup)
+  if (wakeup == user->state.wakeup)
     {
       return;
     }
 
-  user->state.nonwakeup = nonwakeup;
+  user->state.wakeup = wakeup;
   nxrmutex_lock(&upper->lock);
   list_for_every_entry(&upper->userlist, user, struct sensor_user_s,
                        node)
     {
-      if (!user->state.nonwakeup)
+      if (user->state.wakeup)
         {
-          nonwakeup = false;
+          wakeup = true;
           break;
         }
     }
 
-  if (nonwakeup != upper->state.nonwakeup)
+  if (wakeup != upper->state.wakeup)
     {
-      upper->state.nonwakeup = nonwakeup;
-      sminfo(upper->name, "update nonwakeup %d", nonwakeup);
+      upper->state.wakeup = wakeup;
+      sminfo(upper->name, "update wakeup %d", wakeup);
       nxrmutex_unlock(&upper->lock);
-      if (lower->ops->set_nonwakeup)
+      if (lower->ops->set_wakeup)
         {
-          lower->ops->set_nonwakeup(lower, filep, nonwakeup);
+          lower->ops->set_wakeup(lower, filep, wakeup);
         }
     }
   else
@@ -773,7 +773,7 @@ static int sensor_open(FAR struct file *filep)
 
   user->state.interval = UINT32_MAX;
   user->state.esize = upper->state.esize;
-  user->state.nonwakeup = true;
+  user->state.wakeup = false;
   nxsem_init(&user->buffersem, 0, 0);
   list_add_tail(&upper->userlist, &user->node);
 
@@ -807,7 +807,7 @@ static int sensor_close(FAR struct file *filep)
 
   sensor_update_interval(filep, upper, user, UINT32_MAX);
   sensor_update_latency(filep, upper, user, UINT32_MAX);
-  sensor_update_nonwakeup(filep, upper, user, true);
+  sensor_update_wakeup(filep, upper, user, false);
 
   nxrmutex_lock(&upper->lock);
 
@@ -1027,9 +1027,9 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
-      case SNIOC_SET_NONWAKEUP:
+      case SNIOC_SET_WAKEUP:
         {
-          sensor_update_nonwakeup(filep, upper, user, (bool)arg);
+          sensor_update_wakeup(filep, upper, user, (bool)arg);
         }
         break;
 
@@ -1455,7 +1455,7 @@ int sensor_custom_register(FAR struct sensor_lowerhalf_s *lower,
   list_initialize(&upper->userlist);
   upper->state.esize = esize;
   upper->state.min_interval = UINT32_MAX;
-  upper->state.nonwakeup = true;
+  upper->state.wakeup = false;
   if (lower->ops->activate)
     {
       upper->state.nadvertisers = 1;
