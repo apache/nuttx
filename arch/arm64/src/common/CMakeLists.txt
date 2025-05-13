@@ -24,7 +24,7 @@ set(SRCS arm64_head.S)
 
 # TODO: support kernel startup obj ctr0
 
-list(APPEND SRCS arm64_vector_table.S arm64_vectors.S arm64_smccc.S)
+list(APPEND SRCS arm64_vector_table.S arm64_vectors.S)
 list(APPEND SRCS arm64_fork_func.S)
 
 # Common C source files ( OS call up_xxx)
@@ -57,6 +57,10 @@ if(CONFIG_ARM64_GIC_VERSION EQUAL 2)
   if(CONFIG_ARM64_GICV2M)
     list(APPEND SRCS arm64_gicv2m.c)
   endif()
+endif()
+
+if(CONFIG_ARCH_HAVE_EL3)
+  list(APPEND SRCS arm64_smccc.S)
 endif()
 
 if(CONFIG_ARCH_HAVE_MMU)
