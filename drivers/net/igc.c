@@ -238,6 +238,10 @@ static const struct pci_device_id_s g_igc_id_table[] =
     .driver_data = (uintptr_t)&g_igc_i225lm
   },
   {
+    PCI_DEVICE(0x8086, 0x15f3),
+    .driver_data = (uintptr_t)&g_igc_i225lm
+  },
+  {
     PCI_DEVICE(0x8086, 0x125c),
     .driver_data = (uintptr_t)&g_igc_i226v
   },
