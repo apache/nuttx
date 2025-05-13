@@ -628,7 +628,11 @@ rpmsg_port_spi_init_gpio(FAR struct ioexpander_dev_s *ioe,
           return ret;
         }
 
+#if CONFIG_IOEXPANDER_NPINS <= 64
+      ptr = IOEP_ATTACH(ioe, 1 << pin, callback, args);
+#else
       ptr = IOEP_ATTACH(ioe, pin, callback, args);
+#endif
       if (ptr == NULL)
         {
           rpmsgerr("gpio attach error: %d\n", ret);
