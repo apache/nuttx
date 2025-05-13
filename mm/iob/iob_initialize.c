@@ -41,13 +41,13 @@
 
 #ifdef CONFIG_IOB_ALLOC
 #  define IOB_ALIGN_SIZE  ALIGN_UP(sizeof(struct iob_s) + CONFIG_IOB_BUFSIZE, \
-                                   CONFIG_IOB_ALIGNMENT)
+                                   IOB_ALIGNMENT)
 #else
-#  define IOB_ALIGN_SIZE  ALIGN_UP(sizeof(struct iob_s), CONFIG_IOB_ALIGNMENT)
+#  define IOB_ALIGN_SIZE  ALIGN_UP(sizeof(struct iob_s), IOB_ALIGNMENT)
 #endif
 
 #define IOB_BUFFER_SIZE   (IOB_ALIGN_SIZE * CONFIG_IOB_NBUFFERS + \
-                           CONFIG_IOB_ALIGNMENT - 1)
+                           IOB_ALIGNMENT - 1)
 
 /****************************************************************************
  * Private Data
@@ -55,7 +55,7 @@
 
 /* Following raw buffer will be divided into iob_s instances, the initial
  * procedure will ensure that the member io_data of each iob_s is aligned
- * to the CONFIG_IOB_ALIGNMENT memory boundary.
+ * to the IOB_ALIGNMENT memory boundary.
  */
 
 #ifdef IOB_SECTION
@@ -135,11 +135,11 @@ void iob_initialize(void)
   uintptr_t buf;
 
   /* Get a start address which plus offsetof(struct iob_s, io_data) is
-   * aligned to the CONFIG_IOB_ALIGNMENT memory boundary
+   * aligned to the IOB_ALIGNMENT memory boundary
    */
 
   buf = ALIGN_UP((uintptr_t)g_iob_buffer + offsetof(struct iob_s, io_data),
-                 CONFIG_IOB_ALIGNMENT) - offsetof(struct iob_s, io_data);
+                 IOB_ALIGNMENT) - offsetof(struct iob_s, io_data);
 
   /* Get I/O buffer instance from the start address and add each I/O buffer
    * to the free list

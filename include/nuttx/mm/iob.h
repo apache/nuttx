@@ -31,6 +31,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <sys/param.h>
 
 #ifdef CONFIG_IOB_NOTIFIER
 #  include <nuttx/wqueue.h>
@@ -74,9 +75,7 @@
 
 /* Default config of alignment and head padding size */
 
-#if !defined(CONFIG_IOB_ALIGNMENT)
-#  define CONFIG_IOB_ALIGNMENT      1
-#endif
+#define IOB_ALIGNMENT    MAX(CONFIG_IOB_ALIGNMENT, sizeof(uintptr_t))
 
 /* IOB helpers */
 

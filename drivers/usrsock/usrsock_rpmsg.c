@@ -25,6 +25,7 @@
  ****************************************************************************/
 
 #include <nuttx/net/dns.h>
+#include <nuttx/net/net.h>
 #include <nuttx/rpmsg/rpmsg.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/usrsock/usrsock_rpmsg.h>
