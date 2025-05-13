@@ -24,16 +24,8 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <stdint.h>
-#include <stdbool.h>
-#include <errno.h>
-#include <nuttx/arch.h>
-#include <nuttx/clock.h>
 #include <debug.h>
-
-#include <arch/board/board.h>
+#include <errno.h>
 
 #include "chip.h"
 #include "arm64_internal.h"
@@ -52,11 +44,23 @@
 #define upper_32_bits(n) ((uint32_t)(((n) >> 16) >> 16))
 #define lower_32_bits(n) ((uint32_t)(n))
 
+#define ELE_RNG_TIMEOUT_US    5000
+#define ELE_RNG_SLEEP_US      100
+#define ELE_TRNG_STATUS_READY 0x3
+#define ELE_CSAL_STATUS_READY 0x2
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
 struct ele_msg msg;
+
+struct ele_trng_state
+{
+  uint8_t  trng_state;
+  uint8_t  csal_state;
+  uint16_t reserved;
+};
 
 /****************************************************************************
  * Private Function Prototypes
@@ -154,8 +158,8 @@ void imx9_ele_init(void)
 
 int imx9_ele_release_rdc(uint32_t rdc_id)
 {
-  msg.header.version = AHAB_VERSION;
-  msg.header.tag = AHAB_CMD_TAG;
+  msg.header.version = ELE_VERSION;
+  msg.header.tag = ELE_CMD_TAG;
   msg.header.size = 2;
   msg.header.command = ELE_RELEASE_RDC_REQ;
   msg.data[0] = rdc_id;
@@ -175,8 +179,8 @@ uint32_t imx9_ele_read_common_fuse(uint32_t fuse_id)
 {
   uint32_t value = 0;
 
-  msg.header.version = AHAB_VERSION;
-  msg.header.tag = AHAB_CMD_TAG;
+  msg.header.version = ELE_VERSION;
+  msg.header.tag = ELE_CMD_TAG;
   msg.header.size = 2;
   msg.header.command = ELE_READ_FUSE_REQ;
   msg.data[0] = fuse_id;
@@ -225,8 +229,8 @@ int imx9_ele_get_key(uint8_t *key, size_t key_size,
       return -EINVAL;
     }
 
-  msg.header.version = AHAB_VERSION;
-  msg.header.tag = AHAB_CMD_TAG;
+  msg.header.version = ELE_VERSION;
+  msg.header.tag = ELE_CMD_TAG;
   msg.header.size = 7;
   msg.header.command = ELE_DERIVE_KEY_REQ;
   msg.data[0] = upper_32_bits((ulong)key);
@@ -264,8 +268,8 @@ int imx9_ele_get_events(uint32_t *buffer, size_t buffer_size)
   size_t events_num;
   size_t i;
 
-  msg.header.version = AHAB_VERSION;
-  msg.header.tag = AHAB_CMD_TAG;
+  msg.header.version = ELE_VERSION;
+  msg.header.tag = ELE_CMD_TAG;
   msg.header.size = 1;
   msg.header.command = ELE_GET_EVENTS_REQ;
 
@@ -295,8 +299,8 @@ int imx9_ele_get_events(uint32_t *buffer, size_t buffer_size)
 
 int imx9_ele_close_device(void)
 {
-  msg.header.version = AHAB_VERSION;
-  msg.header.tag = AHAB_CMD_TAG;
+  msg.header.version = ELE_VERSION;
+  msg.header.tag = ELE_CMD_TAG;
   msg.header.size = 2;
   msg.header.command = ELE_FWD_LIFECYCLE_UP_REQ;
   msg.data[0] = 0x08;
@@ -319,8 +323,8 @@ uint32_t imx9_ele_get_lifecycle(void)
 
 int imx9_ele_auth_oem_ctnr(unsigned long ctnr_addr, uint32_t *response)
 {
-  msg.header.version = AHAB_VERSION;
-  msg.header.tag = AHAB_CMD_TAG;
+  msg.header.version = ELE_VERSION;
+  msg.header.tag = ELE_CMD_TAG;
   msg.header.size = 3;
   msg.header.command = ELE_OEM_CNTN_AUTH_REQ;
   msg.data[0] = upper_32_bits(ctnr_addr);
@@ -343,8 +347,8 @@ int imx9_ele_auth_oem_ctnr(unsigned long ctnr_addr, uint32_t *response)
 
 int imx9_ele_release_container(uint32_t *response)
 {
-  msg.header.version = AHAB_VERSION;
-  msg.header.tag = AHAB_CMD_TAG;
+  msg.header.version = ELE_VERSION;
+  msg.header.tag = ELE_CMD_TAG;
   msg.header.size = 1;
   msg.header.command = ELE_RELEASE_CONTAINER_REQ;
 
@@ -366,8 +370,8 @@ int imx9_ele_release_container(uint32_t *response)
 
 int imx9_ele_verify_image(uint32_t img_id, uint32_t *response)
 {
-  msg.header.version = AHAB_VERSION;
-  msg.header.tag = AHAB_CMD_TAG;
+  msg.header.version = ELE_VERSION;
+  msg.header.tag = ELE_CMD_TAG;
   msg.header.size = 2;
   msg.header.command = ELE_VERIFY_IMAGE_REQ;
   msg.data[0] = 1 << img_id;
@@ -382,6 +386,106 @@ int imx9_ele_verify_image(uint32_t img_id, uint32_t *response)
 
   if ((msg.data[0] & 0xff) == ELE_OK)
     {
+      return 0;
+    }
+
+  return -EIO;
+}
+
+int imx9_ele_start_rng(void)
+{
+  msg.header.version = ELE_VERSION;
+  msg.header.tag = ELE_CMD_TAG;
+  msg.header.size = 1;
+  msg.header.command = ELE_START_RNG_REQ;
+
+  imx9_ele_sendmsg(&msg);
+  imx9_ele_receivemsg(&msg);
+
+  if ((msg.data[0] & 0xff) == ELE_OK)
+    {
+      return 0;
+    }
+
+  return -EIO;
+}
+
+int imx9_ele_get_trng_state(void)
+{
+  msg.header.version = ELE_VERSION;
+  msg.header.tag = ELE_CMD_TAG;
+  msg.header.size = 1;
+  msg.header.command = ELE_GET_TRNG_STATE_REQ;
+
+  imx9_ele_sendmsg(&msg);
+  imx9_ele_receivemsg(&msg);
+
+  if ((msg.data[0] & 0xff) == ELE_OK)
+    {
+      struct ele_trng_state *ele_trng =
+        (struct ele_trng_state *)(msg.data + 1);
+      if (ele_trng->trng_state != ELE_TRNG_STATUS_READY ||
+          ele_trng->csal_state != ELE_CSAL_STATUS_READY)
+        {
+          /* Ensure imx9_ele_start_rng() was called earlier or we will
+           * end up here.
+           */
+
+          return -EBUSY;
+        }
+      else
+        {
+          return 0;
+        }
+    }
+
+  return -EIO;
+}
+
+int imx9_ele_get_random(uint32_t paddr, size_t len)
+{
+  uint16_t counter = 0;
+  uint16_t max_tries = ELE_RNG_TIMEOUT_US / ELE_RNG_SLEEP_US;
+
+  if (paddr == 0 || len == 0)
+    {
+      _err("Wrong input parameters!\n");
+      return -EINVAL;
+    }
+
+  while ((imx9_ele_get_trng_state() != 0))
+    {
+      if (counter > max_tries)
+        {
+          _err("Timed out after %hu iterations!\n", counter);
+          return -EBUSY;
+        }
+
+      usleep(ELE_RNG_SLEEP_US);
+      counter++;
+    }
+
+  /* Flush the cache before sending the request to ELE. */
+
+  up_flush_dcache((uintptr_t)paddr, (uintptr_t)(paddr + len));
+
+  msg.header.version = ELE_VERSION_FW;
+  msg.header.tag = ELE_CMD_TAG;
+  msg.header.size = 4;
+  msg.header.command = ELE_GET_RNG_REQ;
+  msg.data[0] = 0;
+  msg.data[1] = paddr;
+  msg.data[2] = len;
+
+  imx9_ele_sendmsg(&msg);
+  imx9_ele_receivemsg(&msg);
+
+  if ((msg.data[0] & 0xff) == ELE_OK)
+    {
+      /* Invalidate the cache so we can read the result from RAM. */
+
+      up_invalidate_dcache((uintptr_t)paddr,
+                           (uintptr_t)(paddr + len));
       return 0;
     }
 
