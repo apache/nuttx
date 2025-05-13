@@ -62,7 +62,7 @@
 #define PRIu32      "lu"
 #define PRIu64      "llu"
 
-#define PRIuPTR     "u"
+#define PRIuPTR     "lu"
 
 #define PRIx8       "x"
 #define PRIx16      "x"
