@@ -81,8 +81,15 @@ void up_pthread_start(pthread_trampoline_t startup,
    *   SPSR = user mode
    */
 
-  arm64_jump_to_user((uint64_t)startup, (uint64_t)entrypt, (uint64_t)arg,
+#ifdef CONFIG_BUILD_KERNEL
+  arm64_jump_to_user((uint64_t)startup, (uint64_t)entrypt,
+                     (uint64_t)arg, 0,
                      (uint64_t)rtcb->xcp.ustkptr, rtcb->xcp.initregs);
+#elif defined(CONFIG_BUILD_PROTECTED)
+  arm64_jump_to_user((uint64_t)USERSPACE->task_startup,
+                     (uint64_t)startup, (uint64_t)entrypt, (uint64_t)arg,
+                     (uint64_t)rtcb->xcp.ustkptr, rtcb->xcp.initregs);
+#endif
 }
 
 #endif /* !CONFIG_BUILD_FLAT && __KERNEL__ && !CONFIG_DISABLE_PTHREAD */

@@ -131,7 +131,7 @@ pid_t arm64_fork(const struct fork_s *context)
 
   /* Allocate and initialize a TCB for the child task. */
 
-  child = nxtask_setup_fork((start_t)(context->lr & ~1));
+  child = nxtask_setup_fork((start_t)context->lr);
   if (!child)
     {
       serr("ERROR: nxtask_setup_fork failed\n");

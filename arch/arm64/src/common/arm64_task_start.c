@@ -72,14 +72,23 @@ void up_task_start(main_t taskentry, int argc, char *argv[])
   /* Set up to return to the user-space _start function in
    * unprivileged mode.  We need:
    *
-   *   R0   = argc
-   *   R1   = argv
-   *   ELR  = taskentry
-   *   SPSR = user mode
+   *   X0 = REG_ELR
+   *   X1 = param1
+   *   X2 = param2
+   *   X3 = param3
+   *   X4 = SP_EL0
+   *   X5 = REGS
    */
 
-  arm64_jump_to_user((uint64_t)taskentry, (uint64_t)argc, (uint64_t)argv,
+#ifdef CONFIG_BUILD_KERNEL
+  arm64_jump_to_user((uint64_t)taskentry, (uint64_t)argc,
+                     (uint64_t)argv, 0,
                      (uint64_t)rtcb->xcp.ustkptr, rtcb->xcp.initregs);
+#elif defined(CONFIG_BUILD_PROTECTED)
+  arm64_jump_to_user((uint64_t)USERSPACE->task_startup,
+                     (uint64_t)taskentry, (uint64_t)argc, (uint64_t)argv,
+                     (uint64_t)rtcb->xcp.ustkptr, rtcb->xcp.initregs);
+#endif
 }
 
 #endif /* !CONFIG_BUILD_FLAT */
