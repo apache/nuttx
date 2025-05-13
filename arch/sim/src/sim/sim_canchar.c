@@ -180,6 +180,7 @@ static int sim_can_remoterequest(struct can_dev_s *dev, uint16_t id)
 static int sim_can_send(struct can_dev_s *dev, struct can_msg_s *msg)
 {
   struct sim_canchar_s *priv = dev->cd_priv;
+  int ret;
 
   if (!msg->cm_hdr.ch_edl)
     {
@@ -204,7 +205,7 @@ static int sim_can_send(struct can_dev_s *dev, struct can_msg_s *msg)
 
       memcpy(frame.data, msg->cm_data, frame.can_dlc);
 
-      return host_can_send(&priv->host, &frame, sizeof(struct can_frame));
+      ret = host_can_send(&priv->host, &frame, sizeof(struct can_frame));
     }
   else
     {
@@ -240,8 +241,17 @@ static int sim_can_send(struct can_dev_s *dev, struct can_msg_s *msg)
 
       memcpy(frame.data, msg->cm_data, frame.len);
 
-      return host_can_send(&priv->host, &frame, sizeof(struct canfd_frame));
+      ret = host_can_send(&priv->host, &frame, sizeof(struct canfd_frame));
     }
+
+  if (ret > 0)
+    {
+      /* Tell the upper half that the transfer is finished. */
+
+      can_txdone(dev);
+    }
+
+  return ret;
 }
 
 /****************************************************************************
