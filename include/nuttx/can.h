@@ -33,8 +33,6 @@
 #include <sys/socket.h>
 #include <stdint.h>
 
-#ifdef CONFIG_NET_CAN
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -383,5 +381,4 @@ extern "C"
 }
 #endif
 
-#endif /* CONFIG_CAN */
 #endif /* __INCLUDE_NUTTX_CAN_H */
