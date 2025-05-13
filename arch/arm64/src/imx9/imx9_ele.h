@@ -27,8 +27,9 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
 #include "hardware/imx9_ele.h"
+#include <sys/types.h>
+#include <stdint.h>
 
 /****************************************************************************
  * Public Function Prototypes
@@ -219,4 +220,51 @@ int imx9_ele_release_container(uint32_t *response);
  ****************************************************************************/
 
 int imx9_ele_verify_image(uint32_t img_id, uint32_t *response);
+
+/****************************************************************************
+ * Name: imx9_ele_start_rng
+ *
+ * Description:
+ *   Sends command to initialize the ELE RNG context.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned for success. A negated errno value is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+int imx9_ele_start_rng(void);
+
+/****************************************************************************
+ * Name: imx9_ele_get_trng_state
+ *
+ * Description:
+ *   Query the state of the True Random Number Generator.
+ *
+ * Returned Value:
+ *   Zero is returned if the Random Number Generator (RNG) is ready for use.
+ *   A negated errno value (-EBUSY) or another is returned on failure.
+ *
+ ****************************************************************************/
+
+int imx9_ele_get_trng_state(void);
+
+/****************************************************************************
+ * Name: imx9_ele_get_random
+ *
+ * Description:
+ *   Request from the ELE the generation of a random number of specified
+ *   length.
+ *
+ * Input Parameters:
+ *   paddr  -  32bit physical address to store the random number.
+ *   len    -  Length in bytes of the random number.
+ *
+ * Returned Value:
+ *   Zero is returned if ELE successfully generated the random number.
+ *   A negated errno value (-EBUSY) or another is returned on failure.
+ *
+ ****************************************************************************/
+
+int imx9_ele_get_random(uint32_t paddr, size_t len);
 #endif /* __ARCH_ARM64_SRC_IMX9_IMX9_ELE_H */
