@@ -692,7 +692,12 @@ static int sensor_rpmsg_open(FAR struct sensor_lowerhalf_s *lower,
 
   if (filep->f_oflags & O_RDOK)
     {
-      if (dev->nsubscribers++ == 0)
+      /* Send broadcast subscribed info if dev isn't
+       * physical sensor to avoid waking up remote core.
+       */
+
+      if (dev->nsubscribers++ == 0 &&
+          drv->ops->activate == NULL)
         {
           sub = true;
         }
@@ -756,7 +761,15 @@ static int sensor_rpmsg_close(FAR struct sensor_lowerhalf_s *lower,
     {
       if (dev->nsubscribers == 1)
         {
-          unsub = true;
+          /* Send broadcast unsubscribed info if dev isn't
+           * physical sensor to avoid waking up remote core.
+           */
+
+          if (drv->ops->activate == NULL)
+            {
+              unsub = true;
+            }
+
           list_for_every_entry_safe(&dev->proxylist, proxy, ptmp,
                                     struct sensor_rpmsg_proxy_s, node)
             {
