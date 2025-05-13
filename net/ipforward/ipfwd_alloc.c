@@ -63,6 +63,8 @@
 
 #define MAX_HDRLEN (L2_MAXHDRLEN + L3_MAXHDRLEN)
 
+static_assert(MAX_HDRLEN <= CONFIG_IOB_BUFSIZE, "IOB buffer size too small");
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -77,26 +79,6 @@ NET_BUFPOOL_DECLARE(g_fwdpool, sizeof(struct forward_s),
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: ipfwd_initialize
- *
- * Description:
- *   Initialize the struct forward_s allocator.
- *
- * Assumptions:
- *   Called early in system initialization.
- *
- ****************************************************************************/
-
-void ipfwd_initialize(void)
-{
-  /* The IOB size must be such that the maximum L2 and L3 headers fit into
-   * the contiguous memory of the first IOB in the IOB chain.
-   */
-
-  DEBUGASSERT(MAX_HDRLEN <= CONFIG_IOB_BUFSIZE);
-}
 
 /****************************************************************************
  * Name: ipfwd_alloc

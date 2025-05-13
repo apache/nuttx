@@ -79,19 +79,6 @@ static dq_queue_t g_active_pkt_connections;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pkt_initialize()
- *
- * Description:
- *   Initialize the packet socket connection structures.  Called once and
- *   only from the network initialization layer.
- *
- ****************************************************************************/
-
-void pkt_initialize(void)
-{
-}
-
-/****************************************************************************
  * Name: pkt_alloc()
  *
  * Description:

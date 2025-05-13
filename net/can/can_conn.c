@@ -72,19 +72,6 @@ static dq_queue_t g_active_can_connections;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: can_initialize()
- *
- * Description:
- *   Initialize the User Socket connection structures.  Called once and only
- *   from the networking layer.
- *
- ****************************************************************************/
-
-void can_initialize(void)
-{
-}
-
-/****************************************************************************
  * Name: can_alloc()
  *
  * Description:

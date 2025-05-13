@@ -37,6 +37,7 @@
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
+#include <nuttx/net/netstats.h>
 
 #include "netdev/netdev.h"
 #include "utils/utils.h"
@@ -48,6 +49,16 @@
 
 #define DEVIF_CB_DONT_FREE  (1 << 0)
 #define DEVIF_CB_PEND_FREE  (1 << 1)
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/* IP/TCP/UDP/ICMP statistics for all network interfaces */
+
+#ifdef CONFIG_NET_STATISTICS
+struct net_stats_s g_netstats;
+#endif
 
 /****************************************************************************
  * Private Data
