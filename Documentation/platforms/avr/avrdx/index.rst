@@ -110,3 +110,11 @@ Supported Boards
 
    boards/*/*
 
+Other documents
+===============
+
+.. toctree::
+   :glob:
+   :maxdepth: 1
+
+   docs/*
