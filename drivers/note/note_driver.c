@@ -217,7 +217,17 @@ static void note_common(FAR struct tcb_s *tcb,
       note->nc_pid = tcb->pid;
     }
 
+#if defined (CONFIG_NOTE_GET_PERF_TIME)
   note->nc_systime = perf_gettime();
+
+#elif defined (CONFIG_NOTE_GET_CLOCK_TIME)
+  struct timespec ts;
+  clock_gettime(CLOCK_REALTIME, &ts);
+  note->nc_systime = ts.tv_sec * NSEC_PER_SEC + ts.tv_nsec;
+
+#else
+
+#endif
 }
 
 /****************************************************************************
