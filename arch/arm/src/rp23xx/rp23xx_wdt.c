@@ -272,6 +272,10 @@ int rp23xx_wdt_init(void)
   watchdog_lowerhalf_t *lower = &g_rp23xx_watchdog_lowerhalf;
   int                   ret   = OK;
 
+  putreg32(WDT_MAX_TIMEOUT,  RP23XX_WATCHDOG_LOAD);
+  modreg32(0, RP23XX_WATCHDOG_CTRL_ENABLE, RP23XX_WATCHDOG_CTRL);
+  lower->timeout = WDT_MAX_TIMEOUT / USEC_PER_MSEC;
+
   lower->upper = watchdog_register(CONFIG_WATCHDOG_DEVPATH,
                                    (struct watchdog_lowerhalf_s *) lower);
   if (lower->upper == NULL)
@@ -279,9 +283,6 @@ int rp23xx_wdt_init(void)
       ret = -EEXIST;
       goto errout;
     }
-
-  putreg32(WDT_MAX_TIMEOUT,  RP23XX_WATCHDOG_LOAD);
-  modreg32(0, RP23XX_WATCHDOG_CTRL_ENABLE, RP23XX_WATCHDOG_CTRL);
 
 errout:
   return ret;
