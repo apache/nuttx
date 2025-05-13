@@ -187,10 +187,14 @@ void mpu_freeregion(unsigned int region)
   write_sysreg(region, prselr_el1);
   UP_DSB();
 
-  /* Set the region base, limit and attribute */
+  /* Set the region base, limit and attribute
+   * Have to set limit register first as the enable/disable bit of the
+   * region is in the limit register.
+   */
 
-  write_sysreg(0, prbar_el1);
   write_sysreg(0, prlar_el1);
+  write_sysreg(0, prbar_el1);
+
   g_mpu_region[this_cpu()] &= ~(1 << region);
   UP_MB();
 }
