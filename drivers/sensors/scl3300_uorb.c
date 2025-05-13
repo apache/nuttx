@@ -299,7 +299,7 @@ static const struct sensor_ops_s g_scl3300_ops =
   NULL,                   /* set_calibvalue */
   NULL,                   /* calibrate */
   scl3300_get_info,       /* get_info */
-  NULL,                   /* set_nonwakeup */
+  NULL,                   /* set_wakeup */
   scl3300_control,        /* control */
 };
 
