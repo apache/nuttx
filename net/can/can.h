@@ -149,19 +149,6 @@ EXTERN const struct sock_intf_s g_can_sockif;
  * Public Function Prototypes
  ****************************************************************************/
 
-struct sockaddr_can;  /* Forward reference */
-
-/****************************************************************************
- * Name: can_initialize()
- *
- * Description:
- *   Initialize the NetLink connection structures.  Called once and only
- *   from the networking layer.
- *
- ****************************************************************************/
-
-void can_initialize(void);
-
 /****************************************************************************
  * Name: can_alloc()
  *

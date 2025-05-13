@@ -301,17 +301,6 @@ extern "C"
 EXTERN const struct sock_intf_s g_netlink_sockif;
 
 /****************************************************************************
- * Name: netlink_initialize()
- *
- * Description:
- *   Initialize the NetLink connection structures.  Called once and only
- *   from the networking layer.
- *
- ****************************************************************************/
-
-void netlink_initialize(void);
-
-/****************************************************************************
  * Name: netlink_alloc()
  *
  * Description:

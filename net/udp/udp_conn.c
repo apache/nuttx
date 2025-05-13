@@ -538,19 +538,6 @@ errout:
 }
 
 /****************************************************************************
- * Name: udp_initialize
- *
- * Description:
- *   Initialize the UDP connection structures.  Called once and only from
- *   the UIP layer.
- *
- ****************************************************************************/
-
-void udp_initialize(void)
-{
-}
-
-/****************************************************************************
  * Name: udp_alloc
  *
  * Description:

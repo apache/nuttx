@@ -137,17 +137,6 @@ struct net_driver_s; /* Forward reference */
 struct socket;       /* Forward reference */
 
 /****************************************************************************
- * Name: pkt_initialize()
- *
- * Description:
- *   Initialize the packet socket connection structures.  Called once and
- *   only from the network initialization logic.
- *
- ****************************************************************************/
-
-void pkt_initialize(void);
-
-/****************************************************************************
  * Name: pkt_alloc()
  *
  * Description:

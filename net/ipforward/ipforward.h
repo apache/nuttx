@@ -84,19 +84,6 @@ struct ipv4_hdr_s; /* Forward reference */
 struct ipv6_hdr_s; /* Forward reference */
 
 /****************************************************************************
- * Name: ipfwd_initialize
- *
- * Description:
- *   Initialize the struct forward_s allocator.
- *
- * Assumptions:
- *   Called early in system initialization.
- *
- ****************************************************************************/
-
-void ipfwd_initialize(void);
-
-/****************************************************************************
  * Name: ipfwd_alloc
  *
  * Description:

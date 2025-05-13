@@ -139,19 +139,6 @@ netlink_get_terminator(FAR const struct nlmsghdr *req)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: netlink_initialize()
- *
- * Description:
- *   Initialize the NetLink connection structures.  Called once and only
- *   from the networking layer.
- *
- ****************************************************************************/
-
-void netlink_initialize(void)
-{
-}
-
-/****************************************************************************
  * Name: netlink_alloc()
  *
  * Description:

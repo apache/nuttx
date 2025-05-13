@@ -460,17 +460,6 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tcp_initialize
- *
- * Description:
- *   Initialize the TCP/IP connection structures.  Called only once and only
- *   from the network layer at start-up.
- *
- ****************************************************************************/
-
-void tcp_initialize(void);
-
-/****************************************************************************
  * Name: tcp_alloc
  *
  * Description:

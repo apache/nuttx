@@ -22,7 +22,7 @@
 
 # Network device interface source files
 
-NET_CSRCS += devif_initialize.c devif_callback.c
+NET_CSRCS += devif_callback.c
 
 # Device driver IP packet receipt interfaces
 
