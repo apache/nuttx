@@ -31,7 +31,7 @@ STARTUP_OBJS = crt0$(OBJEXT)
 # debug.
 
 # Common assembly language files
-CMN_ASRCS  = arm64_vector_table.S arm64_vectors.S arm64_smccc.S
+CMN_ASRCS  = arm64_vector_table.S arm64_vectors.S
 CMN_ASRCS += arm64_fork_func.S
 
 # Common C source files ( OS call up_xxx)
@@ -65,6 +65,10 @@ CMN_CSRCS += arm64_gicv2.c
 ifeq ($(CONFIG_ARM64_GICV2M),y)
 CMN_CSRCS += arm64_gicv2m.c
 endif
+endif
+
+ifeq ($(CONFIG_ARCH_HAVE_EL3),y)
+CMN_ASRCS += arm64_smccc.S
 endif
 
 ifeq ($(CONFIG_ARCH_HAVE_MMU),y)
