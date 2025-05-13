@@ -122,7 +122,7 @@ FAR struct iob_s *iob_free(FAR struct iob_s *iob)
   if (iob->io_free != NULL)
     {
       FAR uint8_t *io_data = (FAR uint8_t *)ALIGN_UP((uintptr_t)(iob + 1),
-                                                     CONFIG_IOB_ALIGNMENT);
+                                                     IOB_ALIGNMENT);
       if (iob->io_data == io_data)
         {
           iob->io_free(iob);
