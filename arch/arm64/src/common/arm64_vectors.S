@@ -105,15 +105,16 @@ SECTION_FUNC(text, up_saveusercontext)
  *
  ****************************************************************************/
 
-#ifndef CONFIG_BUILD_FLAT
+#if defined(CONFIG_BUILD_KERNEL) || defined(CONFIG_BUILD_PROTECTED)
 GTEXT(arm64_jump_to_user)
 SECTION_FUNC(text, arm64_jump_to_user)
     msr daifset, #IRQ_DAIF_MASK
-    mov sp,  x4
+    mov sp,  x5
     str x0,  [sp, #8 * REG_ELR]
     str x1,  [sp, #8 * REG_X0]
     str x2,  [sp, #8 * REG_X1]
-    str x3,  [sp, #8 * REG_SP_EL0]
+    str x3,  [sp, #8 * REG_X2]
+    str x4,  [sp, #8 * REG_SP_EL0]
     mrs x0,  spsr_el1
     and x0,  x0, #~SPSR_MODE_MASK
     #orr x0, x0, #SPSR_MODE_EL0T # EL0T=0x00, out of range for orr
