@@ -43,6 +43,7 @@
 #include "chip.h"
 #include "fvp_boot.h"
 
+#include <arch/board/board_memorymap.h>
 #include <nuttx/serial/uart_pl011.h>
 
 /****************************************************************************
@@ -51,35 +52,44 @@
 
 static const struct arm64_mpu_region g_mpu_regions[] =
 {
-  /* Region 0 NuttX text */
+  /* Region 0 NuttX ktext */
 
-  MPU_REGION_ENTRY("nx_code",
-     (uint64_t)_stext,
-     (uint64_t)_etext,
-     REGION_RAM_TEXT_ATTR),
+  MPU_REGION_ENTRY("nx_ktext",
+    (uint64_t)KTEXT_START,
+    (uint64_t)KTEXT_END,
+    REGION_RAM_TEXT_ATTR),
 
-  /* Region 1 NuttX rodata */
+  /* Region 1 NuttX kdata */
 
-  MPU_REGION_ENTRY("nx_rodata",
-     (uint64_t)_srodata,
-     (uint64_t)_erodata,
-     REGION_RAM_RO_ATTR),
+  MPU_REGION_ENTRY("nx_kdata",
+    (uint64_t)KSRAM_START,
+    (uint64_t)KSRAM_END,
+    REGION_RAM_ATTR),
 
-  /* Region 2 NuttX data */
+#ifdef CONFIG_BUILD_PROTECTED
+  /* Region 2 NuttX utext */
 
-  MPU_REGION_ENTRY("nx_data",
-     (uint64_t)_sdata,
-     (uint64_t)CONFIG_RAMBANK_END,
-     REGION_RAM_ATTR),
+  MPU_REGION_ENTRY("nx_utext",
+      (uint64_t)UTEXT_START,
+      (uint64_t)UTEXT_END,
+      REGION_RAM_UTEXT_ATTR),
 
-  /* Region 3 device region */
+  /* Region 3 NuttX udata */
+
+  MPU_REGION_ENTRY("nx_udata",
+     (uint64_t)USRAM_START,
+     (uint64_t)USRAM_END,
+     REGION_URAM_ATTR),
+#endif
+
+  /* Region 4 device region */
 
   MPU_REGION_ENTRY("DEVICE1",
      (uint64_t)CONFIG_DEVICEIO1_BASEADDR,
      (uint64_t)CONFIG_DEVICEIO1_END,
      REGION_DEVICE_ATTR),
 
-  /* Region 4 device region */
+  /* Region 5 device region */
 
   MPU_REGION_ENTRY("DEVICE2",
      (uint64_t)CONFIG_DEVICEIO2_BASEADDR,
