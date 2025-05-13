@@ -188,7 +188,7 @@ static const struct sensor_ops_s g_bmm150_sensor_ops =
   NULL,                 /* set_calibvalue */
   NULL,                 /* calibrate */
   NULL,                 /* get_info */
-  NULL,                 /* set_nonwakeup */
+  NULL,                 /* set_wakeup */
   NULL,                 /* control */
 };
 
