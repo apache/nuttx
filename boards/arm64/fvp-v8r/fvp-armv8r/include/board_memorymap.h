@@ -52,6 +52,42 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
+#ifdef CONFIG_BUILD_PROTECTED
+/* Split SRAM between kernel and user spaces */
+
+#  define KTEXT_SIZE  (CONFIG_RAM_SIZE / 4)
+#  define KSRAM_SIZE  (CONFIG_RAM_SIZE / 4)
+#  define UTEXT_SIZE  (CONFIG_RAM_SIZE / 4)
+#  define USRAM_SIZE  (CONFIG_RAM_SIZE / 4)
+#else
+/* Give All RAM to kernel */
+
+#  define KTEXT_SIZE  (CONFIG_RAM_SIZE / 2)
+#  define KSRAM_SIZE  (CONFIG_RAM_SIZE / 2)
+#  define UTEXT_SIZE  0
+#  define USRAM_SIZE  0
+#endif
+
+/* Kernel code memory (RX) */
+
+#define KTEXT_START   CONFIG_RAM_START
+#define KTEXT_END     (KTEXT_START + KTEXT_SIZE)
+
+/* Kernel RAM (RW) */
+
+#define KSRAM_START   KTEXT_END
+#define KSRAM_END     (KSRAM_START + KSRAM_SIZE)
+
+/* User code memory (RX) */
+
+#define UTEXT_START   KSRAM_END
+#define UTEXT_END     (UTEXT_START + UTEXT_SIZE)
+
+/* User RAM (RW) */
+
+#define USRAM_START   UTEXT_END
+#define USRAM_END     (USRAM_START + USRAM_SIZE)
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
