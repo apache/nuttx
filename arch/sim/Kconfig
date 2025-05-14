@@ -229,6 +229,7 @@ endchoice
 
 config SIM_CANDEV
 	bool "Simulated CAN Device"
+	depends on HOST_LINUX
 	default n
 	---help---
 		Build in support for a simulated CAN device.
