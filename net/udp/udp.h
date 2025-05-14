@@ -254,6 +254,32 @@ FAR struct udp_conn_s *udp_active(FAR struct net_driver_s *dev,
 FAR struct udp_conn_s *udp_nextconn(FAR struct udp_conn_s *conn);
 
 /****************************************************************************
+ * Name: udp_conn_list_lock
+ *
+ * Description:
+ *   Lock the UDP connection list
+ *
+ * Assumptions:
+ *   This function must be called by driver thread.
+ *
+ ****************************************************************************/
+
+void udp_conn_list_lock(void);
+
+/****************************************************************************
+ * Name: udp_conn_list_unlock
+ *
+ * Description:
+ *   Unlock the UDP connection list
+ *
+ * Assumptions:
+ *   This function must be called by driver thread.
+ *
+ ****************************************************************************/
+
+void udp_conn_list_unlock(void);
+
+/****************************************************************************
  * Name: udp_select_port
  *
  * Description:
