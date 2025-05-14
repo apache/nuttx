@@ -35,7 +35,9 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/pci/pci.h>
 
-#include <nuttx/can/can.h>
+#ifdef CONFIG_CAN_CTUCANFD_CHARDEV
+#  include <nuttx/can/can.h>
+#endif
 
 #ifdef CONFIG_CAN_CTUCANFD_SOCKET
 #  include <nuttx/wqueue.h>
