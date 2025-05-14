@@ -694,8 +694,16 @@ ssize_t psock_udp_recvfrom(FAR struct socket *psock, FAR struct msghdr *msg,
    * because we don't want anything to happen until we are ready.
    */
 
-  net_lock();
   udp_recvfrom_initialize(conn, msg, &state, flags);
+
+  /* Get the device that will handle the packet transfers.  This may be
+   * NULL if the UDP socket is bound to INADDR_ANY.  In that case, no
+   * NETDEV_DOWN notifications will be received.
+   */
+
+  dev = udp_find_laddr_device(conn);
+
+  conn_dev_lock(&conn->sconn, dev);
 
   /* Copy the read-ahead data from the packet */
 
@@ -735,13 +743,6 @@ ssize_t psock_udp_recvfrom(FAR struct socket *psock, FAR struct msghdr *msg,
 
   else if (state.ir_recvlen <= 0)
     {
-      /* Get the device that will handle the packet transfers.  This may be
-       * NULL if the UDP socket is bound to INADDR_ANY.  In that case, no
-       * NETDEV_DOWN notifications will be received.
-       */
-
-      dev = udp_find_laddr_device(conn);
-
       /* Set up the callback in the connection */
 
       state.ir_cb = udp_callback_alloc(dev, conn);
@@ -768,8 +769,10 @@ ssize_t psock_udp_recvfrom(FAR struct socket *psock, FAR struct msghdr *msg,
            * received.
            */
 
+          conn_dev_unlock(&conn->sconn, dev);
           ret = net_sem_timedwait(&state.ir_sem,
                               _SO_TIMEOUT(conn->sconn.s_rcvtimeo));
+          conn_dev_lock(&conn->sconn, dev);
           tls_cleanup_pop(tls_get_info(), 0);
           if (ret == -ETIMEDOUT)
             {
@@ -787,9 +790,9 @@ ssize_t psock_udp_recvfrom(FAR struct socket *psock, FAR struct msghdr *msg,
         }
     }
 
+  conn_dev_unlock(&conn->sconn, dev);
   udp_notify_recvcpu(conn);
 
-  net_unlock();
   udp_recvfrom_uninitialize(&state);
   return ret;
 }

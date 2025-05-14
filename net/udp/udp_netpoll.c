@@ -37,6 +37,7 @@
 #include "devif/devif.h"
 #include "netdev/netdev.h"
 #include "socket/socket.h"
+#include "utils/utils.h"
 #include "udp/udp.h"
 
 /****************************************************************************
@@ -132,12 +133,11 @@ int udp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
   FAR struct udp_conn_s *conn;
   FAR struct udp_poll_s *info;
   FAR struct devif_callback_s *cb;
+  FAR struct net_driver_s *dev;
   pollevent_t eventset = 0;
   int ret = OK;
 
   /* Some of the following must be atomic */
-
-  net_lock();
 
   conn = psock->s_conn;
 
@@ -145,9 +145,12 @@ int udp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
 
   if (conn == NULL || fds == NULL)
     {
-      ret = -EINVAL;
-      goto errout_with_lock;
+      return -EINVAL;
     }
+
+  dev = udp_find_laddr_device(conn);
+
+  conn_dev_lock(&conn->sconn, dev);
 
   /* Find a container to hold the poll information */
 
@@ -166,7 +169,7 @@ int udp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
    * dev value will be zero and there will be no NETDEV_DOWN notifications.
    */
 
-  info->dev = udp_find_laddr_device(conn);
+  info->dev = dev;
 
   /* Allocate a UDP callback structure */
 
@@ -229,7 +232,8 @@ int udp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
   poll_notify(&fds, 1, eventset);
 
 errout_with_lock:
-  net_unlock();
+  conn_dev_unlock(&conn->sconn, dev);
+
   return ret;
 }
 
@@ -254,9 +258,7 @@ int udp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
   FAR struct udp_conn_s *conn;
   FAR struct udp_poll_s *info;
 
-  /* Some of the following must be atomic */
-
-  net_lock();
+  /* Some of the following must be atomic? */
 
   conn = psock->s_conn;
 
@@ -264,7 +266,6 @@ int udp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
 
   if (!conn || !fds->priv)
     {
-      net_unlock();
       return -EINVAL;
     }
 
@@ -274,6 +275,8 @@ int udp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
   DEBUGASSERT(info->fds != NULL && info->cb != NULL);
   if (info != NULL)
     {
+      conn_dev_lock(&conn->sconn, info->dev);
+
       /* Release the callback */
 
       udp_callback_free(info->dev, conn, info->cb);
@@ -285,9 +288,8 @@ int udp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
       /* Then free the poll info container */
 
       info->conn = NULL;
+      conn_dev_unlock(&conn->sconn, info->dev);
     }
-
-  net_unlock();
 
   return OK;
 }
