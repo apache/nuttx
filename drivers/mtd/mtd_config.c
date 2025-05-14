@@ -1730,14 +1730,15 @@ static int mtdconfig_poll(FAR struct file *filep, FAR struct pollfd *fds,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mtdconfig_register
+ * Name: mtdconfig_register_by_path
  *
  * Description:
- *   Register a /dev/config device backed by an MTD
+ *   Register a "path" device backed by an MTD
  *
  ****************************************************************************/
 
-int mtdconfig_register(FAR struct mtd_dev_s *mtd)
+int mtdconfig_register_by_path(FAR struct mtd_dev_s *mtd,
+                               FAR const char *path)
 {
   int ret = -ENOMEM;
   struct mtdconfig_struct_s *dev;
@@ -1782,11 +1783,58 @@ int mtdconfig_register(FAR struct mtd_dev_s *mtd)
         }
 
       nxmutex_init(&dev->lock);
-      register_driver("/dev/config", &g_mtdconfig_fops, 0666, dev);
+      register_driver(path, &g_mtdconfig_fops, 0666, dev);
     }
 
 errout:
   return ret;
+}
+
+/****************************************************************************
+ * Name: mtdconfig_register
+ *
+ * Description:
+ *   Register a /dev/config device backed by an MTD
+ *
+ ****************************************************************************/
+
+int mtdconfig_register(FAR struct mtd_dev_s *mtd)
+{
+  return mtdconfig_register_by_path(mtd, "/dev/config");
+}
+
+/****************************************************************************
+ * Name: mtdconfig_unregister_by_path
+ *
+ * Description:
+ *   Unregister a "path" device backed by a MTD.
+ *
+ ****************************************************************************/
+
+int mtdconfig_unregister_by_path(FAR const char *path)
+{
+  int ret;
+  struct file file;
+  FAR struct inode *inode;
+  FAR struct mtdconfig_struct_s *dev;
+
+  ret = file_open(&file, path, O_CLOEXEC);
+  if (ret < 0)
+    {
+      ferr("ERROR: open %s failed: %d\n", path, ret);
+      return ret;
+    }
+
+  inode = file.f_inode;
+  dev = inode->i_private;
+  nxmutex_destroy(&dev->lock);
+  kmm_free(dev);
+
+  file_close(&file);
+
+  unregister_driver(path);
+
+  return OK;
 }
 
 /****************************************************************************
@@ -1799,28 +1847,7 @@ errout:
 
 int mtdconfig_unregister(void)
 {
-  int ret;
-  struct file file;
-  FAR struct inode *inode;
-  FAR struct mtdconfig_struct_s *dev;
-
-  ret = file_open(&file, "/dev/config", O_CLOEXEC);
-  if (ret < 0)
-    {
-      ferr("ERROR: open /dev/config failed: %d\n", ret);
-      return ret;
-    }
-
-  inode = file.f_inode;
-  dev = inode->i_private;
-  nxmutex_destroy(&dev->lock);
-  kmm_free(dev);
-
-  file_close(&file);
-
-  unregister_driver("/dev/config");
-
-  return OK;
+  return mtdconfig_unregister_by_path("/dev/config");
 }
 
 #endif /* CONFIG_MTD_CONFIG */
