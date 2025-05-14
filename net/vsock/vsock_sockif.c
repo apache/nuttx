@@ -1092,14 +1092,17 @@ static void vsock_update_rx_credit(FAR struct vsock_conn_s *conn,
 static int vsock_reset(FAR struct vsock_conn_s *conn,
                        FAR struct vsock_pkt_s *pkt)
 {
-  FAR struct vsock_hdr_s *hdr = vsock_pkt2hdr(pkt);
-
-  /* Send RST only if the original pkt is not a RST pkt */
-
-  if (pkt && hdr->op == VIRTIO_VSOCK_OP_RST)
+  if (pkt)
     {
-      return 0;
+      FAR struct vsock_hdr_s *hdr = vsock_pkt2hdr(pkt);
+
+      if (hdr->op == VIRTIO_VSOCK_OP_RST)
+        {
+          return 0;
+        }
     }
+
+  /* Send RST only if the original pkt is not a RST pkt or pkt is null */
 
   return vsock_send_pkt(conn, NULL, VIRTIO_VSOCK_OP_RST, 0, 0, 0);
 }
@@ -1338,7 +1341,11 @@ static void vsock_recv_closing(FAR struct vsock_conn_s *conn,
 {
   FAR struct vsock_hdr_s *hdr = vsock_pkt2hdr(pkt);
 
-  if (hdr->op == VIRTIO_VSOCK_OP_RST)
+  if (hdr->op == VIRTIO_VSOCK_OP_SHUTDOWN)
+    {
+      vsock_reset(conn, pkt);
+    }
+  else if (hdr->op == VIRTIO_VSOCK_OP_RST)
     {
       work_cancel_sync_wq(g_vsock_wqueue, &conn->close_work);
       vsock_remove_conn(conn);
@@ -2290,13 +2297,13 @@ static void vsock_dump_pkt(FAR struct vsock_pkt_s *pkt,
   FAR struct vsock_hdr_s *hdr = vsock_pkt2hdr(pkt);
   size_t i;
 
-  ninfo("%s pkt: %p src: cid=%" PRIu64 " port=%" PRIu32
-        " dst: cid=%" PRIu64 " port=%" PRIu32
-        " op=%s type=%" PRIu16 " len=%" PRIu32 " flags=0x%" PRIx32
-        " rx_buf_alloc=%" PRIu32 " rx_fwd_cnt=%" PRIu32 " \n",
-        msg, pkt, hdr->src_cid, hdr->src_port, hdr->dst_cid, hdr->dst_port,
-        g_vsock_op[hdr->op], hdr->type, hdr->len, hdr->flags,
-        hdr->buf_alloc, hdr->fwd_cnt);
+  _alert("%s pkt: %p src: cid=%" PRIu64 " port=%" PRIu32
+         " dst: cid=%" PRIu64 " port=%" PRIu32
+         " op=%s type=%" PRIu16 " len=%" PRIu32 " flags=0x%" PRIx32
+         " rx_buf_alloc=%" PRIu32 " rx_fwd_cnt=%" PRIu32 " \n",
+         msg, pkt, hdr->src_cid, hdr->src_port, hdr->dst_cid, hdr->dst_port,
+         g_vsock_op[hdr->op], hdr->type, hdr->len, hdr->flags,
+         hdr->buf_alloc, hdr->fwd_cnt);
 
   if (dumpbuf)
     {
@@ -2324,7 +2331,6 @@ void vsock_recv_pkt(FAR struct vsock_transport_s *t,
   struct sockaddr_vm remote_addr;
   struct sockaddr_vm local_addr;
 
-  DEBUGASSERT(pkt->vb[0].len == hdr->len + VIRTIO_VSOCK_HDR_LEN);
   vsock_dump_pkt(pkt, "Recv", false);
 
   /* Type check */
