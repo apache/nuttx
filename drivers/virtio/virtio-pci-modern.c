@@ -626,7 +626,8 @@ static int virtio_pci_init_device(FAR struct virtio_pci_device_s *vpdev)
   /* Find pci capabilities */
 
   common = virtio_pci_find_capability(dev, VIRTIO_PCI_CAP_COMMON_CFG,
-                                      PCI_RESOURCE_MEM);
+                                      PCI_RESOURCE_MEM |
+                                      PCI_RESOURCE_MEM_64);
   if (common == 0)
     {
       vrtinfo("Leaving for legacy driver\n");
@@ -634,7 +635,7 @@ static int virtio_pci_init_device(FAR struct virtio_pci_device_s *vpdev)
     }
 
   isr = virtio_pci_find_capability(dev, VIRTIO_PCI_CAP_ISR_CFG,
-                                   PCI_RESOURCE_MEM);
+                                   PCI_RESOURCE_MEM | PCI_RESOURCE_MEM_64);
   if (isr == 0)
     {
       vrterr("Missing isr capabilities\n");
@@ -642,7 +643,8 @@ static int virtio_pci_init_device(FAR struct virtio_pci_device_s *vpdev)
     }
 
   notify = virtio_pci_find_capability(dev, VIRTIO_PCI_CAP_NOTIFY_CFG,
-                                      PCI_RESOURCE_MEM);
+                                      PCI_RESOURCE_MEM |
+                                      PCI_RESOURCE_MEM_64);
   if (notify == 0)
     {
       vrterr("Missing capabilities %d %d %d\n", isr, common, notify);
@@ -650,7 +652,8 @@ static int virtio_pci_init_device(FAR struct virtio_pci_device_s *vpdev)
     }
 
   device = virtio_pci_find_capability(dev, VIRTIO_PCI_CAP_DEVICE_CFG,
-                                      PCI_RESOURCE_MEM);
+                                      PCI_RESOURCE_MEM |
+                                      PCI_RESOURCE_MEM_64);
 
   /* Map the BAR */
 
