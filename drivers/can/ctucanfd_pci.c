@@ -1703,7 +1703,7 @@ static int ctucanfd_interrupt(int irq, FAR void *context, FAR void *arg)
 
       if (regval != 0)
         {
-          /* Disable RX interrupts until we handle all interrups */
+          /* Disable RX interrupts until we handle all interrupts */
 
           ctucanfd_rxint(&priv->devs[i], false);
 
@@ -1757,10 +1757,10 @@ static void ctucanfd_init(FAR struct ctucanfd_driver_s *priv)
 }
 
 /*****************************************************************************
- * Name: ctucanfd_ctucanfd_proble
+ * Name: ctucanfd_ctucanfd_probe
  *
  * Description:
- *   Proble CTUCANFD devices on board and return the number of vailalbe chips.
+ *   Probe CTUCANFD devices on board and return the number of vailalbe chips.
  *
  *****************************************************************************/
 
