@@ -22,8 +22,12 @@
 
 set(SRCS)
 
+if(CONFIG_CAN OR CONFIG_NET_CAN)
+  list(APPEND SRCS can_common.c)
+endif()
+
 if(CONFIG_CAN)
-  set(SRCS can.c can_sender.c)
+  list(APPEND SRCS can.c can_sender.c)
 endif()
 
 if(CONFIG_CAN_MCP2515)

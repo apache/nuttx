@@ -22,6 +22,10 @@
 
 # Don't build anything if there is no CAN support
 
+ifneq ($(CONFIG_CAN)$(CONFIG_NET_CAN),)
+CSRCS += can_common.c
+endif
+
 ifeq ($(CONFIG_CAN),y)
 CSRCS += can.c can_sender.c
 endif
