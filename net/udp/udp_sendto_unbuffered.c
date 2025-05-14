@@ -44,6 +44,7 @@
 #include "arp/arp.h"
 #include "icmpv6/icmpv6.h"
 #include "socket/socket.h"
+#include "utils/utils.h"
 #include "udp/udp.h"
 
 /****************************************************************************
@@ -399,7 +400,6 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
    * ready.
    */
 
-  net_lock();
   memset(&state, 0, sizeof(struct sendto_s));
   nxsem_init(&state.st_sem, 0, 0);
 
@@ -424,7 +424,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
       if (ret < 0)
         {
           nerr("ERROR: udp_connect failed: %d\n", ret);
-          goto errout_with_lock;
+          return ret;
         }
     }
 
@@ -436,8 +436,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
   if (state.st_dev == NULL)
     {
       nerr("ERROR: udp_find_raddr_device failed\n");
-      ret = -ENETUNREACH;
-      goto errout_with_lock;
+      return -ENETUNREACH;
     }
 
   /* Make sure that the device is in the UP state */
@@ -445,9 +444,10 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
   if ((state.st_dev->d_flags & IFF_UP) == 0)
     {
       nwarn("WARNING: device is DOWN\n");
-      ret = -EHOSTUNREACH;
-      goto errout_with_lock;
+      return -EHOSTUNREACH;
     }
+
+  conn_dev_lock(&conn->sconn, state.st_dev);
 
   /* Set up the callback in the connection */
 
@@ -458,6 +458,8 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
       state.st_cb->flags   = (UDP_POLL | NETDEV_DOWN);
       state.st_cb->priv    = (FAR void *)&state;
       state.st_cb->event   = sendto_eventhandler;
+
+      conn_dev_unlock(&conn->sconn, state.st_dev);
 
       /* Notify the device driver of the availability of TX data */
 
@@ -479,12 +481,12 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
           ret = state.st_sndlen;
         }
 
+      conn_dev_lock(&conn->sconn, state.st_dev);
+
       /* Make sure that no further events are processed */
 
       udp_callback_free(state.st_dev, conn, state.st_cb);
     }
-
-errout_with_lock:
 
   /* Release the semaphore */
 
@@ -492,7 +494,7 @@ errout_with_lock:
 
   /* Unlock the network and return the result of the sendto() operation */
 
-  net_unlock();
+  conn_dev_unlock(&conn->sconn, state.st_dev);
   return ret;
 }
 

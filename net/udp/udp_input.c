@@ -286,6 +286,7 @@ static int udp_input(FAR struct net_driver_s *dev, unsigned int iplen)
        * that, however.
        */
 
+      udp_conn_list_lock();
       conn = udp_active(dev, NULL, udp);
       if (conn)
         {
@@ -378,6 +379,8 @@ static int udp_input(FAR struct net_driver_s *dev, unsigned int iplen)
 #  endif /* CONFIG_NET_IPv6*/
 #endif
         }
+
+      udp_conn_list_unlock();
     }
 
   return ret;

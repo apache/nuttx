@@ -81,16 +81,17 @@ int udp_txdrain(FAR struct socket *psock, unsigned int timeout)
 
   /* The following needs to be done with the network stable */
 
-  net_lock();
-
+  conn_lock(&conn->sconn);
   if (!sq_empty(&conn->write_q))
     {
       conn->txdrain_sem = &waitsem;
+      conn_unlock(&conn->sconn);
       ret = net_sem_timedwait_uninterruptible(&waitsem, timeout);
+      conn_lock(&conn->sconn);
       conn->txdrain_sem = NULL;
     }
 
-  net_unlock();
+  conn_unlock(&conn->sconn);
   nxsem_destroy(&waitsem);
   leave_cancellation_point();
   return ret;

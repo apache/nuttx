@@ -38,6 +38,7 @@
 #include <nuttx/mm/iob.h>
 #include <nuttx/net/net.h>
 
+#include "utils/utils.h"
 #include "udp/udp.h"
 
 /****************************************************************************
@@ -117,7 +118,7 @@ int udp_ioctl(FAR struct udp_conn_s *conn, int cmd, unsigned long arg)
   FAR struct iob_s *iob;
   int ret = OK;
 
-  net_lock();
+  conn_lock(&conn->sconn);
 
   switch (cmd)
     {
@@ -155,7 +156,7 @@ int udp_ioctl(FAR struct udp_conn_s *conn, int cmd, unsigned long arg)
         break;
     }
 
-  net_unlock();
+  conn_unlock(&conn->sconn);
 
   return ret;
 }

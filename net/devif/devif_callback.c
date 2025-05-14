@@ -93,11 +93,10 @@ static void devif_callback_free(FAR struct net_driver_s *dev,
 
   if (cb)
     {
-      net_lock();
-
 #ifdef CONFIG_DEBUG_FEATURES
       /* Check for double freed callbacks */
 
+      NET_BUFPOOL_LOCK(g_cbprealloc);
       curr = (FAR struct devif_callback_s *)g_cbprealloc.freebuffers.head;
 
       while (curr != NULL)
@@ -105,6 +104,8 @@ static void devif_callback_free(FAR struct net_driver_s *dev,
           DEBUGASSERT(cb != curr);
           curr = curr->nxtconn;
         }
+
+      NET_BUFPOOL_UNLOCK(g_cbprealloc);
 #endif
 
       /* Remove the callback structure from the data notification list if
@@ -164,7 +165,6 @@ static void devif_callback_free(FAR struct net_driver_s *dev,
       if (cb->free_flags & DEVIF_CB_DONT_FREE)
         {
           cb->free_flags |= DEVIF_CB_PEND_FREE;
-          net_unlock();
           return;
         }
 
@@ -200,8 +200,6 @@ static void devif_callback_free(FAR struct net_driver_s *dev,
       /* Free the callback structure */
 
       NET_BUFPOOL_FREE(g_cbprealloc, cb);
-
-      net_unlock();
     }
 }
 
@@ -265,13 +263,11 @@ static bool devif_event_trigger(uint16_t events, uint16_t triggers)
  ****************************************************************************/
 
 FAR struct devif_callback_s *
-  devif_callback_alloc(FAR struct net_driver_s *dev,
-                       FAR struct devif_callback_s **list_head,
-                       FAR struct devif_callback_s **list_tail)
+devif_callback_alloc(FAR struct net_driver_s *dev,
+                     FAR struct devif_callback_s **list_head,
+                     FAR struct devif_callback_s **list_tail)
 {
   FAR struct devif_callback_s *ret;
-
-  net_lock();
 
   /* Verify that the device pointer is valid, i.e., that it still
    * points to a registered network device and also that the network
@@ -288,7 +284,6 @@ FAR struct devif_callback_s *
 
   if (dev && !(netdev_verify(dev) && (dev->d_flags & IFF_UP) != 0))
     {
-      net_unlock();
       return NULL;
     }
 
@@ -339,7 +334,6 @@ FAR struct devif_callback_s *
     }
 #endif
 
-  net_unlock();
   return ret;
 }
 
@@ -466,7 +460,6 @@ uint16_t devif_conn_event(FAR struct net_driver_s *dev, uint16_t flags,
    * set in the flags set.
    */
 
-  net_lock();
   while (list && flags)
     {
       /* Save the pointer to the next callback in the lists.  This is done
@@ -493,7 +486,6 @@ uint16_t devif_conn_event(FAR struct net_driver_s *dev, uint16_t flags,
       list = next;
     }
 
-  net_unlock();
   return flags;
 }
 
@@ -525,7 +517,6 @@ uint16_t devif_dev_event(FAR struct net_driver_s *dev, uint16_t flags)
    * set in the flags set.
    */
 
-  net_lock();
   for (cb = dev->d_devcb; cb != NULL && flags != 0; cb = next)
     {
       /* Save the pointer to the next callback in the lists.  This is done
@@ -562,7 +553,6 @@ uint16_t devif_dev_event(FAR struct net_driver_s *dev, uint16_t flags)
         }
     }
 
-  net_unlock();
   return flags;
 }
 
