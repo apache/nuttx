@@ -960,10 +960,10 @@ menu "Wi-Fi Configuration"
 	depends on ESPRESSIF_WIFI
 
 config ESPRESSIF_WLAN
-        bool "WLAN"
+	bool "WLAN"
 	default y
 	---help---
-	        Enable WLAN support
+		Enable WLAN support
 
 menu "ESP WPA-Supplicant"
 
@@ -1170,11 +1170,11 @@ config ESPRESSIF_ESPNOW_PKTRADIO_PANID
 		PANID for espnow pktradio.
 
 config ESPRESSIF_ESPNOW_PKTRADIO_PANADDR
-       hex "ESPNOW pktradio node address"
-       range 0x0 0xffff
-       default 0xfffe
-       ---help---
-                PANADDRESS for espnow pktradio.
+	hex "ESPNOW pktradio node address"
+	range 0x0 0xffff
+	default 0xfffe
+	---help---
+		PANADDRESS for espnow pktradio.
 
 endif #ESPRESSIF_ESPNOW_PKTRADIO
 
