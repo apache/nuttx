@@ -57,7 +57,7 @@ config VIDEO_FB_NPOLLWAITERS
 	default 2
 
 config VIDEO_FB_SPLASHSCREEN
-  bool "Enable Splashscreen when Framebuffer Driver is registered"
+	bool "Enable Splashscreen when Framebuffer Driver is registered"
 	depends on VIDEO_FB
 	default n
 	---help---
@@ -74,7 +74,6 @@ config VIDEO_FB_SPLASHSCREEN
 		- Python "splashscreen_converter.py" tool (in NuttX tools directory) can be used
 		  to create custom splashscreens - note the tool restricts the number of colours
 		  to 256.
-
 
 if VIDEO_FB_SPLASHSCREEN
 
@@ -96,7 +95,7 @@ config VIDEO_FB_SPLASHSCREEN_CUSTOM
 		build.
 		Typically this would be a source file of an out-of-tree custom board.
 
-endchoice
+endchoice # Select Splashscreen Image Source
 
 choice
 	prompt "Select NXlogo bitmap size to use"
@@ -111,7 +110,8 @@ config VIDEO_FB_SPLASHSCREEN_NXLOGO_160
 
 config VIDEO_FB_SPLASHSCREEN_NXLOGO_80
 	bool "80x80 pixels"
-endchoice
+
+endchoice # Select NXlogo bitmap size to use
 
 choice
 	prompt "Select Splashscreen Bits-per-pixel (BPP)"
@@ -132,7 +132,7 @@ config VIDEO_FB_SPLASHSCREEN_MONO
 config VIDEO_FB_SPLASHSCREEN_GREY
 	bool "Greyscale (8BPP)"
 
-endchoice
+endchoice # Select Splashscreen Bits-per-pixel (BPP)
 
 config VIDEO_FB_SPLASHSCREEN_BG_COLOUR
 	hex "Hex (A)RGB background colour for splashscreen"
@@ -148,7 +148,7 @@ config VIDEO_FB_SPLASHSCREEN_CLR_ON_EXIT
 	bool "Clear Framebuffer memory when driver registration is complete"
 	default y
 
-endmenu # "Splashscreen Image Selection and Configuration"
+endmenu # Splashscreen Image Selection and Configuration
 
 endif # VIDEO_FB_SPLASHSCREEN
 
@@ -179,7 +179,7 @@ config GOLDFISH_GPU_FB_RGB565
 config GOLDFISH_GPU_FB_BGRA8888
 	bool "BGRA8888"
 
-endchoice
+endchoice # Select Goldfish GPU Framebuffer format
 
 config GOLDFISH_GPU_FB_PRIORITY
 	int "Goldfish GPU Framebuffer vsync task priority"
@@ -282,7 +282,8 @@ config VIDEO_SCENE_TEXT
 	default y
 	---help---
 		Enable text scene
-endif
+
+endif # VIDEO_STREAM
 
 config VIDEO_MAX7456
 	bool "Maxim 7456 Monochrome OSD"
@@ -305,7 +306,7 @@ config VIDEO_ISX012_REGDEBUG
 	---help---
 		Enable to read registers of ISX012 for test.
 
-endif
+endif # VIDEO_ISX012
 
 config VIDEO_ISX019
 	bool "ISX019 Image sensor"
@@ -331,7 +332,7 @@ config VIDEO_ISX019_DOL2
 	---help---
 		DOL2 is the mode that combines 2 images with different exposure.
 
-endchoice
+endchoice # HDR mode selection
 
 config VIDEO_ISX019_INITIAL_JPEG_QUALITY
 	int "Initial JPEG quality"
@@ -354,7 +355,7 @@ config VIDEO_ISX019_REGDEBUG
 	---help---
 		Enable to read registers of ISX019 for test.
 
-endif
+endif # VIDEO_ISX019
 
 config VIDEO_OV2640
 	bool "OV2640 camera chip"
@@ -385,7 +386,7 @@ config OV2640_RGB565_COLORFMT
 config OV2640_YUV422_COLORFMT
 	bool "YUV422"
 
-endchoice
+endchoice # Color format
 
 config OV2640_JPEG
 	bool "JPEG output format"
@@ -422,7 +423,7 @@ config OV2640_JPEG_SXVGA_RESOLUTION
 config OV2640_JPEG_UXGA_RESOLUTION
 	bool "UXVGA (1600x1200)"
 
-endchoice
+endchoice # JPEG resolution
 
 choice
 	prompt "Output resolution"
@@ -453,7 +454,7 @@ config OV2640_SXGA_RESOLUTION
 config OV2640_UXGA_RESOLUTION
 	bool "UXVGA (1600x1200)"
 
-endchoice
+endchoice # Output resolution
 
 config OV2640_REGDEBUG
 	bool "Register level debug output"
@@ -462,7 +463,7 @@ config OV2640_REGDEBUG
 	---help---
 		Enable details, register level debug output.
 
-endif
+endif # VIDEO_OV2640
 
 config GOLDFISH_CAMERA
 	bool "Goldfish camera support"
@@ -475,7 +476,7 @@ config GOLDFISH_CAMERA_PIPE_PATH
 	string "Goldfish camera pipe path"
 	default "/dev/goldfish_pipe"
 
-endif
+endif # GOLDFISH_CAMERA
 
 source "drivers/video/vnc/Kconfig"
 source "drivers/video/mipidsi/Kconfig"
