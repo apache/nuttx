@@ -52,6 +52,9 @@
  *   accepts struct file instances instead of file descriptors and it does
  *   not set the errno variable.
  *
+ *   As it deals with file structures, the file descriptor flags are NOT
+ *   inherited.
+ *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is return on
  *   any failure.
@@ -60,7 +63,91 @@
 
 int file_dup2(FAR struct file *filep1, FAR struct file *filep2)
 {
-  return file_dup3(filep1, filep2, 0);
+  FAR struct inode *inode;
+  int ret;
+
+  if (filep1 == NULL || filep1->f_inode == NULL || filep2 == NULL)
+    {
+      return -EBADF;
+    }
+
+  if (filep1 == filep2)
+    {
+      return OK;
+    }
+
+  /* Increment the reference count on the contained inode */
+
+  inode = filep1->f_inode;
+  inode_addref(inode);
+
+  /* Close the second file */
+
+  ret = file_close(filep2);
+  if (ret < 0)
+    {
+      inode_release(inode);
+      return ret;
+    }
+
+  filep2->f_priv  = NULL;
+  filep2->f_pos   = filep1->f_pos;
+  filep2->f_inode = inode;
+
+  /* Call the open method on the file, driver, mountpoint so that it
+   * can maintain the correct open counts.
+   */
+
+  if (inode->u.i_ops)
+    {
+#ifndef CONFIG_DISABLE_MOUNTPOINT
+      if (INODE_IS_MOUNTPT(inode))
+        {
+          /* Dup the open file on the in the new file structure */
+
+          if (inode->u.i_mops->dup)
+            {
+              ret = inode->u.i_mops->dup(filep1, filep2);
+            }
+        }
+      else
+#endif
+        {
+          /* (Re-)open the pseudo file or device driver */
+
+          filep2->f_priv = filep1->f_priv;
+
+          /* Add nonblock flags to avoid happening block when
+           * calling open()
+           */
+
+          filep2->f_oflags |= O_NONBLOCK;
+
+          if (inode->u.i_ops->open)
+            {
+              ret = inode->u.i_ops->open(filep2);
+            }
+
+          if (ret >= 0 && (filep1->f_oflags & O_NONBLOCK) == 0)
+            {
+              ret = file_ioctl(filep2, FIONBIO, 0);
+              if (ret < 0 && inode->u.i_ops->close)
+                {
+                  inode->u.i_ops->close(filep2);
+                }
+            }
+        }
+
+      /* Handle open failures */
+
+      if (ret < 0)
+        {
+          inode_release(inode);
+          return ret;
+        }
+    }
+
+  return OK;
 }
 
 /****************************************************************************

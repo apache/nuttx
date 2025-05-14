@@ -65,7 +65,7 @@ int file_dup(FAR struct file *filep, int minfd, int flags)
   uint8_t f_tag_fdcheck; /* File owner fdcheck tag, init to 0 */
 #endif
 
-  fd2 = file_allocate(g_root_inode, 0, 0, NULL, minfd, true);
+  fd2 = file_allocate(g_root_inode, flags, 0, NULL, minfd, true);
   if (fd2 < 0)
     {
       return fd2;
@@ -73,21 +73,28 @@ int file_dup(FAR struct file *filep, int minfd, int flags)
 
   ret = fs_getfilep(fd2, &filep2);
 #ifdef CONFIG_FDSAN
-  f_tag_fdsan = filep2->f_tag_fdsan;
+  f_tag_fdsan = nx_fcntl(fd2, FIOC_GETTAG_FDSAN, 0);
 #endif
 
 #ifdef CONFIG_FDCHECK
-  f_tag_fdcheck = filep2->f_tag_fdcheck;
+  f_tag_fdcheck = nx_fcntl(fd2, FIOC_GETTAG_FDCHECK, 0);
 #endif
   DEBUGASSERT(ret >= 0);
 
-  ret = file_dup3(filep, filep2, flags);
+  ret = file_dup2(filep, filep2);
+  if (ret >= 0 && flags & O_CLOEXEC)
+    {
+      /* Set close on exec flag */
+
+      ret = nx_fcntl(fd2, F_SETFD, flags & O_CLOEXEC ? FD_CLOEXEC : 0);
+    }
+
 #ifdef CONFIG_FDSAN
-  filep2->f_tag_fdsan = f_tag_fdsan;
+  nx_fcntl(fd2, FIOC_SETTAG_FDSAN, f_tag_fdsan);
 #endif
 
 #ifdef CONFIG_FDCHECK
-  filep2->f_tag_fdcheck = f_tag_fdcheck;
+  nx_fcntl(fd2, FIOC_SETTAG_FDCHECK, f_tag_fdcheck);
 #endif
 
   fs_putfilep(filep2);
@@ -110,29 +117,16 @@ int file_dup(FAR struct file *filep, int minfd, int flags)
 
 int dup(int fd)
 {
-  FAR struct file *filep;
   int ret;
 
-  /* Get the file structure corresponding to the file descriptor. */
+  /* Let nx_dup() do the real work */
 
-  ret = fs_getfilep(fd, &filep);
+  ret = nx_dup(fd, 0, 0);
   if (ret < 0)
     {
-      goto err;
-    }
-
-  /* Let file_dup() do the real work */
-
-  ret = file_dup(filep, 0, 0);
-  fs_putfilep(filep);
-  if (ret < 0)
-    {
-      goto err;
+      set_errno(-ret);
+      return ERROR;
     }
 
   return ret;
-
-err:
-  set_errno(-ret);
-  return ERROR;
 }
