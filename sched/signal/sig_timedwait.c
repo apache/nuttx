@@ -78,20 +78,14 @@
 static void nxsig_timeout(wdparm_t arg)
 {
   FAR struct tcb_s *wtcb = (FAR struct tcb_s *)(uintptr_t)arg;
-#ifdef CONFIG_SMP
+
   irqstate_t flags;
 
   /* We must be in a critical section in order to call up_switch_context()
-   * below.  If we are running on a single CPU architecture, then we know
-   * interrupts a disabled an there is no need to explicitly call
-   * enter_critical_section().  However, in the SMP case,
-   * enter_critical_section() does much more than just disable interrupts on
-   * the local CPU; it also manages spinlocks to assure the stability of the
-   * TCB that we are manipulating.
+   * below.
    */
 
   flags = enter_critical_section();
-#endif
 
   /* There may be a race condition -- make sure the task is
    * still waiting for a signal
@@ -127,9 +121,7 @@ static void nxsig_timeout(wdparm_t arg)
         }
     }
 
-#ifdef CONFIG_SMP
   leave_critical_section(flags);
-#endif
 }
 
 /****************************************************************************
@@ -252,8 +244,8 @@ int nxsig_clockwait(int clockid, int flags,
                     FAR const struct timespec *rqtp,
                     FAR struct timespec *rmtp)
 {
-  FAR struct tcb_s *rtcb = this_task();
-  irqstate_t iflags;
+  FAR struct tcb_s *rtcb;
+  irqstate_t        iflags;
   clock_t expect = 0;
   clock_t stop;
 
@@ -297,6 +289,7 @@ int nxsig_clockwait(int clockid, int flags,
 #endif
 
   iflags = enter_critical_section();
+  rtcb = this_task();
 
   if (rqtp)
     {
@@ -394,7 +387,7 @@ int nxsig_clockwait(int clockid, int flags,
 int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
                     FAR const struct timespec *timeout)
 {
-  FAR struct tcb_s *rtcb = this_task();
+  FAR struct tcb_s *rtcb;
   sigset_t intersection;
   FAR sigpendq_t *sigpend;
   irqstate_t flags;
@@ -410,6 +403,7 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
    */
 
   flags = enter_critical_section();
+  rtcb  = this_task();
 
   /* Check if there is a pending signal corresponding to one of the
    * signals in the pending signal set argument.
