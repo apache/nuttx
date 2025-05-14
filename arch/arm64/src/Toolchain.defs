@@ -43,7 +43,11 @@ ifeq ($(CONFIG_ARCH_ARMV8A),y)
   endif
   ARCHCPUFLAGS += $(OPTION_MARCH)$(OPTION_MARCH_FEATURE)
 else ifeq ($(CONFIG_ARCH_ARMV8R),y)
-  ARCHCPUFLAGS += -march=armv8-r
+  ifeq ($(CONFIG_ARCH_FPU),y)
+    ARCHCPUFLAGS += -march=armv8-r
+  else
+    ARCHCPUFLAGS += -march=armv8-r+nofp
+  endif
 else ifeq ($(CONFIG_ARCH_CORTEX_A53),y)
   ARCHCPUFLAGS += -mcpu=cortex-a53
 else ifeq ($(CONFIG_ARCH_CORTEX_A55),y)
