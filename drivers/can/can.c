@@ -317,7 +317,7 @@ static int can_close(FAR struct file *filep)
 
           nxsem_post(&fifo->rx_sem);
 
-          /* Notify specfic poll/select waiter that they can read from the
+          /* Notify specific poll/select waiter that they can read from the
            * cd_recv buffer
            */
 
@@ -904,7 +904,7 @@ static int can_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case CANIOC_SET_TRANSVSTATE:
         {
           /* if we don't use dev->cd_transv->cts_ops, please initlize
-           * this poniter to NULL in lower board code when Board reset.
+           * this pointer to NULL in lower board code when Board reset.
            */
 
           if (dev->cd_transv && dev->cd_transv->ct_ops
@@ -927,7 +927,7 @@ static int can_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case CANIOC_GET_TRANSVSTATE:
         {
           /* if we don't use dev->cd_transv->cts_ops, please initlize
-           * this poniter to NULL in lower board code when Board reset.
+           * this pointer to NULL in lower board code when Board reset.
            */
 
           if (dev->cd_transv && dev->cd_transv->ct_ops
@@ -1275,7 +1275,7 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
               nxsem_post(&fifo->rx_sem);
             }
 
-          /* Notify specfic poll/select waiter that they can read from the
+          /* Notify specific poll/select waiter that they can read from the
            * cd_recv buffer
            */
 
