@@ -731,22 +731,14 @@ static void vsock_unbind_internal(FAR struct vsock_conn_s *conn)
  * Name: vsock_alloc_tx_credit
  ****************************************************************************/
 
-static inline_function uint32_t
+static inline_function void
 vsock_alloc_tx_credit(FAR struct vsock_conn_s *conn, uint32_t credit)
 {
-  uint32_t ret;
   irqstate_t flags;
 
   flags = spin_lock_irqsave(&conn->cnt_lock);
-  ret = conn->tx_buf_alloc - (conn->tx_cnt - conn->tx_fwd_cnt);
-  if (ret > credit)
-    {
-      ret = credit;
-    }
-
-  conn->tx_cnt += ret;
+  conn->tx_cnt += credit;
   spin_unlock_irqrestore(&conn->cnt_lock, flags);
-  return ret;
 }
 
 /****************************************************************************
@@ -989,9 +981,9 @@ static int vsock_send_pkt(FAR struct vsock_conn_s *conn,
   uint32_t len;
   int ret;
 
-  /* vsock_alloc_tx_credit might return less than len credit */
+  /* vsock_get_tx_credit might return less than len credit */
 
-  len = msg ? vsock_alloc_tx_credit(conn, msg->uio.uio_resid) : 0;
+  len = msg ? MIN(vsock_get_tx_credit(conn), msg->uio.uio_resid) : 0;
 
   /* Do not send zero length OP_RW pkt */
 
@@ -1008,13 +1000,13 @@ static int vsock_send_pkt(FAR struct vsock_conn_s *conn,
   if (ret < 0)
     {
       vrterr("Alloc pkt and buffer failed%d\n");
-      vsock_free_tx_credit(conn, len);
       return ret;
     }
 
   if (len != 0)
     {
       len = vsock_copy_msg2pkt(&pkt, msg, len);
+      vsock_alloc_tx_credit(conn, len);
     }
 
   hdr = vsock_pkt2hdr(&pkt);
@@ -1260,6 +1252,7 @@ static void vsock_recv_enqueue(FAR struct vsock_conn_s *conn,
 
   if (len > conn->rx_buf_alloc)
     {
+      vrterr("ERROR: pkt len larger than rx_buf_alloc\n");
       return;
     }
 
@@ -1982,6 +1975,7 @@ static ssize_t vsock_sendmsg(FAR struct socket *psock,
 
       if (ret < 0)
         {
+          vrterr("vsock_sendmsg: tx_credit timeout\n");
           break;
         }
     }
