@@ -786,16 +786,19 @@ if ARCH_ADDRENV && ARCH_NEED_ADDRENV_MAPPING
 
 config ARCH_TEXT_VBASE
 	hex "Virtual .text base"
+	default 0x0
 	---help---
 		The virtual address of the beginning the .text region
 
 config ARCH_DATA_VBASE
 	hex "Virtual .bss/.data base"
+	default 0x0
 	---help---
 		The virtual address of the beginning of the .bss/.data region.
 
 config ARCH_HEAP_VBASE
 	hex "Virtual heap base"
+	default 0x0
 	---help---
 		The virtual address of the beginning of the heap region.
 
