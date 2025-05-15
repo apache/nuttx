@@ -276,7 +276,7 @@ static int esp_pcnt_ioctl(struct cap_lowerhalf_s *dev, int cmd,
         ret = esp_pcnt_unit_get_count(dev, (int *)arg);
         if (ret != OK)
           {
-            cperr("Could not clear pcnt-%d!\n", priv->unit_id);
+            cperr("Could not get count from pcnt-%d!\n", priv->unit_id);
           }
 
         break;
@@ -857,6 +857,10 @@ struct cap_lowerhalf_s *esp_pcnt_new_unit(
     }
 
   pcnt_ll_disable_all_events(ctx.dev, unit_id);
+
+  pcnt_ll_enable_high_limit_event(ctx.dev, unit_id, config->accum_count);
+  pcnt_ll_enable_low_limit_event(ctx.dev, unit_id, config->accum_count);
+
   pcnt_ll_enable_glitch_filter(ctx.dev, unit_id, false);
   pcnt_ll_set_high_limit_value(ctx.dev, unit_id, config->high_limit);
   pcnt_ll_set_low_limit_value(ctx.dev, unit_id, config->low_limit);
