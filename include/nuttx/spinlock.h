@@ -245,6 +245,8 @@ static inline_function void spin_lock(FAR volatile spinlock_t *lock)
 
   sched_note_spinlock_locked(lock);
 }
+#else
+#  define spin_lock(lock)
 #endif /* CONFIG_SPINLOCK */
 
 /****************************************************************************
@@ -404,6 +406,8 @@ static inline_function void spin_unlock(FAR volatile spinlock_t *lock)
 #  else
 #    define spin_unlock(l)  do { *(l) = SP_UNLOCKED; } while (0)
 #  endif
+#else
+#  define spin_unlock(lock)
 #endif /* CONFIG_SPINLOCK */
 
 /****************************************************************************
