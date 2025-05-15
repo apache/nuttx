@@ -41,6 +41,10 @@
 
 #define NXSTYLE_VERSION "0.01"
 
+#ifdef WIN32
+#  define realpath(n,r) _fullpath((r),(n),_MAX_PATH)
+#endif
+
 #define LINE_SIZE      512
 #define RANGE_NUMBER   4096
 #define DEFAULT_WIDTH  78
@@ -719,6 +723,65 @@ static void show_usage(char *progname, int exitcode, char *what)
   exit(exitcode);
 }
 
+#ifndef HAVE_STRNDUP
+/********************************************************************************
+ * Name: my_strndup
+ *
+ * Description:
+ *   Duplicate a specific number of bytes from a string.
+ *   Implementation of strndup() for Windows Native
+ *   MinGW does not seem to provide strndup
+ *
+ ********************************************************************************/
+
+char *my_strndup(const char *s, size_t size)
+{
+  char *dest = NULL;
+  size_t len;
+
+  len = strnlen(s, size);
+  len = len < size ? len : size;
+  dest = malloc(len + 1);
+
+  if (dest == NULL)
+    {
+      return NULL;
+    }
+
+  memcpy(dest, s, len);
+  dest[len] = '\0';
+  return dest;
+}
+#undef strndup
+#  define strndup my_strndup
+#endif
+
+/********************************************************************************
+ * Name: backslash_to_slash
+ *
+ * Description:
+ *   Replace backslashes \ to forward slashes /.
+ *
+ ********************************************************************************/
+
+static void backslash_to_slash(char *str)
+{
+  char *p;
+
+  if (str == NULL)
+    {
+      return;
+    }
+
+  for (p = str; *p; ++p)
+    {
+      if (*p == '\\')
+        {
+           *p = '/';
+        }
+    }
+}
+
 /********************************************************************************
  * Name: skip
  *
@@ -1246,6 +1309,9 @@ int main(int argc, char **argv, char **envp)
       return 1;
     }
 
+#ifdef CONFIG_WINDOWS_NATIVE
+  backslash_to_slash(g_file_name);
+#endif
   /* Are we parsing a header file? */
 
   ext = strrchr(g_file_name, '.');
