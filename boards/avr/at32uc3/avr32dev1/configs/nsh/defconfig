@@ -40,3 +40,7 @@ CONFIG_SYSTEM_NSH=y
 CONFIG_TASK_NAME_SIZE=0
 CONFIG_USART1_BAUD=57600
 CONFIG_USART1_SERIAL_CONSOLE=y
+# Prevent the linker from removing unused sections until the linker script
+# is checked to verify that it makes sure to preserve sections which appear
+# unreferenced but must be present in the binary
+CONFIG_DEBUG_OPT_UNUSED_SECTIONS=n
