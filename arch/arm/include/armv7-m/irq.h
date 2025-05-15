@@ -106,9 +106,17 @@
 #  define SW_FPU_REGS       (0)
 #endif
 
-/* The total number of registers saved by software */
+/* The total number of registers saved by software.
+ * If lazy FPU is enabled, save only integer registers. FPU registers are
+ * handled separately.
+ */
 
+#ifndef CONFIG_ARCH_LAZYFPU
 #define SW_XCPT_REGS        (SW_INT_REGS + SW_FPU_REGS)
+#else
+#define SW_XCPT_REGS        (SW_INT_REGS)
+#endif
+
 #define SW_XCPT_SIZE        (4 * SW_XCPT_REGS)
 
 /* On entry into an IRQ, the hardware automatically saves the following
@@ -153,7 +161,16 @@
 #  define HW_FPU_REGS       (0)
 #endif
 
+/* If lazy FPU is enabled, save only integer registers. FPU registers are
+ * handled separately.
+ */
+
+#ifndef CONFIG_ARCH_LAZYFPU
 #define HW_XCPT_REGS        (HW_INT_REGS + HW_FPU_REGS)
+#else
+#define HW_XCPT_REGS        (HW_INT_REGS)
+#endif
+
 #define HW_XCPT_SIZE        (4 * HW_XCPT_REGS)
 
 #define XCPTCONTEXT_REGS    (HW_XCPT_REGS + SW_XCPT_REGS)
