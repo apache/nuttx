@@ -750,9 +750,9 @@ static int sensor_open(FAR struct file *filep)
 
   user->state.interval = UINT32_MAX;
   user->state.esize = upper->state.esize;
+  user->state.nonwakeup = true;
   nxsem_init(&user->buffersem, 0, 0);
   list_add_tail(&upper->userlist, &user->node);
-  sensor_update_nonwakeup(filep, upper, user, true);
 
   /* The new user generation, notify to other users */
 
@@ -1415,6 +1415,7 @@ int sensor_custom_register(FAR struct sensor_lowerhalf_s *lower,
   list_initialize(&upper->userlist);
   upper->state.esize = esize;
   upper->state.min_interval = UINT32_MAX;
+  upper->state.nonwakeup = true;
   if (lower->ops->activate)
     {
       upper->state.nadvertisers = 1;
