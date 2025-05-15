@@ -70,7 +70,7 @@ int wd_cancel(FAR struct wdog_s *wdog)
   if (wdog == NULL || !WDOG_ISACTIVE(wdog))
     {
       spin_unlock_irqrestore(&g_wdspinlock, flags);
-      return wdog == NULL ? -EINVAL : 0;
+      return -EINVAL;
     }
 
   sched_note_wdog(NOTE_WDOG_CANCEL, (FAR void *)wdog->func,
