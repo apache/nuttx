@@ -98,7 +98,7 @@
  * value aligned the 8-bytes as required by the ARM EABI.
  */
 
-#  define SMP_STACK_SIZE    STACK_ALIGN_UP(CONFIG_IDLETHREAD_STACKSIZE)
+#  define SMP_STACK_SIZE    STACKFRAME_ALIGN_UP(CONFIG_IDLETHREAD_STACKSIZE)
 #  define SMP_STACK_WORDS   (SMP_STACK_SIZE >> 2)
 #endif
 
@@ -147,9 +147,9 @@ extern "C"
     EXTERN char sym[n][size]
 
 #define STACK_PTR_TO_FRAME(type, ptr) \
-    (type *)STACK_ALIGN_DOWN((uintptr_t)(ptr) - sizeof(type))
+    (type *)STACKFRAME_ALIGN_DOWN((uintptr_t)(ptr) - sizeof(type))
 
-#define INTSTACK_SIZE        (CONFIG_ARCH_INTERRUPTSTACK & ~STACK_ALIGN_MASK)
+#define INTSTACK_SIZE        (CONFIG_ARCH_INTERRUPTSTACK & ~STACKFRAME_ALIGN_MASK)
 
 #ifdef CONFIG_SMP
 

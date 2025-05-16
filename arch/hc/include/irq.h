@@ -62,7 +62,7 @@
  * necessary frame_size must be rounded up to the next boundary
  */
 
-#define STACK_ALIGNMENT     2
+#define STACKFRAME_ALIGN 2
 
 /****************************************************************************
  * Public Types

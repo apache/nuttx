@@ -110,7 +110,7 @@
 #  define FORK_FPU_SIZE    (0)
 #endif
 
-#define FORK_SIZEOF        STACK_ALIGN_UP(FORK_INT_SIZE + FORK_FPU_SIZE)
+#define FORK_SIZEOF        STACKFRAME_ALIGN_UP(FORK_INT_SIZE + FORK_FPU_SIZE)
 
 /****************************************************************************
  * Public Types

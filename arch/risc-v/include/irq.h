@@ -54,7 +54,7 @@
 
 /* RISC-V requires a 16-byte stack alignment. */
 
-#define STACK_ALIGNMENT     16
+#define STACKFRAME_ALIGN 16
 
 /****************************************************************************
  * Map RISC-V exception code to NuttX IRQ,

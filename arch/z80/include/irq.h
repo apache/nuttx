@@ -42,7 +42,7 @@
  * (4 byte) boundary.
  */
 
-#define STACK_ALIGNMENT     4
+#define STACKFRAME_ALIGN 4
 
 /****************************************************************************
  * Public Function Prototypes

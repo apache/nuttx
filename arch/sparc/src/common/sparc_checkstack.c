@@ -101,8 +101,8 @@ size_t sparc_stack_check(void *stackbase, size_t nbytes)
 
   /* Take extra care that we do not check outside the stack boundaries */
 
-  start = STACK_ALIGN_UP((uintptr_t)stackbase);
-  end   = STACK_ALIGN_DOWN((uintptr_t)stackbase + nbytes);
+  start = STACKFRAME_ALIGN_UP((uintptr_t)stackbase);
+  end   = STACKFRAME_ALIGN_DOWN((uintptr_t)stackbase + nbytes);
 
   /* Get the adjusted size based on the top and bottom of the stack */
 
@@ -179,7 +179,7 @@ void sparc_stack_color(void *stackbase, size_t nbytes)
 
   /* Take extra care that we do not write outside the stack boundaries */
 
-  stkptr = (uint32_t *)STACK_ALIGN_UP((uintptr_t)stackbase);
+  stkptr = (uint32_t *)STACKFRAME_ALIGN_UP((uintptr_t)stackbase);
 
   if (nbytes == 0) /* 0: colorize the running stack */
     {
@@ -194,7 +194,7 @@ void sparc_stack_color(void *stackbase, size_t nbytes)
       stkend = (uintptr_t)stackbase + nbytes;
     }
 
-  stkend = STACK_ALIGN_DOWN(stkend);
+  stkend = STACKFRAME_ALIGN_DOWN(stkend);
   nwords = (stkend - (uintptr_t)stkptr) >> 2;
 
   /* Set the entire stack to the coloration value */
@@ -231,7 +231,7 @@ size_t up_check_intstack(int cpu, size_t check_size)
 {
   if (check_size == 0)
     {
-      check_size = STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK);
+      check_size = STACKFRAME_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK);
     }
 
   return sparc_stack_check((void *)up_get_intstackbase(cpu), check_size);

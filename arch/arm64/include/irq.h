@@ -245,7 +245,7 @@
 
 /* AArch64 the stack-pointer must be 128-bit aligned */
 
-#define STACK_ALIGNMENT     16
+#define STACKFRAME_ALIGN    16
 
 #ifndef __ASSEMBLY__
 

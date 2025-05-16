@@ -72,11 +72,11 @@
 #define INTSTACK_COLOR 0xdeadbeef
 #define HEAP_COLOR     'h'
 
-#define STACK_FRAME_SIZE    __XSTR(STACK_ALIGNMENT)
+#define STACK_FRAME_SIZE __XSTR(STACKFRAME_ALIGN)
 
 /* Interrupt Stack macros */
 
-#define INT_STACK_SIZE  (STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK))
+#define INT_STACK_SIZE  (STACKFRAME_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK))
 
 /* Determine which (if any) console driver to use.  If a console is enabled
  * and no other console device is specified, then a serial console is

@@ -361,8 +361,8 @@ riscv_jump_to_user:
   .type   g_intstackalloc, object
   .type   g_intstacktop, object
 g_intstackalloc:
-  .skip  STACK_ALIGN_UP(STACK_ALLOC_SIZE)
+  .skip  STACKFRAME_ALIGN_UP(STACK_ALLOC_SIZE)
 g_intstacktop:
   .size  g_intstacktop, 0
-  .size  g_intstackalloc, STACK_ALIGN_DOWN(STACK_ALLOC_SIZE)
+  .size  g_intstackalloc, STACKFRAME_ALIGN_DOWN(STACK_ALLOC_SIZE)
 #endif

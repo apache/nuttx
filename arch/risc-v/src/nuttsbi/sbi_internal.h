@@ -66,7 +66,7 @@
 
 #define TEMP_STACK_BASE     (_ebss)
 #define TEMP_STACK          (1024)
-#define TEMP_STACK_SIZE     (STACK_ALIGN_DOWN(TEMP_STACK))
+#define TEMP_STACK_SIZE     (STACKFRAME_ALIGN_DOWN(TEMP_STACK))
 
 /****************************************************************************
  * Public Function Prototypes
