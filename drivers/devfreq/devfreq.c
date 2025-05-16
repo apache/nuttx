@@ -480,6 +480,7 @@ FAR struct devfreq_s *devfreq_register(
   BLOCKING_INIT_NOTIFIER_HEAD(&devfreq->notifier_list);
   nxmutex_init(&devfreq->lock);
 
+  strlcpy(devfreq->name, name, NAME_MAX);
   devfreq->driver     = driver;
   devfreq->priv       = priv;
   devfreq->suspended  = false;
@@ -845,6 +846,40 @@ FAR struct devfreq_s *devfreq_find_by_name(FAR const char *name)
   list_for_every_entry(&g_devfreq_list, devfreq, struct devfreq_s, node)
     {
       if (!strcmp(devfreq->name, name))
+        {
+          nxmutex_unlock(&g_devfreq_list_lock);
+          return devfreq;
+        }
+    }
+
+  nxmutex_unlock(&g_devfreq_list_lock);
+  return NULL;
+}
+
+/****************************************************************************
+ * Name: devfreq_find_by_index
+ *
+ * Description:
+ *   find a devfreq entry from global list by index
+ *
+ * Input Parameters:
+ *   index - devfreq index
+ *
+ * Returned Value:
+ *   devfreq handle
+ *
+ ****************************************************************************/
+
+FAR struct devfreq_s *devfreq_find_by_index(size_t index)
+{
+  FAR struct devfreq_s *devfreq;
+  size_t i = 0;
+
+  nxmutex_lock(&g_devfreq_list_lock);
+
+  list_for_every_entry(&g_devfreq_list, devfreq, struct devfreq_s, node)
+    {
+      if (index == i++)
         {
           nxmutex_unlock(&g_devfreq_list_lock);
           return devfreq;

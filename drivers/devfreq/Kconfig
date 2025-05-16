@@ -33,4 +33,19 @@ config DEVFREQ_DEFAULT_GOV_PASSIVE
 
 endchoice
 
+config DEVFREQ_PROCFS
+	bool "devfreq_procfs"
+	default n
+	depends on FS_PROCFS
+	select FS_PROCFS_REGISTER
+	---help---
+		devfreq procfs support
+
+config DEVFREQ_PROCFS_QOS
+	bool "devfreq_procfs_qos"
+	default n
+	depends on DEVFREQ_PROCFS
+	---help---
+		devfreq procfs show qos requests and their callers
+
 endif

@@ -21,5 +21,9 @@
 if(CONFIG_DEVFREQ)
   set(SRCS devfreq.c devfreq_performance.c devfreq_powersave.c devfreq_qos.c)
 
+  if(CONFIG_DEVFREQ_PROCFS)
+    list(APPEND SRCS devfreq_procfs.c)
+  endif()
+
   target_sources(drivers PRIVATE ${SRCS})
 endif()

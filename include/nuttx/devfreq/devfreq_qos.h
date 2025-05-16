@@ -41,6 +41,9 @@ struct qos_request_s
 {
   struct plist_node min_req;
   struct plist_node max_req;
+#ifdef CONFIG_DEVFREQ_PROCFS_QOS
+  int backtrace;
+#endif
 };
 
 struct qos_constraints_s

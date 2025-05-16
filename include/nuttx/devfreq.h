@@ -310,6 +310,38 @@ int devfreq_qos_remove_request(FAR struct devfreq_s *devfreq,
 
 FAR struct devfreq_s *devfreq_find_by_name(FAR const char *name);
 
+/****************************************************************************
+ * Name: devfreq_find_by_index
+ *
+ * Description:
+ *   find a devfreq entry from global list by index
+ *
+ * Input Parameters:
+ *   index - devfreq index
+ *
+ * Returned Value:
+ *   devfreq handle
+ *
+ ****************************************************************************/
+
+FAR struct devfreq_s *devfreq_find_by_index(size_t index);
+
+/****************************************************************************
+ * Name: devfreq_procfs_initialize
+ *
+ * Description:
+ *   initialize procfs for devfreq, called by devfreq_initialize()
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void devfreq_procfs_initialize(void);
+
 #ifdef CONFIG_DEVFREQ_DEFAULT_GOV_PASSIVE
 #define devfreq_default_governor() NULL
 #else
