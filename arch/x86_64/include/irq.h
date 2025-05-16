@@ -51,16 +51,16 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define X86_64_CPUPRIV_USTACK_OFFSET      (16)
-#define X86_64_CPUPRIV_UVBASE_OFFSET      (24)
-#define X86_64_CPUPRIV_KTOPSTK_OFFSET     (32)
+#define X86_64_CPUPRIV_USTACK_OFFSET  16
+#define X86_64_CPUPRIV_UVBASE_OFFSET  24
+#define X86_64_CPUPRIV_KTOPSTK_OFFSET 32
 
 /* The initial stack point is aligned at 16 bytes boundaries. If
  * necessary frame_size must be rounded up to the next boundary to retain
  * this alignment.
  */
 
-#define STACK_ALIGNMENT     16
+#define STACKFRAME_ALIGN              16
 
 /****************************************************************************
  * Public Data

@@ -79,8 +79,8 @@ size_t tricore_stack_check(uintptr_t alloc, size_t size)
 
   /* Get aligned addresses of the top and bottom of the stack */
 
-  start = STACK_ALIGN_UP((uintptr_t)alloc);
-  end   = STACK_ALIGN_DOWN((uintptr_t)alloc + size);
+  start = STACKFRAME_ALIGN_UP((uintptr_t)alloc);
+  end   = STACKFRAME_ALIGN_DOWN((uintptr_t)alloc + size);
 
   /* Get the adjusted size based on the top and bottom of the stack */
 

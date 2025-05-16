@@ -47,7 +47,7 @@
  * rounded up to the next boundary
  */
 
-#define STACK_ALIGNMENT     16
+#define STACKFRAME_ALIGN 16
 
 /****************************************************************************
  * Public Types

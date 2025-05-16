@@ -64,7 +64,7 @@
  * addresses.
  */
 
-#define STACK_ALIGNMENT     8
+#define STACKFRAME_ALIGN 8
 
 #ifndef __ASSEMBLY__
 

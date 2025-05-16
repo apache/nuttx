@@ -176,7 +176,7 @@ int up_create_stack(struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
       /* Align the top of stack to STACK_ALIGNMENT. */
 
-      top_of_stack  = STACK_ALIGN_DOWN(top_of_stack);
+      top_of_stack  = STACKFRAME_ALIGN_DOWN(top_of_stack);
       size_of_stack = top_of_stack - (uintptr_t)tcb->stack_alloc_ptr;
 
       /* Save the adjusted stack values in the struct tcb_s */

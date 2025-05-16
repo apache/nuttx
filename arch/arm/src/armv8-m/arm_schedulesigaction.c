@@ -121,7 +121,7 @@ void up_schedule_sigaction(struct tcb_s *tcb)
 
       /* Stack pointer should be 8-byte aligned */
 
-      tcb->xcp.regs                 = (void *)STACK_ALIGN_DOWN(
+      tcb->xcp.regs                 = (void *)STACKFRAME_ALIGN_DOWN(
                                       (uint32_t)tcb->xcp.regs);
 
       /* Duplicate the register context.  These will be

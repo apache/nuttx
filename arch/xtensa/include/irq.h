@@ -73,7 +73,7 @@
 
 /* XTENSA requires at least a 16-byte stack alignment. */
 
-#define STACK_ALIGNMENT     16
+#define STACKFRAME_ALIGN    16
 
 /* IRQ Stack Frame Format.  Each value is a uint32_t register index */
 

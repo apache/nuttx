@@ -102,8 +102,8 @@ size_t xtensa_stack_check(uintptr_t alloc, size_t size)
    * Skip over the TLS data structure at the bottom of the stack
    */
 
-  start = STACK_ALIGN_UP(alloc);
-  end   = STACK_ALIGN_DOWN(alloc + size);
+  start = STACKFRAME_ALIGN_UP(alloc);
+  end   = STACKFRAME_ALIGN_DOWN(alloc + size);
 
   /* Get the adjusted size based on the top and bottom of the stack */
 

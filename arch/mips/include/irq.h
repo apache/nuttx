@@ -61,9 +61,9 @@
  */
 
 #ifdef CONFIG_LIBC_FLOATINGPOINT
-#  define STACK_ALIGNMENT   8
+#  define STACKFRAME_ALIGN   8
 #else
-#  define STACK_ALIGNMENT   4
+#  define STACKFRAME_ALIGN   4
 #endif
 
 /****************************************************************************

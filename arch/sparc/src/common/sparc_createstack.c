@@ -147,7 +147,7 @@ int up_create_stack(struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
        * boundary to meet these alignment requirements.
        */
 
-      top_of_stack = STACK_ALIGN_DOWN(top_of_stack);
+      top_of_stack = STACKFRAME_ALIGN_DOWN(top_of_stack);
 
       /* The size of the stack in bytes is then the difference between
        * the top and the bottom of the stack (+4 because if the top

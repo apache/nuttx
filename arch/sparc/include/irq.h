@@ -60,7 +60,7 @@
  * however, the stack must be aligned to 8-byte addresses.
  */
 
-#define STACK_ALIGNMENT     8
+#define STACKFRAME_ALIGN 8
 
 /****************************************************************************
  * Public Types

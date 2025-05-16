@@ -86,7 +86,7 @@
 #  define CONFIG_ARCH_INTERRUPTSTACK 0
 #endif
 
-#define INTSTACK_SIZE (CONFIG_ARCH_INTERRUPTSTACK & ~STACK_ALIGN_MASK)
+#define INTSTACK_SIZE (CONFIG_ARCH_INTERRUPTSTACK & ~STACKFRAME_ALIGN_MASK)
 
 /* Toolchain dependent, linker defined section addresses */
 
