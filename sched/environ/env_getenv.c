@@ -67,7 +67,7 @@ FAR char *getenv(FAR const char *name)
 
   /* Verify that a string was passed */
 
-  if (name == NULL)
+  if (name == NULL || up_interrupt_context())
     {
       ret = -EINVAL;
       goto errout;
