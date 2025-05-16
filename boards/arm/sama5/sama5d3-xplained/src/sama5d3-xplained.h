@@ -66,10 +66,10 @@
 #  undef HAVE_HSMCI
 #endif
 
-/* We need PIO interrupts on PIOD to support card detect interrupts */
+/* We need PIO interrupts on PIOE to support card detect interrupts */
 
-#if defined(HAVE_HSMCI) && !defined(CONFIG_SAMA5_PIOD_IRQ)
-#  warning PIOD interrupts not enabled.  No MMC/SD support.
+#if defined(HAVE_HSMCI) && !defined(CONFIG_SAMA5_PIOE_IRQ)
+#  warning PIOE interrupts not enabled.  No MMC/SD support.
 #  undef HAVE_HSMCI
 #endif
 
@@ -311,12 +311,12 @@
  *  (2) a microSD memory card slot (J11).
  *
  * The full size SD card slot connects via HSMCI0.  The card detect discrete
- * is available on PD17 (pulled high).  The write protect discrete is tied to
+ * is available on PE0 (pulled high).  The write protect discrete is tied to
  * ground (via PP6) and not available to software.  The slot supports 8-bit
  * wide transfer mode, but the NuttX driver currently uses only the 4-bit
  * wide transfer mode
  *
- *   PD17 MCI0_CD
+ *   PE0  MCI0_CD
  *   PD1  MCI0_DA0
  *   PD2  MCI0_DA1
  *   PD3  MCI0_DA2
@@ -330,13 +330,13 @@
  */
 
 #define PIO_MCI0_CD  (PIO_INPUT | PIO_CFG_DEFAULT | PIO_CFG_DEGLITCH | \
-                      PIO_INT_BOTHEDGES | PIO_PORT_PIOD | PIO_PIN17)
-#define IRQ_MCI0_CD   SAM_IRQ_PD17
+                      PIO_INT_BOTHEDGES | PIO_PORT_PIOE | PIO_PIN0)
+#define IRQ_MCI0_CD   SAM_IRQ_PE0
 
 /* The microSD connects vi HSMCI1.  The card detect discrete is available on
- * PBD8 (pulled high):
+ * PE1 (pulled high):
  *
- *   PD18  MCI1_CD
+ *   PE1   MCI1_CD
  *   PB20  MCI1_DA0
  *   PB21  MCI1_DA1
  *   PB22  MCI1_DA2
@@ -346,8 +346,8 @@
  */
 
 #define PIO_MCI1_CD  (PIO_INPUT | PIO_CFG_DEFAULT | PIO_CFG_DEGLITCH | \
-                      PIO_INT_BOTHEDGES | PIO_PORT_PIOD | PIO_PIN18)
-#define IRQ_MCI1_CD   SAM_IRQ_PD18
+                      PIO_INT_BOTHEDGES | PIO_PORT_PIOE | PIO_PIN1)
+#define IRQ_MCI1_CD   SAM_IRQ_PE1
 
 /* USB Ports ****************************************************************/
 

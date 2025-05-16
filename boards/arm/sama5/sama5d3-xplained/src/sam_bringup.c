@@ -33,6 +33,8 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/signal.h>
+
 #include <nuttx/fs/fs.h>
 
 #ifdef CONFIG_USBMONITOR
@@ -45,7 +47,7 @@
 #include "sam_twi.h"
 #include "sama5d3-xplained.h"
 
-#ifdef HAVE_ROMFS
+#if defined(CONFIG_FS_ROMFS) && defined(CONFIG_INIT_MOUNT)
 #  include <arch/board/boot_romfsimg.h>
 #endif
 
@@ -59,8 +61,8 @@
  ****************************************************************************/
 
 #define NSECTORS(n) \
-  (((n)+CONFIG_SAMA5D4EK_ROMFS_ROMDISK_SECTSIZE-1) / \
-   CONFIG_SAMA5D4EK_ROMFS_ROMDISK_SECTSIZE)
+  (((n)+CONFIG_SAMA5D3XPLAINED_ROMFS_ROMDISK_SECTSIZE-1) / \
+   CONFIG_SAMA5D3XPLAINED_ROMFS_ROMDISK_SECTSIZE)
 
 /****************************************************************************
  * Private Functions
@@ -156,24 +158,28 @@ int sam_bringup(void)
            HSMCI0_SLOTNO, HSMCI0_MINOR, ret);
     }
 
-#ifdef CONFIG_SAMA5D4EK_HSMCI0_MOUNT
-  else
+#ifdef CONFIG_SAMA5D3XPLAINED_HSMCI0_MOUNT
+  else if (sam_cardinserted(0))
     {
-      /* REVISIT:
-       *  A delay seems to be required here or the mount will fail.
-       */
+      ret = 1;
+      for (int retry = 0; ret != 0 && retry < 3; ++retry)
+        {
+          /* Wait for mmc block driver to be registered. */
 
-      /* Mount the volume on HSMCI0 */
+          nxsig_sleep(1);
 
-      ret = nx_mount(CONFIG_SAMA5D4EK_HSMCI0_MOUNT_BLKDEV,
-                     CONFIG_SAMA5D4EK_HSMCI0_MOUNT_MOUNTPOINT,
-                     CONFIG_SAMA5D4EK_HSMCI0_MOUNT_FSTYPE,
-                     0, NULL);
+          /* Mount the volume on HSMCI0 */
+
+          ret = nx_mount(CONFIG_SAMA5D3XPLAINED_HSMCI0_MOUNT_BLKDEV,
+                         CONFIG_SAMA5D3XPLAINED_HSMCI0_MOUNT_MOUNTPOINT,
+                         CONFIG_SAMA5D3XPLAINED_HSMCI0_MOUNT_FSTYPE,
+                         0, NULL);
+        }
 
       if (ret < 0)
         {
           _err("ERROR: Failed to mount %s: %d\n",
-               CONFIG_SAMA5D4EK_HSMCI0_MOUNT_MOUNTPOINT, ret);
+               CONFIG_SAMA5D3XPLAINED_HSMCI0_MOUNT_MOUNTPOINT, ret);
         }
     }
 #endif
@@ -189,22 +195,22 @@ int sam_bringup(void)
            HSMCI1_SLOTNO, HSMCI1_MINOR, ret);
     }
 
-#ifdef CONFIG_SAMA5D4EK_HSMCI1_MOUNT
+#ifdef CONFIG_SAMA5D3XPLAINED_HSMCI1_MOUNT
   else
     {
       /* REVISIT: A delay seems to be required here or the mount will fail */
 
       /* Mount the volume on HSMCI1 */
 
-      ret = nx_mount(CONFIG_SAMA5D4EK_HSMCI1_MOUNT_BLKDEV,
-                     CONFIG_SAMA5D4EK_HSMCI1_MOUNT_MOUNTPOINT,
-                     CONFIG_SAMA5D4EK_HSMCI1_MOUNT_FSTYPE,
+      ret = nx_mount(CONFIG_SAMA5D3XPLAINED_HSMCI1_MOUNT_BLKDEV,
+                     CONFIG_SAMA5D3XPLAINED_HSMCI1_MOUNT_MOUNTPOINT,
+                     CONFIG_SAMA5D3XPLAINED_HSMCI1_MOUNT_FSTYPE,
                      0, NULL);
 
       if (ret < 0)
         {
           _err("ERROR: Failed to mount %s: %d\n",
-               CONFIG_SAMA5D4EK_HSMCI1_MOUNT_MOUNTPOINT, ret);
+               CONFIG_SAMA5D3XPLAINED_HSMCI1_MOUNT_MOUNTPOINT, ret);
         }
     }
 #endif
@@ -217,29 +223,15 @@ int sam_bringup(void)
   sam_automount_initialize();
 #endif
 
-#ifdef HAVE_ROMFS
+#if defined(CONFIG_FS_ROMFS) && defined(CONFIG_INIT_MOUNT)
   /* Create a ROM disk for the /etc filesystem */
 
-  ret = romdisk_register(CONFIG_SAMA5D4EK_ROMFS_ROMDISK_MINOR, romfs_img,
-                         NSECTORS(romfs_img_len),
-                         CONFIG_SAMA5D4EK_ROMFS_ROMDISK_SECTSIZE);
+  ret = romdisk_register(CONFIG_SAMA5D3XPLAINED_ROMFS_ROMDISK_MINOR,
+                         romfs_img, NSECTORS(romfs_img_len),
+                         CONFIG_SAMA5D3XPLAINED_ROMFS_ROMDISK_SECTSIZE);
   if (ret < 0)
     {
       _err("ERROR: romdisk_register failed: %d\n", -ret);
-    }
-  else
-    {
-      /* Mount the file system */
-
-      ret = nx_mount(CONFIG_SAMA5D4EK_ROMFS_ROMDISK_DEVNAME,
-                     CONFIG_SAMA5D4EK_ROMFS_MOUNT_MOUNTPOINT,
-                     "romfs", MS_RDONLY, NULL);
-      if (ret < 0)
-        {
-          _err("ERROR: nx_mount(%s,%s,romfs) failed: %d\n",
-               CONFIG_SAMA5D4EK_ROMFS_ROMDISK_DEVNAME,
-               CONFIG_SAMA5D4EK_ROMFS_MOUNT_MOUNTPOINT, ret);
-        }
     }
 #endif
 

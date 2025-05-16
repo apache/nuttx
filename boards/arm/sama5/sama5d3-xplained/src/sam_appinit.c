@@ -50,6 +50,8 @@
  *   Perform application specific initialization.  This function is never
  *   called directly from application code, but only indirectly via the
  *   (non-standard) boardctl() interface using the command BOARDIOC_INIT.
+ *   This function is also called by board_late_initialize if
+ *   CONFIG_BOARD_LATE_INITIALIZE is defined.
  *
  * Input Parameters:
  *   arg - The boardctl() argument is passed to the board_app_initialize()
@@ -70,14 +72,7 @@
 
 int board_app_initialize(uintptr_t arg)
 {
-  int ret;
-
-  UNUSED(ret);
-#ifndef CONFIG_BOARD_LATE_INITIALIZE
   /* Perform board initialization */
 
   return sam_bringup();
-#else
-  return OK;
-#endif
 }

@@ -110,6 +110,35 @@ config SAMA5D3XPLAINED_AT25_NXFFS
 
 endchoice # AT25 serial FLASH configuration
 
+config SAMA5D3XPLAINED_HSMCI0_MOUNT
+	bool "HSMCI0 boot mount"
+	default n
+	depends on SAMA5_HSMCI0
+
+if SAMA5D3XPLAINED_HSMCI0_MOUNT
+
+config SAMA5D3XPLAINED_HSMCI0_MOUNT_FSTYPE
+	string "HSMCI0 file system type"
+	default "vfat"
+
+config SAMA5D3XPLAINED_HSMCI0_MOUNT_BLKDEV
+	string "HSMCI0 block device"
+	default "/dev/mmcsd0"
+
+config SAMA5D3XPLAINED_HSMCI0_MOUNT_MOUNTPOINT
+	string "HSMCI0 mount point"
+	default "/bin"
+
+endif # SAMA5D3XPLAINED_HSMCI0_MOUNT
+
+config SAMA5D3XPLAINED_ROMFS_ROMDISK_MINOR
+	int "ROM disk minor device number"
+	default 0
+
+config SAMA5D3XPLAINED_ROMFS_ROMDISK_SECTSIZE
+	int "ROM disk sector size"
+	default 512
+
 config SAMA5D3XPLAINED_USBHOST_STACKSIZE
 	int "USB host waiter stack size"
 	default 1536 if USBHOST_HUB

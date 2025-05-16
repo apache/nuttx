@@ -90,7 +90,7 @@ void sam_boardinitialize(void)
   /* Initialize USB if the 1) the HS host or device controller is in the
    * configuration and 2) the weak function sam_usbinitialize() has been
    * brought into the build.
-   * Presumeably either CONFIG_USBDEV or CONFIG_USBHOST is also selected.
+   * Presumably either CONFIG_USBDEV or CONFIG_USBHOST is also selected.
    */
 
 #if defined(CONFIG_SAMA5_UHPHS) || defined(CONFIG_SAMA5_UDPHS)
@@ -139,8 +139,10 @@ void board_late_initialize(void)
    * This alternative NSH initialization is necessary when NSH is ran in
    * user-space but the initialization function must run in kernel space.
    */
+#if defined(CONFIG_NSH_ARCHINIT)
+#  error Both BOARD_LATE_INITIALIZE and NSH_ARCHINIT enabled
+#elif defined(CONFIG_NSH_LIBRARY)
 
-#if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_BOARDCTL)
   board_app_initialize(0);
 #endif
 }
