@@ -1665,7 +1665,7 @@ static int isx012_replace_frameinterval_to_regval
       case 10 :  /* 5FPS */
         return REGVAL_FPSTYPE_5FPS;
 
-      default :
+      default:
         return -EINVAL;
     }
 }

@@ -615,7 +615,7 @@ static uint64_t etm4_sysreg_read(uint32_t offset)
   switch (offset)
     {
       ETM4_READ_SYSREG_CASES(res)
-      default :
+      default:
         cserr("etm4x: trying to read unsupported register @%x\n", offset);
     }
 
@@ -640,7 +640,7 @@ static void etm4_sysreg_write(uint64_t val, uint32_t offset, bool bit_64)
   switch (offset)
     {
       ETM4_WRITE_SYSREG_CASES(val)
-      default :
+      default:
         cserr("etm4x: trying to write to unsupported register @%x\n",
               offset);
     }

@@ -71,7 +71,7 @@ static int stm32_newsession(uint32_t *sid, struct cryptoini *cri)
 
         *sid = g_stm32_sesnum++;
         break;
-      default :
+      default:
         return -EINVAL;
     }
 

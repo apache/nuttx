@@ -331,7 +331,7 @@ static int esp32c3_newsession(uint32_t *sid, struct cryptoini *cri)
 
             data->hw_axf = axf;
             break;
-          default :
+          default:
             esp32c3_freesession(i);
             kmm_free(data);
             return -EINVAL;

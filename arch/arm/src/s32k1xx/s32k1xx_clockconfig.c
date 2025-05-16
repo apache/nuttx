@@ -1760,7 +1760,7 @@ static void up_pm_notify(struct pm_callback_s *cb, int domain,
     {
       /* if it needs to be set to RUN mode */
 
-      case(PM_NORMAL):
+      case (PM_NORMAL):
         {
           /* Logic for PM_NORMAL goes here */
 
@@ -1891,7 +1891,7 @@ static void up_pm_notify(struct pm_callback_s *cb, int domain,
         }
         break;
 
-      case(PM_IDLE):
+      case (PM_IDLE):
         {
           /* Logic for PM_IDLE goes here */
         }
@@ -1899,7 +1899,7 @@ static void up_pm_notify(struct pm_callback_s *cb, int domain,
 
       /* if it needs to be set to VLPR mode */
 
-      case(PM_STANDBY):
+      case (PM_STANDBY):
         {
           /* Logic for PM_STANDBY goes here */
 
@@ -2098,7 +2098,7 @@ static void up_pm_notify(struct pm_callback_s *cb, int domain,
         }
         break;
 
-      case(PM_SLEEP):
+      case (PM_SLEEP):
         {
           /* Logic for PM_SLEEP goes here */
 

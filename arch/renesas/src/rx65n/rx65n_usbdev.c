@@ -766,7 +766,7 @@ static void hw_usb_write_fifo16(uint16_t pipemode, uint16_t data)
       case USB_D1USE:
         USB0_D1FIFO16 = data;
         break;
-      default :
+      default:
         break;
   }
 }
@@ -792,7 +792,7 @@ static void hw_usb_write_fifo8(uint16_t pipemode, uint8_t data)
       case USB_D1USE:
         USB0_D1FIFO8 = data;
         break;
-      default :
+      default:
         break;
     }
 }
@@ -1204,7 +1204,7 @@ uint16_t usb_pstd_ctrl_read(uint32_t bsize, uint8_t *table)
       case USB_ERROR :
         break;
 
-      default :
+      default:
         break;
     }
 
