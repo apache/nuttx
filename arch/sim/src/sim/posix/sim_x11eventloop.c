@@ -144,7 +144,7 @@ void sim_x11events(void)
             }
             break;
 
-          default :
+          default:
             break;
         }
     }

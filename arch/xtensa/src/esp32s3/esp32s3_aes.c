@@ -1052,7 +1052,7 @@ int aes_cypher(void *out, const void *in, size_t size,
         ret = esp32s3_aes_ctr_cypher(&aes, &nc_off, iv_buf, cache_buf,
                                      in, out, size);
         break;
-      default :
+      default:
         ret = -EINVAL;
         break;
     }

@@ -1735,7 +1735,7 @@ static int isx019_start_capture(FAR struct imgsensor_s *sensor,
             regval |= FPGA_THUMBNAIL_SCALE_1_4;
             break;
 
-          default : /* 1/8 */
+          default: /* 1/8 */
             regval |= FPGA_THUMBNAIL_SCALE_1_8;
             break;
         }
