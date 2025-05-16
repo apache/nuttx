@@ -298,7 +298,7 @@ int lc823450_gpio_config(uint16_t gpiocfg)
             lc823450_configoutput(gpiocfg, port, pin);
             break;
 
-          default :
+          default:
             gpioerr("ERROR: Unrecognized pin mode: %04x\n", gpiocfg);
             ret = -EINVAL;
             break;

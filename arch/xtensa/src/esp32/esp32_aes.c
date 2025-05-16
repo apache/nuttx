@@ -633,7 +633,7 @@ int aes_cypher(void *out, const void *in, size_t size,
         memcpy(iv_buf, iv, AES_BLK_SIZE);
         ret = esp32_aes_ctr_cypher(&aes, &nc_off, iv_buf, cache_buf,
                                    in, out, size);
-      default :
+      default:
         ret = -EINVAL;
         break;
     }

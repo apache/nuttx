@@ -676,7 +676,7 @@ static int stm32_compconfig(struct stm32_comp_s *priv)
             }
 #endif
 
-          default :
+          default:
             return -EINVAL;
           }
 
