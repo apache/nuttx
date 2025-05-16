@@ -83,6 +83,10 @@ void tricore_doirq(void)
 
   if (*running_task != tcb)
     {
+      /* Update scheduler parameters */
+
+      nxsched_switch_context(*running_task, tcb);
+
 #ifdef CONFIG_ARCH_ADDRENV
       /* Make sure that the address environment for the previously
        * running task is closed down gracefully (data caches dump,
@@ -93,10 +97,6 @@ void tricore_doirq(void)
       addrenv_switch(tcb);
       tcb = this_task();
 #endif
-
-      /* Update scheduler parameters */
-
-      nxsched_switch_context(*running_task, tcb);
 
       /* Record the new "running" task when context switch occurred.
        * g_running_tasks[] is only used by assertion logic for reporting
