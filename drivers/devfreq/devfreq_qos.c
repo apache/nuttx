@@ -25,6 +25,7 @@
 #include <nuttx/devfreq/devfreq_qos.h>
 #include <nuttx/kmalloc.h>
 #include <errno.h>
+#include <execinfo.h>
 
 /****************************************************************************
  * Public Functions
@@ -89,6 +90,10 @@ FAR struct qos_request_s *qos_add_request(
   plist_add(&req->min_req, &constraints->min_requests);
   plist_add(&req->max_req, &constraints->max_requests);
 
+#ifdef CONFIG_DEVFREQ_PROCFS_QOS
+  req->backtrace = backtrace_record(0);
+#endif
+
   return req;
 }
 
@@ -117,6 +122,10 @@ int qos_remove_request(FAR struct qos_constraints_s *constraints,
 
   plist_del(&req->min_req, &constraints->min_requests);
   plist_del(&req->max_req, &constraints->max_requests);
+
+#ifdef CONFIG_DEVFREQ_PROCFS_QOS
+  backtrace_remove(req->backtrace);
+#endif
 
   kmm_free(req);
 

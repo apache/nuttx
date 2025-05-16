@@ -24,6 +24,12 @@ ifeq ($(CONFIG_DEVFREQ),y)
 
 CSRCS += devfreq.c devfreq_performance.c devfreq_powersave.c devfreq_qos.c
 
+ifeq ($(CONFIG_DEVFREQ_PROCFS),y)
+
+CSRCS += devfreq_procfs.c
+
+endif
+
 DEPPATH += --dep-path devfreq
 VPATH += devfreq
 

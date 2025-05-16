@@ -26,6 +26,7 @@
 
 #include <nuttx/clk/clk_provider.h>
 #include <nuttx/crypto/crypto.h>
+#include <nuttx/devfreq.h>
 #include <nuttx/drivers/drivers.h>
 #include <nuttx/drivers/rpmsgdev.h>
 #include <nuttx/drivers/rpmsgblk.h>
@@ -123,6 +124,10 @@ void drivers_initialize(void)
 
 #ifdef CONFIG_SERIAL_RTT
   serial_rtt_initialize();
+#endif
+
+#if defined(CONFIG_DEVFREQ_PROCFS)
+  devfreq_procfs_initialize();
 #endif
 
 #if defined(CONFIG_DEV_NULL)
