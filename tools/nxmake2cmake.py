@@ -19,6 +19,8 @@
 #
 ############################################################################
 
+__version__ = "0.0.1"
+
 import argparse
 import os
 import sys
@@ -63,7 +65,6 @@ def add_board_cmakelist(path):
     print("Add", cmpath)
 
     with open(cmpath, "w") as f:
-        content = board_cmakelist_get(path)
         content = board_cmakelist_get(path)
         f.write(content)
 
@@ -150,7 +151,7 @@ def convert_board_makefile(path):
             fc.write(content)
 
 
-# convert board make build to cmake
+# convert board Make build to CMake
 def convert_board(path):
     add_board_cmakelist(path)
 
@@ -167,7 +168,7 @@ def convert_board(path):
         exit(1)
 
 
-# convert arch Make.defs cmake
+# convert arch Make.defs to CMakeLists.txt
 def convert_arch_makedefs(path):
     mdpath = os.path.join(path, "Make.defs")
     cpath = os.path.join(path, "CMakeLists.txt")
@@ -175,7 +176,7 @@ def convert_arch_makedefs(path):
     content = ""
     with open(mdpath, "r") as fm:
         content = fm.read()
-        content = content.replace(mdpath, cpath)
+        content = content.replace("Make.defs", "CMakeLists.txt")
         content = convert_make_conditional(content)
 
         content += "\n"
@@ -195,20 +196,47 @@ def convert_arch_makedefs(path):
             fc.write(content)
 
 
-# convert arch make build to cmake
+# convert arch Make build to CMake
 def convert_arch(path):
     convert_arch_makedefs(path)
 
 
 def main():
     parser = argparse.ArgumentParser(
-        prog="nxmake2cmake", description="convert NuttX makefile to cmake"
+        prog="nxmake2cmake",
+        formatter_class=argparse.RawTextHelpFormatter,
+        description=(
+            """
+            A tool that convert NuttX Makefile to CMakeLists file"
+            Usage:
+              nxmake2cmake.py <path-dir>
+            """
+        ),
+        epilog=(
+            """
+            You can use this tool to on any system locale.
+            """
+        ),
     )
+
+    # Version
+    parser.add_argument("-v", "--version", action="version", version=__version__)
 
     parser.add_argument(
         "path",
         type=str,
-        help="path to board or arch direcotry. eg. boards/arm/stm32f7/steval-eth001v1",
+        help=(
+            """
+            The path pointing to the board or arch directory.
+            If the directory contains Makefiles or Make.defs files, they will be converted into CMakeLists files.
+
+            eg.:
+
+               arch  ->  arch/arm/src/stm32f0l0g0
+
+               board ->  boards/arm/stm32/nucleo-f302r8
+            """
+        ),
     )
 
     args = parser.parse_args()
