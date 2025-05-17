@@ -78,6 +78,18 @@ nsh_cpunet
 Basic NuttShell configuration for the network core (console enabled in UART0,
 exposed via J-Link VCOM1, at 115200 bps).
 
+rpmsghci_nimble_cpuapp
+----------------------
+
+This configuration enables RPMSG Bluetooth HCI client on the application core
+and uses nimBLE for the host-layer
+
+rpmsghci_sdc_cpunet
+-------------------
+
+This configuration enables RPMSG Bluetooth HCI server on the network core which
+can be accessed using RPMSG Bluetooth HCI client on the application core.
+
 Flash & Debug
 =============
 
