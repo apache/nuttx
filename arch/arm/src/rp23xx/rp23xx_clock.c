@@ -415,11 +415,14 @@ void rp23xx_clockconfig(void)
    *   from flash
    * - and the PLLs, as this is fatal if clock muxing has not been reset on
    *   this boot
+   * - and USB, syscfg, as this disturbs USB-to-SWD on core 1
    */
 
   setbits_reg32(RP23XX_RESETS_RESET_MASK & ~(RP23XX_RESETS_RESET_IO_QSPI |
                                              RP23XX_RESETS_RESET_PADS_QSPI |
                                              RP23XX_RESETS_RESET_PLL_USB |
+                                             RP23XX_RESETS_RESET_USBCTRL |
+                                             RP23XX_RESETS_RESET_SYSCFG |
                                              RP23XX_RESETS_RESET_JTAG |
                                              RP23XX_RESETS_RESET_PLL_SYS),
                 RP23XX_RESETS_RESET);
