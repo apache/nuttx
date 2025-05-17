@@ -494,7 +494,7 @@ with NuttX tasks.
 - :c:func:`wd_gettime`
 - Watchdog Timer Callback
 
-.. c:function:: int wd_start(FAR struct wdog_s *wdog, int delay, \
+.. c:function:: int wd_start(FAR struct wdog_s *wdog, clock_t delay, \
                  wdentry_t wdentry, wdparm_t arg)
 
   This function adds a watchdog to the timer queue.

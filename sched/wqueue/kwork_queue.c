@@ -88,6 +88,10 @@ int work_queue_period_wq(FAR struct kwork_wqueue_s *wqueue,
       return -EINVAL;
     }
 
+  /* Ensure delay is within the range the wdog can handle. */
+
+  delay = delay < WDOG_MAX_DELAY ? delay : WDOG_MAX_DELAY;
+
   expected = clock_delay2abstick(delay);
 
   /* Interrupts are disabled so that this logic can be called from with
