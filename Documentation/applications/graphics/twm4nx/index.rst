@@ -22,7 +22,7 @@ minimal resources. For example, no assumption is made about the availability of
 a file system; no ``.twmrc`` file is used. Bitmaps are not used (other than for
 fonts).
 
-The TWM license is, I believe compatible with the BSD license used by NuttX. The
+The TWM license is probably compatible with the BSD license used by NuttX. The
 origin TWM license required notice of copyrights within each file and a full
 copy of the original license which you can find in the ``COPYING`` file. within
 this directory.
@@ -34,8 +34,8 @@ Progress
 ~~~~~~~~
 
 - ``2019-04-28`` This port was brutal. Much TWM logic was removed because it
-  depended on X11 features (or just because I could not understand how to use
-  it). The replacement logic is only mostly in place but more needs to be done
+  depended on X11 features (or just because it was not obvious how it should be
+  used). The replacement logic is only mostly in place but more needs to be done
   to have a complete system (hence, it is marked ``EXPERIMENTAL``). The kinds of
   things that need to done are:
 
@@ -49,12 +49,12 @@ Progress
   connection. The server is no longer connected so Twm4Nx constipates and and
   eventually hangs.
 
-- ``2019-05-08`` I abandoned the VNC interface and found that things are much
+- ``2019-05-08`` After abandoning the VNC interface, things are much
   better using a direct, hardware framebuffer. The background comes up properly
   and the Icon Manager appears properly in the upper right hand corner. The Icon
   Manager Window can be iconified or de-iconified. The Icon Manager window can
   be grabbed by the toolbar title and moved about on the window (the movement is
-  not very smooth on the particular hardware that I am working with).
+  not very smooth on the particular hardware used for testing).
 
 - ``2019-05-10`` A left click on the background brings up the main menu. At
   present there are only two options: _Desktop_ which will iconify all windows
@@ -166,9 +166,8 @@ Issues
 ~~~~~~
 
 ``2019-05-16`` Twm4Nx is in a very complete state but only at perhaps _alpha_ in
-its maturity. You should expect to see some undocumented problems. If you see
-such problems and can describe a sequence to actions to reproduce the problem,
-let me know and I will try to resolve the problems.
+its maturity. You should expect to see some undocumented problems.
+Please report any problems you may encounter.
 
 Here are all known issues and features that are missing:
 
@@ -182,7 +181,7 @@ TWM Compatibilities Issues:
 
 There are no near-term plans to address these compatibility issues.
 
-Other issues/bugs. All-in-all, I would say that Twm4Nx is maturing well and is
+Other issues/bugs. Twm4Nx is maturing well and is
 attaining stability. That being said, there are some issues and untested
 functionality that should be addressed:
 
@@ -194,22 +193,22 @@ functionality that should be addressed:
    though the are configured to be borderless).
 3. Most Twm4Nx configuration settings are hard-coded in ``*_config.hxx`` header
    files. These all need to be brought out and made accessible via Kconfig files
-4. I have seen some odd behavior when many NxTerm windows have been opened
-   (around 15). Specifically, I see failures to start NSH in the windows so they
+4. There is some odd behavior when many NxTerm windows have been opened
+   (around 15). Specifically, failures to start NSH in the windows so they
    come up blank. All other behaviors seem normal. Most likely, some NxTerm
    resource allocation is failing silently and leaving things in an unusable
-   state. The board I am using has 128Mb of SDRAM so I can't believe that memory
-   is the limiting factor. These are, however, RAM-backed windows and will use
+   state. The board used for testing has 128Mb of SDRAM so memory is probably
+   not the limiting factor. These are, however, RAM-backed windows and will use
    significant amounts of memory. The primary issue is that the number of
    windows should probably be managed in some way to assure that the end-user
    does not experience odd behaviors when resource usage is high.
-5. Menus with sub-menus have not been verified. There is no use of sub- menus in
-   the current code base so I expect that there are issues when, for example,
+5. Menus with sub-menus have not been verified. There is no use of sub-menus in
+   the current code base so issues may be expected when, for example,
    and item from a sub-menu item: That menu and all of its antecedent menus
    should be closed.
 6. There is an optional MENU button that may appear at the far left on the
    toolbar. It is not used by any window in the current code base and, hence, is
-   unverified. I would expect some issues with generating and routing the MENU
+   unverified. Some issues may be expected with generating and routing the MENU
    button events to applications. There are likely other unverified features.
 7. X/Y input may be either via a touchscreen or a mouse. Only touchscreen input
    has been verified. There is, however, very little difference. The primary

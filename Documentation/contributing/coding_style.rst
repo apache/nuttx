@@ -1481,7 +1481,7 @@ the naming of `enumeration values <#enumerations>`__.
 -  **Uppercase**. Macro names are always in upper case.
 -  **Lowercase Exceptions**. There are a few lower case values in NuttX
    macro names. Such as a lower-case ``p`` for a period or decimal point
-   (such as ``VOLTAGE_3p3V``). I have also used lower-case ``v`` for a
+   (such as ``VOLTAGE_3p3V``). The lower-case ``v`` is also used for a
    version number (such as ``CONFIG_NET_IPv6``). However, these are
    exceptions to the rule rather than illustrating a rule.
 -  **Macros that could be functions**. Lower-case macro names are also

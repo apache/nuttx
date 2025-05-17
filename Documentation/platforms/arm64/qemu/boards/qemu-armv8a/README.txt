@@ -316,17 +316,17 @@ Status
 
 2022-07-01:
 
-1. It's very stranger to see that signal testing of ostest is PASSED at Physical Ubuntu PC
-   rather than an Ubuntu at VMWare. For Physical Ubuntu PC, I have run the ostest
-   for 10 times at least but never see the crash again, but it's almost crashed every time
+1. It's very strange to see that signal testing of ostest is PASSED at Physical Ubuntu PC
+   rather than an Ubuntu at VMWare. For Physical Ubuntu PC, the ostest was run
+   for 10 times at least but the crash was never seen again, but it's almost crashed every time
    running the ostest at Virtual Ubuntu in VMWare
-   I check the fail point. It's seem at signal routine to access another CPU's task context reg
-   will get a NULL pointer, but I watch the task context with GDB, everything is OK.
-   So maybe this is a SMP cache synchronize issue? But I have done cache synchronize
-   operation at thread switch and how to explain why the crash not happening at
-   Physical Ubuntu PC?
-   So maybe this is a qemu issue at VMWare. I am planning to run
-   the arm64 to real hardware platform like IMX8 and will check the issue again
+   Checking for the the fail point. It's seem at signal routine to access another CPU's task context reg
+   will get a NULL pointer, but watch the task context with GDB, shows everything as OK.
+   So maybe this is a SMP cache synchronize issue? But synchronize operations have
+   been done at thread switch. It is hard to explain why the crash is not happening with a
+   Physical Ubuntu PC.
+   So maybe this is a qemu issue at VMWare.
+   ``arm64`` should be tested on a real hardware platform like IMX8 for the above issue.
 
 2022-06-12:
 
@@ -426,7 +426,7 @@ The nuttx ELF image can be debugged with QEMU.
 
 FPU Support and Performance
 ===========================
-  I was using FPU trap to handle FPU context switch. For threads accessing
+  The FPU trap was used to handle FPU context switch. For threads accessing
 the FPU (FPU instructions or registers), a trap will happen at this thread,
 the FPU context will be saved/restore for the thread at the trap handler.
   It will improve performance for thread switch since it's not to save/restore
@@ -450,7 +450,7 @@ index c58fb45512..acac6febaa
  DEPPATH += --dep-path syslog
  VPATH += :syslog
 +syslog/lib_syslog.c_CFLAGS += -mgeneral-regs-only
-   I cannot commit the patch for NuttX mainline because it's very special case
+   This patch cannot be merged into NuttX mainline because it is a very special case
 since ostest is using syslog for lots of information printing. but this is
 a clue for FPU performance analysis. va_list object is using for many C code to
 handle argument passing, but if it's not passing floating point argument indeed.

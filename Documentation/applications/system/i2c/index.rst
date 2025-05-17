@@ -58,7 +58,7 @@ or::
 
   nsh> i2c ?
 
-Here is an example of the help output. I shows the general form of the command
+Here is an example of the help output. It shows the general form of the command
 line, the various I2C commands supported with their unique command line options,
 and a more detailed summary of the command I2C command options::
 

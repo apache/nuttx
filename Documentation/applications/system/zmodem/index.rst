@@ -27,11 +27,11 @@ Hardware Flow Control
 ~~~~~~~~~~~~~~~~~~~~~
 
 Hardware flow control must be enabled in serial drivers in order to prevent data
-overrun. However, in the most NuttX serial drivers, hardware flow control only
+overrun. However, in most NuttX serial drivers, hardware flow control only
 protects the hardware RX FIFO: Data will not be lost in the hardware FIFO but
 can still be lost when it is taken from the FIFO. We can still overflow the
 serial driver's RX buffer even with hardware flow control enabled! That is
-probably a bug. But the workaround solution that I have used is to use lower
+probably a bug. But the currently implemented workaround solution is to use lower
 data rates and a large serial driver RX buffer.
 
 Those measures should be unnecessary if buffering and hardware flow control are
@@ -70,7 +70,7 @@ Buffer Recommendations
 ~~~~~~~~~~~~~~~~~~~~~~
 
 Based on the limitations of NuttX hardware flow control and of the Linux sz
-behavior, I have been testing with the following configuration (assuming ``UART1``
+behavior, testing was conducted with the following configuration (assuming ``UART1``
 is the ZModem device):
 
 1) This setting determines that maximum size of a data packet frame::
@@ -215,9 +215,9 @@ Status
 
 - ``2013-7-15``: Testing against the Linux ``rz``/``sz`` commands.
 
-  I have tested with the ``boards/arm/lpc17xx_40xx/olimex-lpc1766stk``
-  configuration. I have been able to send large and small files with the target
-  ``sz`` command. I have been able to receive small files, but there are problems
+  Performed tests with the ``boards/arm/lpc17xx_40xx/olimex-lpc1766stk``
+  configuration. Large and small files were transferred with the target
+  ``sz`` command. It was possible to receive small files, but there are problems
   receiving large files using the Linux ``sz`` command: The Linux ``sz`` does not
   obey the buffering limits and continues to send data while ``rz`` is writing the
   previously received data to the file and the serial driver's RX buffer is
@@ -235,9 +235,9 @@ Status
 
 - ``2013-7-16``. More Testing against the Linux ``rz``/``sz`` commands.
 
-  I have verified that with debug off and at lower serial BAUD (``2400``), the
-  transfers of large files succeed without errors. I do not consider this a
-  _solution_ to the problem. I also found that the LPC17xx hardware flow control
+  Verified that with debug off and at lower serial BAUD (``2400``), the
+  transfers of large files succeed without errors. This is considered a
+  _solution_ to the problem. In addition the LPC17xx hardware flow control
   caused strange hangs; ZModem works better with hardware flow control disabled
   on the LPC17xx.
 
@@ -267,7 +267,7 @@ Status
 
   Verified correct operation with hardware flow control using the
   ``olimex-stm32-p407/zmodem`` configuration with target-to-host transfers was
-  verified. Again, there are issues remaining if I tried the NuttX ``rz`` utility
+  verified. Again, there are issues remaining when using the NuttX ``rz`` utility
   running on Linux.
 
 - ``2018-6-26``
