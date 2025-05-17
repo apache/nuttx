@@ -46,7 +46,7 @@
  * Name: file_vfcntl
  ****************************************************************************/
 
-static int file_vfcntl(FAR struct file *filep, int cmd, va_list ap)
+static int file_vfcntl(FAR struct file *filep, int cmd, va_list ap, int fd)
 {
   int ret = -EINVAL;
 
@@ -73,13 +73,13 @@ static int file_vfcntl(FAR struct file *filep, int cmd, va_list ap)
         {
           /* Does not set the errno variable in the event of a failure */
 
-          ret = file_dup(filep, va_arg(ap, int), 0);
+          ret = nx_dup(fd, va_arg(ap, int), 0);
         }
         break;
 
       case F_DUPFD_CLOEXEC:
         {
-          ret = file_dup(filep, va_arg(ap, int), O_CLOEXEC);
+          ret = nx_dup(fd, va_arg(ap, int), O_CLOEXEC);
         }
         break;
 
@@ -91,7 +91,7 @@ static int file_vfcntl(FAR struct file *filep, int cmd, va_list ap)
          */
 
         {
-          ret = filep->f_oflags & O_CLOEXEC ? FD_CLOEXEC : 0;
+          ret = nx_fcntl(fd, F_GETFD, 0);
         }
         break;
 
@@ -114,11 +114,11 @@ static int file_vfcntl(FAR struct file *filep, int cmd, va_list ap)
 
           if (oflags & FD_CLOEXEC)
             {
-              ret = file_ioctl(filep, FIOCLEX, NULL);
+              ret = nx_fcntl(fd, F_SETFD, FD_CLOEXEC);
             }
           else
             {
-              ret = file_ioctl(filep, FIONCLEX, NULL);
+              ret = nx_fcntl(fd, F_SETFD, 0);
             }
         }
         break;
@@ -308,7 +308,7 @@ int file_fcntl(FAR struct file *filep, int cmd, ...)
    * failures.
    */
 
-  ret = file_vfcntl(filep, cmd, ap);
+  ret = file_vfcntl(filep, cmd, ap, -1);
 
   va_end(ap);
   return ret;
@@ -356,7 +356,7 @@ int fcntl(int fd, int cmd, ...)
        * failures.
        */
 
-      ret = file_vfcntl(filep, cmd, ap);
+      ret = file_vfcntl(filep, cmd, ap, fd);
       fs_putfilep(filep);
     }
 

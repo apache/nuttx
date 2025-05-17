@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/group/group_setuptaskfiles.c
+ * fs/vfs/fs_dup3.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -25,74 +25,41 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/fs/fs.h>
+#include <nuttx/fs/ioctl.h>
 
+#include <unistd.h>
 #include <sched.h>
 #include <assert.h>
-
-#include <nuttx/fs/fs.h>
-#include <nuttx/trace.h>
+#include <errno.h>
+#include <fcntl.h>
 
 #include "sched/sched.h"
-#include "group/group.h"
+#include "inode/inode.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: group_setuptaskfiles
+ * Name: dup3
  *
  * Description:
- *   Configure a newly allocated TCB so that it will inherit
- *   file descriptors and streams from the parent task.
- *
- * Input Parameters:
- *   tcb     - tcb of the new task.
- *   actions - The spawn file actions
- *   cloexec - Perform O_CLOEXEC on setup task files
- *
- * Returned Value:
- *   Zero (OK) is returned on success; A negated errno value is returned on
- *   failure.
- *
- * Assumptions:
+ *   Clone a file descriptor or socket descriptor to a specific descriptor
+ *   number and specific flags.
  *
  ****************************************************************************/
 
-int group_setuptaskfiles(FAR struct task_tcb_s *tcb,
-                         FAR const posix_spawn_file_actions_t *actions,
-                         bool cloexec)
+int dup3(int fd1, int fd2, int flags)
 {
-  FAR struct task_group_s *group = tcb->cmn.group;
-  int ret = OK;
-#ifndef CONFIG_FDCLONE_DISABLE
-  FAR struct tcb_s *rtcb = this_task();
-#endif
+  int ret;
 
-  sched_trace_begin();
-  DEBUGASSERT(group);
-#ifndef CONFIG_DISABLE_PTHREAD
-  DEBUGASSERT((tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) !=
-              TCB_FLAG_TTYPE_PTHREAD);
-#endif
-
-#ifndef CONFIG_FDCLONE_DISABLE
-  DEBUGASSERT(rtcb->group);
-
-  /* Duplicate the parent task's file descriptors */
-
-  if (group != rtcb->group)
+  ret = nx_dup3_from_tcb(this_task(), fd1, fd2, flags);
+  if (ret < 0)
     {
-      fdlist_dup(&rtcb->group->tg_fdlist,
-                 &group->tg_fdlist, actions, cloexec);
+      set_errno(-ret);
+      ret = ERROR;
     }
 
-  if (ret >= 0 && actions != NULL)
-    {
-      ret = spawn_file_actions(&tcb->cmn, actions);
-    }
-#endif
-
-  sched_trace_end();
   return ret;
 }

@@ -43,7 +43,7 @@
  * Name: file_vioctl
  ****************************************************************************/
 
-static int file_vioctl(FAR struct file *filep, int req, va_list ap)
+static int file_vioctl(FAR struct file *filep, int req, va_list ap, int fd)
 {
   FAR struct inode *inode;
   unsigned long arg;
@@ -92,7 +92,7 @@ static int file_vioctl(FAR struct file *filep, int req, va_list ap)
       case FIOCLEX:
         if (ret == OK || ret == -ENOTTY)
           {
-            filep->f_oflags |= O_CLOEXEC;
+            nx_fcntl(fd, F_SETFD, FD_CLOEXEC);
             ret = OK;
           }
         break;
@@ -100,7 +100,7 @@ static int file_vioctl(FAR struct file *filep, int req, va_list ap)
       case FIONCLEX:
         if (ret == OK || ret == -ENOTTY)
           {
-            filep->f_oflags &= ~O_CLOEXEC;
+            nx_fcntl(fd, F_SETFD, 0);
             ret = OK;
           }
         break;
@@ -135,29 +135,12 @@ static int file_vioctl(FAR struct file *filep, int req, va_list ap)
           }
         break;
 
-#ifdef CONFIG_FDSAN
       case FIOC_SETTAG_FDSAN:
-        filep->f_tag_fdsan = *(FAR uint64_t *)arg;
-        ret = OK;
-        break;
-
       case FIOC_GETTAG_FDSAN:
-        *(FAR uint64_t *)arg = filep->f_tag_fdsan;
-        ret = OK;
-        break;
-#endif
-
-#ifdef CONFIG_FDCHECK
       case FIOC_SETTAG_FDCHECK:
-        filep->f_tag_fdcheck = *(FAR uint8_t *)arg;
-        ret = OK;
-        break;
-
       case FIOC_GETTAG_FDCHECK:
-        *(FAR uint8_t *)arg = filep->f_tag_fdcheck;
-        ret = OK;
+        ret = nx_fcntl(fd, req, arg);
         break;
-#endif
 
 #ifndef CONFIG_DISABLE_MOUNTPOINT
       case BIOC_BLKSSZGET:
@@ -224,7 +207,7 @@ int file_ioctl(FAR struct file *filep, int req, ...)
   /* Let file_vioctl() do the real work. */
 
   va_start(ap, req);
-  ret = file_vioctl(filep, req, ap);
+  ret = file_vioctl(filep, req, ap, -1);
   va_end(ap);
 
   return ret;
@@ -275,7 +258,7 @@ int ioctl(int fd, int req, ...)
   /* Let file_vioctl() do the real work. */
 
   va_start(ap, req);
-  ret = file_vioctl(filep, req, ap);
+  ret = file_vioctl(filep, req, ap, fd);
   va_end(ap);
 
   fs_putfilep(filep);

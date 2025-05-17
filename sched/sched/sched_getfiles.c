@@ -33,22 +33,22 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxsched_get_files_from_tcb
+ * Name: nxsched_get_fdlist_from_tcb
  *
  * Description:
- *   Return a pointer to the file list from task context
+ *   Return a pointer to the file descriptor list from task context.
  *
  * Input Parameters:
  *   tcb - Address of the new task's TCB
  *
  * Returned Value:
- *   A pointer to the errno.
+ *   A pointer to the file descriptor list.
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-FAR struct filelist *nxsched_get_files_from_tcb(FAR struct tcb_s *tcb)
+FAR struct fdlist *nxsched_get_fdlist_from_tcb(FAR struct tcb_s *tcb)
 {
   FAR struct task_group_s *group = tcb->group;
 
@@ -60,7 +60,7 @@ FAR struct filelist *nxsched_get_files_from_tcb(FAR struct tcb_s *tcb)
 
   if (group)
     {
-      return &group->tg_filelist;
+      return &group->tg_fdlist;
     }
 
   /* Higher level logic must handle the NULL gracefully */
@@ -69,22 +69,22 @@ FAR struct filelist *nxsched_get_files_from_tcb(FAR struct tcb_s *tcb)
 }
 
 /****************************************************************************
- * Name: nxsched_get_files
+ * Name: nxsched_get_fdlist
  *
  * Description:
- *   Return a pointer to the file list for this thread
+ *   Return a pointer to the file descriptor list for this thread.
  *
  * Input Parameters:
  *   None
  *
  * Returned Value:
- *   A pointer to the errno.
+ *   A pointer to the file descriptor list.
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-FAR struct filelist *nxsched_get_files(void)
+FAR struct fdlist *nxsched_get_fdlist(void)
 {
-  return nxsched_get_files_from_tcb(this_task());
+  return nxsched_get_fdlist_from_tcb(this_task());
 }

@@ -34,6 +34,7 @@
 #include <errno.h>
 #include <fcntl.h>
 
+#include "sched/sched.h"
 #include "inode/inode.h"
 
 /****************************************************************************
@@ -41,15 +42,18 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: file_dup3
+ * Name: file_dup2
  *
  * Description:
  *   Assign an inode to a specific files structure.  This is the heart of
- *   dup3.
+ *   dup2.
  *
- *   Equivalent to the non-standard dup3() function except that it
+ *   Equivalent to the non-standard dup2() function except that it
  *   accepts struct file instances instead of file descriptors and it does
  *   not set the errno variable.
+ *
+ *   As it deals with file structures, the file descriptor flags are NOT
+ *   inherited.
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is return on
@@ -57,7 +61,7 @@
  *
  ****************************************************************************/
 
-int file_dup3(FAR struct file *filep1, FAR struct file *filep2, int flags)
+int file_dup2(FAR struct file *filep1, FAR struct file *filep2)
 {
   FAR struct inode *inode;
   int ret;
@@ -65,11 +69,6 @@ int file_dup3(FAR struct file *filep1, FAR struct file *filep2, int flags)
   if (filep1 == NULL || filep1->f_inode == NULL || filep2 == NULL)
     {
       return -EBADF;
-    }
-
-  if (flags != 0 && flags != O_CLOEXEC)
-    {
-      return -EINVAL;
     }
 
   if (filep1 == filep2)
@@ -82,27 +81,13 @@ int file_dup3(FAR struct file *filep1, FAR struct file *filep2, int flags)
   inode = filep1->f_inode;
   inode_addref(inode);
 
-  /* If there is already an inode contained in the new file structure,
-   * close the file and release the inode.
-   * But we need keep the filep2->f_inode, incase of realloced by others.
-   */
+  /* Close the second file */
 
-  ret = file_close_without_clear(filep2);
+  ret = file_close(filep2);
   if (ret < 0)
     {
       inode_release(inode);
       return ret;
-    }
-
-  /* The two filep don't share flags (the close-on-exec flag). */
-
-  if (flags == O_CLOEXEC)
-    {
-      filep2->f_oflags = filep1->f_oflags | O_CLOEXEC;
-    }
-  else
-    {
-      filep2->f_oflags = filep1->f_oflags & ~O_CLOEXEC;
     }
 
   filep2->f_priv  = NULL;
@@ -162,38 +147,51 @@ int file_dup3(FAR struct file *filep1, FAR struct file *filep2, int flags)
         }
     }
 
-  /* Copy tag */
-
-#ifdef CONFIG_FDSAN
-  filep2->f_tag_fdsan = filep1->f_tag_fdsan;
-#endif
-
-#ifdef CONFIG_FDCHECK
-  filep2->f_tag_fdcheck = filep1->f_tag_fdcheck;
-#endif
-
-  FS_ADD_BACKTRACE(filep2);
   return OK;
 }
 
 /****************************************************************************
- * Name: file_dup2
+ * Name: nx_dup2
  *
  * Description:
- *   Assign an inode to a specific files structure.  This is the heart of
- *   dup2.
+ *   nx_dup2() is similar to the standard 'dup2' interface except that is
+ *   not a cancellation point and it does not modify the errno variable.
  *
- *   Equivalent to the non-standard dup2() function except that it
- *   accepts struct file instances instead of file descriptors and it does
- *   not set the errno variable.
+ *   nx_dup2() is an internal NuttX interface and should not be called from
+ *   applications.
+ *
+ *   Clone a file descriptor to a specific descriptor number.
  *
  * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is return on
+ *   fd2 is returned on success; a negated errno value is return on
  *   any failure.
  *
  ****************************************************************************/
 
-int file_dup2(FAR struct file *filep1, FAR struct file *filep2)
+int nx_dup2(int fd1, int fd2)
 {
-  return file_dup3(filep1, filep2, 0);
+  return nx_dup2_from_tcb(this_task(), fd1, fd2);
+}
+
+/****************************************************************************
+ * Name: dup2
+ *
+ * Description:
+ *   Clone a file descriptor or socket descriptor to a specific descriptor
+ *   number
+ *
+ ****************************************************************************/
+
+int dup2(int fd1, int fd2)
+{
+  int ret;
+
+  ret = nx_dup2(fd1, fd2);
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      ret = ERROR;
+    }
+
+  return ret;
 }

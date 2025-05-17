@@ -197,8 +197,6 @@
                                            *      configuration
                                            * OUT: None
                                            */
-
-#ifdef CONFIG_FDSAN
 #define FIOC_SETTAG_FDSAN _FIOC(0x000e)   /* IN:  FAR uint64_t *
                                            * Pointer to file tag
                                            * OUT: None
@@ -208,9 +206,6 @@
                                            * Pointer to file tag
                                            * OUT: None
                                            */
-#endif
-
-#ifdef CONFIG_FDCHECK
 #define FIOC_SETTAG_FDCHECK _FIOC(0x0010) /* IN:  FAR uint8_t *
                                            * Pointer to file fdcheck tag
                                            * OUT: None
@@ -220,8 +215,6 @@
                                            * Pointer to file fdcheck tag
                                            * OUT: None
                                            */
-#endif
-
 #define FIOC_SETLK          _FIOC(0x0012) /* IN:  Pointer to flock
                                            * OUT: None
                                            */

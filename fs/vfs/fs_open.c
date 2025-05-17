@@ -372,7 +372,7 @@ int file_open(FAR struct file *filep, FAR const char *path, int oflags, ...)
 
   if (ret >= OK)
     {
-      FS_ADD_BACKTRACE(filep);
+      FS_ADD_BACKTRACE(fdlist_fdget(nxsched_get_fdlist(), ret));
     }
 
   return ret;

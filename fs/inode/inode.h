@@ -72,21 +72,21 @@
   while (0)
 
 #if CONFIG_FS_BACKTRACE > 0
-#  define FS_ADD_BACKTRACE(filep) \
+#  define FS_ADD_BACKTRACE(fd) \
      do \
        { \
           int n = sched_backtrace(_SCHED_GETTID(), \
-                                  (filep)->f_backtrace, \
+                                  (fd)->f_backtrace, \
                                   CONFIG_FS_BACKTRACE, \
                                   CONFIG_FS_BACKTRACE_SKIP); \
           if (n < CONFIG_FS_BACKTRACE) \
             { \
-              (filep)->f_backtrace[n] = NULL; \
+              (fd)->f_backtrace[n] = NULL; \
             } \
        } \
      while (0)
 #else
-#  define FS_ADD_BACKTRACE(filep)
+#  define FS_ADD_BACKTRACE(fd)
 #endif
 
 /****************************************************************************
@@ -106,7 +106,7 @@
  *  relpath  - INPUT:  (not used)
  *             OUTPUT: If the returned inode is a mountpoint, this is the
  *                     relative path from the mountpoint.
- *             OUTPUT: If a symobolic link into a mounted file system is
+ *             OUTPUT: If a symbolic link into a mounted file system is
  *                     detected while traversing the path, then the link
  *                     will be converted to a mountpoint inode if the
  *                     mountpoint link is in an intermediate node of the

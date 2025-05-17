@@ -25,6 +25,7 @@ set(SRCS
     fs_close.c
     fs_dup.c
     fs_dup2.c
+    fs_dup3.c
     fs_fcntl.c
     fs_epoll.c
     fs_fchstat.c
