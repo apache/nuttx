@@ -36,9 +36,9 @@ How To Use
 The i8sak app has a series of CLI functions that can be invoked. The default
 i8sak command is ``i8`` to make things quick and easy to type.
 
-In my test setup I have 2 Clicker2-STM32 boards from MikroElektronika, with the
-BEE-click (MRF24J40) radios. Choose one device to be the PAN Coordinator. We'll
-refer to that as device A.
+A test setup contained 2 Clicker2-STM32 boards from MikroElektronika, with the
+BEE-click (MRF24J40) radios. Choose one device to be the PAN Coordinator.
+This device is referred to as device A.
 
 On that device, run::
 
@@ -165,7 +165,7 @@ the ``-d`` option.
 
 **Note**: Currently, the indirect transaction timeout is disabled. This means
 frames must be extracted or space may run out. This is only for the testing
-phase as it is easier to debug when I am not fighting a timeout. Re-enabling the
+phase as it is easier to debug when not fighting a timeout. Re-enabling the
 timeout may effect the behavior of the indirect transaction features in the
 ``i8sak`` app.
 

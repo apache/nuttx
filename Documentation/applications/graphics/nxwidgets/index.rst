@@ -260,7 +260,7 @@ Work-Arounds
 Build Issues
 ............
 
-1. I have seen this error on Cygwin building C++ code::
+1. This error was reported on Cygwin building C++ code::
 
      LD:  nuttx.rel
      ld: skipping incompatible /home/patacongo/projects/nuttx/nuttx/trunk/nuttx/libxx//liblibxx.a when searching for -llibxx

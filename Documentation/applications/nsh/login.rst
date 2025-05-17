@@ -174,9 +174,9 @@ start-up script. We can then piggyback the passwd file into the ``/etc``
 file system already mounted for the NSH start up file as described above
 `above <#custinit>`__.
 
-I use the sim/nsh configuration to create a new password file, but other
+The sim/nsh configuration can be used to create a new password file, but other
 configurations could also be used. That configuration already supports a
-ROMFS file system, passwords, and login prompts. First, I make these
+ROMFS file system, passwords, and login prompts. First make these
 changes to that configuration.
 
   #. Disable logins:

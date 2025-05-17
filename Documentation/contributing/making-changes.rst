@@ -8,8 +8,7 @@ Making Changes Using Git
 The Apache NuttX project uses the `Git version control system <https://git-scm.com/book/en/v2/Getting-Started-About-Version-Control>`_
 to track changes, and the source code is hosted on `GitHub <https://www.github.com>`_.
 
-If you want to make changes to NuttX, for your own personal use, or to submit them back to project to improve NuttX,
-that's easy. For the purposes of this guide, you'll need a `GitHub <https://www.github.com>`_ account, since
+If you want to make changes to NuttX, for your own personal use, or to submit them back to the project to improve NuttX, that's easy. For the purposes of this guide, you will need a `GitHub <https://www.github.com>`_ account, since
 the Apache NuttX team uses GitHub. (You could also use git locally, or save your changes to other sites like
 `GitLab <https://about.gitlab.com/>`_ or `BitBucket <https://bitbucket.org>`_, but that's beyond the scope of this
 guide).
@@ -71,10 +70,10 @@ Git Workflow With an Upstream Repository
 The main NuttX git repository is called an "upstream" repository - this is because it's the main source of truth, and
 its changes flow downstream to people who've forked that repository, like us.
 
-Working with an upstream repo is a bit more complex, but it's worth it since you can submit fixes and features
+Working with an upstream repo is a bit more complex, but it is worth the effort since you can submit fixes and features
 to the main NuttX repos. One of the things you need to do regularly is keep your local repo in sync
-with the upstream. I work with a local branch, make changes, pull new software from the upstream and merge it in,
-maybe doing that several times. Then when everything works, I get my branch ready to do a Pull Request. Here's how:
+with the upstream. While working with a local branch you can make changes, pull new software from the upstream and merge it in,
+maybe doing that several times. Then when everything works, the branch is ready to be proposed as a Pull Request. That is how it works:
 
 #. Fetch upstream changes and merge into my local master:
 
@@ -171,10 +170,10 @@ Submitting Your Changes to NuttX
 
 Before you do a Pull Request, the NuttX team will usually want all the changes you made in your branch "squashed" into
 a single commit, so that when they review your changes, there's a clean view of the history. If there are changes
-after Pull Request review feedback, they can be separate commits. Here's the easiest way I found to do that initial
+after Pull Request review feedback, they can be separate commits. Here is the easiest way to do this initial
 squash before submitting the Pull Request:
 
-#. Check out my branch
+#. Check out ``my-branch``
 
     .. code-block:: bash
 
@@ -268,7 +267,7 @@ So, someone will ask you some enigmatic thing: "Please rebase and squash these c
 Basically what they are saying is that you need to update your repository
 and fuse your commits in a single commit.
 
-Let walk through the steps to do it!
+Let us walk through the steps to do it!
 
 Move to upstream branch and pull the new commits from there:
 

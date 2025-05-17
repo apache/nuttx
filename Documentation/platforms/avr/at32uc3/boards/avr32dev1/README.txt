@@ -79,9 +79,9 @@ Serial Connection
 USART1 is the default USART1 used in the configuration files to
 provide a serial console (of course, that can be easily changed
 by editing the configuration file).  The AVR32DEV1 board has no
-RS-232 drivers or connectors on board.  I use an off-board MAX232
-module that I got on eBay (search for MAX232 if you want to find
-one).  I connect the MAX232 board as follows:
+RS-232 drivers or connectors on board.  An off-board MAX232 module
+was used (search for MAX232 if you want to find
+one).  The MAX232 board was conneted as follows:
 
 In boards/avr/at32uc3/avr32dev/include/board.h:
 
@@ -106,7 +106,7 @@ PA17 and PA23 are available from the AVR32DEV1:
   PA11-PA12, PA18-PA19, PA28-PA31............................-0.3 to 3.6V
   Other Pins ............................................... -0.3 to 5.5V
 
-  I get the 5V from another USB port (using the 5V power cable that normally
+  The 5V are taken from another USB port (using the 5V power cable that normally
   provides the extra current needed by my USB IDE drive).
 
 Development Environment
@@ -307,7 +307,7 @@ AVR32 Bootloader
 Reset
 ^^^^^
 
-   I don't trust the reset button -- if you reset and something weird happens,
+   The reset button may not be really reliable -- if you reset and something weird happens,
    try a full power cycle.
 
 Make Tip

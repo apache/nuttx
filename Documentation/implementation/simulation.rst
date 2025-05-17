@@ -60,7 +60,8 @@ If you want to access a host device driver, then the code that does that has to 
 Toward a General Design
 =======================
 
-There is no design in place for accessing Host devices from the simulation.  Here are some directions that I would investigate, however.
+There is no design in place for accessing Host devices from the simulation.
+Here are some directions that could be worth investigating, however.
 
 Perhaps you could create a NuttX FIFO in the NuttX blob.  It would reside at, say, ``/dev/mydevice`` in the NuttX VFS.  Perhaps this FIFO could be used in the NuttX world as your character device?  Perhaps it could read and write from FIFOs to intermediate the interaction with the host PC device?
 
@@ -96,13 +97,13 @@ The current NuttX host simulation has no interrupts and, hence, is non-preemptib
 
 Currently, all timing and serial input is simulated in the IDLE loop: When nothing is going on in the simulation, the IDLE loop runs and fakes timer and UART events.
 
-I have been thinking about how to implement simulated interrupts in the simulation.  I think a solution would work like this.
+The simulation of interrupts needs some thought. A possible solution could look like this:
 
   * In the earliest initialization, simulator could start a host simulation interrupt thread and setup a signal handler to catch signals on the main thread.  One signal, say ``SIGUSER`` could indicate a context switch.  This would be a type ``SA_SIGINFO`` and the context switch information would be provided in the ``sival_t`` field of the ``siginfo``.
 
   * Interrupt logic could be implemented on a host pthread.  The host pthread, like a hardware interrupt, executes asynchronously outside of the operating system.  The interrupt thread could wait for a host signal or a host message and, upon receipt, perform simulated interrupt logic.
 
-  * ``up_interrupt_context()`` would need to be implemented; it is only a stub now.  I think this could be done with a simple global boolean like:
+  * ``up_interrupt_context()`` would need to be implemented; it is only a stub now.  This could probably be done with a simple global boolean like:
 
     .. code-block:: console
 
@@ -132,7 +133,7 @@ The threading is a little mind-bending.  The signal handler needs to run in the 
 
 When ``up_longjmp()`` is executing, operation will continue under the main thread, but the context including the stack are different for the new NuttX thread.  When the context finally switches back to this thread, it will appear as an appear return from ``up_setjmp()`` with a non-zero return value.  In that case, the signal handler will just return and the normal execution of the preempted NuttX task will resume.
 
-**Issues**.  My only real technical questions involve signal masking.  When the ``SIGUSER`` signal handler executes, the ``SIGUSER`` interrupt will be masked.  That would prevent any further context switches until the signal handler returns.  Can we simply *unmask* ``SIGUSER`` signal to get more context switches?  I would need to experiment to know for sure.
+**Issues**.  My only real technical questions involve signal masking.  When the ``SIGUSER`` signal handler executes, the ``SIGUSER`` interrupt will be masked.  That would prevent any further context switches until the signal handler returns.  Can we simply *unmask* ``SIGUSER`` signal to get more context switches?  This detail needs to be clarified by experiments.
 
 Supported Devices
 =================
@@ -167,7 +168,7 @@ SMP
 
 There is a simulator configuration has basic support for SMP testing.  The simulation supports the emulation of multiple CPUs by creating multiple pthreads, each run a copy of the simulation in the same process address space.
 
-At present, the SMP simulation is not fully functional:  It does operate on the simulated CPU threads for a few context switches then fails during a setjmp() operation.  I suspect that this is not an issue with the NuttX SMP logic but more likely some chaos in the pthread controls.  I have seen similar such strange behavior other times that I have tried to use setjmp/longmp from a signal handler! Like when I tried to implement simulated interrupts using signals.
+At present, the SMP simulation is not fully functional:  It does operate on the simulated CPU threads for a few context switches then fails during a setjmp() operation.  It is suspected that this is not an issue with the NuttX SMP logic but more likely some chaos in the pthread controls.  Similar strange behavior was seen in other times where setjmp/longmp was used from a signal handler. For example when implementing simulated interrupts using signals.
 
 Apparently, if longjmp is invoked from the context of a signal handler, the result is undefined: http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1318.htm
 
@@ -213,4 +214,4 @@ But for example, this command:
 
     nsh> sleep 1 &
 
-will execute the sleep command on CPU1 which has worked every time that I have tried it (which is not too many times).
+will execute the sleep command on CPU1 which has worked every time it was tested.

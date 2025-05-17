@@ -39,7 +39,7 @@ referenced above may be build in the Cygwin environment as well.
 Windows with Cygwin + GNU ``make`` + SDCC (custom built under Cygwin)
 =====================================================================
 
-I have never tried this combination, but it would probably work just
+This combination was not reported to have ever been tested, but it would probably work just
 fine.
 
 Windows with Cygwin + GNU ``make`` + Windows Native Toolchain
@@ -95,11 +95,11 @@ At present, this build environment also requires:
 
 **Windows Console**. The build must be performed in a Windows console
 window. This may be using the standard ``CMD.exe`` terminal that comes
-with Windows. I prefer the ConEmu terminal which can be downloaded from:
+with Windows. The ConEmu terminal may be preferable. It can be downloaded from:
 http://code.google.com/p/conemu-maximus5/
 
-**GNUWin32**. The build still relies on some Unix-like commands. I
-usethe GNUWin32 tools that can be downloaded from
+**GNUWin32**. The build still relies on some Unix-like commands.
+The GNUWin32 tools may be of use here. They can be downloaded from
 http://gnuwin32.sourceforge.net/. See the top-level ``nuttx/README.txt``
 file for some download, build, and installation notes.
 
@@ -112,7 +112,7 @@ there may be conflicts.
 Wine + GNU ``make`` + Windows Native Toolchain
 ==============================================
 
-I've never tried this one, but I off the following reported by an ez80
+The following was reported by an ez80
 user using the ZiLOG ZDS-II Windows-native toolchain:
 
    "I've installed ZDS-II 5.1.1 (IDE for ez80-based boards) on wine
@@ -141,8 +141,8 @@ very likely that NuttX would work in that environment as well (with some
 porting effort). If GNU make is not supported, then some significant
 modification of the Make system would be required.
 
-**MSYS**. I have not used MSYS but what I gather from talking with NuttX
-users is that MSYS can be used as an alternative to Cygwin in any of the
+**MSYS**. MSYS was not specifically tested, but some users consider it
+as an alternative to Cygwin in any of the
 above Cygwin environments. This is not surprising since MSYS is based on
 an older version of Cygwin (cygwin-1.3). MSYS has been modified,
 however, to interoperate in the Windows environment better than Cygwin
