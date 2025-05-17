@@ -53,7 +53,7 @@ Note:
       terminal_2: Listening for serial connection on port 5002
       terminal_3: Listening for serial connection on port 5003
 
-     FVP has four UART port and I choice UART1 as tty, so just telnet to port 5001
+     FVP has four UART port and UART1 was choosen as tty, so just telnet to port 5001
      will enter nsh:
      telnet localhost 5001
 

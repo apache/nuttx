@@ -175,6 +175,6 @@ There are currently be three ways to execute applications from NSH:
 
    **Next Steps**
 
-   In the longer term, I would like to see an option to move most of the larger
+   In the longer term, it would be good to optionally move most of the larger
    NSH commands out of RAM and built them as standalone programs that can reside,
    for example, on an SD card (**NOT implemented**).

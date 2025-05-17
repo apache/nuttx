@@ -239,7 +239,7 @@ OS with all of that?
     you actually use.
 
     Using a variety of technologies, NuttX can scale from the very tiny to the moderate-size system.
-    I have executed NuttX with some simple applications in as little as 32K *total* memory (code and
+    NuttX was seen operating with some simple applications in as little as 32K *total* memory (code and
     data). On the other hand, typical, richly featured NuttX builds require more like 64K (and
     if all of the features are used, this can push 100K).
 
