@@ -68,6 +68,16 @@ changes such as documenting parts of NuttX which are not yet covered or even wri
 The contribution workflow is the same as for the code, so check the :doc:`/contributing/workflow` to understand
 how your changes should be upstreamed.
 
+Some templates are available below for standard documentation types, such as board support documentation or certain
+drivers, etc. These templates can be viewed here in the browser as an HTML render, but when writing your own
+documentation from these templates you will want to copy their corresponding ``.rst`` file and modify it.
+
+.. toctree::
+   :caption: Documentation templates
+   :glob:
+
+   doc_templates/*
+
 Writing ReStructure Text with Sphinx
 ====================================
 
