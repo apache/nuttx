@@ -75,7 +75,7 @@
 #define IOEXPANDER_OPTION_NONGENERIC  4  /* Non generic option interface. Some
                                           * IO expanders have more advance
                                           * options for pins and communication.
-                                          * This is used to pass driver dependend
+                                          * This is used to pass driver dependent
                                           * structure to expander driver.
                                           */
 

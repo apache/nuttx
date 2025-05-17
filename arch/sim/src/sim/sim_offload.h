@@ -50,7 +50,7 @@ typedef struct sim_codec_ops_s
 
   void *(*init)(struct audio_info_s *info);
 
-  /* return how much samples return from deocde.
+  /* return how much samples return from decode.
    * or encoder needed.
    * */
 

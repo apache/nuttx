@@ -47,7 +47,7 @@
 /* Configuration ************************************************************/
 
 #if !defined(CONFIG_STM32_FDCAN1)
-#  error "No CAN is enable. Please eneable at least one CAN device"
+#  error "No CAN is enable. Please enable at least one CAN device"
 #endif
 
 #ifdef CONFIG_BOARD_STM32_BG431BESC1_CANTERM

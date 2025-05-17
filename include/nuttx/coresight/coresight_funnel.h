@@ -37,7 +37,7 @@ struct coresight_funnel_dev_s
 {
   struct coresight_dev_s csdev;
   uint32_t priority;                 /* Port selection order. */
-  uint8_t port_num;                  /* Port numbre. */
+  uint8_t port_num;                  /* Port number. */
   uint8_t port_refcnt[0];            /* Port refcnt. */
 };
 

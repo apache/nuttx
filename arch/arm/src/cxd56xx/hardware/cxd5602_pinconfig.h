@@ -35,7 +35,7 @@
 
 /* Set the standard pinconf macro Definitions
  *  - If it's used as input pin, then set 1. Otherwise set 0 (default).
- *  - If it's drived in 4mA, then set 1. Otherwise set 0 (default 2mA).
+ *  - If it's driven with 4mA, then set 1. Otherwise set 0 (default 2mA).
  *  - If it's used as weak pull-up/down,
  *    then set PINCONF_PULLUP/PINCONF_PULLDOWN.
  *    Otherwise set 0 (default).

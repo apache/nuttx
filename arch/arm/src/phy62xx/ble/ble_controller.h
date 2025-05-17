@@ -402,7 +402,7 @@ typedef struct
     uint8_t          allocConn;                      /* flag to indicate if this connection is allocated */
     uint8_t          active;                         /* flag to indicate if this connection is active */
     uint8_t          connId;                         /* connection ID */
-    uint8_t          firstPacket;                    /* flag to indicate when the first packet has been received. 0 means TURE, 1 means FALSE */
+    uint8_t          firstPacket;                    /* flag to indicate when the first packet has been received. 0 means TRUE, 1 means FALSE */
 
     uint16_t         currentEvent;                   /* current event number */
     uint16_t         nextEvent;                      /* next active event number */
@@ -519,7 +519,7 @@ typedef struct
 
     /* ===============  A2 multi connection */
 
-    uint8_t ctrlDataIsProcess ;     /* seding a control packet or not */
+    uint8_t ctrlDataIsProcess ;     /* sending a control packet or not */
 
     uint8_t ctrlDataIsPending ;   /* control packet is pending to be sent */
 

@@ -176,7 +176,7 @@ static struct bl808_i2c_s bl808_i2c3 =
  * Name: bl808_i2c_find_clock_dividers
  *
  * Description:
- *   Finds values for the clock divison registers to give the requested
+ *   Finds values for the clock division registers to give the requested
  *   frequency. Tries to keep period values small for better accuracy.
  *   Warns when fails to match freq.
  *
@@ -427,7 +427,7 @@ void bl808_i2c_transferbytes(struct bl808_i2c_s *priv)
  *
  * Description:
  *   Configures I2C module according to message, enables relevant
- *   interrupts and intitiates the transaction.
+ *   interrupts and initiates the transaction.
  *
  * Input Parameters:
  *   priv - Private I2C device structure

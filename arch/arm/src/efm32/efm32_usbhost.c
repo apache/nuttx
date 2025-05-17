@@ -2793,7 +2793,7 @@ static inline void efm32_gint_hcoutisr(struct efm32_usbhost_s *priv,
 
   else if ((pending & USB_HC_INT_STALL) != 0)
     {
-      /* Clear the pending the STALL response receiv (STALL) interrupt */
+      /* Clear the pending the STALL response receive (STALL) interrupt */
 
       efm32_putreg(EFM32_USB_HC_INT(chidx), USB_HC_INT_STALL);
 

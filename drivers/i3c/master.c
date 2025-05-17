@@ -2161,8 +2161,8 @@ void i3c_master_detach_i2c_dev(FAR struct i3c_master_controller *master,
  *
  *   This function takes care of everything for you:
  *    - creates and initializes the I3C bus.
- *    - registers all I3C charactor driver that supports I3C transfer.
- *    - registers the I2C charactor driver that supports I2C transfer.
+ *    - registers all I3C character driver that supports I3C transfer.
+ *    - registers the I2C character driver that supports I2C transfer.
  *
  * Input Parameters:
  *   master    - Master used to send frames on the bus.

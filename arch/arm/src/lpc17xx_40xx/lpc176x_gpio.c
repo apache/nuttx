@@ -589,7 +589,7 @@ int lpc17_40_configgpio(lpc17_40_pinset_t cfgset)
           ret = lpc17_40_configinterrupt(cfgset, port, pin);
           break;
 
-        case GPIO_OUTPUT:  /* GPIO outpout pin */
+        case GPIO_OUTPUT:  /* GPIO output pin */
           ret = lpc17_40_configoutput(cfgset, port, pin);
           break;
 

@@ -1063,7 +1063,7 @@ config PIC32MX_PHY_AUTONEG
 		Enable auto-negotiation
 
 config PIC32MX_PHY_SPEED100
-	bool "100Mbps spped"
+	bool "100Mbps speed"
 	default n
 	depends on PIC32MX_ETHERNET && !PIC32MX_PHY_AUTONEG
 	---help---

@@ -39,7 +39,7 @@
  * Name: mx8mp_iomuxc_set_pin_config
  *
  * Description:
- *   Congigure the IOMUXC pin configuration.
+ *   Configure the IOMUXC pin configuration.
  *   The first five parameters can be filled with the pin function ID macros.
  *
  ****************************************************************************/

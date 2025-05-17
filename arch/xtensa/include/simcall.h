@@ -40,7 +40,7 @@
 /* fcntl O_xxx constants for simcall.
  *
  * Someone with the official spec should fix this and qemu.
- * I made this CONFIG_HOST_xxx dependant because:
+ * I made this CONFIG_HOST_xxx dependent because:
  *  - the qemu implementation just pass them to the host OS
  *  - I don't have an official documentation.
  *  - I build NuttX and run qemu on the same host.

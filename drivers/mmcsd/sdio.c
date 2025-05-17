@@ -415,7 +415,7 @@ int sdio_probe(FAR struct sdio_dev_s *dev)
       goto err;
     }
 
-  /* Get the maximun and minimum values for VDD */
+  /* Get the maximum and minimum values for VDD */
 
   bit = ffs(data);
   if (bit)

@@ -31,13 +31,13 @@
  * 256Kib to OCRRAM, 128Kib ITCM and 128Kib DTCM.
  * This can be changed by using a dcd by minipulating
  * IOMUX GPR16 and GPR17.
- * The configuartion we will use is 384Kib to OCRRAM, 0Kib ITCM and
+ * The configuration we will use is 384Kib to OCRRAM, 0Kib ITCM and
  * 128Kib DTCM.
  *
  * This is the OCRAM inker script.
  * The NXP ROM bootloader will move the FLASH image to OCRAM.
  * We must reserve 32K for the bootloader' OCRAM usage from  the OCRAM Size
- * and an additinal 8K for the ivt_s which is IVT_SIZE(8K) This 40K can be
+ * and an additional 8K for the ivt_s which is IVT_SIZE(8K) This 40K can be
  * reused once the application is running.
  *
  *      0x2020:A000 to 0x202d:ffff - The application Image's vector table

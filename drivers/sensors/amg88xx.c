@@ -497,7 +497,7 @@ static int amg88xx_ioctl(FAR struct file *filep, int cmd,
     break;
 
     /* Enabling and disabling the moving average requires following
-     * a precedure described in the i2c communication interface manual
+     * a procedure described in the i2c communication interface manual.
      */
 
     case SNIOC_SET_MOVING_AVG:

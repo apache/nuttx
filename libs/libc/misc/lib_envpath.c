@@ -179,7 +179,7 @@ FAR char *envpath_next(ENVPATH_HANDLE handle, FAR const char *relpath)
       if (*path == '\0')
         {
           /* If it points to a NULL it means that either (1) the PATH
-           * varialbe is empty, or (2) we have already examined all of the
+           * variable is empty, or (2) we have already examined all of the
            * paths in the path variable.
            */
 

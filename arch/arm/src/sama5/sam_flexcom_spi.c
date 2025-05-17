@@ -523,7 +523,7 @@ static struct sam_flex_spidev_s g_flexcom4dev =
  *
  * Returned Value:
  *   true:  This is the first register access of this type.
- *   flase: This is the same as the preceding register access.
+ *   false: This is the same as the preceding register access.
  *
  ****************************************************************************/
 
@@ -1815,7 +1815,7 @@ static void flex_spi_recvblock(struct spi_dev_s *dev, void *buffer,
  *   Initialize the selected flexcom SPI port
  *
  * Input Parameters:
- *   port - the 5 flexcom ports only have 2 physial CS lines
+ *   port - the 5 flexcom ports only have 2 physical CS lines
  *        - so there are 10 "logical" ports.
  *
  * Returned Value:

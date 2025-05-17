@@ -510,7 +510,7 @@ static int spiffs_close(FAR struct file *filep)
 
       /* Flush any cached writes for the file object being closed.
        * This could result in an ENOSPC error being reported if the
-       * cache could not flushed to FALSH (and the file will appear to
+       * cache could not flushed to FLASH (and the file will appear to
        * to have been truncated).
        */
 

@@ -167,7 +167,7 @@
 #define STM32_IRQ_DMA2CH8         (STM32_IRQ_FIRST + 99)  /* 99: DMA2 channel 8 global interrupt */
 
 #define STM32_IRQ_CORDIC          (STM32_IRQ_FIRST + 100) /* 100: CORDIC trigonometric accelerator interrupt */
-#define STM32_IRQ_FMAC            (STM32_IRQ_FIRST + 101) /* 101: FMAC filter math acclerator interrupt */
+#define STM32_IRQ_FMAC            (STM32_IRQ_FIRST + 101) /* 101: FMAC filter math accelerator interrupt */
 
 #define STM32_IRQ_NEXTINT         (102)
 #define NR_IRQS                   (STM32_IRQ_FIRST + 102)

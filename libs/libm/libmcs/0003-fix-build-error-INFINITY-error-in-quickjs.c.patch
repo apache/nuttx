@@ -5,7 +5,7 @@ Subject: [PATCH 3/3] fix build error: INFINITY error in quickjs.c
 
 quickjs/quickjs.c:40035:45: error: initializer element is not constant 40035 | JS_PROP_DOUBLE_DEF("POSITIVE_INFINITY", INFINITY, 0 )
 
-(1)open menuconfig  (2)close math.h:build setup->Customize Header Files->math.h (2) select libmcs:Library Rountines->Select math library->Math Library fram LibmCS (3)build
+(1)open menuconfig  (2)close math.h:build setup->Customize Header Files->math.h (2) select libmcs:Library Rountines->Select math library->Math Library from LibmCS (3)build
 
 Signed-off-by: yanghuatao <yanghuatao@xiaomi.com>
 ---

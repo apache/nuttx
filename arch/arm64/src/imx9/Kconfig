@@ -64,8 +64,8 @@ config IMX9_HAVE_ATF_FIRMWARE
 	select ARM64_HAVE_PSCI
 	---help---
 		Configure this n if using Nuttx bootloader that does not
-		implement EL3 services, by default this is y when using uboot as
-		a bootloader
+		implement EL3 services. By default this is y when using uboot as
+		a bootloader.
 
 config IMX9_BOOTLOADER
 	bool "Bootloader"
@@ -839,7 +839,7 @@ config IMX9_LPI2C_DMA_MAXMSG
 	default 8
 	depends on IMX9_LPI2C_DMA
 	---help---
-		This option set the number of mesg that can be in a transfer.
+		This option sets the number of mesg that can be in a transfer.
 		It is used to allocate space for the 16 bit LPI2C commands
 		that will be DMA-ed to the LPI2C device.
 

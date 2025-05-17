@@ -413,8 +413,8 @@ static int dns_send_query(int sd, FAR const char *name,
   /* Convert hostname into suitable query format.
    *
    * There is space for CONFIG_NETDB_DNSCLIENT_NAMESIZE
-   * plus one pre-pended name length and NUL-terminator
-   * (other pre-pended name lengths replace dots).
+   * plus one prepended name length and NUL-terminator
+   * (other prepended name lengths replace dots).
    */
 
   src   = name - 1;
@@ -441,7 +441,7 @@ static int dns_send_query(int sd, FAR const char *name,
           len++;
         }
 
-      /* Pre-pend the name length */
+      /* Prepend the name length */
 
       *nptr = n;
       *qptr = n;

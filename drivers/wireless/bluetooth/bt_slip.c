@@ -553,7 +553,7 @@ static void bt_slip_unack_handle(FAR struct sliphci_s *priv)
     {
       bt_slip_unack_dtor(priv);
 
-      /* When it was blocked by full tx window, we needs to notifiy
+      /* When it was blocked by full tx window, we need to notify
        * bt_slip_send.
        */
 
@@ -941,7 +941,7 @@ static int bt_slip_receive(FAR struct bt_driver_s *drv,
                 break;
               }
 
-            /* Remove 2 bytes crc payload, then caculate packect
+            /* Remove 2 bytes crc payload, then calculate packet
              * checksum with packet header and body.
              */
 

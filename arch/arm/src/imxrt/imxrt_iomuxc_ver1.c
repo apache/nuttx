@@ -350,12 +350,12 @@ int imxrt_iomux_configure(uintptr_t padctl, iomux_pinset_t ioset)
   value = (ioset & IOMUX_DRIVE_MASK) >> IOMUX_DRIVE_SHIFT;
   regval |= PADCTL_DSE(value);
 
-  /* Select spped */
+  /* Select speed */
 
   value = (ioset & IOMUX_SPEED_MASK) >> IOMUX_SPEED_SHIFT;
   regval |= PADCTL_SPEED(value);
 
-  /* Select CMOS output or Open Drain outpout */
+  /* Select CMOS output or Open Drain output */
 
   if ((ioset & IOMUX_OPENDRAIN) != 0)
     {

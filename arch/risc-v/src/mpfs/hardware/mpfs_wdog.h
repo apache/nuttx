@@ -56,10 +56,10 @@
  ****************************************************************************/
 
 #define WDOG_CONTROL_INTEN_MSVP_MASK        (1 << 0) /* Bit 0:  Enable MVRP interrupt when MVRP level is passed */
-#define WDOG_CONTROL_INTEN_TRIG_MASK        (1 << 1) /* Bit 1:  Enable NMI interrupt. This bit is permanenty set */
+#define WDOG_CONTROL_INTEN_TRIG_MASK        (1 << 1) /* Bit 1:  Enable NMI interrupt. This bit is permanently set */
 #define WDOG_CONTROL_INTEN_SLEEP_MASK       (1 << 2) /* Bit 2:  Enable MVRP interrupt when MVRP level is passed and M3 is sleeping */
 #define WDOG_CONTROL_ACTIVE_SLEEP_MASK      (1 << 3) /* Bit 3:  Set WDOG operational during CPU sleep */
-#define WDOG_CONTROL_ENABLE_FORBITTEN_MASK  (1 << 4) /* Bit 4:  Enable trigger wdog from write during forbitten window */
+#define WDOG_CONTROL_ENABLE_FORBITTEN_MASK  (1 << 4) /* Bit 4:  Enable trigger wdog from write during forbidden window */
 
 /****************************************************************************
  * Status register masks
@@ -67,7 +67,7 @@
 
 #define WDOG_STATUS_MVRP_TRIPPED_MASK       (1 << 0) /* Bit 0:  MVRP level has passed. Write to clear interrupt */
 #define WDOG_STATUS_WDOG_TRIPPED_MASK       (1 << 1) /* Bit 1:  TRIGGER level has passed and NMI is asserted. Write to clear interrupt */
-#define WDOG_STATUS_FORBITTEN_MASK          (1 << 2) /* Bit 2:  Watchdog in forbitten window */
+#define WDOG_STATUS_FORBITTEN_MASK          (1 << 2) /* Bit 2:  Watchdog in forbidden window */
 #define WDOG_STATUS_TRIGGERED_MASK          (1 << 3) /* Bit 3:  Watchdog has triggered */
 #define WDOG_STATUS_LOCKED_MASK             (1 << 4) /* Bit 4:  Following registers are locked and cannot be changed */
 #define WDOG_STATUS_DEVRST_MASK             (1 << 5) /* Bit 5:  DEVRST caused NMI */

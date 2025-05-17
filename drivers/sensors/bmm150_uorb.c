@@ -735,7 +735,7 @@ int bmm150_register_uorb(int devno, FAR struct bmm150_config_s *config)
       return ret;
     }
 
-  /* Regsiter driver */
+  /* Register driver */
 
   ret = sensor_register(&dev->lower, devno);
   if (ret < 0)

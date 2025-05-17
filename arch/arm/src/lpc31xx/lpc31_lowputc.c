@@ -97,7 +97,7 @@ static inline void up_waittxready(void)
 
   for (tmp = 1000 ; tmp > 0 ; tmp--)
     {
-      /* Check if the tranmitter holding register (THR) is empty */
+      /* Check if the transmitter holding register (THR) is empty */
 
       if ((getreg32(LPC31_UART_LSR) & UART_LSR_THRE) != 0)
         {

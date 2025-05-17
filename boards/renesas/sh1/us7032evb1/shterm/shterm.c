@@ -741,7 +741,7 @@ int main(int argc, char **argv, char **envp)
       ret = readbyte(0, &ch);
       if (ret == 0)
         {
-          printconsole("End-of-file: exitting\n");
+          printconsole("End-of-file: exiting\n");
           close_tty();
           return 0;
         }

@@ -217,7 +217,7 @@ struct mm_delaynode_s
 
 struct mm_heap_s
 {
-  /* Mutex for controling access to this heap */
+  /* Mutex for controlling access to this heap */
 
   mutex_t mm_lock;
 

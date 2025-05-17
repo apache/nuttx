@@ -717,14 +717,14 @@
 
 /* Output Mask register */
 
-#define FTM_OUTMASK_CH0OM                (1 << 0)  /* Bit 0: Channel 0 Ouput Mask */
-#define FTM_OUTMASK_CH1OM                (1 << 1)  /* Bit 1: Channel 1 Ouput Mask */
-#define FTM_OUTMASK_CH2OM                (1 << 2)  /* Bit 2: Channel 2 Ouput Mask */
-#define FTM_OUTMASK_CH3OM                (1 << 3)  /* Bit 3: Channel 3 Ouput Mask */
-#define FTM_OUTMASK_CH4OM                (1 << 4)  /* Bit 4: Channel 4 Ouput Mask */
-#define FTM_OUTMASK_CH5OM                (1 << 5)  /* Bit 5: Channel 5 Ouput Mask */
-#define FTM_OUTMASK_CH6OM                (1 << 6)  /* Bit 6: Channel 6 Ouput Mask */
-#define FTM_OUTMASK_CH7OM                (1 << 7)  /* Bit 7: Channel 7 Ouput Mask */
+#define FTM_OUTMASK_CH0OM                (1 << 0)  /* Bit 0: Channel 0 Output Mask */
+#define FTM_OUTMASK_CH1OM                (1 << 1)  /* Bit 1: Channel 1 Output Mask */
+#define FTM_OUTMASK_CH2OM                (1 << 2)  /* Bit 2: Channel 2 Output Mask */
+#define FTM_OUTMASK_CH3OM                (1 << 3)  /* Bit 3: Channel 3 Output Mask */
+#define FTM_OUTMASK_CH4OM                (1 << 4)  /* Bit 4: Channel 4 Output Mask */
+#define FTM_OUTMASK_CH5OM                (1 << 5)  /* Bit 5: Channel 5 Output Mask */
+#define FTM_OUTMASK_CH6OM                (1 << 6)  /* Bit 6: Channel 6 Output Mask */
+#define FTM_OUTMASK_CH7OM                (1 << 7)  /* Bit 7: Channel 7 Output Mask */
 
                                                    /* Bit 8-31: Reserved */
 

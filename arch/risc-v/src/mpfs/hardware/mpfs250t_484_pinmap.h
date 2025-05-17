@@ -81,7 +81,7 @@
 #define MSSIO_MUX_BANK_REG(bank,pin) (MPFS_SYSREG_BASE +                       \
                                       MSSIO_MUX_BANK_REG_OFFSET(bank,pin))
 
-/* Drive strenght configuration in mA
+/* Drive strength configuration in mA
  * The following bit combinations are from the reference design.
  */
 

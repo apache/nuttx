@@ -37,7 +37,7 @@
 #include "sched/sched.h"
 
 /****************************************************************************
- * Privte Types
+ * Private Types
  ****************************************************************************/
 
 /* This is the type of the list of interrupt handlers, one for each IRQ.

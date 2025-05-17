@@ -142,7 +142,7 @@
 #define SAI_CR1_SYNCEN_MASK        (3 << SAI_CR1_SYNCEN_SHIFT)
 #  define SAI_CR1_SYNCEN_ASYNCH    (0 << SAI_CR1_SYNCEN_SHIFT) /* Asynchronous mode */
 #  define SAI_CR1_SYNCEN_INTERNAL  (1 << SAI_CR1_SYNCEN_SHIFT) /* Synchronous with other internal sub-block */
-#  define SAI_CR1_SYNCEN_EXTERNAL  (2 << SAI_CR1_SYNCEN_SHIFT) /* Aynchronous with external SAI peripheral */
+#  define SAI_CR1_SYNCEN_EXTERNAL  (2 << SAI_CR1_SYNCEN_SHIFT) /* Asynchronous with external SAI peripheral */
 
 #define SAI_CR1_MONO               (1 << 12) /* Bit 12: Mono mode */
 #define SAI_CR1_OUTDRIV            (1 << 13) /* Bit 13: Output drive */

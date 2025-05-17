@@ -375,7 +375,7 @@ void stm32wb_blehci_initialize(void)
 
   stm32wb_mboxinitialize(stm32wb_blehci_rxevt);
 
-  /* Enable communication hardware and bootup CPU2 */
+  /* Enable communication hardware and boot up CPU2 */
 
   stm32wb_mboxenable();
 }

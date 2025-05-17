@@ -1031,7 +1031,7 @@ static int stm3210e_setpower(struct lcd_dev_s *dev, int power)
           power = CONFIG_LCD_MAXPOWER;
         }
 
-      /* Caclulate the new backlight duty.  It is a faction of the timer1
+      /* Calculate the new backlight duty.  It is a faction of the timer1
        * period based on the ration of the current power setting to the
        * maximum power setting.
        */
@@ -1112,7 +1112,7 @@ static int stm3210e_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
  * Input Parameters:
  *
  *    cb - Returned to the driver. The driver version of the callback
- *         strucure may include additional, driver-specific state data at
+ *         structure may include additional, driver-specific state data at
  *         the end of the structure.
  *
  *    pmstate - Identifies the new PM state
@@ -1135,7 +1135,7 @@ static void stm3210e_pm_notify(struct pm_callback_s *cb, int domain,
 
   switch (pmstate)
     {
-      case(PM_NORMAL):
+      case (PM_NORMAL):
         {
           /* Restore normal LCD operation */
 
@@ -1152,7 +1152,7 @@ static void stm3210e_pm_notify(struct pm_callback_s *cb, int domain,
         }
         break;
 
-      case(PM_IDLE):
+      case (PM_IDLE):
         {
           /* Entering IDLE mode - Reduce LCD light */
 
@@ -1172,7 +1172,7 @@ static void stm3210e_pm_notify(struct pm_callback_s *cb, int domain,
         }
         break;
 
-      case(PM_STANDBY):
+      case (PM_STANDBY):
         {
           /* Entering STANDBY mode - Turn display backlight off */
 
@@ -1182,7 +1182,7 @@ static void stm3210e_pm_notify(struct pm_callback_s *cb, int domain,
         }
         break;
 
-      case(PM_SLEEP):
+      case (PM_SLEEP):
         {
           /* Entering SLEEP mode - Turn off LCD */
 
@@ -1240,7 +1240,7 @@ static void stm3210e_pm_notify(struct pm_callback_s *cb, int domain,
  * Input Parameters:
  *
  *    cb - Returned to the driver. The driver version of the callback
- *         strucure may include additional, driver-specific state data at
+ *         structure may include additional, driver-specific state data at
  *         the end of the structure.
  *
  *    pmstate - Identifies the new PM state

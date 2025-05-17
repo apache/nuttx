@@ -38,7 +38,7 @@ while [ ! -z "$1" ]; do
     ;;
   -h )
     echo "$progname is a tool for flexible generation of command line pre-processor"
-    echo "definitions arguments for a variety of diffent compilers in a variety of"
+    echo "definitions arguments for a variety of different compilers in a variety of"
     echo "compilation environments"
     echo ""
     echo $usage

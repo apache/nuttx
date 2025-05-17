@@ -271,7 +271,7 @@ static inline void tlsr82_adc_dfifo_disable(void)
 static inline void tlsr82_adc_dfifo_config(uint8_t *buffer, size_t size)
 {
   /* Config the data buffer, so DFIFO2 can copy sample value to buffer
-   * DFIFO buffer address : only need low 16 bit, beacause the high 16 bit
+   * DFIFO buffer address : only need low 16 bit, because the high 16 bit
    *                        must be 0x0084
    * DFIFO buffer size    : DFIFO_ADC_SIZE_REG = n ==> 4 * (n + 1) size
    *                        DFIFO_ADC_SIZE_REG = size / 4 - 1
@@ -369,7 +369,7 @@ static void tlsr82_adc_clk_ctrl(bool enable)
  *
  * Description:
  *   Config the adc to different mode, after this, the adc can start sample
- *   the voltage in the gpio pin (Base mode) or the chip volatge (Vbat
+ *   the voltage in the gpio pin (Base mode) or the chip voltage (Vbat
  *   channel mode).
  *   Five configuration conditions:
  *   1. Same channel, do not need do not need re-configuration;
@@ -429,7 +429,7 @@ static void tlsr82_adc_config(struct adc_chan_s *priv)
    *                  BASE mode, 1/8
    */
 
-  /* Enable misc chanel and set totaol length for sampling state be 2 */
+  /* Enable misc channel and set totaol length for sampling state be 2 */
 
   tlsr82_analog_write(ADC_CTRL0_REG, ADC_CTRL0_CHANEN_ENABLE |
                                      (2 << ADC_CTRL0_SAMPLEN_SHIFT));
@@ -537,7 +537,7 @@ static void tlsr82_adc_pin_config(uint32_t pinset)
 
   GPIO_SET_AS_GPIO(GPIO_GET(GROUP, cfg), GPIO_GET(PIN, cfg));
 
-  /* Base mode pin config, diable input, disable output, output set low */
+  /* Base mode pin config, disable input, disable output, output set low */
 
   tlsr82_gpio_input_ctrl(cfg, false);
 
@@ -828,7 +828,7 @@ static void tlsr82_adc_calibrate(struct adc_chan_s *priv)
         }
     }
 
-    ainfo("Calibration paramters:\n");
+    ainfo("Calibration parameters:\n");
     ainfo("  base two-point: gain=%d, offset=%d\n",
           priv->info->base_vref, priv->info->base_off);
     ainfo("  base one-point: vref=%lu\n", priv->info->base_vref);
@@ -975,7 +975,7 @@ static void adc_reset(struct adc_dev_s *dev)
   tlsr82_adc_clk_ctrl(false);
 
   /* adc_reset() will be called in adc_register(), the same one adc
-   * device should be resetted only once.
+   * device should be reset only once.
    */
 
   priv->info->registered = true;

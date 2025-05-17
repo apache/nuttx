@@ -84,7 +84,7 @@ struct unionfs_inode_s
   bool ui_unmounted;                 /* File system has been unmounted */
 };
 
-/* This structure descries one opened file */
+/* This structure describes one opened file */
 
 struct unionfs_file_s
 {

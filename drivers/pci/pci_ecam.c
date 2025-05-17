@@ -189,7 +189,7 @@ static bool pci_ecam_addr_valid(FAR const struct pci_bus_s *bus,
  * Name: pci_ecam_read_config
  *
  * Description:
- *   Read data from the speicfy register.
+ *   Read data from the specified register.
  *
  * Input Parameters:
  *   bus   - The bus on this to read reg data
@@ -247,7 +247,7 @@ static int pci_ecam_read_config(FAR struct pci_bus_s *bus,
  * Name: pci_ecam_write_config
  *
  * Description:
- *   Write data into speicfy register.
+ *   Write data into specified register.
  *
  * Input Parameters:
  *   bus   - The specify bus private data

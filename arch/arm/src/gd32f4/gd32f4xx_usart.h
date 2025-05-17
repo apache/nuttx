@@ -490,11 +490,11 @@
 
 /* USART interrupts maps, each interrupt of the USART can be individually
  * configured by software. The following definitions provide the bit
- * encodingthat used to define the interrupt and control register offset.
+ * encoding that used to define the interrupt and control register offset.
  *
  * 24-bit Encoding:       2222 2222 1111 1111 1100 0000 0000
  *                        7654 3210 9876 5432 1098 7654 3210
- * ENCODING               SHIF
+ * ENCODING               SHIFT
  *
  * CTL SHIFT: Bit24-27, CTL2 int: Bit8-23, CTL3 int: Bit6-7,
  *  CTL1 int: Bit5, CTL0 int: Bit0-4,

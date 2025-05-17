@@ -189,7 +189,7 @@
 #define DCDC_REG3_REG_FBK_SEL_SHIFT         (22)       /* Bits 22-24: Select the feedback point of the internal regulator */
 #define DCDC_REG3_REG_FBK_SEL_MASK          (0x3 << DCDC_REG3_REG_FBK_SEL_SHIFT)
 #define DCDC_REG3_REG_FBK_SEL(n)            (((n) << DCDC_REG3_REG_FBK_SEL_SHIFT) & DCDC_REG3_REG_FBK_SEL_MASK)
-#define DCDC_REG3_MINPWR_DC_HALFCLK         (1 << 24)  /* Bit 24: Set DCDC clock to half freqeuncy for continuous mode. */
+#define DCDC_REG3_MINPWR_DC_HALFCLK         (1 << 24)  /* Bit 24: Set DCDC clock to half frequency for continuous mode. */
 #define DCDC_REG3_MINPWR_HALF_FETS          (1 << 26)  /* Bit 26: Use half switch FET */
 #define DCDC_REG3_MISC_DELAY_TIMING         (1 << 27)  /* Bit 27: Miscellaneous Delay Timing */
 #define DCDC_REG3_VDD1P0CTRL_DISABLE_STEP   (1 << 29)  /* Bit 29: Disable Step for VDD1P0 */

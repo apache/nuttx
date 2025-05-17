@@ -42,7 +42,7 @@
  ****************************************************************************/
 
 #if CONFIG_MOTOR_FOC_SHUNTS != 3
-#  error For now ony 3-shunts configuration is supported
+#  error For now only 3-shunts configuration is supported
 #endif
 
 /* Configuration specific for STSPIN830:

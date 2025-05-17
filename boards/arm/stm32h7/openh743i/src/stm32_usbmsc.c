@@ -40,7 +40,7 @@
 
 #if !defined(CONFIG_USBDEV_CUSTOM_TXFIFO_SIZE) && \
   defined(CONFIG_USBDEV_DUALSPEED)
-#  error USBMSC high-speed require custom TXFIFO configuratin that set EPIN FIFO to >=512
+#  error USBMSC high-speed require custom TXFIFO configuration that set EPIN FIFO to >=512
 #endif
 
 /****************************************************************************

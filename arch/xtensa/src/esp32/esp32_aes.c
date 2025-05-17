@@ -482,7 +482,7 @@ int esp32_aes_xts_cypher(struct esp32_aes_xts_s *aes, bool encrypt,
  * Name: esp32_aes_setkey
  *
  * Description:
- *   Configurate AES key.
+ *   Configure AES key.
  *
  * Input Parameters:
  *   aes     - AES object data pointer
@@ -514,7 +514,7 @@ int esp32_aes_setkey(struct esp32_aes_s *aes, const void *keyptr,
  * Name: esp32_aes_xts_setkey
  *
  * Description:
- *   Configurate AES XTS key.
+ *   Configure AES XTS key.
  *
  * Input Parameters:
  *   aes     - AES object data pointer
@@ -633,7 +633,7 @@ int aes_cypher(void *out, const void *in, size_t size,
         memcpy(iv_buf, iv, AES_BLK_SIZE);
         ret = esp32_aes_ctr_cypher(&aes, &nc_off, iv_buf, cache_buf,
                                    in, out, size);
-      default :
+      default:
         ret = -EINVAL;
         break;
     }

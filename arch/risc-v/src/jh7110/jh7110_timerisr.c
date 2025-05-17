@@ -64,7 +64,7 @@ static uint32_t g_stimer_pending = false;
 
 static int jh7110_ssoft_interrupt(int irq, void *context, void *arg)
 {
-  /* Cleaer Supervisor Software Interrupt */
+  /* Clear Supervisor Software Interrupt */
 
   CLEAR_CSR(CSR_SIP, SIP_SSIP);
 

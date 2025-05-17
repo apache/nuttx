@@ -48,7 +48,7 @@
  * Description:
  *   Perform an atomic test and set operation on the provided spinlock.
  *
- *   This function must be provided via the architecture-specific logoic.
+ *   This function must be provided via the architecture-specific logic.
  *
  * Input Parameters:
  *   lock - The address of spinlock object.

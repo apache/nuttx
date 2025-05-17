@@ -311,8 +311,8 @@ static int cap_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
-      /* CAPIOC_FREQUENCE - Get the pulse frequence from the capture.
-       * Argument: int32_t pointer to the location to return the frequence.
+      /* CAPIOC_FREQUENCE - Get the pulse frequency from the capture.
+       * Argument: int32_t pointer to the location to return the frequency.
        */
 
       case CAPIOC_FREQUENCE:
@@ -351,7 +351,7 @@ static int cap_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
-      /* CAPIOC_ALL - Get the pwm duty, pulse frequence, pwm edges, from
+      /* CAPIOC_ALL - Get the pwm duty, pulse frequency, pwm edges, from
        * the capture.
        * Argument: A reference to struct cap_all_s.
        */

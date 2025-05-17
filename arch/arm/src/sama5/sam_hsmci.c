@@ -105,7 +105,7 @@
 
 #elif defined(ATSAMA5D4)
   /* The SAMA5D3 has two HSMCI blocks: HSMCI0-1.  They can be driven
-   * either by XDMAC0 (secure) or XDMAC1 (unsecure).
+   * either by XDMAC0 (secure) or XDMAC1 (insecure).
    */
 
 #  if !defined(CONFIG_SAMA5_XDMAC0) && !defined(CONFIG_SAMA5_XDMAC1)
@@ -751,7 +751,7 @@ static struct sam_dev_s g_hsmci2 =
  *
  * Returned Value:
  *   true:  This is the first register access of this type.
- *   flase: This is the same as the preceding register access.
+ *   false: This is the same as the preceding register access.
  *
  ****************************************************************************/
 

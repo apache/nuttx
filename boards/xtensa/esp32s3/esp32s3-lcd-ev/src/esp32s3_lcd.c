@@ -614,7 +614,7 @@ static void lcd_initialize_spi(void)
 
 static void lcd_configure_display(void)
 {
-  /* Pull-up V-SYNC pin to start configurating LCD */
+  /* Pull-up V-SYNC pin to start configuring LCD */
 
   esp32s3_configgpio(CONFIG_ESP32S3_LCD_VSYNC_PIN, OUTPUT | PULLUP);
   esp32s3_gpiowrite(CONFIG_ESP32S3_LCD_VSYNC_PIN, 1);

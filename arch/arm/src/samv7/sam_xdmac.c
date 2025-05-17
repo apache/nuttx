@@ -1116,7 +1116,7 @@ static int sam_txbuffer(struct sam_xdmach_s *xdmach, uint32_t paddr,
 {
   uint32_t cubc;
 
-  /* If we are appending a buffer to a linklist, then re-use the previously
+  /* If we are appending a buffer to a linklist, then reuse the previously
    * calculated CC register value.  Otherwise, create the CC register value
    * from the properties of the transfer.
    */
@@ -1156,7 +1156,7 @@ static int sam_rxbuffer(struct sam_xdmach_s *xdmach, uint32_t paddr,
 {
   uint32_t cubc;
 
-  /* If we are appending a buffer to a linklist, then re-use the previously
+  /* If we are appending a buffer to a linklist, then reuse the previously
    * calculated CC register value.  Otherwise, create the CC register value
    * from the properties of the transfer.
    */
@@ -1961,7 +1961,7 @@ int sam_dmarxsetup_circular(DMA_HANDLE handle,
       nextdescr = i;
     }
 
-  /* Settup of llhead and lltail does not really matter in this case */
+  /* Setup of llhead and lltail does not really matter in this case */
 
   xdmach->llhead = descr[0];
   xdmach->lltail = descr[0];

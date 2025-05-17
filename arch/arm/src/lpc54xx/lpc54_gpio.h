@@ -249,7 +249,7 @@ extern "C"
  *
  * Description:
  *   Initialize logic to support interrupting GPIO pins.
- *   This function is called by the OS inialization logic and is not a
+ *   This function is called by the OS initialization logic and is not a
  *   user interface.
  *
  ****************************************************************************/

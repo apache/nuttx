@@ -134,7 +134,7 @@ static void sixlowpan_reass_expire(void)
       next = reass->rb_flink;
 
       /* Free any inactive reassembly buffers.  This is done because the life
-       * the reassembly buffer is not cerain.
+       * the reassembly buffer is not certain.
        */
 
       if (!reass->rb_active)

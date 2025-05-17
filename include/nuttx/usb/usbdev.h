@@ -45,7 +45,7 @@
 /* Endpoint helpers *********************************************************/
 
 /* Configure endpoint, making it usable.
- * The class driver may deallocate or re-use the 'desc' structure after
+ * The class driver may deallocate or reuse the 'desc' structure after
  * returning:
  *
  * ep   - the struct usbdev_ep_s instance obtained from allocep()

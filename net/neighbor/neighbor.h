@@ -144,7 +144,7 @@ void neighbor_update(const net_ipv6addr_t ipaddr);
  *   If the destination IPv6 address is in the local network (determined
  *   by logical ANDing of netmask and our IPv6 address), the function
  *   checks the Neighbor Table to see if an entry for the destination IPv6
- *   address is found.  If so, an Ethernet header is pre-pended at the
+ *   address is found.  If so, an Ethernet header is prepended at the
  *   beginning of the packet and the function returns.
  *
  *   If no Neighbor Table entry is found for the destination IPv6 address,

@@ -303,7 +303,7 @@ int nxffs_nextblock(FAR struct nxffs_volume_s *volume, off_t offset,
 
           /* Check for the magic sequence indicating the start of an NXFFS
            * data block or start of the next inode. There is the possibility
-           * of this magic sequnce occurring in FLASH data.  However, the
+           * of this magic sequence occurring in FLASH data.  However, the
            * data block CRC should distinguish between real NXFFS data blocks
            * headers and such false alarms.
            */

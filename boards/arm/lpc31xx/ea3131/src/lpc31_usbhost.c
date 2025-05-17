@@ -118,7 +118,7 @@ static int ehci_waiter(int argc, char *argv[])
  * Name: lpc31_usbhost_bootinitialize
  *
  * Description:
- *   Called from lpc31_boardinitialize very early in inialization to setup
+ *   Called from lpc31_boardinitialize very early in initialization to setup
  *   USB host-related GPIO pins for the EA3131 board.
  *
  *   USB host VBUS power is controlled by a Micrel USB power switch.

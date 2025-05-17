@@ -33,7 +33,7 @@
  * DCT-II, the normally so called DCT
  * DCT-III, inverse of DCT-II, so called IDCT
  * DCT-IV, inverse of DCT-IV is itself
- * see all the formula and more mathmatics trueth in wikipedia:
+ * see all the formula and more mathematics trueth in wikipedia:
  * https://en.wikipedia.org/wiki/Discrete_cosine_transform
  */
 

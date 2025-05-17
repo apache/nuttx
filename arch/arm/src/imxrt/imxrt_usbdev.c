@@ -222,7 +222,7 @@ const struct trace_msg_t g_usb_trace_strings_intdecode[] =
 
 struct imxrt_dtd_s
 {
-  volatile uint32_t       nextdesc;      /* Address of the next DMA descripto in RAM */
+  volatile uint32_t       nextdesc;      /* Address of the next DMA descriptor in RAM */
   volatile uint32_t       config;        /* Misc. bit encoded configuration information */
   uint32_t                buffer0;       /* Buffer start address */
   uint32_t                buffer1;       /* Buffer start address */
@@ -303,7 +303,7 @@ struct imxrt_dqh_s
 #define IMXRT_EP0MAXPACKET           (64)         /* EP0 max packet size (1-64) */
 #define IMXRT_BULKMAXPACKET          (512)        /* Bulk endpoint max packet (8/16/32/64/512) */
 #define IMXRT_INTRMAXPACKET          (1024)       /* Interrupt endpoint max packet (1 to 1024) */
-#define IMXRT_ISOCMAXPACKET          (512)        /* Acutally 1..1023 */
+#define IMXRT_ISOCMAXPACKET          (512)        /* Actually 1..1023 */
 
 /* Endpoint bit position in SETUPSTAT, PRIME, FLUSH, STAT, COMPLETE
  * registers
@@ -1224,7 +1224,7 @@ static void imxrt_usbreset(struct imxrt_usbdev_s *priv)
 
   imxrt_set_address(priv, 0);
 
-  /* Initialise the Enpoint List Address */
+  /* Initialise the Endpoint List Address */
 
   imxrt_putreg((uint32_t)g_qh, IMXRT_USBDEV_ENDPOINTLIST);
 

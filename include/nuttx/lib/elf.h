@@ -177,7 +177,7 @@ struct module_s
 #if CONFIG_LIBC_ELF_MAXDEPEND > 0
   uint8_t dependents;                  /* Number of modules that depend on this module */
 
-  /* This is an upacked array of pointers to other modules that this module
+  /* This is an unpacked array of pointers to other modules that this module
    * depends upon.
    */
 

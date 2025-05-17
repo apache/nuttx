@@ -119,7 +119,7 @@ static int usbhost_waiter(int argc, char *argv[])
  * Name: stm32_usbinitialize
  *
  * Description:
- *   Called from stm32_boardinitialize very early in inialization to setup
+ *   Called from stm32_boardinitialize very early in initialization to setup
  *   USB-related GPIO pins for the WeAct Studio MiniF4 board.
  *
  ****************************************************************************/

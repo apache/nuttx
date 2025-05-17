@@ -24,7 +24,7 @@
  * XMC CCU Driver
  *
  * For now, this file contains only helper methods mandatory for xmc tickless
- * feature. Contibutions are welcomed.
+ * feature. Contributions are welcome.
  *
  ****************************************************************************/
 

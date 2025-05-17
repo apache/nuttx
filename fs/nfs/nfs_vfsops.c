@@ -107,7 +107,7 @@
 
 struct nfs_dir_s
 {
-  struct fs_dirent_s nfs_base;                /* VFS diretory structure */
+  struct fs_dirent_s nfs_base;                /* VFS directory structure */
   uint8_t  nfs_fhsize;                        /* Length of the file handle */
   uint8_t  nfs_fhandle[DIRENT_NFS_MAXHANDLE]; /* File handle (max size allocated) */
   uint8_t  nfs_verifier[DIRENT_NFS_VERFLEN];  /* Cookie verifier */

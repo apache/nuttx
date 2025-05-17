@@ -109,7 +109,7 @@ const unsigned int   g_cyw43439_nvram_len = sizeof(g_cyw43439_nvram_image);
 
 /* These are defined as array because the symbols name an actual address
  * not a pointer to an address.  This is not one of the many cases where
- * pointers and arrays are interchangable in C.
+ * pointers and arrays are interchangeable in C.
  */
 
 extern const uint8_t       g_cyw43439_firmware_image[];
@@ -122,7 +122,7 @@ extern const unsigned int  g_cyw43439_clm_blob_len;
  *    - Copies the firmware image file data to that location.
  *    - Defines g_cyw43439_firmware_end as the location directly beyond
  *      that data.
- *    - Defines g_cyw43439_clm_blob_image as a location withing that
+ *    - Defines g_cyw43439_clm_blob_image as a location within that
  *      data where the clm_blob begins.
  *    - Force 4-byte alignment
  *    - Allocates an integer named g_cyw43439_clm_blob_len that

@@ -181,7 +181,7 @@ static const uint16_t fsmc_gpios[] =
   GPIO_NPS_D8, GPIO_NPS_D9, GPIO_NPS_D10, GPIO_NPS_D11,
   GPIO_NPS_D12, GPIO_NPS_D13, GPIO_NPS_D14, GPIO_NPS_D15,
 
-  /* NOE, NWE  */
+  /* NOE, NWE */
 
   GPIO_NPS_NOE, GPIO_NPS_NWE,
 

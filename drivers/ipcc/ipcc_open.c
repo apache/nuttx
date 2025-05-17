@@ -49,7 +49,7 @@
  *   filep - pointer to a file structure to open.
  *
  * Returned Value:
- *   OK on successfull open, or negated errno on failure.
+ *   OK on successful open, or negated errno on failure.
  *
  * Assumptions/Limitations:
  *

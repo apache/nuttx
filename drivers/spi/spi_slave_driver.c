@@ -72,7 +72,7 @@ struct spi_slave_driver_s
 
   FAR struct pollfd *fds;
 
-  /* The semphore reader */
+  /* The semaphore reader */
 
   sem_t wait;
 
@@ -639,7 +639,7 @@ static void spi_slave_cmddata(FAR struct spi_slave_dev_s *dev, bool data)
  *
  * Input Parameters:
  *   dev  - SPI Slave device interface instance
- *   data - Pointer to the data buffer pointer to be shifed out.
+ *   data - Pointer to the data buffer pointer to be shifted out.
  *          The device will set the data buffer pointer to the actual data
  *
  * Returned Value:

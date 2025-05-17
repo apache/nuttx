@@ -107,7 +107,7 @@ struct nrf52_radioi8_rtc_s
  * Name: nrf52_radioi8_rtc_init
  *
  * Description:
- *   Initialize low resoluton, low power timer for IEEE802154 operations.
+ *   Initialize low resolution, low power timer for IEEE802154 operations.
  *   Used to handle superframe timings.
  *
  ****************************************************************************/

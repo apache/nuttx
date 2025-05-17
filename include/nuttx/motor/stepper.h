@@ -89,7 +89,7 @@ enum stepper_idle_e
 {
   STEPPER_ENABLE_IDLE  = 0,  /* Enable IDLE mode */
   STEPPER_DISABLE_IDLE = 1,  /* Disable IDLE mode */
-  STEPPER_AUTO_IDLE    = 2,  /* Set automaticaly IDLE when stepper not in movement */
+  STEPPER_AUTO_IDLE    = 2,  /* Set automatically IDLE when stepper not in movement */
 };
 
 /* Stepper driver status */

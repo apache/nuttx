@@ -115,7 +115,7 @@ static int tmc_etf_sink_hw_enable(FAR struct coresight_tmc_dev_s *tmcdev)
       return -EAGAIN;
     }
 
-  /* TMC-ETB and TMC-ETF sink device use cirular buffer mode. */
+  /* TMC-ETB and TMC-ETF sink device use circular buffer mode. */
 
   coresight_put32(TMC_MODE_CIRCULAR_BUFFER, tmcdev->csdev.addr + TMC_MODE);
   coresight_put32(TMC_FFCR_EN_FMT | TMC_FFCR_EN_TI | TMC_FFCR_FON_FLIN |
@@ -193,7 +193,7 @@ static void tmc_flush_and_stop(FAR struct coresight_tmc_dev_s *tmcdev)
  * Description:
  *   Dump ETB RAM buffer to device's buffer for usrspace's read. It just need
  *   to performing successive reads to the RRD Register, until the value
- *   0xFFFFFFFF is returned whick is kind different from coresight ETB
+ *   0xFFFFFFFF is returned which is kind different from coresight ETB
  *   device's reading process. refers to TRM.
  *
  ****************************************************************************/
@@ -230,7 +230,7 @@ static void tmc_etf_hw_read(FAR struct coresight_tmc_dev_s *tmcdev)
  * Description:
  *   Used for ETF sink devices to dump trace buffer. Do not dump trace buffer
  *   in tmc_etf_hw_disable to avoid trace buffer's data confusion when a
- *   process is reading trace buffer and anther process calles tmc_disable.
+ *   process is reading trace buffer and another process calls tmc_disable.
  *
  ****************************************************************************/
 

@@ -1735,7 +1735,7 @@ static int isx019_start_capture(FAR struct imgsensor_s *sensor,
             regval |= FPGA_THUMBNAIL_SCALE_1_4;
             break;
 
-          default : /* 1/8 */
+          default: /* 1/8 */
             regval |= FPGA_THUMBNAIL_SCALE_1_8;
             break;
         }
@@ -2439,7 +2439,7 @@ static int set_wbmode(FAR isx019_dev_t *priv,
 static int set_awb(FAR isx019_dev_t *priv,
                    imgsensor_value_t val)
 {
-  /* true  -> false : Update regster to HOLD
+  /* true  -> false : Update register to HOLD
    * false -> true  : Update register
    *                  with IMGSENSOR_ID_AUTO_N_PRESET_WB setting
    * otherwise      : Nothing to do
@@ -2616,7 +2616,7 @@ static int set_spot_position(FAR isx019_dev_t *priv,
   int split;
 
   /* Spot position of ISX019 is divided into 9x7 sections.
-   * - Horizontal direction is devided into 9 sections.
+   * - Horizontal direction is divided into 9 sections.
    * - Vertical  direction is divided into 7 sections.
    * The register value 0 means left top.
    * The register value 62 means right bottom.

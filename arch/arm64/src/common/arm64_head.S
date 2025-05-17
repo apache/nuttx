@@ -124,8 +124,8 @@ real_start:
     /* The global variable cpu_boot_params is not safety to
      * access in some case. eg. Some debugger will reboot
      * the NuttX but not reload the whole image, so it will
-     * be not predicable for the initial value of the global
-     * value in that case
+     * be not predictable for the initial value of the global
+     * value in that case.
      *
      * get_cpu_id is safety because the CPU identification is
      * not change in any case, so the code will judge in a

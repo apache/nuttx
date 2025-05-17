@@ -26,7 +26,7 @@
  *
  * The full size SD card slot connects via HSMCI0.
  * The card detect discrete is available on PB17 (pulled high).
- * The write protect descrete is tied to ground (via PP6) and not available
+ * The write protect discrete is tied to ground (via PP6) and not available
  * to software.
  * The slot supports 8-bit wide transfer mode, but the NuttX driver
  * currently uses only the 4-bit wide transfer mode

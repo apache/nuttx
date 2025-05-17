@@ -1023,7 +1023,7 @@ static const uintptr_t g_layerclut[LCDC_NLAYERS] =
  *
  * Returned Value:
  *   true:  This is the first register access of this type.
- *   flase: This is the same as the preceding register access.
+ *   false: This is the same as the preceding register access.
  *
  ****************************************************************************/
 

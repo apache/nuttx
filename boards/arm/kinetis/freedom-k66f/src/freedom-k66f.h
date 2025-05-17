@@ -290,7 +290,7 @@ int k66_bringup(void);
  * Name: k66_sdhc_initialize
  *
  * Description:
- *   Inititialize the SDHC SD card slot
+ *   Initialize the SDHC SD card slot
  *
  ****************************************************************************/
 

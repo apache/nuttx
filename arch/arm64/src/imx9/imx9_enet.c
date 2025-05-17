@@ -94,7 +94,7 @@
 
 /* We need an even number of RX buffers, since RX descriptors are
  * freed for the DMA in pairs due to two descriptors always fitting
- * in one cache line (cahce line size is 64, descriptor size is 32)
+ * in one cache line (cache line size is 64, descriptor size is 32)
  */
 
 #if CONFIG_IMX9_ENET_NRXBUFFERS < 2
@@ -2062,16 +2062,16 @@ int imx9_read_phy_status(struct imx9_driver_s *priv)
 
   if (priv->cur_phy == NULL)
     {
-      /* We don't support guessing the link speed based ou our and link
+      /* We don't support guessing the link speed based on our and link
        * partner's capabilities. For now, user must manually set the
-       * speed and duplex if the phy is unknown
+       * speed and duplex if the phy is unknown.
        */
 
       nerr("Unknown PHY, can't read link speed\n");
       return ERROR;
     }
 
-  /* Special handling for rtl8211f, which needs to chage page */
+  /* Special handling for rtl8211f, which needs to change page. */
 
   if (imx9_phy_is(priv, GMII_RTL8211F_NAME))
     {
@@ -2216,7 +2216,7 @@ static int imx9_determine_phy(struct imx9_driver_s *priv)
  *
  * Input Parameters:
  *   priv - Reference to the private ENET driver state structure
- *   name - a pointer to comapre to.
+ *   name - a pointer to compare to.
  *
  * Returned Value:
  *   1 on match, a 0 on no match.

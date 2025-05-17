@@ -365,7 +365,7 @@ void pmsm_phy_params_init_b16(FAR struct pmsm_phy_params_b16_s *phy,
 
   motor_phy_params_init_b16(&phy->motor, poles, res, ind, flux);
 
-  /* Iniitalize PMSM specific data */
+  /* Initialize PMSM specific data */
 
   phy->iner        = iner;
   phy->ind_d       = ind_d;

@@ -71,9 +71,9 @@
  * Name: up_saveusercontext
  *
  * Description:
- *	 Create this state save strucure:
+ *	 Create this state save structure:
  *   Low Address  [PPAGE]
- *                [soft regisers]
+ *                [soft registers]
  *                XYH
  *                XYL
  *                ZH

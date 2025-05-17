@@ -587,7 +587,7 @@ int xmc4_vadc_group_channel_initialize(vadc_group_t *const group_ptr,
  *
  * Description:
  *   Adds a channel to the background scan sequence. The pending
- *   register are updated only after a new load event occured.
+ *   register are updated only after a new load event occurred.
  *   Configures the register bit fields of BRSSEL.
  *
  * Returned Value:

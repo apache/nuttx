@@ -97,7 +97,7 @@ void weak_function nuc_spidev_initialize(void);
  * Name: nuc_usbinitialize
  *
  * Description:
- *   Called from nuc_usbinitialize very early in inialization to setup
+ *   Called from nuc_usbinitialize very early in initialization to setup
  *   USB-related GPIO pins for the NuTiny-EVB-120 board.
  *
  ****************************************************************************/

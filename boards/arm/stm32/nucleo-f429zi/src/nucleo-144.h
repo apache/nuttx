@@ -226,7 +226,7 @@ int stm32_sdio_initialize(void);
  * Name: stm32_usbinitialize
  *
  * Description:
- *   Called from stm32_usbinitialize very early in inialization to
+ *   Called from stm32_usbinitialize very early in initialization to
  *   setup USB-related GPIO pins for the nucleo-144 board.
  *
  ****************************************************************************/

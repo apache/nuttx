@@ -336,14 +336,14 @@ void local_free(FAR struct local_conn_s *conn)
     }
 #endif /* CONFIG_NET_LOCAL_SCM */
 
-  /* Destroy all FIFOs associted with the connection */
+  /* Destroy all FIFOs associated with the connection */
 
   local_release_fifos(conn);
 #ifdef CONFIG_NET_LOCAL_STREAM
   nxsem_destroy(&conn->lc_waitsem);
 #endif
 
-  /* Destory sem associated with the connection */
+  /* Destroy sem associated with the connection */
 
   nxmutex_destroy(&conn->lc_sendlock);
   nxmutex_destroy(&conn->lc_polllock);

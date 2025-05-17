@@ -48,7 +48,7 @@
  * Name: cpuindex
  *
  * Description:
- *   Return an index idenifying the current CPU.  Single CPU case.  Must be
+ *   Return an index identifying the current CPU.  Single CPU case.  Must be
  *   provided by MCU-specific logic in chip.h for the SMP case.
  *
  ****************************************************************************/

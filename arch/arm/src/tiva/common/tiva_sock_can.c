@@ -1636,7 +1636,7 @@ static void tivacan_reset(struct net_driver_s *dev)
 #endif /* CONFIG_TIVA_CAN1 */
   if (modnum > 1)
     {
-      canerr("ERROR: tried to reset nonexistant module CAN%d\n",
+      canerr("ERROR: tried to reset nonexistent module CAN%d\n",
              canmod->modnum);
     }
 

@@ -214,7 +214,7 @@ void ipv6_nat_inbound(FAR struct net_driver_s *dev,
  * Returned Value:
  *   Zero is returned if NAT is successfully applied, or is not enabled for
  *   this packet;
- *   A negated errno value is returned if error occured.
+ *   A negated errno value is returned if error occurred.
  *
  ****************************************************************************/
 

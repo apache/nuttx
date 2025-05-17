@@ -34,7 +34,7 @@
 
 #ifndef CONFIG_LIBCXXTOOLCHAIN
 
-/* MSVC seems to conflict with theses macro if defined in the public area.
+/* MSVC seems to conflict with these macros if defined in the public area.
  * As such, they are defined in the private section to let NuttX build
  */
 

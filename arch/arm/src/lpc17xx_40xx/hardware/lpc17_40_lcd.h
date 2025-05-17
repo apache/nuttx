@@ -206,7 +206,7 @@
 
                                                       /* Bits 0: Reserved */
 #define LCD_INTRAW_FUFRIS                   (1 << 1)  /* Bit 1: FIFO Underflow raw interrupt status */
-#define LCD_INTRAW_LNBURIS                  (1 << 2)  /* Bit 2: LCD Next address base update intterupt */
+#define LCD_INTRAW_LNBURIS                  (1 << 2)  /* Bit 2: LCD Next address base update interrupt */
 #define LCD_INTRAW_VCOMPRIS                 (1 << 3)  /* Bit 3: Vertical compare interrupt status */
 #define LCD_INTRAW_BERRAW                   (1 << 4)  /* Bit 4: AHB Master bus error interrupt status */
                                                       /* Bits 5-31: Reserved */
@@ -216,7 +216,7 @@
 
                                                       /* Bits 0: Reserved */
 #define LCD_INTSTAT_FUFMIS                  (1 << 1)  /* Bit 1: FIFO Underflow raw interrupt status */
-#define LCD_INTSTAT_LNBUMIS                 (1 << 2)  /* Bit 2: LCD Next address base update intterupt */
+#define LCD_INTSTAT_LNBUMIS                 (1 << 2)  /* Bit 2: LCD Next address base update interrupt */
 #define LCD_INTSTAT_VCOMPMIS                (1 << 3)  /* Bit 3: Vertical compare interrupt status */
 #define LCD_INTSTAT_BERMIS                  (1 << 4)  /* Bit 4: AHB Master bus error interrupt status */
                                                       /* Bits 15-31: Reserved */
@@ -226,7 +226,7 @@
 
                                                       /* Bits 0: Reserved */
 #define LCD_INTCLR_FUFIC                    (1 << 1)  /* Bit 1: FIFO Underflow raw interrupt clear */
-#define LCD_INTCLR_LNBUIC                   (1 << 2)  /* Bit 2: LCD Next address base update intterupt */
+#define LCD_INTCLR_LNBUIC                   (1 << 2)  /* Bit 2: LCD Next address base update interrupt */
 #define LCD_INTCLR_VCOMPIC                  (1 << 3)  /* Bit 3: Vertical compare interrupt clear */
 #define LCD_INTCLR_BERIC                    (1 << 4)  /* Bit 4: AHB Master bus error interrupt clear */
                                                       /* Bits 15-31: Reserved */
@@ -289,7 +289,7 @@
 
 /* LCD CRSR_PAL0/1 - Cursor Palette Registers */
 
-#define LCD_CRSR_PAL_RED_SHIFT              (0)       /* Bits 0-7: Red color componnent */
+#define LCD_CRSR_PAL_RED_SHIFT              (0)       /* Bits 0-7: Red color component */
 #define LCD_CRSR_PAL_RED_MASK               (0xff << LCD_CRSR_PAL0_RED_SHIFT)
 #define LCD_CRSR_PAL_GREEN_SHIFT            (8)       /* Bits 8-15: Green color component */
 #define LCD_CRSR_PAL_GREEN_MASK             (0xff << LCD_CRSR_PAL0_GREEN_SHIFT)

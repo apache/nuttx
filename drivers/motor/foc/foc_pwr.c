@@ -62,7 +62,7 @@ int focpwr_initialize(FAR struct focpwr_dev_s *pwr,
   pwr->devno = devno;
   pwr->ops   = ops;
 
-  /* Connet to FOC device */
+  /* Connect to FOC device */
 
   dev->pwr = pwr;
 

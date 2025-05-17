@@ -287,7 +287,7 @@
 #define ENET_OPD_OPCODE_SHIFT        (16)      /* Bits 16-31: Opcode field in PAUSE frames */
 #define ENET_OPD_OPCODE_MASK         (0xffff << ENET_OPD_OPCODE_SHIFT)
 
-/* Descriptor Individual Uupper/Lower Address Register
+/* Descriptor Individual Upper/Lower Address Register
  * (64-bit address in two 32-bit registers)
  */
 

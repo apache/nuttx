@@ -84,7 +84,7 @@ void nx_pthread_exit(FAR void *exit_value)
   status = pthread_completejoin(nxsched_gettid(), exit_value);
   if (status != OK)
     {
-      /* Assume that the join completion failured because this
+      /* Assume that the join completion failed because this is
        * not really a pthread.  Exit by calling exit().
        */
 

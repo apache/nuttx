@@ -141,7 +141,7 @@ void lpc54_sdram_initialize(void)
       lpc54_gpio_config(g_emc_pinset[i]);
     }
 
-  /* EMC Dynamc memory configuration. */
+  /* EMC Dynamic memory configuration. */
 
   lpc54_emc_sdram_initialize(&g_emc_dynconfig, &g_emc_dynchipconfig, 1);
 }

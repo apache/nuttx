@@ -1298,7 +1298,7 @@ static void bl808_spi_init(struct spi_dev_s *dev)
  * Name: bl808_spibus_initialize
  *
  * Description:
- *   Initialize and register the configured SPI busses
+ *   Initialize and register the configured SPI buses
  *
  ****************************************************************************/
 

@@ -99,7 +99,7 @@ enum battery_status_e
 enum battery_health_e
 {
   BATTERY_HEALTH_UNKNOWN = 0,   /* Battery health state is not known */
-  BATTERY_HEALTH_GOOD,          /* Battery is in good condiction */
+  BATTERY_HEALTH_GOOD,          /* Battery is in good condition */
   BATTERY_HEALTH_DEAD,          /* Battery is dead, nothing we can do */
   BATTERY_HEALTH_OVERHEAT,      /* Battery is over recommended temperature */
   BATTERY_HEALTH_OVERVOLTAGE,   /* Battery voltage is over recommended level */

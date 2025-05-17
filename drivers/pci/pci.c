@@ -396,7 +396,7 @@ static int pci_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  * Name: pci_change_master
  *
  * Description:
- *   Enables/Disbale bus-mastering for device dev
+ *   Enable/Disable bus-mastering for device dev
  *
  * Input Parameters:
  *   dev    - The PCI device to cchange
@@ -602,7 +602,7 @@ static FAR struct pci_device_s *pci_alloc_device(void)
  * Name: pci_register_bus_devices
  *
  * Description:
- *   Register all devices scanned and all buses scanned to responsing list.
+ *   Register all devices scanned and all buses scanned to responding list.
  *
  * Input Parameters:
  *   bus - The boot bus
@@ -1191,7 +1191,7 @@ static int pci_enable_msi(FAR struct pci_device_s *dev, FAR int *irq,
   uint32_t  mmc   = 0;
   int       ret   = OK;
 
-  /* Suppoted messages */
+  /* Supported messages */
 
   for (mme = 0; (1 << mme) < num; mme++);
 
@@ -1214,7 +1214,7 @@ static int pci_enable_msi(FAR struct pci_device_s *dev, FAR int *irq,
       return ret;
     }
 
-  /* Write Message Address Regsiter */
+  /* Write Message Address Register */
 
   pci_write_config_dword(dev, msi + PCI_MSI_ADDRESS_LO, mar);
 
@@ -1265,7 +1265,7 @@ static void pci_disable_msi(FAR struct pci_device_s *dev, uint8_t msi)
 
   pci_read_config_word(dev, msi + PCI_MSI_FLAGS, &flags);
 
-  /* Write Message Address Regsiter */
+  /* Write Message Address Register */
 
   pci_write_config_dword(dev, msi + PCI_MSI_ADDRESS_LO, 0);
 
@@ -1496,7 +1496,7 @@ pci_find_device_from_bus(FAR struct pci_bus_s *bus, uint8_t busno,
  *   val   - The data buffer
  *
  * Returned Value:
- *   Zero if success, otherwise nagative
+ *   Zero if success, otherwise negative
  *
  ****************************************************************************/
 
@@ -1526,7 +1526,7 @@ int pci_bus_read_config(FAR struct pci_bus_s *bus,
  *   val   - The data
  *
  * Returned Value:
- *   Zero if success, otherwise nagative
+ *   Zero if success, otherwise negative
  *
  ****************************************************************************/
 
@@ -1555,7 +1555,7 @@ int pci_bus_write_config(FAR struct pci_bus_s *bus,
  *   val   - The data buffer
  *
  * Returned Value:
- *   Zero if success, otherwise nagative
+ *   Zero if success, otherwise negative
  *
  ****************************************************************************/
 
@@ -1583,7 +1583,7 @@ int pci_bus_read_io(FAR struct pci_bus_s *bus, uintptr_t addr,
  *   val   - The data
  *
  * Returned Value:
- *   Zero if success, otherwise nagative
+ *   Zero if success, otherwise negative
  *
  ****************************************************************************/
 
@@ -1641,7 +1641,7 @@ void pci_clear_master(FAR struct pci_device_s *dev)
  *   dev - PCI device to be enabled
  *
  * Returned Value:
- *   Zero if success, otherwise nagative
+ *   Zero if success, otherwise negative
  *
  ****************************************************************************/
 
@@ -1665,7 +1665,7 @@ int pci_enable_device(FAR struct pci_device_s *dev)
  *   dev - PCI device to be disable
  *
  * Returned Value:
- *   Zero if success, otherwise nagative
+ *   Zero if success, otherwise negative
  *
  ****************************************************************************/
 
@@ -1918,7 +1918,7 @@ int pci_get_irq(FAR struct pci_device_s *dev)
  *   num - number of vectors
  *
  * Return value:
- *   Return the number of allocated vectors on succes or negative errno
+ *   Return the number of allocated vectors on success or negative errno
  *   on failure.
  *
  ****************************************************************************/
@@ -2014,7 +2014,7 @@ int pci_connect_irq(FAR struct pci_device_s *dev, FAR int *irq, int num)
 #ifdef CONFIG_PCI_MSIX
   if (msix != 0)
     {
-      /* Disalbe MSI */
+      /* Disable MSI */
 
       if (msi != 0)
         {
@@ -2323,7 +2323,7 @@ int pci_dev_register(void)
  *   val   - The data buf
  *
  * Returned Value:
- *   Zero if success, otherwise nagative
+ *   Zero if success, otherwise negative
  *
  ****************************************************************************/
 
@@ -2344,7 +2344,7 @@ PCI_BUS_READ_CONFIG(dword, uint32_t, 4)
  *   val   - The data
  *
  * Returned Value:
- *   Zero if success, otherwise nagative
+ *   Zero if success, otherwise negative
  *
  ****************************************************************************/
 
@@ -2364,7 +2364,7 @@ PCI_BUS_WRITE_CONFIG(dword, uint32_t, 4)
  *   val   - The data buffer
  *
  * Returned Value:
- *   Zero if success, otherwise nagative
+ *   Zero if success, otherwise negative
  *
  ****************************************************************************/
 
@@ -2384,7 +2384,7 @@ PCI_BUS_READ_IO(dword, uint32_t, 4)
  *   val   - The data
  *
  * Returned Value:
- *   Zero if success, otherwise nagative
+ *   Zero if success, otherwise negative
  *
  ****************************************************************************/
 

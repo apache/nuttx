@@ -2440,7 +2440,7 @@
 
 /* RTC_CNTL_SWD_DISABLE : R/W ;bitpos:[30] ;default: 1'b0 ; */
 
-/* Description: disabel SWD */
+/* Description: disable SWD */
 
 #define RTC_CNTL_SWD_DISABLE  (BIT(30))
 #define RTC_CNTL_SWD_DISABLE_M  (BIT(30))

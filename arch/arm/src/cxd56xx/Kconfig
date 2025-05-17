@@ -115,7 +115,7 @@ config CXD56_FARAPI_VERSION_CHECK
 	default y
 	---help---
 		Enable the Far API version compatibility check. If the version
-		mismatch is detected during system bootup, the target system shows
+		mismatch is detected during system boot up, the target system shows
 		the message to update the loader and gnssfw firmwares.
 
 if CXD56_FARAPI_VERSION_CHECK
@@ -1093,7 +1093,7 @@ config CXD56_SCU_PREDIV
 	default 64
 	range 1 256
 	---help---
-		This configuration ralated to maximum sampling rate based
+		This configuration related to maximum sampling rate based
 		on 32.768KHz.
 		e.g. 32768 / 64 = 512 (samples)
 

@@ -212,7 +212,7 @@ static int stm32l4_spirit_devsetup(struct stm32l4_priv_s *priv)
   struct spi_dev_s *spi;
   int ret;
 
-  /* Configure the interrupt pin and SDN pins.  Innitializing the SDN to '1'
+  /* Configure the interrupt pin and SDN pins.  Initializing the SDN to '1'
    * powers down the Spirit.
    */
 

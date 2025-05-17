@@ -80,7 +80,7 @@
 #  endif
 #endif
 
-/* Provide a default section for the exeception handler. */
+/* Provide a default section for the exception handler. */
 
 #ifndef EXCEPTION_SECTION
 #  define EXCEPTION_SECTION .text

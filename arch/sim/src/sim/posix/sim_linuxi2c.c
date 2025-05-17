@@ -218,7 +218,7 @@ static int linux_i2cbus_transfer(struct i2c_master_s *dev,
         }
       else
         {
-          /* Many busses cannot handle more than 2 messages */
+          /* Many buses cannot handle more than 2 messages */
 
           return -1;
         }

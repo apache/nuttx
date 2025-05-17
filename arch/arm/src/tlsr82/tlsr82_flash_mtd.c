@@ -134,7 +134,7 @@ struct tlsr82_flash_dev_s
 {
   struct mtd_dev_s      mtd;          /* MTD interface */
   uint32_t              baseaddr;     /* mtd flash start address */
-  uint32_t              size;         /* avaliable size for MTD */
+  uint32_t              size;         /* available size for MTD */
   uint16_t              nsectors;     /* Number of erase sectors */
   uint16_t              sectorsize;   /* Size of one sector */
   uint16_t              pagesize;     /* Size of one page */
@@ -433,7 +433,7 @@ static int tlsr82_flash_test(struct tlsr82_flash_dev_s *priv)
 
       if (memcmp(flash_read_buffer, flash_buffer, TLSR82_PAGE_SIZE) != 0)
         {
-          ferr("    Flash write compre is not equal, page_i=%d\n", i);
+          ferr("    Flash write compare is not equal, page_i=%d\n", i);
           tlsr82_flash_print("Write buffer data:", flash_buffer,
                              TLSR82_PAGE_SIZE);
           tlsr82_flash_print("Read buffer data:", flash_read_buffer,
@@ -603,7 +603,7 @@ static int tlsr82_flash_test(struct tlsr82_flash_dev_s *priv)
 
       if (memcmp(flash_read_buffer, flash_buffer, TLSR82_PAGE_SIZE) != 0)
         {
-          ferr("    Flash write compre is not equal, page_i=%d\n", i);
+          ferr("    Flash write compare is not equal, page_i=%d\n", i);
           tlsr82_flash_print("Write buffer data:", flash_buffer,
                              TLSR82_PAGE_SIZE);
           tlsr82_flash_print("Read buffer data:", flash_read_buffer,
@@ -736,7 +736,7 @@ static ssize_t tlsr82_flash_write (struct mtd_dev_s *dev, off_t offset,
 
   do
     {
-      /* The allow length is the max allow write lentgh that not cross page */
+      /* The allow length is the max allow write length that not cross page */
 
       allow_len = TLSR82_PAGE_SIZE - (addr & (TLSR82_PAGE_SIZE - 1));
       write_len = MIN(nbytes, allow_len);
@@ -864,7 +864,7 @@ static int tlsr82_flash_ioctl(struct mtd_dev_s *dev, int cmd,
  *
  * Parameter:
  *   offset - offset from 0 of internal flash
- *   size   - avaiable size for NVM
+ *   size   - available size for NVM
  *
  ****************************************************************************/
 

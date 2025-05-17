@@ -67,7 +67,7 @@
 #define PCF8833_RAMWR     0x2c /* Memory write; Data: (1) write data */
 #define PCF8833_RGBSET    0x2d /* Colour set; Data: (1-8) red tones, (9-16) green tones, (17-20) blue tones */
 #define PCF8833_PTLAR     0x30 /* Partial area; Data: (1) start address (2) end address */
-#define PCF8833_VSCRDEF   0x33 /* Vertical scroll definition; Data: (1) top fixed, (2) scrol area, (3) bottom fixed */
+#define PCF8833_VSCRDEF   0x33 /* Vertical scroll definition; Data: (1) top fixed, (2) scroll area, (3) bottom fixed */
 #define PCF8833_TEOFF     0x34 /* Tearing line off; Data: none */
 #define PCF8833_TEON      0x35 /* Tearing line on;  Data: (1) don't care */
 #define PCF8833_MADCTL    0x36 /* Memory data access control; Data: (1) access control settings */

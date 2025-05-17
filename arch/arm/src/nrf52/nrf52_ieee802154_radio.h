@@ -66,7 +66,7 @@ enum nrf52_radioi8_state_e
   NRF52_RADIO_STATE_TX_NOCSMA,     /* Non CSMA TX armed */
   NRF52_RADIO_STATE_TX,            /* TX on the air */
   NRF52_RADIO_STATE_RX,            /* RX active */
-  NRF52_RADIO_STATE_ACKTX,         /* Transmiting ACK now */
+  NRF52_RADIO_STATE_ACKTX,         /* Transmitting ACK now */
   NRF52_RADIO_STATE_ED,            /* Energy detection now */
 };
 
@@ -123,7 +123,7 @@ struct ieee802154_cca_s;
 
 struct nrf52_radioi8_radio_ops_s
 {
-  /* Start transmition - TX must be armed (TXEN set) */
+  /* Start transmission - TX must be armed (TXEN set) */
 
   void (*txstart)(struct nrf52_radioi8_dev_s *dev);
 

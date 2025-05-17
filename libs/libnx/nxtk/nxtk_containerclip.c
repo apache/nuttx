@@ -76,7 +76,7 @@ void nxtk_containerclip(FAR struct nxtk_framedwindow_s *fwnd,
   nxgl_rectoffset(&relbounds, bounds, -fwnd->wnd.bounds.pt1.x,
                   -fwnd->wnd.bounds.pt1.y);
 
-  /* The interection then leaves the portion of the containing window that
+  /* The intersection then leaves the portion of the containing window that
    * needs to be updated window that needs to be updated.
    */
 

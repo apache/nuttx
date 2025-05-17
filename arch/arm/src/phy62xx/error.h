@@ -53,11 +53,11 @@
 #define PPlus_ERR_FORBIDDEN                     (15) /* Forbidden Operation */
 #define PPlus_ERR_INVALID_ADDR                  (16) /* Bad Memory Address */
 #define PPlus_ERR_BUSY                          (17) /* Busy */
-#define PPlus_ERR_NOT_REGISTED                  (18) /* not registed */
+#define PPlus_ERR_NOT_REGISTED                  (18) /* not registered */
 #define PPlus_ERR_IO_CONFILCT                   (19) /* IO config error */
 #define PPlus_ERR_IO_FAIL                       (20) /* IO fail error */
 #define PPlus_ERR_NOT_IMPLEMENTED               (22) /* Function is not provide now */
-#define PPlus_ERR_SPI_FLASH                     (23) /* spi falsh operation error */
+#define PPlus_ERR_SPI_FLASH                     (23) /* spi flash operation error */
 #define PPlus_ERR_UNINITIALIZED                 (24)
 #define PPlus_ERR_FS_WRITE_FAILED               (31)
 #define PPlus_ERR_FS_CONTEXT                    (32)
@@ -78,7 +78,7 @@
 #define PPlus_ERR_ACCESS_REJECTED               (51)
 
 #define PPlus_ERR_BLE_NOT_READY                 (80) /* BLE not ready error */
-#define PPlus_ERR_BLE_BUSY                      (81) /* BLE operation failed becuase of busy */
+#define PPlus_ERR_BLE_BUSY                      (81) /* BLE operation failed because of busy */
 #define PPlus_ERR_BLE_FAIL                      (82) /* BLE operation failed */
 
 #define PPlus_ERR_OTA_INVALID_STATE             (100) /* state machine error when OTA */
@@ -86,7 +86,7 @@
 #define PPlus_ERR_OTA_CRC                       (102) /* bad checksum(crc) */
 #define PPlus_ERR_OTA_NO_APP                    (103) /* No application data */
 #define PPlus_ERR_OTA_BAD_DATA                  (104) /* bad application data */
-#define PPlus_ERR_OTA_UNKNOW_CMD                (105) /* unknow command */
+#define PPlus_ERR_OTA_UNKNOW_CMD                (105) /* unknown command */
 #define PPlus_ERR_OTA_CRYPTO                    (106) /* crypto verify error */
 #define PPlus_ERR_KEY_VERIFY                    (107) /* security boot key verify fail */
 #define PPlus_ERR_DOUBLE_CONFIRM                (108) /* security boot double key verify fail */

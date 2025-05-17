@@ -1286,7 +1286,7 @@ out:
 
   kinetis_i2c_setfrequency(priv, frequency);
 
-  /* Release the port for re-use by other clients */
+  /* Release the port for reuse by other clients */
 
   nxmutex_unlock(&priv->lock);
   return ret;

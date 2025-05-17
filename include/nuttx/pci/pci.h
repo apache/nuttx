@@ -396,7 +396,7 @@ struct pci_driver_s
  *   val   - The data buf
  *
  * Returned Value:
- *   Zero if success, otherwise nagative
+ *   Zero if success, otherwise negative
  *
  ****************************************************************************/
 
@@ -417,7 +417,7 @@ int pci_bus_read_config(FAR struct pci_bus_s *bus,
  *   val   - The data buf
  *
  * Returned Value:
- *   Zero if success, otherwise nagative
+ *   Zero if success, otherwise negative
  *
  ****************************************************************************/
 
@@ -445,7 +445,7 @@ int pci_bus_read_config_dword(FAR struct pci_bus_s *bus,
  *   val   - The data
  *
  * Returned Value:
- *   Zero if success, otherwise nagative
+ *   Zero if success, otherwise negative
  *
  ****************************************************************************/
 
@@ -466,7 +466,7 @@ int pci_bus_write_config(FAR struct pci_bus_s *bus,
  *   val   - The data
  *
  * Returned Value:
- *   Zero if success, otherwise nagative
+ *   Zero if success, otherwise negative
  *
  ****************************************************************************/
 
@@ -493,7 +493,7 @@ int pci_bus_write_config_dword(FAR struct pci_bus_s *bus,
  *   val   - The data buffer
  *
  * Returned Value:
- *   Zero if success, otherwise nagative
+ *   Zero if success, otherwise negative
  *
  ****************************************************************************/
 
@@ -512,7 +512,7 @@ int pci_bus_read_io(FAR struct pci_bus_s *bus, uintptr_t addr,
  *   val   - The data buffer
  *
  * Returned Value:
- *   Zero if success, otherwise nagative
+ *   Zero if success, otherwise negative
  *
  ****************************************************************************/
 
@@ -536,7 +536,7 @@ int pci_bus_read_io_dword(FAR struct pci_bus_s *bus, uintptr_t where,
  *   val   - The data
  *
  * Returned Value:
- *   Zero if success, otherwise nagative
+ *   Zero if success, otherwise negative
  *
  ****************************************************************************/
 
@@ -555,7 +555,7 @@ int pci_bus_write_io(FAR struct pci_bus_s *bus, uintptr_t addr,
  *   val   - The data
  *
  * Returned Value:
- *   Zero if success, otherwise nagative
+ *   Zero if success, otherwise negative
  *
  ****************************************************************************/
 
@@ -603,7 +603,7 @@ void pci_clear_master(FAR struct pci_device_s *dev);
  *   dev - PCI device to be initialized
  *pci_bus_ops_s
  * Returned Value:
- *   Zero if success, otherwise nagative
+ *   Zero if success, otherwise negative
  *
  ****************************************************************************/
 
@@ -620,7 +620,7 @@ int pci_enable_device(FAR struct pci_device_s *dev);
  *   dev - PCI device to be Disable
  *
  * Returned Value:
- *   Zero if success, otherwise nagative
+ *   Zero if success, otherwise negative
  *
  ****************************************************************************/
 
@@ -791,7 +791,7 @@ int pci_get_irq(FAR struct pci_device_s *dev);
  *   num - number of vectors
  *
  * Return value:
- *   Return the number of allocated vectors on succes or negative errno
+ *   Return the number of allocated vectors on success or negative errno
  *   on failure.
  *
  ****************************************************************************/

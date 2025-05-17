@@ -178,12 +178,12 @@ static int get_ifindex(void)
   uint32_t devset;
   int ndx;
 
-  /* Try to postpone re-using interface indices as long as possible */
+  /* Try to postpone reusing interface indices as long as possible */
 
   devset = g_devset | g_devfreed;
   if (devset == 0xffffffff)
     {
-      /* Time start re-using interface indices */
+      /* Time start reusing interface indices */
 
       devset     = g_devset;
       g_devfreed = 0;

@@ -157,7 +157,7 @@ static FAR netpkt_t *netpkt_get(FAR struct net_driver_s *dev,
 
   if (atomic_fetch_sub(&upper->lower->quota[type], 1) <= 0)
     {
-      nwarn("WARNING: Allowing temperarily exceeding quota of %s.\n",
+      nwarn("WARNING: Allowing temporarily exceeding quota of %s.\n",
             dev->d_ifname);
     }
 
@@ -1510,7 +1510,7 @@ FAR uint8_t *netpkt_getbase(FAR netpkt_t *pkt)
  * Description:
  *   Set the length of data in netpkt, used when data is written into
  *   netpkt by data/base pointer, no need to set this length after
- *   copyin.
+ *   copying.
  *
  * Input Parameters:
  *   dev    - The lower half device driver structure

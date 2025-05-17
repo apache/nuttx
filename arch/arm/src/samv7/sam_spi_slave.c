@@ -235,7 +235,7 @@ static struct sam_spidev_s g_spi1_ctrlr =
  *
  * Returned Value:
  *   true:  This is the first register access of this type.
- *   flase: This is the same as the preceding register access.
+ *   false: This is the same as the preceding register access.
  *
  ****************************************************************************/
 
@@ -1007,7 +1007,7 @@ static bool spi_qfull(struct spi_slave_ctrlr_s *ctrlr)
   if (ret < 0)
     {
       /* REVISIT:  No mechanism to report error.  This error should only
-       * occurr if the calling task was canceled.
+       * occur if the calling task was canceled.
        */
 
       spierr("RROR: nxmutex_lock failed: %d\n", ret);

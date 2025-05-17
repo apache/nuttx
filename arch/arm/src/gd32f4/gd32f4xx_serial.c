@@ -176,7 +176,7 @@ struct up_dev_s
 
 #ifdef SERIAL_HAVE_TXDMA
   const uint32_t  txdma_channel; /* DMA channel assigned */
-  DMA_HANDLE      txdma;         /* currently-open trasnmit DMA stream */
+  DMA_HANDLE      txdma;         /* currently-open transmit DMA stream */
 #endif
 
   /* RX DMA state */
@@ -1982,7 +1982,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 #  endif
 #endif
 
-  /* Only availible in USART0,1,2,5 */
+  /* Only available in USART0,1,2,5 */
 
 #ifdef CONFIG_GD32F4_USART_INVERT
     case TIOCSINVERT:
@@ -2379,7 +2379,7 @@ static void up_dma_tx_callback(DMA_HANDLE handle, uint16_t status, void *arg)
           dma_init_struct.priority = USART_DMA_PRIO;
           dma_init_struct.circular_mode = DMA_CIRCULAR_MODE_DISABLE;
 
-          /* Configure DMA for USART transmmit */
+          /* Configure DMA for USART transmit */
 
           gd32_dma_setup(priv->txdma, &dma_init_struct, 1);
 
@@ -2470,7 +2470,7 @@ static void up_dma_send(struct uart_dev_s *dev)
   dma_init_struct.priority = USART_DMA_PRIO;
   dma_init_struct.circular_mode = DMA_CIRCULAR_MODE_DISABLE;
 
-  /* Configure DMA for USART transmmit */
+  /* Configure DMA for USART transmit */
 
   gd32_dma_setup(priv->txdma, &dma_init_struct, 1);
 
@@ -2658,25 +2658,25 @@ static void up_pm_notify(struct pm_callback_s *cb, int domain,
 {
   switch (pmstate)
     {
-      case(PM_NORMAL):
+      case (PM_NORMAL):
         {
           /* Logic for PM_NORMAL goes here */
         }
         break;
 
-      case(PM_IDLE):
+      case (PM_IDLE):
         {
           /* Logic for PM_IDLE goes here */
         }
         break;
 
-      case(PM_STANDBY):
+      case (PM_STANDBY):
         {
           /* Logic for PM_STANDBY goes here */
         }
         break;
 
-      case(PM_SLEEP):
+      case (PM_SLEEP):
         {
           /* Logic for PM_SLEEP goes here */
         }
@@ -2748,7 +2748,7 @@ static int up_pm_prepare(struct pm_callback_s *cb, int domain,
  *
  * Description:
  *   Performs the low level USART initialization early in debug so that the
- *   serial console will be available during bootup.  This must be called
+ *   serial console will be available during boot up.  This must be called
  *   before arm_serialinit.
  *
  ****************************************************************************/

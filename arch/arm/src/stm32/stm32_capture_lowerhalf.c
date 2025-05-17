@@ -82,9 +82,9 @@ struct stm32_lowerhalf_s
   bool                   started;    /* True: Timer has been started */
   const uint8_t          resolution; /* Number of bits in the timer */
   uint8_t                channel;    /* pwm input channel */
-  uint32_t               clock;      /* Timer clock frequence */
-  uint8_t                duty;       /* Result pwm frequence */
-  uint32_t               freq;       /* Result pwm frequence */
+  uint32_t               clock;      /* Timer clock frequency */
+  uint8_t                duty;       /* Result pwm frequency */
+  uint32_t               freq;       /* Result pwm frequency */
 };
 
 /****************************************************************************
@@ -446,7 +446,7 @@ static int stm32_getduty(struct cap_lowerhalf_s *lower, uint8_t *duty)
  * Input Parameters:
  *   lower - A pointer the publicly visible representation of the
  *             "lower-half" driver state structure.
- *   freq  - Frequence in Hz .
+ *   freq  - Frequency in Hz.
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure.

@@ -47,7 +47,7 @@
 /* Configuration ************************************************************/
 
 #if !defined(CONFIG_STM32_CAN1) && !defined(CONFIG_STM32_CAN2)
-#  error "No CAN is enable. Please eneable at least one CAN device"
+#  error "No CAN is enable. Please enable at least one CAN device"
 #endif
 
 /****************************************************************************

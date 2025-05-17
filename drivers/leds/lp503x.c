@@ -419,7 +419,7 @@ static int lp503x_open(struct file *filep)
 
   /* reset and enable the device */
 
-  /* means the device was possibly never regsitered? */
+  /* means the device was possibly never registered? */
 
   if (priv->state == LP503X_STATE_UNINIT)
     {

@@ -40,7 +40,7 @@ endfunction()
 # ~~~
 # add_dynamic_rcsrcs & add_dynamic_rcraws
 # provide a way to add dynamic ROMFS data
-# which genrate during the build process
+# which generate during the build process
 # to the final romfs_holder target
 # ~~~
 function(add_dynamic_rcsrcs)
@@ -244,7 +244,7 @@ endfunction()
 
 # ~~~
 # The files of romfs may be added in
-# ANY PROCESS IN ANY DIRECORY,
+# ANY PROCESS IN ANY DIRECTORY,
 # so we process all the targets at the end.
 # ~~~
 function(process_all_directory_romfs)

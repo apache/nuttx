@@ -952,7 +952,7 @@ static int vscanf_internal(FAR struct lib_instream_s *stream, FAR int *lastc,
 
               /* Get a pointer to the double value.  We need to do this even
                * if we have reached the end of the input data in order to
-               * upate the 'ap' variable.
+               * update the 'ap' variable.
                */
 
               if (!noassign)

@@ -263,7 +263,7 @@
 #define SENSITIVE_CACHE_TAG_ACCESS_1_REG (DR_REG_SENSITIVE_BASE + 0x2c)
 
 /* SENSITIVE_PRO_D_TAG_WR_ACS : R/W; bitpos: [3]; default: 1;
- * Set 1 to enable Dcache wrtie access tag memory.
+ * Set 1 to enable Dcache write access tag memory.
  */
 
 #define SENSITIVE_PRO_D_TAG_WR_ACS    (BIT(3))
@@ -281,7 +281,7 @@
 #define SENSITIVE_PRO_D_TAG_RD_ACS_S  2
 
 /* SENSITIVE_PRO_I_TAG_WR_ACS : R/W; bitpos: [1]; default: 1;
- * Set 1 to enable Icache wrtie access tag memory.
+ * Set 1 to enable Icache write access tag memory.
  */
 
 #define SENSITIVE_PRO_I_TAG_WR_ACS    (BIT(1))
@@ -2621,7 +2621,7 @@
 
 /* SENSITIVE_CORE_X_DRAM0_PMS_CONSTRAIN_ROM_WORLD_1_PMS : R/W; bitpos:
  * [27:26]; default: 3;
- * core0/core1's permission(sotre,load) of rom in world1.
+ * core0/core1's permission (store,load) of rom in world1.
  */
 
 #define SENSITIVE_CORE_X_DRAM0_PMS_CONSTRAIN_ROM_WORLD_1_PMS    0x00000003
@@ -2631,7 +2631,7 @@
 
 /* SENSITIVE_CORE_X_DRAM0_PMS_CONSTRAIN_ROM_WORLD_0_PMS : R/W; bitpos:
  * [25:24]; default: 3;
- * core0/core1's permission(sotre,load) of rom in world0.
+ * core0/core1's permission (store,load) of rom in world0.
  */
 
 #define SENSITIVE_CORE_X_DRAM0_PMS_CONSTRAIN_ROM_WORLD_0_PMS    0x00000003
@@ -4874,7 +4874,7 @@
 
 /* SENSITIVE_CORE_0_PIF_PMS_MONITOR_VIOLATE_STATUS_HSIZE : RO; bitpos:
  * [4:2]; default: 0;
- * Record access type when core0 initate illegal access.
+ * Record access type when core0 initiates an illegal access.
  */
 
 #define SENSITIVE_CORE_0_PIF_PMS_MONITOR_VIOLATE_STATUS_HSIZE    0x00000007
@@ -6988,7 +6988,7 @@
 
 /* SENSITIVE_CORE_1_PIF_PMS_MONITOR_VIOLATE_STATUS_HSIZE : RO; bitpos:
  * [4:2]; default: 0;
- * Record access type when core1 initate illegal access.
+ * Record access type when core1 initiates an illegal access.
  */
 
 #define SENSITIVE_CORE_1_PIF_PMS_MONITOR_VIOLATE_STATUS_HSIZE    0x00000007
@@ -7887,7 +7887,7 @@
 
 /* SENSITIVE_BACKUP_BUS_PMS_MONITOR_VIOLATE_STATUS_HSIZE : RO; bitpos:
  * [5:3]; default: 0;
- * Record access type when BackUp initate illegal access.
+ * Record access type when BackUp initiates an illegal access.
  */
 
 #define SENSITIVE_BACKUP_BUS_PMS_MONITOR_VIOLATE_STATUS_HSIZE    0x00000007
@@ -7897,7 +7897,7 @@
 
 /* SENSITIVE_BACKUP_BUS_PMS_MONITOR_VIOLATE_STATUS_HTRANS : RO; bitpos:
  * [2:1]; default: 0;
- * Record htrans when BackUp initate illegal access.
+ * Record htrans when BackUp initiates an illegal access.
  */
 
 #define SENSITIVE_BACKUP_BUS_PMS_MONITOR_VIOLATE_STATUS_HTRANS    0x00000003

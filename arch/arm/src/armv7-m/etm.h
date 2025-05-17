@@ -533,7 +533,7 @@
 #define _ETM_ETMCCER_EICEWPNT_MASK                    0xF0000UL                              /* Bit mask for ETM_EICEWPNT */
 #define _ETM_ETMCCER_EICEWPNT_DEFAULT                 0x00000004UL                           /* Mode DEFAULT for ETM_ETMCCER */
 #define ETM_ETMCCER_EICEWPNT_DEFAULT                  (_ETM_ETMCCER_EICEWPNT_DEFAULT << 16)  /* Shifted mode DEFAULT for ETM_ETMCCER */
-#define ETM_ETMCCER_TEICEWPNT                         (0x1UL << 20)                          /* Trace Sart/Stop Block Uses EmbeddedICE watchpoint inputs */
+#define ETM_ETMCCER_TEICEWPNT                         (0x1UL << 20)                          /* Trace Start/Stop Block Uses EmbeddedICE watchpoint inputs */
 #define _ETM_ETMCCER_TEICEWPNT_SHIFT                  20                                     /* Shift value for ETM_TEICEWPNT */
 #define _ETM_ETMCCER_TEICEWPNT_MASK                   0x100000UL                             /* Bit mask for ETM_TEICEWPNT */
 #define _ETM_ETMCCER_TEICEWPNT_DEFAULT                0x00000001UL                           /* Mode DEFAULT for ETM_ETMCCER */

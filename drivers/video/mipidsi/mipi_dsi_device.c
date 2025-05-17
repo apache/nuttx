@@ -68,7 +68,7 @@
  *   msg - Message to transfer
  *
  * Returned Value:
- *   The number of bytes successfully transfered or a negative error code on
+ *   The number of bytes successfully transferred or a negative error code on
  *   failure.
  *
  ****************************************************************************/

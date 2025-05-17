@@ -112,7 +112,7 @@ static inline void ipv6addr_mask(FAR uint16_t *dest, FAR const uint16_t *src,
  *   Copy an IPv6 DNS address into RDNSS field
  *
  * Input Parameters:
- *   arg     - RDNSS context infomation
+ *   arg     - RDNSS context information
  *   addr    - DNS server address
  *   addrlen - length of DNS server address
  *
@@ -235,7 +235,7 @@ void icmpv6_radvertise(FAR struct net_driver_s *dev)
   mtu->mtu[1]       = HTONS(dev->d_pktsize - dev->d_llhdrlen);
 
 #ifndef CONFIG_NET_ICMPv6_ROUTER_MANUAL
-  /* We only anounce a prefix when we have one. */
+  /* We only announce a prefix when we have one. */
 
   ifaddr = netdev_ipv6_srcifaddr(dev, g_ipv6_unspecaddr);
   if (net_ipv6addr_cmp(ifaddr->addr, g_ipv6_unspecaddr))
@@ -261,7 +261,7 @@ void icmpv6_radvertise(FAR struct net_driver_s *dev)
   l3size              += sizeof(struct icmpv6_prefixinfo_s);
 
 #ifdef CONFIG_NET_ICMPv6_ROUTER_MANUAL
-  /* Copy the configured prefex */
+  /* Copy the configured prefix */
 
   prefix->preflen     = CONFIG_NET_ICMPv6_PREFLEN;
   net_ipv6addr_copy(prefix->prefix, g_ipv6_prefix);

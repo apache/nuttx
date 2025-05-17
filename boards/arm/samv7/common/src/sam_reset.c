@@ -47,7 +47,7 @@
  *      reason (and potentially subreason) is saved.
  *
  * Returned Value:
- *   This functions should always return succesfully with 0. We save
+ *   This functions should always return successfully with 0. We save
  *   BOARDIOC_RESETCAUSE_UNKOWN in cause structure if we are
  *   not able to get last reset cause from HW (which is unlikely).
  *

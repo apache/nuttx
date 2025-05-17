@@ -372,7 +372,7 @@ static int usbmsc_scsi_wait(FAR struct usbmsc_dev_s *priv)
 
   /* A flag is used to prevent driving up the semaphore count.  This function
    * is called (primarily) from the SCSI work thread so we must disable
-   * interrupts momentarily to assure that test of the flag and the wait fo
+   * interrupts momentarily to assure that test of the flag and the wait for
    * the semaphore count are atomic.  Interrupts will, of course, be re-
    * enabled while we wait for the event.
    */
@@ -2037,7 +2037,7 @@ static int usbmsc_cmdparsestate(FAR struct usbmsc_dev_s *priv)
      * case SCSI_CMD_WRITEANDVERIFY:           0x2e Optional
      */
 
-    case SCSI_CMD_VERIFY10:                 /* 0x2f Opt, excpt Windows */
+    case SCSI_CMD_VERIFY10:                 /* 0x2f Opt, except Windows */
       ret = usbmsc_cmdverify10(priv);
       break;
 

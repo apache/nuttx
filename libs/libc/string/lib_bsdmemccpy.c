@@ -37,7 +37,7 @@
 
 #define LITTLEBLOCKSIZE (sizeof(long))
 
-/* Threshhold for punting to the byte copier. */
+/* Threshold for punting to the byte copier. */
 
 #define TOO_SMALL(len) ((len) < LITTLEBLOCKSIZE)
 

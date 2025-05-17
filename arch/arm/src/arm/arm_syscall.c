@@ -76,7 +76,7 @@ uint32_t *arm_syscall(uint32_t *regs)
   cmd = regs[REG_R0];
 
   /* if cmd == SYS_restore_context (*running_task)->xcp.regs is valid
-   * should not be overwriten
+   * should not be overwritten
    */
 
   if (cmd != SYS_restore_context)

@@ -158,7 +158,7 @@ void coresight_disclaim_device(uintptr_t addr)
     }
   else
     {
-      cserr("current device is not claimed or something wrong happend\n");
+      cserr("current device is not claimed or something wrong happened\n");
     }
 
   coresight_lock(addr);

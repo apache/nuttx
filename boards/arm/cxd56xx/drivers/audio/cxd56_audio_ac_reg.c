@@ -1058,7 +1058,7 @@ CXD56_AUDIO_ECODE cxd56_audio_ac_reg_set_alcspc(void)
     }
   else if (CXD56_AUDIO_CFG_ALCSPC == CXD56_AUDIO_CFG_ALCSPC_SPC)
     {
-      /* Set sound pressure conter */
+      /* Set sound pressure counter */
 
       ret = set_spc_param();
       if (ret != CXD56_AUDIO_ECODE_OK)

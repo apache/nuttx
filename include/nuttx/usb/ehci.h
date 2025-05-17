@@ -439,7 +439,7 @@
                                                     /* Bits 3-4: zero */
 #define PFL_MASK                       (0xffffffe0) /* Bits 5-31:  Frame List Link Pointer */
 
-/* Aysnchronous List Queue Head Pointer.
+/* Asynchronous List Queue Head Pointer.
  * Paragraph 3.2. Circular list of queue heads
  */
 
@@ -687,7 +687,7 @@
 
 #define QH_EPCHAR_DEVADDR_SHIFT        (0)        /* Bitx 0-6: Device Address */
 #define QH_EPCHAR_DEVADDR_MASK         (0x7f << QH_EPCHAR_DEVADDR_SHIFT)
-#define QH_EPCHAR_I                    (1 << 7)   /* Bit 7: Inactivate on Next Transaction */
+#define QH_EPCHAR_I                    (1 << 7)   /* Bit 7: Deactivate on Next Transaction */
 #define QH_EPCHAR_ENDPT_SHIFT          (8)        /* Bitx 8-11: Endpoint Number */
 #define QH_EPCHAR_ENDPT_MASK           (15 << QH_EPCHAR_ENDPT_SHIFT)
 #define QH_EPCHAR_EPS_SHIFT            (12)       /* Bitx 12-13: Endpoint Speed */
@@ -881,7 +881,7 @@ struct ehci_hcor_s
 
 /* USB2 Debug Port Register Interface.
  *  This register block is normally found via the PCI capabalities.
- * In non-PCI implementions, you need apriori information about the
+ * In non-PCI implementations, you need apriori information about the
  * location of these registers.
  */
 
@@ -901,7 +901,7 @@ struct ehci_debug_s
  * Paragraph 3.1.  An array of pointers.
  */
 
-/* Aysnchronous List Queue Head Pointer.
+/* Asynchronous List Queue Head Pointer.
  * Paragraph 3.2. Circular list of queue heads
  */
 

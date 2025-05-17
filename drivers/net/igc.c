@@ -69,7 +69,7 @@
 /* After RX packet is done, we provide free netpkt to the RX descriptor ring.
  * The upper-half network logic is responsible for freeing the RX packets
  * so we need some additional spare netpkt buffers to assure that it's
- * allways possible to allocate the new RX packet in the recevier logic.
+ * always possible to allocate the new RX packet in the receiver logic.
  * It's hard to tell how many spare buffers is needed, for now it's set to 8.
  */
 
@@ -434,7 +434,7 @@ static void igc_dump_mem(FAR struct igc_driver_s *priv, FAR const char *msg)
  * Name: igc_txclean
  *
  * Description:
- *   Clean transmition ring
+ *   Clean transmission ring
  *
  * Input Parameters:
  *   priv - Reference to the driver state structure
@@ -629,7 +629,7 @@ static FAR netpkt_t * igc_receive(FAR struct netdev_lowerhalf_s *dev)
 
   igc_putreg_mem(priv, IGC_RDT0, desc);
 
-  /* Handle errros */
+  /* Handle errors */
 
   if (rx->errors)
     {
@@ -1062,7 +1062,7 @@ static void igc_disable(FAR struct igc_driver_s *priv)
   igc_putreg_mem(priv, IGC_IMC, IGC_MSIX_IMS);
   up_disable_irq(priv->irq);
 
-  /* Disable Transmiter */
+  /* Disable Transmitter */
 
   igc_putreg_mem(priv, IGC_TCTL, 0);
 
@@ -1184,7 +1184,7 @@ static void igc_enable(FAR struct igc_driver_s *priv)
 
   igc_putreg_mem(priv, IGC_CTRL, IGC_CTRL_SLU);
 
-  /* Setup and enable Transmiter */
+  /* Setup and enable Transmitter */
 
   regval = igc_getreg_mem(priv, IGC_TCTL);
   regval |= IGC_TCTL_EN | IGC_TCTL_PSP;
@@ -1215,7 +1215,7 @@ static void igc_enable(FAR struct igc_driver_s *priv)
 
   igc_rxclean(priv);
 
-  /* All RX descriptors availalbe */
+  /* All RX descriptors available */
 
   igc_putreg_mem(priv, IGC_RDT0, IGC_RX_DESC);
 
@@ -1298,7 +1298,7 @@ static int igc_initialize(FAR struct igc_driver_s *priv)
     }
   else
     {
-      nwarn("Receive Address not vaild!\n");
+      nwarn("Receive Address not valid!\n");
     }
 
   return OK;

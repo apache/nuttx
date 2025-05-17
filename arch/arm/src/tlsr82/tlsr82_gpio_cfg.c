@@ -143,7 +143,7 @@ int tlsr82_gpio_cfg_check(uint32_t cfg, uint32_t mux)
   pinnum = GPIO_PIN2NUM(cfg);
   cfg_af = GPIO_GET(AF, cfg);
 
-  /* ADC and LPC is not configed by gpio mux register */
+  /* ADC and LPC is not configured by gpio mux register */
 
   if ((mux == MUX_ADC) || (mux == MUX_LPC))
     {

@@ -172,7 +172,7 @@ int net_breaklock(FAR unsigned int *count);
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on
- *   failured (probably -ECANCELED).
+ *   failure (probably -ECANCELED).
  *
  ****************************************************************************/
 
@@ -247,7 +247,7 @@ unsigned int net_timeval2dsec(FAR struct timeval *tv,
  *   This, of course, assumes that all MS bits are '1' and all LS bits are
  *   '0' with no intermixed 1's and 0's.  This function searches from the MS
  *   bit until the first '0' is found (this does not necessary mean that
- *   there might not be additional '1' bits following the firs '0', but that
+ *   there might not be additional '1' bits following the first '0', but that
  *   will be a malformed netmask.
  *
  * Input Parameters:
@@ -294,7 +294,7 @@ uint8_t net_ipv6_common_pref(FAR const uint16_t *a1, FAR const uint16_t *a2);
  *   This, of course, assumes that all MS bits are '1' and all LS bits are
  *   '0' with no intermixed 1's and 0's.  This function searches from the MS
  *   bit until the first '0' is found (this does not necessary mean that
- *   there might not be additional '1' bits following the firs '0', but that
+ *   there might not be additional '1' bits following the first '0', but that
  *   will be a malformed netmask.
  *
  * Input Parameters:

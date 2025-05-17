@@ -49,7 +49,7 @@
 
 struct rpmsghci_s
 {
-  /* This must be te first thung in the structure so we can simply cast from
+  /* This must be the first thing in the structure so we can simply cast from
    * struct rpmsghci_s to struct bt_driver_s.
    */
 
@@ -308,8 +308,8 @@ static int rpmsghci_bt_ioctl(FAR struct bt_driver_s *btdev, int cmd,
  *   ept  - The rpmsg endpoint
  *   data - The return message
  *   len  - The return message length
- *   src  - unknow
- *   priv - unknow
+ *   src  - unknown
+ *   priv - unknown
  *
  * Returned Values:
  *   Always OK
@@ -342,8 +342,8 @@ static int rpmsghci_default_handler(FAR struct rpmsg_endpoint *ept,
  *   ept  - The rpmsg endpoint
  *   data - The return message
  *   len  - The return message length
- *   src  - unknow
- *   priv - unknow
+ *   src  - unknown
+ *   priv - unknown
  *
  * Returned Values:
  *   OK on success; A negated errno value is returned on any failure.
@@ -381,8 +381,8 @@ static int rpmsghci_recv_handler(FAR struct rpmsg_endpoint *ept,
  *   ept  - The rpmsg-HCI end point
  *   data - The received data
  *   len  - The received data length
- *   src  - unknow
- *   priv - unknow
+ *   src  - unknown
+ *   priv - unknown
  *
  * Returned Values:
  *   OK on success; A negated errno value is returned on any failure.

@@ -1312,7 +1312,7 @@ static void classd_reset(struct classd_dev_s *priv)
  *   Calculate the right and left attenuation values based on the
  *   volume and balance settings.
  *
- *   The range is limited to 0..78 since any value <77 wil be treated as
+ *   The range is limited to 0..78 since any value <77 will be treated as
  *   mutes.
  *
  *  Input Parameters:

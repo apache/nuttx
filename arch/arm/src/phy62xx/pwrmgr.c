@@ -432,7 +432,7 @@ void hal_pwrmgr_poweroff(pwroff_cfg_t *pcfg, uint8_t wakeup_pin_num)
    *    }
    */
 
-  /*     config reset casue as RSTC_OFF_MODE
+  /*     config reset cause as RSTC_OFF_MODE
    *     reset path walkaround dwc
    */
 

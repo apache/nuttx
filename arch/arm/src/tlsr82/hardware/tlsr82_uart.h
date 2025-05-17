@@ -140,7 +140,7 @@
 #define UART_GET_TX_BUF_CNT()          ((UART_BUF_CNT0_REG & UART_BUF_CNT0_TX_CNT) >>\
                                         UART_BUF_CNT0_TX_CNT_SHIFT)
 
-/* Uart interupt register definitions */
+/* Uart interrupt register definitions */
 
 #define UART_IRQ_REG                   REG_ADDR8(0x9e)
 

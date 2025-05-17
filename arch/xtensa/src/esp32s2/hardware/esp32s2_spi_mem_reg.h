@@ -934,7 +934,7 @@ extern "C"
 
 /* SPI_MEM_TRANS_END_INT_ENA : R/W ;bitpos:[4] ;default: 1'b0 ; */
 
-/* Description: The bit is used to enable the intterrupt of SPI
+/* Description: The bit is used to enable the interrupt of SPI
  * transmitting done.
  */
 

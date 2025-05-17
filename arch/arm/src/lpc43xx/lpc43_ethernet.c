@@ -1660,7 +1660,7 @@ static void lpc43_receive(struct lpc43_ethmac_s *priv)
         }
 
       /* We are finished with the RX buffer.  NOTE:  If the buffer is
-       * re-used for transmission, the dev->d_buf field will have been
+       * reused for transmission, the dev->d_buf field will have been
        * nullified.
        */
 
@@ -1891,7 +1891,7 @@ static void lpc43_interrupt_work(void *arg)
       lpc43_putreg(ETH_DMAINT_NIS, LPC43_ETH_DMASTAT);
     }
 
-  /* Handle error interrupt only if CONFIG_DEBUG_NET is eanbled */
+  /* Handle error interrupt only if CONFIG_DEBUG_NET is enabled */
 
 #ifdef CONFIG_DEBUG_NET
   /* Check if there are pending "abnormal" interrupts */

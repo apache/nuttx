@@ -41,7 +41,7 @@
 
 /* Sizing parameters */
 
-#define IFCELLDEVPARAMSIZ   136 /* Big enough to store cellular net paramters */
+#define IFCELLDEVPARAMSIZ   136 /* Big enough to store cellular net parameters */
 
 /* Network Driver IOCTL Commands ********************************************/
 

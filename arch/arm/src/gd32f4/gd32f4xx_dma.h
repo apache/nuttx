@@ -135,7 +135,7 @@ extern "C"
  *   gd32_dma_channel_free().
  *
  * Input Parameters:
- *   periph_req - Identifies the DMA channle is request by which peripheral
+ *   periph_req - Identifies the DMA channel is request by which peripheral
  *
  * Returned Value:
  *   If periph_req is valid, this function ALWAYS returns a non-NULL

@@ -515,7 +515,7 @@ begin_packed_struct struct ist_s
 
 begin_packed_struct struct tss_s
 {
-  struct ist_s  ist;    /* IST  */
+  struct ist_s  ist;    /* Interrupt Stack Table */
   void         *cpu;    /* CPU private data */
 } end_packed_struct;
 

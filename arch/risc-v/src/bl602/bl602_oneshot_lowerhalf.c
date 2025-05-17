@@ -46,7 +46,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Private definetions */
+/* Private definitions */
 #define TIMER_MAX_VALUE (0xFFFFFFFF)
 #define TIMER_CLK_DIV   (160)
 #define TIMER_CLK_FREQ  (160000000UL / (TIMER_CLK_DIV))

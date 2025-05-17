@@ -704,7 +704,7 @@ static void gnss_push_event(FAR void *priv, FAR const void *data,
  *             instance is bound to the GNSS driver and must persist as long
  *             as the driver persists.
  *   devno   - The user specifies which device of this type, from 0. If the
- *             devno alerady exists, -EEXIST will be returned.
+ *             devno already exists, -EEXIST will be returned.
  *   nbuffer - The number of events that the circular buffer can hold.
  *   count   - The array size of nbuffer.
  *

@@ -672,7 +672,7 @@
 #define  PCI_EXP_DEVCAP2_LTR              0x00000800 /* Latency tolerance reporting */
 #define  PCI_EXP_DEVCAP2_OBFF_MASK        0x000c0000 /* OBFF support mechanism */
 #define  PCI_EXP_DEVCAP2_OBFF_MSG         0x00040000 /* New message signaling */
-#define  PCI_EXP_DEVCAP2_OBFF_WAKE        0x00080000 /* Re-use WAKE# for OBFF */
+#define  PCI_EXP_DEVCAP2_OBFF_WAKE        0x00080000 /* Reuse WAKE# for OBFF */
 #define PCI_EXP_DEVCTL2                   40         /* Device Control 2 */
 #define  PCI_EXP_DEVCTL2_COMP_TIMEOUT     0x000f     /* Completion Timeout Value */
 #define  PCI_EXP_DEVCTL2_ARI              0x0020     /* Alternative Routing-ID */

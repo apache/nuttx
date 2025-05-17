@@ -112,7 +112,7 @@
 #define FLASH_CMD_ERASE_SECTOR               0x20
 #define FLASH_CMD_ERASE_SECURITY_REG         0x44
 
-/* Read the flash uniqe id command
+/* Read the flash unique id command
  * FLASH_CMD_READ_UID1: GD_PUYA_ZB_TH
  * FLASH_CMD_READ_UID2: XTX
  */
@@ -151,7 +151,7 @@
 /* When enable the ble sdk, we can not disable the system timer
  * and rf(ble) interrupt to avoid loss of ble packets. We also
  * need to call sched_lock()/sched_unlock() to avoid task switch
- * beacause sem_post() will be called in ble interrupt (Task
+ * because sem_post() will be called in ble interrupt (Task
  * switch may leads that the chip execute code in flash during
  * the operation of flash).
  */
@@ -245,7 +245,7 @@ static const uint32_t g_support_mid_num =
  * Name: flash_send_cmd
  *
  * Description:
- *   Configurate the gpio drive strength be high/low.
+ *   Configure the gpio drive strength be high/low.
  *
  * Input Parameters:
  *   cmd - GPIO config information
@@ -740,7 +740,7 @@ void tlsr82_flash_calibrate(uint32_t mid)
 
   if ((0xffff == cali_data) || (0 != (cali_data & 0xf8f8)))
     {
-      /* No flash calibration paramters */
+      /* No flash calibration parameters */
 
       finfo("No flash calibration parameters\n");
 
@@ -783,7 +783,7 @@ void tlsr82_flash_calibrate(uint32_t mid)
 
   if (0xff == cali_data)
     {
-      /* No flash calibration paramters */
+      /* No flash calibration parameters */
 
       finfo("No flash calibration parameters\n");
 

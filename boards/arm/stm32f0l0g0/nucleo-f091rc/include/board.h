@@ -73,7 +73,7 @@
  *
  *   - PLL source is HSI       -> 8MHz input (nominal)
  *   - PLL source predivider 2 -> 4MHz divided down PLL VCO clock output
- *   - PLL multipler is 12     -> 48MHz PLL VCO clock output (for USB)
+ *   - PLL multiplier is 12    -> 48MHz PLL VCO clock output (for USB)
  *
  * Resulting SYSCLK frequency is 8MHz x 12 / 2 = 48MHz
  *

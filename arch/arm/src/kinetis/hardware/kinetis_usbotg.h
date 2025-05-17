@@ -88,7 +88,7 @@
 #  define KINETIS_USB_USBFRMADJUST_OFFSET                0x114 /* Frame Adjust Register */
 #  define KINETIS_USB_USB0_CLK_RECOVER_CTRL_OFFSET       0x140 /* USB Clock recovery control */
 #  define KINETIS_USB_USB0_CLK_RECOVER_IRC_EN_OFFSET     0x144 /* IRC48M oscillator enable register */
-#  define KINETIS_USB_USB0_CLK_RECOVER_INT_STATUS_OFFSET 0x15c /* Clock recovery sperated interrupt status */
+#  define KINETIS_USB_USB0_CLK_RECOVER_INT_STATUS_OFFSET 0x15c /* Clock recovery separated interrupt status */
 #endif
 
 /* Register Addresses *******************************************************/

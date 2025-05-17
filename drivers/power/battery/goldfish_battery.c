@@ -233,11 +233,11 @@ static int goldfish_battery_temp(FAR struct battery_gauge_dev_s *dev,
   int32_t regval;
   float temp;
 
-  /* BATTERY_TEMP units is 0.1 celsuis */
+  /* BATTERY_TEMP units is 0.1 celsius */
 
   regval = GOLDFISH_BATTERY_READ(data, BATTERY_TEMP);
 
-  /* convert to unit celsuis and fill b16_t */
+  /* convert to unit celsius and fill b16_t */
 
   temp = regval / 10.0f;
   *value = ftob8(temp);

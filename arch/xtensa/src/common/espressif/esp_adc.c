@@ -139,7 +139,7 @@ struct esp_adc_dev_s
   struct esp_adc_dev_common_s *common;     /* Common ADC driver data */
 
   enum esp_adc_mode_e mode;  /* ADC mode */
-  adc_atten_t atten_mode;    /* Attenuation paramenter */
+  adc_atten_t atten_mode;    /* Attenuation parameter */
   uint32_t atten_k;          /* Attenuation factor */
   uint8_t channels;          /* Total channels for this ADC */
   uint8_t unit;              /* ADC unit number */

@@ -293,7 +293,7 @@ static void x86_64_set_dr(uint8_t i, uint8_t g, uint8_t rw, uint8_t len,
 
       default:
         {
-          _err("unsuported DR %d\n", i);
+          _err("unsupported DR %d\n", i);
           PANIC();
         }
     }
@@ -409,7 +409,7 @@ int up_debugpoint_add(int type, void *addr, size_t size,
 
       default:
         {
-          _err("unsuported debugpoint type %d\n", type);
+          _err("unsupported debugpoint type %d\n", type);
           PANIC();
         }
     }
@@ -510,7 +510,7 @@ int up_debugpoint_remove(int type, void *addr, size_t size)
  * Name: x86_64_hwdebug_init
  *
  * Description:
- *   One-time initializtion for hardware debug interface.
+ *   One-time initialization for hardware debug interface.
  *
  ****************************************************************************/
 

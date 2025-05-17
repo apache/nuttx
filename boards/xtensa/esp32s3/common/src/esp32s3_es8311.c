@@ -115,7 +115,7 @@ int esp32s3_es8311_initialize(int i2c_port, uint8_t i2c_addr, int i2c_freq,
           goto errout;
         }
 
-      /* Check wheter to enable a simple character driver that supports I2S
+      /* Check whether to enable a simple character driver that supports I2S
        * transfers via a read() and write().  The intent of this driver is to
        * support I2S testing.  It is not an audio driver but does conform to
        * some of the buffer management heuristics of an audio driver.  It is

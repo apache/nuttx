@@ -111,7 +111,7 @@ static void x86_64_mb2_config(void)
             {
               /* We have to postpone frame buffer initialization because
                * at this boot stage we can't map >4GB memory yet and it's
-               * possible that frame bufer address is above 4GB.
+               * possible that frame buffer address is above 4GB.
                */
 
               g_mb_fb_tag = (struct multiboot_tag_framebuffer *)tag;

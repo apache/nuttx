@@ -149,7 +149,7 @@ static void gd32_gpio_clock_enable(uint32_t port_base)
 
   regaddr = GD32_RCU_AHB1EN;
 
-  /* Check clock if alreay enable. */
+  /* Check clock if already enable. */
 
   if (rcu_en != (rcu_en & getreg32(regaddr)))
     {
@@ -316,7 +316,7 @@ int gd32_gpio_config(uint32_t cfgset)
 
   port_base = g_gpio_base[port];
 
-  /* Eable the GPIO port clock */
+  /* Enable the GPIO port clock */
 
   gd32_gpio_clock_enable(port_base);
 

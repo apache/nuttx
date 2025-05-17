@@ -83,7 +83,7 @@ void imx9_clockconfig(void)
               IMX9_GPC_CTRL_CMC_MISC_SLEEP_HOLD_EN_FLAG, 0);
 #endif
 
-  /* Cortex-M33 with SM does PLL initalization */
+  /* Cortex-M33 with SM does PLL initialization */
 }
 
 #ifdef CONFIG_IMX9_CLK_OVER_SCMI

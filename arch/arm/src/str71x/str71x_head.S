@@ -312,7 +312,7 @@ eicloop:
 	mov		\value, \irqno, lsl #16
 	str		\value, [\eicbase, \offset]
 
-	/* Increment the offset to the next SIR register and inrement
+	/* Increment the offset to the next SIR register and increment
 	 * the IRQ number.
 	 */
 

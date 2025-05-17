@@ -57,8 +57,8 @@
 #define LEDC_IS_DIV_INVALID(div)  ((div) <= LEDC_LL_FRACTIONAL_MAX || \
                                    (div) > LEDC_TIMER_DIV_NUM_MAX)
 
-/* Precision degree only affects RC_FAST, other clock sources' frequences are
- * fixed values. For targets that do not support RC_FAST calibration, can
+/* Precision degree only affects RC_FAST, other clock sources' frequencies
+ * are fixed values. For targets that do not support RC_FAST calibration, can
  * only use its approximate value.
  */
 
@@ -127,7 +127,7 @@
 #  define LEDC_TIM3_CHANS_OFF     (LEDC_TIM2_CHANS_OFF + LEDC_TIM2_CHANS)
 #endif
 
-/* Unititialized LEDC timer clock */
+/* Uninitialized LEDC timer clock */
 
 #define LEDC_SLOW_CLK_UNINIT      (-1)
 

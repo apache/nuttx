@@ -763,7 +763,7 @@ static ssize_t lirc_read(FAR struct file *filep, FAR char *buffer,
  * Input Parameters:
  *   lower - A pointer to an instance of lower half lirc driver.
  *   devno - The user specifies device number, from 0. If the
- *           devno alerady exists, -EEXIST will be returned.
+ *           devno already exists, -EEXIST will be returned.
  *
  * Returned Value:
  *   OK if the driver was successfully register; A negated errno value is

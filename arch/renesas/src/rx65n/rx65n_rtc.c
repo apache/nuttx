@@ -578,7 +578,7 @@ int rx65n_rtc_setdatetime(const struct tm *tp)
    *   tm_min    0-59  MIN    (0-59)
    *   tm_hour   0-23  HOUR   (0-23)
    *
-   *  *To allow for leap seconds.  But these never actuall happen.
+   *  *To allow for leap seconds.  But these never actually happen.
    */
 
   /* Stop all counters */
@@ -730,7 +730,7 @@ int up_rtc_settime(const struct timespec *tp)
    *   tm_min    0-59  MIN    (0-59)
    *   tm_hour   0-23  HOUR   (0-23)
    *
-   *  *To allow for leap seconds.  But these never actuall happen.
+   *  *To allow for leap seconds.  But these never actually happen.
    */
 
   /* Stop all counters */
@@ -1314,7 +1314,7 @@ int up_rtc_getdatetime(struct tm *tp)
    *   tm_min    0-59  MIN    (0-59)
    *   tm_hour   0-23  HOUR   (0-23)
    *
-   *  *To allow for leap seconds.  But these never actuall happen.
+   *  *To allow for leap seconds.  But these never actually happen.
    */
 
   /* Disable ICU CUP interrupt */

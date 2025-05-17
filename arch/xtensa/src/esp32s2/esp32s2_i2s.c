@@ -917,7 +917,7 @@ static void i2s_tx_schedule(struct esp32s2_i2s_s *priv,
 
       /* Check if the DMA descriptor that generated an EOF interrupt is the
        * last descriptor of the current buffer container's DMA outlink.
-       * REVISIT: what to do if we miss syncronization and the descriptor
+       * REVISIT: what to do if we miss synchronization and the descriptor
        * that generated the interrupt is different from the expected (the
        * oldest of the list containing active transmissions)?
        */
@@ -1016,7 +1016,7 @@ static void i2s_rx_schedule(struct esp32s2_i2s_s *priv,
 
       /* Check if the DMA descriptor that generated an EOF interrupt is the
        * last descriptor of the current buffer container's DMA inlink.
-       * REVISIT: what to do if we miss syncronization and the descriptor
+       * REVISIT: what to do if we miss synchronization and the descriptor
        * that generated the interrupt is different from the expected (the
        * oldest of the list containing active transmissions)?
        */
@@ -1496,7 +1496,7 @@ static void i2s_configure(struct esp32s2_i2s_s *priv)
           modifyreg32(I2S_CONF_REG, I2S_RX_SLAVE_MOD, 0);
         }
 
-      /* Congfigure RX chan bit, audio data bit and mono mode.
+      /* Configure RX chan bit, audio data bit and mono mode.
        * On ESP32-S2, sample_bit should equals to data_bit.
        */
 
@@ -2687,7 +2687,7 @@ struct i2s_dev_s *esp32s2_i2sbus_initialize(void)
   struct esp32s2_i2s_s *priv = NULL;
   irqstate_t flags;
 
-  /* Statically allocated I2S' device strucuture */
+  /* Statically allocated I2S' device structure */
 
   priv = &esp32s2_i2s0_priv;
 

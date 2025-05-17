@@ -679,7 +679,7 @@ FAR struct tcp_conn_s *tcp_alloc(uint8_t domain)
           tmp = (FAR struct tcp_conn_s *)tmp->sconn.node.flink;
         }
 
-      /* Did we find a connection that we can re-use? */
+      /* Did we find a connection that we can reuse? */
 
       if (conn != NULL)
         {

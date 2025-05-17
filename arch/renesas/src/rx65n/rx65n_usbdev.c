@@ -766,7 +766,7 @@ static void hw_usb_write_fifo16(uint16_t pipemode, uint16_t data)
       case USB_D1USE:
         USB0_D1FIFO16 = data;
         break;
-      default :
+      default:
         break;
   }
 }
@@ -792,7 +792,7 @@ static void hw_usb_write_fifo8(uint16_t pipemode, uint8_t data)
       case USB_D1USE:
         USB0_D1FIFO8 = data;
         break;
-      default :
+      default:
         break;
     }
 }
@@ -1204,7 +1204,7 @@ uint16_t usb_pstd_ctrl_read(uint32_t bsize, uint8_t *table)
       case USB_ERROR :
         break;
 
-      default :
+      default:
         break;
     }
 
@@ -5508,7 +5508,7 @@ void usb_pstd_brdy_pipe(uint16_t bitsts, struct rx65n_usbdev_s *priv,
        * which further, unblocks the semaphore waiting
        * on read()
        * Failing to invoke this function will result,
-       * in failiure of application specific read
+       * in failure of application specific read.
        *
        */
 
@@ -5970,7 +5970,7 @@ static int rx65n_usbinterrupt(int irq, void *context, void *arg)
       }
     else
       {
-        /* Vender Specific */
+        /* Vendor Specific */
 
         type = LSBYTE(rx65n_getreg16(RX65N_USB_USBREQ));
         rx65n_ep0setup(priv);

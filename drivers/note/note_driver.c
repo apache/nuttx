@@ -2095,7 +2095,7 @@ void sched_note_filter_tag(FAR struct note_filter_named_tag_s *oldf,
  *   PID - Task ID
  *
  * Returned Value:
- *   Retrun name if task name can be retrieved, otherwise NULL
+ *   Return name if task name can be retrieved, otherwise NULL
  ****************************************************************************/
 
 FAR const char *note_get_taskname(pid_t pid)

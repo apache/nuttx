@@ -51,7 +51,7 @@
  *  NR = REFCLKDIV+1
  *  Fintclk = Fclkin / NR
  *
- * PLLMUL controls multipler on divided input clock (Fintclk):
+ * PLLMUL controls multiplier on divided input clock (Fintclk):
  *
  *  Non-modulated:
  *    NF = (PLLMUL + 256) / 256

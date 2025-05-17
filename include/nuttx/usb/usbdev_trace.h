@@ -406,7 +406,7 @@ struct usbtrace_s
 struct trace_msg_t
 {
   uint16_t        id;   /* 8-bit ID value */
-  FAR const char *str;  /* String assoiciated with the ID */
+  FAR const char *str;  /* String associated with the ID */
 };
 #endif
 

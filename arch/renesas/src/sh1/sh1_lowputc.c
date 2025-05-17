@@ -98,7 +98,7 @@
 #endif
 
 /* The full SMR setting also includes internal clocking with no divisor,
- * aysnchronous operation and multiprocessor disabled:
+ * asynchronous operation and multiprocessor disabled:
  */
 
 #define SH1_SMR_VALUE (SH1_SMR_MODE|SH1_SMR_PARITY|SH1_SMR_STOP)

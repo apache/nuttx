@@ -56,7 +56,7 @@
  *   frequency which is subject to manufacturing process variations.
  *
  * Input Parameters:
- *   Identifies the syncrhonization source for the HSI48.  When used as the
+ *   Identifies the synchronization source for the HSI48.  When used as the
  *   USB source clock, this must be set to SYNCSRC_USB.
  *
  * Returned Value:

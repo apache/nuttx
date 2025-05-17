@@ -99,7 +99,7 @@ if(CONFIG_LIBM_NEWLIB)
 
   set(CSRCS ${COMMON_CSRCS} ${COMPLEX_CSRCS} ${ARCH_CSRCS})
 
-  # aggresive optimisation can replace occurrences of sinl() and cosl() with
+  # aggressive optimisation can replace occurrences of sinl() and cosl() with
   # sincosl(), but sincosl() is missing in newlib which causes error. So let's
   # use custom implementation here.
 

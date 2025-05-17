@@ -146,7 +146,7 @@ struct ipcc_ops_s
    *
    * Description:
    *   Cleans up resources initialized by <arch>_ipcc_init(). If arch code
-   *   malloc()ed any memory, this funciton is responsible of freeing it.
+   *   malloc()ed any memory, this function is responsible of freeing it.
    *   After this function is called, ipcc driver will not access lower
    *   half pointer anymore.
    *

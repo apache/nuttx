@@ -64,7 +64,7 @@ config WL_GS2200M_SYNC_INTERVAL
 		Time interval to recognize dis-association situation.
 		The value indicate n times of Wi-Fi beacon. If the node
 		lost receiving beacon n times, behave as dis-associtaion.
-		Time difference between 2 beacons are approximetely 100 msec.
+		Time difference between 2 beacons are approximately 100 msec.
 		So the unit of the value is 100 ms.
 
 config WL_GS2200M_LOGLEVEL

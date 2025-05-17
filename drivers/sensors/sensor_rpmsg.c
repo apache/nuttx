@@ -1357,7 +1357,7 @@ static void sensor_rpmsg_ept_release(FAR struct rpmsg_endpoint *ept)
   sre = container_of(ept, struct sensor_rpmsg_ept_s, ept);
 
   /* Remove all proxy and stub info in sensor device with the ept
-   * destoryed.
+   * destroyed.
    */
 
   nxrmutex_lock(&g_dev_lock);
@@ -1537,7 +1537,7 @@ void sensor_rpmsg_unregister(FAR struct sensor_lowerhalf_s *lower)
  *
  * Description:
  *   This function initializes the context of sensor rpmsg, registers
- *   rpmsg callback and prepares enviroment to intercat with remote sensor.
+ *   rpmsg callback and prepares environment to interact with remote sensor.
  *
  * Returned Value:
  *   OK on success; A negated errno value is returned on any failure.

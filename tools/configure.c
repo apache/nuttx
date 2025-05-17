@@ -120,7 +120,7 @@ static char        g_delim         = '/';   /* Delimiter to use when forming pat
 static bool        g_winpaths      = false; /* False: POSIX style paths */
 #endif
 static bool        g_debug         = false; /* Enable debug output */
-static bool        g_enforce       = false; /* Enfore distclean */
+static bool        g_enforce       = false; /* Enforce distclean */
 static bool        g_distclean     = false; /* Distclean if configured */
 
 static const char *g_appdir        = NULL;  /* Relative path to the application directory */

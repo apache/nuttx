@@ -60,7 +60,7 @@
 #elif defined(CONFIG_TIVA_UART7_HCIUART)
 #  define HCIUART_SERDEV HCIUART7
 #else
-#  error No HCI UART specifified
+#  error No HCI UART specified
 #endif
 
 /* How many SSI modules does this chip support? */

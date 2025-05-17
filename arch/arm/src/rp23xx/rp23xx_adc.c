@@ -42,7 +42,7 @@
  *
  *    This lower-half supports multiple drivers (/dev/adc0, /dav/dca1, etc.)
  *    that each may read data from any of the ADC ports.  The driver reads
- *    whichever ADC ports are needed by ANY of ther drivers in strict
+ *    whichever ADC ports are needed by ANY of the drivers in strict
  *    round-robin fashion, passing the converted values to the drivers that
  *    needed it.  Data is only passed if the driver is open.
  *
@@ -50,7 +50,7 @@
  *
  *    This code reads the ADC ports at full speed.  At the time this comment
  *    was written, the upper-half will throw away any converted values it
- *    receives when the buffer is full; therefor, if the data is not read
+ *    receives when the buffer is full; therefore, if the data is not read
  *    for a while, the returned values may be stale when finally read. You
  *    can use the ANIOC_RESET_FIFO ioctl call to flush this stale data.
  ****************************************************************************/
@@ -134,7 +134,7 @@ static int  my_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg);
 static const struct adc_ops_s g_adcops =
 {
   .ao_bind     = my_bind,     /*  Called first  during initialization. */
-  .ao_reset    = my_reset,    /*  Called second during intialization.  */
+  .ao_reset    = my_reset,    /*  Called second during initialization. */
   .ao_setup    = my_setup,    /*  Called during first open.            */
   .ao_shutdown = my_shutdown, /*  Called during last close.            */
   .ao_rxint    = my_rxint,    /*  Called to enable/disable interrupts. */

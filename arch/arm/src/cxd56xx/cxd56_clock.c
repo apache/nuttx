@@ -296,7 +296,7 @@ static void do_power_control2(uint32_t reg1, uint32_t mask1, uint32_t stat1,
 
 static inline void release_pwd_reset(uint32_t domain)
 {
-  /* Reset acts only belows
+  /* Reset affects only:
    *   [ 0] SCU
    *   [ 6] SYSIOP_SUB
    *   [ 8] APP

@@ -49,7 +49,7 @@
 #  error "UART1/2 should not be used on SKP16C26"
 #endif
 
-/* Hardware defintitions ****************************************************/
+/* Hardware definitions *****************************************************/
 
 /* Xin Freq */
 

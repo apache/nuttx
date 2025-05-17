@@ -397,7 +397,7 @@ static void nrf52_radioi8_ack_transmit(struct nrf52_radioi8_dev_s *dev)
       pending = true;
     }
 
-  /* Set frame pedning flag for this ACK */
+  /* Set frame pending flag for this ACK */
 
   if (pending)
     {
@@ -582,7 +582,7 @@ static void nrf52_radioi8_dopoll_gts(void *arg)
  * Name: nrf52_radioi8_txstart
  *
  * Description:
- *   Start transmition, TX must be armed (TXEN must be set).
+ *   Start transmission, TX must be armed (TXEN must be set).
  *
  ****************************************************************************/
 
@@ -692,7 +692,7 @@ static int nrf52_radioi8_rxenable(struct nrf52_radioi8_dev_s *dev,
     {
       nrf52_radioi8_trace_put(RADIO_TRACE_RXDISABLE, 0);
 
-      /* Disalbe interrups and shorts */
+      /* Disable interrupts and shorts */
 
       NRF52_RADIO_INTCLR(lower, IEEE802154_RX_INT);
       NRF52_RADIO_SHRTSET(lower, 0);
@@ -792,7 +792,7 @@ static int nrf52_radioi8_setcca(struct nrf52_radioi8_dev_s *dev,
   DEBUGASSERT(dev);
   lower = dev->radio->lower;
 
-  /* Fill radio sturcture */
+  /* Fill radio structure */
 
   memset(&c, 0, sizeof(struct nrf52_radio_cca_s));
 
@@ -839,7 +839,7 @@ static void nrf52_radioi8_norm_setup_buf(struct nrf52_radioi8_dev_s *dev,
 
   nrf52_radioi8_trace_put(RADIO_TRACE_CSMASETUP, csma);
 
-  /* If RX is enabled - we have to temporarly disable it */
+  /* If RX is enabled - we have to temporarily disable it */
 
   if (dev->radio->state.rxenabled)
     {
@@ -1054,14 +1054,14 @@ static void nrf52_radioi8_norm_trigger(struct nrf52_radioi8_dev_s *dev)
       dev->radio->state.waitack = true;
     }
 
-  /* CSMA transmition */
+  /* CSMA transmission */
 
   if (dev->radio->state.state == NRF52_RADIO_STATE_TX_CSMA)
     {
       nrf52_radioi8_trg_csma(dev);
     }
 
-  /* No-CSMA transmition */
+  /* No-CSMA transmission */
 
   else if (dev->radio->state.state == NRF52_RADIO_STATE_TX_NOCSMA)
     {
@@ -1145,7 +1145,7 @@ static int nrf52_radioi8_reset(struct nrf52_radioi8_radio_s *dev)
 
   NRF52_RADIO_RESET(radio);
 
-  /* MAC prameters */
+  /* MAC parameters */
 
   dev->state.max_frame_waittime = IEEE802154_MAX_FRAME_WAITTIME;
   dev->state.max_csma_backoffs  = IEEE802154_MAX_CSMA_BACKOFFS;
@@ -1705,7 +1705,7 @@ static void nrf52_radioi8_state_rx(struct nrf52_radioi8_dev_s *dev)
 
       dev->radio->state.waitack = false;
 
-      /* Get frame pedning flag */
+      /* Get frame pending flag */
 
       dev->radio->state.framepending = rxbuf[1] & 0x10;
 
@@ -1796,7 +1796,7 @@ static void nrf52_radioi8_state_tx(struct nrf52_radioi8_dev_s *dev)
 
           if (dev->radio->state.NB > dev->radio->state.max_csma_backoffs)
             {
-              /* Return fauilure to MAC */
+              /* Return failure to MAC */
 
               if (work_available(&dev->radio->irqwork))
                 {
@@ -1832,7 +1832,7 @@ static void nrf52_radioi8_state_tx(struct nrf52_radioi8_dev_s *dev)
 
           if (dev->radio->state.NB > dev->radio->state.max_csma_backoffs)
             {
-              /* Return fauilure to MAC */
+              /* Return failure to MAC */
 
               if (work_available(&dev->radio->irqwork))
                 {
@@ -2010,7 +2010,7 @@ static int nrf52_radioi8_isr_radio(int irq, void *context, void *arg)
       NRF52_RADIO_PUTREG(lower, NRF52_RADIO_TASKS_DISABLE_OFFSET, 1);
 
       /* Don't wait for the DISABLED event, hopefully the radio will be
-       * disabled by the time we use it again. Max delay is TX->DSIABLED
+       * disabled by the time we use it again. Max delay is TX->DISABLED
        * and takes 21us.
        */
     }

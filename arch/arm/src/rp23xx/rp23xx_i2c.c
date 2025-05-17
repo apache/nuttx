@@ -757,7 +757,7 @@ out:
 
 out_without_reinit:
 
-  /* Release the port for re-use by other clients */
+  /* Release the port for reuse by other clients */
 
   nxmutex_unlock(&priv->lock);
   return ret;

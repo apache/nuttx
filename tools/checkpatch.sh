@@ -33,6 +33,7 @@ spell=0
 encoding=0
 message=0
 cmake_warning_once=0
+codespell_config_file_location_was_shown_once=0
 
 usage() {
   echo "USAGE: ${0} [options] [list|-]"
@@ -125,7 +126,14 @@ check_file() {
   fi
 
   if [ $spell != 0 ]; then
-    if ! codespell -q 7 ${@: -1}; then
+    if [ "$codespell_config_file_location_was_shown_once" != "1" ]; then
+        # show the configuration file location just once during (not for each input file)
+        codespell_args="-q 7"
+        codespell_config_file_location_was_shown_once=1
+    else
+        codespell_args=""
+    fi
+    if ! codespell $codespell_args ${@: -1}; then
       fail=1
     fi
   fi

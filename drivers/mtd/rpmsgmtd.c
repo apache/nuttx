@@ -52,18 +52,18 @@ struct rpmsgmtd_s
   FAR const char       *remotecpu;   /* The server cpu name */
   FAR const char       *remotepath;  /* The device path in the server cpu */
   sem_t                 wait;        /* Wait sem, used for preventing any
-                                      * opreation until the connection
+                                      * operation until the connection
                                       * between two cpu established.
                                       */
   mutex_t               geolock;     /* Get mtd geometry operation mutex */
-  struct mtd_geometry_s geo;         /* MTD geomerty */
+  struct mtd_geometry_s geo;         /* MTD geometry */
 };
 
 /* Rpmsg device cookie used to handle the response from the remote cpu */
 
 struct rpmsgmtd_cookie_s
 {
-  sem_t     sem;     /* Semaphore used fo rpmsg */
+  sem_t     sem;     /* Semaphore used for rpmsg */
   int       result;  /* The return value of the remote call */
   FAR void *data;    /* The return data buffer of the remote call */
 };
@@ -215,7 +215,7 @@ static int rpmsgmtd_get_geometry(FAR struct rpmsgmtd_s *dev,
       return ret;
     }
 
-  /* Return the perviously got geometry */
+  /* Return the previously got geometry */
 
   if (priv->geo.blocksize != 0)
     {
@@ -775,8 +775,8 @@ fail:
  *   ept  - The rpmsg endpoint
  *   data - The return message
  *   len  - The return message length
- *   src  - unknow
- *   priv - unknow
+ *   src  - unknown
+ *   priv - unknown
  *
  * Returned Values:
  *   Always OK
@@ -812,8 +812,8 @@ static int rpmsgmtd_default_handler(FAR struct rpmsg_endpoint *ept,
  *   ept  - The rpmsg endpoint
  *   data - The return message
  *   len  - The return message length
- *   src  - unknow
- *   priv - unknow
+ *   src  - unknown
+ *   priv - unknown
  *
  * Returned Values:
  *   Always OK
@@ -859,8 +859,8 @@ static int rpmsgmtd_bread_handler(FAR struct rpmsg_endpoint *ept,
  *   ept  - The rpmsg endpoint
  *   data - The return message
  *   len  - The return message length
- *   src  - unknow
- *   priv - unknow
+ *   src  - unknown
+ *   priv - unknown
  *
  * Returned Values:
  *   Always OK
@@ -903,8 +903,8 @@ static int rpmsgmtd_read_handler(FAR struct rpmsg_endpoint *ept,
  *   ept  - The rpmsg endpoint
  *   data - The return message
  *   len  - The return message length
- *   src  - unknow
- *   priv - unknow
+ *   src  - unknown
+ *   priv - unknown
  *
  * Returned Values:
  *   Always OK
@@ -939,8 +939,8 @@ static int rpmsgmtd_geometry_handler(FAR struct rpmsg_endpoint *ept,
  *   ept  - The rpmsg endpoint
  *   data - The return message
  *   len  - The return message length
- *   src  - unknow
- *   priv - unknow
+ *   src  - unknown
+ *   priv - unknown
  *
  * Returned Values:
  *   Always OK
@@ -1059,8 +1059,8 @@ static void rpmsgmtd_device_destroy(FAR struct rpmsg_device *rdev,
  *   ept  - The rpmsg-mtd end point
  *   data - The received data
  *   len  - The received data length
- *   src  - unknow
- *   priv - unknow
+ *   src  - unknown
+ *   priv - unknown
  *
  * Returned Values:
  *   OK on success; A negated errno value is returned on any failure.
@@ -1097,7 +1097,7 @@ static int rpmsgmtd_ept_cb(FAR struct rpmsg_endpoint *ept,
  *   remotecpu  - the server cpu name
  *   remotepath - the device you want to access in the remote cpu
  *   localpath  - the device path in local cpu, if NULL, the localpath is
- *                same as the remotepath, provide this argument to supoort
+ *                same as the remotepath, provide this argument to support
  *                custom device path
  *
  * Returned Values:

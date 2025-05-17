@@ -32,7 +32,7 @@ endif
 
 include $(TOPDIR)/boards/Board.mk
 
-# don't use single-colon targets as they may coflict with those included ones.
+# don't use single-colon targets as they may conflict with those included ones.
 # use double-colon targets to avoid collisions below.
 
 ifeq ($(CONFIG_BUILD_KERNEL),y)

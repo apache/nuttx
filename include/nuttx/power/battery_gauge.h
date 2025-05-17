@@ -263,7 +263,7 @@ FAR struct battery_gauge_dev_s *max1704x_initialize(
  * Name: goldfish_battery_register
  *
  * Description:
- *   Register a emulate battery to tyhe upper-half battery driver.
+ *   Register a emulate battery to the upper-half battery driver.
  *
  * Input Parameters:
  *   regs - the base address for the goldfish battery.

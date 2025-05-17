@@ -60,7 +60,7 @@
 vector_isr\intno:
 	cli               /* Disable interrupts firstly. */
 
-	/* CPU has sawitched to the ISR stack using IST */
+	/* CPU has sawitched to the ISR stack using Interrupt Stack Table */
 
 	pushq  $0         /* Push a dummy error code. */
 
@@ -80,7 +80,7 @@ vector_isr\intno:
 vector_isr\intno:
 	cli               /* Disable interrupts firstly. */
 
-	/* CPU has sawitched to the ISR stack using IST */
+	/* CPU has sawitched to the ISR stack using Interrupt Stack Table */
 
 	/* Save rdi, rsi */
 	pushq   %rdi
@@ -98,7 +98,7 @@ vector_isr\intno:
 	vector_irq\irqno:
 	cli               /* Disable interrupts firstly. */
 
-	/* CPU has switched to the IRQ stack using IST */
+	/* CPU has switched to the IRQ stack using Interrupt Stack Table */
 
 	pushq   $0         /* Push a dummy error code. */
 
@@ -813,7 +813,7 @@ irq_common:
 
 	movq    $0x0, (8*REG_AUX)(%rdi)
 
-	/* A context swith will be performed. RAX holds the address of the new
+	/* A context switch will be performed. RAX holds the address of the new
 	 * register save structure.
 	 *
 	 * Jump to x86_64_fullcontextrestore().  We perform a call here, but that function

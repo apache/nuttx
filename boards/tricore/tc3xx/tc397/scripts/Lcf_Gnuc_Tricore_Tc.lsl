@@ -2917,7 +2917,7 @@ SECTIONS
         __DTOR_LIST__ = . ;
         LONG((__DTOR_END__ - __DTOR_LIST__) / 4 - 2);
         /*
-         * Code executed before calling main extra section for C++ distructor init
+         * Code executed before calling main extra section for C++ destructor init
          *  -------------------------Start-----------------------------------------
          */
         KEEP (*crtbegin.o(.dtors))
@@ -2925,7 +2925,7 @@ SECTIONS
         KEEP (*(SORT(.dtors.*)))
         KEEP (*(.dtors))
         /*
-         * Code executed before calling main extra section for C++ distructor init
+         * Code executed before calling main extra section for C++ destructor init
          *  -------------------------End-----------------------------------------
          */
         LONG(0) ;

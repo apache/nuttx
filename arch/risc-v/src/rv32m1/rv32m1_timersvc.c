@@ -91,7 +91,7 @@ uint32_t rv32m1_timersvc_value(void)
 
   uint64_t value = *(volatile uint64_t *)(RV32M1_TSTMR_BASE);
 
-  /* It is ok to return the ONLY low valud caused the it is accumulated
+  /* It is ok to return ONLY the low value because the it is accumulated
    * outside.
    */
 

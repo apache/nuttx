@@ -92,7 +92,7 @@ void board_uart_rxdma_poll_start(void)
  * Name: board_uart_rxdma_poll_stop
  *
  * Description:
- *   This function stops the timer polling UART. No resourses are freed,
+ *   This function stops the timer polling UART. No resources are freed,
  *   time is just stopped and can be started again.
  *
  * Input Parameters:

@@ -2914,7 +2914,7 @@ static void cxd56_epinitialize(struct cxd56_usbdev_s *priv)
 
   priv->usbdev.ep0 = &priv->eplist[0].ep;
 
-  /* Initilialize USB hardware */
+  /* Initialize USB hardware */
 
   for (i = 1; i < CXD56_NENDPOINTS; i++)
     {
@@ -2996,7 +2996,7 @@ static int cxd56_vbusinterrupt(int irq, void *context, void *arg)
     }
 
   /* Notify attach signal.
-   * if class driver not binded, can't get supply curret value.
+   * if class driver not bound, can't get supply current value.
    */
 
   if (!priv->driver)
@@ -3307,7 +3307,7 @@ static void cxd56_usbreset(struct cxd56_usbdev_s *priv)
       mask &= ~(1 << i << (priv->eplist[i].in ? 0 : 16));
       putreg32(mask, CXD56_USB_DEV_EP_INTR_MASK);
 
-      /* DMA descripter setting */
+      /* DMA descriptor setting */
 
       priv->eplist[i].buffer       = NULL;
       priv->eplist[i].desc->status = DESC_BS_HOST_BUSY;

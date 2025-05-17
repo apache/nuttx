@@ -34,7 +34,7 @@
 #include "hpm6300/hpm6300_ioc.h"
 #include "hpm6300/hpm6300_pinmux.h"
 #else
-#error The selected HPM variant is not impelemented
+#error The selected HPM variant is not implemented
 #endif
 
 /****************************************************************************

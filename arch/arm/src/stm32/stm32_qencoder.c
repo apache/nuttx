@@ -1312,7 +1312,7 @@ static int stm32_setindex(struct qe_lowerhalf_s *lower, uint32_t pos)
   struct stm32_lowerhalf_s *priv = (struct stm32_lowerhalf_s *)lower;
   int ret = OK;
 
-  sninfo("Set QE TIM%d the index pin positon %" PRIx32 "\n",
+  sninfo("Set QE TIM%d the index pin position %" PRIx32 "\n",
          priv->config->timid, pos);
   DEBUGASSERT(lower && priv->inuse);
 

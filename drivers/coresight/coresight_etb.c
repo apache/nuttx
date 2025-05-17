@@ -182,7 +182,7 @@ static void etb_hw_read(FAR struct coresight_etb_dev_s *etbdev)
 
   /* ARM recommends that addresses are 128-bit aligned. Read from 0 when ETB
    * buffer is not full, otherwise, read from writepointer and there are some
-   * trace data has been overwriten and lost.
+   * trace data has been overwritten and lost.
    */
 
   readptr = coresight_get32(etbdev->csdev.addr + ETB_RAM_READ_POINTER);

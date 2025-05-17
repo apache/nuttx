@@ -109,7 +109,7 @@ struct aw86225_config
 
   unsigned int sine_array[4];
 
-  /* The boundry between ram mode and rtp mode */
+  /* The boundary between ram mode and rtp mode */
 
   unsigned int effect_id_boundary;
 

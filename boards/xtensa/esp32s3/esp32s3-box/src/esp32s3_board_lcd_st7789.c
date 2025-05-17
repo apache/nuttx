@@ -118,7 +118,7 @@ int board_lcd_initialize(void)
  *   allows support for multiple LCD devices.
  *
  * Input Parameters:
- *   devno - LCD device nmber
+ *   devno - LCD device number
  *
  * Returned Value:
  *   LCD device pointer if success or NULL if failed.

@@ -143,7 +143,7 @@ int reset_control_status(FAR struct reset_control *rstc);
  *   name     - The reset controller name
  *   index    - The reset controller in reset controller device
  *   shared   - Is this a shared (1), or an exclusive (0) reset_control
- *   acquired - flags that used to get a exculsive reset control
+ *   acquired - flags that used to get a exclusive reset control
  *
  * Returned Value:
  *   Return reset_control if success, others return NULL if failed
@@ -310,7 +310,7 @@ reset_control_get_shared(FAR const char *name)
  *   This is to be used to perform a list of resets for a device or power
  *   domain in whatever order. Returns a struct reset_control or NULL errno.
  * Input Parameters:
- *   name  - The controller name symble
+ *   name  - The controller name symbol
  *   index - Index of the reset controller
  *
  * Returned Value:

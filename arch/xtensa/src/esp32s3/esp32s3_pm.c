@@ -224,7 +224,7 @@ static _Atomic uint32_t pm_wakelock = 0;
 inform_out_sleep_overhead_cb_t
   g_periph_inform_out_sleep_overhead_cb[PERIPH_INFORM_OUT_SLEEP_OVERHEAD_NO];
 
-/* Indicates if light sleep shoule be skipped by peripherals. */
+/* Indicates if light sleep should be skipped by peripherals. */
 
 skip_light_sleep_cb_t g_periph_skip_sleep_cb[PERIPH_SKIP_SLEEP_NO];
 
@@ -662,7 +662,7 @@ static int IRAM_ATTR esp32s3_light_sleep_inner(uint32_t pd_flags,
  * Name:  esp32s3_periph_should_skip_sleep
  *
  * Description:
- *   Indicates if light sleep shoule be skipped by peripherals
+ *   Indicates if light sleep should be skipped by peripherals
  *
  * Input Parameters:
  *   None
@@ -756,7 +756,7 @@ int esp32s3_pm_unregister_skip_sleep_callback(skip_light_sleep_cb_t cb)
  * Name:  esp32s3_should_skip_light_sleep
  *
  * Description:
- *   Indicates if light sleep shoule be skipped.
+ *   Indicates if light sleep should be skipped.
  *
  * Input Parameters:
  *   None
@@ -948,8 +948,8 @@ int IRAM_ATTR esp32s3_light_sleep_start(uint64_t *sleep_time)
         esp32s3_rtc_clk_cal(RTC_CAL_RTC_MUX, RTC_CLK_SRC_CAL_CYCLES);
 
   /* Adjustment time consists of parts below:
-   * 1. Hardware time waiting for internal 8M oscilate clock and XTAL;
-   * 2. Hardware state swithing time of the rtc main state machine;
+   * 1. Hardware time waiting for internal 8M oscillate clock and XTAL;
+   * 2. Hardware state switching time of the rtc main state machine;
    * 3. Code execution time when clock is not stable;
    * 4. Code execution time which can be measured;
    */

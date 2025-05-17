@@ -53,7 +53,7 @@ void imx9_mix_powerup(void)
   modifyreg32(IMX9_SRC_ML_SLICE_BASE +
               SRC_SLICE_AUTHEN_CTRL_OFFSET, 0, BIT(9));
 
-  /* Enable s400 handsake */
+  /* Enable s400 handshake */
 
   modifyreg32(IMX9_BLK_CTRL_S_AONMIX2_BASE +
               AON_MIX_LP_HANDSAKE, 0, BIT(13));

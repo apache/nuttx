@@ -605,7 +605,7 @@ static inline int nxffs_wropen(FAR struct nxffs_volume_s *volume,
                 }
 
               /* Then just break out of the loop reporting success.  Note
-               * that the alllocated inode name string is retained; it
+               * that the allocated inode name string is retained; it
                * will be needed later to calculate the inode CRC.
                */
 

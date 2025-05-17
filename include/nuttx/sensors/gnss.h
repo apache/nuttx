@@ -163,7 +163,7 @@ struct gnss_lowerhalf_s
 
   /* Lower half driver pushes raw data by calling this function.
    * It is provided by upper half driver to lower half driver,
-   * if paramenter is_nmea is true, the data includes nmea message.
+   * if parameter is_nmea is true, the data includes nmea message.
    */
 
   gnss_push_data_t push_data;
@@ -207,7 +207,7 @@ extern "C"
  *             instance is bound to the GNSS driver and must persist as long
  *             as the driver persists.
  *   devno   - The user specifies which device of this type, from 0. If the
- *             devno alerady exists, -EEXIST will be returned.
+ *             devno already exists, -EEXIST will be returned.
  *   nbuffer - The number of events that the circular buffer can hold.
  *   count   - The array size of nbuffer.
  *

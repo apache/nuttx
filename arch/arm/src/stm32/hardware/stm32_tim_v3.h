@@ -472,7 +472,7 @@
 #define ATIM_CR2_OIS3N                 (1 << 13)                          /* Bit 13: Output Idle state 3 (OC3N output) */
 #define ATIM_CR2_OIS4                  (1 << 14)                          /* Bit 14: Output Idle state 4 (OC4 output) */
 #define ATIM_CR2_OIS4N                 (1 << 15)                          /* Bit 15: Output Idle state 4 (OC4N output) */
-#define ATIM_CR2_OIS5                  (1 << 16)                          /* Bit 16: OOutput Idle state 5 (OC5 output) */
+#define ATIM_CR2_OIS5                  (1 << 16)                          /* Bit 16: Output Idle state 5 (OC5 output) */
 #define ATIM_CR2_OIS6                  (1 << 18)                          /* Bit 18: Output Idle state 6 (OC6 output) */
 #define ATIM_CR2_MMS2_SHIFT            (20)                               /* Bits 20-23: Master Mode Selection 2 */
 #define ATIM_CR2_MMS2_MASK             (0xf << ATIM_CR2_MMS2_SHIFT)

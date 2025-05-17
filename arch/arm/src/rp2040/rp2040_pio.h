@@ -876,7 +876,7 @@ static inline void rp2040_pio_sm_clkdiv_restart(uint32_t pio, uint32_t sm)
  *   machines and wish to resynchronise them), and that disabling a state
  *   machine does not halt its clock divider: that is, if multiple state
  *   machines have their clocks synchronised, you can safely disable and
- *   reenable one of the state machines without losing synchronisation.
+ *   re-enable one of the state machines without losing synchronisation.
  *
  * Input Parameters:
  *   pio - PIO index (0..1)

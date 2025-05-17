@@ -108,7 +108,7 @@ void weak_function kl_spidev_initialize(void);
  * Name: kl_usbinitialize
  *
  * Description:
- *   Called from kl_usbinitialize very early in inialization to setup
+ *   Called from kl_usbinitialize very early in initialization to setup
  *   USB-related GPIO pins for the Freedom KL26Z board.
  *
  ****************************************************************************/

@@ -169,7 +169,7 @@ int esp_nxdiag_read_flash_status(uint32_t *status)
  * Name: esp_nxdiag_read_mac
  *
  * Description:
- *   Read MAC adress.
+ *   Read MAC address.
  *
  * Input Parameters:
  *   mac - Mac address to return.
@@ -234,7 +234,7 @@ static ssize_t esp_nxdiag_read(struct file *filep,
   ret = esp_nxdiag_read_mac(mac);
   if (ret != OK)
     {
-      printf("Failed to fetch MAC adress\n\n");
+      printf("Failed to fetch MAC address\n\n");
     }
   else
     {

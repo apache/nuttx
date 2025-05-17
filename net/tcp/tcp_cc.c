@@ -123,7 +123,7 @@ void tcp_cc_init(FAR struct tcp_conn_s *conn)
  * Name: tcp_cc_update
  *
  * Description:
- *   Update the congestion control variables when recieve the SYNACK/ACK
+ *   Update the congestion control variables when receive the SYNACK/ACK
  *   packet from the peer in the connection phase.
  *
  * Input Parameters:

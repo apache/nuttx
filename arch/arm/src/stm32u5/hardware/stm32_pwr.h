@@ -190,7 +190,7 @@
 #define PWR_SVMSR_REGS_LDO       0                         /* 0: LDO selected */
 #define PWR_SVMSR_REGS_SMPS      PWR_SVMSR_REGS            /* 1: SMPS selected */
 #define PWR_SVMSR_PVDO           (1 <<  4)                 /* Bit 4: Programmable voltage detector output */
-#define PWR_SVMSR_ACTVOSRDY      (1 << 15)                 /* Bit 15: Voltage level ready for currenty used VOS */
+#define PWR_SVMSR_ACTVOSRDY      (1 << 15)                 /* Bit 15: Voltage level ready for currently used VOS */
 #define PWR_SVMSR_ACTVOS_SHIFT   16
 #define PWR_SVMSR_ACTVOS_MASK    (3 << PWR_SVMSR_ACTVOS_SHIFT) /* Bits 16-17: VOS currently applied to V_CORE */
 #define PWR_SVMSR_ACTVOS_RANGE4  (0 << PWR_SVMSR_ACTVOS_SHIFT) /* 00: Range 4 (lowest power) */

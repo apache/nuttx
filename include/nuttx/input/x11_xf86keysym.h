@@ -118,7 +118,7 @@
 #define XF86XK_ApplicationRight 0x1008FF51   /* switch to application, right*/
 #define XF86XK_Book             0x1008FF52   /* Launch bookreader           */
 #define XF86XK_CD               0x1008FF53   /* Launch CD/DVD player        */
-#define XF86XK_Calculater       0x1008FF54   /* Launch Calculater           */
+#define XF86XK_Calculater       0x1008FF54   /* Launch Calculator           */
 #define XF86XK_Clear            0x1008FF55   /* Clear window, screen        */
 #define XF86XK_Close            0x1008FF56   /* Close window                */
 #define XF86XK_Copy             0x1008FF57   /* Copy selection              */
@@ -152,7 +152,7 @@
 #define XF86XK_RotationKB       0x1008FF76   /* don't use                   */
 #define XF86XK_Save             0x1008FF77   /* Save (file, document, state */
 #define XF86XK_ScrollUp         0x1008FF78   /* Scroll window/contents up   */
-#define XF86XK_ScrollDown       0x1008FF79   /* Scrool window/contentd down */
+#define XF86XK_ScrollDown       0x1008FF79   /* Scroll window/contentd down */
 #define XF86XK_ScrollClick      0x1008FF7A   /* Use XKB mousekeys instead   */
 #define XF86XK_Send             0x1008FF7B   /* Send mail, file, object     */
 #define XF86XK_Spell            0x1008FF7C   /* Spell checker               */

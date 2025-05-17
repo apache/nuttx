@@ -73,7 +73,7 @@ struct rpmsgdev_s
   FAR const char       *remotecpu;   /* The server cpu name */
   FAR const char       *remotepath;  /* The device path in the server cpu */
   sem_t                 wait;        /* Wait sem, used for preventing any
-                                      * opreation until the connection
+                                      * operation until the connection
                                       * between two cpu established.
                                       */
   uint32_t              flags;       /* Read and write special handle flags */
@@ -83,7 +83,7 @@ struct rpmsgdev_s
 
 struct rpmsgdev_cookie_s
 {
-  sem_t     sem;     /* Semaphore used fo rpmsg */
+  sem_t     sem;     /* Semaphore used for rpmsg */
   int       result;  /* The return value of the remote call */
   FAR void *data;    /* The return data buffer of the remote call */
 };
@@ -321,7 +321,7 @@ static void rpmsgdev_wait_cb(FAR struct pollfd *fds)
  *   not NONBLOCKED to avoid the server rptun thread blocked in file_read()
  *   or file_write(). By calling this function before sending the READ or
  *   WRITE command to server, a simulated blocked read/write operation is
- *   achived.
+ *   achieved.
  *
  * Parameters:
  *   filep  - the file instance
@@ -863,8 +863,8 @@ fail:
  *   ept  - The rpmsg endpoint
  *   data - The return message
  *   len  - The return message length
- *   src  - unknow
- *   priv - unknow
+ *   src  - unknown
+ *   priv - unknown
  *
  * Returned Values:
  *   Always OK
@@ -900,8 +900,8 @@ static int rpmsgdev_default_handler(FAR struct rpmsg_endpoint *ept,
  *   ept  - The rpmsg endpoint
  *   data - The return message
  *   len  - The return message length
- *   src  - unknow
- *   priv - unknow
+ *   src  - unknown
+ *   priv - unknown
  *
  * Returned Values:
  *   Always OK
@@ -945,8 +945,8 @@ static int rpmsgdev_read_handler(FAR struct rpmsg_endpoint *ept,
  *   ept  - The rpmsg endpoint
  *   data - The return message
  *   len  - The return message length
- *   src  - unknow
- *   priv - unknow
+ *   src  - unknown
+ *   priv - unknown
  *
  * Returned Values:
  *   Always OK
@@ -982,8 +982,8 @@ static int rpmsgdev_ioctl_handler(FAR struct rpmsg_endpoint *ept,
  *   ept  - The rpmsg endpoint
  *   data - The return message
  *   len  - The return message length
- *   src  - unknow
- *   priv - unknow
+ *   src  - unknown
+ *   priv - unknown
  *
  * Returned Values:
  *   Always OK
@@ -1097,8 +1097,8 @@ static void rpmsgdev_device_destroy(FAR struct rpmsg_device *rdev,
  *   ept  - The rpmsg-device end point
  *   data - The received data
  *   len  - The received data length
- *   src  - unknow
- *   priv - unknow
+ *   src  - unknown
+ *   priv - unknown
  *
  * Returned Values:
  *   OK on success; A negated errno value is returned on any failure.
@@ -1135,7 +1135,7 @@ static int rpmsgdev_ept_cb(FAR struct rpmsg_endpoint *ept,
  *   remotecpu  - the server cpu name
  *   remotepath - the device you want to access in the remote cpu
  *   localpath  - the device path in local cpu, if NULL, the localpath is
- *                same as the remotepath, provide this argument to supoort
+ *                same as the remotepath, provide this argument to support
  *                custom device path
  *   flags      - RPMSGDEV_NOFRAG_READ and RPMSGDEV_NOFRAG_WRITE can be set
  *                to indicates that the read and write data of the device

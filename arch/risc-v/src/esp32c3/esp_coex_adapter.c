@@ -316,7 +316,7 @@ void IRAM_ATTR esp_coex_common_task_yield_from_isr_wrapper(void)
  *   Create and initialize semaphore
  *
  * Input Parameters:
- *   max  - No meanining for NuttX
+ *   max  - No meaning for NuttX
  *   init - semaphore initialization value
  *
  * Returned Value:
