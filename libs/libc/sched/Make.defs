@@ -39,6 +39,10 @@ ifneq ($(CONFIG_BUILD_KERNEL),y)
 CSRCS += task_startup.c
 endif # CONFIG_BUILD_KERNEL
 
+ifeq ($(CONFIG_ARCH_HAVE_PERF_EVENTS_USER_ACCESS),y)
+  CSRCS += clock_perf.c
+endif
+
 # Add the sched directory to the build
 
 DEPPATH += --dep-path sched
