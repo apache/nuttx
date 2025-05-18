@@ -31,7 +31,13 @@
 #include <nuttx/spinlock.h>
 #include <nuttx/wdog.h>
 
-#if defined(CONFIG_PERF_OVERFLOW_CORRECTION) && ULONG_MAX != UINT64_MAX
+#ifndef CONFIG_ARCH_HAVE_PERF_EVENTS_USER_ACCESS
+
+/****************************************************************************
+ * Preprocessors
+ ****************************************************************************/
+
+#  if defined(CONFIG_PERF_OVERFLOW_CORRECTION) && ULONG_MAX != UINT64_MAX
 
 /****************************************************************************
  * Private Types
@@ -104,8 +110,8 @@ clock_t perf_gettime(void)
   return result;
 }
 
-#elif defined(CONFIG_ALARM_ARCH) || defined (CONFIG_TIMER_ARCH) || \
-      defined(CONFIG_ARCH_PERF_EVENTS)
+#  elif defined(CONFIG_ALARM_ARCH) || defined (CONFIG_TIMER_ARCH) || \
+        defined(CONFIG_ARCH_PERF_EVENTS)
 
 /****************************************************************************
  * perf_gettime
@@ -116,7 +122,7 @@ clock_t perf_gettime(void)
   return up_perf_gettime();
 }
 
-#else
+#  else
 
 /****************************************************************************
  * perf_gettime
@@ -127,7 +133,8 @@ clock_t perf_gettime(void)
   return clock_systime_ticks();
 }
 
-#endif
+#  endif
+#endif /* !CONFIG_ARCH_HAVE_PERF_EVENTS_USER_ACCESS */
 
 #if defined(CONFIG_ALARM_ARCH) || defined (CONFIG_TIMER_ARCH) || \
     defined(CONFIG_ARCH_PERF_EVENTS)
