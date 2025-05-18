@@ -43,4 +43,8 @@ if(NOT CONFIG_BUILD_KERNEL)
   list(APPEND SRCS task_startup.c)
 endif()
 
+if(CONFIG_ARCH_HAVE_PERF_EVENTS_USER_ACCESS)
+  list(APPEND SRCS clock_perf.c)
+endif()
+
 target_sources(c PRIVATE ${SRCS})

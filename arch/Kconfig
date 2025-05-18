@@ -605,6 +605,13 @@ config ARCH_HAVE_PERF_EVENTS
 	---help---
 		The architecture supports hardware performance counting.
 
+config ARCH_HAVE_PERF_EVENTS_USER_ACCESS
+	bool
+	default n
+	select ARCH_HAVE_PERF_EVENTS
+	---help---
+		Select if hardware allows userspace perf counter access.
+
 config ARCH_PERF_EVENTS
 	bool "Configure hardware performance counting"
 	default y if SCHED_CRITMONITOR || SCHED_IRQMONITOR || RPMSG_PING || SEGGER_SYSVIEW
