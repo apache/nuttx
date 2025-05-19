@@ -4120,6 +4120,7 @@ config SAMA5_OHCI
 	default n
 	select USBHOST
 	select USBHOST_HAVE_ASYNCH
+	select USBHOST_WAITER
 	---help---
 		Build support for the SAMA5 USB full speed Open Host Controller
 		Interface (OHCI).
@@ -4156,6 +4157,7 @@ config SAMA5_EHCI
 	default n
 	select USBHOST
 	select USBHOST_HAVE_ASYNCH
+	select USBHOST_WAITER
 	---help---
 		Build support for the SAMA5 USB high speed Enhanced Host Controller
 		Interface (EHCI).  If low/full speed is needed too, then you must
