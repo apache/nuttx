@@ -42,7 +42,7 @@
  *
  *    This lower-half supports multiple drivers (/dev/adc0, /dav/dca1, etc.)
  *    that each may read data from any of the ADC ports.  The driver reads
- *    whichever ADC ports are needed by ANY of ther drivers in strict
+ *    whichever ADC ports are needed by ANY of the drivers in strict
  *    round-robin fashion, passing the converted values to the drivers that
  *    needed it.  Data is only passed if the driver is open.
  *
@@ -50,7 +50,7 @@
  *
  *    This code reads the ADC ports at full speed.  At the time this comment
  *    was written, the upper-half will throw away any converted values it
- *    receives when the buffer is full; therefor, if the data is not read
+ *    receives when the buffer is full; therefore, if the data is not read
  *    for a while, the returned values may be stale when finally read. You
  *    can use the ANIOC_RESET_FIFO ioctl call to flush this stale data.
  ****************************************************************************/
@@ -134,7 +134,7 @@ static int  my_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg);
 static const struct adc_ops_s g_adcops =
 {
   .ao_bind     = my_bind,     /*  Called first  during initialization. */
-  .ao_reset    = my_reset,    /*  Called second during intialization.  */
+  .ao_reset    = my_reset,    /*  Called second during initialization. */
   .ao_setup    = my_setup,    /*  Called during first open.            */
   .ao_shutdown = my_shutdown, /*  Called during last close.            */
   .ao_rxint    = my_rxint,    /*  Called to enable/disable interrupts. */
@@ -162,7 +162,8 @@ static uint8_t               g_active_count     = 0;
  *   ADC interrupt handler.  Note that this one handler is shared between
  *   all ADC devices.
  *
- *  Note: This is called from inside an interrupt service routine.
+ *   Note: This is called from inside an interrupt service routine.
+ *
  ****************************************************************************/
 
 static int interrupt_handler(int irq, void *context, void *arg)
@@ -242,7 +243,8 @@ static int interrupt_handler(int irq, void *context, void *arg)
  *   Update g_current_channel to point to next channel in use and start
  *   the conversion.
  *
- *  Note: This is called from inside a critical section.
+ *   Note: This is called from inside a critical section.
+ *
  ****************************************************************************/
 
 static void get_next_channel(void)
@@ -324,7 +326,8 @@ static void get_next_channel(void)
  *   This function is called to link the device int the device list.
  *   It also makes sure ADC reads are taking place
  *
- *  Note: This is called from inside a critical section.
+ *   Note: This is called from inside a critical section.
+ *
  ****************************************************************************/
 
 static void add_device(struct adc_dev_s *dev)
@@ -381,7 +384,8 @@ static void add_device(struct adc_dev_s *dev)
  * Description:
  *   This function is called to unlink the device from the device list.
  *
- *  Note: This is called from inside a critical section.
+ *   Note: This is called from inside a critical section.
+ *
  ****************************************************************************/
 
 void remove_device(struct adc_dev_s *dev)
@@ -486,7 +490,8 @@ static void my_reset(struct adc_dev_s *dev)
  *
  *   We don't do anything here.
  *
- *  Note: This is called from inside a critical section.
+ *   Note: This is called from inside a critical section.
+ *
  ****************************************************************************/
 
 static int my_setup(struct adc_dev_s *dev)
@@ -516,11 +521,12 @@ static int my_setup(struct adc_dev_s *dev)
  * Name: my_shutdown
  *
  * Description:
- *  This is called to shutdown an ADC device.  It unlinks the
- *  device from out local chain and turns off ADC interrupts if no
- *  more devices are active.
+ *   This is called to shutdown an ADC device.  It unlinks the
+ *   device from out local chain and turns off ADC interrupts if no
+ *   more devices are active.
  *
- *  Note: This is called from inside a critical section.
+ *   Note: This is called from inside a critical section.
+ *
  ****************************************************************************/
 
 static void my_shutdown(struct adc_dev_s *dev)
@@ -538,7 +544,8 @@ static void my_shutdown(struct adc_dev_s *dev)
  * Description:
  *   Call to enable or disable ADC RX interrupts
  *
- *  Note: This is called from inside a critical section.
+ *   Note: This is called from inside a critical section.
+ *
  ****************************************************************************/
 
 static void my_rxint(struct adc_dev_s *dev, bool enable)
@@ -561,7 +568,7 @@ static void my_rxint(struct adc_dev_s *dev, bool enable)
  * Name: my_ioctl
  *
  * Description:
- *  All ioctl calls will be routed through this method
+ *   All ioctl calls will be routed through this method
  *
  ****************************************************************************/
 
@@ -599,6 +606,7 @@ static int my_ioctl(struct adc_dev_s *dev,
  * Returned Value:
  *   An opaque pointer that can be passed to rp23xx_adc_release on
  *   success or NULL (with errno set) on failure
+ *
  ****************************************************************************/
 
 int rp23xx_adc_setup(const char *path,

@@ -496,8 +496,10 @@ static int rp2040_flash_ioctl(struct mtd_dev_s *dev,
 /****************************************************************************
  * Name: rp2040_flash_initialize
  *
- * Description: Bind a block mode driver that uses the built-in rp2040
- * flash programming commands for read/write access to unused flash.
+ * Description:
+ *   Bind a block mode driver that uses the built-in rp2040
+ *   flash programming commands for read/write access to unused flash.
+ *
  ****************************************************************************/
 
 struct mtd_dev_s *rp2040_flash_mtd_initialize(void)

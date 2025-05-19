@@ -252,6 +252,7 @@ EXTERN const uint32_t g_gpio_base[GD32_NGPIO_PORTS];
  * Return value:
  *   OK on success
  *   A negated errno value on invalid port or mode.
+ *
  ****************************************************************************/
 
 int gd32_gpio_config(uint32_t cfgset);

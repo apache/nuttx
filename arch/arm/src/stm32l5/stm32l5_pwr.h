@@ -120,6 +120,7 @@ bool stm32l5_pwr_enableusv(bool set);
  *
  * Returned Value:
  *   True: The bit was previously set.
+ *
  ****************************************************************************/
 
 bool stm32l5_pwr_vddio2_valid(bool set);

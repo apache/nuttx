@@ -410,6 +410,7 @@ static void flash_lock_opt(void)
  *
  *   -EFAULT: Block number provided falls outside of the ranges specified in
  *            reference manual.
+ *
  ****************************************************************************/
 
 static int flash_verify_blocknum(size_t block)
@@ -451,6 +452,7 @@ static int flash_verify_blocknum(size_t block)
  *   This function assumes the block number has already been verified. Take
  *   care to make sure the block number is valid for the specific chip using
  *   flash_verify_blocknum() first.
+ *
  ****************************************************************************/
 
 static uint32_t flash_block_address(size_t block)

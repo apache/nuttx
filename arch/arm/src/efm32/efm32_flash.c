@@ -209,6 +209,7 @@ void efm32_flash_unlock(void)
  *   -EBUSY     - Busy timeout.
  *   -EINVAL    - Operation tried to access a non-flash area.
  *   -EACCES    - Operation tried to access a locked area of the flash.
+ *
  ****************************************************************************/
 
 int __ramfunc__ msc_load_verify_address(uint32_t *address)

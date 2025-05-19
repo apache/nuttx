@@ -149,7 +149,7 @@ static void gd32_gpio_clock_enable(uint32_t port_base)
 
   regaddr = GD32_RCU_AHB1EN;
 
-  /* Check clock if alreay enable. */
+  /* Check clock if already enable. */
 
   if (rcu_en != (rcu_en & getreg32(regaddr)))
     {
@@ -213,6 +213,7 @@ static inline bool gd32_gpio_input_get(uint32_t port_base, uint32_t pin)
  *
  * Description:
  *   Configure a GPIO pin as the Alternative function.
+ *
  ****************************************************************************/
 
 static void gd32_gpio_af_config(uint32_t cfgset, uint32_t port_base,
@@ -246,6 +247,7 @@ static void gd32_gpio_af_config(uint32_t cfgset, uint32_t port_base,
  *
  * Description:
  *   Configure a GPIO pin's Alternative function as reset value.
+ *
  ****************************************************************************/
 
 static void gd32_gpio_af_unconfig(uint32_t cfgset, uint32_t port_base,

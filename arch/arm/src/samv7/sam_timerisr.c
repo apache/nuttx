@@ -110,6 +110,7 @@ static int sam_timerisr(int irq, uint32_t *regs, void *arg)
  *
  * Assumptions:
  *   Called from within critical section or interrupt context.
+ *
  ****************************************************************************/
 
 #ifdef CONFIG_CLOCK_ADJTIME
