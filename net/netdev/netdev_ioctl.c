@@ -1026,26 +1026,50 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
 #endif
 
       case SIOCSIFFLAGS:  /* Sets the interface flags */
+#ifdef CONFIG_NET_ARP
 
-        /* Is this a request to bring the interface up? */
+        /* Is this a request to set the IFF_NOARP flag? */
 
-        if ((req->ifr_flags & IFF_UP) != 0)
+        if (IFF_IS_NOARP(req->ifr_flags) != IFF_IS_NOARP(dev->d_flags))
           {
-            /* Yes.. bring the interface up */
+            if (IFF_IS_NOARP(req->ifr_flags))
+              {
+                /* Yes. Set the IFF_NOARP flag */
 
-            ret = netdev_ifup(dev);
+                IFF_SET_NOARP(dev->d_flags);
+              }
+            else
+              {
+                /* No. Clear the IFF_NOARP flag */
+
+                IFF_CLR_NOARP(dev->d_flags);
+              }
+          }
+#endif
+
+        /* Is this a request to bring the interface up/down? */
+
+        if (IFF_IS_UP(req->ifr_flags) != IFF_IS_UP(dev->d_flags))
+          {
+            if (IFF_IS_UP(req->ifr_flags))
+              {
+                /* Yes.. bring the interface up */
+
+                ret = netdev_ifup(dev);
 #ifdef CONFIG_NET_ARP_ACD
-            /* having address then start acd */
+                /* having address then start acd */
 
-            arp_acd_setup(dev);
+                arp_acd_setup(dev);
 #endif /* CONFIG_NET_ARP_ACD */
-          }
-        else
-          {
-            /* Yes.. take the interface down */
+              }
+            else
+              {
+                /* Yes.. take the interface down */
 
-            ret = netdev_ifdown(dev);
+                ret = netdev_ifdown(dev);
+              }
           }
+
         break;
 
       case SIOCGIFFLAGS:  /* Gets the interface flags */

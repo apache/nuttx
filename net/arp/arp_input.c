@@ -196,6 +196,15 @@ void arp_input(FAR struct net_driver_s *dev)
 {
   FAR uint8_t *buf;
 
+  if (IFF_IS_NOARP(dev->d_flags))
+    {
+      /* No arp */
+
+      ninfo("ARP not supported on %s, no receive!\n", dev->d_ifname);
+      dev->d_len = 0;
+      return;
+    }
+
   if (dev->d_iob != NULL)
     {
       buf = dev->d_buf;
