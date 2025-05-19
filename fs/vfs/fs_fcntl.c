@@ -43,19 +43,12 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: file_vfcntl
+ * Name: fd_vfcntl
  ****************************************************************************/
 
-static int file_vfcntl(FAR struct file *filep, int cmd, va_list ap)
+static int fd_vfcntl(int fd, int cmd, va_list ap)
 {
   int ret = -EINVAL;
-
-  /* Was this file opened ? */
-
-  if (!filep->f_inode)
-    {
-      return -EBADF;
-    }
 
   switch (cmd)
     {
@@ -73,13 +66,13 @@ static int file_vfcntl(FAR struct file *filep, int cmd, va_list ap)
         {
           /* Does not set the errno variable in the event of a failure */
 
-          ret = file_dup(filep, va_arg(ap, int), 0);
+          ret = nx_dup(fd, va_arg(ap, int), 0);
         }
         break;
 
       case F_DUPFD_CLOEXEC:
         {
-          ret = file_dup(filep, va_arg(ap, int), O_CLOEXEC);
+          ret = nx_dup(fd, va_arg(ap, int), O_CLOEXEC);
         }
         break;
 
@@ -91,7 +84,7 @@ static int file_vfcntl(FAR struct file *filep, int cmd, va_list ap)
          */
 
         {
-          ret = filep->f_oflags & O_CLOEXEC ? FD_CLOEXEC : 0;
+          ret = fs_getcloseonexec(fd);
         }
         break;
 
@@ -104,25 +97,35 @@ static int file_vfcntl(FAR struct file *filep, int cmd, va_list ap)
          */
 
         {
-          int oflags = va_arg(ap, int);
-
-          if (oflags & ~FD_CLOEXEC)
-            {
-              ret = -ENOSYS;
-              break;
-            }
-
-          if (oflags & FD_CLOEXEC)
-            {
-              ret = file_ioctl(filep, FIOCLEX, NULL);
-            }
-          else
-            {
-              ret = file_ioctl(filep, FIONCLEX, NULL);
-            }
+          ret = fs_setcloseonexec(fd, va_arg(ap, int));
         }
         break;
 
+      default:
+        ret = -ENOSYS;
+        break;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: file_vfcntl
+ ****************************************************************************/
+
+static int file_vfcntl(FAR struct file *filep, int cmd, va_list ap)
+{
+  int ret = -EINVAL;
+
+  /* Was this file opened ? */
+
+  if (!filep->f_inode)
+    {
+      return -EBADF;
+    }
+
+  switch (cmd)
+    {
       case F_GETFL:
         /* Get the file status flags and file access modes, defined in
          * <fcntl.h>, for the file description associated with fd. The file
@@ -347,17 +350,28 @@ int fcntl(int fd, int cmd, ...)
 
   va_start(ap, cmd);
 
-  /* Get the file structure corresponding to the file descriptor. */
+  /* Try fd_vfcntl() first */
 
-  ret = fs_getfilep(fd, &filep);
-  if (ret >= 0)
+  ret = fd_vfcntl(fd, cmd, ap);
+  if (ret < 0)
     {
-      /* Let file_vfcntl() do the real work.  The errno is not set on
-       * failures.
-       */
+      /* Get the file structure corresponding to the file descriptor. */
 
-      ret = file_vfcntl(filep, cmd, ap);
-      fs_putfilep(filep);
+      ret = fs_getfilep(fd, &filep);
+      if (ret >= 0)
+        {
+          /* Must reset the variable argument list */
+
+          va_end(ap);
+          va_start(ap, cmd);
+
+          /* Let file_vfcntl() do the real work.  The errno is not set on
+           * failures.
+           */
+
+          ret = file_vfcntl(filep, cmd, ap);
+          fs_putfilep(filep);
+        }
     }
 
   if (ret < 0)

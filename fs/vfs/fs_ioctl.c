@@ -26,11 +26,14 @@
 
 #include <nuttx/config.h>
 
+#include <stdarg.h>
 #include <sys/ioctl.h>
 #include <sched.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <assert.h>
+
+#include <nuttx/spinlock.h>
 
 #include "inode/inode.h"
 #include "lock.h"
@@ -38,6 +41,94 @@
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: fd_vioctl
+ ****************************************************************************/
+
+static int fd_vioctl(int fd, int req, va_list ap)
+{
+  FAR struct fdlist *list;
+  FAR struct fd *fdp;
+  irqstate_t flags;
+  unsigned long arg;
+  int ret;
+
+  /* arg is potentially unused */
+
+  UNUSED(arg);
+
+  /* Get the file descriptor list.  It should not be NULL in this context. */
+
+  list = nxsched_get_fdlist();
+
+  /* Check the incoming parameters */
+
+  if (fd < 0 || fd >= fdlist_count(list))
+    {
+      return -EBADF;
+    }
+
+  arg = va_arg(ap, unsigned long);
+
+  /* Run the command atomically */
+
+  flags = spin_lock_irqsave_notrace(&list->fl_lock);
+
+  /* The file must be open */
+
+  fdp = fdlist_fdget(list, fd);
+  if (fdp->f_file == NULL)
+    {
+      ret = -EBADF;
+      goto errout_with_lock;
+    }
+
+  switch (req)
+    {
+      case FIOCLEX:
+        fdp->f_cloexec = true;
+        ret = OK;
+        break;
+
+      case FIONCLEX:
+        fdp->f_cloexec = false;
+        ret = OK;
+        break;
+
+#ifdef CONFIG_FDSAN
+      case FIOC_SETTAG_FDSAN:
+        fdp->f_tag_fdsan = *(FAR uint64_t *)arg;
+        ret = OK;
+        break;
+
+      case FIOC_GETTAG_FDSAN:
+        *(FAR uint64_t *)arg = fdp->f_tag_fdsan;
+        ret = OK;
+        break;
+#endif
+
+#ifdef CONFIG_FDCHECK
+      case FIOC_SETTAG_FDCHECK:
+        fdp->f_tag_fdcheck = *(FAR uint8_t *)arg;
+        ret = OK;
+        break;
+
+      case FIOC_GETTAG_FDCHECK:
+        *(FAR uint8_t *)arg = fdp->f_tag_fdcheck;
+        ret = OK;
+        break;
+#endif
+
+      default:
+        ret = -ENOSYS;
+        break;
+    }
+
+errout_with_lock:
+  spin_unlock_irqrestore_notrace(&list->fl_lock, flags);
+  return ret;
+}
 
 /****************************************************************************
  * Name: file_vioctl
@@ -89,22 +180,6 @@ static int file_vioctl(FAR struct file *filep, int req, va_list ap)
           }
         break;
 
-      case FIOCLEX:
-        if (ret == OK || ret == -ENOTTY)
-          {
-            filep->f_oflags |= O_CLOEXEC;
-            ret = OK;
-          }
-        break;
-
-      case FIONCLEX:
-        if (ret == OK || ret == -ENOTTY)
-          {
-            filep->f_oflags &= ~O_CLOEXEC;
-            ret = OK;
-          }
-        break;
-
       case FIOC_FILEPATH:
         if (ret == -ENOTTY && !INODE_IS_MOUNTPT(inode))
           {
@@ -134,30 +209,6 @@ static int file_vioctl(FAR struct file *filep, int req, va_list ap)
                              false);
           }
         break;
-
-#ifdef CONFIG_FDSAN
-      case FIOC_SETTAG_FDSAN:
-        filep->f_tag_fdsan = *(FAR uint64_t *)arg;
-        ret = OK;
-        break;
-
-      case FIOC_GETTAG_FDSAN:
-        *(FAR uint64_t *)arg = filep->f_tag_fdsan;
-        ret = OK;
-        break;
-#endif
-
-#ifdef CONFIG_FDCHECK
-      case FIOC_SETTAG_FDCHECK:
-        filep->f_tag_fdcheck = *(FAR uint8_t *)arg;
-        ret = OK;
-        break;
-
-      case FIOC_GETTAG_FDCHECK:
-        *(FAR uint8_t *)arg = filep->f_tag_fdcheck;
-        ret = OK;
-        break;
-#endif
 
 #ifndef CONFIG_DISABLE_MOUNTPOINT
       case BIOC_BLKSSZGET:
@@ -264,29 +315,39 @@ int ioctl(int fd, int req, ...)
   va_list ap;
   int ret;
 
-  /* Get the file structure corresponding to the file descriptor. */
-
-  ret = fs_getfilep(fd, &filep);
-  if (ret < 0)
-    {
-      goto err;
-    }
-
-  /* Let file_vioctl() do the real work. */
+  /* Setup to access the variable argument list */
 
   va_start(ap, req);
-  ret = file_vioctl(filep, req, ap);
-  va_end(ap);
 
-  fs_putfilep(filep);
+  /* Try fd_vioctl() first */
+
+  ret = fd_vioctl(fd, req, ap);
   if (ret < 0)
     {
-      goto err;
+      /* Get the file structure corresponding to the file descriptor. */
+
+      ret = fs_getfilep(fd, &filep);
+      if (ret >= 0)
+        {
+          /* Must reset the variable argument list */
+
+          va_end(ap);
+          va_start(ap, req);
+
+          /* Let file_vioctl() do the real work. */
+
+          ret = file_vioctl(filep, req, ap);
+          fs_putfilep(filep);
+        }
     }
 
-  return ret;
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      ret = ERROR;
+    }
 
-err:
-  set_errno(-ret);
-  return ERROR;
+  va_end(ap);
+
+  return ret;
 }
