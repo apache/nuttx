@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM64_SRC_BCM2711_IRQ_H
-#define __ARCH_ARM64_SRC_BCM2711_IRQ_H
+#ifndef __ARCH_ARM64_INCLUDE_BCM2711_IRQ_H
+#define __ARCH_ARM64_INCLUDE_BCM2711_IRQ_H
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -122,8 +122,6 @@
 #define BCM_IRQ_VC_EMMC BCM_IRQ_VC(62)
 #define BCM_IRQ_VC_ETHPCIESEC BCM_IRQ_VC(63)
 
-/* TODO: what about PACTL_CS address section 6.2.4? */
-
 /* ETH_PCIe interrupts */
 
 #define BCM_IRQ_ETH_BASE 160
@@ -143,4 +141,4 @@
 #define BCM_IRQ_ARMLOCAL_IRQ_SOURCEN_MAILBOX_CORE3_IRQ (1 << 4)
 #define BCM_IRQ_ARMLOCAL_IRQ_SOURCEN_CNT_V_IRQ (1 << 3)
 
-#endif // __ARCH_ARM64_SRC_BCM2711_IRQ_H
+#endif // __ARCH_ARM64_INCLUDE_BCM2711_IRQ_H

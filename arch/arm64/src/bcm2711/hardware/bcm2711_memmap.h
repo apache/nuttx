@@ -103,6 +103,10 @@
 #define BCM_DMA15_BASE                                                       \
   (BCM_PERIPHERAL_BASEADDR + 0x000e05000) /* DMA Channel 15 */
 
+/* PACTL register address */
+
+#define BCM_PACTL_CS (BCM_PERIPHERAL_BASEADDR + 0x204e00)
+
 /* ARM_LOCAL base address */
 
 #if defined(CONFIG_BCM2711_LOW_PERIPHERAL)
