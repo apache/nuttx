@@ -138,12 +138,6 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
               ethhdr->type = pstate->addr->sll_protocol;
               dev->d_len += NET_LL_HDRLEN(dev);
             }
-
-          /* Make sure no ARP request overwrites this ARP request.  This
-           * flag will be cleared in arp_out().
-           */
-
-          IFF_SET_NOARP(dev->d_flags);
         }
 
 end_wait:

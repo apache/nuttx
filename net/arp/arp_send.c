@@ -134,12 +134,6 @@ static uint16_t arp_send_eventhandler(FAR struct net_driver_s *dev,
 
       arp_format(dev, state->snd_ipaddr);
 
-      /* Make sure no ARP request overwrites this ARP request.  This
-       * flag will be cleared in arp_out().
-       */
-
-      IFF_SET_NOARP(dev->d_flags);
-
       /* Don't allow any further call backs. */
 
       arp_send_terminate(dev, state, OK);
@@ -274,6 +268,14 @@ int arp_send(in_addr_t ipaddr)
     {
       /* Yes.. We don't need to send the ARP request */
 
+      return OK;
+    }
+
+  /* No ARP packet if this device do not support ARP */
+
+  if (IFF_IS_NOARP(dev->d_flags))
+    {
+      ninfo("ARP not supported on %s, no send!\n", dev->d_ifname);
       return OK;
     }
 

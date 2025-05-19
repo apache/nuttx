@@ -236,7 +236,7 @@ void arp_acd_update(FAR struct net_driver_s *dev)
 
 void arp_acd_setup(FAR struct net_driver_s *dev)
 {
-  if (dev->d_acd.need_announce == false)
+  if (!dev->d_acd.need_announce || IFF_IS_NOARP(dev->d_flags))
     {
       return;
     }

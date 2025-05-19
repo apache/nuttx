@@ -53,7 +53,7 @@
 #define IFF_IPv6           (1 << 3)  /* Configured for IPv6 packet (vs ARP or IPv4) */
 #define IFF_LOOPBACK       (1 << 5)  /* Is a loopback net */
 #define IFF_POINTOPOINT    (1 << 6)  /* Is point-to-point link */
-#define IFF_NOARP          (1 << 7)  /* ARP is not required for this packet */
+#define IFF_NOARP          (1 << 7)  /* ARP is not required for this interface */
 #define IFF_NAT            (1 << 8)  /* NAT is enabled for this interface */
 #define IFF_SLAVE          (1 << 11) /* Slave of a load balancer. */
 #define IFF_MULTICAST      (1 << 12) /* Supports multicast. */

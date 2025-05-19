@@ -150,20 +150,6 @@ void arp_out(FAR struct net_driver_s *dev)
       return;
     }
 
-#if defined(CONFIG_NET_PKT) || defined(CONFIG_NET_ARP_SEND)
-  /* Skip sending ARP requests when the frame to be transmitted was
-   * written into a packet socket.
-   */
-
-  if (IFF_IS_NOARP(dev->d_flags))
-    {
-      /* Clear the indication and let the packet continue on its way. */
-
-      IFF_CLR_NOARP(dev->d_flags);
-      return;
-    }
-#endif
-
   /* Find the destination IP address in the ARP table and construct
    * the Ethernet header. If the destination IP address isn't on the
    * local network, we use the default router's IP address instead.
@@ -265,6 +251,15 @@ void arp_out(FAR struct net_driver_s *dev)
   ret = arp_find(ipaddr, ethaddr.ether_addr_octet, dev, false);
   if (ret < 0)
     {
+      /* No send ARP if the interface forbidden */
+
+      if (IFF_IS_NOARP(dev->d_flags))
+        {
+          ninfo("ARP not supported on %s, no send!\n", dev->d_ifname);
+          dev->d_len = 0;
+          return;
+        }
+
       ninfo("ARP request for IP %08lx\n", (unsigned long)ipaddr);
 
       /* The destination address was not in our ARP table, so we overwrite

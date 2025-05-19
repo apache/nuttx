@@ -259,6 +259,14 @@ int icmpv6_neighbor(FAR struct net_driver_s *dev,
 #endif
     }
 
+  /* No ARP packet if this device do not support ARP */
+
+  if (IFF_IS_NOARP(dev->d_flags))
+    {
+      ninfo("ARP not supported on %s, no send!\n", dev->d_ifname);
+      return -EHOSTUNREACH;
+    }
+
   /* Allocate resources to receive a callback.  This and the following
    * initialization is performed with the network lock because we don't
    * want anything to happen until we are ready.
