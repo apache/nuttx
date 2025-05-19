@@ -513,8 +513,9 @@ static int rp2040_i2c_send(struct rp2040_i2cdev_s *priv, int last)
  * Description:
  *   Perform a sequence of I2C transfers
  *
- * TODO: Multiple i2c_msg_s read operations with the same address are not
- * currently guaranteed.
+ *   TODO: Multiple i2c_msg_s read operations with the same address are not
+ *   currently guaranteed.
+ *
  ****************************************************************************/
 
 static int rp2040_i2c_transfer(struct i2c_master_s *dev,
@@ -756,7 +757,7 @@ out:
 
 out_without_reinit:
 
-  /* Release the port for re-use by other clients */
+  /* Release the port for reuse by other clients */
 
   nxmutex_unlock(&priv->lock);
   return ret;

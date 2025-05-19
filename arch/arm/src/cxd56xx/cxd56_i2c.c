@@ -484,7 +484,8 @@ static int cxd56_i2c_interrupt(int irq, void *context, void *arg)
  *   if the interrupt occurs when the writing request.
  *   Actual receiving data is in RX_FULL interrupt handler.
  *
- * TODO : The argument "last" is not used.
+ *   TODO : The argument "last" is not used.
+ *
  ****************************************************************************/
 
 static int cxd56_i2c_receive(struct cxd56_i2cdev_s *priv, int last)
@@ -588,8 +589,9 @@ static int cxd56_i2c_send(struct cxd56_i2cdev_s *priv, int last)
  * Description:
  *   Perform a sequence of I2C transfers
  *
- * TODO: Multiple i2c_msg_s read operations with the same address are not
- * currently guaranteed.
+ *   TODO: Multiple i2c_msg_s read operations with the same address are not
+ *         currently guaranteed.
+ *
  ****************************************************************************/
 
 static int cxd56_i2c_transfer(struct i2c_master_s *dev,
@@ -833,7 +835,7 @@ out:
 
   cxd56_i2c_clock_gate_enable(priv->port);
 
-  /* Release the port for re-use by other clients */
+  /* Release the port for reuse by other clients */
 
   nxmutex_unlock(&priv->lock);
   return ret;

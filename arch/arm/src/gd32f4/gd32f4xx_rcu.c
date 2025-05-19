@@ -652,6 +652,7 @@ void gd32_rcu_ckout0_config(uint32_t src, uint32_t div)
  * Description:
  *   Configure the CK_OUT0 clock source and divider. CK_OUT0 is connected
  *   to PC9. PC9 should be configured in alternate function mode.
+ *
  ****************************************************************************/
 
 void gd32_rcu_ckout1_config(uint32_t src, uint32_t div)

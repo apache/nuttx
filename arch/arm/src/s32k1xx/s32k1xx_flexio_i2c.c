@@ -661,8 +661,9 @@ int s32k1xx_flexio_i2cbus_uninitialize(struct i2c_master_s *dev)
  * Description:
  *   Perform a sequence of I2C transfers
  *
- * TODO: Multiple i2c_msg_s read operations with the same address are not
- * currently guaranteed.
+ *   TODO: Multiple i2c_msg_s read operations with the same address are not
+ *   currently guaranteed.
+ *
  ****************************************************************************/
 
 static int s32k1xx_flexio_i2c_transfer(struct i2c_master_s *dev,

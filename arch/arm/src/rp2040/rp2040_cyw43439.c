@@ -78,7 +78,7 @@ typedef struct dma_info_s
  * to one less than the total number of BITS to be transmitted.
  *
  * The Y register is the input bit count register.  It too must be set
- * to one less thant the total number of bits to be read.
+ * to one less than the total number of bits to be read.
  *
  * The PIO's state machine is set up to auto-pull data from the input
  * fifo whenever the output shift register is empty.  This happens at
@@ -640,7 +640,7 @@ static int my_read(struct gspi_dev_s   *gspi,
    * word we set X to 31.
    *
    * We load Y with the number of bits to read.  This is based on the
-   * byte count in "length" which we round up to a 32-bit boundry so the
+   * byte count in "length" which we round up to a 32-bit boundary so the
    * pio program will be sure to autopush the final data to the output fifo.
    *
    * This is slightly magical.  The way we load the X is to first
@@ -775,6 +775,7 @@ static int my_read(struct gspi_dev_s   *gspi,
  *
  * Description:
  *   Initialize the cyw43439 private data and PIO communication.
+ *
  ****************************************************************************/
 
 gspi_dev_t *rp2040_cyw_setup(uint8_t gpio_on,
@@ -853,6 +854,7 @@ gspi_dev_t *rp2040_cyw_setup(uint8_t gpio_on,
  *
  * Description:
  *   Deinitialize the cyw43439 PIO communication.
+ *
  ****************************************************************************/
 
 void rp2040_cyw_remove(gspi_dev_t *gspi)

@@ -753,6 +753,7 @@ static inline bool stm32_rcc_enablepll(void)
  * Pre-conditions:
  *   rcc_reset() and rcc_resetbkp() have been called and the HSI is
  *   the MCU's SYSCLK.
+ *
  ****************************************************************************/
 
 static void stm32_stdclockconfig(void)
