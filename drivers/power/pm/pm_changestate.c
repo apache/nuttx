@@ -35,8 +35,6 @@
 
 #include "pm.h"
 
-#ifdef CONFIG_PM
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -390,5 +388,3 @@ enum pm_state_e pm_querystate(int domain)
   DEBUGASSERT(domain >= 0 && domain < CONFIG_PM_NDOMAINS);
   return g_pmdomains[domain].state;
 }
-
-#endif /* CONFIG_PM */

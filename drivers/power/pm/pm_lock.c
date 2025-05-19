@@ -28,8 +28,6 @@
 #include <nuttx/power/pm.h>
 #include "pm.h"
 
-#if defined(CONFIG_PM)
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -71,5 +69,3 @@ void pm_domain_unlock(int domain, irqstate_t flags)
 {
   spin_unlock_irqrestore(&g_pmdomains[domain].lock, flags);
 }
-
-#endif /* CONFIG_PM */

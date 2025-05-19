@@ -34,8 +34,6 @@
 #include <nuttx/power/pm.h>
 #include "pm.h"
 
-#if defined(CONFIG_PM)
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -121,5 +119,3 @@ void pm_auto_update(int domain, bool auto_update)
   pdom->auto_update = auto_update;
   pm_domain_unlock(domain, flags);
 }
-
-#endif /* CONFIG_PM */

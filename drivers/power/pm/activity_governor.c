@@ -36,8 +36,6 @@
 
 #include "pm.h"
 
-#ifdef CONFIG_PM_GOVERNOR_ACTIVITY
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -601,5 +599,3 @@ FAR const struct pm_governor_s *pm_activity_governor_initialize(void)
 {
   return &g_pmgovernor;
 }
-
-#endif /* CONFIG_PM_GOVERNOR_ACTIVITY */
