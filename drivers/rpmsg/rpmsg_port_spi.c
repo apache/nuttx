@@ -312,7 +312,7 @@ static void rpmsg_port_spi_exchange(FAR struct rpmsg_port_spi_s *rpspi)
   rpmsg_port_spi_pm_action(rpspi, true);
   SPI_SELECT(rpspi->spi, rpspi->devid, true);
   SPI_EXCHANGE(rpspi->spi, txhdr, rpspi->rxhdr,
-               RPMSG_PORT_SPI_BYTES2WORDS(rpspi, rpspi->cmdhdr->len));
+               RPMSG_PORT_SPI_BYTES2WORDS(rpspi, rpspi->port.txq.len));
 
   rpspi->rxavail = txhdr->avail;
 }
@@ -772,6 +772,7 @@ rpmsg_port_spi_initialize(FAR const struct rpmsg_port_config_s *cfg,
   rpspi->rxhdr = rpmsg_port_queue_get_available_buffer(
     &rpspi->port.rxq, true);
   DEBUGASSERT(rpspi->cmdhdr != NULL && rpspi->rxhdr != NULL);
+  rpspi->cmdhdr->len = sizeof(struct rpmsg_port_header_s);
 
   rpspi->rxthres = rpmsg_port_queue_navail(&rpspi->port.rxq) *
                    CONFIG_RPMSG_PORT_SPI_RX_THRESHOLD / 100;
