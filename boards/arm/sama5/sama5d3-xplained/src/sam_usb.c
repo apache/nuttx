@@ -52,14 +52,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_SAMA5D3XPLAINED_USBHOST_PRIO
-#  define CONFIG_SAMA5D3XPLAINED_USBHOST_PRIO 50
-#endif
-
-#ifndef CONFIG_SAMA5D3XPLAINED_USBHOST_STACKSIZE
-#  define CONFIG_SAMA5D3XPLAINED_USBHOST_STACKSIZE 1024
-#endif
-
 #ifdef HAVE_USBDEV
 #  undef CONFIG_SAMA5_UHPHS_RHPORT1
 #endif
@@ -67,15 +59,6 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
-
-/* Retained device driver handles */
-
-#ifdef CONFIG_SAMA5_OHCI
-static struct usbhost_connection_s *g_ohciconn;
-#endif
-#ifdef CONFIG_SAMA5_EHCI
-static struct usbhost_connection_s *g_ehciconn;
-#endif
 
 /* Overcurrent interrupt handler */
 
@@ -88,86 +71,6 @@ static xcpt_t g_ochandler;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: usbhost_waiter
- *
- * Description:
- *   Wait for USB devices to be connected to either the OHCI or EHCI hub.
- *
- ****************************************************************************/
-
-#ifdef HAVE_USBHOST
-#ifdef CONFIG_DEBUG_USB
-static int usbhost_waiter(struct usbhost_connection_s *dev,
-                          const char *hcistr)
-#else
-static int usbhost_waiter(struct usbhost_connection_s *dev)
-#endif
-{
-  struct usbhost_hubport_s *hport;
-
-  uinfo("Running\n");
-  for (; ; )
-    {
-      /* Wait for the device to change state */
-
-      DEBUGVERIFY(CONN_WAIT(dev, &hport));
-      uinfo("%s\n", hport->connected ? "connected" : "disconnected");
-
-      /* Did we just become connected? */
-
-      if (hport->connected)
-        {
-          /* Yes.. enumerate the newly connected device */
-
-          CONN_ENUMERATE(dev, hport);
-        }
-    }
-
-  /* Keep the compiler from complaining */
-
-  return 0;
-}
-#endif
-
-/****************************************************************************
- * Name: ohci_waiter
- *
- * Description:
- *   Wait for USB devices to be connected to the OHCI hub.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SAMA5_OHCI
-static int ohci_waiter(int argc, char *argv[])
-{
-#ifdef CONFIG_DEBUG_USB
-  return usbhost_waiter(g_ohciconn, "OHCI");
-#else
-  return usbhost_waiter(g_ohciconn);
-#endif
-}
-#endif
-
-/****************************************************************************
- * Name: ehci_waiter
- *
- * Description:
- *   Wait for USB devices to be connected to the EHCI hub.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SAMA5_EHCI
-static int ehci_waiter(int argc, char *argv[])
-{
-#ifdef CONFIG_DEBUG_USB
-  return usbhost_waiter(g_ehciconn, "EHCI");
-#else
-  return usbhost_waiter(g_ehciconn);
-#endif
-}
-#endif
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -175,7 +78,7 @@ static int ehci_waiter(int argc, char *argv[])
  * Name: sam_usbinitialize
  *
  * Description:
- *   Called from sam_usbinitialize very early in inialization to setup
+ *   Called from sam_usbinitialize very early in initialization to setup
  *   USB-related GPIO pins for the SAMA5D3-Xplained board.
  *
  * USB Ports
@@ -290,6 +193,13 @@ int sam_usbhost_initialize(void)
 {
   int ret;
 
+#ifdef CONFIG_SAMA5_OHCI
+  struct usbhost_connection_s *ohciconn;
+#endif
+#ifdef CONFIG_SAMA5_EHCI
+  struct usbhost_connection_s *ehciconn;
+#endif
+
   /* First, register all of the class drivers needed to support the drivers
    * that we care about
    */
@@ -359,18 +269,17 @@ int sam_usbhost_initialize(void)
 #ifdef CONFIG_SAMA5_OHCI
   /* Get an instance of the USB OHCI interface */
 
-  g_ohciconn = sam_ohci_initialize(0);
-  if (!g_ohciconn)
+  ohciconn = sam_ohci_initialize(0);
+  if (!ohciconn)
     {
       uerr("ERROR: sam_ohci_initialize failed\n");
       return -ENODEV;
     }
 
-  /* Start a thread to handle device connection. */
+  /* Initialize waiter */
 
-  ret = kthread_create("OHCI Monitor", CONFIG_SAMA5D3XPLAINED_USBHOST_PRIO,
-                       CONFIG_SAMA5D3XPLAINED_USBHOST_STACKSIZE,
-                       ohci_waiter, NULL);
+  ret = usbhost_waiter_initialize(ohciconn);
+
   if (ret < 0)
     {
       uerr("ERROR: Failed to create ohci_waiter task: %d\n", ret);
@@ -381,18 +290,17 @@ int sam_usbhost_initialize(void)
 #ifdef CONFIG_SAMA5_EHCI
   /* Get an instance of the USB EHCI interface */
 
-  g_ehciconn = sam_ehci_initialize(0);
-  if (!g_ehciconn)
+  ehciconn = sam_ehci_initialize(0);
+  if (!ehciconn)
     {
       uerr("ERROR: sam_ehci_initialize failed\n");
       return -ENODEV;
     }
 
-  /* Start a thread to handle device connection. */
+  /* Initialize waiter */
 
-  ret = kthread_create("EHCI Monitor", CONFIG_SAMA5D3XPLAINED_USBHOST_PRIO,
-                       CONFIG_SAMA5D3XPLAINED_USBHOST_STACKSIZE,
-                       ehci_waiter, NULL);
+  ret = usbhost_waiter_initialize(ehciconn);
+
   if (ret < 0)
     {
       uerr("ERROR: Failed to create ehci_waiter task: %d\n", ret);
