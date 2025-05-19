@@ -42,15 +42,18 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: file_dup3
+ * Name: file_dup2
  *
  * Description:
  *   Assign an inode to a specific files structure.  This is the heart of
- *   dup3.
+ *   dup2.
  *
- *   Equivalent to the non-standard dup3() function except that it
+ *   Equivalent to the non-standard dup2() function except that it
  *   accepts struct file instances instead of file descriptors and it does
  *   not set the errno variable.
+ *
+ *   As it deals with file structures, the file descriptor flags are NOT
+ *   inherited.
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is return on
@@ -58,7 +61,7 @@
  *
  ****************************************************************************/
 
-int file_dup3(FAR struct file *filep1, FAR struct file *filep2, int flags)
+int file_dup2(FAR struct file *filep1, FAR struct file *filep2)
 {
   FAR struct inode *inode;
   int ret;
@@ -66,11 +69,6 @@ int file_dup3(FAR struct file *filep1, FAR struct file *filep2, int flags)
   if (filep1 == NULL || filep1->f_inode == NULL || filep2 == NULL)
     {
       return -EBADF;
-    }
-
-  if (flags != 0 && flags != O_CLOEXEC)
-    {
-      return -EINVAL;
     }
 
   if (filep1 == filep2)
@@ -83,27 +81,13 @@ int file_dup3(FAR struct file *filep1, FAR struct file *filep2, int flags)
   inode = filep1->f_inode;
   inode_addref(inode);
 
-  /* If there is already an inode contained in the new file structure,
-   * close the file and release the inode.
-   * But we need keep the filep2->f_inode, in case of realloced by others.
-   */
+  /* Close the second file */
 
-  ret = file_close_without_clear(filep2);
+  ret = file_close(filep2);
   if (ret < 0)
     {
       inode_release(inode);
       return ret;
-    }
-
-  /* The two filep don't share flags (the close-on-exec flag). */
-
-  if (flags == O_CLOEXEC)
-    {
-      filep2->f_oflags = filep1->f_oflags | O_CLOEXEC;
-    }
-  else
-    {
-      filep2->f_oflags = filep1->f_oflags & ~O_CLOEXEC;
     }
 
   filep2->f_priv  = NULL;
@@ -163,40 +147,7 @@ int file_dup3(FAR struct file *filep1, FAR struct file *filep2, int flags)
         }
     }
 
-  /* Copy tag */
-
-#ifdef CONFIG_FDSAN
-  filep2->f_tag_fdsan = filep1->f_tag_fdsan;
-#endif
-
-#ifdef CONFIG_FDCHECK
-  filep2->f_tag_fdcheck = filep1->f_tag_fdcheck;
-#endif
-
-  FS_ADD_BACKTRACE(filep2);
   return OK;
-}
-
-/****************************************************************************
- * Name: file_dup2
- *
- * Description:
- *   Assign an inode to a specific files structure.  This is the heart of
- *   dup2.
- *
- *   Equivalent to the non-standard dup2() function except that it
- *   accepts struct file instances instead of file descriptors and it does
- *   not set the errno variable.
- *
- * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is return on
- *   any failure.
- *
- ****************************************************************************/
-
-int file_dup2(FAR struct file *filep1, FAR struct file *filep2)
-{
-  return file_dup3(filep1, filep2, 0);
 }
 
 /****************************************************************************
