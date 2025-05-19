@@ -345,6 +345,12 @@ config ESPRESSIF_LEDC
 	select PWM
 	select ARCH_HAVE_PWM_MULTICHAN
 
+config ESPRESSIF_SHA_ACCELERATOR
+	bool "SHA Accelerator"
+	default n
+	---help---
+		Enable SHA accelerator support.
+
 config ESPRESSIF_ADC
 	bool "Analog-to-digital converter (ADC)"
 	default n

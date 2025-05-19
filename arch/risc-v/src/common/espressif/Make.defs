@@ -170,6 +170,14 @@ ifeq ($(CONFIG_ESPRESSIF_ADC),y)
 CHIP_CSRCS += esp_adc.c
 endif
 
+ifeq ($(CONFIG_ESPRESSIF_SHA_ACCELERATOR),y)
+	CHIP_CSRCS += esp_sha.c
+endif
+
+ifeq ($(CONFIG_CRYPTO_CRYPTODEV_HARDWARE),y)
+	CHIP_CSRCS += esp_crypto.c
+endif
+
 #############################################################################
 # Espressif HAL for 3rd Party Platforms
 #############################################################################
