@@ -4,6 +4,26 @@ Raspberry Pi 4B
 
 .. tags:: chip:bcm2711, experimental
 
+.. warning::
+
+   The board support for this device is experimental. Not all features are
+   implemented and they have not been extensively tested by many users.
+
+   Help is wanted if you are interested in supporting a feature or if you've
+   found an issue with any of the implementation! See :doc:`the contributing
+   guidelines </contributing/index>`.
+
+.. warning::
+
+   The SPI driver implemented for the :doc:`BCM2711 <../../index>` has only been
+   tested on SPI0. It appears that even using the special `overlays
+   <https://github.com/raspberrypi/linux/blob/stable/arch/arm/boot/dts/overlays/README>`_
+   for the device tree passed to the proprietary firmware does not properly
+   initialize the remaining SPI interfaces, and thus they have not been working
+   properly. More effort is required to reverse engineer the magic incantations
+   required to initialize these interfaces, at which point it is assumed that
+   the driver implementation should extend to SPI3-6.
+
 The `Raspberry Pi 4B <https://www.raspberrypi.com/products/raspberry-pi-4-model-b/specifications/>`_ is an ARM64
 hobbyist board created by Raspberry Pi.
 
@@ -139,17 +159,14 @@ Board Peripheral Support
 
 SMP is currently unsupported.
 
+To see support for general chip peripherals (I2C, SPI, UART, etc), see the
+:doc:`BCM2711 page <../../index>`
+
 NuttX for the Raspberry Pi 4 supports these on-board peripherals:
 
 ======================== =======
 Peripheral               Support
 ======================== =======
-I2C                      Partial (able to read, that's it)
-UART                     Mini UART yes, PL011 no
-GPIO                     Partial
-PWM                      No
-SPI                      No
-PCM                      No
 AV port                  No
 HDMI                     No
 WiFi                     No

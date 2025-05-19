@@ -103,17 +103,92 @@ config BCM2711_SPI
 
 if BCM2711_SPI
 
-config BCM2711_SPI1
-	bool "SPI1"
+config BCM2711_SPI0
+	bool "SPI0"
+	depends on BCM2711_SPI
 	default n
 	---help---
-		Enable the SPI1 interface.
+		Enable the SPI0 interface.
+
+if BCM2711_SPI0
+
+config BCM2711_SPI0_CE0
+	int "CE0 GPIO"
+	depends on BCM2711_SPI0
+	default 8
+	---help---
+		The GPIO pin for the chip enable 0 signal (8, 36, 43)
+
+config BCM2711_SPI0_CE1
+	int "CE1 GPIO"
+	depends on BCM2711_SPI0
+	default 7
+	---help---
+		The GPIO pin for the chip enable 1 signal (7, 35, 44)
+
+config BCM2711_SPI0_MISO
+	int "MISO GPIO"
+	depends on BCM2711_SPI0
+	default 9
+	---help---
+		The GPIO pin for the MISO signal (9, 37, 40)
+
+config BCM2711_SPI0_MOSI
+	int "MOSI GPIO"
+	depends on BCM2711_SPI0
+	default 10
+	---help---
+		The GPIO pin for the MOSI signal (10, 38, 41)
+
+config BCM2711_SPI0_SCLK
+	int "SCLK GPIO"
+	depends on BCM2711_SPI0
+	default 11
+	---help---
+		The GPIO pin for the SCLK signal (11, 39, 42)
+
+endif
+
+config BCM2711_SPI1
+	bool "SPI1"
+	depends on BCM2711_SPI
+	default n
+	---help---
+		Enable the SPI1 interface (auxiliary).
 
 config BCM2711_SPI2
 	bool "SPI2"
 	default n
 	---help---
-		Enable the SPI2 interface.
+		Enable the SPI2 interface (auxiliary).
+
+config BCM2711_SPI3
+	bool "SPI3"
+	depends on BCM2711_SPI
+	default n
+	---help---
+		Enable the SPI3 interface.
+
+config BCM2711_SPI4
+	bool "SPI4"
+	depends on BCM2711_SPI
+	default n
+	---help---
+		Enable the SPI4 interface.
+
+config BCM2711_SPI5
+	bool "SPI5"
+	depends on BCM2711_SPI
+	default n
+	---help---
+		Enable the SPI5 interface.
+
+config BCM2711_SPI6
+	bool "SPI6"
+	depends on BCM2711_SPI
+	default n
+	---help---
+		Enable the SPI6 interface.
 
 endif # BCM2711_SPI
 

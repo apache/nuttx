@@ -327,22 +327,25 @@ void bcm2711_gpio_set_pulls(uint32_t gpio, bool up, bool down)
   if (gpio <= 15)
     {
       value = (direction << (gpio * 2));
-      modreg32(value, value, BCM_GPIO_PUP_PDN_CNTRL_REG0);
+      modreg32(value, (0x3 << (gpio * 2)), BCM_GPIO_PUP_PDN_CNTRL_REG0);
     }
   else if (gpio <= 31 && gpio > 15)
     {
       value = (direction << ((gpio - 16) * 2));
-      modreg32(value, value, BCM_GPIO_PUP_PDN_CNTRL_REG1);
+      modreg32(value, (0x3 << ((gpio - 16) * 2)),
+               BCM_GPIO_PUP_PDN_CNTRL_REG1);
     }
   else if (gpio <= 47 && gpio > 31)
     {
       value = (direction << ((gpio - 32) * 2));
-      modreg32(value, value, BCM_GPIO_PUP_PDN_CNTRL_REG2);
+      modreg32(value, (0x3 << ((gpio - 32) * 2)),
+               BCM_GPIO_PUP_PDN_CNTRL_REG2);
     }
   else if (gpio <= 57 && gpio > 47)
     {
       value = (direction << ((gpio - 48) * 2));
-      modreg32(value, value, BCM_GPIO_PUP_PDN_CNTRL_REG3);
+      modreg32(value, (0x3 << ((gpio - 48) * 2)),
+               BCM_GPIO_PUP_PDN_CNTRL_REG3);
     }
 }
 

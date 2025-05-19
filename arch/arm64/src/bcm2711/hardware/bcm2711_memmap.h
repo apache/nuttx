@@ -60,7 +60,7 @@
 #define BCM_ARMT_BASEADDR                                                    \
   (BCM_PERIPHERAL_BASEADDR + 0x0000b000) /* ARM timer */
 #define BCM_AUX_BASEADDR                                                     \
-  (BCM_PERIPHERAL_BASEADDR + 0x000215000) /* Auxilliary */
+  (BCM_PERIPHERAL_BASEADDR + 0x000215000) /* Auxiliary */
 #define BCM_GPCLK_BASEADDR                                                   \
   (BCM_PERIPHERAL_BASEADDR + 0x000101000) /* General purpose clock */
 #define BCM_GPIO_BASEADDR                                                    \
@@ -102,6 +102,10 @@
   (BCM_PERIPHERAL_BASEADDR + 0x000007000) /* DMA Channel 0 */
 #define BCM_DMA15_BASE                                                       \
   (BCM_PERIPHERAL_BASEADDR + 0x000e05000) /* DMA Channel 15 */
+
+/* PACTL register address */
+
+#define BCM_PACTL_CS (BCM_PERIPHERAL_BASEADDR + 0x204e00)
 
 /* ARM_LOCAL base address */
 
