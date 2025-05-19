@@ -218,6 +218,7 @@ static void governor_initialize(void)
 static void governor_activity(int domain, int count)
 {
   FAR struct pm_domain_state_s *pdomstate;
+  FAR struct pm_domain_s *pdom;
   clock_t now, elapsed;
   uint32_t accum;
   irqstate_t flags;
@@ -226,6 +227,7 @@ static void governor_activity(int domain, int count)
 
   DEBUGASSERT(domain >= 0 && domain < CONFIG_PM_NDOMAINS);
   pdomstate = &g_pm_activity_governor.domain_states[domain];
+  pdom      = &g_pmdomains[domain];
 
   /* Just increment the activity count in the current time slice. The
    * priority is simply the number of counts that are added.
@@ -235,7 +237,7 @@ static void governor_activity(int domain, int count)
     {
       /* Add the activity count to the accumulated counts. */
 
-      flags = pm_domain_lock(domain);
+      flags = spin_lock_irqsave(&pdom->lock);
       accum = (uint32_t)pdomstate->accum + count;
 
       /* Make sure that we do not overflow the underlying representation */
@@ -275,7 +277,7 @@ static void governor_activity(int domain, int count)
           governor_update(domain, tmp);
         }
 
-      pm_domain_unlock(domain, flags);
+      spin_unlock_irqrestore(&pdom->lock, flags);
     }
 }
 

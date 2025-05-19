@@ -307,10 +307,12 @@ static inline void pm_changeall(int domain, enum pm_state_e newstate)
 
 int pm_changestate(int domain, enum pm_state_e newstate)
 {
+  FAR struct pm_domain_s *pdom;
   irqstate_t flags;
   int ret = OK;
 
   DEBUGASSERT(domain >= 0 && domain < CONFIG_PM_NDOMAINS);
+  pdom = &g_pmdomains[domain];
 
   /* Disable interrupts throughout this operation... changing driver states
    * could cause additional driver activity that might interfere with the
@@ -318,7 +320,7 @@ int pm_changestate(int domain, enum pm_state_e newstate)
    * re-enabled.
    */
 
-  flags = pm_domain_lock(domain);
+  flags = spin_lock_irqsave(&pdom->lock);
 
   if (newstate != PM_RESTORE)
     {
@@ -365,7 +367,7 @@ int pm_changestate(int domain, enum pm_state_e newstate)
 
   /* Restore the interrupt state */
 
-  pm_domain_unlock(domain, flags);
+  spin_unlock_irqrestore(&pdom->lock, flags);
   return ret;
 }
 
@@ -455,7 +457,7 @@ int pm_updatestate(int domain)
 
   /* Restore the interrupt state */
 
-  pm_domain_unlock(domain, flags);
+  spin_unlock_irqrestore(&pdom->lock, flags);
   return ret;
 }
 
