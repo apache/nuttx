@@ -84,6 +84,13 @@ ifeq ($(CONFIG_ESPRESSIF_DEDICATED_GPIO),y)
 CHIP_CSRCS += esp_dedic_gpio.c
 endif
 
+ifeq ($(CONFIG_ESPRESSIF_SHA_ACCELERATOR),y)
+CHIP_CSRCS += esp_sha.c
+ifeq ($(CONFIG_CRYPTO_CRYPTODEV_HARDWARE),y)
+CHIP_CSRCS += esp_crypto.c
+endif
+endif
+
 ifeq ($(CONFIG_SYSTEM_NXDIAG_ESPRESSIF_CHIP_WO_TOOL),y)
 CHIP_CSRCS += esp_nxdiag.c
 endif
