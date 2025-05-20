@@ -128,3 +128,8 @@ void up_timer_initialize(void)
 
   apic_timer_set(NS_PER_MSEC);
 }
+
+void intel64_timer_secondary_init(void)
+{
+  /* Secondary CPU initialization is not required. */
+}

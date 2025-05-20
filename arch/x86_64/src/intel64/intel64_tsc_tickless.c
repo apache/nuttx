@@ -171,6 +171,13 @@ void up_timer_initialize(void)
 #endif
 }
 
+void intel64_timer_secondary_init(void)
+{
+#ifdef CONFIG_ARCH_INTEL64_HAVE_TSC_ADJUST
+  write_msr(MSR_IA32_TSC_ADJUST, get_tsc_adjust());
+#endif
+}
+
 static inline uint64_t up_ts2tick(const struct timespec *ts)
 {
   return ROUND_INT_DIV((uint64_t)ts->tv_nsec * g_x86_64_timer_freq,
