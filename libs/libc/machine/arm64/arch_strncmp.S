@@ -84,6 +84,8 @@
 	nop	/* Pad so that the loop below fits a cache line.  */
 	.endr
 def_fn ARCH_LIBCFUN(strncmp)
+	.cfi_sections .debug_frame
+	.cfi_startproc
 	cbz	limit, .Lret0
 	eor	tmp1, src1, src2
 	mov	zeroones, #REP8_01
@@ -295,6 +297,7 @@ def_fn ARCH_LIBCFUN(strncmp)
 .Lret0:
 	mov	result, #0
 	ret
+	.cfi_endproc
 	.size ARCH_LIBCFUN(strncmp), . - ARCH_LIBCFUN(strncmp)
 
 #endif

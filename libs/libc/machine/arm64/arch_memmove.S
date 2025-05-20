@@ -101,6 +101,8 @@
 */
 
 def_fn ARCH_LIBCFUN(memmove), 6
+	.cfi_sections .debug_frame
+	.cfi_startproc
 	sub	tmp1, dstin, src
 	cmp	count, 96
 	ccmp	tmp1, count, 2, hi
@@ -158,6 +160,7 @@ def_fn ARCH_LIBCFUN(memmove), 6
 	stp	C_l, C_h, [dstin]
 3:	ret
 
+	.cfi_endproc
 	.size	ARCH_LIBCFUN(memmove), . - ARCH_LIBCFUN(memmove)
 
 #endif

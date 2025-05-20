@@ -81,6 +81,8 @@
 	.endm
 
 def_fn ARCH_LIBCFUN(memchr)
+	.cfi_sections .debug_frame
+	.cfi_startproc
 	/* Do not dereference srcin if no bytes to compare.  */
 	cbz	cntin, .Lzero_length
 	/*
@@ -174,6 +176,7 @@ def_fn ARCH_LIBCFUN(memchr)
 	mov	result, #0
 	ret
 
+	.cfi_endproc
 	.size	ARCH_LIBCFUN(memchr), . - ARCH_LIBCFUN(memchr)
 
 #endif

@@ -108,6 +108,8 @@
 #define MIN_PAGE_SIZE (1 << MIN_PAGE_P2)
 
 def_fn ARCH_LIBCFUN(strcpy) p2align=6
+	.cfi_sections .debug_frame
+	.cfi_startproc
 	/* For moderately short strings, the fastest way to do the copy is to
 	   calculate the length of the string in the same way as strlen, then
 	   essentially do a memcpy of the result.  This avoids the need for
@@ -321,6 +323,7 @@ def_fn ARCH_LIBCFUN(strcpy) p2align=6
 	bic	has_nul2, tmp3, tmp4
 	b	.Lfp_gt8
 
+	.cfi_endproc
 	.size	ARCH_LIBCFUN(strcpy), . - ARCH_LIBCFUN(strcpy)
 
 #endif

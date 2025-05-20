@@ -77,6 +77,8 @@
 
 	/* Start of performance-critical section  -- one 64B cache line.  */
 def_fn ARCH_LIBCFUN(strcmp) p2align=6
+	.cfi_sections .debug_frame
+	.cfi_startproc
 	eor	tmp1, src1, src2
 	mov	zeroones, #REP8_01
 	tst	tmp1, #7
@@ -206,6 +208,7 @@ L(loop_misaligned):
 L(done):
 	sub	result, data1, data2
 	ret
+	.cfi_endproc
 	.size	ARCH_LIBCFUN(strcmp), .-ARCH_LIBCFUN(strcmp)
 
 #endif
