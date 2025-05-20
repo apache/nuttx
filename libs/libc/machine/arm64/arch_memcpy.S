@@ -112,6 +112,8 @@
 */
 
 def_fn ARCH_LIBCFUN(memcpy) p2align=6
+	.cfi_sections .debug_frame
+	.cfi_startproc
 	prfm	PLDL1KEEP, [src]
 	add	srcend, src, count
 	add	dstend, dstin, count
@@ -233,6 +235,7 @@ L(copy_long):
 	stp	C_l, C_h, [dstend, -16]
 	ret
 
+	.cfi_endproc
 	.size	ARCH_LIBCFUN(memcpy), . - ARCH_LIBCFUN(memcpy)
 
 #endif
