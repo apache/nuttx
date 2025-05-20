@@ -427,7 +427,7 @@ RSA          No
 RTC          Yes
 SDIO         No
 SD/MMC       Yes
-SHA          No
+SHA          Yes
 SPI          Yes
 SPIFLASH     Yes
 SPIRAM       Yes
