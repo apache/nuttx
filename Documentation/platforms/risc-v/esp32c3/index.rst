@@ -365,7 +365,7 @@ RMT          Yes
 RNG          Yes
 RSA          No
 RTC          Yes
-SHA          No
+SHA          Yes
 SPI          Yes
 SPIFLASH     Yes
 SPIRAM       No
