@@ -193,10 +193,6 @@ void x86_64_ap_boot(void)
   x86_64_stack_color(tcb->stack_alloc_ptr, 0);
 #endif
 
-#ifdef CONFIG_ARCH_INTEL64_HAVE_TSC_ADJUST
-  write_msr(MSR_IA32_TSC_ADJUST, get_tsc_adjust());
-#endif
-
   intel64_timer_secondary_init();
 
   /* CPU ready */
