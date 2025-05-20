@@ -2864,6 +2864,9 @@ static int cdcncm_setup(FAR struct usbdevclass_driver_s *driver,
 static void cdcncm_disconnect(FAR struct usbdevclass_driver_s *driver,
                               FAR struct usbdev_s *dev)
 {
+  FAR struct cdcncm_driver_s *self = (FAR struct cdcncm_driver_s *)driver;
+
+  cdcncm_resetconfig(self);
   uinfo("\n");
 }
 
