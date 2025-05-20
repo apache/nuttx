@@ -61,6 +61,13 @@ config ESPRESSIF_LEDC
 	select PWM
 	select ARCH_HAVE_PWM_MULTICHAN
 
+config ESPRESSIF_SHA_ACCELERATOR
+	bool "SHA Accelerator"
+	depends on !ARCH_CHIP_ESP32
+	default n
+	---help---
+		Enable SHA accelerator support.
+
 config ESPRESSIF_I2S
 	bool
 	default n
