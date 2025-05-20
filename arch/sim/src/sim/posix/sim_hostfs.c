@@ -37,6 +37,7 @@
 #include <errno.h>
 
 #include "hostfs.h"
+#include "sim_hosterrno.h"
 
 /****************************************************************************
  * Private Functions
@@ -46,13 +47,9 @@
  * Name: host_errno_convert
  ****************************************************************************/
 
-static int host_errno_convert(int errcode)
+static int host_errno_convert(int negative_host_errno)
 {
-  /* Provide a common interface, which should have different conversions
-   * on different platforms.
-   */
-
-  return errcode;
+  return -host_errno_to_nx(-negative_host_errno, EIO);
 }
 
 /****************************************************************************
