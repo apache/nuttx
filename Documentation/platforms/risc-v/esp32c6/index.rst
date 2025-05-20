@@ -356,7 +356,7 @@ RNG              Yes
 RSA              No
 RTC              Yes
 SDIO             No
-SHA              No
+SHA              Yes
 SPI              Yes
 SPIFLASH         Yes
 SPIRAM           No
