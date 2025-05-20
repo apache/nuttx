@@ -391,7 +391,7 @@ RNG          Yes
 RSA          No
 RTC          Yes
 SD/MMC       Yes    SPI based SD card driver
-SHA          No
+SHA          Yes
 SPI          Yes
 SPIFLASH     Yes
 SPIRAM       Yes
