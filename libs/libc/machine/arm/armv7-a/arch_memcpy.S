@@ -164,6 +164,8 @@
 	.endm
 
 def_fn ARCH_LIBCFUN(memcpy) p2align=6
+	.cfi_sections .debug_frame
+	.cfi_startproc
 
 	mov	dst, dstin	/* Preserve dstin, we need to return it.  */
 	cmp	count, #64
@@ -627,6 +629,7 @@ def_fn ARCH_LIBCFUN(memcpy) p2align=6
 	bne	.Ltail63unaligned
 	bx	lr
 
+	.cfi_endproc
 	.size	ARCH_LIBCFUN(memcpy), . - ARCH_LIBCFUN(memcpy)
 
 #endif

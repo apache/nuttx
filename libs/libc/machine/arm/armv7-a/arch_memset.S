@@ -38,6 +38,8 @@
 	.global ARCH_LIBCFUN(memset)
 	.type	ARCH_LIBCFUN(memset), %function
 ARCH_LIBCFUN(memset):
+	.cfi_sections .debug_frame
+	.cfi_startproc
 
 #ifdef __ARM_NEON__
 	mov         r3, r0
@@ -219,5 +221,6 @@ ARCH_LIBCFUN(memset):
 	ldmfd       sp!, {r0, r4-r7, pc}
 
 #endif
+	.cfi_endproc
 
 #endif
