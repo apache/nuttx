@@ -62,5 +62,6 @@ int host_can_send(struct sim_can_s *can, void *frame, size_t len);
 int host_can_ifup(struct sim_can_s *can);
 int host_can_ifdown(struct sim_can_s *can);
 bool host_can_avail(struct sim_can_s *can);
+int host_can_loopback(struct sim_can_s *can, bool enable);
 
 #endif /* __ARCH_SIM_SRC_SIM_CAN_H */

@@ -361,9 +361,17 @@ int sim_canchar_initialize(int devidx, int devno)
   if (ret < 0)
     {
       canerr("host_can_init failed %d\n", ret);
-      kmm_free(priv);
-      return ret;
+      goto errout;
     }
+
+#ifdef CONFIG_CAN_LOOPBACK
+  ret = host_can_loopback(&priv->host, true);
+  if (ret < 0)
+    {
+      canerr("host_can_loopback failed %d\n", ret);
+      goto errout;
+    }
+#endif
 
   /* Initialzie CAN character driver */
 
@@ -377,9 +385,12 @@ int sim_canchar_initialize(int devidx, int devno)
   if (ret < 0)
     {
       canerr("can_register failed %d\n", ret);
-      kmm_free(priv);
-      return ret;
+      goto errout;
     }
 
   return OK;
+
+errout:
+  kmm_free(priv);
+  return ret;
 }
