@@ -578,7 +578,8 @@ size_t up_progmem_erasesize(size_t block)
 
 ssize_t up_progmem_eraseblock(size_t block)
 {
-  struct stm32h5_flash_priv_s *priv;
+  bool bank_swap;
+  bool phy_bank1;
   int ret;
   size_t block_address = STM32_FLASH_BASE + (block * FLASH_BLOCK_SIZE);
 
@@ -587,7 +588,28 @@ ssize_t up_progmem_eraseblock(size_t block)
       return -EFAULT;
     }
 
-  priv = flash_bank(block_address);
+  /* If SWAP_BANK == 0: Logical bank 2 corresponds to physical bank 2
+   * If SWAP_BANK == 1: Logical bank 2 corresponds to physical bank 1
+   */
+
+  bank_swap = (bool)(getreg32(STM32_FLASH_OPTSR_CUR) &
+                     FLASH_OPTSR_CUR_SWAP_BANK);
+
+  if ((!bank_swap && block >= H5_FLASH_BANK_NBLOCKS) ||
+      (bank_swap && block < H5_FLASH_BANK_NBLOCKS))
+    {
+      phy_bank1 = false;
+    }
+  else
+    {
+      phy_bank1 = true;
+    }
+
+  /* Convert logical block number into physical erase sector number for
+   * placing in NSCR_SNB
+   */
+
+  block = block % H5_FLASH_BANK_NBLOCKS;
 
   ret = nxmutex_lock(&g_lock);
   if (ret < 0)
@@ -605,7 +627,7 @@ ssize_t up_progmem_eraseblock(size_t block)
 
   flash_unlock_nscr();
 
-  if (priv->base == STM32_FLASH_BANK1)
+  if (phy_bank1)
     {
       modifyreg32(STM32_FLASH_NSCR, FLASH_NSCR_BKSEL, FLASH_NSCR_SER);
     }
@@ -614,8 +636,7 @@ ssize_t up_progmem_eraseblock(size_t block)
       modifyreg32(STM32_FLASH_NSCR, 0, FLASH_NSCR_BKSEL | FLASH_NSCR_SER);
     }
 
-  modifyreg32(STM32_FLASH_NSCR, FLASH_NSCR_SNB_MASK,
-              FLASH_NSCR_SNB(block - priv->stblock));
+  modifyreg32(STM32_FLASH_NSCR, FLASH_NSCR_SNB_MASK, FLASH_NSCR_SNB(block));
 
   modifyreg32(STM32_FLASH_NSCR, 0, FLASH_NSCR_STRT);
 
@@ -703,14 +724,7 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
 
   flash_unlock_nscr();
 
-  if (priv->base == STM32_FLASH_BANK1)
-    {
-      modifyreg32(STM32_FLASH_NSCR, FLASH_NSCR_BKSEL, FLASH_NSCR_PG);
-    }
-  else
-    {
-      modifyreg32(STM32_FLASH_NSCR, 0, FLASH_NSCR_BKSEL | FLASH_NSCR_PG);
-    }
+  modifyreg32(STM32_FLASH_NSCR, 0, FLASH_NSCR_PG);
 
   /* Write */
 
