@@ -43,6 +43,8 @@
 	.text
 
 ARCH_LIBCFUN(memcpy):
+	.cfi_sections .debug_frame
+	.cfi_startproc
 	move		t6, a0  /* Preserve return value */
 
 	/* Defer to byte-oriented copy for small sizes */
@@ -140,4 +142,5 @@ ARCH_LIBCFUN(memcpy):
 6:
 	ret
 
+	.cfi_endproc
 #endif
