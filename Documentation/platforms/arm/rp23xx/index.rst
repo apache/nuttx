@@ -7,7 +7,9 @@ RaspberryPi rp2350
 The rp2350 is a dual core chip produced by the RaspberryPi Foundation that
 is based on ARM Cortex-M33 or the Hazard3 RISC-V.
 
-For now, only the ARM Cortex-M33 is supported.
+ARM Cortex-M33 and Hazard3 RISC-V cores are supported.
+
+This is ARM Cortex-M33 version of the chip configuration.
 
 This port is experimental and still a work in progress. Use with caution.
 

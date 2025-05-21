@@ -191,7 +191,7 @@ Installation
   $ git clone https://github.com/apache/nuttx-apps.git apps
   $ cd nuttx
   $ make distclean
-  $ ./tools/configure.sh raspberrypi-pico:nsh
+  $ ./tools/configure.sh raspberrypi-pico-2:nsh
   $ make V=1
 
 5. Connect Raspberry Pi Pico 2 board to USB port while pressing BOOTSEL.
@@ -213,6 +213,12 @@ nsh
 ---
 
 Basic NuttShell configuration (console enabled in UART0, at 115200 bps).
+
+usbnsh
+---
+
+Basic NuttShell configuration (console enabled via USB CDC/ACM).
+
 
 smp
 ---
