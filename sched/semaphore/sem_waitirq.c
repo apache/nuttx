@@ -101,21 +101,12 @@ void nxsem_wait_irq(FAR struct tcb_s *wtcb, int errcode)
 
   /* This restores the value to what it was before the previous sem_wait.
    * This caused the thread to be blocked in the first place.
+   *
+   * For mutexes, the holder is updated by the thread itself
+   * when it exits nxsem_wait
    */
 
-  if (mutex)
-    {
-      /* The TID of the mutex holder is correct but we need to
-       * update the blocking bit. The mutex is still blocking if there are
-       * any items left in the wait queue.
-       */
-
-      if (dq_empty(SEM_WAITLIST(sem)))
-        {
-          atomic_fetch_and(NXSEM_MHOLDER(sem), ~NXSEM_MBLOCKING_BIT);
-        }
-    }
-  else
+  if (!mutex)
     {
       atomic_fetch_add(NXSEM_COUNT(sem), 1);
     }
