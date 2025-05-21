@@ -476,6 +476,7 @@ static int cryptodev_op(FAR struct csession *cse,
         }
 
       crp->crp_iv = cop->iv;
+      crp->crp_ivlen = cop->ivlen;
     }
 
   if (cop->dst)

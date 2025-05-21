@@ -201,6 +201,7 @@ struct cryptop
   uint64_t crp_sid;  /* Session ID */
   int crp_ilen;      /* Input data total length */
   int crp_olen;      /* Result total length */
+  int crp_ivlen;     /* IV length */
   int crp_alloctype; /* Type of buf to allocate if needed */
   int crp_etype;     /* Error type (zero means no error).
                       * All error codes except EAGAIN
@@ -399,6 +400,7 @@ struct crypt_op
   uint16_t flags;
   unsigned len;
   unsigned olen;
+  unsigned ivlen;
   unsigned aadlen;
   caddr_t src, dst;   /* become iov[] inside kernel */
   caddr_t mac;        /* must be big enough for chosen MAC */
