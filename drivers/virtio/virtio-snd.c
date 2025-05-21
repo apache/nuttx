@@ -74,6 +74,7 @@ struct virtio_snd_dev_s
   struct audio_lowerhalf_s dev;
   uint32_t cache_buffers;
   uint32_t period_bytes;
+  uint32_t period_count;
   uint32_t frame_size;
   uint32_t index;
   bool running;
@@ -427,6 +428,12 @@ static int virtio_snd_send_pcm(FAR struct virtio_snd_dev_s *sdev,
 
   virtqueue_kick(vq);
   sdev->cache_buffers++;
+  if (sdev->cache_buffers > sdev->period_count)
+    {
+      vrterr("cache_buffers:%"PRIu32" > period_count:%"PRIu32"\n",
+        sdev->cache_buffers, sdev->period_count);
+    }
+
   spin_unlock_irqrestore(&priv->lock, flags);
 
   return OK;
@@ -571,8 +578,7 @@ static int virtio_snd_set_params(FAR struct virtio_snd_dev_s *sdev,
     }
 
   req->period_bytes = sdev->period_bytes;
-  req->buffer_bytes = req->period_bytes *
-                      CONFIG_DRIVERS_VIRTIO_SND_BUFFER_COUNT;
+  req->buffer_bytes = req->period_bytes * sdev->period_count;
 
   resp = virtio_malloc_buf(priv->vdev, sizeof(*resp), 16);
   if (resp == NULL)
@@ -750,6 +756,11 @@ static int virtio_snd_configure(FAR struct audio_lowerhalf_s *dev,
 #endif
 {
   FAR struct virtio_snd_dev_s *sdev = (FAR struct virtio_snd_dev_s *)dev;
+  FAR struct virtio_snd_s *priv = sdev->priv;
+  FAR struct virtio_snd_pcm_info *info = &priv->info[sdev->index];
+  int idx = info->direction == VIRTIO_SND_D_INPUT ?
+                               VIRTIO_SND_VQ_RX : VIRTIO_SND_VQ_TX;
+  FAR struct virtqueue *vq = priv->vdev->vrings_info[idx].vq;
   int ret = -ENOTTY;
   uint32_t rate;
   uint8_t bps;
@@ -767,9 +778,13 @@ static int virtio_snd_configure(FAR struct audio_lowerhalf_s *dev,
         bps = caps->ac_controls.b[2];
         ch = caps->ac_channels;
         sdev->frame_size = ch * bps / 8;
+        sdev->period_count = MIN(CONFIG_DRIVERS_VIRTIO_SND_BUFFER_COUNT,
+                                 vq->vq_nentries / 3);
         sdev->period_bytes =
         virtio_snd_get_period_bytes(rate, ch, bps,
-                                    CONFIG_DRIVERS_VIRTIO_SOUND_PERIOD_TIME);
+                                    CONFIG_DRIVERS_VIRTIO_SOUND_PERIOD_TIME *
+                                    CONFIG_DRIVERS_VIRTIO_SND_BUFFER_COUNT /
+                                    sdev->period_count);
         vrtinfo("period_bytes:%"PRIu32"\n", sdev->period_bytes);
         ret = virtio_snd_set_params(sdev, ch, rate, bps);
         if (ret < 0)
@@ -1019,7 +1034,7 @@ static int virtio_snd_ioctl(FAR struct audio_lowerhalf_s *dev,
     {
       case AUDIOIOC_GETBUFFERINFO:
         bufinfo = (FAR struct ap_buffer_info_s *)arg;
-        bufinfo->nbuffers = CONFIG_DRIVERS_VIRTIO_SND_BUFFER_COUNT;
+        bufinfo->nbuffers = sdev->period_count;
         bufinfo->buffer_size = sdev->period_bytes;
         break;
 
