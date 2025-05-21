@@ -246,7 +246,9 @@ void x86_64_cpu_init(void)
           g_cpu_priv[i].ready     = false;
 #ifdef CONFIG_ARCH_HAVE_SYSCALL
           g_cpu_priv[i].ustack    = NULL;
+#  ifdef CONFIG_BUILD_KERNEL
           g_cpu_priv[i].uvbase    = (uint64_t *)CONFIG_ARCH_TEXT_VBASE;
+#  endif
 #endif
 #ifdef CONFIG_ARCH_KERNEL_STACK
           g_cpu_priv[i].ktopstk   = NULL;
