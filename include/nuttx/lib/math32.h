@@ -30,6 +30,7 @@
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 
+#include <limits.h>
 #include <inttypes.h>
 #include <stdint.h>
 #include <strings.h>
@@ -387,7 +388,11 @@ void invdiv_init_param32(uint32_t d, FAR invdiv_param32_t *param)
   uint64_t t2 = (uint64_t)1 << l;
 
   param->mult  = (t1 * (t2 - d)) / d + 1;
+#if ULONG_MAX == 4294967295UL
   param->shift = l - 1;
+#else
+  param->shift = l;
+#endif
 }
 
 /****************************************************************************
@@ -410,13 +415,20 @@ void invdiv_init_param32(uint32_t d, FAR invdiv_param32_t *param)
 static inline_function
 uint64_t invdiv_u32(uint32_t n, FAR const invdiv_param32_t *param)
 {
-  uint64_t m   = param->mult;
-  uint8_t  sh1 = 1;
-  uint8_t  sh2 = param->shift;
-  uint64_t t1  = (m * n) >> 32;
-  uint64_t t2  = (n - t1) >> sh1;
+  uint8_t  sh = param->shift;
+#if ULONG_MAX == 4294967295UL
+  uint32_t m  = param->mult;
+  uint32_t t1 = ((uint64_t)m * n) >> 32; /* UMULH if supported */
+  uint32_t t2 = (n - t1) >> 1;
+#else
+  /* This division can be 25% faster using 64-bit register. */
 
-  return (t1 + t2) >> sh2;
+  uint64_t m  = param->mult;
+  uint64_t t1 = (m * n) >> 32;
+  uint32_t t2 = n;
+#endif
+
+  return (t1 + t2) >> sh;
 }
 
 /* Helper function to do n bits integer division. */
