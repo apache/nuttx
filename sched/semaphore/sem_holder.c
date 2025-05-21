@@ -240,9 +240,11 @@ static int nxsem_freecount0holder(FAR struct semholder_s *pholder,
 {
   /* When no more counts are held, remove the holder from the list.  The
    * count was decremented in nxsem_release_holder.
+   *
+   * Mutex is held only by one thread, so the holder is always freed.
    */
 
-  if (pholder->counts <= 0)
+  if (pholder->counts <= 0 || NXSEM_IS_MUTEX(sem))
     {
       nxsem_freeholder(sem, pholder);
       return 1;
@@ -442,9 +444,11 @@ static int nxsem_restoreholderprio(FAR struct semholder_s *pholder,
 
   /* Release the holder if all counts have been given up
    * before reprioritizing causes a context switch.
+   *
+   * Mutex is held only by one thread, so the holder is always freed.
    */
 
-  if (pholder->counts <= 0)
+  if (pholder->counts <= 0 || NXSEM_IS_MUTEX(sem))
     {
       nxsem_freeholder(sem, pholder);
     }
