@@ -766,11 +766,15 @@ static void ctucanfd_chardev_receive(FAR struct ctucanfd_can_s *priv)
 
       frame = (struct ctucanfd_frame_s *)&buff;
 
-      for (i = 0; i < sizeof(struct ctucanfd_frame_s) / 4; i++)
-        {
-          /* RX buffer in automatic mode */
+      /* RX buffer in automatic mode */
 
-          buff[i] = ctucanfd_getreg(priv, CTUCANFD_RXDATA);
+      buff[0] = ctucanfd_getreg(priv, CTUCANFD_RXDATA);
+
+      /* Read the rest of data */
+
+      for (i = 0; i < frame->fmt.rwcnt; i++)
+        {
+          buff[i + 1] = ctucanfd_getreg(priv, CTUCANFD_RXDATA);
         }
 
       /* Get the DLC */
@@ -1369,11 +1373,15 @@ static void ctucanfd_sock_receive(FAR struct ctucanfd_can_s *priv)
 
       rxframe = (struct ctucanfd_frame_s *)&buff;
 
-      for (i = 0; i < sizeof(struct ctucanfd_frame_s) / 4; i++)
-        {
-          /* RX buffer in automatic mode */
+      /* RX buffer in automatic mode */
 
-          buff[i] = ctucanfd_getreg(priv, CTUCANFD_RXDATA);
+      buff[0] = ctucanfd_getreg(priv, CTUCANFD_RXDATA);
+
+      /* Read the rest of data */
+
+      for (i = 0; i < rxframe->fmt.rwcnt; i++)
+        {
+          buff[i + 1] = ctucanfd_getreg(priv, CTUCANFD_RXDATA);
         }
 
       /* CAN 2.0 or CAN FD */
