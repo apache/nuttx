@@ -38,6 +38,12 @@
 volatile void *g_current_regs[CONFIG_SMP_NCPUS];
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static sigset_t g_sigset;
+
+/****************************************************************************
  * Private Types
  ****************************************************************************/
 
@@ -95,7 +101,7 @@ uint64_t up_irq_save(void)
   union sigset_u nmask;
   union sigset_u omask;
 
-  sigfillset(&nmask.sigset);
+  memcpy(&nmask.sigset, &g_sigset, sizeof(nmask.sigset));
   pthread_sigmask(SIG_SETMASK, &nmask.sigset, &omask.sigset);
 
   return omask.flags;
@@ -147,6 +153,10 @@ void up_enable_irq(int irq)
   struct sigaction act;
   sigset_t set;
 
+  /* Add the signal to the set */
+
+  sigaddset(&g_sigset, irq);
+
   /* Register signal handler */
 
   memset(&act, 0, sizeof(act));
@@ -172,6 +182,10 @@ void up_enable_irq(int irq)
 
 void up_disable_irq(int irq)
 {
+  /* Remove the signal from the set */
+
+  sigdelset(&g_sigset, irq);
+
   /* Since it's hard to mask the signal on all threads,
    * let's change the signal handler to ignore instead.
    */
