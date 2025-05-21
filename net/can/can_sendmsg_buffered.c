@@ -377,7 +377,8 @@ ssize_t can_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
           /* A buffer allocation error occurred */
 
           nerr("ERROR: Failed to allocate callback\n");
-          return -ENOMEM;
+          ret = -ENOMEM;
+          goto errout_with_wrb;
         }
 
       /* Set up the callback in the connection */
