@@ -51,10 +51,6 @@
 #  define lis2dh_dbg(x, ...)        sninfo(x, ##__VA_ARGS__)
 #endif
 
-#ifndef CONFIG_LIS2DH_I2C_FREQUENCY
-#  define CONFIG_LIS2DH_I2C_FREQUENCY   400000
-#endif
-
 #ifdef CONFIG_LIS2DH_DRIVER_SELFTEST
 #  define LSB_AT_10BIT_RESOLUTION       4
 #  define LSB_AT_12BIT_RESOLUTION       1
@@ -74,7 +70,7 @@
 #define LIS2DH_COUNT_INTS
 
 /****************************************************************************
- * Private Data Types
+ * Private Types
  ****************************************************************************/
 
 enum interrupts

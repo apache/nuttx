@@ -51,10 +51,6 @@
 #  define sht3x_dbg(x, ...)    sninfo(x, ##__VA_ARGS__)
 #endif
 
-#ifndef CONFIG_SHT3X_I2C_FREQUENCY
-#  define CONFIG_SHT3X_I2C_FREQUENCY 400000
-#endif
-
 /* Commands */
 
 #define SHT3X_READ_SERIALNBR  0x3780 /* read serial number */
@@ -98,7 +94,7 @@
 #define SHT3X_DEFAULT_MEAS_MODE SHT3X_MEAS_PERI_1_H
 
 /****************************************************************************
- * Private
+ * Private Types
  ****************************************************************************/
 
 struct sht3x_dev_s

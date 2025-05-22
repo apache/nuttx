@@ -49,18 +49,6 @@
  * Pre-process Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_APDS9922_I2C_FREQUENCY
-#  define CONFIG_APDS9922_I2C_FREQUENCY 400000
-#endif
-
-#ifndef CONFIG_APDS9922_ALS_NPOLLWAITERS
-#  define CONFIG_APDS9922_ALS_NPOLLWAITERS 2
-#endif
-
-#ifndef CONFIG_APDS9922_PS_NPOLLWAITERS
-#  define CONFIG_APDS9922_PS_NPOLLWAITERS 2
-#endif
-
 /* Helper macros */
 
 #ifdef CONFIG_ENDIAN_BIG

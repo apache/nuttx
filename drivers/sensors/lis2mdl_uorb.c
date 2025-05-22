@@ -49,12 +49,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* The LIS2MDL supports up to 3.4MHz bus speeds */
-
-#ifndef CONFIG_SENSORS_LIS2MDL_I2C_FREQUENCY
-#define CONFIG_SENSORS_LIS2MDL_I2C_FREQUENCY 1000000
-#endif
-
 /* The value that should be in the "who am I" register */
 
 #define WHO_AM_I_VAL 0x40

@@ -45,10 +45,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_MS58XX_I2C_FREQUENCY
-#  define CONFIG_MS58XX_I2C_FREQUENCY 400000
-#endif
-
 /* Register Definitions *****************************************************/
 
 /* Register Addresses */

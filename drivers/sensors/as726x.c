@@ -60,10 +60,6 @@
  * Pre-process Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_AS726X_I2C_FREQUENCY
-#  define CONFIG_AS726X_I2C_FREQUENCY 100000
-#endif
-
 #define AS726X_INTEGRATION_TIME 50
 #define AS726X_GAIN             0b01   /* Set gain to 64x */
 #define AS726X_MEASURMENT_MODE  0b10   /* One-shot reading of VBGYOR or RSTUVW */

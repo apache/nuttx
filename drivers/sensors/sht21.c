@@ -51,10 +51,6 @@
 #  define sht21_dbg(x, ...)    sninfo(x, ##__VA_ARGS__)
 #endif
 
-#ifndef CONFIG_SHT21_I2C_FREQUENCY
-#  define CONFIG_SHT21_I2C_FREQUENCY 400000
-#endif
-
 /* I2C command bytes */
 
 #define SHT21_TRIG_T_MEAS_HM         0xe3
@@ -64,7 +60,7 @@
 #define SHT21_SOFT_RESET             0xfe
 
 /****************************************************************************
- * Private
+ * Private Types
  ****************************************************************************/
 
 struct sht21_dev_s

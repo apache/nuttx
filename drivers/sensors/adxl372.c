@@ -47,7 +47,7 @@
 #define ADXL372_INITIAL_CR_SIZE 7
 
 /****************************************************************************
- * Private structure definitions
+ * Private Types
  ****************************************************************************/
 
 struct sensor_data_s

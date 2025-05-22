@@ -55,10 +55,6 @@
 #  define sps30_dbg(x, ...)    sninfo(x, ##__VA_ARGS__)
 #endif
 
-#ifndef CONFIG_SPS30_I2C_FREQUENCY
-#  define CONFIG_SPS30_I2C_FREQUENCY 100000
-#endif
-
 #define SPS30_MEASUREMENT_INTERVAL 1      /* one second, fixed in hw */
 #define SPS30_MEASUREMENT_MODE     0x0300
 
@@ -77,7 +73,7 @@
 #define SPS30_CMD_SOFT_RESET                 0xd304
 
 /****************************************************************************
- * Private
+ * Private Types
  ****************************************************************************/
 
 struct sps30_dev_s

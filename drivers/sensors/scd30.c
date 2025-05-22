@@ -55,10 +55,6 @@
 #  define scd30_dbg(x, ...)    sninfo(x, ##__VA_ARGS__)
 #endif
 
-#ifndef CONFIG_SCD30_I2C_FREQUENCY
-#  define CONFIG_SCD30_I2C_FREQUENCY 100000
-#endif
-
 #define SCD30_I2C_RETRIES 3
 
 /* SCD30 command words */
@@ -80,7 +76,7 @@
 #define SCD30_DEFAULT_TEMPERATURE_OFFSET    0
 
 /****************************************************************************
- * Private
+ * Private Types
  ****************************************************************************/
 
 struct scd30_dev_s

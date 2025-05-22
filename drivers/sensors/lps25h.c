@@ -48,10 +48,6 @@
 #  define lps25h_dbg(x, ...)      sninfo(x, ##__VA_ARGS__)
 #endif
 
-#ifndef CONFIG_LPS25H_I2C_FREQUENCY
-#  define CONFIG_LPS25H_I2C_FREQUENCY     400000
-#endif
-
 #define LPS25H_PRESSURE_INTERNAL_DIVIDER  4096
 
 /* 'AN4450 - Hardware and software guidelines for use of LPS25H pressure

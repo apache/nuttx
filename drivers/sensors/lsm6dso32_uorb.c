@@ -58,10 +58,6 @@
 
 #define MDPS_TO_RADS (3.141592653f / (180.0f * 1000.0f))
 
-#ifndef CONFIG_SENSORS_LSM6DSO32_I2C_FREQUENCY
-#define CONFIG_SENSORS_LSM6DSO32_I2C_FREQUENCY 400000
-#endif /* CONFIG_SENSORS_LSM6DSO32_I2C_FREQUENCY */
-
 /* Number of measurement rounds for gyro self test */
 
 #define GYRO_SELFTEST_ROUNDS 5

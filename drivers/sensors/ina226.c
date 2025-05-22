@@ -44,10 +44,6 @@
 #  error i2c support required
 #endif
 
-#ifndef CONFIG_INA226_I2C_FREQUENCY
-#  define CONFIG_INA226_I2C_FREQUENCY 400000
-#endif
-
 #define I2C_NOSTARTSTOP_MSGS              2
 #define I2C_NOSTARTSTOP_ADDRESS_MSG_INDEX 0
 #define I2C_NOSTARTSTOP_DATA_MSG_INDEX    1

@@ -44,17 +44,13 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_LM92_I2C_FREQUENCY
-#  define CONFIG_LM92_I2C_FREQUENCY 400000
-#endif
-
 /* Centigrade to Fahrenheit conversion:  F = 9*C/5 + 32 */
 
 #define B16_9DIV5  (9 * 65536 / 5)
 #define B16_32     (32 * 65536)
 
 /****************************************************************************
- * Private
+ * Private Types
  ****************************************************************************/
 
 struct lm92_dev_s
