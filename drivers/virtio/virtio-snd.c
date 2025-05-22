@@ -62,8 +62,8 @@ struct virtio_snd_format_map_s
 struct virtio_snd_buffer_s
 {
   struct ap_buffer_s apb;
-  struct virtio_snd_pcm_xfer xfer;
-  struct virtio_snd_pcm_status status;
+  struct virtio_snd_pcm_xfer *xfer;
+  struct virtio_snd_pcm_status *status;
   FAR struct audio_lowerhalf_s *dev;
 };
 
@@ -406,26 +406,26 @@ static int virtio_snd_send_pcm(FAR struct virtio_snd_dev_s *sdev,
   int idx = info->direction == VIRTIO_SND_D_INPUT ?
                                VIRTIO_SND_VQ_RX : VIRTIO_SND_VQ_TX;
   FAR struct virtqueue *vq = priv->vdev->vrings_info[idx].vq;
-  struct virtqueue_buf vb[3];
+  struct virtqueue_buf vb[2];
   irqstate_t flags;
 
-  vb[0].buf = &buf->xfer;
-  vb[0].len = sizeof(buf->xfer);
-  vb[1].buf = buf->apb.samp;
-  vb[1].len = sdev->period_bytes;
-  vb[2].buf = &buf->status;
-  vb[2].len = sizeof(buf->status);
-
-  flags = spin_lock_irqsave(&priv->lock);
   if (idx == VIRTIO_SND_VQ_RX)
     {
-      virtqueue_add_buffer(vq, vb, 1, 2, buf);
+      vb[0].buf = buf->xfer;
+      vb[0].len = sizeof(*(buf->xfer));
+      vb[1].buf = buf->apb.samp;
+      vb[1].len = sdev->period_bytes + sizeof(*(buf->status));
     }
   else
     {
-      virtqueue_add_buffer(vq, vb, 2, 1, buf);
+      vb[0].buf = buf->xfer;
+      vb[0].len = sizeof(*(buf->xfer)) + sdev->period_bytes;
+      vb[1].buf = buf->status;
+      vb[1].len = sizeof(*(buf->status));
     }
 
+  flags = spin_lock_irqsave(&priv->lock);
+  virtqueue_add_buffer(vq, vb, 1, 1, buf);
   virtqueue_kick(vq);
   sdev->cache_buffers++;
   if (sdev->cache_buffers > sdev->period_count)
@@ -779,7 +779,7 @@ static int virtio_snd_configure(FAR struct audio_lowerhalf_s *dev,
         ch = caps->ac_channels;
         sdev->frame_size = ch * bps / 8;
         sdev->period_count = MIN(CONFIG_DRIVERS_VIRTIO_SND_BUFFER_COUNT,
-                                 vq->vq_nentries / 3);
+                                 vq->vq_nentries / 2);
         sdev->period_bytes =
         virtio_snd_get_period_bytes(rate, ch, bps,
                                     CONFIG_DRIVERS_VIRTIO_SOUND_PERIOD_TIME *
@@ -952,7 +952,11 @@ static int virtio_snd_allocbuffer(FAR struct audio_lowerhalf_s *dev,
 
   DEBUGASSERT(desc->u.pbuffer != NULL);
 
-  buf = virtio_zalloc_buf(priv->vdev, sizeof(*buf) + desc->numbytes, 16);
+  buf = virtio_zalloc_buf(priv->vdev,
+                          sizeof(*buf) +
+                          sizeof(struct virtio_snd_pcm_xfer) +
+                          desc->numbytes +
+                          sizeof(struct virtio_snd_pcm_status), 16);
   if (buf == NULL)
     {
       vrterr("failed to allocate apb buffer\n");
@@ -963,12 +967,15 @@ static int virtio_snd_allocbuffer(FAR struct audio_lowerhalf_s *dev,
 
   buf->apb.crefs = 1;
   buf->apb.nmaxbytes = desc->numbytes;
-  buf->apb.samp = (FAR uint8_t *)(buf + 1);
+  buf->xfer = (FAR struct virtio_snd_pcm_xfer *)(buf + 1);
+  buf->apb.samp = (FAR uint8_t *)(buf->xfer + 1);
+  buf->status = (FAR struct virtio_snd_pcm_status *)
+                (buf->apb.samp + desc->numbytes);
 #ifdef CONFIG_AUDIO_MULTI_SESSION
   buf->apb.session = desc->session;
 #endif
-  buf->xfer.stream_id = sdev->index;
-  buf->status.status = VIRTIO_SND_S_IO_ERR;
+  buf->xfer->stream_id = sdev->index;
+  buf->status->status = VIRTIO_SND_S_IO_ERR;
   buf->dev = dev;
   nxmutex_init(&buf->apb.lock);
 
