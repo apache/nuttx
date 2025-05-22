@@ -43,7 +43,7 @@
 #  define LIBC_MEM_FD_VFS_PATH CONFIG_LIBC_MEM_FD_VFS_PATH
 #endif
 
-#define LIBC_MEM_FD_VFS_PATH_FMT LIBC_MEM_FD_VFS_PATH "/%s"
+#define LIBC_MEM_FD_VFS_PATH_FMT LIBC_MEM_FD_VFS_PATH "/%sXXXXXX"
 
 /****************************************************************************
  * Public Functions
@@ -65,21 +65,29 @@ int memfd_create(FAR const char *name, unsigned int flags)
       return -1;
     }
 
+retry:
   snprintf(path, PATH_MAX, LIBC_MEM_FD_VFS_PATH_FMT, name);
+  mktemp(path);
+
 #  ifdef CONFIG_LIBC_MEMFD_SHMFS
-  ret = shm_open(path, O_RDWR | flags, 0660);
+  ret = shm_open(path, O_RDWR | O_EXCL | flags, 0660);
   if (ret >= 0)
     {
       shm_unlink(path);
     }
 #  else
   mkdir(LIBC_MEM_FD_VFS_PATH, 0666);
-  ret = open(path, O_RDWR | flags, 0660);
+  ret = open(path, O_RDWR | O_EXCL | flags, 0660);
   if (ret >= 0)
     {
       unlink(path);
     }
 #  endif
+
+  if (ret < 0 && get_errno() == EEXIST)
+    {
+      goto retry;
+    }
 
   lib_put_pathbuffer(path);
   return ret;
