@@ -23,7 +23,6 @@ CMake,arduino-nano-33ble:usbnsh
 CMake,arduino-nano-33ble-rev2:nsh
 CMake,arduino-nano-33ble-rev2:usbnsh
 
-CMake,nrf52832-dk:buttons
 CMake,nrf52832-dk:mcuboot_app
 CMake,nrf52832-dk:mcuboot_loader
 CMake,nrf52832-dk:mcuboot_loader_minimal
@@ -31,14 +30,11 @@ CMake,nrf52832-dk:nsh
 CMake,nrf52832-dk:ostest_tickless
 CMake,nrf52832-dk:sdc
 CMake,nrf52832-dk:sdc_nimble
-CMake,nrf52832-dk:wdog
 
 CMake,nrf52832-mdk:nsh
 
 CMake,nrf52832-sparkfun:nsh
 
-CMake,nrf52840-dk:adc
-CMake,nrf52840-dk:buttons
 CMake,nrf52840-dk:cdcacm
 CMake,nrf52840-dk:composite
 CMake,nrf52840-dk:highpri
@@ -46,13 +42,10 @@ CMake,nrf52840-dk:mcuboot_app
 CMake,nrf52840-dk:mcuboot_loader
 CMake,nrf52840-dk:nsh
 CMake,nrf52840-dk:ostest_tickless
-CMake,nrf52840-dk:pwm
-CMake,nrf52840-dk:qspi
 CMake,nrf52840-dk:rndis
 CMake,nrf52840-dk:sdc
 CMake,nrf52840-dk:sdc_nimble
 CMake,nrf52840-dk:sx127x
-CMake,nrf52840-dk:timer
 
 CMake,nrf52840-dongle:nsh
 CMake,nrf52840-dongle:usbnsh
