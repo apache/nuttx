@@ -38,6 +38,7 @@
 #include <nuttx/spinlock.h>
 #include <nuttx/lib/lib.h>
 #include <nuttx/signal.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/mutex.h>
 #include <nuttx/timers/timer.h>

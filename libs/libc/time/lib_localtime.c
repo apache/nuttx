@@ -48,6 +48,7 @@
 #include <string.h>
 #include <limits.h>
 #include <fcntl.h>
+#include <unistd.h>
 #include <assert.h>
 #include <errno.h>
 

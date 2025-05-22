@@ -26,6 +26,7 @@
 
 #include <nuttx/streams.h>
 #include <nuttx/lib/lib.h>
+#include <nuttx/kmalloc.h>
 
 /****************************************************************************
  * Pre-processor Definitions

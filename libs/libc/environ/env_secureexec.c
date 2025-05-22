@@ -30,6 +30,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <unistd.h>
 
 #include <nuttx/environ.h>
 #include <nuttx/tls.h>

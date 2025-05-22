@@ -42,6 +42,7 @@
 #include <sys/param.h>
 
 #include <nuttx/lib/lib.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/procfs.h>
 #include <nuttx/net/netdev.h>
