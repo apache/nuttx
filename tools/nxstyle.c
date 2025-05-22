@@ -756,6 +756,7 @@ char *my_strndup(const char *s, size_t size)
 #  define strndup my_strndup
 #endif
 
+#ifdef CONFIG_WINDOWS_NATIVE
 /********************************************************************************
  * Name: backslash_to_slash
  *
@@ -781,6 +782,7 @@ static void backslash_to_slash(char *str)
         }
     }
 }
+#endif
 
 /********************************************************************************
  * Name: skip
