@@ -52,10 +52,6 @@
 #  define hdc1008_dbg(x, ...)    sninfo(x, ##__VA_ARGS__)
 #endif
 
-#ifndef CONFIG_SHT21_I2C_FREQUENCY
-#  define CONFIG_SHT21_I2C_FREQUENCY 400000
-#endif
-
 /* Macros to convert raw temperature and humidity to real values. Temperature
  * is scaled by 100, humidity by 10.
  */
@@ -99,7 +95,7 @@
 #define HDC1008_CONFIGURATION_RST             (1 << 15) /* Bit 15: Software reset bit */
 
 /****************************************************************************
- * Private
+ * Private Types
  ****************************************************************************/
 
 struct hdc1008_dev_s

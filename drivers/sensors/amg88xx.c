@@ -195,6 +195,7 @@ static const struct file_operations g_amg88xx_fops =
  *   Write to an amg88xx register transaction pattern:
  *   Write COMMAND at REGISTER
  *   Sensor Address / W - Register Address - Command
+ *
  ****************************************************************************/
 
 static inline int amg88xx_i2c_write_addr(FAR struct amg88xx_dev_s *priv,
@@ -230,6 +231,7 @@ static inline int amg88xx_i2c_write_addr(FAR struct amg88xx_dev_s *priv,
  *   Read to an amg88xx register transaction pattern:
  *   Read COMMAND from REGISTER
  *   Sensor Address / W - Register Address - Sensor Address / R - Command
+ *
  ****************************************************************************/
 
 static inline int amg88xx_i2c_read_addr(FAR struct amg88xx_dev_s *priv,

@@ -44,10 +44,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_AHT10_I2C_FREQUENCY
-#  define CONFIG_AHT10_I2C_FREQUENCY 400000
-#endif
-
 /* I2C command bytes */
 
 #define AHT10_SOFT_INIT              0xe1
@@ -56,7 +52,7 @@
 #define AHT10_NORMAL_CMD             0xa8
 
 /****************************************************************************
- * Private
+ * Private Types
  ****************************************************************************/
 
 struct aht10_dev_s

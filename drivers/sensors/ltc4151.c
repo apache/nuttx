@@ -43,16 +43,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_LTC4151_I2C_FREQUENCY
-#  define CONFIG_LTC4151_I2C_FREQUENCY 400000
-#endif
-
 #define I2C_NOSTARTSTOP_MSGS 2
 #define I2C_NOSTARTSTOP_ADDRESS_MSG_INDEX 0
 #define I2C_NOSTARTSTOP_DATA_MSG_INDEX 1
 
 /****************************************************************************
- * Private
+ * Private Types
  ****************************************************************************/
 
 struct ltc4151_dev_s

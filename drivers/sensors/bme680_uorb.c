@@ -270,7 +270,7 @@ const float const_array2[16] =
   ((type) >= BME680_OS_SKIPPED && (type) <= BME680_OS_16X)
 
 /****************************************************************************
- * Private Type Definitions
+ * Private Types
  ****************************************************************************/
 
 struct bme680_data_s

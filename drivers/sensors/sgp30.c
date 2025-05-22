@@ -55,16 +55,12 @@
 #  define sgp30_dbg(x, ...)    sninfo(x, ##__VA_ARGS__)
 #endif
 
-#ifndef CONFIG_SGP30_I2C_FREQUENCY
-#  define CONFIG_SGP30_I2C_FREQUENCY 100000
-#endif
-
 #define SGP30_I2C_RETRIES 3
 #define SGP30_INIT_RETRIES 5
 #define SGP30_INIT_LIMIT_MS 10
 
 /****************************************************************************
- * Private
+ * Private Types
  ****************************************************************************/
 
 struct sgp30_dev_s

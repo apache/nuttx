@@ -42,7 +42,7 @@
 #if defined(CONFIG_SPI) && defined(CONFIG_SENSORS_LIS3MDL)
 
 /****************************************************************************
- * Private
+ * Private Types
  ****************************************************************************/
 
 struct lis3mdl_sensor_data_s

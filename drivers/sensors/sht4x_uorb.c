@@ -47,10 +47,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_SHT4X_I2C_FREQUENCY
-#define CONFIG_SHT4X_I2C_FREQUENCY 400000
-#endif
-
 #define SHT4X_CRC_INIT 0xFF /* Initial value of the calculated CRC. */
 #define SHT4X_CRC_POLY 0x31 /* CRC calculation polynomial. */
 
@@ -67,7 +63,7 @@
 #define SHT4X_HEAT_20_P1 0x15     /* Activate heater with 20mW for 0.1s. */
 
 /****************************************************************************
- * Private
+ * Private Types
  ****************************************************************************/
 
 /* Sensor information for the lowerhalf sensors.

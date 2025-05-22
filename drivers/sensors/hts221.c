@@ -54,10 +54,6 @@
 #  define hts221_dbg(x, ...)    sninfo(x, ##__VA_ARGS__)
 #endif
 
-#ifndef CONFIG_HTS221_I2C_FREQUENCY
-#  define CONFIG_HTS221_I2C_FREQUENCY 400000
-#endif
-
 #define HTS221_WHO_AM_I             0x0f
 #define HTS221_AV_CONF              0x10
 #define HTS221_CTRL_REG1            0x20

@@ -48,7 +48,7 @@
 #define LSM330_INITIAL_GYROCR_SIZE 5
 
 /****************************************************************************
- * Private structure definitions
+ * Private Types
  ****************************************************************************/
 
 struct sensor_data_s

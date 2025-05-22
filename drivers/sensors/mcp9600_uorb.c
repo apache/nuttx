@@ -47,12 +47,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* I2C frequency to use during transfers */
-
-#ifdef CONFIG_MCP9600_I2C_FREQUENCY
-#define CONFIG_MCP9600_I2C_FREQUENCY 100000
-#endif
-
 #define REG_THERMO_HOT_JUNC 0x0 /* Thermocouple Hot-Junction, T H */
 #define REG_JUNC_TEMP_DELTA 0x1 /* Junctions Temperature Delta, TΔ */
 #define REG_COLD_JUNC_TEMP 0x2  /* Cold-Junction Temperature, T C */

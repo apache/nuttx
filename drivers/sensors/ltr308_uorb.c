@@ -56,7 +56,7 @@
 #define LTR308_DATA_0         0x0D
 
 /****************************************************************************
- * Private Type Definitions
+ * Private Types
  ****************************************************************************/
 
 struct ltr308_sensor_s
@@ -118,6 +118,7 @@ static const struct sensor_ops_s g_sensor_ops =
  *
  * Return value:
  *   Zero (OK) on success; a negated errno value on failure
+ *
  ****************************************************************************/
 
 static int ltr308_set_reg8(FAR struct ltr308_dev_s *priv, uint8_t regaddr,
@@ -153,6 +154,7 @@ static int ltr308_set_reg8(FAR struct ltr308_dev_s *priv, uint8_t regaddr,
  *
  * Return value:
  *   Zero (OK) on success; a negated errno value on failure
+ *
  ****************************************************************************/
 
 static int ltr308_get_reg8(FAR struct ltr308_dev_s *priv, uint8_t regaddr,
@@ -190,6 +192,7 @@ static int ltr308_get_reg8(FAR struct ltr308_dev_s *priv, uint8_t regaddr,
  *
  * Return value:
  *   Zero (OK) on success; a negated errno value on failure
+ *
  ****************************************************************************/
 
 static int ltr308_get_reg24(FAR struct ltr308_dev_s *priv, uint8_t regaddr,
@@ -219,6 +222,7 @@ static int ltr308_get_reg24(FAR struct ltr308_dev_s *priv, uint8_t regaddr,
  *
  * Return value:
  *   Zero (OK) on success; a negated errno value on failure
+ *
  ****************************************************************************/
 
 static int ltr308_checkid(FAR struct ltr308_dev_s *priv)
@@ -247,6 +251,7 @@ static int ltr308_checkid(FAR struct ltr308_dev_s *priv)
  *
  * Return value:
  *   Zero (OK) on success; a negated errno value on failure
+ *
  ****************************************************************************/
 
 static int ltr308_get_status(FAR struct ltr308_dev_s *priv,
@@ -292,6 +297,7 @@ static int ltr308_get_status(FAR struct ltr308_dev_s *priv,
  *
  * Return value:
  *   Zero (OK) on success; a negated errno value on failure
+ *
  ****************************************************************************/
 
 static int ltr308_get_lux(FAR struct ltr308_dev_s *priv, uint8_t gain,
@@ -375,6 +381,7 @@ static int ltr308_get_lux(FAR struct ltr308_dev_s *priv, uint8_t gain,
  *
  * Return value:
  *   Zero (OK) on success; a negated errno value on failure
+ *
  ****************************************************************************/
 
 static int ltr308_activate(FAR struct sensor_lowerhalf_s *lower,
@@ -418,6 +425,7 @@ static int ltr308_activate(FAR struct sensor_lowerhalf_s *lower,
  *
  * Return value:
  *   Zero (OK) on success; a negated errno value on failure
+ *
  ****************************************************************************/
 
 static int ltr308_calibrate(FAR struct sensor_lowerhalf_s *lower,
@@ -503,6 +511,7 @@ err_out:
  *
  * Return value:
  *   Zero (OK) on success; a negated errno value on failure
+ *
  ****************************************************************************/
 
 static int ltr308_thread(int argc, char** argv)
@@ -581,6 +590,7 @@ thread_sleep:
  *
  * Return value:
  *   Zero (OK) on success; a negated errno value on failure
+ *
  ****************************************************************************/
 
 int ltr308_register(int devno, FAR struct i2c_master_s *i2c)

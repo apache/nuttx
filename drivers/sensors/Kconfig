@@ -143,6 +143,11 @@ config SENSORS_AS726X
 	---help---
 		Enable driver support for the AS726X Spectral Sensor.
 
+config AS726X_I2C_FREQUENCY
+	int "AS726X I2C frequency"
+	default 100000
+	depends on SENSORS_AS726X
+
 config SENSORS_BH1749NUC
 	bool "Rohm BH1749NUC Color Sensor support"
 	default n
@@ -200,6 +205,20 @@ config SENSORS_NAU7802
 	select I2C 
 	---help---
 		Enable driver support for the Adafruit NAU7802 sensor.
+
+if SENSORS_NAU7802
+
+config NAU7802_I2C_FREQUENCY
+	int "NAU7802 I2C frequency"
+	default 100000
+
+config SENSORS_NAU7802_THREAD_STACKSIZE
+	int "NAU7802 worker thread stack size"
+	default 1024
+	---help---
+		The stack size for the worker threads that perform measurements.
+
+endif # SENSORS_NAU7802
 
 config BH1750FVI_I2C_FREQUENCY
 	int "BH1750FVI I2C frequency"
@@ -979,6 +998,11 @@ config SENSORS_MSA301
 	---help---
 		Enable driver support for the MSA301.
 
+config MSA301_I2C_FREQUENCY
+	int "MSA301 I2C frequency"
+	default 400000
+	depends on SENSORS_MSA301
+
 config LSM9DS1_I2C_FREQUENCY
 	int "LSM9DS1 I2C frequency"
 	default 400000
@@ -1587,7 +1611,7 @@ config SENSORS_LIS2MDL
 
 if SENSORS_LIS2MDL
 
-config SENSORS_LIS2MDL_FREQUENCY
+config SENSORS_LIS2MDL_I2C_FREQUENCY
 	int "LIS2MDL I2C frequency"
 	default 1000000
 	range 1 3400000
@@ -1737,13 +1761,11 @@ config SENSORS_AHT10
 	---help---
 		Enable driver support for the ASAIR AHT10 temperature and humidity sensors.
 
-if SENSORS_AHT10
 config AHT10_I2C_FREQUENCY
 	int "AHT10 I2C frequency"
+	depends on SENSORS_AHT10
 	default 400000
 	range 1 400000
-
-endif # SENSORS_AHT10
 
 config SENSORS_SHT21
 	bool "Sensirion SHT21 temperature and humidity sensor"
@@ -1937,6 +1959,11 @@ config SENSORS_ADT7320
 	select SPI
 	---help---
 		Enables support for the ADT7320 Driver
+
+config ADT7320_SPI_FREQUENCY
+	int "ADT7320 SPI frequency"
+	depends on SENSORS_ADT7320
+	default 1000000
 
 config SENSORS_HDC1008
 	bool "TI HDC1008 temperature and humidity sensor"

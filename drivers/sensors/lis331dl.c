@@ -42,10 +42,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_LIS331DL_I2C_FREQUENCY
-#  define CONFIG_LIS331DL_I2C_FREQUENCY 100000
-#endif
-
 /* LIS331DL Internal Registers **********************************************/
 
 #define ST_LIS331DL_WHOAMI          0x0F    /* who am I register */
@@ -80,7 +76,7 @@
 #define ST_LIS331DL_OUT_Z           0x2D
 
 /****************************************************************************
- * Private Data Types
+ * Private Types
  ****************************************************************************/
 
 struct lis331dl_dev_s

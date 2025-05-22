@@ -50,10 +50,6 @@
 #  define max44009_dbg(x, ...)      sninfo(x, ##__VA_ARGS__)
 #endif
 
-#ifndef CONFIG_MAX44009_I2C_FREQUENCY
-#  define CONFIG_MAX44009_I2C_FREQUENCY 400000
-#endif
-
 /* Registers */
 
 #define MAX44009_INT_STS            0x0

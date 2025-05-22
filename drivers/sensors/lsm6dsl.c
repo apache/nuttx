@@ -63,10 +63,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_LSM6DSL_I2C_FREQUENCY
-#  define CONFIG_LSM6DSL_I2C_FREQUENCY 400000
-#endif
-
 /* Self test limits. */
 
 #define LSM6DSL_MIN_ST_LIMIT_MG   50.0f      /* Accelerator min limit */

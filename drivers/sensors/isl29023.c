@@ -45,10 +45,6 @@
  * Pre-Processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_ISL29023_I2C_FREQUENCY
-#  define CONFIG_ISL29023_I2C_FREQUENCY 400000
-#endif
-
 /* Registers definitions */
 
 #define ISL29023_COMMAND_1   0x00
