@@ -34,6 +34,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/nuttx.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/kthread.h>
 #include <nuttx/video/imgsensor.h>
 #include <nuttx/video/imgdata.h>
