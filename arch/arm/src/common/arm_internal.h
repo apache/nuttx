@@ -463,6 +463,21 @@ void arm_netinitialize(void);
 #  define arm_netinitialize()
 #endif
 
+/****************************************************************************
+ * Name: arm_timer_secondary_init
+ *
+ * Description:
+ *   Initialize the ARM timer for secondary CPUs.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
+void arm_timer_secondary_init(unsigned int freq);
+#endif
+
 /* USB **********************************************************************/
 
 #ifdef CONFIG_USBDEV

@@ -116,6 +116,8 @@ void arm_cpu_boot(int cpu)
   up_irq_enable();
 #endif
 
+  arm_timer_secondary_init(0);
+
   /* The next thing that we expect to happen is for logic running on CPU0
    * to call up_cpu_start() which generate an SGI and a context switch to
    * the configured NuttX IDLE task.
