@@ -49,7 +49,8 @@ void fs_heap_initialize(void)
 #endif
 
   DEBUGASSERT(buf != NULL);
-  g_fs_heap = mm_initialize("heapfs", buf, CONFIG_FS_HEAPSIZE);
+  g_fs_heap = mm_initialize_pool(NULL, "heapfs", buf,
+                                 CONFIG_FS_HEAPSIZE, NULL);
 }
 
 FAR void *fs_heap_zalloc(size_t size)
