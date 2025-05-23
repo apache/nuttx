@@ -182,32 +182,8 @@ static int sim_can_send(struct can_dev_s *dev, struct can_msg_s *msg)
   struct sim_canchar_s *priv = dev->cd_priv;
   int ret;
 
-  if (!msg->cm_hdr.ch_edl)
-    {
-      struct can_frame frame;
-
-      frame.can_id  = msg->cm_hdr.ch_id;
-      frame.can_dlc = msg->cm_hdr.ch_dlc;
-
-      if (msg->cm_hdr.ch_rtr)
-        {
-          frame.can_id |= CAN_RTR_FLAG;
-        }
-
-#ifdef CONFIG_CAN_EXTID
-      /* Extended frame */
-
-      if (msg->cm_hdr.ch_extid)
-        {
-          frame.can_id |= CAN_EFF_FLAG;
-        }
-#endif
-
-      memcpy(frame.data, msg->cm_data, frame.can_dlc);
-
-      ret = host_can_send(&priv->host, &frame, sizeof(struct can_frame));
-    }
-  else
+#ifdef CONFIG_CAN_FD
+  if (msg->cm_hdr.ch_edl)
     {
       struct canfd_frame frame;
 
@@ -242,6 +218,32 @@ static int sim_can_send(struct can_dev_s *dev, struct can_msg_s *msg)
       memcpy(frame.data, msg->cm_data, frame.len);
 
       ret = host_can_send(&priv->host, &frame, sizeof(struct canfd_frame));
+    }
+  else
+#endif
+    {
+      struct can_frame frame;
+
+      frame.can_id  = msg->cm_hdr.ch_id;
+      frame.can_dlc = msg->cm_hdr.ch_dlc;
+
+      if (msg->cm_hdr.ch_rtr)
+        {
+          frame.can_id |= CAN_RTR_FLAG;
+        }
+
+#ifdef CONFIG_CAN_EXTID
+      /* Extended frame */
+
+      if (msg->cm_hdr.ch_extid)
+        {
+          frame.can_id |= CAN_EFF_FLAG;
+        }
+#endif
+
+      memcpy(frame.data, msg->cm_data, frame.can_dlc);
+
+      ret = host_can_send(&priv->host, &frame, sizeof(struct can_frame));
     }
 
   if (ret > 0)
