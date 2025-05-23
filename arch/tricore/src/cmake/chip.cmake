@@ -49,5 +49,9 @@ elseif(CONFIG_ARCH_CHIP_TC4X)
   endif()
 endif()
 
+if(NOT CONFIG_ARCH_HAVE_FPU)
+  list(APPEND PLATFORM_FLAGS -msoft-sp-float -msoft-dp-float)
+endif()
+
 add_compile_options(${PLATFORM_FLAGS})
 add_link_options(${PLATFORM_FLAGS})
