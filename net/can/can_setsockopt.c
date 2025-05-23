@@ -133,7 +133,7 @@ int can_setsockopt(FAR struct socket *psock, int level, int option,
             return -EINVAL;
           }
 
-        conn->err_mask = *(FAR can_err_mask_t *)value & CAN_ERR_MASK;
+        conn->err_mask = *(FAR can_err_mask_t *)value;
         break;
 #endif
 
