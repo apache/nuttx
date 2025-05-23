@@ -229,6 +229,10 @@ static const struct virtio_snd_format_map_s g_format_map[] =
     {
       AUDIO_SUBFMT_PCM_S8, 8
     },
+  [VIRTIO_SND_PCM_FMT_U8] =
+    {
+      AUDIO_SUBFMT_PCM_U8, 8
+    },
   [VIRTIO_SND_PCM_FMT_S16] =
     {
       AUDIO_SUBFMT_PCM_S16_LE, 16
@@ -321,7 +325,7 @@ virtio_snd_get_support_formats(FAR const struct virtio_snd_pcm_info *info,
 
   for (i = 0; i < nitems(g_format_map); i++)
     {
-      if (info->formats & (1 << i))
+      if (info->formats & (1 << i) && g_format_map[i].nformat)
         {
           caps->ac_controls.b[subformats++] = g_format_map[i].nformat;
           if (subformats >= nitems(caps->ac_controls.b))
