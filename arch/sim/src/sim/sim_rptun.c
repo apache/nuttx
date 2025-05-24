@@ -245,6 +245,7 @@ static int sim_rptun_stop(struct rptun_dev_s *dev)
 
   if ((priv->master & SIM_RPTUN_BOOT) && priv->pid > 0)
     {
+      host_kill(priv->pid, SIGKILL);
       host_waitpid(priv->pid);
     }
 
