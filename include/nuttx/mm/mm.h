@@ -195,6 +195,7 @@ struct mm_heap_config_s
   FAR const char       *name;
   FAR void             *start;
   size_t                size;
+  bool                  nokasan;
 };
 
 struct mempool_init_s

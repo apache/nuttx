@@ -311,9 +311,10 @@ static int rptun_init_carveout(FAR struct rptun_priv_s *priv,
     }
 
   memset(&config, 0, sizeof(config));
-  config.name  = shmname;
-  config.start = shmbase;
-  config.size  = shmlen;
+  config.name    = shmname;
+  config.start   = shmbase;
+  config.size    = shmlen;
+  config.nokasan = true;
 
   carveout->base = shmbase;
   carveout->size = shmlen;
