@@ -56,6 +56,7 @@ struct epoll_node_s
   epoll_data_t             data;
   bool                     notified;
   struct pollfd            pfd;
+  FAR struct file         *filep;
   FAR struct epoll_head_s *eph;
 };
 
@@ -198,7 +199,8 @@ static int epoll_do_close(FAR struct file *filep)
       nxmutex_destroy(&eph->lock);
       list_for_every_entry(&eph->setup, epn, epoll_node_t, node)
         {
-          poll_fdsetup(epn->pfd.fd, &epn->pfd, false);
+          file_poll(epn->filep, &epn->pfd, false);
+          fs_putfilep(epn->filep);
         }
 
       list_for_every_entry_safe(&eph->extend, epn, tmp, epoll_node_t, node)
@@ -302,11 +304,11 @@ static int epoll_setup(FAR epoll_head_t *eph)
 
       epn->notified    = false;
       epn->pfd.revents = 0;
-      ret = poll_fdsetup(epn->pfd.fd, &epn->pfd, true);
+      ret = file_poll(epn->filep, &epn->pfd, true);
       if (ret < 0)
         {
-          ferr("epoll setup failed, fd=%d, events=%08" PRIx32 ", ret=%d\n",
-               epn->pfd.fd, epn->pfd.events, ret);
+          ferr("epoll setup failed, filep=%p, events=%08" PRIx32 ", "
+               "ret=%d\n", epn->filep, epn->pfd.events, ret);
           break;
         }
 
@@ -356,7 +358,7 @@ static int epoll_teardown(FAR epoll_head_t *eph, FAR struct epoll_event *evs,
 
       /* Teradown all the notified fd */
 
-      poll_fdsetup(epn->pfd.fd, &epn->pfd, false);
+      file_poll(epn->filep, &epn->pfd, false);
       list_delete(&epn->node);
 
       if (epn->pfd.revents != 0 && i < maxevents)
@@ -488,6 +490,7 @@ int epoll_ctl(int epfd, int op, int fd, FAR struct epoll_event *ev)
   eph = epoll_head_from_fd(epfd, &filep);
   if (eph == NULL)
     {
+      set_errno(EBADF);
       return ERROR;
     }
 
@@ -565,9 +568,17 @@ int epoll_ctl(int epfd, int op, int fd, FAR struct epoll_event *ev)
         epn->pfd.cb      = epoll_default_cb;
         epn->pfd.revents = 0;
 
-        ret = poll_fdsetup(fd, &epn->pfd, true);
+        ret = fs_getfilep(fd, &epn->filep);
         if (ret < 0)
           {
+            list_add_tail(&eph->free, &epn->node);
+            goto err;
+          }
+
+        ret = file_poll(epn->filep, &epn->pfd, true);
+        if (ret < 0)
+          {
+            fs_putfilep(epn->filep);
             list_add_tail(&eph->free, &epn->node);
             goto err;
           }
@@ -581,7 +592,8 @@ int epoll_ctl(int epfd, int op, int fd, FAR struct epoll_event *ev)
           {
             if (epn->pfd.fd == fd)
               {
-                poll_fdsetup(fd, &epn->pfd, false);
+                file_poll(epn->filep, &epn->pfd, false);
+                fs_putfilep(epn->filep);
                 list_delete(&epn->node);
                 list_add_tail(&eph->free, &epn->node);
                 goto out;
@@ -592,6 +604,7 @@ int epoll_ctl(int epfd, int op, int fd, FAR struct epoll_event *ev)
           {
             if (epn->pfd.fd == fd)
               {
+                fs_putfilep(epn->filep);
                 list_delete(&epn->node);
                 list_add_tail(&eph->free, &epn->node);
                 goto out;
@@ -602,6 +615,7 @@ int epoll_ctl(int epfd, int op, int fd, FAR struct epoll_event *ev)
           {
             if (epn->pfd.fd == fd)
               {
+                fs_putfilep(epn->filep);
                 list_delete(&epn->node);
                 list_add_tail(&eph->free, &epn->node);
                 goto out;
@@ -618,15 +632,14 @@ int epoll_ctl(int epfd, int op, int fd, FAR struct epoll_event *ev)
               {
                 if (epn->pfd.events != (ev->events | POLLALWAYS))
                   {
-                    poll_fdsetup(fd, &epn->pfd, false);
+                    file_poll(epn->filep, &epn->pfd, false);
 
                     epn->notified    = false;
                     epn->data        = ev->data;
                     epn->pfd.events  = ev->events | POLLALWAYS;
-                    epn->pfd.fd      = fd;
                     epn->pfd.revents = 0;
 
-                    ret = poll_fdsetup(fd, &epn->pfd, true);
+                    ret = file_poll(epn->filep, &epn->pfd, true);
                     if (ret < 0)
                       {
                         goto err;
@@ -646,10 +659,9 @@ int epoll_ctl(int epfd, int op, int fd, FAR struct epoll_event *ev)
                     epn->notified    = false;
                     epn->data        = ev->data;
                     epn->pfd.events  = ev->events | POLLALWAYS;
-                    epn->pfd.fd      = fd;
                     epn->pfd.revents = 0;
 
-                    ret = poll_fdsetup(fd, &epn->pfd, true);
+                    ret = file_poll(epn->filep, &epn->pfd, true);
                     if (ret < 0)
                       {
                         goto err;
@@ -670,10 +682,9 @@ int epoll_ctl(int epfd, int op, int fd, FAR struct epoll_event *ev)
                 epn->notified    = false;
                 epn->data        = ev->data;
                 epn->pfd.events  = ev->events | POLLALWAYS;
-                epn->pfd.fd      = fd;
                 epn->pfd.revents = 0;
 
-                ret = poll_fdsetup(fd, &epn->pfd, true);
+                ret = file_poll(epn->filep, &epn->pfd, true);
                 if (ret < 0)
                   {
                     goto err;
