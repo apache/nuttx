@@ -205,12 +205,7 @@ static void mm_delayfree(struct mm_heap_s *heap, void *mem, bool delay)
  *   heap region.
  *
  * Input Parameters:
- *   heap      - If heap is NULL, will use heapstart initialize heap context,
- *               otherwise, will use heap alloc a heap context, caller need
- *               free it after mm_uninitialize.
- *   name      - The heap procfs name
- *   heapstart - Start of the initial heap region
- *   heapsize  - Size of the initial heap region
+ *   config - The heap config structure
  *
  * Returned Value:
  *   Return the address of a new heap instance.
@@ -219,10 +214,13 @@ static void mm_delayfree(struct mm_heap_s *heap, void *mem, bool delay)
  *
  ****************************************************************************/
 
-struct mm_heap_s *
-mm_initialize_heap(struct mm_heap_s *heap, const char *name,
-                   void *heapstart, size_t heapsize)
+struct mm_heap_s *mm_initialize_heap(const struct mm_heap_config_s *config)
 {
+  struct mm_heap_s *heap = config->heap;
+  const char *name = config->name;
+  void *heap_start = config->start;
+  size_t heap_size = config->size;
+
   if (heap == NULL)
     {
       heap = host_memalign(sizeof(void *), sizeof(*heap));
@@ -246,6 +244,8 @@ mm_initialize_heap(struct mm_heap_s *heap, const char *name,
 #endif
 
   sched_note_heap(NOTE_HEAP_ADD, heap, heap_start, heap_size, 0);
+  UNUSED(heap_start);
+  UNUSED(heap_size);
   return heap;
 }
 

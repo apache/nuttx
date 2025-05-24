@@ -297,6 +297,7 @@ static int rptun_init_carveout(FAR struct rptun_priv_s *priv,
                                FAR void *shmbase, size_t shmlen)
 {
   FAR struct rptun_carveout_s *carveout;
+  struct mm_heap_config_s config;
 
   if (vdev->role == VIRTIO_DEV_DEVICE)
     {
@@ -309,9 +310,14 @@ static int rptun_init_carveout(FAR struct rptun_priv_s *priv,
       return -ENOMEM;
     }
 
+  memset(&config, 0, sizeof(config));
+  config.name  = shmname;
+  config.start = shmbase;
+  config.size  = shmlen;
+
   carveout->base = shmbase;
   carveout->size = shmlen;
-  carveout->heap = mm_initialize_heap(KRN_HEAP, shmname, shmbase, shmlen);
+  carveout->heap = mm_initialize_heap(&config);
   if (carveout->heap == NULL)
     {
       rptunerr("ERROR: Failed to initialize heap\n");

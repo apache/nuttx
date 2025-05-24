@@ -219,12 +219,7 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
  *   heap region.
  *
  * Input Parameters:
- *   heap      - If heap is NULL, will use heapstart initialize heap context,
- *               otherwise, will use heap alloc a heap context, caller need
- *               free it after mm_uninitialize.
- *   name      - The heap procfs name
- *   heapstart - Start of the initial heap region
- *   heapsize  - Size of the initial heap region
+ *   config - The heap config structure
  *
  * Returned Value:
  *   Return the address of a new heap instance.
@@ -234,9 +229,12 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
  ****************************************************************************/
 
 FAR struct mm_heap_s *
-mm_initialize_heap(FAR struct mm_heap_s *heap, FAR const char *name,
-                   FAR void *heapstart, size_t heapsize)
+mm_initialize_heap(FAR const struct mm_heap_config_s *config)
 {
+  FAR struct mm_heap_s *heap = config->heap;
+  FAR const char *name = config->name;
+  FAR void *heapstart = config->start;
+  size_t heapsize = config->size;
   int i;
 
   minfo("Heap: name=%s, start=%p size=%zu\n", name, heapstart, heapsize);
@@ -309,11 +307,10 @@ mm_initialize_heap(FAR struct mm_heap_s *heap, FAR const char *name,
 
 #ifdef CONFIG_MM_HEAP_MEMPOOL
 FAR struct mm_heap_s *
-mm_initialize_pool(FAR struct mm_heap_s *heap,
-                   FAR const char *name,
-                   FAR void *heap_start, size_t heap_size,
+mm_initialize_pool(FAR const struct mm_heap_config_s *config,
                    FAR const struct mempool_init_s *init)
 {
+  FAR struct mm_heap_s *heap;
 #if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD > 0
   size_t poolsize[MEMPOOL_NPOOLS];
   struct mempool_init_s def;
@@ -344,15 +341,15 @@ mm_initialize_pool(FAR struct mm_heap_s *heap,
     }
 #endif
 
-  heap = mm_initialize_heap(heap, name, heap_start, heap_size);
+  heap = mm_initialize_heap(config);
 
   /* Initialize the multiple mempool in heap */
 
   if (init != NULL && init->poolsize != NULL && init->npools != 0)
     {
       heap->mm_threshold = init->threshold;
-      heap->mm_mpool     = mempool_multiple_init(name, init->poolsize,
-                               init->npools,
+      heap->mm_mpool     = mempool_multiple_init(config->name,
+                               init->poolsize, init->npools,
                                (mempool_multiple_alloc_t)mempool_memalign,
                                (mempool_multiple_alloc_size_t)mm_malloc_size,
                                (mempool_multiple_free_t)mm_free, heap,
