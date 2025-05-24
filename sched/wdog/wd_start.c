@@ -406,12 +406,12 @@ int wd_start_abstick(FAR struct wdog_s *wdog, clock_t ticks,
  *
  ****************************************************************************/
 
-int wd_start(FAR struct wdog_s *wdog, sclock_t delay,
+int wd_start(FAR struct wdog_s *wdog, clock_t delay,
              wdentry_t wdentry, wdparm_t arg)
 {
-  /* Verify the wdog and setup parameters */
+  /* Ensure delay is within the range the wdog can handle. */
 
-  if (delay < 0)
+  if (delay > WDOG_MAX_DELAY)
     {
       return -EINVAL;
     }
@@ -444,7 +444,7 @@ int wd_start(FAR struct wdog_s *wdog, sclock_t delay,
  *
  ****************************************************************************/
 
-int wd_start_period(FAR struct wdog_period_s *wdog, sclock_t delay,
+int wd_start_period(FAR struct wdog_period_s *wdog, clock_t delay,
                     clock_t period, wdentry_t wdentry, wdparm_t arg)
 {
   if (!wdog || !period || !wdentry)

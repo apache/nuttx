@@ -83,7 +83,8 @@ int work_queue_period_wq(FAR struct kwork_wqueue_s *wqueue,
   clock_t expected;
   bool retimer;
 
-  if (wqueue == NULL || work == NULL || worker == NULL)
+  if (wqueue == NULL || work == NULL || worker == NULL ||
+      delay > WDOG_MAX_DELAY)
     {
       return -EINVAL;
     }
