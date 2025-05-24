@@ -31,9 +31,6 @@ class File(Value):
     f_pos: Value
     f_inode: Value
     f_priv: Value
-    f_tag_fdsan: Value
-    f_tag_fdcheck: Value
-    f_backtrace: Value
     locked: Value
 
 
