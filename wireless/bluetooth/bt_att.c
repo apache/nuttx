@@ -1037,22 +1037,31 @@ static uint8_t check_perm(FAR struct bt_conn_s *conn,
                           FAR const struct bt_gatt_attr_s *attr,
                           uint8_t mask)
 {
-  if ((mask & BT_GATT_PERM_READ) && !(attr->perm & BT_GATT_PERM_READ))
+  if ((mask & BT_GATT_PERM_READ) &&
+      (!(attr->perm & BT_GATT_PERM_READ_MASK) || !attr->read))
     {
       return BT_ATT_ERR_READ_NOT_PERMITTED;
     }
 
-  if ((mask & BT_GATT_PERM_WRITE) && !(attr->perm & BT_GATT_PERM_WRITE))
+  if ((mask & BT_GATT_PERM_WRITE) &&
+      (!(attr->perm & BT_GATT_PERM_WRITE_MASK) || !attr->write))
     {
-      return BT_ATT_ERR_READ_NOT_PERMITTED;
+      return BT_ATT_ERR_WRITE_NOT_PERMITTED;
     }
 
   mask &= attr->perm;
   if (mask & BT_GATT_PERM_AUTHEN_MASK)
     {
-      /* TODO: Check conn authentication */
+      if (!conn->encrypt || conn->sec_level < BT_SECURITY_HIGH)
+        {
+          wlerr("Auth Fail - encrypt=%d, level=%d (need >= %d)\n",
+                conn->encrypt, conn->sec_level, BT_SECURITY_HIGH);
+          return BT_ATT_ERR_AUTHENTICATION;
+        }
 
-      return BT_ATT_ERR_AUTHENTICATION;
+      wlinfo("Auth OK - encrypt=%d, level=%d\n",
+          conn->encrypt, conn->sec_level);
+      mask &= ~BT_GATT_PERM_AUTHEN_MASK;
     }
 
   if ((mask & BT_GATT_PERM_ENCRYPT_MASK) && !conn->encrypt)
