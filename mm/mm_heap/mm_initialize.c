@@ -156,7 +156,10 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
    * address alignment.
    */
 
-  kasan_register((void *)heapbase, &heapsize);
+  if (!heap->mm_nokasan)
+    {
+      kasan_register((void *)heapbase, &heapsize);
+    }
 
   heapend  = MM_ALIGN_DOWN((uintptr_t)heapbase + (uintptr_t)heapsize);
   heapsize = heapend - heapbase;
@@ -266,6 +269,7 @@ mm_initialize_heap(FAR const struct mm_heap_config_s *config)
   /* Set up global variables */
 
   memset(heap, 0, sizeof(struct mm_heap_s));
+  heap->mm_nokasan = config->nokasan;
 
   /* Initialize the node array */
 
@@ -385,7 +389,11 @@ void mm_uninitialize(FAR struct mm_heap_s *heap)
 
   for (i = 0; i < CONFIG_MM_REGIONS; i++)
     {
-      kasan_unregister(heap->mm_heapstart[i]);
+      if (!heap->mm_nokasan)
+        {
+          kasan_unregister(heap->mm_heapstart[i]);
+        }
+
       sched_note_heap(NOTE_HEAP_REMOVE, heap, heap->mm_heapstart[i],
                       (uintptr_t)heap->mm_heapend[i] -
                       (uintptr_t)heap->mm_heapstart[i], heap->mm_curused);

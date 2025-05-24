@@ -112,6 +112,10 @@ struct mm_heap_s
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
   struct procfs_meminfo_entry_s mm_procfs;
 #endif
+
+  /* Kasan is disable or enable for this heap */
+
+  bool mm_nokasan;
 };
 
 #if CONFIG_MM_BACKTRACE >= 0
@@ -730,7 +734,10 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
 
   /* Register to KASan for access check */
 
-  kasan_register(heapstart, &heapsize);
+  if (!heap->mm_nokasan)
+    {
+      kasan_register(heapstart, &heapsize);
+    }
 
   DEBUGVERIFY(mm_lock(heap));
 
@@ -1035,6 +1042,7 @@ mm_initialize_heap(FAR const struct mm_heap_config_s *config)
     }
 
   memset(heap, 0, sizeof(struct mm_heap_s));
+  heap->mm_nokasan = config->nokasan;
 
   /* Allocate and create TLSF context */
 
@@ -1674,7 +1682,11 @@ void mm_uninitialize(FAR struct mm_heap_s *heap)
 
   for (i = 0; i < CONFIG_MM_REGIONS; i++)
     {
-      kasan_unregister(heap->mm_heapstart[i]);
+      if (!heap->mm_nokasan)
+        {
+          kasan_unregister(heap->mm_heapstart[i]);
+        }
+
       sched_note_heap(NOTE_HEAP_REMOVE, heap, heap->mm_heapstart[i],
                       (uintptr_t)heap->mm_heapend[i] -
                       (uintptr_t)heap->mm_heapstart[i], heap->mm_curused);
