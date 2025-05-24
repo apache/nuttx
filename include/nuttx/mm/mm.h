@@ -184,6 +184,19 @@
 
 struct mm_heap_s; /* Forward reference */
 
+struct mm_heap_config_s
+{
+  /* If heap == NULL, means use the heap memory ([start, start + size])
+   * to construct the heap struct.
+   * If heap != NULL, means malloc struct mm_heap_s from this heap.
+   */
+
+  FAR struct mm_heap_s *heap;
+  FAR const char       *name;
+  FAR void             *start;
+  size_t                size;
+};
+
 struct mempool_init_s
 {
   FAR const size_t *poolsize;
@@ -253,20 +266,28 @@ EXTERN FAR struct mm_heap_s *g_kmmheap;
 /* Functions contained in mm_initialize.c ***********************************/
 
 FAR struct mm_heap_s *
-mm_initialize_heap(FAR struct mm_heap_s *heap, FAR const char *name,
-                   FAR void *heapstart, size_t heapsize);
-#define mm_initialize(name, heapstart, heapsize) \
-        mm_initialize_heap(NULL, name, heapstart, heapsize)
+mm_initialize_heap(FAR const struct mm_heap_config_s *config);
+
+static inline_function FAR struct mm_heap_s *
+mm_initialize(FAR const char *name, FAR void *heapstart, size_t heapsize)
+{
+  struct mm_heap_config_s config;
+
+  memset(&config, 0, sizeof(config));
+  config.name  = name;
+  config.start = heapstart;
+  config.size  = heapsize;
+
+  return mm_initialize_heap(&config);
+}
+
 #ifdef CONFIG_MM_HEAP_MEMPOOL
 FAR struct mm_heap_s *
-mm_initialize_pool(FAR struct mm_heap_s *heap,
-                   FAR const char *name,
-                   FAR void *heap_start, size_t heap_size,
+mm_initialize_pool(FAR const struct mm_heap_config_s *config,
                    FAR const struct mempool_init_s *init);
 
 #else
-#  define mm_initialize_pool(heap, name, heap_start, heap_size, init) \
-          mm_initialize_heap(heap, name, heap_start, heap_size)
+#  define mm_initialize_pool(config, init) mm_initialize_heap(config)
 #endif
 
 void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
