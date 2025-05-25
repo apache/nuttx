@@ -2055,6 +2055,13 @@ config ARCH_BOARD_RASPBERRYPI_PICO_2
 	---help---
 		This is a port to the Raspberry Pi Pico 2 board.
 
+config ARCH_BOARD_RASPBERRYPI_PICO_2_RV
+	bool "Raspberry Pi Pico 2 board RISC-V (not Pico, not W)"
+	depends on ARCH_CHIP_RP23XX_RV
+	select ARCH_HAVE_LEDS
+	---help---
+		This is a port to the Raspberry Pi Pico 2 RISC-V board.
+
 config ARCH_BOARD_XIAO_RP2350
 	bool "Seeed Xiao RP2350"
 	depends on ARCH_CHIP_RP23XX
@@ -3637,6 +3644,7 @@ config ARCH_BOARD
 	default "adafruit-qt-py-rp2040"     if ARCH_BOARD_ADAFRUIT_QT_PY_RP2040
 	default "waveshare-rp2040-lcd-1.28" if ARCH_BOARD_WAVESHARE_RP2040_LCD_1_28
 	default "raspberrypi-pico-2"        if ARCH_BOARD_RASPBERRYPI_PICO_2
+	default "raspberrypi-pico-2-rv"  if ARCH_BOARD_RASPBERRYPI_PICO_2_RV
 	default "xiao-rp2350"               if ARCH_BOARD_XIAO_RP2350
 	default "pimoroni-pico-2-plus"      if ARCH_BOARD_PIMORONI_PICO_2_PLUS
 	default "w5500-evb-pico"            if ARCH_BOARD_W5500_EVB_PICO
@@ -4861,6 +4869,9 @@ endif
 if ARCH_BOARD_FRDM_MCXN236
 source "boards/arm/mcx-nxxx/frdm-mcxn236/Kconfig"
 endif
+if ARCH_BOARD_RASPBERRYPI_PICO_2_RV
+source "boards/risc-v/rp23xx-rv/raspberrypi-pico-2-rv/Kconfig"
+endif
 
 comment "Board-Common Options"
 
@@ -4919,6 +4930,11 @@ endif
 if ARCH_CHIP_NRF91
 source "boards/arm/nrf91/common/Kconfig"
 endif
+
+if ARCH_CHIP_RP23XX_RV
+source "boards/risc-v/rp23xx-rv/common/Kconfig"
+endif
+
 endif
 
 choice
