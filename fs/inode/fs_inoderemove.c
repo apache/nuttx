@@ -92,7 +92,16 @@ static FAR struct inode *inode_unlink(FAR const char *path)
 
       else
         {
-          DEBUGASSERT(desc.parent != NULL);
+          /* The parent could be null if we are trying to remove the
+           * root inode. In that case, fail because we cannot remove it.
+           */
+
+          if (desc.parent == NULL)
+            {
+              inode = NULL;
+              goto errout;
+            }
+
           desc.parent->i_child = inode->i_peer;
         }
 
@@ -101,6 +110,7 @@ static FAR struct inode *inode_unlink(FAR const char *path)
       atomic_fetch_sub(&inode->i_crefs, 1);
     }
 
+errout:
   RELEASE_SEARCH(&desc);
   return inode;
 }
