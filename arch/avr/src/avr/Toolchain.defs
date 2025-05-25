@@ -110,6 +110,10 @@ ifeq ($(CONFIG_DEBUG_LINK_MAP),y)
   LDFLAGS += -Map=$(call CONVERT_PATH,$(TOPDIR)$(DELIM)nuttx.map)
 endif
 
+ifeq ($(CONFIG_ARCH_TOOLCHAIN_GCC),y)
+  LDFLAGS += --print-memory-usage
+endif
+
 ifneq ($(CONFIG_DEBUG_NOOPT),y)
   ARCHOPTIMIZATION += -fno-strict-aliasing
 endif
