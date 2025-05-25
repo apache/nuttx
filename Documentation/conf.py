@@ -135,6 +135,14 @@ copybutton_exclude = ".linenos, .gp, .go"
 
 warnings_filter_config = "known-warnings.txt"
 
+html_context = {
+    "display_github": True,
+    "github_user": "apache",
+    "github_repo": "nuttx",
+    "github_version": "master",
+    "conf_py_path": "/Documentation/",
+}
+
 # -- Options for sphinx_tags ----------------------------------------------
 
 tags_create_tags = True
