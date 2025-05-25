@@ -130,6 +130,10 @@ ifeq ($(CONFIG_LCD_ILI9341),y)
   CSRCS += esp32_ili9341.c
 endif
 
+ifeq ($(CONFIG_LCD_GC9A01),y)
+  CSRCS += esp32_gc9a01.c
+endif
+
 ifeq ($(CONFIG_LCD_ST7789),y)
   CSRCS += esp32_st7789.c
 endif
