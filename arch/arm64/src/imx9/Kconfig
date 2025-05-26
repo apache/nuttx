@@ -69,12 +69,12 @@ config IMX9_HAVE_ATF_FIRMWARE
 
 config IMX9_BOOTLOADER
 	bool "Bootloader"
-	select ARM64_DECODEFIQ
-	select IMX9_DDR_TRAINING
+	select ARM64_DECODEFIQ if ARCH_ARM64_EXCEPTION_LEVEL = 3
+	select IMX9_DDR_TRAINING if ARCH_ARM64_EXCEPTION_LEVEL = 3
 	default n
 	---help---
 		Configure NuttX as the bootloader. NuttX will be compiled
-		into OCRAM. It will run in EL3 secure state.
+		into OCRAM if we are in EL3.
 
 config BOOTLOADER_SYS_CLOCK
 	int "Bootloader system clock for timer"
