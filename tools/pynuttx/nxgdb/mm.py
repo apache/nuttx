@@ -223,7 +223,9 @@ class MemPool(Value, p.MemPool):
 
     @property
     def nwaiter(self) -> int:
-        return -int(self.waitsem.semcount) if self.wait and self.expandsize == 0 else 0
+        return (
+            -int(self.waitsem.val.semcount) if self.wait and self.expandsize == 0 else 0
+        )
 
     @property
     def nused(self) -> int:
