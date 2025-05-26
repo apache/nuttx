@@ -35,6 +35,7 @@
 #  include <nuttx/page.h>
 #endif
 
+#include "mmu.h"
 #include "sched/sched.h"
 #include "arm_internal.h"
 
@@ -77,7 +78,11 @@ uint32_t *arm_prefetchabort(uint32_t *regs, uint32_t ifar, uint32_t ifsr)
   pginfo("VADDR: %08x VBASE: %08x VEND: %08x\n",
          regs[REG_PC], PG_PAGED_VBASE, PG_PAGED_VEND);
 
-  if (regs[REG_R15] >= PG_PAGED_VBASE && regs[REG_R15] < PG_PAGED_VEND)
+  if (FSR_FAULT(ifsr) == FSR_FAULT_DEBUG)
+    {
+      arm_dbgmonitor(0, (void *)regs[REG_PC], regs);
+    }
+  else if (regs[REG_R15] >= PG_PAGED_VBASE && regs[REG_R15] < PG_PAGED_VEND)
     {
       /* Save the offending PC as the fault address in the TCB of the
        * currently executing task.  This value is, of course, already known
@@ -101,11 +106,6 @@ uint32_t *arm_prefetchabort(uint32_t *regs, uint32_t ifar, uint32_t ifsr)
        */
 
       pg_miss();
-
-      /* Restore the previous value of saveregs. */
-
-      up_set_interrupt_context(savestate);
-      tcb->xcp.regs = saveregs;
     }
   else
     {
@@ -113,6 +113,11 @@ uint32_t *arm_prefetchabort(uint32_t *regs, uint32_t ifar, uint32_t ifsr)
              " IFSR: %08" PRIx32 "\n", regs[REG_PC], ifar, ifsr);
       PANIC_WITH_REGS("panic", regs);
     }
+
+  /* Restore the previous value of saveregs. */
+
+  up_set_interrupt_context(savestate);
+  tcb->xcp.regs = saveregs;
 
   return regs;
 }
@@ -130,7 +135,17 @@ uint32_t *arm_prefetchabort(uint32_t *regs, uint32_t ifar, uint32_t ifsr)
 
   _alert("Prefetch abort. PC: %08" PRIx32 " IFAR: %08" PRIx32 " IFSR: %08"
          PRIx32 "\n", regs[REG_PC], ifar, ifsr);
-  PANIC_WITH_REGS("panic", regs);
+
+  if (FSR_FAULT(ifsr) == FSR_FAULT_DEBUG)
+    {
+      arm_dbgmonitor(0, (void *)regs[REG_PC], regs);
+    }
+  else
+    {
+      PANIC_WITH_REGS("panic", regs);
+    }
+
+  up_set_interrupt_context(false);
   return regs; /* To keep the compiler happy */
 }
 
