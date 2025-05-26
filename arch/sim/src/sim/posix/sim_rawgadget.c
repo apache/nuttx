@@ -89,7 +89,8 @@
 
 #define USB_RAW_RX_BUF_NUM          8
 
-#define USB_RAW_DEVICE              "dummy_udc.0"
+#define USB_RAW_DEVICE_MAX          32
+#define USB_RAW_DEVICE              "dummy_udc.%d"
 #define USB_RAW_DRIVER              "dummy_udc"
 
 #define USB_RAW_FIFO_USED(fifo)     ((fifo)->write - (fifo)->read)
@@ -324,7 +325,7 @@ static void host_raw_init(int fd, enum usb_device_speed speed,
 
 static int host_raw_run(int fd)
 {
-  int rv = host_uninterruptible(ioctl, fd, USB_RAW_IOCTL_RUN, 0);
+  int rv = host_uninterruptible_errno(ioctl, fd, USB_RAW_IOCTL_RUN, 0);
   if (rv < 0)
     {
       ERROR("ioctl(USB_RAW_IOCTL_RUN) fail");
@@ -672,19 +673,40 @@ static void *host_raw_ephandle(void *arg)
 int host_usbdev_init(uint32_t speed)
 {
   struct usb_raw_gadget_dev_t *dev = &g_raw_gadget_dev;
-  const char *device = USB_RAW_DEVICE;
   const char *driver = USB_RAW_DRIVER;
+  char device[16];
+  int ret;
   int fd;
+  int i;
 
-  fd = host_raw_open();
-  if (fd < 0)
+  memset(device, 0, sizeof(device));
+
+  for (i = 0; i < USB_RAW_DEVICE_MAX; i++)
     {
-      ERROR("USB raw open error");
-      return -1;
+      fd = host_raw_open();
+      if (fd < 0)
+        {
+          ERROR("USB raw open error:%d", fd);
+          return fd;
+        }
+
+      sprintf(device, USB_RAW_DEVICE, i);
+      host_raw_init(fd, speed, driver, device);
+      ret = host_raw_run(fd);
+      if (ret == 0)
+        {
+          break;
+        }
+
+      ERROR("USB raw %d run error:%d", i, ret);
+      host_raw_close(fd);
     }
 
-  host_raw_init(fd, speed, driver, device);
-  host_raw_run(fd);
+  if (i == USB_RAW_DEVICE_MAX)
+    {
+      return ret;
+    }
+
   host_raw_vbusdraw(fd, 0x32);
   host_raw_configure(fd);
   dev->fd = fd;

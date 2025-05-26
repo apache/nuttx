@@ -1094,9 +1094,9 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
       /* Setup the USB host controller */
 
 #ifdef CONFIG_USBDEV_DUALSPEED
-      host_usbdev_init(SIM_USB_SPEED);
+      ret = host_usbdev_init(SIM_USB_SPEED);
 #else
-      host_usbdev_init(USB_SPEED_FULL);
+      ret = host_usbdev_init(USB_SPEED_FULL);
 #endif
     }
 
