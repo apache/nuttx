@@ -107,7 +107,15 @@ FAR void *net_bufpool_timedalloc(FAR struct net_bufpool_s *pool,
       DEBUGASSERT(pool->nodesize > 0);
     }
 
-  ret = net_sem_timedwait_uninterruptible(&pool->sem, timeout);
+  if (timeout == 0)
+    {
+      ret = nxsem_trywait(&pool->sem);
+    }
+  else
+    {
+      ret = net_sem_timedwait_uninterruptible(&pool->sem, timeout);
+    }
+
   if (ret != OK)
     {
       return NULL;
