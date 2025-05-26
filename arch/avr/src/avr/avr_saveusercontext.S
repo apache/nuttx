@@ -68,5 +68,26 @@ up_saveusercontext:
 
 	USER_SAVE
 
+	/* Main purpose of USER_SAVE macro is to serve as a first half
+	 * of a context switch. To be able to do that, it - among other
+	 * things - pops return address from the stack. The other half
+	 * of context switch procedure then reverses that and pushes
+	 * (different) return address back to the stack and returns
+	 *
+	 * The same needs to be done here, albeit simplified (we are
+	 * not restoring context, just need return address back on the stack
+	 * to be able to return.)
+	 *
+	 * Return address is loaded to r18-r20 in USER_SAVE
+	 */
+
+	push r18
+	push r19
+#if AVR_PC_SIZE > 16
+	push r20
+#endif /* AVR_PC_SIZE */
+
+	ret
+
 	.endfunc
 	.end

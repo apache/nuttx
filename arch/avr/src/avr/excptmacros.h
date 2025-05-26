@@ -346,6 +346,12 @@
 
   /* Pop the return address from the stack (PC0 then PC1).
    *  R18:19 are Call-used
+   *
+   * NOTE: up_saveusercontext in avr_saveusercontext.S uses this macro
+   * and needs to reverse this by pushing the return address back
+   * to the stack. Contents of these two/three registers must not change
+   * throughout whole macro and all changes in registers used and/or
+   * instruction ordering need to be reflected in up_saveusercontext.
    */
 
 #if AVR_PC_SIZE > 16
