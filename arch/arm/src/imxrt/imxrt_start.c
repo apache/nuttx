@@ -37,6 +37,7 @@
 
 #include "arm_internal.h"
 #include "nvic.h"
+#include "ram_vectors.h"
 
 #include "imxrt_clockconfig.h"
 #include "imxrt_mpuinit.h"
@@ -214,6 +215,10 @@ void __start(void)
     {
       *dest++ = *src++;
     }
+#endif
+
+#ifdef CONFIG_ARCH_RAMVECTORS
+  arm_ramvec_initialize();
 #endif
 
 #ifdef CONFIG_ARMV7M_STACKCHECK
