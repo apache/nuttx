@@ -55,6 +55,10 @@ if(CONFIG_ARMV7A_GICv2M)
   list(APPEND SRCS arm_gicv2m.c)
 endif()
 
+if(CONFIG_ARCH_HAVE_DEBUG)
+  list(APPEND SRCS arm_hwdebug.c)
+endif()
+
 if(CONFIG_ARMV7A_HAVE_PTM)
   list(APPEND SRCS arm_timer.c)
 endif()

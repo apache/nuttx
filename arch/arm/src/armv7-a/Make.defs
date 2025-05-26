@@ -46,6 +46,10 @@ ifeq ($(CONFIG_ARMV7A_GICv2M),y)
   CMN_CSRCS += arm_gicv2m.c
 endif
 
+ifeq ($(CONFIG_ARCH_HAVE_DEBUG),y)
+  CMN_CSRCS += arm_hwdebug.c
+endif
+
 ifeq ($(CONFIG_ARMV7A_HAVE_PTM),y)
   CMN_CSRCS += arm_timer.c
 endif
