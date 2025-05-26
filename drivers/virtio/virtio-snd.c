@@ -358,6 +358,12 @@ static void virtio_snd_pcm_notify_cb(FAR struct virtqueue *vq)
 #endif
       sdev = (FAR struct virtio_snd_dev_s *)buf->dev;
       sdev->cache_buffers--;
+      if (sdev->running &&
+          buf->status->latency_bytes < sdev->period_bytes)
+        {
+          buf->dev->upper(buf->dev->priv, AUDIO_CALLBACK_UNDERRUN,
+                          NULL, OK);
+        }
     }
 }
 
