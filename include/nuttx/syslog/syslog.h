@@ -88,6 +88,11 @@
 
 #define SYSLOGIOC_SETFILTER _SYSLOGIOC(0x0002)
 
+/* Set/Get syslog ratelimit */
+
+#define SYSLOGIOC_SETRATELIMIT _SYSLOGIOC(0x0003)
+#define SYSLOGIOC_GETRATELIMIT _SYSLOGIOC(0x0004)
+
 #define SYSLOG_CHANNEL_NAME_LEN       32
 
 #define SYSLOG_CHANNEL_DISABLE        0x01
@@ -125,6 +130,12 @@ struct syslog_channel_ops_s
   syslog_write_t sc_write;        /* Write multiple bytes */
   syslog_write_t sc_write_force;  /* Write multiple bytes for interrupt handlers */
   syslog_close_t sc_close;        /* Channel close callback */
+};
+
+struct syslog_ratelimit_s
+{
+  unsigned int interval; /* The interval in seconds */
+  unsigned int burst;    /* The max allowed note number during interval */
 };
 
 struct syslog_channel_info_s

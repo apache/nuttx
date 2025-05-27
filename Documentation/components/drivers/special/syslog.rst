@@ -539,6 +539,73 @@ Other miscellaneous settings
 -  ``CONFIG_RAMLOG_NPOLLWAITERS``: The maximum number of threads
    that may be waiting on the poll method.
 
+RAMLOG Rate Limiting
+--------------------
+
+The RAMLOG SYSLOG channel supports rate limiting to prevent log flooding.
+You can set or get the rate limit using the following IOCTLs:
+
+- ``SYSLOGIOC_SETRATELIMIT``: Set the rate limit.
+- ``SYSLOGIOC_GETRATELIMIT``: Get the current rate limit.
+
+The argument is a pointer to:
+
+.. code-block:: c
+
+   struct syslog_ratelimit_s
+   {
+     unsigned int interval; /* The interval in seconds */
+     unsigned int burst;    /* The max allowed log entries during interval */
+   };
+
+**Example (C code):**
+
+.. code-block:: c
+
+   struct syslog_ratelimit_s limit = { .interval = 1, .burst = 100 };
+   ioctl(fd, SYSLOGIOC_SETRATELIMIT, (unsigned long)&limit);
+
+**NSH Tool Example: setlograte**
+
+You can implement a simple NSH command to control the RAMLOG rate limit at runtime, similar to setlogmask:
+
+.. code-block:: c
+
+   int cmd_setlograte(int argc, char **argv)
+   {
+     int fd;
+     struct syslog_ratelimit_s limit;
+
+     if (argc != 3)
+       {
+         printf("Usage: setlograte <interval_sec> <burst>\n");
+         return -1;
+       }
+
+     limit.interval = atoi(argv[1]);
+     limit.burst = atoi(argv[2]);
+
+     fd = open("/dev/ramlog", O_RDWR);
+     if (fd < 0)
+       {
+         printf("Failed to open /dev/ramlog\n");
+         return -1;
+       }
+
+     if (ioctl(fd, SYSLOGIOC_SETRATELIMIT, (unsigned long)&limit) < 0)
+       {
+         printf("Failed to set rate limit\n");
+         close(fd);
+         return -1;
+       }
+
+     printf("Set RAMLOG rate limit: interval=%u sec, burst=%u\n", limit.interval, limit.burst);
+     close(fd);
+     return 0;
+   }
+
+This command allows you to set the maximum number of log entries (burst) allowed in a given interval (seconds) for the RAMLOG device at runtime.
+
 SYSLOG Protocol (RFC 5424)
 ==========================
 
