@@ -86,7 +86,7 @@
 #endif
 
 /****************************************************************************
- * Private Type Definitions
+ * Private Types
  ****************************************************************************/
 
 /* This structure describes the state of the upper half driver */

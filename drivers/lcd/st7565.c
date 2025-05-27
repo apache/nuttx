@@ -147,7 +147,7 @@
 #define MS_BIT          (1 << 7)
 
 /****************************************************************************
- * Private Type Definition
+ * Private Types
  ****************************************************************************/
 
 /* This structure describes the state of this driver */

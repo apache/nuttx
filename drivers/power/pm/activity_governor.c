@@ -56,7 +56,7 @@
 #define TIME_SLICE_TICKS ((CONFIG_PM_GOVERNOR_SLICEMS * CLOCKS_PER_SEC) /  1000)
 
 /****************************************************************************
- * Private Type Declarations
+ * Private Types
  ****************************************************************************/
 
 struct pm_domain_state_s

@@ -349,7 +349,7 @@
 #endif
 
 /****************************************************************************
- * Private Type Definition
+ * Private Types
  ****************************************************************************/
 
 /* Each single connected ili9340 LCD driver needs an own driver instance

@@ -41,7 +41,7 @@ static_assert(CONFIG_PM_NDOMAINS >= (CONFIG_SMP_NCPUS + 1),
               "No enough domain for PM SMP to occupy");
 
 /****************************************************************************
- * Private Type Declarations
+ * Private Types
  ****************************************************************************/
 
 struct pm_idle_s
