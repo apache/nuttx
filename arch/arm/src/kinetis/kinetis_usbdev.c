@@ -383,7 +383,7 @@ const struct trace_msg_t g_usb_trace_strings_deverror[] =
 #endif
 
 /****************************************************************************
- * Private Type Definitions
+ * Private Types
  ****************************************************************************/
 
 /* Overvall device state */

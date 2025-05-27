@@ -94,7 +94,7 @@
 #define INSN_C_FSDSP 0xa002
 
 /****************************************************************************
- * Private Type Definitions
+ * Private Types
  ****************************************************************************/
 
 /* Compressed instruction encoding */

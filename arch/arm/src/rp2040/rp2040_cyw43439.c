@@ -59,7 +59,7 @@ bool  g_print_gspi = false;
 #define TX_FIFO_SIZE    4
 
 /****************************************************************************
- * Private Type Definitions
+ * Private Types
  ****************************************************************************/
 
 typedef struct dma_info_s
