@@ -53,7 +53,7 @@
     !defined(CONFIG_FS_PROCFS_EXCLUDE_NET)
 
 /****************************************************************************
- * Private Type Definitions
+ * Private Types
  ****************************************************************************/
 
 /* Read statistics function type */

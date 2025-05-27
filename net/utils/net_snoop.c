@@ -51,7 +51,7 @@
                               + (tv).tv_usec + 0x00e03ab44a676000ll)
 
 /****************************************************************************
- * Private Type Definitions
+ * Private Types
  ****************************************************************************/
 
 /* The availability of tools to capture, display and interpret packets
