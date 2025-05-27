@@ -254,10 +254,8 @@ switch_el:
     mov   sp, x24
     b     el3_boot
 #endif
-
-    /* Get next EL */
-
-    adr   x0, switch_el
+    /* Jump to EL2 */
+    adr   x0, 2f
     bl    arm64_boot_el3_get_next_el
     eret
 #endif
