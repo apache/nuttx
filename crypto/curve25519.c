@@ -36,7 +36,7 @@
 #include <crypto/curve25519.h>
 
 /****************************************************************************
- * Private Type Definitions
+ * Private Types
  ****************************************************************************/
 
 /* fe means field element. Here the field is \Z/(2^255-19). An element t,
