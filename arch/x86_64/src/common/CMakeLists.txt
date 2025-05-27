@@ -38,7 +38,7 @@ if(CONFIG_ARCH_HAVE_FORK)
   list(APPEND SRCS x86_64_fork.c fork.S)
 endif()
 
-if(CONFIG_LIB_SYSCALL)
+if(CONFIG_ARCH_HAVE_SYSCALL)
   list(APPEND SRCS x86_64_syscall.c)
 endif()
 
