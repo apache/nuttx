@@ -34,7 +34,6 @@
 #include <nuttx/arch.h>
 
 #include "sched/sched.h"
-#include "signal/signal.h"
 #include "x86_64_internal.h"
 
 /****************************************************************************
@@ -84,8 +83,8 @@ void up_schedule_sigaction(struct tcb_s *tcb)
 
   if (tcb == this_task() && !up_interrupt_context())
     {
-      nxsig_deliver(tcb);
-      tcb->flags &= ~TCB_FLAG_SIGDELIVER;
+      (tcb->sigdeliver)(tcb);
+      tcb->sigdeliver = NULL;
     }
 
   /* Otherwise, we are (1) signaling a task is not running from an

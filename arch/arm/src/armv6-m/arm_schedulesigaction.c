@@ -37,7 +37,6 @@
 #include "psr.h"
 #include "exc_return.h"
 #include "sched/sched.h"
-#include "signal/signal.h"
 #include "arm_internal.h"
 #include "irq/irq.h"
 #include "nvic.h"
@@ -97,8 +96,8 @@ void up_schedule_sigaction(struct tcb_s *tcb)
        * REVISIT:  Signal handle will run in a critical section!
        */
 
-      nxsig_deliver(tcb);
-      tcb->flags &= ~TCB_FLAG_SIGDELIVER;
+      (tcb->sigdeliver)(tcb);
+      tcb->sigdeliver = NULL;
     }
   else if (tcb == rtcb && ipsr != NVIC_IRQ_PENDSV)
     {

@@ -89,7 +89,7 @@ void up_initial_state(struct tcb_s *tcb)
 #else
   /* No pending signal delivery */
 
-  tcb->flags &= ~TCB_FLAG_SIGDELIVER;
+  tcb->sigdeliver   = NULL;
 
   /* Clear the frame pointer and link register since this is the outermost
    * frame.

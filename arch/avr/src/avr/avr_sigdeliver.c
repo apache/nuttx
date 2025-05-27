@@ -37,7 +37,6 @@
 #include <arch/board/board.h>
 
 #include "sched/sched.h"
-#include "signal/signal.h"
 #include "avr_internal.h"
 
 /****************************************************************************
@@ -61,9 +60,9 @@ void avr_sigdeliver(void)
 
   board_autoled_on(LED_SIGNAL);
 
-  sinfo("rtcb=%p sigpendactionq.head=%p\n",
-        rtcb, rtcb->sigpendactionq.head);
-  DEBUGASSERT((rtcb->flags & TCB_FLAG_SIGDELIVER) != 0);
+  sinfo("rtcb=%p sigdeliver=%p sigpendactionq.head=%p\n",
+        rtcb, rtcb->sigdeliver, rtcb->sigpendactionq.head);
+  DEBUGASSERT(rtcb->sigdeliver != NULL);
 
   /* Save the return state on the stack. */
 
@@ -79,7 +78,7 @@ void avr_sigdeliver(void)
 
   /* Deliver the signal */
 
-  nxsig_deliver(rtcb);
+  (rtcb->sigdeliver)(rtcb);
 
   /* Output any debug messages BEFORE restoring errno (because they may
    * alter errno), then disable interrupts again and restore the original
@@ -99,19 +98,17 @@ void avr_sigdeliver(void)
    * could be modified by a hostile program.
    */
 
-  regs[REG_PC0] = rtcb->xcp.saved_pc0;
-  regs[REG_PC1] = rtcb->xcp.saved_pc1;
+  regs[REG_PC0]    = rtcb->xcp.saved_pc0;
+  regs[REG_PC1]    = rtcb->xcp.saved_pc1;
 #if defined(REG_PC2)
-  regs[REG_PC2] = rtcb->xcp.saved_pc2;
+  regs[REG_PC2]    = rtcb->xcp.saved_pc2;
 #endif
+
 #if defined(REG_RAMPZ)
   regs[REG_RAMPZ] = rtcb->xcp.saved_rampz;
 #endif
-  regs[REG_SREG] = rtcb->xcp.saved_sreg;
-
-  /* Allows next handler to be scheduled */
-
-  rtcb->flags &= ~TCB_FLAG_SIGDELIVER;
+  regs[REG_SREG]   = rtcb->xcp.saved_sreg;
+  rtcb->sigdeliver = NULL;  /* Allows next handler to be scheduled */
 
   /* Then restore the correct state for this thread of execution. This is an
    * unusual case that must be handled by up_fullcontextresore. This case is

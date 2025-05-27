@@ -35,7 +35,6 @@
 #include <nuttx/arch.h>
 
 #include "sched/sched.h"
-#include "signal/signal.h"
 #include "arm64_internal.h"
 #include "arm64_arch.h"
 #include "irq/irq.h"
@@ -131,8 +130,8 @@ void up_schedule_sigaction(struct tcb_s *tcb)
        * REVISIT:  Signal handler will run in a critical section!
        */
 
-      nxsig_deliver(tcb);
-      tcb->flags &= ~TCB_FLAG_SIGDELIVER;
+      (tcb->sigdeliver)(tcb);
+      tcb->sigdeliver = NULL;
     }
   else
     {

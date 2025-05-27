@@ -68,7 +68,7 @@ static bool syslog_safe_to_block(void)
   /* It's not safe to block if a signal is being delivered */
 
   rtcb = nxsched_self();
-  if ((rtcb->flags & TCB_FLAG_SIGDELIVER) != 0)
+  if (rtcb->sigdeliver != NULL)
     {
       return false;
     }

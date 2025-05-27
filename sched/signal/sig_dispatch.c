@@ -86,7 +86,7 @@ static int sig_handler(FAR void *cookie)
       tcb->flags &= ~TCB_FLAG_CPU_LOCKED;
     }
 
-  if ((tcb->flags & TCB_FLAG_SIGDELIVER) != 0)
+  if (tcb->sigdeliver)
     {
       up_schedule_sigaction(tcb);
     }
@@ -158,13 +158,13 @@ static int nxsig_queue_action(FAR struct tcb_s *stcb,
            * up_schedule_sigaction()
            */
 
-          if ((stcb->flags & TCB_FLAG_SIGDELIVER) == 0)
+          if (!stcb->sigdeliver)
             {
 #ifdef CONFIG_SMP
               int cpu = stcb->cpu;
               int me  = this_cpu();
 
-              stcb->flags |= TCB_FLAG_SIGDELIVER;
+              stcb->sigdeliver = nxsig_deliver;
               if (cpu != me && stcb->task_state == TSTATE_TASK_RUNNING)
                 {
                   struct sig_arg_s arg;
@@ -189,7 +189,7 @@ static int nxsig_queue_action(FAR struct tcb_s *stcb,
               else
 #endif
                 {
-                  stcb->flags |= TCB_FLAG_SIGDELIVER;
+                  stcb->sigdeliver = nxsig_deliver;
                   up_schedule_sigaction(stcb);
                 }
             }
