@@ -561,6 +561,18 @@ static ssize_t ftl_flush(FAR void *priv, FAR const uint8_t *buffer,
   int    nbytes;
   int    ret;
 
+  if (dev->mtd->erase == NULL && dev->lptable == NULL)
+    {
+      ret = MTD_BWRITE(dev->mtd, startblock, nblocks, buffer);
+      if (ret != nblocks)
+        {
+          ferr("ERROR: Direct write block %" PRIdOFF " failed: %d\n",
+               startblock, ret);
+        }
+
+      return ret;
+    }
+
   if (dev->oflags & O_DIRECT)
     {
       /* Direct write mode */
