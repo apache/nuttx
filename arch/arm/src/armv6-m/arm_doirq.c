@@ -34,7 +34,6 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 #include <sched/sched.h>
-#include <signal/signal.h>
 
 #include "arm_internal.h"
 #include "exc_return.h"
@@ -87,7 +86,7 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
 
       irq_dispatch(irq, regs);
 #endif
-      if ((tcb->flags & TCB_FLAG_SIGDELIVER) != 0)
+      if (tcb->sigdeliver)
         {
           /* Pendsv able to access running tcb with no critical section */
 

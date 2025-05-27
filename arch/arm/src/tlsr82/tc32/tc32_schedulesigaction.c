@@ -35,7 +35,6 @@
 
 #include "tc32.h"
 #include "sched/sched.h"
-#include "signal/signal.h"
 #include "arm_internal.h"
 
 /****************************************************************************
@@ -91,8 +90,8 @@ void up_schedule_sigaction(struct tcb_s *tcb)
     {
       /* In this case just deliver the signal now. */
 
-      nxsig_deliver(tcb);
-      tcb->flags &= ~TCB_FLAG_SIGDELIVER;
+      (tcb->sigdeliver)(tcb);
+      tcb->sigdeliver = NULL;
     }
 
   /* Otherwise, we are (1) signaling a task is not running
