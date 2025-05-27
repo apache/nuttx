@@ -50,7 +50,7 @@ static struct smp_call_data_s g_call_data;
 #endif
 
 /****************************************************************************
- * Private Type Declarations
+ * Private Types
  ****************************************************************************/
 
 struct roundrobin_arg_s

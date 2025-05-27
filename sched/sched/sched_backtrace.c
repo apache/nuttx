@@ -33,7 +33,7 @@
 #ifdef CONFIG_ARCH_HAVE_BACKTRACE
 
 /****************************************************************************
- * Private Type Declarations
+ * Private Types
  ****************************************************************************/
 
 #ifdef CONFIG_SMP
