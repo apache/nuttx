@@ -275,7 +275,7 @@
 #define SLCD_CHAR6_UPDATE3(s) SLCD_CHAR6_UPDATE2(s)
 
 /****************************************************************************
- * Private Type Definition
+ * Private Types
  ****************************************************************************/
 
 /* Global SLCD state */

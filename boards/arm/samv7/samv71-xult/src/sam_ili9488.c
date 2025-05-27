@@ -280,7 +280,7 @@
 #endif
 
 /****************************************************************************
- * Private Type Definition
+ * Private Types
  ****************************************************************************/
 
 /* Type definition for the correct size of one pixel (from the application

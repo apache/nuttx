@@ -58,7 +58,7 @@
 #define CONFIG_LCD_FASTCONFIG 1
 
 /****************************************************************************
- * Private Type Definition
+ * Private Types
  ****************************************************************************/
 
 /* This structure describes the state of this driver */
