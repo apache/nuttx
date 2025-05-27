@@ -383,7 +383,7 @@ static int goldfish_gpu_fb_commit(FAR struct goldfish_gpu_fb_s *fb,
                                            fb->colorformat,
                                            fb->colortype,
                                            buf,
-                                           fb->planeinfo.stride
+                                           (size_t)fb->planeinfo.stride
                                            * fb->videoinfo.yres);
   if (ret < 0)
     {
