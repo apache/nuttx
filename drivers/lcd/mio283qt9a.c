@@ -110,7 +110,7 @@
 #define ILI9341_ID_2 0x41
 
 /****************************************************************************
- * Private Type Definition
+ * Private Types
  ****************************************************************************/
 
 /* This structure describes the state of this driver */

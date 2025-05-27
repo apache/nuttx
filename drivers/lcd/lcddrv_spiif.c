@@ -40,7 +40,7 @@
 #include <nuttx/lcd/lcddrv_spiif.h>
 
 /****************************************************************************
- * Private Type Definition
+ * Private Types
  ****************************************************************************/
 
 struct lcddrv_spiif_lcd_s
