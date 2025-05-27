@@ -102,12 +102,23 @@ def convert_board_common(path, content):
 
     content += "target_sources(board PRIVATE ${SRCS})\n\n"
 
+    count = 0
+    scriptpath = os.path.join(path, "scripts")
     # linker script
-    if os.path.exists(os.path.join(path, "scripts/ld.script")):
-        content += 'set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/ld.script")'
-    elif os.path.exists(os.path.join(path, "scripts/flash.ld")):
-        content += 'set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/flash.ld")'
-    else:
+    for filename in os.listdir(scriptpath):
+        if filename.endswith(".ld") or filename.endswith(".script"):
+            print("found linker script ->", filename)
+            content += (
+                'set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/'
+                + filename
+                + '")\n'
+            )
+            count += 1
+            continue
+        else:
+            continue
+
+    if count == 0:
         print("ERROR: not found linker script")
 
     content += "\n"
