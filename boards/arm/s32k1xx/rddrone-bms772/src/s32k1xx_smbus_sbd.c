@@ -53,7 +53,7 @@
 #define HIBYTE(n) ((uint8_t)(((n) & 0xff00) >> 8))
 
 /****************************************************************************
- * Private Type Definitions
+ * Private Types
  ****************************************************************************/
 
 /* Private data of the SMBus Smart Battery Data slave device */

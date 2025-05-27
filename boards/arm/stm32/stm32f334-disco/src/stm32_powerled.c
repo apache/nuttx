@@ -109,7 +109,7 @@
 #define CURRENT_TO_VOLTAGE_RATIO (1/(LED_CURRENT_SENSE_RESISTOR))
 
 /****************************************************************************
- * Private Type Definition
+ * Private Types
  ****************************************************************************/
 
 /* Private data for powerled */

@@ -273,7 +273,7 @@
 #define HX8347_R95H          0x95
 
 /****************************************************************************
- * Private Type Definition
+ * Private Types
  ****************************************************************************/
 
 /* This structure describes the state of this driver */

@@ -241,7 +241,7 @@
 #define BKL_DISABLE_DURATION  (128*1024)
 
 /****************************************************************************
- * Private Type Definition
+ * Private Types
  ****************************************************************************/
 
 /* Type definition for the correct size of one pixel
