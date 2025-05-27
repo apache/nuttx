@@ -76,6 +76,14 @@ ifeq ($(CONFIG_STACK_CANARIES),y)
   ARCHOPTIMIZATION += -fstack-protector-all
 endif
 
+ifeq ($(CONFIG_STACK_USAGE),y)
+  ARCHOPTIMIZATION += -fstack-usage
+endif
+
+ifneq ($(CONFIG_STACK_USAGE_WARNING),0)
+  ARCHOPTIMIZATION += -Wstack-usage=$(CONFIG_STACK_USAGE_WARNING)
+endif
+
 ifeq ($(CONFIG_MM_UBSAN_ALL),y)
   ARCHOPTIMIZATION += $(CONFIG_MM_UBSAN_OPTION)
 endif
