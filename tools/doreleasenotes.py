@@ -83,9 +83,6 @@ def doreleasenotes(release, gh_token):
     pr_nums = set(prs.keys())
 
     existing_pr_nums = set()
-    projs = gh_repo.get_projects(state="all")
-    for proj in projs:
-        existing_pr_nums.add(pr.number)
 
     of_interest = sorted(pr_nums.difference(existing_pr_nums))
     print(f"Need to sort {len(of_interest)} PRs\n")
