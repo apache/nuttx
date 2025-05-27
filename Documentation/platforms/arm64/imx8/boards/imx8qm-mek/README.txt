@@ -1,5 +1,0 @@
-README.txt
-==========
-
-TODO
-
