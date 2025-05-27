@@ -203,7 +203,7 @@
                            USBD_INT_ENDISOIN | USBD_INT_ENDISOOUT)
 
 /****************************************************************************
- * Private Type Definitions
+ * Private Types
  ****************************************************************************/
 
 /* Parsed control request */
