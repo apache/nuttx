@@ -34,7 +34,7 @@ CMN_CSRCS += x86_64_fork.c
 CMN_ASRCS += fork.S
 endif
 
-ifeq ($(CONFIG_LIB_SYSCALL),y)
+ifeq ($(CONFIG_ARCH_HAVE_SYSCALL),y)
 CMN_CSRCS += x86_64_syscall.c
 endif
 

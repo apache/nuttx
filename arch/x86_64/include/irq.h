@@ -76,7 +76,7 @@ struct intel64_cpu_s
 
   struct tcb_s *this_task;
 
-#ifdef CONFIG_LIB_SYSCALL
+#ifdef CONFIG_ARCH_HAVE_SYSCALL
   /* Current user RSP for syscall */
 
   uint64_t *ustack;
