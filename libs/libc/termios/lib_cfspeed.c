@@ -38,7 +38,7 @@
 #define BOTHER         0010000  /* Magic token for custom baud rate */
 
 /****************************************************************************
- * Private Type Definitions
+ * Private Types
  ****************************************************************************/
 
 struct speed_s
