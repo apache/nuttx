@@ -40,7 +40,7 @@
 #include "netdb/lib_netdb.h"
 
 /****************************************************************************
- * Private Type Definitions
+ * Private Types
  ****************************************************************************/
 
 /* This is the layout of the caller provided memory area */
