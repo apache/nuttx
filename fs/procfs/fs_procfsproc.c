@@ -81,7 +81,7 @@
 #define STATUS_LINELEN PATH_MAX
 
 /****************************************************************************
- * Private Type Definitions
+ * Private Types
  ****************************************************************************/
 
 /* This enumeration identifies all of the task/thread nodes that can be
