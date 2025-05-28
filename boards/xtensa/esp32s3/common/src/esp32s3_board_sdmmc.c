@@ -32,6 +32,11 @@
 #include <nuttx/sdio.h>
 #include <nuttx/mmcsd.h>
 
+#ifdef CONFIG_MMCSD_SPI
+#include <nuttx/spi/spi.h>
+#include "esp32s3_spi.h"
+#endif
+
 extern struct sdio_dev_s *sdio_initialize(int slotno);
 /****************************************************************************
  * Public Functions
@@ -41,7 +46,7 @@ extern struct sdio_dev_s *sdio_initialize(int slotno);
  * Name: board_sdmmc_initialize
  *
  * Description:
- *   Configure the sdmmc subsystem.
+ *   Configure the SDMMC peripheral to communicate with SDIO or MMC card.
  *
  * Input Parameters:
  *   None.
@@ -73,3 +78,53 @@ int board_sdmmc_initialize(void)
 
   return OK;
 }
+
+/****************************************************************************
+ * Name: board_sdmmc_spi_initialize
+ *
+ * Description:
+ *   Initialize SPI-based SD card.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MMCSD_SPI
+int board_sdmmc_spi_initialize(void)
+{
+  struct spi_dev_s *spi;
+  int ret;
+
+  syslog(LOG_INFO, "INFO: init MMC/SD slot %d on SPI%d: /dev/mmcsd%d\n",
+         CONFIG_NSH_MMCSDSLOTNO, CONFIG_NSH_MMCSDSPIPORTNO,
+         CONFIG_NSH_MMCSDMINOR);
+
+  spi = esp32s3_spibus_initialize(CONFIG_NSH_MMCSDSPIPORTNO);
+
+  if (spi == NULL)
+    {
+      syslog(LOG_ERR, "ERROR: failed to initialize SPI%d.\n",
+             CONFIG_NSH_MMCSDSPIPORTNO);
+      return -ENODEV;
+    }
+
+  /* Mounts to /dev/mmcsdN where N in the minor number */
+
+  ret = mmcsd_spislotinitialize(CONFIG_NSH_MMCSDMINOR,
+                                CONFIG_NSH_MMCSDSLOTNO, spi);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: failed to bind SPI%d to SD slot %d\n",
+            CONFIG_NSH_MMCSDSPIPORTNO, CONFIG_NSH_MMCSDSLOTNO);
+      return ret;
+    }
+
+  syslog(LOG_INFO, "INFO: MMCSD initialized\n");
+  return OK;
+}
+#endif /* CONFIG_MMCSD_SPI */

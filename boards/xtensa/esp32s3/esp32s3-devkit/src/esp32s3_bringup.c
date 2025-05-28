@@ -116,7 +116,7 @@
 #  endif
 #endif
 
-#ifdef CONFIG_ESP32S3_SDMMC
+#if defined(CONFIG_ESP32S3_SDMMC) || defined(CONFIG_MMCSD_SPI)
 #include "esp32s3_board_sdmmc.h"
 #endif
 
@@ -506,6 +506,14 @@ int esp32s3_bringup(void)
 
 #ifdef CONFIG_ESP32S3_SDMMC
   ret = board_sdmmc_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize SDMMC: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_MMCSD_SPI
+  ret = board_sdmmc_spi_initialize();
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize SDMMC: %d\n", ret);

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32s3/common/include/esp32s3_board_sdmmc.h
+ * boards/xtensa/esp32s2/common/src/esp32s2_board_sdmmc.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,74 +20,74 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_XTENSA_ESP32S3_COMMON_INCLUDE_ESP32S3_BOARD_SDMMC_H
-#define __BOARDS_XTENSA_ESP32S3_COMMON_INCLUDE_ESP32S3_BOARD_SDMMC_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <syslog.h>
+#include <nuttx/mmcsd.h>
+#include <nuttx/spi/spi.h>
+
+#include "esp32s2_spi.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
+/****************************************************************************
+ * Private Definitions
+ ****************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: esp32_mmcsd_initialize
+ *
+ * Description:
+ *   Configure a SPI subsystem peripheral to communicate with SD card.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
+ *
+ ****************************************************************************/
+
+int board_sdmmc_initialize(void)
 {
-#else
-#define EXTERN extern
-#endif
+  struct spi_dev_s *spi;
+  int ret;
 
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
+  syslog(LOG_INFO, "INFO: init MMC/SD slot %d on SPI%d: /dev/mmcsd%d\n",
+         CONFIG_NSH_MMCSDSLOTNO, CONFIG_NSH_MMCSDSPIPORTNO,
+         CONFIG_NSH_MMCSDMINOR);
 
-#ifdef CONFIG_ESP32S3_SDMMC
+  spi = esp32s2_spibus_initialize(CONFIG_NSH_MMCSDSPIPORTNO);
 
-/****************************************************************************
- * Name: board_sdmmc_initialize
- *
- * Description:
- *   Configure the SDMMC peripheral to communicate with SDIO or MMC card.
- *
- * Returned Value:
- *   Zero (OK) is returned on success; A negated errno value is returned
- *   to indicate the nature of any failure.
- *
- ****************************************************************************/
+  if (spi == NULL)
+    {
+      syslog(LOG_ERR, "ERROR: failed to initialize SPI%d.\n",
+             CONFIG_NSH_MMCSDSPIPORTNO);
+      return -ENODEV;
+    }
 
-int board_sdmmc_initialize(void);
+  /* Mounts to /dev/mmcsdN where N in the minor number */
 
-#endif /* CONFIG_ESP32S3_SDMMC */
+  ret = mmcsd_spislotinitialize(CONFIG_NSH_MMCSDMINOR,
+                                CONFIG_NSH_MMCSDSLOTNO, spi);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: failed to bind SPI%d to SD slot %d\n",
+            CONFIG_NSH_MMCSDSPIPORTNO, CONFIG_NSH_MMCSDSLOTNO);
+      return ret;
+    }
 
-/****************************************************************************
- * Name: board_sdmmc_spi_initialize
- *
- * Description:
- *   Initialize SPI-based SD card.
- *
- * Input Parameters:
- *   None.
- *
- * Returned Value:
- *   Zero (OK) is returned on success; A negated errno value is returned
- *   to indicate the nature of any failure.
- *
- ****************************************************************************/
-#ifdef CONFIG_MMCSD_SPI
-int board_sdmmc_spi_initialize(void);
-#endif /* CONFIG_MMCSD_SPI */
-
-#undef EXTERN
-#if defined(__cplusplus)
+  syslog(LOG_INFO, "INFO: MMCSD initialized\n");
+  return OK;
 }
-#endif
-
-#endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_XTENSA_ESP32S3_COMMON_INCLUDE_ESP32S3_BOARD_SDMMC_H */
