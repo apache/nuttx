@@ -696,6 +696,10 @@ no_kstack_switch:
 
 syscall_no_ring3:
 #  endif
+	/* Restore the value of RFLAGS from R11 */
+	pushq   %r11
+	popfq
+
 	/* Return to address pointed in RCX - must be on stack */
 	pushq   %rcx
 	ret
