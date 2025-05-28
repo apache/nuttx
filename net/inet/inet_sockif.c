@@ -762,12 +762,14 @@ static int inet_get_socketlevel_option(FAR struct socket *psock, int option,
               return -EINVAL;
             }
 
+#  ifdef NET_UDP_HAVE_STACK
           if (psock->s_type == SOCK_DGRAM)
             {
               FAR struct udp_conn_s *conn = psock->s_conn;
               *(FAR int *)value = (conn->timestamp != 0);
             }
           else
+#  endif
             {
               return -ENOPROTOOPT;
             }
@@ -1064,6 +1066,7 @@ static int inet_set_socketlevel_option(FAR struct socket *psock, int option,
               return -EINVAL;
             }
 
+#  ifdef NET_UDP_HAVE_STACK
           if (psock->s_type == SOCK_DGRAM)
             {
               net_lock();
@@ -1079,6 +1082,7 @@ static int inet_set_socketlevel_option(FAR struct socket *psock, int option,
               net_unlock();
             }
           else
+#  endif
             {
               return -ENOPROTOOPT;
             }
