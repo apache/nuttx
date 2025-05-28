@@ -117,6 +117,10 @@
 #  include "espressif/esp_sdm.h"
 #endif
 
+#ifdef CONFIG_MMCSD_SPI
+#  include "esp32s2_board_sdmmc.h"
+#endif
+
 #include "esp32s2-saola-1.h"
 
 /****************************************************************************
@@ -477,6 +481,14 @@ int esp32s2_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: board_adc_init failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_MMCSD_SPI
+  ret = board_sdmmc_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize SDMMC: %d\n", ret);
     }
 #endif
 

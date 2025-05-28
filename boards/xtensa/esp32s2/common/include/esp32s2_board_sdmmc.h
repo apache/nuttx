@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32s3/common/include/esp32s3_board_sdmmc.h
+ * boards/xtensa/esp32s2/common/include/esp32s2_board_sdmmc.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_XTENSA_ESP32S3_COMMON_INCLUDE_ESP32S3_BOARD_SDMMC_H
-#define __BOARDS_XTENSA_ESP32S3_COMMON_INCLUDE_ESP32S3_BOARD_SDMMC_H
+#ifndef __BOARDS_XTENSA_ESP32S2_COMMON_INCLUDE_ESP32S2_BOARD_SDMMC_H
+#define __BOARDS_XTENSA_ESP32S2_COMMON_INCLUDE_ESP32S2_BOARD_SDMMC_H
 
 /****************************************************************************
  * Included Files
@@ -48,26 +48,8 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-#ifdef CONFIG_ESP32S3_SDMMC
-
 /****************************************************************************
  * Name: board_sdmmc_initialize
- *
- * Description:
- *   Configure the SDMMC peripheral to communicate with SDIO or MMC card.
- *
- * Returned Value:
- *   Zero (OK) is returned on success; A negated errno value is returned
- *   to indicate the nature of any failure.
- *
- ****************************************************************************/
-
-int board_sdmmc_initialize(void);
-
-#endif /* CONFIG_ESP32S3_SDMMC */
-
-/****************************************************************************
- * Name: board_sdmmc_spi_initialize
  *
  * Description:
  *   Initialize SPI-based SD card.
@@ -80,9 +62,8 @@ int board_sdmmc_initialize(void);
  *   to indicate the nature of any failure.
  *
  ****************************************************************************/
-#ifdef CONFIG_MMCSD_SPI
-int board_sdmmc_spi_initialize(void);
-#endif /* CONFIG_MMCSD_SPI */
+
+int board_sdmmc_initialize(void);
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -90,4 +71,4 @@ int board_sdmmc_spi_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_XTENSA_ESP32S3_COMMON_INCLUDE_ESP32S3_BOARD_SDMMC_H */
+#endif /* __BOARDS_XTENSA_ESP32S2_COMMON_INCLUDE_ESP32S2_BOARD_SDMMC_H */

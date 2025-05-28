@@ -86,6 +86,10 @@ ifeq ($(CONFIG_ESP_MCPWM),y)
   CSRCS += esp32s3_board_mcpwm.c
 endif
 
+ifeq ($(CONFIG_MMCSD_SPI),y)
+  CSRCS += esp32s3_board_sdmmc.c
+endif
+
 ifeq ($(CONFIG_ESP32S3_SDMMC),y)
   CSRCS += esp32s3_board_sdmmc.c
 endif
