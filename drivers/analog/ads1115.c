@@ -423,7 +423,7 @@ static int ads1115_readchannel(FAR struct ads1115_dev_s *priv,
             {
               /* ADS1115 takes ~25 usec to wake up */
 
-              nxsig_usleep(25);
+              up_udelay(4000);
               ret = ads1115_read_current_register(priv, &buf);
               count++;
             }
