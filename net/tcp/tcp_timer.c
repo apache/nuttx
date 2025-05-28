@@ -701,6 +701,8 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
                        * connection.
                        */
 
+                      devif_conn_event(conn->dev, TCP_ABORT,
+                                       conn->sconn.list);
                       tcp_stop_monitor(conn, TCP_ABORT);
                     }
                   else
