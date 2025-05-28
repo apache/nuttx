@@ -41,9 +41,33 @@
 #include "netdev/netdev.h"
 #include "devif/devif.h"
 #include "route/route.h"
+#include "utils/utils.h"
 #include "arp/arp.h"
 
 #ifdef CONFIG_NET_ARP_SEND
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+struct arp_send_info_s
+{
+  struct arp_send_s   state;  /* ARP send state, keep first */
+  struct arp_notify_s notify; /* ARP notify structure */
+};
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/* This is the pool of pre-allocated ARP send states.  The pool is used to
+ * hold the state of an ARP request until the request is completed.
+ * Avoid accessing stack memory across threads.
+ */
+
+NET_BUFPOOL_DECLARE(g_arp_send_infos, sizeof(struct arp_send_info_s),
+                    CONFIG_NET_ARP_PREALLOC_STATES,
+                    CONFIG_NET_ARP_ALLOC_STATES, CONFIG_NET_ARP_MAX_STATES);
 
 /****************************************************************************
  * Private Functions
@@ -73,7 +97,7 @@ static void arp_send_terminate(FAR struct net_driver_s *dev,
       nxsem_destroy(&state->snd_sem);
       arp_callback_free(dev, state->snd_cb);
       state->finish_cb(dev, result);
-      kmm_free(state);
+      NET_BUFPOOL_FREE(g_arp_send_infos, state);
     }
 }
 
@@ -188,8 +212,9 @@ static void arp_send_async_finish(FAR struct net_driver_s *dev, int result)
 int arp_send(in_addr_t ipaddr)
 {
   FAR struct net_driver_s *dev;
-  struct arp_notify_s notify;
-  struct arp_send_s state;
+  FAR struct arp_send_info_s *info;
+  FAR struct arp_send_s *state;
+  FAR struct arp_notify_s *notify;
   int ret;
 
   /* First check if destination is a local broadcast. */
@@ -282,23 +307,34 @@ int arp_send(in_addr_t ipaddr)
    * want anything to happen until we are ready.
    */
 
+  info = NET_BUFPOOL_ALLOC(g_arp_send_infos);
+  if (info == NULL)
+    {
+      nerr("ERROR: Failed to allocate ARP send info\n");
+      ret = -ENOMEM;
+      goto errout;
+    }
+
+  state = &info->state;
+  notify = &info->notify;
+
   net_lock();
-  state.snd_cb = arp_callback_alloc(dev);
-  if (!state.snd_cb)
+  state->snd_cb = arp_callback_alloc(dev);
+  if (!state->snd_cb)
     {
       nerr("ERROR: Failed to allocate a callback\n");
       ret = -ENOMEM;
       goto errout_with_lock;
     }
 
-  nxsem_init(&state.snd_sem, 0, 0); /* Doesn't really fail */
+  nxsem_init(&state->snd_sem, 0, 0); /* Doesn't really fail */
 
-  state.snd_retries = 0;            /* No retries yet */
-  state.snd_ipaddr  = ipaddr;       /* IP address to query */
+  state->snd_retries = 0;            /* No retries yet */
+  state->snd_ipaddr  = ipaddr;       /* IP address to query */
 
   /* Remember the routing device name */
 
-  strlcpy((FAR char *)state.snd_ifname, (FAR const char *)dev->d_ifname,
+  strlcpy((FAR char *)state->snd_ifname, (FAR const char *)dev->d_ifname,
           IFNAMSIZ);
 
   /* Now loop, testing if the address mapping is in the ARP table and re-
@@ -333,16 +369,16 @@ int arp_send(in_addr_t ipaddr)
 
       /* Set up the ARP response wait BEFORE we send the ARP request */
 
-      arp_wait_setup(ipaddr, &notify);
+      arp_wait_setup(ipaddr, notify);
 
       /* Arm/re-arm the callback */
 
-      state.snd_sent      = false;
-      state.snd_result    = -EBUSY;
-      state.snd_cb->flags = (ARP_POLL | NETDEV_DOWN);
-      state.snd_cb->priv  = (FAR void *)&state;
-      state.snd_cb->event = arp_send_eventhandler;
-      state.finish_cb     = NULL;
+      state->snd_sent      = false;
+      state->snd_result    = -EBUSY;
+      state->snd_cb->flags = (ARP_POLL | NETDEV_DOWN);
+      state->snd_cb->priv  = (FAR void *)state;
+      state->snd_cb->event = arp_send_eventhandler;
+      state->finish_cb     = NULL;
 
       /* Notify the device driver that new TX data is available. */
 
@@ -354,31 +390,31 @@ int arp_send(in_addr_t ipaddr)
 
       do
         {
-          ret = net_sem_timedwait_uninterruptible(&state.snd_sem,
+          ret = net_sem_timedwait_uninterruptible(&state->snd_sem,
                                               CONFIG_ARP_SEND_DELAYMSEC);
           if (ret == -ETIMEDOUT)
             {
-              arp_wait_cancel(&notify);
+              arp_wait_cancel(notify);
               goto timeout;
             }
         }
-      while (!state.snd_sent);
+      while (!state->snd_sent);
 
       /* Check the result of the send operation */
 
-      ret = state.snd_result;
+      ret = state->snd_result;
       if (ret < 0)
         {
           /* Break out on a send failure */
 
           nerr("ERROR: Send failed: %d\n", ret);
-          arp_wait_cancel(&notify);
+          arp_wait_cancel(notify);
           break;
         }
 
       /* Now wait for response to the ARP response to be received. */
 
-      ret = arp_wait(&notify, CONFIG_ARP_SEND_DELAYMSEC);
+      ret = arp_wait(notify, CONFIG_ARP_SEND_DELAYMSEC);
 
       /* arp_wait will return OK if and only if the matching ARP response
        * is received.  Otherwise, it will return -ETIMEDOUT.
@@ -395,12 +431,12 @@ timeout:
 
       /* Increment the retry count */
 
-      state.snd_retries++;
+      state->snd_retries++;
       nerr("ERROR: arp_wait failed: %d, ipaddr: %u.%u.%u.%u\n", ret,
            ip4_addr1(ipaddr), ip4_addr2(ipaddr),
            ip4_addr3(ipaddr), ip4_addr4(ipaddr));
     }
-  while (state.snd_retries < CONFIG_ARP_SEND_MAXTRIES);
+  while (state->snd_retries < CONFIG_ARP_SEND_MAXTRIES);
 
   /* MAC address marked with all zeros, therefore, we can quickly execute
    * asynchronous ARP request next time.
@@ -409,9 +445,10 @@ timeout:
   arp_update(dev, ipaddr, NULL);
 
 out:
-  nxsem_destroy(&state.snd_sem);
-  arp_callback_free(dev, state.snd_cb);
+  nxsem_destroy(&state->snd_sem);
+  arp_callback_free(dev, state->snd_cb);
 errout_with_lock:
+  NET_BUFPOOL_FREE(g_arp_send_infos, info);
   net_unlock();
 errout:
   return ret;
@@ -443,16 +480,18 @@ errout:
 int arp_send_async(in_addr_t ipaddr, arp_send_finish_cb_t cb)
 {
   FAR struct net_driver_s *dev;
-  FAR struct arp_send_s *state = kmm_zalloc(sizeof(struct arp_send_s));
+  FAR struct arp_send_info_s *info = NET_BUFPOOL_ALLOC(g_arp_send_infos);
+  FAR struct arp_send_s *state;
   int ret = 0;
 
-  if (!state)
+  if (!info)
     {
       nerr("ERROR: %s \n", ENOMEM_STR);
       ret = -ENOMEM;
       goto errout;
     }
 
+  state = &info->state;
   dev = netdev_findby_ripv4addr(INADDR_ANY, ipaddr);
   if (!dev)
     {

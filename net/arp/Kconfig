@@ -67,6 +67,47 @@ config ARP_SEND_DELAYMSEC
 		on the network since it is basically the time from when an ARP
 		request is sent until the response is received.
 
+config NET_ARP_PREALLOC_STATES
+	int "Preallocated ARP send states"
+	default 2
+	---help---
+		Number of ARP send states (all tasks).
+
+		This number of connections will be pre-allocated during system boot.
+		If dynamic connections allocation is enabled, more connections may
+		be allocated at a later time, as the system needs them. Else this
+		will be the maximum number of connections available to the system
+		at all times.
+
+		Set to 0 to disable (and rely only on dynamic allocations).
+
+config NET_ARP_ALLOC_STATES
+	int "Dynamic ARP send states allocation"
+	default 1
+	---help---
+		Dynamic memory allocations for ARP send states.
+
+		When set to 0 all dynamic allocations are disabled.
+
+		When set to 1 a new connection will be allocated every time,
+		and it will be free'd when no longer needed.
+
+		Setting this to 2 or more will allocate the connections in
+		batches (with batch size equal to this config). When a
+		connection is no longer needed, it will be returned to the
+		free connections pool, and it will never be deallocated!
+
+config NET_ARP_MAX_STATES
+	int "Maximum number of ARP/IP connections"
+	default 0
+	depends on NET_ARP_ALLOC_STATES > 0
+	---help---
+		If dynamic connections allocation is selected (NET_ARP_ALLOC_STATES > 0)
+		this will limit the number of connections that can be allocated.
+
+		This is useful in case the system is under very heavy load (or
+		under attack), ensuring that the heap will not be exhausted.
+
 endif # NET_ARP_SEND
 
 config NET_ARP_DUMP
