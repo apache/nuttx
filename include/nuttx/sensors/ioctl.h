@@ -498,6 +498,19 @@
 
 #define SNIOC_GET_CALIBVALUE          _SNIOC(0x00A3)
 
+/* Command:      SNIOC_SET_BAUD
+ * Description:  Sets the baud rate of the sensor.
+ */
+
+#define SNIOC_SET_BAUD                _SNIOC(0x00A4)      
+
+/* IOCTL commands unique to the L86XXX and other GNSS modules */
+
+#define SNIOC_HOT_START               _SNIOC(0X00A5)
+#define SNIOC_WARM_START              _SNIOC(0X00A6)
+#define SNIOC_COLD_START              _SNIOC(0X00A7)
+#define SNIOC_FULL_COLD_START         _SNIOC(0X00A8)
+
 /****************************************************************************
  * Public types
  ****************************************************************************/
