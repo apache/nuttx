@@ -144,10 +144,6 @@ struct e1000_driver_s
   struct netdev_lowerhalf_s dev;
   struct work_s work;
 
-  /* Driver state */
-
-  bool bifup;
-
   /* Packets list */
 
   FAR netpkt_t **tx_pkt;
@@ -985,12 +981,16 @@ static int e1000_ifup(FAR struct netdev_lowerhalf_s *dev)
         dev->netdev.d_ipv6addr[6], dev->netdev.d_ipv6addr[7]);
 #endif
 
+  flags = enter_critical_section();
+
   /* Enable the Ethernet */
 
-  flags = enter_critical_section();
   e1000_enable(priv);
-  priv->bifup = true;
   leave_critical_section(flags);
+
+  /* Update link status in case link status interrupt is missing */
+
+  e1000_link_work(priv);
 
   return OK;
 }
@@ -1028,7 +1028,6 @@ static int e1000_ifdown(FAR struct netdev_lowerhalf_s *dev)
 
   /* Mark the device "down" */
 
-  priv->bifup = false;
   leave_critical_section(flags);
   return OK;
 }
