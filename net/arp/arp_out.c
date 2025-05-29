@@ -224,6 +224,12 @@ void arp_out(FAR struct net_driver_s *dev)
 
       net_ipv4addr_copy(ipaddr, dev->d_draddr);
 #endif
+
+      if (ipaddr == INADDR_ANY)
+        {
+          dev->d_len = 0;
+          return;
+        }
     }
 
   /* The destination address is on the local network.  Check if it is
