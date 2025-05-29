@@ -125,10 +125,6 @@ struct igc_driver_s
   struct netdev_lowerhalf_s dev;
   struct work_s work;
 
-  /* Driver state */
-
-  bool bifup;
-
   /* Packets list */
 
   FAR netpkt_t **tx_pkt;
@@ -580,7 +576,7 @@ static int igc_transmit(FAR struct netdev_lowerhalf_s *dev,
  *
  *****************************************************************************/
 
-static FAR netpkt_t * igc_receive(FAR struct netdev_lowerhalf_s *dev)
+static FAR netpkt_t *igc_receive(FAR struct netdev_lowerhalf_s *dev)
 {
   FAR struct igc_driver_s *priv = (FAR struct igc_driver_s *)dev;
   FAR netpkt_t            *pkt  = NULL;
@@ -866,12 +862,16 @@ static int igc_ifup(FAR struct netdev_lowerhalf_s *dev)
         dev->netdev.d_ipv6addr[6], dev->netdev.d_ipv6addr[7]);
 #endif
 
+  flags = enter_critical_section();
+
   /* Enable the Ethernet */
 
-  flags = enter_critical_section();
   igc_enable(priv);
-  priv->bifup = true;
   leave_critical_section(flags);
+
+  /* Update link status in case link status interrupt is missing */
+
+  igc_link_work(priv);
 
   return OK;
 }
@@ -909,7 +909,6 @@ static int igc_ifdown(FAR struct netdev_lowerhalf_s *dev)
 
   /* Mark the device "down" */
 
-  priv->bifup = false;
   leave_critical_section(flags);
   return OK;
 }
