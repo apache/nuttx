@@ -311,6 +311,7 @@ static int rptun_init_carveout(FAR struct rptun_priv_s *priv,
     }
 
   memset(&config, 0, sizeof(config));
+  config.heap    = KRN_HEAP;
   config.name    = shmname;
   config.start   = shmbase;
   config.size    = shmlen;
