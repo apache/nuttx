@@ -166,7 +166,7 @@ static int rpmsg_port_create_queue(FAR struct rpmsg_port_queue_s *queue,
 
   if (buf == NULL)
     {
-      buf = kmm_malloc(count * len);
+      buf = kmm_memalign(64, count * len);
       if (buf == NULL)
         {
           kmm_free(queue->node);
