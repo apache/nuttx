@@ -74,12 +74,6 @@ void _exit(int status)
 
 #endif
 
-  /* Make sure that we are in a critical section with local interrupts.
-   * The IRQ state will be restored when the next task is started.
-   */
-
-  enter_critical_section();
-
   /* Perform common task termination logic.  This will get called again later
    * through logic kicked off by up_exit().
    *
@@ -94,7 +88,15 @@ void _exit(int status)
 
   atomic_or(&tcb->shared_flags, TCB_FLAG_EXIT_PROCESSING);
 
+  enter_critical_section();
+
   nxtask_exithook(tcb, status);
 
+  /* In nxtask_exithook, nxmutex_lock is used, and nxmutex_lock depends
+   * on nxsched_get_tcb. Therefore, we move nxsched_releasepid
+   * to this position.
+   */
+
+  nxsched_releasepid(tcb->pid);
   up_exit(status);
 }

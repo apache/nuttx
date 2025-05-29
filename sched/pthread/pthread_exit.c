@@ -122,8 +122,6 @@ void nx_pthread_exit(FAR void *exit_value)
    * The IRQ state will be restored when the next task is started.
    */
 
-  nxsched_releasepid(tcb->pid);
-
   enter_critical_section();
 
   /* Perform common task termination logic.  This will get called again later
@@ -140,5 +138,11 @@ void nx_pthread_exit(FAR void *exit_value)
 
   nxtask_exithook(tcb, status);
 
+  /* In nxtask_exithook, nxmutex_lock is used, and nxmutex_lock depends
+   * on nxsched_get_tcb. Therefore, we move nxsched_releasepid
+   * to this position.
+   */
+
+  nxsched_releasepid(tcb->pid);
   up_exit(EXIT_SUCCESS);
 }
