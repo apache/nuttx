@@ -254,6 +254,10 @@ int arp_send(in_addr_t ipaddr)
       net_ipv4addr_copy(dripaddr, dev->d_draddr);
 #endif
       ipaddr = dripaddr;
+      if (ipaddr == INADDR_ANY)
+        {
+          return -EHOSTUNREACH;
+        }
     }
 
   /* The destination address is on the local network.  Check if it is
