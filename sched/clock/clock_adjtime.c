@@ -135,7 +135,7 @@ static int adjtime_start(long long adjust_usec)
   if (g_adjtime_ppb != 0)
     {
       wd_start(&g_adjtime_wdog, MSEC2TICK(CONFIG_CLOCK_ADJTIME_PERIOD_MS),
-              adjtime_wdog_callback, 0);
+               adjtime_wdog_callback, 0);
     }
   else
     {

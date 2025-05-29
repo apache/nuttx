@@ -128,7 +128,7 @@ static inline void timer_restart(FAR struct posix_timer_s *timer,
        */
 
       frame = (delay + timer->pt_delay) / timer->pt_delay;
-      timer->pt_overrun = frame - 1;
+      timer->pt_overrun   = frame - 1;
       timer->pt_expected += frame * timer->pt_delay;
 
       wd_start_abstick(&timer->pt_wdog, timer->pt_expected,
