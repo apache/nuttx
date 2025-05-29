@@ -37,6 +37,10 @@ if(CONFIG_SENSORS)
     list(APPEND SRCS nau7802.c)
   endif()
 
+  if(CONFIG_SENSORS_L86_XXX)
+    list(APPEND SRCS l86xxx_uorb.c)
+  endif()
+
   if(CONFIG_SENSORS_GNSS)
     set_source_files_properties(
       gnss_uorb.c DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/..

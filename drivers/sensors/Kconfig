@@ -838,6 +838,35 @@ config KXTJ9_I2C_BUS_SPEED
 
 endif # SENSORS_KXTJ9
 
+config SENSORS_L86_XXX
+	bool "Quectel L86-XXX GNSS support"
+	default n
+	depends on SERIAL && STANDARD_SERIAL && UORB
+	---help---
+		Enable driver support for the L86-XXX series of GNSS modules.
+
+config SENSORS_L86_XXX_THREAD_STACKSIZE
+	int "Stack size for L86XXX module collection thread"
+	default 10000
+	depends on SENSORS_L86_XXX
+
+config L86_XXX_BAUD
+	int "Quectel L86-XXX baud rate"
+	default 9600
+	depends on SENSORS_L86_XXX && SERIAL_TERMIOS
+	range 4800 115200
+	---help---
+		Supported values are: 4800, 9600, 14400, 19200, 38400, 57600 and 115200
+
+config L86_XXX_FIX_INT
+	int "Quectel L86-XXX fix interval rate"
+	default 1000
+	depends on SENSORS_L86_XXX && SERIAL_TERMIOS
+	range 100 10000
+	---help---
+		Rate in ms at which module obtains satellite fix. Supported values
+		are integers between 100 10000
+	
 config SENSORS_LIS2DH
 	bool "STMicro LIS2DH device support"
 	default n
