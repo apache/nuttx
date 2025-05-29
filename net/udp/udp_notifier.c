@@ -95,64 +95,6 @@ int udp_readahead_notifier_setup(worker_t worker,
 }
 
 /****************************************************************************
- * Name: udp_writebuffer_notifier_setup
- *
- * Description:
- *   Set up to perform a callback to the worker function when an UDP write
- *   buffer is emptied.  The worker function will execute on the high
- *   priority worker thread.
- *
- * Input Parameters:
- *   worker - The worker function to execute on the low priority work
- *            queue when data is available in the UDP read-ahead buffer.
- *   conn  - The UDP connection where read-ahead data is needed.
- *   arg    - A user-defined argument that will be available to the worker
- *            function when it runs.
- *
- * Returned Value:
- *   > 0   - The notification is in place.  The returned value is a key that
- *           may be used later in a call to udp_notifier_teardown().
- *   == 0  - There is already buffered read-ahead data.  No notification
- *           will be provided.
- *   < 0   - An unexpected error occurred and no notification will occur.
- *           The returned value is a negated errno value that indicates the
- *           nature of the failure.
- *
- ****************************************************************************/
-
-int udp_writebuffer_notifier_setup(worker_t worker,
-                                   FAR struct udp_conn_s *conn,
-                                   FAR void *arg)
-{
-#ifdef CONFIG_NET_UDP_WRITE_BUFFERS
-  struct work_notifier_s info;
-
-  DEBUGASSERT(worker != NULL);
-
-  /* If there is already buffered read-ahead data, then return zero without
-   * setting up the notification.
-   */
-
-  if (sq_empty(&conn->write_q))
-    {
-      return 0;
-    }
-
-  /* Otherwise, this is just a simple wrapper around work_notifer_setup(). */
-
-  info.evtype    = WORK_UDP_WRITEBUFFER;
-  info.qid       = LPWORK;
-  info.qualifier = conn;
-  info.arg       = arg;
-  info.worker    = worker;
-
-  return work_notifier_setup(&info);
-#else
-  return 0;
-#endif
-}
-
-/****************************************************************************
  * Name: udp_notifier_teardown
  *
  * Description:
@@ -204,35 +146,5 @@ void udp_readahead_signal(FAR struct udp_conn_s *conn)
 
   work_notifier_signal(WORK_UDP_READAHEAD, conn);
 }
-
-/****************************************************************************
- * Name: udp_writebuffer_signal
- *
- * Description:
- *   All buffer Tx data has been sent.  Signal all threads waiting for the
- *   write buffers to become empty.
- *
- *   When write buffer becomes empty, *all* of the workers waiting
- *   for that event data will be executed.  If there are multiple workers
- *   waiting for read-ahead data then only the first to execute will get the
- *   data.  Others will need to call tcp_writebuffer_notifier_setup() once
- *   again.
- *
- * Input Parameters:
- *   conn  - The UDP connection where read-ahead data was just buffered.
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_UDP_WRITE_BUFFERS
-void udp_writebuffer_signal(FAR struct udp_conn_s *conn)
-{
-  /* This is just a simple wrapper around work_notifier_signal(). */
-
-  work_notifier_signal(WORK_UDP_WRITEBUFFER, conn);
-}
-#endif
 
 #endif /* CONFIG_NET_UDP_NOTIFIER */
