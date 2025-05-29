@@ -73,11 +73,12 @@
 
 struct audio_upperhalf_s
 {
-  uint8_t           crefs;            /* The number of times the device has been opened */
-  volatile bool     started;          /* True: playback is active */
-  mutex_t           lock;             /* Supports mutual exclusion */
-  FAR struct audio_lowerhalf_s *dev;  /* lower-half state */
-  struct file      *usermq;           /* User mode app's message queue */
+  uint8_t                      crefs;   /* The number of times the device has been opened */
+  volatile bool                started; /* True: playback is active */
+  struct audio_info_s          info;    /* Record the last playing audio format */
+  mutex_t                      lock;    /* Supports mutual exclusion */
+  FAR struct audio_lowerhalf_s *dev;    /* lower-half state */
+  struct file                  *usermq; /* User mode app's message queue */
 };
 
 /****************************************************************************
@@ -293,6 +294,42 @@ static ssize_t audio_write(FAR struct file *filep,
 }
 
 /****************************************************************************
+ * Name: audio_configure
+ *
+ * Description:
+ *   Handle the AUDIOIOC_CONFIGURE ioctl command
+ *
+ ****************************************************************************/
+
+static int audio_configure(FAR struct audio_upperhalf_s *upper,
+                           FAR const struct audio_caps_desc_s *cap_desc)
+{
+  FAR struct audio_lowerhalf_s *lower = upper->dev;
+  FAR const struct audio_caps_s *caps = &cap_desc->caps;
+  int ret = OK;
+
+  DEBUGASSERT(lower->ops->configure != NULL);
+
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+  ret = lower->ops->configure(lower, cap_desc->session, caps);
+#else
+  ret = lower->ops->configure(lower, caps);
+#endif
+
+  if (ret == OK && (caps->ac_type == AUDIO_TYPE_INPUT ||
+                    caps->ac_type == AUDIO_TYPE_OUTPUT))
+    {
+      upper->info.format = caps->ac_subtype;
+      upper->info.channels = caps->ac_channels;
+      upper->info.subformat = caps->ac_controls.b[2];
+      upper->info.samplerate = caps->ac_controls.hw[0] |
+                               (caps->ac_controls.b[3] << 16);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
  * Name: audio_start
  *
  * Description:
@@ -395,17 +432,12 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           FAR const struct audio_caps_desc_s *caps =
             (FAR const struct audio_caps_desc_s *)((uintptr_t)arg);
-          DEBUGASSERT(lower->ops->configure != NULL);
 
           audinfo("AUDIOIOC_INITIALIZE: Device=%d\n", caps->caps.ac_type);
 
           /* Call the lower-half driver configure handler */
 
-#ifdef CONFIG_AUDIO_MULTI_SESSION
-          ret = lower->ops->configure(lower, caps->session, &caps->caps);
-#else
-          ret = lower->ops->configure(lower, &caps->caps);
-#endif
+          ret = audio_configure(upper, caps);
         }
         break;
 
@@ -646,6 +678,18 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 #else
           ret = lower->ops->release(lower);
 #endif
+        }
+        break;
+
+      /* AUDIOIOC_GETAUDIOINFO - Get the last playing audio format
+       *
+       *   ioctl argument - pointer to receive the audio info
+       */
+
+      case AUDIOIOC_GETAUDIOINFO:
+        {
+          memcpy((void *)arg, &upper->info, sizeof(struct audio_info_s));
+          ret = OK;
         }
         break;
 
