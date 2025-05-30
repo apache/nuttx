@@ -146,6 +146,9 @@ static size_t rpmsg_port_spi_slave_receive(FAR struct spi_slave_dev_s *dev,
                                            size_t nwords);
 static void rpmsg_port_spi_slave_notify(FAR struct spi_slave_dev_s *dev,
                                         spi_slave_state_t state);
+static size_t
+rpmsg_port_spi_slave_getrecvbuf(FAR struct spi_slave_dev_s *dev,
+                                FAR void **buffer);
 
 /****************************************************************************
  * Private Data
@@ -165,6 +168,7 @@ static const struct spi_slave_devops_s g_rpmsg_port_spi_slave_ops =
   rpmsg_port_spi_slave_getdata,            /* getdata */
   rpmsg_port_spi_slave_receive,            /* receive */
   rpmsg_port_spi_slave_notify,             /* notify */
+  rpmsg_port_spi_slave_getrecvbuf,         /* getrecvbuf */
 };
 
 /****************************************************************************
@@ -360,10 +364,21 @@ static void rpmsg_port_spi_slave_cmddata(FAR struct spi_slave_dev_s *dev,
 static size_t rpmsg_port_spi_slave_getdata(FAR struct spi_slave_dev_s *dev,
                                            FAR const void **data)
 {
+  return 0;
+}
+
+/****************************************************************************
+ * Name: rpmsg_port_spi_slave_getrecvbuf
+ ****************************************************************************/
+
+static size_t
+rpmsg_port_spi_slave_getrecvbuf(FAR struct spi_slave_dev_s *dev,
+                                FAR void **buffer)
+{
   FAR struct rpmsg_port_spi_s *rpspi =
     container_of(dev, struct rpmsg_port_spi_s, spislv);
 
-  *data = rpspi->rxhdr;
+  *buffer = rpspi->rxhdr;
   return RPMSG_PORT_SPI_BYTES2WORDS(rpspi, rpspi->port.rxq.len);
 }
 
