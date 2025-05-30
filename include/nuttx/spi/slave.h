@@ -267,6 +267,30 @@
 #define SPIS_DEV_GETDATA(d,v)  ((d)->ops->getdata(d,v))
 
 /****************************************************************************
+ * Name: SPIS_DEV_GETRECVBUF
+ *
+ * Description:
+ *   This is a SPI device callback should be called when the device would
+ *   like to do a nocopy transfer though the device. When the buffer pointer
+ *   controller get is not NULL, it will transfer the data from enqueue
+ *   directly.
+ *
+ * Input Parameters:
+ *   dev  - SPI Slave device interface instance
+ *   buffer - Pointer to the receive buffer pointer to be shifted in.
+ *
+ * Returned Value:
+ *   The size of data units can be received from this exchange.
+ *
+ * Assumptions:
+ *   May be called from an interrupt handler and the response is usually
+ *   time-critical.
+ *
+ ****************************************************************************/
+
+#define SPIS_DEV_GETRECVBUF(d,b)  ((d)->ops->getrecvbuf(d,b))
+
+/****************************************************************************
  * Name: SPIS_DEV_RECEIVE
  *
  * Description:
@@ -544,6 +568,8 @@ struct spi_slave_devops_s
                            FAR const void *data, size_t nwords);
   CODE void     (*notify)(FAR struct spi_slave_dev_s *sdev,
                           spi_slave_state_t state);
+  CODE size_t   (*getrecvbuf)(FAR struct spi_slave_dev_s *sdev,
+                              FAR void **buffer);
 };
 
 /* SPI slave device private data. This structure only defines the initial
