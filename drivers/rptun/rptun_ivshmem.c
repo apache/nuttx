@@ -288,6 +288,44 @@ rptun_ivshmem_get_resource(FAR struct rptun_dev_s *dev)
       rsc->rpmsg0_carveout.len        = sizeof(priv->shmem->rsc.rpmsg0_shm);
       memcpy(rsc->rpmsg0_carveout.name, "vdev2buffer", 11);
 
+      /* Virtio Driver 3, VIRTIO_ID_VSOCK */
+
+      rsc->offset[6]                  = offsetof(struct rptun_ivshmem_rsc_s,
+                                                 vsock);
+      rsc->vsock.type                 = RSC_VDEV;
+      rsc->vsock.id                   = VIRTIO_ID_VSOCK;
+      rsc->vsock.notifyid             = RSC_NOTIFY_ID_ANY;
+      rsc->vsock.dfeatures            = 1 << VIRTIO_VSOCK_F_HOST_CID;
+      rsc->vsock.config_len           = sizeof(struct virtio_vsock_config_s);
+      rsc->vsock.num_of_vrings        = 3;
+      rsc->vsock.reserved[0]          = VIRTIO_DEV_DRIVER;
+      rsc->vsock.reserved[1]          = 0;
+      rsc->vsock_vring0.align         = 8;
+      rsc->vsock_vring0.num           = 32;
+      rsc->vsock_vring0.notifyid      = RSC_NOTIFY_ID_ANY;
+      rsc->vsock_vring0.da            = FW_RSC_U32_ADDR_ANY;
+      rsc->vsock_vring1.align         = 8;
+      rsc->vsock_vring1.num           = 32;
+      rsc->vsock_vring1.notifyid      = RSC_NOTIFY_ID_ANY;
+      rsc->vsock_vring1.da            = FW_RSC_U32_ADDR_ANY;
+      rsc->vsock_vring2.align         = 8;
+      rsc->vsock_vring2.num           = 32;
+      rsc->vsock_vring2.notifyid      = RSC_NOTIFY_ID_ANY;
+      rsc->vsock_vring2.da            = FW_RSC_U32_ADDR_ANY;
+      strlcpy((FAR char *)&rsc->vsock_config.guest_cid, priv->cpuname, 5);
+      strlcpy((FAR char *)&rsc->vsock_config.host_cid,
+              CONFIG_RPMSG_LOCAL_CPUNAME, 5);
+
+      /* Virtio Vsock share memory buffer */
+
+      rsc->offset[7]                  = offsetof(struct rptun_ivshmem_rsc_s,
+                                                 vsock_carveout);
+      rsc->vsock_carveout.type        = RSC_CARVEOUT;
+      rsc->vsock_carveout.da          = offsetof(struct rptun_ivshmem_mem_s,
+                                                 rsc.vsock_shm);
+      rsc->vsock_carveout.pa          = (uint32_t)METAL_BAD_PHYS;
+      rsc->vsock_carveout.len         = sizeof(priv->shmem->rsc.vsock_shm);
+      memcpy(rsc->vsock_carveout.name, "vdev3buffer", 11);
       priv->shmem->rsc_size           = sizeof(struct rptun_ivshmem_rsc_s);
       cmd->cmd_slave                  = RPTUN_CMD(RPTUN_CMD_READY, 0);
 
