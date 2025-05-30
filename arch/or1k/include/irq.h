@@ -58,6 +58,25 @@
  * Inline functions
  ****************************************************************************/
 
+/* Return program counter */
+
+static inline_function uint32_t up_getpc(void)
+{
+  uint32_t pc;
+
+  __asm__ __volatile__
+    (
+      "l.call 1f\n\t"
+      "1:\n\t"
+      "or %0, r9, r0\n\t"
+      : "=r"(pc)
+      :
+      : "r9"
+    );
+
+  return pc;
+}
+
 /* Return the current value of the stack pointer */
 
 static inline_function uint32_t up_getsp(void)

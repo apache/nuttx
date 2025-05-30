@@ -653,6 +653,19 @@ struct xcptcontext
  * Inline functions
  ****************************************************************************/
 
+/* Return program counter */
+
+static inline_function uintptr_t up_getpc(void)
+{
+  register uintptr_t pc;
+  __asm__
+  (
+    "\tauipc %0, 0\n"
+    : "=r"(pc)
+  );
+  return pc;
+}
+
 /* Return the current value of the stack pointer */
 
 static inline_function uintptr_t up_getsp(void)

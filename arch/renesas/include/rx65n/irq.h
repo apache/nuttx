@@ -1029,6 +1029,23 @@ static inline_function void __setsr(irqstate_t psw)
   __asm__ __volatile__("mvtc %0, psw": :"r"(psw));
 }
 
+/* Return program counter */
+
+static inline_function uint16_t up_getpc(void)
+{
+  uint32_t pc;
+
+  __asm__ __volatile__
+    (
+      "bsr 1f        \n\t"
+      "1:            \n\t"
+      "pop %0        \n\t"
+      : "=r"(pc)
+    );
+
+  return pc;
+}
+
 /* Return the current value of the stack pointer */
 
 static inline_function uint16_t up_getsp(void)

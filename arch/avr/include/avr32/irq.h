@@ -155,6 +155,25 @@ static inline_function uint32_t avr32_evba(void)
   return evba;
 }
 
+/* Return program counter */
+
+static inline_function uint32_t up_getpc(void)
+{
+  uint32_t pc;
+
+  __asm__ __volatile__
+    (
+      "rcall .+0\n\t"
+      "pop %A0\n\t"
+      "pop %B0\n\t"
+      "in %C0, __RAMPZ__\n\t"
+      "andi %C0, 0x03\n\t"
+      : "=r" (pc)
+    );
+
+  return pc;
+}
+
 /* Return the current value of the stack pointer */
 
 static inline_function uint32_t up_getsp(void)

@@ -81,6 +81,24 @@ extern "C"
  * Inline functions
  ****************************************************************************/
 
+/* Return program counter */
+
+static inline_function uint16_t up_getpc(void)
+{
+  uint16_t pc;
+
+  __asm__ volatile
+    (
+      "tsx          \n\t"
+      "ldd 0, x     \n\t"
+      : "=d"(pc)
+      :
+      : "x"
+    );
+
+  return pc;
+}
+
 /* Return the current value of the stack pointer */
 
 static inline_function uint16_t up_getsp(void)

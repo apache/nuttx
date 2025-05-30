@@ -253,6 +253,25 @@ struct xcptcontext
  * Inline functions
  ****************************************************************************/
 
+/* Return program counter */
+
+static inline_function uint16_t up_getpc(void)
+{
+  uint16_t pc;
+
+  __asm__ __volatile__
+    (
+      "call 1f\n\t"
+      "1:\n\t"
+      "pop %0\n\t"
+      : "=r"(pc)
+      :
+      :
+    );
+
+  return pc;
+}
+
 /* Return the current value of the stack pointer */
 
 static inline_function uint16_t up_getsp(void)

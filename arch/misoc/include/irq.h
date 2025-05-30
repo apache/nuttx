@@ -63,6 +63,17 @@ extern "C"
  * Inline functions
  ****************************************************************************/
 
+/* Return program counter */
+
+static inline_function uint32_t up_getpc(void)
+{
+  uint32_t pc;
+
+  __asm__ __volatile__ ("auipc %0, 0" : "=r"(pc));
+
+  return pc;
+}
+
 /* Return the current value of the stack pointer */
 
 static inline_function uint32_t up_getsp(void)

@@ -227,6 +227,22 @@ static inline_function void setmodp(uint32_t modp_v)
       );
 }
 
+/* Return program counter */
+
+static inline_function uint32_t up_getpc(void)
+{
+  uint32_t pc;
+
+  __asm__ __volatile__
+    (
+      "call .+4\n\t"
+      "pop %0\n\t"
+      : "=r"(pc)
+    );
+
+  return pc;
+}
+
 /* Return the current value of the stack pointer */
 
 static inline_function uint32_t up_getsp(void)

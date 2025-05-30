@@ -114,6 +114,19 @@ void up_irq_enable(void);
  * Inline functions
  ****************************************************************************/
 
+/* Return program counter */
+
+noinstrument_function static inline_function uintptr_t up_getpc(void)
+{
+#ifdef CONFIG_TRICORE_TOOLCHAIN_TASKING
+  return (uintptr_t)__mfcr(CPU_PC);
+#else
+  uintptr_t pc;
+  __asm__ volatile ("mfcr %0,%1": "=d" (pc) :"i"(CPU_PC): "memory");
+  return pc;
+#endif
+}
+
 noinstrument_function static inline_function uintptr_t up_getsp(void)
 {
 #ifdef CONFIG_TRICORE_TOOLCHAIN_TASKING

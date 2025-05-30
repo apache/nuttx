@@ -476,7 +476,22 @@ static always_inline_function uint32_t getpsp(void)
 int up_cpu_index(void) noinstrument_function;
 #endif /* CONFIG_ARCH_HAVE_MULTICPU */
 
-static always_inline_function uint32_t up_getsp(void)
+/* Return program counter */
+
+static inline_function uint32_t up_getpc(void)
+{
+  uint32_t pc;
+
+  __asm__ __volatile__
+  (
+    "mov %0, pc\n"
+    : "=r" (pc)
+  );
+
+  return pc;
+}
+
+static inline_function uint32_t up_getsp(void)
 {
   uint32_t sp;
 

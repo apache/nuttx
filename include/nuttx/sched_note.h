@@ -34,6 +34,7 @@
 #include <stdbool.h>
 #include <stdarg.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/macro.h>
 #include <nuttx/sched.h>
 #include <nuttx/spinlock_type.h>
@@ -179,13 +180,10 @@
 #define NOTE_PRINTF_TAG(...) \
         ((GET_ARG_COUNT(__VA_ARGS__) << 28) + NOTE_PRINTF_TYPES(__VA_ARGS__))
 
-#define SCHED_NOTE_IP \
-        ({ __label__ __here; __here: (unsigned long)&&__here; })
-
 #define sched_note_event(tag, event, buf, len) \
-        sched_note_event_ip(tag, SCHED_NOTE_IP, event, buf, len)
+        sched_note_event_ip(tag, up_getpc(), event, buf, len)
 #define sched_note_vprintf(tag, fmt, va) \
-        sched_note_vprintf_ip(tag, SCHED_NOTE_IP, fmt, 0, &(va))
+        sched_note_vprintf_ip(tag, up_getpc(), fmt, 0, &(va))
 
 #ifdef CONFIG_DRIVERS_NOTE_STRIP_FORMAT
 #  define sched_note_printf(tag, fmt, ...) \
@@ -197,13 +195,13 @@
               static_assert(GET_ARG_COUNT(__VA_ARGS__) <= 14, \
                             "The number of sched_note_nprintf " \
                             "parameters needs to be less than 14"); \
-              sched_note_printf_ip(tag, SCHED_NOTE_IP, __fmt__, \
+              sched_note_printf_ip(tag, up_getpc(), __fmt__, \
                                    __type__, ##__VA_ARGS__); \
             } \
           while (0)
 #else
 #  define sched_note_printf(tag, fmt, ...) \
-          sched_note_printf_ip(tag, SCHED_NOTE_IP, fmt, 0, ##__VA_ARGS__)
+          sched_note_printf_ip(tag, up_getpc(), fmt, 0, ##__VA_ARGS__)
 #endif
 
 #define sched_note_begin(tag) \

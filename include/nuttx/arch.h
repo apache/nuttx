@@ -2142,6 +2142,23 @@ int up_timer_tick_start(clock_t ticks);
 #endif
 
 /****************************************************************************
+ * Name: up_getpc
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Current program counter.
+ *
+ ****************************************************************************/
+
+/* uintptr_t up_getpc(void);
+ *
+ * The actual declaration or definition is provided in arch/arch.h.
+ * The actual implementation may be a MACRO or an inline function.
+ */
+
+/****************************************************************************
  * Name: up_getsp
  *
  * Input Parameters:

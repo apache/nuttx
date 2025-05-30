@@ -66,6 +66,22 @@ extern "C"
 #define EXTERN extern
 #endif
 
+/* Return program counter */
+
+static inline_function chipreg_t up_getpc(void)
+{
+  chipreg_t pc;
+
+  __asm__ __volatile__
+    (
+      "call .+2\n\t"
+      "pop %0\n\t"
+      : "=r"(pc)
+    );
+
+  return pc;
+}
+
 /* Return the current value of the stack pointer */
 
 chipreg_t up_getsp(void);

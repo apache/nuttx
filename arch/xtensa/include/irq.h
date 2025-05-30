@@ -259,6 +259,21 @@ void xtensa_setps(uint32_t ps)
   );
 }
 
+/* Return program counter */
+
+static inline_function uint32_t up_getpc(void)
+{
+  register uint32_t pc;
+
+  __asm__ __volatile__
+  (
+    "rsr %0, PC\n"
+    : "=r" (pc)
+  );
+
+  return pc;
+}
+
 /* Return the current value of the stack pointer */
 
 static inline_function uint32_t up_getsp(void)
