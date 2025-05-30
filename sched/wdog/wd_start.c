@@ -104,12 +104,13 @@
  *
  ****************************************************************************/
 
-static inline_function void wd_expiration(clock_t ticks)
+static inline_function clock_t wd_expiration(clock_t ticks)
 {
   FAR struct wdog_s *wdog;
   irqstate_t         flags;
   wdentry_t          func;
   wdparm_t           arg;
+  clock_t            ret = CLOCK_MAX;
 
   flags = enter_critical_section();
 
@@ -127,6 +128,7 @@ static inline_function void wd_expiration(clock_t ticks)
 
       if (!clock_compare(wdog->expired, ticks))
         {
+          ret = wdog->expired - ticks;
           break;
         }
 
@@ -147,6 +149,8 @@ static inline_function void wd_expiration(clock_t ticks)
     }
 
   leave_critical_section(flags);
+
+  return ret;
 }
 
 /****************************************************************************
@@ -338,37 +342,35 @@ clock_t wd_timer(clock_t ticks, bool noswitches)
 {
   FAR struct wdog_s *wdog;
   irqstate_t flags;
-  sclock_t ret;
+  clock_t    ret = CLOCK_MAX;
 
   /* Check if the watchdog at the head of the list is ready to run */
 
   if (!noswitches)
     {
-      wd_expiration(ticks);
+      ret = wd_expiration(ticks);
     }
-
-  flags = enter_critical_section();
-
-  /* Return the delay for the next watchdog to expire */
-
-  if (list_is_empty(&g_wdactivelist))
+  else
     {
+      flags = enter_critical_section();
+
+      /* Return the delay for the next watchdog to expire */
+
+      if (!list_is_empty(&g_wdactivelist))
+        {
+          /* Notice that if noswitches, expired - g_wdtickbase
+           * may get negative value.
+           */
+
+          wdog = list_first_entry(&g_wdactivelist, struct wdog_s, node);
+          ret  = !clock_compare(wdog->expired, ticks) ?
+                 wdog->expired - ticks : 0u;
+        }
+
       leave_critical_section(flags);
-      return CLOCK_MAX;
     }
 
-  /* Notice that if noswitches, expired - g_wdtickbase
-   * may get negative value.
-   */
-
-  wdog = list_first_entry(&g_wdactivelist, struct wdog_s, node);
-  ret = wdog->expired - ticks;
-
-  leave_critical_section(flags);
-
-  /* Return the delay for the next watchdog to expire */
-
-  return MAX(ret, 0);
+  return ret;
 }
 
 #else
