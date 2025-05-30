@@ -118,6 +118,7 @@
 #define AUDIOIOC_FLUSH              _AUDIOIOC(20)
 #define AUDIOIOC_GETPOSITION        _AUDIOIOC(21)
 #define AUDIOIOC_GETAUDIOINFO       _AUDIOIOC(22)
+#define AUDIOIOC_GETSTATE           _AUDIOIOC(23)
 
 /* Audio Device Types *******************************************************/
 
@@ -375,6 +376,15 @@
 /* Audio channels range wrapper macro */
 
 #define AUDIO_CHANNELS_RANGE(min, max) ((uint8_t)(((min) << 4) | ((max) & 0xf)))
+
+/* State of appl and lower driver, higher value = higher priority */
+
+#define AUDIO_STATE_OPEN           0
+#define AUDIO_STATE_PREPARED       1
+#define AUDIO_STATE_PAUSED         2
+#define AUDIO_STATE_XRUN           3
+#define AUDIO_STATE_DRAINING       4
+#define AUDIO_STATE_RUNNING        5
 
 /****************************************************************************
  * Public Types
