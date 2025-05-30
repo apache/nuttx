@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32/ttgo_t_display_esp32/src/esp32_mmcsd.c
+ * boards/xtensa/esp32/common/include/esp32_board_sdmmc.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,67 +20,52 @@
  *
  ****************************************************************************/
 
+#ifndef __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_ESP32_BOARD_SDMMC_H
+#define __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_ESP32_BOARD_SDMMC_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <debug.h>
 #include <nuttx/config.h>
-#include <nuttx/mmcsd.h>
-#include <nuttx/spi/spi.h>
-#include <pthread.h>
-#include <sched.h>
-#include <time.h>
-#include <unistd.h>
-
-#include "esp32_spi.h"
-#include "ttgo_t_display_esp32.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
+#ifndef __ASSEMBLY__
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
 /****************************************************************************
- * Private Definitions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: esp32_mmcsd_initialize
+ * Name: board_sdmmc_initialize
  *
  * Description:
- *   Initialize SPI-based SD card and card detect thread.
+ *   Configure a SPI subsystem peripheral to communicate with SD card.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
+ *
  ****************************************************************************/
 
-int esp32_mmcsd_initialize(int minor)
-{
-  struct spi_dev_s *spi;
-  int rv;
+int board_sdmmc_initialize(void);
 
-  mcinfo("INFO: Initializing mmcsd card\n");
-
-  spi = esp32_spibus_initialize(CONFIG_NSH_MMCSDSPIPORTNO);
-  if (spi == NULL)
-    {
-      mcerr("ERROR: Failed to initialize SPI port %d\n", 2);
-      return -ENODEV;
-    }
-
-  rv = mmcsd_spislotinitialize(minor, 0, spi);
-  if (rv < 0)
-    {
-      mcerr("ERROR: Failed to bind SPI port %d to SD slot %d\n",
-            2, 0);
-      return rv;
-    }
-
-  spiinfo("INFO: mmcsd card has been initialized successfully\n");
-  return OK;
+#undef EXTERN
+#if defined(__cplusplus)
 }
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_ESP32_BOARD_SDMMC_H */

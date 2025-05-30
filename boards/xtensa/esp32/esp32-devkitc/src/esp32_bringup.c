@@ -191,6 +191,10 @@
 #  include "esp32_board_adc.h"
 #endif
 
+#ifdef CONFIG_MMCSD_SPI
+#  include "esp32_board_sdmmc.h"
+#endif
+
 #include "esp32-devkitc.h"
 
 /****************************************************************************
@@ -272,8 +276,8 @@ int esp32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_MMCSD
-  ret = esp32_mmcsd_initialize(0);
+#ifdef CONFIG_MMCSD_SPI
+  ret = board_sdmmc_initialize();
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize SD slot: %d\n", ret);
