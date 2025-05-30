@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/vfs/fs_dup.c
+ * fs/vfs/fs_dup3.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -25,6 +25,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/fs/fs.h>
+#include <nuttx/fs/ioctl.h>
 
 #include <unistd.h>
 #include <sched.h>
@@ -32,11 +34,7 @@
 #include <errno.h>
 #include <fcntl.h>
 
-#ifdef CONFIG_FDCHECK
-#  include <nuttx/fdcheck.h>
-#endif
-
-#include <nuttx/fs/fs.h>
+#include "sched/sched.h"
 #include "inode/inode.h"
 
 /****************************************************************************
@@ -44,75 +42,23 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: file_dup
+ * Name: dup3
  *
  * Description:
- *   Equivalent to the standard dup() function except that it
- *   accepts a struct file instance instead of a file descriptor.
- *
- * Returned Value:
- *   The new file descriptor is returned on success; a negated errno value
- *   is returned on any failure.
+ *   Clone a file descriptor or socket descriptor to a specific descriptor
+ *   number and specific flags.
  *
  ****************************************************************************/
 
-int file_dup(FAR struct file *filep, int minfd, int flags)
-{
-  FAR struct file *filep2;
-  int fd2;
-  int ret;
-
-#ifdef CONFIG_FDCHECK
-  minfd = fdcheck_restore(minfd);
-#endif
-
-  /* Pass the close on exec flag to file_allocate */
-
-  fd2 = file_allocate(g_root_inode, flags, 0, NULL, minfd, true);
-  if (fd2 < 0)
-    {
-      return fd2;
-    }
-
-  /* Get the associated file pointer, taking a reference to it */
-
-  ret = fs_getfilep(fd2, &filep2);
-  if (ret >= 0)
-    {
-      ret = file_dup2(filep, filep2);
-      fs_putfilep(filep2);
-    }
-
-  if (ret >= 0)
-    {
-      return fd2;
-    }
-
-  /* There was an error: release filep2 */
-
-  fs_putfilep(filep2);
-  return ret;
-}
-
-/****************************************************************************
- * Name: dup
- *
- * Description:
- *   Clone a file or socket descriptor to an arbitrary descriptor number
- *
- ****************************************************************************/
-
-int dup(int fd)
+int dup3(int fd1, int fd2, int flags)
 {
   int ret;
 
-  /* Let nx_dup() do the real work */
-
-  ret = nx_dup(fd, 0, 0);
+  ret = nx_dup3_from_tcb(this_task(), fd1, fd2, flags);
   if (ret < 0)
     {
       set_errno(-ret);
-      return ERROR;
+      ret = ERROR;
     }
 
   return ret;
