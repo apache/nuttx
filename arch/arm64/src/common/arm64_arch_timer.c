@@ -79,7 +79,7 @@ struct arm64_oneshot_lowerhalf_s
 };
 
 /****************************************************************************
- * Private Functions
+ * Inline Functions
  ****************************************************************************/
 
 static inline void arm64_arch_timer_set_compare(uint64_t value)
@@ -171,6 +171,10 @@ static inline uint64_t arm64_arch_tick2cnt(uint64_t ticks, uint64_t freq)
 
   return count;
 }
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: arm64_arch_timer_compare_isr
@@ -358,6 +362,28 @@ static int arm64_tick_current(struct oneshot_lowerhalf_s *lower,
 }
 
 /****************************************************************************
+ * Name: arm64_oneshot_initialize_per_cpu
+ *
+ * Description:
+ *   Initialize the ARM generic timer for secondary CPUs.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void arm64_oneshot_initialize_per_cpu(void)
+{
+  /* Enable int */
+
+  up_enable_irq(ARM_ARCH_TIMER_IRQ);
+
+  /* Start timer */
+
+  arm64_arch_timer_enable(true);
+}
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -415,31 +441,19 @@ struct oneshot_lowerhalf_s *arm64_oneshot_initialize(void)
   irq_attach(ARM_ARCH_TIMER_IRQ,
              arm64_arch_timer_compare_isr, priv);
 
-  arm64_oneshot_secondary_init();
+  arm64_oneshot_initialize_per_cpu();
 
   tmrinfo("oneshot_initialize ok %p \n", &priv->lh);
 
   return &priv->lh;
 }
 
-/****************************************************************************
- * Name: arm64_arch_timer_secondary_init
- *
- * Description:
- *   Initialize the ARM generic timer for secondary CPUs.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void arm64_oneshot_secondary_init(void)
+void up_timer_initialize(void)
 {
-  /* Enable int */
+  up_alarm_set_lowerhalf(arm64_oneshot_initialize());
+}
 
-  up_enable_irq(ARM_ARCH_TIMER_IRQ);
-
-  /* Start timer */
-
-  arm64_arch_timer_enable(true);
+void arm64_timer_secondary_init(void)
+{
+  arm64_oneshot_initialize_per_cpu();
 }

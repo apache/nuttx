@@ -34,6 +34,7 @@
  * Public Function Prototypes
  ****************************************************************************/
 
+#ifdef CONFIG_ONESHOT
 /****************************************************************************
  * Name: arm64_oneshot_initialize
  *
@@ -48,18 +49,6 @@
  ****************************************************************************/
 
 struct oneshot_lowerhalf_s *arm64_oneshot_initialize(void);
-
-/****************************************************************************
- * Name: arm64_oneshot_secondary_init
- *
- * Description:
- *   Initialize the ARM generic timer for secondary CPUs.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void arm64_oneshot_secondary_init(void);
+#endif
 
 #endif /* __ARCH_ARM64_SRC_COMMON_ARM64_ARCH_TIMER_H */
