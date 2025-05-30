@@ -118,6 +118,7 @@
 #define AUDIOIOC_FLUSH              _AUDIOIOC(20)
 #define AUDIOIOC_GETPOSITION        _AUDIOIOC(21)
 #define AUDIOIOC_GETAUDIOINFO       _AUDIOIOC(22)
+#define AUDIOIOC_GETSTATE           _AUDIOIOC(23)
 
 /* Audio Device Types *******************************************************/
 
@@ -379,6 +380,18 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
+/* Define the state of appl and lower driver */
+
+enum audio_state_e
+{
+  AUDIO_STATE_OPEN,
+  AUDIO_STATE_PREPARED,
+  AUDIO_STATE_RUNNING,
+  AUDIO_STATE_XRUN,
+  AUDIO_STATE_DRAINING,
+  AUDIO_STATE_PAUSED,
+};
 
 /* Define the size of AP Buffer sample count base on CONFIG */
 

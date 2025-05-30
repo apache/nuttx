@@ -74,7 +74,7 @@
 struct audio_upperhalf_s
 {
   uint8_t                      crefs;   /* The number of times the device has been opened */
-  volatile bool                started; /* True: playback is active */
+  volatile enum audio_state_e  state;   /* lowerhalf state */
   struct audio_info_s          info;    /* Record the last playing audio format */
   mutex_t                      lock;    /* Supports mutual exclusion */
   FAR struct audio_lowerhalf_s *dev;    /* lower-half state */
@@ -319,6 +319,7 @@ static int audio_configure(FAR struct audio_upperhalf_s *upper,
   if (ret == OK && (caps->ac_type == AUDIO_TYPE_INPUT ||
                     caps->ac_type == AUDIO_TYPE_OUTPUT))
     {
+      upper->state = AUDIO_STATE_PREPARED;
       upper->info.format = caps->ac_subtype;
       upper->info.channels = caps->ac_channels;
       upper->info.subformat = caps->ac_controls.b[2];
@@ -351,7 +352,7 @@ static int audio_start(FAR struct audio_upperhalf_s *upper)
 
   /* Verify that the Audio is not already running */
 
-  if (!upper->started)
+  if (upper->state == AUDIO_STATE_PREPARED)
     {
       /* Invoke the bottom half method to start the audio stream */
 
@@ -369,7 +370,7 @@ static int audio_start(FAR struct audio_upperhalf_s *upper)
         {
           /* Indicate that the audio stream has started */
 
-          upper->started = true;
+          upper->state = AUDIO_STATE_RUNNING;
         }
     }
 
@@ -487,7 +488,8 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           audinfo("AUDIOIOC_STOP\n");
           DEBUGASSERT(lower->ops->stop != NULL);
 
-          if (upper->started)
+          if (upper->state == AUDIO_STATE_RUNNING ||
+              upper->state == AUDIO_STATE_PAUSED)
             {
 #ifdef CONFIG_AUDIO_MULTI_SESSION
               session = (FAR void *) arg;
@@ -495,7 +497,10 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 #else
               ret = lower->ops->stop(lower);
 #endif
-              upper->started = false;
+              if (ret == OK)
+                {
+                  upper->state = AUDIO_STATE_DRAINING;
+                }
             }
         }
         break;
@@ -513,7 +518,7 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           audinfo("AUDIOIOC_PAUSE\n");
           DEBUGASSERT(lower->ops->pause != NULL);
 
-          if (upper->started)
+          if (upper->state == AUDIO_STATE_RUNNING)
             {
 #ifdef CONFIG_AUDIO_MULTI_SESSION
               session = (FAR void *) arg;
@@ -521,6 +526,10 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 #else
               ret = lower->ops->pause(lower);
 #endif
+              if (ret == OK)
+                {
+                  upper->state = AUDIO_STATE_PAUSED;
+                }
             }
         }
         break;
@@ -535,7 +544,7 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           audinfo("AUDIOIOC_RESUME\n");
           DEBUGASSERT(lower->ops->resume != NULL);
 
-          if (upper->started)
+          if (upper->state == AUDIO_STATE_PAUSED)
             {
 #ifdef CONFIG_AUDIO_MULTI_SESSION
               session = (FAR void *) arg;
@@ -543,6 +552,10 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 #else
               ret = lower->ops->resume(lower);
 #endif
+              if (ret == OK)
+                {
+                  upper->state = AUDIO_STATE_RUNNING;
+                }
             }
         }
         break;
@@ -693,6 +706,18 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
+      /* AUDIOIOC_GETSTATE - Get lower driver state
+       *
+       *   ioctl argument - pointer to receive the state
+       */
+
+      case AUDIOIOC_GETSTATE:
+        {
+          *(FAR enum audio_state_e *)arg = upper->state;
+          ret = OK;
+        }
+        break;
+
       /* Any unrecognized IOCTL commands might be
        * platform-specific ioctl commands
        */
@@ -792,6 +817,15 @@ static inline void audio_complete(FAR struct audio_upperhalf_s *upper,
   struct audio_msg_s    msg;
 
   audinfo("Entry\n");
+
+  nxmutex_lock(&upper->lock);
+
+  if (upper->state == AUDIO_STATE_DRAINING)
+    {
+      upper->state = AUDIO_STATE_OPEN;
+    }
+
+  nxmutex_unlock(&upper->lock);
 
   /* Send a dequeue message to the user if a message queue is registered */
 
