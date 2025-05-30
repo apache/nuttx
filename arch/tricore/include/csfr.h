@@ -35,6 +35,7 @@
 
 #define TRICORE_CPU_PCXI            0xfe00  /* Previous Context Information */
 #define TRICORE_CPU_PSW             0xfe04  /* Program Status Word */
+#define TRICORE_CPU_PC              0xfe08  /* Program Counter */
 #define TRICORE_CPU_CORE_ID         0xfe1c  /* Core Identification */
 #define TRICORE_CPU_ICR             0xfe2c  /* Interrupt Control Register */
 #define TRICORE_CPU_FCX             0xfe38  /* Free CSA List Head Pointer */

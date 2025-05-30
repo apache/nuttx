@@ -153,6 +153,27 @@ static inline_function irqstate_t getsreg(void)
   return sreg;
 }
 
+/* Return program counter */
+
+static inline_function uint16_t up_getpc(void)
+{
+  uint16_t pc;
+
+  __asm__ __volatile__
+    (
+      "rcall 1f\n"
+      "1:\n\t"
+#if AVR_PC_SIZE > 16
+      "pop __tmp_reg__\n\t"   /* Discard PC[23:16] */
+#endif
+      "pop %B0\n\t"           /* MSB is on top of the stack */
+      "pop %A0"
+      : "=r" (pc)
+    );
+
+  return pc;
+}
+
 /* Return the current value of the stack pointer */
 
 static inline_function uint16_t up_getsp(void)

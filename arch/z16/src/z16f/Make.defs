@@ -29,6 +29,7 @@ CMN_CSRCS += z16_switchcontext.c
 CMN_CSRCS += z16_stackframe.c z16_usestack.c
 
 CHIP_SSRCS = z16f_lowuart.S z16f_saveusercontext.S z16f_restoreusercontext.S
+CHIP_SSRCS += z16f_up_getpc.S
 CHIP_CSRCS = z16f_clkinit.c z16f_sysexec.c z16f_irq.c z16f_serial.c
 
 ifeq ($(CONFIG_ENABLE_ALL_SIGNALS),y)

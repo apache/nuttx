@@ -136,6 +136,15 @@ static inline_function void up_set_current_regs(xcpt_reg_t *regs)
 #endif
 }
 
+/* Return program counter */
+
+#ifdef __GNUC__
+#  define up_getpc() \
+    ({ __label__ __here; __here: (unsigned long)&&__here; })
+#else
+#  define up_getpc() ((uintptr_t)0)
+#endif
+
 /* Return the current value of the stack pointer */
 
 static inline_function uintptr_t up_getsp(void)
