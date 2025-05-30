@@ -318,8 +318,9 @@ rptun_ivshmem_get_resource(FAR struct rptun_dev_s *dev)
       rsc->vsock_vring2.num           = 32;
       rsc->vsock_vring2.notifyid      = RSC_NOTIFY_ID_ANY;
       rsc->vsock_vring2.da            = FW_RSC_U32_ADDR_ANY;
-      rsc->vsock_config.guest_cid     = 3;
-      rsc->vsock_config.host_cid      = 2;
+      strlcpy((FAR char *)&rsc->vsock_config.guest_cid, priv->cpuname, 5);
+      strlcpy((FAR char *)&rsc->vsock_config.host_cid,
+              CONFIG_RPMSG_LOCAL_CPUNAME, 5);
 
       /* Virtio Vsock share memory buffer */
 
