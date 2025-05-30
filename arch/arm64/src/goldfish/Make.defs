@@ -23,7 +23,7 @@
 include common/Make.defs
 
 # qemu-specific C source files
-CHIP_CSRCS = goldfish_boot.c goldfish_serial.c goldfish_timer.c
+CHIP_CSRCS = goldfish_boot.c goldfish_serial.c
 
 ifeq ($(CONFIG_RTC_PL031),y)
   CHIP_CSRCS += goldfish_rtc.c
