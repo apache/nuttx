@@ -78,6 +78,8 @@ struct audio_upperhalf_s
   struct audio_info_s          info;     /* Record the last playing audio format */
   mutex_t                      lock;     /* Supports mutual exclusion */
   spinlock_t                   spinlock; /* Supports spin lock */
+  uint8_t                      periods;  /* Ap buffers number */
+  FAR struct ap_buffer_s       **apbs;   /* Ap buffers list */
   FAR struct audio_lowerhalf_s *dev;     /* lower-half state */
   struct audio_status_s        *status;  /* lowerhalf driver status */
   struct file                  *usermq;  /* User mode app's message queue */
@@ -98,6 +100,10 @@ static ssize_t  audio_write(FAR struct file *filep,
 static int      audio_ioctl(FAR struct file *filep,
                             int cmd,
                             unsigned long arg);
+static int      audio_allocbuffer(FAR struct audio_upperhalf_s *upper,
+                                  FAR struct audio_buf_desc_s * bufdesc);
+static int      audio_freebuffer(FAR struct audio_upperhalf_s *upper,
+                                 FAR struct audio_buf_desc_s * bufdesc);
 #ifdef CONFIG_AUDIO_MULTI_SESSION
 static int      audio_start(FAR struct audio_upperhalf_s *upper,
                             FAR void *session);
@@ -606,16 +612,7 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           audinfo("AUDIOIOC_ALLOCBUFFER\n");
 
           bufdesc = (FAR struct audio_buf_desc_s *) arg;
-          if (lower->ops->allocbuffer)
-            {
-              ret = lower->ops->allocbuffer(lower, bufdesc);
-            }
-          else
-            {
-              /* Perform a simple kumm_malloc operation assuming 1 session */
-
-              ret = apb_alloc(bufdesc);
-            }
+          ret = audio_allocbuffer(upper, bufdesc);
         }
         break;
 
@@ -629,18 +626,7 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           audinfo("AUDIOIOC_FREEBUFFER\n");
 
           bufdesc = (FAR struct audio_buf_desc_s *) arg;
-          if (lower->ops->freebuffer)
-            {
-              ret = lower->ops->freebuffer(lower, bufdesc);
-            }
-          else
-            {
-              /* Perform a simple apb_free operation */
-
-              DEBUGASSERT(bufdesc->u.buffer != NULL);
-              apb_free(bufdesc->u.buffer);
-              ret = sizeof(struct audio_buf_desc_s);
-            }
+          ret = audio_freebuffer(upper, bufdesc);
         }
         break;
 
@@ -772,6 +758,108 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
     }
 
   nxmutex_unlock(&upper->lock);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: audio_allocbuffer
+ *
+ * Description:
+ *   Handle the AUDIOIOC_ALLOCBUFFER ioctl command
+ *
+ ****************************************************************************/
+
+static int audio_allocbuffer(FAR struct audio_upperhalf_s *upper,
+                             FAR struct audio_buf_desc_s *bufdesc)
+{
+  FAR struct audio_lowerhalf_s *lower = upper->dev;
+  FAR struct ap_buffer_s *apb;
+  bool share = false;
+  FAR void *newaddr;
+  int ret;
+
+  if (bufdesc->u.pbuffer == NULL)
+    {
+      bufdesc->u.pbuffer = &apb;
+      share = true;
+    }
+
+  if (lower->ops->allocbuffer)
+    {
+      ret = lower->ops->allocbuffer(lower, bufdesc);
+    }
+  else
+    {
+      /* Perform a simple kumm_malloc operation assuming 1 session */
+
+      ret = apb_alloc(bufdesc);
+    }
+
+  if (ret > 0 && share)
+    {
+      newaddr = kmm_realloc(upper->apbs,
+                            (upper->periods + 1) * sizeof(*upper->apbs));
+      if (newaddr == NULL)
+        {
+          audio_freebuffer(upper, bufdesc);
+          return -ENOMEM;
+        }
+
+      upper->apbs = (FAR struct ap_buffer_s **)newaddr;
+      upper->apbs[upper->periods] = apb;
+      upper->periods++;
+      bufdesc->u.pbuffer = NULL;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: audio_freebuffer
+ *
+ * Description:
+ *   Handle the AUDIOIOC_FREEBUFFER ioctl command
+ *
+ ****************************************************************************/
+
+static int audio_freebuffer(FAR struct audio_upperhalf_s *upper,
+                            FAR struct audio_buf_desc_s *bufdesc)
+{
+  FAR struct audio_lowerhalf_s *lower = upper->dev;
+  bool share = false;
+  int ret;
+
+  if (bufdesc->u.buffer == NULL)
+    {
+      bufdesc->u.buffer = upper->apbs[upper->periods - 1];
+      share = true;
+    }
+
+  if (lower->ops->freebuffer)
+    {
+      ret = lower->ops->freebuffer(lower, bufdesc);
+    }
+  else
+    {
+      /* Perform a simple apb_free operation */
+
+      DEBUGASSERT(bufdesc->u.buffer != NULL);
+      apb_free(bufdesc->u.buffer);
+      ret = sizeof(struct audio_buf_desc_s);
+    }
+
+  if (ret > 0 && share)
+    {
+      bufdesc->u.buffer = NULL;
+      upper->apbs[upper->periods] = NULL;
+      upper->periods--;
+      if (upper->periods == 0)
+        {
+          kmm_free(upper->apbs);
+          upper->apbs = NULL;
+        }
+    }
+
   return ret;
 }
 
