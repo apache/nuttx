@@ -258,6 +258,21 @@ static inline_function void up_set_interrupt_context(bool flag)
 #endif
 }
 
+/* Return program counter */
+
+static inline_function uint32_t up_getpc(void)
+{
+  register uint32_t pc;
+
+  __asm__ __volatile__
+  (
+    "mov %0, pc\n"
+    : "=r" (pc)
+  );
+
+  return pc;
+}
+
 static inline_function uint32_t up_getsp(void)
 {
   register uint32_t sp;

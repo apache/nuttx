@@ -217,6 +217,25 @@ static inline_function void setmoda(uint32_t moda)
   __asm__ __volatile__("nop #0x04\nnop\nmovp %0.ui, moda.ui" : : "r"(moda));
 }
 
+/* Return program counter */
+
+static inline_function uint32_t up_getpc(void)
+{
+  uint32_t pc;
+
+  __asm__ __volatile__
+    (
+      "push retreg.ui\n\t"
+      "callr #1f, ?prx.b\n"
+      "1:\n\t"
+      "mov retreg.ui, %0.ui\n\t"
+      "pop retreg.ui"
+      : "=r"(pc)
+    );
+
+  return pc;
+}
+
 /* Return the current value of the stack pointer */
 
 static inline_function uint32_t up_getsp(void)

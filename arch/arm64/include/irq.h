@@ -352,6 +352,21 @@ typedef struct mcontext_s
 #endif
 } mcontext_t;
 
+/* Return program counter */
+
+static inline_function uint64_t up_getpc(void)
+{
+  register uint64_t pc;
+
+  __asm__ __volatile__
+  (
+    "adr %0, .\n"
+    : "=r" (pc)
+  );
+
+  return pc;
+}
+
 /* Name: up_irq_save, up_irq_restore, and friends.
  *
  * NOTE: This function should never be called from application code and,

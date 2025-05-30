@@ -60,6 +60,29 @@ extern "C"
  * Inline functions
  ****************************************************************************/
 
+/* Return program counter */
+
+static inline_function uint32_t up_getpc(void)
+{
+  uint32_t pc;
+
+#ifdef CONFIG_ARCH_CHIP_LM32
+  __asm__ __volatile__
+    (
+      "calli 1f\n"
+      "1:\n\t"
+      "or %0, ra, r0"
+      : "=r"(pc)
+      :
+      : "ra"
+    );
+#else /* CONFIG_ARCH_CHIP_MINERVA */
+  __asm__ __volatile__ ("auipc %0, 0" : "=r"(pc));
+#endif
+
+  return pc;
+}
+
 /* Return the current value of the stack pointer */
 
 static inline_function uint32_t up_getsp(void)

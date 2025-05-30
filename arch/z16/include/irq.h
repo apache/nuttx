@@ -63,6 +63,10 @@ extern "C"
 {
 #endif
 
+/* Return program counter */
+
+chipreg_t up_getpc(void);
+
 /* Return the current value of the stack pointer */
 
 chipreg_t up_getsp(void);

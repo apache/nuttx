@@ -503,6 +503,25 @@ static inline_function void __setsr(irqstate_t sr)
   __asm__ __volatile__ ("ldc %0, sr" : : "r" (sr));
 }
 
+/* Return program counter */
+
+static inline_function uint32_t up_getpc(void)
+{
+  uint32_t pc;
+
+  __asm__ __volatile__
+    (
+      "jsr 1f\n\t"
+      "nop\n\t"
+      "1: sts pr, %0\n\t"
+      : "=r"(pc)
+      :
+      : "pr"
+    );
+
+  return pc;
+}
+
 /* Return the current value of the stack pointer */
 
 static inline_function uint32_t up_getsp(void)

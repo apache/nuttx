@@ -78,6 +78,24 @@ extern "C"
  * Inline functions
  ****************************************************************************/
 
+/* Return program counter */
+
+static inline_function uint16_t up_getpc(void)
+{
+  uint16_t pc;
+
+  __asm__ volatile
+    (
+      "bsr 1f\n\t"
+      "1:\n\t"
+      "pula\n\t"                /* A <- PCH, at the top of the stack */
+      "pulb"                    /* B <- PCL */
+      : "=d"(pc)
+    );
+
+  return pc;
+}
+
 /* Return the current value of the stack pointer */
 
 static inline_function uint16_t up_getsp(void)
