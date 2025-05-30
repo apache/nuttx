@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32/esp32-ethernet-kit/src/esp32_mmcsd.c
+ * boards/xtensa/esp32/common/src/esp32_board_sdmmc.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -24,17 +24,12 @@
  * Included Files
  ****************************************************************************/
 
-#include <debug.h>
 #include <nuttx/config.h>
+#include <syslog.h>
 #include <nuttx/mmcsd.h>
 #include <nuttx/spi/spi.h>
-#include <pthread.h>
-#include <sched.h>
-#include <time.h>
-#include <unistd.h>
 
 #include "esp32_spi.h"
-#include "esp32-ethernet-kit.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -56,31 +51,43 @@
  * Name: esp32_mmcsd_initialize
  *
  * Description:
- *   Initialize SPI-based SD card and card detect thread.
+ *   Configure a SPI subsystem peripheral to communicate with SD card.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
+ *
  ****************************************************************************/
 
-int esp32_mmcsd_initialize(int minor)
+int board_sdmmc_initialize(void)
 {
   struct spi_dev_s *spi;
-  int rv;
+  int ret;
 
-  mcinfo("INFO: Initializing mmcsd card\n");
+  syslog(LOG_INFO, "INFO: init MMC/SD slot %d on SPI%d: /dev/mmcsd%d\n",
+         CONFIG_NSH_MMCSDSLOTNO, CONFIG_NSH_MMCSDSPIPORTNO,
+         CONFIG_NSH_MMCSDMINOR);
 
-  spi = esp32_spibus_initialize(2);
+  spi = esp32_spibus_initialize(CONFIG_NSH_MMCSDSPIPORTNO);
+
   if (spi == NULL)
     {
-      mcerr("ERROR: Failed to initialize SPI port %d\n", 2);
+      syslog(LOG_ERR, "ERROR: failed to initialize SPI%d.\n",
+             CONFIG_NSH_MMCSDSPIPORTNO);
       return -ENODEV;
     }
 
-  rv = mmcsd_spislotinitialize(minor, 0, spi);
-  if (rv < 0)
+  /* Mounts to /dev/mmcsdN where N in the minor number */
+
+  ret = mmcsd_spislotinitialize(CONFIG_NSH_MMCSDMINOR,
+                                CONFIG_NSH_MMCSDSLOTNO, spi);
+  if (ret < 0)
     {
-      mcerr("ERROR: Failed to bind SPI port %d to SD slot %d\n",
-            2, 0);
-      return rv;
+      syslog(LOG_ERR, "ERROR: failed to bind SPI%d to SD slot %d\n",
+            CONFIG_NSH_MMCSDSPIPORTNO, CONFIG_NSH_MMCSDSLOTNO);
+      return ret;
     }
 
-  spiinfo("INFO: mmcsd card has been initialized successfully\n");
+  syslog(LOG_INFO, "INFO: MMCSD initialized\n");
   return OK;
 }
