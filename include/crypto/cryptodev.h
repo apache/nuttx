@@ -352,6 +352,7 @@ struct cryptocap
 #define CRYPTOCAP_F_SOFTWARE    0x02
 #define CRYPTOCAP_F_ENCRYPT_MAC 0x04 /* Can do encrypt-then-MAC (IPsec) */
 #define CRYPTOCAP_F_MAC_ENCRYPT 0x08 /* Can do MAC-then-encrypt (TLS) */
+#define CRYPTOCAP_F_REMOTE      0x10 /* Remote core driver  */
 
   CODE int (*cc_newsession)(FAR uint32_t *, FAR struct cryptoini *);
   CODE int (*cc_process)(FAR struct cryptop *);

@@ -106,22 +106,18 @@ int crypto_newsession(FAR uint64_t *sid,
 
           if (cpc->cc_flags & CRYPTOCAP_F_SOFTWARE)
             {
-              /* First round of search, ignore
-               * software drivers.
-               */
+              /* Thread round of search only for software */
 
-              if (turn == 0)
+              if (turn != 2)
                 {
                   continue;
                 }
             }
-          else
+          else if (cpc->cc_flags & CRYPTOCAP_F_REMOTE)
             {
-              /* !CRYPTOCAP_F_SOFTWARE
-               * Second round of search, only software.
-               */
+              /* Second round of search only for remote */
 
-              if (turn == 1)
+              if (turn != 1)
                 {
                   continue;
                 }
@@ -189,7 +185,7 @@ int crypto_newsession(FAR uint64_t *sid,
 
       /* If we only want hardware drivers, don't do second pass. */
     }
-  while (turn <= 2 && hard == 0);
+  while (turn < 2 || (turn == 2 && !hard));
 
   hid = hid2;
 
