@@ -27,6 +27,14 @@ config ARCH_BOARD_ARDUINO_MEGA2560
 		This option selects the Arduino Mega 2560 board featuring the Atmel
 		Atmega2560 MCU running at 16 MHz.
 
+config ARCH_BOARD_ELEGOO_MEGA2560R3
+	bool "Elegoo Mega 2560r3"
+	depends on ARCH_CHIP_ATMEGA2560
+	select ARCH_HAVE_LEDS
+	---help---
+		This option selects the Elegoo Mega 2560 board featuring the Atmel
+		Atmega2560 MCU running at 16 MHz.
+
 config ARCH_BOARD_ARDUINO_DUE
 	bool "Arduino Due"
 	depends on ARCH_CHIP_ATSAM3X8E
@@ -3450,6 +3458,7 @@ config ARCH_BOARD
 	default "efm32-g8xx-stk"            if ARCH_BOARD_EFM32G8XXSTK
 	default "efm32gg-stk3700"           if ARCH_BOARD_EFM32GG_STK3700
 	default "ekk-lm3s9b96"              if ARCH_BOARD_EKKLM3S9B96
+	default "elegoo-mega2560r3"         if ARCH_BOARD_ELEGOO_MEGA2560R3
 	default "emw3162"                   if ARCH_BOARD_EMW3162
 	default "quickfeather"              if ARCH_BOARD_QUICKFEATHER
 	default "esp32-audio-kit"           if ARCH_BOARD_ESP32_AUDIO_KIT
@@ -4596,6 +4605,9 @@ source "boards/avr/atmega/amber/Kconfig"
 endif
 if ARCH_BOARD_ARDUINO_MEGA2560
 source "boards/avr/atmega/arduino-mega2560/Kconfig"
+endif
+if ARCH_BOARD_ELEGOO_MEGA2560R3
+source "boards/avr/atmega/elegoo-mega2560r3/Kconfig"
 endif
 if ARCH_BOARD_MOTEINO_MEGA
 source "boards/avr/atmega/moteino-mega/Kconfig"

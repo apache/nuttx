@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/avr/atmega/arduino-mega2560/scripts/flash.ld
+ * boards/avr/atmega/elegoo-mega2560r3/scripts/flash.ld
  *
  * SPDX-License-Identifier: Apache-2.0
  *

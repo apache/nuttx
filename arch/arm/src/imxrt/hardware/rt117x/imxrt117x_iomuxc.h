@@ -2397,6 +2397,10 @@
 #  define GPR_GPR16_FLEXRAM_BANK_CFG_SEL_FUSE (0 << 2) /*          Use fuse value to configure */
 #  define GPR_GPR16_FLEXRAM_BANK_CFG_SEL_REG  (1 << 2) /*          Use FLEXRAM_BANK_CFG to configure */
 
+#define GPR_GPR16_CM7_FORCE_HCLK            (1 << 3) /* Bit 3:   Force FlexRAM AHB clock during CM7 sleep (CM7_FORCE_HCLK) */
+#  define GPR_GPR16_CM7_FORCE_HCLK_GATED    (0 << 3) /*          When CM7 is sleeping and TCM is not accessible */
+#  define GPR_GPR16_CM7_FORCE_HCLK_ENABLED  (1 << 3) /*          When CM7 is sleeping and TCM is accessible */
+
                                                     /* Bit 4:      Reserved */
 
 #define GPR_GPR16_M7_GPC_SLEEP_SEL             (1 << 5) /* Bit 5:  CM7 sleep request selection (M7_GPC_SLEEP_SEL) */

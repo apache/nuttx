@@ -130,8 +130,16 @@ static void imxrt_oscsetup(void)
 
   /* FlexRAM AXI CLK ROOT */
 
-  putreg32(CCM_CG_CTRL_RSTDIV(1) | CCM_CG_CTRL_DIV0(1),
+  putreg32(CCM_CG_CTRL_RSTDIV(3) | CCM_CG_CTRL_DIV0(3),
   IMXRT_CCM_CG_CTRL(0));
+
+  /* Keep TCM clock running during M7 sleep
+   * needed for DMA to read/write from TCM or OCRAM-M7 FlexRAM ECC
+   */
+
+  reg = getreg32(IMXRT_IOMUXC_GPR_GPR16);
+  putreg32(reg | GPR_GPR16_CM7_FORCE_HCLK_ENABLED,
+  IMXRT_IOMUXC_GPR_GPR16);
 }
 
 /****************************************************************************
