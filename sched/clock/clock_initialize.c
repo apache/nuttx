@@ -227,8 +227,6 @@ void clock_initialize(void)
   clock_inittime(NULL);
 #endif
 
-  perf_init();
-
 #ifdef CONFIG_SCHED_CPULOAD_SYSCLK
   cpuload_init();
 #endif

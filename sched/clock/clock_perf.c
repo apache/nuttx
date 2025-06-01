@@ -42,7 +42,7 @@ struct perf_s
   struct wdog_s wdog;
   spinlock_t lock;
   unsigned long last;
-  unsigned long overflow;
+  clock_t overflow;
   clock_t timeout;
 };
 
@@ -62,32 +62,15 @@ static struct perf_s g_perf;
 
 static void perf_update(wdparm_t arg)
 {
-  FAR struct perf_s *perf = &g_perf;
+  FAR struct perf_s *perf = (FAR struct perf_s *)arg;
 
   perf_gettime();
-  wd_start_next((FAR struct wdog_s *)arg, perf->timeout, perf_update, arg);
+  wd_start_next(&perf->wdog, perf->timeout, perf_update, arg);
 }
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * perf_init
- ****************************************************************************/
-
-void perf_init(void)
-{
-  FAR struct perf_s *perf = &g_perf;
-
-  perf->timeout = (((clock_t)1 << (CONFIG_ARCH_PERF_COUNT_BITWIDTH - 1)) - 1)
-                  * TICK_PER_SEC / up_perf_getfreq();
-  perf->last = up_perf_gettime();
-
-  /* Periodic check for overflow */
-
-  wd_start(&perf->wdog, perf->timeout, perf_update, (wdparm_t)perf);
-}
 
 /****************************************************************************
  * perf_gettime
@@ -100,16 +83,23 @@ clock_t perf_gettime(void)
   clock_t now = up_perf_gettime();
   clock_t result;
 
-  /* Check if overflow */
+  if (perf->timeout == 0)
+    {
+      perf->timeout =
+        ((clock_t)1 << (CONFIG_ARCH_PERF_COUNT_BITWIDTH - 1)) *
+        TICK_PER_SEC / up_perf_getfreq();
 
-  if (now < perf->last)
+      /* Periodic check for overflow */
+
+      wd_start(&perf->wdog, perf->timeout, perf_update, (wdparm_t)perf);
+    }
+  else if (now < perf->last)
     {
       perf->overflow++;
     }
 
   perf->last = now;
-  result = (clock_t)now | \
-           (clock_t)perf->overflow << CONFIG_ARCH_PERF_COUNT_BITWIDTH;
+  result = now | (perf->overflow << CONFIG_ARCH_PERF_COUNT_BITWIDTH);
   spin_unlock_irqrestore(&perf->lock, flags);
   return result;
 }
@@ -140,14 +130,6 @@ unsigned long perf_getfreq(void)
       defined(CONFIG_ARCH_PERF_EVENTS)
 
 /****************************************************************************
- * perf_init
- ****************************************************************************/
-
-void perf_init(void)
-{
-}
-
-/****************************************************************************
  * perf_gettime
  ****************************************************************************/
 
@@ -175,14 +157,6 @@ unsigned long perf_getfreq(void)
 }
 
 #else
-
-/****************************************************************************
- * perf_init
- ****************************************************************************/
-
-void perf_init(void)
-{
-}
 
 /****************************************************************************
  * perf_gettime
