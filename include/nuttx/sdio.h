@@ -35,7 +35,7 @@
 
 #include <nuttx/wqueue.h>
 #include <nuttx/mutex.h>
-
+#include <nuttx/dma/dma_align_manager.h>
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -850,6 +850,11 @@
 #  define SDIO_DMAPREFLIGHT(dev,buffer,len) (OK)
 #endif
 
+#ifdef CONFIG_SDIO_DMA 
+#define SDIO_DMA_ALLOCATOR(dev)  (&((dev)->dma_align_allocator))
+#endif
+
+
 /****************************************************************************
  * Name: SDIO_DMARECVSETUP
  *
@@ -1034,6 +1039,8 @@ struct sdio_dev_s
 #ifdef CONFIG_ARCH_HAVE_SDIO_PREFLIGHT
   CODE int   (*dmapreflight)(FAR struct sdio_dev_s *dev,
                              FAR const uint8_t *buffer, size_t buflen);
+  /* when dmapreflight returns failure, this function is called to allocate memory. */
+  struct dma_align_allocator_s dma_align_allocator;                           
 #endif
   CODE int   (*dmarecvsetup)(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
                              size_t buflen);
