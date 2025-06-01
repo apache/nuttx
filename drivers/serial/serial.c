@@ -513,7 +513,7 @@ static int uart_tcdrain(FAR uart_dev_t *dev,
 #endif
     }
 
-  /* Get exclusive access to the to dev->tmit.  We cannot permit new data to
+  /* Get exclusive access to the to dev->xmit.  We cannot permit new data to
    * be written while we are trying to flush the old data.
    *
    * A signal received while waiting for access to the xmit.head will abort
