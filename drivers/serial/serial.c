@@ -230,6 +230,7 @@ static void uart_poll_notify(FAR uart_dev_t *dev, unsigned int min,
 static int uart_putxmitchar(FAR uart_dev_t *dev, int ch, bool oktoblock)
 {
   irqstate_t flags;
+  int16_t tail;
   int nexthead;
   int ret;
 
@@ -248,9 +249,26 @@ static int uart_putxmitchar(FAR uart_dev_t *dev, int ch, bool oktoblock)
           nexthead = 0;
         }
 
-      /* Check if the TX buffer is full */
+      /* Check if the TX buffer is full
+       *
+       * This method is currently called from uart_readv and uart_writev.
+       * The latter calls it after a call to uart_disabletxint, meaning
+       * transmit interrupt cannot happen. The former, however, runs
+       * with interrupt handling enabled. Interrupt handler can therefore
+       * execute in the middle of loading xmit.tail. If the load isn't
+       * atomic (8bit MCUs), it must run with interrupts disabled because
+       * the interrupt handler changes xmit.tail.
+       */
 
-      if (nexthead != dev->xmit.tail)
+#ifdef CONFIG_ARCH_LD_16BIT_NOT_ATOMIC
+      flags = enter_critical_section();
+      tail = dev->xmit.tail;
+      leave_critical_section(flags);
+#else
+      tail = dev->xmit.tail;
+#endif
+
+      if (nexthead != tail)
         {
           /* No.. not full.  Add the character to the TX buffer and return. */
 
@@ -550,6 +568,9 @@ static int uart_tcdrain(FAR uart_dev_t *dev,
            * situations were this loop could hang (with hardware flow
            * control, as an example),  the caller should call
            * tcflush() first to discard this buffered Tx data.
+           *
+           * Also note - running with interrupts disabled, no need
+           * to protect load of xmit.tail even if it is not atomic.
            */
 
           ret = OK;
@@ -906,6 +927,7 @@ static ssize_t uart_readv(FAR struct file *filep, FAR struct uio *uio)
   ssize_t recvd = 0;
   ssize_t buflen;
   bool echoed = false;
+  int16_t head;
   int16_t tail;
   char ch;
   int ret;
@@ -956,10 +978,20 @@ static ssize_t uart_readv(FAR struct file *filep, FAR struct uio *uio)
        * The head and tail pointers are 16-bit values.  The only time that
        * the following could be unsafe is if the CPU made two non-atomic
        * 8-bit accesses to obtain the 16-bit head index.
+       *
+       * This is the case for 8bit microcontrollers so atomic load
+       * of the head value is forced there.
        */
 
       tail = rxbuf->tail;
-      if (rxbuf->head != tail)
+#ifdef CONFIG_ARCH_LD_16BIT_NOT_ATOMIC
+      flags = enter_critical_section();
+      head = rxbuf->head;
+      leave_critical_section(flags);
+#else
+      head = rxbuf->head;
+#endif
+      if (head != tail)
         {
           /* Take the next character from the tail of the buffer */
 
@@ -1114,6 +1146,9 @@ static ssize_t uart_readv(FAR struct file *filep, FAR struct uio *uio)
           /* If the Rx ring buffer still empty?  Bytes may have been added
            * between the last time that we checked and when we disabled
            * interrupts.
+           *
+           * Unlike above, we no longer need to force atomic access
+           * on 8bit MCUs, we already are in critical section.
            */
 
           if (rxbuf->head == rxbuf->tail)
@@ -1336,17 +1371,34 @@ static ssize_t uart_readv(FAR struct file *filep, FAR struct uio *uio)
   uart_enablerxint(dev);
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
+
+  /* Not in critical section, need to use one for head load, see above. */
+
+#  ifdef CONFIG_ARCH_LD_16BIT_NOT_ATOMIC
+  flags = enter_critical_section();
+  head = rxbuf->head;
+  leave_critical_section(flags);
+#  else
+  head = rxbuf->head;
+#  endif
+
+  /* As mentioned above, tail can only be modified by us here,
+   * atomic read not needed. This assignment loses the volatile
+   * property of rxbuf->tail so we can save few instructions.
+   */
+
+  tail = rxbuf->tail;
+
 #ifdef CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS
   /* How many bytes are now buffered */
 
-  rxbuf = &dev->recv;
-  if (rxbuf->head >= rxbuf->tail)
+  if (head >= tail)
     {
-      nbuffered = rxbuf->head - rxbuf->tail;
+      nbuffered = head - tail;
     }
   else
     {
-      nbuffered = rxbuf->size - rxbuf->tail + rxbuf->head;
+      nbuffered = rxbuf->size - tail + head;
     }
 
   /* Is the level now below the watermark level that we need to report? */
@@ -1364,7 +1416,7 @@ static ssize_t uart_readv(FAR struct file *filep, FAR struct uio *uio)
 #else
   /* Is the RX buffer empty? */
 
-  if (rxbuf->head == rxbuf->tail)
+  if (head == tail)
     {
       /* Deactivate RX flow control. */
 
@@ -1540,6 +1592,10 @@ static ssize_t uart_writev(FAR struct file *filep, FAR struct uio *uio)
           break;
         }
     }
+
+  /* Note - running with TX interrupt disabled, no need to protect
+   * load of xmit.tail even if it is not atomic.
+   */
 
   if (dev->xmit.head != dev->xmit.tail)
     {
@@ -1812,6 +1868,8 @@ static int uart_poll(FAR struct file *filep,
   FAR uart_dev_t   *dev   = inode->i_private;
   pollevent_t       eventset;
   irqstate_t        flags;
+  int16_t           head;
+  int16_t           tail;
   int               ndx;
   int               ret = OK;
   int               i;
@@ -1875,7 +1933,18 @@ static int uart_poll(FAR struct file *filep,
           ndx = 0;
         }
 
-      if (ndx != dev->xmit.tail)
+      /* See other occurrences of this - transmit interrupt handler
+       * may execute and change xmit.tail while it is being loaded
+       */
+
+#ifdef CONFIG_ARCH_LD_16BIT_NOT_ATOMIC
+      flags = enter_critical_section();
+      tail = dev->xmit.tail;
+      leave_critical_section(flags);
+#else
+      tail = dev->xmit.tail;
+#endif
+      if (ndx != tail)
         {
           eventset |= POLLOUT;
         }
@@ -1890,7 +1959,17 @@ static int uart_poll(FAR struct file *filep,
        */
 
       nxmutex_lock(&dev->recv.lock);
-      if (dev->recv.head != dev->recv.tail)
+
+      /* Same as above with xmit.tail and transmit interrupt handler */
+
+#ifdef CONFIG_ARCH_LD_16BIT_NOT_ATOMIC
+      flags = enter_critical_section();
+      head = dev->recv.head;
+      leave_critical_section(flags);
+#else
+      head = dev->recv.head;
+#endif
+      if (head != dev->recv.tail)
         {
           eventset |= POLLIN;
         }
