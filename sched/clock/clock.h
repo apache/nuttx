@@ -78,12 +78,6 @@ void clock_increase_sched_ticks(clock_t ticks);
 
 clock_t clock_get_sched_ticks(void);
 
-/****************************************************************************
- * perf_init
- ****************************************************************************/
-
-void perf_init(void);
-
 #ifdef CONFIG_SCHED_CPULOAD_SYSCLK
 void cpuload_init(void);
 #endif
