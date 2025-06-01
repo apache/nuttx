@@ -1842,6 +1842,12 @@ config ARCH_BOARD_WEACT_STM32H743
 	---help---
 		This is WeAct MiniSTM32H7xx (STM32H743VIT6) board.
 
+config ARCH_BOARD_ICS_STM32H723ZG
+	bool "ICS STM32H723"
+	depends on ARCH_CHIP_STM32H723ZG
+	---help---
+		This is ICS(STM32H723ZG) board.
+
 config ARCH_BOARD_NUCLEO_H743ZI
 	bool "STM32H743 Nucleo H743ZI"
 	depends on ARCH_CHIP_STM32H743ZI
@@ -4296,6 +4302,9 @@ source "boards/arm/stm32h7/stm32h747i-disco/Kconfig"
 endif
 if ARCH_BOARD_WEACT_STM32H743
 source "boards/arm/stm32h7/weact-stm32h743/Kconfig"
+endif
+if ARCH_BOARD_ICS_STM32H723
+source "boards/arm/stm32h7/ics-stm32h723zg/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_H743ZI
 source "boards/arm/stm32h7/nucleo-h743zi/Kconfig"

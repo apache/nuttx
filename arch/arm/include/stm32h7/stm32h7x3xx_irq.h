@@ -200,13 +200,26 @@
 #define STM32_IRQ_LPUART       (STM32_IRQ_FIRST + 142)  /* 142: LPUART global interrupt */
 #define STM32_IRQ_WWDG1RST     (STM32_IRQ_FIRST + 143)  /* 143: Window Watchdog interrupt */
 #define STM32_IRQ_CRS          (STM32_IRQ_FIRST + 144)  /* 144: Clock Recovery System global interrupt */
-#define STM32_IRQ_RESERVED145  (STM32_IRQ_FIRST + 145)  /* 145: Reserved */
+#define STM32_IRQ_ECC  (STM32_IRQ_FIRST + 145)  /* 145: Reserved */
 #define STM32_IRQ_SAI4         (STM32_IRQ_FIRST + 146)  /* 146: SAI4  global interrupt */
-#define STM32_IRQ_RESERVED147  (STM32_IRQ_FIRST + 147)  /* 147: Reserved */
+#define STM32_IRQ_DTS  (STM32_IRQ_FIRST + 147)  /* 147: Reserved */
 #define STM32_IRQ_RESERVED148  (STM32_IRQ_FIRST + 148)  /* 148: Reserved */
 #define STM32_IRQ_WKUP         (STM32_IRQ_FIRST + 149)  /* 149: WKUP1 to WKUP6 pins */
+#define STM32_IRQ_OCTOSPI2        (STM32_IRQ_FIRST + 150)  /* 150: OCTOSPI2 */
+#define STM32_IRQ_RESERVED151     (STM32_IRQ_FIRST + 151)  /* 151: Reserved */
+#define STM32_IRQ_RESERVED152     (STM32_IRQ_FIRST + 152)  /* 152: Reserved */
+#define STM32_IRQ_FMAC            (STM32_IRQ_FIRST + 153)  /* 153: FMAC */
+#define STM32_IRQ_CORDIC          (STM32_IRQ_FIRST + 154)  /* 154: CORDIC */
+#define STM32_IRQ_UART9           (STM32_IRQ_FIRST + 155)  /* 155: UART9 */
+#define STM32_IRQ_USART10         (STM32_IRQ_FIRST + 156)  /* 156: USART10 */
+#define STM32_IRQ_I2C5_EV         (STM32_IRQ_FIRST + 157)  /* 157: I2C5 Event */
+#define STM32_IRQ_I2C5_ER         (STM32_IRQ_FIRST + 158)  /* 158: I2C5 Error */
+#define STM32_IRQ_FDCAN3_0      (STM32_IRQ_FIRST + 159)  /* 159: FDCAN3 Interrupt 0 */
+#define STM32_IRQ_FDCAN3_1      (STM32_IRQ_FIRST + 160)  /* 160: FDCAN3 Interrupt 1 */
+#define STM32_IRQ_TIM23           (STM32_IRQ_FIRST + 161)  /* 161: TIM23 global */
+#define STM32_IRQ_TIM24           (STM32_IRQ_FIRST + 162)  /* 162: TIM24 global */
 
-#define STM32_IRQ_NEXTINTS     150
+#define STM32_IRQ_NEXTINTS     163
 #define NR_IRQS                (STM32_IRQ_FIRST + STM32_IRQ_NEXTINTS)
 
 #endif /* __ARCH_ARM_INCLUDE_STM32H7_STM32H7X3XX_IRQ_H */

@@ -128,9 +128,8 @@ int map_anonymous(FAR struct mm_map_entry_s *entry, bool kernel)
    * build, this could be accomplished using pgalloc(), provided that
    * you had logic in place to assign a virtual address to the mapping.
    */
-
-  entry->vaddr = kernel ?
-    fs_heap_zalloc(entry->length) : kumm_zalloc(entry->length);
+  size_t page_size = sysconf(_SC_PAGESIZE);
+  entry->vaddr = kernel ? fs_heap_memalign(page_size,entry->length) : kumm_memalign(page_size,entry->length);
   if (entry->vaddr == NULL)
     {
       ferr("ERROR: kumm_alloc() failed, enable DEBUG_MM for info!\n");

@@ -77,7 +77,8 @@
     defined (CONFIG_ARCH_CHIP_STM32H745XI) || \
     defined (CONFIG_ARCH_CHIP_STM32H745ZI) || \
     defined (CONFIG_ARCH_CHIP_STM32H750B)  || \
-    defined (CONFIG_ARCH_CHIP_STM32H755II)
+    defined (CONFIG_ARCH_CHIP_STM32H755II) || \
+    defined (CONFIG_ARCH_CHIP_STM32H723ZG) 
 #elif defined(CONFIG_ARCH_CHIP_STM32H747XI)
 #else
 #  error STM32 H7 chip not identified

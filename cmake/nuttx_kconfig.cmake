@@ -56,6 +56,7 @@ function(nuttx_export_kconfig_by_value kconfigfile config)
       break()
     endif()
   endforeach()
+  message(STATUS "Name: ${Name}, Value: ${Value}")
 endfunction()
 
 function(nuttx_export_kconfig kconfigfile)

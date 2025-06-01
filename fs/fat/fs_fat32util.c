@@ -513,7 +513,7 @@ int fat_mount(struct fat_mountpt_s *fs, bool writeable)
 
   /* Allocate a buffer to hold one hardware sector */
 
-  fs->fs_buffer = (FAR uint8_t *)fat_io_alloc(fs->fs_hwsectorsize);
+  fs->fs_buffer = (FAR uint8_t *)fs_heap_malloc(fs->fs_hwsectorsize);
   if (!fs->fs_buffer)
     {
       ret = -ENOMEM;
@@ -658,7 +658,8 @@ int fat_mount(struct fat_mountpt_s *fs, bool writeable)
   return OK;
 
 errout_with_buffer:
-  fat_io_free(fs->fs_buffer, fs->fs_hwsectorsize);
+  /* fat_io_free(fs->fs_buffer, fs->fs_hwsectorsize); */
+  fs_heap_free(fs->fs_buffer);
   fs->fs_buffer = NULL;
 
 errout:

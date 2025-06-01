@@ -58,10 +58,16 @@
 
 extern void __start(void);
 
-static void start(void)
+static __attribute__((naked,no_instrument_function)) void start(void)
 {
   /* Zero lr to mark the end of backtrace */
-
+  register uintptr_t *reg_value_sp=IDLE_STACK;
+  asm volatile (
+    "mov sp, %0"     
+    :               
+    : "r" (reg_value_sp) 
+    : "sp", "memory"    
+);
   asm volatile ("mov lr, #0\n\t"
                 "b  __start\n\t");
 }

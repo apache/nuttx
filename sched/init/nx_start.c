@@ -648,13 +648,13 @@ void nx_start(void)
 
   fs_initialize();
 
-  /* Initialize the interrupt handling subsystem (if included) */
-
-  irq_initialize();
-
   /* Initialize the POSIX timer facility (if included in the link) */
 
   clock_initialize();
+
+  /*Please do not call the irq_initialize function here. After the chip is powered up, interrupts should be initialized as early as possible. Here, simply enabling the interrupts is sufficient. */
+
+  up_irq_enable();
 
 #ifndef CONFIG_DISABLE_POSIX_TIMERS
   timer_initialize();

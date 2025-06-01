@@ -1,5 +1,5 @@
 ############################################################################
-# drivers/dma/Make.defs
+# drivers/dma/CMakeLists.txt
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -19,16 +19,7 @@
 # under the License.
 #
 ############################################################################
+set(SRCS dma_align_manager.c)
+target_sources(drivers PRIVATE ${SRCS})
 
-# Include dma driver build support
 
-ifeq ($(CONFIG_DMA),y)
-
-CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)drivers$(DELIM)dma
-
-endif # CONFIG_DMA
-
-CSRCS += dma_align_manager.c
-
-DEPPATH += --dep-path dma
-VPATH += :dma

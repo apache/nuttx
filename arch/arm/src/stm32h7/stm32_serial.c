@@ -1572,8 +1572,7 @@ static inline void up_setusartint(struct up_dev_s *priv, uint16_t ie)
  * Name: up_restoreusartint
  ****************************************************************************/
 
-#if !defined(SERIAL_HAVE_ONLY_DMA) || defined(CONFIG_PM) || \
-    defined(HAVE_RS485)
+
 static void up_restoreusartint(struct up_dev_s *priv, uint16_t ie)
 {
   irqstate_t flags;
@@ -1584,7 +1583,7 @@ static void up_restoreusartint(struct up_dev_s *priv, uint16_t ie)
 
   spin_unlock_irqrestore(&priv->lock, flags);
 }
-#endif
+
 
 /****************************************************************************
  * Name: up_disableusartint

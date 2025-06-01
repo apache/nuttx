@@ -332,7 +332,7 @@ static int fat_open(FAR struct file *filep, FAR const char *relpath,
 
   /* Create a file buffer to support partial sector accesses */
 
-  ff->ff_buffer = (FAR uint8_t *)fat_io_alloc(fs->fs_hwsectorsize);
+  ff->ff_buffer = (FAR uint8_t *)fs_heap_malloc(fs->fs_hwsectorsize);
   if (!ff->ff_buffer)
     {
       ret = -ENOMEM;
@@ -469,7 +469,8 @@ static int fat_close(FAR struct file *filep)
 
   if (ff->ff_buffer)
     {
-      fat_io_free(ff->ff_buffer, fs->fs_hwsectorsize);
+      /* old code:fat_io_free(ff->ff_buffer, fs->fs_hwsectorsize); */
+      fs_heap_free(ff->ff_buffer);
     }
 
   /* Then free the file structure itself. */
@@ -761,10 +762,7 @@ static ssize_t fat_read(FAR struct file *filep, FAR char *buffer,
   int sectorindex;
   int ret;
 
-#ifndef CONFIG_FAT_FORCE_INDIRECT
   unsigned int nsectors;
-  bool force_indirect = false;
-#endif
 
   /* Sanity checks */
 
@@ -851,18 +849,13 @@ static ssize_t fat_read(FAR struct file *filep, FAR char *buffer,
           goto errout_with_lock;
         }
 
-#ifdef CONFIG_FAT_DIRECT_RETRY /* Warning avoidance */
-fat_read_restart:
-#endif
-
-#ifndef CONFIG_FAT_FORCE_INDIRECT
       /* Check if the user has provided a buffer large enough to hold one
        * or more complete sectors -AND- the read is aligned to a sector
        * boundary.
        */
 
       nsectors = buflen / fs->fs_hwsectorsize;
-      if (nsectors > 0 && sectorindex == 0 && !force_indirect)
+      if (nsectors > 0 && sectorindex == 0)
         {
           /* Read maximum contiguous sectors directly to the user's
            * buffer without using our tiny read buffer.
@@ -888,24 +881,6 @@ fat_read_restart:
           ret = fat_hwread(fs, userbuffer, ff->ff_currentsector, nsectors);
           if (ret < 0)
             {
-#ifdef CONFIG_FAT_DIRECT_RETRY
-              /* The low-level driver may return -EFAULT in the case where
-               * the transfer cannot be performed due to buffer memory
-               * constraints.  It is probable that the buffer is completely
-               * un-DMA-able or improperly aligned.  In this case, force
-               * indirect transfers via the sector buffer and restart the
-               * operation (unless we have already tried that).
-               */
-
-              if (ret == -EFAULT && !force_indirect)
-                {
-                  ferr("ERROR: DMA read alignment error,"
-                       " restarting indirect\n");
-                  force_indirect = true;
-                  goto fat_read_restart;
-                }
-#endif /* CONFIG_FAT_DIRECT_RETRY */
-
               goto errout_with_lock;
             }
 
@@ -914,7 +889,6 @@ fat_read_restart:
           bytesread                = nsectors * fs->fs_hwsectorsize;
         }
       else
-#endif /* CONFIG_FAT_FORCE_INDIRECT */
         {
           /* We are reading a partial sector, or handling a non-DMA-able
            * whole-sector transfer.  First, read the whole sector
@@ -981,10 +955,7 @@ static ssize_t fat_write(FAR struct file *filep, FAR const char *buffer,
   int sectorindex;
   int ret;
 
-#ifndef CONFIG_FAT_FORCE_INDIRECT
   unsigned int nsectors;
-  bool force_indirect = false;
-#endif
 
   DEBUGASSERT(filep->f_priv != NULL);
 
@@ -1049,18 +1020,12 @@ static ssize_t fat_write(FAR struct file *filep, FAR const char *buffer,
         {
           goto errout_with_lock;
         }
-
-#ifdef CONFIG_FAT_DIRECT_RETRY /* Warning avoidance */
-fat_write_restart:
-#endif
-
-#ifndef CONFIG_FAT_FORCE_INDIRECT
       /* Check if the user has provided a buffer large enough to
        * hold one or more complete sectors.
        */
 
       nsectors = buflen / fs->fs_hwsectorsize;
-      if (nsectors > 0 && sectorindex == 0 && !force_indirect)
+      if (nsectors > 0 && sectorindex == 0)
         {
           /* Write maximum contiguous sectors directly from the user's
            * buffer without using our tiny read buffer.
@@ -1087,24 +1052,6 @@ fat_write_restart:
           ret = fat_hwwrite(fs, userbuffer, ff->ff_currentsector, nsectors);
           if (ret < 0)
             {
-#ifdef CONFIG_FAT_DIRECT_RETRY
-              /* The low-level driver may return -EFAULT in the case where
-               * the transfer cannot be performed due to buffer memory
-               * constraints.  It is probable that the buffer is completely
-               * un-DMA-able or improperly aligned.  In this case, force
-               * indirect transfers via the sector buffer and restart the
-               * operation (unless we have already tried that).
-               */
-
-              if (ret == -EFAULT && !force_indirect)
-                {
-                  ferr("ERROR: DMA write alignment error,"
-                        " restarting indirect\n");
-                  force_indirect = true;
-                  goto fat_write_restart;
-                }
-#endif /* CONFIG_FAT_DIRECT_RETRY */
-
               goto errout_with_lock;
             }
 
@@ -1114,7 +1061,6 @@ fat_write_restart:
           ff->ff_bflags           |= FFBUFF_MODIFIED;
         }
       else
-#endif /* CONFIG_FAT_FORCE_INDIRECT */
         {
           /* Decide whether we are performing a read-modify-write
            * operation, in which case we have to read the existing sector
@@ -1563,7 +1509,7 @@ static int fat_dup(FAR const struct file *oldp, FAR struct file *newp)
 
   /* Create a file buffer to support partial sector accesses */
 
-  newff->ff_buffer = (FAR uint8_t *)fat_io_alloc(fs->fs_hwsectorsize);
+  newff->ff_buffer = (FAR uint8_t *)fs_heap_malloc(fs->fs_hwsectorsize);
   if (!newff->ff_buffer)
     {
       ret = -ENOMEM;
@@ -2355,7 +2301,8 @@ static int fat_unbind(FAR void *handle, FAR struct inode **blkdriver,
 
   if (fs->fs_buffer)
     {
-      fat_io_free(fs->fs_buffer, fs->fs_hwsectorsize);
+      /* old code :fat_io_free(fs->fs_buffer, fs->fs_hwsectorsize);*/
+      fs_heap_free(fs->fs_buffer);
     }
 
   nxmutex_destroy(&fs->fs_lock);

@@ -59,4 +59,14 @@ function(nuttx_generate_outputs target)
     add_custom_target(${target}-asm ALL DEPENDS ${target}.asm)
     file(APPEND ${CMAKE_BINARY_DIR}/nuttx.manifest "${target}.asm\n")
   endif()
+
+  #Because some debugging software only recognizes files with the .elf extension.
+  add_custom_command(
+    OUTPUT ${target}.elf
+    COMMAND cp ${target} ${target}.elf
+    DEPENDS ${target})
+  
+  add_custom_target(${target}-elf ALL DEPENDS ${target}.elf)
+  add_dependencies(nuttx_post ${target}-elf)
+  file(APPEND ${CMAKE_BINARY_DIR}/nuttx.manifest "${target}.elf\n")
 endfunction(nuttx_generate_outputs)

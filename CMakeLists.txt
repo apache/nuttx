@@ -183,8 +183,12 @@ else()
   set(CONFIG_APPS_DIR)
 endif()
 
-if(NOT EXISTS "${NUTTX_APPS_DIR}")
-  message(FATAL_ERROR "Application directory ${NUTTX_APPS_DIR} is not found")
+#Under occasional special circumstances, CMAKE may detect that the ../apps directory does not exist. However, the issue disappears after converting the path to an absolute address.
+get_filename_component(NUTTX_APPS_DIR_ABS_PATH "${NUTTX_APPS_DIR}" ABSOLUTE)
+message(STATUS "NUTTX_APPS_DIR_ABS_PATH is: ${NUTTX_APPS_DIR_ABS_PATH}")
+
+if(NOT EXISTS "${NUTTX_APPS_DIR_ABS_PATH}")
+  message(FATAL_ERROR "Application directory ${NUTTX_APPS_DIR_ABS_PATH} is not found")
 endif()
 
 get_filename_component(NUTTX_APPS_DIR ${NUTTX_APPS_DIR} ABSOLUTE)

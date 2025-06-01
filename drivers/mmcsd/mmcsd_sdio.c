@@ -493,25 +493,6 @@ static int mmcsd_recv_r6(FAR struct mmcsd_state_s *priv, uint32_t cmd)
 static int mmcsd_get_scr(FAR struct mmcsd_state_s *priv, uint32_t scr[2])
 {
   int ret;
-#ifdef CONFIG_SDIO_DMA
-  bool drop = false;
-#endif
-
-#if defined(CONFIG_SDIO_DMA) && defined(CONFIG_ARCH_HAVE_SDIO_PREFLIGHT)
-  /* If we think we are going to perform a DMA transfer, make sure that we
-   * will be able to before we commit the card to the operation.
-   */
-
-  if ((priv->caps & SDIO_CAPS_DMASUPPORTED) != 0)
-    {
-      ret = SDIO_DMAPREFLIGHT(priv->dev, (FAR uint8_t *)scr, 8);
-      if (ret != OK)
-        {
-          finfo("SDIO_DMAPREFLIGHT: error %d, drop to RECVSETUP\n", ret);
-          drop = true;
-        }
-    }
-#endif
 
   /* Set Block Size To 8 Bytes */
 
@@ -523,25 +504,8 @@ static int mmcsd_get_scr(FAR struct mmcsd_state_s *priv, uint32_t scr[2])
     }
 
   /* Setup up to receive data with interrupt mode */
-
   SDIO_BLOCKSETUP(priv->dev, 8, 1);
-#ifdef CONFIG_SDIO_DMA
-  if (!drop && (priv->caps & SDIO_CAPS_DMASUPPORTED) != 0)
-    {
-      ret = SDIO_DMARECVSETUP(priv->dev, (FAR uint8_t *)scr, 8);
-      if (ret != OK)
-        {
-          finfo("SDIO_DMARECVSETUP: error %d, drop to RECVSETUP\n", ret);
-          drop = true;
-        }
-    }
-
-  if (drop)
-#endif
-    {
-      SDIO_RECVSETUP(priv->dev, (FAR uint8_t *)scr, 8);
-    }
-
+  SDIO_RECVSETUP(priv->dev, (FAR uint8_t *)scr, 8);
   SDIO_WAITENABLE(priv->dev,
                   SDIOWAIT_TRANSFERDONE | SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR,
                   MMCSD_SCR_DATADELAY);
@@ -569,7 +533,6 @@ static int mmcsd_get_scr(FAR struct mmcsd_state_s *priv, uint32_t scr[2])
     }
 
   /* Wait for data to be transferred */
-
   ret = mmcsd_eventwait(priv, SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR);
   if (ret != OK)
     {
@@ -1522,7 +1485,12 @@ static ssize_t mmcsd_readsingle(FAR struct mmcsd_part_s *part,
   uint32_t partnum = part - priv->part;
   off_t offset;
   int ret;
-
+#ifdef CONFIG_SDIO_DMA
+  struct dma_align_manager_s dma_align_manager;
+  memset(&dma_align_manager,0,sizeof(dma_align_manager));
+  uint8_t *aligned_buffer=(uint8_t *)buffer;
+  struct dma_align_allocator_s *dma_align_allocator=SDIO_DMA_ALLOCATOR(priv->dev);
+#endif
   finfo("startblock=%jd\n", (intmax_t)startblock);
   DEBUGASSERT(priv != NULL && buffer != NULL);
 
@@ -1548,20 +1516,33 @@ static ssize_t mmcsd_readsingle(FAR struct mmcsd_part_s *part,
       priv->partnum = partnum;
     }
 
-#if defined(CONFIG_SDIO_DMA) && defined(CONFIG_ARCH_HAVE_SDIO_PREFLIGHT)
-  /* If we think we are going to perform a DMA transfer, make sure that we
+#if defined(CONFIG_SDIO_DMA)
+	 /* If we think we are going to perform a DMA transfer, make sure that we
    * will be able to before we commit the card to the operation.
    */
-
+   
   if ((priv->caps & SDIO_CAPS_DMASUPPORTED) != 0)
+  {
+    #ifdef CONFIG_ARCH_HAVE_SDIO_PREFLIGHT
+    ret = SDIO_DMAPREFLIGHT(priv->dev, buffer, priv->blocksize);
+    if (ret != OK)
     {
-      ret = SDIO_DMAPREFLIGHT(priv->dev, buffer, priv->blocksize);
-
-      if (ret != OK)
-        {
-          return ret;
-        }
+      struct dma_align_manager_init_s dma_align_mgr_init_cfg;
+      memset(&dma_align_mgr_init_cfg,0,sizeof(dma_align_mgr_init_cfg));
+      dma_align_mgr_init_cfg.dev=(void *)priv->dev;
+      dma_align_mgr_init_cfg.allocator=dma_align_allocator;
+      dma_align_mgr_init_cfg.original_buffer=(uint8_t *)buffer;
+      dma_align_mgr_init_cfg.original_buffer_len=priv->blocksize;
+      ret=dma_align_manager_init(&dma_align_manager,&dma_align_mgr_init_cfg);
+      if(ret!=OK)
+      {
+        return ret;
+      }
+      aligned_buffer=dma_align_manager_get_align_buffer(&dma_align_manager);
     }
+    
+    #endif 
+  }
 #endif
 
   /* Verify that the card is ready for the transfer.  The card may still be
@@ -1575,7 +1556,7 @@ static ssize_t mmcsd_readsingle(FAR struct mmcsd_part_s *part,
   if (ret != OK)
     {
       ferr("ERROR: Card not ready: %d\n", ret);
-      return ret;
+      goto __exit;
     }
 
   /* If this is a byte addressed SD card, then convert sector start sector
@@ -1599,7 +1580,7 @@ static ssize_t mmcsd_readsingle(FAR struct mmcsd_part_s *part,
   if (ret != OK)
     {
       ferr("ERROR: mmcsd_setblocklen failed: %d\n", ret);
-      return ret;
+      goto __exit;
     }
 
   /* Configure SDIO controller hardware for the read transfer */
@@ -1612,12 +1593,12 @@ static ssize_t mmcsd_readsingle(FAR struct mmcsd_part_s *part,
 #ifdef CONFIG_SDIO_DMA
   if ((priv->caps & SDIO_CAPS_DMASUPPORTED) != 0)
     {
-      ret = SDIO_DMARECVSETUP(priv->dev, buffer, priv->blocksize);
+      ret = SDIO_DMARECVSETUP(priv->dev, aligned_buffer, priv->blocksize);
       if (ret != OK)
         {
           finfo("SDIO_DMARECVSETUP: error %d\n", ret);
           SDIO_CANCEL(priv->dev);
-          return ret;
+          goto __exit;
         }
     }
   else
@@ -1638,7 +1619,7 @@ static ssize_t mmcsd_readsingle(FAR struct mmcsd_part_s *part,
     {
       ferr("ERROR: mmcsd_recv_r1 for CMD17 failed: %d\n", ret);
       SDIO_CANCEL(priv->dev);
-      return ret;
+      goto __exit;
     }
 
   /* Then wait for the data transfer to complete */
@@ -1647,12 +1628,31 @@ static ssize_t mmcsd_readsingle(FAR struct mmcsd_part_s *part,
   if (ret != OK)
     {
       ferr("ERROR: CMD17 transfer failed: %d\n", ret);
-      return ret;
+      goto __exit;
     }
 
-  /* Return value:  One sector read */
+#ifdef CONFIG_SDIO_DMA
+    if ((priv->caps & SDIO_CAPS_DMASUPPORTED) != 0)
+    {
+      if(dma_align_manager.allocated)
+      {
+        memcpy(buffer,aligned_buffer,priv->blocksize);
+      }  
+    } 
+#endif
 
-  return 1;
+    ret=1;
+__exit:
+
+#ifdef CONFIG_SDIO_DMA
+    if ((priv->caps & SDIO_CAPS_DMASUPPORTED) != 0)
+    {
+      dma_align_manager_finish(&dma_align_manager);
+    }
+#endif
+
+/* Return value:  One sector read */
+  return ret;
 }
 
 /****************************************************************************
@@ -1673,7 +1673,12 @@ static ssize_t mmcsd_readmultiple(FAR struct mmcsd_part_s *part,
   uint32_t partnum = part - priv->part;
   off_t  offset;
   int ret;
-
+#if defined(CONFIG_SDIO_DMA)
+  struct dma_align_manager_s dma_align_manager;
+  memset(&dma_align_manager,0,sizeof(dma_align_manager));
+  uint8_t *aligned_buffer=(uint8_t *)buffer;
+  struct dma_align_allocator_s *dma_align_allocator=SDIO_DMA_ALLOCATOR(priv->dev);
+#endif
   finfo("startblock=%jd nblocks=%zu\n", (intmax_t)startblock, nblocks);
   DEBUGASSERT(priv != NULL && buffer != NULL);
 
@@ -1699,20 +1704,33 @@ static ssize_t mmcsd_readmultiple(FAR struct mmcsd_part_s *part,
       priv->partnum = partnum;
     }
 
-#if defined(CONFIG_SDIO_DMA) && defined(CONFIG_ARCH_HAVE_SDIO_PREFLIGHT)
+#if defined(CONFIG_SDIO_DMA)
   /* If we think we are going to perform a DMA transfer, make sure that we
    * will be able to before we commit the card to the operation.
    */
-
-  if ((priv->caps & SDIO_CAPS_DMASUPPORTED) != 0)
+ if ((priv->caps & SDIO_CAPS_DMASUPPORTED) != 0)
+  {
+    #ifdef CONFIG_ARCH_HAVE_SDIO_PREFLIGHT
+    ret = SDIO_DMAPREFLIGHT(priv->dev, buffer, nbytes);
+    if (ret != OK)
     {
-      ret = SDIO_DMAPREFLIGHT(priv->dev, buffer, nbytes);
-
-      if (ret != OK)
-        {
-          return ret;
-        }
+      struct dma_align_manager_init_s dma_align_mgr_init_cfg;
+      memset(&dma_align_mgr_init_cfg,0,sizeof(dma_align_mgr_init_cfg));
+      dma_align_mgr_init_cfg.dev=(void *)priv->dev;
+      dma_align_mgr_init_cfg.allocator=dma_align_allocator;
+      dma_align_mgr_init_cfg.original_buffer=(uint8_t *)buffer;
+      dma_align_mgr_init_cfg.original_buffer_len=nbytes;
+      ret=dma_align_manager_init(&dma_align_manager,&dma_align_mgr_init_cfg);
+      if(ret!=OK)
+      {
+        return ret;
+      }
+      aligned_buffer=dma_align_manager_get_align_buffer(&dma_align_manager);
     }
+    
+    #endif 
+  }
+
 #endif
 
   /* Verify that the card is ready for the transfer.  The card may still be
@@ -1726,7 +1744,7 @@ static ssize_t mmcsd_readmultiple(FAR struct mmcsd_part_s *part,
   if (ret != OK)
     {
       ferr("ERROR: Card not ready: %d\n", ret);
-      return ret;
+      goto __exit;
     }
 
   /* If this is a byte addressed SD card, then convert both the total
@@ -1751,7 +1769,7 @@ static ssize_t mmcsd_readmultiple(FAR struct mmcsd_part_s *part,
   if (ret != OK)
     {
       ferr("ERROR: mmcsd_setblocklen failed: %d\n", ret);
-      return ret;
+      goto __exit;
     }
 
   /* Configure SDIO controller hardware for the read transfer */
@@ -1764,12 +1782,12 @@ static ssize_t mmcsd_readmultiple(FAR struct mmcsd_part_s *part,
 #ifdef CONFIG_SDIO_DMA
   if ((priv->caps & SDIO_CAPS_DMASUPPORTED) != 0)
     {
-      ret = SDIO_DMARECVSETUP(priv->dev, buffer, nbytes);
+      ret = SDIO_DMARECVSETUP(priv->dev, aligned_buffer, nbytes);
       if (ret != OK)
         {
           finfo("SDIO_DMARECVSETUP: error %d\n", ret);
           SDIO_CANCEL(priv->dev);
-          return ret;
+          goto __exit;
         }
     }
   else
@@ -1787,7 +1805,7 @@ static ssize_t mmcsd_readmultiple(FAR struct mmcsd_part_s *part,
       ret = mmcsd_setblockcount(priv, nblocks);
       if (ret != OK)
         {
-          return ret;
+          goto __exit;
         }
     }
 
@@ -1801,7 +1819,7 @@ static ssize_t mmcsd_readmultiple(FAR struct mmcsd_part_s *part,
     {
       ferr("ERROR: mmcsd_recv_r1 for CMD18 failed: %d\n", ret);
       SDIO_CANCEL(priv->dev);
-      return ret;
+      goto __exit;
     }
 
   /* Wait for the transfer to complete */
@@ -1810,7 +1828,7 @@ static ssize_t mmcsd_readmultiple(FAR struct mmcsd_part_s *part,
   if (ret != OK)
     {
       ferr("ERROR: CMD18 transfer failed: %d\n", ret);
-      return ret;
+      goto __exit;
     }
 
   if (IS_SD(priv->type) && !priv->cmd23support)
@@ -1824,10 +1842,27 @@ static ssize_t mmcsd_readmultiple(FAR struct mmcsd_part_s *part,
           ferr("ERROR: mmcsd_stoptransmission failed: %d\n", ret);
         }
     }
+#ifdef CONFIG_SDIO_DMA
+    if ((priv->caps & SDIO_CAPS_DMASUPPORTED) != 0)
+    {
+      if(dma_align_manager.allocated)
+      {
+        memcpy(buffer,aligned_buffer,nbytes);
+      }
+    } 
+#endif
 
   /* On success, return the number of blocks read */
+  ret=nblocks;
 
-  return nblocks;
+__exit:
+#ifdef CONFIG_SDIO_DMA
+    if ((priv->caps & SDIO_CAPS_DMASUPPORTED) != 0)
+    {
+      dma_align_manager_finish(&dma_align_manager);
+    }
+#endif
+  return ret;
 }
 #endif
 
@@ -1846,6 +1881,13 @@ static ssize_t mmcsd_writesingle(FAR struct mmcsd_part_s *part,
   uint32_t partnum = part - priv->part;
   off_t offset;
   int ret;
+
+#ifdef CONFIG_SDIO_DMA
+  struct dma_align_manager_s dma_align_manager;
+  memset(&dma_align_manager,0,sizeof(dma_align_manager));
+  uint8_t *aligned_buffer=(uint8_t *)buffer;
+  struct dma_align_allocator_s *dma_align_allocator=SDIO_DMA_ALLOCATOR(priv->dev);
+#endif
 
   finfo("startblock=%jd\n", (intmax_t)startblock);
   DEBUGASSERT(priv != NULL && buffer != NULL);
@@ -1874,20 +1916,36 @@ static ssize_t mmcsd_writesingle(FAR struct mmcsd_part_s *part,
       priv->partnum = partnum;
     }
 
-#if defined(CONFIG_SDIO_DMA) && defined(CONFIG_ARCH_HAVE_SDIO_PREFLIGHT)
-  /* If we think we are going to perform a DMA transfer, make sure that we
-   * will be able to before we commit the card to the operation.
-   */
-
-  if ((priv->caps & SDIO_CAPS_DMASUPPORTED) != 0)
+#if defined(CONFIG_SDIO_DMA) 
+   if ((priv->caps & SDIO_CAPS_DMASUPPORTED) != 0)
+  {
+    #ifdef CONFIG_ARCH_HAVE_SDIO_PREFLIGHT
+    ret = SDIO_DMAPREFLIGHT(priv->dev, buffer, priv->blocksize);
+    if (ret != OK)
     {
-      ret = SDIO_DMAPREFLIGHT(priv->dev, buffer, priv->blocksize);
-
-      if (ret != OK)
-        {
-          return ret;
-        }
+      struct dma_align_manager_init_s dma_align_mgr_init_cfg;
+      memset(&dma_align_mgr_init_cfg,0,sizeof(dma_align_mgr_init_cfg));
+      dma_align_mgr_init_cfg.dev=(void *)priv->dev;
+      dma_align_mgr_init_cfg.allocator=dma_align_allocator;
+      dma_align_mgr_init_cfg.original_buffer=(uint8_t *)buffer;
+      dma_align_mgr_init_cfg.original_buffer_len=priv->blocksize;
+      ret=dma_align_manager_init(&dma_align_manager,&dma_align_mgr_init_cfg);
+      if(ret!=OK)
+      {
+        return ret;
+      }
+      aligned_buffer=dma_align_manager_get_align_buffer(&dma_align_manager);
+      if(dma_align_manager.allocated)
+      {
+          memcpy(aligned_buffer,buffer,priv->blocksize);
+      }
     }
+    
+    #endif 
+    
+  }
+
+  
 #endif
 
   /* Verify that the card is ready for the transfer.  The card may still be
@@ -1901,7 +1959,7 @@ static ssize_t mmcsd_writesingle(FAR struct mmcsd_part_s *part,
   if (ret != OK)
     {
       ferr("ERROR: Card not ready: %d\n", ret);
-      return ret;
+      goto __exit;
     }
 
   /* If this is a byte addressed SD card, then convert sector start sector
@@ -1925,7 +1983,7 @@ static ssize_t mmcsd_writesingle(FAR struct mmcsd_part_s *part,
   if (ret != OK)
     {
       ferr("ERROR: mmcsd_setblocklen failed: %d\n", ret);
-      return ret;
+      goto __exit;
     }
 
   /* If Controller does not need DMA setup before the write then send CMD24
@@ -1941,7 +1999,7 @@ static ssize_t mmcsd_writesingle(FAR struct mmcsd_part_s *part,
       if (ret != OK)
         {
           ferr("ERROR: mmcsd_recv_r1 for CMD24 failed: %d\n", ret);
-          return ret;
+          goto __exit;
         }
     }
 
@@ -1955,12 +2013,12 @@ static ssize_t mmcsd_writesingle(FAR struct mmcsd_part_s *part,
 #ifdef CONFIG_SDIO_DMA
   if ((priv->caps & SDIO_CAPS_DMASUPPORTED) != 0)
     {
-      ret = SDIO_DMASENDSETUP(priv->dev, buffer, priv->blocksize);
+      ret = SDIO_DMASENDSETUP(priv->dev, aligned_buffer, priv->blocksize);
       if (ret != OK)
         {
           finfo("SDIO_DMASENDSETUP: error %d\n", ret);
           SDIO_CANCEL(priv->dev);
-          return ret;
+          goto __exit;
         }
     }
   else
@@ -1981,7 +2039,7 @@ static ssize_t mmcsd_writesingle(FAR struct mmcsd_part_s *part,
         {
           ferr("ERROR: mmcsd_recv_r1 for CMD24 failed: %d\n", ret);
           SDIO_CANCEL(priv->dev);
-          return ret;
+          goto __exit;
         }
     }
 
@@ -1991,7 +2049,7 @@ static ssize_t mmcsd_writesingle(FAR struct mmcsd_part_s *part,
   if (ret != OK)
     {
       ferr("ERROR: CMD24 transfer failed: %d\n", ret);
-      return ret;
+      goto __exit;
     }
 
   /* Flag that a write transfer is pending that we will have to check for
@@ -2007,9 +2065,19 @@ static ssize_t mmcsd_writesingle(FAR struct mmcsd_part_s *part,
                   MMCSD_BLOCK_WDATADELAY);
 #endif
 
-  /* On success, return the number of blocks written */
+     /* On success, return the number of blocks written */
+    ret=1;
 
-  return 1;
+__exit:
+#ifdef CONFIG_SDIO_DMA
+    if ((priv->caps & SDIO_CAPS_DMASUPPORTED) != 0)
+    {
+      dma_align_manager_finish(&dma_align_manager);
+    }
+#endif
+ 
+
+  return ret;
 }
 
 /****************************************************************************
@@ -2034,6 +2102,13 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_part_s *part,
   int ret;
   int evret = OK;
 
+#ifdef CONFIG_SDIO_DMA
+  struct dma_align_manager_s dma_align_manager;
+  memset(&dma_align_manager,0,sizeof(dma_align_manager));
+  uint8_t *aligned_buffer=(uint8_t *)buffer;
+  struct dma_align_allocator_s *dma_align_allocator=SDIO_DMA_ALLOCATOR(priv->dev);
+#endif
+
   finfo("startblock=%jd nblocks=%zu\n", (intmax_t)startblock, nblocks);
   DEBUGASSERT(priv != NULL && buffer != NULL);
 
@@ -2061,20 +2136,35 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_part_s *part,
       priv->partnum = partnum;
     }
 
-#if defined(CONFIG_SDIO_DMA) && defined(CONFIG_ARCH_HAVE_SDIO_PREFLIGHT)
-  /* If we think we are going to perform a DMA transfer, make sure that we
-   * will be able to before we commit the card to the operation.
-   */
+#if defined(CONFIG_SDIO_DMA) 
 
-  if ((priv->caps & SDIO_CAPS_DMASUPPORTED) != 0)
+     if ((priv->caps & SDIO_CAPS_DMASUPPORTED) != 0)
     {
+      #ifdef CONFIG_ARCH_HAVE_SDIO_PREFLIGHT
       ret = SDIO_DMAPREFLIGHT(priv->dev, buffer, nbytes);
-
       if (ret != OK)
+      {
+        struct dma_align_manager_init_s dma_align_mgr_init_cfg;
+        memset(&dma_align_mgr_init_cfg,0,sizeof(dma_align_mgr_init_cfg));
+        dma_align_mgr_init_cfg.dev=(void *)priv->dev;
+        dma_align_mgr_init_cfg.allocator=dma_align_allocator;
+        dma_align_mgr_init_cfg.original_buffer=(uint8_t *)buffer;
+        dma_align_mgr_init_cfg.original_buffer_len=nbytes;
+        ret=dma_align_manager_init(&dma_align_manager,&dma_align_mgr_init_cfg);
+        if(ret!=OK)
         {
           return ret;
         }
+        aligned_buffer=dma_align_manager_get_align_buffer(&dma_align_manager);
+        if(dma_align_manager.allocated)
+        {
+            memcpy(aligned_buffer,buffer,nbytes);
+        }
+      }
+      
+      #endif 
     }
+  
 #endif
 
   /* Verify that the card is ready for the transfer.  The card may still be
@@ -2088,7 +2178,7 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_part_s *part,
   if (ret != OK)
     {
       ferr("ERROR: Card not ready: %d\n", ret);
-      return ret;
+      goto __exit;
     }
 
   /* If this is a byte addressed SD card, then convert both the total
@@ -2113,7 +2203,7 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_part_s *part,
   if (ret != OK)
     {
       ferr("ERROR: mmcsd_setblocklen failed: %d\n", ret);
-      return ret;
+      goto __exit;
     }
 
   /* If this is an SD card, then send ACMD23 (SET_WR_BLK_ERASE_COUNT) just
@@ -2131,7 +2221,7 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_part_s *part,
       if (ret != OK)
         {
           ferr("ERROR: mmcsd_recv_r1 for CMD55 (ACMD23) failed: %d\n", ret);
-          return ret;
+          goto __exit;
         }
 
       /* Send CMD23, SET_WR_BLK_ERASE_COUNT, and verify that good R1 status
@@ -2143,7 +2233,7 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_part_s *part,
       if (ret != OK)
         {
           ferr("ERROR: mmcsd_recv_r1 for ACMD23 failed: %d\n", ret);
-          return ret;
+          goto __exit;
         }
     }
 
@@ -2160,7 +2250,7 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_part_s *part,
                                 ((1 << 31) | nblocks) : nblocks);
       if (ret != OK)
         {
-          return ret;
+          goto __exit;
         }
     }
   else
@@ -2170,7 +2260,7 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_part_s *part,
       ret = mmcsd_setblockcount(priv, nblocks);
       if (ret != OK)
         {
-          return ret;
+          goto __exit;
         }
     }
 
@@ -2189,7 +2279,7 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_part_s *part,
       if (ret != OK)
         {
           ferr("ERROR: mmcsd_recv_r1 for CMD25 failed: %d\n", ret);
-          return ret;
+          goto __exit;
         }
     }
 
@@ -2203,12 +2293,12 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_part_s *part,
 #ifdef CONFIG_SDIO_DMA
   if ((priv->caps & SDIO_CAPS_DMASUPPORTED) != 0)
     {
-      ret = SDIO_DMASENDSETUP(priv->dev, buffer, nbytes);
+      ret = SDIO_DMASENDSETUP(priv->dev, aligned_buffer, nbytes);
       if (ret != OK)
         {
           ferr("SDIO_DMASENDSETUP: error %d\n", ret);
           SDIO_CANCEL(priv->dev);
-          return ret;
+          goto __exit;
         }
     }
   else
@@ -2231,7 +2321,7 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_part_s *part,
         {
           ferr("ERROR: mmcsd_recv_r1 for CMD25 failed: %d\n", ret);
           SDIO_CANCEL(priv->dev);
-          return ret;
+          goto __exit;
         }
     }
 
@@ -2256,20 +2346,22 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_part_s *part,
       ret = mmcsd_stoptransmission(priv);
       if (evret != OK)
         {
-          return evret;
+          ret=evret;
+          goto __exit;
         }
 
       if (ret != OK)
         {
           ferr("ERROR: mmcsd_stoptransmission failed: %d\n", ret);
-          return ret;
+          goto __exit;
         }
     }
   else
     {
       if (evret != OK)
         {
-          return evret;
+          ret=evret;
+          goto __exit;
         }
     }
 
@@ -2286,9 +2378,17 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_part_s *part,
                   nblocks * MMCSD_BLOCK_WDATADELAY);
 #endif
 
-  /* On success, return the number of blocks written */
+   /* On success, return the number of blocks written */
+    ret=nblocks;
 
-  return nblocks;
+__exit:
+#ifdef CONFIG_SDIO_DMA
+    if ((priv->caps & SDIO_CAPS_DMASUPPORTED) != 0)
+    {
+      dma_align_manager_finish(&dma_align_manager);
+    }
+#endif
+  return ret;
 }
 #endif
 
@@ -3173,6 +3273,12 @@ static int mmcsd_read_extcsd(FAR struct mmcsd_state_s *priv,
 
   DEBUGASSERT(priv != NULL);
 
+#ifdef CONFIG_SDIO_DMA
+  struct dma_align_manager_s dma_align_manager;
+  memset(&dma_align_manager,0,sizeof(dma_align_manager));
+  uint8_t *aligned_buffer=extcsd;
+  struct dma_align_allocator_s *dma_align_allocator=SDIO_DMA_ALLOCATOR(priv->dev);
+#endif
   /* Check if the card is locked */
 
   if (priv->locked)
@@ -3183,20 +3289,29 @@ static int mmcsd_read_extcsd(FAR struct mmcsd_state_s *priv,
 
   memset(extcsd, 0, 512);
 
-#if defined(CONFIG_SDIO_DMA) && defined(CONFIG_ARCH_HAVE_SDIO_PREFLIGHT)
-
-  /* If we think we are going to perform a DMA transfer, make sure that we
-   * will be able to before we commit the card to the operation.
-   */
-
+#if defined(CONFIG_SDIO_DMA)
   if ((priv->caps & SDIO_CAPS_DMASUPPORTED) != 0)
+  {
+    #ifdef CONFIG_ARCH_HAVE_SDIO_PREFLIGHT
+    ret = SDIO_DMAPREFLIGHT(priv->dev, extcsd, 512);
+    if (ret != OK)
     {
-      ret = SDIO_DMAPREFLIGHT(priv->dev, extcsd, priv->blocksize);
-      if (ret != OK)
-        {
-          return ret;
-        }
+      return ret;
     }
+    struct dma_align_manager_init_s dma_align_mgr_init_cfg;
+    memset(&dma_align_mgr_init_cfg,0,sizeof(dma_align_mgr_init_cfg));
+    dma_align_mgr_init_cfg.dev=(void *)priv->dev;
+    dma_align_mgr_init_cfg.allocator=dma_align_allocator;
+    dma_align_mgr_init_cfg.original_buffer=extcsd;
+    dma_align_mgr_init_cfg.original_buffer_len=512;
+    ret=dma_align_manager_init(&dma_align_manager,&dma_align_mgr_init_cfg);
+    if(ret!=OK)
+    {
+      return ret;
+    }
+    aligned_buffer=dma_align_manager_get_align_buffer(&dma_align_manager);
+    #endif 
+  }
 #endif
 
   /* Verify that the card is ready for the transfer.  The card may still be
@@ -3210,7 +3325,7 @@ static int mmcsd_read_extcsd(FAR struct mmcsd_state_s *priv,
   if (ret != OK)
     {
       ferr("ERROR: Card not ready: %d\n", ret);
-      return ret;
+      goto __exit;
     }
 
   /* Select the block size for the card (CMD16) */
@@ -3219,7 +3334,7 @@ static int mmcsd_read_extcsd(FAR struct mmcsd_state_s *priv,
   if (ret != OK)
     {
       ferr("ERROR: mmcsd_setblocklen failed: %d\n", ret);
-      return ret;
+      goto __exit;
     }
 
   /* Configure SDIO controller hardware for the read transfer */
@@ -3233,12 +3348,12 @@ static int mmcsd_read_extcsd(FAR struct mmcsd_state_s *priv,
   if ((priv->caps & SDIO_CAPS_DMASUPPORTED) != 0)
     {
       finfo("Setting up for DMA transfer.\n");
-      ret = SDIO_DMARECVSETUP(priv->dev, extcsd, 512);
+      ret = SDIO_DMARECVSETUP(priv->dev, aligned_buffer, 512);
       if (ret != OK)
         {
           ferr("SDIO_DMARECVSETUP: error %d\n", ret);
           SDIO_CANCEL(priv->dev);
-          return ret;
+          goto __exit;
         }
     }
   else
@@ -3258,7 +3373,7 @@ static int mmcsd_read_extcsd(FAR struct mmcsd_state_s *priv,
     {
       ferr("ERROR: Could not get MMC extended CSD register: %d\n", ret);
       SDIO_CANCEL(priv->dev);
-      return ret;
+      goto __exit;
     }
 
   /* Then wait for the data transfer to complete */
@@ -3267,14 +3382,29 @@ static int mmcsd_read_extcsd(FAR struct mmcsd_state_s *priv,
   if (ret != OK)
     {
       ferr("ERROR: CMD17 transfer failed: %d\n", ret);
-      return ret;
+      goto __exit;
     }
 
   SDIO_GOTEXTCSD(priv->dev, extcsd);
-
-  /* Return value:  One sector read */
-
-  return OK;
+   /* Return value:  One sector read */
+  ret=OK;
+#ifdef CONFIG_SDIO_DMA
+  if ((priv->caps & SDIO_CAPS_DMASUPPORTED) != 0)
+  {
+    if(dma_align_manager.allocated)
+    {
+      memcpy(extcsd,aligned_buffer,512);
+    }
+  } 
+#endif
+__exit:
+#ifdef CONFIG_SDIO_DMA
+    if ((priv->caps & SDIO_CAPS_DMASUPPORTED) != 0)
+    {
+      dma_align_manager_finish(&dma_align_manager);
+    }
+#endif
+  return ret;
 }
 #endif
 
@@ -3292,6 +3422,12 @@ static int mmcsd_general_cmd_write(FAR struct mmcsd_state_s *priv,
                                    off_t startblock)
 {
   int ret;
+#ifdef CONFIG_SDIO_DMA
+  struct dma_align_manager_s dma_align_manager;
+  memset(&dma_align_manager,0,sizeof(dma_align_manager));
+  uint8_t *aligned_buffer=(uint8_t *)buffer;
+  struct dma_align_allocator_s *dma_align_allocator=SDIO_DMA_ALLOCATOR(priv->dev);
+#endif
 
   DEBUGASSERT(priv != NULL && buffer != NULL);
 
@@ -3305,18 +3441,33 @@ static int mmcsd_general_cmd_write(FAR struct mmcsd_state_s *priv,
       return -EPERM;
     }
 
-#if defined(CONFIG_SDIO_DMA) && defined(CONFIG_ARCH_HAVE_SDIO_PREFLIGHT)
-  /* If we think we are going to perform a DMA transfer, make sure that we
-   * will be able to before we commit the card to the operation.
-   */
-
+#if defined(CONFIG_SDIO_DMA) 
   if ((priv->caps & SDIO_CAPS_DMASUPPORTED) != 0)
     {
+      #ifdef CONFIG_ARCH_HAVE_SDIO_PREFLIGHT
       ret = SDIO_DMAPREFLIGHT(priv->dev, buffer, priv->blocksize);
       if (ret != OK)
+      {
+        struct dma_align_manager_init_s dma_align_mgr_init_cfg;
+        memset(&dma_align_mgr_init_cfg,0,sizeof(dma_align_mgr_init_cfg));
+        dma_align_mgr_init_cfg.dev=(void *)priv->dev;
+        dma_align_mgr_init_cfg.allocator=dma_align_allocator;
+        dma_align_mgr_init_cfg.original_buffer=(uint8_t *)buffer;
+        dma_align_mgr_init_cfg.original_buffer_len=priv->blocksize;
+        ret=dma_align_manager_init(&dma_align_manager,&dma_align_mgr_init_cfg);
+        if(ret!=OK)
         {
           return ret;
         }
+        aligned_buffer=dma_align_manager_get_align_buffer(&dma_align_manager);
+        if(dma_align_manager.allocated)
+        {
+          memcpy(aligned_buffer,buffer, priv->blocksize);
+        }
+      }
+      
+    #endif 
+      
     }
 #endif
 
@@ -3331,7 +3482,7 @@ static int mmcsd_general_cmd_write(FAR struct mmcsd_state_s *priv,
   if (ret != OK)
     {
       ferr("ERROR: Card not ready: %d\n", ret);
-      return ret;
+      goto __exit;
     }
 
   /* Select the block size for the card */
@@ -3340,7 +3491,7 @@ static int mmcsd_general_cmd_write(FAR struct mmcsd_state_s *priv,
   if (ret != OK)
     {
       ferr("ERROR: mmcsd_setblocklen failed: %d\n", ret);
-      return ret;
+      goto __exit;
     }
 
   /* If Controller does not need DMA setup before the write then send CMD56
@@ -3356,7 +3507,7 @@ static int mmcsd_general_cmd_write(FAR struct mmcsd_state_s *priv,
       if (ret != OK)
         {
           ferr("ERROR: mmcsd_recv_r1 for CMD56 failed: %d\n", ret);
-          return ret;
+          goto __exit;
         }
     }
 
@@ -3370,12 +3521,12 @@ static int mmcsd_general_cmd_write(FAR struct mmcsd_state_s *priv,
 #ifdef CONFIG_SDIO_DMA
   if ((priv->caps & SDIO_CAPS_DMASUPPORTED) != 0)
     {
-      ret = SDIO_DMASENDSETUP(priv->dev, buffer, priv->blocksize);
+      ret = SDIO_DMASENDSETUP(priv->dev, aligned_buffer, priv->blocksize);
       if (ret != OK)
         {
           finfo("SDIO_DMASENDSETUP: error %d\n", ret);
           SDIO_CANCEL(priv->dev);
-          return ret;
+          goto __exit;
         }
     }
   else
@@ -3396,7 +3547,7 @@ static int mmcsd_general_cmd_write(FAR struct mmcsd_state_s *priv,
         {
           ferr("ERROR: mmcsd_recv_r1 for CMD56 failed: %d\n", ret);
           SDIO_CANCEL(priv->dev);
-          return ret;
+          goto __exit;
         }
     }
 
@@ -3406,7 +3557,7 @@ static int mmcsd_general_cmd_write(FAR struct mmcsd_state_s *priv,
   if (ret != OK)
     {
       ferr("ERROR: CMD56 transfer failed: %d\n", ret);
-      return ret;
+      goto __exit;
     }
 
   /* Flag that a write transfer is pending that we will have to check for
@@ -3422,9 +3573,17 @@ static int mmcsd_general_cmd_write(FAR struct mmcsd_state_s *priv,
                   MMCSD_BLOCK_WDATADELAY);
 #endif
 
-  /* On success, return OK */
-
-  return OK;
+    /* On success, return OK */
+    ret=OK;
+  
+__exit:
+#ifdef CONFIG_SDIO_DMA
+    if ((priv->caps & SDIO_CAPS_DMASUPPORTED) != 0)
+    {
+      dma_align_manager_finish(&dma_align_manager);
+    }
+#endif
+  return ret;
 }
 
 /****************************************************************************
@@ -3439,6 +3598,13 @@ static int mmcsd_general_cmd_read(FAR struct mmcsd_state_s *priv,
                                   FAR uint8_t *buffer, off_t startblock)
 {
   int ret;
+#ifdef CONFIG_SDIO_DMA
+  struct dma_align_manager_s dma_align_manager;
+  memset(&dma_align_manager,0,sizeof(dma_align_manager));
+  uint8_t *aligned_buffer=(uint8_t *)buffer;
+  struct dma_align_allocator_s *dma_align_allocator=SDIO_DMA_ALLOCATOR(priv->dev);
+#endif
+
 
   DEBUGASSERT(priv != NULL && buffer != NULL);
 
@@ -3450,18 +3616,29 @@ static int mmcsd_general_cmd_read(FAR struct mmcsd_state_s *priv,
       return -EPERM;
     }
 
-#if defined(CONFIG_SDIO_DMA) && defined(CONFIG_ARCH_HAVE_SDIO_PREFLIGHT)
-  /* If we think we are going to perform a DMA transfer, make sure that we
-   * will be able to before we commit the card to the operation.
-   */
-
+#if defined(CONFIG_SDIO_DMA) 
+    
   if ((priv->caps & SDIO_CAPS_DMASUPPORTED) != 0)
     {
+      #ifdef CONFIG_ARCH_HAVE_SDIO_PREFLIGHT
       ret = SDIO_DMAPREFLIGHT(priv->dev, buffer, priv->blocksize);
       if (ret != OK)
+      {
+        struct dma_align_manager_init_s dma_align_mgr_init_cfg;
+        memset(&dma_align_mgr_init_cfg,0,sizeof(dma_align_mgr_init_cfg));
+        dma_align_mgr_init_cfg.dev=(void *)priv->dev;
+        dma_align_mgr_init_cfg.allocator=dma_align_allocator;
+        dma_align_mgr_init_cfg.original_buffer=(uint8_t *)buffer;
+        dma_align_mgr_init_cfg.original_buffer_len=priv->blocksize;
+        ret=dma_align_manager_init(&dma_align_manager,&dma_align_mgr_init_cfg);
+        if(ret!=OK)
         {
           return ret;
         }
+        aligned_buffer=dma_align_manager_get_align_buffer(&dma_align_manager);
+      }
+      
+      #endif 
     }
 #endif
 
@@ -3476,7 +3653,7 @@ static int mmcsd_general_cmd_read(FAR struct mmcsd_state_s *priv,
   if (ret != OK)
     {
       ferr("ERROR: Card not ready: %d\n", ret);
-      return ret;
+      goto __exit;
     }
 
   /* Select the block size for the card */
@@ -3485,7 +3662,7 @@ static int mmcsd_general_cmd_read(FAR struct mmcsd_state_s *priv,
   if (ret != OK)
     {
       ferr("ERROR: mmcsd_setblocklen failed: %d\n", ret);
-      return ret;
+      goto __exit;
     }
 
   /* Configure SDIO controller hardware for the read transfer */
@@ -3498,12 +3675,12 @@ static int mmcsd_general_cmd_read(FAR struct mmcsd_state_s *priv,
 #ifdef CONFIG_SDIO_DMA
   if ((priv->caps & SDIO_CAPS_DMASUPPORTED) != 0)
     {
-      ret = SDIO_DMARECVSETUP(priv->dev, buffer, priv->blocksize);
+      ret = SDIO_DMARECVSETUP(priv->dev, aligned_buffer, priv->blocksize);
       if (ret != OK)
         {
           finfo("SDIO_DMARECVSETUP: error %d\n", ret);
           SDIO_CANCEL(priv->dev);
-          return ret;
+          goto __exit;
         }
     }
   else
@@ -3522,7 +3699,7 @@ static int mmcsd_general_cmd_read(FAR struct mmcsd_state_s *priv,
     {
       ferr("ERROR: mmcsd_recv_r1 for CMD56 failed: %d\n", ret);
       SDIO_CANCEL(priv->dev);
-      return ret;
+      goto __exit;
     }
 
   /* Then wait for the data transfer to complete */
@@ -3531,10 +3708,30 @@ static int mmcsd_general_cmd_read(FAR struct mmcsd_state_s *priv,
   if (ret != OK)
     {
       ferr("ERROR: CMD56 transfer failed: %d\n", ret);
-      return ret;
+      goto __exit;
     }
 
   /* Return value:  OK */
+  ret=OK;
+
+#ifdef CONFIG_SDIO_DMA
+    if ((priv->caps & SDIO_CAPS_DMASUPPORTED) != 0)
+    {
+      if(dma_align_manager.allocated)
+      {
+        memcpy(buffer,aligned_buffer,priv->blocksize);
+      }
+    } 
+#endif
+
+__exit:
+
+#ifdef CONFIG_SDIO_DMA
+    if ((priv->caps & SDIO_CAPS_DMASUPPORTED) != 0)
+    {
+      dma_align_manager_finish(&dma_align_manager);
+    }
+#endif
 
   return OK;
 }

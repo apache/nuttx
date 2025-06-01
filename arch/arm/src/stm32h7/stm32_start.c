@@ -38,6 +38,7 @@
 #include "arm_internal.h"
 #include "nvic.h"
 #include "mpu.h"
+#include "irq/irq.h"
 #ifdef CONFIG_ARM_MPU
 #  include "stm32_mpuinit.h"
 #endif
@@ -184,7 +185,8 @@ void __start(void)
 {
   const uint32_t *src;
   uint32_t *dest;
-
+  cpsid();
+	
 #ifdef CONFIG_ARMV7M_STACKCHECK
   /* Set the stack limit before we attempt to call any functions */
 
@@ -239,7 +241,7 @@ void __start(void)
       *dest++ = *src++;
     }
 #endif
-
+	irq_initialize();
 #ifdef CONFIG_ARMV7M_STACKCHECK
   arm_stack_check_init();
 #endif

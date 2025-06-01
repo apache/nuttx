@@ -346,7 +346,6 @@ static const struct fdcan_config_s stm32_fdcan1_config =
 #endif
 
 #ifdef CONFIG_STM32H7_FDCAN3
-#  error "FDCAN3 support not yet added to stm32h7x3xx header files (pinmap, irq, etc.)"
 static const struct fdcan_config_s stm32_fdcan2_config =
 {
   .tx_pin      = GPIO_CAN3_TX,
@@ -2475,7 +2474,7 @@ int stm32_fdcansockinitialize(int intf)
 
 #ifdef CONFIG_STM32H7_FDCAN3
     case 2:
-      priv             = &g_fdcan2
+      priv             = &g_fdcan2;
       memset(priv, 0, sizeof(struct fdcan_driver_s));
       priv->base       = STM32_FDCAN3_BASE;
       priv->iface_idx  = 2;
