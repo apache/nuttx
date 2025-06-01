@@ -230,3 +230,8 @@ of type uint16_t, which corresponds to the HIGH_THRESH register value.
 
 This command changes the LOW_THRESH register of the ADS1115. The argument passed should be 
 of type uint16_t, which corresponds to the LOW_THRESH register value.
+
+.. c:macro:: ANIOC_ADS1115_READ_CHANNEL
+
+This command reads a value from a specific channel of the ADS1115. The argument passed should
+be a pointer to a struct adc_msg_s.
