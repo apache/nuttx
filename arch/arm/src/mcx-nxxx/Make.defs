@@ -34,3 +34,7 @@ endif
 ifeq ($(CONFIG_NXXX_GPIO_IRQ),y)
   CHIP_CSRCS += nxxx_gpioirq.c
 endif
+
+ifeq ($(CONFIG_NXXX_LPI2C),y)
+  CHIP_CSRCS += nxxx_lpi2c.c
+endif

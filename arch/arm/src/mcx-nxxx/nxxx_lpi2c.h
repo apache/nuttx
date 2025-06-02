@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/mcx-nxxx/frdm-mcxn236/include/board.h
+ * arch/arm/src/mcx-nxxx/nxxx_lpi2c.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,67 +20,54 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_MCX_NXXX_FRDM_MCXN236_INCLUDE_BOARD_H
-#define __BOARDS_ARM_MCX_NXXX_FRDM_MCXN236_INCLUDE_BOARD_H
+#ifndef __ARCH_ARM_SRC_MCX_NXXX_NXXX_LPI2C_H
+#define __ARCH_ARM_SRC_MCX_NXXX_NXXX_LPI2C_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define PORT_LPUART4_RX PORT_CFG(1, 8, PORT_PCR_MUX_ALT2 | PORT_PCR_IBE)
-#define PORT_LPUART4_TX PORT_CFG(1, 9, PORT_PCR_MUX_ALT2 | PORT_PCR_IBE)
-
-#define PORT_LPI2C0_SCL PORT_CFG(4, 1, PORT_PCR_MUX_ALT2 | PORT_PCR_IBE)
-#define PORT_LPI2C0_SDA PORT_CFG(4, 0, PORT_PCR_MUX_ALT2 | PORT_PCR_IBE)
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
+#include <nuttx/i2c/i2c_master.h>
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxxx_boardinitialize
+ * Name: nxxx_i2cbus_initialize
  *
  * Description:
- *   All architectures must provide the following entry point.  This
- *   entry point is called in the initialization phase -- after
- *   imx_memory_initialize and after all memory has been configured and
- *   mapped but before any devices have been initialized.
+ *   Initialize the selected I2C port. And return a unique instance of struct
+ *   struct i2c_master_s.  This function may be called to obtain multiple
+ *   instances of the interface, each of which may be set up with a
+ *   different frequency and slave address.
  *
  * Input Parameters:
- *   None
+ *   Port number (for hardware that has multiple I2C interfaces)
  *
  * Returned Value:
- *   None
+ *   Valid I2C device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 
-void nxxx_boardinitialize(void);
+struct i2c_master_s *nxxx_i2cbus_initialize(int port);
 
-#undef EXTERN
-#if defined(__cplusplus)
-}
-#endif
+/****************************************************************************
+ * Name: nxxx_i2cbus_uninitialize
+ *
+ * Description:
+ *   De-initialize the selected I2C port, and power down the device.
+ *
+ * Input Parameters:
+ *   Device structure as returned by the nxxx_i2cbus_initialize()
+ *
+ * Returned Value:
+ *   OK on success, ERROR when internal reference count mismatch or dev
+ *   points to invalid hardware device.
+ *
+ ****************************************************************************/
 
-#endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_MCX_NXXX_FRDM_MCXN236_INCLUDE_BOARD_H */
+int nxxx_i2cbus_uninitialize(struct i2c_master_s *dev);
+
+#endif /* __ARCH_ARM_SRC_MCX_NXXX_LPI2C_H */
