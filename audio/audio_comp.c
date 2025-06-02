@@ -955,7 +955,7 @@ FAR struct audio_lowerhalf_s *audio_comp_initialize(FAR const char *name,
 
   if (i == 0)
     {
-      return -EINVAL;
+      return NULL;
     }
 
   priv = kmm_zalloc(sizeof(struct audio_comp_priv_s) +
