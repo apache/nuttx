@@ -263,12 +263,6 @@ int nx_dup3_from_tcb(FAR struct tcb_s *tcb, int fd1, int fd2, int flags)
   FAR struct filelist *list;
   FAR struct file *filep1;
   FAR struct file *filep;
-#ifdef CONFIG_FDCHECK
-  uint8_t f_tag_fdcheck;
-#endif
-#ifdef CONFIG_FDSAN
-  uint64_t f_tag_fdsan;
-#endif
   bool new = false;
   int count;
   int ret;
@@ -313,14 +307,6 @@ int nx_dup3_from_tcb(FAR struct tcb_s *tcb, int fd1, int fd2, int flags)
                               fd2 % CONFIG_NFILE_DESCRIPTORS_PER_BLOCK,
                               &new);
 
-#ifdef CONFIG_FDSAN
-  f_tag_fdsan = filep->f_tag_fdsan;
-#endif
-
-#ifdef CONFIG_FDCHECK
-  f_tag_fdcheck = filep->f_tag_fdcheck;
-#endif
-
   /* Perform the dup3 operation */
 
   ret = file_dup3(filep1, filep, flags);
@@ -335,14 +321,6 @@ int nx_dup3_from_tcb(FAR struct tcb_s *tcb, int fd1, int fd2, int flags)
 
       return ret;
     }
-
-#ifdef CONFIG_FDSAN
-  filep->f_tag_fdsan = f_tag_fdsan;
-#endif
-
-#ifdef CONFIG_FDCHECK
-  filep->f_tag_fdcheck = f_tag_fdcheck;
-#endif
 
 #ifdef CONFIG_FDCHECK
   return fdcheck_protect(fd2);
