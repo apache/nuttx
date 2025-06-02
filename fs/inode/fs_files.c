@@ -72,7 +72,6 @@ static FAR struct file *files_fget_by_index(FAR struct filelist *list,
   filep = &list->fl_files[l1][l2];
   spin_unlock_irqrestore_notrace(&list->fl_lock, flags);
 
-#ifdef CONFIG_FS_REFCOUNT
   if (filep->f_inode != NULL)
     {
       /* When the reference count is zero but the inode has not yet been
@@ -99,13 +98,6 @@ static FAR struct file *files_fget_by_index(FAR struct filelist *list,
       atomic_fetch_add(&filep->f_refs, 1);
       *new = true;
     }
-
-#else
-  if (filep->f_inode == NULL && new == NULL)
-    {
-      filep = NULL;
-    }
-#endif
 
   return filep;
 }
@@ -586,9 +578,7 @@ int file_allocate_from_tcb(FAR struct tcb_s *tcb, FAR struct inode *inode,
               filep->f_pos         = pos;
               filep->f_inode       = inode;
               filep->f_priv        = priv;
-#ifdef CONFIG_FS_REFCOUNT
               atomic_set(&filep->f_refs, 1);
-#endif
 #ifdef CONFIG_FDSAN
               filep->f_tag_fdsan   = 0;
 #endif
@@ -812,7 +802,6 @@ int fs_getfilep(int fd, FAR struct file **filep)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_FS_REFCOUNT
 void fs_reffilep(FAR struct file *filep)
 {
   /* This interface is used to increase the reference count of filep */
@@ -852,7 +841,6 @@ int fs_putfilep(FAR struct file *filep)
 
   return ret;
 }
-#endif
 
 /****************************************************************************
  * Name: nx_dup2_from_tcb
@@ -928,7 +916,6 @@ int nx_close_from_tcb(FAR struct tcb_s *tcb, int fd)
       return -EBADF;
     }
 
-#ifdef CONFIG_FS_REFCOUNT
 
   /* files_fget will increase the reference count, there call fs_putfilep
    * reduce reference count.
@@ -939,9 +926,6 @@ int nx_close_from_tcb(FAR struct tcb_s *tcb, int fd)
   /* Undo the last reference count from file_allocate_from_tcb */
 
   return fs_putfilep(filep);
-#else
-  return file_close(filep);
-#endif
 }
 
 /****************************************************************************
