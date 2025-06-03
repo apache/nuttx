@@ -202,10 +202,13 @@ driver. You can find LVGL here::
 
 This configuration uses the LVGL demonstration at `apps/examples/lvgldemo`.
 
-mmcsdspi
---------
+sdmmc_spi
+---------
 
 This configuration is used to mount a FAT/FAT32 SD Card into the OS' filesystem.
+
+The SD slot number, SPI port number and minor number can be modified in ``Application Configuration → NSH Library``.
+
 To access the card's files, execute the following commands::
 
     nsh> mount -t vfat /dev/mmcsd0 /mnt
