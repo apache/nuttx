@@ -711,16 +711,13 @@ static void igc_link_work(FAR void *arg)
   if (tmp & IGC_STATUS_LU)
     {
       ninfo("Link up, status = 0x%x\n", tmp);
+
       netdev_lower_carrier_on(&priv->dev);
-
-      /* Clear Tx and RX rings */
-
-      igc_txclean(priv);
-      igc_rxclean(priv);
     }
   else
     {
       ninfo("Link down\n");
+
       netdev_lower_carrier_off(&priv->dev);
     }
 }
