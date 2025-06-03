@@ -37,4 +37,8 @@ if(CONFIG_NXXX_GPIO_IRQ)
   list(APPEND SRCS nxxx_gpioirq.c)
 endif()
 
+if(CONFIG_NXXX_LPI2C)
+  list(APPEND SRCS nxxx_lpi2c.c)
+endif()
+
 target_sources(arch PRIVATE ${SRCS})
