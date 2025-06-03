@@ -33,7 +33,7 @@
 
 #include <netinet/in.h>
 
-#include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 
@@ -59,6 +59,7 @@
 /* List of tasks waiting for Neighbor Discover events */
 
 static struct icmpv6_rnotify_s *g_icmpv6_rwaiters;
+static spinlock_t g_icmpv6_rnotify_lock = SP_UNLOCKED;
 
 /****************************************************************************
  * Public Functions
@@ -183,10 +184,10 @@ void icmpv6_rwait_setup(FAR struct net_driver_s *dev,
 
   /* Add the wait structure to the list with interrupts disabled */
 
-  flags             = enter_critical_section();
+  flags             = spin_lock_irqsave(&g_icmpv6_rnotify_lock);
   notify->rn_flink  = g_icmpv6_rwaiters;
-  g_icmpv6_rwaiters  = notify;
-  leave_critical_section(flags);
+  g_icmpv6_rwaiters = notify;
+  spin_unlock_irqrestore(&g_icmpv6_rnotify_lock, flags);
 }
 
 /****************************************************************************
@@ -216,7 +217,7 @@ int icmpv6_rwait_cancel(FAR struct icmpv6_rnotify_s *notify)
    * head of the list).
    */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_icmpv6_rnotify_lock);
   for (prev = NULL, curr = g_icmpv6_rwaiters;
        curr && curr != notify;
        prev = curr, curr = curr->rn_flink)
@@ -238,7 +239,7 @@ int icmpv6_rwait_cancel(FAR struct icmpv6_rnotify_s *notify)
       ret = OK;
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_icmpv6_rnotify_lock, flags);
   nxsem_destroy(&notify->rn_sem);
   return ret;
 }
@@ -296,8 +297,11 @@ int icmpv6_rwait(FAR struct icmpv6_rnotify_s *notify, unsigned int timeout)
 void icmpv6_rnotify(FAR struct net_driver_s *dev, int result)
 {
   FAR struct icmpv6_rnotify_s *curr;
+  irqstate_t flags;
 
   ninfo("Notified\n");
+
+  flags = spin_lock_irqsave_nopreempt(&g_icmpv6_rnotify_lock);
 
   /* Find an entry with the matching device name in the list of waiters */
 
@@ -318,6 +322,8 @@ void icmpv6_rnotify(FAR struct net_driver_s *dev, int result)
           break;
         }
     }
+
+  spin_unlock_irqrestore_nopreempt(&g_icmpv6_rnotify_lock, flags);
 }
 
 #endif /* CONFIG_NET_ICMPv6_AUTOCONF */

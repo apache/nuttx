@@ -32,7 +32,7 @@
 
 #include <netinet/in.h>
 
-#include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/net/net.h>
 
 #include "arp/arp.h"
@@ -46,6 +46,7 @@
 /* List of tasks waiting for ARP events */
 
 static FAR struct arp_notify_s *g_arp_waiters;
+static spinlock_t g_arp_notify_lock = SP_UNLOCKED;
 
 /****************************************************************************
  * Public Functions
@@ -78,10 +79,10 @@ void arp_wait_setup(in_addr_t ipaddr, FAR struct arp_notify_s *notify)
 
   /* Add the wait structure to the list with interrupts disabled */
 
-  flags             = enter_critical_section();
-  notify->nt_flink  = g_arp_waiters;
-  g_arp_waiters     = notify;
-  leave_critical_section(flags);
+  flags            = spin_lock_irqsave(&g_arp_notify_lock);
+  notify->nt_flink = g_arp_waiters;
+  g_arp_waiters    = notify;
+  spin_unlock_irqrestore(&g_arp_notify_lock, flags);
 }
 
 /****************************************************************************
@@ -108,7 +109,7 @@ int arp_wait_cancel(FAR struct arp_notify_s *notify)
    * head of the list).
    */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_arp_notify_lock);
   for (prev = NULL, curr = g_arp_waiters;
        curr && curr != notify;
        prev = curr, curr = curr->nt_flink)
@@ -130,7 +131,7 @@ int arp_wait_cancel(FAR struct arp_notify_s *notify)
       ret = OK;
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_arp_notify_lock, flags);
   nxsem_destroy(&notify->nt_sem);
   return ret;
 }
@@ -187,7 +188,7 @@ void arp_notify(in_addr_t ipaddr)
   FAR struct arp_notify_s *curr;
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave_nopreempt(&g_arp_notify_lock);
 
   /* Find an entry with the matching IP address in the list of waiters */
 
@@ -208,7 +209,7 @@ void arp_notify(in_addr_t ipaddr)
         }
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore_nopreempt(&g_arp_notify_lock, flags);
 }
 
 #endif /* CONFIG_NET_ARP_SEND */
