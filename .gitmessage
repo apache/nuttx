@@ -1,0 +1,20 @@
+# EXAMPLE: net/can: Add g_ prefix to can_dlc_to_len and len_to_can_dlc.
+maintopic/subtopic: Short, explanatory context about this commit.
+
+Here you should write a description on what's changed, how, and why. You
+can use several lines, short sentences or even bullet points. You can
+even mention a specific issue/pull request using `#` followed by the
+numerical ID. For more pointers, please see `nuttx/CONTRIBUTING.md`.
+
+# Don't forget to run `git commit` with the `-s` option to sign-off your
+# commit!
+
+# Some questions to help you write a clear commit message
+# - What is the purpose of change?
+# - Why it is necessary
+# - What it does / adds / fixes
+# - How things are added / changed / fixed / updated
+# - What is the impact (build / runtime / api / what area)
+# - How it was tested (build host, compiler, target, logs)
+# - References (i.e. nuttx and nuttx-apps changes).
+# - Dependencies (if change depends on another change).
