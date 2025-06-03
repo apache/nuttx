@@ -688,7 +688,7 @@ static int nau7802_control(FAR struct sensor_lowerhalf_s *lower,
 
     default:
       err = -EINVAL;
-      snerr("Unknown command for NAU7802: lu\n", cmd);
+      snerr("Unknown command for NAU7802: %d\n", cmd);
       break;
     }
 
