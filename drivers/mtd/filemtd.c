@@ -42,7 +42,7 @@
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/fs/loopmtd.h>
 #include <nuttx/mtd/mtd.h>
-#ifdef CONFIG_MTD_CONFIG
+#ifndef CONFIG_MTD_CONFIG_NONE
 #  include <nuttx/mtd/configdata.h>
 #endif
 
@@ -554,7 +554,7 @@ static int filemtd_ioctl(FAR struct mtd_dev_s *dev, int cmd,
  ****************************************************************************/
 
 #ifdef CONFIG_MTD_LOOP
-#  ifdef CONFIG_MTD_CONFIG
+#  ifndef CONFIG_MTD_CONFIG_NONE
 static int mtd_loop_setup(FAR const char *devname, FAR const char *filename,
                           int sectsize, int erasesize, off_t offset,
                           int configdata)
@@ -572,7 +572,7 @@ static int mtd_loop_setup(FAR const char *devname, FAR const char *filename,
       return -ENOENT;
     }
 
-#  ifdef CONFIG_MTD_CONFIG
+#  ifndef CONFIG_MTD_CONFIG_NONE
   if (configdata)
     {
       if (configdata == 2)
@@ -647,7 +647,7 @@ static int mtd_loop_teardown(FAR const char *devname)
 
   filemtd_teardown(&dev->mtd);
 
-#  ifdef CONFIG_MTD_CONFIG
+#  ifndef CONFIG_MTD_CONFIG_NONE
   if (inode->i_private)
     {
       mtdconfig_unregister_by_path(devname);
@@ -715,7 +715,7 @@ static int mtd_loop_ioctl(FAR struct file *filep, int cmd,
           }
         else
           {
-#  ifdef CONFIG_MTD_CONFIG
+#  ifndef CONFIG_MTD_CONFIG_NONE
             ret = mtd_loop_setup(setup->devname, setup->filename,
                                  setup->sectsize, setup->erasesize,
                                  setup->offset, setup->configdata);
