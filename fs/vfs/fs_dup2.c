@@ -35,6 +35,7 @@
 #include <fcntl.h>
 
 #include "inode/inode.h"
+#include "sched/sched.h"
 
 /****************************************************************************
  * Public Functions
@@ -196,4 +197,50 @@ int file_dup3(FAR struct file *filep1, FAR struct file *filep2, int flags)
 int file_dup2(FAR struct file *filep1, FAR struct file *filep2)
 {
   return file_dup3(filep1, filep2, 0);
+}
+
+/****************************************************************************
+ * Name: nx_dup2
+ *
+ * Description:
+ *   nx_dup2() is similar to the standard 'dup2' interface except that is
+ *   not a cancellation point and it does not modify the errno variable.
+ *
+ *   nx_dup2() is an internal NuttX interface and should not be called from
+ *   applications.
+ *
+ *   Clone a file descriptor to a specific descriptor number.
+ *
+ * Returned Value:
+ *   fd2 is returned on success; a negated errno value is return on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+int nx_dup2(int fd1, int fd2)
+{
+  return nx_dup2_from_tcb(this_task(), fd1, fd2);
+}
+
+/****************************************************************************
+ * Name: dup2
+ *
+ * Description:
+ *   Clone a file descriptor or socket descriptor to a specific descriptor
+ *   number
+ *
+ ****************************************************************************/
+
+int dup2(int fd1, int fd2)
+{
+  int ret;
+
+  ret = nx_dup2(fd1, fd2);
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      ret = ERROR;
+    }
+
+  return ret;
 }
