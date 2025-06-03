@@ -41,9 +41,11 @@ Help message::
 
   Options:
   -h
-  -c spell check with codespell(install with: pip install codespell)
+  -c spell check with codespell (install with: pip install codespell)
+  -u encoding check with cvt2utf (install with: pip install cvt2utf)
   -r range check only (coupled with -p or -g)
   -p <patch list> (default)
+  -m Change-Id check in commit message (coupled with -g)
   -g <commit list>
   -f <file list>
   -  read standard input mainly used by git pre-commit hook as below:
