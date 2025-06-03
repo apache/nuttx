@@ -34,7 +34,7 @@ CSRCS += lib_strsep.c lib_strerrorr.c lib_explicit_bzero.c lib_strsignal.c
 CSRCS += lib_index.c lib_rindex.c lib_timingsafe_bcmp.c lib_strverscmp.c
 CSRCS += lib_mempcpy.c lib_rawmemchr.c
 
-CSRCS += lib_memmove.c lib_memset.c
+CSRCS += lib_memmove.c
 CSRCS += lib_strlcat.c
 CSRCS += lib_strlcpy.c lib_strnlen.c
 
@@ -54,12 +54,12 @@ ifeq ($(CONFIG_LIBC_NEWLIB_OPTSPEED),y)
 CSRCS += lib_bsdmemccpy.c lib_bsdmemcmp.c lib_bsdmemrchr.c lib_bsdstpncpy.c
 CSRCS += lib_bsdstrchr.c lib_bsdstrcmp.c lib_bsdstrlen.c lib_bsdstrncpy.c
 CSRCS += lib_bsdmemchr.c  lib_bsdstpcpy.c lib_bsdstrcat.c lib_bsdstrchrnul.c
-CSRCS += lib_bsdstrcpy.c lib_bsdstrncmp.c lib_bsdstrrchr.c
+CSRCS += lib_bsdstrcpy.c lib_bsdstrncmp.c lib_bsdstrrchr.c lib_memset.c
 else
 CSRCS += lib_memccpy.c lib_memcmp.c lib_memrchr.c lib_stpncpy.c
 CSRCS += lib_strchr.c lib_strcmp.c lib_strlen.c lib_strncpy.c
 CSRCS += lib_memchr.c lib_stpcpy.c lib_strcat.c lib_strchrnul.c
-CSRCS += lib_strcpy.c lib_strncmp.c lib_strrchr.c
+CSRCS += lib_strcpy.c lib_strncmp.c lib_strrchr.c lib_memset.c
 endif
 
 # Add the string directory to the build
