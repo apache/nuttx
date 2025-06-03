@@ -438,6 +438,9 @@ static void igc_dump_mem(FAR struct igc_driver_s *priv, FAR const char *msg)
  * Returned Value:
  *   None
  *
+ * Assumption:
+ *   This function can be called only after card reset and when TX is disabled
+ *
  *****************************************************************************/
 
 static void igc_txclean(FAR struct igc_driver_s *priv)
@@ -478,6 +481,9 @@ static void igc_txclean(FAR struct igc_driver_s *priv)
  * Returned Value:
  *   None
  *
+ * Assumption:
+ *   This function can be called only after card reset and when RX is disabled
+ *
  *****************************************************************************/
 
 static void igc_rxclean(FAR struct igc_driver_s *priv)
@@ -485,7 +491,7 @@ static void igc_rxclean(FAR struct igc_driver_s *priv)
   priv->rx_now = 0;
 
   igc_putreg_mem(priv, IGC_RDH0, 0);
-  igc_putreg_mem(priv, IGC_RDT0, 0);
+  igc_putreg_mem(priv, IGC_RDT0, IGC_RX_DESC - 1);
 }
 
 /*****************************************************************************
@@ -1061,6 +1067,12 @@ static void igc_disable(FAR struct igc_driver_s *priv)
 
   igc_putreg_mem(priv, IGC_RCTL, 0);
 
+  /* We have to reset device, otherwise writing to RDH and THD corrupts
+   * the device state.
+   */
+
+  igc_putreg_mem(priv, IGC_CTRL, IGC_CTRL_DEVRST);
+
   /* Reset Tx tail */
 
   igc_txclean(priv);
@@ -1213,10 +1225,6 @@ static void igc_enable(FAR struct igc_driver_s *priv)
   /* Reset RX tail - after queue is enabled */
 
   igc_rxclean(priv);
-
-  /* All RX descriptors available */
-
-  igc_putreg_mem(priv, IGC_RDT0, IGC_RX_DESC);
 
 #ifdef CONFIG_DEBUG_NET_INFO
   /* Dump memory */
