@@ -415,7 +415,7 @@ RMT          Yes
 RNG          Yes
 RSA          No
 RTC          Yes
-SD/MMC       No
+SD/MMC       Yes    SPI based SD card driver
 SDIO         No
 SHA          Yes
 SPI          Yes

@@ -463,11 +463,14 @@ the ``buttons`` application and pressing on any of the available board buttons::
     To avoid any conflicts, it's not registered in the buttons subsystem and, thus,
     is unable to be used.
 
-mmcsdspi
---------
+sdmmc_spi
+---------
 
 This configuration is used to mount a FAT/FAT32 SD Card into the OS' filesystem.
 For the ESP32-LyraT, make sure the DIP switches 1 and 2 are turned to the ON position.
+
+The SD slot number, SPI port number and minor number can be modified in ``Application Configuration → NSH Library``.
+
 To access the card's files, execute the following commands::
 
     nsh> mount -t vfat /dev/mmcsd0 /mnt
