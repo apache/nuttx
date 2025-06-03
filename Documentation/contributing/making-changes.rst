@@ -207,6 +207,19 @@ squash before submitting the Pull Request:
 
    It is important to include an informative commit title and a commit message.
 
+   .. note::
+
+      You can setup the Git configuration local to your cloned copy of NuttX to
+      use the provided commit template every time you commit.
+
+      .. code:: console
+
+         $ cd nuttx
+         $ git config commit.template .gitmessage
+
+      This will pre-populate the commit message in your editor with the
+      template, which you can edit as a starting point.
+
    In the commit title please include the subsystem/area related to your contribution,
    followed by a descriptive message. Some examples:
 
