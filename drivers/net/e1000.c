@@ -1168,14 +1168,6 @@ static void e1000_disable(FAR struct e1000_driver_s *priv)
 {
   int i = 0;
 
-  /* Reset Tx tail */
-
-  e1000_txclean(priv);
-
-  /* Reset Rx tail */
-
-  e1000_rxclean(priv);
-
   /* Disable interrupts */
 
   e1000_putreg_mem(priv, E1000_IMC, priv->irqs);
@@ -1188,6 +1180,14 @@ static void e1000_disable(FAR struct e1000_driver_s *priv)
   /* Disable Receiver */
 
   e1000_putreg_mem(priv, E1000_RCTL, 0);
+
+  /* Reset Tx tail */
+
+  e1000_txclean(priv);
+
+  /* Reset Rx tail */
+
+  e1000_rxclean(priv);
 
   /* Free RX packets */
 

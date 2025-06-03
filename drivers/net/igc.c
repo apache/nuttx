@@ -1048,14 +1048,6 @@ static void igc_disable(FAR struct igc_driver_s *priv)
 {
   int i = 0;
 
-  /* Reset Tx tail */
-
-  igc_txclean(priv);
-
-  /* Reset Rx tail */
-
-  igc_rxclean(priv);
-
   /* Disable interrupts */
 
   igc_putreg_mem(priv, IGC_EIMC, IGC_MSIX_EIMS);
@@ -1069,6 +1061,14 @@ static void igc_disable(FAR struct igc_driver_s *priv)
   /* Disable Receiver */
 
   igc_putreg_mem(priv, IGC_RCTL, 0);
+
+  /* Reset Tx tail */
+
+  igc_txclean(priv);
+
+  /* Reset Rx tail */
+
+  igc_rxclean(priv);
 
   /* Free RX packets */
 
