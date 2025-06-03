@@ -757,15 +757,11 @@ static void e1000_link_work(FAR void *arg)
       ninfo("Link up, status = 0x%x\n", tmp);
 
       netdev_lower_carrier_on(&priv->dev);
-
-      /* Clear Tx and RX rings */
-
-      e1000_txclean(priv);
-      e1000_rxclean(priv);
     }
   else
     {
       ninfo("Link down\n");
+
       netdev_lower_carrier_off(&priv->dev);
     }
 }
