@@ -186,7 +186,7 @@ static int mtd_erase(FAR struct mtd_dev_s *dev,
   size_t nsectors;
   int ret;
 
-  finfo("block: %08zx nsectors: %zu\n",
+  finfo("block: %08jx nsectors: %zu\n",
         (intmax_t)block, nsectors);
 
   /* Convert to logical sectors and sector numbers */
@@ -295,7 +295,8 @@ static int mtd_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
               geo->neraseblocks = priv->rwb.nblocks / priv->spb;
               ret               = OK;
 
-              finfo("blocksize: %d erasesize: %d neraseblocks: %d\n",
+              finfo("blocksize: %" PRIu32 " erasesize: %" PRIu32
+                    "neraseblocks: %" PRIu32 "\n",
                     geo->blocksize, geo->erasesize, geo->neraseblocks);
             }
         }
