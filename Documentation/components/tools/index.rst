@@ -7,6 +7,11 @@ This page discusses the contents of the NuttX tools/ directory.
 The tools/ directory contains miscellaneous scripts and host C programs
 that are necessary parts of the NuttX build system.
 
+.. toctree::
+   :maxdepth: 2
+
+   parsetrace
+
 cmpconfig.c
 -----------
 
@@ -1224,6 +1229,11 @@ Binaries for both Windows and Linux are available at:
     https://sourceforge.net/projects/uncrustify/files/
 
 See also indent.sh and nxstyle.c
+
+parsetrace.py
+-------------
+
+``parsetrace.py`` is a Python script for parsing and converting NuttX trace logs. See :doc:`parsetrace` for details.
 
 zds
 ---
