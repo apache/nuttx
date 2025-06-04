@@ -65,10 +65,6 @@ if(CONFIG_MM_PGALLOC)
   list(APPEND SRCS intel64_pgalloc.c)
 endif()
 
-if(CONFIG_ARCH_HAVE_TESTSET)
-  list(APPEND SRCS intel64_testset.S)
-endif()
-
 if(CONFIG_SMP)
   list(APPEND SRCS intel64_cpuidlestack.c intel64_smpcall.c intel64_cpustart.c)
 endif()

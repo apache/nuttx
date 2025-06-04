@@ -95,5 +95,25 @@ typedef uintptr_t spinlock_t;
 
 /* See prototype in nuttx/include/nuttx/spinlock.h */
 
+#if defined(CONFIG_ARCH_HAVE_TESTSET)
+static inline_function spinlock_t up_testset(volatile spinlock_t *lock)
+{
+  /* Perform the 32-bit CAS operation */
+
+  unsigned char ret;
+  uint32_t new_val = SP_LOCKED;
+  uint32_t old_val = SP_UNLOCKED;
+
+  asm volatile (
+                "lock cmpxchgl %[val], %[ptr]\n\
+                 sete %0\n"
+                : "=q" (ret), [ptr] "+m" (*lock), "+a" (old_val)
+                : [val]"r" (new_val)
+                : "memory");
+
+  return !ret;
+}
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_X86_64_INCLUDE_SPINLOCK_H */
