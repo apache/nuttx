@@ -124,4 +124,12 @@ extern spinlock_t g_segger_lock;
 
 #define SEGGER_SYSVIEW_PRINTF_IMPLICIT_FORMAT 1
 
+/* Segger sysview post-mortem (circular buffer) mode */
+
+#ifdef CONFIG_SEGGER_SYSVIEW_POST_MORTEM
+#  define SEGGER_SYSVIEW_POST_MORTEM_MODE       1
+#else
+#  define SEGGER_SYSVIEW_POST_MORTEM_MODE       0
+#endif
+
 #endif /* __DRIVERS_SEGGER_CONFIG_SEGGER_RTT_CONF_H */

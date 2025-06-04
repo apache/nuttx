@@ -246,6 +246,12 @@ config SEGGER_SYSVIEW_RAM_BASE
 	---help---
 		The lowest RAM address used for IDs
 
+config SEGGER_SYSVIEW_POST_MORTEM
+	bool "Segger System View post-mortem mode"
+	default n
+	---help---
+		Configures the System View to record continuously in circular buffer
+
 endif # SEGGER_SYSVIEW
 
 endif # DRIVERS_NOTE
