@@ -46,6 +46,8 @@
 
 #define SEGGER_SYSVIEW_GET_TIMESTAMP       note_sysview_get_timestamp
 
+#define SEGGER_SYSVIEW_TIMESTAMP_FREQ      note_sysview_timestamp_freq
+
 /* The RTT channel that SystemView will use. */
 
 #define SEGGER_SYSVIEW_RTT_CHANNEL         CONFIG_SEGGER_SYSVIEW_RTT_CHANNEL
@@ -67,6 +69,7 @@
  ****************************************************************************/
 
 #define note_sysview_get_timestamp() perf_gettime()
+#define note_sysview_timestamp_freq() perf_getfreq()
 
 /****************************************************************************
  * Public Data
