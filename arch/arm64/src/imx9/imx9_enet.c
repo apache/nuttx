@@ -3032,6 +3032,7 @@ static void imx9_enet_mux_io(void)
   imx9_iomux_configure(MUX_ENET1_TX_DATA02);
   imx9_iomux_configure(MUX_ENET1_TX_DATA03);
   imx9_iomux_configure(MUX_ENET1_RXC);
+  imx9_iomux_configure(MUX_ENET1_TXC);
   imx9_iomux_configure(MUX_ENET1_TX_CTL);
   imx9_iomux_configure(MUX_ENET1_RX_CTL);
 #  else /* RMII */
