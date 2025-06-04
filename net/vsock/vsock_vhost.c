@@ -282,6 +282,7 @@ static int vsock_vhost_probe(FAR struct vhost_device *hdev)
   FAR struct vsock_vhost_priv_s *priv;
   FAR const char *vqnames[VSOCK_VQ_NUM];
   vq_callback callbacks[VSOCK_VQ_NUM];
+  uint64_t features;
   int ret;
 
   priv = kmm_zalloc(sizeof(*priv));
@@ -312,6 +313,7 @@ static int vsock_vhost_probe(FAR struct vhost_device *hdev)
       goto err;
     }
 
+  virtio_get_features(hdev, &features);
   virtio_read_config_member(priv->hdev, struct virtio_vsock_config_s,
                             guest_cid, &priv->guest_cid);
 
