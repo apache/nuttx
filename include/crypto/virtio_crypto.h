@@ -124,7 +124,7 @@ int virtio_crypto_get_iv_len(int vservice, int valg)
         }
     }
 
-  return -EINVAL;
+  return 0;
 }
 
 static inline_function
@@ -207,6 +207,7 @@ int virtio_crypto_get_service(int alg)
       case CRYPTO_SHA2_384_HMAC:
       case CRYPTO_SHA2_512_HMAC:
       case CRYPTO_AES_128_GMAC:
+      case CRYPTO_AES_CMAC:
       case CRYPTO_AES_128_CMAC:
         return VIRTIO_CRYPTO_SERVICE_MAC;
       case CRYPTO_AES_GCM_16:
@@ -266,6 +267,68 @@ int virtio_crypto_get_alg(int alg)
       case CRYPTO_CHACHA20_POLY1305_MAC:
         return VIRTIO_CRYPTO_AEAD_CHACHA20_POLY1305;
     }
+
+  return -EINVAL;
+}
+
+static inline_function
+int virtio_crypto_get_cipher_alg(int alg)
+{
+  switch (alg)
+  {
+    case VIRTIO_CRYPTO_CIPHER_3DES_CBC:
+      return CRYPTO_3DES_CBC;
+    case VIRTIO_CRYPTO_CIPHER_AES_CBC:
+      return CRYPTO_AES_CBC;
+    case VIRTIO_CRYPTO_CIPHER_AES_CTR:
+      return CRYPTO_AES_CTR;
+    case VIRTIO_CRYPTO_CIPHER_AES_XTS:
+      return CRYPTO_AES_XTS;
+  }
+
+  return -EINVAL;
+}
+
+static inline_function
+int virtio_crypto_get_hash_alg(int alg)
+{
+  switch (alg)
+  {
+    case VIRTIO_CRYPTO_HASH_MD5:
+      return CRYPTO_MD5;
+    case VIRTIO_CRYPTO_HASH_SHA1:
+      return CRYPTO_SHA1;
+    case VIRTIO_CRYPTO_HASH_SHA_224:
+      return CRYPTO_SHA2_224;
+    case VIRTIO_CRYPTO_HASH_SHA_256:
+      return CRYPTO_SHA2_256;
+    case VIRTIO_CRYPTO_HASH_SHA_384:
+      return CRYPTO_SHA2_384;
+    case VIRTIO_CRYPTO_HASH_SHA_512:
+      return CRYPTO_SHA2_512;
+  }
+
+  return -EINVAL;
+}
+
+static inline_function
+int virtio_crypto_get_mac_alg(int alg)
+{
+  switch (alg)
+  {
+    case VIRTIO_CRYPTO_MAC_HMAC_MD5:
+      return CRYPTO_MD5_HMAC;
+    case VIRTIO_CRYPTO_MAC_HMAC_SHA1:
+      return CRYPTO_SHA1_HMAC;
+    case VIRTIO_CRYPTO_MAC_HMAC_SHA_256:
+      return CRYPTO_SHA2_256_HMAC;
+    case VIRTIO_CRYPTO_MAC_HMAC_SHA_384:
+      return CRYPTO_SHA2_384_HMAC;
+    case VIRTIO_CRYPTO_MAC_HMAC_SHA_512:
+      return CRYPTO_SHA2_512_HMAC;
+    case VIRTIO_CRYPTO_MAC_CMAC_AES:
+      return CRYPTO_AES_128_CMAC;
+  }
 
   return -EINVAL;
 }
