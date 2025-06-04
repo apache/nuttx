@@ -33,19 +33,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define ALIGNED(x) \
-  (((long)(uintptr_t)(x) & (sizeof(long) - 1)) == 0)
-
-/* Macros for detecting endchar */
-
-#if LONG_MAX == 2147483647
-#  define DETECTNULL(x) (((x) - 0x01010101) & ~(x) & 0x80808080)
-#elif LONG_MAX == 9223372036854775807
-/* Nonzero if x (a long int) contains a NULL byte. */
-
-#  define DETECTNULL(x) (((x) - 0x0101010101010101) & ~(x) & 0x8080808080808080)
-#endif
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -62,7 +49,7 @@ FAR char *strcat(FAR char *dest, FAR const char *src)
 
   if (ALIGNED(dest))
     {
-      FAR unsigned long *aligned_s1 = (FAR unsigned long *)dest;
+      FAR libc_data_t *aligned_s1 = (FAR libc_data_t *)dest;
       while (!DETECTNULL(*aligned_s1))
         {
           aligned_s1++;
