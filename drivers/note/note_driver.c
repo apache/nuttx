@@ -611,7 +611,7 @@ void sched_note_add(FAR const void *data, size_t len)
           note_add(*driver, note, notelen);
         }
 
-      data += notelen;
+      data = (FAR void *)((uintptr_t)data + notelen);
       len -= notelen;
     }
 }
@@ -1224,7 +1224,9 @@ void sched_note_syscall_enter(int nr, int argc, ...)
   unsigned int length = 0;
   uintptr_t arg;
   va_list ap;
+#ifdef CONFIG_SCHED_INSTRUMENTATION_FILTER
   int argc_bak = argc;
+#endif
   int i;
 
   va_start(ap, argc);
