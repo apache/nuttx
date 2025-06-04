@@ -94,7 +94,8 @@
 #define GMII_RTL8211F_PHYSCR_A46      20      /* PHY Special Config Register */
 #define GMII_RTL8211F_LCR_D04         16      /* LED Control Register */
 #define GMII_RTL8211F_EEELCR_D04      17      /* EEE LED Control Register */
-#define GMII_RTL8211F_MIICR_D08       21      /* MII Control Register */
+#define GMII_RTL8211F_MIICR1_D08      17      /* MII Control Register 1 */
+#define GMII_RTL8211F_MIICR2_D08      21      /* MII Control Register 2 */
 #define GMII_RTL8211F_INTBCR_D40      22      /* INTB Pin Control Register */
 
 /* MII register bit settings ************************************************/
@@ -308,6 +309,8 @@
 #define GMII_RTL8211F_PHYSR_100MBPS    0x10
 #define GMII_RTL8211F_PHYSR_1000MBPS   0x20
 #define GMII_RTL8211F_PHYSR_DUPLEX     0x8
+#define GMII_RTL8211F_MIICR1_TX_DELAY  (1 << 8) /* Enable PHY internal TX delay */
+#define GMII_RTL8211F_MIICR2_RX_DELAY  (1 << 3) /* Enable PHY internal RX delay */
 
 /****************************************************************************
  * Type Definitions

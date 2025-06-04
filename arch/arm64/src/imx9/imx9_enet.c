@@ -277,6 +277,11 @@ static int imx9_writemii(struct imx9_driver_s *priv, uint8_t regaddr,
                          uint16_t data);
 static int imx9_readmii(struct imx9_driver_s *priv, uint8_t regaddr,
                         uint16_t *data);
+#ifdef CONFIG_IMX9_ENET1_RGMII
+static int imx9_config_rgmii_id(struct imx9_driver_s *priv);
+#else
+#  define imx9_config_rgmii_id(priv) (OK)
+#endif
 static int imx9_initphy(struct imx9_driver_s *priv, bool renogphy);
 
 static int imx9_readmmd(struct imx9_driver_s *priv, uint8_t mmd,
@@ -2678,6 +2683,102 @@ static int imx9_phy_wait_autoneg_complete(struct imx9_driver_s *priv)
 }
 
 /****************************************************************************
+ * Function: imx9_config_rgmii_id
+ *
+ * Description:
+ *   Configure the PHY internal delay. Currently only supported on RTL8211F.
+ *   If CONFIG_IMX9_ENET1_RGMII_ID is set, this function sets both TXDLY
+ *   and RXDLY bit on MIICR1 and MIICR2 respectively. Otherwise, it clears
+ *   the respective bits.
+ *
+ * Input Parameters:
+ *   priv     - Reference to the private ENET driver state structure
+ *
+ * Returned Value:
+ *   Zero (OK) returned on success; a negated errno value is returned on any
+ *   failure;
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_IMX9_ENET1_RGMII
+static int imx9_config_rgmii_id(struct imx9_driver_s *priv)
+{
+  int ret;
+  uint16_t prev_page;
+  uint16_t reg;
+
+  if (!imx9_phy_is(priv, GMII_RTL8211F_NAME))
+    {
+      nwarn("WARN: not configuring RGMII Internal Delay on %s phy\n",
+            priv->cur_phy->name);
+      return OK;
+    }
+
+  ret = imx9_readmii(priv, GMII_RTL8211F_PAGSR, &prev_page);
+  if (ret < 0)
+    {
+      nerr("ERROR: Getting page, imx9_readmii failed: %d\n", ret);
+      goto errout;
+    }
+
+  ret = imx9_writemii(priv, GMII_RTL8211F_PAGSR, 0xd08);
+  if (ret < 0)
+    {
+      nerr("ERROR: Selecting page, imx9_writemii failed: %d\n", ret);
+      goto errout;
+    }
+
+  ret = imx9_readmii(priv, GMII_RTL8211F_MIICR1_D08, &reg);
+  if (ret < 0)
+    {
+      nerr("ERROR: Reading MIICR1, imx9_readmii failed: %d\n", ret);
+      goto errout;
+    }
+
+#ifdef CONFIG_IMX9_ENET1_RGMII_ID
+  reg |= GMII_RTL8211F_MIICR1_TX_DELAY;
+#else
+  reg &= ~GMII_RTL8211F_MIICR1_TX_DELAY;
+#endif
+  ret = imx9_writemii(priv, GMII_RTL8211F_MIICR1_D08, reg);
+  if (ret < 0)
+    {
+      nerr("ERROR: Enabling TXDLY, imx9_writemii failed: %d\n", ret);
+      goto errout;
+    }
+
+  ret = imx9_readmii(priv, GMII_RTL8211F_MIICR2_D08, &reg);
+  if (ret < 0)
+    {
+      nerr("ERROR: Reading MIICR2, imx9_readmii failed: %d\n", ret);
+      goto errout;
+    }
+
+#ifdef CONFIG_IMX9_ENET1_RGMII_ID
+  reg |= GMII_RTL8211F_MIICR2_RX_DELAY;
+#else
+  reg &= ~GMII_RTL8211F_MIICR2_RX_DELAY;
+#endif
+  ret = imx9_writemii(priv, GMII_RTL8211F_MIICR2_D08, reg);
+  if (ret < 0)
+    {
+      nerr("ERROR: Enabling RXDLY, imx9_writemii failed: %d\n", ret);
+      goto errout;
+    }
+
+  ret = imx9_writemii(priv, GMII_RTL8211F_PAGSR, prev_page);
+  if (ret < 0)
+    {
+      nerr("ERROR: Restoring page, imx9_writemii failed: %d\n", ret);
+      goto errout;
+    }
+
+errout:
+  return ret;
+}
+#endif /* CONFIG_IMX9_ENET1_RGMII */
+
+/****************************************************************************
  * Function: imx9_initphy
  *
  * Description:
@@ -2897,6 +2998,17 @@ static inline int imx9_initphy(struct imx9_driver_s *priv, bool renogphy)
 
   imx9_enet_putreg32(priv, rcr, IMX9_ENET_RCR_OFFSET);
   imx9_enet_putreg32(priv, tcr, IMX9_ENET_TCR_OFFSET);
+
+  if (priv->phy_type == PHY_RGMII)
+    {
+      ret = imx9_config_rgmii_id(priv);
+      if (ret < 0)
+        {
+          nerr("ERROR: configure internal delay failed: %d\n", ret);
+          return ret;
+        }
+    }
+
   return OK;
 }
 
