@@ -86,7 +86,7 @@ ifneq ($(CONFIG_PROFILE_ALL)$(CONFIG_SIM_PROFILE),)
   ARCHOPTIMIZATION += -pg
 endif
 
-ifeq ($(CONFIG_SIM_ASAN),y)
+ifneq ($(CONFIG_SIM_ASAN)$(CONFIG_MM_KASAN_SIM),)
   ARCHOPTIMIZATION += -fsanitize=address -fsanitize-address-use-after-scope
   ARCHOPTIMIZATION += -fsanitize=pointer-compare -fsanitize=pointer-subtract
 else ifeq ($(CONFIG_MM_KASAN_INSTRUMENT_ALL),y)

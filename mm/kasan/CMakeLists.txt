@@ -24,7 +24,8 @@ set(SRCS hook.c)
 if(CONFIG_MM_KASAN)
   list(APPEND FLAGS ${NO_LTO})
   list(APPEND FLAGS -fno-builtin)
-  list(APPEND FLAGS -fno-sanitize=kernel-address)
+  list(APPEND FLAGS -fno-sanitize=kernel-address -fno-sanitize=address
+       -fno-sanitize=pointer-compare -fno-sanitize=pointer-subtract)
 
   if(NOT "${CONFIG_MM_KASAN_MARK_LOCATION}" STREQUAL "")
     target_compile_definitions(

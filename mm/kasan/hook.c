@@ -43,6 +43,8 @@
 #  include "sw_tags.c"
 #elif defined(CONFIG_MM_KASAN_HW_TAGS)
 #  include "hw_tags.c"
+#elif defined(CONFIG_MM_KASAN_SIM)
+#  include "sim_asan.c"
 #else
 #  define kasan_is_poisoned(addr, size) false
 #endif
