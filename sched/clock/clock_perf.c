@@ -104,28 +104,6 @@ clock_t perf_gettime(void)
   return result;
 }
 
-/****************************************************************************
- * perf_convert
- ****************************************************************************/
-
-void perf_convert(clock_t elapsed, FAR struct timespec *ts)
-{
-  unsigned long freq = up_perf_getfreq();
-
-  ts->tv_sec  = elapsed / freq;
-  elapsed -= ts->tv_sec * freq;
-  ts->tv_nsec = NSEC_PER_SEC * elapsed / freq;
-}
-
-/****************************************************************************
- * perf_getfreq
- ****************************************************************************/
-
-unsigned long perf_getfreq(void)
-{
-  return up_perf_getfreq();
-}
-
 #elif defined(CONFIG_ALARM_ARCH) || defined (CONFIG_TIMER_ARCH) || \
       defined(CONFIG_ARCH_PERF_EVENTS)
 
@@ -137,6 +115,22 @@ clock_t perf_gettime(void)
 {
   return up_perf_gettime();
 }
+
+#else
+
+/****************************************************************************
+ * perf_gettime
+ ****************************************************************************/
+
+clock_t perf_gettime(void)
+{
+  return clock_systime_ticks();
+}
+
+#endif
+
+#if defined(CONFIG_ALARM_ARCH) || defined (CONFIG_TIMER_ARCH) || \
+    defined(CONFIG_ARCH_PERF_EVENTS)
 
 /****************************************************************************
  * perf_convert
@@ -157,15 +151,6 @@ unsigned long perf_getfreq(void)
 }
 
 #else
-
-/****************************************************************************
- * perf_gettime
- ****************************************************************************/
-
-clock_t perf_gettime(void)
-{
-  return clock_systime_ticks();
-}
 
 /****************************************************************************
  * perf_convert
