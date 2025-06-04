@@ -158,27 +158,25 @@
 
 /* Ethernet configuration */
 
+#ifdef CONFIG_IMX9_ENET1
+
 #define BOARD_ENET1_PHY_LIST                             \
 {                                                        \
   {                                                      \
-    .name = GMII_RTL8211F_NAME,                           \
-    .id1 = GMII_PHYID1_RTL8211F,                                \
-    .id2 = GMII_PHYID2_RTL8211F,                                \
-    .status = GMII_RTL8211F_PHYSR_A43,                             \
-    .address_lo = 2,                                                   \
-    .address_high = 0xffff,                                              \
-    .mbps10 = GMII_RTL8211F_PHYSR_10MBPS,                          \
-    .mbps100 = GMII_RTL8211F_PHYSR_100MBPS,                         \
-    .duplex = GMII_RTL8211F_PHYSR_DUPLEX,                          \
-    .clause = 22,                                                  \
-    .mbps1000 = GMII_RTL8211F_PHYSR_1000MBPS,                       \
-    .speed_mask = GMII_RTL8211F_PHYSR_SPEED_MASK,                    \
+    .name = GMII_RTL8211F_NAME,                          \
+    .id1 = GMII_PHYID1_RTL8211F,                         \
+    .id2 = GMII_PHYID2_RTL8211F,                         \
+    .status = GMII_RTL8211F_PHYSR_A43,                   \
+    .address_lo = 2,                                     \
+    .address_high = 0xffff,                              \
+    .mbps10 = GMII_RTL8211F_PHYSR_10MBPS,                \
+    .mbps100 = GMII_RTL8211F_PHYSR_100MBPS,              \
+    .duplex = GMII_RTL8211F_PHYSR_DUPLEX,                \
+    .clause = 22,                                        \
+    .mbps1000 = GMII_RTL8211F_PHYSR_1000MBPS,            \
+    .speed_mask = GMII_RTL8211F_PHYSR_SPEED_MASK,        \
   },                                                     \
 }
-
-#endif /* CONFIG_IMX9_ENET1 */
-
-#ifdef CONFIG_IMX9_ENET1
 
 #define MUX_ENET1_MDIO        IOMUX_CFG(IOMUXC_PAD_ENET2_MDIO_ENET1_MDIO, IOMUXC_PAD_FSEL_FAST | IOMUXC_PAD_DSE_X6, IOMUXC_MUX_SION_ON)
 #define MUX_ENET1_MDC         IOMUX_CFG(IOMUXC_PAD_ENET2_MDC_ENET1_MDC, IOMUXC_PAD_FSEL_FAST | IOMUXC_PAD_DSE_X6, 0)
@@ -217,23 +215,7 @@
 #error ENET1 supports only RMII and RGMII
 #endif
 
-#define BOARD_ENET1_PHY_LIST                             \
-{                                                        \
-  {                                                      \
-    GMII_RTL8211F_NAME,                                  \
-    GMII_PHYID1_RTL8211F,                                \
-    GMII_PHYID2_RTL8211F,                                \
-    GMII_RTL8211F_PHYSR_A43,                             \
-    2,                                                   \
-    0xffff,                                              \
-    GMII_RTL8211F_PHYSR_10MBPS,                          \
-    GMII_RTL8211F_PHYSR_100MBPS,                         \
-    GMII_RTL8211F_PHYSR_DUPLEX,                          \
-    22,                                                  \
-    GMII_RTL8211F_PHYSR_1000MBPS,                        \
-    GMII_RTL8211F_PHYSR_SPEED_MASK,                      \
-  },                                                     \
-}
+#endif /* CONFIG_IMX9_ENET1 */
 
 /****************************************************************************
  * Public Data
