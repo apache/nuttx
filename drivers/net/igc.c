@@ -1042,7 +1042,8 @@ static int igc_rmmac(FAR struct netdev_lowerhalf_s *dev,
 
 static void igc_disable(FAR struct igc_driver_s *priv)
 {
-  int i = 0;
+  uint32_t regval;
+  int      i = 0;
 
   /* Disable interrupts */
 
@@ -1052,7 +1053,9 @@ static void igc_disable(FAR struct igc_driver_s *priv)
 
   /* Disable Transmitter */
 
-  igc_putreg_mem(priv, IGC_TCTL, 0);
+  regval = igc_getreg_mem(priv, IGC_TCTL);
+  regval &= ~IGC_TCTL_EN;
+  igc_putreg_mem(priv, IGC_TCTL, regval);
 
   /* Disable Receiver */
 
