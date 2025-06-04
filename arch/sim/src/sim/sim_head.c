@@ -113,7 +113,7 @@ static void allsyms_relocate(void)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SIM_ASAN
+#if defined(CONFIG_SIM_ASAN) || defined(CONFIG_MM_KASAN_SIM)
 noprofile_function const char *__asan_default_options(void)
 {
   return "abort_on_error=1"

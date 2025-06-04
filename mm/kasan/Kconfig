@@ -44,6 +44,12 @@ config MM_KASAN_HW_TAGS
 	---help---
 		KAsan based on hardware tags
 
+config MM_KASAN_SIM
+	bool "KAsan on simulator"
+	depends on ARCH_SIM && FRAME_POINTER
+	---help---
+		KASan on simulator that use asan api to protect memory
+
 endchoice
 
 config MM_KASAN_INSTRUMENT_ALL

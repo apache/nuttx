@@ -161,7 +161,7 @@ if(CONFIG_PROFILE_ALL OR CONFIG_SIM_PROFILE)
   add_compile_options(-pg)
 endif()
 
-if(CONFIG_SIM_ASAN)
+if(CONFIG_SIM_ASAN OR CONFIG_MM_KASAN_SIM)
   add_compile_options(-fsanitize=address)
   add_link_options(-fsanitize=address)
   add_compile_options(-fsanitize-address-use-after-scope)

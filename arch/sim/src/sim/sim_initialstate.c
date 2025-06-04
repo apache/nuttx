@@ -28,7 +28,7 @@
 
 #include <stdint.h>
 #include <string.h>
-#ifdef CONFIG_SIM_ASAN
+#if defined(CONFIG_SIM_ASAN) || defined(CONFIG_MM_KASAN_SIM)
 #include <sanitizer/asan_interface.h>
 #endif
 
@@ -119,7 +119,7 @@ void up_initial_state(struct tcb_s *tcb)
 
   tcb->xcp.regs[JB_PC] = (xcpt_reg_t)pre_start;
 
-#ifdef CONFIG_SIM_ASAN
+#if defined(CONFIG_SIM_ASAN) || defined(CONFIG_MM_KASAN_SIM)
   __asan_unpoison_memory_region(tcb->stack_alloc_ptr, tcb->adj_stack_size);
 #endif
 }
