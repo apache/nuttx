@@ -31,6 +31,7 @@
 #include <string.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/nuttx.h>
 #include <nuttx/tls.h>
 #include <arch/barriers.h>
 #include <arch/irq.h>
@@ -45,38 +46,44 @@
  * Name: tricore_alloc_csa
  ****************************************************************************/
 
-uintptr_t *tricore_alloc_csa(uintptr_t pc, uintptr_t sp,
-                             uintptr_t psw, bool irqsave)
+uintptr_t *tricore_alloc_csa(struct tcb_s *tcb, uintptr_t pc,
+                             uintptr_t sp, uintptr_t psw,
+                             bool irqsave)
 {
   uintptr_t *plcsa;
   uintptr_t *pucsa;
 
-  plcsa = (uintptr_t *)tricore_csa2addr(tricore_mfcr(TRICORE_CPU_FCX));
+  /* If the task corresponding to tcb is in running state, it must be in
+   * interrupt context to ensure the correct management of csa.
+   */
 
-  /* DSYNC instruction should be executed immediately prior to the MTCR */
+  DEBUGASSERT(tcb != nxsched_self() || up_interrupt_context());
 
-  UP_DSB();
+  /* Init new uppercsa and lowcsa */
 
-  pucsa = (uintptr_t *)tricore_csa2addr(plcsa[REG_UPCXI]);
+  if (tcb->xcp.regs == NULL)
+    {
+      pucsa = tcb->stack_base_ptr;
+    }
+  else
+    {
+      pucsa = tcb->xcp.regs + TC_CONTEXT_REGS;
+    }
 
-  tricore_mtcr(TRICORE_CPU_FCX, pucsa[REG_UPCXI]);
-
-  /* ISYNC instruction executed immediately following MTCR */
-
-  UP_ISB();
+  plcsa = pucsa + TC_CONTEXT_REGS;
 
   memset(pucsa, 0, TC_CONTEXT_SIZE);
   memset(plcsa, 0, TC_CONTEXT_SIZE);
 
+  /* Save the function entry point */
+
+  plcsa[REG_LPC] = pc;
   pucsa[REG_SP]  = sp;
   pucsa[REG_PSW] = psw;
 
-  /* Save the task entry point */
-
-  pucsa[REG_UPC] = pc;
-  plcsa[REG_LPC] = pc;
-
   plcsa[REG_LPCXI] = (PCXI_UL | tricore_addr2csa(pucsa));
+
+  /* Determine whether to enable interrupt */
 
   if (!irqsave)
     {
@@ -92,64 +99,36 @@ uintptr_t *tricore_alloc_csa(uintptr_t pc, uintptr_t sp,
 
 void tricore_reclaim_csa(uintptr_t pcxi)
 {
-  uintptr_t head;
-  uintptr_t tail;
-  uintptr_t free;
-  uintptr_t *next;
+  uintptr_t *tail;
 
-  /* A pointer to the first CSA in the list of CSAs consumed by the task is
-   * stored in the first element of the tasks TCB structure (where the stack
-   * pointer would be on a traditional stack based architecture).
-   */
-
-  head = pcxi & FCX_FREE;
-
-  /* Mask off everything in the CSA link field other than the address.  If
-   * the address is NULL, then the CSA is not linking anywhere and there is
-   * nothing to do.
-   */
-
-  tail = head;
-
-  /* Convert the link value to contain just a raw address and store this
-   * in a local variable.
-   */
-
-  next = tricore_csa2addr(tail);
-
-  /* Iterate over the CSAs that were consumed as part of the task.  The
-   * first field in the CSA is the pointer to then next CSA.  Mask off
-   * everything in the pointer to the next CSA, other than the link address.
-   * If this is NULL, then the CSA currently being pointed to is the last in
-   * the chain.
-   */
-
-  while ((next[0] & FCX_FREE) != 0)
+  while ((pcxi & FCX_FREE) != 0)
     {
-      /* Clear all bits of the pointer to the next in the chain, other
-       * than the address bits themselves.
-       */
+      tail = tricore_csa2addr(pcxi);
+      pcxi = tail[0];
+      tail[0] = tricore_addr2csa(tail +TC_CONTEXT_REGS);
+    }
+}
 
-      next[0] = next[0] & FCX_FREE;
+/****************************************************************************
+ * Name: tricore_region_csainit
+ ****************************************************************************/
 
-      /* Move the pointer to point to the next CSA in the list. */
+void tricore_region_csainit(void *regionbase, size_t nbytes)
+{
+  uintptr_t *cur;
+  uintptr_t *next;
+  uintptr_t *end;
 
-      tail = next[0];
+  cur = (uintptr_t *)ALIGN_UP((uintptr_t)regionbase, TC_CONTEXT_SIZE);
+  end = (uintptr_t *)ALIGN_DOWN((uintptr_t)regionbase + nbytes,
+                                TC_CONTEXT_SIZE);
 
-      /* Update the local pointer to the CSA. */
-
-      next = tricore_csa2addr(tail);
+  for (next = cur + TC_CONTEXT_REGS; next < end;
+       next += TC_CONTEXT_REGS)
+    {
+      cur[REG_UPCXI] = tricore_addr2csa(next);
+      cur = next;
     }
 
-  /* Look up the current free CSA head. */
-
-  free = tricore_mfcr(TRICORE_CPU_FCX);
-
-  /* Join the current Free onto the Tail of what is being reclaimed. */
-
-  tricore_csa2addr(tail)[0] = free;
-
-  /* Move the head of the reclaimed into the Free. */
-
-  tricore_mtcr(TRICORE_CPU_FCX, head);
+  cur[REG_UPCXI] = 0;
 }

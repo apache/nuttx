@@ -84,17 +84,20 @@ size_t tricore_stack_check(uintptr_t alloc, size_t size)
 
   /* Get the adjusted size based on the top and bottom of the stack */
 
-  size  = end - start;
+  size  = (end - start) >> 2;
 
-  /* RISC-V uses a push-down stack:  the stack grows toward lower addresses
-   * in memory.  We need to start at the lowest address in the stack memory
-   * allocation and search to higher addresses.  The first word we encounter
-   * that does not have the magic value is the high water mark.
+  /* In tricore, a csa linked list built on task's stack, so it is
+   * necessary to traverse the entire stack space instead of counting
+   * to the first non-STACK_COLOR address.
    */
 
-  for (ptr = (uint32_t *)start, mark = (size >> 2);
-       mark > 0 && *ptr == STACK_COLOR;
-       ptr++, mark--);
+  for (ptr = (uint32_t *)start, mark = size; size > 0; ptr++, size--)
+    {
+      if (*ptr == STACK_COLOR)
+        {
+          mark--;
+        }
+    }
 
   /* Return our guess about how much stack space was used */
 

@@ -103,6 +103,10 @@
 
 #define TC_CONTEXT_REGS  (16)
 #define TC_CONTEXT_SIZE  (sizeof(void *) * TC_CONTEXT_REGS)
+#define TC_CONTEXT_ALIGNED(addr) \
+  (((uintptr_t)(addr) & (TC_CONTEXT_SIZE - 1)) == 0)
+
+#define FCD_RESERVE_SIZE (TC_CONTEXT_SIZE * 4)
 
 #define XCPTCONTEXT_REGS (TC_CONTEXT_REGS * 2)
 #define XCPTCONTEXT_SIZE (sizeof(void *) * XCPTCONTEXT_REGS)
@@ -141,7 +145,7 @@
  * addresses.
  */
 
-#define STACKFRAME_ALIGN 8
+#define STACKFRAME_ALIGN  TC_CONTEXT_SIZE
 
 /* FPU registers */
 
@@ -321,7 +325,7 @@ static inline_function uintptr_t up_getusrsp(void *regs)
     }
   else
     {
-       csaregs += TC_CONTEXT_REGS;
+      csaregs += TC_CONTEXT_REGS;
     }
 
   return csaregs[REG_SP];

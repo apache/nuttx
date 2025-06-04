@@ -32,6 +32,9 @@
 #include <nuttx/debug.h>
 
 #include <nuttx/arch.h>
+#include <arch/barriers.h>
+
+#include "sched/sched.h"
 
 #include "tricore_internal.h"
 
@@ -73,6 +76,11 @@
 void *up_stack_frame(struct tcb_s *tcb, size_t frame_size)
 {
   void *ret;
+  uintptr_t *dest;
+  uintptr_t *src;
+  uintptr_t *csaptr;
+  uintptr_t top_of_stack;
+  size_t nwords = 0;
 
   /* Align the frame_size */
 
@@ -86,12 +94,72 @@ void *up_stack_frame(struct tcb_s *tcb, size_t frame_size)
     }
 
   ret = tcb->stack_base_ptr;
-  memset(ret, 0, frame_size);
+  src = (uintptr_t *)tcb->stack_base_ptr;
+  top_of_stack = (uintptr_t)tcb->stack_base_ptr + tcb->adj_stack_size;
 
   /* Save the adjusted stack values in the struct tcb_s */
 
-  tcb->stack_base_ptr  = (uint8_t *)tcb->stack_base_ptr + frame_size;
-  tcb->adj_stack_size -= frame_size;
+  tcb->stack_base_ptr =
+    (uint8_t *)STACK_ALIGN_UP((uintptr_t)tcb->stack_base_ptr + frame_size);
+  tcb->adj_stack_size = top_of_stack - (uintptr_t)tcb->stack_base_ptr;
+  dest = tcb->stack_base_ptr;
+
+  /* If one task call up_stack_frame in running state, it can only be idle.
+   * the reason for this is that tcb->pid may not be set at this time.
+   */
+
+  if (tcb == this_task())
+    {
+      /* Size of csa list to be copied in idle task */
+
+      UP_DSB();
+      csaptr = tricore_csa2addr(tricore_mfcr(TRICORE_CPU_FCX));
+      nwords = csaptr - src;
+
+      /* Reset FCX and PCXI */
+
+      tricore_mtcr(TRICORE_CPU_FCX, tricore_addr2csa(dest + nwords));
+      tricore_mtcr(TRICORE_CPU_PCXI,
+             PCXI_UL | tricore_addr2csa(dest + nwords - TC_CONTEXT_REGS));
+      UP_ISB();
+    }
+  else if (tcb->xcp.regs)
+    {
+      /* Size of csa list to be copied in other tasks */
+
+      nwords = XCPTCONTEXT_REGS;
+
+      /* Reset tcb->xcp.regs */
+
+      tcb->xcp.regs = dest + TC_CONTEXT_REGS;
+    }
+
+  /* Copy csa list in reverse order to avoid overwriting */
+
+  dest += nwords;
+  src  += nwords;
+  csaptr = NULL;
+  while (nwords-- > 0)
+    {
+      *--dest = *--src;
+
+      /* Reinit csa in pcxi list since physical address has changed */
+
+      if (TC_CONTEXT_ALIGNED(dest))
+        {
+          if (!csaptr)
+            {
+              csaptr = dest;
+            }
+          else
+            {
+              csaptr[0] = (csaptr[0] & ~FCX_FREE) | tricore_addr2csa(dest);
+              csaptr = dest;
+            }
+        }
+    }
+
+  memset(ret, 0, frame_size);
 
   /* And return the pointer to the allocated region */
 

@@ -61,9 +61,12 @@ static inline void tricore_color_intstack(void)
 
   for (size = (CONFIG_ARCH_INTERRUPTSTACK & ~15);
        size > 0;
-       size -= sizeof(uint32_t))
+       size -= sizeof(uint32_t), ptr++)
     {
-      *ptr++ = INTSTACK_COLOR;
+      if (!TC_CONTEXT_ALIGNED(ptr))
+        {
+          *ptr = INTSTACK_COLOR;
+        }
     }
 }
 #else
@@ -165,6 +168,8 @@ void up_irqinitialize(void)
 #ifdef CONFIG_ARCH_HAVE_IRQTRIGGER
   tricore_gpsrinitialize();
 #endif
+
+  tricore_region_csainit(g_intstackalloc, CONFIG_ARCH_INTERRUPTSTACK);
 
   tricore_color_intstack();
   up_irq_enable();

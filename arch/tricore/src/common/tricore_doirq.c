@@ -71,6 +71,13 @@ IFX_INTERRUPT_INTERNAL(tricore_doirq, 0, 255)
       (*running_task)->xcp.regs = regs;
     }
 
+  /* set registers related to csa */
+
+  tricore_mtcr(CPU_FCX, tricore_addr2csa(g_intstackalloc));
+  tricore_mtcr(CPU_LCX, tricore_addr2csa((uintptr_t)g_intstacktop -
+                                         FCD_RESERVE_SIZE));
+  UP_ISB();
+
   board_autoled_on(LED_INIRQ);
 
   /* Nested interrupts are not supported */
@@ -112,10 +119,16 @@ IFX_INTERRUPT_INTERNAL(tricore_doirq, 0, 255)
        */
 
       *running_task = tcb;
-
-      tricore_mtcr(CPU_PCXI, tricore_addr2csa(tcb->xcp.regs));
-      UP_ISB();
     }
+
+  /* Reserve CSAs for FCD depletion threshold */
+
+  tricore_mtcr(CPU_PCXI, tricore_addr2csa(tcb->xcp.regs));
+  tricore_mtcr(CPU_FCX, tricore_addr2csa(tcb->xcp.regs + TC_CONTEXT_REGS));
+  tricore_mtcr(CPU_LCX, tricore_addr2csa((uintptr_t)tcb->stack_base_ptr +
+                                         tcb->adj_stack_size -
+                                         FCD_RESERVE_SIZE));
+  UP_ISB();
 
   /* Set irq flag */
 
