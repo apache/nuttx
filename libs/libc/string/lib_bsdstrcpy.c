@@ -33,21 +33,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Nonzero if either x or y is not aligned on a "long" boundary. */
-
-#define UNALIGNED(x, y) \
-  (((long)(uintptr_t)(x) & (sizeof(long) - 1)) | ((long)(uintptr_t)(y) & (sizeof(long) - 1)))
-
-/* Macros for detecting endchar */
-
-#if LONG_MAX == 2147483647
-#  define DETECTNULL(x) (((x) - 0x01010101) & ~(x) & 0x80808080)
-#elif LONG_MAX == 9223372036854775807
-/* Nonzero if x (a long int) contains a NULL byte. */
-
-#  define DETECTNULL(x) (((x) - 0x0101010101010101) & ~(x) & 0x8080808080808080)
-#endif
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -72,17 +57,17 @@ FAR char *strcpy(FAR char *dest, FAR const char *src)
 {
   FAR char *dst0 = dest;
   FAR const char *src0 = src;
-  FAR unsigned long *aligned_dst;
-  FAR const unsigned long *aligned_src;
+  FAR libc_data_t *aligned_dst;
+  FAR const libc_data_t *aligned_src;
 
   /* If SRC or DEST is unaligned, then copy bytes. */
 
   if (!UNALIGNED(src0, dst0))
     {
-      aligned_dst = (FAR unsigned long *)dst0;
-      aligned_src = (FAR unsigned long *)src0;
+      aligned_dst = (FAR libc_data_t *)dst0;
+      aligned_src = (FAR libc_data_t *)src0;
 
-      /* SRC and DEST are both "long int" aligned, try to do "long int"
+      /* SRC and DEST are both "libc_data_t" aligned, try to do "libc_data_t"
        * sized copies.
        */
 

@@ -33,23 +33,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define LBLOCKSIZE (sizeof(long))
-
-/* Nonzero if either x or y is not aligned on a "long" boundary. */
-
-#define UNALIGNED(x, y) \
-  (((long)(uintptr_t)(x) & (sizeof(long) - 1)) | ((long)(uintptr_t)(y) & (sizeof(long) - 1)))
-
-/* Macros for detecting endchar */
-
-#if LONG_MAX == 2147483647
-#  define DETECTNULL(x) (((x) - 0x01010101) & ~(x) & 0x80808080)
-#elif LONG_MAX == 9223372036854775807
-/* Nonzero if x (a long int) contains a NULL byte. */
-
-#  define DETECTNULL(x) (((x) - 0x0101010101010101) & ~(x) & 0x8080808080808080)
-#endif
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -60,8 +43,8 @@ no_builtin("strncmp")
 nosanitize_address
 int strncmp(FAR const char *cs, FAR const char *ct, size_t nb)
 {
-  FAR unsigned long *a1;
-  FAR unsigned long *a2;
+  FAR libc_data_t *a1;
+  FAR libc_data_t *a2;
 
   if (nb == 0)
     {
@@ -74,11 +57,11 @@ int strncmp(FAR const char *cs, FAR const char *ct, size_t nb)
     {
       /* If cs and ct are word-aligned, compare them a word at a time. */
 
-      a1 = (FAR unsigned long *)cs;
-      a2 = (FAR unsigned long *)ct;
-      while (nb >= LBLOCKSIZE && *a1 == *a2)
+      a1 = (FAR libc_data_t *)cs;
+      a2 = (FAR libc_data_t *)ct;
+      while (nb >= LITTLEBLOCKSIZE && *a1 == *a2)
         {
-          nb -= LBLOCKSIZE;
+          nb -= LITTLEBLOCKSIZE;
 
           /* If we've run out of bytes or hit a null, return zero
            * since we already know *a1 == *a2.

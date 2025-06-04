@@ -33,28 +33,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define UNALIGNED(x) ((long)(uintptr_t)(x) & (sizeof(long) - 1))
-
-/* How many bytes are loaded each iteration of the word copy loop. */
-
-#define LBLOCKSIZE (sizeof(long))
-
-/* Threshold for punting to the bytewise iterator. */
-
-#define TOO_SMALL(len) ((len) < LBLOCKSIZE)
-
-#if LONG_MAX == 2147483647
-#  define DETECTNULL(x) (((x) - 0x01010101) & ~(x) & 0x80808080)
-#elif LONG_MAX == 9223372036854775807
-/* Nonzero if x (a long int) contains a NULL byte. */
-
-#  define DETECTNULL(x) (((x) - 0x0101010101010101) & ~(x) & 0x8080808080808080)
-#endif
-
-/* DETECTCHAR returns nonzero if (long)x contains the byte used
- * to fill (long)mask.
- */
-
 #define DETECTCHAR(x, mask) (DETECTNULL((x) ^ (mask)))
 
 /****************************************************************************
@@ -81,12 +59,12 @@ no_builtin("memchr")
 FAR void *memchr(FAR const void *s, int c, size_t n)
 {
   FAR const unsigned char *p = (FAR const unsigned char *)s;
-  FAR unsigned long *asrc;
+  FAR libc_data_t *asrc;
   unsigned char d = c;
-  unsigned long mask;
+  libc_data_t mask;
   unsigned int i;
 
-  while (UNALIGNED(p))
+  while (UNALIGNED_X(p))
     {
       if (!n--)
         {
@@ -113,26 +91,26 @@ FAR void *memchr(FAR const void *s, int c, size_t n)
        * result.
        */
 
-      asrc = (FAR unsigned long *)p;
+      asrc = (FAR libc_data_t *)p;
       mask = d << 8 | d;
       mask = mask << 16 | mask;
-      for (i = 32; i < LBLOCKSIZE * 8; i <<= 1)
+      for (i = 32; i < LITTLEBLOCKSIZE * 8; i <<= 1)
         {
           mask = (mask << i) | mask;
         }
 
-      while (n >= LBLOCKSIZE)
+      while (n >= LITTLEBLOCKSIZE)
         {
           if (DETECTCHAR(*asrc, mask))
             {
               break;
             }
 
-          n -= LBLOCKSIZE;
+          n -= LITTLEBLOCKSIZE;
           asrc++;
         }
 
-      /* If there are fewer than LBLOCKSIZE characters left,
+      /* If there are fewer than LITTLEBLOCKSIZE characters left,
        * then we resort to the bytewise loop.
        */
 

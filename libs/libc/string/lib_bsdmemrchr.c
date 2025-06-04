@@ -27,31 +27,11 @@
 
 #include <string.h>
 
+#include "libc.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-/* Nonzero if x is not aligned on a "long" boundary. */
-
-#define UNALIGNED(x) ((long)(uintptr_t)((x) + 1) & (sizeof(long) - 1))
-
-/* How many bytes are loaded each iteration of the word copy loop. */
-
-#define LBLOCKSIZE (sizeof(long))
-
-/* Threshold for punting to the bytewise iterator. */
-
-#define TOO_SMALL(len) ((len) < LBLOCKSIZE)
-
-/* Macros for detecting endchar */
-
-#if LONG_MAX == 2147483647
-#  define DETECTNULL(x) (((x) - 0x01010101) & ~(x) & 0x80808080)
-#elif LONG_MAX == 9223372036854775807
-/* Nonzero if x (a long int) contains a NULL byte. */
-
-#  define DETECTNULL(x) (((x) - 0x0101010101010101) & ~(x) & 0x8080808080808080)
-#endif
 
 #define DETECTCHAR(x, mask) (DETECTNULL((x) ^ (mask)))
 
@@ -78,12 +58,12 @@ FAR void *memrchr(FAR const void *s, int c, size_t n)
 {
   FAR const unsigned char *src0 =
             (FAR const unsigned char *)s + n - 1;
-  FAR unsigned long *asrc;
+  FAR libc_data_t *asrc;
   unsigned char d = c;
-  unsigned long mask;
+  libc_data_t mask;
   unsigned int i;
 
-  while (UNALIGNED(src0))
+  while (UNALIGNED_X(src0))
     {
       if (!n--)
         {
@@ -110,30 +90,31 @@ FAR void *memrchr(FAR const void *s, int c, size_t n)
        * result.
        */
 
-      asrc = (FAR unsigned long *)(src0 - LBLOCKSIZE + 1);
+      asrc = (FAR libc_data_t *)((uintptr_t)(src0 - LITTLEBLOCKSIZE + 1) &
+                                 ~(sizeof(libc_data_t) - 1));
       mask = d << 8 | d;
       mask = mask << 16 | mask;
-      for (i = 32; i < LBLOCKSIZE * 8; i <<= 1)
+      for (i = 32; i < LITTLEBLOCKSIZE * 8; i <<= 1)
         {
           mask = (mask << i) | mask;
         }
 
-      while (n >= LBLOCKSIZE)
+      while (n >= LITTLEBLOCKSIZE)
         {
           if (DETECTCHAR(*asrc, mask))
             {
               break;
             }
 
-          n -= LBLOCKSIZE;
+          n -= LITTLEBLOCKSIZE;
           asrc--;
         }
 
-      /* If there are fewer than LBLOCKSIZE characters left,
+      /* If there are fewer than LITTLEBLOCKSIZE characters left,
        * then we resort to the bytewise loop.
        */
 
-      src0 = (FAR unsigned char *)asrc + LBLOCKSIZE - 1;
+      src0 = (FAR unsigned char *)asrc + LITTLEBLOCKSIZE - 1;
     }
 
   while (n--)

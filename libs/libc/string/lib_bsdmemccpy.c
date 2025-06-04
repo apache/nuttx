@@ -27,32 +27,11 @@
 #include <sys/types.h>
 #include <string.h>
 
+#include "libc.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-/* Nonzero if either x or y is not aligned on a "long" boundary. */
-
-#define UNALIGNED(x, y) \
-  (((long)(uintptr_t)(x) & (sizeof(long) - 1)) | ((long)(uintptr_t)(y) & (sizeof(long) - 1)))
-
-/* How many bytes are copied each iteration of the word copy loop. */
-
-#define LITTLEBLOCKSIZE (sizeof(long))
-
-/* Threshold for punting to the byte copier. */
-
-#define TOO_SMALL(len) ((len) < LITTLEBLOCKSIZE)
-
-/* Macros for detecting endchar */
-
-#if LONG_MAX == 2147483647
-#  define DETECTNULL(x) (((x) - 0x01010101) & ~(x) & 0x80808080)
-#elif LONG_MAX == 9223372036854775807
-/* Nonzero if x (a long int) contains a NULL byte. */
-
-#  define DETECTNULL(x) (((x) - 0x0101010101010101) & ~(x) & 0x8080808080808080)
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -80,8 +59,8 @@ FAR void *memccpy(FAR void *s1, FAR const void *s2, int c, size_t n)
   FAR void *ptr = NULL;
   FAR unsigned char *pout = (FAR unsigned char *)s1;
   FAR const unsigned char *pin = (FAR const unsigned char *)s2;
-  FAR long *paligned_out;
-  FAR const long *paligned_in;
+  FAR libc_data_t *paligned_out;
+  FAR const libc_data_t *paligned_in;
   unsigned char endchar = c & 0xff;
 
   /* If the size is small, or either pin or pout is unaligned,
@@ -91,10 +70,10 @@ FAR void *memccpy(FAR void *s1, FAR const void *s2, int c, size_t n)
   if (!TOO_SMALL(n) && !UNALIGNED(pin, pout))
     {
       unsigned int i;
-      unsigned long mask = 0;
+      libc_data_t mask = 0;
 
-      paligned_out = (FAR long *)pout;
-      paligned_in = (FAR long *)pin;
+      paligned_out = (FAR libc_data_t *)pout;
+      paligned_in = (FAR libc_data_t *)pin;
 
       /* The fast code reads the ASCII one word at a time and only
        * performs the bytewise search on word-sized segments if they
@@ -109,11 +88,11 @@ FAR void *memccpy(FAR void *s1, FAR const void *s2, int c, size_t n)
           mask = (mask << 8) + endchar;
         }
 
-      /* Copy one long word at a time if possible.  */
+      /* Copy one libc_data_t word at a time if possible.  */
 
       while (n >= LITTLEBLOCKSIZE)
         {
-          unsigned long buffer = (unsigned long)(*paligned_in);
+          libc_data_t buffer = (libc_data_t)(*paligned_in);
           buffer ^= mask;
           if (DETECTNULL(buffer))
             {

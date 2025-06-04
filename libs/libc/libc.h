@@ -171,15 +171,39 @@
 #  define ARCH_LIBCFUN(x)  x
 #endif
 
+/* Nonzero if either x or y is not aligned on a "libc_data_t" boundary. */
+
+#define UNALIGNED_X(x) \
+  (((libc_data_t)(uintptr_t)(x) & (sizeof(libc_data_t) - 1)) != 0)
+
+#define UNALIGNED(x, y) ((UNALIGNED_X(x)) | (UNALIGNED_X(y)))
+
+#define ALIGNED(x) \
+  (((libc_data_t)(uintptr_t)(x) & (sizeof(libc_data_t) - 1)) == 0)
+
+/* How many bytes are copied each iteration of the word copy loop. */
+
+#define LITTLEBLOCKSIZE (sizeof(libc_data_t))
+
+/* Threshold for punting to the byte copier. */
+
+#define TOO_SMALL(len) ((len) < LITTLEBLOCKSIZE)
+
+/* Macros for detecting endchar */
+
+#define DETECTNULL(x) (((x) - 0x0101010101010101LL) & ~(x) & 0x8080808080808080LL)
+
+#ifndef __ASSEMBLY__
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
+typedef unsigned long long libc_data_t;
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
-
-#ifndef __ASSEMBLY__
 
 #undef EXTERN
 #if defined(__cplusplus)

@@ -33,19 +33,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Nonzero if either x or y is not aligned on a "long" boundary. */
-
-#define UNALIGNED(x, y) \
-  (((long)(uintptr_t)(x) & (sizeof(long) - 1)) | ((long)(uintptr_t)(y) & (sizeof(long) - 1)))
-
-/* How many bytes are copied each iteration of the word copy loop. */
-
-#define LBLOCKSIZE (sizeof(long))
-
-/* Threshold for punting to the byte copier. */
-
-#define TOO_SMALL(len) ((len) < LBLOCKSIZE)
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -57,8 +44,8 @@ int memcmp(FAR const void *s1, FAR const void *s2, size_t n)
 {
   FAR unsigned char *p1 = (FAR unsigned char *)s1;
   FAR unsigned char *p2 = (FAR unsigned char *)s2;
-  FAR unsigned long *a1;
-  FAR unsigned long *a2;
+  FAR libc_data_t *a1;
+  FAR libc_data_t *a2;
 
   /* If the size is too small, or either pointer is unaligned,
    * then we punt to the byte compare loop.  Hopefully this will
@@ -71,9 +58,9 @@ int memcmp(FAR const void *s1, FAR const void *s2, size_t n)
        * word at a time.
        */
 
-      a1 = (FAR unsigned long *)p1;
-      a2 = (FAR unsigned long *)p2;
-      while (n >= LBLOCKSIZE)
+      a1 = (FAR libc_data_t *)p1;
+      a2 = (FAR libc_data_t *)p2;
+      while (n >= LITTLEBLOCKSIZE)
         {
           if (*a1 != *a2)
             {
@@ -82,7 +69,7 @@ int memcmp(FAR const void *s1, FAR const void *s2, size_t n)
 
           a1++;
           a2++;
-          n -= LBLOCKSIZE;
+          n -= LITTLEBLOCKSIZE;
         }
 
       /* check s mod LBLOCKSIZE remaining characters */
