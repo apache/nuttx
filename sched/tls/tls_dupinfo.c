@@ -77,5 +77,9 @@ int tls_dup_info(FAR struct tcb_s *dst, FAR struct tcb_s *src)
 
   info->tl_argv = NULL;
 
+  /* Thread ID */
+
+  info->tl_tid = dst->pid;
+
   return OK;
 }
