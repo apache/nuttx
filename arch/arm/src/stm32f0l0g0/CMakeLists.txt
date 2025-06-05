@@ -32,7 +32,8 @@ list(
   stm32_lowputc.c
   stm32_serial.c
   stm32_lsi.c
-  stm32_rcc.c)
+  stm32_rcc.c
+  stm32_uid.c)
 
 if(CONFIG_STM32F0L0G0_RTC_LSECLOCK OR CONFIG_LCD_LSECLOCK)
   list(APPEND SRCS stm32_lse.c)
