@@ -35,7 +35,7 @@
 #include "hardware/esp32c3_system.h"
 #include "esp32c3_clockconfig.h"
 
-#ifdef CONFIG_ARCH_PERF_EVENTS
+#ifdef CONFIG_ARCH_HAVE_PERF_EVENTS
 
 /****************************************************************************
  * Pre-processor Definitions

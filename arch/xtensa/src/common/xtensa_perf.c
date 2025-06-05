@@ -30,7 +30,7 @@
 #include "xtensa_counter.h"
 #include "xtensa.h"
 
-#ifdef CONFIG_ARCH_PERF_EVENTS
+#ifdef CONFIG_ARCH_HAVE_PERF_EVENTS
 
 /****************************************************************************
  * Private Data

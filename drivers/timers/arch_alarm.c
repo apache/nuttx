@@ -351,7 +351,7 @@ int weak_function up_alarm_tick_start(clock_t ticks)
  *   units.
  ****************************************************************************/
 
-#ifndef CONFIG_ARCH_PERF_EVENTS
+#ifndef CONFIG_ARCH_HAVE_PERF_EVENTS
 void up_perf_init(FAR void *arg)
 {
   UNUSED(arg);
