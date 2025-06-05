@@ -663,6 +663,21 @@ static inline_function void vsock_remove_conn(FAR struct vsock_conn_s *conn)
   spin_unlock_irqrestore(&g_vsock_conn_lock, flags);
 }
 
+static inline_function bool vsock_check_conn(FAR struct vsock_conn_s *conn)
+{
+  irqstate_t flags;
+
+  flags = spin_lock_irqsave(&g_vsock_conn_lock);
+  if (list_in_list(&conn->node))
+    {
+      spin_unlock_irqrestore(&g_vsock_conn_lock, flags);
+      return true;
+    }
+
+  spin_unlock_irqrestore(&g_vsock_conn_lock, flags);
+  return false;
+}
+
 /****************************************************************************
  * Name: vsock_bind_internal
  *
@@ -2111,6 +2126,7 @@ static int vsock_close(FAR struct socket *psock)
     }
   else if (_SS_ISCONNECTED(conn->sconn.s_flags))
     {
+      vsock_add_ref(conn);
       conn->shutdown = SHUT_RDWR;
 
       /* Follow Virtio Spec 1.2 to do the clean disconnect:
@@ -2128,16 +2144,19 @@ static int vsock_close(FAR struct socket *psock)
       if (ret < 0)
         {
           vsockdbg("send shutdown failed conn=%p\n", conn);
+          vsock_sub_ref(conn);
           vsock_unlock(conn);
           return ret;
         }
 
       /* Queue the close timeout work */
 
-      vsockdbg("queue the close work conn=%p\n", conn);
-      vsock_add_ref(conn);
-      ret = vsock_queue_work(&conn->close_work, vsock_close_work, conn,
-                             VSOCK_CLOSE_TIMEOUT);
+      if (vsock_check_conn(conn))
+        {
+          vsockdbg("queue the close work conn=%p\n", conn);
+          ret = vsock_queue_work(&conn->close_work, vsock_close_work, conn,
+                                 VSOCK_CLOSE_TIMEOUT);
+        }
     }
   else if (_SS_ISBOUND(conn->sconn.s_flags) ||
            _SS_ISLISTENING(conn->sconn.s_flags))
