@@ -137,20 +137,24 @@ static void rpmsg_router_hub_unbind(FAR struct rpmsg_endpoint *ept)
 {
   FAR struct rpmsg_endpoint *dst_ept = ept->priv;
 
-  /* Destroy dest edge ept firstly */
-
-  if (dst_ept)
+  if (!dst_ept)
     {
-      /* Possible failure to execute create_ept at rpmsg_router_hub_bound */
+      return;
+    }
 
-      if (dst_ept->cb)
-        {
-          rpmsg_destroy_ept(dst_ept);
-        }
-      else
-        {
-          kmm_free(dst_ept);
-        }
+  /* Destroy dest edge ept firstly if it's binded at rpmsg_router_hub_bound */
+
+  metal_mutex_acquire(&dst_ept->rdev->lock);
+  if (dst_ept->cb)
+    {
+      dst_ept->priv = NULL;
+      metal_mutex_release(&dst_ept->rdev->lock);
+      rpmsg_destroy_ept(dst_ept);
+    }
+  else
+    {
+      metal_mutex_release(&dst_ept->rdev->lock);
+      kmm_free(dst_ept);
     }
 
   /* Destroy source edge ept */
