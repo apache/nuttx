@@ -215,7 +215,6 @@ config ARCH_CHIP_MPFS
 	select ARCH_HAVE_S_MODE
 	select ARCH_RV_CPUID_MAP
 	select ARCH_HAVE_PERF_EVENTS
-	select ARCH_PERF_EVENTS
 	select ONESHOT
 	select ALARM_ARCH
 	---help---
