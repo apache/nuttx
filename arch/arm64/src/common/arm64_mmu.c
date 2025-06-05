@@ -142,7 +142,9 @@
 #define BASE_XLAT_TABLE_ALIGN NUM_BASE_LEVEL_ENTRIES * sizeof(uint64_t)
 #endif
 
-#if (CONFIG_ARM64_PA_BITS == 48)
+#if (CONFIG_ARM64_PA_BITS == 52)
+#define TCR_PS_BITS             TCR_PS_BITS_4PB
+#elif (CONFIG_ARM64_PA_BITS == 48)
 #define TCR_PS_BITS             TCR_PS_BITS_256TB
 #elif (CONFIG_ARM64_PA_BITS == 44)
 #define TCR_PS_BITS             TCR_PS_BITS_16TB
@@ -266,6 +268,10 @@ static uint64_t get_tcr(int el)
 
   tcr |= TCR_TG0_4K | TCR_SHARED_INNER | TCR_ORGN_WBWA |
          TCR_IRGN_WBWA | TCR_TBI_FLAGS;
+
+#if (CONFIG_ARM64_PA_BITS == 52)
+  tcr |= TCR_DS;
+#endif
 
   return tcr;
 }
@@ -487,7 +493,8 @@ static void init_xlat_tables(const struct arm_mmu_region *region)
 
       level_size = 1ULL << LEVEL_TO_VA_SIZE_SHIFT(level);
 
-      if (size >= level_size && !(virt & (level_size - 1)))
+      if (size >= level_size && !(virt & (level_size - 1))
+          && ((level == 0 && CONFIG_ARM64_PA_BITS == 52) || level != 0))
         {
           /* Given range fits into level size,
            * create block/page descriptor
