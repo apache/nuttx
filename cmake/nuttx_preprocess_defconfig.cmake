@@ -32,8 +32,8 @@ if(INCLUDE_FOUND GREATER -1)
     COMMAND
       ${NUTTX_DIR}/tools/process_config.sh -I
       ${DEFCONFIG_PATH}/../../common/configs -I ${DEFCONFIG_PATH}/../common -I
-      ${DEFCONFIG_PATH} -o ${CMAKE_BINARY_DIR}/preprocess_defconfig/defconfig
-      ${NUTTX_DEFCONFIG}
+      ${DEFCONFIG_PATH} -I ${NUTTX_DIR}/../apps -o
+      ${CMAKE_BINARY_DIR}/preprocess_defconfig/defconfig ${NUTTX_DEFCONFIG}
     RESULT_VARIABLE PREPROCESS_DEFCONFIG_RESULT)
   set(NUTTX_DEFCONFIG ${CMAKE_BINARY_DIR}/preprocess_defconfig/defconfig)
 endif()
