@@ -151,11 +151,6 @@ static inline_function irqstate_t getsreg(void)
   return sreg;
 }
 
-static inline_function void putsreg(irqstate_t sreg)
-{
-  asm volatile ("out __SREG__, %s" : : "r" (sreg) :);
-}
-
 /* Return the current value of the stack pointer */
 
 static inline_function uint16_t up_getsp(void)
@@ -178,12 +173,7 @@ static inline_function uint16_t up_getsp(void)
 
 static inline_function void up_irq_enable()
 {
-  asm volatile ("sei" ::);
-}
-
-static inline_function void up_irq_disabled()
-{
-  asm volatile ("cli" ::);
+  asm volatile ("sei" ::: "memory");
 }
 
 /* Save the current interrupt enable state & disable all interrupts */
@@ -195,7 +185,7 @@ static inline_function irqstate_t up_irq_save(void)
     (
       "\tin %0, __SREG__\n"
       "\tcli\n"
-      : "=&r" (sreg) ::
+      : "=&r" (sreg) :: "memory"
     );
   return sreg;
 }
@@ -204,7 +194,7 @@ static inline_function irqstate_t up_irq_save(void)
 
 static inline_function void up_irq_restore(irqstate_t flags)
 {
-  asm volatile ("out __SREG__, %0" : : "r" (flags) :);
+  asm volatile ("out __SREG__, %0" : : "r" (flags) : "memory");
 }
 #endif /* __ASSEMBLY__ */
 
