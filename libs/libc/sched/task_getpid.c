@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/task/task_getpid.c
+ * libs/libc/sched/task_getpid.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -24,59 +24,35 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #include <sys/types.h>
 #include <unistd.h>
-#include <sched.h>
-#include <errno.h>
 
-#include "sched/sched.h"
-#include "task/task.h"
+#include <nuttx/tls.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxsched_getpid
+ * Name: getpid
  *
  * Description:
- *   Get the Process ID of the currently executing task.
+ *   Get the process ID of the currently executing thread.
  *
  * Input parameters:
  *   None
  *
  * Returned Value:
- *   Normally when called from user applications, nxsched_getpid() will
- *   return the Process ID of the currently executing task. that is,
- *   the main task for the task groups. There is no specification for
- *   any errors returned from nxsched_getpid().
+ *   On success, returns the thread ID of the calling process.
  *
  ****************************************************************************/
 
-pid_t nxsched_getpid(void)
+pid_t getpid(void)
 {
-  FAR struct tcb_s *rtcb;
+  FAR struct task_info_s *info = task_get_info();
 
-  /* Get the TCB at the head of the ready-to-run task list.  That
-   * will usually be the currently executing task.  There is are two
-   * exceptions to this:
-   *
-   * Early in the start-up sequence, the ready-to-run list may be
-   * empty!  In this case, of course, the CPU0 start-up/IDLE thread with
-   * pid == 0 must be running, and
-   */
-
-  rtcb = this_task();
-  if (rtcb != NULL)
-    {
-      /* Yes.. Return the Process ID */
-
-      return rtcb->group->tg_pid;
-    }
-
-  /* We must have been called earlier in the start up sequence from the
-   * start-up/IDLE thread before the ready-to-run list has been initialized.
-   */
-
-  return IDLE_PROCESS_ID;
+  DEBUGASSERT(info != NULL);
+  return info->ta_pid;
 }

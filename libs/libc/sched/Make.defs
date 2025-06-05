@@ -24,7 +24,7 @@
 
 CSRCS += sched_getprioritymax.c sched_getprioritymin.c
 CSRCS += task_cancelpt.c task_setcancelstate.c task_setcanceltype.c
-CSRCS += task_testcancel.c task_gettid.c
+CSRCS += task_testcancel.c task_gettid.c task_getpid.c
 CSRCS += clock_getcpuclockid.c
 
 ifeq ($(CONFIG_SMP),y)
