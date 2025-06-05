@@ -163,6 +163,12 @@ void up_enable_irq(int irq)
   act.sa_sigaction = up_handle_irq;
   act.sa_flags     = SA_SIGINFO;
   sigfillset(&act.sa_mask);
+
+  /* Allow SIGSTOP signal to be received when signal is blocked,
+   * so that gdb can stop normally when used (ctrl-Z).
+   */
+
+  sigdelset(&act.sa_mask, SIGSTOP);
   sigaction(irq, &act, NULL);
 
   /* Unmask the signal */
