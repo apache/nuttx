@@ -50,6 +50,7 @@ static void add_delaylist(FAR struct mm_heap_s *heap, FAR void *mem)
   /* Delay the deallocation until a more appropriate time. */
 
   flags = mm_lock_irq(heap);
+  kasan_bypass(true);
 
 #  ifdef CONFIG_DEBUG_ASSERTIONS
   FAR struct mm_freenode_s *node;
@@ -65,6 +66,7 @@ static void add_delaylist(FAR struct mm_heap_s *heap, FAR void *mem)
   heap->mm_delaycount[this_cpu()]++;
 #endif
 
+  kasan_bypass(false);
   mm_unlock_irq(heap, flags);
 #endif
 }
@@ -100,6 +102,7 @@ void mm_delayfree(FAR struct mm_heap_s *heap, FAR void *mem, bool delay)
       return;
     }
 
+  kasan_bypass(true);
   nodesize = mm_malloc_size(heap, mem);
 #ifdef CONFIG_MM_FILL_ALLOCATIONS
 #if CONFIG_MM_FREE_DELAYCOUNT_MAX > 0
@@ -120,6 +123,7 @@ void mm_delayfree(FAR struct mm_heap_s *heap, FAR void *mem, bool delay)
 
   if (delay)
     {
+      kasan_bypass(false);
       mm_unlock(heap);
       add_delaylist(heap, mem);
       return;
@@ -217,6 +221,8 @@ void mm_delayfree(FAR struct mm_heap_s *heap, FAR void *mem, bool delay)
   /* Add the merged node to the nodelist */
 
   mm_addfreechunk(heap, node);
+
+  kasan_bypass(false);
   mm_unlock(heap);
 }
 
