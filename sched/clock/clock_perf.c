@@ -64,7 +64,7 @@ static void perf_update(wdparm_t arg)
   clock_t tick = (clock_t)LONG_MAX * TICK_PER_SEC / up_perf_getfreq();
 
   perf_gettime();
-  wd_start((FAR struct wdog_s *)arg, tick, perf_update, arg);
+  wd_start_next((FAR struct wdog_s *)arg, tick, perf_update, arg);
 }
 
 /****************************************************************************

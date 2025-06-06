@@ -118,7 +118,7 @@ static void cpuload_callback(wdparm_t arg)
 {
   FAR struct wdog_s *wdog = (FAR struct wdog_s *)arg;
   nxsched_process_cpuload_ticks(CPULOAD_SAMPLING_PERIOD);
-  wd_start(wdog, CPULOAD_SAMPLING_PERIOD, cpuload_callback, arg);
+  wd_start_next(wdog, CPULOAD_SAMPLING_PERIOD, cpuload_callback, arg);
 }
 #endif
 

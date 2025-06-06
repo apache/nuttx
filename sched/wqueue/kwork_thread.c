@@ -239,30 +239,9 @@ static int work_thread(int argc, FAR char *argv[])
 
           arg = work->arg;
 
-          /* Check whether the work is periodic. */
+          /* Return the work structure ownership to the work owner. */
 
-          if (work->period != 0)
-            {
-              /* Calculate next expiration qtime. */
-
-              work->qtime += work->period;
-
-              /* Enqueue to the waiting queue */
-
-              if (work_insert_pending(wqueue, work))
-                {
-                  /* We should reset timer if the work is the earliest. */
-
-                  wd_start_abstick(&wqueue->timer, work->qtime,
-                                   work_timer_expired, (wdparm_t)wqueue);
-                }
-            }
-          else
-            {
-              /* Return the work structure ownership to the work owner. */
-
-              work->worker = NULL;
-            }
+          work->worker = NULL;
 
           /* Mark the thread busy */
 

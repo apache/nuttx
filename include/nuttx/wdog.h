@@ -99,13 +99,6 @@ struct wdog_s
   clock_t            expired;    /* Timer associated with the absolute time */
 };
 
-struct wdog_period_s
-{
-  struct wdog_s      wdog;       /* Watchdog */
-  clock_t            period;     /* Period time in ticks */
-  wdentry_t          func;       /* Wrapped function to execute when delay expires */
-};
-
 /****************************************************************************
  * Pubic Function Prototypes
  ****************************************************************************/
@@ -271,10 +264,11 @@ int wd_start_abstick(FAR struct wdog_s *wdog, clock_t ticks,
  *
  ****************************************************************************/
 
-static inline int wd_start_realtime(FAR struct wdog_s *wdog,
-                                    FAR const struct timespec *realtime,
-                                    wdentry_t wdentry,
-                                    wdparm_t arg)
+static inline_function
+int wd_start_realtime(FAR struct wdog_s *wdog,
+                      FAR const struct timespec *realtime,
+                      wdentry_t wdentry,
+                      wdparm_t arg)
 {
 #ifdef CONFIG_CLOCK_TIMEKEEPING
   irqstate_t flags;
@@ -296,15 +290,15 @@ static inline int wd_start_realtime(FAR struct wdog_s *wdog,
 }
 
 /****************************************************************************
- * Name: wd_start_period
+ * Name: wd_start_next
  *
  * Description:
- *   This function periodically adds a watchdog timer to the active timer.
+ *   This function restart watchdog timer based on the last expiration time.
+ *   It can be used to implement a periodic watchdog timer.
  *
  * Input Parameters:
  *   wdog     - Pointer of the periodic watchdog.
  *   delay    - Delayed time in system ticks.
- *   period   - Period in system ticks.
  *   wdentry  - Function to call on timeout.
  *   arg      - Parameter to pass to wdentry.
  *
@@ -320,8 +314,19 @@ static inline int wd_start_realtime(FAR struct wdog_s *wdog,
  *
  ****************************************************************************/
 
-int wd_start_period(FAR struct wdog_period_s *wdog, clock_t delay,
-                    clock_t period, wdentry_t wdentry, wdparm_t arg);
+static inline_function
+int wd_start_next(FAR struct wdog_s *wdog, clock_t delay,
+                  wdentry_t wdentry, wdparm_t arg)
+{
+  /* Ensure delay is within the range the wdog can handle. */
+
+  if (delay > WDOG_MAX_DELAY)
+    {
+      return -EINVAL;
+    }
+
+  return wd_start_abstick(wdog, wdog->expired + delay, wdentry, arg);
+}
 
 /****************************************************************************
  * Name: wd_cancel
@@ -340,32 +345,6 @@ int wd_start_period(FAR struct wdog_period_s *wdog, clock_t delay,
  ****************************************************************************/
 
 int wd_cancel(FAR struct wdog_s *wdog);
-
-/****************************************************************************
- * Name: wd_cancel_period
- *
- * Description:
- *   This function cancels a currently running periodic watchdog timer.
- *
- * Input Parameters:
- *   wdog_period - Pointer of the periodic watchdog.
- *
- * Returned Value:
- *   Zero (OK) is returned on success;  A negated errno value is returned to
- *   indicate the nature of any failure.
- *
- ****************************************************************************/
-
-static inline int wd_cancel_period(FAR struct wdog_period_s *wdog_period)
-{
-  if (!wdog_period)
-    {
-      return -EINVAL;
-    }
-
-  wdog_period->period = 0;
-  return wd_cancel(&wdog_period->wdog);
-}
 
 /****************************************************************************
  * Name: wd_gettime

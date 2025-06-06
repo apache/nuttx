@@ -102,7 +102,7 @@ static void profil_timer_handler(wdparm_t arg)
 #endif
 
   profil_timer_handler_cpu(prof);
-  wd_start(&prof->timer, PROFTICK, profil_timer_handler, arg);
+  wd_start_next(&prof->timer, PROFTICK, profil_timer_handler, arg);
 }
 
 /****************************************************************************

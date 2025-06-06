@@ -251,7 +251,6 @@ struct work_s
 {
   struct list_node node;   /* Implements a double linked list */
   clock_t          qtime;  /* Time work queued */
-  clock_t          period; /* Periodical delay ticks */
   worker_t         worker; /* Work callback */
   FAR void        *arg;    /* Callback argument */
 };
@@ -411,18 +410,11 @@ int work_queue_wq(FAR struct kwork_wqueue_s *wqueue,
                   FAR void *arg, clock_t delay);
 
 /****************************************************************************
- * Name: work_queue_period/work_queue_period_wq
+ * Name: work_queue_next/work_queue_next_wq
  *
  * Description:
- *   Queue work to be performed periodically.  All queued work will be
- *   performed on the worker thread of execution (not the caller's).
- *
- *   The work structure is allocated and must be initialized to all zero by
- *   the caller.  Otherwise, the work structure is completely managed by the
- *   work queue logic.  The caller should never modify the contents of the
- *   work queue structure directly.  If work_queue() is called before the
- *   previous work has been performed and removed from the queue, then any
- *   pending work will be canceled and lost.
+ *   Queue work to be performed at a later time based on the last expiration
+ *   time. This function must be called in the workqueue callback.
  *
  * Input Parameters:
  *   qid    - The work queue ID (must be HPWORK or LPWORK)
@@ -434,18 +426,17 @@ int work_queue_wq(FAR struct kwork_wqueue_s *wqueue,
  *            it is invoked.
  *   delay  - Delay (in clock ticks) from the time queue until the worker
  *            is invoked. Zero means to perform the work immediately.
- *   period - Period (in clock ticks).
  *
  * Returned Value:
  *   Zero on success, a negated errno on failure
  *
  ****************************************************************************/
 
-int work_queue_period(int qid, FAR struct work_s *work, worker_t worker,
-                      FAR void *arg, clock_t delay, clock_t period);
-int work_queue_period_wq(FAR struct kwork_wqueue_s *wqueue,
-                         FAR struct work_s *work, worker_t worker,
-                         FAR void *arg, clock_t delay, clock_t period);
+int work_queue_next(int qid, FAR struct work_s *work, worker_t worker,
+                    FAR void *arg, clock_t delay);
+int work_queue_next_wq(FAR struct kwork_wqueue_s *wqueue,
+                       FAR struct work_s *work, worker_t worker,
+                       FAR void *arg, clock_t delay);
 
 /****************************************************************************
  * Name: work_queue_pri
