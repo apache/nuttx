@@ -671,6 +671,9 @@ static int esp_pcnt_unit_get_count(struct cap_lowerhalf_s *dev, int *ret)
 {
   struct esp_pcnt_priv_s *priv = (struct esp_pcnt_priv_s *)dev;
   irqstate_t flags;
+  int32_t tmp_count;
+  uint32_t event_status;
+  uint32_t intr_status;
 
   if (!priv->unit_used)
     {
@@ -679,8 +682,38 @@ static int esp_pcnt_unit_get_count(struct cap_lowerhalf_s *dev, int *ret)
     }
 
   flags = spin_lock_irqsave(&priv->lock);
-  *ret = pcnt_ll_get_count(ctx.dev, priv->unit_id) +
-      priv->accum_value;
+  tmp_count = pcnt_ll_get_count(ctx.dev, priv->unit_id);
+
+  intr_status = pcnt_ll_get_intr_status(ctx.dev);
+  if (intr_status & PCNT_LL_UNIT_WATCH_EVENT(priv->unit_id))
+    {
+      event_status = pcnt_ll_get_event_status(ctx.dev, priv->unit_id);
+      while (event_status)
+        {
+          int event_id = __builtin_ffs(event_status) - 1;
+          event_status &= (event_status - 1);
+
+          if (priv->config.accum_count)
+            {
+              if (event_id == PCNT_LL_WATCH_EVENT_LOW_LIMIT)
+                {
+                  if (tmp_count >= (priv->config.low_limit / 2))
+                    {
+                      tmp_count += priv->config.low_limit;
+                    }
+                }
+              else if (event_id == PCNT_LL_WATCH_EVENT_HIGH_LIMIT)
+                {
+                  if (tmp_count <= (priv->config.high_limit / 2))
+                    {
+                      tmp_count += priv->config.high_limit;
+                    }
+                }
+            }
+        }
+    }
+
+  *ret = tmp_count + priv->accum_value;
   spin_unlock_irqrestore(&priv->lock, flags);
 
   return OK;
