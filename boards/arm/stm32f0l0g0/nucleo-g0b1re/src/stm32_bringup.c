@@ -26,11 +26,15 @@
 
 #include <nuttx/config.h>
 
+#include <sys/mount.h>
 #include <sys/types.h>
 #include <syslog.h>
+#include <debug.h>
 
 #include <nuttx/board.h>
+#include <nuttx/input/buttons.h>
 #include <nuttx/leds/userled.h>
+#include <arch/board/board.h>
 
 #include "nucleo-g0b1re.h"
 

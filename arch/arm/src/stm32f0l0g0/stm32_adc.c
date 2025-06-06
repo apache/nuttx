@@ -60,7 +60,7 @@
 
 #if defined(CONFIG_STM32F0L0G0_ADC1)
 
-#if defined(CONFIG_STM32F0L0G0_STM32F0) || defined(CONFIG_STM32F0L0G0_STM32G0)
+#if defined(CONFIG_STM32F0L0G0_STM32F0)
 #  error Not tested
 #endif
 
@@ -134,7 +134,8 @@
 
 #if defined(CONFIG_STM32F0L0G0_STM32F0) || \
     defined(CONFIG_STM32F0L0G0_STM32L0) || \
-    defined(CONFIG_STM32F0L0G0_STM32C0)
+    defined(CONFIG_STM32F0L0G0_STM32C0) || \
+    defined(CONFIG_STM32F0L0G0_STM32G0)
 #  define ADC_CHANNELS_NUMBER 19
 #else
 #  error "Not supported"
@@ -164,6 +165,12 @@
 /* ADC DMA configuration bit support */
 
 #define ADC_HAVE_DMACFG 1
+
+#if defined(CONFIG_STM32F0L0G0_STM32G0) || defined(CONFIG_STM32F0L0G0_STM32L0)
+#  ifndef ANIOC_SET_OVERSAMPLE
+#    define ANIOC_SET_OVERSAMPLE _ANIOC(0x0f)
+#  endif
+#endif
 
 /****************************************************************************
  * Private Types
@@ -1459,6 +1466,22 @@ static void adc_sampletime_cfg(struct adc_dev_s *dev)
 }
 
 /****************************************************************************
+ * Name: adc_ckmode_cfg
+ ****************************************************************************/
+
+static void adc_ckmode_cfg(struct stm32_dev_s *priv)
+{
+  uint32_t setbits = 0;
+  uint32_t clearbits = ADC_CFGR2_CKMODE_MASK;
+
+#ifdef STM32_ADC_CFGR2_CKMODE
+  setbits |= STM32_ADC_CFGR2_CKMODE;
+#endif
+
+  adc_modifyreg(priv, STM32_ADC_CFGR2_OFFSET, clearbits, setbits);
+}
+
+/****************************************************************************
  * Name: adc_common_cfg
  ****************************************************************************/
 
@@ -1467,10 +1490,18 @@ static void adc_common_cfg(struct stm32_dev_s *priv)
   uint32_t clrbits = 0;
   uint32_t setbits = 0;
 
+#ifdef STM32_ADC_CCR_PRESC
+  setbits |= STM32_ADC_CCR_PRESC;
+#endif
+
   /* REVISIT: for now we reset all CCR bits */
 
-  clrbits |= ADC_CCR_VREFEN;
-  clrbits |= ADC_CCR_TSEN;
+  clrbits |= ADC_CCR_PRESC_MASK | ADC_CCR_VREFEN |
+             ADC_CCR_TSEN;
+
+#ifdef HAVE_ADC_VBAT
+  clrbits |= ADC_CCR_VBATEN;
+#endif
 
 #ifdef HAVE_ADC_VLCD
   clrbits |= ADC_CCR_PRESC_MASK;
@@ -1483,8 +1514,6 @@ static void adc_common_cfg(struct stm32_dev_s *priv)
 #ifdef HAVE_ADC_LFM
   clrbits |= ADC_CCR_LFMEN;
 #endif
-
-  setbits = 0;
 
   adccmn_modifyreg(priv, STM32_ADC_CCR_OFFSET, clrbits, setbits);
 }
@@ -1590,6 +1619,10 @@ static void adc_configure(struct adc_dev_s *dev)
       adc_set_ch(dev, 0);
     }
 
+  /* ADC clock mode configuration  */
+
+  adc_ckmode_cfg(priv);
+
   /* ADC common register configuration */
 
   adc_common_cfg(priv);
@@ -1629,6 +1662,31 @@ static void adc_configure(struct adc_dev_s *dev)
 
   adc_dumpregs(priv);
 }
+
+ #ifdef CONFIG_STM32F0L0G0_ADC_OVERSAMPLE
+
+/****************************************************************************
+ * Name: adc_oversample
+ ****************************************************************************/
+
+static void adc_oversample(struct adc_dev_s *dev)
+{
+  struct stm32_dev_s *priv = (struct stm32_dev_s *)dev->ad_priv;
+
+  uint32_t clrbits = ADC_CFGR2_OVSE | ADC_CFGR2_TOVS |
+                     ADC_CFGR2_OVSR_MASK | ADC_CFGR2_OVSS_MASK;
+
+  uint32_t setbits = ADC_CFGR2_OVSE |
+                     (CONFIG_STM32F0L0G0_ADC_OVSR << ADC_CFGR2_OVSR_SHIFT) |
+                     (CONFIG_STM32F0L0G0_ADC_OVSS << ADC_CFGR2_OVSS_SHIFT);
+
+#  ifdef CONFIG_STM32F0L0G0_ADC_TOVS
+  setbits |= ADC_CFGR2_TOVS;
+#  endif
+
+  adc_modifyreg(priv, STM32_ADC_CFGR2_OFFSET, clrbits, setbits);
+}
+#endif
 
 /****************************************************************************
  * Name: adc_reset
@@ -1726,6 +1784,10 @@ static int adc_setup(struct adc_dev_s *dev)
   /* Configure ADC device */
 
   adc_configure(dev);
+
+#ifdef CONFIG_STM32F0L0G0_ADC_OVERSAMPLE
+  adc_oversample(dev);
+#endif
 
 #ifdef ADC_HAVE_TIMER
   /* Configure timer */
@@ -2193,6 +2255,55 @@ static int adc_ioc_change_ints(struct adc_dev_s *dev, int cmd, bool arg)
 
   return ret;
 }
+#ifdef CONFIG_STM32F0L0G0_ADC_OVERSAMPLE
+
+/****************************************************************************
+ * Name: adc_ioc_set_oversample
+ *
+ * Description:
+ *   For STM32G0 and STM32L0: Configure hardware oversampling via CFGR2.
+ *
+ * Input:
+ *   dev - pointer to the ADC device
+ *   arg - Packed 32-bit value that matches CFGR2 layout for OVSE, TOVS,
+ *         OVSR[2:0] and OVSS[3:0].
+ *
+ *         Bit fields (match ADC_CFGR2 register layout):
+ *           [0]     = OVSE  (enable oversampling)
+ *           [1]     = TOVS  (triggered oversampling)
+ *           [4:2]   = OVSR  (ratio: 000=2x, ..., 111=256x)
+ *           [9:5]   = OVSS  (right shift: 00000=no shift, ..., 11111=31-bit)
+ *
+ * Returned Value:
+ *   OK (0) on success
+ *
+ ****************************************************************************/
+
+static int adc_ioc_set_oversample(struct adc_dev_s *dev, uint32_t arg)
+{
+  struct stm32_dev_s *priv = (struct stm32_dev_s *)dev->ad_priv;
+  uint32_t clrbits;
+  uint32_t setbits;
+
+  /* Mask out the oversampling-related fields from CFGR2:
+   * OVSE | TOVS | OVSR[2:0] | OVSS[3:0]
+   */
+
+  clrbits = ADC_CFGR2_OVSE     |
+            ADC_CFGR2_TOVS     |
+            ADC_CFGR2_OVSR_MASK |
+            ADC_CFGR2_OVSS_MASK;
+
+  setbits = arg & (ADC_CFGR2_OVSE     |
+                   ADC_CFGR2_TOVS     |
+                   ADC_CFGR2_OVSR_MASK |
+                   ADC_CFGR2_OVSS_MASK);
+
+  adc_modifyreg(priv, STM32_ADC_CFGR2_OFFSET, clrbits, setbits);
+  return OK;
+}
+
+#endif /* G0 or L0 */
 
 /****************************************************************************
  * Name: adc_set_ch
@@ -2286,6 +2397,7 @@ static int adc_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg)
 
           ret = priv->cr_channels;
         }
+
         break;
 
       case IO_TRIGGER_REG:
@@ -2362,6 +2474,14 @@ static int adc_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg)
           adc_reg_startconv(priv, true);
           break;
         }
+
+#if defined(CONFIG_STM32F0L0G0_ADC_OVERSAMPLE)
+      case ANIOC_SET_OVERSAMPLE:
+        {
+          ret = adc_ioc_set_oversample(dev, arg);
+          break;
+        }
+#endif
 
       default:
         {

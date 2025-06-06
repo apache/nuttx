@@ -76,14 +76,14 @@
  *   2 <= PLLR <= 8
  *
  *   PLLR <= 64MHz
- *   PLLQ <= 128MHz
- *   PLLP <= 128MHz
+ *   PLLQ <= 64MHz
+ *   PLLP <= 64MHz
  *
- *   PLL_VCO = (16,000,000 / 4) * 50 = 200 MHz
+ *   PLL_VCO = (16,000,000 / 2) * 32 = 256 MHz
  *
- *   PLLP = PLL_VCO/4 = 200 MHz / 4 = 40 MHz
- *   PLLQ = PLL_VCO/4 = 200 MHz / 4 = 40 MHz
- *   PLLR = PLL_VCO/4 = 200 MHz / 4 = 40 MHz
+ *   PLLP = PLL_VCO/4 = 256 MHz / 4 = 64 MHz
+ *   PLLQ = PLL_VCO/4 = 256 MHz / 4 = 64 MHz
+ *   PLLR = PLL_VCO/4 = 256 MHz / 4 = 64 MHz
  */
 
 #define STM32_PLLCFG_PLLSRC     RCC_PLLCFG_PLLSRC_HSI
@@ -91,13 +91,13 @@
                                  RCC_PLLCFG_PLLQEN | \
                                  RCC_PLLCFG_PLLREN)
 
-#define STM32_PLLCFG_PLLM       RCC_PLLCFG_PLLM(4)
-#define STM32_PLLCFG_PLLN       RCC_PLLCFG_PLLN(50)
+#define STM32_PLLCFG_PLLM       RCC_PLLCFG_PLLM(2)
+#define STM32_PLLCFG_PLLN       RCC_PLLCFG_PLLN(64)
 #define STM32_PLLCFG_PLLP       RCC_PLLCFG_PLLP(4)
 #define STM32_PLLCFG_PLLQ       RCC_PLLCFG_PLLQ(4)
 #define STM32_PLLCFG_PLLR       RCC_PLLCFG_PLLR(4)
 
-#define STM32_VCO_FREQUENCY     ((STM32_HSE_FREQUENCY / 2) * 50)
+#define STM32_VCO_FREQUENCY     ((STM32_HSI_FREQUENCY / 2) * 64)
 #define STM32_PLLP_FREQUENCY    (STM32_VCO_FREQUENCY / 4)
 #define STM32_PLLQ_FREQUENCY    (STM32_VCO_FREQUENCY / 4)
 #define STM32_PLLR_FREQUENCY    (STM32_VCO_FREQUENCY / 4)
@@ -117,6 +117,13 @@
 
 #define STM32_RCC_CFGR_PPRE1    RCC_CFGR_PPRE1_HCLKd2
 #define STM32_PCLK1_FREQUENCY   (STM32_HCLK_FREQUENCY/2)
+
+/* ADC1 clock prescaled is SYSCLK (64MHz) / 2 = 32MHz */
+
+#define STM32_ADC_CLK_FREQUENCY     STM32_SYSCLK_FREQUENCY
+#define STM32_RCC_CCIPR_ADCSEL      RCC_CCIPR_ADCSEL_SYSCLK
+#define STM32_ADC_CFGR2_CKMODE      ADC_CFGR2_CKMODE_ADCCLK
+#define STM32_ADC_CCR_PRESC         ADC_CCR_PRESC_DIV2
 
 /* LED definitions **********************************************************/
 
@@ -200,6 +207,10 @@
 
 #define GPIO_USART2_RX (GPIO_USART2_RX_1|GPIO_SPEED_HIGH) /* PA3 */
 #define GPIO_USART2_TX (GPIO_USART2_TX_1|GPIO_SPEED_HIGH) /* PA2 */
+
+/* ADC */
+
+#define GPIO_ADC1_IN0  (GPIO_ANALOG | GPIO_PORTA | GPIO_PIN0)
 
 /* DMA channels *************************************************************/
 

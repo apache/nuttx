@@ -335,6 +335,12 @@
 
 /* TODO: Clock configuration register */
 
+#define RCC_CCIPR_ADCSEL_SHIFT      (30)
+#define RCC_CCIPR_ADCSEL_MASK       (3 << RCC_CCIPR_ADCSEL_SHIFT)
+#define RCC_CCIPR_ADCSEL_SYSCLK     (0)
+#define RCC_CCIPR_ADCSEL_PLLPCLK    (1 << RCC_CCIPR_ADCSEL_SHIFT)
+#define RCC_CCIPR_ADCSEL_HSI16      (2 << RCC_CCIPR_ADCSEL_SHIFT)
+
 /* TODO: RTC domain control register */
 
 /* Control/status register */

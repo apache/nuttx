@@ -89,4 +89,15 @@
 
 int stm32_bringup(void);
 
+/****************************************************************************
+ * Name: stm32_adc_setup
+ *
+ * Description:
+ *   Initialize ADC and register the ADC driver.
+ ****************************************************************************/
+
+#ifdef CONFIG_ADC
+int stm32_adc_setup(void);
+#endif
+
 #endif /* __BOARDS_ARM_STM32F0L0G0_NUCLEO_G0B1RE_SRC_NUCLEO_G0B1RE_H */
