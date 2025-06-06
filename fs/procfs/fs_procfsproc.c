@@ -1263,7 +1263,7 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
 
   DEBUGASSERT(group != NULL);
 
-  count = files_countlist(&group->tg_filelist);
+  count = fdlist_count(&group->tg_fdlist);
   if (count == 0)
     {
       return 0;
@@ -1303,7 +1303,7 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
 
   for (i = 0; i < count; i++)
     {
-      filep = files_fget(&group->tg_filelist, i);
+      filep = fdlist_fget(&group->tg_fdlist, i);
 
       /* Is there an inode associated with the file descriptor? */
 
@@ -1325,9 +1325,10 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
       if (linesize < STATUS_LINELEN)
         {
 #if CONFIG_FS_BACKTRACE > 0
+          FAR struct fd *fd = fdlist_fdget(&group->tg_fdlist, i);
           linesize += backtrace_format(procfile->line + linesize,
                                        STATUS_LINELEN - linesize,
-                                       filep->f_backtrace,
+                                       fd->f_backtrace,
                                        CONFIG_FS_BACKTRACE);
 #endif
           procfile->line[linesize - 2] = '\n';
