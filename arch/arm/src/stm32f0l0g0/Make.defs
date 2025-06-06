@@ -23,7 +23,7 @@
 include armv6-m/Make.defs
 
 CHIP_CSRCS  = stm32_start.c stm32_gpio.c stm32_exti_gpio.c stm32_irq.c
-CHIP_CSRCS += stm32_lowputc.c stm32_serial.c stm32_rcc.c stm32_lsi.c
+CHIP_CSRCS += stm32_lowputc.c stm32_serial.c stm32_rcc.c stm32_lsi.c stm32_uid.c
 
 ifneq ($(CONFIG_STM32F0L0G0_RTC_LSECLOCK)$(CONFIG_STM32F0L0G0_LCD_LSECLOCK),)
 CHIP_CSRCS += stm32_lse.c

@@ -123,6 +123,7 @@
  * this address range
  */
 
+#define STM32_SYSMEM_UID     0x1fff7590     /* The 96-bit unique device identifier */
 #define STM32_SCS_BASE       0xe000e000
 #define STM32_DEBUGMCU_BASE  0xe0042000
 
