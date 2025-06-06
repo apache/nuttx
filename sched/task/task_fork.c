@@ -221,14 +221,6 @@ FAR struct tcb_s *nxtask_setup_fork(start_t retaddr)
     }
 #endif
 
-  /* Setup thread local storage */
-
-  ret = tls_dup_info(child, parent);
-  if (ret < OK)
-    {
-      goto errout_with_tcb;
-    }
-
   /* Get the priority of the parent task */
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
@@ -242,6 +234,14 @@ FAR struct tcb_s *nxtask_setup_fork(start_t retaddr)
   sinfo("Child priority=%d start=%p\n", priority, retaddr);
   ret = nxtask_setup_scheduler(child, priority, retaddr,
                                ptcb->entry.main, ttype);
+  if (ret < OK)
+    {
+      goto errout_with_tcb;
+    }
+
+  /* Setup thread local storage */
+
+  ret = tls_dup_info(child, parent);
   if (ret < OK)
     {
       goto errout_with_tcb;
