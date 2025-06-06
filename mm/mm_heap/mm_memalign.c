@@ -159,6 +159,7 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
    */
 
   DEBUGVERIFY(mm_lock(heap));
+  kasan_bypass(true);
 
   /* Get the node associated with the allocation and the next node after
    * the allocation.
@@ -291,6 +292,7 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
   sched_note_heap(NOTE_HEAP_ALLOC, heap, (FAR void *)alignedchunk, size,
                   heap->mm_curused);
 
+  kasan_bypass(false);
   mm_unlock(heap);
 
   MM_ADD_BACKTRACE(heap, node);

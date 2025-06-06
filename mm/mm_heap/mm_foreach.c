@@ -29,6 +29,7 @@
 #include <assert.h>
 #include <nuttx/debug.h>
 
+#include <nuttx/mm/kasan.h>
 #include <nuttx/mm/mm.h>
 
 #include "mm_heap/mm.h"
@@ -77,6 +78,8 @@ void mm_foreach(FAR struct mm_heap_s *heap, mm_node_handler_t handler,
           return;
         }
 
+      kasan_bypass(true);
+
       for (node = heap->mm_heapstart[region];
            node < heap->mm_heapend[region];
            node = (FAR struct mm_allocnode_s *)((FAR char *)node + nodesize))
@@ -100,6 +103,7 @@ void mm_foreach(FAR struct mm_heap_s *heap, mm_node_handler_t handler,
       DEBUGASSERT(node == heap->mm_heapend[region]);
       handler(node, arg);
 
+      kasan_bypass(false);
       mm_unlock(heap);
     }
 #undef region
