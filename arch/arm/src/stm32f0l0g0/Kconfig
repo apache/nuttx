@@ -1512,6 +1512,10 @@ config STM32F0L0G0_HAVE_ADC1_DMA
 	bool
 	default n
 
+config STM32F0L0G0_HAVE_ADC_OVERSAMPLE
+    bool
+    default STM32F0L0G0_STM32L0 || STM32F0L0G0_STM32G0 || STM32F0L0G0_STM32C0
+
 config STM32F0L0G0_HAVE_CEC
 	bool
 	default n
@@ -3418,6 +3422,45 @@ config STM32F0L0G0_ADC1_DMA_CFG
 	default 0
 	---help---
 		0 - ADC1 DMA in One Shot Mode, 1 - ADC1 DMA in Circular Mode
+
+config STM32F0L0G0_ADC_OVERSAMPLE
+    bool "Enable ADC hardware oversampling support"
+    depends on STM32F0L0G0_ADC1 && STM32F0L0G0_HAVE_ADC_OVERSAMPLE
+    default n
+    ---help---
+        Enable the on-chip ADC oversampling/accumulation block (CFGR2.OVSE).
+        Only STM32G0 and STM32L0 series include this hardware block.
+
+if STM32F0L0G0_ADC_OVERSAMPLE
+
+config STM32F0L0G0_ADC_TOVS
+    bool "Enable triggered oversampling (CFGR2.TOVS)"
+    default n
+    ---help---
+        If set, oversampling will only occur when a trigger event occurs.
+        If not set, oversampling occurs continuously (TOVS=0).
+
+config STM32F0L0G0_ADC_OVSR
+    int "Oversampling ratio (CFGR2.OVSR)"
+    default 0
+    range 0 7
+    ---help---
+        Sets the oversampling ratio as 2^(OVSR+1). For example:
+          0 → 2×
+          1 → 4×
+          2 → 8×
+          ...
+          7 → 256×
+
+config STM32F0L0G0_ADC_OVSS
+    int "Oversampling right-shift bits (CFGR2.OVSS)"
+    default 0
+    range 0 8
+    ---help---
+        Sets how many bits the accumulated result is right-shifted.
+        Max of 8-bits.
+
+endif # STM32F0L0G0_ADC_OVERSAMPLE
 
 config STM32F0L0G0_ADC1_DMA_BATCH
 	int "ADC1 DMA number of conversions"
