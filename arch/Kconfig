@@ -492,6 +492,10 @@ config ARCH_HAVE_RESET
 	bool
 	default n
 
+config ARCH_LD_16BIT_NOT_ATOMIC
+	bool
+	default n
+
 config ARCH_HAVE_TESTSET
 	bool
 	default n
