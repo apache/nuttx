@@ -388,12 +388,12 @@ static int IRAM_ATTR esp_pcnt_isr_default(int irq, void *context,
       unit = &pcnt_units[unit_id];
       pcnt_ll_clear_intr_status(ctx.dev, PCNT_LL_UNIT_WATCH_EVENT(unit_id));
       event_status = pcnt_ll_get_event_status(ctx.dev, unit_id);
+      flags = spin_lock_irqsave(&unit->lock);
       while (event_status)
         {
           int event_id = __builtin_ffs(event_status) - 1;
           event_status &= (event_status - 1);
 
-          flags = spin_lock_irqsave(&unit->lock);
           if (unit->config.accum_count)
             {
               if (event_id == PCNT_LL_WATCH_EVENT_LOW_LIMIT)
@@ -406,7 +406,6 @@ static int IRAM_ATTR esp_pcnt_isr_default(int irq, void *context,
                 }
             }
 
-          spin_unlock_irqrestore(&unit->lock, flags);
           if (unit->cb)
             {
               data.unit_id = unit_id;
@@ -417,6 +416,8 @@ static int IRAM_ATTR esp_pcnt_isr_default(int irq, void *context,
               unit->cb(irq, context, &data);
             }
         }
+
+      spin_unlock_irqrestore(&unit->lock, flags);
     }
 
   return 0;
@@ -634,6 +635,9 @@ static int esp_pcnt_unit_get_count(struct cap_lowerhalf_s *dev, int *ret)
 {
   struct esp_pcnt_priv_s *priv = (struct esp_pcnt_priv_s *)dev;
   irqstate_t flags;
+  int32_t tmp_count;
+  uint32_t event_status;
+  uint32_t intr_status;
 
   if (!priv->unit_used)
     {
@@ -642,8 +646,29 @@ static int esp_pcnt_unit_get_count(struct cap_lowerhalf_s *dev, int *ret)
     }
 
   flags = spin_lock_irqsave(&priv->lock);
-  *ret = pcnt_ll_get_count(ctx.dev, priv->unit_id) +
-      priv->accum_value;
+  tmp_count = pcnt_ll_get_count(ctx.dev, priv->unit_id);
+
+  if (priv->config.accum_count)
+    {
+      intr_status = pcnt_ll_get_intr_status(ctx.dev);
+      if (intr_status & PCNT_LL_UNIT_WATCH_EVENT(priv->unit_id))
+        {
+          event_status = pcnt_ll_get_event_status(ctx.dev, priv->unit_id);
+          if ((event_status & (1 << PCNT_LL_WATCH_EVENT_LOW_LIMIT)) && \
+              (tmp_count >= (priv->config.low_limit / 2)))
+            {
+              tmp_count += priv->config.low_limit;
+            }
+          else if ((event_status & \
+                    (1 << PCNT_LL_WATCH_EVENT_HIGH_LIMIT)) && \
+                   (tmp_count <= (priv->config.high_limit / 2)))
+            {
+              tmp_count += priv->config.high_limit;
+            }
+        }
+    }
+
+  *ret = tmp_count + priv->accum_value;
   spin_unlock_irqrestore(&priv->lock, flags);
 
   return OK;
