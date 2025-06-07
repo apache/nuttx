@@ -150,7 +150,6 @@ static int file_shm_open(FAR struct file *shm, FAR const char *name,
 
   /* Associate the inode with a file structure */
 
-  memset(shm, 0, sizeof(*shm));
   shm->f_oflags = oflags | O_CLOEXEC | O_NOFOLLOW;
   shm->f_inode = inode;
 
@@ -173,24 +172,25 @@ errout_with_sem:
 
 int shm_open(FAR const char *name, int oflag, mode_t mode)
 {
-  struct file shm;
+  FAR struct file *shm;
   int ret;
+  int fd;
 
-  ret = file_shm_open(&shm, name, oflag, mode);
+  fd = file_allocate(oflag, 0, &shm);
+  if (fd < 0)
+    {
+      set_errno(-fd);
+      return ERROR;
+    }
+
+  ret = file_shm_open(shm, name, oflag, mode);
+  file_put(shm);
   if (ret < 0)
     {
+      nx_close(fd);
       set_errno(-ret);
       return ERROR;
     }
 
-  ret = file_allocate(shm.f_inode, shm.f_oflags, shm.f_pos, shm.f_priv, 0,
-                      false);
-  if (ret < 0)
-    {
-      set_errno(-ret);
-      file_close(&shm);
-      return ERROR;
-    }
-
-  return ret;
+  return fd;
 }

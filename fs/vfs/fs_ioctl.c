@@ -89,22 +89,6 @@ static int file_vioctl(FAR struct file *filep, int req, va_list ap)
           }
         break;
 
-      case FIOCLEX:
-        if (ret == OK || ret == -ENOTTY)
-          {
-            filep->f_oflags |= O_CLOEXEC;
-            ret = OK;
-          }
-        break;
-
-      case FIONCLEX:
-        if (ret == OK || ret == -ENOTTY)
-          {
-            filep->f_oflags &= ~O_CLOEXEC;
-            ret = OK;
-          }
-        break;
-
       case FIOC_FILEPATH:
         if (ret == -ENOTTY && !INODE_IS_MOUNTPT(inode))
           {
@@ -134,30 +118,6 @@ static int file_vioctl(FAR struct file *filep, int req, va_list ap)
                              false);
           }
         break;
-
-#ifdef CONFIG_FDSAN
-      case FIOC_SETTAG_FDSAN:
-        filep->f_tag_fdsan = *(FAR uint64_t *)arg;
-        ret = OK;
-        break;
-
-      case FIOC_GETTAG_FDSAN:
-        *(FAR uint64_t *)arg = filep->f_tag_fdsan;
-        ret = OK;
-        break;
-#endif
-
-#ifdef CONFIG_FDCHECK
-      case FIOC_SETTAG_FDCHECK:
-        filep->f_tag_fdcheck = *(FAR uint8_t *)arg;
-        ret = OK;
-        break;
-
-      case FIOC_GETTAG_FDCHECK:
-        *(FAR uint8_t *)arg = filep->f_tag_fdcheck;
-        ret = OK;
-        break;
-#endif
 
 #ifndef CONFIG_DISABLE_MOUNTPOINT
       case BIOC_BLKSSZGET:
@@ -191,6 +151,65 @@ static int file_vioctl(FAR struct file *filep, int req, va_list ap)
 #endif
     }
 
+  return ret;
+}
+
+/****************************************************************************
+ * Name: nx_vioctl
+ ****************************************************************************/
+
+static int nx_vioctl(int fd, int req, va_list ap)
+{
+  FAR struct file *filep;
+  FAR struct fd *fdp;
+  int ret;
+
+  ret = file_get2(fd, &filep, &fdp);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  switch (req)
+    {
+      case FIOCLEX:
+        fdp->f_cloexec = true;
+        break;
+
+      case FIONCLEX:
+        fdp->f_cloexec = false;
+        break;
+
+      case FIOGCLEX:
+        *va_arg(ap, FAR int *) = fdp->f_cloexec ? O_CLOEXEC : 0;
+        break;
+
+#ifdef CONFIG_FDSAN
+      case FIOC_SETTAG_FDSAN:
+        fdp->f_tag_fdsan = *va_arg(ap, FAR uint64_t *);
+        break;
+
+      case FIOC_GETTAG_FDSAN:
+        *va_arg(ap, FAR uint64_t *) = fdp->f_tag_fdsan;
+        break;
+#endif
+
+#ifdef CONFIG_FDCHECK
+      case FIOC_SETTAG_FDCHECK:
+        fdp->f_tag_fdcheck = *va_arg(ap, FAR uint8_t *);
+        break;
+
+      case FIOC_GETTAG_FDCHECK:
+        *va_arg(ap, FAR uint8_t *) = fdp->f_tag_fdcheck;
+        break;
+#endif
+
+      default:
+        ret = file_vioctl(filep, req, ap);
+        break;
+    }
+
+  file_put(filep);
   return ret;
 }
 
@@ -260,33 +279,21 @@ int file_ioctl(FAR struct file *filep, int req, ...)
 
 int ioctl(int fd, int req, ...)
 {
-  FAR struct file *filep;
   va_list ap;
   int ret;
 
-  /* Get the file structure corresponding to the file descriptor. */
+  va_start(ap, req);
 
-  ret = file_get(fd, &filep);
+  /* Let nx_vioctl() do the real work. */
+
+  ret = nx_vioctl(fd, req, ap);
   if (ret < 0)
     {
-      goto err;
+      set_errno(-ret);
+      ret = ERROR;
     }
 
-  /* Let file_vioctl() do the real work. */
-
-  va_start(ap, req);
-  ret = file_vioctl(filep, req, ap);
   va_end(ap);
 
-  file_put(filep);
-  if (ret < 0)
-    {
-      goto err;
-    }
-
   return ret;
-
-err:
-  set_errno(-ret);
-  return ERROR;
 }

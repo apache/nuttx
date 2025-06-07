@@ -264,7 +264,6 @@ static int file_mq_vopen(FAR struct file *mq, FAR const char *mq_name,
 
       /* Associate the inode with a file structure */
 
-      memset(mq, 0, sizeof(*mq));
       mq->f_oflags = oflags;
       mq->f_inode  = inode;
 
@@ -308,7 +307,6 @@ static int file_mq_vopen(FAR struct file *mq, FAR const char *mq_name,
 
       /* Associate the inode with a file structure */
 
-      memset(mq, 0, sizeof(*mq));
       mq->f_oflags = oflags;
       mq->f_inode  = inode;
 
@@ -347,28 +345,26 @@ errout:
 
 static mqd_t nxmq_vopen(FAR const char *mq_name, int oflags, va_list ap)
 {
-  struct file mq;
+  FAR struct file *mq;
   int created;
   int ret;
+  int fd;
 
-  ret = file_mq_vopen(&mq, mq_name, oflags, getumask(), ap, &created);
+  fd = file_allocate(oflags, 0, &mq);
+  if (fd < 0)
+    {
+      return fd;
+    }
+
+  ret = file_mq_vopen(mq, mq_name, oflags, getumask(), ap, &created);
+  file_put(mq);
   if (ret < 0)
     {
+      nx_close(fd);
       return ret;
     }
 
-  ret = file_allocate(mq.f_inode, mq.f_oflags,
-                      mq.f_pos, mq.f_priv, 0, false);
-  if (ret < 0)
-    {
-      file_mq_close(&mq);
-      if (created)
-        {
-          file_mq_unlink(mq_name);
-        }
-    }
-
-  return ret;
+  return fd;
 }
 
 /****************************************************************************

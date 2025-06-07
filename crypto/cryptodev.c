@@ -1028,8 +1028,7 @@ static int cryptoioctl(FAR struct file *filep, int cmd, unsigned long arg)
         TAILQ_INIT(&fcr->csessions);
         TAILQ_INIT(&fcr->crpk_ret);
 
-        fd = file_allocate(&g_cryptoinode, 0,
-                           0, fcr, 0, true);
+        fd = file_allocate_from_inode(&g_cryptoinode, 0, 0, fcr, 0);
         if (fd < 0)
           {
             kmm_free(fcr);

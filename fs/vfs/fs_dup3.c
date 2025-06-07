@@ -49,7 +49,8 @@ int dup3(int fd1, int fd2, int flags)
 {
   int ret;
 
-  ret = nx_dup3_from_tcb(this_task(), fd1, fd2, flags);
+  ret = fdlist_dup3(nxsched_get_fdlist_from_tcb(this_task()),
+                    fd1, fd2, flags);
   if (ret < 0)
     {
       set_errno(-ret);

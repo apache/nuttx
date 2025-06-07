@@ -528,8 +528,8 @@ int eventfd(unsigned int count, int flags)
     }
 
   new_dev->counter = count;
-  new_fd = file_allocate(&g_eventfd_inode, O_RDWR | flags,
-                         0, new_dev, 0, true);
+  new_fd = file_allocate_from_inode(&g_eventfd_inode, O_RDWR | flags,
+                                    0, new_dev, 0);
   if (new_fd < 0)
     {
       ret = new_fd;
