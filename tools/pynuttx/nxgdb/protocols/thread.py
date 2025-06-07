@@ -20,7 +20,7 @@
 #
 ############################################################################
 
-from .fs import FileList
+from .fs import FdList
 from .value import Value
 
 
@@ -52,7 +52,7 @@ class Group(Value):
     tg_envp: Value
     tg_envc: Value
     itimer: Value
-    tg_filelist: FileList
+    tg_fdlist: FdList
     tg_mm_map: Value
 
 
