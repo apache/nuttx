@@ -153,6 +153,18 @@ ssize_t file_writev(FAR struct file *filep,
       return -EACCES;
     }
 
+  /* Check buffer count and pointer for iovec */
+
+  if (iovcnt == 0)
+    {
+      return 0;
+    }
+
+  if (iov == NULL)
+    {
+      return -EFAULT;
+    }
+
   /* Are all iov_base accessible? */
 
   for (ret = 0; ret < iovcnt; ret++)
