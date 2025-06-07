@@ -34,7 +34,7 @@ class File(Value):
     f_tag_fdsan: Value
     f_tag_fdcheck: Value
     f_backtrace: Value
-    locked: Value
+    f_locked: Value
 
 
 class Inode(Value):
