@@ -477,7 +477,7 @@ struct file
 #endif
 
 #if CONFIG_FS_LOCK_BUCKET_SIZE > 0
-  bool              locked; /* Filelock state: false - unlocked, true - locked */
+  bool              f_locked; /* Filelock state: false - unlocked, true - locked */
 #endif
 };
 
