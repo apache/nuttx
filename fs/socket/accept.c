@@ -264,7 +264,7 @@ int accept4(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen,
       goto errout_with_psock;
     }
 
-  fs_putfilep(filep);
+  file_put(filep);
 
 #ifdef CONFIG_MM_KMAP
   kmm_unmap(kaddr);
@@ -281,7 +281,7 @@ errout_with_alloc:
   fs_heap_free(newsock);
 
 errout_with_filep:
-  fs_putfilep(filep);
+  file_put(filep);
 
 errout_with_kmap:
 #ifdef CONFIG_MM_KMAP

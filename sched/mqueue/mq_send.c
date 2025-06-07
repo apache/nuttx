@@ -519,14 +519,14 @@ int nxmq_timedsend(mqd_t mqdes, FAR const char *msg, size_t msglen,
   FAR struct file *filep;
   int ret;
 
-  ret = fs_getfilep(mqdes, &filep);
+  ret = file_get(mqdes, &filep);
   if (ret < 0)
     {
       return ret;
     }
 
   ret = file_mq_timedsend_internal(filep, msg, msglen, prio, abstime, -1);
-  fs_putfilep(filep);
+  file_put(filep);
   return ret;
 }
 
@@ -671,14 +671,14 @@ int nxmq_send(mqd_t mqdes, FAR const char *msg, size_t msglen,
   FAR struct file *filep;
   int ret;
 
-  ret = fs_getfilep(mqdes, &filep);
+  ret = file_get(mqdes, &filep);
   if (ret < 0)
     {
       return ret;
     }
 
   ret = file_mq_timedsend_internal(filep, msg, msglen, prio, NULL, -1);
-  fs_putfilep(filep);
+  file_put(filep);
   return ret;
 }
 

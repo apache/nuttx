@@ -365,7 +365,7 @@ int getsockopt(int sockfd, int level, int option,
   if (ret == OK)
     {
       ret = psock_getsockopt(psock, level, option, value, value_len);
-      fs_putfilep(filep);
+      file_put(filep);
     }
 
   if (ret < 0)

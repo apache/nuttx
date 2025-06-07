@@ -279,7 +279,7 @@ FAR void *mmap(FAR void *start, size_t length, int prot, int flags,
   FAR void *mapped = NULL;
   int ret;
 
-  if (fd != -1 && fs_getfilep(fd, &filep) < 0)
+  if (fd != -1 && file_get(fd, &filep) < 0)
     {
       ferr("ERROR: fd:%d referred file whose type is not supported\n", fd);
       ret = -ENODEV;
@@ -290,7 +290,7 @@ FAR void *mmap(FAR void *start, size_t length, int prot, int flags,
                    prot, flags, offset, MAP_USER, &mapped);
   if (filep)
     {
-      fs_putfilep(filep);
+      file_put(filep);
     }
 
   if (ret < 0)

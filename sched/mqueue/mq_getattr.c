@@ -105,11 +105,11 @@ int mq_getattr(mqd_t mqdes, struct mq_attr *mq_stat)
   FAR struct file *filep;
   int ret;
 
-  ret = fs_getfilep(mqdes, &filep);
+  ret = file_get(mqdes, &filep);
   if (ret >= 0)
     {
       ret = file_mq_getattr(filep, mq_stat);
-      fs_putfilep(filep);
+      file_put(filep);
       if (ret >= 0)
         {
           return OK;

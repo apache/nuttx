@@ -160,7 +160,7 @@ int getpeername(int sockfd, FAR struct sockaddr *addr,
   if (ret == OK)
     {
       ret = psock_getpeername(psock, addr, addrlen);
-      fs_putfilep(filep);
+      file_put(filep);
     }
 
   if (ret < 0)

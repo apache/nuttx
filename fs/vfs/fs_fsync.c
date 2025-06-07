@@ -106,7 +106,7 @@ int fsync(int fd)
 
   /* Get the file structure corresponding to the file descriptor. */
 
-  ret = fs_getfilep(fd, &filep);
+  ret = file_get(fd, &filep);
   if (ret < 0)
     {
       goto errout;
@@ -115,7 +115,7 @@ int fsync(int fd)
   /* Perform the fsync operation */
 
   ret = file_fsync(filep);
-  fs_putfilep(filep);
+  file_put(filep);
   if (ret < 0)
     {
       goto errout;

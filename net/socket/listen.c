@@ -154,7 +154,7 @@ int listen(int sockfd, int backlog)
   if (ret == OK)
     {
       ret = psock_listen(psock, backlog);
-      fs_putfilep(filep);
+      file_put(filep);
     }
 
   if (ret < 0)

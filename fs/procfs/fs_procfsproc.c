@@ -1333,7 +1333,7 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
           procfile->line[linesize - 2] = '\n';
         }
 
-      fs_putfilep(filep);
+      file_put(filep);
       copysize   = procfs_memcpy(procfile->line, linesize,
                                  buffer, remaining, &offset);
 

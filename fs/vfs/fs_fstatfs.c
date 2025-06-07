@@ -67,10 +67,10 @@ int fstatfs(int fd, FAR struct statfs *buf)
   DEBUGASSERT(buf != NULL);
 
   /* First, get the file structure.  Note that on failure,
-   * fs_getfilep() will return the errno.
+   * file_get() will return the errno.
    */
 
-  ret = fs_getfilep(fd, &filep);
+  ret = file_get(fd, &filep);
   if (ret < 0)
     {
       goto errout;
@@ -113,7 +113,7 @@ int fstatfs(int fd, FAR struct statfs *buf)
 
   /* Check if the fstat operation was successful */
 
-  fs_putfilep(filep);
+  file_put(filep);
   if (ret >= 0)
     {
       /* Successfully statfs'ed the file */

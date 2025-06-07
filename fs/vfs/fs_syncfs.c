@@ -84,11 +84,11 @@ int syncfs(int fd)
 
   enter_cancellation_point();
 
-  ret = fs_getfilep(fd, &filep);
+  ret = file_get(fd, &filep);
   if (ret == OK)
     {
       ret = file_syncfs(filep);
-      fs_putfilep(filep);
+      file_put(filep);
     }
 
   leave_cancellation_point();

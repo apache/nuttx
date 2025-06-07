@@ -170,7 +170,7 @@ int ftruncate(int fd, off_t length)
 
   /* Get the file structure corresponding to the file descriptor. */
 
-  ret = fs_getfilep(fd, &filep);
+  ret = file_get(fd, &filep);
   if (ret < 0)
     {
       ferr("ERROR: Could no get file structure: %d\n", ret);
@@ -180,7 +180,7 @@ int ftruncate(int fd, off_t length)
   /* Perform the truncate operation */
 
   ret = file_truncate(filep, length);
-  fs_putfilep(filep);
+  file_put(filep);
   if (ret >= 0)
     {
 #ifdef CONFIG_FS_NOTIFY

@@ -158,7 +158,7 @@ int getsockname(int sockfd, FAR struct sockaddr *addr,
   if (ret == OK)
     {
       ret = psock_getsockname(psock, addr, addrlen);
-      fs_putfilep(filep);
+      file_put(filep);
     }
 
   if (ret < 0)

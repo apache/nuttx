@@ -141,7 +141,7 @@ int shutdown(int sockfd, int how)
   if (ret == OK)
     {
       ret = psock_shutdown(psock, how);
-      fs_putfilep(filep);
+      file_put(filep);
     }
 
   if (ret < 0)

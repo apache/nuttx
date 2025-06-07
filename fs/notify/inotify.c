@@ -605,14 +605,14 @@ static int inotify_close(FAR struct file *filep)
 static FAR struct inotify_device_s *
 inotify_get_device_from_fd(int fd, FAR struct file **filep)
 {
-  if (fs_getfilep(fd, filep) < 0)
+  if (file_get(fd, filep) < 0)
     {
       return NULL;
     }
 
   if ((*filep)->f_inode != &g_inotify_inode)
     {
-      fs_putfilep(*filep);
+      file_put(*filep);
       return NULL;
     }
 
@@ -1083,7 +1083,7 @@ int inotify_add_watch(int fd, FAR const char *pathname, uint32_t mask)
   abspath = lib_realpath(pathname, NULL, mask & IN_DONT_FOLLOW);
   if (abspath == NULL)
     {
-      fs_putfilep(filep);
+      file_put(filep);
       return ERROR;
     }
 
@@ -1154,7 +1154,7 @@ out:
   nxmutex_unlock(&g_inotify.lock);
 
 out_free:
-  fs_putfilep(filep);
+  file_put(filep);
   fs_heap_free(abspath);
   if (ret < 0)
     {
@@ -1202,7 +1202,7 @@ int inotify_rm_watch(int fd, int wd)
     {
       nxmutex_unlock(&dev->lock);
       nxmutex_unlock(&g_inotify.lock);
-      fs_putfilep(filep);
+      file_put(filep);
       set_errno(EINVAL);
       return ERROR;
     }
@@ -1210,7 +1210,7 @@ int inotify_rm_watch(int fd, int wd)
   inotify_remove_watch(dev, watch);
   nxmutex_unlock(&dev->lock);
   nxmutex_unlock(&g_inotify.lock);
-  fs_putfilep(filep);
+  file_put(filep);
   return OK;
 }
 

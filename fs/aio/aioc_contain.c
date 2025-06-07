@@ -70,7 +70,7 @@ FAR struct aio_container_s *aio_contain(FAR struct aiocb *aiocbp)
 
   /* Get the file structure corresponding to the file descriptor. */
 
-  ret = fs_getfilep(aiocbp->aio_fildes, &filep);
+  ret = file_get(aiocbp->aio_fildes, &filep);
   if (ret < 0)
     {
       goto errout;
@@ -115,7 +115,7 @@ FAR struct aio_container_s *aio_contain(FAR struct aiocb *aiocbp)
   return aioc;
 
 err_putfilep:
-  fs_putfilep(filep);
+  file_put(filep);
 errout:
   set_errno(-ret);
   return NULL;
@@ -155,7 +155,7 @@ FAR struct aiocb *aioc_decant(FAR struct aio_container_s *aioc)
        */
 
       aiocbp = aioc->aioc_aiocbp;
-      fs_putfilep(aioc->aioc_filep);
+      file_put(aioc->aioc_filep);
       aioc_free(aioc);
 
       aio_unlock();
