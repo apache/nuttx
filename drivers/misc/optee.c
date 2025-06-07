@@ -1038,7 +1038,8 @@ optee_ioctl_shm_register(FAR struct optee_priv_data *priv,
       return ret;
     }
 
-  ret = file_allocate(&g_optee_shm_inode, O_CLOEXEC, 0, shm, 0, true);
+  ret = file_allocate_from_inode(&g_optee_shm_inode, O_CLOEXEC,
+                                 0, shm, 0, true);
   if (ret < 0)
     {
       optee_shm_free(shm);

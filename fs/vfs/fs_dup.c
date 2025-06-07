@@ -33,7 +33,9 @@
 #include <fcntl.h>
 
 #include <nuttx/fs/fs.h>
+
 #include "inode/inode.h"
+#include "sched/sched.h"
 
 /****************************************************************************
  * Public Functions
@@ -54,32 +56,8 @@
 
 int file_dup(FAR struct file *filep, int minfd, int flags)
 {
-  FAR struct file *filep2;
-  int fd2;
-  int ret;
-#ifdef CONFIG_FDCHECK
-  minfd = fdcheck_restore(minfd);
-#endif
-
-  fd2 = file_allocate(g_root_inode, 0, 0, NULL, minfd, true);
-  if (fd2 < 0)
-    {
-      return fd2;
-    }
-
-  ret = file_get(fd2, &filep2);
-  DEBUGASSERT(ret >= 0);
-
-  ret = file_dup3(filep, filep2, flags);
-
-  file_put(filep2);
-  if (ret >= 0)
-    {
-      return fd2;
-    }
-
-  file_put(filep2);
-  return ret;
+  return fdlist_dupfile(nxsched_get_fdlist_from_tcb(this_task()),
+                        flags, minfd, filep);
 }
 
 /****************************************************************************

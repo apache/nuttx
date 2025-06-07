@@ -258,7 +258,7 @@ static int epoll_do_create(int size, int flags)
 
   /* Alloc the file descriptor */
 
-  fd = file_allocate(&g_epoll_inode, flags, 0, eph, 0, true);
+  fd = file_allocate_from_inode(&g_epoll_inode, flags, 0, eph, 0);
   if (fd < 0)
     {
       nxmutex_destroy(&eph->lock);

@@ -352,8 +352,8 @@ int signalfd(int fd, FAR const sigset_t *mask, int flags)
 
       nxmutex_init(&dev->mutex);
 
-      fd = file_allocate(&g_signalfd_inode, O_RDOK | flags,
-                         0, dev, 0, true);
+      fd = file_allocate_from_inode(&g_signalfd_inode, O_RDOK | flags,
+                                    0, dev, 0);
       if (fd < 0)
         {
           ret = -fd;

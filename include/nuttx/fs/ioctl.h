@@ -235,6 +235,16 @@
                                            * OUT: Current file xip base address
                                            */
 
+#define FIOC_GETFLAGS       _FIOC(0x0016) /* IN:  None
+                                           * OUT: None
+                                           */
+#define FIOC_SETFLAGS       _FIOC(0x0017) /* IN:  The flags that need to set to file
+                                           * OUT: None
+                                           */
+#define FIOGCLEX            _FIOC(0x0018) /* IN:  FAR int *
+                                           * OUT: None
+                                           */
+
 /* NuttX file system ioctl definitions **************************************/
 
 #define _DIOCVALID(c)   (_IOC_TYPE(c)==_DIOCBASE)
