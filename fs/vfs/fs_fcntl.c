@@ -59,70 +59,6 @@ static int file_vfcntl(FAR struct file *filep, int cmd, va_list ap)
 
   switch (cmd)
     {
-      case F_DUPFD:
-        /* Return a new file descriptor which shall be the lowest numbered
-         * available (that is, not already open) file descriptor greater than
-         * or equal to the third argument, arg, taken as an integer of type
-         * int. The new file descriptor shall refer to the same open file
-         * description as the original file descriptor, and shall share any
-         * locks.  The FD_CLOEXEC flag associated  with the new file
-         * descriptor shall be cleared to keep the file open across calls to
-         * one of the exec functions.
-         */
-
-        {
-          /* Does not set the errno variable in the event of a failure */
-
-          ret = file_dup(filep, va_arg(ap, int), 0);
-        }
-        break;
-
-      case F_DUPFD_CLOEXEC:
-        {
-          ret = file_dup(filep, va_arg(ap, int), O_CLOEXEC);
-        }
-        break;
-
-      case F_GETFD:
-        /* Get the file descriptor flags defined in <fcntl.h> that are
-         * associated with the file descriptor fd.  File descriptor flags are
-         * associated with a single file descriptor and do not affect other
-         * file descriptors that refer to the same file.
-         */
-
-        {
-          ret = filep->f_oflags & O_CLOEXEC ? FD_CLOEXEC : 0;
-        }
-        break;
-
-      case F_SETFD:
-        /* Set the file descriptor flags defined in <fcntl.h>, that are
-         * associated with fd, to the third argument, arg, taken as type int.
-         * If the FD_CLOEXEC flag in the third argument is 0, the file shall
-         * remain open across the exec functions; otherwise, the file shall
-         * be closed upon successful execution of one of the exec functions.
-         */
-
-        {
-          int oflags = va_arg(ap, int);
-
-          if (oflags & ~FD_CLOEXEC)
-            {
-              ret = -ENOSYS;
-              break;
-            }
-
-          if (oflags & FD_CLOEXEC)
-            {
-              ret = file_ioctl(filep, FIOCLEX, NULL);
-            }
-          else
-            {
-              ret = file_ioctl(filep, FIONCLEX, NULL);
-            }
-        }
-        break;
-
       case F_GETFL:
         /* Get the file status flags and file access modes, defined in
          * <fcntl.h>, for the file description associated with fd. The file
@@ -347,27 +283,100 @@ int fcntl(int fd, int cmd, ...)
 
   va_start(ap, cmd);
 
-  /* Get the file structure corresponding to the file descriptor. */
-
   ret = file_get(fd, &filep);
-  if (ret >= 0)
+  if (ret < 0)
     {
-      /* Let file_vfcntl() do the real work.  The errno is not set on
-       * failures.
-       */
-
-      ret = file_vfcntl(filep, cmd, ap);
-      file_put(filep);
+      goto errout;
     }
+
+  switch (cmd)
+    {
+      case F_DUPFD:
+        /* Return a new file descriptor which shall be the lowest numbered
+         * available (that is, not already open) file descriptor greater than
+         * or equal to the third argument, arg, taken as an integer of type
+         * int. The new file descriptor shall refer to the same open file
+         * description as the original file descriptor, and shall share any
+         * locks.  The FD_CLOEXEC flag associated  with the new file
+         * descriptor shall be cleared to keep the file open across calls to
+         * one of the exec functions.
+         */
+
+        {
+          ret = file_dup(filep, va_arg(ap, int), 0);
+        }
+        break;
+
+      case F_DUPFD_CLOEXEC:
+        {
+          ret = file_dup(filep, va_arg(ap, int), O_CLOEXEC);
+        }
+        break;
+
+      case F_GETFD:
+        /* Get the file descriptor flags defined in <fcntl.h> that are
+         * associated with the file descriptor fd.  File descriptor flags are
+         * associated with a single file descriptor and do not affect other
+         * file descriptors that refer to the same file.
+         */
+
+        {
+          int flags;
+
+          ret = file_ioctl(filep, FIOGCLEX, &flags);
+          if (ret >= 0)
+            {
+              ret = flags;
+            }
+        }
+        break;
+
+      case F_SETFD:
+        /* Set the file descriptor flags defined in <fcntl.h>, that are
+         * associated with fd, to the third argument, arg, taken as type int.
+         * If the FD_CLOEXEC flag in the third argument is 0, the file shall
+         * remain open across the exec functions; otherwise, the file shall
+         * be closed upon successful execution of one of the exec functions.
+         */
+
+        {
+          int oflags = va_arg(ap, int);
+
+          if (oflags & ~FD_CLOEXEC)
+            {
+              ret = -ENOSYS;
+              break;
+            }
+
+          if (oflags & FD_CLOEXEC)
+            {
+              ret = file_ioctl(filep, FIOCLEX, NULL);
+            }
+          else
+            {
+              ret = file_ioctl(filep, FIONCLEX, NULL);
+            }
+        }
+        break;
+
+      default:
+        {
+          ret = file_vfcntl(filep, cmd, ap);
+        }
+        break;
+    }
+
+  file_put(filep);
+
+errout:
+  va_end(ap);
+  leave_cancellation_point();
 
   if (ret < 0)
     {
       set_errno(-ret);
-      ret = ERROR;
+      return ERROR;
     }
-
-  va_end(ap);
-  leave_cancellation_point();
 
   return ret;
 }

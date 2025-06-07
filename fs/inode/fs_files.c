@@ -59,56 +59,39 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: files_fget_by_index
+ * Name: fdlist_get_by_index
  ****************************************************************************/
 
-static FAR struct file *files_fget_by_index(FAR struct filelist *list,
-                                            int l1, int l2, FAR bool *new)
+static void fdlist_get_by_index(FAR struct fdlist *list,
+                                int l1, int l2,
+                                FAR struct file **filep,
+                                FAR struct fd **fdp)
 {
-  FAR struct file *filep;
+  FAR struct fd *fdp1;
   irqstate_t flags;
 
   flags = spin_lock_irqsave_notrace(&list->fl_lock);
-  filep = &list->fl_files[l1][l2];
+  fdp1 = &list->fl_fds[l1][l2];
+  *filep = fdp1->f_file;
+  if (*filep != NULL)
+    {
+      atomic_fetch_add(&(*filep)->f_refs, 1);
+    }
+
   spin_unlock_irqrestore_notrace(&list->fl_lock, flags);
-
-  if (filep->f_inode != NULL)
+  if (fdp != NULL)
     {
-      /* When the reference count is zero but the inode has not yet been
-       * released, At this point we should return a null pointer
-       */
-
-      int32_t refs = atomic_read(&filep->f_refs);
-      do
-        {
-          if (refs == 0)
-            {
-              filep = NULL;
-              break;
-            }
-        }
-      while (!atomic_try_cmpxchg(&filep->f_refs, &refs, refs + 1));
+      *fdp = fdp1;
     }
-  else if (new == NULL)
-    {
-      filep = NULL;
-    }
-  else if (atomic_fetch_add(&filep->f_refs, 1) == 0)
-    {
-      atomic_fetch_add(&filep->f_refs, 1);
-      *new = true;
-    }
-
-  return filep;
 }
 
 /****************************************************************************
- * Name: files_extend
+ * Name: fdlist_extend
  ****************************************************************************/
 
-static int files_extend(FAR struct filelist *list, size_t row)
+static int fdlist_extend(FAR struct fdlist *list, size_t row)
 {
-  FAR struct file **files;
+  FAR struct fd **fds;
   uint8_t orig_rows;
   FAR void *tmp;
   int flags;
@@ -123,13 +106,13 @@ static int files_extend(FAR struct filelist *list, size_t row)
 
   if (CONFIG_NFILE_DESCRIPTORS_PER_BLOCK * orig_rows > OPEN_MAX)
     {
-      files_dumplist(list);
+      fdlist_dump(list);
       return -EMFILE;
     }
 
-  files = fs_heap_malloc(sizeof(FAR struct file *) * row);
-  DEBUGASSERT(files);
-  if (files == NULL)
+  fds = fs_heap_malloc(sizeof(FAR struct fd *) * row);
+  DEBUGASSERT(fds);
+  if (fds == NULL)
     {
       return -ENFILE;
     }
@@ -137,16 +120,16 @@ static int files_extend(FAR struct filelist *list, size_t row)
   i = orig_rows;
   do
     {
-      files[i] = fs_heap_zalloc(sizeof(struct file) *
-                            CONFIG_NFILE_DESCRIPTORS_PER_BLOCK);
-      if (files[i] == NULL)
+      fds[i] = fs_heap_zalloc(sizeof(struct fd) *
+                              CONFIG_NFILE_DESCRIPTORS_PER_BLOCK);
+      if (fds[i] == NULL)
         {
           while (--i >= orig_rows)
             {
-              fs_heap_free(files[i]);
+              fs_heap_free(fds[i]);
             }
 
-          fs_heap_free(files);
+          fs_heap_free(fds);
           return -ENFILE;
         }
     }
@@ -165,27 +148,26 @@ static int files_extend(FAR struct filelist *list, size_t row)
 
       for (j = orig_rows; j < i; j++)
         {
-          fs_heap_free(files[j]);
+          fs_heap_free(fds[j]);
         }
 
-      fs_heap_free(files);
+      fs_heap_free(fds);
 
       return OK;
     }
 
-  if (list->fl_files != NULL)
+  if (list->fl_fds != NULL)
     {
-      memcpy(files, list->fl_files,
-             list->fl_rows * sizeof(FAR struct file *));
+      memcpy(fds, list->fl_fds, list->fl_rows * sizeof(FAR struct fd *));
     }
 
-  tmp = list->fl_files;
-  list->fl_files = files;
+  tmp = list->fl_fds;
+  list->fl_fds = fds;
   list->fl_rows = row;
 
   spin_unlock_irqrestore_notrace(&list->fl_lock, flags);
 
-  if (tmp != NULL && tmp != &list->fl_prefile)
+  if (tmp != NULL && tmp != &list->fl_prefd)
     {
       fs_heap_free(tmp);
     }
@@ -193,10 +175,65 @@ static int files_extend(FAR struct filelist *list, size_t row)
   return OK;
 }
 
+/****************************************************************************
+ * Name: fdlist_uninstall
+ ****************************************************************************/
+
+static void fdlist_uninstall(FAR struct fdlist *list, FAR struct fd *fdp)
+{
+  FAR struct file *filep = NULL;
+  irqstate_t flags;
+
+  flags = spin_lock_irqsave_notrace(&list->fl_lock);
+
+  if (fdp->f_file != NULL)
+    {
+#ifdef CONFIG_FDSAN
+      fdp->f_tag_fdsan   = 0;
+#endif
+#ifdef CONFIG_FDCHECK
+      fdp->f_tag_fdcheck = 0;
+#endif
+      filep              = fdp->f_file;
+      fdp->f_file        = NULL;
+    }
+
+  spin_unlock_irqrestore_notrace(&list->fl_lock, flags);
+  file_put(filep);
+}
+
+static void fdlist_install(FAR struct fdlist *list, int fd,
+                           FAR struct file *filep, int oflags)
+{
+  FAR struct file *oldfilep;
+  FAR struct fd *fdp;
+  irqstate_t flags;
+  int l1;
+  int l2;
+
+  l1 = fd / CONFIG_NFILE_DESCRIPTORS_PER_BLOCK;
+  l2 = fd % CONFIG_NFILE_DESCRIPTORS_PER_BLOCK;
+
+  flags = spin_lock_irqsave_notrace(&list->fl_lock);
+
+  fdp = &list->fl_fds[l1][l2];
+  oldfilep = fdp->f_file;
+  fdp->f_file = filep;
+  file_ref(filep);
+  fdp->f_cloexec = !!(oflags & O_CLOEXEC);
+  FS_ADD_BACKTRACE(fdp);
+
+  spin_unlock_irqrestore_notrace(&list->fl_lock, flags);
+  file_put(oldfilep);
+}
+
+/****************************************************************************
+ * Name: task_fssync
+ ****************************************************************************/
+
 static void task_fssync(FAR struct tcb_s *tcb, FAR void *arg)
 {
   FAR struct tcb_s *ctcb;
-  FAR struct file *filep;
   int pid = tcb->pid;
   uint8_t rows;
   int i;
@@ -207,28 +244,25 @@ static void task_fssync(FAR struct tcb_s *tcb, FAR void *arg)
       return;
     }
 
-  rows = tcb->group->tg_filelist.fl_rows;
+  rows = tcb->group->tg_fdlist.fl_rows;
 
   for (i = 0; i < rows; i++)
     {
       for (j = 0; j < CONFIG_NFILE_DESCRIPTORS_PER_BLOCK; j++)
         {
+          FAR struct file *filep;
+
           ctcb = nxsched_get_tcb(pid);
           if (ctcb == NULL || ctcb->group == NULL || ctcb != tcb)
             {
               return;
             }
 
-          filep = files_fget_by_index(&ctcb->group->tg_filelist,
-                                      i, j, NULL);
+          fdlist_get_by_index(&ctcb->group->tg_fdlist, i, j, &filep, NULL);
           if (filep != NULL)
             {
               file_fsync(filep);
-              ctcb = nxsched_get_tcb(pid);
-              if (ctcb != NULL && ctcb->group != NULL && ctcb == tcb)
-                {
-                  file_put(filep);
-                }
+              file_put(filep);
             }
         }
     }
@@ -239,14 +273,14 @@ static void task_fssync(FAR struct tcb_s *tcb, FAR void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nx_dup3_from_tcb
+ * Name: fdlist_dup3
  *
  * Description:
- *   nx_dup3_from_tcb() is similar to the standard 'dup3' interface
+ *   fdlist_dup3() is similar to the standard 'dup3' interface
  *   except that is not a cancellation point and it does not modify the
  *   errno variable.
  *
- *   nx_dup3_from_tcb() is an internal NuttX interface and should not be
+ *   fdlist_dup3() is an internal NuttX interface and should not be
  *   called from applications.
  *
  *   Clone a file descriptor to a specific descriptor number and
@@ -258,69 +292,45 @@ static void task_fssync(FAR struct tcb_s *tcb, FAR void *arg)
  *
  ****************************************************************************/
 
-int nx_dup3_from_tcb(FAR struct tcb_s *tcb, int fd1, int fd2, int flags)
+int fdlist_dup3(FAR struct fdlist *list, int fd1, int fd2, int flags)
 {
-  FAR struct filelist *list;
   FAR struct file *filep1;
-  FAR struct file *filep;
-  bool new = false;
-  int count;
   int ret;
 
   if (fd1 == fd2)
     {
-      return fd1;
+      return -EINVAL;
     }
 
 #ifdef CONFIG_FDCHECK
-  fd1 = fdcheck_restore(fd1);
   fd2 = fdcheck_restore(fd2);
 #endif
 
   /* Get the file descriptor list.  It should not be NULL in this context. */
 
-  list = nxsched_get_files_from_tcb(tcb);
-  count = files_countlist(list);
-
-  if (fd1 < 0 || fd1 >= count || fd2 < 0)
+  if (fd2 < 0)
     {
       return -EBADF;
     }
 
-  if (fd2 >= count)
+  if (fd2 >= fdlist_count(list))
     {
-      ret = files_extend(list, fd2 / CONFIG_NFILE_DESCRIPTORS_PER_BLOCK + 1);
+      ret = fdlist_extend(list,
+                          fd2 / CONFIG_NFILE_DESCRIPTORS_PER_BLOCK + 1);
       if (ret < 0)
         {
           return ret;
         }
     }
 
-  filep1 = files_fget(list, fd1);
-  if (filep1 == NULL)
-    {
-      return -EBADF;
-    }
-
-  filep = files_fget_by_index(list,
-                              fd2 / CONFIG_NFILE_DESCRIPTORS_PER_BLOCK,
-                              fd2 % CONFIG_NFILE_DESCRIPTORS_PER_BLOCK,
-                              &new);
-
-  /* Perform the dup3 operation */
-
-  ret = file_dup3(filep1, filep, flags);
-  file_put(filep1);
-  file_put(filep);
+  ret = fdlist_get(list, fd1, &filep1);
   if (ret < 0)
     {
-      if (new)
-        {
-          file_put(filep);
-        }
-
       return ret;
     }
+
+  fdlist_install(list, fd2, filep1, flags);
+  file_put(filep1);
 
 #ifdef CONFIG_FDCHECK
   return fdcheck_protect(fd2);
@@ -330,37 +340,37 @@ int nx_dup3_from_tcb(FAR struct tcb_s *tcb, int fd1, int fd2, int flags)
 }
 
 /****************************************************************************
- * Name: files_initlist
+ * Name: fdlist_init
  *
- * Description: Initializes the list of files for a new task
+ * Description: Initializes the list of file descriptors for a new task.
  *
  ****************************************************************************/
 
-void files_initlist(FAR struct filelist *list)
+void fdlist_init(FAR struct fdlist *list)
 {
   /* The first row will reuse pre-allocated files, which will avoid
    * unnecessary allocator accesses during file initialization.
    */
 
   list->fl_rows = 1;
-  list->fl_files = &list->fl_prefile;
-  list->fl_prefile = list->fl_prefiles;
+  list->fl_fds = &list->fl_prefd;
+  list->fl_prefd = list->fl_prefds;
   spin_lock_init(&list->fl_lock);
 }
 
 /****************************************************************************
- * Name: files_dumplist
+ * Name: fdlist_dump
  *
  * Description:
- *   Dump the list of files.
+ *   Dump the list of file descriptors.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_SCHED_DUMP_ON_EXIT
-void files_dumplist(FAR struct filelist *list)
+void fdlist_dump(FAR struct fdlist *list)
 {
   FAR char *path;
-  int count = files_countlist(list);
+  int count = fdlist_count(list);
   int i;
 
   syslog(LOG_INFO, "%-4s%-4s%-8s%-5s%-10s%-14s"
@@ -379,7 +389,8 @@ void files_dumplist(FAR struct filelist *list)
 
   for (i = 0; i < count; i++)
     {
-      FAR struct file *filep = files_fget(list, i);
+      FAR struct fd *fdp;
+      FAR struct file *filep;
 
 #if CONFIG_FS_BACKTRACE > 0
       char buf[BACKTRACE_BUFFER_SIZE(CONFIG_FS_BACKTRACE)];
@@ -387,7 +398,7 @@ void files_dumplist(FAR struct filelist *list)
 
       /* Is there an inode associated with the file descriptor? */
 
-      if (filep == NULL || filep->f_inode == NULL)
+      if (fdlist_get2(list, i, &filep, &fdp) < 0)
         {
           continue;
         }
@@ -398,7 +409,7 @@ void files_dumplist(FAR struct filelist *list)
         }
 
 #if CONFIG_FS_BACKTRACE > 0
-      backtrace_format(buf, sizeof(buf), filep->f_backtrace,
+      backtrace_format(buf, sizeof(buf), fdp->f_backtrace,
                        CONFIG_FS_BACKTRACE);
 #endif
 
@@ -413,6 +424,7 @@ void files_dumplist(FAR struct filelist *list)
             , buf
 #endif
             );
+
       file_put(filep);
     }
 
@@ -421,17 +433,17 @@ void files_dumplist(FAR struct filelist *list)
 #endif
 
 /****************************************************************************
- * Name: files_putlist
+ * Name: fdlist_free
  *
  * Description:
- *   Release the list of files.
+ *   Release the list of file descriptors.
  *
  * Assumptions:
  *   Called during task deletion in a safe context.
  *
  ****************************************************************************/
 
-void files_putlist(FAR struct filelist *list)
+void fdlist_free(FAR struct fdlist *list)
 {
   int i;
   int j;
@@ -445,90 +457,120 @@ void files_putlist(FAR struct filelist *list)
     {
       for (j = CONFIG_NFILE_DESCRIPTORS_PER_BLOCK - 1; j >= 0; j--)
         {
-          file_close(&list->fl_files[i][j]);
+          fdlist_close(list, i * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK + j);
         }
 
       if (i != 0)
         {
-          fs_heap_free(list->fl_files[i]);
+          fs_heap_free(list->fl_fds[i]);
         }
     }
 
-  if (list->fl_files != &list->fl_prefile)
+  if (list->fl_fds != &list->fl_prefd)
     {
-      fs_heap_free(list->fl_files);
+      fs_heap_free(list->fl_fds);
     }
 }
 
 /****************************************************************************
- * Name: files_countlist
+ * Name: fdlist_count
  *
  * Description:
- *   Get file count from file list.
+ *   Get file descriptor count from file list.
  *
  * Input Parameters:
- *   list - Pointer to the file list structure.
+ *   list - Pointer to the file descriptor list structure.
  *
  * Returned Value:
  *   file count of file list.
  *
  ****************************************************************************/
 
-int files_countlist(FAR struct filelist *list)
+int fdlist_count(FAR struct fdlist *list)
 {
   return list->fl_rows * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK;
 }
 
 /****************************************************************************
- * Name: files_fget
+ * Name: fdlist_get2
  *
  * Description:
- *   Get the instance of struct file from file list by file descriptor.
+ *   Given a file descriptor, return the corresponding instance of struct
+ *   fd and filep.
  *
  * Input Parameters:
- *   list - The list of files for a task.
- *   fd   - A valid descriptor between 0 and files_countlist(list).
+ *   list  - Pointer to the file descriptor list structure.
+ *   fd    - The file descriptor
+ *   filep - The location to return the struct file instance
+ *   fdp   - The location to return the struct fd instance
  *
  * Returned Value:
- *   Pointer to file structure of list[fd].
+ *   Return the pointer to file structure of list[fd] when list[fd].f_file
+ *   is valid, otherwise, a null pointer is returned.
  *
  ****************************************************************************/
 
-FAR struct file *files_fget(FAR struct filelist *list, int fd)
+int fdlist_get2(FAR struct fdlist *list, int fd,
+                FAR struct file **filep, FAR struct fd **fdp)
 {
-  return files_fget_by_index(list, fd / CONFIG_NFILE_DESCRIPTORS_PER_BLOCK,
-                             fd % CONFIG_NFILE_DESCRIPTORS_PER_BLOCK, NULL);
+  if (list == NULL)
+    {
+      return -EINVAL;
+    }
+
+#ifdef CONFIG_FDCHECK
+  fd = fdcheck_restore(fd);
+#endif
+
+  if (fd < 0 || fd >= fdlist_count(list))
+    {
+      return -EBADF;
+    }
+
+  fdlist_get_by_index(list,
+                      fd / CONFIG_NFILE_DESCRIPTORS_PER_BLOCK,
+                      fd % CONFIG_NFILE_DESCRIPTORS_PER_BLOCK,
+                      filep, fdp);
+  if (*filep == NULL)
+    {
+      return -EBADF;
+    }
+
+  return 0;
 }
 
 /****************************************************************************
- * Name: file_allocate_from_tcb
+ * Name: fdlist_dupfile
  *
  * Description:
- *   Allocate a struct files instance and associate it with an inode
- *   instance.
+ *   Allocate a struct fd instance and bind it to the corresponding file
+ *   handle.
  *
  * Returned Value:
- *     Returns the file descriptor == index into the files array on success;
- *     a negated errno value is returned on any failure.
+ *   Returns the file descriptor == index into the files array on success;
+ *   a negated errno value is returned on any failure.
  *
  ****************************************************************************/
 
-int file_allocate_from_tcb(FAR struct tcb_s *tcb, FAR struct inode *inode,
-                           int oflags, off_t pos, FAR void *priv, int minfd,
-                           bool addref)
+int fdlist_dupfile(FAR struct fdlist *list, int oflags, int minfd,
+                   FAR struct file *filep)
 {
-  int i = minfd / CONFIG_NFILE_DESCRIPTORS_PER_BLOCK;
-  int j = minfd % CONFIG_NFILE_DESCRIPTORS_PER_BLOCK;
-  FAR struct filelist *list;
-  FAR struct file *filep;
+  FAR struct fd *fdp;
   irqstate_t flags;
   int ret;
+  int i;
+  int j;
 
-  /* Get the file descriptor list.  It should not be NULL in this context. */
+  DEBUGASSERT(filep);
 
-  list = nxsched_get_files_from_tcb(tcb);
+#ifdef CONFIG_FDCHECK
+  minfd = fdcheck_restore(minfd);
+#endif
 
-  /* Find free file */
+  i = minfd / CONFIG_NFILE_DESCRIPTORS_PER_BLOCK;
+  j = minfd % CONFIG_NFILE_DESCRIPTORS_PER_BLOCK;
+
+  /* Find free file descriptor */
 
   flags = spin_lock_irqsave_notrace(&list->fl_lock);
 
@@ -538,7 +580,7 @@ int file_allocate_from_tcb(FAR struct tcb_s *tcb, FAR struct inode *inode,
         {
           spin_unlock_irqrestore_notrace(&list->fl_lock, flags);
 
-          ret = files_extend(list, i + 1);
+          ret = fdlist_extend(list, i + 1);
           if (ret < 0)
             {
               return ret;
@@ -549,21 +591,18 @@ int file_allocate_from_tcb(FAR struct tcb_s *tcb, FAR struct inode *inode,
 
       do
         {
-          filep = &list->fl_files[i][j];
-          if (filep->f_inode == NULL)
+          fdp = &list->fl_fds[i][j];
+          if (fdp->f_file == NULL)
             {
-              filep->f_oflags      = oflags;
-              filep->f_pos         = pos;
-              filep->f_inode       = inode;
-              filep->f_priv        = priv;
-              atomic_set(&filep->f_refs, 1);
-#ifdef CONFIG_FDSAN
-              filep->f_tag_fdsan   = 0;
-#endif
-#ifdef CONFIG_FDCHECK
-              filep->f_tag_fdcheck = 0;
-#endif
-
+              atomic_fetch_add(&filep->f_refs, 1);
+              fdp->f_file        = filep;
+              fdp->f_cloexec     = !!(oflags & O_CLOEXEC);
+ #ifdef CONFIG_FDSAN
+              fdp->f_tag_fdsan   = 0;
+ #endif
+ #ifdef CONFIG_FDCHECK
+              fdp->f_tag_fdcheck = 0;
+ #endif
               goto found;
             }
         }
@@ -573,12 +612,7 @@ int file_allocate_from_tcb(FAR struct tcb_s *tcb, FAR struct inode *inode,
 found:
   spin_unlock_irqrestore_notrace(&list->fl_lock, flags);
 
-  if (addref)
-    {
-      inode_addref(inode);
-    }
-
-  FS_ADD_BACKTRACE(filep);
+  FS_ADD_BACKTRACE(fdp);
 
 #ifdef CONFIG_FDCHECK
   return fdcheck_protect(i * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK + j);
@@ -588,36 +622,134 @@ found:
 }
 
 /****************************************************************************
- * Name: file_allocate
+ * Name: fdlist_allocate
  *
  * Description:
- *   Allocate a struct files instance and associate it with an inode
- *   instance.
+ *   Allocate a struct fd instance and associate it with an empty file
+ *   instance. The difference between this function and
+ *   file_allocate_from_inode is that this function is only used for
+ *   placeholder purposes. Later, the caller will initialize the file entity
+ *   through the returned filep.
+ *
+ *   The fd allocated by this function can be released using fdlist_close.
+ *
+ *   After the function call is completed, it will hold a reference count
+ *   for the filep. Therefore, when the filep is no longer in use, it is
+ *   necessary to call file_put to release the reference count, in order
+ *   to avoid a race condition where the file might be closed during
+ *   this process.
  *
  * Returned Value:
- *     Returns the file descriptor == index into the files array on success;
- *     a negated errno value is returned on any failure.
+ *   Returns the file descriptor == index into the files array on success;
+ *   a negated errno value is returned on any failure.
  *
  ****************************************************************************/
 
-int file_allocate(FAR struct inode *inode, int oflags, off_t pos,
-                  FAR void *priv, int minfd, bool addref)
+int fdlist_allocate(FAR struct fdlist *list, int oflags,
+                    int minfd, FAR struct file **filep)
 {
-  return file_allocate_from_tcb(this_task(), inode, oflags,
-                                pos, priv, minfd, addref);
+  int fd;
+
+  *filep = fs_heap_zalloc(sizeof(struct file));
+  if (*filep == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  file_ref(*filep);
+  fd = fdlist_dupfile(list, oflags, minfd, *filep);
+  if (fd < 0)
+    {
+      file_put(*filep);
+    }
+
+  return fd;
 }
 
 /****************************************************************************
- * Name: files_duplist
+ * Name: file_allocate
  *
  * Description:
- *   Duplicate parent task's file descriptors.
+ *   Allocate a struct fd instance and associate it with an empty file
+ *   instance. The difference between this function and
+ *   file_allocate_from_inode is that this function is only used for
+ *   placeholder purposes. Later, the caller will initialize the file entity
+ *   through the returned filep.
+ *
+ *   The fd allocated by this function can be released using nx_close.
+ *
+ *   After the function call is completed, it will hold a reference count
+ *   for the filep. Therefore, when the filep is no longer in use, it is
+ *   necessary to call file_put to release the reference count, in order
+ *   to avoid a race condition where the file might be closed during
+ *   this process.
+ *
+ * Returned Value:
+ *   Returns the file descriptor == index into the files array on success;
+ *   a negated errno value is returned on any failure.
  *
  ****************************************************************************/
 
-int files_duplist(FAR struct filelist *plist, FAR struct filelist *clist,
-                  FAR const posix_spawn_file_actions_t *actions,
-                  bool cloexec)
+int file_allocate(int oflags, int minfd, FAR struct file **filep)
+{
+  return fdlist_allocate(nxsched_get_fdlist_from_tcb(this_task()),
+                         oflags, minfd, filep);
+}
+
+/****************************************************************************
+ * Name: file_allocate_from_inode
+ *
+ * Description:
+ *   Allocate a struct fd instance and associate it with an file instance.
+ *   And initialize them with inode, oflags, pos and priv.
+ *
+ * Returned Value:
+ *   Returns the file descriptor == index into the files array on success;
+ *   a negated errno value is returned on any failure.
+ *
+ ****************************************************************************/
+
+int file_allocate_from_inode(FAR struct inode *inode, int oflags, off_t pos,
+                             FAR void *priv, int minfd)
+{
+  FAR struct file *filep;
+  int fd;
+
+  fd = file_allocate(oflags, minfd, &filep);
+  if (fd < 0)
+    {
+      return fd;
+    }
+
+  inode_addref(inode);
+  filep->f_inode  = inode;
+  filep->f_pos    = pos;
+  filep->f_oflags = oflags & ~O_CLOEXEC;
+  filep->f_priv   = priv;
+#if CONFIG_FS_LOCK_BUCKET_SIZE > 0
+  filep->f_locked = false;
+#endif
+
+  file_put(filep);
+
+  return fd;
+}
+
+/****************************************************************************
+ * Name: fdlist_copy
+ *
+ * Description:
+ *   Copy parent task's file descriptors to child task.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+int fdlist_copy(FAR struct fdlist *plist, FAR struct fdlist *clist,
+                FAR const posix_spawn_file_actions_t *actions,
+                bool cloexec)
 {
   bool fcloexec;
   int ret;
@@ -629,9 +761,8 @@ int files_duplist(FAR struct filelist *plist, FAR struct filelist *clist,
     {
       for (j = 0; j < CONFIG_NFILE_DESCRIPTORS_PER_BLOCK; j++)
         {
-          FAR struct file *filep2;
           FAR struct file *filep;
-          bool new = false;
+          FAR struct fd *fdp;
 
           fd = i * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK + j;
 #ifdef CONFIG_FDCLONE_STDIO
@@ -649,13 +780,13 @@ int files_duplist(FAR struct filelist *plist, FAR struct filelist *clist,
             }
 #endif
 
-          filep = files_fget_by_index(plist, i, j, NULL);
+          fdlist_get_by_index(plist, i, j, &filep, &fdp);
           if (filep == NULL)
             {
               continue;
             }
 
-          fcloexec = (cloexec && (filep->f_oflags & O_CLOEXEC));
+          fcloexec = cloexec && fdp->f_cloexec;
 
           /* Skip file dup if file action is unnecessary to duplicate */
 
@@ -676,28 +807,17 @@ int files_duplist(FAR struct filelist *plist, FAR struct filelist *clist,
               continue;
             }
 
-          ret = files_extend(clist, i + 1);
+          ret = fdlist_extend(clist, i + 1);
           if (ret < 0)
             {
               file_put(filep);
               return ret;
             }
 
-          /* Yes... duplicate it for the child, include O_CLOEXEC flag. */
+          /* Assign filep to the child's descriptor list. Omit the flags */
 
-          filep2 = files_fget_by_index(clist, i, j, &new);
-          ret = file_dup2(filep, filep2);
-          file_put(filep2);
+          fdlist_install(clist, fd, filep, 0);
           file_put(filep);
-          if (ret < 0)
-            {
-              if (new)
-                {
-                  file_put(filep2);
-                }
-
-              return ret;
-            }
         }
     }
 
@@ -705,15 +825,16 @@ int files_duplist(FAR struct filelist *plist, FAR struct filelist *clist,
 }
 
 /****************************************************************************
- * Name: file_get
+ * Name: file_get2
  *
  * Description:
  *   Given a file descriptor, return the corresponding instance of struct
- *   file.
+ *   fd and filep
  *
  * Input Parameters:
  *   fd    - The file descriptor
  *   filep - The location to return the struct file instance
+ *   fdp   - The location to return the struct fd instance
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on
@@ -721,49 +842,9 @@ int files_duplist(FAR struct filelist *plist, FAR struct filelist *clist,
  *
  ****************************************************************************/
 
-int file_get(int fd, FAR struct file **filep)
+int file_get2(int fd, FAR struct file **filep, FAR struct fd **fdp)
 {
-  FAR struct filelist *list;
-
-#ifdef CONFIG_FDCHECK
-  fd = fdcheck_restore(fd);
-#endif
-
-  *filep = NULL;
-
-  list = nxsched_get_files();
-
-  /* The file list can be NULL under two cases:  (1) One is an obscure
-   * cornercase:  When memory management debug output is enabled.  Then
-   * there may be attempts to write to stdout from malloc before the group
-   * data has been allocated.  The other other is (2) if this is a kernel
-   * thread.  Kernel threads have no allocated file descriptors.
-   */
-
-  if (list == NULL)
-    {
-      return -EAGAIN;
-    }
-
-  if (fd < 0 || fd >= files_countlist(list))
-    {
-      return -EBADF;
-    }
-
-  /* The descriptor is in a valid range to file descriptor... Get the
-   * thread-specific file list.
-   */
-
-  *filep = files_fget(list, fd);
-
-  /* if *filep is NULL, fd was closed */
-
-  if (*filep == NULL)
-    {
-      return -EBADF;
-    }
-
-  return OK;
+  return fdlist_get2(nxsched_get_fdlist(), fd, filep, fdp);
 }
 
 /****************************************************************************
@@ -804,7 +885,10 @@ int file_put(FAR struct file *filep)
 {
   int ret = 0;
 
-  DEBUGASSERT(filep);
+  if (filep == NULL)
+    {
+      return ret;
+    }
 
   /* If refs is zero, the close() had called, closing it now. */
 
@@ -815,20 +899,22 @@ int file_put(FAR struct file *filep)
         {
           ferr("ERROR: fs putfilep file_close() failed: %d\n", ret);
         }
+
+      fs_heap_free(filep);
     }
 
   return ret;
 }
 
 /****************************************************************************
- * Name: nx_dup2_from_tcb
+ * Name: fdlist_dup2
  *
  * Description:
- *   nx_dup2_from_tcb() is similar to the standard 'dup2' interface
+ *   fdlist_dup2() is similar to the standard 'dup2' interface
  *   except that is not a cancellation point and it does not modify the
  *   errno variable.
  *
- *   nx_dup2_from_tcb() is an internal NuttX interface and should not be
+ *   fdlist_dup2() is an internal NuttX interface and should not be
  *   called from applications.
  *
  *   Clone a file descriptor to a specific descriptor number.
@@ -839,20 +925,41 @@ int file_put(FAR struct file *filep)
  *
  ****************************************************************************/
 
-int nx_dup2_from_tcb(FAR struct tcb_s *tcb, int fd1, int fd2)
+int fdlist_dup2(FAR struct fdlist *list, int fd1, int fd2)
 {
-  return nx_dup3_from_tcb(tcb, fd1, fd2, 0);
+  /* If fd1 is a valid file descriptor, and fd1 == fd2, then dup2() does
+   * nothing, and returns fd2.
+   */
+
+  if (fd1 == fd2)
+    {
+      FAR struct file *filep;
+      int ret;
+
+      ret = file_get(fd1, &filep);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      /* Release the reference */
+
+      file_put(filep);
+      return fd2;
+    }
+
+  return fdlist_dup3(list, fd1, fd2, 0);
 }
 
 /****************************************************************************
- * Name: nx_close_from_tcb
+ * Name: fdlist_close
  *
  * Description:
- *   nx_close_from_tcb() is similar to the standard 'close' interface
+ *   fdlist_close() is similar to the standard 'close' interface
  *   except that is not a cancellation point and it does not modify the
  *   errno variable.
  *
- *   nx_close_from_tcb() is an internal NuttX interface and should not
+ *   fdlist_close() is an internal NuttX interface and should not
  *   be called from applications.
  *
  *   Close an inode (if open)
@@ -867,41 +974,25 @@ int nx_dup2_from_tcb(FAR struct tcb_s *tcb, int fd1, int fd2)
  *
  ****************************************************************************/
 
-int nx_close_from_tcb(FAR struct tcb_s *tcb, int fd)
+int fdlist_close(FAR struct fdlist *list, int fd)
 {
-  FAR struct file     *filep;
-  FAR struct filelist *list;
+  FAR struct file *filep;
+  FAR struct fd   *fdp;
+  int ret;
 
-#ifdef CONFIG_FDCHECK
-  fd = fdcheck_restore(fd);
-#endif
-
-  list = nxsched_get_files_from_tcb(tcb);
+  ret = fdlist_get2(list, fd, &filep, &fdp);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Perform the protected close operation */
 
-  if (fd < 0 || fd >= files_countlist(list))
-    {
-      return -EBADF;
-    }
+  fdlist_uninstall(list, fdp);
 
-  filep = files_fget(list, fd);
-
-  /* If the file was properly opened, there should be an inode assigned */
-
-  if (filep == NULL)
-    {
-      return -EBADF;
-    }
-
-
-  /* files_fget will increase the reference count, there call file_put
-   * reduce reference count.
+  /* fdlist_get2 will increase the reference count, there call
+   * file_put reduce reference count.
    */
-
-  file_put(filep);
-
-  /* Undo the last reference count from file_allocate_from_tcb */
 
   return file_put(filep);
 }

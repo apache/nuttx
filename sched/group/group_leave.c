@@ -102,7 +102,7 @@ group_release(FAR struct task_group_s *group, uint8_t ttype)
 
   /* Free resources held by the file descriptor list */
 
-  files_putlist(&group->tg_filelist);
+  fdlist_free(&group->tg_fdlist);
 
 #ifndef CONFIG_DISABLE_ENVIRON
   /* Release all shared environment variables */

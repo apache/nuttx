@@ -68,7 +68,7 @@ nxspawn_close(FAR struct tcb_s *tcb,
 
   sinfo("Closing fd=%d\n", action->fd);
 
-  nx_close_from_tcb(tcb, action->fd);
+  fdlist_close(nxsched_get_fdlist_from_tcb(tcb), action->fd);
 }
 
 static inline int nxspawn_dup2(FAR struct tcb_s *tcb,
@@ -78,12 +78,14 @@ static inline int nxspawn_dup2(FAR struct tcb_s *tcb,
 
   sinfo("Dup'ing %d->%d\n", action->fd1, action->fd2);
 
-  return nx_dup2_from_tcb(tcb, action->fd1, action->fd2);
+  return fdlist_dup2(nxsched_get_fdlist_from_tcb(tcb),
+                     action->fd1, action->fd2);
 }
 
 static inline int nxspawn_open(FAR struct tcb_s *tcb,
                                FAR struct spawn_open_file_action_s *action)
 {
+  FAR struct fdlist *list;
   int ret = OK;
   int fd;
 
@@ -92,22 +94,23 @@ static inline int nxspawn_open(FAR struct tcb_s *tcb,
   sinfo("Open'ing path=%s oflags=%04x mode=%04x\n",
         action->path, action->oflags, action->mode);
 
-  nx_close_from_tcb(tcb, action->fd);
+  list = nxsched_get_fdlist_from_tcb(tcb);
+  fdlist_close(list, action->fd);
 
-  fd = nx_open_from_tcb(tcb, action->path, action->oflags, action->mode);
+  fd = fdlist_open(list, action->path, action->oflags, action->mode);
   if (fd < 0)
     {
       ret = fd;
     }
   else if (fd != action->fd)
     {
-      ret = nx_dup2_from_tcb(tcb, fd, action->fd);
+      ret = fdlist_dup2(list, fd, action->fd);
       if (ret >= 0)
         {
           ret = OK;
         }
 
-      nx_close_from_tcb(tcb, fd);
+      fdlist_close(list, fd);
     }
 
   return ret;

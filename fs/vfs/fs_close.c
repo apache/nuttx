@@ -76,11 +76,10 @@ static FAR char *file_get_path(FAR struct file *filep)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: file_close_without_clear
+ * Name: file_close
  *
  * Description:
- *   Close a file that was previously opened with file_open(), but without
- *   clear filep.
+ *   Close a file that was previously opened with file_open().
  *
  * Input Parameters:
  *   filep - A pointer to a user provided memory location containing the
@@ -92,7 +91,7 @@ static FAR char *file_get_path(FAR struct file *filep)
  *
  ****************************************************************************/
 
-int file_close_without_clear(FAR struct file *filep)
+int file_close(FAR struct file *filep)
 {
   struct inode *inode;
 #ifdef CONFIG_FS_NOTIFY
@@ -140,43 +139,13 @@ int file_close_without_clear(FAR struct file *filep)
 
           inode_release(inode);
         }
-    }
 
-  return ret;
-}
-
-/****************************************************************************
- * Name: file_close
- *
- * Description:
- *   Close a file that was previously opened with file_open().
- *
- * Input Parameters:
- *   filep - A pointer to a user provided memory location containing the
- *           open file data returned by file_open().
- *
- * Returned Value:
- *   Zero (OK) is returned on success; A negated errno value is returned on
- *   any failure to indicate the nature of the failure.
- *
- ****************************************************************************/
-
-int file_close(FAR struct file *filep)
-{
-  int ret;
-
-  ret = file_close_without_clear(filep);
-  if (ret >= 0 && filep->f_inode)
-    {
-#ifdef CONFIG_FDCHECK
-      filep->f_tag_fdcheck = 0;
+#ifdef CONFIG_FS_NOTIFY
+      if (path != NULL)
+        {
+          lib_put_pathbuffer(path);
+        }
 #endif
-
-#ifdef CONFIG_FDSAN
-      filep->f_tag_fdsan = 0;
-#endif
-
-      /* Reset the user file struct instance so that it cannot be reused. */
 
       filep->f_inode = NULL;
     }
@@ -208,7 +177,7 @@ int file_close(FAR struct file *filep)
 
 int nx_close(int fd)
 {
-  return nx_close_from_tcb(this_task(), fd);
+  return fdlist_close(nxsched_get_fdlist_from_tcb(this_task()), fd);
 }
 
 /****************************************************************************

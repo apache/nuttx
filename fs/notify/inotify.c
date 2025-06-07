@@ -1025,7 +1025,7 @@ static inline void notify_queue_filep_event(FAR struct file *filep,
 
 static void notify_free_entry(FAR ENTRY *entry)
 {
-  /* Key is alloced by lib_malloc, value is alloced by fs_heap_malloc */
+  /* Key is allocated by lib_malloc, value is allocated by fs_heap_malloc */
 
   fs_heap_free(entry->key);
   fs_heap_free(entry->data);
@@ -1255,8 +1255,8 @@ int inotify_init1(int flags)
       goto exit_set_errno;
     }
 
-  ret = file_allocate(&g_inotify_inode, O_RDOK | flags,
-                      0, dev, 0, true);
+  ret = file_allocate_from_inode(&g_inotify_inode, O_RDOK | flags,
+                                 0, dev, 0);
   if (ret < 0)
     {
       ferr("Failed to allocate inotify fd\n");
