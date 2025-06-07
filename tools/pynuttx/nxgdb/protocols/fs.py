@@ -23,6 +23,16 @@
 from .value import Value
 
 
+class Fd(Value):
+    """struct fd"""
+
+    f_file: Value
+    f_cloexec: Value
+    f_tag_fdcheck: Value
+    f_tag_fdsan: Value
+    f_backtrace: Value
+
+
 class File(Value):
     """struct file"""
 
@@ -31,9 +41,6 @@ class File(Value):
     f_pos: Value
     f_inode: Value
     f_priv: Value
-    f_tag_fdsan: Value
-    f_tag_fdcheck: Value
-    f_backtrace: Value
     f_locked: Value
 
 
@@ -58,8 +65,8 @@ class Inode(Value):
     i_name: Value
 
 
-class FileList(Value):
-    """struct filelist_s"""
+class FdList(Value):
+    """struct fdlist"""
 
     fl_rows: Value
-    fl_files: Value
+    fl_fds: Value
