@@ -341,14 +341,6 @@
 #  undef HAVE_LED_DRIVER
 #endif
 
-#ifdef HAVE_LED_DRIVER
-#  ifdef CONFIG_EXAMPLES_LEDS_DEVPATH
-#    define LED_DRIVER_PATH CONFIG_EXAMPLES_LEDS_DEVPATH
-#  else
-#    define LED_DRIVER_PATH "/dev/userleds"
-#  endif
-#endif
-
 /* Check if the MRF24J40 is supported in this configuration */
 
 #ifndef CONFIG_IEEE802154_MRF24J40
