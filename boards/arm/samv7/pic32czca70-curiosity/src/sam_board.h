@@ -138,14 +138,6 @@
 #  undef HAVE_LED_DRIVER
 #endif
 
-#ifdef HAVE_LED_DRIVER
-#  ifdef CONFIG_EXAMPLES_LEDS_DEVPATH
-#    define LED_DRIVER_PATH CONFIG_EXAMPLES_LEDS_DEVPATH
-#  else
-#    define LED_DRIVER_PATH "/dev/userleds"
-#  endif
-#endif
-
 /* Configuration ************************************************************/
 
 /* PIC32CZ CA70 GPIO Pin Definitions ****************************************/
