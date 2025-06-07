@@ -144,7 +144,7 @@ ssize_t file_writev(FAR struct file *filep,
                     FAR const struct iovec *iov, int iovcnt)
 {
   FAR struct inode *inode;
-  ssize_t ret = -EBADF;
+  ssize_t ret;
 
   /* Was this file opened for write access? */
 
@@ -153,10 +153,33 @@ ssize_t file_writev(FAR struct file *filep,
       return -EACCES;
     }
 
+  /* Check buffer count and pointer for iovec */
+
+  if (iovcnt == 0)
+    {
+      return 0;
+    }
+
+  if (iov == NULL)
+    {
+      return -EFAULT;
+    }
+
+  /* Are all iov_base accessible? */
+
+  for (ret = 0; ret < iovcnt; ret++)
+    {
+      if (iov[ret].iov_base == NULL && iov[ret].iov_len != 0)
+        {
+          return -EFAULT;
+        }
+    }
+
   /* Is a driver registered? Does it support the write method?
    * If yes, then let the driver perform the write.
    */
 
+  ret = -EBADF;
   inode = filep->f_inode;
   if (inode != NULL && inode->u.i_ops)
     {

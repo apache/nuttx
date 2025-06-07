@@ -159,10 +159,34 @@ ssize_t file_readv(FAR struct file *filep,
                    FAR const struct iovec *iov, int iovcnt)
 {
   FAR struct inode *inode;
-  ssize_t ret = -EBADF;
+  ssize_t ret;
 
   DEBUGASSERT(filep);
   inode = filep->f_inode;
+
+  /* Check buffer count and pointer for iovec */
+
+  if (iovcnt == 0)
+    {
+      return 0;
+    }
+
+  if (iov == NULL)
+    {
+      return -EFAULT;
+    }
+
+  /* Are all iov_base accessible? */
+
+  for (ret = 0; ret < iovcnt; ret++)
+    {
+      if (iov[ret].iov_base == NULL && iov[ret].iov_len != 0)
+        {
+          return -EFAULT;
+        }
+    }
+
+  ret = -EBADF;
 
   /* Was this file opened for read access? */
 
