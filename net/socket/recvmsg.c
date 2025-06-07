@@ -179,7 +179,7 @@ ssize_t recvmsg(int sockfd, FAR struct msghdr *msg, int flags)
   if (ret == OK)
     {
       ret = psock_recvmsg(psock, msg, flags);
-      fs_putfilep(filep);
+      file_put(filep);
     }
 
   if (ret < 0)

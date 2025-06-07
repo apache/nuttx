@@ -276,10 +276,10 @@ ssize_t nx_writev(int fd, FAR const struct iovec *iov, int iovcnt)
   ssize_t ret;
 
   /* First, get the file structure.
-   * Note that fs_getfilep() will return the errno on failure.
+   * Note that file_get() will return the errno on failure.
    */
 
-  ret = (ssize_t)fs_getfilep(fd, &filep);
+  ret = (ssize_t)file_get(fd, &filep);
   if (ret >= 0)
     {
       /* Perform the write operation using the file descriptor as an
@@ -288,7 +288,7 @@ ssize_t nx_writev(int fd, FAR const struct iovec *iov, int iovcnt)
 
       ret = file_writev(filep, iov, iovcnt);
 
-      fs_putfilep(filep);
+      file_put(filep);
     }
 
   return ret;

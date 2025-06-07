@@ -227,7 +227,7 @@ static void task_fssync(FAR struct tcb_s *tcb, FAR void *arg)
               ctcb = nxsched_get_tcb(pid);
               if (ctcb != NULL && ctcb->group != NULL && ctcb == tcb)
                 {
-                  fs_putfilep(filep);
+                  file_put(filep);
                 }
             }
         }
@@ -310,13 +310,13 @@ int nx_dup3_from_tcb(FAR struct tcb_s *tcb, int fd1, int fd2, int flags)
   /* Perform the dup3 operation */
 
   ret = file_dup3(filep1, filep, flags);
-  fs_putfilep(filep1);
-  fs_putfilep(filep);
+  file_put(filep1);
+  file_put(filep);
   if (ret < 0)
     {
       if (new)
         {
-          fs_putfilep(filep);
+          file_put(filep);
         }
 
       return ret;
@@ -413,7 +413,7 @@ void files_dumplist(FAR struct filelist *list)
             , buf
 #endif
             );
-      fs_putfilep(filep);
+      file_put(filep);
     }
 
   lib_put_pathbuffer(path);
@@ -666,20 +666,20 @@ int files_duplist(FAR struct filelist *plist, FAR struct filelist *clist,
 #endif
               if (!spawn_file_is_duplicateable(actions, fd, fcloexec))
                 {
-                  fs_putfilep(filep);
+                  file_put(filep);
                   continue;
                 }
             }
           else if (fcloexec)
             {
-              fs_putfilep(filep);
+              file_put(filep);
               continue;
             }
 
           ret = files_extend(clist, i + 1);
           if (ret < 0)
             {
-              fs_putfilep(filep);
+              file_put(filep);
               return ret;
             }
 
@@ -687,13 +687,13 @@ int files_duplist(FAR struct filelist *plist, FAR struct filelist *clist,
 
           filep2 = files_fget_by_index(clist, i, j, &new);
           ret = file_dup2(filep, filep2);
-          fs_putfilep(filep2);
-          fs_putfilep(filep);
+          file_put(filep2);
+          file_put(filep);
           if (ret < 0)
             {
               if (new)
                 {
-                  fs_putfilep(filep2);
+                  file_put(filep2);
                 }
 
               return ret;
@@ -705,7 +705,7 @@ int files_duplist(FAR struct filelist *plist, FAR struct filelist *clist,
 }
 
 /****************************************************************************
- * Name: fs_getfilep
+ * Name: file_get
  *
  * Description:
  *   Given a file descriptor, return the corresponding instance of struct
@@ -721,7 +721,7 @@ int files_duplist(FAR struct filelist *plist, FAR struct filelist *clist,
  *
  ****************************************************************************/
 
-int fs_getfilep(int fd, FAR struct file **filep)
+int file_get(int fd, FAR struct file **filep)
 {
   FAR struct filelist *list;
 
@@ -767,7 +767,7 @@ int fs_getfilep(int fd, FAR struct file **filep)
 }
 
 /****************************************************************************
- * Name: fs_reffilep
+ * Name: file_ref
  *
  * Description:
  *   To specify filep increase the reference count.
@@ -780,7 +780,7 @@ int fs_getfilep(int fd, FAR struct file **filep)
  *
  ****************************************************************************/
 
-void fs_reffilep(FAR struct file *filep)
+void file_ref(FAR struct file *filep)
 {
   /* This interface is used to increase the reference count of filep */
 
@@ -789,7 +789,7 @@ void fs_reffilep(FAR struct file *filep)
 }
 
 /****************************************************************************
- * Name: fs_putfilep
+ * Name: file_put
  *
  * Description:
  *   Handles reference counts for files, less than or equal to 0 and close
@@ -800,7 +800,7 @@ void fs_reffilep(FAR struct file *filep)
  *            file' instance.
  ****************************************************************************/
 
-int fs_putfilep(FAR struct file *filep)
+int file_put(FAR struct file *filep)
 {
   int ret = 0;
 
@@ -895,15 +895,15 @@ int nx_close_from_tcb(FAR struct tcb_s *tcb, int fd)
     }
 
 
-  /* files_fget will increase the reference count, there call fs_putfilep
+  /* files_fget will increase the reference count, there call file_put
    * reduce reference count.
    */
 
-  fs_putfilep(filep);
+  file_put(filep);
 
   /* Undo the last reference count from file_allocate_from_tcb */
 
-  return fs_putfilep(filep);
+  return file_put(filep);
 }
 
 /****************************************************************************

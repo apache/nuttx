@@ -134,7 +134,7 @@ ssize_t pread(int fd, FAR void *buf, size_t nbytes, off_t offset)
 
   /* Get the file structure corresponding to the file descriptor. */
 
-  ret = (ssize_t)fs_getfilep(fd, &filep);
+  ret = (ssize_t)file_get(fd, &filep);
   if (ret < 0)
     {
       goto errout;
@@ -143,7 +143,7 @@ ssize_t pread(int fd, FAR void *buf, size_t nbytes, off_t offset)
   /* Let file_pread do the real work */
 
   ret = file_pread(filep, buf, nbytes, offset);
-  fs_putfilep(filep);
+  file_put(filep);
   if (ret < 0)
     {
       goto errout;

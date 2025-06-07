@@ -293,17 +293,17 @@ ssize_t nx_readv(int fd, FAR const struct iovec *iov, int iovcnt)
   ssize_t ret;
 
   /* First, get the file structure.  Note that on failure,
-   * fs_getfilep() will return the errno.
+   * file_get() will return the errno.
    */
 
-  ret = (ssize_t)fs_getfilep(fd, &filep);
+  ret = (ssize_t)file_get(fd, &filep);
   if (ret >= 0)
     {
       /* Then let file_readv do all of the work. */
 
       ret = file_readv(filep, iov, iovcnt);
 
-      fs_putfilep(filep);
+      file_put(filep);
     }
 
   return ret;

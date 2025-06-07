@@ -364,7 +364,7 @@ int signalfd(int fd, FAR const sigset_t *mask, int flags)
     }
   else
     {
-      if (fs_getfilep(fd, &filep) < 0)
+      if (file_get(fd, &filep) < 0)
         {
           ret = EBADF;
           goto errout;
@@ -372,7 +372,7 @@ int signalfd(int fd, FAR const sigset_t *mask, int flags)
 
       if (filep->f_inode->u.i_ops != &g_signalfd_fileops)
         {
-          fs_putfilep(filep);
+          file_put(filep);
           goto errout;
         }
 
@@ -402,7 +402,7 @@ int signalfd(int fd, FAR const sigset_t *mask, int flags)
 
   if (filep != NULL)
     {
-      fs_putfilep(filep);
+      file_put(filep);
     }
 
   return fd;

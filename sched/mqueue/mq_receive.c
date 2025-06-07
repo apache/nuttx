@@ -371,14 +371,14 @@ ssize_t nxmq_timedreceive(mqd_t mqdes, FAR char *msg, size_t msglen,
   FAR struct file *filep;
   ssize_t ret;
 
-  ret = fs_getfilep(mqdes, &filep);
+  ret = file_get(mqdes, &filep);
   if (ret < 0)
     {
       return ret;
     }
 
   ret = file_mq_timedreceive_internal(filep, msg, msglen, prio, abstime, -1);
-  fs_putfilep(filep);
+  file_put(filep);
   return ret;
 }
 
@@ -521,14 +521,14 @@ ssize_t nxmq_receive(mqd_t mqdes, FAR char *msg, size_t msglen,
   FAR struct file *filep;
   ssize_t ret;
 
-  ret = fs_getfilep(mqdes, &filep);
+  ret = file_get(mqdes, &filep);
   if (ret < 0)
     {
       return ret;
     }
 
   ret = file_mq_receive(filep, msg, msglen, prio);
-  fs_putfilep(filep);
+  file_put(filep);
   return ret;
 }
 

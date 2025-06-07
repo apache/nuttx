@@ -245,7 +245,7 @@ ssize_t sendto(int sockfd, FAR const void *buf, size_t len, int flags,
   if (ret == OK)
     {
       ret = psock_sendto(psock, buf, len, flags, to, tolen);
-      fs_putfilep(filep);
+      file_put(filep);
     }
 
 #ifdef CONFIG_BUILD_KERNEL

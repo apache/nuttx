@@ -1171,7 +1171,7 @@ int nx_open_from_tcb(FAR struct tcb_s *tcb,
 int nx_open(FAR const char *path, int oflags, ...);
 
 /****************************************************************************
- * Name: fs_getfilep
+ * Name: file_get
  *
  * Description:
  *   Given a file descriptor, return the corresponding instance of struct
@@ -1188,10 +1188,10 @@ int nx_open(FAR const char *path, int oflags, ...);
  *
  ****************************************************************************/
 
-int fs_getfilep(int fd, FAR struct file **filep);
+int file_get(int fd, FAR struct file **filep);
 
 /****************************************************************************
- * Name: fs_reffilep
+ * Name: file_ref
  *
  * Description:
  *   To specify filep increase the reference count.
@@ -1204,10 +1204,10 @@ int fs_getfilep(int fd, FAR struct file **filep);
  *
  ****************************************************************************/
 
-void fs_reffilep(FAR struct file *filep);
+void file_ref(FAR struct file *filep);
 
 /****************************************************************************
- * Name: fs_putfilep
+ * Name: file_put
  *
  * Description:
  *   Release reference counts for files, less than or equal to 0 and close
@@ -1219,7 +1219,7 @@ void fs_reffilep(FAR struct file *filep);
  *
  ****************************************************************************/
 
-int fs_putfilep(FAR struct file *filep);
+int file_put(FAR struct file *filep);
 
 /****************************************************************************
  * Name: file_close

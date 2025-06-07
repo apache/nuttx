@@ -206,7 +206,7 @@ FAR struct socket *file_socket(FAR struct file *filep)
 int sockfd_socket(int sockfd, FAR struct file **filep,
                   FAR struct socket **socketp)
 {
-  if (fs_getfilep(sockfd, filep) < 0)
+  if (file_get(sockfd, filep) < 0)
     {
       *socketp = NULL;
       return -EBADF;
@@ -215,7 +215,7 @@ int sockfd_socket(int sockfd, FAR struct file **filep,
   *socketp = file_socket(*filep);
   if (*socketp == NULL)
     {
-      fs_putfilep(*filep);
+      file_put(*filep);
     }
 
   return *socketp != NULL ? OK : -ENOTSOCK;

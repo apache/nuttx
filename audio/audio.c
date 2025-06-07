@@ -590,7 +590,7 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           audinfo("AUDIOIOC_REGISTERMQ\n");
 
-          ret = fs_getfilep((mqd_t)arg, &upper->usermq);
+          ret = file_get((mqd_t)arg, &upper->usermq);
         }
         break;
 
@@ -603,7 +603,7 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           audinfo("AUDIOIOC_UNREGISTERMQ\n");
 
-          fs_putfilep(upper->usermq);
+          file_put(upper->usermq);
           upper->usermq = NULL;
           ret = OK;
         }
