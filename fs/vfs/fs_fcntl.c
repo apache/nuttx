@@ -349,7 +349,7 @@ int fcntl(int fd, int cmd, ...)
 
   /* Get the file structure corresponding to the file descriptor. */
 
-  ret = fs_getfilep(fd, &filep);
+  ret = file_get(fd, &filep);
   if (ret >= 0)
     {
       /* Let file_vfcntl() do the real work.  The errno is not set on
@@ -357,7 +357,7 @@ int fcntl(int fd, int cmd, ...)
        */
 
       ret = file_vfcntl(filep, cmd, ap);
-      fs_putfilep(filep);
+      file_put(filep);
     }
 
   if (ret < 0)

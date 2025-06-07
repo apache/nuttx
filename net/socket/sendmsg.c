@@ -158,7 +158,7 @@ ssize_t sendmsg(int sockfd, FAR struct msghdr *msg, int flags)
   if (ret == OK)
     {
       ret = psock_sendmsg(psock, msg, flags);
-      fs_putfilep(filep);
+      file_put(filep);
     }
 
   if (ret < 0)

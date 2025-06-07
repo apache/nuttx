@@ -164,7 +164,7 @@ int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
   if (ret == OK)
     {
       ret = psock_bind(psock, addr, addrlen);
-      fs_putfilep(filep);
+      file_put(filep);
     }
 
   if (ret < 0)

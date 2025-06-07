@@ -127,7 +127,7 @@ off_t nx_seek(int fd, off_t offset, int whence)
 
   /* Get the file structure corresponding to the file descriptor. */
 
-  ret = fs_getfilep(fd, &filep);
+  ret = file_get(fd, &filep);
   if (ret < 0)
     {
       return ret;
@@ -136,7 +136,7 @@ off_t nx_seek(int fd, off_t offset, int whence)
   /* Then let file_seek do the real work */
 
   ret = file_seek(filep, offset, whence);
-  fs_putfilep(filep);
+  file_put(filep);
   return ret;
 }
 

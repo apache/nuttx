@@ -104,7 +104,7 @@ int mq_notify(mqd_t mqdes, FAR const struct sigevent *notification)
   irqstate_t flags;
   int errval;
 
-  errval = fs_getfilep(mqdes, &filep);
+  errval = file_get(mqdes, &filep);
   if (errval < 0)
     {
       errval = -errval;
@@ -184,14 +184,14 @@ int mq_notify(mqd_t mqdes, FAR const struct sigevent *notification)
     }
 
   leave_critical_section(flags);
-  fs_putfilep(filep);
+  file_put(filep);
   return OK;
 
 errout:
   leave_critical_section(flags);
 
 errout_with_filep:
-  fs_putfilep(filep);
+  file_put(filep);
 
 errout_without_lock:
   set_errno(errval);

@@ -175,7 +175,7 @@ static int unmap_rammap(FAR struct task_group_s *group,
           kumm_free(entry->vaddr);
         }
 
-      fs_putfilep(filep);
+      file_put(filep);
 
       /* Then remove the mapping from the list */
 
@@ -332,7 +332,7 @@ int rammap(FAR struct file *filep, FAR struct mm_map_entry_s *entry,
   /* Add the buffer to the list of regions */
 
 out:
-  fs_reffilep(filep);
+  file_ref(filep);
   entry->priv.p = (FAR void *)((uintptr_t)filep | type);
   entry->munmap = unmap_rammap;
   entry->msync = msync_rammap;

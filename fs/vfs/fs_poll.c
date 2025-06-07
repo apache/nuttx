@@ -82,7 +82,7 @@ static inline void poll_teardown(FAR struct pollfd *fds, nfds_t nfds,
           FAR struct file *filep;
           int ret;
 
-          ret = fs_getfilep(fds[i].fd, &filep);
+          ret = file_get(fds[i].fd, &filep);
           if (ret >= 0)
             {
               ret = file_poll(filep, &fds[i], false);
@@ -92,8 +92,8 @@ static inline void poll_teardown(FAR struct pollfd *fds, nfds_t nfds,
                * before the poll.
                */
 
-              fs_putfilep(filep);
-              fs_putfilep(filep);
+              file_put(filep);
+              file_put(filep);
             }
 
           if (ret < 0)
@@ -163,7 +163,7 @@ static inline int poll_setup(FAR struct pollfd *fds, nfds_t nfds,
           FAR struct file *filep;
           int num = i;
 
-          ret = fs_getfilep(fds[i].fd, &filep);
+          ret = file_get(fds[i].fd, &filep);
           if (ret < 0)
             {
               num -= 1;

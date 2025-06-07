@@ -401,7 +401,7 @@ int setsockopt(int sockfd, int level, int option, const void *value,
   if (ret == OK)
     {
       ret = psock_setsockopt(psock, level, option, value, value_len);
-      fs_putfilep(filep);
+      file_put(filep);
     }
 
   if (ret < 0)

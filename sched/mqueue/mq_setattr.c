@@ -117,11 +117,11 @@ int mq_setattr(mqd_t mqdes, const struct mq_attr *mq_stat,
   FAR struct file *filep;
   int ret;
 
-  ret = fs_getfilep(mqdes, &filep);
+  ret = file_get(mqdes, &filep);
   if (ret >= 0)
     {
       ret = file_mq_setattr(filep, mq_stat, oldstat);
-      fs_putfilep(filep);
+      file_put(filep);
       if (ret >= 0)
         {
           return OK;

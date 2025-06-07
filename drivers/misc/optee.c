@@ -539,14 +539,14 @@ static int optee_close(FAR struct file *filep)
 
   idr_for_each_entry(priv->shms, shm, id)
     {
-      if (shm->fd > -1 && fs_getfilep(shm->fd, &shm_filep) >= 0)
+      if (shm->fd > -1 && fs_get(shm->fd, &shm_filep) >= 0)
         {
           /* The user did not call close(), prevent vfs auto-close from
            * double-freeing our SHM
            */
 
           shm_filep->f_priv = NULL;
-          fs_putfilep(shm_filep);
+          fs_put(shm_filep);
         }
 
       optee_shm_free(shm);

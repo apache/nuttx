@@ -943,7 +943,7 @@ static int telnet_session(FAR struct telnet_session_s *session)
     }
 
   ret = psock_dup2(psock, &priv->td_psock);
-  fs_putfilep(filep);
+  file_put(filep);
   if (ret < 0)
     {
       nerr("ERROR: psock_dup2 failed: %d\n", ret);

@@ -67,18 +67,18 @@ int file_dup(FAR struct file *filep, int minfd, int flags)
       return fd2;
     }
 
-  ret = fs_getfilep(fd2, &filep2);
+  ret = file_get(fd2, &filep2);
   DEBUGASSERT(ret >= 0);
 
   ret = file_dup3(filep, filep2, flags);
 
-  fs_putfilep(filep2);
+  file_put(filep2);
   if (ret >= 0)
     {
       return fd2;
     }
 
-  fs_putfilep(filep2);
+  file_put(filep2);
   return ret;
 }
 
@@ -97,7 +97,7 @@ int dup(int fd)
 
   /* Get the file structure corresponding to the file descriptor. */
 
-  ret = fs_getfilep(fd, &filep);
+  ret = file_get(fd, &filep);
   if (ret < 0)
     {
       goto err;
@@ -106,7 +106,7 @@ int dup(int fd)
   /* Let file_dup() do the real work */
 
   ret = file_dup(filep, 0, 0);
-  fs_putfilep(filep);
+  file_put(filep);
   if (ret < 0)
     {
       goto err;

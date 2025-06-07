@@ -111,7 +111,7 @@ static int local_sendctl(FAR struct local_conn_s *conn,
 
       for (i = 0; i < count; i++)
         {
-          ret = fs_getfilep(fds[i], &filep);
+          ret = file_get(fds[i], &filep);
           if (ret < 0)
             {
               goto fail;
@@ -120,13 +120,13 @@ static int local_sendctl(FAR struct local_conn_s *conn,
           filep2 = kmm_zalloc(sizeof(*filep2));
           if (!filep2)
             {
-              fs_putfilep(filep);
+              file_put(filep);
               ret = -ENOMEM;
               goto fail;
             }
 
           ret = file_dup2(filep, filep2);
-          fs_putfilep(filep);
+          file_put(filep);
           if (ret < 0)
             {
               kmm_free(filep2);
