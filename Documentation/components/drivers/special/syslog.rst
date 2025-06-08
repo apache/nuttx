@@ -518,3 +518,36 @@ Other miscellaneous settings
 
 -  ``CONFIG_RAMLOG_NPOLLWAITERS``: The maximum number of threads
    that may be waiting on the poll method.
+
+SYSLOG Protocol (RFC 5424)
+==========================
+
+`RFC 5424 <https://www.rfc-editor.org/rfc/rfc5424>`_ is a protocol defined for
+syslog messages which makes provisions to have logs created by "originators" to
+be saved on "collectors" (log servers).
+
+NuttX is capable of generating RFC 5424 compatible ``syslog`` entries with the
+option ``CONFIG_SYSLOG_RFC5424``. Not all features of RFC 5424 are currently
+implemented, such as the ``HOSTNAME`` field or ``MSGID`` fields. However, the
+majority of the RFC 5424 functionality is in place and allows for a NuttX device
+to become a RFC 5424 originator.
+
+Syslog over the network
+-----------------------
+
+Using RFC 5424, network capable NuttX devices can become originators and
+transmit ``syslog`` entries to a collector (log server). This is currently
+possible using the basic UDP implementation with
+:doc:`/applications/system/syslogd/index`.
+
+If using ``syslogd``, it is recommended to use the ``RAMLOG`` device as the
+syslog sink. This allows very fast recording of logs, which unlocks the
+ability to record logs from interrupt contexts or time-sensitive code. The
+``syslogd`` daemon can then transmit these later from user space. As stated
+in :doc:`the syslogd documentation </applications/system/syslogd/index>`, it is
+recommended to configure ``RAMLOG`` in blocking mode.
+
+Once messages are set up for transmission with ``syslogd``, you can consume them
+on another network capable host device using one of the RFC 5424 compatible log
+servers. You're even able to use `WireShark <https://www.wireshark.org/>`_ to
+view and parse ``syslog`` entries in your packet captures.
