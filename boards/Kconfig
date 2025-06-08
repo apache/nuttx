@@ -824,6 +824,17 @@ config ARCH_BOARD_IMXRT1050_EVK
 		This is the board configuration for the port of NuttX to the NXP i.MXRT
 		evaluation kit, MIMXRT1050-EVKB.  This board features the MIMXRT1052DVL6A MCU.
 
+config ARCH_BOARD_ARCX_SOCKET_GRID
+	bool "ARCX Socket Grid board"
+	depends on ARCH_CHIP_MIMXRT1052DVL6A
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	select ARCH_PHY_INTERRUPT
+	---help---
+		This is the board configuration for the port of NuttX for
+		ARC Socket Grid board.
+
 config ARCH_BOARD_IMXRT1060_EVK
 	bool "NXP i.MX RT 1060 EVK"
 	depends on ARCH_CHIP_MIMXRT1062DVL6A
@@ -3522,6 +3533,7 @@ config ARCH_BOARD
 	default "hymini-stm32v"             if ARCH_BOARD_HYMINI_STM32V
 	default "imxrt1020-evk"             if ARCH_BOARD_IMXRT1020_EVK
 	default "imxrt1050-evk"             if ARCH_BOARD_IMXRT1050_EVK
+	default "arcx-socket-grid"          if ARCH_BOARD_ARCX_SOCKET_GRID
 	default "imxrt1060-evk"             if ARCH_BOARD_IMXRT1060_EVK
 	default "imxrt1064-evk"             if ARCH_BOARD_IMXRT1064_EVK
 	default "imxrt1170-evk"             if ARCH_BOARD_IMXRT1170_EVK
@@ -3943,6 +3955,9 @@ source "boards/arm/imxrt/imxrt1020-evk/Kconfig"
 endif
 if ARCH_BOARD_IMXRT1050_EVK
 source "boards/arm/imxrt/imxrt1050-evk/Kconfig"
+endif
+if ARCH_BOARD_ARCX_SOCKET_GRID
+source "boards/arm/imxrt/arcx-socket-grid/Kconfig"
 endif
 if ARCH_BOARD_IMXRT1060_EVK
 source "boards/arm/imxrt/imxrt1060-evk/Kconfig"
