@@ -901,6 +901,7 @@ static ssize_t uart_readv(FAR struct file *filep, FAR struct uio *uio)
 #ifdef CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS
   unsigned int nbuffered;
   unsigned int watermark;
+  int16_t head;
 #endif
   irqstate_t flags;
   ssize_t recvd = 0;
@@ -1337,16 +1338,23 @@ static ssize_t uart_readv(FAR struct file *filep, FAR struct uio *uio)
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
 #ifdef CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS
-  /* How many bytes are now buffered */
+  /* How many bytes are now buffered. Head needs to be copied
+   * to a non-volatile variable to prevent TOCTOU error in case
+   * the interrupt handler changes it between comparison and assignment.
+   * (Copy of tail is not strictly needed but saves us few instructions.)
+   */
 
   rxbuf = &dev->recv;
-  if (rxbuf->head >= rxbuf->tail)
+  head = rxbuf->head;
+  tail = rxbuf->tail;
+
+  if (head >= tail)
     {
-      nbuffered = rxbuf->head - rxbuf->tail;
+      nbuffered = head - tail;
     }
   else
     {
-      nbuffered = rxbuf->size - rxbuf->tail + rxbuf->head;
+      nbuffered = rxbuf->size - tail + head;
     }
 
   /* Is the level now below the watermark level that we need to report? */
