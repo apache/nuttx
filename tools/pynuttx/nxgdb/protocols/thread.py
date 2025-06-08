@@ -97,7 +97,6 @@ class Tcb(Value):
     sigpendactionq: Value
     sigpostedq: Value
     sigunbinfo: Value
-    mhead: Value
     ticks: Value
     run_start: Value
     run_max: Value

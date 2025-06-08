@@ -29,11 +29,6 @@ if(NOT CONFIG_DISABLE_PTHREAD)
       pthread_detach.c
       pthread_getschedparam.c
       pthread_setschedparam.c
-      pthread_mutexinit.c
-      pthread_mutexdestroy.c
-      pthread_mutextimedlock.c
-      pthread_mutextrylock.c
-      pthread_mutexunlock.c
       pthread_condwait.c
       pthread_condsignal.c
       pthread_condbroadcast.c
@@ -46,7 +41,7 @@ if(NOT CONFIG_DISABLE_PTHREAD)
       pthread_setschedprio.c)
 
   if(NOT CONFIG_PTHREAD_MUTEX_UNSAFE)
-    list(APPEND SRCS pthread_mutex.c pthread_mutexconsistent.c)
+    list(APPEND SRCS pthread_mutexinconsistent.c)
   endif()
 
   if(CONFIG_SMP)

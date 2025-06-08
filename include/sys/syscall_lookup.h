@@ -77,6 +77,7 @@ SYSCALL_LOOKUP(sethostname,                2)
 
 SYSCALL_LOOKUP(nxsem_destroy,              1)
 SYSCALL_LOOKUP(nxsem_post_slow,            1)
+SYSCALL_LOOKUP(nxsem_reset,                2)
 SYSCALL_LOOKUP(nxsem_tickwait,             2)
 SYSCALL_LOOKUP(nxsem_clockwait,            3)
 SYSCALL_LOOKUP(nxsem_timedwait,            2)
@@ -323,14 +324,6 @@ SYSCALL_LOOKUP(munmap,                     2)
   SYSCALL_LOOKUP(nx_pthread_exit,          1)
   SYSCALL_LOOKUP(pthread_getschedparam,    3)
   SYSCALL_LOOKUP(pthread_join,             2)
-  SYSCALL_LOOKUP(pthread_mutex_destroy,    1)
-  SYSCALL_LOOKUP(pthread_mutex_init,       2)
-  SYSCALL_LOOKUP(pthread_mutex_timedlock,  2)
-  SYSCALL_LOOKUP(pthread_mutex_trylock,    1)
-  SYSCALL_LOOKUP(pthread_mutex_unlock,     1)
-#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
-  SYSCALL_LOOKUP(pthread_mutex_consistent, 1)
-#endif
   SYSCALL_LOOKUP(pthread_setschedparam,    3)
   SYSCALL_LOOKUP(pthread_setschedprio,     2)
 #ifdef CONFIG_SMP

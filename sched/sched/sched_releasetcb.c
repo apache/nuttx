@@ -118,6 +118,10 @@ int nxsched_release_tcb(FAR struct tcb_s *tcb, uint8_t ttype)
       timer_deleteall(tcb->pid);
 #endif
 
+#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
+      nxmutex_destroy(&nxsched_get_tls(tcb)->tl_lock);
+#endif
+
       /* Release the task's process ID if one was assigned.  PID
        * zero is reserved for the IDLE task.  The TCB of the IDLE
        * task is never release so a value of zero simply means that

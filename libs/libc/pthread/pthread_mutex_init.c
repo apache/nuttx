@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/pthread/pthread_mutexinit.c
+ * libs/libc/pthread/pthread_mutex_init.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -32,8 +32,7 @@
 #include <debug.h>
 
 #include <nuttx/semaphore.h>
-
-#include "pthread/pthread.h"
+#include <nuttx/pthread.h>
 
 /****************************************************************************
  * Public Functions

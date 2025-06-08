@@ -41,6 +41,7 @@
 #include <nuttx/wdog.h>
 #include <nuttx/signal.h>
 #include <nuttx/cancelpt.h>
+#include <nuttx/pthread.h>
 
 #include "sched/sched.h"
 #include "pthread/pthread.h"

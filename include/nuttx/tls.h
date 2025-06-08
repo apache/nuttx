@@ -226,6 +226,15 @@ struct tls_info_s
   int tl_errno;                        /* Per-thread error number */
   pid_t tl_tid;                        /* Thread ID */
   FAR char **tl_argv;                  /* Arguments first string */
+
+  /* Robust mutex support ***************************************************/
+
+#if !defined(CONFIG_DISABLE_PTHREAD) && !defined(CONFIG_PTHREAD_MUTEX_UNSAFE)
+  FAR struct pthread_mutex_s *tl_mhead;   /* List of mutexes held by thread  */
+#endif
+#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
+  mutex_t tl_lock;
+#endif
 };
 
 /****************************************************************************

@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/pthread/pthread_mutexunlock.c
+ * libs/libc/pthread/pthread_mutex_unlock.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -33,7 +33,7 @@
 #include <errno.h>
 #include <debug.h>
 
-#include "pthread/pthread.h"
+#include <nuttx/pthread.h>
 
 /****************************************************************************
  * Public Functions

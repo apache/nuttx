@@ -126,10 +126,6 @@ int nxtask_init(FAR struct tcb_s *tcb, const char *name, int priority,
   nxtask_joininit(tcb);
 #endif
 
-#if !defined(CONFIG_DISABLE_PTHREAD) && !defined(CONFIG_PTHREAD_MUTEX_UNSAFE)
-  spin_lock_init(&tcb->mhead_lock);
-#endif
-
   /* Duplicate the parent tasks environment */
 
   ret = env_dup(tcb->group, envp);
