@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/pthread/pthread_mutex.c
+ * libs/libc/pthread/pthread_mutex.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -34,13 +34,13 @@
 #include <nuttx/irq.h>
 #include <nuttx/sched.h>
 #include <nuttx/semaphore.h>
-
-#include "sched/sched.h"
-#include "pthread/pthread.h"
+#include <nuttx/pthread.h>
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
 
 /****************************************************************************
  * Name: pthread_mutex_add
@@ -58,17 +58,16 @@
 
 static void pthread_mutex_add(FAR struct pthread_mutex_s *mutex)
 {
-  FAR struct tcb_s *rtcb = this_task();
-  irqstate_t flags;
+  FAR struct tls_info_s *tls = tls_get_info();
 
   DEBUGASSERT(mutex->flink == NULL);
 
   /* Add the mutex to the list of mutexes held by this pthread */
 
-  flags        = spin_lock_irqsave(&rtcb->mhead_lock);
-  mutex->flink = rtcb->mhead;
-  rtcb->mhead  = mutex;
-  spin_unlock_irqrestore(&rtcb->mhead_lock, flags);
+  nxmutex_lock(&tls->tl_lock);
+  mutex->flink = tls->tl_mhead;
+  tls->tl_mhead = mutex;
+  nxmutex_unlock(&tls->tl_lock);
 }
 
 /****************************************************************************
@@ -87,16 +86,15 @@ static void pthread_mutex_add(FAR struct pthread_mutex_s *mutex)
 
 static void pthread_mutex_remove(FAR struct pthread_mutex_s *mutex)
 {
-  FAR struct tcb_s *rtcb = this_task();
+  FAR struct tls_info_s *tls = tls_get_info();
   FAR struct pthread_mutex_s *curr;
   FAR struct pthread_mutex_s *prev;
-  irqstate_t flags;
 
-  flags = spin_lock_irqsave(&rtcb->mhead_lock);
+  nxmutex_lock(&tls->tl_lock);
 
   /* Remove the mutex from the list of mutexes held by this task */
 
-  for (prev = NULL, curr = rtcb->mhead;
+  for (prev = NULL, curr = tls->tl_mhead;
        curr != NULL && curr != mutex;
        prev = curr, curr = curr->flink)
     {
@@ -110,7 +108,7 @@ static void pthread_mutex_remove(FAR struct pthread_mutex_s *mutex)
 
   if (prev == NULL)
     {
-      rtcb->mhead = mutex->flink;
+      tls->tl_mhead = mutex->flink;
     }
   else
     {
@@ -118,7 +116,7 @@ static void pthread_mutex_remove(FAR struct pthread_mutex_s *mutex)
     }
 
   mutex->flink = NULL;
-  spin_unlock_irqrestore(&rtcb->mhead_lock, flags);
+  nxmutex_unlock(&tls->tl_lock);
 }
 
 /****************************************************************************
@@ -346,49 +344,4 @@ int pthread_mutex_restorelock(FAR struct pthread_mutex_s *mutex,
 
   return ret;
 }
-
-/****************************************************************************
- * Name: pthread_mutex_inconsistent
- *
- * Description:
- *   This function is called when a pthread is terminated via either
- *   pthread_exit() or pthread_cancel().  It will check for any mutexes
- *   held by exiting thread.  It will mark them as inconsistent and
- *   then wake up the highest priority waiter for the mutex.  That
- *   instance of pthread_mutex_lock() will then return EOWNERDEAD.
- *
- * Input Parameters:
- *   tcb -- a reference to the TCB of the exiting pthread.
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-void pthread_mutex_inconsistent(FAR struct tcb_s *tcb)
-{
-  FAR struct pthread_mutex_s *mutex;
-  irqstate_t flags;
-
-  DEBUGASSERT(tcb != NULL);
-
-  flags = spin_lock_irqsave_nopreempt(&tcb->mhead_lock);
-
-  /* Remove and process each mutex held by this task */
-
-  while (tcb->mhead != NULL)
-    {
-      /* Remove the mutex from the TCB list */
-
-      mutex        = tcb->mhead;
-      tcb->mhead   = mutex->flink;
-      mutex->flink = NULL;
-
-      /* Mark the mutex as INCONSISTENT and wake up any waiting thread */
-
-      mutex->flags |= _PTHREAD_MFLAGS_INCONSISTENT;
-      mutex_unlock(&mutex->mutex);
-    }
-
-  spin_unlock_irqrestore_nopreempt(&tcb->mhead_lock, flags);
-}
+#endif

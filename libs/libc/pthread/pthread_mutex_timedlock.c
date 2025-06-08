@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/pthread/pthread_mutextimedlock.c
+ * libs/libc/pthread/pthread_mutex_timedlock.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -34,8 +34,7 @@
 #include <debug.h>
 
 #include <nuttx/sched.h>
-
-#include "pthread/pthread.h"
+#include <nuttx/pthread.h>
 
 /****************************************************************************
  * Public Functions

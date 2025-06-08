@@ -673,13 +673,6 @@ struct tcb_s
   siginfo_t  *sigunbinfo;                /* Signal info when task unblocked */
 #endif /* !CONFIG_DISABLE_ALL_SIGNALS */
 
-  /* Robust mutex support ***************************************************/
-
-#if !defined(CONFIG_DISABLE_PTHREAD) && !defined(CONFIG_PTHREAD_MUTEX_UNSAFE)
-  FAR struct pthread_mutex_s *mhead;     /* List of mutexes held by thread  */
-  spinlock_t mhead_lock;
-#endif
-
   /* CPU load monitoring support ********************************************/
 
 #ifndef CONFIG_SCHED_CPULOAD_NONE

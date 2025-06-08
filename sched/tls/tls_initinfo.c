@@ -84,5 +84,9 @@ int tls_init_info(FAR struct tcb_s *tcb)
 
   info->tl_argv = NULL;
 
+#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
+  nxmutex_init(&info->tl_lock);
+#endif
+
   return OK;
 }

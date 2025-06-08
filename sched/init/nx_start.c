@@ -451,10 +451,6 @@ static void idle_group_initialize(void)
 
       nxtask_joininit(tcb);
 
-#if !defined(CONFIG_DISABLE_PTHREAD) && !defined(CONFIG_PTHREAD_MUTEX_UNSAFE)
-      spin_lock_init(&tcb->mhead_lock);
-#endif
-
 #ifdef CONFIG_SMP
       /* Create a stack for all CPU IDLE threads (except CPU0 which already
        * has a stack).

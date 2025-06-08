@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/pthread/pthread_condwait.c
+ * sched/pthread/pthread_mutexinconsistent.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -26,100 +26,64 @@
 
 #include <nuttx/config.h>
 
-#include <unistd.h>
 #include <pthread.h>
 #include <sched.h>
+#include <assert.h>
 #include <errno.h>
-#include <debug.h>
 
-#include <nuttx/atomic.h>
-#include <nuttx/cancelpt.h>
+#include <nuttx/sched.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/pthread.h>
 
 #include "pthread/pthread.h"
+#include "sched/sched.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: int pthread_cond_wait
+ * Name: pthread_mutex_inconsistent
  *
  * Description:
- *   A thread can wait for a condition variable to be signalled or broadcast.
+ *   This function is called when a pthread is terminated via either
+ *   pthread_exit() or pthread_cancel().  It will check for any mutexes
+ *   held by exiting thread.  It will mark them as inconsistent and
+ *   then wake up the highest priority waiter for the mutex.  That
+ *   instance of pthread_mutex_lock() will then return EOWNERDEAD.
  *
  * Input Parameters:
- *   None
+ *   tcb -- a reference to the TCB of the exiting pthread.
  *
  * Returned Value:
- *   None
- *
- * Assumptions:
+ *   None.
  *
  ****************************************************************************/
 
-int pthread_cond_wait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex)
+void pthread_mutex_inconsistent(FAR struct tcb_s *tcb)
 {
-  int status;
-  int ret;
+  FAR struct pthread_mutex_s *mutex;
+  FAR struct tls_info_s *tls = nxsched_get_tls(tcb);
 
-  sinfo("cond=%p mutex=%p\n", cond, mutex);
+  DEBUGASSERT(tcb != NULL);
 
-  /* pthread_cond_wait() is a cancellation point */
+  nxmutex_lock(&tls->tl_lock);
 
-  enter_cancellation_point();
+  /* Remove and process each mutex held by this task */
 
-  /* Make sure that non-NULL references were provided. */
-
-  if (cond == NULL || mutex == NULL)
+  while (tls->tl_mhead != NULL)
     {
-      ret = EINVAL;
+      /* Remove the mutex from the TCB list */
+
+      mutex         = tls->tl_mhead;
+      tls->tl_mhead = mutex->flink;
+      mutex->flink  = NULL;
+
+      /* Mark the mutex as INCONSISTENT and wake up any waiting thread */
+
+      mutex->flags |= _PTHREAD_MFLAGS_INCONSISTENT;
+      mutex_reset(&mutex->mutex);
     }
 
-  /* Make sure that the caller holds the mutex */
-
-  else if (!mutex_is_hold(&mutex->mutex))
-    {
-      ret = EPERM;
-    }
-  else
-    {
-      unsigned int nlocks;
-
-      /* Give up the mutex */
-
-      sinfo("Give up mutex / take cond\n");
-
-      atomic_fetch_add(COND_WAIT_COUNT(cond), 1);
-      ret = pthread_mutex_breaklock(mutex, &nlocks);
-
-      status = -nxsem_wait_uninterruptible(&cond->sem);
-      if (ret == OK)
-        {
-          /* Report the first failure that occurs */
-
-          ret = status;
-        }
-
-      /* Reacquire the mutex.
-       *
-       * When cancellation points are enabled, we need to hold the mutex
-       * when the pthread is canceled and cleanup handlers, if any, are
-       * entered.
-       */
-
-      sinfo("Reacquire mutex...\n");
-
-      status = pthread_mutex_restorelock(mutex, nlocks);
-      if (ret == OK)
-        {
-          /* Report the first failure that occurs */
-
-          ret = status;
-        }
-    }
-
-  leave_cancellation_point();
-  sinfo("Returning %d\n", ret);
-  return ret;
+  nxmutex_unlock(&tls->tl_lock);
 }

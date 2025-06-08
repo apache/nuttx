@@ -226,10 +226,6 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
 
   nxtask_joininit(ptcb);
 
-#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
-  spin_lock_init(&ptcb->mhead_lock);
-#endif
-
   /* Bind the parent's group to the new TCB (we have not yet joined the
    * group).
    */

@@ -584,12 +584,10 @@ static inline_function int nxmutex_unlock(FAR mutex_t *mutex)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
 static inline_function void nxmutex_reset(FAR mutex_t *mutex)
 {
   nxsem_reset(&mutex->sem, 1);
 }
-#endif
 
 /****************************************************************************
  * Name: nxmutex_breaklock
@@ -870,13 +868,11 @@ static inline_function bool nxrmutex_is_locked(FAR rmutex_t *rmutex)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
 static inline_function void nxrmutex_reset(FAR rmutex_t *rmutex)
 {
   rmutex->count = 0;
   nxmutex_reset(&rmutex->mutex);
 }
-#endif
 
 #undef EXTERN
 #ifdef __cplusplus

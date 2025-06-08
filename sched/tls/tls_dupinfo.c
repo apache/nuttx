@@ -81,5 +81,9 @@ int tls_dup_info(FAR struct tcb_s *dst, FAR struct tcb_s *src)
 
   info->tl_tid = dst->pid;
 
+#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
+  nxmutex_init(&info->tl_lock);
+#endif
+
   return OK;
 }
