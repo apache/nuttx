@@ -87,26 +87,26 @@
  *   LOG_UUCP     - UUCP subsystem
  */
 
-#define LOG_AUTH      0
-#define LOG_AUTHPRIV  0
-#define LOG_CRON      0
-#define LOG_DAEMON    0
-#define LOG_FTP       0
-#define LOG_KERN      0
-#define LOG_LOCAL0    0
-#define LOG_LOCAL1    0
-#define LOG_LOCAL2    0
-#define LOG_LOCAL3    0
-#define LOG_LOCAL4    0
-#define LOG_LOCAL5    0
-#define LOG_LOCAL6    0
-#define LOG_LOCAL7    0
-#define LOG_LPR       0
-#define LOG_MAIL      0
-#define LOG_NEWS      0
-#define LOG_SYSLOG    0
-#define LOG_USER      0
-#define LOG_UUCP      0
+#define LOG_KERN      (0 << 3)
+#define LOG_USER      (1 << 3)
+#define LOG_MAIL      (2 << 3)
+#define LOG_DAEMON    (3 << 3)
+#define LOG_AUTH      (4 << 3)
+#define LOG_SYSLOG    (5 << 3)
+#define LOG_LPR       (6 << 3)
+#define LOG_NEWS      (7 << 3)
+#define LOG_UUCP      (8 << 3)
+#define LOG_CRON      (9 << 3)
+#define LOG_AUTHPRIV  (10 << 3)
+#define LOG_FTP       (11 << 3)
+#define LOG_LOCAL0    (16 << 3)
+#define LOG_LOCAL1    (17 << 3)
+#define LOG_LOCAL2    (18 << 3)
+#define LOG_LOCAL3    (19 << 3)
+#define LOG_LOCAL4    (20 << 3)
+#define LOG_LOCAL5    (21 << 3)
+#define LOG_LOCAL6    (22 << 3)
+#define LOG_LOCAL7    (23 << 3)
 
 /* This determines the importance of the message. The levels are, in order
  * of decreasing importance:
@@ -126,6 +126,10 @@
 #define LOG_MASK(p)   (1 << (p))
 #define LOG_UPTO(p)   ((1 << ((p)+1)) - 1)
 #define LOG_ALL       0xff
+
+#define LOG_PRIMASK            0x07               /* mask to extract priority part (internal) */
+#define LOG_PRI(p)            ((p) & LOG_PRIMASK) /* extract priority */
+#define LOG_MAKEPRI(fac, pri) ((fac) | (pri))
 
 /****************************************************************************
  * Public Function Prototypes

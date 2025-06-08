@@ -140,11 +140,39 @@ config SYSLOG_INTBUFSIZE
 
 comment "Formatting options"
 
-config SYSLOG_TIMESTAMP
-	bool "Prepend timestamp to syslog message"
+config SYSLOG_RFC5424
+	bool "Standard syslog format (RFC 5424)"
 	default n
 	---help---
-		Prepend timestamp to syslog message.
+		Forces syslog logs to follow the RFC 5424 (syslog protocol) standard.
+		This allows for structured data elements, standard severity levels,
+		standard facilities, standard timestamps and other features that allow
+		syslogs to be compatible with other open source programs (such as
+		logging servers).
+
+if SYSLOG_RFC5424
+
+comment "RFC5424 options"
+
+config SYSLOG_RFC5424_HOSTNAME
+	bool "Enable hostname field"
+	default n
+	---help---
+		Adds the HOSTNAME field to the RFC 5424 compatible syslog output.
+
+config SYSLOG_RFC5424_TIMEQUALITY
+	bool "timeQuality structured data"
+	depends on SYSLOG_TIMESTAMP
+	default n
+	---help---
+		Enables the RFC 5424 'timeQuality' structured data element, which describes the
+		quality of the timestamp sent.
+
+endif # SYSLOG_RFC5424
+
+if !SYSLOG_RFC5424
+
+comment "Regular syslog formatting options"
 
 config SYSLOG_TIMESTAMP_REALTIME
 	bool "Use wall-clock for syslog timestamp"
@@ -198,19 +226,6 @@ config SYSLOG_PRIORITY
 	---help---
 		Prepend log priority (severity) to syslog message.
 
-config SYSLOG_PROCESS_NAME
-	bool "Prepend process name to syslog message"
-	default n
-	depends on TASK_NAME_SIZE > 0
-	---help---
-		Prepend Process name to syslog message.
-
-config SYSLOG_PROCESSID
-	bool "Prepend process ID to syslog message"
-	default n
-	---help---
-		Prepend Process ID to syslog message.
-
 config SYSLOG_PREFIX
 	bool "Prepend prefix to syslog message"
 	default n
@@ -228,6 +243,28 @@ config SYSLOG_COLOR_OUTPUT
 	default n
 	---help---
 		Enables colored output in syslog, according to message priority.
+
+endif # !SYSLOG_RFC5424
+
+config SYSLOG_TIMESTAMP
+	bool "Timestamp in syslog message"
+	default n
+	---help---
+		Prepend timestamp to syslog message, or include the TIMESTAMP field for
+		RFC 5424.
+
+config SYSLOG_PROCESS_NAME
+	bool "Prepend process name to syslog message"
+	default n
+	depends on TASK_NAME_SIZE > 0
+	---help---
+		Prepend Process name to syslog message.
+
+config SYSLOG_PROCESSID
+	bool "Prepend process ID to syslog message"
+	default n
+	---help---
+		Prepend Process ID to syslog message.
 
 comment "SYSLOG channels"
 
