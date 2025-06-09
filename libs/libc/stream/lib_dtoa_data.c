@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/stdio/lib_dtoa_data.c
+ * libs/libc/stream/lib_dtoa_data.c
  *
  * SPDX-License-Identifier: BSD-3-Clause
  * SPDX-FileCopyrightText: 2018, Keith Packard. All rights reserved.

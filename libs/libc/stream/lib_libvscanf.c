@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/stdio/lib_libvscanf.c
+ * libs/libc/stream/lib_libvscanf.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
