@@ -50,6 +50,7 @@
 #define ETH_P_IP    ETHERTYPE_IP
 #define ETH_P_IPV6  ETHERTYPE_IPV6
 #define ETH_P_ARP   ETHERTYPE_ARP
+#define ETH_P_TSN   0x22F0  /* TSN (IEEE 1722) packet */
 
 /****************************************************************************
  * Public Type Definitions
