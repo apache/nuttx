@@ -1387,6 +1387,24 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
 }
 
 /****************************************************************************
+ * Name: lib_sprintf
+ ****************************************************************************/
+
+int lib_sprintf(FAR struct lib_outstream_s *stream, FAR const IPTR char *fmt,
+                ...)
+{
+  va_list ap;
+  int     n;
+
+  /* Let lib_vsprintf do the real work */
+
+  va_start(ap, fmt);
+  n = lib_vsprintf(stream, fmt, ap);
+  va_end(ap);
+  return n;
+}
+
+/****************************************************************************
  * Name: lib_sprintf_internal
  *
  * Description:

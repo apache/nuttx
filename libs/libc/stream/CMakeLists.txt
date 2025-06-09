@@ -46,7 +46,6 @@ list(
   lib_fileinstream.c
   lib_fileoutstream.c
   lib_libbsprintf.c
-  lib_libsprintf.c
   lib_libvscanf.c
   lib_libvsprintf.c
   lib_ultoa_invert.c)
