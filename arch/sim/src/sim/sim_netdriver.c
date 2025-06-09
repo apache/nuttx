@@ -113,6 +113,12 @@ static int netdriver_send(struct netdev_lowerhalf_s *dev, netpkt_t *pkt);
 static netpkt_t *netdriver_recv(struct netdev_lowerhalf_s *dev);
 static int netdriver_ifup(struct netdev_lowerhalf_s *dev);
 static int netdriver_ifdown(struct netdev_lowerhalf_s *dev);
+#ifdef CONFIG_NET_MCASTGROUP
+static int netdriver_addmac(struct netdev_lowerhalf_s *dev,
+                            const uint8_t *mac);
+static int netdriver_rmmac(struct netdev_lowerhalf_s *dev,
+                           const uint8_t *mac);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -127,6 +133,10 @@ static const struct netdev_ops_s g_ops =
   netdriver_ifdown, /* ifdown */
   netdriver_send,   /* transmit */
   netdriver_recv    /* receive */
+#ifdef CONFIG_NET_MCASTGROUP
+  , netdriver_addmac,
+  netdriver_rmmac   /* addmac, rmmac */
+#endif
 };
 
 /****************************************************************************
@@ -221,6 +231,20 @@ static int netdriver_ifdown(struct netdev_lowerhalf_s *dev)
   sim_netdev_ifdown(DEVIDX(dev));
   return OK;
 }
+
+#ifdef CONFIG_NET_MCASTGROUP
+static int netdriver_addmac(struct netdev_lowerhalf_s *dev,
+                            const uint8_t *mac)
+{
+  return OK;
+}
+
+static int netdriver_rmmac(struct netdev_lowerhalf_s *dev,
+                           const uint8_t *mac)
+{
+  return OK;
+}
+#endif
 
 static void netdriver_txdone_interrupt(void *priv)
 {
