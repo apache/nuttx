@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/stdio/lib_libbsprintf.c
+ * libs/libc/stream/lib_libbsprintf.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
