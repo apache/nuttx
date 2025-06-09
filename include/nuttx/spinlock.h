@@ -84,22 +84,6 @@ extern "C"
 #  define __SP_UNLOCK_FUNCTION 1
 #endif
 
-#define RSPINLOCK_CPU_INVALID (-1)
-#define RSPINLOCK_INITIALIZER {RSPINLOCK_CPU_INVALID, SP_UNLOCKED, 0}
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-struct rspinlock_s
-{
-  /* Which cpu is holding spinlock,  and taking recursive count */
-
-  volatile int holder;
-  volatile spinlock_t lock;
-  volatile unsigned int count;
-};
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -196,11 +180,9 @@ static inline spinlock_t up_testset(FAR volatile spinlock_t *lock)
  *
  ****************************************************************************/
 
-static inline_function void rspin_lock_init(FAR struct rspinlock_s *lock)
+static inline_function void rspin_lock_init(FAR rspinlock_t *lock)
 {
-  lock->holder = RSPINLOCK_CPU_INVALID;
-  spin_lock_init(&lock->lock);
-  lock->count = 0;
+  lock->val = 0;
 }
 
 /****************************************************************************
@@ -577,7 +559,7 @@ irqstate_t spin_lock_irqsave_nopreempt(FAR volatile spinlock_t *lock)
 }
 
 /****************************************************************************
- * Name: rspin_lock_irqsave_nopreempt
+ * Name: rspin_lock_irqsave/rspin_lock_irqsave_nopreempt
  *
  * Description:
  *   Nest supported spinlock, can support UINT8_MAX max depth.
@@ -601,24 +583,41 @@ irqstate_t spin_lock_irqsave_nopreempt(FAR volatile spinlock_t *lock)
  ****************************************************************************/
 
 static inline_function
-irqstate_t rspin_lock_irqsave_nopreempt(FAR struct rspinlock_s *lock)
+irqstate_t rspin_lock_irqsave(FAR rspinlock_t *lock)
 {
-  /* For race condition, we may get cpuid in stack and then thread
-   * moved to other cpu.  So we have to get cpuid with irq disabled.
-   */
+  rspinlock_t new_val;
+  rspinlock_t old_val = RSPINLOCK_INITIALIZER;
+  irqstate_t  flags   = up_irq_save();
+  int         cpu     = this_cpu() + 1;
 
-  irqstate_t flags = up_irq_save();
-  int cpu = this_cpu();
+  new_val.count = 1;
+  new_val.owner = cpu;
 
-  if (lock->holder != cpu)
+  /* Try seize the ownership of the lock. */
+
+  while (!atomic_cmpxchg_acquire((atomic_t *)&lock->val,
+                                 (atomic_t *)&old_val.val, new_val.val))
     {
-      spin_lock(&lock->lock);
-      sched_lock();
-      DEBUGASSERT(lock->count == 0);
-      lock->holder = cpu;
+      /* Already owned this lock. */
+
+      if (old_val.owner == cpu)
+        {
+          lock->count += 1;
+          break;
+        }
+
+      old_val.val = 0;
     }
 
-  lock->count++;
+  return flags;
+}
+
+static inline_function
+irqstate_t rspin_lock_irqsave_nopreempt(FAR rspinlock_t *lock)
+{
+  irqstate_t flags = rspin_lock_irqsave(lock);
+  sched_lock();
+
   return flags;
 }
 
@@ -789,7 +788,7 @@ void spin_unlock_irqrestore_nopreempt(FAR volatile spinlock_t *lock,
 }
 
 /****************************************************************************
- * Name: rspin_unlock_irqrestore_nopreempt
+ * Name: rspin_unlock_irqrestore/rspin_unlock_irqrestore_nopreempt
  *
  * Description:
  *   Nest supported spinunlock, can support UINT8_MAX max depth.
@@ -816,17 +815,25 @@ void spin_unlock_irqrestore_nopreempt(FAR volatile spinlock_t *lock,
  ****************************************************************************/
 
 static inline_function
-void rspin_unlock_irqrestore_nopreempt(FAR struct rspinlock_s *lock,
-                                      irqstate_t flags)
+void rspin_unlock_irqrestore(FAR rspinlock_t *lock, irqstate_t flags)
 {
-  DEBUGASSERT(lock->holder == this_cpu());
+  DEBUGASSERT(lock->owner == this_cpu() + 1);
+
   if (--lock->count == 0)
     {
-      lock->holder = RSPINLOCK_CPU_INVALID;
-      spin_unlock_irqrestore_nopreempt(&lock->lock, flags);
+      atomic_set_release((atomic_t *)&lock->val, 0);
+      up_irq_restore(flags);
     }
 
   /* If not last rspinlock restore,  up_irq_restore should not required */
+}
+
+static inline_function
+void rspin_unlock_irqrestore_nopreempt(FAR rspinlock_t *lock,
+                                       irqstate_t flags)
+{
+  rspin_unlock_irqrestore(lock, flags);
+  sched_unlock();
 }
 
 #if defined(CONFIG_RW_SPINLOCK)
