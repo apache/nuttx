@@ -815,6 +815,36 @@ config NET_E1000_RXSPARE
 
 endif # NET_E1000
 
+menuconfig NET_IGB
+	bool "Intel IGB support"
+	default n
+	depends on PCI && PCI_MSIX
+	---help---
+		Enable IGB PCI Ethernet driver.
+
+if NET_IGB
+
+config NET_IGB_TXDESC
+	int "Intel IGB TX descriptors"
+	default 256
+
+config NET_IGB_RXDESC
+	int "Intel IGB RX descriptors"
+	default 256
+
+config NET_IGB_RXSPARE
+	int "Intel IGB spare RX buffers"
+	default 8
+
+config NET_IGB_INT_INTERVAL
+	int "Intel IGB interrupt interval"
+	default 100
+	range 1 8191
+	---help---
+		Minimum Inter-interrupt Interval in 1 us increments.
+
+endif # NET_IGB
+
 menuconfig NET_IGC
 	bool "Intel IGC support"
 	default n
