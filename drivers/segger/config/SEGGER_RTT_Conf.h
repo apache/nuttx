@@ -38,7 +38,7 @@
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
-extern struct rspinlock_s g_segger_lock;
+extern rspinlock_t g_segger_lock;
 #endif
 
 #ifdef CONFIG_SEGGER_RTT_UNCACHED_OFF_VARIABLE

@@ -81,6 +81,21 @@ typedef struct spinlock_s
 
 #endif /* CONFIG_SPINLOCK */
 
+#define RSPINLOCK_CPU_INVALID (-1)
+#define RSPINLOCK_INITIALIZER {0}
+
+typedef union rspinlock_u
+{
+  /* Which cpu is holding spinlock, and taking recursive count */
+
+  uint32_t val;
+  struct
+    {
+      uint16_t owner;
+      uint16_t count;
+    };
+} rspinlock_t;
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
