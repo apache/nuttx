@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/stdio/lib_ultoa_invert.h
+ * libs/libc/stream/lib_ultoa_invert.h
  *
  * SPDX-License-Identifier: BSD-3-Clause
  * SPDX-FileCopyrightText: 2005, Dmitry Xmelkov. All rights reserved.
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __LIBS_LIBC_STDIO_LIB_ULTOA_INVERT_H
-#define __LIBS_LIBC_STDIO_LIB_ULTOA_INVERT_H
+#ifndef __LIBS_LIBC_STREAM_LIB_ULTOA_INVERT_H
+#define __LIBS_LIBC_STREAM_LIB_ULTOA_INVERT_H
 
 /****************************************************************************
  * Included Files
@@ -71,4 +71,4 @@ FAR char *__ultoa_invert(unsigned long long val, FAR char *str, int base);
 FAR char *__ultoa_invert(unsigned long val, FAR char *str, int base);
 #endif
 
-#endif /* __LIBS_LIBC_STDIO_LIB_ULTOA_INVERT_H */
+#endif /* __LIBS_LIBC_STREAM_LIB_ULTOA_INVERT_H */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/stdio/lib_libvsprintf.c
+ * libs/libc/stream/lib_libvsprintf.c
  *
  * SPDX-License-Identifier: BSD-3-Clause
  * SPDX-FileCopyrightText: 2002, Alexander Popov (sasho@vip.bg)
