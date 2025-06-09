@@ -103,12 +103,16 @@ ifeq ($(CONFIG_NET_E1000),y)
   CSRCS += e1000.c
 endif
 
-ifeq ($(CONFIG_DRIVERS_WIFI_SIM),y)
-  CSRCS += wifi_sim.c
+ifeq ($(CONFIG_NET_IGB),y)
+  CSRCS += igb.c
 endif
 
 ifeq ($(CONFIG_NET_IGC),y)
   CSRCS += igc.c
+endif
+
+ifeq ($(CONFIG_DRIVERS_WIFI_SIM),y)
+  CSRCS += wifi_sim.c
 endif
 
 # Include network build support

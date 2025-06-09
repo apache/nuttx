@@ -50,6 +50,16 @@ Supported devices:
 - Intel 82574L
 - Intel 82574L
 
+Intel igb
+---------
+
+Intel igb compatible NIC support can be found in ``drivers/net/igb.c``.
+
+Supported devices:
+
+- Intel 82576
+- Intel I211
+
 Intel igc
 ---------
 
