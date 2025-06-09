@@ -111,4 +111,8 @@
 #define STM32_SCS_BASE       0xe000e000
 #define STM32_DEBUGMCU_BASE  0xe0042000
 
+/* System Memory Addresses **************************************************/
+
+#define STM32_SYSMEM_UID     0x1fff7550     /* The 96-bit unique device identifier */
+
 #endif /* __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32C0_MEMORYMAP_H */
