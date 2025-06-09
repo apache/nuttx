@@ -89,6 +89,10 @@ if(CONFIG_NET)
     list(APPEND SRCS e1000.c)
   endif()
 
+  if(CONFIG_NET_IGB)
+    list(APPEND SRCS igb.c)
+  endif()
+
   if(CONFIG_NET_IGC)
     list(APPEND SRCS igc.c)
   endif()
