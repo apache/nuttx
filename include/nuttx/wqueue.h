@@ -414,7 +414,11 @@ int work_queue_wq(FAR struct kwork_wqueue_s *wqueue,
  *
  * Description:
  *   Queue work to be performed at a later time based on the last expiration
- *   time. This function must be called in the workqueue callback.
+ *   time. This function can be used to implement a periodic workqueue.
+ *   E.g, Call this function instead of work_queue in the work callback to
+ *   restart the next work for better timing accuracy.
+ *   Note that calling this function outside the work callback requires
+ *   the work->qtime being set.
  *
  * Input Parameters:
  *   qid    - The work queue ID (must be HPWORK or LPWORK)

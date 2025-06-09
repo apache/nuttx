@@ -294,7 +294,11 @@ int wd_start_realtime(FAR struct wdog_s *wdog,
  *
  * Description:
  *   This function restart watchdog timer based on the last expiration time.
- *   It can be used to implement a periodic watchdog timer.
+ *   It can be used to implement a periodic watchdog timer. E.g, Call this
+ *   function instead of wd_start in the watchdog callback to restart the
+ *   next timer for better timing accuracy.
+ *   Note that calling this function outside the watchdog callback requires
+ *   the wdog->expired being set.
  *
  * Input Parameters:
  *   wdog     - Pointer of the periodic watchdog.
