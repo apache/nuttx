@@ -101,7 +101,7 @@ static void fileoutstream_putc(FAR struct lib_outstream_s *self, int ch)
  *   mode   - Mode flags.
  *
  * Returned Value:
- *   0 on success, negative error code in failuer.
+ *   0 on success, negative error code in failure.
  *
  ****************************************************************************/
 
