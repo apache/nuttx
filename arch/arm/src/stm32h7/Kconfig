@@ -12,6 +12,32 @@ choice
 	default ARCH_CHIP_STM32H743ZI
 	depends on ARCH_CHIP_STM32H7
 
+config ARCH_CHIP_STM32H723VG
+	bool "STM32H723VG"
+	select STM32H7_STM32H7X3XX
+	select STM32H7_STM32H72XXX_OR_STM32H73XXX
+	select STM32H7_FLASH_CONFIG_G
+	select STM32H7_IO_CONFIG_V
+	select STM32H7_HAVE_FDCAN1
+	select STM32H7_HAVE_FDCAN2
+	select STM32H7_HAVE_FDCAN3
+	---help---
+		STM32 H7 Cortex M7, 1024 Kb FLASH, 564K Kb SRAM,
+		LQFP144
+
+config ARCH_CHIP_STM32H723ZG
+	bool "STM32H723ZG"
+	select STM32H7_STM32H7X3XX
+	select STM32H7_STM32H72XXX_OR_STM32H73XXX
+	select STM32H7_FLASH_CONFIG_G
+	select STM32H7_IO_CONFIG_Z
+	select STM32H7_HAVE_FDCAN1
+	select STM32H7_HAVE_FDCAN2
+	select STM32H7_HAVE_FDCAN3
+	---help---
+		STM32 H7 Cortex M7, 1024 Kb FLASH, 564K Kb SRAM,
+		LQFP144
+
 config ARCH_CHIP_STM32H743AG
 	bool "STM32H743AG"
 	select STM32H7_STM32H7X3XX
@@ -491,6 +517,11 @@ config STM32H7_STM32H7X7XX
 	select STM32H7_HAVE_SPI6
 	select STM32H7_HAVE_RNG
 
+# The reduced SRAM configuration STM32H72X and STM32H73X
+config STM32H7_STM32H72XXX_OR_STM32H73XXX
+	bool
+	default n
+
 config STM32H7_FLASH_CONFIG_B
 	bool
 	default n
@@ -697,6 +728,10 @@ config STM32H7_HAVE_FDCAN1
 	default n
 
 config STM32H7_HAVE_FDCAN2
+	bool
+	default n
+
+config STM32H7_HAVE_FDCAN3
 	bool
 	default n
 
@@ -935,6 +970,11 @@ config STM32H7_FDCAN1
 
 config STM32H7_FDCAN2
 	bool "FDCAN2"
+	default n
+	select STM32H7_FDCAN
+
+config STM32H7_FDCAN3
+	bool "FDCAN3"
 	default n
 	select STM32H7_FDCAN
 
@@ -6394,7 +6434,7 @@ endchoice # Input channel event count
 endmenu # QEncoder Driver
 
 menu "FDCAN Driver Configuration"
-	depends on STM32H7_FDCAN1 || STM32H7_FDCAN2
+	depends on STM32H7_FDCAN1 || STM32H7_FDCAN2 || STM32H7_FDCAN3
 
 menu "FDCAN1 Configuration"
 	depends on STM32H7_FDCAN1
@@ -6435,6 +6475,26 @@ config FDCAN2_DATA_BITRATE
 	default 4000000
 
 endmenu # STM32H7_FDCAN2
+
+menu "FDCAN3 Configuration"
+	depends on STM32H7_FDCAN3
+
+config FDCAN3_BITRATE
+	int "CAN bitrate"
+	depends on !NET_CAN_CANFD
+	default 1000000
+
+config FDCAN3_ARBI_BITRATE
+	int "CAN FD Arbitration phase bitrate"
+	depends on NET_CAN_CANFD
+	default 1000000
+
+config FDCAN3_DATA_BITRATE
+	int "CAN FD Data phase bitrate"
+	depends on NET_CAN_CANFD
+	default 4000000
+
+endmenu # STM32H7_FDCAN3
 
 config STM32H7_FDCAN_REGDEBUG
 	bool "Enable register dump debugging"
