@@ -55,7 +55,9 @@
  * overridden with CONFIG_STM32H7_FLASH_OVERRIDE_x
  */
 
-#if defined (CONFIG_ARCH_CHIP_STM32H743AG) || \
+#if defined (CONFIG_ARCH_CHIP_STM32H723VG) || \
+    defined (CONFIG_ARCH_CHIP_STM32H723ZG) || \
+    defined (CONFIG_ARCH_CHIP_STM32H743AG) || \
     defined (CONFIG_ARCH_CHIP_STM32H743AI) || \
     defined (CONFIG_ARCH_CHIP_STM32H743BG) || \
     defined (CONFIG_ARCH_CHIP_STM32H743BI) || \
@@ -91,12 +93,21 @@
 #if defined(CONFIG_STM32H7_STM32H7X0XX) || defined(CONFIG_STM32H7_STM32H7X3XX) || defined(CONFIG_STM32H7_STM32H7X5XX)
 /* Memory */
 
+#  ifdef CONFIG_STM32H7_STM32H72XXX_OR_STM32H73XXX
+#    define STM32H7_SRAM_SIZE             (320*1024)  /* 320Kb SRAM on AXI bus Matrix (D1) */
+#    define STM32H7_SRAM1_SIZE            (16*1024)   /*  16Kb SRAM1 on AHB bus Matrix (D2) */
+#    define STM32H7_SRAM2_SIZE            (16*1024)   /*  16Kb SRAM2 on AHB bus Matrix (D2) */
+#    define STM32H7_SRAM3_SIZE            (0*1024)    /*    No SRAM3 on AHB bus Matrix (D2) */
+#    define STM32H7_SRAM123_SIZE          (32*1024)   /*  32Kb SRAM123 on AHB bus Matrix (D2) */
+#    define STM32H7_SRAM4_SIZE            (16*1024)   /*  16Kb SRAM4 on AHB bus Matrix (D3) */
+#  else /* STM32H74XXX or STM32H75XXX with full SRAM configuration  */
 #    define STM32H7_SRAM_SIZE             (512*1024)  /* 512Kb SRAM on AXI bus Matrix (D1) */
 #    define STM32H7_SRAM1_SIZE            (128*1024)  /* 128Kb SRAM1 on AHB bus Matrix (D2) */
 #    define STM32H7_SRAM2_SIZE            (128*1024)  /* 128Kb SRAM2 on AHB bus Matrix (D2) */
 #    define STM32H7_SRAM3_SIZE            (32*1024)   /*  32Kb SRAM3 on AHB bus Matrix (D2) */
 #    define STM32H7_SRAM123_SIZE          (288*1024)  /* 128Kb SRAM123 on AHB bus Matrix (D2) */
 #    define STM32H7_SRAM4_SIZE            (64*1024)   /*  64Kb SRAM2 on AHB bus Matrix (D3) */
+#  endif /* STM32H72XXX or STM32H73XXX / STM32H74XXX or STM32H75XXX */
 #  if defined(CONFIG_ARMV7M_HAVE_DTCM)
 #      define STM32H7_DTCM_SRAM_SIZE      (128*1024)  /* 128Kb DTCM SRAM on TCM interface */
 #  else

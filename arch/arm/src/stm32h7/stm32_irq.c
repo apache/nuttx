@@ -355,7 +355,7 @@ static int stm32_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
         }
       else
 #else
-#  warning Missing logic
+#  error Missing logic
 #endif
         {
           return ERROR; /* Invalid interrupt */
