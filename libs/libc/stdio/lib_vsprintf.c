@@ -39,9 +39,9 @@ int vsprintf(FAR char *dest, FAR const IPTR char *src, va_list ap)
   struct lib_memoutstream_s memoutstream;
 
   /* Wrap the destination buffer in a stream object and let
-   * libs/libc/stdio/lib_vsprintf do the work.
+   * libs/libc/stdio/lib_vprintf do the work.
    */
 
   lib_memoutstream(&memoutstream, dest, INT_MAX);
-  return lib_vsprintf(&memoutstream.common, src, ap);
+  return lib_vprintf(&memoutstream.common, src, ap);
 }

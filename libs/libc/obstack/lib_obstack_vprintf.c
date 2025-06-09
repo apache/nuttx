@@ -98,7 +98,7 @@ int obstack_vprintf(FAR struct obstack *h, FAR const char *fmt, va_list ap)
   outstream.common.nput = 0;
   outstream.h = h;
 
-  int nbytes = lib_vsprintf(&outstream.common, fmt, ap);
+  int nbytes = lib_vprintf(&outstream.common, fmt, ap);
 
   if (nbytes < 0)
     {

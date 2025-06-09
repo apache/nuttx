@@ -1283,18 +1283,18 @@ int lib_vscanf(FAR struct lib_instream_s *stream, FAR int *lastc,
  * Name: lib_bscanf
  *
  * Description:
- *  Convert data into a structure according to standard formatting protocols.
+ *  Convert data into an object according to standard formatting protocols.
  *  For string arrays, please use "%{length}s" or "%{length}c" to specify
  *  the length.
  *
  ****************************************************************************/
 
-int lib_bscanf(FAR struct lib_instream_s *stream, FAR int *lastc,
-               FAR const IPTR char *fmt, FAR void *data)
+int lib_oscanf(FAR struct lib_instream_s *stream, FAR int *lastc,
+               FAR const IPTR char *fmt, FAR void *obj)
 {
   union vabuf_u vabuf =
     {
-      data
+      obj
     };
 
   return vscanf_internal(stream, lastc, fmt, false, vabuf);

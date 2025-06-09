@@ -45,8 +45,8 @@
 
 #ifdef CONFIG_LIB_GDBSTUB_DEBUG
 #  define GDB_DEBUG(stat, ...) \
-          lib_sprintf((FAR struct lib_outstream_s *)&state->stream, \
-                      ##__VA_ARGS__)
+          lib_printf((FAR struct lib_outstream_s *)&state->stream, \
+                     ##__VA_ARGS__)
 #  define GDB_ASSERT() __assert(__FILE__, __LINE__, 0)
 #else
 #  define GDB_DEBUG(...)

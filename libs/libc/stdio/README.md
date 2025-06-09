@@ -1,5 +1,5 @@
-# lib_bsprintf
-  This function is mainly used to output the contents of the input structure. Supports standard formats for printf and scanf.
+# lib_oprintf
+  This function is mainly used to output the contents of the input object. Supports standard formats for printf and scanf.
   For detailed parameters, see:
   1. https://en.cppreference.com/w/c/io/fprintf
   2. https://en.cppreference.com/w/c/io/fscanf
@@ -77,8 +77,8 @@
     lib_stdoutstream(&stdoutstream, stdout);
 
     flockfile(stdout);
-    lib_bsprintf(&stdoutstream.common, sv, &test_v);
-    lib_bsprintf(&stdoutstream.common, sg, &test_g);
+    lib_oprintf(&stdoutstream.common, sv, &test_v);
+    lib_oprintf(&stdoutstream.common, sg, &test_g);
     funlockfile(stdout);
   #else
     struct lib_rawoutstream_s rawoutstream;
@@ -87,15 +87,15 @@
     lib_rawoutstream(&rawoutstream, STDOUT_FILENO);
     lib_bufferedoutstream(&outstream, &rawoutstream.common);
 
-    lib_bsprintf(&outstream.common, sv, &test_v);
-    lib_bsprintf(&outstream.common, sg, &test_g);
+    lib_oprintf(&outstream.common, sv, &test_v);
+    lib_oprintf(&outstream.common, sg, &test_g);
 
     lib_stream_flush(&outstream.common);
   #endif
    ~~~
 
-# lib_bscanf
-  This function adds a formatted standard scanf string to the structure(lib_bscanf).
+# lib_oscanf
+  This function adds a formatted standard scanf string to the object(lib_oscanf).
   1. https://zh.cppreference.com/w/c/io/fscanf
 
 - **special**:
@@ -151,5 +151,5 @@
   3. **use**:
   ~~~
   struct test vg;
-  ret = lib_bscanf(binput, bflag, &vg);
+  ret = lib_oscanf(binput, bflag, &vg);
   ~~~

@@ -67,8 +67,8 @@ int vsnprintf(FAR char *buf, size_t size, FAR const IPTR char *format,
       stream = &u.nulloutstream;
     }
 
-  /* Then let lib_vsprintf do the real work */
+  /* Then let lib_vprintf do the real work */
 
-  n = lib_vsprintf(stream, format, ap);
+  n = lib_vprintf(stream, format, ap);
   return n;
 }

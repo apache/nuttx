@@ -44,8 +44,8 @@
 
 /* RFC5424 NILVALUE encoding */
 
-#define NILVALUE "-"
-#define NILVALUE_SPACE NILVALUE " "
+#define RFC5424_NILVALUE "-"
+#define RFC5424_NILVALUE_SPACE RFC5424_NILVALUE " "
 
 /* RFC5424 timestamp format string (fractional seconds and 'Z' added by
  * appending to format string)
@@ -56,9 +56,9 @@
 /* RFC5424 structured data options were selected */
 
 #ifdef CONFIG_SYSLOG_RFC5424_TIMEQUALITY
-#  define HAVE_RFC5424_SDATA 1
+#  define RFC5424_HAVE_SDATA 1
 #else
-#  define HAVE_RFC5424_SDATA 0
+#  define RFC5424_HAVE_SDATA 0
 #endif /* defined(CONFIG_SYSLOG_RFC5424_TIMEQUALITY) || ... */
 
 /****************************************************************************
@@ -106,7 +106,7 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
   char hostname_buf[HOST_NAME_MAX + 1];
 #endif
 
-  /* Wrap the low-level output in a stream object and let lib_vsprintf
+  /* Wrap the low-level output in a stream object and let lib_vprintf
    * do the work.
    */
 
@@ -144,78 +144,79 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
   gethostname(hostname_buf, sizeof(hostname_buf));
   if (hostname_buf[0] == '\0')
     {
-      memcpy(hostname_buf, NILVALUE, sizeof(NILVALUE));
+      memcpy(hostname_buf, RFC5424_NILVALUE, sizeof(RFC5424_NILVALUE));
     }
 #endif
 
   /* Output the RFC5424 header */
 
-  ret = lib_sprintf_internal(&stream.common,
+  ret = lib_printf_internal(&stream.common,
 
-      /* Start of format string */
+  /* Start of format string */
 
-      "<%d>" /* PRI */
-      "1 "   /* VERSION */
+                            "<%d>" /* PRI */
+                            "1 "   /* VERSION */
 
   /* End of format string */
 
 #ifdef CONFIG_SYSLOG_TIMESTAMP
-      "%s.%06ldZ " /* TIMESTAMP */
+                            "%s.%06ldZ " /* TIMESTAMP */
 #else
-      NILVALUE_SPACE /* NO TIMESTAMP */
+                            RFC5424_NILVALUE_SPACE /* NO TIMESTAMP */
 #endif
 #ifdef CONFIG_SYSLOG_RFC5424_HOSTNAME
-      "%s " /* HOSTNAME */
+                            "%s " /* HOSTNAME */
 #else
-      NILVALUE_SPACE /* NO HOSTNAME */
+                            RFC5424_NILVALUE_SPACE /* NO HOSTNAME */
 #endif
 #ifdef CONFIG_SYSLOG_PROCESS_NAME
-      "%s " /* APPNAME */
+                            "%s " /* APPNAME */
 #else
-      NILVALUE_SPACE /* NO APPNAME */
+                            RFC5424_NILVALUE_SPACE /* NO APPNAME */
 #endif
 #ifdef CONFIG_SYSLOG_PROCESSID
-      "%d " /* PROCID */
+                            "%d " /* PROCID */
 #else
-      NILVALUE_SPACE /* NO PROCID */
+                            RFC5424_NILVALUE_SPACE /* NO PROCID */
 #endif
-      NILVALUE_SPACE /* TODO: MSGID */
-#if !HAVE_RFC5424_SDATA
-      NILVALUE_SPACE /* Empty structured data, print the NILVALUE here to
-                      * save `libsprintf` call */
+                            RFC5424_NILVALUE_SPACE /* TODO: MSGID */
+#if !RFC5424_HAVE_SDATA
+                            RFC5424_NILVALUE_SPACE /* Empty structured data, print the NILVALUE
+                                                    * here to save `libsprintf` call
+                                                    */
 #endif
 #ifdef CONFIG_SYSLOG_RFC5424_TIMEQUALITY
-      "[timeQuality isSynced=\"%d\" tzKnown=\"%d\"]"
+                            "[timeQuality isSynced=\"%d\" tzKnown=\"%d\"]"
 #endif
-#if HAVE_RFC5424_SDATA
-      " " /* Space at the end of structured data before message */
+#if RFC5424_HAVE_SDATA
+                            " " /* Space at the end of structured data before message */
 #endif
 
-      /* Beginning of formatted arguments */
+  /* Beginning of formatted arguments */
 
-      , priority /* PRIVAL */
+                            , priority /* PRIVAL */
 #ifdef CONFIG_SYSLOG_TIMESTAMP
-      , date_buf, ts.tv_nsec / NSEC_PER_USEC /* TIMESTAMP */
+                            , date_buf, ts.tv_nsec / NSEC_PER_USEC /* TIMESTAMP */
 #endif
 #ifdef CONFIG_SYSLOG_RFC5424_HOSTNAME
-      , hostname_buf /* HOSTNAME */
+                            , hostname_buf /* HOSTNAME */
 #endif
 #ifdef CONFIG_SYSLOG_PROCESS_NAME
-      , get_task_name(tcb)
+                            , get_task_name(tcb)
 #endif
 #ifdef CONFIG_SYSLOG_PROCESSID
-      , nxsched_gettid() /* PROCID */
+                            , nxsched_gettid() /* PROCID */
 #endif
-      /* TODO: MSGID */
+  /* TODO: MSGID */
 
-      /* Formatted arguments for structured data */
+  /* Formatted arguments for structured data */
 
 #ifdef CONFIG_SYSLOG_RFC5424_TIMEQUALITY
-      , 0 /* TODO: Not sure if synced */
-      , 0 /* TODO: Not sure if time zone known */
+                            , 0 /* TODO: Not sure if synced */
+                            , 0 /* TODO: Not sure if time zone known */
 #endif
-      /* End of formatted arguments */
-  );
+  /* End of formatted arguments */
+                            );
 
   /* MSG string is generated below from common code for all syslog
    * calls since RFC5424 allows the MSG field to be a free-form string.
@@ -223,7 +224,7 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
 
   /* Generate the output */
 
-  ret += lib_vsprintf_internal(&stream.common, fmt, *ap);
+  ret += lib_vprintf_internal(&stream.common, fmt, *ap);
 
   if (stream.last_ch != '\n')
     {

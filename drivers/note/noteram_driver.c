@@ -802,9 +802,9 @@ static int noteram_dump_header(FAR struct lib_outstream_s *s,
   int cpu = 0;
 #endif
 
-  ret = lib_sprintf(s, "%8s-%-3u [%d] %3" PRIu64 ".%09lu: ",
-                    get_taskname(pid), get_pid(pid), cpu,
-                    (uint64_t)ts.tv_sec, ts.tv_nsec);
+  ret = lib_printf(s, "%8s-%-3u [%d] %3" PRIu64 ".%09lu: ",
+                   get_taskname(pid), get_pid(pid), cpu,
+                   (uint64_t)ts.tv_sec, ts.tv_nsec);
 
   return ret;
 }
@@ -838,13 +838,13 @@ static int noteram_dump_sched_switch(FAR struct lib_outstream_s *s,
   current_priority = cctx->current_priority;
   next_priority = cctx->next_priority;
 
-  ret = lib_sprintf(s, "sched_switch: prev_comm=%s prev_pid=%u "
-                    "prev_prio=%u prev_state=%c ==> "
-                    "next_comm=%s next_pid=%u next_prio=%u\n",
-                    get_taskname(current_pid), get_pid(current_pid),
-                    current_priority, get_task_state(cctx->current_state),
-                    get_taskname(next_pid), get_pid(next_pid),
-                    next_priority);
+  ret = lib_printf(s, "sched_switch: prev_comm=%s prev_pid=%u "
+                   "prev_prio=%u prev_state=%c ==> "
+                   "next_comm=%s next_pid=%u next_prio=%u\n",
+                   get_taskname(current_pid), get_pid(current_pid),
+                   current_priority, get_task_state(cctx->current_state),
+                   get_taskname(next_pid), get_pid(next_pid),
+                   next_priority);
 
   cctx->current_pid = cctx->next_pid;
   cctx->current_priority = cctx->next_priority;
@@ -865,7 +865,7 @@ static int noteram_dump_printf(FAR struct lib_outstream_s *s,
 
   if (note->npt_type == 0)
     {
-      ret = lib_bsprintf(s, note->npt_fmt, note->npt_data);
+      ret = lib_oprintf(s, note->npt_fmt, note->npt_data);
     }
   else
     {
@@ -874,7 +874,7 @@ static int noteram_dump_printf(FAR struct lib_outstream_s *s,
       size_t i;
 
       fmt[0] = '\0';
-      ret += lib_sprintf(s, "%p", note->npt_fmt);
+      ret += lib_printf(s, "%p", note->npt_fmt);
       for (i = 0; i < count; i++)
         {
           int type = NOTE_PRINTF_GET_TYPE(note->npt_type, i);
@@ -903,7 +903,7 @@ static int noteram_dump_printf(FAR struct lib_outstream_s *s,
             }
         }
 
-        ret += lib_bsprintf(s, fmt, note->npt_data);
+        ret += lib_oprintf(s, fmt, note->npt_data);
         lib_stream_putc(s, '\n');
         ret++;
     }
@@ -945,9 +945,9 @@ static int noteram_dump_one(FAR uint8_t *p, FAR struct lib_outstream_s *s,
     case NOTE_START:
       {
         ret += noteram_dump_header(s, note, ctx);
-        ret += lib_sprintf(s, "sched_wakeup_new: comm=%s pid=%d "
-                           "target_cpu=%d\n",
-                           get_taskname(pid), get_pid(pid), cpu);
+        ret += lib_printf(s, "sched_wakeup_new: comm=%s pid=%d "
+                          "target_cpu=%d\n",
+                          get_taskname(pid), get_pid(pid), cpu);
       }
       break;
 
@@ -998,10 +998,10 @@ static int noteram_dump_one(FAR uint8_t *p, FAR struct lib_outstream_s *s,
              */
 
             ret += noteram_dump_header(s, note, ctx);
-            ret += lib_sprintf(s, "sched_waking: comm=%s "
-                               "pid=%d target_cpu=%d\n",
-                               get_taskname(cctx->next_pid),
-                               get_pid(cctx->next_pid), cpu);
+            ret += lib_printf(s, "sched_waking: comm=%s "
+                              "pid=%d target_cpu=%d\n",
+                              get_taskname(cctx->next_pid),
+                              get_pid(cctx->next_pid), cpu);
             cctx->pendingswitch = true;
           }
       }
@@ -1023,23 +1023,23 @@ static int noteram_dump_one(FAR uint8_t *p, FAR struct lib_outstream_s *s,
           }
 
         ret += noteram_dump_header(s, note, ctx);
-        ret += lib_sprintf(s, "sys_%s(",
-                           g_funcnames[nsc->nsc_nr - CONFIG_SYS_RESERVED]);
+        ret += lib_printf(s, "sys_%s(",
+                          g_funcnames[nsc->nsc_nr - CONFIG_SYS_RESERVED]);
 
         for (i = 0; i < nsc->nsc_argc; i++)
           {
             arg = nsc->nsc_args[i];
             if (i == 0)
               {
-                ret += lib_sprintf(s, "arg%d: 0x%" PRIxPTR, i, arg);
+                ret += lib_printf(s, "arg%d: 0x%" PRIxPTR, i, arg);
               }
             else
               {
-                ret += lib_sprintf(s, ", arg%d: 0x%" PRIxPTR, i, arg);
+                ret += lib_printf(s, ", arg%d: 0x%" PRIxPTR, i, arg);
               }
           }
 
-        ret += lib_sprintf(s, ")\n");
+        ret += lib_printf(s, ")\n");
       }
       break;
 
@@ -1057,7 +1057,7 @@ static int noteram_dump_one(FAR uint8_t *p, FAR struct lib_outstream_s *s,
 
         ret += noteram_dump_header(s, note, ctx);
         result = nsc->nsc_result;
-        ret += lib_sprintf(s, "sys_%s -> 0x%" PRIxPTR "\n",
+        ret += lib_printf(s, "sys_%s -> 0x%" PRIxPTR "\n",
                           g_funcnames[nsc->nsc_nr - CONFIG_SYS_RESERVED],
                           result);
       }
@@ -1071,8 +1071,8 @@ static int noteram_dump_one(FAR uint8_t *p, FAR struct lib_outstream_s *s,
 
         nih = (FAR struct note_irqhandler_s *)p;
         ret += noteram_dump_header(s, note, ctx);
-        ret += lib_sprintf(s, "irq_handler_entry: irq=%u name=%pS\n",
-                           nih->nih_irq, (FAR void *)nih->nih_handler);
+        ret += lib_printf(s, "irq_handler_entry: irq=%u name=%pS\n",
+                          nih->nih_irq, (FAR void *)nih->nih_handler);
         cctx->intr_nest++;
       }
       break;
@@ -1083,8 +1083,8 @@ static int noteram_dump_one(FAR uint8_t *p, FAR struct lib_outstream_s *s,
 
         nih = (FAR struct note_irqhandler_s *)p;
         ret += noteram_dump_header(s, note, ctx);
-        ret += lib_sprintf(s, "irq_handler_exit: irq=%u ret=handled\n",
-                           nih->nih_irq);
+        ret += lib_printf(s, "irq_handler_exit: irq=%u ret=handled\n",
+                          nih->nih_irq);
         cctx->intr_nest--;
 
         if (cctx->intr_nest <= 0)
@@ -1116,9 +1116,9 @@ static int noteram_dump_one(FAR uint8_t *p, FAR struct lib_outstream_s *s,
 
         nw = (FAR struct note_wdog_s *)p;
         ret += noteram_dump_header(s, note, ctx);
-        ret += lib_sprintf(s, "tracing_mark_write: I|%d|wdog: %s-%pS %p\n",
-                           pid, name[note->nc_type - NOTE_WDOG_START],
-                           (FAR void *)nw->handler, (FAR void *)nw->arg);
+        ret += lib_printf(s, "tracing_mark_write: I|%d|wdog: %s-%pS %p\n",
+                          pid, name[note->nc_type - NOTE_WDOG_START],
+                          (FAR void *)nw->handler, (FAR void *)nw->arg);
       }
       break;
 #endif
@@ -1130,9 +1130,9 @@ static int noteram_dump_one(FAR uint8_t *p, FAR struct lib_outstream_s *s,
         struct note_csection_s *ncs;
         ncs = (FAR struct note_csection_s *)p;
         ret += noteram_dump_header(s, &ncs->ncs_cmn, ctx);
-        ret += lib_sprintf(s, "tracing_mark_write: %c|%d|critical_section\n",
-                           note->nc_type == NOTE_CSECTION_ENTER ?
-                           'B' : 'E', pid);
+        ret += lib_printf(s, "tracing_mark_write: %c|%d|critical_section\n",
+                          note->nc_type == NOTE_CSECTION_ENTER ?
+                          'B' : 'E', pid);
       }
       break;
 #endif
@@ -1146,10 +1146,10 @@ static int noteram_dump_one(FAR uint8_t *p, FAR struct lib_outstream_s *s,
         npr = (FAR struct note_preempt_s *)p;
         count = npr->npr_count;
         ret += noteram_dump_header(s, &npr->npr_cmn, ctx);
-        ret += lib_sprintf(s,  "tracing_mark_write: "
-                          "%c|%d|sched_lock:%d\n",
-                          note->nc_type == NOTE_PREEMPT_LOCK ?
-                          'B' : 'E', pid, count);
+        ret += lib_printf(s,  "tracing_mark_write: "
+                         "%c|%d|sched_lock:%d\n",
+                         note->nc_type == NOTE_PREEMPT_LOCK ?
+                         'B' : 'E', pid, count);
       }
       break;
 #endif
@@ -1161,7 +1161,7 @@ static int noteram_dump_one(FAR uint8_t *p, FAR struct lib_outstream_s *s,
 
         npt = (FAR struct note_printf_s *)p;
         ret += noteram_dump_header(s, &npt->npt_cmn, ctx);
-        ret += lib_sprintf(s, "tracing_mark_write: ");
+        ret += lib_printf(s, "tracing_mark_write: ");
         ret += noteram_dump_printf(s, npt);
       }
       break;
@@ -1177,13 +1177,13 @@ static int noteram_dump_one(FAR uint8_t *p, FAR struct lib_outstream_s *s,
         ret += noteram_dump_header(s, &nbi->nev_cmn, ctx);
         if (len > 0)
           {
-            ret += lib_sprintf(s, "tracing_mark_write: %c|%d|%.*s\n",
-                               c, pid, len, (FAR const char *)nbi->nev_data);
+            ret += lib_printf(s, "tracing_mark_write: %c|%d|%.*s\n",
+                              c, pid, len, (FAR const char *)nbi->nev_data);
           }
         else
           {
-            ret += lib_sprintf(s, "tracing_mark_write: %c|%d|%pS\n",
-                               c, pid, (FAR void *)ip);
+            ret += lib_printf(s, "tracing_mark_write: %c|%d|%pS\n",
+                              c, pid, (FAR void *)ip);
           }
       }
       break;
@@ -1192,8 +1192,8 @@ static int noteram_dump_one(FAR uint8_t *p, FAR struct lib_outstream_s *s,
         int len = note->nc_length - sizeof(struct note_event_s);
         FAR struct note_event_s *nbi = (FAR struct note_event_s *)p;
         ret += noteram_dump_header(s, &nbi->nev_cmn, ctx);
-        ret += lib_sprintf(s, "tracing_mark_write: I|%d|%.*s\n",
-                           pid, len, (FAR const char *)nbi->nev_data);
+        ret += lib_printf(s, "tracing_mark_write: I|%d|%.*s\n",
+                          pid, len, (FAR const char *)nbi->nev_data);
       }
       break;
     case NOTE_DUMP_COUNTER:
@@ -1202,8 +1202,8 @@ static int noteram_dump_one(FAR uint8_t *p, FAR struct lib_outstream_s *s,
         FAR struct note_counter_s *counter;
         counter = (FAR struct note_counter_s *)nbi->nev_data;
         ret += noteram_dump_header(s, &nbi->nev_cmn, ctx);
-        ret += lib_sprintf(s, "tracing_mark_write: C|%d|%s|%ld\n",
-                           pid, counter->name, counter->value);
+        ret += lib_printf(s, "tracing_mark_write: C|%d|%s|%ld\n",
+                          pid, counter->name, counter->value);
       }
       break;
 #endif
@@ -1220,11 +1220,11 @@ static int noteram_dump_one(FAR uint8_t *p, FAR struct lib_outstream_s *s,
           };
 
         ret += noteram_dump_header(s, &nmm->nhp_cmn, ctx);
-        ret += lib_sprintf(s, "tracing_mark_write: C|%d|Heap Usage|%d|%s"
-                           ": heap: %p size:%" PRIiPTR ", address: %p\n",
-                           pid, nmm->used,
-                           name[note->nc_type - NOTE_HEAP_ADD],
-                           nmm->heap, nmm->size, nmm->mem);
+        ret += lib_printf(s, "tracing_mark_write: C|%d|Heap Usage|%d|%s"
+                          ": heap: %p size:%" PRIiPTR ", address: %p\n",
+                          pid, nmm->used,
+                          name[note->nc_type - NOTE_HEAP_ADD],
+                          nmm->heap, nmm->size, nmm->mem);
       }
       break;
 #endif
@@ -1250,7 +1250,7 @@ static void noteram_dump(FAR struct noteram_driver_s *drv)
   uint8_t note[256];
 
   lib_syslograwstream_open(&stream);
-  lib_sprintf(&stream.common, "# tracer:nop\n#\n");
+  lib_printf(&stream.common, "# tracer:nop\n#\n");
 
   while (1)
     {

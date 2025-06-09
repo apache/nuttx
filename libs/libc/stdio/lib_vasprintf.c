@@ -81,7 +81,7 @@ int nx_vasprintf(FAR char **ptr, FAR const IPTR char *fmt, va_list ap)
    */
 
   lib_nulloutstream(&nulloutstream);
-  lib_vsprintf(&nulloutstream, fmt, ap);
+  lib_vprintf(&nulloutstream, fmt, ap);
 
   /* Then allocate a buffer to hold that number of characters, adding one
    * for the null terminator.
@@ -103,13 +103,13 @@ int nx_vasprintf(FAR char **ptr, FAR const IPTR char *fmt, va_list ap)
 
   lib_memoutstream(&memoutstream, buf, nulloutstream.nput + 1);
 
-  /* Then let lib_vsprintf do it's real thing */
+  /* Then let lib_vprintf do it's real thing */
 
 #ifdef va_copy
-  nbytes = lib_vsprintf(&memoutstream.common, fmt, ap2);
+  nbytes = lib_vprintf(&memoutstream.common, fmt, ap2);
   va_end(ap2);
 #else
-  nbytes = lib_vsprintf(&memoutstream.common, fmt, ap);
+  nbytes = lib_vprintf(&memoutstream.common, fmt, ap);
 #endif
 
   /* Return a pointer to the string to the caller.  NOTE: the memstream put()
@@ -177,7 +177,7 @@ int vasprintf(FAR char **ptr, FAR const IPTR char *fmt, va_list ap)
    */
 
   lib_nulloutstream(&nulloutstream);
-  lib_vsprintf(&nulloutstream, fmt, ap);
+  lib_vprintf(&nulloutstream, fmt, ap);
 
   /* Then allocate a buffer to hold that number of characters, adding one
    * for the null terminator.
@@ -199,13 +199,13 @@ int vasprintf(FAR char **ptr, FAR const IPTR char *fmt, va_list ap)
 
   lib_memoutstream(&memoutstream, buf, nulloutstream.nput + 1);
 
-  /* Then let lib_vsprintf do it's real thing */
+  /* Then let lib_vprintf do it's real thing */
 
 #ifdef va_copy
-  nbytes = lib_vsprintf(&memoutstream.common, fmt, ap2);
+  nbytes = lib_vprintf(&memoutstream.common, fmt, ap2);
   va_end(ap2);
 #else
-  nbytes = lib_vsprintf(&memoutstream.common, fmt, ap);
+  nbytes = lib_vprintf(&memoutstream.common, fmt, ap);
 #endif
 
   /* Return a pointer to the string to the caller.  NOTE: the memstream put()

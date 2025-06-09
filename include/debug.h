@@ -1335,7 +1335,7 @@
     { \
        struct lib_outstream_s stream; \
        lib_lowoutstream(&stream); \
-       lib_sprintf(&stream, __VA_ARGS__); \
+       lib_printf(&stream, __VA_ARGS__); \
     } \
   while (0)
 

@@ -35,19 +35,19 @@ int vfprintf(FAR FILE *stream, FAR const IPTR char *fmt, va_list ap)
   struct lib_stdoutstream_s stdoutstream;
   int  n = ERROR;
 
-  /* Wrap the stream in a stream object and let lib_vsprintf
+  /* Wrap the stream in a stream object and let lib_vprintf
    * do the work.
    */
 
   lib_stdoutstream(&stdoutstream, stream);
 
-  /* Hold the stream semaphore throughout the lib_vsprintf
+  /* Hold the stream semaphore throughout the lib_vprintf
    * call so that this thread can get its entire message out
    * before being preempted by the next thread.
    */
 
   flockfile(stream);
-  n = lib_vsprintf(&stdoutstream.common, fmt, ap);
+  n = lib_vprintf(&stdoutstream.common, fmt, ap);
   funlockfile(stream);
 
   return n;

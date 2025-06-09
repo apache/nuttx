@@ -798,55 +798,55 @@ int lib_noflush(FAR struct lib_outstream_s *self);
 int lib_snoflush(FAR struct lib_sostream_s *self);
 
 /****************************************************************************
- * Name: lib_sprintf
+ * Name: lib_printf
  *
  * Description:
- *  Stream-oriented implementation of sprintf.  Used only by the SYSLOG.
+ *  Stream-oriented implementation of printf.  Used only by the SYSLOG.
  *
  ****************************************************************************/
 
-int lib_sprintf(FAR struct lib_outstream_s *stream,
-                FAR const IPTR char *fmt, ...) printf_like(2, 3);
+int lib_printf(FAR struct lib_outstream_s *stream,
+               FAR const IPTR char *fmt, ...) printf_like(2, 3);
 
 /****************************************************************************
- * Name: lib_bsprintf
+ * Name: lib_oprintf
  *
  * Description:
- *  Implementation of sprintf formatted output buffer data. Structure data
+ *  Implementation of printf formatted output stream. Object data
  *  types must be one-byte aligned.
  *
  ****************************************************************************/
 
-int lib_bsprintf(FAR struct lib_outstream_s *s, FAR const IPTR char *fmt,
-                 FAR const void *buf);
+int lib_oprintf(FAR struct lib_outstream_s *stream,
+                FAR const IPTR char *fmt, FAR const void *obj);
 
 /****************************************************************************
- * Name: lib_sprintf_internal
+ * Name: lib_printf_internal
  *
  * Description:
  *   This function does not take numbered arguments in printf.
- *   Equivalent to lib_sprintf when CONFIG_LIBC_NUMBERED_ARGS is not enabled
+ *   Equivalent to lib_printf when CONFIG_LIBC_NUMBERED_ARGS is not enabled
  *
  ****************************************************************************/
 
-int lib_sprintf_internal(FAR struct lib_outstream_s *stream,
-                         FAR const IPTR char *fmt, ...) printf_like(2, 3);
+int lib_printf_internal(FAR struct lib_outstream_s *stream,
+                        FAR const IPTR char *fmt, ...) printf_like(2, 3);
 
 /****************************************************************************
- * Name: lib_vsprintf_internal
+ * Name: lib_vprintf_internal
  *
  * Description:
  *   This function does not take numbered arguments in printf.
- *   Equivalent to lib_sprintf when CONFIG_LIBC_NUMBERED_ARGS is not enabled
+ *   Equivalent to lib_printf when CONFIG_LIBC_NUMBERED_ARGS is not enabled
  *
  ****************************************************************************/
 
-int lib_vsprintf_internal(FAR struct lib_outstream_s *stream,
-                          FAR const IPTR char *fmt, va_list ap)
-                          printf_like(2, 0);
+int lib_vprintf_internal(FAR struct lib_outstream_s *stream,
+                         FAR const IPTR char *fmt, va_list ap)
+                         printf_like(2, 0);
 
 /****************************************************************************
- * Name: lib_vsprintf
+ * Name: lib_vprintf
  *
  * Description:
  *  Stream-oriented implementation that underlies printf family:  printf,
@@ -854,8 +854,8 @@ int lib_vsprintf_internal(FAR struct lib_outstream_s *stream,
  *
  ****************************************************************************/
 
-int lib_vsprintf(FAR struct lib_outstream_s *stream,
-                 FAR const IPTR char *src, va_list ap) printf_like(2, 0);
+int lib_vprintf(FAR struct lib_outstream_s *stream,
+                FAR const IPTR char *tmp, va_list ap) printf_like(2, 0);
 
 /****************************************************************************
  * Name: lib_vscanf
@@ -870,17 +870,17 @@ int lib_vscanf(FAR struct lib_instream_s *stream, FAR int *lastc,
                FAR const IPTR char *src, va_list ap) scanf_like(3, 0);
 
 /****************************************************************************
- * Name: lib_bscanf
+ * Name: lib_oscanf
  *
  * Description:
- *  Convert data into a structure according to standard formatting protocols.
+ *  Convert stream into an object according to standard formatting protocols.
  *  For string arrays, please use "%{length}s" or "%{length}c" to specify
  *  the length.
  *
  ****************************************************************************/
 
-int lib_bscanf(FAR struct lib_instream_s *stream, FAR int *lastc,
-               FAR const IPTR char *fmt, FAR void *data);
+int lib_oscanf(FAR struct lib_instream_s *stream, FAR int *lastc,
+               FAR const IPTR char *fmt, FAR void *obj);
 
 #undef EXTERN
 #if defined(__cplusplus)

@@ -45,9 +45,9 @@ list(
   lib_base64outstream.c
   lib_fileinstream.c
   lib_fileoutstream.c
-  lib_libbsprintf.c
+  lib_liboprintf.c
   lib_libvscanf.c
-  lib_libvsprintf.c
+  lib_libvprintf.c
   lib_ultoa_invert.c)
 
 if(CONFIG_LIBC_FLOATINGPOINT)

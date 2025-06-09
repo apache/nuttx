@@ -51,11 +51,11 @@ int vdprintf(int fd, FAR const IPTR char *fmt, va_list ap)
   struct lib_rawoutstream_s rawoutstream;
   struct lib_bufferedoutstream_s outstream;
 
-  /* Wrap the fd in a stream object and let lib_vsprintf do the work. */
+  /* Wrap the fd in a stream object and let lib_vprintf do the work. */
 
   lib_rawoutstream(&rawoutstream, fd);
   lib_bufferedoutstream(&outstream, &rawoutstream.common);
-  ret = lib_vsprintf(&outstream.common, fmt, ap);
+  ret = lib_vprintf(&outstream.common, fmt, ap);
   lib_stream_flush(&outstream.common);
   return ret;
 }

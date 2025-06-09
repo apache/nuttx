@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/stream/lib_libvsprintf.c
+ * libs/libc/stream/lib_libvprintf.c
  *
  * SPDX-License-Identifier: BSD-3-Clause
  * SPDX-FileCopyrightText: 2002, Alexander Popov (sasho@vip.bg)
@@ -146,18 +146,18 @@ static const char g_nullstring[] = "(null)";
  * Private Function Prototypes
  ****************************************************************************/
 
-static int vsprintf_internal(FAR struct lib_outstream_s *stream,
-                             FAR struct arg_s *arglist, int numargs,
-                             FAR const IPTR char *fmt, va_list ap)
+static int vprintf_internal(FAR struct lib_outstream_s *stream,
+                            FAR struct arg_s *arglist, int numargs,
+                            FAR const IPTR char *fmt, va_list ap)
            printf_like(4, 0);
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-static int vsprintf_internal(FAR struct lib_outstream_s *stream,
-                             FAR struct arg_s *arglist, int numargs,
-                             FAR const IPTR char *fmt, va_list ap)
+static int vprintf_internal(FAR struct lib_outstream_s *stream,
+                            FAR struct arg_s *arglist, int numargs,
+                            FAR const IPTR char *fmt, va_list ap)
 {
   unsigned char c; /* Holds a char from the format string */
   uint16_t flags;
@@ -1127,7 +1127,7 @@ str_lpad:
                     {
                       FAR struct va_format *vaf = (FAR void *)(uintptr_t)x;
 
-                      lib_bsprintf(stream, vaf->fmt, vaf->va);
+                      lib_oprintf(stream, vaf->fmt, vaf->va);
                       continue;
                     }
 
@@ -1138,10 +1138,10 @@ str_lpad:
                       va_list copy;
 
                       va_copy(copy, *vaf->va);
-                      lib_vsprintf(stream, vaf->fmt, copy);
+                      lib_vprintf(stream, vaf->fmt, copy);
                       va_end(copy);
 #  else
-                      lib_vsprintf(stream, vaf->fmt, *vaf->va);
+                      lib_vprintf(stream, vaf->fmt, *vaf->va);
 #  endif
                       continue;
                     }
@@ -1166,10 +1166,10 @@ str_lpad:
                           if (c == 'S')
                             {
                               total_len +=
-                              lib_sprintf_internal(stream,
-                                                   "+%#tx/%#zx",
-                                                   addr - symbol->sym_value,
-                                                   symbolsize);
+                              lib_printf_internal(stream,
+                                                  "+%#tx/%#zx",
+                                                  addr - symbol->sym_value,
+                                                  symbolsize);
                             }
 
                           continue;
@@ -1337,14 +1337,14 @@ ret:
  * Public Functions
  ****************************************************************************/
 
-int lib_vsprintf(FAR struct lib_outstream_s *stream,
-                 FAR const IPTR char *fmt, va_list ap)
+int lib_vprintf(FAR struct lib_outstream_s *stream,
+                FAR const IPTR char *fmt, va_list ap)
 {
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
   /* We do 2 passes of parsing and fill the arglist between the passes. */
 
   struct arg_s arglist;
-  int numargs = vsprintf_internal(NULL, &arglist, NL_ARGMAX, fmt, ap);
+  int numargs = vprintf_internal(NULL, &arglist, NL_ARGMAX, fmt, ap);
   union arg_u argvalue[MAX(numargs, 1)];
   int i;
 
@@ -1380,65 +1380,65 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
         }
     }
 
-  return vsprintf_internal(stream, &arglist, numargs, fmt, ap);
+  return vprintf_internal(stream, &arglist, numargs, fmt, ap);
 #else
-  return vsprintf_internal(stream, NULL, 0, fmt, ap);
+  return vprintf_internal(stream, NULL, 0, fmt, ap);
 #endif
 }
 
 /****************************************************************************
- * Name: lib_sprintf
+ * Name: lib_printf
  ****************************************************************************/
 
-int lib_sprintf(FAR struct lib_outstream_s *stream, FAR const IPTR char *fmt,
-                ...)
+int lib_printf(FAR struct lib_outstream_s *stream,
+               FAR const IPTR char *fmt, ...)
 {
   va_list ap;
   int     n;
 
-  /* Let lib_vsprintf do the real work */
+  /* Let lib_vprintf do the real work */
 
   va_start(ap, fmt);
-  n = lib_vsprintf(stream, fmt, ap);
+  n = lib_vprintf(stream, fmt, ap);
   va_end(ap);
   return n;
 }
 
 /****************************************************************************
- * Name: lib_sprintf_internal
+ * Name: lib_printf_internal
  *
  * Description:
  *   This function does not take numbered arguments in printf.
- *   Equivalent to lib_sprintf when CONFIG_LIBC_NUMBERED_ARGS is not enabled
+ *   Equivalent to lib_printf when CONFIG_LIBC_NUMBERED_ARGS is not enabled
  *
  ****************************************************************************/
 
-int lib_sprintf_internal(FAR struct lib_outstream_s *stream,
-                         FAR const IPTR char *fmt, ...)
+int lib_printf_internal(FAR struct lib_outstream_s *stream,
+                        FAR const IPTR char *fmt, ...)
 {
   va_list ap;
   int     n;
 
-  /* Then let vsprintf_internal do the real work */
+  /* Then let vprintf_internal do the real work */
 
   va_start(ap, fmt);
-  n = vsprintf_internal(stream, NULL, 0, fmt, ap);
+  n = vprintf_internal(stream, NULL, 0, fmt, ap);
   va_end(ap);
 
   return n;
 }
 
 /****************************************************************************
- * Name: lib_vsprintf_internal
+ * Name: lib_vprintf_internal
  *
  * Description:
  *   This function does not take numbered arguments in printf.
- *   Equivalent to lib_sprintf when CONFIG_LIBC_NUMBERED_ARGS is not enabled
+ *   Equivalent to lib_printf when CONFIG_LIBC_NUMBERED_ARGS is not enabled
  *
  ****************************************************************************/
 
-int lib_vsprintf_internal(FAR struct lib_outstream_s *stream,
-                          FAR const IPTR char *fmt, va_list ap)
+int lib_vprintf_internal(FAR struct lib_outstream_s *stream,
+                         FAR const IPTR char *fmt, va_list ap)
 {
-  return vsprintf_internal(stream, NULL, 0, fmt, ap);
+  return vprintf_internal(stream, NULL, 0, fmt, ap);
 }

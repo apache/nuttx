@@ -397,18 +397,18 @@ void notesnap_dump_with_stream(FAR struct lib_outstream_s *stream)
       struct timespec time;
 
       perf_convert(note->count, &time);
-      lib_sprintf(stream,
-                  "snapshoot: [%" PRIu64 ".%09u] "
+      lib_printf(stream,
+                 "snapshoot: [%" PRIu64 ".%09u] "
 #ifdef CONFIG_SMP
-                  "[CPU%d] "
+                 "[CPU%d] "
 #endif
-                  "[%d] %-16s %#" PRIxPTR "\n",
-                  (uint64_t)time.tv_sec,
-                  (unsigned)time.tv_nsec,
+                 "[%d] %-16s %#" PRIxPTR "\n",
+                 (uint64_t)time.tv_sec,
+                 (unsigned)time.tv_nsec,
 #ifdef CONFIG_SMP
-                  note->cpu,
+                 note->cpu,
 #endif
-                  note->pid, g_notesnap_type[note->type], note->args);
+                 note->pid, g_notesnap_type[note->type], note->args);
     }
 
   atomic_set(&g_notesnap.dumping, false);

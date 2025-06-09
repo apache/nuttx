@@ -96,7 +96,7 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
 #  endif
 #endif
 
-  /* Wrap the low-level output in a stream object and let lib_vsprintf
+  /* Wrap the low-level output in a stream object and let lib_vprintf
    * do the work.
    */
 
@@ -152,110 +152,110 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
     defined(CONFIG_SYSLOG_PRIORITY) || defined(CONFIG_SYSLOG_PREFIX) || \
     defined(CONFIG_SYSLOG_PROCESS_NAME)
 
-  ret = lib_sprintf_internal(&stream.common,
+  ret = lib_printf_internal(&stream.common,
 #if defined(CONFIG_SYSLOG_COLOR_OUTPUT)
   /* Reset the terminal style. */
 
-                             "\e[0m"
+                            "\e[0m"
 #endif
 
 #ifdef CONFIG_SYSLOG_TIMESTAMP
 #  if defined(CONFIG_SYSLOG_TIMESTAMP_FORMATTED)
 #    if defined(CONFIG_SYSLOG_TIMESTAMP_FORMAT_MICROSECOND)
-                             "[%s.%06ld] "
+                            "[%s.%06ld] "
 #    else
-                             "[%s] "
+                            "[%s] "
 #    endif
 #  else
-                             "[%5ju.%06ld] "
+                            "[%5ju.%06ld] "
 #  endif
 #endif
 
 #if defined(CONFIG_SMP)
-                             "[CPU%d] "
+                            "[CPU%d] "
 #endif
 
 #if defined(CONFIG_SYSLOG_PROCESSID)
   /* Prepend the Thread ID */
 
-                             "[%2d] "
+                            "[%2d] "
 #endif
 
 #if defined(CONFIG_SYSLOG_COLOR_OUTPUT)
   /* Set the terminal style according to message priority. */
 
-                             "%s"
+                            "%s"
 #endif
 
 #if defined(CONFIG_SYSLOG_PRIORITY)
   /* Prepend the message priority. */
 
-                             "[%6s] "
+                            "[%6s] "
 #endif
 
 #if defined(CONFIG_SYSLOG_PREFIX)
   /* Prepend the prefix, if available */
 
-                             "[%s] "
+                            "[%s] "
 #endif
 #ifdef CONFIG_SYSLOG_PROCESS_NAME
   /* Prepend the thread name */
 
-                             "%s: "
+                            "%s: "
 #endif
 #ifdef CONFIG_SYSLOG_TIMESTAMP
 #  if defined(CONFIG_SYSLOG_TIMESTAMP_FORMATTED)
 #    if defined(CONFIG_SYSLOG_TIMESTAMP_FORMAT_MICROSECOND)
-                             , date_buf, ts.tv_nsec / NSEC_PER_USEC
+                            , date_buf, ts.tv_nsec / NSEC_PER_USEC
 #    else
-                             , date_buf
+                            , date_buf
 #    endif
 #  else
-                             , (uintmax_t)ts.tv_sec
-                             , ts.tv_nsec / NSEC_PER_USEC
+                            , (uintmax_t)ts.tv_sec
+                            , ts.tv_nsec / NSEC_PER_USEC
 #  endif
 #endif
 
 #if defined(CONFIG_SMP)
-                             , this_cpu()
+                            , this_cpu()
 #endif
 
 #if defined(CONFIG_SYSLOG_PROCESSID)
   /* Prepend the Thread ID */
 
-                             , nxsched_gettid()
+                            , nxsched_gettid()
 #endif
 
 #if defined(CONFIG_SYSLOG_COLOR_OUTPUT)
   /* Set the terminal style according to message priority. */
 
-                             , g_priority_color[LOG_PRI(priority)]
+                            , g_priority_color[LOG_PRI(priority)]
 #endif
 
 #if defined(CONFIG_SYSLOG_PRIORITY)
   /* Prepend the message priority. */
 
-                             , g_priority_str[LOG_PRI(priority)]
+                            , g_priority_str[LOG_PRI(priority)]
 #endif
 
 #if defined(CONFIG_SYSLOG_PREFIX)
   /* Prepend the prefix, if available */
 
-                             , CONFIG_SYSLOG_PREFIX_STRING
+                            , CONFIG_SYSLOG_PREFIX_STRING
 #endif
 
 #ifdef CONFIG_SYSLOG_PROCESS_NAME
   /* Prepend the thread name */
 
-                             , get_task_name(tcb)
+                            , get_task_name(tcb)
 #endif
-                    );
+                            );
 
 #endif /* CONFIG_SYSLOG_COLOR_OUTPUT || CONFIG_SYSLOG_TIMESTAMP || ... */
 
   /* Generate the output */
 
-  ret += lib_vsprintf_internal(&stream.common, fmt, *ap);
+  ret += lib_vprintf_internal(&stream.common, fmt, *ap);
 
   if (stream.last_ch != '\n')
     {

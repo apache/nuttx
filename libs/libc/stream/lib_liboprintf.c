@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/stream/lib_libbsprintf.c
+ * libs/libc/stream/lib_liboprintf.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -34,8 +34,8 @@
  * Public Functions
  ****************************************************************************/
 
-int lib_bsprintf(FAR struct lib_outstream_s *s, FAR const IPTR char *fmt,
-                 FAR const void *buf)
+int lib_oprintf(FAR struct lib_outstream_s *s, FAR const IPTR char *fmt,
+                FAR const void *obj)
 {
   begin_packed_struct union
     {
@@ -61,7 +61,7 @@ int lib_bsprintf(FAR struct lib_outstream_s *s, FAR const IPTR char *fmt,
 
   end_packed_struct *var;
   FAR const char *prec = NULL;
-  FAR const char *data = buf;
+  FAR const char *data = obj;
   char fmtstr[64];
   bool infmt = false;
   size_t offset = 0;
@@ -85,7 +85,7 @@ int lib_bsprintf(FAR struct lib_outstream_s *s, FAR const IPTR char *fmt,
           memset(fmtstr, 0, sizeof(fmtstr));
         }
 
-      var = (FAR void *)((char *)buf + offset);
+      var = (FAR void *)((char *)obj + offset);
       fmtstr[len++] = c;
 
       if (c == 'c' || c == 'd' || c == 'i' || c == 'u' ||
@@ -94,44 +94,44 @@ int lib_bsprintf(FAR struct lib_outstream_s *s, FAR const IPTR char *fmt,
           if (*(fmt - 2) == 'j')
             {
               offset += sizeof(var->im);
-              ret += lib_sprintf(s, fmtstr, var->im);
+              ret += lib_printf(s, fmtstr, var->im);
             }
 #ifdef CONFIG_HAVE_LONG_LONG
           else if (*(fmt - 2) == 'l' && *(fmt - 3) == 'l')
             {
               offset += sizeof(var->ll);
-              ret += lib_sprintf(s, fmtstr, var->ll);
+              ret += lib_printf(s, fmtstr, var->ll);
             }
 #endif
           else if (*(fmt - 2) == 'l')
             {
               offset += sizeof(var->l);
-              ret += lib_sprintf(s, fmtstr, var->l);
+              ret += lib_printf(s, fmtstr, var->l);
             }
           else if (*(fmt - 2) == 'z')
             {
               offset += sizeof(var->sz);
-              ret += lib_sprintf(s, fmtstr, var->sz);
+              ret += lib_printf(s, fmtstr, var->sz);
             }
           else if (*(fmt - 2) == 't')
             {
               offset += sizeof(var->pd);
-              ret += lib_sprintf(s, fmtstr, var->pd);
+              ret += lib_printf(s, fmtstr, var->pd);
             }
           else if (*(fmt - 2) == 'h' && *(fmt - 3) == 'h')
             {
               offset += sizeof(var->c);
-              ret += lib_sprintf(s, fmtstr, var->c);
+              ret += lib_printf(s, fmtstr, var->c);
             }
           else if (*(fmt - 2) == 'h')
             {
               offset += sizeof(var->si);
-              ret += lib_sprintf(s, fmtstr, var->si);
+              ret += lib_printf(s, fmtstr, var->si);
             }
           else
             {
               offset += sizeof(var->i);
-              ret += lib_sprintf(s, fmtstr, var->i);
+              ret += lib_printf(s, fmtstr, var->i);
             }
 
           infmt = false;
@@ -143,19 +143,19 @@ int lib_bsprintf(FAR struct lib_outstream_s *s, FAR const IPTR char *fmt,
           if (*(fmt - 2) == 'h')
             {
               offset += sizeof(var->f);
-              ret += lib_sprintf(s, fmtstr, var->f);
+              ret += lib_printf(s, fmtstr, var->f);
             }
 #  ifdef CONFIG_HAVE_LONG_DOUBLE
           else if (*(fmt - 2) == 'L')
             {
               offset += sizeof(var->ld);
-              ret += lib_sprintf(s, fmtstr, var->ld);
+              ret += lib_printf(s, fmtstr, var->ld);
             }
 #  endif
           else
             {
               offset += sizeof(var->d);
-              ret += lib_sprintf(s, fmtstr, var->d);
+              ret += lib_printf(s, fmtstr, var->d);
             }
 
           infmt = false;
@@ -181,13 +181,13 @@ int lib_bsprintf(FAR struct lib_outstream_s *s, FAR const IPTR char *fmt,
               offset += strlen(value) + 1;
             }
 
-          ret += lib_sprintf(s, fmtstr, value);
+          ret += lib_printf(s, fmtstr, value);
           infmt = false;
         }
       else if (c == 'p')
         {
           offset += sizeof(var->p);
-          ret += lib_sprintf(s, fmtstr, var->p);
+          ret += lib_printf(s, fmtstr, var->p);
           infmt = false;
         }
       else if (c == '.')

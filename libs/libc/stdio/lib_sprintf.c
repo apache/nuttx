@@ -44,10 +44,10 @@ int sprintf(FAR char *buf, FAR const IPTR char *fmt, ...)
 
   lib_memoutstream(&memoutstream, buf, INT_MAX);
 
-  /* Then let lib_vsprintf do the real work */
+  /* Then let lib_vprintf do the real work */
 
   va_start(ap, fmt);
-  n = lib_vsprintf(&memoutstream.common, fmt, ap);
+  n = lib_vprintf(&memoutstream.common, fmt, ap);
   va_end(ap);
   return n;
 }
