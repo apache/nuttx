@@ -17,8 +17,10 @@ Configuration Options
   Dynamic memory allocations for packet connections.
 ``CONFIG_NET_PKT_MAX_CONNS``
   Maximum number of packet connections.
-``NET_PKT_WRITE_BUFFERS``
+``CONFIG_NET_PKT_WRITE_BUFFERS``
   Use write buffers for packet sockets, support SOCK_NONBLOCK mode.
+``CONFIG_NET_PKTPROTO_OPTIONS``
+  Enable setting protocol options on packet sockets.
 
 Usage
 =====
@@ -58,3 +60,21 @@ Usage
          (struct sockaddr *)&addr, sizeof(addr));
 
   close(sd); /* Close the socket */
+
+.. code-block:: c
+
+    int sd;
+    struct packet_mreq mreq;
+    char macaddr[ETH_ALEN] = {0x91, 0xe0, 0xf0, 0x00, 0x0e, 0x01};
+
+    sd = socket(AF_PACKET, SOCK_RAW, 0);
+
+    mreq.mr_ifindex = if_nametoindex("eth0");
+    mreq.mr_type = PACKET_MR_MULTICAST;
+    mreq.mr_alen = ETH_ALEN;
+    memcpy(&mreq.mr_address, macaddr, ETH_ALEN);
+
+    setsockopt(sd, SOL_PACKET, PACKET_ADD_MEMBERSHIP, &mreq,
+               sizeof(struct packet_mreq));
+
+    close(sd);

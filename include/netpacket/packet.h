@@ -44,6 +44,13 @@
 #define PACKET_LOOPBACK   5
 #define PACKET_FASTROUTE  6
 
+/* Packet socket options */
+
+#define PACKET_ADD_MEMBERSHIP  1 /* Add a multicast address to the interface */
+#define PACKET_DROP_MEMBERSHIP 2 /* Drop a multicast address from the interface */
+
+#define PACKET_MR_MULTICAST    0 /* Multicast address */
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -57,6 +64,14 @@ struct sockaddr_ll
   unsigned char  sll_pkttype;
   unsigned char  sll_halen;
   unsigned char  sll_addr[8];
+};
+
+struct packet_mreq
+{
+  int            mr_ifindex;
+  unsigned short mr_type;
+  unsigned short mr_alen;
+  unsigned char  mr_address[8];
 };
 
 #endif /* __INCLUDE_NETPACKET_PACKET_H */

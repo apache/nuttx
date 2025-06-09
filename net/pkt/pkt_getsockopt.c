@@ -94,7 +94,7 @@ int pkt_getsockopt(FAR struct socket *psock, int level, int option,
 
   switch (option)
     {
-#if CONFIG_NET_SEND_BUFSIZE > 0
+#if defined(CONFIG_NET_PKT_WRITE_BUFFERS) && CONFIG_NET_SEND_BUFSIZE > 0
       case SO_SNDBUF:
         {
           FAR struct pkt_conn_s *conn;

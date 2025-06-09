@@ -61,7 +61,7 @@ config NET_CANPROTO_OPTIONS
 		Enable or disable support for CAN protocol level socket option
 
 config NET_PKTPROTO_OPTIONS
-	bool
+	bool "PACKET proto socket options"
 	default n
 	---help---
 		Enable or disable support for PKT protocol level socket option
