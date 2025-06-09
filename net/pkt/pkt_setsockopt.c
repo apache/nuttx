@@ -32,9 +32,11 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <netpacket/packet.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/pkt.h>
 
+#include "netdev/netdev.h"
 #include "socket/socket.h"
 #include "utils/utils.h"
 #include "pkt/pkt.h"
@@ -90,7 +92,7 @@ int pkt_setsockopt(FAR struct socket *psock, int level, int option,
 
   switch (option)
     {
-#if CONFIG_NET_SEND_BUFSIZE > 0
+#if defined(CONFIG_NET_PKT_WRITE_BUFFERS) && CONFIG_NET_SEND_BUFSIZE > 0
       case SO_SNDBUF:
         {
           FAR struct pkt_conn_s *conn;
@@ -119,6 +121,55 @@ int pkt_setsockopt(FAR struct socket *psock, int level, int option,
           conn->sndbufs = buffersize;
           break;
         }
+#endif
+
+#ifdef CONFIG_NET_MCASTGROUP
+      case PACKET_ADD_MEMBERSHIP:
+      case PACKET_DROP_MEMBERSHIP:
+        {
+          FAR const struct packet_mreq *mreq;
+          FAR struct net_driver_s *dev;
+
+          if (value == NULL || value_len < sizeof(struct packet_mreq))
+            {
+              return -EINVAL;
+            }
+
+          mreq = (FAR const struct packet_mreq *)value;
+          dev = netdev_findbyindex(mreq->mr_ifindex);
+          if (dev == NULL)
+            {
+              return -ENODEV;
+            }
+
+          if (mreq->mr_type == PACKET_MR_MULTICAST)
+            {
+              if (option == PACKET_ADD_MEMBERSHIP && dev->d_addmac != NULL)
+                {
+                  /* Add the multicast MAC address to the device */
+
+                  ret = dev->d_addmac(dev, mreq->mr_address);
+                }
+              else if (option == PACKET_DROP_MEMBERSHIP &&
+                       dev->d_rmmac != NULL)
+                {
+                  /* Drop the multicast MAC address from the device */
+
+                  ret = dev->d_rmmac(dev, mreq->mr_address);
+                }
+              else
+                {
+                  nerr("ERROR: Device does not support add MAC address\n");
+                  ret = -ENOSYS;
+                }
+            }
+          else
+            {
+              nerr("ERROR: Invalid mr_type: %d\n", mreq->mr_type);
+              return -ENOSYS;
+            }
+        }
+        break;
 #endif
 
       default:
