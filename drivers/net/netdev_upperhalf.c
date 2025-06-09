@@ -321,6 +321,7 @@ static int netdev_upper_txpoll(FAR struct net_driver_s *dev)
        */
 
       NETDEV_TXERRORS(dev);
+      nerr("ERROR: Transmit failed: %d\n", ret);
       netpkt_put(dev, pkt, NETPKT_TX);
       return ret;
     }
@@ -715,6 +716,7 @@ static void netdev_upper_rxpoll_work(FAR struct netdev_upperhalf_s *upper)
 
           NETDEV_RXDROPPED(dev);
           netpkt_free(lower, pkt, NETPKT_RX);
+          nerr("ERROR: Dropped frame due to lower dev not up\n");
           continue;
         }
 
@@ -1342,6 +1344,7 @@ int netdev_lower_register(FAR struct netdev_lowerhalf_s *dev,
   if (dev == NULL || dev->ops == NULL ||
       dev->ops->transmit == NULL || dev->ops->receive == NULL)
     {
+      nerr("ERROR: Invalid lower half device\n");
       return -EINVAL;
     }
 
@@ -1375,6 +1378,7 @@ int netdev_lower_register(FAR struct netdev_lowerhalf_s *dev,
   ret = netdev_register(&dev->netdev, lltype);
   if (ret < 0)
     {
+      nerr("ERROR: Netdev_register failed: %d\n", ret);
       kmm_free(upper);
       dev->netdev.d_private = NULL;
     }
@@ -1417,6 +1421,7 @@ int netdev_lower_unregister(FAR struct netdev_lowerhalf_s *dev)
 
   if (dev == NULL || dev->netdev.d_private == NULL)
     {
+      nerr("ERROR: Invalid lower half device\n");
       return -EINVAL;
     }
 
