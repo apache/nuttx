@@ -33,6 +33,7 @@
 
 #include <arch/irq.h>
 #include <netinet/if_ether.h>
+#include <netpacket/packet.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
@@ -42,6 +43,7 @@
 #include <nuttx/net/ethernet.h>
 
 #include "devif/devif.h"
+#include "netdev/netdev.h"
 #include "pkt/pkt.h"
 #include "utils/utils.h"
 
@@ -215,6 +217,79 @@ FAR struct pkt_conn_s *pkt_nextconn(FAR struct pkt_conn_s *conn)
     {
       return (FAR struct pkt_conn_s *)conn->sconn.node.flink;
     }
+}
+
+/****************************************************************************
+ * Name: pkt_sendmsg_is_valid
+ *
+ * Description:
+ *   Validate the sendmsg() parameters for a packet socket.
+ *
+ * Input Parameters:
+ *   psock - The socket structure to validate
+ *   msg   - The message header containing the data to be sent
+ *   dev   - The network device to be used to send the packet
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int pkt_sendmsg_is_valid(FAR struct socket *psock,
+                         FAR const struct msghdr *msg,
+                         FAR struct net_driver_s **dev)
+{
+  FAR struct sockaddr_ll *addr = msg->msg_name;
+
+  /* Only single iov supported */
+
+  if (msg->msg_iovlen != 1)
+    {
+      return -ENOTSUP;
+    }
+
+  /* Verify that the sockfd corresponds to valid, allocated socket */
+
+  if (psock == NULL || psock->s_conn == NULL)
+    {
+      return -EBADF;
+    }
+
+  if (psock->s_type == SOCK_DGRAM)
+    {
+      if (msg->msg_name == NULL ||
+          msg->msg_namelen < sizeof(struct sockaddr_ll) ||
+          addr->sll_halen < ETHER_ADDR_LEN)
+        {
+          return -EINVAL;
+        }
+
+      /* Get the device driver that will service this transfer */
+
+      *dev = netdev_findbyindex(addr->sll_ifindex);
+    }
+  else if (psock->s_type == SOCK_RAW)
+    {
+      if (msg->msg_name != NULL)
+        {
+          return -EAFNOSUPPORT;
+        }
+
+      /* Get the device driver that will service this transfer */
+
+      *dev = pkt_find_device(psock->s_conn);
+    }
+  else
+    {
+      return -ENOTSUP;
+    }
+
+  if (*dev == NULL)
+    {
+      return -ENODEV;
+    }
+
+  return OK;
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_PKT */
