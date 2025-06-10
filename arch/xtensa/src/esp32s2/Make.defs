@@ -63,10 +63,6 @@ ifeq ($(CONFIG_ESP32S2_TWAI),y)
 CHIP_CSRCS += esp32s2_twai.c
 endif
 
-ifeq ($(CONFIG_ESP32S2_LEDC),y)
-CHIP_CSRCS += esp32s2_ledc.c
-endif
-
 ifeq ($(CONFIG_ESP32S2_SPI),y)
 CHIP_CSRCS += esp32s2_spi.c
 ifeq ($(CONFIG_SPI_SLAVE),y)

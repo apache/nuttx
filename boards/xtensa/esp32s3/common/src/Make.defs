@@ -98,7 +98,7 @@ ifeq ($(CONFIG_USBMSC),y)
   CSRCS += esp32s3_usbmsc.c
 endif
 
-ifeq ($(CONFIG_ESP32S3_LEDC),y)
+ifeq ($(CONFIG_ESPRESSIF_LEDC),y)
 CSRCS += esp32s3_board_ledc.c
 endif
 

@@ -232,7 +232,7 @@ int esp32s2_cs4344_initialize(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ESP32S2_LEDC
+#ifdef CONFIG_ESPRESSIF_LEDC
 int esp32s2_pwm_setup(void);
 #endif
 
