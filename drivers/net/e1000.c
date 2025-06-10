@@ -48,12 +48,12 @@
  * Pre-processor Definitions
  *****************************************************************************/
 
-#if CONFIG_NET_E1000_TXDESC % 2 != 0
-#  error CONFIG_NET_E1000_TXDESC must be multiple of 2
+#if CONFIG_NET_E1000_TXDESC % 8 != 0
+#  error CONFIG_NET_E1000_TXDESC must be multiple of 8
 #endif
 
-#if CONFIG_NET_E1000_RXDESC % 2 != 0
-#  error CONFIG_NET_E1000_RXDESC must be multiple of 2
+#if CONFIG_NET_E1000_RXDESC % 8 != 0
+#  error CONFIG_NET_E1000_RXDESC must be multiple of 8
 #endif
 
 /* Packet buffer size */
