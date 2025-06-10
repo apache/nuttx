@@ -515,10 +515,11 @@ static void igc_rxclean(FAR struct igc_driver_s *priv)
 static int igc_transmit(FAR struct netdev_lowerhalf_s *dev,
                           FAR netpkt_t *pkt)
 {
-  FAR struct igc_driver_s *priv = (FAR struct igc_driver_s *)dev;
-  uint64_t                 pa   = 0;
-  int                      desc = priv->tx_now;
-  size_t                   len  = netpkt_getdatalen(dev, pkt);
+  FAR struct igc_driver_s *priv    = (FAR struct igc_driver_s *)dev;
+  uint64_t                 pa      = 0;
+  int                      desc    = priv->tx_now;
+  size_t                   len     = netpkt_getdatalen(dev, pkt);
+  size_t                   tx_next = (priv->tx_now + 1) % IGC_TX_DESC;
 
   ninfo("transmit\n");
 
@@ -535,13 +536,20 @@ static int igc_transmit(FAR struct netdev_lowerhalf_s *dev,
       return -ENETDOWN;
     }
 
+  /* Drop packet if ring full */
+
+  if (tx_next == priv->tx_done)
+    {
+      return -ENOMEM;
+    }
+
   /* Store TX packet reference */
 
   priv->tx_pkt[priv->tx_now] = pkt;
 
   /* Prepare next TX descriptor */
 
-  priv->tx_now = (priv->tx_now + 1) % IGC_TX_DESC;
+  priv->tx_now = tx_next;
 
   /* Setup TX descriptor */
 
