@@ -33,6 +33,28 @@
 #endif
 
 NXSYMBOLS(__cxa_atexit)
+NXSYMBOLS(_ZdaPv) /* void operator delete[]( void* ptr ) throw(); */
+NXSYMBOLS(_ZdaPvRKSt9nothrow_t) /* void operator delete[]( void* ptr, const std::nothrow_t& tag ) throw(); */
+NXSYMBOLS(_ZdaPvS_) /* void operator delete[]( void* ptr, void* place ) throw(); */
+NXSYMBOLS(_ZdaPvSt11align_val_t) /* void operator delete[]( void* ptr, std::align_val_t al ) noexcept; */
+NXSYMBOLS(_ZdaPvSt11align_val_tRKSt9nothrow_t) /* void operator delete[]( void* ptr, std::align_val_t al, const std::nothrow_t& tag ) noexcept; */
+NXSYMBOLS(_ZdaPvSt8size_t) /* void operator delete[]( void* ptr, std::size_t sz ) noexcept; */
+NXSYMBOLS(_ZdaPvSt8size_tSt11align_val_t) /* void operator delete[]( void* ptr, std::size_t sz,std::align_val_t al ) noexcept; */
+NXSYMBOLS(_ZdlPv) /* void operator delete  ( void* ptr ) throw(); */
+NXSYMBOLS(_ZdlPvRKSt9nothrow_t) /* void operator delete  ( void* ptr, const std::nothrow_t& tag ) throw(); */
+NXSYMBOLS(_ZdlPvS_) /* void operator delete  ( void* ptr, void* place ) throw(); */
+NXSYMBOLS(_ZdlPvSt11align_val_t) /* void operator delete  ( void* ptr, std::align_val_t al ) noexcept; */
+NXSYMBOLS(_ZdlPvSt11align_val_tRKSt9nothrow_t) /* void operator delete  ( void* ptr, std::align_val_t al, const std::nothrow_t& tag ) noexcept; */
+NXSYMBOLS(_ZdlPvSt8size_t) /* void operator delete  ( void* ptr, std::size_t sz ) noexcept; */
+NXSYMBOLS(_ZdlPvSt8size_tSt11align_val_t) /* void operator delete  ( void* ptr, std::size_t sz, std::align_val_t al ) noexcept; */
+NXSYMBOLS(_Znam) /* void* operator new[](std::size_t size) */
+NXSYMBOLS(_ZnamRKSt9nothrow_t) /* void* operator new[]( std::size_t count, const std::nothrow_t& tag ) */
+NXSYMBOLS(_ZnamSt11align_val_t) /* void* operator new[]( std::size_t count, std::align_val_t al ) */
+NXSYMBOLS(_ZnamSt11align_val_tRKSt9nothrow_t) /* void* operator new[]( std::size_t count, std::align_val_t al, const std::nothrow_t& tag ) noexcept */
+NXSYMBOLS(_Znwm) /* void* operator new(std::size_t size) */
+NXSYMBOLS(_ZnwmRKSt9nothrow_t) /* void* operator new  ( std::size_t count, const std::nothrow_t& tag ) */
+NXSYMBOLS(_ZnwmSt11align_val_t) /* void* operator new  ( std::size_t count, std::align_val_t al ) */
+NXSYMBOLS(_ZnwmSt11align_val_tRKSt9nothrow_t) /* void* operator new  ( std::size_t count, std::align_val_t al, const std::nothrow_t& tag ) noexcept */
 NXSYMBOLS(abort)
 NXSYMBOLS(accept)
 NXSYMBOLS(access)
