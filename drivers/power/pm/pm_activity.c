@@ -315,10 +315,10 @@ void pm_wakelock_uninit(FAR struct pm_wakelock_s *wakelock)
     }
 
   wakelock->count = 0;
+  wd_cancel(wdog);
   pm_wakelock_stats_rm(wakelock);
 
   spin_unlock_irqrestore(&pdom->lock, flags);
-  wd_cancel(wdog);
 }
 
 /****************************************************************************
@@ -442,7 +442,6 @@ void pm_wakelock_staytimeout(FAR struct pm_wakelock_s *wakelock, int ms)
   FAR struct pm_domain_s *pdom;
   FAR struct dq_queue_s *dq;
   FAR struct wdog_s *wdog;
-  bool wdstart = false;
   irqstate_t flags;
   int domain;
 
@@ -469,14 +468,10 @@ void pm_wakelock_staytimeout(FAR struct pm_wakelock_s *wakelock, int ms)
 
   if (TICK2MSEC(wd_gettime(wdog)) < ms)
     {
-      wdstart = true;
+      wd_start(wdog, MSEC2TICK(ms), pm_waklock_cb, (wdparm_t)wakelock);
     }
 
   spin_unlock_irqrestore(&pdom->lock, flags);
-  if (wdstart)
-    {
-      wd_start(wdog, MSEC2TICK(ms), pm_waklock_cb, (wdparm_t)wakelock);
-    }
 
   pm_auto_updatestate(domain);
 }
