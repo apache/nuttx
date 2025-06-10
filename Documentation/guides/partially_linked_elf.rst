@@ -241,7 +241,7 @@ The Makefile used to create the ELF program is as follows:
     ARCHOPTIMIZATION = -Os -fno-strict-aliasing -fno-strength-reduce -fomit-frame-pointer
     ARCHINCLUDES = -I. -isystem  nuttx-export-7.25/include
     
-    CFLAGS = $(ARCHCFLAGS) $(ARCHWARNINGS) $(ARCHOPTIMIZATION) $(ARCHINCLUDES) -pipe
+    CFLAGS = $(ARCHCPUFLAGS) $(ARCHCFLAGS) $(ARCHWARNINGS) $(ARCHOPTIMIZATION) $(ARCHINCLUDES) -pipe
     
     CROSSDEV = arm-none-eabi-
     CC = $(CROSSDEV)gcc
