@@ -29,7 +29,9 @@
 #include <fcntl.h>
 #include <poll.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/sched.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/video/v4l2_m2m.h>
 #include <nuttx/video/video.h>
 
@@ -75,6 +77,7 @@ struct codec_file_s
   sq_queue_t        event_avail;
   sq_queue_t        event_free;
   codec_event_t     event_pool[CODEC_EVENT_COUNT];
+  spinlock_t        lock;
   FAR struct pollfd *fds;
   FAR void          *priv;
 };
@@ -270,7 +273,6 @@ static int codec_reqbufs(FAR struct file *filep,
   FAR codec_mng_t *cmng = inode->i_private;
   FAR codec_file_t *cfile = filep->f_priv;
   FAR codec_type_inf_t *type_inf;
-  irqstate_t flags;
   uint32_t buf_size;
   int ret = OK;
 
@@ -299,8 +301,6 @@ static int codec_reqbufs(FAR struct file *filep,
       return -EINVAL;
     }
 
-  flags = enter_critical_section();
-
   type_inf = codec_get_type_inf(cfile, reqbufs->type);
   video_framebuff_change_mode(&type_inf->bufinf, reqbufs->mode);
   ret = video_framebuff_realloc_container(&type_inf->bufinf,
@@ -325,7 +325,6 @@ static int codec_reqbufs(FAR struct file *filep,
         }
     }
 
-  leave_critical_section(flags);
   return ret;
 }
 
@@ -442,7 +441,6 @@ static int codec_dqbuf(FAR struct file *filep,
   FAR codec_file_t *cfile = filep->f_priv;
   FAR codec_type_inf_t *type_inf;
   FAR vbuf_container_t *container;
-  irqstate_t flags;
 
   if (buf == NULL)
     {
@@ -455,18 +453,14 @@ static int codec_dqbuf(FAR struct file *filep,
       return -EINVAL;
     }
 
-  flags = enter_critical_section();
-
   if (video_framebuff_is_empty(&type_inf->bufinf))
     {
-      leave_critical_section(flags);
       return -EAGAIN;
     }
 
   container = video_framebuff_dq_valid_container(&type_inf->bufinf);
   if (container == NULL)
     {
-      leave_critical_section(flags);
       return -EAGAIN;
     }
 
@@ -476,7 +470,6 @@ static int codec_dqbuf(FAR struct file *filep,
   vinfo("%s dequeue done\n", V4L2_TYPE_IS_OUTPUT(buf->type) ?
                              "output" : "capture");
 
-  leave_critical_section(flags);
   return OK;
 }
 
@@ -758,11 +751,11 @@ int codec_dqevent(FAR struct file *filep,
       return -EINVAL;
     }
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&cfile->lock);
 
   if (sq_empty(&cfile->event_avail))
     {
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(&cfile->lock, flags);
       return -ENOENT;
     }
 
@@ -770,7 +763,7 @@ int codec_dqevent(FAR struct file *filep,
   memcpy(event, &cevt->event, sizeof(struct v4l2_event));
   sq_addlast((FAR sq_entry_t *)cevt, &cfile->event_free);
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&cfile->lock, flags);
   return OK;
 }
 
@@ -853,6 +846,7 @@ static int codec_open(FAR struct file *filep)
                  &cfile->event_free);
     }
 
+  spin_lock_init(&cfile->lock);
   video_framebuff_init(&cfile->capture_inf.bufinf);
   video_framebuff_init(&cfile->output_inf.bufinf);
 
@@ -943,7 +937,7 @@ static int codec_poll(FAR struct file *filep,
   pollevent_t eventset = 0;
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave_nopreempt(&cfile->lock);
 
   if (setup)
     {
@@ -975,7 +969,7 @@ static int codec_poll(FAR struct file *filep,
         }
       else
         {
-          leave_critical_section(flags);
+          spin_unlock_irqrestore_nopreempt(&cfile->lock, flags);
           return -EBUSY;
         }
     }
@@ -985,7 +979,7 @@ static int codec_poll(FAR struct file *filep,
       fds->priv  = NULL;
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore_nopreempt(&cfile->lock, flags);
   return OK;
 }
 
@@ -1101,12 +1095,12 @@ int codec_queue_event(FAR void *cookie, FAR struct v4l2_event *evt)
   FAR codec_event_t *cevt;
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave_nopreempt(&cfile->lock);
 
   cevt = (FAR codec_event_t *)sq_remfirst(&cfile->event_free);
   if (cevt == NULL)
     {
-      leave_critical_section(flags);
+      spin_unlock_irqrestore_nopreempt(&cfile->lock, flags);
       return -EINVAL;
     }
 
@@ -1114,7 +1108,7 @@ int codec_queue_event(FAR void *cookie, FAR struct v4l2_event *evt)
   sq_addlast((FAR sq_entry_t *)cevt, &cfile->event_avail);
 
   poll_notify(&cfile->fds, 1, POLLPRI);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore_nopreempt(&cfile->lock, flags);
 
   return OK;
 }
