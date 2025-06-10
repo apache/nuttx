@@ -35,7 +35,7 @@
 
 #include <arch/board/board.h>
 
-#include "esp32s2_ledc.h"
+#include "espressif/esp_ledc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -58,8 +58,8 @@ int esp32s2_pwm_setup(void)
   int ret;
   struct pwm_lowerhalf_s *pwm;
 
-#ifdef CONFIG_ESP32S2_LEDC_TIM0
-  pwm = esp32s2_ledc_init(0);
+#if defined(CONFIG_ESP32S2_LEDC_TIM0) || defined(CONFIG_ESPRESSIF_LEDC_TIMER0)
+  pwm = esp_ledc_init(0);
   if (!pwm)
     {
       syslog(LOG_ERR, "ERROR: Failed to get the LEDC PWM 0 lower half\n");
@@ -76,8 +76,8 @@ int esp32s2_pwm_setup(void)
     }
 #endif
 
-#ifdef CONFIG_ESP32S2_LEDC_TIM1
-  pwm = esp32s2_ledc_init(1);
+#if defined(CONFIG_ESP32S2_LEDC_TIM1) || defined(CONFIG_ESPRESSIF_LEDC_TIMER1)
+  pwm = esp_ledc_init(1);
   if (!pwm)
     {
       syslog(LOG_ERR, "ERROR: Failed to get the LEDC PWM 1 lower half\n");
@@ -94,8 +94,8 @@ int esp32s2_pwm_setup(void)
     }
 #endif
 
-#ifdef CONFIG_ESP32S2_LEDC_TIM2
-  pwm = esp32s2_ledc_init(2);
+#if defined(CONFIG_ESP32S2_LEDC_TIM2) || defined(CONFIG_ESPRESSIF_LEDC_TIMER2)
+  pwm = esp_ledc_init(2);
   if (!pwm)
     {
       syslog(LOG_ERR, "ERROR: Failed to get the LEDC PWM 2 lower half\n");
@@ -112,8 +112,8 @@ int esp32s2_pwm_setup(void)
     }
 #endif
 
-#ifdef CONFIG_ESP32S2_LEDC_TIM3
-  pwm = esp32s2_ledc_init(3);
+#if defined(CONFIG_ESP32S2_LEDC_TIM3) || defined(CONFIG_ESPRESSIF_LEDC_TIMER3)
+  pwm = esp_ledc_init(3);
   if (!pwm)
     {
       syslog(LOG_ERR, "ERROR: Failed to get the LEDC PWM 3 lower half\n");

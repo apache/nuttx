@@ -85,7 +85,7 @@
 #  include "esp32s3_efuse.h"
 #endif
 
-#ifdef CONFIG_ESP32S3_LEDC
+#ifdef CONFIG_ESPRESSIF_LEDC
 #  include "esp32s3_board_ledc.h"
 #endif
 
@@ -203,13 +203,13 @@ int esp32s3_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_ESP32S3_LEDC
+#ifdef CONFIG_ESPRESSIF_LEDC
   ret = esp32s3_pwm_setup();
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: esp32s3_pwm_setup() failed: %d\n", ret);
     }
-#endif /* CONFIG_ESP32S3_LEDC */
+#endif /* CONFIG_ESPRESSIF_LEDC */
 
 #ifdef CONFIG_ESP32S3_TIMER
   /* Configure general purpose timers */

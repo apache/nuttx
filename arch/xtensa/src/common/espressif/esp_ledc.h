@@ -1,5 +1,7 @@
 /****************************************************************************
- * arch/xtensa/src/esp32s2/esp32s2_ledc.h
+ * arch/xtensa/src/common/espressif/esp_ledc.h
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_XTENSA_SRC_ESP32S2_ESP32S2_LEDC_H
-#define __ARCH_XTENSA_SRC_ESP32S2_ESP32S2_LEDC_H
+#ifndef __ARCH_XTENSA_SRC_COMMON_ESPRESSIF_ESP_LEDC_H
+#define __ARCH_XTENSA_SRC_COMMON_ESPRESSIF_ESP_LEDC_H
 
 /****************************************************************************
  * Included Files
@@ -33,7 +35,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp32s2_ledc_init
+ * Name: esp_ledc_init
  *
  * Description:
  *   Initialize one LEDC timer for use with the upper_level PWM driver.
@@ -42,11 +44,11 @@
  *   timer - A number identifying the timer use.
  *
  * Returned Value:
- *   On success, a pointer to the ESP32S2-C3 LEDC lower half PWM driver is
+ *   On success, a pointer to the ESP LEDC lower half PWM driver is
  *   returned. NULL is returned on any failure.
  *
  ****************************************************************************/
 
-struct pwm_lowerhalf_s *esp32s2_ledc_init(int timer);
+struct pwm_lowerhalf_s *esp_ledc_init(int timer);
 
-#endif /* __ARCH_RISCV_SRC_ESP32S2_ESP32S2_LEDC_H */
+#endif /* __ARCH_XTENSA_SRC_COMMON_ESPRESSIF_ESP_LEDC_H */

@@ -54,6 +54,13 @@ config ESP_SDM
 	select ANALOG
 	select DAC
 
+config ESPRESSIF_LEDC
+	bool "LEDC (PWM)"
+	default n
+	depends on ARCH_CHIP_ESP32S2 || ARCH_CHIP_ESP32S3
+	select PWM
+	select ARCH_HAVE_PWM_MULTICHAN
+
 config ESPRESSIF_I2S
 	bool
 	default n
@@ -152,6 +159,167 @@ config ESPRESSIF_DEDICATED_GPIO_IRQ
 	default n
 	---help---
 		Enable dedicated GPIO IRQ support
+
+menu "LEDC configuration"
+	depends on ESPRESSIF_LEDC
+
+config ESPRESSIF_LEDC_HPOINT
+	hex "LEDC hpoint value"
+	default 0x0000
+	range 0x0 1048575
+	---help---
+		This value sets the start point of the pulse within each timer period,
+		measured in timer ticks. It allows adjusting the phase of the signal.
+
+menuconfig ESPRESSIF_LEDC_TIMER0
+	bool "Timer 0"
+	default n
+
+if ESPRESSIF_LEDC_TIMER0
+
+config ESPRESSIF_LEDC_TIMER0_CHANNELS
+	int "Number of Timer 0 channels"
+	default 2 if PWM_MULTICHAN && PWM_NCHANNELS > 1
+	default 1 if !PWM_MULTICHAN || PWM_NCHANNELS = 1
+	range 0 6
+
+config ESPRESSIF_LEDC_TIMER0_RESOLUTION
+	int "Timer 0 resolution"
+	default 12
+	range 1 14
+	---help---
+		Timer resolution in bits. The resolution is the number of bits used to by the timer
+		counter to generate the PWM signal. The duty cycle provided by the upper layers
+		will be scaled to fit the resolution.
+
+endif # ESPRESSIF_LEDC_TIMER0
+
+menuconfig ESPRESSIF_LEDC_TIMER1
+	bool "Timer 1"
+	default n
+
+if ESPRESSIF_LEDC_TIMER1
+
+config ESPRESSIF_LEDC_TIMER1_CHANNELS
+	int "Number of Timer 1 channels"
+	default 2 if PWM_MULTICHAN && PWM_NCHANNELS > 1
+	default 1 if !PWM_MULTICHAN || PWM_NCHANNELS = 1
+	range 0 6
+
+config ESPRESSIF_LEDC_TIMER1_RESOLUTION
+	int "Timer 1 resolution"
+	default 12
+	range 1 14
+	---help---
+		Timer resolution in bits. The resolution is the number of bits used to by the timer
+		counter to generate the PWM signal. The duty cycle provided by the upper layers
+		will be scaled to fit the resolution.
+
+endif # ESPRESSIF_LEDC_TIMER1
+
+menuconfig ESPRESSIF_LEDC_TIMER2
+	bool "Timer 2"
+	default n
+
+if ESPRESSIF_LEDC_TIMER2
+
+config ESPRESSIF_LEDC_TIMER2_CHANNELS
+	int "Number of Timer 2 channels"
+	default 2 if PWM_MULTICHAN && PWM_NCHANNELS > 1
+	default 1 if !PWM_MULTICHAN || PWM_NCHANNELS = 1
+	range 0 6
+
+config ESPRESSIF_LEDC_TIMER2_RESOLUTION
+	int "Timer 2 resolution"
+	default 12
+	range 1 14
+	---help---
+		Timer resolution in bits. The resolution is the number of bits used to by the timer
+		counter to generate the PWM signal. The duty cycle provided by the upper layers
+		will be scaled to fit the resolution.
+
+endif # ESPRESSIF_LEDC_TIMER2
+
+menuconfig ESPRESSIF_LEDC_TIMER3
+	bool "Timer 3"
+	default n
+
+if ESPRESSIF_LEDC_TIMER3
+
+config ESPRESSIF_LEDC_TIMER3_CHANNELS
+	int "Number of Timer 3 channels"
+	default 2 if PWM_MULTICHAN && PWM_NCHANNELS > 1
+	default 1 if !PWM_MULTICHAN || PWM_NCHANNELS = 1
+	range 0 6
+
+config ESPRESSIF_LEDC_TIMER3_RESOLUTION
+	int "Timer 3 resolution"
+	default 12
+	range 1 14
+	---help---
+		Timer resolution in bits. The resolution is the number of bits used to by the timer
+		counter to generate the PWM signal. The duty cycle provided by the upper layers
+		will be scaled to fit the resolution.
+
+endif # ESPRESSIF_LEDC_TIMER3
+
+if !ESP32S2_LEDC && !ESP32S3_LEDC
+
+config ESPRESSIF_LEDC_CHANNEL0_PIN
+	int "Channel 0 pin"
+	default 2
+	range 0 48 if ARCH_CHIP_ESP32S3
+	range 0 46 if ARCH_CHIP_ESP32S2
+
+config ESPRESSIF_LEDC_CHANNEL1_PIN
+	int "Channel 1 pin"
+	default 3
+	range 0 48 if ARCH_CHIP_ESP32S3
+	range 0 46 if ARCH_CHIP_ESP32S2
+
+config ESPRESSIF_LEDC_CHANNEL2_PIN
+	int "Channel 2 pin"
+	default 4
+	range 0 48 if ARCH_CHIP_ESP32S3
+	range 0 46 if ARCH_CHIP_ESP32S2
+
+config ESPRESSIF_LEDC_CHANNEL3_PIN
+	int "Channel 3 pin"
+	default 5
+	range 0 48 if ARCH_CHIP_ESP32S3
+	range 0 46 if ARCH_CHIP_ESP32S2
+
+if PWM_MULTICHAN && PWM_NCHANNELS > 1
+
+config ESPRESSIF_LEDC_CHANNEL4_PIN
+	int "Channel 4 pin"
+	default 6
+	range 0 48 if ARCH_CHIP_ESP32S3
+	range 0 46 if ARCH_CHIP_ESP32S2
+
+config ESPRESSIF_LEDC_CHANNEL5_PIN
+	int "Channel 5 pin"
+	default 7
+	range 0 48 if ARCH_CHIP_ESP32S3
+	range 0 46 if ARCH_CHIP_ESP32S2
+
+config ESPRESSIF_LEDC_CHANNEL6_PIN
+	int "Channel 6 pin"
+	default 8
+	range 0 48 if ARCH_CHIP_ESP32S3
+	range 0 46 if ARCH_CHIP_ESP32S2
+
+config ESPRESSIF_LEDC_CHANNEL7_PIN
+	int "Channel 7 pin"
+	default 9
+	range 0 48 if ARCH_CHIP_ESP32S3
+	range 0 46 if ARCH_CHIP_ESP32S2
+
+endif # PWM_MULTICHAN && PWM_NCHANNELS > 1
+
+endif # !ESP32_LEDC && !ESP32S2_LEDC && !ESP32S3_LEDC
+
+endmenu # LEDC configuration
 
 menu "Bootloader and Image Configuration"
 

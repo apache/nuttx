@@ -65,6 +65,10 @@ CHIP_CSRCS += esp_qencoder.c
 endif
 endif
 
+ifeq ($(CONFIG_ESPRESSIF_LEDC),y)
+CHIP_CSRCS += esp_ledc.c
+endif
+
 ifeq ($(CONFIG_ESPRESSIF_SPIFLASH),y)
 CHIP_CSRCS += esp_spiflash.c
 ifeq ($(CONFIG_ESPRESSIF_MTD),y)
