@@ -652,7 +652,7 @@ endif()
 
 add_definitions(-D__NuttX__)
 
-add_compile_options($<$<COMPILE_LANGUAGE:ASM>:-D__ASSEMBLY__>)
+add_compile_definitions($<$<COMPILE_LANGUAGE:ASM>:__ASSEMBLY__>)
 
 # Setup main nuttx target ####################################################
 
@@ -702,6 +702,8 @@ if(CONFIG_ARCH_SIM)
     target_link_libraries(nuttx PRIVATE ${NUTTX_BINARY_DIR}/nuttx.rel)
   endif()
 else()
+  # Make nuttx target can inheriting common compilation properties
+  nuttx_add_library_internal(nuttx)
   # These flags apply to source files not part of the library. In sim build this
   # corresponds to "host" files, so we only do this on non-sim build
   target_compile_definitions(
