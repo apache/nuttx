@@ -326,30 +326,11 @@ enum stm32_adc_resoluton_e
 
 #ifdef CONFIG_STM32F0L0G0_ADC_CHANGE_SAMPLETIME
 
-/* Channel and sample time pair */
-
-typedef struct adc_channel_s
-{
-  uint8_t channel:5;
-
-  /* Sampling time individually for each channel.
-   * It differs between families
-   */
-
-  uint8_t sample_time:3;
-} adc_channel_t;
-
-/* This structure will be used while setting channels to specified by the
- * "channel-sample time" pairs' values
- */
-
 struct adc_sample_time_s
 {
-  adc_channel_t *channel;                /* Array of channels */
-  uint8_t        channels_nbr:5;         /* Number of channels in array */
-  bool           all_same:1;             /* All channels will get the
-                                          * same value of the sample time */
-  uint8_t        all_ch_sample_time:3;   /* Sample time for all channels */
+  uint8_t smp1;     /* Sample time for channels with SMPSEL bit = 0 */
+  uint8_t smp2;     /* Sample time for channels with SMPSEL bit = 1 */
+  uint32_t smpsel;  /* Bitmask for selecting which channels use SMP2 */
 };
 #endif /* CONFIG_STM32F0L0G0_ADC_CHANGE_SAMPLETIME */
 

@@ -102,23 +102,26 @@
 
 /* Sample time default configuration */
 
-/* G0 support additional sample time selection 2 */
+/* C0 and G0 support additional sample time selection 2 */
 
-#if defined(CONFIG_STM32F0L0G0_STM32G0)
+#if defined(CONFIG_STM32F0L0G0_STM32G0) || defined(CONFIG_STM32F0L0G0_STM32C0)
 #  define ADC_HAVE_SMPR_SMP2
 #endif
 
 #if defined(ADC_HAVE_DMA) || (ADC_MAX_SAMPLES == 1)
-#  ifdef ADC_SMPR_13p5
-#    define ADC_SMP1_DEFAULT  ADC_SMPR_13p5
-#    define ADC_SMP2_DEFAULT  ADC_SMPR_13p5
-#  else
+#  if defined(CONFIG_ARCH_CHIP_STM32C0) || defined(CONFIG_ARCH_CHIP_STM32G0)
 #    define ADC_SMP1_DEFAULT  ADC_SMPR_12p5
 #    define ADC_SMP2_DEFAULT  ADC_SMPR_12p5
+#  else
+#    define ADC_SMP1_DEFAULT  ADC_SMPR_13p5
 #  endif
 #else /* Slow down sampling frequency */
-#  define ADC_SMP1_DEFAULT    ADC_SMPR_239p5
-#  define ADC_SMP2_DEFAULT    ADC_SMPR_239p5
+#  if defined(CONFIG_ARCH_CHIP_STM32C0) || defined(CONFIG_ARCH_CHIP_STM32G0)
+#    define ADC_SMP1_DEFAULT  ADC_SMPR_160p5
+#    define ADC_SMP2_DEFAULT  ADC_SMPR_160p5
+#  else
+#    define ADC_SMP1_DEFAULT  ADC_SMPR_239p5
+#  endif
 #endif
 
 #ifdef ADC_HAVE_SMPR_SMP2
@@ -218,12 +221,14 @@ struct stm32_dev_s
   uint16_t dmabatch;         /* Number of conversions for DMA batch */
 #endif
 #ifdef CONFIG_STM32F0L0G0_ADC_CHANGE_SAMPLETIME
-  /* Sample time selection. These bits must be written only when ADON=0.
-   * REVISIT: this takes too much space. We need only 3 bits per channel.
-   */
+  /* Sample time selection. These bits must be written only when ADON=0. */
 
-  uint8_t sample_rate[ADC_CHANNELS_NUMBER];
-  uint8_t adc_channels;      /* ADC channels number */
+#  ifdef ADC_HAVE_SMPR_SMP2
+  uint8_t sample_rate[2];    /* [0] for SMP1, [1] for SMP2 */
+  uint32_t smpsel;           /* ADC Sample Rate Selection Bits */
+#  else
+  uint8_t sample_rate[1];    /* Only SMP1 is used */
+#  endif
 #endif
 #ifdef ADC_HAVE_TIMER
   uint8_t trigger;           /* Timer trigger channel: 0=CC1, 1=CC2, 2=CC3,
@@ -1408,6 +1413,10 @@ static void adc_mode_cfg(struct stm32_dev_s *priv)
   clrbits |= ADC_CFGR1_EXTEN_MASK;
   setbits |= ADC_CFGR1_EXTEN_NONE;
 
+#ifdef CONFIG_STM32F0L0G0_ADC1_CONTINUOUS
+  setbits |= ADC_CFGR1_CONT;
+#endif
+
   /* Set CFGR configuration */
 
   adc_modifyreg(priv, STM32_ADC_CFGR1_OFFSET, clrbits, setbits);
@@ -1437,8 +1446,33 @@ static void adc_sampletime_cfg(struct adc_dev_s *dev)
   /* Initialize the same sample time for each ADC.
    * During sample cycles channel selection bits must remain unchanged.
    */
-
 #ifdef CONFIG_STM32F0L0G0_ADC_CHANGE_SAMPLETIME
+  struct adc_sample_time_s time_samples = {
+#  ifdef STM32_ADC1_SMPR_SMP1
+      .smp1    = STM32_ADC1_SMPR_SMP1,
+#  else
+      .smp1    = ADC_SMP1_DEFAULT,
+#  endif
+
+#  ifdef ADC_HAVE_SMPR_SMP2
+#    ifdef STM32_ADC1_SMPR_SMP2
+      .smp2    = STM32_ADC1_SMPR_SMP2,
+#    else
+      .smp2    = ADC_SMP2_DEFAULT,
+#    endif
+
+#    ifdef STM32_ADC1_SMPR_SMPSEL
+      .smpsel  = STM32_ADC1_SMPR_SMPSEL
+#    else
+      .smpsel  = ADC_SMPSEL_DEFAULT
+#    endif
+#  else
+      .smp2    = 0,
+      .smpsel  = 0
+#  endif
+  };
+
+  adc_sampletime_set((struct stm32_adc_dev_s *)dev, &time_samples);
   adc_sampletime_write((struct stm32_adc_dev_s *)dev);
 #else
   struct stm32_dev_s *priv = (struct stm32_dev_s *)dev->ad_priv;
@@ -1448,7 +1482,7 @@ static void adc_sampletime_cfg(struct adc_dev_s *dev)
 
   setbits |= ADC_SMP1_DEFAULT << ADC_SMPR_SMP1_SHIFT;
 
-#  ifdef ADC_HAVE_SMPR_SMP2
+#ifdef ADC_HAVE_SMPR_SMP2
   /* Configure sample time 2 */
 
   setbits |= ADC_SMP2_DEFAULT << ADC_SMPR_SMP2_SHIFT;
@@ -1456,12 +1490,11 @@ static void adc_sampletime_cfg(struct adc_dev_s *dev)
   /* Configure sample time selection */
 
   setbits |= ADC_SMPSEL_DEFAULT << ADC_SMPR_SMPSEL_SHIFT;
-#  endif
+#endif
 
   /* Write SMPR register */
 
   adc_putreg(priv, STM32_ADC_SMPR_OFFSET, setbits);
-
 #endif
 }
 
@@ -1596,7 +1629,7 @@ static void adc_configure(struct adc_dev_s *dev)
 
   adc_voltreg_cfg(priv);
 
-  /* Calibrate ADC - doesn't work for now */
+  /* Calibrate ADC */
 
   adc_calibrate(priv);
 
@@ -2717,6 +2750,7 @@ static int adc_llops_regbufregister(struct stm32_adc_dev_s *dev,
 }
 #endif /* ADC_HAVE_DMA */
 
+#ifdef CONFIG_STM32F0L0G0_ADC_CHANGE_SAMPLETIME
 /****************************************************************************
  * Name: adc_sampletime_write
  *
@@ -2729,10 +2763,19 @@ static int adc_llops_regbufregister(struct stm32_adc_dev_s *dev,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32F0L0G0_ADC_CHANGE_SAMPLETIME
 static void adc_sampletime_write(struct stm32_adc_dev_s *dev)
 {
-  #error TODO adc_sampletime_write
+  struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
+  uint32_t smpr = 0;
+
+  smpr |= ((uint32_t)priv->sample_rate[0] << ADC_SMPR_SMP1_SHIFT);
+
+#ifdef ADC_HAVE_SMPR_SMP2
+  smpr |= ((uint32_t)priv->sample_rate[1] << ADC_SMPR_SMP2_SHIFT);
+  smpr |= ((uint32_t)priv->smpsel << ADC_SMPR_SMPSEL_SHIFT);
+#endif
+
+  adc_putreg(priv, STM32_ADC_SMPR_OFFSET, smpr);
 }
 
 /****************************************************************************
@@ -2756,10 +2799,16 @@ static void adc_sampletime_write(struct stm32_adc_dev_s *dev)
  *
  ****************************************************************************/
 
-void adc_sampletime_set(struct stm32_adc_dev_s *dev,
-                        struct adc_sample_time_s *time_samples)
+static void adc_sampletime_set(struct stm32_adc_dev_s *dev,
+                               struct adc_sample_time_s *time_samples)
 {
-  #error TODO adc_sampletime_write
+  struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
+
+  priv->sample_rate[0] = time_samples->smp1;
+#ifdef ADC_HAVE_SMPR_SMP2
+  priv->sample_rate[1] = time_samples->smp2;
+  priv->smpsel = time_samples->smpsel;
+#endif
 }
 #endif /* CONFIG_STM32F0L0G0_ADC_CHANGE_SAMPLETIME */
 

@@ -243,8 +243,9 @@
 #define ADC_SMPR_SMP2_SHIFT         (4)       /* Bits 4-6: Sampling time selection 2 */
 #define ADC_SMPR_SMP2_MASK          (7 << ADC_SMPR_SMP_SHIFT)
 #define ADC_SMPR_SMPSEL_SHIFT       (8)       /* Bits 8-26: channel-x sampling time selection */
-#if defined(CONFIG_ARCH_CHIP_STM32G0)
-#  define ADC_SMPR_SMPSEL(ch, smp)  ((smp) << (ADC_SMPR_SMPSEL_SHIFT + ch)) /* ch = [0..18] and smp = 1 or 0 */
+#if defined(CONFIG_ARCH_CHIP_STM32G0) || defined(CONFIG_ARCH_CHIP_STM32C0)
+#  define ADC_SMPR_SMPSEL(ch, smp)  ((smp) << (ADC_SMPR_SMPSEL_SHIFT + ch)) /* ch = [0..22] and smp = 0 or 1 */
+#  define ADC_SMPSEL(ch, smp)       ((smp) << (ch))                         /* For use in adc_sampletime_set */
 #else
 #  define ADC_SMPR_SMPSEL(ch, smp)  (smp << ADC_SMPR_SMPSEL_SHIFT)
 #endif

@@ -202,7 +202,8 @@
 /* AHB peripheral reset register */
 
 #define RCC_AHBRSTR_DMA1RST         (1 << 0)  /* Bit 0: DMA 1 reset */
-                                              /* Bits 1-7: Reserved */
+#define RCC_AHBRSTR_DMA2RST         (1 << 1)  /* Bit 1: DMA 2 reset */
+                                              /* Bits 2-7: Reserved */
 #define RCC_AHBRSTR_MIFRST          (1 << 8)  /* Bit 8: Memory interface reset */
                                               /* Bits 9-11: Reserved */
 #define RCC_AHBRSTR_CRCRST          (1 << 12) /* Bit 12: Memory interface reset */
@@ -265,7 +266,8 @@
 /* AHB Peripheral Clock enable register */
 
 #define RCC_AHBENR_DMA1EN           (1 << 0)  /* Bit 0: DMA 1 enable */
-                                              /* Bits 1-7: Reserved */
+#define RCC_AHBENR_DMA2EN           (1 << 1)  /* Bit 1: DMA 2 enable */
+                                              /* Bits 2-7: Reserved */
 #define RCC_AHBENR_MIFEN            (1 << 8)  /* Bit 8: Memory interface enable */
                                               /* Bits 9-11: Reserved */
 #define RCC_AHBENR_CRCEN            (1 << 12) /* Bit 12: Memory interface enable */
@@ -321,7 +323,8 @@
 /* AHB peripheral clock enable in Sleep mode register */
 
 #define RCC_AHBSMENR_DMA1SMEN       (1 << 0)  /* Bit 0: DMA 1 enable in Sleep mode */
-                                              /* Bits 1-7: Reserved */
+#define RCC_AHBSMENR_DMA2SMEN       (1 << 1)  /* Bit 1: DMA 2 enable in Sleep mode */
+                                              /* Bits 2-7: Reserved */
 #define RCC_AHBSMENR_MIFSMEN        (1 << 8)  /* Bit 8: Memory interface enable in Sleep mode */
                                               /* Bits 9-11: Reserved */
 #define RCC_AHBSMENR_CRCSMEN        (1 << 12) /* Bit 12: Memory interface enable in Sleep mode */
