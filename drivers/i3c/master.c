@@ -1034,6 +1034,12 @@ static int i3c_master_bus_init(FAR struct i3c_master_controller *master)
       goto err_bus_cleanup;
     }
 
+  if (master->i3c_bus_id < 0)
+    {
+      i3cinfo("i3c_bus_id = %d\n", master->i3c_bus_id);
+      return 0;
+    }
+
   /* Reset all dynamic address that may have been assigned before
    * (assigned by the bootloader for example).
    */
@@ -2254,6 +2260,11 @@ int i3c_master_register(FAR struct i3c_master_controller *master,
   i3c_master_register_new_i3c_devs(master);
   i3c_bus_normaluse_unlock(&master->bus);
 
+  if (master->i3c_bus_id < 0)
+    {
+      return 0;
+    }
+
   /* Expose I3C driver node by the i3c_driver on our I3C Bus, i3c driver id
    * equal to i3c bus id.
    */
@@ -2292,7 +2303,11 @@ err_cleanup_bus:
 void i3c_master_unregister(FAR struct i3c_master_controller *master)
 {
   i2c_unregister_driver(master);
-  i3c_master_unregister_i3c_devs(master);
-  i3c_master_bus_cleanup(master);
-  i3c_unregister_driver(master);
+
+  if (master->i3c_bus_id >= 0)
+    {
+      i3c_master_unregister_i3c_devs(master);
+      i3c_master_bus_cleanup(master);
+      i3c_unregister_driver(master);
+    }
 }
