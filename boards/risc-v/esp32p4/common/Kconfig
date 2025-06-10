@@ -1,0 +1,50 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config ESPRESSIF_MERGE_BINS
+	bool "Merge raw binary files into a single file"
+	default n
+	---help---
+		Merge the raw binary files into a single file for flashing to the
+		device.
+		This is only useful when the path to binary files (e.g. bootloader)
+		is provided via the ESPTOOL_BINDIR variable.
+
+choice ESPRESSIF_SPIFLASH_FS
+	prompt "Mount SPI Flash MTD on bring-up"
+	default ESPRESSIF_SPIFLASH_SMARTFS
+	depends on ESPRESSIF_MTD
+	optional
+	---help---
+		Mount the SPI Flash MTD with the selected File System format on board
+		bring-up.
+		If not selected, the MTD will be registered as a device node on /dev.
+
+config ESPRESSIF_SPIFLASH_SMARTFS
+	bool "SmartFS"
+	select FS_SMARTFS
+	select MTD_SMART
+
+config ESPRESSIF_SPIFLASH_NXFFS
+	bool "NXFFS"
+	select FS_NXFFS
+
+config ESPRESSIF_SPIFLASH_SPIFFS
+	bool "SPIFFS"
+	select FS_SPIFFS
+
+config ESPRESSIF_SPIFLASH_LITTLEFS
+	bool "LittleFS"
+	select FS_LITTLEFS
+
+config ESPRESSIF_SPIFLASH_MTD_CONFIG
+	bool "Non-volatile storage"
+
+endchoice # ESPRESSIF_SPIFLASH_FS
+
+config ESPRESSIF_SPIFLASH_FS_MOUNT_PT
+	string "File-system Mount Point"
+	depends on ESPRESSIF_SPIFLASH_SMARTFS || ESPRESSIF_SPIFLASH_NXFFS || ESPRESSIF_SPIFLASH_SPIFFS || ESPRESSIF_SPIFLASH_LITTLEFS
+	default "/data"

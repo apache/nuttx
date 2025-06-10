@@ -67,6 +67,12 @@
     _count;                           \
 })
 
+#ifdef CONFIG_ARCH_CHIP_ESP32P4
+#  define PIN_FUNCTION FUNCTION_1
+#else
+#  define PIN_FUNCTION FUNCTION_2
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -571,7 +577,7 @@ static int esp_adc_oneshot_config_channel(struct adc_dev_s *dev,
   /* Configure GPIO for ADC */
 
   gpio = ADC_GET_IO_NUM(priv->unit, channel);
-  ret = esp_configgpio(gpio, FUNCTION_2);
+  ret = esp_configgpio(gpio, PIN_FUNCTION);
   if (ret < 0)
     {
       aerr("ERROR: Failed to configure GPIO %d\n", gpio);
@@ -743,6 +749,15 @@ struct adc_dev_s *esp_adc_initialize(int adc_num,
 #  endif
           break;
 #endif
+        }
+
+      case 2:
+        {
+#ifdef CONFIG_ESPRESSIF_ADC_2
+          dev = &g_adcdev2;
+          priv = &g_adcpriv2;
+#endif
+          break;
         }
 
       default:

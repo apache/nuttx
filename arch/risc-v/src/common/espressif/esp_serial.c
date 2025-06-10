@@ -847,7 +847,11 @@ static bool esp_txempty(uart_dev_t *dev)
 {
   struct esp_uart_s *priv = dev->priv;
 
+#if defined(CONFIG_ARCH_CHIP_ESP32P4)
+  return priv->hal->dev->int_raw.txfifo_empty_int_raw != 0;
+#else
   return priv->hal->dev->int_raw.txfifo_empty != 0;
+#endif
 }
 
 /****************************************************************************

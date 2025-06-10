@@ -49,6 +49,7 @@ VALID_CHIPS=(
   "esp32c3"
   "esp32c6"
   "esp32h2"
+  "esp32p4"
 )
 
 # Make sure we have the required argument(s)
@@ -96,6 +97,9 @@ else
       ADDR2LINE_TOOL="riscv-none-elf-addr2line"
       ;;
     esp32h2)
+      ADDR2LINE_TOOL="riscv-none-elf-addr2line"
+      ;;
+    esp32p4)
       ADDR2LINE_TOOL="riscv-none-elf-addr2line"
       ;;
   esac

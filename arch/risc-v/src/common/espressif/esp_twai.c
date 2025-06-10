@@ -96,8 +96,10 @@
 #  endif
 #endif
 
-#ifdef CONFIG_ARCH_CHIP_ESP32C3
+#if defined(CONFIG_ARCH_CHIP_ESP32C3)
 #  define INT_ENA_REG(hw)       hw->interrupt_enable_reg.val
+#elif defined(CONFIG_ARCH_CHIP_ESP32P4)
+#  define INT_ENA_REG(hw)       hw->interrupt_ena.val
 #else
 #  define INT_ENA_REG(hw)       hw->interrupt_enable.val
 #endif /* CONFIG_ARCH_CHIP_ESP32C3 */

@@ -1,0 +1,83 @@
+#############################################################################
+# boards/risc-v/esp32p4/common/src/Make.defs
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+#############################################################################
+
+ifeq ($(CONFIG_ARCH_BOARD_COMMON),y)
+
+ifeq ($(CONFIG_ESPRESSIF_ADC),y)
+  CSRCS += esp_board_adc.c
+endif
+
+ifeq ($(CONFIG_ESPRESSIF_LEDC),y)
+  CSRCS += esp_board_ledc.c
+endif
+
+ifeq ($(CONFIG_ESP_RMT),y)
+  CSRCS += esp_board_rmt.c
+endif
+
+ifeq ($(CONFIG_ESPRESSIF_SPI),y)
+  CSRCS += esp_board_spi.c
+endif
+
+ifeq ($(CONFIG_SPI_DRIVER),y)
+  CSRCS += esp_board_spidev.c
+endif
+
+ifeq ($(CONFIG_ESPRESSIF_SPI),y)
+ifeq ($(CONFIG_SPI_SLAVE_DRIVER),y)
+  CSRCS += esp_board_spislavedev.c
+endif
+endif
+
+ifeq ($(CONFIG_I2C_DRIVER),y)
+  CSRCS += esp_board_i2c.c
+endif
+
+ifeq ($(CONFIG_ESPRESSIF_I2S),y)
+  CSRCS += esp_board_i2s.c
+endif
+
+ifeq ($(CONFIG_ESPRESSIF_SPIFLASH),y)
+  CSRCS += esp_board_spiflash.c
+endif
+
+ifeq ($(CONFIG_ESPRESSIF_TWAI),y)
+  CSRCS += esp_board_twai.c
+endif
+
+ifeq ($(CONFIG_SENSORS_BMP180),y)
+  CSRCS += esp_board_bmp180.c
+endif
+
+ifeq ($(CONFIG_ESP_MCPWM),y)
+  CSRCS += esp_board_mcpwm.c
+endif
+
+ifeq ($(CONFIG_ESP_PCNT),y)
+  CSRCS += esp_board_pcnt.c
+endif
+
+DEPPATH += --dep-path src
+VPATH += :src
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src
+
+endif

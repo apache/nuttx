@@ -23,6 +23,8 @@
 include common/Make.defs
 include common/espressif/Make.defs
 
+CHIP_CSRCS += esp_chip_rev.c
+
 # Wireless interfaces.
 
 ifeq ($(CONFIG_ESPRESSIF_WIFI),y)

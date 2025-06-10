@@ -124,7 +124,6 @@ config ARCH_CHIP_ESP32C3
 	select LIBC_ARCH_STRLEN
 	select LIBC_ARCH_STRNLEN
 	select ESPRESSIF_SOC_RTC_MEM_SUPPORTED
-	select ARCH_CHIP_ESPRESSIF
 	select ARCH_HAVE_DEBUG
 	select ARCH_HAVE_RAMFUNCS
 	select ONESHOT_COUNT if ONESHOT
@@ -159,7 +158,6 @@ config ARCH_CHIP_ESP32C6
 	select LIBC_ARCH_STRLEN
 	select LIBC_ARCH_STRNLEN
 	select ESPRESSIF_SOC_RTC_MEM_SUPPORTED
-	select ARCH_CHIP_ESPRESSIF
 	select ARCH_HAVE_RAMFUNCS
 	select ONESHOT_COUNT if ONESHOT
 	select ONESHOT_FAST_DIVISION if ONESHOT
@@ -192,13 +190,44 @@ config ARCH_CHIP_ESP32H2
 	select LIBC_ARCH_STRLEN
 	select LIBC_ARCH_STRNLEN
 	select ESPRESSIF_SOC_RTC_MEM_SUPPORTED
-	select ARCH_CHIP_ESPRESSIF
 	select ARCH_HAVE_RAMFUNCS
 	select ONESHOT_COUNT if ONESHOT
 	select ONESHOT_FAST_DIVISION if ONESHOT
 	select ARCH_MINIMAL_VECTORTABLE
 	---help---
 		Espressif ESP32-H2 (RV32IMC).
+
+config ARCH_CHIP_ESP32P4
+	bool "ESP32-P4"
+	select ARCH_RV32
+	select ARCH_RV_ISA_M
+	select ARCH_RV_ISA_A
+	select ARCH_RV_ISA_C
+	select ARCH_VECNOTIRQ
+	select ARCH_HAVE_BOOTLOADER if !ESPRESSIF_SIMPLE_BOOT
+	select ARCH_HAVE_I2CRESET
+	select ARCH_HAVE_MPU
+	select ARCH_HAVE_RESET
+	select ARCH_HAVE_RNG
+	select ARCH_HAVE_TICKLESS
+	select ARCH_HAVE_MULTICPU
+	select LIBC_ARCH_MEMCPY
+	select LIBC_ARCH_MEMCHR
+	select LIBC_ARCH_MEMCMP
+	select LIBC_ARCH_MEMMOVE
+	select LIBC_ARCH_MEMSET
+	select LIBC_ARCH_STRCHR
+	select LIBC_ARCH_STRCMP
+	select LIBC_ARCH_STRCPY
+	select LIBC_ARCH_STRLCPY
+	select LIBC_ARCH_STRNCPY
+	select LIBC_ARCH_STRLEN
+	select LIBC_ARCH_STRNLEN
+	select ARCH_HAVE_RAMFUNCS
+	select ONESHOT_COUNT if ONESHOT
+	select ARCH_MINIMAL_VECTORTABLE
+	---help---
+		Espressif ESP32-P4 (RV32IMC).
 
 config ARCH_CHIP_C906
 	bool "THEAD C906"
@@ -606,6 +635,7 @@ config ARCH_CHIP
 	default "esp32c3"               if ARCH_CHIP_ESP32C3
 	default "esp32c6"               if ARCH_CHIP_ESP32C6
 	default "esp32h2"               if ARCH_CHIP_ESP32H2
+	default "esp32p4"               if ARCH_CHIP_ESP32P4
 	default "c906"                  if ARCH_CHIP_C906
 	default "mpfs"                  if ARCH_CHIP_MPFS
 	default "rv32m1"                if ARCH_CHIP_RV32M1
@@ -845,6 +875,9 @@ source "arch/risc-v/src/esp32c6/Kconfig"
 endif
 if ARCH_CHIP_ESP32H2
 source "arch/risc-v/src/esp32h2/Kconfig"
+endif
+if ARCH_CHIP_ESP32P4
+source "arch/risc-v/src/esp32p4/Kconfig"
 endif
 if ARCH_CHIP_C906
 source "arch/risc-v/src/c906/Kconfig"

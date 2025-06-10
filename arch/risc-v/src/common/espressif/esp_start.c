@@ -58,6 +58,10 @@
 #include "rom/cache.h"
 #include "soc/soc.h"
 #include "soc/soc_caps.h"
+#ifdef CONFIG_ARCH_CHIP_ESP32P4
+#  include "soc/hp_peri_pms_reg.h"
+#  include "soc/lp_peri_pms_reg.h"
+#endif
 #include "soc/rtc.h"
 
 #include "bootloader_init.h"
@@ -172,6 +176,7 @@ extern int ets_printf(const char *fmt, ...) printf_like(1, 2);
 #endif
 
 extern void cache_set_idrom_mmu_size(uint32_t irom_size, uint32_t drom_size);
+extern void ets_delay_us(uint32_t us);
 
 /****************************************************************************
  * Private Function Prototypes
@@ -576,6 +581,8 @@ void __esp_start(void)
 
   riscv_earlyserialinit();
 #endif
+
+  esp_chip_revision_check();
 
   showprogress("A");
 

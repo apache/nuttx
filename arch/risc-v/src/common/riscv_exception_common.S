@@ -87,6 +87,10 @@
 #  define EXCEPTION_SECTION .text
 #endif
 
+/* Valid exceptions causes range is from 0 to 63 */
+
+#define CAUSE_EXCEPTION   63
+
 /****************************************************************************
  * Public Symbols
  ****************************************************************************/
@@ -160,6 +164,11 @@ exception_common:
   /* Check whether it is an exception or interrupt */
 
   blt        s2, x0, handle_irq   /* If cause < 0 it is interrupt */
+
+  /* Adjust exception cause range from 0 to 63 */
+
+  li         s3, CAUSE_EXCEPTION
+  and        s2, s2, s3
 
   /* Is it a system call ? */
 
