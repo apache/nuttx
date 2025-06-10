@@ -22,7 +22,7 @@
 
 # The vector table
 
-set(SRCS arm_vectortab.S)
+target_sources(nuttx PRIVATE arm_vectortab.S)
 
 # Common assembly language files
 
