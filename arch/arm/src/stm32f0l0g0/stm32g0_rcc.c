@@ -125,6 +125,12 @@ static inline void rcc_enableahb(void)
   regval |= RCC_AHBENR_DMA1EN;
 #endif
 
+#ifdef CONFIG_STM32F0L0G0_DMA2
+  /* DMA 1 clock enable */
+
+  regval |= RCC_AHBENR_DMA2EN;
+#endif
+
 #ifdef CONFIG_STM32F0L0G0_MIF
   /* Memory interface clock enable */
 
