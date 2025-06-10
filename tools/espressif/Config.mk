@@ -22,7 +22,11 @@
 
 # Remove quotes from CONFIG_ESPRESSIF_CHIP_SERIES configuration
 
-CHIP_SERIES = $(patsubst "%",%,$(CONFIG_ESPRESSIF_CHIP_SERIES))
+ARCH_SRCDIR           := $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src
+ESP_HAL_3RDPARTY_REPO := esp-hal-3rdparty
+CHIP_SERIES           := $(patsubst "%",%,$(CONFIG_ESPRESSIF_CHIP_SERIES))
+
+# include $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)nuttx$(DELIM)$(CHIP_SERIES)$(DELIM)include$(DELIM)sdkconfig.h
 
 # MCUBoot requires a region in flash for the E-Fuse virtual mode.
 # To avoid erasing this region, flash a dummy empty file to the
@@ -78,7 +82,11 @@ ESPTOOL_MIN_VERSION := 4.8.0
 
 ifdef ESPTOOL_BINDIR
 	ifeq ($(CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT),y)
-		BL_OFFSET       := 0x0000
+		ifeq ($(CONFIG_ARCH_CHIP_ESP32P4),y)
+			BL_OFFSET := 0x2000
+		else
+			BL_OFFSET := 0x0000
+		endif
 		BOOTLOADER      := $(ESPTOOL_BINDIR)/mcuboot-$(CHIP_SERIES).bin
 		FLASH_BL        := $(BL_OFFSET) $(BOOTLOADER)
 		ESPTOOL_BINS    := $(FLASH_BL)
@@ -122,7 +130,11 @@ ifeq ($(CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT),y)
 		-H $(CONFIG_ESPRESSIF_APP_MCUBOOT_HEADER_SIZE) --pad-header \
 		-S $(CONFIG_ESPRESSIF_OTA_SLOT_SIZE)
 else ifeq ($(CONFIG_ESPRESSIF_SIMPLE_BOOT),y)
-	APP_OFFSET     := 0x0000
+	ifeq ($(CONFIG_ARCH_CHIP_ESP32P4),y)
+		APP_OFFSET := 0x2000
+	else
+		APP_OFFSET := 0x0000
+	endif
 	APP_IMAGE      := nuttx.bin
 	FLASH_APP      := $(APP_OFFSET) $(APP_IMAGE)
 	ESPTOOL_BINDIR := .

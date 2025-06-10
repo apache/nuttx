@@ -1,0 +1,182 @@
+/****************************************************************************
+ * boards/risc-v/esp32p4/common/scripts/esp32p4_flat_memory.ld
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
+/****************************************************************************
+ * ESP32-P4 Linker Script Memory Layout
+ *
+ * This file describes the memory layout (memory blocks) as virtual
+ * memory addresses.
+ *
+ * esp32p4_<legacy/mcuboot>_sections.ld contains output sections to link compiler
+ * output into these memory blocks.
+ *
+ ****************************************************************************/
+
+#include "common.ld"
+
+#if !CONFIG_ESP32P4_SELECTS_REV_LESS_V3
+#define SRAM_START       0x4FF00000 + CONFIG_CACHE_L2_CACHE_SIZE
+#define SRAM_END         0x4FFAEFC0  /* 2nd stage bootloader iram_loader_seg start address */
+#define SRAM_SIZE        SRAM_END - SRAM_START
+#else
+#define SRAM_LOW_START     0x4FF00000
+#define SRAM_LOW_END       0x4FF2CBD0  /* 2nd stage bootloader iram_loader_seg start address */
+#define SRAM_LOW_SIZE      SRAM_LOW_END - SRAM_LOW_START
+
+/* If the cache size is less than 512KB, then there is a region of RAM
+ * above the ROM-reserved region and below the start of the cache.
+ */
+
+#define SRAM_HIGH_START    0x4FF40000
+#define SRAM_HIGH_SIZE     0x80000 - CONFIG_CACHE_L2_CACHE_SIZE
+#define SRAM_HIGH_END      SRAM_HIGH_START + SRAM_HIGH_SIZE
+#endif
+
+#if CONFIG_P4_REV3_MSPI_CRASH_AFTER_POWER_UP_WORKAROUND
+#define MSPI_WORKAROUND_SIZE   CONFIG_P4_REV3_MSPI_WORKAROUND_SIZE
+#else
+#define MSPI_WORKAROUND_SIZE   0x0
+#endif
+
+#define IDROM_SEG_SIZE   (CONFIG_MMU_PAGE_SIZE << 10)
+
+#define LP_ROM_DRAM_START 0x5010fa80 // Value taken from ROM elf, includes LP ROM stack
+#define LP_RAM_END        0x50110000
+#define LP_ROM_DRAM_SIZE  (LP_RAM_END - LP_ROM_DRAM_START)
+
+
+MEMORY
+{
+  /**
+   *  All these values assume the flash cache is on, and have the blocks this uses subtracted from the length
+   *  of the various regions. The 'data access port' dram/drom regions map to the same iram/irom regions but
+   *  are connected to the data port of the CPU and eg allow byte-wise access.
+   */
+  /* TCM */
+  tcm_idram_seg (RX) :               org = 0x30100000, len = 0x2000
+
+  /* Flash mapped instruction data */
+  irom_seg (RX) :                    org = 0x40000000, len = IDROM_SEG_SIZE
+
+  /**
+   * (0x20 offset above is a convenience for the app binary image generation.
+   * Flash cache has 64KB pages. The .bin file which is flashed to the chip
+   * has a 0x18 byte file header, and each segment has a 0x08 byte segment
+   * header. Setting this offset makes it simple to meet the flash cache MMU's
+   * constraint that (paddr % 64KB == vaddr % 64KB).)
+   */
+
+  /**
+   * Shared data RAM, excluding memory reserved for ROM bss/data/stack.
+   * Enabling Bluetooth & Trace Memory features in menuconfig will decrease the amount of RAM available.
+   */
+#if CONFIG_ESP32P4_SELECTS_REV_LESS_V3
+  sram_low (RWX) :                 org = SRAM_LOW_START, len = SRAM_LOW_SIZE
+  sram_high (RW) :                 org = SRAM_HIGH_START, len = SRAM_HIGH_SIZE
+#else
+  sram_seg (RWX) :                 org = SRAM_START, len = SRAM_SIZE
+#endif
+
+#if CONFIG_SPIRAM_RODATA
+  /* PSRAM mapped constant data */
+  drom_seg (R) :                     org = 0x48000000, len = IDROM_SEG_SIZE
+#else
+  /* Flash mapped constant data */
+  drom_seg (R) :                     org = 0x40000000, len = IDROM_SEG_SIZE
+#endif // CONFIG_SPIRAM_RODATA
+
+  /* (See irom_seg for meaning of 0x20 offset in the above.) */
+
+  /* Used to store the deep sleep workaround code of P4 rev3.0. The reset vector will be set here before the chip enters sleep. */
+
+  rev3_mspi_workaround_seg(RWX) :        org = 0x50108000, len = MSPI_WORKAROUND_SIZE
+
+  /**
+   * lp ram memory (RWX). Persists over deep sleep. // TODO: IDF-5667
+   */
+#if CONFIG_ULP_COPROC_ENABLED
+  lp_ram_seg(RW)  :                 org = 0x50108000 + RESERVE_RTC_MEM + CONFIG_ULP_COPROC_RESERVE_MEM,
+                                    len = 0x8000 - CONFIG_ULP_COPROC_RESERVE_MEM - RESERVE_RTC_MEM - LP_ROM_DRAM_SIZE
+#else
+  lp_ram_seg(RW)  :                 org = 0x50108000 + RESERVE_RTC_MEM, len = 0x8000 - RESERVE_RTC_MEM
+#endif // CONFIG_ULP_COPROC_ENABLED
+
+  /* We reduced the size of lp_ram_seg by RESERVE_RTC_MEM value.
+     It reserves the amount of LP memory that we use for this memory segment.
+     This segment is intended for keeping:
+       - (lower addr) rtc timer data (s_rtc_timer_retain_mem, see esp_clk.c files).
+       - (higher addr) bootloader rtc data (s_bootloader_retain_mem, when a Kconfig option is on).
+     The aim of this is to keep data that will not be moved around and have a fixed address.
+     This segment is placed at the beginning of LP RAM, as the end of LP RAM is occupied by LP ROM stack/data
+  */
+  lp_reserved_seg(RW) :        org = 0x50108000, len = RESERVE_RTC_MEM
+
+  /* PSRAM seg */
+  extern_ram_seg(RWX) :        org = 0x48000000, len = IDROM_SEG_SIZE
+}
+
+_data_seg_org = ORIGIN(rtc_data_seg);
+
+/**
+ *  The lines below define location alias for .rtc.data section
+ *  P4 has no distinguished LP(RTC) fast and slow memory sections, instead, there is a unified LP_RAM section
+ *  Thus, the following region segments are not configurable like on other targets
+ */
+REGION_ALIAS("rtc_iram_seg", lp_ram_seg );
+REGION_ALIAS("rtc_data_seg", rtc_iram_seg );
+REGION_ALIAS("rtc_slow_seg", rtc_iram_seg );
+REGION_ALIAS("rtc_data_location", rtc_iram_seg );
+REGION_ALIAS("rtc_reserved_seg", lp_reserved_seg );
+
+#if CONFIG_APP_BUILD_USE_FLASH_SECTIONS
+  REGION_ALIAS("text_seg_low", irom_seg);
+#else
+  REGION_ALIAS("text_seg_low", sram_low);
+  REGION_ALIAS("text_seg_high", sram_high);
+#endif // CONFIG_APP_BUILD_USE_FLASH_SECTIONS
+
+#if CONFIG_APP_BUILD_USE_FLASH_SECTIONS
+  REGION_ALIAS("rodata_seg_low", drom_seg);
+#else
+  REGION_ALIAS("rodata_seg_low", sram_low);
+  REGION_ALIAS("rodata_seg_high", sram_high);
+#endif // CONFIG_APP_BUILD_USE_FLASH_SECTIONS
+
+#if CONFIG_SPIRAM_XIP_FROM_PSRAM
+  REGION_ALIAS("ext_ram_seg", drom_seg);
+#else
+  REGION_ALIAS("ext_ram_seg", extern_ram_seg);
+#endif //#if CONFIG_SPIRAM_XIP_FROM_PSRAM
+
+/**
+ *  If rodata default segment is placed in `drom_seg`, then flash's first rodata section must
+ *  also be first in the segment.
+ */
+#if CONFIG_APP_BUILD_USE_FLASH_SECTIONS
+  ASSERT(_flash_rodata_dummy_start == ORIGIN(rodata_seg_low),
+         ".flash_rodata_dummy section must be placed at the beginning of the rodata segment.")
+#endif
+
+#if CONFIG_ESP_SYSTEM_USE_EH_FRAME
+    ASSERT ((__eh_frame_end > __eh_frame), "Error: eh_frame size is null!");
+    ASSERT ((__eh_frame_hdr_end > __eh_frame_hdr), "Error: eh_frame_hdr size is null!");
+#endif

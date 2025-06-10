@@ -51,7 +51,11 @@
 #  define SYSTIMER_TRIGGER_TYPE ESP_IRQ_TRIGGER_EDGE
 #endif /* SOC_SYSTIMER_INT_LEVEL */
 
-#define CHIP_SYSTIMER_SOURCE SYSTIMER_TARGET0_EDGE_INTR_SOURCE
+#if defined(CONFIG_ARCH_CHIP_ESP32P4)
+#  define CHIP_SYSTIMER_SOURCE SYSTIMER_TARGET0_INTR_SOURCE
+#else
+#  define CHIP_SYSTIMER_SOURCE SYSTIMER_TARGET0_EDGE_INTR_SOURCE
+#endif
 
 /****************************************************************************
  * Private Data
