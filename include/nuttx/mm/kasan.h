@@ -48,7 +48,7 @@
 #  define kasan_stop()
 #  define kasan_debugpoint(t,a,s) 0
 #  define kasan_init_early()
-#  define kasan_bypass(state) false
+#  define kasan_bypass(state) ((void)state, state)
 #else
 
 #  define kasan_init_early() kasan_stop()

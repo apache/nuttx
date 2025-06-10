@@ -75,6 +75,5 @@ size_t mm_malloc_size(FAR struct mm_heap_s *heap, FAR void *mem)
   size = MM_SIZEOF_NODE(node) - MM_ALLOCNODE_OVERHEAD;
 
   kasan_bypass(flag);
-  UNUSED(flag);
   return size;
 }
