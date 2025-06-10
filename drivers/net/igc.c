@@ -48,12 +48,12 @@
  * Pre-processor Definitions
  *****************************************************************************/
 
-#if CONFIG_NET_IGC_TXDESC % 2 != 0
-#  error CONFIG_NET_IGC_TXDESC must be multiple of 2
+#if CONFIG_NET_IGC_TXDESC % 8 != 0
+#  error CONFIG_NET_IGC_TXDESC must be multiple of 8
 #endif
 
-#if CONFIG_NET_IGC_RXDESC % 2 != 0
-#  error CONFIG_NET_IGC_RXDESC must be multiple of 2
+#if CONFIG_NET_IGC_RXDESC % 8 != 0
+#  error CONFIG_NET_IGC_RXDESC must be multiple of 8
 #endif
 
 /* Packet buffer size */
