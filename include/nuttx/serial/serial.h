@@ -123,14 +123,25 @@
 /* This structure defines one serial I/O buffer.
  * The serial infrastructure will initialize the 'sem' field but all other
  * fields must be initialized by the caller of uart_register().
+ *
+ * Maximum buffer size is reduced to 8 bits on architectures where 16bit
+ * load takes two instructions and is therefore not atomic. This prevents
+ * corrupted read if the value is changed in an interrupt handler while
+ * being loaded in non-interrupt code.
  */
 
 struct uart_buffer_s
 {
   mutex_t          lock;   /* Used to control exclusive access to the buffer */
+#ifndef CONFIG_ARCH_LD_16BIT_NOT_ATOMIC
   volatile int16_t head;   /* Index to the head [IN] index in the buffer */
   volatile int16_t tail;   /* Index to the tail [OUT] index in the buffer */
   int16_t          size;   /* The allocated size of the buffer */
+#else
+  volatile uint8_t head;   /* Index to the head [IN] index in the buffer */
+  volatile uint8_t tail;   /* Index to the tail [OUT] index in the buffer */
+  uint8_t          size;   /* The allocated size of the buffer */
+#endif
   FAR char        *buffer; /* Pointer to the allocated buffer memory */
 };
 

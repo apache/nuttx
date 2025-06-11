@@ -513,7 +513,7 @@ static int uart_tcdrain(FAR uart_dev_t *dev,
 #endif
     }
 
-  /* Get exclusive access to the to dev->tmit.  We cannot permit new data to
+  /* Get exclusive access to the to dev->xmit.  We cannot permit new data to
    * be written while we are trying to flush the old data.
    *
    * A signal received while waiting for access to the xmit.head will abort
@@ -901,12 +901,21 @@ static ssize_t uart_readv(FAR struct file *filep, FAR struct uio *uio)
 #ifdef CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS
   unsigned int nbuffered;
   unsigned int watermark;
+#  ifndef CONFIG_ARCH_LD_16BIT_NOT_ATOMIC
+  int16_t head;
+#  else
+  uint8_t head;
+#  endif
 #endif
   irqstate_t flags;
   ssize_t recvd = 0;
   ssize_t buflen;
   bool echoed = false;
+#ifndef CONFIG_ARCH_LD_16BIT_NOT_ATOMIC
   int16_t tail;
+#else
+  uint8_t tail;
+#endif
   char ch;
   int ret;
 
@@ -953,9 +962,13 @@ static ssize_t uart_readv(FAR struct file *filep, FAR struct uio *uio)
        * index is only modified in this function.  Therefore, no
        * special handshaking is required here.
        *
-       * The head and tail pointers are 16-bit values.  The only time that
-       * the following could be unsafe is if the CPU made two non-atomic
-       * 8-bit accesses to obtain the 16-bit head index.
+       * The head and tail pointers values are sized based
+       * on the architecture. If the architecture reads 16-bit values
+       * atomically by nature, they are 16-bit values. On architectures
+       * where 16-bit access is split into two non-atomic 8-bit accesses,
+       * the pointers are 8-bit.
+       *
+       * The following code is therefore safe even with interrupts enabled.
        */
 
       tail = rxbuf->tail;
@@ -1337,16 +1350,23 @@ static ssize_t uart_readv(FAR struct file *filep, FAR struct uio *uio)
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
 #ifdef CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS
-  /* How many bytes are now buffered */
+  /* How many bytes are now buffered. Head needs to be copied
+   * to a non-volatile variable to prevent TOCTOU error in case
+   * the interrupt handler changes it between comparison and assignment.
+   * (Copy of tail is not strictly needed but saves us few instructions.)
+   */
 
   rxbuf = &dev->recv;
-  if (rxbuf->head >= rxbuf->tail)
+  head = rxbuf->head;
+  tail = rxbuf->tail;
+
+  if (head >= tail)
     {
-      nbuffered = rxbuf->head - rxbuf->tail;
+      nbuffered = head - tail;
     }
   else
     {
-      nbuffered = rxbuf->size - rxbuf->tail + rxbuf->head;
+      nbuffered = rxbuf->size - tail + head;
     }
 
   /* Is the level now below the watermark level that we need to report? */
