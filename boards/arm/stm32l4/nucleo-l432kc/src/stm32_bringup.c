@@ -226,7 +226,7 @@ int stm32_bringup(void)
 
 #ifdef CONFIG_CAN
   /* Initialize CAN and register the CAN device. */
-  
+
   ret = stm32l4_can_setup();
   if (ret < 0)
     {
