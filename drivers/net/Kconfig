@@ -22,51 +22,12 @@ if NETDEVICES
 
 comment "Upper-half Network Device Driver Options"
 
-choice
-	prompt "Netdev poll worker"
-
-config NETDEV_LPWORK_THREAD
-	bool "Use low-priority worker thread to do netdev poll"
-	depends on SCHED_LPWORK
-
-config NETDEV_HPWORK_THREAD
-	bool "Use high-priority worker thread to do netdev poll"
-	depends on SCHED_HPWORK
-
-config NETDEV_WORK_THREAD
-	bool "Use a dedicated work thread to do netdev poll"
-
-endchoice # Netdev poll worker
-
-config NETDEV_WORK_THREAD_POLLING_PERIOD
-	int "Polling period, the units are microseconds"
-	default 0
-	depends on NETDEV_WORK_THREAD
-	---help---
-		Disable the txdone and rxready interrupt and use polling
-		period to receive packets when the value is not 0.
-
-config NETDEV_WORK_THREAD_PRIORITY
-	int "Priority of work poll thread"
-	default 100
-	depends on NETDEV_WORK_THREAD
-	---help---
-		The priority of work poll thread in netdev.
-
 config NETDEV_WIRELESS_HANDLER
 	bool "Support wireless handler in upper-half driver"
 	default y
 	depends on NETDEV_WIRELESS_IOCTL
 	---help---
 		Enable the wireless handler support in upper-half driver.
-
-config NETDEV_RSS
-	bool "Using hardware RSS (Receive Side Scaling) with network card"
-	default n
-	depends on SMP && NETDEV_IOCTL && NETDEV_WORK_THREAD
-	---help---
-		When the hardware supports RSS/aRFS function, provide the
-		hash value and CPU ID to the hardware driver.
 
 menuconfig MDIO_BUS
 	bool "Upper-half MDIO Bus Driver Options"

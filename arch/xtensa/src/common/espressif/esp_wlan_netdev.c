@@ -1221,6 +1221,8 @@ static int esp_wlan_initialize(uint32_t mode)
 
   priv->dev.quota[NETPKT_RX] = RX_BUF_COUNT;
   priv->dev.quota[NETPKT_TX] = TX_BUF_COUNT;
+  priv->dev.rxtype           = NETDEV_RX_THREAD;
+  priv->dev.priority         = 100;
 
   IOB_QINIT(&priv->netdev_rx_queue);
 
