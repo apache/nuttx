@@ -80,6 +80,7 @@ struct audio_upperhalf_s
   uint8_t                      periods; /* Ap buffers number */
   FAR struct ap_buffer_s       **apbs;  /* Ap buffers list */
   FAR struct audio_lowerhalf_s *dev;    /* lower-half state */
+  struct hw_ptr_s              *hwptr;  /* Hardware pointer */
   struct file                  *usermq; /* User mode app's message queue */
 };
 
@@ -158,7 +159,20 @@ static int audio_open(FAR struct file *filep)
   ret = nxmutex_lock(&upper->lock);
   if (ret < 0)
     {
-      goto errout;
+      return ret;
+    }
+
+  /* First open, alloc hwptr memory */
+
+  if (upper->crefs == 0)
+    {
+      upper->hwptr = kumm_zalloc(sizeof(struct hw_ptr_s));
+      if (!upper->hwptr)
+        {
+          auderr("ERROR: Allocation hwptr failed\n");
+          ret = -ENOMEM;
+          goto errout;
+        }
     }
 
   /* Increment the count of references to the device.  If this the first
@@ -172,7 +186,7 @@ static int audio_open(FAR struct file *filep)
       /* More than 255 opens; uint8_t overflows to zero */
 
       ret = -EMFILE;
-      goto errout_with_lock;
+      goto errout;
     }
 
   /* Save the new open count on success */
@@ -180,10 +194,8 @@ static int audio_open(FAR struct file *filep)
   upper->crefs = tmp;
   ret = OK;
 
-errout_with_lock:
-  nxmutex_unlock(&upper->lock);
-
 errout:
+  nxmutex_unlock(&upper->lock);
   return ret;
 }
 
@@ -234,6 +246,8 @@ static int audio_close(FAR struct file *filep)
 
       lower->ops->shutdown(lower);
       upper->usermq = NULL;
+      kumm_free(upper->hwptr);
+      upper->hwptr = NULL;
       upper->state = AUDIO_STATE_OPEN;
     }
 
@@ -610,6 +624,10 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
           bufdesc = (FAR struct audio_buf_desc_s *) arg;
           ret = lower->ops->enqueuebuffer(lower, bufdesc->u.buffer);
+          if (ret == OK)
+            {
+              upper->hwptr->head++;
+            }
         }
         break;
 
@@ -868,6 +886,10 @@ static inline void audio_dequeuebuffer(FAR struct audio_upperhalf_s *upper,
   struct audio_msg_s    msg;
 
   audinfo("Entry\n");
+
+  nxmutex_lock(&upper->lock);
+  upper->hwptr->tail++;
+  nxmutex_unlock(&upper->lock);
 
   /* Send a dequeue message to the user if a message queue is registered */
 

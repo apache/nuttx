@@ -401,6 +401,14 @@ typedef uint32_t apb_samp_t;
 typedef uint16_t apb_samp_t;
 #endif
 
+/* This structure describes the Hardware pointer used in Alsa Dmix */
+
+struct hw_ptr_s
+{
+  volatile unsigned long head;
+  volatile unsigned long tail;
+};
+
 /* This structure is used to describe the audio device capabilities */
 
 struct audio_caps_s
