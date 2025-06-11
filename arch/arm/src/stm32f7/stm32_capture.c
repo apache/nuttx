@@ -41,6 +41,7 @@
 #include "arm_internal.h"
 #include "stm32_gpio.h"
 #include "stm32_capture.h"
+#include "stm32_rcc.h"
 
 /****************************************************************************
  * Private Types
