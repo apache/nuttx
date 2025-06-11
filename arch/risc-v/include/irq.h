@@ -130,6 +130,14 @@
 
 #define RISCV_IRQ_MASK            (~RISCV_IRQ_BIT)
 
+#ifndef RISCV_MAX_INTTHRESH
+/* The maximum interrupt threshold value. This is the maximum value that
+ * can be set in the MINTTHRESH or SINTTHRESH CSR registers to mask all
+ * interrupts.
+ */
+#  define RISCV_MAX_INTTHRESH     (0xff)
+#endif
+
 /* Configuration ************************************************************/
 
 /* Processor PC */
@@ -197,14 +205,47 @@
 #define REG_X30_NDX         30
 #define REG_X31_NDX         31
 
-/* Interrupt Context register */
+/* Interrupt Context register
+ * This register stores interrupt-related state that needs to be preserved
+ * across context switches and interrupt handling.
+ *
+ * If ARCH_RV_HAVE_CLIC is enabled:
+ *   - Both machine mode and supervisor mode use CLIC to mask interrupts
+ *   - Contains the value of CSR_MINTTHRESH (Machine Interrupt Threshold)
+ *     in machine mode or CSR_SINTTHRESH (Supervisor Interrupt Threshold)
+ *     in supervisor mode
+ *   - CLIC (Core Local Interrupt Controller) extension allows setting a
+ *     threshold level below which interrupts are masked
+ *   - This threshold value must be saved/restored to maintain proper
+ *     interrupt priority handling across context switches
+ *
+ * Otherwise (standard RISC-V interrupt handling):
+ *   - Contains the value of CSR_MSTATUS (Machine Status Register) in
+ *     machine mode or CSR_SSTATUS (Supervisor Status Register) in
+ *     supervisor mode
+ *   - Preserves critical status bits including:
+ *     * MIE/SIE (Machine/Supervisor Interrupt Enable)
+ *     * MPIE/SPIE (Machine/Supervisor Previous Interrupt Enable)
+ *     * MPP/SPP (Machine/Supervisor Previous Privilege)
+ *     * FS (Floating Point Status) - floating-point unit state
+ *   - Essential for proper interrupt state restoration when returning
+ *     from exceptions or switching between tasks
+ *
+ * This context preservation ensures that interrupt handling behavior
+ * remains consistent across task switches and nested interrupt scenarios.
+ */
 
-#define REG_INT_CTX_NDX     32
+#ifdef CONFIG_ARCH_RV_HAVE_CLIC
+#  define REG_INT_THRESH_NDX  32
+#  define REG_INT_CTX_NDX     33
+#else
+#  define REG_INT_CTX_NDX     32
+#endif
 
 #ifdef CONFIG_ARCH_RISCV_INTXCPT_EXTREGS
-#  define INT_XCPT_REGS     (33 + CONFIG_ARCH_RISCV_INTXCPT_EXTREGS)
+#  define INT_XCPT_REGS     (REG_INT_CTX_NDX + 1 + CONFIG_ARCH_RISCV_INTXCPT_EXTREGS)
 #else
-#  define INT_XCPT_REGS     33
+#  define INT_XCPT_REGS     (REG_INT_CTX_NDX + 1)
 #endif
 
 #ifdef CONFIG_ARCH_RV32
@@ -346,6 +387,9 @@
 #  define REG_X29           (INT_REG_SIZE*REG_X29_NDX)
 #  define REG_X30           (INT_REG_SIZE*REG_X30_NDX)
 #  define REG_X31           (INT_REG_SIZE*REG_X31_NDX)
+#  ifdef CONFIG_ARCH_RV_HAVE_CLIC
+#    define REG_INT_THRESH  (INT_REG_SIZE*REG_INT_THRESH_NDX)
+#  endif
 #  define REG_INT_CTX       (INT_REG_SIZE*REG_INT_CTX_NDX)
 
 #ifdef CONFIG_ARCH_FPU
@@ -425,6 +469,9 @@
 #  define REG_X29           REG_X29_NDX
 #  define REG_X30           REG_X30_NDX
 #  define REG_X31           REG_X31_NDX
+#  ifdef CONFIG_ARCH_RV_HAVE_CLIC
+#    define REG_INT_THRESH  REG_INT_THRESH_NDX
+#  endif
 #  define REG_INT_CTX       REG_INT_CTX_NDX
 
 #ifdef CONFIG_ARCH_FPU
@@ -755,6 +802,42 @@ int up_this_cpu(void);
  * Inline Functions
  ****************************************************************************/
 
+#ifdef CONFIG_ARCH_RV_HAVE_CLIC
+
+/****************************************************************************
+ * Name: up_irq_save
+ *
+ * Description:
+ *   Disable interrupts by setting interrupt threshold to maximum and return
+ *   the previous threshold value
+ *
+ ****************************************************************************/
+
+noinstrument_function static inline_function irqstate_t up_irq_save(void)
+{
+  /* Read current interrupt threshold and set to maximum to mask all */
+
+  return SWAP_CSR(CSR_INTTHRESH, RISCV_MAX_INTTHRESH);
+}
+
+/****************************************************************************
+ * Name: up_irq_restore
+ *
+ * Description:
+ *   Restore the value of the interrupt threshold register
+ *
+ ****************************************************************************/
+
+noinstrument_function static inline_function
+void up_irq_restore(irqstate_t flags)
+{
+  /* Restore the interrupt threshold value */
+
+  WRITE_CSR(CSR_INTTHRESH, flags);
+}
+
+#else
+
 /****************************************************************************
  * Name: up_irq_save
  *
@@ -803,6 +886,8 @@ void up_irq_restore(irqstate_t flags)
       : "memory"
     );
 }
+
+#endif /* CONFIG_ARCH_RV_HAVE_CLIC */
 
 /****************************************************************************
  * Name: up_set_interrupt_context
