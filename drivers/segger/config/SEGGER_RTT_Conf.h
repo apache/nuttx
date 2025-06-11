@@ -38,7 +38,7 @@
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
-extern spinlock_t g_segger_lock;
+extern struct rspinlock_s g_segger_lock;
 #endif
 
 /****************************************************************************
@@ -89,11 +89,11 @@ extern spinlock_t g_segger_lock;
 
 /* Lock RTT (nestable)   (i.e. disable interrupts) */
 
-#define SEGGER_RTT_LOCK()               irqstate_t __flags = spin_lock_irqsave_notrace(&g_segger_lock)
+#define SEGGER_RTT_LOCK()               irqstate_t __flags = rspin_lock_irqsave_nopreempt(&g_segger_lock)
 
 /* Unlock RTT (nestable) (i.e. enable previous interrupt lock state) */
 
-#define SEGGER_RTT_UNLOCK()             spin_unlock_irqrestore_notrace(&g_segger_lock, __flags)
+#define SEGGER_RTT_UNLOCK()             rspin_unlock_irqrestore_nopreempt(&g_segger_lock, __flags)
 
 /* Disable RTT SEGGER_RTT_WriteSkipNoLock */
 

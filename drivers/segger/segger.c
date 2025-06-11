@@ -30,7 +30,7 @@
  * Public Data
  ****************************************************************************/
 
-spinlock_t g_segger_lock = SP_UNLOCKED;
+struct rspinlock_s g_segger_lock = RSPINLOCK_INITIALIZER;
 
 /****************************************************************************
  * Public Functions
