@@ -195,125 +195,127 @@ extern "C"
 
 /* Default C implementation for umul64_const()
  *
- * Prototype: uint64_t umul64_const(uint64_t retval, uint64_t m,
- *                                  uint64_t n, bool bias);
- * Semantic:  retval = ((bias ? m : 0) + m * n) >> 64
+ * Prototype: uint64_t umul64_const(uint64_t m, uint64_t n, int bias);
+ * Semantic:  return ((bias ? m : 0) + m * n) >> 64
  *
  * The product is a 128-bit value, scaled down to 64 bits.
  * Assuming constant propagation to optimize away unused conditional code.
  * Architectures may provide their own optimized assembly implementation.
  */
 
-#  ifdef up_umul64_const
-#    define umul64_const(res, m, n, bias) \
-      (res) = up_umul64_const(m, n, bias)
-#  else
-#    define umul64_const(res, m, n, bias) \
-      do \
-        { \
-          uint32_t __m_lo = (m) & 0xffffffff; \
-          uint32_t __m_hi = (m) >> 32; \
-          uint32_t __n_lo = (n) & 0xffffffff; \
-          uint32_t __n_hi = (n) >> 32; \
-          uint32_t __res_lo; \
-          uint32_t __res_hi; \
-          uint32_t __tmp; \
-          \
-          if (!(bias)) \
-            { \
-              (res) = ((uint64_t)__m_lo * __n_lo) >> 32; \
-            } \
-          else if (!((m) & ((1ULL << 63) | (1ULL << 31)))) \
-            { \
-              (res) = ((m) + (uint64_t)__m_lo * __n_lo) >> 32; \
-            } \
-          else \
-            { \
-              (res) = (m) + (uint64_t)__m_lo * __n_lo; \
-              __res_lo = (res) >> 32; \
-              __res_hi = (__res_lo < __m_hi); \
-              (res) = __res_lo | ((uint64_t)__res_hi << 32); \
-            } \
-          \
-          if (!((m) & ((1ULL << 63) | (1ULL << 31)))) \
-            { \
-              (res) += (uint64_t)__m_lo * __n_hi; \
-              (res) += (uint64_t)__m_hi * __n_lo; \
-              (res) >>= 32; \
-            } \
-          else \
-            { \
-              (res) += (uint64_t)__m_lo * __n_hi; \
-              __tmp = (res) >> 32; \
-              (res) += (uint64_t)__m_hi * __n_lo; \
-              __res_lo = (res) >> 32; \
-              __res_hi = (__res_lo < __tmp); \
-              (res) = __res_lo | ((uint64_t)__res_hi << 32); \
-            } \
-          \
-          (res) += (uint64_t)__m_hi * __n_hi; \
-        } \
-      while (0)
-#  endif
+/* Due to compilation issues, use inline functions instead of macros. */
 
-#  define div64_const32(n, b) \
-    do \
-      { \
-        uint64_t ___res; \
-        uint64_t ___x; \
-        uint64_t ___t; \
-        uint64_t ___m; \
-        uint64_t ___n = (n); \
-        uint32_t ___p; \
-        uint32_t ___bias; \
-        uint32_t ___b = (b); \
-        ___p = 1 << LOG2_FLOOR(___b); \
-        ___m = (~0ULL / ___b) * ___p; \
-        ___m += (((~0ULL % ___b + 1) * ___p) + ___b - 1) / ___b; \
-        ___x = ~0ULL / ___b * ___b - 1; \
-        ___res = ((___m & 0xffffffff) * (___x & 0xffffffff)) >> 32; \
-        ___t = ___res += (___m & 0xffffffff) * (___x >> 32); \
-        ___res += (___x & 0xffffffff) * (___m >> 32); \
-        ___t = (___res < ___t) ? (1ULL << 32) : 0; \
-        ___res = (___res >> 32) + ___t; \
-        ___res += (___m >> 32) * (___x >> 32); \
-        ___res /= ___p; \
-        if (~0ULL % (___b / (___b & -___b)) == 0) \
-          { \
-            ___n /= (___b & -___b); \
-            ___m = ~0ULL / (___b / (___b & -___b)); \
-            ___p = 1; \
-            ___bias = 1; \
-          } \
-        else if (___res != ___x / ___b) \
-          { \
-            ___bias = 1; \
-            ___m = (~0ULL / ___b) * ___p; \
-            ___m += ((~0ULL % ___b + 1) * ___p) / ___b; \
-          } \
-        else \
-          { \
-            uint32_t ___bits = -(___m & -___m); \
-            ___bits |= ___m >> 32; \
-            ___bits = (~___bits) << 1; \
-            if (!___bits) \
-              { \
-                ___p /= (___m & -___m); \
-                ___m /= (___m & -___m); \
-              } \
-            else \
-              { \
-                ___p >>= LOG2_FLOOR(___bits); \
-                ___m >>= LOG2_FLOOR(___bits); \
-              } \
-            ___bias = 0; \
-          } \
-        umul64_const(___res, ___m, ___n, ___bias); \
-        \
-        ___res /= ___p; \
-        (n) = ___res; \
-      } \
-    while (0)
+#ifdef up_umul64_const
+#  define umul64_const(m, n, bias) up_umul64_const(m, n, bias)
+#else
+static inline_function uint64_t umul64_const(uint64_t m, uint64_t n,
+                                             int bias)
+{
+  uint32_t m_lo = (m) & 0xffffffff;
+  uint32_t m_hi = (m) >> 32;
+  uint32_t n_lo = (n) & 0xffffffff;
+  uint32_t n_hi = (n) >> 32;
+  uint32_t res_lo;
+  uint32_t res_hi;
+  uint32_t tmp;
+  uint64_t res;
+
+  if (!(bias))
+    {
+      res = ((uint64_t)m_lo * n_lo) >> 32;
+    }
+  else if (!((m) & ((1ULL << 63) | (1ULL << 31))))
+    {
+      res = ((m) + (uint64_t)m_lo * n_lo) >> 32;
+    }
+  else
+    {
+      res = (m) + (uint64_t)m_lo * n_lo;
+      res_lo = res >> 32;
+      res_hi = (res_lo < m_hi);
+      res = res_lo | ((uint64_t)res_hi << 32);
+    }
+
+  if (!((m) & ((1ULL << 63) | (1ULL << 31))))
+    {
+      res += (uint64_t)m_lo * n_hi;
+      res += (uint64_t)m_hi * n_lo;
+      res >>= 32;
+    }
+  else
+    {
+      res += (uint64_t)m_lo * n_hi;
+      tmp = res >> 32;
+      res += (uint64_t)m_hi * n_lo;
+      res_lo = res >> 32;
+      res_hi = (res_lo < tmp);
+      res = res_lo | ((uint64_t)res_hi << 32);
+    }
+
+  res += (uint64_t)m_hi * n_hi;
+
+  return res;
+}
+#endif
+
+static inline_function uint64_t div64_const32(uint64_t n, uint32_t b)
+{
+  uint64_t res;
+  uint64_t x;
+  uint64_t t;
+  uint64_t m;
+  uint32_t p;
+  uint32_t bias;
+
+  p = 1 << LOG2_FLOOR(b);
+  m = (~0ULL / b) * p;
+  m += (((~0ULL % b + 1) * p) + b - 1) / b;
+  x = ~0ULL / b * b - 1;
+  res = ((m & 0xffffffff) * (x & 0xffffffff)) >> 32;
+  t = res += (m & 0xffffffff) * (x >> 32);
+  res += (x & 0xffffffff) * (m >> 32);
+  t = (res < t) ? (1ULL << 32) : 0;
+  res = (res >> 32) + t;
+  res += (m >> 32) * (x >> 32);
+  res /= p;
+
+  if (~0ULL % (b / (b & -b)) == 0)
+    {
+      n /= (b & -b);
+      m = ~0ULL / (b / (b & -b));
+      p = 1;
+      bias = 1;
+    }
+  else if (res != x / b)
+    {
+      bias = 1;
+      m = (~0ULL / b) * p;
+      m += ((~0ULL % b + 1) * p) / b;
+    }
+  else
+    {
+      uint32_t bits = -(m & -m);
+      bits |= m >> 32;
+      bits = (~bits) << 1;
+      if (!bits)
+        {
+          p /= (m & -m);
+          m /= (m & -m);
+        }
+      else
+        {
+          p >>= LOG2_FLOOR(bits);
+          m >>= LOG2_FLOOR(bits);
+        }
+
+      bias = 0;
+    }
+
+  res = umul64_const(m, n, bias);
+  res /= p;
+
+  return res;
+}
 
 static inline_function uint64_t div64_const(uint64_t n, uint32_t base)
 {
@@ -323,7 +325,7 @@ static inline_function uint64_t div64_const(uint64_t n, uint32_t base)
     }
   else if (UINTPTR_MAX == UINT32_MAX)
     {
-      div64_const32(n, base);
+      n = div64_const32(n, base);
     }
   else
     {
