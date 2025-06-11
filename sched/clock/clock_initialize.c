@@ -40,6 +40,8 @@
 #include <nuttx/clock.h>
 #include <nuttx/trace.h>
 
+#include <nuttx/spinlock.h>
+
 #include "clock/clock.h"
 #ifdef CONFIG_CLOCK_TIMEKEEPING
 #  include "clock/clock_timekeeping.h"

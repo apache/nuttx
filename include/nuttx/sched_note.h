@@ -36,7 +36,7 @@
 
 #include <nuttx/macro.h>
 #include <nuttx/sched.h>
-#include <nuttx/spinlock.h>
+#include <nuttx/spinlock_type.h>
 
 /* For system call numbers definition */
 
