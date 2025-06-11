@@ -37,6 +37,48 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: up_addrenv_find_page
+ *
+ * Description:
+ *   Find physical page mapped to user virtual address from the address
+ *   environment page directory.
+ *
+ * Input Parameters:
+ *   addrenv - The user address environment.
+ *   vaddr   - The user virtual address
+ *
+ * Returned Value:
+ *   Page physical address on success; NULL on failure.
+ *
+ ****************************************************************************/
+
+uintptr_t up_addrenv_find_page(arch_addrenv_t *addrenv, uintptr_t vaddr)
+{
+  /* Implement it later */
+
+  return 0;
+}
+
+/****************************************************************************
+ * Name: up_addrenv_user_vaddr
+ *
+ * Description:
+ *   Check if a virtual address is in user virtual address space.
+ *
+ * Input Parameters:
+ *   vaddr - The virtual address.
+ *
+ * Returned Value:
+ *   True if it is; false if it's not
+ *
+ ****************************************************************************/
+
+bool up_addrenv_user_vaddr(uintptr_t vaddr)
+{
+  return arm_uservaddr(vaddr);
+}
+
+/****************************************************************************
  * Name: up_addrenv_page_vaddr
  *
  * Description:
