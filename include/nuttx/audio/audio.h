@@ -118,7 +118,7 @@
 #define AUDIOIOC_FLUSH              _AUDIOIOC(20)
 #define AUDIOIOC_GETPOSITION        _AUDIOIOC(21)
 #define AUDIOIOC_GETAUDIOINFO       _AUDIOIOC(22)
-#define AUDIOIOC_GETSTATE           _AUDIOIOC(23)
+#define AUDIOIOC_GETSTATUS          _AUDIOIOC(23)
 
 /* Audio Device Types *******************************************************/
 
@@ -397,6 +397,15 @@ typedef uint32_t apb_samp_t;
 #else
 typedef uint16_t apb_samp_t;
 #endif
+
+/* This structure describes the lower driver status */
+
+struct audio_status_s
+{
+  volatile int state;
+  volatile unsigned long head;
+  volatile unsigned long tail;
+};
 
 /* This structure is used to describe the audio device capabilities */
 
