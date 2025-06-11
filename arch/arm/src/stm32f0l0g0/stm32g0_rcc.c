@@ -173,33 +173,25 @@ static inline void rcc_enableapb1(void)
 #ifdef CONFIG_STM32F0L0G0_TIM2
   /* Timer 2 clock enable */
 
-#ifdef CONFIG_STM32F0L0G0_FORCEPOWER
   regval |= RCC_APB1ENR_TIM2EN;
-#endif
 #endif
 
 #ifdef CONFIG_STM32F0L0G0_TIM3
   /* Timer 3 clock enable */
 
-#ifdef CONFIG_STM32F0L0G0_FORCEPOWER
   regval |= RCC_APB1ENR_TIM3EN;
-#endif
 #endif
 
 #ifdef CONFIG_STM32F0L0G0_TIM6
   /* Timer 6 clock enable */
 
-#ifdef CONFIG_STM32F0L0G0_FORCEPOWER
   regval |= RCC_APB1ENR_TIM6EN;
-#endif
 #endif
 
 #ifdef CONFIG_STM32F0L0G0_TIM7
   /* Timer 7 clock enable */
 
-#ifdef CONFIG_STM32F0L0G0_FORCEPOWER
   regval |= RCC_APB1ENR_TIM7EN;
-#endif
 #endif
 
 #ifdef CONFIG_STM32F0L0G0_SPI2
@@ -211,50 +203,39 @@ static inline void rcc_enableapb1(void)
 #ifdef CONFIG_STM32F0L0G0_USART2
   /* USART 2 clock enable */
 
-#ifdef CONFIG_STM32F0L0G0_FORCEPOWER
   regval |= RCC_APB1ENR_USART2EN;
-#endif
 #endif
 
 #ifdef CONFIG_STM32F0L0G0_USART3
   /* USART 3 clock enable */
 
-#ifdef CONFIG_STM32F0L0G0_FORCEPOWER
   regval |= RCC_APB1ENR_USART3EN;
-#endif
 #endif
 
 #ifdef CONFIG_STM32F0L0G0_USART4
   /* USART 4 clock enable */
 
-#ifdef CONFIG_STM32F0L0G0_FORCEPOWER
   regval |= RCC_APB1ENR_USART4EN;
-#endif
 #endif
 
 #ifdef CONFIG_STM32F0L0G0_LPUSART1
   /* USART 5 clock enable */
 
-#ifdef CONFIG_STM32F0L0G0_FORCEPOWER
   regval |= RCC_APB1ENR_LPUSART1EN;
-#endif
 #endif
 
 #ifdef CONFIG_STM32F0L0G0_I2C1
   /* I2C 1 clock enable */
 
-#ifdef CONFIG_STM32F0L0G0_FORCEPOWER
   regval |= RCC_APB1ENR_I2C1EN;
-#endif
 #endif
 
 #ifdef CONFIG_STM32F0L0G0_I2C2
   /* I2C 2 clock enable */
 
-#ifdef CONFIG_STM32F0L0G0_FORCEPOWER
   regval |= RCC_APB1ENR_I2C2EN;
 #endif
-#endif
+
 #ifdef CONFIG_STM32F0L0G0_PWR
   /* Power interface clock enable */
 
@@ -309,9 +290,7 @@ static inline void rcc_enableapb2(void)
 #ifdef CONFIG_STM32F0L0G0_TIM1
   /* TIM1 Timer clock enable */
 
-#ifdef CONFIG_STM32F0L0G0_FORCEPOWER
   regval |= RCC_APB2ENR_TIM1EN;
-#endif
 #endif
 
 #ifdef CONFIG_STM32F0L0G0_SPI1
@@ -323,41 +302,31 @@ static inline void rcc_enableapb2(void)
 #ifdef CONFIG_STM32F0L0G0_USART1
   /* USART1 clock enable */
 
-#ifdef CONFIG_STM32F0L0G0_FORCEPOWER
   regval |= RCC_APB2ENR_USART1EN;
-#endif
 #endif
 
 #ifdef CONFIG_STM32F0L0G0_TIM14
   /* TIM14 Timer clock enable */
 
-#ifdef CONFIG_STM32F0L0G0_FORCEPOWER
   regval |= RCC_APB2ENR_TIM14EN;
-#endif
 #endif
 
 #ifdef CONFIG_STM32F0L0G0_TIM15
   /* TIM5 Timer clock enable */
 
-#ifdef CONFIG_STM32F0L0G0_FORCEPOWER
   regval |= RCC_APB2ENR_TIM15EN;
-#endif
 #endif
 
 #ifdef CONFIG_STM32F0L0G0_TIM16
   /* TIM16 Timer clock enable */
 
-#ifdef CONFIG_STM32F0L0G0_FORCEPOWER
   regval |= RCC_APB2ENR_TIM16EN;
-#endif
 #endif
 
 #ifdef CONFIG_STM32F0L0G0_TIM17
   /* TIM17 Timer clock enable */
 
-#ifdef CONFIG_STM32F0L0G0_FORCEPOWER
   regval |= RCC_APB2ENR_TIM17EN;
-#endif
 #endif
 
 #ifdef CONFIG_STM32F0L0G0_ADC1
