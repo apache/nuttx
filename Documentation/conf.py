@@ -61,6 +61,7 @@ extensions = [
     "warnings_filter",
     "sphinx_tags",
     "sphinx_design",
+    "sphinx_collapse",
 ]
 
 source_suffix = [".rst", ".md"]
