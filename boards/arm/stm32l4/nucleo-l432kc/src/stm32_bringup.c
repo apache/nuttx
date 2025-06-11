@@ -224,6 +224,17 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_CAN
+  /* Initialize CAN and register the CAN device. */
+  
+  ret = stm32l4_can_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32l4_can_setup failed: %d\n", ret);
+      return ret;
+    }
+#endif
+
 #ifdef CONFIG_STM32L4_ADC
   /* Initialize ADC and register the ADC driver. */
 
