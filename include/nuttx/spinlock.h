@@ -37,9 +37,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
-#if defined(CONFIG_TICKET_SPINLOCK) || defined(CONFIG_RW_SPINLOCK)
-#  include <nuttx/atomic.h>
-#endif
+#include <nuttx/atomic.h>
 
 #include <nuttx/spinlock_type.h>
 

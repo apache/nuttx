@@ -26,6 +26,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/notifier.h>
+#include <nuttx/spinlock.h>
 
 #include <sys/types.h>
 
