@@ -44,10 +44,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_NETDEV_WORK_THREAD_POLLING_PERIOD
-#  define CONFIG_NETDEV_WORK_THREAD_POLLING_PERIOD 0
-#endif
-
 /* Layout for net packet:
  *
  * | <-------------- NETPKT_BUFLEN ---------------> |
@@ -91,6 +87,13 @@ enum netpkt_type_e
   NETPKT_TYPENUM
 };
 
+enum netdev_rx_e
+{
+  NETDEV_RX_WORK,      /* Use work queue thread */
+  NETDEV_RX_THREAD,    /* Upper half dedicated thread */
+  NETDEV_RX_THREAD_RSS /* RSS mode, upper half thread */
+};
+
 /* This structure is the generic form of state structure used by lower half
  * netdev driver. This state structure is passed to the netdev driver when
  * the driver is initialized. Then, on subsequent callbacks into the lower
@@ -119,6 +122,9 @@ struct netdev_lowerhalf_s
 
   FAR atomic_t *quota_ptr; /* Shared quota, ignore `quota` if ptr is set */
   atomic_t quota[NETPKT_TYPENUM];
+
+  uint8_t rxtype;
+  uint8_t priority;
 
   /* The structure used by net stack.
    * Note: Do not change its fields unless you know what you are doing.

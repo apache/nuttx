@@ -51,18 +51,6 @@
 
 #define NETDEV_THREAD_NAME_FMT "netdev-%s"
 
-#ifdef CONFIG_NETDEV_HPWORK_THREAD
-#  define NETDEV_WORK HPWORK
-#else
-#  define NETDEV_WORK LPWORK
-#endif
-
-#ifdef CONFIG_NETDEV_RSS
-#  define NETDEV_THREAD_COUNT CONFIG_SMP_NCPUS
-#else
-#  define NETDEV_THREAD_COUNT 1
-#endif
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -75,21 +63,18 @@ struct netdev_vlan_entry_s
 };
 #endif
 
+struct netdev_thread_s
+{
+  pid_t tid;
+  sem_t sem;
+  sem_t sem_exit;
+};
+
 /* This structure describes the state of the upper half driver */
 
 struct netdev_upperhalf_s
 {
   FAR struct netdev_lowerhalf_s *lower;
-
-  /* Deferring poll work to work queue or thread */
-
-#ifdef CONFIG_NETDEV_WORK_THREAD
-  pid_t tid[NETDEV_THREAD_COUNT];
-  sem_t sem[NETDEV_THREAD_COUNT];
-  sem_t sem_exit[NETDEV_THREAD_COUNT];
-#else
-  struct work_s work;
-#endif
 
   /* TX queue for re-queueing replies */
 
@@ -100,6 +85,14 @@ struct netdev_upperhalf_s
 #ifdef CONFIG_NET_VLAN
   struct netdev_vlan_entry_s vlan[CONFIG_NET_VLAN_COUNT];
 #endif
+
+  /* Deferring process to work queue or thread */
+
+  union
+  {
+    struct netdev_thread_s thread[0];
+    struct work_s work[0];
+  };
 };
 
 /****************************************************************************
@@ -214,7 +207,7 @@ static void netpkt_put(FAR struct net_driver_s *dev, FAR netpkt_t *pkt,
  ****************************************************************************/
 
 static FAR struct netdev_upperhalf_s *
-netdev_upper_alloc(FAR struct netdev_lowerhalf_s *dev)
+netdev_upper_alloc(FAR struct netdev_lowerhalf_s *dev, size_t extra_size)
 {
   /* Allocate the upper-half data structure */
 
@@ -222,7 +215,7 @@ netdev_upper_alloc(FAR struct netdev_lowerhalf_s *dev)
 
   DEBUGASSERT(dev != NULL && dev->netdev.d_private == NULL);
 
-  upper = kmm_zalloc(sizeof(struct netdev_upperhalf_s));
+  upper = kmm_zalloc(sizeof(struct netdev_upperhalf_s) + extra_size);
   if (upper == NULL)
     {
       nerr("ERROR: Allocation failed\n");
@@ -787,27 +780,6 @@ static void netdev_upper_work(FAR void *arg)
 }
 
 /****************************************************************************
- * Name: netdev_upper_wait
- *
- * Description:
- *   Wait for timeout or signal.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NETDEV_WORK_THREAD
-static int netdev_upper_wait(FAR sem_t *sem)
-{
-#if CONFIG_NETDEV_WORK_THREAD_POLLING_PERIOD > 0
-  int ret =
-    nxsem_tickwait(sem, USEC2TICK(CONFIG_NETDEV_WORK_THREAD_POLLING_PERIOD));
-
-  return ret == -ETIMEDOUT ? OK : ret;
-#else
-  return nxsem_wait(sem);
-#endif
-}
-
-/****************************************************************************
  * Name: netdev_upper_loop
  *
  * Description:
@@ -820,26 +792,26 @@ static int netdev_upper_loop(int argc, FAR char *argv[])
   FAR struct netdev_upperhalf_s *upper =
     (FAR struct netdev_upperhalf_s *)((uintptr_t)strtoul(argv[1], NULL, 16));
   int cpu = atoi(argv[2]);
+  FAR struct netdev_thread_s *t = &upper->thread[cpu];
 
-#ifdef CONFIG_NETDEV_RSS
-  cpu_set_t cpuset;
+  if (upper->lower->rxtype == NETDEV_RX_THREAD_RSS)
+    {
+      cpu_set_t cpuset;
 
-  CPU_ZERO(&cpuset);
-  CPU_SET(cpu, &cpuset);
-  sched_setaffinity(upper->tid[cpu], sizeof(cpu_set_t), &cpuset);
-#endif
+      CPU_ZERO(&cpuset);
+      CPU_SET(cpu, &cpuset);
+      sched_setaffinity(t->tid, sizeof(cpu_set_t), &cpuset);
+    }
 
-  while (netdev_upper_wait(&upper->sem[cpu]) == OK &&
-         upper->tid[cpu] != INVALID_PROCESS_ID)
+  while (nxsem_wait(&t->sem) == OK && t->tid != INVALID_PROCESS_ID)
     {
       netdev_upper_work(upper);
     }
 
   nwarn("WARNING: Netdev work thread quitting.");
-  nxsem_post(&upper->sem_exit[cpu]);
+  nxsem_post(&t->sem_exit);
   return 0;
 }
-#endif
 
 /****************************************************************************
  * Name: netdev_upper_queue_work
@@ -855,28 +827,36 @@ static int netdev_upper_loop(int argc, FAR char *argv[])
 static inline void netdev_upper_queue_work(FAR struct net_driver_s *dev)
 {
   FAR struct netdev_upperhalf_s *upper = dev->d_private;
+  int cpu = 0;
 
-#ifdef CONFIG_NETDEV_WORK_THREAD
-#  ifdef CONFIG_NETDEV_RSS
-  int cpu = this_cpu();
-#  else
-  const int cpu = 0;
-#  endif
-  int semcount;
-
-  if (nxsem_get_value(&upper->sem[cpu], &semcount) == OK &&
-      semcount <= 0)
+  switch (upper->lower->rxtype)
     {
-      nxsem_post(&upper->sem[cpu]);
-    }
-#else
-  if (work_available(&upper->work))
-    {
-      /* Schedule to serialize the poll on the worker thread. */
+      case NETDEV_RX_WORK:
+        {
+          FAR struct work_s *work = upper->work;
+          if (work_available(work))
+            {
+              /* Schedule to serialize the poll on the worker thread. */
 
-      work_queue(NETDEV_WORK, &upper->work, netdev_upper_work, upper, 0);
+              work_queue(upper->lower->priority, work, netdev_upper_work,
+                         upper, 0);
+            }
+        }
+        break;
+      case NETDEV_RX_THREAD_RSS:
+        cpu = this_cpu();
+      case NETDEV_RX_THREAD:
+        {
+          FAR struct netdev_thread_s *t = &upper->thread[cpu];
+          int semcount;
+
+          if (nxsem_get_value(&t->sem, &semcount) == OK && semcount <= 0)
+            {
+              nxsem_post(&t->sem);
+            }
+        }
+        break;
     }
-#endif
 }
 
 /****************************************************************************
@@ -1174,6 +1154,40 @@ int netdev_upper_vlan_ioctl(FAR struct netdev_lowerhalf_s *lower,
 #endif /* CONFIG_NET_VLAN */
 
 /****************************************************************************
+ * Name: netdev_upper_exit_thread
+ *
+ * Description:
+ *   Exit the dedicated thread
+ *
+ ****************************************************************************/
+
+static void netdev_upper_exit_thread(FAR struct netdev_upperhalf_s *upper)
+{
+  int cpu = 1;
+
+  switch (upper->lower->rxtype)
+    {
+      case NETDEV_RX_THREAD_RSS:
+        cpu = CONFIG_SMP_NCPUS;
+      case NETDEV_RX_THREAD:
+        while (--cpu >= 0)
+          {
+            FAR struct netdev_thread_s *t = &upper->thread[cpu];
+
+            if (t->tid >= 0)
+              {
+                /* Try to tear down the dedicated thread for work. */
+
+                t->tid = INVALID_PROCESS_ID;
+                nxsem_post(&t->sem);
+                nxsem_wait(&t->sem_exit);
+              }
+          }
+        break;
+    }
+}
+
+/****************************************************************************
  * Name: netdev_upper_ifup/ifdown/addmac/rmmac/ioctl
  *
  * Description:
@@ -1184,42 +1198,45 @@ int netdev_upper_vlan_ioctl(FAR struct netdev_lowerhalf_s *lower,
 static int netdev_upper_ifup(FAR struct net_driver_s *dev)
 {
   FAR struct netdev_upperhalf_s *upper = dev->d_private;
+  int cpu = 1;
 
-#ifdef CONFIG_NETDEV_WORK_THREAD
-  int i;
-
-  /* Try to bring up a dedicated thread for work. */
-
-  for (i = 0; i < NETDEV_THREAD_COUNT; i++)
+  switch (upper->lower->rxtype)
     {
-      if (upper->tid[i] <= 0)
-        {
-          FAR char *argv[3];
-          char      arg1[32];
-          char      arg2[32];
-          char      name[32];
+      case NETDEV_RX_THREAD_RSS:
+        cpu = CONFIG_SMP_NCPUS;
+      case NETDEV_RX_THREAD:
 
-          snprintf(arg1, sizeof(arg1), "%p", upper);
-          argv[0] = arg1;
+        /* Try to bring up a dedicated thread for work. */
 
-          snprintf(arg2, sizeof(arg2), "%d", i);
-          argv[1] = arg2;
-          argv[2] = NULL;
+        while (--cpu >= 0)
+          {
+            FAR struct netdev_thread_s *t = &upper->thread[cpu];
+            FAR char *argv[3];
+            char      arg1[32];
+            char      arg2[32];
+            char      name[32];
 
-          snprintf(name, sizeof(name), NETDEV_THREAD_NAME_FMT,
-                   dev->d_ifname);
+            snprintf(arg1, sizeof(arg1), "%p", upper);
+            argv[0] = arg1;
 
-          upper->tid[i] = kthread_create(name,
-                                         CONFIG_NETDEV_WORK_THREAD_PRIORITY,
-                                         CONFIG_DEFAULT_TASK_STACKSIZE,
-                                         netdev_upper_loop, argv);
-          if (upper->tid[i] < 0)
-            {
-              return upper->tid[i];
-            }
-        }
+            snprintf(arg2, sizeof(arg2), "%d", cpu);
+            argv[1] = arg2;
+            argv[2] = NULL;
+
+            snprintf(name, sizeof(name), NETDEV_THREAD_NAME_FMT,
+                     dev->d_ifname);
+
+            t->tid = kthread_create(name, upper->lower->priority,
+                                    CONFIG_DEFAULT_TASK_STACKSIZE,
+                                    netdev_upper_loop, argv);
+            if (t->tid < 0)
+              {
+                netdev_upper_exit_thread(upper);
+                return t->tid;
+              }
+          }
+        break;
     }
-#endif
 
   if (upper->lower->ops->ifup)
     {
@@ -1233,9 +1250,16 @@ static int netdev_upper_ifdown(FAR struct net_driver_s *dev)
 {
   FAR struct netdev_upperhalf_s *upper = dev->d_private;
 
-#ifndef CONFIG_NETDEV_WORK_THREAD
-  work_cancel(NETDEV_WORK, &upper->work);
-#endif
+  switch (upper->lower->rxtype)
+    {
+      case NETDEV_RX_WORK:
+        work_cancel_sync(upper->lower->priority, upper->work);
+        break;
+      case NETDEV_RX_THREAD:
+      case NETDEV_RX_THREAD_RSS:
+        netdev_upper_exit_thread(upper);
+        break;
+    }
 
   if (upper->lower->ops->ifdown)
     {
@@ -1336,10 +1360,9 @@ int netdev_lower_register(FAR struct netdev_lowerhalf_s *dev,
                           enum net_lltype_e lltype)
 {
   FAR struct netdev_upperhalf_s *upper;
+  size_t extra_size;
+  int cpu = 0;
   int ret;
-#ifdef CONFIG_NETDEV_WORK_THREAD
-  int i;
-#endif
 
   if (dev == NULL || dev->ops == NULL ||
       dev->ops->transmit == NULL || dev->ops->receive == NULL)
@@ -1358,7 +1381,25 @@ int netdev_lower_register(FAR struct netdev_lowerhalf_s *dev,
       return -EINVAL;
     }
 
-  if ((upper = netdev_upper_alloc(dev)) == NULL)
+  switch (dev->rxtype)
+    {
+      case NETDEV_RX_WORK:
+        extra_size = sizeof(struct work_s);
+        break;
+      case NETDEV_RX_THREAD:
+        extra_size = sizeof(struct netdev_thread_s);
+        cpu = 1;
+        break;
+      case NETDEV_RX_THREAD_RSS:
+        extra_size = sizeof(struct netdev_thread_s) * CONFIG_SMP_NCPUS;
+        cpu = CONFIG_SMP_NCPUS;
+        break;
+      default:
+        nerr("ERROR: Unrecognized device rxtype: %d\n", dev->rxtype);
+        return -EINVAL;
+    }
+
+  if ((upper = netdev_upper_alloc(dev, extra_size)) == NULL)
     {
       return -ENOMEM;
     }
@@ -1382,17 +1423,15 @@ int netdev_lower_register(FAR struct netdev_lowerhalf_s *dev,
       kmm_free(upper);
       dev->netdev.d_private = NULL;
     }
-#ifdef CONFIG_NETDEV_WORK_THREAD
-  else
+
+  while (--cpu >= 0)
     {
-      for (i = 0; i < NETDEV_THREAD_COUNT; i++)
-        {
-          upper->tid[i] = INVALID_PROCESS_ID;
-          nxsem_init(&upper->sem[i], 0, 0);
-          nxsem_init(&upper->sem_exit[i], 0, 0);
-        }
+      FAR struct netdev_thread_s *t = &upper->thread[cpu];
+
+      t->tid = INVALID_PROCESS_ID;
+      nxsem_init(&t->sem, 0, 0);
+      nxsem_init(&t->sem_exit, 0, 0);
     }
-#endif
 
   return ret;
 }
@@ -1414,10 +1453,8 @@ int netdev_lower_register(FAR struct netdev_lowerhalf_s *dev,
 int netdev_lower_unregister(FAR struct netdev_lowerhalf_s *dev)
 {
   FAR struct netdev_upperhalf_s *upper;
+  int cpu = 1;
   int ret;
-#ifdef CONFIG_NETDEV_WORK_THREAD
-  int i;
-#endif
 
   if (dev == NULL || dev->netdev.d_private == NULL)
     {
@@ -1437,22 +1474,24 @@ int netdev_lower_unregister(FAR struct netdev_lowerhalf_s *dev)
       return ret;
     }
 
-#ifdef CONFIG_NETDEV_WORK_THREAD
-  for (i = 0; i < NETDEV_THREAD_COUNT; i++)
+  switch (dev->rxtype)
     {
-      if (upper->tid[i] > 0)
-        {
-          /* Try to tear down the dedicated thread for work. */
+      case NETDEV_RX_THREAD_RSS:
+        cpu = CONFIG_SMP_NCPUS;
+      case NETDEV_RX_THREAD:
 
-          upper->tid[i] = INVALID_PROCESS_ID;
-          nxsem_post(&upper->sem[i]);
-          nxsem_wait(&upper->sem_exit[i]);
-        }
+        /* Stop the dedicated thread for network operations in thread mode */
 
-      nxsem_destroy(&upper->sem[i]);
-      nxsem_destroy(&upper->sem_exit[i]);
+        netdev_upper_exit_thread(upper);
+        while (--cpu >= 0)
+          {
+            FAR struct netdev_thread_s *t = &upper->thread[cpu];
+
+            nxsem_destroy(&t->sem);
+            nxsem_destroy(&t->sem_exit);
+          }
+        break;
     }
-#endif
 
 #if CONFIG_IOB_NCHAINS > 0
   iob_free_queue(&upper->txq);
@@ -1521,13 +1560,11 @@ void netdev_lower_carrier_off(FAR struct netdev_lowerhalf_s *dev)
 
 void netdev_lower_rxready(FAR struct netdev_lowerhalf_s *dev)
 {
-#if CONFIG_NETDEV_WORK_THREAD_POLLING_PERIOD == 0
-  /* Note: Don't need to handle VLAN here, because RX of VLAN is handled in
-   * eth_input.
+  /* Note: Don't need to handle VLAN here, because RX of VLAN is handled
+   * in eth_input.
    */
 
   netdev_upper_queue_work(&dev->netdev);
-#endif
 }
 
 /****************************************************************************
@@ -1543,14 +1580,11 @@ void netdev_lower_rxready(FAR struct netdev_lowerhalf_s *dev)
 
 void netdev_lower_txdone(FAR struct netdev_lowerhalf_s *dev)
 {
-#if CONFIG_NETDEV_WORK_THREAD_POLLING_PERIOD == 0
-#  ifdef CONFIG_NET_VLAN
+#ifdef CONFIG_NET_VLAN
   FAR struct netdev_upperhalf_s *upper = dev->netdev.d_private;
   netdev_upper_vlan_foreach(upper, netdev_lower_txdone);
-#  endif
-
-  netdev_upper_queue_work(&dev->netdev);
 #endif
+  netdev_upper_queue_work(&dev->netdev);
   NETDEV_TXDONE(&dev->netdev);
 }
 
