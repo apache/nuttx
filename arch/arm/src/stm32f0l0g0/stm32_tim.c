@@ -897,11 +897,19 @@ static int stm32_tim_setmode(struct stm32_tim_dev_s *dev,
    * disable it, simply set its clock to valid frequency or zero.
    */
 
-  if (((struct stm32_tim_priv_s *)dev)->base == STM32_TIM6_BASE || \
-      ((struct stm32_tim_priv_s *)dev)->base == STM32_TIM7_BASE)
+#ifdef STM32_TIM6_BASE
+  if (((struct stm32_tim_priv_s *)dev)->base == STM32_TIM6_BASE)
     {
       return -EINVAL;
     }
+#endif
+
+#ifdef STM32_TIM7_BASE
+  if (((struct stm32_tim_priv_s *)dev)->base == STM32_TIM7_BASE)
+    {
+      return -EINVAL;
+    }
+#endif
 
   /* Decode operational modes */
 
@@ -985,11 +993,19 @@ static int stm32_tim_setchannel(struct stm32_tim_dev_s *dev,
    * disable it, simply set its clock to valid frequency or zero.
    */
 
-  if (((struct stm32_tim_priv_s *)dev)->base == STM32_TIM6_BASE || \
-      ((struct stm32_tim_priv_s *)dev)->base == STM32_TIM7_BASE)
+#ifdef STM32_TIM6_BASE
+  if (((struct stm32_tim_priv_s *)dev)->base == STM32_TIM6_BASE)
     {
       return -EINVAL;
     }
+#endif
+
+#ifdef STM32_TIM7_BASE
+  if (((struct stm32_tim_priv_s *)dev)->base == STM32_TIM7_BASE)
+    {
+      return -EINVAL;
+    }
+#endif
 
   /* Decode configuration */
 
