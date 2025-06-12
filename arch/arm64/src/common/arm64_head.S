@@ -143,13 +143,11 @@ real_start:
 
     /* Wait until cpu0 notify */
 
-#ifdef CONFIG_ARM64_SMP_BUSY_WAIT
-    ldr    x2, =CONFIG_ARM64_SMP_BUSY_WAIT_FLAG_ADDR
+    ldr    x2, =g_smp_busy_wait_flag
 1:
-    ldr    x3, [x2, #0]
-    cmp    x3, #0
+    ldr    w3, [x2, #0]
+    cmp    w3, #0
     beq    1b
-#endif
 
     /* we can now load our stack pointer value and move on */
 

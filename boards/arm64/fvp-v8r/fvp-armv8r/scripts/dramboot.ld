@@ -59,9 +59,6 @@ SECTIONS
 
   .bss : {                     /* BSS */
        _sbss = . ;
-#if defined(CONFIG_SMP) && defined(CONFIG_ARM64_SMP_BUSY_WAIT)
-       . = . + 0x4;          /* Busy Wait Flag */
-#endif
        *(.bss*)
        . = ALIGN(4096);
        _ebss = .;

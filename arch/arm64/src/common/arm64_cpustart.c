@@ -76,6 +76,8 @@ uint64_t *const g_cpu_int_stacktop[CONFIG_SMP_NCPUS] =
 #endif /* CONFIG_SMP_NCPUS > 1 */
 };
 
+uint32_t g_smp_busy_wait_flag;
+
 #ifdef CONFIG_ARM64_DECODEFIQ
 uint64_t *const g_cpu_int_fiq_stacktop[CONFIG_SMP_NCPUS] =
 {
@@ -198,8 +200,8 @@ int up_cpu_start(int cpu)
   sched_note_cpu_start(this_task(), cpu);
 #endif
 
-#ifdef CONFIG_ARM64_SMP_BUSY_WAIT
-  uint32_t *address = (uint32_t *)CONFIG_ARM64_SMP_BUSY_WAIT_FLAG_ADDR;
+#ifdef CONFIG_SMP
+  uint32_t *address = &g_smp_busy_wait_flag;
   *address = 1;
   up_flush_dcache((uintptr_t)address, (uintptr_t)address + sizeof(address));
 #endif

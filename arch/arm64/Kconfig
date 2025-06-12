@@ -217,17 +217,6 @@ config ARM64_TBI
 	bool "Top Byte Ignore support"
 	default n
 
-config ARM64_SMP_BUSY_WAIT
-	bool "Busy wait when SMP boot"
-	default n
-	depends on SMP
-	---help---
-		Enables busy wait when SMP boot
-
-config ARM64_SMP_BUSY_WAIT_FLAG_ADDR
-	hex "Busy wait flag address"
-	depends on ARM64_SMP_BUSY_WAIT
-
 config ARCH_HAVE_EL3
 	bool
 	default n
