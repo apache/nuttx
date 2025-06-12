@@ -45,6 +45,7 @@
 
 #include "soc/gdma_periph.h"
 #include "hal/gdma_hal.h"
+#include "hal/gdma_hal_ahb.h"
 #include "hal/gdma_types.h"
 #include "hal/gdma_ll.h"
 #include "periph_ctrl.h"
@@ -58,6 +59,12 @@
 
 #define ESPRESSIF_DMA_CHAN_MAX  (SOC_GDMA_PAIRS_PER_GROUP_MAX)
 
+#if !SOC_RCC_IS_INDEPENDENT
+#define GDMA_RCC_ATOMIC() PERIPH_RCC_ATOMIC()
+#else
+#define GDMA_RCC_ATOMIC()
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -65,6 +72,10 @@
 static bool g_dma_chan_used[ESPRESSIF_DMA_CHAN_MAX];
 static mutex_t g_dma_lock = NXMUTEX_INITIALIZER;
 static gdma_hal_context_t ctx;
+static gdma_hal_config_t cfg =
+{
+  .group_id = 0
+};
 
 /****************************************************************************
  * Public Functions
@@ -123,26 +134,27 @@ int32_t esp_dma_request(enum esp_dma_periph_e periph,
 
   dmainfo("Allocated channel=%d\n", chan);
 
-  gdma_ll_rx_connect_to_periph(ctx.dev, chan, periph, periph);
-  gdma_ll_tx_connect_to_periph(ctx.dev, chan, periph, periph);
+  gdma_hal_connect_peri(&ctx, chan, GDMA_CHANNEL_DIRECTION_TX,
+                        periph, periph);
+  gdma_hal_connect_peri(&ctx, chan, GDMA_CHANNEL_DIRECTION_RX,
+                        periph, periph);
 
   if (burst_en)
     {
       /* Enable DMA TX/RX channels burst sending data */
 
-      gdma_ll_tx_enable_data_burst(ctx.dev, chan, true);
-      gdma_ll_rx_enable_data_burst(ctx.dev, chan, true);
-
       /* Enable DMA TX/RX channels burst reading descriptor link */
 
-      gdma_ll_tx_enable_descriptor_burst(ctx.dev, chan, true);
-      gdma_ll_rx_enable_descriptor_burst(ctx.dev, chan, true);
+      gdma_hal_enable_burst(&ctx, chan, GDMA_CHANNEL_DIRECTION_TX,
+                            true, true);
+      gdma_hal_enable_burst(&ctx, chan, GDMA_CHANNEL_DIRECTION_RX,
+                            true, true);
     }
 
   /* Set priority for DMA TX/RX channels */
 
-  gdma_ll_tx_set_priority(ctx.dev, chan, tx_prio);
-  gdma_ll_rx_set_priority(ctx.dev, chan, rx_prio);
+  gdma_hal_set_priority(&ctx, chan, GDMA_CHANNEL_DIRECTION_TX, tx_prio);
+  gdma_hal_set_priority(&ctx, chan, GDMA_CHANNEL_DIRECTION_RX, rx_prio);
 
   nxmutex_unlock(&g_dma_lock);
   return chan;
@@ -177,6 +189,8 @@ uint32_t esp_dma_setup(int chan, bool tx,
   uint8_t *pdata = pbuf;
   uint32_t data_len;
   uint32_t buf_len;
+  gdma_channel_direction_t dir = tx == true ? GDMA_CHANNEL_DIRECTION_TX : \
+    GDMA_CHANNEL_DIRECTION_RX;
   dma_descriptor_t *dma_desc = (dma_descriptor_t *)dmadesc;
 
   DEBUGASSERT(chan >= 0);
@@ -212,22 +226,16 @@ uint32_t esp_dma_setup(int chan, bool tx,
   dma_desc[i].dw0.suc_eof = 1;
   dmadesc[i].next  = NULL;
 
+  gdma_hal_reset(&ctx, chan, dir);
+
   if (tx)
     {
-      /* Reset DMA TX channel FSM and FIFO pointer */
-
-      gdma_ll_tx_reset_channel(ctx.dev, chan);
-
       /* Set the descriptor link base address for TX channel */
 
       gdma_ll_tx_set_desc_addr(ctx.dev, chan, (uint32_t)dmadesc);
     }
   else
     {
-      /* Reset DMA RX channel FSM and FIFO pointer */
-
-      gdma_ll_rx_reset_channel(ctx.dev, chan);
-
       /* Set the descriptor link base address for RX channel */
 
       gdma_ll_rx_set_desc_addr(ctx.dev, chan, (uint32_t)dmadesc);
@@ -256,30 +264,14 @@ uint32_t esp_dma_setup(int chan, bool tx,
 void esp_dma_load(struct esp_dmadesc_s *dmadesc, int chan, bool tx)
 {
   uint32_t regval;
+  gdma_channel_direction_t dir = tx == true ? GDMA_CHANNEL_DIRECTION_TX : \
+    GDMA_CHANNEL_DIRECTION_RX;
 
   DEBUGASSERT(chan >= 0);
   DEBUGASSERT(dmadesc != NULL);
 
-  if (tx)
-    {
-      /* Reset DMA TX channel FSM and FIFO pointer */
-
-      gdma_ll_rx_reset_channel(ctx.dev, chan);
-
-      /* Set the descriptor link base address for TX channel */
-
-      gdma_ll_tx_set_desc_addr(ctx.dev, chan, (uint32_t)dmadesc);
-    }
-  else
-    {
-      /* Reset DMA RX channel FSM and FIFO pointer */
-
-      gdma_ll_rx_reset_channel(ctx.dev, chan);
-
-      /* Set the descriptor link base address for RX channel */
-
-      gdma_ll_rx_set_desc_addr(ctx.dev, chan, (uint32_t)dmadesc);
-    }
+  gdma_hal_reset(&ctx, chan, dir);
+  gdma_hal_start_with_desc(&ctx, chan, dir, (uint32_t)dmadesc);
 }
 
 /****************************************************************************
@@ -301,14 +293,9 @@ void esp_dma_load(struct esp_dmadesc_s *dmadesc, int chan, bool tx)
 
 void esp_dma_enable_interrupt(int chan, bool tx, uint32_t mask, bool en)
 {
-  if (tx)
-    {
-      gdma_ll_tx_enable_interrupt(ctx.dev, chan, mask, en);
-    }
-  else
-    {
-      gdma_ll_rx_enable_interrupt(ctx.dev, chan, mask, en);
-    }
+  gdma_channel_direction_t dir = tx == true ? GDMA_CHANNEL_DIRECTION_TX : \
+    GDMA_CHANNEL_DIRECTION_RX;
+  gdma_hal_enable_intr(&ctx, chan, dir, mask, en);
 }
 
 /****************************************************************************
@@ -329,17 +316,9 @@ void esp_dma_enable_interrupt(int chan, bool tx, uint32_t mask, bool en)
 int esp_dma_get_interrupt(int chan, bool tx)
 {
   uint32_t intr_status = 0;
-
-  if (tx)
-    {
-      intr_status = gdma_ll_tx_get_interrupt_status(ctx.dev, chan, false);
-    }
-  else
-    {
-      intr_status = gdma_ll_rx_get_interrupt_status(ctx.dev, chan, false);
-    }
-
-  return intr_status;
+  gdma_channel_direction_t dir = tx == true ? GDMA_CHANNEL_DIRECTION_TX : \
+    GDMA_CHANNEL_DIRECTION_RX;
+  return gdma_hal_read_intr_status(&ctx, chan, dir, false);
 }
 
 /****************************************************************************
@@ -360,14 +339,9 @@ int esp_dma_get_interrupt(int chan, bool tx)
 
 void esp_dma_clear_interrupt(int chan, bool tx, uint32_t mask)
 {
-  if (tx)
-    {
-      gdma_ll_tx_clear_interrupt_status(ctx.dev, chan, mask);
-    }
-  else
-    {
-      gdma_ll_rx_clear_interrupt_status(ctx.dev, chan, mask);
-    }
+  gdma_channel_direction_t dir = tx == true ? GDMA_CHANNEL_DIRECTION_TX : \
+    GDMA_CHANNEL_DIRECTION_RX;
+  gdma_hal_clear_intr(&ctx, chan, dir, mask);
 }
 
 /****************************************************************************
@@ -387,18 +361,9 @@ void esp_dma_clear_interrupt(int chan, bool tx, uint32_t mask)
 
 int esp_dma_get_desc_addr(int chan, bool tx)
 {
-  uint32_t desc_addr = 0;
-
-  if (tx)
-    {
-      desc_addr = gdma_ll_tx_get_eof_desc_addr(ctx.dev, chan);
-    }
-  else
-    {
-      desc_addr = gdma_ll_rx_get_success_eof_desc_addr(ctx.dev, chan);
-    }
-
-  return desc_addr;
+  gdma_channel_direction_t dir = tx == true ? GDMA_CHANNEL_DIRECTION_TX : \
+    GDMA_CHANNEL_DIRECTION_RX;
+  return gdma_hal_get_eof_desc_addr(&ctx, chan, dir, true);
 }
 
 /****************************************************************************
@@ -445,14 +410,9 @@ void esp_dma_enable(int chan, bool tx)
 
 void esp_dma_disable(int chan, bool tx)
 {
-  if (tx)
-    {
-      gdma_ll_tx_stop(ctx.dev, chan);
-    }
-  else
-    {
-      gdma_ll_rx_stop(ctx.dev, chan);
-    }
+  gdma_channel_direction_t dir = tx == true ? GDMA_CHANNEL_DIRECTION_TX : \
+    GDMA_CHANNEL_DIRECTION_RX;
+  gdma_hal_stop(&ctx, chan, dir);
 }
 
 /****************************************************************************
@@ -499,14 +459,9 @@ void esp_dma_wait_idle(int chan, bool tx)
 
 void esp_dma_reset_channel(int chan, bool tx)
 {
-  if (tx)
-    {
-      gdma_ll_tx_reset_channel(ctx.dev, chan);
-    }
-  else
-    {
-      gdma_ll_rx_reset_channel(ctx.dev, chan);
-    }
+  gdma_channel_direction_t dir = tx == true ? GDMA_CHANNEL_DIRECTION_TX : \
+    GDMA_CHANNEL_DIRECTION_RX;
+  gdma_hal_reset(&ctx, chan, dir);
 }
 
 /****************************************************************************
@@ -526,7 +481,12 @@ void esp_dma_reset_channel(int chan, bool tx)
 void esp_dma_init(void)
 {
   periph_module_enable(PERIPH_GDMA_MODULE);
-  ctx.dev = GDMA_LL_GET_HW(0);
+  GDMA_RCC_ATOMIC()
+    {
+      gdma_ll_enable_bus_clock(0, true);
+    }
+
+  gdma_ahb_hal_init(&ctx, &cfg);
   gdma_ll_force_enable_reg_clock(ctx.dev, true);
 }
 
@@ -551,12 +511,17 @@ void esp_dma_deinit(void)
   /* Disable DMA clock gating */
 
   gdma_ll_force_enable_reg_clock(ctx.dev, false);
+  GDMA_RCC_ATOMIC()
+    {
+      gdma_ll_enable_bus_clock(0, false);
+    }
 
   /* Disable DMA module by gating the clock and asserting the reset
    * signal.
    */
 
   periph_module_disable(PERIPH_GDMA_MODULE);
+  gdma_hal_deinit(&ctx);
 
   nxmutex_unlock(&g_dma_lock);
 }
