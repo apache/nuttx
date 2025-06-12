@@ -24,7 +24,6 @@ ifeq ($(CONFIG_ESPRESSIF_SIMPLE_BOOT),)
 
 TOOLSDIR           = $(TOPDIR)/tools/espressif
 CHIPDIR            = $(TOPDIR)/arch/xtensa/src/chip
-HALDIR             = $(CHIPDIR)/esp-hal-3rdparty
 
 BOOTLOADER_DIR     = $(CHIPDIR)/bootloader
 BOOTLOADER_SRCDIR  = $(BOOTLOADER_DIR)/esp-nuttx-bootloader
@@ -32,16 +31,22 @@ BOOTLOADER_VERSION = main
 BOOTLOADER_URL     = https://github.com/espressif/esp-nuttx-bootloader
 BOOTLOADER_OUTDIR  = out
 BOOTLOADER_CONFIG  = $(BOOTLOADER_DIR)/bootloader.conf
+HALDIR             = $(BOOTLOADER_DIR)/esp-hal-3rdparty-mcuboot
 
 MCUBOOT_SRCDIR     = $(BOOTLOADER_DIR)/mcuboot
 MCUBOOT_ESPDIR     = $(MCUBOOT_SRCDIR)/boot/espressif
 MCUBOOT_TOOLCHAIN  = $(TOPDIR)/tools/esp32s3/mcuboot_toolchain_esp32s3.cmake
+
 ifndef MCUBOOT_VERSION
 	MCUBOOT_VERSION = $(CONFIG_ESP32S3_MCUBOOT_VERSION)
 endif
 
 ifndef MCUBOOT_URL
 	MCUBOOT_URL = https://github.com/mcu-tools/mcuboot
+endif
+
+ifndef ESP_HAL_3RDPARTY_VERSION_FOR_MCUBOOT
+	ESP_HAL_3RDPARTY_VERSION_FOR_MCUBOOT = 3f02f2139e79ddc60f98ca35ed65c62c6914f079
 endif
 
 $(BOOTLOADER_DIR):
@@ -101,13 +106,23 @@ else ifeq ($(CONFIG_ESP32S3_APP_FORMAT_MCUBOOT),y)
 
 BOOTLOADER_BIN        = $(TOPDIR)/mcuboot-esp32s3.bin
 
+define CLONE_ESP_HAL_3RDPARTY_REPO_MCUBOOT
+	$(call CLONE, $(ESP_HAL_3RDPARTY_URL),$(HALDIR))
+endef
+
 $(MCUBOOT_SRCDIR): $(BOOTLOADER_DIR)
 	$(Q) echo "Cloning MCUboot"
 	$(Q) git clone --quiet $(MCUBOOT_URL) $(MCUBOOT_SRCDIR)
 	$(Q) git -C "$(MCUBOOT_SRCDIR)" checkout --quiet $(MCUBOOT_VERSION)
 	$(Q) git -C "$(MCUBOOT_SRCDIR)" submodule --quiet update --init --recursive ext/mbedtls
 
-$(BOOTLOADER_BIN): chip/$(ESP_HAL_3RDPARTY_REPO) $(MCUBOOT_SRCDIR) $(BOOTLOADER_CONFIG)
+$(HALDIR):
+	$(Q) echo "Cloning Espressif HAL for 3rd Party Platforms (MCUBoot build)"
+	$(Q) $(call CLONE_ESP_HAL_3RDPARTY_REPO_MCUBOOT)
+	$(Q) echo "Espressif HAL for 3rd Party Platforms (MCUBoot build): ${ESP_HAL_3RDPARTY_VERSION_FOR_MCUBOOT}"
+	$(Q) git -C $(HALDIR) checkout --quiet $(ESP_HAL_3RDPARTY_VERSION_FOR_MCUBOOT)
+
+$(BOOTLOADER_BIN): $(HALDIR) $(MCUBOOT_SRCDIR) $(BOOTLOADER_CONFIG)
 	$(Q) echo "Building Bootloader"
 	$(Q) $(TOOLSDIR)/build_mcuboot.sh \
 		-c esp32s3 \
@@ -120,6 +135,7 @@ $(BOOTLOADER_BIN): chip/$(ESP_HAL_3RDPARTY_REPO) $(MCUBOOT_SRCDIR) $(BOOTLOADER_
 bootloader: $(BOOTLOADER_CONFIG) $(BOOTLOADER_BIN)
 
 clean_bootloader:
+	$(call DELDIR,$(HALDIR))
 	$(call DELDIR,$(BOOTLOADER_DIR))
 	$(call DELFILE,$(BOOTLOADER_BIN))
 
@@ -135,6 +151,7 @@ bootloader: $(BOOTLOADER_SRCDIR) $(BOOTLOADER_CONFIG)
 	$(call COPYFILE,$(BOOTLOADER_SRCDIR)/$(BOOTLOADER_OUTDIR)/partition-table-esp32s3.bin,$(TOPDIR))
 
 clean_bootloader:
+	$(call DELDIR,$(HALDIR))
 	$(call DELDIR,$(BOOTLOADER_DIR))
 	$(call DELFILE,$(TOPDIR)/bootloader-esp32s3.bin)
 	$(call DELFILE,$(TOPDIR)/partition-table-esp32s3.bin)
