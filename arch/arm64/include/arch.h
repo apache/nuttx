@@ -78,6 +78,7 @@
  *   which gives access to 2MB of memory. This is plenty for many tasks.
  */
 
+#ifdef CONFIG_ARCH_USE_MMU
 struct arch_addrenv_s
 {
   /* Physical addresses of the static page tables (levels N-1) here, these
@@ -97,6 +98,22 @@ struct arch_addrenv_s
 
   uintptr_t ttbr0;
 };
+
+#elif defined(CONFIG_ARCH_USE_MPU)
+struct arch_addrenv_s
+{
+  uintptr_t text;
+  size_t textsize;
+  uintptr_t data;
+  size_t datasize;
+  uintptr_t heap;
+  size_t heapsize;
+#  ifdef CONFIG_ARCH_VMA_MAPPING
+  uintptr_t shm;
+  size_t shmsize;
+#  endif
+};
+#endif
 
 typedef struct arch_addrenv_s arch_addrenv_t;
 
