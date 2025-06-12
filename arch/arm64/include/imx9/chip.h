@@ -84,6 +84,7 @@
 
 .macro  get_cpu_id xreg0
   mrs    \xreg0, mpidr_el1
+  lsr    \xreg0, \xreg0, 8
   ubfx   \xreg0, \xreg0, #0, #8
 .endm
 

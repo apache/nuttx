@@ -297,4 +297,8 @@
 
 #define NR_IRQS                         (301)
 
+/* Cores are at 100h offset from each other (affinity 1) */
+
+#define MPID_TO_CORE(mpid)              (((mpid) >> MPIDR_AFF1_SHIFT) & MPIDR_AFFLVL_MASK)
+
 #endif /* __ARCH_ARM64_INCLUDE_IMX9_IMX93_IRQ_H */
