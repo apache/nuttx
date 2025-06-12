@@ -73,6 +73,7 @@ uImage
 .dirlinks
 .fakelnk
 .vscode
+.idea
 .DS_Store
 tools/gdb/__pycache__
 /build
