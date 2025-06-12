@@ -725,6 +725,48 @@ static int audio_allocbuffer(FAR struct audio_upperhalf_s *upper,
 }
 
 /****************************************************************************
+ * Name: audio_enqueuebuffer
+ *
+ * Description:
+ *   Handle the AUDIOIOC_ENQUEUEBUFFER ioctl command
+ *
+ ****************************************************************************/
+
+static int audio_enqueuebuffer(FAR struct file *filep,
+                               FAR struct audio_buf_desc_s *bufdesc)
+{
+  FAR struct inode *inode = filep->f_inode;
+  FAR struct audio_upperhalf_s *upper = inode->i_private;
+  FAR struct audio_lowerhalf_s *lower = upper->dev;
+  FAR struct audio_openpriv_s *priv = filep->f_priv;
+  irqstate_t flags;
+  int ret;
+
+  DEBUGASSERT(lower->ops->enqueuebuffer != NULL);
+
+  if (bufdesc->u.buffer)
+    {
+      ret = lower->ops->enqueuebuffer(lower, bufdesc->u.buffer);
+      if (ret != OK)
+        {
+          return ret;
+        }
+
+      flags = spin_lock_irqsave(&upper->spinlock);
+      upper->status->head++;
+      spin_unlock_irqrestore(&upper->spinlock, flags);
+    }
+  else
+    {
+      flags = spin_lock_irqsave(&upper->spinlock);
+      priv->head += bufdesc->numbytes;
+      spin_unlock_irqrestore(&upper->spinlock, flags);
+    }
+
+  return OK;
+}
+
+/****************************************************************************
  * Name: audio_ioctl
  *
  * Description:
@@ -738,8 +780,6 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct audio_upperhalf_s *upper = inode->i_private;
   FAR struct audio_lowerhalf_s *lower = upper->dev;
   FAR struct audio_openpriv_s *priv = filep->f_priv;
-  FAR struct audio_buf_desc_s  *bufdesc;
-  irqstate_t flags;
   int ret;
 
   audinfo("cmd: %d arg: %ld\n", cmd, arg);
@@ -887,8 +927,7 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           audinfo("AUDIOIOC_ALLOCBUFFER\n");
 
-          bufdesc = (FAR struct audio_buf_desc_s *) arg;
-          ret = audio_allocbuffer(upper, bufdesc);
+          ret = audio_allocbuffer(upper, (FAR struct audio_buf_desc_s *)arg);
         }
         break;
 
@@ -901,8 +940,7 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           audinfo("AUDIOIOC_FREEBUFFER\n");
 
-          bufdesc = (FAR struct audio_buf_desc_s *) arg;
-          ret = audio_freebuffer(upper, bufdesc);
+          ret = audio_freebuffer(upper, (FAR struct audio_buf_desc_s *)arg);
         }
         break;
 
@@ -915,16 +953,8 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           audinfo("AUDIOIOC_ENQUEUEBUFFER\n");
 
-          DEBUGASSERT(lower->ops->enqueuebuffer != NULL);
-
-          bufdesc = (FAR struct audio_buf_desc_s *) arg;
-          ret = lower->ops->enqueuebuffer(lower, bufdesc->u.buffer);
-          if (ret == OK)
-            {
-              flags = spin_lock_irqsave_nopreempt(&upper->spinlock);
-              upper->status->head++;
-              spin_unlock_irqrestore_nopreempt(&upper->spinlock, flags);
-            }
+          ret =
+              audio_enqueuebuffer(filep, (FAR struct audio_buf_desc_s *)arg);
         }
         break;
 
