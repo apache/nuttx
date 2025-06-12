@@ -229,14 +229,14 @@ config DRIVERS_NOTERPMSG_SERVER
 	bool "Enable RPMSG server for NOTE"
 	select DRIVERS_NOTE
 	default n
-	depends on RPTUN
+	depends on RPMSG
 	---help---
 		Use rpmsg to receive message from remote proc.
 
 config DRIVERS_NOTERPMSG
 	bool "Note to RPMSG"
 	select DRIVERS_NOTE
-	depends on RPTUN
+	depends on RPMSG
 	depends on SCHED_WORKQUEUE
 	default n
 	---help---
