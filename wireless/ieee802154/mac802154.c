@@ -2050,9 +2050,8 @@ static void mac802154_rxbeaconframe(FAR struct ieee802154_privmac_s *priv,
                     }
                   else if (priv->curr_op == MAC802154_OP_NONE)
                     {
-                      int sval;
-                      DEBUGASSERT(nxsem_get_value(&priv->opsem, &sval) == 0
-                                  && sval == 1);
+                      DEBUGASSERT(atomic_read(NXSEM_COUNT(&priv->opsem))
+                                  == 1);
                       nxsem_wait_uninterruptible(&priv->opsem);
                       priv->curr_op = MAC802154_OP_AUTOEXTRACT;
                       priv->curr_cmd = IEEE802154_CMD_DATA_REQ;
