@@ -457,6 +457,8 @@ static void sensor_update_wakeup(FAR struct file *filep,
       return;
     }
 
+  sminfo(upper->name, "update wakeup:%d, user:%d, upper:%d", wakeup,
+         user->state.wakeup, upper->state.wakeup);
   user->state.wakeup = wakeup;
   nxrmutex_lock(&upper->lock);
   list_for_every_entry(&upper->userlist, user, struct sensor_user_s,
@@ -469,10 +471,11 @@ static void sensor_update_wakeup(FAR struct file *filep,
         }
     }
 
+  sminfo(upper->name, "change status, wakeup:%d, upper:%d",
+         wakeup, upper->state.wakeup);
   if (wakeup != upper->state.wakeup)
     {
       upper->state.wakeup = wakeup;
-      sminfo(upper->name, "update wakeup %d", wakeup);
       nxrmutex_unlock(&upper->lock);
       if (lower->ops->set_wakeup)
         {

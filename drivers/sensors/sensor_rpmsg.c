@@ -822,6 +822,7 @@ static int sensor_rpmsg_set_wakeup(FAR struct sensor_lowerhalf_s *lower,
   FAR struct sensor_lowerhalf_s *drv = dev->drv;
   int ret = -ENOTTY;
 
+  sminfo(dev->name, "rpsmg set wakeup status:%d", wakeup);
   if (drv->ops->set_wakeup)
     {
       ret = drv->ops->set_wakeup(drv, filep, wakeup);
@@ -839,6 +840,7 @@ static int sensor_rpmsg_set_wakeup(FAR struct sensor_lowerhalf_s *lower,
     }
   else
     {
+      sminfo(dev->name, "rpsmg set wakeup to remote core:%d", wakeup);
       ret = sensor_rpmsg_ioctl(dev, SNIOC_SET_WAKEUP,
                                wakeup, 0, true);
     }
@@ -1375,6 +1377,7 @@ static int sensor_rpmsg_ioctl_handler(FAR struct rpmsg_endpoint *ept,
           if (msg->request == SNIOC_SET_WAKEUP)
             {
               stub->wakeup = arg;
+              sminfo(dev->name, "receiving wakeup update:%d", stub->wakeup);
             }
 
           if (msg->cookie)
