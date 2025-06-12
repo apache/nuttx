@@ -87,6 +87,43 @@ const struct arm_mmu_config g_mmu_config =
  * Public Functions
  ****************************************************************************/
 
+#ifdef CONFIG_SMP
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: arm64_get_mpid
+ *
+ * Description:
+ *   The function from cpu index to get cpu mpid which is reading
+ * from mpidr_el1 register. Different ARM64 Core will use different
+ * Affn define, the mpidr_el1 value is not CPU number, So we need
+ * to change CPU number to mpid and vice versa
+ *
+ ****************************************************************************/
+
+uint64_t arm64_get_mpid(int cpu)
+{
+  return CORE_TO_MPID(cpu, 1);
+}
+
+/****************************************************************************
+ * Name: arm64_get_cpuid
+ *
+ * Description:
+ *   The function from mpid to get cpu id
+ *
+ ****************************************************************************/
+
+int arm64_get_cpuid(uint64_t mpid)
+{
+  return MPID_TO_CORE(mpid);
+}
+
+#endif /* CONFIG_SMP */
+
 /****************************************************************************
  * Name: arm64_el_init
  *
