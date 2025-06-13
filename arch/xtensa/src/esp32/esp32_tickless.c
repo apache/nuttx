@@ -60,7 +60,6 @@
 #include <arch/xtensa/core_macros.h>
 #include <arch/board/board.h>
 
-#include "xtensa_timer.h"
 #include "xtensa.h"
 #include "xtensa_attr.h"
 #include "xtensa_counter.h"

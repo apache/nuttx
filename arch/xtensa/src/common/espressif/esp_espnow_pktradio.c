@@ -778,15 +778,15 @@ static void espnow_recv_cb(const esp_now_recv_info_t * esp_now_info,
  *   Callback after data is send over espnow, just cancel the watchdog.
  *
  * Input Parameters:
- *   mac_address - The mac address of the destination node,
- *   status      - The send result
+ *   tx_info - Sending information for ESPNOW data
+ *   status  - The send result
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-static void espnow_send_cb(const uint8_t *mac_address,
+static void espnow_send_cb(const esp_now_send_info_t *tx_info,
                            esp_now_send_status_t status)
 {
   FAR struct espnow_driver_s *priv = &g_espnow;

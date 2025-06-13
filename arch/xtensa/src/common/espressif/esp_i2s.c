@@ -298,11 +298,17 @@
       cfg.sinc_scale = I2S_PDM_SIG_SCALING_MUL_1,               \
       cfg.line_mode = I2S_PDM_TX_ONE_LINE_CODEC,                \
       cfg.hp_en = true,                                         \
-      cfg.hp_cut_off_freq_hz = 35.5,                            \
+      cfg.hp_cut_off_freq_hzx10 = 355,                          \
       cfg.sd_dither = 0,                                        \
       cfg.sd_dither2 = 1                                        \
 
 #endif /* CONFIG_ARCH_CHIP_ESP32S3 */
+
+#if !SOC_RCC_IS_INDEPENDENT
+#  define I2S_RCC_ATOMIC() PERIPH_RCC_ATOMIC()
+#else
+#  define I2S_RCC_ATOMIC()
+#endif
 
 #define MIN(x,y) ((x)<(y)?(x):(y))
 
@@ -337,6 +343,7 @@ typedef enum
 struct esp_i2s_config_s
 {
   uint32_t port;                    /* I2S port */
+  periph_module_t module;           /* I2S peripheral module */
   uint32_t role;                    /* I2S port role (master or slave) */
   uint8_t data_width;               /* I2S sample data width */
   uint32_t rate;                    /* I2S sample-rate */
@@ -581,6 +588,7 @@ i2s_hal_clock_info_t clk_info_i2s0 =
 static const struct esp_i2s_config_s esp_i2s0_config =
 {
   .port             = 0,
+  .module           = PERIPH_I2S0_MODULE,
 #ifdef CONFIG_ESPRESSIF_I2S0_ROLE_MASTER
   .role             = I2S_ROLE_MASTER,
 #else
@@ -654,6 +662,7 @@ i2s_hal_clock_info_t clk_info_i2s1 =
 static const struct esp_i2s_config_s esp_i2s1_config =
 {
   .port             = 1,
+  .module           = PERIPH_I2S1_MODULE,
 #ifdef CONFIG_ESPRESSIF_I2S1_ROLE_MASTER
   .role             = I2S_ROLE_MASTER,
 #else
@@ -1575,10 +1584,13 @@ static void i2s_configure(struct esp_i2s_s *priv)
 
   /* Set peripheral clock and clear reset */
 
-  periph_module_enable(i2s_periph_signal[priv->config->port].module);
+  periph_module_enable(priv->config->module);
 
   i2s_hal_init(priv->config->ctx, priv->config->port);
-  i2s_ll_enable_clock(priv->config->ctx->dev);
+  I2S_RCC_ATOMIC()
+    {
+      i2s_ll_enable_core_clock(priv->config->ctx->dev, true);
+    }
 
   /* Configure multiplexed pins as connected on the board */
 
@@ -1758,7 +1770,7 @@ static void i2s_configure(struct esp_i2s_s *priv)
 #ifdef CONFIG_ARCH_CHIP_ESP32S3
       else
         {
-          i2s_ll_tx_enable_pdm(priv->config->ctx->dev);
+          i2s_ll_tx_enable_pdm(priv->config->ctx->dev, true);
           I2S_PDM_TX_SLOT_DEFAULT_CONFIG(tx_slot_cfg.pdm_tx);
           i2s_hal_pdm_set_tx_slot(priv->config->ctx,
                                   priv->config->role == I2S_ROLE_SLAVE,
@@ -2054,13 +2066,15 @@ static void i2s_set_clock(struct esp_i2s_s *priv)
 #ifdef I2S_HAVE_TX
   i2s_hal_set_tx_clock(priv->config->ctx,
                        priv->config->clk_info,
-                       priv->config->tx_clk_src);
+                       priv->config->tx_clk_src,
+                       NULL);
 #endif /* I2S_HAVE_TX */
 
 #ifdef I2S_HAVE_RX
   i2s_hal_set_rx_clock(priv->config->ctx,
                        priv->config->clk_info,
-                       priv->config->rx_clk_src);
+                       priv->config->rx_clk_src,
+                       NULL);
 #endif /* I2S_HAVE_RX */
 }
 

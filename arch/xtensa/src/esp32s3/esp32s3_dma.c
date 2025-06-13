@@ -472,11 +472,11 @@ int esp32s3_dma_get_interrupt(int chan, bool tx)
 
   if (tx)
     {
-      intr_status = gdma_ll_tx_get_interrupt_status(ctx.dev, chan);
+      intr_status = gdma_ll_tx_get_interrupt_status(ctx.dev, chan, false);
     }
   else
     {
-      intr_status = gdma_ll_rx_get_interrupt_status(ctx.dev, chan);
+      intr_status = gdma_ll_rx_get_interrupt_status(ctx.dev, chan, false);
     }
 
   return intr_status;
@@ -694,7 +694,7 @@ void esp32s3_dma_init(void)
   modifyreg32(SYSTEM_PERIP_CLK_EN1_REG, 0, SYSTEM_DMA_CLK_EN_M);
   modifyreg32(SYSTEM_PERIP_RST_EN1_REG, SYSTEM_DMA_RST_M, 0);
 
-  gdma_hal_init(&ctx, 0);
+  ctx.dev = GDMA_LL_GET_HW(0);
 
   /* enable DMA clock gating */
 

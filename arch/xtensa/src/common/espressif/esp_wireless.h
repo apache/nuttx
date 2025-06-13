@@ -44,6 +44,9 @@
 #include "esp32s3_rt_timer.h"
 #endif
 
+#ifdef CONFIG_ESPRESSIF_WIFI
+#  include "os.h"
+#endif
 #include "esp_log.h"
 #include "esp_mac.h"
 #include "esp_private/phy.h"

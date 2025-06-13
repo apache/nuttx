@@ -143,7 +143,7 @@ endif
 
 ESP_HAL_3RDPARTY_REPO   = esp-hal-3rdparty
 ifndef ESP_HAL_3RDPARTY_VERSION
-	ESP_HAL_3RDPARTY_VERSION = 3f02f2139e79ddc60f98ca35ed65c62c6914f079
+	ESP_HAL_3RDPARTY_VERSION = e9a78c811578545e2bc673862d885a15bd6cbf67
 endif
 
 ifndef ESP_HAL_3RDPARTY_URL
@@ -184,12 +184,13 @@ include common/espressif/Make.defs
 include chip/Bootloader.mk
 
 context:: chip/$(ESP_HAL_3RDPARTY_REPO)
-ifeq ($(CONFIG_ESPRESSIF_WIRELESS),y)
 	$(Q) echo "Espressif HAL for 3rd Party Platforms: initializing submodules..."
-	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) submodule --quiet update --init $(GIT_DEPTH_PARAMETER) components/mbedtls/mbedtls components/esp_phy/lib components/esp_wifi/lib
+	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) submodule --quiet update --init $(GIT_DEPTH_PARAMETER) components/mbedtls/mbedtls
 	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO)/components/mbedtls/mbedtls reset --quiet --hard
 	$(Q) echo "Applying patches..."
 	$(Q) cd chip/$(ESP_HAL_3RDPARTY_REPO)/components/mbedtls/mbedtls && git apply ../../../nuttx/patches/components/mbedtls/mbedtls/*.patch
+ifeq ($(CONFIG_ESPRESSIF_WIRELESS),y)
+	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) submodule --quiet update --init $(GIT_DEPTH_PARAMETER) components/esp_phy/lib components/esp_wifi/lib
 endif
 
 distclean::

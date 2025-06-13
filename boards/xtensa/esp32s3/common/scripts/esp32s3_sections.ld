@@ -170,6 +170,7 @@ SECTIONS
     *libarch.a:xtensa_irqdispatch.*(.literal .text .literal.* .text.*)
     *libarch.a:xtensa_modifyreg32.*(.literal .text .literal.* .text.*)
     *libarch.a:xtensa_testset.*(.literal .text .literal.* .text.*)
+    *libarch.a:esp_app_desc.*(.literal .text .literal.* .text.*)
 
     *libc.a:sq_remlast.*(.literal .text .literal.* .text.*)
 
@@ -277,7 +278,13 @@ SECTIONS
     *libarch.a:*esp_efuse_fields.*(.text .text.* .literal .literal.*)
     *libarch.a:*esp_efuse_api_key.*(.text .text.* .literal .literal.*)
     *libarch.a:*log.*(.text .text.* .literal .literal.*)
-    *libarch.a:*log_noos.*(.text .text.* .literal .literal.*)
+    *libarch.a:*log_lock.*(.literal .literal.* .text .text.*)
+    *libarch.a:*log_print.*(.literal .literal.* .text .text.*)
+    *libarch.a:*log_timestamp.*(.literal.esp_log_early_timestamp .text.esp_log_early_timestamp)
+    *libarch.a:*log_timestamp.*(.literal.esp_log_timestamp .text.esp_log_timestamp)
+    *libarch.a:*log_timestamp_common.*(.literal .literal.* .text .text.*)
+    *libarch.a:*log_write.*(.literal.esp_log_write .text.esp_log_write)
+    *libarch.a:*log_write.*(.literal.esp_log_writev .text.esp_log_writev)
     *libarch.a:*cpu_region_protect.*(.text .text.* .literal .literal.*)
     *libarch.a:*mspi_timing_tuning.*(.text .text.* .literal .literal.*)
     *libarch.a:*esp_rom_cache_esp32s2_esp32s3.*(.literal .text .literal.* .text.*)
@@ -588,6 +595,10 @@ SECTIONS
   .flash.rodata : ALIGN(0x10000)
   {
     _rodata_reserved_start = ABSOLUTE(.);
+
+    /* !DO NOT PUT ANYTHING BEFORE THIS! */
+    /* Should be the first.  App version info. */
+    *(.rodata_desc .rodata_desc.*)
 
     _srodata = ABSOLUTE(.);
     *(EXCLUDE_FILE (esp32s3_start.* esp32s3_region.*
