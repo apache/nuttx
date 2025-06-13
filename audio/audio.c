@@ -99,6 +99,8 @@ static ssize_t  audio_write(FAR struct file *filep,
 static int      audio_ioctl(FAR struct file *filep,
                             int cmd,
                             unsigned long arg);
+static int      audio_mmap(FAR struct file *filep,
+                           FAR struct mm_map_entry_s *map);
 static int      audio_allocbuffer(FAR struct audio_upperhalf_s *upper,
                                   FAR struct audio_buf_desc_s * bufdesc);
 static int      audio_freebuffer(FAR struct audio_upperhalf_s *upper,
@@ -131,6 +133,7 @@ static const struct file_operations g_audioops =
   audio_write, /* write */
   NULL,        /* seek */
   audio_ioctl, /* ioctl */
+  audio_mmap,  /* mmap */
 };
 
 /****************************************************************************
@@ -734,6 +737,68 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           ret = lower->ops->ioctl(lower, cmd, arg);
         }
         break;
+    }
+
+  nxmutex_unlock(&upper->lock);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: audio_munmap
+ *
+ * Description:
+ *   The standard unmap method.
+ *
+ ****************************************************************************/
+
+static int audio_munmap(FAR struct task_group_s *group,
+                         FAR struct mm_map_entry_s *entry, FAR void *start,
+                         size_t length)
+{
+  return mm_map_remove(get_group_mm(group), entry);
+}
+
+/****************************************************************************
+ * Name: audio_mmap
+ *
+ * Description:
+ *   The standard mmap method.
+ *
+ ****************************************************************************/
+
+static int audio_mmap(FAR struct file *filep, FAR struct mm_map_entry_s *map)
+{
+  FAR struct inode *inode = filep->f_inode;
+  FAR struct audio_upperhalf_s *upper = inode->i_private;
+  int ret;
+
+  ret = nxmutex_lock(&upper->lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Return the address corresponding to the start of frame buffer. */
+
+  if (upper->apbs && map->length == upper->apbs[0]->nmaxbytes)
+    {
+      ret = map->offset / upper->apbs[0]->nmaxbytes;
+
+      DEBUGASSERT(ret < upper->periods);
+
+      map->vaddr = (FAR char *)upper->apbs[ret]->samp;
+      map->munmap = audio_munmap;
+      ret = mm_map_add(get_current_mm(), map);
+    }
+  else if (map->length == sizeof(struct hw_ptr_s))
+    {
+      map->vaddr = (FAR char *)upper->hwptr;
+      map->munmap = audio_munmap;
+      ret = mm_map_add(get_current_mm(), map);
+    }
+  else
+    {
+      ret = -EINVAL;
     }
 
   nxmutex_unlock(&upper->lock);
