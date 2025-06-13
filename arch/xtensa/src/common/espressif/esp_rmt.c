@@ -455,8 +455,8 @@ static void rmt_module_enable(void)
 
   if (g_rmtdev_common.rmt_module_enabled == false)
     {
-      periph_module_reset(rmt_periph_signals.groups[0].module);
-      periph_module_enable(rmt_periph_signals.groups[0].module);
+      periph_module_reset(PERIPH_RMT_MODULE);
+      periph_module_enable(PERIPH_RMT_MODULE);
       g_rmtdev_common.rmt_module_enabled = true;
     }
 

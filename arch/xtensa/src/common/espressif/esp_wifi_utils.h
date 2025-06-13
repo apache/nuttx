@@ -30,11 +30,12 @@
 #include <nuttx/config.h>
 #include <nuttx/net/netdev.h>
 
+#include "esp_private/wifi.h"
+
 #ifndef __ASSEMBLY__
+#  include <stdint.h>
+#endif /* __ASSEMBLY__ */
 
-#include <stdint.h>
-
-#undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
 extern "C"
@@ -97,10 +98,101 @@ int esp_wifi_get_scan_results(struct iwreq *iwr);
 
 void esp_wifi_scan_event_parse(void);
 
+/****************************************************************************
+ * Name: esp_evt_work_cb
+ *
+ * Description:
+ *   Process the cached event
+ *
+ * Input Parameters:
+ *   arg - No mean
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void esp_evt_work_cb(void *arg);
+
+/****************************************************************************
+ * Name: esp_event_post
+ *
+ * Description:
+ *   Active work queue and let the work to process the cached event
+ *
+ * Input Parameters:
+ *   event_base      - Event set name
+ *   event_id        - Event ID
+ *   event_data      - Event private data
+ *   event_data_size - Event data size
+ *   ticks           - Waiting system ticks
+ *
+ * Returned Value:
+ *   0 if success or -1 if fail
+ *
+ ****************************************************************************/
+
+int esp_event_post(const char *event_base,
+                   int32_t event_id,
+                   void *event_data,
+                   size_t event_data_size,
+                   uint32_t ticks);
+
+/****************************************************************************
+ * Name: esp_init_event_queue
+ *
+ * Description:
+ *   Initialize the Wi-Fi event queue that holds pending events to be
+ *   processed.  This queue is used to store Wi-Fi events like scan
+ *   completion, station connect/disconnect etc. before they are handled by
+ *   the event work callback.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void esp_init_event_queue(void);
+
+/****************************************************************************
+ * Name: esp_wifi_lock
+ *
+ * Description:
+ *   Lock or unlock the event process
+ *
+ * Input Parameters:
+ *   lock - true: Lock event process, false: unlock event process
+ *
+ * Returned Value:
+ *   The result of lock or unlock the event process
+ *
+ ****************************************************************************/
+
+int esp_wifi_lock(bool lock);
+
+/****************************************************************************
+ * Name: esp_wifi_notify_subscribe
+ *
+ * Description:
+ *   Enable event notification
+ *
+ * Input Parameters:
+ *   pid   - Task PID
+ *   event - Signal event data pointer
+ *
+ * Returned Value:
+ *   0 if success or -1 if fail
+ *
+ ****************************************************************************/
+
+int esp_wifi_notify_subscribe(pid_t pid, struct sigevent *event);
+
+#undef EXTERN
 #ifdef __cplusplus
 }
 #endif
-#undef EXTERN
 
-#endif /* __ASSEMBLY__ */
 #endif /* __ARCH_XTENSA_SRC_COMMON_ESPRESSIF_ESP_WIFI_UTILS_H */

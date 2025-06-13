@@ -51,6 +51,7 @@
 
 #include "spi_flash_defs.h"
 #include "hal/cache_hal.h"
+#include "hal/cache_ll.h"
 #include "soc/extmem_reg.h"
 #include "soc/spi_mem_reg.h"
 #include "rom/opi_flash.h"
@@ -887,7 +888,7 @@ static inline void IRAM_ATTR spiflash_os_yield(void)
 
 static void spi_flash_disable_cache(void)
 {
-  cache_hal_suspend(CACHE_TYPE_ALL);
+  cache_hal_suspend(CACHE_LL_LEVEL_EXT_MEM, CACHE_TYPE_ALL);
 }
 
 /****************************************************************************
@@ -907,7 +908,7 @@ static void spi_flash_disable_cache(void)
 
 static void spi_flash_restore_cache(void)
 {
-  cache_hal_resume(CACHE_TYPE_ALL);
+  cache_hal_resume(CACHE_LL_LEVEL_EXT_MEM, CACHE_TYPE_ALL);
 }
 
 #ifdef CONFIG_SMP
@@ -1098,7 +1099,7 @@ int esp32s3_mmap(struct spiflash_map_req_s *req)
        start_page < DROM0_PAGES_END;
        ++start_page)
     {
-      if (MMU_TABLE[start_page] == MMU_INVALID)
+      if (MMU_TABLE[start_page] == SOC_MMU_INVALID)
         {
           break;
         }
@@ -1165,7 +1166,7 @@ void esp32s3_ummap(const struct spiflash_map_req_s *req)
 
   for (i = req->start_page; i < req->start_page + req->page_cnt; ++i)
     {
-      MMU_TABLE[i] = MMU_INVALID;
+      MMU_TABLE[i] = SOC_MMU_INVALID;
     }
 
   spiflash_end();

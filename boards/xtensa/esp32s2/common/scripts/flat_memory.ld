@@ -160,6 +160,7 @@ MEMORY
 
   /* RTC fast memory (same block as above), viewed from data bus */
   rtc_data_seg(RW)  :                 org = 0x3ff9e000, len = 0x2000
+  rtc_reserved_seg(RW) : org = 0x3ff9e000 + 0x2000 - (0 + (24)), len = (0 + (24))
 }
 
 #if CONFIG_ESP32S2_RUN_IRAM

@@ -285,7 +285,7 @@ int map_rom_segments(uint32_t app_drom_start, uint32_t app_drom_vaddr,
   cache_read_enable(APP_CPU_NUM);
 #  endif
 #else
-  cache_hal_disable(CACHE_TYPE_ALL);
+  cache_hal_disable(CACHE_LL_LEVEL_EXT_MEM, CACHE_TYPE_ALL);
 #endif
 
   /* Clear the MMU entries that are already set up,
@@ -341,7 +341,7 @@ int map_rom_segments(uint32_t app_drom_start, uint32_t app_drom_vaddr,
 #ifdef CONFIG_ARCH_CHIP_ESP32
   cache_read_enable(0);
 #else
-  cache_hal_enable(CACHE_TYPE_ALL);
+  cache_hal_enable(CACHE_LL_LEVEL_EXT_MEM, CACHE_TYPE_ALL);
 #endif
   return (int)rc;
 }

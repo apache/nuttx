@@ -56,13 +56,57 @@ extern "C"
  * Pre-processor Definitions
  ****************************************************************************/
 
-#
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#if defined(CONFIG_ESPRESSIF_WIFI_STATION)
+#  define ESPRESSIF_WLAN_HAS_STA
+#  define ESPRESSIF_WLAN_STA_DEVNO    0
+#  define ESPRESSIF_WLAN_DEVS         1
+#elif defined(CONFIG_ESPRESSIF_WIFI_SOFTAP)
+#  define ESPRESSIF_WLAN_HAS_SOFTAP
+#  define ESPRESSIF_WLAN_SOFTAP_DEVNO 0
+#  define ESPRESSIF_WLAN_DEVS         1
+#elif defined(CONFIG_ESPRESSIF_WIFI_STATION_SOFTAP)
+#  define ESPRESSIF_WLAN_HAS_STA
+#  define ESPRESSIF_WLAN_HAS_SOFTAP
+#  define ESPRESSIF_WLAN_STA_DEVNO    0
+#  define ESPRESSIF_WLAN_SOFTAP_DEVNO 1
+#  define ESPRESSIF_WLAN_DEVS         2
+#endif
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#ifdef ESPRESSIF_WLAN_HAS_STA
+
+/* If reconnect automatically */
+
+extern volatile bool g_sta_reconnect;
+
+/* If Wi-Fi sta starts */
+
+extern volatile bool g_sta_started;
+
+/* If Wi-Fi sta connected */
+
+extern volatile bool g_sta_connected;
+
+#endif /* ESPRESSIF_WLAN_HAS_STA */
+
+#ifdef ESPRESSIF_WLAN_HAS_SOFTAP
+
+/* If Wi-Fi SoftAP starts */
+
+extern volatile bool g_softap_started;
+
+#endif /* ESPRESSIF_WLAN_HAS_SOFTAP */
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
-
-#ifdef ESPRESSIF_WLAN_HAS_STA
 
 /****************************************************************************
  * Name: esp_wlan_sta_set_linkstatus
@@ -97,7 +141,6 @@ int esp_wlan_sta_set_linkstatus(bool linkstatus);
  ****************************************************************************/
 
 int esp_wlan_sta_initialize(void);
-#endif /* ESPRESSIF_WLAN_HAS_STA */
 
 /****************************************************************************
  * Name: esp_wlan_softap_initialize
@@ -113,9 +156,7 @@ int esp_wlan_sta_initialize(void);
  *
  ****************************************************************************/
 
-#ifdef ESPRESSIF_WLAN_HAS_SOFTAP
 int esp_wlan_softap_initialize(void);
-#endif /* ESPRESSIF_WLAN_HAS_SOFTAP */
 
 #endif /* CONFIG_ESPRESSIF_WIFI */
 #ifdef __cplusplus
