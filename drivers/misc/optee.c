@@ -539,14 +539,14 @@ static int optee_close(FAR struct file *filep)
 
   idr_for_each_entry(priv->shms, shm, id)
     {
-      if (shm->fd > -1 && fs_get(shm->fd, &shm_filep) >= 0)
+      if (shm->fd > -1 && file_get(shm->fd, &shm_filep) >= 0)
         {
           /* The user did not call close(), prevent vfs auto-close from
            * double-freeing our SHM
            */
 
           shm_filep->f_priv = NULL;
-          fs_put(shm_filep);
+          file_put(shm_filep);
         }
 
       optee_shm_free(shm);
@@ -1038,8 +1038,7 @@ optee_ioctl_shm_register(FAR struct optee_priv_data *priv,
       return ret;
     }
 
-  ret = file_allocate_from_inode(&g_optee_shm_inode, O_CLOEXEC,
-                                 0, shm, 0, true);
+  ret = file_allocate_from_inode(&g_optee_shm_inode, O_CLOEXEC, 0, shm, 0);
   if (ret < 0)
     {
       optee_shm_free(shm);
