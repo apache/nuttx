@@ -151,6 +151,42 @@ struct wlan_priv_s
 };
 
 /****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#ifdef ESP_WLAN_HAS_STA
+
+/* If reconnect automatically */
+
+volatile bool g_sta_reconnect;
+
+/* If Wi-Fi sta starts */
+
+volatile bool g_sta_started;
+
+/* If Wi-Fi sta connected */
+
+volatile bool g_sta_connected;
+
+/* Wi-Fi interface configuration */
+
+wifi_config_t g_sta_wifi_cfg;
+
+#endif /* ESP_WLAN_HAS_STA */
+
+#ifdef ESP_WLAN_HAS_SOFTAP
+
+/* If Wi-Fi SoftAP starts */
+
+volatile bool g_softap_started;
+
+/* Wi-Fi interface configuration */
+
+wifi_config_t g_softap_wifi_cfg;
+
+#endif /* ESP_WLAN_HAS_SOFTAP */
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -1694,8 +1730,8 @@ int esp_wlan_softap_initialize(void)
  *   ifidx    - The interface id that the tx callback has been triggered from
  *   data     - Pointer to the data transmitted
  *   data_len - Length of the data transmitted
- *   txstatus - True:if the data was transmitted successfully False: if data
- *              transmission failed
+ *   txstatus - True: if the data was transmitted successfully
+ *              False: if data transmission failed
  *
  * Returned Value:
  *   None
