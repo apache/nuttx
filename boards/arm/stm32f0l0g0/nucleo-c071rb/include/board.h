@@ -72,6 +72,15 @@
 #define STM32_RCC_CFGR_PPRE     RCC_CFGR_PPRE_HCLK
 #define STM32_PCLK1_FREQUENCY   STM32_HCLK_FREQUENCY
 
+/* All timers on PCLK x1 (48 MHz) */
+
+#define STM32_APB2_TIM1_CLKIN   STM32_PCLK1_FREQUENCY
+#define STM32_APB1_TIM2_CLKIN   STM32_PCLK1_FREQUENCY
+#define STM32_APB1_TIM3_CLKIN   STM32_PCLK1_FREQUENCY
+#define STM32_APB2_TIM15_CLKIN  STM32_PCLK1_FREQUENCY
+#define STM32_APB2_TIM16_CLKIN  STM32_PCLK1_FREQUENCY
+#define STM32_APB2_TIM17_CLKIN  STM32_PCLK1_FREQUENCY
+
 /* LED definitions **********************************************************/
 
 /* LED index values for use with board_userled() */
