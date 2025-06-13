@@ -27,10 +27,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if defined(CONFIG_STM32F0L0G0_STM32F0) || defined(CONFIG_STM32F0L0G0_STM32L0)
-#error "Timer definitions should be validated for target before use"
-#endif
-
 /* TODO Missing TIM2 definitions available on STM32G0x1 */
 
 /* Register Offsets *********************************************************/
