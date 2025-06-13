@@ -38,6 +38,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/fs/procfs.h>
+#include <nuttx/lib/lib.h>
 #include <nuttx/mutex.h>
 #include <nuttx/mm/mm.h>
 #include <nuttx/mm/kasan.h>
@@ -1021,13 +1022,13 @@ bool mm_heapmember(FAR struct mm_heap_s *heap, FAR void *mem)
 FAR struct mm_heap_s *
 mm_initialize_heap(FAR const struct mm_heap_config_s *config)
 {
-  FAR struct mm_heap_s *heap = config->heap;
+  FAR struct mm_heap_s *heap;
   FAR const char *name = config->name;
   FAR void *heapstart = config->start;
   size_t heapsize = config->size;
 
   minfo("Heap: name=%s start=%p size=%zu\n", name, heapstart, heapsize);
-  if (heap == NULL)
+  if (!config->allocheap)
     {
       /* Reserve a block space for mm_heap_s context */
 
@@ -1041,7 +1042,7 @@ mm_initialize_heap(FAR const struct mm_heap_config_s *config)
     }
   else
     {
-      heap = mm_memalign(heap, MM_ALIGN, sizeof(struct mm_heap_s));
+      heap = lib_memalign(MM_ALIGN, sizeof(struct mm_heap_s));
       if (heap == NULL)
         {
           return NULL;

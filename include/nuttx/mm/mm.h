@@ -142,14 +142,12 @@
  */
 
 #ifdef CONFIG_MM_KERNEL_HEAP
-#  define KRN_HEAP               g_kmmheap
 #  if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
 #    define MM_INTERNAL_HEAP(heap) ((heap) == g_kmmheap)
 #  else
 #    define MM_INTERNAL_HEAP(heap) ((heap) == USR_HEAP || (heap) == g_kmmheap)
 #  endif
 #else
-#  define KRN_HEAP               USR_HEAP
 #  if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
 #    define MM_INTERNAL_HEAP(heap) 0
 #  else
@@ -203,16 +201,16 @@ struct mm_heap_s; /* Forward reference */
 
 struct mm_heap_config_s
 {
-  /* If heap == NULL, means use the heap memory ([start, start + size])
+  /* If allocheap == false, means use the heap memory ([start, start + size])
    * to construct the heap struct.
-   * If heap != NULL, means malloc struct mm_heap_s from this heap.
+   * If allocheap == true, means malloc struct mm_heap_s from this heap.
    */
 
-  FAR struct mm_heap_s *heap;
-  FAR const char       *name;
-  FAR void             *start;
-  size_t                size;
-  bool                  nokasan;
+  FAR const char *name;
+  FAR void       *start;
+  size_t          size;
+  bool            nokasan;
+  bool            allocheap;
 };
 
 struct mempool_init_s
