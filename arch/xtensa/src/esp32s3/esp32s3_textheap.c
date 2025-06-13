@@ -32,6 +32,7 @@
 #include <nuttx/kmalloc.h>
 
 #include "hal/cache_hal.h"
+#include "hal/cache_ll.h"
 #include "hardware/esp32s3_soc.h"
 
 #ifdef CONFIG_ESP32S3_RTC_HEAP
@@ -226,8 +227,9 @@ IRAM_ATTR void up_textheap_data_sync(void)
 #ifdef CONFIG_ESP32S3_SPIRAM
   esp_spiram_writeback_cache();
 #endif
-  cache_hal_disable(CACHE_TYPE_INSTRUCTION);
-  cache_hal_enable(CACHE_TYPE_INSTRUCTION);
+
+  cache_hal_disable(CACHE_LL_LEVEL_EXT_MEM, CACHE_TYPE_ALL);
+  cache_hal_enable(CACHE_LL_LEVEL_EXT_MEM, CACHE_TYPE_ALL);
 
   leave_critical_section(flags);
 }

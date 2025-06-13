@@ -40,7 +40,6 @@
 #include <arch/irq.h>
 
 #include "esp32s2_gpio.h"
-#include "esp32s2_rtc_gpio.h"
 #include "esp32s2_touch.h"
 
 #include "esp32s2-kaluga-1.h"

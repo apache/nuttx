@@ -1371,6 +1371,7 @@ config ESPRESSIF_SIMPLE_BOOT
 config ESP32S2_APP_FORMAT_MCUBOOT
 	bool "Enable MCUboot-bootable format"
 	depends on !MCUBOOT_BOOTLOADER
+	select ESPRESSIF_BOOTLOADER_MCUBOOT
 	default n
 	select ESPRESSIF_HAVE_OTA_PARTITION
 	---help---

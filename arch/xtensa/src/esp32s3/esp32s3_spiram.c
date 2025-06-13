@@ -167,7 +167,7 @@ static inline uint32_t mmu_valid_space(uint32_t *start_address)
 
   for (int i = (FLASH_MMU_TABLE_SIZE - 1); i >= 0; i--)
     {
-      if (FLASH_MMU_TABLE[i] & MMU_INVALID)
+      if (FLASH_MMU_TABLE[i] & SOC_MMU_INVALID)
         {
           continue;
         }
@@ -178,7 +178,7 @@ static inline uint32_t mmu_valid_space(uint32_t *start_address)
 
       i++;
 
-      *start_address = DRAM0_CACHE_ADDRESS_LOW + (i) * MMU_PAGE_SIZE;
+      *start_address = SOC_DRAM0_CACHE_ADDRESS_LOW + (i) * MMU_PAGE_SIZE;
       return (FLASH_MMU_TABLE_SIZE - i) * MMU_PAGE_SIZE;
     }
 
@@ -228,11 +228,10 @@ static inline bool mmu_check_valid_ext_vaddr_region(uint32_t vaddr_start,
                                                     uint32_t len)
 {
   uint32_t vaddr_end = vaddr_start + len - 1;
-  bool valid = false;
-  valid |= (ADDRESS_IN_IRAM0_CACHE(vaddr_start) &&
-            ADDRESS_IN_IRAM0_CACHE(vaddr_end)) |
-           (ADDRESS_IN_DRAM0_CACHE(vaddr_start) &&
-            ADDRESS_IN_DRAM0_CACHE(vaddr_end));
+  bool valid = (SOC_ADDRESS_IN_IRAM0_CACHE(vaddr_start) &&
+                SOC_ADDRESS_IN_IRAM0_CACHE(vaddr_end)) |
+               (SOC_ADDRESS_IN_DRAM0_CACHE(vaddr_start) &&
+                SOC_ADDRESS_IN_DRAM0_CACHE(vaddr_end));
   return valid;
 }
 
@@ -272,7 +271,7 @@ static int IRAM_ATTR esp_mmu_map_region(uint32_t vaddr, uint32_t paddr,
     {
       entry_id = (vaddr & MMU_VADDR_MASK) >> 16;
       DEBUGASSERT(entry_id < MMU_ENTRY_NUM);
-      if (write_back == false &&  FLASH_MMU_TABLE[entry_id] != MMU_INVALID)
+      if (!write_back && FLASH_MMU_TABLE[entry_id] != SOC_MMU_INVALID)
         {
           esp_spiram_writeback_cache();
           write_back = true;
@@ -359,7 +358,8 @@ int IRAM_ATTR cache_dbus_mmu_map(int vaddr, int paddr, int num)
 #endif
   cache_state[cpu] = cache_suspend_dcache();
 
-  esp_mmu_map_region(vaddr, paddr, num * MMU_PAGE_SIZE, MMU_ACCESS_SPIRAM);
+  esp_mmu_map_region(vaddr, paddr, num * MMU_PAGE_SIZE,
+                     SOC_MMU_ACCESS_SPIRAM);
 
   regval = getreg32(EXTMEM_DCACHE_CTRL1_REG);
   regval &= ~EXTMEM_DCACHE_SHUT_CORE0_BUS;
@@ -414,7 +414,7 @@ int IRAM_ATTR esp_spiram_init_cache(void)
     {
       ASSERT(SPIRAM_VADDR_OFFSET % MMU_PAGE_SIZE == 0);
       ASSERT(SPIRAM_VADDR_MAP_SIZE % MMU_PAGE_SIZE == 0);
-      target_mapped_vaddr_start = DRAM0_CACHE_ADDRESS_LOW +
+      target_mapped_vaddr_start = SOC_DRAM0_CACHE_ADDRESS_LOW +
                                   SPIRAM_VADDR_OFFSET;
       target_mapped_vaddr_end = target_mapped_vaddr_start +
                                 SPIRAM_VADDR_MAP_SIZE;
@@ -439,7 +439,7 @@ int IRAM_ATTR esp_spiram_init_cache(void)
         }
 
       ASSERT(target_mapped_vaddr_end > target_mapped_vaddr_start);
-      ASSERT(target_mapped_vaddr_end <= DRAM0_CACHE_ADDRESS_HIGH);
+      ASSERT(target_mapped_vaddr_end <= SOC_DRAM0_CACHE_ADDRESS_HIGH);
       mapped_vaddr_size = target_mapped_vaddr_end -
                           target_mapped_vaddr_start;
       g_mapped_vaddr_start = target_mapped_vaddr_start;
@@ -468,7 +468,7 @@ int IRAM_ATTR esp_spiram_init_cache(void)
 
   cache_suspend_dcache();
 
-  cache_dbus_mmu_set(MMU_ACCESS_SPIRAM, g_mapped_vaddr_start,
+  cache_dbus_mmu_set(SOC_MMU_ACCESS_SPIRAM, g_mapped_vaddr_start,
                      0, 64, g_mapped_size >> 16, 0);
 
   regval = getreg32(EXTMEM_DCACHE_CTRL1_REG);

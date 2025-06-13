@@ -33,6 +33,8 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/wireless/wireless.h>
+#include <nuttx/signal.h>
+#include <nuttx/spinlock.h>
 
 #ifdef CONFIG_ARCH_CHIP_ESP32
 #include "esp32_wifi_adapter.h"
@@ -44,6 +46,20 @@
 #include "esp32s3_wifi_adapter.h"
 #endif
 
+#ifdef CONFIG_ESPRESSIF_BLE
+#  ifdef CONFIG_ARCH_CHIP_ESP32
+#    include "esp32_ble_adapter.h"
+#  endif
+#  ifdef CONFIG_ARCH_CHIP_ESP32S3
+#    include "esp32s3_ble_adapter.h"
+#  endif
+#  ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
+#    include "private/esp_coexist_internal.h"
+#  endif
+#endif
+
+#include "espressif/esp_wlan.h"
+
 #include "esp_wifi_utils.h"
 #include "esp_wireless.h"
 
@@ -53,7 +69,9 @@
 #include "esp_private/wifi.h"
 #include "esp_random.h"
 #include "esp_timer.h"
-#include "esp_wpa.h"
+#ifdef CONFIG_ESPRESSIF_WIFI
+#  include "esp_wpa.h"
+#endif
 #include "rom/ets_sys.h"
 #include "soc/soc_caps.h"
 
@@ -78,6 +96,18 @@
 
 #define CHANNEL_MAX_NUM              (14)
 
+/* CONFIG_POWER_SAVE_MODEM */
+
+#if defined(CONFIG_ESPRESSIF_POWER_SAVE_MIN_MODEM)
+#  define DEFAULT_PS_MODE WIFI_PS_MIN_MODEM
+#elif defined(CONFIG_ESPRESSIF_POWER_SAVE_MAX_MODEM)
+#  define DEFAULT_PS_MODE WIFI_PS_MAX_MODEM
+#elif defined(CONFIG_ESPRESSIF_POWER_SAVE_NONE)
+#  define DEFAULT_PS_MODE WIFI_PS_NONE
+#else
+#  define DEFAULT_PS_MODE WIFI_PS_NONE
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -99,6 +129,70 @@ struct wifi_scan_result
   unsigned int scan_result_size;       /* Current size of temp buffer */
 };
 
+/* Wi-Fi event ID */
+
+enum wifi_adpt_evt_e
+{
+  WIFI_ADPT_EVT_SCAN_DONE = 0,
+  WIFI_ADPT_EVT_STA_START,
+  WIFI_ADPT_EVT_STA_CONNECT,
+  WIFI_ADPT_EVT_STA_DISCONNECT,
+  WIFI_ADPT_EVT_STA_AUTHMODE_CHANGE,
+  WIFI_ADPT_EVT_STA_STOP,
+  WIFI_ADPT_EVT_AP_START,
+  WIFI_ADPT_EVT_AP_STOP,
+  WIFI_ADPT_EVT_AP_STACONNECTED,
+  WIFI_ADPT_EVT_AP_STADISCONNECTED,
+  WIFI_ADPT_EVT_MAX,
+};
+
+/* Wi-Fi event callback function */
+
+typedef void (*wifi_evt_cb_t)(void *p);
+
+/* Wi-Fi event private data */
+
+struct evt_adpt
+{
+  sq_entry_t entry;         /* Sequence entry */
+  int32_t id;               /* Event ID */
+  uint8_t buf[0];           /* Event private data */
+};
+
+/* Wi-Fi event notification private data */
+
+struct wifi_notify
+{
+  bool assigned;            /* Flag indicate if it is used */
+  pid_t pid;                /* Signal's target thread PID */
+  struct sigevent event;    /* Signal event private data */
+  struct sigwork_s work;    /* Signal work private data */
+};
+
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+static int esp_event_id_map(int event_id);
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/* Wi-Fi interface configuration */
+
+#ifdef ESPRESSIF_WLAN_HAS_STA
+
+extern wifi_config_t g_sta_wifi_cfg;
+
+#endif /* ESPRESSIF_WLAN_HAS_STA */
+
+#ifdef ESPRESSIF_WLAN_HAS_SOFTAP
+
+extern wifi_config_t g_softap_wifi_cfg;
+
+#endif /* ESPRESSIF_WLAN_HAS_SOFTAP */
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -109,6 +203,91 @@ static struct wifi_scan_result g_scan_priv =
 };
 static uint8_t g_channel_num;
 static uint8_t g_channel_list[CHANNEL_MAX_NUM];
+
+/* Wi-Fi event private data */
+
+static spinlock_t g_lock_event;
+static struct work_s g_wifi_evt_work;
+static sq_queue_t g_wifi_evt_queue;
+static struct wifi_notify g_wifi_notify[WIFI_ADPT_EVT_MAX];
+
+static mutex_t g_wifiexcl_lock = NXMUTEX_INITIALIZER;
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: esp_event_id_map
+ *
+ * Description:
+ *   Transform from esp-idf event ID to Wi-Fi adapter event ID
+ *
+ * Input Parameters:
+ *   event_id - esp-idf event ID
+ *
+ * Returned Value:
+ *   Wi-Fi adapter event ID
+ *
+ ****************************************************************************/
+
+static int esp_event_id_map(int event_id)
+{
+  int id;
+
+  switch (event_id)
+    {
+      case WIFI_EVENT_SCAN_DONE:
+        id = WIFI_ADPT_EVT_SCAN_DONE;
+        break;
+
+#ifdef ESPRESSIF_WLAN_HAS_STA
+      case WIFI_EVENT_STA_START:
+        id = WIFI_ADPT_EVT_STA_START;
+        break;
+
+      case WIFI_EVENT_STA_CONNECTED:
+        id = WIFI_ADPT_EVT_STA_CONNECT;
+        break;
+
+      case WIFI_EVENT_STA_DISCONNECTED:
+        id = WIFI_ADPT_EVT_STA_DISCONNECT;
+        break;
+
+      case WIFI_EVENT_STA_AUTHMODE_CHANGE:
+        id = WIFI_ADPT_EVT_STA_AUTHMODE_CHANGE;
+        break;
+
+      case WIFI_EVENT_STA_STOP:
+        id = WIFI_ADPT_EVT_STA_STOP;
+        break;
+#endif /* ESPRESSIF_WLAN_HAS_STA */
+
+#ifdef ESPRESSIF_WLAN_HAS_SOFTAP
+      case WIFI_EVENT_AP_START:
+        id = WIFI_ADPT_EVT_AP_START;
+        break;
+
+      case WIFI_EVENT_AP_STOP:
+        id = WIFI_ADPT_EVT_AP_STOP;
+        break;
+
+      case WIFI_EVENT_AP_STACONNECTED:
+        id = WIFI_ADPT_EVT_AP_STACONNECTED;
+        break;
+
+      case WIFI_EVENT_AP_STADISCONNECTED:
+        id = WIFI_ADPT_EVT_AP_STADISCONNECTED;
+        break;
+#endif /* ESPRESSIF_WLAN_HAS_SOFTAP */
+
+      default:
+        wlerr("ERROR: Unknown event ID: %d\n", event_id);
+        return -1;
+    }
+
+  return id;
+}
 
 /****************************************************************************
  * Public Functions
@@ -582,4 +761,405 @@ scan_result_full:
 
   priv->scan_status = ESP_SCAN_DONE;
   nxsem_post(&priv->scan_signal);
+}
+
+/****************************************************************************
+ * Name: esp_evt_work_cb
+ *
+ * Description:
+ *   Process the cached event
+ *
+ * Input Parameters:
+ *   arg - No mean
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void esp_evt_work_cb(void *arg)
+{
+  int ret;
+  irqstate_t flags;
+  struct evt_adpt *evt_adpt;
+  struct wifi_notify *notify;
+  wifi_ps_type_t ps_type = DEFAULT_PS_MODE;
+
+  while (1)
+    {
+      flags = spin_lock_irqsave(&g_lock_event);
+      evt_adpt = (struct evt_adpt *)sq_remfirst(&g_wifi_evt_queue);
+      spin_unlock_irqrestore(&g_lock_event, flags);
+      if (!evt_adpt)
+        {
+          break;
+        }
+
+      /* Some of the following logic (eg. esp32s3_wlan_sta_set_linkstatus)
+       * can take net_lock(). To maintain the consistent locking order,
+       * we take net_lock() here before taking esp_wifi_lock. Note that
+       * net_lock() is a recursive lock.
+       */
+
+      net_lock();
+      esp_wifi_lock(true);
+
+      switch (evt_adpt->id)
+        {
+          case WIFI_ADPT_EVT_SCAN_DONE:
+            esp_wifi_scan_event_parse();
+            break;
+
+#ifdef ESPRESSIF_WLAN_HAS_STA
+          case WIFI_ADPT_EVT_STA_START:
+            wlinfo("Wi-Fi sta start\n");
+
+            g_sta_connected = false;
+
+#ifdef CONFIG_ESPRESSIF_BLE
+            if (esp_bt_controller_get_status() !=
+                ESP_BT_CONTROLLER_STATUS_IDLE)
+              {
+                if (ps_type == WIFI_PS_NONE)
+                  {
+                    ps_type = WIFI_PS_MIN_MODEM;
+                  }
+              }
+#endif
+
+            ret = esp_wifi_set_ps(ps_type);
+
+            if (ret)
+              {
+                wlerr("Failed to set power save type\n");
+                break;
+              }
+            else
+              {
+                wlinfo("INFO: Set ps type=%d\n", ps_type);
+              }
+
+            ret = esp_wifi_get_config(WIFI_IF_STA, &g_sta_wifi_cfg);
+            if (ret)
+              {
+                wlerr("Failed to get Wi-Fi config data ret=%d\n", ret);
+              }
+            break;
+
+          case WIFI_ADPT_EVT_STA_CONNECT:
+            wlinfo("Wi-Fi sta connect\n");
+            g_sta_connected = true;
+            ret = esp_wlan_sta_set_linkstatus(true);
+            if (ret < 0)
+              {
+                wlerr("ERROR: Failed to set Wi-Fi station link status\n");
+              }
+
+            break;
+
+          case WIFI_ADPT_EVT_STA_DISCONNECT:
+            wlinfo("Wi-Fi sta disconnect\n");
+            g_sta_connected = false;
+            ret = esp_wlan_sta_set_linkstatus(false);
+            if (ret < 0)
+              {
+                wlerr("ERROR: Failed to set Wi-Fi station link status\n");
+              }
+
+            if (g_sta_reconnect)
+              {
+                ret = esp_wifi_connect();
+                if (ret)
+                  {
+                    wlerr("Failed to connect AP error=%d\n", ret);
+                  }
+              }
+            break;
+
+          case WIFI_ADPT_EVT_STA_STOP:
+            wlinfo("Wi-Fi sta stop\n");
+            g_sta_connected = false;
+            break;
+#endif /* ESPRESSIF_WLAN_HAS_STA */
+
+#ifdef ESPRESSIF_WLAN_HAS_SOFTAP
+          case WIFI_ADPT_EVT_AP_START:
+            wlinfo("INFO: Wi-Fi softap start\n");
+
+#ifdef CONFIG_ESPRESSIF_BLE
+            if (esp_bt_controller_get_status() !=
+                ESP_BT_CONTROLLER_STATUS_IDLE)
+              {
+                if (ps_type == WIFI_PS_NONE)
+                  {
+                    ps_type = WIFI_PS_MIN_MODEM;
+                  }
+              }
+#endif
+
+            ret = esp_wifi_set_ps(ps_type);
+
+            if (ret)
+              {
+                wlerr("Failed to set power save type\n");
+                break;
+              }
+            else
+              {
+                wlinfo("INFO: Set ps type=%d\n", ps_type);
+              }
+
+            ret = esp_wifi_get_config(WIFI_IF_AP, &g_softap_wifi_cfg);
+            if (ret)
+              {
+                wlerr("Failed to get Wi-Fi config data ret=%d\n", ret);
+              }
+            break;
+
+          case WIFI_ADPT_EVT_AP_STOP:
+            wlinfo("INFO: Wi-Fi softap stop\n");
+            break;
+
+          case WIFI_ADPT_EVT_AP_STACONNECTED:
+            wlinfo("INFO: Wi-Fi station join\n");
+            break;
+
+          case WIFI_ADPT_EVT_AP_STADISCONNECTED:
+            wlinfo("INFO: Wi-Fi station leave\n");
+            break;
+#endif /* ESPRESSIF_WLAN_HAS_SOFTAP */
+          default:
+            break;
+        }
+
+      notify = &g_wifi_notify[evt_adpt->id];
+      if (notify->assigned)
+        {
+          notify->event.sigev_value.sival_ptr = evt_adpt->buf;
+
+          ret = nxsig_notification(notify->pid, &notify->event,
+                                   SI_QUEUE, &notify->work);
+          if (ret < 0)
+            {
+              wlwarn("nxsig_notification event ID=%" PRId32 " failed: %d\n",
+                     evt_adpt->id, ret);
+            }
+        }
+
+      esp_wifi_lock(false);
+      net_unlock();
+
+      kmm_free(evt_adpt);
+    }
+}
+
+/****************************************************************************
+ * Name: esp_event_post
+ *
+ * Description:
+ *   Active work queue and let the work to process the cached event
+ *
+ * Input Parameters:
+ *   event_base      - Event set name
+ *   event_id        - Event ID
+ *   event_data      - Event private data
+ *   event_data_size - Event data size
+ *   ticks           - Waiting system ticks
+ *
+ * Returned Value:
+ *   0 if success or -1 if fail
+ *
+ ****************************************************************************/
+
+int esp_event_post(esp_event_base_t event_base,
+                   int32_t event_id,
+                   void *event_data,
+                   size_t event_data_size,
+                   uint32_t ticks)
+{
+  size_t size;
+  int32_t id;
+  irqstate_t flags;
+  struct evt_adpt *evt_adpt;
+
+  wlinfo("Event: base=%s id=%" PRId32 " data=%p data_size=%d "
+         "ticks=%" PRIu32 "\n",
+         event_base, event_id, event_data, event_data_size, ticks);
+
+  id = esp_event_id_map(event_id);
+  if (id < 0)
+    {
+      wlinfo("No process event %" PRId32 "\n", event_id);
+      return -1;
+    }
+
+  size = event_data_size + sizeof(struct evt_adpt);
+  evt_adpt = kmm_malloc(size);
+  if (!evt_adpt)
+    {
+      wlerr("Failed to alloc %d memory\n", size);
+      return -1;
+    }
+
+  evt_adpt->id = id;
+  memcpy(evt_adpt->buf, event_data, event_data_size);
+
+  flags = spin_lock_irqsave(&g_lock_event);
+  sq_addlast(&evt_adpt->entry, &g_wifi_evt_queue);
+  spin_unlock_irqrestore(&g_lock_event, flags);
+
+  work_queue(LPWORK, &g_wifi_evt_work, esp_evt_work_cb, NULL, 0);
+
+  return 0;
+}
+
+/****************************************************************************
+ * Name: esp_init_event_queue
+ *
+ * Description:
+ *   Initialize the Wi-Fi event queue that holds pending events to be
+ *   processed.  This queue is used to store Wi-Fi events like scan
+ *   completion, station connect/disconnect etc. before they are handled by
+ *   the event work callback.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void esp_init_event_queue(void)
+{
+  sq_init(&g_wifi_evt_queue);
+}
+
+/****************************************************************************
+ * Name: esp_wifi_lock
+ *
+ * Description:
+ *   Lock or unlock the event process
+ *
+ * Input Parameters:
+ *   lock - true: Lock event process, false: unlock event process
+ *
+ * Returned Value:
+ *   The result of lock or unlock the event process
+ *
+ ****************************************************************************/
+
+int esp_wifi_lock(bool lock)
+{
+  int ret;
+
+  if (lock)
+    {
+      ret = nxmutex_lock(&g_wifiexcl_lock);
+      if (ret < 0)
+        {
+          wlinfo("Failed to lock Wi-Fi ret=%d\n", ret);
+        }
+    }
+  else
+    {
+      ret = nxmutex_unlock(&g_wifiexcl_lock);
+      if (ret < 0)
+        {
+          wlinfo("Failed to unlock Wi-Fi ret=%d\n", ret);
+        }
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: esp_wifi_notify_subscribe
+ *
+ * Description:
+ *   Enable event notification
+ *
+ * Input Parameters:
+ *   pid   - Task PID
+ *   event - Signal event data pointer
+ *
+ * Returned Value:
+ *   0 if success or -1 if fail
+ *
+ ****************************************************************************/
+
+int esp_wifi_notify_subscribe(pid_t pid, struct sigevent *event)
+{
+  int id;
+  struct wifi_notify *notify;
+  int ret = -1;
+
+  wlinfo("PID=%d event=%p\n", pid, event);
+
+  esp_wifi_lock(true);
+
+  if (event->sigev_notify == SIGEV_SIGNAL)
+    {
+      id = esp_event_id_map(event->sigev_signo);
+      if (id < 0)
+        {
+          wlerr("No process event %d\n", event->sigev_signo);
+        }
+      else
+        {
+          notify = &g_wifi_notify[id];
+
+          if (notify->assigned)
+            {
+              wlerr("sigev_signo %d has subscribed\n",
+                    event->sigev_signo);
+            }
+          else
+            {
+              if (pid == 0)
+                {
+                  pid = nxsched_gettid();
+                  wlinfo("Actual PID=%d\n", pid);
+                }
+
+              notify->pid = pid;
+              notify->event = *event;
+              notify->assigned = true;
+
+              ret = 0;
+            }
+        }
+    }
+  else if (event->sigev_notify == SIGEV_NONE)
+    {
+      id = esp_event_id_map(event->sigev_signo);
+      if (id < 0)
+        {
+          wlerr("No process event %d\n", event->sigev_signo);
+        }
+      else
+        {
+          notify = &g_wifi_notify[id];
+
+          if (!notify->assigned)
+            {
+              wlerr("sigev_signo %d has not subscribed\n",
+                    event->sigev_signo);
+            }
+          else
+            {
+              notify->assigned = false;
+
+              ret = 0;
+            }
+        }
+    }
+  else
+    {
+      wlerr("sigev_notify %d is invalid\n", event->sigev_signo);
+    }
+
+  esp_wifi_lock(false);
+
+  return ret;
 }

@@ -171,6 +171,7 @@ SECTIONS
     *libarch.a:*clk_tree_hal.*(.text .text.* .literal .literal.*)
     *libarch.a:*rtc_clk.*(.text .text.* .literal .literal.*)
     *libarch.a:*rtc_clk_init.*(.text .text.* .literal .literal.*)
+    *libarch.a:*rtc_init.*(.text .text.* .literal .literal.*)
     *libarch.a:*rtc_time.*(.text .text.* .literal .literal.*)
     *libarch.a:*regi2c_ctrl.*(.text .text.* .literal .literal.*)
     *libarch.a:*uart_hal_iram.*(.text .text.* .literal .literal.*)
@@ -200,6 +201,7 @@ SECTIONS
     *libarch.a:*mpu_hal.*(.text .text.* .literal .literal.*)
     *libarch.a:*mmu_hal.*(.text .text.* .literal .literal.*)
     *libarch.a:*uart_periph.*(.text .text.* .literal .literal.*)
+    *libarch.a:esp_app_desc.*(.literal .text .literal.* .text.*)
     *libarch.a:*esp_rom_uart.*(.text .text.* .literal .literal.*)
     *libarch.a:*esp_rom_sys.*(.text .text.* .literal .literal.*)
     *libarch.a:*esp_rom_spiflash.*(.text .text.* .literal .literal.*)
@@ -207,8 +209,16 @@ SECTIONS
     *libarch.a:*esp_efuse_fields.*(.text .text.* .literal .literal.*)
     *libarch.a:*esp_efuse_api_key.*(.text .text.* .literal .literal.*)
     *libarch.a:*log.*(.text .text.* .literal .literal.*)
-    *libarch.a:*log_noos.*(.text .text.* .literal .literal.*)
+    *libarch.a:*log_lock.*(.literal .literal.* .text .text.*)
+    *libarch.a:*log_print.*(.literal .literal.* .text .text.*)
+    *libarch.a:*log_timestamp.*(.literal.esp_log_early_timestamp .text.esp_log_early_timestamp)
+    *libarch.a:*log_timestamp.*(.literal.esp_log_timestamp .text.esp_log_timestamp)
+    *libarch.a:*log_timestamp_common.*(.literal .literal.* .text .text.*)
+    *libarch.a:*log_write.*(.literal.esp_log_write .text.esp_log_write)
+    *libarch.a:*log_write.*(.literal.esp_log_writev .text.esp_log_writev)
     *libarch.a:*cpu_region_protect.*(.text .text.* .literal .literal.*)
+    *libarch.a:*flash_qio_mode.*(.text .text.* .literal .literal.*)
+    *libarch.a:*spi_flash_wrap.*(.text .text.* .literal .literal.*)
 
 #ifdef CONFIG_STACK_CANARIES
     *libc.a:lib_stackchk.*(.literal .text .literal.* .text.*)
@@ -450,6 +460,9 @@ SECTIONS
     *libarch.a:*log.*(.rodata .rodata.*)
     *libarch.a:*log_noos.*(.rodata .rodata.*)
     *libarch.a:*cpu_region_protect.*(.rodata .rodata.*)
+    *libarch.a:*flash_qio_mode.*(.rodata .rodata.*)
+    *libarch.a:*spi_flash_wrap.*(.rodata .rodata.*)
+
     _edata = ABSOLUTE(.);
     _data_end = ABSOLUTE(.);
 
@@ -505,6 +518,11 @@ SECTIONS
   .flash.rodata : ALIGN(0x10000)
   {
     _rodata_reserved_start = ABSOLUTE(.);
+
+    /* !DO NOT PUT ANYTHING BEFORE THIS! */
+    /* Should be the first.  App version info. */
+    *(.rodata_desc .rodata_desc.*)
+
     . = ALIGN(4);
     _srodata = ABSOLUTE(.);
     *(EXCLUDE_FILE (*libarch.a:esp32_spiflash.* esp32_start.*

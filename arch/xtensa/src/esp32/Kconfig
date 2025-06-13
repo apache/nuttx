@@ -2761,6 +2761,7 @@ config ESP32_APP_FORMAT_LEGACY
 config ESP32_APP_FORMAT_MCUBOOT
 	bool "Enable MCUboot-bootable format"
 	depends on !MCUBOOT_BOOTLOADER
+	select ESPRESSIF_BOOTLOADER_MCUBOOT
 	default n
 	select ESP32_HAVE_OTA_PARTITION
 	---help---
