@@ -60,6 +60,7 @@
 #include "hal/spi_types.h"
 #include "hal/spi_hal.h"
 #include "esp_clk_tree.h"
+#include "esp_clk_tree_common.h"
 #include "hal/clk_tree_hal.h"
 #include "periph_ctrl.h"
 
@@ -143,6 +144,16 @@
 
 #define SPI_MAX_BUF_SIZE (64)
 
+/* SPI blank array size */
+
+#define SPI_BLANK_ARRAY_SIZE (16)
+
+#if SOC_PERIPH_CLK_CTRL_SHARED
+#define SPI_MASTER_PERI_CLOCK_ATOMIC() PERIPH_RCC_ATOMIC()
+#else
+#define SPI_MASTER_PERI_CLOCK_ATOMIC()
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -190,7 +201,6 @@ struct esp_spi_priv_s
   uint8_t id;                           /* ID number of SPI interface */
   uint8_t module;                       /* Module ID of SPI interface */
   spi_hal_context_t *ctx;               /* Context struct of common layer */
-  spi_hal_config_t *cfg;
   spi_hal_dev_config_t *dev_cfg;        /* Device configuration struct of common layer */
   spi_hal_timing_param_t *timing_param; /* Timing struct of common layer */
 };
@@ -252,11 +262,6 @@ static void esp_spi_deinit(struct spi_dev_s *dev);
  ****************************************************************************/
 
 #ifdef CONFIG_ESPRESSIF_SPI2
-
-static spi_hal_config_t cfg =
-{
-    0
-};
 
 static spi_hal_context_t ctx =
 {
@@ -357,7 +362,6 @@ static struct esp_spi_priv_s esp_spi2_priv =
   .id           = SPI2_HOST,
   .module       = PERIPH_SPI2_MODULE,
   .nbits        = 0,
-  .cfg          = &cfg,
   .dev_cfg      = &dev_cfg,
   .ctx          = &ctx,
   .timing_param = &timing_param,
@@ -377,6 +381,10 @@ static struct esp_dmadesc_s dma_rxdesc[SPI_DMA_DESC_NUM];
 static struct esp_dmadesc_s dma_txdesc[SPI_DMA_DESC_NUM];
 
 #endif
+
+/* Blank array to fill the send buffer */
+
+static uint32_t blank_arr[SPI_BLANK_ARRAY_SIZE];
 
 /****************************************************************************
  * Private Functions
@@ -494,29 +502,42 @@ static uint32_t esp_spi_setfrequency(struct spi_dev_s *dev,
                                      uint32_t frequency)
 {
   struct esp_spi_priv_s *priv = (struct esp_spi_priv_s *)dev;
+  spi_hal_timing_conf_t temp_timing_conf;
 
-  if (priv->timing_param->clk_src_hz == frequency)
+  if (priv->dev_cfg->timing_conf.real_freq == frequency)
     {
       /* Requested frequency is the same as the current frequency. */
 
-      return priv->timing_param->clk_src_hz;
+      return priv->dev_cfg->timing_conf.real_freq;
     }
 
   priv->timing_param->expected_freq = frequency;
 
+  SPI_MASTER_PERI_CLOCK_ATOMIC()
+    {
+      spi_ll_set_clk_source(priv->ctx->hw,
+                            priv->dev_cfg->timing_conf.clock_source);
+    }
+
+  esp_clk_tree_enable_src(SPI_CLK_SRC_DEFAULT, true);
   esp_clk_tree_src_get_freq_hz(SPI_CLK_SRC_DEFAULT,
-                               ESP_CLK_TREE_SRC_FREQ_PRECISION_APPROX,
+                               ESP_CLK_TREE_SRC_FREQ_PRECISION_CACHED,
                                &priv->timing_param->clk_src_hz);
 
   spi_hal_cal_clock_conf(priv->timing_param,
-                         (int *)&(priv->timing_param->clk_src_hz),
-                         &(priv->dev_cfg->timing_conf));
+                         &temp_timing_conf);
+  temp_timing_conf.clock_source = SPI_CLK_SRC_DEFAULT;
+  temp_timing_conf.source_pre_div = 1;
+  temp_timing_conf.source_real_freq = priv->timing_param->clk_src_hz;
+
+  priv->dev_cfg->timing_conf = temp_timing_conf;
   spi_hal_setup_device(priv->ctx, priv->dev_cfg);
 
-  spiinfo("frequency=%" PRIu32 ", actual=%" PRIu32 "\n",
-          priv->timing_param->expected_freq, priv->timing_param->clk_src_hz);
+  spiinfo("frequency=%" PRIu32 ", actual=%d\n",
+          priv->timing_param->expected_freq,
+          priv->dev_cfg->timing_conf.real_freq);
 
-  return priv->timing_param->clk_src_hz;
+  return priv->dev_cfg->timing_conf.real_freq;
 }
 
 /****************************************************************************
@@ -737,6 +758,7 @@ static void esp_spi_dma_exchange(struct esp_spi_priv_s *priv,
 static uint32_t esp_spi_poll_send(struct esp_spi_priv_s *priv, uint32_t wd)
 {
   uint32_t val;
+  spi_hal_dev_config_t *hal_dev = priv->dev_cfg;
   spi_hal_trans_config_t trans =
     {
       0
@@ -752,9 +774,12 @@ static uint32_t esp_spi_poll_send(struct esp_spi_priv_s *priv, uint32_t wd)
   trans.line_mode.cmd_lines = 0;
   priv->ctx->trans_config = trans;
 
-  spi_ll_set_mosi_bitlen(priv->ctx->hw, priv->nbits);
-  spi_hal_prepare_data(priv->ctx, priv->dev_cfg, &trans);
   spi_hal_setup_trans(priv->ctx, priv->dev_cfg, &trans);
+  spi_hal_push_tx_buffer(priv->ctx, &trans);
+  spi_hal_enable_data_line(priv->ctx->hw,
+                           (!hal_dev->half_duplex && trans.rcv_buffer) \
+                            || trans.send_buffer, !!trans.rcv_buffer);
+
   spi_hal_user_start(priv->ctx);
 
   while (!spi_hal_usr_is_done(priv->ctx));
@@ -833,29 +858,54 @@ static void esp_spi_poll_exchange(struct esp_spi_priv_s *priv,
       uint32_t transfer_size = MIN(SPI_MAX_BUF_SIZE, bytes_remaining);
 
       /* Write data words to data buffer registers.
-       * SPI peripheral contains 16 registers (W0 - W15).
+       * SPI peripheral contains 16 registers (W0 - W15)
+       * allowing up to 64 bytes to be sent or received at one time.
        */
 
       trans.tx_bitlen = transfer_size * 8;
       trans.rx_bitlen = transfer_size * 8;
       trans.rcv_buffer = (uint8_t *)rp;
-      trans.send_buffer = (uint8_t *)tp;
       priv->ctx->trans_config = trans;
 
-      spi_hal_prepare_data(priv->ctx, priv->dev_cfg, &trans);
+      if (tp == NULL)
+        {
+          /* Write 0xffffffff to fill the send buffer */
+
+          trans.send_buffer = (uint8_t *)blank_arr;
+          spiinfo("send %" PRIu32 " bytes value=0x%" PRIx32 "\n",
+                  transfer_size, blank_arr[0]);
+        }
+      else
+        {
+          trans.send_buffer = (uint8_t *)tp;
+          spiinfo("send %" PRIu32 " bytes addr=0x%p\n",
+                  transfer_size, tp);
+        }
+
       spi_hal_setup_trans(priv->ctx, priv->dev_cfg, &trans);
+      spi_hal_push_tx_buffer(priv->ctx, &trans);
       spi_hal_user_start(priv->ctx);
+      spi_hal_enable_data_line(priv->ctx->hw,
+                               (!priv->timing_param->half_duplex && \
+                                trans.rcv_buffer) || trans.send_buffer,
+                               !!trans.rcv_buffer);
 
       while (!spi_hal_usr_is_done(priv->ctx));
 
       if (rp != NULL)
         {
-          rp += transfer_size;
           spi_hal_fetch_result(priv->ctx);
+          spiinfo("recv %" PRIu32 " bytes addr=0x%p\n",
+                  transfer_size, rp);
+          rp += transfer_size;
+        }
+
+      if (tp != NULL)
+        {
+          tp += transfer_size;
         }
 
       bytes_remaining -= transfer_size;
-      tp += transfer_size;
     }
 }
 
@@ -1078,29 +1128,24 @@ static void esp_spi_init(struct spi_dev_s *dev)
   esp_gpio_matrix_out(config->clk_pin, config->clk_outsig, 0, 0);
 #endif
 
+  SPI_MASTER_PERI_CLOCK_ATOMIC()
+    {
+      spi_ll_enable_clock(priv->id, true);
+    }
+
   periph_module_enable(priv->module);
 
 #ifdef CONFIG_ESPRESSIF_SPI2_DMA
   esp_spi_dma_init(dev);
 
   priv->ctx->hw = SPI_LL_GET_HW(priv->id);
-  priv->cfg->dma_enabled = true;
-  priv->cfg->dmadesc_rx = (lldesc_t *)dma_rxdesc;
-  priv->cfg->dmadesc_tx = (lldesc_t *)dma_txdesc;
-  priv->cfg->rx_dma_chan = priv->dma_channel;
-  priv->cfg->tx_dma_chan = priv->dma_channel;
 
   spi_ll_master_init(priv->ctx->hw);
   spi_ll_enable_int(priv->ctx->hw);
   spi_ll_set_mosi_delay(priv->ctx->hw, 0, 0);
 #else
-  spi_hal_init(priv->ctx, priv->id, priv->cfg);
+  spi_hal_init(priv->ctx, priv->id);
 #endif
-
-  priv->dev_cfg->timing_conf.clock_source = SPI_CLK_SRC_DEFAULT;
-  esp_clk_tree_src_get_freq_hz(priv->dev_cfg->timing_conf.clock_source,
-                               ESP_CLK_TREE_SRC_FREQ_PRECISION_APPROX,
-                               &priv->timing_param->clk_src_hz);
 
   esp_spi_setbits(dev, config->width);
   esp_spi_setmode(dev, priv->dev_cfg->mode);
@@ -1197,6 +1242,13 @@ struct spi_dev_s *esp_spibus_initialize(int port)
       priv->refs++;
       nxmutex_unlock(&priv->lock);
       return spi_dev;
+    }
+
+  /* Initialize the blank array */
+
+  for (int i = 0; i < SPI_BLANK_ARRAY_SIZE; i++)
+    {
+      blank_arr[i] = UINT32_MAX;
     }
 
 #ifdef CONFIG_ESPRESSIF_SPI2_DMA

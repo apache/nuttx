@@ -35,5 +35,9 @@ cache_invalidate_icache_all = Cache_Invalidate_ICache_All;
 api_vhci_host_check_send_available = API_vhci_host_check_send_available;
 api_vhci_host_send_packet = API_vhci_host_send_packet;
 api_vhci_host_register_callback = API_vhci_host_register_callback;
+scan_stack_enable_adv_flow_ctrl_vs_cmd = scan_stack_enableAdvFlowCtrlVsCmd;
+adv_stack_enable_clear_legacy_adv_vs_cmd = adv_stack_enableClearLegacyAdvVsCmd;
+adv_filter_stack_enable_dup_exc_list_vs_cmd = advFilter_stack_enableDupExcListVsCmd;
+chan_sel_stack_enable_set_csa_vs_cmd = chanSel_stack_enableSetCsaVsCmd;
 
 #endif

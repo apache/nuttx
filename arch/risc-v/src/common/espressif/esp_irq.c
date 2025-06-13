@@ -281,7 +281,7 @@ static void esp_cpuint_initialize(void)
 
   /* Set CPU interrupt threshold level */
 
-  esprv_intc_int_set_threshold(ESP_DEFAULT_INT_THRESHOLD);
+  esprv_int_set_threshold(ESP_DEFAULT_INT_THRESHOLD);
 
   /* Indicate that no interrupt sources are assigned to CPU interrupts */
 
@@ -405,7 +405,7 @@ void up_enable_irq(int irq)
   irqstate_t irqstate = enter_critical_section();
 
   CPUINT_ENABLE(g_cpuint_map[cpuint]);
-  esprv_intc_int_enable(BIT(cpuint));
+  esprv_int_enable(BIT(cpuint));
 
   leave_critical_section(irqstate);
 }
@@ -437,7 +437,7 @@ void up_disable_irq(int irq)
   irqstate_t irqstate = enter_critical_section();
 
   CPUINT_DISABLE(g_cpuint_map[cpuint]);
-  esprv_intc_int_disable(BIT(cpuint));
+  esprv_int_disable(BIT(cpuint));
 
   leave_critical_section(irqstate);
 }
@@ -466,21 +466,21 @@ void esp_route_intr(int source, int cpuint, irq_priority_t priority,
 {
   /* Ensure the CPU interrupt is disabled */
 
-  esprv_intc_int_disable(BIT(cpuint));
+  esprv_int_disable(BIT(cpuint));
 
   /* Set the interrupt priority */
 
-  esprv_intc_int_set_priority(cpuint, priority);
+  esprv_int_set_priority(cpuint, priority);
 
   /* Set the interrupt trigger type (Edge or Level) */
 
   if (type == ESP_IRQ_TRIGGER_EDGE)
     {
-      esprv_intc_int_set_type(cpuint, INTR_TYPE_EDGE);
+      esprv_int_set_type(cpuint, INTR_TYPE_EDGE);
     }
   else
     {
-      esprv_intc_int_set_type(cpuint, INTR_TYPE_LEVEL);
+      esprv_int_set_type(cpuint, INTR_TYPE_LEVEL);
     }
 
   /* Route the interrupt source to the provided CPU interrupt */
@@ -632,7 +632,7 @@ IRAM_ATTR void *riscv_dispatch_irq(uintreg_t mcause, uintreg_t *regs)
         }
 #endif
 
-      is_edge = esprv_intc_int_get_type(cpuint) == INTR_TYPE_LEVEL;
+      is_edge = esprv_int_get_type(cpuint) == INTR_TYPE_LEVEL;
       if (is_edge)
         {
           /* Clear edge interrupts. */

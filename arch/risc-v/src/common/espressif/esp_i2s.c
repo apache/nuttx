@@ -73,12 +73,6 @@
 #endif
 
 #ifdef CONFIG_ESPRESSIF_ESP32C3
-#  define GDMA_OUT_TOTAL_EOF_CH0_INT_ENA  DMA_OUT_TOTAL_EOF_CH0_INT_ENA
-#  define GDMA_OUT_DSCR_ERR_CH0_INT_ENA   DMA_OUT_DSCR_ERR_CH0_INT_ENA
-#  define GDMA_IN_SUC_EOF_CH0_INT_ENA     DMA_IN_SUC_EOF_CH0_INT_ENA
-#  define GDMA_OUT_EOF_CH0_INT_ENA        DMA_OUT_EOF_CH0_INT_ENA
-#  define GDMA_OUT_TOTAL_EOF_CH0_INT_ST   DMA_OUT_TOTAL_EOF_CH0_INT_ST
-#  define GDMA_IN_SUC_EOF_CH0_INT_ST      DMA_IN_SUC_EOF_CH0_INT_ST
 #  define CLK_SRC                         I2S_CLK_SRC_PLL_160M
 #endif
 
@@ -173,7 +167,7 @@
     cfg.sinc_scale = I2S_PDM_SIG_SCALING_MUL_1,               \
     cfg.line_mode = I2S_PDM_TX_ONE_LINE_CODEC,                \
     cfg.hp_en = true,                                         \
-    cfg.hp_cut_off_freq_hz = 35.5,                            \
+    cfg.hp_cut_off_freq_hzx10 = 35.5,                         \
     cfg.sd_dither = 0,                                        \
     cfg.sd_dither2 = 1                                        \
 
@@ -1330,6 +1324,8 @@ static void i2s_configure(struct esp_i2s_s *priv)
   uint32_t tx_conf  = 0;
   uint32_t rx_conf  = 0;
   bool loopback = false;
+  int __DECLARE_RCC_ATOMIC_ENV __attribute__((unused));
+
   i2s_hal_slot_config_t tx_slot_cfg =
     {
       0
@@ -1342,10 +1338,10 @@ static void i2s_configure(struct esp_i2s_s *priv)
 
   /* Set peripheral clock and clear reset */
 
-  periph_module_enable(i2s_periph_signal[priv->config->port].module);
+  periph_module_enable(PERIPH_I2S0_MODULE);
 
   i2s_hal_init(priv->config->ctx, priv->config->port);
-  i2s_ll_enable_clock(priv->config->ctx->dev);
+  i2s_ll_enable_bus_clock(priv->config->port, true);
 
   /* Configure multiplexed pins as connected on the board */
 
@@ -1524,7 +1520,7 @@ static void i2s_configure(struct esp_i2s_s *priv)
         }
       else
         {
-          i2s_ll_tx_enable_pdm(priv->config->ctx->dev);
+          i2s_ll_tx_enable_pdm(priv->config->ctx->dev, true);
           I2S_PDM_TX_SLOT_DEFAULT_CONFIG(tx_slot_cfg.pdm_tx);
           i2s_hal_pdm_set_tx_slot(priv->config->ctx,
                                   priv->config->role == I2S_ROLE_SLAVE,
@@ -1807,13 +1803,15 @@ static void i2s_set_clock(struct esp_i2s_s *priv)
 #ifdef I2S_HAVE_TX
   i2s_hal_set_tx_clock(priv->config->ctx,
                        priv->config->clk_info,
-                       priv->config->tx_clk_src);
+                       priv->config->tx_clk_src,
+                       NULL);
 #endif /* I2S_HAVE_TX */
 
 #ifdef I2S_HAVE_RX
   i2s_hal_set_rx_clock(priv->config->ctx,
                        priv->config->clk_info,
-                       priv->config->rx_clk_src);
+                       priv->config->rx_clk_src,
+                       NULL);
 #endif /* I2S_HAVE_RX */
 }
 

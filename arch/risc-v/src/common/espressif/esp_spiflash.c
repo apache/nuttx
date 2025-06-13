@@ -315,7 +315,7 @@ static IRAM_ATTR void esp_spi_trans(uint32_t command,
 
   /* Start transmission */
 
-  spi_flash_ll_user_start(dev);
+  spi_flash_ll_user_start(dev, false);
 
   /* Wait until transmission is done */
 

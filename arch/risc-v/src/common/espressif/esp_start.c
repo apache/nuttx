@@ -57,6 +57,10 @@
 #include "spi_flash_mmap.h"
 #include "rom/cache.h"
 
+#ifdef CONFIG_ARCH_CHIP_ESP32H2
+#include "soc/rtc.h"
+#endif
+
 #include "bootloader_init.h"
 
 #ifdef CONFIG_ESPRESSIF_SIMPLE_BOOT
@@ -64,6 +68,8 @@
 #include "esp_rom_uart.h"
 #include "esp_app_format.h"
 #endif
+
+#include "esp_private/startup_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -348,7 +354,7 @@ static int map_rom_segments(uint32_t app_drom_start, uint32_t app_drom_vaddr,
   ets_printf("total segments stored %d\n", segments - 1);
 #endif
 
-  cache_hal_disable(CACHE_TYPE_ALL);
+  cache_hal_disable(CACHE_LL_LEVEL_EXT_MEM, CACHE_TYPE_ALL);
 
   /* Clear the MMU entries that are already set up,
    * so the new app only has the mappings it creates.
@@ -380,9 +386,39 @@ static int map_rom_segments(uint32_t app_drom_start, uint32_t app_drom_vaddr,
 
   /* ------------------Enable Cache----------------------------------- */
 
-  cache_hal_enable(CACHE_TYPE_ALL);
+  cache_hal_enable(CACHE_LL_LEVEL_EXT_MEM, CACHE_TYPE_ALL);
 
   return (int)rc;
+}
+#endif
+
+/****************************************************************************
+ * Name: recalib_bbpll
+ *
+ * Description:
+ *   Workaround for bootloader calibration issues. This function is placed in
+ *   IRAM because disabling BBPLL may influence the cache.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_CHIP_ESP32H2
+static void IRAM_ATTR NOINLINE_ATTR recalib_bbpll(void)
+{
+    rtc_cpu_freq_config_t old_config;
+    rtc_clk_cpu_freq_get_config(&old_config);
+
+  if (old_config.source == SOC_CPU_CLK_SRC_PLL ||
+      old_config.source == SOC_CPU_CLK_SRC_FLASH_PLL)
+    {
+      rtc_clk_cpu_freq_set_xtal();
+      rtc_clk_cpu_freq_set_config(&old_config);
+    }
 }
 #endif
 
@@ -443,7 +479,7 @@ void __esp_start(void)
 #endif /* CONFIG_ESP_ROM_NEEDS_SET_CACHE_MMU_SIZE */
 
 #if CONFIG_ESP_SYSTEM_BBPLL_RECALIB
-  rtc_clk_recalib_bbpll();
+  recalib_bbpll();
 #endif
 
 #ifdef CONFIG_ESPRESSIF_REGION_PROTECTION
@@ -497,11 +533,17 @@ void __esp_start(void)
   wdt_hal_disable(&rwdt_ctx);
   wdt_hal_write_protect_enable(&rwdt_ctx);
 
+  showprogress("C");
+
   /* Initialize onboard resources */
 
   esp_board_initialize();
 
-  showprogress("C");
+  showprogress("D");
+
+  SYS_STARTUP_FN();
+
+  showprogress("E");
 
   /* Bring up NuttX */
 

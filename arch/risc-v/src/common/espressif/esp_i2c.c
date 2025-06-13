@@ -125,6 +125,10 @@
 #  define CONFIG_I2C_NTRACE 32
 #endif
 
+/* Time to wait for the bus to be cleared */
+
+#define I2C_CLR_BUS_TIMEOUT_MS (50)
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -212,6 +216,8 @@ struct esp_i2c_priv_s
   const struct i2c_ops_s *ops; /* Standard I2C operations */
 
   uint32_t id;                 /* I2C instance */
+
+  periph_module_t module;      /* Peripheral module */
 
   /* Port configuration */
 
@@ -346,6 +352,7 @@ static struct esp_i2c_priv_s esp_i2c0_priv =
 {
   .ops        = &esp_i2c_ops,
   .id         = 0,
+  .module     = PERIPH_I2C0_MODULE,
   .config     = &esp_i2c0_config,
   .refs       = 0,
   .lock       = NXMUTEX_INITIALIZER,
@@ -396,6 +403,7 @@ static struct esp_i2c_priv_s esp_i2c1_priv =
 {
   .ops        = &esp_i2c_ops,
   .id         = 1,
+  .module     = PERIPH_I2C1_MODULE,
   .config     = &esp_i2c1_config,
   .refs       = 0,
   .lock       = NXMUTEX_INITIALIZER,
@@ -515,9 +523,9 @@ static void esp_i2c_sendstart(struct esp_i2c_priv_s *priv)
 
   end_cmd.op_code = I2C_LL_CMD_END;
 
-  i2c_ll_write_cmd_reg(priv->ctx->dev, restart_cmd, 0);
-  i2c_ll_write_cmd_reg(priv->ctx->dev, write_cmd, 1);
-  i2c_ll_write_cmd_reg(priv->ctx->dev, end_cmd, 2);
+  i2c_ll_master_write_cmd_reg(priv->ctx->dev, restart_cmd, 0);
+  i2c_ll_master_write_cmd_reg(priv->ctx->dev, write_cmd, 1);
+  i2c_ll_master_write_cmd_reg(priv->ctx->dev, end_cmd, 2);
 
   /* Write data to FIFO register */
 
@@ -564,8 +572,8 @@ static void esp_i2c_senddata(struct esp_i2c_priv_s *priv)
   n = n < I2C_FIFO_SIZE ? n : I2C_FIFO_SIZE;
 
   write_cmd.byte_num = n;
-  i2c_ll_write_cmd_reg(priv->ctx->dev, write_cmd, 0);
-  i2c_ll_write_cmd_reg(priv->ctx->dev, end_cmd, 1);
+  i2c_ll_master_write_cmd_reg(priv->ctx->dev, write_cmd, 0);
+  i2c_ll_master_write_cmd_reg(priv->ctx->dev, end_cmd, 1);
   i2c_ll_write_txfifo(priv->ctx->dev, &msg->buffer[priv->bytes], n);
   i2c_ll_master_enable_tx_it(priv->ctx->dev);
 
@@ -643,10 +651,10 @@ static void esp_i2c_startrecv(struct esp_i2c_priv_s *priv)
   read_cmd.byte_num = n;
   read_cmd.ack_val = ack_value;
   read_cmd.op_code = I2C_LL_CMD_READ;
-  i2c_ll_write_cmd_reg(priv->ctx->dev, read_cmd, 0);
+  i2c_ll_master_write_cmd_reg(priv->ctx->dev, read_cmd, 0);
 
   end_cmd.op_code = I2C_LL_CMD_END;
-  i2c_ll_write_cmd_reg(priv->ctx->dev, end_cmd, 1);
+  i2c_ll_master_write_cmd_reg(priv->ctx->dev, end_cmd, 1);
 
   /* Enable I2C master RX interrupt */
 
@@ -677,7 +685,7 @@ static void esp_i2c_sendstop(struct esp_i2c_priv_s *priv)
       .op_code = I2C_LL_CMD_STOP
     };
 
-  i2c_ll_write_cmd_reg(priv->ctx->dev, stop_cmd, 0);
+  i2c_ll_master_write_cmd_reg(priv->ctx->dev, stop_cmd, 0);
 
   /* Enable I2C master TX interrupt */
 
@@ -747,7 +755,7 @@ static void esp_i2c_init(struct esp_i2c_priv_s *priv)
 
   /* Enable I2C hardware */
 
-  periph_module_enable(i2c_periph_signal[priv->id].module);
+  periph_module_enable(priv->module);
 
   i2c_hal_init(priv->ctx, priv->id);
 
@@ -761,7 +769,7 @@ static void esp_i2c_init(struct esp_i2c_priv_s *priv)
 
   /* Configure the hardware filter function */
 
-  i2c_ll_set_filter(priv->ctx->dev, I2C_FILTER_CYC_NUM_DEF);
+  i2c_ll_master_set_filter(priv->ctx->dev, I2C_FILTER_CYC_NUM_DEF);
 
   /* Initialize I2C bus clock */
 
@@ -785,7 +793,7 @@ static void esp_i2c_deinit(struct esp_i2c_priv_s *priv)
 
   priv->clk_freq = 0;
   i2c_hal_deinit(priv->ctx);
-  periph_module_disable(i2c_periph_signal[priv->id].module);
+  periph_module_disable(priv->module);
 }
 
 /****************************************************************************
@@ -1089,7 +1097,24 @@ static int esp_i2c_transfer(struct i2c_master_s *dev,
 #ifdef CONFIG_I2C_RESET
 static void esp_i2c_clear_bus(struct esp_i2c_priv_s *priv)
 {
-  i2c_ll_master_clr_bus(priv->ctx->dev);
+  i2c_ll_master_clr_bus(priv->ctx->dev,
+                        I2C_LL_RESET_SLV_SCL_PULSE_NUM_DEFAULT, true);
+
+  /* Wait for bus clear done or timeout */
+
+  clock_t start = clock_systime_ticks();
+  clock_t timeout = start + MSEC2TICK(I2C_CLR_BUS_TIMEOUT_MS);
+  while (i2c_ll_master_is_bus_clear_done(priv->ctx->dev))
+    {
+      if (clock_systime_ticks() >= timeout)
+        {
+          i2cerr("ERROR: clear bus failed.\n");
+          i2c_ll_master_clr_bus(priv->ctx->dev, 0, false);
+          break;
+        }
+    }
+
+  i2c_ll_update(priv->ctx->dev);
 }
 #endif
 
