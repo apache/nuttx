@@ -60,6 +60,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 #  if defined(CONFIG_CAN_LOOPBACK) && defined(CONFIG_ESPRESSIF_TWAI_TEST_MODE)
 #   define TX_PIN_ATTR (OUTPUT_FUNCTION_1 | INPUT_FUNCTION_1)
 #   define RX_PIN_ATTR (OUTPUT_FUNCTION_1 | INPUT_FUNCTION_1)
@@ -112,6 +113,18 @@
 #    define TWAI0_RX_IDX          TWAI_RX_IDX
 #  endif /* CONFIG_ESPRESSIF_ESP32H2 */
 
+#if !SOC_RCC_IS_INDEPENDENT
+#define TWAI_RCC_ATOMIC() PERIPH_RCC_ATOMIC()
+#else
+#define TWAI_RCC_ATOMIC()
+#endif
+
+#if SOC_PERIPH_CLK_CTRL_SHARED
+#define TWAI_PERI_ATOMIC() PERIPH_RCC_ATOMIC()
+#else
+#define TWAI_PERI_ATOMIC()
+#endif
+
 /* Configuration ************************************************************/
 
 #  ifndef CONFIG_CAN_EXTID
@@ -128,7 +141,7 @@
 
 /* Default values written to various registers on initialization */
 
-#  define TWAI_DEFAULT_INTERRUPTS   0xe7  /* Exclude data overrun (bit[3]) and brp_div (bit[4]) */
+#  define DRIVER_DEFAULT_INTERRUPTS   0xe7  /* Exclude data overrun (bit[3]) and brp_div (bit[4]) */
 
 struct esp_twai_dev_s
 {
@@ -244,26 +257,40 @@ static void esp_twai_reset(struct can_dev_s *dev)
   int ret;
   twai_hal_config_t hal_config =
     {
-      .clock_source_hz = esp_clk_apb_freq(),
+      .clock_source_hz = TWAI_CLK_SRC_DEFAULT,
       .controller_id = priv->port,
+      .intr_mask = DRIVER_DEFAULT_INTERRUPTS,
+#ifdef CONFIG_CAN_LOOPBACK
+      .enable_self_test = true,
+#else
+      .enable_self_test = false,
+#endif
+      .enable_listen_only = false,
     };
 
   caninfo("TWAI%" PRIu8 "\n", priv->port);
+
+  TWAI_RCC_ATOMIC()
+    {
+      twai_ll_enable_bus_clock(priv->port, true);
+      twai_ll_reset_register(priv->port);
+    }
+
+  TWAI_PERI_ATOMIC()
+    {
+      twai_ll_set_clock_source(priv->port, TWAI_CLK_SRC_DEFAULT);
+      twai_ll_enable_clock(priv->port, true);
+    }
 
   flags = enter_critical_section();
 
   ret = twai_hal_init(&priv->ctx, &hal_config);
   ASSERT(ret);
-  twai_hal_configure(&priv->ctx, &priv->t_config, &f_config,
-                     TWAI_DEFAULT_INTERRUPTS, 0);
+  twai_hal_configure(&priv->ctx, &priv->t_config, &f_config, 0);
 
   /* Restart the TWAI */
 
-#ifdef CONFIG_CAN_LOOPBACK
-  twai_hal_start(&priv->ctx, TWAI_MODE_NO_ACK); /* Leave Reset Mode, enter Test Mode */
-#else
-  twai_hal_start(&priv->ctx, TWAI_MODE_NORMAL); /* Leave Reset Mode */
-#endif
+  twai_hal_start(&priv->ctx);
 
   /* Abort transmission, release RX buffer and clear overrun.
    * Command register can only be modified when in Operation Mode.
@@ -301,7 +328,7 @@ static int esp_twai_setup(struct can_dev_s *dev)
 
   flags = enter_critical_section();
 
-  twai_ll_set_enabled_intrs(priv->ctx.dev, TWAI_DEFAULT_INTERRUPTS);
+  twai_ll_set_enabled_intrs(priv->ctx.dev, DRIVER_DEFAULT_INTERRUPTS);
 
   twai_ll_get_and_clear_intrs(priv->ctx.dev); /* clear latched interrupts */
 
@@ -743,7 +770,8 @@ static int esp_twai_interrupt(int irq, void *context, void *arg)
       /* Release the receive buffer */
 
       twai_ll_set_cmd_release_rx_buffer(priv->ctx.dev);
-      twai_ll_parse_frame_buffer(&rx_frame, &id, &dlc, data, &flags);
+      twai_ll_parse_frame_buffer(&rx_frame, &id, &dlc, data,
+                                 TWAI_FRAME_MAX_LEN, &flags);
       hdr.ch_id = id;
       hdr.ch_dlc = dlc;
       hdr.ch_rtr = (flags && TWAI_MSG_FLAG_RTR) ? 1 : 0;

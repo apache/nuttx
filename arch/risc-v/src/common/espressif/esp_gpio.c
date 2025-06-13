@@ -238,11 +238,11 @@ int esp_configgpio(int pin, gpio_pinattr_t attr)
   if ((attr & FUNCTION_MASK) != 0)
     {
       uint32_t val = ((attr & FUNCTION_MASK) >> FUNCTION_SHIFT) - 1;
-      gpio_hal_iomux_func_sel(GPIO_PIN_MUX_REG[pin], val);
+      gpio_hal_func_sel(&g_gpio_hal, pin, val);
     }
   else
     {
-      gpio_hal_iomux_func_sel(GPIO_PIN_MUX_REG[pin], PIN_FUNC_GPIO);
+      gpio_hal_func_sel(&g_gpio_hal, pin, PIN_FUNC_GPIO);
     }
 
   return OK;

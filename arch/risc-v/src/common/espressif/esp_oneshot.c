@@ -509,8 +509,10 @@ struct oneshot_lowerhalf_s *oneshot_initialize(int chan, uint16_t resolution)
 
   /* Configure clock source */
 
-  timer_ll_set_clock_source(lower->hal.dev, lower->hal.timer_id,
+  timer_ll_set_clock_source(ONESHOT_TIMERGROUP_ID, lower->hal.timer_id,
                             GPTIMER_CLK_SRC_DEFAULT);
+
+  timer_ll_enable_clock(ONESHOT_TIMERGROUP_ID, lower->hal.timer_id, true);
 
   /* Calculate the suitable prescaler according to the current APB
    * frequency to generate a period of 1 us.

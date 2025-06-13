@@ -50,6 +50,6 @@
  *
  ****************************************************************************/
 
-int esp_timer_initialize(uint32_t timer_id);
+int esp_timer_initialize(int timer_id);
 
 #endif /* __ARCH_RISCV_SRC_COMMON_ESPRESSIF_ESP_TIMER_H */

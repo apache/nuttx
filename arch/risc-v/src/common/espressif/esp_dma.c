@@ -56,7 +56,7 @@
 
 /* DMA channel number */
 
-#define ESPRESSIF_DMA_CHAN_MAX  (SOC_GDMA_PAIRS_PER_GROUP)
+#define ESPRESSIF_DMA_CHAN_MAX  (SOC_GDMA_PAIRS_PER_GROUP_MAX)
 
 /****************************************************************************
  * Private Data
@@ -104,7 +104,7 @@ int32_t esp_dma_request(enum esp_dma_periph_e periph,
 
   nxmutex_lock(&g_dma_lock);
 
-  for (chan = 0; chan < SOC_GDMA_PAIRS_PER_GROUP; chan++)
+  for (chan = 0; chan < ESPRESSIF_DMA_CHAN_MAX; chan++)
     {
       if (!g_dma_chan_used[chan])
         {
@@ -113,7 +113,7 @@ int32_t esp_dma_request(enum esp_dma_periph_e periph,
         }
     }
 
-  if (chan == SOC_GDMA_PAIRS_PER_GROUP)
+  if (chan == ESPRESSIF_DMA_CHAN_MAX)
     {
       dmaerr("No available GDMA channel for allocation\n");
 
@@ -332,11 +332,11 @@ int esp_dma_get_interrupt(int chan, bool tx)
 
   if (tx)
     {
-      intr_status = gdma_ll_tx_get_interrupt_status(ctx.dev, chan);
+      intr_status = gdma_ll_tx_get_interrupt_status(ctx.dev, chan, false);
     }
   else
     {
-      intr_status = gdma_ll_rx_get_interrupt_status(ctx.dev, chan);
+      intr_status = gdma_ll_rx_get_interrupt_status(ctx.dev, chan, false);
     }
 
   return intr_status;
@@ -474,11 +474,11 @@ void esp_dma_wait_idle(int chan, bool tx)
 {
   if (tx)
     {
-      while (gdma_ll_tx_is_fsm_idle(ctx.dev, chan) == 0);
+      while (gdma_ll_tx_is_desc_fsm_idle(ctx.dev, chan) == 0);
     }
   else
     {
-      while (gdma_ll_rx_is_fsm_idle(ctx.dev, chan) == 0);
+      while (gdma_ll_rx_is_desc_fsm_idle(ctx.dev, chan) == 0);
     }
 }
 
@@ -526,8 +526,8 @@ void esp_dma_reset_channel(int chan, bool tx)
 void esp_dma_init(void)
 {
   periph_module_enable(PERIPH_GDMA_MODULE);
-  gdma_hal_init(&ctx, 0);
-  gdma_ll_enable_clock(ctx.dev, true);
+  ctx.dev = GDMA_LL_GET_HW(0);
+  gdma_ll_force_enable_reg_clock(ctx.dev, true);
 }
 
 /****************************************************************************
@@ -550,7 +550,7 @@ void esp_dma_deinit(void)
 
   /* Disable DMA clock gating */
 
-  gdma_ll_enable_clock(ctx.dev, false);
+  gdma_ll_force_enable_reg_clock(ctx.dev, false);
 
   /* Disable DMA module by gating the clock and asserting the reset
    * signal.

@@ -62,6 +62,34 @@ extern "C"
 
 #define MAC_LEN                 (6)
 
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#ifdef ESP_WLAN_HAS_STA
+
+/* If reconnect automatically */
+
+extern volatile bool g_sta_reconnect;
+
+/* If Wi-Fi sta starts */
+
+extern volatile bool g_sta_started;
+
+/* If Wi-Fi sta connected */
+
+extern volatile bool g_sta_connected;
+
+#endif
+
+#ifdef ESP_WLAN_HAS_SOFTAP
+
+/* If Wi-Fi SoftAP starts */
+
+extern volatile bool g_softap_started;
+
+#endif
+
 #ifdef CONFIG_ESPRESSIF_WIFI
 
 /****************************************************************************
@@ -156,8 +184,8 @@ int esp_wlan_softap_initialize(void);
  *   ifidx    - The interface id that the tx callback has been triggered from
  *   data     - Pointer to the data transmitted
  *   data_len - Length of the data transmitted
- *   txstatus - True:if the data was transmitted successfully False: if data
- *              transmission failed
+ *   txstatus - True: if the data was transmitted successfully
+ *              False: if data transmission failed
  *
  * Returned Value:
  *   none

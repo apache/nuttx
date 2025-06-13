@@ -41,6 +41,7 @@
 
 #include "esp_hr_timer.h"
 #include "esp_rtc.h"
+#include "esp_rtc_time.h"
 #include "riscv_internal.h"
 
 #include "esp_attr.h"
@@ -49,13 +50,10 @@
 /* Chip-dependent headers from esp-hal-3rdparty */
 
 #ifdef CONFIG_ESPRESSIF_ESP32C3
-#include "esp32c3/rtc.h"
 #include "esp32c3/rom/rtc.h"
 #elif defined(CONFIG_ESPRESSIF_ESP32C6)
-#include "esp32c6/rtc.h"
 #include "esp32c6/rom/rtc.h"
 #elif defined(CONFIG_ESPRESSIF_ESP32H2)
-#include "esp32h2/rtc.h"
 #include "esp32h2/rom/rtc.h"
 #endif
 

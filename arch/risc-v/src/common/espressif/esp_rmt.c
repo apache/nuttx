@@ -116,6 +116,18 @@
       }                                           \
   }
 
+#if SOC_PERIPH_CLK_CTRL_SHARED
+#define RMT_CLOCK_SRC_ATOMIC() PERIPH_RCC_ATOMIC()
+#else
+#define RMT_CLOCK_SRC_ATOMIC()
+#endif
+
+#if !SOC_RCC_IS_INDEPENDENT
+#define RMT_RCC_ATOMIC() PERIPH_RCC_ATOMIC()
+#else
+#define RMT_RCC_ATOMIC()
+#endif
+
 #define rmt_item32_t rmt_symbol_word_t
 
 /****************************************************************************
@@ -409,8 +421,14 @@ static void rmt_module_enable(void)
 
   if (g_rmtdev_common.rmt_module_enabled == false)
     {
-      periph_module_reset(rmt_periph_signals.groups[0].module);
-      periph_module_enable(rmt_periph_signals.groups[0].module);
+      RMT_RCC_ATOMIC()
+        {
+          rmt_ll_enable_bus_clock(0, true);
+          rmt_ll_reset_register(0);
+        }
+
+      periph_module_reset(PERIPH_RMT_MODULE);
+      periph_module_enable(PERIPH_RMT_MODULE);
       g_rmtdev_common.rmt_module_enabled = true;
     }
 
@@ -843,6 +861,11 @@ static int rmt_internal_config(rmt_dev_t *dev,
       rmt_ll_set_group_clock_src(dev, channel,
                                  (rmt_clock_source_t)RMT_BASECLK_DEFAULT,
                                  1, 0, 0);
+    }
+
+  RMT_CLOCK_SRC_ATOMIC()
+    {
+      rmt_ll_enable_group_clock(dev, true);
     }
 
   spin_unlock_irqrestore(&g_rmtdev_common.rmt_spinlock, flags);
