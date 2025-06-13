@@ -6320,10 +6320,10 @@ config STM32_ADC1_SAMPLE_FREQUENCY
 config STM32_ADC1_TIMTRIG
 	int "ADC1 Timer Trigger"
 	default 0
-	range 0 4
+	range 0 5
 	depends on STM32_HAVE_ADC1_TIMER
 	---help---
-		Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO
+		Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO 5:TRGO2
 
 config STM32_ADC2_SAMPLE_FREQUENCY
 	int "ADC2 Sampling Frequency"
@@ -6335,10 +6335,10 @@ config STM32_ADC2_SAMPLE_FREQUENCY
 config STM32_ADC2_TIMTRIG
 	int "ADC2 Timer Trigger"
 	default 0
-	range 0 4
+	range 0 5
 	depends on STM32_HAVE_ADC2_TIMER
 	---help---
-		Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO
+		Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO 5:TRGO2
 
 config STM32_ADC3_SAMPLE_FREQUENCY
 	int "ADC3 Sampling Frequency"
@@ -6350,10 +6350,10 @@ config STM32_ADC3_SAMPLE_FREQUENCY
 config STM32_ADC3_TIMTRIG
 	int "ADC3 Timer Trigger"
 	default 0
-	range 0 4
+	range 0 5
 	depends on STM32_HAVE_ADC3_TIMER
 	---help---
-		Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO
+		Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO 5:TRGO2
 
 config STM32_TIM1_DAC
 	bool "TIM1 DAC"
