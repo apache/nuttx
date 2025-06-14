@@ -59,6 +59,28 @@ static int file_vfcntl(FAR struct file *filep, int cmd, va_list ap)
 
   switch (cmd)
     {
+      case F_DUPFD:
+        /* Return a new file descriptor which shall be the lowest numbered
+         * available (that is, not already open) file descriptor greater than
+         * or equal to the third argument, arg, taken as an integer of type
+         * int. The new file descriptor shall refer to the same open file
+         * description as the original file descriptor, and shall share any
+         * locks.  The FD_CLOEXEC flag associated  with the new file
+         * descriptor shall be cleared to keep the file open across calls to
+         * one of the exec functions.
+         */
+
+        {
+          ret = file_dup(filep, va_arg(ap, int), 0);
+        }
+        break;
+
+      case F_DUPFD_CLOEXEC:
+        {
+          ret = file_dup(filep, va_arg(ap, int), O_CLOEXEC);
+        }
+        break;
+
       case F_GETFL:
         /* Get the file status flags and file access modes, defined in
          * <fcntl.h>, for the file description associated with fd. The file
@@ -271,7 +293,6 @@ int file_fcntl(FAR struct file *filep, int cmd, ...)
 
 int fcntl(int fd, int cmd, ...)
 {
-  FAR struct file *filep;
   va_list ap;
   int ret;
 
@@ -283,36 +304,8 @@ int fcntl(int fd, int cmd, ...)
 
   va_start(ap, cmd);
 
-  ret = file_get(fd, &filep);
-  if (ret < 0)
-    {
-      goto errout;
-    }
-
   switch (cmd)
     {
-      case F_DUPFD:
-        /* Return a new file descriptor which shall be the lowest numbered
-         * available (that is, not already open) file descriptor greater than
-         * or equal to the third argument, arg, taken as an integer of type
-         * int. The new file descriptor shall refer to the same open file
-         * description as the original file descriptor, and shall share any
-         * locks.  The FD_CLOEXEC flag associated  with the new file
-         * descriptor shall be cleared to keep the file open across calls to
-         * one of the exec functions.
-         */
-
-        {
-          ret = file_dup(filep, va_arg(ap, int), 0);
-        }
-        break;
-
-      case F_DUPFD_CLOEXEC:
-        {
-          ret = file_dup(filep, va_arg(ap, int), O_CLOEXEC);
-        }
-        break;
-
       case F_GETFD:
         /* Get the file descriptor flags defined in <fcntl.h> that are
          * associated with the file descriptor fd.  File descriptor flags are
@@ -323,7 +316,7 @@ int fcntl(int fd, int cmd, ...)
         {
           int flags;
 
-          ret = file_ioctl(filep, FIOGCLEX, &flags);
+          ret = ioctl(fd, FIOGCLEX, &flags);
           if (ret >= 0)
             {
               ret = flags;
@@ -344,39 +337,44 @@ int fcntl(int fd, int cmd, ...)
 
           if (oflags & ~FD_CLOEXEC)
             {
-              ret = -ENOSYS;
+              set_errno(ENOSYS);
+              ret = ERROR;
               break;
             }
 
           if (oflags & FD_CLOEXEC)
             {
-              ret = file_ioctl(filep, FIOCLEX, NULL);
+              ret = ioctl(fd, FIOCLEX, NULL);
             }
           else
             {
-              ret = file_ioctl(filep, FIONCLEX, NULL);
+              ret = ioctl(fd, FIONCLEX, NULL);
             }
         }
         break;
 
       default:
         {
-          ret = file_vfcntl(filep, cmd, ap);
+          FAR struct file *filep;
+
+          ret = file_get(fd, &filep);
+          if (ret >= 0)
+            {
+              ret = file_vfcntl(filep, cmd, ap);
+              file_put(filep);
+            }
+
+          if (ret < 0)
+            {
+              set_errno(-ret);
+              ret = ERROR;
+            }
         }
         break;
     }
 
-  file_put(filep);
-
-errout:
   va_end(ap);
   leave_cancellation_point();
-
-  if (ret < 0)
-    {
-      set_errno(-ret);
-      return ERROR;
-    }
 
   return ret;
 }
