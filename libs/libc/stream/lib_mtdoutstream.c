@@ -44,30 +44,85 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mtdoutstream_flush
+ * Name: mtdoutstream_bwrite_cache
  ****************************************************************************/
 
-static int mtdoutstream_flush(FAR struct lib_sostream_s *self)
+static ssize_t
+mtdoutstream_bwrite_cache(FAR struct lib_mtdoutstream_s *stream,
+                          FAR struct mtd_dev_s *mtd, size_t block)
 {
-  FAR struct lib_mtdoutstream_s *stream =
-    (FAR struct lib_mtdoutstream_s *)self;
-  FAR struct mtd_dev_s *i_mtd = stream->inode->u.i_mtd;
-  size_t erasesize = stream->geo.erasesize;
-  size_t nblkpererase = erasesize / stream->geo.blocksize;
-  int ret = OK;
+  size_t nblkpererase = stream->geo.erasesize / stream->geo.blocksize;
+  ssize_t ret;
 
-  if (self->nput % erasesize > 0)
+  if (block % nblkpererase == 0)
     {
-      size_t sblock = self->nput / erasesize;
-
-      ret = MTD_ERASE(i_mtd, sblock, 1);
+      ret = MTD_ERASE(mtd, block / nblkpererase, 1);
       if (ret < 0)
         {
           return ret;
         }
+    }
 
-      ret = MTD_BWRITE(i_mtd, sblock * nblkpererase,
-                        nblkpererase, stream->cache);
+  ret = MTD_BWRITE(mtd, block, 1, stream->cache);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  return ret;
+}
+
+static ssize_t mtdoutstream_bwrite(FAR struct lib_mtdoutstream_s *stream,
+                                   FAR struct mtd_dev_s *mtd,
+                                   size_t sblock, size_t nblock,
+                                   FAR const unsigned char *buf)
+{
+  size_t nblkpererase = stream->geo.erasesize / stream->geo.blocksize;
+  size_t serase = (sblock + nblkpererase - 1) / nblkpererase;
+  size_t eerase = (sblock + nblock + nblkpererase - 1) / nblkpererase;
+  ssize_t ret;
+
+  if (serase != eerase)
+    {
+      ret = MTD_ERASE(mtd, serase, eerase - serase);
+      if (ret < 0)
+        {
+          return ret;
+        }
+    }
+
+  ret = MTD_BWRITE(mtd, sblock, nblock, buf);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: mtdoutstream_flush
+ ****************************************************************************/
+
+static int mtdoutstream_flush(FAR struct lib_outstream_s *self)
+{
+  FAR struct lib_mtdoutstream_s *stream =
+    (FAR struct lib_mtdoutstream_s *)self;
+  FAR struct mtd_dev_s *mtd = stream->inode->u.i_mtd;
+  size_t blocksize = stream->geo.blocksize;
+  int ret = OK;
+
+  if (self->nput % blocksize > 0)
+    {
+#ifdef CONFIG_MTD_BYTE_WRITE
+      /* If byte write, flush won't be needed */
+
+      if (mtd->write == NULL)
+#endif
+        {
+          ret = mtdoutstream_bwrite_cache(stream, mtd,
+                                          self->nput / blocksize);
+        }
     }
 
   return ret;
@@ -77,14 +132,14 @@ static int mtdoutstream_flush(FAR struct lib_sostream_s *self)
  * Name: mtdoutstream_puts
  ****************************************************************************/
 
-static ssize_t mtdoutstream_puts(FAR struct lib_sostream_s *self,
+static ssize_t mtdoutstream_puts(FAR struct lib_outstream_s *self,
                                  FAR const void *buf, size_t len)
 {
   FAR struct lib_mtdoutstream_s *stream =
     (FAR struct lib_mtdoutstream_s *)self;
-  FAR struct mtd_dev_s *i_mtd = stream->inode->u.i_mtd;
+  FAR struct mtd_dev_s *mtd = stream->inode->u.i_mtd;
   size_t erasesize = stream->geo.erasesize;
-  size_t nblkpererase = erasesize / stream->geo.blocksize;
+  size_t blocksize = stream->geo.blocksize;
   FAR const unsigned char *ptr = buf;
   size_t remain = len;
   ssize_t ret;
@@ -94,73 +149,85 @@ static ssize_t mtdoutstream_puts(FAR struct lib_sostream_s *self,
       return -ENOSPC;
     }
 
-  while (remain > 0)
+#ifdef CONFIG_MTD_BYTE_WRITE
+  if (mtd->write != NULL)
     {
-      off_t sblock = self->nput / erasesize;
-      off_t offset = self->nput % erasesize;
+      size_t serase = (self->nput + erasesize - 1) / erasesize;
+      size_t eerase = (self->nput + len + erasesize - 1) / erasesize;
 
-      if (offset > 0)
+      if (serase != eerase)
         {
-          size_t copying = offset + remain > erasesize ?
-                           erasesize - offset : remain;
-
-          memcpy(stream->cache + offset, ptr, copying);
-
-          ptr        += copying;
-          offset     += copying;
-          self->nput += copying;
-          remain     -= copying;
-
-          if (offset == erasesize)
+          ret = MTD_ERASE(mtd, serase, eerase - serase);
+          if (ret < 0)
             {
-              ret = MTD_ERASE(i_mtd, sblock, 1);
+              return ret;
+            }
+        }
+
+      ret = MTD_WRITE(mtd, self->nput, len, buf);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      self->nput += len;
+    }
+  else
+#endif
+    {
+      while (remain > 0)
+        {
+          off_t sblock = self->nput / blocksize;
+          off_t offset = self->nput % blocksize;
+
+          if (offset > 0)
+            {
+              size_t copying = offset + remain > blocksize ?
+                               blocksize - offset : remain;
+
+              memcpy(stream->cache + offset, ptr, copying);
+
+              ptr        += copying;
+              offset     += copying;
+              self->nput += copying;
+              remain     -= copying;
+
+              if (offset == blocksize)
+                {
+                  ret = mtdoutstream_bwrite_cache(stream, mtd, sblock);
+                  if (ret < 0)
+                    {
+                      return ret;
+                    }
+                }
+            }
+          else if (remain < blocksize)
+            {
+              ret = MTD_BREAD(mtd, sblock, 1, stream->cache);
               if (ret < 0)
                 {
                   return ret;
                 }
 
-              ret = MTD_BWRITE(i_mtd, sblock * nblkpererase,
-                               nblkpererase, stream->cache);
+              memcpy(stream->cache, ptr, remain);
+              self->nput += remain;
+              remain      = 0;
+            }
+          else
+            {
+              size_t nblock = remain / blocksize;
+              size_t copying = nblock * blocksize;
+
+              ret = mtdoutstream_bwrite(stream, mtd, sblock, nblock, ptr);
               if (ret < 0)
                 {
                   return ret;
                 }
-            }
-        }
-      else if (remain < erasesize)
-        {
-          ret = MTD_BREAD(i_mtd, sblock * nblkpererase,
-                          nblkpererase, stream->cache);
-          if (ret < 0)
-            {
-              return ret;
-            }
 
-          memcpy(stream->cache, ptr, remain);
-          self->nput += remain;
-          remain      = 0;
-        }
-      else
-        {
-          size_t nblock = remain / erasesize;
-          size_t copying = nblock * erasesize;
-
-          ret = MTD_ERASE(i_mtd, sblock, nblock);
-          if (ret < 0)
-            {
-              return ret;
+              ptr        += copying;
+              self->nput += copying;
+              remain     -= copying;
             }
-
-          ret = MTD_BWRITE(i_mtd, sblock * nblkpererase,
-                           nblock * nblkpererase, ptr);
-          if (ret < 0)
-            {
-              return ret;
-            }
-
-          ptr        += copying;
-          self->nput += copying;
-          remain     -= copying;
         }
     }
 
@@ -171,89 +238,10 @@ static ssize_t mtdoutstream_puts(FAR struct lib_sostream_s *self,
  * Name: mtdoutstream_putc
  ****************************************************************************/
 
-static void mtdoutstream_putc(FAR struct lib_sostream_s *self, int ch)
+static void mtdoutstream_putc(FAR struct lib_outstream_s *self, int ch)
 {
   char tmp = ch;
   mtdoutstream_puts(self, &tmp, 1);
-}
-
-/****************************************************************************
- * Name: mtdoutstream_seek
- ****************************************************************************/
-
-static off_t mtdoutstream_seek(FAR struct lib_sostream_s *self,
-                               off_t offset, int whence)
-{
-  FAR struct lib_mtdoutstream_s *stream =
-    (FAR struct lib_mtdoutstream_s *)self;
-  FAR struct mtd_dev_s *i_mtd = stream->inode->u.i_mtd;
-  size_t erasesize    = stream->geo.erasesize;
-  off_t  streamsize   = erasesize * stream->geo.neraseblocks;
-  size_t nblkpererase = erasesize / stream->geo.blocksize;
-  size_t block;
-  off_t  ret;
-
-  switch (whence)
-    {
-      case SEEK_SET:
-        break;
-      case SEEK_END:
-        offset += streamsize;
-        break;
-      case SEEK_CUR:
-        offset += self->nput;
-        break;
-      default:
-        return -ENOTSUP;
-    }
-
-  /* Seek to negative value or value larger than maximum size shall fail */
-
-  if (offset < 0 || offset > streamsize)
-    {
-      return -EINVAL;
-    }
-
-  if (self->nput % erasesize)
-    {
-      block = self->nput / erasesize;
-      if (offset >= block * erasesize &&
-          offset < (block + 1) * erasesize)
-        {
-          /* Inside same erase block */
-
-          goto out;
-        }
-
-      ret = MTD_ERASE(i_mtd, block, 1);
-      if (ret < 0)
-        {
-          return ret;
-        }
-
-      ret = MTD_BWRITE(i_mtd, block * nblkpererase,
-                       nblkpererase, stream->cache);
-      if (ret < 0)
-        {
-          return ret;
-        }
-    }
-
-  if (offset % erasesize)
-    {
-      block = offset / erasesize;
-
-      ret = MTD_BREAD(i_mtd, block * nblkpererase,
-                      nblkpererase, stream->cache);
-      if (ret < 0)
-        {
-          return ret;
-        }
-    }
-
-out:
-  self->nput = offset;
-  return offset;
 }
 
 /****************************************************************************
@@ -279,17 +267,17 @@ void lib_mtdoutstream_close(FAR struct lib_mtdoutstream_s *stream)
 {
   if (stream != NULL)
     {
-      if (stream->inode != NULL)
-        {
-          close_mtddriver(stream->inode);
-          stream->inode = NULL;
-        }
-
       if (stream->cache != NULL)
         {
           mtdoutstream_flush(&stream->common);
           lib_free(stream->cache);
           stream->cache = NULL;
+        }
+
+      if (stream->inode != NULL)
+        {
+          close_mtddriver(stream->inode);
+          stream->inode = NULL;
         }
     }
 }
@@ -342,18 +330,26 @@ int lib_mtdoutstream_open(FAR struct lib_mtdoutstream_s *stream,
       return -EINVAL;
     }
 
-  stream->cache = lib_malloc(stream->geo.erasesize);
-  if (stream->cache == NULL)
+  /* If mtd driver support the byte write,
+   * the temp buffer is not needed at all.
+   */
+
+#ifdef CONFIG_MTD_BYTE_WRITE
+  if (node->u.i_mtd->write == NULL)
+#endif
     {
-      close_mtddriver(node);
-      return -ENOMEM;
+      stream->cache = lib_malloc(stream->geo.blocksize);
+      if (stream->cache == NULL)
+        {
+          close_mtddriver(node);
+          return -ENOMEM;
+        }
     }
 
   stream->inode        = node;
   stream->common.putc  = mtdoutstream_putc;
   stream->common.puts  = mtdoutstream_puts;
   stream->common.flush = mtdoutstream_flush;
-  stream->common.seek  = mtdoutstream_seek;
 
   return OK;
 }

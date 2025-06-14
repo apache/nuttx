@@ -35,6 +35,7 @@ list(
   lib_nullinstream.c
   lib_nulloutstream.c
   lib_mtdoutstream.c
+  lib_mtdsostream.c
   lib_libnoflush.c
   lib_libsnoflush.c
   lib_syslogstream.c
@@ -42,6 +43,7 @@ list(
   lib_bufferedoutstream.c
   lib_hexdumpstream.c
   lib_base64outstream.c
+  lib_fileinstream.c
   lib_fileoutstream.c)
 
 if(CONFIG_FILE_STREAM)
