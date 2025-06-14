@@ -48,6 +48,8 @@ endif()
 if(CONFIG_SEGGER_RTT)
   nuttx_add_kernel_library(RTT)
 
+  target_sources(RTT PRIVATE segger.c)
+
   set(RTT_SRCS SystemView/SEGGER/SEGGER_RTT.c)
 
   if(CONFIG_SEGGER_RTT_SECTION)

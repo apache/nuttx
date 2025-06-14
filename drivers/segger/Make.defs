@@ -24,6 +24,7 @@ TARGET_ZIP =
 SGDIR      = segger
 
 ifeq ($(CONFIG_SEGGER_RTT),y)
+  CSRCS += segger/segger.c
   CSRCS += segger/SystemView/SEGGER/SEGGER_RTT.c
 
   CFLAGS += -Wno-shadow -Wno-pointer-to-int-cast
