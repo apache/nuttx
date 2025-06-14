@@ -150,7 +150,7 @@ static int file_shm_open(FAR struct file *shm, FAR const char *name,
 
   /* Associate the inode with a file structure */
 
-  shm->f_oflags = oflags | O_CLOEXEC | O_NOFOLLOW;
+  shm->f_oflags = oflags | O_NOFOLLOW;
   shm->f_inode = inode;
 
 errout_with_sem:
@@ -176,7 +176,7 @@ int shm_open(FAR const char *name, int oflag, mode_t mode)
   int ret;
   int fd;
 
-  fd = file_allocate(oflag, 0, &shm);
+  fd = file_allocate(oflag | O_CLOEXEC, 0, &shm);
   if (fd < 0)
     {
       set_errno(-fd);
