@@ -643,6 +643,13 @@ static void stm32_stdclockconfig(void)
 
   stm32_rcc_enablelse();
 #endif
+
+#if defined(STM32_RCC_CCIPR_ADCSEL)
+  regval = getreg32(STM32_RCC_CCIPR);
+  regval &= ~RCC_CCIPR_ADCSEL_MASK;
+  regval |= STM32_RCC_CCIPR_ADCSEL;
+  putreg32(regval, STM32_RCC_CCIPR);
+#endif
 }
 #endif
 
