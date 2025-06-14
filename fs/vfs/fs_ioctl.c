@@ -181,7 +181,7 @@ static int nx_vioctl(int fd, int req, va_list ap)
         break;
 
       case FIOGCLEX:
-        *va_arg(ap, FAR int *) = fdp->f_cloexec ? O_CLOEXEC : 0;
+        *va_arg(ap, FAR int *) = fdp->f_cloexec ? FD_CLOEXEC : 0;
         break;
 
 #ifdef CONFIG_FDSAN
