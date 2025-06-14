@@ -168,6 +168,13 @@ static inline void putreg64(uint64_t v, const volatile uintreg_t a)
 
 #endif
 
+/* Non-atomic, but more effective modification of registers */
+
+#define modreg8(v,m,a)  putreg8((getreg8(a) & ~(m)) | ((v) & (m)), (a))
+#define modreg16(v,m,a) putreg16((getreg16(a) & ~(m)) | ((v) & (m)), (a))
+#define modreg32(v,m,a) putreg32((getreg32(a) & ~(m)) | ((v) & (m)), (a))
+#define modreg64(v,m,a) putreg64((getreg64(a) & ~(m)) | ((v) & (m)), (a))
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
