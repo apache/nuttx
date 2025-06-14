@@ -28,7 +28,6 @@ set(SRCS
     lib_sprintf.c
     lib_asprintf.c
     lib_snprintf.c
-    lib_libsprintf.c
     lib_vsprintf.c
     lib_vasprintf.c
     lib_vsnprintf.c
@@ -44,19 +43,11 @@ set(SRCS
     lib_libdgets.c
     lib_sscanf.c
     lib_vsscanf.c
-    lib_libvscanf.c
-    lib_libvsprintf.c
     lib_remove.c
     lib_tempnam.c
     lib_tmpnam.c
-    lib_ultoa_invert.c
     lib_renameat.c
-    lib_putwchar.c
-    lib_libbsprintf.c)
-
-if(CONFIG_LIBC_FLOATINGPOINT)
-  list(APPEND SRCS lib_dtoa_engine.c lib_dtoa_data.c)
-endif()
+    lib_putwchar.c)
 
 # The remaining sources files depend upon C streams
 

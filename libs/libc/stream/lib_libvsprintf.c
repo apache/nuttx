@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/stdio/lib_libvsprintf.c
+ * libs/libc/stream/lib_libvsprintf.c
  *
  * SPDX-License-Identifier: BSD-3-Clause
  * SPDX-FileCopyrightText: 2002, Alexander Popov (sasho@vip.bg)
@@ -1384,6 +1384,24 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
 #else
   return vsprintf_internal(stream, NULL, 0, fmt, ap);
 #endif
+}
+
+/****************************************************************************
+ * Name: lib_sprintf
+ ****************************************************************************/
+
+int lib_sprintf(FAR struct lib_outstream_s *stream, FAR const IPTR char *fmt,
+                ...)
+{
+  va_list ap;
+  int     n;
+
+  /* Let lib_vsprintf do the real work */
+
+  va_start(ap, fmt);
+  n = lib_vsprintf(stream, fmt, ap);
+  va_end(ap);
+  return n;
 }
 
 /****************************************************************************

@@ -29,7 +29,13 @@ CSRCS += lib_rawoutstream.c lib_rawsistream.c lib_rawsostream.c
 CSRCS += lib_zeroinstream.c lib_nullinstream.c lib_nulloutstream.c
 CSRCS += lib_mtdoutstream.c lib_libnoflush.c lib_libsnoflush.c
 CSRCS += lib_syslogstream.c lib_syslograwstream.c lib_bufferedoutstream.c
-CSRCS += lib_hexdumpstream.c lib_base64outstream.c lib_fileoutstream.c
+CSRCS += lib_hexdumpstream.c lib_base64outstream.c lib_mtdsostream.c
+CSRCS += lib_fileinstream.c lib_fileoutstream.c lib_libbsprintf.c
+CSRCS += lib_libvscanf.c lib_libvsprintf.c lib_ultoa_invert.c
+
+ifeq ($(CONFIG_LIBC_FLOATINGPOINT),y)
+CSRCS += lib_dtoa_engine.c lib_dtoa_data.c
+endif
 
 # The remaining sources files depend upon C streams
 
