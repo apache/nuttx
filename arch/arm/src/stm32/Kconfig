@@ -8594,6 +8594,16 @@ config STM32_ADC1_DMA_CFG
 	---help---
 		0 - ADC1 DMA in One Shot Mode, 1 - ADC1 DMA in Circular Mode
 
+config STM32_ADC1_DMA_BATCH
+	int "ADC1 DMA number of conversions"
+	depends on STM32_ADC1 && STM32_ADC1_DMA
+	default 1
+	---help---
+		This option allows you to select the number of regular group conversions
+		that will trigger a DMA callback transerring data to the upper-half driver.
+		By default, this value is 1, which means that data is transferred after
+		each group conversion.
+
 config STM32_ADC1_ANIOC_TRIGGER
 	int "ADC1 software trigger (ANIOC_TRIGGER) configuration"
 	depends on STM32_ADC1
@@ -8626,6 +8636,16 @@ config STM32_ADC2_DMA_CFG
 	default 0
 	---help---
 		0 - ADC2 DMA in One Shot Mode, 1 - ADC2 DMA in Circular Mode
+
+config STM32_ADC2_DMA_BATCH
+	int "ADC2 DMA number of conversions"
+	depends on STM32_ADC2 && STM32_ADC2_DMA
+	default 1
+	---help---
+		This option allows you to select the number of regular group conversions
+		that will trigger a DMA callback transerring data to the upper-half driver.
+		By default, this value is 1, which means that data is transferred after
+		each group conversion.
 
 config STM32_ADC2_ANIOC_TRIGGER
 	int "ADC2 software trigger (ANIOC_TRIGGER) configuration"
@@ -8660,6 +8680,16 @@ config STM32_ADC3_DMA_CFG
 	---help---
 		0 - ADC3 DMA in One Shot Mode, 1 - ADC3 DMA in Circular Mode
 
+config STM32_ADC3_DMA_BATCH
+	int "ADC3 DMA number of conversions"
+	depends on STM32_ADC3 && STM32_ADC3_DMA
+	default 1
+	---help---
+		This option allows you to select the number of regular group conversions
+		that will trigger a DMA callback transerring data to the upper-half driver.
+		By default, this value is 1, which means that data is transferred after
+		each group conversion.
+
 config STM32_ADC3_ANIOC_TRIGGER
 	int "ADC3 software trigger (ANIOC_TRIGGER) configuration"
 	depends on STM32_ADC3
@@ -8687,6 +8717,16 @@ config STM32_ADC4_DMA_CFG
 	---help---
 		0 - ADC4 DMA in One Shot Mode, 1 - ADC4 DMA in Circular Mode
 
+config STM32_ADC4_DMA_BATCH
+	int "ADC4 DMA number of conversions"
+	depends on STM32_ADC4 && STM32_ADC4_DMA
+	default 1
+	---help---
+		This option allows you to select the number of regular group conversions
+		that will trigger a DMA callback transerring data to the upper-half driver.
+		By default, this value is 1, which means that data is transferred after
+		each group conversion.
+
 config STM32_ADC4_ANIOC_TRIGGER
 	int "ADC4 software trigger (ANIOC_TRIGGER) configuration"
 	depends on STM32_ADC4
@@ -8713,6 +8753,16 @@ config STM32_ADC5_DMA_CFG
 	default 0
 	---help---
 		0 - ADC5 DMA in One Shot Mode, 1 - ADC5 DMA in Circular Mode
+
+config STM32_ADC5_DMA_BATCH
+	int "ADC5 DMA number of conversions"
+	depends on STM32_ADC5 && STM32_ADC5_DMA
+	default 1
+	---help---
+		This option allows you to select the number of regular group conversions
+		that will trigger a DMA callback transerring data to the upper-half driver.
+		By default, this value is 1, which means that data is transferred after
+		each group conversion.
 
 config STM32_ADC1_INJECTED_CHAN
 	int "ADC1 injected channels"
