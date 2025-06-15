@@ -4550,6 +4550,49 @@ endif # STM32H5_SERIALDRIVER
 
 endmenu # U[S]ART Configuration
 
+menu "ADC Configuration"
+	depends on STM32H5_ADC
+
+config STM32H5_ADC1_DMA
+	bool "ADC1 DMA (not supported yet)"
+	depends on STM32H5_ADC1 && EXPERIMENTAL
+	default n
+	---help---
+		If DMA is selected, then the ADC may be configured to support
+		DMA transfer, which is necessary if multiple channels are read
+		or if very high trigger frequencies are used.
+
+config STM32H5_ADC1_DMA_BATCH
+	int "ADC1 DMA number of conversions"
+	depends on STM32H5_ADC1 && STM32H5_ADC1_DMA
+	default 1
+	---help---
+		This option allows you to select the number of regular group conversions
+		that will trigger a DMA callback transerring data to the upper-half driver.
+		By default, this value is 1, which means that data is transferred after
+		each group conversion.
+
+config STM32H5_ADC2_DMA
+	bool "ADC2 DMA (not supported yet)"
+	depends on STM32H5_ADC2 && EXPERIMENTAL
+	default n
+	---help---
+		If DMA is selected, then the ADC may be configured to support
+		DMA transfer, which is necessary if multiple channels are read
+		or if very high trigger frequencies are used.
+
+config STM32H5_ADC2_DMA_BATCH
+	int "ADC2 DMA number of conversions"
+	depends on STM32H5_ADC2 && STM32H5_ADC2_DMA
+	default 1
+	---help---
+		This option allows you to select the number of regular group conversions
+		that will trigger a DMA callback transerring data to the upper-half driver.
+		By default, this value is 1, which means that data is transferred after
+		each group conversion.
+
+endmenu
+
 menu "Ethernet MAC Configuration"
 	depends on STM32H5_ETHMAC
 
