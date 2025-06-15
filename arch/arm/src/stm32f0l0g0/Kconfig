@@ -3419,6 +3419,16 @@ config STM32F0L0G0_ADC1_DMA_CFG
 	---help---
 		0 - ADC1 DMA in One Shot Mode, 1 - ADC1 DMA in Circular Mode
 
+config STM32F0L0G0_ADC1_DMA_BATCH
+	int "ADC1 DMA number of conversions"
+	depends on STM32F0L0G0_ADC1 && STM32F0L0G0_ADC1_DMA
+	default 1
+	---help---
+		This option allows you to select the number of regular group conversions
+		that will trigger a DMA callback transerring data to the upper-half driver.
+		By default, this value is 1, which means that data is transferred after
+		each group conversion.
+
 config STM32F0L0G0_ADC1_EXTSEL
 	bool "ADC1 external trigger for regular group"
 	depends on STM32F0L0G0_ADC1 && !STM32F0L0G0_HAVE_ADC1_TIMER
