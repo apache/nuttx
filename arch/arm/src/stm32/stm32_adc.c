@@ -420,6 +420,7 @@ struct stm32_dev_s
   uint8_t dmacfg;            /* DMA channel configuration, only for ADC IPv2 */
 #  endif
   bool    hasdma;            /* True: This channel supports DMA */
+  uint16_t dmabatch;         /* Number of conversions for DMA batch */
 #endif
 #ifdef ADC_HAVE_SCAN
   bool    scan;              /* True: Scan mode */
@@ -456,7 +457,7 @@ struct stm32_dev_s
 
   /* DMA transfer buffer */
 
-  uint16_t r_dmabuffer[CONFIG_STM32_ADC_MAX_SAMPLES];
+  uint16_t *r_dmabuffer;
 #endif
 
   /* List of selected ADC channels to sample */
@@ -745,6 +746,12 @@ struct adccmn_data_s g_adc34_cmn =
 /* ADC1 state */
 
 #ifdef CONFIG_STM32_ADC1
+
+#ifdef ADC1_HAVE_DMA
+static uint16_t g_adc1_dmabuffer[CONFIG_STM32_ADC_MAX_SAMPLES *
+                                 CONFIG_STM32_ADC1_DMA_BATCH];
+#endif
+
 static struct stm32_dev_s g_adcpriv1 =
 {
 #ifdef CONFIG_STM32_ADC_LL_OPS
@@ -792,6 +799,8 @@ static struct stm32_dev_s g_adcpriv1 =
   .dmacfg      = CONFIG_STM32_ADC1_DMA_CFG,
 #  endif
   .hasdma      = true,
+  .r_dmabuffer = g_adc1_dmabuffer,
+  .dmabatch    = CONFIG_STM32_ADC1_DMA_BATCH,
 #endif
 #ifdef ADC_HAVE_SCAN
   .scan        = CONFIG_STM32_ADC1_SCAN,
@@ -808,6 +817,12 @@ static struct adc_dev_s g_adcdev1 =
 /* ADC2 state */
 
 #ifdef CONFIG_STM32_ADC2
+
+#ifdef ADC2_HAVE_DMA
+static uint16_t g_adc2_dmabuffer[CONFIG_STM32_ADC_MAX_SAMPLES *
+                                 CONFIG_STM32_ADC2_DMA_BATCH];
+#endif
+
 static struct stm32_dev_s g_adcpriv2 =
 {
 #ifdef CONFIG_STM32_ADC_LL_OPS
@@ -852,6 +867,8 @@ static struct stm32_dev_s g_adcpriv2 =
   .dmacfg      = CONFIG_STM32_ADC2_DMA_CFG,
 #  endif
   .hasdma      = true,
+  .r_dmabuffer = g_adc2_dmabuffer,
+  .dmabatch    = CONFIG_STM32_ADC2_DMA_BATCH,
 #endif
 #ifdef ADC_HAVE_SCAN
   .scan        = CONFIG_STM32_ADC2_SCAN,
@@ -868,6 +885,12 @@ static struct adc_dev_s g_adcdev2 =
 /* ADC3 state */
 
 #ifdef CONFIG_STM32_ADC3
+
+#ifdef ADC3_HAVE_DMA
+static uint16_t g_adc3_dmabuffer[CONFIG_STM32_ADC_MAX_SAMPLES *
+                                 CONFIG_STM32_ADC3_DMA_BATCH];
+#endif
+
 static struct stm32_dev_s g_adcpriv3 =
 {
 #ifdef CONFIG_STM32_ADC_LL_OPS
@@ -912,6 +935,8 @@ static struct stm32_dev_s g_adcpriv3 =
   .dmacfg      = CONFIG_STM32_ADC3_DMA_CFG,
 #  endif
   .hasdma      = true,
+  .r_dmabuffer = g_adc3_dmabuffer,
+  .dmabatch    = CONFIG_STM32_ADC3_DMA_BATCH,
 #endif
 #ifdef ADC_HAVE_SCAN
   .scan        = CONFIG_STM32_ADC3_SCAN,
@@ -928,6 +953,12 @@ static struct adc_dev_s g_adcdev3 =
 /* ADC4 state */
 
 #ifdef CONFIG_STM32_ADC4
+
+#ifdef ADC4_HAVE_DMA
+static uint16_t g_adc4_dmabuffer[CONFIG_STM32_ADC_MAX_SAMPLES *
+                                 CONFIG_STM32_ADC4_DMA_BATCH];
+#endif
+
 static struct stm32_dev_s g_adcpriv4 =
 {
 #ifdef CONFIG_STM32_ADC_LL_OPS
@@ -965,6 +996,8 @@ static struct stm32_dev_s g_adcpriv4 =
   .dmacfg      = CONFIG_STM32_ADC4_DMA_CFG,
 #  endif
   .hasdma      = true,
+  .r_dmabuffer = g_adc4_dmabuffer,
+  .dmabatch    = CONFIG_STM32_ADC4_DMA_BATCH
 #endif
 };
 
@@ -2254,10 +2287,10 @@ static void adc_dmaconvcallback(DMA_HANDLE handle, uint8_t isr,
     {
       DEBUGASSERT(priv->cb->au_receive != NULL);
 
-      for (i = 0; i < priv->rnchannels; i++)
+      for (i = 0; i < priv->rnchannels * priv->dmabatch; i++)
         {
           priv->cb->au_receive(dev, priv->r_chanlist[priv->current],
-                               priv->r_dmabuffer[priv->current]);
+                               priv->r_dmabuffer[i]);
           priv->current++;
           if (priv->current >= priv->rnchannels)
             {
@@ -2689,7 +2722,7 @@ static void adc_dma_start(struct adc_dev_s *dev)
   stm32_dmasetup(priv->dma,
                  priv->base + STM32_ADC_DR_OFFSET,
                  (uint32_t)priv->r_dmabuffer,
-                 priv->rnchannels,
+                 priv->rnchannels * priv->dmabatch,
                  ADC_DMA_CONTROL_WORD);
 
   stm32_dmastart(priv->dma, adc_dmaconvcallback, dev, false);
