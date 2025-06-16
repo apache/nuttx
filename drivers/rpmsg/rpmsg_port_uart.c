@@ -578,6 +578,19 @@ static int rpmsg_port_uart_rx_thread(int argc, FAR char *argv[])
 
                     state = RPMSG_PORT_UART_RX_RECV_NORMAL;
                   }
+                else if (buf[i] == RPMSG_PORT_UART_END)
+                  {
+                    rpmsgerr("Recv dup end char buf[%zd]=%x dbg_i=%d\n",
+                             i, buf[i], rpuart->rx_dbg_idx);
+                    rpmsgerrdump("Recv dbg:", rpuart->rx_dbg_buf,
+                                 sizeof(rpuart->rx_dbg_buf));
+                    rpmsgerrdump("Recv error:", buf, ret);
+                  }
+                else
+                  {
+                    rpmsgerr("Recv non start char buf[%zd]=%x dbg_i=%d\n",
+                             i, buf[i], rpuart->rx_dbg_idx);
+                  }
                 break;
 
               case RPMSG_PORT_UART_RX_RECV_NORMAL:
