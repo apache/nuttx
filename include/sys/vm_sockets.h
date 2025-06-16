@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/netpacket/vm_sockets.h
+ * include/sys/vm_sockets.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NETPACKET_VM_SOCKETS_H
-#define __INCLUDE_NETPACKET_VM_SOCKETS_H
+#ifndef __INCLUDE_SYS_VM_SOCKETS_H
+#define __INCLUDE_SYS_VM_SOCKETS_H
 
 /****************************************************************************
  * Included Files
@@ -204,4 +204,4 @@ struct sockaddr_vm
                           sizeof(uint8_t)];
 };
 
-#endif /* __INCLUDE_NETPACKET_VM_SOCKETS_H */
+#endif /* __INCLUDE_SYS_VM_SOCKETS_H */
