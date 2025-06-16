@@ -34,7 +34,7 @@
 #include <netinet/in.h>
 #include <nuttx/net/loopback.h>
 #include <netpacket/rpmsg.h>
-#include <netpacket/vm_sockets.h>
+#include <sys/vm_sockets.h>
 #include <sys/un.h>
 
 #include "libc.h"

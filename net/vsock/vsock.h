@@ -30,8 +30,8 @@
 #ifdef CONFIG_NET_VSOCK
 
 #include <debug.h>
+#include <sys/vm_sockets.h>
 
-#include <netpacket/vm_sockets.h>
 #include <nuttx/list.h>
 #include <nuttx/net/net.h>
 #include <nuttx/virtio/virtio.h>
