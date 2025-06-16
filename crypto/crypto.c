@@ -624,65 +624,6 @@ migrate:
   return 0;
 }
 
-/* Release a set of crypto descriptors. */
-
-void crypto_freereq(FAR struct cryptop *crp)
-{
-  FAR struct cryptodesc *crd;
-
-  if (crp == NULL)
-    {
-      return;
-    }
-
-  nxmutex_lock(&g_crypto_lock);
-
-  while ((crd = crp->crp_desc) != NULL)
-    {
-      crp->crp_desc = crd->crd_next;
-      kmm_free(crd);
-    }
-
-  kmm_free(crp);
-  nxmutex_unlock(&g_crypto_lock);
-}
-
-/* Acquire a set of crypto descriptors. */
-
-FAR struct cryptop *crypto_getreq(int num)
-{
-  FAR struct cryptodesc *crd;
-  FAR struct cryptop *crp;
-
-  nxmutex_lock(&g_crypto_lock);
-
-  crp = kmm_malloc(sizeof(struct cryptop));
-  if (crp == NULL)
-    {
-      nxmutex_unlock(&g_crypto_lock);
-      return NULL;
-    }
-
-  bzero(crp, sizeof(struct cryptop));
-
-  while (num--)
-    {
-      crd = kmm_calloc(1, sizeof(struct cryptodesc));
-      if (crd == NULL)
-        {
-          nxmutex_unlock(&g_crypto_lock);
-          crypto_freereq(crp);
-          return NULL;
-        }
-
-      crd->crd_next = crp->crp_desc;
-      crp->crp_desc = crd;
-    }
-
-  nxmutex_unlock(&g_crypto_lock);
-  return crp;
-}
-
 int crypto_getfeat(FAR int *featp)
 {
   extern int cryptodevallowsoft;
