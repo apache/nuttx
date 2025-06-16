@@ -139,9 +139,8 @@ int file_close(FAR struct file *filep)
 
           inode_release(inode);
         }
-
 #ifdef CONFIG_FS_NOTIFY
-      if (path != NULL)
+      else if (path != NULL)
         {
           lib_put_pathbuffer(path);
         }
