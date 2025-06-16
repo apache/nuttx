@@ -1500,6 +1500,12 @@ static void cdcacm_unbind(FAR struct usbdevclass_driver_s *driver,
 
 #ifdef CONFIG_CDCACM_DISABLE_TXBUF
       DEBUGASSERT(priv->nwrq >= CONFIG_CDCACM_NWRREQS - 1);
+      if (priv->wrcontainer)
+        {
+          sq_addlast((FAR sq_entry_t *)priv->wrcontainer, &priv->txfree);
+          priv->wrcontainer = NULL;
+          priv->nwrq++;
+        }
 #else
       DEBUGASSERT(priv->nwrq == CONFIG_CDCACM_NWRREQS);
 #endif
