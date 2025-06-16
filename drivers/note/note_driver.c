@@ -2112,7 +2112,8 @@ void note_get_taskname(pid_t pid, FAR char *buf, size_t len)
     }
   else
     {
-#  ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
+#  if defined(CONFIG_SCHED_INSTRUMENTATION_SWITCH) && \
+      (CONFIG_DRIVERS_NOTE_TASKNAME_BUFSIZE > 0)
       FAR struct note_taskname_info_s *ti = note_find_taskname(pid);
 
       if (ti != NULL)
