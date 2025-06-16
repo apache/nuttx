@@ -358,6 +358,7 @@ static inline int tcp_ipv4_bind(FAR struct tcp_conn_s *conn,
     {
       ret = -EADDRNOTAVAIL;
 
+      netdev_list_lock();
       for (dev = g_netdevices; dev; dev = dev->flink)
         {
           if (net_ipv4addr_cmp(addr->sin_addr.s_addr, dev->d_ipaddr))
@@ -366,6 +367,8 @@ static inline int tcp_ipv4_bind(FAR struct tcp_conn_s *conn,
               break;
             }
         }
+
+      netdev_list_unlock();
 
       if (ret == -EADDRNOTAVAIL)
         {
@@ -456,6 +459,7 @@ static inline int tcp_ipv6_bind(FAR struct tcp_conn_s *conn,
     {
       ret = -EADDRNOTAVAIL;
 
+      netdev_list_lock();
       for (dev = g_netdevices; dev; dev = dev->flink)
         {
           if (NETDEV_IS_MY_V6ADDR(dev, addr->sin6_addr.in6_u.u6_addr16))
@@ -465,6 +469,7 @@ static inline int tcp_ipv6_bind(FAR struct tcp_conn_s *conn,
             }
         }
 
+      netdev_list_unlock();
       if (ret == -EADDRNOTAVAIL)
         {
           net_unlock();

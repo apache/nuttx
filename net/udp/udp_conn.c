@@ -751,6 +751,7 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr)
         {
           ret = -EADDRNOTAVAIL;
 
+          netdev_list_lock();
           for (dev = g_netdevices; dev; dev = dev->flink)
             {
               if (net_ipv4addr_cmp(inaddr->sin_addr.s_addr, dev->d_ipaddr))
@@ -760,6 +761,7 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr)
                 }
             }
 
+          netdev_list_unlock();
           if (ret == -EADDRNOTAVAIL)
             {
               net_unlock();
@@ -798,6 +800,7 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr)
         {
           ret = -EADDRNOTAVAIL;
 
+          netdev_list_lock();
           for (dev = g_netdevices; dev; dev = dev->flink)
             {
               if (NETDEV_IS_MY_V6ADDR(dev,
@@ -808,6 +811,7 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr)
                 }
             }
 
+          netdev_list_unlock();
           if (ret == -EADDRNOTAVAIL)
             {
               net_unlock();
