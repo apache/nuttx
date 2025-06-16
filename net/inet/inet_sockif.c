@@ -298,30 +298,6 @@ static int inet_setup(FAR struct socket *psock)
 #endif
 #endif /* CONFIG_NET_UDP */
 
-#if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_UDP)
-      case SOCK_CTRL:
-#  ifdef NET_TCP_HAVE_STACK
-        if (psock->s_proto == 0 || psock->s_proto == IPPROTO_TCP)
-          {
-             /* Allocate and attach the TCP connection structure */
-
-             return inet_tcp_alloc(psock);
-          }
-
-#  endif
-#  ifdef NET_UDP_HAVE_STACK
-        if (psock->s_proto == 0 || psock->s_proto == IPPROTO_UDP)
-          {
-             /* Allocate and attach the UDP connection structure */
-
-             return inet_udp_alloc(psock);
-          }
-
-#  endif
-        nerr("ERROR: Unsupported control protocol: %d\n", psock->s_proto);
-        return -EPROTONOSUPPORT;
-#endif /* CONFIG_NET_TCP || CONFIG_NET_UDP */
-
       default:
         nerr("ERROR: Unsupported type: %d\n", psock->s_type);
         return -EPROTONOSUPPORT;
@@ -357,11 +333,6 @@ static sockcaps_t inet_sockcaps(FAR struct socket *psock)
         return SOCKCAP_NONBLOCKING;
 #endif
 
-#if defined(NET_TCP_HAVE_STACK) || defined(NET_UDP_HAVE_STACK)
-      case SOCK_CTRL:
-        return SOCKCAP_NONBLOCKING;
-#endif
-
       default:
         return 0;
     }
@@ -387,9 +358,7 @@ static void inet_addref(FAR struct socket *psock)
   DEBUGASSERT(psock != NULL && psock->s_conn != NULL);
 
 #ifdef NET_TCP_HAVE_STACK
-  if (psock->s_type == SOCK_STREAM ||
-      (psock->s_type == SOCK_CTRL &&
-      (psock->s_proto == 0 || psock->s_proto == IPPROTO_TCP)))
+  if (psock->s_type == SOCK_STREAM)
     {
       FAR struct tcp_conn_s *conn = psock->s_conn;
       DEBUGASSERT(conn->crefs > 0 && conn->crefs < 255);
@@ -398,9 +367,7 @@ static void inet_addref(FAR struct socket *psock)
   else
 #endif
 #ifdef NET_UDP_HAVE_STACK
-  if (psock->s_type == SOCK_DGRAM ||
-      (psock->s_type == SOCK_CTRL &&
-      (psock->s_proto == 0 || psock->s_proto == IPPROTO_UDP)))
+  if (psock->s_type == SOCK_DGRAM)
     {
       FAR struct udp_conn_s *conn = psock->s_conn;
       DEBUGASSERT(conn->crefs > 0 && conn->crefs < 255);
@@ -502,15 +469,6 @@ static int inet_bind(FAR struct socket *psock,
         }
         break;
 #endif /* CONFIG_NET_UDP */
-
-#if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_UDP)
-      case SOCK_CTRL:
-        {
-          nerr("ERROR:  Inappropriate socket type: %d\n", psock->s_type);
-          ret = -EOPNOTSUPP;
-        }
-        break;
-#endif
 
       default:
         nerr("ERROR: Unsupported socket type: %d\n", psock->s_type);
@@ -1414,14 +1372,6 @@ static int inet_connect(FAR struct socket *psock,
         }
 #endif /* CONFIG_NET_UDP */
 
-#if defined(CONFIG_NET_TCP) && defined(CONFIG_NET_UDP)
-      case SOCK_CTRL:
-        {
-          nerr("ERROR:  Inappropriate socket type: %d\n", psock->s_type);
-          return -EOPNOTSUPP;
-        }
-#endif
-
       default:
         return -EBADF;
     }
@@ -1612,14 +1562,6 @@ static inline int inet_pollsetup(FAR struct socket *psock,
     }
   else
 #endif /* NET_UDP_HAVE_STACK */
-#if defined(NET_TCP_HAVE_STACK) || defined(NET_UDP_HAVE_STACK)
-  if (psock->s_type == SOCK_CTRL)
-    {
-      nerr("ERROR:  Inappropriate socket type: %d\n", psock->s_type);
-      return -EOPNOTSUPP;
-    }
-  else
-#endif
     {
       return -ENOSYS;
     }
@@ -1660,14 +1602,6 @@ static inline int inet_pollteardown(FAR struct socket *psock,
     }
   else
 #endif /* NET_UDP_HAVE_STACK */
-#if defined(NET_TCP_HAVE_STACK) || defined(NET_UDP_HAVE_STACK)
-  if (psock->s_type == SOCK_CTRL)
-    {
-      nerr("ERROR:  Inappropriate socket type: %d\n", psock->s_type);
-      return -EOPNOTSUPP;
-    }
-  else
-#endif
     {
       return -ENOSYS;
     }
@@ -1803,15 +1737,6 @@ static ssize_t inet_send(FAR struct socket *psock, FAR const void *buf,
         }
         break;
 #endif /* CONFIG_NET_UDP */
-
-#if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_UDP)
-      case SOCK_CTRL:
-        {
-          nerr("ERROR:  Inappropriate socket type: %d\n", psock->s_type);
-          ret = -EOPNOTSUPP;
-        }
-        break;
-#endif
 
       default:
         {
@@ -2011,18 +1936,14 @@ static int inet_ioctl(FAR struct socket *psock, int cmd, unsigned long arg)
     }
 
 #ifdef NET_TCP_HAVE_STACK
-  if (psock->s_type == SOCK_STREAM ||
-      (psock->s_type == SOCK_CTRL &&
-      (psock->s_proto == 0 || psock->s_proto == IPPROTO_TCP)))
+  if (psock->s_type == SOCK_STREAM)
     {
       return tcp_ioctl(psock->s_conn, cmd, arg);
     }
 #endif
 
 #if defined(CONFIG_NET_UDP) && defined(NET_UDP_HAVE_STACK)
-  if (psock->s_type == SOCK_DGRAM ||
-      (psock->s_type == SOCK_CTRL &&
-      (psock->s_proto == 0 || psock->s_proto == IPPROTO_UDP)))
+  if (psock->s_type == SOCK_DGRAM)
     {
       return udp_ioctl(psock->s_conn, cmd, arg);
     }
@@ -2342,15 +2263,6 @@ static ssize_t inet_recvmsg(FAR struct socket *psock,
       break;
 #endif /* CONFIG_NET_UDP */
 
-#if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_UDP)
-    case SOCK_CTRL:
-      {
-        nerr("ERROR:  Inappropriate socket type: %d\n", psock->s_type);
-        ret = -EOPNOTSUPP;
-      }
-      break;
-#endif
-
     default:
       {
         nerr("ERROR: Unsupported socket type: %d\n", psock->s_type);
@@ -2391,9 +2303,7 @@ int inet_close(FAR struct socket *psock)
    */
 
 #ifdef CONFIG_NET_TCP
-  if (psock->s_type == SOCK_STREAM ||
-      (psock->s_type == SOCK_CTRL &&
-      (psock->s_proto == 0 || psock->s_proto == IPPROTO_TCP)))
+  if (psock->s_type == SOCK_STREAM)
     {
 #ifdef NET_TCP_HAVE_STACK
       FAR struct tcp_conn_s *conn = psock->s_conn;
@@ -2433,9 +2343,7 @@ int inet_close(FAR struct socket *psock)
   else
 #endif /* CONFIG_NET_TCP */
 #ifdef CONFIG_NET_UDP
-  if (psock->s_type == SOCK_DGRAM ||
-      (psock->s_type == SOCK_CTRL &&
-      (psock->s_proto == 0 || psock->s_proto == IPPROTO_UDP)))
+  if (psock->s_type == SOCK_DGRAM)
     {
 #ifdef NET_UDP_HAVE_STACK
       FAR struct udp_conn_s *conn = psock->s_conn;
@@ -2506,8 +2414,8 @@ inet_sockif(sa_family_t family, int type, int protocol)
 #if defined(HAVE_PFINET_SOCKETS) && defined(CONFIG_NET_ICMP_SOCKET)
   /* PF_INET, ICMP data gram sockets are a special case of raw sockets */
 
-  if (family == PF_INET && (type == SOCK_DGRAM || type == SOCK_CTRL ||
-      type == SOCK_RAW) && protocol == IPPROTO_ICMP)
+  if (family == PF_INET && (type == SOCK_DGRAM || type == SOCK_RAW) &&
+      protocol == IPPROTO_ICMP)
     {
       return &g_icmp_sockif;
     }
@@ -2516,8 +2424,8 @@ inet_sockif(sa_family_t family, int type, int protocol)
 #if defined(HAVE_PFINET6_SOCKETS) && defined(CONFIG_NET_ICMPv6_SOCKET)
   /* PF_INET, ICMP data gram sockets are a special case of raw sockets */
 
-  if (family == PF_INET6 && (type == SOCK_DGRAM || type == SOCK_CTRL ||
-      type == SOCK_RAW) && protocol == IPPROTO_ICMPV6)
+  if (family == PF_INET6 && (type == SOCK_DGRAM || type == SOCK_RAW)
+      && protocol == IPPROTO_ICMPV6)
     {
       return &g_icmpv6_sockif;
     }
