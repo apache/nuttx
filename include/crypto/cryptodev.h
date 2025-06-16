@@ -445,10 +445,6 @@ int crypto_kinvoke(FAR struct cryptkop *);
 int crypto_getfeat(FAR int *);
 int crypto_driver_set_priv(uint32_t, FAR void *);
 FAR void *crypto_driver_get_priv(uint32_t);
-
-FAR struct cryptop *crypto_getreq(int);
-void crypto_freereq(FAR struct cryptop *);
-
 #ifdef CONFIG_CRYPTO_CRYPTODEV_HARDWARE
 void hwcr_init(void);
 #endif
