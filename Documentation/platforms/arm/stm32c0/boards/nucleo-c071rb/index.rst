@@ -44,3 +44,52 @@ Enabled features:
 - ADC with DMA enabled using A0 and A1 pins
 
 - button with software debouncing enabled (no RC filter on the board)
+
+analogscope
+-----------
+
+Configuration demonstrating ADC data stream using NxScope over UART
+connected to VCOM.
+
+See :doc:`/applications/system/adcscope/index` for more details.
+
+Device detection with ``nxscli`` client::
+
+    $ nxscli serial /dev/ttyACM0 pdevinfo               
+    INFO:nxscli:enable (0, <class 'nxscli.plugins.devinfo.PluginDevinfo'>, {}) 
+    INFO:nxscli:connecting to nxs device...
+    INFO:nxscli:connected!
+    INFO:nxscli:started <nxscli.plugins.devinfo.PluginDevinfo object at 0x7f090d810830>
+
+    Device Summary
+      Channels:         6
+      Divider support:  no
+      Ack support:      no
+      Flags:            0x00
+      RX padding:       0
+
+    Stream
+      Connected:        yes
+      Started:          no
+      Overflow count:   0
+      Bitrate:          0.0 B/s
+
+    Channel State
+      Applied enabled:  none
+      Buffered enabled: none
+
+    Channels
+    +----+-------+-------+-----+-------+----+-----+
+    | ID | Name  | Type  | Dim | Valid | En | Div |
+    +====+=======+=======+=====+=======+====+=====+
+    |  0 | chan0 | INT16 |   1 | yes   | no |   0 |
+    |  1 | chan1 | INT16 |   1 | yes   | no |   0 |
+    |  2 | chan2 | INT16 |   1 | yes   | no |   0 |
+    |  3 | chan3 | INT16 |   1 | yes   | no |   0 |
+    |  4 | chan4 | INT16 |   1 | yes   | no |   0 |
+    |  5 | chan5 | INT16 |   1 | yes   | no |   0 |
+    +----+-------+-------+-----+-------+----+-----+
+
+    closing...
+    INFO:nxscli:disconnecting from nxs device...
+    INFO:nxscli:disconnected!
