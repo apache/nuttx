@@ -93,7 +93,9 @@
 #define RCC_CR_HSEBYP               (1 << 18) /* Bit 18: External high speed clock bypass */
 
 #define RCC_CR_CSSON                (1 << 19) /* Bit 19: Clock security system enable */
-                                              /* Bits 20-23: Reserved */
+                                              /* Bits 20-21: Reserved */
+#define RCC_CR_HSI48ON              (1 << 22) /* Bit 22: HSI48 On */
+#define RCC_CR_HSI48RDY             (1 << 23) /* Bit 23: HSI48 Ready */
 #define RCC_CR_PLLON                (1 << 24) /* Bit 24: PLL enable */
 #define RCC_CR_PLLRDY               (1 << 25) /* Bit 25: PLL clock ready flag */
                                               /* Bits 26-27: Reserved */
