@@ -38,6 +38,7 @@
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/analog/ioctl.h>
 
@@ -156,9 +157,9 @@ struct dac_dev_s
   uint8_t                     ad_ocount;    /* The number of times the device has
                                              * been opened */
   uint8_t                     ad_nchannel;  /* Number of dac channel */
-  mutex_t                     ad_closelock; /* Locks out new opens while close is
-                                             * in progress */
+  mutex_t                     ad_lock;      /* Locks used to serialize access */
   struct dac_fifo_s           ad_xmit;      /* Describes receive FIFO */
+  spinlock_t                  ad_spinlock;  /* Used for data protection between irq and threads */
 };
 
 /****************************************************************************

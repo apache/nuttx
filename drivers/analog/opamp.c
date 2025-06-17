@@ -84,7 +84,7 @@ static int opamp_open(FAR struct file *filep)
    * finished.
    */
 
-  ret = nxmutex_lock(&dev->ad_closelock);
+  ret = nxmutex_lock(&dev->ad_lock);
   if (ret >= 0)
     {
       /* Increment the count of references to the device.  If this is the
@@ -109,10 +109,7 @@ static int opamp_open(FAR struct file *filep)
             {
               /* Yes.. perform one time hardware initialization. */
 
-              irqstate_t flags = enter_critical_section();
-
               ret = dev->ad_ops->ao_setup(dev);
-              leave_critical_section(flags);
             }
 
           /* Save the new open count on success */
@@ -123,7 +120,7 @@ static int opamp_open(FAR struct file *filep)
             }
         }
 
-      nxmutex_unlock(&dev->ad_closelock);
+      nxmutex_unlock(&dev->ad_lock);
     }
 
   return ret;
@@ -142,10 +139,9 @@ static int opamp_close(FAR struct file *filep)
 {
   FAR struct inode     *inode = filep->f_inode;
   FAR struct opamp_dev_s *dev   = inode->i_private;
-  irqstate_t            flags;
   int                   ret;
 
-  ret = nxmutex_lock(&dev->ad_closelock);
+  ret = nxmutex_lock(&dev->ad_lock);
   if (ret >= 0)
     {
       /* Decrement the references to the driver.  If the reference count will
@@ -155,7 +151,7 @@ static int opamp_close(FAR struct file *filep)
       if (dev->ad_ocount > 1)
         {
           dev->ad_ocount--;
-          nxmutex_unlock(&dev->ad_closelock);
+          nxmutex_unlock(&dev->ad_lock);
         }
       else
         {
@@ -165,11 +161,9 @@ static int opamp_close(FAR struct file *filep)
 
           /* Free the IRQ and disable the OPAMP device */
 
-          flags = enter_critical_section();       /* Disable interrupts */
-          dev->ad_ops->ao_shutdown(dev);          /* Disable the OPAMP */
-          leave_critical_section(flags);
+          dev->ad_ops->ao_shutdown(dev);
 
-          nxmutex_unlock(&dev->ad_closelock);
+          nxmutex_unlock(&dev->ad_lock);
         }
     }
 
@@ -208,14 +202,14 @@ int opamp_register(FAR const char *path, FAR struct opamp_dev_s *dev)
 
   /* Initialize mutex */
 
-  nxmutex_init(&dev->ad_closelock);
+  nxmutex_init(&dev->ad_lock);
 
   /* Register the OPAMP character driver */
 
   ret = register_driver(path, &g_opamp_fops, 0400, dev);
   if (ret < 0)
     {
-      nxmutex_destroy(&dev->ad_closelock);
+      nxmutex_destroy(&dev->ad_lock);
     }
 
   return ret;

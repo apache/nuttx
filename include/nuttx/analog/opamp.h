@@ -72,7 +72,7 @@ struct opamp_dev_s
   /* Fields managed by common upper half OPAMP logic */
 
   uint8_t                 ad_ocount;    /* The number of times the device has been opened */
-  mutex_t                 ad_closelock; /* Locks out new opens while close is in progress */
+  mutex_t                 ad_lock;      /* Lock used to serialize access */
 #endif
 
   /* Fields provided by lower half OPAMP logic */
