@@ -57,14 +57,14 @@ static const struct arm64_mpu_region g_mpu_regions[] =
   MPU_REGION_ENTRY("nx_ktext",
     (uint64_t)KTEXT_START,
     (uint64_t)KTEXT_END,
-    REGION_RAM_TEXT_ATTR),
+    REGION_KTEXT_ATTR),
 
   /* Region 1 NuttX kdata */
 
   MPU_REGION_ENTRY("nx_kdata",
     (uint64_t)KSRAM_START,
     (uint64_t)KSRAM_END,
-    REGION_RAM_ATTR),
+    REGION_RW_NA_ATTR),
 
 #ifdef CONFIG_BUILD_PROTECTED
   /* Region 2 NuttX utext */
@@ -72,14 +72,14 @@ static const struct arm64_mpu_region g_mpu_regions[] =
   MPU_REGION_ENTRY("nx_utext",
       (uint64_t)UTEXT_START,
       (uint64_t)UTEXT_END,
-      REGION_RAM_UTEXT_ATTR),
+      REGION_UTEXT_ATTR),
 
   /* Region 3 NuttX udata */
 
   MPU_REGION_ENTRY("nx_udata",
      (uint64_t)USRAM_START,
      (uint64_t)USRAM_END,
-     REGION_URAM_ATTR),
+     REGION_RW_RW_ATTR),
 #endif
 
   /* Region 4 device region */
