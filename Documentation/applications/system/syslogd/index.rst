@@ -27,9 +27,9 @@ not receive or forward logs.
 
 .. warning::
 
-   The daemon is currently runs itself in the background using ``fork()``. On
-   architectures where ``fork()`` is not implemented, the daemon must be
-   "backgrounded" by using the trailing ``&`` in NSH at the moment. It is also
-   possible to us ``posix_spawn()`` from a parent program.
+   The daemon runs itself in the background using ``posix_spawn()`` due to
+   limitations with the NuttX implementation of ``fork()`` being architecture
+   dependent. This results in more consistent behaviour, but requires
+   ``CONFIG_LIBC_EXECFUNCS`` to be enabled.
 
 Read more about ``syslog`` on NuttX: :doc:`/components/drivers/special/syslog`
