@@ -3024,6 +3024,24 @@ config STM32_I2C3
 	depends on STM32_HAVE_I2C3
 	select STM32_I2C
 
+config STM32_I2C1_SLAVE
+	bool "I2C1 Slave"
+	default n
+	depends on !STM32_I2C1 && I2C_SLAVE
+	select STM32_I2C_SLAVE
+
+config STM32_I2C2_SLAVE
+	bool "I2C2 Slave"
+	default n
+	depends on STM32_HAVE_I2C2 && !STM32_I2C2 && I2C_SLAVE
+	select STM32_I2C_SLAVE
+
+config STM32_I2C3_SLAVE
+	bool "I2C3 Slave"
+	default n
+	depends on STM32_HAVE_I2C3 && !STM32_I2C3 && I2C_SLAVE
+	select STM32_I2C_SLAVE
+
 config STM32_LPTIM1
 	bool "LPTIM1"
 	default n
@@ -3418,6 +3436,10 @@ config STM32_I2S
 	select STM32_SPI_DMA
 
 config STM32_I2C
+	bool
+	default n
+
+config STM32_I2C_SLAVE
 	bool
 	default n
 
@@ -10717,6 +10739,31 @@ config STM32_I2C_DMA
 		This option enables the DMA for I2C transfers.
 		Note: The user can define CONFIG_I2C_DMAPRIO: a custom priority value for the
 		I2C dma streams, else the default priority level is set to medium.
+
+endmenu
+
+menu "I2C Slave Configuration"
+	depends on STM32_I2C_SLAVE
+
+config STM32_I2C_SLAVE_DEFAULT_TX
+	hex "Default TX byte to be sent when the TX buffer is empty"
+	default 0xFF
+
+config STM32_I2C_SLAVE_USEWQ
+	bool "Use work queue to delegate the isr completion status"
+	default n
+	---help---
+		With the current upperhalf I2C slave driver implementation, the user
+		should delegate the callback completion status using a work queue.
+		However, work queues introduce a delay, so in certain scenarios
+		it is better to use a custom driver without using a work queue.
+
+config STM32_I2C_SLAVE_RETRANSFER
+	bool "The frame is retransferred when stop is issued beforehand"
+	default n
+	---help---
+		If stop is issued before the whole frame is transferred,
+		the tx pointer is reset to 0.
 
 endmenu
 
