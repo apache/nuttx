@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/esp32c6/common/src/esp_board_spi.c
+ * boards/risc-v/esp32h2/common/include/esp_board_mmcsd.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,71 +20,57 @@
  *
  ****************************************************************************/
 
+#ifndef __BOARDS_RISCV_ESP32H2_COMMON_INCLUDE_ESP_BOARD_MMCSD_H
+#define __BOARDS_RISCV_ESP32H2_COMMON_INCLUDE_ESP_BOARD_MMCSD_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <stdbool.h>
-#include <debug.h>
-
-#include <nuttx/spi/spi.h>
-
-#include "espressif/esp_gpio.h"
-
 /****************************************************************************
- * Private Functions
+ * Pre-processor Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
+#ifndef __ASSEMBLY__
 
-/****************************************************************************
- * Name: esp_spi2_status
- ****************************************************************************/
-
-#ifdef CONFIG_ESPRESSIF_SPI2
-
-uint8_t esp_spi2_status(struct spi_dev_s *dev, uint32_t devid)
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
 {
-  uint8_t status = 0;
-
-  if (devid == SPIDEV_MMCSD(0))
-    {
-      return SPI_STATUS_PRESENT;
-    }
-
-  return status;
-}
-
+#else
+#define EXTERN extern
 #endif
 
 /****************************************************************************
- * Name: esp_spi2_cmddata
+ * Public Function Prototypes
  ****************************************************************************/
 
-#if defined(CONFIG_ESPRESSIF_SPI2) && defined(CONFIG_SPI_CMDDATA)
+/****************************************************************************
+ * Name: esp_mmcsd_spi_initialize
+ *
+ * Description:
+ *   Initialize SPI-based SD card.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
+ *
+ ****************************************************************************/
 
-int esp_spi2_cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
-{
-  if (devid == SPIDEV_DISPLAY(0))
-    {
-      /*  This is the Data/Command control pad which determines whether the
-       *  data bits are data or a command.
-       */
-
-      esp_gpiowrite(CONFIG_ESPRESSIF_SPI2_MISOPIN, !cmd);
-
-      return OK;
-    }
-
-  spiinfo("devid: %" PRIu32 " CMD: %s\n", devid, cmd ? "command" :
-          "data");
-
-  return -ENODEV;
-}
-
+#ifdef CONFIG_MMCSD_SPI
+int esp_mmcsd_spi_initialize(void);
 #endif
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __BOARDS_RISCV_ESP32H2_COMMON_INCLUDE_ESP_BOARD_MMCSD_H */
