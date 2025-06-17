@@ -215,7 +215,7 @@ function configure_cmake {
       }
     }
     else {
-      if (cmake -B build -DBOARD_CONFIG="$tmpconfig" -GNinja 1> $null) {
+      if (cmake -B build -DBOARD_CONFIG="$tmpconfig" -GNinja 1>$null) {
         cmake -B build -DBOARD_CONFIG="$tmpconfig" -GNinja
         Write-Host "cmake -B build -DBOARD_CONFIG=$tmpconfig -GNinja"
         $global:fail = 1
@@ -270,11 +270,18 @@ function build_cmake {
 
   # Build the project
   try {
-    if (cmake --build build 1> $null) {
-      cmake --build build
-      $global:fail = 1
+    $errorcmakelist = @()
+    # $ErrorActionPreference = 'Stop'
+    $ErrorActionPreference = "Continue"
+    $errorcmakelist = (cmake --build build 2>$null)
+    if ($lastExitCode -ne 0) { 
+      foreach ($errorline in $errorcmakelist) {
+        Write-Host "$errorline"
+      }
     }
-    Write-Host "  Build completed successfully."
+    else {
+      Write-Host "  Build completed successfully."
+    }
   }
   catch {
     Write-Error "Build failed: $_"
@@ -300,6 +307,7 @@ function build_cmake {
     }
     catch {
       Write-Host "  An error occurred while copying files: $_" -ForegroundColor Red
+      $global:fail = 1
     }
   }
 }
@@ -307,7 +315,7 @@ function build_cmake {
 function build {
   Write-Host "  Building NuttX..."
   if ($cmake) {
-    Write-Host "  build_cmake" -ForegroundColor Green
+    # Write-Host "  build_cmake" -ForegroundColor Green
     build_cmake
   }
   else {
@@ -330,14 +338,14 @@ function refresh_cmake {
   }
 
   try {
-    if (cmake --build build -t refreshsilent 1> $null) {
+    if (cmake --build build -t refreshsilent 1>$null) {
       cmake --build build -t refreshsilent
       $global:fail = 1
     }
     Write-Host "  Refresh completed successfully."
   }
   catch {
-    Write-Error "refresh failed: $_"
+    Write-Error "Refresh failed: $_"
     $global:fail = 1
   }
 
@@ -353,12 +361,12 @@ function refresh_cmake {
   if ($CHECKCLEAN -ne 0) {
     if ((Test-Path -Path "$nuttx\.git") -or (Test-Path -Path "$APPSDIR\.git")) {
       try {
-        if (git -C $nuttx status -s 2> $null) {
+        if (git -C $nuttx status -s 2>$null) {
           Write-Host "Git $nuttx status " -ForegroundColor Yellow
           git -C $nuttx status -s
           $global:fail = 1
         }
-        if (git -C $APPSDIR status -s 2> $null) {
+        if (git -C $APPSDIR status -s 2>$null) {
           Write-Host "Git $APPSDIR status " -ForegroundColor Yellow
           git -C $APPSDIR status -s
           $global:fail = 1
@@ -448,7 +456,7 @@ function dotest {
     $toolchain = $($configarr[1])
   }
 
-  Write-Host (Get-Date).ToString("yyyy-MM-dd HH:mm:ss")  -ForegroundColor Yellow
+  Write-Host (Get-Date).ToString("yyyy-MM-dd HH:mm:ss") -ForegroundColor Yellow
   Write-Host "------------------------------------------------------------------------------------"
 
   distclean
@@ -496,5 +504,8 @@ foreach ($line in $testlist) {
 
 }
 
+Write-Host "------------------------------------------------------------------------------------"
+$timestamp = (Get-Date).ToString("yyyy-MM-dd HH:mm:ss")
+Write-Host "End: $timestamp" -ForegroundColor Yellow
 Write-Host "===================================================================================="
 exit $global:fail
