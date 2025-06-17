@@ -438,6 +438,78 @@ Steps for Using NuttX as IVSHMEM host and guest
          server recv data normal exit
          server Complete ret 0, errno 0
 
+fastboot
+--------
+Fastboot TCP network device configuration with reference to qemu-armv8a:netnsh.
+More details about usage of fastboot, please refer to `fastbootd — NuttX latest documentation <https://nuttx.apache.org/docs/latest/applications/system/fastboot/index.html>`_.
+
+You can run the configuration procedure::
+
+  $ ./tools/configure.sh -l qemu-armv8a:fastboot
+  $ make
+  $ dd if=/dev/zero of=./mydisk-1gb.img bs=1M count=1024
+
+To test it, there are two example ways:
+
+1. NAT::
+
+    # a. Add "hostfwd=tcp:127.0.0.1:15002-10.0.2.15:5554" for option "-netdev"
+    qemu-system-aarch64 -cpu cortex-a53 -nographic \
+                    -machine virt,virtualization=on,gic-version=3 \
+                    -chardev stdio,id=con,mux=on -serial chardev:con \
+                    -global virtio-mmio.force-legacy=false \
+                    -device virtio-serial-device,bus=virtio-mmio-bus.0 \
+                    -chardev socket,telnet=on,host=127.0.0.1,port=3450,server=on,wait=off,id=foo \
+                    -device virtconsole,chardev=foo \
+                    -device virtio-rng-device,bus=virtio-mmio-bus.1 \
+                    -netdev user,id=u1,hostfwd=tcp:127.0.0.1:10023-10.0.2.15:23,hostfwd=tcp:127.0.0.1:15002-10.0.2.15:5554 \
+                    -device virtio-net-device,netdev=u1,bus=virtio-mmio-bus.2 \
+                    -drive file=./mydisk-1gb.img,if=none,format=raw,id=hd \
+                    -device virtio-blk-device,bus=virtio-mmio-bus.3,drive=hd \
+                    -mon chardev=con,mode=readline -kernel ./nuttx
+
+    # b. Run fastboot daemon on qemu device
+    fastbootd &
+
+    # c. Exec fastboot command on host side with device IP and PORT
+    fastboot -s tcp:127.0.0.1:15002 getvar version
+
+2. Bridge::
+
+    # a. Set option "-netdev" to "-netdev bridge,br=br0,id=u1"
+    qemu-system-aarch64 -cpu cortex-a53 -nographic \
+                    -machine virt,virtualization=on,gic-version=3 \
+                    -chardev stdio,id=con,mux=on -serial chardev:con \
+                    -global virtio-mmio.force-legacy=false \
+                    -device virtio-serial-device,bus=virtio-mmio-bus.0 \
+                    -chardev socket,telnet=on,host=127.0.0.1,port=3450,server=on,wait=off,id=foo \
+                    -device virtconsole,chardev=foo \
+                    -device virtio-rng-device,bus=virtio-mmio-bus.1 \
+                    -netdev bridge,br=br0,id=u1 \
+                    -device virtio-net-device,netdev=u1,bus=virtio-mmio-bus.2 \
+                    -drive file=./mydisk-1gb.img,if=none,format=raw,id=hd \
+                    -device virtio-blk-device,bus=virtio-mmio-bus.3,drive=hd \
+                    -mon chardev=con,mode=readline -kernel ./nuttx
+
+    # b. Init network bridge and ACL for host
+    sudo ip link add name br0 type bridge
+    ip addr add 192.168.100.1/24 brd + dev br0
+    ip link set br0 up
+    sysctl -w net.ipv4.ip_forward=1
+    iptables -t filter -A FORWARD -i br0 -j ACCEPT
+    iptables -t filter -A FORWARD -o br0 -j ACCEPT
+    echo "allow all" | sudo tee /etc/qemu/${USER}.conf
+    echo "include /etc/qemu/${USER}.conf" | sudo tee --append /etc/qemu/bridge.conf
+    sudo chown root:${USER} /etc/qemu/${USER}.conf
+    sudo chmod 640 /etc/qemu/${USER}.conf
+
+    # c. Configure IP address for qemu device, and run fastboot daemon
+    ifconfig eth0 192.168.100.2
+    fastbootd &
+
+    # d. Exec fastboot command on host side with device IP
+    fastboot -s tcp:192.168.100.2 getvar version
+
 Status
 ======
 
