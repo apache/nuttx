@@ -445,7 +445,7 @@ config ARCH_RV32
 config ARCH_RV64
 	bool
 	default n
-	select LIBC_ARCH_ELF_64BIT if LIBC_ARCH_ELF && !ARCH_RV64ILP32
+	select ARCH_64BIT if !ARCH_RV64ILP32
 
 config ARCH_RV64ILP32
 	bool

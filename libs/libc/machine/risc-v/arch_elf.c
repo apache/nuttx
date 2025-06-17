@@ -46,11 +46,11 @@
 
 /* ELF32 and ELF64 definitions */
 
-#ifdef CONFIG_LIBC_ARCH_ELF_64BIT
+#ifdef CONFIG_ARCH_64BIT
 #  define ARCH_ELF_TYP_STR "64"
-#else /* !CONFIG_LIBC_ARCH_ELF_64BIT */
+#else /* !CONFIG_ARCH_64BIT */
 #  define ARCH_ELF_TYP_STR "32"
-#endif /* CONFIG_LIBC_ARCH_ELF_64BIT */
+#endif /* CONFIG_ARCH_64BIT */
 
 /****************************************************************************
  * Private Data Types
@@ -275,7 +275,7 @@ static uintptr_t _find_hi20(void *arch_data, uintptr_t hi20_rel)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_LIBC_ARCH_ELF_64BIT
+#ifdef CONFIG_ARCH_64BIT
 static inline bool _valid_hi20_imm(long imm_hi)
 {
   /* 32-bit sign extend imm_hi and compare with the original value */
