@@ -33,7 +33,9 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include <nuttx/atomic.h>
 #include <nuttx/signal.h>
+#include <nuttx/spinlock_type.h>
 #include <nuttx/fs/ioctl.h>
 
 #ifdef CONFIG_DEV_GPIO
@@ -196,7 +198,7 @@ struct gpio_dev_s
 
   /* Number of times the device has been registered by ioctl */
 
-  uint8_t register_count;
+  atomic_t register_count;
 
   /* Number of times interrupt occurred */
 
@@ -217,6 +219,10 @@ struct gpio_dev_s
 #if CONFIG_DEV_GPIO_NPOLLWAITERS > 0
   FAR struct pollfd_s *fds[CONFIG_DEV_GPIO_NPOLLWAITERS];
 #endif
+
+  /* Access lock for changing devices' private data */
+
+  spinlock_t lock;
 
   /* Device specific, lower-half information may follow. */
 };
