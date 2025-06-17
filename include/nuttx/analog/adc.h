@@ -38,6 +38,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/i2c/i2c_master.h>
 
@@ -217,6 +218,7 @@ struct adc_dev_s
   sem_t                       ad_recvsem;    /* Used to wakeup user waiting for space in ad_recv.buffer */
   struct adc_fifo_s           ad_recv;       /* Describes receive FIFO */
   bool                        ad_isovr;      /* Flag to indicate an ADC overrun */
+  spinlock_t                  ad_spinlock;   /* Used for data protection between irq and threads */
 
   /* The following is a list of poll structures of threads waiting for
    * driver events.  The 'struct pollfd_s' reference for each open is also

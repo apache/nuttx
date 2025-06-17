@@ -220,10 +220,7 @@ static int comp_open(FAR struct file *filep)
             {
               /* Yes.. perform one time hardware initialization. */
 
-              irqstate_t flags = enter_critical_section();
-
               ret = dev->ad_ops->ao_setup(dev);
-              leave_critical_section(flags);
             }
 
           /* Save the new open count on success */
@@ -253,7 +250,6 @@ static int comp_close(FAR struct file *filep)
 {
   FAR struct inode      *inode = filep->f_inode;
   FAR struct comp_dev_s *dev   = inode->i_private;
-  irqstate_t            flags;
   int                   ret;
 
   ret = nxmutex_lock(&dev->ad_lock);
@@ -274,11 +270,9 @@ static int comp_close(FAR struct file *filep)
 
           dev->ad_ocount = 0;
 
-          /* Free the IRQ and disable the COMP device */
+          /* Disable the IRQ and then disable the COMP device */
 
-          flags = enter_critical_section();       /* Disable interrupts */
-          dev->ad_ops->ao_shutdown(dev);          /* Disable the COMP */
-          leave_critical_section(flags);
+          dev->ad_ops->ao_shutdown(dev);
 
           nxmutex_unlock(&dev->ad_lock);
         }
