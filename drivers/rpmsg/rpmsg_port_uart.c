@@ -52,10 +52,12 @@
 #define RPMSG_PORT_UART_ESCAPE             0x7c
 #define RPMSG_PORT_UART_SUSPEND            0x7b
 #define RPMSG_PORT_UART_RESUME             0x7a
-#define RPMSG_PORT_UART_STAYWAKE           0x79
-#define RPMSG_PORT_UART_STAYWAKEACK        0x78
+#define RPMSG_PORT_UART_STAYWAKE1          0x79
+#define RPMSG_PORT_UART_STAYWAKEACK1       0x78
 #define RPMSG_PORT_UART_RELAXWAKE          0x77
 #define RPMSG_PORT_UART_POWEROFF           0x76
+#define RPMSG_PORT_UART_STAYWAKE2          0x75
+#define RPMSG_PORT_UART_STAYWAKEACK2       0x74
 #define RPMSG_PORT_UART_END                0x70
 #define RPMSG_PORT_UART_ESCAPE_MASK        0x20
 
@@ -105,6 +107,7 @@ struct rpmsg_port_uart_s
   int                    rx_dbg_idx;
   nxevent_t              event;
   struct notifier_block  nb;       /* Reboot notifier block */
+  uint8_t                tx_staywake;
 #ifdef CONFIG_PM
   struct pm_wakelock_s   txwakelock;
   struct pm_wakelock_s   rxwakelock;
@@ -215,16 +218,17 @@ static void rpmsg_port_uart_staywake(FAR struct rpmsg_port_uart_s *rpuart)
 
   if (rpmsg_port_uart_check(rpuart, RPMSG_PORT_UART_EVT_WAKED))
     {
-      rpmsgdbg("Peer is running, no need to wakeup 0x%x\n",
-               rpuart->event.events);
+      rpmsgdbg("Peer is running, no need to wakeup 0x%x 0x%x\n",
+               rpuart->tx_staywake, rpuart->event.events);
       return;
     }
 
   rpmsg_port_uart_set(rpuart, RPMSG_PORT_UART_EVT_WAKING);
   for (; ; )
     {
-      rpmsgdbg("Try to wakeup peer 0x%x\n", rpuart->event.events);
-      rpmsg_port_uart_send_one(rpuart, RPMSG_PORT_UART_STAYWAKE);
+      rpmsgdbg("Try to wakeup peer 0x%x 0x%x\n",
+               rpuart->tx_staywake, rpuart->event.events);
+      rpmsg_port_uart_send_one(rpuart, rpuart->tx_staywake);
       if (rpmsg_port_uart_wait(rpuart, RPMSG_PORT_UART_EVT_WAKED,
                                false, true))
         {
@@ -233,7 +237,8 @@ static void rpmsg_port_uart_staywake(FAR struct rpmsg_port_uart_s *rpuart)
     }
 
   rpmsg_port_uart_clear(rpuart, RPMSG_PORT_UART_EVT_WAKING);
-  rpmsgdbg("Wakeup peer success 0x%x\n", rpuart->event.events);
+  rpmsgdbg("Wakeup peer success 0x%x 0x%x\n",
+           rpuart->tx_staywake, rpuart->event.events);
 }
 
 /****************************************************************************
@@ -244,12 +249,21 @@ static void rpmsg_port_uart_relaxwake(FAR struct rpmsg_port_uart_s *rpuart)
 {
   if (rpmsg_port_uart_check(rpuart, RPMSG_PORT_UART_EVT_WAKED))
     {
-      rpmsgdbg("Try allow peer sleep 0x%x\n", rpuart->event.events);
+      rpmsgdbg("Try allow peer sleep 0x%x 0x%x\n",
+               rpuart->tx_staywake, rpuart->event.events);
       rpmsg_port_uart_send_one(rpuart, RPMSG_PORT_UART_RELAXWAKE);
       rpmsg_port_uart_clear(rpuart, RPMSG_PORT_UART_EVT_WAKED);
     }
 
   pm_wakelock_relax(&rpuart->txwakelock);
+  if (rpuart->tx_staywake == RPMSG_PORT_UART_STAYWAKE1)
+    {
+      rpuart->tx_staywake = RPMSG_PORT_UART_STAYWAKE2;
+    }
+  else
+    {
+      rpuart->tx_staywake = RPMSG_PORT_UART_STAYWAKE1;
+    }
 }
 
 /****************************************************************************
@@ -515,17 +529,30 @@ static int rpmsg_port_uart_rx_thread(int argc, FAR char *argv[])
 
               continue;
             }
-          else if (buf[i] == RPMSG_PORT_UART_STAYWAKE)
+          else if (buf[i] == RPMSG_PORT_UART_STAYWAKE1)
             {
               int count = pm_wakelock_staycount(&rpuart->rxwakelock);
-              rpmsgdbg("Received staywake command %d 0x%x\n",
+              rpmsgdbg("Received staywake1 command %d 0x%x\n",
                        count, rpuart->event.events);
               if (count == 0)
                 {
                   pm_wakelock_stay(&rpuart->rxwakelock);
                 }
 
-              rpmsg_port_uart_send_one(rpuart, RPMSG_PORT_UART_STAYWAKEACK);
+              rpmsg_port_uart_send_one(rpuart, RPMSG_PORT_UART_STAYWAKEACK1);
+              continue;
+            }
+          else if (buf[i] == RPMSG_PORT_UART_STAYWAKE2)
+            {
+              int count = pm_wakelock_staycount(&rpuart->rxwakelock);
+              rpmsgdbg("Received staywake2 command %d 0x%x\n",
+                       count, rpuart->event.events);
+              if (count == 0)
+                {
+                  pm_wakelock_stay(&rpuart->rxwakelock);
+                }
+
+              rpmsg_port_uart_send_one(rpuart, RPMSG_PORT_UART_STAYWAKEACK2);
               continue;
             }
           else if (buf[i] == RPMSG_PORT_UART_RELAXWAKE)
@@ -540,11 +567,13 @@ static int rpmsg_port_uart_rx_thread(int argc, FAR char *argv[])
 
               continue;
             }
-          else if (buf[i] == RPMSG_PORT_UART_STAYWAKEACK)
+          else if (buf[i] == RPMSG_PORT_UART_STAYWAKEACK1 ||
+                   buf[i] == RPMSG_PORT_UART_STAYWAKEACK2)
             {
-              rpmsgdbg("Received staywake ack command 0x%x\n",
-                       rpuart->event.events);
-              if (rpmsg_port_uart_check(rpuart, RPMSG_PORT_UART_EVT_WAKING))
+              rpmsgdbg("Received staywake ack command 0x%x 0x%x 0x%x\n",
+                       buf[i], rpuart->tx_staywake, rpuart->event.events);
+              if (buf[i] == rpuart->tx_staywake - 1 &&
+                  rpmsg_port_uart_check(rpuart, RPMSG_PORT_UART_EVT_WAKING))
                 {
                   rpmsg_port_uart_set(rpuart, RPMSG_PORT_UART_EVT_WAKED);
                 }
@@ -764,6 +793,7 @@ int rpmsg_port_uart_initialize(FAR const struct rpmsg_port_config_s *cfg,
       return -ENOMEM;
     }
 
+  rpuart->tx_staywake = RPMSG_PORT_UART_STAYWAKE1;
   nxevent_init(&rpuart->event, 0);
 
   /* Hardware initialize */
