@@ -120,6 +120,10 @@ Several board configurations in NuttX use the NxScope library:
 - **sim:nxscope**: A configuration for the NuttX simulator that allows for
   easy testing and development of NxScope-related features on a host PC.
 
+- **nucleo-c071rb:adcscope**: Uses UART and ST-LINK VCOM with the
+  :doc:`adcscope <../../system/adcscope/index>` application to stream
+  data from ADC channels.
+
 External Tools
 ==============
 
