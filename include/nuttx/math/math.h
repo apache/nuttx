@@ -27,6 +27,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/mutex.h>
 #ifdef CONFIG_MATH_CORDIC
 #include <nuttx/math/cordic.h>
 #endif
@@ -57,6 +58,7 @@ struct math_config_s
 #ifdef CONFIG_MATH_MPI
   FAR struct mpi_lowerhalf_s    *mpi;
 #endif
+  mutex_t lock;
 };
 
 /****************************************************************************
