@@ -217,7 +217,7 @@ static void kasan_check_watchpoint(FAR const void *addr, size_t size,
         }
 
       if (addr + size <= watchpoint->addr ||
-          addr > watchpoint->addr + watchpoint->size)
+          addr >= watchpoint->addr + watchpoint->size)
         {
           continue;
         }
