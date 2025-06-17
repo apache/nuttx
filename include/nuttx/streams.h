@@ -858,6 +858,13 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
                  FAR const IPTR char *src, va_list ap) printf_like(2, 0);
 
 /****************************************************************************
+ * Name: lib_scanf
+ ****************************************************************************/
+
+int lib_scanf(FAR struct lib_instream_s *stream, FAR int *lastc,
+              FAR const IPTR char *fmt, ...) scanf_like(3, 4);
+
+/****************************************************************************
  * Name: lib_vscanf
  *
  * Description:
@@ -867,7 +874,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
  ****************************************************************************/
 
 int lib_vscanf(FAR struct lib_instream_s *stream, FAR int *lastc,
-               FAR const IPTR char *src, va_list ap) scanf_like(3, 0);
+               FAR const IPTR char *fmt, va_list ap) scanf_like(3, 0);
 
 /****************************************************************************
  * Name: lib_bscanf

@@ -1280,6 +1280,24 @@ int lib_vscanf(FAR struct lib_instream_s *stream, FAR int *lastc,
 }
 
 /****************************************************************************
+ * Name: lib_scanf
+ ****************************************************************************/
+
+int lib_scanf(FAR struct lib_instream_s *stream, FAR int *lastc,
+              FAR const IPTR char *fmt, ...)
+{
+  va_list ap;
+  int     n;
+
+  /* Let lib_vscanf do the real work */
+
+  va_start(ap, fmt);
+  n = lib_vscanf(stream, lastc, fmt, ap);
+  va_end(ap);
+  return n;
+}
+
+/****************************************************************************
  * Name: lib_bscanf
  *
  * Description:
