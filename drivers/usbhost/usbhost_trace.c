@@ -25,6 +25,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/spinlock.h>
 
 #include <sys/types.h>
 #include <stdint.h>
@@ -60,6 +61,7 @@
 
 #ifdef CONFIG_USBHOST_TRACE
 static uint32_t g_trace[CONFIG_USBHOST_TRACE_NRECORDS];
+static spinlock_t g_usbhost_trace_lock = SP_UNLOCKED;
 static volatile uint16_t g_head = 0;
 static volatile uint16_t g_tail = 0;
 static volatile bool g_disabled = false;
@@ -136,7 +138,7 @@ void usbhost_trace_common(uint32_t event)
 
   /* Check if tracing is enabled for this ID */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_usbhost_trace_lock);
   if (!g_disabled)
     {
       /* Yes... save the new trace data at the head */
@@ -159,7 +161,7 @@ void usbhost_trace_common(uint32_t event)
         }
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_usbhost_trace_lock, flags);
 }
 #endif /* CONFIG_USBHOST_TRACE */
 
