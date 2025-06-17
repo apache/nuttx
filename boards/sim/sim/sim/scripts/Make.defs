@@ -252,7 +252,7 @@ CMODULEFLAGS = $(CFLAGS) -fvisibility=hidden
 
 # -fno-pic to avoid GOT relocations
 CMODULEFLAGS += -fno-pic
-ifeq ($(CONFIG_LIBC_ARCH_ELF_64BIT),y)
+ifeq ($(CONFIG_ARCH_64BIT),y)
   # For amd64:
   # It seems macOS/x86_64 loads the program text around 00000001_xxxxxxxx.
   # The gcc default (-mcmodel=small) would produce out-of-range 32-bit
@@ -286,7 +286,7 @@ CXXELFFLAGS = $(CXXFLAGS) -fvisibility=hidden
 # -fno-pic to avoid GOT relocations
 CELFFLAGS += -fno-pic
 CXXELFFLAGS += -fno-pic
-ifeq ($(CONFIG_LIBC_ARCH_ELF_64BIT),y)
+ifeq ($(CONFIG_ARCH_64BIT),y)
   # See the comment on CMODULEFLAGS above.
   CELFFLAGS += -mcmodel=large
   CXXELFFLAGS += -mcmodel=large

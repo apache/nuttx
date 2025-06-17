@@ -12,8 +12,8 @@ choice
 
 config HOST_X86_64
 	bool "x86_64"
+	select ARCH_64BIT if !SIM_M32
 	select ARCH_HAVE_STACKCHECK
-	select LIBC_ARCH_ELF_64BIT if LIBC_ARCH_ELF && !SIM_M32
 	select ARCH_HAVE_MATH_H
 
 config HOST_X86
@@ -26,6 +26,7 @@ config HOST_ARM
 
 config HOST_ARM64
 	bool "arm64"
+	select ARCH_64BIT if !SIM_M32
 	select ARCH_HAVE_STACKCHECK
 
 endchoice # Host CPU Type
