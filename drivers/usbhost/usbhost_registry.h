@@ -28,6 +28,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/spinlock.h>
 
 #include <nuttx/usb/usbhost.h>
 
@@ -61,6 +62,7 @@ extern "C"
  */
 
 EXTERN struct usbhost_registry_s *g_classregistry;
+EXTERN spinlock_t g_classregistry_lock;
 
 /****************************************************************************
  * Public Function Prototypes

@@ -57,6 +57,7 @@
  */
 
 struct usbhost_registry_s *g_classregistry;
+spinlock_t g_classregistry_lock = SP_UNLOCKED;
 
 /****************************************************************************
  * Private Functions

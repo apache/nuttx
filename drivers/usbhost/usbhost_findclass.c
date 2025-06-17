@@ -139,7 +139,7 @@ const struct usbhost_registry_s *usbhost_findclass(
    * protected by disabling interrupts.
    */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave_nopreempt(&g_classregistry_lock);
 
   /* Examine each register class in the linked list */
 
@@ -158,7 +158,7 @@ const struct usbhost_registry_s *usbhost_findclass(
             {
               /* Yes.. restore interrupts and return the class info */
 
-              leave_critical_section(flags);
+              spin_unlock_irqrestore_nopreempt(&g_classregistry_lock, flags);
               return usbclass;
             }
         }
@@ -166,6 +166,6 @@ const struct usbhost_registry_s *usbhost_findclass(
 
   /* Not found... restore interrupts and return NULL */
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore_nopreempt(&g_classregistry_lock, flags);
   return NULL;
 }
