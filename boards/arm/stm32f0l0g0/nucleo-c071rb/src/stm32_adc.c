@@ -44,7 +44,7 @@
 
 /* The number of ADC channels in the conversion list */
 
-#define ADC1_NCHANNELS 2
+#define ADC1_NCHANNELS 6
 
 /****************************************************************************
  * Private Function Prototypes
@@ -56,18 +56,26 @@
 
 /* Identifying number of each ADC channel (even if NCHANNELS is less ) */
 
-static const uint8_t g_chanlist1[2] =
+static const uint8_t g_chanlist1[ADC1_NCHANNELS] =
 {
   0,
   1,
+  4,
+  17,
+  11,
+  12,
 };
 
 /* Configurations of pins used by each ADC channel */
 
-static const uint32_t g_pinlist1[2]  =
+static const uint32_t g_pinlist1[ADC1_NCHANNELS]  =
 {
   GPIO_ADC1_IN0_0,                /* PA0/A0 */
-  GPIO_ADC1_IN1_0                 /* PA1/A1 */
+  GPIO_ADC1_IN1_0,                /* PA1/A1 */
+  GPIO_ADC1_IN4_0,                /* PA4/A2 */
+  GPIO_ADC1_IN17_0,               /* PB0/A3 */
+  GPIO_ADC1_IN11_0,               /* PC4/A4 */
+  GPIO_ADC1_IN12_0,               /* PC5/A5 */
 };
 
 /****************************************************************************
