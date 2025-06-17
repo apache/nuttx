@@ -122,6 +122,10 @@
 #  include "espressif/esp_sha.h"
 #endif
 
+#ifdef CONFIG_MMCSD_SPI
+#  include "esp_board_mmcsd.h"
+#endif
+
 #include "esp32c3-generic.h"
 
 /****************************************************************************
@@ -260,6 +264,14 @@ int esp_bringup(void)
     }
 #  endif /* CONFIG_ESPRESSIF_SPI_BITBANG */
 #endif /* CONFIG_ESPRESSIF_SPI */
+
+#if defined(CONFIG_ESPRESSIF_SPI) && defined(CONFIG_MMCSD_SPI)
+  ret = esp_mmcsd_spi_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: failed to init MMCSD SPI\n");
+    }
+#endif
 
 #ifdef CONFIG_ESPRESSIF_SPIFLASH
   ret = board_spiflash_init();
