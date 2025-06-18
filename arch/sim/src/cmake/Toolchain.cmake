@@ -29,6 +29,12 @@ if(WIN32)
   return()
 endif()
 
+if(CONFIG_HOST_LINUX)
+  set(CMAKE_LD ld)
+  set(CMAKE_PREPROCESSOR cc -E -P -x c)
+  set(CMAKE_STRIP strip --strip-unneeded)
+endif()
+
 # LLVM style architecture flags
 if(CONFIG_HOST_X86_64)
   if(CONFIG_SIM_M32)

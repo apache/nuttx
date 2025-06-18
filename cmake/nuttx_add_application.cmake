@@ -131,8 +131,9 @@ function(nuttx_add_application)
           COMMAND
             ${CMAKE_LD}
             $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx_global,NUTTX_ELF_APP_LINK_OPTIONS>>
-            -e __start -T ${CMAKE_BINARY_DIR}/gnu-elf.ld
-            $<TARGET_OBJECTS:STARTUP_OBJS> --start-group
+            -T ${CMAKE_BINARY_DIR}/gnu-elf.ld
+            $<$<TARGET_EXISTS:STARTUP_OBJS>:$<TARGET_OBJECTS:STARTUP_OBJS>>
+            --start-group
             $<$<BOOL:${CONFIG_BUILD_KERNEL}>:$<GENEX_EVAL:$<TARGET_PROPERTY:nuttx_global,NUTTX_ELF_LINK_LIBRARIES>>>
             $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx_global,NUTTX_ELF_LINK_EXTRA_LIBRARIES>>
             $<TARGET_FILE:${TARGET}> --end-group -o
