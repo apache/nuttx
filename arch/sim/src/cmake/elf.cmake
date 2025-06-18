@@ -1,5 +1,5 @@
 # ##############################################################################
-# arch/x86_64/src/cmake/elf.cmake
+# arch/sim/src/cmake/elf.cmake
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
@@ -20,10 +20,10 @@
 
 # Loadable and ELF module settings
 
-nuttx_elf_compile_options(-fvisibility=hidden -fno-pic -mcmodel=large)
+nuttx_elf_compile_options(-fvisibility=hidden -fno-pic)
 
-nuttx_elf_link_options(-r)
+nuttx_elf_compile_options_ifdef(CONFIG_LIBC_ARCH_ELF_64BIT -mcmodel=large)
 
-nuttx_elf_link_options_ifdef(CONFIG_DEBUG_OPT_UNUSED_SECTIONS --gc-sections)
+nuttx_elf_link_options(-r -e main)
 
-nuttx_elf_link_options(-e __start)
+nuttx_elf_link_options_ifdef(CONFIG_SIM_M32 -melf_i386)

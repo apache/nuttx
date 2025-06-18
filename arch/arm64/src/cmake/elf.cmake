@@ -27,3 +27,5 @@ nuttx_elf_link_options_ifdef(CONFIG_BINFMT_ELF_RELOCATABLE -r)
 nuttx_elf_link_options_ifdef(CONFIG_BUILD_KERNEL -Bstatic)
 
 nuttx_elf_link_options_ifdef(CONFIG_DEBUG_OPT_UNUSED_SECTIONS --gc-sections)
+
+nuttx_elf_link_options(-e __start)
