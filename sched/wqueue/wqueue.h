@@ -48,6 +48,13 @@
 #define HPWORKNAME "hpwork"
 #define LPWORKNAME "lpwork"
 
+/* Get the worker structure from the work queue.
+ * This function requires the workers are located next to the wqueue.
+ */
+
+#define wq_get_worker(wq) \
+  (FAR struct kworker_s *)((FAR char *)(wq) + sizeof(struct kwork_wqueue_s))
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
@@ -74,7 +81,6 @@ struct kwork_wqueue_s
   uint8_t          nthreads;  /* Number of worker threads */
   bool             exit;      /* A flag to request the thread to exit */
   struct wdog_s    timer;     /* Timer to pending. */
-  struct kworker_s worker[0]; /* Describes a worker thread */
 };
 
 /* This structure defines the state of one high-priority work queue.  This
