@@ -25,12 +25,14 @@
  ****************************************************************************/
 
 #include <arch/irq.h>
+#include <debug.h>
 #include <execinfo.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include <syslog.h>
 
 #include <nuttx/init.h>
+#include <nuttx/nuttx.h>
 #include <nuttx/sched.h>
 #include <nuttx/spinlock.h>
 
@@ -286,6 +288,9 @@ backtrace_alloc(FAR struct backtrace_pool_s *bp, uint32_t slot,
       return NULL;
     }
 
+  entry = container_of(entry, struct backtrace_entry_s, freenode);
+  DEBUGASSERT(entry->ref == 0);
+
   /* Copy the backtrace to the entry */
 
   bp->used++;
@@ -395,9 +400,10 @@ void backtrace_remove(FAR void *index)
     }
 
   flags = backtrace_lock(bp);
-  if (entry->ref > 1)
+  DEBUGASSERT(entry->ref > 0);
+  entry->ref--;
+  if (entry->ref > 0)
     {
-      entry->ref--;
       backtrace_unlock(bp, flags);
       return;
     }
@@ -424,6 +430,12 @@ void backtrace_remove(FAR void *index)
 
           prev = prev->next;
         }
+
+      /* If the backtrace record is not found, it means that the backtrace
+       * record entry is an invalid value.
+       */
+
+      DEBUGASSERT(prev != NULL);
     }
 
   bp->used--;
