@@ -492,6 +492,23 @@ config ARCH_HAVE_RESET
 	bool
 	default n
 
+config ARCH_LDST_16BIT_NOT_ATOMIC
+	bool
+	default n
+	select ARCH_HAVE_8BIT_SERIAL_BUFSIZE
+	---help---
+	This configuration option denotes architecture incapable of loading
+	16-bit values atomically, ie. in a single instruction. If this is set,
+	it means that the architecture needs two (or more) instructions
+	to perform such load AND that a interrupt service routine may run
+	between their execution. The same applies for stores.
+
+	If set, any code running in non-interrupt context that reads 16-bit
+	variable that may be written in interrupt context must disable
+	interrupts or use another method that makes the read atomic.
+	(The same applies for non-interrupt context write and interrupt
+	context read.)
+
 config ARCH_HAVE_TESTSET
 	bool
 	default n
