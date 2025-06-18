@@ -28,11 +28,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 
-#include <arch/barriers.h>
-
-#include "riscv_internal.h"
 #include "riscv_mtimer.h"
-#include "riscv_sbi.h"
 
 /****************************************************************************
  * Private Types
@@ -98,83 +94,16 @@ static const struct oneshot_operations_s g_riscv_mtimer_ops =
  * Private Functions
  ****************************************************************************/
 
-#ifndef CONFIG_ARCH_USE_S_MODE
 static uint64_t riscv_mtimer_get_mtime(struct riscv_mtimer_lowerhalf_s *priv)
 {
-#if CONFIG_ARCH_RV_MMIO_BITS == 64
-  /* priv->mtime is -1, means this SoC:
-   * 1. does NOT support 64bit/DWORD write for the mtimer compare value regs,
-   * 2. has NO memory mapped regs which hold the value of mtimer counter,
-   *    it could be read from the CSR "time".
-   */
-
-  return -1 == priv->mtime ? READ_CSR(CSR_TIME) : getreg64(priv->mtime);
-#else
-  uint32_t hi;
-  uint32_t lo;
-
-  do
-    {
-      hi = getreg32(priv->mtime + 4);
-      lo = getreg32(priv->mtime);
-    }
-  while (getreg32(priv->mtime + 4) != hi);
-
-  return ((uint64_t)hi << 32) | lo;
-#endif
+  return riscv_mtimer_get(priv->mtime);
 }
 
 static void riscv_mtimer_set_mtimecmp(struct riscv_mtimer_lowerhalf_s *priv,
                                       uint64_t value)
 {
-#if CONFIG_ARCH_RV_MMIO_BITS == 64
-  if (-1 != priv->mtime)
-    {
-      putreg64(value, priv->mtimecmp);
-    }
-  else
-#endif
-    {
-      putreg32(UINT32_MAX, priv->mtimecmp + 4);
-      putreg32(value, priv->mtimecmp);
-      putreg32(value >> 32, priv->mtimecmp + 4);
-    }
-
-  /* Make sure it sticks */
-
-  UP_DSB();
+  riscv_mtimer_set(priv->mtime, priv->mtimecmp, value);
 }
-#else
-
-#ifdef CONFIG_ARCH_RV_EXT_SSTC
-static inline void riscv_write_stime(uint64_t value)
-{
-#ifdef CONFIG_ARCH_RV64
-  WRITE_CSR(CSR_STIMECMP, value);
-#else
-  WRITE_CSR(CSR_STIMECMP, (uint32_t)value);
-  WRITE_CSR(CSR_STIMECMPH, (uint32_t)(value >> 32));
-#endif
-}
-#endif
-
-static uint64_t riscv_mtimer_get_mtime(struct riscv_mtimer_lowerhalf_s *priv)
-{
-  UNUSED(priv);
-  return riscv_sbi_get_time();
-}
-
-static void riscv_mtimer_set_mtimecmp(struct riscv_mtimer_lowerhalf_s *priv,
-                                      uint64_t value)
-{
-  UNUSED(priv);
-#ifndef CONFIG_ARCH_RV_EXT_SSTC
-  riscv_sbi_set_timer(value);
-#else
-  riscv_write_stime(value);
-#endif
-}
-#endif
 
 /****************************************************************************
  * Name: riscv_mtimer_max_delay
