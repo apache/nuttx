@@ -1177,7 +1177,7 @@ config STM32F0L0G0_FLASH_OVERRIDE_G
 config STM32F0L0G0_FLASH_OVERRIDE_I
 	bool "I 2048KiB"
 
-endchoice
+endchoice # Override Flash Size Designator
 
 config STM32F0L0G0_STM32F0
 	bool
@@ -1566,7 +1566,7 @@ config STM32F0L0G0_SYSTICK_CORECLK
 config STM32F0L0G0_SYSTICK_CORECLK_DIV16
 	bool "Cortex-M0 core clock divided by 16"
 
-endchoice
+endchoice # SysTick clock source
 
 config ARCH_BOARD_STM32F0G0L0_CUSTOM_CLOCKCONFIG
 	bool "Custom clock configuration"
@@ -1708,8 +1708,8 @@ config STM32F0L0G0_HAVE_ADC1_DMA
 	default n
 
 config STM32F0L0G0_HAVE_ADC_OVERSAMPLE
-    bool
-    default STM32F0L0G0_STM32L0 || STM32F0L0G0_STM32G0 || STM32F0L0G0_STM32C0
+	bool
+	default STM32F0L0G0_STM32L0 || STM32F0L0G0_STM32G0 || STM32F0L0G0_STM32C0
 
 config STM32F0L0G0_HAVE_CEC
 	bool
@@ -2112,7 +2112,7 @@ config STM32F0L0G0_WWDG
 	default n
 	select WATCHDOG
 
-endmenu
+endmenu # STM32 Peripheral Support
 
 config STM32F0L0G0_COMP
 	bool
@@ -3585,9 +3585,9 @@ config STM32F0L0G0_PM_SERIAL_ACTIVITY
 		PM activity reported to power management logic on every serial
 		interrupt.
 
-endif
+endif # PM
 
-endmenu
+endmenu # U[S]ART Configuration
 
 menu "ADC Configuration"
 	depends on STM32F0L0G0_ADC
@@ -3643,41 +3643,41 @@ config STM32F0L0G0_ADC1_DMA_CFG
 		0 - ADC1 DMA in One Shot Mode, 1 - ADC1 DMA in Circular Mode
 
 config STM32F0L0G0_ADC_OVERSAMPLE
-    bool "Enable ADC hardware oversampling support"
-    depends on STM32F0L0G0_ADC1 && STM32F0L0G0_HAVE_ADC_OVERSAMPLE
-    default n
-    ---help---
-        Enable the on-chip ADC oversampling/accumulation block (CFGR2.OVSE).
-        Only STM32G0 and STM32L0 series include this hardware block.
+	bool "Enable ADC hardware oversampling support"
+	depends on STM32F0L0G0_ADC1 && STM32F0L0G0_HAVE_ADC_OVERSAMPLE
+	default n
+	---help---
+		Enable the on-chip ADC oversampling/accumulation block (CFGR2.OVSE).
+		Only STM32G0 and STM32L0 series include this hardware block.
 
 if STM32F0L0G0_ADC_OVERSAMPLE
 
 config STM32F0L0G0_ADC_TOVS
-    bool "Enable triggered oversampling (CFGR2.TOVS)"
-    default n
-    ---help---
-        If set, oversampling will only occur when a trigger event occurs.
-        If not set, oversampling occurs continuously (TOVS=0).
+	bool "Enable triggered oversampling (CFGR2.TOVS)"
+	default n
+	---help---
+		If set, oversampling will only occur when a trigger event occurs.
+		If not set, oversampling occurs continuously (TOVS=0).
 
 config STM32F0L0G0_ADC_OVSR
-    int "Oversampling ratio (CFGR2.OVSR)"
-    default 0
-    range 0 7
-    ---help---
-        Sets the oversampling ratio as 2^(OVSR+1). For example:
-          0 → 2×
-          1 → 4×
-          2 → 8×
-          ...
-          7 → 256×
+	int "Oversampling ratio (CFGR2.OVSR)"
+	default 0
+	range 0 7
+	---help---
+		Sets the oversampling ratio as 2^(OVSR+1). For example:
+		0 -> 2×
+		1 -> 4×
+		2 -> 8×
+		...
+		7 -> 256×
 
 config STM32F0L0G0_ADC_OVSS
-    int "Oversampling right-shift bits (CFGR2.OVSS)"
-    default 0
-    range 0 8
-    ---help---
-        Sets how many bits the accumulated result is right-shifted.
-        Max of 8-bits.
+	int "Oversampling right-shift bits (CFGR2.OVSS)"
+	default 0
+	range 0 8
+	---help---
+		Sets how many bits the accumulated result is right-shifted.
+		Max of 8-bits.
 
 endif # STM32F0L0G0_ADC_OVERSAMPLE
 
@@ -3698,7 +3698,7 @@ config STM32F0L0G0_ADC1_EXTSEL
 	---help---
 		Enable EXTSEL for ADC1.
 
-endmenu
+endmenu # ADC Configuration
 
 menu "SPI Configuration"
 	depends on STM32F0L0G0_SPI
