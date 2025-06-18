@@ -25,6 +25,8 @@
 *.rel
 *.src
 *.srec
+*.swn
+*.swo
 *.swp
 *.sym
 *.wsp
@@ -60,7 +62,7 @@
 /nuttx.*
 /nuttx_user*
 /staging
-/tags
+**/tags
 /TAGS
 core
 Make*.dep
