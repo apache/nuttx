@@ -35,6 +35,7 @@
 
 #include "devif/devif.h"
 #include "pkt/pkt.h"
+#include "utils/utils.h"
 
 /****************************************************************************
  * Public Functions
@@ -65,7 +66,9 @@ uint16_t pkt_callback(FAR struct net_driver_s *dev,
     {
       /* Perform the callback */
 
+      conn_lock(&conn->sconn);
       flags = devif_conn_event(dev, flags, conn->sconn.list);
+      conn_unlock(&conn->sconn);
     }
 
   return flags;

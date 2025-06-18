@@ -38,6 +38,7 @@
 #include "devif/devif.h"
 #include "netdev/netdev.h"
 #include "socket/socket.h"
+#include "utils/utils.h"
 #include "pkt/pkt.h"
 
 /****************************************************************************
@@ -172,17 +173,23 @@ int pkt_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
 
   /* Some of the following must be atomic */
 
-  net_lock();
-
   conn = psock->s_conn;
 
   /* Sanity check */
 
   if (conn == NULL || fds == NULL)
     {
-      ret = -EINVAL;
-      goto errout_with_lock;
+      return -EINVAL;
     }
+
+  dev = pkt_find_device(conn);
+  if (dev == NULL)
+    {
+      nerr("ERROR: No device found for PKT connection\n");
+      return -ENODEV;
+    }
+
+  conn_dev_lock(&conn->sconn, dev);
 
   /* Find a container to hold the poll information */
 
@@ -195,10 +202,6 @@ int pkt_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
           goto errout_with_lock;
         }
     }
-
-  /* Get the device that will provide the provide the NETDEV_DOWN event. */
-
-  dev = pkt_find_device(conn);
 
   /* Allocate a PKT callback structure */
 
@@ -263,7 +266,7 @@ int pkt_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
   poll_notify(&fds, 1, eventset);
 
 errout_with_lock:
-  net_unlock();
+  conn_dev_unlock(&conn->sconn, dev);
   return ret;
 }
 
@@ -289,19 +292,23 @@ int pkt_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
   FAR struct pkt_poll_s   *info;
   FAR struct net_driver_s *dev;
 
-  /* Some of the following must be atomic */
-
-  net_lock();
-
   conn = psock->s_conn;
 
   /* Sanity check */
 
   if (!conn || !fds->priv)
     {
-      net_unlock();
       return -EINVAL;
     }
+
+  dev = pkt_find_device(conn);
+  if (dev == NULL)
+    {
+      nerr("ERROR: No device found for PKT connection\n");
+      return -ENODEV;
+    }
+
+  conn_dev_lock(&conn->sconn, dev);
 
   /* Recover the socket descriptor poll state info from the poll structure */
 
@@ -309,10 +316,6 @@ int pkt_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
   DEBUGASSERT(info->fds != NULL && info->cb != NULL);
   if (info != NULL)
     {
-      /* Get the device that will provide the NETDEV_DOWN event. */
-
-      dev = pkt_find_device(conn);
-
       /* Release the callback */
 
       pkt_callback_free(dev, conn, info->cb);
@@ -326,7 +329,7 @@ int pkt_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
       info->conn = NULL;
     }
 
-  net_unlock();
+  conn_dev_unlock(&conn->sconn, dev);
 
   return OK;
 }
