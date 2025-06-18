@@ -1923,7 +1923,7 @@ static ssize_t nvs_write(FAR struct nvs_fs *fs,
 
       if (pdata->len == 0)
         {
-          return -ENOENT;
+          return 0;
         }
     }
 
