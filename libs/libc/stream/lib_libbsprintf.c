@@ -40,6 +40,7 @@ int lib_bsprintf(FAR struct lib_outstream_s *s, FAR const IPTR char *fmt,
   begin_packed_struct union
     {
       char c;
+      char s[1];
       short int si;
       int i;
       long l;
@@ -85,7 +86,7 @@ int lib_bsprintf(FAR struct lib_outstream_s *s, FAR const IPTR char *fmt,
           memset(fmtstr, 0, sizeof(fmtstr));
         }
 
-      var = (FAR void *)((char *)buf + offset);
+      var = (FAR void *)(data + offset);
       fmtstr[len++] = c;
 
       if (c == 'c' || c == 'd' || c == 'i' || c == 'u' ||
@@ -169,8 +170,6 @@ int lib_bsprintf(FAR struct lib_outstream_s *s, FAR const IPTR char *fmt,
         }
       else if (c == 's')
         {
-          FAR const char *value = data + offset;
-
           if (prec != NULL)
             {
               offset += strtol(prec, NULL, 10);
@@ -178,10 +177,10 @@ int lib_bsprintf(FAR struct lib_outstream_s *s, FAR const IPTR char *fmt,
             }
           else
             {
-              offset += strlen(value) + 1;
+              offset += strlen(var->s) + 1;
             }
 
-          ret += lib_sprintf(s, fmtstr, value);
+          ret += lib_sprintf(s, fmtstr, var->s);
           infmt = false;
         }
       else if (c == 'p')
