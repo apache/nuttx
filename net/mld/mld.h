@@ -286,7 +286,8 @@ int mld_done(FAR struct net_driver_s *dev,
  * Name:  mld_grpalloc
  *
  * Description:
- *   Allocate a new group from heap memory.
+ *   Allocate a new group from heap memory.  The new group has njoins == 0;
+ *   the caller must account for a local member, if any.
  *
  ****************************************************************************/
 
