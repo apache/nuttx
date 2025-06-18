@@ -230,8 +230,6 @@ ssize_t pkt_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
       return 0;
     }
 
-  net_lock();
-
   conn = psock->s_conn;
   if (psock->s_type == SOCK_DGRAM)
     {
@@ -240,6 +238,7 @@ ssize_t pkt_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
       conn->ifindex = addr->sll_ifindex;
     }
 
+  conn_dev_lock(&conn->sconn, dev);
   nonblock = _SS_ISNONBLOCK(conn->sconn.s_flags) ||
              (flags & MSG_DONTWAIT) != 0;
 
@@ -309,20 +308,14 @@ ssize_t pkt_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
     }
   else
     {
-      unsigned int count;
-      int blresult;
-
       /* iob_copyin might wait for buffers to be freed, but if
        * network is locked this might never happen, since network
        * driver is also locked, therefore we need to break the lock
        */
 
-      blresult = net_breaklock(&count);
+      conn_dev_unlock(&conn->sconn, dev);
       ret = iob_copyin(iob, buf, len, offset, false);
-      if (blresult >= 0)
-        {
-          net_restorelock(count);
-        }
+      conn_dev_lock(&conn->sconn, dev);
     }
 
   if (ret < 0)
@@ -379,13 +372,12 @@ ssize_t pkt_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
       conn->sndcb->flags = PKT_POLL;
       conn->sndcb->priv  = conn;
       conn->sndcb->event = psock_send_eventhandler;
+      conn_dev_unlock(&conn->sconn, dev);
 
       /* Notify the device driver that new TX data is available. */
 
       netdev_txnotify_dev(dev);
     }
-
-  net_unlock();
 
   return len;
 
@@ -393,7 +385,7 @@ errout_with_iob:
   iob_free_chain(iob);
 
 errout_with_lock:
-  net_unlock();
+  conn_dev_unlock(&conn->sconn, dev);
 
   return ret;
 }

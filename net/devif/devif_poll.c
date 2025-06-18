@@ -236,6 +236,7 @@ static int devif_poll_pkt_connections(FAR struct net_driver_s *dev,
    * action.
    */
 
+  pkt_conn_list_lock();
   while (!bstop && (pkt_conn = pkt_nextconn(pkt_conn)))
     {
       /* Skip packet connections that are bound to other polling devices */
@@ -259,6 +260,7 @@ static int devif_poll_pkt_connections(FAR struct net_driver_s *dev,
         }
     }
 
+  pkt_conn_list_unlock();
   return bstop;
 }
 #endif /* CONFIG_NET_PKT */

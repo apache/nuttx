@@ -206,6 +206,32 @@ int pkt_sendmsg_is_valid(FAR struct socket *psock,
                          FAR struct net_driver_s **dev);
 
 /****************************************************************************
+ * Name: pkt_conn_list_lock()
+ *
+ * Description:
+ *   Lock the packet connection list
+ *
+ * Assumptions:
+ *   This function must be called by driver thread.
+ *
+ ****************************************************************************/
+
+void pkt_conn_list_lock(void);
+
+/****************************************************************************
+ * Name: pkt_conn_list_unlock()
+ *
+ * Description:
+ *   Unlock the packet connection list
+ *
+ * Assumptions:
+ *   This function must be called by driver thread.
+ *
+ ****************************************************************************/
+
+void pkt_conn_list_unlock(void);
+
+/****************************************************************************
  * Name: pkt_callback
  *
  * Description:
