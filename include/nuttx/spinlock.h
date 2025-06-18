@@ -595,8 +595,8 @@ irqstate_t rspin_lock_irqsave(FAR rspinlock_t *lock)
 
   /* Try seize the ownership of the lock. */
 
-  while (!atomic_cmpxchg_acquire((atomic_t *)&lock->val,
-                                 (atomic_t *)&old_val.val, new_val.val))
+  while (!atomic_cmpxchg_acquire((FAR atomic_t *)&lock->val,
+                                 (FAR atomic_t *)&old_val.val, new_val.val))
     {
       /* Already owned this lock. */
 
@@ -821,7 +821,7 @@ void rspin_unlock_irqrestore(FAR rspinlock_t *lock, irqstate_t flags)
 
   if (--lock->count == 0)
     {
-      atomic_set_release((atomic_t *)&lock->val, 0);
+      atomic_set_release((FAR atomic_t *)&lock->val, 0);
       up_irq_restore(flags);
     }
 
