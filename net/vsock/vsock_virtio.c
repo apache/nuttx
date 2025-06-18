@@ -299,7 +299,7 @@ static void vsock_virtio_rx_fill(FAR struct vsock_virtio_priv_s *priv)
       ret = virtqueue_add_buffer(vq, &vb, 0, 1, buf);
       if (ret < 0)
         {
-          vrterr("Add rx buffer %d failed, ret=%d\n", ret);
+          vrterr("Add rx buffer failed, ret=%d\n", ret);
           list_add_head(&priv->rx_buf_list, (FAR struct list_node *)buf);
           break;
         }

@@ -2013,7 +2013,7 @@ static ssize_t vsock_sendmsg(FAR struct socket *psock,
 
       if (ret < 0)
         {
-          vrterr("vsock_sendmsg: tx_credit timeout %d\n", ret);
+          vrterr("vsock_sendmsg: tx_credit timeout %zd\n", ret);
           break;
         }
     }
