@@ -94,6 +94,12 @@ static int mld_ngroups(FAR struct net_driver_s *dev)
  * Description:
  *   Allocate a new group from heap memory.
  *
+ *   The new group has njoins == 0, i.e. no member on this host.  A group
+ *   may be allocated either because this host is joining it, or (in the
+ *   Router case) because another node reported a group that this host has
+ *   not joined.  Only the caller knows which, so the caller must account
+ *   for any local member by setting njoins itself.
+ *
  * Assumptions:
  *   The network is locked.
  *

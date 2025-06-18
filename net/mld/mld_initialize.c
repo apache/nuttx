@@ -54,6 +54,8 @@
 
 void mld_devinit(struct net_driver_s *dev)
 {
+  FAR struct mld_group_s *group;
+
   mldinfo("MLD initializing dev %p\n", dev);
 
   /* Initialize the MLD state in the device structure */
@@ -69,7 +71,17 @@ void mld_devinit(struct net_driver_s *dev)
    * probably is not relevant here.
    */
 
-  mld_grpalloc(dev, g_ipv6_allnodes);
+  group = mld_grpalloc(dev, g_ipv6_allnodes);
+  if (group != NULL)
+    {
+      /* This host is implicitly a member of the all-nodes group:  it is
+       * joined here rather than via mld_joingroup() and is never left.
+       * Account for that member so that a join/leave pair on this group
+       * from the application does not underflow njoins.
+       */
+
+      group->njoins = 1;
+    }
 
   /* Allow the MLD messages at the MAC level */
 
