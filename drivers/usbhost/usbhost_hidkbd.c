@@ -25,6 +25,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/spinlock.h>
 
 #include <sys/types.h>
 #include <stdbool.h>
@@ -190,6 +191,7 @@ struct usbhost_state_s
   volatile bool           waiting;      /* TRUE: waiting for keyboard data */
   uint8_t                 ifno;         /* Interface number */
   int16_t                 crefs;        /* Reference count on the driver instance */
+  spinlock_t              spinlock;     /* Used to protect critical section */
   mutex_t                 lock;         /* Used to maintain mutual exclusive access */
   sem_t                   waitsem;      /* Used to wait for keyboard data */
   FAR uint8_t            *tbuffer;      /* The allocated transfer buffer */
@@ -388,6 +390,8 @@ static const struct file_operations g_hidkbd_fops =
 /* This is a bitmap that is used to allocate device names /dev/kbda-z. */
 
 static uint32_t g_devinuse;
+
+static spinlock_t g_lock = SP_UNLOCKED;
 
 /* Global caps lock status */
 
@@ -730,7 +734,7 @@ static int usbhost_allocdevno(FAR struct usbhost_state_s *priv)
   irqstate_t flags;
   int devno;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_lock);
   for (devno = 0; devno < 26; devno++)
     {
       uint32_t bitno = 1 << devno;
@@ -738,12 +742,12 @@ static int usbhost_allocdevno(FAR struct usbhost_state_s *priv)
         {
           g_devinuse |= bitno;
           priv->devchar = 'a' + devno;
-          leave_critical_section(flags);
+          spin_unlock_irqrestore(&g_lock, flags);
           return OK;
         }
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_lock, flags);
   return -EMFILE;
 }
 
@@ -753,9 +757,9 @@ static void usbhost_freedevno(FAR struct usbhost_state_s *priv)
 
   if (devno >= 0 && devno < 26)
     {
-      irqstate_t flags = enter_critical_section();
+      irqstate_t flags = spin_lock_irqsave(&g_lock);
       g_devinuse &= ~(1 << devno);
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(&g_lock, flags);
     }
 }
 
@@ -1042,9 +1046,9 @@ static inline bool usbhost_get_capslock(void)
   irqstate_t flags;
   bool retval;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_lock);
   retval = g_caps_lock;
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_lock, flags);
 
   return retval;
 }
@@ -1067,9 +1071,9 @@ static inline void usbhost_toggle_capslock(void)
 {
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_lock);
   g_caps_lock = !g_caps_lock;
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_lock, flags);
 }
 
 /****************************************************************************
@@ -1548,7 +1552,6 @@ static int usbhost_kbdpoll(int argc, FAR char *argv[])
 
   uinfo("Keyboard removed, polling halted\n");
 
-  flags = enter_critical_section();
   priv->polling = false;
 
   /* Decrement the reference count held by this thread. */
@@ -1583,7 +1586,6 @@ static int usbhost_kbdpoll(int argc, FAR char *argv[])
       nxmutex_unlock(&priv->lock);
     }
 
-  leave_critical_section(flags);
   return 0;
 }
 
@@ -2297,6 +2299,7 @@ usbhost_create(FAR struct usbhost_hubport_s *hport,
           nxmutex_init(&priv->lock);
           nxsem_init(&priv->waitsem, 0, 0);
           nxsem_init(&priv->syncsem, 0, 0);
+          spin_lock_init(&priv->spinlock);
 
           priv->empty = true;
 
@@ -2499,7 +2502,7 @@ static int usbhost_open(FAR struct file *filep)
    * disconnect events.
    */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->spinlock);
   if (priv->disconnected)
     {
       /* No... the driver is no longer bound to the class.  That means that
@@ -2518,7 +2521,7 @@ static int usbhost_open(FAR struct file *filep)
       ret        = OK;
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->spinlock, flags);
 
   nxmutex_unlock(&priv->lock);
   return ret;
@@ -2556,7 +2559,7 @@ static int usbhost_close(FAR struct file *filep)
    * asynchronous poll or disconnect events.
    */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->spinlock);
   priv->crefs--;
 
   /* Check if the USB mouse device is still connected.  If the device is
@@ -2596,11 +2599,11 @@ static int usbhost_close(FAR struct file *filep)
                * and free the driver class instance.
                */
 
+              spin_unlock_irqrestore(&priv->spinlock, flags);
               usbhost_destroy(priv);
 
               /* Skip giving the semaphore... it is no longer valid */
 
-              leave_critical_section(flags);
               return OK;
             }
           else /* if (priv->crefs == 1) */
@@ -2615,8 +2618,8 @@ static int usbhost_close(FAR struct file *filep)
         }
     }
 
+  spin_unlock_irqrestore(&priv->spinlock, flags);
   nxmutex_unlock(&priv->lock);
-  leave_critical_section(flags);
   return OK;
 }
 
