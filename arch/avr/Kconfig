@@ -49,6 +49,7 @@ config ARCH_FAMILY_AVR
 	bool
 	default n
 	select ARCH_HAVE_STACKCHECK
+	select ARCH_LDST_16BIT_NOT_ATOMIC
 
 config ARCH_FAMILY_AVR32
 	bool
