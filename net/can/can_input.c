@@ -316,7 +316,7 @@ int can_input_confirm(FAR struct net_driver_s *dev)
       return ret;
     }
 
-  return netdev_input(dev, can_in, false);
+  return netdev_input(dev, can_in, false, true);
 }
 
 /****************************************************************************
@@ -368,7 +368,7 @@ int can_input(FAR struct net_driver_s *dev)
       return ret;
     }
 
-  ret = netdev_input(dev, can_in, false);
+  ret = netdev_input(dev, can_in, false, false);
   if (ret < 0)
     {
 #ifdef CONFIG_NET_STATISTICS

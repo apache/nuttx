@@ -599,7 +599,7 @@ int devif_loopback(FAR struct net_driver_s *dev);
  ****************************************************************************/
 
 int netdev_input(FAR struct net_driver_s *dev,
-                 devif_poll_callback_t callback, bool reply);
+                 devif_poll_callback_t callback, bool reply, bool throttled);
 
 /****************************************************************************
  * Name: devif_get_mtu

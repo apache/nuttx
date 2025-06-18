@@ -281,7 +281,7 @@ int pkt_input(FAR struct net_driver_s *dev)
       return ret;
     }
 
-  ret = netdev_input(dev, pkt_in, false);
+  ret = netdev_input(dev, pkt_in, false, false);
   netdev_unlock(dev);
   return ret;
 }
