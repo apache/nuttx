@@ -901,13 +901,13 @@ static ssize_t uart_readv(FAR struct file *filep, FAR struct uio *uio)
 #ifdef CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS
   unsigned int nbuffered;
   unsigned int watermark;
-  int16_t head;
+  sbuf_size_t head;
 #endif
   irqstate_t flags;
   ssize_t recvd = 0;
   ssize_t buflen;
   bool echoed = false;
-  int16_t tail;
+  sbuf_size_t tail;
   char ch;
   int ret;
 
@@ -954,9 +954,13 @@ static ssize_t uart_readv(FAR struct file *filep, FAR struct uio *uio)
        * index is only modified in this function.  Therefore, no
        * special handshaking is required here.
        *
-       * The head and tail pointers are 16-bit values.  The only time that
-       * the following could be unsafe is if the CPU made two non-atomic
-       * 8-bit accesses to obtain the 16-bit head index.
+       * The head and tail pointers values are sized based
+       * on the architecture. If the architecture reads 16-bit values
+       * atomically by nature, they are 16-bit values. On architectures
+       * where 16-bit access is split into two non-atomic 8-bit accesses,
+       * the pointers are 8-bit.
+       *
+       * The following code is therefore safe even with interrupts enabled.
        */
 
       tail = rxbuf->tail;

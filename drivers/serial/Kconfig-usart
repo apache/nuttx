@@ -58,17 +58,25 @@ menu "USART0 Configuration"
 
 config USART0_RXBUFSIZE
 	int "Receive buffer size"
-	default 256
+	default 252
 	---help---
 		Characters are buffered as they are received. This specifies
 		the size of the receive buffer.
 
+		Note that on architectures that are unable to load 16-bit
+		values atomically without eg. disabling interrupts, the size
+		of the buffer is stored in uint8_t variable.
+
 config USART0_TXBUFSIZE
 	int "Transmit buffer size"
-	default 256
+	default 252
 	---help---
 		Characters are buffered before being sent.  This specifies
 		the size of the transmit buffer.
+
+		Note that on architectures that are unable to load 16-bit
+		values atomically without eg. disabling interrupts, the size
+		of the buffer is stored in uint8_t variable.
 
 config USART0_BAUD
 	int "BAUD rate"
@@ -130,17 +138,25 @@ menu "USART1 Configuration"
 
 config USART1_RXBUFSIZE
 	int "Receive buffer size"
-	default 256
+	default 252
 	---help---
 		Characters are buffered as they are received. This specifies
 		the size of the receive buffer.
 
+		Note that on architectures that are unable to load 16-bit
+		values atomically without eg. disabling interrupts, the size
+		of the buffer is stored in uint8_t variable.
+
 config USART1_TXBUFSIZE
 	int "Transmit buffer size"
-	default 256
+	default 252
 	---help---
 		Characters are buffered before being sent.  This specifies
 		the size of the transmit buffer.
+
+		Note that on architectures that are unable to load 16-bit
+		values atomically without eg. disabling interrupts, the size
+		of the buffer is stored in uint8_t variable.
 
 config USART1_BAUD
 	int "BAUD rate"
@@ -202,17 +218,25 @@ menu "USART2 Configuration"
 
 config USART2_RXBUFSIZE
 	int "Receive buffer size"
-	default 256
+	default 252
 	---help---
 		Characters are buffered as they are received. This specifies
 		the size of the receive buffer.
 
+		Note that on architectures that are unable to load 16-bit
+		values atomically without eg. disabling interrupts, the size
+		of the buffer is stored in uint8_t variable.
+
 config USART2_TXBUFSIZE
 	int "Transmit buffer size"
-	default 256
+	default 252
 	---help---
 		Characters are buffered before being sent.  This specifies
 		the size of the transmit buffer.
+
+		Note that on architectures that are unable to load 16-bit
+		values atomically without eg. disabling interrupts, the size
+		of the buffer is stored in uint8_t variable.
 
 config USART2_BAUD
 	int "BAUD rate"
@@ -273,17 +297,25 @@ menu "USART3 Configuration"
 
 config USART3_RXBUFSIZE
 	int "Receive buffer size"
-	default 256
+	default 252
 	---help---
 		Characters are buffered as they are received. This specifies
 		the size of the receive buffer.
 
+		Note that on architectures that are unable to load 16-bit
+		values atomically without eg. disabling interrupts, the size
+		of the buffer is stored in uint8_t variable.
+
 config USART3_TXBUFSIZE
 	int "Transmit buffer size"
-	default 256
+	default 252
 	---help---
 		Characters are buffered before being sent.  This specifies
 		the size of the transmit buffer.
+
+		Note that on architectures that are unable to load 16-bit
+		values atomically without eg. disabling interrupts, the size
+		of the buffer is stored in uint8_t variable.
 
 config USART3_BAUD
 	int "BAUD rate"
@@ -345,17 +377,25 @@ menu "USART4 Configuration"
 
 config USART4_RXBUFSIZE
 	int "Receive buffer size"
-	default 256
+	default 252
 	---help---
 		Characters are buffered as they are received. This specifies
 		the size of the receive buffer.
 
+		Note that on architectures that are unable to load 16-bit
+		values atomically without eg. disabling interrupts, the size
+		of the buffer is stored in uint8_t variable.
+
 config USART4_TXBUFSIZE
 	int "Transmit buffer size"
-	default 256
+	default 252
 	---help---
 		Characters are buffered before being sent.  This specifies
 		the size of the transmit buffer.
+
+		Note that on architectures that are unable to load 16-bit
+		values atomically without eg. disabling interrupts, the size
+		of the buffer is stored in uint8_t variable.
 
 config USART4_BAUD
 	int "BAUD rate"
@@ -417,17 +457,25 @@ menu "USART5 Configuration"
 
 config USART5_RXBUFSIZE
 	int "Receive buffer size"
-	default 256
+	default 252
 	---help---
 		Characters are buffered as they are received. This specifies
 		the size of the receive buffer.
 
+		Note that on architectures that are unable to load 16-bit
+		values atomically without eg. disabling interrupts, the size
+		of the buffer is stored in uint8_t variable.
+
 config USART5_TXBUFSIZE
 	int "Transmit buffer size"
-	default 256
+	default 252
 	---help---
 		Characters are buffered before being sent.  This specifies
 		the size of the transmit buffer.
+
+		Note that on architectures that are unable to load 16-bit
+		values atomically without eg. disabling interrupts, the size
+		of the buffer is stored in uint8_t variable.
 
 config USART5_BAUD
 	int "BAUD rate"
@@ -489,17 +537,25 @@ menu "USART6 Configuration"
 
 config USART6_RXBUFSIZE
 	int "Receive buffer size"
-	default 256
+	default 252
 	---help---
 		Characters are buffered as they are received. This specifies
 		the size of the receive buffer.
 
+		Note that on architectures that are unable to load 16-bit
+		values atomically without eg. disabling interrupts, the size
+		of the buffer is stored in uint8_t variable.
+
 config USART6_TXBUFSIZE
 	int "Transmit buffer size"
-	default 256
+	default 252
 	---help---
 		Characters are buffered before being sent.  This specifies
 		the size of the transmit buffer.
+
+		Note that on architectures that are unable to load 16-bit
+		values atomically without eg. disabling interrupts, the size
+		of the buffer is stored in uint8_t variable.
 
 config USART6_BAUD
 	int "BAUD rate"
@@ -561,17 +617,25 @@ menu "USART7 Configuration"
 
 config USART7_RXBUFSIZE
 	int "Receive buffer size"
-	default 256
+	default 252
 	---help---
 		Characters are buffered as they are received. This specifies
 		the size of the receive buffer.
 
+		Note that on architectures that are unable to load 16-bit
+		values atomically without eg. disabling interrupts, the size
+		of the buffer is stored in uint8_t variable.
+
 config USART7_TXBUFSIZE
 	int "Transmit buffer size"
-	default 256
+	default 252
 	---help---
 		Characters are buffered before being sent.  This specifies
 		the size of the transmit buffer.
+
+		Note that on architectures that are unable to load 16-bit
+		values atomically without eg. disabling interrupts, the size
+		of the buffer is stored in uint8_t variable.
 
 config USART7_BAUD
 	int "BAUD rate"
@@ -633,17 +697,25 @@ menu "USART8 Configuration"
 
 config USART8_RXBUFSIZE
 	int "Receive buffer size"
-	default 256
+	default 252
 	---help---
 		Characters are buffered as they are received. This specifies
 		the size of the receive buffer.
 
+		Note that on architectures that are unable to load 16-bit
+		values atomically without eg. disabling interrupts, the size
+		of the buffer is stored in uint8_t variable.
+
 config USART8_TXBUFSIZE
 	int "Transmit buffer size"
-	default 256
+	default 252
 	---help---
 		Characters are buffered before being sent.  This specifies
 		the size of the transmit buffer.
+
+		Note that on architectures that are unable to load 16-bit
+		values atomically without eg. disabling interrupts, the size
+		of the buffer is stored in uint8_t variable.
 
 config USART8_BAUD
 	int "BAUD rate"
@@ -705,17 +777,25 @@ menu "USART9 Configuration"
 
 config USART9_RXBUFSIZE
 	int "Receive buffer size"
-	default 256
+	default 252
 	---help---
 		Characters are buffered as they are received. This specifies
 		the size of the receive buffer.
 
+		Note that on architectures that are unable to load 16-bit
+		values atomically without eg. disabling interrupts, the size
+		of the buffer is stored in uint8_t variable.
+
 config USART9_TXBUFSIZE
 	int "Transmit buffer size"
-	default 256
+	default 252
 	---help---
 		Characters are buffered before being sent.  This specifies
 		the size of the transmit buffer.
+
+		Note that on architectures that are unable to load 16-bit
+		values atomically without eg. disabling interrupts, the size
+		of the buffer is stored in uint8_t variable.
 
 config USART9_BAUD
 	int "BAUD rate"
