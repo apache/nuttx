@@ -138,6 +138,7 @@ void can_free(FAR struct can_conn_s *conn)
   /* Remove the connection from the active list */
 
   dq_rem(&conn->sconn.node, &g_active_can_connections);
+  nxmutex_destroy(&conn->sconn.s_lock);
 
 #ifdef CONFIG_NET_CAN_WRITE_BUFFERS
   /* Free the write queue */
@@ -244,6 +245,29 @@ FAR struct can_conn_s *can_nextconn(FAR struct can_conn_s *conn)
 }
 
 /****************************************************************************
+ * Name: can_conn_list_lock
+ *       can_conn_list_unlock
+ *
+ * Description:
+ *   Lock and unlock the CAN connection list. This is used to protect
+ *   the list of active connections.
+ *
+ * Assumptions:
+ *   This function is called from driver.
+ *
+ ****************************************************************************/
+
+void can_conn_list_lock(void)
+{
+  NET_BUFPOOL_LOCK(g_can_connections);
+}
+
+void can_conn_list_unlock(void)
+{
+  NET_BUFPOOL_UNLOCK(g_can_connections);
+}
+
+/****************************************************************************
  * Name: can_active()
  *
  * Description:
@@ -267,6 +291,7 @@ FAR struct can_conn_s *can_active(FAR struct net_driver_s *dev,
   memcpy(&can_id, NETLLBUF, sizeof(canid_t));
 #endif
 
+  can_conn_list_lock();
   while ((conn = can_nextconn(conn)) != NULL)
     {
       if ((conn->dev == NULL && _SS_ISBOUND(conn->sconn.s_flags)) ||
@@ -282,6 +307,7 @@ FAR struct can_conn_s *can_active(FAR struct net_driver_s *dev,
         }
     }
 
+  can_conn_list_unlock();
   return conn;
 }
 

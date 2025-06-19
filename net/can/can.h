@@ -189,6 +189,22 @@ void can_free(FAR struct can_conn_s *conn);
 FAR struct can_conn_s *can_nextconn(FAR struct can_conn_s *conn);
 
 /****************************************************************************
+ * Name: can_conn_list_lock
+ *       can_conn_list_unlock
+ *
+ * Description:
+ *   Lock and unlock the CAN connection list. This is used to protect
+ *   the list of active connections.
+ *
+ * Assumptions:
+ *   This function is called from driver.
+ *
+ ****************************************************************************/
+
+void can_conn_list_lock(void);
+void can_conn_list_unlock(void);
+
+/****************************************************************************
  * Name: can_active()
  *
  * Description:
