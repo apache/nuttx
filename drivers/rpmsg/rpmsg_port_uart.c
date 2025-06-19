@@ -109,8 +109,8 @@ struct rpmsg_port_uart_s
   struct notifier_block  nb;       /* Reboot notifier block */
   uint8_t                tx_staywake;
 #ifdef CONFIG_PM
-  struct pm_wakelock_s   txwakelock;
-  struct pm_wakelock_s   rxwakelock;
+  struct pm_wakelock_s   tx_wakelock;
+  struct pm_wakelock_s   rx_wakelock;
 #endif
 };
 
@@ -214,7 +214,7 @@ rpmsg_port_uart_send_one(FAR struct rpmsg_port_uart_s *rpuart, uint8_t ch)
 
 static void rpmsg_port_uart_staywake(FAR struct rpmsg_port_uart_s *rpuart)
 {
-  pm_wakelock_stay(&rpuart->txwakelock);
+  pm_wakelock_stay(&rpuart->tx_wakelock);
 
   if (rpmsg_port_uart_check(rpuart, RPMSG_PORT_UART_EVT_WAKED))
     {
@@ -255,7 +255,7 @@ static void rpmsg_port_uart_relaxwake(FAR struct rpmsg_port_uart_s *rpuart)
       rpmsg_port_uart_clear(rpuart, RPMSG_PORT_UART_EVT_WAKED);
     }
 
-  pm_wakelock_relax(&rpuart->txwakelock);
+  pm_wakelock_relax(&rpuart->tx_wakelock);
   if (rpuart->tx_staywake == RPMSG_PORT_UART_STAYWAKE1)
     {
       rpuart->tx_staywake = RPMSG_PORT_UART_STAYWAKE2;
@@ -510,7 +510,7 @@ static int rpmsg_port_uart_rx_thread(int argc, FAR char *argv[])
             }
           else if (buf[i] == RPMSG_PORT_UART_POWEROFF)
             {
-              int count = pm_wakelock_staycount(&rpuart->rxwakelock);
+              int count = pm_wakelock_staycount(&rpuart->rx_wakelock);
               rpmsgvbs("Received poweroff command %d 0x%x\n",
                        count, rpuart->event.events);
               rpmsg_port_uart_clear(rpuart, RPMSG_PORT_UART_EVT_CONNED);
@@ -524,19 +524,19 @@ static int rpmsg_port_uart_rx_thread(int argc, FAR char *argv[])
               DEBUGVERIFY(file_ioctl(&rpuart->file, TIOCVHANGUP, 0) >= 0);
               if (count != 0)
                 {
-                  pm_wakelock_relax(&rpuart->rxwakelock);
+                  pm_wakelock_relax(&rpuart->rx_wakelock);
                 }
 
               continue;
             }
           else if (buf[i] == RPMSG_PORT_UART_STAYWAKE1)
             {
-              int count = pm_wakelock_staycount(&rpuart->rxwakelock);
+              int count = pm_wakelock_staycount(&rpuart->rx_wakelock);
               rpmsgdbg("Received staywake1 command %d 0x%x\n",
                        count, rpuart->event.events);
               if (count == 0)
                 {
-                  pm_wakelock_stay(&rpuart->rxwakelock);
+                  pm_wakelock_stay(&rpuart->rx_wakelock);
                 }
 
               rpmsg_port_uart_send_one(rpuart, RPMSG_PORT_UART_STAYWAKEACK1);
@@ -544,12 +544,12 @@ static int rpmsg_port_uart_rx_thread(int argc, FAR char *argv[])
             }
           else if (buf[i] == RPMSG_PORT_UART_STAYWAKE2)
             {
-              int count = pm_wakelock_staycount(&rpuart->rxwakelock);
+              int count = pm_wakelock_staycount(&rpuart->rx_wakelock);
               rpmsgdbg("Received staywake2 command %d 0x%x\n",
                        count, rpuart->event.events);
               if (count == 0)
                 {
-                  pm_wakelock_stay(&rpuart->rxwakelock);
+                  pm_wakelock_stay(&rpuart->rx_wakelock);
                 }
 
               rpmsg_port_uart_send_one(rpuart, RPMSG_PORT_UART_STAYWAKEACK2);
@@ -557,12 +557,12 @@ static int rpmsg_port_uart_rx_thread(int argc, FAR char *argv[])
             }
           else if (buf[i] == RPMSG_PORT_UART_RELAXWAKE)
             {
-              int count = pm_wakelock_staycount(&rpuart->rxwakelock);
+              int count = pm_wakelock_staycount(&rpuart->rx_wakelock);
               rpmsgdbg("Received relaxwake command %d 0x%x\n",
                        count, rpuart->event.events);
               if (count != 0)
                 {
-                  pm_wakelock_relax(&rpuart->rxwakelock);
+                  pm_wakelock_relax(&rpuart->rx_wakelock);
                 }
 
               continue;
@@ -819,9 +819,9 @@ int rpmsg_port_uart_initialize(FAR const struct rpmsg_port_config_s *cfg,
 
 #ifdef CONFIG_PM
   snprintf(arg1, sizeof(arg1), "rpmsg-uart-rx-%s", cfg->remotecpu);
-  pm_wakelock_init(&rpuart->rxwakelock, arg1, PM_IDLE_DOMAIN, PM_IDLE);
+  pm_wakelock_init(&rpuart->rx_wakelock, arg1, PM_IDLE_DOMAIN, PM_IDLE);
   snprintf(arg1, sizeof(arg1), "rpmsg-uart-tx-%s", cfg->remotecpu);
-  pm_wakelock_init(&rpuart->txwakelock, arg1, PM_IDLE_DOMAIN, PM_IDLE);
+  pm_wakelock_init(&rpuart->tx_wakelock, arg1, PM_IDLE_DOMAIN, PM_IDLE);
 #endif
 
   snprintf(arg1, sizeof(arg1), "%p", rpuart);
@@ -861,8 +861,8 @@ err_tx_thread:
   kthread_delete(rx);
 err_rx_thread:
 #ifdef CONFIG_PM
-  pm_wakelock_uninit(&rpuart->txwakelock);
-  pm_wakelock_uninit(&rpuart->rxwakelock);
+  pm_wakelock_uninit(&rpuart->tx_wakelock);
+  pm_wakelock_uninit(&rpuart->rx_wakelock);
 #endif
   rpmsg_port_uninitialize(&rpuart->port);
 err_rpmsg_port:
