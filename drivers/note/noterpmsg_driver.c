@@ -202,7 +202,7 @@ static void noterpmsg_add(FAR struct note_driver_s *driver,
   flags = spin_lock_irqsave_notrace(&drv->lock);
 
   space = CONFIG_DRIVERS_NOTERPMSG_BUFSIZE - noterpmsg_length(drv);
-  if (space < notelen)
+  if (space < NOTE_ALIGN(notelen))
     {
       if (!up_interrupt_context() && !sched_idletask())
         {
@@ -218,7 +218,7 @@ static void noterpmsg_add(FAR struct note_driver_s *driver,
               space = CONFIG_DRIVERS_NOTERPMSG_BUFSIZE -
                       noterpmsg_length(drv);
             }
-          while (space < notelen);
+          while (space < NOTE_ALIGN(notelen));
         }
     }
 
@@ -228,7 +228,7 @@ static void noterpmsg_add(FAR struct note_driver_s *driver,
   memcpy(drv->buffer + drv->head, note, space);
   memcpy(drv->buffer, note + space, notelen - space);
 
-  drv->head = noterpmsg_next(drv, drv->head, notelen);
+  drv->head = noterpmsg_next(drv, drv->head, NOTE_ALIGN(notelen));
 
   if (work_available(&drv->work))
     {
