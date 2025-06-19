@@ -166,6 +166,7 @@ static uint16_t icmp_datahandler(FAR struct net_driver_s *dev,
    * without waiting).
    */
 
+  conn_lock(&conn->sconn);
   ret = iob_tryadd_queue(iob, &conn->readahead);
   if (ret < 0)
     {
@@ -177,6 +178,7 @@ static uint16_t icmp_datahandler(FAR struct net_driver_s *dev,
       ninfo("Buffered %d bytes\n", buflen);
     }
 
+  conn_unlock(&conn->sconn);
   return buflen;
 }
 

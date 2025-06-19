@@ -221,6 +221,22 @@ FAR struct icmp_conn_s *icmp_nextconn(FAR struct icmp_conn_s *conn);
 #endif
 
 /****************************************************************************
+ * Name: icmp_conn_list_lock
+ *       icmp_conn_list_unlock
+ *
+ * Description:
+ *   Lock and unlock the ICMP connection list.  This is used to protect the
+ *   list of active connections.
+ *
+ * Assumptions:
+ *   This function is called from driver.
+ *
+ ****************************************************************************/
+
+void icmp_conn_list_lock(void);
+void icmp_conn_list_unlock(void);
+
+/****************************************************************************
  * Name: icmp_findconn
  *
  * Description:
