@@ -611,8 +611,12 @@ void sched_note_add(FAR const void *data, size_t len)
           note_add(*driver, note, notelen);
         }
 
-      data = (FAR void *)((uintptr_t)data + notelen);
-      len -= notelen;
+      /* The note data from note rpmsg is aligned. When parsing
+       * the data, it is necessary to align the notelen.
+       */
+
+      data = (FAR void *)((uintptr_t)data + NOTE_ALIGN(notelen));
+      len -= NOTE_ALIGN(notelen);
     }
 }
 #endif
