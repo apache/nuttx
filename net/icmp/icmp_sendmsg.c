@@ -350,10 +350,12 @@ ssize_t icmp_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
   if (psock->s_type != SOCK_RAW && (icmp->type != ICMP_ECHO_REQUEST ||
       icmp->id != conn->id || dev != conn->dev))
     {
+      conn_lock(&conn->sconn);
       conn->id  = 0;
       conn->dev = NULL;
 
       iob_free_queue(&conn->readahead);
+      conn_unlock(&conn->sconn);
     }
 
 #ifdef CONFIG_NET_ARP_SEND
@@ -379,7 +381,7 @@ ssize_t icmp_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
   state.snd_buflen = len;                     /* Size of the ICMP header +
                                                * data payload */
 
-  net_lock();
+  conn_dev_lock(&conn->sconn, dev);
 
   /* Set up the callback */
 
@@ -401,6 +403,7 @@ ssize_t icmp_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 
       /* Notify the device driver of the availability of TX data */
 
+      conn_dev_unlock(&conn->sconn, dev);
       netdev_txnotify_dev(dev);
 
       /* Wait for either the send to complete or for timeout to occur.
@@ -409,6 +412,7 @@ ssize_t icmp_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 
       ret = net_sem_timedwait(&state.snd_sem,
                           _SO_TIMEOUT(conn->sconn.s_sndtimeo));
+      conn_dev_lock(&conn->sconn, dev);
       if (ret < 0)
         {
           if (ret == -ETIMEDOUT)
@@ -442,7 +446,7 @@ ssize_t icmp_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 
   nxsem_destroy(&state.snd_sem);
 
-  net_unlock();
+  conn_dev_unlock(&conn->sconn, dev);
 
   /* Return the negated error number in the event of a failure, or the
    * number of bytes sent on success.
@@ -458,10 +462,12 @@ ssize_t icmp_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
   return len;
 
 errout:
+  conn_lock(&conn->sconn);
   conn->id  = 0;
   conn->dev = NULL;
 
   iob_free_queue(&conn->readahead);
+  conn_unlock(&conn->sconn);
   return ret;
 }
 

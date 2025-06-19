@@ -412,6 +412,7 @@ static inline int devif_poll_icmp(FAR struct net_driver_s *dev,
    * action.
    */
 
+  icmp_conn_list_lock();
   while (!bstop && (conn = icmp_nextconn(conn)) != NULL)
     {
       /* Skip ICMP connections that are bound to other polling devices */
@@ -432,6 +433,7 @@ static inline int devif_poll_icmp(FAR struct net_driver_s *dev,
         }
     }
 
+  icmp_conn_list_unlock();
   return bstop;
 }
 #endif /* CONFIG_NET_ICMP && CONFIG_NET_ICMP_SOCKET */

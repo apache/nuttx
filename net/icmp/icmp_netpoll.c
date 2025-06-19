@@ -36,6 +36,7 @@
 
 #include "devif/devif.h"
 #include "netdev/netdev.h"
+#include "utils/utils.h"
 #include "icmp/icmp.h"
 
 /****************************************************************************
@@ -144,19 +145,18 @@ int icmp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
   pollevent_t eventset = 0;
   int ret = OK;
 
-  /* Some of the following must be atomic */
-
-  net_lock();
-
   conn = psock->s_conn;
 
   /* Sanity check */
 
   if (!conn || !fds)
     {
-      ret = -EINVAL;
-      goto errout_with_lock;
+      return -EINVAL;
     }
+
+  /* Some of the following must be atomic */
+
+  conn_dev_lock(&conn->sconn, conn->dev);
 
   /* Find a container to hold the poll information */
 
@@ -226,7 +226,7 @@ int icmp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
   poll_notify(&fds, 1, eventset);
 
 errout_with_lock:
-  net_unlock();
+  conn_dev_unlock(&conn->sconn, conn->dev);
   return ret;
 }
 
@@ -251,17 +251,12 @@ int icmp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
   FAR struct icmp_conn_s *conn;
   FAR struct icmp_poll_s *info;
 
-  /* Some of the following must be atomic */
-
-  net_lock();
-
   conn = psock->s_conn;
 
   /* Sanity check */
 
   if (!conn || !fds->priv)
     {
-      net_unlock();
       return -EINVAL;
     }
 
@@ -272,6 +267,10 @@ int icmp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
 
   if (info != NULL)
     {
+      /* Some of the following must be atomic */
+
+      conn_dev_lock(&conn->sconn, info->dev);
+
       /* Release the callback */
 
       icmp_callback_free(info->dev, conn, info->cb);
@@ -283,9 +282,8 @@ int icmp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
       /* Then free the poll info container */
 
       info->psock = NULL;
+      conn_dev_unlock(&conn->sconn, info->dev);
     }
-
-  net_unlock();
 
   return OK;
 }

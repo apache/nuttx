@@ -37,6 +37,7 @@
 
 #include "devif/devif.h"
 #include "socket/socket.h"
+#include "utils/utils.h"
 #include "icmp/icmp.h"
 
 #ifdef CONFIG_NET_ICMP_SOCKET
@@ -320,15 +321,14 @@ ssize_t icmp_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
         }
     }
 
-  net_lock();
-
   conn = psock->s_conn;
+  dev = conn->dev;
+
+  conn_dev_lock(&conn->sconn, dev);
   if (psock->s_type != SOCK_RAW)
     {
       /* Get the device that was used to send the ICMP request. */
 
-      dev = conn->dev;
-      DEBUGASSERT(dev != NULL);
       if (dev == NULL)
         {
           ret = -EPROTO;
@@ -378,8 +378,10 @@ ssize_t icmp_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
            * received.
            */
 
+          conn_dev_unlock(&conn->sconn, dev);
           ret = net_sem_timedwait(&state.recv_sem,
                               _SO_TIMEOUT(conn->sconn.s_rcvtimeo));
+          conn_dev_lock(&conn->sconn, dev);
           if (ret < 0)
             {
               state.recv_result = ret;
@@ -426,7 +428,7 @@ errout:
         }
     }
 
-  net_unlock();
+  conn_dev_unlock(&conn->sconn, dev);
 
   return ret;
 }

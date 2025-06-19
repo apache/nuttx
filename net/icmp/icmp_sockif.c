@@ -41,6 +41,7 @@
 
 #include "icmp/icmp.h"
 #include "inet/inet.h"
+#include "utils/utils.h"
 
 #ifdef CONFIG_NET_ICMP_SOCKET
 
@@ -143,6 +144,8 @@ static int icmp_setup(FAR struct socket *psock)
         {
           conn->filter = UINT32_MAX;
         }
+
+      nxmutex_init(&conn->sconn.s_lock);
 
       /* Save the pre-allocated connection in the socket structure */
 
@@ -256,7 +259,6 @@ static int icmp_close(FAR struct socket *psock)
 {
   FAR struct icmp_conn_s *conn;
 
-  net_lock();
   conn = psock->s_conn;
 
   /* Is this the last reference to the connection structure (there could be\
@@ -267,10 +269,6 @@ static int icmp_close(FAR struct socket *psock)
 
   if (conn->crefs <= 1)
     {
-      /* Yes... free any read-ahead data */
-
-      iob_free_queue(&conn->readahead);
-
       /* Then free the connection structure */
 
       conn->crefs = 0;           /* No more references on the connection */
@@ -283,7 +281,6 @@ static int icmp_close(FAR struct socket *psock)
       conn->crefs--;
     }
 
-  net_unlock();
   return OK;
 }
 
@@ -324,7 +321,6 @@ static int icmp_getsockopt_internal(FAR struct socket *psock, int option,
       return -ENOPROTOOPT;
     }
 
-  net_lock();
   switch (option)
     {
       case ICMP_FILTER:
@@ -336,7 +332,9 @@ static int icmp_getsockopt_internal(FAR struct socket *psock, int option,
               *value_len = sizeof(uint32_t);
             }
 
+          conn_lock(&conn->sconn);
           memcpy(value, &conn->filter, *value_len);
+          conn_unlock(&conn->sconn);
           ret = OK;
         }
         break;
@@ -347,7 +345,6 @@ static int icmp_getsockopt_internal(FAR struct socket *psock, int option,
         break;
     }
 
-  net_unlock();
   return ret;
 }
 
@@ -441,7 +438,6 @@ static int icmp_setsockopt_internal(FAR struct socket *psock, int option,
       return -ENOPROTOOPT;
     }
 
-  net_lock();
   switch (option)
     {
       case ICMP_FILTER:
@@ -453,7 +449,9 @@ static int icmp_setsockopt_internal(FAR struct socket *psock, int option,
               value_len = sizeof(uint32_t);
             }
 
+          conn_lock(&conn->sconn);
           memcpy(&conn->filter, value, value_len);
+          conn_unlock(&conn->sconn);
           ret = OK;
         }
         break;
@@ -464,7 +462,6 @@ static int icmp_setsockopt_internal(FAR struct socket *psock, int option,
         break;
     }
 
-  net_unlock();
   return ret;
 }
 
