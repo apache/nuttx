@@ -288,6 +288,7 @@ static int devif_poll_can_connections(FAR struct net_driver_s *dev,
    * perform the poll action
    */
 
+  can_conn_list_lock();
   while (!bstop && (can_conn = can_nextconn(can_conn)))
     {
       /* Skip connections that are bound to other polling devices */
@@ -307,6 +308,7 @@ static int devif_poll_can_connections(FAR struct net_driver_s *dev,
         }
     }
 
+  can_conn_list_unlock();
   return bstop;
 }
 #endif /* CONFIG_NET_PKT */

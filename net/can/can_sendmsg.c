@@ -47,6 +47,7 @@
 #include "netdev/netdev.h"
 #include "devif/devif.h"
 #include "socket/socket.h"
+#include "utils/utils.h"
 #include "can/can.h"
 
 #include <sys/time.h>
@@ -225,7 +226,7 @@ ssize_t can_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
    * because we don't want anything to happen until we are ready.
    */
 
-  net_lock();
+  conn_dev_lock(&conn->sconn, dev);
   memset(&state, 0, sizeof(struct send_s));
   nxsem_init(&state.snd_sem, 0, 0); /* Doesn't really fail */
 
@@ -258,6 +259,8 @@ ssize_t can_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
       state.snd_cb->priv  = (FAR void *)&state;
       state.snd_cb->event = psock_send_eventhandler;
 
+      conn_dev_unlock(&conn->sconn, dev);
+
       /* Notify the device driver that new TX data is available. */
 
       netdev_txnotify_dev(dev);
@@ -275,13 +278,15 @@ ssize_t can_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
           ret = net_sem_timedwait(&state.snd_sem, UINT_MAX);
         }
 
+      conn_dev_lock(&conn->sconn, dev);
+
       /* Make sure that no further events are processed */
 
       can_callback_free(dev, conn, state.snd_cb);
     }
 
   nxsem_destroy(&state.snd_sem);
-  net_unlock();
+  conn_dev_unlock(&conn->sconn, dev);
 
   /* Check for a errors, Errors are signalled by negative errno values
    * for the send length

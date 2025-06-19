@@ -47,6 +47,7 @@
 #include "devif/devif.h"
 #include "can/can.h"
 #include "socket/socket.h"
+#include "utils/utils.h"
 #include <netpacket/packet.h>
 
 #ifdef CONFIG_NET_TIMESTAMP
@@ -419,7 +420,7 @@ ssize_t can_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
                     int flags)
 {
   FAR struct can_conn_s *conn;
-  FAR struct net_driver_s *dev;
+  FAR struct net_driver_s *dev = NULL;
   struct can_recvfrom_s state;
   int ret;
 
@@ -436,7 +437,7 @@ ssize_t can_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
       return -ENOTSUP;
     }
 
-  net_lock();
+  conn_lock(&conn->sconn);
 
   /* Initialize the state structure. */
 
@@ -504,6 +505,9 @@ ssize_t can_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
       goto errout_with_state;
     }
 
+  conn_unlock(&conn->sconn);
+  conn_dev_lock(&conn->sconn, dev);
+
   /* Set up the callback in the connection */
 
   state.pr_cb = can_callback_alloc(dev, conn);
@@ -519,7 +523,9 @@ ssize_t can_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
        * the task sleeps and automatically re-locked when the task restarts.
        */
 
+      conn_dev_unlock(&conn->sconn, dev);
       ret = net_sem_wait(&state.pr_sem);
+      conn_dev_lock(&conn->sconn, dev);
 
       /* Make sure that no further events are processed */
 
@@ -532,7 +538,7 @@ ssize_t can_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
     }
 
 errout_with_state:
-  net_unlock();
+  conn_dev_unlock(&conn->sconn, dev);
   nxsem_destroy(&state.pr_sem);
   return ret;
 }
