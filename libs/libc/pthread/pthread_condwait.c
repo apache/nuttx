@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/pthread/pthread_condsignal.c
+ * libs/libc/pthread/pthread_condwait.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -26,23 +26,27 @@
 
 #include <nuttx/config.h>
 
+#include <unistd.h>
 #include <pthread.h>
+#include <sched.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <nuttx/atomic.h>
+#include <nuttx/cancelpt.h>
+#include <nuttx/pthread.h>
 
-#include "pthread/pthread.h"
+#include "pthread.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pthread_cond_signal
+ * Name: int pthread_cond_wait
  *
  * Description:
- *    A thread can signal on a condition variable.
+ *   A thread can wait for a condition variable to be signalled or broadcast.
  *
  * Input Parameters:
  *   None
@@ -54,31 +58,68 @@
  *
  ****************************************************************************/
 
-int pthread_cond_signal(FAR pthread_cond_t *cond)
+int pthread_cond_wait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex)
 {
-  int ret = OK;
+  int status;
+  int ret;
 
-  sinfo("cond=%p\n", cond);
+  sinfo("cond=%p mutex=%p\n", cond, mutex);
 
-  if (!cond)
+  /* pthread_cond_wait() is a cancellation point */
+
+  enter_cancellation_point();
+
+  /* Make sure that non-NULL references were provided. */
+
+  if (cond == NULL || mutex == NULL)
     {
       ret = EINVAL;
     }
+
+  /* Make sure that the caller holds the mutex */
+
+  else if (!mutex_is_hold(&mutex->mutex))
+    {
+      ret = EPERM;
+    }
   else
     {
-      int wcnt = atomic_read(COND_WAIT_COUNT(cond));
+      unsigned int nlocks;
 
-      while (wcnt > 0)
+      /* Give up the mutex */
+
+      sinfo("Give up mutex / take cond\n");
+
+      atomic_fetch_add(COND_WAIT_COUNT(cond), 1);
+      ret = pthread_mutex_breaklock(mutex, &nlocks);
+
+      status = -nxsem_wait_uninterruptible(&cond->sem);
+      if (ret == OK)
         {
-          if (atomic_cmpxchg(COND_WAIT_COUNT(cond), &wcnt, wcnt - 1))
-            {
-              sinfo("Signalling...\n");
-              ret = -nxsem_post(&cond->sem);
-              break;
-            }
+          /* Report the first failure that occurs */
+
+          ret = status;
+        }
+
+      /* Reacquire the mutex.
+       *
+       * When cancellation points are enabled, we need to hold the mutex
+       * when the pthread is canceled and cleanup handlers, if any, are
+       * entered.
+       */
+
+      sinfo("Reacquire mutex...\n");
+
+      status = pthread_mutex_restorelock(mutex, nlocks);
+      if (ret == OK)
+        {
+          /* Report the first failure that occurs */
+
+          ret = status;
         }
     }
 
+  leave_cancellation_point();
   sinfo("Returning %d\n", ret);
   return ret;
 }

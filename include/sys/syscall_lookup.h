@@ -316,9 +316,6 @@ SYSCALL_LOOKUP(munmap,                     2)
 
 #ifndef CONFIG_DISABLE_PTHREAD
   SYSCALL_LOOKUP(pthread_cancel,           1)
-  SYSCALL_LOOKUP(pthread_cond_broadcast,   1)
-  SYSCALL_LOOKUP(pthread_cond_signal,      1)
-  SYSCALL_LOOKUP(pthread_cond_wait,        2)
   SYSCALL_LOOKUP(nx_pthread_create,        5)
   SYSCALL_LOOKUP(pthread_detach,           1)
   SYSCALL_LOOKUP(nx_pthread_exit,          1)
@@ -330,7 +327,6 @@ SYSCALL_LOOKUP(munmap,                     2)
   SYSCALL_LOOKUP(pthread_setaffinity_np,   3)
   SYSCALL_LOOKUP(pthread_getaffinity_np,   3)
 #endif
-  SYSCALL_LOOKUP(pthread_cond_clockwait,   4)
   SYSCALL_LOOKUP(pthread_sigmask,          3)
 #endif
 

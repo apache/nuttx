@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/pthread/pthread_condwait.c
+ * libs/libc/pthread/pthread_condclockwait.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -25,53 +25,68 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
 
+#include <stdint.h>
 #include <unistd.h>
 #include <pthread.h>
-#include <sched.h>
+#include <signal.h>
+#include <time.h>
 #include <errno.h>
+#include <assert.h>
 #include <debug.h>
 
 #include <nuttx/atomic.h>
+#include <nuttx/irq.h>
+#include <nuttx/wdog.h>
+#include <nuttx/signal.h>
 #include <nuttx/cancelpt.h>
 #include <nuttx/pthread.h>
+#include <nuttx/atomic.h>
 
-#include "pthread/pthread.h"
+#include "pthread.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: int pthread_cond_wait
+ * Name: pthread_cond_clockwait
  *
  * Description:
- *   A thread can wait for a condition variable to be signalled or broadcast.
+ *   A thread can perform a timed wait on a condition variable.
  *
  * Input Parameters:
- *   None
+ *   cond    - the condition variable to wait on
+ *   mutex   - the mutex that protects the condition variable
+ *   clockid - The timing source to use in the conversion
+ *   abstime - wait until this absolute time
  *
  * Returned Value:
- *   None
+ *   OK (0) on success; A non-zero errno value is returned on failure.
  *
  * Assumptions:
+ *   Timing is of resolution 1 msec, with +/-1 millisecond accuracy.
  *
  ****************************************************************************/
 
-int pthread_cond_wait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex)
+int pthread_cond_clockwait(FAR pthread_cond_t *cond,
+                           FAR pthread_mutex_t *mutex,
+                           clockid_t clockid,
+                           FAR const struct timespec *abstime)
 {
+  int ret = OK;
   int status;
-  int ret;
 
-  sinfo("cond=%p mutex=%p\n", cond, mutex);
+  sinfo("cond=%p mutex=%p abstime=%p\n", cond, mutex, abstime);
 
-  /* pthread_cond_wait() is a cancellation point */
+  /* pthread_cond_clockwait() is a cancellation point */
 
   enter_cancellation_point();
 
   /* Make sure that non-NULL references were provided. */
 
-  if (cond == NULL || mutex == NULL)
+  if (!cond || !mutex)
     {
       ret = EINVAL;
     }
@@ -82,39 +97,44 @@ int pthread_cond_wait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex)
     {
       ret = EPERM;
     }
+
+  /* If no wait time is provided, this function degenerates to
+   * the same behavior as pthread_cond_wait().
+   */
+
+  else if (!abstime)
+    {
+      ret = pthread_cond_wait(cond, mutex);
+    }
+
   else
     {
       unsigned int nlocks;
 
-      /* Give up the mutex */
-
-      sinfo("Give up mutex / take cond\n");
+      sinfo("Give up mutex...\n");
 
       atomic_fetch_add(COND_WAIT_COUNT(cond), 1);
+
+      /* Give up the mutex */
+
       ret = pthread_mutex_breaklock(mutex, &nlocks);
-
-      status = -nxsem_wait_uninterruptible(&cond->sem);
-      if (ret == OK)
+      if (ret == 0)
         {
-          /* Report the first failure that occurs */
-
-          ret = status;
+          status = nxsem_clockwait_uninterruptible(&cond->sem,
+                                                   clockid, abstime);
+          if (status < 0)
+            {
+              ret = -status;
+            }
         }
 
-      /* Reacquire the mutex.
-       *
-       * When cancellation points are enabled, we need to hold the mutex
-       * when the pthread is canceled and cleanup handlers, if any, are
-       * entered.
-       */
+      /* Reacquire the mutex (retaining the ret). */
 
-      sinfo("Reacquire mutex...\n");
+      sinfo("Re-locking...\n");
 
       status = pthread_mutex_restorelock(mutex, nlocks);
-      if (ret == OK)
+      if (ret == 0)
         {
-          /* Report the first failure that occurs */
-
           ret = status;
         }
     }

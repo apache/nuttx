@@ -283,35 +283,3 @@ int nxsem_wait_slow(FAR sem_t *sem)
   leave_critical_section(flags);
   return ret;
 }
-
-/****************************************************************************
- * Name: nxsem_wait_uninterruptible
- *
- * Description:
- *   This function is wrapped version of nxsem_wait(), which is
- *   uninterruptible and convenient for use.
- *
- * Parameters:
- *   sem - Semaphore descriptor.
- *
- * Return Value:
- *   Zero(OK)  - On success
- *   EINVAL    - Invalid attempt to get the semaphore
- *   ECANCELED - May be returned if the thread is canceled while waiting.
- *
- ****************************************************************************/
-
-int nxsem_wait_uninterruptible(FAR sem_t *sem)
-{
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(sem);
-    }
-  while (ret == -EINTR);
-
-  return ret;
-}

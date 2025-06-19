@@ -46,7 +46,8 @@ CSRCS += pthread_condattr_init.c pthread_condattr_destroy.c
 CSRCS += pthread_condattr_getpshared.c pthread_condattr_setpshared.c
 CSRCS += pthread_condattr_setclock.c pthread_condattr_getclock.c
 CSRCS += pthread_condinit.c pthread_conddestroy.c pthread_condtimedwait.c
-CSRCS += pthread_create.c pthread_equal.c pthread_exit.c pthread_kill.c
+CSRCS += pthread_equal.c pthread_condbroadcast.c pthread_condclockwait.c pthread_condsignal.c
+CSRCS += pthread_condwait.c pthread_create.c pthread_exit.c pthread_kill.c
 CSRCS += pthread_setname_np.c pthread_getname_np.c
 CSRCS += pthread_get_stackaddr_np.c pthread_get_stacksize_np.c
 CSRCS += pthread_mutexattr_init.c pthread_mutexattr_destroy.c
@@ -73,7 +74,7 @@ CSRCS += pthread_attr_getaffinity.c pthread_attr_setaffinity.c
 endif
 
 ifneq ($(CONFIG_PTHREAD_MUTEX_UNSAFE),y)
-CSRCS += pthread_mutex_consistent.c
+CSRCS += pthread_mutex_consistent.c pthread_mutex_inconsistent.c
 endif
 
 ifeq ($(CONFIG_PTHREAD_SPINLOCKS),y)

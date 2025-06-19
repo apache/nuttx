@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/pthread/pthread.h
+ * libs/libc/pthread/pthread_condsignal.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,67 +20,65 @@
  *
  ****************************************************************************/
 
-#ifndef __SCHED_PTHREAD_PTHREAD_H
-#define __SCHED_PTHREAD_PTHREAD_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <stdint.h>
-#include <stdbool.h>
 #include <pthread.h>
+#include <errno.h>
+#include <debug.h>
 
-#include <nuttx/compiler.h>
-#include <nuttx/semaphore.h>
-#include <nuttx/sched.h>
+#include <nuttx/atomic.h>
+
+#include "pthread.h"
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
+ * Name: pthread_cond_signal
+ *
+ * Description:
+ *    A thread can signal on a condition variable.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
  ****************************************************************************/
 
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
+int pthread_cond_signal(FAR pthread_cond_t *cond)
 {
-#else
-#define EXTERN extern
-#endif
+  int ret = OK;
 
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
+  sinfo("cond=%p\n", cond);
 
-struct task_group_s;  /* Forward reference */
+  if (!cond)
+    {
+      ret = EINVAL;
+    }
+  else
+    {
+      int wcnt = atomic_read(COND_WAIT_COUNT(cond));
 
-int pthread_setup_scheduler(FAR struct tcb_s *tcb, int priority,
-                            start_t start, pthread_startroutine_t entry);
+      while (wcnt > 0)
+        {
+          if (atomic_cmpxchg(COND_WAIT_COUNT(cond), &wcnt, wcnt - 1))
+            {
+              sinfo("Signalling...\n");
+              ret = -nxsem_post(&cond->sem);
+              break;
+            }
+        }
+    }
 
-int pthread_completejoin(pid_t pid, FAR void *exit_value);
-void pthread_destroyjoin(FAR struct task_group_s *group,
-                         FAR struct task_join_s *pjoin);
-int pthread_findjoininfo(FAR struct task_group_s *group, pid_t pid,
-                         FAR struct task_join_s **join, bool create);
-void pthread_release(FAR struct task_group_s *group);
-
-#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
-void pthread_mutex_inconsistent(FAR struct tls_info_s *tls);
-#endif
-
-#ifdef CONFIG_PTHREAD_MUTEX_TYPES
-int pthread_mutexattr_verifytype(int type);
-#endif
-
-#undef EXTERN
-#ifdef __cplusplus
+  sinfo("Returning %d\n", ret);
+  return ret;
 }
-#endif
-
-#endif /* __SCHED_PTHREAD_PTHREAD_H */
