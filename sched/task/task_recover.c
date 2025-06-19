@@ -67,7 +67,7 @@ void nxtask_recover(FAR struct tcb_s *tcb)
 #if !defined(CONFIG_DISABLE_PTHREAD) && !defined(CONFIG_PTHREAD_MUTEX_UNSAFE)
   /* Recover any mutexes still held by the canceled thread */
 
-  pthread_mutex_inconsistent(tcb);
+  pthread_mutex_inconsistent(nxsched_get_tls(tcb));
 #endif
 
   /* The task is being deleted.  Cancel in pending timeout events. */

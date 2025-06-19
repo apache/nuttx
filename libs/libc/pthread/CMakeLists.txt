@@ -66,9 +66,13 @@ if(NOT CONFIG_DISABLE_PTHREAD)
     pthread_condattr_setpshared.c
     pthread_condattr_setclock.c
     pthread_condattr_getclock.c
+    pthread_condbroadcast.c
+    pthread_condclockwait.c
     pthread_condinit.c
     pthread_conddestroy.c
     pthread_condtimedwait.c
+    pthread_condsignal.c
+    pthread_condwait.c
     pthread_create.c
     pthread_equal.c
     pthread_exit.c
@@ -117,7 +121,7 @@ if(NOT CONFIG_DISABLE_PTHREAD)
     pthread_concurrency.c)
 
   if(NOT CONFIG_PTHREAD_MUTEX_UNSAFE)
-    list(APPEND SRCS pthread_mutex_consistent.c)
+    list(APPEND SRCS pthread_mutex_consistent.c pthread_mutex_inconsistent.c)
   endif()
 
   if(CONFIG_SMP)
