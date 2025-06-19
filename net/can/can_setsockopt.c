@@ -158,7 +158,7 @@ int can_setsockopt(FAR struct socket *psock, int level, int option,
          * options.
          */
 
-        net_lock();
+        conn_lock(&conn->sconn);
 
         /* Set or clear the option bit */
 
@@ -171,7 +171,7 @@ int can_setsockopt(FAR struct socket *psock, int level, int option,
             _SO_CLROPT(conn->sconn.s_options, option);
           }
 
-        net_unlock();
+        conn_unlock(&conn->sconn);
         break;
 
 #if CONFIG_NET_RECV_BUFSIZE > 0

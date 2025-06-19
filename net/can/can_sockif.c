@@ -43,6 +43,7 @@
 
 #include "can/can.h"
 #include "netdev/netdev.h"
+#include "utils/utils.h"
 
 #ifdef CONFIG_NET_CAN
 
@@ -235,6 +236,7 @@ static int can_setup(FAR struct socket *psock)
       conn->sndbufs = CONFIG_NET_SEND_BUFSIZE;
       nxsem_init(&conn->sndsem, 0, 0);
 #endif
+      nxmutex_init(&conn->sconn.s_lock);
 
       /* Attach the connection instance to the socket */
 
@@ -388,7 +390,7 @@ static int can_poll_local(FAR struct socket *psock, FAR struct pollfd *fds,
 
   if (setup)
     {
-      net_lock();
+      conn_dev_lock(&conn->sconn, conn->dev);
 
       info->dev = conn->dev;
 
@@ -451,7 +453,7 @@ static int can_poll_local(FAR struct socket *psock, FAR struct pollfd *fds,
       poll_notify(&fds, 1, eventset);
 
 errout_with_lock:
-      net_unlock();
+      conn_dev_unlock(&conn->sconn, conn->dev);
     }
   else
     {
@@ -461,7 +463,9 @@ errout_with_lock:
         {
           /* Cancel any response notifications */
 
+          conn_dev_lock(&conn->sconn, info->dev);
           can_callback_free(info->dev, conn, info->cb);
+          conn_dev_unlock(&conn->sconn, info->dev);
 
           /* Release the poll/select data slot */
 

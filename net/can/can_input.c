@@ -35,6 +35,7 @@
 #include <nuttx/net/netstats.h>
 
 #include "devif/devif.h"
+#include "utils/utils.h"
 #include "can/can.h"
 
 /****************************************************************************
@@ -218,6 +219,7 @@ static int can_in(FAR struct net_driver_s *dev)
 {
   FAR struct can_conn_s *conn = can_active(dev, NULL);
   FAR struct can_conn_s *nextconn;
+  int ret;
 
   if (conn == NULL)
     {
@@ -225,6 +227,8 @@ static int can_in(FAR struct net_driver_s *dev)
 
       return OK;
     }
+
+  can_conn_list_lock();
 
   /* Do we have second connection that can hold this packet? */
 
@@ -250,7 +254,11 @@ static int can_in(FAR struct net_driver_s *dev)
 
   /* We can deliver the packet directly to the last listener. */
 
-  return can_input_conn(dev, conn);
+  ret = can_input_conn(dev, conn);
+
+  can_conn_list_unlock();
+
+  return ret;
 }
 
 /****************************************************************************
