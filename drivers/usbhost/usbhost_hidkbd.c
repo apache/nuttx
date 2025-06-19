@@ -389,11 +389,6 @@ static const struct file_operations g_hidkbd_fops =
 
 static uint32_t g_devinuse;
 
-/* The following are used to managed the class creation operation */
-
-static mutex_t g_lock = NXMUTEX_INITIALIZER;
-static FAR struct usbhost_state_s *g_priv;
-
 /* Global caps lock status */
 
 static bool g_caps_lock = false;
@@ -1393,7 +1388,7 @@ static int usbhost_kbdpoll(int argc, FAR char *argv[])
    * decrement when this thread exits.
    */
 
-  priv = g_priv;
+  priv = (FAR struct usbhost_state_s *)strtoul(argv[1], NULL, 16);
   DEBUGASSERT(priv != NULL && priv->usbclass.hport);
 
   priv->polling = true;
@@ -1880,8 +1875,10 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
 static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
 {
   char devname[DEV_NAMELEN];
-  int ret;
+  FAR char *argv[2];
+  char arg1[16];
   uint8_t leds;
+  int ret;
 #ifdef CONFIG_HIDKBD_NOGETREPORT
   FAR struct usbhost_hubport_s *hport;
   hport = priv->usbclass.hport;
@@ -1964,33 +1961,19 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
 
   uinfo("Start poll task\n");
 
-  /* The inputs to a task started by kthread_create() are very awkward for
-   * this purpose.  They are really designed for command line tasks
-   * (argc/argv).  So the following is kludge pass binary data when the
-   * keyboard poll task is started.
-   *
-   * First, make sure we have exclusive access to g_priv (what is the
-   * likelihood of this being used?  About zero, but we protect it anyway).
-   */
+  snprintf(arg1, sizeof(arg1), "%p", priv);
 
-  ret = nxmutex_lock(&g_lock);
-  if (ret < 0)
-    {
-      usbhost_tdfree(priv);
-      goto errout;
-    }
-
-  g_priv = priv;
+  argv[0] = arg1;
+  argv[1] = NULL;
 
   ret = kthread_create("kbdpoll", CONFIG_HIDKBD_DEFPRIO,
-                       CONFIG_HIDKBD_STACKSIZE, usbhost_kbdpoll, NULL);
+                       CONFIG_HIDKBD_STACKSIZE, usbhost_kbdpoll, argv);
   if (ret < 0)
     {
       /* Failed to started the poll thread...
        * probably due to memory resources
        */
 
-      nxmutex_unlock(&g_lock);
       goto errout;
     }
 
@@ -1999,8 +1982,6 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
   /* Now wait for the poll task to get properly initialized */
 
   ret = nxsem_wait_uninterruptible(&priv->syncsem);
-  nxmutex_unlock(&g_lock);
-
   if (ret < 0)
     {
       goto errout;
