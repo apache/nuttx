@@ -282,7 +282,7 @@ devif_callback_alloc(FAR struct net_driver_s *dev,
    * to de-allocate connection callbacks reliably on NETDEV_DOWN event.
    */
 
-  if (dev && !(netdev_verify(dev) && (dev->d_flags & IFF_UP) != 0))
+  if (dev && !netdev_verify(dev))
     {
       return NULL;
     }
