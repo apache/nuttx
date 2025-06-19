@@ -286,7 +286,7 @@ FAR struct devif_callback_s *
    * to de-allocate connection callbacks reliably on NETDEV_DOWN event.
    */
 
-  if (dev && !(netdev_verify(dev) && (dev->d_flags & IFF_UP) != 0))
+  if (dev && !netdev_verify(dev))
     {
       net_unlock();
       return NULL;
