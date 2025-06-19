@@ -44,9 +44,11 @@
  * SDA: 19
  */
 
-#define TOUCHSCEEN_ADDR (0x5D)
-#define TOUCHSCEEN_CLOCK (400 * 1000)
-#define TOUCHSCEEN_INT (-1)
+#define TOUCHSCEEN_ADDR             (0x5D)
+#define TOUCHSCEEN_CLOCK            (400 * 1000)
+#define TOUCHSCEEN_INT              (-1)
+
+#define ESP32S3_DISPLAY_BCKL        (2)
 
 /* BOOT Button */
 
@@ -142,6 +144,24 @@ int board_i2c_init(void);
 
 #ifdef CONFIG_ESP32S3_BOARD_TOUCHSCREEN
 int board_touchscreen_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: board_lcd_initialize
+ *
+ * Description:
+ *   Initialize LCD.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32S3_BOARD_LCD
+int board_lcd_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

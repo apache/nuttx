@@ -41,6 +41,10 @@ ifeq ($(CONFIG_DEV_GPIO),y)
 CSRCS += esp32s3_gpio.c
 endif
 
+ifeq ($(CONFIG_ESP32S3_BOARD_LCD),y)
+CSRCS += esp32s3_lcd.c
+endif
+
 ifeq ($(CONFIG_ESP32S3_BOARD_TOUCHSCREEN),y)
 CSRCS += esp32s3_board_touchsceen.c
 endif
