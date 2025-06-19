@@ -32,7 +32,16 @@ range=0
 spell=0
 encoding=0
 message=0
+
+# CMake
 cmake_warning_once=0
+
+# Python
+black_warning_once=0
+flake8_warning_once=0
+isort_warning_once=0
+
+cvt2utf_warning_once=0
 codespell_config_file_location_was_shown_once=0
 
 usage() {
@@ -67,6 +76,14 @@ is_rust_file() {
   fi
 }
 
+is_python_file() {
+  if [[ ${@##*.} == 'py' ]]; then
+    echo 1
+  else
+    echo 0
+  fi
+}
+
 is_cmake_file() {
   file_name=$(basename $@)
   if [ "$file_name" == "CMakeLists.txt" ] || [[ "$file_name" =~ \.cmake$ ]]; then
@@ -88,18 +105,55 @@ check_file() {
     esac
   fi
 
-  if [ ${@##*.} == 'py' ]; then
+  if [ "$(is_python_file $@)" == "1" ]; then
     setupcfg="${TOOLDIR}/../.github/linters/setup.cfg"
-    black --check "$@" || fail=1
-    flake8 --config "${setupcfg}" "$@" || fail=1
-    isort --diff --check-only --settings-path "${setupcfg}" "$@"
-    if [ $? -ne 0 ]; then
-      # Format in place
-      isort --settings-path "${setupcfg}" "$@"
+    if ! command -v black &> /dev/null; then
+      if [ $black_warning_once == 0 ]; then
+        echo -e "\nblack not found, run following command to install:"
+        echo "  $ pip install black"
+        black_warning_once=1
+      fi
+      fail=1
+    elif ! black --check $@ 2>&1; then
+      if [ $black_warning_once == 0 ]; then
+        echo -e "\nblack check failed, run following command to update the style:"
+        echo -e "  $ black <src>\n"
+        black_warning_once=1
+      fi
+      fail=1
+    fi
+    if ! command -v flake8 &> /dev/null; then
+      if [ $flake8_warning_once == 0 ]; then
+        echo -e "\nflake8 not found, run following command to install:"
+        echo "  $ pip install flake8"
+        flake8_warning_once=1
+      fi
+      fail=1
+    elif ! flake8 --config "${setupcfg}" "$@" 2>&1; then
+      if [ $flake8_warning_once == 0 ]; then
+        echo -e "\nflake8 check failed !!!"
+        flake8_warning_once=1
+      fi
+      fail=1
+    fi
+    if ! command -v isort &> /dev/null; then
+      if [ $isort_warning_once == 0 ]; then
+        echo -e "\nisort not found, run following command to install:"
+        echo "  $ pip install isort"
+        isort_warning_once=1
+      fi
+      fail=1
+    elif ! isort --diff --check-only --settings-path "${setupcfg}" "$@" 2>&1; then
+      if [ $isort_warning_once == 0 ]; then
+        isort --settings-path "${setupcfg}" "$@"
+        isort_warning_once=1
+      fi
       fail=1
     fi
   elif [ "$(is_rust_file $@)" == "1" ]; then
     if ! command -v rustfmt &> /dev/null; then
+      echo -e "\nrustfmt not found, run following command to install:"
+      echo "  $ rustup component add rustfmt"
       fail=1
     elif ! rustfmt --edition 2021 --check $@ 2>&1; then
       fail=1
@@ -126,24 +180,45 @@ check_file() {
   fi
 
   if [ $spell != 0 ]; then
-    if [ "$codespell_config_file_location_was_shown_once" != "1" ]; then
+    if ! command -v codespell &> /dev/null; then
+      if [ $codespell_config_file_location_was_shown_once == 0 ]; then
+        echo -e "\ncodespell not found, run following command to install:"
+        echo "  $ pip install codespell"
+        codespell_config_file_location_was_shown_once=1
+      fi
+      fail=1
+    else
+      if [ $codespell_config_file_location_was_shown_once != 1 ]; then
         # show the configuration file location just once during (not for each input file)
         codespell_args="-q 7"
         codespell_config_file_location_was_shown_once=1
-    else
+      else
         codespell_args=""
-    fi
-    if ! codespell $codespell_args ${@: -1}; then
-      fail=1
+      fi
+      if ! codespell $codespell_args ${@: -1}; then
+        fail=1
+      fi
     fi
   fi
 
   if [ $encoding != 0 ]; then
-    md5="$(md5sum $@)"
-    cvt2utf convert --nobak "$@" &> /dev/null
-    if [ "$md5" != "$(md5sum $@)" ]; then
-      echo "$@: error: Non-UTF8 characters detected!"
+    if ! command -v cvt2utf &> /dev/null; then
+      if [ $cvt2utf_warning_once == 0 ]; then
+        echo -e "\ncvt2utf not found, run following command to install:"
+        echo "  $ pip install cvt2utf"
+        cvt2utf_warning_once=1
+      fi
       fail=1
+    else
+      md5="$(md5sum $@)"
+      cvt2utf convert --nobak "$@" &> /dev/null
+      if [ "$md5" != "$(md5sum $@)" ]; then
+        if [ $cvt2utf_warning_once == 0 ]; then
+            echo "$@: error: Non-UTF8 characters detected!"
+            cvt2utf_warning_once=1
+        fi
+        fail=1
+      fi
     fi
   fi
 }
