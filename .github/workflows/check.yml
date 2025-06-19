@@ -41,7 +41,7 @@ jobs:
           echo "::add-matcher::nuttx/.github/nxstyle.json"
           python3 -m venv .venv
           source .venv/bin/activate
-          pip install codespell cmake-format black isort flake8
+          pip install codespell cmake-format black isort flake8 cvt2utf
           cd nuttx
           commits="${{ github.event.pull_request.base.sha }}..HEAD"
           git log --oneline $commits
