@@ -284,7 +284,8 @@ static void dump_stacks(FAR struct tcb_s *rtcb, uintptr_t sp)
   else
     {
       force = true;
-      _alert("ERROR: Stack pointer is not within the stack\n");
+      _alert("ERROR: Stack pointer %" PRIxPTR "is not within the stack\n",
+             sp);
     }
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 0
@@ -307,6 +308,9 @@ static void dump_stacks(FAR struct tcb_s *rtcb, uintptr_t sp)
                     up_getusrsp((FAR void *)running_regs()) : 0;
       if (tcbstack_sp < tcbstack_base || tcbstack_sp >= tcbstack_top)
         {
+          _alert("ERROR: Stack pointer %" PRIxPTR " is not within the"
+                 " stack\n", tcbstack_sp);
+
           tcbstack_sp = 0;
           force = true;
         }
