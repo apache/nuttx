@@ -273,6 +273,16 @@ config CAN_KVASER
 
 if CAN_KVASER
 
+config CAN_KVASER_IRQ_PASSES
+	int "Kvaser PCI interrupt passes"
+	default 16
+	range 1 512
+	---help---
+		This option sets how many times the card status will be checked
+		during one interrupt handler. A value greater than 1 helps avoid
+		data loss when there is a lot of traffic on the CAN bus.
+		The downside is that it increases the interrupt service time.
+
 choice
 	prompt "Kvaser PCI CAN device type"
 	default CAN_KVASER_CHARDEV if CAN

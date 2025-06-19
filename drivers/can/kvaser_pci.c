@@ -946,36 +946,37 @@ static void kvaser_chardev_interrupt(FAR struct kvaser_driver_s *priv)
 {
   uint8_t st = 0;
   int     i  = 0;
+  int     passes;
 
-  for (i = 0; i < priv->count; i++)
+  for (passes = 0; passes < CONFIG_CAN_KVASER_IRQ_PASSES; passes++)
     {
-      st = kvaser_getreg_sja(&priv->sja[i], SJA1000_INT_RAW_REG);
-      if (st == 0)
+      for (i = 0; i < priv->count; i++)
         {
-          continue;
-        }
+          st = kvaser_getreg_sja(&priv->sja[i], SJA1000_INT_RAW_REG);
+          if (st == 0)
+            {
+              continue;
+            }
 
-      /* Receive interrupt */
+          /* Handle RX frames */
 
-      if (st & SJA1000_RX_INT_ST)
-        {
           kvaser_chardev_receive(&priv->sja[i]);
-        }
 
-      /* Transmit interrupt */
+          /* Transmit interrupt */
 
-      if (st & SJA1000_TX_INT_ST)
-        {
-          /* Tell the upper half that the transfer is finished. */
+          if (st & SJA1000_TX_INT_ST)
+            {
+              /* Tell the upper half that the transfer is finished. */
 
-          can_txdone(&priv->sja[i].dev);
-        }
+              can_txdone(&priv->sja[i].dev);
+            }
 
 #ifdef CONFIG_CAN_ERRORS
-      /* Handle errors */
+          /* Handle errors */
 
-      kvaser_chardev_error(&priv->sja[i], st);
+          kvaser_chardev_error(&priv->sja[i], st);
 #endif
+        }
     }
 }
 #endif  /* CONFIG_CAN_KVASER_CHARDEV */
@@ -1487,42 +1488,43 @@ static void kvaser_sock_interrupt_work(FAR void *arg)
   FAR struct kvaser_driver_s *priv = arg;
   uint8_t                     st   = 0;
   uint8_t                     i    = 0;
+  int                         passes;
 
-  for (i = 0; i < priv->count; i++)
+  for (passes = 0; passes < CONFIG_CAN_KVASER_IRQ_PASSES; passes++)
     {
-      st = kvaser_getreg_sja(&priv->sja[i], SJA1000_INT_RAW_REG);
-      if (st == 0)
+      for (i = 0; i < priv->count; i++)
         {
-          continue;
-        }
+          st = kvaser_getreg_sja(&priv->sja[i], SJA1000_INT_RAW_REG);
+          if (st == 0)
+            {
+              continue;
+            }
 
-      /* Receive interrupt */
+          /* Handle RX frames */
 
-      if (st & SJA1000_RX_INT_ST)
-        {
           kvaser_sock_receive(&priv->sja[i]);
-        }
 
-      /* Transmit interrupt */
+          /* Transmit interrupt */
 
-      if (st & SJA1000_TX_INT_ST)
-        {
-          NETDEV_TXDONE(&priv->sja[i].dev);
+          if (st & SJA1000_TX_INT_ST)
+            {
+              NETDEV_TXDONE(&priv->sja[i].dev);
 
-          /* There should be space for a new TX in any event.
-           * Poll the network for new XMIT data.
-           */
+              /* There should be space for a new TX in any event.
+               * Poll the network for new XMIT data.
+               */
 
-          net_lock();
-          devif_poll(&priv->sja[i].dev, kvaser_sock_txpoll);
-          net_unlock();
-        }
+              net_lock();
+              devif_poll(&priv->sja[i].dev, kvaser_sock_txpoll);
+              net_unlock();
+            }
 
 #ifdef CONFIG_NET_CAN_ERRORS
-      /* Handle errors */
+          /* Handle errors */
 
-      kvaser_sock_error(&priv->sja[i], st);
+          kvaser_sock_error(&priv->sja[i], st);
 #endif
+        }
     }
 }
 #endif /* CONFIG_CAN_KVASER_SOCKET */
