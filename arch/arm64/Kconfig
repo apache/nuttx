@@ -34,6 +34,7 @@ config ARCH_CHIP_A64
 	select ARCH_HAVE_IRQTRIGGER
 	select ARCH_NEED_ADDRENV_MAPPING
 	select ARM64_HAVE_PSCI
+	select ARCH_HAVE_IRQPRIO
 	---help---
 		Allwinner A64 SoC
 
@@ -44,6 +45,7 @@ config ARCH_CHIP_RK3399
 	select ARCH_HAVE_RESET
 	select ARCH_NEED_ADDRENV_MAPPING
 	select ARM64_HAVE_PSCI
+	select ARCH_HAVE_IRQPRIO
 	---help---
 		Rockchip RK3399 SoC
 
@@ -57,6 +59,7 @@ config ARCH_CHIP_QEMU
 	select ARCH_HAVE_RESET
 	select ARCH_HAVE_TEXT_HEAP
 	select ARM64_HAVE_PSCI
+	select ARCH_HAVE_IRQPRIO
 	---help---
 		QEMU virt platform (ARMv8a)
 
@@ -72,6 +75,7 @@ config ARCH_CHIP_GOLDFISH
 	select ARCH_HAVE_RESET
 	select ARCH_NEED_ADDRENV_MAPPING
 	select ARM64_HAVE_PSCI
+	select ARCH_HAVE_IRQPRIO
 	---help---
 		Android GoldFish platform for NuttX (ARMv8a),
 		based on ARM virt board
@@ -80,6 +84,7 @@ config ARCH_CHIP_FVP_ARMV8R
 	bool "ARM FVP virt platform (ARMv8r)"
 	select ARCH_CORTEX_R82
 	select ARCH_HAVE_IRQTRIGGER
+	select ARCH_HAVE_IRQPRIO
 	---help---
 		ARM FVP virt platform (ARMv8r)
 
@@ -88,6 +93,7 @@ config ARCH_CHIP_IMX8
 	select ARCH_HAVE_ADDRENV
 	select ARCH_HAVE_IRQTRIGGER
 	select ARCH_NEED_ADDRENV_MAPPING
+	select ARCH_HAVE_IRQPRIO
 	---help---
 		NXP i.MX8 (ARMv8a) applications processors
 
@@ -98,6 +104,7 @@ config ARCH_CHIP_IMX9
 	select ARCH_HAVE_I2CRESET
 	select ARCH_HAVE_IRQTRIGGER
 	select ARCH_NEED_ADDRENV_MAPPING
+	select ARCH_HAVE_IRQPRIO
 	---help---
 		NXP i.MX9 (ARMv8.2a) applications processors
 
@@ -109,6 +116,7 @@ config ARCH_CHIP_ZYNQ_MPSOC
 	select ARCH_HAVE_IRQTRIGGER
 	select ARCH_NEED_ADDRENV_MAPPING
 	select ARM64_HAVE_PSCI
+	select ARCH_HAVE_IRQPRIO
 	---help---
 		XilinX ZYNQ MPSOC
 
@@ -123,6 +131,7 @@ config ARCH_CHIP_BCM2711
 	select ARCH_USE_MMU # Required for up_testset
 	select ARMV8A_HAVE_GICv2
 	select ARCH_HAVE_SDIO
+	select ARCH_HAVE_IRQPRIO
 	---help---
 		Broadcom BCM2711 quad-core ARM Cortex A72
 
