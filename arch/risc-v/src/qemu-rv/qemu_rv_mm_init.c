@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
+#include <nuttx/nuttx.h>
 
 #include <stdint.h>
 #include <assert.h>
@@ -57,7 +58,8 @@
 #define PGT_L2_VBASE    PGT_L2_PBASE
 
 #define PGT_L1_SIZE     (1024)       /* Enough to map 4 GiB */
-#define PGT_L2_SIZE     (3072)       /* Enough to map 12 MiB */
+#define PGT_L2_SIZE     (4096)       /* Enough to map continuous 12 MiB,
+                                      *  even unaligned */
 
 #define SLAB_COUNT      (sizeof(m_l2_pgtable) / RV_MMU_PAGE_SIZE)
 
@@ -191,18 +193,13 @@ static uintptr_t slab_alloc(void)
 static void map_region(uintptr_t paddr, uintptr_t vaddr, size_t size,
                        uint32_t mmuflags)
 {
+  uintptr_t alignaddr;
   uintptr_t endaddr;
   uintptr_t pbase;
-  int npages;
-  int i;
-  int j;
 
-  /* How many pages */
-
-  npages = (size + RV_MMU_PAGE_MASK) >> RV_MMU_PAGE_SHIFT;
   endaddr = vaddr + size;
 
-  for (i = 0; i < npages; i += RV_MMU_PAGE_ENTRIES)
+  while (vaddr < endaddr)
     {
       /* See if a mapping exists ? */
 
@@ -223,7 +220,8 @@ static void map_region(uintptr_t paddr, uintptr_t vaddr, size_t size,
 
       /* Then add the mappings */
 
-      for (j = 0; j < RV_MMU_PAGE_ENTRIES && vaddr < endaddr; j++)
+      alignaddr = ALIGN_UP_MASK(vaddr + 1, RV_MMU_SECTION_ALIGN_MASK);
+      while (vaddr < alignaddr && vaddr < endaddr)
         {
           mmu_ln_setentry(KMM_PBASE_IDX, pbase, paddr, vaddr, mmuflags);
           paddr += KMM_PAGE_SIZE;
