@@ -153,4 +153,5 @@ Implementation Details
    :maxdepth: 1
    :caption: Contents:
    
+   stream.rst
    zoneinfo.rst
