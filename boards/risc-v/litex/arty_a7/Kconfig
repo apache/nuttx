@@ -45,9 +45,52 @@ config LITEX_SDIO_MOUNT
 	bool "Mount SDIO at startup"
 	default n
 
+config LITEX_SDIO_USE_CACHE
+	bool "Use block caching"
+	default n
+	depends on LITEX_SDIO
+	depends on BLOCK_CACHE
+	---help---
+		Use block caching to improvce SD performance.
+
+		Warning: This may result in potential data loss if removable medio is detached
+		without flushing the cache, via umount or other mechanisms.
+
+		The total RAM consumed by caching can be calculated using:
+			B * W * C
+		where B = the underlying device's block size, W = the cache width and C is
+		the number of caches.
+
+if LITEX_SDIO_USE_CACHE
+
+config	LITEX_SDIO_CACHE_WIDTH
+	int "Block cache width"
+	default 64
+	---help---
+		The width of a single cache window. This translates to the size of a single
+		read-ahead buffer, and how many blocks are written to the underlying block
+		device in a single transaction.
+
+config	LITEX_SDIO_CACHE_COUNT
+	int "Block cache count"
+	default 16
+	---help---
+		The number of cache windows to use. Higher numbers improve performance by
+		caching blocks at different offets in the underlying device.
+
+config	LITEX_SDIO_CACHE_MULTIPLIER
+	int "Block cache multiplier"
+	default 1
+	---help---
+		Multiplies the underlying device's geometry to expose it in larger blocks.
+
+endif
+
 config LITEX_SDIO_MOUNT_BLKDEV
 	string "SDIO block device name"
-	default "/dev/mmcsd0"
+	default "/dev/mmcsd0"	 if !LITEX_SDIO_USE_CACHE
+	default "/dev/bmmcsd0" if LITEX_SDIO_USE_CACHE
+	depends on LITEX_SDIO
 
 config LITEX_SDIO_MOUNT_MOUNTPOINT
 	string "SDIO mountpoint"
