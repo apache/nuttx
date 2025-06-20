@@ -25,6 +25,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/spinlock.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -219,6 +220,8 @@ static struct usbhost_registry_s g_bthci =
 
 static uint32_t g_devinuse;
 
+static spinlock_t g_lock = SP_UNLOCKED;
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -294,7 +297,7 @@ static int usbhost_allocdevno(FAR struct usbhost_state_s *priv)
   irqstate_t flags;
   int devno;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_lock);
   for (devno = 0; devno < 26; devno++)
     {
       uint32_t bitno = 1 << devno;
@@ -302,12 +305,12 @@ static int usbhost_allocdevno(FAR struct usbhost_state_s *priv)
         {
           g_devinuse |= bitno;
           priv->devchar = 'a' + devno;
-          leave_critical_section(flags);
+          spin_unlock_irqrestore(&g_lock, flags);
           return OK;
         }
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_lock, flags);
   return -EMFILE;
 }
 
@@ -319,9 +322,9 @@ static void usbhost_freedevno(FAR struct usbhost_state_s *priv)
 
       if (devno >= 0 && devno < 26)
         {
-          irqstate_t flags = enter_critical_section();
+          irqstate_t flags = spin_lock_irqsave(&g_lock);
           g_devinuse &= ~(1 << devno);
-          leave_critical_section(flags);
+          spin_unlock_irqrestore(&g_lock, flags);
         }
     }
 }
@@ -1440,15 +1443,12 @@ static int usbhci_connect(FAR struct usbhost_class_s *usbclass,
 static int usbhost_disconnected(FAR struct usbhost_class_s *usbclass)
 {
   FAR struct usbhost_state_s *priv = (FAR struct usbhost_state_s *)usbclass;
-  irqstate_t flags;
 
   DEBUGASSERT(priv != NULL);
 
   /* Set an indication to any users of the device that the device is no
    * longer available.
    */
-
-  flags              = enter_critical_section();
 
   priv->disconnected = true;
 
@@ -1481,7 +1481,6 @@ static int usbhost_disconnected(FAR struct usbhost_class_s *usbclass)
       usbhost_destroy(priv);
     }
 
-  leave_critical_section(flags);
   return OK;
 }
 
