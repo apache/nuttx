@@ -740,9 +740,12 @@ int sensor_custom_register(FAR struct sensor_lowerhalf_s *dev,
  *           as the driver persists.
  *   devno - The user specifies which device of this type, from 0.
  *
+ * Returned Value:
+ *   OK if the driver was successfully unregister; A negated errno value is
+ *   returned on any failure.
  ****************************************************************************/
 
-void sensor_unregister(FAR struct sensor_lowerhalf_s *dev, int devno);
+int sensor_unregister(FAR struct sensor_lowerhalf_s *dev, int devno);
 
 /****************************************************************************
  * Name: sensor_custom_unregister
@@ -757,10 +760,13 @@ void sensor_unregister(FAR struct sensor_lowerhalf_s *dev, int devno);
  *           as the driver persists.
  *   path  - The user specifies path of device, ex: /dev/uorb/xxx
  *
+ * Returned Value:
+ *   OK if the driver was successfully unregister; A negated errno value is
+ *   returned on any failure.
  ****************************************************************************/
 
-void sensor_custom_unregister(FAR struct sensor_lowerhalf_s *dev,
-                              FAR const char *path);
+int sensor_custom_unregister(FAR struct sensor_lowerhalf_s *dev,
+                             FAR const char *path);
 
 /****************************************************************************
  * Name: usensor_initialize

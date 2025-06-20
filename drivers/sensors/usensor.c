@@ -163,9 +163,16 @@ static int usensor_unregister(FAR struct usensor_context_s *usensor,
     {
       if (strcmp(path, lower->path) == 0)
         {
-          list_delete(&lower->node);
           nxmutex_unlock(&usensor->lock);
-          sensor_custom_unregister(&lower->driver, path);
+          ret = sensor_custom_unregister(&lower->driver, path);
+          if (ret < 0)
+            {
+              snerr("ERROR: Topic %s unregister failed! return:%d",
+                    lower->path, ret);
+              return ret;
+            }
+
+          list_delete(&lower->node);
           kmm_free(lower);
           return 0;
         }
