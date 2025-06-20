@@ -312,10 +312,10 @@ int riscv_swint(int irq, void *context, void *arg)
    */
 
 #ifdef CONFIG_DEBUG_SYSCALL_INFO
-  if (cmd <= SYS_switch_context)
+  if (regs[REG_A0] <= SYS_switch_context)
     {
       svcinfo("SWInt Return: Context switch!\n");
-      up_dump_register(tcb.xcp.regs);
+      up_dump_register(tcb->xcp.regs);
     }
   else
     {
