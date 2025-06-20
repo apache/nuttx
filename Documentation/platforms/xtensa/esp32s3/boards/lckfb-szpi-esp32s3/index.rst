@@ -147,8 +147,8 @@ Then check the partition::
 fastboot
 --------
 
-The basic Fastboot configuration is based on lckfb-szpi-esp32s3:usb_device.
-More details about usage of fastboot, please refer to `fastbootd — NuttX latest documentation <https://nuttx.apache.org/docs/latest/applications/system/fastboot/index.html>`_.
+| The Fastboot configuration is based on lckfb-szpi-esp32s3:usb_device and lckfb-szpi-esp32s3:wifi, and support both **USB** and **TCP** network transport.
+| More details about usage of fastboot, please refer to `fastbootd — NuttX latest documentation <https://nuttx.apache.org/docs/latest/applications/system/fastboot/index.html>`_.
 
 You can run the configuration and compilation procedure::
 
@@ -161,14 +161,36 @@ To test it, just run the following (**Default is host side**):
 
     sudo apt install fastboot
 
-2. List devices running fastboot::
+2. Specify a device / List devices:
+
+  List devices only supported for USB transport::
 
     fastboot devices
 
-  Example::
+    # Examples
 
     $ fastboot devices
     1234    fastboot
+
+  To specific a device, use "-s" option::
+
+    # Usage
+    #
+    #   -s tcp:HOST[:PORT]         Specify a TCP network device.
+    #   -s SERIAL                  Specify a USB device.
+
+    fastboot -s SERIAL COMMAND
+    fastboot -s tcp:HOST[:PORT] COMMAND
+
+    # Examples
+
+    $ fastboot -s 1234 oem shell ifconfig
+    wlan0   Link encap:Ethernet HWaddr a0:85:e3:f4:43:30 at RUNNING mtu 1500
+            inet addr:192.168.211.111 DRaddr:192.168.211.107 Mask:255.255.255.0
+
+    PS C:\workspace> fastboot.exe -s tcp:192.168.211.111 oem shell ifconfig
+    wlan0   Link encap:Ethernet HWaddr a0:85:e3:f4:43:30 at RUNNING mtu 1500
+            inet addr:192.168.211.111 DRaddr:192.168.211.107 Mask:255.255.255.0
 
 3. Display given variable::
 
@@ -226,6 +248,48 @@ To test it, just run the following (**Default is host side**):
     0050: 44 ff c9 3b 55 51 93 b3 fb 1e 88 9e e9 2d 69 36 D..;UQ.......-i6
     0060: 10 d0 70 27 92 91 32 25 f5 cc 1f 59 ea 39 31 24 ..p'..2%...Y.91$
     0070: 3f 2e b0 fe ef 87 df 9b d4 7d 79 2e de 64 f6 ed ?........}y..d..
+
+fastboot_usb
+------------
+
+| The basic Fastboot configuration is based on lckfb-szpi-esp32s3:usb_device and support **USB** transport only.
+| More details about usage of fastboot, please refer to `fastbootd — NuttX latest documentation <https://nuttx.apache.org/docs/latest/applications/system/fastboot/index.html>`_.
+
+You can run the configuration and compilation procedure::
+
+  $ ./tools/configure.sh -l lckfb-szpi-esp32s3:fastboot_usb
+  $ make flash ESPTOOL_PORT=/dev/ttyUSBx -j
+
+fastboot_tcp
+------------
+
+| The Fastboot TCP network device configuration is based on lckfb-szpi-esp32s3:wifi and support **TCP** network transport only.
+| More details about usage of fastboot, please refer to `fastbootd — NuttX latest documentation <https://nuttx.apache.org/docs/latest/applications/system/fastboot/index.html>`_.
+
+You can run the configuration and compilation procedure::
+
+    $ ./tools/configure.sh -l lckfb-szpi-esp32s3:fastboot_tcp
+    $ make flash ESPTOOL_PORT=/dev/ttyUSBx -j
+
+To test it, just run the following::
+
+    # Device side
+
+    nsh> wapi psk wlan0 mypasswd 3
+    nsh> wapi essid wlan0 myssid 1
+    nsh> renew wlan0
+
+    # Host side
+
+    PS C:\workspace> fastboot.exe -s tcp:HOST[:PORT] oem shell ls
+    /:
+     data/
+     dev/
+     etc/
+     proc/
+     var/
+    OKAY [  0.063s]
+    Finished. Total time: 0.064s
 
 pca9557
 -------
