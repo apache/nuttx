@@ -25,6 +25,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/spinlock.h>
 
 #include <inttypes.h>
 #include <stdio.h>
@@ -120,6 +121,7 @@ struct usbhost_state_s
   int16_t                 crefs;        /* Reference count on the driver instance */
   uint16_t                blocksize;    /* Block size of USB mass storage device */
   uint32_t                nblocks;      /* Number of blocks on the USB mass storage device */
+  spinlock_t              spinlock;     /* Used to protect critical section */
   mutex_t                 lock;         /* Used to maintain mutual exclusive access */
   struct work_s           work;         /* For interacting with the worker thread */
   FAR uint8_t            *tbuffer;      /* The allocated transfer buffer */
@@ -298,6 +300,8 @@ static FAR struct usbhost_freestate_s *g_freelist;
 
 static uint32_t g_devinuse;
 
+static spinlock_t g_lock = SP_UNLOCKED;
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -331,14 +335,14 @@ static inline FAR struct usbhost_state_s *usbhost_allocclass(void)
    * our pre-allocated class instances from the free list.
    */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_lock);
   entry = g_freelist;
   if (entry)
     {
       g_freelist = entry->flink;
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_lock, flags);
   uinfo("Allocated: %p\n", entry);
   return (FAR struct usbhost_state_s *)entry;
 }
@@ -387,10 +391,10 @@ static inline void usbhost_freeclass(FAR struct usbhost_state_s *usbclass)
 
   /* Just put the pre-allocated class structure back on the freelist */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_lock);
   entry->flink = g_freelist;
   g_freelist = entry;
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_lock, flags);
 }
 #else
 static inline void usbhost_freeclass(FAR struct usbhost_state_s *usbclass)
@@ -420,7 +424,7 @@ static int usbhost_allocdevno(FAR struct usbhost_state_s *priv)
   irqstate_t flags;
   int devno;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_lock);
   for (devno = 0; devno < 26; devno++)
     {
       uint32_t bitno = 1 << devno;
@@ -428,12 +432,12 @@ static int usbhost_allocdevno(FAR struct usbhost_state_s *priv)
         {
           g_devinuse |= bitno;
           priv->sdchar = 'a' + devno;
-          leave_critical_section(flags);
+          spin_unlock_irqrestore(&g_lock, flags);
           return OK;
         }
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_lock, flags);
   return -EMFILE;
 }
 
@@ -443,9 +447,9 @@ static void usbhost_freedevno(FAR struct usbhost_state_s *priv)
 
   if (devno >= 0 && devno < 26)
     {
-      irqstate_t flags = enter_critical_section();
+      irqstate_t flags = spin_lock_irqsave(&g_lock);
       g_devinuse &= ~(1 << devno);
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(&g_lock, flags);
     }
 }
 
@@ -1703,6 +1707,7 @@ static FAR struct usbhost_class_s *
            */
 
           nxmutex_init(&priv->lock);
+          spin_lock_init(&priv->spinlock);
 
           /* NOTE: We do not yet know the geometry of the USB mass storage
            * device.
@@ -1825,7 +1830,7 @@ static int usbhost_disconnected(struct usbhost_class_s *usbclass)
    * device is no longer available.
    */
 
-  flags              = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->spinlock);
   priv->disconnected = true;
 
   /* Now check the number of references on the class instance.  If it is one,
@@ -1834,7 +1839,6 @@ static int usbhost_disconnected(struct usbhost_class_s *usbclass)
    * block driver.
    */
 
-  uinfo("crefs: %d\n", priv->crefs);
   if (priv->crefs == 1)
     {
       /* Destroy the class instance.  If we are executing from an interrupt
@@ -1842,6 +1846,7 @@ static int usbhost_disconnected(struct usbhost_class_s *usbclass)
        * Otherwise, destroy the instance now.
        */
 
+      spin_unlock_irqrestore(&priv->spinlock, flags);
       if (up_interrupt_context())
         {
           /* Destroy the instance on the worker thread. */
@@ -1857,9 +1862,11 @@ static int usbhost_disconnected(struct usbhost_class_s *usbclass)
 
           usbhost_destroy(priv);
         }
+
+      return OK;
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->spinlock, flags);
   return OK;
 }
 
@@ -1894,7 +1901,7 @@ static int usbhost_open(FAR struct inode *inode)
    * disconnect events.
    */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->spinlock);
   if (priv->disconnected)
     {
       /* No... the block driver is no longer bound to the class.  That means
@@ -1912,7 +1919,7 @@ static int usbhost_open(FAR struct inode *inode)
       ret = OK;
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->spinlock, flags);
 
   nxmutex_unlock(&priv->lock);
   return ret;
@@ -1939,20 +1946,13 @@ static int usbhost_close(FAR struct inode *inode)
   DEBUGASSERT(priv->crefs > 1);
 
   nxmutex_lock(&priv->lock);
-  priv->crefs--;
-
-  /* Release the semaphore.  The following operations when crefs == 1 are
-   * safe because we know that there is no outstanding open references to
-   * the block driver.
-   */
-
-  nxmutex_unlock(&priv->lock);
 
   /* We need to disable interrupts momentarily to assure that there are
    * no asynchronous disconnect events.
    */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->spinlock);
+  priv->crefs--;
 
   /* Check if the USB mass storage device is still connected.  If the
    * storage device is not connected and the reference count just
@@ -1965,10 +1965,14 @@ static int usbhost_close(FAR struct inode *inode)
       /* Destroy the class instance */
 
       DEBUGASSERT(priv->crefs == 1);
+      spin_unlock_irqrestore(&priv->spinlock, flags);
+      nxmutex_unlock(&priv->lock);
       usbhost_destroy(priv);
+      return OK;
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->spinlock, flags);
+  nxmutex_unlock(&priv->lock);
   return OK;
 }
 
