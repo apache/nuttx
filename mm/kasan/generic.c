@@ -248,7 +248,7 @@ void kasan_register(FAR void *addr, FAR size_t *size)
 
   flags = spin_lock_irqsave(&g_lock);
 
-  DEBUGASSERT(g_region_count <= CONFIG_MM_KASAN_REGIONS);
+  DEBUGASSERT(g_region_count < CONFIG_MM_KASAN_REGIONS);
   g_region[g_region_count++] = region;
 
   spin_unlock_irqrestore(&g_lock, flags);
