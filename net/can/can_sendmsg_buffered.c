@@ -378,7 +378,7 @@ ssize_t can_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 
           nerr("ERROR: Failed to allocate callback\n");
           ret = -ENOMEM;
-          goto errout_with_wrb;
+          goto errout_with_wq;
         }
 
       /* Set up the callback in the connection */
@@ -406,6 +406,9 @@ ssize_t can_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 
 errout_with_wrb:
   iob_free_chain(wb_iob);
+
+errout_with_wq:
+  iob_free_queue(&conn->write_q);
 
 errout_with_lock:
   net_unlock();
