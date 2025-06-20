@@ -54,6 +54,7 @@
 /* Definitions of 8-bit socket flags */
 
 #define _SF_INITD           0x01  /* Bit 0: Socket structure is initialized */
+#define _SF_CONNECTING      0x02  /* Bit 1: SOCK_STREAM is connecting */
 #define _SF_NONBLOCK        0x08  /* Bit 3: Don't block if no data (TCP/READ only) */
 #define _SF_LISTENING       0x10  /* Bit 4: SOCK_STREAM is listening */
 #define _SF_BOUND           0x20  /* Bit 5: SOCK_STREAM is bound to an address */
@@ -71,12 +72,13 @@
 
 /* Macro to manage the socket state and flags */
 
-#define _SS_INITD(s)        (((s) & _SF_INITD)     != 0)
-#define _SS_ISNONBLOCK(s)   (((s) & _SF_NONBLOCK)  != 0)
-#define _SS_ISLISTENING(s)  (((s) & _SF_LISTENING) != 0)
-#define _SS_ISBOUND(s)      (((s) & _SF_BOUND)     != 0)
-#define _SS_ISCONNECTED(s)  (((s) & _SF_CONNECTED) != 0)
-#define _SS_ISCLOSED(s)     (((s) & _SF_CLOSED)    != 0)
+#define _SS_INITD(s)        (((s) & _SF_INITD)      != 0)
+#define _SS_ISCONNECTING(s) (((s) & _SF_CONNECTING) != 0)
+#define _SS_ISNONBLOCK(s)   (((s) & _SF_NONBLOCK)   != 0)
+#define _SS_ISLISTENING(s)  (((s) & _SF_LISTENING)  != 0)
+#define _SS_ISBOUND(s)      (((s) & _SF_BOUND)      != 0)
+#define _SS_ISCONNECTED(s)  (((s) & _SF_CONNECTED)  != 0)
+#define _SS_ISCLOSED(s)     (((s) & _SF_CLOSED)     != 0)
 
 /* Determine if a socket is valid.  Valid means both (1) allocated and (2)
  * successfully initialized:
