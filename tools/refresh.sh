@@ -78,9 +78,11 @@ while [ ! -z "$1" ]; do
     echo "     The architecture directory under nuttx/boards/"
     echo "  <chipname>"
     echo "     The chip family directory under nuttx/boards/<arch>/"
-    echo "  Note1: all configuration is refreshed if <board>:<config> equals all."
-    echo "  Note2: all configuration of arch XYZ is refreshed if \"arch:<namearch>\" is passed"
-    echo "  Note3: all configuration of chip XYZ is refreshed if \"chip:<chipname>\" is passed"
+    echo " "
+    echo "  Note1: all configurations are refreshed if <board>:<config> is replaced with \"all\" keyword" 
+    echo "  Note2: all configurations of arch XYZ are refreshed if \"arch:<namearch>\" is passed"
+    echo "  Note3: all configurations of chip XYZ are refreshed if \"chip:<chipname>\" is passed"
+    echo "  Note4: all configurations of board XYZ are refreshed if \"board:<boardname>\" is passed"
     exit 0
     ;;
   * )
@@ -129,6 +131,14 @@ else
       CHIP=$chipname
       echo "Normalizing all boards in chip: ${CHIP} !"
       CONFIGS=(`find boards/*/${CHIP} -name defconfig | cut -d'/' -f4,6`)
+    else
+      if [[ "X${CONFIGS}" == "Xboard:"* ]]; then
+        IFS=: read -r atype boardname <<< "${CONFIGS}"
+        BOARD=$boardname
+        echo "Normalizing all configs in board: ${BOARD} !"
+	# ATTENTION: It assumes we don't have a board with same name in other arch or chip
+        CONFIGS=(`find boards/*/*/${boardname} -name defconfig | cut -d'/' -f4,6`)
+      fi
     fi
   fi
 fi
