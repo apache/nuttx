@@ -1749,6 +1749,14 @@ sensor_rpmsg_unregister(FAR struct sensor_lowerhalf_s *lower)
 {
   FAR struct sensor_rpmsg_dev_s *dev = lower->priv;
 
+  /* A physical sensor is its own advertiser, see sensor_rpmsg_register */
+
+  if (dev->nsubscribers != 0 ||
+      dev->nadvertisers > (dev->drv->ops->activate ? 1 : 0))
+    {
+      return NULL;
+    }
+
   down_write(&g_dev_lock);
   list_delete(&dev->node);
   up_write(&g_dev_lock);
