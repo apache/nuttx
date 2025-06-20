@@ -427,6 +427,114 @@ rpmsg_port_uart_process_rx_conn(FAR struct rpmsg_port_uart_s *rpuart,
 }
 
 /****************************************************************************
+ * Name: rpmsg_port_uart_process_rx_cmd
+ ****************************************************************************/
+
+static bool
+rpmsg_port_uart_process_rx_cmd(FAR struct rpmsg_port_uart_s *rpuart,
+                               FAR struct rpmsg_port_header_s **hdr,
+                               FAR uint8_t *state, uint8_t ch)
+{
+  bool iscmd = true;
+  int count;
+
+  switch (ch)
+    {
+      case RPMSG_PORT_UART_CONNREQ:
+      case RPMSG_PORT_UART_CONNACK:
+        if (*hdr != NULL)
+          {
+            rpmsg_port_queue_return_buffer(&rpuart->port.rxq, *hdr);
+            *hdr = NULL;
+          }
+
+        rpmsg_port_uart_process_rx_conn(rpuart, ch);
+        *state = RPMSG_PORT_UART_RX_WAIT_START;
+        break;
+      case RPMSG_PORT_UART_SUSPEND:
+        rpmsgdbg("Received suspend command\n");
+        rpmsg_modify_signals(&rpuart->port.rpmsg, 0, RPMSG_SIGNAL_RUNNING);
+        break;
+      case RPMSG_PORT_UART_RESUME:
+        rpmsgdbg("Received resume command\n");
+        rpmsg_modify_signals(&rpuart->port.rpmsg, RPMSG_SIGNAL_RUNNING, 0);
+        break;
+      case RPMSG_PORT_UART_POWEROFF:
+        count = pm_wakelock_staycount(&rpuart->rx_wakelock);
+        rpmsgvbs("Received poweroff command %d 0x%x\n",
+                 count, rpuart->event.events);
+        rpmsg_port_uart_clear(rpuart, RPMSG_PORT_UART_EVT_CONNED);
+        if (rpmsg_port_uart_check(rpuart, RPMSG_PORT_UART_EVT_WAKING))
+          {
+            rpmsg_port_uart_set(rpuart, RPMSG_PORT_UART_EVT_WAKED);
+          }
+
+        rpmsg_port_drop_packets(&rpuart->port, RPMSG_PORT_DROP_TXQ);
+        rpmsg_port_unregister(&rpuart->port);
+        DEBUGVERIFY(file_ioctl(&rpuart->file, TIOCVHANGUP, 0) >= 0);
+        if (count != 0)
+          {
+            pm_wakelock_relax(&rpuart->rx_wakelock);
+          }
+        break;
+      case RPMSG_PORT_UART_STAYWAKE1:
+        count = pm_wakelock_staycount(&rpuart->rx_wakelock);
+        rpmsgdbg("Received staywake1 command %d 0x%x\n",
+                 count, rpuart->event.events);
+        if (count == 0)
+          {
+            pm_wakelock_stay(&rpuart->rx_wakelock);
+          }
+
+        rpmsg_port_uart_send_one(rpuart, RPMSG_PORT_UART_STAYWAKEACK1);
+        break;
+      case RPMSG_PORT_UART_STAYWAKE2:
+        count = pm_wakelock_staycount(&rpuart->rx_wakelock);
+        rpmsgdbg("Received staywake2 command %d 0x%x\n",
+                 count, rpuart->event.events);
+        if (count == 0)
+          {
+            pm_wakelock_stay(&rpuart->rx_wakelock);
+          }
+
+        rpmsg_port_uart_send_one(rpuart, RPMSG_PORT_UART_STAYWAKEACK2);
+        break;
+      case RPMSG_PORT_UART_RELAXWAKE:
+        count = pm_wakelock_staycount(&rpuart->rx_wakelock);
+        rpmsgdbg("Received relaxwake command %d 0x%x\n",
+                 count, rpuart->event.events);
+        if (count != 0)
+          {
+            pm_wakelock_relax(&rpuart->rx_wakelock);
+          }
+        break;
+      case RPMSG_PORT_UART_STAYWAKEACK1:
+      case RPMSG_PORT_UART_STAYWAKEACK2:
+        rpmsgdbg("Received staywake ack command 0x%x 0x%x 0x%x\n",
+                 ch, rpuart->tx_staywake, rpuart->event.events);
+        if (ch == rpuart->tx_staywake - 1 &&
+            rpmsg_port_uart_check(rpuart, RPMSG_PORT_UART_EVT_WAKING))
+          {
+            rpmsg_port_uart_set(rpuart, RPMSG_PORT_UART_EVT_WAKED);
+          }
+        break;
+      default:
+        if (ch < RPMSG_PORT_UART_START && ch > RPMSG_PORT_UART_END &&
+            ch != RPMSG_PORT_UART_ESCAPE)
+          {
+            rpmsgerr("Receive Command %x\n", ch);
+          }
+        else
+          {
+            iscmd = false;
+          }
+        break;
+    }
+
+  return iscmd;
+}
+
+/****************************************************************************
  * Name: rpmsg_port_uart_process_rx_data
  ****************************************************************************/
 
@@ -481,110 +589,8 @@ static int rpmsg_port_uart_rx_thread(int argc, FAR char *argv[])
               rpuart->rx_dbg_idx = 0;
             }
 
-          if (buf[i] == RPMSG_PORT_UART_CONNREQ ||
-              buf[i] == RPMSG_PORT_UART_CONNACK)
+          if (rpmsg_port_uart_process_rx_cmd(rpuart, &hdr, &state, buf[i]))
             {
-              if (hdr != NULL)
-                {
-                  rpmsg_port_queue_return_buffer(rxq, hdr);
-                  hdr = NULL;
-                }
-
-              rpmsg_port_uart_process_rx_conn(rpuart, buf[i]);
-              state = RPMSG_PORT_UART_RX_WAIT_START;
-              continue;
-            }
-          else if (buf[i] == RPMSG_PORT_UART_SUSPEND)
-            {
-              rpmsgdbg("Received suspend command\n");
-              rpmsg_modify_signals(&rpuart->port.rpmsg,
-                                   0, RPMSG_SIGNAL_RUNNING);
-              continue;
-            }
-          else if (buf[i] == RPMSG_PORT_UART_RESUME)
-            {
-              rpmsgdbg("Received resume command\n");
-              rpmsg_modify_signals(&rpuart->port.rpmsg,
-                                   RPMSG_SIGNAL_RUNNING, 0);
-              continue;
-            }
-          else if (buf[i] == RPMSG_PORT_UART_POWEROFF)
-            {
-              int count = pm_wakelock_staycount(&rpuart->rx_wakelock);
-              rpmsgvbs("Received poweroff command %d 0x%x\n",
-                       count, rpuart->event.events);
-              rpmsg_port_uart_clear(rpuart, RPMSG_PORT_UART_EVT_CONNED);
-              if (rpmsg_port_uart_check(rpuart, RPMSG_PORT_UART_EVT_WAKING))
-                {
-                  rpmsg_port_uart_set(rpuart, RPMSG_PORT_UART_EVT_WAKED);
-                }
-
-              rpmsg_port_drop_packets(&rpuart->port, RPMSG_PORT_DROP_TXQ);
-              rpmsg_port_unregister(&rpuart->port);
-              DEBUGVERIFY(file_ioctl(&rpuart->file, TIOCVHANGUP, 0) >= 0);
-              if (count != 0)
-                {
-                  pm_wakelock_relax(&rpuart->rx_wakelock);
-                }
-
-              continue;
-            }
-          else if (buf[i] == RPMSG_PORT_UART_STAYWAKE1)
-            {
-              int count = pm_wakelock_staycount(&rpuart->rx_wakelock);
-              rpmsgdbg("Received staywake1 command %d 0x%x\n",
-                       count, rpuart->event.events);
-              if (count == 0)
-                {
-                  pm_wakelock_stay(&rpuart->rx_wakelock);
-                }
-
-              rpmsg_port_uart_send_one(rpuart, RPMSG_PORT_UART_STAYWAKEACK1);
-              continue;
-            }
-          else if (buf[i] == RPMSG_PORT_UART_STAYWAKE2)
-            {
-              int count = pm_wakelock_staycount(&rpuart->rx_wakelock);
-              rpmsgdbg("Received staywake2 command %d 0x%x\n",
-                       count, rpuart->event.events);
-              if (count == 0)
-                {
-                  pm_wakelock_stay(&rpuart->rx_wakelock);
-                }
-
-              rpmsg_port_uart_send_one(rpuart, RPMSG_PORT_UART_STAYWAKEACK2);
-              continue;
-            }
-          else if (buf[i] == RPMSG_PORT_UART_RELAXWAKE)
-            {
-              int count = pm_wakelock_staycount(&rpuart->rx_wakelock);
-              rpmsgdbg("Received relaxwake command %d 0x%x\n",
-                       count, rpuart->event.events);
-              if (count != 0)
-                {
-                  pm_wakelock_relax(&rpuart->rx_wakelock);
-                }
-
-              continue;
-            }
-          else if (buf[i] == RPMSG_PORT_UART_STAYWAKEACK1 ||
-                   buf[i] == RPMSG_PORT_UART_STAYWAKEACK2)
-            {
-              rpmsgdbg("Received staywake ack command 0x%x 0x%x 0x%x\n",
-                       buf[i], rpuart->tx_staywake, rpuart->event.events);
-              if (buf[i] == rpuart->tx_staywake - 1 &&
-                  rpmsg_port_uart_check(rpuart, RPMSG_PORT_UART_EVT_WAKING))
-                {
-                  rpmsg_port_uart_set(rpuart, RPMSG_PORT_UART_EVT_WAKED);
-                }
-
-              continue;
-            }
-          else if (buf[i] < RPMSG_PORT_UART_START &&
-                   buf[i] > RPMSG_PORT_UART_END &&
-                   buf[i] != RPMSG_PORT_UART_ESCAPE)
-            {
-              rpmsgerr("Receive Command %x\n", buf[i]);
               continue;
             }
 
