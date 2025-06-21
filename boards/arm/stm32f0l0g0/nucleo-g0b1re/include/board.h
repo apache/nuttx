@@ -210,12 +210,15 @@
 
 /* ADC */
 
-#define GPIO_ADC1_IN0  (GPIO_ANALOG | GPIO_PORTA | GPIO_PIN0)
+#define GPIO_ADC1_A0  GPIO_ADC1_IN0_1
+#define GPIO_ADC1_A1  GPIO_ADC1_IN1_1
+#define GPIO_ADC1_A2  GPIO_ADC1_IN4_1
+#define GPIO_ADC1_A3  GPIO_ADC1_IN9_1
 
 /* DMA channels *************************************************************/
 
 /* ADC */
 
-#define ADC1_DMA_CHAN DMACHAN_ADC1     /* DMA1_CH1 */
+#define ADC1_DMA_CHAN DMAMAP_DMA1_ADC1
 
 #endif /* __BOARDS_ARM_STM32F0L0G0_NUCLEO_G0B1RE_INCLUDE_BOARD_H */

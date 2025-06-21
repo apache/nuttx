@@ -101,7 +101,7 @@
 /* AHB1 Base Addresses ******************************************************/
 
 #define STM32_DMA1_BASE      0x40020000     /* 0x40020000-0x400203ff: DMA1  */
-#define STM32_DMAMUX_BASE    0x40020800     /* 0x40020800-0x40020bff: DMAMUX  */
+#define STM32_DMAMUX1_BASE   0x40020800     /* 0x40020800-0x40020bff: DMAMUX  */
 #define STM32_RCC_BASE       0x40021000     /* 0x40021000-0x400213ff: Reset and Clock control RCC */
 #define STM32_EXTI_BASE      0x40021800     /* 0x40021800-0x40021bff: EXTI */
 #define STM32_FLASHIF_BASE   0x40022000     /* 0x40022000-0x400223ff: Flash memory interface */
