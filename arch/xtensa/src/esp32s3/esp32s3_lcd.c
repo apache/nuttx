@@ -312,8 +312,8 @@ static struct esp32s3_lcd_s g_lcd_priv;
 static const struct fb_videoinfo_s g_base_videoinfo =
 {
   .fmt      = ESP32S3_LCD_COLOR_FMT,
-  .xres     = CONFIG_ESP32S3_LCD_VRES,
-  .yres     = CONFIG_ESP32S3_LCD_HRES,
+  .xres     = CONFIG_ESP32S3_LCD_HRES,
+  .yres     = CONFIG_ESP32S3_LCD_VRES,
   .nplanes  = 1
 };
 
