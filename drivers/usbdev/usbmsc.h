@@ -39,6 +39,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/queue.h>
 #include <nuttx/mutex.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/usb/storage.h>
 #include <nuttx/usb/usbdev.h>
@@ -380,6 +381,7 @@ struct usbmsc_dev_s
 
   pid_t             thpid;            /* The worker thread task ID */
   sem_t             thsynch;          /* Used to synchronizer terminal events */
+  spinlock_t        spinlock;         /* Used to protect the critical section */
   mutex_t           thlock;           /* Used to get exclusive access to the state data */
   sem_t             thwaitsem;        /* Used to signal worker thread */
   volatile bool     thwaiting;        /* True: worker thread is waiting for an event */
