@@ -65,6 +65,9 @@ CHIP_CSRCS += stm32_i2c.c
 endif
 else ifeq ($(CONFIG_STM32_HAVE_IP_I2C_V2),y)
 CHIP_CSRCS += stm32_i2c_v2.c
+ifeq ($(CONFIG_STM32_I2C_SLAVE),y)
+CHIP_CSRCS += stm32_i2cslave_v2.c
+endif
 endif
 
 ifeq ($(CONFIG_USBDEV),y)
