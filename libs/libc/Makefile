@@ -198,7 +198,7 @@ makekdepfile: $(CSRCS:.c=.ddc) $(ASRCS:.S=.dds)
 	$(call CATFILE, kbin/Make.dep, $^)
 	$(call DELFILE, $^)
 
-.depend: Makefile $(SRCS) $(TOPDIR)$(DELIM).config
+.depend: Makefile $(SRCS) $(TOPDIR)$(DELIM).config $(TOPDIR)$(DELIM).version
 	$(Q) $(MAKE) makedepfile OBJPATH="bin"
 ifneq ($(CONFIG_BUILD_FLAT),y)
 	$(Q) $(MAKE) makekdepfile CFLAGS="$(CFLAGS) $(KDEFINE)" OBJPATH="kbin"
