@@ -155,6 +155,12 @@ SECTIONS
       _edata = . ;
     }
 
+  .noinit (NOLOAD) : ALIGN(4)
+    {
+      *(.noinit)
+      *(.noinit.*)
+    } > ksram
+
   .bss :
     {
       _sbss = . ;
