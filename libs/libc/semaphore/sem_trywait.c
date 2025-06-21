@@ -107,8 +107,8 @@ int sem_trywait(FAR sem_t *sem)
 
 int nxsem_trywait(FAR sem_t *sem)
 {
-  bool mutex;
   bool fastpath = true;
+  bool mutex;
 
   DEBUGASSERT(sem != NULL);
 
@@ -119,32 +119,25 @@ int nxsem_trywait(FAR sem_t *sem)
               up_interrupt_context());
 #endif
 
-  /* We don't do atomic fast path in case of LIBC_ARCH_ATOMIC because that
-   * uses spinlocks, which can't be called from userspace. Also in the kernel
-   * taking the slow path directly is faster than locking first in here
-   */
-
-#ifndef CONFIG_LIBC_ARCH_ATOMIC
-
   mutex = NXSEM_IS_MUTEX(sem);
 
   /* Disable fast path if priority protection is enabled on the semaphore */
 
-#  ifdef CONFIG_PRIORITY_PROTECT
+#ifdef CONFIG_PRIORITY_PROTECT
   if ((sem->flags & SEM_PRIO_MASK) == SEM_PRIO_PROTECT)
     {
       fastpath = false;
     }
-#  endif
+#endif
 
   /* Disable fast path on a counting semaphore with priority inheritance */
 
-#  ifdef CONFIG_PRIORITY_INHERITANCE
+#ifdef CONFIG_PRIORITY_INHERITANCE
   if (!mutex && (sem->flags & SEM_PRIO_MASK) != SEM_PRIO_NONE)
     {
       fastpath = false;
     }
-#  endif
+#endif
 
   while (fastpath)
     {
@@ -176,11 +169,6 @@ int nxsem_trywait(FAR sem_t *sem)
           return OK;
         }
     }
-
-#else
-  UNUSED(mutex);
-  UNUSED(fastpath);
-#endif
 
   return nxsem_trywait_slow(sem);
 }
