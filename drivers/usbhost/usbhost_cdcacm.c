@@ -25,6 +25,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/spinlock.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -255,6 +256,7 @@ struct usbhost_cdcacm_s
   uint16_t       rxndx;          /* Index to the next byte in the RX packet buffer */
   int16_t        crefs;          /* Reference count on the driver instance */
   int16_t        nbytes;         /* The number of bytes actually transferred */
+  spinlock_t     spinlock;       /* Used to protect critical section */
   mutex_t        lock;           /* Used to maintain mutual exclusive access */
   struct work_s  ntwork;         /* For asynchronous notification work */
   struct work_s  rxwork;         /* For RX packet work */
@@ -474,6 +476,8 @@ static FAR struct usbhost_freestate_s *g_freelist;
 
 static uint32_t g_devinuse;
 
+static spinlock_t g_lock = SP_UNLOCKED;
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -507,14 +511,14 @@ static FAR struct usbhost_cdcacm_s *usbhost_allocclass(void)
    * our pre-allocated class instances from the free list.
    */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_lock);
   entry = g_freelist;
   if (entry)
     {
       g_freelist = entry->flink;
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_lock, flags);
   uinfo("Allocated: %p\n", entry);
   return (FAR struct usbhost_cdcacm_s *)entry;
 }
@@ -562,10 +566,10 @@ static void usbhost_freeclass(FAR struct usbhost_cdcacm_s *usbclass)
 
   /* Just put the pre-allocated class structure back on the freelist */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_lock);
   entry->flink = g_freelist;
   g_freelist = entry;
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_lock, flags);
 }
 #else
 static void usbhost_freeclass(FAR struct usbhost_cdcacm_s *usbclass)
@@ -594,7 +598,7 @@ static int usbhost_devno_alloc(FAR struct usbhost_cdcacm_s *priv)
   irqstate_t flags;
   int devno;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_lock);
   for (devno = 0; devno < 32; devno++)
     {
       uint32_t bitno = 1 << devno;
@@ -602,12 +606,12 @@ static int usbhost_devno_alloc(FAR struct usbhost_cdcacm_s *priv)
         {
           g_devinuse |= bitno;
           priv->minor = devno;
-          leave_critical_section(flags);
+          spin_unlock_irqrestore(&g_lock, flags);
           return OK;
         }
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_lock, flags);
   return -EMFILE;
 }
 
@@ -625,9 +629,9 @@ static void usbhost_devno_free(FAR struct usbhost_cdcacm_s *priv)
 
   if (devno >= 0 && devno < 32)
     {
-      irqstate_t flags = enter_critical_section();
+      irqstate_t flags = spin_lock_irqsave(&g_lock);
       g_devinuse &= ~(1 << devno);
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(&g_lock, flags);
     }
 }
 
@@ -1905,6 +1909,7 @@ usbhost_create(FAR struct usbhost_hubport_s *hport,
            */
 
           nxmutex_init(&priv->lock);
+          spin_lock_init(&priv->spinlock);
 
           /* Set up the serial lower-half interface */
 
@@ -2123,6 +2128,7 @@ static int usbhost_disconnected(FAR struct usbhost_class_s *usbclass)
     (FAR struct usbhost_cdcacm_s *)usbclass;
   FAR struct usbhost_hubport_s *hport;
   irqstate_t flags;
+  int16_t crefs;
   int ret;
 
   DEBUGASSERT(priv != NULL && priv->usbclass.hport != NULL);
@@ -2132,8 +2138,10 @@ static int usbhost_disconnected(FAR struct usbhost_class_s *usbclass)
    * is no longer available.
    */
 
-  flags              = enter_critical_section();
+  flags              = spin_lock_irqsave(&priv->spinlock);
   priv->disconnected = true;
+  crefs              = priv->crefs;
+  spin_unlock_irqrestore(&priv->spinlock, flags);
 
   /* Let the upper half driver know that serial device is no longer
    * connected.
@@ -2174,8 +2182,8 @@ static int usbhost_disconnected(FAR struct usbhost_class_s *usbclass)
    * serial driver.
    */
 
-  uinfo("crefs: %d\n", priv->crefs);
-  if (priv->crefs == 1)
+  uinfo("crefs: %d\n", crefs);
+  if (crefs == 1)
     {
       /* Destroy the class instance.  If we are executing from an interrupt
        * handler, then defer the destruction to the worker thread.
@@ -2200,7 +2208,6 @@ static int usbhost_disconnected(FAR struct usbhost_class_s *usbclass)
         }
     }
 
-  leave_critical_section(flags);
   return OK;
 }
 
@@ -2241,7 +2248,7 @@ static int usbhost_setup(FAR struct uart_dev_s *uartdev)
    * isconnect events.
    */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->spinlock);
   if (priv->disconnected)
     {
       /* No... the block driver is no longer bound to the class.  That means
@@ -2259,7 +2266,7 @@ static int usbhost_setup(FAR struct uart_dev_s *uartdev)
       ret = OK;
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->spinlock, flags);
   nxmutex_unlock(&priv->lock);
   return ret;
 }
@@ -2286,20 +2293,13 @@ static void usbhost_shutdown(FAR struct uart_dev_s *uartdev)
 
   DEBUGASSERT(priv->crefs > 1);
   nxmutex_lock(&priv->lock);
-  priv->crefs--;
-
-  /* Release the semaphore.  The following operations when crefs == 1 are
-   * safe because we know that there is no outstanding open references to
-   * the block driver.
-   */
-
-  nxmutex_unlock(&priv->lock);
 
   /* We need to disable interrupts momentarily to assure that there are
    * no asynchronous disconnect events.
    */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->spinlock);
+  priv->crefs--;
 
   /* Check if the USB CDC/ACM device is still connected.  If the
    * CDC/ACM device is not connected and the reference count just
@@ -2312,10 +2312,15 @@ static void usbhost_shutdown(FAR struct uart_dev_s *uartdev)
       /* Destroy the class instance */
 
       DEBUGASSERT(priv->crefs == 1);
+      spin_unlock_irqrestore(&priv->spinlock, flags);
+      nxmutex_unlock(&priv->lock);
       usbhost_destroy(priv);
     }
-
-  leave_critical_section(flags);
+  else
+    {
+      spin_unlock_irqrestore(&priv->spinlock, flags);
+      nxmutex_unlock(&priv->lock);
+    }
 }
 
 /****************************************************************************
