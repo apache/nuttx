@@ -174,24 +174,26 @@ int nxsem_wait(FAR sem_t *sem)
     }
 #  endif
 
-  if (fastpath)
+  while (fastpath)
     {
-      int32_t old;
-      int32_t new;
       FAR atomic_t *val = mutex ? NXSEM_MHOLDER(sem) : NXSEM_COUNT(sem);
+      int32_t old = atomic_read(val);
+      int32_t new;
 
       if (mutex)
         {
-          old = NXSEM_NO_MHOLDER;
+          if (old != NXSEM_NO_MHOLDER)
+            {
+              break;
+            }
+
           new = _SCHED_GETTID();
         }
       else
         {
-          old = atomic_read(val);
-
           if (old < 1)
             {
-              goto out;
+              break;
             }
 
           new = old - 1;
@@ -202,9 +204,6 @@ int nxsem_wait(FAR sem_t *sem)
           return OK;
         }
     }
-
-out:
-
 #else
   UNUSED(mutex);
   UNUSED(fastpath);

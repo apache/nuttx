@@ -146,43 +146,35 @@ int nxsem_trywait(FAR sem_t *sem)
     }
 #  endif
 
-  if (fastpath)
+  while (fastpath)
     {
-      bool ret = false;
-      int32_t old;
-      int32_t new;
       FAR atomic_t *val = mutex ? NXSEM_MHOLDER(sem) : NXSEM_COUNT(sem);
+      int32_t old = atomic_read(val);
+      int32_t new;
 
       if (mutex)
         {
-          old = NXSEM_NO_MHOLDER;
+          if (old != NXSEM_NO_MHOLDER)
+            {
+              return -EAGAIN;
+            }
+
+          new = _SCHED_GETTID();
         }
       else
         {
-          old = atomic_read(val);
+          if (old < 1)
+            {
+              return -EAGAIN;
+            }
+
+          new = old - 1;
         }
 
-      do
+      if (atomic_try_cmpxchg_acquire(val, &old, new))
         {
-          if (!mutex)
-            {
-              if (old < 1)
-                {
-                  break;
-                }
-
-              new = old - 1;
-            }
-          else
-            {
-              new = _SCHED_GETTID();
-            }
-
-          ret = atomic_try_cmpxchg_acquire(NXSEM_MHOLDER(sem), &old, new);
+          return OK;
         }
-      while (!mutex && !ret);
-
-      return ret ? OK : -EAGAIN;
     }
 
 #else
