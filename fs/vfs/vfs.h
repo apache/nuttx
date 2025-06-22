@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/vfs/lock.h
+ * fs/vfs/vfs.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __FS_VFS_LOCK_H
-#define __FS_VFS_LOCK_H
+#ifndef __FS_VFS_VFS_H
+#define __FS_VFS_VFS_H
 
 /****************************************************************************
  * Included Files
@@ -105,4 +105,4 @@ int file_setlk(FAR struct file *filep, FAR struct flock *flock,
                bool nonblock);
 
 #endif /* CONFIG_FS_LOCK_BUCKET_SIZE */
-#endif /* __FS_VFS_LOCK_H */
+#endif /* __FS_VFS_VFS_H */
