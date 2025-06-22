@@ -196,7 +196,7 @@ static int gt9xx_i2c_read(FAR struct gt9xx_dev_s *dev,
 
   const int msgv_len = sizeof(msgv) / sizeof(msgv[0]);
 
-  iinfo("reg=0x%x, buflen=%ld\n", reg, buflen);
+  iinfo("reg=0x%x, buflen=%zu\n", reg, buflen);
   DEBUGASSERT(dev && dev->i2c && buf);
 
   /* Execute the I2C Transfer */
@@ -482,10 +482,10 @@ static ssize_t gt9xx_read(FAR struct file *filep, FAR char *buffer,
 
   /* Returned Touch Sample will have 0 or 1 Touch Points */
 
-  iinfo("buflen=%ld\n", buflen);
+  iinfo("buflen=%zu\n", buflen);
   if (buflen < outlen)
     {
-      ierr("Buffer should be at least %ld bytes, got %ld bytes\n",
+      ierr("Buffer should be at least %zu bytes, got %zu bytes\n",
            outlen, buflen);
       return -EINVAL;
     }
