@@ -1,5 +1,5 @@
 ############################################################################
-# libs/libc/machine/risc-v/gnu/arch_setjmp.S
+# libs/libc/machine/risc-v/arch_setjmp.S
 #
 # SPDX-License-Identifier: Apache-2.0
 #

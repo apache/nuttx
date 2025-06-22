@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/machine/risc-v/gnu/arch_memcpy.S
+ * libs/libc/machine/risc-v/arch_memcpy.S
  *
  * SPDX-License-Identifier: Apache-2.0
  *

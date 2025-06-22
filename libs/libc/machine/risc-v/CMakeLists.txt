@@ -17,17 +17,24 @@
 # the License.
 #
 # ##############################################################################
-add_subdirectory(gnu)
-
-if(CONFIG_ARCH_RV64GC)
-  add_subdirectory(rv64)
-endif()
-
-if(CONFIG_ARCH_RV32IM)
-  add_subdirectory(rv32)
-endif()
 
 set(SRCS)
+
+if(CONFIG_RISCV_MEMCPY)
+  list(APPEND SRCS arch_memcpy.S)
+endif()
+
+if(CONFIG_RISCV_MEMSET)
+  list(APPEND SRCS arch_memset.S)
+endif()
+
+if(CONFIG_RISCV_STRCMP)
+  list(APPEND SRCS arch_strcmp.S)
+endif()
+
+if(CONFIG_ARCH_SETJMP_H)
+  list(APPEND SRCS arch_setjmp.S)
+endif()
 
 if(CONFIG_LIBC_ARCH_ELF)
   list(APPEND SRCS arch_elf.c)
