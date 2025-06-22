@@ -23,6 +23,3 @@
 ifeq ($(CONFIG_ARCH_SETJMP_H),y)
 ASRCS += arch_setjmp.S
 endif
-
-DEPPATH += --dep-path machine/renesas/rx/gnu
-VPATH += :machine/renesas/rx/gnu
