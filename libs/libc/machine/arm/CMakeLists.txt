@@ -49,23 +49,23 @@ elseif(CONFIG_ARCH_ARMV8R) # All ARMv8-R
 endif()
 
 if(NOT CONFIG_LIBSUPCXX_TOOLCHAIN)
-  list(APPEND SRCS aeabi_atexit.c)
+  list(APPEND SRCS arch_atexit.c)
 endif()
 
 if(CONFIG_CXX_EXCEPTION)
-  list(APPEND SRCS gnu_unwind_find_exidx.c)
+  list(APPEND SRCS arch_unwind_find_exidx.c)
 endif()
 
 if(CONFIG_ARCH_SETJMP_H)
   if(CONFIG_ARCH_CHIP_TLSR82)
-    list(APPEND SRCS gnu/tc32_setjmp.S)
-  elseif(CONFIG_ARCH_TOOLCHAIN_GNU)
-    list(APPEND SRCS gnu/arch_setjmp.S)
+    list(APPEND SRCS tc32_setjmp.S)
+  else()
+    list(APPEND SRCS arch_setjmp.S)
   endif()
 endif()
 
 if(CONFIG_PROFILE_MINI)
-  list(APPEND SRCS gnu/mcount.S)
+  list(APPEND SRCS arch_mcount.S)
 endif()
 
 if(CONFIG_LIBC_ARCH_CRC32)
