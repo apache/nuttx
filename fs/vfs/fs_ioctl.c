@@ -33,7 +33,7 @@
 #include <assert.h>
 
 #include "inode/inode.h"
-#include "lock.h"
+#include "vfs.h"
 
 /****************************************************************************
  * Private Functions

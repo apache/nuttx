@@ -38,9 +38,9 @@
 #include <nuttx/mutex.h>
 #include <nuttx/list.h>
 
-#include "lock.h"
 #include "sched/sched.h"
 #include "fs_heap.h"
+#include "vfs.h"
 
 /****************************************************************************
  * Pre-processor Definitions
