@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/machine/risc-v/gnu/asm.h
+ * libs/libc/machine/risc-v/asm.h
  *
  * SPDX-License-Identifier: BSD-2-Clause-FreeBSD
  * SPDX-FileCopyrightText: 2017  SiFive Inc. All rights reserved.

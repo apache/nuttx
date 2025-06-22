@@ -40,10 +40,5 @@ ifeq ($(CONFIG_LIBC_ARCH_ELF),y)
 CSRCS += arch_elf.c
 endif
 
-ifeq ($(CONFIG_ARCH_TOOLCHAIN_GNU),y)
-DEPPATH += --dep-path machine/risc-v/gnu
-VPATH += :machine/risc-v/gnu
-endif
-
 DEPPATH += --dep-path machine/risc-v
 VPATH += :machine/risc-v

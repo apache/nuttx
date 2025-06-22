@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/machine/risc-v/gnu/arch_strcmp.S
+ * libs/libc/machine/risc-v/arch_strcmp.S
  *
  * SPDX-License-Identifier: BSD-2-Clause-FreeBSD
  * SPDX-FileCopyrightText: 2017  SiFive Inc. All rights reserved.

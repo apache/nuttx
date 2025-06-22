@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/machine/risc-v/gnu/arch_memset.S
+ * libs/libc/machine/risc-v/arch_memset.S
  *
  * SPDX-License-Identifier: BSD-2-Clause-FreeBSD
  * SPDX-FileCopyrightText: 2017  SiFive Inc. All rights reserved.
