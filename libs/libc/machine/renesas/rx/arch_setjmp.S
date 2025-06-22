@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/machine/renesas/rx/gnu/arm_setjmp.S
+ * libs/libc/machine/renesas/rx/arm_setjmp.S
  *
  * SPDX-License-Identifier: Apache-2.0
  *
