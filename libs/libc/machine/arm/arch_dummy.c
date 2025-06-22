@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/common/ghs/lib_dummy.c
+ * libs/libc/machine/arm/arch_dummy.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
