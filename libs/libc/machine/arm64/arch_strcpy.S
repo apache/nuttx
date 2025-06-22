@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/machine/arm64/gnu/arch_strcpy.S
+ * libs/libc/machine/arm64/arch_strcpy.S
  *
  * SPDX-License-Identifier: BSD-3-Clause
  * SPDX-FileCopyrightText: 2013, 2014, 2015 ARM Ltd., All rights Reserved.

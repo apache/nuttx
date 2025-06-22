@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/machine/arm64/gnu/arch_memset.S
+ * libs/libc/machine/arm64/arch_memset.S
  *
  * SPDX-License-Identifier: BSD-3-Clause
  * SPDX-FileCopyrightText: 2012-2013, Linaro Limited, 2015 ARM Ltd

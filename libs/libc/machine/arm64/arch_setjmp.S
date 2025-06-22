@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/machine/arm64/gnu/arch_setjmp.S
+ * libs/libc/machine/arm64/arch_setjmp.S
  *
  * SPDX-License-Identifier: BSD-3-Clause
  * SPDX-FileCopyrightText: 2011, 2012 ARM Ltd, All rights reserved.

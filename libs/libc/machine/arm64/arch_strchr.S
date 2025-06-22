@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/machine/arm64/gnu/arch_strrchr.S
+ * libs/libc/machine/arm64/arch_strchr.S
  *
  * SPDX-License-Identifier: BSD-3-Clause
  * SPDX-FileCopyrightText: 2014, ARM Limited, All rights Reserved.
@@ -31,7 +31,7 @@
 
 #include "libc.h"
 
-#ifdef LIBC_BUILD_STRRCHR
+#ifdef LIBC_BUILD_STRCHR
 
 /* Assumptions:
  *
@@ -49,12 +49,6 @@
 #define	tmp1		x3
 #define wtmp2		w4
 #define tmp3		x5
-#define src_match	x6
-#define src_offset	x7
-#define const_m1	x8
-#define tmp4		x9
-#define nul_match	x10
-#define chr_match	x11
 
 #define vrepchr		v0
 #define vdata1		v1
@@ -90,7 +84,7 @@
 \f:
 	.endm
 
-def_fn ARCH_LIBCFUN(strrchr)
+def_fn ARCH_LIBCFUN(strchr)
 	/* Magic constant 0x40100401 to allow us to identify which lane
 	   matches the requested byte.  Magic constant 0x80200802 used
 	   similarly for NUL termination.  */
@@ -99,10 +93,9 @@ def_fn ARCH_LIBCFUN(strrchr)
 	dup	vrepchr.16b, chrin
 	bic	src, srcin, #31		/* Work with aligned 32-byte hunks.  */
 	dup	vrepmask_c.4s, wtmp2
-	mov	src_offset, #0
 	ands	tmp1, srcin, #31
 	add	vrepmask_0.4s, vrepmask_c.4s, vrepmask_c.4s /* equiv: lsl #1 */
-	b.eq	.Laligned
+	b.eq	.Lloop
 
 	/* Input string is not 32-byte aligned.  Rather than forcing
 	   the padding bytes to a safe value, we calculate the syndrome
@@ -115,71 +108,60 @@ def_fn ARCH_LIBCFUN(strrchr)
 	cmeq	vhas_nul2.16b, vdata2.16b, #0
 	cmeq	vhas_chr2.16b, vdata2.16b, vrepchr.16b
 	and	vhas_nul1.16b, vhas_nul1.16b, vrepmask_0.16b
-	and	vhas_chr1.16b, vhas_chr1.16b, vrepmask_c.16b
 	and	vhas_nul2.16b, vhas_nul2.16b, vrepmask_0.16b
+	and	vhas_chr1.16b, vhas_chr1.16b, vrepmask_c.16b
 	and	vhas_chr2.16b, vhas_chr2.16b, vrepmask_c.16b
-	addp	vhas_nul1.16b, vhas_nul1.16b, vhas_nul2.16b	// 256->128
-	addp	vhas_chr1.16b, vhas_chr1.16b, vhas_chr2.16b	// 256->128
-	addp	vhas_nul1.16b, vhas_nul1.16b, vhas_nul1.16b	// 128->64
-	addp	vhas_chr1.16b, vhas_chr1.16b, vhas_chr1.16b	// 128->64
-	mov	nul_match, vhas_nul1.2d[0]
+	orr	vend1.16b, vhas_nul1.16b, vhas_chr1.16b
+	orr	vend2.16b, vhas_nul2.16b, vhas_chr2.16b
 	lsl	tmp1, tmp1, #1
-	mov	const_m1, #~0
-	mov	chr_match, vhas_chr1.2d[0]
-	lsr	tmp3, const_m1, tmp1
+	addp	vend1.16b, vend1.16b, vend2.16b		// 256->128
+	mov	tmp3, #~0
+	addp	vend1.16b, vend1.16b, vend2.16b		// 128->64
+	lsr	tmp1, tmp3, tmp1
 
-	bic	nul_match, nul_match, tmp3	// Mask padding bits.
-	bic	chr_match, chr_match, tmp3	// Mask padding bits.
-	cbnz	nul_match, .Ltail
+	mov	tmp3, vend1.2d[0]
+	bic	tmp1, tmp3, tmp1	// Mask padding bits.
+	cbnz	tmp1, .Ltail
 
 .Lloop:
-	cmp	chr_match, #0
-	csel	src_match, src, src_match, ne
-	csel	src_offset, chr_match, src_offset, ne
-.Laligned:
 	ld1	{vdata1.16b, vdata2.16b}, [src], #32
 	cmeq	vhas_nul1.16b, vdata1.16b, #0
 	cmeq	vhas_chr1.16b, vdata1.16b, vrepchr.16b
 	cmeq	vhas_nul2.16b, vdata2.16b, #0
 	cmeq	vhas_chr2.16b, vdata2.16b, vrepchr.16b
-	addp	vend1.16b, vhas_nul1.16b, vhas_nul2.16b	// 256->128
-	and	vhas_chr1.16b, vhas_chr1.16b, vrepmask_c.16b
-	and	vhas_chr2.16b, vhas_chr2.16b, vrepmask_c.16b
-	addp	vhas_chr1.16b, vhas_chr1.16b, vhas_chr2.16b	// 256->128
-	addp	vend1.16b, vend1.16b, vend1.16b	// 128->64
-	addp	vhas_chr1.16b, vhas_chr1.16b, vhas_chr1.16b	// 128->64
-	mov	nul_match, vend1.2d[0]
-	mov	chr_match, vhas_chr1.2d[0]
-	cbz	nul_match, .Lloop
+	/* Use a fast check for the termination condition.  */
+	orr	vend1.16b, vhas_nul1.16b, vhas_chr1.16b
+	orr	vend2.16b, vhas_nul2.16b, vhas_chr2.16b
+	orr	vend1.16b, vend1.16b, vend2.16b
+	addp	vend1.2d, vend1.2d, vend1.2d
+	mov	tmp1, vend1.2d[0]
+	cbz	tmp1, .Lloop
 
+	/* Termination condition found.  Now need to establish exactly why
+	   we terminated.  */
 	and	vhas_nul1.16b, vhas_nul1.16b, vrepmask_0.16b
 	and	vhas_nul2.16b, vhas_nul2.16b, vrepmask_0.16b
-	addp	vhas_nul1.16b, vhas_nul1.16b, vhas_nul2.16b
-	addp	vhas_nul1.16b, vhas_nul1.16b, vhas_nul1.16b
-	mov	nul_match, vhas_nul1.2d[0]
+	and	vhas_chr1.16b, vhas_chr1.16b, vrepmask_c.16b
+	and	vhas_chr2.16b, vhas_chr2.16b, vrepmask_c.16b
+	orr	vend1.16b, vhas_nul1.16b, vhas_chr1.16b
+	orr	vend2.16b, vhas_nul2.16b, vhas_chr2.16b
+	addp	vend1.16b, vend1.16b, vend2.16b		// 256->128
+	addp	vend1.16b, vend1.16b, vend2.16b		// 128->64
 
+	mov	tmp1, vend1.2d[0]
 .Ltail:
-	/* Work out exactly where the string ends.  */
-	sub	tmp4, nul_match, #1
-	eor	tmp4, tmp4, nul_match
-	ands	chr_match, chr_match, tmp4
-	/* And pick the values corresponding to the last match.  */
-	csel	src_match, src, src_match, ne
-	csel	src_offset, chr_match, src_offset, ne
-
-	/* Count down from the top of the syndrome to find the last match.  */
-	clz	tmp3, src_offset
-	/* Src_match points beyond the word containing the match, so we can
-	   simply subtract half the bit-offset into the syndrome.  Because
-	   we are counting down, we need to go back one more character.  */
-	add	tmp3, tmp3, #2
-	sub	result, src_match, tmp3, lsr #1
-	/* But if the syndrome shows no match was found, then return NULL.  */
-	cmp	src_offset, #0
-	csel	result, result, xzr, ne
-
+	/* Count the trailing zeros, by bit reversing...  */
+	rbit	tmp1, tmp1
+	/* Re-bias source.  */
+	sub	src, src, #32
+	clz	tmp1, tmp1	/* And counting the leading zeros.  */
+	/* Tmp1 is even if the target charager was found first.  Otherwise
+	   we've found the end of string and we weren't looking for NUL.  */
+	tst	tmp1, #1
+	add	result, src, tmp1, lsr #1
+	csel	result, result, xzr, eq
 	ret
 
-	.size	ARCH_LIBCFUN(strrchr), . - ARCH_LIBCFUN(strrchr)
+	.size	ARCH_LIBCFUN(strchr), . - ARCH_LIBCFUN(strchr)
 
 #endif

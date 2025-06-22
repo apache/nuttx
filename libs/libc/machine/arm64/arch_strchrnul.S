@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/machine/arm64/gnu/arch_strchrnul.S
+ * libs/libc/machine/arm64/arch_strchrnul.S
  *
  * SPDX-License-Identifier: BSD-3-Clause
  * SPDX-FileCopyrightText: 2014, ARM Limited, All rights Reserved.
