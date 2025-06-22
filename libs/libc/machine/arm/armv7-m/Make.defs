@@ -52,10 +52,5 @@ ifeq ($(CONFIG_LIBC_ARCH_ELF),y)
 CSRCS += arch_elf.c
 endif
 
-ifeq ($(CONFIG_ARCH_TOOLCHAIN_GNU),y)
-DEPPATH += --dep-path machine/arm/armv7-m/gnu
-VPATH += :machine/arm/armv7-m/gnu
-endif
-
 DEPPATH += --dep-path machine/arm/armv7-m
 VPATH += :machine/arm/armv7-m

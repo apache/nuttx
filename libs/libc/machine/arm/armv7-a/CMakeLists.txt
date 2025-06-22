@@ -20,32 +20,28 @@
 #
 # ##############################################################################
 
-if(CONFIG_ARCH_TOOLCHAIN_GNU)
-  set(ARCH_TOOLCHAIN_DIR gnu)
-endif()
-
 if(CONFIG_ARMV7A_MEMCHR)
-  list(APPEND SRCS ${ARCH_TOOLCHAIN_DIR}/arch_memchr.S)
+  list(APPEND SRCS arch_memchr.S)
 endif()
 
 if(CONFIG_ARMV7A_MEMCPY)
-  list(APPEND SRCS ${ARCH_TOOLCHAIN_DIR}/arch_memcpy.S)
+  list(APPEND SRCS arch_memcpy.S)
 endif()
 
 if(CONFIG_ARMV7A_MEMMOVE)
-  list(APPEND SRCS ${ARCH_TOOLCHAIN_DIR}/arch_memmove.S)
+  list(APPEND SRCS arch_memmove.S)
 endif()
 
 if(CONFIG_ARMV7A_MEMSET)
-  list(APPEND SRCS ${ARCH_TOOLCHAIN_DIR}/arch_memset.S)
+  list(APPEND SRCS arch_memset.S)
 endif()
 
 if(CONFIG_ARMV7A_STRCMP)
-  list(APPEND SRCS ${ARCH_TOOLCHAIN_DIR}/arch_strcmp.S)
+  list(APPEND SRCS arch_strcmp.S)
 endif()
 
 if(CONFIG_ARMV7A_STRLEN)
-  list(APPEND SRCS ${ARCH_TOOLCHAIN_DIR}/arch_strlen.S)
+  list(APPEND SRCS arch_strlen.S)
 endif()
 
 if(CONFIG_LIBC_ARCH_ELF)
