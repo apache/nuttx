@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/machine/arm64/gnu/arch_strnlen.S
+ * libs/libc/machine/arm64/arch_strnlen.S
  *
  * SPDX-License-Identifier: BSD-3-Clause
  * SPDX-FileCopyrightText: 2013, Linaro Limited, All rights reserved.

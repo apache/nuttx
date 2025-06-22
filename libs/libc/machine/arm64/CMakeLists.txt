@@ -19,12 +19,71 @@
 # the License.
 #
 # ##############################################################################
-add_subdirectory(gnu)
 
 set(SRCS)
 
 if(CONFIG_LIBC_ARCH_ELF_64BIT)
   list(APPEND SRCS arch_elf.c)
+endif()
+
+if(CONFIG_ARM64_MEMCHR)
+  list(APPEND SRCS arch_memchr.S)
+endif()
+
+if(CONFIG_ARM64_MEMCMP)
+  list(APPEND SRCS arch_memcmp.S)
+endif()
+
+if(CONFIG_ARM64_MEMCPY)
+  list(APPEND SRCS arch_memcpy.S)
+endif()
+
+if(CONFIG_ARM64_MEMMOVE)
+  list(APPEND SRCS arch_memmove.S)
+endif()
+
+if(CONFIG_ARM64_MEMSET)
+  list(APPEND SRCS arch_memset.S)
+endif()
+
+if(CONFIG_ARM64_STRCHR)
+  list(APPEND SRCS arch_strchr.S)
+endif()
+
+if(CONFIG_ARM64_STRCHRNUL)
+  list(APPEND SRCS arch_strchrnul.S)
+endif()
+
+if(CONFIG_ARM64_STRCMP)
+  list(APPEND SRCS arch_strcmp.S)
+endif()
+
+if(CONFIG_ARM64_STRCPY)
+  list(APPEND SRCS arch_strcpy.S)
+endif()
+
+if(CONFIG_ARM64_STRLEN)
+  list(APPEND SRCS arch_strlen.S)
+endif()
+
+if(CONFIG_ARM64_STRNCMP)
+  list(APPEND SRCS arch_strncmp.S)
+endif()
+
+if(CONFIG_ARM64_STRNLEN)
+  list(APPEND SRCS arch_strnlen.S)
+endif()
+
+if(CONFIG_ARM64_STRRCHR)
+  list(APPEND SRCS arch_strrchr.S)
+endif()
+
+if(CONFIG_ARCH_SETJMP_H)
+  list(APPEND SRCS arch_setjmp.S)
+endif()
+
+if(NOT CONFIG_PROFILE_NONE)
+  list(APPEND SRCS arch_mcount.c)
 endif()
 
 target_sources(c PRIVATE ${SRCS})

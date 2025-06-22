@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/machine/arm64/gnu/arch_strncmp.S
+ * libs/libc/machine/arm64/arch_strncmp.S
  *
  * SPDX-License-Identifier: BSD-3-Clause
  * SPDX-FileCopyrightText: 2013, 2018, Linaro Limited, All rights reserved.
