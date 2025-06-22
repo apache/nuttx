@@ -40,8 +40,8 @@
 #include <nuttx/lib/math32.h>
 
 #include "inode/inode.h"
-#include "notify/notify.h"
 #include "fs_heap.h"
+#include "vfs.h"
 
 /****************************************************************************
  * Private Types

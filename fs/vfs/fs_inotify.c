@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/notify/inotify.c
+ * fs/vfs/fs_inotify.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *

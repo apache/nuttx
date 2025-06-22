@@ -33,7 +33,7 @@
 #include <nuttx/mtd/mtd.h>
 
 #include "inode/inode.h"
-#include "notify/notify.h"
+#include "vfs/vfs.h"
 
 #if defined(CONFIG_MTD) && !defined(CONFIG_DISABLE_MOUNTPOINT)
 

@@ -27,6 +27,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/fs/fs.h>
 #include <fcntl.h>
 
 /****************************************************************************
@@ -105,4 +106,21 @@ int file_setlk(FAR struct file *filep, FAR struct flock *flock,
                bool nonblock);
 
 #endif /* CONFIG_FS_LOCK_BUCKET_SIZE */
+
+#ifdef CONFIG_FS_NOTIFY
+void notify_open(FAR const char *path, int oflags);
+void notify_close(FAR const char *path, int oflags);
+void notify_close2(FAR struct inode *inode);
+void notify_read(FAR struct file *filep);
+void notify_write(FAR struct file *filep);
+void notify_chstat(FAR struct file *filep);
+void notify_unlink(FAR const char *path);
+void notify_unmount(FAR const char *path);
+void notify_mkdir(FAR const char *path);
+void notify_create(FAR const char *path);
+void notify_rename(FAR const char *oldpath, bool oldisdir,
+                   FAR const char *newpath, bool newisdir);
+void notify_initialize(void);
+#endif /* CONFIG_FS_NOTIFY */
+
 #endif /* __FS_VFS_VFS_H */

@@ -35,8 +35,8 @@
 
 #include <nuttx/cancelpt.h>
 
-#include "notify/notify.h"
 #include "inode/inode.h"
+#include "vfs.h"
 
 /****************************************************************************
  * Private Functions

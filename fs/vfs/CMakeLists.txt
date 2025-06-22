@@ -53,13 +53,17 @@ set(SRCS
     fs_syncfs.c
     fs_truncate.c)
 
+# File notify support
+
+if(CONFIG_FS_NOTIFY)
+  list(APPEND SRCS fs_inotify.c)
+endif()
+
 # File lock support
 
 if(NOT "${CONFIG_FS_LOCK_BUCKET_SIZE}" STREQUAL "0")
   list(APPEND SRCS fs_lock.c)
 endif()
-
-# Certain interfaces are not available if there is no mountpoint support
 
 if(NOT "${CONFIG_PSEUDOFS_SOFTLINKS}" STREQUAL "0")
   list(APPEND SRCS fs_link.c fs_symlink.c fs_readlink.c)

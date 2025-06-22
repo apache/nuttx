@@ -34,7 +34,7 @@
 #include <nuttx/fs/fs.h>
 
 #include "inode/inode.h"
-#include "notify/notify.h"
+#include "vfs/vfs.h"
 
 /****************************************************************************
  * Public Functions
