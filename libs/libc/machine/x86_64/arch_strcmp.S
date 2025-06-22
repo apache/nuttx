@@ -1,5 +1,5 @@
 /*********************************************************************************
- * libs/libc/machine/x86_64/gnu/arch_strcmp.S
+ * libs/libc/machine/x86_64/arch_strcmp.S
  *
  * SPDX-License-Identifier: BSD-3-Clause
  * SPDX-FileCopyrightText: 2014, Intel Corporation

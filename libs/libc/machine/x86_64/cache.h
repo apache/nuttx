@@ -1,5 +1,5 @@
 /*********************************************************************************
- * libs/libc/machine/x86_64/gnu/arch_strpcpy.S
+ * libs/libc/machine/x86_64/cache.h
  *
  * SPDX-License-Identifier: BSD-3-Clause
  * SPDX-FileCopyrightText: 2014, Intel Corporation
@@ -28,14 +28,22 @@
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-  *
+ *
  *********************************************************************************/
 
-/********************************************************************************
- * Included Files
+#ifndef __LIBS_LIBC_MACHINE_X86_64_GNU_CACHE_H
+#define __LIBS_LIBC_MACHINE_X86_64_GNU_CACHE_H
+
+/*********************************************************************************
+ * Pre-processor Definitions
  *********************************************************************************/
 
-#define USE_AS_STRNCPY
-#define USE_AS_STPCPY
-#define STRCPY		stpncpy
-#include "arch_strcpy.S"
+/* Values are optimized for Core Architecture */
+
+#define SHARED_CACHE_SIZE (4096 * 1024)  /* Core Architecture L2 Cache */
+#define DATA_CACHE_SIZE   (24 * 1024)    /* Core Architecture L1 Data Cache */
+
+#define SHARED_CACHE_SIZE_HALF (SHARED_CACHE_SIZE / 2)
+#define DATA_CACHE_SIZE_HALF   (DATA_CACHE_SIZE / 2)
+
+#endif  /* __LIBS_LIBC_MACHINE_X86_64_GNU_CACHE_H */

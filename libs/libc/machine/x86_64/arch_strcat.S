@@ -1,5 +1,5 @@
 /*********************************************************************************
- * libs/libc/machine/x86_64/gnu/arch_strncmp.S
+ * libs/libc/machine/x86_64/arch_strcat.S
  *
  * SPDX-License-Identifier: BSD-3-Clause
  * SPDX-FileCopyrightText: 2014, Intel Corporation
@@ -31,10 +31,68 @@
   *
  *********************************************************************************/
 
-/********************************************************************************
- * Included Files
+/*********************************************************************************
+ * Pre-processor Definitions
  *********************************************************************************/
 
-#define USE_AS_STRNCMP
-#define STRCMP		strncmp
-#include "arch_strcmp.S"
+#ifndef STRCAT
+# define STRCAT		strcat
+#endif
+
+#ifndef L
+# define L(label)		.L##label
+#endif
+
+#ifndef cfi_startproc
+# define cfi_startproc		 .cfi_startproc
+#endif
+
+#ifndef cfi_endproc
+# define cfi_endproc		.cfi_endproc
+#endif
+
+#ifndef ENTRY
+# define ENTRY(name)      \
+	.type name,  @function; \
+	.globl name;            \
+	.p2align 4;             \
+name:                     \
+	cfi_startproc
+#endif
+
+#ifndef END
+# define END(name)    \
+	cfi_endproc;        \
+	.size name, .-name
+#endif
+
+#define USE_AS_STRCAT
+
+/*********************************************************************************
+ * Public Functions
+ *********************************************************************************/
+
+.text
+ENTRY (STRCAT)
+	mov	%rdi, %r9
+#ifdef USE_AS_STRNCAT
+	mov	%rdx, %r8
+#endif
+
+#define RETURN jmp L(Strcpy)
+#include "arch_strlen.S"
+
+#undef RETURN
+#define RETURN ret
+
+L(Strcpy):
+	lea	(%r9, %rax), %rdi
+	mov	%rsi, %rcx
+	mov	%r9, %rax	/* save result */
+
+#ifdef USE_AS_STRNCAT
+	test	%r8, %r8
+	jz	L(ExitZero)
+# define USE_AS_STRNCPY
+#endif
+#include "arch_strcpy.S"

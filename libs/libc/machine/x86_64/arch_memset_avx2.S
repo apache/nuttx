@@ -1,5 +1,5 @@
 /*********************************************************************************
- * libs/libc/machine/x86_64/gnu/arch_memset_sse2.S
+ * libs/libc/machine/x86_64/arch_memset_avx2.S
  *
  * SPDX-License-Identifier: BSD-3-Clause
  * SPDX-FileCopyrightText: 2014, Intel Corporation
@@ -65,7 +65,7 @@ __f:                       \
  * Public Functions
  *********************************************************************************/
 
-	.section .text.sse2,"ax",@progbits
+	.section .text.avx2,"ax",@progbits
 
 ENTRY(memset)
 	movq	%rdi, %rax
@@ -81,10 +81,9 @@ ENTRY(memset)
 	testb	$2, %dl
 	jnz	L(2_3bytes)
 	testb	$1, %dl
-	jz	L(return)
+	jz	1f
 	movb	%cl, (%rdi)
-L(return):
-	ret
+1:	ret
 
 L(8_15bytes):
 	movq	%rcx, (%rdi)
@@ -108,59 +107,73 @@ L(16bytesormore):
 	movdqu	%xmm0, (%rdi)
 	movdqu	%xmm0, -16(%rdi, %rdx)
 	cmpq	$32, %rdx
-	jbe	L(32bytesless)
+	jbe	L(done)
 	movdqu	%xmm0, 16(%rdi)
 	movdqu	%xmm0, -32(%rdi, %rdx)
 	cmpq	$64, %rdx
-	jbe	L(64bytesless)
+	jbe	L(done)
 	movdqu	%xmm0, 32(%rdi)
 	movdqu	%xmm0, 48(%rdi)
 	movdqu	%xmm0, -64(%rdi, %rdx)
 	movdqu	%xmm0, -48(%rdi, %rdx)
 	cmpq	$128, %rdx
-	ja	L(128bytesmore)
-L(32bytesless):
-L(64bytesless):
-	ret
+	jbe	L(done)
+	vpbroadcastb %xmm0, %ymm0
+	vmovdqu	%ymm0, 64(%rdi)
+	vmovdqu	%ymm0, 96(%rdi)
+	vmovdqu	%ymm0, -128(%rdi, %rdx)
+	vmovdqu	%ymm0, -96(%rdi, %rdx)
+	cmpq	$256, %rdx
+	jbe	L(done)
 
 	ALIGN (4)
-L(128bytesmore):
-	leaq	64(%rdi), %rcx
-	andq	$-64, %rcx
+	leaq	128(%rdi), %rcx
+	andq	$-128, %rcx
 	movq	%rdx, %r8
 	addq	%rdi, %rdx
-	andq	$-64, %rdx
+	andq	$-128, %rdx
 	cmpq	%rcx, %rdx
-	je	L(return)
+	je	L(done)
 
 #ifdef SHARED_CACHE_SIZE
 	cmp	$SHARED_CACHE_SIZE, %r8
 #else
 	cmp	__x86_64_shared_cache_size(%rip), %r8
 #endif
-	ja	L(128bytesmore_nt)
+	ja	L(non_temporal_loop)
 
 	ALIGN (4)
-L(128bytesmore_normal):
-	movdqa	%xmm0, (%rcx)
-	movaps	%xmm0, 0x10(%rcx)
-	movaps	%xmm0, 0x20(%rcx)
-	movaps	%xmm0, 0x30(%rcx)
-	addq	$64, %rcx
+L(normal_loop):
+	vmovdqa	%ymm0, (%rcx)
+	vmovdqa	%ymm0, 32(%rcx)
+	vmovdqa	%ymm0, 64(%rcx)
+	vmovdqa	%ymm0, 96(%rcx)
+	addq	$128, %rcx
 	cmpq	%rcx, %rdx
-	jne	L(128bytesmore_normal)
-	ret
+	jne	L(normal_loop)
+	jmp	L(done)
 
 	ALIGN (4)
-L(128bytesmore_nt):
-	movntdq	%xmm0, (%rcx)
-	movntdq	%xmm0, 0x10(%rcx)
-	movntdq	%xmm0, 0x20(%rcx)
-	movntdq	%xmm0, 0x30(%rcx)
-	leaq	64(%rcx), %rcx
+L(non_temporal_loop):
+	movntdq	 %xmm0, (%rcx)
+	movntdq	 %xmm0, 16(%rcx)
+	movntdq	 %xmm0, 32(%rcx)
+	movntdq	 %xmm0, 48(%rcx)
+	movntdq	 %xmm0, 64(%rcx)
+	movntdq	 %xmm0, 80(%rcx)
+	movntdq	 %xmm0, 96(%rcx)
+	movntdq	 %xmm0, 112(%rcx)
+	leaq	128(%rcx), %rcx
 	cmpq	%rcx, %rdx
-	jne	L(128bytesmore_nt)
+	jne	L(non_temporal_loop)
+	/* We used non-temporal stores, so we need a fence here. */
 	sfence
+
+L(done):
+  /* We used the ymm registers, and that can break SSE2 performance
+   * unless you do this.
+   */
+	vzeroupper
 	ret
 
 END(memset)

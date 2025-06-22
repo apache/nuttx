@@ -27,6 +27,7 @@ endif
 ifeq ($(CONFIG_ARCH_SETJMP_H),y)
 ASRCS += arch_setjmp_x86_64.S
 endif
+
 ifeq ($(CONFIG_X86_64_MEMCMP),y)
 ASRCS += arch_memcmp.S
 endif
@@ -73,11 +74,6 @@ endif
 
 ifeq ($(CONFIG_X86_64_STRNCMP),y)
 ASRCS += arch_strncmp.S
-endif
-
-ifeq ($(CONFIG_ARCH_TOOLCHAIN_GNU),y)
-DEPPATH += --dep-path machine/x86_64/gnu
-VPATH += :machine/x86_64/gnu
 endif
 
 DEPPATH += --dep-path machine/x86_64

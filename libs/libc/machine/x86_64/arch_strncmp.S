@@ -1,5 +1,5 @@
 /*********************************************************************************
- * libs/libc/machine/x86_64/gnu/arch_strncpy.S
+ * libs/libc/machine/x86_64/arch_strncmp.S
  *
  * SPDX-License-Identifier: BSD-3-Clause
  * SPDX-FileCopyrightText: 2014, Intel Corporation
@@ -35,6 +35,6 @@
  * Included Files
  *********************************************************************************/
 
-#define USE_AS_STRNCPY
-#define STRCPY		strncpy
-#include "arch_strcpy.S"
+#define USE_AS_STRNCMP
+#define STRCMP		strncmp
+#include "arch_strcmp.S"
