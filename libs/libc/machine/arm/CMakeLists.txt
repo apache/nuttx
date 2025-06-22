@@ -52,6 +52,10 @@ if(NOT CONFIG_LIBSUPCXX_TOOLCHAIN)
   list(APPEND SRCS arch_atexit.c)
 endif()
 
+if(CONFIG_ARCH_TOOLCHAIN_GHS)
+  list(APPEND SRCS arch_dummy.c)
+endif()
+
 if(CONFIG_CXX_EXCEPTION)
   list(APPEND SRCS arch_unwind_find_exidx.c)
 endif()
