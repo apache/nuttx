@@ -28,7 +28,6 @@
 #include <nuttx/reboot_notifier.h>
 #include <nuttx/trace.h>
 
-#include "notify/notify.h"
 #include "rpmsgfs/rpmsgfs.h"
 #include "inode/inode.h"
 #include "aio/aio.h"

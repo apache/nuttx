@@ -42,7 +42,7 @@
 #include "sched/sched.h"
 #include "inode/inode.h"
 #include "driver/driver.h"
-#include "notify/notify.h"
+#include "vfs.h"
 
 /****************************************************************************
  * Private Functions

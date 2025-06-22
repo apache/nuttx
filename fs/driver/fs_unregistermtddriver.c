@@ -30,7 +30,7 @@
 #include <nuttx/mtd/mtd.h>
 
 #include "inode/inode.h"
-#include "notify/notify.h"
+#include "vfs/vfs.h"
 
 /****************************************************************************
  * Public Functions

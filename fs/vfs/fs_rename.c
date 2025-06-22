@@ -37,9 +37,9 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/lib/lib.h>
 
-#include "notify/notify.h"
 #include "inode/inode.h"
 #include "fs_heap.h"
+#include "vfs.h"
 
 /****************************************************************************
  * Pre-processor Definitions

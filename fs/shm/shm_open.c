@@ -31,7 +31,7 @@
 #include <errno.h>
 
 #include "inode/inode.h"
-#include "notify/notify.h"
+#include "vfs/vfs.h"
 #include "shm/shmfs.h"
 
 /****************************************************************************

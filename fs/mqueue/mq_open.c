@@ -41,7 +41,7 @@
 
 #include "inode/inode.h"
 #include "mqueue/mqueue.h"
-#include "notify/notify.h"
+#include "vfs/vfs.h"
 
 /****************************************************************************
  * Private Functions Prototypes

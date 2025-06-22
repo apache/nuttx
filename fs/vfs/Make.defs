@@ -29,7 +29,9 @@ CSRCS += fs_rename.c fs_rmdir.c fs_select.c fs_sendfile.c fs_stat.c
 CSRCS += fs_statfs.c fs_uio.c fs_unlink.c fs_write.c fs_dir.c fs_fsync.c
 CSRCS += fs_syncfs.c fs_truncate.c
 
-# Certain interfaces are not available if there is no mountpoint support
+ifeq ($(CONFIG_FS_NOTIFY),y)
+CSRCS += fs_inotify.c
+endif
 
 ifneq ($(CONFIG_FS_LOCK_BUCKET_SIZE),0)
 CSRCS += fs_lock.c

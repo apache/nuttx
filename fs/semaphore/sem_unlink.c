@@ -36,7 +36,7 @@
 #include <nuttx/semaphore.h>
 
 #include "inode/inode.h"
-#include "notify/notify.h"
+#include "vfs/vfs.h"
 #include "semaphore/semaphore.h"
 
 /****************************************************************************
