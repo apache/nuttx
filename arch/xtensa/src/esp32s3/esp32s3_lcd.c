@@ -443,7 +443,7 @@ static uint32_t esp32s3_lcd_getreg(uintptr_t address)
 
   if (esp32s3_lcd_checkreg(false, regval, address))
     {
-      lcdinfo("%" PRIx32 " ->%" PRIx32 "\n", address, regval);
+      lcdinfo("%" PRIuPTR " ->%" PRIu32 "\n", address, regval);
     }
 
   return regval;
@@ -470,7 +470,7 @@ static void esp32s3_lcd_putreg(uintptr_t address, uint32_t regval)
 {
   if (esp32s3_lcd_checkreg(true, regval, address))
     {
-      lcdinfo("%" PRIx32 " <-%" PRIx32 "\n", address, regval);
+      lcdinfo("%" PRIuPTR " <-%" PRIu32 "\n", address, regval);
     }
 
   putreg32(regval, address);
@@ -854,7 +854,7 @@ static void esp32s3_lcd_enableclk(void)
     clk_b = ESP32S3_LCD_CLK_RES / divisor;
     clk_a = CONFIG_ESP32S3_LCD_CLOCK_MHZ / divisor;
 
-    lcdinfo("divisor=%d\n", divisor);
+    lcdinfo("divisor= %" PRIu32 "\n", divisor);
 #else
     clk_b = clk_a = 0;
 #endif
