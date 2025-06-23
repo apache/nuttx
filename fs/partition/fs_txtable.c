@@ -115,6 +115,8 @@ int parse_txtable_partition(FAR struct partition_state_s *state,
         {
           struct file f;
 
+          memset(&f, 0, sizeof(struct file));
+
           ret = file_open(&f, CONFIG_TXTABLE_DEFAULT_PARTITION_PATH,
                           O_RDONLY);
           if (ret < 0)
