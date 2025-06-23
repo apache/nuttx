@@ -779,15 +779,8 @@ static int net_rpmsg_drv_ifdown(FAR struct net_driver_s *dev)
 {
   FAR struct net_rpmsg_drv_s *priv = dev->d_private;
   FAR struct net_rpmsg_ifdown_s msg;
-  irqstate_t flags;
-
-  /* Disable the interrupt */
-
-  flags = enter_critical_section();
 
   work_cancel(LPWORK, &priv->pollwork);
-
-  leave_critical_section(flags);
 
   /* Put the EMAC in its reset, non-operational state.  This should be
    * a known configuration that will guarantee the net_rpmsg_drv_ifup()
