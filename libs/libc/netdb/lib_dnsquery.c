@@ -902,6 +902,7 @@ try_stream:
                 {
                   if (!stream && should_try_stream)
                     {
+                      close(sd);  /* Close current socket before trying stream mode */
                       stream = true;
                       goto try_stream; /* Don't consume retry count */
                     }
@@ -961,6 +962,7 @@ try_stream:
                 {
                   if (!stream && should_try_stream)
                     {
+                      close(sd);  /* Close current socket before trying stream mode */
                       stream = true;
                       goto try_stream; /* Don't consume retry count */
                     }
