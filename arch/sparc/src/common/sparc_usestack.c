@@ -73,6 +73,22 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
   size_t top_of_stack;
   size_t size_of_stack;
 
+#ifdef CONFIG_TLS_ALIGNED
+  /* The allocated stack size must not exceed the maximum possible for the
+   * TLS feature.
+   */
+
+  DEBUGASSERT(stack_size <= TLS_MAXSTACK);
+  if (stack_size >= TLS_MAXSTACK)
+    {
+      stack_size = TLS_MAXSTACK;
+    }
+#endif
+
+  /* Make certain that the user provided stack is properly aligned */
+
+  DEBUGASSERT(((uintptr_t)stack & STACK_ALIGN_MASK) == 0);
+
   /* Is there already a stack allocated? */
 
   if (tcb->stack_alloc_ptr)
