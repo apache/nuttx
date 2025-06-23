@@ -37,7 +37,7 @@
 #include <arpa/inet.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/net/ip.h>
@@ -104,6 +104,7 @@ struct skel_driver_s
   struct wdog_s sk_txtimeout;  /* TX timeout timer */
   struct work_s sk_irqwork;    /* For deferring interrupt work to the work queue */
   struct work_s sk_pollwork;   /* For deferring poll work to the work queue */
+  spinlock_t    sk_lock;       /* Spinlock to protect the driver state */
 
   /* This holds the information visible to the NuttX network */
 
@@ -634,6 +635,7 @@ static int skel_ifup(FAR struct net_driver_s *dev)
 {
   FAR struct skel_driver_s *priv =
     (FAR struct skel_driver_s *)dev->d_private;
+  irqstate_t flags;
 
 #ifdef CONFIG_NET_IPv4
   ninfo("Bringing up: %u.%u.%u.%u\n",
@@ -651,8 +653,10 @@ static int skel_ifup(FAR struct net_driver_s *dev)
 
   /* Enable the Ethernet interrupt */
 
+  flags = spin_lock_irqsave(&priv->sk_lock);
   priv->sk_bifup = true;
   up_enable_irq(CONFIG_NET_SKELETON_IRQ);
+  spin_unlock_irqrestore(&priv->sk_lock, flags);
   return OK;
 }
 
@@ -681,7 +685,7 @@ static int skel_ifdown(FAR struct net_driver_s *dev)
 
   /* Disable the Ethernet interrupt */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->sk_lock);
   up_disable_irq(CONFIG_NET_SKELETON_IRQ);
 
   /* Cancel the TX timeout timers */
@@ -696,7 +700,7 @@ static int skel_ifdown(FAR struct net_driver_s *dev)
   /* Mark the device "down" */
 
   priv->sk_bifup = false;
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->sk_lock, flags);
   return OK;
 }
 
@@ -939,6 +943,8 @@ int skel_initialize(int intf)
   priv->sk_dev.d_ioctl   = skel_ioctl;                    /* Handle network IOCTL commands */
 #endif
   priv->sk_dev.d_private = g_skel;                        /* Used to recover private state from dev */
+
+  spin_lock_init(&priv->sk_lock);
 
   /* Put the interface in the down state.  This usually amounts to resetting
    * the device and/or calling skel_ifdown().
