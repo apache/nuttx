@@ -31,7 +31,7 @@
 #include <assert.h>
 #include <debug.h>
 
-#include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/wireless/ieee802154/ieee802154_mac.h>
 
@@ -114,6 +114,7 @@ static struct ieee802154_priv_primitive_s
 #endif /* CONFIG_IEEE802154_PRIMITIVE_PREALLOC > 0 */
 
 static bool g_poolinit = false;
+static spinlock_t g_primfree_lock = SP_UNLOCKED;
 
 /****************************************************************************
  * Public Functions
@@ -238,7 +239,7 @@ FAR struct ieee802154_primitive_s *ieee802154_primitive_allocate(void)
    * then try the list of messages reserved for interrupt handlers
    */
 
-  flags = enter_critical_section(); /* Always necessary in SMP mode */
+  flags = spin_lock_irqsave(&g_primfree_lock); /* Always necessary in SMP mode */
   if (up_interrupt_context())
     {
 #if CONFIG_IEEE802154_PRIMITIVE_PREALLOC > CONFIG_IEEE802154_PRIMITIVE_IRQRESERVE
@@ -246,11 +247,11 @@ FAR struct ieee802154_primitive_s *ieee802154_primitive_allocate(void)
 
       if (g_primfree != NULL)
         {
-          prim           = g_primfree;
-          g_primfree     = prim->flink;
+          prim       = g_primfree;
+          g_primfree = prim->flink;
 
-          leave_critical_section(flags);
-          pool          = POOL_PRIMITIVE_GENERAL;
+          spin_unlock_irqrestore(&g_primfree_lock, flags);
+          pool       = POOL_PRIMITIVE_GENERAL;
         }
       else
 #endif
@@ -262,13 +263,13 @@ FAR struct ieee802154_primitive_s *ieee802154_primitive_allocate(void)
           prim           = g_primfree_irq;
           g_primfree_irq = prim->flink;
 
-          leave_critical_section(flags);
-          pool          = POOL_PRIMITIVE_IRQ;
+          spin_unlock_irqrestore(&g_primfree_lock, flags);
+          pool           = POOL_PRIMITIVE_IRQ;
         }
       else
 #endif
         {
-          leave_critical_section(flags);
+          spin_unlock_irqrestore(&g_primfree_lock, flags);
           return NULL;
         }
     }
@@ -282,11 +283,11 @@ FAR struct ieee802154_primitive_s *ieee802154_primitive_allocate(void)
 
       if (g_primfree != NULL)
         {
-          prim           = g_primfree;
-          g_primfree     = prim->flink;
+          prim       = g_primfree;
+          g_primfree = prim->flink;
 
-          leave_critical_section(flags);
-          pool          = POOL_PRIMITIVE_GENERAL;
+          spin_unlock_irqrestore(&g_primfree_lock, flags);
+          pool       = POOL_PRIMITIVE_GENERAL;
         }
       else
 #endif
@@ -295,7 +296,7 @@ FAR struct ieee802154_primitive_s *ieee802154_primitive_allocate(void)
            * will have to allocate one from the kernel memory pool.
            */
 
-          leave_critical_section(flags);
+          spin_unlock_irqrestore(&g_primfree_lock, flags);
           prim = (FAR struct ieee802154_priv_primitive_s *)
             kmm_malloc((sizeof (struct ieee802154_priv_primitive_s)));
 
@@ -372,10 +373,10 @@ void ieee802154_primitive_free(FAR struct ieee802154_primitive_s *prim)
        * list from interrupt handlers.
        */
 
-      flags = enter_critical_section();
+      flags = spin_lock_irqsave(&g_primfree_lock);
       priv->flink = g_primfree;
       g_primfree  = priv;
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(&g_primfree_lock, flags);
     }
   else
 #endif
@@ -391,10 +392,10 @@ void ieee802154_primitive_free(FAR struct ieee802154_primitive_s *prim)
        * list from interrupt handlers.
        */
 
-      flags = enter_critical_section();
+      flags = spin_lock_irqsave(&g_primfree_lock);
       priv->flink    = g_primfree_irq;
-      g_primfree_irq  = priv;
-      leave_critical_section(flags);
+      g_primfree_irq = priv;
+      spin_unlock_irqrestore(&g_primfree_lock, flags);
     }
   else
 #endif
