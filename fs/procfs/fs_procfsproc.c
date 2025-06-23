@@ -1330,7 +1330,7 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
                                        fdp->f_backtrace,
                                        CONFIG_FS_BACKTRACE);
 #endif
-          procfile->line[linesize - 2] = '\n';
+          procfile->line[linesize - 1] = '\n';
         }
 
       file_put(filep);
