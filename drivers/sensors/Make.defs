@@ -78,12 +78,32 @@ ifeq ($(CONFIG_SENSORS_DHTXX),y)
   CSRCS += dhtxx.c
 endif
 
+# These drivers can be used with sensor connected over SPI or I2C bus
+
+ifeq ($(CONFIG_SENSORS_BMI160),y)
+  CSRCS += bmi160_base.c
+ifeq ($(CONFIG_SENSORS_BMI160_UORB),y)
+  CSRCS += bmi160_uorb.c
+else
+  CSRCS += bmi160.c
+endif
+endif
+
 ifeq ($(CONFIG_SENSORS_BMI270),y)
   CSRCS += bmi270_base.c
 ifeq ($(CONFIG_SENSORS_BMI270_UORB),y)
   CSRCS += bmi270_uorb.c
 else
   CSRCS += bmi270.c
+endif
+endif
+
+ifeq ($(CONFIG_SENSORS_BMI088),y)
+  CSRCS += bmi088_base.c
+ifeq ($(CONFIG_SENSORS_BMI088_UORB),y)
+  CSRCS += bmi088_uorb.c
+else
+  CSRCS += bmi088.c
 endif
 endif
 
@@ -179,24 +199,6 @@ endif
 
 ifeq ($(CONFIG_SENSORS_BMG160),y)
   CSRCS += bmg160.c
-endif
-
-ifeq ($(CONFIG_SENSORS_BMI160),y)
-  CSRCS += bmi160_base.c
-ifeq ($(CONFIG_SENSORS_BMI160_UORB),y)
-  CSRCS += bmi160_uorb.c
-else
-  CSRCS += bmi160.c
-endif
-endif
-
-ifeq ($(CONFIG_SENSORS_BMI088),y)
-  CSRCS += bmi088_base.c
-ifeq ($(CONFIG_SENSORS_BMI088_UORB),y)
-  CSRCS += bmi088_uorb.c
-else
-  CSRCS += bmi088.c
-endif
 endif
 
 ifeq ($(CONFIG_SENSORS_BMP180),y)
@@ -334,6 +336,10 @@ endif
 
 ifeq ($(CONFIG_SENSORS_BMM150),y)
   CSRCS += bmm150_uorb.c
+endif
+
+ifeq ($(CONFIG_SENSORS_AMG88XX),y)
+  CSRCS += amg88xx.c
 endif
 
 ifeq ($(CONFIG_SENSORS_TMP112),y)
