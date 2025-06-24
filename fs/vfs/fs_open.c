@@ -366,6 +366,8 @@ int file_open(FAR struct file *filep, FAR const char *path, int oflags, ...)
   va_list ap;
   int ret;
 
+  memset(filep, 0, sizeof(*filep));
+
   va_start(ap, oflags);
   ret = file_vopen(filep, path, oflags, 0, ap);
   va_end(ap);
