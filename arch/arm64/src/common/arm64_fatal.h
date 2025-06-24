@@ -182,12 +182,12 @@ typedef int (*fatal_handle_func_t)(uint64_t *regs, uint64_t far,
  * Input Parameters:
  *   reg:    exception stack reg context
  *
- * Returned Value: None
+ * Returned Value: regs
  *   If the function return, the exception has been handled
  *
  ****************************************************************************/
 
-void arm64_fatal_handler(uint64_t *reg);
+uint64_t *arm64_fatal_handler(uint64_t *reg);
 
 /****************************************************************************
  * Name: arm64_register_debug_hook
