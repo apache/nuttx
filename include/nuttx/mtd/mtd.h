@@ -260,6 +260,30 @@ FAR struct mtd_dev_s *mtd_partition(FAR struct mtd_dev_s *mtd,
                                     off_t firstblock, off_t nblocks);
 
 /****************************************************************************
+ * Name: mtd_partition_register
+ *
+ * Description:
+ *   Registers an MTD partition as a device driver with standard
+ *   open/read/write/ioctl call support. This provides the direct access
+ *   to the raw flash without the need to uzilize FTL or/and BCH layers.
+ *
+ *
+ * Input Parameters:
+ *   mtd        - The MTD device
+ *   path       - Path where the driver should be registered
+ *   readonly   * True if the underlying partition is read only.
+ *
+ * Returned Value:
+ *   OK on success, negated errno on error.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MTD_PARTITION_REGISTER
+int mtd_partition_register(FAR struct mtd_dev_s *mtd, FAR const char *path,
+                           bool readonly);
+#endif
+
+/****************************************************************************
  * Name: mtd_setpartitionname
  *
  * Description:

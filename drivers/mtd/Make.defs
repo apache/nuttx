@@ -41,6 +41,10 @@ ifeq ($(CONFIG_MTD_PARTITION),y)
 CSRCS += mtd_partition.c
 endif
 
+ifeq ($(CONFIG_MTD_PARTITION_REGISTER),y)
+CSRCS += mtd_register.c
+endif
+
 ifeq ($(CONFIG_MTD_SECT512),y)
 CSRCS += sector512.c
 endif
