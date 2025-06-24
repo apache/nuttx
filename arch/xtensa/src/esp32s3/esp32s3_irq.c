@@ -343,7 +343,7 @@ static int esp32s3_getcpuint(int cpu, uint32_t intmask)
 
   if (ret >= 0)
     {
-      xtensa_enable_cpuint(&g_intenable[cpu], 1ul << ret);
+      xtensa_enable_cpuint(&g_intenable[cpu], ret);
     }
 
   return ret;
@@ -499,7 +499,7 @@ void up_irqinitialize(void)
 #ifdef CONFIG_ESPRESSIF_WIFI
   g_cpu0_intmap[ESP32S3_CPUINT_MAC] = CPUINT_ASSIGN(ESP32S3_IRQ_MAC);
   g_cpu0_intmap[ESP32S3_CPUINT_PWR] = CPUINT_ASSIGN(ESP32S3_IRQ_PWR);
-  xtensa_enable_cpuint(&g_intenable[0], 1 << ESP32S3_CPUINT_MAC);
+  xtensa_enable_cpuint(&g_intenable[0], ESP32S3_CPUINT_MAC);
 #endif
 
 #ifdef CONFIG_SMP
@@ -570,7 +570,7 @@ void up_disable_irq(int irq)
         }
 #endif
 
-      xtensa_disable_cpuint(&g_intenable[cpu], 1ul << cpuint);
+      xtensa_disable_cpuint(&g_intenable[cpu], cpuint);
     }
   else
     {
@@ -615,7 +615,7 @@ void up_enable_irq(int irq)
 
       /* Enable the CPU interrupt now for internal CPU. */
 
-      xtensa_enable_cpuint(&g_intenable[cpu], (1ul << cpuint));
+      xtensa_enable_cpuint(&g_intenable[cpu], cpuint);
     }
   else
     {
@@ -986,7 +986,7 @@ int esp32s3_getcpuint_from_irq(int irq, int *cpu)
  *
  ****************************************************************************/
 
-uint32_t *xtensa_int_decode(uint32_t cpuints, uint32_t *regs)
+uint32_t *xtensa_int_decode(uint32_t *cpuints, uint32_t *regs)
 {
   uint8_t *intmap;
   uint32_t mask;
@@ -1014,15 +1014,15 @@ uint32_t *xtensa_int_decode(uint32_t cpuints, uint32_t *regs)
   /* Skip over zero bits, eight at a time */
 
   for (bit = 0, mask = 0xff;
-       bit < ESP32S3_NCPUINTS && (cpuints & mask) == 0;
+       bit < ESP32S3_NCPUINTS && (cpuints[0] & mask) == 0;
        bit += 8, mask <<= 8);
 
   /* Process each pending CPU interrupt */
 
-  for (; bit < ESP32S3_NCPUINTS && cpuints != 0; bit++)
+  for (; bit < ESP32S3_NCPUINTS && cpuints[0] != 0; bit++)
     {
       mask = 1 << bit;
-      if ((cpuints & mask) != 0)
+      if ((cpuints[0] & mask) != 0)
         {
           /* Extract the IRQ number from the mapping table */
 
@@ -1044,7 +1044,7 @@ uint32_t *xtensa_int_decode(uint32_t cpuints, uint32_t *regs)
 
           /* Clear software or edge-triggered interrupt */
 
-           xtensa_intclear(mask);
+           xtensa_intclear(bit);
 
           /* Dispatch the CPU interrupt.
            *
@@ -1058,7 +1058,7 @@ uint32_t *xtensa_int_decode(uint32_t cpuints, uint32_t *regs)
            * we can exit the look early.
            */
 
-          cpuints &= ~mask;
+          cpuints[0] &= ~mask;
         }
     }
 
@@ -1084,6 +1084,8 @@ uint32_t *xtensa_int_decode(uint32_t cpuints, uint32_t *regs)
 void esp32s3_irq_noniram_disable(void)
 {
   irqstate_t irqstate;
+  uint32_t mask;
+  int bit;
   int cpu;
   uint32_t oldint;
   uint32_t non_iram_ints;
@@ -1097,7 +1099,14 @@ void esp32s3_irq_noniram_disable(void)
   g_non_iram_int_disabled_flag[cpu] = true;
   oldint = g_intenable[cpu];
 
-  xtensa_disable_cpuint(&g_intenable[cpu], non_iram_ints);
+  for (bit = 0; bit < ESP32S3_NCPUINTS; bit++)
+    {
+      mask = 1 << bit;
+      if ((non_iram_ints & mask) != 0)
+        {
+          xtensa_disable_cpuint(&g_intenable[cpu], bit);
+        }
+    }
 
   g_non_iram_int_disabled[cpu] = oldint & non_iram_ints;
 
@@ -1121,6 +1130,8 @@ void esp32s3_irq_noniram_disable(void)
 void esp32s3_irq_noniram_enable(void)
 {
   irqstate_t irqstate;
+  uint32_t mask;
+  int bit;
   int cpu;
   uint32_t non_iram_ints;
 
@@ -1132,7 +1143,14 @@ void esp32s3_irq_noniram_enable(void)
 
   g_non_iram_int_disabled_flag[cpu] = false;
 
-  xtensa_enable_cpuint(&g_intenable[cpu], non_iram_ints);
+  for (bit = 0; bit < ESP32S3_NCPUINTS; bit++)
+    {
+      mask = 1 << bit;
+      if ((non_iram_ints & mask) != 0)
+        {
+          xtensa_enable_cpuint(&g_intenable[cpu], bit);
+        }
+    }
 
   leave_critical_section(irqstate);
 }
