@@ -412,6 +412,8 @@ int file_mq_open(FAR struct file *mq,
   va_list ap;
   int ret;
 
+  memset(mq, 0, sizeof(*mq));
+
   va_start(ap, oflags);
   ret = file_mq_vopen(mq, mq_name, oflags, 0, ap, NULL);
   va_end(ap);
