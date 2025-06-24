@@ -67,6 +67,10 @@ CMN_CSRCS += arm64_gicv2m.c
 endif
 endif
 
+ifneq ($(CONFIG_ARCH_HAVE_DEBUG),)
+CMN_CSRCS += arm64_hwdebug.c
+endif
+
 ifeq ($(CONFIG_ARCH_HAVE_EL3),y)
 CMN_ASRCS += arm64_smccc.S
 endif
