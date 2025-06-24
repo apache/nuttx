@@ -343,6 +343,7 @@ config ARCH_CPU_UNKNOWN
 	default n
 	select ARCH_ARMV8A
 	select ARCH_HAVE_TRUSTZONE
+	select ARCH_HAVE_DEBUG
 	select ARCH_DCACHE
 	select ARCH_ICACHE
 	select ARCH_HAVE_MMU

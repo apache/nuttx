@@ -59,6 +59,10 @@ if(CONFIG_ARM64_GIC_VERSION EQUAL 2)
   endif()
 endif()
 
+if(CONFIG_ARCH_HAVE_DEBUG)
+  list(APPEND SRCS arm64_hwdebug.c)
+endif()
+
 if(CONFIG_ARCH_HAVE_EL3)
   list(APPEND SRCS arm64_smccc.S)
 endif()
