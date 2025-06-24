@@ -530,6 +530,7 @@ static void gicv3_cpuif_init(void)
   UP_ISB();
 }
 
+#ifndef CONFIG_IMX95_BOOTL_FROM_LINUX
 static void gicv3_dist_init(void)
 {
   unsigned int  num_ints;
@@ -666,6 +667,7 @@ static void gicv3_dist_init(void)
   DEBUGVERIFY(irq_attach(GIC_SMP_CALL, nxsched_smp_call_handler, NULL));
 #endif
 }
+#endif
 
 void up_enable_irq(int irq)
 {
@@ -975,7 +977,9 @@ int arm64_gic_initialize(void)
       return err;
     }
 
+#ifndef CONFIG_IMX95_BOOTL_FROM_LINUX
   gicv3_dist_init();
+#endif
 
   arm64_gic_init();
 

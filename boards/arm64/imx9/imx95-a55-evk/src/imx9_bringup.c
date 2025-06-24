@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm64/src/imx9/hardware/imx9_dmamux.h
+ * boards/arm64/imx9/imx95-a55-evk/src/imx9_bringup.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,20 +20,47 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM64_SRC_IMX9_HARDWARE_IMX9_DMAMUX_H
-#define __ARCH_ARM64_SRC_IMX9_HARDWARE_IMX9_DMAMUX_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_ARCH_CHIP_IMX93)
-#  include "hardware/imx93/imx93_dmamux.h"
-#elif defined(CONFIG_ARCH_CHIP_IMX95)
-#else
-#  error Unrecognized i.MX9 architecture
+#include <sys/types.h>
+#include <syslog.h>
+
+#include <nuttx/fs/fs.h>
+
+#include "imx9_dma_alloc.h"
+
+#include "imx95-evk.h"
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: imx_bringup
+ *
+ * Description:
+ *   Bring up board features
+ *
+ ****************************************************************************/
+
+int imx9_bringup(void)
+{
+  int ret;
+
+#ifdef CONFIG_FS_PROCFS
+  /* Mount the procfs file system */
+
+  ret = nx_mount(NULL, "/proc", "procfs", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n", ret);
+    }
 #endif
 
-#endif /* __ARCH_ARM64_SRC_IMX9_HARDWARE_IMX9_DMAMUX_H */
+  UNUSED(ret);
+  return OK;
+}
