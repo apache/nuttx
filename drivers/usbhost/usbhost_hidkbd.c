@@ -1370,8 +1370,6 @@ static void usbhost_kbd_callback(FAR void *arg, ssize_t nbytes)
 static int usbhost_kbdpoll(int argc, FAR char *argv[])
 {
   FAR struct usbhost_state_s *priv;
-  irqstate_t flags;
-
 #if defined(CONFIG_DEBUG_USB) && defined(CONFIG_DEBUG_INFO)
   unsigned int npolls = 0;
 #endif
