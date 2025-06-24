@@ -111,7 +111,6 @@ static int powerled_open(FAR struct file *filep)
             {
               /* Yes.. perform one time hardware initialization. */
 
-              irqstate_t flags = enter_critical_section();
               ret = dev->ops->setup(dev);
               if (ret == OK)
                 {
@@ -119,8 +118,6 @@ static int powerled_open(FAR struct file *filep)
 
                   dev->ocount = tmp;
                 }
-
-              leave_critical_section(flags);
             }
         }
 
@@ -143,7 +140,6 @@ static int powerled_close(FAR struct file *filep)
 {
   FAR struct inode *inode        = filep->f_inode;
   FAR struct powerled_dev_s *dev = inode->i_private;
-  irqstate_t flags;
   int ret;
 
   ret = nxmutex_lock(&dev->closelock);
@@ -166,10 +162,7 @@ static int powerled_close(FAR struct file *filep)
 
           /* Free the IRQ and disable the POWERLED device */
 
-          flags = enter_critical_section();      /* Disable interrupts */
-          dev->ops->shutdown(dev);               /* Disable the POWERLED */
-          leave_critical_section(flags);
-
+          dev->ops->shutdown(dev);  /* Disable the POWERLED */
           nxmutex_unlock(&dev->closelock);
         }
     }
