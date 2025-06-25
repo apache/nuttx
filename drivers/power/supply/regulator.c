@@ -57,17 +57,16 @@ static int _regulator_set_voltage_unlocked(FAR struct regulator_s *regulator,
                                            int min_uv, int max_uv);
 static int _regulator_do_enable_pulldown(FAR struct regulator_dev_s *rdev);
 static int _regulator_do_disable_pulldown(FAR struct regulator_dev_s *rdev);
-static irqstate_t regulator_lock(FAR mutex_t *lock);
-static void regulator_unlock(FAR mutex_t *lock, irqstate_t flags);
-static irqstate_t regulator_list_lock(void);
-static void regulator_list_unlock(irqstate_t flags);
+static irqstate_t regulator_lock(FAR struct regulator_dev_s *rdev);
+static void regulator_unlock(FAR struct regulator_dev_s *rdev,
+                             irqstate_t flags);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
 static struct list_node g_reg_list = LIST_INITIAL_VALUE(g_reg_list);
-static rmutex_t g_reg_lock         = NXRMUTEX_INITIALIZER;
+static spinlock_t g_list_lock      = SP_UNLOCKED;
 
 /****************************************************************************
  * Private Functions
@@ -207,8 +206,11 @@ static int regulator_check_consumers(FAR struct regulator_dev_s *rdev,
 
 static FAR struct regulator_dev_s *regulator_dev_lookup(const char *supply)
 {
+  irqstate_t flags;
   FAR struct regulator_dev_s *rdev;
   FAR struct regulator_dev_s *rdev_found = NULL;
+
+  flags = spin_lock_irqsave(&g_list_lock);
 
   list_for_every_entry(&g_reg_list, rdev, struct regulator_dev_s, list)
     {
@@ -219,6 +221,7 @@ static FAR struct regulator_dev_s *regulator_dev_lookup(const char *supply)
         }
     }
 
+  spin_unlock_irqrestore(&g_list_lock, flags);
   return rdev_found;
 }
 
@@ -512,43 +515,31 @@ static void regulator_pm_notify(struct pm_callback_s *cb, int domain,
 
 #endif
 
-static irqstate_t regulator_lock(FAR mutex_t *lock)
+static irqstate_t regulator_lock(FAR struct regulator_dev_s *rdev)
 {
-  if (!up_interrupt_context() && !sched_idletask())
+  irqstate_t flags = 0;
+  if (rdev->desc->lock_spin)
     {
-      nxmutex_lock(lock);
+      flags = spin_lock_irqsave(&rdev->lock.s);
+    }
+  else
+    {
+      nxmutex_lock(&rdev->lock.m);
     }
 
-  return enter_critical_section();
+  return flags;
 }
 
-static void regulator_unlock(FAR mutex_t *lock, irqstate_t flags)
+static void
+regulator_unlock(FAR struct regulator_dev_s *rdev, irqstate_t flags)
 {
-  leave_critical_section(flags);
-
-  if (!up_interrupt_context() && !sched_idletask())
+  if (rdev->desc->lock_spin)
     {
-      nxmutex_unlock(lock);
+      spin_unlock_irqrestore(&rdev->lock.s, flags);
     }
-}
-
-static irqstate_t regulator_list_lock(void)
-{
-  if (!up_interrupt_context() && !sched_idletask())
+  else
     {
-      nxrmutex_lock(&g_reg_lock);
-    }
-
-  return enter_critical_section();
-}
-
-static void regulator_list_unlock(irqstate_t flags)
-{
-  leave_critical_section(flags);
-
-  if (!up_interrupt_context() && !sched_idletask())
-    {
-      nxrmutex_unlock(&g_reg_lock);
+      nxmutex_unlock(&rdev->lock.m);
     }
 }
 
@@ -582,7 +573,6 @@ FAR struct regulator_s *regulator_get(FAR const char *id)
       return NULL;
     }
 
-  flags = regulator_list_lock();
   rdev = regulator_dev_lookup(id);
 
 #if defined(CONFIG_REGULATOR_RPMSG)
@@ -591,18 +581,6 @@ FAR struct regulator_s *regulator_get(FAR const char *id)
       rdev = regulator_rpmsg_get(id);
     }
 #endif
-
-  if (rdev && rdev->desc->supply_name && rdev->supply == NULL)
-    {
-      rdev->supply = regulator_get(rdev->desc->supply_name);
-      if (rdev->supply == NULL)
-        {
-          pwrerr("get supply %s failed \n", rdev->desc->supply_name);
-          rdev = NULL;
-        }
-    }
-
-  regulator_list_unlock(flags);
 
   if (rdev == NULL)
     {
@@ -617,13 +595,36 @@ FAR struct regulator_s *regulator_get(FAR const char *id)
       return NULL;
     }
 
+  if (rdev->desc->supply_name && rdev->supply == NULL)
+    {
+      FAR struct regulator_s *supply;
+
+      supply = regulator_get(rdev->desc->supply_name);
+      if (supply == NULL)
+        {
+          pwrerr("get supply %s failed \n", rdev->desc->supply_name);
+          kmm_free(regulator);
+          return NULL;
+        }
+
+      flags = regulator_lock(rdev);
+      if (rdev->supply == NULL)
+        {
+          rdev->supply = supply;
+          supply = NULL;
+        }
+
+      regulator_unlock(rdev, flags);
+      regulator_put(supply);
+    }
+
   regulator->rdev = rdev;
   list_initialize(&regulator->list);
 
-  flags = regulator_lock(&rdev->regulator_lock);
+  flags = regulator_lock(rdev);
   rdev->open_count++;
   list_add_tail(&rdev->consumer_list, &regulator->list);
-  regulator_unlock(&rdev->regulator_lock, flags);
+  regulator_unlock(rdev, flags);
 
   return regulator;
 }
@@ -652,10 +653,10 @@ void regulator_put(FAR struct regulator_s *regulator)
     }
 
   rdev = regulator->rdev;
-  flags = regulator_lock(&rdev->regulator_lock);
+  flags = regulator_lock(rdev);
   list_delete(&regulator->list);
   rdev->open_count--;
-  regulator_unlock(&rdev->regulator_lock, flags);
+  regulator_unlock(rdev, flags);
 
   kmm_free(regulator);
 }
@@ -693,9 +694,9 @@ int regulator_is_enabled(FAR struct regulator_s *regulator)
       return 1;
     }
 
-  flags = regulator_lock(&rdev->regulator_lock);
+  flags = regulator_lock(rdev);
   ret = _regulator_is_enabled(rdev);
-  regulator_unlock(&rdev->regulator_lock, flags);
+  regulator_unlock(rdev, flags);
   return ret;
 }
 
@@ -727,7 +728,7 @@ int regulator_enable(FAR struct regulator_s *regulator)
 
   rdev = regulator->rdev;
 
-  flags = regulator_lock(&rdev->regulator_lock);
+  flags = regulator_lock(rdev);
   if (rdev->use_count == 0 && !rdev->desc->always_on)
     {
       ret = _regulator_do_enable(rdev);
@@ -740,7 +741,7 @@ int regulator_enable(FAR struct regulator_s *regulator)
   rdev->use_count++;
 
 err:
-  regulator_unlock(&rdev->regulator_lock, flags);
+  regulator_unlock(rdev, flags);
   return ret;
 }
 
@@ -800,7 +801,7 @@ int regulator_disable(FAR struct regulator_s *regulator)
 
   rdev = regulator->rdev;
 
-  flags = regulator_lock(&rdev->regulator_lock);
+  flags = regulator_lock(rdev);
   if (rdev->use_count <= 0)
     {
       ret = -EIO;
@@ -819,7 +820,7 @@ int regulator_disable(FAR struct regulator_s *regulator)
   rdev->use_count--;
 
 err:
-  regulator_unlock(&rdev->regulator_lock, flags);
+  regulator_unlock(rdev, flags);
   return ret;
 }
 
@@ -880,9 +881,9 @@ int regulator_set_voltage(FAR struct regulator_s *regulator,
 
   rdev = regulator->rdev;
 
-  flags = regulator_lock(&rdev->regulator_lock);
+  flags = regulator_lock(rdev);
   ret = _regulator_set_voltage_unlocked(regulator, min_uv, max_uv);
-  regulator_unlock(&rdev->regulator_lock, flags);
+  regulator_unlock(rdev, flags);
 
   return ret;
 }
@@ -915,9 +916,9 @@ int regulator_get_voltage(FAR struct regulator_s *regulator)
 
   rdev = regulator->rdev;
 
-  flags = regulator_lock(&rdev->regulator_lock);
+  flags = regulator_lock(rdev);
   ret = _regulator_get_voltage(rdev);
-  regulator_unlock(&rdev->regulator_lock, flags);
+  regulator_unlock(rdev, flags);
 
   return ret;
 }
@@ -946,7 +947,7 @@ int regulator_set_mode(FAR struct regulator_s *regulator,
   irqstate_t flags;
   int ret;
 
-  flags = regulator_lock(&rdev->regulator_lock);
+  flags = regulator_lock(rdev);
   if (!rdev->ops->set_mode || mode == REGULATOR_MODE_INVALID)
     {
       ret = -EINVAL;
@@ -965,7 +966,7 @@ int regulator_set_mode(FAR struct regulator_s *regulator,
 
   ret = rdev->ops->set_mode(rdev, mode);
 out:
-  regulator_unlock(&rdev->regulator_lock, flags);
+  regulator_unlock(rdev, flags);
   return ret;
 }
 
@@ -987,61 +988,67 @@ regulator_register(FAR const struct regulator_desc_s *regulator_desc,
   irqstate_t flags;
   int ret = 0;
 
-  flags = regulator_list_lock();
-
   if (regulator_desc == NULL)
     {
       pwrerr("regulator desc is null\n");
-      goto out;
+      return NULL;
     }
 
   if (regulator_desc->name == NULL || regulator_ops == NULL)
     {
       pwrerr("regulator name or ops is null\n");
-      goto out;
+      return NULL;
     }
 
   if (regulator_dev_lookup(regulator_desc->name))
     {
       pwrerr("regulator name is registered\n");
-      goto out;
+      return NULL;
     }
 
   if (regulator_ops->get_voltage && regulator_ops->get_voltage_sel)
     {
       pwrerr("get_voltage and get_voltage_sel are both assigned\n");
-      goto out;
+      return NULL;
     }
 
   if (regulator_ops->set_voltage && regulator_ops->set_voltage_sel)
     {
       pwrerr("set_voltage and set_voltage_sel are both assigned\n");
-      goto out;
+      return NULL;
     }
 
   if (regulator_ops->get_voltage_sel && !regulator_ops->list_voltage)
     {
       pwrerr("list voltage is null\n");
-      goto out;
+      return NULL;
     }
 
   if (regulator_ops->set_voltage_sel && !regulator_ops->list_voltage)
     {
       pwrerr("list voltage is null\n");
-      goto out;
+      return NULL;
     }
 
   rdev = kmm_zalloc(sizeof(struct regulator_dev_s));
   if (rdev == NULL)
     {
       pwrerr("failed to get memory\n");
-      goto out;
+      return NULL;
     }
 
   rdev->desc = regulator_desc;
   rdev->ops = regulator_ops;
   rdev->priv = priv;
-  nxmutex_init(&rdev->regulator_lock);
+  if (rdev->desc->lock_spin)
+    {
+      spin_lock_init(&rdev->lock.s);
+    }
+  else
+    {
+      nxmutex_init(&rdev->lock.m);
+    }
+
   list_initialize(&rdev->consumer_list);
   list_initialize(&rdev->list);
 
@@ -1056,9 +1063,13 @@ regulator_register(FAR const struct regulator_desc_s *regulator_desc,
       if (ret < 0)
         {
           pwrerr("failed to enable regulator\n");
+          if (!rdev->desc->lock_spin)
+            {
+              nxmutex_destroy(&rdev->lock.m);
+            }
+
           kmm_free(rdev);
-          rdev = NULL;
-          goto out;
+          return NULL;
         }
     }
   else if (!rdev->desc->boot_on && !rdev->desc->always_on
@@ -1092,10 +1103,9 @@ bypass:
     }
 #endif
 
+  flags = spin_lock_irqsave(&g_list_lock);
   list_add_tail(&g_reg_list, &rdev->list);
-
-out:
-  regulator_list_unlock(flags);
+  spin_unlock_irqrestore(&g_list_lock, flags);
   return rdev;
 }
 
@@ -1117,16 +1127,16 @@ void regulator_unregister(FAR struct regulator_dev_s *rdev)
       return;
     }
 
-  flags = regulator_list_lock();
+  flags = spin_lock_irqsave(&g_list_lock);
   if (rdev->open_count)
     {
+      spin_unlock_irqrestore(&g_list_lock, flags);
       pwrerr("unregister, open %" PRIu32 "\n", rdev->open_count);
-      regulator_list_unlock(flags);
       return;
     }
 
   list_delete(&rdev->list);
-  regulator_list_unlock(flags);
+  spin_unlock_irqrestore(&g_list_lock, flags);
 #ifdef CONFIG_PM
   if (rdev->desc->auto_lp)
     {
@@ -1137,6 +1147,11 @@ void regulator_unregister(FAR struct regulator_dev_s *rdev)
   if (rdev->supply)
     {
       regulator_put(rdev->supply);
+    }
+
+  if (!rdev->desc->lock_spin)
+    {
+      nxmutex_destroy(&rdev->lock.m);
     }
 
   kmm_free(rdev);

@@ -36,6 +36,7 @@
 #include <nuttx/mutex.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/power/pm.h>
+#include <nuttx/spinlock.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -127,6 +128,9 @@ struct regulator_desc_s
   unsigned int   bypass_on;         /* true if this regulator should be ignored
                                      * during initialization
                                      */
+  unsigned int   lock_spin;         /* default lock by mutex, change to true if
+                                     * need lock by spinlock
+                                     */
   FAR const char *supply_name;
 #ifdef CONFIG_PM
   unsigned int auto_lp;
@@ -141,7 +145,11 @@ struct regulator_dev_s
   FAR const struct regulator_ops_s *ops;
   uint32_t use_count;
   uint32_t open_count;
-  mutex_t regulator_lock;
+  union
+  {
+    mutex_t    m;
+    spinlock_t s;
+  } lock;
   struct list_node list;
   struct list_node consumer_list;
   FAR struct regulator_s *supply;
