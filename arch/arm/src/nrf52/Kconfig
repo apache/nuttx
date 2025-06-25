@@ -660,7 +660,7 @@ config NRF52_RADIO_IEEE802154_TRACE_BUFSIZE
 	depends on NRF52_RADIO_IEEE802154_TRACE
 	default 1024
 
-endif
+endif # NRF52_RADIO_IEEE802154
 
 endif #NRF52_RADIO
 
@@ -836,7 +836,7 @@ config NRF52_SDC_MULTIROLE
 config NRF52_SDC_CENTRAL
 	bool "BLE Central role"
 
-endchoice
+endchoice # BLE Controller role
 
 config NRF52_SDC_CLOCK_ACCURACY
 	int "Clock Accuracy [PPM]"
@@ -882,7 +882,7 @@ config NRF52_SDC_SCAN_BUFFER_COUNT
 	---help---
 		The minimum allowed number of buffers is 2.
 
-endif
+endif # NRF52_SDC_SCANNING
 
 config NRF52_SDC_LE_2M_PHY
 	bool "Support LE 2M PHY"
@@ -905,5 +905,4 @@ config NRF52_SDC_PUB_ADDR
 	hex "Configure BT public address"
 	default 0x0000000000
 
-endif
-
+endif # NRF52_SOFTDEVICE_CONTROLLER
