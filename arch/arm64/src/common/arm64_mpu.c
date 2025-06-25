@@ -292,28 +292,30 @@ void arm64_mpu_disable(void)
  *
  * Input Parameters:
  *   region - The index of the MPU region to modify.
- *   table  - Pointer to a struct containing the configuration
- *            parameters for the region.
+ *   base   - The base address of the region.
+ *   size   - The size of the region.
+ *   flags1 - Additional flags for the region.
+ *   flags2 - Additional flags for the region.
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-void mpu_modify_region(unsigned int region,
-                       const struct arm64_mpu_region *table)
+void mpu_modify_region(unsigned int region, uintptr_t base, size_t size,
+                       uint32_t flags1, uint32_t flags2)
 {
-  uint64_t rbar = table->base & MPU_RBAR_BASE_MSK;
-  uint64_t rlar = (table->limit - 1) & MPU_RLAR_LIMIT_MSK;
+  uint64_t rbar = base & MPU_RBAR_BASE_MSK;
+  uint64_t rlar = (base + size - 1) & MPU_RLAR_LIMIT_MSK;
 
   /* Check that the region is valid */
 
   DEBUGASSERT(g_mpu_region[this_cpu()] & (1 << region));
 
-  rbar |= table->attr.rbar &
+  rbar |= flags1 &
           (MPU_RBAR_XN_MSK | MPU_RBAR_AP_MSK | MPU_RBAR_SH_MSK);
   rlar |=
-     (table->attr.mair_idx <<
+     (flags2 <<
       MPU_RLAR_ATTRINDX_POS) & MPU_RLAR_ATTRINDX_MSK;
   rlar |= MPU_RLAR_EN_MSK;
 
@@ -336,19 +338,21 @@ void mpu_modify_region(unsigned int region,
  *   Configure a region for privileged, strongly ordered memory
  *
  * Input Parameters:
- *   table - Pointer to a struct containing the configuration
- *           parameters for the region.
+ *   base   - The base address of the region.
+ *   size   - The size of the region.
+ *   flags1 - Additional flags for the region.
+ *   flags2 - Additional flags for the region.
  *
  * Returned Value:
  *   The region number allocated for the configured region.
  *
  ****************************************************************************/
 
-unsigned int mpu_configure_region(const struct arm64_mpu_region *
-                                  table)
+unsigned int mpu_configure_region(uintptr_t base, size_t size,
+                                  uint32_t flags1, uint32_t flags2)
 {
   unsigned int region = mpu_allocregion();
-  mpu_modify_region(region, table);
+  mpu_modify_region(region, base, size, flags1, flags2);
   return region;
 }
 
@@ -451,7 +455,10 @@ void arm64_mpu_init(bool is_primary_core)
 
   for (r_index = 0U; r_index < g_mpu_config.num_regions; r_index++)
     {
-      mpu_configure_region(&g_mpu_config.mpu_regions[r_index]);
+      mpu_configure_region(g_mpu_config.mpu_regions[r_index].base,
+                           g_mpu_config.mpu_regions[r_index].size,
+                           g_mpu_config.mpu_regions[r_index].attr.rbar,
+                           g_mpu_config.mpu_regions[r_index].attr.mair_idx);
     }
 
   arm64_mpu_enable();
