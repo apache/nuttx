@@ -113,6 +113,10 @@
 #  include "espressif/esp_sdm.h"
 #endif
 
+#ifdef CONFIG_NCV7410
+#  include "esp_board_ncv7410.h"
+#endif
+
 #include "esp32c6-devkitm.h"
 
 /****************************************************************************
@@ -418,6 +422,14 @@ int esp_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: esp_nxdiag_initialize failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_NCV7410
+  ret = board_ncv7410_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: esp_ncv7410_initialize failed: %d\n", ret);
     }
 #endif
 
