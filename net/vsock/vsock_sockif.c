@@ -392,42 +392,51 @@ static inline_function void vsock_poll_notify(FAR struct vsock_conn_s *conn,
 
 static void vsock_notify(FAR struct vsock_conn_s *conn, int type)
 {
+  pollevent_t eventset = 0;
+
   switch (type)
     {
       case VSOCK_NOTIFY_ERROR:
         vsock_post(&conn->rx_sem);
         vsock_post(&conn->tx_sem);
-        vsock_poll_notify(conn, POLLIN | POLLOUT);
+        eventset = POLLIN | POLLOUT;
         break;
       case VSOCK_NOTIFY_LISTEN:
         vsock_post(&conn->rx_sem);
-        vsock_poll_notify(conn, POLLIN);
+        eventset = POLLIN;
         break;
       case VSOCK_NOTIFY_SEND:
         vsock_post(&conn->tx_sem);
-        vsock_poll_notify(conn, POLLOUT);
+        eventset = POLLOUT;
         break;
       case VSOCK_NOTIFY_RECV:
         if (vsock_get_rx_size(conn) >= conn->rx_lowat)
           {
             vsock_post(&conn->rx_sem);
-            vsock_poll_notify(conn, POLLIN);
+            eventset = POLLIN;
           }
         break;
       case VSOCK_NOTIFY_SHUTDOWN:
         if (conn->shutdown & SHUT_RD)
           {
             vsock_post(&conn->rx_sem);
-            vsock_poll_notify(conn, POLLIN);
+            eventset |= POLLIN;
           }
 
         if (conn->shutdown & SHUT_WR)
           {
             vsock_post(&conn->tx_sem);
-            vsock_poll_notify(conn, POLLOUT);
+            eventset |= POLLOUT;
+          }
+
+        if (VSOCK_IS_SHUTDOWN(conn->shutdown))
+          {
+            eventset |= POLLHUP;
           }
         break;
     }
+
+  vsock_poll_notify(conn, eventset);
 }
 
 /****************************************************************************
@@ -1749,11 +1758,25 @@ static int vsock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
       FAR struct vsock_conn_s *conn = NULL;
 
       vsock_lock(server);
-      if (!list_is_empty(&server->child))
+      while (!list_is_empty(&server->child))
         {
           conn = list_first_entry(&server->child, struct vsock_conn_s,
                                   child);
           list_delete(&conn->child);
+
+          vsock_lock(conn);
+          if (VSOCK_IS_SHUTDOWN(conn->shutdown))
+            {
+              vsock_remove_conn(conn);
+              vsock_unlock(conn);
+              vsock_sub_ref(conn);
+              conn = NULL;
+            }
+          else
+            {
+              vsock_unlock(conn);
+              break;
+            }
         }
 
       vsock_unlock(server);
