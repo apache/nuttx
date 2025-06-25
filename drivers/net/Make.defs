@@ -50,6 +50,10 @@ ifeq ($(CONFIG_ENC28J60),y)
   CSRCS += enc28j60.c
 endif
 
+ifeq ($(CONFIG_NCV7410),y)
+  CSRCS += ncv7410.c
+endif
+
 ifeq ($(CONFIG_ENCX24J600),y)
   CSRCS += encx24j600.c
 endif
