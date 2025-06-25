@@ -29,6 +29,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/circbuf.h>
 
 #include <fcntl.h>
@@ -64,6 +65,7 @@ struct uart_bth4_s
   mutex_t                 sendlock;
   mutex_t                 openlock;
   uint8_t                 refcnt;
+  spinlock_t              lock;
 
   FAR struct pollfd_s    *fds[CONFIG_UART_BTH4_NPOLLWAITERS];
 };
@@ -135,7 +137,7 @@ static int uart_bth4_receive(FAR struct bt_driver_s *drv,
   irqstate_t flags;
   uint8_t htype;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave_nopreempt(&dev->lock);
 
   if (circbuf_space(&dev->circbuf) >=
       buflen + H4_HEADER_SIZE)
@@ -169,7 +171,7 @@ static int uart_bth4_receive(FAR struct bt_driver_s *drv,
       ret = -ENOMEM;
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore_nopreempt(&dev->lock, flags);
   return ret;
 }
 
@@ -241,7 +243,7 @@ static ssize_t uart_bth4_read(FAR struct file *filep,
   irqstate_t flags;
   ssize_t nread;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&dev->lock);
 
   for (; ; )
     {
@@ -253,11 +255,13 @@ static ssize_t uart_bth4_read(FAR struct file *filep,
 
       while (circbuf_is_empty(&dev->circbuf))
         {
+          spin_unlock_irqrestore(&dev->lock, flags);
           nxsem_wait_uninterruptible(&dev->recvsem);
+          flags = spin_lock_irqsave(&dev->lock);
         }
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&dev->lock, flags);
   return nread;
 }
 
@@ -393,7 +397,7 @@ static int uart_bth4_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
   int ret = 0;
   int i;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave_nopreempt(&dev->lock);
 
   if (setup)
     {
@@ -439,7 +443,7 @@ static int uart_bth4_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
         }
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore_nopreempt(&dev->lock, flags);
   return ret;
 }
 
@@ -473,6 +477,7 @@ int uart_bth4_register(FAR const char *path, FAR struct bt_driver_s *drv)
 
   nxmutex_init(&dev->sendlock);
   nxmutex_init(&dev->openlock);
+  spin_lock_init(&dev->lock);
   nxsem_init(&dev->recvsem, 0, 0);
 
   ret = register_driver(path, &g_uart_bth4_ops, 0600, dev);
