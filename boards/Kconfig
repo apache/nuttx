@@ -434,8 +434,8 @@ config ARCH_BOARD_ESP32C3_XIAO
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
-	    The XIAO-ESP32C3 from Seeed Studio features the ESP32-C3 CPU with a RISC-V core,
-	    supporting IEEE 802.11 b/g/n WiFi, and Bluetooth 5 (BLE) protocols.
+		The XIAO-ESP32C3 from Seeed Studio features the ESP32-C3 CPU with a RISC-V core,
+		supporting IEEE 802.11 b/g/n WiFi, and Bluetooth 5 (BLE) protocols.
 
 config ARCH_BOARD_ESP32S2_KALUGA_1
 	bool "Espressif ESP32-S2-Kaluga-1 V1.3"
