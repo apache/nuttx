@@ -328,6 +328,39 @@ You can set an alarm, check its progress and receive a notification after it exp
     Alarm 0 is active with 10 seconds to expiration
     nsh> alarm_daemon: alarm 0 received
 
+sdmmc_spi
+---------
+
+This configuration is used to mount a FAT/FAT32 SD Card into the OS' filesystem.
+It uses SPI to communicate with the SD Card, defaulting to SPI2.
+
+The SD slot number, SPI port number and minor number can be modified in ``Application Configuration → NSH Library``.
+
+To access the card's files, make sure ``/dev/mmcsd0`` exists and then execute the following commands::
+
+    nsh> ls /dev
+    /dev:
+    console
+    mmcsd0
+    null
+    ttyS0
+    zero
+    nsh> mount -t vfat /dev/mmcsd0 /mnt
+
+This will mount the SD Card to ``/mnt``. Now, you can use the SD Card as a normal filesystem.
+For example, you can read a file and write to it::
+
+    nsh> ls /mnt
+    /mnt:
+    hello.txt
+    nsh> cat /mnt/hello.txt
+    Hello World
+    nsh> echo 'NuttX RTOS' >> /mnt/hello.txt
+    nsh> cat /mnt/hello.txt
+    Hello World!
+    NuttX RTOS
+    nsh>
+
 spi
 --------
 
