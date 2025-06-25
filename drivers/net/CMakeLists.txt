@@ -49,6 +49,10 @@ if(CONFIG_NET)
     list(APPEND SRCS enc28j60.c)
   endif()
 
+  if(CONFIG_NCV7410)
+    list(APPEND SRCS ncv7410.c)
+  endif()
+
   if(CONFIG_ENCX24J600)
     list(APPEND SRCS encx24j600.c)
   endif()

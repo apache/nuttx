@@ -287,6 +287,30 @@ config ENC28J60_REGDEBUG
 
 endif # ENC28J60
 
+menuconfig NCV7410
+	bool "onsemi NCV7410 support"
+	default n
+	select SPI
+	select ARCH_HAVE_NETDEV_STATISTICS
+	---help---
+		Enable support for onsemi NCV7410 10BASE-T1S MAC-PHY
+
+if NCV7410
+
+config NCV7410_INT_PIN
+	int "NCV7410 interrupt pin"
+	default 3
+	---help---
+		Number of boarad pin to be connected to NCV7410's interrupt signal
+
+config NCV7410_FREQUENCY
+	int "SPI frequency"
+	default 20000000
+	---help---
+		NCV7410 SPI bus frequency
+
+endif # NCV7410
+
 menuconfig ENCX24J600
 	bool "Microchip ENCX24J600 support"
 	default n
