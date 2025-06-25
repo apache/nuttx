@@ -213,7 +213,7 @@ int nxsem_open(FAR sem_t **sem, FAR const char *name, int oflags, ...)
           /* Initialize the inode */
 
           INODE_SET_NAMEDSEM(inode);
-          atomic_add(&inode->i_crefs, 1);
+          inode_addref(inode);
 
           /* Initialize the semaphore */
 
