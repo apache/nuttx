@@ -336,7 +336,7 @@ retry:
 
           /* Set the initial reference count on this inode to one */
 
-          atomic_add(&inode->i_crefs, 1);
+          inode_addref(inode);
         }
 
       inode_unlock();

@@ -158,7 +158,7 @@ static int file_shm_open(FAR struct file *shm, FAR const char *name,
       INODE_SET_SHM(inode);
       inode->u.i_ops = &g_shmfs_operations;
       inode->i_private = NULL;
-      atomic_add(&inode->i_crefs, 1);
+      inode_addref(inode);
     }
 
   /* Associate the inode with a file structure */
