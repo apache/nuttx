@@ -123,7 +123,7 @@ static int sched_backtrace_handler(FAR void *cookie)
 
 int sched_backtrace(pid_t tid, FAR void **buffer, int size, int skip)
 {
-  FAR struct tcb_s *tcb = this_task();
+  FAR struct tcb_s *tcb = running_task();
   int ret = 0;
 
   if (size <= 0 || buffer == NULL)
