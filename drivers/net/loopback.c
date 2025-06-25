@@ -239,7 +239,7 @@ static int lo_txavail(FAR struct net_driver_s *dev)
     {
       /* Schedule to serialize the poll on the worker thread. */
 
-      work_queue(LPWORK, &priv->lo_work, lo_txavail_work, priv, 0);
+      work_queue(HPWORK, &priv->lo_work, lo_txavail_work, priv, 0);
     }
 
   return OK;
