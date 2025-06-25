@@ -1145,7 +1145,7 @@ static int vsock_recv_connecting(FAR struct vsock_conn_s *conn,
         ret = -ECONNRESET;
         break;
       default:
-        vrterr("conn=%p, VSOCK_ERROR, op=%d\n", conn, hdr->op);
+        vrterr("conn=%p, VSOCK_ERROR, op=%u\n", conn, hdr->op);
         break;
     }
 
@@ -1332,7 +1332,7 @@ static int vsock_recv_connected(FAR struct vsock_conn_s *conn,
 
         if (VSOCK_IS_SHUTDOWN(conn->shutdown))
           {
-            vsockdbg("Shutdown and Reset, hdr->flags=0x%x\n", hdr->flags);
+            vsockdbg("Recv SHUTDOWN, flags=0x%" PRIx32 "\n", hdr->flags);
             vsock_reset(conn, pkt);
           }
 
@@ -2143,7 +2143,7 @@ static int vsock_close(FAR struct socket *psock)
 
   if (VSOCK_IS_SHUTDOWN(conn->shutdown))
     {
-      vsockdbg("Peer has closed conn=%p s_flags=%d\n",
+      vsockdbg("Peer has closed conn=%p s_flags=0x%x\n",
                conn, conn->sconn.s_flags);
       vsock_remove_conn(conn);
     }
