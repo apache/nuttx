@@ -213,96 +213,55 @@
   }
 
 #ifdef CONFIG_SMP
-#  define REGION_RW_NA_ATTR                                     \
-    {                                                           \
-      /* AP, XN, SH */                                          \
-      .rbar = (NOT_EXEC | P_RW_U_NA_MSK | INNER_SHAREABLE_MSK), \
-      /* Cache-ability */                                       \
-      .mair_idx = MPU_MAIR_INDEX_SRAM,                          \
-    }
-#  define REGION_RW_RW_ATTR                                     \
-    {                                                           \
-      /* AP, XN, SH */                                          \
-      .rbar = (NOT_EXEC | P_RW_U_RW_MSK | INNER_SHAREABLE_MSK), \
-      /* Cache-ability */                                       \
-      .mair_idx = MPU_MAIR_INDEX_SRAM,                          \
-    }
-#  define REGION_RO_RO_ATTR                                 \
-  {                                                         \
-    /* AP, XN, SH */                                        \
-    .rbar = NOT_EXEC | P_RO_U_RO_MSK | INNER_SHAREABLE_MSK, \
-    /* Cache-ability */                                     \
-    .mair_idx = MPU_MAIR_INDEX_SRAM,                        \
-  }
-#  define REGION_RO_NA_ATTR                                 \
-  {                                                         \
-    /* AP, XN, SH */                                        \
-    .rbar = NOT_EXEC | P_RO_U_NA_MSK | INNER_SHAREABLE_MSK, \
-    /* Cache-ability */                                     \
-    .mair_idx = MPU_MAIR_INDEX_SRAM,                        \
-  }
+# define SHAREABLE_MSK INNER_SHAREABLE_MSK
 #else
-#  define REGION_RW_NA_ATTR                                 \
-    {                                                       \
-      /* AP, XN, SH */                                      \
-      .rbar = NOT_EXEC | P_RW_U_NA_MSK | NON_SHAREABLE_MSK, \
-      /* Cache-ability */                                   \
-      .mair_idx = MPU_MAIR_INDEX_SRAM,                      \
-    }
-#  define REGION_RW_RW_ATTR                                 \
-    {                                                       \
-      /* AP, XN, SH */                                      \
-      .rbar = NOT_EXEC | P_RW_U_RW_MSK | NON_SHAREABLE_MSK, \
-      /* Cache-ability */                                   \
-      .mair_idx = MPU_MAIR_INDEX_SRAM,                      \
-    }
-#  define REGION_RO_RO_ATTR                               \
-  {                                                       \
-    /* AP, XN, SH */                                      \
-    .rbar = NOT_EXEC | P_RO_U_RO_MSK | NON_SHAREABLE_MSK, \
-    /* Cache-ability */                                   \
-    .mair_idx = MPU_MAIR_INDEX_SRAM,                      \
-  }
-#  define REGION_RO_NA_ATTR                               \
-  {                                                       \
-    /* AP, XN, SH */                                      \
-    .rbar = NOT_EXEC | P_RO_U_NA_MSK | NON_SHAREABLE_MSK, \
-    /* Cache-ability */                                   \
-    .mair_idx = MPU_MAIR_INDEX_SRAM,                      \
-  }
+# define SHAREABLE_MSK NON_SHAREABLE_MSK
 #endif
 
-#ifdef CONFIG_SMP
-#  define REGION_KTEXT_ATTR                      \
-  {                                              \
-    /* AP, XN, SH */                             \
-    .rbar = P_RO_U_NA_MSK | INNER_SHAREABLE_MSK, \
-    /* Cache-ability */                          \
-    .mair_idx = MPU_MAIR_INDEX_SRAM,             \
+#define REGION_RW_NA_ATTR                             \
+  {                                                   \
+    /* AP, XN, SH */                                  \
+    .rbar = NOT_EXEC | P_RW_U_NA_MSK | SHAREABLE_MSK, \
+    /* Cache-ability */                               \
+    .mair_idx = MPU_MAIR_INDEX_SRAM,                  \
   }
-#  define REGION_UTEXT_ATTR                      \
-  {                                              \
-    /* AP, XN, SH */                             \
-    .rbar = P_RO_U_RO_MSK | INNER_SHAREABLE_MSK, \
-    /* Cache-ability */                          \
-    .mair_idx = MPU_MAIR_INDEX_SRAM,             \
+#define REGION_RW_RW_ATTR                             \
+  {                                                   \
+    /* AP, XN, SH */                                  \
+    .rbar = NOT_EXEC | P_RW_U_RW_MSK | SHAREABLE_MSK, \
+    /* Cache-ability */                               \
+    .mair_idx = MPU_MAIR_INDEX_SRAM,                  \
   }
-#else
-#  define REGION_KTEXT_ATTR                    \
-  {                                            \
-    /* AP, XN, SH */                           \
-    /* Cache-ability */                        \
-    .rbar = P_RO_U_NA_MSK | NON_SHAREABLE_MSK, \
-    .mair_idx = MPU_MAIR_INDEX_SRAM,           \
+#define REGION_RO_RO_ATTR                             \
+  {                                                   \
+    /* AP, XN, SH */                                  \
+    .rbar = NOT_EXEC | P_RO_U_RO_MSK | SHAREABLE_MSK, \
+    /* Cache-ability */                               \
+    .mair_idx = MPU_MAIR_INDEX_SRAM,                  \
   }
-#  define REGION_UTEXT_ATTR                    \
-  {                                            \
-    /* AP, XN, SH */                           \
-    .rbar = P_RO_U_RO_MSK | NON_SHAREABLE_MSK, \
-    /* Cache-ability */                        \
-    .mair_idx = MPU_MAIR_INDEX_SRAM,           \
+#define REGION_RO_NA_ATTR                             \
+  {                                                   \
+    /* AP, XN, SH */                                  \
+    .rbar = NOT_EXEC | P_RO_U_NA_MSK | SHAREABLE_MSK, \
+    /* Cache-ability */                               \
+    .mair_idx = MPU_MAIR_INDEX_SRAM,                  \
   }
-#endif
+
+#define REGION_KTEXT_ATTR                  \
+  {                                        \
+    /* AP, XN, SH */                       \
+    /* Cache-ability */                    \
+    .rbar = P_RO_U_NA_MSK | SHAREABLE_MSK, \
+    .mair_idx = MPU_MAIR_INDEX_SRAM,       \
+  }
+
+#define REGION_UTEXT_ATTR                  \
+  {                                        \
+    /* AP, XN, SH */                       \
+    .rbar = P_RO_U_RO_MSK | SHAREABLE_MSK, \
+    /* Cache-ability */                    \
+    .mair_idx = MPU_MAIR_INDEX_SRAM,       \
+  }
 
 #ifndef __ASSEMBLY__
 
