@@ -3695,14 +3695,14 @@ config STM32F0L0G0_ADC1_EXTSEL
 		Enable EXTSEL for ADC1.
 
 config STM32F0L0G0_ADC1_CONTINUOUS
-        bool "Enable ADC1 Continuous Conversion Mode"
-        default n
-        depends on STM32F0L0G0_ADC1
-        ---help---
-          If enabled, the ADC will operate in continuous conversion mode.
-          Otherwise, it will perform single conversions.
-             Note: Continuous and discontinuous mode cannot be defined at
-             the same time
+	bool "Enable ADC1 Continuous Conversion Mode"
+	default n
+	depends on STM32F0L0G0_ADC1
+	---help---
+		If enabled, the ADC will operate in continuous conversion mode.
+		Otherwise, it will perform single conversions.
+		Note: Continuous and discontinuous mode cannot be defined at
+		      the same time
 
 endmenu # ADC Configuration
 
