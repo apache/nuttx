@@ -45,8 +45,8 @@ config ARCH_CHIP_MPS3_AN547
 	select ARCH_HAVE_TEXT_HEAP
 	select ARCH_HAVE_DATA_HEAP
 
-endchoice
+endchoice # ARM MPS Configuration
 
-endmenu
+endmenu # MPS Chip Selection
 
-endif
+endif # ARCH_CHIP_MPS
