@@ -53,6 +53,7 @@
 #define HAVE_S25FL1_NXFFS    1
 #define HAVE_S25FL1_SMARTFS  1
 #define HAVE_S25FL1_CHARDEV  1
+#define HAVE_S25FL1_MTDDEV   1
 #define HAVE_PROGMEM_CHARDEV 1
 #define HAVE_WM8904          1
 #define HAVE_AUDIO_NULL      1
@@ -180,6 +181,7 @@
 #  undef HAVE_S25FL1_NXFFS
 #  undef HAVE_S25FL1_SMARTFS
 #  undef HAVE_S25FL1_CHARDEV
+#  undef HAVE_S25FL1_MTDDEV
 #endif
 
 #ifndef CONFIG_SAMV7_QSPI
@@ -187,6 +189,7 @@
 #  undef HAVE_S25FL1_NXFFS
 #  undef HAVE_S25FL1_SMARTFS
 #  undef HAVE_S25FL1_CHARDEV
+#  undef HAVE_S25FL1_MTDDEV
 #endif
 
 #ifndef CONFIG_FS_NXFFS
@@ -197,12 +200,8 @@
 #  undef HAVE_S25FL1_SMARTFS
 #endif
 
-#if defined(HAVE_S25FL1_NXFFS) && defined(HAVE_S25FL1_SMARTFS)
-#  undef HAVE_S25FL1_NXFFS
-#endif
-
-#if defined(HAVE_S25FL1_NXFFS) || defined(HAVE_S25FL1_SMARTFS)
-#  undef HAVE_S25FL1_CHARDEV
+#ifndef CONFIG_MTD_PARTITON_REGISTER
+#  undef HAVE_S25FL1_MTDDEV
 #endif
 
 /* On-chip Programming Memory */
@@ -731,6 +730,18 @@ int sam_emac0_setmac(void);
 
 #ifdef HAVE_MTDCONFIG
 int sam_at24config(void);
+#endif
+
+/****************************************************************************
+ * Name: sam_s25fl1_init
+ *
+ * Description:
+ *   Create an S25F1 NOR flash based MTD configuration device.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MTD_S25FL1
+int sam_s25fl1_init(void);
 #endif
 
 /****************************************************************************
