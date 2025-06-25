@@ -327,7 +327,7 @@ struct arm64_mpu_region
 
   /* Region limit Address */
 
-  uint64_t limit;
+  uint64_t size;
 
   /* Region Name */
 
@@ -351,11 +351,11 @@ struct arm64_mpu_config
   const struct arm64_mpu_region *mpu_regions;
 };
 
-#define MPU_REGION_ENTRY(_name, _base, _limit, _attr) \
+#define MPU_REGION_ENTRY(_name, _base, _size, _attr)  \
   {                                                   \
     .name   = _name,                                  \
     .base   = _base,                                  \
-    .limit  = _limit,                                 \
+    .size   = _size,                                  \
     .attr   = _attr,                                  \
   }
 
@@ -459,16 +459,18 @@ void mpu_dump_region(void);
  *
  * Input Parameters:
  *   region - The index of the MPU region to modify.
- *   table  - Pointer to a struct containing the configuration
- *            parameters for the region.
+ *   base   - The base address of the region.
+ *   size   - The size of the region.
+ *   flags1 - Additional flags for the region.
+ *   flags2 - Additional flags for the region.
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-void mpu_modify_region(unsigned int region,
-                       const struct arm64_mpu_region *table);
+void mpu_modify_region(unsigned int region, uintptr_t base, size_t size,
+                       uint32_t flags1, uint32_t flags2);
 
 /****************************************************************************
  * Name: mpu_configure_region
@@ -477,16 +479,18 @@ void mpu_modify_region(unsigned int region,
  *   Configure a region for privileged, strongly ordered memory
  *
  * Input Parameters:
- *   table - Pointer to a struct containing the configuration
- *           parameters for the region.
+ *   base   - The base address of the region.
+ *   size   - The size of the region.
+ *   flags1 - Additional flags for the region.
+ *   flags2 - Additional flags for the region.
  *
  * Returned Value:
  *   The region number allocated for the configured region.
  *
  ****************************************************************************/
 
-unsigned int mpu_configure_region(const struct arm64_mpu_region *
-                                  table);
+unsigned int mpu_configure_region(uintptr_t base, size_t size,
+                                  uint32_t flags1, uint32_t flags2);
 
 /****************************************************************************
  * Name: arm64_mpu_init

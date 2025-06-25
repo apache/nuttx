@@ -56,14 +56,14 @@ static const struct arm64_mpu_region g_mpu_regions[] =
 
   MPU_REGION_ENTRY("nx_ktext",
     (uint64_t)KTEXT_START,
-    (uint64_t)KTEXT_END,
+    (uint64_t)KTEXT_SIZE,
     REGION_KTEXT_ATTR),
 
   /* Region 1 NuttX kdata */
 
   MPU_REGION_ENTRY("nx_kdata",
     (uint64_t)KSRAM_START,
-    (uint64_t)KSRAM_END,
+    (uint64_t)KSRAM_SIZE,
     REGION_RW_NA_ATTR),
 
 #ifdef CONFIG_BUILD_PROTECTED
@@ -71,14 +71,14 @@ static const struct arm64_mpu_region g_mpu_regions[] =
 
   MPU_REGION_ENTRY("nx_utext",
       (uint64_t)UTEXT_START,
-      (uint64_t)UTEXT_END,
+      (uint64_t)UTEXT_SIZE,
       REGION_UTEXT_ATTR),
 
   /* Region 3 NuttX udata */
 
   MPU_REGION_ENTRY("nx_udata",
      (uint64_t)USRAM_START,
-     (uint64_t)USRAM_END,
+     (uint64_t)USRAM_SIZE,
      REGION_RW_RW_ATTR),
 #endif
 
@@ -86,14 +86,14 @@ static const struct arm64_mpu_region g_mpu_regions[] =
 
   MPU_REGION_ENTRY("DEVICE1",
      (uint64_t)CONFIG_DEVICEIO1_BASEADDR,
-     (uint64_t)CONFIG_DEVICEIO1_END,
+     (uint64_t)CONFIG_DEVICEIO1_SIZE,
      REGION_DEVICE_ATTR),
 
   /* Region 5 device region */
 
   MPU_REGION_ENTRY("DEVICE2",
      (uint64_t)CONFIG_DEVICEIO2_BASEADDR,
-     (uint64_t)CONFIG_DEVICEIO2_END,
+     (uint64_t)CONFIG_DEVICEIO2_SIZE,
      REGION_DEVICE_ATTR)
 };
 
