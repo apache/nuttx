@@ -136,30 +136,20 @@ static void rpmsg_router_hub_ept_release(FAR struct rpmsg_endpoint *ept)
 static void rpmsg_router_hub_unbind(FAR struct rpmsg_endpoint *ept)
 {
   FAR struct rpmsg_endpoint *dst_ept = ept->priv;
+  FAR struct rpmsg_device *rdev = dst_ept->rdev;
 
-  if (!dst_ept)
-    {
-      return;
-    }
-
-  /* Destroy dest edge ept firstly if it's binded at rpmsg_router_hub_bound */
-
-  metal_mutex_acquire(&dst_ept->rdev->lock);
+  rpmsg_destroy_ept(ept);
   if (dst_ept->cb)
     {
-      dst_ept->priv = NULL;
-      metal_mutex_release(&dst_ept->rdev->lock);
-      rpmsg_destroy_ept(dst_ept);
+      rpmsg_send_ns_message(dst_ept, RPMSG_NS_DESTROY);
+      metal_mutex_acquire(&rdev->lock);
+      rpmsg_ept_decref(dst_ept);
+      metal_mutex_release(&rdev->lock);
     }
   else
     {
-      metal_mutex_release(&dst_ept->rdev->lock);
       kmm_free(dst_ept);
     }
-
-  /* Destroy source edge ept */
-
-  rpmsg_destroy_ept(ept);
 }
 
 /****************************************************************************
@@ -178,6 +168,8 @@ static void rpmsg_router_hub_unbind(FAR struct rpmsg_endpoint *ept)
 static void rpmsg_router_hub_bound(FAR struct rpmsg_endpoint *ept)
 {
   FAR struct rpmsg_endpoint *src_ept = ept->priv;
+  FAR struct rpmsg_device *src_rdev = src_ept->rdev;
+  FAR struct rpmsg_device *rdev = ept->rdev;
   int ret;
 
   /* Create endpoint (r:dst_cpu:name) and send ACK to source edge core */
@@ -186,6 +178,14 @@ static void rpmsg_router_hub_bound(FAR struct rpmsg_endpoint *ept)
                          RPMSG_ADDR_ANY, src_ept->dest_addr,
                          rpmsg_router_hub_cb, rpmsg_router_hub_unbind);
   DEBUGASSERT(ret == RPMSG_SUCCESS);
+
+  metal_mutex_acquire(&rdev->lock);
+  rpmsg_ept_incref(ept);
+  metal_mutex_release(&rdev->lock);
+
+  metal_mutex_acquire(&src_rdev->lock);
+  rpmsg_ept_incref(src_ept);
+  metal_mutex_release(&src_rdev->lock);
 }
 
 /****************************************************************************
