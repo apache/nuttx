@@ -299,7 +299,7 @@ endif # NET_TCP_WRITE_BUFFERS
 
 config NET_TCPBACKLOG
 	bool "TCP/IP backlog support"
-	default n
+	default y
 	---help---
 		Incoming connections pend in a backlog until accept() is called.
 		The size of the backlog is selected when listen() is called.
