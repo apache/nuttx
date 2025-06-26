@@ -5,7 +5,6 @@
 /arm/mps/mps3-an547/configs/ap,CONFIG_ARM_TOOLCHAIN_GNU_EABI
 /arm/mps/mps3-an547/configs/bl,CONFIG_ARM_TOOLCHAIN_GNU_EABI
 /arm/mps/mps3-an547/configs/clang,CONFIG_ARM_TOOLCHAIN_CLANG
-/arm/mps/mps3-an547/configs/gcov,CONFIG_ARM_TOOLCHAIN_CLANG
 /arm/mps/mps3-an547/configs/nsh,CONFIG_ARM_TOOLCHAIN_GNU_EABI
 /arm/mps/mps3-an547/configs/picostest,CONFIG_ARM_TOOLCHAIN_GNU_EABI
 
@@ -22,6 +21,8 @@ CMake,arduino-nano-33ble:usbnsh
 
 CMake,arduino-nano-33ble-rev2:nsh
 CMake,arduino-nano-33ble-rev2:usbnsh
+
+CMAKE,mps3-an547:gcov
 
 CMake,nrf52832-dk:mcuboot_app
 CMake,nrf52832-dk:mcuboot_loader
