@@ -393,6 +393,10 @@ size_t arm64_stack_check(void *stackbase, size_t nbytes);
 void arm64_stack_color(void *stackbase, size_t nbytes);
 #endif
 
+#ifdef CONFIG_ARCH_HAVE_DEBUG
+void arm64_enable_dbgmonitor(void);
+#endif
+
 #undef EXTERN
 #ifdef __cplusplus
 }

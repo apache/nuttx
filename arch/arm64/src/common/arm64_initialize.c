@@ -217,5 +217,9 @@ void up_initialize(void)
   arm64_fpu_procfs_register();
 #endif
 
+#ifdef CONFIG_ARCH_HAVE_DEBUG
+  arm64_enable_dbgmonitor();
+#endif
+
 #endif
 }
