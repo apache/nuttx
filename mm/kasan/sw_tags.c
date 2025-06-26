@@ -36,13 +36,6 @@
 
 #define KASAN_TAG_SHIFT 56
 
-#define kasan_get_tag(addr) \
-  ((uint8_t)((uint64_t)(addr) >> KASAN_TAG_SHIFT))
-
-#define kasan_set_tag(addr, tag) \
-  (FAR void *)((((uint64_t)(addr)) & ~((uint64_t)0xff << KASAN_TAG_SHIFT)) | \
-               (((uint64_t)(tag)) << KASAN_TAG_SHIFT))
-
 #define kasan_random_tag() (1 + rand() % ((1 << (64 - KASAN_TAG_SHIFT)) - 2))
 
 #define KASAN_SHADOW_SCALE (sizeof(uintptr_t))
