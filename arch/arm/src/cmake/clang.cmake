@@ -54,11 +54,14 @@ if(TOOLCHAIN_CLANG_CONFIG)
     set(TOOLCHAIN_CLANG_CONFIG ${TOOLCHAIN_CLANG_CONFIG}_nosys)
   elseif(CLANGVER STRGREATER_EQUAL "17.0")
     set(TOOLCHAIN_CLANG_OPTION -target)
-    add_compile_options(--target=arm-none-eabi)
+    set(TOOLCHAIN_CLANG_TARGET --target=arm-none-eabi)
   else()
     set(TOOLCHAIN_CLANG_OPTION --config)
   endif()
-  add_compile_options(${TOOLCHAIN_CLANG_OPTION} ${TOOLCHAIN_CLANG_CONFIG}.cfg)
+  add_compile_options(${TOOLCHAIN_CLANG_OPTION} ${TOOLCHAIN_CLANG_CONFIG}.cfg
+                      ${TOOLCHAIN_CLANG_TARGET})
+  add_link_options(${TOOLCHAIN_CLANG_OPTION} ${TOOLCHAIN_CLANG_CONFIG}.cfg
+                   ${TOOLCHAIN_CLANG_TARGET})
 endif()
 
 # override the ARCHIVE command
