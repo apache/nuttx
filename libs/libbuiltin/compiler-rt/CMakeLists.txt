@@ -136,5 +136,5 @@ elseif(CONFIG_COVERAGE_MINI AND CONFIG_ARCH_TOOLCHAIN_CLANG)
   target_compile_options(rt.miniprofile PRIVATE -fno-profile-instr-generate
                                                 -fno-coverage-mapping)
 
-  target_sources(rt.profile PRIVATE ${CMAKE_CURRENT_LIST_DIR}/coverage.c)
+  target_sources(rt.miniprofile PRIVATE ${CMAKE_CURRENT_LIST_DIR}/coverage.c)
 endif()
