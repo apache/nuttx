@@ -20,6 +20,7 @@ ESP32 Toolchain
 ===============
 
 The toolchain used to build ESP32 firmware can be either downloaded or built from the sources.
+
 It is **highly** recommended to use (download or build) the same toolchain version that is being
 used by the NuttX CI.
 
@@ -33,20 +34,12 @@ check for the current compiler version being used. For instance:
   # Build image for tool required by ESP32 builds
   ###############################################################################
   FROM nuttx-toolchain-base AS nuttx-toolchain-esp32
-  # Download the latest ESP32 GCC toolchain prebuilt by Espressif
-  RUN mkdir -p xtensa-esp32-elf-gcc && \
-    curl -s -L "https://github.com/espressif/crosstool-NG/releases/download/esp-12.2.0_20230208/xtensa-esp32-elf-12.2.0_20230208-x86_64-linux-gnu.tar.xz" \
-    | tar -C xtensa-esp32-elf-gcc --strip-components 1 -xJ
+  # Download the latest ESP32, ESP32-S2 and ESP32-S3 GCC toolchain prebuilt by Espressif
+  RUN mkdir -p xtensa-esp-elf-gcc && \
+    curl -s -L "https://github.com/espressif/crosstool-NG/releases/download/esp-14.2.0_20241119/xtensa-esp-elf-14.2.0_20241119-x86_64-linux-gnu.tar.xz" \
+    | tar -C xtensa-esp-elf-gcc --strip-components 1 -xJ
 
-  RUN mkdir -p xtensa-esp32s2-elf-gcc && \
-    curl -s -L "https://github.com/espressif/crosstool-NG/releases/download/esp-12.2.0_20230208/xtensa-esp32s2-elf-12.2.0_20230208-x86_64-linux-gnu.tar.xz" \
-    | tar -C xtensa-esp32s2-elf-gcc --strip-components 1 -xJ
-
-  RUN mkdir -p xtensa-esp32s3-elf-gcc && \
-    curl -s -L "https://github.com/espressif/crosstool-NG/releases/download/esp-12.2.0_20230208/xtensa-esp32s3-elf-12.2.0_20230208-x86_64-linux-gnu.tar.xz" \
-    | tar -C xtensa-esp32s3-elf-gcc --strip-components 1 -xJ
-
-For ESP32, the toolchain version is based on GGC 12.2.0 (``xtensa-esp32-elf-12.2.0_20230208``)
+For ESP32, the toolchain version is based on GGC 14.2.0 (``xtensa-esp-elf-14.2.0_20241119``)
 
 The prebuilt Toolchain (Recommended)
 ------------------------------------
@@ -55,20 +48,20 @@ First, create a directory to hold the toolchain:
 
 .. code-block:: console
 
-  $ mkdir -p /path/to/your/toolchain/xtensa-esp32-elf-gcc
+  $ mkdir -p /path/to/your/toolchain/xtensa-esp-elf-gcc
 
 Download and extract toolchain:
 
 .. code-block:: console
 
-  $ curl -s -L "https://github.com/espressif/crosstool-NG/releases/download/esp-12.2.0_20230208/xtensa-esp32-elf-12.2.0_20230208-x86_64-linux-gnu.tar.xz" \
-  | tar -C xtensa-esp32-elf-gcc --strip-components 1 -xJ
+  $ curl -s -L "https://github.com/espressif/crosstool-NG/releases/download/esp-14.2.0_20241119/xtensa-esp-elf-14.2.0_20241119-x86_64-linux-gnu.tar.xz" \
+  | tar -C xtensa-esp-elf-gcc --strip-components 1 -xJ
 
 Add the toolchain to your `PATH`:
 
 .. code-block:: console
 
-  $ echo "export PATH=/path/to/your/toolchain/xtensa-esp32-elf-gcc/bin:$PATH" >> ~/.bashrc
+  $ echo "export PATH=/path/to/your/toolchain/xtensa-esp-elf-gcc/bin:$PATH" >> ~/.bashrc
 
 You can edit your shell's rc files if you don't use bash.
 
