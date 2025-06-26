@@ -56,6 +56,8 @@
 #  include "soc/uart_pins.h"
 #  include "hal/rtc_io_hal.h"
 #  include "soc/uart_periph.h"
+#  include "driver/rtc_io.h"
+#  include "io_mux.h"
 #endif
 
 /****************************************************************************
@@ -271,11 +273,7 @@ static void esp_lowputc_lp_uart_config_io(const struct esp_uart_s *priv,
   DEBUGASSERT(lp_pin != -1);
 
 #if SOC_LP_IO_CLOCK_IS_INDEPENDENT
-  RTCIO_RCC_ATOMIC()
-    {
-      rtcio_ll_enable_io_clock(true);
-    }
-
+  io_mux_enable_lp_io_clock(lp_pin, true);
 #endif
   rtcio_hal_function_select(lp_pin, RTCIO_LL_FUNC_RTC);
   rtcio_hal_set_direction(pin, direction);
@@ -283,7 +281,7 @@ static void esp_lowputc_lp_uart_config_io(const struct esp_uart_s *priv,
   const uart_periph_sig_t *upin =
     &uart_periph_signal[LP_UART_NUM_0].pins[idx];
 #if !SOC_LP_GPIO_MATRIX_SUPPORTED
-  rtcio_hal_iomux_func_sel(lp_pin, upin->iomux_func);
+  rtc_gpio_iomux_func_sel(pin, upin->iomux_func);
 #else
   /* ToDo: Add LP UART for LP GPIO Matrix supported devices (e.g ESP32-P4) */
 #endif /* SOC_LP_GPIO_MATRIX_SUPPORTED */
