@@ -99,18 +99,22 @@
 
 struct rpmsg_port_uart_s
 {
-  struct rpmsg_port_s    port;     /* Rpmsg port device */
-  struct file            file;     /* Indicate uart device */
-  char                   localcpu[RPMSG_NAME_SIZE];
-  rpmsg_port_rx_cb_t     rx_cb;
-  uint8_t                rx_dbg_buf[RPMSG_PORT_UART_DBG_BUFLEN];
-  int                    rx_dbg_idx;
-  nxevent_t              event;
-  struct notifier_block  nb;       /* Reboot notifier block */
-  uint8_t                tx_staywake;
+  struct rpmsg_port_s             port;     /* Rpmsg port device */
+  struct file                     file;     /* Indicate uart device */
+  char                            localcpu[RPMSG_NAME_SIZE];
+  FAR struct rpmsg_port_header_s *rx_hdr;
+  uint16_t                        rx_next;
+  uint8_t                         rx_state;
+  rpmsg_port_rx_cb_t              rx_cb;
+  pid_t                           rx_tid;
+  uint8_t                         rx_dbg_buf[RPMSG_PORT_UART_DBG_BUFLEN];
+  int                             rx_dbg_idx;
+  nxevent_t                       event;
+  struct notifier_block           nb;       /* Reboot notifier block */
+  uint8_t                         tx_staywake;
 #ifdef CONFIG_PM
-  struct pm_wakelock_s   tx_wakelock;
-  struct pm_wakelock_s   rx_wakelock;
+  struct pm_wakelock_s            tx_wakelock;
+  struct pm_wakelock_s            rx_wakelock;
 #endif
 };
 
@@ -122,8 +126,14 @@ static void rpmsg_port_uart_send_data(FAR struct rpmsg_port_uart_s *rpuart,
                                       FAR struct rpmsg_port_header_s *hdr);
 
 static void rpmsg_port_uart_tx_ready(FAR struct rpmsg_port_s *port);
+static int
+rpmsg_port_uart_queue_noavail(FAR struct rpmsg_port_s *port,
+                              FAR struct rpmsg_port_queue_s *queue);
 static void rpmsg_port_uart_register_callback(FAR struct rpmsg_port_s *port,
                                               rpmsg_port_rx_cb_t callback);
+
+static void rpmsg_port_uart_rx_worker(FAR struct rpmsg_port_uart_s *rpuart,
+                                      bool process_rx);
 
 /****************************************************************************
  * Private Data
@@ -131,9 +141,10 @@ static void rpmsg_port_uart_register_callback(FAR struct rpmsg_port_s *port,
 
 static const struct rpmsg_port_ops_s g_rpmsg_port_uart_ops =
 {
-  .notify_tx_ready   = rpmsg_port_uart_tx_ready,
-  .notify_rx_free    = NULL,
-  .register_callback = rpmsg_port_uart_register_callback,
+  .notify_tx_ready      = rpmsg_port_uart_tx_ready,
+  .notify_rx_free       = NULL,
+  .notify_queue_noavail = rpmsg_port_uart_queue_noavail,
+  .register_callback    = rpmsg_port_uart_register_callback,
 };
 
 /****************************************************************************
@@ -382,6 +393,26 @@ static void rpmsg_port_uart_tx_ready(FAR struct rpmsg_port_s *port)
 }
 
 /****************************************************************************
+ * Name: rpmsg_port_uart_queue_noavail
+ ****************************************************************************/
+
+static int
+rpmsg_port_uart_queue_noavail(FAR struct rpmsg_port_s *port,
+                              FAR struct rpmsg_port_queue_s *queue)
+{
+  FAR struct rpmsg_port_uart_s *rpuart =
+    (FAR struct rpmsg_port_uart_s *)port;
+
+  if (nxsched_gettid() != rpuart->rx_tid || queue != &rpuart->port.txq)
+    {
+      return -ENOTSUP;
+    }
+
+  rpmsg_port_uart_rx_worker(rpuart, false);
+  return 0;
+}
+
+/****************************************************************************
  * Name: rpmsg_port_uart_register_callback
  ****************************************************************************/
 
@@ -554,6 +585,154 @@ rpmsg_port_uart_process_rx_data(FAR struct rpmsg_port_uart_s *rpuart)
 }
 
 /****************************************************************************
+ * Name: rpmsg_port_uart_rx_worker
+ ****************************************************************************/
+
+static void rpmsg_port_uart_rx_worker(FAR struct rpmsg_port_uart_s *rpuart,
+                                      bool process_rx)
+{
+  FAR struct rpmsg_port_queue_s *rxq = &rpuart->port.rxq;
+  FAR struct rpmsg_port_header_s *hdr = rpuart->rx_hdr;
+  uint16_t next = rpuart->rx_next;
+  uint8_t state = rpuart->rx_state;
+  uint8_t buf[RPMSG_PORT_UART_BUFLEN];
+  ssize_t ret;
+  ssize_t i;
+
+  ret = file_read(&rpuart->file, buf, sizeof(buf));
+  if (ret < 0)
+    {
+      rpmsgerr("file_read failed, ret=%zd\n", ret);
+      PANIC();
+    }
+
+  rpmsgdump("Received data:", buf, ret);
+
+  for (i = 0; i < ret; i++)
+    {
+      rpuart->rx_dbg_buf[rpuart->rx_dbg_idx++] = buf[i];
+      if (rpuart->rx_dbg_idx >= RPMSG_PORT_UART_DBG_BUFLEN)
+        {
+          rpuart->rx_dbg_idx = 0;
+        }
+
+      if (rpmsg_port_uart_process_rx_cmd(rpuart, &hdr, &state, buf[i]))
+        {
+          continue;
+        }
+
+      if (!rpmsg_port_uart_check(rpuart, RPMSG_PORT_UART_EVT_CONNED))
+        {
+          continue;
+        }
+
+      switch (state)
+        {
+          case RPMSG_PORT_UART_RX_WAIT_START:
+            if (buf[i] == RPMSG_PORT_UART_START)
+              {
+                if (hdr == NULL)
+                  {
+                    hdr = rpmsg_port_queue_get_available_buffer(rxq,
+                                                                true);
+                    next = 0;
+                  }
+
+                state = RPMSG_PORT_UART_RX_RECV_NORMAL;
+              }
+            else if (buf[i] == RPMSG_PORT_UART_END)
+              {
+                rpmsgerr("Recv dup end char buf[%zd]=%x dbg_i=%d\n",
+                         i, buf[i], rpuart->rx_dbg_idx);
+                rpmsgerrdump("Recv dbg:", rpuart->rx_dbg_buf,
+                             sizeof(rpuart->rx_dbg_buf));
+                rpmsgerrdump("Recv error:", buf, ret);
+              }
+            else
+              {
+                rpmsgerr("Recv non start char buf[%zd]=%x dbg_i=%d\n",
+                          i, buf[i], rpuart->rx_dbg_idx);
+              }
+            break;
+
+          case RPMSG_PORT_UART_RX_RECV_NORMAL:
+            if (buf[i] == RPMSG_PORT_UART_START)
+              {
+                rpmsgerr("Recv dup start char, len=%u next=%u i=%zd "
+                         "dbg_i=%d\n", hdr->len, next, i,
+                         rpuart->rx_dbg_idx);
+                rpmsgerrdump("Recv dbg:", rpuart->rx_dbg_buf,
+                              sizeof(rpuart->rx_dbg_buf));
+                rpmsgerrdump("Recv error:", buf, ret);
+                rpmsgerrdump("Recv hdr:", hdr, hdr->len);
+                state = RPMSG_PORT_UART_RX_WAIT_START;
+                next = 0;
+              }
+            else if (buf[i] == RPMSG_PORT_UART_END)
+              {
+                if (hdr->len != next || (hdr->crc != 0 &&
+                    hdr->crc != rpmsg_port_uart_crc16(hdr)))
+                  {
+                    rpmsgerr("Recv error crc=%u len=%u next=%u i=%zd "
+                             "dbg_i=%d\n", hdr->crc, hdr->len, next, i,
+                             rpuart->rx_dbg_idx);
+                    rpmsgerrdump("Recv dbg:", rpuart->rx_dbg_buf,
+                                 sizeof(rpuart->rx_dbg_buf));
+                    rpmsgerrdump("Recv error:", buf, ret);
+                    rpmsgerrdump("Recv hdr:", hdr, hdr->len);
+                  }
+
+                rpmsg_port_queue_add_buffer(rxq, hdr);
+
+                state = RPMSG_PORT_UART_RX_WAIT_START;
+                hdr = NULL;
+              }
+            else if (buf[i] == RPMSG_PORT_UART_ESCAPE)
+              {
+                state = RPMSG_PORT_UART_RX_RECV_ESCAPE;
+              }
+            else if (next < rxq->len)
+              {
+                *((FAR char *)hdr + next++) = buf[i];
+              }
+            else
+              {
+                rpmsgerr("Recv len %u exceed buffer len %u\n",
+                         next, rxq->len);
+              }
+            break;
+
+          case RPMSG_PORT_UART_RX_RECV_ESCAPE:
+            if (next < rxq->len)
+              {
+                *((FAR char *)hdr + next++) =
+                  buf[i] ^ RPMSG_PORT_UART_ESCAPE_MASK;
+              }
+            else
+              {
+                rpmsgerr("Recv escape len %u exceed buffer len %u\n",
+                         next, rxq->len);
+              }
+
+            state = RPMSG_PORT_UART_RX_RECV_NORMAL;
+            break;
+
+          default:
+            PANIC();
+        }
+    }
+
+  rpuart->rx_hdr = hdr;
+  rpuart->rx_next = next;
+  rpuart->rx_state = state;
+
+  if (process_rx)
+    {
+      rpmsg_port_uart_process_rx_data(rpuart);
+    }
+}
+
+/****************************************************************************
  * Name: rpmsg_port_uart_rx_thread
  ****************************************************************************/
 
@@ -561,145 +740,12 @@ static int rpmsg_port_uart_rx_thread(int argc, FAR char *argv[])
 {
   FAR struct rpmsg_port_uart_s *rpuart =
     (FAR struct rpmsg_port_uart_s *)(uintptr_t)strtoul(argv[2], NULL, 16);
-  FAR struct rpmsg_port_queue_s *rxq = &rpuart->port.rxq;
-  FAR struct rpmsg_port_header_s *hdr = NULL;
-  uint8_t state = RPMSG_PORT_UART_RX_WAIT_START;
-  uint8_t buf[RPMSG_PORT_UART_BUFLEN];
-  uint16_t next;
+
+  rpuart->rx_tid = nxsched_gettid();
 
   for (; ; )
     {
-      ssize_t ret;
-      ssize_t i;
-
-      ret = file_read(&rpuart->file, buf, sizeof(buf));
-      if (ret < 0)
-        {
-          rpmsgerr("file_read failed, ret=%zd\n", ret);
-          PANIC();
-        }
-
-      rpmsgdump("Received data:", buf, ret);
-
-      for (i = 0; i < ret; i++)
-        {
-          rpuart->rx_dbg_buf[rpuart->rx_dbg_idx++] = buf[i];
-          if (rpuart->rx_dbg_idx >= RPMSG_PORT_UART_DBG_BUFLEN)
-            {
-              rpuart->rx_dbg_idx = 0;
-            }
-
-          if (rpmsg_port_uart_process_rx_cmd(rpuart, &hdr, &state, buf[i]))
-            {
-              continue;
-            }
-
-          if (!rpmsg_port_uart_check(rpuart, RPMSG_PORT_UART_EVT_CONNED))
-            {
-              continue;
-            }
-
-          switch (state)
-            {
-              case RPMSG_PORT_UART_RX_WAIT_START:
-                if (buf[i] == RPMSG_PORT_UART_START)
-                  {
-                    if (hdr == NULL)
-                      {
-                        hdr = rpmsg_port_queue_get_available_buffer(rxq,
-                                                                    true);
-                        next = 0;
-                      }
-
-                    state = RPMSG_PORT_UART_RX_RECV_NORMAL;
-                  }
-                else if (buf[i] == RPMSG_PORT_UART_END)
-                  {
-                    rpmsgerr("Recv dup end char buf[%zd]=%x dbg_i=%d\n",
-                             i, buf[i], rpuart->rx_dbg_idx);
-                    rpmsgerrdump("Recv dbg:", rpuart->rx_dbg_buf,
-                                 sizeof(rpuart->rx_dbg_buf));
-                    rpmsgerrdump("Recv error:", buf, ret);
-                  }
-                else
-                  {
-                    rpmsgerr("Recv non start char buf[%zd]=%x dbg_i=%d\n",
-                             i, buf[i], rpuart->rx_dbg_idx);
-                  }
-                break;
-
-              case RPMSG_PORT_UART_RX_RECV_NORMAL:
-                if (buf[i] == RPMSG_PORT_UART_START)
-                  {
-                    rpmsgerr("Recv dup start char, len=%u next=%u i=%zd "
-                             "dbg_i=%d\n", hdr->len, next, i,
-                             rpuart->rx_dbg_idx);
-                    rpmsgerrdump("Recv dbg:", rpuart->rx_dbg_buf,
-                                 sizeof(rpuart->rx_dbg_buf));
-                    rpmsgerrdump("Recv error:", buf, ret);
-                    rpmsgerrdump("Recv hdr:", hdr, hdr->len);
-                    state = RPMSG_PORT_UART_RX_WAIT_START;
-                    next = 0;
-                  }
-                else if (buf[i] == RPMSG_PORT_UART_END)
-                  {
-                    if (hdr->len != next || (hdr->crc != 0 &&
-                        hdr->crc != rpmsg_port_uart_crc16(hdr)))
-                      {
-                        rpmsgerr("Recv error crc=%u len=%u next=%u i=%zd "
-                                 "dbg_i=%d\n", hdr->crc, hdr->len, next, i,
-                                 rpuart->rx_dbg_idx);
-                        rpmsgerrdump("Recv dbg:", rpuart->rx_dbg_buf,
-                                     sizeof(rpuart->rx_dbg_buf));
-                        rpmsgerrdump("Recv error:", buf, ret);
-                        rpmsgerrdump("Recv hdr:", hdr, hdr->len);
-                      }
-
-                    rpmsg_port_queue_add_buffer(rxq, hdr);
-                    if (rpmsg_port_queue_navail(rxq) == 0)
-                      {
-                        rpmsg_port_uart_process_rx_data(rpuart);
-                      }
-
-                    state = RPMSG_PORT_UART_RX_WAIT_START;
-                    hdr = NULL;
-                  }
-                else if (buf[i] == RPMSG_PORT_UART_ESCAPE)
-                  {
-                    state = RPMSG_PORT_UART_RX_RECV_ESCAPE;
-                  }
-                else if (next < rxq->len)
-                  {
-                    *((FAR char *)hdr + next++) = buf[i];
-                  }
-                else
-                  {
-                    rpmsgerr("Recv len %u exceed buffer len %u\n",
-                             next, rxq->len);
-                  }
-                break;
-
-              case RPMSG_PORT_UART_RX_RECV_ESCAPE:
-                if (next < rxq->len)
-                  {
-                    *((FAR char *)hdr + next++) =
-                      buf[i] ^ RPMSG_PORT_UART_ESCAPE_MASK;
-                  }
-                else
-                  {
-                    rpmsgerr("Recv escape len %u exceed buffer len %u\n",
-                             next, rxq->len);
-                  }
-
-                state = RPMSG_PORT_UART_RX_RECV_NORMAL;
-                break;
-
-              default:
-                PANIC();
-            }
-        }
-
-      rpmsg_port_uart_process_rx_data(rpuart);
+      rpmsg_port_uart_rx_worker(rpuart, true);
     }
 
   return 0;
@@ -799,6 +845,7 @@ int rpmsg_port_uart_initialize(FAR const struct rpmsg_port_config_s *cfg,
       return -ENOMEM;
     }
 
+  rpuart->rx_state = RPMSG_PORT_UART_RX_WAIT_START;
   rpuart->tx_staywake = RPMSG_PORT_UART_STAYWAKE1;
   nxevent_init(&rpuart->event, 0);
 
