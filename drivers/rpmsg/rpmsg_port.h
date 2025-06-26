@@ -67,8 +67,14 @@ struct rpmsg_port_list_s
   struct list_node head;          /* List head */
 };
 
+struct rpmsg_port_s;
+
 struct rpmsg_port_queue_s
 {
+  /* Pointer to the rpmsg port handler */
+
+  FAR struct rpmsg_port_s  *port;
+
   /* Indicate buffers current queue managed is dynamic alloced */
 
   bool                     alloced;
@@ -94,8 +100,6 @@ struct rpmsg_port_queue_s
   struct rpmsg_port_list_s ready;
 };
 
-struct rpmsg_port_s;
-
 typedef void (*rpmsg_port_rx_cb_t)(FAR struct rpmsg_port_s *port,
                                    FAR struct rpmsg_port_header_s *hdr);
 
@@ -108,6 +112,11 @@ struct rpmsg_port_ops_s
   /* Notify driver there is a buffer in rx queue is freed */
 
   CODE void (*notify_rx_free)(FAR struct rpmsg_port_s *port);
+
+  /* Notify driver there is no available buffer */
+
+  CODE int (*notify_queue_noavail)(FAR struct rpmsg_port_s *port,
+                                   FAR struct rpmsg_port_queue_s *queue);
 
   /* Register callback function which should be invoked when there is
    * date received to the rx queue by driver

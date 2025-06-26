@@ -158,6 +158,7 @@ static const struct rpmsg_port_ops_s g_rpmsg_port_spi_ops =
 {
   rpmsg_port_spi_notify_tx_ready,
   rpmsg_port_spi_notify_rx_free,
+  NULL,
   rpmsg_port_spi_register_cb,
 };
 
