@@ -362,7 +362,7 @@ SPIFLASH         Yes
 SPIRAM           No
 Temp. Sensor     No
 Timers           Yes
-UART             Yes
+UART             Yes     LPUART supported
 USB Serial       Yes
 Watchdog         Yes
 Wi-Fi            Yes
