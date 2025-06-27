@@ -48,6 +48,22 @@
       virtio_write_config((vdev), offsetof(structname, member), \
                           (ptr), sizeof(*(ptr)));
 
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+static inline void virtio_read_config_bytes(FAR struct virtio_device *vdev,
+                                            uint32_t offset, FAR void *dst,
+                                            int len)
+{
+  int i;
+
+  for (i = 0; i < len; i++)
+    {
+      virtio_read_config(vdev, offset + i, dst + i, 1);
+    }
+}
+
 #endif /* CONFIG_OPENAMP */
 
 #endif /* __INCLUDE_NUTTX_VIRTIO_VIRTIO_CONFIG_H */
