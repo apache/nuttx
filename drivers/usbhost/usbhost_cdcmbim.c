@@ -43,6 +43,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/kthread.h>
 #include <nuttx/mutex.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/signal.h>
@@ -200,6 +201,7 @@ struct usbhost_cdcmbim_s
   uint16_t                dataif;       /* Data interface number */
   int16_t                 crefs;        /* Reference count on the driver instance */
   mutex_t                 lock;         /* Used to maintain mutual exclusive access */
+  spinlock_t              spinlock;     /* Used to protect critical section */
   struct work_s           ntwork;       /* Notification work */
   struct work_s           comm_rxwork;  /* Communication interface RX work */
   struct work_s           bulk_rxwork;
@@ -360,6 +362,8 @@ static const struct file_operations g_cdcwdm_fops =
 
 static uint32_t g_devinuse;
 
+static spinlock_t g_lock = SP_UNLOCKED;
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -401,7 +405,7 @@ static ssize_t usbhost_readmessage(FAR struct usbhost_cdcmbim_s *priv,
   irqstate_t flags;
   ssize_t ret = -EAGAIN;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->spinlock);
 
   if (priv->comm_rxlen > 0)
     {
@@ -421,7 +425,7 @@ static ssize_t usbhost_readmessage(FAR struct usbhost_cdcmbim_s *priv,
         }
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->spinlock, flags);
   return ret;
 }
 
@@ -676,7 +680,7 @@ static int usbhost_allocdevno(FAR struct usbhost_cdcmbim_s *priv)
   irqstate_t flags;
   int devno;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_lock);
   for (devno = 0; devno < 32; devno++)
     {
       uint32_t bitno = 1 << devno;
@@ -684,12 +688,12 @@ static int usbhost_allocdevno(FAR struct usbhost_cdcmbim_s *priv)
         {
           g_devinuse |= bitno;
           priv->minor = devno;
-          leave_critical_section(flags);
+          spin_unlock_irqrestore(&g_lock, flags);
           return OK;
         }
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_lock, flags);
   return -EMFILE;
 }
 
@@ -699,9 +703,9 @@ static void usbhost_freedevno(FAR struct usbhost_cdcmbim_s *priv)
 
   if (devno >= 0 && devno < 26)
     {
-      irqstate_t flags = enter_critical_section();
+      irqstate_t flags = spin_lock_irqsave(&g_lock);
       g_devinuse &= ~(1 << devno);
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(&g_lock, flags);
     }
 }
 
@@ -1927,6 +1931,7 @@ usbhost_create(FAR struct usbhost_hubport_s *hport,
           /* Initialize mutex (this works in the interrupt context) */
 
           nxmutex_init(&priv->lock);
+          spin_lock_init(&priv->spinlock);
 
           /* Return the instance of the USB class driver */
 
@@ -2045,7 +2050,7 @@ static int usbhost_disconnected(FAR struct usbhost_class_s *usbclass)
    * longer available.
    */
 
-  flags              = enter_critical_section();
+  flags              = spin_lock_irqsave(&priv->spinlock);
   priv->disconnected = true;
 
   /* Now check the number of references on the class instance.  If it is one,
@@ -2057,6 +2062,8 @@ static int usbhost_disconnected(FAR struct usbhost_class_s *usbclass)
   uinfo("crefs: %d\n", priv->crefs);
   if (priv->crefs == 1)
     {
+      spin_unlock_irqrestore(&priv->spinlock, flags);
+
       /* Destroy the class instance.  If we are executing from an interrupt
        * handler, then defer the destruction to the worker thread.
        * Otherwise, destroy the instance now.
@@ -2078,9 +2085,11 @@ static int usbhost_disconnected(FAR struct usbhost_class_s *usbclass)
 
           usbhost_destroy(priv);
         }
+
+      return OK;
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->spinlock, flags);
   return OK;
 }
 
@@ -2363,13 +2372,13 @@ static int cdcmbim_ifdown(FAR struct net_driver_s *dev)
       (FAR struct usbhost_cdcmbim_s *)dev->d_private;
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->spinlock);
 
   /* Mark the device "down" */
 
   priv->bifup = false;
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->spinlock, flags);
   return OK;
 }
 
