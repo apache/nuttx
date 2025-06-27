@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/avr/atmega/mega1284p-xplained/scripts/ld.script
+ * boards/avr/avrdx/breadxavr/scripts/breadxavr.ld
  *
  * SPDX-License-Identifier: Apache-2.0
  *
