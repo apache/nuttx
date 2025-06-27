@@ -46,9 +46,7 @@ ifeq ($(CONFIG_NRF91_GPIOTE),y)
 CHIP_CSRCS += nrf91_gpiote.c
 endif
 
-ifeq ($(CONFIG_NRF91_UART),y)
 CHIP_CSRCS += nrf91_serial.c
-endif
 
 ifeq ($(CONFIG_NRF91_SPI_MASTER),y)
 CHIP_CSRCS += nrf91_spi.c
