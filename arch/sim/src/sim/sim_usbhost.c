@@ -569,7 +569,7 @@ static int sim_usbhost_ctrlin(struct usbhost_driver_s *drvr,
   nxsem_wait(&ep0info->iocsem);
   nxsem_destroy(&ep0info->iocsem);
 
-  return ep0info->xfrd;
+  return ep0info->xfrd < 0 ? ep0info->xfrd : OK;
 }
 
 /****************************************************************************
