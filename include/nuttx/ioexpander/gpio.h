@@ -182,7 +182,9 @@ struct gpio_operations_s
 struct gpio_signal_s
 {
   struct sigevent gp_event;
+#ifdef CONFIG_SIG_EVTHREAD
   struct sigwork_s gp_work;
+#endif
   pid_t gp_pid;        /* The task to be signaled */
 };
 
