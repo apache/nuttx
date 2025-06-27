@@ -242,8 +242,8 @@ static int virtio_9p_probe(FAR struct virtio_device *vdev)
 
   virtio_read_config_member(vdev, struct virtio_9p_config_s, tag_len,
                             &config.tag_len);
-  virtio_read_config(vdev, offsetof(struct virtio_9p_config_s, tag),
-                     &config.tag, config.tag_len);
+  virtio_read_config_bytes(vdev, offsetof(struct virtio_9p_config_s, tag),
+                           &config.tag, config.tag_len);
   config.tag[config.tag_len] = '\0';
   if (strcmp(config.tag, priv->tag))
     {
