@@ -238,10 +238,6 @@ void arm64_chip_boot(void)
 
   arm64_mmu_init(true);
 
-  /* Optional: Enable the Memory Tagging Extension */
-
-  arm64_enable_mte();
-
 #if defined(CONFIG_ARM64_PSCI)
   /* Init the Power State Coordination Interface */
 
