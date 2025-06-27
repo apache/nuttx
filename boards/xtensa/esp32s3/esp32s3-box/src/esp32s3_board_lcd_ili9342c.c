@@ -30,6 +30,7 @@
 #include <stdbool.h>
 #include <debug.h>
 #include <errno.h>
+#include <endian.h>
 #include <sys/param.h>
 
 #include <nuttx/arch.h>
@@ -419,6 +420,11 @@ static int ili9342c_sendgram(struct ili9341_lcd_s *lcd,
                              uint32_t nwords)
 {
   struct ili9342c_lcd_dev *priv = (struct ili9342c_lcd_dev *)lcd;
+
+  for (uint32_t i = 0; i < nwords; i++)
+    {
+      ((uint16_t *)wd)[i] = swap16(wd[i]);
+    }
 
   lcdinfo("lcd:%p, wd=%p, nwords=%" PRIu32 "\n", lcd, wd, nwords);
 
