@@ -93,8 +93,8 @@ struct sensor_rpmsg_dev_s
   struct list_node               stublist;
   struct list_node               proxylist;
   sem_t                          proxysem;
-  uint8_t                        nadvertisers;
-  uint8_t                        nsubscribers;
+  int16_t                        nadvertisers;
+  int16_t                        nsubscribers;
   FAR void                      *upper;
   sensor_push_event_t            push_event;
   FAR const char                *name;
@@ -756,8 +756,9 @@ static int sensor_rpmsg_open(FAR struct sensor_lowerhalf_s *lower,
           dev->lower.persist = true;
         }
 
-      if (dev->nadvertisers++ == 0)
+      if (dev->nadvertisers++ <= 0)
         {
+          dev->nadvertisers = 1;
           adv = true;
         }
     }
@@ -1271,7 +1272,16 @@ static int sensor_rpmsg_sub_handler(FAR struct rpmsg_endpoint *ept,
   int ret;
 
   dev = sensor_rpmsg_find_dev(msg->path);
-  if (!dev || (dev->nadvertisers == 0 && !dev->lower.persist))
+
+  /* The received subscription broadcast is not processed under the
+   * following conditions:
+   *   1.There is no node under the current core.(/dev/uorb/xxx)
+   *   2.The current core has not advertised any data. nadvertisers is -1.
+   *   3.When the number of advertisers is 0, it is not persistent attribute.
+   */
+
+  if (!dev || dev->nadvertisers < 0 || (dev->nadvertisers == 0 &&
+      !dev->lower.persist))
     {
       return 0;
     }
@@ -1669,7 +1679,7 @@ sensor_rpmsg_register(FAR struct sensor_lowerhalf_s *lower,
   strlcpy(dev->path, path, size + 1);
 
   dev->name           = basename(dev->path);
-  dev->nadvertisers   = !!lower->ops->activate;
+  dev->nadvertisers   = lower->ops->activate ? 1 : -1;
   dev->push_event     = lower->push_event;
   dev->upper          = lower->priv;
   lower->push_event   = sensor_rpmsg_push_event;
