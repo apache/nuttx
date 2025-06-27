@@ -60,6 +60,10 @@ else ifeq ($(CONFIG_ARCH_CORTEX_R82),y)
   ARCHCPUFLAGS += -mcpu=cortex-r82
 endif
 
+ifeq ($(CONFIG_ARM_TOOLCHAIN_CLANG),y)
+  ARCHCPUFLAGS += --target=aarch64-none-elf
+endif
+
 ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
   ARCHOPTIMIZATION += $(CONFIG_DEBUG_OPTLEVEL)
 else ifeq ($(CONFIG_DEBUG_FULLOPT),y)
