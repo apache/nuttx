@@ -30,7 +30,7 @@
 #include <nuttx/config.h>
 #include <nuttx/fs/ioctl.h>
 #include <sys/types.h>
-
+#include <nuttx/irq.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/i2c/i2c_master.h>
 
