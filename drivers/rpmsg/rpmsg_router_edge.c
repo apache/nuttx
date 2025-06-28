@@ -466,7 +466,9 @@ rpmsg_router_edge_send_offchannel_raw(FAR struct rpmsg_device *rdev,
       /* Create endpoint (r:cpu:name) for real communication */
 
       ret = rpmsg_create_ept(ept, hubdev, ns_msg->name,
-                             RPMSG_ADDR_ANY, RPMSG_ADDR_ANY,
+                             RPMSG_ADDR_ANY,
+                             ns_msg->flags == RPMSG_NS_CREATE_ACK ?
+                             usr_ept->dest_addr : RPMSG_ADDR_ANY,
                              rpmsg_router_edge_cb,
                              rpmsg_router_edge_unbind);
       if (ret < 0)
