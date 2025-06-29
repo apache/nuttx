@@ -1396,6 +1396,9 @@ int netdev_lower_register(FAR struct netdev_lowerhalf_s *dev,
       case NETDEV_RX_WORK:
         extra_size = sizeof(struct work_s);
         break;
+      case NETDEV_RX_DIRECT:
+        extra_size = 0; /* No extra size needed for direct mode */
+        break;
       case NETDEV_RX_THREAD:
         extra_size = sizeof(struct netdev_thread_s);
         cpu = 1;
@@ -1580,7 +1583,14 @@ void netdev_lower_rxready(FAR struct netdev_lowerhalf_s *dev)
    * in eth_input.
    */
 
-  netdev_upper_queue_work(&dev->netdev);
+  if (dev->rxtype == NETDEV_RX_DIRECT)
+    {
+      netdev_upper_rxpoll_work(dev->netdev.d_private);
+    }
+  else
+    {
+      netdev_upper_queue_work(&dev->netdev);
+    }
 }
 
 /****************************************************************************
@@ -1600,7 +1610,15 @@ void netdev_lower_txdone(FAR struct netdev_lowerhalf_s *dev)
   FAR struct netdev_upperhalf_s *upper = dev->netdev.d_private;
   netdev_upper_vlan_foreach(upper, netdev_lower_txdone);
 #endif
-  netdev_upper_queue_work(&dev->netdev);
+  if (dev->rxtype == NETDEV_RX_DIRECT)
+    {
+      netdev_upper_txavail_work(dev->netdev.d_private);
+    }
+  else
+    {
+      netdev_upper_queue_work(&dev->netdev);
+    }
+
   NETDEV_TXDONE(&dev->netdev);
 }
 
