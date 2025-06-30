@@ -225,6 +225,47 @@ int bchlib_setup(FAR const char *blkdev, bool readonly, FAR void **handle);
 int bchlib_teardown(FAR void *handle);
 
 /****************************************************************************
+ * Name: bchlib_open
+ *
+ * Description:
+ *   Opens a block device and increments the reference count for tracking
+ *   the number of active users. Ensures no more than the maximum allowed
+ *   open count (`MAX_OPENCNT`) is exceeded.
+ *
+ * Parameters:
+ *   handle - Pointer to the BCH handle (device context).
+ *
+ * Return:
+ *   On success, returns `OK`.
+ *   On failure, returns a negative error code such as:
+ *     -EMFILE: Maximum open count exceeded.
+ *     Other error codes may reflect mutex lock issues.
+ ****************************************************************************/
+
+int bchlib_open(FAR void *handle);
+
+/****************************************************************************
+ * Name: bchlib_close
+ *
+ * Description:
+ *   Closes the block device by decrementing the reference count and
+ *   performing cleanup operations like flushing dirty pages in the cache.
+ *   If all references are released and the device is marked as unlinked,
+ *   it tears down the BCH device.
+ *
+ * Parameters:
+ *   handle - Pointer to the BCH handle (device context).
+ *
+ * Return:
+ *   On success, returns `OK`.
+ *   On failure, returns a negative error code such as:
+ *     -EIO: Reference count is already zero.
+ *     Other error codes may reflect mutex lock issues.
+ ****************************************************************************/
+
+int bchlib_close(FAR void *handle);
+
+/****************************************************************************
  * Name: bchlib_read
  *
  * Description:
@@ -247,6 +288,77 @@ ssize_t bchlib_read(FAR void *handle, FAR char *buffer, off_t offset,
 
 ssize_t bchlib_write(FAR void *handle, FAR const char *buffer, off_t offset,
                      size_t len);
+
+/****************************************************************************
+ * Name: bchlib_ioctl
+ *
+ * Description:
+ *   Handles I/O control requests (IOCTLs) for the block device. Implements
+ *   device-specific commands like retrieving private data, flushing the
+ *   cache, or setting encryption keys (if encryption is enabled).
+ *
+ * Parameters:
+ *   handle - Pointer to the BCH handle (device context).
+ *   cmd    - Command indicating the requested operation.
+ *   arg    - Argument for the command.
+ *
+ * Return:
+ *   On success, returns `OK` or a command-specific result value.
+ *   On failure, returns a negative error code:
+ *     -ENOTTY: Command not supported.
+ *     -EINVAL: Invalid argument.
+ *     Other error codes may reflect underlying implementation issues.
+ ****************************************************************************/
+
+int bchlib_ioctl(FAR void *handle, int cmd, unsigned long arg);
+
+/****************************************************************************
+ * Name: bchlib_seek
+ *
+ * Description:
+ *   Adjusts the current position within the block device based on the
+ *   provided offset and the specified seek mode (whence).
+ *
+ * Parameters:
+ *   handle - Pointer to the BCH handle (device context).
+ *   offset - The offset value used to calculate the new position.
+ *   whence - Specifies the base position for seeking. It can take one of
+ *            the following values:
+ *            - SEEK_SET: Seek from the start of the device.
+ *            - SEEK_CUR: Seek from the current position.
+ *            - SEEK_END: Seek from the end of the device.
+ *   pos    - Pointer to the position value that will be updated to reflect
+ *            the new position after seeking.
+ *
+ * Return:
+ *   On success, returns the new position within the block device.
+ *   On failure, returns a negative error code, such as:
+ *     -EINVAL: Invalid value for `whence` or if the resulting position is
+ *              negative.
+ *     Other error codes may reflect mutex lock issues.
+ ****************************************************************************/
+
+off_t bchlib_seek(FAR void *handle, off_t offset, int whence, off_t *pos);
+
+/****************************************************************************
+ * Name: bchlib_unlink
+ *
+ * Description:
+ *   Marks the block device as unlinked (no longer actively accessible). If
+ *   there are no remaining open references, tears down the BCH device.
+ *
+ * Parameters:
+ *   handle - Pointer to the BCH handle (device context).
+ *
+ * Return:
+ *   On success, returns `OK`.
+ *   On failure, returns a negative error code indicating issues like mutex
+ *   lock errors.
+ ****************************************************************************/
+
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+int bchlib_unlink(FAR void *handle);
+#endif
 
 /****************************************************************************
  * Name: lwlconsole_init
