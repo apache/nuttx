@@ -132,7 +132,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
   /* Map the memory chunk into an allocated node structure */
 
   oldnode = (FAR struct mm_allocnode_s *)
-    ((FAR char *)kasan_reset_tag(oldmem) - MM_SIZEOF_ALLOCNODE);
+    ((FAR char *)kasan_clear_tag(oldmem) - MM_SIZEOF_ALLOCNODE);
 
   /* We need to hold the MM mutex while we muck with the nodelist. */
 
@@ -388,12 +388,15 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
                       heap->mm_curused - newsize);
       sched_note_heap(NOTE_HEAP_ALLOC, heap, newmem, newsize,
                       heap->mm_curused);
+
+      size = MM_SIZEOF_NODE(oldnode);
       mm_unlock(heap);
       MM_ADD_BACKTRACE(heap, (FAR char *)newmem - MM_SIZEOF_ALLOCNODE);
 
-      newmem = kasan_unpoison(newmem, MM_SIZEOF_NODE(oldnode) -
-                              MM_ALLOCNODE_OVERHEAD);
-      if (kasan_reset_tag(newmem) != kasan_reset_tag(oldmem))
+      newmem = kasan_unpoison(newmem, size - MM_ALLOCNODE_OVERHEAD);
+
+      oldmem = kasan_set_tag(oldmem, kasan_get_tag(newmem));
+      if (newmem != oldmem)
         {
           /* Now we have to move the user contents 'down' in memory.  memcpy
            * should be safe for this.

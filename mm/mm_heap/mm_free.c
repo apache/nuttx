@@ -128,7 +128,7 @@ void mm_delayfree(FAR struct mm_heap_s *heap, FAR void *mem, bool delay)
   /* Map the memory chunk into a free node */
 
   node = (FAR struct mm_freenode_s *)
-         ((FAR char *)kasan_reset_tag(mem) - MM_SIZEOF_ALLOCNODE);
+         ((FAR char *)kasan_clear_tag(mem) - MM_SIZEOF_ALLOCNODE);
   nodesize = MM_SIZEOF_NODE(node);
 
   /* Sanity check against double-frees */

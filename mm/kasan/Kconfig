@@ -32,14 +32,19 @@ config MM_KASAN_GENERIC
 		KASan generic mode that does not require hardware support at all
 
 config MM_KASAN_SW_TAGS
-	bool "KAsan SW tags"
-	select ARM64_TBI
+	bool "KAsan softtags tags"
+	select ARM64_TBI if ARCH_ARM64
 	select MM_KASAN_INSTRUMENT
-	depends on ARCH_ARM64
 	---help---
 		KAsan based on software tags
 
-endchoice # KAsan Mode
+config MM_KASAN_HW_TAGS
+	bool "KAsan hardware tags"
+	select ARM64_MTE if ARCH_ARM64
+	---help---
+		KAsan based on hardware tags
+
+endchoice
 
 config MM_KASAN_INSTRUMENT_ALL
 	bool "Enable KASan for the entire image"
@@ -51,6 +56,15 @@ config MM_KASAN_INSTRUMENT_ALL
 		"-fsanitize=kernel-address" for the files/directories you want
 		to check. Enabling this option will get image size increased
 		and performance decreased significantly.
+
+config MM_KASAN_MARK_LOCATION
+	string "Kasan's mark storage location"
+	---help---
+		The section where KASan mark is located. It can prevent
+		variables located in non-chip memory, and crashes
+		caused by instrumentation access
+
+if MM_KASAN_INSTRUMENT
 
 config MM_KASAN_REGIONS
 	int "Kasan region count"
@@ -126,4 +140,5 @@ config MM_KASAN_GLOBAL_ALIGN
 		It is recommended to use 1, 2, 4, 8, 16, 32.
 		The maximum value is 32.
 
+endif # MM_KASAN_INSTRUMENT
 endif # MM_KASAN

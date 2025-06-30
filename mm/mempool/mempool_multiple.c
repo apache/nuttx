@@ -309,7 +309,7 @@ mempool_multiple_get_dict(FAR struct mempool_multiple_s *mpool,
     }
 
   addr = (FAR void *)ALIGN_DOWN((uintptr_t)blk, mpool->expandsize);
-  if (kasan_reset_tag(blk) == kasan_reset_tag(addr))
+  if (kasan_clear_tag(blk) == kasan_clear_tag(addr))
     {
       /* It is not a memory block allocated by mempool
        * Because the blk is need not aligned with the expandsize
@@ -328,10 +328,10 @@ mempool_multiple_get_dict(FAR struct mempool_multiple_s *mpool,
   row = index >> mpool->dict_col_num_log2;
   col = index - (row << mpool->dict_col_num_log2);
 
-  addr = kasan_reset_tag(addr);
-  if (kasan_reset_tag(mpool->dict[row]) == NULL ||
-      kasan_reset_tag(mpool->dict[row][col].addr) != addr ||
-      ((FAR char *)kasan_reset_tag(blk) -
+  addr = kasan_clear_tag(addr);
+  if (kasan_clear_tag(mpool->dict[row]) == NULL ||
+      kasan_clear_tag(mpool->dict[row][col].addr) != addr ||
+      ((FAR char *)kasan_clear_tag(blk) -
        (FAR char *)addr >= mpool->dict[row][col].size))
     {
       return NULL;
@@ -630,8 +630,8 @@ int mempool_multiple_free(FAR struct mempool_multiple_s *mpool,
       return -EINVAL;
     }
 
-  blk = (FAR char *)blk - (((FAR char *)kasan_reset_tag(blk) -
-                            ((FAR char *)kasan_reset_tag(dict->addr) +
+  blk = (FAR char *)blk - (((FAR char *)kasan_clear_tag(blk) -
+                            ((FAR char *)kasan_clear_tag(dict->addr) +
                              mpool->minpoolsize)) %
                            MEMPOOL_REALBLOCKSIZE(dict->pool));
   mempool_release(dict->pool, blk);

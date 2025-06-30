@@ -36,13 +36,6 @@
 
 #define KASAN_TAG_SHIFT 56
 
-#define kasan_get_tag(addr) \
-  ((uint8_t)((uint64_t)(addr) >> KASAN_TAG_SHIFT))
-
-#define kasan_set_tag(addr, tag) \
-  (FAR void *)((((uint64_t)(addr)) & ~((uint64_t)0xff << KASAN_TAG_SHIFT)) | \
-               (((uint64_t)(tag)) << KASAN_TAG_SHIFT))
-
 #define kasan_random_tag() (1 + rand() % ((1 << (64 - KASAN_TAG_SHIFT)) - 2))
 
 #define KASAN_SHADOW_SCALE (sizeof(uintptr_t))
@@ -81,7 +74,7 @@ kasan_mem_to_shadow(FAR const void *ptr, size_t size)
   uintptr_t addr;
   int i;
 
-  addr = (uintptr_t)kasan_reset_tag(ptr);
+  addr = (uintptr_t)kasan_clear_tag(ptr);
 
   for (i = 0; i < g_region_count; i++)
     {
@@ -156,15 +149,31 @@ static void kasan_set_poison(FAR const void *addr,
  * Public Functions
  ****************************************************************************/
 
-FAR void *kasan_reset_tag(FAR const void *addr)
+FAR void *kasan_set_tag(FAR const void *addr, uint8_t tag)
 {
-  return (FAR void *)
-         (((uint64_t)(addr)) & ~((uint64_t)0xff << KASAN_TAG_SHIFT));
+  return (FAR void *)((uint64_t)kasan_clear_tag(addr) |
+                      (((uint64_t)tag) << KASAN_TAG_SHIFT));
 }
 
 void kasan_poison(FAR const void *addr, size_t size)
 {
   kasan_set_poison(addr, size, 0xff);
+}
+
+FAR void *kasan_clear_tag(FAR const void *addr)
+{
+  return (FAR void *)
+         (((uint64_t)addr) & ~((uint64_t)0xff << KASAN_TAG_SHIFT));
+}
+
+uint8_t kasan_get_tag(FAR const void *addr)
+{
+  return (uint8_t)((uint64_t)addr >> KASAN_TAG_SHIFT);
+}
+
+bool kasan_bypass(bool state)
+{
+  return false;
 }
 
 FAR void *kasan_unpoison(FAR const void *addr, size_t size)

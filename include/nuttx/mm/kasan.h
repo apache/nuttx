@@ -41,11 +41,14 @@
 #  define kasan_unpoison(addr, size) addr
 #  define kasan_register(addr, size)
 #  define kasan_unregister(addr)
-#  define kasan_reset_tag(addr) addr
+#  define kasan_get_tag(addr) 0
+#  define kasan_set_tag(addr, tag) addr
+#  define kasan_clear_tag(addr) addr
 #  define kasan_start()
 #  define kasan_stop()
 #  define kasan_debugpoint(t,a,s) 0
 #  define kasan_init_early()
+#  define kasan_bypass(state) ((void)state, state)
 #else
 
 #  define kasan_init_early() kasan_stop()
@@ -133,7 +136,13 @@ void kasan_register(FAR void *addr, FAR size_t *size);
 void kasan_unregister(FAR void *addr);
 
 /****************************************************************************
- * Name: kasan_reset_tag
+ * Name: kasan_set_tag
+ ****************************************************************************/
+
+FAR void *kasan_set_tag(FAR const void *addr, uint8_t tag);
+
+/****************************************************************************
+ * Name: kasan_clear_tag
  *
  * Input Parameters:
  *   addr - The address of the memory to reset the tag.
@@ -143,7 +152,20 @@ void kasan_unregister(FAR void *addr);
  *
  ****************************************************************************/
 
-FAR void *kasan_reset_tag(FAR const void *addr);
+FAR void *kasan_clear_tag(FAR const void *addr);
+
+/****************************************************************************
+ * Name: kasan_get_tag
+ *
+ * Input Parameters:
+ *   addr - The address of the memory to get the tag.
+ *
+ * Returned Value:
+ *   address tag
+ *
+ ****************************************************************************/
+
+uint8_t kasan_get_tag(FAR const void *addr);
 
 /****************************************************************************
  * Name: kasan_start
@@ -159,7 +181,11 @@ FAR void *kasan_reset_tag(FAR const void *addr);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_MM_KASAN_INSTRUMENT
 void kasan_start(void);
+#else
+#  define kasan_start()
+#endif
 
 /****************************************************************************
  * Name: kasan_stop
@@ -177,7 +203,11 @@ void kasan_start(void);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_MM_KASAN_INSTRUMENT
 void kasan_stop(void);
+#else
+#  define kasan_stop()
+#endif
 
 /****************************************************************************
  * Name: kasan_debugpoint
@@ -200,6 +230,12 @@ void kasan_stop(void);
  ****************************************************************************/
 
 int kasan_debugpoint(int type, FAR void *addr, size_t size);
+
+/****************************************************************************
+ * Name: kasan_bypass
+ ****************************************************************************/
+
+bool kasan_bypass(bool state);
 
 #undef EXTERN
 #ifdef __cplusplus

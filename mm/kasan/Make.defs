@@ -28,6 +28,10 @@ ifeq ($(CONFIG_MM_KASAN),y)
   CFLAGS += -fno-sanitize=kernel-address
 endif
 
+ifneq ($(CONFIG_MM_KASAN_MARK_LOCATION),"")
+  CFLAGS += ${DEFINE_PREFIX}MM_KASAN_MARK_LOCATION=CONFIG_MM_KASAN_MARK_LOCATION
+endif
+
 # Add the core heap directory to the build
 
 DEPPATH += --dep-path kasan

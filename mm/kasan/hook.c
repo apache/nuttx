@@ -42,6 +42,8 @@
 #  include "generic.c"
 #elif defined(CONFIG_MM_KASAN_SW_TAGS)
 #  include "sw_tags.c"
+#elif defined(CONFIG_MM_KASAN_HW_TAGS)
+#  include "hw_tags.c"
 #else
 #  define kasan_is_poisoned(addr, size) false
 #endif
@@ -96,6 +98,8 @@
 
 #define KASAN_INIT_VALUE 0xcafe
 
+#ifdef CONFIG_MM_KASAN_INSTRUMENT
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -116,7 +120,11 @@ static struct kasan_watchpoint_s g_watchpoint[MM_KASAN_WATCHPOINT];
 #endif
 
 #ifdef CONFIG_MM_KASAN
+#  ifdef MM_KASAN_MARK_LOCATION
+static uint32_t g_region_init locate_data(MM_KASAN_MARK_LOCATION);
+#  else
 static uint32_t g_region_init;
+#  endif
 #endif
 
 /****************************************************************************
@@ -405,3 +413,6 @@ DEFINE_ASAN_LOAD_STORE(2)
 DEFINE_ASAN_LOAD_STORE(4)
 DEFINE_ASAN_LOAD_STORE(8)
 DEFINE_ASAN_LOAD_STORE(16)
+
+#endif /* CONFIG_MM_KASAN_INSTRUMENT */
+
