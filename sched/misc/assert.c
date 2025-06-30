@@ -828,7 +828,8 @@ static void dump_fatal_info(FAR struct tcb_s *rtcb,
  * Name: dump_core_info
  ****************************************************************************/
 
-static void dump_core_info(void)
+static void dump_core_info(FAR struct tcb_s *rtcb, FAR const char *filename,
+                           int linenum, FAR const char *msg, FAR void *regs)
 {
 #ifdef CONFIG_BOARD_CRASHDUMP_CUSTOM
   board_crashdump(up_getsp(), rtcb, filename, linenum, msg, regs);
@@ -978,7 +979,7 @@ void _assert(FAR const char *filename, int linenum,
 
       /* Dump core information */
 
-      dump_core_info();
+      dump_core_info(rtcb, filename, linenum, msg, regs);
 
       reboot_notifier_call_chain(SYS_HALT, NULL);
 
