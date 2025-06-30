@@ -50,15 +50,6 @@
 #include "sam_twihs.h"
 #include "samv71-xult.h"
 
-#if defined(HAVE_S25FL1) || defined(HAVE_PROGMEM_CHARDEV)
-#  include <nuttx/mtd/mtd.h>
-#endif
-
-#ifdef HAVE_S25FL1
-#  include <nuttx/spi/qspi.h>
-#  include "sam_qspi.h"
-#endif
-
 #ifdef HAVE_LED_DRIVER
 #  include <nuttx/leds/userled.h>
 #endif
@@ -208,20 +199,8 @@ static void sam_i2ctool(void)
 
 int sam_bringup(void)
 {
-#ifdef HAVE_S25FL1
-  struct qspi_dev_s *qspi;
-#endif
-#if defined(HAVE_S25FL1)
-  struct mtd_dev_s *mtd;
-#endif
 #if defined(HAVE_RTC_DSXXXX) || defined(HAVE_RTC_PCF85263)
   struct i2c_master_s *i2c;
-#endif
-#if defined(HAVE_S25FL1_CHARDEV)
-#if defined(CONFIG_BCH)
-  char blockdev[18];
-  char chardev[12];
-#endif /* defined(CONFIG_BCH) */
 #endif
   int ret;
 
@@ -409,82 +388,11 @@ int sam_bringup(void)
 #endif
 
 #ifdef HAVE_S25FL1
-  /* Create an instance of the SAMV71 QSPI device driver */
-
-  qspi = sam_qspi_initialize(0);
-  if (!qspi)
+  ret = sam_s25fl1_init();
+  if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: sam_qspi_initialize failed\n");
-    }
-  else
-    {
-      /* Use the QSPI device instance to initialize the
-       * S25FL1 device.
-       */
-
-      mtd = s25fl1_initialize(qspi, true);
-      if (!mtd)
-        {
-          syslog(LOG_ERR, "ERROR: s25fl1_initialize failed\n");
-        }
-
-#ifdef HAVE_S25FL1_SMARTFS
-      /* Configure the device with no partition support */
-
-      ret = smart_initialize(S25FL1_SMART_MINOR, mtd, NULL);
-      if (ret != OK)
-        {
-          syslog(LOG_ERR, "ERROR: Failed to initialize SmartFS: %d\n", ret);
-        }
-
-#elif defined(HAVE_S25FL1_NXFFS)
-      /* Initialize to provide NXFFS on the S25FL1 MTD interface */
-
-      ret = nxffs_initialize(mtd);
-      if (ret < 0)
-        {
-         syslog(LOG_ERR, "ERROR: NXFFS initialization failed: %d\n", ret);
-        }
-
-      /* Mount the file system at /mnt/s25fl1 */
-
-      ret = nx_mount(NULL, "/mnt/s25fl1", "nxffs", 0, NULL);
-      if (ret < 0)
-        {
-          syslog(LOG_ERR, "ERROR: Failed to mount the NXFFS volume: %d\n",
-                 ret);
-          return ret;
-        }
-
-#else /* if  defined(HAVE_S25FL1_CHARDEV) */
-      /* Use the FTL layer to wrap the MTD driver as a block driver */
-
-      ret = ftl_initialize(S25FL1_MTD_MINOR, mtd);
-      if (ret < 0)
-        {
-          syslog(LOG_ERR, "ERROR: Failed to initialize the FTL layer: %d\n",
-                 ret);
-          return ret;
-        }
-
-#if defined(CONFIG_BCH)
-      /* Use the minor number to create device paths */
-
-      snprintf(blockdev, sizeof(blockdev), "/dev/mtdblock%d",
-               S25FL1_MTD_MINOR);
-      snprintf(chardev, sizeof(chardev), "/dev/mtd%d", S25FL1_MTD_MINOR);
-
-      /* Now create a character device on the block device */
-
-      ret = bchdev_register(blockdev, chardev, false);
-      if (ret < 0)
-        {
-          syslog(LOG_ERR, "ERROR: bchdev_register %s failed: %d\n",
-                 chardev, ret);
-          return ret;
-        }
-#endif /* defined(CONFIG_BCH) */
-#endif
+       syslog(LOG_ERR, "ERROR: Failed to initialize s25fl flash: %d\n",
+             ret);
     }
 #endif
 
