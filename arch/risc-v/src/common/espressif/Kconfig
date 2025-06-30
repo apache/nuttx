@@ -384,6 +384,10 @@ config ESPRESSIF_I2C
 	bool
 	default n
 
+config ESPRESSIF_LPI2C
+	bool
+	default n
+
 config ESPRESSIF_I2C_PERIPH_MASTER_MODE
 	bool
 	depends on (ESPRESSIF_I2C0_MASTER_MODE || ESPRESSIF_I2C1_MASTER_MODE)
@@ -405,6 +409,14 @@ config ESPRESSIF_I2C1
 	default n
 	depends on ARCH_CHIP_ESP32H2
 	select ESPRESSIF_I2C
+	select I2C
+
+config ESPRESSIF_LP_I2C0
+	bool "LP I2C 0"
+	default n
+	depends on ARCH_CHIP_ESP32C6
+	select ESPRESSIF_I2C
+	select ESPRESSIF_LPI2C
 	select I2C
 
 choice ESPRESSIF_I2C0_MODE
@@ -2041,7 +2053,8 @@ if ESPRESSIF_I2C0
 
 config ESPRESSIF_I2C0_SCLPIN
 	int "I2C0 SCL Pin"
-	default 6
+	default 6 if !ESPRESSIF_LPI2C
+	default 23 if ESPRESSIF_LPI2C
 	range 0 21
 
 config ESPRESSIF_I2C0_SDAPIN

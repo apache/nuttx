@@ -160,5 +160,9 @@ int board_i2c_init(void)
   ret = i2c_slave_driver_init(ESPRESSIF_I2C0_SLAVE, I2C0_SLAVE_ADDR);
 #endif
 
+#ifdef CONFIG_ESPRESSIF_LP_I2C0
+  ret = i2c_driver_init(ESPRESSIF_LP_I2C0);
+#endif
+
   return ret;
 }
