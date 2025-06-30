@@ -107,12 +107,6 @@
 #define sim_savestate(regs) sim_copyfullstate(regs, up_current_regs())
 #define sim_restorestate(regs) up_set_current_regs(regs)
 
-/* Provide a common interface, which should have different conversions
- * on different platforms.
- */
-
-#define host_errno_convert(errcode) (errcode)
-
 #define sim_saveusercontext(saveregs, ret)                      \
     do                                                          \
       {                                                         \
@@ -226,6 +220,10 @@ void up_irq_restore(uint64_t flags);
 void sim_copyfullstate(xcpt_reg_t *dest, xcpt_reg_t *src);
 void *sim_doirq(int irq, void *regs);
 void  sim_unlock(void);
+
+/* sim_errno.c */
+
+int host_errno_convert(int negative_errcode);
 
 /* sim_hostmisc.c ***********************************************************/
 
