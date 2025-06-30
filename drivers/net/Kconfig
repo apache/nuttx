@@ -815,14 +815,6 @@ config NET_E1000_RXSPARE
 
 endif # NET_E1000
 
-config NET_IGC_TXDESC
-	int "Intel IGC TX descriptors"
-	default 256
-
-config NET_IGC_RXDESC
-	int "Intel IGC RX descriptors"
-	default 256
-
 menuconfig NET_IGC
 	bool "Intel IGC support"
 	default n
@@ -831,6 +823,14 @@ menuconfig NET_IGC
 		Enable IGC PCI Ethernet driver.
 
 if NET_IGC
+
+config NET_IGC_TXDESC
+	int "Intel IGC TX descriptors"
+	default 256
+
+config NET_IGC_RXDESC
+	int "Intel IGC RX descriptors"
+	default 256
 
 config NET_IGC_RXSPARE
 	int "Intel IGC spare RX buffers"
