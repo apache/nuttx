@@ -42,6 +42,9 @@ COMPILER_RT_OBJDIR = compiler-rt \
 BIN_OBJDIR = $(addprefix $(BINDIR)$(DELIM),$(COMPILER_RT_OBJDIR))
 KBIN_OBJDIR = $(addprefix $(KBINDIR)$(DELIM),$(COMPILER_RT_OBJDIR))
 
+$(BIN_OBJDIR) $(KBIN_OBJDIR):
+	$(Q) mkdir -p $@
+
 ifeq ($(wildcard compiler-rt/compiler-rt/lib),)
 
 compiler-rt-$(COMPILER_RT_VERSION).src.tar.xz:
@@ -51,7 +54,6 @@ compiler-rt/compiler-rt: compiler-rt-$(COMPILER_RT_VERSION).src.tar.xz
 	$(Q) tar -xf $<
 	$(Q) mv compiler-rt-$(COMPILER_RT_VERSION).src $@
 	$(call DELDIR, $<)
-	$(Q) mkdir $(BIN_OBJDIR) $(KBIN_OBJDIR)
 
 compiler-rt: compiler-rt/compiler-rt
 
@@ -60,12 +62,14 @@ endif
 ifeq ($(CONFIG_LIB_COMPILER_RT),y)
 
 .PHONY: compiler-rt
-depend:: compiler-rt
+depend:: compiler-rt $(BIN_OBJDIR) $(KBIN_OBJDIR)
 
 distclean::
 	$(call DELDIR, $(BIN_OBJDIR))
 	$(call DELDIR, $(KBIN_OBJDIR))
+ifeq ($(wildcard compiler-rt/compiler-rt/.git),)
 	$(call DELDIR, compiler-rt/compiler-rt)
+endif
 
 FLAGS += ${INCDIR_PREFIX}$(CURDIR)/compiler-rt/compiler-rt/include
 

@@ -310,7 +310,7 @@ void __gcov_dump(void)
       return;
     }
 
-  fd = _NX_OPEN(path, O_WRONLY | O_CREAT);
+  fd = _NX_OPEN(path, O_WRONLY | O_CREAT | O_TRUNC, 0666);
   if (fd < 0)
     {
       _NX_SETERRNO(fd);

@@ -75,7 +75,7 @@ config COVERAGE_GCOV_DUMP_REBOOT
 
 config COVERAGE_DEFAULT_PREFIX_STRIP
 	string "Default gcov dump path prefix strip"
-	default "99"
+	default "0"
 	---help---
 		The default prefix strip of the gcov data
 
