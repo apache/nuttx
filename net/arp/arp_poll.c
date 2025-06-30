@@ -54,6 +54,8 @@
 
 int arp_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
 {
+  int bstop = 0;
+
   /* Setup for the ARP callback (most of these do not apply) */
 
   dev->d_appdata = NULL;
@@ -66,7 +68,12 @@ int arp_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
 
   /* Call back into the driver */
 
-  return devif_poll_out(dev, callback);
+  if (dev->d_len > 0)
+    {
+      bstop = callback(dev);
+    }
+
+  return bstop;
 }
 
 #endif /* CONFIG_NET_ARP_SEND */
