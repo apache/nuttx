@@ -332,8 +332,6 @@ EXTERN const void * const _vectors[];
 
 int  arm_svcall(int irq, void *context, void *arg);
 int  arm_hardfault(int irq, void *context, void *arg);
-int  arm_enable_dbgmonitor(void);
-int  arm_dbgmonitor(int irq, void *context, void *arg);
 
 #  if defined(CONFIG_ARCH_ARMV7M) || defined(CONFIG_ARCH_ARMV8M)
 
@@ -493,6 +491,11 @@ void arm_stack_check_init(void) noinstrument_function;
 
 #ifdef CONFIG_ARM_COREDUMP_REGION
   void arm_coredump_add_region(void);
+#endif
+
+#ifdef CONFIG_ARCH_HAVE_DEBUG
+int arm_enable_dbgmonitor(void);
+int arm_dbgmonitor(int irq, void *context, void *arg);
 #endif
 
 #undef EXTERN

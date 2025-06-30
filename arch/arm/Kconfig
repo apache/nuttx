@@ -952,6 +952,7 @@ config ARCH_ARMV7A
 	bool
 	default n
 	select ARCH_HAVE_CPUINFO
+	select ARCH_HAVE_DEBUG
 	select ARCH_HAVE_PERF_EVENTS
 	select ARM_HAVE_WFE_SEV
 

@@ -164,6 +164,31 @@
 #define IFSR_EXT             (1 << 12) /* Bit 12: External Abort Qualifier */
                                        /* Bits 13-31: Reserved */
 
+#define FSR_FAULT(fsr)                (((fsr) & 0x0f) | (((fsr) & 0x400) >> 6))
+#define FSR_FAULT_ALIGNMENT           0x01 /* Alignment fault (DFSR only) */
+#define FSR_FAULT_DEBUG               0x02 /* Debug event */
+#define FSR_FAULT_TRANSLATION_L1      0x05 /* Translation fault, first level */
+#define FSR_FAULT_TRANSLATION_L2      0x07 /* Translation fault, second level */
+#define FSR_FAULT_ACCESS_FLAG_L1      0x06 /* Access flag fault, first level */
+#define FSR_FAULT_ACCESS_FLAG_L2      0x08 /* Access flag fault, second level */
+#define FSR_FAULT_DOMAIN_L1           0x09 /* Domain fault, first level */
+#define FSR_FAULT_DOMAIN_L2           0x0b /* Domain fault, second level */
+#define FSR_FAULT_PERMISSION_L1       0x0d /* Permission fault, first level */
+#define FSR_FAULT_PERMISSION_L2       0x0f /* Permission fault, second level */
+#define FSR_FAULT_SYNC_EXTERNAL_ABORT 0x08 /* Synchronous external abort */
+#define FSR_FAULT_SYNC_EXTERNAL_L1    0x0c /* External abort on translation table walk, first level */
+#define FSR_FAULT_SYNC_EXTERNAL_L2    0x0e /* External abort on translation table walk, second level */
+#define FSR_FAULT_SYNC_PARITY_L1      0x1c /* Synchronous parity error on translation table walk, first level */
+#define FSR_FAULT_SYNC_PARITY_L2      0x1e /* Synchronous parity error on translation table walk, second level */
+#define FSR_FAULT_PARITY              0x19 /* Parity error on memory access */
+#define FSR_FAULT_TLB_CONFLICT        0x10 /* TLB conflict abort */
+#define FSR_FAULT_ICACHE_MAINT        0x04 /* Fault on instruction cache maintenance */
+#define FSR_FAULT_LOCKDOWN            0x14 /* Implementation defined: lockdown */
+#define FSR_FAULT_COPROC_ABORT        0x1a /* Implementation defined: coprocessor abort */
+#define FSR_FAULT_PARITY_MEM_SYNC     0x11 /* Synchronous parity error on memory access */
+#define FSR_FAULT_EXTERNAL_ASYNC      0x16 /* Asynchronous external abort (DFSR only) */
+#define FSR_FAULT_PARITY_MEM_ASYNC    0x18 /* Asynchronous parity error on memory access (DFSR only) */
+
 /* Data Fault Address Register(DFAR).  Holds the MVA of the faulting address
  * when a synchronous fault occurs
  *
