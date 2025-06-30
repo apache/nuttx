@@ -123,11 +123,11 @@ int esp_hr_timer_create(const struct esp_hr_timer_args_s *args,
  *   repeat        - Repeat mode (true: enabled, false: disabled).
  *
  * Returned Value:
- *   None.
+ *   OK on success; ERROR on failure.
  *
  ****************************************************************************/
 
-void esp_hr_timer_start(struct esp_hr_timer_s *timer,
+int esp_hr_timer_start(struct esp_hr_timer_s *timer,
                         uint64_t timeout,
                         bool repeat);
 
@@ -142,11 +142,11 @@ void esp_hr_timer_start(struct esp_hr_timer_s *timer,
  *   timeout       - Timeout value.
  *
  * Returned Value:
- *   None.
+ *   OK on success; ERROR on failure.
  *
  ****************************************************************************/
 
-void esp_hr_timer_start_once(struct esp_hr_timer_s *timer, uint64_t timeout);
+int esp_hr_timer_start_once(struct esp_hr_timer_s *timer, uint64_t timeout);
 
 /****************************************************************************
  * Name: esp_hr_timer_start_periodic
@@ -159,11 +159,11 @@ void esp_hr_timer_start_once(struct esp_hr_timer_s *timer, uint64_t timeout);
  *   timeout       - Timeout value.
  *
  * Returned Value:
- *   None.
+ *   OK on success; ERROR on failure.
  *
  ****************************************************************************/
 
-void esp_hr_timer_start_periodic(struct esp_hr_timer_s *timer,
+int esp_hr_timer_start_periodic(struct esp_hr_timer_s *timer,
                                  uint64_t timeout);
 
 /****************************************************************************
@@ -176,12 +176,12 @@ void esp_hr_timer_start_periodic(struct esp_hr_timer_s *timer,
  *   timer         - HR Timer pointer.
  *
  * Returned Value:
- *   None.
+ *   OK on success; ERROR on failure.
  *
  ****************************************************************************/
 
-void esp_hr_timer_stop(struct esp_hr_timer_s *timer);
-void esp_hr_timer_stop_nolock(struct esp_hr_timer_s *timer);
+int esp_hr_timer_stop(struct esp_hr_timer_s *timer);
+int esp_hr_timer_stop_nolock(struct esp_hr_timer_s *timer);
 
 /****************************************************************************
  * Name: esp_hr_timer_delete
@@ -193,11 +193,11 @@ void esp_hr_timer_stop_nolock(struct esp_hr_timer_s *timer);
  *   timer         - HR Timer pointer.
  *
  * Returned Value:
- *   None.
+ *   OK on success; ERROR on failure.
  *
  ****************************************************************************/
 
-void esp_hr_timer_delete(struct esp_hr_timer_s *timer);
+int esp_hr_timer_delete(struct esp_hr_timer_s *timer);
 
 /****************************************************************************
  * Name: esp_hr_timer_time_us

@@ -862,7 +862,7 @@ struct cap_lowerhalf_s *esp_pcnt_new_unit(
       return NULL;
     }
 
-  if (config->low_limit >= 0 && config->low_limit < PCNT_LL_MIN_LIN)
+  if (config->low_limit >= 0 && config->low_limit < PCNT_LL_MIN_LIM)
     {
       cperr("Configuration low limit is out of range!\n");
       return NULL;
@@ -878,8 +878,8 @@ struct cap_lowerhalf_s *esp_pcnt_new_unit(
 
   if (g_pcnt_refs++ == 0)
     {
-      periph_module_enable(pcnt_periph_signals.groups[0].module);
-      periph_module_reset(pcnt_periph_signals.groups[0].module);
+      periph_module_enable(PERIPH_PCNT_MODULE);
+      periph_module_reset(PERIPH_PCNT_MODULE);
       pcnt_hal_init(&ctx, 0);
     }
 
@@ -1009,7 +1009,7 @@ int esp_pcnt_del_unit(struct cap_lowerhalf_s *dev)
   g_pcnt_refs--;
   if (g_pcnt_refs == 0)
     {
-      periph_module_disable(pcnt_periph_signals.groups[0].module);
+      periph_module_disable(PERIPH_PCNT_MODULE);
       esp_teardown_irq(
 #ifndef CONFIG_ARCH_CHIP_ESP32S2
                        cpu,

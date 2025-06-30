@@ -114,6 +114,7 @@ SECTIONS
     *libkarch.a:xtensa_copystate.*(.literal .text .literal.* .text.*)
     *libkarch.a:xtensa_interruptcontext.*(.literal .text .literal.* .text.*)
     *libkarch.a:xtensa_testset.*(.literal .text .literal.* .text.*)
+    *libkarch.a:esp_app_desc.*(.literal .text .literal.* .text.*)
 
     *libsched.a:sched_suspendscheduler.*(.literal .text .literal.* .text.*)
     *libsched.a:sched_note.*(.literal .text .literal.* .text.*)
@@ -279,7 +280,12 @@ SECTIONS
 
   .flash.rodata : ALIGN(0x10)
   {
+    _rodata_reserved_start = ABSOLUTE(.);
     _srodata = ABSOLUTE(.);
+
+    /* !DO NOT PUT ANYTHING BEFORE THIS! */
+    /* Should be the first.  App version info. */
+    *(.rodata_desc .rodata_desc.*)
 
     *(.rodata)
     *(.rodata.*)

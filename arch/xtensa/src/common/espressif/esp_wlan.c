@@ -202,6 +202,42 @@ struct wlan_priv_s
 };
 
 /****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#ifdef ESPRESSIF_WLAN_HAS_STA
+
+/* If reconnect automatically */
+
+volatile bool g_sta_reconnect;
+
+/* If Wi-Fi sta starts */
+
+volatile bool g_sta_started;
+
+/* If Wi-Fi sta connected */
+
+volatile bool g_sta_connected;
+
+/* Wi-Fi interface configuration */
+
+wifi_config_t g_sta_wifi_cfg;
+
+#endif /* ESPRESSIF_WLAN_HAS_STA */
+
+#ifdef ESPRESSIF_WLAN_HAS_SOFTAP
+
+/* If Wi-Fi SoftAP starts */
+
+volatile bool g_softap_started;
+
+/* Wi-Fi interface configuration */
+
+wifi_config_t g_softap_wifi_cfg;
+
+#endif /* ESPRESSIF_WLAN_HAS_SOFTAP */
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 

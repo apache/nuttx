@@ -48,12 +48,19 @@
 #include "esp_config.h"
 #include "esp_irq.h"
 
+#include "esp_private/periph_ctrl.h"
 #include "hal/uart_hal.h"
 #include "hal/usb_serial_jtag_ll.h"
 
 /****************************************************************************
  * Pre-processor Macros
  ****************************************************************************/
+
+#if !SOC_RCC_IS_INDEPENDENT
+#define USJ_RCC_ATOMIC() PERIPH_RCC_ATOMIC()
+#else
+#define USJ_RCC_ATOMIC()
+#endif
 
 /* The hardware buffer has a fixed size of 64 bytes */
 
@@ -277,6 +284,15 @@ static int esp_attach(struct uart_dev_s *dev)
 
   DEBUGASSERT(priv->cpuint == -ENOMEM);
 
+  USJ_RCC_ATOMIC()
+    {
+      usb_serial_jtag_ll_enable_bus_clock(true);
+    }
+
+  usb_serial_jtag_ll_phy_set_defaults();
+
+  usb_serial_jtag_ll_ena_intr_mask(USB_SERIAL_JTAG_INTR_SERIAL_OUT_RECV_PKT);
+
   /* Try to attach the IRQ to a CPU int */
 
   priv->cpuint = esp_setup_irq(priv->source,
@@ -465,4 +481,3 @@ void esp_usbserial_write(char ch)
 
   esp_send(&g_uart_usbserial, ch);
 }
-

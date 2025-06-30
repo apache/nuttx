@@ -1586,9 +1586,11 @@ static void esp_mcpwm_group_start(void)
 
   periph_module_enable(PERIPH_MCPWM0_MODULE);
   mcpwm_hal_init(hal, &g_mcpwm_common.group);
-  mcpwm_ll_group_set_clock_source(hal->dev, MCPWM_DEV_CLK_SOURCE);
-  mcpwm_ll_group_set_clock_prescale(hal->dev, g_mcpwm_common.group_prescale);
-  mcpwm_ll_group_enable_clock(hal->dev, true);
+  mcpwm_ll_group_set_clock_source(g_mcpwm_common.group.group_id,
+                                  MCPWM_DEV_CLK_SOURCE);
+  mcpwm_ll_group_set_clock_prescale(g_mcpwm_common.group.group_id,
+                                    g_mcpwm_common.group_prescale);
+  mcpwm_ll_group_enable_clock(g_mcpwm_common.group.group_id, true);
 
   g_mcpwm_common.initialized = true;
 }

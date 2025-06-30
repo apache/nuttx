@@ -45,22 +45,6 @@ extern "C"
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if defined(CONFIG_ESPRESSIF_WIFI_STATION)
-#  define ESPRESSIF_WLAN_HAS_STA
-#  define ESPRESSIF_WLAN_STA_DEVNO    0
-#  define ESPRESSIF_WLAN_DEVS         1
-#elif defined(CONFIG_ESPRESSIF_WIFI_SOFTAP)
-#  define ESPRESSIF_WLAN_HAS_SOFTAP
-#  define ESPRESSIF_WLAN_SOFTAP_DEVNO 0
-#  define ESPRESSIF_WLAN_DEVS         1
-#elif defined(CONFIG_ESPRESSIF_WIFI_STATION_SOFTAP)
-#  define ESPRESSIF_WLAN_HAS_STA
-#  define ESPRESSIF_WLAN_HAS_SOFTAP
-#  define ESPRESSIF_WLAN_STA_DEVNO    0
-#  define ESPRESSIF_WLAN_SOFTAP_DEVNO 1
-#  define ESPRESSIF_WLAN_DEVS         2
-#endif
-
 #define SSID_MAX_LEN                (32)
 #define PWD_MAX_LEN                 (64)
 
@@ -69,23 +53,6 @@ extern "C"
 /* Define esp_err_t */
 
 typedef int esp_err_t;
-
-/* Wi-Fi event ID */
-
-enum wifi_adpt_evt_e
-{
-  WIFI_ADPT_EVT_SCAN_DONE = 0,
-  WIFI_ADPT_EVT_STA_START,
-  WIFI_ADPT_EVT_STA_CONNECT,
-  WIFI_ADPT_EVT_STA_DISCONNECT,
-  WIFI_ADPT_EVT_STA_AUTHMODE_CHANGE,
-  WIFI_ADPT_EVT_STA_STOP,
-  WIFI_ADPT_EVT_AP_START,
-  WIFI_ADPT_EVT_AP_STOP,
-  WIFI_ADPT_EVT_AP_STACONNECTED,
-  WIFI_ADPT_EVT_AP_STADISCONNECTED,
-  WIFI_ADPT_EVT_MAX,
-};
 
 /* Wi-Fi event callback function */
 
@@ -130,25 +97,6 @@ int esp_wifi_adapter_init(void);
  ****************************************************************************/
 
 void esp_wifi_free_eb(void *eb);
-
-/****************************************************************************
- * Name: esp_wifi_notify_subscribe
- *
- * Description:
- *   Enable event notification
- *
- * Input Parameters:
- *   pid   - Task PID
- *   event - Signal event data pointer
- *
- * Returned Value:
- *   0 if success or -1 if fail
- *
- ****************************************************************************/
-
-int esp_wifi_notify_subscribe(pid_t pid, struct sigevent *event);
-
-#ifdef ESPRESSIF_WLAN_HAS_STA
 
 /****************************************************************************
  * Name: esp_wifi_sta_start
@@ -484,9 +432,6 @@ int esp_wifi_sta_country(struct iwreq *iwr, bool set);
  ****************************************************************************/
 
 int esp_wifi_sta_rssi(struct iwreq *iwr, bool set);
-#endif /* ESPRESSIF_WLAN_HAS_STA */
-
-#ifdef ESPRESSIF_WLAN_HAS_SOFTAP
 
 /****************************************************************************
  * Name: esp_wifi_softap_start
@@ -822,7 +767,6 @@ int esp_wifi_softap_country(struct iwreq *iwr, bool set);
  ****************************************************************************/
 
 int esp_wifi_softap_rssi(struct iwreq *iwr, bool set);
-#endif /* ESPRESSIF_WLAN_HAS_SOFTAP */
 
 /****************************************************************************
  * Name: esp_wifi_stop_callback

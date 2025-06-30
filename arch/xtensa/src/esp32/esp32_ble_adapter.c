@@ -3262,7 +3262,7 @@ int esp32_bt_controller_disable(void)
 }
 
 /****************************************************************************
- * Name: esp32_bt_controller_get_status
+ * Name: esp_bt_controller_get_status
  *
  * Description:
  *   Returns the status of the BT Controller
@@ -3275,7 +3275,7 @@ int esp32_bt_controller_disable(void)
  *
  ****************************************************************************/
 
-esp_bt_controller_status_t esp32_bt_controller_get_status(void)
+esp_bt_controller_status_t esp_bt_controller_get_status(void)
 {
   return g_btdm_controller_status;
 }

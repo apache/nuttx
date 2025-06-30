@@ -58,14 +58,26 @@
                                    (div) > LEDC_TIMER_DIV_NUM_MAX)
 
 /* Precision degree only affects RC_FAST, other clock sources' frequencies
- * are fixed values. For targets that do not support RC_FAST calibration, can
- * only use its approximate value.
+ * are fixed values. For targets that do not support RC_FAST calibration,
+ * can only use its approximate value.
  */
 
 #if SOC_CLK_RC_FAST_SUPPORT_CALIBRATION
 #  define LEDC_CLK_SRC_FREQ_PRECISION ESP_CLK_TREE_SRC_FREQ_PRECISION_CACHED
 #else
 #  define LEDC_CLK_SRC_FREQ_PRECISION ESP_CLK_TREE_SRC_FREQ_PRECISION_APPROX
+#endif
+
+#if !SOC_RCC_IS_INDEPENDENT
+#define LEDC_BUS_CLOCK_ATOMIC() PERIPH_RCC_ATOMIC()
+#else
+#define LEDC_BUS_CLOCK_ATOMIC()
+#endif
+
+#if SOC_PERIPH_CLK_CTRL_SHARED
+#define LEDC_FUNC_CLOCK_ATOMIC() PERIPH_RCC_ATOMIC()
+#else
+#define LEDC_FUNC_CLOCK_ATOMIC()
 #endif
 
 /* All chips have 4 internal timers */
@@ -433,6 +445,17 @@ static bool ledc_ctx_create(void)
       if (ledc_new_mode_obj)
         {
           new_ctx = true;
+
+          LEDC_BUS_CLOCK_ATOMIC()
+            {
+              ledc_ll_enable_bus_clock(true);
+              ledc_ll_enable_reset_reg(false);
+            }
+
+          LEDC_FUNC_CLOCK_ATOMIC()
+            {
+              ledc_ll_enable_clock(LEDC_LL_GET_HW(), true);
+            }
 
           /* Only ESP32 supports High Speed mode */
 
@@ -1054,17 +1077,17 @@ static IRAM_ATTR int ledc_duty_config(ledc_channel_t channel,
       ledc_hal_set_duty_int_part(&(p_ledc_obj->ledc_hal), channel, duty_val);
     }
 
-  ledc_hal_set_duty_direction(&(p_ledc_obj->ledc_hal),
-                              channel,
-                              duty_direction);
-
-  ledc_hal_set_duty_num(&(p_ledc_obj->ledc_hal), channel, duty_num);
-  ledc_hal_set_duty_cycle(&(p_ledc_obj->ledc_hal), channel, duty_cycle);
-  ledc_hal_set_duty_scale(&(p_ledc_obj->ledc_hal), channel, duty_scale);
+  pwminfo("ledc_duty_config: channel: %d, hpoint_val: %d, duty_val: %d, "
+          "duty_direction: %d, duty_num: %" PRIu32 ", "
+          "duty_cycle: %" PRIu32 ", duty_scale: %" PRIu32 "\n",
+          channel, hpoint_val, duty_val, duty_direction, duty_num,
+          duty_cycle, duty_scale);
+  ledc_hal_set_fade_param(&(p_ledc_obj->ledc_hal), channel, 0,
+                         duty_direction, duty_cycle, duty_scale, duty_num);
 
 #if SOC_LEDC_GAMMA_CURVE_FADE_SUPPORTED
-  ledc_hal_set_duty_range_wr_addr(&(p_ledc_obj->ledc_hal), channel, 0);
   ledc_hal_set_range_number(&(p_ledc_obj->ledc_hal), channel, 1);
+  ledc_hal_clear_left_off_fade_param(&(p_ledc_obj->ledc_hal), channel, 1);
 #endif
   return OK;
 }

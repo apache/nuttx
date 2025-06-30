@@ -1018,6 +1018,12 @@ config ESPRESSIF_WIFI_ENABLE_SAE_PK
 	---help---
 		Select this option to enable SAE-PK
 
+config ESPRESSIF_WIFI_ENABLE_SAE_H2E
+	bool "Enable SAE-H2E"
+	default y
+	---help---
+		Select this option to enable SAE-H2E
+
 config ESPRESSIF_WIFI_SOFTAP_SAE_SUPPORT
 	bool "Enable WPA3 Personal(SAE) SoftAP"
 	default y

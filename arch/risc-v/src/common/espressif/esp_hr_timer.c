@@ -351,11 +351,11 @@ int IRAM_ATTR esp_hr_timer_create(const struct esp_hr_timer_args_s *args,
  *   repeat        - Repeat mode (true: enabled, false: disabled).
  *
  * Returned Value:
- *   None.
+ *   OK on success; ERROR on failure.
  *
  ****************************************************************************/
 
-void IRAM_ATTR esp_hr_timer_start(struct esp_hr_timer_s *timer,
+int IRAM_ATTR esp_hr_timer_start(struct esp_hr_timer_s *timer,
                                   uint64_t timeout,
                                   bool repeat)
 {
@@ -364,12 +364,22 @@ void IRAM_ATTR esp_hr_timer_start(struct esp_hr_timer_s *timer,
   uint64_t counter;
   struct esp_hr_timer_s *p;
   irqstate_t flags = spin_lock_irqsave(&priv->lock);
+  int ret = ERROR;
+
+  if (timer == NULL)
+    {
+      return ret;
+    }
 
   /* Only idle timer can be started */
 
   if (timer->state != HR_TIMER_IDLE)
     {
-      esp_hr_timer_stop_nolock(timer);
+      ret = esp_hr_timer_stop_nolock(timer);
+      if (ret != OK)
+        {
+          return ret;
+        }
     }
 
   /* Calculate the timer's alarm value */
@@ -424,6 +434,7 @@ void IRAM_ATTR esp_hr_timer_start(struct esp_hr_timer_s *timer,
     }
 
   spin_unlock_irqrestore(&priv->lock, flags);
+  return OK;
 }
 
 /****************************************************************************
@@ -437,13 +448,14 @@ void IRAM_ATTR esp_hr_timer_start(struct esp_hr_timer_s *timer,
  *   timeout       - Timeout value.
  *
  * Returned Value:
- *   None.
+ *   OK on success; ERROR on failure.
  *
  ****************************************************************************/
 
-void esp_hr_timer_start_once(struct esp_hr_timer_s *timer, uint64_t timeout)
+int esp_hr_timer_start_once(struct esp_hr_timer_s *timer, uint64_t timeout)
 {
-  esp_hr_timer_start(timer, timeout, false);
+  int ret = esp_hr_timer_start(timer, timeout, false);
+  return ret;
 }
 
 /****************************************************************************
@@ -457,14 +469,15 @@ void esp_hr_timer_start_once(struct esp_hr_timer_s *timer, uint64_t timeout)
  *   timeout       - Timeout value.
  *
  * Returned Value:
- *   None.
+ *   OK on success; ERROR on failure.
  *
  ****************************************************************************/
 
-void esp_hr_timer_start_periodic(struct esp_hr_timer_s *timer,
+int esp_hr_timer_start_periodic(struct esp_hr_timer_s *timer,
                                  uint64_t timeout)
 {
-  esp_hr_timer_start(timer, timeout, true);
+  int ret = esp_hr_timer_start(timer, timeout, true);
+  return ret;
 }
 
 /****************************************************************************
@@ -477,13 +490,18 @@ void esp_hr_timer_start_periodic(struct esp_hr_timer_s *timer,
  *   timer         - HR Timer pointer.
  *
  * Returned Value:
- *   None.
+ *   OK on success, ERROR on failure.
  *
  ****************************************************************************/
 
-void IRAM_ATTR esp_hr_timer_stop_nolock(struct esp_hr_timer_s *timer)
+int IRAM_ATTR esp_hr_timer_stop_nolock(struct esp_hr_timer_s *timer)
 {
   struct esp_hr_timer_context_s *priv = &g_hr_timer_context;
+
+  if (timer == NULL)
+    {
+      return ERROR;
+    }
 
   /* "start" function can set the timer's repeat flag, and "stop" function
    * should remove this flag.
@@ -546,15 +564,24 @@ void IRAM_ATTR esp_hr_timer_stop_nolock(struct esp_hr_timer_s *timer)
       timer->state = HR_TIMER_IDLE;
       timer->callback(timer->arg);
     }
+
+  return OK;
 }
 
-void IRAM_ATTR esp_hr_timer_stop(struct esp_hr_timer_s *timer)
+int IRAM_ATTR esp_hr_timer_stop(struct esp_hr_timer_s *timer)
 {
+  int ret = ERROR;
   struct esp_hr_timer_context_s *priv = &g_hr_timer_context;
 
   irqstate_t flags = spin_lock_irqsave(&priv->lock);
-  esp_hr_timer_stop_nolock(timer);
+  if (timer == NULL)
+    {
+      return ret;
+    }
+
+  ret = esp_hr_timer_stop_nolock(timer);
   spin_unlock_irqrestore(&priv->lock, flags);
+  return ret;
 }
 
 /****************************************************************************
@@ -567,13 +594,13 @@ void IRAM_ATTR esp_hr_timer_stop(struct esp_hr_timer_s *timer)
  *   timer         - HR Timer pointer.
  *
  * Returned Value:
- *   None.
+ *   OK on success; ERROR on failure.
  *
  ****************************************************************************/
 
-void esp_hr_timer_delete(struct esp_hr_timer_s *timer)
+int esp_hr_timer_delete(struct esp_hr_timer_s *timer)
 {
-  int ret;
+  int ret = ERROR;
   irqstate_t flags;
 
   struct esp_hr_timer_context_s *priv = &g_hr_timer_context;
@@ -591,7 +618,7 @@ void esp_hr_timer_delete(struct esp_hr_timer_s *timer)
   else if (timer->state == HR_TIMER_DELETE)
     {
       spin_unlock_irqrestore(&priv->lock, flags);
-      return;
+      return ret;
     }
 
   list_add_after(&priv->toutlist, &timer->list);
@@ -605,6 +632,8 @@ void esp_hr_timer_delete(struct esp_hr_timer_s *timer)
     {
       tmrerr("Failed to post sem ret=%d\n", ret);
     }
+
+  return ret;
 }
 
 /****************************************************************************
