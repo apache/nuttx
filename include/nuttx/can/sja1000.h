@@ -112,10 +112,7 @@ struct sja1000_dev_s
   uint8_t filters;                      /* STD/EXT filter bit allocator. */
   uint8_t nalloc;                       /* Number of allocated filters */
   uint32_t base;                        /* SJA1000 register base address */
-
-#ifdef CONFIG_ARCH_HAVE_MULTICPU
-  spinlock_t lock; /* Device specific lock */
-#endif             /* CONFIG_ARCH_HAVE_MULTICPU */
+  spinlock_t lock;                      /* Device specific lock */
 
   /* Register read/write callbacks.  These operations all hidden behind
    * callbacks to isolate the driver from differences in register read/write
