@@ -57,6 +57,12 @@ on top of another MTD driver, it changes the apparent page size of the FLASH to
 ``drivers/mtd/mtd_partitions.c`` can be used to break up a large FLASH into
 separate, independent partitions, each of which looks like another MTD driver.
 
+It is possible to register the partition as a character device driver. This
+provides a direct access to the raw flash, but doesn't ensure any logic
+needed to operate the flash (page erase prior to write, wear leveling,
+fault block detection). The driver is implemented in
+``drivers/mtd/mtd_register.c``.
+
 ``drivers/mtd/ftl.c`` is also interesting. FTL stands for FLASH Translation Layer.
 The FTL driver is an MTD driver that when layered on top of another MTD driver,
 converts the MTD driver to a block driver. The permutations are endless.
