@@ -540,7 +540,7 @@ static void esp_i2c_slave_init(struct esp_i2c_priv_s *priv)
 
   /* Enable I2C hardware */
 
-  periph_module_enable(i2c_periph_signal[priv->id].module);
+  periph_module_enable(PERIPH_I2C0_MODULE);
 
   i2c_hal_init(priv->ctx, priv->id);
 
@@ -551,7 +551,7 @@ static void esp_i2c_slave_init(struct esp_i2c_priv_s *priv)
   /* Initialize I2C Slave */
 
   i2c_hal_slave_init(priv->ctx);
-  i2c_ll_slave_tx_auto_start_en(priv->ctx->dev, true);
+  i2c_ll_slave_enable_auto_start(priv->ctx->dev, true);
   i2c_ll_set_source_clk(priv->ctx->dev, I2C_CLK_SRC_DEFAULT);
   i2c_ll_set_slave_addr(priv->ctx->dev, priv->addr, false);
   i2c_ll_set_rxfifo_full_thr(priv->ctx->dev, I2C_FIFO_FULL_THRESH_VAL);
@@ -583,7 +583,7 @@ static void esp_i2c_slave_deinit(struct esp_i2c_priv_s *priv)
   const struct esp_i2c_config_s *config = priv->config;
 
   i2c_hal_deinit(priv->ctx);
-  periph_module_disable(i2c_periph_signal[priv->id].module);
+  periph_module_disable(PERIPH_I2C0_MODULE);
 }
 
 /****************************************************************************

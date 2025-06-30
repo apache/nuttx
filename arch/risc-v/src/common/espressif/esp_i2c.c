@@ -64,10 +64,23 @@
 #if defined(CONFIG_ESPRESSIF_ESP32H2) || defined(CONFIG_ESPRESSIF_ESP32C6)
 #  include "soc/pcr_reg.h"
 #endif
+#if defined(CONFIG_ESPRESSIF_LP_I2C0)
+#  include "driver/rtc_io.h"
+#  include "hal/rtc_io_hal.h"
+#  include "io_mux.h"
+#  include "lp_core_i2c.h"
+#  include "soc/i2c_struct.h"
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#if defined(CONFIG_ESPRESSIF_LP_I2C0)
+#  define ESP_LP_I2C0_ID     LP_I2C_NUM_0
+#else
+#  define ESP_LP_I2C0_ID     I2C_NUM_MAX
+#endif
 
 #ifdef CONFIG_ESPRESSIF_ESP32H2
 #  define SYSTEM_I2C_EXT0_CLK_EN PCR_I2C0_CLK_EN
@@ -251,6 +264,8 @@ struct esp_i2c_priv_s
 
   bool ready_read;             /* If I2C is ready for receiving data */
 
+  soc_module_clk_t clk_src;   /* Clock source */
+
   uint32_t clk_freq;           /* Current I2C Clock frequency */
 
   /* I2C trace support */
@@ -373,6 +388,7 @@ static struct esp_i2c_priv_s esp_i2c0_priv =
 #endif
   .error      = 0,
   .ready_read = false,
+  .clk_src    = I2C_CLK_SRC_DEFAULT,
   .clk_freq   = 0,
   .ctx = &i2c0_ctx
 };
@@ -424,10 +440,62 @@ static struct esp_i2c_priv_s esp_i2c1_priv =
 #endif
   .error      = 0,
   .ready_read = false,
+  .clk_src    = I2C_CLK_SRC_DEFAULT,
   .clk_freq   = 0,
   .ctx        = &i2c1_ctx
 };
 #endif /* CONFIG_ESPRESSIF_I2C1 */
+
+#ifdef CONFIG_ESPRESSIF_LP_I2C0
+i2c_hal_context_t lp_i2c0_ctx =
+{
+  0
+};
+
+/* I2C device structure */
+
+static const struct esp_i2c_config_s esp_lp_i2c0_config =
+{
+  .clk_freq   = I2C_CLK_FREQ_DEF,
+  .scl_pin    = 7,
+  .sda_pin    = 6,
+#ifndef CONFIG_I2C_POLLED
+  .periph     = ETS_LP_I2C_INTR_SOURCE,
+  .irq        = ESP_IRQ_LP_I2C,
+#endif
+  .clk_bit    = SYSTEM_I2C_EXT0_CLK_EN,
+  .rst_bit    = SYSTEM_I2C_EXT0_RST,
+  .scl_insig  = 0,
+  .scl_outsig = 0,
+  .sda_insig  = 0,
+  .sda_outsig = 0
+};
+
+static struct esp_i2c_priv_s esp_lp_i2c0_priv =
+{
+  .ops        = &esp_i2c_ops,
+  .id         = LP_I2C_NUM_0,
+  .module     = PERIPH_LP_I2C0_MODULE,
+  .config     = &esp_lp_i2c0_config,
+  .refs       = 0,
+  .lock       = NXMUTEX_INITIALIZER,
+#ifndef CONFIG_I2C_POLLED
+  .sem_isr    = SEM_INITIALIZER(0),
+#endif
+  .i2cstate   = I2CSTATE_IDLE,
+  .msgv       = NULL,
+  .msgid      = 0,
+  .bytes      = 0,
+#ifndef CONFIG_I2C_POLLED
+  .cpuint     = -ENOMEM,
+#endif
+  .error      = 0,
+  .ready_read = false,
+  .clk_src    = LP_I2C_SCLK_DEFAULT,
+  .clk_freq   = 0,
+  .ctx        = &lp_i2c0_ctx
+};
+#endif /* CONFIG_ESPRESSIF_LP_I2C0 */
 
 /* Trace events strings */
 
@@ -718,24 +786,63 @@ static void esp_i2c_sendstop(struct esp_i2c_priv_s *priv)
 static void esp_i2c_init_clock(struct esp_i2c_priv_s *priv,
                                uint32_t bus_freq)
 {
-  uint32_t src_clk_frequency;
+  uint32_t src_clk_frequency = 0;
 
   if (bus_freq == priv->clk_freq)
     {
       return ;
     }
 
-  i2c_clock_source_t src_clk = I2C_CLK_SRC_DEFAULT;
-  esp_clk_tree_src_get_freq_hz((soc_module_clk_t)src_clk,
-                               ESP_CLK_TREE_SRC_FREQ_PRECISION_CACHED,
+  esp_clk_tree_src_get_freq_hz(priv->clk_src,
+                               ESP_CLK_TREE_SRC_FREQ_PRECISION_APPROX,
                                &src_clk_frequency);
   i2c_hal_set_bus_timing(priv->ctx, priv->config->clk_freq,
-                         src_clk, src_clk_frequency);
+                         priv->clk_src, src_clk_frequency);
   i2c_hal_master_set_scl_timeout_val(priv->ctx, SCL_TIMEOUT_VAL_US,
                                      src_clk_frequency);
+
+#ifdef CONFIG_ESPRESSIF_LPI2C
+  PERIPH_RCC_ATOMIC()
+    {
+      lp_i2c_ll_set_source_clk(priv->ctx->dev, priv->clk_src);
+    }
+#endif
+
   i2c_ll_update(priv->ctx->dev);
   priv->clk_freq = bus_freq;
 }
+
+#ifdef CONFIG_ESPRESSIF_LPI2C
+/****************************************************************************
+ * Name: esp_lp_i2c_config_io
+ *
+ * Description:
+ *   Configures LP I2C pin.
+ *
+ * Parameters:
+ *   priv      - Pointer to the private driver struct.
+ *   pin       - Pin number to configure.
+ *
+ * Return Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+static void esp_lp_i2c_config_io(const struct esp_i2c_priv_s *priv,
+                                 int8_t pin)
+{
+  int lp_pin = rtc_io_num_map[pin];
+
+  DEBUGASSERT(lp_pin != -1);
+
+  rtc_gpio_set_level(pin, 1);
+  rtc_gpio_init(pin);
+
+  rtc_gpio_set_direction(pin, RTC_GPIO_MODE_INPUT_OUTPUT_OD);
+  rtc_gpio_pulldown_dis(pin);
+  rtc_gpio_pullup_en(pin);
+}
+#endif /* CONFIG_ESPRESSIF_LPI2C */
 
 /****************************************************************************
  * Name: esp_i2c_init
@@ -752,22 +859,53 @@ static void esp_i2c_init(struct esp_i2c_priv_s *priv)
 {
   const struct esp_i2c_config_s *config = priv->config;
 
-  /* Configure GPIO signals for I2C SCL and SDA pins */
+  if (priv->id < ESP_LP_I2C0_ID)
+    {
+      /* Configure GPIO signals for I2C SCL and SDA pins */
 
-  esp_gpiowrite(config->scl_pin, 1);
-  esp_gpiowrite(config->sda_pin, 1);
+      esp_gpiowrite(config->scl_pin, 1);
+      esp_gpiowrite(config->sda_pin, 1);
 
-  esp_configgpio(config->scl_pin, INPUT_PULLUP | OUTPUT_OPEN_DRAIN);
-  esp_gpio_matrix_out(config->scl_pin, config->scl_outsig, 0, 0);
-  esp_gpio_matrix_in(config->scl_pin, config->scl_insig, 0);
+      esp_configgpio(config->scl_pin, INPUT_PULLUP | OUTPUT_OPEN_DRAIN);
+      esp_gpio_matrix_out(config->scl_pin, config->scl_outsig, 0, 0);
+      esp_gpio_matrix_in(config->scl_pin, config->scl_insig, 0);
 
-  esp_configgpio(config->sda_pin, INPUT_PULLUP | OUTPUT_OPEN_DRAIN);
-  esp_gpio_matrix_out(config->sda_pin, config->sda_outsig, 0, 0);
-  esp_gpio_matrix_in(config->sda_pin, config->sda_insig, 0);
+      esp_configgpio(config->sda_pin, INPUT_PULLUP | OUTPUT_OPEN_DRAIN);
+      esp_gpio_matrix_out(config->sda_pin, config->sda_outsig, 0, 0);
+      esp_gpio_matrix_in(config->sda_pin, config->sda_insig, 0);
 
-  /* Enable I2C hardware */
+      /* Enable I2C hardware */
 
-  periph_module_enable(priv->module);
+      periph_module_enable(priv->module);
+    }
+#ifdef CONFIG_ESPRESSIF_LPI2C
+  else
+    {
+      PERIPH_RCC_ATOMIC()
+        {
+          /* Enable LP I2C bus clock */
+
+          lp_i2c_ll_enable_bus_clock(priv->id - LP_I2C_NUM_0, true);
+
+          /* Reset LP I2C register */
+
+          lp_i2c_ll_reset_register(priv->id - LP_I2C_NUM_0);
+        }
+
+      esp_lp_i2c_config_io(priv, config->scl_pin);
+      esp_lp_i2c_config_io(priv, config->sda_pin);
+      const i2c_signal_conn_t *p_i2c_pin = &i2c_periph_signal[priv->id];
+#if !SOC_LP_GPIO_MATRIX_SUPPORTED
+      rtc_gpio_iomux_func_sel(config->sda_pin, p_i2c_pin->iomux_func);
+      rtc_gpio_iomux_func_sel(config->scl_pin, p_i2c_pin->iomux_func);
+#else
+      /* ToDo: Add LP I2C for LP GPIO Matrix
+       * supported devices (e.g ESP32-P4)
+       */
+
+#endif /* SOC_LP_GPIO_MATRIX_SUPPORTED */
+    }
+#endif
 
   i2c_hal_init(priv->ctx, priv->id);
 
@@ -782,6 +920,17 @@ static void esp_i2c_init(struct esp_i2c_priv_s *priv)
   /* Configure the hardware filter function */
 
   i2c_ll_master_set_filter(priv->ctx->dev, I2C_FILTER_CYC_NUM_DEF);
+
+#ifdef CONFIG_ESPRESSIF_LPI2C
+  /* Enable internal open-drain mode for I2C IO lines */
+
+  priv->ctx->dev->ctr.sda_force_out = 0;
+  priv->ctx->dev->ctr.scl_force_out = 0;
+
+  /* Configure the I2C master to send a NACK when the Rx FIFO count is full */
+
+  i2c_ll_master_rx_full_ack_level(priv->ctx->dev, 1);
+#endif
 
   /* Initialize I2C bus clock */
 
@@ -1530,6 +1679,11 @@ struct i2c_master_s *esp_i2cbus_initialize(int port)
 #ifdef CONFIG_ESPRESSIF_I2C1_MASTER_MODE
     case ESPRESSIF_I2C1:
       priv = &esp_i2c1_priv;
+      break;
+#endif
+#ifdef CONFIG_ESPRESSIF_LP_I2C0
+    case ESPRESSIF_LP_I2C0:
+      priv = &esp_lp_i2c0_priv;
       break;
 #endif
     default:

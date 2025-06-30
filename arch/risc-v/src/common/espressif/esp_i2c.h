@@ -49,6 +49,10 @@
 #  define ESPRESSIF_I2C1 1
 #endif
 
+#ifdef CONFIG_ESPRESSIF_LP_I2C0
+#  define ESPRESSIF_LP_I2C0 2
+#endif
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
