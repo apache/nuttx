@@ -606,7 +606,7 @@ static int sim_usbhost_asynch(struct usbhost_driver_s *drvr,
     }
 
   datareq->addr = (epinfo->dirin << 7) + epinfo->epno;
-  datareq->len = MIN(buflen, epinfo->maxpacket);
+  datareq->len = buflen;
   datareq->xfrtype = epinfo->xfrtype;
   datareq->callback = callback;
   datareq->data = buffer;
@@ -692,10 +692,14 @@ static void sim_usbhost_rqcomplete(struct sim_usbhost_s *drvr)
 
   while ((datareq = host_usbhost_getcomplete()) != NULL)
     {
-      usbhost_asynch_t callback = datareq->callback;
-      ssize_t result = datareq->success ? datareq->xfer : -EIO;
+      if (datareq->callback)
+        {
+          usbhost_asynch_t callback = datareq->callback;
+          ssize_t result = datareq->success ? datareq->xfer : -EIO;
 
-      callback(datareq->priv, result);
+          callback(datareq->priv, result);
+        }
+
       sim_usbhost_freerq(datareq);
     }
 }
