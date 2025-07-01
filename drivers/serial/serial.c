@@ -241,15 +241,13 @@ static void uart_poll_notify(FAR uart_dev_t *dev, unsigned int min,
 
   DEBUGASSERT(max > min && max - min <= CONFIG_SERIAL_NPOLLWAITERS);
 
-  flags = enter_critical_section();
-  sched_lock();
+  flags = uart_spinlock(dev, true);
 
   /* Notify the fds in range dev->fds[min] - dev->fds[max] */
 
   poll_notify(&dev->fds[min], max - min, eventset);
 
-  sched_unlock();
-  leave_critical_section(flags);
+  uart_spinunlock(dev, true, flags);
 }
 
 /****************************************************************************
@@ -355,13 +353,9 @@ static ssize_t uart_putxmitbuf(FAR uart_dev_t *dev, FAR const char *buf,
 
       /* The following steps must be atomic with respect to serial interrupt
        * handling.
-       *
-       * This critical section is also used for the serialization with the
-       * up_putc-based syslog channels.
-       * See https://github.com/apache/nuttx/issues/14662
        */
 
-      flags = enter_critical_section();
+      flags = uart_spinlock(dev, true);
 
       /* Check again...  In certain race conditions an interrupt may have
        * occurred between the test at the top of the loop and entering the
@@ -390,7 +384,7 @@ static ssize_t uart_putxmitbuf(FAR uart_dev_t *dev, FAR const char *buf,
         {
           /* Space is available again; retry the copy. */
 
-          leave_critical_section(flags);
+          uart_spinunlock(dev, true, flags);
           continue;
         }
 
@@ -402,7 +396,7 @@ static ssize_t uart_putxmitbuf(FAR uart_dev_t *dev, FAR const char *buf,
 
       if (dev->disconnected)
         {
-          leave_critical_section(flags);
+          uart_spinunlock(dev, true, flags);
           return nwritten > 0 ? nwritten : -ENOTCONN;
         }
 #endif
@@ -420,9 +414,11 @@ static ssize_t uart_putxmitbuf(FAR uart_dev_t *dev, FAR const char *buf,
       uart_dmatxavail(dev);
 #endif
       uart_enabletxint(dev);
+      uart_spinunlock(dev, true, flags);
       ret = nxsem_wait(&dev->xmitsem);
+      flags = uart_spinlock(dev, true);
       uart_disabletxint(dev);
-      leave_critical_section(flags);
+      uart_spinunlock(dev, true, flags);
 
 #ifdef CONFIG_SERIAL_REMOVABLE
       /* Check if the removable device was disconnected while we were
@@ -722,7 +718,7 @@ static int uart_tcdrain(FAR uart_dev_t *dev,
 
       /* Trigger emission to flush the contents of the tx buffer */
 
-      flags = enter_critical_section();
+      flags = uart_spinlock(dev, true);
 
 #ifdef CONFIG_SERIAL_REMOVABLE
       /* Check if the removable device is no longer connected while we have
@@ -762,6 +758,7 @@ static int uart_tcdrain(FAR uart_dev_t *dev,
               uart_dmatxavail(dev);
 #endif
               uart_enabletxint(dev);
+              uart_spinunlock(dev, true, flags);
 
               elapsed = clock_systime_ticks() - start;
               if (elapsed >= timeout)
@@ -773,11 +770,12 @@ static int uart_tcdrain(FAR uart_dev_t *dev,
                   ret = nxsem_tickwait(&dev->xmitsem, timeout - elapsed);
                 }
 
+              flags = uart_spinlock(dev, true);
               uart_disabletxint(dev);
             }
         }
 
-      leave_critical_section(flags);
+      uart_spinunlock(dev, true, flags);
 
       /* The TX buffer is empty (or an error occurred).  But there still may
        * be data in the UART TX FIFO.  We get no asynchronous indication of
@@ -945,7 +943,7 @@ static int uart_open(FAR struct file *filep)
 
   if (tmp == 1)
     {
-      irqstate_t flags = enter_critical_section();
+      irqstate_t flags = uart_spinlock(dev, false);
 
       /* If this is the console, then the UART has already been
        * initialized.
@@ -958,7 +956,7 @@ static int uart_open(FAR struct file *filep)
           ret = uart_setup(dev);
           if (ret < 0)
             {
-              leave_critical_section(flags);
+              uart_spinunlock(dev, false, flags);
               goto errout_with_lock;
             }
         }
@@ -977,7 +975,7 @@ static int uart_open(FAR struct file *filep)
               uart_shutdown(dev);
             }
 
-          leave_critical_section(flags);
+          uart_spinunlock(dev, false, flags);
           goto errout_with_lock;
         }
 
@@ -990,7 +988,7 @@ static int uart_open(FAR struct file *filep)
       /* Enable the RX interrupt */
 
       uart_enablerxint(dev);
-      leave_critical_section(flags);
+      uart_spinunlock(dev, false, flags);
     }
 
   /* Save the new open count on success */
@@ -1052,7 +1050,7 @@ static int uart_close(FAR struct file *filep)
 
   /* Free the IRQ and disable the UART */
 
-  flags = enter_critical_section();  /* Disable interrupts */
+  flags = uart_spinlock(dev, false);
   uart_detach(dev);                  /* Detach interrupts */
 
   /* Check for the serial console UART */
@@ -1062,7 +1060,7 @@ static int uart_close(FAR struct file *filep)
       uart_shutdown(dev);            /* Disable the UART */
     }
 
-  leave_critical_section(flags);
+  uart_spinunlock(dev, false, flags);
 
   /* Wake up read and poll functions */
 
@@ -1385,7 +1383,7 @@ static ssize_t uart_readv(FAR struct file *filep, FAR struct uio *uio)
         {
           /* Disable all interrupts and test again... */
 
-          flags = enter_critical_section();
+          flags = uart_spinlock(dev, false);
 
           /* Disable Rx interrupts and test again... */
 
@@ -1426,7 +1424,7 @@ static ssize_t uart_readv(FAR struct file *filep, FAR struct uio *uio)
 
               if (rxbuf->head != rxbuf->tail)
                 {
-                  leave_critical_section(flags);
+                  uart_spinunlock(dev, false, flags);
                   continue;
                 }
 
@@ -1447,7 +1445,7 @@ static ssize_t uart_readv(FAR struct file *filep, FAR struct uio *uio)
                       recvd = -EAGAIN;
                     }
 
-                  leave_critical_section(flags);
+                  uart_spinunlock(dev, false, flags);
                   break;
                 }
 #else
@@ -1461,7 +1459,7 @@ static ssize_t uart_readv(FAR struct file *filep, FAR struct uio *uio)
                    * of bytes received up to the wait condition.
                    */
 
-                  leave_critical_section(flags);
+                  uart_spinunlock(dev, false, flags);
                   break;
                 }
 
@@ -1472,7 +1470,7 @@ static ssize_t uart_readv(FAR struct file *filep, FAR struct uio *uio)
                    */
 
                   recvd = -EBADFD;
-                  leave_critical_section(flags);
+                  uart_spinunlock(dev, false, flags);
                   break;
                 }
 
@@ -1486,7 +1484,7 @@ static ssize_t uart_readv(FAR struct file *filep, FAR struct uio *uio)
                   /* Break out of the loop returning -EAGAIN */
 
                   recvd = -EAGAIN;
-                  leave_critical_section(flags);
+                  uart_spinunlock(dev, false, flags);
                   break;
                 }
 #endif
@@ -1514,9 +1512,11 @@ static ssize_t uart_readv(FAR struct file *filep, FAR struct uio *uio)
 #ifdef CONFIG_SERIAL_TERMIOS
                       dev->minrecv = 0;
 #endif
+                      uart_spinunlock(dev, false, flags);
                       nxmutex_unlock(&dev->recv.lock);
                       ret = nxsem_wait(&dev->recvsem);
                       nxmutex_lock(&dev->recv.lock);
+                      flags = uart_spinlock(dev, false);
                     }
                   else
                     {
@@ -1525,18 +1525,21 @@ static ssize_t uart_readv(FAR struct file *filep, FAR struct uio *uio)
                                          dev->minread - recvd);
                       if (dev->timeout)
                         {
+                          uart_spinunlock(dev, false, flags);
                           nxmutex_unlock(&dev->recv.lock);
                           ret = nxsem_tickwait(&dev->recvsem,
-                                              DSEC2TICK(dev->timeout));
+                                               DSEC2TICK(dev->timeout));
                         }
                       else
 #endif
                         {
+                          uart_spinunlock(dev, false, flags);
                           nxmutex_unlock(&dev->recv.lock);
                           ret = nxsem_wait(&dev->recvsem);
                         }
 
                       nxmutex_lock(&dev->recv.lock);
+                      flags = uart_spinlock(dev, false);
 
 #ifdef CONFIG_SERIAL_TERMIOS
                       dev->minrecv = dev->minread;
@@ -1544,7 +1547,7 @@ static ssize_t uart_readv(FAR struct file *filep, FAR struct uio *uio)
                     }
                 }
 
-              leave_critical_section(flags);
+              uart_spinunlock(dev, false, flags);
 
               /* Was a signal received while waiting for data to be
                * received?  Was a removable device disconnected while
@@ -1588,7 +1591,7 @@ static ssize_t uart_readv(FAR struct file *filep, FAR struct uio *uio)
                * the loop.
                */
 
-              leave_critical_section(flags);
+              uart_spinunlock(dev, false, flags);
 
               uart_enablerxint(dev);
             }
@@ -1606,9 +1609,9 @@ static ssize_t uart_readv(FAR struct file *filep, FAR struct uio *uio)
 #ifdef CONFIG_SERIAL_RXDMA
   /* Notify DMA that there is free space in the RX buffer */
 
-  flags = enter_critical_section();
+  flags = uart_spinlock(dev, false);
   uart_dmarxfree(dev);
-  leave_critical_section(flags);
+  uart_spinunlock(dev, false, flags);
 #endif
 
   /* RX interrupt could be disabled by RX buffer overflow. Enable it now. */
@@ -1714,9 +1717,9 @@ static ssize_t uart_writev(FAR struct file *filep, FAR struct uio *uio)
         }
 #endif
 
-      flags = enter_critical_section();
+      flags = uart_spinlock(dev, false);
       ret = uart_irqwritev(dev, uio, oktoblock);
-      leave_critical_section(flags);
+      uart_spinunlock(dev, false, flags);
 
       return ret;
     }
@@ -1969,7 +1972,7 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           case FIONREAD:
             {
               int count;
-              irqstate_t flags = enter_critical_section();
+              irqstate_t flags = uart_spinlock(dev, false);
 
               /* Determine the number of bytes available in the RX buffer */
 
@@ -1982,7 +1985,7 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
                   count = dev->recv.size - (dev->recv.tail - dev->recv.head);
                 }
 
-              leave_critical_section(flags);
+              uart_spinunlock(dev, false, flags);
 
               *(FAR int *)((uintptr_t)arg) = count;
               ret = 0;
@@ -1996,7 +1999,7 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           case FIONWRITE:
             {
               int count;
-              irqstate_t flags = enter_critical_section();
+              irqstate_t flags = uart_spinlock(dev, false);
 
               /* Determine the number of bytes waiting in the TX buffer */
 
@@ -2009,7 +2012,7 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
                   count = dev->xmit.size - (dev->xmit.tail - dev->xmit.head);
                 }
 
-              leave_critical_section(flags);
+              uart_spinunlock(dev, false, flags);
 
               *(FAR int *)((uintptr_t)arg) = count;
               ret = 0;
@@ -2021,7 +2024,7 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           case FIONSPACE:
             {
               int count;
-              irqstate_t flags = enter_critical_section();
+              irqstate_t flags = uart_spinlock(dev, false);
 
               /* Determine the number of bytes free in the TX buffer */
 
@@ -2035,7 +2038,7 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
                          (dev->xmit.head - dev->xmit.tail) - 1;
                 }
 
-              leave_critical_section(flags);
+              uart_spinunlock(dev, false, flags);
 
               *(FAR int *)((uintptr_t)arg) = count;
               ret = 0;
@@ -2046,7 +2049,7 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             {
               /* Empty the tx/rx buffers */
 
-              irqstate_t flags = enter_critical_section();
+              irqstate_t flags = uart_spinlock(dev, true);
 
               if (arg == TCIFLUSH || arg == TCIOFLUSH)
                 {
@@ -2068,7 +2071,7 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
                   uart_datasent(dev);
                 }
 
-              leave_critical_section(flags);
+              uart_spinunlock(dev, true, flags);
               ret = 0;
             }
             break;
@@ -2274,7 +2277,7 @@ static int uart_poll(FAR struct file *filep,
     }
 #endif
 
-  flags = enter_critical_section();
+  flags = uart_spinlock(dev, false);
 
   /* Are we setting up the poll?  Or tearing it down? */
 
@@ -2305,7 +2308,7 @@ static int uart_poll(FAR struct file *filep,
           goto errout;
         }
 
-      leave_critical_section(flags);
+      uart_spinunlock(dev, false, flags);
 
       /* Should we immediately notify on any of the requested events?
        * First, check if the xmit buffer is full.
@@ -2376,13 +2379,13 @@ static int uart_poll(FAR struct file *filep,
       *slot     = NULL;
       fds->priv = NULL;
 
-      leave_critical_section(flags);
+      uart_spinunlock(dev, false, flags);
     }
 
   return ret;
 
 errout:
-  leave_critical_section(flags);
+  uart_spinunlock(dev, false, flags);
   return ret;
 }
 
@@ -2504,6 +2507,43 @@ static void uart_wakeup(FAR sem_t *sem)
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: uart_spinlock
+ *
+ * Description:
+ *   Enter critical section for this uart.
+ *
+ ****************************************************************************/
+
+irqstate_t uart_spinlock(FAR uart_dev_t *dev, bool nopreempt)
+{
+  if (nopreempt)
+    {
+      return rspin_lock_irqsave_nopreempt(&dev->lock);
+    }
+
+  return rspin_lock_irqsave(&dev->lock);
+}
+
+/****************************************************************************
+ * Name: uart_spinunlock
+ *
+ * Description:
+ *   Leave critical section for this uart.
+ *
+ ****************************************************************************/
+
+void uart_spinunlock(FAR uart_dev_t *dev, bool nopreempt, irqstate_t flags)
+{
+  if (nopreempt)
+    {
+      rspin_unlock_irqrestore_nopreempt(&dev->lock, flags);
+      return;
+    }
+
+  rspin_unlock_irqrestore(&dev->lock, flags);
+}
+
+/****************************************************************************
  * Name: uart_register
  *
  * Description:
@@ -2559,6 +2599,7 @@ int uart_register(FAR const char *path, FAR uart_dev_t *dev)
   nxmutex_init(&dev->closelock);
   nxsem_init(&dev->xmitsem, 0, 0);
   nxsem_init(&dev->recvsem, 0, 0);
+  rspin_lock_init(&dev->lock);
 
 #ifdef CONFIG_SERIAL_TERMIOS
   dev->timeout = 0;
@@ -2666,8 +2707,7 @@ void uart_connected(FAR uart_dev_t *dev, bool connected)
    * function may be called from interrupt handling logic.
    */
 
-  flags = enter_critical_section();
-  sched_lock();
+  flags = uart_spinlock(dev, true);
   dev->disconnected = !connected;
   if (!connected)
     {
@@ -2688,8 +2728,7 @@ void uart_connected(FAR uart_dev_t *dev, bool connected)
       uart_wakeup(&dev->recvsem);
     }
 
-  sched_unlock();
-  leave_critical_section(flags);
+  uart_spinunlock(dev, true, flags);
 }
 #endif
 
