@@ -239,8 +239,11 @@ function(nuttx_generate_preprocess_target)
 
   add_custom_command(
     OUTPUT ${EXPECT_TARGET_FILE_NAME}
-    COMMAND ${PREPROCESS} -I${CMAKE_BINARY_DIR}/include -filetype.cpp
-            ${SOURCE_FILE} -o ${EXPECT_TARGET_FILE_NAME}
+    COMMAND
+      ${PREPROCESS}
+      $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx_global,NUTTX_CPP_COMPILE_OPTIONS>>
+      -I${CMAKE_BINARY_DIR}/include -filetype.cpp ${SOURCE_FILE} -o
+      ${EXPECT_TARGET_FILE_NAME}
     DEPENDS ${SOURCE_FILE} ${DEPENDS})
 
   if(NOT ${EXPECT_TARGET_FILE_NAME} STREQUAL ${TARGET_FILE})
