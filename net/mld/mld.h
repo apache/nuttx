@@ -331,6 +331,16 @@ void mld_grpfree(FAR struct net_driver_s *dev,
                  FAR struct mld_group_s *group);
 
 /****************************************************************************
+ * Name:  mld_grpfree_all
+ *
+ * Description:
+ *   Release all previously allocated groups for a device.
+ *
+ ****************************************************************************/
+
+void mld_grpfree_all(FAR struct net_driver_s *dev);
+
+/****************************************************************************
  * Name:  mld_new_pollcycle
  *
  * Description:
