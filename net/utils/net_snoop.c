@@ -264,14 +264,11 @@ static int snoop_flush(FAR struct snoop_s *snoop)
 
 static int snoop_flush_lock(FAR struct snoop_s *snoop)
 {
-  irqstate_t flags;
   int ret;
 
-  flags = enter_critical_section();
   nxmutex_lock(&snoop->mutex);
   ret = snoop_flush(snoop);
   nxmutex_unlock(&snoop->mutex);
-  leave_critical_section(flags);
 
   return ret;
 }
@@ -417,7 +414,6 @@ int snoop_dump(FAR struct snoop_s *snoop, FAR const void *buf,
                uint32_t nbytes, uint32_t drops, uint32_t flags)
 {
   struct snoop_packet_header_s header;
-  irqstate_t irqflags;
   int ret = 0;
 
   if (!snoop)
@@ -427,7 +423,6 @@ int snoop_dump(FAR struct snoop_s *snoop, FAR const void *buf,
 
   snoop_fill_packet_header(snoop, nbytes, drops, flags, &header);
 
-  irqflags = enter_critical_section();
   if (up_interrupt_context())
     {
       if (sizeof(snoop->buf) - snoop->next <
@@ -484,7 +479,6 @@ int snoop_dump(FAR struct snoop_s *snoop, FAR const void *buf,
 out_unlock:
   nxmutex_unlock(&snoop->mutex);
 out_leave:
-  leave_critical_section(irqflags);
   return ret;
 }
 
