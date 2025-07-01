@@ -269,7 +269,7 @@ static int file_mq_vopen(FAR struct file *mq, FAR const char *mq_name,
 
       if (created)
         {
-          *created = 1;
+          *created = 0;
         }
     }
   else
@@ -321,7 +321,7 @@ static int file_mq_vopen(FAR struct file *mq, FAR const char *mq_name,
 
       if (created)
         {
-          *created = 0;
+          *created = 1;
         }
     }
 
