@@ -37,6 +37,7 @@
 #include <net/ethernet.h>
 #include <nuttx/net/netdev.h>
 
+#include "mld/mld.h"
 #include "utils/utils.h"
 #include "netdev/netdev.h"
 
@@ -150,6 +151,16 @@ int netdev_unregister(FAR struct net_driver_s *dev)
 #ifdef CONFIG_NETDEV_IFINDEX
       free_ifindex(dev->d_ifindex);
 #endif
+
+#ifdef CONFIG_NET_MLD
+      if ((dev->d_flags & IFF_MULTICAST) != 0)
+        {
+          /* MLD is only supported on multicast capable devices */
+
+          mld_grpfree_all(dev);
+        }
+#endif
+
       net_unlock();
 
 #if CONFIG_NETDEV_STATISTICS_LOG_PERIOD > 0
