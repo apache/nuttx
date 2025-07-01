@@ -352,13 +352,6 @@ static void virtio_snd_pcm_notify_cb(FAR struct virtqueue *vq)
           break;
         }
 
-#ifdef CONFIG_AUDIO_MULTI_SESSION
-      buf->dev->upper(buf->dev->priv, AUDIO_CALLBACK_DEQUEUE,
-                      &buf->apb, OK, NULL);
-#else
-      buf->dev->upper(buf->dev->priv, AUDIO_CALLBACK_DEQUEUE,
-                      &buf->apb, OK);
-#endif
       sdev = (FAR struct virtio_snd_dev_s *)buf->dev;
       sdev->cache_buffers--;
       if (sdev->running &&
@@ -367,6 +360,14 @@ static void virtio_snd_pcm_notify_cb(FAR struct virtqueue *vq)
           buf->dev->upper(buf->dev->priv, AUDIO_CALLBACK_UNDERRUN,
                           NULL, OK);
         }
+
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+      buf->dev->upper(buf->dev->priv, AUDIO_CALLBACK_DEQUEUE,
+                      &buf->apb, OK, NULL);
+#else
+      buf->dev->upper(buf->dev->priv, AUDIO_CALLBACK_DEQUEUE,
+                      &buf->apb, OK);
+#endif
     }
 
   spin_unlock_irqrestore(&priv->lock, flags);
