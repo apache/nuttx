@@ -119,28 +119,22 @@ static FAR struct tcb_s *nxsched_nexttcb(FAR struct tcb_s *tcb)
    * assigned task list (nxttcb) or a TCB in the g_readytorun list.  We can
    * only select a task from that list if the affinity mask includes the
    * tcb->cpu.
-   *
-   * If pre-emption is locked or another CPU is in a critical section,
-   * then use the 'nxttcb' which will probably be the IDLE thread.
    */
 
-  if (!nxsched_islocked_tcb(this_task()))
+  /* Search for the highest priority task that can run on tcb->cpu. */
+
+  for (rtrtcb = (FAR struct tcb_s *)list_readytorun()->head;
+       rtrtcb != NULL && !CPU_ISSET(tcb->cpu, &rtrtcb->affinity);
+       rtrtcb = rtrtcb->flink);
+
+  /* Return the TCB from the readyt-to-run list if it is the next
+   * highest priority task.
+   */
+
+  if (rtrtcb != NULL &&
+      rtrtcb->sched_priority >= nxttcb->sched_priority)
     {
-      /* Search for the highest priority task that can run on tcb->cpu. */
-
-      for (rtrtcb = (FAR struct tcb_s *)list_readytorun()->head;
-           rtrtcb != NULL && !CPU_ISSET(tcb->cpu, &rtrtcb->affinity);
-           rtrtcb = rtrtcb->flink);
-
-      /* Return the TCB from the readyt-to-run list if it is the next
-       * highest priority task.
-       */
-
-      if (rtrtcb != NULL &&
-          rtrtcb->sched_priority >= nxttcb->sched_priority)
-        {
-          return rtrtcb;
-        }
+      return rtrtcb;
     }
 
   /* Otherwise, return the next TCB in the g_assignedtasks[] list...
@@ -196,9 +190,7 @@ static inline void nxsched_running_setpriority(FAR struct tcb_s *tcb,
 
   if (sched_priority <= nxttcb->sched_priority)
     {
-      FAR struct tcb_s *rtcb = this_task();
-
-      if (nxsched_islocked_tcb(rtcb))
+      if (nxsched_islocked_tcb(tcb))
         {
           /* Move all tasks with the higher priority from the ready-to-run
            * list to the pending list.
@@ -219,7 +211,7 @@ static inline void nxsched_running_setpriority(FAR struct tcb_s *tcb,
               nxttcb = tcb->flink;
 #endif
             }
-          while (sched_priority < nxttcb->sched_priority);
+          while (sched_priority <= nxttcb->sched_priority);
 
           /* Change the task priority */
 
@@ -231,8 +223,7 @@ static inline void nxsched_running_setpriority(FAR struct tcb_s *tcb,
 
 #ifdef CONFIG_SMP
           int cpu = this_cpu();
-          if (tcb->cpu != cpu &&
-              tcb->task_state == TSTATE_TASK_RUNNING)
+          if (tcb->cpu != this_cpu())
             {
               struct reprioritize_arg_s *arg = &g_reprioritize_arg[cpu];
               arg->pid = tcb->pid;
@@ -259,7 +250,7 @@ static inline void nxsched_running_setpriority(FAR struct tcb_s *tcb,
 #endif
           if (nxsched_reprioritize_rtr(tcb, sched_priority))
             {
-              up_switch_context(this_task(), rtcb);
+              up_switch_context(this_task(), tcb);
             }
         }
     }

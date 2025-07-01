@@ -196,7 +196,7 @@ bool nxsched_add_readytorun(FAR struct tcb_s *btcb)
    * situation.
    */
 
-  if (nxsched_islocked_tcb(this_task()))
+  if (nxsched_islocked_tcb(rtcb))
     {
       /* Add the new ready-to-run task to the g_pendingtasks task list for
        * now.
