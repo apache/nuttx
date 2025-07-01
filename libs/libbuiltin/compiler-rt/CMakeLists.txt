@@ -96,6 +96,26 @@ if(CONFIG_BUILTIN_COMPILER_RT)
     list(REMOVE_ITEM RT_BUILTINS_SRCS ${RT_BUILTINS_BFLOAT16_SRCS})
   endif()
 
+  set(x86_80_BIT_SOURCES
+      divxc3.c
+      extendxftf2.c
+      fixxfdi.c
+      fixxfti.c
+      fixunsxfdi.c
+      fixunsxfsi.c
+      fixunsxfti.c
+      floatdixf.c
+      floattixf.c
+      floatundixf.c
+      floatuntixf.c
+      mulxc3.c
+      powixf2.c
+      trunctfxf2.c)
+
+  if(NOT CONFIG_ARCH_X86_64)
+    list(REMOVE_ITEM RT_BUILTINS_SRCS ${x86_80_BIT_SOURCES})
+  endif()
+
   if(NOT CONFIG_COVERAGE_NONE)
     target_compile_options(rt.builtins PRIVATE -fno-profile-instr-generate
                                                -fno-coverage-mapping)
