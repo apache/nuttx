@@ -31,6 +31,7 @@
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/mutex.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/wqueue.h>
 
 /****************************************************************************
@@ -96,6 +97,7 @@ struct snoop_s
   uint32_t         datalink;
   struct file      filep;
   mutex_t          mutex;
+  spinlock_t       lock;
   struct work_s    work;
   uint8_t          buf[CONFIG_NET_SNOOP_BUFSIZE];
   size_t           next;

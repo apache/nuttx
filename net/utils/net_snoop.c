@@ -224,25 +224,34 @@ static void snoop_fill_packet_header(FAR struct snoop_s *snoop,
 
 static int snoop_flush(FAR struct snoop_s *snoop)
 {
+  irqstate_t flags;
+  size_t len;
   ssize_t ret;
 
-  if (snoop->next == 0)
+  flags = spin_lock_irqsave(&snoop->lock);
+  len = snoop->next;
+  spin_unlock_irqrestore(&snoop->lock, flags);
+
+  if (len == 0)
     {
       return 0;
     }
 
   do
     {
-      ret = file_write(&snoop->filep, snoop->buf, snoop->next);
+      ret = file_write(&snoop->filep, snoop->buf, len);
       if (ret < 0)
         {
           break;
         }
 
+      flags = spin_lock_irqsave(&snoop->lock);
       snoop->next -= ret;
       memmove(snoop->buf, snoop->buf + ret, snoop->next);
+      len = snoop->next;
+      spin_unlock_irqrestore(&snoop->lock, flags);
     }
-  while (snoop->next > 0);
+  while (len > 0);
 
 #ifndef CONFIG_DISABLE_MOUNTPOINT
   if (snoop->autosync)
@@ -264,14 +273,11 @@ static int snoop_flush(FAR struct snoop_s *snoop)
 
 static int snoop_flush_lock(FAR struct snoop_s *snoop)
 {
-  irqstate_t flags;
   int ret;
 
-  flags = enter_critical_section();
   nxmutex_lock(&snoop->mutex);
   ret = snoop_flush(snoop);
   nxmutex_unlock(&snoop->mutex);
-  leave_critical_section(flags);
 
   return ret;
 }
@@ -386,6 +392,7 @@ int snoop_open(FAR struct snoop_s *snoop, FAR const char *filename,
     }
 
   nxmutex_init(&snoop->mutex);
+  spin_lock_init(&snoop->lock);
   return OK;
 
 error:
@@ -427,12 +434,13 @@ int snoop_dump(FAR struct snoop_s *snoop, FAR const void *buf,
 
   snoop_fill_packet_header(snoop, nbytes, drops, flags, &header);
 
-  irqflags = enter_critical_section();
   if (up_interrupt_context())
     {
+      irqflags = spin_lock_irqsave(&snoop->lock);
       if (sizeof(snoop->buf) - snoop->next <
           nbytes + sizeof(struct snoop_packet_header_s))
         {
+          spin_unlock_irqrestore(&snoop->lock, irqflags);
           ret = -ENOMEM;
           goto out_leave;
         }
@@ -441,6 +449,7 @@ int snoop_dump(FAR struct snoop_s *snoop, FAR const void *buf,
       snoop->next += sizeof(header);
       memcpy(snoop->buf + snoop->next, buf, nbytes);
       snoop->next += nbytes;
+      spin_unlock_irqrestore(&snoop->lock, irqflags);
 
       if (work_available(&snoop->work))
         {
@@ -484,7 +493,6 @@ int snoop_dump(FAR struct snoop_s *snoop, FAR const void *buf,
 out_unlock:
   nxmutex_unlock(&snoop->mutex);
 out_leave:
-  leave_critical_section(irqflags);
   return ret;
 }
 
