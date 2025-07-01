@@ -392,11 +392,11 @@ static int uart_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept, FAR void *data,
 
       /* Get write-cmd, there are some data, we need receive them */
 
-      flags = enter_critical_section();
+      flags = uart_spinlock(dev, true);
       priv->recv_data = data;
       uart_recvchars_dma(dev);
       priv->recv_data = NULL;
-      leave_critical_section(flags);
+      uart_spinunlock(dev, true, flags);
 
       header->response = 1;
       rpmsg_send(ept, msg, sizeof(*msg));
