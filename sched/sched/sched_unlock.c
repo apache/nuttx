@@ -35,6 +35,7 @@
 
 #include "irq/irq.h"
 #include "sched/sched.h"
+#include "sched/queue.h"
 
 /****************************************************************************
  * Public Functions
@@ -85,7 +86,11 @@ void sched_unlock(void)
            * this task to be switched out!
            */
 
-          if (list_pendingtasks()->head != NULL)
+#ifdef CONFIG_SMP
+          if (!dq_empty(list_readytorun()))
+#else
+          if (!dq_empty(list_pendingtasks()))
+#endif
             {
               if (nxsched_merge_pending())
                 {

@@ -33,6 +33,7 @@
 #include <nuttx/sched.h>
 
 #include "sched/sched.h"
+#include "sched/queue.h"
 
 /****************************************************************************
  * Public Functions
@@ -81,10 +82,17 @@ bool nxsched_reprioritize_rtr(FAR struct tcb_s *tcb, int priority)
   switch_needed ^= nxsched_add_readytorun(tcb);
 
   /* If we are going to do a context switch, then now is the right
-   * time to add any pending tasks back into the ready-to-run list.
+   * time to add any pending tasks back into the ready-to-run list,
+   * or in SMP case to the assigned list.
    */
 
-  if (switch_needed && list_pendingtasks()->head)
+  if (switch_needed &&
+#ifdef CONFIG_SMP
+      !dq_empty(list_readytorun())
+#else
+      !dq_empty(list_pendingtasks())
+#endif
+      )
     {
       nxsched_merge_pending();
     }

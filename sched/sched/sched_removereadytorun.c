@@ -278,7 +278,7 @@ void nxsched_remove_running(FAR struct tcb_s *tcb)
 void nxsched_remove_self(FAR struct tcb_s *tcb)
 {
   nxsched_remove_running(tcb);
-  if (g_pendingtasks.head)
+  if (!dq_empty(list_readytorun()))
     {
       nxsched_merge_pending();
     }

@@ -62,11 +62,7 @@
 
 void nxsched_process_delivered(int cpu)
 {
-  FAR dq_queue_t *tasklist;
-  FAR struct tcb_s *next;
-  FAR struct tcb_s *prev;
   struct tcb_s *btcb = NULL;
-  struct tcb_s *tcb;
 
   DEBUGASSERT(g_cpu_nestcount[cpu] == 0);
   DEBUGASSERT(up_interrupt_context());
@@ -78,67 +74,14 @@ void nxsched_process_delivered(int cpu)
       g_cpu_irqset |= (1 << cpu);
     }
 
-  tcb = current_task(cpu);
-
-  if (g_delivertasks[cpu] == NULL)
-    {
-      if (tcb->irqcount <= 0)
-        {
-          cpu_irqlock_clear();
-        }
-
-      return;
-    }
-
-  if (nxsched_islocked_tcb(tcb))
+  if (g_delivertasks[cpu] != NULL)
     {
       btcb = g_delivertasks[cpu];
       g_delivertasks[cpu] = NULL;
-      nxsched_add_prioritized(btcb, &g_pendingtasks);
-      btcb->task_state = TSTATE_TASK_PENDING;
-      if (tcb->irqcount <= 0)
-        {
-          cpu_irqlock_clear();
-        }
-
-      return;
+      nxsched_switch_running(btcb, cpu);
     }
 
-  btcb = g_delivertasks[cpu];
-
-  for (next = tcb; btcb->sched_priority <= next->sched_priority;
-      next = next->flink);
-
-  DEBUGASSERT(next);
-
-  prev = next->blink;
-  if (prev == NULL)
-    {
-      /* Special case:  Insert at the head of the list */
-
-      tasklist = &g_assignedtasks[cpu];
-      dq_addfirst_nonempty((FAR dq_entry_t *)btcb, tasklist);
-      btcb->cpu = cpu;
-      btcb->task_state = TSTATE_TASK_RUNNING;
-      up_update_task(btcb);
-
-      DEBUGASSERT(btcb->flink != NULL);
-      DEBUGASSERT(next == btcb->flink);
-      next->task_state = TSTATE_TASK_ASSIGNED;
-    }
-  else
-    {
-      /* Insert in the middle of the list */
-
-      dq_insert_mid(prev, btcb, next);
-      btcb->cpu = cpu;
-      btcb->task_state = TSTATE_TASK_ASSIGNED;
-    }
-
-  g_delivertasks[cpu] = NULL;
-  tcb = current_task(cpu);
-
-  if (tcb->irqcount <= 0)
+  if (current_task(cpu)->irqcount <= 0)
     {
       cpu_irqlock_clear();
     }
