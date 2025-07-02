@@ -549,12 +549,19 @@ irqstate_t spin_lock_irqsave_nopreempt(FAR volatile spinlock_t *lock)
  ****************************************************************************/
 
 static inline_function
-irqstate_t rspin_lock_irqsave(FAR rspinlock_t *lock)
+void rspin_lock(FAR rspinlock_t *lock)
 {
   rspinlock_t new_val;
   rspinlock_t old_val = RSPINLOCK_INITIALIZER;
-  irqstate_t  flags   = up_irq_save();
   int         cpu     = this_cpu() + 1;
+
+  /* Already owned this lock. */
+
+  if (lock->owner == cpu)
+  {
+    lock->count += 1;
+    return;
+  }
 
   new_val.count = 1;
   new_val.owner = cpu;
@@ -564,16 +571,15 @@ irqstate_t rspin_lock_irqsave(FAR rspinlock_t *lock)
   while (!atomic_cmpxchg_acquire((FAR atomic_t *)&lock->val,
                                  (FAR atomic_t *)&old_val.val, new_val.val))
     {
-      /* Already owned this lock. */
-
-      if (old_val.owner == cpu)
-        {
-          lock->count += 1;
-          break;
-        }
-
       old_val.val = 0;
     }
+}
+
+static inline_function
+irqstate_t rspin_lock_irqsave(FAR rspinlock_t *lock)
+{
+  irqstate_t flags = up_irq_save();
+  rspin_lock(lock);
 
   return flags;
 }
@@ -776,18 +782,30 @@ void spin_unlock_irqrestore_nopreempt(FAR volatile spinlock_t *lock,
  *           spin_unlock_irqrestore_nopreempt(lock);
  *
  * Returned Value:
- *   None
+ *   true  - Indicates exiting the spinlock.
  *
  ****************************************************************************/
 
 static inline_function
-void rspin_unlock_irqrestore(FAR rspinlock_t *lock, irqstate_t flags)
+bool rspin_unlock(FAR rspinlock_t *lock)
 {
   DEBUGASSERT(lock->owner == this_cpu() + 1);
+  DEBUGASSERT(lock->count >= 1);
 
   if (--lock->count == 0)
     {
       atomic_set_release((FAR atomic_t *)&lock->val, 0);
+      return true;
+    }
+
+  return false;
+}
+
+static inline_function
+void rspin_unlock_irqrestore(FAR rspinlock_t *lock, irqstate_t flags)
+{
+  if (rspin_unlock(lock))
+    {
       up_irq_restore(flags);
     }
 
@@ -800,6 +818,24 @@ void rspin_unlock_irqrestore_nopreempt(FAR rspinlock_t *lock,
 {
   rspin_unlock_irqrestore(lock, flags);
   sched_unlock();
+}
+
+static inline_function
+uint16_t rspin_breaklock(FAR rspinlock_t *lock)
+{
+  int oldcount = lock->count;
+
+  lock->count = 1;
+  rspin_unlock(lock);
+
+  return oldcount;
+}
+
+static inline_function
+void rspin_restorelock(FAR rspinlock_t *lock, uint16_t count)
+{
+  rspin_lock(lock);
+  lock->count = count;
 }
 
 #if defined(CONFIG_RW_SPINLOCK)
