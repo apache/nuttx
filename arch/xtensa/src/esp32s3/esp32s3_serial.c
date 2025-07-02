@@ -1212,6 +1212,9 @@ void xtensa_serialinit(void)
 
 void up_putc(int ch)
 {
+#ifdef CONFIG_ESP32S3_USBSERIAL
+  esp32s3_usbserial_write(ch);
+#else
 #ifdef CONSOLE_UART
   uint32_t int_status;
 
@@ -1222,6 +1225,7 @@ void up_putc(int ch)
 
 #ifdef CONSOLE_UART
   esp32s3_lowputc_restore_all_uart_int(CONSOLE_DEV.priv, &int_status);
+#endif
 #endif
 }
 
