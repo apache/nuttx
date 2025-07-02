@@ -95,7 +95,7 @@ is_cmake_file() {
 }
 
 format_file() {
-  if [ ${@##*.} == 'py' ]; then
+  if [ "$(is_python_file $@)" == "1" ]; then
     if command -v black >/dev/null; then
       echo "Auto-formatting Python file with black: $@"
       setupcfg="${TOOLDIR}/../.github/linters/setup.cfg"
