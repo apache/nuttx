@@ -600,6 +600,12 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
                 {
                   /* Fast retransmission has been triggered */
 
+#ifndef CONFIG_NET_TCP_CC_NEWRENO
+                  /* Reset counter */
+
+                  TCP_WBNACK(wrb) = 0;
+#endif
+
                   if ((flags & TCP_NEWDATA) != 0)
                     {
                       FAR uint8_t *buf = dev->d_buf;
@@ -619,7 +625,6 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
                        * driver to send the message and marked as rexmit
                        */
 
-                      TCP_WBNACK(wrb) = 0;
                       conn->timeout = true;
 
                       netdev_txnotify_dev(conn->dev);
@@ -653,11 +658,6 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
                       /* Do fast retransmit */
 
                       rexmitno = ackno;
-#ifndef CONFIG_NET_TCP_CC_NEWRENO
-                      /* Reset counter */
-
-                      TCP_WBNACK(wrb) = 0;
-#endif
 #endif
                     }
 
