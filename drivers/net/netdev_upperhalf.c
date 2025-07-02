@@ -86,6 +86,8 @@ struct netdev_upperhalf_s
   struct netdev_vlan_entry_s vlan[CONFIG_NET_VLAN_COUNT];
 #endif
 
+  bool txing;
+
   /* Deferring process to work queue or thread */
 
   union
@@ -381,11 +383,13 @@ static void netdev_upper_txavail_work(FAR struct netdev_upperhalf_s *upper)
   /* Ignore the notification if the interface is not yet up */
 
   net_lock();
-  if (IFF_IS_UP(dev->d_flags))
+  if (IFF_IS_UP(dev->d_flags) && !upper->txing)
     {
       DEBUGASSERT(dev->d_buf == NULL); /* Make sure: IOB only. */
+      upper->txing = true;
       while (netdev_upper_can_tx(upper) &&
              netdev_upper_tx(dev) == NETDEV_TX_CONTINUE);
+      upper->txing = false;
     }
 
   net_unlock();
@@ -1407,6 +1411,8 @@ int netdev_lower_register(FAR struct netdev_lowerhalf_s *dev,
     {
       return -ENOMEM;
     }
+
+  upper->txing = false;
 
   dev->netdev.d_ifup    = netdev_upper_ifup;
   dev->netdev.d_ifdown  = netdev_upper_ifdown;
