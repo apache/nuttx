@@ -83,18 +83,41 @@ int atexit_register(int type, CODE void (*func)(void), FAR void *arg,
   if (func)
     {
       ret = nxmutex_lock(&info->ta_lock);
+      if (aehead->capacity == 0)
+        {
+          aehead->capacity = ATEXIT_MAX;
+        }
+
       if (ret < 0)
         {
           return -ret;
         }
 
-      if ((idx = aehead->nfuncs) < ATEXIT_MAX)
+      if ((idx = aehead->nfuncs) < aehead->capacity)
         {
           aehead->funcs[idx].type = type;
           aehead->funcs[idx].func = func;
           aehead->funcs[idx].arg  = arg;
           aehead->nfuncs++;
           ret = OK;
+        }
+      else if (aehead->nfuncs >= aehead->capacity)
+        {
+          int capacity = aehead->capacity * 2;
+          FAR struct atexit_s *newfuncs = (FAR struct atexit_s *)realloc(
+            aehead->exfuncs, capacity * sizeof(struct atexit_s));
+          if (newfuncs)
+            {
+              aehead->exfuncs = newfuncs;
+              aehead->capacity = capacity;
+            }
+
+          if (aehead->nfuncs == ATEXIT_MAX)
+            {
+              memcpy(aehead->exfuncs, aehead->funcs, ATEXIT_MAX * sizeof(struct atexit_s));
+            }
+
+          ret = -ENOMEM;
         }
       else
         {
@@ -155,6 +178,13 @@ void atexit_call_exitfuncs(int status, bool quick)
         {
           (*((CODE void (*)(FAR void *))func))(arg);
         }
+    }
+
+  if (aehead->capacity > ATEXIT_MAX)
+    {
+      free(aehead->exfuncs);
+      aehead->exfuncs = NULL;
+      aehead->capacity = 0;
     }
 }
 

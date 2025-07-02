@@ -62,7 +62,9 @@ struct atexit_s
 struct atexit_list_s
 {
   int             nfuncs;
+  int             capacity;
   struct atexit_s funcs[ATEXIT_MAX];
+  FAR struct atexit_s *exfuncs;
 };
 
 /****************************************************************************

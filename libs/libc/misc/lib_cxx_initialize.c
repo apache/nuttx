@@ -24,8 +24,8 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
 #include <nuttx/arch.h>
+#include <nuttx/config.h>
 
 #include <assert.h>
 #include <debug.h>
@@ -62,40 +62,54 @@ extern void macho_call_saved_init_funcs(void);
  *
  ****************************************************************************/
 
+static void call_ctors(void)
+{
+  initializer_t *initp;
+
+  sinfo("_sinit: %p _einit: %p\n", _sinit, _einit);
+
+  /* Visit each entry in the initialization table */
+
+  for (initp = _sinit; initp < _einit; initp++)
+    {
+      initializer_t initializer = *initp;
+      sinfo("initp: %p initializer: %p\n", initp, initializer);
+
+      /* Make sure that the address is non-NULL. Some toolchains may put
+       * NULL values or counts in the initialization table.
+       */
+
+      if (initializer)
+        {
+          sinfo("Calling %p\n", initializer);
+          initializer();
+        }
+    }
+}
+
 void lib_cxx_initialize(void)
 {
 #ifdef CONFIG_HAVE_CXXINITIALIZE
   static int inited = 0;
 
+#if defined(CONFIG_ARCH_SIM) && defined(CONFIG_HOST_MACOS)
   if (inited == 0)
     {
-#if defined(CONFIG_ARCH_SIM) && defined(CONFIG_HOST_MACOS)
       macho_call_saved_init_funcs();
+    }
 #else
-      initializer_t *initp;
-
-      sinfo("_sinit: %p _einit: %p\n", _sinit, _einit);
-
-      /* Visit each entry in the initialization table */
-
-      for (initp = _sinit; initp < _einit; initp++)
-        {
-          initializer_t initializer = *initp;
-          sinfo("initp: %p initializer: %p\n", initp, initializer);
-
-          /* Make sure that the address is non-NULL. Some toolchains may put
-           * NULL values or counts in the initialization table.
-           */
-
-          if (initializer)
-            {
-              sinfo("Calling %p\n", initializer);
-              initializer();
-            }
-        }
+#if CONFIG_LIBC_MAX_EXITFUNS <= 0
+  if (inited == 0)
+    {
+      call_ctors();
+    }
+#else
+  call_ctors();
 #endif
-
+  if (inited == 0)
+    {
       inited = 1;
     }
+#endif
 #endif
 }
