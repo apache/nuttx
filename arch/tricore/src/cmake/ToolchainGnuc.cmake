@@ -118,6 +118,8 @@ elseif(CONFIG_LTO_FULL)
   endif()
 endif()
 
+set(NO_LTO "-fno-lto")
+
 # Debug link map
 
 if(CONFIG_DEBUG_LINK_MAP)
