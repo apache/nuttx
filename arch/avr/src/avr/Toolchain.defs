@@ -106,6 +106,16 @@ ifeq ($(CONFIG_DEBUG_OPT_UNUSED_SECTIONS),y)
   ARCHOPTIMIZATION += -ffunction-sections -fdata-sections
 endif
 
+# .rodata size for FLMAP configuration
+ifeq ($(CONFIG_AVR_CONST_TO_FLMAP),y)
+  LDFLAGS += --defsym=__RODATA_SIZE__=$(CONFIG_AVR_FLMAP_RODATA_SIZE)
+endif
+
+# .rodata offset for FLMAP configuration
+ifeq ($(CONFIG_AVR_CONST_TO_FLMAP),y)
+  LDFLAGS += --defsym=__RODATA_OFFSET__=$(CONFIG_AVR_FLMAP_RODATA_OFFSET)
+endif
+
 ifeq ($(CONFIG_DEBUG_LINK_MAP),y)
   LDFLAGS += -Map=$(call CONVERT_PATH,$(TOPDIR)$(DELIM)nuttx.map)
 endif

@@ -94,6 +94,7 @@ config ARCH_BOARD_AVRDX_BREADXAVR
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
+	select AVR_HAVE_BOARD_FLMAP
 	---help---
 		This is a board used to make something use an AVRnDx core
 		so it can be developed and tested.
