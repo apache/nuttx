@@ -492,6 +492,61 @@ __start:
 	out		_SFR_IO_ADDR(SPH), r29
 	out		_SFR_IO_ADDR(SPL), r28
 
+
+#ifdef CONFIG_AVR_HAVE_FLMAP
+
+	/* Configure FLMAP bits in NVMCTRL.CTRLB in case this was software
+	 * reset and they are not in default state.
+	 *
+	 * Don't care if the application actually changes the register. These
+	 * bits are not under configuration protection (CCP) and runaway
+	 * application can possibly change them.
+	 *
+	 * This is executed if the chip supports it, regardless of if the board
+	 * declared it is using the feature by setting AVR_HAVE_BOARD_FLMAP
+	 * in Kconfig (it may be using it without setting that option.)
+	 */
+
+	ldi		r26, lo8(NVMCTRL_CTRLB)
+	ldi		r27, hi8(NVMCTRL_CTRLB)
+	ld		r16, X
+
+	/* Default value (on current chips anyway) uses all bits set to one. */
+
+#  if !defined(NVMCTRL_FLMAP_1_bm)
+
+	/* Might be there won't be such (supported) device ever. */
+
+#    error Chips without FLMAP bit 1 are not supported
+
+#  elif !defined(NVMCTRL_FLMAP_2_bm)
+
+	/* Expected case */
+
+	ldi		r17, NVMCTRL_FLMAP_0_bm | NVMCTRL_FLMAP_1_bm;
+
+#  else
+
+	/* Future device with more than 128kB RAM. The default is expected
+	 * to be all bits set to one but it needs to be verified when
+	 * support for such chip is added. Issue a warning.
+	 */
+
+#    warning Support for more than 128kB flash was done blindly here
+
+	ldi		r17, NVMCTRL_FLMAP_0_bm | NVMCTRL_FLMAP_1_bm | NVMCTRL_FLMAP_2_bm;
+
+#  endif
+
+	/* As long as we are always setting bits to one, we don't need
+	 * to clear them in the original value
+	 */
+
+	or		r16, r17
+	st		X, r16
+
+#endif
+
 	/* Copy initial global data values from FLASH into RAM */
 
 	.global	__do_copy_data;			/* Required to suppress dragging in logic from libgcc */

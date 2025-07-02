@@ -178,3 +178,48 @@ Note that both ``IOBJ`` and ``IPTR`` need to be activated by
 If this configuration option is not set, both macros are defined
 to be empty and all strings will be copied to RAM (performance penalty
 discussed above is therefore removed as well.)
+
+Using memory-mapped flash
+=========================
+
+Newer AVR devices - tinyAVR and AVR DA/DB family - have their program
+memory mapped into upper 32kB half of data memory address space.
+(If the program memory size exceeds 32kB, only a 32kB-sized window
+is mapped. This is controlled by NVM peripheral within the chip.
+On current chips, the top window is mapped by default.)
+
+This can be leveraged in a way that makes these AVR devices behave
+as a von Neumann architecture. With proper configuration in a linker
+script, all constants can be placed into the mapped program memory
+region where they will be accessible for both load from program memory
+instructions and load from data address space instructions.
+
+As long as these constants fit into the 32kB window, this is a best
+available option on devices that support it. It combines advantages
+of all previous options and doesn't have any of their drawbacks.
+The performance penalty is negligible (flash read is few cycles slower
+than RAM read), RAM is not consumed and all variables are fully
+available to be used as parameters for any kernel interface.
+
+Unlike previous options, using this one is fully controlled by board's
+linker script. The linker script needs to place the constants
+(eg. ``rodata`` section) to appropriate memory location.
+
+Despite that, there is still a configuration option
+:menuselection:`System Type --> Use memory-mapped access to flash`,
+which is selected by default on devices that support this method
+of not copying data from program memory to RAM. Setting it unlocks
+additional configuration options
+:menuselection:`Size of .rodata FLMAP section` and
+:menuselection:`Offset of .rodata FLMAP section` which may be used
+to further configure section sizes. Note that these values are
+only made available to the linker and board's linker script needs
+to be designed to obey them.
+
+To have these configuration options available, the board needs
+to select ``AVR_HAVE_BOARD_FLMAP`` in its configuration. It declares
+that its linker script will obey ``__RODATA_SIZE__`` and
+``__RODATA_OFFSET__`` symbols (which are set by the above-mentioned
+configuration options.)
+
+See the linker script of :ref:`breadxavr_board` for an example.
