@@ -418,6 +418,7 @@ static int audio_configure(FAR struct file *filep,
       upper->info.subformat = caps->ac_format.b[0];
       upper->info.samplerate =
           caps->ac_controls.hw[0] | (caps->ac_controls.b[3] << 16);
+      memcpy(&upper->info.codec, &caps->ac_codec, sizeof(caps->ac_codec));
     }
 
   priv->state = AUDIO_STATE_PREPARED;
@@ -1055,7 +1056,12 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case AUDIOIOC_GETAUDIOINFO:
         {
-          memcpy((void *)arg, &upper->info, sizeof(struct audio_info_s));
+          if (!lower->ops->ioctl ||
+              lower->ops->ioctl(lower, AUDIOIOC_GETAUDIOINFO, arg) < 0)
+            {
+              memcpy((void *)arg, &upper->info, sizeof(struct audio_info_s));
+            }
+
           ret = OK;
         }
         break;
