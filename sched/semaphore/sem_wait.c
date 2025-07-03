@@ -98,6 +98,11 @@ int nxsem_wait_slow(FAR sem_t *sem)
        */
 
       mholder = atomic_fetch_or(NXSEM_MHOLDER(sem), NXSEM_MBLOCKING_BIT);
+
+      /* Avoid mutex recursion, which is not allowed. */
+
+      DEBUGASSERT((mholder & (~NXSEM_MBLOCKING_BIT)) != nxsched_gettid());
+
       if (NXSEM_MACQUIRED(mholder))
         {
           /* htcb gets NULL if
