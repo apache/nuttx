@@ -1746,6 +1746,7 @@ static void fdcan_error_work(void *arg)
   ie = fdcan_getreg(priv, STM32_FDCAN_IE_OFFSET);
 
   pending = (ir & ie);
+  ie |= FDCAN_ANYERR_INTS;
 
   /* Check for common errors */
 
@@ -1767,7 +1768,6 @@ static void fdcan_error_work(void *arg)
       if ((psr & FDCAN_PSR_LEC_MASK) != 0)
         {
           ie &= ~(FDCAN_INT_PEA | FDCAN_INT_PED);
-          fdcan_putreg(priv, STM32_FDCAN_IE_OFFSET, ie);
         }
 
       /* Clear the error indications */
@@ -1809,7 +1809,6 @@ static void fdcan_error_work(void *arg)
        */
 
       ie &= ~(pending & FDCAN_RXERR_INTS);
-      fdcan_putreg(priv, STM32_FDCAN_IE_OFFSET, ie);
 
       /* Clear the error indications */
 
@@ -1824,7 +1823,7 @@ static void fdcan_error_work(void *arg)
 
   /* Re-enable ERROR interrupts */
 
-  fdcan_errint(priv, true);
+  fdcan_putreg(priv, STM32_FDCAN_IE_OFFSET, ie);
 }
 
 /****************************************************************************
