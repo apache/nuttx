@@ -57,8 +57,10 @@ process_file() {
             fi
         else
             if [[ -n "$line" ]]; then
-                local key_config="$(echo "$line" | cut -d= -f1)="
-                sed -i.backup "/^$key_config/d" "$output_file"
+                if [[ ! "$line" == \#* ]]; then
+                    local key_config="$(echo "$line" | cut -d= -f1)="
+                    sed -i.backup "/^$key_config/d" "$output_file"
+                fi
                 echo "$line" >> "$output_file"
             fi
         fi
