@@ -33,3 +33,4 @@ general interface.
     sensors/sht4x.rst
     sensors/lsm6dso32.rst
     sensors/lis2mdl.rst
+    sensors/l86xxx.rst
