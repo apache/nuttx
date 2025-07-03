@@ -293,6 +293,20 @@ FAR struct mtd_dev_s *mtd_rwb_initialize(FAR struct mtd_dev_s *mtd);
  * Name: ftl_initialize_by_path
  *
  * Description:
+ *   Initialize to provide a char driver wrapper around an MTD interface
+ *
+ * Input Parameters:
+ *   path - The char device path.
+ *   mtd  - The MTD device that supports the FLASH interface.
+ *
+ ****************************************************************************/
+
+int ftl_initialize_by_path(FAR const char *path, FAR struct mtd_dev_s *mtd);
+
+/****************************************************************************
+ * Name: ftl_initialize_to_block
+ *
+ * Description:
  *   Initialize to provide a block driver wrapper around an MTD interface
  *
  * Input Parameters:
@@ -301,7 +315,7 @@ FAR struct mtd_dev_s *mtd_rwb_initialize(FAR struct mtd_dev_s *mtd);
  *
  ****************************************************************************/
 
-int ftl_initialize_by_path(FAR const char *path, FAR struct mtd_dev_s *mtd);
+int ftl_initialize_to_block(FAR const char *path, FAR struct mtd_dev_s *mtd);
 
 /****************************************************************************
  * Name: ftl_initialize
@@ -825,6 +839,27 @@ int register_cfi_driver(volatile uintptr_t addr_base,
                         volatile uintptr_t addr_end, uint32_t bankwidth,
                         int id);
 #endif
+
+/****************************************************************************
+ * Name: unique_dev
+ *
+ * Description:
+ *   Create a unique temporary device name in the /dev/ directory of the
+ *   pseudo-file system.
+ *
+ * Input Parameters:
+ *   dev_prefix - The prefix to use for the device name.
+ *   devbuf     - The buffer in which to return the full device name.
+ *   len        - The length of the buffer.
+ *
+ * Returned Value:
+ *   The allocated path to the device.  This must be released by the caller
+ *   to prevent memory links.  NULL will be returned only the case where
+ *   we fail to allocate memory.
+ *
+ ****************************************************************************/
+
+int unique_dev(FAR char *dev_prefix, FAR char *devbuf, size_t len);
 
 #undef EXTERN
 #ifdef __cplusplus

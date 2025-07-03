@@ -28,7 +28,15 @@ if(CONFIG_BCH)
             bchlib_read.c
             bchlib_write.c
             bchlib_cache.c
+            bchlib_close.c
+            bchlib_open.c
+            bchlib_seek.c
+            bchlib_unlink.c
+            bchlib_ioctl.c
             bchdev_register.c
             bchdev_unregister.c
             bchdev_driver.c)
+
+  target_include_directories(drivers PRIVATE ${CMAKE_CURRENT_LIST_DIR})
+
 endif()

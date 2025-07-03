@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/driver/fs_blockproxy.c
+ * drivers/mtd/unique_dev.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -23,31 +23,15 @@
 /****************************************************************************
  * Included Files
  ****************************************************************************/
-
 #include <nuttx/config.h>
-
 #include <sys/types.h>
 #include <sys/stat.h>
-
-#include <stdlib.h>
-#include <unistd.h>
 #include <stdio.h>
-#include <fcntl.h>
 #include <string.h>
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
-
-#include <nuttx/lib/lib.h>
-#include <nuttx/drivers/drivers.h>
-#include <nuttx/fs/fs.h>
 #include <nuttx/mutex.h>
-
-#include "driver.h"
-#include "fs_heap.h"
-
-#if !defined(CONFIG_DISABLE_MOUNTPOINT) && \
-    !defined(CONFIG_DISABLE_PSEUDOFS_OPERATIONS)
 
 /****************************************************************************
  * Private Data
@@ -61,7 +45,7 @@ static mutex_t g_devno_lock = NXMUTEX_INITIALIZER;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: unique_chardev
+ * Name: unique_dev
  *
  * Description:
  *   Create a unique temporary device name in the /dev/ directory of the
@@ -69,7 +53,9 @@ static mutex_t g_devno_lock = NXMUTEX_INITIALIZER;
  *   attempt to open() the file.
  *
  * Input Parameters:
- *   None
+ *   dev_prefix - The prefix to use for the device name.
+ *   devbuf     - The buffer in which to return the full device name.
+ *   len        - The length of the buffer.
  *
  * Returned Value:
  *   The allocated path to the device.  This must be released by the caller
@@ -78,10 +64,11 @@ static mutex_t g_devno_lock = NXMUTEX_INITIALIZER;
  *
  ****************************************************************************/
 
-static int unique_chardev(FAR char *devbuf, size_t len)
+int unique_dev(FAR char *dev_prefix, FAR char *devbuf, size_t len)
 {
   struct stat statbuf;
   uint32_t devno;
+
   int ret;
 
   /* Loop until we get a unique device name */
@@ -100,12 +87,14 @@ static int unique_chardev(FAR char *devbuf, size_t len)
       /* Get the next device number and release the semaphore */
 
       devno = ++g_devno;
+
       nxmutex_unlock(&g_devno_lock);
 
       /* Construct the full device number */
 
       devno &= 0xffffff;
-      snprintf(devbuf, len, "/dev/tmpc%06lx", (unsigned long)devno);
+      snprintf(devbuf, len, "/dev/%s%06lx", dev_prefix,
+               (unsigned long)devno);
 
       /* Make sure that file name is not in use */
 
@@ -119,84 +108,3 @@ static int unique_chardev(FAR char *devbuf, size_t len)
       /* It is in use, try again */
     }
 }
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: block_proxy
- *
- * Description:
- *   Create a temporary char driver using drivers/bch to mediate character
- *   oriented accessed to the block driver.
- *
- * Input Parameters:
- *   filep  - The caller provided location in which to return the 'struct
- *            file' instance.
- *   blkdev - The path to the block driver
- *   oflags - Character driver open flags
- *
- * Returned Value:
- *   Zero (OK) is returned on success.  On failure, a negated errno value is
- *   returned.
- *
- ****************************************************************************/
-
-int block_proxy(FAR struct file *filep, FAR const char *blkdev, int oflags)
-{
-  char chardev[16];
-  bool readonly;
-  int ret;
-
-  DEBUGASSERT(blkdev);
-
-  /* Create a unique temporary file name for the character device */
-
-  ret = unique_chardev(chardev, sizeof(chardev));
-  if (ret != OK)
-    {
-      ferr("ERROR: Failed to create temporary device name\n");
-      return ret;
-    }
-
-  /* Should this character driver be read-only? */
-
-  readonly = ((oflags & O_WROK) == 0);
-
-  /* Wrap the block driver with an instance of the BCH driver */
-
-  ret = bchdev_register(blkdev, chardev, readonly);
-  if (ret < 0)
-    {
-      ferr("ERROR: bchdev_register(%s, %s) failed: %d\n",
-           blkdev, chardev, ret);
-      return ret;
-    }
-
-  /* Open the newly created character driver */
-
-  oflags &= ~(O_CREAT | O_EXCL | O_APPEND | O_TRUNC);
-  ret = file_open(filep, chardev, oflags);
-  if (ret < 0)
-    {
-      ferr("ERROR: Failed to open %s: %d\n", chardev, ret);
-      nx_unlink(chardev);
-      return ret;
-    }
-
-  /* Unlink the character device name.  The driver instance will persist,
-   * provided that CONFIG_DISABLE_PSEUDOFS_OPERATIONS=y (otherwise, we have
-   * a problem here!)
-   */
-
-  ret = nx_unlink(chardev);
-  if (ret < 0)
-    {
-      ferr("ERROR: Failed to unlink %s: %d\n", chardev, ret);
-    }
-
-  return ret;
-}
-
-#endif /* !CONFIG_DISABLE_MOUNTPOINT && !CONFIG_DISABLE_PSEUDOFS_OPERATIONS */

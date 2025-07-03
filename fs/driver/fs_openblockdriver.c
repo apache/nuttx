@@ -85,7 +85,7 @@ int open_blockdriver(FAR const char *pathname, int mountflags,
 #ifdef CONFIG_MTD
       /* Not block device, mtd device? let's try it. */
 
-      return mtd_proxy(pathname, mountflags, ppinode);
+      return mtd_block_proxy(pathname, mountflags, ppinode);
 #else
       ferr("ERROR: Failed to file %s block driver\n", pathname);
       return ret;

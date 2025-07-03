@@ -47,13 +47,23 @@
  * Name: bchlib_write
  *
  * Description:
- *   Write to the block device set-up by bchlib_setup as if it were a
- *   character device.
+ *   Performs write operations to the block device managed by bchlib_setup as
+ *   if it were a character device.
  *
+ * Parameters:
+ *   handle - Pointer to the BCH handle (device context).
+ *   buffer - Pointer to the user-supplied data to be written.
+ *   offset - Byte offset where data should be written.
+ *   len    - The length of data in bytes to write.
+ *
+ * Return:
+ *   On success, returns the number of bytes written.
+ *   On failure, returns a negative error code such as -EFBIG or other
+ *               IO errors.
  ****************************************************************************/
 
-ssize_t bchlib_write(FAR void *handle, FAR const char *buffer, off_t offset,
-        size_t len)
+ssize_t bchlib_write(FAR void *handle, FAR const char *buffer,
+                     off_t offset, size_t len)
 {
   FAR struct bchlib_s *bch = (FAR struct bchlib_s *)handle;
 #ifndef CONFIG_BCH_FORCE_INDIRECT

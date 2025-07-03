@@ -132,7 +132,7 @@ int register_partition_with_mtd(FAR const char *partition,
 #endif
 
 /****************************************************************************
- * Name: mtd_proxy
+ * Name: mtd_block_proxy
  *
  * Description:
  *   Create a temporary block driver using drivers/mtd/ftl to mediate block
@@ -153,8 +153,32 @@ int register_partition_with_mtd(FAR const char *partition,
  ****************************************************************************/
 
 #ifdef CONFIG_MTD
-int mtd_proxy(FAR const char *mtddev, int mountflags,
-              FAR struct inode **ppinode);
+int mtd_block_proxy(FAR const char *mtddev, int mountflags,
+                    FAR struct inode **ppinode);
+#endif
+
+/****************************************************************************
+ * Name: mtd_char_proxy
+ *
+ * Description:
+ *   Create a temporary char driver using drivers/ftl to mediate character
+ *   oriented accessed to the mtd driver.
+ *
+ * Input Parameters:
+ *   mtddev - The path to the mtd driver
+ *   oflags - Character driver open flags
+ *   filep  - The caller provided location in which to return the 'struct
+ *            file' instance.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success.  On failure, a negated errno value is
+ *   returned.
+ *
+ ****************************************************************************/
+
+ #ifdef CONFIG_MTD
+int mtd_char_proxy(FAR const char *mtddev, int oflags,
+                   FAR struct file *filep);
 #endif
 
 #undef EXTERN
