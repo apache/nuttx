@@ -352,8 +352,8 @@ int nand_ram_rawread(FAR struct nand_raw_s *raw, off_t block,
   if (nand_ram_flash_spare[read_page].bad != NAND_RAM_BLOCK_GOOD)
     {
       ret = -EFAULT;
-      NAND_RAM_LOG("[LOWER %" PRIu64 " | %s] Failed: %s\n",
-                    nand_ram_ins_i, "rawread", EFAULT_STR);
+      NAND_RAM_LOG("[LOWER %" PRIu64 " | %s] Failed: Bad address\n",
+                    nand_ram_ins_i, "rawread");
       goto errout;
     }
 
@@ -428,8 +428,8 @@ int nand_ram_rawwrite(FAR struct nand_raw_s *raw, off_t block,
   if (nand_ram_flash_spare[write_page].free != NAND_RAM_PAGE_FREE)
     {
       ret = -EACCES;
-      NAND_RAM_LOG("[LOWER %" PRIu64 " | %s] Failed: %s\n",
-                    nand_ram_ins_i, "rawwrite", EACCES_STR);
+      NAND_RAM_LOG("[LOWER %" PRIu64 " | %s] Failed: Bad address\n",
+                    nand_ram_ins_i, "rawwrite");
       goto errout;
     }
 
