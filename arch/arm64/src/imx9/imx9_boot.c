@@ -216,12 +216,6 @@ void arm64_chip_boot(void)
   imx9_gpioirq_initialize();
 #endif
 
-  /* Perform board-specific device initialization. This would include
-   * configuration of board specific resources such as GPIOs, LEDs, etc.
-   */
-
-  imx9_board_initialize();
-
 #ifdef USE_EARLYSERIALINIT
   /* Perform early serial initialization if we are going to use the serial
    * driver.
@@ -229,4 +223,10 @@ void arm64_chip_boot(void)
 
   arm64_earlyserialinit();
 #endif
+
+  /* Perform board-specific device initialization. This would include
+   * configuration of board specific resources such as GPIOs, LEDs, etc.
+   */
+
+  imx9_board_initialize();
 }
