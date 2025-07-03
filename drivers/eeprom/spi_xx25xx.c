@@ -860,5 +860,6 @@ int ee25xx_initialize(FAR struct spi_dev_s *dev, FAR char *devname,
         "%u per page, addrlen %u, readonly %d\n",
        devname, eedev->size, eedev->pgsize, eedev->addrlen, eedev->readonly);
 
-  return register_driver(devname, &g_ee25xx_fops, 0666, eedev);
+  return register_driver_with_size(devname, &g_ee25xx_fops, 0666, eedev,
+                                   eedev->size);
 }

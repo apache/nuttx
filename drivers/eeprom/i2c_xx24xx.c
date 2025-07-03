@@ -924,5 +924,6 @@ int ee24xx_initialize(FAR struct i2c_master_s *bus, uint8_t devaddr,
     }
 #endif
 
-  return register_driver(devname, &g_ee24xx_fops, 0666, eedev);
+  return register_driver_with_size(devname, &g_ee24xx_fops, 0666, eedev,
+                                   eedev->size);
 }

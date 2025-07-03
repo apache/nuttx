@@ -407,9 +407,7 @@ struct inode
   uint16_t          i_flags;    /* Flags for inode */
   union inode_ops_u u;          /* Inode operations */
   ino_t             i_ino;      /* Inode serial number */
-#if defined(CONFIG_PSEUDOFS_FILE) || defined(CONFIG_FS_SHMFS)
   size_t            i_size;     /* The size of per inode driver */
-#endif
 #ifdef CONFIG_PSEUDOFS_ATTRIBUTES
   mode_t            i_mode;     /* Access mode flags */
   uid_t             i_owner;    /* Owner */
@@ -624,6 +622,35 @@ void fs_initialize(void);
 int register_driver(FAR const char *path,
                     FAR const struct file_operations *fops, mode_t mode,
                     FAR void *priv);
+
+/****************************************************************************
+ * Name: register_driver_with_size
+ *
+ * Description:
+ *   Register a character driver inode into the pseudo file system and
+ *   assign a size to it.
+ *
+ * Input Parameters:
+ *   path - The path to the inode to create
+ *   fops - The file operations structure
+ *   mode - inmode privileges
+ *   priv - Private, user data that will be associated with the inode.
+ *   size - Size in bytes to assign to the driver
+ *
+ * Returned Value:
+ *   Zero on success (with the inode point in 'inode'); A negated errno
+ *   value is returned on a failure (all error values returned by
+ *   inode_reserve):
+ *
+ *   EINVAL - 'path' is invalid for this operation
+ *   EEXIST - An inode already exists at 'path'
+ *   ENOMEM - Failed to allocate in-memory resources for the operation
+ *
+ ****************************************************************************/
+
+int register_driver_with_size(FAR const char *path,
+                              FAR const struct file_operations *fops,
+                              mode_t mode, FAR void *priv, size_t size);
 
 /****************************************************************************
  * Name: register_blockdriver
