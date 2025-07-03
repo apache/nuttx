@@ -299,6 +299,82 @@ Running with QEMU + hvf on M1/MacBook Pro (macOS 12.6.1)
      -mon chardev=con,mode=readline -kernel ./nuttx
 
 ----------------------------------
+Single Core /w Xedge
+----------------------------------
+
+Configuring NuttX and compile:
+
+.. code:: console
+
+   $ ./tools/configure.sh -l qemu-armv8a:xedge_demo
+   $ make
+
+Running with QEMU:
+
+.. code:: console
+
+   $ qemu-system-aarch64 -cpu cortex-a53 -smp 4 -nographic \
+      -machine virt,virtualization=on,gic-version=3 \
+      -chardev stdio,id=con,mux=on -serial chardev:con \
+      -netdev user,id=u1,hostfwd=tcp:127.0.0.1:8080-10.0.2.15:80,hostfwd=tcp:127.0.0.1:8443-10.0.2.15:443,hostfwd=tcp:127.0.0.1:10023-10.0.2.15:23 \
+      -device virtio-net-device,netdev=u1 \
+      -fsdev local,security_model=none,id=fsdev0,path=/mnt/xxx \
+      -device virtio-9p-device,id=fs0,fsdev=fsdev0,mount_tag=host \
+      -mon chardev=con,mode=readline -kernel ./nuttx
+
+.. note:: Replace **/mnt/xxx** with your actual host directory path. This directory will be shared between your host system and the NuttX environment.
+
+Before running Xedge, you need to create and mount a filesystem that Xedge will use for storing configuration files and web content::
+
+.. code:: console
+
+      nsh> mkdir mnt
+      nsh> mount -t v9fs -o trans=virtio,tag=host mnt
+      nsh> mkdir /mnt/lfs
+
+Running Xedge in NuttX terminal
+
+.. code:: console
+
+   nsh> xedge_demo
+      [   18.490000] [CPU0] Xedge: Server listening on IPv4 port 80
+      [   18.500000] [CPU0] Xedge: SharkSSL server listening on IPv4 port 443
+      [   18.510000] [CPU0] Xedge: Configuration file: /mnt/lfs/xcfg.bin: enoent
+      [   38.240000] [CPU1] 10.0.2.2 GET "rtl/"
+      [   38.240000] [CPU1] Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138
+      [   38.240000] [CPU1] .0.0.0 Safari/537.36
+      [   38.240000] [CPU1] Host: 127.0.0.1:8080
+      [   38.240000] [CPU1] Connection: keep-alive
+      [   38.240000] [CPU1] sec-ch-ua: "Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"
+      [   38.240000] [CPU1] sec-ch-ua-mobile: ?0
+      [   38.240000] [CPU1] sec-ch-ua-platform: "Linux"
+      [   38.240000] [CPU1] Upgrade-Insecure-Requests: 1
+      [   38.240000] [CPU1] User-Agent: c
+      [   38.240000] [CPU1] Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138
+      [   38.240000] [CPU1] .0.0.0 Safari/537.36
+      [   38.240000] [CPU1] Sec-Purpose: prefetch;prerender
+      [   38.240000] [CPU1] Purpose: prefetch
+      [   38.240000] [CPU1] Accept:
+      [   38.240000] [CPU1] text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image
+      [   38.240000] [CPU1] /apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+      [   38.240000] [CPU1] Sec-Fetch-Site: none
+      [   38.240000] [CPU1] Sec-Fetch-Mode: navigate
+      [   38.240000] [CPU1] Sec-Fetch-User: ?1
+      [   38.240000] [CPU1] Sec-Fetch-Dest: document
+      [   38.240000] [CPU1] Accept-Encoding: gzip, deflate, br, zstd
+      [   38.240000] [CPU1] Accept-Language: pt,en-US;q=0.9,en;q=0.8
+      [   38.240000] [CPU1]
+      [   38.240000] [CPU0] 10.0.2.2 Response:
+      ,
+      [   38.240000] [CPU0] no-store, no-cache, must-revalidate, max-age=0
+      Transfer-Encoding: chunked
+      Keep-
+      [   38.240000] [CPU0] Alive: Keep-Alive
+
+Launch your web browser and access 127.0.0.1:8080
+
+You should see the Xedge IDE, which is enabled in developer mode:
+
 Single Core /w kernel mode (GICv3)
 ----------------------------------
 
@@ -563,16 +639,17 @@ ostest crash at signal testing
 Platform Features
 =================
 
+
 The following hardware features are supported:
-+--------------+------------+----------------------+
-| Interface    | Controller | Driver/Component     |
-+==============+============+======================+
-| GIC          | on-chip    | interrupt controller |
-+--------------+------------+----------------------+
-| PL011 UART   | on-chip    | serial port          |
-+--------------+------------+----------------------+
-| ARM TIMER    | on-chip    | system clock         |
-+--------------+------------+----------------------+
+
+============== ============ ======================
+Interface      Controller   Driver/Component
+============== ============ ======================
+GIC            on-chip      interrupt controller
+PL011 UART     on-chip      serial port
+ARM TIMER      on-chip      system clock
+============== ============ ======================
+
 
 The kernel currently does not support other hardware features on this
 QEMU platform.
