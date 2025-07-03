@@ -60,6 +60,7 @@ Character device drivers have these properties:
   can.rst
   contactless.rst
   crypto/index.rst
+  eeprom.rst
   efuse.rst
   i2s.rst
   input/index.rst

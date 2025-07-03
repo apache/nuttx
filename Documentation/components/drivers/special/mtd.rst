@@ -127,17 +127,23 @@ FTL behavior:
 EEPROM
 ======
 
-EEPROMs are a form of Memory Technology Device (MTD).  EEPROMs are non-
-volatile memory like FLASH, but differ in underlying memory technology and
-differ in usage in many respects:  They may not be organized into blocks
-(at least from the standpoint of the user) and it is not necessary to
-erase the EEPROM memory before re-writing it.  In addition, EEPROMs tend
-to be much smaller than FLASH parts, usually only a few kilobytes vs
-megabytes for FLASH.  EEPROM tends to be used to retain a small amount of
-device configuration information; FLASH tends to be used for program or
-massive data storage. For these reasons, it may not be convenient to use
-the more complex MTD interface but instead use the simple character
-interface provided by the EEPROM drivers.  See drivers/eeprom.
+SPI EEPROMs using the same commands as the Microchip 25xxxx family, and I2C
+EEPROMs using the same commands as the Microchip 24xxxx family can be
+interfaced using the `drivers/mtd/at25ee.c` and `drivers/mtd/at24xx.c` driver
+respectively.
+
+Refer to the :doc:`EEPROM character driver reference <../character/eeprom>`
+for
+
+-  the differences between EEPROM and FLASH memory;
+-  the list of supported EEPROM variants;
+-  interfacing EEPROM using a character driver.
+
+The MTD interface should be preferred over the character driver interface in
+most cases, unless finer control is desired over the EEPROM operations. The
+character driver interface may also be preferred to reduce footprint or for
+very trivial usage of the EEPROM (e.g. storing parameters without having to
+rely on a filesystem).
 
 CFI FLASH
 =========
