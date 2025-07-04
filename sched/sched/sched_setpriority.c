@@ -51,12 +51,19 @@ struct reprioritize_arg_s
 };
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static struct reprioritize_arg_s g_reprioritize_arg[CONFIG_SMP_NCPUS];
+static struct smp_call_data_s g_reprioritize_data;
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-static int reprioritize_handler(FAR void *cookie)
+static int reprioritize_handler(FAR void *reprioritize_arg)
 {
-  FAR struct reprioritize_arg_s *arg = cookie;
+  FAR struct reprioritize_arg_s *arg = reprioritize_arg;
   FAR struct tcb_s *rtcb = this_task();
   FAR struct tcb_s *tcb;
   irqstate_t flags;
@@ -223,29 +230,30 @@ static inline void nxsched_running_setpriority(FAR struct tcb_s *tcb,
           /* A context switch will occur. */
 
 #ifdef CONFIG_SMP
-          if (tcb->cpu != this_cpu() &&
+          int cpu = this_cpu();
+          if (tcb->cpu != cpu &&
               tcb->task_state == TSTATE_TASK_RUNNING)
             {
-              struct reprioritize_arg_s arg;
+              struct reprioritize_arg_s *arg = &g_reprioritize_arg[cpu];
+              arg->pid = tcb->pid;
+              arg->sched_priority = sched_priority;
 
               if ((tcb->flags & TCB_FLAG_CPU_LOCKED) != 0)
                 {
-                  arg.pid = tcb->pid;
-                  arg.need_restore = false;
+                  arg->need_restore = false;
                 }
               else
                 {
-                  arg.pid = tcb->pid;
-                  arg.saved_affinity = tcb->affinity;
-                  arg.need_restore = true;
-
+                  arg->saved_affinity = tcb->affinity;
+                  arg->need_restore = true;
                   tcb->flags |= TCB_FLAG_CPU_LOCKED;
                   CPU_ZERO(&tcb->affinity);
                   CPU_SET(tcb->cpu, &tcb->affinity);
                 }
 
-              arg.sched_priority = sched_priority;
-              nxsched_smp_call_single(tcb->cpu, reprioritize_handler, &arg);
+              nxsched_smp_call_init(&g_reprioritize_data,
+                                    reprioritize_handler, arg);
+              nxsched_smp_call_single_async(tcb->cpu, &g_reprioritize_data);
             }
           else
 #endif
