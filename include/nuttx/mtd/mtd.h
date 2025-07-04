@@ -298,10 +298,25 @@ FAR struct mtd_dev_s *mtd_rwb_initialize(FAR struct mtd_dev_s *mtd);
  * Input Parameters:
  *   path - The block device path.
  *   mtd  - The MTD device that supports the FLASH interface.
+ *   oflags - oflags passed to the ftl layer. Currently, the ftl is affected
+ *            by two oflags:
+ *           1. O_DIRECT when this flag is passed in, ftl internally uses
+ *              the direct write strategy and no read cache is used in ftl;
+ *              otherwise, each write will be executed with the minimum
+ *              granularity of flash erase sector size which means a
+ *              "sector read back - erase sector - write sector" operation
+ *              is performed by using a read cache buffer in heap.
+ *
+ *           2. O_SYNC, when this flag is passed in, we assume that the
+ *              flash has been erased in advance and no erase operation
+ *              will be performed internally within ftl. O_SYNC will take
+ *              effect only when both O_DIRECT and O_SYNC are passed in
+ *              simultaneously
  *
  ****************************************************************************/
 
-int ftl_initialize_by_path(FAR const char *path, FAR struct mtd_dev_s *mtd);
+int ftl_initialize_by_path(FAR const char *path, FAR struct mtd_dev_s *mtd,
+                           int oflags);
 
 /****************************************************************************
  * Name: ftl_initialize
@@ -313,7 +328,6 @@ int ftl_initialize_by_path(FAR const char *path, FAR struct mtd_dev_s *mtd);
  *   minor - The minor device number.  The MTD block device will be
  *      registered as as /dev/mtdblockN where N is the minor number.
  *   mtd - The MTD device that supports the FLASH interface.
- *
  ****************************************************************************/
 
 int ftl_initialize(int minor, FAR struct mtd_dev_s *mtd);

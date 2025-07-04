@@ -149,7 +149,6 @@ int block_proxy(FAR struct file *filep, FAR const char *blkdev, int oflags)
 {
   struct file temp;
   FAR char *chardev;
-  bool readonly;
   int ret;
 
   DEBUGASSERT(blkdev);
@@ -163,13 +162,9 @@ int block_proxy(FAR struct file *filep, FAR const char *blkdev, int oflags)
       return -ENOMEM;
     }
 
-  /* Should this character driver be read-only? */
-
-  readonly = ((oflags & O_WROK) == 0);
-
   /* Wrap the block driver with an instance of the BCH driver */
 
-  ret = bchdev_register(blkdev, chardev, readonly);
+  ret = bchdev_register(blkdev, chardev, oflags);
   if (ret < 0)
     {
       ferr("ERROR: bchdev_register(%s, %s) failed: %d\n",
