@@ -81,8 +81,9 @@ static int     touch_ioctl(FAR struct file *filep, int cmd,
 static int     touch_poll(FAR struct file *filep, FAR struct pollfd *fds,
                           bool setup);
 
-static void    touch_event_notify(FAR struct touch_openpriv_s  *openpriv,
-                                  FAR const struct touch_sample_s *sample);
+static void    touch_event_notify(FAR struct touch_upperhalf_s *upper,
+                                  FAR struct touch_openpriv_s  *openpriv,
+                                  FAR struct touch_sample_s *sample);
 
 /****************************************************************************
  * Private Data
@@ -384,17 +385,40 @@ errout:
  * Name: touch_event_notify
  ****************************************************************************/
 
-static void touch_event_notify(FAR struct touch_openpriv_s  *openpriv,
-                               FAR const struct touch_sample_s *sample)
+static void touch_event_notify(FAR struct touch_upperhalf_s *upper,
+                               FAR struct touch_openpriv_s  *openpriv,
+                               FAR struct touch_sample_s *sample)
 {
-  int semcount;
+  FAR struct touch_lowerhalf_s *lower = upper->lower;
+  FAR struct touch_point_s *point = sample->point;
+  int n;
+
+  for (n = 0; lower->flags && n < sample->npoints; n++)
+    {
+      if (lower->flags & TOUCH_FLAG_SWAPXY)
+        {
+          int16_t p = point[n].x;
+          point[n].x = point[n].y;
+          point[n].y = p;
+        }
+
+      if (lower->flags & TOUCH_FLAG_MIRRORX)
+        {
+          point[n].x = upper->lower->xres - point[n].x;
+        }
+
+      if (lower->flags & TOUCH_FLAG_MIRRORY)
+        {
+          point[n].y = upper->lower->yres - point[n].y;
+        }
+    }
 
   nxmutex_lock(&openpriv->lock);
   circbuf_overwrite(&openpriv->circbuf, sample,
                     SIZEOF_TOUCH_SAMPLE_S(sample->npoints));
 
-  nxsem_get_value(&openpriv->waitsem, &semcount);
-  if (semcount < 1)
+  nxsem_get_value(&openpriv->waitsem, &n);
+  if (n < 1)
     {
       nxsem_post(&openpriv->waitsem);
     }
@@ -411,7 +435,7 @@ static void touch_event_notify(FAR struct touch_openpriv_s  *openpriv,
  * Name: touch_event
  ****************************************************************************/
 
-void touch_event(FAR void *priv, FAR const struct touch_sample_s *sample)
+void touch_event(FAR void *priv, FAR struct touch_sample_s *sample)
 {
   FAR struct touch_upperhalf_s *upper = priv;
   FAR struct touch_openpriv_s  *openpriv;
@@ -423,14 +447,14 @@ void touch_event(FAR void *priv, FAR const struct touch_sample_s *sample)
 
   if (upper->grab)
     {
-      touch_event_notify(upper->grab, sample);
+      touch_event_notify(upper, upper->grab, sample);
     }
   else
     {
       list_for_every_entry(&upper->head, openpriv,
                            struct touch_openpriv_s, node)
         {
-          touch_event_notify(openpriv, sample);
+          touch_event_notify(upper, openpriv, sample);
         }
     }
 

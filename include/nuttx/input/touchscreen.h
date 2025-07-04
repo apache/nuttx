@@ -141,6 +141,14 @@
 #define TOUCH_SIZE_VALID     (1 << 6) /* Hardware provided a valid H/W contact size */
 #define TOUCH_GESTURE_VALID  (1 << 7) /* Hardware provided a valid gesture */
 
+/* These definitions provide the meaning of all of the bits that may be
+ * reported in the struct touch_lowerhalf_s flags.
+ */
+
+#define TOUCH_FLAG_SWAPXY    (1 << 0) /* Swap the X and Y coordinates */
+#define TOUCH_FLAG_MIRRORX   (1 << 1) /* Mirror X coordinate */
+#define TOUCH_FLAG_MIRRORY   (1 << 2) /* Mirror Y coordinate */
+
 /* These are definitions for touch gesture */
 
 #define TOUCH_DOUBLE_CLICK   (0x00)
@@ -234,6 +242,9 @@ struct touch_sample_s
 struct touch_lowerhalf_s
 {
   uint8_t       maxpoint;       /* Maximal point supported by the touchscreen */
+  uint8_t       flags;          /* Flags for rotation, see TOUCH_FLAG_* */
+  uint16_t      xres;           /* Horizontal resolution in pixels */
+  uint16_t      yres;           /* Vertical   resolution in pixels */
   FAR void      *priv;          /* Save the upper half pointer */
 
   /**************************************************************************
@@ -333,7 +344,7 @@ static inline uint64_t touch_get_time(void)
  *   sample  - pointer to data of touch point event.
  ****************************************************************************/
 
-void touch_event(FAR void *priv, FAR const struct touch_sample_s *sample);
+void touch_event(FAR void *priv, FAR struct touch_sample_s *sample);
 
 /****************************************************************************
  * Name: touch_register
