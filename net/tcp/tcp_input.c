@@ -1070,7 +1070,7 @@ found:
            */
 
           uint32_t sndseq = tcp_getsequence(conn->sndseq);
-          if (TCP_SEQ_LT(sndseq, ackseq))
+          if (TCP_SEQ_LTE(sndseq, ackseq))
             {
               ninfo("sndseq: %08" PRIx32 "->%08" PRIx32
                     " unackseq: %08" PRIx32 " new tx_unacked: %" PRIu32 "\n",
