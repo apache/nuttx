@@ -81,7 +81,7 @@ static int nxsched_roundrobin_handler(FAR void *cookie)
     }
 
   if (tcb->task_state == TSTATE_TASK_RUNNING && tcb->cpu == this_cpu() &&
-      nxsched_reprioritize_rtr(tcb, tcb->sched_priority))
+      nxsched_switch_running(tcb->cpu, true))
     {
       up_switch_context(this_task(), tcb);
     }
@@ -191,17 +191,18 @@ uint32_t nxsched_process_roundrobin(FAR struct tcb_s *tcb, uint32_t ticks,
                */
 
 #ifdef CONFIG_SMP
-              if (tcb->task_state == TSTATE_TASK_RUNNING &&
-                  tcb->cpu != this_cpu())
+              DEBUGASSERT(tcb->task_state == TSTATE_TASK_RUNNING);
+              if (tcb->cpu != this_cpu())
                 {
                   nxsched_smp_call_init(&g_call_data,
                                         nxsched_roundrobin_handler,
                                         (FAR void *)(uintptr_t)tcb->pid);
                   nxsched_smp_call_single_async(tcb->cpu, &g_call_data);
                 }
-              else
-#endif
+              else if (nxsched_switch_running(tcb->cpu, true))
+#else
               if (nxsched_reprioritize_rtr(tcb, tcb->sched_priority))
+#endif
                 {
                   up_switch_context(this_task(), rtcb);
                 }

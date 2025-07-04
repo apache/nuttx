@@ -126,7 +126,7 @@ dq_queue_t g_readytorun;
 
 #ifdef CONFIG_SMP
 dq_queue_t g_assignedtasks[CONFIG_SMP_NCPUS];
-FAR struct tcb_s *g_delivertasks[CONFIG_SMP_NCPUS];
+enum task_deliver_e g_delivertasks[CONFIG_SMP_NCPUS];
 #endif
 
 /* g_running_tasks[] holds a references to the running task for each CPU.
@@ -141,7 +141,9 @@ FAR struct tcb_s *g_running_tasks[CONFIG_SMP_NCPUS];
  * currently active task has disabled pre-emption.
  */
 
+#ifndef CONFIG_SMP
 dq_queue_t g_pendingtasks;
+#endif
 
 /* This is the list of all tasks that are blocked waiting for a signal */
 
@@ -242,11 +244,6 @@ static void tasklist_initialize(void)
   tlist[TSTATE_TASK_INVALID].list = NULL;
   tlist[TSTATE_TASK_INVALID].attr = 0;
 
-  /* TSTATE_TASK_PENDING */
-
-  tlist[TSTATE_TASK_PENDING].list = list_pendingtasks();
-  tlist[TSTATE_TASK_PENDING].attr = TLIST_ATTR_PRIORITIZED;
-
 #ifdef CONFIG_SMP
 
   /* TSTATE_TASK_READYTORUN */
@@ -268,6 +265,11 @@ static void tasklist_initialize(void)
                                     TLIST_ATTR_INDEXED |
                                     TLIST_ATTR_RUNNABLE;
 #else
+
+  /* TSTATE_TASK_PENDING */
+
+  tlist[TSTATE_TASK_PENDING].list = list_pendingtasks();
+  tlist[TSTATE_TASK_PENDING].attr = TLIST_ATTR_PRIORITIZED;
 
   /* TSTATE_TASK_READYTORUN */
 
