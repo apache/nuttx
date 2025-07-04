@@ -35,6 +35,7 @@
 #include <nuttx/arch.h>
 
 #include "sched/sched.h"
+#include "sched/queue.h"
 
 #ifdef CONFIG_SMP
 /****************************************************************************
@@ -131,6 +132,9 @@ void nxsched_suspend(FAR struct tcb_s *tcb)
     }
   else
     {
+#ifdef CONFIG_SMP
+      int cpu = this_cpu();
+#endif
       FAR struct tcb_s *rtcb = this_task();
 
       /* The task was running or runnable before being stopped.  Simply
@@ -145,7 +149,7 @@ void nxsched_suspend(FAR struct tcb_s *tcb)
       /* Remove the tcb task from the ready-to-run list. */
 
 #ifdef CONFIG_SMP
-      if (tcb->task_state == TSTATE_TASK_RUNNING && tcb->cpu != this_cpu())
+      if (tcb->task_state == TSTATE_TASK_RUNNING && tcb->cpu != cpu)
         {
           struct suspend_arg_s arg;
 
@@ -172,9 +176,14 @@ void nxsched_suspend(FAR struct tcb_s *tcb)
         {
           switch_needed = nxsched_remove_readytorun(tcb);
 
-          if (list_pendingtasks()->head)
+          if (switch_needed || !nxsched_islocked_tcb(rtcb))
             {
+#ifdef CONFIG_SMP
+              switch_needed |= nxsched_deliver_task(cpu, tcb->cpu,
+                                                    SWITCH_HIGHER);
+#else
               switch_needed |= nxsched_merge_pending();
+#endif
             }
 
           /* Add the task to the specified blocked task list */
