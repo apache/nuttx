@@ -66,8 +66,13 @@ ASRCS += arch_setjmp.S
 endif
 endif
 
+# ARMv6-M implementation of mcount is in armv6-m/arch_mcount.S
+# otherwise, use arch_mcount.S
+
+ifeq ($(CONFIG_ARCH_ARMV6M),)
 ifeq ($(CONFIG_PROFILE_MINI),y)
 ASRCS += arch_mcount.S
+endif
 endif
 
 ifeq ($(CONFIG_LIBC_ARCH_CRC32),y)
