@@ -103,7 +103,13 @@ static const struct ft5x06_config_s g_ft5x06_config =
   .clear     = stm32_ft5x06_clear,
 #endif
   .wakeup    = stm32_ft5x06_wakeup,
-  .nreset    = stm32_ft5x06_nreset
+  .nreset    = stm32_ft5x06_nreset,
+  .lower     =
+    {
+#ifdef CONFIG_STM32F746GDISCO_TOUCHSCREEN_SWAPXY
+      .flags = TOUCH_FLAG_SWAPXY,
+#endif
+    },
 };
 
 static struct stm32_ft5x06_config_s g_priv_config =

@@ -4327,7 +4327,7 @@ endif
 if ARCH_BOARD_STM32H745I_DISCO
 source "boards/arm/stm32h7/stm32h745i-disco/Kconfig"
 endif
-if ARCH_BOARD_STM32H750B_DB
+if ARCH_BOARD_STM32H750B_DK
 source "boards/arm/stm32h7/stm32h750b-dk/Kconfig"
 endif
 if ARCH_BOARD_LINUM_STM32H753BI

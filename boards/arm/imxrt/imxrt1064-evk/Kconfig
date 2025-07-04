@@ -24,4 +24,8 @@ config IMXRT1064_EVK_SDRAM
 	---help---
 		Activate DCD configuration of SDRAM
 
+config IMXRT1064_EVK_TOUCHSCREEN_SWAPXY
+       bool "IMXRT1064 EVK Touchscreen sway X/Y"
+       depends on INPUT_TOUCHSCREEN
+
 endif
