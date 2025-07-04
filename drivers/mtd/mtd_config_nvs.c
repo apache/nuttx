@@ -717,7 +717,8 @@ static bool nvs_ate_valid(FAR struct nvs_fs *fs,
                          FAR const struct nvs_ate *entry)
 {
   return nvs_ate_crc8_check(entry) &&
-         entry->offset < (fs->blocksize - nvs_ate_size(fs));
+         entry->offset < (fs->blocksize - nvs_ate_size(fs)) &&
+         (entry->key_len > 0 || entry->id == nvs_special_ate_id(fs));
 }
 
 /****************************************************************************
@@ -907,7 +908,8 @@ static int nvs_recover_last_ate(FAR struct nvs_fs *fs,
           return rc;
         }
 
-      if (nvs_ate_valid(fs, end_ate))
+      if (nvs_ate_valid(fs, end_ate) &&
+          end_ate->offset >= (data_end_addr & NVS_ADDR_OFFS_MASK))
         {
           /* Found a valid ate, update data_end_addr and *addr */
 
