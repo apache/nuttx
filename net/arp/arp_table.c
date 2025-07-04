@@ -71,7 +71,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define ARP_MAXAGE_TICK SEC2TICK(10 * CONFIG_NET_ARP_MAXAGE)
+#define ARP_MAXAGE_TICK SEC2TICK(10 * (clock_t)CONFIG_NET_ARP_MAXAGE)
 
 /****************************************************************************
  * Private Types
