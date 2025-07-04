@@ -37,33 +37,28 @@
 #include "irq/irq.h"
 #include "sched/sched.h"
 
+#ifdef CONFIG_SMP
+
 /****************************************************************************
- * Private Types
+ * Private Data
  ****************************************************************************/
 
-#ifdef CONFIG_SMP
-struct reprioritize_arg_s
-{
-  pid_t pid;
-  cpu_set_t saved_affinity;
-  int  sched_priority;
-  bool need_restore;
-};
+static struct smp_call_data_s g_reprioritize_data;
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-static int reprioritize_handler(FAR void *cookie)
+static int reprioritize_handler(FAR void *reprioritize_arg)
 {
-  FAR struct reprioritize_arg_s *arg = cookie;
+  FAR struct smpcall_arg_s *arg;
   FAR struct tcb_s *rtcb = this_task();
   FAR struct tcb_s *tcb;
   irqstate_t flags;
 
   flags = enter_critical_section();
 
-  tcb = nxsched_get_tcb(arg->pid);
+  tcb = nxsched_get_tcb((pid_t)(uintptr_t)reprioritize_arg);
 
   if (!tcb || tcb->task_state == TSTATE_TASK_INVALID ||
       (tcb->flags & TCB_FLAG_EXIT_PROCESSING) != 0)
@@ -72,13 +67,15 @@ static int reprioritize_handler(FAR void *cookie)
       return OK;
     }
 
+  arg = &tcb->smpcall_arg;
+
   if (arg->need_restore)
     {
       tcb->affinity = arg->saved_affinity;
       tcb->flags &= ~TCB_FLAG_CPU_LOCKED;
     }
 
-  if (nxsched_reprioritize_rtr(tcb, arg->sched_priority))
+  if (nxsched_reprioritize_rtr(tcb, arg->data))
     {
       up_switch_context(this_task(), rtcb);
     }
@@ -223,29 +220,30 @@ static inline void nxsched_running_setpriority(FAR struct tcb_s *tcb,
           /* A context switch will occur. */
 
 #ifdef CONFIG_SMP
-          if (tcb->cpu != this_cpu() &&
+          int cpu = tcb->cpu;
+          if (cpu != this_cpu() &&
               tcb->task_state == TSTATE_TASK_RUNNING)
             {
-              struct reprioritize_arg_s arg;
+              struct smpcall_arg_s *arg = &tcb->smpcall_arg;
+              arg->data = sched_priority;
 
               if ((tcb->flags & TCB_FLAG_CPU_LOCKED) != 0)
                 {
-                  arg.pid = tcb->pid;
-                  arg.need_restore = false;
+                  arg->need_restore = false;
                 }
               else
                 {
-                  arg.pid = tcb->pid;
-                  arg.saved_affinity = tcb->affinity;
-                  arg.need_restore = true;
-
+                  arg->saved_affinity = tcb->affinity;
+                  arg->need_restore = true;
                   tcb->flags |= TCB_FLAG_CPU_LOCKED;
                   CPU_ZERO(&tcb->affinity);
-                  CPU_SET(tcb->cpu, &tcb->affinity);
+                  CPU_SET(cpu, &tcb->affinity);
                 }
 
-              arg.sched_priority = sched_priority;
-              nxsched_smp_call_single(tcb->cpu, reprioritize_handler, &arg);
+              nxsched_smp_call_init(&g_reprioritize_data,
+                                    reprioritize_handler,
+                                    (FAR void *)(uintptr_t)tcb->pid);
+              nxsched_smp_call_single_async(cpu, &g_reprioritize_data);
             }
           else
 #endif
