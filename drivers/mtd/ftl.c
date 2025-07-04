@@ -39,6 +39,7 @@
 #include <assert.h>
 #include <debug.h>
 #include <errno.h>
+#include <fcntl.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
@@ -77,6 +78,7 @@ struct ftl_struct_s
   uint16_t              refs;     /* Number of references */
   bool                  unlinked; /* The driver has been unlinked */
   FAR uint8_t          *eblock;   /* One, in-memory erase block */
+  int                   oflags;
 
   /* The nand block map between logic block and physical block */
 
@@ -96,6 +98,9 @@ static ssize_t ftl_read(FAR struct inode *inode, FAR unsigned char *buffer,
                  blkcnt_t start_sector, unsigned int nsectors);
 static ssize_t ftl_flush(FAR void *priv, FAR const uint8_t *buffer,
                  off_t startblock, size_t nblocks);
+static ssize_t ftl_flush_direct(FAR struct ftl_struct_s *dev,
+                                FAR const uint8_t *buffer,
+                                off_t startblock, size_t nblocks);
 static ssize_t ftl_write(FAR struct inode *inode,
                  FAR const unsigned char *buffer, blkcnt_t start_sector,
                  unsigned int nsectors);
@@ -474,6 +479,74 @@ static int ftl_alloc_eblock(FAR struct ftl_struct_s *dev)
   return dev->eblock != NULL ? OK : -ENOMEM;
 }
 
+/****************************************************************************
+ * Name: ftl_flush_direct
+ *
+ * Description: Write the specified number of sectors without cache
+ *
+ ****************************************************************************/
+
+static ssize_t ftl_flush_direct(FAR struct ftl_struct_s *dev,
+                                FAR const uint8_t *buffer,
+                                off_t startblock, size_t nblocks)
+{
+  size_t blocksize = dev->geo.blocksize;
+  off_t starteraseblock;
+  off_t offset;
+  ssize_t ret;
+  size_t count;
+
+  while (nblocks)
+    {
+      starteraseblock = startblock / dev->blkper;
+      offset = startblock & (dev->blkper - 1);
+      count = MIN(dev->blkper - offset, nblocks);
+
+      if (offset == 0 && dev->mtd->erase != NULL && !(dev->oflags & O_SYNC))
+        {
+          ret = ftl_mtd_erase(dev, starteraseblock);
+          if (ret < 0)
+            {
+              return ret;
+            }
+        }
+
+      if (dev->lptable == NULL)
+        {
+          ret = MTD_BWRITE(dev->mtd, startblock, count, buffer);
+          if (ret != count)
+            {
+              ferr("ERROR: Write block %"PRIdOFF" failed: %zd\n",
+                   startblock, ret);
+              return ret;
+            }
+        }
+      else
+        {
+          if (starteraseblock >= dev->lpcount)
+            {
+              return -ENOSPC;
+            }
+
+          ret = MTD_BWRITE(dev->mtd,
+                           dev->lptable[starteraseblock] * dev->blkper
+                           + offset, count, buffer);
+          if (ret != count)
+            {
+              MTD_MARKBAD(dev->mtd, dev->lptable[starteraseblock]);
+              ftl_update_map(dev, starteraseblock);
+              continue;
+            }
+        }
+
+      nblocks -= count;
+      startblock += count;
+      buffer += count * blocksize;
+    }
+
+  return nblocks;
+}
+
 static ssize_t ftl_flush(FAR void *priv, FAR const uint8_t *buffer,
                          off_t startblock, size_t nblocks)
 {
@@ -487,6 +560,13 @@ static ssize_t ftl_flush(FAR void *priv, FAR const uint8_t *buffer,
   size_t nxfrd;
   int    nbytes;
   int    ret;
+
+  if (dev->oflags & O_DIRECT)
+    {
+      /* Direct write mode */
+
+      return ftl_flush_direct(dev, buffer, startblock, nblocks);
+    }
 
   /* Get the aligned block.  Here is is assumed: (1) The number of R/W blocks
    * per erase block is a power of 2, and (2) the erase begins with that same
@@ -803,7 +883,8 @@ static int ftl_unlink(FAR struct inode *inode)
  *
  ****************************************************************************/
 
-int ftl_initialize_by_path(FAR const char *path, FAR struct mtd_dev_s *mtd)
+int ftl_initialize_by_path(FAR const char *path, FAR struct mtd_dev_s *mtd,
+                           int oflags)
 {
   struct ftl_struct_s *dev;
   int ret = -ENOMEM;
@@ -825,6 +906,7 @@ int ftl_initialize_by_path(FAR const char *path, FAR struct mtd_dev_s *mtd)
       /* Initialize the FTL device structure */
 
       dev->mtd = mtd;
+      dev->oflags = oflags;
 
       /* Get the device geometry. (casting to uintptr_t first eliminates
        * complaints on some architectures where the sizeof long is different
@@ -928,5 +1010,5 @@ int ftl_initialize(int minor, FAR struct mtd_dev_s *mtd)
   /* Do the real work by ftl_initialize_by_path */
 
   snprintf(path, DEV_NAME_MAX, "/dev/mtdblock%d", minor);
-  return ftl_initialize_by_path(path, mtd);
+  return ftl_initialize_by_path(path, mtd, O_RDWR);
 }
