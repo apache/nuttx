@@ -26,7 +26,7 @@ NETDEV_CSRCS += netdev_register.c netdev_ioctl.c netdev_txnotify.c
 NETDEV_CSRCS += netdev_findbyname.c netdev_findbyaddr.c netdev_findbyindex.c
 NETDEV_CSRCS += netdev_count.c netdev_ifconf.c netdev_foreach.c
 NETDEV_CSRCS += netdev_unregister.c netdev_carrier.c netdev_default.c
-NETDEV_CSRCS += netdev_verify.c netdev_lladdrsize.c
+NETDEV_CSRCS += netdev_verify.c netdev_lladdrsize.c netdev_lock.c
 
 ifeq ($(CONFIG_MM_IOB),y)
 NETDEV_CSRCS += netdev_input.c netdev_iob.c

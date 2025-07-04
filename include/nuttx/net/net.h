@@ -206,6 +206,13 @@ struct socket_conn_s
   FAR struct devif_callback_s *list;
   FAR struct devif_callback_s *list_tail;
 
+  /* This lock protects the connection structure.  It is used to prevent
+   * re-entrance into the connection structure while it is being modified.
+   * This mutex is also used to protect the list of callbacks.
+   */
+
+  mutex_t       s_lock;      /* Protect the connection structure */
+
   /* Socket options */
 
 #ifdef CONFIG_NET_SOCKOPTS
@@ -1497,6 +1504,26 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype);
  ****************************************************************************/
 
 int netdev_unregister(FAR struct net_driver_s *dev);
+
+/****************************************************************************
+ * Name: netdev_lock
+ *
+ * Description:
+ *   Lock the network device.
+ *
+ ****************************************************************************/
+
+void netdev_lock(FAR struct net_driver_s *dev);
+
+/****************************************************************************
+ * Name: netdev_unlock
+ *
+ * Description:
+ *   Unlock the network device.
+ *
+ ****************************************************************************/
+
+void netdev_unlock(FAR struct net_driver_s *dev);
 
 #undef EXTERN
 #ifdef __cplusplus
