@@ -218,12 +218,6 @@ config FT5X06_POLLMODE
 		in detecting touch related events and (2) it will consume a
 		significant amount of CPU time to perform the polling.
 
-config FT5X06_SWAPXY
-	bool "Swap X/Y"
-	default n
-	---help---
-		Reverse the meaning of X and Y to handle different LCD orientations.
-
 config FT5X06_SINGLEPOINT
 	bool "Single point"
 	default n
@@ -252,11 +246,11 @@ config FT5X06_THRESHY
 
 endif # FT5X06_SINGLEPOINT
 
-config FT5X06_NPOLLWAITERS
-	int "Number FT5336/FT5x06 poll waiters"
-	default 4
-	---help---
-		Maximum number of threads that can be waiting on poll()
+config FT5X06_SAMPLE_NBUFFER
+       int "Number FT5336/FT5x06 sample buffers"
+       default 4
+       ---help---
+               Maximum number of samples buffered.
 
 endif # INPUT_FT5X06
 
