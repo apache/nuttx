@@ -80,6 +80,12 @@
 #define I2C_SLAVE_POLL_RATE           10
 #endif
 
+#if !SOC_RCC_IS_INDEPENDENT
+#  define I2C_RCC_ATOMIC() PERIPH_RCC_ATOMIC()
+#else
+#  define I2C_RCC_ATOMIC()
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -540,7 +546,11 @@ static void esp_i2c_slave_init(struct esp_i2c_priv_s *priv)
 
   /* Enable I2C hardware */
 
-  periph_module_enable(PERIPH_I2C0_MODULE);
+  I2C_RCC_ATOMIC()
+    {
+      i2c_ll_enable_bus_clock(priv->id, true);
+      i2c_ll_reset_register(priv->id);
+    }
 
   i2c_hal_init(priv->ctx, priv->id);
 
@@ -583,7 +593,10 @@ static void esp_i2c_slave_deinit(struct esp_i2c_priv_s *priv)
   const struct esp_i2c_config_s *config = priv->config;
 
   i2c_hal_deinit(priv->ctx);
-  periph_module_disable(PERIPH_I2C0_MODULE);
+  I2C_RCC_ATOMIC()
+    {
+      i2c_ll_enable_bus_clock(priv->id, false);
+    }
 }
 
 /****************************************************************************
