@@ -165,7 +165,7 @@ int mtd_proxy(FAR const char *mtddev, int mountflags,
       goto out_with_blkdev;
     }
 
-  ret = ftl_initialize_by_path(blkdev, mtd->u.i_mtd);
+  ret = ftl_initialize_by_path(blkdev, mtd->u.i_mtd, mountflags);
   inode_release(mtd);
   if (ret < 0)
     {
