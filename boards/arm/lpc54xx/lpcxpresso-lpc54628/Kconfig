@@ -3,5 +3,10 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-if ARCH_BOARD_LPCXPRESSO
+if ARCH_BOARD_LPCXPRESSO_LPC54628
+
+config ARCH_BOARD_LPCXPRESSO_LPC54628_TOUCHSCREEN_SWAPXY
+       bool "LPCXPRESSO LPC54628 Touchscreen sway X/Y"
+       depends on INPUT_TOUCHSCREEN
+
 endif
