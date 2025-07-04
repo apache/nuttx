@@ -117,9 +117,9 @@ struct note_startalloc_s
 };
 
 #if CONFIG_TASK_NAME_SIZE > 0
-#  define SIZEOF_NOTE_START(n) (sizeof(struct note_start_s) + (n) - 1)
+#  define SIZEOF_NOTE_START(n) (sizeof(struct note_common_s) + (n))
 #else
-#  define SIZEOF_NOTE_START(n) (sizeof(struct note_start_s))
+#  define SIZEOF_NOTE_START(n) (sizeof(struct note_common_s))
 #endif
 
 #if CONFIG_DRIVERS_NOTE_TASKNAME_BUFSIZE > 0

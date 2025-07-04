@@ -324,16 +324,6 @@ struct note_common_s
   clock_t nc_systime;          /* Time when note was buffered */
 };
 
-/* This is the specific form of the NOTE_START note */
-
-struct note_start_s
-{
-  struct note_common_s nst_cmn; /* Common note parameters */
-#if CONFIG_TASK_NAME_SIZE > 0
-  char    nst_name[1];          /* Start of the name of the thread/task */
-#endif
-};
-
 /* This is the specific form of the NOTE_STOP note */
 
 struct note_stop_s
