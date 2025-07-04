@@ -34,7 +34,6 @@
 #include <errno.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <stdio.h>
 #include <sys/types.h>
 
 #include <nuttx/analog/adc.h>
@@ -47,27 +46,31 @@
  * Preprocessor definitions
  ****************************************************************************/
 
-#if defined(CONFIG_ADC_ADS1115)
-
-#ifndef CONFIG_ADC_ADS1115_I2C_FREQUENCY
-#define CONFIG_ADC_ADS1115_I2C_FREQUENCY 100000
-#endif
-
 #define ADS1115_NUM_CHANNELS 8
 
 #define ADS1115_OS_SHIFT (1 << 15)
-#define ADS1115_MUX_SHIFT 12
+#define ADS1115_MUX_SHIFT (12)
 #define ADS1115_MUX_MASK (7 << ADS1115_MUX_SHIFT)
-#define ADS1115_PGA_SHIFT 9
+#define ADS1115_PGA_SHIFT (9)
 #define ADS1115_PGA_MASK (7 << ADS1115_PGA_SHIFT)
 #define ADS1115_MODE_MASK (1 << 8)
-#define ADS1115_DR_SHIFT 5
+#define ADS1115_DR_SHIFT (5)
 #define ADS1115_DR_MASK (7 << ADS1115_DR_SHIFT)
 #define ADS1115_COMP_MODE_MASK (1 << 4)
 #define ADS1115_COMP_POL_MASK (1 << 3)
 #define ADS1115_COMP_LAT_MASK (1 << 2)
-#define ADS1115_COMP_QUE_SHIFT 0
+#define ADS1115_COMP_QUE_SHIFT (0)
 #define ADS1115_COMP_QUE_MASK (3 << ADS1115_COMP_QUE_SHIFT)
+
+/* Helper macros for checking modes */
+
+#define ADS1115_ONESHOT_MODE(priv)                                           \
+  (((priv->cmdbyte & ADS1115_MODE_MASK) == ADS1115_MODE_MASK))
+#define ADS1115_CHANNEL_BITS(am_channel) (am_channel << ADS1115_MUX_SHIFT)
+
+/* The conversion time is based on the data rate */
+
+#define ADS1115_CONVERSION_TIME (1000000 / (1 << (CONFIG_ADC_ADS1115_DR + 3)))
 
 /****************************************************************************
  * Private Types
@@ -111,12 +114,12 @@ static int ads1115_ioctl(FAR struct adc_dev_s *dev, int cmd,
 
 static const struct adc_ops_s g_ads1115ops =
 {
-    .ao_bind = ads1115_bind,
-    .ao_reset = ads1115_reset,
-    .ao_setup = ads1115_setup,
-    .ao_shutdown = ads1115_shutdown,
-    .ao_rxint = ads1115_rxint,
-    .ao_ioctl = ads1115_ioctl,
+  .ao_bind = ads1115_bind,
+  .ao_reset = ads1115_reset,
+  .ao_setup = ads1115_setup,
+  .ao_shutdown = ads1115_shutdown,
+  .ao_rxint = ads1115_rxint,
+  .ao_ioctl = ads1115_ioctl,
 };
 
 /****************************************************************************
@@ -141,36 +144,30 @@ static int ads1115_write_register(FAR struct ads1115_dev_s *priv,
                                   uint16_t value)
 {
   int ret = OK;
+  struct i2c_msg_s i2cmsg[2];
 
-  if (priv == NULL)
+  DEBUGASSERT(priv != NULL);
+
+  /* Write the register into the address pointer register. */
+
+  i2cmsg[0].frequency = CONFIG_ADC_ADS1115_I2C_FREQUENCY;
+  i2cmsg[0].addr = priv->addr;
+  i2cmsg[0].flags = 0;
+  i2cmsg[0].buffer = &reg;
+  i2cmsg[0].length = sizeof(reg);
+
+  /* Write the value into the register. */
+
+  i2cmsg[1].frequency = CONFIG_ADC_ADS1115_I2C_FREQUENCY;
+  i2cmsg[1].addr = priv->addr;
+  i2cmsg[1].flags = I2C_M_NOSTART;
+  i2cmsg[1].buffer = (FAR uint8_t *)&value;
+  i2cmsg[1].length = sizeof(value);
+
+  ret = I2C_TRANSFER(priv->i2c, i2cmsg, 2);
+  if (ret < 0)
     {
-      ret = -EINVAL;
-    }
-  else
-    {
-      struct i2c_msg_s i2cmsg[2];
-
-      /* Write the register into the address pointer register. */
-
-      i2cmsg[0].frequency = CONFIG_ADC_ADS1115_I2C_FREQUENCY;
-      i2cmsg[0].addr = priv->addr;
-      i2cmsg[0].flags = 0;
-      i2cmsg[0].buffer = &reg;
-      i2cmsg[0].length = sizeof(reg);
-
-      /* Write the value into the register. */
-
-      i2cmsg[1].frequency = CONFIG_ADC_ADS1115_I2C_FREQUENCY;
-      i2cmsg[1].addr = priv->addr;
-      i2cmsg[1].flags = I2C_M_NOSTART;
-      i2cmsg[1].buffer = (FAR uint8_t *)&value;
-      i2cmsg[1].length = sizeof(value);
-
-      ret = I2C_TRANSFER(priv->i2c, i2cmsg, 2);
-      if (ret < 0)
-        {
-          aerr("ADS1115 I2C transfer failed: %d\n", ret);
-        }
+      aerr("ADS1115 I2C transfer failed: %d\n", ret);
     }
 
   return ret;
@@ -193,36 +190,31 @@ static int ads1115_read_register(FAR struct ads1115_dev_s *priv, uint8_t reg,
                                  uint16_t *buf)
 {
   int ret = OK;
+  struct i2c_msg_s i2cmsg[2];
 
-  if (priv == NULL || buf == NULL)
+  DEBUGASSERT(priv != NULL);
+  DEBUGASSERT(buf != NULL);
+
+  /* Write the register into the address pointer register. */
+
+  i2cmsg[0].frequency = CONFIG_ADC_ADS1115_I2C_FREQUENCY;
+  i2cmsg[0].addr = priv->addr;
+  i2cmsg[0].flags = 0;
+  i2cmsg[0].buffer = (FAR uint8_t *)(&reg);
+  i2cmsg[0].length = sizeof(reg);
+
+  /* Read from the register. */
+
+  i2cmsg[1].frequency = CONFIG_ADC_ADS1115_I2C_FREQUENCY;
+  i2cmsg[1].addr = priv->addr;
+  i2cmsg[1].flags = I2C_M_READ;
+  i2cmsg[1].buffer = (FAR uint8_t *)(buf);
+  i2cmsg[1].length = sizeof(*buf);
+
+  ret = I2C_TRANSFER(priv->i2c, i2cmsg, 2);
+  if (ret < 0)
     {
-      ret = -EINVAL;
-    }
-  else
-    {
-      struct i2c_msg_s i2cmsg[2];
-
-      /* Write the register into the address pointer register. */
-
-      i2cmsg[0].frequency = CONFIG_ADC_ADS1115_I2C_FREQUENCY;
-      i2cmsg[0].addr = priv->addr;
-      i2cmsg[0].flags = 0;
-      i2cmsg[0].buffer = (FAR uint8_t *)(&reg);
-      i2cmsg[0].length = sizeof(reg);
-
-      /* Read from the register. */
-
-      i2cmsg[1].frequency = CONFIG_ADC_ADS1115_I2C_FREQUENCY;
-      i2cmsg[1].addr = priv->addr;
-      i2cmsg[1].flags = I2C_M_READ;
-      i2cmsg[1].buffer = (FAR uint8_t *)(buf);
-      i2cmsg[1].length = sizeof(*buf);
-
-      ret = I2C_TRANSFER(priv->i2c, i2cmsg, 2);
-      if (ret < 0)
-        {
-          aerr("ADS1115 I2C transfer failed: %d\n", ret);
-        }
+      aerr("ADS1115 I2C transfer failed: %d\n", ret);
     }
 
   return ret;
@@ -244,26 +236,21 @@ static int ads1115_read_current_register(FAR struct ads1115_dev_s *priv,
                                          uint16_t *buf)
 {
   int ret = OK;
+  struct i2c_msg_s i2cmsg[1];
 
-  if (priv == NULL || buf == NULL)
+  DEBUGASSERT(priv != NULL);
+  DEBUGASSERT(buf != NULL);
+
+  i2cmsg[0].frequency = CONFIG_ADC_ADS1115_I2C_FREQUENCY;
+  i2cmsg[0].addr = priv->addr;
+  i2cmsg[0].flags = I2C_M_READ;
+  i2cmsg[0].buffer = (FAR uint8_t *)(buf);
+  i2cmsg[0].length = sizeof(*buf);
+
+  ret = I2C_TRANSFER(priv->i2c, i2cmsg, 1);
+  if (ret < 0)
     {
-      ret = -EINVAL;
-    }
-  else
-    {
-      struct i2c_msg_s i2cmsg[1];
-
-      i2cmsg[0].frequency = CONFIG_ADC_ADS1115_I2C_FREQUENCY;
-      i2cmsg[0].addr = priv->addr;
-      i2cmsg[0].flags = I2C_M_READ;
-      i2cmsg[0].buffer = (FAR uint8_t *)(buf);
-      i2cmsg[0].length = sizeof(*buf);
-
-      ret = I2C_TRANSFER(priv->i2c, i2cmsg, 1);
-      if (ret < 0)
-        {
-          aerr("ADS1115 I2C transfer failed: %d\n", ret);
-        }
+      aerr("ADS1115 I2C transfer failed: %d\n", ret);
     }
 
   return ret;
@@ -333,9 +320,133 @@ static int cmdbyte_init(FAR struct ads1115_dev_s *priv)
       return ret;
     }
 
-  ret = ads1115_write_register(priv, ADS1115_LO_THRESH_REGISTER,
-                               htobe16(CONFIG_ADC_ADS1115_LO_THRESH));
+  return ads1115_write_register(priv, ADS1115_LO_THRESH_REGISTER,
+                                htobe16(CONFIG_ADC_ADS1115_LO_THRESH));
+}
 
+/****************************************************************************
+ * Name: ads1115_trigger_conversion
+ *
+ * Description:
+ *   Triggers a conversion on the specified channel.
+ *
+ * Input Parameters:
+ *   priv - An ADS1115 device structure
+ *   channel - The channel number to trigger conversion on (0-7)
+ *
+ * Return Value:
+ *   OK on success; a negated errno on failure
+ *
+ * NOTE:
+ *   Each channel corresponds to a differing mux configuration as defined in
+ *   the datasheet.
+ *
+ *   channel  MUX Configuration
+ *   0       AINP = AIN0, AINN = AIN1
+ *   1       AINP = AIN0, AINN = AIN3
+ *   2       AINP = AIN1, AINN = AIN3
+ *   3       AINP = AIN2, AINN = AIN3
+ *   4       AINP = AIN0, AINN = GND
+ *   5       AINP = AIN0, AINN = GND
+ *   6       AINP = AIN1, AINN = GND
+ *   7       AINP = AIN2, AINN = GND
+ *   8       AINP = AIN3, AINN = GND
+ ****************************************************************************/
+
+static int ads1115_trigger_conversion(FAR struct ads1115_dev_s *priv,
+                                      FAR struct adc_msg_s *msg)
+{
+  int ret = OK;
+  uint16_t channel_bits;
+  bool new_channel;
+
+  DEBUGASSERT(priv != NULL);
+  DEBUGASSERT(msg != NULL);
+  DEBUGASSERT(msg->am_channel <= ADS1115_NUM_CHANNELS);
+
+  channel_bits = ADS1115_CHANNEL_BITS(msg->am_channel);
+  new_channel = ((priv->cmdbyte & ADS1115_MUX_MASK) != channel_bits);
+
+  /* Check if our current channel is the same as the one that
+   * is set or if we are in one shot mode.
+   */
+
+  if (new_channel || ADS1115_ONESHOT_MODE(priv))
+    {
+      /* Clear the current mux bits. */
+
+      priv->cmdbyte &= ~(ADS1115_MUX_MASK);
+
+      /* Set the new mux bits. */
+
+      priv->cmdbyte |= channel_bits;
+
+      /* Set the OS bit to start conversion. */
+
+      priv->cmdbyte |= ADS1115_OS_SHIFT;
+
+      /* Write to the configuration register. */
+
+      ret = ads1115_write_register(priv, ADS1115_CONFIG_REGISTER,
+                                   htobe16(priv->cmdbyte));
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: ads1115_read_conversion
+ *
+ * Description:
+ *   Reads the conversion result from the ADC.
+ *
+ * Input Parameters:
+ *   priv - An ADS1115 device structure
+ *   value - Pointer to store the conversion result
+ *
+ * Return Value:
+ *   OK on success; a negated errno on failure
+ ****************************************************************************/
+
+static int ads1115_read_conversion(FAR struct ads1115_dev_s *priv,
+                                   FAR struct adc_msg_s *msg)
+{
+  int ret = OK;
+  uint16_t buf;
+  int count = 0;
+
+  /* Read the configuration register until OS has been set to 1, indicating
+   * that the conversion value is ready.
+   */
+
+  ret = ads1115_read_register(priv, ADS1115_CONFIG_REGISTER, &buf);
+  while (!(be16toh(buf) & ADS1115_OS_SHIFT) && count < 3)
+    {
+      up_udelay(ADS1115_CONVERSION_TIME);
+      ret = ads1115_read_register(priv, ADS1115_CONFIG_REGISTER, &buf);
+      count++;
+    }
+
+  /* If we are here, either the conversion completed or we encountered some
+   * error.
+   */
+
+  if (ret != OK)
+    {
+      return ret;
+    }
+
+  if (count >= 3)
+    {
+      aerr("ADS1115 timed out waiting for conversion to finish\n");
+      return -ETIMEDOUT;
+    }
+
+  /* Read the conversion register. */
+
+  ret = ads1115_read_register(priv, ADS1115_CONVERSION_REGISTER, &buf);
+  msg->am_data = (uint32_t)betoh16(buf);
+  priv->cmdbyte &= ~(ADS1115_OS_SHIFT); /* Clear the OS bit. */
   return ret;
 }
 
@@ -375,79 +486,19 @@ static int ads1115_readchannel(FAR struct ads1115_dev_s *priv,
 {
   int ret = OK;
 
-  if (priv == NULL || msg == NULL || msg->am_channel >= ADS1115_NUM_CHANNELS)
+  DEBUGASSERT(priv != NULL);
+  DEBUGASSERT(msg != NULL);
+  DEBUGASSERT(msg->am_channel <= ADS1115_NUM_CHANNELS);
+
+  /* Trigger a conversion on the requested channel */
+
+  ret = ads1115_trigger_conversion(priv, msg);
+  if (ret)
     {
-      ret = -EINVAL;
-    }
-  else
-    {
-      uint16_t buf;
-      uint16_t channel_bits = msg->am_channel << ADS1115_MUX_SHIFT;
-
-      bool one_shot =
-          ((priv->cmdbyte & ADS1115_MODE_MASK) == ADS1115_MODE_MASK);
-      bool new_channel =
-          ((priv->cmdbyte & ADS1115_MUX_MASK) != channel_bits);
-
-      /* check if our current channel is the same as the one that
-       * is set or if in one shot mode.
-       */
-
-      if (new_channel || one_shot)
-        {
-          /* Clear the current mux bits. */
-
-          priv->cmdbyte &= ~(ADS1115_MUX_MASK);
-
-          /* Set the new mux bits. */
-
-          priv->cmdbyte |= channel_bits;
-
-          /* Set the OS bit to start conversion. */
-
-          priv->cmdbyte |= ADS1115_OS_SHIFT;
-
-          /* Write to the configuration register. */
-
-          ainfo("cmdbyte: %x\n", priv->cmdbyte);
-          ret = ads1115_write_register(priv, ADS1115_CONFIG_REGISTER,
-                                       htobe16(priv->cmdbyte));
-        }
-
-      if (one_shot)
-        {
-          /* Read the configuration register until OS has been set to 1. */
-
-          int count = 0;
-          do
-            {
-              /* ADS1115 takes ~25 usec to wake up */
-
-              up_udelay(4000);
-              ret = ads1115_read_current_register(priv, &buf);
-              count++;
-            }
-          while ((be16toh(buf) & ADS1115_OS_SHIFT) == 0 && ret == OK &&
-                  count < 3);
-          ainfo("config register: %x\n", (be16toh(buf)));
-
-          if (count >= 3)
-            {
-              aerr("ADS1115 timed out waiting for conversion to finish\n");
-              return -ETIMEDOUT;
-            }
-        }
-
-      /* Read the conversion register. */
-
-      ret = ads1115_read_register(priv, ADS1115_CONVERSION_REGISTER, &buf);
-      ainfo("output: %d\n", (int16_t)betoh16(buf));
-      msg->am_data = (uint32_t)betoh16(buf);
-
-      priv->cmdbyte &= ~(ADS1115_OS_SHIFT); /* Clear the OS bit. */
+      return ret;
     }
 
-  return ret;
+  return ads1115_read_conversion(priv, msg);
 }
 
 /****************************************************************************
@@ -463,7 +514,6 @@ static int ads1115_bind(FAR struct adc_dev_s *dev,
                         FAR const struct adc_callback_s *callback)
 {
   FAR struct ads1115_dev_s *priv = (FAR struct ads1115_dev_s *)dev->ad_priv;
-
   DEBUGASSERT(priv != NULL);
   priv->cb = callback;
   return 0;
@@ -481,7 +531,6 @@ static int ads1115_bind(FAR struct adc_dev_s *dev,
 static void ads1115_reset(FAR struct adc_dev_s *dev)
 {
   FAR struct ads1115_dev_s *priv = (FAR struct ads1115_dev_s *)dev->ad_priv;
-
   cmdbyte_init(priv);
 }
 
@@ -498,10 +547,8 @@ static void ads1115_reset(FAR struct adc_dev_s *dev)
 static int ads1115_setup(FAR struct adc_dev_s *dev)
 {
   FAR struct ads1115_dev_s *priv = (FAR struct ads1115_dev_s *)dev->ad_priv;
-
-  int ret = ads1115_write_register(priv, ADS1115_CONFIG_REGISTER,
-                                   htobe16(priv->cmdbyte));
-  return ret;
+  return ads1115_write_register(priv, ADS1115_CONFIG_REGISTER,
+                                htobe16(priv->cmdbyte));
 }
 
 /****************************************************************************
@@ -519,7 +566,6 @@ static int ads1115_setup(FAR struct adc_dev_s *dev)
 static void ads1115_shutdown(FAR struct adc_dev_s *dev)
 {
   FAR struct ads1115_dev_s *priv = (FAR struct ads1115_dev_s *)dev->ad_priv;
-
   priv->cmdbyte |= ADS1115_MODE_MASK;
   ads1115_write_register(priv, ADS1115_CONFIG_REGISTER,
                          htobe16(priv->cmdbyte));
@@ -558,36 +604,29 @@ static int ads1115_ioctl(FAR struct adc_dev_s *dev, int cmd,
       {
         struct adc_msg_s msg;
 
-        for (uint8_t i = 0; i < ADS1115_NUM_CHANNELS && (ret == 0); i++)
+        /* Read all channels in sequence */
+
+        for (uint8_t i = 0; i < ADS1115_NUM_CHANNELS; i++)
           {
             msg.am_channel = i;
-            ainfo("Channel: %d\n", i);
             ret = ads1115_readchannel(priv, &msg);
-            if (ret == 0)
-              {
-                priv->cb->au_receive(dev, i, msg.am_data);
-              }
-            else
+            if (ret)
               {
                 aerr("Error reading channel %d with error %d \n", i, ret);
+                break;
               }
+
+            priv->cb->au_receive(dev, i, msg.am_data);
           }
       }
       break;
 
     case ANIOC_ADS1115_SET_PGA:
       {
-        if (arg >= ADS1115_PGA1 && arg <= ADS1115_PGA8)
-          {
-            priv->cmdbyte &= ~ADS1115_PGA_MASK;
-            priv->cmdbyte |= arg << ADS1115_PGA_SHIFT;
-          }
-        else
-          {
-            ret = -EINVAL;
-            break;
-          }
+        DEBUGASSERT(arg >= ADS1115_PGA1 && arg <= ADS1115_PGA8);
 
+        priv->cmdbyte &= ~ADS1115_PGA_MASK;
+        priv->cmdbyte |= arg << ADS1115_PGA_SHIFT;
         ret = ads1115_write_register(priv, ADS1115_CONFIG_REGISTER,
                                      htobe16(priv->cmdbyte));
       }
@@ -616,16 +655,9 @@ static int ads1115_ioctl(FAR struct adc_dev_s *dev, int cmd,
 
     case ANIOC_ADS1115_SET_DR:
       {
-        if (arg >= ADS1115_DR1 && arg <= ADS1115_DR8)
-          {
-            priv->cmdbyte &= ~ADS1115_DR_MASK;
-            priv->cmdbyte |= arg << ADS1115_DR_SHIFT;
-          }
-        else
-          {
-            ret = -EINVAL;
-            break;
-          }
+        DEBUGASSERT(arg >= ADS1115_DR1 && arg <= ADS1115_DR8);
+        priv->cmdbyte &= ~ADS1115_DR_MASK;
+        priv->cmdbyte |= arg << ADS1115_DR_SHIFT;
 
         ret = ads1115_write_register(priv, ADS1115_CONFIG_REGISTER,
                                      htobe16(priv->cmdbyte));
@@ -697,16 +729,11 @@ static int ads1115_ioctl(FAR struct adc_dev_s *dev, int cmd,
 
     case ANIOC_ADS1115_SET_COMP_QUEUE:
       {
-        if (arg >= ADS1115_COMP_QUEUE1 && arg <= ADS1115_COMP_QUEUE4)
-          {
-            priv->cmdbyte &= ~ADS1115_COMP_QUE_MASK;
-            priv->cmdbyte |= arg << ADS1115_COMP_QUE_SHIFT;
-          }
-        else
-          {
-            ret = -EINVAL;
-            break;
-          }
+        DEBUGASSERT(arg >= ADS1115_COMP_QUEUE1 &&
+                    arg <= ADS1115_COMP_QUEUE4);
+
+        priv->cmdbyte &= ~ADS1115_COMP_QUE_MASK;
+        priv->cmdbyte |= arg << ADS1115_COMP_QUE_SHIFT;
 
         ret = ads1115_write_register(priv, ADS1115_CONFIG_REGISTER,
                                      htobe16(priv->cmdbyte));
@@ -715,36 +742,35 @@ static int ads1115_ioctl(FAR struct adc_dev_s *dev, int cmd,
 
     case ANIOC_ADS1115_READ_CHANNEL:
       {
-        FAR struct adc_msg_s *msg = (FAR struct adc_msg_s *)arg;
-        ret = ads1115_readchannel(priv, msg);
+        ret = ads1115_readchannel(priv, (FAR struct adc_msg_s *)arg);
+      }
+      break;
+
+    case ANIOC_ADS1115_TRIGGER_CONVERSION:
+      {
+        ret = ads1115_trigger_conversion(priv, (FAR struct adc_msg_s *)arg);
+      }
+      break;
+
+    case ANIOC_ADS1115_READ_CHANNEL_NO_CONVERSION:
+      {
+        ret = ads1115_read_conversion(priv, (FAR struct adc_msg_s *)arg);
       }
       break;
 
     case ANIOC_ADS1115_SET_HI_THRESH:
       {
-        if (arg >= 0 && arg <= UINT16_MAX)
-          {
-            ret = ads1115_write_register(priv, ADS1115_HI_THRESH_REGISTER,
-                                         htobe16(arg));
-          }
-        else
-          {
-            ret = -EINVAL;
-          }
+        DEBUGASSERT(arg >= 0 && arg <= UINT16_MAX);
+        ret = ads1115_write_register(priv, ADS1115_HI_THRESH_REGISTER,
+                                     htobe16(arg));
       }
       break;
 
     case ANIOC_ADS1115_SET_LO_THRESH:
       {
-        if (arg >= 0 && arg <= UINT16_MAX)
-          {
-            ret = ads1115_write_register(priv, ADS1115_LO_THRESH_REGISTER,
-                                         htobe16(arg));
-          }
-        else
-          {
-            ret = -EINVAL;
-          }
+        DEBUGASSERT(arg >= 0 && arg <= UINT16_MAX);
+        ret = ads1115_write_register(priv, ADS1115_LO_THRESH_REGISTER,
+                                     htobe16(arg));
       }
       break;
 
@@ -786,6 +812,7 @@ FAR struct adc_dev_s *ads1115_initialize(FAR struct i2c_master_s *i2c,
 {
   FAR struct ads1115_dev_s *priv;
   FAR struct adc_dev_s *adcdev;
+  int ret;
 
   DEBUGASSERT(i2c != NULL);
 
@@ -793,7 +820,6 @@ FAR struct adc_dev_s *ads1115_initialize(FAR struct i2c_master_s *i2c,
   if (priv == NULL)
     {
       aerr("ERROR: Failed to allocate ads1115_dev_s instance\n");
-      free(priv);
       return NULL;
     }
 
@@ -802,7 +828,7 @@ FAR struct adc_dev_s *ads1115_initialize(FAR struct i2c_master_s *i2c,
   priv->addr = addr;
   priv->cmdbyte = 0;
 
-  int ret = cmdbyte_init(priv);
+  ret = cmdbyte_init(priv);
   if (ret != OK)
     {
       aerr("Failed to initialize ADS1115\n");
@@ -823,5 +849,3 @@ FAR struct adc_dev_s *ads1115_initialize(FAR struct i2c_master_s *i2c,
 
   return adcdev;
 }
-
-#endif /* CONFIG_ADC_ADS1115 */
