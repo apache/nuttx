@@ -40,6 +40,25 @@ config MTD_PARTITION
 		managing the sub-region of flash beginning at 'offset' (in blocks)
 		and of size 'nblocks' on the device specified by 'mtd'.
 
+config MTD_PARTITION_REGISTER
+	bool "Register MTD partition as a driver"
+	default n
+	depends on MTD_PARTITION
+	---help---
+		This option allows to register created MTD partition as a device
+		driver and perform standard open/close/read/write/ioctl calls
+		directly on the MTD layer. This has some pros and cons compared
+		to the access through FTL or/and BCH layers. FTL layer buffers
+		the erase page, thus increasing RAM memory consumption. It also
+		means the data may be lost during power cutoff as flash write
+		means read, erase, write and erase operation may take time. On the
+		other hand, the access through FTL/BCH takes care of page erase
+		if needed, thus is easier to manage from an application.
+
+		Direct access to MTD layer can be faster and lower RAM memory
+		consumption, but the application has to take care of page erase
+		before writes if needed. This can be done with ioctl calls.
+
 config FTL_WRITEBUFFER
 	bool "Enable write buffering in the FTL layer"
 	default n
