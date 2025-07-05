@@ -66,8 +66,8 @@
 #  include "esp32s2_efuse.h"
 #endif
 
-#ifdef CONFIG_ESP32S2_LEDC
-#  include "esp32s2_ledc.h"
+#ifdef CONFIG_ESPRESSIF_LEDC
+#  include "espressif/esp_ledc.h"
 #endif
 
 #ifdef CONFIG_WATCHDOG
@@ -184,13 +184,13 @@ int esp32s2_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_ESP32S2_LEDC
+#ifdef CONFIG_ESPRESSIF_LEDC
   ret = esp32s2_pwm_setup();
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: esp32s2_pwm_setup() failed: %d\n", ret);
     }
-#endif /* CONFIG_ESP32S2_LEDC */
+#endif /* CONFIG_ESPRESSIF_LEDC */
 
 #ifdef CONFIG_ESPRESSIF_SPIFLASH
   ret = board_spiflash_init();

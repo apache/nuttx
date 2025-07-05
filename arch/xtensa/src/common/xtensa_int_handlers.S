@@ -87,6 +87,68 @@ g_intstacktop:
  * Assembly Language Macros
  ****************************************************************************/
 
+	.macro get_int_mask tmp level mask
+
+	.ifeq \mask
+		.ifeq \level - 1
+		movi	\tmp, XCHAL_INTLEVEL1_MASK
+		.elseif (\level - 2) == 0
+		movi	\tmp, XCHAL_INTLEVEL2_MASK
+		.elseif (\level - 3) == 0
+		movi	\tmp, XCHAL_INTLEVEL3_MASK
+		.elseif (\level - 4) == 0
+		movi	\tmp, XCHAL_INTLEVEL4_MASK
+		.elseif (\level - 5) == 0
+		movi	\tmp, XCHAL_INTLEVEL5_MASK
+		.elseif (\level - 6) == 0
+		movi	\tmp, XCHAL_INTLEVEL6_MASK
+		.endif
+	.elseif (\mask - 1) == 0
+		.ifeq \level - 1
+		movi	\tmp, XCHAL_INTLEVEL1_MASK1
+		.elseif (\level - 2) == 0
+		movi	\tmp, XCHAL_INTLEVEL2_MASK1
+		.elseif (\level - 3) == 0
+		movi	\tmp, XCHAL_INTLEVEL3_MASK1
+		.elseif (\level - 4) == 0
+		movi	\tmp, XCHAL_INTLEVEL4_MASK1
+		.elseif (\level - 5) == 0
+		movi	\tmp, XCHAL_INTLEVEL5_MASK1
+		.elseif (\level - 6) == 0
+		movi	\tmp, XCHAL_INTLEVEL6_MASK1
+		.endif
+	.elseif (\mask - 2) == 0
+		.ifeq \level - 1
+		movi	\tmp, XCHAL_INTLEVEL1_MASK2
+		.elseif (\level - 2) == 0
+		movi	\tmp, XCHAL_INTLEVEL2_MASK2
+		.elseif (\level - 3) == 0
+		movi	\tmp, XCHAL_INTLEVEL3_MASK2
+		.elseif (\level - 4) == 0
+		movi	\tmp, XCHAL_INTLEVEL4_MASK2
+		.elseif (\level - 5) == 0
+		movi	\tmp, XCHAL_INTLEVEL5_MASK2
+		.elseif (\level - 6) == 0
+		movi	\tmp, XCHAL_INTLEVEL6_MASK2
+		.endif
+	.elseif (\mask - 3) == 0
+		.ifeq \level - 1
+		movi	\tmp, XCHAL_INTLEVEL1_MASK3
+		.elseif (\level - 2) == 0
+		movi	\tmp, XCHAL_INTLEVEL2_MASK3
+		.elseif (\level - 3) == 0
+		movi	\tmp, XCHAL_INTLEVEL3_MASK3
+		.elseif (\level - 4) == 0
+		movi	\tmp, XCHAL_INTLEVEL4_MASK3
+		.elseif (\level - 5) == 0
+		movi	\tmp, XCHAL_INTLEVEL5_MASK3
+		.elseif (\level - 6) == 0
+		movi	\tmp, XCHAL_INTLEVEL6_MASK3
+		.endif
+	.endif
+
+	.endm
+
 /****************************************************************************
  * Macro dispatch_c_isr level mask tmp
  *
@@ -102,7 +164,6 @@ g_intstacktop:
  *
  * Entry Conditions/Side Effects:
  *   level - interrupt level
- *   mask  - interrupt bitmask for this level
  *   a12   - register save area
  *
  * Exit Conditions:
@@ -111,7 +172,7 @@ g_intstacktop:
  *
  ****************************************************************************/
 
-	.macro	dispatch_c_isr	level mask tmp
+	.macro	dispatch_c_isr	level tmp
 
 	/* If the interrupt stack is disabled, reserve xcpcontext to ensure
 	 * that signal processing can have a separate xcpcontext to handle
@@ -122,6 +183,15 @@ g_intstacktop:
 	addi	sp, sp, -XCPTCONTEXT_SIZE
 #endif
 
+	/* Reserve the area to save INTERRUPT[1|2|3] registers:
+	 *   [sp + 0]  = INTERRUPT
+	 *   [sp + 4]  = INTERRUPT1
+	 *   [sp + 8]  = INTERRUPT2
+	 *   [sp + 12] = INTERRUPT3
+	 */
+
+	addi	sp, sp, -(XCHAL_NUM_INTERRUPTS / 8)
+
 	/* Set up PS for C, enable interrupts above this level and clear EXCM. */
 
 	ps_setup	\level \tmp
@@ -130,10 +200,37 @@ g_intstacktop:
 
 	rsr    ARG1, INTENABLE
 	rsr    a3, INTERRUPT
-	movi   a4, \mask
+	get_int_mask a4, \level, 0
 	and    ARG1, ARG1, a3
 	and    ARG1, ARG1, a4           /* Set of pending, enabled interrupts for this level */
+	s32i   ARG1, sp, 0
+
+#if XCHAL_NUM_INTERRUPTS <= 32
 	beqz   ARG1, 1f                 /* Nothing to do */
+#else
+	rsr    ARG1, INTENABLE1
+	rsr    a3, INTERRUPT1
+	get_int_mask a4, \level, 1
+	and    ARG1, ARG1, a3
+	and    ARG1, ARG1, a4           /* Set of pending, enabled interrupts for this level */
+	s32i   ARG1, sp, 4
+#  if XCHAL_NUM_INTERRUPTS > 64
+	rsr    ARG1, INTENABLE2
+	rsr    a3, INTERRUPT2
+	get_int_mask a4, \level, 2
+	and    ARG1, ARG1, a3
+	and    ARG1, ARG1, a4           /* Set of pending, enabled interrupts for this level */
+	s32i   ARG1, sp, 8
+#    if XCHAL_NUM_INTERRUPTS > 96
+	rsr    ARG1, INTENABLE3
+	rsr    a3, INTERRUPT3
+	get_int_mask a4, \level, 3
+	and    ARG1, ARG1, a3
+	and    ARG1, ARG1, a4           /* Set of pending, enabled interrupts for this level */
+	s32i   ARG1, sp, 12
+#    endif
+#  endif
+#endif
 
 	/* Link the pre-exception frame for debugging. At this point, a12 points to the
 	 * allocated and filled exception stack frame (old value of SP in case of
@@ -142,6 +239,7 @@ g_intstacktop:
 
 	exception_backtrace a12 \level
 
+	mov     ARG1, sp
 		          					    /* Argument 1: Set of CPU interrupt to dispatch */
 	mov     ARG2, a12					/* Argument 2: Top of stack = register save area */
 	CALL    xtensa_int_decode
@@ -164,6 +262,10 @@ g_intstacktop:
 
 	mov 	a2, a12
 2:
+	/* Release the area saving INTERRUPT[1|2|3] registers. */
+
+	addi	sp, sp, XCHAL_NUM_INTERRUPTS / 8
+
 #if CONFIG_ARCH_INTERRUPTSTACK < 15
 	addi	sp, sp, XCPTCONTEXT_SIZE
 #endif
@@ -219,7 +321,7 @@ _xtensa_level1_handler:
 	 * area in a2.
 	 */
 
-	dispatch_c_isr	1 XCHAL_INTLEVEL1_MASK a0
+	dispatch_c_isr	1 a0
 
 	/* Set PS.EXCM to 1 */
 
@@ -304,7 +406,7 @@ _xtensa_level2_handler:
 	 * area in a2.
 	 */
 
-	dispatch_c_isr	2 XCHAL_INTLEVEL2_MASK a0
+	dispatch_c_isr	2 a0
 
 	/* Restore registers in preparation to return from interrupt */
 
@@ -357,7 +459,7 @@ _xtensa_level3_handler:
 	 * area in a2.
 	 */
 
-	dispatch_c_isr	3 XCHAL_INTLEVEL3_MASK a0
+	dispatch_c_isr	3 a0
 
 	/* Restore registers in preparation to return from interrupt */
 
@@ -410,7 +512,7 @@ _xtensa_level4_handler:
 	 * area in a2.
 	 */
 
-	dispatch_c_isr	4 XCHAL_INTLEVEL4_MASK a0
+	dispatch_c_isr	4 a0
 
 	/* Restore registers in preparation to return from interrupt */
 
@@ -463,7 +565,7 @@ _xtensa_level5_handler:
 	 * area in a2.
 	 */
 
-	dispatch_c_isr	5 XCHAL_INTLEVEL5_MASK a0
+	dispatch_c_isr	5 a0
 
 	/* Restore registers in preparation to return from interrupt */
 
@@ -516,7 +618,7 @@ _xtensa_level6_handler:
 	 * area in a2.
 	 */
 
-	dispatch_c_isr	6 XCHAL_INTLEVEL6_MASK a0
+	dispatch_c_isr	6 a0
 
 	/* Restore registers in preparation to return from interrupt */
 

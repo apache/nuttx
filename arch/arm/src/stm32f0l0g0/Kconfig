@@ -3596,6 +3596,18 @@ config STM32F0L0G0_ADC1_RESOLUTION
 	---help---
 		ADC1 resolution. 0 - 12 bit, 1 - 10 bit, 2 - 8 bit, 3 - 6 bit
 
+config STM32F0L0G0_ADC_MAX_SAMPLES
+	int "The maximum number of channels that can be sampled"
+	default 16 if STM32F0L0G0_ADC1_DMA
+	default 1 if !STM32F0L0G0_ADC1_DMA
+	---help---
+		The maximum number of samples which can be handled without
+		overrun depends on various factors. This is the user's
+		responsibility to correctly select this value.
+		Since the interface to update the sampling time is available
+		for all supported devices, the user can change the default
+		values in the board initialization logic and avoid ADC overrun.
+
 config STM32F0L0G0_ADC_NO_STARTUP_CONV
 	bool "Do not start conversion when opening ADC device"
 	default n

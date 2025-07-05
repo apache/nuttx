@@ -47,7 +47,7 @@ list(
   APPEND
   SRCS
   xtensa_context.S
-  xtensa_cpuint.S
+  xtensa_cpuint.c
   xtensa_panic.S
   xtensa_assert.c
   xtensa_cache.c

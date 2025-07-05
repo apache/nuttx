@@ -56,7 +56,7 @@ extern "C"
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ESP32S3_LEDC
+#ifdef CONFIG_ESPRESSIF_LEDC
 int esp32s3_pwm_setup(void);
 #endif
 

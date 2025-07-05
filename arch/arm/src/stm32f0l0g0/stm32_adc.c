@@ -75,20 +75,6 @@
 
 /* ADC Channels/DMA *********************************************************/
 
-/* The maximum number of channels that can be sampled.  If DMA support is
- * not enabled, then only a single channel can be sampled.  Otherwise,
- * data overruns would occur.
- */
-
-#define ADC_MAX_CHANNELS_DMA   16
-#define ADC_MAX_CHANNELS_NODMA 1
-
-#ifdef ADC_HAVE_DMA
-#  define ADC_MAX_SAMPLES ADC_MAX_CHANNELS_DMA
-#else
-#  define ADC_MAX_SAMPLES ADC_MAX_CHANNELS_NODMA
-#endif
-
 /* DMA values differs according to STM32 DMA IP core version */
 
 #if  defined(HAVE_IP_DMA_V1)
@@ -108,7 +94,7 @@
 #  define ADC_HAVE_SMPR_SMP2
 #endif
 
-#if defined(ADC_HAVE_DMA) || (ADC_MAX_SAMPLES == 1)
+#if defined(ADC_HAVE_DMA) || (CONFIG_STM32F0L0G0_ADC_MAX_SAMPLES == 1)
 #  if defined(CONFIG_ARCH_CHIP_STM32C0) || defined(CONFIG_ARCH_CHIP_STM32G0)
 #    define ADC_SMP1_DEFAULT  ADC_SMPR_12p5
 #    define ADC_SMP2_DEFAULT  ADC_SMPR_12p5
@@ -256,7 +242,7 @@ struct stm32_dev_s
 
   /* List of selected ADC channels to sample */
 
-  uint8_t  r_chanlist[ADC_MAX_SAMPLES];
+  uint8_t  r_chanlist[CONFIG_STM32F0L0G0_ADC_MAX_SAMPLES];
 };
 
 /****************************************************************************
@@ -414,7 +400,7 @@ static const struct stm32_adc_ops_s g_adc_llops =
 #ifdef CONFIG_STM32F0L0G0_ADC1
 
 #ifdef ADC1_HAVE_DMA
-static uint16_t g_adc1_dmabuffer[ADC_MAX_SAMPLES *
+static uint16_t g_adc1_dmabuffer[CONFIG_STM32F0L0G0_ADC_MAX_SAMPLES *
                                  CONFIG_STM32F0L0G0_ADC1_DMA_BATCH];
 #endif
 
@@ -2876,7 +2862,7 @@ struct adc_dev_s *stm32_adcinitialize(int intf, const uint8_t *chanlist,
   priv = (struct stm32_dev_s *)dev->ad_priv;
   priv->cb = NULL;
 
-  DEBUGASSERT(channels <= ADC_MAX_SAMPLES);
+  DEBUGASSERT(channels <= CONFIG_STM32F0L0G0_ADC_MAX_SAMPLES);
 
   priv->cr_channels = channels;
   memcpy(priv->r_chanlist, chanlist, channels);
