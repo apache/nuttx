@@ -588,6 +588,22 @@ to demonstrate the use of the userleds subsystem::
     led_daemon: LED set 0x00
     led_daemon: LED set 0x01
 
+match4
+------
+
+This configuration enables match4 game using led matrix (ws2812) and gpio pins.
+Alternatively, you can use serial console for input with enabling `GAMES_MATCH4_USE_CONSOLEKEY`
+option.
+
+You can run the game by using ``match`` command::
+
+    nsh> match
+
+Here is the sample wiring diagram that demonstrates how to wire ws2812 with buttons for match4 example:
+
+.. figure:: esp32-brickmatch-game-schematic.jpg
+    :align: center
+
 max6675
 -------
 
