@@ -33,6 +33,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <nuttx/input/ft5x06.h>
+#include <nuttx/input/touchscreen.h>
 
 #include "esp32s3_i2c.h"
 #include "esp32s3-szpi.h"
@@ -55,6 +56,14 @@ static const struct ft5x06_config_s g_ft5x06_config =
 {
   .address   = FT5X06_I2C_ADDRESS,
   .frequency = FT5X06_FREQUENCY,
+  .lower =
+    {
+      .xres = CONFIG_ARCH_BOARD_ESP32S3_LCKFB_SZPI_DISPLAY_XRES,
+      .yres = CONFIG_ARCH_BOARD_ESP32S3_LCKFB_SZPI_DISPLAY_YRES,
+#ifdef CONFIG_ARCH_BOARD_ESP32S3_LCKFB_SZPI_DISPLAY_LANDSCAPE
+      .flags = TOUCH_FLAG_MIRRORY,
+#endif
+    },
 };
 
 /****************************************************************************

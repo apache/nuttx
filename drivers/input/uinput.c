@@ -309,8 +309,7 @@ static ssize_t uinput_touch_notify(FAR void *uinput_lower,
 {
   FAR struct uinput_touch_lowerhalf_s *utcs_lower =
     (FAR struct uinput_touch_lowerhalf_s *)uinput_lower;
-  FAR const struct touch_sample_s *sample =
-    (FAR const struct touch_sample_s *)buffer;
+  FAR struct touch_sample_s *sample = (FAR struct touch_sample_s *)buffer;
 
   touch_event(utcs_lower->lower.priv, sample);
   return buflen;

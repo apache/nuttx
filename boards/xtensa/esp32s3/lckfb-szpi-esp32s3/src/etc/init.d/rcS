@@ -29,3 +29,7 @@ adbd &
 #ifdef CONFIG_SYSTEM_FASTBOOTD
 fastbootd &
 #endif
+
+#ifdef CONFIG_EXAMPLES_LVGLDEMO
+lvgldemo widgets &
+#endif
