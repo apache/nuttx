@@ -149,6 +149,11 @@ static int touch_open(FAR struct file *filep)
 
   filep->f_priv = openpriv;
   nxmutex_unlock(&upper->lock);
+  if (lower->open)
+    {
+      return lower->open(lower);
+    }
+
   return ret;
 }
 
@@ -161,6 +166,7 @@ static int touch_close(FAR struct file *filep)
   FAR struct touch_openpriv_s  *openpriv = filep->f_priv;
   FAR struct inode             *inode    = filep->f_inode;
   FAR struct touch_upperhalf_s *upper    = inode->i_private;
+  FAR struct touch_lowerhalf_s *lower    = upper->lower;
   int ret;
 
   ret = nxmutex_lock(&upper->lock);
@@ -181,6 +187,11 @@ static int touch_close(FAR struct file *filep)
   kmm_free(openpriv);
 
   nxmutex_unlock(&upper->lock);
+  if (lower->close)
+    {
+      return lower->close(lower);
+    }
+
   return ret;
 }
 
