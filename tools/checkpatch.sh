@@ -56,6 +56,7 @@ usage() {
   echo "-m Change-Id check in commit message (coupled with -g)"
   echo "-g <commit list>"
   echo "-f <file list>"
+  echo "-x format supported files (only .py, requires: pip install black)"
   echo "-  read standard input mainly used by git pre-commit hook as below:"
   echo "   git diff --cached | ./tools/checkpatch.sh -"
   echo "Where a <commit list> is any syntax supported by git for specifying git revision, see GITREVISIONS(7)"
@@ -90,6 +91,24 @@ is_cmake_file() {
     echo 1
   else
     echo 0
+  fi
+}
+
+format_file() {
+  if [ "$(is_python_file $@)" == "1" ]; then
+    if command -v black >/dev/null; then
+      echo "Auto-formatting Python file with black: $@"
+      setupcfg="${TOOLDIR}/../.github/linters/setup.cfg"
+      isort --settings-path "${setupcfg}" "$@"
+      black $@
+    else
+      echo "$@: error: black not found. Please install with: pip install black"
+      fail=1
+    fi
+  else
+    # TODO: extend for other file types in the future
+    echo "$@: error: format files type not implemented"
+    fail=1
   fi
 }
 
@@ -294,6 +313,9 @@ while [ ! -z "$1" ]; do
     ;;
   -u )
     encoding=1
+    ;;
+  -x )
+    check=format_file
     ;;
   -f )
     check=check_file
