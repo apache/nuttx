@@ -1830,6 +1830,17 @@ endmenu # U[S]ART Configuration
 menu "ADC Configuration"
 	depends on STM32H7_ADC
 
+config STM32H7_ADC_MAX_SAMPLES
+	int "The maximum number of channels that can be sampled"
+	default 16
+	---help---
+		The maximum number of samples which can be handled without
+		overrun depends on various factors. This is the user's
+		responsibility to correctly select this value.
+		Since the interface to update the sampling time is available
+		for all supported devices, the user can change the default
+		values in the board initialization logic and avoid ADC overrun.
+
 config STM32H7_ADC1_DMA
 	bool "ADC1 DMA (not supported yet)"
 	depends on STM32H7_ADC1 && EXPERIMENTAL
