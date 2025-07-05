@@ -64,18 +64,9 @@
 
 /* ADC Channels/DMA *********************************************************/
 
-#define ADC_MAX_CHANNELS_DMA   20
-#define ADC_MAX_CHANNELS_NODMA 20
-
 #ifdef ADC_HAVE_DMA
 #  error "STM32H5 ADC does not have DMA support."
 #  undef ADC_HAVE_DMA
-#endif
-
-#ifdef ADC_HAVE_DMA
-#  define ADC_MAX_SAMPLES ADC_MAX_CHANNELS_DMA
-#else
-#  define ADC_MAX_SAMPLES ADC_MAX_CHANNELS_NODMA
 #endif
 
 #define ADC_SMPR_DEFAULT    ADC_SMPR_640p5
@@ -153,7 +144,7 @@ struct stm32_dev_s
 
   /* List of selected ADC channels to sample */
 
-  uint8_t  chanlist[ADC_MAX_SAMPLES];
+  uint8_t  chanlist[CONFIG_STM32H5_ADC_MAX_SAMPLES];
 };
 
 /****************************************************************************
@@ -232,7 +223,7 @@ static const struct adc_ops_s g_adcops =
 #ifdef CONFIG_STM32H5_ADC1
 
 #ifdef ADC1_HAVE_DMA
-static uint16_t g_adc1_dmabuffer[ADC_MAX_SAMPLES *
+static uint16_t g_adc1_dmabuffer[CONFIG_STM32H5_ADC_MAX_SAMPLES *
                                  CONFIG_STM32H5_ADC1_DMA_BATCH];
 #endif
 
@@ -1079,7 +1070,7 @@ static int adc_set_ch(struct adc_dev_s *dev, uint8_t ch)
       priv->rnchannels = 1;
     }
 
-  DEBUGASSERT(priv->rnchannels <= ADC_MAX_SAMPLES);
+  DEBUGASSERT(priv->rnchannels <= CONFIG_STM32H5_ADC_MAX_SAMPLES);
 
   bits = adc_sqrbits(priv, ADC_SQR4_FIRST, ADC_SQR4_LAST,
                      ADC_SQR4_SQ_OFFSET);
@@ -1930,10 +1921,10 @@ struct adc_dev_s *stm32h5_adc_initialize(int intf,
   priv = (struct stm32_dev_s *)dev->ad_priv;
   priv->cb = NULL;
 
-  DEBUGASSERT(cchannels <= ADC_MAX_SAMPLES);
-  if (cchannels > ADC_MAX_SAMPLES)
+  DEBUGASSERT(cchannels <= CONFIG_STM32H5_ADC_MAX_SAMPLES);
+  if (cchannels > CONFIG_STM32H5_ADC_MAX_SAMPLES)
     {
-      cchannels = ADC_MAX_SAMPLES;
+      cchannels = CONFIG_STM32H5_ADC_MAX_SAMPLES;
     }
 
   priv->cchannels = cchannels;

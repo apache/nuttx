@@ -91,25 +91,11 @@
 
 /* ADC Channels/DMA *********************************************************/
 
-/* The maximum number of channels that can be sampled.  While DMA support is
- * very nice for reliable multi-channel sampling, the STM32H7 can function
- * without, although there is a risk of overrun.
- */
-
-#define ADC_MAX_CHANNELS_DMA   20
-#define ADC_MAX_CHANNELS_NODMA 20
-
 #ifdef ADC_HAVE_DMA
 #  if !defined(CONFIG_STM32H7_DMA1) && !defined(CONFIG_STM32H7_DMA2)
 #    /* REVISIT: check accordingly to which one is configured in board.h */
 #    error "STM32H7 ADC DMA support requires CONFIG_STM32H7_DMA1 or CONFIG_STM32H7_DMA2"
 #  endif
-#endif
-
-#ifdef ADC_HAVE_DMA
-#  define ADC_MAX_SAMPLES ADC_MAX_CHANNELS_DMA
-#else
-#  define ADC_MAX_SAMPLES ADC_MAX_CHANNELS_NODMA
 #endif
 
 #define ADC_DMA_CONTROL_WORD (DMA_CCR_MSIZE_16BITS | \
@@ -205,7 +191,7 @@ struct stm32_dev_s
 
   /* List of selected ADC channels to sample */
 
-  uint8_t  chanlist[ADC_MAX_SAMPLES];
+  uint8_t  chanlist[CONFIG_STM32H7_ADC_MAX_SAMPLES];
 };
 
 /****************************************************************************
@@ -306,7 +292,7 @@ static const struct adc_ops_s g_adcops =
 #ifdef CONFIG_STM32H7_ADC1
 
 #ifdef ADC1_HAVE_DMA
-static uint16_t g_adc1_dmabuffer[ADC_MAX_SAMPLES *
+static uint16_t g_adc1_dmabuffer[CONFIG_STM32H7_ADC_MAX_SAMPLES *
                                  CONFIG_STM32H7_ADC1_DMA_BATCH];
 #endif
 
@@ -356,7 +342,7 @@ static struct adc_dev_s g_adcdev1 =
 #ifdef CONFIG_STM32H7_ADC2
 
 #ifdef ADC2_HAVE_DMA
-static uint16_t g_adc2_dmabuffer[ADC_MAX_SAMPLES *
+static uint16_t g_adc2_dmabuffer[CONFIG_STM32H7_ADC_MAX_SAMPLES *
                                  CONFIG_STM32H7_ADC2_DMA_BATCH];
 #endif
 
@@ -406,7 +392,7 @@ static struct adc_dev_s g_adcdev2 =
 #ifdef CONFIG_STM32H7_ADC3
 
 #ifdef ADC3_HAVE_DMA
-static uint16_t g_adc3_dmabuffer[ADC_MAX_SAMPLES *
+static uint16_t g_adc3_dmabuffer[CONFIG_STM32H7_ADC_MAX_SAMPLES *
                                  CONFIG_STM32H7_ADC3_DMA_BATCH];
 #endif
 
@@ -1894,7 +1880,7 @@ static int adc_set_ch(struct adc_dev_s *dev, uint8_t ch)
       priv->rnchannels = 1;
     }
 
-  DEBUGASSERT(priv->rnchannels <= ADC_MAX_SAMPLES);
+  DEBUGASSERT(priv->rnchannels <= CONFIG_STM32H7_ADC_MAX_SAMPLES);
 
   bits = adc_sqrbits(priv, ADC_SQR4_FIRST, ADC_SQR4_LAST,
                      ADC_SQR4_SQ_OFFSET);
@@ -2354,10 +2340,10 @@ struct adc_dev_s *stm32h7_adc_initialize(int intf,
   priv = (struct stm32_dev_s *)dev->ad_priv;
   priv->cb = NULL;
 
-  DEBUGASSERT(cchannels <= ADC_MAX_SAMPLES);
-  if (cchannels > ADC_MAX_SAMPLES)
+  DEBUGASSERT(cchannels <= CONFIG_STM32H7_ADC_MAX_SAMPLES);
+  if (cchannels > CONFIG_STM32H7_ADC_MAX_SAMPLES)
     {
-      cchannels = ADC_MAX_SAMPLES;
+      cchannels = CONFIG_STM32H7_ADC_MAX_SAMPLES;
     }
 
   priv->cchannels = cchannels;
