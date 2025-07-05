@@ -24,5 +24,9 @@ ifeq ($(CONFIG_LIBC_ARCH_ELF),y)
 CSRCS += arch_elf.c
 endif
 
+ifeq ($(CONFIG_PROFILE_NONE),)
+ASRCS += arch_mcount.S
+endif
+
 DEPPATH += --dep-path machine/arm/armv6-m
 VPATH += :machine/arm/armv6-m
