@@ -63,7 +63,7 @@ extern "C"
  *
  ****************************************************************************/
 
-#ifdef CONFIG_I2C_DRIVER
+#ifdef CONFIG_I2C
 int board_i2c_init(void);
 #endif
 

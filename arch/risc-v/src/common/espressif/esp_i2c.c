@@ -60,6 +60,7 @@
 #include "soc/system_reg.h"
 #include "soc/gpio_sig_map.h"
 #include "soc/i2c_periph.h"
+#include "esp_clk_tree.h"
 #if defined(CONFIG_ESPRESSIF_ESP32H2) || defined(CONFIG_ESPRESSIF_ESP32C6)
 #  include "soc/pcr_reg.h"
 #endif
@@ -128,6 +129,10 @@
 /* Time to wait for the bus to be cleared */
 
 #define I2C_CLR_BUS_TIMEOUT_MS (50)
+
+/* SCL timeout value in microseconds */
+
+#define SCL_TIMEOUT_VAL_US (CONFIG_ESPRESSIF_I2CTIMEOMS * 1000)
 
 /****************************************************************************
  * Private Types
@@ -713,14 +718,21 @@ static void esp_i2c_sendstop(struct esp_i2c_priv_s *priv)
 static void esp_i2c_init_clock(struct esp_i2c_priv_s *priv,
                                uint32_t bus_freq)
 {
+  uint32_t src_clk_frequency;
+
   if (bus_freq == priv->clk_freq)
     {
       return ;
     }
 
   i2c_clock_source_t src_clk = I2C_CLK_SRC_DEFAULT;
+  esp_clk_tree_src_get_freq_hz((soc_module_clk_t)src_clk,
+                               ESP_CLK_TREE_SRC_FREQ_PRECISION_CACHED,
+                               &src_clk_frequency);
   i2c_hal_set_bus_timing(priv->ctx, priv->config->clk_freq,
-                         src_clk, XTAL_CLK_FREQ);
+                         src_clk, src_clk_frequency);
+  i2c_hal_master_set_scl_timeout_val(priv->ctx, SCL_TIMEOUT_VAL_US,
+                                     src_clk_frequency);
   i2c_ll_update(priv->ctx->dev);
   priv->clk_freq = bus_freq;
 }

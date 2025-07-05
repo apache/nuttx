@@ -67,7 +67,7 @@ extern "C"
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SPI_DRIVER
+#ifdef CONFIG_SPI
 int board_spidev_initialize(int bus);
 #endif
 

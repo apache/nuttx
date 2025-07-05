@@ -27,7 +27,7 @@
 #include <nuttx/config.h>
 
 #include <debug.h>
-#include <errno.h>
+#include <syslog.h>
 #include <sys/types.h>
 
 #include <nuttx/i2c/i2c_master.h>
@@ -64,15 +64,17 @@ static int i2c_bitbang_driver_init(int bus)
   i2c = esp_i2cbus_bitbang_initialize();
   if (i2c == NULL)
     {
-      i2cerr("Failed to get I2C%d interface\n", bus);
+      syslog(LOG_ERR, "Failed to get I2C%d interface\n", bus);
       return -ENODEV;
     }
 
+#ifdef CONFIG_I2C_DRIVER
   ret = i2c_register(i2c, bus);
   if (ret < 0)
     {
-      i2cerr("Failed to register I2C%d driver: %d\n", bus, ret);
+      syslog(LOG_ERR, "Failed to register I2C%d driver: %d\n", bus, ret);
     }
+#endif
 
   return ret;
 }
@@ -82,21 +84,23 @@ static int i2c_bitbang_driver_init(int bus)
 static int i2c_driver_init(int bus)
 {
   struct i2c_master_s *i2c;
-  int ret;
+  int ret = OK;
 
   i2c = esp_i2cbus_initialize(bus);
   if (i2c == NULL)
     {
-      i2cerr("Failed to get I2C%d interface\n", bus);
+      syslog(LOG_ERR, "Failed to get I2C%d interface\n", bus);
       return -ENODEV;
     }
 
+#ifdef CONFIG_I2C_DRIVER
   ret = i2c_register(i2c, bus);
   if (ret < 0)
     {
-      i2cerr("Failed to register I2C%d driver: %d\n", bus, ret);
+      syslog(LOG_ERR, "Failed to register I2C%d driver: %d\n", bus, ret);
       esp_i2cbus_uninitialize(i2c);
     }
+#endif
 
   return ret;
 }
@@ -106,21 +110,23 @@ static int i2c_driver_init(int bus)
 static int i2c_slave_driver_init(int bus, int addr)
 {
   struct i2c_slave_s *i2c;
-  int ret;
+  int ret = OK;
 
   i2c = esp_i2cbus_slave_initialize(bus, addr);
   if (i2c == NULL)
     {
-      i2cerr("Failed to get I2C%d interface\n", bus);
+      syslog(LOG_ERR, "Failed to get I2C%d interface\n", bus);
       return -ENODEV;
     }
 
+#ifdef CONFIG_I2C_DRIVER
   ret = i2c_slave_register(i2c, bus, addr, I2C0_SLAVE_NBITS);
   if (ret < 0)
     {
-      i2cerr("Failed to register I2C%d driver: %d\n", bus, ret);
+      syslog(LOG_ERR, "Failed to register I2C%d driver: %d\n", bus, ret);
       esp_i2cbus_slave_uninitialize(i2c);
     }
+#endif
 
   return ret;
 }
