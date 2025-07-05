@@ -273,6 +273,36 @@ struct touch_lowerhalf_s
 
   CODE ssize_t (*write)(FAR struct touch_lowerhalf_s *lower,
                         FAR const char *buffer, size_t buflen);
+
+  /**************************************************************************
+   * Name: open
+   *
+   * Description:
+   *   Users can use this interface to implement custom open().
+   *
+   * Arguments:
+   *   lower   - The instance of lower half of touchscreen device.
+   *
+   * Return Value:
+   *   Zero(OK) on success; a negated errno value on failure.
+   **************************************************************************/
+
+  CODE int (*open)(FAR struct touch_lowerhalf_s *lower);
+
+  /**************************************************************************
+   * Name: close
+   *
+   * Description:
+   *   Users can use this interface to implement custom close().
+   *
+   * Arguments:
+   *   lower   - The instance of lower half of touchscreen device.
+   *
+   * Return Value:
+   *   Zero(OK) on success; a negated errno value on failure.
+   **************************************************************************/
+
+  CODE int (*close)(FAR struct touch_lowerhalf_s *lower);
 };
 
 /****************************************************************************
