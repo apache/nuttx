@@ -267,7 +267,7 @@ struct touch_lowerhalf_s
    *   buflen  - User defined specific buffer size.
    *
    * Return Value:
-   *   Number of bytes written；a negated errno value on failure.
+   *   Number of bytes written; a negated errno value on failure.
    *
    **************************************************************************/
 
