@@ -184,7 +184,7 @@ static const IOBJ uint8_t avrdx_usart_dre_interrupts[] =
 
 /* USARTn operations - common for all ports */
 
-static struct uart_ops_s g_usart_ops =
+static const struct uart_ops_s g_usart_ops =
 {
   .setup          = avrdx_usart_setup,
   .shutdown       = avrdx_usart_shutdown,
