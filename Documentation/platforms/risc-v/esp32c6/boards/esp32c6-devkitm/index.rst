@@ -210,6 +210,11 @@ You can scan for all I2C devices using the following command::
 
     nsh> i2c dev 0x00 0x7f
 
+To use LP_I2C, you can enable `ESPRESSIF_LP_I2C0` option.  When this option is enabled,
+LP_I2C operates on GPIO7 as SCL and GPIO6 as SDA. These pins are fixed and cannot be changed.
+Also enabling LP_I2C will change the default pins of I2C0 due to LP_I2C pin limitation.
+The default I2C0 pins will be remapped to GPIO23 for SCL and GPIO5 for SDA.
+
 To use slave mode, you can enable `ESPRESSIF_I2C0_SLAVE_MODE` option.
 To use slave mode driver following snippet demonstrates how write to i2c bus
 using slave driver:
