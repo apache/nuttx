@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32h7/weact-stm32h743/src/stm32_bringup.c
+ * boards/arm/stm32h7/weact-stm32h743/src/stm32_dma_alloc.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -25,76 +25,83 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <sys/types.h>
 #include <syslog.h>
+#include <stdint.h>
 #include <errno.h>
-
-#include <arch/board/board.h>
-
-#include <nuttx/fs/fs.h>
+#include <nuttx/mm/gran.h>
 
 #include "weact-stm32h743.h"
 
-#include "stm32_gpio.h"
+#if defined(CONFIG_FAT_DMAMEMORY)
 
 /****************************************************************************
- * Private Functions
+ * Pre-processor Definitions
  ****************************************************************************/
+
+#if !defined(CONFIG_GRAN)
+#  error microSD DMA support requires CONFIG_GRAN
+#endif
+
+#define BOARD_DMA_ALLOC_POOL_SIZE (8*512)
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static GRAN_HANDLE dma_allocator;
+
+/* The DMA heap size constrains the total number of things that can be
+ * ready to do DMA at a time.
+ *
+ * For example, FAT DMA depends on one sector-sized buffer per
+ * filesystem plus one sector-sized buffer per file.
+ *
+ * We use a fundamental alignment / granule size of 64B; this is
+ * sufficient to guarantee alignment for the largest STM32 DMA burst
+ * (16 beats x 32bits).
+ */
+
+static uint8_t g_dma_heap[BOARD_DMA_ALLOC_POOL_SIZE]
+                aligned_data(64);
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_bringup
+ * Name: stm32_dma_alloc_init
  *
  * Description:
- *   Perform architecture-specific initialization
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=y :
- *     Called from board_late_initialize().
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=n && CONFIG_BOARDCTL=y &&
- *   CONFIG_NSH_ARCHINIT:
- *     Called from the NSH library
+ *   All boards may optionally provide this API to instantiate a pool of
+ *   memory for uses with FAST FS DMA operations.
  *
  ****************************************************************************/
 
-int stm32_bringup(void)
+int stm32_dma_alloc_init(void)
 {
-  int ret = OK;
+  dma_allocator = gran_initialize(g_dma_heap,
+                                  sizeof(g_dma_heap),
+                                  7,  /* 128B granule - must be > alignment (XXX bug?) */
+                                  6); /* 64B alignment */
 
-  UNUSED(ret);
-
-#ifdef CONFIG_FS_PROCFS
-  /* Mount the procfs file system */
-
-  ret = nx_mount(NULL, STM32_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
-  if (ret < 0)
+  if (dma_allocator == NULL)
     {
-      syslog(LOG_ERR,
-             "ERROR: Failed to mount the PROC filesystem: %d\n",  ret);
+      return -ENOMEM;
     }
-#endif /* CONFIG_FS_PROCFS */
-
-#if defined(CONFIG_FAT_DMAMEMORY)
-  if (stm32_dma_alloc_init() < 0)
-    {
-      syslog(LOG_ERR, "DMA alloc FAILED");
-    }
-#endif
-
-#ifdef HAVE_SDIO
-  /* Initialize the SDIO block driver */
-
-  ret = stm32_sdio_initialize();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR,
-             "ERROR: Failed to initialize MMC/SD driver: %d\n", ret);
-    }
-#endif
 
   return OK;
 }
+
+/* DMA-aware allocator stubs for the FAT filesystem. */
+
+void *fat_dma_alloc(size_t size)
+{
+  return gran_alloc(dma_allocator, size);
+}
+
+void fat_dma_free(void *memory, size_t size)
+{
+  gran_free(dma_allocator, memory, size);
+}
+
+#endif /* CONFIG_FAT_DMAMEMORY */

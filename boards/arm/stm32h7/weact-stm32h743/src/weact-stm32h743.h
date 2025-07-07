@@ -115,6 +115,24 @@
 
 #define GPIO_BTN_USER  (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI | GPIO_PORTC | GPIO_PIN13)
 
+/* SD Card
+ *
+ * PD4  Card detected pin
+ */
+
+#if defined(CONFIG_STM32H7_SDMMC1)
+#  define HAVE_SDIO
+#endif
+
+#if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_MMCSD_SDIO)
+#  undef HAVE_SDIO
+#endif
+
+#define GPIO_SDIO_NCD     (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTD|GPIO_PIN4) /* PD4 */
+
+#define SDIO_SLOTNO        0
+#define SDIO_MINOR         0
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -135,5 +153,32 @@
  ****************************************************************************/
 
 int stm32_bringup(void);
+
+/****************************************************************************
+ * Name: stm32_dma_alloc_init
+ *
+ * Description:
+ *   Called to create a FAT DMA allocator.
+ *
+ * Returned Value:
+ *   0 on success or -ENOMEM
+ *
+ ****************************************************************************/
+
+#if defined (CONFIG_FAT_DMAMEMORY)
+int stm32_dma_alloc_init(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_sdio_initialize
+ *
+ * Description:
+ *   Initialize SDIO-based MMC/SD card support.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_SDIO
+int stm32_sdio_initialize(void);
+#endif
 
 #endif /* __BOARDS_ARM_STM32H7_WEACT_STM32H743_SRC_WEACT_STM32H743_H */
