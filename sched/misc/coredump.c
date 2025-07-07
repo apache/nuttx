@@ -686,7 +686,7 @@ static void coredump_dump_syslog(pid_t pid)
   FAR const char *streamname;
   int logmask;
 
-  logmask = setlogmask(LOG_ALERT);
+  logmask = setlogmask(LOG_UPTO(LOG_ALERT));
 
   _alert("Start coredump:\n");
 
