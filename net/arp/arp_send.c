@@ -314,7 +314,7 @@ int arp_send(in_addr_t ipaddr)
        * issue.
        */
 
-      ret = arp_find(ipaddr, NULL, dev);
+      ret = arp_find(ipaddr, NULL, dev, true);
       if (ret >= 0)
         {
           /* We have it!  Break out with success */
