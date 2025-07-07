@@ -128,7 +128,8 @@ netdev_prefixlen_findby_lipv4addr(in_addr_t lipaddr, FAR int8_t *prefixlen)
 
               if (len > bestpref
 #ifdef CONFIG_NET_ARP
-                  || (len == bestpref && arp_find(lipaddr, NULL, dev) == OK)
+                  || (len == bestpref
+                      && arp_find(lipaddr, NULL, dev, true) == OK)
 #endif
                   )
                 {

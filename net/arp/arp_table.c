@@ -186,6 +186,7 @@ arp_return_old_entry(FAR struct arp_entry_s *e1, FAR struct arp_entry_s *e2)
  * Input Parameters:
  *   ipaddr - Refers to an IP address in network order
  *   dev    - Device structure
+ *   check_expiry - Expiry check
  *
  * Assumptions:
  *   The network is locked to assure exclusive access to the ARP table.
@@ -194,7 +195,8 @@ arp_return_old_entry(FAR struct arp_entry_s *e1, FAR struct arp_entry_s *e2)
  ****************************************************************************/
 
 static FAR struct arp_entry_s *arp_lookup(in_addr_t ipaddr,
-                                          FAR struct net_driver_s *dev)
+                                          FAR struct net_driver_s *dev,
+                                          bool check_expiry)
 {
   FAR struct arp_entry_s *tabptr;
   int i;
@@ -205,10 +207,23 @@ static FAR struct arp_entry_s *arp_lookup(in_addr_t ipaddr,
     {
       tabptr = &g_arptable[i];
       if (tabptr->at_dev == dev &&
-          net_ipv4addr_cmp(ipaddr, tabptr->at_ipaddr) &&
-          clock_systime_ticks() - tabptr->at_time <= ARP_MAXAGE_TICK)
+          net_ipv4addr_cmp(ipaddr, tabptr->at_ipaddr))
         {
-          return tabptr;
+          /* Find matching entries */
+
+          if (!check_expiry)
+            {
+              return tabptr;  /* Ignore expiration time */
+            }
+
+          /* Check if it has expired */
+
+          if (clock_systime_ticks() - tabptr->at_time <= ARP_MAXAGE_TICK)
+            {
+              return tabptr;
+            }
+
+          return NULL;  /* Expired */
         }
     }
 
@@ -401,6 +416,7 @@ void arp_hdr_update(FAR struct net_driver_s *dev, FAR uint16_t *pipaddr,
  *             used simply to determine if the Ethernet MAC address is
  *             available.
  *   dev     - Device structure
+ *   check_expiry  - Expiry check
  *
  * Assumptions
  *   The network is locked to assure exclusive access to the ARP table.
@@ -408,14 +424,14 @@ void arp_hdr_update(FAR struct net_driver_s *dev, FAR uint16_t *pipaddr,
  ****************************************************************************/
 
 int arp_find(in_addr_t ipaddr, FAR uint8_t *ethaddr,
-             FAR struct net_driver_s *dev)
+             FAR struct net_driver_s *dev, bool check_expiry)
 {
   FAR struct arp_entry_s *tabptr;
   struct arp_table_info_s info;
 
   /* Check if the IPv4 address is already in the ARP table. */
 
-  tabptr = arp_lookup(ipaddr, dev);
+  tabptr = arp_lookup(ipaddr, dev, check_expiry);
   if (tabptr != NULL)
     {
       /* Addresses that have failed to be searched will return a special
@@ -485,7 +501,7 @@ int arp_delete(in_addr_t ipaddr, FAR struct net_driver_s *dev)
 #endif
   /* Check if the IPv4 address is in the ARP table. */
 
-  tabptr = arp_lookup(ipaddr, dev);
+  tabptr = arp_lookup(ipaddr, dev, false);
   if (tabptr != NULL)
     {
       /* Notify to netlink */

@@ -425,7 +425,7 @@ void arp_notify(in_addr_t ipaddr);
 
 struct ether_addr;  /* Forward reference */
 int arp_find(in_addr_t ipaddr, FAR uint8_t *ethaddr,
-             FAR struct net_driver_s *dev);
+             FAR struct net_driver_s *dev, bool check_expiry);
 
 /****************************************************************************
  * Name: arp_delete
@@ -620,7 +620,7 @@ void arp_acd_setup(FAR struct net_driver_s *dev);
 #  define arp_wait_cancel(n) (0)
 #  define arp_wait(n,t) (0)
 #  define arp_notify(i)
-#  define arp_find(i,e,d) (-ENOSYS)
+#  define arp_find(i,e,d,u) (-ENOSYS)
 #  define arp_delete(i,d) (-ENOSYS)
 #  define arp_cleanup(d)
 #  define arp_update(d,i,m);
