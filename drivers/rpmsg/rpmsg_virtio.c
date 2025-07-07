@@ -642,21 +642,25 @@ int rpmsg_virtio_probe(FAR struct virtio_device *vdev)
   DEBUGASSERT(virtio_has_feature(vdev, VIRTIO_RPMSG_F_CPUNAME));
   if (vdev->role == VIRTIO_DEV_DRIVER)
     {
-      virtio_read_config(vdev, offsetof(struct fw_rsc_config, host_cpuname),
-                         priv->rpmsg.local_cpuname,
-                         VIRTIO_RPMSG_CPUNAME_SIZE);
-      virtio_read_config(vdev,
-                         offsetof(struct fw_rsc_config, remote_cpuname),
-                         priv->rpmsg.cpuname, VIRTIO_RPMSG_CPUNAME_SIZE);
+      virtio_read_config_bytes(vdev, offsetof(struct fw_rsc_config,
+                                              host_cpuname),
+                               priv->rpmsg.local_cpuname,
+                               VIRTIO_RPMSG_CPUNAME_SIZE);
+      virtio_read_config_bytes(vdev, offsetof(struct fw_rsc_config,
+                                              remote_cpuname),
+                               priv->rpmsg.cpuname,
+                               VIRTIO_RPMSG_CPUNAME_SIZE);
     }
   else
     {
-      virtio_read_config(vdev, offsetof(struct fw_rsc_config, host_cpuname),
-                         priv->rpmsg.cpuname, VIRTIO_RPMSG_CPUNAME_SIZE);
-      virtio_read_config(vdev,
-                         offsetof(struct fw_rsc_config, remote_cpuname),
-                         priv->rpmsg.local_cpuname,
-                         VIRTIO_RPMSG_CPUNAME_SIZE);
+      virtio_read_config_bytes(vdev, offsetof(struct fw_rsc_config,
+                                              host_cpuname),
+                               priv->rpmsg.cpuname,
+                               VIRTIO_RPMSG_CPUNAME_SIZE);
+      virtio_read_config_bytes(vdev, offsetof(struct fw_rsc_config,
+                                              remote_cpuname),
+                               priv->rpmsg.local_cpuname,
+                               VIRTIO_RPMSG_CPUNAME_SIZE);
     }
 
   /* Register the rpmsg to rpmsg framework */

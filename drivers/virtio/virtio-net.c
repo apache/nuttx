@@ -614,8 +614,9 @@ static void virtio_net_set_macaddr(FAR struct virtio_net_priv_s *priv)
 
   if (virtio_has_feature(vdev, VIRTIO_NET_F_MAC))
     {
-      virtio_read_config(vdev, offsetof(struct virtio_net_config_s, mac),
-                         mac, IFHWADDRLEN);
+      virtio_read_config_bytes(vdev,
+                               offsetof(struct virtio_net_config_s, mac),
+                               mac, IFHWADDRLEN);
     }
   else
     {
