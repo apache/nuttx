@@ -56,6 +56,28 @@ USART1
   RX     PB15 
   ====== =====
 
+
+SDMMC
+======
+
+The WeAct STM32H743 has one SDCard slot connected as below:
+
+  ========== =====
+  SDMMC1     PINS
+  ========== =====
+  SDMMC_D0   PC8
+  SDMMC_D1   PC9
+  SDMMC_D2   PC10
+  SDMMC_D3   PC11
+  SDMMC_DK   PC12
+  ========== =====
+
+  =============== =====
+  GPIO            PINS
+  =============== =====
+  SDCARD_DETECTED PD4
+  =============== =====
+
 ==============
 
 Each weact-stm32h743 configuration is maintained in a sub-directory and
@@ -95,3 +117,18 @@ After flashing and reboot your board you should see in your dmesg logs::
 
 You may need to press **ENTER** 3 times before the NSH show up.
 
+sdcard
+------
+
+Configures the NuttShell (nsh) and enables SD card support. The board has an onboard microSD slot that should be
+automatically registered as the block device /dev/mmcsd0 when an SD card is present.
+
+The SD card can then be mounted by the NSH commands::
+
+    nsh> mount -t vfat /dev/mmcsd0 /mnt
+    nsh> mount
+    nsh> echo "Hello World!!" > /mnt/test_file.txt
+    nhs> ls /mnt/
+    test_file.txt
+    nsh> cat /mnt/test_file.txt
+    Hello World!!
