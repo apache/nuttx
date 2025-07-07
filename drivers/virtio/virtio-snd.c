@@ -1107,8 +1107,12 @@ static int virtio_snd_init(FAR struct virtio_snd_s *priv)
 
   virtio_set_status(priv->vdev, VIRTIO_CONFIG_STATUS_DRIVER_OK);
 
-  virtio_read_config(priv->vdev, 0, &priv->config,
-                     sizeof(struct virtio_snd_config));
+  virtio_read_config_member(priv->vdev, struct virtio_snd_config, jacks,
+                            &priv->config.jacks);
+  virtio_read_config_member(priv->vdev, struct virtio_snd_config, streams,
+                            &priv->config.streams);
+  virtio_read_config_member(priv->vdev, struct virtio_snd_config, chmaps,
+                            &priv->config.chmaps);
   vrtinfo("jacks:%"PRIu32" streams:%"PRIu32" chmap:%"PRIu32"\n",
            priv->config.jacks, priv->config.streams, priv->config.chmaps);
 
