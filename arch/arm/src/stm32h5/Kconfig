@@ -881,6 +881,75 @@ config ARCH_BOARD_STM32H5_CUSTOM_CLOCKCONFIG
 	---help---
 		Enables special, board-specific STM32 clock configuration.
 
+menu "ADC Configuration"
+	depends on STM32H5_ADC
+
+config STM32H5_ADC_MAX_SAMPLES
+	int "The maximum number of channels that can be sampled"
+	default 16
+	---help---
+		The maximum number of samples which can be handled without
+		overrun depends on various factors. This is the user's
+		responsibility to correctly select this value.
+		Since the interface to update the sampling time is available
+		for all supported devices, the user can change the default
+		values in the board initialization logic and avoid ADC overrun.
+
+config STM32H5_ADC1_DMA
+	bool "ADC1 DMA Enable"
+	depends on STM32H5_ADC1 && STM32H5_DMA
+	default n
+	---help---
+		If DMA is selected, then the ADC may be configured to support DMA
+		transfer, which is necessary if multiple channels are read or if
+		very high trigger frequencies are used.
+
+config STM32H5_ADC1_DMA_BATCH
+	int "ADC1 DMA number of conversions"
+	depends on STM32H5_ADC1 && STM32H5_ADC1_DMA
+	default 1
+	---help---
+		This option allows you to select the number of regular group conversions
+		that will trigger a DMA callback transerring data to the upper-half driver.
+		By default, this value is 1, which means that data is transferred after
+		each group conversion.
+
+config STM32H5_ADC1_DMA_CFG
+	bool "ADC1 DMA configuration"
+	depends on STM32H5_ADC1 && STM32H5_ADC1_DMA
+	default n
+	---help---
+		0 - ADC1 DMA in One Shot Mode, 1 - ADC1 DMA in Circular Mode
+
+config STM32H5_ADC2_DMA
+	bool "ADC2 DMA Enable"
+	depends on STM32H5_ADC2 && STM32H5_DMA
+	default n
+	---help---
+		If DMA is selected, then the ADC may be configured to support DMA
+		transfer, which is necessary if multiple channels are read or if
+		very high trigger frequencies are used.
+
+config STM32H5_ADC2_DMA_BATCH
+	int "ADC2 DMA number of conversions"
+	depends on STM32H5_ADC2 && STM32H5_ADC2_DMA
+	default 1
+	---help---
+		This option allows you to select the number of regular group conversions
+		that will trigger a DMA callback transerring data to the upper-half driver.
+		By default, this value is 1, which means that data is transferred after
+		each group conversion.
+
+config STM32H5_ADC2_DMA_CFG
+	int "ADC2 DMA configuration"
+	depends on STM32H5_ADC2_DMA && STM32H5_DMA
+	range 0 1
+	default 0
+	---help---
+		0 - ADC2 DMA in One Shot Mode, 1 - ADC2 DMA in Circular Mode
+
+endmenu # ADC Configuration
+
 menu "SPI Configuration"
 	depends on STM32H5_SPI
 
@@ -4549,60 +4618,6 @@ endif
 endif # STM32H5_SERIALDRIVER
 
 endmenu # U[S]ART Configuration
-
-menu "ADC Configuration"
-	depends on STM32H5_ADC
-
-config STM32H5_ADC_MAX_SAMPLES
-	int "The maximum number of channels that can be sampled"
-	default 16
-	---help---
-		The maximum number of samples which can be handled without
-		overrun depends on various factors. This is the user's
-		responsibility to correctly select this value.
-		Since the interface to update the sampling time is available
-		for all supported devices, the user can change the default
-		values in the board initialization logic and avoid ADC overrun.
-
-config STM32H5_ADC1_DMA
-	bool "ADC1 DMA (not supported yet)"
-	depends on STM32H5_ADC1 && EXPERIMENTAL
-	default n
-	---help---
-		If DMA is selected, then the ADC may be configured to support
-		DMA transfer, which is necessary if multiple channels are read
-		or if very high trigger frequencies are used.
-
-config STM32H5_ADC1_DMA_BATCH
-	int "ADC1 DMA number of conversions"
-	depends on STM32H5_ADC1 && STM32H5_ADC1_DMA
-	default 1
-	---help---
-		This option allows you to select the number of regular group conversions
-		that will trigger a DMA callback transerring data to the upper-half driver.
-		By default, this value is 1, which means that data is transferred after
-		each group conversion.
-
-config STM32H5_ADC2_DMA
-	bool "ADC2 DMA (not supported yet)"
-	depends on STM32H5_ADC2 && EXPERIMENTAL
-	default n
-	---help---
-		If DMA is selected, then the ADC may be configured to support
-		DMA transfer, which is necessary if multiple channels are read
-		or if very high trigger frequencies are used.
-
-config STM32H5_ADC2_DMA_BATCH
-	int "ADC2 DMA number of conversions"
-	depends on STM32H5_ADC2 && STM32H5_ADC2_DMA
-	default 1
-	---help---
-		This option allows you to select the number of regular group conversions
-		that will trigger a DMA callback transerring data to the upper-half driver.
-		By default, this value is 1, which means that data is transferred after
-		each group conversion.
-
-endmenu
 
 menu "Ethernet MAC Configuration"
 	depends on STM32H5_ETHMAC

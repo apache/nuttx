@@ -3,8 +3,6 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  *
- * SPDX-License-Identifier: Apache-2.0
- *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -49,6 +47,9 @@
 #include "stm32_adc.h"
 #include "stm32_tim.h"
 #include "stm32_rcc.h"
+#include "stm32_dma.h"
+
+/* ADC "upper half" support must be enabled */
 
 #ifdef CONFIG_ADC
 
@@ -63,11 +64,6 @@
 #endif
 
 /* ADC Channels/DMA *********************************************************/
-
-#ifdef ADC_HAVE_DMA
-#  error "STM32H5 ADC does not have DMA support."
-#  undef ADC_HAVE_DMA
-#endif
 
 #define ADC_SMPR_DEFAULT    ADC_SMPR_640p5
 #define ADC_SMPR1_DEFAULT   ((ADC_SMPR_DEFAULT << ADC_SMPR1_SMP0_SHIFT) | \
@@ -105,10 +101,10 @@ struct stm32_dev_s
   uint8_t cchannels;    /* Number of configured channels */
   uint8_t intf;         /* ADC interface number */
   uint8_t current;      /* Current ADC channel being converted */
+  bool     hasdma;      /* True: This ADC supports DMA */
 #ifdef ADC_HAVE_DMA
-  uint8_t dmachan;      /* DMA channel needed by this ADC */
-  bool    hasdma;       /* True: This ADC supports DMA */
   uint16_t dmabatch;    /* Number of conversions for DMA batch */
+  bool     circular;    /* 0 = one-shot, 1 = circular */
 #endif
 #ifdef ADC_HAVE_TIMER
   uint8_t trigger;      /* Timer trigger channel: 0=CC1, 1=CC2, 2=CC3,
@@ -187,6 +183,13 @@ static void adc_timstart(struct stm32_dev_s *priv, bool enable);
 static int  adc_timinit(struct stm32_dev_s *priv);
 #endif
 
+#ifdef ADC_HAVE_DMA
+static void adc_dmaconvcallback(DMA_HANDLE handle, uint8_t status,
+                                void *arg);
+static void adc_dmacfg(struct stm32_dev_s *priv,
+                               struct stm32_gpdma_cfg_s *cfg);
+#endif
+
 /* ADC Interrupt Handler */
 
 static int adc_interrupt(struct adc_dev_s *dev, uint32_t regval);
@@ -245,10 +248,16 @@ static struct stm32_dev_s g_adcpriv1 =
   .freq        = CONFIG_STM32H5_ADC1_SAMPLE_FREQUENCY,
 #endif
 #ifdef ADC1_HAVE_DMA
-  .dmachan     = ADC1_DMA_CHAN,
   .hasdma      = true,
   .r_dmabuffer = g_adc1_dmabuffer,
-  .dmabatch    = CONFIG_STM32H5_ADC1_DMA_BATCH
+  .dmabatch    = CONFIG_STM32H5_ADC1_DMA_BATCH,
+#  ifdef CONFIG_STM32H5_ADC1_DMA_CFG
+  .circular    = true,
+#  else
+  .circular    = false,
+#  endif
+#else
+  .hasdma      = false,
 #endif
 };
 
@@ -262,6 +271,12 @@ static struct adc_dev_s g_adcdev1 =
 /* ADC2 state */
 
 #ifdef CONFIG_STM32H5_ADC2
+
+#ifdef ADC2_HAVE_DMA
+static uint16_t g_adc2_dmabuffer[CONFIG_STM32H5_ADC_MAX_SAMPLES *
+                                 CONFIG_STM32H5_ADC2_DMA_BATCH];
+#endif
+
 static struct stm32_dev_s g_adcpriv2 =
 {
   .irq         = STM32_IRQ_ADC2,
@@ -278,6 +293,18 @@ static struct stm32_dev_s g_adcpriv2 =
   .extsel      = ADC2_EXTSEL_VALUE,
   .pclck       = ADC2_TIMER_PCLK_FREQUENCY,
   .freq        = CONFIG_STM32H5_ADC2_SAMPLE_FREQUENCY,
+#endif
+#ifdef ADC2_HAVE_DMA
+  .hasdma      = true,
+  .r_dmabuffer = g_adc2_dmabuffer,
+  .dmabatch    = CONFIG_STM32H5_ADC2_DMA_BATCH,
+#  ifdef CONFIG_STM32H5_ADC2_DMA_CFG
+  .circular    = true,
+#  else
+  .circular    = false,
+#  endif
+#else
+  .hasdma      = false,
 #endif
 };
 
@@ -778,6 +805,104 @@ static void adc_reset(struct adc_dev_s *dev)
 }
 
 /****************************************************************************
+ * Name: adc_dmaconvcallback
+ *
+ * Description:
+ *   Callback for DMA.  Called from the DMA transfer complete interrupt after
+ *   all channels have been converted and transferred with DMA.
+ *
+ * Input Parameters:
+ *
+ *   handle - handle to DMA
+ *   status -
+ *   arg - adc device
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+ #ifdef ADC_HAVE_DMA
+static void adc_dmaconvcallback(DMA_HANDLE handle, uint8_t status, void *arg)
+{
+  struct adc_dev_s   *dev  = (struct adc_dev_s *)arg;
+  struct stm32_dev_s *priv = (struct stm32_dev_s *)dev->ad_priv;
+  struct stm32_gpdma_cfg_s dmacfg;
+  int i;
+
+  /* Verify that the upper-half has bound its callback */
+
+  if (priv->cb != NULL)
+    {
+      DEBUGASSERT(priv->cb->au_receive != NULL);
+
+      /* Deliver one sample per configured channel */
+
+      for (i = 0; i < priv->rnchannels * priv->dmabatch; i++)
+        {
+          priv->cb->au_receive(dev,
+                              priv->chanlist[priv->current],
+                              priv->r_dmabuffer[i]);
+          priv->current++;
+          if (priv->current >= priv->rnchannels)
+            {
+              priv->current = 0;
+            }
+        }
+    }
+
+  /* Restart DMA for the next conversion series */
+
+  if (priv->circular == 0)
+    {
+      adc_dmacfg(priv, &dmacfg);
+      stm32_dmasetup(priv->dma, &dmacfg);
+      stm32_dmastart(priv->dma, adc_dmaconvcallback, dev, false);
+      adc_startconv(priv, true);
+    }
+}
+
+/****************************************************************************
+ * Name: adc_dmacfg
+ *
+ * Description:
+ *   Generate the required DMA configuration structure for oneshot mode based
+ *   on the ADC configuration.
+ *
+ * Input Parameters:
+ *   priv     - ADC instance structure
+ *   cfg      - DMA configuration structure
+ *   circular - 0 = oneshot, 1 = circular
+ *
+ * Returned Value:
+ *   None
+ ****************************************************************************/
+
+static void adc_dmacfg(struct stm32_dev_s *priv,
+                       struct stm32_gpdma_cfg_s *cfg)
+{
+  const uint32_t sdw_log2 = 1;  /* Always 16-bit half-word for ADC_DR */
+
+  cfg->src_addr   = priv->base + STM32_ADC_DR_OFFSET;
+  cfg->dest_addr  = (uintptr_t)priv->r_dmabuffer;
+
+  cfg->request    = (priv->base == STM32_ADC1_BASE)
+                     ? GPDMA_REQ_ADC1
+                     : GPDMA_REQ_ADC2;
+
+  cfg->priority   = GPMDACFG_PRIO_LH;
+
+  cfg->mode       = priv->circular ? GPDMACFG_MODE_CIRC : 0;
+
+  cfg->ntransfers = priv->cchannels * priv->dmabatch * (1u << sdw_log2);
+
+  cfg->tr1        = (sdw_log2 << GPDMA_CXTR1_SDW_LOG2_SHIFT)
+                  | (sdw_log2 << GPDMA_CXTR1_DDW_LOG2_SHIFT)
+                  | GPDMA_CXTR1_DINC;  /* dest-inc, source fixed */
+}
+#endif
+
+/****************************************************************************
  * Name: adc_setup
  *
  * Description:
@@ -795,6 +920,9 @@ static void adc_reset(struct adc_dev_s *dev)
 static int adc_setup(struct adc_dev_s *dev)
 {
   struct stm32_dev_s *priv = (struct stm32_dev_s *)dev->ad_priv;
+#ifdef ADC_HAVE_DMA
+  struct stm32_gpdma_cfg_s dmacfg;
+#endif
   int ret;
   irqstate_t flags;
   uint32_t clrbits;
@@ -842,15 +970,29 @@ static int adc_setup(struct adc_dev_s *dev)
 #ifdef ADC_HAVE_DMA
   if (priv->hasdma)
     {
-      /* Enable One shot DMA */
+      /* Enable One-shot or Circular DMA.
+       * WARNING: This doesn't work in dual-ADC modes. [RM0481] ADC_CFGR
+       * register description (pg. 1122) - "In dual-ADC modes, this bit is
+       * not relevant and replaced by control bit DMACFG of the ADC_CCR
+       * register"
+       */
 
       setbits |= ADC_CFGR_DMAEN;
+
+      if (priv->circular)
+        {
+          setbits |= ADC_CFGR_DMACFG;
+          setbits |= ADC_CFGR_CONT;
+        }
+      else
+        {
+          clrbits |= ADC_CFGR_DMACFG;
+          clrbits |= ADC_CFGR_CONT;
+        }
     }
-#endif
-
-  /* Disable continuous mode */
-
+#else
   clrbits |= ADC_CFGR_CONT;
+#endif
 
   /* Disable external trigger for regular channels */
 
@@ -903,17 +1045,14 @@ static int adc_setup(struct adc_dev_s *dev)
           stm32_dmafree(priv->dma);
         }
 
-      priv->dma = stm32_dmachannel(priv->dmachan);
+      priv->dma = stm32_dmachannel(GPDMA_TTYPE_P2M);
 
-      stm32_dmasetup(priv->dma,
-                     priv->base + STM32_ADC_DR_OFFSET,
-                     (uint32_t)priv->r_dmabuffer,
-                     priv->rnchannels * priv->dmabatch,
-                     ADC_DMA_CONTROL_WORD);
+      adc_dmacfg(priv, &dmacfg);
+
+      stm32_dmasetup(priv->dma, &dmacfg);
 
       stm32_dmastart(priv->dma, adc_dmaconvcallback, dev, false);
     }
-
 #endif
 
   /* Set ADEN to wake up the ADC from Power Down. */
@@ -949,10 +1088,14 @@ static int adc_setup(struct adc_dev_s *dev)
         adc_getreg(priv, STM32_ADC_SQR4_OFFSET));
   ainfo("CCR:   0x%08" PRIx32 "\n", adc_getregm(priv, STM32_ADC_CCR_OFFSET));
 
-  /* Enable the ADC interrupt */
+  if (!priv->hasdma)
+    {
+      /* Enable the ADC interrupt */
 
-  ainfo("Enable the ADC interrupt: irq=%d\n", priv->irq);
-  up_enable_irq(priv->irq);
+      ainfo("Enable the ADC interrupt: irq=%d\n", priv->irq);
+
+      up_enable_irq(priv->irq);
+    }
 
   priv->initialized = true;
 

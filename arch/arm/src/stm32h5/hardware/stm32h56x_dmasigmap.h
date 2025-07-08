@@ -1,0 +1,218 @@
+/****************************************************************************
+ * arch/arm/src/stm32h5/hardware/stm32h56x_dmasigmap.h
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
+#ifndef __ARCH_ARM_SRC_STM32H5_HARDWARE_STM32H56X_DMASIGMAP_H
+#define __ARCH_ARM_SRC_STM32H5_HARDWARE_STM32H56X_DMASIGMAP_H
+
+/* This file is valid for STM32H562/563/573 devices */
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* GPDMA Request Number */
+
+#define GPDMA_REQ_ADC1              (0)
+#define GPDMA_REQ_ADC2              (1)
+#define GPDMA_REQ_DAC1_CH1          (2)
+#define GPDMA_REQ_DAC1_CH2          (3)
+#define GPDMA_REQ_TIM6_UPD          (4)
+#define GPDMA_REQ_TIM7_UPD          (5)
+#define GPDMA_REQ_SPI1_RX           (6)
+#define GPDMA_REQ_SPI1_TX           (7)
+#define GPDMA_REQ_SPI2_RX           (8)
+#define GPDMA_REQ_SPI2_TX           (9)
+#define GPDMA_REQ_SPI3_RX           (10)
+#define GPDMA_REQ_SPI3_TX           (11)
+#define GPDMA_REQ_I2C1_RX           (12)
+#define GPDMA_REQ_I2C1_TX           (13)
+                                 /* (14) RESERVED */
+#define GPDMA_REQ_I2C2_RX           (15)
+#define GPDMA_REQ_I2C2_TX           (16)
+                                 /* (17) RESERVED */
+#define GPDMA_REQ_I2C3_RX           (18)
+#define GPDMA_REQ_I2C3_TX           (19)
+                                 /* (20) RESERVED */
+#define GPDMA_REQ_USART1_RX         (21)
+#define GPDMA_REQ_USART1_TX         (22)
+#define GPDMA_REQ_USART2_RX         (23)
+#define GPDMA_REQ_USART2_TX         (24)
+#define GPDMA_REQ_USART3_RX         (25)
+#define GPDMA_REQ_USART3_TX         (26)
+#define GPDMA_REQ_UART4_RX          (27)
+#define GPDMA_REQ_UART4_TX          (28)
+#define GPDMA_REQ_UART5_RX          (29)
+#define GPDMA_REQ_UART5_TX          (30)
+#define GPDMA_REQ_USART6_RX         (31)
+#define GPDMA_REQ_USART6_TX         (32)
+#define GPDMA_REQ_UART7_RX          (33)
+#define GPDMA_REQ_UART7_TX          (34)
+#define GPDMA_REQ_UART8_RX          (35)
+#define GPDMA_REQ_UART8_TX          (36)
+#define GPDMA_REQ_UART9_RX          (37)
+#define GPDMA_REQ_UART9_TX          (38)
+#define GPDMA_REQ_UART10_RX         (39)
+#define GPDMA_REQ_UART10_TX         (40)
+#define GPDMA_REQ_UART11_RX         (41)
+#define GPDMA_REQ_UART11_TX         (42)
+#define GPDMA_REQ_UART12_RX         (43)
+#define GPDMA_REQ_UART12_TX         (44)
+#define GPDMA_REQ_LPUART1_RX        (45)
+#define GPDMA_REQ_LPUART1_TX        (46)
+#define GPDMA_REQ_SPI4_RX           (47)
+#define GPDMA_REQ_SPI4_TX           (48)
+#define GPDMA_REQ_SPI5_RX           (49)
+#define GPDMA_REQ_SPI5_TX           (50)
+#define GPDMA_REQ_SPI6_RX           (51)
+#define GPDMA_REQ_SPI6_TX           (52)
+#define GPDMA_REQ_SAI1_A            (53)
+#define GPDMA_REQ_SAI1_B            (54)
+#define GPDMA_REQ_SAI2_A            (55)
+#define GPDMA_REQ_SAI2_B            (56)
+#define GPDMA_REQ_OSPI1             (57)
+#define GPDMA_REQ_TIM1_CC1          (58)
+#define GPDMA_REQ_TIM1_CC2          (59)
+#define GPDMA_REQ_TIM1_CC3          (60)
+#define GPDMA_REQ_TIM1_CC4          (61)
+#define GPDMA_REQ_TIM1_UPD          (62)
+#define GPDMA_REQ_TIM1_TRG          (63)
+#define GPDMA_REQ_TIM1_COM          (64)
+#define GPDMA_REQ_TIM8_CC1          (65)
+#define GPDMA_REQ_TIM8_CC2          (66)
+#define GPDMA_REQ_TIM8_CC3          (67)
+#define GPDMA_REQ_TIM8_CC4          (68)
+#define GPDMA_REQ_TIM8_UPD          (69)
+#define GPDMA_REQ_TIM8_TIG          (70)
+#define GPDMA_REQ_TIM8_COM          (71)
+#define GPDMA_REQ_TIM2_CC1          (72)
+#define GPDMA_REQ_TIM2_CC2          (73)
+#define GPDMA_REQ_TIM2_CC3          (74)
+#define GPDMA_REQ_TIM2_CC4          (75)
+#define GPDMA_REQ_TIM2_UPD          (76)
+#define GPDMA_REQ_TIM3_CC1          (77)
+#define GPDMA_REQ_TIM3_CC2          (78)
+#define GPDMA_REQ_TIM3_CC3          (79)
+#define GPDMA_REQ_TIM3_CC4          (80)
+#define GPDMA_REQ_TIM3_UPD          (81)
+#define GPDMA_REQ_TIM3_TRG          (82)
+#define GPDMA_REQ_TIM4_CC1          (83)
+#define GPDMA_REQ_TIM4_CC2          (84)
+#define GPDMA_REQ_TIM4_CC3          (85)
+#define GPDMA_REQ_TIM4_CC4          (86)
+#define GPDMA_REQ_TIM4_UPD          (87)
+#define GPDMA_REQ_TIM5_CC1          (88)
+#define GPDMA_REQ_TIM5_CC2          (89)
+#define GPDMA_REQ_TIM5_CC3          (90)
+#define GPDMA_REQ_TIM5_CC4          (91)
+#define GPDMA_REQ_TIM5_UPD          (92)
+#define GPDMA_REQ_TIM5_TRG          (93)
+#define GPDMA_REQ_TIM15_CC1         (94)
+#define GPDMA_REQ_TIM15_UPD         (95)
+#define GPDMA_REQ_TIM15_TRG         (96)
+#define GPDMA_REQ_TIM15_COM         (97)
+#define GPDMA_REQ_TIM16_CC1         (98)
+#define GPDMA_REQ_TIM16_UPD         (99)
+#define GPDMA_REQ_TIM17_CC1         (100)
+#define GPDMA_REQ_TIM17_UPD         (101)
+#define GPDMA_REQ_LPTIM1_IC1        (102)
+#define GPDMA_REQ_LPTIM1_IC2        (103)
+#define GPDMA_REQ_LPTIM1_UE         (104)
+#define GPDMA_REQ_LPTIM2_IC1        (105)
+#define GPDMA_REQ_LPTIM2_IC2        (106)
+#define GPDMA_REQ_LPTIM2_UE         (107)
+#define GPDMA_REQ_DCMI_PSSI         (108)
+#define GPDMA_REQ_AES_OUT           (109)
+#define GPDMA_REQ_AES_IN            (110)
+#define GPDMA_REQ_HASH_IN           (111)
+#define GPDMA_REQ_UCPD1_RX          (112)
+#define GPDMA_REQ_UCPD1_TX          (113)
+#define GPDMA_REQ_CORDIC_R          (114)
+#define GPDMA_REQ_CORDIC_W          (115)
+#define GPDMA_REQ_FMAC_R            (116)
+#define GPDMA_REQ_FMAC_W            (117)
+#define GPDMA_REQ_SAES_OUT          (118)
+#define GPDMA_REQ_SAES_IN           (119)
+#define GPDMA_REQ_I3C1_RX           (120)
+#define GPDMA_REQ_I3C1_TX           (121)
+#define GPDMA_REQ_I3C1_TC           (122)
+#define GPDMA_REQ_I3C1_RS           (123)
+#define GPDMA_REQ_I2C4_RX           (124)
+#define GPDMA_REQ_I2C4_TX           (125)
+                                 /* (126) RESERVED */
+#define GPDMA_REQ_LPTIM3_IC1        (127)
+#define GPDMA_REQ_LPTIM3_IC2        (128)
+#define GPDMA_REQ_LPTIM3_UE         (129)
+#define GPDMA_REQ_LPTIM5_IC1        (130)
+#define GPDMA_REQ_LPTIM5_IC2        (131)
+#define GPDMA_REQ_LPTIM5_UE         (132)
+#define GPDMA_REQ_LPTIM6_IC1        (133)
+#define GPDMA_REQ_LPTIM6_IC2        (134)
+#define GPDMA_REQ_LPTIM6_UE         (135)
+
+/* GPDMA Trigger Number */
+
+#define GPDMA_TRIG_EXTI0            (0)
+#define GPDMA_TRIG_EXTI1            (1)
+#define GPDMA_TRIG_EXTI2            (2)
+#define GPDMA_TRIG_EXTI3            (3)
+#define GPDMA_TRIG_EXTI4            (4)
+#define GPDMA_TRIG_EXTI5            (5)
+#define GPDMA_TRIG_EXTI6            (6)
+#define GPDMA_TRIG_EXTI7            (7)
+#define GPDMA_TRIG_TAMP_TRG1        (8)
+#define GPDMA_TRIG_TAMP_TRG2        (9)
+#define GPDMA_TRIG_TAMP_TRG4        (10)
+#define GPDMA_TRIG_LPTIM1_CH1       (11)
+#define GPDMA_TRIG_LPTIM1_CH2       (12)
+#define GPDMA_TRIG_LPTIM2_CH1       (13)
+#define GPDMA_TRIG_LPTIM2_CH2       (14)
+#define GPDMA_TRIG_RTC_ALRA_TRG     (15)
+#define GPDMA_TRIG_RTC_ALRB_TRG     (16)
+#define GPDMA_TRIG_RTC_WUT_TRG      (17)
+#define GPDMA_TRIG_GPDMA1_CH0_TC    (18)
+#define GPDMA_TRIG_GPDMA1_CH1_TC    (19)
+#define GPDMA_TRIG_GPDMA1_CH2_TC    (20)
+#define GPDMA_TRIG_GPDMA1_CH3_TC    (21)
+#define GPDMA_TRIG_GPDMA1_CH4_TC    (22)
+#define GPDMA_TRIG_GPDMA1_CH5_TC    (23)
+#define GPDMA_TRIG_GPDMA1_CH6_TC    (24)
+#define GPDMA_TRIG_GPDMA1_CH7_TC    (25)
+#define GPDMA_TRIG_GPDMA2_CH0_TC    (26)
+#define GPDMA_TRIG_GPDMA2_CH1_TC    (27)
+#define GPDMA_TRIG_GPDMA2_CH2_TC    (28)
+#define GPDMA_TRIG_GPDMA2_CH3_TC    (29)
+#define GPDMA_TRIG_GPDMA2_CH4_TC    (30)
+#define GPDMA_TRIG_GPDMA2_CH5_TC    (31)
+#define GPDMA_TRIG_GPDMA2_CH6_TC    (32)
+#define GPDMA_TRIG_GPDMA2_CH7_TC    (33)
+#define GPDMA_TRIG_TIM2_TRGO        (34)
+#define GPDMA_TRIG_TIM15_TRG0       (35)
+#define GPDMA_TRIG_TIM12_TRGO       (36)
+#define GPDMA_TRIG_LPTIM3_CH1       (37)
+#define GPDMA_TRIG_LPTIM3_CH2       (38)
+#define GPDMA_TRIG_LPTIM4_AIT       (39)
+#define GPDMA_TRIG_LPTIM5_CH1       (40)
+#define GPDMA_TRIG_LPTIM5_CH2       (41)
+#define GPDMA_TRIG_LPTIM6_CH1       (42)
+#define GPDMA_TRIG_LPTIM6_CH2       (43)
+
+#endif /* __ARCH_ARM_SRC_STM32H5_HARDWARE_STM32H56X_DMASIGMAP_H */
