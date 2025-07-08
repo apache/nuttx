@@ -401,6 +401,7 @@ config STM32H7_STM32H7X3XX
 	select STM32H7_HAVE_SPI4
 	select STM32H7_HAVE_SPI5 if !STM32H7_IO_CONFIG_V
 	select STM32H7_HAVE_SPI6
+	select STM32H7_HAVE_RNG
 
 config STM32H7_STM32H7B3XX
 	bool
@@ -414,6 +415,7 @@ config STM32H7_STM32H7B3XX
 	select STM32H7_HAVE_SPI4
 	select STM32H7_HAVE_SPI5 if !STM32H7_IO_CONFIG_V
 	select STM32H7_HAVE_SPI6
+	select STM32H7_HAVE_RNG
 
 config STM32H7_STM32H7X5XX
 	bool
@@ -430,6 +432,7 @@ config STM32H7_STM32H7X5XX
 	select STM32H7_HAVE_SPI5 if !STM32H7_IO_CONFIG_V
 	select STM32H7_HAVE_SPI6
 	select STM32H7_HAVE_SMPS
+	select STM32H7_HAVE_RNG
 
 config STM32H7_STM32H7X7XX
 	bool
@@ -445,6 +448,7 @@ config STM32H7_STM32H7X7XX
 	select STM32H7_HAVE_SPI4
 	select STM32H7_HAVE_SPI5
 	select STM32H7_HAVE_SPI6
+	select STM32H7_HAVE_RNG
 
 config STM32H7_FLASH_CONFIG_B
 	bool
@@ -655,6 +659,10 @@ config STM32H7_HAVE_FDCAN2
 	bool
 	default n
 
+config STM32H7_HAVE_RNG
+	bool
+	default n
+
 # These "hidden" settings are the OR of individual peripheral selections
 # indicating that the general capability is required.
 
@@ -751,6 +759,12 @@ config STM32H7_ADC3
 	bool "ADC3"
 	default n
 	select STM32H7_ADC
+
+config STM32H7_RNG
+	bool "RNG"
+	default n
+	depends on STM32H7_HAVE_RNG
+	select ARCH_HAVE_RNG
 
 config STM32H7_CRC
 	bool "CRC"
