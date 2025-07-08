@@ -30,6 +30,12 @@
 #include <nuttx/config.h>
 #include "chip.h"
 
+#if defined(CONFIG_STM32H5_STM32H56XXX) || defined(CONFIG_STM32H5_STM32H57XXX)
+#  include "stm32h56x_dmasigmap.h"
+#else
+# error "Unsupported STM32 H5 DMA map"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -455,6 +461,8 @@
 #define GPDMA_CXCR_PRIO_SHIFT         (22)      /* Bits 22-23: Priority level of ch x GPDMA transfer */
 #define GPDMA_CXCR_PRIO_MASK          (0b11 << GPDMA_CXCR_PRIO_SHIFT)
 
+#define GPDMA_CXCR_ALLINTS            (GPDMA_CXCR_TOIE|GPDMA_CXCR_SUSPEI|GPDMA_CXCR_USEIE|GPDMA_CXCR_ULEIE|GPDMA_CXCR_DTEIE|GPDMA_CXCR_HTIE|GPDMA_CXCR_TCIE)
+
 /* Channel x transfer register 1 */
 
 #define GPDMA_CXTR1_SDW_LOG2_SHIFT    (0)
@@ -485,7 +493,7 @@
 #define GPDMA_CXTR1_DBL_1(l)          ((l) - 1 << GPDMA_CXTR1_DBL_1_SHIFT)
 
 #define GPDMA_CXTR1_DBX               (1 << 26) /* Destination byte exchange */
-#define GPDMA_CXTR1_DHX               (1 << 17) /* Destination half-word exchange */
+#define GPDMA_CXTR1_DHX               (1 << 27) /* Destination half-word exchange */
 #define GPDMA_CXTR1_DAP               (1 << 30) /* Destination allocated port */
 #define GPDMA_CXTR1_DSEC              (1 << 31) /* Security attribute of transfer to the destination */
 

@@ -89,13 +89,13 @@ static inline void rcc_enableahb1(void)
 
   regval = getreg32(STM32_RCC_AHB1ENR);
 
-#ifdef CONFIG_STM32H5_GPDMA1
+#ifdef CONFIG_STM32H5_DMA1
   /* DMA 1 clock enable */
 
   regval |= RCC_AHB1ENR_GPDMA1EN;
 #endif
 
-#ifdef CONFIG_STM32H5_GPDMA2
+#ifdef CONFIG_STM32H5_DMA2
   /* DMA 2 clock enable */
 
   regval |= RCC_AHB1ENR_GPDMA2EN;
