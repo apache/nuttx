@@ -2047,14 +2047,18 @@ static int tmpfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
     {
       tdir->tf_tdo   = tdo;
       tdir->tf_index = tdo->tdo_nentries;
-
+      *dir = &tdir->tf_base;
       tmpfs_unlock_directory(tdo);
     }
 
   /* Release the lock on the file system and return the result */
 
   tmpfs_unlock(fs);
-  *dir = &tdir->tf_base;
+  if (ret < 0)
+    {
+      fs_heap_free(tdir);
+    }
+
   return ret;
 }
 
