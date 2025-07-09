@@ -841,13 +841,13 @@ endif # SENSORS_KXTJ9
 config SENSORS_L86_XXX
 	bool "Quectel L86-XXX GNSS support"
 	default n
-	depends on SERIAL && STANDARD_SERIAL && UORB
+	depends on SERIAL && STANDARD_SERIAL && UORB && GNSSUTILS_MINMEA_LIB
 	---help---
 		Enable driver support for the L86-XXX series of GNSS modules.
 
 config SENSORS_L86_XXX_THREAD_STACKSIZE
 	int "Stack size for L86XXX module collection thread"
-	default 10000
+	default 1024
 	depends on SENSORS_L86_XXX
 
 config L86_XXX_BAUD
@@ -861,7 +861,7 @@ config L86_XXX_BAUD
 config L86_XXX_FIX_INT
 	int "Quectel L86-XXX fix interval rate"
 	default 1000
-	depends on SENSORS_L86_XXX && SERIAL_TERMIOS
+	depends on SENSORS_L86_XXX
 	range 100 10000
 	---help---
 		Rate in ms at which module obtains satellite fix. Supported values
