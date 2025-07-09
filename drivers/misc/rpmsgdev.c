@@ -830,20 +830,25 @@ static int rpmsgdev_send_recv(FAR struct rpmsgdev_s *priv,
 
   if (copy)
     {
-      ret = rpmsg_send(&priv->ept, msg, len);
-    }
-  else
-    {
-      ret = rpmsg_send_nocopy(&priv->ept, msg, len);
-    }
+      uint32_t buflen;
+      FAR void *buf;
 
-  if (ret < 0)
-    {
-      if (!copy)
+      buf = rpmsgdev_get_tx_payload_buffer(priv, &buflen);
+      if (buf == NULL)
         {
-          rpmsg_release_tx_buffer(&priv->ept, msg);
+          ret = -ENOMEM;
+          goto fail;
         }
 
+      DEBUGASSERT(len <= buflen);
+      memcpy(buf, msg, len);
+      msg = buf;
+    }
+
+  ret = rpmsg_send_nocopy(&priv->ept, msg, len);
+  if (ret < 0)
+    {
+      rpmsg_release_tx_buffer(&priv->ept, msg);
       goto fail;
     }
 
