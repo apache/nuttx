@@ -748,13 +748,7 @@ static int gpio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   FAR struct inode *inode;
   FAR struct gpio_dev_s *dev;
-  irqstate_t flags;
   int ret = OK;
-#if CONFIG_DEV_GPIO_NSIGNALS > 0
-  pid_t pid;
-  int i;
-  int j;
-#endif
 
   inode = filep->f_inode;
   DEBUGASSERT(inode->i_private != NULL);
@@ -833,6 +827,10 @@ static int gpio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 #if CONFIG_DEV_GPIO_NSIGNALS > 0
             if (arg)
               {
+                pid_t pid;
+                irqstate_t flags;
+                int i;
+
                 ret = nxsig_event_valid((FAR struct sigevent *)arg);
                 if (ret < 0)
                   {
@@ -896,15 +894,19 @@ static int gpio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         if (dev->gp_pintype >= GPIO_INTERRUPT_PIN)
           {
 #if CONFIG_DEV_GPIO_NSIGNALS > 0
-            pid = nxsched_getpid();
-            flags = spin_lock_irqsave(&dev->lock);
+            pid_t pid = nxsched_getpid();
+            irqstate_t flags = spin_lock_irqsave(&dev->lock);
+            int i;
+
             for (i = 0; i < CONFIG_DEV_GPIO_NSIGNALS; i++)
               {
                 if (pid == dev->gp_signals[i].gp_pid)
                   {
-#  ifdef CONFIG_SIG_EVTHREAD
+#   if CONFIG_DEV_GPIO_NSIGNALS > 1
+#     ifdef CONFIG_SIG_EVTHREAD
                     FAR struct sigwork_s *work;
-#  endif
+#     endif
+                    int j;
 
                     for (j = i + 1; j < CONFIG_DEV_GPIO_NSIGNALS; j++)
                       {
@@ -921,13 +923,14 @@ static int gpio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
                       }
 
                     dev->gp_signals[j].gp_pid = 0;
-#  ifdef CONFIG_SIG_EVTHREAD
+#     ifdef CONFIG_SIG_EVTHREAD
                     work = &dev->gp_signals[j].gp_work;
                     spin_unlock_irqrestore(&dev->lock, flags);
                     nxsig_cancel_notification(work);
                     flags = spin_lock_irqsave(&dev->lock);
-#  endif
+#     endif
                     break;
+#  endif
                   }
               }
 
