@@ -213,6 +213,7 @@ def get_espressif_toolchain_version():
         "xtensa-esp32-elf-gcc",
         "xtensa-esp32s2-elf-gcc",
         "xtensa-esp32s3-elf-gcc",
+        "riscv-none-elf-gcc",
         "riscv32-esp-elf-gcc",
         "riscv64-unknown-elf-gcc",
     ]
