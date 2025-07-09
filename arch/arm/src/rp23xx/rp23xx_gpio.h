@@ -103,9 +103,10 @@ extern "C"
 
 static inline void rp23xx_gpio_put(uint32_t gpio, int set)
 {
-  uint32_t value = 1 << gpio;
-
   DEBUGASSERT(gpio < RP23XX_GPIO_NUM);
+
+#if (RP23XX_GPIO_NUM <= 32)
+  uint32_t value = 1 << gpio;
 
   if (set)
     {
@@ -115,22 +116,60 @@ static inline void rp23xx_gpio_put(uint32_t gpio, int set)
     {
       putreg32(value, RP23XX_SIO_GPIO_OUT_CLR);
     }
+#else
+  uint32_t mask = 1ul << (gpio & 0x1fu);
+  if (gpio < 32)
+    {
+      if (set)
+        {
+          putreg32(mask, RP23XX_SIO_GPIO_OUT_SET);
+        }
+      else
+        {
+          putreg32(mask, RP23XX_SIO_GPIO_OUT_CLR);
+        }
+    }
+  else
+    {
+        if (set)
+        {
+            putreg32(mask, RP23XX_SIO_GPIO_HI_OUT_SET);
+        }
+        else
+        {
+            putreg32(mask, RP23XX_SIO_GPIO_HI_OUT_CLR);
+        }
+    }
+#endif
 }
 
 static inline bool rp23xx_gpio_get(uint32_t gpio)
 {
-  uint32_t value = 1 << gpio;
-
   DEBUGASSERT(gpio < RP23XX_GPIO_NUM);
 
+#if (RP23XX_GPIO_NUM <= 32)
+  uint32_t value = 1 << gpio;
   return (getreg32(RP23XX_SIO_GPIO_IN) & value) != 0;
+#else
+  if (gpio < 32)
+    {
+        uint32_t value = 1 << gpio;
+        return (getreg32(RP23XX_SIO_GPIO_IN) & value) != 0;
+    }
+  else
+    {
+        uint32_t value = 1 << (gpio -32);
+        return (getreg32(RP23XX_SIO_GPIO_HI_IN) & value) != 0;
+    }
+#endif
 }
 
 static inline void rp23xx_gpio_setdir(uint32_t gpio, int out)
 {
-  uint32_t value = 1 << gpio;
-
   DEBUGASSERT(gpio < RP23XX_GPIO_NUM);
+
+#if (RP23XX_GPIO_NUM <= 32)
+  uint32_t value = 1 << gpio;
 
   if (out)
     {
@@ -140,6 +179,31 @@ static inline void rp23xx_gpio_setdir(uint32_t gpio, int out)
     {
       putreg32(value, RP23XX_SIO_GPIO_OE_CLR);
     }
+#else
+  uint32_t mask = 1ul << (gpio & 0x1fu);
+  if (gpio < 32)
+    {
+        if (out)
+        {
+            putreg32(mask, RP23XX_SIO_GPIO_OE_SET);
+        }
+        else
+        {
+            putreg32(mask, RP23XX_SIO_GPIO_OE_CLR);
+        }
+    }
+    else
+    {
+        if (out)
+        {
+            putreg32(mask, RP23XX_SIO_GPIO_HI_OE_SET);
+        }
+        else
+        {
+            putreg32(mask, RP23XX_SIO_GPIO_HI_OE_CLR);
+        }
+    }
+#endif
 }
 
 /****************************************************************************
