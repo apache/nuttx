@@ -211,7 +211,7 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_ADC
+#if defined(CONFIG_ADC) && defined(CONFIG_STM32_ADC1)
   /* Initialize ADC and register the ADC driver. */
 
   ret = stm32_adc_setup();
@@ -366,6 +366,14 @@ int stm32_bringup(void)
     {
       syslog(LOG_ERR, "Failed to initialize BMP180, error %d\n", ret);
       return ret;
+    }
+#endif
+
+#ifdef CONFIG_ADC_HX711
+  ret = stm32_hx711_initialize();
+  if (ret != OK)
+    {
+      aerr("ERROR: Failed to initialize hx711: %d\n", ret);
     }
 #endif
 

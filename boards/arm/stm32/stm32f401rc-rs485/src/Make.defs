@@ -80,6 +80,10 @@ ifeq ($(CONFIG_DEV_GPIO),y)
 CSRCS += stm32_gpio.c
 endif
 
+ifeq ($(CONFIG_ADC_HX711),y)
+CSRCS += stm32_hx711.c
+endif
+
 DEPPATH += --dep-path board
 VPATH += :board
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board

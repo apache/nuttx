@@ -159,6 +159,15 @@
 #define GPIO_INT1         (GPIO_INPUT | GPIO_PULLDOWN | GPIO_SPEED_2MHz | \
                            GPIO_PORTC | GPIO_PIN4)
 
+/* HX711 PINs */
+#ifdef CONFIG_ADC_HX711
+#  define HX711_CLK_PIN  (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_OUTPUT_SET|\
+                          GPIO_SPEED_2MHz|GPIO_PULLUP|\
+                          GPIO_PORTB|GPIO_PIN1)
+#  define HX711_DATA_PIN (GPIO_INPUT|GPIO_SPEED_2MHz|GPIO_PULLUP|GPIO_EXTI|\
+                          GPIO_PORTB|GPIO_PIN2)
+#endif /* CONFIG_ADC_HX711 */
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -303,6 +312,18 @@ int stm32_gpio_initialize(void);
 
 #ifdef CONFIG_ADC
 int stm32_adc_setup(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_hx711_initialize
+ *
+ * Description:
+ *   Initialize hx711 chip
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ADC_HX711
+int stm32_hx711_initialize(void);
 #endif
 
 #endif /* __BOARDS_ARM_STM32_STM32F401RC_RS485_SRC_STM32F401RC_RS485_H */
