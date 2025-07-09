@@ -97,8 +97,11 @@ static int virtio_crypto_freesession(uint64_t tid);
 
 static int virtio_crypto_fill_crtlq_request(FAR struct cryptoini *cri,
                         FAR struct virtio_crypto_op_ctrl_req_s *ctrl);
-static int virtio_crypto_fill_dataq_request(FAR struct cryptop *crp,
-                  FAR struct virtio_crypto_op_data_req_s *req_data);
+static int virtio_crypto_fill_dataq_request(
+              FAR struct cryptop *crp, FAR struct virtqueue_buf *vb,
+              FAR struct virtio_crypto_op_data_req_s *data,
+              FAR struct virtio_crypto_inhdr_s *inhdr,
+              FAR int *num_out, FAR int *num_in);
 
 static void virtio_crypto_notify(FAR struct virtqueue *vq);
 static int  virtio_crypto_create_vqs(FAR struct virtio_crypto_s *vcrypto);
@@ -308,11 +311,148 @@ static int virtio_crypto_freesession(uint64_t tid)
   return ret;
 }
 
-static int virtio_crypto_fill_dataq_request(
-              FAR struct cryptop *crp,
-              FAR struct virtio_crypto_op_data_req_s *req_data)
+static int virtio_crypto_fill_dataq_request_cipher(
+              FAR struct cryptop *crp, FAR struct virtqueue_buf *vb,
+              FAR struct virtio_crypto_op_data_req_s *data,
+              FAR struct virtio_crypto_inhdr_s *inhdr,
+              FAR int *num_out, FAR int *num_in)
 {
-  FAR struct virtio_crypto_op_header_s *header = &req_data->header;
+  data->header.opcode = crp->crp_desc->crd_flags & CRD_F_ENCRYPT ?
+          VIRTIO_CRYPTO_CIPHER_ENCRYPT : VIRTIO_CRYPTO_CIPHER_DECRYPT;
+  data->op_flf.sym.op_type = VIRTIO_CRYPTO_SYM_OP_CIPHER;
+  data->op_flf.sym.op_type_flf.cipher.src_data_len = crp->crp_ilen;
+  data->op_flf.sym.op_type_flf.cipher.dst_data_len = crp->crp_olen;
+
+  vb[*num_out].buf = data;
+  vb[(*num_out)++].len = sizeof(*data);
+  if (crp->crp_ivlen > 0 && !(crp->crp_desc->crd_flags & CRD_F_UPDATE))
+    {
+      vb[*num_out].buf = crp->crp_iv;
+      vb[(*num_out)++].len = crp->crp_ivlen;
+      data->op_flf.sym.op_type_flf.cipher.iv_len = crp->crp_ivlen;
+    }
+
+  vb[*num_out].buf = crp->crp_buf;
+  vb[(*num_out)++].len = crp->crp_ilen;
+  vb[*num_out + *num_in].buf = crp->crp_dst;
+  vb[*num_out + (*num_in)++].len = crp->crp_olen;
+  vb[*num_out + *num_in].buf = inhdr;
+  vb[*num_out + (*num_in)++].len = sizeof(*inhdr);
+  return OK;
+}
+
+static int virtio_crypto_fill_dataq_request_hash(
+              FAR struct cryptop *crp, FAR struct virtqueue_buf *vb,
+              FAR struct virtio_crypto_op_data_req_s *data,
+              FAR struct virtio_crypto_inhdr_s *inhdr,
+              FAR int *num_out, FAR int *num_in)
+{
+  data->header.opcode = VIRTIO_CRYPTO_HASH;
+  data->op_flf.hash.src_data_len = crp->crp_ilen;
+
+  vb[*num_out].buf = data;
+  vb[(*num_out)++].len = sizeof(*data);
+
+  vb[*num_out].buf = crp->crp_buf;
+  vb[(*num_out)++].len = crp->crp_ilen;
+  if (!(crp->crp_desc->crd_flags & CRD_F_UPDATE))
+    {
+      vb[*num_out + *num_in].buf = crp->crp_mac;
+      vb[*num_out + (*num_in)++].len = crp->crp_olen;
+      data->op_flf.hash.hash_result_len = crp->crp_olen;
+    }
+
+  vb[*num_out + *num_in].buf = inhdr;
+  vb[*num_out + (*num_in)++].len = sizeof(*inhdr);
+  return OK;
+}
+
+static int virtio_crypto_fill_dataq_request_mac(
+              FAR struct cryptop *crp, FAR struct virtqueue_buf *vb,
+              FAR struct virtio_crypto_op_data_req_s *data,
+              FAR struct virtio_crypto_inhdr_s *inhdr,
+              FAR int *num_out, FAR int *num_in)
+{
+  data->header.opcode = VIRTIO_CRYPTO_MAC;
+
+  vb[*num_out].buf = data;
+  vb[(*num_out)++].len = sizeof(*data);
+
+  if (crp->crp_desc->crd_flags & CRD_F_UPDATE)
+    {
+      vb[*num_out].buf = crp->crp_buf;
+      vb[(*num_out)++].len = crp->crp_ilen;
+      data->op_flf.mac.hdr.src_data_len = crp->crp_ilen;
+    }
+  else
+    {
+      vb[*num_out + *num_in].buf = crp->crp_mac;
+      vb[*num_out + (*num_in)++].len = crp->crp_olen;
+      data->op_flf.mac.hdr.hash_result_len = crp->crp_olen;
+    }
+
+  vb[*num_out + *num_in].buf = inhdr;
+  vb[*num_out + (*num_in)++].len = sizeof(*inhdr);
+  return OK;
+}
+
+static int virtio_crypto_fill_dataq_request_aead(
+              FAR struct cryptop *crp, FAR struct virtqueue_buf *vb,
+              FAR struct virtio_crypto_op_data_req_s *data,
+              FAR struct virtio_crypto_inhdr_s *inhdr,
+              FAR int *num_out, FAR int *num_in)
+{
+  int flags = crp->crp_desc->crd_flags;
+
+  data->header.opcode = flags & CRD_F_ENCRYPT ?
+          VIRTIO_CRYPTO_AEAD_ENCRYPT : VIRTIO_CRYPTO_AEAD_DECRYPT;
+  data->op_flf.aead.src_data_len = crp->crp_ilen;
+
+  vb[*num_out].buf = data;
+  vb[(*num_out)++].len = sizeof(*data);
+
+  if (crp->crp_ivlen > 0)
+    {
+      vb[*num_out].buf = crp->crp_iv;
+      vb[(*num_out)++].len = crp->crp_ivlen;
+      data->op_flf.aead.iv_len = crp->crp_ivlen;
+    }
+
+  vb[*num_out].buf = crp->crp_buf;
+  vb[(*num_out)++].len = crp->crp_ilen;
+
+  if (crp->crp_aadlen > 0 && (flags & CRD_F_UPDATE_AAD))
+    {
+      vb[*num_out].buf = crp->crp_aad;
+      vb[(*num_out)++].len = crp->crp_aadlen;
+      data->op_flf.aead.aad_len = crp->crp_aadlen;
+    }
+
+  if (flags & CRD_F_UPDATE)
+    {
+      vb[*num_out + *num_in].buf = crp->crp_dst;
+      vb[*num_out + (*num_in)++].len = crp->crp_olen;
+      data->op_flf.aead.dst_data_len = crp->crp_olen;
+    }
+  else
+    {
+      vb[*num_out + *num_in].buf = crp->crp_mac;
+      vb[*num_out + (*num_in)++].len = crp->crp_olen;
+      data->op_flf.aead.tag_len = crp->crp_olen;
+    }
+
+  vb[*num_out + *num_in].buf = inhdr;
+  vb[*num_out + (*num_in)++].len = sizeof(*inhdr);
+  return OK;
+}
+
+static int virtio_crypto_fill_dataq_request(
+              FAR struct cryptop *crp, FAR struct virtqueue_buf *vb,
+              FAR struct virtio_crypto_op_data_req_s *data,
+              FAR struct virtio_crypto_inhdr_s *inhdr,
+              FAR int *num_out, FAR int *num_in)
+{
+  FAR struct virtio_crypto_op_header_s *header = &data->header;
   FAR struct cryptodesc *crda = crp->crp_desc;
   int service = virtio_crypto_get_service(crda->crd_alg);
   int algo = virtio_crypto_get_alg(crda->crd_alg);
@@ -327,43 +467,33 @@ static int virtio_crypto_fill_dataq_request(
       return algo;
     }
 
-  memset(req_data, 0, sizeof(struct virtio_crypto_op_data_req_s));
+  memset(data, 0, sizeof(struct virtio_crypto_op_data_req_s));
 
   header->algo = algo;
   header->session_id = crp->crp_sid & 0xffffffff;
+  inhdr->status = VIRTIO_CRYPTO_ERR;
 
   switch (service)
     {
       case VIRTIO_CRYPTO_SERVICE_CIPHER:
-        header->opcode = crda->crd_flags & CRD_F_ENCRYPT ?
-                VIRTIO_CRYPTO_CIPHER_ENCRYPT : VIRTIO_CRYPTO_CIPHER_DECRYPT;
-        req_data->op_flf.sym.op_type = VIRTIO_CRYPTO_SYM_OP_CIPHER;
-        req_data->op_flf.sym.op_type_flf.cipher.iv_len =
-                              virtio_crypto_get_iv_len(service, algo);
-        req_data->op_flf.sym.op_type_flf.cipher.src_data_len = crp->crp_ilen;
-        req_data->op_flf.sym.op_type_flf.cipher.dst_data_len = crp->crp_olen;
+        virtio_crypto_fill_dataq_request_cipher(
+                                  crp, vb, data, inhdr,
+                                  num_out, num_in);
         break;
       case VIRTIO_CRYPTO_SERVICE_HASH:
-        header->opcode = VIRTIO_CRYPTO_HASH;
-        req_data->op_flf.hash.src_data_len = crp->crp_ilen;
-        req_data->op_flf.hash.hash_result_len =
-                  virtio_crypto_get_hash_result_len(algo);
+        virtio_crypto_fill_dataq_request_hash(
+                                  crp, vb, data, inhdr,
+                                  num_out, num_in);
         break;
       case VIRTIO_CRYPTO_SERVICE_MAC:
-        header->opcode = VIRTIO_CRYPTO_MAC;
-        req_data->op_flf.mac.hdr.src_data_len = crp->crp_ilen;
-        req_data->op_flf.mac.hdr.hash_result_len =
-                  virtio_crypto_get_hash_result_len(algo);
+        virtio_crypto_fill_dataq_request_mac(
+                                  crp, vb, data, inhdr,
+                                  num_out, num_in);
         break;
       case VIRTIO_CRYPTO_SERVICE_AEAD:
-        header->opcode = crda->crd_flags & CRD_F_ENCRYPT ?
-                VIRTIO_CRYPTO_AEAD_ENCRYPT : VIRTIO_CRYPTO_AEAD_DECRYPT;
-        req_data->op_flf.aead.iv_len =
-                              virtio_crypto_get_iv_len(service, algo);
-        req_data->op_flf.aead.src_data_len = crp->crp_ilen;
-        req_data->op_flf.aead.dst_data_len = crp->crp_olen;
-        req_data->op_flf.aead.aad_len = crp->crp_aadlen;
-        req_data->op_flf.aead.tag_len = virtio_crypto_get_tag_len(algo);
+        virtio_crypto_fill_dataq_request_aead(
+                                  crp, vb, data, inhdr,
+                                  num_out, num_in);
         break;
       default:
         return -ENOTSUP;
@@ -374,7 +504,7 @@ static int virtio_crypto_fill_dataq_request(
 
 static int virtio_crypto_process(FAR struct cryptop *crp)
 {
-  struct virtio_crypto_op_data_req_s req_data;
+  struct virtio_crypto_op_data_req_s data;
   struct virtio_crypto_inhdr_s inhdr;
   FAR struct virtio_crypto_s *vcrypto;
   FAR struct virtqueue *vq;
@@ -393,42 +523,15 @@ static int virtio_crypto_process(FAR struct cryptop *crp)
     }
 
   vq = vcrypto->vdev->vrings_info[0].vq;
+  nxsem_init(&sem, 0, 0);
 
-  ret = virtio_crypto_fill_dataq_request(crp, &req_data);
+  ret = virtio_crypto_fill_dataq_request(crp, vb, &data, &inhdr,
+                                         &num_out, &num_in);
   if (ret < 0)
     {
       vrterr("Virtio Crypto: Invalid parameters in process\n");
       return ret;
     }
-
-  nxsem_init(&sem, 0, 0);
-  inhdr.status = VIRTIO_CRYPTO_ERR;
-
-  vb[num_out].buf = &req_data;
-  vb[num_out++].len = sizeof(req_data);
-
-  if (crp->crp_iv != NULL)
-    {
-      vb[num_out].buf = crp->crp_iv;
-      vb[num_out++].len =
-            virtio_crypto_get_iv_len(
-              virtio_crypto_get_service(crp->crp_desc->crd_alg),
-              req_data.header.algo);
-    }
-
-  vb[num_out].buf = crp->crp_buf;
-  vb[num_out++].len = crp->crp_ilen;
-
-  if (crp->crp_aad != NULL)
-    {
-      vb[num_out].buf = crp->crp_aad;
-      vb[num_out++].len = crp->crp_aadlen;
-    }
-
-  vb[num_out + num_in].buf = crp->crp_dst;
-  vb[num_out + num_in++].len = crp->crp_olen;
-  vb[num_out + num_in].buf = &inhdr;
-  vb[num_out + num_in++].len = sizeof(inhdr);
 
   virtqueue_add_buffer_lock(vq, vb, num_out, num_in, &sem,
                             &vcrypto->lock);
