@@ -141,11 +141,11 @@ static ssize_t bmi270_read(FAR struct file *filep, FAR char *buffer,
       return 0;
     }
 
+  /* Set sensor_time to the lower 24 bits of SENSORTIME. */
+
+  p->sensor_time = 0;
+
   bmi270_getregs(priv, BMI270_DATA_8, (FAR uint8_t *)p, 15);
-
-  /* Adjust sensing time into 24 bit */
-
-  p->sensor_time >>= 8;
 
   return len;
 }
