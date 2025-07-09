@@ -78,6 +78,10 @@ if(CONFIG_VIDEO_FB)
   endif()
 endif()
 
+if(CONFIG_ADC_HX711)
+  list(APPEND SRCS stm32_hx711.c)
+endif()
+
 target_sources(board PRIVATE ${SRCS})
 
 if(CONFIG_ARCH_CHIP_STM32F401RC)

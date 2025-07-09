@@ -943,3 +943,60 @@ NSH usage
      4: ( 56, 44) ( 48, 40)
      5: ( 70, 55) ( 20, 18)
     Test finished
+
+HX711
+-----
+
+HX711 is a precision 24-bit analog-to-digital converter (ADC)
+designed for weigh scales and industrial control applications.
+It interfaces load cells via a simple two-wire serial interface
+(clock and data) and provides high-resolution digital weight
+measurements.
+
+**Enable the following options using ``make menuconfig``:**
+
+::
+
+    CONFIG_ADC=y
+    CONFIG_ANALOG=y
+    CONFIG_ADC_HX711=y
+    CONFIG_EXAMPLES_HX711=y
+
+**Wiring:**
+
+Connect the HX711 to the STM32F4 board using the following pins:
+
++--------+------+
+| HX711  | PIN  |
++========+======+
+| SCK    | PB1  |
++--------+------+
+| DT     | PB2  |
++--------+------+
+
+**NSH usage:**
+
+::
+
+    NuttShell (NSH) NuttX-12.10.0-RC0
+    nsh> hx711 -D
+    Current settings for: /dev/hx711_0
+    average.............: 1
+    channel.............: a
+    gain................: 128
+    value per unit......: 0
+    nsh> hx711 -v 813 -t 10
+    Taring with *float*g precision
+    nsh> hx711 -r 10
+    11
+    9
+    9
+    10
+    11
+    11
+    11
+    12
+    11
+    10
+
+For more details, refer to the official `HX711 NuttX documentation <https://nuttx.apache.org/docs/latest/components/drivers/character/analog/adc/hx711/index.html>`_.
