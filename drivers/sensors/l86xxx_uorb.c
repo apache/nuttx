@@ -113,7 +113,9 @@ static int l86xxx_activate(FAR struct sensor_lowerhalf_s *lower,
 static int l86xxx_set_interval(FAR struct sensor_lowerhalf_s *lower,
                                      FAR struct file *filep,
                                      FAR uint32_t *period_us);
+#ifdef CONFIG_SERIAL_TERMIOS
 static int set_baud_rate(l86xxx_dev_s *dev, int br);
+#endif
 static int send_command(l86xxx_dev_s *dev,
                           L86XXX_PMTK_COMMAND cmd, unsigned long arg);
 static int read_line(l86xxx_dev_s *dev);
@@ -294,9 +296,9 @@ static int send_command(l86xxx_dev_s *dev,
     return err;
   }
 
-  /* These commands do not send ACKs
-  so just return after they've been written
-  */
+  /* These commands do not send ACKs so just return after they've been
+   * written
+   */
 
   if (cmd == CMD_HOT_START ||
       cmd == CMD_WARM_START ||
@@ -308,39 +310,50 @@ static int send_command(l86xxx_dev_s *dev,
     }
 
   /* Setting baud rate also doesn't send an ACK but the interface baud rate
-  needs to be updated
-  */
+   * needs to be updated
+   */
 
   if (cmd == SET_NMEA_BAUDRATE)
   {
+#ifdef CONFIG_SERIAL_TERMIOS
     nxsig_usleep(20000); /* Should wait for a bit before changing interface baud rate */
     ret = set_baud_rate(dev, (int)arg);
+#else
+    ret = -EINVAL;
+#endif
     nxmutex_unlock(&dev->devlock);
     return ret;
   }
 
   /* Some commands will send ACKs,
-  wait for them here before unlocking the mutex
-  */
+   * wait for them here before unlocking the mutex
+   */
 
-  /* ACK message will be $PMTK001,<cmd num>,<flag>
-  flag num indicates success of command
-  0 = Invalid packet
-  1 = Unsupported packet type
-  2 = Valid packet, but action failed
-  3 = Valid packet, action succeeded
-  */
+  /* ACK message will be $PMTK001,<cmd num>,<flag> flag num indicates success
+   * of command:
+   *
+   * 0 = Invalid packet
+   * 1 = Unsupported packet type
+   * 2 = Valid packet, but action failed
+   * 3 = Valid packet, action succeeded
+   */
 
   memset(buf, '\0', 50);
   snprintf(buf, 50, "$PMTK001,%d", cmd);
   sninfo("Waiting for ACK from L86...\n");
-  for (; ; )
+  read_line(dev);
+
+  if (strncmp(buf, dev->buffer, strlen(buf)) == 0)
     {
-      read_line(dev);
-      if (strncmp(buf, dev->buffer, strlen(buf)) == 0) break;
+      sninfo("ACK received!\n");
+    }
+  else
+    {
+      snerr("Did not get ACK!\n");
+      nxmutex_unlock(&dev->devlock);
+      return -EIO;
     }
 
-  sninfo("ACK received!\n");
   nxmutex_unlock(&dev->devlock);
 
   /* Flag num is always in position 13 of ack, subtract by '0'
@@ -719,6 +732,8 @@ int l86xxx_register(FAR const char *uartpath, int devno)
   FAR l86xxx_dev_s *priv = NULL;
   int err;
   char *buf;
+  FAR char *argv[2];
+  char arg1[32];
 
   DEBUGASSERT(uartpath != NULL);
 
@@ -764,29 +779,27 @@ int l86xxx_register(FAR const char *uartpath, int devno)
   /* Setup sensor with configured settings */
 
   sninfo("Waiting for GNSS to start...\n");
+
   buf = "$PMTK010,001*2E";
-  for (; ; )
+  read_line(priv);
+  if (strncmp(buf, priv->buffer, strlen(buf)) == 0)
     {
-      read_line(priv);
-      if (strncmp(buf, priv->buffer, strlen(buf)) == 0) break;
+      sninfo("GNSS module started.\n");
     }
 
-  sninfo("GNSS module started.\n");
-
-  #ifdef CONFIG_SERIAL_TERMIOS
+#ifdef CONFIG_SERIAL_TERMIOS
   err = send_command(priv, SET_NMEA_BAUDRATE, L86_XXX_BAUD_RATE);
   if (err < 0)
     {
       snwarn("Couldn't set baud rate of device: %d\n", err);
     }
+  #endif
 
   err = send_command(priv, SET_POS_FIX, CONFIG_L86_XXX_FIX_INT);
   if (err < 0)
     {
       snwarn("Couldn't set position fix interval, %d\n", err);
     }
-
-  #endif
 
   /* Register UORB Sensor */
 
@@ -800,8 +813,6 @@ int l86xxx_register(FAR const char *uartpath, int devno)
       goto close_file;
     }
 
-  FAR char *argv[2];
-  char arg1[32];
   snprintf(arg1, 16, "%p", priv);
   argv[0] = arg1;
   argv[1] = NULL;
