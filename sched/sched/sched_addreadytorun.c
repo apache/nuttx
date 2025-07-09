@@ -198,11 +198,11 @@ bool nxsched_switch_running(FAR struct tcb_s *btcb, int cpu)
 }
 
 /****************************************************************************
- * Name:  nxsched_add_readytorun
+ * Name:  nxsched_add_readytorun/nxsched_add_readytorun_cpu
  *
  * Description:
- *   This function adds a TCB to one of the ready to run lists.  That might
- *   be:
+ *   This function adds a TCB to one of the ready to run lists. The _cpu
+ *   variant adds the TCB to the specified CPU's list. The list will be:
  *
  *   1. The g_readytorun list if the task is ready-to-run but not running
  *      and not assigned to a CPU.
@@ -234,15 +234,16 @@ bool nxsched_switch_running(FAR struct tcb_s *btcb, int cpu)
 
 bool nxsched_add_readytorun(FAR struct tcb_s *btcb)
 {
-  FAR struct tcb_s *rtcb;
-  bool doswitch;
-  int cpu;
-
-  cpu = nxsched_select_cpu(btcb->affinity);
-
   /* Get the task currently running on the CPU (may be the IDLE task) */
 
-  rtcb = current_delivered(cpu);
+  int cpu = nxsched_select_cpu(btcb->affinity);
+  return nxsched_add_readytorun_cpu(btcb, cpu);
+}
+
+bool nxsched_add_readytorun_cpu(FAR struct tcb_s *btcb,
+                                int cpu)
+{
+  bool doswitch;
 
   /* Determine the desired new task state.  First, if the new task priority
    * is higher then the priority of the lowest priority, running task, then
@@ -250,9 +251,13 @@ bool nxsched_add_readytorun(FAR struct tcb_s *btcb)
    * required.
    */
 
-  if (btcb->sched_priority <= rtcb->sched_priority)
+  if (cpu >= CONFIG_SMP_NCPUS ||
+      btcb->sched_priority <= current_delivered(cpu)->sched_priority)
     {
-      /* The btcb won't be running, add it to the ready-to-run task list */
+      /* There is no CPU available to run the task, or the priority is
+       * lower or equal to the currently running task.
+       * The btcb won't be running, add it to the ready-to-run task list
+       */
 
       nxsched_add_prioritized(btcb, list_readytorun());
 
@@ -276,7 +281,7 @@ bool nxsched_add_readytorun(FAR struct tcb_s *btcb)
             }
           else
             {
-              rtcb = g_delivertasks[cpu];
+              FAR struct tcb_s *rtcb = g_delivertasks[cpu];
               if (rtcb->sched_priority < btcb->sched_priority)
                 {
                   g_delivertasks[cpu] = btcb;

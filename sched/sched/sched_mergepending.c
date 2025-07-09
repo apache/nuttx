@@ -207,6 +207,15 @@ bool nxsched_merge_pending(void)
   /* Find the CPU that is executing the lowest priority task. */
 
   cpu = nxsched_select_cpu(ALL_CPUS);
+  if (cpu >= CONFIG_SMP_NCPUS)
+    {
+      /* There are no available CPUs. This can only happen if
+       * all the CPUs are running scheduler locked
+       */
+
+      return false;
+    }
+
   rtcb = current_delivered(cpu);
   minprio = rtcb->sched_priority;
 
@@ -221,17 +230,25 @@ bool nxsched_merge_pending(void)
 
   while (ptcb && ptcb->sched_priority > minprio)
     {
-      /* If the ptcb is not allowed to run on all CPU's re-select the
-       * CPU. This is unlikely, so not worth doing on every cycle.
+      next = dq_next(ptcb);
+
+      /* If the ptcb is not allowed to run on this CPU, re-select the
+       * CPU. This is unlikely, so re-select is not worth doing on
+       * every cycle.
        */
 
-      if (ptcb->affinity != ALL_CPUS)
+      if (((1 << cpu) & ptcb->affinity) == 0)
         {
           cpu  = nxsched_select_cpu(ptcb->affinity);
+          if (cpu >= CONFIG_SMP_NCPUS)
+            {
+              /* No available CPUs to run this task, try next one */
+
+              continue;
+            }
+
           rtcb = current_delivered(cpu);
         }
-
-      next = dq_next(ptcb);
 
       if (ptcb->sched_priority > rtcb->sched_priority)
         {
@@ -241,12 +258,19 @@ bool nxsched_merge_pending(void)
 
           /* Add the task again to the correct list. */
 
-          ret |= nxsched_add_readytorun(ptcb);
+          ret |= nxsched_add_readytorun_cpu(ptcb, cpu);
         }
 
       /* Re-check the minimum priority. */
 
       cpu = nxsched_select_cpu(ALL_CPUS);
+      if (cpu >= CONFIG_SMP_NCPUS)
+        {
+          /* All CPUs are running sched locked. */
+
+          break;
+        }
+
       rtcb = current_delivered(cpu);
       minprio = rtcb->sched_priority;
 
