@@ -97,6 +97,22 @@
 #  define ADC2_HAVE_DMA 1
 #endif
 
+/* Oversampling support */
+
+#undef ADC_HAVE_OVERSAMPLE
+#if defined(CONFIG_STM32H5_ADC1_OVERSAMPLE) || \
+    defined(CONFIG_STM32H5_ADC2_OVERSAMPLE)
+#  define ADC_HAVE_OVERSAMPLE 1
+#endif
+
+#if defined(CONFIG_STM32H5_ADC1_OVERSAMPLE)
+#  define ADC1_HAVE_OVERSAMPLE 1
+#endif
+
+#if defined(CONFIG_STM32H5_ADC2_OVERSAMPLE)
+#  define ADC2_HAVE_OVERSAMPLE 1
+#endif
+
 /* Timer configuration:  If a timer trigger is specified, then get
  * information about the timer.
  */
