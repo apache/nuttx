@@ -83,8 +83,9 @@ void arp_ipin(FAR struct net_driver_s *dev)
    * Ethernet link layer protocol.
    */
 
-  if (dev->d_lltype != NET_LL_ETHERNET &&
-      dev->d_lltype != NET_LL_IEEE80211)
+  if (IFF_IS_NOARP(dev->d_flags) ||
+      (dev->d_lltype != NET_LL_ETHERNET &&
+       dev->d_lltype != NET_LL_IEEE80211))
     {
       return;
     }
