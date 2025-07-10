@@ -218,10 +218,7 @@ int sam_bringup(void)
   struct i2c_master_s *i2c;
 #endif
 #if defined(HAVE_S25FL1_CHARDEV)
-#if defined(CONFIG_BCH)
-  char blockdev[18];
-  char chardev[12];
-#endif /* defined(CONFIG_BCH) */
+  char mtddev[12];
 #endif
   int ret;
 
@@ -457,33 +454,19 @@ int sam_bringup(void)
         }
 
 #else /* if  defined(HAVE_S25FL1_CHARDEV) */
-      /* Use the FTL layer to wrap the MTD driver as a block driver */
-
-      ret = ftl_initialize(S25FL1_MTD_MINOR, mtd);
-      if (ret < 0)
-        {
-          syslog(LOG_ERR, "ERROR: Failed to initialize the FTL layer: %d\n",
-                 ret);
-          return ret;
-        }
-
-#if defined(CONFIG_BCH)
       /* Use the minor number to create device paths */
 
-      snprintf(blockdev, sizeof(blockdev), "/dev/mtdblock%d",
-               S25FL1_MTD_MINOR);
-      snprintf(chardev, sizeof(chardev), "/dev/mtd%d", S25FL1_MTD_MINOR);
+      snprintf(mtddev, sizeof(mtddev), "/dev/mtd%d", S25FL1_MTD_MINOR);
 
-      /* Now create a character device on the block device */
+      /* Register the MTD driver */
 
-      ret = bchdev_register(blockdev, chardev, false);
+      ret = register_mtddriver(mtddev, mtd, 0755, NULL);
       if (ret < 0)
         {
-          syslog(LOG_ERR, "ERROR: bchdev_register %s failed: %d\n",
-                 chardev, ret);
+          syslog(LOG_ERR, "ERROR: register_mtddriver %s failed: %d\n",
+                 mtddev, ret);
           return ret;
         }
-#endif /* defined(CONFIG_BCH) */
 #endif
     }
 #endif

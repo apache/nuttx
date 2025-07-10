@@ -125,32 +125,18 @@ static int init_ota_partitions(void)
   int ret = OK;
   int i;
 
-#ifdef CONFIG_BCH
-  char blockdev[18];
-#endif
-
   for (i = 0; i < nitems(g_ota_partition_table); ++i)
     {
       const struct ota_partition_s *part = &g_ota_partition_table[i];
       mtd = esp_spiflash_alloc_mtdpart(part->offset, part->size);
 
-      ret = ftl_initialize(i, mtd);
+      ret = register_mtddriver(part->devpath, mtd, 0755, NULL);
       if (ret < 0)
         {
-          ferr("ERROR: Failed to initialize the FTL layer: %d\n", ret);
+          ferr("ERROR: register_mtddriver %s failed: %d\n",
+               part->devpath, ret);
           return ret;
         }
-
-#ifdef CONFIG_BCH
-      snprintf(blockdev, sizeof(blockdev), "/dev/mtdblock%d", i);
-
-      ret = bchdev_register(blockdev, part->devpath, false);
-      if (ret < 0)
-        {
-          ferr("ERROR: bchdev_register %s failed: %d\n", part->devpath, ret);
-          return ret;
-        }
-#endif
     }
 
   return ret;
