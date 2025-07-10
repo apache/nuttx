@@ -582,5 +582,32 @@ static inline_function int nxsched_select_cpu(cpu_set_t affinity)
 
   return cpu;
 }
+
+/* Remove and return a task which is eglible to run on one of the
+ * cpus defined by "affinity" and which has priority higher than
+ * "priority"
+ */
+
+static inline_function FAR struct tcb_s *nxsched_get_task(
+                                           DSEG dq_queue_t *list,
+                                           cpu_set_t affinity,
+                                           int priority)
+{
+  FAR struct tcb_s *tcb;
+
+  for (tcb = (FAR struct tcb_s *)list->head;
+       tcb && tcb->sched_priority > priority;
+       tcb = tcb->flink)
+    {
+      if (affinity & tcb->affinity)
+        {
+          dq_rem((FAR dq_entry_t *)tcb, list);
+          return tcb;
+        }
+    }
+
+  return NULL;
+}
+
 #  endif
 #endif /* __SCHED_SCHED_SCHED_H */

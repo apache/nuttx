@@ -196,10 +196,16 @@ void nxsched_remove_running(FAR struct tcb_s *tcb)
 
 void nxsched_remove_self(FAR struct tcb_s *tcb)
 {
+  FAR struct tcb_s *ptcb;
+  int cpu = tcb->cpu;
+
   nxsched_remove_running(tcb);
-  if (!dq_empty(list_readytorun()))
+
+  ptcb = nxsched_get_task(list_readytorun(), 1 << cpu, 0);
+  if (ptcb)
     {
-      nxsched_merge_pending();
+      ptcb->task_state = TSTATE_TASK_INVALID;
+      nxsched_switch_running(ptcb, cpu);
     }
 }
 
