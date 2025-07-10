@@ -29,13 +29,14 @@
 
 	.type	__gnu_mcount_nc, %function
 __gnu_mcount_nc:
-	push	{r0, r1, r2, r3, lr}			/* Save registers */
-	bic		r1, lr, #1			/* R1 contains callee address, with thumb bit cleared */
-	ldr		r0, [sp, #20]			/* R0 contains caller address */
-	bic		r0, r0, #1			/* Clear thumb bit */
-	bl		mcount_internal			/* Jump to internal _mcount() implementation */
-	pop		{r0, r1, r2, r3, ip, lr}	/* Restore saved registers */
-	bx		ip				/* Return to callee */
+	push	{r0, r1, r2, r3, lr}		/* Save registers */
+	mov	r1, lr
+	bic	r1, r1, #1			/* R1 contains callee address, with thumb bit cleared */
+	ldr	r0, [sp, #20]			/* R0 contains caller address */
+	bic	r0, r0, #1			/* Clear thumb bit */
+	bl	mcount_internal			/* Jump to internal _mcount() implementation */
+	pop	{r0, r1, r2, r3, ip, lr}	/* Restore saved registers */
+	bx	ip				/* Return to callee */
 
 	.size	__gnu_mcount_nc, .-__gnu_mcount_nc
 	.end
