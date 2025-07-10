@@ -139,14 +139,15 @@ void nxsched_remove_running(FAR struct tcb_s *tcb)
 {
   FAR dq_queue_t *tasklist;
   FAR struct tcb_s *nxttcb;
-  FAR struct tcb_s *rtrtcb = NULL;
   int cpu;
 
   /* Which CPU (if any) is the task running on?  Which task list holds the
    * TCB?
    */
 
-  DEBUGASSERT(tcb->task_state == TSTATE_TASK_RUNNING);
+  DEBUGASSERT(tcb->cpu == this_cpu() &&
+              tcb->task_state == TSTATE_TASK_RUNNING);
+
   cpu = tcb->cpu;
   tasklist = &g_assignedtasks[cpu];
 
@@ -174,104 +175,22 @@ void nxsched_remove_running(FAR struct tcb_s *tcb)
    */
 
   nxttcb = tcb->flink;
-  DEBUGASSERT(nxttcb != NULL);
+  DEBUGASSERT(nxttcb != NULL && is_idle_task(nxttcb));
 
   /* The task is running but the CPU that it was running on has been
    * paused.  We can now safely remove its TCB from the running
-   * task list.  In the SMP case this may be either the g_readytorun()
-   * or the g_assignedtasks[cpu] list.
+   * task list.
    */
 
-  dq_rem_head((FAR dq_entry_t *)tcb, tasklist);
-
-  /* Find the highest priority non-running tasks in the g_assignedtasks
-   * list of other CPUs, and also non-idle tasks, place them in the
-   * g_readytorun list. so as to find the task with the highest priority,
-   * globally
-   */
-
-  for (int i = 0; i < CONFIG_SMP_NCPUS; i++)
-    {
-      if (i == cpu)
-        {
-          /* The highest priority task of the current
-           * CPU has been found, which is nxttcb.
-           */
-
-          continue;
-        }
-
-      for (rtrtcb = (FAR struct tcb_s *)g_assignedtasks[i].head;
-                !is_idle_task(rtrtcb); rtrtcb = rtrtcb->flink)
-        {
-          if (rtrtcb->task_state != TSTATE_TASK_RUNNING &&
-              CPU_ISSET(cpu, &rtrtcb->affinity))
-            {
-              /* We have found the task with the highest priority whose
-               * CPU index is i. Since this task must be between the two
-               * tasks, we can use the dq_rem_mid macro to delete it.
-               */
-
-              dq_rem_mid(rtrtcb);
-              rtrtcb->task_state = TSTATE_TASK_READYTORUN;
-
-              /* Add rtrtcb to g_readytorun to find
-               * the task with the highest global priority
-               */
-
-              nxsched_add_prioritized(rtrtcb, &g_readytorun);
-              break;
-            }
-        }
-    }
-
-  /* Which task will go at the head of the list?  It will be either the
-   * next tcb in the assigned task list (nxttcb) or a TCB in the
-   * g_readytorun list.  We can only select a task from that list if
-   * the affinity mask includes the current CPU.
-   */
-
-  /* Search for the highest priority task that can run on this
-   * CPU.
-   */
-
-  for (rtrtcb = (FAR struct tcb_s *)g_readytorun.head;
-        rtrtcb != NULL && !CPU_ISSET(cpu, &rtrtcb->affinity);
-        rtrtcb = rtrtcb->flink);
-
-  /* Did we find a task in the g_readytorun list?  Which task should
-   * we use?  We decide strictly by the priority of the two tasks:
-   * Either (1) the task currently at the head of the
-   * g_assignedtasks[cpu] list (nexttcb) or (2) the highest priority
-   * task from the g_readytorun list with matching affinity (rtrtcb).
-   */
-
-  if (rtrtcb != NULL && rtrtcb->sched_priority >= nxttcb->sched_priority)
-    {
-      /* The TCB rtrtcb has the higher priority and it can be run on
-       * target CPU. Remove that task (rtrtcb) from the g_readytorun
-       * list and add to the head of the g_assignedtasks[cpu] list.
-       */
-
-      dq_rem((FAR dq_entry_t *)rtrtcb, &g_readytorun);
-      dq_addfirst_nonempty((FAR dq_entry_t *)rtrtcb, tasklist);
-
-      rtrtcb->cpu = cpu;
-      nxttcb = rtrtcb;
-    }
-
-  /* NOTE: If the task runs on another CPU(cpu), adjusting global IRQ
-   * controls will be done in the pause handler on the new CPU(cpu).
-   * If the task is scheduled on this CPU(me), do nothing because
-   * this CPU already has a critical section
-   */
-
-  nxttcb->task_state = TSTATE_TASK_RUNNING;
+  dq_remfirst(tasklist);
 
   /* Since the TCB is no longer in any list, it is now invalid */
 
   tcb->task_state = TSTATE_TASK_INVALID;
 
+  /* Activate the idle task */
+
+  nxttcb->task_state = TSTATE_TASK_RUNNING;
   up_update_task(nxttcb);
 }
 
@@ -288,7 +207,6 @@ bool nxsched_remove_readytorun(FAR struct tcb_s *tcb)
 {
   if (tcb->task_state == TSTATE_TASK_RUNNING)
     {
-      DEBUGASSERT(tcb->cpu == this_cpu());
       nxsched_remove_running(tcb);
       return true;
     }
