@@ -63,6 +63,10 @@
 #pragma message "Power Management not implemented in H5 ADC driver. "
 #endif
 
+#ifndef ANIOC_SET_OVERSAMPLE
+#  define ANIOC_SET_OVERSAMPLE _ANIOC(0x0f)
+#endif
+
 /* ADC Channels/DMA *********************************************************/
 
 #define ADC_SMPR_DEFAULT    ADC_SMPR_640p5
@@ -101,6 +105,7 @@ struct stm32_dev_s
   uint8_t cchannels;    /* Number of configured channels */
   uint8_t intf;         /* ADC interface number */
   uint8_t current;      /* Current ADC channel being converted */
+  uint8_t resolution;   /* ADC resolution (0-3) */
   bool     hasdma;      /* True: This ADC supports DMA */
 #ifdef ADC_HAVE_DMA
   uint16_t dmabatch;    /* Number of conversions for DMA batch */
@@ -136,6 +141,13 @@ struct stm32_dev_s
   /* DMA transfer buffer */
 
   uint16_t *r_dmabuffer;
+#endif
+
+  bool oversample;
+#ifdef ADC_HAVE_OVERSAMPLE
+  bool trovs;
+  uint8_t ovsr;
+  uint8_t ovss;
 #endif
 
   /* List of selected ADC channels to sample */
@@ -190,6 +202,10 @@ static void adc_dmacfg(struct stm32_dev_s *priv,
                                struct stm32_gpdma_cfg_s *cfg);
 #endif
 
+#ifdef ADC_HAVE_OVERSAMPLE
+static void adc_oversample(struct adc_dev_s *dev);
+#endif
+
 /* ADC Interrupt Handler */
 
 static int adc_interrupt(struct adc_dev_s *dev, uint32_t regval);
@@ -235,6 +251,7 @@ static struct stm32_dev_s g_adcpriv1 =
   .irq         = STM32_IRQ_ADC1,
   .isr         = adc12_interrupt,
   .intf        = 1,
+  .resolution  = CONFIG_STM32H5_ADC1_RESOLUTION,
   .base        = STM32_ADC1_BASE,
   .mbase       = STM32_ADC1_BASE,
   .initialized = false,
@@ -259,6 +276,19 @@ static struct stm32_dev_s g_adcpriv1 =
 #else
   .hasdma      = false,
 #endif
+
+#ifdef ADC1_HAVE_OVERSAMPLE
+  .oversample = true,
+#  ifdef CONFIG_STM32H5_ADC1_TROVS
+  .trovs = true,
+#  else
+  .trovs = false,
+#  endif
+  .ovsr = CONFIG_STM32H5_ADC1_OVSR,
+  .ovss = CONFIG_STM32H5_ADC1_OVSS,
+#else
+  .oversample = false,
+#endif
 };
 
 static struct adc_dev_s g_adcdev1 =
@@ -282,6 +312,7 @@ static struct stm32_dev_s g_adcpriv2 =
   .irq         = STM32_IRQ_ADC2,
   .isr         = adc12_interrupt,
   .intf        = 2,
+  .resolution  = CONFIG_STM32H5_ADC2_RESOLUTION,
   .base        = STM32_ADC2_BASE,
   .mbase       = STM32_ADC2_BASE,
   .initialized = false,
@@ -305,6 +336,19 @@ static struct stm32_dev_s g_adcpriv2 =
 #  endif
 #else
   .hasdma      = false,
+#endif
+
+#ifdef ADC2_HAVE_OVERSAMPLE
+  .oversample = true,
+#  ifdef CONFIG_STM32H5_ADC2_TROVS
+  .trovs = true,
+#  else
+  .trovs = false,
+#  endif
+  .ovsr = CONFIG_STM32H5_ADC2_OVSR,
+  .ovss = CONFIG_STM32H5_ADC2_OVSS,
+#else
+  .oversample = false,
 #endif
 };
 
@@ -776,6 +820,28 @@ static void adc_setupclock(struct stm32_dev_s *priv)
   adc_modifyreg(priv, STM32_ADC_CCR_OFFSET, ADC_CCR_PRESC_MASK, setbits);
 }
 
+#ifdef ADC_HAVE_OVERSAMPLE
+/****************************************************************************
+ * Name: adc_oversample
+ ****************************************************************************/
+
+static void adc_oversample(struct adc_dev_s *dev)
+{
+  struct stm32_dev_s *priv = (struct stm32_dev_s *)dev->ad_priv;
+
+  uint32_t clrbits = ADC_CFGR2_ROVSE | ADC_CFGR2_TROVS |
+                     ADC_CFGR2_OVSR_MASK | ADC_CFGR2_OVSS_MASK;
+
+  uint32_t setbits = ADC_CFGR2_ROVSE |
+                     (priv->ovsr << ADC_CFGR2_OVSR_SHIFT) |
+                     (priv->ovss << ADC_CFGR2_OVSS_SHIFT);
+
+  setbits |= priv->trovs;
+
+  adc_modifyreg(priv, STM32_ADC_CFGR2_OFFSET, clrbits, setbits);
+}
+#endif
+
 /****************************************************************************
  * Name: adc_reset
  *
@@ -965,7 +1031,7 @@ static int adc_setup(struct adc_dev_s *dev)
   /* Set the resolution of the conversion. */
 
   clrbits = ADC_CFGR_RES_MASK | ADC_CFGR_DMACFG | ADC_CFGR_DMAEN;
-  setbits = ADC_CFGR_RES_12BIT;
+  setbits = (priv->resolution << ADC_CFGR_RES_SHIFT) & ADC_CFGR_RES_MASK;
 
 #ifdef ADC_HAVE_DMA
   if (priv->hasdma)
@@ -1030,6 +1096,13 @@ static int adc_setup(struct adc_dev_s *dev)
   adc_modifyregm(priv, STM32_ADC_CCR_OFFSET, clrbits, setbits);
 
   adc_setupclock(priv);
+
+#ifdef ADC_HAVE_OVERSAMPLE
+  if (priv->oversample)
+    {
+      adc_oversample(dev);
+    }
+#endif
 
 #ifdef ADC_HAVE_DMA
 
@@ -1235,6 +1308,55 @@ static int adc_set_ch(struct adc_dev_s *dev, uint8_t ch)
   return OK;
 }
 
+#ifdef ADC_HAVE_OVERSAMPLE
+/****************************************************************************
+ * Name: adc_ioc_set_oversample
+ *
+ * Description:
+ *   For STM32G0 and STM32L0: Configure hardware oversampling via CFGR2.
+ *
+ * Input:
+ *   dev - pointer to the ADC device
+ *   arg - Packed 32-bit value that matches CFGR2 layout for OVSE, TOVS,
+ *         OVSR[2:0] and OVSS[3:0].
+ *
+ *         Bit fields (match ADC_CFGR2 register layout):
+ *           [0]     = OVSE  (enable oversampling)
+ *           [1]     = TOVS  (triggered oversampling)
+ *           [4:2]   = OVSR  (ratio: 000=2x, ..., 111=256x)
+ *           [9:5]   = OVSS  (right shift: 00000=no shift, ..., 11111=31-bit)
+ *
+ * Returned Value:
+ *   OK (0) on success
+ *
+ ****************************************************************************/
+
+static int adc_ioc_set_oversample(struct adc_dev_s *dev, uint32_t arg)
+{
+  struct stm32_dev_s *priv = (struct stm32_dev_s *)dev->ad_priv;
+  uint32_t clrbits;
+  uint32_t setbits;
+
+  /* Mask out the oversampling-related fields from CFGR2:
+   * OVSE | TOVS | OVSR[2:0] | OVSS[3:0]
+   */
+
+  clrbits = ADC_CFGR2_ROVSE     |
+            ADC_CFGR2_TROVS     |
+            ADC_CFGR2_OVSR_MASK |
+            ADC_CFGR2_OVSS_MASK;
+
+  setbits = arg & (ADC_CFGR2_ROVSE     |
+                   ADC_CFGR2_TROVS     |
+                   ADC_CFGR2_OVSR_MASK |
+                   ADC_CFGR2_OVSS_MASK);
+
+  adc_modifyreg(priv, STM32_ADC_CFGR2_OFFSET, clrbits, setbits);
+  return OK;
+}
+
+#endif
+
 /****************************************************************************
  * Name: adc_ioctl
  *
@@ -1320,6 +1442,14 @@ static int adc_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg)
           adc_wdog_enable(priv);
         }
         break;
+
+#ifdef ADC_HAVE_OVERSAMPLE
+      case ANIOC_SET_OVERSAMPLE:
+        {
+          ret = adc_ioc_set_oversample(dev, arg);
+          break;
+        }
+#endif
 
       default:
         aerr("ERROR: Unknown cmd: %d\n", cmd);
