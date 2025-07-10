@@ -239,6 +239,9 @@ struct codec_ops_s
   CODE size_t (*capture_g_bufsize)(FAR void *priv);
   CODE size_t (*output_g_bufsize)(FAR void *priv);
 
+  CODE void *(*alloc_buf)(FAR void *priv, size_t size);
+  CODE void (*free_buf)(FAR void *priv, FAR void *addr);
+
   /* Stream type-dependent parameter ioctls */
 
   CODE int (*capture_g_parm)(FAR void *priv,

@@ -307,8 +307,18 @@ static int codec_reqbufs(FAR struct file *filep,
                                           reqbufs->count);
   if (ret == 0 && reqbufs->memory == V4L2_MEMORY_MMAP)
     {
-      kumm_free(type_inf->bufheap);
-      type_inf->bufheap = kumm_memalign(32, reqbufs->count * buf_size);
+      if (cmng->codec->ops->free_buf)
+        {
+          cmng->codec->ops->free_buf(cfile->priv, type_inf->bufheap);
+        }
+      else
+        {
+          kumm_free(type_inf->bufheap);
+        }
+
+      type_inf->bufheap = cmng->codec->ops->alloc_buf ?
+        cmng->codec->ops->alloc_buf(cfile->priv, reqbufs->count * buf_size) :
+        kumm_memalign(32, reqbufs->count * buf_size);
       if (type_inf->bufheap == NULL)
         {
           ret = -ENOMEM;
@@ -853,10 +863,18 @@ static int codec_close(FAR struct file *filep)
 
   video_framebuff_uninit(&cfile->capture_inf.bufinf);
   video_framebuff_uninit(&cfile->output_inf.bufinf);
-  kumm_free(cfile->capture_inf.bufheap);
-  kumm_free(cfile->output_inf.bufheap);
-  kmm_free(cfile);
+  if (cmng->codec->ops->free_buf)
+    {
+      cmng->codec->ops->free_buf(cfile->priv, cfile->capture_inf.bufheap);
+      cmng->codec->ops->free_buf(cfile->priv, cfile->output_inf.bufheap);
+    }
+  else
+    {
+      kumm_free(cfile->capture_inf.bufheap);
+      kumm_free(cfile->output_inf.bufheap);
+    }
 
+  kmm_free(cfile);
   return OK;
 }
 
