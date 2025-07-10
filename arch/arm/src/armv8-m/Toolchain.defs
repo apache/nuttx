@@ -81,14 +81,22 @@ else ifeq ($(CONFIG_ARCH_CORTEXM55),y)
   TOOLCHAIN_MARCH    := -march=armv8.1-m.main$(EXTCPUFLAGS)
   LLVM_CPUTYPE       := cortex-m55
   ifeq ($(CONFIG_ARCH_FPU),y)
-    TOOLCHAIN_MFLOAT := -mfpu=fpv5-d16
+    ifeq ($(CONFIG_ARCH_TOOLCHAIN_GCC),y)
+      TOOLCHAIN_MFLOAT := -mfpu=fpv5-d16
+    else ifeq ($(CONFIG_ARCH_TOOLCHAIN_CLANG),y)
+      TOOLCHAIN_MFLOAT := -mfpu=fp-armv8-fullfp16-d16
+    endif
   endif
 else ifeq ($(CONFIG_ARCH_CORTEXM85),y)
   TOOLCHAIN_MTUNE    := -mtune=cortex-m85
   TOOLCHAIN_MARCH    := -march=armv8.1-m.main$(EXTCPUFLAGS)
   LLVM_CPUTYPE       := cortex-m85
   ifeq ($(CONFIG_ARCH_FPU),y)
-    TOOLCHAIN_MFLOAT := -mfpu=fpv5-d16
+    ifeq ($(CONFIG_ARCH_TOOLCHAIN_GCC),y)
+      TOOLCHAIN_MFLOAT := -mfpu=fpv5-d16
+    else ifeq ($(CONFIG_ARCH_TOOLCHAIN_CLANG),y)
+      TOOLCHAIN_MFLOAT := -mfpu=fp-armv8-fullfp16-d16
+    endif
   endif
 endif
 
