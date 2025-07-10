@@ -103,11 +103,11 @@ static int w25_read_hex(FAR uint24_t *len)
 
   /* Open the W25 device for writing */
 
-  fd = open(W25_CHARDEV, O_WRONLY);
+  fd = open(W25_DEV, O_WRONLY);
   if (fd < 0)
     {
       ret = -errno;
-      fprintf(stderr, "ERROR: Failed to open %s: %d\n", W25_CHARDEV, ret);
+      fprintf(stderr, "ERROR: Failed to open %s: %d\n", W25_DEV, ret);
       return ret;
     }
 
@@ -206,11 +206,11 @@ static int w25_write_binary(FAR const struct prog_header_s *hdr)
 
   /* Open the W25 device for writing */
 
-  fd = open(W25_CHARDEV, O_WRONLY);
+  fd = open(W25_DEV, O_WRONLY);
   if (fd < 0)
     {
       ret = -errno;
-      fprintf(stderr, "ERROR: Failed to open %s: %d\n", W25_CHARDEV, ret);
+      fprintf(stderr, "ERROR: Failed to open %s: %d\n", W25_DEV, ret);
       return ret;
     }
 
@@ -290,7 +290,7 @@ static int w25_read_binary(FAR struct prog_header_s *hdr)
 
   /* Open the W25 device for reading */
 
-  fd = open(W25_CHARDEV, O_RDONLY);
+  fd = open(W25_DEV, O_RDONLY);
   if (fd < 0)
     {
       ret = -errno;
