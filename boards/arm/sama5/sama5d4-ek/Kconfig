@@ -157,24 +157,15 @@ config SAMA5D4EK_AT25_BLOCKMOUNT
 
 choice
 	prompt "AT25 serial FLASH configuration"
-	default SAMA5D4EK_AT25_FTL
+	default SAMA5D4EK_AT25_MTD
 	depends on SAMA5D4EK_AT25_BLOCKMOUNT
 
-config SAMA5D4EK_AT25_FTL
-	bool "Create AT25 Serial FLASH block driver"
+config SAMA5D4EK_AT25_MTD
+	bool "Create AT25 Serial FLASH MTD driver"
 	---help---
-		Create the MTD driver for the AT25 and "wrap" the AT25 as a standard
-		block driver that could then, for example, be mounted using FAT or
-		any other file system.  Any file system may be used, but there will
-		be no wear-leveling.
-
-config SAMA5D4EK_AT25_CHARDEV
-	bool "Create AT25 Serial FLASH character driver"
-	---help---
-		Create the MTD driver for the AT25 and "wrap" the AT25 as a standard
-		character driver that could then, for example, via simple open, close,
-		read, write file system operations.  There will be no wear-leveling
-		in this configuration.
+		Create the MTD driver for the AT25 that could then, for example,
+		be mounted using FAT or any other file system.  Any file system may be
+		used, but there will be no wear-leveling.
 
 config SAMA5D4EK_AT25_NXFFS
 	bool "Create AT25 serial FLASH NXFFS file system"

@@ -106,10 +106,7 @@ int stm32_bringup(void)
   struct mtd_dev_s *mtd_temp;
 #endif
 #if defined(HAVE_N25QXXX_CHARDEV)
-#if defined(CONFIG_BCH)
-  char blockdev[18];
-  char chardev[12];
-#endif /* defined(CONFIG_BCH) */
+  char mtddev[12];
 #endif
   int ret = OK;
 
@@ -231,31 +228,18 @@ int stm32_bringup(void)
         }
 
 #else /* if  defined(HAVE_N25QXXX_CHARDEV) */
-      /* Use the FTL layer to wrap the MTD driver as a block driver */
-
-      ret = ftl_initialize(N25QXXX_MTD_MINOR, g_mtd_fs);
-      if (ret < 0)
-        {
-          _err("ERROR: Failed to initialize the FTL layer: %d\n", ret);
-          return ret;
-        }
-
-#if defined(CONFIG_BCH)
       /* Use the minor number to create device paths */
 
-      snprintf(blockdev, sizeof(blockdev), "/dev/mtdblock%d",
-               N25QXXX_MTD_MINOR);
-      snprintf(chardev, sizeof(chardev), "/dev/mtd%d", N25QXXX_MTD_MINOR);
+      snprintf(mtddev, sizeof(mtddev), "/dev/mtd%d", N25QXXX_MTD_MINOR);
 
-      /* Now create a character device on the block device */
+      /* Register the MTD driver */
 
-      ret = bchdev_register(blockdev, chardev, false);
+      ret = register_mtddriver(mtddev, g_mtd_fs, 0755, NULL);
       if (ret < 0)
         {
-          _err("ERROR: bchdev_register %s failed: %d\n", chardev, ret);
+          _err("ERROR: register_mtddriver %s failed: %d\n", mtddev, ret);
           return ret;
         }
-#endif /* defined(CONFIG_BCH) */
 #endif
     }
 #endif
