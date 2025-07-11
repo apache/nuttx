@@ -43,9 +43,7 @@
 #include <nuttx/mtd/mtd.h>
 #include <nuttx/mtd/configdata.h>
 #include <nuttx/fs/nxffs.h>
-#ifdef CONFIG_BCH
-#include <nuttx/drivers/drivers.h>
-#endif
+#include <nuttx/fs/partition.h>
 
 #include "espressif/esp_spiflash.h"
 #include "espressif/esp_spiflash_mtd.h"
@@ -60,13 +58,6 @@
  * Private Types
  ****************************************************************************/
 
-struct ota_partition_s
-{
-  uint32_t    offset;          /* Partition offset from the beginning of MTD */
-  uint32_t    size;            /* Partition size in bytes */
-  const char *devpath;         /* Partition device path */
-};
-
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -80,22 +71,25 @@ static int init_ota_partitions(void);
  ****************************************************************************/
 
 #ifdef CONFIG_ESPRESSIF_HAVE_OTA_PARTITION
-static const struct ota_partition_s g_ota_partition_table[] =
+static const struct partition_s g_ota_partition_table[] =
 {
   {
-    .offset  = CONFIG_ESPRESSIF_OTA_PRIMARY_SLOT_OFFSET,
-    .size    = CONFIG_ESPRESSIF_OTA_SLOT_SIZE,
-    .devpath = CONFIG_ESPRESSIF_OTA_PRIMARY_SLOT_DEVPATH
+    .name       = CONFIG_ESPRESSIF_OTA_PRIMARY_SLOT_DEVPATH,
+    .index      = 0,
+    .firstblock = CONFIG_ESPRESSIF_OTA_PRIMARY_SLOT_OFFSET,
+    .blocksize  = CONFIG_ESPRESSIF_OTA_SLOT_SIZE,
   },
   {
-    .offset  = CONFIG_ESPRESSIF_OTA_SECONDARY_SLOT_OFFSET,
-    .size    = CONFIG_ESPRESSIF_OTA_SLOT_SIZE,
-    .devpath = CONFIG_ESPRESSIF_OTA_SECONDARY_SLOT_DEVPATH
+    .name       = CONFIG_ESPRESSIF_OTA_SECONDARY_SLOT_DEVPATH,
+    .index      = 1,
+    .firstblock = CONFIG_ESPRESSIF_OTA_SECONDARY_SLOT_OFFSET,
+    .blocksize  = CONFIG_ESPRESSIF_OTA_SLOT_SIZE,
   },
   {
-    .offset  = CONFIG_ESPRESSIF_OTA_SCRATCH_OFFSET,
-    .size    = CONFIG_ESPRESSIF_OTA_SCRATCH_SIZE,
-    .devpath = CONFIG_ESPRESSIF_OTA_SCRATCH_DEVPATH
+    .name       = CONFIG_ESPRESSIF_OTA_SCRATCH_DEVPATH,
+    .index      = 2,
+    .firstblock = CONFIG_ESPRESSIF_OTA_SCRATCH_OFFSET,
+    .blocksize  = CONFIG_ESPRESSIF_OTA_SCRATCH_SIZE,
   }
 };
 #endif
@@ -127,14 +121,14 @@ static int init_ota_partitions(void)
 
   for (i = 0; i < nitems(g_ota_partition_table); ++i)
     {
-      const struct ota_partition_s *part = &g_ota_partition_table[i];
-      mtd = esp_spiflash_alloc_mtdpart(part->offset, part->size);
+      const struct partition_s *part = &g_ota_partition_table[i];
+      mtd = esp_spiflash_alloc_mtdpart(part->firstblock, part->blocksize);
 
-      ret = register_mtddriver(part->devpath, mtd, 0755, NULL);
+      ret = register_mtddriver(part->name, mtd, 0755, NULL);
       if (ret < 0)
         {
-          ferr("ERROR: register_mtddriver %s failed: %d\n",
-               part->devpath, ret);
+          syslog(LOG_ERR, "ERROR: register_mtddriver %s failed: %d\n",
+                 part->name, ret);
           return ret;
         }
     }
@@ -451,12 +445,6 @@ static int init_storage_partition(void)
       return ret;
     }
 
-  ret = register_mtddriver("/dev/mtdblock0", mtd, 0755, NULL);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to register MTD mtdblock0: %d\n", ret);
-      return ret;
-    }
 #endif
 
   return ret;
@@ -503,4 +491,3 @@ int board_spiflash_init(void)
 
   return ret;
 }
-
