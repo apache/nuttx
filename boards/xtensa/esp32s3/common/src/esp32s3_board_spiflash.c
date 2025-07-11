@@ -27,6 +27,7 @@
 #include <nuttx/config.h>
 
 #include <sys/mount.h>
+#include <sys/param.h>
 
 #include "inttypes.h"
 #include <stdbool.h>
@@ -40,12 +41,7 @@
 #include <nuttx/spi/spi.h>
 #include <nuttx/mtd/mtd.h>
 #include <nuttx/fs/nxffs.h>
-#ifdef CONFIG_MTD_PARTITION
 #include <nuttx/fs/partition.h>
-#endif
-#ifdef CONFIG_BCH
-#include <nuttx/drivers/drivers.h>
-#endif
 
 #include "esp32s3_spiflash.h"
 #include "esp32s3_spiflash_mtd.h"
@@ -54,9 +50,94 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#ifdef CONFIG_ESP32S3_OTA_PARTITION_ENCRYPT
+#  define OTA_ENCRYPT true
+#else
+#  define OTA_ENCRYPT false
+#endif
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32S3_HAVE_OTA_PARTITION
+static int init_ota_partitions(void);
+#endif
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32S3_HAVE_OTA_PARTITION
+static const struct partition_s g_ota_partition_table[] =
+{
+  {
+    .name       = CONFIG_ESP32S3_OTA_PRIMARY_SLOT_DEVPATH,
+    .index      = 0,
+    .firstblock = CONFIG_ESP32S3_OTA_PRIMARY_SLOT_OFFSET,
+    .blocksize  = CONFIG_ESP32S3_OTA_SLOT_SIZE,
+  },
+  {
+    .name       = CONFIG_ESP32S3_OTA_SECONDARY_SLOT_DEVPATH,
+    .index      = 1,
+    .firstblock = CONFIG_ESP32S3_OTA_SECONDARY_SLOT_OFFSET,
+    .blocksize  = CONFIG_ESP32S3_OTA_SLOT_SIZE,
+  },
+  {
+    .name       = CONFIG_ESP32S3_OTA_SCRATCH_DEVPATH,
+    .index      = 2,
+    .firstblock = CONFIG_ESP32S3_OTA_SCRATCH_OFFSET,
+    .blocksize  = CONFIG_ESP32S3_OTA_SCRATCH_SIZE,
+  }
+};
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: init_ota_partitions
+ *
+ * Description:
+ *   Initialize partitions that are dedicated to firmware OTA update.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+ #ifdef CONFIG_ESP32S3_HAVE_OTA_PARTITION
+static int init_ota_partitions(void)
+{
+  struct mtd_dev_s *mtd;
+  int ret = OK;
+
+  for (int i = 0; i < nitems(g_ota_partition_table); ++i)
+    {
+      const struct partition_s *part = &g_ota_partition_table[i];
+      mtd = esp32s3_spiflash_alloc_mtdpart(part->firstblock, part->blocksize,
+                                           OTA_ENCRYPT);
+
+      ret = register_mtddriver(part->name, mtd, 0755, NULL);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR, "ERROR: register_mtddriver %s failed: %d\n",
+                 part->name, ret);
+          return ret;
+        }
+    }
+
+  return ret;
+}
+#endif
 
 /****************************************************************************
  * Name: setup_smartfs
@@ -334,22 +415,6 @@ static int init_storage_partition(void)
       return ret;
     }
 
-  ret = register_mtddriver("/dev/mtdblock0", mtd, 0755, NULL);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to register MTD mtdblock0: %d\n", ret);
-      return ret;
-    }
-
-#ifdef CONFIG_MTD_PARTITION
-  ret = parse_mtd_partition(mtd, NULL, NULL);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to parse MTD partition: %d\n", ret);
-      return ret;
-    }
-#endif /* CONFIG_MTD_PARTITION */
-
 #endif
 
   return ret;
@@ -377,6 +442,14 @@ int board_spiflash_init(void)
       return ret;
     }
 
+#ifdef CONFIG_ESP32S3_HAVE_OTA_PARTITION
+  ret = init_ota_partitions();
+  if (ret < 0)
+    {
+      return ret;
+    }
+#endif
+
   ret = init_storage_partition();
   if (ret < 0)
     {
@@ -385,4 +458,3 @@ int board_spiflash_init(void)
 
   return ret;
 }
-
