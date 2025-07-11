@@ -235,3 +235,13 @@ of type uint16_t, which corresponds to the LOW_THRESH register value.
 
 This command reads a value from a specific channel of the ADS1115. The argument passed should
 be a pointer to a struct adc_msg_s.
+
+.. c:macro:: ANIOC_ADS1115_TRIGGER_CONVERSION
+
+This command triggers an analog conversion on the ADS1115. The argument passed should be a pointer to a ``struct
+adc_msg_s``, where the member ``am_channel`` is initialized to the channel number the conversion should be started for.
+
+.. c:macro:: ANIOC_ADS1115_READ_CHANNEL_NO_CONVERSION
+
+This command reads the result of the last conversion on the ADS1115. The argument passed should be a pointer to a
+``struct adc_msg_s``, where the result of the conversion will be stored.
