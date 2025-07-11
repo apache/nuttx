@@ -605,6 +605,11 @@ process_all_directory_romfs()
 
 # Link step ##################################################################
 
+# Get linker option
+if(NOT DEFINED LINK_OPTION)
+  set(LINK_OPTION "-T")
+endif()
+
 # Get linker script to use
 get_property(ldscript GLOBAL PROPERTY LD_SCRIPT)
 
@@ -659,8 +664,7 @@ if(NOT CONFIG_ARCH_SIM)
     target_link_libraries(
       nuttx
       PRIVATE ${NUTTX_EXTRA_FLAGS}
-              -T
-              ${ldscript}
+              ${LINK_OPTION}${ldscript}
               $<$<NOT:$<BOOL:${DISABLE_LINK_GROUP}>>:-Wl,--start-group>
               ${nuttx_libs}
               $<$<NOT:$<BOOL:${DISABLE_LINK_GROUP}>>:-Wl,--end-group>)
@@ -755,8 +759,9 @@ else()
 
   # link the final nuttx binary
   add_dependencies(nuttx nuttx-rel)
-  target_link_options(nuttx PUBLIC $<$<NOT:$<BOOL:${APPLE}>>:-T nuttx.ld>
-                      $<$<BOOL:${CONFIG_SIM_M32}>:-m32>)
+  target_link_options(
+    nuttx PUBLIC $<$<NOT:$<BOOL:${APPLE}>>:${LINK_OPTION}nuttx.ld>
+    $<$<BOOL:${CONFIG_SIM_M32}>:-m32>)
 endif()
 
 # TODO: if we use an install target a manifest may not be needed
@@ -828,8 +833,7 @@ if(CONFIG_BUILD_PROTECTED)
 
   target_link_libraries(
     nuttx_user
-    PRIVATE -T
-            ${user_ldscript}
+    PRIVATE ${LINK_OPTION}${user_ldscript}
             $<$<NOT:$<BOOL:${DISABLE_LINK_GROUP}>>:-Wl,--start-group>
             ${nuttx_system_libs}
             ${nuttx_apps_libs}
