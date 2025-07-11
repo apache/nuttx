@@ -448,7 +448,7 @@ int arp_send_async(in_addr_t ipaddr, arp_send_finish_cb_t cb)
 
   if (!state)
     {
-      nerr("ERROR: %s \n", ENOMEM_STR);
+      nerr("ERROR: Out of memory\n");
       ret = -ENOMEM;
       goto errout;
     }

@@ -210,6 +210,10 @@ void sim_copyfullstate(xcpt_reg_t *dest, xcpt_reg_t *src);
 void *sim_doirq(int irq, void *regs);
 void  sim_unlock(void);
 
+/* sim_errno.c */
+
+int host_errno_convert(int errcode);
+
 /* sim_hostmisc.c ***********************************************************/
 
 void host_abort(int status);
