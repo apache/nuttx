@@ -71,10 +71,10 @@ else ifeq ($(CONFIG_ARCH_CHIP_AVR128DA28),y)
   ARCHCPUFLAGS += -mmcu=avr128da28
   LDFLAGS += -mavrxmega4
 else ifeq ($(CONFIG_ARCH_CHIP_AVR128DA64),y)
-  ARCHCPUFLAGS += -mmcu=avr128da28
+  ARCHCPUFLAGS += -mmcu=avr128da64
   LDFLAGS += -mavrxmega4
 else ifeq ($(CONFIG_ARCH_CHIP_AVR128DB64),y)
-  ARCHCPUFLAGS += -mmcu=avr128da28
+  ARCHCPUFLAGS += -mmcu=avr128db64
   LDFLAGS += -mavrxmega4
 else ifeq ($(CONFIG_ARCH_CHIP_AT90USB646),y)
   ARCHCPUFLAGS += -mmcu=at90usb646
