@@ -5955,6 +5955,16 @@ config BOARD_COREDUMP_BASE64STREAM
 	---help---
 		Enable based64 encoded stream instead of default hexstream.
 
+config BOARD_COREDUMP_PRINT_REGIONS
+	bool "Print memory regions before core dump"
+	default n
+	depends on COREDUMP && DEBUG_ALERT
+	---help---
+		Print the list of memory regions that will be dumped to the
+		syslog before the core dump is generated.  This is only a
+		diagnostic aid and is not required for a valid core dump, so it
+		is disabled by default to save code size.
+
 config BOARD_ENTROPY_POOL
 	bool "Enable Board level storing of entropy pool structure"
 	default n
