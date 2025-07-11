@@ -89,6 +89,8 @@ extern "C"
 
 EXTERN const IOBJ uint8_t avrdx_usart_ports[];
 EXTERN const IOBJ uint8_t avrdx_usart_tx_pins[];
+EXTERN const IOBJ uint8_t avrdx_usart_portmux_bits[];
+EXTERN const IOBJ uint8_t avrdx_usart_portmux_masks[];
 
 #endif
 
