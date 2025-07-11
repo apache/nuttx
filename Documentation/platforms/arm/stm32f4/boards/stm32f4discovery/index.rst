@@ -1970,6 +1970,27 @@ the second dongle you will connect to UART3 (PB10 and PB11).
 In the main NSH console (in USART2) type: "pts_test &". It will create a
 new console in UART3. Just press ENTER and start typing commands on it.
 
+sbutton
+-------
+
+This is a configuration to test the Single Button Dual Action feature.
+To test it just compile and flash nuttx.bin in the board. Then run the
+``kbd`` command inside ``nsh>`` and short press and long press User
+Button (B1) on the board.
+
+You will see something like this::
+
+     NuttShell (NSH) NuttX-12.10.0
+     nsh> kbd
+     kbd_main: nsamples: 0
+     kbd_main: Opening /dev/kbd0
+     Sample  :
+        code : 65
+        type : 0
+     Sample  :
+        code : 66
+        type : 0
+
 sporadic
 --------
 

@@ -622,6 +622,47 @@ config INPUT_BUTTONS_NPOLLWAITERS
 
 endif # INPUT_BUTTONS
 
+config INPUT_SBUTTON
+	bool "Single Button Multi Actions"
+	select INPUT_KEYBOARD
+	default n
+	---help---
+		Enable the Single Button Multi Actions upper half driver.
+		This driver allows using a single button to generate two
+		events (mapped to short press and long press). Using it
+		is possible navigate a menu interface when using with a
+		LCD/OLED display.
+
+if INPUT_SBUTTON
+
+config INPUT_SBUTTON_KEY1
+	int "ASCII code to generate for short press"
+	default 9
+	---help---
+		Which key will be generated when user do a short press.
+		Default key is TAB (ASCII 9)
+
+config INPUT_SBUTTON_KEY2
+	int "ASCII code to generate for long press"
+	default 13
+	---help---
+		Which key will be generated when user do a short press.
+		Default key is ENTER (ASCII 13)
+
+config INPUT_SBUTTON_BUFSIZE
+	int "Buffer size to store keys"
+	default 8
+
+config INPUT_SBUTTON_KEY_THRESH_MS
+	int "Threshold in milliseconds for short press"
+	default 500
+
+config INPUT_SBUTTON_KEY_DEBOUNCE_MS
+	int "Key Debounce value in milliseconds"
+	default 30
+
+endif # INPUT_SBUTTON
+
 config INPUT_DJOYSTICK
 	bool "Discrete Joystick"
 	default n
