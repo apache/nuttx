@@ -154,4 +154,8 @@ if(CONFIG_STEPPER_DRV8825)
   list(APPEND SRCS stm32_drv8825.c)
 endif()
 
+if(CONFIG_INPUT_SBUTTON)
+  list(APPEND SRCS stm32_sbutton.c)
+endif()
+
 target_sources(board PRIVATE ${SRCS})
