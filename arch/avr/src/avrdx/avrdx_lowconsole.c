@@ -65,7 +65,7 @@
 #ifdef CONFIG_MCU_SERIAL
 static const IOBJ uint32_t avrdx_usart_baud[] =
 {
-#  ifdef CONFIG_AVR_HAS_USART_2
+#  ifdef CONFIG_AVR_HAVE_USART_2
 
 #    if defined(CONFIG_USART0_SERIALDRIVER)
   CONFIG_USART0_BAUD,
@@ -85,9 +85,9 @@ static const IOBJ uint32_t avrdx_usart_baud[] =
   0
 #    endif
 
-  #  endif /* ifdef CONFIG_AVR_HAS_USART_2 */
+  #  endif /* ifdef CONFIG_AVR_HAVE_USART_2 */
 
-#  ifdef CONFIG_AVR_HAS_USART_4
+#  ifdef CONFIG_AVR_HAVE_USART_4
 #    if defined(CONFIG_USART3_SERIALDRIVER)
   , CONFIG_USART3_BAUD
 #    else
@@ -98,15 +98,15 @@ static const IOBJ uint32_t avrdx_usart_baud[] =
 #    else
   , 0
 #    endif
-#  endif /* ifdef CONFIG_AVR_HAS_USART_4 */
+#  endif /* ifdef CONFIG_AVR_HAVE_USART_4 */
 
-#  ifdef CONFIG_AVR_HAS_USART_5
+#  ifdef CONFIG_AVR_HAVE_USART_5
 #    if defined(CONFIG_USART5_SERIALDRIVER)
   , CONFIG_USART5_BAUD
 #    else
   , 0
 #    endif
-#  endif /* ifdef CONFIG_AVR_HAS_USART_5 */
+#  endif /* ifdef CONFIG_AVR_HAVE_USART_5 */
 };
 
 /* Peripheral settings for USARTn.CTRLC. Combined from multiple Kconfig
@@ -115,7 +115,7 @@ static const IOBJ uint32_t avrdx_usart_baud[] =
 
 static const IOBJ uint8_t avrdx_usart_ctrlc[] =
 {
-#  ifdef CONFIG_AVR_HAS_USART_2
+#  ifdef CONFIG_AVR_HAVE_USART_2
 
   /* USART0 */
 
@@ -219,11 +219,11 @@ static const IOBJ uint8_t avrdx_usart_ctrlc[] =
   0
 #    endif /* if defined(CONFIG_USART2_SERIALDRIVER) */
 
-#  endif /* ifdef CONFIG_AVR_HAS_USART_2 */
+#  endif /* ifdef CONFIG_AVR_HAVE_USART_2 */
 
   /* Definitions for chips that have USART4 */
 
-#  ifdef CONFIG_AVR_HAS_USART_4
+#  ifdef CONFIG_AVR_HAVE_USART_4
 
   /* USART3 */
 
@@ -293,11 +293,11 @@ static const IOBJ uint8_t avrdx_usart_ctrlc[] =
   , 0
 #    endif /* if defined(CONFIG_USART4_SERIALDRIVER) */
 
-#  endif /* ifdef CONFIG_AVR_HAS_USART_4 */
+#  endif /* ifdef CONFIG_AVR_HAVE_USART_4 */
 
   /* Definitions for chips that have USART5 */
 
-#  ifdef CONFIG_AVR_HAS_USART_5
+#  ifdef CONFIG_AVR_HAVE_USART_5
 
   /* USART5 */
 
@@ -333,7 +333,7 @@ static const IOBJ uint8_t avrdx_usart_ctrlc[] =
   , 0
 #    endif /* if defined(CONFIG_USART5_SERIALDRIVER) */
 
-#  endif /* ifdef CONFIG_AVR_HAS_USART_5 */
+#  endif /* ifdef CONFIG_AVR_HAVE_USART_5 */
 };
 
 #endif /* ifdef CONFIG_MCU_SERIAL */
@@ -406,6 +406,7 @@ void avrdx_usart_reset(struct avrdx_uart_priv_s *priv)
 
 void avrdx_usart_configure(struct avrdx_uart_priv_s *priv)
 {
+  volatile uint8_t *portmux_reg;
   irqstate_t irqstate;
   uint32_t baud_temp; /* Being calculated, needs 32 bits */
   uint32_t temp32;
@@ -471,7 +472,33 @@ void avrdx_usart_configure(struct avrdx_uart_priv_s *priv)
 
   usart->CTRLC = avrdx_usart_ctrlc[priv->usart_n];
 
-  /* 3. configure TXD pin as output */
+  /* 3. configure port multiplexer and set TXD pin as output */
+
+#  ifdef PORTMUX_USARTROUTEB
+  if (priv->usart_n < 4)
+#  endif
+    {
+      portmux_reg = &(PORTMUX.USARTROUTEA);
+    }
+#  ifdef PORTMUX_USARTROUTEB
+  else
+    {
+      portmux_reg = &(PORTMUX.USARTROUTEB);
+    }
+#  endif
+
+  /* In theory, only the kernel should manipulate this register
+   * and the value written is static (chosen by configuration.)
+   * That means there should be no need to reset it. Still doing it,
+   * runaway application may do accidental writes.
+   */
+
+  *(portmux_reg) = \
+    (\
+      *(portmux_reg) & \
+      ~(avrdx_usart_portmux_masks[priv->usart_n]) \
+    ) | \
+    avrdx_usart_portmux_bits[priv->usart_n];
 
   AVRDX_USART_PORT(priv->usart_n).DIRSET = \
     avrdx_usart_tx_pins[priv->usart_n];

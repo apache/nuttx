@@ -8,17 +8,55 @@ comment "AVR DA/DB Configuration Options"
 
 # Hidden configuration options selected by specific chip
 # Available serial ports
-config AVR_HAS_USART_2
+config AVR_HAVE_USART_2
 	bool
 	default n
+	---help---
+		Chip has USART 2 (and also 0 and 1)
 
-config AVR_HAS_USART_4
+config AVR_HAVE_USART_4
 	bool
 	default n
+	---help---
+		Chip has USART 4 (and also 3)
 
-config AVR_HAS_USART_5
+config AVR_HAVE_USART_5
 	bool
 	default n
+	---help---
+		Chip has USART 5
+
+# Available alternate pinouts for serial ports
+# USART0 omitted, all chips have that
+config AVR_HAVE_USART1_ALT1
+	bool
+	default n
+	---help---
+		Chip has alternate pin position for USART 1
+
+config AVR_HAVE_USART2_ALT1
+	bool
+	default n
+	---help---
+		Chip has alternate pin position for USART 2
+
+config AVR_HAVE_USART3_ALT1
+	bool
+	default n
+	---help---
+		Chip has alternate pin position for USART 3
+
+config AVR_HAVE_USART4_ALT1
+	bool
+	default n
+	---help---
+		Chip has alternate pin position for USART 4
+
+config AVR_HAVE_USART5_ALT1
+	bool
+	default n
+	---help---
+		Chip has alternate pin position for USART 5
 
 # Available I/O ports (only those not common for all devices)
 config AVR_HAS_PORTB
@@ -40,16 +78,21 @@ choice
 config ARCH_CHIP_AVR128DA28
 	bool "AVR128DA28"
 	select AVR_HAS_RAMPZ
-	select AVR_HAS_USART_2
+	select AVR_HAVE_USART_2
 	---help---
 		Atmel AVR128DA28 8-bit AVR.
 
 config ARCH_CHIP_AVR128DA64
 	bool "AVR128DA64"
 	select AVR_HAS_RAMPZ
-	select AVR_HAS_USART_2
-	select AVR_HAS_USART_4
-	select AVR_HAS_USART_5
+	select AVR_HAVE_USART_2
+	select AVR_HAVE_USART1_ALT1
+	select AVR_HAVE_USART2_ALT1
+	select AVR_HAVE_USART_4
+	select AVR_HAVE_USART3_ALT1
+	select AVR_HAVE_USART4_ALT1
+	select AVR_HAVE_USART_5
+	select AVR_HAVE_USART5_ALT1
 	select AVR_HAS_PORTB
 	select AVR_HAS_PORTE
 	select AVR_HAS_PORTG
@@ -59,9 +102,14 @@ config ARCH_CHIP_AVR128DA64
 config ARCH_CHIP_AVR128DB64
 	bool "AVR128DB64"
 	select AVR_HAS_RAMPZ
-	select AVR_HAS_USART_2
-	select AVR_HAS_USART_4
-	select AVR_HAS_USART_5
+	select AVR_HAVE_USART_2
+	select AVR_HAVE_USART1_ALT1
+	select AVR_HAVE_USART2_ALT1
+	select AVR_HAVE_USART_4
+	select AVR_HAVE_USART3_ALT1
+	select AVR_HAVE_USART4_ALT1
+	select AVR_HAVE_USART_5
+	select AVR_HAVE_USART5_ALT1
 	select AVR_HAS_PORTB
 	select AVR_HAS_PORTE
 	select AVR_HAS_PORTG
@@ -87,97 +135,198 @@ config AVR_USART0
 	bool "Enable serial driver for USART0"
 	select USART0_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
-	depends on AVR_HAS_USART_2
+	depends on AVR_HAVE_USART_2
 	depends on SERIAL
 	---help---
 		Enable serial driver on USART0
 
-config AVR_USART0_ALT
-	bool "Activate USART0 alternative pinout"
+choice AVR_USART0_MUX
+	prompt "USART0 pin selection"
 	depends on AVR_USART0
+	default AVR_USART0_DEFAULT
+	---help---
+		Select which I/O pins will be driven by USART0 interface.
+		Refer to I/O Multiplexing and Port Multiplexer sections
+		in chip documentation for specifics.
+
+config AVR_USART0_DEFAULT
+	bool "Default USART0 pinout"
+
+config AVR_USART0_ALT
+	bool "Alternate USART0 pinout"
 	---help---
 		Board is wired to use alternative I/O pins,
 		4-5 instead of 0-1 for TxD/RxD
+
+config AVR_USART0_NONE
+	bool "Not connected"
+
+endchoice
 
 config AVR_USART1
 	bool "Enable serial driver for USART1"
 	select USART1_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
-	depends on AVR_HAS_USART_2
+	depends on AVR_HAVE_USART_2
 	depends on SERIAL
 	---help---
 		Enable serial driver on USART1
 
-config AVR_USART1_ALT
-	bool "Activate USART1 alternative pinout"
+choice AVR_USART1_MUX
+	prompt "USART1 pin selection"
 	depends on AVR_USART1
+	default AVR_USART1_DEFAULT
+	---help---
+		Select which I/O pins will be driven by USART1 interface.
+		Refer to I/O Multiplexing and Port Multiplexer sections
+		in chip documentation for specifics.
+
+config AVR_USART1_DEFAULT
+	bool "Default USART1 pinout"
+
+config AVR_USART1_ALT
+	depends on AVR_HAVE_USART1_ALT1
+	bool "Alternate USART1 pinout"
 	---help---
 		Board is wired to use alternative I/O pins,
 		4-5 instead of 0-1 for TxD/RxD
+
+config AVR_USART1_NONE
+	bool "Not connected"
+
+endchoice
 
 config AVR_USART2
 	bool "Enable serial driver for USART2"
 	select USART2_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
-	depends on AVR_HAS_USART_2
+	depends on AVR_HAVE_USART_2
 	depends on SERIAL
 	---help---
 		Enable serial driver on USART2
 
-config AVR_USART2_ALT
-	bool "Activate USART2 alternative pinout"
+choice AVR_USART2_MUX
+	prompt "USART2 pin selection"
 	depends on AVR_USART2
+	default AVR_USART2_DEFAULT
+	---help---
+		Select which I/O pins will be driven by USART2 interface.
+		Refer to I/O Multiplexing and Port Multiplexer sections
+		in chip documentation for specifics.
+
+config AVR_USART2_DEFAULT
+	bool "Default USART2 pinout"
+
+config AVR_USART2_ALT
+	depends on AVR_HAVE_USART2_ALT1
+	bool "Alternate USART2 pinout"
 	---help---
 		Board is wired to use alternative I/O pins,
 		4-5 instead of 0-1 for TxD/RxD
+
+config AVR_USART2_NONE
+	bool "Not connected"
+
+endchoice
 
 config AVR_USART3
 	bool "Enable serial driver for USART3"
 	select USART3_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
-	depends on AVR_HAS_USART_4
+	depends on AVR_HAVE_USART_4
 	depends on SERIAL
 	---help---
 		Enable serial driver on USART3
 
-config AVR_USART3_ALT
-	bool "Activate USART3 alternative pinout"
+choice AVR_USART3_MUX
+	prompt "USART3 pin selection"
 	depends on AVR_USART3
+	default AVR_USART3_DEFAULT
+	---help---
+		Select which I/O pins will be driven by USART3 interface.
+		Refer to I/O Multiplexing and Port Multiplexer sections
+		in chip documentation for specifics.
+
+config AVR_USART3_DEFAULT
+	bool "Default USART3 pinout"
+
+config AVR_USART3_ALT
+	depends on AVR_HAVE_USART3_ALT1
+	bool "Alternate USART3 pinout"
 	---help---
 		Board is wired to use alternative I/O pins,
 		4-5 instead of 0-1 for TxD/RxD
+
+config AVR_USART3_NONE
+	bool "Not connected"
+
+endchoice
 
 config AVR_USART4
 	bool "Enable serial driver for USART4"
 	select USART4_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
-	depends on AVR_HAS_USART_4
+	depends on AVR_HAVE_USART_4
 	depends on SERIAL
 	---help---
 		Enable serial driver on USART1
 
-config AVR_USART4_ALT
-	bool "Activate USART4 alternative pinout"
+choice AVR_USART4_MUX
+	prompt "USART4 pin selection"
 	depends on AVR_USART4
+	default AVR_USART4_DEFAULT
+	---help---
+		Select which I/O pins will be driven by USART4 interface.
+		Refer to I/O Multiplexing and Port Multiplexer sections
+		in chip documentation for specifics.
+
+config AVR_USART4_DEFAULT
+	bool "Default USART4 pinout"
+
+config AVR_USART4_ALT
+	depends on AVR_HAVE_USART4_ALT1
+	bool "Alternate USART4 pinout"
 	---help---
 		Board is wired to use alternative I/O pins,
 		4-5 instead of 0-1 for TxD/RxD
+
+config AVR_USART4_NONE
+	bool "Not connected"
+
+endchoice
 
 config AVR_USART5
 	bool "Enable serial driver for USART5"
 	select USART5_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
-	depends on AVR_HAS_USART_5
+	depends on AVR_HAVE_USART_5
 	depends on SERIAL
 	---help---
 		Enable serial driver on USART5
 
-config AVR_USART5_ALT
-	bool "Activate USART5 alternative pinout"
+choice AVR_USART5_MUX
+	prompt "USART5 pin selection"
 	depends on AVR_USART5
+	default AVR_USART5_DEFAULT
+	---help---
+		Select which I/O pins will be driven by USART5 interface.
+		Refer to I/O Multiplexing and Port Multiplexer sections
+		in chip documentation for specifics.
+
+config AVR_USART5_DEFAULT
+	bool "Default USART5 pinout"
+
+config AVR_USART5_ALT
+	depends on AVR_HAVE_USART5_ALT1
+	bool "Alternate USART5 pinout"
 	---help---
 		Board is wired to use alternative I/O pins,
 		4-5 instead of 0-1 for TxD/RxD
+
+config AVR_USART5_NONE
+	bool "Not connected"
+
+endchoice
 
 endmenu # AVR DA/DB Peripheral Selections
 

@@ -156,13 +156,13 @@ static bool avrdx_usart_txempty(struct uart_dev_s *dev);
 
 static const IOBJ uint8_t avrdx_usart_rx_interrupts[] =
 {
-#  ifdef CONFIG_AVR_HAS_USART_2
+#  ifdef CONFIG_AVR_HAVE_USART_2
   AVRDX_IRQ_USART0_RXC, AVRDX_IRQ_USART1_RXC, AVRDX_IRQ_USART2_RXC
 #  endif
-#  ifdef CONFIG_AVR_HAS_USART_4
+#  ifdef CONFIG_AVR_HAVE_USART_4
   , AVRDX_IRQ_USART3_RXC, AVRDX_IRQ_USART4_RXC
 #  endif
-#  ifdef CONFIG_AVR_HAS_USART_5
+#  ifdef CONFIG_AVR_HAVE_USART_5
   , AVRDX_IRQ_USART5_RXC
 #  endif
 };
@@ -171,13 +171,13 @@ static const IOBJ uint8_t avrdx_usart_rx_interrupts[] =
 
 static const IOBJ uint8_t avrdx_usart_dre_interrupts[] =
 {
-#  ifdef CONFIG_AVR_HAS_USART_2
+#  ifdef CONFIG_AVR_HAVE_USART_2
   AVRDX_IRQ_USART0_DRE, AVRDX_IRQ_USART1_DRE, AVRDX_IRQ_USART2_DRE
 #  endif
-#  ifdef CONFIG_AVR_HAS_USART_4
+#  ifdef CONFIG_AVR_HAVE_USART_4
   , AVRDX_IRQ_USART3_DRE, AVRDX_IRQ_USART4_DRE
 #  endif
-#  ifdef CONFIG_AVR_HAS_USART_5
+#  ifdef CONFIG_AVR_HAVE_USART_5
   , AVRDX_IRQ_USART5_DRE
 #  endif
 };
@@ -221,11 +221,11 @@ static const struct uart_ops_s g_usart_ops =
  */
 
 #  ifdef CONFIG_MCU_SERIAL
-#    if defined(CONFIG_AVR_HAS_USART_5)
+#    if defined(CONFIG_AVR_HAVE_USART_5)
 static uart_dev_t *g_usart_ports[6];
-#    elif defined(CONFIG_AVR_HAS_USART_4)
+#    elif defined(CONFIG_AVR_HAVE_USART_4)
 static uart_dev_t *g_usart_ports[5];
-#    elif defined(CONFIG_AVR_HAS_USART_2)
+#    elif defined(CONFIG_AVR_HAVE_USART_2)
 static uart_dev_t *g_usart_ports[3];
 #    endif
 #  endif

@@ -78,16 +78,16 @@ static const IOBJ uint8_t avrdx_main_pdiv[] = \
 
 const IOBJ uint8_t avrdx_usart_ports[] =
 {
-#  ifdef CONFIG_AVR_HAS_USART_2
+#  ifdef CONFIG_AVR_HAVE_USART_2
   AVRDX_GPIO_PORTA_IDX,   /* A, C, F */
   AVRDX_GPIO_PORTC_IDX,
   AVRDX_GPIO_PORTF_IDX
 #  endif
-#  ifdef CONFIG_AVR_HAS_USART_4
+#  ifdef CONFIG_AVR_HAVE_USART_4
   , AVRDX_GPIO_PORTB_IDX  /* B, E */
   , AVRDX_GPIO_PORTE_IDX
 #  endif
-#  ifdef CONFIG_AVR_HAS_USART_5
+#  ifdef CONFIG_AVR_HAVE_USART_5
   , AVRDX_GPIO_PORTG_IDX  /* port G */
 #  endif
 };
@@ -100,7 +100,7 @@ const IOBJ uint8_t avrdx_usart_ports[] =
 
 const IOBJ uint8_t avrdx_usart_tx_pins[] =
 {
-#  ifdef CONFIG_AVR_HAS_USART_2
+#  ifdef CONFIG_AVR_HAVE_USART_2
 #    if !defined(CONFIG_AVR_USART0_ALT)
   PIN0_bm ,
 #    else
@@ -118,7 +118,7 @@ const IOBJ uint8_t avrdx_usart_tx_pins[] =
 #    endif
 #  endif
 
-#  ifdef CONFIG_AVR_HAS_USART_4
+#  ifdef CONFIG_AVR_HAVE_USART_4
 #    if !defined(CONFIG_AVR_USART3_ALT)
   , PIN0_bm
 #    else
@@ -131,7 +131,7 @@ const IOBJ uint8_t avrdx_usart_tx_pins[] =
 #    endif
 #  endif
 
-#  ifdef CONFIG_AVR_HAS_USART_5
+#  ifdef CONFIG_AVR_HAVE_USART_5
 #    if !defined(CONFIG_AVR_USART5_ALT)
   , PIN0_bm
 #    else
@@ -173,6 +173,127 @@ const IOBJ uint8_t avrdx_gpio_irq_vectors[] =
 #else
   , 0
 #endif
+};
+
+/* This array holds bits to be set in PORTMUX.USARTROUTEx registers
+ * depending on if the alternate pin position was configured.
+ * (Index is port index.)
+ */
+
+const IOBJ uint8_t avrdx_usart_portmux_bits[] =
+{
+#  ifdef CONFIG_AVR_HAVE_USART_2
+
+#    ifdef CONFIG_AVR_USART0
+#      if defined(CONFIG_AVR_USART0_DEFAULT)
+  PORTMUX_USART0_DEFAULT_GC,
+#      elif defined(CONFIG_AVR_USART0_ALT)
+  PORTMUX_USART0_ALT1_GC,
+#      elif defined(CONFIG_AVR_USART0_NONE)
+  PORTMUX_USART0_NONE_GC,
+#      else
+#        error Kconfig error, no option is set
+#      endif
+#    else /* AVR_USART0 not active, value will not be used */
+  PORTMUX_USART0_DEFAULT_GC,
+#    endif
+
+#    ifdef CONFIG_AVR_USART1
+#      if defined(CONFIG_AVR_USART1_DEFAULT)
+  PORTMUX_USART1_DEFAULT_GC,
+#      elif defined(CONFIG_AVR_USART1_ALT)
+  PORTMUX_USART1_ALT1_GC,
+#      elif defined(CONFIG_AVR_USART1_NONE)
+  PORTMUX_USART1_NONE_GC,
+#      else
+#        error Kconfig error, no option is set
+#      endif
+#    else /* AVR_USART1 not active, value will not be used */
+  PORTMUX_USART1_DEFAULT_GC,
+#    endif
+
+#    ifdef CONFIG_AVR_USART2
+#      if defined(CONFIG_AVR_USART2_DEFAULT)
+  PORTMUX_USART2_DEFAULT_GC
+#      elif defined(CONFIG_AVR_USART2_ALT)
+  PORTMUX_USART2_ALT1_GC
+#      elif defined(CONFIG_AVR_USART2_NONE)
+  PORTMUX_USART2_NONE_GC
+#      else
+#        error Kconfig error, no option is set
+#      endif
+#    else /* AVR_USART2 not active, value will not be used */
+  PORTMUX_USART2_DEFAULT_GC
+#    endif
+
+#  endif /* ifdef CONFIG_AVR_HAVE_USART_2 */
+
+#  ifdef CONFIG_AVR_HAVE_USART_4
+
+#    ifdef CONFIG_AVR_USART3
+#      if defined(CONFIG_AVR_USART3_DEFAULT)
+  , PORTMUX_USART3_DEFAULT_GC
+#      elif defined(CONFIG_AVR_USART3_ALT)
+  , PORTMUX_USART3_ALT1_GC
+#      elif defined(CONFIG_AVR_USART3_NONE)
+  , PORTMUX_USART3_NONE_GC
+#      else
+#        error Kconfig error, no option is set
+#      endif
+#    else /* AVR_USART3 not active, value will not be used */
+  , PORTMUX_USART3_DEFAULT_GC
+#    endif
+
+#    ifdef CONFIG_AVR_USART4
+#      if defined(CONFIG_AVR_USART4_DEFAULT)
+  , PORTMUX_USART4_DEFAULT_GC
+#      elif defined(CONFIG_AVR_USART4_ALT)
+  , PORTMUX_USART4_ALT1_GC
+#      elif defined(CONFIG_AVR_USART4_NONE)
+  , PORTMUX_USART4_NONE_GC
+#      else
+#        error Kconfig error, no option is set
+#      endif
+#    else /* AVR_USART4 not active, value will not be used */
+  , PORTMUX_USART4_DEFAULT_GC
+#    endif
+
+#  endif /* ifdef CONFIG_AVR_HAVE_USART_4 */
+
+#  ifdef CONFIG_AVR_HAVE_USART_5
+
+#    ifdef CONFIG_AVR_USART5
+#      if defined(CONFIG_AVR_USART5_DEFAULT)
+  , PORTMUX_USART5_DEFAULT_GC
+#      elif defined(CONFIG_AVR_USART5_ALT)
+  , PORTMUX_USART5_ALT1_GC
+#      elif defined(CONFIG_AVR_USART5_NONE)
+  , PORTMUX_USART5_NONE_GC
+#      else
+#        error Kconfig error, no option is set
+#      endif
+#    else /* AVR_USART5 not active, value will not be used */
+  , PORTMUX_USART5_DEFAULT_GC
+#    endif
+
+#  endif /* ifdef CONFIG_AVR_HAVE_USART_5 */
+};
+
+/* This array holds masks for bits affecting specific USART
+ * peripheral in PORTMUX.USARTROUTEx registers. (Index is port index.)
+ */
+
+const IOBJ uint8_t avrdx_usart_portmux_masks[] =
+{
+#  ifdef CONFIG_AVR_HAVE_USART_2
+  PORTMUX_USART0_GM, PORTMUX_USART1_GM, PORTMUX_USART2_GM
+#  endif
+#  ifdef CONFIG_AVR_HAVE_USART_4
+  , PORTMUX_USART3_GM, PORTMUX_USART4_GM
+#  endif
+#  ifdef CONFIG_AVR_HAVE_USART_5
+  , PORTMUX_USART5_GM
+#  endif
 };
 
 /****************************************************************************
