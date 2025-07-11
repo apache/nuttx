@@ -29,6 +29,9 @@ Enable Kconfig
 
       CONFIG_BOARD_COREDUMP_FULL=y        /* Default y, save all task information */
 
+Set ``CONFIG_BOARD_COREDUMP_PRINT_REGIONS=y`` to log the memory regions that
+go into the core dump before it is written.
+
 2. Run Coredump on nsh (CONFIG_SYSTEM_COREDUMP=y)
 
 Parameters of coredump tool

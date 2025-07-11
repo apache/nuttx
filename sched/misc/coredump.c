@@ -712,6 +712,35 @@ static void elf_emit_phdr(FAR struct elf_dumpinfo_s *cinfo,
 }
 
 /****************************************************************************
+ * Name: coredump_print_memory_regions
+ *
+ * Description:
+ *   Print out the memory range when coredump is generated.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BOARD_COREDUMP_PRINT_REGIONS
+static void
+coredump_print_memory_regions(FAR const struct memory_region_s *regions)
+{
+  int i;
+
+  if (regions == NULL)
+    {
+      _alert("No memory regions defined.\n");
+      return;
+    }
+
+  _alert("Memory regions will be printed:\n");
+  for (i = 0; regions[i].start < regions[i].end; i++)
+    {
+      _alert("Region[%d] start=0x%" PRIxPTR ", end=0x%" PRIxPTR "\n",
+             i, regions[i].start, regions[i].end);
+    }
+}
+#endif
+
+/****************************************************************************
  * Name: coredump_dump_syslog
  *
  * Description:
@@ -970,6 +999,10 @@ int coredump_initialize(void)
 
 void coredump_dump(pid_t pid)
 {
+#ifdef CONFIG_BOARD_COREDUMP_PRINT_REGIONS
+  coredump_print_memory_regions(g_regions);
+#endif
+
 #ifdef CONFIG_BOARD_COREDUMP_SYSLOG
   coredump_dump_syslog(pid);
 #endif
