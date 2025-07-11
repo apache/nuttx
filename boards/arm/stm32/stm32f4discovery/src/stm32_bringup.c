@@ -98,6 +98,10 @@
 #include "stm32_nunchuck.h"
 #endif
 
+#ifdef CONFIG_INPUT_SBUTTON
+#include "board_sbutton.h"
+#endif
+
 #ifdef CONFIG_SENSORS_ZEROCROSS
 #include "stm32_zerocross.h"
 #endif
@@ -449,6 +453,16 @@ int stm32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_INPUT_SBUTTON
+  /* Register the Single Button Dual Action driver */
+
+  ret = board_sbutton_initialize(0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_sbtn_initialize() failed: %d\n", ret);
     }
 #endif
 

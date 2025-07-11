@@ -465,6 +465,9 @@
 
 #define BOARD_XEN1210_GPIO_INT  GPIO_XEN1210_INT
 
+#define BOARD_SBUTTON_GPIO_INT (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|\
+                                GPIO_OPENDRAIN|GPIO_PORTA|GPIO_PIN0)
+
 /* Define what timer to use as XEN1210 CLK (will use channel 1) */
 
 #define BOARD_XEN1210_PWMTIMER   1
