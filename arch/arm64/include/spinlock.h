@@ -27,20 +27,12 @@
  * Included Files
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
-#  include <stdint.h>
-#endif /* __ASSEMBLY__ */
-
+#include <arch/types.h>
 #include <arch/barriers.h>
 
 /****************************************************************************
  * Pre-processor Prototypes
  ****************************************************************************/
-
-/* Spinlock states */
-
-#define SP_UNLOCKED 0  /* The Un-locked state */
-#define SP_LOCKED   1  /* The Locked state */
 
 /* Memory barriers for use with NuttX spinlock logic
  *
@@ -67,25 +59,6 @@
 #define UP_SEV() __asm__ __volatile__ ("sev" : : : "memory")
 
 #ifndef __ASSEMBLY__
-
-/* The Type of a spinlock.
- * ARM official document
- * ARM® Cortex®-A Series, Version: 1.0, Programmer’s Guide for ARMv8-A
- * ARM DEN0024A (ID050815)
- *
- * chapter 14.1.4 Synchronization
- *
- * The A64 instruction set has instructions for implementing
- * synchronization functions:
- * -- Load Exclusive (LDXR): LDXR W|Xt, [Xn]
- * -- Store Exclusive (STXR): STXR Ws, W|Xt, [Xn] where Ws
- *     indicates whether the store completed successfully.
- *     0 = success.
- * -- Clear Exclusive access monitor (CLREX) This is used to
- *     clear the state of the Local Exclusive Monitor.
- */
-
-typedef uint64_t spinlock_t;
 
 #if defined(CONFIG_ARCH_HAVE_TESTSET)
 static inline_function spinlock_t up_testset(volatile spinlock_t *lock)

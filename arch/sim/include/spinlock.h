@@ -27,24 +27,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <stdint.h>
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Must match definitions in up_testset.c */
-
-#define SP_UNLOCKED 0 /* The Un-locked state */
-#define SP_LOCKED   1 /* The Locked state */
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/* Must match definitions in up_testset.c */
-
-typedef uint8_t spinlock_t;
+#include <arch/types.h>
 
 /****************************************************************************
  * Public Functions Prototypes

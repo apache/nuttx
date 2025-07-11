@@ -40,6 +40,7 @@
 #include <nuttx/atomic.h>
 
 #include <nuttx/spinlock_type.h>
+#include <arch/spinlock.h>
 
 #undef EXTERN
 #if defined(__cplusplus)

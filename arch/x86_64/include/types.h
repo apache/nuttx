@@ -41,9 +41,24 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Spinlock states */
+
+#define SP_UNLOCKED 0  /* The Un-locked state */
+#define SP_LOCKED   1  /* The Locked state */
+
 /****************************************************************************
  * Type Declarations
  ****************************************************************************/
+
+#ifndef __ASSEMBLY__
+
+/* The Type of a spinlock */
+
+#ifdef CONFIG_SPINLOCK
+typedef _size_t spinlock_t;
+#endif
+
+#endif /* __ASSEMBLY__ */
 
 /****************************************************************************
  * Public Function Prototypes

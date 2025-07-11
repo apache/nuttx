@@ -27,37 +27,10 @@
  * Included Files
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
-#  include <stdint.h>
-#endif /* __ASSEMBLY__ */
-
+#include <arch/types.h>
 #include <arch/barriers.h>
 
-/****************************************************************************
- * Pre-processor Prototypes
- ****************************************************************************/
-
-/* Spinlock states */
-
-#define SP_UNLOCKED 0  /* The Un-locked state */
-#define SP_LOCKED   1  /* The Locked state */
-
-/* Memory barriers for use with NuttX spinlock logic
- *
- * Data Memory Barrier (DMB) acts as a memory barrier.
- * Data Synchronization Barrier (DSB) acts as a special kind of memory
- * barrier.
- */
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
 #ifndef __ASSEMBLY__
-
-/* The Type of a spinlock. */
-
-typedef long spinlock_t;
 
 /****************************************************************************
  * Public Function Prototypes

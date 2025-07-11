@@ -37,6 +37,11 @@
  * Pre-processor Prototypes
  ****************************************************************************/
 
+/* Spinlock states */
+
+#define SP_UNLOCKED 0  /* The Un-locked state */
+#define SP_LOCKED   1  /* The Locked state */
+
 /****************************************************************************
  * Type Declarations
  ****************************************************************************/
@@ -104,6 +109,25 @@ typedef unsigned long           _size_t;
 #else
 typedef signed int              _ssize_t;
 typedef unsigned int            _size_t;
+#endif
+
+/* The Type of a spinlock.
+ *
+ * ARMv6 architecture introduced the concept of exclusive accesses to memory
+ * locations in the form of the Load-Exclusive (LDREX) and Store-Exclusive
+ * (STREX) instructions in ARM and Thumb instruction sets.  ARMv6K extended
+ * this to included byte, halfword, and doubleword variants of LDREX and
+ * STREX.  ARMv7-M supports byte and halfword, but not the doubleword variant
+ * (ARMv6-M does not support exclusive access).
+ *
+ * ARM architectures prior to ARMv6 supported SWP and SWPB instructions that
+ * atomically swap a 32-bit word for byte value between a register and a
+ * memory location.  From the ARMv6 architecture, ARM deprecates the use
+ * of SWP and SWPB.
+ */
+
+#ifdef CONFIG_SPINLOCK
+typedef _uint8_t                spinlock_t;
 #endif
 
 /* This is the size of the interrupt state save returned by up_irq_save().

@@ -35,6 +35,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define SP_UNLOCKED 0  /* The Un-locked state */
+#define SP_LOCKED   1  /* The Locked state */
+
 /****************************************************************************
  * Type Declarations
  ****************************************************************************/
@@ -93,6 +96,20 @@ typedef unsigned long      _size_t;
 #else
 typedef signed int         _ssize_t;
 typedef unsigned int       _size_t;
+#endif
+
+/* The Type of a spinlock.
+ *
+ * This must be a uint32_ because it will be set using S32C1I instruction.
+ * That instruction atomically stores to a memory location only if its
+ * current value is the expected one.  The state register (SCOMPARE1) is
+ * used to provide the additional comparison operand. Some implementations
+ * also have a state register (ATOMCTL) for further control of the atomic
+ * operation in cache and on the PIF bus.
+ */
+
+#ifdef CONFIG_SPINLOCK
+typedef _uint32_t          spinlock_t;
 #endif
 
 /* This is the size of the interrupt state save returned by up_irq_save(). */

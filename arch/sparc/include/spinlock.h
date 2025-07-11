@@ -27,32 +27,9 @@
  * Included Files
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
-#  include <stdint.h>
-#endif /* __ASSEMBLY__ */
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define SP_UNLOCKED 0  /* The Un-locked state */
-#define SP_LOCKED   1  /* The Locked state */
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
+#include <arch/types.h>
 
 #ifndef __ASSEMBLY__
-
-/* The Type of a spinlock.
- *
- * This must be a uint32_ because it will be set using CASA instruction.
- * That instruction atomically Compare the 32-bitvalues in the register
- * and memory, if its current value is the expected one. swap the values
- * of second register with the memory.
- */
-
-typedef uint32_t spinlock_t;
 
 /****************************************************************************
  * Public Function Prototypes
