@@ -329,11 +329,13 @@ void idr_destroy(FAR struct idr_s *idr)
   nxmutex_lock(&idr->lock);
   RB_FOREACH_SAFE(node, idr_tree_s, &idr->removed, temp)
     {
+      RB_REMOVE(idr_tree_s, &idr->removed, node);
       lib_free(node);
     }
 
   RB_FOREACH_SAFE(node, idr_tree_s, &idr->alloced, temp)
     {
+      RB_REMOVE(idr_tree_s, &idr->alloced, node);
       lib_free(node);
     }
 
