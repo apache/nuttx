@@ -127,6 +127,8 @@ static void spi_dmarecvblock(struct spi_dev_s *dev,
 /* SPI methods */
 
 static int spi_lock(struct spi_dev_s *dev, bool lock);
+static void spi_enable_ssp(struct spi_dev_s *dev);
+static void spi_disable_ssp(struct spi_dev_s *dev);
 static uint32_t spi_setfrequency(struct spi_dev_s *dev,
                                  uint32_t frequency);
 static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode);
@@ -136,6 +138,7 @@ static void unused_code spi_exchange(struct spi_dev_s *dev,
                                      const void *txbuffer,
                                      void *rxbuffer,
                                      size_t nwords);
+
 #ifndef CONFIG_SPI_EXCHANGE
 static void spi_sndblock(struct spi_dev_s *dev, const void *buffer,
                          size_t nwords);
@@ -341,6 +344,50 @@ static int spi_lock(struct spi_dev_s *dev, bool lock)
 }
 
 /****************************************************************************
+ * Name: spi_enable_ssp
+ *
+ * Description:
+ *   Enable Spi PrimeCell SSP peripheral.
+ *
+ * Input Parameters:
+ *   dev - Device-specific state data
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void spi_enable_ssp(struct spi_dev_s *dev)
+{
+  struct rp23xx_spidev_s *priv = (struct rp23xx_spidev_s *)dev;
+  uint32_t regval = spi_getreg(priv, RP23XX_SPI_SSPCR1_OFFSET);
+  regval |= RP23XX_SPI_SSPCR1_SSE;
+  spi_putreg(priv, RP23XX_SPI_SSPCR1_OFFSET, regval);
+}
+
+/****************************************************************************
+ * Name: spi_disable_ssp
+ *
+ * Description:
+ *   Disable Spi PrimeCell SSP peripheral.
+ *
+ * Input Parameters:
+ *   dev - Device-specific state data
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void spi_disable_ssp(struct spi_dev_s *dev)
+{
+  struct rp23xx_spidev_s *priv = (struct rp23xx_spidev_s *)dev;
+  uint32_t regval = spi_getreg(priv, RP23XX_SPI_SSPCR1_OFFSET);
+  regval &= ~RP23XX_SPI_SSPCR1_SSE;
+  spi_putreg(priv, RP23XX_SPI_SSPCR1_OFFSET, regval);
+}
+
+/****************************************************************************
  * Name: spi_setfrequency
  *
  * Description:
@@ -382,6 +429,10 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev,
 
   divisor = (divisor + 1) & ~1;
 
+  /* Disable Spi PrimeCell SSP peripheral */
+
+  spi_disable_ssp(dev);
+
   /* Save the new divisor value */
 
   spi_putreg(priv, RP23XX_SPI_SSPCPSR_OFFSET, divisor);
@@ -394,6 +445,10 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev,
 
   priv->frequency = frequency;
   priv->actual    = actual;
+
+  /* Enable Spi PrimeCell SSP peripheral */
+
+  spi_enable_ssp(dev);
 
   spiinfo("Frequency %" PRId32 "->%" PRId32 "\n", frequency, actual);
   return actual;
@@ -425,6 +480,10 @@ static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
     {
       /* Yes... Set CR0 appropriately */
 
+      /* Disable Spi PrimeCell SSP peripheral */
+
+      spi_disable_ssp(dev);
+
       regval = spi_getreg(priv, RP23XX_SPI_SSPCR0_OFFSET);
       regval &= ~(RP23XX_SPI_SSPCR0_SPO | RP23XX_SPI_SSPCR0_SPH);
 
@@ -453,6 +512,10 @@ static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
         }
 
       spi_putreg(priv, RP23XX_SPI_SSPCR0_OFFSET, regval);
+
+      /* Enable Spi PrimeCell SSP peripheral */
+
+      spi_enable_ssp(dev);
 
       /* Save the mode so that subsequent re-configurations will be faster */
 
@@ -488,10 +551,18 @@ static void spi_setbits(struct spi_dev_s *dev, int nbits)
     {
       /* Yes... Set CR0 appropriately */
 
+      /* Disable Spi PrimeCell SSP peripheral */
+
+      spi_disable_ssp(dev);
+
       regval = spi_getreg(priv, RP23XX_SPI_SSPCR0_OFFSET);
       regval &= ~RP23XX_SPI_SSPCR0_DSS_MASK;
       regval |= ((nbits - 1) << RP23XX_SPI_SSPCR0_DSS_SHIFT);
       spi_putreg(priv, RP23XX_SPI_SSPCR0_OFFSET, regval);
+
+      /* Enable Spi PrimeCell SSP peripheral */
+
+      spi_enable_ssp(dev);
 
       /* Save the selection so that re-configurations will be faster
        */
