@@ -373,7 +373,7 @@ jobs:
       - name: Extract sources
         run: |
           7z x sources.tar.gz -y
-          7z x sources.tar -y
+          7z x sources.tar -y -snld
 
       - name: Run Builds
         run: |
