@@ -549,6 +549,19 @@ struct task_group_s
   rmutex_t   tg_mutex;              /* Mutex for group */
 };
 
+#ifdef CONFIG_SMP
+/* struct reprioritize_arg_s ************************************************/
+
+/* This structure defines arguments for task repriorization smp call */
+
+struct smpcall_arg_s
+{
+  cpu_set_t saved_affinity;
+  bool need_restore;
+  uintptr_t data;
+};
+#endif
+
 /* struct tcb_s *************************************************************/
 
 /* This is the common part of the task control block (TCB).
@@ -610,6 +623,7 @@ struct tcb_s
 #ifdef CONFIG_SMP
   uint8_t  cpu;                          /* CPU index if running/assigned   */
   cpu_set_t affinity;                    /* Bit set of permitted CPUs       */
+  struct smpcall_arg_s smpcall_arg;      /* Arguments for smp call  */
 #endif
   uint32_t flags;                        /* Misc. general status flags      */
   int16_t  lockcount;                    /* 0=preemptible (not-locked)      */

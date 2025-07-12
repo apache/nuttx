@@ -53,7 +53,9 @@
  */
 
 #define list_readytorun()        (&g_readytorun)
+#ifndef CONFIG_SMP
 #define list_pendingtasks()      (&g_pendingtasks)
+#endif
 #define list_waitingforsignal()  (&g_waitingforsignal)
 #define list_waitingforfill()    (&g_waitingforfill)
 #define list_stoppedtasks()      (&g_stoppedtasks)
@@ -203,7 +205,9 @@ extern FAR struct tcb_s *g_delivertasks[CONFIG_SMP_NCPUS];
  * currently active task has disabled pre-emption.
  */
 
+#ifndef CONFIG_SMP
 extern dq_queue_t g_pendingtasks;
+#endif
 
 /* This is the list of all tasks that are blocked waiting for a signal */
 
@@ -308,6 +312,10 @@ int nxthread_create(FAR const char *name, uint8_t ttype, int priority,
 /* Task list manipulation functions */
 
 bool nxsched_add_readytorun(FAR struct tcb_s *rtrtcb);
+#ifdef CONFIG_SMP
+bool nxsched_add_readytorun_cpu(FAR struct tcb_s *btcb,
+                                int cpu);
+#endif
 bool nxsched_remove_readytorun(FAR struct tcb_s *rtrtcb);
 void nxsched_remove_self(FAR struct tcb_s *rtrtcb);
 void nxsched_merge_prioritized(FAR dq_queue_t *list1, FAR dq_queue_t *list2,
@@ -388,6 +396,7 @@ static inline_function FAR struct tcb_s *this_task(void)
 #endif
 
 #ifdef CONFIG_SMP
+bool nxsched_switch_running(FAR struct tcb_s *btcb, int cpu);
 void nxsched_process_delivered(int cpu);
 #else
 #  define nxsched_select_cpu(a)     (0)
@@ -518,6 +527,19 @@ static inline_function bool nxsched_add_prioritized(FAR struct tcb_s *tcb,
 }
 
 #  ifdef CONFIG_SMP
+
+/* Return the current task running on a CPU, or, if task delivery is in
+ * process, the task which will be running after it is completed
+ */
+
+static inline_function FAR struct tcb_s *current_delivered(int cpu)
+{
+  FAR struct tcb_s *rtcb = current_task(cpu);
+  FAR struct tcb_s *dtcb = g_delivertasks[cpu];
+
+  return dtcb && dtcb->sched_priority > rtcb->sched_priority ? dtcb : rtcb;
+}
+
 static inline_function int nxsched_select_cpu(cpu_set_t affinity)
 {
   uint8_t minprio;
@@ -525,7 +547,7 @@ static inline_function int nxsched_select_cpu(cpu_set_t affinity)
   int i;
 
   minprio = SCHED_PRIORITY_MAX;
-  cpu     = 0xff;
+  cpu     = CONFIG_SMP_NCPUS;
 
   for (i = 0; i < CONFIG_SMP_NCPUS; i++)
     {
@@ -533,8 +555,7 @@ static inline_function int nxsched_select_cpu(cpu_set_t affinity)
 
       if ((affinity & (1 << i)) != 0)
         {
-          FAR struct tcb_s *rtcb = (FAR struct tcb_s *)
-                                   g_assignedtasks[i].head;
+          FAR struct tcb_s *rtcb = current_delivered(i);
 
           /* If this CPU is executing its IDLE task, then use it.  The
            * IDLE task is always the last task in the assigned task list.
@@ -549,7 +570,8 @@ static inline_function int nxsched_select_cpu(cpu_set_t affinity)
               DEBUGASSERT(rtcb->sched_priority == 0);
               return i;
             }
-          else if (rtcb->sched_priority <= minprio)
+          else if (rtcb->sched_priority <= minprio &&
+                   !nxsched_islocked_tcb(rtcb))
             {
               DEBUGASSERT(rtcb->sched_priority > 0);
               minprio = rtcb->sched_priority;
@@ -558,8 +580,34 @@ static inline_function int nxsched_select_cpu(cpu_set_t affinity)
         }
     }
 
-  DEBUGASSERT(cpu != 0xff);
   return cpu;
 }
+
+/* Remove and return a task which is eglible to run on one of the
+ * cpus defined by "affinity" and which has priority higher than
+ * "priority"
+ */
+
+static inline_function FAR struct tcb_s *nxsched_get_task(
+                                           DSEG dq_queue_t *list,
+                                           cpu_set_t affinity,
+                                           int priority)
+{
+  FAR struct tcb_s *tcb;
+
+  for (tcb = (FAR struct tcb_s *)list->head;
+       tcb && tcb->sched_priority > priority;
+       tcb = tcb->flink)
+    {
+      if (affinity & tcb->affinity)
+        {
+          dq_rem((FAR dq_entry_t *)tcb, list);
+          return tcb;
+        }
+    }
+
+  return NULL;
+}
+
 #  endif
 #endif /* __SCHED_SCHED_SCHED_H */

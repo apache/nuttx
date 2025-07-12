@@ -35,6 +35,7 @@
 
 #include "irq/irq.h"
 #include "sched/sched.h"
+#include "sched/queue.h"
 
 /****************************************************************************
  * Public Functions
@@ -72,6 +73,10 @@ void sched_unlock(void)
       if (rtcb != NULL && --rtcb->lockcount == 0)
         {
           irqstate_t flags = enter_critical_section_wo_note();
+#ifdef CONFIG_SMP
+          int cpu = rtcb->cpu;
+          FAR struct tcb_s *ptcb;
+#endif
 
           /* Note that we no longer have pre-emption disabled. */
 
@@ -85,13 +90,26 @@ void sched_unlock(void)
            * this task to be switched out!
            */
 
-          if (list_pendingtasks()->head != NULL)
+#ifdef CONFIG_SMP
+          ptcb = nxsched_get_task(list_readytorun(), 1 << cpu,
+                                  rtcb->sched_priority);
+          if (ptcb)
+            {
+              ptcb->task_state = TSTATE_TASK_INVALID;
+              if (nxsched_switch_running(ptcb, cpu))
+                {
+                  up_switch_context(ptcb, rtcb);
+                }
+            }
+#else
+          if (!dq_empty(list_pendingtasks()))
             {
               if (nxsched_merge_pending())
                 {
                   up_switch_context(this_task(), rtcb);
                 }
             }
+#endif
 
 #if CONFIG_RR_INTERVAL > 0
           /* If (1) the task that was running supported round-robin

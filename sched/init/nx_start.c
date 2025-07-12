@@ -242,11 +242,6 @@ static void tasklist_initialize(void)
   tlist[TSTATE_TASK_INVALID].list = NULL;
   tlist[TSTATE_TASK_INVALID].attr = 0;
 
-  /* TSTATE_TASK_PENDING */
-
-  tlist[TSTATE_TASK_PENDING].list = list_pendingtasks();
-  tlist[TSTATE_TASK_PENDING].attr = TLIST_ATTR_PRIORITIZED;
-
 #ifdef CONFIG_SMP
 
   /* TSTATE_TASK_READYTORUN */
@@ -268,6 +263,11 @@ static void tasklist_initialize(void)
                                     TLIST_ATTR_INDEXED |
                                     TLIST_ATTR_RUNNABLE;
 #else
+
+  /* TSTATE_TASK_PENDING */
+
+  tlist[TSTATE_TASK_PENDING].list = list_pendingtasks();
+  tlist[TSTATE_TASK_PENDING].attr = TLIST_ATTR_PRIORITIZED;
 
   /* TSTATE_TASK_READYTORUN */
 
