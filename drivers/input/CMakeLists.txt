@@ -106,6 +106,10 @@ if(CONFIG_INPUT)
     list(APPEND SRCS keyboard_upper.c)
   endif()
 
+  if(CONFIG_INPUT_SBUTTON)
+    list(APPEND SRCS sbutton.c)
+  endif()
+
   if(CONFIG_INPUT_DJOYSTICK)
     list(APPEND SRCS djoystick.c)
   endif()

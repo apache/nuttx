@@ -118,6 +118,10 @@ ifeq ($(CONFIG_INPUT_NUNCHUCK),y)
   CSRCS += nunchuck.c
 endif
 
+ifeq ($(CONFIG_INPUT_SBUTTON),y)
+  CSRCS += sbutton.c
+endif
+
 ifeq ($(CONFIG_INPUT_SPQ10KBD),y)
   CSRCS += spq10kbd.c
 endif
