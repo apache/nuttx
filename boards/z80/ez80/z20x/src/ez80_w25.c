@@ -74,37 +74,14 @@ int ez80_w25_initialize(int minor)
       return -ENODEV;
     }
 
-#if defined(CONFIG_Z20X_W25_BLOCKDEV)
-  /* Use the FTL layer to wrap the MTD driver as a block driver. */
+  /* Register the MTD driver */
 
-  ret = ftl_initialize(minor, mtd);
+  ret = register_mtddriver(W25_DEV, mtd, 0755, NULL);
   if (ret < 0)
     {
-      ferr("ERROR: Failed to initialize the FTL layer: %d\n", ret);
+      ferr("ERROR: register_mtddriver %s failed: %d\n", W25_DEV, ret);
       return ret;
     }
-
-#elif defined(CONFIG_Z20X_W25_CHARDEV)
-  /* Use the FTL layer to wrap the MTD driver as a block driver */
-
-  ret = ftl_initialize(minor, mtd);
-  if (ret < 0)
-    {
-      ferr("ERROR: Failed to initialize the FTL layer: %d\n", ret);
-      return ret;
-    }
-
-#if defined(CONFIG_BCH)
-  /* Create a character device on the block device */
-
-  ret = bchdev_register(W25_BLOCKDEV, W25_CHARDEV, false);
-  if (ret < 0)
-    {
-      ferr("ERROR: bchdev_register %s failed: %d\n", W25_CHARDEV, ret);
-      return ret;
-    }
-#endif /* defined(CONFIG_BCH) */
-#endif
 
   return OK;
 }

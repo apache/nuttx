@@ -55,8 +55,8 @@
 #  error CONFIG_SAMA5D4EK_AT25_BLOCKMOUNT must be selected
 #endif
 
-#ifndef CONFIG_SAMA5D4EK_AT25_CHARDEV
-#  error CONFIG_SAMA5D4EK_AT25_CHARDEV must be selected
+#ifndef CONFIG_SAMA5D4EK_AT25_MTD
+#  error CONFIG_SAMA5D4EK_AT25_MTD must be selected
 #endif
 
 #ifdef CONFIG_BOOT_SDRAM_DATA
