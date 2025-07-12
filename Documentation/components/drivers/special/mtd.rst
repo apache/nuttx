@@ -49,7 +49,28 @@ See include/nuttx/mtd/mtd.h for additional information.
    #. Provide that instance to the initialization method of the
       higher level device driver.
 
+-  **Registering MTD Drivers**. MTD partition can be registered as a
+   standard character device driver. This allows to perform standard
+   ``open/read/write/ioctl`` calls directly on the MTD layer (and thus
+   directly on raw flash). This has some advantages compared to FTL
+   and BCH layers used to register flash device. FTL layer has to buffer
+   the entire erase page, because write operation leads to erase page
+   read, erase and then write the modified buffer. Apart from larger
+   RAM memory consumption, the data may be lost during power cut off,
+   because erase takes a considerable amount of time. On the other hand,
+   an access with FTL/BCH layer takes care of page erase if needed, thus
+   simplifying the application logic.
+
+   Direct access through MTD layer can be faster and lower RAM consumption,
+   but the application has to take care of page erase before write if needed.
+   The erase can be performed by ioctl call ``MTDIOC_ERASESECTORS``.
+   The driver is registered with ``mtd_partition_register`` function call.
+
+   Configuration option ``CONFIG_MTD_PARTITION_REGISTER`` has to be selected
+   to support this feature.
+
 -  **Examples**: ``drivers/mtd/m25px.c`` and ``drivers/mtd/ftl.c``
+
 
 EEPROM
 ======

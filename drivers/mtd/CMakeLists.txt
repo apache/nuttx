@@ -33,6 +33,10 @@ if(CONFIG_MTD)
     list(APPEND SRCS mtd_partition.c)
   endif()
 
+  if(CONFIG_MTD_PARTITION_REGISTER)
+    list(APPEND SRCS mtd_register.c)
+  endif()
+
   if(CONFIG_MTD_SECT512)
     list(APPEND SRCS sector512.c)
   endif()
