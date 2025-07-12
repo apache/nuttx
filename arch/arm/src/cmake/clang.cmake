@@ -54,11 +54,14 @@ if(TOOLCHAIN_CLANG_CONFIG)
     set(TOOLCHAIN_CLANG_CONFIG ${TOOLCHAIN_CLANG_CONFIG}_nosys)
   elseif(CLANGVER STRGREATER_EQUAL "17.0")
     set(TOOLCHAIN_CLANG_OPTION -target)
-    add_compile_options(--target=arm-none-eabi)
+    set(TOOLCHAIN_CLANG_TARGET --target=arm-none-eabi)
   else()
     set(TOOLCHAIN_CLANG_OPTION --config)
   endif()
-  add_compile_options(${TOOLCHAIN_CLANG_OPTION} ${TOOLCHAIN_CLANG_CONFIG}.cfg)
+  add_compile_options(${TOOLCHAIN_CLANG_OPTION} ${TOOLCHAIN_CLANG_CONFIG}.cfg
+                      ${TOOLCHAIN_CLANG_TARGET})
+  add_link_options(${TOOLCHAIN_CLANG_OPTION} ${TOOLCHAIN_CLANG_CONFIG}.cfg
+                   ${TOOLCHAIN_CLANG_TARGET})
 endif()
 
 # override the ARCHIVE command
@@ -238,46 +241,3 @@ if(NOT CONFIG_CXX_RTTI)
 endif()
 
 set(PREPROCESS ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} -E -P -x c)
-
-# override nuttx_find_toolchain_lib
-
-set(NUTTX_FIND_TOOLCHAIN_LIB_DEFINED true)
-
-if(CONFIG_BUILTIN_TOOLCHAIN)
-  if(ARGN)
-    function(nuttx_find_toolchain_lib)
-      execute_process(
-        COMMAND ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} ${NUTTX_EXTRA_FLAGS}
-                --print-file-name=${ARGN}
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-        OUTPUT_VARIABLE extra_lib_path)
-      nuttx_add_extra_library(${extra_lib_path})
-    endfunction()
-  else()
-    function(nuttx_find_toolchain_lib)
-      execute_process(
-        COMMAND ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} ${NUTTX_EXTRA_FLAGS}
-                --print-libgcc-file-name
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-        OUTPUT_VARIABLE libgcc_path)
-      get_filename_component(libgcc_name ${libgcc_path} NAME)
-      execute_process(
-        COMMAND ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} ${NUTTX_EXTRA_FLAGS}
-                --print-file-name=${libgcc_name}
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-        OUTPUT_VARIABLE libgcc)
-      nuttx_add_extra_library(${libgcc})
-    endfunction()
-  endif()
-else()
-  function(nuttx_find_toolchain_lib)
-    if(ARGN)
-      execute_process(
-        COMMAND ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} ${NUTTX_EXTRA_FLAGS}
-                --print-file-name=${ARGN}
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-        OUTPUT_VARIABLE extra_lib_path)
-    endif()
-    nuttx_add_extra_library(${extra_lib_path})
-  endfunction()
-endif()
