@@ -1024,6 +1024,9 @@ static void zynq_uart_txint(struct uart_dev_s *dev, bool enable)
 {
   struct zynq_uart_port_s *port = (struct zynq_uart_port_s *)dev->priv;
   struct zynq_uart_config *config = &port->config;
+  irqstate_t flags;
+
+  flags = enter_critical_section();
 
   /* Write to Interrupt Enable Register (UART_IER) */
 
@@ -1048,6 +1051,8 @@ static void zynq_uart_txint(struct uart_dev_s *dev, bool enable)
       modreg32(XUARTPS_IXR_TXEMPTY, XUARTPS_IXR_TXEMPTY,
                config->uart + XUARTPS_IDR_OFFSET);
     }
+
+  leave_critical_section(flags);
 }
 
 /***************************************************************************
