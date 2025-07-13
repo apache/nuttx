@@ -95,7 +95,7 @@ begin_packed_struct struct nvs_ate
   uint16_t offset;       /* Data offset within block */
   uint16_t len;          /* Data len within block */
   uint16_t key_len;      /* Key string len */
-  uint8_t  part;         /* Part of a multipart data - future extension */
+  uint8_t  data_crc8;    /* Crc8 check of the data */
   uint8_t  crc8;         /* Crc8 check of the ate entry */
   uint8_t  expired[0];
 } end_packed_struct;
@@ -670,13 +670,15 @@ static void nvs_ate_crc8_update(FAR struct nvs_ate *entry)
  *
  ****************************************************************************/
 
-static bool nvs_ate_crc8_check(FAR const struct nvs_ate *entry)
+static bool nvs_ate_crc8_check(FAR struct nvs_fs *fs,
+                               FAR const struct nvs_ate *entry)
 {
   uint8_t ate_crc;
 
   ate_crc = crc8part((FAR const uint8_t *)entry,
                      offsetof(struct nvs_ate, crc8), 0xff);
-  return ate_crc == entry->crc8;
+  return ate_crc == entry->crc8 && (entry->len > 0 ||
+         entry->data_crc8 == 0 || entry->data_crc8 == fs->erasestate);
 }
 
 /****************************************************************************
@@ -716,7 +718,7 @@ static int nvs_ate_cmp_const(FAR const struct nvs_ate *entry,
 static bool nvs_ate_valid(FAR struct nvs_fs *fs,
                          FAR const struct nvs_ate *entry)
 {
-  return nvs_ate_crc8_check(entry) &&
+  return nvs_ate_crc8_check(fs, entry) &&
          entry->offset < (fs->blocksize - nvs_ate_size(fs)) &&
          (entry->key_len > 0 || entry->id == nvs_special_ate_id(fs));
 }
@@ -807,6 +809,7 @@ static int nvs_flash_wrt_entry(FAR struct nvs_fs *fs, uint32_t id,
   entry->offset = fs->data_wra & NVS_ADDR_OFFS_MASK;
   entry->len = len;
   entry->key_len = key_size;
+  entry->data_crc8 = crc8(data, len);
 
   nvs_ate_crc8_update(entry);
 
@@ -1654,6 +1657,7 @@ static ssize_t nvs_read_entry(FAR struct nvs_fs *fs, FAR const uint8_t *key,
   uint32_t rd_addr;
   uint32_t hist_addr;
   uint32_t hash_id;
+  uint8_t data_crc8;
   bool hit = true;
   int rc;
 
@@ -1731,6 +1735,19 @@ static ssize_t nvs_read_entry(FAR struct nvs_fs *fs, FAR const uint8_t *key,
         {
           ferr("Data read failed, rc=%d\n", rc);
           return rc;
+        }
+
+      if (len >= wlk_ate->len && wlk_ate->data_crc8 != fs->erasestate)
+        {
+          /* Do not compute CRC for partial reads as CRC won't match */
+
+          data_crc8 = crc8(data, wlk_ate->len);
+          if (wlk_ate->data_crc8 != data_crc8)
+            {
+              ferr("Invalid data crc: %" PRIx8 ", wlk_ate->data_crc8: "
+                   "%" PRIx8 "\n", data_crc8, wlk_ate->data_crc8);
+              return -EIO;
+            }
         }
     }
 
