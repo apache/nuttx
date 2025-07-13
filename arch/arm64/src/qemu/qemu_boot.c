@@ -179,7 +179,9 @@ void arm64_chip_boot(void)
    * configuration of board specific resources such as GPIOs, LEDs, etc.
    */
 
+#ifndef CONFIG_ARCH_CHIP_CUSTOM
   qemu_board_initialize();
+#endif
 
 #ifdef USE_EARLYSERIALINIT
   /* Perform early serial initialization if we are going to use the serial
