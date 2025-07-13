@@ -26,6 +26,7 @@
 
 #include <debug.h>
 #include <errno.h>
+#include <execinfo.h>
 #include <fcntl.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -70,6 +71,8 @@
 
 #define RPMSG_PORT_UART_TIMEOUT            100000 /* us */
 
+#define RPMSG_PORT_UART_BACKTRACE          12
+
 #define RPMSG_PORT_UART_EVT_WAKED          (1 << 0) /* Peer is waked state or not */
 #define RPMSG_PORT_UART_EVT_WAKING         (1 << 1) /* Local is waking peer or not */
 #define RPMSG_PORT_UART_EVT_CONNED         (1 << 2) /* Connected with peer or not */
@@ -111,6 +114,7 @@ struct rpmsg_port_uart_s
   int                             rx_dbg_idx;
   nxevent_t                       event;
   struct notifier_block           nb;       /* Reboot notifier block */
+  pid_t                           tx_tid;
   uint8_t                         tx_staywake;
 #ifdef CONFIG_PM
   struct pm_wakelock_s            tx_wakelock;
@@ -131,6 +135,7 @@ rpmsg_port_uart_queue_noavail(FAR struct rpmsg_port_s *port,
                               FAR struct rpmsg_port_queue_s *queue);
 static void rpmsg_port_uart_register_callback(FAR struct rpmsg_port_s *port,
                                               rpmsg_port_rx_cb_t callback);
+static void rpmsg_port_uart_dump(FAR struct rpmsg_port_s *port);
 
 static void rpmsg_port_uart_rx_worker(FAR struct rpmsg_port_uart_s *rpuart,
                                       bool process_rx);
@@ -145,6 +150,7 @@ static const struct rpmsg_port_ops_s g_rpmsg_port_uart_ops =
   .notify_rx_free       = NULL,
   .notify_queue_noavail = rpmsg_port_uart_queue_noavail,
   .register_callback    = rpmsg_port_uart_register_callback,
+  .dump                 = rpmsg_port_uart_dump,
 };
 
 /****************************************************************************
@@ -423,6 +429,38 @@ static void rpmsg_port_uart_register_callback(FAR struct rpmsg_port_s *port,
     (FAR struct rpmsg_port_uart_s *)port;
 
   rpuart->rx_cb = callback;
+}
+
+/****************************************************************************
+ * Name: rpmsg_port_uart_dump
+ ****************************************************************************/
+
+static void rpmsg_port_uart_dump(FAR struct rpmsg_port_s *port)
+{
+  FAR struct rpmsg_port_uart_s *rpuart =
+    (FAR struct rpmsg_port_uart_s *)port;
+
+  rpmsgvbs("Dump rpmsg port uart:\n");
+  rpmsgvbs("Event: 0x%x\n", rpuart->event.events);
+  if (rpuart->rx_tid != 0)
+    {
+      rpmsgvbs("Dump rx thread: %d\n", rpuart->rx_tid);
+      sched_dumpstack(rpuart->rx_tid);
+    }
+  else
+    {
+      rpmsgvbs("Rx thread not running\n");
+    }
+
+  if (rpuart->tx_tid != 0)
+    {
+      rpmsgvbs("Dump tx thread: %d\n", rpuart->tx_tid);
+      sched_dumpstack(rpuart->tx_tid);
+    }
+  else
+    {
+      rpmsgvbs("Tx thread not running\n");
+    }
 }
 
 /****************************************************************************
@@ -761,6 +799,8 @@ static int rpmsg_port_uart_tx_thread(int argc, FAR char *argv[])
     (FAR struct rpmsg_port_uart_s *)(uintptr_t)strtoul(argv[2], NULL, 16);
   FAR struct rpmsg_port_queue_s *txq = &rpuart->port.txq;
   FAR struct rpmsg_port_header_s *hdr;
+
+  rpuart->tx_tid = nxsched_gettid();
 
   rpmsg_port_uart_staywake(rpuart);
   if (!rpmsg_port_uart_check(rpuart, RPMSG_PORT_UART_EVT_CONNED))
