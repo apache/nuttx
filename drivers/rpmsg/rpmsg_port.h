@@ -124,6 +124,10 @@ struct rpmsg_port_ops_s
 
   CODE void (*register_callback)(FAR struct rpmsg_port_s *port,
                                  rpmsg_port_rx_cb_t callback);
+
+  /* Dump the transport debug information */
+
+  CODE void (*dump)(FAR struct rpmsg_port_s *port);
 };
 
 struct rpmsg_port_s

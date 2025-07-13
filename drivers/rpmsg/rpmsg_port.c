@@ -24,6 +24,8 @@
  * Included Files
  ****************************************************************************/
 
+#include <debug.h>
+#include <execinfo.h>
 #include <stdio.h>
 
 #include <nuttx/irq.h>
@@ -37,6 +39,8 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#define RPMSG_PORT_TIMEOUT_MS       15000
 
 #define RPMSG_PORT_BUF_TO_NODE(q,b) ((q)->node + ((FAR void *)(b) - (q)->buf) / (q)->len)
 #define RPMSG_PORT_NODE_TO_BUF(q,n) ((q)->buf + (((n) - (q)->node)) * (q)->len)
@@ -633,7 +637,14 @@ rpmsg_port_queue_get_available_buffer(FAR struct rpmsg_port_queue_s *queue,
             port->ops->notify_queue_noavail(port, queue) : -ENOTSUP;
       if (ret == -ENOTSUP)
         {
-          nxsem_wait_uninterruptible(&queue->free.sem);
+          ret = nxsem_tickwait_uninterruptible(
+            &queue->free.sem, MSEC2TICK(RPMSG_PORT_TIMEOUT_MS));
+          if (ret == -ETIMEDOUT)
+            {
+              rpmsgerr("Get buffer timeout, Dump debug information:\n");
+              dump_stack();
+              rpmsg_port_dump(&port->rpmsg);
+            }
         }
     }
 }
@@ -825,5 +836,10 @@ static void rpmsg_port_dump(FAR struct rpmsg_s *rpmsg)
   if (needunlock)
     {
       metal_mutex_release(&rdev->lock);
+    }
+
+  if (port->ops->dump)
+    {
+      port->ops->dump(port);
     }
 }
