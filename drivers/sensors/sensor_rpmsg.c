@@ -1201,6 +1201,11 @@ static void sensor_rpmsg_update_config(FAR struct sensor_rpmsg_dev_s *dev,
     {
       sensor_rpmsg_ioctl(dev, SNIOC_BATCH, state->min_latency, 0, false);
     }
+
+  if (state->wakeup)
+    {
+      sensor_rpmsg_ioctl(dev, SNIOC_SET_WAKEUP, state->wakeup, 0, false);
+    }
 }
 
 static int sensor_rpmsg_adv_handler(FAR struct rpmsg_endpoint *ept,
