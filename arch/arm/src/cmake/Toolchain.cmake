@@ -55,7 +55,7 @@ elseif(CONFIG_ARCH_TOOLCHAIN_ARMCLANG) # arm clang
   set(TOOLCHAIN_FILE armclang)
 elseif(CONFIG_ARCH_TOOLCHAIN_GHS) # greenhills
   set(TOOLCHAIN_FILE ghs)
-else() # gcc
+else()
   set(TOOLCHAIN_FILE gcc)
 endif()
 

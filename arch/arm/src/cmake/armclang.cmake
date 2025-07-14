@@ -32,9 +32,9 @@ set(CMAKE_PREPROCESSOR armclang -E -P -x c)
 set(CMAKE_STRIP llvm-strip --strip-unneeded)
 set(CMAKE_OBJCOPY llvm-objcopy)
 set(CMAKE_OBJDUMP llvm-objdump)
-set(CMAKE_LINKER armlink)
+set(CMAKE_LINKER armclang)
 set(CMAKE_LD armlink)
-set(CMAKE_AR armar -rcs)
+set(CMAKE_AR armar)
 set(CMAKE_NM llvm-nm)
 set(CMAKE_RANLIB llvm-ranlib)
 
@@ -42,6 +42,7 @@ set(CMAKE_RANLIB llvm-ranlib)
 # built-in functions, refer: https://github.com/apache/nuttx/pull/5971
 
 add_compile_options(-fno-builtin --target=arm-arm-none-eabi)
+add_link_options(--target=arm-arm-none-eabi)
 
 # Suppress license warning
 
@@ -64,7 +65,7 @@ add_link_options(-Wl,--diag_suppress=6329)
 
 # override the ARCHIVE command
 
-set(CMAKE_ARCHIVE_COMMAND "<CMAKE_AR> rcs <TARGET> <LINK_FLAGS> <OBJECTS>")
+set(CMAKE_ARCHIVE_COMMAND "<CMAKE_AR> -rcs <TARGET> <LINK_FLAGS> <OBJECTS>")
 set(CMAKE_RANLIB_COMMAND "<CMAKE_RANLIB> <TARGET>")
 set(CMAKE_C_ARCHIVE_CREATE ${CMAKE_ARCHIVE_COMMAND})
 set(CMAKE_CXX_ARCHIVE_CREATE ${CMAKE_ARCHIVE_COMMAND})
@@ -87,8 +88,9 @@ endif()
 # Architecture flags
 
 add_link_options(-Wl,--entry=__start)
-add_link_options(-nostdlib)
-add_compile_options(-fno-common -Wall -Wshadow -Wundef -nostdlib)
+add_link_options(-Wl,--undefined=__start)
+
+add_compile_options(-fno-common -Wall -Wshadow -Wundef)
 
 if(CONFIG_DEBUG_CUSTOMOPT)
   add_compile_options(${CONFIG_DEBUG_OPTLEVEL})
@@ -235,10 +237,26 @@ if(NOT CONFIG_CXX_EXCEPTION)
                       $<$<COMPILE_LANGUAGE:CXX>:-fcheck-new>)
 endif()
 
+add_compile_options(-fshort-enums)
+add_compile_options(-Wno-atomic-alignment)
+
 if(NOT CONFIG_CXX_RTTI)
   add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fno-rtti>)
 endif()
 
-set(CMAKE_EXE_LINKER_FLAGS_INIT "--specs=nosys.specs")
+set(LINK_OPTION_FLAG -Wl,--scatter=)
+set(DISABLE_LINK_GROUP true)
+set(PREPROCESS
+    ${CMAKE_C_COMPILER}
+    ${CMAKE_C_FLAG_ARGS}
+    -E
+    -P
+    -x
+    c
+    --target=arm-arm-none-eabi)
 
-set(PREPROCESS ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} -E -P -x c)
+set(NUTTX_FIND_TOOLCHAIN_LIB_DEFINED true)
+
+function(nuttx_find_toolchain_lib)
+
+endfunction()
