@@ -170,7 +170,7 @@ config ESPRESSIF_BOOTLOADER_MCUBOOT
 config ESPRESSIF_MCUBOOT_VERSION
 	string "MCUboot version"
 	depends on ESPRESSIF_BOOTLOADER_MCUBOOT
-	default "20f98e0a975c24864872e0df5701eb1082e9c957"
+	default "aa4fa2b6e17361dd3ce16a60883059778fd147a9"
 
 choice ESPRESSIF_ESPTOOL_TARGET_SLOT
 	prompt "Target slot for image flashing"
@@ -217,7 +217,7 @@ comment "Application Image OTA Update support"
 
 config ESPRESSIF_OTA_PRIMARY_SLOT_OFFSET
 	hex "Application image primary slot offset"
-	default 0x10000
+	default 0x20000
 
 config ESPRESSIF_OTA_PRIMARY_SLOT_DEVPATH
 	string "Application image primary slot device path"
@@ -225,7 +225,7 @@ config ESPRESSIF_OTA_PRIMARY_SLOT_DEVPATH
 
 config ESPRESSIF_OTA_SECONDARY_SLOT_OFFSET
 	hex "Application image secondary slot offset"
-	default 0x110000
+	default 0x120000
 
 config ESPRESSIF_OTA_SECONDARY_SLOT_DEVPATH
 	string "Application image secondary slot device path"
@@ -237,7 +237,7 @@ config ESPRESSIF_OTA_SLOT_SIZE
 
 config ESPRESSIF_OTA_SCRATCH_OFFSET
 	hex "Scratch partition offset"
-	default 0x210000
+	default 0x220000
 
 config ESPRESSIF_OTA_SCRATCH_SIZE
 	hex "Scratch partition size"
@@ -499,17 +499,49 @@ config ESPRESSIF_DMA
 	select ARCH_DMA
 
 config ESPRESSIF_EFUSE
-	bool "EFUSE support"
+	bool "E-Fuse support"
 	default n
 	---help---
 		Enable efuse support.
 
 config ESPRESSIF_EFUSE_VIRTUAL
-	bool "Virtual EFUSE support"
+	bool "Virtual E-Fuses support"
 	depends on ESPRESSIF_EFUSE
 	default n
 	---help---
-		Enable virtual efuse support to simulate eFuse operations in RAM, changes will be reverted each reboot
+		Enable virtual E-Fuse support to simulate E-Fuse operations in RAM.
+		Changes will be reverted each reboot unless enabling ESPRESSIF_EFUSE_VIRTUAL_KEEP_IN_FLASH.
+
+config ESPRESSIF_EFUSE_VIRTUAL_KEEP_IN_FLASH
+	bool "Keep E-Fuses in flash"
+	depends on ESPRESSIF_EFUSE_VIRTUAL
+	---help---
+		In addition to the "Virtual E-Fuses support" option, this option just adds
+		a feature to keep E-Fuses after reboots in flash memory.
+
+		During startup, the E-Fuses are copied from flash or,
+		in case if flash is empty, from real E-Fuse to RAM and then update flash.
+		This mode is useful when need to keep changes after reboots (testing secure_boot,
+		flash_encryption or using MCUBoot + encryption).
+
+if ESPRESSIF_EFUSE_VIRTUAL_KEEP_IN_FLASH
+
+config ESPRESSIF_EFUSE_VIRTUAL_KEEP_IN_FLASH_OFFSET
+	hex "E-Fuses offset in flash"
+	depends on ESPRESSIF_EFUSE_VIRTUAL_KEEP_IN_FLASH
+	default 0x10000 if ESPRESSIF_BOOTLOADER_MCUBOOT
+	default 0x250000 if !ESPRESSIF_BOOTLOADER_MCUBOOT
+	---help---
+		Offset in flash where the E-Fuses will be stored when using the "E-Fuses size to keep in flash" option.
+
+config ESPRESSIF_EFUSE_VIRTUAL_KEEP_IN_FLASH_SIZE
+	hex "E-Fuses size to keep in flash"
+	depends on ESPRESSIF_EFUSE_VIRTUAL_KEEP_IN_FLASH
+	default 0x2000
+	---help---
+		Size of E-Fuse region to keep in flash.
+
+endif # ESPRESSIF_EFUSE_VIRTUAL_KEEP_IN_FLASH
 
 config ESPRESSIF_HR_TIMER
 	bool
@@ -1861,7 +1893,7 @@ config ESPRESSIF_SPI_FLASH_USE_32BIT_ADDRESS
 config ESPRESSIF_STORAGE_MTD_OFFSET
 	hex "Storage MTD base address in SPI Flash"
 	default 0x180000 if !ESPRESSIF_BOOTLOADER_MCUBOOT
-	default 0x250000 if ESPRESSIF_BOOTLOADER_MCUBOOT
+	default 0x260000 if ESPRESSIF_BOOTLOADER_MCUBOOT
 	depends on ESPRESSIF_MTD
 	---help---
 		MTD base address in SPI Flash.
