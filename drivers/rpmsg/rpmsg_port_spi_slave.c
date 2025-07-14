@@ -650,7 +650,7 @@ static int rpmsg_port_spi_thread(int argc, FAR char *argv[])
 }
 
 /****************************************************************************
- * Name: rpmsg_port_spi_gpio_init
+ * Name: rpmsg_port_spi_init_gpio
  ****************************************************************************/
 
 static int
@@ -724,27 +724,6 @@ rpmsg_port_spi_init_hardware(FAR struct rpmsg_port_spi_s *rpspi,
       return -EINVAL;
     }
 
-  /* Init mreq gpio */
-
-  ret = rpmsg_port_spi_init_gpio(ioe, &rpspi->mreq, spicfg->mreq_pin,
-                                 spicfg->mreq_invert,
-                                 rpmsg_port_spi_mreq_handler, rpspi);
-  if (ret < 0)
-    {
-      rpmsgerr("mreq init failed\n");
-      return ret;
-    }
-
-  /* Init sreq gpio */
-
-  ret = rpmsg_port_spi_init_gpio(ioe, &rpspi->sreq, spicfg->sreq_pin,
-                                 spicfg->sreq_invert, NULL, NULL);
-  if (ret < 0)
-    {
-      rpmsgerr("sreq init failed\n");
-      return ret;
-    }
-
   rpspi->ioe = ioe;
   rpspi->spictrlr = spictrlr;
   rpspi->spislv.ops = &g_rpmsg_port_spi_slave_ops;
@@ -753,7 +732,32 @@ rpmsg_port_spi_init_hardware(FAR struct rpmsg_port_spi_s *rpspi,
   SPIS_CTRLR_BIND(spictrlr, &rpspi->spislv, spicfg->mode, spicfg->nbits);
   rpspi->bound = true;
 
+  /* Init sreq gpio */
+
+  ret = rpmsg_port_spi_init_gpio(ioe, &rpspi->sreq, spicfg->sreq_pin,
+                                 spicfg->sreq_invert, NULL, NULL);
+  if (ret < 0)
+    {
+      rpmsgerr("sreq init failed\n");
+      goto out;
+    }
+
+  /* Init mreq gpio */
+
+  ret = rpmsg_port_spi_init_gpio(ioe, &rpspi->mreq, spicfg->mreq_pin,
+                                 spicfg->mreq_invert,
+                                 rpmsg_port_spi_mreq_handler, rpspi);
+  if (ret < 0)
+    {
+      rpmsgerr("mreq init failed\n");
+      goto out;
+    }
+
   return 0;
+
+out:
+  SPIS_CTRLR_UNBIND(spictrlr);
+  return ret;
 }
 
 /****************************************************************************
