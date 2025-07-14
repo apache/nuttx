@@ -112,6 +112,18 @@ FAR void *net_rpmsg_drv_priv(FAR struct netdev_lowerhalf_s *dev);
 void net_rpmsg_drv_set_callback(FAR struct netdev_lowerhalf_s *dev,
                                 net_rpmsg_drv_cb_t cb, FAR void *priv);
 
+/****************************************************************************
+ * Name: net_rpmsg_drv_server_init
+ *
+ * Description:
+ *   Initialize the RPMSG network (for server side).
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_RPMSG_DRV_SERVER
+int net_rpmsg_drv_server_init(void);
+#endif
+
 #undef EXTERN
 #ifdef __cplusplus
 }
