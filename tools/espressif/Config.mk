@@ -106,7 +106,7 @@ define MERGEBIN
 		echo "Missing Flash memory size configuration."; \
 		exit 1; \
 	fi
-	esptool.py -c $(CHIP_SERIES) merge_bin --fill-flash-size $(FLASH_SIZE) --output nuttx.merged.bin $(ESPTOOL_BINS)
+	esptool -c $(CHIP_SERIES) merge_bin --fill-flash-size $(FLASH_SIZE) --output nuttx.merged.bin $(ESPTOOL_BINS)
 	$(Q) echo nuttx.merged.bin >> nuttx.manifest
 	$(Q) echo "Generated: nuttx.merged.bin"
 endef
@@ -136,7 +136,7 @@ define MKIMAGE
 		exit 1; \
 	fi
 	$(eval ELF2IMAGE_OPTS := $(if $(CONFIG_ESPRESSIF_SIMPLE_BOOT),--ram-only-header) -fs $(FLASH_SIZE) -fm $(FLASH_MODE) -ff $(FLASH_FREQ))
-	esptool.py -c $(CHIP_SERIES) elf2image $(ELF2IMAGE_OPTS) -o nuttx.bin nuttx
+	esptool -c $(CHIP_SERIES) elf2image $(ELF2IMAGE_OPTS) -o nuttx.bin nuttx
 	$(Q) echo nuttx.bin >> nuttx.manifest
 	$(Q) echo "Generated: nuttx.bin"
 endef
@@ -149,11 +149,11 @@ define POSTBUILD
 	$(if $(CONFIG_ESPRESSIF_MERGE_BINS),$(call MERGEBIN))
 endef
 
-# ESPTOOL_BAUD -- Serial port baud rate used when flashing/reading via esptool.py
+# ESPTOOL_BAUD -- Serial port baud rate used when flashing/reading via esptool
 
 ESPTOOL_BAUD ?= 921600
 
-# FLASH -- Download a binary image via esptool.py
+# FLASH -- Download a binary image via esptool
 
 define FLASH
 	$(Q) if [ -z $(ESPTOOL_PORT) ]; then \
@@ -164,5 +164,5 @@ define FLASH
 
 	$(eval ESPTOOL_OPTS := -c $(CHIP_SERIES) -p $(ESPTOOL_PORT) -b $(ESPTOOL_BAUD) $(if $(CONFIG_ESPRESSIF_ESPTOOLPY_NO_STUB),--no-stub))
 	$(eval WRITEFLASH_OPTS := $(if $(CONFIG_ESPRESSIF_MERGE_BINS),$(ESPTOOL_WRITEFLASH_OPTS) 0x0 nuttx.merged.bin,$(ESPTOOL_WRITEFLASH_OPTS) $(ESPTOOL_BINS)))
-	esptool.py $(ESPTOOL_OPTS) write_flash $(WRITEFLASH_OPTS)
+	esptool $(ESPTOOL_OPTS) write_flash $(WRITEFLASH_OPTS)
 endef
