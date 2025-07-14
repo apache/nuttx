@@ -1,0 +1,65 @@
+;=========================================================================
+; drivers/trace32/t32fdx.cmm
+;
+; SPDX-License-Identifier: Apache-2.0
+;
+; Licensed to the Apache Software Foundation (ASF) under one or more
+; contributor license agreements.  See the NOTICE file distributed with
+; this work for additional information regarding copyright ownership.  The
+; ASF licenses this file to you under the Apache License, Version 2.0 (the
+; "License"); you may not use this file except in compliance with the
+; License.  You may obtain a copy of the License at
+;
+;   http://www.apache.org/licenses/LICENSE-2.0
+;
+; Unless required by applicable law or agreed to in writing, software
+; distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+; WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+; License for the specific language governing permissions and limitations
+; under the License.
+;
+;=========================================================================
+
+; Usage:
+; 1. Load elf in trace32 software, Data.LOAD.Elf /path/to/your.elf
+; 2. Run the script, "CD.DO /path/to/fdx.cmm"
+; 3. The trace data will be saved to trace.bin
+;
+
+; Check if ELF file is loaded, exit if not
+If !Symbol.Exist("g_fdx_note_buffer")
+(
+    Printf "ERROR: No ELF file loaded! Please load ELF file."
+    Enddo
+)
+
+System.Attach
+
+; Check if the system is running, if not, execute Go
+If !State.Run()
+(
+    Go
+)
+
+; Set the JTAG clock to 100MHz, transfer rate is related to clock frequency
+System.JtagClock 100MHZ
+
+Fdx.Outchannel g_fdx_note_buffer
+
+Fdx.Address g_fdx_note_buffer
+
+Fdx.DisableChannel g_fdx_note_buffer
+
+Fdx.Clear
+
+Fdx.Mode FIFO
+
+Fdx.EnableChannel
+
+; Wait for a while and discard the old data in the fdx buffer
+Wait 10ms
+
+Printf "FDX record start..."
+
+; Write the trace data to trace.bin
+Fdx.Write g_fdx_note_buffer trace.bin
