@@ -283,6 +283,11 @@ config ARCH_TOOLCHAIN_GNU
 	bool
 	default n
 
+config ARCH_TOOLCHAIN_ARMCLANG
+	bool
+	select ARCH_TOOLCHAIN_GNU
+	default n
+
 config ARCH_TOOLCHAIN_CLANG
 	bool
 	select ARCH_TOOLCHAIN_GNU
