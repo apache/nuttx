@@ -548,6 +548,7 @@ irqstate_t spin_lock_irqsave_nopreempt(FAR volatile spinlock_t *lock)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_SPINLOCK
 static inline_function
 void rspin_lock(FAR rspinlock_t *lock)
 {
@@ -583,6 +584,9 @@ irqstate_t rspin_lock_irqsave(FAR rspinlock_t *lock)
 
   return flags;
 }
+#else
+#  define rspin_lock_irqsave(l) ((void)(l), up_irq_save())
+#endif
 
 static inline_function
 irqstate_t rspin_lock_irqsave_nopreempt(FAR rspinlock_t *lock)
@@ -786,6 +790,7 @@ void spin_unlock_irqrestore_nopreempt(FAR volatile spinlock_t *lock,
  *
  ****************************************************************************/
 
+#ifdef CONFIG_SPINLOCK
 static inline_function
 bool rspin_unlock(FAR rspinlock_t *lock)
 {
@@ -811,6 +816,9 @@ void rspin_unlock_irqrestore(FAR rspinlock_t *lock, irqstate_t flags)
 
   /* If not last rspinlock restore,  up_irq_restore should not required */
 }
+#else
+#  define rspin_unlock_irqrestore(l, f) ((void)(l), up_irq_restore(f))
+#endif
 
 static inline_function
 void rspin_unlock_irqrestore_nopreempt(FAR rspinlock_t *lock,
@@ -820,6 +828,7 @@ void rspin_unlock_irqrestore_nopreempt(FAR rspinlock_t *lock,
   sched_unlock();
 }
 
+#ifdef CONFIG_SPINLOCK
 static inline_function
 uint16_t rspin_breaklock(FAR rspinlock_t *lock)
 {
@@ -837,6 +846,10 @@ void rspin_restorelock(FAR rspinlock_t *lock, uint16_t count)
   rspin_lock(lock);
   lock->count = count;
 }
+#else
+#  define rspin_breaklock(lock) (0)
+#  define rspin_restorelock(lock, count)
+#endif
 
 #if defined(CONFIG_RW_SPINLOCK)
 
