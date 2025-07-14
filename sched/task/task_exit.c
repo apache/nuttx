@@ -77,15 +77,8 @@ int nxtask_exit(void)
   FAR struct tcb_s *dtcb;
   FAR struct tcb_s *rtcb;
   int ret;
-#ifdef CONFIG_SMP
-  /* Avoid using this_task() because it may assume a state that is not
-   * appropriate for an exiting task.
-   */
 
-  dtcb = current_task(this_cpu());
-#else
   dtcb = this_task();
-#endif
 
   sinfo("%s pid=%d,TCB=%p\n", get_task_name(dtcb),
         dtcb->pid, dtcb);
@@ -102,11 +95,7 @@ int nxtask_exit(void)
 
   /* Get the new task at the head of the ready to run list */
 
-#ifdef CONFIG_SMP
-  rtcb = current_task(this_cpu());
-#else
   rtcb = this_task();
-#endif
 
   /* We are now in a bad state -- the head of the ready to run task list
    * does not correspond to the thread that is running.  Disabling pre-
@@ -120,17 +109,6 @@ int nxtask_exit(void)
   rtcb->lockcount++;
 
   rtcb->task_state = TSTATE_TASK_READYTORUN;
-
-#ifdef CONFIG_SMP
-  /* NOTE:
-   * During nxtask_terminate(), enter_critical_section() will be called
-   * to deallocate tcb. However, this would acquire g_cpu_irqlock if
-   * rtcb->irqcount = 0, event though we are in critical section.
-   * To prevent from acquiring, increment rtcb->irqcount here.
-   */
-
-  rtcb->irqcount++;
-#endif
 
   dtcb->task_state = TSTATE_TASK_INACTIVE;
 
@@ -146,10 +124,6 @@ int nxtask_exit(void)
 
   sched_note_stop(dtcb);
   ret = nxsched_release_tcb(dtcb, dtcb->flags & TCB_FLAG_TTYPE_MASK);
-
-#ifdef CONFIG_SMP
-  rtcb->irqcount--;
-#endif
 
   rtcb->task_state = TSTATE_TASK_RUNNING;
 

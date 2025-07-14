@@ -1127,9 +1127,6 @@ void sched_note_csection(FAR struct tcb_s *tcb, bool enter)
           formatted = true;
           note_common(tcb, &note.ncs_cmn, sizeof(struct note_csection_s),
                       enter ? NOTE_CSECTION_ENTER : NOTE_CSECTION_LEAVE);
-#ifdef CONFIG_SMP
-          note.ncs_count = tcb->irqcount;
-#endif
         }
 
       /* Add the note to circular buffer */

@@ -619,9 +619,6 @@ struct tcb_s
 #endif
   uint32_t flags;                        /* Misc. general status flags      */
   int16_t  lockcount;                    /* 0=preemptible (not-locked)      */
-#ifdef CONFIG_IRQCOUNT
-  int16_t  irqcount;                     /* 0=Not in critical section       */
-#endif
   int16_t  errcode;                      /* Used to pass error information  */
 
 #if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)

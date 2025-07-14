@@ -135,9 +135,6 @@ static void nxtask_reset_task(FAR struct tcb_s *tcb, bool remove)
    */
 
   tcb->lockcount = 0;
-#ifdef CONFIG_SMP
-  tcb->irqcount  = 0;
-#endif
 
   /* Reset the base task priority and the number of pending
    * reprioritizations.

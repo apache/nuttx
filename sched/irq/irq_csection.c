@@ -45,7 +45,10 @@
  * Private Data
  ****************************************************************************/
 
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0 || \
+    defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION) || defined(CONFIG_SMP)
 static rspinlock_t g_schedlock = RSPINLOCK_INITIALIZER;
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -59,13 +62,13 @@ static rspinlock_t g_schedlock = RSPINLOCK_INITIALIZER;
  * Name: enter_critical_section_notrace
  ****************************************************************************/
 
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0 || \
+    defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION) || defined(CONFIG_SMP)
 irqstate_t enter_critical_section_notrace(void)
 {
   return rspin_lock_irqsave(&g_schedlock);
 }
 
-#if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0 || \
-    defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION) || defined(CONFIG_SMP)
 void restore_critical_section(uint16_t count)
 {
   /* If CONFIG_SCHED_CRITMONITOR_MAXTIME_BUSYWAIT >= 0,
@@ -158,10 +161,13 @@ irqstate_t enter_critical_section(void)
  * Name: leave_critical_section_notrace
  ****************************************************************************/
 
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0 || \
+    defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION) || defined(CONFIG_SMP)
 void leave_critical_section_notrace(irqstate_t flags)
 {
   rspin_unlock_irqrestore(&g_schedlock, flags);
 }
+#endif
 
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0 || \
     CONFIG_SCHED_CRITMONITOR_MAXTIME_BUSYWAIT >= 0 || \
