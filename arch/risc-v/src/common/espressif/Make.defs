@@ -179,6 +179,10 @@ ifeq ($(CONFIG_CRYPTO_CRYPTODEV_HARDWARE),y)
 	CHIP_CSRCS += esp_crypto.c
 endif
 
+ifeq ($(CONFIG_ESPRESSIF_EFUSE),y)
+	LDFLAGS += -u esp_efuse_startup_include_func
+endif
+
 #############################################################################
 # Espressif HAL for 3rd Party Platforms
 #############################################################################
@@ -249,6 +253,7 @@ context:: chip/$(ESP_HAL_3RDPARTY_REPO)
 distclean::
 	$(call DELFILE,../include/chip/gpio_sig_map.h)
 	$(call DELFILE,../include/chip/irq.h)
+	$(call DELFILE,../../../vefuse.bin)
 	$(call DELDIR,chip/$(ESP_HAL_3RDPARTY_REPO))
 
 INCLUDES += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)common$(DELIM)espressif

@@ -24,6 +24,18 @@
 
 CHIP_SERIES = $(patsubst "%",%,$(CONFIG_ESPRESSIF_CHIP_SERIES))
 
+# MCUBoot requires a region in flash for the E-Fuse virtual mode.
+# To avoid erasing this region, flash a dummy empty file to the
+# virtual E-Fuse offset.
+
+VIRTUAL_EFUSE_BIN := vefuse.bin
+
+ifeq ($(CONFIG_ESPRESSIF_EFUSE_VIRTUAL_KEEP_IN_FLASH),y)
+	EFUSE_FLASH_OFFSET := $(CONFIG_ESPRESSIF_EFUSE_VIRTUAL_KEEP_IN_FLASH_OFFSET)
+else
+	EFUSE_FLASH_OFFSET := 0x10000
+endif
+
 # These are the macros that will be used in the NuttX make system to compile
 # and assemble source files and to insert the resulting object files into an
 # archive.  These replace the default definitions at tools/Config.mk
@@ -69,7 +81,16 @@ ifdef ESPTOOL_BINDIR
 	endif
 endif
 
+define MAKE_VIRTUAL_EFUSE_BIN
+	$(Q)if [ ! -f "$(VIRTUAL_EFUSE_BIN)" ]; then \
+		dd if=/dev/zero of=$(VIRTUAL_EFUSE_BIN) count=0 status=none; \
+	fi
+endef
+
 ifeq ($(CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT),y)
+
+	ESPTOOL_BINS += $(EFUSE_FLASH_OFFSET) $(VIRTUAL_EFUSE_BIN)
+
 	ifeq ($(CONFIG_ESPRESSIF_ESPTOOL_TARGET_PRIMARY),y)
 		VERIFIED   := --confirm
 		APP_OFFSET := $(CONFIG_ESPRESSIF_OTA_PRIMARY_SLOT_OFFSET)
@@ -146,6 +167,7 @@ endif
 
 define POSTBUILD
 	$(call MKIMAGE)
+	$(if $(CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT),$(call MAKE_VIRTUAL_EFUSE_BIN))
 	$(if $(CONFIG_ESPRESSIF_MERGE_BINS),$(call MERGEBIN))
 endef
 
