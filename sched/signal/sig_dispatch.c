@@ -591,7 +591,7 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info,
 
           if (nxsched_add_readytorun(stcb))
             {
-              up_switch_context(this_task(), rtcb);
+              nxsched_switch(this_task(), rtcb);
             }
 
 #ifdef CONFIG_ENABLE_ALL_SIGNALS
@@ -658,7 +658,7 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info,
 
           if (nxsched_add_readytorun(stcb))
             {
-              up_switch_context(this_task(), rtcb);
+              nxsched_switch(this_task(), rtcb);
             }
         }
 
@@ -718,7 +718,7 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info,
 
           if (nxsched_add_readytorun(stcb))
             {
-              up_switch_context(this_task(), rtcb);
+              nxsched_switch(this_task(), rtcb);
             }
 #endif
         }

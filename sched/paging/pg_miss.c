@@ -148,7 +148,7 @@ void pg_miss(void)
 
   /* Now, perform the context switch */
 
-  up_switch_context(this_task(), ftcb);
+  nxsched_switch(this_task(), ftcb);
 
   /* Boost the page fill worker thread priority.
    * - Check the priority of the task at the head of the g_waitingforfill

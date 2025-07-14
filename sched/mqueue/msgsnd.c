@@ -105,7 +105,7 @@ static int msgsnd_wait(FAR struct msgq_s *msgq, int msgflg)
 
       /* Now, perform the context switch */
 
-      up_switch_context(this_task(), rtcb);
+      nxsched_switch(this_task(), rtcb);
 
       /* When we resume at this point, either (1) the message queue
        * is no longer empty, or (2) the wait has been interrupted by
@@ -259,7 +259,7 @@ int msgsnd(int msqid, FAR const void *msgp, size_t msgsz, int msgflg)
 
           if (nxsched_add_readytorun(btcb))
             {
-              up_switch_context(this_task(), rtcb);
+              nxsched_switch(this_task(), rtcb);
             }
         }
     }

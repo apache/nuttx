@@ -100,7 +100,7 @@ void nxsched_ticksleep(unsigned int ticks)
 
   /* Now, perform the context switch if one is needed */
 
-  up_switch_context(this_task(), rtcb);
+  nxsched_switch(this_task(), rtcb);
 
   wd_cancel(&rtcb->waitdog);
 
@@ -149,7 +149,7 @@ void nxsched_wakeup(FAR struct tcb_s *tcb)
 
       if (nxsched_add_readytorun(tcb))
         {
-          up_switch_context(this_task(), rtcb);
+          nxsched_switch(this_task(), rtcb);
         }
     }
 

@@ -202,7 +202,7 @@ nxevent_mask_t nxevent_tickwait(FAR nxevent_t *event, nxevent_mask_t events,
 
       /* Now, perform the context switch if one is needed */
 
-      up_switch_context(this_task(), rtcb);
+      nxsched_switch(this_task(), rtcb);
 
       if (rtcb->errcode == OK)
         {

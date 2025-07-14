@@ -228,7 +228,7 @@ int nxsem_post_slow(FAR sem_t *sem)
 
               if (nxsched_add_readytorun(stcb))
                 {
-                  up_switch_context(this_task(), rtcb);
+                  nxsched_switch(this_task(), rtcb);
                 }
             }
         }
