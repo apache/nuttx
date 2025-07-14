@@ -42,25 +42,10 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
+ * Private Data
  ****************************************************************************/
 
-#ifdef CONFIG_SMP
-/* This is the spinlock that enforces critical sections when interrupts are
- * disabled.
- */
-
-volatile spinlock_t g_cpu_irqlock = SP_UNLOCKED;
-
-/* Used to keep track of which CPU(s) hold the IRQ lock. */
-
-volatile cpu_set_t g_cpu_irqset;
-
-#endif
-
-/* Handles nested calls to enter_critical section from interrupt handlers */
-
-volatile uint8_t g_cpu_nestcount[CONFIG_SMP_NCPUS];
+static rspinlock_t g_schedlock = RSPINLOCK_INITIALIZER;
 
 /****************************************************************************
  * Private Functions
@@ -74,39 +59,10 @@ volatile uint8_t g_cpu_nestcount[CONFIG_SMP_NCPUS];
  * Name: enter_critical_section_notrace
  ****************************************************************************/
 
-#ifdef CONFIG_SMP
 irqstate_t enter_critical_section_notrace(void)
 {
-  irqstate_t ret;
-  int cpu;
-
-  ret = up_irq_save();
-  cpu = this_cpu();
-  if (g_cpu_nestcount[cpu]++ == 0)
-    {
-      spin_lock_notrace(&g_cpu_irqlock);
-      DEBUGASSERT(spin_is_locked(&g_cpu_irqlock));
-    }
-
-  return ret;
+  return rspin_lock_irqsave(&g_schedlock);
 }
-
-#else
-
-irqstate_t enter_critical_section_notrace(void)
-{
-  irqstate_t ret;
-
-  /* Disable interrupts */
-
-  ret = up_irq_save();
-  g_cpu_nestcount[this_cpu()]++;
-
-  /* Return interrupt status */
-
-  return ret;
-}
-#endif
 
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0 || \
     defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION) || defined(CONFIG_SMP)
@@ -118,11 +74,7 @@ void restore_critical_section(uint16_t count)
 
   nxsched_critmon_busywait(true, return_address(0));
 
-#  ifdef CONFIG_SMP
-  spin_lock_notrace(&g_cpu_irqlock);
-#  endif
-
-  g_cpu_nestcount[this_cpu()] = count;
+  rspin_restorelock(&g_schedlock, count);
 
   /* Get the lock, end counting busy-waiting */
 
@@ -146,10 +98,8 @@ void restore_critical_section(uint16_t count)
 
 void break_critical_section(void)
 {
-  int cpu = this_cpu();
-
 #  if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0 || \
-    defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION)
+      defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION)
   if (!up_interrupt_context())
     {
       FAR struct tcb_s *rtcb = this_task();
@@ -163,11 +113,7 @@ void break_critical_section(void)
     }
 #  endif
 
-  g_cpu_nestcount[cpu] = 0;
-
-#  ifdef CONFIG_SMP
-  spin_unlock_notrace(&g_cpu_irqlock);
-#  endif
+  rspin_breaklock(&g_schedlock);
 }
 #endif
 
@@ -193,7 +139,7 @@ irqstate_t enter_critical_section(void)
   if (!up_interrupt_context())
     {
       FAR struct tcb_s *rtcb = this_task();
-      if (g_cpu_nestcount[this_cpu()] == 1)
+      if (rspin_lock_count(&g_schedlock) == 1)
         {
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0
           nxsched_critmon_csection(rtcb, true, return_address(0));
@@ -212,28 +158,10 @@ irqstate_t enter_critical_section(void)
  * Name: leave_critical_section_notrace
  ****************************************************************************/
 
-#ifdef CONFIG_SMP
 void leave_critical_section_notrace(irqstate_t flags)
 {
-  int cpu;
-
-  cpu = this_cpu();
-  if (g_cpu_nestcount[cpu]-- == 1)
-    {
-      spin_unlock_notrace(&g_cpu_irqlock);
-    }
-
-  up_irq_restore(flags);
+  rspin_unlock_irqrestore(&g_schedlock, flags);
 }
-#else
-void leave_critical_section_notrace(irqstate_t flags)
-{
-  /* Restore the previous interrupt state. */
-
-  g_cpu_nestcount[this_cpu()]--;
-  up_irq_restore(flags);
-}
-#endif
 
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0 || \
     CONFIG_SCHED_CRITMONITOR_MAXTIME_BUSYWAIT >= 0 || \
@@ -243,7 +171,7 @@ void leave_critical_section(irqstate_t flags)
   if (!up_interrupt_context())
     {
       FAR struct tcb_s *rtcb = this_task();
-      if (g_cpu_nestcount[this_cpu()] == 1)
+      if (rspin_lock_count(&g_schedlock) == 1)
         {
 #  if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0
           nxsched_critmon_csection(rtcb, false, return_address(0));
@@ -276,6 +204,6 @@ void leave_critical_section(irqstate_t flags)
     defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION) || defined(CONFIG_SMP)
 uint16_t critical_section_count(void)
 {
-  return g_cpu_nestcount[this_cpu()];
+  return rspin_lock_count(&g_schedlock);
 }
 #endif
