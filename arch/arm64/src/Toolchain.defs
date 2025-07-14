@@ -187,13 +187,16 @@ ifneq ($(CONFIG_CXX_RTTI),y)
   ARCHCXXFLAGS += -fno-rtti
 endif
 
-LDFLAGS += -nostdlib
+ifeq ($(CONFIG_ARCH_TOOLCHAIN_ARMCLANG),)
+  LDFLAGS += -nostdlib
+endif
 
 # Optimization of unused sections
-
-ifeq ($(CONFIG_DEBUG_OPT_UNUSED_SECTIONS),y)
-  LDFLAGS          += --gc-sections
-  ARCHOPTIMIZATION += -ffunction-sections -fdata-sections
+ifeq ($(CONFIG_ARCH_TOOLCHAIN_ARMCLANG),)
+  ifeq ($(CONFIG_DEBUG_OPT_UNUSED_SECTIONS),y)
+    LDFLAGS          += --gc-sections
+    ARCHOPTIMIZATION += -ffunction-sections -fdata-sections
+  endif
 endif
 
 # Debug --whole-archive
@@ -204,8 +207,11 @@ endif
 
 # Debug link map
 
-ifeq ($(CONFIG_DEBUG_LINK_MAP),y)
+ifeq ($(CONFIG_ARCH_TOOLCHAIN_ARMCLANG),)
   LDFLAGS += --cref -Map=$(call CONVERT_PATH,$(TOPDIR)$(DELIM)nuttx.map)
+else
+  LDFLAGS += --strict --map --xref --symbols --info=unused --info=veneers
+  LDFLAGS += --info=summarysizes --info=summarystack
 endif
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
@@ -238,6 +244,46 @@ else ifeq ($(CONFIG_ARCH_TOOLCHAIN_CLANG),y)
   NM      = llvm-nm
   OBJCOPY = llvm-objcopy
   OBJDUMP = llvm-objdump
+else ifeq ($(CONFIG_ARCH_TOOLCHAIN_ARMCLANG),y)
+  CC      = armclang
+  CXX     = armclang
+  CPP     = armclang -E -P -x c --target=aarch64-arm-none-eabi
+  LD      = armlink
+  STRIP   = llvm-strip --strip-unneeded
+  AR      = armar -rcs
+  NM      = llvm-nm
+  OBJCOPY = llvm-objcopy
+  OBJDUMP = llvm-objdump
+
+  # Since the no_builtin attribute is not fully supported on Clang
+  # disable the built-in functions, refer:
+  # https://github.com/apache/nuttx/pull/5971
+
+  ARCHOPTIMIZATION += -fno-builtin
+  ARCHOPTIMIZATION += --target=aarch64-arm-none-eabi
+
+  # Suppress license warning
+
+  ARCHCPUFLAGS += -Wno-license-management
+  LDFLAGS      += --diag_suppress=9931
+
+  # Input sections are specified even though there will be no such
+  # sections found in the libraries linked.
+  # Warning: L6314W: No section matches pattern *(xxx).
+
+  LDFLAGS      += --diag_suppress=6314
+
+  # Allow Empty Execution region declared on scatter
+  # Warning: L6312W: Empty Execution region description for region xxx
+
+  LDFLAGS      += --diag_suppress=6312
+
+  # Match pattern for an unused section that is being removed.
+  # Warning: L6329W: Pattern xxx only matches removed unused sections.
+
+  LDFLAGS      += --diag_suppress=6329
+
+  LDFLAGS      += --entry=__start
 endif
 
 # Link Time Optimization

@@ -86,7 +86,7 @@ EXTRA_LIBS += $(wildcard $(APPDIR)$(DELIM)staging$(DELIM)*$(LIBEXT))
 
 # Override in Make.defs if linker is not 'ld'
 
-ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),)
+ifeq ($(CONFIG_ARCH_TOOLCHAIN_ARMCLANG),)
   ifeq ($(LD),$(CC))
     ifeq ($(CONFIG_STACK_CANARIES),y)
       # filter out ssp(Stack Smashing Protector) related flags:

@@ -47,6 +47,8 @@ endif()
 
 if(CONFIG_ARCH_TOOLCHAIN_CLANG)
   include(clang)
-elseif(CONFIG_ARCH_TOOLCHAIN_GCC) # gcc
+elseif(CONFIG_ARCH_TOOLCHAIN_ARMCLANG) # armclang
+  include(armclang)
+else() # gcc
   include(gcc)
 endif()
