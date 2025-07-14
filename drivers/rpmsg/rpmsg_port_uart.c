@@ -532,14 +532,18 @@ rpmsg_port_uart_process_rx_cmd(FAR struct rpmsg_port_uart_s *rpuart,
         count = pm_wakelock_staycount(&rpuart->rx_wakelock);
         rpmsgvbs("Received poweroff command %d 0x%x\n",
                  count, rpuart->event.events);
-        rpmsg_port_uart_clear(rpuart, RPMSG_PORT_UART_EVT_CONNED);
         if (rpmsg_port_uart_check(rpuart, RPMSG_PORT_UART_EVT_WAKING))
           {
             rpmsg_port_uart_set(rpuart, RPMSG_PORT_UART_EVT_WAKED);
           }
 
-        rpmsg_port_drop_packets(&rpuart->port, RPMSG_PORT_DROP_TXQ);
-        rpmsg_port_unregister(&rpuart->port);
+        if (rpmsg_port_uart_check(rpuart, RPMSG_PORT_UART_EVT_CONNED))
+          {
+            rpmsg_port_drop_packets(&rpuart->port, RPMSG_PORT_DROP_TXQ);
+            rpmsg_port_unregister(&rpuart->port);
+            rpmsg_port_uart_clear(rpuart, RPMSG_PORT_UART_EVT_CONNED);
+          }
+
         DEBUGVERIFY(file_ioctl(&rpuart->file, TIOCVHANGUP, 0) >= 0);
         if (count != 0)
           {
