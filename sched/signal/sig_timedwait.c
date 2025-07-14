@@ -131,7 +131,7 @@ void nxsig_wait_irq(FAR struct tcb_s *wtcb, uint8_t signo,
 
   if (nxsched_add_readytorun(wtcb))
     {
-      up_switch_context(this_task(), rtcb);
+      nxsched_switch(this_task(), rtcb);
     }
 }
 
@@ -270,7 +270,7 @@ int nxsig_clockwait(int clockid, int flags,
 
   /* Now, perform the context switch if one is needed */
 
-  up_switch_context(this_task(), rtcb);
+  nxsched_switch(this_task(), rtcb);
 
   /* We no longer need the watchdog */
 

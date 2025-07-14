@@ -119,6 +119,13 @@
 #  define CRITMONITOR_PANIC(fmt, ...) _alert(fmt, ##__VA_ARGS__)
 #endif
 
+#define nxsched_switch(tcb, rtcb) \
+  do \
+    { \
+      up_switch_context(tcb, rtcb); \
+    } \
+  while (0)
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/

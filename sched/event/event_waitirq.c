@@ -72,6 +72,6 @@ void nxevent_wait_irq(FAR struct tcb_s *wtcb, int errcode)
 
   if (nxsched_add_readytorun(wtcb))
     {
-      up_switch_context(this_task(), rtcb);
+      nxsched_switch(this_task(), rtcb);
     }
 }
