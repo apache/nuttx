@@ -89,6 +89,7 @@ include pci/Make.defs
 include coresight/Make.defs
 include aie/Make.defs
 include tee/Make.defs
+include trace32/Make.defs
 
 ifeq ($(CONFIG_SPECIFIC_DRIVERS),y)
 -include platform/Make.defs

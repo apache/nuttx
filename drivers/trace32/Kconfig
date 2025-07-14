@@ -1,0 +1,46 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+menu "Trace32 drivers"
+
+config TRACE32_FDX
+	bool
+	default n
+	---help---
+		The Trace32 FDX driver.
+
+config TRACE32_FDX_NOTE
+	bool "Trace32 FDX Note driver"
+	select DRIVERS_NOTE
+	select TRACE32_FDX
+	default n
+	---help---
+		The Note driver output to trace32 FDX.
+
+if TRACE32_FDX_NOTE
+
+config TRACE32_FDX_NOTE_FILTER_DEFAULT_MODE
+	hex "Trace32 FDX Note driver filter mode"
+	depends on SCHED_INSTRUMENTATION_FILTER
+	default SCHED_INSTRUMENTATION_FILTER_DEFAULT_MODE
+	---help---
+		Filter mode for notefdx
+
+config TRACE32_FDX_NOTE_BUFSIZE
+	int "Trace32 FDX Note driver buffer size"
+	default 1024
+	---help---
+		The size of the FDX buffer (in bytes).
+
+config TRACE32_FDX_NOTE_CPUSET
+	hex "Trace32 FDX Note driver CPU set"
+	depends on SMP && SCHED_INSTRUMENTATION_FILTER
+	default SCHED_INSTRUMENTATION_CPUSET
+	---help---
+		CPU set for notefdx
+
+endif # TRACE32_FDX_NOTE
+
+endmenu # Trace32 drivers

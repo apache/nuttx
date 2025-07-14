@@ -850,6 +850,24 @@ static const char *g_white_content_list[] =
   "buildVersion",
   "logSystem",
 
+  /* Ref:
+   * drivers/trace32/t32fdx/t32fdx.c
+   */
+
+  "T32_Fdx_DefineChannel",
+  "T32_Fdx_InitChannel",
+  "T32_Fdx_EnableChannel",
+  "T32_Fdx_SendPoll",
+  "T32_Fdx_Send",
+  "T32_Fdx_ReceivePoll",
+  "T32_Fdx_Receive",
+  "T32_Fdx_Poll",
+  "T32_Fdx_PollInterrupt",
+  "T32_Fdx_TraceInit",
+  "T32_Fdx_TraceData",
+  "T32_Fdx_TraceData2",
+  "T32_Fdx_GetTimebase",
+
   NULL
 };
 
