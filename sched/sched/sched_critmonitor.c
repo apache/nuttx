@@ -421,39 +421,6 @@ void nxsched_switch_critmon(FAR struct tcb_s *from, FAR struct tcb_s *to)
     }
 #endif /* CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION */
 
-#if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0
-
-  /* Is this task in a critical section? */
-
-  if (from->irqcount > 0)
-    {
-      int cpu = this_cpu();
-
-      /* Possibly leaving .. Check for the max elapsed time */
-
-      elapsed = current - from->crit_start;
-      if (elapsed > from->crit_max)
-        {
-          from->crit_max        = elapsed;
-          from->crit_max_caller = from->crit_caller;
-          CHECK_CSECTION(from->pid, elapsed);
-        }
-
-      /* Check for the global max elapsed time */
-
-      if (elapsed > g_crit_max[cpu])
-        {
-          g_crit_max[cpu] = elapsed;
-        }
-    }
-
-  if (to->irqcount > 0)
-    {
-      to->crit_start = current;
-    }
-
-#endif /* CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION */
-
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION >= 0
 
   /* Did this task disable pre-emption? */

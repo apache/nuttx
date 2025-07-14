@@ -20,15 +20,17 @@
 #
 # ##############################################################################
 
-set(SRCS irq_initialize.c irq_attach.c irq_attach_thread.c irq_attach_wqueue.c
-         irq_dispatch.c irq_unexpectedisr.c)
+set(SRCS
+    irq_initialize.c
+    irq_attach.c
+    irq_attach_thread.c
+    irq_attach_wqueue.c
+    irq_dispatch.c
+    irq_unexpectedisr.c
+    irq_csection.c)
 
 if(CONFIG_SPINLOCK)
   list(APPEND SRCS irq_spinlock.c)
-endif()
-
-if(CONFIG_IRQCOUNT)
-  list(APPEND SRCS irq_csection.c)
 endif()
 
 if(CONFIG_SCHED_IRQMONITOR)

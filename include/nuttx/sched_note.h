@@ -405,9 +405,6 @@ struct note_preempt_s
 struct note_csection_s
 {
   struct note_common_s ncs_cmn; /* Common note parameters */
-#ifdef CONFIG_SMP
-  uint16_t ncs_count;           /* Count of nested csections */
-#endif
 };
 
 /* This is the specific form of the NOTE_SPINLOCK_LOCK/LOCKED/UNLOCK/ABORT
