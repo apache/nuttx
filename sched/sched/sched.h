@@ -307,28 +307,6 @@ extern volatile clock_t g_cpuload_total;
  * modify its lockcount.
  */
 
-#ifdef CONFIG_SMP
-
-/* This is the spinlock that enforces critical sections when interrupts are
- * disabled.
- */
-
-extern volatile spinlock_t g_cpu_irqlock;
-
-/* Used to keep track of which CPU(s) hold the IRQ lock. */
-
-extern volatile cpu_set_t g_cpu_irqset;
-
-/* Handles nested calls to enter_critical section from interrupt handlers */
-
-extern volatile uint8_t g_cpu_nestcount[CONFIG_SMP_NCPUS];
-
-/* Used to lock tasklist to prevent from concurrent access */
-
-extern volatile spinlock_t g_cpu_tasklistlock;
-
-#endif /* CONFIG_SMP */
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
