@@ -147,6 +147,7 @@ static FAR char *unique_chardev(void)
 
 int block_proxy(FAR struct file *filep, FAR const char *blkdev, int oflags)
 {
+  struct file temp;
   FAR char *chardev;
   bool readonly;
   int ret;
@@ -180,10 +181,18 @@ int block_proxy(FAR struct file *filep, FAR const char *blkdev, int oflags)
   /* Open the newly created character driver */
 
   oflags &= ~(O_CREAT | O_EXCL | O_APPEND | O_TRUNC);
-  ret = file_open(filep, chardev, oflags);
+  ret = file_open(&temp, chardev, oflags);
   if (ret < 0)
     {
       ferr("ERROR: Failed to open %s: %d\n", chardev, ret);
+      goto errout_with_bchdev;
+    }
+
+  ret = file_dup2(&temp, filep);
+  file_close(&temp);
+  if (ret < 0)
+    {
+      ferr("ERROR: Failed to dup2%s: %d\n", chardev, ret);
       goto errout_with_bchdev;
     }
 
