@@ -120,6 +120,31 @@ function(nuttx_wildcard_sources)
   nuttx_sources(${SRCS})
 endfunction()
 
+# Function: nuttx_wildcard_sources_ifdef
+#
+# Conditionally adds source files matching a wildcard pattern to the current
+# library target if the given condition is true.
+#
+# Usage: nuttx_wildcard_sources_ifdef(MY_CONDITION "*.c" EXCLUDE "exclude_me.c")
+function(nuttx_wildcard_sources_ifdef cond)
+  if(${cond})
+    nuttx_wildcard_sources(${ARGN})
+  endif()
+endfunction()
+
+# Function: nuttx_wildcard_sources_ifndef
+#
+# Conditionally adds source files matching a wildcard pattern to the current
+# library target if the given condition is false.
+#
+# Usage: nuttx_wildcard_sources_ifndef(MY_CONDITION "*.c" EXCLUDE
+# "exclude_me.c")
+function(nuttx_wildcard_sources_ifndef cond)
+  if(NOT ${cond})
+    nuttx_wildcard_sources(${ARGN})
+  endif()
+endfunction()
+
 # Function: nuttx_include_directories
 #
 # Adds include directories to the current library target.
