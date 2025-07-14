@@ -87,9 +87,7 @@ void up_exit(int status)
 
   x86_64_restore_auxstate(tcb);
 
-  /* Restore the cpu lock */
-
-  restore_critical_section(tcb, this_cpu());
+  break_critical_section();
 
 #ifdef CONFIG_ARCH_KERNEL_STACK
   /* Update kernel stack top pointer */

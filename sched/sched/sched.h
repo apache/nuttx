@@ -119,10 +119,25 @@
 #  define CRITMONITOR_PANIC(fmt, ...) _alert(fmt, ##__VA_ARGS__)
 #endif
 
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0 || \
+    defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION) || defined(CONFIG_SMP)
+void restore_critical_section(uint16_t count);
+uint16_t critical_section_count(void);
+#else
+#  define restore_critical_section(count)
+#  define critical_section_count() 0
+#endif
+
 #define nxsched_switch(tcb, rtcb) \
   do \
     { \
+      uint16_t count = critical_section_count(); \
       up_switch_context(tcb, rtcb); \
+      if (!up_interrupt_context()) \
+        { \
+          restore_critical_section(count); \
+        } \
+      UNUSED(count); \
     } \
   while (0)
 
@@ -303,6 +318,10 @@ extern volatile spinlock_t g_cpu_irqlock;
 /* Used to keep track of which CPU(s) hold the IRQ lock. */
 
 extern volatile cpu_set_t g_cpu_irqset;
+
+/* Handles nested calls to enter_critical section from interrupt handlers */
+
+extern volatile uint8_t g_cpu_nestcount[CONFIG_SMP_NCPUS];
 
 /* Used to lock tasklist to prevent from concurrent access */
 

@@ -96,16 +96,6 @@
 #  define NDX_TO_IRQ(ndx) (ndx)
 #endif
 
-#ifdef CONFIG_SMP
-#  define cpu_irqlock_clear() \
-  do \
-    { \
-      g_cpu_irqset = 0; \
-      spin_unlock_notrace(&g_cpu_irqlock); \
-    } \
-  while (0)
-#endif
-
 /* Stack alignment macros */
 
 #ifdef CONFIG_TLS_ALIGNED
@@ -391,10 +381,10 @@ void leave_critical_section_notrace(irqstate_t flags) noinstrument_function;
 #endif
 
 /****************************************************************************
- * Name: restore_critical_section
+ * Name: break_critical_section
  *
  * Description:
- *   Restore the critical_section
+ *   Break the critical_section
  *
  * Input Parameters:
  *   None
@@ -404,19 +394,11 @@ void leave_critical_section_notrace(irqstate_t flags) noinstrument_function;
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SMP
-#  define restore_critical_section(tcb, cpu) \
-   do { \
-       if (tcb->irqcount <= 0) \
-         {\
-           if ((g_cpu_irqset & (1 << cpu)) != 0) \
-             { \
-               cpu_irqlock_clear(); \
-             } \
-         } \
-    } while (0)
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0 || \
+    defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION) || defined(CONFIG_SMP)
+void break_critical_section(void);
 #else
-#  define restore_critical_section(tcb, cpu)
+#  define break_critical_section()
 #endif
 
 #undef EXTERN
