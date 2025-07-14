@@ -545,10 +545,10 @@ static int sensor_rpmsg_ioctl(FAR struct sensor_rpmsg_dev_s *dev,
 static FAR struct sensor_rpmsg_proxy_s *
 sensor_rpmsg_alloc_proxy(FAR struct sensor_rpmsg_dev_s *dev,
                          FAR struct rpmsg_endpoint *ept,
-                         FAR struct sensor_rpmsg_advsub_s *msg)
+                         FAR struct sensor_rpmsg_advsub_s *msg,
+                         FAR struct sensor_state_s *state)
 {
   FAR struct sensor_rpmsg_proxy_s *proxy;
-  struct sensor_state_s state;
   struct file file;
   int ret;
 
@@ -584,7 +584,7 @@ sensor_rpmsg_alloc_proxy(FAR struct sensor_rpmsg_dev_s *dev,
     }
 
   file_ioctl(&file, SNIOC_SET_BUFFER_NUMBER, msg->nbuffer);
-  file_ioctl(&file, SNIOC_GET_STATE, &state);
+  file_ioctl(&file, SNIOC_GET_STATE, state);
   file_close(&file);
 
   sensor_rpmsg_lock(dev);
@@ -597,20 +597,6 @@ sensor_rpmsg_alloc_proxy(FAR struct sensor_rpmsg_dev_s *dev,
   list_add_tail(&dev->proxylist, &proxy->node);
   nxsem_post(&dev->proxysem);
   sensor_rpmsg_unlock(dev);
-
-  /* sync interval and latency */
-
-  if (state.min_interval != UINT32_MAX)
-    {
-      sensor_rpmsg_ioctl(dev, SNIOC_SET_INTERVAL, state.min_interval,
-                         0, false);
-    }
-
-  if (state.min_latency != UINT32_MAX)
-    {
-      sensor_rpmsg_ioctl(dev, SNIOC_BATCH, state.min_latency, 0, false);
-    }
-
   sminfo(dev->name, "create proxy:%p", proxy);
   return proxy;
 }
@@ -1200,6 +1186,23 @@ sensor_rpmsg_find_dev(FAR const char *path)
   return NULL;
 }
 
+static void sensor_rpmsg_update_config(FAR struct sensor_rpmsg_dev_s *dev,
+                                       FAR struct sensor_state_s *state)
+{
+  /* sync interval and latency */
+
+  if (state->min_interval != UINT32_MAX)
+    {
+      sensor_rpmsg_ioctl(dev, SNIOC_SET_INTERVAL, state->min_interval,
+                         0, false);
+    }
+
+  if (state->min_latency != UINT32_MAX)
+    {
+      sensor_rpmsg_ioctl(dev, SNIOC_BATCH, state->min_latency, 0, false);
+    }
+}
+
 static int sensor_rpmsg_adv_handler(FAR struct rpmsg_endpoint *ept,
                                     FAR void *data, size_t len,
                                     uint32_t src, FAR void *priv)
@@ -1207,6 +1210,7 @@ static int sensor_rpmsg_adv_handler(FAR struct rpmsg_endpoint *ept,
   FAR struct sensor_rpmsg_advsub_s *msg = data;
   FAR struct sensor_rpmsg_proxy_s *proxy;
   FAR struct sensor_rpmsg_dev_s *dev;
+  struct sensor_state_s state;
   int ret;
 
   dev = sensor_rpmsg_find_dev(msg->path);
@@ -1215,7 +1219,7 @@ static int sensor_rpmsg_adv_handler(FAR struct rpmsg_endpoint *ept,
       return 0;
     }
 
-  proxy = sensor_rpmsg_alloc_proxy(dev, ept, msg);
+  proxy = sensor_rpmsg_alloc_proxy(dev, ept, msg, &state);
   if (!proxy)
     {
       snerr("ERROR: adv create proxy failed:%s\n", dev->path);
@@ -1230,9 +1234,12 @@ static int sensor_rpmsg_adv_handler(FAR struct rpmsg_endpoint *ept,
           snerr("ERROR: adv rpmsg send failed:%s, %d, %s\n",
                 dev->path, ret, rpmsg_get_cpuname(ept->rdev));
         }
-
-      sminfo(dev->name, "rpmsg adv proxy success, remote:%s",
-             rpmsg_get_cpuname(ept->rdev));
+      else
+        {
+          sensor_rpmsg_update_config(dev, &state);
+          sminfo(dev->name, "rpmsg adv proxy success, remote:%s",
+                 rpmsg_get_cpuname(ept->rdev));
+        }
     }
 
   return 0;
@@ -1317,16 +1324,18 @@ static int sensor_rpmsg_suback_handler(FAR struct rpmsg_endpoint *ept,
 {
   FAR struct sensor_rpmsg_advsub_s *msg = data;
   FAR struct sensor_rpmsg_dev_s *dev;
+  struct sensor_state_s state;
 
   dev = sensor_rpmsg_find_dev(msg->path);
   if (dev && (!dev->nsubscribers ||
-      !sensor_rpmsg_alloc_proxy(dev, ept, msg)))
+      !sensor_rpmsg_alloc_proxy(dev, ept, msg, &state)))
     {
       sensor_rpmsg_advsub_one(dev, ept, SENSOR_RPMSG_UNSUBSCRIBE);
       snerr("ERROR: suback failed:%s\n", dev->path);
     }
   else
     {
+      sensor_rpmsg_update_config(dev, &state);
       sminfo(dev->name, "rpmsg suback success, remote:%s",
              rpmsg_get_cpuname(ept->rdev));
     }
