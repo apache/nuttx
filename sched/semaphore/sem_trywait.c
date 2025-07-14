@@ -118,7 +118,6 @@ int nxsem_trywait_slow(FAR sem_t *sem)
           atomic_fetch_add(NXSEM_COUNT(sem), 1);
         }
 
-      leave_critical_section(flags);
       goto out;
     }
 
