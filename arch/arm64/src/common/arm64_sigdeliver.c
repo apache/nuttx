@@ -57,42 +57,13 @@
 void arm64_sigdeliver(void)
 {
   struct tcb_s *rtcb = this_task();
-
-#ifdef CONFIG_SMP
-  /* In the SMP case, we must terminate the critical section while the signal
-   * handler executes, but we also need to restore the irqcount when the
-   * we resume the main thread of the task.
-   */
-
-  irqstate_t  flags;
-  int16_t saved_irqcount;
-  flags = (rtcb->xcp.saved_regs[REG_SPSR] & SPSR_DAIF_MASK);
-#endif
+  irqstate_t flags;
 
   sinfo("rtcb=%p sigdeliver=%p sigpendactionq.head=%p\n",
         rtcb, rtcb->sigdeliver, rtcb->sigpendactionq.head);
   DEBUGASSERT(rtcb->sigdeliver != NULL);
 
 retry:
-#ifdef CONFIG_SMP
-  /* In the SMP case, up_schedule_sigaction(0) will have incremented
-   * 'irqcount' in order to force us into a critical section.  Save the
-   * pre-incremented irqcount.
-   */
-
-  saved_irqcount = rtcb->irqcount;
-  DEBUGASSERT(saved_irqcount >= 0);
-
-  /* Now we need call leave_critical_section() repeatedly to get the irqcount
-   * to zero, freeing all global spinlocks that enforce the critical section.
-   */
-
-  while (rtcb->irqcount > 0)
-    {
-      leave_critical_section(flags);
-    }
-#endif /* CONFIG_SMP */
-
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
   /* Then make sure that interrupts are enabled.  Signal handlers must always
    * run with interrupts enabled.
@@ -115,28 +86,15 @@ retry:
 
   sinfo("Resuming\n");
 
-#ifdef CONFIG_SMP
-  /* Restore the saved 'irqcount' and recover the critical section
-   * spinlocks.
-   */
-
-  DEBUGASSERT(rtcb->irqcount == 0);
-  while (rtcb->irqcount < saved_irqcount + 1)
-    {
-      enter_critical_section();
-    }
-#endif
-
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
   up_irq_save();
 #endif
 
+  flags = enter_critical_section();
   if (!sq_empty(&rtcb->sigpendactionq) &&
       (rtcb->flags & TCB_FLAG_SIGNAL_ACTION) == 0)
     {
-#ifdef CONFIG_SMP
       leave_critical_section(flags);
-#endif
       goto retry;
     }
 
@@ -154,12 +112,6 @@ retry:
   rtcb->xcp.regs = rtcb->xcp.saved_regs;
 
   /* Then restore the correct state for this thread of execution. */
-
-#ifdef CONFIG_SMP
-  /* We need to keep the IRQ lock until task switching */
-
-  leave_critical_section(up_irq_save());
-#endif
 
   arm64_fullcontextrestore();
 }

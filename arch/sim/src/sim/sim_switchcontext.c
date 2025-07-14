@@ -91,9 +91,7 @@ void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
 
       nxsched_switch_context(rtcb, tcb);
 
-      /* Restore the cpu lock */
-
-      restore_critical_section(tcb, this_cpu());
+      break_critical_section();
 
       /* Record the new "running" task */
 

@@ -100,9 +100,7 @@ void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
       tcb = this_task();
 #endif
 
-      /* Restore the cpu lock */
-
-      restore_critical_section(tcb, cpu);
+      break_critical_section();
 
       /* Update scheduler parameters */
 

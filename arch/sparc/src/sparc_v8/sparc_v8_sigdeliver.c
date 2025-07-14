@@ -57,6 +57,7 @@
 void sparc_sigdeliver(void)
 {
   struct tcb_s *rtcb = this_task();
+  irqstate_t flags;
 
   uint32_t regs[XCPTCONTEXT_REGS];
 
@@ -66,15 +67,6 @@ void sparc_sigdeliver(void)
    */
 
   int saved_errno = get_errno();
-
-#ifdef CONFIG_SMP
-  /* In the SMP case, we must terminate the critical section while the signal
-   * handler executes, but we also need to restore the irqcount when the
-   * we resume the main thread of the task.
-   */
-
-  int16_t saved_irqcount;
-#endif
 
   board_autoled_on(LED_SIGNAL);
 
@@ -87,24 +79,6 @@ void sparc_sigdeliver(void)
   sparc_copystate(regs, rtcb->xcp.regs);
 
 retry:
-#ifdef CONFIG_SMP
-  /* In the SMP case, up_schedule_sigaction(0) will have incremented
-   * 'irqcount' in order to force us into a critical section.  Save the
-   * pre-incremented irqcount.
-   */
-
-  saved_irqcount = rtcb->irqcount;
-  DEBUGASSERT(saved_irqcount >= 0);
-
-  /* Now we need call leave_critical_section() repeatedly to get the irqcount
-   * to zero, freeing all global spinlocks that enforce the critical section.
-   */
-
-  while (rtcb->irqcount > 0)
-    {
-      leave_critical_section((regs[REG_PSR]));
-    }
-#endif /* CONFIG_SMP */
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
   /* Then make sure that interrupts are enabled.  Signal handlers must always
@@ -136,22 +110,17 @@ retry:
    * To avoid this situation, we need to call enter_critical_section().
    */
 
-#ifdef CONFIG_SMP
-  enter_critical_section();
-#else
   up_irq_save();
-#endif
 
   /* Restore the saved errno value */
 
   set_errno(saved_errno);
 
+  flags = enter_critical_section();
   if (!sq_empty(&rtcb->sigpendactionq) &&
       (rtcb->flags & TCB_FLAG_SIGNAL_ACTION) == 0)
     {
-#ifdef CONFIG_SMP
-      leave_critical_section((regs[REG_PSR]));
-#endif
+      leave_critical_section(flags);
       goto retry;
     }
 
@@ -169,22 +138,6 @@ retry:
   regs[REG_NPC]    = rtcb->xcp.saved_npc;
   regs[REG_PSR]    = rtcb->xcp.saved_status;
   rtcb->sigdeliver = NULL;  /* Allows next handler to be scheduled */
-
-#ifdef CONFIG_SMP
-  /* Restore the saved 'irqcount' and recover the critical section
-   * spinlocks.
-   *
-   * REVISIT:  irqcount should be one from the above call to
-   * enter_critical_section().  Could the saved_irqcount be zero?  That
-   * would be a problem.
-   */
-
-  DEBUGASSERT(rtcb->irqcount == 1);
-  while (rtcb->irqcount < saved_irqcount)
-    {
-      enter_critical_section();
-    }
-#endif
 
   /* Then restore the correct state for this thread of execution. This is an
    * unusual case that must be handled by up_fullcontextresore. This case is
@@ -206,10 +159,6 @@ retry:
    */
 
   board_autoled_off(LED_SIGNAL);
-#ifdef CONFIG_SMP
-  /* We need to keep the IRQ lock until task switching */
 
-  leave_critical_section(up_irq_save());
-#endif
   sparc_fullcontextrestore(regs);
 }

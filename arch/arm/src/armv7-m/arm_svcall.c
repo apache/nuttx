@@ -96,7 +96,7 @@ int arm_svcall(int irq, void *context, void *arg)
       case SYS_switch_context:
         {
           tcb = this_task();
-          restore_critical_section(tcb, this_cpu());
+          break_critical_section();
 
 #ifdef CONFIG_DEBUG_SYSCALL_INFO
           regs = tcb->xcp.regs;

@@ -281,9 +281,7 @@ uint32_t *arm_syscall(uint32_t *regs)
 
         *running_task = tcb;
 
-        /* Restore the cpu lock */
-
-        restore_critical_section(tcb, cpu);
+        break_critical_section();
         regs = tcb->xcp.regs;
         break;
 

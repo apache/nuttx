@@ -278,9 +278,7 @@ uint32_t *arm_syscall(uint32_t *regs)
         *running_task = tcb;
         g_running_tasks[cpu] = *running_task;
 
-        /* Restore the cpu lock */
-
-        restore_critical_section(tcb, cpu);
+        break_critical_section();
         regs = tcb->xcp.regs;
 #ifdef CONFIG_ARCH_ADDRENV
         addrenv_switch(tcb);

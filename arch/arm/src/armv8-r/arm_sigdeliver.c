@@ -57,15 +57,7 @@ void arm_sigdeliver(void)
 {
   struct tcb_s *rtcb = this_task();
   uint32_t *regs = rtcb->xcp.saved_regs;
-
-#ifdef CONFIG_SMP
-  /* In the SMP case, we must terminate the critical section while the signal
-   * handler executes, but we also need to restore the irqcount when the
-   * we resume the main thread of the task.
-   */
-
-  int16_t saved_irqcount;
-#endif
+  irqstate_t flags;
 
   board_autoled_on(LED_SIGNAL);
 
@@ -74,24 +66,6 @@ void arm_sigdeliver(void)
   DEBUGASSERT(rtcb->sigdeliver != NULL);
 
 retry:
-#ifdef CONFIG_SMP
-  /* In the SMP case, up_schedule_sigaction(0) will have incremented
-   * 'irqcount' in order to force us into a critical section.  Save the
-   * pre-incremented irqcount.
-   */
-
-  saved_irqcount = rtcb->irqcount;
-  DEBUGASSERT(saved_irqcount >= 0);
-
-  /* Now we need call leave_critical_section() repeatedly to get the irqcount
-   * to zero, freeing all global spinlocks that enforce the critical section.
-   */
-
-  while (rtcb->irqcount > 0)
-    {
-      leave_critical_section(regs[REG_CPSR]);
-    }
-#endif /* CONFIG_SMP */
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
   /* Then make sure that interrupts are enabled.  Signal handlers must always
@@ -112,28 +86,15 @@ retry:
 
   sinfo("Resuming\n");
 
-#ifdef CONFIG_SMP
-  /* Restore the saved 'irqcount' and recover the critical section
-   * spinlocks.
-   */
-
-  DEBUGASSERT(rtcb->irqcount == 0);
-  while (rtcb->irqcount < saved_irqcount + 1)
-    {
-      enter_critical_section();
-    }
-#endif
-
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
   up_irq_save();
 #endif
 
+  flags = enter_critical_section();
   if (!sq_empty(&rtcb->sigpendactionq) &&
       (rtcb->flags & TCB_FLAG_SIGNAL_ACTION) == 0)
     {
-#ifdef CONFIG_SMP
-      leave_critical_section(regs[REG_CPSR]);
-#endif
+      leave_critical_section(flags);
       goto retry;
     }
 
@@ -152,10 +113,6 @@ retry:
   /* Then restore the correct state for this thread of execution. */
 
   board_autoled_off(LED_SIGNAL);
-#ifdef CONFIG_SMP
-  leave_critical_section(up_irq_save());
-#endif
-
   rtcb->xcp.regs = rtcb->xcp.saved_regs;
   arm_fullcontextrestore();
   UNUSED(regs);

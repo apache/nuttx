@@ -190,9 +190,7 @@ uint64_t *arm64_syscall(uint64_t *regs)
     {
       case SYS_restore_context:
 
-        /* Restore the cpu lock */
-
-        restore_critical_section(tcb, cpu);
+        break_critical_section();
 #ifdef CONFIG_ARCH_ADDRENV
         addrenv_switch(tcb);
         tcb = this_task();
@@ -212,9 +210,7 @@ uint64_t *arm64_syscall(uint64_t *regs)
         nxsched_switch_context(*running_task, tcb);
         *running_task = tcb;
 
-        /* Restore the cpu lock */
-
-        restore_critical_section(tcb, cpu);
+        break_critical_section();
         break;
 
 #if (defined(CONFIG_BUILD_KERNEL) || defined(CONFIG_BUILD_PROTECTED)) \

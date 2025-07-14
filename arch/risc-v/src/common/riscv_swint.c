@@ -169,7 +169,7 @@ int riscv_swint(int irq, void *context, void *arg)
       case SYS_restore_context:
         {
           riscv_restorecontext(tcb);
-          restore_critical_section(tcb, cpu);
+          break_critical_section();
         }
         break;
 
@@ -177,7 +177,7 @@ int riscv_swint(int irq, void *context, void *arg)
         {
           riscv_savecontext(g_running_tasks[cpu]);
           riscv_restorecontext(tcb);
-          restore_critical_section(tcb, cpu);
+          break_critical_section();
         }
         break;
 
