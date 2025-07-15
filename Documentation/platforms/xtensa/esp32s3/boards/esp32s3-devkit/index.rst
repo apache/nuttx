@@ -411,6 +411,14 @@ This configuration is the same as the ``nsh`` configuration, but it generates th
 image in a format that can be used by MCUboot. It also makes the ``make bootloader`` command to
 build the MCUboot bootloader image using the Espressif HAL.
 
+mcuboot_update_agent
+--------------------
+
+This configuration is used to represent an MCUboot image that contains an update agent
+to perform over-the-air (OTA) updates. Wi-Fi settings are already enabled and image confirmation program is included.
+
+Follow the instructions in the :ref:`MCUBoot and OTA Update <MCUBoot and OTA Update S3>` section to execute OTA update.
+
 nsh
 ---
 
