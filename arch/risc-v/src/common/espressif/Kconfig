@@ -1736,7 +1736,8 @@ config ESPRESSIF_SPI_FLASH_USE_32BIT_ADDRESS
 
 config ESPRESSIF_STORAGE_MTD_OFFSET
 	hex "Storage MTD base address in SPI Flash"
-	default 0x180000
+	default 0x180000 if !ESPRESSIF_BOOTLOADER_MCUBOOT
+	default 0x250000 if ESPRESSIF_BOOTLOADER_MCUBOOT
 	depends on ESPRESSIF_MTD
 	---help---
 		MTD base address in SPI Flash.
