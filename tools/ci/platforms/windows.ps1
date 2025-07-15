@@ -231,12 +231,12 @@ function riscv_gcc_toolchain() {
       add_path "$NUTTXTOOLS\riscv-none-elf-gcc\bin"
       if (-not (Test-Path -Path "$NUTTXTOOLS\riscv-none-elf-gcc\bin\riscv-none-elf-gcc.exe")) {
         Write-Host "Download: RISCV GCC toolchain" -ForegroundColor Green
-        $basefile = "xpack-riscv-none-elf-gcc-13.2.0-2-win32-x64"
+        $basefile = "xpack-riscv-none-elf-gcc-14.2.0-3-win32-x64"
         Set-Location "$NUTTXTOOLS"
         # Download the latest RISCV GCC toolchain prebuilt by xPack
-        Invoke-WebRequest -Uri "https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v13.2.0-2/$basefile.zip" -OutFile "$NUTTXTOOLS\$basefile.zip" -ErrorAction Stop
+        Invoke-WebRequest -Uri "https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v14.2.0-3/$basefile.zip" -OutFile "$NUTTXTOOLS\$basefile.zip" -ErrorAction Stop
         Expand-Archive "$NUTTXTOOLS\$basefile.zip"
-        Move-Item -Path "$basefile\xpack-riscv-none-elf-gcc-13.2.0-2" -Destination "riscv-none-elf-gcc"
+        Move-Item -Path "$basefile\xpack-riscv-none-elf-gcc-14.2.0-3" -Destination "riscv-none-elf-gcc"
         Remove-Item "$basefile*" -Force
       }
     }
