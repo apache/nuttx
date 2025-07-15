@@ -345,8 +345,18 @@
 /* Amount of channels */
 
 #define DMA3_CHANNEL_COUNT                (31)
-#define DMA4_CHANNEL_COUNT                (64)
-#define IMX9_EDMA_NCHANNELS               (DMA3_CHANNEL_COUNT + DMA4_CHANNEL_COUNT)
+#ifdef IMX9_DMA4_BASE
+#  define DMA4_CHANNEL_COUNT              (64)
+#else
+#  define DMA4_CHANNEL_COUNT              (0)
+#endif
+#ifdef IMX9_EDMA5_2_BASE
+#define DMA5_CHANNEL_COUNT                (64 - CONFIG_IMX9_EDMA5_CHAN_COUNT)
+#else
+#  define DMA5_CHANNEL_COUNT              (0)
+#endif
+
+#define IMX9_EDMA_NCHANNELS               (DMA3_CHANNEL_COUNT + DMA4_CHANNEL_COUNT + DMA5_CHANNEL_COUNT)
 
 /* Amount of interrupt sources */
 #ifdef CONFIG_ARCH_CHIP_IMX95_M7

@@ -909,7 +909,8 @@ void weak_function arm_dma_initialize(void)
 
   /* Initialize the channel */
 
-  for (i = 0; i < DMA4_CHANNEL_COUNT; i++, dmach++)
+  for (i = CONFIG_IMX9_EDMA5_CHAN_OFFSET;
+       i < CONFIG_IMX9_EDMA5_CHAN_COUNT; i++, dmach++)
     {
       dmach->base = IMX9_EDMA5_2_BASE;
       dmach->chan = i;

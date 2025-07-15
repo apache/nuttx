@@ -652,6 +652,26 @@ config IMX9_EDMA_NTCD
 		which case only the TCD channel registers will be used and scatter-
 		will not be supported.
 
+config IMX9_EDMA5_CHAN_OFFSET
+	int "Offset of 1st EDMA5 channel"
+	default 30
+	depends on ARCH_CHIP_IMX95_M7
+	---help---
+		The EDMA5 controller on the i.MX95 can be accessed by multiple cores.
+		However, TCD (Transfer Control Descriptor) mappings are not shareable
+		between instances. Instead, each instance must specify its usable TCD
+		channels using an offset and count to define a dedicated range.
+
+config IMX9_EDMA5_CHAN_COUNT
+	int "Number of EDMA5 channels"
+	default 34
+	depends on ARCH_CHIP_IMX95_M7
+	---help---
+		The EDMA5 controller on the i.MX95 can be accessed by multiple cores.
+		However, TCD (Transfer Control Descriptor) mappings are not shareable
+		between instances. Instead, each instance must specify its usable TCD
+		channels using an offset and count to define a dedicated range.
+
 config IMX9_EDMA_ELINK
 	bool "Channeling Linking"
 	default n
