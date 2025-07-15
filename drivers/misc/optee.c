@@ -27,6 +27,7 @@
 #include <fcntl.h>
 #include <nuttx/tee.h>
 #include <nuttx/nuttx.h>
+#include <nuttx/cache.h>
 #include <nuttx/drivers/optee.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
@@ -345,6 +346,10 @@ optee_shm_to_page_list(FAR struct optee_shm *shm, FAR uintptr_t *list_pa)
       *list_pa = optee_va_to_pa(list) | pgoff;
     }
 
+#ifndef CONFIG_ARCH_USE_MMU
+  up_clean_dcache((uintptr_t)list, (uintptr_t)list + list_size);
+#endif
+
   return list;
 }
 
@@ -609,6 +614,10 @@ static int optee_memref_to_msg_param(FAR struct optee_priv_data *priv,
       mp->u.tmem.size = shm->length;
     }
 
+#ifndef CONFIG_ARCH_USE_MMU
+  up_clean_dcache(shm->addr, shm->addr + shm->length);
+#endif
+
   return 0;
 }
 
@@ -671,7 +680,7 @@ static int optee_from_msg_param(FAR struct tee_ioctl_param *params,
     {
       FAR const struct optee_msg_param *mp = mparams + n;
       FAR struct tee_ioctl_param *p = params + n;
-      FAR struct optee_shm *shm;
+      FAR struct optee_shm *shm = NULL;
 
       switch (mp->attr & OPTEE_MSG_ATTR_TYPE_MASK)
         {
@@ -710,10 +719,18 @@ static int optee_from_msg_param(FAR struct tee_ioctl_param *params,
             p->attr = TEE_IOCTL_PARAM_ATTR_TYPE_MEMREF_INPUT +
                       mp->attr - OPTEE_MSG_ATTR_TYPE_RMEM_INPUT;
             p->b = mp->u.rmem.size;
+            shm = (FAR struct optee_shm *)(uintptr_t)mp->u.tmem.shm_ref;
             break;
           default:
             return -EINVAL;
         }
+
+#ifndef CONFIG_ARCH_USE_MMU
+      if (shm)
+        {
+          up_invalidate_dcache(shm->addr, shm->addr + shm->length);
+        }
+#endif
     }
 
   return 0;

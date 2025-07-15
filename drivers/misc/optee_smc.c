@@ -24,6 +24,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/cache.h>
 #include <nuttx/kmalloc.h>
 #include <errno.h>
 #include <syslog.h>
@@ -314,11 +315,17 @@ int optee_transport_call(FAR struct optee_priv_data *priv_,
   smccc_res_t res;
   smccc_res_t par;
   uintptr_t arg_pa;
+#ifndef CONFIG_ARCH_USE_MMU
+  size_t arg_size = OPTEE_MSG_GET_ARG_SIZE(arg->num_params);
+
+  up_clean_dcache((uintptr_t)arg, (uintptr_t)arg + arg_size);
+#endif
 
   memset(&par, 0, sizeof(smccc_res_t));
 
   par.a0 = OPTEE_SMC_CALL_WITH_ARG;
   arg_pa = optee_va_to_pa(arg);
+
   reg_pair_from_64(arg_pa, &par.a1, &par.a2);
 
   for (; ; )
@@ -335,6 +342,9 @@ int optee_transport_call(FAR struct optee_priv_data *priv_,
         }
       else
         {
+#ifndef CONFIG_ARCH_USE_MMU
+          up_invalidate_dcache((uintptr_t)arg, (uintptr_t)arg + arg_size);
+#endif
           return (int)res.a0;
         }
     }
