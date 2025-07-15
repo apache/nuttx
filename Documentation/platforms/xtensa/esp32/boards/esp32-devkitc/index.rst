@@ -649,11 +649,19 @@ The MCP2515 interrupt (INT) pin is connected to the pin 22 of the
 ESP32-Devkit.
 
 mcuboot_nsh
---------------------
+-----------
 
 This configuration is the same as the ``nsh`` configuration, but it generates the application
 image in a format that can be used by MCUboot. It also makes the ``make bootloader`` command to
 build the MCUboot bootloader image using the Espressif HAL.
+
+mcuboot_update_agent
+--------------------
+
+This configuration is used to represent an MCUboot image that contains an update agent
+to perform over-the-air (OTA) updates. Wi-Fi settings are already enabled and image confirmation program is included.
+
+Follow the instructions in the :ref:`MCUBoot and OTA Update <MCUBoot and OTA Update ESP32>` section to execute OTA update.
 
 mcuboot_slot_confirm
 --------------------
@@ -663,28 +671,6 @@ after flashing. The image can be confirmed by using the following command::
 
     nsh> mcuboot_confirm
     Application Image successfully confirmed!
-
-For more information, check `this demo <https://www.youtube.com/watch?v=Vzy0rl-ixbc>`_.
-
-mcuboot_update_agent
---------------------
-
-This configuration is used to represent an MCUboot image that contains an update agent
-to perform OTA updates. First, you will have to setup a HTTP server to provide the update
-image. To do that, we can run a simple Python server on the same folder that contains our
-binary file on the computer::
-
-    sudo python -m http.server 8080
-
-After this, we can use NSH to connect to our network and use the agent to perform the firmware
-update::
-
-    nsh> ifup wlan0
-    nsh> wapi mode wlan0 2
-    nsh> wapi psk wlan0 mypasswd 3
-    nsh> wapi essid wlan0 myssid 1
-    nsh> renew wlan0
-    nsh> mcuboot_agent http://<SERVER_IP>:8080/nuttx.bin
 
 For more information, check `this demo <https://www.youtube.com/watch?v=Vzy0rl-ixbc>`_.
 
