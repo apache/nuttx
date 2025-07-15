@@ -158,12 +158,12 @@ riscv_gcc_toolchain() {
 
   if [ ! -f "${NUTTXTOOLS}/riscv-none-elf-gcc/bin/riscv-none-elf-gcc" ]; then
     local basefile
-    basefile=xpack-riscv-none-elf-gcc-13.2.0-2-win32-x64
+    basefile=xpack-riscv-none-elf-gcc-14.2.0-3-win32-x64
     cd "${NUTTXTOOLS}"
     # Download the latest RISCV GCC toolchain prebuilt by xPack
-    curl -O -L -s https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v13.2.0-2/${basefile}.zip
+    curl -O -L -s https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v14.2.0-3/${basefile}.zip
     unzip -qo ${basefile}.zip
-    mv xpack-riscv-none-elf-gcc-13.2.0-2 riscv-none-elf-gcc
+    mv xpack-riscv-none-elf-gcc-14.2.0-3 riscv-none-elf-gcc
     rm ${basefile}.zip
   fi
   command riscv-none-elf-gcc --version
