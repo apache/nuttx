@@ -1090,9 +1090,12 @@ choice ESP32S3_SPIRAM_HEAP
 
 config ESP32S3_SPIRAM_COMMON_HEAP
 	bool "Additional region to kernel heap"
+	depends on !ESP32S3_SPIFLASH && !ESPRESSIF_WIFI && !BUILD_PROTECTED
 
 config ESP32S3_SPIRAM_USER_HEAP
 	bool "Separated userspace heap"
+	depends on SCHED_LPWORK
+	select ESP32S3_SPI_FLASH_SUPPORT_PSRAM_STACK if ESP32S3_SPIFLASH
 	select MM_KERNEL_HEAP
 
 endchoice # ESP32S3_SPIRAM_HEAP
@@ -1949,10 +1952,7 @@ config ESP32S3_SPIFLASH_OP_TASK_STACKSIZE
 		to be finished.
 
 config ESP32S3_SPI_FLASH_SUPPORT_PSRAM_STACK
-	bool "Support PSRAM As Task Stack"
-	default n
-	depends on ESP32S3_SPIRAM
-	select SCHED_LPWORK
+	bool
 	---help---
 		Enable this option, Tasks which use PSRAM as stack
 		can do SPI Flash read/write/erase/map/unmap. Otherwise,
