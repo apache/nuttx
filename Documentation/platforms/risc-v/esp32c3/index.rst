@@ -408,11 +408,100 @@ Then, it can be customized in the menu :menuselection:`System Type --> ADC Confi
 
 .. warning:: Maximum measurable voltage may saturate around 2900 mV.
 
+.. _MCUBoot and OTA Update C3:
+
+MCUBoot and OTA Update
+======================
+
+The ESP32-C3 supports over-the-air (OTA) updates using MCUBoot.
+
+Read more about the MCUBoot for Espressif devices `here <https://docs.mcuboot.com/readme-espressif.html>`__.
+
+Executing OTA Update
+--------------------
+
+This section describes how to execute OTA update using MCUBoot.
+
+1. First build the default ``mcuboot_update_agent`` config. This image defaults to the primary slot and already comes with Wi-Fi settings enabled::
+
+    ./tools/configure.sh esp32c3-generic:mcuboot_update_agent
+
+2. Build the MCUBoot bootloader::
+
+    make bootloader
+
+3. Finally, build the application image::
+
+    make
+
+Flash the image to the board and verify it boots ok.
+It should show the message "This is MCUBoot Update Agent image" before NuttShell is ready.
+
+At this point, the board should be able to connect to Wi-Fi so we can download a new binary from our network::
+
+  NuttShell (NSH) NuttX-12.4.0
+  This is MCUBoot Update Agent image
+  nsh>
+  nsh> wapi psk wlan0 <wifi_ssid> 3
+  nsh> wapi essid wlan0 <wifi_password> 1
+  nsh> renew wlan0
+
+Now, keep the board as is and execute the following commands to **change the MCUBoot target slot to the 2nd slot**
+and modify the message of the day (MOTD) as a mean to verify the new image is being used.
+
+1. Change the MCUBoot target slot to the 2nd slot::
+
+    kconfig-tweak -d CONFIG_ESPRESSIF_ESPTOOL_TARGET_PRIMARY
+    kconfig-tweak -e CONFIG_ESPRESSIF_ESPTOOL_TARGET_SECONDARY
+    kconfig-tweak --set-str CONFIG_NSH_MOTD_STRING "This is MCUBoot UPDATED image!"
+    make olddefconfig
+
+  .. note::
+    The same changes can be accomplished through ``menuconfig`` in :menuselection:`System Type --> Bootloader and Image Configuration --> Target slot for image flashing`
+    for MCUBoot target slot and in :menuselection:`System Type --> Bootloader and Image Configuration --> Search (motd) --> NSH Library --> Message of the Day` for the MOTD.
+
+2. Rebuild the application image::
+
+    make
+
+At this point the board is already connected to Wi-Fi and has the primary image flashed.
+The new image configured for the 2nd slot is ready to be downloaded.
+
+To execute OTA, create a simple HTTP server on the NuttX directory so we can access the binary remotely::
+
+  cd nuttxspace/nuttx
+  python3 -m http.server
+   Serving HTTP on 0.0.0.0 port 8000 (http://0.0.0.0:8000/) ...
+
+On the board, execute the update agent, setting the IP address to the one on the host machine. Wait until image is transferred and the board should reboot automatically::
+
+  nsh> mcuboot_agent http://10.42.0.1:8000/nuttx.bin
+  MCUboot Update Agent example
+  Downloading from http://10.42.0.1:8000/nuttx.bin
+  Firmware Update size: 1048576 bytes
+  Received: 512      of 1048576 bytes [0%]
+  Received: 1024     of 1048576 bytes [0%]
+  Received: 1536     of 1048576 bytes [0%]
+  [.....]
+  Received: 1048576  of 1048576 bytes [100%]
+  Application Image successfully downloaded!
+  Requested update for next boot. Restarting...
+
+NuttShell should now show the new MOTD, meaning the new image is being used::
+
+  NuttShell (NSH) NuttX-12.4.0
+  This is MCUBoot UPDATED image!
+  nsh>
+
+Finally, the image is loaded but not confirmed.
+To make sure it won't rollback to the previous image, you must confirm with ``mcuboot_confirm`` and reboot the board.
+The OTA is now complete.
+
 Secure Boot and Flash Encryption
-================================
+--------------------------------
 
 Secure Boot
------------
+^^^^^^^^^^^
 
 Secure Boot protects a device from running any unauthorized (i.e., unsigned) code by checking that
 each piece of software that is being booted is signed. On an ESP32-C3, these pieces of software include
@@ -440,7 +529,7 @@ The Secure Boot process on the ESP32-C3 involves the following steps performed:
    by MCUboot rather than the original NuttX port.
 
 Flash Encryption
-----------------
+^^^^^^^^^^^^^^^^
 
 Flash encryption is intended for encrypting the contents of the ESP32-C3's off-chip flash memory. Once this feature is enabled,
 firmware is flashed as plaintext, and then the data is encrypted in place on the first boot. As a result, physical readout
@@ -452,7 +541,7 @@ of flash will not be sufficient to recover most flash contents.
    `here <https://docs.espressif.com/projects/esp-idf/en/latest/esp32c3/security/flash-encryption.html>`__.
 
 Prerequisites
--------------
+^^^^^^^^^^^^^
 
 First of all, we need to install ``imgtool`` (the MCUboot utility application to manipulate binary
 images)::
@@ -476,7 +565,7 @@ respectively, of the compiled project::
 .. important:: The contents of the key files must be stored securely and kept secret.
 
 Enabling Secure Boot and Flash Encryption
------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 To enable Secure Boot for the current project, go to the project's NuttX directory, execute ``make menuconfig`` and the following steps:
 
