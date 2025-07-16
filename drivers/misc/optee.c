@@ -138,14 +138,18 @@ struct optee_page_list_entry
  * Private Function Prototypes
  ****************************************************************************/
 
-/* The file operation functions */
+/* File operation functions for /dev/tee* */
 
 static int optee_open(FAR struct file *filep);
 static int optee_close(FAR struct file *filep);
 static int optee_ioctl(FAR struct file *filep, int cmd,
                        unsigned long arg);
 
+/* File operation functions for shm fds. */
+
 static int optee_shm_close(FAR struct file *filep);
+static int optee_shm_mmap(FAR struct file *filep,
+                          FAR struct mm_map_entry_s *map);
 
 /****************************************************************************
  * Private Data
@@ -168,15 +172,8 @@ static const struct file_operations g_optee_ops =
 
 static const struct file_operations g_optee_shm_ops =
 {
-  NULL,            /* open */
-  optee_shm_close, /* close */
-  NULL,            /* read */
-  NULL,            /* write */
-  NULL,            /* seek */
-  NULL,            /* ioctl */
-  NULL,            /* mmap */
-  NULL,            /* truncate */
-  NULL             /* poll */
+  .close = optee_shm_close,
+  .mmap = optee_shm_mmap,
 };
 
 static struct inode g_optee_shm_inode =
@@ -489,6 +486,60 @@ static int optee_shm_close(FAR struct file *filep)
     }
 
   return 0;
+}
+
+/****************************************************************************
+ * Name: optee_shm_mmap
+ *
+ * Description:
+ *   shm mmap operation
+ *
+ * Parameters:
+ *   filep  - the file instance
+ *   map    - Filled by the userspace, with the mapping parameters.
+ *
+ * Returned Values:
+ *   OK on success; A negated errno value is returned on any failure.
+ *
+ ****************************************************************************/
+
+static int optee_shm_mmap(FAR struct file *filep,
+                          FAR struct mm_map_entry_s *map)
+{
+  FAR struct optee_shm *shm = filep->f_priv;
+  int32_t ret = OK;
+
+  if ((map->flags & MAP_PRIVATE) && (map->flags & MAP_SHARED))
+    {
+      return -EINVAL;
+    }
+
+  /* Forbid multiple mmaps of the same fd. */
+
+  if (shm->vaddr != 0)
+    {
+      return -EBUSY;
+    }
+
+  /* Forbid allocations with bigger size than what registered with
+   * with optee_ioctl_shm_alloc().
+   */
+
+  if (shm->length < map->length)
+    {
+      return -EINVAL;
+    }
+
+  ret = map_anonymous(map, false);
+
+  if (ret == OK)
+    {
+      DEBUGASSERT(map->vaddr != NULL);
+      shm->vaddr = (uint64_t)map->vaddr;
+      shm->paddr = optee_va_to_pa(map->vaddr);
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -980,8 +1031,6 @@ optee_ioctl_shm_alloc(FAR struct optee_priv_data *priv,
                       FAR struct tee_ioctl_shm_alloc_data *data)
 {
   FAR struct optee_shm *shm;
-  FAR void *addr;
-  int memfd;
   int ret;
 
   if (!optee_is_valid_range(data, sizeof(*data)))
@@ -989,40 +1038,27 @@ optee_ioctl_shm_alloc(FAR struct optee_priv_data *priv,
       return -EFAULT;
     }
 
-  memfd = memfd_create(OPTEE_SERVER_PATH, O_CREAT | O_CLOEXEC);
-  if (memfd < 0)
-    {
-      return get_errno();
-    }
-
-  if (ftruncate(memfd, data->size) < 0)
-    {
-      ret = get_errno();
-      goto err;
-    }
-
-  addr = mmap(NULL, data->size, PROT_READ | PROT_WRITE, MAP_SHARED,
-              memfd, 0);
-  if (addr == MAP_FAILED)
-    {
-      ret = get_errno();
-      goto err;
-    }
-
-  ret = optee_shm_alloc(priv, addr, data->size, 0, &shm);
+  ret = optee_shm_alloc(priv, NULL, data->size, TEE_SHM_USER_MAP, &shm);
   if (ret < 0)
     {
-      goto err_with_mmap;
+      return ret;
     }
 
-  data->id = shm->id;
-  return memfd;
+  ret = file_allocate_from_inode(&g_optee_shm_inode,
+                                 O_CLOEXEC | O_RDOK, 0, shm, 0);
 
-err_with_mmap:
-  munmap(addr, data->size);
-err:
-  close(memfd);
-  return ret;
+  /* Will free automatically the shm once the descriptor is closed. */
+
+  if (ret < 0)
+    {
+      optee_shm_free(shm);
+      return ret;
+    }
+
+  shm->fd = ret;
+
+  data->id = shm->id;
+  return shm->fd;
 }
 
 static int
@@ -1218,15 +1254,15 @@ int optee_shm_alloc(FAR struct optee_priv_data *priv, FAR void *addr,
       ptr = addr;
     }
 
-  if (ptr == NULL)
+  if (!(flags & TEE_SHM_USER_MAP) && ptr == NULL)
     {
-      goto err;
+      return -EINVAL;
     }
 
   shm->fd = -1;
   shm->priv = priv;
   shm->vaddr = (uintptr_t)ptr;
-  shm->paddr = optee_va_to_pa((FAR void *)shm->vaddr);
+  shm->paddr = shm->vaddr ? optee_va_to_pa((FAR void *)shm->vaddr) : 0;
   shm->length = size;
   shm->flags = flags;
   shm->id = idr_alloc(priv->shms, shm, 0, 0);
@@ -1290,13 +1326,6 @@ void optee_shm_free(FAR struct optee_shm *shm)
   if (shm->flags & TEE_SHM_ALLOC)
     {
       kmm_free((FAR void *)(uintptr_t)shm->vaddr);
-    }
-
-  if (!(shm->flags & (TEE_SHM_ALLOC | TEE_SHM_REGISTER)))
-    {
-      /* allocated by optee_ioctl_shm_alloc(), need to unmap */
-
-      munmap((FAR void *)(uintptr_t)shm->vaddr, shm->length);
     }
 
   idr_remove(shm->priv->shms, shm->id);
