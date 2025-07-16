@@ -675,16 +675,13 @@ config ESP32S3_SPI
 	bool
 	default n
 
+config ESP32S3_EFUSE
+	bool
+	select ESPRESSIF_EFUSE
+
 config ESP32S3_WDT
 	bool
 	default n
-
-config ESP32S3_EFUSE
-	bool "EFUSE support"
-	select EFUSE
-	default n
-	---help---
-		Enable ESP32-S3 efuse support.
 
 config ESP32S3_RNG
 	bool "Random Number Generator (RNG)"
