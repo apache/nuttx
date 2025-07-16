@@ -149,6 +149,17 @@ int nxevent_open(FAR nxevent_t **event, FAR const char *name,
           goto errout_with_search;
         }
 
+      /* Allocate the event group structure (using the appropriate allocator
+       * for the group)
+       */
+
+      nevent = group_malloc(NULL, sizeof(struct nevent_inode_s));
+      if (!nevent)
+        {
+          ret = -ENOMEM;
+          goto errout_with_search;
+        }
+
       /* Create the event group.  First we have to extract the additional
        * parameters from the variable argument list.
        * REVISIT:  Mode parameter is not currently used.
@@ -165,37 +176,30 @@ int nxevent_open(FAR nxevent_t **event, FAR const char *name,
 
       inode_lock();
       ret = inode_reserve(fullpath, mode, &inode);
+      if (ret >= 0)
+        {
+          /* Link to the inode */
+
+          inode->u.i_nevent = nevent;
+          nevent->ne_inode  = inode;
+
+          /* Initialize the inode */
+
+          INODE_SET_NAMEDEVENT(inode);
+          atomic_fetch_add(&inode->i_crefs, 1);
+
+          /* Initialize the event groups */
+
+          nxevent_init(&nevent->ne_event, events);
+        }
+
       inode_unlock();
 
       if (ret < 0)
         {
+          group_free(NULL, nevent);
           goto errout_with_search;
         }
-
-      /* Allocate the event group structure (using the appropriate allocator
-       * for the group)
-       */
-
-      nevent = group_malloc(NULL, sizeof(struct nevent_inode_s));
-      if (!nevent)
-        {
-          ret = -ENOMEM;
-          goto errout_with_inode;
-        }
-
-      /* Link to the inode */
-
-      inode->u.i_nevent = nevent;
-      nevent->ne_inode  = inode;
-
-      /* Initialize the inode */
-
-      INODE_SET_NAMEDEVENT(inode);
-      atomic_fetch_add(&inode->i_crefs, 1);
-
-      /* Initialize the event groups */
-
-      nxevent_init(&nevent->ne_event, events);
 
       /* Return a reference to the event groups */
 
