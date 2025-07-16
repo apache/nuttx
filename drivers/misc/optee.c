@@ -309,7 +309,7 @@ optee_shm_to_page_list(FAR struct optee_shm *shm, FAR uintptr_t *list_pa)
   uint32_t list_size;
   uint32_t i = 0;
 
-  pgoff = shm->addr & (pgsize - 1);
+  pgoff = shm->vaddr & (pgsize - 1);
   total_pages = (uint32_t)div_round_up(pgoff + shm->length, pgsize);
   list_size = div_round_up(total_pages, OPTEE_PAGES_ARRAY_LEN)
               * sizeof(struct optee_page_list_entry);
@@ -326,7 +326,7 @@ optee_shm_to_page_list(FAR struct optee_shm *shm, FAR uintptr_t *list_pa)
     }
 
   list_entry = (FAR struct optee_page_list_entry *)list;
-  page = ALIGN_DOWN(shm->addr, pgsize);
+  page = ALIGN_DOWN(shm->vaddr, pgsize);
   while (total_pages)
     {
       list_entry->pages_array[i++] = optee_va_to_pa((FAR const void *)page);
@@ -615,7 +615,7 @@ static int optee_memref_to_msg_param(FAR struct optee_priv_data *priv,
     }
 
 #ifndef CONFIG_ARCH_USE_MMU
-  up_clean_dcache(shm->addr, shm->addr + shm->length);
+  up_clean_dcache(shm->vaddr, shm->vaddr + shm->length);
 #endif
 
   return 0;
@@ -728,7 +728,7 @@ static int optee_from_msg_param(FAR struct tee_ioctl_param *params,
 #ifndef CONFIG_ARCH_USE_MMU
       if (shm)
         {
-          up_invalidate_dcache(shm->addr, shm->addr + shm->length);
+          up_invalidate_dcache(shm->vaddr, shm->vaddr + shm->length);
         }
 #endif
     }
@@ -1225,7 +1225,8 @@ int optee_shm_alloc(FAR struct optee_priv_data *priv, FAR void *addr,
 
   shm->fd = -1;
   shm->priv = priv;
-  shm->addr = (uintptr_t)ptr;
+  shm->vaddr = (uintptr_t)ptr;
+  shm->paddr = optee_va_to_pa((FAR void *)shm->vaddr);
   shm->length = size;
   shm->flags = flags;
   shm->id = idr_alloc(priv->shms, shm, 0, 0);
@@ -1288,14 +1289,14 @@ void optee_shm_free(FAR struct optee_shm *shm)
 
   if (shm->flags & TEE_SHM_ALLOC)
     {
-      kmm_free((FAR void *)(uintptr_t)shm->addr);
+      kmm_free((FAR void *)(uintptr_t)shm->vaddr);
     }
 
   if (!(shm->flags & (TEE_SHM_ALLOC | TEE_SHM_REGISTER)))
     {
       /* allocated by optee_ioctl_shm_alloc(), need to unmap */
 
-      munmap((FAR void *)(uintptr_t)shm->addr, shm->length);
+      munmap((FAR void *)(uintptr_t)shm->vaddr, shm->length);
     }
 
   idr_remove(shm->priv->shms, shm->id);

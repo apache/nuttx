@@ -179,7 +179,6 @@ static void optee_smc_handle_rpc(FAR struct optee_priv_data *priv_,
                                  FAR smccc_res_t *par)
 {
   FAR struct optee_shm *shm;
-  uintptr_t shm_pa;
   uint32_t rpc_func;
 
   rpc_func = OPTEE_SMC_RETURN_GET_RPC_FUNC(par->a0);
@@ -190,8 +189,7 @@ static void optee_smc_handle_rpc(FAR struct optee_priv_data *priv_,
       case OPTEE_SMC_RPC_FUNC_ALLOC:
         if (!optee_shm_alloc(priv_, NULL, par->a1, TEE_SHM_ALLOC, &shm))
           {
-            shm_pa = optee_va_to_pa((FAR void *)(uintptr_t)shm->addr);
-            reg_pair_from_64(shm_pa, &par->a1, &par->a2);
+            reg_pair_from_64(shm->paddr, &par->a1, &par->a2);
             reg_pair_from_64((uintptr_t)shm, &par->a4, &par->a5);
           }
         else
