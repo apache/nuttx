@@ -262,6 +262,23 @@ void arp_out(FAR struct net_driver_s *dev)
 
       ninfo("ARP request for IP %08lx\n", (unsigned long)ipaddr);
 
+      if (ret == -EINPROGRESS)
+        {
+          /* The destination address was not in our ARP table, and
+           * the last arp request is in progress, directly drop the packet
+           * to prevent arp flood.
+           */
+
+          dev->d_len = 0;
+          return;
+        }
+
+      /* MAC address marked with all zeros to limit concurrent task
+       * send ARP request for same destination.
+       */
+
+      arp_update(dev, ipaddr, NULL);
+
       /* The destination address was not in our ARP table, so we overwrite
        * the IP packet with an ARP request.
        */
