@@ -88,7 +88,7 @@ FAR struct icmpv6_conn_s *icmpv6_alloc(void)
 
   /* The free list is protected by a mutex. */
 
-  NET_BUFPOLL_LOCK(g_icmpv6_connections);
+  NET_BUFPOOL_LOCK(g_icmpv6_connections);
 
   conn = NET_BUFPOOL_TRYALLOC(g_icmpv6_connections);
   if (conn != NULL)
@@ -98,7 +98,7 @@ FAR struct icmpv6_conn_s *icmpv6_alloc(void)
       dq_addlast(&conn->sconn.node, &g_active_icmpv6_connections);
     }
 
-  NET_BUFPOLL_UNLOCK(g_icmpv6_connections);
+  NET_BUFPOOL_UNLOCK(g_icmpv6_connections);
 
   return conn;
 }
@@ -120,7 +120,7 @@ void icmpv6_free(FAR struct icmpv6_conn_s *conn)
 
   /* Take the mutex (perhaps waiting) */
 
-  NET_BUFPOLL_LOCK(g_icmpv6_connections);
+  NET_BUFPOOL_LOCK(g_icmpv6_connections);
 
   /* Remove the connection from the active list */
 
@@ -130,7 +130,7 @@ void icmpv6_free(FAR struct icmpv6_conn_s *conn)
 
   NET_BUFPOOL_FREE(g_icmpv6_connections, conn);
 
-  NET_BUFPOLL_UNLOCK(g_icmpv6_connections);
+  NET_BUFPOOL_UNLOCK(g_icmpv6_connections);
 }
 
 /****************************************************************************

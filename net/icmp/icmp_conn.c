@@ -87,7 +87,7 @@ FAR struct icmp_conn_s *icmp_alloc(void)
 
   /* The free list is protected by a mutex. */
 
-  NET_BUFPOLL_LOCK(g_icmp_connections);
+  NET_BUFPOOL_LOCK(g_icmp_connections);
 
   conn = NET_BUFPOOL_TRYALLOC(g_icmp_connections);
   if (conn != NULL)
@@ -97,7 +97,7 @@ FAR struct icmp_conn_s *icmp_alloc(void)
       dq_addlast(&conn->sconn.node, &g_active_icmp_connections);
     }
 
-  NET_BUFPOLL_UNLOCK(g_icmp_connections);
+  NET_BUFPOOL_UNLOCK(g_icmp_connections);
 
   return conn;
 }
@@ -119,7 +119,7 @@ void icmp_free(FAR struct icmp_conn_s *conn)
 
   /* Take the mutex (perhaps waiting) */
 
-  NET_BUFPOLL_LOCK(g_icmp_connections);
+  NET_BUFPOOL_LOCK(g_icmp_connections);
 
   /* Is this the last reference on the connection?  It might not be if the
    * socket was cloned.
@@ -142,7 +142,7 @@ void icmp_free(FAR struct icmp_conn_s *conn)
       NET_BUFPOOL_FREE(g_icmp_connections, conn);
     }
 
-  NET_BUFPOLL_UNLOCK(g_icmp_connections);
+  NET_BUFPOOL_UNLOCK(g_icmp_connections);
 }
 
 /****************************************************************************

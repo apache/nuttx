@@ -552,7 +552,7 @@ FAR struct udp_conn_s *udp_alloc(uint8_t domain)
 
   /* The free list is protected by a mutex. */
 
-  NET_BUFPOLL_LOCK(g_udp_connections);
+  NET_BUFPOOL_LOCK(g_udp_connections);
 
   conn = NET_BUFPOOL_TRYALLOC(g_udp_connections);
 
@@ -585,7 +585,7 @@ FAR struct udp_conn_s *udp_alloc(uint8_t domain)
       dq_addlast(&conn->sconn.node, &g_active_udp_connections);
     }
 
-  NET_BUFPOLL_UNLOCK(g_udp_connections);
+  NET_BUFPOOL_UNLOCK(g_udp_connections);
   return conn;
 }
 
@@ -608,7 +608,7 @@ void udp_free(FAR struct udp_conn_s *conn)
 
   DEBUGASSERT(conn->crefs == 0);
 
-  NET_BUFPOLL_LOCK(g_udp_connections);
+  NET_BUFPOOL_LOCK(g_udp_connections);
   conn->lport = 0;
 
   /* Remove the connection from the active list */
@@ -644,7 +644,7 @@ void udp_free(FAR struct udp_conn_s *conn)
 
   NET_BUFPOOL_FREE(g_udp_connections, conn);
 
-  NET_BUFPOLL_UNLOCK(g_udp_connections);
+  NET_BUFPOOL_UNLOCK(g_udp_connections);
 }
 
 /****************************************************************************
