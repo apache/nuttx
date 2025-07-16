@@ -28,6 +28,14 @@ config NET_ARP_MAXAGE
 		The maximum age of ARP table entries measured in deciseconds.  The
 		default value of 120 corresponds to 20 minutes (BSD default).
 
+config NET_ARP_MAXAGE_UNREACHABLE
+	int "Max unreachable ARP entry age"
+	default 1
+	---help---
+		The maximum age of unreachable ARP table entries measured in
+		deciseconds. During unreachable period not send a retry ARP
+		request for the same destination.
+
 config NET_ARP_IPIN
 	bool "ARP address harvesting"
 	default n
