@@ -55,6 +55,7 @@
 #include "icmpv6/icmpv6.h"
 #include "neighbor/neighbor.h"
 #include "route/route.h"
+#include "utils/utils.h"
 #include "tcp/tcp.h"
 
 /****************************************************************************
@@ -548,7 +549,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
    * ready.
    */
 
-  net_lock();
+  conn_dev_lock(&conn->sconn, conn->dev);
 
   /* Now that we have the network locked, we need to check the connection
    * state again to ensure the connection is still valid.
@@ -557,7 +558,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
   if (!_SS_ISCONNECTED(conn->sconn.s_flags))
     {
       nerr("ERROR: No longer connected\n");
-      net_unlock();
+      conn_dev_unlock(&conn->sconn, conn->dev);
       ret = -ENOTCONN;
       goto errout;
     }
@@ -613,11 +614,13 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
               info.tc_conn = conn;
               info.tc_cb   = &state.snd_cb;
               info.tc_sem  = &state.snd_sem;
+              conn_dev_unlock(&conn->sconn, conn->dev);
               tls_cleanup_push(tls_get_info(), tcp_callback_cleanup, &info);
 
               ret = net_sem_timedwait(&state.snd_sem,
                                   _SO_TIMEOUT(conn->sconn.s_sndtimeo));
               tls_cleanup_pop(tls_get_info(), 0);
+              conn_dev_lock(&conn->sconn, conn->dev);
               if (ret != -ETIMEDOUT || acked == state.snd_acked)
                 {
                   if (ret == -ETIMEDOUT)
@@ -636,7 +639,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
     }
 
   nxsem_destroy(&state.snd_sem);
-  net_unlock();
+  conn_dev_unlock(&conn->sconn, conn->dev);
 
   /* Check for a errors.  Errors are signalled by negative errno values
    * for the send length

@@ -697,6 +697,26 @@ int tcp_connect(FAR struct tcp_conn_s *conn,
 void tcp_removeconn(FAR struct tcp_conn_s *conn);
 
 /****************************************************************************
+ * Name: tcp_conn_list_lock
+ *
+ * Description:
+ *   Lock the TCP connection list.
+ *
+ ****************************************************************************/
+
+void tcp_conn_list_lock(void);
+
+/****************************************************************************
+ * Name: tcp_conn_list_unlock
+ *
+ * Description:
+ *   Unlock the TCP connection list.
+ *
+ ****************************************************************************/
+
+void tcp_conn_list_unlock(void);
+
+/****************************************************************************
  * Name: psock_tcp_connect
  *
  * Description:

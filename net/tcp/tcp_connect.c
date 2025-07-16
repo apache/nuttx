@@ -47,6 +47,7 @@
 #include "netdev/netdev.h"
 #include "socket/socket.h"
 #include "inet/inet.h"
+#include "utils/utils.h"
 #include "tcp/tcp.h"
 
 #ifdef NET_TCP_HAVE_STACK
@@ -304,8 +305,6 @@ int psock_tcp_connect(FAR struct socket *psock,
    * setup.
    */
 
-  net_lock();
-
   conn = psock->s_conn;
 
   /* Get the connection reference from the socket */
@@ -367,6 +366,7 @@ int psock_tcp_connect(FAR struct socket *psock,
         {
           /* Set up the callbacks in the connection */
 
+          conn_dev_lock(&conn->sconn, conn->dev);
           ret = psock_setup_callbacks(psock, &state);
           if (ret >= 0)
             {
@@ -377,6 +377,7 @@ int psock_tcp_connect(FAR struct socket *psock,
               info.tc_conn = conn;
               info.tc_cb = &state.tc_cb;
               info.tc_sem = &state.tc_sem;
+              conn_dev_unlock(&conn->sconn, conn->dev);
               tls_cleanup_push(tls_get_info(), tcp_callback_cleanup, &info);
 
               /* Notify the device driver that new connection is available. */
@@ -392,6 +393,7 @@ int psock_tcp_connect(FAR struct socket *psock,
               ret = net_sem_wait(&state.tc_sem);
 
               tls_cleanup_pop(tls_get_info(), 0);
+              conn_dev_lock(&conn->sconn, conn->dev);
 
               /* Uninitialize the state structure */
 
@@ -412,6 +414,8 @@ int psock_tcp_connect(FAR struct socket *psock,
 
               psock_teardown_callbacks(&state, ret);
             }
+
+          conn_dev_unlock(&conn->sconn, conn->dev);
         }
 
       /* Check if the socket was successfully connected. */
@@ -443,7 +447,6 @@ int psock_tcp_connect(FAR struct socket *psock,
         }
     }
 
-  net_unlock();
   return ret;
 }
 

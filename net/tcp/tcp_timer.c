@@ -62,6 +62,7 @@
 #include "netdev/netdev.h"
 #include "devif/devif.h"
 #include "socket/socket.h"
+#include "utils/utils.h"
 #include "tcp/tcp.h"
 
 /****************************************************************************
@@ -145,19 +146,20 @@ static void tcp_timer_expiry(FAR void *arg)
 {
   FAR struct tcp_conn_s *conn = NULL;
 
-  net_lock();
+  tcp_conn_list_lock();
 
   while ((conn = tcp_nextconn(conn)) != NULL)
     {
       if (conn == arg)
         {
+          tcp_conn_list_unlock();
           conn->timeout = true;
           netdev_txnotify_dev(conn->dev);
-          break;
+          return;
         }
     }
 
-  net_unlock();
+  tcp_conn_list_unlock();
 }
 
 /****************************************************************************
@@ -418,6 +420,7 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
    * the connection.
    */
 
+  conn_lock(&conn->sconn);
   tcp_ip_select(conn);
 
   hdrlen = tcpip_hdrsize(conn);
@@ -435,6 +438,7 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
     {
       /* Nothing to be done */
 
+      conn_unlock(&conn->sconn);
       return;
     }
 
@@ -537,6 +541,7 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
                   /* Finally, we must free this TCP connection structure */
 
                   conn->crefs = 0;
+                  conn_unlock(&conn->sconn);
                   tcp_free(conn);
                   return;
                 }
@@ -824,6 +829,7 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
 
 done:
   tcp_update_timer(conn);
+  conn_unlock(&conn->sconn);
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_TCP */

@@ -37,8 +37,9 @@
 
 #include "netdev/netdev.h"
 #include "devif/devif.h"
-#include "tcp/tcp.h"
 #include "socket/socket.h"
+#include "utils/utils.h"
+#include "tcp/tcp.h"
 
 /****************************************************************************
  * Private Functions
@@ -105,11 +106,10 @@ static inline int tcp_send_fin(FAR struct socket *psock)
 
   /* Interrupts are disabled here to avoid race conditions */
 
-  net_lock();
-
   conn = psock->s_conn;
   DEBUGASSERT(conn != NULL);
 
+  conn_dev_lock(&conn->sconn, conn->dev);
   if ((conn->tcpstateflags == TCP_ESTABLISHED ||
        conn->tcpstateflags == TCP_SYN_SENT ||
        conn->tcpstateflags == TCP_SYN_RCVD ||
@@ -129,11 +129,13 @@ static inline int tcp_send_fin(FAR struct socket *psock)
 
       /* Notify the device driver of the availability of TX data */
 
+      conn_dev_unlock(&conn->sconn, conn->dev);
       tcp_send_txnotify(psock, conn);
+      return ret;
     }
 
 out:
-  net_unlock();
+  conn_dev_unlock(&conn->sconn, conn->dev);
   return ret;
 }
 

@@ -42,8 +42,9 @@
 
 #include "netdev/netdev.h"
 #include "devif/devif.h"
-#include "tcp/tcp.h"
 #include "socket/socket.h"
+#include "utils/utils.h"
+#include "tcp/tcp.h"
 
 /****************************************************************************
  * Private Types
@@ -805,6 +806,7 @@ static ssize_t tcp_recvfrom_one(FAR struct tcp_conn_s *conn, FAR void *buf,
           info.tc_conn = conn;
           info.tc_cb   = &state.ir_cb;
           info.tc_sem  = &state.ir_sem;
+          conn_dev_unlock(&conn->sconn, conn->dev);
           tls_cleanup_push(tls_get_info(), tcp_callback_cleanup, &info);
 
           /* Wait for either the receive to complete or for an
@@ -815,6 +817,7 @@ static ssize_t tcp_recvfrom_one(FAR struct tcp_conn_s *conn, FAR void *buf,
           ret = net_sem_timedwait(&state.ir_sem,
                               _SO_TIMEOUT(conn->sconn.s_rcvtimeo));
           tls_cleanup_pop(tls_get_info(), 0);
+          conn_dev_lock(&conn->sconn, conn->dev);
           if (ret == -ETIMEDOUT)
             {
               ret = -EAGAIN;
@@ -839,7 +842,9 @@ static ssize_t tcp_recvfrom_one(FAR struct tcp_conn_s *conn, FAR void *buf,
 
   if (tcp_should_send_recvwindow(conn))
     {
+      conn_unlock(&conn->sconn);
       netdev_txnotify_dev(conn->dev);
+      conn_lock(&conn->sconn);
     }
 
   tcp_notify_recvcpu(conn);
@@ -880,9 +885,8 @@ ssize_t psock_tcp_recvfrom(FAR struct socket *psock, FAR struct msghdr *msg,
   ssize_t                ret     = 0;
   int                    i;
 
-  net_lock();
-
   conn = psock->s_conn;
+  conn_dev_lock(&conn->sconn, conn->dev);
   for (i = 0; i < msg->msg_iovlen; i++)
     {
       FAR void *buf = msg->msg_iov[i].iov_base;
@@ -909,7 +913,7 @@ ssize_t psock_tcp_recvfrom(FAR struct socket *psock, FAR struct msghdr *msg,
         }
     }
 
-  net_unlock();
+  conn_dev_unlock(&conn->sconn, conn->dev);
   return nrecv ? nrecv : ret;
 }
 

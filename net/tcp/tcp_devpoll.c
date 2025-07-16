@@ -55,6 +55,7 @@
 #include <nuttx/net/tcp.h>
 
 #include "devif/devif.h"
+#include "utils/utils.h"
 #include "tcp/tcp.h"
 
 /****************************************************************************
@@ -117,6 +118,7 @@ void tcp_poll(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
        * setup may not actually be used.
        */
 
+      conn_lock(&conn->sconn);
       tcp_ip_select(conn);
 
       /* Perform the callback */
@@ -126,6 +128,7 @@ void tcp_poll(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
       /* Handle the callback response */
 
       tcp_appsend(dev, conn, result);
+      conn_unlock(&conn->sconn);
     }
 }
 
