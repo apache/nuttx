@@ -71,6 +71,8 @@
 #include "esp_clk_internal.h"
 #include "periph_ctrl.h"
 
+#include "esp_private/startup_internal.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -451,6 +453,8 @@ noinstrument_function void noreturn_function IRAM_ATTR __esp32s3_start(void)
   esp32s3_userspace();
   showprogress('C');
 #endif
+
+  SYS_STARTUP_FN();
 
   /* Bring up NuttX */
 

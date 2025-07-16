@@ -207,6 +207,8 @@ SECTIONS
     *libarch.a:*esp_rom_spiflash.*(.text .text.* .literal .literal.*)
     *libarch.a:*esp_rom_wdt.*(.text .text.* .literal .literal.*)
     *libarch.a:*esp_efuse_fields.*(.text .text.* .literal .literal.*)
+    *libarch.a:*esp_efuse_utility.*(.text .text.* .literal .literal.*)
+    *libarch.a:*esp_efuse_startup.*(.text .text.* .literal .literal.*)
     *libarch.a:*esp_efuse_api_key.*(.text .text.* .literal .literal.*)
     *libarch.a:*log.*(.text .text.* .literal .literal.*)
     *libarch.a:*log_lock.*(.literal .literal.* .text .text.*)
@@ -457,6 +459,8 @@ SECTIONS
     *libarch.a:*esp_rom_wdt.*(.rodata .rodata.*)
     *libarch.a:*esp_efuse_fields.*(.rodata .rodata.*)
     *libarch.a:*esp_efuse_api_key.*(.rodata .rodata.*)
+    *libarch.a:*esp_efuse_utility.*(.rodata .rodata.*)
+    *libarch.a:*esp_efuse_startup.*(.rodata .rodata.*)
     *libarch.a:*log.*(.rodata .rodata.*)
     *libarch.a:*log_noos.*(.rodata .rodata.*)
     *libarch.a:*cpu_region_protect.*(.rodata .rodata.*)
@@ -558,19 +562,6 @@ SECTIONS
 
     . = (. + 3) & ~ 3;
 
-    /* C++ constructor and destructor tables, properly ordered: */
-
-    _sinit = ABSOLUTE(.);
-    KEEP (*crtbegin.o(.ctors))
-    KEEP (*(EXCLUDE_FILE (*crtend.o) .ctors))
-    KEEP (*(SORT(.ctors.*)))
-    KEEP (*(.ctors))
-    _einit = ABSOLUTE(.);
-    KEEP (*crtbegin.o(.dtors))
-    KEEP (*(EXCLUDE_FILE (*crtend.o) .dtors))
-    KEEP (*(SORT(.dtors.*)))
-    KEEP (*(.dtors))
-
     /* C++ exception handlers table: */
 
     __XT_EXCEPTION_DESCS_ = ABSOLUTE(.);
@@ -595,6 +586,31 @@ SECTIONS
     *(.lit4.*)
     *(.gnu.linkonce.lit4.*)
     _lit4_end = ABSOLUTE(.);
+
+    /* C++ constructor tables. Those are initialized by lib_cxx_initialize
+     * which calls constructor functions that may be on common source code.
+     */
+
+    . = ALIGN(4);
+    _sinit = ABSOLUTE(.);
+    __init_array_start = ABSOLUTE(.);
+    KEEP (*(EXCLUDE_FILE (*crtend.* *crtbegin.*) .ctors SORT(.ctors.*)))
+    __init_array_end = ABSOLUTE(.);
+    _einit = ABSOLUTE(.);
+
+    /* Addresses of memory regions reserved via SOC_RESERVE_MEMORY_REGION() */
+
+    . = ALIGN(4);
+    soc_reserved_memory_region_start = ABSOLUTE(.);
+    KEEP (*(.reserved_memory_address))
+    soc_reserved_memory_region_end = ABSOLUTE(.);
+
+    /* System init functions registered via ESP_SYSTEM_INIT_FN */
+
+    . = ALIGN(4);
+    _esp_system_init_fn_array_start = ABSOLUTE(.);
+    KEEP (*(SORT_BY_INIT_PRIORITY(.esp_system_init_fn.*)))
+    _esp_system_init_fn_array_end = ABSOLUTE(.);
 
     /* TLS data. */
 

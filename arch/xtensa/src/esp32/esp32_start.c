@@ -48,6 +48,7 @@
 #include "hardware/esp32_rtccntl.h"
 #include "rom/esp32_libc_stubs.h"
 #include "espressif/esp_loader.h"
+#include "esp_private/startup_internal.h"
 
 #ifdef CONFIG_ESPRESSIF_SIMPLE_BOOT
 #  include "bootloader_init.h"
@@ -295,6 +296,10 @@ static noreturn_function void __esp32_start(void)
   esp32_userspace();
   showprogress('C');
 #endif
+
+  SYS_STARTUP_FN();
+
+  showprogress('D');
 
   /* Bring up NuttX */
 
