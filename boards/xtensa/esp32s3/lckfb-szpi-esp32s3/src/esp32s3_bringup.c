@@ -81,8 +81,8 @@
 #include <nuttx/video/fb.h>
 #endif
 
-#ifdef CONFIG_ESP32S3_EFUSE
-#  include "esp32s3_efuse.h"
+#ifdef CONFIG_ESPRESSIF_EFUSE
+#  include "espressif/esp_efuse.h"
 #endif
 
 #ifdef CONFIG_ESPRESSIF_LEDC
@@ -194,8 +194,8 @@ int esp32s3_bringup(void)
   #endif /* CONFIG_ESPRESSIF_SPI_BITBANG */
 #endif /* CONFIG_ESP32S3_SPI && CONFIG_SPI_DRIVER*/
 
-#if defined(CONFIG_ESP32S3_EFUSE)
-  ret = esp32s3_efuse_initialize("/dev/efuse");
+#if defined(CONFIG_ESPRESSIF_EFUSE)
+  ret = esp_efuse_initialize("/dev/efuse");
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to init EFUSE: %d\n", ret);
