@@ -436,11 +436,12 @@ uint16_t tcp_datahandler(FAR struct net_driver_s *dev,
 void tcp_callback_cleanup(FAR void *arg)
 {
   FAR struct tcp_callback_s *cb = (FAR struct tcp_callback_s *)arg;
+  FAR struct tcp_conn_s *conn = cb->tc_conn;
 
-  net_lock();
+  conn_dev_lock(&conn->sconn, conn->dev);
   nerr("ERROR: pthread is being canceled, need to cleanup cb\n");
   tcp_callback_free(cb->tc_conn, *(cb->tc_cb));
   nxsem_destroy(cb->tc_sem);
-  net_unlock();
+  conn_dev_unlock(&conn->sconn, conn->dev);
 }
 #endif /* NET_TCP_HAVE_STACK */
