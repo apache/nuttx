@@ -93,7 +93,7 @@ FAR struct pkt_conn_s *pkt_alloc(void)
 
   /* The free list is protected by a mutex. */
 
-  NET_BUFPOLL_LOCK(g_pkt_connections);
+  NET_BUFPOOL_LOCK(g_pkt_connections);
 
   conn = NET_BUFPOOL_TRYALLOC(g_pkt_connections);
   if (conn)
@@ -103,7 +103,7 @@ FAR struct pkt_conn_s *pkt_alloc(void)
       dq_addlast(&conn->sconn.node, &g_active_pkt_connections);
     }
 
-  NET_BUFPOLL_UNLOCK(g_pkt_connections);
+  NET_BUFPOOL_UNLOCK(g_pkt_connections);
   return conn;
 }
 
@@ -122,7 +122,7 @@ void pkt_free(FAR struct pkt_conn_s *conn)
 
   DEBUGASSERT(conn->crefs == 0);
 
-  NET_BUFPOLL_LOCK(g_pkt_connections);
+  NET_BUFPOOL_LOCK(g_pkt_connections);
 
   /* Remove the connection from the active list */
 
@@ -138,7 +138,7 @@ void pkt_free(FAR struct pkt_conn_s *conn)
 
   NET_BUFPOOL_FREE(g_pkt_connections, conn);
 
-  NET_BUFPOLL_UNLOCK(g_pkt_connections);
+  NET_BUFPOOL_UNLOCK(g_pkt_connections);
 }
 
 /****************************************************************************

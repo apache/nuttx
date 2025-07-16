@@ -107,8 +107,8 @@
 #define NET_BUFPOOL_FREE(p,n)       net_bufpool_free(&p, n)
 #define NET_BUFPOOL_TEST(p)         net_bufpool_test(&p)
 #define NET_BUFPOOL_NAVAIL(p)       net_bufpool_navail(&p)
-#define NET_BUFPOLL_LOCK(p)         net_bufpool_lock(&p)
-#define NET_BUFPOLL_UNLOCK(p)       net_bufpool_unlock(&p)
+#define NET_BUFPOOL_LOCK(p)         net_bufpool_lock(&p)
+#define NET_BUFPOOL_UNLOCK(p)       net_bufpool_unlock(&p)
 
 /****************************************************************************
  * Public Types
