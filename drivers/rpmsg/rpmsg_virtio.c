@@ -244,6 +244,7 @@ static int rpmsg_virtio_process_rx_buffer(FAR struct rpmsg_device *rdev,
                                           FAR struct rpmsg_endpoint *ept,
                                           FAR struct rpmsg_hdr *hdr)
 {
+  size_t len = hdr->len + sizeof(*hdr);
   int status;
 
   if (ept->dest_addr == RPMSG_ADDR_ANY)
@@ -258,8 +259,18 @@ static int rpmsg_virtio_process_rx_buffer(FAR struct rpmsg_device *rdev,
   rpmsg_ept_incref(ept);
   metal_mutex_release(&rdev->lock);
 
+  rpmsg_trace(ept->name, false, hdr, len,
+              "[Virtio] rx ept->cb start ept:%p name:%s cb:%p "
+              "rdev:%p hdr:%p len:%zu\n",
+              ept, ept->name, ept->cb, rdev, hdr, len);
+
   status = ept->cb(ept, RPMSG_LOCATE_DATA(hdr), hdr->len, hdr->src,
                    ept->priv);
+
+  rpmsg_trace(ept->name, false, NULL, 0,
+              "[Virtio] rx ept->cb end ept:%p name:%s cb:%p "
+              "rdev:%p hdr:%p len:%zu\n",
+              ept, ept->name, ept->cb, rdev, hdr, len);
 
   RPMSG_ASSERT(status >= 0 || status == RPMSG_SUCCESS_BUFFER_RELEASED,
                "unexpected callback status\r\n");
