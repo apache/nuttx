@@ -56,7 +56,8 @@ struct optee_shm
   FAR struct optee_priv_data *priv;
   int fd;
   int32_t id;
-  uint64_t addr;
+  uint64_t vaddr;
+  uint64_t paddr;
   uint64_t length;
   FAR void *page_list;
   uint32_t flags;
