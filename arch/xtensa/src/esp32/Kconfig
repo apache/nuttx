@@ -2878,4 +2878,26 @@ config ESP32_TICKLESS
 	select ARCH_HAVE_TICKLESS
 	select SCHED_TICKLESS
 
+config ESP32_IGNORE_CHIP_REVISION_CHECK
+	bool "Ignore chip revision"
+	default !ESP32_SPIRAM && !SMP && !WATCHDOG
+	---help---
+		Do not prevent boot on chip revisions older than v3.0.
+
+		See the following document for the changes in
+		the chip revision v3.0.
+		https://www.espressif.com/sites/default/files/documentation/esp32_chip_revision_v3_0_user_guide_en.pdf
+
+		The following items are particularly relevant.
+
+		* When the CPU accesses the external SRAM in a certain
+		  sequence, read & write errors may occur
+
+		* When each CPU reads certain different address spaces
+		  simultaneously, a read error can occur
+
+		* Due to the flash start-up time, a spurious watchdog
+		  reset occurs when ESP32 is powered up or wakes up
+		  from Deep-sleep
+
 endif # ARCH_CHIP_ESP32
