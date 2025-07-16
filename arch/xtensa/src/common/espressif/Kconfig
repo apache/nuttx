@@ -41,6 +41,50 @@ config ESPRESSIF_ADC_2
 
 endif # ESPRESSIF_ADC
 
+config ESPRESSIF_EFUSE
+	bool "EFUSE support"
+	default n
+	select EFUSE
+	---help---
+		Enable efuse support.
+
+config ESPRESSIF_EFUSE_VIRTUAL
+	bool "Virtual EFUSE support"
+	depends on ESPRESSIF_EFUSE
+	default n
+	---help---
+		Enable virtual efuse support to simulate eFuse operations in RAM, changes will be reverted each reboot
+
+config ESPRESSIF_EFUSE_VIRTUAL_KEEP_IN_FLASH
+	bool "Keep E-Fuses in flash"
+	depends on ESPRESSIF_EFUSE_VIRTUAL
+	---help---
+		In addition to the "Virtual E-Fuses support" option, this option just adds
+		a feature to keep E-Fuses after reboots in flash memory.
+
+		During startup, the E-Fuses are copied from flash or,
+		in case if flash is empty, from real E-Fuse to RAM and then update flash.
+		This mode is useful when need to keep changes after reboot (testing secure_boot,
+		flash_encryption or using MCUBoot + encryption).
+
+if ESPRESSIF_EFUSE_VIRTUAL_KEEP_IN_FLASH
+
+config ESPRESSIF_EFUSE_VIRTUAL_KEEP_IN_FLASH_OFFSET
+	hex "E-Fuses offset in flash"
+	depends on ESPRESSIF_EFUSE_VIRTUAL_KEEP_IN_FLASH
+	default 0x250000
+	---help---
+		Offset in flash where the E-Fuses will be stored when using the "E-Fuses size to keep in flash" option.
+
+config ESPRESSIF_EFUSE_VIRTUAL_KEEP_IN_FLASH_SIZE
+	hex "E-Fuses size to keep in flash"
+	depends on ESPRESSIF_EFUSE_VIRTUAL_KEEP_IN_FLASH
+	default 0x2000
+	---help---
+		Size of E-Fuse region to keep in flash.
+
+endif # ESPRESSIF_EFUSE_VIRTUAL_KEEP_IN_FLASH
+
 config ESPRESSIF_TEMP
 	bool "Internal Temperature Sensor"
 	default n
