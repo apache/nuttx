@@ -39,6 +39,7 @@
 #include <nuttx/net/net.h>
 
 #include "socket/socket.h"
+#include "utils/utils.h"
 #include "tcp/tcp.h"
 
 /****************************************************************************
@@ -217,13 +218,15 @@ int psock_tcp_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 {
   FAR struct tcp_conn_s *conn;
   struct accept_s state;
-  int ret;
+  int ret = OK;
 
   /* Check the backlog to see if there is a connection already pending for
    * this listener.
    */
 
   conn = psock->s_conn;
+
+  conn_lock(&conn->sconn);
 
 #ifdef CONFIG_NET_TCPBACKLOG
   state.acpt_newconn = tcp_backlogremove(conn);
@@ -243,7 +246,8 @@ int psock_tcp_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 
   else if (_SS_ISNONBLOCK(conn->sconn.s_flags))
     {
-      return -EAGAIN;
+      ret = -EAGAIN;
+      goto out;
     }
   else
 #endif
@@ -271,7 +275,9 @@ int psock_tcp_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
        * net_sem_wait will also terminate if a signal is received.
        */
 
+      conn_unlock(&conn->sconn);
       ret = net_sem_wait(&state.acpt_sem);
+      conn_lock(&conn->sconn);
 
       /* Make sure that no further events are processed */
 
@@ -287,7 +293,7 @@ int psock_tcp_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
       if (state.acpt_result != 0)
         {
           DEBUGASSERT(state.acpt_result > 0);
-          return -state.acpt_result;
+          ret = -state.acpt_result;
         }
 
       /* If net_sem_wait failed, then we were probably reawakened by a
@@ -297,12 +303,15 @@ int psock_tcp_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 
       if (ret < 0)
         {
-          return ret;
+          goto out;
         }
     }
 
   *newconn = (FAR void *)state.acpt_newconn;
-  return OK;
+
+out:
+  conn_unlock(&conn->sconn);
+  return ret;
 }
 
 #endif /* CONFIG_NET_TCP */

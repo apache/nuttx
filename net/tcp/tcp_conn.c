@@ -343,11 +343,8 @@ static inline int tcp_ipv4_bind(FAR struct tcp_conn_s *conn,
 
   /* Verify or select a local port and address */
 
-  net_lock();
-
   if (conn->lport != 0)
     {
-      net_unlock();
       return -EINVAL;
     }
 
@@ -372,7 +369,6 @@ static inline int tcp_ipv4_bind(FAR struct tcp_conn_s *conn,
 
       if (ret == -EADDRNOTAVAIL)
         {
-          net_unlock();
           return ret;
         }
     }
@@ -385,7 +381,6 @@ static inline int tcp_ipv4_bind(FAR struct tcp_conn_s *conn,
   if (port < 0)
     {
       nerr("ERROR: tcp_selectport failed: %d\n", port);
-      net_unlock();
       return port;
     }
 
@@ -411,7 +406,6 @@ static inline int tcp_ipv4_bind(FAR struct tcp_conn_s *conn,
       net_ipv4addr_copy(conn->u.ipv4.laddr, INADDR_ANY);
     }
 
-  net_unlock();
   return ret;
 }
 #endif /* CONFIG_NET_IPv4 */
@@ -441,11 +435,8 @@ static inline int tcp_ipv6_bind(FAR struct tcp_conn_s *conn,
 
   /* Verify or select a local port and address */
 
-  net_lock();
-
   if (conn->lport != 0)
     {
-      net_unlock();
       return -EINVAL;
     }
 
@@ -472,7 +463,6 @@ static inline int tcp_ipv6_bind(FAR struct tcp_conn_s *conn,
       netdev_list_unlock();
       if (ret == -EADDRNOTAVAIL)
         {
-          net_unlock();
           return ret;
         }
     }
@@ -487,7 +477,6 @@ static inline int tcp_ipv6_bind(FAR struct tcp_conn_s *conn,
   if (port < 0)
     {
       nerr("ERROR: tcp_selectport failed: %d\n", port);
-      net_unlock();
       return port;
     }
 
@@ -513,7 +502,6 @@ static inline int tcp_ipv6_bind(FAR struct tcp_conn_s *conn,
       net_ipv6addr_copy(conn->u.ipv6.laddr, g_ipv6_unspecaddr);
     }
 
-  net_unlock();
   return ret;
 }
 #endif /* CONFIG_NET_IPv6 */
@@ -561,6 +549,7 @@ int tcp_selectport(uint8_t domain,
       NET_PORT_RANDOM_INIT(g_last_tcp_port);
     }
 
+  tcp_conn_list_lock();
   if (portno == 0)
     {
       uint16_t loop_start = g_last_tcp_port;
@@ -609,6 +598,7 @@ int tcp_selectport(uint8_t domain,
 
   /* Return the selected or verified port number (host byte order) */
 
+  tcp_conn_list_unlock();
   return portno;
 }
 
@@ -632,7 +622,7 @@ FAR struct tcp_conn_s *tcp_alloc(uint8_t domain)
    * locked in any cased while accessing g_free_tcp_connections[];
    */
 
-  net_lock();
+  tcp_conn_list_lock();
 
   /* Return the entry from the head of the free list */
 
@@ -714,7 +704,7 @@ FAR struct tcp_conn_s *tcp_alloc(uint8_t domain)
     }
 #endif
 
-  net_unlock();
+  tcp_conn_list_unlock();
 
   /* Mark the connection allocated */
 
@@ -739,6 +729,7 @@ FAR struct tcp_conn_s *tcp_alloc(uint8_t domain)
 
       nxsem_init(&conn->snd_sem, 0, 0);
 #endif
+      nxmutex_init(&conn->sconn.s_lock);
 
       /* Set the default value of mss to max, this field will changed when
        * receive SYN.
@@ -815,13 +806,6 @@ void tcp_free(FAR struct tcp_conn_s *conn)
   FAR struct tcp_wrbuffer_s *wrbuffer;
 #endif
 
-  /* Because g_free_tcp_connections is accessed from user level and event
-   * processing logic, it is necessary to keep the network locked during this
-   * operation.
-   */
-
-  net_lock();
-
   DEBUGASSERT(conn->crefs == 0);
 
   /* Cancel close work */
@@ -831,7 +815,6 @@ void tcp_free(FAR struct tcp_conn_s *conn)
     {
       /* Close work is already running, tcp_free will be called again. */
 
-      net_unlock();
       return;
     }
 
@@ -841,6 +824,7 @@ void tcp_free(FAR struct tcp_conn_s *conn)
 
   /* Make sure monitor is stopped. */
 
+  conn_dev_lock(&conn->sconn, conn->dev);
   tcp_stop_monitor(conn, TCP_CLOSE);
 
   /* Free remaining callbacks, actually there should be only the send
@@ -853,6 +837,8 @@ void tcp_free(FAR struct tcp_conn_s *conn)
       tcp_callback_free(conn, cb);
     }
 
+  conn_dev_unlock(&conn->sconn, conn->dev);
+
   /* TCP_ALLOCATED means that that the connection is not in the active list
    * yet.
    */
@@ -861,9 +847,12 @@ void tcp_free(FAR struct tcp_conn_s *conn)
     {
       /* Remove the connection from the active list */
 
+      tcp_conn_list_lock();
       dq_rem(&conn->sconn.node, &g_active_tcp_connections);
+      tcp_conn_list_unlock();
     }
 
+  nxmutex_destroy(&conn->sconn.s_lock);
   tcp_free_rx_buffers(conn);
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
@@ -918,8 +907,6 @@ void tcp_free(FAR struct tcp_conn_s *conn)
   /* Free the connection structure */
 
   NET_BUFPOOL_FREE(g_tcp_connections, conn);
-
-  net_unlock();
 }
 
 /****************************************************************************
@@ -937,12 +924,15 @@ void tcp_free(FAR struct tcp_conn_s *conn)
 FAR struct tcp_conn_s *tcp_active(FAR struct net_driver_s *dev,
                                   FAR struct tcp_hdr_s *tcp)
 {
+  FAR struct tcp_conn_s *conn = NULL;
+
+  tcp_conn_list_lock();
 #ifdef CONFIG_NET_IPv6
 #ifdef CONFIG_NET_IPv4
   if (IFF_IS_IPv6(dev->d_flags))
 #endif
     {
-      return tcp_ipv6_active(dev, tcp);
+      conn = tcp_ipv6_active(dev, tcp);
     }
 #endif /* CONFIG_NET_IPv6 */
 
@@ -951,9 +941,12 @@ FAR struct tcp_conn_s *tcp_active(FAR struct net_driver_s *dev,
   else
 #endif
     {
-      return tcp_ipv4_active(dev, tcp);
+      conn = tcp_ipv4_active(dev, tcp);
     }
 #endif /* CONFIG_NET_IPv4 */
+
+  tcp_conn_list_unlock();
+  return conn;
 }
 
 /****************************************************************************
@@ -1162,7 +1155,10 @@ FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct net_driver_s *dev,
        * Interrupts should already be disabled in this context.
        */
 
+      tcp_conn_list_lock();
       dq_addlast(&conn->sconn.node, &g_active_tcp_connections);
+      tcp_conn_list_unlock();
+
       tcp_update_retrantimer(conn, TCP_RTO);
     }
 
@@ -1243,7 +1239,7 @@ int tcp_bind(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
 int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
 {
   int port;
-  int ret = OK;
+  int ret;
 
   /* The connection is expected to be in the TCP_ALLOCATED state.. i.e.,
    * allocated via up_tcpalloc(), but not yet put into the active connections
@@ -1259,8 +1255,6 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
    * one now. We assume that the IP address has been bound to a local device,
    * but the port may still be INPORT_ANY.
    */
-
-  net_lock();
 
   /* Check if the local port has been bind() */
 
@@ -1302,8 +1296,7 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
 
       if (port < 0)
         {
-          ret = port;
-          goto errout_with_lock;
+          return port;
         }
     }
 
@@ -1387,7 +1380,7 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
        */
 
       nerr("ERROR: Failed to find network device: %d\n", ret);
-      goto errout_with_lock;
+      return ret;
     }
 
 #if defined(CONFIG_NET_ARP_SEND) || defined(CONFIG_NET_ICMPv6_NEIGHBOR)
@@ -1417,8 +1410,7 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
 
   if (ret < 0)
     {
-      ret = -ENETUNREACH;
-      goto errout_with_lock;
+      return -ENETUNREACH;
     }
 #endif /* CONFIG_NET_ARP_SEND || CONFIG_NET_ICMPv6_NEIGHBOR */
 
@@ -1473,12 +1465,37 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
 
   /* And, finally, put the connection structure into the active list. */
 
+  tcp_conn_list_lock();
   dq_addlast(&conn->sconn.node, &g_active_tcp_connections);
-  ret = OK;
+  tcp_conn_list_unlock();
 
-errout_with_lock:
-  net_unlock();
-  return ret;
+  return OK;
+}
+
+/****************************************************************************
+ * Name: tcp_conn_list_lock
+ *
+ * Description:
+ *   Lock the TCP connection list.
+ *
+ ****************************************************************************/
+
+void tcp_conn_list_lock(void)
+{
+  NET_BUFPOOL_LOCK(g_tcp_connections);
+}
+
+/****************************************************************************
+ * Name: tcp_conn_list_unlock
+ *
+ * Description:
+ *   Unlock the TCP connection list.
+ *
+ ****************************************************************************/
+
+void tcp_conn_list_unlock(void)
+{
+  NET_BUFPOOL_UNLOCK(g_tcp_connections);
 }
 
 /****************************************************************************
@@ -1494,9 +1511,7 @@ errout_with_lock:
 
 void tcp_removeconn(FAR struct tcp_conn_s *conn)
 {
-  net_lock();
   dq_rem(&conn->sconn.node, &g_active_tcp_connections);
-  net_unlock();
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_TCP */

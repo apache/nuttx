@@ -93,6 +93,7 @@ FAR struct tcp_conn_s *tcp_findlistener(FAR union ip_binding_u *uaddr,
 
   /* Examine each connection structure in each slot of the listener list */
 
+  tcp_conn_list_lock();
   for (ndx = 0; ndx < CONFIG_NET_MAX_LISTENPORTS; ndx++)
     {
       /* Is this slot assigned?  If so, does the connection have the same
@@ -117,6 +118,7 @@ FAR struct tcp_conn_s *tcp_findlistener(FAR union ip_binding_u *uaddr,
                 {
                   /* Yes.. we found a listener on this port */
 
+                  tcp_conn_list_unlock();
                   return conn;
                 }
             }
@@ -133,6 +135,7 @@ FAR struct tcp_conn_s *tcp_findlistener(FAR union ip_binding_u *uaddr,
                 {
                   /* Yes.. we found a listener on this port */
 
+                  tcp_conn_list_unlock();
                   return conn;
                 }
             }
@@ -142,6 +145,7 @@ FAR struct tcp_conn_s *tcp_findlistener(FAR union ip_binding_u *uaddr,
 
   /* No listener for this port */
 
+  tcp_conn_list_unlock();
   return NULL;
 }
 
@@ -165,7 +169,7 @@ int tcp_unlisten(FAR struct tcp_conn_s *conn)
   int ndx;
   int ret = -EINVAL;
 
-  net_lock();
+  tcp_conn_list_lock();
   for (ndx = 0; ndx < CONFIG_NET_MAX_LISTENPORTS; ndx++)
     {
       if (tcp_listenports[ndx] == conn)
@@ -176,7 +180,7 @@ int tcp_unlisten(FAR struct tcp_conn_s *conn)
         }
     }
 
-  net_unlock();
+  tcp_conn_list_unlock();
   return ret;
 }
 
@@ -200,7 +204,7 @@ int tcp_listen(FAR struct tcp_conn_s *conn)
    * is accessed from event processing logic as well.
    */
 
-  net_lock();
+  tcp_conn_list_lock();
 
   /* First, check if there is already a socket listening on this port */
 
@@ -239,7 +243,7 @@ int tcp_listen(FAR struct tcp_conn_s *conn)
         }
     }
 
-  net_unlock();
+  tcp_conn_list_unlock();
   return ret;
 }
 
