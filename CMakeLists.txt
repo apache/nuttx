@@ -35,6 +35,17 @@
 
 cmake_minimum_required(VERSION 3.16)
 
+# Disable runtime detection of C or CXX compiler IDs
+
+set(CMAKE_C_COMPILER_ID_RUN FALSE)
+set(CMAKE_CXX_COMPILER_ID_RUN FALSE)
+
+# Prevent CMake from trying to execute compiler detection code
+
+if(POLICY CMP0123)
+  cmake_policy(SET CMP0123 NEW)
+endif()
+
 # Handle newer CMake versions correctly by setting policies
 
 if(POLICY CMP0115)
