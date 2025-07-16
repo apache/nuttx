@@ -38,6 +38,23 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Some GlobalPlatform error codes used in this driver */
+
+#define TEE_SUCCESS                    0x00000000
+#define TEE_ERROR_ACCESS_DENIED        0xFFFF0001
+#define TEE_ERROR_BAD_FORMAT           0xFFFF0005
+#define TEE_ERROR_BAD_PARAMETERS       0xFFFF0006
+#define TEE_ERROR_GENERIC              0xFFFF0000
+#define TEE_ERROR_NOT_SUPPORTED        0xFFFF000A
+#define TEE_ERROR_OUT_OF_MEMORY        0xFFFF000C
+#define TEE_ERROR_BUSY                 0xFFFF000D
+#define TEE_ERROR_COMMUNICATION        0xFFFF000E
+#define TEE_ERROR_SECURITY             0xFFFF000F
+#define TEE_ERROR_SHORT_BUFFER         0xFFFF0010
+#define TEE_ERROR_TIMEOUT              0xFFFF3001
+
+#define TEE_ORIGIN_COMMS               0x00000002
+
 #define OPTEE_SERVER_PATH              "optee"
 #define OPTEE_MAX_PARAM_NUM            6
 
@@ -45,10 +62,17 @@
  * Public Types
  ****************************************************************************/
 
+enum optee_role_e
+{
+  OPTEE_ROLE_CA,              /* /dev/tee0   */
+  OPTEE_ROLE_SUPPLICANT,      /* /dev/tee-supp0 */
+};
+
 struct optee_priv_data
 {
   uintptr_t alignment;        /* Transport-specified message alignment */
-  FAR struct idr_s *shms;     /* An RB tree of all shm entries */
+  FAR struct idr_s *shms;     /* An RB tree of process local shm entries */
+  enum optee_role_e role;
 };
 
 struct optee_shm
@@ -88,9 +112,20 @@ void optee_shm_free(FAR struct optee_shm *shm);
 int optee_transport_init(void);
 int optee_transport_open(FAR struct optee_priv_data **priv);
 void optee_transport_close(FAR struct optee_priv_data *priv);
+
 int optee_transport_call(FAR struct optee_priv_data *priv,
                          FAR struct optee_msg_arg *arg);
 
+int optee_from_msg_param(FAR struct tee_ioctl_param *params,
+                         size_t num_params,
+                         FAR const struct optee_msg_param *mparams);
+
+int optee_to_msg_param(FAR struct optee_priv_data *priv,
+                       FAR struct optee_msg_param *mparams,
+                       size_t num_params,
+                       FAR const struct tee_ioctl_param *params);
+
+int optee_convert_to_errno(uint32_t oterr);
 #undef EXTERN
 #if defined(__cplusplus)
 }

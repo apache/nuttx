@@ -73,6 +73,11 @@ config DEV_OPTEE_NONE
 
 endchoice
 
+config DEV_OPTEE_SUPPLICANT
+	bool "Enables kernel driver for TEE supplicant"
+	default n
+	depends on DEV_OPTEE_SMC
+
 if DEV_OPTEE_RPMSG
 
 config OPTEE_REMOTE_CPU_NAME
