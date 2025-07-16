@@ -53,6 +53,7 @@
 #include "hal/sar_ctrl_ll.h"
 #include "rom/spi_flash.h"
 #include "esp_private/cache_utils.h"
+#include "esp_private/startup_internal.h"
 
 #ifdef CONFIG_ESPRESSIF_SIMPLE_BOOT
 #  include "bootloader_init.h"
@@ -340,6 +341,10 @@ static void noreturn_function IRAM_ATTR __esp32s2_start(void)
   esp32s2_board_initialize();
 
   showprogress('B');
+
+  SYS_STARTUP_FN();
+
+  showprogress('C');
 
   /* Bring up NuttX */
 
