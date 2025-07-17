@@ -101,31 +101,19 @@ dq_queue_t g_readytorun;
  *    and
  *  - Tasks/threads that have not been assigned to a CPU.
  *
- * Otherwise, the TCB will be retained in an assigned task list,
- * g_assignedtasks.  As its name suggests, on 'g_assignedtasks queue for CPU
- * 'n' would contain only tasks/threads that are assigned to CPU 'n'.  Tasks/
+ * Otherwise, the running TCB will be retained in g_assignedtasks vector.
+ * As its name suggests, on 'g_assignedtasks vector for CPU
+ * 'n' would contain the task/thread which is assigned to CPU 'n'.  Tasks/
  * threads would be assigned a particular CPU by one of two mechanisms:
  *
  *  - (Semi-)permanently through an RTOS interfaces such as
  *    pthread_attr_setaffinity(), or
  *  - Temporarily through scheduling logic when a previously unassigned task
  *    is made to run.
- *
- * Tasks/threads that are assigned to a CPU via an interface like
- * pthread_attr_setaffinity() would never go into the g_readytorun list, but
- * would only go into the g_assignedtasks[n] list for the CPU 'n' to which
- * the thread has been assigned.  Hence, the g_readytorun list would hold
- * only unassigned tasks/threads.
- *
- * Like the g_readytorun list in in non-SMP case, each g_assignedtask[] list
- * is prioritized:  The head of the list is the currently active task on this
- * CPU.  Tasks after the active task are ready-to-run and assigned to this
- * CPU. The tail of this assigned task list, the lowest priority task, is
- * always the CPU's IDLE task.
  */
 
 #ifdef CONFIG_SMP
-dq_queue_t g_assignedtasks[CONFIG_SMP_NCPUS];
+FAR struct tcb_s *g_assignedtasks[CONFIG_SMP_NCPUS];
 enum task_deliver_e g_delivertasks[CONFIG_SMP_NCPUS];
 #endif
 
@@ -199,10 +187,6 @@ struct tasklist_s g_tasklisttable[NUM_TASK_STATES];
 
 volatile uint8_t g_nx_initstate;  /* See enum nx_initstate_e */
 
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
 /* This is an array of task control block (TCB) for the IDLE thread of each
  * CPU.  For the non-SMP case, this is a a single TCB; For the SMP case,
  * there is one TCB per CPU.  NOTE: The system boots on CPU0 into the IDLE
@@ -211,7 +195,11 @@ volatile uint8_t g_nx_initstate;  /* See enum nx_initstate_e */
  * bringing up the rest of the system.
  */
 
-static struct tcb_s g_idletcb[CONFIG_SMP_NCPUS];
+struct tcb_s g_idletcb[CONFIG_SMP_NCPUS];
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
 
 /* This is the name of the idle task */
 
@@ -251,19 +239,6 @@ static void tasklist_initialize(void)
   tlist[TSTATE_TASK_READYTORUN].list = list_readytorun();
   tlist[TSTATE_TASK_READYTORUN].attr = TLIST_ATTR_PRIORITIZED;
 
-  /* TSTATE_TASK_ASSIGNED */
-
-  tlist[TSTATE_TASK_ASSIGNED].list = list_assignedtasks(0);
-  tlist[TSTATE_TASK_ASSIGNED].attr = TLIST_ATTR_PRIORITIZED |
-                                     TLIST_ATTR_INDEXED |
-                                     TLIST_ATTR_RUNNABLE;
-
-  /* TSTATE_TASK_RUNNING */
-
-  tlist[TSTATE_TASK_RUNNING].list = list_assignedtasks(0);
-  tlist[TSTATE_TASK_RUNNING].attr = TLIST_ATTR_PRIORITIZED |
-                                    TLIST_ATTR_INDEXED |
-                                    TLIST_ATTR_RUNNABLE;
 #else
 
   /* TSTATE_TASK_PENDING */
@@ -346,7 +321,6 @@ static void tasklist_initialize(void)
 static void idle_task_initialize(void)
 {
   FAR struct tcb_s *tcb;
-  FAR dq_queue_t *tasklist;
   int i;
 
   memset(g_idletcb, 0, sizeof(g_idletcb));
@@ -422,11 +396,10 @@ static void idle_task_initialize(void)
        */
 
 #ifdef CONFIG_SMP
-      tasklist = TLIST_HEAD(tcb, i);
+      g_assignedtasks[i] = tcb;
 #else
-      tasklist = TLIST_HEAD(tcb);
+      dq_addfirst((FAR dq_entry_t *)tcb, TLIST_HEAD(tcb));
 #endif
-      dq_addfirst((FAR dq_entry_t *)tcb, tasklist);
 
       /* Mark the idle task as the running task */
 

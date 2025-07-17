@@ -181,33 +181,23 @@ bool nxsched_switch_running(int cpu, bool switch_equal)
       if (CPU_ISSET(cpu, &btcb->affinity) &&
           ((btcb->flags & TCB_FLAG_CPU_LOCKED) == 0 || btcb->cpu == cpu))
         {
-          FAR dq_queue_t *tasklist = list_assignedtasks(cpu);
-
           /* Found a task, remove it from ready-to-run list */
 
           dq_rem((FAR struct dq_entry_s *)btcb, list_readytorun());
 
-          /* Remove the current task from assigned tasks list and put it
-           * to the ready-to-run. But leave idle task.
-           */
-
           if (!is_idle_task(rtcb))
             {
-              dq_remfirst(tasklist);
+              /* Put currently running task back to ready-to-run list */
+
               rtcb->task_state = TSTATE_TASK_READYTORUN;
               nxsched_add_prioritized(rtcb, list_readytorun());
-
-              /* We should now have only the idle task assigned */
-
-              DEBUGASSERT(
-                is_idle_task((FAR struct tcb_s *)dq_peek(tasklist)));
             }
           else
             {
               rtcb->task_state = TSTATE_TASK_ASSIGNED;
             }
 
-          dq_addfirst((FAR dq_entry_t *)btcb, tasklist);
+          g_assignedtasks[cpu] = btcb;
           up_update_task(btcb);
 
           btcb->cpu = cpu;
