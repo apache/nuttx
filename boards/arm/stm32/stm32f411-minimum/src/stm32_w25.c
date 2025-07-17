@@ -121,12 +121,16 @@ int stm32_w25initialize(int minor)
     }
 
 #ifndef CONFIG_FS_SMARTFS
-  /* And use the FTL layer to wrap the MTD driver as a block driver */
+  /* Register the MTD driver */
 
-  ret = ftl_initialize(minor, mtd);
+  char path[32];
+  snprintf(path, sizeof(path), "/dev/mtdblock%d", minor);
+  ret = register_mtddriver(path, mtd, 0755, NULL);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: Initialize the FTL layer\n");
+      syslog(LOG_ERR,
+             "ERROR: Failed to register the MTD driver %s, ret %d\n",
+             path, ret);
       return ret;
     }
 #else
