@@ -110,6 +110,16 @@ int stm32_bringup(void)
     }
 #endif /* CONFIG_ADC*/
 
+#ifdef CONFIG_STM32H5_DTS
+  /* devno == 0 creates /dev/sensor_temp0 */
+
+  ret = stm32_dts_setup(0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_adc_setup failed: %d\n", ret);
+    }
+#endif
+
   UNUSED(ret);
   return OK;
 }
