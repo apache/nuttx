@@ -977,18 +977,20 @@ if(CONFIG_BUILD_PROTECTED)
   get_property(user_ldscript GLOBAL PROPERTY LD_SCRIPT_USER)
 
   # Pre-compile linker script(s)
-  set(user_ldscript_tmp_list)
-  foreach(ldscript ${user_ldscript})
-    get_filename_component(LD_SCRIPT_USER_NAME ${ldscript} NAME)
-    set(LD_SCRIPT_USER_TMP "${NUTTX_BINARY_DIR}/${LD_SCRIPT_USER_NAME}.tmp")
-    nuttx_generate_preprocess_target(SOURCE_FILE ${ldscript} TARGET_FILE
-                                     ${LD_SCRIPT_USER_TMP})
-    add_custom_target(user_ldscript_tmp_${LD_SCRIPT_USER_NAME}
-                      DEPENDS ${LD_SCRIPT_USER_TMP})
-    add_dependencies(nuttx_user user_ldscript_tmp_${LD_SCRIPT_USER_NAME})
-    list(APPEND user_ldscript_tmp_list -T ${LD_SCRIPT_USER_TMP})
-  endforeach()
-  set(user_ldscript ${user_ldscript_tmp_list})
+  if(NOT CONFIG_ARCH_TOOLCHAIN_TASKING)
+    set(user_ldscript_tmp_list)
+    foreach(ldscript ${user_ldscript})
+      get_filename_component(LD_SCRIPT_USER_NAME ${ldscript} NAME)
+      set(LD_SCRIPT_USER_TMP "${NUTTX_BINARY_DIR}/${LD_SCRIPT_USER_NAME}.tmp")
+      nuttx_generate_preprocess_target(SOURCE_FILE ${ldscript} TARGET_FILE
+                                       ${LD_SCRIPT_USER_TMP})
+      add_custom_target(user_ldscript_tmp_${LD_SCRIPT_USER_NAME}
+                        DEPENDS ${LD_SCRIPT_USER_TMP})
+      add_dependencies(nuttx_user user_ldscript_tmp_${LD_SCRIPT_USER_NAME})
+      list(APPEND user_ldscript_tmp_list -T ${LD_SCRIPT_USER_TMP})
+    endforeach()
+    set(user_ldscript ${user_ldscript_tmp_list})
+  endif()
 
   # reset link options that don't fit userspace
   get_target_property(nuttx_user_LINK_OPTIONS nuttx_user LINK_OPTIONS)
@@ -998,6 +1000,12 @@ if(CONFIG_BUILD_PROTECTED)
     list(REMOVE_ITEM nuttx_user_LINK_OPTIONS "-entry=__start")
     list(REMOVE_ITEM nuttx_user_LINK_OPTIONS "-map=nuttx.map")
     list(APPEND nuttx_user_LINK_OPTIONS "-map=nuttx_user.map")
+  elseif(CONFIG_ARCH_TOOLCHAIN_TASKING)
+    list(REMOVE_ITEM nuttx_user_LINK_OPTIONS "-entry=__start")
+    list(REMOVE_ITEM nuttx_user_LINK_OPTIONS "--map-file=nuttx.map" "-lc_fpu"
+         "-lfp_fpu" "-lrt")
+    list(APPEND nuttx_user_LINK_OPTIONS "--map-file=nuttx_user.map" "-i"
+         "--first-library-first")
   else()
     list(REMOVE_ITEM nuttx_user_LINK_OPTIONS "-Wl,--entry=__start")
     list(APPEND nuttx_user_LINK_OPTIONS "-Wl,-Map=nuttx_user.map")
@@ -1009,22 +1017,38 @@ if(CONFIG_BUILD_PROTECTED)
   if(CONFIG_ARCH_TOOLCHAIN_GHS)
     target_link_options(nuttx_user PRIVATE -nostartfiles -minlib
                         -entry=${CONFIG_INIT_ENTRYPOINT})
-  else()
+  elseif(NOT CONFIG_ARCH_TOOLCHAIN_TASKING)
     target_link_options(
       nuttx_user PRIVATE -nostartfiles -nodefaultlibs
       -Wl,--entry=${CONFIG_INIT_ENTRYPOINT}
       -Wl,--undefined=${CONFIG_INIT_ENTRYPOINT})
   endif()
 
-  target_link_libraries(
-    nuttx_user
-    PRIVATE ${user_ldscript}
-            $<$<NOT:$<BOOL:${DISABLE_LINK_GROUP}>>:-Wl,--start-group>
-            ${nuttx_system_libs}
-            ${nuttx_apps_libs}
-            ${nuttx_user_extra_libs}
-            $<$<BOOL:${CONFIG_HAVE_CXX}>:supc++>
-            $<$<NOT:$<BOOL:${DISABLE_LINK_GROUP}>>:-Wl,--end-group>)
+  if(CONFIG_ARCH_TOOLCHAIN_TASKING)
+    set(user_ldscript_lsl)
+    foreach(ldscript ${user_ldscript})
+      list(APPEND user_ldscript_lsl --lsl-file=${ldscript})
+    endforeach()
+    target_link_libraries(
+      nuttx_user
+      PRIVATE ${user_ldscript_lsl}
+              ${nuttx_system_libs}
+              ${nuttx_apps_libs}
+              ${nuttx_user_extra_libs}
+              -lc_fpu
+              -lfp_fpu
+              -lrt)
+  else()
+    target_link_libraries(
+      nuttx_user
+      PRIVATE ${user_ldscript}
+              $<$<NOT:$<BOOL:${DISABLE_LINK_GROUP}>>:-Wl,--start-group>
+              ${nuttx_system_libs}
+              ${nuttx_apps_libs}
+              ${nuttx_user_extra_libs}
+              $<$<BOOL:${CONFIG_HAVE_CXX}>:supc++>
+              $<$<NOT:$<BOOL:${DISABLE_LINK_GROUP}>>:-Wl,--end-group>)
+  endif()
 
   target_include_directories(
     nuttx_user SYSTEM PRIVATE ${NUTTX_DIR}/include ${NUTTX_BINARY_DIR}/include
