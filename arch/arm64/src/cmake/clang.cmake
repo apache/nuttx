@@ -169,3 +169,46 @@ if(NOT CONFIG_ARCH_USE_MMU)
 endif()
 
 add_link_options(-no-pie)
+
+# override nuttx_find_toolchain_lib
+
+set(NUTTX_FIND_TOOLCHAIN_LIB_DEFINED true)
+
+if(CONFIG_BUILTIN_TOOLCHAIN)
+  function(nuttx_find_toolchain_lib)
+    if(ARGN)
+      execute_process(
+        COMMAND ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} ${NUTTX_EXTRA_FLAGS}
+                --print-file-name=${ARGN}
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        OUTPUT_VARIABLE extra_lib_path)
+      nuttx_add_extra_library(${extra_lib_path})
+    else()
+      execute_process(
+        COMMAND ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} ${NUTTX_EXTRA_FLAGS}
+                --print-libgcc-file-name
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        OUTPUT_VARIABLE libgcc_path)
+      get_filename_component(libgcc_name ${libgcc_path} NAME)
+      execute_process(
+        COMMAND ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} ${NUTTX_EXTRA_FLAGS}
+                --print-file-name=${libgcc_name}
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        OUTPUT_VARIABLE libgcc)
+      nuttx_add_extra_library(${libgcc})
+    endif()
+  endfunction()
+else()
+  function(nuttx_find_toolchain_lib)
+    if(ARGN)
+      execute_process(
+        COMMAND ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} ${NUTTX_EXTRA_FLAGS}
+                --print-file-name=${ARGN}
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        OUTPUT_VARIABLE extra_lib_path)
+    endif()
+    nuttx_add_extra_library(${extra_lib_path})
+  endfunction()
+endif()
+
+set(PREPROCESS ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} -E -P -x c)
