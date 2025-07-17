@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32h5/stm32_dts.h
+ * boards/arm/stm32h5/nucleo-h563zi/src/stm32_dts.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,57 +20,72 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32H5_STM32_DTS_H
-#define __ARCH_ARM_SRC_STM32H5_STM32_DTS_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/sensors/sensor.h>      /* For struct sensor_lowerhalf_s */
-#include <nuttx/sensors/ioctl.h>       /* SNIOC_* if needed */
-#include <nuttx/uorb.h>               /* SENSOR_TYPE_AMBIENT_TEMPERATURE */
 
-#ifndef __ASSEMBLY__
+#include <stdbool.h>
+#include <errno.h>
+#include <debug.h>
 
-/****************************************************************************
- * Public Types
- ****************************************************************************/
+#include <arch/board/board.h>
 
-struct stm32_dts_cal_s
-{
-  uint16_t fmt0;
-  uint16_t ramp;
-  float t0;
-};
+#include "stm32.h"
 
-struct stm32_dts_cfg_s
-{
-  uint8_t samples;
-  bool lse;
-  uint32_t clk_frequency;
-};
+#if defined(CONFIG_STM32H5_DTS)
 
 /****************************************************************************
- * Public Function Prototypes
+ * Pre-processor Definitions
  ****************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: stm32_dts_setup
+ *
+ * Description:
+ *   Initialize DTS and register the DTS driver.
+ *
+ ****************************************************************************/
+
+int stm32_dts_setup(int devno)
 {
-#else
-#define EXTERN extern
-#endif
+  static bool initialized = false;
+  int ret;
 
-int stm32h5_dts_register(int devno);
+  /* Check if we have already initialized */
 
-#undef EXTERN
-#if defined(__cplusplus)
+  if (!initialized)
+    {
+      /* Register the DTS driver at "/dev/sensor_temp0" */
+
+      ret = stm32h5_dts_register(0);
+      if (ret < 0)
+        {
+          aerr("ERROR: dts_register /dev/dts0 failed: %d\n", ret);
+          return ret;
+        }
+
+      initialized = true;
+    }
+
+  return OK;
 }
-#endif
 
-#endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_STM32H5_STM32_DTS_H */
+#endif

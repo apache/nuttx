@@ -264,13 +264,13 @@
 #  define RCC_CFGR2_HPRE_SYSCLKd256      (14 << RCC_CFGR2_HPRE_SHIFT) /* 1110: SYSCLK divided by 256 */
 #  define RCC_CFGR2_HPRE_SYSCLKd512      (15 << RCC_CFGR2_HPRE_SHIFT) /* 1111: SYSCLK divided by 512 */
 
-#define RCC_CFGR2_PPRE1_SHIFT            (0) /* Bits 6-4: PPRE1 Prescaler */
+#define RCC_CFGR2_PPRE1_SHIFT            (4) /* Bits 6-4: PPRE1 Prescaler */
 #define RCC_CFGR2_PPRE1_MASK             (0x7 << RCC_CFGR2_PPRE1_SHIFT)
 #  define RCC_CFGR2_PPRE1_HCLK1          (0 << RCC_CFGR2_PPRE1_SHIFT)  /* 0xx: HCLK1 not divided */
-#  define RCC_CFGR2_PPRE1_HCLK1d2        (4 << RCC_CFGR2_PPRE1_SHIFT)  /* 1000: HCLK1 divided by 2 */
-#  define RCC_CFGR2_PPRE1_HCLK1d4        (5 << RCC_CFGR2_PPRE1_SHIFT)  /* 1001: HCLK1 divided by 4 */
-#  define RCC_CFGR2_PPRE1_HCLK1d8        (6 << RCC_CFGR2_PPRE1_SHIFT)  /* 1010: HCLK1 divided by 8 */
-#  define RCC_CFGR2_PPRE1_HCLK1d16       (7 << RCC_CFGR2_PPRE1_SHIFT)  /* 1011: HCLK1 divided by 16 */
+#  define RCC_CFGR2_PPRE1_HCLK1d2        (4 << RCC_CFGR2_PPRE1_SHIFT)  /* 100: HCLK1 divided by 2 */
+#  define RCC_CFGR2_PPRE1_HCLK1d4        (5 << RCC_CFGR2_PPRE1_SHIFT)  /* 101: HCLK1 divided by 4 */
+#  define RCC_CFGR2_PPRE1_HCLK1d8        (6 << RCC_CFGR2_PPRE1_SHIFT)  /* 110: HCLK1 divided by 8 */
+#  define RCC_CFGR2_PPRE1_HCLK1d16       (7 << RCC_CFGR2_PPRE1_SHIFT)  /* 111: HCLK1 divided by 16 */
 
 #define RCC_CFGR2_PPRE2_SHIFT            (8) /* Bits 10-8: PPRE2 Prescaler */
 #define RCC_CFGR2_PPRE2_MASK             (0x7 << RCC_CFGR2_PPRE2_SHIFT)

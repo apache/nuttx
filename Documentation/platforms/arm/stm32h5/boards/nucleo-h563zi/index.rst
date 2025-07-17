@@ -145,6 +145,13 @@ usbnsh:
 
 This configuration provides a basic NuttShell through the USB User interface.
 
+dts:
+--------
+
+This configuration configures the digital temperature sensor (DTS) 
+at /dev/uorb/sensor_temp0 and provides the test application 
+sensortest. E.g. sensortest -n 10 temp0
+
 References
 ===========
 

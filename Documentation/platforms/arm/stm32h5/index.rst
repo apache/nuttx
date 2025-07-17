@@ -35,8 +35,10 @@ Peripheral  Support  Notes
 ==========  =======  =====
 ADC         Yes
 ETH         Yes
+DTS         Yes      Software trigger only.
 FLASH       Yes      Hardware defines only.
 FDCAN       Yes
+GPDMA       Yes
 GPIO        Yes
 I2C         Yes
 ICACHE      Yes
@@ -59,11 +61,9 @@ DBG         No
 DCACHE      No
 DCMI        No
 DLYB        No
-DTS         No
 EXTI        No
 FMAC        No
 FSMC        No
-GPDMA       No
 GTZC        No
 HASH        No
 I3C         No
