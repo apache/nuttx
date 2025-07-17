@@ -247,17 +247,15 @@ set(PREPROCESS ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} -E -P -x c)
 set(NUTTX_FIND_TOOLCHAIN_LIB_DEFINED true)
 
 if(CONFIG_BUILTIN_TOOLCHAIN)
-  if(ARGN)
-    function(nuttx_find_toolchain_lib)
+  function(nuttx_find_toolchain_lib)
+    if(ARGN)
       execute_process(
         COMMAND ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} ${NUTTX_EXTRA_FLAGS}
                 --print-file-name=${ARGN}
         OUTPUT_STRIP_TRAILING_WHITESPACE
         OUTPUT_VARIABLE extra_lib_path)
       nuttx_add_extra_library(${extra_lib_path})
-    endfunction()
-  else()
-    function(nuttx_find_toolchain_lib)
+    else()
       execute_process(
         COMMAND ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} ${NUTTX_EXTRA_FLAGS}
                 --print-libgcc-file-name
@@ -270,8 +268,8 @@ if(CONFIG_BUILTIN_TOOLCHAIN)
         OUTPUT_STRIP_TRAILING_WHITESPACE
         OUTPUT_VARIABLE libgcc)
       nuttx_add_extra_library(${libgcc})
-    endfunction()
-  endif()
+    endif()
+  endfunction()
 else()
   function(nuttx_find_toolchain_lib)
     if(ARGN)
