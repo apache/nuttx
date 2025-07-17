@@ -537,11 +537,10 @@ rpmsg_port_uart_process_rx_cmd(FAR struct rpmsg_port_uart_s *rpuart,
             rpmsg_port_uart_set(rpuart, RPMSG_PORT_UART_EVT_WAKED);
           }
 
-        if (rpmsg_port_uart_check(rpuart, RPMSG_PORT_UART_EVT_CONNED))
+        if (rpmsg_port_uart_clear(rpuart, RPMSG_PORT_UART_EVT_CONNED))
           {
             rpmsg_port_drop_packets(&rpuart->port, RPMSG_PORT_DROP_TXQ);
             rpmsg_port_unregister(&rpuart->port);
-            rpmsg_port_uart_clear(rpuart, RPMSG_PORT_UART_EVT_CONNED);
           }
 
         DEBUGVERIFY(file_ioctl(&rpuart->file, TIOCVHANGUP, 0) >= 0);
