@@ -137,7 +137,6 @@ void nxsched_remove_self(FAR struct tcb_s *tcb)
 #ifdef CONFIG_SMP
 static void nxsched_remove_running(FAR struct tcb_s *tcb)
 {
-  FAR dq_queue_t *tasklist;
   FAR struct tcb_s *nxttcb;
   int cpu;
 
@@ -149,40 +148,10 @@ static void nxsched_remove_running(FAR struct tcb_s *tcb)
               tcb->task_state == TSTATE_TASK_RUNNING);
 
   cpu = tcb->cpu;
-  tasklist = &g_assignedtasks[cpu];
 
-  /* Check if the TCB to be removed is at the head of a running list.
-   * For the case of SMP, there are two lists involved:  (1) the
-   * g_readytorun list that holds non-running tasks that have not been
-   * assigned to a CPU, and (2) and the g_assignedtasks[] lists which hold
-   * tasks assigned a CPU, including the task that is currently running on
-   * that CPU.  Only this latter list contains the currently active task
-   * only removing the head of that list can result in a context switch.
-   *
-   * tcb->blink == NULL will tell us if the TCB is at the head of the
-   * running list and, hence, a candidate for the new running task.
-   *
-   * If so, then the tasklist RUNNABLE attribute will inform us if the list
-   * holds the currently executing task and, hence, if a context switch
-   * should occur.
-   */
+  /* Next task will be the idle task */
 
-  DEBUGASSERT(tcb->blink == NULL);
-  DEBUGASSERT(TLIST_ISRUNNABLE(tcb->task_state));
-
-  /* There must always be at least one task in the list (the IDLE task)
-   * after the TCB being removed.
-   */
-
-  nxttcb = tcb->flink;
-  DEBUGASSERT(nxttcb != NULL && is_idle_task(nxttcb));
-
-  /* The task is running but the CPU that it was running on has been
-   * paused.  We can now safely remove its TCB from the running
-   * task list.
-   */
-
-  dq_remfirst(tasklist);
+  nxttcb = &g_idletcb[cpu];
 
   /* Since the TCB is no longer in any list, it is now invalid */
 
@@ -191,6 +160,7 @@ static void nxsched_remove_running(FAR struct tcb_s *tcb)
   /* Activate the idle task */
 
   nxttcb->task_state = TSTATE_TASK_RUNNING;
+  g_assignedtasks[cpu] = nxttcb;
   up_update_task(nxttcb);
 }
 
@@ -213,10 +183,7 @@ bool nxsched_remove_readytorun(FAR struct tcb_s *tcb)
 
       tasklist = TLIST_HEAD(tcb, tcb->cpu);
 
-      /* The task is not running.  Just remove its TCB from the task
-       * list.  In the SMP case this may be either the g_readytorun() or the
-       * g_assignedtasks[cpu] list.
-       */
+      /* The task is not running.  Just remove its TCB from the task list */
 
       dq_rem((FAR dq_entry_t *)tcb, tasklist);
 

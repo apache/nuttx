@@ -60,7 +60,6 @@
 #define list_waitingforfill()    (&g_waitingforfill)
 #define list_stoppedtasks()      (&g_stoppedtasks)
 #define list_inactivetasks()     (&g_inactivetasks)
-#define list_assignedtasks(cpu)  (&g_assignedtasks[cpu])
 
 /* These are macros to access the current CPU and the current task on a CPU.
  * These macros are intended to support a future SMP implementation.
@@ -68,7 +67,7 @@
  */
 
 #ifdef CONFIG_SMP
-#  define current_task(cpu)      ((FAR struct tcb_s *)list_assignedtasks(cpu)->head)
+#  define current_task(cpu)      (g_assignedtasks[cpu])
 #else
 #  define current_task(cpu)      ((FAR struct tcb_s *)list_readytorun()->head)
 #endif
@@ -176,36 +175,30 @@ extern dq_queue_t g_readytorun;
  *    and
  *  - Tasks/threads that have not been assigned to a CPU.
  *
- * Otherwise, the TCB will be retained in an assigned task list,
- * g_assignedtasks.  As its name suggests, on 'g_assignedtasks queue for CPU
- * 'n' would contain only tasks/threads that are assigned to CPU 'n'.  Tasks/
- * threads would be assigned a particular CPU by one of two mechanisms:
+ * Otherwise, the TCB will be retained in an assigned task vector,
+ * g_assignedtasks.  As its name suggests, on 'g_assignedtasks vector for CPU
+ * 'n' would contain only the task/thread which is running on the CPU 'n'.
+ * Tasks/threads would be assigned a particular CPU by one of two
+ * mechanisms:
  *
  *  - (Semi-)permanently through an RTOS interfaces such as
  *    pthread_attr_setaffinity(), or
  *  - Temporarily through scheduling logic when a previously unassigned task
  *    is made to run.
- *
- * Tasks/threads that are assigned to a CPU via an interface like
- * pthread_attr_setaffinity() would never go into the g_readytorun list, but
- * would only go into the g_assignedtasks[n] list for the CPU 'n' to which
- * the thread has been assigned.  Hence, the g_readytorun list would hold
- * only unassigned tasks/threads.
- *
- * Like the g_readytorun list in in non-SMP case, each g_assignedtask[] list
- * is prioritized:  The head of the list is the currently active task on this
- * CPU.  Tasks after the active task are ready-to-run and assigned to this
- * CPU. The tail of this assigned task list, the lowest priority task, is
- * always the CPU's IDLE task.
  */
 
-extern dq_queue_t g_assignedtasks[CONFIG_SMP_NCPUS];
+extern FAR struct tcb_s *g_assignedtasks[CONFIG_SMP_NCPUS];
 
 /* g_delivertasks is used to indicate that a task switch is scheduled for
  * another cpu to be processed.
  */
 
 extern enum task_deliver_e g_delivertasks[CONFIG_SMP_NCPUS];
+
+/* This is the list of idle tasks */
+
+extern FAR struct tcb_s g_idletcb[CONFIG_SMP_NCPUS];
+
 #endif
 
 /* This is the list of all tasks that are ready-to-run, but cannot be placed
