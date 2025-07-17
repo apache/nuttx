@@ -359,6 +359,14 @@ config STM32H5_DMA2
 	select STM32H5_DMA
 	select ARCH_DMA
 
+config STM32H5_DTS
+	bool "DTS"
+	default n
+	---help---
+		Enable support for the on‑die digital temperature sensor (DTS)
+		built into STM32H5 devices.  When enabled, the driver will register
+		a `/dev/sensor_tempX` device using the common NuttX sensor framework.
+
 config STM32H5_ETHMAC
 	bool "Ethernet MAC"
 	default n
@@ -624,6 +632,107 @@ config STM32H5_USBFS
 	select USBDEV
 
 endmenu # STM32H5 Peripheral Selection
+
+menu "DTS Configuration"
+	depends on STM32H5_DTS
+
+config STM32H5_DTS_REFCLK_LSE
+	bool "Use LSE (32.768 kHz crystal) as DTS reference clock"
+	default n
+	---help---
+		Select the low‑speed external (LSE) oscillator as the reference clock
+		for the DTS.  When enabled, DTS_CFGR1.REFCLK_SEL=1 and the driver will
+		measure FM(T) pulses over N LSE cycles.
+
+		If disabled, the DTS will use the APB‑bus clock (PCLK) as the reference
+		(REFCLK_SEL=0) and you must supply a valid HSREF_CLK_DIV to keep the
+		calibration prescaler ≤ 1 MHz.
+
+config STM32H5_DTS_SMP_TIME
+	int "DTS sampling time (TS1_SMP_TIME[3:0])"
+	default 1
+	range 1 15
+	---help---
+		Number of reference‑clock cycles (PCLK or LSE) counted per
+		DTS measurement.  Valid range 1 (1 cycle) through 15 (15 cycles).
+
+config STM32H5_DTS_TRIGGER
+	int "DTS hardware trigger source (TS1_INTRIG_SEL[3:0])"
+	default 0
+	---help---
+		If non‑zero, DTS will start measurements on the rising edge of
+		the selected hardware line.  Values match RM0481 Table 275:
+		0=Software Trigger, 1=LPTIM1_CH1, 
+		2=LPTIM2_CH1, 3=LPTIM3_CH1, 4=EXTI13, 5-15 are reserved.
+
+config STM32H5_DTS_LOW_THRESHOLD
+	int "DTS low‑threshold (°C)"
+	default 0
+	---help---
+		The temperature (in whole °C) below which the DTS window comparator will
+		assert the low‑threshold flag (TS1_ITLF).  To disable, set equal to 0.
+
+config STM32H5_DTS_HIGH_THRESHOLD
+	int "DTS high‑threshold (°C)"
+	default 100
+	---help---
+		The temperature (in whole °C) above which the DTS window comparator will
+		assert the high‑threshold flag (TS1_ITHF).  Must be >= LOW_THRESHOLD.
+
+config STM32H5_DTS_ITEN_ITEF
+	bool "Enable DTS end‑of‑measurement interrupt (TS1_ITEF)"
+	default y
+	---help---
+		Enable the synchronous “end of measurement” interrupt for the
+		digital temperature sensor.  When set, the driver will attach
+		and unmask TS1_ITEF and will call your ISR on every fresh sample.
+
+config STM32H5_DTS_ITEN_ITLF
+	bool "Enable DTS low‑threshold interrupt (TS1_ITLF)"
+	default n
+	---help---
+		Enable the synchronous “low threshold crossed” interrupt for the
+		digital temperature sensor.  When set, the driver will unmask
+		TS1_ITLF so you can get notified whenever the measured value
+		drops below your programmed low‑threshold.
+
+config STM32H5_DTS_ITEN_ITHF
+	bool "Enable DTS high‑threshold interrupt (TS1_ITHF)"
+	default n
+	---help---
+		Enable the synchronous “high threshold crossed” interrupt for the
+		digital temperature sensor.  When set, the driver will unmask
+		TS1_ITHF so you can get notified whenever the measured value
+		exceeds your programmed high‑threshold.
+
+config STM32H5_DTS_AITEN_AITEF
+	bool "Enable DTS asynchronous end‑of‑measurement interrupt (TS1_AITEF)"
+	depends on STM32H5_DTS_REFCLK_LSE
+	default n
+	---help---
+		Enable the asynchronous end‑of‑measurement interrupt.  This will
+		set TS1_AITEEN in DTS_ITENR and cause an _asynchronous_ wakeup
+		event when a conversion completes (in Stop/Sleep modes).
+
+config STM32H5_DTS_AITEN_AITLF
+	bool "Enable DTS asynchronous low‑threshold interrupt (TS1_AITLF)"
+	depends on STM32H5_DTS_REFCLK_LSE
+	default n
+	---help---
+		Enable the asynchronous low‑threshold comparator interrupt.  This
+		will set TS1_AITLEN in DTS_ITENR and generate a wakeup event
+		when the measurement drops below your low threshold.
+
+config STM32H5_DTS_AITEN_AITHF
+	bool "Enable DTS asynchronous high‑threshold interrupt (TS1_AITHF)"
+	depends on STM32H5_DTS_REFCLK_LSE
+	default n
+	---help---
+		Enable the asynchronous high‑threshold comparator interrupt.  This
+		will set TS1_AITHEN in DTS_ITENR and generate a wakeup event
+		when the measurement exceeds your high threshold.
+
+endmenu # DTS Configuration
 
 config STM32H5_FLASH_PREFETCH
 	bool "Enable FLASH Pre-fetch"

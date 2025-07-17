@@ -39,6 +39,7 @@
 #include "chip.h"
 #include "stm32_adc.h"
 #include "stm32_dbgmcu.h"
+#include "stm32_dts.h"
 #include "stm32_flash.h"
 #include "stm32_gpio.h"
 #include "stm32_i2c.h"
