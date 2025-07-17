@@ -43,8 +43,7 @@
 #include <arch/irq.h>
 
 #include "sched/sched.h"
-
-#if defined(CONFIG_SPINLOCK)
+#include "irq/irq.h"
 
 /****************************************************************************
  * Public Data
@@ -67,9 +66,56 @@ static void dump_spinlock(FAR sq_queue_t *hold_spinlock)
     }
 }
 
+void spinlock_mark_locking(FAR spinlock_debug_t *info)
+{
+  FAR struct tcb_s *rtcb = running_task();
+
+#ifdef CONFIG_SMP
+  /* The critical-section lock is allowed to be acquired while another
+   * spinlock is being waited for (e.g. from the assert path), so it is
+   * not marked to avoid false multi-wait detection.
+   */
+
+  if (info == &g_cpu_irqlock.info)
+    {
+      return;
+    }
+#endif
+
+  /* Check if the current tcb is not waiting for other spinlock. */
+
+  if (rtcb->wait_spinlock != NULL)
+    {
+      _alert("Detect thread(%d) is waiting for multiple spinlocks at the "
+             "same time, lock1(%p) and lock2 (%p)!\n",
+             rtcb->pid, rtcb->wait_spinlock, info);
+      dump_spinlock(&rtcb->hold_spinlock);
+      PANIC();
+    }
+
+  /* Only the method of acquiring lock through busywait needs to be marked.
+   * If the lock is acquired through trylock, no marking is required
+   * because it will not cause a circular wait and lead to deadlock.
+   */
+
+  rtcb->wait_spinlock = info;
+}
+
 void spinlock_mark_locked(FAR spinlock_debug_t *info)
 {
   FAR struct tcb_s *rtcb = running_task();
+
+#ifdef CONFIG_SMP
+  /* The critical-section lock is allowed to be acquired while another
+   * spinlock is being waited for (e.g. from the assert path), so it is
+   * not marked to avoid false multi-wait detection.
+   */
+
+  if (info == &g_cpu_irqlock.info)
+    {
+      return;
+    }
+#endif
 
   /* Check if the spinlock has been held. */
 
@@ -81,16 +127,43 @@ void spinlock_mark_locked(FAR spinlock_debug_t *info)
       PANIC();
     }
 
+  /* Check if the current tcb acquires the right lock. */
+
+  if (rtcb->wait_spinlock != info)
+    {
+      _alert("Detect thread(%d) wants to acquire lock1(%p), but ends up "
+             "acquiring lock2(%p)!\n",
+             rtcb->pid, rtcb->wait_spinlock, info);
+      dump_spinlock(&rtcb->hold_spinlock);
+      PANIC();
+    }
+
   /* Set info and enqueue. */
 
   info->holder = rtcb;
   info->caller = return_address(0);
   sq_addlast(&info->flink, &rtcb->hold_spinlock);
+
+  /* Reset wait_spinlock. */
+
+  rtcb->wait_spinlock = NULL;
 }
 
 void spinlock_mark_unlocked(FAR spinlock_debug_t *info)
 {
   FAR struct tcb_s *rtcb = running_task();
+
+#ifdef CONFIG_SMP
+  /* The critical-section lock is allowed to be acquired while another
+   * spinlock is being waited for (e.g. from the assert path), so it is
+   * not marked to avoid false multi-wait detection.
+   */
+
+  if (info == &g_cpu_irqlock.info)
+    {
+      return;
+    }
+#endif
 
   /* Check if locking and unlocking are the same task. */
 
@@ -132,6 +205,20 @@ void spinlock_switch_context(FAR struct tcb_s *from)
     }
 }
 
-#endif /* CONFIG_SPINLOCK_DEBUG */
+/* Get the pid of the current lock holder as a reference-free snapshot:
+ * take the holder pid and drop the pointer immediately.  Note that this
+ * is inherently racy: the holder may release the lock or exit at any
+ * time, so the pid is valid only at the moment of the read.
+ */
 
-#endif /* CONFIG_SPINLOCK */
+pid_t spinlock_get_holder(FAR spinlock_debug_t *info)
+{
+  if (info->holder != NULL)
+    {
+      return info->holder->pid;
+    }
+
+  return INVALID_PROCESS_ID;
+}
+
+#endif /* CONFIG_SPINLOCK_DEBUG */

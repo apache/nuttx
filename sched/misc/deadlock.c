@@ -26,6 +26,7 @@
 
 #include <nuttx/mutex.h>
 #include <nuttx/sched.h>
+#include <nuttx/spinlock.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -43,28 +44,37 @@ struct deadlock_info_s
  ****************************************************************************/
 
 /****************************************************************************
- * Name: getmutex
+ * Name: getholder
  ****************************************************************************/
 
-static FAR mutex_t *getmutex(FAR struct tcb_s *tcb)
+static pid_t getholder(FAR struct tcb_s *tcb)
 {
-  FAR sem_t *sem;
-
   if (tcb == NULL)
     {
-      return NULL;
+      return INVALID_PROCESS_ID;
     }
+
+  /* Spinlock deadlock only occurs in RUNNING threads,
+   * while mutex deadlock only occurs in WAIT_SEM threads.
+   */
 
   if (tcb->task_state == TSTATE_WAIT_SEM)
     {
-      sem = tcb->waitobj;
+      FAR sem_t *sem = tcb->waitobj;
+
       if (sem != NULL && (sem->flags & SEM_TYPE_MUTEX) != 0)
         {
-          return (FAR mutex_t *)sem;
+          return nxmutex_get_holder((FAR mutex_t *)sem);
         }
     }
+#ifdef CONFIG_SPINLOCK_DEBUG
+  else if (tcb->wait_spinlock)
+    {
+      return spinlock_get_holder(tcb->wait_spinlock);
+    }
+#endif
 
-  return NULL;
+  return INVALID_PROCESS_ID;
 }
 
 /****************************************************************************
@@ -73,17 +83,9 @@ static FAR mutex_t *getmutex(FAR struct tcb_s *tcb)
 
 static FAR struct tcb_s *deadlock_next(FAR struct tcb_s *tcb)
 {
-  FAR mutex_t *mutex;
-  pid_t holder;
+  pid_t holder = getholder(tcb);
 
-  mutex = getmutex(tcb);
-  if (mutex == NULL)
-    {
-      return NULL;
-    }
-
-  holder = nxmutex_get_holder(mutex);
-  if (holder < 0)
+  if (holder == INVALID_PROCESS_ID)
     {
       return NULL;
     }

@@ -688,6 +688,7 @@ struct tcb_s
 
 #ifdef CONFIG_SPINLOCK_DEBUG
   sq_queue_t hold_spinlock;
+  FAR spinlock_debug_t *wait_spinlock;
 #endif
 
   struct wdog_s waitdog;                 /* All timed waits use this timer  */
