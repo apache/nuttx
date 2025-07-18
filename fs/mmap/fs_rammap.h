@@ -45,18 +45,10 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <sys/types.h>
+#include <nuttx/fs/fs.h>
 #include <nuttx/mm/map.h>
 
-/* A memory mapping type definition */
-
-enum mm_map_type_e
-{
-  MAP_USER = 0,
-  MAP_KERNEL,
-  MAP_XIP,
-};
+#include <sys/types.h>
 
 #ifdef CONFIG_FS_RAMMAP
 

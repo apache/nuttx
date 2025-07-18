@@ -32,6 +32,7 @@
 
 #include "optee.h"
 #include "optee_smc.h"
+#include "optee_rpc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -176,10 +177,10 @@ static bool optee_smc_is_compatible(optee_smc_fn smc_fn)
 }
 
 static void optee_smc_handle_rpc(FAR struct optee_priv_data *priv_,
-                                 FAR smccc_res_t *par)
+                                 FAR smccc_res_t *par,
+                                 FAR void **last_page_list)
 {
   FAR struct optee_shm *shm;
-  uintptr_t shm_pa;
   uint32_t rpc_func;
 
   rpc_func = OPTEE_SMC_RETURN_GET_RPC_FUNC(par->a0);
@@ -190,8 +191,7 @@ static void optee_smc_handle_rpc(FAR struct optee_priv_data *priv_,
       case OPTEE_SMC_RPC_FUNC_ALLOC:
         if (!optee_shm_alloc(priv_, NULL, par->a1, TEE_SHM_ALLOC, &shm))
           {
-            shm_pa = optee_va_to_pa((FAR void *)(uintptr_t)shm->addr);
-            reg_pair_from_64(shm_pa, &par->a1, &par->a2);
+            reg_pair_from_64(shm->paddr, &par->a1, &par->a2);
             reg_pair_from_64((uintptr_t)shm, &par->a4, &par->a5);
           }
         else
@@ -207,6 +207,10 @@ static void optee_smc_handle_rpc(FAR struct optee_priv_data *priv_,
         break;
 
       case OPTEE_SMC_RPC_FUNC_FOREIGN_INTR:
+        break;
+      case OPTEE_SMC_RPC_FUNC_CMD:
+        shm = reg_pair_to_ptr(par->a1, par->a2);
+        optee_rpc_handle_cmd(priv_, shm, last_page_list);
         break;
 
       default:
@@ -320,6 +324,7 @@ int optee_transport_call(FAR struct optee_priv_data *priv_,
 
   up_clean_dcache((uintptr_t)arg, (uintptr_t)arg + arg_size);
 #endif
+  FAR void *last_page_list = NULL;
 
   memset(&par, 0, sizeof(smccc_res_t));
 
@@ -338,13 +343,15 @@ int optee_transport_call(FAR struct optee_priv_data *priv_,
       if (OPTEE_SMC_RETURN_IS_RPC(res.a0))
         {
           memcpy(&par, &res, 4 * sizeof(unsigned long));
-          optee_smc_handle_rpc(priv_, &par);
+          optee_smc_handle_rpc(priv_, &par, &last_page_list);
         }
       else
         {
 #ifndef CONFIG_ARCH_USE_MMU
           up_invalidate_dcache((uintptr_t)arg, (uintptr_t)arg + arg_size);
 #endif
+
+          kmm_free(last_page_list);
           return (int)res.a0;
         }
     }

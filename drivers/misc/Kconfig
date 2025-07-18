@@ -53,25 +53,30 @@ choice
 config DEV_OPTEE_LOCAL
 	bool "OPTEE Local Socket Support"
 	depends on NET_LOCAL
-	depends on LIBC_MEMFD_SHMFS
+	depends on FS_ANONMAP
 	depends on ALLOW_BSD_COMPONENTS
 
 config DEV_OPTEE_RPMSG
 	bool "OP-TEE RPMSG Socket Support"
 	depends on NET_RPMSG
-	depends on LIBC_MEMFD_SHMFS
+	depends on FS_ANONMAP
 	depends on ALLOW_BSD_COMPONENTS
 
 config DEV_OPTEE_SMC
 	bool "OP-TEE SMC CC Support"
 	depends on ARCH_ARM || ARCH_ARM64
-	depends on LIBC_MEMFD_SHMFS
+	depends on FS_ANONMAP
 	depends on ALLOW_BSD_COMPONENTS
 
 config DEV_OPTEE_NONE
 	bool "Disable OP-TEE driver"
 
 endchoice
+
+config DEV_OPTEE_SUPPLICANT
+	bool "Enables kernel driver for TEE supplicant"
+	default n
+	depends on DEV_OPTEE_SMC
 
 if DEV_OPTEE_RPMSG
 
