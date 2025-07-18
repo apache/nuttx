@@ -47,7 +47,8 @@
 #  define backtrace_unlock(bp, flags) spin_unlock_irqrestore(&(bp)->lock, flags)
 #else
 #  define backtrace_lock(bp) ((irqstate_t)nxmutex_lock(&(bp)->lock))
-#  define backtrace_unlock(bp, flags) (flags, nxmutex_unlock(&(bp)->lock))
+#  define backtrace_unlock(bp, flags) \
+          ((void)flags, nxmutex_unlock(&(bp)->lock))
 #endif
 
 /****************************************************************************
