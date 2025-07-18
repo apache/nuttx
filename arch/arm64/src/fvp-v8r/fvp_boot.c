@@ -42,6 +42,7 @@
 #include "arm64_mpu.h"
 #include "chip.h"
 #include "fvp_boot.h"
+#include "fvp_userspace.h"
 
 #include <arch/board/board_memorymap.h>
 #include <nuttx/serial/uart_pl011.h>
@@ -49,59 +50,6 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
-
-static const struct arm64_mpu_region g_mpu_regions[] =
-{
-  /* Region 0 NuttX ktext */
-
-  MPU_REGION_ENTRY("nx_ktext",
-    (uint64_t)KTEXT_START,
-    (uint64_t)KTEXT_SIZE,
-    REGION_KTEXT_ATTR),
-
-  /* Region 1 NuttX kdata */
-
-  MPU_REGION_ENTRY("nx_kdata",
-    (uint64_t)KSRAM_START,
-    (uint64_t)KSRAM_SIZE,
-    REGION_RW_NA_ATTR),
-
-#ifdef CONFIG_BUILD_PROTECTED
-  /* Region 2 NuttX utext */
-
-  MPU_REGION_ENTRY("nx_utext",
-      (uint64_t)UTEXT_START,
-      (uint64_t)UTEXT_SIZE,
-      REGION_UTEXT_ATTR),
-
-  /* Region 3 NuttX udata */
-
-  MPU_REGION_ENTRY("nx_udata",
-     (uint64_t)USRAM_START,
-     (uint64_t)USRAM_SIZE,
-     REGION_RW_RW_ATTR),
-#endif
-
-  /* Region 4 device region */
-
-  MPU_REGION_ENTRY("DEVICE1",
-     (uint64_t)CONFIG_DEVICEIO1_BASEADDR,
-     (uint64_t)CONFIG_DEVICEIO1_SIZE,
-     REGION_DEVICE_ATTR),
-
-  /* Region 5 device region */
-
-  MPU_REGION_ENTRY("DEVICE2",
-     (uint64_t)CONFIG_DEVICEIO2_BASEADDR,
-     (uint64_t)CONFIG_DEVICEIO2_SIZE,
-     REGION_DEVICE_ATTR)
-};
-
-const struct arm64_mpu_config g_mpu_config =
-{
-  .num_regions = nitems(g_mpu_regions),
-  .mpu_regions = g_mpu_regions,
-};
 
 /****************************************************************************
  * Public Functions
@@ -174,9 +122,11 @@ int arm64_get_cpuid(uint64_t mpid)
 
 void arm64_chip_boot(void)
 {
-  /* MAP IO and DRAM, enable MMU. */
-
   arm64_mpu_init(true);
+
+#ifdef CONFIG_BUILD_PROTECTED
+  fvp_userspace();
+#endif
 
 #if defined(CONFIG_ARM64_PSCI)
   arm64_psci_init("smc");
@@ -199,4 +149,81 @@ void arm64_chip_boot(void)
 #ifdef CONFIG_ARCH_PERF_EVENTS
   up_perf_init((void *)CONFIG_SYS_CLOCK_HW_CYCLES_PER_SEC);
 #endif
+}
+
+/****************************************************************************
+ * Name: arm64_mpu_init_regiions
+ *
+ ****************************************************************************/
+
+void arm64_mpu_init_regiions(void)
+{
+#ifdef CONFIG_BUILD_PROTECTED
+  uintptr_t ubase;
+  size_t    usize;
+#endif
+
+  /* Kernel text region */
+
+  mpu_configure_region((uintptr_t)_stext, _etext -  _stext,
+                       P_RO_U_NA_MSK | SHAREABLE_MSK,
+                       MPU_MAIR_INDEX_SRAM);
+
+  /* Kernel data base and size */
+
+  mpu_configure_region((uintptr_t)_sbss, g_idle_topstack - _sbss,
+                       NOT_EXEC | P_RW_U_NA_MSK | SHAREABLE_MSK,
+                       MPU_MAIR_INDEX_SRAM);
+
+#ifdef CONFIG_BUILD_PROTECTED
+  ubase = (uintptr_t)USERSPACE->us_bssend +
+                    CONFIG_MM_KERNEL_HEAPSIZE;
+  usize = CONFIG_RAM_END - ubase;
+
+  /* User heap base and size */
+
+  mpu_configure_region(ubase, usize,
+                       NOT_EXEC | P_RW_U_RW_MSK | SHAREABLE_MSK,
+                       MPU_MAIR_INDEX_SRAM);
+
+  /* User text region */
+
+  mpu_configure_region(USERSPACE->us_textstart,
+                       USERSPACE->us_textend - USERSPACE->us_textstart,
+                       P_RO_U_RO_MSK | SHAREABLE_MSK,
+                       MPU_MAIR_INDEX_SRAM);
+
+  /* User data base and size */
+
+  mpu_configure_region(USERSPACE->us_datastart,
+                       USERSPACE->us_bssend - USERSPACE->us_datastart,
+                       NOT_EXEC | P_RW_U_RW_MSK | SHAREABLE_MSK,
+                       MPU_MAIR_INDEX_SRAM);
+
+  /* Kernel heap base and size */
+
+  mpu_configure_region((uintptr_t)USERSPACE->us_bssend,
+                       CONFIG_MM_KERNEL_HEAPSIZE,
+                       NOT_EXEC | P_RW_U_NA_MSK | SHAREABLE_MSK,
+                       MPU_MAIR_INDEX_SRAM);
+#else
+  /* Kernel heap base and size */
+
+  mpu_configure_region((uintptr_t)g_idle_topstack,
+                       CONFIG_RAM_END - (uintptr_t)g_idle_topstack,
+                       NOT_EXEC | P_RW_U_RW_MSK | SHAREABLE_MSK,
+                       MPU_MAIR_INDEX_SRAM);
+#endif
+
+  /* Device region */
+
+  mpu_configure_region(CONFIG_DEVICEIO1_BASEADDR, CONFIG_DEVICEIO1_SIZE,
+                       NOT_EXEC | P_RW_U_NA_MSK | NON_SHAREABLE_MSK,
+                       MPU_MAIR_INDEX_DEVICE);
+
+  /* Device region */
+
+  mpu_configure_region(CONFIG_DEVICEIO2_BASEADDR, CONFIG_DEVICEIO2_SIZE,
+                       NOT_EXEC | P_RW_U_NA_MSK | NON_SHAREABLE_MSK,
+                       MPU_MAIR_INDEX_DEVICE);
 }

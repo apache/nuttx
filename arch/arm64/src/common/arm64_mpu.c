@@ -420,7 +420,6 @@ void mpu_dump_region(void)
 void arm64_mpu_init(bool is_primary_core)
 {
   uint64_t  val;
-  uint32_t  r_index;
 
 #ifdef CONFIG_MM_KASAN_SW_TAGS
   val  = read_sysreg(tcr_el1);
@@ -451,15 +450,7 @@ void arm64_mpu_init(bool is_primary_core)
 
   mpu_init();
 
-  /* Program fixed regions configured at SOC definition. */
-
-  for (r_index = 0U; r_index < g_mpu_config.num_regions; r_index++)
-    {
-      mpu_configure_region(g_mpu_config.mpu_regions[r_index].base,
-                           g_mpu_config.mpu_regions[r_index].size,
-                           g_mpu_config.mpu_regions[r_index].attr.rbar,
-                           g_mpu_config.mpu_regions[r_index].attr.mair_idx);
-    }
+  arm64_mpu_init_regiions();
 
   arm64_mpu_enable();
 }
