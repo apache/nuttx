@@ -907,4 +907,12 @@ begin_packed_struct struct virtio_crypto_op_data_req_s
     } op_flf;
 } end_packed_struct;
 
+begin_packed_struct struct virtio_key_op_req_s
+{
+  uint32_t cmd;
+  uint32_t name_len;
+  uint32_t src_data_len;
+  uint32_t dst_data_len;
+} end_packed_struct;
+
 #endif /* __INCLUDE_NUTTX_VIRTIO_VIRTIO_CRYPTO_H */
