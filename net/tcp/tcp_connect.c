@@ -349,10 +349,6 @@ int psock_tcp_connect(FAR struct socket *psock,
         }
 #endif /* CONFIG_NET_IPv4 */
 
-      /* Notify the device driver that new connection is available. */
-
-      netdev_txnotify_dev(conn->dev);
-
       /* Non-blocking connection ? set the socket error
        * and start the monitor
        */
@@ -376,6 +372,10 @@ int psock_tcp_connect(FAR struct socket *psock,
               info.tc_cb = state.tc_cb;
               info.tc_sem = &state.tc_sem;
               tls_cleanup_push(tls_get_info(), tcp_callback_cleanup, &info);
+
+              /* Notify the device driver that new connection is available. */
+
+              netdev_txnotify_dev(conn->dev);
 
               /* Wait for either the connect to complete or for an
                * error/timeout to occur.
@@ -430,6 +430,10 @@ int psock_tcp_connect(FAR struct socket *psock,
               tcp_stop_monitor(conn, TCP_ABORT);
               ret = ret2;
             }
+
+          /* Notify the device driver that new connection is available. */
+
+          netdev_txnotify_dev(conn->dev);
         }
     }
 
