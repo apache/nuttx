@@ -263,7 +263,10 @@
     .mair_idx = MPU_MAIR_INDEX_SRAM,       \
   }
 
-#ifdef CONFIG_MM_TASK_HEAP
+#ifdef CONFIG_ARCH_STACK_PROTECT
+#  define MPU_HEAP_REGION_AREAS_NUM 5
+#  define MPU_BR_REGION_AREAS_NUM   3
+#else
 #  define MPU_HEAP_REGION_AREAS_NUM 3
 #  define MPU_BR_REGION_AREAS_NUM   2
 #endif
