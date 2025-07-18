@@ -307,7 +307,7 @@ static void mpu_init_heap_region(void)
 }
 #endif
 
-#if defined(CONFIG_MM_TASK_HEAP)
+#if defined(CONFIG_MM_TASK_HEAP) && defined(CONFIG_ARCH_STACK_PROTECT)
 
 /****************************************************************************
  * Name: mpu_update
@@ -319,11 +319,98 @@ static void mpu_init_heap_region(void)
  *   The following diagram represent the typical layout:
  *
  *   +-------------+
- *   | kernel RW   |  Backgroud region
+ *   | kernel RW   |  Background region
+ *   +-------------+
+ *   | User RW     |  User heap/stack
+ *   +-------------+
+ *   | kernel RW   |  Background region
+ *   +-------------+
+ *   | User RW     |  User stack/heap
+ *   +-------------+
+ *   | kernel RW   |  Background region
+ *   +-------------+
+ * Input Parameters:
+ *   tcb
+ */
+
+void mpu_update(struct tcb_s *tcb)
+{
+  const arch_addrenv_t *addrenv = &tcb->addrenv_curr->addrenv;
+  uintptr_t stack_start = (uintptr_t)tcb->stack_alloc_ptr;
+  uintptr_t stack_end   = ((uintptr_t)tcb->stack_base_ptr +
+                                     tcb->adj_stack_size);
+  uintptr_t heap_start  = addrenv->heap;
+  uintptr_t heap_end    = addrenv->heap + addrenv->heapsize;
+
+  g_br_region[0].start = (uintptr_t)USERSPACE->us_bssend +
+                               CONFIG_MM_KERNEL_HEAPSIZE;
+
+  if (addrenv->heap < stack_start)
+    {
+      g_br_region[0].size  = heap_start - g_br_region[0].start;
+      g_br_region[1].start = heap_end;
+      g_br_region[1].size  = stack_start - g_br_region[1].start;
+      g_br_region[2].start = stack_end;
+      g_br_region[2].size  = CONFIG_RAM_END - stack_end;
+    }
+  else
+    {
+      g_br_region[0].size  = stack_start - g_br_region[0].start;
+      g_br_region[1].start = stack_end;
+      g_br_region[1].size  = heap_start - g_br_region[1].start;
+      g_br_region[2].start = heap_end;
+      g_br_region[2].size  = CONFIG_RAM_END - heap_end;
+    }
+
+  mpu_init_heap_region();
+
+  /* Configure the user heap/stack region to be RW used for the user. */
+
+  mpu_modify_region(g_addrenv_heap_region[0],
+                    heap_start, heap_end - heap_start,
+                    NOT_EXEC | P_RW_U_RW_MSK | SHAREABLE_MSK,
+                    MPU_MAIR_INDEX_SRAM);
+
+  mpu_modify_region(g_addrenv_heap_region[1],
+                    stack_start, stack_end - stack_start,
+                    NOT_EXEC | P_RW_U_RW_MSK | SHAREABLE_MSK,
+                    MPU_MAIR_INDEX_SRAM);
+
+  /* Background region */
+
+  mpu_modify_region(g_addrenv_heap_region[2],
+                    g_br_region[0].start, g_br_region[0].size,
+                    NOT_EXEC | P_RW_U_NA_MSK | SHAREABLE_MSK,
+                    MPU_MAIR_INDEX_SRAM);
+
+  mpu_modify_region(g_addrenv_heap_region[3],
+                    g_br_region[1].start, g_br_region[1].size,
+                    NOT_EXEC | P_RW_U_NA_MSK | SHAREABLE_MSK,
+                    MPU_MAIR_INDEX_SRAM);
+
+  mpu_modify_region(g_addrenv_heap_region[4],
+                    g_br_region[2].start, g_br_region[2].size,
+                    NOT_EXEC | P_RW_U_NA_MSK | SHAREABLE_MSK,
+                    MPU_MAIR_INDEX_SRAM);
+  return ;
+}
+#elif defined(CONFIG_MM_TASK_HEAP)
+
+/****************************************************************************
+ * Name: mpu_update
+ *
+ * Description:
+ *   Config regions
+ *   MPU does not support mpu region overlap in hardware
+ *   the old configuration needs to be cleared.
+ *   The following diagram represent the typical layout:
+ *
+ *   +-------------+
+ *   | kernel RW   |  Background region
  *   +-------------+
  *   | User RW     |  User heap
  *   +-------------+
- *   | kernel RW   |  Backgroud region
+ *   | kernel RW   |  Background region
  *   +-------------+
  *
  * Input Parameters:
@@ -388,7 +475,7 @@ void mpu_update(struct tcb_s *tcb)
 
 int up_addrenv_select(const arch_addrenv_t *addrenv)
 {
-#if defined(CONFIG_MM_TASK_HEAP)
+#if defined(CONFIG_MM_TASK_HEAP) && !defined(CONFIG_ARCH_STACK_PROTECT)
   struct tcb_s *tcb = this_task();
 
   if ((atomic_read(&tcb->flags) & TCB_FLAG_TTYPE_MASK) !=
@@ -550,8 +637,7 @@ int up_addrenv_mprot(arch_addrenv_t *addrenv, uintptr_t addr, size_t len,
 
 int up_addrenv_ustackswitch(struct tcb_s *tcb)
 {
-  /* Implement it later */
-
+  mpu_update(tcb);
   return OK;
 }
 
