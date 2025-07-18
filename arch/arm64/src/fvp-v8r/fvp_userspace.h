@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm64/src/fvp-v8r/fvp_v8r_allocateheap.c
+ * arch/arm64/src/fvp-v8r/fvp_userspace.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,65 +18,59 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_ARM64_SRC_FVP_FVP_USERSPACE_H
+#define __ARCH_ARM64_SRC_FVP_FVP_USERSPACE_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
 
 #include <sys/types.h>
 #include <stdint.h>
-
-#include <assert.h>
-#include <debug.h>
-#include <nuttx/arch.h>
-#include <nuttx/board.h>
-#include <nuttx/userspace.h>
-#include <arch/board/board_memorymap.h>
+#include <stdbool.h>
 
 #include "arm64_internal.h"
+#include "chip.h"
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Data
  ****************************************************************************/
 
-/* Configuration ************************************************************/
+#ifndef __ASSEMBLY__
 
-/* Terminology.  In the flat build (CONFIG_BUILD_FLAT=y), there is only a
- * single heap access with the standard allocations (malloc/free).  This
- * heap is referred to as the user heap.  In the protected build
- * (CONFIG_BUILD_PROTECTED=y) where an MPU is used to protect a region of
- * otherwise flat memory, there will be two allocators:  One that allocates
- * protected (kernel) memory and one that allocates unprotected (user)
- * memory.  These are referred to as the kernel and user heaps,
- * respectively.
- *
- * The ARMv8 has no MPU but does have an MMU.  With this MMU, it can support
- * the kernel build (CONFIG_BUILD_KERNEL=y).  In this configuration, there
- * is one kernel heap but multiple user heaps:  One per task group.  However,
- * in this case, we need only be concerned about initializing the single
- * kernel heap here.
- */
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_allocate_kheap
+ * Name: fvp_userspace
  *
  * Description:
- *   For the kernel build (CONFIG_BUILD_PROTECTED/KERNEL=y) with both kernel-
- *   and user-space heaps (CONFIG_MM_KERNEL_HEAP=y), this function allocates
- *   the kernel-space heap.  A custom version of this function is needed if
- *   memory protection of the kernel heap is required.
+ *   For the case of the separate user-/kernel-space build, perform whatever
+ *   platform specific initialization of the user memory is required.
+ *   Normally this just means initializing the user space .data and .bss
+ *   segments.
  *
  ****************************************************************************/
 
-#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
-void up_allocate_kheap(void **heap_start, size_t *heap_size)
-{
-  *heap_start = g_idle_topstack;
-  *heap_size = KSRAM_END - (size_t)g_idle_topstack;
+void fvp_userspace(void);
+
+#undef EXTERN
+#if defined(__cplusplus)
 }
 #endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_ARM64_SRC_FVP_FVP_USERSPACE_H */

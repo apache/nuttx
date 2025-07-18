@@ -21,12 +21,65 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <arch/board/board_memorymap.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifdef CONFIG_BUILD_PROTECTED
+/* Split SRAM between kernel and user spaces */
+
+/****************************************************************************
+ *   Memory map
+ *   +---------------------+
+ *   | Kernel text         |
+ *   +---------------------+
+ *   | Kernel data         |
+ *   +---------------------+
+ *   | User text           |
+ *   +---------------------+
+ *   | User data           |
+ *   +---------------------+
+ *   | Kernel Heap         |
+ *   +---------------------+
+ *   | User Heap           |
+ *   |                     |
+ *   +---------------------+
+ ****************************************************************************/
+
+#  define KSRAM_START   CONFIG_RAM_START
+#  define KSRAM_END     CONFIG_NUTTX_USERSPACE
+#  define KSRAM_SIZE    (KSRAM_END - KSRAM_START)
+#  define USRAM_START   CONFIG_NUTTX_USERSPACE
+#  define USRAM_END     CONFIG_RAM_END
+#  define USRAM_SIZE    (USRAM_END - USRAM_START)
+#else
+/* Give All RAM to kernel */
+
+/****************************************************************************
+ *   Memory map
+ *   +---------------------+
+ *   | Kernel text         |
+ *   +---------------------+
+ *   | Kernel data         |
+ *   +---------------------+
+ *   | Kernel Heap         |
+ *   +---------------------+
+ *
+ ****************************************************************************/
+
+#  define KSRAM_START   CONFIG_RAM_START
+#  define KSRAM_END     CONFIG_RAM_END
+#  define KSRAM_SIZE    (KSRAM_END - KSRAM_START)
+#  define USRAM_START   0
+#  define USRAM_END     0
+#  define USRAM_SIZE    0
+#endif
 
 MEMORY
 {
-  ktext (rwx) : ORIGIN = KTEXT_START, LENGTH = KTEXT_SIZE
   ksram (rwx) : ORIGIN = KSRAM_START, LENGTH = KSRAM_SIZE
-  utext (rwx) : ORIGIN = UTEXT_START, LENGTH = UTEXT_SIZE
+#ifdef CONFIG_BUILD_PROTECTED
   usram (rwx) : ORIGIN = USRAM_START, LENGTH = USRAM_SIZE
+#endif
 }

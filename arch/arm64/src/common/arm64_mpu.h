@@ -462,6 +462,13 @@ unsigned int mpu_configure_region(uintptr_t base, size_t size,
 
 void arm64_mpu_init(bool is_primary_core);
 
+/****************************************************************************
+ * Name: arm64_mpu_init_regiions
+ *
+ ****************************************************************************/
+
+void arm64_mpu_init_regiions(void);
+
 #endif  /* __ASSEMBLY__ */
 
 #endif  /* __ARCH_ARM64_SRC_COMMON_ARM64_MPU_H */

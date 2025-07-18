@@ -27,9 +27,10 @@ SECTIONS
 {
     .userspace : {
         KEEP(*(.userspace))
-    } > utext
+    } > usram
 
     .text : {
+        . = ALIGN(64);
         _stext = ABSOLUTE(.);
         *(.text .text.*)
         *(.fixup)
@@ -41,14 +42,8 @@ SECTIONS
         *(.got)
         *(.gcc_except_table)
         *(.gnu.linkonce.r.*)
+        . = ALIGN(64);
         _etext = ABSOLUTE(.);
-    } > utext
-
-    .init_section : {
-        _sinit = ABSOLUTE(.);
-        KEEP(*(SORT_BY_INIT_PRIORITY(.init_array.*) SORT_BY_INIT_PRIORITY(.ctors.*)))
-        KEEP(*(.init_array EXCLUDE_FILE(*crtbegin.o *crtbegin?.o *crtend.o *crtend?.o) .ctors))
-        _einit = ABSOLUTE(.);
     } > usram
 
     .ARM.extab : {
@@ -64,22 +59,31 @@ SECTIONS
 
     _eronly = ABSOLUTE(.);
 
-    .bss : {
-        _sbss = ABSOLUTE(.);
-        *(.bss .bss.*)
-        *(.gnu.linkonce.b.*)
-        *(COMMON)
-        . = ALIGN(4);
-        _ebss = ABSOLUTE(.);
-    } > usram
-
     .data : {
+        . = ALIGN(64);
         _sdata = ABSOLUTE(.);
         *(.data .data.*)
         *(.gnu.linkonce.d.*)
         CONSTRUCTORS
-        . = ALIGN(4);
+        . = ALIGN(64);
         _edata = ABSOLUTE(.);
+    } > usram
+
+    .init_section : {
+        _sinit = ABSOLUTE(.);
+        KEEP(*(SORT_BY_INIT_PRIORITY(.init_array.*) SORT_BY_INIT_PRIORITY(.ctors.*)))
+        KEEP(*(.init_array EXCLUDE_FILE(*crtbegin.o *crtbegin?.o *crtend.o *crtend?.o) .ctors))
+        _einit = ABSOLUTE(.);
+    } > usram
+
+    .bss : {
+        . = ALIGN(64);
+        _sbss = ABSOLUTE(.);
+        *(.bss .bss.*)
+        *(.gnu.linkonce.b.*)
+        *(COMMON)
+        . = ALIGN(64);
+        _ebss = ABSOLUTE(.);
     } > usram
 
     /* Stabs debugging sections */
