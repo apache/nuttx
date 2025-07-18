@@ -78,6 +78,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/cache.h>
+#include <nuttx/addrenv.h>
 #include <nuttx/tls.h>
 #include <nuttx/mm/mm.h>
 
@@ -88,6 +89,21 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+#ifdef CONFIG_MM_TASK_HEAP
+
+/* Mpu heap region */
+
+int g_addrenv_heap_region[MPU_HEAP_REGION_AREAS_NUM];
+
+typedef struct
+{
+  uintptr_t start;
+  uintptr_t size;
+} arm64_background_region;
+
+static arm64_background_region g_br_region[MPU_BR_REGION_AREAS_NUM];
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -131,7 +147,54 @@ int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize,
 
   DEBUGASSERT(addrenv);
 
-  /* Implement it later */
+  /* When use mpu addrenv info must set by modlib */
+
+  addrenv->textsize = textsize;
+  addrenv->datasize = datasize;
+  addrenv->heapsize = heapsize;
+
+#ifdef CONFIG_MM_TASK_HEAP
+  /* Allocate the heap memory */
+
+  group_heap_initialize((struct mm_heap_s **)&addrenv->heap,
+                        CONFIG_MM_TASK_HEAP_DEFAULT_ALIGN, heapsize);
+  if (addrenv->heap != 0)
+    {
+      /* Initialize the memory manager */
+
+      mm_initialize("Module", (void *)addrenv->heap,
+                    CONFIG_MM_TASK_HEAP_DEFAULT_SIZE);
+    }
+  else
+    {
+      return -ENOMEM;
+    }
+
+  if (textsize != 0)
+    {
+      addrenv->text =
+        (uintptr_t)mm_memalign((void *)addrenv->heap,
+                               CONFIG_MM_TASK_HEAP_DEFAULT_ALIGN, textsize);
+      if (addrenv->text == 0)
+        {
+          group_heap_uninitialize((void *)addrenv->heap);
+          return -ENOMEM;
+        }
+    }
+
+  if (datasize != 0)
+    {
+      addrenv->data =
+        (uintptr_t)mm_memalign((void *)(addrenv->heap),
+                               CONFIG_MM_TASK_HEAP_DEFAULT_ALIGN, datasize);
+      if (addrenv->data == 0)
+        {
+          mm_free((void *)addrenv->heap, (void *)addrenv->text);
+          group_heap_uninitialize((void *)addrenv->heap);
+          return -ENOMEM;
+        }
+    }
+#endif
 
   return OK;
 }
@@ -222,6 +285,88 @@ int up_addrenv_vdata(arch_addrenv_t *addrenv, uintptr_t textsize,
   return OK;
 }
 
+#if defined(CONFIG_MM_TASK_HEAP)
+/****************************************************************************
+ * Name: mpu_init_heap_region
+ *
+ * Description:
+ *   Clear and Alloc all MPU region.
+ */
+
+static void mpu_init_heap_region(void)
+{
+  for (int i = 0; i < MPU_HEAP_REGION_AREAS_NUM; i++)
+    {
+      if (g_addrenv_heap_region[i] != 0)
+        {
+          mpu_freeregion(g_addrenv_heap_region[i]);
+        }
+
+      g_addrenv_heap_region[i] = mpu_allocregion();
+    }
+}
+#endif
+
+#if defined(CONFIG_MM_TASK_HEAP)
+
+/****************************************************************************
+ * Name: mpu_update
+ *
+ * Description:
+ *   Config regions
+ *   MPU does not support mpu region overlap in hardware
+ *   the old configuration needs to be cleared.
+ *   The following diagram represent the typical layout:
+ *
+ *   +-------------+
+ *   | kernel RW   |  Backgroud region
+ *   +-------------+
+ *   | User RW     |  User heap
+ *   +-------------+
+ *   | kernel RW   |  Backgroud region
+ *   +-------------+
+ *
+ * Input Parameters:
+ *   tcb
+ */
+
+void mpu_update(struct tcb_s *tcb)
+{
+  const arch_addrenv_t *addrenv = &tcb->addrenv_curr->addrenv;
+  uintptr_t heap_start  = addrenv->heap;
+  uintptr_t heap_end    = addrenv->heap + addrenv->heapsize;
+
+  g_br_region[0].start = (uintptr_t)USERSPACE->us_bssend +
+                                   CONFIG_MM_KERNEL_HEAPSIZE;
+  g_br_region[0].size  = heap_start - g_br_region[0].start;
+  g_br_region[1].start = heap_end;
+  g_br_region[1].size  = CONFIG_RAM_END - g_br_region[1].start;
+
+  mpu_init_heap_region();
+
+  /* Configure the user heap region to be RW used for the user. */
+
+  mpu_modify_region(g_addrenv_heap_region[0],
+                    heap_start, heap_end - heap_start,
+                    NOT_EXEC | P_RW_U_RW_MSK | SHAREABLE_MSK,
+                    MPU_MAIR_INDEX_SRAM);
+
+  /* Background region */
+
+  mpu_modify_region(g_addrenv_heap_region[1],
+                    g_br_region[0].start, g_br_region[0].size,
+                    NOT_EXEC | P_RW_U_NA_MSK | SHAREABLE_MSK,
+                    MPU_MAIR_INDEX_SRAM);
+
+  mpu_modify_region(g_addrenv_heap_region[2],
+                    g_br_region[1].start, g_br_region[1].size,
+                    NOT_EXEC | P_RW_U_NA_MSK | SHAREABLE_MSK,
+                    MPU_MAIR_INDEX_SRAM);
+
+  return ;
+}
+#endif
+
 /****************************************************************************
  * Name: up_addrenv_select
  *
@@ -243,7 +388,15 @@ int up_addrenv_vdata(arch_addrenv_t *addrenv, uintptr_t textsize,
 
 int up_addrenv_select(const arch_addrenv_t *addrenv)
 {
-  /* Implement it later */
+#if defined(CONFIG_MM_TASK_HEAP)
+  struct tcb_s *tcb = this_task();
+
+  if ((atomic_read(&tcb->flags) & TCB_FLAG_TTYPE_MASK) !=
+       TCB_FLAG_TTYPE_KERNEL)
+    {
+      mpu_update(tcb);
+    }
+#endif
 
   return OK;
 }

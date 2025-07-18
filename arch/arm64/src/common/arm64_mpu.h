@@ -263,6 +263,11 @@
     .mair_idx = MPU_MAIR_INDEX_SRAM,       \
   }
 
+#ifdef CONFIG_MM_TASK_HEAP
+#  define MPU_HEAP_REGION_AREAS_NUM 3
+#  define MPU_BR_REGION_AREAS_NUM   2
+#endif
+
 #ifndef __ASSEMBLY__
 
 struct arm64_mpu_region_attr
@@ -318,14 +323,9 @@ struct arm64_mpu_config
     .attr   = _attr,                                  \
   }
 
-/* Reference to the MPU configuration.
- *
- * This struct is defined and populated for each SoC (in the SoC definition),
- * and holds the build-time configuration information for the fixed MPU
- * regions enabled during kernel initialization.
- */
-
-extern const struct arm64_mpu_config g_mpu_config;
+#ifdef CONFIG_ARCH_ADDRENV
+extern int g_addrenv_heap_region[MPU_HEAP_REGION_AREAS_NUM];
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
