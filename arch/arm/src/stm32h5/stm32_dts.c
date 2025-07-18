@@ -65,14 +65,14 @@ static int      stm32_dts_isr (int irq, void *context, void *arg);
  * Private Data
  ****************************************************************************/
 
-static struct dts_cal_s dts_cal =
+static struct dts_cal_s g_dts_cal =
 {
   .fmt0    = 0,
   .ramp    = 0,
   .t0      = 0.0,
 };
 
-static struct dts_cfg_s dts_cfg =
+static struct dts_cfg_s g_dts_cfg =
 {
   .samples        = 1,
   .lse            = false,
@@ -120,7 +120,7 @@ static const struct sensor_ops_s g_dts_ops =
  ****************************************************************************/
 
 static int stm32_dts_activate(struct sensor_lowerhalf_s *lower,
-                                struct file *filep, bool enable)
+                              struct file *filep, bool enable)
 {
   uint32_t t0valr1;
   uint8_t  t0valr1_t0;
@@ -155,26 +155,26 @@ static int stm32_dts_activate(struct sensor_lowerhalf_s *lower,
       while (!(getreg32(STM32_DTS_SR) & DTS_SR_TS1_RDY));
 
       t0valr1 = getreg32(STM32_DTS_T0VALR1);
-      dts_cal.fmt0 = (t0valr1
+      g_dts_cal.fmt0 = (t0valr1
             & DTS_T0VALR1_TS1_FMT0_MASK) >> DTS_T0VALR1_TS1_FMT0_SHIFT;
-      dts_cal.ramp = (getreg32(STM32_DTS_RAMPVALR)
+      g_dts_cal.ramp = (getreg32(STM32_DTS_RAMPVALR)
             & DTS_RAMPVALR_TS1_RAMP_COEFF_MASK)
             >> DTS_RAMPVALR_TS1_RAMP_COEFF_SHIFT;
       t0valr1_t0 = (t0valr1
             & DTS_T0VALR1_TS1_T0_MASK) >> DTS_T0VALR1_TS1_T0_SHIFT;
 
-      dts_cal.t0 = (t0valr1_t0 == 0) ? 30.0f : 130.0f;
+      g_dts_cal.t0 = (t0valr1_t0 == 0) ? 30.0f : 130.0f;
 
 #if defined(CONFIG_STM32H5_DTS_REFCLK_LSE)
-      dts_cfg.lse = true;
+      g_dts_cfg.lse = true;
 #else
-      dts_cfg.lse = false;
+      g_dts_cfg.lse = false;
 #endif
-      dts_cfg.samples = ((cfgr1 & DTS_CFGR1_TS1_SMP_TIME_MASK) >>
+      g_dts_cfg.samples = ((cfgr1 & DTS_CFGR1_TS1_SMP_TIME_MASK) >>
                         DTS_CFGR1_TS1_SMP_TIME_SHIFT);
-      dts_cfg.samples = (dts_cfg.samples == 0) ? 1 : dts_cfg.samples;
+      g_dts_cfg.samples = (g_dts_cfg.samples == 0) ? 1 : g_dts_cfg.samples;
 
-      dts_cfg.clk_frequency = (dts_cfg.lse) ? STM32_LSE_FREQUENCY :
+      g_dts_cfg.clk_frequency = (g_dts_cfg.lse) ? STM32_LSE_FREQUENCY :
                                               STM32_PCLK1_FREQUENCY;
 
 #ifdef CONFIG_STM32H5_DTS_ITEN_ITEF
@@ -197,7 +197,7 @@ static int stm32_dts_activate(struct sensor_lowerhalf_s *lower,
       regval |= DTS_ITENR_AITHEN;
 #endif
       putreg32(regval, STM32_DTS_ITENR);
-      irq_attach(STM32_IRQ_DTS, stm32_dts_isr, (void *)lower);
+      irq_attach(STM32_IRQ_DTS, stm32_dts_isr, lower);
       up_enable_irq(STM32_IRQ_DTS);
     }
   else
@@ -221,8 +221,8 @@ static int stm32_dts_activate(struct sensor_lowerhalf_s *lower,
  ****************************************************************************/
 
 static ssize_t stm32_dts_fetch(struct sensor_lowerhalf_s *lower,
-                                 struct file *filep,
-                                 char *buffer, size_t buflen)
+                               struct file *filep,
+                               char *buffer, size_t buflen)
 {
   struct sensor_temp report;
   uint32_t raw;
@@ -248,25 +248,25 @@ static ssize_t stm32_dts_fetch(struct sensor_lowerhalf_s *lower,
 
   /* Convert raw → frequency */
 
-  if (dts_cfg.lse)
+  if (g_dts_cfg.lse)
     {
       /* (LSE) mode: count FM pulses in (samp) LSE cycles */
 
       fmeas = (float)raw * (float)STM32_LSE_FREQUENCY
-            / (float)(dts_cfg.samples);
+            / (float)(g_dts_cfg.samples);
     }
   else
     {
       /* (PCLK) mode: count PCLK ticks in (samp) FM(T) cycles */
 
-      fmeas = (float)STM32_PCLK1_FREQUENCY * (float)(dts_cfg.samples)
+      fmeas = (float)STM32_PCLK1_FREQUENCY * (float)(g_dts_cfg.samples)
             / (float)raw;
     }
 
   report.timestamp   = sensor_get_timestamp();
-  report.temperature = dts_cal.t0 +
-                     ((fmeas - ((float)dts_cal.fmt0 * 100.0f)) /
-                     (float)dts_cal.ramp);
+  report.temperature = g_dts_cal.t0 +
+                     ((fmeas - ((float)g_dts_cal.fmt0 * 100.0f)) /
+                     (float)g_dts_cal.ramp);
 
   if (buflen < sizeof(report))
     {
@@ -286,22 +286,22 @@ static void stm32_dts_handle_result(struct sensor_lowerhalf_s *lower)
 
   /* Convert raw ==> freq */
 
-  if (dts_cfg.lse)
+  if (g_dts_cfg.lse)
     {
-      fmeas = (float)raw * STM32_LSE_FREQUENCY / (float)(dts_cfg.samples);
+      fmeas = (float)raw * STM32_LSE_FREQUENCY / (float)(g_dts_cfg.samples);
     }
   else
     {
-      fmeas = (float)STM32_PCLK1_FREQUENCY * (float)(dts_cfg.samples)
+      fmeas = (float)STM32_PCLK1_FREQUENCY * (float)(g_dts_cfg.samples)
             / (float)raw;
     }
 
   /* Build the report */
 
   report.timestamp   = sensor_get_timestamp();
-  report.temperature = dts_cal.t0 +
-                     ((fmeas - ((float)dts_cal.fmt0 * 100.0f)) /
-                     (float)dts_cal.ramp);
+  report.temperature = g_dts_cal.t0 +
+                     ((fmeas - ((float)g_dts_cal.fmt0 * 100.0f)) /
+                     (float)g_dts_cal.ramp);
 
   /* Push into NuttX sensor framework */
 
@@ -346,8 +346,8 @@ static int stm32_dts_get_info(struct sensor_lowerhalf_s *lower,
   info->max_delay                 = 0;
   info->fifo_reserved_event_count = 1;
   info->fifo_max_event_count      = 1;
-  strlcpy(info->name,   "STM32H5 DTS",      SENSOR_INFO_NAME_SIZE);
-  strlcpy(info->vendor, "STMicro",          SENSOR_INFO_NAME_SIZE);
+  strlcpy(info->name,   "STM32H5 DTS", SENSOR_INFO_NAME_SIZE);
+  strlcpy(info->vendor, "STMicro",     SENSOR_INFO_NAME_SIZE);
   return OK;
 }
 
