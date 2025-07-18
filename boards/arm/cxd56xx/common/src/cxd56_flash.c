@@ -64,6 +64,7 @@ int board_flash_initialize(void)
 {
   int ret;
   struct mtd_dev_s *mtd;
+  char path[32];
 
   mtd = cxd56_sfc_initialize();
   if (!mtd)
@@ -72,12 +73,14 @@ int board_flash_initialize(void)
       return -ENODEV;
     }
 
-  /* use the FTL layer to wrap the MTD driver as a block driver */
+  /* Register the MTD driver */
 
-  ret = ftl_initialize(CONFIG_SFC_DEVNO, mtd);
+  snprintf(path, sizeof(path), "/dev/mtdblock%d", CONFIG_SFC_DEVNO);
+  ret = register_mtddriver(path, mtd, 0755, NULL);
   if (ret < 0)
     {
-      ferr("ERROR: Initializing the FTL layer: %d\n", ret);
+      ferr("ERROR: Register the MTD driver %s ret %d\n",
+            path, ret);
       return ret;
     }
 

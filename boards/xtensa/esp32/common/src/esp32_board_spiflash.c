@@ -406,6 +406,8 @@ static int init_storage_partition(void)
     }
 
 #else
+  int minor;
+  char path[32];
 
   ret = register_mtddriver("/dev/esp32flash", mtd, 0755, NULL);
   if (ret < 0)
@@ -415,14 +417,16 @@ static int init_storage_partition(void)
     }
 
 #ifdef CONFIG_ESP32_HAVE_OTA_PARTITION
-  ret = ftl_initialize(nitems(g_ota_partition_table), mtd);
+  minor = nitems(g_ota_partition_table);
 #else
-  ret = ftl_initialize(0, mtd);
+  minor = 0;
 #endif
+  snprintf(path, sizeof(path), "/dev/mtdblock%d", minor);
+  ret = register_mtddriver(path, mtd, 0755, NULL);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: Failed to initialize the FTL layer: %d\n",
-              ret);
+      syslog(LOG_ERR, "ERROR: Failed to register the MTD driver %s, \
+             ret %d\n", path, ret);
       return ret;
     }
 #endif

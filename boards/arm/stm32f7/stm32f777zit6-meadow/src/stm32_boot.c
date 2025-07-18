@@ -144,10 +144,11 @@ void board_late_initialize(void)
       syslog(LOG_ERR, "ERROR: w25qxxxjv_initialize failed\n");
     }
 
-  ret = ftl_initialize(0, mtd);
+  ret = register_mtddriver("/dev/mtdblock0", mtd, 0755, NULL);
   if (ret < 0)
     {
-      ferr("ERROR: Initialize the FTL layer\n");
+      syslog(LOG_ERR, "ERROR: Failed to register MTD /dev/mtdblock0: %d\n",
+             ret);
     }
 
   meminfo.flags = QSPIMEM_READ | QSPIMEM_QUADIO;

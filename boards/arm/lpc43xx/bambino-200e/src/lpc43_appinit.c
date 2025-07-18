@@ -91,12 +91,15 @@ static int nsh_spifi_initialize(void)
     }
 
 #ifndef CONFIG_SPFI_NXFFS
-  /* And use the FTL layer to wrap the MTD driver as a block driver */
+  /* Register the MTD driver */
 
-  ret = ftl_initialize(CONFIG_SPIFI_DEVNO, mtd);
+  char path[32];
+  snprintf(path, sizeof(path), "/dev/mtdblock%d", CONFIG_SPIFI_DEVNO);
+  ret = register_mtddriver(path, mtd, 0755, NULL);
   if (ret < 0)
     {
-      ferr("ERROR: Initializing the FTL layer: %d\n", ret);
+      ferr("ERROR: Failed to register the MTD driver %s, ret %d\n",
+           path, ret);
       return ret;
     }
 #else
