@@ -71,6 +71,8 @@
 #  define DTS_CFGR1_TS1_INTRIG_SEL_LPTIM2_CH1 (0x2 << DTS_CFGR1_TS1_INTRIG_SEL_SHIFT)
 #  define DTS_CFGR1_TS1_INTRIG_SEL_LPTIM3_CH1 (0x3 << DTS_CFGR1_TS1_INTRIG_SEL_SHIFT)
 #  define DTS_CFGR1_TS1_INTRIG_SEL_EXTI13     (0x4 << DTS_CFGR1_TS1_INTRIG_SEL_SHIFT)
+#define DTS_CFGR1_TS1_INTRIG(n) \
+    (((n) << DTS_CFGR1_TS1_INTRIG_SEL_SHIFT) & DTS_CFGR1_TS1_INTRIG_SEL_MASK)
 
 #define DTS_CFGR1_TS1_SMP_TIME_SHIFT          (16)      /* Bits 16-19: Sampling time */
 #define DTS_CFGR1_TS1_SMP_TIME_MASK           (0xf << DTS_CFGR1_TS1_SMP_TIME_SHIFT)
@@ -86,26 +88,26 @@
 /* Temperature sensor T0 value register 1 */
 
 #define DTS_T0VALR1_TS1_FMT0_SHIFT            (0)       /* Engineering value for frequency at T0 */
-#define DTS_T0VALR1_TS1_FMT0_MASK             (0xff << DTS_T0VALR1_TS1_FMT0_SHIFT)
+#define DTS_T0VALR1_TS1_FMT0_MASK             (0xffff << DTS_T0VALR1_TS1_FMT0_SHIFT)
 #define DTS_T0VALR1_TS1_T0_SHIFT              (16)      /* Engineering value of T0 */
 #define DTS_T0VALR1_TS1_T0_MASK               (0b11 << DTS_T0VALR1_TS1_T0_SHIFT)
 
 /* Temperature sensor ramp value register */
 
 #define DTS_RAMPVALR_TS1_RAMP_COEFF_SHIFT     (0)       /* Engineering value of ramp coefficient */
-#define DTS_RAMPVALR_TS1_RAMP_COEFF_MASK      (0xff << DTS_RAMPVALR_TS1_RAMP_COEFF_SHIFT)
+#define DTS_RAMPVALR_TS1_RAMP_COEFF_MASK      (0xffff << DTS_RAMPVALR_TS1_RAMP_COEFF_SHIFT)
 
 /* Temperature sensor interrupt threshold register 1 */
 
 #define DTS_ITR1_TS1_LITTHD_SHIFT             (0)       /* High interrupt threshold */
-#define DTS_ITR1_TS1_LITTHD_MASK              (0xff << DTS_ITR1_TS1_LITTHD_SHIFT)
+#define DTS_ITR1_TS1_LITTHD_MASK              (0xffff << DTS_ITR1_TS1_LITTHD_SHIFT)
 #define DTS_ITR1_TS1_HITTHD_SHIFT             (16)      /* Low interrupt threshold */
-#define DTS_ITR1_TS1_HITTHD_MASK              (0xff << DTS_ITR1_TS1_HITTHD_SHIFT)
+#define DTS_ITR1_TS1_HITTHD_MASK              (0xffff << DTS_ITR1_TS1_HITTHD_SHIFT)
 
 /* Temperature sensor data register */
 
 #define DTS_DR_TS1_MFREQ_SHIFT  (0)
-#define DTS_DR_TS1_MFREQ_MASK   (0xff << DTS_DR_TS1_MFREQ_SHIFT)
+#define DTS_DR_TS1_MFREQ_MASK   (0xffff << DTS_DR_TS1_MFREQ_SHIFT)
 
 /* Temperature sensor status register */
 
@@ -134,6 +136,7 @@
 #define DTS_ICIFR_CAITEF        (1 << 4)      /* Asynchronous interrupt clear flag: end of measurement */
 #define DTS_ICIFR_CAITLF        (1 << 5)      /* Asynchronous interrupt clear flag: low threshold */
 #define DTS_ICIFR_CAITHF        (1 << 6)      /* Asynchronous interrupt clear flag: high threshold */
+#define DTS_ICIFR_ALL           (0x77)        /* All interrupts */
 
 /* Temperature sensor option register */
 

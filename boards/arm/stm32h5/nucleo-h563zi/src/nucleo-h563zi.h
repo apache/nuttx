@@ -129,5 +129,9 @@ int stm32_bringup(void);
 int stm32_adc_setup(void);
 #endif
 
+#ifdef CONFIG_STM32H5_DTS
+int stm32_dts_setup(int devno);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_STM32H5_NUCLEO_H563ZI_SRC_NUCLEO_H563ZI_H */

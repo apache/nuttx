@@ -43,4 +43,8 @@ ifeq ($(CONFIG_ADC),y)
 CSRCS += stm32_adc.c
 endif
 
+ifeq ($(CONFIG_STM32H5_DTS),y)
+CSRCS += stm32_dts.c
+endif
+
 include $(TOPDIR)/boards/Board.mk
