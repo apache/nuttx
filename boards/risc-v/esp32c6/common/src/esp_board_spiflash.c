@@ -451,7 +451,11 @@ static int init_storage_partition(void)
       return ret;
     }
 
+#ifdef CONFIG_ESPRESSIF_HAVE_OTA_PARTITION
+  ret = ftl_initialize(nitems(g_ota_partition_table), mtd);
+#else
   ret = ftl_initialize(0, mtd);
+#endif
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize the FTL layer: %d\n",
@@ -504,4 +508,3 @@ int board_spiflash_init(void)
 
   return ret;
 }
-

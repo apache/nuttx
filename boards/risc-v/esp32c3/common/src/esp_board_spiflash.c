@@ -60,17 +60,105 @@
  * Private Types
  ****************************************************************************/
 
+struct ota_partition_s
+{
+  uint32_t    offset;          /* Partition offset from the beginning of MTD */
+  uint32_t    size;            /* Partition size in bytes */
+  const char *devpath;         /* Partition device path */
+};
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
+#ifdef CONFIG_ESPRESSIF_HAVE_OTA_PARTITION
+static int init_ota_partitions(void);
+#endif
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
+#ifdef CONFIG_ESPRESSIF_HAVE_OTA_PARTITION
+static const struct ota_partition_s g_ota_partition_table[] =
+{
+  {
+    .offset  = CONFIG_ESPRESSIF_OTA_PRIMARY_SLOT_OFFSET,
+    .size    = CONFIG_ESPRESSIF_OTA_SLOT_SIZE,
+    .devpath = CONFIG_ESPRESSIF_OTA_PRIMARY_SLOT_DEVPATH
+  },
+  {
+    .offset  = CONFIG_ESPRESSIF_OTA_SECONDARY_SLOT_OFFSET,
+    .size    = CONFIG_ESPRESSIF_OTA_SLOT_SIZE,
+    .devpath = CONFIG_ESPRESSIF_OTA_SECONDARY_SLOT_DEVPATH
+  },
+  {
+    .offset  = CONFIG_ESPRESSIF_OTA_SCRATCH_OFFSET,
+    .size    = CONFIG_ESPRESSIF_OTA_SCRATCH_SIZE,
+    .devpath = CONFIG_ESPRESSIF_OTA_SCRATCH_DEVPATH
+  }
+};
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: init_ota_partitions
+ *
+ * Description:
+ *   Initialize partitions that are dedicated to firmware OTA update.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESPRESSIF_HAVE_OTA_PARTITION
+static int init_ota_partitions(void)
+{
+  struct mtd_dev_s *mtd;
+  int ret = OK;
+  int i;
+
+#ifdef CONFIG_BCH
+  char blockdev[18];
+#endif
+
+  for (i = 0; i < nitems(g_ota_partition_table); ++i)
+    {
+      const struct ota_partition_s *part = &g_ota_partition_table[i];
+      mtd = esp_spiflash_alloc_mtdpart(part->offset, part->size);
+
+      ret = ftl_initialize(i, mtd);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR, "ERROR: Failed to initialize the FTL layer: %d\n",
+                 ret);
+          return ret;
+        }
+
+#ifdef CONFIG_BCH
+      snprintf(blockdev, sizeof(blockdev), "/dev/mtdblock%d", i);
+
+      ret = bchdev_register(blockdev, part->devpath, false);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR, "ERROR: bchdev_register %s failed: %d\n",
+                 part->devpath, ret);
+          return ret;
+        }
+#endif
+    }
+
+  return ret;
+}
+
+#endif
 
 /****************************************************************************
  * Name: setup_smartfs
@@ -125,7 +213,8 @@ static int setup_smartfs(int smartn, struct mtd_dev_s *mtd,
       ret = nx_mount(path, mnt_pt, "smartfs", 0, NULL);
       if (ret < 0)
         {
-          syslog(LOG_ERR, "ERROR: Failed to mount the FS volume: %d\n", ret);
+          syslog(LOG_ERR, "ERROR: Failed to mount the FS volume: %d\n",
+                 ret);
           if (ret == -ENODEV)
             {
               syslog(LOG_WARNING, "Smartfs seems unformatted. "
@@ -224,7 +313,8 @@ static int setup_spiffs(const char *path, struct mtd_dev_s *mtd,
       ret = nx_mount(path, mnt_pt, "spiffs", 0, NULL);
       if (ret < 0)
         {
-          syslog(LOG_ERR, "ERROR: Failed to mount the FS volume: %d\n", ret);
+          syslog(LOG_ERR, "ERROR: Failed to mount the FS volume: %d\n",
+                 ret);
           return ret;
         }
     }
@@ -265,7 +355,8 @@ static int setup_nxffs(struct mtd_dev_s *mtd, const char *mnt_pt)
       ret = nx_mount(NULL, mnt_pt, "nxffs", 0, NULL);
       if (ret < 0)
         {
-          syslog(LOG_ERR, "ERROR: Failed to mount the FS volume: %d\n", ret);
+          syslog(LOG_ERR, "ERROR: Failed to mount the FS volume: %d\n",
+                 ret);
           return ret;
         }
     }
@@ -297,7 +388,7 @@ static int init_storage_partition(void)
                                    CONFIG_ESPRESSIF_STORAGE_MTD_SIZE);
   if (!mtd)
     {
-      syslog(LOG_ERR, "ERROR: Failed to alloc MTD partition of SPI Flash\n");
+      syslog(LOG_ERR, "ERROR: Fail to alloc MTD partition of SPI Flash\n");
       return ERROR;
     }
 
@@ -333,7 +424,8 @@ static int init_storage_partition(void)
 #elif defined (CONFIG_ESPRESSIF_SPIFLASH_SPIFFS)
 
   const char *path = "/dev/espflash";
-  ret = setup_spiffs(path, mtd, CONFIG_ESPRESSIF_SPIFLASH_FS_MOUNT_PT, 0755);
+  ret = setup_spiffs(path, mtd, CONFIG_ESPRESSIF_SPIFLASH_FS_MOUNT_PT,
+                     0755);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to setup spiffs\n");
@@ -379,7 +471,11 @@ static int init_storage_partition(void)
       return ret;
     }
 
+#ifdef CONFIG_ESPRESSIF_HAVE_OTA_PARTITION
+  ret = ftl_initialize(nitems(g_ota_partition_table), mtd);
+#else
   ret = ftl_initialize(0, mtd);
+#endif
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize the FTL layer: %d\n",
@@ -416,6 +512,14 @@ int board_spiflash_init(void)
 
   esp_spiflash_init();
 
+#ifdef CONFIG_ESPRESSIF_HAVE_OTA_PARTITION
+  ret = init_ota_partitions();
+  if (ret < 0)
+    {
+      return ret;
+    }
+#endif
+
   ret = init_storage_partition();
   if (ret < 0)
     {
@@ -424,4 +528,3 @@ int board_spiflash_init(void)
 
   return ret;
 }
-
