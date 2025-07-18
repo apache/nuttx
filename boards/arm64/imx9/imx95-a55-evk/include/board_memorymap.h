@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm64/src/imx9/hardware/imx9_dmamux.h
+ * boards/arm64/imx9/imx95-a55-evk/include/board_memorymap.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM64_SRC_IMX9_HARDWARE_IMX9_DMAMUX_H
-#define __ARCH_ARM64_SRC_IMX9_HARDWARE_IMX9_DMAMUX_H
+#ifndef __BOARDS_ARM64_IMX9_IMX93_EVK_INCLUDE_BOARD_MEMORYMAP_H
+#define __BOARDS_ARM64_IMX9_IMX93_EVK_INCLUDE_BOARD_MEMORYMAP_H
 
 /****************************************************************************
  * Included Files
@@ -29,11 +29,33 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_ARCH_CHIP_IMX93)
-#  include "hardware/imx93/imx93_dmamux.h"
-#elif defined(CONFIG_ARCH_CHIP_IMX95)
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#ifndef __ASSEMBLY__
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
 #else
-#  error Unrecognized i.MX9 architecture
+#define EXTERN extern
 #endif
 
-#endif /* __ARCH_ARM64_SRC_IMX9_HARDWARE_IMX9_DMAMUX_H */
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __BOARDS_ARM64_IMX9_IMX93_EVK_INCLUDE_BOARD_MEMORYMAP_H */
