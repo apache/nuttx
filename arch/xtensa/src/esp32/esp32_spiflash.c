@@ -1732,7 +1732,7 @@ static int esp32_async_op(enum spiflash_op_code_e opcode,
   ret = work_queue(LPWORK, &g_work, esp32_spiflash_work, &work_arg, 0);
   if (ret == 0)
     {
-      nxsem_wait(&work_arg.sem);
+      nxsem_wait_uninterruptible(&work_arg.sem);
       ret = work_arg.ret;
     }
 
