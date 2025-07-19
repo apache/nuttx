@@ -94,9 +94,16 @@
 #define REG_SAR             (18)
 #define REG_EXCCAUSE        (19)
 #define REG_EXCVADDR        (20)
-#define REG_THREADPTR       (21)
 
-#define _REG_EXTRA_START    (22)
+#ifdef CONFIG_SCHED_THREAD_LOCAL
+#  ifndef XCHAL_HAVE_THREADPTR || XCHAL_HAVE_THREADPTR == 0
+#    error architecture-specific TLS depends on ISA THREADPTR(Thread Porinter)
+#  endif
+#  define REG_THREADPTR     (21)
+#  define _REG_EXTRA_START  (22)
+#else
+#  define _REG_EXTRA_START  (21)
+#endif
 
 #if XCHAL_HAVE_S32C1I != 0
 #  define REG_SCOMPARE1       (_REG_EXTRA_START + 0)
