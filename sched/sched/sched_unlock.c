@@ -35,6 +35,7 @@
 
 #include "irq/irq.h"
 #include "sched/sched.h"
+#include "sched/queue.h"
 
 /****************************************************************************
  * Public Functions
@@ -72,6 +73,7 @@ void sched_unlock(void)
       if (rtcb != NULL && --rtcb->lockcount == 0)
         {
           irqstate_t flags = enter_critical_section_wo_note();
+          FAR struct tcb_s *ptcb;
 
           /* Note that we no longer have pre-emption disabled. */
 
@@ -79,13 +81,21 @@ void sched_unlock(void)
           sched_note_preemption(rtcb, false);
 
           /* Release any ready-to-run tasks that have collected in
-           * g_pendingtasks.
+           * g_pendingtasks (or in g_readytorun for SMP)
            *
            * NOTE: This operation has a very high likelihood of causing
            * this task to be switched out!
            */
 
-          if (list_pendingtasks()->head != NULL)
+#ifdef CONFIG_SMP
+          /* Checking the priority already here is just an optimization. */
+
+          ptcb = (FAR struct tcb_s *)dq_peek(list_readytorun());
+          if (ptcb && ptcb->sched_priority >= rtcb->sched_priority)
+#else
+          ptcb = (FAR struct tcb_s *)dq_peek(list_pendingtasks());
+          if (ptcb)
+#endif
             {
               if (nxsched_merge_pending())
                 {
