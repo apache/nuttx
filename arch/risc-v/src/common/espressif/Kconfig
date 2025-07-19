@@ -682,6 +682,22 @@ config ESP_PCNT_TEST_MODE
 		to the receiver internally, being able to test the PCNT
 		peripheral without any external connection.
 
+config ESP_PCNT_HIGH_LIMIT
+	int "PCNT high limit value"
+	default 1024
+	range 1 32767
+	---help---
+		This sets thr_h_lim value for all units. When pulse_cnt reaches
+		this value, the counter will be cleared.
+
+config ESP_PCNT_LOW_LIMIT
+	int "PCNT low limit value"
+	default -1024
+	range -32768 -1
+	---help---
+		This sets thr_l_lim value for all units. When pulse_cnt reaches
+		this value, the counter will be cleared.
+
 config ESP_PCNT_AS_QE
 	bool
 	default n

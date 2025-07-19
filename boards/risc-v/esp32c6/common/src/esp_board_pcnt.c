@@ -41,8 +41,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define PCNT_HIGH_LIMIT 1000
-#define PCNT_LOW_LIMIT  -1000
+#define PCNT_HIGH_LIMIT CONFIG_ESP_PCNT_HIGH_LIMIT
+#define PCNT_LOW_LIMIT  CONFIG_ESP_PCNT_LOW_LIMIT
 
 #define PCNT_GLITCH_FILTER(pcnt, thres) pcnt->ops->ioctl(pcnt,          \
                                                          CAPIOC_FILTER, \
