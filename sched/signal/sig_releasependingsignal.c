@@ -37,6 +37,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/spinlock.h>
 
 #include "signal/signal.h"
 

@@ -39,6 +39,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/serial/serial.h>
 #include <nuttx/fs/ioctl.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/serial/uart_cmsdk.h>
 
 #include <arch/board/board.h>

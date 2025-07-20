@@ -35,6 +35,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/timers/timer.h>
+#include <nuttx/spinlock.h>
 
 #include <arch/board/board.h>
 #include "riscv_internal.h"

@@ -34,6 +34,7 @@
 #include <nuttx/syslog/syslog.h>
 #include <nuttx/compiler.h>
 #include <nuttx/init.h>
+#include <nuttx/spinlock.h>
 
 #ifdef CONFIG_RAMLOG_SYSLOG
 #  include <nuttx/syslog/ramlog.h>

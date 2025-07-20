@@ -38,6 +38,7 @@
 #include <nuttx/mutex.h>
 #include <nuttx/nuttx.h>
 #include <nuttx/clock_notifier.h>
+#include <nuttx/spinlock.h>
 
 #include <sys/ioctl.h>
 #include <sys/timerfd.h>

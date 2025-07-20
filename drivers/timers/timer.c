@@ -41,6 +41,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/mutex.h>
 #include <nuttx/timers/timer.h>
+#include <nuttx/spinlock.h>
 #include <sys/poll.h>
 
 #ifdef CONFIG_TIMER

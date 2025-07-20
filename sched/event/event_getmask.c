@@ -25,6 +25,7 @@
  ****************************************************************************/
 
 #include <nuttx/sched.h>
+#include <nuttx/spinlock.h>
 
 #include "event.h"
 

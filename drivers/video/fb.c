@@ -46,6 +46,7 @@
 #include <nuttx/wdog.h>
 #include <nuttx/circbuf.h>
 #include <nuttx/sched_note.h>
+#include <nuttx/spinlock.h>
 
 #ifdef CONFIG_VIDEO_FB_SPLASHSCREEN
 #  include <nuttx/signal.h>

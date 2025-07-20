@@ -37,6 +37,7 @@
 #include <nuttx/queue.h>
 #include <nuttx/wdog.h>
 #include <nuttx/arch.h>
+#include <nuttx/spinlock.h>
 
 #ifdef CONFIG_HRTIMER
 #  include <nuttx/hrtimer.h> 

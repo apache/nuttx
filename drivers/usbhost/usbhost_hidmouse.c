@@ -46,6 +46,7 @@
 #include <nuttx/signal.h>
 #include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/spinlock.h>
 
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbhost.h>

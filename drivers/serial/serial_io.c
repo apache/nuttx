@@ -37,6 +37,7 @@
 
 #include <nuttx/signal.h>
 #include <nuttx/serial/serial.h>
+#include <nuttx/spinlock.h>
 
 /****************************************************************************
  * Public Functions
