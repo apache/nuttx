@@ -76,6 +76,12 @@ void nxsched_critmon_busywait(bool state, FAR void *caller);
  * Public Data Types
  ****************************************************************************/
 
+/* This is the spinlock that enforces critical sections when interrupts are
+ * disabled.
+ */
+
+extern rspinlock_t g_schedlock;
+
 /****************************************************************************
  * Name: up_testset
  *
@@ -1341,6 +1347,101 @@ void write_unlock_irqrestore(FAR rwlock_t *lock, irqstate_t flags);
 #endif
 
 #endif /* CONFIG_RW_SPINLOCK */
+
+/****************************************************************************
+ * Name: enter_critical_section
+ *
+ * Description:
+ *   If thread-specific IRQ counter is enabled (for SMP or other
+ *   instrumentation):
+ *
+ *     Take the CPU IRQ lock and disable interrupts on all CPUs.  A thread-
+ *     specific counter is incremented to indicate that the thread has IRQs
+ *     disabled and to support nested calls to enter_critical_section().
+ *
+ *     NOTE: Most architectures do not support disabling all CPUs from one
+ *     CPU.  ARM is an example.  In such cases, logic in
+ *     enter_critical_section() will still manage entrance into the
+ *     protected logic using spinlocks.
+ *
+ *   If thread-specific IRQ counter is not enabled:
+ *
+ *     This function is equivalent to up_irq_save().
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   An opaque, architecture-specific value that represents the state of
+ *   the interrupts prior to the call to enter_critical_section();
+ *
+ ****************************************************************************/
+
+#define enter_critical_section_notrace() rspin_lock_irqsave(&g_schedlock)
+
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0 || \
+    CONFIG_SCHED_CRITMONITOR_MAXTIME_BUSYWAIT >= 0 || \
+    defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION)
+irqstate_t enter_critical_section(void) noinstrument_function;
+#else
+#  define enter_critical_section() enter_critical_section_notrace()
+#endif
+
+/****************************************************************************
+ * Name: leave_critical_section
+ *
+ * Description:
+ *   If thread-specific IRQ counter is enabled (for SMP or other
+ *   instrumentation):
+ *
+ *     Decrement the IRQ lock count and if it decrements to zero then release
+ *     the spinlock and restore the interrupt state as it was prior to the
+ *     previous call to enter_critical_section().
+ *
+ *   If thread-specific IRQ counter is not enabled:
+ *
+ *     This function is equivalent to up_irq_restore().
+ *
+ * Input Parameters:
+ *   flags - The architecture-specific value that represents the state of
+ *           the interrupts prior to the call to enter_critical_section();
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#define leave_critical_section_notrace(f) rspin_unlock_irqrestore(&g_schedlock, f)
+
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0 || \
+    CONFIG_SCHED_CRITMONITOR_MAXTIME_BUSYWAIT >= 0 || \
+    defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION)
+void leave_critical_section(irqstate_t flags) noinstrument_function;
+#else
+#  define leave_critical_section(f) leave_critical_section_notrace(f)
+#endif
+
+/****************************************************************************
+ * Name: break_critical_section
+ *
+ * Description:
+ *   Break the critical_section
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0 || \
+    CONFIG_SCHED_CRITMONITOR_MAXTIME_BUSYWAIT >= 0 || \
+    defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION)
+void break_critical_section(void);
+#else
+#  define break_critical_section() rspin_breaklock(&g_schedlock)
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

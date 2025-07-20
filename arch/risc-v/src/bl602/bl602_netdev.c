@@ -41,6 +41,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/list.h>
 #include <nuttx/signal.h>
+#include <nuttx/spinlock.h>
 
 #include <sys/types.h>
 

@@ -60,6 +60,7 @@
 #include <nuttx/mm/mm.h>
 #include <nuttx/queue.h>
 #include <nuttx/lib/lib.h>
+#include <nuttx/spinlock.h>
 
 #include "fs_heap.h"
 

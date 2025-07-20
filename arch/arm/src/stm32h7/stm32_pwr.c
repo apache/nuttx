@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
+#include <nuttx/spinlock.h>
 #include <arch/barriers.h>
 
 #include <stdint.h>

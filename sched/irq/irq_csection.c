@@ -38,37 +38,18 @@
 #include "irq/irq.h"
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Data
  ****************************************************************************/
 
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-#if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0 || \
-    defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION) || defined(CONFIG_SMP)
-static rspinlock_t g_schedlock = RSPINLOCK_INITIALIZER;
-#endif
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+rspinlock_t g_schedlock = RSPINLOCK_INITIALIZER;
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: enter_critical_section_notrace
- ****************************************************************************/
-
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0 || \
-    defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION) || defined(CONFIG_SMP)
-irqstate_t enter_critical_section_notrace(void)
-{
-  return rspin_lock_irqsave(&g_schedlock);
-}
-
+    CONFIG_SCHED_CRITMONITOR_MAXTIME_BUSYWAIT >= 0 || \
+    defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION)
 void restore_critical_section(uint16_t count)
 {
   /* If CONFIG_SCHED_CRITMONITOR_MAXTIME_BUSYWAIT >= 0,
@@ -83,46 +64,36 @@ void restore_critical_section(uint16_t count)
 
   nxsched_critmon_busywait(false, return_address(0));
 
-#  if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0 || \
-      defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION)
   if (!up_interrupt_context())
     {
       FAR struct tcb_s *rtcb = this_task();
 
-#    ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
+#  ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
       sched_note_csection(rtcb, true);
-#    endif
-#    if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0
-      nxsched_critmon_csection(rtcb, true, return_address(0));
-#    endif
-    }
 #  endif
+#  if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0
+      nxsched_critmon_csection(rtcb, true, return_address(0));
+#  endif
+    }
 }
 
 void break_critical_section(void)
 {
-#  if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0 || \
-      defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION)
   if (!up_interrupt_context())
     {
       FAR struct tcb_s *rtcb = this_task();
 
-#    ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
+#  ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
       sched_note_csection(rtcb, false);
-#    endif
-#    if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0
-      nxsched_critmon_csection(rtcb, false, return_address(0));
-#    endif
-    }
 #  endif
+#  if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0
+      nxsched_critmon_csection(rtcb, false, return_address(0));
+#  endif
+    }
 
   rspin_breaklock(&g_schedlock);
 }
-#endif
 
-#if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0 || \
-    CONFIG_SCHED_CRITMONITOR_MAXTIME_BUSYWAIT >= 0 || \
-    defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION)
 irqstate_t enter_critical_section(void)
 {
   irqstate_t flags;
@@ -144,34 +115,18 @@ irqstate_t enter_critical_section(void)
       FAR struct tcb_s *rtcb = this_task();
       if (rspin_lock_count(&g_schedlock) == 1)
         {
-#if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0
-          nxsched_critmon_csection(rtcb, true, return_address(0));
-#endif
-#ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
+#  ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
           sched_note_csection(rtcb, true);
-#endif
+#  endif
+#  if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0
+          nxsched_critmon_csection(rtcb, true, return_address(0));
+#  endif
         }
     }
 
   return flags;
 }
-#endif
 
-/****************************************************************************
- * Name: leave_critical_section_notrace
- ****************************************************************************/
-
-#if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0 || \
-    defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION) || defined(CONFIG_SMP)
-void leave_critical_section_notrace(irqstate_t flags)
-{
-  rspin_unlock_irqrestore(&g_schedlock, flags);
-}
-#endif
-
-#if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0 || \
-    CONFIG_SCHED_CRITMONITOR_MAXTIME_BUSYWAIT >= 0 || \
-    defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION)
 void leave_critical_section(irqstate_t flags)
 {
   if (!up_interrupt_context())
@@ -179,37 +134,15 @@ void leave_critical_section(irqstate_t flags)
       FAR struct tcb_s *rtcb = this_task();
       if (rspin_lock_count(&g_schedlock) == 1)
         {
-#  if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0
-          nxsched_critmon_csection(rtcb, false, return_address(0));
-#  endif
 #  ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
           sched_note_csection(rtcb, false);
+#  endif
+#  if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0
+          nxsched_critmon_csection(rtcb, false, return_address(0));
 #  endif
         }
     }
 
   leave_critical_section_notrace(flags);
-}
-#endif
-
-/****************************************************************************
- * Name: critical_section_count
- *
- * Description:
- *   get critical section count
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   Critical section count
- *
- ****************************************************************************/
-
-#if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0 || \
-    defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION) || defined(CONFIG_SMP)
-uint16_t critical_section_count(void)
-{
-  return rspin_lock_count(&g_schedlock);
 }
 #endif

@@ -42,6 +42,7 @@
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/mutex.h>
 #include <nuttx/serial/serial.h>
+#include <nuttx/spinlock.h>
 
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbhost.h>

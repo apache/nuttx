@@ -41,6 +41,7 @@
 #include <nuttx/rpmsg/rpmsg.h>
 #include <nuttx/syslog/syslog_rpmsg.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/spinlock.h>
 
 #include "syslog_rpmsg.h"
 

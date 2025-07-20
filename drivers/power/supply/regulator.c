@@ -37,6 +37,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/power/consumer.h>
 #include <nuttx/signal.h>
+#include <nuttx/spinlock.h>
 
 /****************************************************************************
  * Private Function Prototypes

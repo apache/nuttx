@@ -28,6 +28,7 @@
 #include <debug.h>
 #include <nuttx/arch.h>
 #include <nuttx/power/pm.h>
+#include <nuttx/spinlock.h>
 
 #include "sim_internal.h"
 
