@@ -79,6 +79,11 @@
 #  define CONFIG_HAVE_CXX14 1
 #endif
 
+#if (defined(__cplusplus) && __cplusplus >= 201103L) || \
+    (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L)
+#  define CONFIG_HAVE_ZERO_SIZE_ARRAY 1
+#endif
+
 /* Green Hills Software definitions *****************************************/
 
 #if defined(__ghs__)
