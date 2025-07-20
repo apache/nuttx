@@ -247,10 +247,8 @@ if(CONFIG_BUILD_PIC)
   add_link_options(-Wl,--emit-relocs)
 endif()
 
-add_compile_options(
-  -Wno-attributes -Wno-unknown-pragmas
-  $<$<COMPILE_LANGUAGE:C>:-Wstrict-prototypes>
-  $<$<COMPILE_LANGUAGE:CXX>:-nostdinc++>)
+add_compile_options(-Wno-attributes -Wno-unknown-pragmas
+                    $<$<COMPILE_LANGUAGE:C>:-Wstrict-prototypes>)
 
 # When all C++ code is built using GCC 7.1 or a higher version, we can safely
 # disregard warnings of the type "parameter passing for X changed in GCC 7.1."
@@ -258,6 +256,10 @@ add_compile_options(
 # https://stackoverflow.com/questions/48149323/what-does-the-gcc-warning-project-parameter-passing-for-x-changed-in-gcc-7-1-m
 
 add_compile_options(-Wno-psabi)
+
+if(NOT CONFIG_LIBCXXTOOLCHAIN)
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-nostdinc++>)
+endif()
 
 if(CONFIG_CXX_STANDARD)
   add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-std=${CONFIG_CXX_STANDARD}>)
