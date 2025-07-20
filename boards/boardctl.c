@@ -804,42 +804,47 @@ int boardctl(unsigned int cmd, uintptr_t arg)
 
           if (spinlock->action == BOARDIOC_SPINLOCK_LOCK)
             {
-              if (flags != NULL)
-                {
-                  *flags = up_irq_save();
-                }
-
               if (lock != NULL)
                 {
-                  spin_lock(lock);
+                  if (flags != NULL)
+                    {
+                      *flags = spin_lock_irqsave(lock);
+                    }
+                  else
+                    {
+                      spin_lock(lock);
+                    }
                 }
             }
           else if (spinlock->action == BOARDIOC_SPINLOCK_TRYLOCK)
             {
-              if (flags != NULL)
-                {
-                  *flags = up_irq_save();
-                }
-
-              if (!spin_trylock(lock))
-                {
-                  ret = -EBUSY;
-                  if (flags != NULL)
-                    {
-                      up_irq_restore(*flags);
-                    }
-                }
+              if (lock != NULL)
+              {
+                if (flags != NULL)
+                  {
+                    if (!spin_trylock_irqsave(lock, *flags))
+                      {
+                        ret = -EBUSY;
+                      }
+                  }
+                else if (!spin_trylock(lock))
+                  {
+                    ret = -EBUSY;
+                  }
+              }
             }
           else if (spinlock->action == BOARDIOC_SPINLOCK_UNLOCK)
             {
-              if (flags != NULL)
-                {
-                  up_irq_restore(*flags);
-                }
-
               if (lock != NULL)
                 {
-                  spin_unlock(lock);
+                  if (flags != NULL)
+                    {
+                      spin_unlock_irqrestore(lock, *flags);
+                    }
+                  else
+                    {
+                      spin_unlock(lock);
+                    }
                 }
             }
           else
