@@ -38,6 +38,12 @@
 #include "esp_efuse.h"
 #include "esp_efuse_utility.h"
 
+#ifdef CONFIG_ARCH_CHIP_ESP32
+#include "xtensa.h"
+#include "soc/apb_ctrl_reg.h"
+#include "esp_efuse_table.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -53,6 +59,8 @@ struct esp_efuse_lowerhalf_s
   const struct efuse_ops_s *ops; /* Lower half operations */
   void *upper;                   /* Pointer to efuse_upperhalf_s */
 };
+
+#ifdef CONFIG_ESPRESSIF_EFUSE
 
 /****************************************************************************
  * Private Functions Prototypes
@@ -306,3 +314,66 @@ int esp_efuse_initialize(const char *devpath)
 
   return ret;
 }
+#endif
+
+/****************************************************************************
+ * Name: esp_efuse_hal_chip_revision
+ *
+ * Description:
+ *   Returns the chip version in the format: Major * 100 + Minor.
+ *   This function must be compiled even when CONFIG_ESPRESSIF_EFUSE is not
+ *   defined, because it required used by esp32_start.c.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   The chip version as an unsigned 32-bit integer.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_CHIP_ESP32
+uint32_t esp_efuse_hal_chip_revision(void)
+{
+  uint8_t eco_bit0;
+  uint8_t eco_bit1;
+  uint8_t eco_bit2;
+  uint8_t minor_chip_version;
+  uint32_t combine_value;
+  uint32_t chip_ver = 0;
+
+  esp_efuse_read_field_blob(ESP_EFUSE_CHIP_VER_REV1,
+                            &eco_bit0,
+                            ESP_EFUSE_CHIP_VER_REV1[0]->bit_count);
+  esp_efuse_read_field_blob(ESP_EFUSE_CHIP_VER_REV2,
+                            &eco_bit1,
+                            ESP_EFUSE_CHIP_VER_REV2[0]->bit_count);
+  esp_efuse_read_field_blob(ESP_EFUSE_WAFER_VERSION_MINOR,
+                            &minor_chip_version,
+                            ESP_EFUSE_WAFER_VERSION_MINOR[0]->bit_count);
+
+  eco_bit2 = (getreg32(APB_CTRL_DATE_REG) & 0x80000000) >> 31;
+  combine_value = (eco_bit2 << 2) | (eco_bit1 << 1) | eco_bit0;
+
+  switch (combine_value)
+  {
+    case 0:
+        chip_ver = 0;
+        break;
+    case 1:
+        chip_ver = 1;
+        break;
+    case 3:
+        chip_ver = 2;
+        break;
+    case 7:
+        chip_ver = 3;
+        break;
+    default:
+        chip_ver = 0;
+        break;
+  }
+
+  return (chip_ver * 100) + minor_chip_version;
+}
+#endif
