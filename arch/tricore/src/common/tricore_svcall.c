@@ -36,6 +36,7 @@
 #include <arch/barriers.h>
 #include <arch/irq.h>
 #include <sched/sched.h>
+#include <nuttx/addrenv.h>
 #include <nuttx/sched.h>
 
 #include "tricore_internal.h"
