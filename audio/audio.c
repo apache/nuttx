@@ -82,6 +82,7 @@ struct audio_upperhalf_s
   uint8_t                      periods;  /* Ap buffers number */
   FAR struct ap_buffer_s       **apbs;   /* Ap buffers list */
   FAR struct audio_lowerhalf_s *dev;     /* lower-half state */
+  FAR struct pollfd            *fd;      /* Poll fd */
   struct hw_ptr_s              *hwptr;   /* Hardware pointer */
   struct file                  *usermq;  /* User mode app's message queue */
 };
@@ -103,6 +104,8 @@ static int      audio_ioctl(FAR struct file *filep,
                             unsigned long arg);
 static int      audio_mmap(FAR struct file *filep,
                            FAR struct mm_map_entry_s *map);
+static int      audio_poll(FAR struct file *filep,
+                           FAR struct pollfd *fds, bool setup);
 static int      audio_allocbuffer(FAR struct audio_upperhalf_s *upper,
                                   FAR struct audio_buf_desc_s * bufdesc);
 static int      audio_freebuffer(FAR struct audio_upperhalf_s *upper,
@@ -136,6 +139,8 @@ static const struct file_operations g_audioops =
   NULL,        /* seek */
   audio_ioctl, /* ioctl */
   audio_mmap,  /* mmap */
+  NULL,        /* truncate */
+  audio_poll,  /* poll */
 };
 
 /****************************************************************************
@@ -225,7 +230,7 @@ static int audio_close(FAR struct file *filep)
   ret = nxmutex_lock(&upper->lock);
   if (ret < 0)
     {
-      goto errout;
+      return ret;
     }
 
   /* Decrement the references to the driver.  If the reference count will
@@ -259,7 +264,6 @@ static int audio_close(FAR struct file *filep)
   ret = OK;
   nxmutex_unlock(&upper->lock);
 
-errout:
   return ret;
 }
 
@@ -811,6 +815,48 @@ static int audio_mmap(FAR struct file *filep, FAR struct mm_map_entry_s *map)
 }
 
 /****************************************************************************
+ * Name: audio_poll
+ *
+ * Description:
+ *   Wait for framebuffer to be writable.
+ *
+ ****************************************************************************/
+
+static int audio_poll(FAR struct file *filep,
+                      FAR struct pollfd *fds, bool setup)
+{
+  FAR struct inode *inode = filep->f_inode;
+  FAR struct audio_upperhalf_s *upper = inode->i_private;
+  irqstate_t flags;
+
+  DEBUGASSERT(upper != NULL);
+
+  flags = spin_lock_irqsave_nopreempt(&upper->spinlock);
+
+  if (setup)
+    {
+      upper->fd = fds;
+      fds->priv = &upper->fd;
+
+      if (upper->hwptr->head - upper->hwptr->tail != upper->periods)
+        {
+          poll_notify(&fds, 1, POLLIN | POLLOUT);
+        }
+    }
+  else if (fds->priv != NULL)
+    {
+      /* This is a request to tear down the poll. */
+
+      FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
+      *slot = NULL;
+      fds->priv = NULL;
+    }
+
+  spin_unlock_irqrestore_nopreempt(&upper->spinlock, flags);
+  return OK;
+}
+
+/****************************************************************************
  * Name: audio_allocbuffer
  *
  * Description:
@@ -960,6 +1006,11 @@ static inline void audio_dequeuebuffer(FAR struct audio_upperhalf_s *upper,
 
   flags = spin_lock_irqsave_nopreempt(&upper->spinlock);
   upper->hwptr->tail++;
+  if (upper->fd)
+    {
+      poll_notify(&upper->fd, 1, POLLIN | POLLOUT);
+    }
+
   spin_unlock_irqrestore_nopreempt(&upper->spinlock, flags);
 
   /* Send a dequeue message to the user if a message queue is registered */
