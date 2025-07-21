@@ -69,9 +69,11 @@ void sched_unlock(void)
        * then pre-emption has been re-enabled.
        */
 
-      if (rtcb != NULL && --rtcb->lockcount == 0)
+      if (rtcb != NULL && rtcb->lockcount == 1)
         {
           irqstate_t flags = enter_critical_section_wo_note();
+
+          rtcb->lockcount = 0;
 
           /* Note that we no longer have pre-emption disabled. */
 
@@ -163,6 +165,10 @@ void sched_unlock(void)
 #endif
 
           leave_critical_section_wo_note(flags);
+        }
+      else
+        {
+          rtcb->lockcount--;
         }
     }
 }
