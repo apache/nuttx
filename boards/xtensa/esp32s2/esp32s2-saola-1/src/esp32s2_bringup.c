@@ -62,8 +62,8 @@
 #  include "esp32s2_rt_timer.h"
 #endif
 
-#ifdef CONFIG_ESP32S2_EFUSE
-#  include "esp32s2_efuse.h"
+#ifdef CONFIG_ESPRESSIF_EFUSE
+#  include "espressif/esp_efuse.h"
 #endif
 
 #ifdef CONFIG_ESPRESSIF_LEDC
@@ -170,8 +170,8 @@ int esp32s2_bringup(void)
     }
 #endif
 
-#if defined(CONFIG_ESP32S2_EFUSE)
-  ret = esp32s2_efuse_initialize("/dev/efuse");
+#if defined(CONFIG_ESPRESSIF_EFUSE)
+  ret = esp_efuse_initialize("/dev/efuse");
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to init EFUSE: %d\n", ret);
