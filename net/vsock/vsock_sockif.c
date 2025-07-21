@@ -1339,7 +1339,8 @@ static int vsock_recv_connected(FAR struct vsock_conn_s *conn,
         vsock_notify(conn, VSOCK_NOTIFY_SHUTDOWN);
         break;
       case VIRTIO_VSOCK_OP_RST:
-        vsockdbg("Reset\n");
+        vsockdbg("Recv reset\n");
+        conn->shutdown |= SHUT_RDWR;
         vsock_notify(conn, VSOCK_NOTIFY_SHUTDOWN);
         break;
       default:
