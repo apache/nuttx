@@ -558,33 +558,21 @@ void optee_supplicant_cmd(FAR struct optee_priv_data *priv,
       return;
     }
 
-  if (optee_from_msg_param(params, arg->num_params, arg->params))
+  if ((ret = optee_from_msg_param(params, arg->num_params, arg->params))
+      != 0)
     {
-      arg->ret = TEE_ERROR_BAD_PARAMETERS;
+      arg->ret = optee_convert_from_errno(ret);
       goto out;
     }
 
   arg->ret = optee_supplicant_request(arg->cmd, arg->num_params, params);
-
-  if ((ret = optee_to_msg_param(priv, arg->params, arg->num_params, params)))
+  if (arg->ret != TEE_SUCCESS)
     {
-      if (ret == -ENOMEM)
-        {
-          arg->ret = TEE_ERROR_OUT_OF_MEMORY;
-        }
-      else if (ret == -EPROTO)
-        {
-          arg->ret = TEE_ERROR_COMMUNICATION;
-        }
-      else if (ret == -EINVAL)
-        {
-          arg->ret = TEE_ERROR_BAD_PARAMETERS;
-        }
-      else
-        {
-          arg->ret = TEE_ERROR_GENERIC;
-        }
+      goto out;
     }
+
+  ret = optee_to_msg_param(priv, arg->params, arg->num_params, params);
+  arg->ret = optee_convert_from_errno(ret);
 
 out:
   kmm_free(params);

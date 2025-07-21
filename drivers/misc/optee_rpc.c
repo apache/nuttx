@@ -188,32 +188,16 @@ static void optee_rpc_cmd_shm_alloc(FAR struct optee_priv_data *priv,
         ret = optee_supplicant_alloc(priv, size, &shm);
         break;
 #else
-        arg->ret = TEE_ERROR_NOT_SUPPORTED;
-        return;
+        ret = -ENOTSUP;
 #endif
       case OPTEE_MSG_RPC_SHM_TYPE_KERNEL:
         ret = optee_shm_alloc(priv, NULL, size, TEE_SHM_ALLOC, &shm);
         break;
     }
 
-  if (ret == -ENOMEM)
+  arg->ret = optee_convert_from_errno(ret);
+  if (arg->ret != TEE_SUCCESS)
     {
-      arg->ret = TEE_ERROR_OUT_OF_MEMORY;
-      return;
-    }
-  else if (ret == -ECOMM)
-    {
-      arg->ret = TEE_ERROR_COMMUNICATION;
-      return;
-    }
-  else if (ret == -EINVAL)
-    {
-      arg->ret = TEE_ERROR_BAD_PARAMETERS;
-      return;
-    }
-  else if (ret != OK)
-    {
-      arg->ret = TEE_ERROR_GENERIC;
       return;
     }
 
@@ -233,8 +217,6 @@ static void optee_rpc_cmd_shm_alloc(FAR struct optee_priv_data *priv,
       arg->params[0].u.tmem.size = size;
       arg->params[0].u.tmem.shm_ref = (unsigned long)shm;
     }
-
-  arg->ret = TEE_SUCCESS;
 }
 
 /****************************************************************************

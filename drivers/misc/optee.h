@@ -126,6 +126,7 @@ int optee_to_msg_param(FAR struct optee_priv_data *priv,
                        FAR const struct tee_ioctl_param *params);
 
 int optee_convert_to_errno(uint32_t oterr);
+uint32_t optee_convert_from_errno(int err);
 #undef EXTERN
 #if defined(__cplusplus)
 }

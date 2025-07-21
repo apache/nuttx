@@ -1252,6 +1252,51 @@ int optee_convert_to_errno(uint32_t oterr)
 }
 
 /****************************************************************************
+ * Name: optee_convert_from_errno
+ *
+ * Description:
+ *   Convert errno values to TEE errors.
+ *
+ * Parameters:
+ *   err - errno value (negative).
+ *
+ * Returned Values:
+ *   The converted TEE error code.
+ *
+ ****************************************************************************/
+
+uint32_t optee_convert_from_errno(int err)
+{
+  /* Make sure we handle negative errno values */
+
+  switch (-err)
+    {
+      case 0:
+        return TEE_SUCCESS;
+      case EACCES:
+        return TEE_ERROR_ACCESS_DENIED;
+      case EINVAL:
+        return TEE_ERROR_BAD_PARAMETERS;
+      case ENOTSUP:
+      case EOPNOTSUPP:
+        return TEE_ERROR_NOT_SUPPORTED;
+      case ENOMEM:
+        return TEE_ERROR_OUT_OF_MEMORY;
+      case EBUSY:
+        return TEE_ERROR_BUSY;
+      case ECOMM:
+      case EPROTO:
+        return TEE_ERROR_COMMUNICATION;
+      case ENOBUFS:
+        return TEE_ERROR_SHORT_BUFFER;
+      case ETIMEDOUT:
+        return TEE_ERROR_TIMEOUT;
+      default:
+        return TEE_ERROR_GENERIC;
+    }
+}
+
+/****************************************************************************
  * Name: optee_va_to_pa
  *
  * Description:
