@@ -86,41 +86,65 @@
 int aio_suspend(FAR const struct aiocb * const list[], int nent,
                 FAR const struct timespec *timeout)
 {
+  struct timespec end;
+  struct timespec rem;
   sigset_t set;
   int ret;
   int i;
 
   DEBUGASSERT(list);
 
-  /* Check each entry in the list.  Break out of the loop if any entry
-   * has completed.
-   */
-
-  for (i = 0; i < nent; i++)
+  if (timeout)
     {
-      /* Check if the I/O has completed */
-
-      if (list[i] && list[i]->aio_result != -EINPROGRESS)
-        {
-          /* Yes, return success */
-
-          return OK;
-        }
+      clock_gettime(CLOCK_MONOTONIC, &end);
+      clock_timespec_add(&end, timeout, &end);
+      timeout = &rem;
     }
-
-  /* Then wait for SIGPOLL.  On success sigtimedwait() will return the
-   * signal number that cause the error (SIGPOLL).  It will set errno
-   * appropriately for this function on errors.
-   *
-   * NOTE: If completion of the I/O causes other signals to be generated
-   * first, then this will wake up and return EINTR instead of success.
-   */
 
   sigemptyset(&set);
   sigaddset(&set, SIGPOLL);
 
-  ret = sigtimedwait(&set, NULL, timeout);
-  return ret >= 0 ? OK : ERROR;
+  for (; ; )
+    {
+      /* Check each entry in the list.  Break out of the loop if any entry
+       * has completed.
+       */
+
+      for (i = 0; i < nent; i++)
+        {
+          /* Check if the I/O has completed */
+
+          if (list[i] && list[i]->aio_result != -EINPROGRESS)
+            {
+              /* Yes, return success */
+
+              return OK;
+            }
+        }
+
+      /* Then wait for SIGPOLL.  On success sigtimedwait() will return the
+       * signal number that cause the error (SIGPOLL).  It will set errno
+       * appropriately for this function on errors.
+       *
+       * NOTE: If completion of the I/O causes other signals to be generated
+       * first, then this will wake up and return EINTR instead of success.
+       */
+
+      if (timeout)
+        {
+          clock_gettime(CLOCK_MONOTONIC, &rem);
+          clock_timespec_subtract(&end, &rem, &rem);
+        }
+
+      ret = sigtimedwait(&set, NULL, timeout);
+
+      if (ret < 0)
+        {
+          return ERROR;
+        }
+    }
+
+  return OK;
 }
 
 #endif /* CONFIG_FS_AIO */
