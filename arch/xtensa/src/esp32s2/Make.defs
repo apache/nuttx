@@ -43,12 +43,6 @@ ifeq ($(CONFIG_ESP32S2_UART),y)
 CHIP_CSRCS += esp32s2_serial.c
 endif
 
-ifeq ($(CONFIG_ESP32S2_EFUSE),y)
-CHIP_CSRCS += esp32s2_efuse.c
-CHIP_CSRCS += esp32s2_efuse_table.c
-CHIP_CSRCS += esp32s2_efuse_lowerhalf.c
-endif
-
 ifeq ($(CONFIG_ESP32S2_RNG),y)
 CHIP_CSRCS += esp32s2_rng.c
 endif
@@ -139,7 +133,7 @@ endif
 
 ESP_HAL_3RDPARTY_REPO   = esp-hal-3rdparty
 ifndef ESP_HAL_3RDPARTY_VERSION
-	ESP_HAL_3RDPARTY_VERSION = e9a78c811578545e2bc673862d885a15bd6cbf67
+	ESP_HAL_3RDPARTY_VERSION = 96185c5348c747d2e15baef639d0b2a842ecd504
 endif
 
 ifndef ESP_HAL_3RDPARTY_URL
