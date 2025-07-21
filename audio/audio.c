@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stdint.h>
@@ -65,6 +66,8 @@
 #ifndef CONFIG_AUDIO_BUFFER_DEQUEUE_PRIO
 #  define CONFIG_AUDIO_BUFFER_DEQUEUE_PRIO  1
 #endif
+
+#define AUDIO_ENQUEUE_THRESHOLD 2
 
 /****************************************************************************
  * Private Types
@@ -373,6 +376,66 @@ static inline int audio_getnstate(FAR struct audio_upperhalf_s *upper,
   spin_unlock_irqrestore(&upper->spinlock, flags);
 
   return nstate;
+}
+
+/****************************************************************************
+ * Name: audio_try_enqueue
+ *
+ * Description:
+ *   Try enqueue audio buffer
+ *
+ ****************************************************************************/
+
+static int audio_try_enqueue(FAR struct audio_upperhalf_s *upper)
+{
+  FAR struct audio_lowerhalf_s *lower = upper->dev;
+  FAR struct audio_openpriv_s *priv;
+  int ret = OK;
+
+  for (; ; )
+    {
+      uint32_t count = upper->status->head - upper->status->tail;
+      bool ready = false;
+      bool wait = false;
+
+      for (priv = upper->head; priv != NULL; priv = priv->flink)
+        {
+          if (priv->state == AUDIO_STATE_OPEN ||
+              priv->state == AUDIO_STATE_PAUSED)
+            {
+              continue;
+            }
+          else if (priv->head > upper->status->head)
+            {
+              ready = true;
+            }
+          else if (priv->head < upper->status->head ||
+                   priv->head <= upper->status->tail)
+            {
+              priv->state = AUDIO_STATE_XRUN;
+            }
+          else
+            {
+              wait = true;
+            }
+        }
+
+      if (!ready || (wait && count > AUDIO_ENQUEUE_THRESHOLD))
+        {
+          return OK;
+        }
+
+      ret = lower->ops->enqueuebuffer(
+          lower, upper->apbs[upper->status->head % upper->periods]);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      upper->status->head++;
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -756,7 +819,7 @@ static int audio_enqueuebuffer(FAR struct file *filep,
   FAR struct audio_lowerhalf_s *lower = upper->dev;
   FAR struct audio_openpriv_s *priv = filep->f_priv;
   irqstate_t flags;
-  int ret;
+  int ret = OK;
 
   DEBUGASSERT(lower->ops->enqueuebuffer != NULL);
 
@@ -774,12 +837,16 @@ static int audio_enqueuebuffer(FAR struct file *filep,
     }
   else
     {
-      flags = spin_lock_irqsave(&upper->spinlock);
-      priv->head += bufdesc->numbytes;
-      spin_unlock_irqrestore(&upper->spinlock, flags);
+      flags = spin_lock_irqsave_nopreempt(&upper->spinlock);
+      upper->apbs[priv->head % upper->periods]->nbytes =
+          MAX(upper->apbs[priv->head % upper->periods]->nbytes,
+              bufdesc->numbytes);
+      priv->head++;
+      ret = audio_try_enqueue(upper);
+      spin_unlock_irqrestore_nopreempt(&upper->spinlock, flags);
     }
 
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
@@ -1319,6 +1386,7 @@ static inline void audio_dequeuebuffer(FAR struct audio_upperhalf_s *upper,
 
   flags = spin_lock_irqsave_nopreempt(&upper->spinlock);
   upper->status->tail++;
+  audio_try_enqueue(upper);
   for (priv = upper->head; priv != NULL; priv = priv->flink)
     {
       if (priv->fd > 0)
