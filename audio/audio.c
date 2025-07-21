@@ -70,20 +70,27 @@
  * Private Types
  ****************************************************************************/
 
+struct audio_openpriv_s
+{
+  unsigned long               head;
+  int                         state;
+  FAR struct pollfd           *fd;
+  FAR struct audio_openpriv_s *flink;
+  struct file                 *usermq; /* User mode app's message queue */
+};
+
 /* This structure describes the state of the upper half driver */
 
 struct audio_upperhalf_s
 {
-  uint8_t                      crefs;    /* The number of times the device has been opened */
   struct audio_info_s          info;     /* Record the last playing audio format */
   mutex_t                      lock;     /* Supports mutual exclusion */
   spinlock_t                   spinlock; /* Supports spin lock */
   uint8_t                      periods;  /* Ap buffers number */
   FAR struct ap_buffer_s       **apbs;   /* Ap buffers list */
   FAR struct audio_lowerhalf_s *dev;     /* lower-half state */
-  FAR struct pollfd            *fd;      /* Poll fd */
+  FAR struct audio_openpriv_s  *head;    /* Appl private info list */
   struct audio_status_s        *status;  /* lowerhalf driver status */
-  struct file                  *usermq;  /* User mode app's message queue */
 };
 
 /****************************************************************************
@@ -151,10 +158,9 @@ static int audio_open(FAR struct file *filep)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct audio_upperhalf_s *upper = inode->i_private;
-  uint8_t tmp;
+  FAR struct audio_openpriv_s *priv;
+  irqstate_t flags;
   int ret;
-
-  audinfo("crefs: %d\n", upper->crefs);
 
   /* Get exclusive access to the device structures */
 
@@ -164,9 +170,9 @@ static int audio_open(FAR struct file *filep)
       return ret;
     }
 
-  /* First open, alloc hwptr memory */
+  /* First open, alloc status memory */
 
-  if (upper->crefs == 0)
+  if (upper->head == NULL)
     {
       upper->status = kumm_zalloc(sizeof(struct audio_status_s));
       if (!upper->status)
@@ -177,23 +183,18 @@ static int audio_open(FAR struct file *filep)
         }
     }
 
-  /* Increment the count of references to the device.  If this the first
-   * time that the driver has been opened for this device, then initialize
-   * the device.
-   */
-
-  tmp = upper->crefs + 1;
-  if (tmp == 0)
+  priv = kmm_zalloc(sizeof(*priv));
+  if (priv == NULL)
     {
-      /* More than 255 opens; uint8_t overflows to zero */
-
-      ret = -EMFILE;
+      ret = -ENOMEM;
       goto errout;
     }
 
-  /* Save the new open count on success */
-
-  upper->crefs = tmp;
+  flags = spin_lock_irqsave(&upper->spinlock);
+  priv->flink = upper->head;
+  filep->f_priv = priv;
+  upper->head = priv;
+  spin_unlock_irqrestore(&upper->spinlock, flags);
   ret = OK;
 
 errout:
@@ -213,9 +214,11 @@ static int audio_close(FAR struct file *filep)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct audio_upperhalf_s *upper = inode->i_private;
+  FAR struct audio_openpriv_s *priv = filep->f_priv;
+  FAR struct audio_openpriv_s *curr;
+  FAR struct audio_openpriv_s *prev;
+  irqstate_t flags;
   int ret;
-
-  audinfo("crefs: %d\n", upper->crefs);
 
   /* Get exclusive access to the device structures */
 
@@ -225,21 +228,33 @@ static int audio_close(FAR struct file *filep)
       return ret;
     }
 
-  /* Decrement the references to the driver.  If the reference count will
-   * decrement to 0, then uninitialize the driver.
-   */
+  flags = spin_lock_irqsave(&upper->spinlock);
 
-  if (upper->crefs > 1)
+  /* find and drop priv from list */
+
+  for (prev = NULL, curr = upper->head; curr && curr != priv;
+       prev = curr, curr = curr->flink);
+
+  if (prev)
     {
-      upper->crefs--;
+      prev->flink = priv->flink;
     }
   else
     {
+      upper->head = priv->flink;
+    }
+
+  spin_unlock_irqrestore(&upper->spinlock, flags);
+
+  kmm_free(priv);
+
+  /*  If the reference head decrement to NULL,
+   *  then uninitialize the driver.
+   */
+
+  if (upper->head == NULL)
+    {
       FAR struct audio_lowerhalf_s *lower = upper->dev;
-
-      /* There are no more references to the port */
-
-      upper->crefs = 0;
 
       /* Disable the Audio device */
 
@@ -247,7 +262,6 @@ static int audio_close(FAR struct file *filep)
       audinfo("calling shutdown\n");
 
       lower->ops->shutdown(lower);
-      upper->usermq = NULL;
       kumm_free(upper->status);
       upper->status = NULL;
     }
@@ -333,6 +347,35 @@ static inline void audio_setstate(FAR struct audio_upperhalf_s *upper,
 }
 
 /****************************************************************************
+ * Name: audio_getnstate
+ *
+ * Description:
+ *   Get the applications next top state
+ *
+ ****************************************************************************/
+
+static inline int audio_getnstate(FAR struct audio_upperhalf_s *upper,
+                                  FAR struct audio_openpriv_s *cur)
+{
+  FAR struct audio_openpriv_s *priv;
+  int nstate = AUDIO_STATE_OPEN;
+  irqstate_t flags;
+
+  flags = spin_lock_irqsave(&upper->spinlock);
+  for (priv = upper->head; priv != NULL; priv = priv->flink)
+    {
+      if (priv != cur && priv->state > nstate)
+        {
+          nstate = priv->state;
+        }
+    }
+
+  spin_unlock_irqrestore(&upper->spinlock, flags);
+
+  return nstate;
+}
+
+/****************************************************************************
  * Name: audio_configure
  *
  * Description:
@@ -340,33 +383,44 @@ static inline void audio_setstate(FAR struct audio_upperhalf_s *upper,
  *
  ****************************************************************************/
 
-static int audio_configure(FAR struct audio_upperhalf_s *upper,
+static int audio_configure(FAR struct file *filep,
                            FAR const struct audio_caps_desc_s *cap_desc)
 {
+  FAR struct inode *inode = filep->f_inode;
+  FAR struct audio_upperhalf_s *upper = inode->i_private;
   FAR struct audio_lowerhalf_s *lower = upper->dev;
   FAR const struct audio_caps_s *caps = &cap_desc->caps;
+  FAR struct audio_openpriv_s *priv = filep->f_priv;
   int ret = OK;
 
   DEBUGASSERT(lower->ops->configure != NULL);
 
-#ifdef CONFIG_AUDIO_MULTI_SESSION
-  ret = lower->ops->configure(lower, cap_desc->session, caps);
-#else
-  ret = lower->ops->configure(lower, caps);
-#endif
-  if (ret < 0 || (caps->ac_type != AUDIO_TYPE_INPUT &&
-      caps->ac_type != AUDIO_TYPE_OUTPUT))
+  if (upper->status->state == AUDIO_STATE_OPEN ||
+      (caps->ac_type != AUDIO_TYPE_INPUT &&
+       caps->ac_type != AUDIO_TYPE_OUTPUT))
     {
-      return ret;
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+      ret = lower->ops->configure(lower, cap_desc->session, caps);
+#else
+      ret = lower->ops->configure(lower, caps);
+#endif
+      if (ret < 0 || (caps->ac_type != AUDIO_TYPE_INPUT &&
+                      caps->ac_type != AUDIO_TYPE_OUTPUT))
+        {
+          return ret;
+        }
+
+      /* INPUT/OUTPUT configure success here */
+
+      audio_setstate(upper, AUDIO_STATE_PREPARED);
+      upper->info.format = caps->ac_subtype;
+      upper->info.channels = caps->ac_channels;
+      upper->info.subformat = caps->ac_controls.b[2];
+      upper->info.samplerate =
+          caps->ac_controls.hw[0] | (caps->ac_controls.b[3] << 16);
     }
 
-  audio_setstate(upper, AUDIO_STATE_PREPARED);
-  upper->info.format = caps->ac_subtype;
-  upper->info.channels = caps->ac_channels;
-  upper->info.subformat = caps->ac_controls.b[2];
-  upper->info.samplerate =
-      caps->ac_controls.hw[0] | (caps->ac_controls.b[3] << 16);
-
+  priv->state = AUDIO_STATE_PREPARED;
   return ret;
 }
 
@@ -387,24 +441,31 @@ static int audio_pause(FAR struct file *filep)
   FAR struct inode *inode = filep->f_inode;
   FAR struct audio_upperhalf_s *upper = inode->i_private;
   FAR struct audio_lowerhalf_s *lower = upper->dev;
-  int ret = OK;
+  FAR struct audio_openpriv_s *priv = filep->f_priv;
+  int nstate;
+  int ret;
 
   DEBUGASSERT(upper != NULL && lower->ops->pause != NULL);
 
-  if (upper->status->state == AUDIO_STATE_RUNNING)
+  nstate = audio_getnstate(upper, priv);
+  if (upper->status->state == AUDIO_STATE_RUNNING &&
+      nstate <= AUDIO_STATE_PAUSED)
     {
 #ifdef CONFIG_AUDIO_MULTI_SESSION
       ret = lower->ops->pause(lower, session);
 #else
       ret = lower->ops->pause(lower);
 #endif
-      if (ret == OK)
+      if (ret != OK)
         {
-          audio_setstate(upper, AUDIO_STATE_PAUSED);
+          return ret;
         }
+
+      audio_setstate(upper, AUDIO_STATE_PAUSED);
     }
 
-  return ret;
+  priv->state = AUDIO_STATE_PAUSED;
+  return OK;
 }
 
 /****************************************************************************
@@ -424,24 +485,29 @@ static int audio_resume(FAR struct file *filep)
   FAR struct inode *inode = filep->f_inode;
   FAR struct audio_upperhalf_s *upper = inode->i_private;
   FAR struct audio_lowerhalf_s *lower = upper->dev;
-  int ret = OK;
+  FAR struct audio_openpriv_s *priv = filep->f_priv;
+  int ret;
 
   DEBUGASSERT(upper != NULL && lower->ops->resume != NULL);
 
-  if (upper->status->state == AUDIO_STATE_PAUSED)
+  if (upper->status->state == AUDIO_STATE_PAUSED ||
+      upper->status->state == AUDIO_STATE_XRUN)
     {
 #ifdef CONFIG_AUDIO_MULTI_SESSION
       ret = lower->ops->resume(lower, session);
 #else
       ret = lower->ops->resume(lower);
 #endif
-      if (ret == OK)
+      if (ret != OK)
         {
-          audio_setstate(upper, AUDIO_STATE_RUNNING);
+          return ret;
         }
+
+      audio_setstate(upper, AUDIO_STATE_RUNNING);
     }
 
-  return ret;
+  priv->state = AUDIO_STATE_RUNNING;
+  return OK;
 }
 
 /****************************************************************************
@@ -461,13 +527,24 @@ static int audio_start(FAR struct file *filep)
   FAR struct inode *inode = filep->f_inode;
   FAR struct audio_upperhalf_s *upper = inode->i_private;
   FAR struct audio_lowerhalf_s *lower = upper->dev;
-  int ret = OK;
+  FAR struct audio_openpriv_s *priv = filep->f_priv;
+  int ret;
 
   DEBUGASSERT(upper != NULL && lower->ops->start != NULL);
 
+  if (upper->status->state == AUDIO_STATE_OPEN)
+    {
+      return -EPERM;
+    }
+  else if (upper->status->state == AUDIO_STATE_PAUSED)
+    {
+      return audio_resume(filep);
+    }
+
   /* Verify that the Audio is not already running */
 
-  if (upper->status->state == AUDIO_STATE_PREPARED)
+  if (upper->status->state == AUDIO_STATE_PREPARED ||
+      upper->status->state == AUDIO_STATE_XRUN)
     {
       /* Invoke the bottom half method to start the audio stream */
 
@@ -476,20 +553,20 @@ static int audio_start(FAR struct file *filep)
 #else
       ret = lower->ops->start(lower);
 #endif
-
-      /* A return value of zero means that the audio stream was started
+      /* A return value of zero means that the audio stream was running
        * successfully.
        */
 
-      if (ret == OK)
+      if (ret != OK)
         {
-          /* Indicate that the audio stream has started */
-
-          audio_setstate(upper, AUDIO_STATE_RUNNING);
+          return ret;
         }
+
+      audio_setstate(upper, AUDIO_STATE_RUNNING);
     }
 
-  return ret;
+  priv->state = AUDIO_STATE_RUNNING;
+  return OK;
 }
 
 /****************************************************************************
@@ -509,25 +586,40 @@ static int audio_stop(FAR struct file *filep)
   FAR struct inode *inode = filep->f_inode;
   FAR struct audio_upperhalf_s *upper = inode->i_private;
   FAR struct audio_lowerhalf_s *lower = upper->dev;
-  int ret = OK;
+  FAR struct audio_openpriv_s *priv = filep->f_priv;
+  int nstate;
+  int ret;
 
   DEBUGASSERT(upper != NULL && lower->ops->stop != NULL);
 
-  if (upper->status->state == AUDIO_STATE_RUNNING ||
-      upper->status->state == AUDIO_STATE_PAUSED)
+  nstate = audio_getnstate(upper, priv);
+  if ((upper->status->state == AUDIO_STATE_RUNNING ||
+       upper->status->state == AUDIO_STATE_PAUSED) &&
+      nstate <= AUDIO_STATE_PREPARED)
     {
 #ifdef CONFIG_AUDIO_MULTI_SESSION
       ret = lower->ops->stop(lower, session);
 #else
       ret = lower->ops->stop(lower);
 #endif
-      if (ret == OK)
+      if (ret != OK)
         {
-          audio_setstate(upper, AUDIO_STATE_DRAINING);
+          return ret;
+        }
+
+      audio_setstate(upper, AUDIO_STATE_DRAINING);
+    }
+  else if (nstate == AUDIO_STATE_PAUSED)
+    {
+      ret = audio_pause(filep);
+      if (ret != OK)
+        {
+          return ret;
         }
     }
 
-  return ret;
+  priv->state = AUDIO_STATE_OPEN;
+  return OK;
 }
 
 /****************************************************************************
@@ -645,6 +737,7 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct inode *inode = filep->f_inode;
   FAR struct audio_upperhalf_s *upper = inode->i_private;
   FAR struct audio_lowerhalf_s *lower = upper->dev;
+  FAR struct audio_openpriv_s *priv = filep->f_priv;
   FAR struct audio_buf_desc_s  *bufdesc;
   irqstate_t flags;
   int ret;
@@ -691,7 +784,7 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
           /* Call the lower-half driver configure handler */
 
-          ret = audio_configure(upper, caps);
+          ret = audio_configure(filep, caps);
         }
         break;
 
@@ -844,7 +937,7 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           audinfo("AUDIOIOC_REGISTERMQ\n");
 
-          ret = file_get((mqd_t)arg, &upper->usermq);
+          ret = fs_getfilep((mqd_t)arg, &priv->usermq);
         }
         break;
 
@@ -857,8 +950,12 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           audinfo("AUDIOIOC_UNREGISTERMQ\n");
 
-          file_put(upper->usermq);
-          upper->usermq = NULL;
+          if (priv->usermq != NULL)
+            {
+              fs_putfilep(priv->usermq);
+              priv->usermq = NULL;
+            }
+
           ret = OK;
         }
         break;
@@ -872,6 +969,11 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           audinfo("AUDIOIOC_RESERVE\n");
           DEBUGASSERT(lower->ops->reserve != NULL);
+
+          if (upper->head->flink)
+            {
+              break;
+            }
 
           /* Call lower-half to perform the reservation */
 
@@ -892,6 +994,11 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           audinfo("AUDIOIOC_RELEASE\n");
           DEBUGASSERT(lower->ops->release != NULL);
+
+          if (upper->head->flink)
+            {
+              break;
+            }
 
           /* Call lower-half to perform the release */
 
@@ -1019,6 +1126,7 @@ static int audio_poll(FAR struct file *filep,
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct audio_upperhalf_s *upper = inode->i_private;
+  FAR struct audio_openpriv_s *priv = filep->f_priv;
   irqstate_t flags;
 
   DEBUGASSERT(upper != NULL);
@@ -1027,10 +1135,10 @@ static int audio_poll(FAR struct file *filep,
 
   if (setup)
     {
-      upper->fd = fds;
-      fds->priv = &upper->fd;
+      priv->fd = fds;
+      fds->priv = &priv->fd;
 
-      if (upper->status->head - upper->status->tail != upper->periods)
+      if (priv->head - upper->status->tail != upper->periods)
         {
           poll_notify(&fds, 1, POLLIN | POLLOUT);
         }
@@ -1046,6 +1154,33 @@ static int audio_poll(FAR struct file *filep,
 
   spin_unlock_irqrestore_nopreempt(&upper->spinlock, flags);
   return OK;
+}
+
+/****************************************************************************
+ * Name: audio_sendmsg
+ *
+ * Description:
+ *   Send message to the user if a message queue is registered
+ *
+ ****************************************************************************/
+
+static inline void audio_sendmsg(FAR struct audio_upperhalf_s *upper,
+                                 FAR struct audio_msg_s *msg)
+{
+  FAR struct audio_openpriv_s *priv;
+  irqstate_t flags;
+
+  flags = spin_lock_irqsave_nopreempt(&upper->spinlock);
+  for (priv = upper->head; priv != NULL; priv = priv->flink)
+    {
+      if (priv->usermq != NULL)
+        {
+          file_mq_send(priv->usermq, (FAR const char *)msg, sizeof(*msg),
+                       CONFIG_AUDIO_BUFFER_DEQUEUE_PRIO);
+        }
+    }
+
+  spin_unlock_irqrestore_nopreempt(&upper->spinlock, flags);
 }
 
 /****************************************************************************
@@ -1089,6 +1224,7 @@ static inline void audio_dequeuebuffer(FAR struct audio_upperhalf_s *upper,
                     FAR struct ap_buffer_s *apb, uint16_t status)
 #endif
 {
+  FAR struct audio_openpriv_s *priv;
   struct audio_msg_s    msg;
   irqstate_t flags;
 
@@ -1096,26 +1232,25 @@ static inline void audio_dequeuebuffer(FAR struct audio_upperhalf_s *upper,
 
   flags = spin_lock_irqsave_nopreempt(&upper->spinlock);
   upper->status->tail++;
-  if (upper->fd)
+  for (priv = upper->head; priv != NULL; priv = priv->flink)
     {
-      poll_notify(&upper->fd, 1, POLLIN | POLLOUT);
+      if (priv->fd)
+        {
+          poll_notify(&priv->fd, 1, POLLOUT);
+        }
     }
 
   spin_unlock_irqrestore_nopreempt(&upper->spinlock, flags);
 
   /* Send a dequeue message to the user if a message queue is registered */
 
-  if (upper->usermq != NULL)
-    {
-      msg.msg_id = AUDIO_MSG_DEQUEUE;
-      msg.u.ptr = apb;
+  msg.msg_id = AUDIO_MSG_DEQUEUE;
+  msg.u.ptr = apb;
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-      msg.session = session;
+  msg.session = session;
 #endif
-      apb->flags |= AUDIO_APB_DEQUEUED;
-      file_mq_send(upper->usermq, (FAR const char *)&msg, sizeof(msg),
-                   CONFIG_AUDIO_BUFFER_DEQUEUE_PRIO);
-    }
+  apb->flags |= AUDIO_APB_DEQUEUED;
+  audio_sendmsg(upper, &msg);
 }
 
 /****************************************************************************
@@ -1148,16 +1283,12 @@ static inline void audio_complete(FAR struct audio_upperhalf_s *upper,
 
   /* Send a dequeue message to the user if a message queue is registered */
 
-  if (upper->usermq != NULL)
-    {
-      msg.msg_id = AUDIO_MSG_COMPLETE;
-      msg.u.ptr = NULL;
+  msg.msg_id = AUDIO_MSG_COMPLETE;
+  msg.u.ptr = NULL;
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-      msg.session = session;
+  msg.session = session;
 #endif
-      file_mq_send(upper->usermq, (FAR const char *)&msg, sizeof(msg),
-                   CONFIG_AUDIO_BUFFER_DEQUEUE_PRIO);
-    }
+  audio_sendmsg(upper, &msg);
 }
 
 /****************************************************************************
@@ -1183,14 +1314,10 @@ static inline void audio_message(FAR struct audio_upperhalf_s *upper,
 
   /* Send a message to the user if a message queue is registered */
 
-  if (upper->usermq != NULL)
-    {
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-      msg->session = session;
+  msg->session = session;
 #endif
-      file_mq_send(upper->usermq, (FAR const char *)msg, sizeof(*msg),
-                   CONFIG_AUDIO_BUFFER_DEQUEUE_PRIO);
-    }
+  audio_sendmsg(upper, msg);
 }
 
 /****************************************************************************
@@ -1218,16 +1345,12 @@ static inline void audio_ioerr(FAR struct audio_upperhalf_s *upper,
 
   /* Send io error message to the user if a message queue is registered */
 
-  if (upper->usermq != NULL)
-    {
-      msg.msg_id = AUDIO_MSG_IOERR;
-      msg.u.data = status;
+  msg.msg_id = AUDIO_MSG_IOERR;
+  msg.u.data = status;
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-      msg.session = session;
+  msg.session = session;
 #endif
-      file_mq_send(upper->usermq, (FAR const char *)&msg, sizeof(msg),
-                   CONFIG_AUDIO_BUFFER_DEQUEUE_PRIO);
-    }
+  audio_sendmsg(upper, &msg);
 }
 
 /****************************************************************************
@@ -1255,16 +1378,12 @@ static inline void audio_underrun(FAR struct audio_upperhalf_s *upper,
 
   /* Send a dequeue message to the user if a message queue is registered */
 
-  if (upper->usermq != NULL)
-    {
-      msg.msg_id = AUDIO_MSG_UNDERRUN;
-      msg.u.ptr = NULL;
+  msg.msg_id = AUDIO_MSG_UNDERRUN;
+  msg.u.ptr = NULL;
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-      msg.session = session;
+  msg.session = session;
 #endif
-      file_mq_send(upper->usermq, (FAR const char *)&msg, sizeof(msg),
-                   CONFIG_AUDIO_BUFFER_DEQUEUE_PRIO);
-    }
+  audio_sendmsg(upper, &msg);
 }
 
 /****************************************************************************
