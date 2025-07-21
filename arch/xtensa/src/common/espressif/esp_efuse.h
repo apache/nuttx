@@ -116,6 +116,24 @@ typedef enum
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: esp_efuse_hal_chip_revision
+ *
+ * Description:
+ *   Returns the chip version in the format: Major * 100 + Minor.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   The chip version as an unsigned 32-bit integer.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_CHIP_ESP32
+uint32_t esp_efuse_hal_chip_revision(void);
+#endif
+
+/****************************************************************************
  * Name: esp_efuse_initialize
  *
  * Description:
@@ -131,7 +149,9 @@ typedef enum
  *
  ****************************************************************************/
 
+#ifdef CONFIG_ESPRESSIF_EFUSE
 int esp_efuse_initialize(const char *devpath);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

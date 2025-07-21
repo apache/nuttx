@@ -111,8 +111,9 @@ ifeq ($(CONFIG_ESPRESSIF_ADC),y)
 CHIP_CSRCS += esp_adc.c
 endif
 
-ifeq ($(CONFIG_ESPRESSIF_EFUSE),y)
 CHIP_CSRCS += esp_efuse.c
+
+ifeq ($(CONFIG_ESPRESSIF_EFUSE),y)
 LDFLAGS    += -u esp_efuse_startup_include_func
 endif
 
