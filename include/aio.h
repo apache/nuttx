@@ -32,6 +32,7 @@
 #include <sys/types.h>
 #include <time.h>
 
+#include <nuttx/list.h>
 #include <nuttx/signal.h>
 #include <nuttx/wqueue.h>
 
@@ -133,7 +134,9 @@ struct aiocb
 
   struct sigwork_s aio_sigwork;  /* Signal work */
   volatile ssize_t aio_result;   /* Support for aio_error() and aio_return() */
-  FAR void *aio_priv;            /* Used by signal handlers */
+  struct list_node lio_link;     /* Make list of aiocb for lio_listio() */
+  struct sigevent lio_sigevent;  /* Sigevent for lio_listio() */
+  struct sigwork_s lio_sigwork;  /* Signal work for lio_listio() */
 };
 
 /****************************************************************************
