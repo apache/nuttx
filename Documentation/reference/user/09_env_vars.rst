@@ -12,7 +12,7 @@ variables in the multi-processing OS:
    an inherited, exact copy of the environment of the parent. However,
    after child task has been created, subsequent operations by the child
    task on its environment does not alter the environment of the parent.
-   No do operations by the parent effect the child's environment. The
+   Nor do operations by the parent effect the child's environment. The
    environments start identical but are independent and may diverge.
 -  **Thread environments**. When a pthread is created using
    `pthread_create <#pthreadcreate>`__, the child thread also inherits

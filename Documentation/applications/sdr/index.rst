@@ -1,6 +1,6 @@
-===============================
-Software Define Radio Libraries
-===============================
+================================
+Software Defined Radio Libraries
+================================
 
 .. toctree::
    :glob:
