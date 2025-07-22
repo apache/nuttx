@@ -82,7 +82,7 @@ static void aio_write_worker(FAR void *arg)
 #ifdef CONFIG_PRIORITY_INHERITANCE
   prio   = aioc->aioc_prio;
 #endif
-  aiocbp = aioc_decant(aioc);
+  aiocbp = aioc->aioc_aiocbp;
 
   /* Call fcntl(F_GETFL) to get the file open mode. */
 
@@ -134,6 +134,7 @@ errout:
   /* Signal the client */
 
   aio_signal(pid, aiocbp);
+  aioc_decant(aioc);
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
   /* Restore the low priority worker thread default priority */
