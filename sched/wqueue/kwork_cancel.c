@@ -45,8 +45,9 @@
 static int work_qcancel(FAR struct kwork_wqueue_s *wqueue, bool sync,
                         FAR struct work_s *work)
 {
-  irqstate_t flags;
   FAR sem_t *sync_wait = NULL;
+  irqstate_t flags;
+  int ret = 0;
 
   if (wqueue == NULL || work == NULL)
     {
@@ -70,6 +71,10 @@ static int work_qcancel(FAR struct kwork_wqueue_s *wqueue, bool sync,
         {
           work_timer_reset(wqueue);
         }
+    }
+  else
+    {
+      ret = -ENOENT;
     }
 
   /* Note that cancel_sync can not be called in the interrupt
@@ -102,7 +107,7 @@ static int work_qcancel(FAR struct kwork_wqueue_s *wqueue, bool sync,
       nxsem_wait_uninterruptible(sync_wait);
     }
 
-  return 0;
+  return ret;
 }
 
 /****************************************************************************
