@@ -165,14 +165,16 @@ int aio_cancel(int fildes, FAR struct aiocb *aiocbp)
     {
       /* No aiocbp.. cancel all outstanding I/O for the fildes */
 
-      next = (FAR struct aio_container_s *)g_aio_pending.head;
-      do
+      for (aioc = (FAR struct aio_container_s *)g_aio_pending.head;
+           aioc;
+           aioc = next)
         {
-          /* Find the next container with this AIO control block */
+          next = (FAR struct aio_container_s *)aioc->aioc_link.flink;
 
-          for (aioc = next;
-               aioc && aioc->aioc_aiocbp->aio_fildes != fildes;
-               aioc = (FAR struct aio_container_s *)aioc->aioc_link.flink);
+          if (aioc->aioc_aiocbp->aio_fildes != fildes)
+            {
+              continue;
+            }
 
           /* Did we find the container?  We should; the aio_result says
            * that the transfer is pending.  If not we return AIO_ALLDONE.
@@ -195,8 +197,6 @@ int aio_cancel(int fildes, FAR struct aiocb *aiocbp)
                    * transfers
                    */
 
-                  next   =
-                    (FAR struct aio_container_s *)aioc->aioc_link.flink;
                   pid    = aioc->aioc_pid;
                   aiocbp = aioc_decant(aioc);
                   DEBUGASSERT(aiocbp);
@@ -217,7 +217,6 @@ int aio_cancel(int fildes, FAR struct aiocb *aiocbp)
                 }
             }
         }
-      while (aioc);
     }
 
   aio_unlock();
