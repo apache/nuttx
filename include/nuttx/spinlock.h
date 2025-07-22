@@ -525,6 +525,26 @@ irqstate_t spin_lock_irqsave_nopreempt(FAR volatile spinlock_t *lock)
 }
 
 /****************************************************************************
+ * Name: rspin_lock_count
+ *
+ * Description:
+ *   This function return rspinlock count.
+ *
+ * Parameters:
+ *   lock - Recursive spinlock descriptor.
+ *
+ * Return Value:
+ *  Rspinlock count.
+ *
+ ****************************************************************************/
+
+static inline_function
+uint16_t rspin_lock_count(FAR volatile rspinlock_t *lock)
+{
+  return lock->count;
+}
+
+/****************************************************************************
  * Name: rspin_lock_irqsave/rspin_lock_irqsave_nopreempt
  *
  * Description:
