@@ -53,7 +53,7 @@ software flow control in the host. But that would only work in one direction: If
 would prevent the host from overrunning the the target Rx buffering. So you
 should be able to do host-to-target software flow control. But there would still
 be no target-to-host flow control. That might not be an issue because the host
-is usually so much faster than that target.
+is usually so much faster than the target.
 
 RX Buffer Size
 ~~~~~~~~~~~~~~
@@ -64,7 +64,7 @@ that the Linux sz ignores this setting and always sends file data at the maximum
 size (``1024``) no matter what size of buffer you report. That is unfortunate
 because that, combined with the possibilities of data overrun mean that you must
 use quite large buffering for ZModem file receipt to be reliable (none of these
-issues effect sending of files).
+issues affect sending of files).
 
 Buffer Recommendations
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -135,7 +135,7 @@ Then on the target (using ``/dev/ttyS1`` as an example)::
 
 Where filename is the full path to the file to send (i.e., it begins with the
 ``/`` character). ``/dev/ttyS1`` or whatever device you select **must** support
-Hardware flow control in order to throttle therates of data transfer to fit
+Hardware flow control in order to throttle the rate of data transfer to fit
 within the allocated buffers.
 
 Receiving Files on the Target from the Linux Host PC
@@ -181,7 +181,7 @@ You can add the ``sz -v`` option multiple times, each increases the level of deb
 output. If you want to capture the Linux ``sz`` output, then re-direct ``stderr`` to
 a log file by adding ``2>sz.log`` to the end of the ``sz`` command.
 
-If you don't have the sz command on your Linux box, the package to install
+If you don't have the sz command on your Linux box, the package to install is
 ``rzsz`` (or possibly ``lrzsz``).
 
 Building the ZModem Tools to Run Under Linux
