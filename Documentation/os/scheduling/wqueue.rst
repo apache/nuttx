@@ -275,6 +275,13 @@ Work Queue Interfaces
   :return: Zero on success, ``-EINVAL`` for an invalid or predefined
     queue, or ``-EDEADLK`` when called by one of the queue's workers.
 
+.. c:function:: bool work_queue_in_queue(FAR struct kwork_wqueue_s *wqueue)
+
+  Report whether the caller runs on one of the queue's worker threads.
+  Kernel only.
+
+  :return: ``true`` if the caller is a worker of ``wqueue``.
+
 .. c:function:: int work_queue_wq(FAR struct kwork_wqueue_s *wqueue, \
                FAR struct work_s *work, worker_t worker, FAR void *arg, \
                clock_t delay)

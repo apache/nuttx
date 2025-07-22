@@ -581,6 +581,37 @@ int work_queue_free(FAR struct kwork_wqueue_s *wqueue)
 }
 
 /****************************************************************************
+ * Name: work_queue_in_queue
+ *
+ * Description:
+ *   Check if the execute context is in the work queue thread.
+ *
+ * Input Parameters:
+ *  wqueue - The work queue handle
+ *
+ * Returned Value:
+ *   true if the current thread is in the work queue, false otherwise.
+ *
+ * **************************************************************************/
+
+bool work_queue_in_queue(FAR struct kwork_wqueue_s *wqueue)
+{
+  FAR struct kworker_s *worker = wq_get_worker(wqueue);
+  pid_t pid = nxsched_gettid();
+  int i;
+
+  for (i = 0; i < wqueue->nthreads; i++)
+    {
+      if (pid == worker[i].pid)
+        {
+          return true;
+        }
+    }
+
+  return false;
+}
+
+/****************************************************************************
  * Name: work_queue_priority_wq
  *
  * Description: Get priority of the wqueue. We believe that all worker

@@ -381,6 +381,24 @@ FAR struct kwork_wqueue_s *work_queue_create(FAR const char *name,
 int work_queue_free(FAR struct kwork_wqueue_s *wqueue);
 
 /****************************************************************************
+ * Name: work_queue_in_queue
+ *
+ * Description:
+ *   Check if the execute context is in the work queue thread.
+ *
+ * Input Parameters:
+ *  wqueue - The work queue handle
+ *
+ * Returned Value:
+ *   true if the current thread is in the work queue, false otherwise.
+ *
+ * **************************************************************************/
+
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+bool work_queue_in_queue(FAR struct kwork_wqueue_s *wqueue);
+#endif
+
+/****************************************************************************
  * Name: work_queue/work_queue_wq
  *
  * Description:
