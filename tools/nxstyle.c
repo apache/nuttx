@@ -217,6 +217,12 @@ static const char *g_white_prefix[] =
   "ub32",    /* Ref:  include/fixedmath.h */
   "lua_",    /* Ref:  apps/interpreters/lua/lua-5.x.x/src/lua.h */
   "luaL_",   /* Ref:  apps/interpreters/lua/lua-5.x.x/src/lauxlib.h */
+  "Ba",      /* Ref:  apps/netutils/xedge/BAS/examples/xedge/src/xedge.h */
+  "Thread",  /* Ref:  apps/netutils/xedge/BAS/examples/xedge/src/xedge.h */
+  "LThread", /* Ref:  apps/netutils/xedge/BAS/examples/xedge/src/xedge.h */
+  "Http",    /* Ref:  apps/netutils/xedge/BAS/examples/xedge/src/xedge.h */
+  "Disk",    /* Ref:  apps/netutils/xedge/BAS/examples/xedge/src/xedge.h */
+  "Xedge",   /* Ref:  apps/netutils/xedge/BAS/examples/xedge/src/xedge.h */
   NULL
 };
 
@@ -650,6 +656,19 @@ static const char *g_white_content_list[] =
   "timeLow",
   "timeMid",
   "timeHiAndVersion",
+
+  /* Ref:
+   * apps/netutils/xedge/BAS/examples/xedge/src/xedge.h
+   */
+
+  "ltMgr",
+  "Lt",
+  "setDispExit",
+  "baGetUnixTime",
+  "platformInitDiskIo",
+  "xedgeInitDiskIo",
+  "xedgeOpenAUX",
+  "baParseDate",
 
   NULL
 };
