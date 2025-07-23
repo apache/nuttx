@@ -239,6 +239,13 @@ struct oneshot_lowerhalf_s
 
 #ifdef CONFIG_ONESHOT_COUNT
   uint32_t frequency;
+
+  uint32_t cnt2nsec_mult;
+  uint32_t cnt2nsec_shift;
+#endif
+
+#ifdef CONFIG_ONESHOT_FAST_DIVISION
+  invdiv_param64_t invdiv_freq;
 #endif
 
   /* Private lower half data may follow */
@@ -277,9 +284,78 @@ static inline_function
 void oneshot_count_init(FAR struct oneshot_lowerhalf_s *lower,
                         uint32_t frequency)
 {
+  clkcnt_t result;
   DEBUGASSERT(lower && frequency);
 
   lower->frequency = frequency;
+
+  clkcnt_best_multshift(frequency, NSEC_PER_SEC,
+                        &lower->cnt2nsec_mult,
+                        &lower->cnt2nsec_shift);
+
+  /* Ensure the maximum error of the mult-shift is less than 5ns. */
+
+  result = clkcnt_delta_cnt2nsec_fast(frequency, lower->cnt2nsec_mult,
+                                      lower->cnt2nsec_shift);
+
+  ASSERT(NSEC_PER_SEC - 5 <= result && NSEC_PER_SEC + 5 >= result);
+
+#  ifdef CONFIG_ONESHOT_FAST_DIVISION
+  /* invdiv requires the invariant-divsor > 1. */
+
+  ASSERT(frequency > 1);
+
+  invdiv_init_param64(frequency, &lower->invdiv_freq);
+#  endif
+}
+
+static inline_function
+uint32_t oneshot_delta_cnt2nsec(FAR struct oneshot_lowerhalf_s *lower,
+                                clkcnt_t delta)
+{
+  DEBUGASSERT(delta <= lower->frequency);
+
+  /* Here we use a multiply-shift method to convert the clock
+   * count to nanoseconds. This will reduce at least one divsion
+   * operation and improve the performance. Note that this is an
+   * approximate method that trades accuracy for performance, it may lead
+   * to 1-3 nanoseconds of error when converting the cycles that
+   * represent less than 1 second. If extremely high resolution time is
+   * required, then this option should be disabled.
+   */
+
+  return clkcnt_delta_cnt2nsec_fast(delta, lower->cnt2nsec_mult,
+                                    lower->cnt2nsec_shift);
+}
+
+static inline_function
+clock_t oneshot_delta_cnt2tick(FAR struct oneshot_lowerhalf_s *lower,
+                               clkcnt_t delta)
+{
+  uint32_t nsec;
+
+  DEBUGASSERT(delta <= lower->frequency);
+
+  /* Be careful of using mult-shift fast converting here.
+   * Since ticks are realted to the scheduling, inaccurate converting
+   * results may lead to wrong scheduling.
+   */
+
+  nsec = clkcnt_delta_cnt2nsec_fast(delta, lower->cnt2nsec_mult,
+                                    lower->cnt2nsec_shift);
+
+  return div_const(nsec, NSEC_PER_TICK);
+}
+
+static inline_function
+uint64_t oneshot_cnt2sec(FAR struct oneshot_lowerhalf_s *lower,
+                         clkcnt_t cnt)
+{
+#  ifdef CONFIG_ONESHOT_FAST_DIVISION
+  return clkcnt_delta_cnt2time_invdiv(cnt, 1, &lower->invdiv_freq);
+#  else
+  return clkcnt_cnt2sec(cnt, lower->frequency);
+#  endif
 }
 #endif
 
@@ -321,10 +397,10 @@ int oneshot_current(FAR struct oneshot_lowerhalf_s *lower,
 #ifdef CONFIG_ONESHOT_COUNT
   clkcnt_t cnt  = lower->ops->current(lower);
   uint32_t freq = lower->frequency;
-  uint64_t sec  = clkcnt_cnt2sec(cnt, freq);
+  uint64_t sec  = oneshot_cnt2sec(lower, cnt);
 
   cnt          -= sec * freq;
-  ts->tv_nsec   = clkcnt_delta_cnt2nsec(cnt, freq);
+  ts->tv_nsec   = oneshot_delta_cnt2nsec(lower, cnt);
   ts->tv_sec    = sec;
 #else
   ret = lower->ops->current(lower, ts);
@@ -520,10 +596,10 @@ int oneshot_tick_current(FAR struct oneshot_lowerhalf_s *lower,
 #ifdef CONFIG_ONESHOT_COUNT
   clkcnt_t cnt  = lower->ops->current(lower);
   uint32_t freq = lower->frequency;
-  uint64_t sec  = clkcnt_cnt2sec(cnt, freq);
+  uint64_t sec  = oneshot_cnt2sec(lower, cnt);
 
   cnt   -= sec * freq;
-  *tick  = sec * TICK_PER_SEC + clkcnt_delta_cnt2tick(cnt, freq);
+  *tick  = sec * TICK_PER_SEC + oneshot_delta_cnt2tick(lower, cnt);
 #else
   struct timespec ts;
 
