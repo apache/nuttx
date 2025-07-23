@@ -58,7 +58,7 @@ typedef struct spinlock_s
 
 #  define SP_UNLOCKED (spinlock_t){0, 0}
 #  define SP_LOCKED   (spinlock_t){0, 1}
-#else
+#elif defined(CONFIG_SPINLOCK) || !defined(CONFIG_HAVE_ZERO_SIZE_ARRAY)
 #  if defined(CONFIG_ARCH_HAVE_TESTSET)
 
 /* The architecture specific spinlock.h header file must also provide the
@@ -83,6 +83,20 @@ typedef _spinlock_t spinlock_t;
 
 #  define SP_UNLOCKED UP_SP_UNLOCKED
 #  define SP_LOCKED   UP_SP_LOCKED
+#else
+#  define SP_LOCKED      SP_UNLOCKED
+#  define SP_UNLOCKED    \
+     (struct spinlock_s) \
+     {                   \
+       .lock = {}        \
+     }
+
+struct spinlock_s
+{
+  uint8_t lock[0];
+};
+
+typedef struct spinlock_s spinlock_t;
 #endif
 
 #define RSPINLOCK_CPU_INVALID (-1)
