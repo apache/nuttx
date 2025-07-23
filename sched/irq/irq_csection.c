@@ -289,7 +289,6 @@ irqstate_t enter_critical_section_notrace(void)
     defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION)
 irqstate_t enter_critical_section(void)
 {
-  FAR struct tcb_s *rtcb;
   irqstate_t flags;
 
   /* If CONFIG_SCHED_CRITMONITOR_MAXTIME_BUSYWAIT >= 0,
@@ -462,8 +461,6 @@ void leave_critical_section_notrace(irqstate_t flags)
     defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION)
 void leave_critical_section(irqstate_t flags)
 {
-  FAR struct tcb_s *rtcb;
-
   if (!up_interrupt_context())
     {
       rtcb = this_task();
