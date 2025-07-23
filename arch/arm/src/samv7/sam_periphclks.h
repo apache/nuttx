@@ -29,7 +29,7 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_ARCH_CHIP_SAMV71)
+#if defined(CONFIG_ARCH_CHIP_SAMV71) || defined(CONFIG_ARCH_CHIP_PIC32CZCA70)
 #  include "samv71_periphclks.h"
 #elif defined(CONFIG_ARCH_CHIP_SAME70)
 #  include "same70_periphclks.h"
