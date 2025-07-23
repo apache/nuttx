@@ -4380,8 +4380,14 @@ struct can_dev_s *sam_mcan_initialize(int port)
 
       /* Get the revision of the chip (A or B) */
 
+#ifdef CONFIG_ARCH_CHIP_PIC32CZCA70
+      /* PIC32CZ CA70 series always have revision B MCAN */
+
+      priv->rev = 1;
+#else
       regval = getreg32(SAM_CHIPID_CIDR);
       priv->rev = regval & CHIPID_CIDR_VERSION_MASK;
+#endif
 
       /* Set the initial bit timing.  This might change subsequently
        * due to IOCTL command processing.
