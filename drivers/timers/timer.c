@@ -411,10 +411,7 @@ static int timer_poll(FAR struct file *filep,
   irqstate_t flags;
   int ret = OK;
 
-  if (upper == NULL || fds == NULL)
-    {
-      return -EINVAL;
-    }
+  DEBUGASSERT(upper != NULL && fds != NULL);
 
   flags = enter_critical_section();
 
