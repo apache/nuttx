@@ -179,6 +179,10 @@ ifeq ($(CONFIG_CRYPTO_CRYPTODEV_HARDWARE),y)
 	CHIP_CSRCS += esp_crypto.c
 endif
 
+ifeq ($(CONFIG_ESPRESSIF_USE_LP_CORE), y)
+	CHIP_CSRCS += esp_ulp.c
+endif
+
 ifeq ($(CONFIG_ESPRESSIF_EFUSE),y)
 	LDFLAGS += -u esp_efuse_startup_include_func
 endif
@@ -191,7 +195,7 @@ endif
 
 ESP_HAL_3RDPARTY_REPO   = esp-hal-3rdparty
 ifndef ESP_HAL_3RDPARTY_VERSION
-	ESP_HAL_3RDPARTY_VERSION = 8d7f4177afafdb7941182d8997d3589b1152aec0
+	ESP_HAL_3RDPARTY_VERSION = b6fa6c9098318007a61acc7c9f0f180443bb80c2
 endif
 
 ifndef ESP_HAL_3RDPARTY_URL
@@ -242,6 +246,10 @@ CHIP_SERIES = $(patsubst "%",%,$(CONFIG_ESPRESSIF_CHIP_SERIES))
 
 include chip/hal_${CHIP_SERIES}.mk
 
+ifeq ($(CONFIG_ESPRESSIF_USE_LP_CORE), y)
+	include common$(DELIM)espressif$(DELIM)/esp_ulp.mk
+endif
+
 ifeq ($(CONFIG_ESP_WIRELESS),y)
 	include common$(DELIM)espressif$(DELIM)Wireless.mk
 endif
@@ -255,6 +263,9 @@ distclean::
 	$(call DELFILE,../include/chip/irq.h)
 	$(call DELFILE,../../../vefuse.bin)
 	$(call DELDIR,chip/$(ESP_HAL_3RDPARTY_REPO))
+ifeq ($(CONFIG_ESPRESSIF_USE_LP_CORE),y)
+	$(call DELDIR,chip/ulp)
+endif
 
 INCLUDES += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)common$(DELIM)espressif
 INCLUDES += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)common$(DELIM)espressif$(DELIM)platform_include

@@ -251,6 +251,51 @@ endif # ESPRESSIF_HAVE_OTA_PARTITION
 
 endmenu # Bootloader and Image Configuration
 
+menu "LP Core (Low-power core) Coprocessor Configuration"
+
+config ESPRESSIF_USE_LP_CORE
+	bool "Enable LP Coprocessor"
+	depends on ESPRESSIF_ESP32C6
+	---help---
+		Enable LP core (Low-power core) coprocessor
+
+config ESPRESSIF_ULP_PROJECT_PATH
+	string "Path to ULP project (relative to nuttx root folder)"
+	depends on ESPRESSIF_USE_LP_CORE
+	default ""
+	---help---
+		Path to ULP project to include build system and run on LP core.
+		This path can either be a .bin file or a project folder
+
+config ESPRESSIF_ULP_COPROC_RESERVE_MEM_SIZE
+	int "RTC slow memory reserved for coprocessor"
+	depends on ESPRESSIF_USE_LP_CORE
+	default 4096
+	range 32 16352
+	---help---
+		Bytes of memory to reserve for ULP Co-processor firmware & data.
+		Data is reserved at the beginning of RTC slow memory.
+
+config ESPRESSIF_ULP_SHARED_MEM_SIZE
+	int "Size of the shared memory for ULP core"
+	depends on ESPRESSIF_USE_LP_CORE
+	default 16
+	---help---
+		Size of the shared memory defined in bytes.
+
+config ESPRESSIF_ULP_ENABLE_UBSAN
+	bool "Enable UBSan (undefined behavior sanitizer) for LP core application"
+	depends on ESPRESSIF_USE_LP_CORE
+	depends on DEBUG_SYMBOLS
+	default n
+	---help---
+		LP core supports limited set of HW exceptions. This can be overcome
+		by enabling undefined behavior sanitizer for LP core application to catch some errors.
+		But note that it will increase code size significantly and it can happen that
+		application will not fit into RTC RAM
+
+endmenu # LP Core (Low-power core) Coprocessor Configuration
+
 menu "Peripheral Support"
 
 config ESPRESSIF_RTC
