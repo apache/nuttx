@@ -1667,8 +1667,7 @@ static ssize_t nvs_read_entry(FAR struct nvs_fs *fs, FAR const uint8_t *key,
                 size_t key_size, FAR void *data, size_t len,
                 FAR uint32_t *ate_addr)
 {
-  size_t ate_size = nvs_ate_size(fs);
-  NVS_ATE(wlk_ate, ate_size);
+  NVS_ATE(wlk_ate, nvs_ate_size(fs));
   uint32_t wlk_addr;
   uint32_t rd_addr;
   uint32_t hist_addr;
@@ -2158,8 +2157,7 @@ static ssize_t nvs_read(FAR struct nvs_fs *fs,
 static int nvs_next(FAR struct nvs_fs *fs,
                     FAR struct config_data_s *pdata, bool first)
 {
-  size_t ate_size = nvs_ate_size(fs);
-  NVS_ATE(step_ate, ate_size);
+  NVS_ATE(step_ate, nvs_ate_size(fs));
   uint32_t rd_addr;
   int rc;
 
