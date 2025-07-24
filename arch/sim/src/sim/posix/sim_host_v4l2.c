@@ -37,6 +37,7 @@
 #include <sys/mman.h>
 #include <sys/ioctl.h>
 
+#include "sim_internal.h"
 #include "sim_hostvideo.h"
 
 /****************************************************************************
@@ -130,7 +131,8 @@ int host_video_dqbuf(struct host_video_dev_s *vdev, uint8_t *addr,
 
   if (-1 == host_video_ioctl(vdev->fd, VIDIOC_DQBUF, &buf))
     {
-      switch (errno)
+      int errcode = errno;
+      switch (errcode)
         {
           case EAGAIN:
 
@@ -140,7 +142,7 @@ int host_video_dqbuf(struct host_video_dev_s *vdev, uint8_t *addr,
 
           default:
             perror("VIDIOC_DQBUF");
-            return -errno;
+            return host_errno_convert(-errcode);
         }
     }
 
@@ -153,7 +155,7 @@ int host_video_dqbuf(struct host_video_dev_s *vdev, uint8_t *addr,
   if (-1 == ioctl(vdev->fd, VIDIOC_QBUF, &buf))
     {
       perror("VIDIOC_QBUF");
-      return -errno;
+      return host_errno_convert(-errno);
     }
 
   return size;
@@ -187,7 +189,7 @@ int host_video_start_capture(struct host_video_dev_s *vdev)
   if (-1 == host_video_ioctl(vdev->fd, VIDIOC_REQBUFS, &reqbuf))
     {
       perror("VIDIOC_REQBUFS");
-      return -errno;
+      return host_errno_convert(-errno);
     }
 
   if (reqbuf.count < 2)
@@ -242,7 +244,7 @@ err_out:
       vdev->buflen[i] = 0;
     }
 
-  return -errno;
+  return host_errno_convert(-errno);
 }
 
 int host_video_stop_capture(struct host_video_dev_s *vdev)
@@ -254,7 +256,7 @@ int host_video_stop_capture(struct host_video_dev_s *vdev)
   if (-1 == host_video_ioctl(vdev->fd, VIDIOC_STREAMOFF, &type))
     {
       perror("VIDIOC_STREAMOFF");
-      return -errno;
+      return host_errno_convert(-errno);
     }
 
   for (i = 0; i < MAX_REQBUFS; i++)
@@ -289,7 +291,7 @@ int host_video_set_fmt(struct host_video_dev_s *vdev,
   if (-1 == host_video_ioctl(vdev->fd, VIDIOC_S_FMT, &v4l2_fmt))
     {
       perror("VIDIOC_S_FMT");
-      return -errno;
+      return host_errno_convert(-errno);
     }
 
   memset(&streamparm, 0, sizeof(streamparm));
@@ -297,7 +299,7 @@ int host_video_set_fmt(struct host_video_dev_s *vdev,
   if (-1 == host_video_ioctl(vdev->fd, VIDIOC_G_PARM, &streamparm))
     {
       perror("VIDIOC_G_PARM");
-      return -errno;
+      return host_errno_convert(-errno);
     }
 
   streamparm.parm.capture.capturemode |= V4L2_CAP_TIMEPERFRAME;
@@ -306,7 +308,7 @@ int host_video_set_fmt(struct host_video_dev_s *vdev,
   if (-1 == host_video_ioctl(vdev->fd, VIDIOC_S_PARM, &streamparm))
     {
       perror("VIDIOC_S_PARM");
-      return -errno;
+      return host_errno_convert(-errno);
     }
 
   return 0;
@@ -329,7 +331,7 @@ int host_video_try_fmt(struct host_video_dev_s *vdev,
   if (-1 == host_video_ioctl(vdev->fd, VIDIOC_TRY_FMT, &v4l2_fmt))
     {
       perror("VIDIOC_TRY_FMT");
-      return -errno;
+      return host_errno_convert(-errno);
     }
 
   if (v4l2_fmt.fmt.pix.pixelformat != fmt)
