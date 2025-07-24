@@ -227,14 +227,16 @@ static int host_usrsock_sockopt(int sockfd, int level, int optname,
 
   if (set)
     {
-      ret = setsockopt(sockfd, level, optname, optval, *optlen);
+      ret = host_uninterruptible_errno(
+              setsockopt, sockfd, level, optname, optval, *optlen);
     }
   else
     {
-      ret = getsockopt(sockfd, level, optname, (void *)optval, optlen);
+      ret = host_uninterruptible_errno(
+              getsockopt, sockfd, level, optname, (void *)optval, optlen);
     }
 
-  return ret < 0 ? -errno : 0;
+  return ret < 0 ? ret : 0;
 }
 
 /****************************************************************************
@@ -289,10 +291,11 @@ int host_usrsock_socket(int domain, int type, int protocol)
       return -EINVAL;
     }
 
-  ret = socket(domain, type, protocol);
+  ret = host_uninterruptible_errno(socket, domain, type, protocol);
+
   if (ret < 0)
     {
-      return -errno;
+      return ret;
     }
 
   /* Reuse all addresses to avoid bind fail if the
@@ -326,11 +329,11 @@ int host_usrsock_connect(int sockfd,
   sockaddr_to_native(addr, addrlen, &naddr, &naddrlen);
 
   sock_nonblock(sockfd, false);
-  ret = connect(sockfd, &naddr, naddrlen);
+  ret = host_uninterruptible_errno(connect, sockfd, &naddr, naddrlen);
   sock_nonblock(sockfd, true);
   if (ret < 0)
     {
-      return -errno;
+      return ret;
     }
 
   host_usrsock_set_fd(sockfd, &g_active_read_fds);
@@ -350,16 +353,18 @@ ssize_t host_usrsock_sendto(int sockfd, const void *buf,
   if (dest_addr && addrlen >= sizeof(*dest_addr))
     {
       sockaddr_to_native(dest_addr, addrlen, &naddr, &naddrlen);
-      ret = sendto(sockfd, buf, len, flags, &naddr, naddrlen);
+      ret = host_uninterruptible_errno(
+              sendto, sockfd, buf, len, flags, &naddr, naddrlen);
     }
   else
     {
-      ret = sendto(sockfd, buf, len, flags, NULL, 0);
+      ret = host_uninterruptible_errno(
+              sendto, sockfd, buf, len, flags, NULL, 0);
     }
 
   if (ret < 0)
     {
-      if (errno == EAGAIN)
+      if (ret == -EAGAIN)
         {
           host_usrsock_set_fd(sockfd, &g_active_write_fds);
         }
@@ -369,7 +374,7 @@ ssize_t host_usrsock_sendto(int sockfd, const void *buf,
         }
     }
 
-  return ret >= 0 ? ret : -errno;
+  return ret;
 }
 
 ssize_t host_usrsock_recvfrom(int sockfd, void *buf, size_t len, int flags,
@@ -383,21 +388,23 @@ ssize_t host_usrsock_recvfrom(int sockfd, void *buf, size_t len, int flags,
   if (src_addr && addrlen && *addrlen >= sizeof(*src_addr))
     {
       sockaddr_to_native(src_addr, *addrlen, &naddr, &naddrlen);
-      ret = recvfrom(sockfd, buf, len, flags, &naddr, &naddrlen);
+      ret = host_uninterruptible_errno(
+              recvfrom, sockfd, buf, len, flags, &naddr, &naddrlen);
     }
   else
     {
-      ret = recvfrom(sockfd, buf, len, flags, NULL, NULL);
+      ret = host_uninterruptible_errno(
+              recvfrom, sockfd, buf, len, flags, NULL, NULL);
     }
 
   if (ret <= 0)
     {
-      if (ret == 0 || errno != EAGAIN)
+      if (ret == 0 || ret != -EAGAIN)
         {
           usrsock_event_callback(sockfd, NUTTX_USRSOCK_EVENT_REMOTE_CLOSED);
         }
 
-      return -errno;
+      return ret;
     }
 
   if (src_addr && addrlen && *addrlen >= sizeof(*src_addr))
@@ -432,10 +439,10 @@ int host_usrsock_getsockname(int sockfd,
   struct sockaddr naddr;
   int ret;
 
-  ret = getsockname(sockfd, &naddr, &naddrlen);
+  ret = host_uninterruptible_errno(getsockname, sockfd, &naddr, &naddrlen);
   if (ret < 0)
     {
-      return -errno;
+      return ret;
     }
 
   if (addr && addrlen && *addrlen >= sizeof(*addr))
@@ -454,10 +461,10 @@ int host_usrsock_getpeername(int sockfd,
   struct sockaddr naddr;
   int ret;
 
-  ret = getpeername(sockfd, &naddr, &naddrlen);
+  ret = host_uninterruptible_errno(getpeername, sockfd, &naddr, &naddrlen);
   if (ret < 0)
     {
-      return -errno;
+      return ret;
     }
 
   if (addr && addrlen && *addrlen >= sizeof(*addr))
@@ -474,20 +481,23 @@ int host_usrsock_bind(int sockfd,
 {
   struct sockaddr naddr;
   socklen_t naddrlen;
+  int ret;
 
   sockaddr_to_native(addr, addrlen, &naddr, &naddrlen);
 
-  return bind(sockfd, &naddr, naddrlen) < 0 ? -errno : 0;
+  ret = host_uninterruptible_errno(bind, sockfd, &naddr, naddrlen);
+
+  return ret < 0 ? ret : 0;
 }
 
 int host_usrsock_listen(int sockfd, int backlog)
 {
   int ret;
 
-  ret = listen(sockfd, backlog);
+  ret = host_uninterruptible_errno(listen, sockfd, backlog);
   if (ret < 0)
     {
-      return -errno;
+      return ret;
     }
 
   host_usrsock_set_fd(sockfd, &g_active_read_fds);
@@ -502,10 +512,10 @@ int host_usrsock_accept(int sockfd, struct nuttx_sockaddr *addr,
   struct sockaddr naddr;
   int ret;
 
-  ret = accept(sockfd, &naddr, &naddrlen);
+  ret = host_uninterruptible_errno(accept, sockfd, &naddr, &naddrlen);
   if (ret <= 0)
     {
-      return -errno;
+      return ret;
     }
 
   if (addr && addrlen && *addrlen >= sizeof(*addr))
@@ -527,6 +537,7 @@ int host_usrsock_ioctl(int fd, unsigned long request, ...)
 
 int host_usrsock_shutdown(int sockfd, int how)
 {
+  int ret = 0;
   switch (how)
     {
       case NUTTX_SHUT_RD:
@@ -542,7 +553,9 @@ int host_usrsock_shutdown(int sockfd, int how)
         return -EINVAL;
     }
 
-  return shutdown(sockfd, how) < 0 ? -errno : 0;
+  ret = host_uninterruptible_errno(shutdown, sockfd, how);
+
+  return ret < 0 ? ret : 0;
 }
 
 void host_usrsock_loop(void)
