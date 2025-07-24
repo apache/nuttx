@@ -360,6 +360,23 @@
 
 /* Alternate function pin selections ****************************************/
 
+/* ADC */
+
+#define GPIO_ADC12_INP5   GPIO_ADC12_INP5_0                      /* PB1, channel 5 */
+#define GPIO_ADC123_INP10 GPIO_ADC123_INP10_0                    /* PC0, channel 10 */
+#define GPIO_ADC123_INP12 GPIO_ADC123_INP12_0                    /* PC2, channel 12 */
+#define GPIO_ADC12_INP13  GPIO_ADC12_INP13_0                     /* PC3, channel 13 */
+#define GPIO_ADC12_INP15  GPIO_ADC12_INP15_0                     /* PA3, channel 15 */
+#define GPIO_ADC12_INP18  GPIO_ADC12_INP18_0                     /* PA4, channel 18 */
+#define GPIO_ADC12_INP19  GPIO_ADC12_INP19_0                     /* PA5, channel 19 */
+#define GPIO_ADC123_INP7  GPIO_ADC12_INP7_0                      /* PA7, channel 7 */
+#define GPIO_ADC123_INP11 GPIO_ADC123_INP11_0                    /* PC1, channel 11 */
+#define GPIO_ADC2_INP2    GPIO_ADC2_INP2_0                       /* PF13, channel 2 */
+#define GPIO_ADC12_INP3   GPIO_ADC12_INP3_0                      /* PA6, channel 3  */
+#define GPIO_ADC12_INP14  GPIO_ADC12_INP14_0                     /* PA2, channel 14 */
+#define GPIO_ADC12_INP4   GPIO_ADC12_INP4_0                      /* PC4, channel 4  */
+#define GPIO_ADC12_INP8   GPIO_ADC12_INP8_0                      /* PC5, channel 8  */
+
 /* USART3 (Nucleo Virtual Console) */
 
 #define GPIO_USART3_RX    (GPIO_USART3_RX_3 | GPIO_SPEED_100MHz) /* PD9 */
