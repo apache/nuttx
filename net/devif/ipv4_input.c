@@ -187,6 +187,8 @@ static int ipv4_in(FAR struct net_driver_s *dev)
 
   /* Get the size of the packet minus the size of link layer header */
 
+  dev->d_len -= NET_LL_HDRLEN(dev);
+
   if (IPv4_HDRLEN > dev->d_len)
     {
       nwarn("WARNING: Packet shorter than IPv4 header\n");
@@ -214,6 +216,9 @@ static int ipv4_in(FAR struct net_driver_s *dev)
     }
   else if (totlen > dev->d_len)
     {
+#ifdef CONFIG_NET_STATISTICS
+      g_netstats.ipv4.drop++;
+#endif
       nwarn("WARNING: IP packet shorter than length in IP header\n");
       goto drop;
     }
