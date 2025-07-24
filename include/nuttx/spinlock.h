@@ -618,6 +618,76 @@ irqstate_t rspin_lock_irqsave_nopreempt(FAR rspinlock_t *lock)
 }
 
 /****************************************************************************
+ * Name: rspin_trylock/rspin_trylock_irqsave/rspin_trylock_irqsave_nopreempt
+ *
+ * Description:
+ *   Nest supported spinlock, try once to lock the rspinlock, can support
+ *   UINT16_MAX max depth.
+ *   As we should not disable irq for long time, sched also locked.
+ *   Similar feature with enter_critical_section, but isolate by instance.
+ *
+ *   If SPINLOCK is enabled:
+ *     Will take spinlock each cpu first call.
+ *
+ *   If SPINLOCK is not enabled:
+ *     Equivalent to up_irq_save() + sched_lock().
+ *     Will only sched_lock once when first called.
+ *
+ * Input Parameters:
+ *   lock - Caller specific rspinlock_s. not NULL.
+ *
+ * Returned Value:
+ *   true  - Success, the spinlock was successfully locked
+ *   false - Failure, the spinlock was already locked
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SPINLOCK
+static inline_function bool rspin_trylock(FAR rspinlock_t *lock)
+{
+  rspinlock_t new_val;
+  rspinlock_t old_val = RSPINLOCK_INITIALIZER;
+  int         cpu     = this_cpu() + 1;
+
+  /* Already owned this lock. */
+
+  if (lock->owner == cpu)
+    {
+      lock->count += 1;
+      return true;
+    }
+
+  new_val.count = 1;
+  new_val.owner = cpu;
+
+  /* Try seize the ownership of the lock. */
+
+  return atomic_cmpxchg_acquire((FAR atomic_t *)&lock->val,
+                                (FAR atomic_t *)&old_val.val, new_val.val);
+}
+
+#  define rspin_trylock_irqsave(l, f) \
+    ({ \
+      (f) = up_irq_save(); \
+      rspin_trylock(l) ? \
+      true : ({ up_irq_restore(f); false; }); \
+    })
+#else
+#  define rspin_trylock_irqsave(l, f) \
+    ({ \
+      (void)(l); \
+      (f) = up_irq_save(); \
+      true; \
+    })
+#endif
+
+#define rspin_trylock_irqsave_nopreempt(l, f) \
+  ({ \
+    rspin_trylock_irqsave(l, f) ? \
+    ({ sched_lock(); true; }) : false; \
+  })
+
+/****************************************************************************
  * Name: spin_trylock_irqsave_notrace
  *
  * Description:
