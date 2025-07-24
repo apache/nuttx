@@ -443,7 +443,12 @@ static int ipv4_in(FAR struct net_driver_s *dev)
 #endif
 
         nwarn("WARNING: Unrecognized IP protocol\n");
+#if defined(CONFIG_NET_ICMP) && !defined(CONFIG_NET_ICMP_NO_STACK)
+        icmp_reply(dev, ICMP_DEST_UNREACHABLE, ICMP_PROT_UNREACH);
+        goto done;
+#else
         goto drop;
+#endif
     }
 
 #ifdef CONFIG_NET_IPFILTER
@@ -451,7 +456,8 @@ static int ipv4_in(FAR struct net_driver_s *dev)
 #endif
 
 #if defined(CONFIG_NET_IPFORWARD) || defined(CONFIG_NET_IPFILTER) || \
-    (defined(CONFIG_NET_BROADCAST) && defined(NET_UDP_HAVE_STACK))
+    (defined(CONFIG_NET_BROADCAST) && defined(NET_UDP_HAVE_STACK)) || \
+    defined(CONFIG_NET_ICMP) && !defined(CONFIG_NET_ICMP_NO_STACK)
 done:
 #endif
 
