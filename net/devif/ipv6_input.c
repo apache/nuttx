@@ -224,6 +224,8 @@ static int ipv6_in(FAR struct net_driver_s *dev)
 
   /* Get the size of the packet minus the size of link layer header */
 
+  dev->d_len -= NET_LL_HDRLEN(dev);
+
   if (IPv6_HDRLEN > dev->d_len)
     {
       nwarn("WARNING: Packet shorter than IPv6 header\n");
