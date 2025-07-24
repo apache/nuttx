@@ -148,7 +148,7 @@ int host_system(char *buf, size_t len, const char *fmt, ...)
       fp = host_uninterruptible(popen, cmd, "r");
       if (fp == NULL)
         {
-          ret = -errno;
+          ret = host_errno_convert(-errno);
           up_irq_restore(flags);
           return ret;
         }
