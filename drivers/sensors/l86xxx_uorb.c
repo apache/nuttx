@@ -548,7 +548,6 @@ static int l86xxx_thread(int argc, FAR char *argv[])
       (FAR l86xxx_dev_s *)((uintptr_t)strtoul(argv[1], NULL, 16));
   struct sensor_gnss gps;
   memset(&gps, 0, sizeof(gps));
-  dev->enabled = true;
   int err;
   int bw;
 
@@ -792,6 +791,7 @@ int l86xxx_register(FAR const char *uartpath, int devno)
   if (err < 0)
     {
       snwarn("Couldn't set baud rate of device: %d\n", err);
+      goto close_file;
     }
   #endif
 
@@ -799,6 +799,7 @@ int l86xxx_register(FAR const char *uartpath, int devno)
   if (err < 0)
     {
       snwarn("Couldn't set position fix interval, %d\n", err);
+      goto close_file;
     }
 
   /* Register UORB Sensor */
