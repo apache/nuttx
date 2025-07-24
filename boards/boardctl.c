@@ -819,6 +819,10 @@ int boardctl(unsigned int cmd, uintptr_t arg)
                       spin_lock(lock);
                     }
                 }
+              else
+                {
+                  *flags = up_irq_save();
+                }
             }
           else if (spinlock->action == BOARDIOC_SPINLOCK_TRYLOCK)
             {
@@ -849,6 +853,10 @@ int boardctl(unsigned int cmd, uintptr_t arg)
                     {
                       spin_unlock(lock);
                     }
+                }
+              else
+                {
+                  up_irq_restore(*flags);
                 }
             }
           else
