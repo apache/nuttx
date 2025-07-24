@@ -526,6 +526,17 @@
 
 #define SENSOR_GNSS_SAT_INFO_MAX                    4
 
+/* GNSS satellite status flags, see `flags` of `struct sensor_gnss_satellite`
+ * Refs: https://android.googlesource.com/platform/hardware/libhardware/+/
+ *       refs/heads/android14-release/include/hardware/gnss-base.h#134
+ */
+
+#define SENSOR_GNSS_SV_FLAGS_NONE                   (0)
+#define SENSOR_GNSS_SV_FLAGS_HAS_EPHEMERIS_DATA     (1 << 0)
+#define SENSOR_GNSS_SV_FLAGS_HAS_ALMANAC_DATA       (1 << 1)
+#define SENSOR_GNSS_SV_FLAGS_USED_IN_FIX            (1 << 2)
+#define SENSOR_GNSS_SV_FLAGS_HAS_CARRIER_FREQUENCY  (1 << 3)
+
 /* Maximum length of sensor device information name and path name. */
 
 #define SENSOR_INFO_NAME_SIZE                       32
@@ -951,7 +962,11 @@ struct sensor_gnss_satellite
 
   uint32_t constellation;
 
-  float cf;                 /* Carrier Frequency(Hz), GSV.signal_id */
+  /* Carrier Frequency(Hz), GSV.signal_id.
+   * Flag: SENSOR_GNSS_SV_FLAGS_HAS_CARRIER_FREQUENCY
+   */
+
+  float cf;
 
   struct satellite
   {
@@ -972,6 +987,10 @@ struct sensor_gnss_satellite
    */
 
     uint32_t snr;
+
+  /* Indicating what fields are valid. */
+
+    uint32_t flags;
   }
   info[SENSOR_GNSS_SAT_INFO_MAX];
 };
