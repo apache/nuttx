@@ -230,11 +230,13 @@ static int icmpv6_send_message(FAR struct net_driver_s *dev, bool advertise)
    * net_sem_wait will also terminate if a signal is received.
    */
 
+  netdev_unlock(dev);
   do
     {
       net_sem_wait(&state.snd_sem);
     }
   while (!state.snd_sent);
+  netdev_lock(dev);
 
   ret = state.snd_result;
   devif_dev_callback_free(dev, state.snd_cb);
@@ -271,6 +273,9 @@ errout_with_semaphore:
  *   Zero (OK) is returned on success; A negated errno value is returned on
  *   any failure.
  *
+ * Assumptions:
+ *   This function must be called with the network locked.
+ *
  ****************************************************************************/
 
 int icmpv6_autoconfig(FAR struct net_driver_s *dev)
@@ -284,22 +289,6 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
 
   DEBUGASSERT(dev);
   ninfo("Auto-configuring %s\n", dev->d_ifname);
-
-  /* Lock the network.
-   *
-   * NOTE:  Normally it is required that the network be in the "down" state
-   * when re-configuring the network interface.  This is thought not to be
-   * a problem here because.
-   *
-   *   1. The ICMPv6 logic here runs with the network locked so there can be
-   *      no outgoing packets with bad source IP addresses from any
-   *      asynchronous network activity using the device being reconfigured.
-   *   2. Incoming packets depend only upon the MAC filtering.  Network
-   *      drivers do not use the IP address; they filter incoming packets
-   *      using only the MAC address which is not being changed here.
-   */
-
-  net_lock();
 
   /* IPv6 Stateless Autoconfiguration
    * Reference:
@@ -354,7 +343,6 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
 
           nerr("ERROR: IP conflict\n");
 
-          net_unlock();
           return -EEXIST;
         }
     }
@@ -369,7 +357,6 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
   ret = netdev_ipv6_add(dev, lladdr, net_ipv6_mask2pref(g_ipv6_llnetmask));
   if (ret < 0)
     {
-      net_unlock();
       return ret;
     }
 
@@ -463,7 +450,6 @@ got_lladdr:
 
   /* On success, the new address was already set (in icmpv_rnotify()). */
 
-  net_unlock();
   return ret;
 }
 
