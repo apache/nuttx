@@ -181,6 +181,7 @@ struct pci_epc_mem_s
  * num_windows: Number of mem supported by device
  * max_functions: Max number of functions that can be configured in this EPC
  * node: The node of epc list
+ * dmaheap: The dma heap
  * lock: Mutex to protect pci_epc ops
  * funcno_map: Bitmap to manage physical function number
  * priv: The private data
@@ -195,6 +196,7 @@ struct pci_epc_ctrl_s
   unsigned int num_windows;
   uint8_t max_functions;
   struct list_node node;
+  FAR struct mm_heap_s *dmaheap;
 
   /* Mutex to protect against concurrent access of EP controller */
 
@@ -714,9 +716,11 @@ void pci_epc_bme_notify(FAR struct pci_epc_ctrl_s *epc);
  *   Invoke to create a new EPC device and add it to pci_epc class.
  *
  * Input Parameters:
- *   name - EPC name strings
- *   priv - The epc priv data
- *   ops  - Function pointers for performing EPC operations
+ *   name        - EPC name strings
+ *   priv        - The epc priv data
+ *   dma_addr    - Used for inbound address
+ *   dma_len     - The dma memory len
+ *   ops         - Function pointers for performing EPC operations
  *
  * Returned Value:
  *   Return struct pci_epc_ctrl_s * if success, NULL if failed.
@@ -724,9 +728,8 @@ void pci_epc_bme_notify(FAR struct pci_epc_ctrl_s *epc);
  ****************************************************************************/
 
 FAR struct pci_epc_ctrl_s *
-pci_epc_create(FAR const char *name, FAR void *priv,
-               FAR const struct pci_epc_ops_s *ops);
-
+pci_epc_create(FAR const char *name, FAR void *priv, FAR void *dma_addr,
+               size_t dma_len, FAR const struct pci_epc_ops_s *ops);
 /****************************************************************************
  * Name: pci_epc_destroy
  *
@@ -851,5 +854,64 @@ FAR void *pci_epc_mem_alloc_addr(FAR struct pci_epc_ctrl_s *epc,
 
 void pci_epc_mem_free_addr(FAR struct pci_epc_ctrl_s *epc,
                            uintptr_t phys_addr, size_t size);
+
+/****************************************************************************
+ * Name: pci_epc_dma_alloc
+ *
+ * Description:
+ *   This function is used to create a new endpoint controller (EPC) device.
+ *
+ *   Invoke to destroy the PCI EPC device.
+ *
+ * Input Parameters:
+ *   epc  - The EPC device that has to be destroyed
+ *   size - The dma memory size
+ *
+ * Returned Value:
+ *   The point of dma memory if success, NULL if failed
+ *
+ ****************************************************************************/
+
+FAR void *pci_epc_dma_alloc(FAR struct pci_epc_ctrl_s *epc, size_t size);
+
+/****************************************************************************
+ * Name: pci_epc_dma_memalign
+ *
+ * Description:
+ *   This function is used to create a new endpoint controller (EPC) device.
+ *
+ *   Invoke to destroy the PCI EPC device.
+ *
+ * Input Parameters:
+ *   epc       - The EPC device that has to be destroyed
+ *   alignment - Alignment size
+ *   size      - The dma memory size
+ *
+ * Returned Value:
+ *   The point of dma memory if success, NULL if failed
+ *
+ ****************************************************************************/
+
+FAR void *pci_epc_dma_memalign(FAR struct pci_epc_ctrl_s *epc,
+                               size_t alignment, size_t size);
+
+/****************************************************************************
+ * Name: pci_epc_dma_free
+ *
+ * Description:
+ *   This function is used to create a new endpoint controller (EPC) device.
+ *
+ *   Invoke to destroy the PCI EPC device.
+ *
+ * Input Parameters:
+ *   epc       - The EPC device that has to be destroyed
+ *   mem       - The dma memory need ed to be free
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void pci_epc_dma_free(FAR struct pci_epc_ctrl_s *epc, FAR void *mem);
 
 #endif /* __INCLUDE_NUTTX_PCI_PCI_EPC_H */
