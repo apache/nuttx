@@ -600,6 +600,115 @@ to ``Application image secondary slot``.
    **After disabling UART Download Mode you will not be able to flash other images through UART.**
 
 
+Flash Allocation for MCUBoot
+----------------------------
+
+When MCUBoot is enabled on ESP32-C3, the flash memory is organized as follows
+based on the default KConfig values:
+
+**Flash Layout (MCUBoot Enabled)**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 20 20
+   :align: left
+
+   * - Region
+     - Offset
+     - Size
+   * - Bootloader
+     - 0x000000
+     - 64KB
+   * - E-Fuse Virtual (see Note)
+     - 0x010000
+     - 64KB
+   * - Primary Application Slot (/dev/ota0)
+     - 0x020000
+     - 1MB
+   * - Secondary Application Slot (/dev/ota1)
+     - 0x120000
+     - 1MB
+   * - Scratch Partition (/dev/otascratch)
+     - 0x220000
+     - 256KB
+   * - Storage MTD (optional)
+     - 0x260000
+     - 1MB
+   * - Available Flash
+     - 0x360000+
+     - Remaining
+
+.. raw:: html
+
+   <div style="clear: both"></div>
+
+
+**Note**: The E-Fuse Virtual region is optional and only used when
+``ESPRESSIF_EFUSE_VIRTUAL_KEEP_IN_FLASH`` is enabled. However, this 64KB
+location is always allocated in the memory layout to prevent accidental
+erasure during board flashing operations, ensuring data preservation if
+virtual E-Fuses are later enabled.
+
+.. code-block:: text
+
+    Memory Map (Addresses in hex):
+
+    0x000000  ┌─────────────────────────────┐
+              │                             │
+              │      MCUBoot Bootloader     │
+              │           (64KB)            │
+              │                             │
+    0x010000  ├─────────────────────────────┤
+              │       E-Fuse Virtual        │
+              │           (64KB)            │
+    0x020000  ├─────────────────────────────┤
+              │                             │
+              │      Primary App Slot       │
+              │            (1MB)            │
+              │          /dev/ota0          │
+              │                             │
+    0x120000  ├─────────────────────────────┤
+              │                             │
+              │     Secondary App Slot      │
+              │            (1MB)            │
+              │          /dev/ota1          │
+              │                             │
+    0x220000  ├─────────────────────────────┤
+              │                             │
+              │      Scratch Partition      │
+              │           (256KB)           │
+              │       /dev/otascratch       │
+              │                             │
+    0x260000  ├─────────────────────────────┤
+              │                             │
+              │   Storage MTD (optional)    │
+              │            (1MB)            │
+              │                             │
+    0x360000  ├─────────────────────────────┤
+              │                             │
+              │       Available Flash       │
+              │         (Remaining)         │
+              │                             │
+              └─────────────────────────────┘
+
+The key KConfig options that control this layout:
+
+- ``ESPRESSIF_OTA_PRIMARY_SLOT_OFFSET`` (default: 0x20000)
+- ``ESPRESSIF_OTA_SECONDARY_SLOT_OFFSET`` (default: 0x120000)
+- ``ESPRESSIF_OTA_SLOT_SIZE`` (default: 0x100000)
+- ``ESPRESSIF_OTA_SCRATCH_OFFSET`` (default: 0x220000)
+- ``ESPRESSIF_OTA_SCRATCH_SIZE`` (default: 0x40000)
+- ``ESPRESSIF_STORAGE_MTD_OFFSET`` (default: 0x260000 when MCUBoot enabled)
+- ``ESPRESSIF_STORAGE_MTD_SIZE`` (default: 0x100000)
+
+For MCUBoot operation:
+
+- The **Primary Slot** contains the currently running application
+- The **Secondary Slot** receives OTA updates
+- The **Scratch Partition** is used by MCUBoot for image swapping during updates
+- MCUBoot manages image validation, confirmation, and rollback functionality
+
+
 _`Managing esptool on virtual environment`
 ==========================================
 
