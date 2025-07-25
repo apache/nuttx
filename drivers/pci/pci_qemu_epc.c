@@ -803,7 +803,7 @@ static int qemu_epc_probe(FAR struct pci_device_s *dev)
     }
 
   qep->pdev = dev;
-  epc = pci_epc_create("qemu_epc", qep, &g_qemu_epc_ops);
+  epc = pci_epc_create("qemu_epc", qep, NULL, 0, &g_qemu_epc_ops);
   if (epc == NULL)
     {
       pcierr("Failed to create epc device\n");
