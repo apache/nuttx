@@ -249,6 +249,39 @@ static bool icmp_deliver(FAR struct net_driver_s *dev, uint16_t iphdrlen)
 #endif
 
 /****************************************************************************
+ * Name: icmp_timestamp
+ *
+ * Description:
+ *   Return milliseconds since midnight.
+ *
+ ****************************************************************************/
+
+static uint32_t icmp_timestamp(void)
+{
+  struct timespec ts;
+  uint32_t secs;
+  uint32_t msecs;
+
+  nxclock_gettime(CLOCK_REALTIME, &ts);
+
+  /* Get secs since midnight. */
+
+  secs = ts.tv_sec % 86400;
+
+  /* Convert to msecs. */
+
+  msecs = secs * MSEC_PER_SEC;
+
+  /* Convert nsec to msec. */
+
+  msecs += ts.tv_nsec / NSEC_PER_MSEC;
+
+  /* Convert to network byte order. */
+
+  return msecs;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -412,6 +445,62 @@ void icmp_input(FAR struct net_driver_s *dev)
         }
     }
 #endif
+  else if (icmp->type == ICMP_TIMESTAMP_REQUEST)
+    {
+      uint16_t len = iphdrlen + sizeof(struct icmp_hdr_s) +
+                     3 * sizeof(uint32_t);
+      uint32_t timestamp;
+      FAR uint8_t *buf;
+
+      /* Change the ICMP type */
+
+      icmp->type = ICMP_TIMESTAMP_REPLY;
+
+      /* Swap IP addresses. */
+
+      net_ipv4addr_hdrcopy(ipv4->destipaddr, ipv4->srcipaddr);
+      net_ipv4addr_hdrcopy(ipv4->srcipaddr, &dev->d_ipaddr);
+
+      ipv4->len[0] = (len >> 8);
+      ipv4->len[1] = (len & 0xff);
+
+      ipv4->ipchksum = 0;
+#ifdef CONFIG_NET_IPV4_CHECKSUMS
+      ipv4->ipchksum = ~ipv4_chksum(ipv4);
+#endif
+
+      dev->d_len = len;
+
+      /* Update device buffer length */
+
+      iob_update_pktlen(dev->d_iob, dev->d_len, false);
+
+      /* Set Receive Timestamp and Transmit Timestamp */
+
+      buf = (FAR uint8_t *)(icmp + 1);
+      timestamp = htonl(icmp_timestamp());
+      memcpy(buf + 4, &timestamp, 4);
+      memcpy(buf + 8, &timestamp, 4);
+
+      /* Recalculate the ICMP checksum */
+
+      icmp->icmpchksum = 0;
+#ifdef CONFIG_NET_ICMP_CHECKSUMS
+      icmp->icmpchksum = ~icmp_chksum_iob(dev->d_iob);
+      if (icmp->icmpchksum == 0)
+        {
+          icmp->icmpchksum = 0xffff;
+        }
+#endif
+
+      ninfo("Outgoing ICMP packet length: %d (%d)\n",
+            dev->d_len, (ipv4->len[0] << 8) | ipv4->len[1]);
+
+#ifdef CONFIG_NET_STATISTICS
+      g_netstats.icmp.sent++;
+      g_netstats.ipv4.sent++;
+#endif
+    }
 
   /* Otherwise the ICMP input was not processed */
 
