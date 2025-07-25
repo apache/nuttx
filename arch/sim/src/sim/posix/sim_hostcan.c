@@ -54,11 +54,13 @@ int host_can_init(struct sim_can_s *can, int devidx)
 
   /* Get socket */
 
-  can->fd = socket(PF_CAN, SOCK_RAW, CAN_RAW);
-  if (can->fd < 0)
+  ret = host_uninterruptible_errno(socket, PF_CAN, SOCK_RAW, CAN_RAW);
+  if (ret < 0)
     {
-      return -errno;
+      return ret;
     }
+
+  can->fd = ret;
 
   /* Get SocketCAN interface */
 
@@ -75,19 +77,21 @@ int host_can_init(struct sim_can_s *can, int devidx)
 
   /* Switch to CAN FD mode */
 
-  ret = setsockopt(can->fd, SOL_CAN_RAW, CAN_RAW_FD_FRAMES, &enable_canfd,
-                   sizeof(enable_canfd));
+  ret = host_uninterruptible_errno(
+          setsockopt, can->fd, SOL_CAN_RAW, CAN_RAW_FD_FRAMES, &enable_canfd,
+                      sizeof(enable_canfd));
   if (ret < 0)
     {
-      return -errno;
+      return ret;
     }
 
   /* Bind socket */
 
-  ret = bind(can->fd, (struct sockaddr *)&addr, sizeof(addr));
+  ret = host_uninterruptible_errno(
+          bind, can->fd, (struct sockaddr *)&addr, sizeof(addr));
   if (ret < 0)
     {
-      return -errno;
+      return ret;
     }
 
   return 0;
