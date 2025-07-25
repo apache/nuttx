@@ -22,12 +22,18 @@
 
 include $(TOPDIR)/Make.defs
 
-CSRCS = stm32_boot.c stm32_bringup.c stm32_usb.c stm32_ioctl.c
+CSRCS = stm32_boot.c stm32_bringup.c stm32_usb.c stm32_ioctl.c stm32_spi.c
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += stm32_autoleds.c
 else
 CSRCS += stm32_userleds.c
+endif
+
+ifeq ($(CONFIG_VIDEO_FB),y)
+  ifeq ($(CONFIG_LCD_ST7735),y)
+    CSRCS += stm32_lcd_st7735.c
+  endif
 endif
 
 ifeq ($(CONFIG_STM32H7_SDMMC),y)
