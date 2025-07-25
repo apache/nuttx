@@ -177,3 +177,4 @@ libs/libc/tre-mem.c
             fs_ep, &fs_ep->sems, &fs_ep->reqq);
 #define RTPROT_RA                        9    /* RDISC/ND router advertisements */
   /* Followed by one or more ND options */
+   *    message using the Neighbor Discovery (ND) protocol. It then listens

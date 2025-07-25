@@ -38,6 +38,7 @@
 #include <nuttx/mm/iob.h>
 #include <nuttx/net/net.h>
 
+#include "utils/utils.h"
 #include "icmpv6/icmpv6.h"
 
 /****************************************************************************
@@ -62,7 +63,7 @@ int icmpv6_ioctl(FAR struct socket *psock, int cmd, unsigned long arg)
   FAR struct icmpv6_conn_s *conn = psock->s_conn;
   int ret = OK;
 
-  net_lock();
+  conn_lock(&conn->sconn);
 
   switch (cmd)
     {
@@ -91,7 +92,7 @@ int icmpv6_ioctl(FAR struct socket *psock, int cmd, unsigned long arg)
         break;
     }
 
-  net_unlock();
+  conn_unlock(&conn->sconn);
 
   return ret;
 }

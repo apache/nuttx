@@ -377,7 +377,7 @@ ssize_t icmpv6_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
   net_ipv6addr_copy(state.snd_toaddr.s6_addr16,
                     inaddr->sin6_addr.s6_addr16);
 
-  net_lock();
+  conn_dev_lock(&conn->sconn, dev);
 
   /* Set up the callback */
 
@@ -405,8 +405,10 @@ ssize_t icmpv6_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
        * net_sem_timedwait will also terminate if a signal is received.
        */
 
+      conn_dev_unlock(&conn->sconn, dev);
       ret = net_sem_timedwait(&state.snd_sem,
                           _SO_TIMEOUT(conn->sconn.s_sndtimeo));
+      conn_dev_lock(&conn->sconn, dev);
       if (ret < 0)
         {
           if (ret == -ETIMEDOUT)
@@ -439,7 +441,7 @@ ssize_t icmpv6_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 
   nxsem_destroy(&state.snd_sem);
 
-  net_unlock();
+  conn_dev_unlock(&conn->sconn, dev);
 
   /* Return the negated error number in the event of a failure, or the
    * number of bytes sent on success.
