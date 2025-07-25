@@ -40,6 +40,7 @@
 
 #include "icmpv6/icmpv6.h"
 #include "inet/inet.h"
+#include "utils/utils.h"
 
 #ifdef CONFIG_NET_ICMPv6_SOCKET
 
@@ -142,6 +143,8 @@ static int icmpv6_setup(FAR struct socket *psock)
         {
           memset(&conn->filter, 0xff, sizeof(conn->filter));
         }
+
+      nxmutex_init(&conn->sconn.s_lock);
 
       /* Save the pre-allocated connection in the socket structure */
 
@@ -322,7 +325,6 @@ static int icmpv6_getsockopt_internal(FAR struct socket *psock, int option,
       return -ENOPROTOOPT;
     }
 
-  net_lock();
   switch (option)
     {
       case ICMP6_FILTER:
@@ -334,7 +336,9 @@ static int icmpv6_getsockopt_internal(FAR struct socket *psock, int option,
               *value_len = sizeof(struct icmp6_filter);
             }
 
+          conn_lock(&conn->sconn);
           memcpy(value, &conn->filter, *value_len);
+          conn_unlock(&conn->sconn);
           ret = OK;
         }
         break;
@@ -345,7 +349,6 @@ static int icmpv6_getsockopt_internal(FAR struct socket *psock, int option,
         break;
     }
 
-  net_unlock();
   return ret;
 }
 
@@ -430,7 +433,6 @@ static int icmpv6_setsockopt_internal(FAR struct socket *psock, int option,
       return -ENOPROTOOPT;
     }
 
-  net_lock();
   switch (option)
     {
       case ICMP6_FILTER:
@@ -442,7 +444,9 @@ static int icmpv6_setsockopt_internal(FAR struct socket *psock, int option,
               value_len = sizeof(struct icmp6_filter);
             }
 
+          conn_lock(&conn->sconn);
           memcpy(&conn->filter, value, value_len);
+          conn_unlock(&conn->sconn);
           ret = OK;
         }
         break;
@@ -453,7 +457,6 @@ static int icmpv6_setsockopt_internal(FAR struct socket *psock, int option,
         break;
     }
 
-  net_unlock();
   return ret;
 }
 

@@ -331,9 +331,8 @@ ssize_t icmpv6_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
         }
     }
 
-  net_lock();
-
   conn = psock->s_conn;
+  conn_dev_lock(&conn->sconn, conn->dev);
   if (psock->s_type != SOCK_RAW)
     {
       /* Get the device that was used to send the ICMPv6 request. */
@@ -440,7 +439,7 @@ errout:
         }
     }
 
-  net_unlock();
+  conn_dev_unlock(&conn->sconn, conn->dev);
 
   return ret;
 }
