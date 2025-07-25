@@ -2628,6 +2628,19 @@ config ARCH_BOARD_SAMV71_XULT
 	---help---
 		The port of NuttX to the Atmel SAMV71 Xplained Ultra evaluation board.
 
+config ARCH_BOARD_PIC32CZCA70_CURIOSITY
+	bool "Microchip PIC32CZ CA70 Curiosity Ultra Evaluation Board"
+	depends on ARCH_CHIP_PIC32CZCA70144
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	select ARCH_PHY_INTERRUPT
+	---help---
+		The port of NuttX to the PIC32CZ CA70 Curiosity Ultra Evaluation
+		Board. The used microcontroller is pin to pin and binary compatible
+		with SAMV70/SAME70 series, but the evaluation board's pinout differs
+		from Xplained evaluation kits.
+
 config ARCH_BOARD_SHENZHOU
 	bool "Shenzhou STM32F107 board"
 	depends on ARCH_CHIP_STM32F107VC
@@ -3737,6 +3750,7 @@ config ARCH_BOARD
 	default "same70-qmtech"             if ARCH_BOARD_SAME70_QMTECH
 	default "same70-xplained"           if ARCH_BOARD_SAME70_XPLAINED
 	default "samv71-xult"               if ARCH_BOARD_SAMV71_XULT
+	default "pic32czca70-curiosity"     if ARCH_BOARD_PIC32CZCA70_CURIOSITY
 	default "shenzhou"                  if ARCH_BOARD_SHENZHOU
 	default "skp16c26"                  if ARCH_BOARD_SKP16C26
 	default "photon"                    if ARCH_BOARD_PHOTON
@@ -4264,6 +4278,9 @@ source "boards/arm/samv7/same70-xplained/Kconfig"
 endif
 if ARCH_BOARD_SAMV71_XULT
 source "boards/arm/samv7/samv71-xult/Kconfig"
+endif
+if ARCH_BOARD_PIC32CZCA70_CURIOSITY
+source "boards/arm/samv7/pic32czca70-curiosity/Kconfig"
 endif
 if ARCH_BOARD_B_G474E_DPOW1
 source "boards/arm/stm32/b-g474e-dpow1/Kconfig"
