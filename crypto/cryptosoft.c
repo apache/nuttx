@@ -291,11 +291,11 @@ int swcr_authenc(FAR struct cryptop *crp)
   caddr_t buf = (caddr_t)crp->crp_buf;
   caddr_t aad = (caddr_t)crp->crp_aad;
   FAR uint32_t *blkp;
+  int aadlen = 0;
   int blksz = 0;
   int ivlen = 0;
   int iskip = 0;
   int oskip = 0;
-  int aadlen;
   int len;
   int i;
 
