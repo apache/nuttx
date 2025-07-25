@@ -52,13 +52,7 @@
 #include "chip.h"
 #include "stm32_gpio.h"
 #include "stm32_uart.h"
-
-/* DMA has not been implemented for H5 chip yet, so disable any serial DMA */
-
-#ifdef SERIAL_HAVE_DMA
-#  error Serial DMA not implemented for STM32H5 chips.
-#undef SERIAL_HAVE_DMA
-#endif
+#include "stm32_dma.h"
 
 #include "stm32_rcc.h"
 #include "arm_internal.h"
@@ -81,22 +75,18 @@
  *    5       X
  */
 
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+#  warning STM32H5 Serial IFLOWCONTROL is untested
+#endif
+
 #ifdef SERIAL_HAVE_DMA
 
 /* Verify that DMA has been enabled and the DMA channel has been defined.
  */
 
-#  if defined(CONFIG_USART2_RXDMA) || defined(CONFIG_USART3_RXDMA)
-#    if !defined(CONFIG_STM32H5_DMA1) && !defined(CONFIG_STM32H5_DMAMUX)
-#      error STM32H5 USART2/3 receive DMA requires CONFIG_STM32H5_DMA1
-#    endif
-#  endif
-
-#  if defined(CONFIG_UART4_RXDMA) || defined(CONFIG_UART5_RXDMA)
-#    if !defined(CONFIG_STM32H5_DMA2) && !defined(CONFIG_STM32H5_DMAMUX)
-#      error STM32H5 UART4/5 receive DMA requires CONFIG_STM32H5_DMA2
-#    endif
-#  endif
+#if !defined(CONFIG_STM32H5_DMA1) && !defined(CONFIG_STM32H5_DMA2)
+#  error STM32H5 Serial DMA requires one of DMA1 or DMA2 to be enabled
+#endif
 
 /* Currently RS-485 support cannot be enabled when RXDMA is in use due to
  * lack of testing - RS-485 support was developed on STM32F1x
@@ -108,40 +98,6 @@
       (defined(CONFIG_UART4_RXDMA) && defined(CONFIG_UART4_RS485))   || \
       (defined(CONFIG_UART5_RXDMA) && defined(CONFIG_UART5_RS485))
 #    error "RXDMA and RS-485 cannot be enabled at the same time for the same U[S]ART"
-#  endif
-
-/* For the L4, there are alternate DMA channels for USART1.
- * Logic in the board.h file make the DMA channel selection by defining
- * the following in the board.h file.
- */
-
-#  if defined(CONFIG_USART1_RXDMA) && !defined(DMAMAP_USART1_RX)
-#    error "USART1 DMA channel not defined (DMAMAP_USART1_RX)"
-#  endif
-
-/* UART2-5 have no alternate channels without DMAMUX */
-
-#  ifndef CONFIG_STM32H5_HAVE_DMAMUX
-#    define DMAMAP_USART2_RX  DMACHAN_USART2_RX
-#    define DMAMAP_USART3_RX  DMACHAN_USART3_RX
-#    define DMAMAP_UART4_RX   DMACHAN_UART4_RX
-#    define DMAMAP_UART5_RX   DMACHAN_UART5_RX
-#  endif
-
-#  if defined(CONFIG_USART2_RXDMA) && !defined(DMAMAP_USART2_RX)
-#    error "USART2 DMA channel not defined (DMAMAP_USART2_RX)"
-#  endif
-
-#  if defined(CONFIG_USART3_RXDMA) && !defined(DMAMAP_USART3_RX)
-#    error "USART3 DMA channel not defined (DMAMAP_USART3_RX)"
-#  endif
-
-#  if defined(CONFIG_UART4_RXDMA) && !defined(DMAMAP_UART4_RX)
-#    error "UART4 DMA channel not defined (DMAMAP_UART4_RX)"
-#  endif
-
-#  if defined(CONFIG_UART5_RXDMA) && !defined(DMAMAP_UART5_RX)
-#    error "UART5 DMA channel not defined (DMAMAP_UART5_RX)"
 #  endif
 
 /* The DMA buffer size when using RX DMA to emulate a FIFO.
@@ -159,31 +115,6 @@
 #    define RXDMA_BUFFER_SIZE 32
 #  else
 #    define RXDMA_BUFFER_SIZE ((CONFIG_STM32H5_SERIAL_RXDMA_BUFFER_SIZE + 31) & ~31)
-#  endif
-
-/* DMA priority */
-
-#  ifndef CONFIG_USART_DMAPRIO
-#    define CONFIG_USART_DMAPRIO  DMA_CCR_PRIMED
-#  endif
-#  if (CONFIG_USART_DMAPRIO & ~DMA_CCR_PL_MASK) != 0
-#    error "Illegal value for CONFIG_USART_DMAPRIO"
-#  endif
-
-/* DMA control words */
-
-#  define SERIAL_DMA_CONTROL_WORD      \
-              (DMA_CCR_CIRC          | \
-               DMA_CCR_MINC          | \
-               DMA_CCR_PSIZE_8BITS   | \
-               DMA_CCR_MSIZE_8BITS   | \
-               CONFIG_USART_DMAPRIO)
-#  ifdef CONFIG_SERIAL_IFLOWCONTROL
-#    define SERIAL_DMA_IFLOW_CONTROL_WORD \
-              (DMA_CCR_MINC          | \
-               DMA_CCR_PSIZE_8BITS   | \
-               DMA_CCR_MSIZE_8BITS   | \
-               CONFIG_USART_DMAPRIO)
 #  endif
 
 #endif
@@ -243,9 +174,6 @@ struct stm32_serial_s
   uint8_t           parity;    /* 0=none, 1=odd, 2=even */
   uint8_t           bits;      /* Number of bits (7 or 8) */
   bool              stopbits2; /* True: Configure with 2 stop bits instead of 1 */
-#ifdef CONFIG_SERIAL_IFLOWCONTROL
-  bool              iflow;     /* input flow control (RTS) enabled */
-#endif
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
   bool              oflow;     /* output flow control (CTS) enabled */
 #endif
@@ -254,15 +182,11 @@ struct stm32_serial_s
   const uint8_t     parity;    /* 0=none, 1=odd, 2=even */
   const uint8_t     bits;      /* Number of bits (7 or 8) */
   const bool        stopbits2; /* True: Configure with 2 stop bits instead of 1 */
-#ifdef CONFIG_SERIAL_IFLOWCONTROL
-  const bool        iflow;     /* input flow control (RTS) enabled */
-#endif
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
   const bool        oflow;     /* output flow control (CTS) enabled */
 #endif
   const uint32_t    baud;      /* Configured baud */
 #endif
-
   const uint8_t     irq;       /* IRQ associated with this USART */
   const uint32_t    apbclock;  /* PCLK 1 or 2 frequency */
   const uint32_t    usartbase; /* Base address of USART registers */
@@ -274,10 +198,7 @@ struct stm32_serial_s
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
   const uint32_t    cts_gpio;  /* U[S]ART CTS GPIO pin configuration */
 #endif
-
-#ifdef SERIAL_HAVE_DMA
-  const unsigned int rxdma_channel; /* DMA channel assigned */
-#endif
+  const bool        iflow;     /* input flow control (RTS) enabled */
 
   /* RX DMA state */
 
@@ -288,7 +209,8 @@ struct stm32_serial_s
   bool              rxdmasusp; /* Rx DMA suspended */
 #endif
   uint32_t          rxdmanext; /* Next byte in the DMA buffer to be read */
-  char       *const rxfifo;    /* Receive DMA buffer */
+  uint16_t          rxdma_req; /* GPDMA Request number */
+  char          *const rxfifo; /* Receive DMA buffer */
 #endif
 
 #ifdef HAVE_RS485
@@ -543,8 +465,8 @@ static struct stm32_serial_s g_lpuart1priv =
   .rts_gpio      = GPIO_LPUART1_RTS,
 #  endif
 #  ifdef CONFIG_LPUART1_RXDMA
-  .rxdma_channel = DMAMAP_LPUSART_RX,
   .rxfifo        = g_lpuart1rxfifo,
+  .rxdma_req     = GPDMA_REQ_LPUART1_RX,
 #  endif
 
 #  ifdef CONFIG_USART1_RS485
@@ -604,8 +526,8 @@ static struct stm32_serial_s g_usart1priv =
   .rts_gpio      = GPIO_USART1_RTS,
 #  endif
 #  ifdef CONFIG_USART1_RXDMA
-  .rxdma_channel = DMAMAP_USART1_RX,
   .rxfifo        = g_usart1rxfifo,
+  .rxdma_req     = GPDMA_REQ_USART1_RX,
 #  endif
 
 #  ifdef CONFIG_USART1_RS485
@@ -667,8 +589,8 @@ static struct stm32_serial_s g_usart2priv =
   .rts_gpio      = GPIO_USART2_RTS,
 #  endif
 #  ifdef CONFIG_USART2_RXDMA
-  .rxdma_channel = DMAMAP_USART2_RX,
   .rxfifo        = g_usart2rxfifo,
+  .rxdma_req     = GPDMA_REQ_USART2_RX,
 #  endif
 
 #  ifdef CONFIG_USART2_RS485
@@ -730,8 +652,8 @@ static struct stm32_serial_s g_usart3priv =
   .rts_gpio      = GPIO_USART3_RTS,
 #  endif
 #  ifdef CONFIG_USART3_RXDMA
-  .rxdma_channel = DMAMAP_USART3_RX,
   .rxfifo        = g_usart3rxfifo,
+  .rxdma_req     = GPDMA_REQ_USART3_RX,
 #  endif
 
 #  ifdef CONFIG_USART3_RS485
@@ -793,8 +715,8 @@ static struct stm32_serial_s g_uart4priv =
   .tx_gpio       = GPIO_UART4_TX,
   .rx_gpio       = GPIO_UART4_RX,
 #  ifdef CONFIG_UART4_RXDMA
-  .rxdma_channel = DMAMAP_UART4_RX,
   .rxfifo        = g_uart4rxfifo,
+  .rxdma_req     = GPDMA_REQ_UART4_RX,
 #  endif
 
 #  ifdef CONFIG_UART4_RS485
@@ -856,8 +778,8 @@ static struct stm32_serial_s g_uart5priv =
   .tx_gpio        = GPIO_UART5_TX,
   .rx_gpio        = GPIO_UART5_RX,
 #  ifdef CONFIG_UART5_RXDMA
-  .rxdma_channel = DMAMAP_UART5_RX,
   .rxfifo        = g_uart5rxfifo,
+  .rxdma_req     = GPDMA_REQ_UART5_RX,
 #  endif
 
 #  ifdef CONFIG_UART5_RS485
@@ -919,8 +841,8 @@ static struct stm32_serial_s g_usart6priv =
   .rts_gpio      = GPIO_USART6_RTS,
 #  endif
 #  ifdef CONFIG_USART6_RXDMA
-  .rxdma_channel = DMAMAP_USART6_RX,
   .rxfifo        = g_usart6rxfifo,
+  .rxdma_req     = GPDMA_REQ_USART6_RX,
 #  endif
 
 #  ifdef CONFIG_USART6_RS485
@@ -982,8 +904,8 @@ static struct stm32_serial_s g_uart7priv =
   .tx_gpio        = GPIO_UART7_TX,
   .rx_gpio        = GPIO_UART7_RX,
 #  ifdef CONFIG_UART7_RXDMA
-  .rxdma_channel = DMAMAP_UART7_RX,
   .rxfifo        = g_uart7rxfifo,
+  .rxdma_req     = GPDMA_REQ_UART7_RX,
 #  endif
 
 #  ifdef CONFIG_UART7_RS485
@@ -1045,8 +967,8 @@ static struct stm32_serial_s g_uart8priv =
   .tx_gpio        = GPIO_UART8_TX,
   .rx_gpio        = GPIO_UART8_RX,
 #  ifdef CONFIG_UART8_RXDMA
-  .rxdma_channel = DMAMAP_UART8_RX,
   .rxfifo        = g_uart8rxfifo,
+  .rxdma_req     = GPDMA_REQ_UART8_RX,
 #  endif
 
 #  ifdef CONFIG_UART8_RS485
@@ -1108,8 +1030,8 @@ static struct stm32_serial_s g_uart9priv =
   .tx_gpio        = GPIO_UART9_TX,
   .rx_gpio        = GPIO_UART9_RX,
 #  ifdef CONFIG_UART9_RXDMA
-  .rxdma_channel = DMAMAP_UART9_RX,
   .rxfifo        = g_uart9rxfifo,
+  .rxdma_req     = GPDMA_REQ_UART9_RX,
 #  endif
 
 #  ifdef CONFIG_UART9_RS485
@@ -1171,8 +1093,8 @@ static struct stm32_serial_s g_usart10priv =
   .rts_gpio      = GPIO_USART10_RTS,
 #  endif
 #  ifdef CONFIG_USART10_RXDMA
-  .rxdma_channel = DMAMAP_USART10_RX,
   .rxfifo        = g_usart10rxfifo,
+  .rxdma_req     = GPDMA_REQ_USART10_RX,
 #  endif
 
 #  ifdef CONFIG_USART10_RS485
@@ -1234,8 +1156,8 @@ static struct stm32_serial_s g_usart11priv =
   .rts_gpio      = GPIO_USART11_RTS,
 #  endif
 #  ifdef CONFIG_USART11_RXDMA
-  .rxdma_channel = DMAMAP_USART11_RX,
   .rxfifo        = g_usart11rxfifo,
+  .rxdma_req     = GPDMA_REQ_USART11_RX,
 #  endif
 
 #  ifdef CONFIG_USART11_RS485
@@ -1297,8 +1219,8 @@ static struct stm32_serial_s g_uart12priv =
   .tx_gpio        = GPIO_UART12_TX,
   .rx_gpio        = GPIO_UART12_RX,
 #  ifdef CONFIG_UART12_RXDMA
-  .rxdma_channel = DMAMAP_UART12_RX,
   .rxfifo        = g_uart12rxfifo,
+  .rxdma_req     = GPDMA_REQ_UART12_RX,
 #  endif
 
 #  ifdef CONFIG_UART12_RS485
@@ -2167,67 +2089,86 @@ static int stm32serial_setup(struct uart_dev_s *dev)
 }
 
 /****************************************************************************
+ * Name: serial_rxdmacfg
+ *
+ * Description:
+ *   Generate the required DMA configuration structure for oneshot mode based
+ *   on the serial configuration.
+ *
+ * Input Parameters:
+ *   priv     - serial instance structure
+ *   cfg      - DMA configuration structure
+ *   circular - 0 = oneshot, 1 = circular
+ *
+ * Returned Value:
+ *   None
+ ****************************************************************************/
+
+ #ifdef SERIAL_HAVE_DMA
+static void serial_rxdmacfg(struct stm32_serial_s *priv,
+                            struct stm32_gpdma_cfg_s *cfg)
+{
+  cfg->src_addr   = priv->usartbase + STM32_USART_RDR_OFFSET;
+  cfg->dest_addr  = (uint32_t)priv->rxfifo;
+
+  cfg->request    = priv->rxdma_req;
+
+  cfg->priority   = GPMDACFG_PRIO_LH;
+
+  cfg->mode       = GPDMACFG_MODE_CIRC;
+
+  cfg->ntransfers = RXDMA_BUFFER_SIZE;
+
+  /* Write SDW and DDW to 0 for 8-bit beats */
+
+  cfg->tr1        = GPDMA_CXTR1_DINC;  /* dest-inc, source fixed */
+}
+#endif
+
+/****************************************************************************
  * Name: stm32serial_dmasetup
  *
  * Description:
- *   Configure the USART baud, bits, parity, etc. This method is called the
- *   first time that the serial port is opened.
+ *   Configure and start circular RX DMA for USART:
+ *     - Allocate a GPDMA channel
+ *     - Set up source (USART RDR), destination (RX buffer), REQSEL,
+ *       circular mode
+ *     - Program DMA and reset read index
+ *     - Enable USART CR3.DMAR
+ *     - Start DMA with half‑ and full‑transfer callbacks
  *
+ * Returned Value:
+ *   OK on success; negative errno on failure.
  ****************************************************************************/
 
 #ifdef SERIAL_HAVE_DMA
 static int stm32serial_dmasetup(struct uart_dev_s *dev)
 {
-  struct stm32_serial_s *priv =
-    (struct stm32_serial_s *)dev->priv;
-  int result;
-  uint32_t regval;
-
-  /* Do the basic UART setup first, unless we are the console */
+  struct stm32_serial_s   *priv = (struct stm32_serial_s *)dev->priv;
+  struct stm32_gpdma_cfg_s dmacfg;
+  uint32_t                 regval;
+  int                      ret;
 
   if (!dev->isconsole)
     {
-      result = stm32serial_setup(dev);
-      if (result != OK)
+      ret = stm32serial_setup(dev);
+      if (ret != OK)
         {
-          return result;
+          return ret;
         }
     }
 
-  /* Acquire the DMA channel.  This should always succeed. */
-
-  priv->rxdma = stm32h5_dmachannel(priv->rxdma_channel);
-
-#ifdef CONFIG_SERIAL_IFLOWCONTROL
-  if (priv->iflow)
+  priv->rxdma = stm32_dmachannel(GPDMA_TTYPE_P2M);
+  if (!priv->rxdma)
     {
-      /* Configure for non-circular DMA reception into the RX FIFO */
-
-      stm32h5_dmasetup(priv->rxdma,
-                     priv->usartbase + STM32_USART_RDR_OFFSET,
-                     (uint32_t)priv->rxfifo,
-                     RXDMA_BUFFER_SIZE,
-                     SERIAL_DMA_IFLOW_CONTROL_WORD);
-    }
-  else
-#endif
-    {
-      /* Configure for circular DMA reception into the RX FIFO */
-
-      stm32h5_dmasetup(priv->rxdma,
-                     priv->usartbase + STM32_USART_RDR_OFFSET,
-                     (uint32_t)priv->rxfifo,
-                     RXDMA_BUFFER_SIZE,
-                     SERIAL_DMA_CONTROL_WORD);
+      return -EBUSY;
     }
 
-  /* Reset our DMA shadow pointer to match the address just
-   * programmed above.
-   */
+  serial_rxdmacfg(priv, &dmacfg);
+
+  stm32_dmasetup(priv->rxdma, &dmacfg);
 
   priv->rxdmanext = 0;
-
-  /* Enable receive DMA for the UART */
 
   regval  = stm32serial_getreg(priv, STM32_USART_CR3_OFFSET);
   regval |= USART_CR3_DMAR;
@@ -2241,8 +2182,8 @@ static int stm32serial_dmasetup(struct uart_dev_s *dev)
        * in and DMA transfer is stopped.
        */
 
-      stm32h5_dmastart(priv->rxdma, stm32serial_dmarxcallback,
-                       (void *)priv, false);
+      stm32_dmastart(priv->rxdma, stm32serial_dmarxcallback,
+                      (void *)priv, false);
     }
   else
 #endif
@@ -2252,8 +2193,8 @@ static int stm32serial_dmasetup(struct uart_dev_s *dev)
        * worth of time to claim bytes before they are overwritten.
        */
 
-      stm32h5_dmastart(priv->rxdma, stm32serial_dmarxcallback,
-                       (void *)priv, true);
+      stm32_dmastart(priv->rxdma, stm32serial_dmarxcallback,
+                      (void *)priv, true);
     }
 
   return OK;
@@ -2347,11 +2288,13 @@ static void stm32serial_dmashutdown(struct uart_dev_s *dev)
 
   /* Stop the DMA channel */
 
-  stm32h5_dmastop(priv->rxdma);
+  stm32_dmastop(priv->rxdma);
+
+  priv->rxenable = false;
 
   /* Release the DMA channel */
 
-  stm32h5_dmafree(priv->rxdma);
+  stm32_dmafree(priv->rxdma);
   priv->rxdma = NULL;
 }
 #endif
@@ -3131,43 +3074,64 @@ static bool stm32serial_rxflowcontrol(struct uart_dev_s *dev,
  * Name: stm32serial_dmareceive
  *
  * Description:
- *   Called (usually) from the interrupt level to receive one
- *   character from the USART.  Error bits associated with the
- *   receipt are provided in the return 'status'.
+ *   Retrieve one character from the RX FIFO filled by circular DMA.  Also
+ *   report any USART error flags in *status.
  *
  ****************************************************************************/
 
 #ifdef SERIAL_HAVE_DMA
 static int stm32serial_dmareceive(struct uart_dev_s *dev,
-                                    unsigned int *status)
+                                     unsigned int *status)
 {
   struct stm32_serial_s *priv =
     (struct stm32_serial_s *)dev->priv;
-  int c = 0;
+  unsigned int next;
+  int          ch  = -1;
+  uint32_t     sr;
 
-  if (stm32serial_dmanextrx(priv) != priv->rxdmanext)
+  /* 1) Capture USART error flags */
+
+  sr      = getreg32(priv->usartbase + STM32_USART_ISR_OFFSET);
+  *status = sr & (USART_ISR_ORE | USART_ISR_NF |
+                  USART_ISR_FE  | USART_ISR_PE);
+
+  /* 2) Where will DMA write the next byte? */
+
+  next = stm32serial_dmanextrx(priv);
+
+  /* 3) Pull one byte if available */
+
+  if (next != priv->rxdmanext)
     {
-      c = priv->rxfifo[priv->rxdmanext];
+      ch = priv->rxfifo[priv->rxdmanext++];
 
-      priv->rxdmanext++;
-      if (priv->rxdmanext == RXDMA_BUFFER_SIZE)
+      /* 4) End‑of‑buffer wrap or flow‑control pause */
+
+      if (priv->rxdmanext >= RXDMA_BUFFER_SIZE)
         {
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
           if (priv->iflow)
             {
-              /* RX DMA buffer full. RX paused, RTS line pulled up to prevent
-               * more input data from other end.
-               */
+              /* Pause DMA callbacks */
+
+              stm32serial_dmarxint(&priv->dev, false);
+
+              /* Assert RTS to halt sender */
+
+              (void)stm32serial_rxflowcontrol(&priv->dev,
+                                              RXDMA_BUFFER_SIZE, true);
             }
           else
 #endif
             {
+              /* Simply wrap to buffer start */
+
               priv->rxdmanext = 0;
             }
         }
     }
 
-  return c;
+  return ch;
 }
 #endif
 
@@ -3182,28 +3146,10 @@ static int stm32serial_dmareceive(struct uart_dev_s *dev,
 #if defined(SERIAL_HAVE_DMA)
 static void stm32serial_dmareenable(struct stm32_serial_s *priv)
 {
-#ifdef CONFIG_SERIAL_IFLOWCONTROL
-  if (priv->iflow)
-    {
-      /* Configure for non-circular DMA reception into the RX FIFO */
+  struct stm32_gpdma_cfg_s dmacfg;
 
-      stm32h5_dmasetup(priv->rxdma,
-                       priv->usartbase + STM32_USART_RDR_OFFSET,
-                       (uint32_t)priv->rxfifo,
-                       RXDMA_BUFFER_SIZE,
-                       SERIAL_DMA_IFLOW_CONTROL_WORD);
-    }
-  else
-#endif
-    {
-      /* Configure for circular DMA reception into the RX FIFO */
-
-      stm32h5_dmasetup(priv->rxdma,
-                       priv->usartbase + STM32_USART_RDR_OFFSET,
-                       (uint32_t)priv->rxfifo,
-                       RXDMA_BUFFER_SIZE,
-                       SERIAL_DMA_CONTROL_WORD);
-    }
+  serial_rxdmacfg(priv, &dmacfg);
+  stm32_dmasetup(priv->rxdma, &dmacfg);
 
   /* Reset our DMA shadow pointer to match the address just
    * programmed above.
@@ -3219,7 +3165,7 @@ static void stm32serial_dmareenable(struct stm32_serial_s *priv)
        * in and DMA transfer is stopped.
        */
 
-      stm32h5_dmastart(priv->rxdma, stm32serial_dmarxcallback,
+      stm32_dmastart(priv->rxdma, stm32serial_dmarxcallback,
                       (void *)priv, false);
     }
   else
@@ -3230,7 +3176,7 @@ static void stm32serial_dmareenable(struct stm32_serial_s *priv)
        * worth of time to claim bytes before they are overwritten.
        */
 
-      stm32h5_dmastart(priv->rxdma, stm32serial_dmarxcallback,
+      stm32_dmastart(priv->rxdma, stm32serial_dmarxcallback,
                       (void *)priv, true);
     }
 
@@ -3461,50 +3407,57 @@ static bool stm32serial_txready(struct uart_dev_s *dev)
  * Name: stm32serial_dmarxcallback
  *
  * Description:
- *   This function checks the current DMA state and calls the generic
- *   serial stack when bytes appear to be available.
+ *   DMA callback for STM32H5 USART RX.  Called on half and full‐transfer
+ *   events.  Reads and clears the GPDMA status flags, notifies the NuttX
+ *   serial core of newly arrived bytes, signals end‐of‐buffer when a
+ *   full transfer completes, handles RTS flow control restart, and
+ *   clears any lingering UART error flags to keep RX‐DMA running.
+ *
+ * Input Parameters:
+ *   handle         - DMA channel handle returned by stm32_dmachannel()
+ *   status         - Raw status byte passed by the DMA ISR (ignored here)
+ *   arg            - Pointer to the STM32 serial driver state
+ *                    (struct stm32_serial_s)
+ *
+ * Returned Value:
+ *   None
  *
  ****************************************************************************/
 
-#ifdef SERIAL_HAVE_DMA
-static void stm32serial_dmarxcallback(DMA_HANDLE handle, uint8_t status,
-                                        void *arg)
+static void stm32serial_dmarxcallback(DMA_HANDLE handle,
+                                      uint8_t status,
+                                      void *arg)
 {
-  struct stm32_serial_s *priv = (struct stm32_serial_s *)arg;
+  struct stm32_serial_s *priv = arg;
 
-  if (priv->rxenable && stm32serial_dmarxavailable(&priv->dev))
-    {
-      uart_recvchars(&priv->dev);
+  /* pull whatever is in the buffer now */
 
-#ifdef CONFIG_SERIAL_IFLOWCONTROL
-      if (priv->iflow)
-        {
-          /* Re-enable RX DMA. */
+  uart_recvchars(&priv->dev);
 
-          stm32serial_dmaiflowrestart(priv);
-        }
-#endif
-    }
-
-  /* Get the masked USART status word to check and clear error flags.
-   *
-   * When wake-up from low power mode was not fast enough, UART is resumed
-   * too late and sometimes exactly when character was coming over UART,
-   * resulting to frame error.
-   * If error flag is not cleared, Rx DMA will be stuck. Clearing errors
-   * will release Rx DMA.
+  /* If it really was a full‑buffer event, signal “done” so the
+   * serial core can rearm/restart the DMA behind the scenes:
    */
 
-  priv->sr = stm32serial_getreg(priv, STM32_USART_ISR_OFFSET);
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+  /* If you had paused the DMA on RTS flow control, restart it now */
 
-  if ((priv->sr & (USART_ISR_ORE | USART_ISR_NF | USART_ISR_FE)) != 0)
+  if (priv->iflow)
+    {
+      stm32serial_dmaiflowrestart(priv);
+    }
+#endif
+
+  /* Clear any USART framing/overrun errors so RX‑DMA
+   * doesn’t get stuck waiting for the UART to clear them.
+   */
+
+  priv->sr = getreg32(priv->usartbase + STM32_USART_ISR_OFFSET);
+  if (priv->sr & (USART_ISR_ORE | USART_ISR_NF | USART_ISR_FE))
     {
       stm32serial_putreg(priv, STM32_USART_ICR_OFFSET,
-                           (USART_ICR_NCF | USART_ICR_ORECF |
-                            USART_ICR_FECF));
+                        USART_ICR_ORECF | USART_ICR_NCF | USART_ICR_FECF);
     }
 }
-#endif
 
 /****************************************************************************
  * Name: stm32serial_pmnotify

@@ -4397,6 +4397,13 @@ config LPUART1_RS485_DIR_POLARITY
 		Polarity of DIR pin for RS-485 on LPUART1. Set to state on DIR pin which
 		enables TX (0 - low / nTXEN, 1 - high / TXEN).
 
+config LPUART1_RXDMA
+	bool "LPUART1 RX DMA"
+	default n
+	depends on STM32H5_LPUART1 && (STM32H5_DMA1 || STM32H5_DMA2)
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
 endif # LPUART1_SERIALDRIVER
 
 choice
@@ -4430,6 +4437,13 @@ config USART1_RS485_DIR_POLARITY
 	---help---
 		Polarity of DIR pin for RS-485 on USART1. Set to state on DIR pin which
 		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+config USART1_RXDMA
+	bool "USART1 RX DMA"
+	default n
+	depends on STM32H5_USART1 && (STM32H5_DMA1 || STM32H5_DMA2)
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
 
 endif # USART1_SERIALDRIVER
 
@@ -4465,6 +4479,13 @@ config USART2_RS485_DIR_POLARITY
 		Polarity of DIR pin for RS-485 on USART2. Set to state on DIR pin which
 		enables TX (0 - low / nTXEN, 1 - high / TXEN).
 
+config USART2_RXDMA
+	bool "USART2 RX DMA"
+	default n
+	depends on STM32H5_USART2 && (STM32H5_DMA1 || STM32H5_DMA2)
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
 endif # USART2_SERIALDRIVER
 
 choice
@@ -4498,6 +4519,13 @@ config USART3_RS485_DIR_POLARITY
 	---help---
 		Polarity of DIR pin for RS-485 on USART3. Set to state on DIR pin which
 		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+config USART3_RXDMA
+	bool "USART3 RX DMA"
+	default n
+	depends on STM32H5_USART3 && (STM32H5_DMA1 || STM32H5_DMA2)
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
 
 endif # USART3_SERIALDRIVER
 
@@ -4533,6 +4561,13 @@ config UART4_RS485_DIR_POLARITY
 		Polarity of DIR pin for RS-485 on UART4. Set to state on DIR pin which
 		enables TX (0 - low / nTXEN, 1 - high / TXEN).
 
+config UART4_RXDMA
+	bool "UART4 RX DMA"
+	default n
+	depends on STM32H5_UART4 && (STM32H5_DMA1 || STM32H5_DMA2)
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
 endif # UART4_SERIALDRIVER
 
 choice
@@ -4566,6 +4601,13 @@ config UART5_RS485_DIR_POLARITY
 	---help---
 		Polarity of DIR pin for RS-485 on UART5. Set to state on DIR pin which
 		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+config UART5_RXDMA
+	bool "UART5 RX DMA"
+	default n
+	depends on STM32H5_UART5 && (STM32H5_DMA1 || STM32H5_DMA2)
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
 
 endif # UART5_SERIALDRIVER
 
@@ -4601,6 +4643,13 @@ config USART6_RS485_DIR_POLARITY
 		Polarity of DIR pin for RS-485 on USART6. Set to state on DIR pin which
 		enables TX (0 - low / nTXEN, 1 - high / TXEN).
 
+config USART6_RXDMA
+	bool "USART6 RX DMA"
+	default n
+	depends on STM32H5_USART6 && (STM32H5_DMA1 || STM32H5_DMA2)
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
 endif # USART6_SERIALDRIVER
 
 if UART7_SERIALDRIVER
@@ -4622,6 +4671,13 @@ config UART7_RS485_DIR_POLARITY
 	---help---
 		Polarity of DIR pin for RS-485 on UART7. Set to state on DIR pin which
 		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+config UART7_RXDMA
+	bool "UART7 RX DMA"
+	default n
+	depends on STM32H5_UART7 && (STM32H5_DMA1 || STM32H5_DMA2)
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
 
 endif # UART7_SERIALDRIVER
 
@@ -4645,6 +4701,13 @@ config UART8_RS485_DIR_POLARITY
 		Polarity of DIR pin for RS-485 on UART8. Set to state on DIR pin which
 		enables TX (0 - low / nTXEN, 1 - high / TXEN).
 
+config UART8_RXDMA
+	bool "UART8 RX DMA"
+	default n
+	depends on STM32H5_UART8 && (STM32H5_DMA1 || STM32H5_DMA2)
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
 endif # UART8_SERIALDRIVER
 
 if UART9_SERIALDRIVER
@@ -4666,6 +4729,13 @@ config UART9_RS485_DIR_POLARITY
 	---help---
 		Polarity of DIR pin for RS-485 on UART9. Set to state on DIR pin which
 		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+config UART9_RXDMA
+	bool "UART9 RX DMA"
+	default n
+	depends on STM32H5_UART9 && (STM32H5_DMA1 || STM32H5_DMA2)
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
 
 endif # UART9_SERIALDRIVER
 
@@ -4689,6 +4759,13 @@ config USART10_RS485_DIR_POLARITY
 		Polarity of DIR pin for RS-485 on USART10. Set to state on DIR pin which
 		enables TX (0 - low / nTXEN, 1 - high / TXEN).
 
+config USART10_RXDMA
+	bool "USART10 RX DMA"
+	default n
+	depends on STM32H5_USART10 && (STM32H5_DMA1 || STM32H5_DMA2)
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
 endif # USART10_SERIALDRIVER
 
 if USART11_SERIALDRIVER
@@ -4710,6 +4787,13 @@ config USART11_RS485_DIR_POLARITY
 	---help---
 		Polarity of DIR pin for RS-485 on USART11. Set to state on DIR pin which
 		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+config USART11_RXDMA
+	bool "USART11 RX DMA"
+	default n
+	depends on STM32H5_USART11 && (STM32H5_DMA1 || STM32H5_DMA2)
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
 
 endif # USART11_SERIALDRIVER
 
@@ -4733,11 +4817,32 @@ config UART12_RS485_DIR_POLARITY
 		Polarity of DIR pin for RS-485 on UART12. Set to state on DIR pin which
 		enables TX (0 - low / nTXEN, 1 - high / TXEN).
 
+config UART12_RXDMA
+	bool "UART12 RX DMA"
+	default n
+	depends on STM32H5_UART12 && (STM32H5_DMA1 || STM32H5_DMA2)
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
 endif # UART12_SERIALDRIVER
 
 if STM32H5_SERIALDRIVER
 
 comment "Serial Driver Configuration"
+
+config STM32H5_SERIAL_RXDMA_BUFFER_SIZE
+	int "Rx DMA buffer size"
+	default 32
+	depends on USART1_RXDMA || USART2_RXDMA || USART3_RXDMA || USART6_RXDMA || USART10_RXDMA || \
+		   USART11_RXDMA || UART4_RXDMA || UART5_RXDMA || UART7_RXDMA || UART8_RXDMA || \
+		   UART9_RXDMA || UART12_RXDMA || LPUART1_RXDMA
+	---help---
+		The DMA buffer size when using RX DMA to emulate a FIFO.
+
+		When streaming data, the generic serial layer will be called
+		every time the FIFO receives half this number of bytes.
+
+		Value given here will be rounded up to next multiple of 32 bytes.
 
 config STM32H5_SERIAL_DISABLE_REORDERING
 	bool "Disable reordering of ttySx devices."
