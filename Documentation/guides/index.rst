@@ -7,6 +7,7 @@ Guides
 
 .. toctree::
   nfs.rst
+  nix_flake.rst
   usbtrace.rst
   simulator.rst
   rndis.rst
