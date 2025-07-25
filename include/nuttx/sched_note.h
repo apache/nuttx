@@ -632,11 +632,9 @@ void sched_note_csection(FAR struct tcb_s *tcb, bool enter);
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
-void sched_note_spinlock(FAR struct tcb_s *tcb,
-                         FAR volatile spinlock_t *spinlock,
-                         int type);
+void sched_note_spinlock(FAR volatile spinlock_t *spinlock, int type);
 #else
-#  define sched_note_spinlock(tcb, spinlock, type)
+#  define sched_note_spinlock(spinlock, type)
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SYSCALL
