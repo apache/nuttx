@@ -115,6 +115,17 @@
 
 #define GPIO_BTN_USER  (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI | GPIO_PORTC | GPIO_PIN13)
 
+/* LCD ST7735 */
+
+#define GPIO_LCD_DC     (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
+                         GPIO_OUTPUT_CLEAR | GPIO_PORTE | GPIO_PIN13)
+
+#define GPIO_LCD_CS     (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
+                         GPIO_OUTPUT_CLEAR | GPIO_PORTE | GPIO_PIN11)
+
+#define GPIO_LCD_LED     (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
+                          GPIO_OUTPUT_CLEAR | GPIO_PORTE | GPIO_PIN10)
+
 /* SD Card
  *
  * PD4  Card detected pin
@@ -136,6 +147,17 @@
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: stm32_spidev_initialize
+ *
+ * Description:
+ *   Called to configure SPI chip select GPIO pins for the Mikroe Clicker2
+ *   STM32 board.
+ *
+ ****************************************************************************/
+
+void weak_function stm32_spidev_initialize(void);
 
 /****************************************************************************
  * Name: stm32_bringup
