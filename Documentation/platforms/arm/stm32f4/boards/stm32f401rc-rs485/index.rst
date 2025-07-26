@@ -1000,3 +1000,110 @@ Connect the HX711 to the STM32F4 board using the following pins:
     10
 
 For more details, refer to the official `HX711 NuttX documentation <https://nuttx.apache.org/docs/latest/components/drivers/character/analog/adc/hx711/index.html>`_.
+
+MAX31855
+--------
+
+MAX31855 is a thermocouple-to-digital converter supporting Type-K
+thermocouples. It provides 14-bit temperature resolution with cold-junction
+compensation and fault detection, interfacing via SPI.
+
+**Enable the following options using ``make menuconfig``:**
+
+::
+
+    CONFIG_STM32_SPI1=y
+    CONFIG_SENSORS=y
+    CONFIG_SENSORS_MAX31855=y
+    CONFIG_EXAMPLES_MAX31855=y
+
+**Wiring:**
+
+Connect the MAX31855 to the STM32F4 board using the following pins:
+
++-------------+------+
+| MAX31855    | PIN  |
++=============+======+
+| SCK         | PA5  |
++-------------+------+
+| CS          | PC4  |
++-------------+------+
+| SO (MISO)   | PA6  |
++-------------+------+
+
+**NSH usage:**
+
+::
+
+    NuttShell (NSH) NuttX-12.10.0
+    nsh> ls /dev/temp0
+     /dev/temp0
+    nsh> max31855
+    Unable to open file /dev/temp1
+    Unable to open file /dev/temp2
+    Unable to open file /dev/temp3
+    Starting...
+    Channel SSP0/SPI1 Device 0: Temperature = 24!
+    Channel SSP0/SPI1 Device 1: Not enabled!
+    Channel SSP1/SPI2 Device 0: Not enabled!
+    Channel SSP1/SPI2 Device 1: Not enabled!
+
+    Channel SSP0/SPI1 Device 0: Temperature = 25!
+    Channel SSP0/SPI1 Device 1: Not enabled!
+    Channel SSP1/SPI2 Device 0: Not enabled!
+    Channel SSP1/SPI2 Device 1: Not enabled!
+
+
+
+MAX6675
+-------
+
+MAX6675 is a cold-junction-compensated K-type thermocouple-to-digital
+converter with a 12-bit resolution. It communicates via SPI and is
+suited for measuring high temperatures in embedded systems.
+
+**Enable the following options using ``make menuconfig``:**
+
+::
+
+    CONFIG_STM32_SPI1=y
+    CONFIG_SENSORS=y
+    CONFIG_SENSORS_MAX6675=y
+    CONFIG_EXAMPLES_MAX31855=y (same example works for both)
+
+**Wiring:**
+
+Connect the MAX6675 to the STM32F4 board using the following pins:
+
++-------------+------+
+| MAX6675     | PIN  |
++=============+======+
+| SCK         | PA5  |
++-------------+------+
+| CS          | PC5  |
++-------------+------+
+| SO (MISO)   | PA6  |
++-------------+------+
+
+**NSH usage:**
+
+::
+
+        NuttShell (NSH) NuttX-12.10.0
+    nsh> ls /dev/temp0
+     /dev/temp0
+    nsh> max31855
+    Unable to open file /dev/temp1
+    Unable to open file /dev/temp2
+    Unable to open file /dev/temp3
+    Starting...
+    Channel SSP0/SPI1 Device 0: Temperature = 24!
+    Channel SSP0/SPI1 Device 1: Not enabled!
+    Channel SSP1/SPI2 Device 0: Not enabled!
+    Channel SSP1/SPI2 Device 1: Not enabled!
+
+    Channel SSP0/SPI1 Device 0: Temperature = 24!
+    Channel SSP0/SPI1 Device 1: Not enabled!
+    Channel SSP1/SPI2 Device 0: Not enabled!
+    Channel SSP1/SPI2 Device 1: Not enabled!
+

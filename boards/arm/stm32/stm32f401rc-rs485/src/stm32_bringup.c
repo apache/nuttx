@@ -93,6 +93,14 @@
 #include "stm32_bmp180.h"
 #endif
 
+#ifdef CONFIG_SENSORS_MAX31855
+#include "stm32_max31855.h"
+#endif
+
+#ifdef CONFIG_SENSORS_MAX6675
+#include "stm32_max6675.h"
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -180,6 +188,24 @@ int stm32_bringup(void)
 
 #if defined(CONFIG_I2C) && defined(CONFIG_SYSTEM_I2CTOOL)
   stm32_i2ctool();
+#endif
+
+#ifdef CONFIG_SENSORS_MAX31855
+  /* Register device 0 on spi channel 1 */
+
+  ret = board_max31855_initialize(0, 1);
+  if (ret < 0)
+    {
+      serr("ERROR:  stm32_max31855initialize failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_MAX6675
+  ret = board_max6675_initialize(0, 1);
+  if (ret < 0)
+    {
+      serr("ERROR:  stm32_max6675initialize failed: %d\n", ret);
+    }
 #endif
 
 #ifdef CONFIG_I2C_EE_24XX
