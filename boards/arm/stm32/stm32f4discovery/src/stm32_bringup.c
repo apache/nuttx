@@ -637,5 +637,13 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_ADC_HX711
+  ret = stm32_hx711_initialize();
+  if (ret != OK)
+    {
+      aerr("ERROR: Failed to initialize hx711: %d\n", ret);
+    }
+#endif
+
   return ret;
 }
