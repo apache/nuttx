@@ -22,7 +22,6 @@
 
 CSRCS += sched_getfiles.c sched_profil.c
 CSRCS += sched_addreadytorun.c sched_removereadytorun.c
-CSRCS += sched_mergeprioritized.c sched_mergepending.c
 CSRCS += sched_addblocked.c sched_removeblocked.c
 CSRCS += sched_gettcb.c sched_verifytcb.c sched_releasetcb.c
 CSRCS += sched_setparam.c sched_setpriority.c sched_getparam.c
@@ -30,7 +29,7 @@ CSRCS += sched_setscheduler.c sched_getscheduler.c
 CSRCS += sched_yield.c sched_rrgetinterval.c sched_foreach.c
 CSRCS += sched_lock.c sched_unlock.c sched_lockcount.c
 CSRCS += sched_idletask.c sched_self.c sched_get_stackinfo.c sched_get_tls.c
-CSRCS += sched_sysinfo.c sched_reprioritizertr.c sched_get_stateinfo.c sched_getcpu.c
+CSRCS += sched_sysinfo.c sched_get_stateinfo.c sched_getcpu.c
 
 ifeq ($(CONFIG_PRIORITY_INHERITANCE),y)
 CSRCS += sched_reprioritize.c
@@ -39,6 +38,8 @@ endif
 ifeq ($(CONFIG_SMP),y)
 CSRCS += sched_process_delivered.c
 CSRCS += sched_getaffinity.c sched_setaffinity.c
+else
+CSRCS += sched_reprioritizertr.c sched_mergepending.c
 endif
 
 ifeq ($(CONFIG_SIG_SIGSTOP_ACTION),y)
