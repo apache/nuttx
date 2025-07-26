@@ -841,7 +841,7 @@ endif # SENSORS_KXTJ9
 config SENSORS_L86_XXX
 	bool "Quectel L86-XXX GNSS support"
 	default n
-	depends on SERIAL && STANDARD_SERIAL && UORB && GNSSUTILS_MINMEA_LIB
+	depends on SERIAL && STANDARD_SERIAL && UORB && SENSORS_GNSS
 	---help---
 		Enable driver support for the L86-XXX series of GNSS modules.
 
