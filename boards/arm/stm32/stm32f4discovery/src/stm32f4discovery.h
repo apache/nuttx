@@ -243,6 +243,15 @@
 
 #define GPIO_SX127X_RESET   (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_OUTPUT_CLEAR|\
                              GPIO_SPEED_50MHz|GPIO_PORTD|GPIO_PIN4)
+/* HX711 PINs */
+
+#ifdef CONFIG_ADC_HX711
+#  define HX711_CLK_PIN     (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_OUTPUT_SET|\
+                            GPIO_SPEED_2MHz|GPIO_PULLUP|\
+                            GPIO_PORTB|GPIO_PIN1)
+#  define HX711_DATA_PIN    (GPIO_INPUT|GPIO_SPEED_2MHz|GPIO_PULLUP|GPIO_EXTI|\
+                            GPIO_PORTB|GPIO_PIN2)
+#endif /* CONFIG_ADC_HX711 */
 
 /* PWM
  *
@@ -900,6 +909,18 @@ int stm32_gs2200m_initialize(const char *devpath, int bus);
 
 #ifdef CONFIG_INPUT_DJOYSTICK
 int stm32_djoy_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_hx711_initialize
+ *
+ * Description:
+ *   Initialize hx711 chip
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ADC_HX711
+int stm32_hx711_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
