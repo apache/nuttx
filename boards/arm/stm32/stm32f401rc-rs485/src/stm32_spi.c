@@ -68,6 +68,14 @@ void weak_function stm32_spidev_initialize(void)
 #ifdef CONFIG_CL_MFRC522
   stm32_configgpio(GPIO_RFID_CS);    /* MFRC522 chip select */
 #endif
+
+#if defined(CONFIG_STM32_SPI1) && defined(CONFIG_SENSORS_MAX31855)
+  stm32_configgpio(GPIO_MAX31855_CS); /* MAX31855 chip select */
+#endif
+
+#if defined(CONFIG_STM32_SPI1) && defined(CONFIG_SENSORS_MAX66755)
+  stm32_configgpio(GPIO_MAX6675_CS); /* MAX6675 chip select */
+#endif
 }
 
 /****************************************************************************
@@ -103,7 +111,7 @@ void stm32_spi1select(struct spi_dev_s *dev,
   spiinfo("devid: %d CS: %s\n",
           (int)devid, selected ? "assert" : "de-assert");
 
-#if defined(CONFIG_LCD_SSD1306) || defined(CONFIG_LCD_ST7735)
+  #if defined(CONFIG_LCD_SSD1306) || defined(CONFIG_LCD_ST7735)
   if (devid == SPIDEV_DISPLAY(0))
     {
       stm32_gpiowrite(GPIO_LCD_CS, !selected);
@@ -121,6 +129,20 @@ void stm32_spi1select(struct spi_dev_s *dev,
   if (devid == SPIDEV_CONTACTLESS(0))
     {
       stm32_gpiowrite(GPIO_RFID_CS, !selected);
+    }
+  #endif
+
+  #if defined(CONFIG_SENSORS_MAX31855)
+  if (devid == SPIDEV_TEMPERATURE(0))
+    {
+      stm32_gpiowrite(GPIO_MAX31855_CS, !selected);
+    }
+  #endif
+
+  #if defined(CONFIG_SENSORS_MAX6675)
+  if (devid == SPIDEV_TEMPERATURE(0))
+    {
+      stm32_gpiowrite(GPIO_MAX6675_CS, !selected);
     }
   #endif
 }
