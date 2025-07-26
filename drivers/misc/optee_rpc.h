@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/mmap/fs_anonmap.h
+ * drivers/misc/optee_rpc.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,44 +20,34 @@
  *
  ****************************************************************************/
 
-#ifndef __FS_MMAP_FS_ANONMAP_H
-#define __FS_MMAP_FS_ANONMAP_H
+#ifndef __DRIVERS_MISC_OPTEE_RPC_H
+#define __DRIVERS_MISC_OPTEE_RPC_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-#include <sys/types.h>
-#include <nuttx/mm/map.h>
+#include "optee.h"
 
 /****************************************************************************
- * Public Function Prototypes
+ * Public Functions Prototypes
  ****************************************************************************/
 
-/****************************************************************************
- * Name: map_anonymous
- *
- * Description:
- *   Support simulation of private anonymous mapping by allocating memory
- *   from heap
- *
- * Input Parameters:
- *   map     Input struct containing user request
- *   kernel  fs_heap_zalloc or kumm_zalloc
- *
- * Returned Value:
- *   On success returns 0. Otherwise negated errno is returned appropriately.
- *
- *     ENOMEM
- *       Insufficient memory is available to simulate mapping
- *
- ****************************************************************************/
-
-#ifdef CONFIG_FS_ANONMAP
-int map_anonymous(FAR struct mm_map_entry_s *entry, bool kernel);
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
 #else
-#  define map_anonymous(entry, kernel) (-ENOSYS)
-#endif /* CONFIG_FS_ANONMAP */
+#define EXTERN extern
+#endif
 
-#endif /* __FS_MMAP_FS_ANONMAP_H */
+void optee_rpc_handle_cmd(FAR struct optee_priv_data *priv,
+                          FAR struct optee_shm *shm,
+                          FAR void **last_page_list);
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
+#endif /* __DRIVERS_MISC_OPTEE_RPC_H */

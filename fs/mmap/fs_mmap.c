@@ -35,10 +35,10 @@
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/fs/fs.h>
 
 #include "inode/inode.h"
 #include "fs_rammap.h"
-#include "fs_anonmap.h"
 
 /****************************************************************************
  * Private Functions

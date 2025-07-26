@@ -1938,6 +1938,31 @@ int file_pipe(FAR struct file *filep[2], size_t bufsize, int flags);
 int nx_mkfifo(FAR const char *pathname, mode_t mode, size_t bufsize);
 #endif
 
+/****************************************************************************
+ * Name: map_anonymous
+ *
+ * Description:
+ *   Support simulation of private anonymous mapping by allocating memory
+ *   from heap
+ *
+ * Input Parameters:
+ *   map     Input struct containing user request
+ *   kernel  fs_heap_zalloc or kumm_zalloc
+ *
+ * Returned Value:
+ *   On success returns 0. Otherwise negated errno is returned appropriately.
+ *
+ *     ENOMEM
+ *       Insufficient memory is available to simulate mapping
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_FS_ANONMAP
+int map_anonymous(FAR struct mm_map_entry_s *entry, bool kernel);
+#else
+#  define map_anonymous(entry, kernel) (-ENOSYS)
+#endif /* CONFIG_FS_ANONMAP */
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
