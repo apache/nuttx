@@ -1189,6 +1189,13 @@ sensor_rpmsg_find_dev(FAR const char *path)
 static void sensor_rpmsg_update_config(FAR struct sensor_rpmsg_dev_s *dev,
                                        FAR struct sensor_state_s *state)
 {
+  if (state->esize == UINT32_MAX)
+    {
+      /* Invalid esize of state */
+
+      return;
+    }
+
   /* sync interval and latency */
 
   if (state->min_interval != UINT32_MAX)
@@ -1224,6 +1231,7 @@ static int sensor_rpmsg_adv_handler(FAR struct rpmsg_endpoint *ept,
       return 0;
     }
 
+  state.esize = UINT32_MAX;
   proxy = sensor_rpmsg_alloc_proxy(dev, ept, msg, &state);
   if (!proxy)
     {
@@ -1331,6 +1339,7 @@ static int sensor_rpmsg_suback_handler(FAR struct rpmsg_endpoint *ept,
   FAR struct sensor_rpmsg_dev_s *dev;
   struct sensor_state_s state;
 
+  state.esize = UINT32_MAX;
   dev = sensor_rpmsg_find_dev(msg->path);
   if (dev && (!dev->nsubscribers ||
       !sensor_rpmsg_alloc_proxy(dev, ept, msg, &state)))
