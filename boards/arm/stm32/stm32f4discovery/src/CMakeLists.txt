@@ -171,6 +171,10 @@ if(CONFIG_LCD_ST7789)
   list(APPEND SRCS stm32_st7789.c)
 endif()
 
+if(CONFIG_ADC_HX711)
+  list(APPEND SRCS stm32_hx711.c)
+endif()
+
 target_sources(board PRIVATE ${SRCS})
 
 # TODO: make this the default and then allow boards to redefine
