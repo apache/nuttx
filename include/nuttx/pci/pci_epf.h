@@ -98,6 +98,22 @@ struct pci_epf_device_id_s
   unsigned long driver_data;
 };
 
+/* struct pci_epf_msix_tbl - represents the MSIX table entry structure
+ * @msg_addr: Writes to this address will trigger MSIX interrupt in host
+ * @msg_data: Data that should be written to @msg_addr to trigger
+ *            MSIX interrupt
+ * @vector_ctrl: Identifies if the function is prohibited from sending
+ *               a message
+ * using this MSIX table entry
+ */
+
+struct pci_epf_msix_tbl_s
+{
+  uint64_t msg_addr;
+  uint32_t msg_data;
+  uint32_t vector_ctrl;
+};
+
 /* struct pci_epf_device_s - Represents the PCI EPF device
  *
  * name: The name of the PCI EPF device
