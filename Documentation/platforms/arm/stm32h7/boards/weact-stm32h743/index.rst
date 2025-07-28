@@ -132,3 +132,32 @@ The SD card can then be mounted by the NSH commands::
     test_file.txt
     nsh> cat /mnt/test_file.txt
     Hello World!!
+
+st7735
+------
+
+This config enables the ST7735 0.96" Display (80*160) on weact-stm32h743 board::
+
+     nsh> fb
+     VideoInfo:
+           fmt: 11
+          xres: 80
+          yres: 160
+       nplanes: 1                                               
+     PlaneInfo (plane 0):                                       
+         fbmem: 0x38000d50                                      
+         fblen: 25600                                           
+        stride: 160                                             
+       display: 0                                               
+           bpp: 16                                              
+     Mapped FB: 0x38000d50                                      
+      0: (  0,  0) ( 80,160)                                    
+      1: (  7, 14) ( 66,132)                                    
+      2: ( 14, 28) ( 52,104)                                    
+      3: ( 21, 42) ( 38, 76)                                    
+      4: ( 28, 56) ( 24, 48)                                    
+      5: ( 35, 70) ( 10, 20)                                    
+     Test finished                                              
+     nsh> 
+
+
