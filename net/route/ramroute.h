@@ -120,25 +120,6 @@ extern struct net_route_ipv6_queue_s g_ipv6_routes;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: net_init_ramroute
- *
- * Description:
- *   Initialize the in-memory, RAM routing table
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Called early in initialization so that no special protection is needed.
- *
- ****************************************************************************/
-
-void net_init_ramroute(void);
-
-/****************************************************************************
  * Name: net_allocroute_ipv4 and net_allocroute_ipv6
  *
  * Description:
@@ -181,6 +162,32 @@ void net_freeroute_ipv4(FAR struct net_route_ipv4_s *route);
 
 #ifdef CONFIG_ROUTE_IPv6_RAMROUTE
 void net_freeroute_ipv6(FAR struct net_route_ipv6_s *route);
+#endif
+
+/****************************************************************************
+ * Name: net_lockroute_ipv4 and net_unlockroute_ipv4
+ *
+ * Description:
+ *   Lock and unlock the g_ipv4routes pool
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ROUTE_IPv4_RAMROUTE
+void net_lockroute_ipv4(void);
+void net_unlockroute_ipv4(void);
+#endif
+
+/****************************************************************************
+ * Name: net_lockroute_ipv6 and net_unlockroute_ipv6
+ *
+ * Description:
+ *   Lock and unlock the g_ipv6routes pool
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ROUTE_IPv6_RAMROUTE
+void net_lockroute_ipv6(void);
+void net_unlockroute_ipv6(void);
 #endif
 
 /****************************************************************************
