@@ -207,7 +207,7 @@ static int rpmsgdev_open(FAR struct file *filep)
 {
   FAR struct rpmsgdev_s *dev;
   FAR struct rpmsgdev_priv_s *priv;
-  struct rpmsgdev_open_s msg;
+  FAR struct rpmsgdev_open_s *msg;
   int ret;
 
   /* Get the mountpoint inode reference from the file structure and the
@@ -228,19 +228,22 @@ static int rpmsgdev_open(FAR struct file *filep)
    * operations.
    */
 
-  msg.flags = filep->f_oflags | O_NONBLOCK;
-  ret = rpmsgdev_send_recv(dev, RPMSGDEV_OPEN, true, &msg.header,
-                           sizeof(msg), NULL);
+  msg = rpmsg_pool_alloc(sizeof(*msg));
+  msg->flags = filep->f_oflags | O_NONBLOCK;
+  ret = rpmsgdev_send_recv(dev, RPMSGDEV_OPEN, true, &msg->header,
+                           sizeof(*msg), NULL);
   if (ret < 0)
     {
       rpmsgdeverr("open failed, ret=%d\n", ret);
+      rpmsg_pool_free(msg);
       kmm_free(priv);
       return ret;
     }
 
-  priv->filep    = msg.filep;
+  priv->filep    = msg->filep;
   priv->nonblock = !!(filep->f_oflags & O_NONBLOCK);
   nxmutex_init(&priv->lock);
+  rpmsg_pool_free(msg);
 
   /* Attach the private data to the struct file instance */
 
@@ -266,7 +269,7 @@ static int rpmsgdev_close(FAR struct file *filep)
 {
   FAR struct rpmsgdev_s *dev;
   FAR struct rpmsgdev_priv_s *priv;
-  struct rpmsgdev_close_s msg;
+  FAR struct rpmsgdev_close_s *msg;
   int ret;
 
   /* Recover our private data from the struct file instance */
@@ -277,15 +280,18 @@ static int rpmsgdev_close(FAR struct file *filep)
 
   /* Try to close the device in the remote cpu */
 
-  msg.filep = priv->filep;
-  ret = rpmsgdev_send_recv(dev, RPMSGDEV_CLOSE, true, &msg.header,
-                           sizeof(msg), NULL);
+  msg = rpmsg_pool_alloc(sizeof(*msg));
+  msg->filep = priv->filep;
+  ret = rpmsgdev_send_recv(dev, RPMSGDEV_CLOSE, true, &msg->header,
+                           sizeof(*msg), NULL);
   if (ret < 0)
     {
+      rpmsg_pool_free(msg);
       rpmsgdeverr("close failed, ret=%d\n", ret);
       return ret;
     }
 
+  rpmsg_pool_free(msg);
   filep->f_priv = NULL;
   nxmutex_destroy(&priv->lock);
   kmm_free(priv);
@@ -399,7 +405,7 @@ static ssize_t rpmsgdev_read(FAR struct file *filep, FAR char *buffer,
 {
   FAR struct rpmsgdev_s *dev;
   FAR struct rpmsgdev_priv_s *priv;
-  struct rpmsgdev_read_s msg;
+  FAR struct rpmsgdev_read_s *msg;
   uint32_t command;
   ssize_t ret;
 
@@ -416,20 +422,23 @@ static ssize_t rpmsgdev_read(FAR struct file *filep, FAR char *buffer,
 
   /* Call the host to perform the read */
 
-  msg.filep = priv->filep;
-  msg.count = buflen;
+  msg = rpmsg_pool_alloc(sizeof(*msg));
+  msg->filep = priv->filep;
+  msg->count = buflen;
 
   command = priv->nonblock ? RPMSGDEV_READ_NONBLOCK : RPMSGDEV_READ;
 
   ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
+      rpmsg_pool_free(msg);
       return ret;
     }
 
-  ret = rpmsgdev_send_recv(dev, command, true, &msg.header,
-                           sizeof(msg) - 1, buffer);
+  ret = rpmsgdev_send_recv(dev, command, true, &msg->header,
+                           sizeof(*msg) - 1, buffer);
   nxmutex_unlock(&priv->lock);
+  rpmsg_pool_free(msg);
 
   return ret;
 }
@@ -543,7 +552,7 @@ static off_t rpmsgdev_seek(FAR struct file *filep, off_t offset, int whence)
 {
   FAR struct rpmsgdev_s *dev;
   FAR struct rpmsgdev_priv_s *priv;
-  struct rpmsgdev_lseek_s msg;
+  FAR struct rpmsgdev_lseek_s *msg;
   int ret;
 
   /* Recover our private data from the struct file instance */
@@ -554,17 +563,19 @@ static off_t rpmsgdev_seek(FAR struct file *filep, off_t offset, int whence)
 
   /* Call our internal routine to perform the seek */
 
-  msg.filep  = priv->filep;
-  msg.offset = offset;
-  msg.whence = whence;
+  msg = rpmsg_pool_alloc(sizeof(*msg));
+  msg->filep  = priv->filep;
+  msg->offset = offset;
+  msg->whence = whence;
 
-  ret = rpmsgdev_send_recv(dev, RPMSGDEV_LSEEK, true, &msg.header,
-                           sizeof(msg), NULL);
+  ret = rpmsgdev_send_recv(dev, RPMSGDEV_LSEEK, true, &msg->header,
+                           sizeof(*msg), NULL);
   if (ret >= 0)
     {
-      filep->f_pos = msg.offset;
+      filep->f_pos = msg->offset;
     }
 
+  rpmsg_pool_free(msg);
   return ret;
 }
 
@@ -720,7 +731,8 @@ static int rpmsgdev_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
 {
   FAR struct rpmsgdev_s *dev;
   FAR struct rpmsgdev_priv_s *priv;
-  struct rpmsgdev_poll_s msg;
+  FAR struct rpmsgdev_poll_s *msg;
+  int ret;
 
   /* Recover our private data from the struct file instance */
 
@@ -730,13 +742,16 @@ static int rpmsgdev_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
 
   /* Setup or teardown the poll */
 
-  msg.filep  = priv->filep;
-  msg.events = fds->events;
-  msg.setup  = setup;
-  msg.fds    = (uint64_t)(uintptr_t)fds;
+  msg = rpmsg_pool_alloc(sizeof(*msg));
+  msg->filep  = priv->filep;
+  msg->events = fds->events;
+  msg->setup  = setup;
+  msg->fds    = (uint64_t)(uintptr_t)fds;
 
-  return rpmsgdev_send_recv(dev, RPMSGDEV_POLL, true, &msg.header,
-                            sizeof(msg), NULL);
+  ret = rpmsgdev_send_recv(dev, RPMSGDEV_POLL, true, &msg->header,
+                           sizeof(*msg), NULL);
+  rpmsg_pool_free(msg);
+  return ret;
 }
 
 /****************************************************************************
@@ -800,28 +815,28 @@ static int rpmsgdev_send_recv(FAR struct rpmsgdev_s *priv,
                               FAR struct rpmsgdev_header_s *msg,
                               int len, FAR void *data)
 {
-  struct rpmsgdev_cookie_s cookie;
+  FAR struct rpmsgdev_cookie_s *cookie = rpmsg_pool_alloc(sizeof(*cookie));
   irqstate_t flags;
   int ret;
 
-  memset(&cookie, 0, sizeof(cookie));
-  nxsem_init(&cookie.sem, 0, 0);
+  memset(cookie, 0, sizeof(*cookie));
+  nxsem_init(&cookie->sem, 0, 0);
 
   if (data != NULL)
     {
-      cookie.data = data;
+      cookie->data = data;
     }
   else if (copy)
     {
-      cookie.data = msg;
+      cookie->data = msg;
     }
 
   msg->command = command;
   msg->result  = -ENXIO;
-  msg->cookie  = (uintptr_t)&cookie;
+  msg->cookie  = (uintptr_t)cookie;
 
   flags = spin_lock_irqsave(&priv->lock);
-  list_add_tail(&priv->cookies, &cookie.node);
+  list_add_tail(&priv->cookies, &cookie->node);
   spin_unlock_irqrestore(&priv->lock, flags);
 
   if (copy)
@@ -843,17 +858,18 @@ static int rpmsgdev_send_recv(FAR struct rpmsgdev_s *priv,
       goto fail;
     }
 
-  ret = rpmsg_wait(&priv->ept, &cookie.sem);
+  ret = rpmsg_wait(&priv->ept, &cookie->sem);
   if (ret >= 0)
     {
-      ret = cookie.result;
+      ret = cookie->result;
     }
 
 fail:
   flags = spin_lock_irqsave(&priv->lock);
-  list_delete(&cookie.node);
+  list_delete(&cookie->node);
   spin_unlock_irqrestore(&priv->lock, flags);
-  nxsem_destroy(&cookie.sem);
+  nxsem_destroy(&cookie->sem);
+  rpmsg_pool_free(cookie);
   return ret;
 }
 
