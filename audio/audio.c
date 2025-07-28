@@ -234,6 +234,7 @@ static int audio_close(FAR struct file *filep)
 
       lower->ops->shutdown(lower);
       upper->usermq = NULL;
+      upper->state = AUDIO_STATE_OPEN;
     }
 
   ret = OK;
@@ -786,7 +787,14 @@ static int audio_freebuffer(FAR struct audio_upperhalf_s *upper,
                             FAR struct audio_buf_desc_s *bufdesc)
 {
   FAR struct audio_lowerhalf_s *lower = upper->dev;
+  bool share = false;
   int ret;
+
+  if (bufdesc->u.buffer == NULL)
+    {
+      bufdesc->u.buffer = upper->apbs[upper->periods - 1];
+      share = true;
+    }
 
   if (lower->ops->freebuffer)
     {
@@ -799,6 +807,18 @@ static int audio_freebuffer(FAR struct audio_upperhalf_s *upper,
       DEBUGASSERT(bufdesc->u.buffer != NULL);
       apb_free(bufdesc->u.buffer);
       ret = sizeof(struct audio_buf_desc_s);
+    }
+
+  if (ret > 0 && share)
+    {
+      bufdesc->u.buffer = NULL;
+      upper->apbs[upper->periods] = NULL;
+      upper->periods--;
+      if (upper->periods == 0)
+        {
+          kmm_free(upper->apbs);
+          upper->apbs = NULL;
+        }
     }
 
   return ret;
@@ -883,29 +903,9 @@ static inline void audio_complete(FAR struct audio_upperhalf_s *upper,
                     FAR struct ap_buffer_s *apb, uint16_t status)
 #endif
 {
-  struct audio_buf_desc_s bufdesc;
   struct audio_msg_s    msg;
-  uint8_t i;
 
   audinfo("Entry\n");
-
-  nxmutex_lock(&upper->lock);
-
-  if (upper->state == AUDIO_STATE_DRAINING)
-    {
-      for (i = 0; i < upper->periods; i++)
-        {
-          bufdesc.u.buffer = upper->apbs[i];
-          audio_freebuffer(upper, &bufdesc);
-        }
-
-      kmm_free(upper->apbs);
-      upper->apbs = NULL;
-      upper->periods = 0;
-      upper->state = AUDIO_STATE_OPEN;
-    }
-
-  nxmutex_unlock(&upper->lock);
 
   /* Send a dequeue message to the user if a message queue is registered */
 
