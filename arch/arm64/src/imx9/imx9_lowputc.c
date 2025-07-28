@@ -146,6 +146,7 @@ static const struct uart_config_s g_console_config =
 void imx9_lowsetup(void)
 {
 #ifndef CONFIG_SUPPRESS_LPUART_CONFIG
+#ifndef CONFIG_ARCH_CHIP_IMX95
 
 #ifdef CONFIG_IMX9_LPUART1
   /* Configure LPUART1 pins: RXD and TXD.  Also configure RTS and CTS if flow
@@ -281,6 +282,7 @@ void imx9_lowsetup(void)
   imx9_iomux_configure(MUX_LPUART8_RTS);
 #endif
 #endif
+#endif
 
 #ifdef IMX9_CONSOLE_BASE
   /* Configure the serial console for initial, non-interrupt driver mode */
@@ -316,11 +318,13 @@ int imx9_lpuart_configure(uint32_t base, int uartnum,
 
   /* Configure root clock to 24MHz OSC */
 
+#ifndef CONFIG_ARCH_CHIP_IMX95
   imx9_ccm_configure_root_clock(CCM_CR_LPUART1 + uartnum - 1, OSC_24M, 1);
 
   /* Enable peripheral clock */
 
   imx9_ccm_gate_on(CCM_LPCG_LPUART1 + uartnum - 1, true);
+#endif
 
   /* This LPUART instantiation uses a slightly different baud rate
    * calculation.  The idea is to use the best OSR (over-sampling rate)
