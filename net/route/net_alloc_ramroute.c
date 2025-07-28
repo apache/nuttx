@@ -33,6 +33,7 @@
 #include <nuttx/net/net.h>
 #include <arch/irq.h>
 
+#include "utils/utils.h"
 #include "route/ramroute.h"
 #include "route/route.h"
 
@@ -58,79 +59,21 @@ FAR struct net_route_ipv6_queue_s g_ipv6_routes;
  * Private Data
  ****************************************************************************/
 
-/* These are lists of free routing table entries */
+/* The array containing all routing table entries. */
 
 #ifdef CONFIG_ROUTE_IPv4_RAMROUTE
-static struct net_route_ipv4_queue_s g_free_ipv4routes;
+NET_BUFPOOL_DECLARE(g_ipv4routes, sizeof(struct net_route_ipv4_entry_s),
+                    CONFIG_ROUTE_MAX_IPv4_RAMROUTES, 0, 0);
 #endif
 
 #ifdef CONFIG_ROUTE_IPv6_RAMROUTE
-static struct net_route_ipv6_queue_s g_free_ipv6routes;
-#endif
-
-/* These are arrays of pre-allocated network routes */
-
-#ifdef CONFIG_ROUTE_IPv4_RAMROUTE
-static struct net_route_ipv4_entry_s
-  g_prealloc_ipv4routes[CONFIG_ROUTE_MAX_IPv4_RAMROUTES];
-#endif
-
-#ifdef CONFIG_ROUTE_IPv6_RAMROUTE
-static struct net_route_ipv6_entry_s
-  g_prealloc_ipv6routes[CONFIG_ROUTE_MAX_IPv6_RAMROUTES];
+NET_BUFPOOL_DECLARE(g_ipv6routes, sizeof(struct net_route_ipv6_entry_s),
+                    CONFIG_ROUTE_MAX_IPv6_RAMROUTES, 0, 0);
 #endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: net_init_ramroute
- *
- * Description:
- *   Initialize the in-memory, RAM routing table
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Called early in initialization so that no special protection is needed.
- *
- ****************************************************************************/
-
-void net_init_ramroute(void)
-{
-  int i;
-
-  /* Initialize the routing table and the free list */
-
-#ifdef CONFIG_ROUTE_IPv4_RAMROUTE
-  ramroute_init(&g_ipv4_routes);
-  ramroute_init(&g_free_ipv4routes);
-
-  /* Add all of the pre-allocated routing table entries to a free list */
-
-  for (i = 0; i < CONFIG_ROUTE_MAX_IPv4_RAMROUTES; i++)
-    {
-      ramroute_ipv4_addlast(&g_prealloc_ipv4routes[i], &g_free_ipv4routes);
-    }
-#endif
-
-#ifdef CONFIG_ROUTE_IPv6_RAMROUTE
-  ramroute_init(&g_ipv6_routes);
-  ramroute_init(&g_free_ipv6routes);
-
-  /* Add all of the pre-allocated routing table entries to a free list */
-
-  for (i = 0; i < CONFIG_ROUTE_MAX_IPv6_RAMROUTES; i++)
-    {
-      ramroute_ipv6_addlast(&g_prealloc_ipv6routes[i], &g_free_ipv6routes);
-    }
-#endif
-}
 
 /****************************************************************************
  * Name: net_allocroute_ipv4 and net_allocroute_ipv6
@@ -152,15 +95,11 @@ FAR struct net_route_ipv4_s *net_allocroute_ipv4(void)
 {
   FAR struct net_route_ipv4_entry_s *route;
 
-  /* Get exclusive address to the networking data structures */
+  /* Get exclusive address to the networking data structures and
+   * then remove the first entry from the g_ipv4routes pool
+   */
 
-  net_lock();
-
-  /* Then add the remove the first entry from the table */
-
-  route = ramroute_ipv4_remfirst(&g_free_ipv4routes);
-
-  net_unlock();
+  route = NET_BUFPOOL_TRYALLOC(g_ipv4routes);
   if (!route)
     {
       return NULL;
@@ -175,15 +114,11 @@ FAR struct net_route_ipv6_s *net_allocroute_ipv6(void)
 {
   FAR struct net_route_ipv6_entry_s *route;
 
-  /* Get exclusive address to the networking data structures */
+  /* Get exclusive address to the networking data structures and
+   * then remove the first entry from the g_ipv6routes pool
+   */
 
-  net_lock();
-
-  /* Then add the remove the first entry from the table */
-
-  route = ramroute_ipv6_remfirst(&g_free_ipv6routes);
-
-  net_unlock();
+  route = NET_BUFPOOL_TRYALLOC(g_ipv6routes);
   if (!route)
     {
       return NULL;
@@ -212,15 +147,9 @@ void net_freeroute_ipv4(FAR struct net_route_ipv4_s *route)
 {
   DEBUGASSERT(route);
 
-  /* Get exclusive address to the networking data structures */
+  /* Add the new entry to the g_ipv4routes pool */
 
-  net_lock();
-
-  /* Then add the new entry to the table */
-
-  ramroute_ipv4_addlast((FAR struct net_route_ipv4_entry_s *)route,
-                        &g_free_ipv4routes);
-  net_unlock();
+  NET_BUFPOOL_FREE(g_ipv4routes, (FAR struct net_route_ipv4_entry_s *)route);
 }
 #endif
 
@@ -229,15 +158,49 @@ void net_freeroute_ipv6(FAR struct net_route_ipv6_s *route)
 {
   DEBUGASSERT(route);
 
-  /* Get exclusive address to the networking data structures */
+  /* Add the new entry to the g_ipv6routes pool */
 
-  net_lock();
+  NET_BUFPOOL_FREE(g_ipv6routes, (FAR struct net_route_ipv6_entry_s *)route);
+}
+#endif
 
-  /* Then add the new entry to the table */
+/****************************************************************************
+ * Name: net_lockroute_ipv4 and net_unlockroute_ipv4
+ *
+ * Description:
+ *   Lock and unlock the g_ipv4routes pool
+ *
+ ****************************************************************************/
 
-  ramroute_ipv6_addlast((FAR struct net_route_ipv6_entry_s *)route,
-                        &g_free_ipv6routes);
-  net_unlock();
+#ifdef CONFIG_ROUTE_IPv4_RAMROUTE
+void net_lockroute_ipv4(void)
+{
+  NET_BUFPOOL_LOCK(g_ipv4routes);
+}
+
+void net_unlockroute_ipv4(void)
+{
+  NET_BUFPOOL_UNLOCK(g_ipv4routes);
+}
+#endif
+
+/****************************************************************************
+ * Name: net_lockroute_ipv6 and net_unlockroute_ipv6
+ *
+ * Description:
+ *   Lock and unlock the g_ipv6routes pool
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ROUTE_IPv6_RAMROUTE
+void net_lockroute_ipv6(void)
+{
+  NET_BUFPOOL_LOCK(g_ipv6routes);
+}
+
+void net_unlockroute_ipv6(void)
+{
+  NET_BUFPOOL_UNLOCK(g_ipv6routes);
 }
 #endif
 
