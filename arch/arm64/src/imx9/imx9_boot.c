@@ -66,6 +66,7 @@ static const struct arm_mmu_region g_mmu_regions[] =
                         CONFIG_RAMBANK1_ADDR, CONFIG_RAMBANK1_SIZE,
                         MT_NORMAL | MT_RW | MT_SECURE),
 
+#if defined(CONFIG_ARCH_CHIP_IMX93)
 #ifndef CONFIG_IMX9_DDR_TRAINING /* OCRAM set at arm64_mmu.c */
   MMU_REGION_FLAT_ENTRY("OCRAM",
                         CONFIG_OCRAM_BASE_ADDR, CONFIG_OCRAM_SIZE,
@@ -75,6 +76,7 @@ static const struct arm_mmu_region g_mmu_regions[] =
   MMU_REGION_FLAT_ENTRY("FSPI_PERIPHERAL",
                         CONFIG_FSPI_PER_BASEADDR, CONFIG_FSPI_PER_SIZE,
                         MT_DEVICE_NGNRNE | MT_RW | MT_SECURE),
+#endif
 };
 
 const struct arm_mmu_config g_mmu_config =
@@ -163,6 +165,7 @@ void arm64_el_init(void)
 
 void arm64_chip_boot(void)
 {
+#ifndef CONFIG_ARCH_CHIP_IMX95
 #if defined(CONFIG_IMX9_BOOTLOADER) && CONFIG_ARCH_ARM64_EXCEPTION_LEVEL == 3
   imx9_mix_powerup();
 
@@ -176,6 +179,7 @@ void arm64_chip_boot(void)
 
 #ifdef CONFIG_IMX9_DDR_TRAINING
   imx9_dram_init();
+#endif
 #endif
 #endif
 

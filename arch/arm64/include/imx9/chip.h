@@ -44,12 +44,14 @@
 #define MB(x)   (KB(x) << 10)
 #define GB(x)   (MB(UINT64_C(x)) << 10)
 
-#if defined(CONFIG_ARCH_CHIP_IMX93)
-
 #if CONFIG_ARM64_GIC_VERSION == 3 || CONFIG_ARM64_GIC_VERSION == 4
 
 #define CONFIG_GICD_BASE          0x48000000
+#if defined(CONFIG_ARCH_CHIP_IMX93)
 #define CONFIG_GICR_BASE          0x48040000
+#elif defined(CONFIG_ARCH_CHIP_IMX95)
+#define CONFIG_GICR_BASE          0x48060000
+#endif
 #define CONFIG_GICR_OFFSET        0x20000
 
 #else
@@ -58,7 +60,11 @@
 
 #endif /* CONFIG_ARM64_GIC_VERSION */
 
+#if defined(CONFIG_ARCH_CHIP_IMX93)
 #define CONFIG_RAMBANK1_ADDR      0x80000000
+#elif defined(CONFIG_ARCH_CHIP_IMX95)
+#define CONFIG_RAMBANK1_ADDR      0xa0100000
+#endif
 #define CONFIG_RAMBANK1_SIZE      MB(128)
 
 #define CONFIG_DEVICEIO_BASEADDR  0x40000000
@@ -73,8 +79,6 @@
 #define MPID_TO_CLUSTER_ID(mpid)  ((mpid) & ~0xff)
 
 #define IMX9_GPIO_NPORTS          4
-
-#endif
 
 /****************************************************************************
  * Assembly Macros
