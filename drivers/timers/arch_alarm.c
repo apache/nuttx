@@ -47,20 +47,12 @@ static clock_t g_current_tick;
 static void oneshot_callback(FAR struct oneshot_lowerhalf_s *lower,
                              FAR void *arg)
 {
-  clock_t now = 0;
+  clock_t now;
 
   ONESHOT_TICK_CURRENT(g_oneshot_lower, &now);
 #ifdef CONFIG_SCHED_TICKLESS
   nxsched_tick_expiration(now);
 #else
-  /* Start the next tick first, in order to minimize latency. Ideally
-   * the ONESHOT_TICK_START would also return the current tick so that
-   * the retrieving the current tick and starting the new one could be done
-   * atomically w. respect to a HW timer
-   */
-
-  ONESHOT_TICK_START(g_oneshot_lower, 1);
-
   /* It is always an error if this progresses more than 1 tick at a time.
    * That would break any timer based on wdog; such timers might timeout
    * early. Add a DEBUGASSERT here to catch those errors. It is not added
@@ -68,13 +60,13 @@ static void oneshot_callback(FAR struct oneshot_lowerhalf_s *lower,
    * would occur due to HW timers possibly running while CPU is being halted.
    */
 
-  /* DEBUGASSERT(now - g_current_tick <= 1); */
-
-  while (now - g_current_tick > 0)
+  while (!clock_compare(now, g_current_tick))
     {
       g_current_tick++;
       nxsched_process_timer();
     }
+
+  ONESHOT_TICK_ABSOLUTE(g_oneshot_lower, now + 1);
 #endif
 }
 
