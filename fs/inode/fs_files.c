@@ -203,10 +203,11 @@ static void fdlist_uninstall(FAR struct fdlist *list, FAR struct fd *fdp)
 }
 
 static void fdlist_install(FAR struct fdlist *list, int fd,
-                           FAR struct file *filep, int oflags)
+                           FAR struct file *filep, FAR struct fd *fdp,
+                           int oflags, bool copy)
 {
-  FAR struct file *oldfilep;
-  FAR struct fd *fdp;
+  FAR struct file *filep1;
+  FAR struct fd *fdp1;
   irqstate_t flags;
   int l1;
   int l2;
@@ -216,15 +217,24 @@ static void fdlist_install(FAR struct fdlist *list, int fd,
 
   flags = spin_lock_irqsave_notrace(&list->fl_lock);
 
-  fdp = &list->fl_fds[l1][l2];
-  oldfilep = fdp->f_file;
-  fdp->f_file = filep;
+  fdp1 = &list->fl_fds[l1][l2];
+  filep1 = fdp1->f_file;
+  fdp1->f_file = filep;
   file_ref(filep);
-  fdp->f_cloexec = !!(oflags & O_CLOEXEC);
-  FS_ADD_BACKTRACE(fdp);
+  fdp1->f_cloexec = !!(oflags & O_CLOEXEC);
+  FS_ADD_BACKTRACE(fdp1);
+  if (copy)
+    {
+#ifdef CONFIG_FDSAN
+      fdp1->f_tag_fdsan = fdp->f_tag_fdsan;
+#endif
+#ifdef CONFIG_FDCHECK
+      fdp1->f_tag_fdcheck = fdp->f_tag_fdcheck;
+#endif
+    }
 
   spin_unlock_irqrestore_notrace(&list->fl_lock, flags);
-  file_put(oldfilep);
+  file_put(filep1);
 }
 
 /****************************************************************************
@@ -295,6 +305,7 @@ static void task_fssync(FAR struct tcb_s *tcb, FAR void *arg)
 int fdlist_dup3(FAR struct fdlist *list, int fd1, int fd2, int flags)
 {
   FAR struct file *filep1;
+  FAR struct fd *fdp1;
   int ret;
 
   if (fd1 == fd2)
@@ -323,13 +334,13 @@ int fdlist_dup3(FAR struct fdlist *list, int fd1, int fd2, int flags)
         }
     }
 
-  ret = fdlist_get(list, fd1, &filep1);
+  ret = fdlist_get2(list, fd1, &filep1, &fdp1);
   if (ret < 0)
     {
       return ret;
     }
 
-  fdlist_install(list, fd2, filep1, flags);
+  fdlist_install(list, fd2, filep1, fdp1, flags, false);
   file_put(filep1);
 
 #ifdef CONFIG_FDCHECK
@@ -820,7 +831,7 @@ int fdlist_copy(FAR struct fdlist *plist, FAR struct fdlist *clist,
 
           /* Assign filep to the child's descriptor list. Omit the flags */
 
-          fdlist_install(clist, fd, filep, 0);
+          fdlist_install(clist, fd, filep, fdp, 0, true);
           file_put(filep);
         }
     }
