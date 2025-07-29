@@ -79,11 +79,11 @@ LLVM_ABITYPE := sysv
 # Cygwin toolchains don't generate ELF binaries.
 
 ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
-CROSSDEV = i486-nuttx-elf-
+CROSSDEV ?= i486-nuttx-elf-
 endif
 
 ifeq ($(CONFIG_HOST_MACOS),y)
-CROSSDEV = x86_64-elf-
+CROSSDEV ?= x86_64-elf-
 endif
 
 ifneq ($(CONFIG_CXX_STANDARD),)
