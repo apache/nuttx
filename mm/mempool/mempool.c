@@ -343,14 +343,16 @@ int mempool_init(FAR struct mempool_s *pool, FAR const char *name)
  *   pool if expandsize isn't zero.
  *
  * Input Parameters:
- *   pool - Address of the memory pool to be used.
+ *   pool    - Address of the memory pool to be used.
+ *   timeout - The maximum time (ms) to wait for a buffer to become
+ *             available.
  *
  * Returned Value:
  *   The pointer to the allocated block on success; NULL on any failure.
  *
  ****************************************************************************/
 
-FAR void *mempool_allocate(FAR struct mempool_s *pool)
+FAR void *mempool_allocate(FAR struct mempool_s *pool, unsigned int timeout)
 {
   FAR sq_entry_t *blk;
   irqstate_t flags;
@@ -394,14 +396,29 @@ retry:
                          &pool->equeue);
               blk = mempool_remove_queue(pool, &pool->queue);
             }
-          else if (!pool->wait ||
-                   pool->expandsize > 0 ||
-                   nxsem_wait_uninterruptible(&pool->waitsem) < 0)
+          else if (!pool->wait || pool->expandsize > 0 || timeout == 0)
             {
               return NULL;
             }
           else
             {
+              int ret;
+
+              if (timeout == UINT_MAX)
+                {
+                  ret = nxsem_wait_uninterruptible(&pool->waitsem);
+                }
+              else
+                {
+                  ret = nxsem_tickwait_uninterruptible(&pool->waitsem,
+                                                       MSEC2TICK(timeout));
+                }
+
+              if (ret < 0)
+                {
+                  return NULL;
+                }
+
               goto retry;
             }
         }
