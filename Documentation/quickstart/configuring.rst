@@ -83,8 +83,7 @@ computer.
     .. code-block:: console
 
        $ ./nuttx
-       NuttShell (NSH) NuttX-8.2
-       MOTD: username=admin password=Administrator
+       NuttShell (NSH) NuttX-12.10.0
 
    Success!
 

@@ -8,8 +8,7 @@ README
   provided that CONFIG_ETC_ROMFS=y.  These scripts provide a ROMFS volume
   that will be mounted at /etc and will look like this at run-time:
 
-    NuttShell (NSH) NuttX-7.31
-    MOTD: username=admin password=Administrator
+    NuttShell (NSH) NuttX-12.10.0
     nsh> ls -Rl /etc
     /etc:
      dr-xr-xr-x       0 .
