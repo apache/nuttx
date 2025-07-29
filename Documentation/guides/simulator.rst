@@ -63,12 +63,8 @@ Compiling
     .. code-block:: console
 
        $ ./nuttx
-       login: admin
-       password: Administrator
-       User Logged-in!
 
-       NuttShell (NSH) NuttX-9.1.0
-       MOTD: username=admin password=Administrator
+       NuttShell (NSH) NuttX-12.10.0
        nsh> help
        help usage:  help [-v] [<cmd>]
 
