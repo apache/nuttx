@@ -251,7 +251,13 @@ void rpmsg_port_queue_add_buffer(FAR struct rpmsg_port_queue_s *queue,
 static inline_function
 uint16_t rpmsg_port_queue_navail(FAR struct rpmsg_port_queue_s *queue)
 {
-  return atomic_read(&queue->free.num);
+  irqstate_t flags;
+  uint16_t num;
+
+  flags = spin_lock_irqsave(&queue->free.lock);
+  num = queue->free.num;
+  spin_unlock_irqrestore(&queue->free.lock, flags);
+  return num;
 }
 
 /****************************************************************************
@@ -271,7 +277,13 @@ uint16_t rpmsg_port_queue_navail(FAR struct rpmsg_port_queue_s *queue)
 static inline_function
 uint16_t rpmsg_port_queue_nused(FAR struct rpmsg_port_queue_s *queue)
 {
-  return atomic_read(&queue->ready.num);
+  irqstate_t flags;
+  uint16_t num;
+
+  flags = spin_lock_irqsave(&queue->ready.lock);
+  num = queue->ready.num;
+  spin_unlock_irqrestore(&queue->ready.lock, flags);
+  return num;
 }
 
 /****************************************************************************
