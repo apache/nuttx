@@ -182,10 +182,6 @@ static struct gpdma_ch_s g_chan[] =
 #endif
 };
 
-static uint32_t circ_addr_1;
-
-static uint32_t circ_addr_1;
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -358,18 +354,6 @@ static int gpdma_setup(struct gpdma_ch_s *chan,
   /* Calculate block number of data bytes to transfer, update BR1 */
 
   reg = cfg->ntransfers;
-
-  if (cfg->mode & GPDMACFG_MODE_CIRC)
-    {
-      /* This only targets peripheral to memory, with memory increment */
-
-      circ_addr_1 = cfg->dest_addr;
-      gpdmach_putreg(chan, CH_CXLBAR_OFFSET,
-                    (uint32_t)&circ_addr_1 & (0xffff << 16));
-
-      reg = GPDMA_CXLLR_UDA | ((uint32_t)&circ_addr_1 & GPDMA_CXLLR_LA_MASK);
-      gpdmach_putreg(chan, CH_CXLLR_OFFSET, reg);
-    }
 
   gpdmach_putreg(chan, CH_CXBR1_OFFSET, reg);
 
@@ -595,7 +579,7 @@ void stm32_dmasetup(DMA_HANDLE handle, struct stm32_gpdma_cfg_s *cfg)
 
   /* Clear any unhandled flags from previous transactions */
 
-  /* gpdmach_putreg(chan, CH_CXFCR_OFFSET, 0x7f << 8); */
+  gpdmach_putreg(chan, CH_CXFCR_OFFSET, ~0);
 
   if (cfg->mode & GPDMACFG_MODE_CIRC)
     {
