@@ -397,6 +397,18 @@ static int init_storage_partition(void)
       return ret;
     }
 
+#elif defined(CONFIG_MTD_NVBLK)
+
+  ret = nvblk_initialize("/dev/mtdblock0", mtd,
+                         CONFIG_MTD_NVBLK_DEFAULT_LBS,
+                         CONFIG_MTD_NVBLK_DEFAULT_IOBS,
+                         CONFIG_MTD_NVBLK_DEFAULT_SPEB);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to setup nvblk\n");
+      return ret;
+    }
+
 #else
 
   ret = register_mtddriver("/dev/esp32flash", mtd, 0755, NULL);
