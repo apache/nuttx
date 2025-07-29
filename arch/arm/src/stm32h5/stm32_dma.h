@@ -60,8 +60,8 @@
 #define DMA_STATUS_SUSPF      (1 << 5) /* Completed suspension flag */
 #define DMA_STATUS_TOF        (1 << 6) /* Trigger overrun flag */
 
-#define DMA_STATUS_ERROR      (DMA_STATUS_DTEF | DMA_STATUS_ULEF | DMA_STATUS_USEF | DMA_STATUS_TOF)
-#define DMA_STATUS_SUCCESS    (DMA_STATUS_TCF | DMA_STATUS_HTEF)
+#define DMA_STATUS_FATAL      (DMA_STATUS_DTEF | DMA_STATUS_ULEF | DMA_STATUS_USEF)
+#define DMA_STATUS_SUCCESS    (DMA_STATUS_TCF | DMA_STATUS_HTF)
 
 /* GPDMA Mode Flags: WARNING!! NOT YET IMPLEMENTED! */
 

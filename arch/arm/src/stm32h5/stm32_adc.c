@@ -241,9 +241,24 @@ static const struct adc_ops_s g_adcops =
 
 #ifdef CONFIG_STM32H5_ADC1
 
+/* Double the size of the buffer in circular mode
+ * Circular mode utilizes half-transfer DMA interrupts and a 2x buffer
+ * to implement "double buffer" operation. While the CPU is servicing
+ * one half, DMA is filling the other half.
+ */
+
 #ifdef ADC1_HAVE_DMA
-static uint16_t g_adc1_dmabuffer[CONFIG_STM32H5_ADC_MAX_SAMPLES *
-                                 CONFIG_STM32H5_ADC1_DMA_BATCH];
+#  ifdef CONFIG_STM32H5_ADC1_DMA_CFG
+#    define ADC1_DMA_BUFFER_SIZE (CONFIG_STM32H5_ADC_MAX_SAMPLES *\
+                                  CONFIG_STM32H5_ADC1_DMA_BATCH * 2)
+#  else
+#    define ADC1_DMA_BUFFER_SIZE (CONFIG_STM32H5_ADC_MAX_SAMPLES *\
+                                  CONFIG_STM32H5_ADC1_DMA_BATCH)
+#  endif
+
+static uint16_t g_adc1_dmabuffer[ADC1_DMA_BUFFER_SIZE]
+__attribute__((aligned(32)));
+
 #endif
 
 static struct stm32_dev_s g_adcpriv1 =
@@ -303,8 +318,16 @@ static struct adc_dev_s g_adcdev1 =
 #ifdef CONFIG_STM32H5_ADC2
 
 #ifdef ADC2_HAVE_DMA
-static uint16_t g_adc2_dmabuffer[CONFIG_STM32H5_ADC_MAX_SAMPLES *
-                                 CONFIG_STM32H5_ADC2_DMA_BATCH];
+#  ifdef CONFIG_STM32H5_ADC2_DMA_CFG
+#    define ADC2_DMA_BUFFER_SIZE (CONFIG_STM32H5_ADC_MAX_SAMPLES *\
+                                  CONFIG_STM32H5_ADC2_DMA_BATCH * 2)
+#  else
+#    define ADC2_DMA_BUFFER_SIZE (CONFIG_STM32H5_ADC_MAX_SAMPLES *\
+                                  CONFIG_STM32H5_ADC2_DMA_BATCH)
+#  endif
+
+static uint16_t g_adc2_dmabuffer[ADC2_DMA_BUFFER_SIZE]
+__attribute__((aligned(32)));
 #endif
 
 static struct stm32_dev_s g_adcpriv2 =
@@ -871,6 +894,42 @@ static void adc_reset(struct adc_dev_s *dev)
 }
 
 /****************************************************************************
+ * Name: adc_restart_dma
+ *
+ * Description:
+ *   Restarts DMA for the configured ADC DMA channel. This is used in
+ *   one-shot mode, where DMA and ADC must be reconfigured and restarted
+ *   after each completed transfer.
+ *
+ * Input Parameters:
+ *   dev - adc device
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef ADC_HAVE_DMA
+static void adc_restart_dma(struct adc_dev_s *dev)
+{
+  struct stm32_dev_s *priv = (struct stm32_dev_s *)dev->ad_priv;
+  struct stm32_gpdma_cfg_s dmacfg;
+
+  DEBUGASSERT(!priv->circular);
+
+#ifdef ADC_HAVE_TIMER
+  bool software_trigger = (priv->tbase == 0);
+#else
+  bool software_trigger = true;
+#endif
+
+  adc_dmacfg(priv, &dmacfg);
+  stm32_dmasetup(priv->dma, &dmacfg);
+  stm32_dmastart(priv->dma, adc_dmaconvcallback, dev, false);
+  adc_startconv(priv, software_trigger);
+}
+
+/****************************************************************************
  * Name: adc_dmaconvcallback
  *
  * Description:
@@ -888,13 +947,21 @@ static void adc_reset(struct adc_dev_s *dev)
  *
  ****************************************************************************/
 
- #ifdef ADC_HAVE_DMA
 static void adc_dmaconvcallback(DMA_HANDLE handle, uint8_t status, void *arg)
 {
   struct adc_dev_s   *dev  = (struct adc_dev_s *)arg;
   struct stm32_dev_s *priv = (struct stm32_dev_s *)dev->ad_priv;
-  struct stm32_gpdma_cfg_s dmacfg;
+
+  uint16_t conversion_count;
+  uint16_t buffer_offset;
   int i;
+
+  /* About Circular Mode
+   * The size of r_dmabuffer and transfer size is doubled
+   * half-transfer interrupts are enabled. Code should do this:
+   * half-transfer int: read r_dmabuffer[0] through r_dmabuffer[conv_count-1]
+   * transfer complete int: read r_dmabuffer[conv_count] to end of buffer.
+   */
 
   /* Verify that the upper-half has bound its callback */
 
@@ -902,29 +969,81 @@ static void adc_dmaconvcallback(DMA_HANDLE handle, uint8_t status, void *arg)
     {
       DEBUGASSERT(priv->cb->au_receive != NULL);
 
-      /* Deliver one sample per configured channel */
-
-      for (i = 0; i < priv->rnchannels * priv->dmabatch; i++)
+      if (status & DMA_STATUS_FATAL)
         {
-          priv->cb->au_receive(dev,
-                              priv->chanlist[priv->current],
-                              priv->r_dmabuffer[i]);
-          priv->current++;
-          if (priv->current >= priv->rnchannels)
+          aerr("ADC DMA fatal error(s) — stopping DMA\n");
+
+          if (status & DMA_STATUS_DTEF)
             {
-              priv->current = 0;
+              aerr("ADC DMA Error: DTEF (Data Transfer Error) occurred\n");
+            }
+
+          if (status & DMA_STATUS_ULEF)
+            {
+              aerr("ADC DMA Error: ULEF (Linked-list update error)\n");
+            }
+
+          if (status & DMA_STATUS_USEF)
+            {
+              aerr("ADC DMA Config Error: USEF (User Setting Error)\n");
+            }
+
+          stm32_dmastop(priv->dma);
+
+          if (!priv->circular)
+            {
+              /* In non-circular mode, restart DMA and conversion */
+
+              adc_restart_dma(dev);
+            }
+
+          return;
+        }
+
+      /* Circular Mode - Use second half of double size buffer on TCF */
+
+      conversion_count = priv->rnchannels * priv->dmabatch;
+      buffer_offset = (priv->circular) ? conversion_count : 0;
+
+      /* Half-Transfer Interrupt enabled for circular mode only */
+
+      if (status & DMA_STATUS_HTF && priv->circular)
+        {
+          for (i = 0; i < conversion_count; i++)
+            {
+              priv->cb->au_receive(dev,
+                priv->chanlist[priv->current],
+                priv->r_dmabuffer[i]);
+
+              priv->current++;
+              if (priv->current >= priv->rnchannels)
+                {
+                  priv->current = 0;
+                }
+            }
+        }
+
+      if (status & DMA_STATUS_TCF)
+        {
+          for (i = 0; i < conversion_count; i++)
+            {
+              priv->cb->au_receive(dev,
+                priv->chanlist[priv->current],
+                priv->r_dmabuffer[buffer_offset + i]);
+              priv->current++;
+              if (priv->current >= priv->rnchannels)
+                {
+                  priv->current = 0;
+                }
             }
         }
     }
 
-  /* Restart DMA for the next conversion series */
+  /* Restart DMA for the next conversion series if in one-shot mode */
 
-  if (priv->circular == 0)
+  if (!priv->circular)
     {
-      adc_dmacfg(priv, &dmacfg);
-      stm32_dmasetup(priv->dma, &dmacfg);
-      stm32_dmastart(priv->dma, adc_dmaconvcallback, dev, false);
-      adc_startconv(priv, true);
+      adc_restart_dma(dev);
     }
 }
 
@@ -960,7 +1079,8 @@ static void adc_dmacfg(struct stm32_dev_s *priv,
 
   cfg->mode       = priv->circular ? GPDMACFG_MODE_CIRC : 0;
 
-  cfg->ntransfers = priv->cchannels * priv->dmabatch * (1u << sdw_log2);
+  cfg->ntransfers = (priv->cchannels * priv->dmabatch) << sdw_log2;
+  cfg->ntransfers <<= (priv->circular ? 1 : 0);
 
   cfg->tr1        = (sdw_log2 << GPDMA_CXTR1_SDW_LOG2_SHIFT)
                   | (sdw_log2 << GPDMA_CXTR1_DDW_LOG2_SHIFT)
@@ -1124,7 +1244,7 @@ static int adc_setup(struct adc_dev_s *dev)
 
       stm32_dmasetup(priv->dma, &dmacfg);
 
-      stm32_dmastart(priv->dma, adc_dmaconvcallback, dev, false);
+      stm32_dmastart(priv->dma, adc_dmaconvcallback, dev, priv->circular);
     }
 #endif
 
@@ -1142,6 +1262,13 @@ static int adc_setup(struct adc_dev_s *dev)
         }
 
       adc_startconv(priv, ret < 0 ? false : true);
+    }
+#endif
+
+#ifdef ADC_HAVE_DMA
+  if (priv->circular)
+    {
+      adc_startconv(priv, true);
     }
 #endif
 
