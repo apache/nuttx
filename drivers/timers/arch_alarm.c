@@ -262,17 +262,7 @@ int weak_function up_alarm_tick_start(clock_t ticks)
 
   if (g_oneshot_lower != NULL)
     {
-      clock_t now = 0;
-      clock_t delta;
-
-      ONESHOT_TICK_CURRENT(g_oneshot_lower, &now);
-      delta = ticks - now;
-      if ((sclock_t)delta < 0)
-        {
-          delta = 0;
-        }
-
-      ret = ONESHOT_TICK_START(g_oneshot_lower, delta);
+      ret = ONESHOT_TICK_ABSOLUTE(g_oneshot_lower, ticks);
     }
 
   return ret;
