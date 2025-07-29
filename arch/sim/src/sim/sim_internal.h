@@ -117,6 +117,8 @@
         val[0] = flags & UINT32_MAX;                            \
         val[1] = (flags >> 32) & UINT32_MAX;                    \
                                                                 \
+        int *errcode = (int *)&env[JB_ERRNO];                   \
+        *errcode          = host_errno_get();                   \
         ret = setjmp(saveregs);                                 \
       }                                                         \
     while (0)
@@ -128,6 +130,9 @@
         uint32_t *flags = (uint32_t *)&env[JB_FLAG];            \
                                                                 \
         up_irq_restore(((uint64_t)flags[1] << 32) | flags[0]);  \
+                                                                \
+        int *errcode = (int *)&env[JB_ERRNO];                   \
+        host_errno_set(*errcode);                               \
         longjmp(env, 1);                                        \
       }                                                         \
     while (0)
