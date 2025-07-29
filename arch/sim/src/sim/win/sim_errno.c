@@ -34,3 +34,13 @@ int host_errno_convert(int negative_errcode)
 {
   return negative_errcode;
 }
+
+int host_errno_get(void)
+{
+  return errno;
+}
+
+void host_errno_set(int errcode)
+{
+  errno = errcode;
+}

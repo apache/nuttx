@@ -224,6 +224,8 @@ void  sim_unlock(void);
 /* sim_errno.c */
 
 int host_errno_convert(int negative_errcode);
+int host_errno_get(void);
+void host_errno_set(int errcode);
 
 /* sim_hostmisc.c ***********************************************************/
 

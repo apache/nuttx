@@ -329,3 +329,13 @@ int host_errno_convert(int negative_errno)
 
   return negative_errno;
 }
+
+int host_errno_get(void)
+{
+  return errno;
+}
+
+void host_errno_set(int errcode)
+{
+  errno = errcode;
+}
