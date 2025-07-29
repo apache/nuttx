@@ -35,6 +35,7 @@
 #include <netinet/in.h>
 
 #include "netfilter/iptables.h"
+#include "utils/utils.h"
 
 #ifdef CONFIG_NET_IPv4
 
@@ -76,7 +77,7 @@ int ipv4_getsockopt(FAR struct socket *psock, int option,
 
   ninfo("option: %d\n", option);
 
-  net_lock();
+  conn_lock(psock->s_conn);
   switch (option)
     {
 #ifdef CONFIG_NET_IPTABLES
@@ -102,7 +103,7 @@ int ipv4_getsockopt(FAR struct socket *psock, int option,
         break;
     }
 
-  net_unlock();
+  conn_unlock(psock->s_conn);
   return ret;
 }
 
