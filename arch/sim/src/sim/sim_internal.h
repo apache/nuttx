@@ -155,18 +155,6 @@
       }                                                         \
     while (0)
 
-#define host_uninterruptible_errno(func, ...)                   \
-    ({                                                          \
-        uint64_t flags_ = up_irq_save();                        \
-        typeof(func(__VA_ARGS__)) ret_ = func(__VA_ARGS__);     \
-        if (ret_ < 0)                                           \
-          {                                                     \
-            ret_ = host_errno_convert(-errno);                  \
-          }                                                     \
-        up_irq_restore(flags_);                                 \
-        ret_;                                                   \
-    })
-
 /* File System Definitions **************************************************/
 
 /* These definitions characterize the compressed filesystem image */
