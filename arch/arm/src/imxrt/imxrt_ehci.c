@@ -71,16 +71,16 @@
  * Root hub port plus one for EP0.
  */
 
-#ifndef CONFIG_IMXRT_EHCI_NQHS
-#  define CONFIG_IMXRT_EHCI_NQHS (IMXRT_EHCI_NRHPORT + 1)
+#ifndef CONFIG_IMXRT_EHCI_USB1_NQHS
+#  define CONFIG_IMXRT_EHCI_USB1_NQHS (IMXRT_EHCI_NRHPORT + 1)
 #endif
 
 /* Configurable number of Queue Element Transfer Descriptor (qTDs).  The
  * default is one per root hub plus three from EP0.
  */
 
-#ifndef CONFIG_IMXRT_EHCI_NQTDS
-#  define CONFIG_IMXRT_EHCI_NQTDS (IMXRT_EHCI_NRHPORT + 3)
+#ifndef CONFIG_IMXRT_EHCI_USB1_NQTDS
+#  define CONFIG_IMXRT_EHCI_USB1_NQTDS (IMXRT_EHCI_NRHPORT + 3)
 #endif
 
 /* Buffers must be aligned to the cache line size */
@@ -89,17 +89,17 @@
 
 /* Configurable size of a request/descriptor buffers */
 
-#ifndef CONFIG_IMXRT_EHCI_BUFSIZE
-#  define CONFIG_IMXRT_EHCI_BUFSIZE 128
+#ifndef CONFIG_IMXRT_EHCI_USB1_BUFSIZE
+#  define CONFIG_IMXRT_EHCI_USB1_BUFSIZE 128
 #endif
 
 #define IMXRT_EHCI_BUFSIZE \
-  ((CONFIG_IMXRT_EHCI_BUFSIZE + DCACHE_LINEMASK) & ~DCACHE_LINEMASK)
+  ((CONFIG_IMXRT_EHCI_USB1_BUFSIZE + DCACHE_LINEMASK) & ~DCACHE_LINEMASK)
 
 /* Debug options */
 
 #ifndef CONFIG_DEBUG_USB_INFO
-#  undef CONFIG_IMXRT_EHCI_REGDEBUG
+#  undef CONFIG_IMXRT_EHCI_USB1_REGDEBUG
 #endif
 
 /* Isochronous transfers are not currently supported */
@@ -407,7 +407,7 @@ static uint32_t imxrt_swap32(uint32_t value);
 #  define imxrt_swap32(value) (value)
 #endif
 
-#ifdef CONFIG_IMXRT_EHCI_REGDEBUG
+#ifdef CONFIG_IMXRT_EHCI_USB1_REGDEBUG
 static void imxrt_printreg(volatile uint32_t *regaddr, uint32_t regval,
          bool iswrite);
 static void imxrt_checkreg(volatile uint32_t *regaddr, uint32_t regval,
@@ -451,7 +451,7 @@ static int imxrt_qh_flush(struct imxrt_qh_s *qh);
 
 /* Endpoint Transfer Handling ***********************************************/
 
-#ifdef CONFIG_IMXRT_EHCI_REGDEBUG
+#ifdef CONFIG_IMXRT_EHCI_USB1_REGDEBUG
 static void imxrt_qtd_print(struct imxrt_qtd_s *qtd);
 static void imxrt_qh_print(struct imxrt_qh_s *qh);
 static int imxrt_qtd_dump(struct imxrt_qtd_s *qtd, uint32_t **bp, void *arg);
@@ -604,26 +604,26 @@ static struct imxrt_qh_s g_intrhead aligned_data(32);
 
 /* The frame list */
 
-#ifdef CONFIG_IMXRT_EHCI_PREALLOCATE
+#ifdef CONFIG_IMXRT_EHCI_USB1_PREALLOCATE
 static uint32_t g_framelist[FRAME_LIST_SIZE] aligned_data(4096);
 #else
 static uint32_t *g_framelist;
 #endif
 #endif /* CONFIG_USBHOST_INT_DISABLE */
 
-#ifdef CONFIG_IMXRT_EHCI_PREALLOCATE
+#ifdef CONFIG_IMXRT_EHCI_USB1_PREALLOCATE
 /* Pools of pre-allocated data structures.  These will all be linked into the
  * free lists within g_ehci.  These must all be aligned to 32-byte boundaries
  */
 
 /* Queue Head (QH) pool */
 
-static struct imxrt_qh_s g_qhpool[CONFIG_IMXRT_EHCI_NQHS]
+static struct imxrt_qh_s g_qhpool[CONFIG_IMXRT_EHCI_USB1_NQHS]
                        aligned_data(32);
 
 /* Queue Element Transfer Descriptor (qTD) pool */
 
-static struct imxrt_qtd_s g_qtdpool[CONFIG_IMXRT_EHCI_NQTDS]
+static struct imxrt_qtd_s g_qtdpool[CONFIG_IMXRT_EHCI_USB1_NQTDS]
                         aligned_data(32);
 
 #else
@@ -884,7 +884,7 @@ static uint32_t imxrt_swap32(uint32_t value)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_IMXRT_EHCI_REGDEBUG
+#ifdef CONFIG_IMXRT_EHCI_USB1_REGDEBUG
 static void imxrt_printreg(volatile uint32_t *regaddr, uint32_t regval,
                            bool iswrite)
 {
@@ -901,7 +901,7 @@ static void imxrt_printreg(volatile uint32_t *regaddr, uint32_t regval,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_IMXRT_EHCI_REGDEBUG
+#ifdef CONFIG_IMXRT_EHCI_USB1_REGDEBUG
 static void imxrt_checkreg(volatile uint32_t *regaddr, uint32_t regval,
                            bool iswrite)
 {
@@ -966,7 +966,7 @@ static void imxrt_checkreg(volatile uint32_t *regaddr, uint32_t regval,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_IMXRT_EHCI_REGDEBUG
+#ifdef CONFIG_IMXRT_EHCI_USB1_REGDEBUG
 static uint32_t imxrt_getreg(volatile uint32_t *regaddr)
 {
   /* Read the value from the register */
@@ -993,7 +993,7 @@ static inline uint32_t imxrt_getreg(volatile uint32_t *regaddr)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_IMXRT_EHCI_REGDEBUG
+#ifdef CONFIG_IMXRT_EHCI_USB1_REGDEBUG
 static void imxrt_putreg(uint32_t regval, volatile uint32_t *regaddr)
 {
   /* Check if we need to print this value */
@@ -1477,7 +1477,7 @@ static int imxrt_qh_flush(struct imxrt_qh_s *qh)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_IMXRT_EHCI_REGDEBUG
+#ifdef CONFIG_IMXRT_EHCI_USB1_REGDEBUG
 static void imxrt_qtd_print(struct imxrt_qtd_s *qtd)
 {
   uinfo("  QTD[%p]:\n", qtd);
@@ -1498,7 +1498,7 @@ static void imxrt_qtd_print(struct imxrt_qtd_s *qtd)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_IMXRT_EHCI_REGDEBUG
+#ifdef CONFIG_IMXRT_EHCI_USB1_REGDEBUG
 static void imxrt_qh_print(struct imxrt_qh_s *qh)
 {
   struct imxrt_epinfo_s *epinfo;
@@ -1541,7 +1541,7 @@ static void imxrt_qh_print(struct imxrt_qh_s *qh)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_IMXRT_EHCI_REGDEBUG
+#ifdef CONFIG_IMXRT_EHCI_USB1_REGDEBUG
 static int imxrt_qtd_dump(struct imxrt_qtd_s *qtd, uint32_t **bp, void *arg)
 {
   imxrt_qtd_print(qtd);
@@ -1558,7 +1558,7 @@ static int imxrt_qtd_dump(struct imxrt_qtd_s *qtd, uint32_t **bp, void *arg)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_IMXRT_EHCI_REGDEBUG
+#ifdef CONFIG_IMXRT_EHCI_USB1_REGDEBUG
 static int imxrt_qh_dump(struct imxrt_qh_s *qh, uint32_t **bp, void *arg)
 {
   imxrt_qh_print(qh);
@@ -4988,7 +4988,7 @@ struct usbhost_connection_s *imxrt_ehci_initialize(int controller)
   DEBUGASSERT((sizeof(struct imxrt_qh_s) & 0x1f) == 0);
   DEBUGASSERT((sizeof(struct imxrt_qtd_s) & 0x1f) == 0);
 
-#  ifdef CONFIG_IMXRT_EHCI_PREALLOCATE
+#  ifdef CONFIG_IMXRT_EHCI_USB1_PREALLOCATE
   DEBUGASSERT(((uintptr_t)&g_qhpool & 0x1f) == 0);
   DEBUGASSERT(((uintptr_t)&g_qtdpool & 0x1f) == 0);
 #  endif
@@ -5058,7 +5058,7 @@ struct usbhost_connection_s *imxrt_ehci_initialize(int controller)
 #  ifndef CONFIG_IMXRT_EHCI_PREALLOCATE
   /* Allocate a pool of free Queue Head (QH) structures */
 
-  g_qhpool = kmm_memalign(32, CONFIG_IMXRT_EHCI_NQHS *
+  g_qhpool = kmm_memalign(32, CONFIG_IMXRT_EHCI_USB1_NQHS *
                               sizeof(struct imxrt_qh_s));
   if (!g_qhpool)
     {
@@ -5069,17 +5069,17 @@ struct usbhost_connection_s *imxrt_ehci_initialize(int controller)
 
   /* Initialize the list of free Queue Head (QH) structures */
 
-  for (i = 0; i < CONFIG_IMXRT_EHCI_NQHS; i++)
+  for (i = 0; i < CONFIG_IMXRT_EHCI_USB1_NQHS; i++)
     {
       /* Put the QH structure in a free list */
 
       imxrt_qh_free(&g_qhpool[i]);
     }
 
-#  ifndef CONFIG_IMXRT_EHCI_PREALLOCATE
+#  ifndef CONFIG_IMXRT_EHCI_USB1_PREALLOCATE
   /* Allocate a pool of free Transfer Descriptor (qTD) structures */
 
-  g_qtdpool = kmm_memalign(32, CONFIG_IMXRT_EHCI_NQTDS *
+  g_qtdpool = kmm_memalign(32, CONFIG_IMXRT_EHCI_USB1_NQTDS *
                                sizeof(struct imxrt_qtd_s));
   if (!g_qtdpool)
     {
@@ -5089,7 +5089,7 @@ struct usbhost_connection_s *imxrt_ehci_initialize(int controller)
     }
 #  endif
 
-#  if !defined(CONFIG_IMXRT_EHCI_PREALLOCATE) && !defined(CONFIG_USBHOST_INT_DISABLE)
+#  if !defined(CONFIG_IMXRT_EHCI_USB1_PREALLOCATE) && !defined(CONFIG_USBHOST_INT_DISABLE)
   /* Allocate the periodic framelist */
 
   g_framelist = kmm_memalign(4096, FRAME_LIST_SIZE * sizeof(uint32_t));
@@ -5104,7 +5104,7 @@ struct usbhost_connection_s *imxrt_ehci_initialize(int controller)
 
   /* Initialize the list of free Transfer Descriptor (qTD) structures */
 
-  for (i = 0; i < CONFIG_IMXRT_EHCI_NQTDS; i++)
+  for (i = 0; i < CONFIG_IMXRT_EHCI_USB1_NQTDS; i++)
     {
       /* Put the TD in a free list */
 
@@ -5127,7 +5127,7 @@ struct usbhost_connection_s *imxrt_ehci_initialize(int controller)
    * some performance.
    */
 
-#  ifdef CONFIG_IMXRT_EHCI_SDIS
+#  ifdef CONFIG_IMXRT_EHCI_USB1_SDIS
   putreg32(USBHOST_USBMODE_CM_HOST | USBHOST_USBMODE_SDIS |
            USBHOST_USBMODE_VBPS, IMXRT_USBDEV_USBMODE);
 #  else
@@ -5149,7 +5149,7 @@ struct usbhost_connection_s *imxrt_ehci_initialize(int controller)
    * host configuration in the reset.
    */
 
-#  ifdef CONFIG_IMXRT_EHCI_SDIS
+#  ifdef CONFIG_IMXRT_EHCI_USB1_SDIS
   putreg32(USBHOST_USBMODE_CM_HOST | USBHOST_USBMODE_SDIS |
            USBHOST_USBMODE_VBPS, IMXRT_USBDEV_USBMODE);
 #  else

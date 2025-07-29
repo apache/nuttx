@@ -15,69 +15,95 @@ choice
 config ARCH_CHIP_MIMXRT1021CAG4A
 	bool "MIMXRT1021CAG4A"
 	select ARCH_FAMILY_MIMXRT1021C
+	select IMXRT_HAVE_USBOTG1
 
 config ARCH_CHIP_MIMXRT1021CAF4A
 	bool "MIMXRT1021CAF4A"
 	select ARCH_FAMILY_MIMXRT1021C
+	select IMXRT_HAVE_USBOTG1
 
 config ARCH_CHIP_MIMXRT1021DAF5A
 	bool "MIMXRT1021DAF5A"
 	select ARCH_FAMILY_MIMXRT1021D
+	select IMXRT_HAVE_USBOTG1
 
 config ARCH_CHIP_MIMXRT1021DAG5A
 	bool "MIMXRT1021DAG5A"
 	select ARCH_FAMILY_MIMXRT1021D
+	select IMXRT_HAVE_USBOTG1
 
 config ARCH_CHIP_MIMXRT1051DVL6A
 	bool "MIMXRT1051DVL6A"
 	select ARCH_FAMILY_MIMXRT105xDVL6A
+	select IMXRT_HAVE_USBOTG1
+	select IMXRT_HAVE_USBOTG2
 
 config ARCH_CHIP_MIMXRT1051CVL5A
 	bool "MIMXRT1051CVL5A"
 	select ARCH_FAMILY_MIMXRT105xCVL5A
+	select IMXRT_HAVE_USBOTG1
+	select IMXRT_HAVE_USBOTG2
 
 config ARCH_CHIP_MIMXRT1052DVL6A
 	bool "MIMXRT1052DVL6A"
 	select ARCH_FAMILY_MIMXRT105xDVL6A
 	select IMXRT_HAVE_LCD
+	select IMXRT_HAVE_USBOTG1
+	select IMXRT_HAVE_USBOTG2
 
 config ARCH_CHIP_MIMXRT1052CVL5A
 	bool "MIMXRT1052CVL5A"
 	select ARCH_FAMILY_MIMXRT105xCVL5A
 	select IMXRT_HAVE_LCD
+	select IMXRT_HAVE_USBOTG1
+	select IMXRT_HAVE_USBOTG2
 
 config ARCH_CHIP_MIMXRT1061DVL6A
 	bool "MIMXRT1061DVL6A"
 	select ARCH_FAMILY_MXRT106xDVL6A
+	select IMXRT_HAVE_USBOTG1
+	select IMXRT_HAVE_USBOTG2
 
 config ARCH_CHIP_MIMXRT1061CVL5A
 	bool "MIMXRT1061CVL5A"
 	select ARCH_FAMILY_MIMXRT106xCVL5A
+	select IMXRT_HAVE_USBOTG1
+	select IMXRT_HAVE_USBOTG2
 
 config ARCH_CHIP_MIMXRT1062DVL6A
 	bool "MIMXRT1062DVL6A"
 	select ARCH_FAMILY_MXRT106xDVL6A
 	select IMXRT_HAVE_LCD
+	select IMXRT_HAVE_USBOTG1
+	select IMXRT_HAVE_USBOTG2
 
 config ARCH_CHIP_MIMXRT1062CVL5A
 	bool "MIMXRT1062DVL6A"
 	select ARCH_FAMILY_MIMXRT106xCVL5A
 	select IMXRT_HAVE_LCD
+	select IMXRT_HAVE_USBOTG1
+	select IMXRT_HAVE_USBOTG2
 
 config ARCH_CHIP_MIMXRT1064DVL6A
 	bool "MIMXRT1064DVL6A"
 	select ARCH_FAMILY_MXRT106xDVL6A
 	select IMXRT_HAVE_LCD
+	select IMXRT_HAVE_USBOTG1
+	select IMXRT_HAVE_USBOTG2
 
 config ARCH_CHIP_MIMXRT1064CVL5A
 	bool "MIMXRT1064DVL6A"
 	select ARCH_FAMILY_MIMXRT106xCVL5A
 	select IMXRT_HAVE_LCD
+	select IMXRT_HAVE_USBOTG1
+	select IMXRT_HAVE_USBOTG2
 
 config ARCH_CHIP_MIMXRT1176DVMAA
 	bool "MIMXRT1176DVMAA"
 	select ARCH_FAMILY_IMXRT117x
 	select IMXRT_HAVE_LCD
+	select IMXRT_HAVE_USBOTG1
+	select IMXRT_HAVE_USBOTG2
 
 endchoice # i.MX RT Chip Selection
 
@@ -333,9 +359,19 @@ config IMXRT_EDMA
 	default n
 	select ARCH_DMA
 
-config IMXRT_USBOTG
-	bool "USB EHCI"
+config IMXRT_USBOTG1
+	bool "USB EHCI OTG1"
 	default n
+	depends on IMXRT_HAVE_USBOTG1
+	select IMXRT_USBOTG
+	select USBHOST_HAVE_ASYNCH if USBHOST
+	select USBHOST_ASYNCH
+
+config IMXRT_USBOTG2
+	bool "USB EHCI OTG2: NOT SUPPORTED YET"
+	default n
+	depends on IMXRT_HAVE_USBOTG2
+	select IMXRT_USBOTG
 	select USBHOST_HAVE_ASYNCH if USBHOST
 	select USBHOST_ASYNCH
 
@@ -3088,25 +3124,25 @@ endif # SCHED_TICKLESS
 
 endmenu # Timer Configuration
 
-if IMXRT_USBOTG && USBHOST
+if IMXRT_USBOTG1 && USBHOST
 
-menu "USB host controller driver (HCD) options"
+menu "USB OTG1 Host Controller Driver (HCD) options"
 
-config IMXRT_EHCI_NQHS
+config IMXRT_EHCI_USB1_NQHS
 	int "Number of Queue Head (QH) structures"
 	default 4
 	---help---
 		Configurable number of Queue Head (QH) structures.  The default is
 		one per Root hub port plus one for EP0 (4).
 
-config IMXRT_EHCI_NQTDS
+config IMXRT_EHCI_USB1_NQTDS
 	int "Number of Queue Element Transfer Descriptor (qTDs)"
 	default 6
 	---help---
 		Configurable number of Queue Element Transfer Descriptor (qTDs).
 		The default is one per root hub plus three from EP0 (6).
 
-config IMXRT_EHCI_BUFSIZE
+config IMXRT_EHCI_USB1_BUFSIZE
 	int "Size of one request/descriptor buffer"
 	default 128
 	---help---
@@ -3114,7 +3150,7 @@ config IMXRT_EHCI_BUFSIZE
 		size must be an even number of 32-bit words and must be large enough
 		to hangle the largest transfer via a SETUP request.
 
-config IMXRT_EHCI_PREALLOCATE
+config IMXRT_EHCI_USB1_PREALLOCATE
 	bool "Preallocate descriptor pool"
 	default y
 	---help---
@@ -3123,7 +3159,44 @@ config IMXRT_EHCI_PREALLOCATE
 		dynamically allocated using kmm_memalign().
 
 endmenu # USB host controller driver (HCD) options
-endif # IMXRT_USBOTG && USBHOST
+endif # IMXRT_USBOTG1 && USBHOST
+
+if IMXRT_USBOTG2 && USBHOST
+
+menu "USB OTG2 Host Controller Driver (HCD) options: NOT SUPPORTED YET"
+
+config IMXRT_EHCI_USB2_NQHS
+	int "Number of Queue Head (QH) structures"
+	default 4
+	---help---
+		Configurable number of Queue Head (QH) structures.  The default is
+		one per Root hub port plus one for EP0 (4).
+
+config IMXRT_EHCI_USB2_NQTDS
+	int "Number of Queue Element Transfer Descriptor (qTDs)"
+	default 6
+	---help---
+		Configurable number of Queue Element Transfer Descriptor (qTDs).
+		The default is one per root hub plus three from EP0 (6).
+
+config IMXRT_EHCI_USB2_BUFSIZE
+	int "Size of one request/descriptor buffer"
+	default 128
+	---help---
+		The size of one request/descriptor buffer in bytes.  The TD buffe
+		size must be an even number of 32-bit words and must be large enough
+		to hangle the largest transfer via a SETUP request.
+
+config IMXRT_EHCI_USB2_PREALLOCATE
+	bool "Preallocate descriptor pool"
+	default y
+	---help---
+		Select this option to pre-allocate EHCI queue and descriptor
+		structure pools in .bss.  Otherwise, these pools will be
+		dynamically allocated using kmm_memalign().
+
+endmenu # USB host controller driver (HCD) options
+endif # IMXRT_USBOTG2
 
 if IMXRT_USBDEV
 
