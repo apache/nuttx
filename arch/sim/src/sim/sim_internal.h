@@ -158,11 +158,11 @@
     ({                                                          \
         uint64_t flags_ = up_irq_save();                        \
         typeof(func(__VA_ARGS__)) ret_ = func(__VA_ARGS__);     \
+        up_irq_restore(flags_);                                 \
         if (ret_ < 0)                                           \
           {                                                     \
             ret_ = host_errno_convert(-errno);                  \
           }                                                     \
-        up_irq_restore(flags_);                                 \
         ret_;                                                   \
     })
 
