@@ -180,14 +180,16 @@ int mempool_init(FAR struct mempool_s *pool, FAR const char *name);
  *   pool if expandsize isn't zero.
  *
  * Input Parameters:
- *   pool - Address of the memory pool to be used.
+ *   pool    - Address of the memory pool to be used.
+ *   timeout - The maximum time (ms) to wait for a buffer to become
+ *             available.
  *
  * Returned Value:
  *   The pointer to the allocated block on success; NULL on any failure.
  *
  ****************************************************************************/
 
-FAR void *mempool_allocate(FAR struct mempool_s *pool);
+FAR void *mempool_allocate(FAR struct mempool_s *pool, unsigned int timeout);
 
 /****************************************************************************
  * Name: mempool_release
