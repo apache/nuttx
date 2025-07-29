@@ -736,6 +736,8 @@ coredump_print_memory_regions(FAR const struct memory_region_s *regions)
     {
       _alert("Region[%d] start=0x%" PRIxPTR ", end=0x%" PRIxPTR "\n",
              i, regions[i].start, regions[i].end);
+      *(volatile int *)regions[i].start;
+      *(volatile int *)(regions[i].end - sizeof(int));
     }
 }
 #endif
