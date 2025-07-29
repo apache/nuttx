@@ -284,6 +284,8 @@ endif()
 list(APPEND HOSTSRCS sim_hostfs.c)
 list(APPEND HOST_DEFINITIONS CONFIG_NAME_MAX=${CONFIG_NAME_MAX})
 
+list(APPEND HOSTSRCS sim_errno.c)
+
 configure_file(${NUTTX_DIR}/include/nuttx/fs/hostfs.h
                ${CMAKE_CURRENT_BINARY_DIR}/hostfs.h COPYONLY)
 configure_file(${CMAKE_BINARY_DIR}/include/nuttx/config.h
