@@ -1459,6 +1459,25 @@ config DHARA_READ_NCACHES
 	default 4
 endif
 
+config MTD_NVBLK
+	bool "MTD using Non Volatile BLock driver"
+	default n
+
+if MTD_NVBLK
+
+config MTD_NVBLK_DEFAULT_LBS
+	int "nvblk (logical) block size"
+	default 256
+
+config MTD_NVBLK_DEFAULT_IOBS
+	int "nvblk io block size (block device sector size)"
+	default 512
+
+config MTD_NVBLK_DEFAULT_SPEB
+	int "nvblk spare erase blocks"
+	default 1
+endif
+
 config MTD_CFI
 	bool "CFI(common flash interface) NOR FLASH"
 	default n

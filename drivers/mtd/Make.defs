@@ -208,6 +208,29 @@ CSRCS += mtd/dhara/dhara/journal.c
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)drivers$(DELIM)mtd$(DELIM)dhara
 endif
 
+ifeq ($(CONFIG_MTD_NVBLK),y)
+
+main.zip:
+	$(call DOWNLOAD,https://github.com/Laczen/nvblk/archive/refs/heads,main.zip,mtd/nvblk-main.zip)
+
+.nvblkunpack: main.zip
+	$(Q) unzip mtd/nvblk-main.zip
+	$(call DELFILE, mtd/nvblk-main.zip)
+	$(Q) mv nvblk-main mtd/nvblk
+	$(Q) touch mtd/nvblk/.nvblkunpack
+
+ifeq ($(wildcard mtd/nvblk/.gitignore),)
+context:: .nvblkunpack
+endif
+
+distclean::
+	$(call DELDIR, mtd/nvblk)
+
+CSRCS += nvblk.c
+CSRCS += mtd/nvblk/src/nvblk.c
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)drivers$(DELIM)mtd$(DELIM)nvblk$(DELIM)include
+endif
+
 ifeq ($(CONFIG_MTD_CFI),y)
 CSRCS += mtd_cfi.c
 CSRCS += cfi.c

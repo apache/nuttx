@@ -821,6 +821,29 @@ int dhara_initialize_by_path(FAR const char *path,
 #endif
 
 /****************************************************************************
+ * Name: nvblk_initialize
+ *
+ * Description:
+ *   Initialize to provide a block driver wrapper around an MTD interface
+ *
+ * Input Parameters:
+ *   path - The block device path.
+ *   mtd  - The MTD device that supports the FLASH interface.
+ *   lbs  - The logical blocksize (size of the nvblk blocks).
+ *   iobs - The input output blocksize (multiple of lbs).
+ *   speb - The number of spare erase blocks.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MTD_NVBLK
+int nvblk_initialize(FAR const char *path,
+                     FAR struct mtd_dev_s *mtd,
+                     uint32_t lbs,
+                     uint32_t iobs,
+                     uint32_t speb);
+#endif
+
+/****************************************************************************
  * Name: register_cfi_driver
  *
  * Description:
