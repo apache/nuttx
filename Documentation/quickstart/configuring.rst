@@ -33,18 +33,17 @@ computer.
 
     .. code-block:: console
 
-       $ make clean; make
+       $ make clean
+       $ make -j
        $ ./nuttx
-       login: admin
-       password: Administrator
        User Logged-in!
        nsh>
 
-   From another terminal window, kill the simulator:
+   You can explore the nsh typing ``help`` or ``?``. Then to leave you can run:
 
     .. code-block:: console
 
-       $ pkill nuttx
+       nsh> quit
 
 #. Modify configuration
 
