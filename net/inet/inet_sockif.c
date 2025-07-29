@@ -44,6 +44,7 @@
 #include "icmpv6/icmpv6.h"
 #include "sixlowpan/sixlowpan.h"
 #include "socket/socket.h"
+#include "utils/utils.h"
 #include "inet/inet.h"
 
 #ifdef HAVE_INET_SOCKETS
@@ -913,7 +914,7 @@ static int inet_set_socketlevel_option(FAR struct socket *psock, int option,
            * options.
            */
 
-          net_lock();
+          conn_lock(conn);
 
           /* Set or clear the linger option bit and linger time
            * (in deciseconds)
@@ -930,7 +931,7 @@ static int inet_set_socketlevel_option(FAR struct socket *psock, int option,
               conn->s_linger = 0;
             }
 
-          net_unlock();
+          conn_unlock(conn);
         }
         break;
 #endif
@@ -961,7 +962,7 @@ static int inet_set_socketlevel_option(FAR struct socket *psock, int option,
           buffersize = MIN(buffersize, CONFIG_NET_MAX_RECV_BUFSIZE);
 #endif
 
-          net_lock();
+          conn_lock(psock->s_conn);
 
 #ifdef NET_TCP_HAVE_STACK
           if (psock->s_type == SOCK_STREAM)
@@ -986,11 +987,11 @@ static int inet_set_socketlevel_option(FAR struct socket *psock, int option,
           else
 #endif
             {
-              net_unlock();
+              conn_unlock(psock->s_conn);
               return -ENOPROTOOPT;
             }
 
-          net_unlock();
+          conn_unlock(psock->s_conn);
         }
         break;
 #endif
@@ -1022,7 +1023,7 @@ static int inet_set_socketlevel_option(FAR struct socket *psock, int option,
           buffersize = MIN(buffersize, CONFIG_NET_MAX_SEND_BUFSIZE);
 #endif
 
-          net_lock();
+          conn_lock(psock->s_conn);
 
 #ifdef NET_TCP_HAVE_STACK
           if (psock->s_type == SOCK_STREAM)
@@ -1047,11 +1048,11 @@ static int inet_set_socketlevel_option(FAR struct socket *psock, int option,
           else
 #endif
             {
-              net_unlock();
+              conn_unlock(psock->s_conn);
               return -ENOPROTOOPT;
             }
 
-          net_unlock();
+          conn_unlock(psock->s_conn);
         }
         break;
 #endif
@@ -1066,7 +1067,7 @@ static int inet_set_socketlevel_option(FAR struct socket *psock, int option,
 
           if (psock->s_type == SOCK_DGRAM)
             {
-              net_lock();
+              conn_lock(psock->s_conn);
 
               /* For now the timestamp enable is just boolean.
                * If SO_TIMESTAMPING support is added in future, it can be
@@ -1076,7 +1077,7 @@ static int inet_set_socketlevel_option(FAR struct socket *psock, int option,
               FAR struct udp_conn_s *conn = psock->s_conn;
               conn->timestamp = (*((FAR int *)value) != 0);
 
-              net_unlock();
+              conn_unlock(psock->s_conn);
             }
           else
             {
