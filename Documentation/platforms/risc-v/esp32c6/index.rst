@@ -178,6 +178,8 @@ Now opening the serial port with a terminal emulator should show the NuttX conso
   nsh> uname -a
   NuttX 12.8.0 759d37b97c-dirty Mar  5 2025 19:42:41 risc-v esp32c6-devkitc
 
+.. _esp32c6_debug:
+
 Debugging
 =========
 
@@ -200,7 +202,7 @@ USB-to-JTAG adapter.
 
 OpenOCD can then be used::
 
-  openocd -s <tcl_scripts_path> -c 'set ESP_RTOS hwthread' -f board/esp32c3-builtin.cfg -c 'init; reset halt; esp appimage_offset 0x0'
+  openocd -s <tcl_scripts_path> -c 'set ESP_RTOS hwthread' -f board/esp32c6-builtin.cfg -c 'init; reset halt; esp appimage_offset 0x0'
 
 .. note::
   - ``appimage_offset`` should be set to ``0x0`` when ``Simple Boot`` is used. For MCUboot, this value should be set to
@@ -593,6 +595,180 @@ For MCUBoot operation:
 - The **Secondary Slot** receives OTA updates
 - The **Scratch Partition** is used by MCUBoot for image swapping during updates
 - MCUBoot manages image validation, confirmation, and rollback functionality
+
+.. _esp32c6_ulp:
+
+ULP LP Core Coprocessor
+=======================
+
+The ULP LP core (Low-power core) is a 32-bit RISC-V coprocessor integrated into the ESP32-C6 SoC.
+It is designed to run independently of the main high-performance (HP) core and is capable of executing lightweight tasks
+such as GPIO polling, simple peripheral control and I/O interactions.
+
+This coprocessor benefits to offload simple tasks from HP core (e.g., GPIO polling , I2C operations, basic control logic) and
+frees the main CPU for higher-level processing
+
+For more information about ULP LP Core Coprocessor `check here <https://docs.espressif.com/projects/esp-idf/en/stable/esp32c6/api-reference/system/ulp-lp-core.html>`__.
+
+Features of the ULP LP-Core
+---------------------------
+
+* Processor Architecture
+   - RV32I RISC-V core with IMAC extensions—Integer (I), Multiplication/Division (M), Atomic (A), and Compressed (C) instructions
+   - Runs at 20 MHz
+* Memory
+   - Access to 16 KB of low-power memory (LP-RAM) and LP-domain peripherals any time
+   - Full access to all of the chip's memory and peripherals when when the HP core is active
+* Debugging
+   - Built-in JTAG debug module for external debugging
+   - Supports LP UART for logging from the ULP itself
+   - Includes a panic handler capable of dumping register state via LP UART on exceptions
+* Peripheral support
+   - LP domain peripherals (LP GPIO, LP I2C, LP UART and LP Timer)
+   - Full access HP domain peripherals when when the HP core is active
+
+Loading Binary into ULP LP-Core
+-------------------------------
+
+There are two ways to load a binary into LP-Core:
+  - Using a prebuilt binary
+  - Using NuttX internal build system to build your own (bare-metal) application
+
+When using a prebuilt binary, the already compiled output for the ULP system whether built from NuttX
+or the ESP-IDF environment can be leveraged. However, whenever the ULP code needs to be modified, it must be rebuilt separately,
+and the resulting .bin file has to be integrated into NuttX. This workflow, while compatible, can become tedious.
+
+With NuttX internal build system, the ULP binary code can be built and flashed from a single location. It is more convenient but
+using build system has some dependencies on example side.
+
+Both methods requires `CONFIG_ESPRESSIF_USE_LP_CORE` variable to enable ULP core and
+`CONFIG_ESPRESSIF_ULP_PROJECT_PATH` variable to set the path to the ULP project or prebuilt binary file
+relative to NuttX root folder.
+These variables can be set using `make menuconfig` or `kconfig-tweak` commands.
+
+Here is an example for enabling ULP and using a prebuilt binary for ULP core::
+
+    make distclean
+    ./tools/configure.sh esp32c6-devkitc:nsh
+    kconfig-tweak -e CONFIG_ESPRESSIF_USE_LP_CORE
+    kconfig-tweak --set-str CONFIG_ESPRESSIF_ULP_PROJECT_PATH "Documentation/platforms/risc-v/esp32c6/boards/esp32c6-devkitc/ulp_blink.bin"
+    make olddefconfig
+    make -j
+
+Creating an ULP LP-Core Application
+-----------------------------------
+
+To use NuttX's internal build system to compile the bare-metal LP binary, check the following instructions.
+
+First, create a folder for the ULP source and header files. This folder is just for ULP project and it is
+an independent project. Therefore, the NuttX example guide should not be followed, and no Makefile or similar
+build files should be added. Also folder location could be anywhere. To include ULP folder into build
+system don't forget to set `CONFIG_ESPRESSIF_ULP_PROJECT_PATH` variable with path of the ULP project folder relative to
+NuttX root folder. Instructions for setting up can be found above.
+
+NuttX's internal functions or POSIX calls are not supported.
+
+Here is an example:
+
+- ULP UART Snippet:
+
+.. code-block:: C
+
+  #include <stdint.h>
+  #include "ulp_lp_core_print.h"
+  #include "ulp_lp_core_utils.h"
+  #include "ulp_lp_core_uart.h"
+  #include "ulp_lp_core_gpio.h"
+
+  #define nop() __asm__ __volatile__ ("nop")
+
+  int main (void)
+  {
+    while(1)
+    {
+
+      lp_core_printf("Hello from the LP core!!\r\n");
+      for (int i = 0; i < 10000; i++)
+        {
+          nop();
+        }
+    }
+
+    return 0;
+  }
+
+For more information about ULP Core Coprocessor examples `check here <https://github.com/espressif/esp-idf/tree/master/examples/system/ulp/lp_core>`__.
+After these settings follow the same steps as for any other configuration to build NuttX. Build system checks ULP project path,
+adds every source and header file into project and builds it.
+
+To sum up, here is an complete example. `ulp_example/ulp (../ulp_example/ulp)` folder selected as example
+to create a subfolder for ULP but folder that includes ULP source code can be anywhere:
+
+- Tree view:
+
+.. code-block:: text
+
+   nuttxspace/
+   ├── nuttx/
+   └── apps/
+   └── ulp_example/
+       └── ulp/
+           └── ulp_main.c
+
+- Contents in ulp_main.c:
+
+.. code-block:: C
+
+   #include <stdint.h>
+   #include <stdbool.h>
+   #include "ulp_lp_core_gpio.h"
+
+   #define GPIO_PIN 0
+
+   #define nop() __asm__ __volatile__ ("nop")
+
+   bool gpio_level_previous = true;
+
+   int main (void)
+    {
+       while (1)
+           {
+           ulp_lp_core_gpio_set_level(GPIO_PIN, gpio_level_previous);
+           gpio_level_previous = !gpio_level_previous;
+           for (int i = 0; i < 10000; i++)
+             {
+               nop();
+             }
+           }
+
+       return 0;
+    }
+
+- Command to build::
+
+    make distclean
+    ./tools/configure.sh esp32c6-devkitc:nsh
+    kconfig-tweak -e CONFIG_ESPRESSIF_GPIO_IRQ
+    kconfig-tweak -e CONFIG_DEV_GPIO
+    kconfig-tweak -e CONFIG_ESPRESSIF_USE_LP_CORE
+    kconfig-tweak --set-str CONFIG_ESPRESSIF_ULP_PROJECT_PATH "../ulp_example/ulp"
+    make olddefconfig
+    make -j
+
+Debugging ULP LP-Core
+---------------------
+
+To debug ULP LP-Core please first refer to :ref:`Debugging section. <esp32c6_debug>`
+Debugging ULP core consist same steps with some small differences. First of all, configuration file
+needs to be changed from `board/esp32c6-builtin.cfg` or `board/esp32c6-ftdi.cfg` to
+`board/esp32c6-lpcore-builtin.cfg` or `board/esp32c6-lpcore-ftdi.cfg` depending on preferred debug adapter.
+
+LP core supports limited set of HW exceptions, so, for example, writing at address
+0x0 will not cause a panic as it would be for the code running on HP core.
+This can be overcome to some extent by enabling undefined behavior sanitizer for LP core application,
+so ubsan can help to catch some errors. But note that it will increase code size significantly and
+it can happen that application won't fit into RTC RAM.
+To enable ubsan for ULP please add `CONFIG_ESPRESSIF_ULP_ENABLE_UBSAN` in menuconfig.
 
 _`Managing esptool on virtual environment`
 ==========================================
