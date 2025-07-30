@@ -141,9 +141,14 @@ MEMORY
   drom_seg    (R) :       org = 0x42000000, len = IDRAM0_2_SEG_SIZE
 #endif
 
+#if CONFIG_ESPRESSIF_USE_LP_CORE
+  lp_ram_seg(RW)  :       org = 0x50000000 + CONFIG_ESPRESSIF_ULP_COPROC_RESERVE_MEM_SIZE,
+                          len = 0x4000 - CONFIG_ESPRESSIF_ULP_COPROC_RESERVE_MEM_SIZE - RESERVE_RTC_MEM
+#else
   /* RTC fast memory (executable). Persists over deep sleep. */
 
   lp_ram_seg  (RWX) :     org = 0x50000000, len = 0x4000 - RESERVE_RTC_MEM
+#endif /* CONFIG_ESPRESSIF_USE_LP_CORE */
 
   /* We reduced the size of lp_ram_seg by RESERVE_RTC_MEM value.
    * It reserves the amount of LP memory that we use for this memory segment.
