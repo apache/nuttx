@@ -435,6 +435,12 @@ config ARCH_NEED_ADDRENV_MAPPING
 	bool
 	default n
 
+config ARCH_HAVE_AE
+	bool
+	default n
+	---help---
+		Supports security and high reliability features (RAS)
+
 config ARCH_HAVE_EXTRA_HEAPS
 	bool
 	default n
