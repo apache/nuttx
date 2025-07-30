@@ -208,6 +208,22 @@ FAR void *mempool_allocate(FAR struct mempool_s *pool, unsigned int timeout);
 void mempool_release(FAR struct mempool_s *pool, FAR void *blk);
 
 /****************************************************************************
+ * Name: mempool_navail
+ *
+ * Description:
+ *   Return the number of available buffers in the mempool.
+ *
+ * Input Parameters:
+ *   pool - Address of the memory pool to be used.
+ *
+ * Returned Value:
+ *   Return the number of available buffers in the mempool, 0 means no room.
+ *
+ ****************************************************************************/
+
+size_t mempool_navail(FAR struct mempool_s *pool);
+
+/****************************************************************************
  * Name: mempool_info
  *
  * Description:

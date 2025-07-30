@@ -521,6 +521,40 @@ void mempool_release(FAR struct mempool_s *pool, FAR void *blk)
 }
 
 /****************************************************************************
+ * Name: mempool_navail
+ *
+ * Description:
+ *   Return the number of available buffers in the mempool.
+ *
+ * Input Parameters:
+ *   pool - Address of the memory pool to be used.
+ *
+ * Returned Value:
+ *   Return the number of available buffers in the mempool, 0 means no room.
+ *
+ ****************************************************************************/
+
+size_t mempool_navail(FAR struct mempool_s *pool)
+{
+  irqstate_t flags;
+  size_t ret;
+
+  DEBUGASSERT(pool != NULL);
+
+  flags = spin_lock_irqsave(&pool->lock);
+  if (pool->maxalloc == 0)
+    {
+      spin_unlock_irqrestore(&pool->lock, flags);
+      return SIZE_MAX;
+    }
+
+  ret = pool->maxalloc > pool->nalloc ? pool->maxalloc - pool->nalloc : 0;
+  spin_unlock_irqrestore(&pool->lock, flags);
+
+  return ret;
+}
+
+/****************************************************************************
  * Name: mempool_info
  *
  * Description:
