@@ -97,37 +97,6 @@ int virtio_crypto_get_tag_len(int valg)
 }
 
 static inline_function
-int virtio_crypto_get_iv_len(int vservice, int valg)
-{
-  if (vservice == VIRTIO_CRYPTO_SERVICE_CIPHER)
-    {
-      switch (valg)
-      {
-        case VIRTIO_CRYPTO_CIPHER_3DES_CBC:
-          return VIRTIO_CRYPTO_DES_IV_LEN;
-        case VIRTIO_CRYPTO_CIPHER_AES_CBC:
-        case VIRTIO_CRYPTO_CIPHER_AES_CTR:
-        case VIRTIO_CRYPTO_CIPHER_AES_XTS:
-          return VIRTIO_CRYPTO_AES_IV_LEN;
-      }
-    }
-  else if (vservice = VIRTIO_CRYPTO_SERVICE_AEAD)
-    {
-      switch (valg)
-        {
-          case VIRTIO_CRYPTO_AEAD_GCM:
-            return VIRTIO_CRYPTO_GCM_IV_LEN;
-          case VIRTIO_CRYPTO_AEAD_CCM:
-            return VIRTIO_CRYPTO_CCM_IV_LEN;
-          case VIRTIO_CRYPTO_AEAD_CHACHA20_POLY1305:
-            return VIRTIO_CRYPTO_CHACHAPOLY_IV_LEN;
-        }
-    }
-
-  return 0;
-}
-
-static inline_function
 int virtio_crypto_get_auth_key_len(int valg)
 {
   switch (valg)
