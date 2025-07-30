@@ -262,6 +262,7 @@ struct crypt_kop
   u_int crk_flags;
   struct crparam crk_param[CRK_MAXPARAM];
   uint32_t crk_reqid;
+  FAR void *crk_arg;   /* callback parameter */
 };
 
 #define CRK_MOD_EXP                0
@@ -333,6 +334,7 @@ struct cryptkop
   FAR struct fcrypt *krp_fcr;
   u_int krp_flags;     /* same as cryptop */
   uint32_t krp_reqid;  /* distinguish tasks in asynchronous calling */
+  FAR void *krp_opaque;
 };
 
 /* Crypto capabilities structure */
