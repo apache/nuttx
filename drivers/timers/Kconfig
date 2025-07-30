@@ -124,7 +124,7 @@ config ONESHOT
 if ONESHOT
 
 config ONESHOT_COUNT
-	bool "Oneshot count-based clock device driver"
+	bool
 	default n
 	---help---
 		This option enables the oneshot implementation to be based on the

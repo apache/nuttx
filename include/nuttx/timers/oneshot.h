@@ -96,8 +96,8 @@
  *
  ****************************************************************************/
 
-#define ONESHOT_MAX_DELAY(l,t) (l)->ops->max_delay(l,t)
-#define ONESHOT_TICK_MAX_DELAY(l,t) oneshot_tick_max_delay(l,t)
+#define ONESHOT_MAX_DELAY(l,t) oneshot_max_delay(l,t)
+#define ONESHOT_TICK_MAX_DELAY(l,t)  oneshot_tick_max_delay(l,t)
 
 /****************************************************************************
  * Name: ONESHOT_START
@@ -119,7 +119,7 @@
  *
  ****************************************************************************/
 
-#define ONESHOT_START(l,t) (l)->ops->start(l,t)
+#define ONESHOT_START(l,t) oneshot_start(l,t)
 #define ONESHOT_TICK_START(l,t) oneshot_tick_start(l,t)
 
 /****************************************************************************
@@ -146,7 +146,7 @@
  *
  ****************************************************************************/
 
-#define ONESHOT_CANCEL(l,t) (l)->ops->cancel(l,t)
+#define ONESHOT_CANCEL(l,t) oneshot_cancel(l,t)
 #define ONESHOT_TICK_CANCEL(l,t) oneshot_tick_cancel(l,t)
 
 /****************************************************************************
@@ -168,7 +168,7 @@
  *
  ****************************************************************************/
 
-#define ONESHOT_CURRENT(l,t) (l)->ops->current(l,t)
+#define ONESHOT_CURRENT(l,t) oneshot_current(l,t)
 #define ONESHOT_TICK_CURRENT(l,t) oneshot_tick_current(l,t)
 
 /****************************************************************************
@@ -266,43 +266,205 @@ extern "C"
  * Inline Functions
  ****************************************************************************/
 
+#ifdef CONFIG_ONESHOT_COUNT
+static inline_function
+void oneshot_count_init(FAR struct oneshot_lowerhalf_s *lower,
+                        uint32_t frequency)
+{
+  DEBUGASSERT(lower && frequency);
+
+  lower->frequency = frequency;
+}
+#endif
+
+static inline_function
+int oneshot_max_delay(FAR struct oneshot_lowerhalf_s *lower,
+                      FAR struct timespec *ts)
+{
+  int ret = OK;
+#ifdef CONFIG_ONESHOT_COUNT
+  clkcnt_t max = lower->ops->max_delay(lower);
+  clkcnt_max_timespec(max, lower->frequency, ts);
+#else
+  ret = lower->ops->max_delay(lower, ts);
+#endif
+  return ret;
+}
+
+/****************************************************************************
+ * Name: oneshot_current
+ *
+ * Description:
+ *   Get the current time.
+ *
+ * Input Parameters:
+ *   ops - The oneshot interface.
+ *   lower - The oneshot lowerhalf data.
+ *   ts - The pointer to the current time.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+static inline_function
+int oneshot_current(FAR struct oneshot_lowerhalf_s *lower,
+                    FAR struct timespec *ts)
+{
+  int ret = OK;
+#ifdef CONFIG_ONESHOT_COUNT
+  clkcnt_t cnt  = lower->ops->current(lower);
+  uint32_t freq = lower->frequency;
+  uint64_t sec  = clkcnt_cnt2sec(cnt, freq);
+
+  cnt          -= sec * freq;
+  ts->tv_nsec   = clkcnt_delta_cnt2nsec(cnt, freq);
+  ts->tv_sec    = sec;
+#else
+  ret = lower->ops->current(lower, ts);
+#endif
+  return ret;
+}
+
+/****************************************************************************
+ * Name: oneshot_cancel
+ *
+ * Description:
+ *   Cancel the timer
+ *
+ * Input Parameters:
+ *   ops - The oneshot interface.
+ *   ts - The delta time in timespec.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+static inline_function
+int oneshot_cancel(FAR struct oneshot_lowerhalf_s *lower,
+                   FAR struct timespec *ts)
+{
+  int ret = OK;
+#ifdef CONFIG_ONESHOT_COUNT
+  lower->ops->cancel(lower);
+  oneshot_current(lower, ts);
+#else
+  ret = lower->ops->cancel(lower, ts);
+#endif
+  return ret;
+}
+
+/****************************************************************************
+ * Name: oneshot_start
+ *
+ * Description:
+ *   Set the relative time in timespec to trigger the clockevent.
+ *
+ * Input Parameters:
+ *   ops - The oneshot interface.
+ *   ts - The delta time in timespec.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+static inline_function
+int oneshot_start(FAR struct oneshot_lowerhalf_s *lower,
+                  FAR const struct timespec *ts)
+{
+  int ret = OK;
+#ifdef CONFIG_ONESHOT_COUNT
+  clkcnt_t freq = lower->frequency;
+  clkcnt_t cnt  = clkcnt_delta_time2cnt(ts->tv_nsec, freq, NSEC_PER_SEC) +
+                  ts->tv_sec * freq;
+
+  lower->ops->start(lower, cnt);
+#else
+  ret = lower->ops->start(lower, ts);
+#endif
+  return ret;
+}
+
 /* Tick-based compatiable layer for oneshot */
 
 static inline_function
 int oneshot_tick_max_delay(FAR struct oneshot_lowerhalf_s *lower,
                            FAR clock_t *tick)
 {
+  int ret = OK;
+#ifdef CONFIG_ONESHOT_COUNT
+  clkcnt_t max = lower->ops->max_delay(lower);
+  *tick = clkcnt_max_tick(max, lower->frequency);
+#else
   struct timespec ts;
 
-  ONESHOT_MAX_DELAY(lower, &ts);
+  ret = lower->ops->max_delay(lower, &ts);
   *tick = clock_time2ticks(&ts);
-
-  return OK;
+#endif
+  return ret;
 }
+
+/****************************************************************************
+ * Name: oneshot_tick_start
+ *
+ * Description:
+ *   Set the relative time in ticks to trigger the clockevent.
+ *
+ * Input Parameters:
+ *   ops - The oneshot interface.
+ *   tick   - The delta time in ticks.
+
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
 
 static inline_function
 int oneshot_tick_start(FAR struct oneshot_lowerhalf_s *lower,
-                       clock_t ticks)
+                       clock_t tick)
 {
+  int ret = OK;
+#ifdef CONFIG_ONESHOT_COUNT
+  clkcnt_t cnt = clkcnt_tick2cnt(tick, lower->frequency);
+  lower->ops->start(lower, cnt);
+#else
   struct timespec ts;
-  clock_ticks2time(&ts, ticks);
-  return lower->ops->start(lower, &ts);
+  clock_ticks2time(&ts, tick);
+  ret = lower->ops->start(lower, &ts);
+#endif
+  return ret;
 }
 
-static inline_function
-int oneshot_tick_cancel(FAR struct oneshot_lowerhalf_s *lower,
-                        FAR clock_t *tick)
-{
-  struct timespec ts;
-  ONESHOT_CANCEL(lower, &ts);
-  *tick = clock_time2ticks_floor(&ts);
-  return OK;
-}
+/****************************************************************************
+ * Name: oneshot_tick_current
+ *
+ * Description:
+ *   Get the current system tick.
+ *
+ * Input Parameters:
+ *   ops - The oneshot interface.
+ *   lower - The oneshot lowerhalf data.
+ *
+ * Returned Value:
+ *   The current system tick.
+ *
+ ****************************************************************************/
 
 static inline_function
 int oneshot_tick_current(FAR struct oneshot_lowerhalf_s *lower,
                          FAR clock_t *tick)
 {
+  int ret = OK;
+#ifdef CONFIG_ONESHOT_COUNT
+  clkcnt_t cnt  = lower->ops->current(lower);
+  uint32_t freq = lower->frequency;
+  uint64_t sec  = clkcnt_cnt2sec(cnt, freq);
+
+  cnt   -= sec * freq;
+  *tick  = sec * TICK_PER_SEC + clkcnt_delta_cnt2tick(cnt, freq);
+#else
   struct timespec ts;
 
   /* Some timer drivers may not have current() function.
@@ -311,9 +473,45 @@ int oneshot_tick_current(FAR struct oneshot_lowerhalf_s *lower,
 
   DEBUGASSERT(lower->ops->current);
 
-  ONESHOT_CURRENT(lower, &ts);
+  ret = lower->ops->current(lower, &ts);
   *tick = clock_time2ticks_floor(&ts);
-  return OK;
+#endif
+  return ret;
+}
+
+/****************************************************************************
+ * Name: oneshot_tick_cancel
+ *
+ * Description:
+ *   Cancel the timer.
+ *
+ * Input Parameters:
+ *   ops - The oneshot interface.
+ *   lower - The oneshot lowerhalf data.
+ *
+ * Returned Value:
+ *   The current system tick.
+ *
+ ****************************************************************************/
+
+static inline_function
+int oneshot_tick_cancel(FAR struct oneshot_lowerhalf_s *lower,
+                        FAR clock_t *tick)
+{
+  int ret = OK;
+#ifdef CONFIG_ONESHOT_COUNT
+  lower->ops->cancel(lower);
+  oneshot_tick_current(lower, tick);
+#else
+  struct timespec ts;
+
+  ret = lower->ops->cancel(lower, &ts);
+
+  /* Converting timespec to ticks may overflow. */
+
+  *tick = clock_time2ticks_floor(&ts);
+#endif
+  return ret;
 }
 
 static inline_function
