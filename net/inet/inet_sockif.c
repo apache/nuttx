@@ -560,13 +560,11 @@ static int inet_getsockname(FAR struct socket *psock,
 #ifdef CONFIG_NET_IPv4
     case PF_INET:
       return ipv4_getsockname(psock, addr, addrlen);
-      break;
 #endif
 
 #ifdef CONFIG_NET_IPv6
     case PF_INET6:
       return ipv6_getsockname(psock, addr, addrlen);
-      break;
 #endif
 
     default:
@@ -613,13 +611,11 @@ static int inet_getpeername(FAR struct socket *psock,
 #ifdef CONFIG_NET_IPv4
     case PF_INET:
       return ipv4_getpeername(psock, addr, addrlen);
-      break;
 #endif
 
 #ifdef CONFIG_NET_IPv6
     case PF_INET6:
       return ipv6_getpeername(psock, addr, addrlen);
-      break;
 #endif
 
     default:
