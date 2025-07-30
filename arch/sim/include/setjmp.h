@@ -40,7 +40,7 @@
 #if defined(CONFIG_HOST_X86_64) && !defined(CONFIG_SIM_M32)
   /* Storage order: %rbx, %rsp, %rbp, %r12, %r13, %r14, %r15, %rip */
 
-#  define XCPTCONTEXT_REGS    9
+#  define XCPTCONTEXT_REGS    10
 #  define XCPTCONTEXT_SIZE    (8 * XCPTCONTEXT_REGS)
 
 #  ifdef __ASSEMBLY__
@@ -54,6 +54,7 @@
 #    define JB_R15            (6*8)
 #    define JB_RIP            (7*8)
 #    define JB_FLAG           (8*8)
+#    define JB_ERRNO          (9*8)
 
 #  else
 
@@ -66,6 +67,7 @@
 #    define JB_R15            (6)
 #    define JB_RIP            (7)
 #    define JB_FLAG           (8)
+#    define JB_ERRNO          (9)
 
 #  endif /* __ASSEMBLY__ */
 
@@ -78,7 +80,7 @@
 #elif defined(CONFIG_HOST_X86) || defined(CONFIG_SIM_M32)
   /* Storage order: %ebx, %esi, %edi, %ebp, sp, and return PC */
 
-#  define XCPTCONTEXT_REGS    (8)
+#  define XCPTCONTEXT_REGS    (9)
 #  define XCPTCONTEXT_SIZE    (4 * XCPTCONTEXT_REGS)
 
 #  ifdef __ASSEMBLY__
@@ -91,6 +93,7 @@
 #    define JB_EIP            (5*4)
 #    define JB_FLAG           (6*4)
 #    define JB_FLAG1          (7*4)
+#    define JB_ERRNO          (8*4)
 
 #  else
 
@@ -102,6 +105,7 @@
 #    define JB_EIP            (5)
 #    define JB_FLAG           (6)
 #    define JB_FLAG1          (7)
+#    define JB_ERRNO          (8)
 
 #  endif /* __ASSEMBLY__ */
 
@@ -113,7 +117,7 @@
 
 #elif defined(CONFIG_HOST_ARM)
 
-#  define XCPTCONTEXT_REGS    18
+#  define XCPTCONTEXT_REGS    19
 #  define XCPTCONTEXT_SIZE    (4 * XCPTCONTEXT_REGS)
 
 #  define JB_FP               7
@@ -121,10 +125,11 @@
 #  define JB_PC               9
 #  define JB_FLAG             16
 #  define JB_FLAG1            17
+#  define JB_ERRNO            18
 
 #elif defined(CONFIG_HOST_ARM64)
 
-#  define XCPTCONTEXT_REGS    33
+#  define XCPTCONTEXT_REGS    34
 #  define XCPTCONTEXT_SIZE    (8 * XCPTCONTEXT_REGS)
 
 #  ifdef __ASSEMBLY__
@@ -148,6 +153,7 @@
 #    define JB_FP             (12)
 #    define JB_SP             (13)
 #    define JB_FLAG           (32)
+#    define JB_ERRNO          (33)
 
 #  endif /* __ASSEMBLY__ */
 
