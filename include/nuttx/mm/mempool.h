@@ -92,8 +92,9 @@ struct mempool_procfs_entry_s
 
 struct mempool_s
 {
-  size_t     blocksize;     /* The size for every block in mempool */
+  FAR void  *initialbase;   /* The initial base pointer of normal mempool */
   size_t     initialsize;   /* The initialize size in normal mempool */
+  size_t     blocksize;     /* The size for every block in mempool */
   size_t     interruptsize; /* The initialize size in interrupt mempool */
   size_t     expandsize;    /* The size of expand block every time for mempool */
   size_t     maxalloc;      /* The maximum allowed alloc number, 0 means not limit */
