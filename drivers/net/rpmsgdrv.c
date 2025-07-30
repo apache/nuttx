@@ -87,6 +87,8 @@ struct net_rpmsg_drv_s
 
 /* RPMSG related functions */
 
+/* Request handler functions */
+
 static int net_rpmsg_drv_default_handler(FAR struct rpmsg_endpoint *ept,
                                          FAR void *data, size_t len,
                                          uint32_t src, FAR void *priv);
@@ -96,6 +98,14 @@ static int net_rpmsg_drv_sockioctl_handler(FAR struct rpmsg_endpoint *ept,
 static int net_rpmsg_drv_transfer_handler(FAR struct rpmsg_endpoint *ept,
                                           FAR void *data, size_t len,
                                           uint32_t src, FAR void *priv);
+
+/* Response handler functions */
+
+static int net_rpmsg_drv_default_response(FAR struct rpmsg_endpoint *ept,
+                                          FAR void *data, size_t len,
+                                          uint32_t src, FAR void *priv);
+
+/* RPMSG device related functions */
 
 static void net_rpmsg_drv_device_created(FAR struct rpmsg_device *rdev,
                                          FAR void *priv_);
@@ -144,6 +154,17 @@ static const rpmsg_ept_cb g_net_rpmsg_drv_handler[] =
   [NET_RPMSG_DEVIOCTL]  = net_rpmsg_drv_default_handler,
   [NET_RPMSG_SOCKIOCTL] = net_rpmsg_drv_sockioctl_handler,
   [NET_RPMSG_TRANSFER]  = net_rpmsg_drv_transfer_handler,
+};
+
+static const rpmsg_ept_cb g_net_rpmsg_drv_response[] =
+{
+  [NET_RPMSG_IFUP]      = net_rpmsg_drv_default_response,
+  [NET_RPMSG_IFDOWN]    = net_rpmsg_drv_default_response,
+  [NET_RPMSG_ADDMCAST]  = net_rpmsg_drv_default_response,
+  [NET_RPMSG_RMMCAST]   = net_rpmsg_drv_default_response,
+  [NET_RPMSG_DEVIOCTL]  = net_rpmsg_drv_default_response,
+  [NET_RPMSG_SOCKIOCTL] = net_rpmsg_drv_default_response,
+  [NET_RPMSG_TRANSFER]  = net_rpmsg_drv_default_response,
 };
 
 static const struct netdev_ops_s g_net_rpmsg_drv_ops =
@@ -237,16 +258,26 @@ net_rpmsg_drv_receive(FAR struct netdev_lowerhalf_s *dev)
 
 /* RPMSG related functions */
 
+static void rpmsg_send_response(FAR struct rpmsg_endpoint *ept,
+                                FAR struct net_rpmsg_header_s *header,
+                                size_t len, int result)
+{
+  header->command |= NET_RPMSG_RESPONSE;
+  header->result   = result;
+  rpmsg_send(ept, header, len);
+}
+
 static int net_rpmsg_drv_default_handler(FAR struct rpmsg_endpoint *ept,
                                          FAR void *data, size_t len,
                                          uint32_t src, FAR void *priv)
 {
   FAR struct net_rpmsg_header_s *header = data;
-  FAR struct net_rpmsg_drv_cookie_s *cookie =
-    (struct net_rpmsg_drv_cookie_s *)(uintptr_t)header->cookie;
 
-  memcpy(cookie->header, header, len);
-  nxsem_post(&cookie->sem);
+  if (header->cookie)
+    {
+      rpmsg_send_response(ept, header, sizeof(*header), -EOPNOTSUPP);
+    }
+
   return 0;
 }
 
@@ -286,7 +317,8 @@ static int net_rpmsg_drv_sockioctl_task(int argc, FAR char *argv[])
 
   if (msg->header.cookie)
     {
-      rpmsg_send(ept, msg, sizeof(*msg) + msg->length);
+      rpmsg_send_response(ept, &msg->header, sizeof(*msg) + msg->length,
+                          msg->header.result);
     }
 
   rpmsg_release_rx_buffer(ept, msg);
@@ -384,6 +416,28 @@ drop:
   return 0;
 }
 
+/****************************************************************************
+ * Name: net_rpmsg_drv_default_response
+ *
+ * Description:
+ *   This function is used to handle the response from the RPMSG device.
+ *   It is used to copy the response to the cookie and post the semaphore.
+ *
+ ****************************************************************************/
+
+static int net_rpmsg_drv_default_response(FAR struct rpmsg_endpoint *ept,
+                                          FAR void *data, size_t len,
+                                          uint32_t src, FAR void *priv)
+{
+  FAR struct net_rpmsg_header_s *header = data;
+  FAR struct net_rpmsg_drv_cookie_s *cookie =
+    (struct net_rpmsg_drv_cookie_s *)(uintptr_t)header->cookie;
+
+  memcpy(cookie->header, header, len);
+  nxsem_post(&cookie->sem);
+  return 0;
+}
+
 static void net_rpmsg_drv_device_created(FAR struct rpmsg_device *rdev,
                                          FAR void *priv_)
 {
@@ -417,11 +471,18 @@ static int net_rpmsg_drv_ept_cb(FAR struct rpmsg_endpoint *ept, void *data,
                                 size_t len, uint32_t src, FAR void *priv)
 {
   FAR struct net_rpmsg_header_s *header = data;
-  uint32_t command = header->command;
+  uint32_t cmd = NET_RPMSG_GET_COMMAND(header->command);
 
-  if (command < nitems(g_net_rpmsg_drv_handler))
+  if (cmd < nitems(g_net_rpmsg_drv_handler))
     {
-      return g_net_rpmsg_drv_handler[command](ept, data, len, src, priv);
+      if (NET_RPMSG_IS_RESPONSE(header->command))
+        {
+          return g_net_rpmsg_drv_response[cmd](ept, data, len, src, priv);
+        }
+      else
+        {
+          return g_net_rpmsg_drv_handler[cmd](ept, data, len, src, priv);
+        }
     }
 
   return -EINVAL;
