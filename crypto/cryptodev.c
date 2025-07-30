@@ -501,6 +501,7 @@ static int cryptodev_op(FAR struct csession *cse,
 
 static int cryptodev_key(FAR struct fcrypt *fcr, FAR struct crypt_kop *kop)
 {
+  FAR struct cryptkop *krp_async = NULL;
   FAR struct cryptkop *krp = NULL;
   int error = -EINVAL;
   int in;
@@ -686,8 +687,20 @@ static int cryptodev_key(FAR struct fcrypt *fcr, FAR struct crypt_kop *kop)
   krp->krp_status = 0;
   krp->krp_flags = kop->crk_flags;
   krp->krp_reqid = kop->crk_reqid;
-  krp->krp_fcr = fcr;
-  krp->krp_callback = cryptodevkey_cb;
+
+  if (krp->krp_flags & CRYPTO_F_CBIMM)
+    {
+      if (kop->crk_arg == NULL)
+        {
+          error = -EINVAL;
+          goto fail;
+        }
+
+      krp_async = (FAR struct cryptkop *)kop->crk_arg;
+      krp_async->krp_fcr = fcr;
+      krp_async->krp_callback = cryptodevkey_cb;
+      krp->krp_opaque = krp_async;
+    }
 
   for (i = 0; i < CRK_MAXPARAM; i++)
     {
@@ -783,11 +796,20 @@ static int cryptodev_getkeystatus(struct fcrypt *fcr, struct crypt_kop *ret)
       return -EAGAIN;
     }
 
-  /* return the result in task list to the upper layer  */
+  TAILQ_FOREACH(krp, &fcr->crpk_ret, krp_next)
+    {
+      if (krp->krp_reqid == ret->crk_reqid)
+        {
+          break;
+        }
+    }
 
-  krp = TAILQ_FIRST(&fcr->crpk_ret);
+  if (krp == NULL)
+    {
+      return -EINVAL;
+    }
+
   TAILQ_REMOVE(&fcr->crpk_ret, krp, krp_next);
-
   ret->crk_op = krp->krp_op;
   ret->crk_status = krp->krp_status;
   ret->crk_iparams = krp->krp_iparams;
@@ -806,19 +828,6 @@ static int cryptodev_getkeystatus(struct fcrypt *fcr, struct crypt_kop *ret)
       memcpy(ret->crk_param[i].crp_p, krp->krp_param[i].crp_p, size);
     }
 
-  /* free asynchronous result */
-
-  for (i = 0; i < CRK_MAXPARAM; i++)
-    {
-      if (krp->krp_param[i].crp_p)
-        {
-          explicit_bzero(krp->krp_param[i].crp_p,
-              (krp->krp_param[i].crp_nbits + 7) / 8);
-          kmm_free(krp->krp_param[i].crp_p);
-        }
-    }
-
-  kmm_free(krp);
   return OK;
 }
 
