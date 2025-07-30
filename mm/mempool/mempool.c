@@ -64,6 +64,7 @@ static inline FAR sq_entry_t *
 mempool_remove_queue(FAR struct mempool_s *pool, FAR sq_queue_t *queue)
 {
   FAR sq_entry_t *ret = queue->head;
+  FAR void *addr = ret;
 
   if (ret)
     {
@@ -72,9 +73,10 @@ mempool_remove_queue(FAR struct mempool_s *pool, FAR sq_queue_t *queue)
         {
           queue->tail = NULL;
         }
-      else
+      else if (pool->initialbase == NULL || addr < pool->initialbase ||
+               addr >= pool->initialbase + pool->initialsize)
         {
-          pool->check(pool, queue->head);
+          pool->check(pool, addr);
         }
 
       ret->flink = NULL;
@@ -298,22 +300,30 @@ int mempool_init(FAR struct mempool_s *pool, FAR const char *name)
       size_t size = ninitial * blocksize + MEMPOOL_HEADER_SIZE;
       FAR char *base;
 
-      base = pool->alloc(pool, size);
-      if (base == NULL)
+      if (pool->initialbase == NULL)
         {
-          if (pool->ibase)
+          base = pool->alloc(pool, size);
+          if (base == NULL)
             {
-              pool->free(pool, pool->ibase);
+              if (pool->ibase)
+                {
+                  pool->free(pool, pool->ibase);
+                }
+
+              return -ENOMEM;
             }
 
-          return -ENOMEM;
+          mempool_add_queue(pool, &pool->queue, base, ninitial, blocksize);
+          sq_addlast((FAR sq_entry_t *)(base + ninitial * blocksize),
+                      &pool->equeue);
+          kasan_poison(base, size);
         }
-
-      mempool_add_queue(pool, &pool->queue,
-                        base, ninitial, blocksize);
-      sq_addlast((FAR sq_entry_t *)(base + ninitial * blocksize),
-                  &pool->equeue);
-      kasan_poison(base, size);
+      else
+        {
+          DEBUGASSERT(pool->initialsize >= size);
+          base = pool->initialbase;
+          mempool_add_queue(pool, &pool->queue, base, ninitial, blocksize);
+        }
     }
 
   spin_lock_init(&pool->lock);
