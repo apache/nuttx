@@ -133,6 +133,10 @@
 #  include "esp_board_mmcsd.h"
 #endif
 
+#ifdef CONFIG_ESPRESSIF_USE_LP_CORE
+#  include "espressif/esp_ulp.h"
+#endif
+
 #include "esp32c6-devkitc.h"
 
 /****************************************************************************
@@ -497,6 +501,15 @@ int esp_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: board_adc_init failed: %d\n", ret);
     }
+#endif
+
+#ifdef CONFIG_ESPRESSIF_USE_LP_CORE
+
+  /* ULP initialization should be the handled later than
+   * peripherals to use supported peripherals properly on ULP core
+   */
+
+  esp_ulp_init();
 #endif
 
   /* If we got here then perhaps not all initialization was successful, but
