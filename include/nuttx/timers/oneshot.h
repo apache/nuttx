@@ -35,6 +35,7 @@
 #include <stdint.h>
 #include <time.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/clock.h>
 #include <nuttx/timers/clkcnt.h>
 #include <nuttx/fs/ioctl.h>
@@ -122,6 +123,9 @@
 #define ONESHOT_START(l,t) oneshot_start(l,t)
 #define ONESHOT_TICK_START(l,t) oneshot_tick_start(l,t)
 
+#define ONESHOT_ABSOLUTE(l,t) oneshot_start_absolute(l,t)
+#define ONESHOT_TICK_ABSOLUTE(l,t) oneshot_tick_absolute(l,t)
+
 /****************************************************************************
  * Name: ONESHOT_CANCEL
  *
@@ -200,6 +204,8 @@ struct oneshot_operations_s
   CODE clkcnt_t (*current)(FAR struct oneshot_lowerhalf_s *lower);
   CODE void     (*start)(FAR struct oneshot_lowerhalf_s *lower,
                          clkcnt_t delay);
+  CODE void     (*start_absolute)(FAR struct oneshot_lowerhalf_s *lower,
+                                  clkcnt_t cnt);
   CODE void     (*cancel)(FAR struct oneshot_lowerhalf_s *lower);
   CODE clkcnt_t (*max_delay)(FAR struct oneshot_lowerhalf_s *lower);
 #else
@@ -387,6 +393,60 @@ int oneshot_start(FAR struct oneshot_lowerhalf_s *lower,
   return ret;
 }
 
+/****************************************************************************
+ * Name: oneshot_start_absolute
+ *
+ * Description:
+ *   Set the absolute time to trigger the clockevent.
+ *
+ * Input Parameters:
+ *   ops - The oneshot interface.
+ *   expected - The expected time count.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+static inline_function
+int oneshot_start_absolute(FAR struct oneshot_lowerhalf_s *lower,
+                           FAR const struct timespec *ts)
+{
+  int ret = OK;
+#ifdef CONFIG_ONESHOT_COUNT
+  uint32_t freq     = lower->frequency;
+  clkcnt_t expected = ts->tv_sec * freq +
+                      clkcnt_delta_time2cnt(ts->tv_nsec, freq, NSEC_PER_SEC);
+
+  if (lower->ops->start_absolute)
+    {
+      lower->ops->start_absolute(lower, expected);
+    }
+  else
+    {
+      /* IRQ should be disable or the timer will be fired too late. */
+
+      irqstate_t flags = up_irq_save();
+      clkcnt_t   delay = expected - lower->ops->current(lower);
+      lower->ops->start(lower, delay);
+      up_irq_restore(flags);
+    }
+#else
+  struct timespec curr;
+
+  /* Some timer drivers may not have current() function.
+   * Since only arch_alarm uses the function, it should be OK.
+   */
+
+  DEBUGASSERT(lower->ops->current);
+
+  ret = lower->ops->current(lower, &curr);
+  clock_timespec_subtract(ts, &curr, &curr);
+  ret = lower->ops->start(lower, &curr);
+#endif
+  return ret;
+}
+
 /* Tick-based compatiable layer for oneshot */
 
 static inline_function
@@ -475,6 +535,34 @@ int oneshot_tick_current(FAR struct oneshot_lowerhalf_s *lower,
 
   ret = lower->ops->current(lower, &ts);
   *tick = clock_time2ticks_floor(&ts);
+#endif
+  return ret;
+}
+
+static inline_function
+int oneshot_tick_absolute(FAR struct oneshot_lowerhalf_s *lower,
+                          clock_t tick)
+{
+  int ret = OK;
+#ifdef CONFIG_ONESHOT_COUNT
+  clkcnt_t expected = clkcnt_tick2cnt(tick, lower->frequency);
+  if (lower->ops->start_absolute)
+    {
+      lower->ops->start_absolute(lower, expected);
+    }
+  else
+    {
+      /* IRQ should be disable or the timer will be fired too late. */
+
+      irqstate_t flags = up_irq_save();
+      clkcnt_t   delay = expected - lower->ops->current(lower);
+      lower->ops->start(lower, delay);
+      up_irq_restore(flags);
+    }
+#else
+  struct timespec ts;
+  clock_ticks2time(&ts, tick);
+  ret = oneshot_start_absolute(lower, &ts);
 #endif
   return ret;
 }
