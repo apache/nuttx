@@ -96,6 +96,7 @@ struct mempool_s
   size_t     initialsize;   /* The initialize size in normal mempool */
   size_t     interruptsize; /* The initialize size in interrupt mempool */
   size_t     expandsize;    /* The size of expand block every time for mempool */
+  size_t     maxalloc;      /* The maximum allowed alloc number, 0 means not limit */
   bool       wait;          /* The flag of need to wait when mempool is empty */
   FAR void  *priv;          /* This pointer is used to store the user's private data */
   mempool_alloc_t alloc;    /* The alloc function for mempool */
@@ -140,6 +141,7 @@ struct mempoolinfo_s
   unsigned long aordblks; /* This is the number of used blocks */
   unsigned long sizeblks; /* This is the size of a mempool blocks */
   unsigned long nwaiter;  /* This is the number of waiter for mempool */
+  unsigned long maxalloc; /* This is the maximum allowed alloc number, 0 means not limit */
 };
 
 /****************************************************************************
