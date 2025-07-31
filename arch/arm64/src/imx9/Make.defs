@@ -40,6 +40,15 @@ ifeq ($(CONFIG_IMX9_GPIO_IRQ),y)
   CHIP_CSRCS += imx9_gpioirq.c
 endif
 
+ifeq ($(CONFIG_IMX9_MU),y)
+  CHIP_CSRCS += imx9_mu.c
+endif
+
+ifeq ($(CONFIG_IMX9_SCMI),y)
+  CHIP_CSRCS += imx9_scmi.c
+  # NXP SDK SCMI interface for pinctrl and clocking
+endif
+
 ifeq ($(CONFIG_IMX9_FLEXIO_PWM),y)
   CHIP_CSRCS += imx9_flexio_pwm.c
 endif
