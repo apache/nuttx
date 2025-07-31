@@ -56,6 +56,7 @@
     0,                        /* affinity */ \
     NULL,                     /* stackaddr */ \
     PTHREAD_STACK_DEFAULT,    /* stacksize */ \
+    PTHREAD_GUARD_DEFAULT,    /* guardsize */ \
     {0, 0},                   /* repl_period */ \
     {0, 0}                    /* budget */ \
   }
@@ -70,6 +71,7 @@
     0,                        /* max_repl */ \
     NULL,                     /* stackaddr */ \
     PTHREAD_STACK_DEFAULT,    /* stacksize */ \
+    PTHREAD_GUARD_DEFAULT,    /* guardsize */   \
     {0, 0},                   /* repl_period */ \
     {0, 0},                   /* budget */ \
   }
@@ -83,6 +85,7 @@
     0,                        /* affinity */ \
     NULL,                     /* stackaddr */ \
     PTHREAD_STACK_DEFAULT,    /* stacksize */ \
+    PTHREAD_GUARD_DEFAULT,    /* guardsize */ \
   }
 #else
 #  define PTHREAD_ATTR_INITIALIZER \
@@ -93,6 +96,7 @@
     PTHREAD_CREATE_JOINABLE,  /* detachstate */ \
     NULL,                     /* stackaddr */ \
     PTHREAD_STACK_DEFAULT,    /* stacksize */ \
+    PTHREAD_GUARD_DEFAULT,    /* guardsize */ \
   }
 #endif
 

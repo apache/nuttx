@@ -51,6 +51,8 @@ if(NOT CONFIG_DISABLE_PTHREAD)
     pthread_attr_getschedparam.c
     pthread_attr_setscope.c
     pthread_attr_getscope.c
+    pthread_attr_setguardsize.c
+    pthread_attr_getguardsize.c
     pthread_barrierattr_init.c
     pthread_barrierattr_destroy.c
     pthread_barrierattr_getpshared.c
