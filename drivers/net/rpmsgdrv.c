@@ -119,9 +119,9 @@ static int net_rpmsg_drv_default_response(FAR struct rpmsg_endpoint *ept,
 /* RPMSG device related functions */
 
 static void net_rpmsg_drv_device_created(FAR struct rpmsg_device *rdev,
-                                         FAR void *priv_);
+                                         FAR void *priv);
 static void net_rpmsg_drv_device_destroy(FAR struct rpmsg_device *rdev,
-                                         FAR void *priv_);
+                                         FAR void *priv);
 static int  net_rpmsg_drv_ept_cb(FAR struct rpmsg_endpoint *ept, void *data,
                                  size_t len, uint32_t src, FAR void *priv);
 
@@ -218,14 +218,14 @@ static const struct netdev_ops_s g_net_rpmsg_drv_ops =
 static int net_rpmsg_drv_transmit(FAR struct netdev_lowerhalf_s *dev,
                                   FAR netpkt_t *pkt)
 {
-  FAR struct net_rpmsg_drv_s *priv =
+  FAR struct net_rpmsg_drv_s *drv =
                               container_of(dev, struct net_rpmsg_drv_s, dev);
   FAR struct net_rpmsg_transfer_s *transfer;
   unsigned int datalen = netpkt_getdatalen(dev, pkt);
   uint32_t len;
   int ret;
 
-  transfer = rpmsg_get_tx_payload_buffer(&priv->ept, &len, true);
+  transfer = rpmsg_get_tx_payload_buffer(&drv->ept, &len, true);
   if (transfer == NULL)
     {
       nwarn("WARNING: Failed to get buffer for xmit\n");
@@ -235,7 +235,7 @@ static int net_rpmsg_drv_transmit(FAR struct netdev_lowerhalf_s *dev,
   if (len < sizeof(*transfer) + datalen)
     {
       nerr("ERROR: Buffer is too small for xmit\n");
-      rpmsg_release_tx_buffer(&priv->ept, transfer);
+      rpmsg_release_tx_buffer(&drv->ept, transfer);
       return -ENOMEM;
     }
 
@@ -246,11 +246,11 @@ static int net_rpmsg_drv_transmit(FAR struct netdev_lowerhalf_s *dev,
   netpkt_copyout(dev, (FAR uint8_t *)(transfer + 1), pkt, datalen, 0);
 
   len = sizeof(*transfer) + datalen;
-  ret = rpmsg_send_nocopy(&priv->ept, transfer, len);
+  ret = rpmsg_send_nocopy(&drv->ept, transfer, len);
   if (ret < 0)
     {
       nerr("ERROR: Failed to send packet\n");
-      rpmsg_release_tx_buffer(&priv->ept, transfer);
+      rpmsg_release_tx_buffer(&drv->ept, transfer);
       return ret;
     }
 
@@ -262,9 +262,9 @@ static int net_rpmsg_drv_transmit(FAR struct netdev_lowerhalf_s *dev,
 static FAR netpkt_t *
 net_rpmsg_drv_receive(FAR struct netdev_lowerhalf_s *dev)
 {
-  FAR struct net_rpmsg_drv_s *priv =
+  FAR struct net_rpmsg_drv_s *drv =
                               container_of(dev, struct net_rpmsg_drv_s, dev);
-  return netpkt_remove_queue(&priv->rxqueue);
+  return netpkt_remove_queue(&drv->rxqueue);
 }
 
 /* RPMSG related functions */
@@ -294,15 +294,15 @@ static int net_rpmsg_drv_default_handler(FAR struct rpmsg_endpoint *ept,
 
 static int net_rpmsg_drv_ifup_handler(FAR struct rpmsg_endpoint *ept,
                                         FAR void *data, size_t len,
-                                        uint32_t src, FAR void *priv_)
+                                        uint32_t src, FAR void *priv)
 {
-  FAR struct net_rpmsg_drv_s *priv = priv_;
+  FAR struct net_rpmsg_drv_s *drv = priv;
   FAR struct net_rpmsg_header_s *header = data;
 
-  netdev_lower_carrier_on(&priv->dev);
-  if (priv->cb != NULL)
+  netdev_lower_carrier_on(&drv->dev);
+  if (drv->cb != NULL)
     {
-      priv->cb(&priv->dev, NET_RPMSG_EVENT_CARRIER_ON);
+      drv->cb(&drv->dev, NET_RPMSG_EVENT_CARRIER_ON);
     }
 
   rpmsg_send_response(ept, header, sizeof(*header), 0);
@@ -312,15 +312,15 @@ static int net_rpmsg_drv_ifup_handler(FAR struct rpmsg_endpoint *ept,
 
 static int net_rpmsg_drv_ifdown_handler(FAR struct rpmsg_endpoint *ept,
                                         FAR void *data, size_t len,
-                                        uint32_t src, FAR void *priv_)
+                                        uint32_t src, FAR void *priv)
 {
-  FAR struct net_rpmsg_drv_s *priv = priv_;
+  FAR struct net_rpmsg_drv_s *drv = priv;
   FAR struct net_rpmsg_header_s *header = data;
 
-  netdev_lower_carrier_off(&priv->dev);
-  if (priv->cb != NULL)
+  netdev_lower_carrier_off(&drv->dev);
+  if (drv->cb != NULL)
     {
-      priv->cb(&priv->dev, NET_RPMSG_EVENT_CARRIER_OFF);
+      drv->cb(&drv->dev, NET_RPMSG_EVENT_CARRIER_OFF);
     }
 
   rpmsg_send_response(ept, header, sizeof(*header), 0);
@@ -417,11 +417,11 @@ static int net_rpmsg_drv_sockioctl_handler(FAR struct rpmsg_endpoint *ept,
 
 static int net_rpmsg_drv_transfer_handler(FAR struct rpmsg_endpoint *ept,
                                           FAR void *data, size_t len,
-                                          uint32_t src, FAR void *priv_)
+                                          uint32_t src, FAR void *priv)
 {
   FAR struct net_rpmsg_transfer_s *transfer = data;
-  FAR struct net_rpmsg_drv_s *priv = priv_;
-  FAR struct netdev_lowerhalf_s *dev = &priv->dev;
+  FAR struct net_rpmsg_drv_s *drv = priv;
+  FAR struct netdev_lowerhalf_s *dev = &drv->dev;
   FAR netpkt_t *pkt;
 
   if (transfer->length > len - sizeof(*transfer))
@@ -446,7 +446,7 @@ static int net_rpmsg_drv_transfer_handler(FAR struct rpmsg_endpoint *ept,
       goto free;
     }
 
-  if (netpkt_tryadd_queue(pkt, &priv->rxqueue) < 0)
+  if (netpkt_tryadd_queue(pkt, &drv->rxqueue) < 0)
     {
       nerr("ERROR: Failed to add pkt to queue!\n");
       goto free;
@@ -491,10 +491,10 @@ static int net_rpmsg_drv_default_response(FAR struct rpmsg_endpoint *ept,
 
 static void net_rpmsg_drv_ept_release(FAR struct rpmsg_endpoint *ept)
 {
-  FAR struct net_rpmsg_drv_s *priv = ept->priv;
+  FAR struct net_rpmsg_drv_s *drv = ept->priv;
 
-  netdev_lower_carrier_off(&priv->dev);
-  rpmsg_wait(&priv->ept, &priv->wait);
+  netdev_lower_carrier_off(&drv->dev);
+  rpmsg_wait(&drv->ept, &drv->wait);
 }
 
 /****************************************************************************
@@ -514,9 +514,9 @@ static void net_rpmsg_drv_ept_release(FAR struct rpmsg_endpoint *ept)
 
 static void net_rpmsg_drv_ns_bound(FAR struct rpmsg_endpoint *ept)
 {
-  FAR struct net_rpmsg_drv_s *priv = ept->priv;
+  FAR struct net_rpmsg_drv_s *drv = ept->priv;
 
-  rpmsg_post(&priv->ept, &priv->wait);
+  rpmsg_post(&drv->ept, &drv->wait);
 }
 
 /****************************************************************************
@@ -524,18 +524,18 @@ static void net_rpmsg_drv_ns_bound(FAR struct rpmsg_endpoint *ept)
  ****************************************************************************/
 
 static void net_rpmsg_drv_device_created(FAR struct rpmsg_device *rdev,
-                                         FAR void *priv_)
+                                         FAR void *priv)
 {
-  FAR struct net_rpmsg_drv_s *priv = priv_;
+  FAR struct net_rpmsg_drv_s *drv = priv;
   char eptname[RPMSG_NAME_SIZE];
 
-  if (!strcmp(priv->cpuname, rpmsg_get_cpuname(rdev)))
+  if (!strcmp(drv->cpuname, rpmsg_get_cpuname(rdev)))
     {
-      priv->ept.priv = priv;
+      drv->ept.priv = drv;
       snprintf(eptname, sizeof(eptname),
-               NET_RPMSG_EPT_PREFIX "%s", priv->dev.netdev.d_ifname);
+               NET_RPMSG_EPT_PREFIX "%s", drv->dev.netdev.d_ifname);
 
-      rpmsg_create_ept(&priv->ept, rdev, eptname,
+      rpmsg_create_ept(&drv->ept, rdev, eptname,
                        RPMSG_ADDR_ANY, RPMSG_ADDR_ANY,
                        net_rpmsg_drv_ept_cb, NULL);
     }
@@ -546,13 +546,13 @@ static void net_rpmsg_drv_device_created(FAR struct rpmsg_device *rdev,
  ****************************************************************************/
 
 static void net_rpmsg_drv_device_destroy(FAR struct rpmsg_device *rdev,
-                                         FAR void *priv_)
+                                         FAR void *priv)
 {
-  FAR struct net_rpmsg_drv_s *priv = priv_;
+  FAR struct net_rpmsg_drv_s *drv = priv;
 
-  if (!strcmp(priv->cpuname, rpmsg_get_cpuname(rdev)))
+  if (!strcmp(drv->cpuname, rpmsg_get_cpuname(rdev)))
     {
-      rpmsg_destroy_ept(&priv->ept);
+      rpmsg_destroy_ept(&drv->ept);
     }
 }
 
@@ -581,18 +581,18 @@ static int net_rpmsg_drv_send_recv(FAR struct netdev_lowerhalf_s *dev,
                                    FAR void *header_, uint32_t command,
                                    int len)
 {
-  FAR struct net_rpmsg_drv_s *priv =
+  FAR struct net_rpmsg_drv_s *drv =
                               container_of(dev, struct net_rpmsg_drv_s, dev);
   FAR struct net_rpmsg_header_s *header = header_;
   FAR struct net_rpmsg_drv_cookie_s cookie;
   int sval = 0;
   int ret;
 
-  nxsem_get_value(&priv->wait, &sval);
+  nxsem_get_value(&drv->wait, &sval);
   if (sval <= 0)
     {
-      rpmsg_wait(&priv->ept, &priv->wait);
-      rpmsg_post(&priv->ept, &priv->wait);
+      rpmsg_wait(&drv->ept, &drv->wait);
+      rpmsg_post(&drv->ept, &drv->wait);
     }
 
   nxsem_init(&cookie.sem, 0, 0);
@@ -602,7 +602,7 @@ static int net_rpmsg_drv_send_recv(FAR struct netdev_lowerhalf_s *dev,
   header->result  = -ENXIO;
   header->cookie  = (uintptr_t)&cookie;
 
-  ret = rpmsg_send(&priv->ept, header, len);
+  ret = rpmsg_send(&drv->ept, header, len);
   if (ret < 0)
     {
       goto out;
@@ -637,7 +637,7 @@ out:
 
 static int net_rpmsg_drv_ifup(FAR struct netdev_lowerhalf_s *dev)
 {
-  FAR struct net_rpmsg_drv_s *priv =
+  FAR struct net_rpmsg_drv_s *drv =
                               container_of(dev, struct net_rpmsg_drv_s, dev);
   struct net_rpmsg_ifup_s msg =
   {
@@ -738,9 +738,9 @@ static int net_rpmsg_drv_ifup(FAR struct netdev_lowerhalf_s *dev)
 #  endif
 #endif
 
-  if (priv->cb != NULL)
+  if (drv->cb != NULL)
     {
-      priv->cb(dev, NET_RPMSG_EVENT_IF_UP);
+      drv->cb(dev, NET_RPMSG_EVENT_IF_UP);
     }
 
   return OK;
@@ -765,7 +765,7 @@ static int net_rpmsg_drv_ifup(FAR struct netdev_lowerhalf_s *dev)
 
 static int net_rpmsg_drv_ifdown(FAR struct netdev_lowerhalf_s *dev)
 {
-  FAR struct net_rpmsg_drv_s *priv =
+  FAR struct net_rpmsg_drv_s *drv =
                               container_of(dev, struct net_rpmsg_drv_s, dev);
   struct net_rpmsg_ifdown_s msg =
   {
@@ -779,9 +779,9 @@ static int net_rpmsg_drv_ifdown(FAR struct netdev_lowerhalf_s *dev)
       return ret;
     }
 
-  if (priv->cb != NULL)
+  if (drv->cb != NULL)
     {
-      priv->cb(dev, NET_RPMSG_EVENT_IF_DOWN);
+      drv->cb(dev, NET_RPMSG_EVENT_IF_DOWN);
     }
 
   return ret;
@@ -906,25 +906,25 @@ static int net_rpmsg_drv_ioctl(FAR struct netdev_lowerhalf_s *dev, int cmd,
 static FAR struct net_rpmsg_drv_s *
 net_rpmsg_drv_alloc(FAR const char *devname, enum net_lltype_e lltype)
 {
-  FAR struct net_rpmsg_drv_s *priv = kmm_zalloc(sizeof(*priv));
+  FAR struct net_rpmsg_drv_s *drv = kmm_zalloc(sizeof(*drv));
   FAR struct netdev_lowerhalf_s *netdev;
 
-  if (!priv)
+  if (!drv)
     {
       return NULL;
     }
 
-  netdev = &priv->dev;
+  netdev = &drv->dev;
   netdev->quota[NETPKT_RX] = CONFIG_IOB_NBUFFERS /
                              NET_RPMSG_DRV_MAX_NIOB / 4;
   netdev->quota[NETPKT_TX] = 1;
   netdev->ops = &g_net_rpmsg_drv_ops;
 
-  priv->ept.priv = priv;
-  priv->ept.release_cb = net_rpmsg_drv_ept_release;
-  priv->ept.ns_bound_cb = net_rpmsg_drv_ns_bound;
+  drv->ept.priv = drv;
+  drv->ept.release_cb = net_rpmsg_drv_ept_release;
+  drv->ept.ns_bound_cb = net_rpmsg_drv_ns_bound;
 
-  nxsem_init(&priv->wait, 0, 0);
+  nxsem_init(&drv->wait, 0, 0);
 
   /* Init a random MAC address, the caller can override it. */
 
@@ -935,7 +935,7 @@ net_rpmsg_drv_alloc(FAR const char *devname, enum net_lltype_e lltype)
 
   netdev_lower_register(netdev, lltype);
 
-  return priv;
+  return drv;
 }
 
 #ifdef CONFIG_NET_RPMSG_DRV_SERVER
@@ -958,28 +958,28 @@ static void net_rpmsg_drv_ns_bind(FAR struct rpmsg_device *rdev,
                                   FAR void *priv_, FAR const char *name,
                                   uint32_t dest)
 {
-  FAR struct net_rpmsg_drv_s *priv;
+  FAR struct net_rpmsg_drv_s *drv;
   FAR struct net_driver_s *dev;
   const char *devname = name + strlen(NET_RPMSG_EPT_PREFIX);
 
   dev = netdev_findbyname(devname);
   if (dev)
     {
-      priv = container_of(dev, struct net_rpmsg_drv_s, dev.netdev);
-      priv->ept.priv = priv;
-      priv->ept.release_cb = net_rpmsg_drv_ept_release;
-      priv->ept.ns_bound_cb = net_rpmsg_drv_ns_bound;
+      drv = container_of(dev, struct net_rpmsg_drv_s, dev.netdev);
+      drv->ept.priv = drv;
+      drv->ept.release_cb = net_rpmsg_drv_ept_release;
+      drv->ept.ns_bound_cb = net_rpmsg_drv_ns_bound;
     }
   else
     {
-      priv = net_rpmsg_drv_alloc(devname, NET_LL_ETHERNET);
-      if (!priv)
+      drv = net_rpmsg_drv_alloc(devname, NET_LL_ETHERNET);
+      if (!drv)
         {
           return;
         }
     }
 
-  rpmsg_create_ept(&priv->ept, rdev, name, RPMSG_ADDR_ANY, dest,
+  rpmsg_create_ept(&drv->ept, rdev, name, RPMSG_ADDR_ANY, dest,
                    net_rpmsg_drv_ept_cb, rpmsg_destroy_ept);
   rpmsg_post(&drv->ept, &drv->wait);
 }
@@ -1053,10 +1053,10 @@ net_rpmsg_drv_init(FAR const char *cpuname, FAR const char *devname,
 
 FAR void *net_rpmsg_drv_priv(FAR struct netdev_lowerhalf_s *dev)
 {
-  FAR struct net_rpmsg_drv_s *priv =
+  FAR struct net_rpmsg_drv_s *drv =
                               container_of(dev, struct net_rpmsg_drv_s, dev);
 
-  return priv->priv;
+  return drv->priv;
 }
 
 /****************************************************************************
@@ -1066,11 +1066,11 @@ FAR void *net_rpmsg_drv_priv(FAR struct netdev_lowerhalf_s *dev)
 void net_rpmsg_drv_set_callback(FAR struct netdev_lowerhalf_s *dev,
                                 net_rpmsg_drv_cb_t cb, FAR void *priv)
 {
-  FAR struct net_rpmsg_drv_s *priv =
+  FAR struct net_rpmsg_drv_s *drv =
                               container_of(dev, struct net_rpmsg_drv_s, dev);
 
-  priv->cb = cb;
-  priv->priv = priv;
+  drv->cb = cb;
+  drv->priv = priv;
 }
 
 #ifdef CONFIG_NET_RPMSG_DRV_SERVER
