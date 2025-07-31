@@ -207,6 +207,10 @@ static void optee_smc_handle_rpc(FAR struct optee_priv_data *priv_,
         break;
 
       case OPTEE_SMC_RPC_FUNC_FOREIGN_INTR:
+
+        /* yield to tasks of same priority to avoid starving the NW */
+
+        sched_yield();
         break;
 
       default:
