@@ -100,6 +100,7 @@ struct mempool_s
   size_t     maxalloc;      /* The maximum allowed alloc number, 0 means not limit */
   bool       wait;          /* The flag of need to wait when mempool is empty */
   FAR void  *priv;          /* This pointer is used to store the user's private data */
+  FAR const char *name;     /* The name of the mempool */
   mempool_alloc_t alloc;    /* The alloc function for mempool */
   mempool_free_t  free;     /* The free function for mempool */
   mempool_check_t check;    /* The check function for mempool */
@@ -164,14 +165,13 @@ extern "C"
  *
  * Input Parameters:
  *   pool - Address of the memory pool to be used.
- *   name - The name of memory pool.
  *
  * Returned Value:
  *   Zero on success; A negated errno value is returned on any failure.
  *
  ****************************************************************************/
 
-int mempool_init(FAR struct mempool_s *pool, FAR const char *name);
+int mempool_init(FAR struct mempool_s *pool);
 
 /****************************************************************************
  * Name: mempool_allocate
