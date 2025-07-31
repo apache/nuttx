@@ -29,6 +29,7 @@
 #include <errno.h>
 #include <syslog.h>
 #include <string.h>
+#include <sched.h>
 
 #include "optee.h"
 #include "optee_smc.h"
