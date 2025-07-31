@@ -44,6 +44,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/audio/audio.h>
 #include <nuttx/mutex.h>
+#include <nuttx/spinlock.h>
 
 #include <arch/irq.h>
 
@@ -73,15 +74,16 @@
 
 struct audio_upperhalf_s
 {
-  uint8_t                      crefs;   /* The number of times the device has been opened */
-  volatile enum audio_state_e  state;   /* lowerhalf state */
-  struct audio_info_s          info;    /* Record the last playing audio format */
-  mutex_t                      lock;    /* Supports mutual exclusion */
-  uint8_t                      periods; /* Ap buffers number */
-  FAR struct ap_buffer_s       **apbs;  /* Ap buffers list */
-  FAR struct audio_lowerhalf_s *dev;    /* lower-half state */
-  struct hw_ptr_s              *hwptr;  /* Hardware pointer */
-  struct file                  *usermq; /* User mode app's message queue */
+  uint8_t                      crefs;    /* The number of times the device has been opened */
+  volatile enum audio_state_e  state;    /* lowerhalf state */
+  struct audio_info_s          info;     /* Record the last playing audio format */
+  mutex_t                      lock;     /* Supports mutual exclusion */
+  spinlock_t                   spinlock; /* Supports spin lock */
+  uint8_t                      periods;  /* Ap buffers number */
+  FAR struct ap_buffer_s       **apbs;   /* Ap buffers list */
+  FAR struct audio_lowerhalf_s *dev;     /* lower-half state */
+  struct hw_ptr_s              *hwptr;   /* Hardware pointer */
+  struct file                  *usermq;  /* User mode app's message queue */
 };
 
 /****************************************************************************
@@ -418,6 +420,7 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 #ifdef CONFIG_AUDIO_MULTI_SESSION
   FAR void *session;
 #endif
+  irqstate_t flags;
   int ret;
 
   audinfo("cmd: %d arg: %ld\n", cmd, arg);
@@ -629,7 +632,9 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           ret = lower->ops->enqueuebuffer(lower, bufdesc->u.buffer);
           if (ret == OK)
             {
+              flags = spin_lock_irqsave_nopreempt(&upper->spinlock);
               upper->hwptr->head++;
+              spin_unlock_irqrestore_nopreempt(&upper->spinlock, flags);
             }
         }
         break;
@@ -949,12 +954,13 @@ static inline void audio_dequeuebuffer(FAR struct audio_upperhalf_s *upper,
 #endif
 {
   struct audio_msg_s    msg;
+  irqstate_t flags;
 
   audinfo("Entry\n");
 
-  nxmutex_lock(&upper->lock);
+  flags = spin_lock_irqsave_nopreempt(&upper->spinlock);
   upper->hwptr->tail++;
-  nxmutex_unlock(&upper->lock);
+  spin_unlock_irqrestore_nopreempt(&upper->spinlock, flags);
 
   /* Send a dequeue message to the user if a message queue is registered */
 
@@ -1279,6 +1285,7 @@ int audio_register(FAR const char *name, FAR struct audio_lowerhalf_s *dev)
    */
 
   nxmutex_init(&upper->lock);
+  spin_lock_init(&upper->spinlock);
   upper->dev = dev;
 
 #ifdef CONFIG_AUDIO_CUSTOM_DEV_PATH
