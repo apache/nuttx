@@ -260,6 +260,23 @@
 #define _SC_NPROCESSORS_CONF             0x007d
 #define _SC_NPROCESSORS_ONLN             0x007e
 
+/* Constants used with POSIX confstr(). */
+
+#define _CS_PATH                           1
+#define _CS_POSIX_V6_ILP32_OFF32_CFLAGS    2
+#define _CS_POSIX_V6_ILP32_OFF32_LDFLAGS   3
+#define _CS_POSIX_V6_ILP32_OFF32_LIBS      4
+#define _CS_POSIX_V6_ILP32_OFFBIG_CFLAGS   5
+#define _CS_POSIX_V6_ILP32_OFFBIG_LDFLAGS  6
+#define _CS_POSIX_V6_ILP32_OFFBIG_LIBS     7
+#define _CS_POSIX_V6_LP64_OFF64_CFLAGS     8
+#define _CS_POSIX_V6_LP64_OFF64_LDFLAGS    9
+#define _CS_POSIX_V6_LP64_OFF64_LIBS       10
+#define _CS_POSIX_V6_LPBIG_OFFBIG_CFLAGS   11
+#define _CS_POSIX_V6_LPBIG_OFFBIG_LDFLAGS  12
+#define _CS_POSIX_V6_LPBIG_OFFBIG_LIBS     13
+#define _CS_POSIX_V6_WIDTH_RESTRICTED_ENVS 14
+
 /* The following symbolic constants must be defined for file streams: */
 
 #define STDERR_FILENO                    2       /* File number of stderr */
@@ -446,6 +463,7 @@ int     sethostname(FAR const char *name, size_t namelen);
 long    sysconf(int name);
 long    fpathconf(int fildes, int name);
 long    pathconf(FAR const char *path, int name);
+size_t  confstr(int name, FAR char *buf, size_t len);
 
 /* User and group identity management */
 
