@@ -45,9 +45,9 @@
 struct noterpmsg_driver_s
 {
   struct note_driver_s  driver;
+  FAR uint8_t          *buffer;
   volatile size_t       head;
   volatile size_t       tail;
-  uint8_t               buffer[CONFIG_DRIVERS_NOTERPMSG_BUFSIZE];
   struct work_s         work;
   struct rpmsg_endpoint ept;
   spinlock_t            lock;
@@ -63,6 +63,8 @@ static void noterpmsg_add(FAR struct note_driver_s *driver,
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+static uint8_t g_noterpmsg_buffer[CONFIG_DRIVERS_NOTERPMSG_BUFSIZE];
 
 static const struct note_driver_ops_s g_noterpmsg_ops =
 {
@@ -85,6 +87,7 @@ struct noterpmsg_driver_s g_noterpmsg_driver =
 #endif
     &g_noterpmsg_ops
   },
+  g_noterpmsg_buffer
 };
 
 /****************************************************************************
