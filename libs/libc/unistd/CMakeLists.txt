@@ -68,7 +68,8 @@ set(SRCS
     lib_flock.c
     lib_getpass.c
     lib_chdir.c
-    lib_fchdir.c)
+    lib_fchdir.c
+    lib_confstr.c)
 
 if(NOT CONFIG_SCHED_USER_IDENTITY)
   list(
