@@ -107,6 +107,7 @@
 
 #define PTHREAD_STACK_MIN             CONFIG_PTHREAD_STACK_MIN
 #define PTHREAD_STACK_DEFAULT         CONFIG_PTHREAD_STACK_DEFAULT
+#define PTHREAD_GUARD_DEFAULT         CONFIG_PTHREAD_GUARDSIZE_DEFAULT
 
 /* Values for the pthread inheritsched attribute */
 
@@ -237,6 +238,7 @@ struct pthread_attr_s
 
   FAR void  *stackaddr;        /* Address of memory to be used as stack */
   size_t stacksize;            /* Size of the stack allocated for the pthread */
+  size_t guardsize;            /* Size of the guard area for the pthread's stack */
 
 #ifdef CONFIG_SCHED_SPORADIC
   struct timespec repl_period; /* Replenishment period */
@@ -528,6 +530,12 @@ int pthread_attr_getstack(FAR const pthread_attr_t *attr,
 
 int pthread_attr_setscope(FAR pthread_attr_t *attr, int scope);
 int pthread_attr_getscope(FAR const pthread_attr_t *attr, FAR int *scope);
+
+/* Set/get guardsize attribute in thread attributes object */
+
+int pthread_attr_setguardsize(FAR pthread_attr_t *attr, size_t guardsize);
+int pthread_attr_getguardsize(FAR const pthread_attr_t *attr,
+                              FAR size_t *guardsize);
 
 /* Set or get the name of a thread */
 

@@ -1960,6 +1960,14 @@ config PTHREAD_STACK_DEFAULT
 	---help---
 		Default pthread stack size
 
+config PTHREAD_GUARDSIZE_DEFAULT
+	int "Default pthread guard area size"
+	default 0
+	---help---
+		This is the default amount of space to reserve at the overflow end of a
+		pthread stack. At this moment this option simply increases the size
+		of thread stacks.
+
 endmenu # Stack and heap information
 
 config SCHED_BACKTRACE
