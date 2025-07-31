@@ -1094,6 +1094,34 @@ extern "C"
 int audio_register(FAR const char *name, FAR struct audio_lowerhalf_s *dev);
 
 /****************************************************************************
+ * Name: audio_unregister
+ *
+ * Description:
+ *   This function unbinds an instance of a "lower half" Audio driver with
+ *   the "upper half" Audio device and unregisters that device from the
+ *   filesystem.
+ *
+ *   When this function is called, the "lower half" driver should be in the
+ *   reset state (as if the shutdown() method had already been called).
+ *
+ * Input Parameters:
+ *   name - The name of the audio device.  This name will be used to generate
+ *     a full path to the driver in the format "/dev/audio/[name]" in the
+ *     NuttX filesystem (i.e. the path "/dev/audio" will be prepended to the
+ *     supplied device name.  The recommended convention is to name Audio
+ *     drivers based on the type of functionality they provide, such as
+ *     "/dev/audio/pcm0", "/dev/audio/midi0", "/dev/audio/mp30, etc.
+ *   dev - A pointer to an instance of lower half audio driver.
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int audio_unregister(FAR const char *name,
+                     FAR struct audio_lowerhalf_s *dev);
+
+/****************************************************************************
  * Name: abp_alloc
  *
  * Description:

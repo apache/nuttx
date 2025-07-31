@@ -1695,6 +1695,65 @@ static void audio_callback(FAR void *handle, uint16_t reason,
 }
 
 /****************************************************************************
+ * Name: audio_get_path
+ *
+ * Description:
+ *   Convert a audio device name to a full path in filesystem.
+ *
+ * Input Parameters:
+ *   name - Audio device name
+ *   path - Outvalue, device absolute path in filesystem
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void audio_get_path(FAR const char *name, FAR char *path,
+                           size_t pathlen)
+{
+#ifndef CONFIG_AUDIO_CUSTOM_DEV_PATH
+  FAR const char *devname = "/dev/audio";
+#elif !defined(CONFIG_AUDIO_DEV_ROOT)
+  FAR const char *devname = CONFIG_AUDIO_DEV_PATH;
+#endif
+
+#ifdef CONFIG_AUDIO_CUSTOM_DEV_PATH
+
+#ifdef CONFIG_AUDIO_DEV_ROOT
+
+  /* This is the simple case ... No need to make a directory */
+
+  strlcpy(path, "/dev/", pathlen);
+  strlcat(path, name, pathlen);
+
+#else
+  /* Ensure the path begins with "/dev" as we don't support placing device
+   * anywhere but in the /dev directory
+   */
+
+  DEBUGASSERT(strncmp(devname, "/dev", 4) == 0);
+
+  strlcpy(path, devname, pathlen);
+  if (devname[strlen(devname) - 1] != '/')
+    {
+      strlcat(path, "/", pathlen);
+    }
+
+  strlcat(path, name, pathlen);
+#endif /* CONFIG_AUDIO_DEV_PATH=="/dev" */
+
+#else /* CONFIG_AUDIO_CUSTOM_DEV_PATH */
+
+  /* Unregister the Audio device */
+
+  strlcpy(path, devname, pathlen);
+  strlcat(path, "/", pathlen);
+  strlcat(path, name, pathlen);
+#endif
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -1727,11 +1786,13 @@ int audio_register(FAR const char *name, FAR struct audio_lowerhalf_s *dev)
 {
   FAR struct audio_upperhalf_s *upper;
   char path[AUDIO_MAX_DEVICE_PATH];
-#ifndef CONFIG_AUDIO_CUSTOM_DEV_PATH
-  FAR const char *devname = "/dev/audio";
-#elif !defined(CONFIG_AUDIO_DEV_ROOT)
-  FAR const char *devname = CONFIG_AUDIO_DEV_PATH;
-#endif
+  int ret;
+
+  if (!name || !dev)
+    {
+      auderr("ERROR: Invalid arguments\n");
+      return -EINVAL;
+    }
 
   /* Allocate the upper-half data structure */
 
@@ -1750,42 +1811,9 @@ int audio_register(FAR const char *name, FAR struct audio_lowerhalf_s *dev)
   spin_lock_init(&upper->spinlock);
   upper->dev = dev;
 
-#ifdef CONFIG_AUDIO_CUSTOM_DEV_PATH
-
-#ifdef CONFIG_AUDIO_DEV_ROOT
-
-  /* This is the simple case ... No need to make a directory */
-
-  strlcpy(path, "/dev/", sizeof(path));
-  strlcat(path, name, sizeof(path));
-
-#else
-  /* Ensure the path begins with "/dev" as we don't support placing device
-   * anywhere but in the /dev directory
-   */
-
-  DEBUGASSERT(strncmp(devname, "/dev", 4) == 0);
-
-  /* Now build the path for registration */
-
-  strlcpy(path, devname, sizeof(path));
-  if (devname[sizeof(devname)-1] != '/')
-    {
-      strlcat(path, "/", sizeof(path));
-    }
-
-  strlcat(path, name, sizeof(path));
-
-#endif /* CONFIG_AUDIO_DEV_PATH=="/dev" */
-
-#else  /* CONFIG_AUDIO_CUSTOM_DEV_PATH */
-
   /* Register the Audio device */
 
-  strlcpy(path, devname, sizeof(path));
-  strlcat(path, "/", sizeof(path));
-  strlcat(path, name, sizeof(path));
-#endif
+  audio_get_path(name, path, sizeof(path));
 
   /* Give the lower-half a context to the upper half */
 
@@ -1794,6 +1822,61 @@ int audio_register(FAR const char *name, FAR struct audio_lowerhalf_s *dev)
 
   audinfo("Registering %s\n", path);
   return register_driver(path, &g_audioops, 0666, upper);
+}
+
+/****************************************************************************
+ * Name: audio_unregister
+ *
+ * Description:
+ *   This function unbinds an instance of a "lower half" Audio driver with
+ *   the "upper half" Audio device and unregisters that device from the
+ *   filesystem.
+ *
+ *   When this function is called, the "lower half" driver should be in the
+ *   reset state (as if the shutdown() method had already been called).
+ *
+ * Input Parameters:
+ *   name - The name of the audio device.  This name will be used to generate
+ *     a full path to the driver in the format "/dev/audio/[name]" in the
+ *     NuttX filesystem (i.e. the path "/dev/audio" will be prepended to the
+ *     supplied device name.  The recommended convention is to name Audio
+ *     drivers based on the type of functionality they provide, such as
+ *     "/dev/audio/pcm0", "/dev/audio/midi0", "/dev/audio/mp30, etc.
+ *   dev - A pointer to an instance of lower half audio driver. This instance
+ *     is bound to the Audio driver and must persists as long as the driver
+ *     persists.
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int audio_unregister(FAR const char *name, FAR struct audio_lowerhalf_s *dev)
+{
+  FAR struct audio_upperhalf_s *upper;
+  char path[AUDIO_MAX_DEVICE_PATH];
+  int ret;
+
+  if (!name || !dev || !dev->priv)
+    {
+      auderr("ERROR: Invalid arguments\n");
+      return -EINVAL;
+    }
+
+  audio_get_path(name, path, sizeof(path));
+
+  ret = unregister_driver(path);
+  if (ret < 0)
+    {
+      auderr("Failed to unregister %s\n", path);
+      return ret;
+    }
+
+  upper = dev->priv;
+  nxmutex_destroy(&upper->lock);
+  kmm_free(upper);
+  dev->priv = NULL;
+  return 0;
 }
 
 #endif /* CONFIG_AUDIO */
