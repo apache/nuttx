@@ -77,11 +77,6 @@ int nxsem_trywait_slow(FAR sem_t *sem)
 
   /* If the semaphore is available, give it to the requesting task */
 
-  if (mutex)
-    {
-      new = nxsched_gettid();
-    }
-
   old = atomic_read(val);
   do
     {
@@ -91,6 +86,8 @@ int nxsem_trywait_slow(FAR sem_t *sem)
             {
               goto out;
             }
+
+          new = nxsched_gettid();
         }
       else
         {
