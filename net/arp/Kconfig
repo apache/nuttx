@@ -49,6 +49,15 @@ config NET_ARP_IPIN
 		time and the MAC addresses that you want will get flushed from
 		the table often.
 
+config NET_ARP_GRATUITOUS
+	bool "Gratuitous ARP address accept"
+	default n
+	---help---
+		Accept IP/MAC address mappings from the ARP table from incoming
+		Gratuitous ARP packets.  If this option is selected,
+		CONFIG_NET_ARTAB_SIZE should be large enough to hold the hosts
+		on the network.
+
 config NET_ARP_SEND
 	bool "ARP send"
 	default y
