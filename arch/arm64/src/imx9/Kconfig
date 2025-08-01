@@ -525,6 +525,14 @@ config IMX9_SCMI
 	default y
 	depends on IMX9_MU
 
+if IMX9_SCMI
+
+config IMX9_CLK_OVER_SCMI
+	bool "Configure CLK over SCMI"
+	default y
+
+endif
+
 menu "LPI2C Peripherals"
 
 menuconfig IMX9_LPI2C1
