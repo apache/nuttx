@@ -22,6 +22,8 @@
 
 nuttx_elf_compile_options(-fvisibility=hidden -mlong-calls)
 
+nuttx_mod_compile_options(-fvisibility=hidden -mlong-calls)
+
 nuttx_elf_compile_options_ifdef(CONFIG_UNWINDER_ARM -fno-unwind-tables
                                 -fno-asynchronous-unwind-tables)
 
@@ -31,6 +33,8 @@ nuttx_elf_link_options_ifdef(
   CONFIG_PIC --unresolved-symbols=ignore-in-object-files --emit-relocs)
 
 nuttx_elf_link_options_ifdef(CONFIG_BINFMT_ELF_RELOCATABLE -r)
+
+nuttx_mod_link_options(-r)
 
 nuttx_elf_link_options_ifdef(CONFIG_BUILD_KERNEL -Bstatic)
 
