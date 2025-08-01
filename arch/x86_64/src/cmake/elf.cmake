@@ -22,7 +22,11 @@
 
 nuttx_elf_compile_options(-fvisibility=hidden -fno-pic -mcmodel=large)
 
+nuttx_mod_compile_options(-fvisibility=hidden)
+
 nuttx_elf_link_options(-r)
+
+nuttx_mod_link_options(-r)
 
 nuttx_elf_link_options_ifdef(CONFIG_DEBUG_OPT_UNUSED_SECTIONS --gc-sections)
 

@@ -65,6 +65,8 @@ endif()
 #                         CONFIG_<app> value)
 #   SRCS                : source files
 #   NO_MAIN_ALIAS       : do not add a main=<app>_main alias(*)
+#   DYNLIB              : if "y", build as dynamic loadable library
+#   LINK_FLAGS          : link flags only for elf or loadable link
 #
 # (*) This is only really needed in convoluted cases where a single .c file
 # contains differently named <app>_main() entries for different <app>. This
@@ -92,8 +94,10 @@ function(nuttx_add_application)
     PRIORITY
     STACKSIZE
     MODULE
+    DYNLIB
     MULTI_VALUE
     COMPILE_FLAGS
+    LINK_FLAGS
     INCLUDE_DIRECTORIES
     SRCS
     DEPENDS
@@ -114,7 +118,8 @@ function(nuttx_add_application)
   if(SRCS_EXIST)
     if(MODULE
        AND ("${MODULE}" STREQUAL "m")
-       OR CONFIG_BUILD_KERNEL)
+       OR CONFIG_BUILD_KERNEL
+       OR "${DYNLIB}" STREQUAL "y")
       # create as standalone executable (loadable application or "module")
       set(TARGET "${NAME}")
 
@@ -125,18 +130,24 @@ function(nuttx_add_application)
         set(TARGET "ELF_${TARGET}")
         add_library(${TARGET} ${SRCS})
         add_dependencies(${TARGET} apps_post)
+        if(NOT "${CMAKE_LD}" MATCHES "gcc$")
+          set(USE_LINKER True)
+        endif()
         add_custom_command(
           TARGET ${TARGET}
           POST_BUILD
           COMMAND
             ${CMAKE_LD}
-            $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx_global,NUTTX_ELF_APP_LINK_OPTIONS>>
-            -T ${CMAKE_BINARY_DIR}/gnu-elf.ld
-            $<$<TARGET_EXISTS:STARTUP_OBJS>:$<TARGET_OBJECTS:STARTUP_OBJS>>
-            --start-group
-            $<$<BOOL:${CONFIG_BUILD_KERNEL}>:$<GENEX_EVAL:$<TARGET_PROPERTY:nuttx_global,NUTTX_ELF_LINK_LIBRARIES>>>
+            $<IF:$<STREQUAL:"${DYNLIB}","y">,$<TARGET_PROPERTY:nuttx_global,NUTTX_MOD_APP_LINK_OPTIONS>,$<TARGET_PROPERTY:nuttx_global,NUTTX_ELF_APP_LINK_OPTIONS>>
+            ${LINK_FLAGS} -T ${CMAKE_BINARY_DIR}/gnu-elf.ld
+            $<$<AND:$<TARGET_EXISTS:STARTUP_OBJS>,$<STREQUAL:"${DYNLIB}","y">>:$<TARGET_OBJECTS:STARTUP_OBJS>>
+            $<$<NOT:$<BOOL:${USE_LINKER}>>:-Wl,>--start-group
+            $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx_global,NUTTX_ELF_LINK_LIBRARIES>>
             $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx_global,NUTTX_ELF_LINK_EXTRA_LIBRARIES>>
-            $<TARGET_FILE:${TARGET}> --end-group -o
+            $<$<NOT:$<BOOL:${USE_LINKER}>>:-Wl,>--whole-archive
+            $<TARGET_FILE:${TARGET}>
+            $<$<NOT:$<BOOL:${USE_LINKER}>>:-Wl,>--no-whole-archive
+            $<$<NOT:$<BOOL:${USE_LINKER}>>:-Wl,>--end-group -o
             ${CMAKE_BINARY_DIR}/bin_debug/${ELF_NAME}
           COMMAND
             ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/bin_debug/${ELF_NAME}
@@ -167,6 +178,14 @@ function(nuttx_add_application)
           ${TARGET}
           PRIVATE
             $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx_global,NUTTX_ELF_APP_COMPILE_OPTIONS>>
+        )
+      endif()
+
+      if("${DYNLIB}" STREQUAL "y")
+        target_compile_options(
+          ${TARGET}
+          PRIVATE
+            $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx_global,NUTTX_MOD_APP_COMPILE_OPTIONS>>
         )
       endif()
 

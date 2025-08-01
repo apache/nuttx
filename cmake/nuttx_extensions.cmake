@@ -329,6 +329,78 @@ function(nuttx_elf_link_options_ifndef cond)
   endif()
 endfunction()
 
+# Function: nuttx_mod_compile_options
+#
+# Adds compile options to mod targets
+#
+# Usage: nuttx_mod_compile_options("-O2" "-Wall")
+function(nuttx_mod_compile_options)
+  set_property(
+    TARGET nuttx_global
+    APPEND
+    PROPERTY NUTTX_MOD_APP_COMPILE_OPTIONS ${ARGN})
+endfunction()
+
+# Function: nuttx_mod_compile_options_ifdef
+#
+# Conditionally adds compile options to the mod target if the given condition is
+# true.
+#
+# Usage: nuttx_mod_compile_options_ifdef(MY_CONDITION "-O2" "-Wall")
+function(nuttx_mod_compile_options_ifdef cond)
+  if(${cond})
+    nuttx_mod_compile_options(${ARGN})
+  endif()
+endfunction()
+
+# Function: nuttx_mod_compile_options_ifndef
+#
+# Conditionally adds compile options to the mod target if the given condition is
+# false.
+#
+# Usage: nuttx_mod_compile_options_ifndef(MY_CONDITION "-O2" "-Wall")
+function(nuttx_mod_compile_options_ifndef cond)
+  if(NOT ${cond})
+    nuttx_mod_compile_options(${ARGN})
+  endif()
+endfunction()
+
+# Function: nuttx_mod_link_options
+#
+# Adds link options to mod targets
+#
+# Usage: nuttx_mod_link_options("-r")
+function(nuttx_mod_link_options)
+  set_property(
+    TARGET nuttx_global
+    APPEND
+    PROPERTY NUTTX_MOD_APP_LINK_OPTIONS ${ARGN})
+endfunction()
+
+# Function: nuttx_mod_link_options_ifdef
+#
+# Conditionally adds link options to the mod target if the given condition is
+# true.
+#
+# Usage: nuttx_mod_link_options_ifdef(MY_CONDITION "-r")
+function(nuttx_mod_link_options_ifdef cond)
+  if(${cond})
+    nuttx_mod_link_options(${ARGN})
+  endif()
+endfunction()
+
+# Function: nuttx_mod_link_options_ifndef
+#
+# Conditionally adds link options to the mod target if the given condition is
+# false.
+#
+# Usage: nuttx_mod_link_options_ifndef(MY_CONDITION "-r")
+function(nuttx_mod_link_options_ifndef cond)
+  if(NOT ${cond})
+    nuttx_mod_link_options(${ARGN})
+  endif()
+endfunction()
+
 # the visible scope is all the APPS include search path
 function(nuttx_include_directories_for_all_apps)
   set_property(
