@@ -1727,13 +1727,10 @@ int audio_register(FAR const char *name, FAR struct audio_lowerhalf_s *dev)
 {
   FAR struct audio_upperhalf_s *upper;
   char path[AUDIO_MAX_DEVICE_PATH];
-  static bool dev_audio_created = false;
 #ifndef CONFIG_AUDIO_CUSTOM_DEV_PATH
   FAR const char *devname = "/dev/audio";
 #elif !defined(CONFIG_AUDIO_DEV_ROOT)
   FAR const char *devname = CONFIG_AUDIO_DEV_PATH;
-  FAR const char *ptr;
-  FAR char *pathptr;
 #endif
 
   /* Allocate the upper-half data structure */
@@ -1769,52 +1766,6 @@ int audio_register(FAR const char *name, FAR struct audio_lowerhalf_s *dev)
 
   DEBUGASSERT(strncmp(devname, "/dev", 4) == 0);
 
-  /* Create a /dev/audio directory. */
-
-  if (!dev_audio_created)
-    {
-      /* Get path name after "/dev" */
-
-      ptr = &devname[4];
-      if (*ptr == '/')
-        {
-          ptr++;
-        }
-
-      strlcpy(path, "/dev/", sizeof(path));
-      pathptr = &path[5];
-
-      /* Do mkdir for each segment of the path */
-
-      while (*ptr != '\0')
-        {
-          /* Build next path segment into path variable */
-
-          while (*ptr != '/' && *ptr != '\0')
-            {
-              *pathptr++ = *ptr++;
-            }
-
-          *pathptr = '\0';
-
-          /* Make this level of directory */
-
-          mkdir(path, 0644);
-
-          /* Check for another level */
-
-          *pathptr++ = '/';
-          if (*ptr == '/')
-            {
-              ptr++;
-            }
-        }
-
-      /* Indicate we have created the audio dev path */
-
-      dev_audio_created = true;
-    }
-
   /* Now build the path for registration */
 
   strlcpy(path, devname, sizeof(path));
@@ -1828,19 +1779,6 @@ int audio_register(FAR const char *name, FAR struct audio_lowerhalf_s *dev)
 #endif /* CONFIG_AUDIO_DEV_PATH=="/dev" */
 
 #else  /* CONFIG_AUDIO_CUSTOM_DEV_PATH */
-
-  /* Create a /dev/audio directory. */
-
-  if (!dev_audio_created)
-    {
-      /* We don't check for error here because even if it fails, then
-       * the register_driver call below will return an error condition
-       * for us.
-       */
-
-      mkdir(devname, 0644);
-      dev_audio_created = true;
-    }
 
   /* Register the Audio device */
 
