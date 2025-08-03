@@ -100,5 +100,10 @@ if(CONFIG_DRIVERS_AUDIO)
   if(CONFIG_AUDIO_DMA)
     list(APPEND SRCS audio_dma.c)
   endif()
+
+  if(CONFIG_AUDIO_RPMSG)
+    list(APPEND SRCS audio_rpmsg.c)
+  endif()
+
   target_sources(drivers PRIVATE ${SRCS})
 endif()

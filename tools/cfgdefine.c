@@ -50,6 +50,9 @@ static const char *dequote_list[] =
 {
   /* NuttX */
 
+  "CONFIG_AUDIO_FAKE_DEVICE_PARAMS",      /* Arguments for the fake audio device */
+  "CONFIG_AUDIO_RPMSG_DEVICE_PARAMS",     /* Arguments for the rpmsg audio device */
+  "CONFIG_BOARD_MEMORY_RANGE",            /* Memory range for board */
   "CONFIG_DEBUG_OPTLEVEL",                /* Custom debug level */
   "CONFIG_EXECFUNCS_NSYMBOLS_VAR",        /* Variable holding number of symbols in the table */
   "CONFIG_EXECFUNCS_SYMTAB_ARRAY",        /* Symbol table array used by exec[l|v] */

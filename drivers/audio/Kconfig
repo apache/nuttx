@@ -566,4 +566,25 @@ config AUDIO_FAKE_WORKER_STACKSIZE
 
 endif # AUDIO_FAKE
 
+config AUDIO_RPMSG
+	bool "Rpmsg audio device"
+	default n
+	depends on AUDIO && RPMSG
+	---help---
+		A rpmsg audio device driver for passing ctrl and data.
+
+config AUDIO_RPMSG_DEVICE_PARAMS
+	string "rpmsg audio device params"
+	depends on AUDIO_RPMSG
+	---help---
+		This is a params for rpmsg audio device. The format like:
+		{remotecpu, devname, consumer}.
+
+		- remotecpu (string): remote cpu name to be connect.
+		- devname (string): a2dp or le or wtp.
+		- consumer (bool): true for data consumer, false for data producer.
+		e.g:
+			{"audio", "a2dp", false},
+			{"cp", "wtp", true},
+
 endif # DRIVERS_AUDIO

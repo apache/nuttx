@@ -56,6 +56,7 @@
 #include <nuttx/virtio/virtio.h>
 #include <nuttx/drivers/optee.h>
 #include <nuttx/usb/usbhost.h>
+#include <nuttx/audio/audio_rpmsg.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -291,6 +292,20 @@ void drivers_initialize(void)
 
 #ifdef CONFIG_THERMAL
   thermal_init();
+#endif
+
+#ifdef CONFIG_AUDIO_FAKE
+  /* Register fake audio driver */
+
+  audio_fake_initialize();
+#endif
+
+#ifdef CONFIG_AUDIO_RPMSG
+  audio_rpmsg_initialize();
+#endif
+
+#ifdef CONFIG_PTP_CLOCK_DUMMY
+  ptp_clock_dummy_initialize(0);
 #endif
 
   drivers_trace_end();
