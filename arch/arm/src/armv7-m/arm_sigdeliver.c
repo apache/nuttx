@@ -160,9 +160,7 @@ retry:
 #ifdef CONFIG_SMP
   /* We need to keep the IRQ lock until task switching */
 
-  rtcb->irqcount++;
-  leave_critical_section((uint8_t)regs[REG_BASEPRI]);
-  rtcb->irqcount--;
+  leave_critical_section(up_irq_save());
 #endif
 
   rtcb->xcp.regs = rtcb->xcp.saved_regs;
