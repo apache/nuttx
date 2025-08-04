@@ -209,9 +209,7 @@ retry:
 #ifdef CONFIG_SMP
   /* We need to keep the IRQ lock until task switching */
 
-  rtcb->irqcount++;
-  leave_critical_section((regs[REG_PSR]));
-  rtcb->irqcount--;
+  leave_critical_section(up_irq_save());
 #endif
   sparc_fullcontextrestore(regs);
 }
