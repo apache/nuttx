@@ -123,6 +123,13 @@ config ONESHOT
 
 if ONESHOT
 
+config ONESHOT_COUNT
+	bool "Oneshot count-based clock device driver"
+	default n
+	---help---
+		This option enables the oneshot implementation to be based on the
+		new clock device driver interfaces.
+
 config ALARM_ARCH
 	bool "Alarm Arch Implementation"
 	select ARCH_HAVE_TICKLESS

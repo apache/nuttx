@@ -36,6 +36,7 @@
 #include <time.h>
 
 #include <nuttx/clock.h>
+#include <nuttx/timers/clkcnt.h>
 #include <nuttx/fs/ioctl.h>
 
 /****************************************************************************
@@ -186,11 +187,24 @@ typedef CODE void (*oneshot_callback_t)
                        (FAR struct oneshot_lowerhalf_s *lower,
                         FAR void *arg);
 
-/* The one short operations supported by the lower half driver */
+/* The oneshot operations supported by the lower half driver */
 
 struct timespec;
 struct oneshot_operations_s
 {
+#ifdef CONFIG_ONESHOT_COUNT
+  /* New clkcnt interfaces with better performance, overflow-free timing
+   * conversion, and the theoretical optimal timing accuracy.
+   */
+
+  CODE clkcnt_t (*current)(FAR struct oneshot_lowerhalf_s *lower);
+  CODE void     (*start)(FAR struct oneshot_lowerhalf_s *lower,
+                         clkcnt_t delay);
+  CODE void     (*cancel)(FAR struct oneshot_lowerhalf_s *lower);
+  CODE clkcnt_t (*max_delay)(FAR struct oneshot_lowerhalf_s *lower);
+#else
+  /* Deprecated interfaces, just for compatiable-usage. */
+
   CODE int (*max_delay)(FAR struct oneshot_lowerhalf_s *lower,
                         FAR struct timespec *ts);
   CODE int (*start)(FAR struct oneshot_lowerhalf_s *lower,
@@ -199,6 +213,7 @@ struct oneshot_operations_s
                      FAR struct timespec *ts);
   CODE int (*current)(FAR struct oneshot_lowerhalf_s *lower,
                       FAR struct timespec *ts);
+#endif
 };
 
 /* This structure describes the state of the oneshot timer lower-half
@@ -215,6 +230,10 @@ struct oneshot_lowerhalf_s
 
   FAR oneshot_callback_t callback;
   FAR void *arg;
+
+#ifdef CONFIG_ONESHOT_COUNT
+  uint32_t frequency;
+#endif
 
   /* Private lower half data may follow */
 };
