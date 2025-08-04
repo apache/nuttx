@@ -40,7 +40,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_MM_KERNEL_HEAP
-#  define MM_DEF_HEAP   &g_kmmheap
+#  define MM_DEF_HEAP   &KNR_HEAP
 #else
 #  define MM_DEF_HEAP   &g_mmheap
 #endif

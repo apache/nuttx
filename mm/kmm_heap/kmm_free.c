@@ -55,7 +55,7 @@
 void kmm_free(FAR void *mem)
 {
   DEBUGASSERT((mem == NULL) || kmm_heapmember(mem));
-  mm_free(g_kmmheap, mem);
+  mm_free(KNR_HEAP, mem);
 }
 
 #endif /* CONFIG_MM_KERNEL_HEAP */

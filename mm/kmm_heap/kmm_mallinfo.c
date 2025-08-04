@@ -45,7 +45,7 @@
 
 struct mallinfo kmm_mallinfo(void)
 {
-  return mm_mallinfo(g_kmmheap);
+  return mm_mallinfo(KNR_HEAP);
 }
 
 /****************************************************************************
@@ -59,6 +59,6 @@ struct mallinfo kmm_mallinfo(void)
 
 struct mallinfo_task kmm_mallinfo_task(FAR const struct malltask *task)
 {
-  return mm_mallinfo_task(g_kmmheap, task);
+  return mm_mallinfo_task(KNR_HEAP, task);
 }
 #endif /* CONFIG_MM_KERNEL_HEAP */

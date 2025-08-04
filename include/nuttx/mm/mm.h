@@ -142,12 +142,14 @@
  */
 
 #ifdef CONFIG_MM_KERNEL_HEAP
+#  define KNR_HEAP g_kmmheap
 #  if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
 #    define MM_INTERNAL_HEAP(heap) ((heap) == g_kmmheap)
 #  else
 #    define MM_INTERNAL_HEAP(heap) ((heap) == USR_HEAP || (heap) == g_kmmheap)
 #  endif
 #else
+#  define KNR_HEAP USR_HEAP
 #  if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
 #    define MM_INTERNAL_HEAP(heap) 0
 #  else
