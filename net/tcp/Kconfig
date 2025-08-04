@@ -105,7 +105,21 @@ config NET_TCP_RTO
 	int "RTO of TCP/IP connections"
 	default 3
 	---help---
-		RTO of TCP/IP connections (all tasks)
+		Default retransmission timeout (RTO) of TCP/IP connections (all tasks).
+		In units of half seconds. When the same data packet is retransmitted
+		multiple times due to timeout, the RTO will be doubled. but the maximum
+		RTO is NET_TCP_RTO * 16. When this packet is ACKed, the RTO will be
+		reset to this value. This algorithm helps to reduce network congestion
+		to some extent.
+
+config NET_TCP_FIXED_RTO
+	bool "Use fixed RTO"
+	default n
+	---help---
+		Use fixed RTO for TCP/IP connections (all tasks), i.e. do not use
+		the RTO exponentially increasing algorithm. This is useful for projects
+		that require a fixed RTO value or have restrictions on the maximum
+		retransmission time.
 
 config NET_TCP_MAXRTX
 	int "Maximum retransmitted number of TCP/IP data packet"
