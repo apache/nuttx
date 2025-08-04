@@ -54,7 +54,6 @@
 
 void kmm_free(FAR void *mem)
 {
-  DEBUGASSERT((mem == NULL) || kmm_heapmember(mem));
   mm_free(KNR_HEAP, mem);
 }
 
@@ -74,7 +73,6 @@ void kmm_free(FAR void *mem)
 
 void kmm_delayfree(FAR void *mem)
 {
-  DEBUGASSERT((mem == NULL) || kmm_heapmember(mem));
   mm_delayfree(g_kmmheap, mem);
 }
 
