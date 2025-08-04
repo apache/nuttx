@@ -5055,7 +5055,7 @@ struct usbhost_connection_s *imxrt_ehci_initialize(int controller)
       hport->speed = USB_SPEED_FULL;
     }
 
-#  ifndef CONFIG_IMXRT_EHCI_PREALLOCATE
+#  ifndef CONFIG_IMXRT_EHCI_USB1_PREALLOCATE
   /* Allocate a pool of free Queue Head (QH) structures */
 
   g_qhpool = kmm_memalign(32, CONFIG_IMXRT_EHCI_USB1_NQHS *
