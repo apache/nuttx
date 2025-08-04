@@ -531,6 +531,10 @@ config IMX9_CLK_OVER_SCMI
 	bool "Configure CLK over SCMI"
 	default y
 
+config IMX9_IOMUX_OVER_SCMI
+	bool "Configure IOMUX over SCMI"
+	default y
+
 endif
 
 menu "LPI2C Peripherals"
