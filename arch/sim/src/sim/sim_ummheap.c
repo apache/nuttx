@@ -172,12 +172,6 @@ struct mm_heap_s
   while (0)
 
 /****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-static void delay_free(struct mm_heap_s *heap, void *mem, bool delay);
-
-/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -276,6 +270,39 @@ static void add_delaylist(struct mm_heap_s *heap, void *mem)
   spin_unlock_irqrestore(&heap->lock, flags);
 }
 
+/****************************************************************************
+ * Name: forcefree
+ *
+ * Description:
+ *   Delay free memory if `delay` is true, otherwise free it immediately.
+ *
+ ****************************************************************************/
+
+static void forcefree(struct mm_heap_s *heap, void *mem)
+{
+  struct mm_allocnode_s *node;
+
+  if (up_interrupt_context() || nxsched_gettid() < 0)
+    {
+      /* In ISR, or nxsched_gettid() returns -ESRCH during context
+       * switching (see nxsched_gettid's comment): the block may be the
+       * running thread stack, add it to the delay list.
+       */
+
+      add_delaylist(heap, mem);
+      return;
+    }
+
+  node = (struct mm_allocnode_s *)((uintptr_t)mem - MM_ALLOCNODE_SIZE);
+#ifdef CONFIG_MM_FILL_ALLOCATIONS
+  memset(mem, MM_FREE_MAGIC,
+         node->size - MM_ALLOCNODE_SIZE - node->padding);
+#endif
+  update_stats(heap, mem, node->size, false);
+  sched_note_heap(NOTE_HEAP_FREE, heap, mem, node->size, 0);
+  host_free(node->allocmem);
+}
+
 static bool free_delaylist(struct mm_heap_s *heap, bool force)
 {
   bool ret = false;
@@ -320,52 +347,10 @@ static bool free_delaylist(struct mm_heap_s *heap, bool force)
        * 'while' condition above.
        */
 
-      delay_free(heap, address, false);
+      forcefree(heap, address);
     }
 
   return ret;
-}
-
-/****************************************************************************
- * Name: delay_free
- *
- * Description:
- *   Delay free memory if `delay` is true, otherwise free it immediately.
- *
- ****************************************************************************/
-
-static void delay_free(struct mm_heap_s *heap, void *mem, bool delay)
-{
-  struct mm_allocnode_s *node;
-
-  /* Check current environment */
-
-  if (up_interrupt_context())
-    {
-      /* We are in ISR, add to the delay list */
-
-      add_delaylist(heap, mem);
-    }
-  else if (nxsched_gettid() < 0 || delay)
-    {
-      /* nxsched_gettid() return -ESRCH, means we are in situations
-       * during context switching(See nxsched_gettid's comment).
-       * Then add to the delay list.
-       */
-
-      add_delaylist(heap, mem);
-    }
-  else
-    {
-      node = (struct mm_allocnode_s *)((uintptr_t)mem - MM_ALLOCNODE_SIZE);
-#ifdef CONFIG_MM_FILL_ALLOCATIONS
-      memset(mem, MM_FREE_MAGIC,
-             node->size - MM_ALLOCNODE_SIZE - node->padding);
-#endif
-      update_stats(heap, mem, node->size, false);
-      sched_note_heap(NOTE_HEAP_FREE, heap, mem, node->size, 0);
-      host_free(node->allocmem);
-    }
 }
 
 static void *reallocate(void *oldmem, size_t alignment, size_t size)
@@ -549,7 +534,37 @@ void free(void *mem)
       return;
     }
 
-  delay_free(g_mmheap, mem, CONFIG_MM_FREE_DELAYCOUNT_MAX > 0);
+#if CONFIG_MM_FREE_DELAYCOUNT_MAX > 0
+  add_delaylist(g_mmheap, mem);
+#else
+  forcefree(g_mmheap, mem);
+#endif
+}
+
+/****************************************************************************
+ * Name: umm_delayfree
+ *
+ * Description:
+ *   Add mem to delaylist, mem will be freed delay a while.
+ *
+ * Input Parameters:
+ *   mem: addr of mem to free delay.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void umm_delayfree(void *mem)
+{
+  /* Protect against attempts to free a NULL reference */
+
+  if (mem == NULL)
+    {
+      return;
+    }
+
+  add_delaylist(g_mmheap, mem);
 }
 
 /****************************************************************************

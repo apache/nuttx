@@ -351,12 +351,18 @@ size_t kmm_malloc_size(FAR void *mem);
 /* Functions contained in mm_free.c *****************************************/
 
 void mm_free(FAR struct mm_heap_s *heap, FAR void *mem);
+void mm_delayfree(FAR struct mm_heap_s *heap, FAR void *mem);
 
 /* Functions contained in kmm_free.c ****************************************/
 
 #ifdef CONFIG_MM_KERNEL_HEAP
 void kmm_free(FAR void *mem);
+void kmm_delayfree(FAR void *mem);
 #endif
+
+/* Functions contained in umm_free.c ****************************************/
+
+void umm_delayfree(FAR void *mem);
 
 /* Functions contained in mm_realloc.c **************************************/
 
