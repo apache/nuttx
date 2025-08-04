@@ -574,6 +574,24 @@ struct mallinfo_task
 mempool_multiple_info_task(FAR struct mempool_multiple_s *mpool,
                            FAR const struct malltask *task);
 
+/****************************************************************************
+ * Name: mempool_multiple_member
+ *
+ * Description:
+ *   Check if an address lies in the mempool.
+ *
+ * Input Parameters:
+ *   mpool - The handle of the multiple memory pool to be used.
+ *   blk   - The pointer of memory block.
+ *
+ * Returned Value:
+ *   true if the address is a member of the mempool.  false if not.
+ *
+ ****************************************************************************/
+
+bool mempool_multiple_member(FAR struct mempool_multiple_s *mpool,
+                             FAR void *blk);
+
 #if defined(__cplusplus)
 }
 #endif
