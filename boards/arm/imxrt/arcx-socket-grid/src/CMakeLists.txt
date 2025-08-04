@@ -50,6 +50,10 @@ if(CONFIG_DEV_GPIO)
   list(APPEND SRCS imxrt_gpio.c)
 endif()
 
+if(CONFIG_IMXRT_USBOTG)
+  list(APPEND SRCS imxrt_usbhost.c)
+endif()
+
 if(CONFIG_IMXRT1052_SOCKET_GRID_SDRAM)
   list(APPEND SRCS imxrt_sdram_ini_dcd.c)
 endif()
