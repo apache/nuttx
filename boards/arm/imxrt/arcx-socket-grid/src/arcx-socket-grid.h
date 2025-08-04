@@ -71,10 +71,14 @@
 #define GPIO_GOUT4      (GPIO_OUTPUT | GPIO_OUTPUT_ZERO | IOMUX_GOUT_DEFAULT | \
                          GPIO_PIN9 | GPIO_PORT1)
 
-/* Backlight */
+/* USB OTG1 ID Pin： GPIO_AD_B0_01 */
 
-#define GPIO_LCD_BL     (GPIO_OUTPUT | GPIO_OUTPUT_ZERO | GPIO_PORT2 | \
-                         GPIO_PIN31 | IOMUX_LCD_BL_DEFAULT)
+#define GPIO_USBOTG1_ID (GPIO_USB_OTG1_ID_2 | IOMUX_USBOTG_ID_DEFAULT)      /* AD_B0_01 */
+
+/* USB HOST Power - GPIO_B1_15 */
+
+#define USB_HOST_PWR    (GPIO_OUTPUT | GPIO_OUTPUT_ZERO | GPIO_PORT2 | \
+                         GPIO_PIN31 | IOMUX_USBOTG_PWR_DEFAULT)
 
 /* Ethernet */
 
@@ -189,6 +193,17 @@ void imxrt_autoled_initialize(void);
  ****************************************************************************/
 
 int imxrt_gpio_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: imxrt_usbhost_initialize
+ *
+ * Description:
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_USBHOST
+int imxrt_usbhost_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

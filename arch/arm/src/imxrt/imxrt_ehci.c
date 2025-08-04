@@ -50,6 +50,7 @@
 #include "chip.h"
 #include "hardware/imxrt_usbotg.h"
 #include "imxrt_periphclks.h"
+#include "imxrt_ehci.h"
 
 #if defined(CONFIG_IMXRT_USBOTG) && defined(CONFIG_USBHOST)
 
@@ -459,8 +460,8 @@ static int imxrt_qh_dump(struct imxrt_qh_s *qh, uint32_t **bp, void *arg);
 #else
 #  define imxrt_qtd_print(qtd)
 #  define imxrt_qh_print(qh)
-#  define imxrt_qtd_dump(qtd, bp, arg) OK
-#  define imxrt_qh_dump(qh, bp, arg)   OK
+#  define imxrt_qtd_dump(qtd, bp, arg) ((void)OK)
+#  define imxrt_qh_dump(qh, bp, arg)   ((void)OK)
 #endif
 
 static inline uint8_t imxrt_ehci_speed(uint8_t usbspeed);
