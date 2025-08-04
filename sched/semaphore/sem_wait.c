@@ -73,7 +73,7 @@ int nxsem_wait_slow(FAR sem_t *sem)
 {
   FAR struct tcb_s *rtcb = this_task();
   irqstate_t flags;
-  int ret;
+  int ret = OK;
   bool unlocked;
   FAR struct tcb_s *htcb = NULL;
   bool mutex = NXSEM_IS_MUTEX(sem);
@@ -121,6 +121,7 @@ int nxsem_wait_slow(FAR sem_t *sem)
     {
       /* It is, let the task take the semaphore. */
 
+#ifdef CONFIG_PRIORITY_PROTECT
       ret = nxsem_protect_wait(sem);
       if (ret < 0)
         {
@@ -136,6 +137,7 @@ int nxsem_wait_slow(FAR sem_t *sem)
           leave_critical_section(flags);
           return ret;
         }
+#endif
 
       /* For mutexes, we only add the holder to the tasks list at the
        * time when a task blocks on the mutex, for priority restoration
