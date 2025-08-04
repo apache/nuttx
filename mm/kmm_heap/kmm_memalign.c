@@ -53,7 +53,7 @@
 
 FAR void *kmm_memalign(size_t alignment, size_t size)
 {
-  return mm_memalign(g_kmmheap, alignment, size);
+  return mm_memalign(KNR_HEAP, alignment, size);
 }
 
 #endif /* CONFIG_MM_KERNEL_HEAP */

@@ -50,7 +50,7 @@
 
 FAR void *kmm_malloc(size_t size)
 {
-  return mm_malloc(g_kmmheap, size);
+  return mm_malloc(KNR_HEAP, size);
 }
 
 #endif /* CONFIG_MM_KERNEL_HEAP */
