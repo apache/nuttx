@@ -1082,6 +1082,7 @@ found:
         }
 #endif
 
+#ifndef CONFIG_NET_TCP_FIXED_RTO
       /* Do RTT estimation, unless we have done retransmissions. */
 
       if (conn->nrtx == 0)
@@ -1102,6 +1103,7 @@ found:
           conn->sv += m;
           conn->rto = (conn->sa >> 3) + conn->sv;
         }
+#endif
 
       /* Set the acknowledged flag. */
 
