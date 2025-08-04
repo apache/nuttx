@@ -328,11 +328,23 @@ config IMXRT_ENC
 	bool
 	default n
 
+config IMXRT_USBOTG
+	bool
+	default n
+
 config IMXRT_HIGHSPEED_GPIO
 	bool
 	default n
 
 config IMXRT_HAVE_LCD
+	bool
+	default n
+
+config IMXRT_HAVE_USBOTG1
+	bool
+	default n
+
+config IMXRT_HAVE_USBOTG2
 	bool
 	default n
 
