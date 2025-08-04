@@ -534,7 +534,7 @@ static const struct stm32_i2c_config_s stm32_i2c2_config =
   .scl_pin       = GPIO_I2C2_SCL,
   .sda_pin       = GPIO_I2C2_SDA,
 #ifndef CONFIG_I2C_POLLED
-  .irq        = STM32_IRQ_I2C1
+  .irq        = STM32_IRQ_I2C2
 #endif
 };
 
@@ -569,7 +569,7 @@ static const struct stm32_i2c_config_s stm32_i2c3_config =
   .scl_pin       = GPIO_I2C3_SCL,
   .sda_pin       = GPIO_I2C3_SDA,
 #ifndef CONFIG_I2C_POLLED
-  .irq        = STM32_IRQ_I2C1
+  .irq        = STM32_IRQ_I2C3
 #endif
 };
 
@@ -604,7 +604,7 @@ static const struct stm32_i2c_config_s stm32_i2c4_config =
   .scl_pin       = GPIO_I2C4_SCL,
   .sda_pin       = GPIO_I2C4_SDA,
 #ifndef CONFIG_I2C_POLLED
-  .irq        = STM32_IRQ_I2C1
+  .irq        = STM32_IRQ_I2C4
 #endif
 };
 
