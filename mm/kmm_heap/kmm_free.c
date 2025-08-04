@@ -58,4 +58,24 @@ void kmm_free(FAR void *mem)
   mm_free(KNR_HEAP, mem);
 }
 
+/****************************************************************************
+ * Name: kmm_delayfree
+ *
+ * Description:
+ *   Add mem to delaylist, mem will be freed delay a while.
+ *
+ * Input Parameters:
+ *   mem: addr of mem to free delay.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void kmm_delayfree(FAR void *mem)
+{
+  DEBUGASSERT((mem == NULL) || kmm_heapmember(mem));
+  mm_delayfree(g_kmmheap, mem);
+}
+
 #endif /* CONFIG_MM_KERNEL_HEAP */

@@ -82,6 +82,7 @@ extern "C"
 #define kumm_realloc(p,s)        realloc(p,s)
 #define kumm_memalign(a,s)       memalign(a,s)
 #define kumm_free(p)             free(p)
+#define kumm_delayfree(p)        umm_delayfree(p)
 #define kumm_mallinfo()          mallinfo()
 
 /* This family of allocators is used to manage kernel protected memory */
@@ -102,6 +103,7 @@ extern "C"
 #  define kmm_realloc(p,s)       realloc(p,s)
 #  define kmm_memalign(a,s)      memalign(a,s)
 #  define kmm_free(p)            free(p)
+#  define kmm_delayfree(p)       kumm_delayfree(p)
 #  define kmm_mallinfo()         mallinfo()
 #  define kmm_heapmember(p)      umm_heapmember(p)
 #  define kmm_memdump(p)         umm_memdump(p)

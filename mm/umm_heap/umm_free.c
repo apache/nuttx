@@ -50,3 +50,22 @@ void free(FAR void *mem)
 {
   mm_free(USR_HEAP, mem);
 }
+
+/****************************************************************************
+ * Name: umm_delayfree
+ *
+ * Description:
+ *   Add mem to delaylist, mem will be freed delay a while.
+ *
+ * Input Parameters:
+ *   mem: addr of mem to free delay.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void umm_delayfree(FAR void *mem)
+{
+  mm_delayfree(USR_HEAP, mem);
+}

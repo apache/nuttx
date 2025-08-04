@@ -180,7 +180,8 @@ void memdump_dump_pool(FAR struct mm_memdump_priv_s *priv,
  * Private Function Prototypes
  ****************************************************************************/
 
-static void mm_delayfree(struct mm_heap_s *heap, void *mem, bool delay);
+static int mm_lock(FAR struct mm_heap_s *heap);
+static void mm_unlock(FAR struct mm_heap_s *heap);
 
 /****************************************************************************
  * Private Functions
@@ -343,7 +344,8 @@ static void memdump_backtrace(FAR struct mm_heap_s *heap,
  * Name: add_delaylist
  ****************************************************************************/
 
-static void add_delaylist(FAR struct mm_heap_s *heap, FAR void *mem)
+static void add_delaylist(FAR struct mm_heap_s *heap, FAR void *mem,
+                          bool asan_check)
 {
 #if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
   FAR struct mm_delaynode_s *tmp = mem;
@@ -352,6 +354,16 @@ static void add_delaylist(FAR struct mm_heap_s *heap, FAR void *mem)
   /* Delay the deallocation until a more appropriate time. */
 
   flags = mm_lock_irq(heap);
+
+  if (asan_check)
+    {
+      size_t size = mm_malloc_size(heap, mem);
+#  ifdef CONFIG_MM_FILL_ALLOCATIONS
+      memset(mem, MM_FREE_MAGIC, size);
+#  endif
+      kasan_poison(mem, size);
+      UNUSED(size);
+    }
 
   tmp->flink = heap->mm_delaylist[this_cpu()];
   heap->mm_delaylist[this_cpu()] = tmp;
@@ -362,6 +374,53 @@ static void add_delaylist(FAR struct mm_heap_s *heap, FAR void *mem)
 
   mm_unlock_irq(heap, flags);
 #endif
+}
+
+/****************************************************************************
+ * Name: forcefree
+ *
+ * Description:
+ *   Free memory immediately.
+ *
+ ****************************************************************************/
+
+static void forcefree(FAR struct mm_heap_s *heap, FAR void *mem)
+{
+  size_t size;
+
+  /* Free mempool blk first */
+
+#ifdef CONFIG_MM_HEAP_MEMPOOL
+  if (heap->mm_mpool && mempool_multiple_free(heap->mm_mpool, mem) >= 0)
+    {
+      return;
+    }
+#endif
+
+  if (mm_lock(heap) < 0)
+    {
+      /* Add to the delay list(see the comment in mm_lock) */
+
+      add_delaylist(heap, mem, false);
+      return;
+    }
+
+  size = mm_malloc_size(heap, mem);
+#if defined(CONFIG_MM_FILL_ALLOCATIONS) && CONFIG_MM_FREE_DELAYCOUNT_MAX == 0
+  /* With the delay count enabled, mm_free() has already filled and
+   * poisoned the block when it was queued on the delay list.
+   */
+
+  memset(mem, MM_FREE_MAGIC, size);
+#endif
+  kasan_poison(mem, size);
+
+  /* Update heap statistics */
+
+  heap->mm_curused -= size;
+  sched_note_heap(NOTE_HEAP_FREE, heap, mem, size, heap->mm_curused);
+  tlsf_free(heap->mm_tlsf, mem);
+  mm_unlock(heap);
 }
 
 /****************************************************************************
@@ -414,7 +473,7 @@ static bool free_delaylist(FAR struct mm_heap_s *heap, bool force)
        * 'while' condition above.
        */
 
-      mm_delayfree(heap, address, false);
+      forcefree(heap, address);
     }
 
 #endif
@@ -626,64 +685,6 @@ static void memdump_handler(FAR void *ptr, size_t size, int used,
       priv->info.aordblks++;
       priv->info.uordblks += size;
       syslog(LOG_INFO, "%12zu%*p\n", size, BACKTRACE_PTR_FMT_WIDTH, ptr);
-    }
-}
-
-/****************************************************************************
- * Name: mm_delayfree
- *
- * Description:
- *   Delay free memory if `delay` is true, otherwise free it immediately.
- *
- ****************************************************************************/
-
-static void mm_delayfree(FAR struct mm_heap_s *heap, FAR void *mem,
-                         bool delay)
-{
-  if (mm_lock(heap) == 0)
-    {
-      size_t size = mm_malloc_size(heap, mem);
-
-      UNUSED(size);
-#ifdef CONFIG_MM_FILL_ALLOCATIONS
-#if CONFIG_MM_FREE_DELAYCOUNT_MAX > 0
-      /* If delay free is enabled, a memory node will be freed twice.
-       * The first time is to add the node to the delay list, and the second
-       * time is to actually free the node. Therefore, we only colorize the
-       * memory node the first time, when `delay` is set to true.
-       */
-
-      if (delay)
-#endif
-        {
-          memset(mem, MM_FREE_MAGIC, size);
-        }
-#endif
-
-      kasan_poison(mem, size);
-
-      /* Pass, return to the tlsf pool */
-
-      if (delay)
-        {
-          add_delaylist(heap, mem);
-        }
-      else
-        {
-          /* Update heap statistics */
-
-          heap->mm_curused -= size;
-          sched_note_heap(NOTE_HEAP_FREE, heap, mem, size, heap->mm_curused);
-          tlsf_free(heap->mm_tlsf, mem);
-        }
-
-      mm_unlock(heap);
-    }
-  else
-    {
-      /* Add to the delay list(see the comment in mm_lock) */
-
-      add_delaylist(heap, mem);
     }
 }
 
@@ -933,16 +934,55 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
   DEBUGASSERT(mm_heapmember(heap, mem));
 
 #ifdef CONFIG_MM_HEAP_MEMPOOL
-  if (heap->mm_mpool)
+  /* A mempool block is filled and poisoned by the mempool itself, so do
+   * not queue it on the delay list where it would be filled again.
+   */
+
+  if (heap->mm_mpool && mempool_multiple_free(heap->mm_mpool, mem) >= 0)
     {
-      if (mempool_multiple_free(heap->mm_mpool, mem) >= 0)
-        {
-          return;
-        }
+      return;
     }
 #endif
 
-  mm_delayfree(heap, mem, CONFIG_MM_FREE_DELAYCOUNT_MAX > 0);
+#if CONFIG_MM_FREE_DELAYCOUNT_MAX > 0
+  if (mm_lock(heap) < 0)
+    {
+      /* Add to the delay list(see the comment in mm_lock), the block may
+       * be the running thread stack, don't touch it.
+       */
+
+      add_delaylist(heap, mem, false);
+      return;
+    }
+
+  mm_unlock(heap);
+  add_delaylist(heap, mem, true);
+#else
+  forcefree(heap, mem);
+#endif
+}
+
+/****************************************************************************
+ * Name: mm_delayfree
+ *
+ * Description:
+ *   Add mem to delaylist, mem will be freed after a while.
+ *
+ ****************************************************************************/
+
+void mm_delayfree(FAR struct mm_heap_s *heap, FAR void *mem)
+{
+  minfo("Adding delaylist %p\n", mem);
+
+  /* Protect against attempts to free a NULL reference */
+
+  if (mem == NULL)
+    {
+      return;
+    }
+
+  DEBUGASSERT(mm_heapmember(heap, mem));
+  add_delaylist(heap, mem, false);
 }
 
 /****************************************************************************
