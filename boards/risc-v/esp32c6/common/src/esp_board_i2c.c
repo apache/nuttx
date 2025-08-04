@@ -148,7 +148,8 @@ int board_i2c_init(void)
 {
   int ret = OK;
 
-#ifdef CONFIG_ESPRESSIF_I2C_PERIPH_MASTER_MODE
+#if defined(CONFIG_ESPRESSIF_I2C_PERIPH_MASTER_MODE) && \
+    defined(CONFIG_ESPRESSIF_I2C0)
   ret = i2c_driver_init(ESPRESSIF_I2C0);
 #endif
 
