@@ -73,6 +73,7 @@ struct rpmsg_virtio_priv_s
   pid_t                        tid;
   vq_notify                    notifytx;
   uint16_t                     headrx;
+  uint16_t                     headtx;
 #ifdef CONFIG_RPMSG_VIRTIO_PM
   spinlock_t                   lock;
   struct pm_wakelock_s         wakelock;
@@ -481,8 +482,10 @@ static void rpmsg_virtio_dump(FAR struct rpmsg_s *rpmsg)
   FAR struct rpmsg_device *rdev = &rvdev->rdev;
   bool needunlock = false;
 
-  metal_log(METAL_LOG_EMERGENCY, "Local: %s Remote: %s Headrx %u\n",
-            priv->rpmsg.local_cpuname, priv->rpmsg.cpuname, priv->headrx);
+  metal_log(METAL_LOG_EMERGENCY,
+            "Local: %s Remote: %s Headrx %u Headtx %u\n",
+            priv->rpmsg.local_cpuname, priv->rpmsg.cpuname, priv->headrx,
+            priv->headtx);
 
   if (!rvdev->vdev)
     {
@@ -540,6 +543,23 @@ static void rpmsg_virtio_update_rx(FAR struct rpmsg_virtio_priv_s *priv,
     }
 }
 
+static void rpmsg_virtio_update_tx(FAR struct rpmsg_virtio_priv_s *priv)
+{
+  FAR struct rpmsg_virtio_device *rvdev = &priv->rvdev;
+  FAR struct virtqueue *svq = rvdev->svq;
+
+  if (rpmsg_virtio_get_role(rvdev) == RPMSG_HOST)
+    {
+      RPMSG_VIRTIO_INVALIDATE(svq->vq_ring.avail->idx);
+      priv->headtx = svq->vq_ring.avail->idx;
+    }
+  else
+    {
+      RPMSG_VIRTIO_INVALIDATE(svq->vq_ring.used->idx);
+      priv->headtx = svq->vq_ring.used->idx;
+    }
+}
+
 /****************************************************************************
  * Name: rpmsg_virtio_rx_callback
  ****************************************************************************/
@@ -586,6 +606,7 @@ static void rpmsg_virtio_tx_notify(FAR struct virtqueue *vq)
    * enter to low power mode until all the buffers are returned by peer.
    */
 
+  rpmsg_virtio_update_tx(priv);
   rpmsg_virtio_pm_action(priv, true);
   priv->notifytx(vq);
 }
