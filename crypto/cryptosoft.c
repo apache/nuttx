@@ -966,6 +966,7 @@ void swkey_init(void)
 
   crypto_driver_set_priv(swkey_id, ctx);
 
+  memset(kalgs, 0, sizeof(kalgs));
   kalgs[CRK_ALLOCATE_KEY] = CRYPTO_ALG_FLAG_SUPPORTED;
   kalgs[CRK_VALIDATE_KEYID] = CRYPTO_ALG_FLAG_SUPPORTED;
   kalgs[CRK_IMPORT_KEY] = CRYPTO_ALG_FLAG_SUPPORTED;
@@ -2441,6 +2442,7 @@ void swcr_init(void)
       PANIC();
     }
 
+  memset(algs, 0, sizeof(algs));
   algs[CRYPTO_3DES_CBC] = CRYPTO_ALG_FLAG_SUPPORTED;
   algs[CRYPTO_BLF_CBC] = CRYPTO_ALG_FLAG_SUPPORTED;
   algs[CRYPTO_CAST_CBC] = CRYPTO_ALG_FLAG_SUPPORTED;
@@ -2486,6 +2488,7 @@ void swcr_init(void)
   crypto_register(swcr_id, algs, swcr_newsession,
                   swcr_freesession, swcr_process);
 
+  memset(kalgs, 0, sizeof(kalgs));
   kalgs[CRK_MOD_EXP] = CRYPTO_ALG_FLAG_SUPPORTED;
   kalgs[CRK_DH_MAKE_PUBLIC] = CRYPTO_ALG_FLAG_SUPPORTED;
   kalgs[CRK_DH_COMPUTE_KEY] = CRYPTO_ALG_FLAG_SUPPORTED;
