@@ -1022,7 +1022,9 @@ static ssize_t uart_readv(FAR struct file *filep, FAR struct uio *uio)
                       uart_putxmitchar(dev, '\b', true);
 
 #ifdef CONFIG_SERIAL_TXDMA
+                      flags = uart_spinlock(dev, true);
                       uart_dmatxavail(dev);
+                      uart_spinunlock(dev, true, flags);
 #endif
                       uart_enabletxint(dev);
                     }
@@ -1089,7 +1091,9 @@ static ssize_t uart_readv(FAR struct file *filep, FAR struct uio *uio)
                   if (dev->tc_lflag & ICANON)
                     {
 #ifdef CONFIG_SERIAL_TXDMA
+                      flags = uart_spinlock(dev, true);
                       uart_dmatxavail(dev);
+                      uart_spinunlock(dev, true, flags);
 #endif
                       uart_enabletxint(dev);
                     }
@@ -1330,7 +1334,9 @@ static ssize_t uart_readv(FAR struct file *filep, FAR struct uio *uio)
   if (echoed)
     {
 #ifdef CONFIG_SERIAL_TXDMA
+      flags = uart_spinlock(dev, true);
       uart_dmatxavail(dev);
+      uart_spinunlock(dev, true, flags);
 #endif
       uart_enabletxint(dev);
     }
@@ -1412,6 +1418,7 @@ static ssize_t uart_writev(FAR struct file *filep, FAR struct uio *uio)
   ssize_t           nwritten;
   ssize_t           buflen;
   bool              oktoblock;
+  irqstate_t        flags;
   int               ret;
   char              ch;
 
@@ -1422,8 +1429,6 @@ static ssize_t uart_writev(FAR struct file *filep, FAR struct uio *uio)
 
   if (up_interrupt_context() || sched_idletask())
     {
-      irqstate_t flags;
-
 #ifdef CONFIG_SERIAL_REMOVABLE
       /* If the removable device is no longer connected, refuse to write to
        * the device.
@@ -1563,7 +1568,9 @@ static ssize_t uart_writev(FAR struct file *filep, FAR struct uio *uio)
   if (dev->xmit.head != dev->xmit.tail)
     {
 #ifdef CONFIG_SERIAL_TXDMA
+      flags = uart_spinlock(dev, true);
       uart_dmatxavail(dev);
+      uart_spinunlock(dev, true, flags);
 #endif
       uart_enabletxint(dev);
     }
