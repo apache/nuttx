@@ -626,6 +626,11 @@ int pthread_getaffinity_np(pthread_t thread, size_t cpusetsize,
 #define pthread_getaffinity_np(...) (-ENOSYS)
 #endif
 
+/* Concurrency level */
+
+int pthread_setconcurrency(int new_level);
+int pthread_getconcurrency(void);
+
 /* Thread-specific Data Interfaces */
 
 int pthread_key_create(FAR pthread_key_t *key,
