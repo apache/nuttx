@@ -247,72 +247,54 @@ extern "C"
  * Inline Functions
  ****************************************************************************/
 
-static inline
+/* Tick-based compatiable layer for oneshot */
+
+static inline_function
 int oneshot_tick_max_delay(FAR struct oneshot_lowerhalf_s *lower,
-                           FAR clock_t *ticks)
+                           FAR clock_t *tick)
 {
   struct timespec ts;
-  int ret;
 
-  if (lower->ops->max_delay == NULL)
-    {
-      return -ENOTSUP;
-    }
+  ONESHOT_MAX_DELAY(lower, &ts);
+  *tick = clock_time2ticks(&ts);
 
-  ret = lower->ops->max_delay(lower, &ts);
-  *ticks = clock_time2ticks(&ts);
-  return ret;
+  return OK;
 }
 
-static inline
+static inline_function
 int oneshot_tick_start(FAR struct oneshot_lowerhalf_s *lower,
                        clock_t ticks)
 {
   struct timespec ts;
-
-  if (lower->ops->start == NULL)
-    {
-      return -ENOTSUP;
-    }
-
   clock_ticks2time(&ts, ticks);
   return lower->ops->start(lower, &ts);
 }
 
-static inline
+static inline_function
 int oneshot_tick_cancel(FAR struct oneshot_lowerhalf_s *lower,
-                        FAR clock_t *ticks)
+                        FAR clock_t *tick)
 {
   struct timespec ts;
-  int ret;
-
-  if (lower->ops->cancel == NULL)
-    {
-      return -ENOTSUP;
-    }
-
-  ret = lower->ops->cancel(lower, &ts);
-  *ticks = clock_time2ticks(&ts);
-
-  return ret;
+  ONESHOT_CANCEL(lower, &ts);
+  *tick = clock_time2ticks_floor(&ts);
+  return OK;
 }
 
-static inline
+static inline_function
 int oneshot_tick_current(FAR struct oneshot_lowerhalf_s *lower,
-                         FAR clock_t *ticks)
+                         FAR clock_t *tick)
 {
   struct timespec ts;
-  int ret;
 
-  if (lower->ops->current == NULL)
-    {
-      return -ENOTSUP;
-    }
+  /* Some timer drivers may not have current() function.
+   * Since only arch_alarm uses the function, it should be OK.
+   */
 
-  ret = lower->ops->current(lower, &ts);
-  *ticks = clock_time2ticks_floor(&ts);
+  DEBUGASSERT(lower->ops->current);
 
-  return ret;
+  ONESHOT_CURRENT(lower, &ts);
+  *tick = clock_time2ticks_floor(&ts);
+  return OK;
 }
 
 static inline_function
