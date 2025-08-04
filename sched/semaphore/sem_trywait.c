@@ -63,7 +63,7 @@
 int nxsem_trywait_slow(FAR sem_t *sem)
 {
   irqstate_t flags;
-  int ret = -EAGAIN;
+  int ret = OK;
   bool mutex = NXSEM_IS_MUTEX(sem);
   FAR atomic_t *val = mutex ? NXSEM_MHOLDER(sem) : NXSEM_COUNT(sem);
   int32_t old;
@@ -103,6 +103,7 @@ int nxsem_trywait_slow(FAR sem_t *sem)
 
   /* It is, let the task take the semaphore */
 
+#ifdef CONFIG_PRIORITY_PROTECT
   ret = nxsem_protect_wait(sem);
   if (ret < 0)
     {
@@ -117,6 +118,7 @@ int nxsem_trywait_slow(FAR sem_t *sem)
 
       goto out;
     }
+#endif
 
   if (!mutex)
     {
