@@ -29,6 +29,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include "hardware/imx95/imx95_memorymap.h"
 
 #include "hardware/imx95/imx95_memorymap.h"
 

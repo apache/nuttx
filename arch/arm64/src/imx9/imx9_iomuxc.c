@@ -32,6 +32,10 @@
 #include "arm64_internal.h"
 #include "imx9_iomuxc.h"
 
+#ifdef CONFIG_IMX9_IOMUX_OVER_SCMI
+#include "imx9_scmi.h"
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -51,8 +55,90 @@
  *
  ****************************************************************************/
 
+#ifdef CONFIG_IMX9_IOMUX_OVER_SCMI
+
+/* Sets the IOMUXC pin mux mode.
+ */
+
+void imx9_sm_iomucx_configure(scmi_pinctrl_t *sm_pinctrl)
+{
+  scmi_pin_config_t configs[4];
+  uint32_t num_configs     = 0;
+  uint32_t channel         = sm_pinctrl->channel;
+  uint32_t mux_register    = sm_pinctrl->mux_register;
+  uint32_t mux_mode        = sm_pinctrl->mux_mode;
+  uint32_t input_register  = sm_pinctrl->input_register;
+  uint32_t input_daisy     = sm_pinctrl->input_daisy;
+  uint32_t input_on_field  = sm_pinctrl->input_on_field;
+  uint32_t config_register = sm_pinctrl->config_register;
+  uint32_t config_value    = sm_pinctrl->config_value;
+
+  if (mux_register)
+    {
+      configs[num_configs].type  = SCMI_PINCTRL_TYPE_MUX;
+      configs[num_configs].value = SCMI_PLATFORM_PINCTRL_MUX_MODE(mux_mode)
+                                   | SCMI_PLATFORM_PINCTRL_SION(
+                                        input_on_field);
+      num_configs++;
+    }
+
+  if (input_register & 0xffff)
+    {
+      configs[num_configs].type = SCMI_PINCTRL_TYPE_DAISY_ID;
+      configs[num_configs].value =
+          (input_register - SCMI_PLATFORM_PINCTRL_DAISYREG_OFF) / 4;
+      num_configs++;
+      configs[num_configs].type  = SCMI_PINCTRL_TYPE_DAISY_CFG;
+      configs[num_configs].value = input_daisy;
+      num_configs++;
+    }
+
+  if (config_register)
+    {
+      configs[num_configs].type  = SCMI_PINCTRL_TYPE_CONFIG;
+      configs[num_configs].value = config_value;
+      num_configs++;
+    }
+
+  if (mux_register || input_register)
+    {
+      uint32_t attributes = SCMI_PINCTRL_SET_ATTR_SELECTOR(
+                                  SCMI_PINCTRL_SEL_PIN)
+                            | SCMI_PINCTRL_SET_ATTR_NUM_CONFIGS(
+                                  num_configs);
+
+      int32_t ret = imx9_scmi_set_pinctrl_config(
+          channel, (mux_register - SCMI_PLATFORM_PINCTRL_MUXREG_OFF) / 4,
+          attributes, configs);
+      if (ret != 0)
+        {
+          assert("Unable to set iomux over SCMI");
+        }
+    }
+}
+
+#endif
+
 int imx9_iomux_configure(iomux_cfg_t cfg)
 {
+#ifdef CONFIG_IMX9_IOMUX_OVER_SCMI
+  scmi_pinctrl_t sm_pinctrl =
+    {
+      0
+    };
+
+  sm_pinctrl.channel         = SCMI_PLATFORM_A2P;
+  sm_pinctrl.mux_register    = IMX9_IOMUXC1_BASE + cfg.padcfg.ctlregoff;
+  sm_pinctrl.mux_mode        = cfg.padcfg.mode;
+  sm_pinctrl.input_register  = SCMI_PLATFORM_PINCTRL_BASE +
+                               cfg.padcfg.dsyregoff;
+  sm_pinctrl.input_daisy     = cfg.padcfg.dsy;
+  sm_pinctrl.config_register = IMX9_IOMUXC1_BASE + cfg.padcfg.padregoff;
+  sm_pinctrl.config_value    = cfg.pad;
+  sm_pinctrl.input_on_field  = cfg.sion;
+
+  imx9_sm_iomucx_configure(&sm_pinctrl);
+#else
   if (!cfg.padcfg.ctlreg)
     {
       return -EINVAL;
@@ -70,9 +156,11 @@ int imx9_iomux_configure(iomux_cfg_t cfg)
       putreg32(cfg.pad, cfg.padcfg.padreg);
     }
 
+#endif
   return OK;
 }
 
+#ifndef CONFIG_IMX9_IOMUX_OVER_SCMI
 /****************************************************************************
  * Name: imx9_iomux_configure
  *
@@ -116,3 +204,4 @@ int imx9_iomux_gpio(iomux_cfg_t cfg, bool sion)
 
   return OK;
 }
+#endif
