@@ -106,7 +106,8 @@ if(NOT CONFIG_DISABLE_PTHREAD)
     pthread_testcancel.c
     pthread_getcpuclockid.c
     pthread_self.c
-    pthread_gettid_np.c)
+    pthread_gettid_np.c
+    pthread_concurrency.c)
 
   if(CONFIG_SMP)
     list(APPEND SRCS pthread_attr_getaffinity.c pthread_attr_setaffinity.c)
