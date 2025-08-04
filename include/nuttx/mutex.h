@@ -461,10 +461,10 @@ static inline_function bool nxmutex_is_locked(FAR mutex_t *mutex)
  * Name: nxmutex_destroy
  *
  * Description:
- *   This function initializes the UNNAMED mutex. Following a
- *   successful call to nxmutex_init(), the mutex may be used in subsequent
- *   calls to nxmutex_lock(), nxmutex_unlock(), and nxmutex_trylock().  The
- *   mutex remains usable until it is destroyed.
+ *   This function destroys the specified mutex. After a successful call,
+ *   the mutex is no longer valid and must not be used in subsequent calls
+ *   to nxmutex_lock(), nxmutex_unlock(), or nxmutex_trylock() unless it is
+ *   reinitialized with nxmutex_init().
  *
  * Parameters:
  *   mutex - Semaphore to be destroyed
