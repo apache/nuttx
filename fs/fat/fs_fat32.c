@@ -1288,7 +1288,7 @@ static off_t fat_seek(FAR struct file *filep, off_t offset, int whence)
   if (position / fs->fs_hwsectorsize == filep->f_pos / fs->fs_hwsectorsize)
     {
       filep->f_pos = position;
-      return OK;
+      return position;
     }
 
   /* Make sure that the mount is still healthy */
@@ -1316,7 +1316,7 @@ static off_t fat_seek(FAR struct file *filep, off_t offset, int whence)
   filep->f_pos = position;
 
   nxmutex_unlock(&fs->fs_lock);
-  return OK;
+  return position;
 
 errout_with_lock:
   nxmutex_unlock(&fs->fs_lock);

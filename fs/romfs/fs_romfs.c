@@ -579,7 +579,7 @@ static off_t romfs_seek(FAR struct file *filep, off_t offset, int whence)
 
 errout_with_lock:
   nxrmutex_unlock(&rm->rm_lock);
-  return ret;
+  return ret < 0 ? ret : position;
 }
 
 /****************************************************************************
