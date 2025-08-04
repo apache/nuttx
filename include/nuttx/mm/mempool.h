@@ -35,12 +35,16 @@
 #include <nuttx/mm/mm.h>
 #include <nuttx/nuttx.h>
 #include <nuttx/fs/procfs.h>
+#include <nuttx/macro.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/semaphore.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#define MEMPOOL_HEADER_SIZE        (sizeof(sq_entry_t) + \
+                                    CONFIG_MM_NODE_GUARDSIZE)
 
 #if CONFIG_MM_BACKTRACE >= 0
 #  define MEMPOOL_REALBLOCKSIZE(s) (ALIGN_UP((s) + \
@@ -49,6 +53,34 @@
 #else
 #  define MEMPOOL_REALBLOCKSIZE(s) (s)
 #endif
+
+/* Static mempool definition related macros, in which:
+ *   name:     The name of the static mempool
+ *   blksize:  The size of each node in the mempool
+ *   prealloc: The number of pre-allocated buffers
+ *   maxalloc: The number of max allocations, 0 means no limit
+ *   dynalloc: The number per dynamic allocations
+ */
+
+#define MEMPOOL_DEFINE(name, blksize, prealloc, maxalloc, dynalloc) \
+  static char CONCATENATE(name, _buffer) \
+  [(prealloc) * MEMPOOL_REALBLOCKSIZE(blksize) + MEMPOOL_HEADER_SIZE] \
+  aligned_data(sizeof(uintptr_t)); \
+  static struct mempool_s name = \
+    { \
+      CONCATENATE(name, _buffer), \
+      MEMPOOL_REALBLOCKSIZE(blksize) * (prealloc), \
+      (blksize), \
+      0, \
+      MEMPOOL_REALBLOCKSIZE(blksize) * (dynalloc), \
+      (maxalloc), \
+      true, \
+      NULL, \
+      STRINGIFY(name), \
+      NULL, \
+      NULL, \
+      NULL, \
+    }
 
 /****************************************************************************
  * Public Types
@@ -114,6 +146,7 @@ struct mempool_s
   size_t     nalloc;  /* The number of used block in mempool */
   spinlock_t lock;    /* The protect lock to mempool */
   sem_t      waitsem; /* The semaphore of waiter get free block */
+  bool       init;    /* The flag indicates whether the mempool initialize finished */
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMPOOL)
   struct mempool_procfs_entry_s procfs; /* The entry of procfs */
 #endif
