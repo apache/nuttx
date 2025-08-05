@@ -385,7 +385,7 @@ static ssize_t gnss_write(FAR struct file *filep, FAR const char *buffer,
                           size_t buflen)
 {
   FAR struct gnss_upperhalf_s *upper;
-  int ret = -ENOTSUP;
+  int ret = -ENOTTY;
 
   upper = filep->f_inode->i_private;
 

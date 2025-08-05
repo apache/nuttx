@@ -75,7 +75,7 @@ static int sensor_rpmsg_##name(FAR struct sensor_lowerhalf_s *lower, \
     } \
   else \
     { \
-      return wait ? -ENOTSUP : 0; \
+      return wait ? -ENOTTY : 0; \
     } \
 } \
 
@@ -923,10 +923,10 @@ static int sensor_rpmsg_flush(FAR struct sensor_lowerhalf_s *lower,
       /* If the driver (drv) does not support the flush operation,
        * and the caller is a remote invocation or the current device
        * is an advertiser, then you can still consider the flush
-       * operation as unsupported and therefore return ENOTSUP
+       * operation as unsupported and therefore return ENOTTY
        */
 
-      return -ENOTSUP;
+      return -ENOTTY;
     }
   else
     {
@@ -956,10 +956,10 @@ static int sensor_rpmsg_set_wakeup(FAR struct sensor_lowerhalf_s *lower,
       /* If the driver (drv) does not support the wakeup operation,
        * and the caller is a remote invocation or the current device
        * is an advertiser, then you can still consider the wakeup
-       * operation as unsupported and therefore return ENOTSUP
+       * operation as unsupported and therefore return ENOTTY
        */
 
-      return -ENOTSUP;
+      return -ENOTTY;
     }
   else
     {
