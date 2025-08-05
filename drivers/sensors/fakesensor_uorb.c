@@ -190,6 +190,24 @@ static inline void fakesensor_read_accel(FAR struct fakesensor_s *sensor,
                     sizeof(struct sensor_accel));
 }
 
+static inline void
+fakesensor_read_accel_uncal(FAR struct fakesensor_s *sensor,
+                            uint64_t event_timestamp)
+{
+  struct sensor_accel_uncal accel;
+  char raw[128];
+
+  fakesensor_read_csv_line(&sensor->data, raw, sizeof(raw),
+                           sensor->raw_start);
+  sscanf(raw, "%f,%f,%f,%f,%f,%f,%" SCNi32 "\n", &accel.x, &accel.y,
+         &accel.z, &accel.x_bias, &accel.y_bias, &accel.z_bias,
+         &accel.status);
+  accel.temperature = NAN;
+  accel.timestamp = event_timestamp;
+  sensor->lower.push_event(sensor->lower.priv, &accel,
+                           sizeof(struct sensor_accel_uncal));
+}
+
 static inline void fakesensor_read_mag(FAR struct fakesensor_s *sensor,
                                        uint64_t event_timestamp)
 {
@@ -203,6 +221,23 @@ static inline void fakesensor_read_mag(FAR struct fakesensor_s *sensor,
   mag.timestamp = event_timestamp;
   sensor->lower.push_event(sensor->lower.priv, &mag,
                            sizeof(struct sensor_mag));
+}
+
+static inline void
+fakesensor_read_mag_uncal(FAR struct fakesensor_s *sensor,
+                          uint64_t event_timestamp)
+{
+  struct sensor_mag_uncal mag;
+  char raw[128];
+
+  fakesensor_read_csv_line(&sensor->data, raw, sizeof(raw),
+                           sensor->raw_start);
+  sscanf(raw, "%f,%f,%f,%f,%f,%f,%" SCNi32 "\n", &mag.x, &mag.y,
+         &mag.z, &mag.x_bias, &mag.y_bias, &mag.z_bias, &mag.status);
+  mag.temperature = NAN;
+  mag.timestamp = event_timestamp;
+  sensor->lower.push_event(sensor->lower.priv, &mag,
+                           sizeof(struct sensor_mag_uncal));
 }
 
 static inline void fakesensor_read_gyro(FAR struct fakesensor_s *sensor,
@@ -220,6 +255,37 @@ static inline void fakesensor_read_gyro(FAR struct fakesensor_s *sensor,
                     sizeof(struct sensor_gyro));
 }
 
+static inline void
+fakesensor_read_gyro_uncal(FAR struct fakesensor_s *sensor,
+                           uint64_t event_timestamp)
+{
+  struct sensor_gyro_uncal gyro;
+  char raw[128];
+
+  fakesensor_read_csv_line(&sensor->data, raw, sizeof(raw),
+                           sensor->raw_start);
+  sscanf(raw, "%f,%f,%f,%f,%f,%f,%" SCNi32 "\n", &gyro.x, &gyro.y,
+         &gyro.z, &gyro.x_bias, &gyro.y_bias, &gyro.z_bias, &gyro.status);
+  gyro.temperature = NAN;
+  gyro.timestamp = event_timestamp;
+  sensor->lower.push_event(sensor->lower.priv, &gyro,
+                           sizeof(struct sensor_gyro_uncal));
+}
+
+static inline void fakesensor_read_light(FAR struct fakesensor_s *sensor,
+                                         uint64_t event_timestamp)
+{
+  struct sensor_light light;
+  char raw[64];
+
+  fakesensor_read_csv_line(&sensor->data, raw, sizeof(raw),
+                           sensor->raw_start);
+  sscanf(raw, "%f,%f\n", &light.light, &light.ir);
+  light.timestamp = event_timestamp;
+  sensor->lower.push_event(sensor->lower.priv, &light,
+                           sizeof(struct sensor_light));
+}
+
 static inline void fakesensor_read_baro(FAR struct fakesensor_s *sensor,
                                         uint64_t event_timestamp)
 {
@@ -232,6 +298,23 @@ static inline void fakesensor_read_baro(FAR struct fakesensor_s *sensor,
   baro.timestamp = event_timestamp;
   sensor->lower.push_event(sensor->lower.priv, &baro,
                            sizeof(struct sensor_baro));
+}
+
+static inline void fakesensor_read_ppgq(FAR struct fakesensor_s *sensor,
+                                        uint64_t event_timestamp)
+{
+  struct sensor_ppgq ppgq;
+  char raw[128];
+
+  fakesensor_read_csv_line(&sensor->data, raw, sizeof(raw),
+                           sensor->raw_start);
+  sscanf(raw, "%" SCNu32 ",%" SCNu32 ",%" SCNu32 ",%" SCNu32 ",%" SCNu32 ","
+         "%" SCNu16 ",%" SCNu16 ",%" SCNu16 ",%" SCNu16 "\n", &ppgq.ppg[0],
+         &ppgq.ppg[1], &ppgq.ppg[2], &ppgq.ppg[3], &ppgq.current,
+         &ppgq.gain[0], &ppgq.gain[1], &ppgq.gain[2], &ppgq.gain[3]);
+  ppgq.timestamp = event_timestamp;
+  sensor->lower.push_event(sensor->lower.priv, &ppgq,
+                           sizeof(struct sensor_ppgq));
 }
 
 #ifdef CONFIG_SENSORS_GNSS
@@ -341,8 +424,29 @@ void fakesensor_push_event(FAR struct fakesensor_s *sensor,
         fakesensor_read_gyro(sensor, event_timestamp);
         break;
 
+      case SENSOR_TYPE_LIGHT:
+      case SENSOR_TYPE_LIGHT_UNCALIBRATED:
+        fakesensor_read_light(sensor, event_timestamp);
+        break;
+
       case SENSOR_TYPE_BAROMETER:
         fakesensor_read_baro(sensor, event_timestamp);
+        break;
+
+      case SENSOR_TYPE_ACCELEROMETER_UNCALIBRATED:
+        fakesensor_read_accel_uncal(sensor, event_timestamp);
+        break;
+
+      case SENSOR_TYPE_MAGNETIC_FIELD_UNCALIBRATED:
+        fakesensor_read_mag_uncal(sensor, event_timestamp);
+        break;
+
+      case SENSOR_TYPE_GYROSCOPE_UNCALIBRATED:
+        fakesensor_read_gyro_uncal(sensor, event_timestamp);
+        break;
+
+      case SENSOR_TYPE_PPGQ:
+        fakesensor_read_ppgq(sensor, event_timestamp);
         break;
 
 #ifdef CONFIG_SENSORS_GNSS
@@ -353,7 +457,8 @@ void fakesensor_push_event(FAR struct fakesensor_s *sensor,
 #endif
 
       default:
-        snerr("fakesensor: unsupported type sensor type\n");
+        snerr("fakesensor: unsupported sensor type:%d\n",
+              sensor->type);
         break;
     }
 }
