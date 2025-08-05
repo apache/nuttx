@@ -60,8 +60,14 @@ extern "C++"
 #    include <stdatomic.h>
 #    define ATOMIC_FUNC(f, n) atomic_##f##_explicit
 
-  typedef volatile _Atomic int32_t atomic_t;
-  typedef volatile _Atomic int64_t atomic64_t;
+#    if defined(__cplusplus)
+#      define __auto_type auto
+typedef _Atomic int32_t atomic_t;
+typedef _Atomic int64_t atomic64_t;
+#    else
+typedef volatile _Atomic int32_t atomic_t;
+typedef volatile _Atomic int64_t atomic64_t;
+#    endif
 #  endif
 #endif
 
