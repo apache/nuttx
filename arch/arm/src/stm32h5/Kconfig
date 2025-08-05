@@ -319,6 +319,10 @@ config STM32H5_DMA
 	bool
 	default n
 
+config STM32H5_FDCAN
+	bool
+	default n
+
 config STM32H5_SPI
 	bool
 	default n
@@ -374,6 +378,18 @@ config STM32H5_ETHMAC
 	select NETDEVICES
 	select ARCH_HAVE_PHY
 	select STM32H5_HAVE_PHY_POLLED
+
+config STM32H5_FDCAN1
+	bool "FDCAN1"
+	default n
+	depends on STM32H5_HAVE_FDCAN1
+	select STM32H5_FDCAN
+
+config STM32H5_FDCAN2
+	bool "FDCAN2"
+	default n
+	depends on STM32H5_HAVE_FDCAN2
+	select STM32H5_FDCAN
 
 config STM32H5_ICACHE
 	bool "ICACHE"

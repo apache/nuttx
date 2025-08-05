@@ -75,7 +75,7 @@
                                   RCC_PLL1CFGR_PLL1REN)
 #define STM32_PLLCFG_PLL1N        RCC_PLL1DIVR_PLL1N(100)
 #define STM32_PLLCFG_PLL1P        RCC_PLL1DIVR_PLL1P(2)
-#define STM32_PLLCFG_PLL1Q        RCC_PLL1DIVR_PLL1Q(2)
+#define STM32_PLLCFG_PLL1Q        RCC_PLL1DIVR_PLL1Q(4)
 #define STM32_PLLCFG_PLL1R        RCC_PLL1DIVR_PLL1R(2)
 #define STM32_PLLCFG_PLL1DIVR     (STM32_PLLCFG_PLL1N | \
                                    STM32_PLLCFG_PLL1P | \
@@ -84,7 +84,7 @@
 
 #define STM32_VC01_FRQ            ((STM32_HSE_FREQUENCY / 5) * 100)
 #define STM32_PLL1P_FREQUENCY     (STM32_VCO1_FRQ / 2)
-#define STM32_PLL1Q_FREQUENCY     (STM32_VCO1_FRQ / 2)
+#define STM32_PLL1Q_FREQUENCY     (STM32_VCO1_FRQ / 4)
 #define STM32_PLL1R_FREQUENCY     (STM32_VCO1_FRQ / 2)
 
 /* PLL2 config: Need to use for max ADC speed. */
@@ -120,7 +120,7 @@
                                    RCC_PLL1CFGR_PLL1REN)
 #define STM32_PLLCFG_PLL1N         RCC_PLL1DIVR_PLL1N(125)
 #define STM32_PLLCFG_PLL1P         RCC_PLL1DIVR_PLL1P(2)
-#define STM32_PLLCFG_PLL1Q         RCC_PLL1DIVR_PLL1Q(2)
+#define STM32_PLLCFG_PLL1Q         RCC_PLL1DIVR_PLL1Q(4)
 #define STM32_PLLCFG_PLL1R         RCC_PLL1DIVR_PLL1R(2)
 #define STM32_PLLCFG_PLL1DIVR     (STM32_PLLCFG_PLL1N | \
                                    STM32_PLLCFG_PLL1P | \
@@ -129,7 +129,7 @@
 
 #define STM32_VCO1_FRQ            ((STM32_HSI_FREQUENCY / 8) * 125)
 #define STM32_PLL1P_FREQUENCY     (STM32_VCO1_FRQ / 2)
-#define STM32_PLL1Q_FREQUENCY     (STM32_VCO1_FRQ / 2)
+#define STM32_PLL1Q_FREQUENCY     (STM32_VCO1_FRQ / 4)
 #define STM32_PLL1R_FREQUENCY     (STM32_VCO1_FRQ / 2)
 
 /* PLL2 config: Needed to use 2 ADC at max speed. */
@@ -317,10 +317,12 @@
 
 /* Alternate function pin selections ****************************************/
 
-/* ADC */
+/* ADC GPIOs ****************************************************************/
 
 #define GPIO_ADC1_IN3   (GPIO_ADC1_IN3_0)
 #define GPIO_ADC1_IN10  (GPIO_ADC1_IN10_0)
+
+/* USART3 GPIOs *************************************************************/
 
 /* USART3 (Nucleo Virtual Console): Default board solder bridge configuration
  * has USART3 going to the on board ST-Link to provide a VCP. Refer to
@@ -330,10 +332,18 @@
 #define GPIO_USART3_RX   GPIO_USART3_RX_4    /* PD9 */
 #define GPIO_USART3_TX   GPIO_USART3_TX_4    /* PD8 */
 
-/* USART2 */
+/* USART2 GPIOs *************************************************************/
 
 #define GPIO_USART2_RX   GPIO_USART2_RX_2    /* PD6 */
 #define GPIO_USART2_TX   GPIO_USART2_TX_2    /* PD5 */
+
+/* FDCAN Clock Source and GPIOs *********************************************/
+
+#define STM32_FDCAN_FREQUENCY      STM32_PLL1Q_FREQUENCY
+#define STM32_RCC_CCIPR5_FDCANSEL  RCC_CCIPR5_FDCANSEL_PLL1QCK
+
+#define GPIO_FDCAN1_RX   GPIO_FDCAN1_RX_3    /* PD0 */
+#define GPIO_FDCAN1_TX   GPIO_FDCAN1_TX_4    /* PD1 */
 
 /****************************************************************************
  * Public Data
