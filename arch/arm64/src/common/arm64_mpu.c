@@ -352,6 +352,7 @@ unsigned int mpu_configure_region(uintptr_t base, size_t size,
                                   uint32_t flags1, uint32_t flags2)
 {
   unsigned int region = mpu_allocregion();
+
   mpu_modify_region(region, base, size, flags1, flags2);
   return region;
 }
@@ -450,7 +451,7 @@ void arm64_mpu_init(bool is_primary_core)
 
   mpu_init();
 
-  arm64_mpu_init_regiions();
+  arm64_mpu_init_regions();
 
   arm64_mpu_enable();
 }

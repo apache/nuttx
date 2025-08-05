@@ -482,11 +482,11 @@ unsigned int mpu_configure_region(uintptr_t base, size_t size,
 void arm64_mpu_init(bool is_primary_core);
 
 /****************************************************************************
- * Name: arm64_mpu_init_regiions
+ * Name: arm64_mpu_init_regions
  *
  ****************************************************************************/
 
-void arm64_mpu_init_regiions(void);
+void arm64_mpu_init_regions(void);
 
 #endif  /* __ASSEMBLY__ */
 

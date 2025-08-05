@@ -153,11 +153,11 @@ void arm64_chip_boot(void)
 }
 
 /****************************************************************************
- * Name: arm64_mpu_init_regiions
+ * Name: arm64_mpu_init_regions
  *
  ****************************************************************************/
 
-void arm64_mpu_init_regiions(void)
+void arm64_mpu_init_regions(void)
 {
 #ifdef CONFIG_BUILD_PROTECTED
   uintptr_t ubase;
