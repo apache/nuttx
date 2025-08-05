@@ -101,7 +101,7 @@ struct netdev_upperhalf_s
   FAR struct bridge_port_s *bridge;
 #endif
 
-  bool txing;
+  int txing;
 
   /* Deferring process to work queue or thread */
 
