@@ -283,10 +283,10 @@
 #define RCC_CFGR2_PPRE3_SHIFT            (12) /* Bits 14-12: PPRE3 Prescaler */
 #define RCC_CFGR2_PPRE3_MASK             (0x7 << RCC_CFGR2_PPRE3_SHIFT)
 #  define RCC_CFGR2_PPRE3_HCLK1          (0 << RCC_CFGR2_PPRE3_SHIFT)  /* 0xx: HCLK1 not divided */
-#  define RCC_CFGR2_PPRE3_HCLK1d2        (4 << RCC_CFGR2_PPRE3_SHIFT)  /* 1000: HCLK1 divided by 2 */
-#  define RCC_CFGR2_PPRE3_HCLK1d4        (5 << RCC_CFGR2_PPRE3_SHIFT)  /* 1001: HCLK1 divided by 4 */
-#  define RCC_CFGR2_PPRE3_HCLK1d8        (6 << RCC_CFGR2_PPRE3_SHIFT)  /* 1010: HCLK1 divided by 8 */
-#  define RCC_CFGR2_PPRE3_HCLK1d16       (7 << RCC_CFGR2_PPRE3_SHIFT)  /* 1011: HCLK1 divided by 16 */
+#  define RCC_CFGR2_PPRE3_HCLK1d2        (4 << RCC_CFGR2_PPRE3_SHIFT)  /* 100: HCLK1 divided by 2 */
+#  define RCC_CFGR2_PPRE3_HCLK1d4        (5 << RCC_CFGR2_PPRE3_SHIFT)  /* 101: HCLK1 divided by 4 */
+#  define RCC_CFGR2_PPRE3_HCLK1d8        (6 << RCC_CFGR2_PPRE3_SHIFT)  /* 110: HCLK1 divided by 8 */
+#  define RCC_CFGR2_PPRE3_HCLK1d16       (7 << RCC_CFGR2_PPRE3_SHIFT)  /* 111: HCLK1 divided by 16 */
 
 #define RCC_CFGR2_AHB1DIS                (1 << 16) /* AHB1 clock disable */
 #define RCC_CFGR2_AHB2DIS                (1 << 17) /* AHB2 clock disable */

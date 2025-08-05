@@ -133,5 +133,17 @@ int stm32_adc_setup(void);
 int stm32_dts_setup(int devno);
 #endif
 
+/****************************************************************************
+ * Name: stm32_can_setup
+ *
+ * Description:
+ *  Initialize CAN and register the CAN device
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_STM32H5_FDCAN_CHARDRIVER
+int stm32_can_setup(uint8_t port);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_STM32H5_NUCLEO_H563ZI_SRC_NUCLEO_H563ZI_H */
