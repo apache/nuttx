@@ -454,7 +454,8 @@ static ssize_t rpmsgdev_write(FAR struct file *filep, const char *buffer,
   FAR struct rpmsgdev_priv_s *priv;
   FAR struct rpmsgdev_write_s *msg;
   uint32_t space;
-  int ret;
+  size_t written = 0;
+  int ret = 0;
 
   if (buffer == NULL)
     {
@@ -469,30 +470,34 @@ static ssize_t rpmsgdev_write(FAR struct file *filep, const char *buffer,
 
   /* Perform the rpmsg write */
 
-  for (; ; )
+  while (written < buflen)
     {
       msg = rpmsgdev_get_tx_payload_buffer(dev, &space);
       if (msg == NULL)
         {
-          return -ENOMEM;
+          ret = -ENOMEM;
+          break;
         }
 
       space -= sizeof(*msg) - 1;
-      if (space < buflen)
+      if (space >= buflen - written)
         {
-          rpmsg_release_tx_buffer(&dev->ept, msg);
-          return -EMSGSIZE;
+          space = buflen - written;
         }
 
       msg->filep = priv->filep;
-      msg->count = buflen;
-      memcpy(msg->buf, buffer, buflen);
-
+      msg->count = space;
+      memcpy(msg->buf, buffer + written, space);
       ret = rpmsgdev_send_recv(dev, RPMSGDEV_WRITE, false, &msg->header,
-                               sizeof(*msg) - 1 + buflen, NULL);
-      if (ret != -EAGAIN || priv->nonblock)
+                               sizeof(*msg) - 1 + space, NULL);
+      if (ret > 0)
         {
-          return ret;
+          written += ret;
+          continue;
+        }
+      else if (ret != -EAGAIN || priv->nonblock || written != 0)
+        {
+          break;
         }
 
       /* If open with block mode and return -EAGAIN and no data
@@ -504,9 +509,11 @@ static ssize_t rpmsgdev_write(FAR struct file *filep, const char *buffer,
       if (ret < 0)
         {
           rpmsgerr("write wait failed, ret=%d\n", ret);
-          return ret;
+          break;
         }
     }
+
+  return written != 0 ? written : ret;
 }
 
 /****************************************************************************
