@@ -189,6 +189,13 @@ static int icmpv6_send_message(FAR struct net_driver_s *dev, bool advertise)
   struct icmpv6_router_s state;
   int ret;
 
+  /* Check whether the link-local address has been overwritten. */
+
+  if (netdev_ipv6_lladdr(dev) == NULL)
+    {
+      return -EADDRNOTAVAIL;
+    }
+
   /* Initialize the state structure with the network locked. */
 
   nxsem_init(&state.snd_sem, 0, 0); /* Doesn't really fail */
