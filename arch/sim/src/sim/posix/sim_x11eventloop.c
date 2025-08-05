@@ -46,6 +46,7 @@ extern Display *g_display;
  * Name: sim_buttonmap
  ****************************************************************************/
 
+#ifdef CONFIG_SIM_TOUCHSCREEN
 static int sim_buttonmap(int state, int button)
 {
   int buttons = 0;
@@ -88,6 +89,7 @@ static int sim_buttonmap(int state, int button)
 
   return buttons;
 }
+#endif
 
 /****************************************************************************
  * Public Functions
