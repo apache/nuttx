@@ -122,7 +122,7 @@ static inline void noterpmsg_remove(FAR struct noterpmsg_driver_s *drv)
   uint8_t notelen = drv->buffer[tail];
 
   DEBUGASSERT(notelen <= noterpmsg_length(drv));
-  drv->tail = noterpmsg_next(drv, tail, notelen);
+  drv->tail = noterpmsg_next(drv, tail, NOTE_ALIGN(notelen));
 }
 
 static bool noterpmsg_transfer(FAR struct noterpmsg_driver_s *drv,
@@ -156,8 +156,8 @@ static bool noterpmsg_transfer(FAR struct noterpmsg_driver_s *drv,
           len = 0;
           while (len + notelen <= space)
             {
-              pos = noterpmsg_next(drv, pos, notelen);
-              len += notelen;
+              pos = noterpmsg_next(drv, pos, NOTE_ALIGN(notelen));
+              len += NOTE_ALIGN(notelen);
               notelen = drv->buffer[pos];
             }
         }
@@ -173,7 +173,7 @@ static bool noterpmsg_transfer(FAR struct noterpmsg_driver_s *drv,
           rpmsg_release_tx_buffer(&drv->ept, buffer);
         }
 
-      drv->tail = noterpmsg_next(drv, drv->tail, len);
+      drv->tail = noterpmsg_next(drv, drv->tail, NOTE_ALIGN(len));
     }
 }
 
@@ -196,6 +196,7 @@ static void noterpmsg_add(FAR struct note_driver_s *driver,
 {
   FAR struct noterpmsg_driver_s *drv =
     (FAR struct noterpmsg_driver_s *)driver;
+  bool sent = false;
   irqstate_t flags;
   size_t space;
 
@@ -206,9 +207,10 @@ static void noterpmsg_add(FAR struct note_driver_s *driver,
     {
       if (!up_interrupt_context() && !sched_idletask())
         {
-          noterpmsg_transfer(drv, true);
+          sent = noterpmsg_transfer(drv, true);
         }
-      else
+
+      if (!sent)
         {
           /* Overwrite */
 
