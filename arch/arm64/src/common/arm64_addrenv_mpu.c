@@ -319,15 +319,15 @@ static void mpu_init_heap_region(void)
  *   The following diagram represent the typical layout:
  *
  *   +-------------+
- *   | kernel RW   |  Backgroud region
+ *   | kernel RW   |  Background region
  *   +-------------+
  *   | User RW     |  User heap/stack
  *   +-------------+
- *   | kernel RW   |  Backgroud region
+ *   | kernel RW   |  Background region
  *   +-------------+
  *   | User RW     |  User stack/heap
  *   +-------------+
- *   | kernel RW   |  Backgroud region
+ *   | kernel RW   |  Background region
  *   +-------------+
  * Input Parameters:
  *   tcb
@@ -406,11 +406,11 @@ void mpu_update(struct tcb_s *tcb)
  *   The following diagram represent the typical layout:
  *
  *   +-------------+
- *   | kernel RW   |  Backgroud region
+ *   | kernel RW   |  Background region
  *   +-------------+
  *   | User RW     |  User heap
  *   +-------------+
- *   | kernel RW   |  Backgroud region
+ *   | kernel RW   |  Background region
  *   +-------------+
  *
  * Input Parameters:
