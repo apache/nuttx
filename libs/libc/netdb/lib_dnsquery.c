@@ -854,12 +854,15 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
   bool stream = false;
 
   /* Loop while receive timeout errors occur and there are remaining
-   * retries.
+   * retries. Use progressive timeout strategy.
    */
 
   for (retries = 0; retries < CONFIG_NETDB_DNSCLIENT_RETRIES; retries++)
     {
       bool should_try_stream;
+
+      ninfo("INFO: DNS query retry %d/%d\n",
+            retries + 1, CONFIG_NETDB_DNSCLIENT_RETRIES);
 
 try_stream:
 #ifdef CONFIG_NET_IPv6
@@ -867,7 +870,7 @@ try_stream:
         {
           /* Send the IPv6 query */
 
-          sd = dns_bind(addr->sa_family, stream);
+          sd = dns_bind(addr->sa_family, stream, retries);
           if (sd < 0)
             {
               query->result = sd;
@@ -922,7 +925,7 @@ try_stream:
         {
           /* Send the IPv4 query */
 
-          sd = dns_bind(addr->sa_family, stream);
+          sd = dns_bind(addr->sa_family, stream, retries);
           if (sd < 0)
             {
               query->result = sd;

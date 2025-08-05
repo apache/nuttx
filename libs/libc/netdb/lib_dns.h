@@ -162,7 +162,9 @@ void dns_restorelock(unsigned int count);
  *   server.  The name server was previously selected via dns_server().
  *
  * Input Parameters:
- *   None
+ *   family - Address family (AF_INET or AF_INET6)
+ *   stream - Whether to use stream socket
+ *   retry_count - Current retry attempt (0 for first attempt)
  *
  * Returned Value:
  *   On success, the bound, non-negative socket descriptor is returned.  A
@@ -170,7 +172,7 @@ void dns_restorelock(unsigned int count);
  *
  ****************************************************************************/
 
-int dns_bind(sa_family_t family, bool stream);
+int dns_bind(sa_family_t family, bool stream, int retry_count);
 
 /****************************************************************************
  * Name: dns_query
