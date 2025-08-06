@@ -118,7 +118,7 @@
 #define AUDIOIOC_FLUSH              _AUDIOIOC(20)
 #define AUDIOIOC_GETPOSITION        _AUDIOIOC(21)
 #define AUDIOIOC_GETAUDIOINFO       _AUDIOIOC(22)
-#define AUDIOIOC_GETSTATE           _AUDIOIOC(23)
+#define AUDIOIOC_GETSTATUS          _AUDIOIOC(23)
 
 /* Audio Device Types *******************************************************/
 
@@ -377,21 +377,18 @@
 
 #define AUDIO_CHANNELS_RANGE(min, max) ((uint8_t)(((min) << 4) | ((max) & 0xf)))
 
+/* State of appl and lower driver, higher value = higher priority */
+
+#define AUDIO_STATE_OPEN           0
+#define AUDIO_STATE_PREPARED       1
+#define AUDIO_STATE_PAUSED         2
+#define AUDIO_STATE_XRUN           3
+#define AUDIO_STATE_DRAINING       4
+#define AUDIO_STATE_RUNNING        5
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
-
-/* Define the state of appl and lower driver */
-
-enum audio_state_e
-{
-  AUDIO_STATE_OPEN,
-  AUDIO_STATE_PREPARED,
-  AUDIO_STATE_RUNNING,
-  AUDIO_STATE_XRUN,
-  AUDIO_STATE_DRAINING,
-  AUDIO_STATE_PAUSED,
-};
 
 /* Define the size of AP Buffer sample count base on CONFIG */
 
@@ -401,10 +398,11 @@ typedef uint32_t apb_samp_t;
 typedef uint16_t apb_samp_t;
 #endif
 
-/* This structure describes the Hardware pointer used in Alsa Dmix */
+/* This structure describes the lower driver status */
 
-struct hw_ptr_s
+struct audio_status_s
 {
+  volatile int state;
   volatile unsigned long head;
   volatile unsigned long tail;
 };
