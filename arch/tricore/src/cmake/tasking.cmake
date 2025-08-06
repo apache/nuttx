@@ -178,7 +178,7 @@ add_link_options(-lc_fpu)
 add_link_options(-lfp_fpu)
 
 add_link_options(--core=mpe:vtc)
-add_link_options(--hex-format=s -OtxYcL -mcrfiklsmnoduq)
+add_link_options(--hex-format=s -mcrfiklsmnoduq)
 add_link_options(-lrt)
 
 # cmake-format: off
