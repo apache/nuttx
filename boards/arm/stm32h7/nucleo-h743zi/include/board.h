@@ -408,15 +408,73 @@
 #define GPIO_SPI3_SCK     (GPIO_SPI3_SCK_1 | GPIO_SPEED_50MHz)  /* PB3 */
 #define GPIO_SPI3_NSS     (GPIO_SPI3_NSS_2 | GPIO_SPEED_50MHz)  /* PA4 */
 
-/* TIM1 */
+/* TIM1 - Advanced Timer 16-bit (4 channels) */
+#define GPIO_TIM1_CH1IN   (GPIO_TIM1_CH1IN_2)   /* PE9  */
+#define GPIO_TIM1_CH2IN   (GPIO_TIM1_CH2IN_2)   /* PE11 */
+#define GPIO_TIM1_CH3IN   (GPIO_TIM1_CH3IN_2)   /* PE13 */
+#define GPIO_TIM1_CH4IN   (GPIO_TIM1_CH4IN_2)   /* PE14 */
 
-#define GPIO_TIM1_CH1OUT  (GPIO_TIM1_CH1OUT_2  | GPIO_SPEED_50MHz) /* PE9  - D6 */
-#define GPIO_TIM1_CH1NOUT (GPIO_TIM1_CH1NOUT_3 | GPIO_SPEED_50MHz) /* PE8  - D42 */
-#define GPIO_TIM1_CH2OUT  (GPIO_TIM1_CH2OUT_2  | GPIO_SPEED_50MHz) /* PE11 - D5 */
-#define GPIO_TIM1_CH2NOUT (GPIO_TIM1_CH2NOUT_3 | GPIO_SPEED_50MHz) /* PE10 - D40 */
-#define GPIO_TIM1_CH3OUT  (GPIO_TIM1_CH3OUT_2  | GPIO_SPEED_50MHz) /* PE13 - D3 */
-#define GPIO_TIM1_CH3NOUT (GPIO_TIM1_CH3NOUT_3 | GPIO_SPEED_50MHz) /* PE12 - D39 */
-#define GPIO_TIM1_CH4OUT  (GPIO_TIM1_CH4OUT_2  | GPIO_SPEED_50MHz) /* PE14 - D38 */
+#define GPIO_TIM1_CH1OUT  (GPIO_TIM1_CH1OUT_2)  /* PE9  - D6 */
+#define GPIO_TIM1_CH1NOUT (GPIO_TIM1_CH1NOUT_3) /* PE8  - D42 */
+#define GPIO_TIM1_CH2OUT  (GPIO_TIM1_CH2OUT_2)  /* PE11 - D5 */
+#define GPIO_TIM1_CH2NOUT (GPIO_TIM1_CH2NOUT_3) /* PE10 - D40 */
+#define GPIO_TIM1_CH3OUT  (GPIO_TIM1_CH3OUT_2)  /* PE13 - D3 */
+#define GPIO_TIM1_CH3NOUT (GPIO_TIM1_CH3NOUT_3) /* PE12 - D39 */
+#define GPIO_TIM1_CH4OUT  (GPIO_TIM1_CH4OUT_2)  /* PE14 - D38 */
+
+/* TIM2 - General Purpose 32-bit Timer (4 channels) */
+#define GPIO_TIM2_CH1IN   (GPIO_TIM2_CH1IN_2)   /* PA15 */
+#define GPIO_TIM2_CH2IN   (GPIO_TIM2_CH2IN_1)   /* PB3 */
+#define GPIO_TIM2_CH3IN   (GPIO_TIM2_CH3IN_1)   /* PB10 */
+#define GPIO_TIM2_CH4IN   (GPIO_TIM2_CH4IN_1)   /* PB11 */
+
+/* TIM3 - General Purpose 16-bit Timer (4 channels) */
+#define GPIO_TIM3_CH1IN   (GPIO_TIM3_CH1IN_1)   /* PA6 */
+#define GPIO_TIM3_CH2IN   (GPIO_TIM3_CH2IN_1)   /* PA7 */
+#define GPIO_TIM3_CH3IN   (GPIO_TIM3_CH3IN_1)   /* PB0 */
+#define GPIO_TIM3_CH4IN   (GPIO_TIM3_CH4IN_1)   /* PB1 */
+
+/* TIM4 - General Purpose 16-bit Timer (4 channels) */
+#define GPIO_TIM4_CH1IN   (GPIO_TIM4_CH1IN_2)   /* PD12 */
+#define GPIO_TIM4_CH2IN   (GPIO_TIM4_CH2IN_2)   /* PD13 */
+#define GPIO_TIM4_CH3IN   (GPIO_TIM4_CH3IN_2)   /* PD14 */
+#define GPIO_TIM4_CH4IN   (GPIO_TIM4_CH4IN_2)   /* PD15 */
+
+/* TIM5 - General Purpose 32-bit Timer (4 channels) */
+#define GPIO_TIM5_CH1IN   (GPIO_TIM5_CH1IN_2)
+#define GPIO_TIM5_CH2IN   (GPIO_TIM5_CH2IN_2)
+#define GPIO_TIM5_CH3IN   (GPIO_TIM5_CH3IN_2)
+#define GPIO_TIM5_CH4IN   (GPIO_TIM5_CH4IN_2)
+
+/* TIM6 - Basic 16-bit Timer (0 channels) */
+
+/* TIM7 - Basic 16-bit Timer (0 channels) */
+
+/* TIM8 - Advanced 16-bit Timer (4 channels) */
+#define GPIO_TIM8_CH1IN   (GPIO_TIM8_CH1IN_1)
+#define GPIO_TIM8_CH2IN   (GPIO_TIM8_CH2IN_1)
+#define GPIO_TIM8_CH3IN   (GPIO_TIM8_CH3IN_1)
+#define GPIO_TIM8_CH4IN   (GPIO_TIM8_CH4IN_1)
+
+/* TIM12 - General purpose 16-bit Timer (2 channels) */
+#define GPIO_TIM12_CH1IN  (GPIO_TIM12_CH1IN_1)
+#define GPIO_TIM12_CH2IN  (GPIO_TIM12_CH2IN_1)
+
+/* TIM13 - General purpose 16-bit Timer (1 channels) */
+#define GPIO_TIM13_CH1IN  (GPIO_TIM13_CH1IN_1)
+
+/* TIM14 - General purpose 16-bit Timer (1 channels) */
+#define GPIO_TIM14_CH1IN  (GPIO_TIM14_CH1IN_1)
+
+/* TIM15 - General purpose 16-bit Timer (2 channels) */
+#define GPIO_TIM15_CH1IN  (GPIO_TIM15_CH1IN_1)
+#define GPIO_TIM15_CH2IN  (GPIO_TIM15_CH2IN_1)
+
+/* TIM16 - General purpose 16-bit Timer (1 channels) */
+#define GPIO_TIM16_CH1IN  (GPIO_TIM16_CH1IN_1)
+
+/* TIM17 - General purpose 16-bit Timer (1 channels) */
+#define GPIO_TIM17_CH1IN  (GPIO_TIM17_CH1IN_1)
 
 /* OTGFS */
 

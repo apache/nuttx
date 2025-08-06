@@ -57,6 +57,11 @@
 #  include "stm32_romfs.h"
 #endif
 
+#ifdef CONFIG_CAPTURE
+#  include <nuttx/timers/capture.h>
+#  include "stm32_capture.h"
+#endif
+
 #ifdef CONFIG_STM32H7_IWDG
 #  include "stm32_wdg.h"
 #endif
@@ -70,6 +75,103 @@
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: stm32_capture_setup
+ *
+ * Description:
+ *   Initialize and register capture drivers.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_CAPTURE
+static int stm32_capture_setup(void)
+{
+  int ret;
+  struct cap_lowerhalf_s *lower[] =
+    {
+#if defined(CONFIG_STM32H7_TIM1_CAP)
+      stm32_cap_initialize(1),
+#endif
+#if defined(CONFIG_STM32H7_TIM2_CAP)
+      stm32_cap_initialize(2),
+#endif
+#if defined(CONFIG_STM32H7_TIM3_CAP)
+      stm32_cap_initialize(3),
+#endif
+#if defined(CONFIG_STM32H7_TIM4_CAP)
+      stm32_cap_initialize(4),
+#endif
+#if defined(CONFIG_STM32H7_TIM5_CAP)
+      stm32_cap_initialize(5),
+#endif
+#if defined(CONFIG_STM32H7_TIM8_CAP)
+      stm32_cap_initialize(8),
+#endif
+#if defined(CONFIG_STM32H7_TIM12_CAP)
+      stm32_cap_initialize(12),
+#endif
+#if defined(CONFIG_STM32H7_TIM13_CAP)
+      stm32_cap_initialize(13),
+#endif
+#if defined(CONFIG_STM32H7_TIM14_CAP)
+      stm32_cap_initialize(14),
+#endif
+#if defined(CONFIG_STM32H7_TIM15_CAP)
+      stm32_cap_initialize(15),
+#endif
+#if defined(CONFIG_STM32H7_TIM16_CAP)
+      stm32_cap_initialize(16),
+#endif
+#if defined(CONFIG_STM32H7_TIM17_CAP)
+      stm32_cap_initialize(17),
+#endif
+      /* TODO: LPTIMy_CAP */
+    };
+
+  size_t count = sizeof(lower) / sizeof(lower[0]);
+
+  /* Nothing to do if no timers enabled */
+
+  if (count == 0)
+    {
+      return OK;
+    }
+
+  /* This will register “/dev/cap0” ... “/dev/cap<count-1>” */
+
+  ret = cap_register_multiple("/dev/cap", lower, count);
+  if (ret == EINVAL)
+    {
+      syslog(LOG_ERR,
+             "ERROR: cap_register_multiple path is invalid\n");
+    }
+  else if (ret == EEXIST)
+    {
+      syslog(LOG_ERR, "ERROR: cap_register_multiple an inode "
+             "already exists at this path\n");
+    }
+  else if (ret == ENOMEM)
+    {
+      syslog(LOG_ERR, "ERROR: cap_register_multiple not enough "
+             "memory to register capture drivers\n");
+    }
+  else if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: cap_register_multiple failed: %d\n",
+             ret);
+    }
+
+  return ret;
+}
+#endif
 
 /****************************************************************************
  * Name: stm32_i2c_register
@@ -355,6 +457,16 @@ int stm32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: stm32_pwm_setup() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_CAPTURE
+  /* Initialize the capture driver */
+
+  ret = stm32_capture_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_capture_setup() failed: %d\\n", ret);
     }
 #endif
 

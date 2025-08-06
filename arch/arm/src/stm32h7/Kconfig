@@ -4584,125 +4584,450 @@ config STM32H7_ADC3_TIMTRIG
 	---help---
 		Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO
 
+config STM32H7_CAP
+	bool
+	default n
+
 config STM32H7_TIM1_CAP
 	bool "TIM1 Capture"
 	default n
 	depends on STM32H7_TIM1
+	select STM32H7_CAP
 	---help---
-		Reserve timer 1 for use by Capture
+		Reserve timer 1 for use by the capture driver.
 
-		Timer devices may be used for different purposes.  One special purpose is
-		to capture input.
+if STM32H7_TIM1_CAP
 
-config STM32H7_TIM2_CAP
-	bool "TIM2 Capture"
-	default n
-	depends on STM32H7_TIM2
+config STM32H7_TIM1_CHANNEL
+	int "TIM1 Capture Input Channel"
+	default 1
+	range 1 6
 	---help---
-		Reserve timer 2 for use by Capture
+		Specifies the timer input channel {1..6} for TIM1.
 
-		Timer devices may be used for different purposes.  One special purpose is
-		to capture input.
-
-config STM32H7_TIM3_CAP
-	bool "TIM3 Capture"
-	default n
-	depends on STM32H7_TIM3
+config STM32H7_TIM1_CLOCK
+	int "TIM1 capture frequency (Hz)"
+	default 100000
 	---help---
-		Reserve timer 3 for use by Capture
+		This clock frequency determines the timer's counting rate.
 
-		Timer devices may be used for different purposes.  One special purpose is
-		to capture input.
-
-config STM32H7_TIM4_CAP
-	bool "TIM4 Capture"
-	default n
-	depends on STM32H7_TIM4
-	---help---
-		Reserve timer 4 for use by Capture
-
-		Timer devices may be used for different purposes.  One special purpose is
-		to capture input.
-
-config STM32H7_TIM5_CAP
-	bool "TIM5 Capture"
-	default n
-	depends on STM32H7_TIM5
-	---help---
-		Reserve timer 5 for use by Capture
-
-		Timer devices may be used for different purposes.  One special purpose is
-		to capture input.
+endif # STM32H7_TIM1_CAP
 
 config STM32H7_TIM8_CAP
 	bool "TIM8 Capture"
 	default n
 	depends on STM32H7_TIM8
+	select STM32H7_CAP
 	---help---
-		Reserve timer 8 for use by Capture
+		Reserve timer 8 for use by the capture driver.
 
-		Timer devices may be used for different purposes.  One special purpose is
-		to capture input.
+if STM32H7_TIM8_CAP
+
+config STM32H7_TIM8_CHANNEL
+	int "TIM8 Capture Input Channel"
+	default 1
+	range 1 6
+	---help---
+		Specifies the timer input channel {1..6} for TIM8.
+
+config STM32H7_TIM8_CLOCK
+	int "TIM8 capture frequency (Hz)"
+	default 100000
+	---help---
+		This clock frequency determines the timer's counting rate.
+
+endif # STM32H7_TIM8_CAP
+
+#
+# General-Purpose Timers (4 Channels)
+#
+
+config STM32H7_TIM2_CAP
+	bool "TIM2 Capture"
+	default n
+	depends on STM32H7_TIM2
+	select STM32H7_CAP
+	---help---
+		Reserve timer 2 for use by the capture driver.
+
+if STM32H7_TIM2_CAP
+
+config STM32H7_TIM2_CHANNEL
+	int "TIM2 Capture Input Channel"
+	default 1
+	range 1 4
+	---help---
+		Specifies the timer input channel {1..4} for TIM2.
+
+config STM32H7_TIM2_CLOCK
+	int "TIM2 capture frequency (Hz)"
+	default 100000
+	---help---
+		This clock frequency determines the timer's counting rate.
+
+endif # STM32H7_TIM2_CAP
+
+config STM32H7_TIM3_CAP
+	bool "TIM3 Capture"
+	default n
+	depends on STM32H7_TIM3
+	select STM32H7_CAP
+	---help---
+		Reserve timer 3 for use by the capture driver.
+
+if STM32H7_TIM3_CAP
+
+config STM32H7_TIM3_CHANNEL
+	int "TIM3 Capture Input Channel"
+	default 1
+	range 1 4
+	---help---
+		Specifies the timer input channel {1..4} for TIM3.
+
+config STM32H7_TIM3_CLOCK
+	int "TIM3 capture frequency (Hz)"
+	default 100000
+	---help---
+		This clock frequency determines the timer's counting rate.
+
+endif # STM32H7_TIM3_CAP
+
+config STM32H7_TIM4_CAP
+	bool "TIM4 Capture"
+	default n
+	depends on STM32H7_TIM4
+	select STM32H7_CAP
+	---help---
+		Reserve timer 4 for use by the capture driver.
+
+if STM32H7_TIM4_CAP
+
+config STM32H7_TIM4_CHANNEL
+	int "TIM4 Capture Input Channel"
+	default 1
+	range 1 4
+	---help---
+		Specifies the timer input channel {1..4} for TIM4.
+
+config STM32H7_TIM4_CLOCK
+	int "TIM4 capture frequency (Hz)"
+	default 100000
+	---help---
+		This clock frequency determines the timer's counting rate.
+
+endif # STM32H7_TIM4_CAP
+
+config STM32H7_TIM5_CAP
+	bool "TIM5 Capture"
+	default n
+	depends on STM32H7_TIM5
+	select STM32H7_CAP
+	---help---
+		Reserve timer 5 for use by the capture driver.
+
+if STM32H7_TIM5_CAP
+
+config STM32H7_TIM5_CHANNEL
+	int "TIM5 Capture Input Channel"
+	default 1
+	range 1 4
+	---help---
+		Specifies the timer input channel {1..4} for TIM5.
+
+config STM32H7_TIM5_CLOCK
+	int "TIM5 capture frequency (Hz)"
+	default 100000
+	---help---
+		This clock frequency determines the timer's counting rate.
+
+endif # STM32H7_TIM5_CAP
+
+#
+# General-Purpose Timers (2 Channels)
+#
 
 config STM32H7_TIM12_CAP
 	bool "TIM12 Capture"
 	default n
 	depends on STM32H7_TIM12
+	select STM32H7_CAP
 	---help---
-		Reserve timer 12 for use by Capture
+		Reserve timer 12 for use by the capture driver.
 
-		Timer devices may be used for different purposes.  One special purpose is
-		to capture input.
+if STM32H7_TIM12_CAP
 
-config STM32H7_TIM13_CAP
-	bool "TIM13 Capture"
-	default n
-	depends on STM32H7_TIM13
+config STM32H7_TIM12_CHANNEL
+	int "TIM12 Capture Input Channel"
+	default 1
+	range 1 2
 	---help---
-		Reserve timer 13 for use by Capture
+		Specifies the timer input channel {1..2} for TIM12.
 
-		Timer devices may be used for different purposes.  One special purpose is
-		to capture input.
-
-config STM32H7_TIM14_CAP
-	bool "TIM14 Capture"
-	default n
-	depends on STM32H7_TIM14
+config STM32H7_TIM12_CLOCK
+	int "TIM12 capture frequency (Hz)"
+	default 100000
 	---help---
-		Reserve timer 14 for use by Capture
+		This clock frequency determines the timer's counting rate.
 
-		Timer devices may be used for different purposes.  One special purpose is
-		to capture input.
+endif # STM32H7_TIM12_CAP
 
 config STM32H7_TIM15_CAP
 	bool "TIM15 Capture"
 	default n
 	depends on STM32H7_TIM15
+	select STM32H7_CAP
 	---help---
-		Reserve timer 15 for use by Capture
+		Reserve timer 15 for use by the capture driver.
 
-		Timer devices may be used for different purposes.  One special purpose is
-		to capture input.
+if STM32H7_TIM15_CAP
+
+config STM32H7_TIM15_CHANNEL
+	int "TIM15 Capture Input Channel"
+	default 1
+	range 1 2
+	---help---
+		Specifies the timer input channel {1..2} for TIM15.
+
+config STM32H7_TIM15_CLOCK
+	int "TIM15 capture frequency (Hz)"
+	default 100000
+	---help---
+		This clock frequency determines the timer's counting rate.
+
+endif # STM32H7_TIM15_CAP
+
+#
+# General-Purpose Timers (1 Channel)
+#
+
+config STM32H7_TIM13_CAP
+	bool "TIM13 Capture"
+	default n
+	depends on STM32H7_TIM13
+	select STM32H7_CAP
+	---help---
+		Reserve timer 13 for use by the capture driver.
+
+if STM32H7_TIM13_CAP
+
+config STM32H7_TIM13_CHANNEL
+	int "TIM13 Capture Input Channel"
+	default 1
+	range 1 1
+	---help---
+		Specifies the timer input channel {1} for TIM13.
+
+config STM32H7_TIM13_CLOCK
+	int "TIM13 capture frequency (Hz)"
+	default 100000
+	---help---
+		This clock frequency determines the timer's counting rate.
+
+endif # STM32H7_TIM13_CAP
+
+config STM32H7_TIM14_CAP
+	bool "TIM14 Capture"
+	default n
+	depends on STM32H7_TIM14
+	select STM32H7_CAP
+	---help---
+		Reserve timer 14 for use by the capture driver.
+
+if STM32H7_TIM14_CAP
+
+config STM32H7_TIM14_CHANNEL
+	int "TIM14 Capture Input Channel"
+	default 1
+	range 1 1
+	---help---
+		Specifies the timer input channel {1} for TIM14.
+
+config STM32H7_TIM14_CLOCK
+	int "TIM14 capture frequency (Hz)"
+	default 100000
+	---help---
+		This clock frequency determines the timer's counting rate.
+
+endif # STM32H7_TIM14_CAP
 
 config STM32H7_TIM16_CAP
 	bool "TIM16 Capture"
 	default n
 	depends on STM32H7_TIM16
+	select STM32H7_CAP
 	---help---
-		Reserve timer 16 for use by Capture
+		Reserve timer 16 for use by the capture driver.
 
-		Timer devices may be used for different purposes.  One special purpose is
-		to capture input.
+if STM32H7_TIM16_CAP
+
+config STM32H7_TIM16_CHANNEL
+	int "TIM16 Capture Input Channel"
+	default 1
+	range 1 1
+	---help---
+		Specifies the timer input channel {1} for TIM16.
+
+config STM32H7_TIM16_CLOCK
+	int "TIM16 capture frequency (Hz)"
+	default 100000
+	---help---
+		This clock frequency determines the timer's counting rate.
+
+endif # STM32H7_TIM16_CAP
 
 config STM32H7_TIM17_CAP
-	bool "TIM14 Capture"
+	bool "TIM17 Capture"
 	default n
 	depends on STM32H7_TIM17
+	select STM32H7_CAP
 	---help---
-		Reserve timer 17 for use by Capture
+		Reserve timer 17 for use by the capture driver.
 
-		Timer devices may be used for different purposes.  One special purpose is
-		to capture input.
+if STM32H7_TIM17_CAP
+
+config STM32H7_TIM17_CHANNEL
+	int "TIM17 Capture Input Channel"
+	default 1
+	range 1 1
+	---help---
+		Specifies the timer input channel {1} for TIM17.
+
+config STM32H7_TIM17_CLOCK
+	int "TIM17 capture frequency (Hz)"
+	default 100000
+	---help---
+		This clock frequency determines the timer's counting rate.
+
+endif # STM32H7_TIM17_CAP
+
+#
+# Low-Power Timers
+#
+
+config STM32H7_LPTIM1_CAP
+	bool "LPTIM1 Capture"
+	default n
+	depends on STM32H7_LPTIM1
+	select STM32H7_CAP
+	---help---
+		Reserve low-power timer 1 for use by the capture driver.
+
+if STM32H7_LPTIM1_CAP
+
+config STM32H7LPTIM1_CHANNEL
+	int "LPTIM1 Capture Input Channel"
+	default 1
+	range 1 2
+	---help---
+		Specifies the timer input channel {1,2} for LPTIM1.
+
+config STM32H7LPTIM1_CLOCK
+	int "LPTIM1 capture frequency (Hz)"
+	default 100000
+	---help---
+		This clock frequency determines the timer's counting rate.
+
+endif # STM32H7_LPTIM1_CAP
+
+config STM32H7_LPTIM2_CAP
+	bool "LPTIM2 Capture"
+	default n
+	depends on STM32H7_LPTIM2
+	select STM32H7_CAP
+	---help---
+		Reserve low-power timer 2 for use by the capture driver.
+
+if STM32H7_LPTIM2_CAP
+
+config STM32H7LPTIM2_CHANNEL
+	int "LPTIM2 Capture Input Channel"
+	default 1
+	range 1 2
+	---help---
+		Specifies the timer input channel {1,2} for LPTIM2.
+
+config STM32H7LPTIM2_CLOCK
+	int "LPTIM2 capture frequency (Hz)"
+	default 100000
+	---help---
+		This clock frequency determines the timer's counting rate.
+
+endif # STM32H7_LPTIM2_CAP
+
+config STM32H7_LPTIM3_CAP
+	bool "LPTIM3 Capture"
+	default n
+	depends on STM32H7_LPTIM3
+	select STM32H7_CAP
+	---help---
+		Reserve low-power timer 3 for use by the capture driver.
+
+if STM32H7_LPTIM3_CAP
+
+config STM32H7LPTIM3_CHANNEL
+	int "LPTIM3 Capture Input Channel"
+	default 1
+	range 1 2
+	---help---
+		Specifies the timer input channel {1,2} for LPTIM3.
+
+config STM32H7LPTIM3_CLOCK
+	int "LPTIM3 capture frequency (Hz)"
+	default 100000
+	---help---
+		This clock frequency determines the timer's counting rate.
+
+endif # STM32H7_LPTIM3_CAP
+
+config STM32H7_LPTIM4_CAP
+	bool "LPTIM4 Capture"
+	default n
+	depends on STM32H7_LPTIM4
+	select STM32H7_CAP
+	---help---
+		Reserve low-power timer 4 for use by the capture driver.
+
+if STM32H7_LPTIM4_CAP
+
+config STM32H7LPTIM4_CHANNEL
+	int "LPTIM4 Capture Input Channel"
+	default 1
+	range 1 2
+	---help---
+		Specifies the timer input channel {1,2} for LPTIM4.
+
+config STM32H7LPTIM4_CLOCK
+	int "LPTIM4 capture frequency (Hz)"
+	default 100000
+	---help---
+		This clock frequency determines the timer's counting rate.
+
+endif # STM32H7_LPTIM4_CAP
+
+config STM32H7_LPTIM5_CAP
+	bool "LPTIM5 Capture"
+	default n
+	depends on STM32H7_LPTIM5
+	select STM32H7_CAP
+	---help---
+		Reserve low-power timer 5 for use by the capture driver.
+
+if STM32H7_LPTIM5_CAP
+
+config STM32H7LPTIM5_CHANNEL
+	int "LPTIM5 Capture Input Channel"
+	default 1
+	range 1 2
+	---help---
+		Specifies the timer input channel {1,2} for LPTIM5.
+
+config STM32H7LPTIM5_CLOCK
+	int "LPTIM5 capture frequency (Hz)"
+	default 100000
+	---help---
+		This clock frequency determines the timer's counting rate.
+
+endif # STM32H7_LPTIM5_CAP
 
 menu "STM32 TIMx Outputs Configuration"
 
@@ -6036,12 +6361,12 @@ menu "FDCAN1 Configuration"
 config FDCAN1_BITRATE
 	int "CAN bitrate"
 	depends on !NET_CAN_CANFD
-	default 1000000
+	default 100000
 
 config FDCAN1_ARBI_BITRATE
 	int "CAN FD Arbitration phase bitrate"
 	depends on NET_CAN_CANFD
-	default 1000000
+	default 100000
 
 config FDCAN1_DATA_BITRATE
 	int "CAN FD Data phase bitrate"
@@ -6056,12 +6381,12 @@ menu "FDCAN2 Configuration"
 config FDCAN2_BITRATE
 	int "CAN bitrate"
 	depends on !NET_CAN_CANFD
-	default 1000000
+	default 100000
 
 config FDCAN2_ARBI_BITRATE
 	int "CAN FD Arbitration phase bitrate"
 	depends on NET_CAN_CANFD
-	default 1000000
+	default 100000
 
 config FDCAN2_DATA_BITRATE
 	int "CAN FD Data phase bitrate"

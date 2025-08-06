@@ -32,6 +32,7 @@ list(
   stm32_start.c
   stm32_rcc.c
   stm32_lowputc.c
+  stm32_capture.c
   stm32_serial.c
   stm32_uid.c)
 
@@ -140,6 +141,10 @@ endif()
 
 if(CONFIG_TIMER)
   list(APPEND SRCS stm32_tim_lowerhalf.c)
+endif()
+
+if(CONFIG_CAPTURE)
+  list(APPEND SRCS stm32_capture_lowerhalf.c)
 endif()
 
 if(CONFIG_USBDEV)

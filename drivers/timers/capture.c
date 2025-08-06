@@ -469,30 +469,30 @@ int cap_register(FAR const char *devpath, FAR struct cap_lowerhalf_s *lower)
 }
 
 int cap_register_multiple(FAR const char *devpath,
-                          FAR struct cap_lowerhalf_s **lower, int n)
+                          FAR struct cap_lowerhalf_s **lower,
+                          int n)
 {
-  FAR struct cap_upperhalf_s *upper;
+  char fullpath[16];
+  int ret;
 
-  /* Allocate the upper-half data structure */
-
-  upper = (FAR struct cap_upperhalf_s *)
-           kmm_zalloc(sizeof(struct cap_upperhalf_s));
-  if (!upper)
+  if (n < 1)
     {
-      return -ENOMEM;
+      return -EINVAL;
     }
 
-  /* Initialize the PWM Capture device structure
-   * (it was already zeroed by kmm_zalloc())
-   */
+  for (int i = 0; i < n; i++)
+    {
+      snprintf(fullpath, sizeof(fullpath), "%s%d", devpath, i);
+      ret = cap_register(fullpath, lower[i]);
+      if (ret < 0)
+        {
+          /* TODO: unwind */
 
-  nxmutex_init(&upper->lock);
-  upper->lower = lower;
-  upper->nchan = n;
+          return ret;
+        }
+    }
 
-  /* Register the PWM Capture device */
-
-  return register_driver(devpath, &g_capops, 0666, upper);
+  return OK;
 }
 
 #endif /* CONFIG_CAPTURE */
