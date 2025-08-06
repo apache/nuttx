@@ -88,9 +88,10 @@
 #  define TCP_ESTABLISHED 0x04
 #  define TCP_FIN_WAIT_1  0x05
 #  define TCP_FIN_WAIT_2  0x06
-#  define TCP_CLOSING     0x07
-#  define TCP_TIME_WAIT   0x08
-#  define TCP_LAST_ACK    0x09
+#  define TCP_CLOSE_WAIT  0x07
+#  define TCP_CLOSING     0x08
+#  define TCP_TIME_WAIT   0x09
+#  define TCP_LAST_ACK    0x0a
 #  define TCP_STOPPED     0x10 /* Bit 4: stopped */
                                /* Bit 5-7: Unused, but not available */
 
