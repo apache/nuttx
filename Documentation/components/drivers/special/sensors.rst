@@ -34,3 +34,4 @@ general interface.
     sensors/lsm6dso32.rst
     sensors/lis2mdl.rst
     sensors/l86xxx.rst
+    sensors/gnss_lowerhalf.rst
