@@ -60,6 +60,18 @@ config RPMSG_WAKELOCK
 		RPMSGIOC_ACQUIRE_WAKELOCK and RPMSGIOC_RELEASE_WAKELOCK ioctls.
 		Both sides of the link must enable it.
 
+config RPMSG_PANIC_DUMP_LEVEL
+	int "rpmsg panic dump level"
+	default 1 if DEFAULT_SMALL
+	default 2 if !DEFAULT_SMALL
+	---help---
+		Control rpmsg auto dump behavior on panic at
+		PANIC_KERNEL_FINAL stage:
+		  0 - Disable: no dump on panic
+		  1 - Info: brief dump on panic
+		  2 - Verbose: full dump on panic
+		Manual rpmsg dump command is not affected.
+
 endif # RPMSG
 
 config RPMSG_ROUTER

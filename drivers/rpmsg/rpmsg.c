@@ -27,6 +27,7 @@
 #include <nuttx/config.h>
 
 #include <inttypes.h>
+#include <limits.h>
 
 #include <metal/sys.h>
 #include <nuttx/kmalloc.h>
@@ -163,6 +164,28 @@ static int rpmsg_dev_ioctl_(FAR struct rpmsg_s *rpmsg, int cmd,
 
   return ret;
 }
+
+#if CONFIG_RPMSG_PANIC_DUMP_LEVEL > RPMSG_PANIC_DUMP_DISABLE
+/****************************************************************************
+ * Name: rpmsg_panic_notifier
+ ****************************************************************************/
+
+static int rpmsg_panic_notifier(FAR struct notifier_block *nb,
+                                unsigned long action, FAR void *data)
+{
+  FAR struct rpmsg_s *rpmsg = metal_container_of(nb, struct rpmsg_s,
+                                                 nbpanic);
+  int ret = OK;
+
+  if (action == PANIC_KERNEL_FINAL)
+    {
+      ret = rpmsg_dev_ioctl_(rpmsg, RPMSGIOC_DUMP,
+              CONFIG_RPMSG_PANIC_DUMP_LEVEL >= RPMSG_PANIC_DUMP_VERBOSE);
+    }
+
+  return ret;
+}
+#endif
 
 static int rpmsg_dev_ioctl(FAR struct file *filep, int cmd,
                            unsigned long arg)
@@ -571,11 +594,21 @@ int rpmsg_register(FAR const char *path, FAR struct rpmsg_s *rpmsg,
   metal_list_add_tail(&g_rpmsg, &rpmsg->node);
   up_write(&g_rpmsg_lock);
 
+#if CONFIG_RPMSG_PANIC_DUMP_LEVEL > RPMSG_PANIC_DUMP_DISABLE
+  rpmsg->nbpanic.notifier_call = rpmsg_panic_notifier;
+  rpmsg->nbpanic.priority = INT_MIN + 2;
+  panic_notifier_chain_register(&rpmsg->nbpanic);
+#endif
+
   return ret;
 }
 
 void rpmsg_unregister(FAR const char *path, FAR struct rpmsg_s *rpmsg)
 {
+#if CONFIG_RPMSG_PANIC_DUMP_LEVEL > RPMSG_PANIC_DUMP_DISABLE
+  panic_notifier_chain_unregister(&rpmsg->nbpanic);
+#endif
+
   down_write(&g_rpmsg_lock);
   metal_list_del(&rpmsg->node);
   up_write(&g_rpmsg_lock);

@@ -27,9 +27,18 @@
 
 #ifdef CONFIG_RPMSG
 
+#include <nuttx/panic_notifier.h>
 #include <nuttx/rpmsg/rpmsg.h>
 
 #include "rpmsg_ping.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define RPMSG_PANIC_DUMP_DISABLE 0
+#define RPMSG_PANIC_DUMP_INFO    1
+#define RPMSG_PANIC_DUMP_VERBOSE 2
 
 /****************************************************************************
  * Public Types
@@ -54,6 +63,9 @@ struct rpmsg_s
   struct rpmsg_endpoint        wakelock;
 #endif
   atomic_t                     signals;
+#if CONFIG_RPMSG_PANIC_DUMP_LEVEL > RPMSG_PANIC_DUMP_DISABLE
+  struct notifier_block        nbpanic;
+#endif
 };
 
 /**
