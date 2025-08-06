@@ -191,8 +191,22 @@ FAR struct pkt_conn_s *pkt_active(FAR struct net_driver_s *dev,
   if (dev->d_lltype == NET_LL_ETHERNET || dev->d_lltype == NET_LL_IEEE80211)
     {
       FAR struct eth_hdr_s *ethhdr = NETLLBUF;
+
       ethertype = ethhdr->type;
     }
+
+#ifdef CONFIG_NET_IPv4
+  else if ((IPv4BUF->vhl & IP_VERSION_MASK) == IPv4_VERSION)
+    {
+      ethertype = HTONS(ETH_P_IP);
+    }
+#endif
+#ifdef CONFIG_NET_IPv6
+  else if ((IPv6BUF->vtc & IP_VERSION_MASK) == IPv6_VERSION)
+    {
+      ethertype = HTONS(ETH_P_IPV6);
+    }
+#endif
 
   while ((conn = pkt_nextconn(conn)) != NULL)
     {
