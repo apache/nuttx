@@ -131,6 +131,7 @@ static bool noterpmsg_transfer(FAR struct noterpmsg_driver_s *drv,
   for (; ; )
     {
       FAR uint8_t *buffer;
+      irqstate_t flags;
       uint32_t space;
       size_t len;
 
@@ -139,16 +140,19 @@ static bool noterpmsg_transfer(FAR struct noterpmsg_driver_s *drv,
           return false;
         }
 
-      len = noterpmsg_length(drv);
-      if (len == 0)
-        {
-          return true;
-        }
-
       buffer = rpmsg_get_tx_payload_buffer(&drv->ept, &space, wait);
       if (buffer == NULL)
         {
           return false;
+        }
+
+      flags = spin_lock_irqsave_notrace(&drv->lock);
+      len = noterpmsg_length(drv);
+      if (len == 0)
+        {
+          spin_unlock_irqrestore_notrace(&drv->lock, flags);
+          rpmsg_release_tx_buffer(&drv->ept, buffer);
+          return true;
         }
 
       if (space < len)
@@ -179,21 +183,19 @@ static bool noterpmsg_transfer(FAR struct noterpmsg_driver_s *drv,
         }
 
       drv->tail = noterpmsg_next(drv, drv->tail, NOTE_ALIGN(len));
+      spin_unlock_irqrestore_notrace(&drv->lock, flags);
     }
 }
 
 static void noterpmsg_work(FAR void *priv)
 {
   FAR struct noterpmsg_driver_s *drv = priv;
-  irqstate_t flags = spin_lock_irqsave_notrace(&drv->lock);
 
   if (!noterpmsg_transfer(drv, false))
     {
       work_queue(HPWORK, &drv->work, noterpmsg_work, drv,
                  NOTE_RPMSG_WORK_DELAY);
     }
-
-  spin_unlock_irqrestore_notrace(&drv->lock, flags);
 }
 
 static void noterpmsg_add(FAR struct note_driver_s *driver,
@@ -212,7 +214,9 @@ static void noterpmsg_add(FAR struct note_driver_s *driver,
     {
       if (!up_interrupt_context() && !sched_idletask())
         {
+          spin_unlock_irqrestore_notrace(&drv->lock, flags);
           sent = noterpmsg_transfer(drv, true);
+          flags = spin_lock_irqsave_notrace(&drv->lock);
         }
 
       if (!sent)
@@ -236,14 +240,13 @@ static void noterpmsg_add(FAR struct note_driver_s *driver,
   memcpy(drv->buffer, note + space, notelen - space);
 
   drv->head = noterpmsg_next(drv, drv->head, NOTE_ALIGN(notelen));
+  spin_unlock_irqrestore_notrace(&drv->lock, flags);
 
   if (work_available(&drv->work))
     {
       work_queue(HPWORK, &drv->work, noterpmsg_work, drv,
                  NOTE_RPMSG_WORK_DELAY);
     }
-
-  spin_unlock_irqrestore_notrace(&drv->lock, flags);
 }
 
 static int noterpmsg_ept_cb(FAR struct rpmsg_endpoint *ept,
