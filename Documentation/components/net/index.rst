@@ -19,6 +19,7 @@ Network Support
   wqueuedeadlocks.rst
   tcp_network_perf.rst
   delay_act_and_tcp_perf.rst
+  tcp_state_machine.rst
 
 ``net`` Directory Structure ::
 

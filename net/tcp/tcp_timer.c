@@ -623,6 +623,7 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
                     goto done;
 
                   case TCP_ESTABLISHED:
+                  case TCP_CLOSE_WAIT:
 
                     /* In the ESTABLISHED state, we call upon the application
                      * to do the actual retransmit after which we jump into
@@ -673,7 +674,8 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
        * connection has been established.
        */
 
-      else if ((conn->tcpstateflags & TCP_STATE_MASK) == TCP_ESTABLISHED)
+      else if ((conn->tcpstateflags & TCP_STATE_MASK) == TCP_ESTABLISHED ||
+               (conn->tcpstateflags & TCP_STATE_MASK) == TCP_CLOSE_WAIT)
         {
 #ifdef CONFIG_NET_TCP_KEEPALIVE
           /* Is this an established connected with KeepAlive enabled? */

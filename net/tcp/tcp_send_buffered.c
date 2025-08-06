@@ -197,8 +197,8 @@ static void retransmit_segment(FAR struct tcp_conn_s *conn,
        * retransmitted, and un-ACKed, if expired is not zero, the
        * connection will be closed.
        *
-       * field expired can only be updated at TCP_ESTABLISHED
-       * state
+       * field expired can only be updated at TCP_ESTABLISHED and
+       * TCP_CLOSE_WAIT state.
        */
 
       conn->expired++;
@@ -936,7 +936,8 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
                * retransmitted, and un-ACKed, if expired is not zero, the
                * connection will be closed.
                *
-               * field expired can only be updated at TCP_ESTABLISHED state
+               * field expired can only be updated at TCP_ESTABLISHED and
+               * TCP_CLOSE_WAIT state.
                */
 
               conn->expired++;
@@ -1012,7 +1013,8 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
    * will have to wait for the next polling cycle.
    */
 
-  if ((conn->tcpstateflags & TCP_ESTABLISHED) &&
+  if ((conn->tcpstateflags & TCP_ESTABLISHED ||
+       conn->tcpstateflags & TCP_CLOSE_WAIT) &&
       ((flags & TCP_NEWDATA) == 0) &&
       (flags & (TCP_POLL | TCP_REXMIT | TCP_ACKDATA)) &&
       !(sq_empty(&conn->write_q)) &&

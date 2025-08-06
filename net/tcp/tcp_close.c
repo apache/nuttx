@@ -153,7 +153,8 @@ static uint16_t tcp_close_eventhandler(FAR struct net_driver_s *dev,
        *   TCP_CLOSE is handled above.
        */
 
-      DEBUGASSERT(conn->tcpstateflags == TCP_ESTABLISHED);
+      DEBUGASSERT(conn->tcpstateflags == TCP_ESTABLISHED ||
+                  conn->tcpstateflags == TCP_CLOSE_WAIT);
 
       /* Drop data received in this state and make sure that TCP_CLOSE
        * is set in the response
@@ -236,7 +237,8 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
    */
 
   if ((conn->tcpstateflags == TCP_ESTABLISHED ||
-       conn->tcpstateflags == TCP_LAST_ACK) &&
+       conn->tcpstateflags == TCP_LAST_ACK ||
+       conn->tcpstateflags == TCP_CLOSE_WAIT) &&
       (conn->clscb = tcp_callback_alloc(conn)) != NULL)
     {
       /* Free rx buffers of the connection immediately */

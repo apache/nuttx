@@ -982,8 +982,7 @@ found:
                 g_netstats.tcp.drop, seq, TCP_SEQ_ADD(seq, dev->d_len),
                 dev->d_len);
 
-          dev->d_len = 0;
-          return;
+          goto drop;
         }
     }
 #endif
@@ -1046,7 +1045,8 @@ found:
            * bytes
            */
 
-          if ((conn->tcpstateflags & TCP_STATE_MASK) == TCP_ESTABLISHED)
+          if ((conn->tcpstateflags & TCP_STATE_MASK) == TCP_ESTABLISHED ||
+              (conn->tcpstateflags & TCP_STATE_MASK) == TCP_CLOSE_WAIT)
             {
               nwarn("WARNING: ackseq > unackseq\n");
               nwarn("sndseq=%" PRIu32 " tx_unacked=%" PRIu32
@@ -1109,7 +1109,8 @@ found:
 
       /* Check if no packet need to retransmission, clear timer. */
 
-      if (conn->tx_unacked == 0 && conn->tcpstateflags == TCP_ESTABLISHED)
+      if (conn->tx_unacked == 0 && (conn->tcpstateflags == TCP_ESTABLISHED ||
+                                    conn->tcpstateflags == TCP_CLOSE_WAIT))
         {
           timeout = 0;
         }
@@ -1397,8 +1398,6 @@ found:
              * has been closed.
              */
 
-            flags |= TCP_CLOSE;
-
             if (dev->d_len > 0)
               {
                 flags |= TCP_NEWDATA;
@@ -1406,23 +1405,10 @@ found:
 
             result = tcp_callback(dev, conn, flags);
 
-            if ((result & TCP_CLOSE) != 0)
-              {
-                conn->tcpstateflags = TCP_LAST_ACK;
-                conn->tx_unacked    = 1;
-                conn->nrtx          = 0;
-                net_incr32(conn->rcvseq, 1); /* ack FIN */
-#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-                conn->sndseq_max    = tcp_getsequence(conn->sndseq) + 1;
-#endif
-                ninfo("TCP state: TCP_LAST_ACK\n");
-                tcp_send(dev, conn, TCP_FIN | TCP_ACK, tcpiplen);
-              }
-            else
-              {
-                ninfo("TCP: Dropped a FIN\n");
-                tcp_appsend(dev, conn, result);
-              }
+            conn->tcpstateflags = TCP_CLOSE_WAIT;
+            net_incr32(conn->rcvseq, 1); /* ack FIN */
+            ninfo("TCP state: TCP_CLOSE_WAIT\n");
+            tcp_appsend(dev, conn, result | TCP_SNDACK);
 
             return;
           }
@@ -1680,6 +1666,40 @@ found:
                                    TCP_TIME_WAIT_TIMEOUT * HSEC_PER_SEC);
             ninfo("TCP state: TCP_TIME_WAIT\n");
           }
+
+        goto drop;
+
+      case TCP_CLOSE_WAIT:
+#ifdef CONFIG_NET_TCP_KEEPALIVE
+        /* If the established socket receives an ACK or any kind of data
+        * from the remote peer (whether we accept it or not), then reset
+        * the keep alive timer.
+        */
+
+        if (conn->keepalive && (tcp->flags & TCP_ACK) != 0)
+          {
+            /* Reset the "alive" timer. */
+
+            tcp_update_keeptimer(conn, conn->keepidle);
+            conn->keepretries = 0;
+          }
+#endif
+
+        if ((flags & TCP_ACKDATA) != 0)
+          {
+            dev->d_sndlen = 0;
+
+            /* Provide the packet to the application */
+
+            result = tcp_callback(dev, conn, flags);
+
+            /* Send the response, ACKing the data or not, as appropriate */
+
+            tcp_appsend(dev, conn, result);
+            return;
+          }
+
+        goto drop;
 
       default:
         break;

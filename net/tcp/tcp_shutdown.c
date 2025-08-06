@@ -112,7 +112,8 @@ static inline int tcp_send_fin(FAR struct socket *psock)
 
   if ((conn->tcpstateflags == TCP_ESTABLISHED ||
        conn->tcpstateflags == TCP_SYN_SENT ||
-       conn->tcpstateflags == TCP_SYN_RCVD))
+       conn->tcpstateflags == TCP_SYN_RCVD ||
+       conn->tcpstateflags == TCP_CLOSE_WAIT))
     {
       if ((conn->shdcb = tcp_callback_alloc(conn)) == NULL)
         {
