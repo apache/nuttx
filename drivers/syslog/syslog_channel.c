@@ -69,9 +69,9 @@ static ssize_t syslog_default_write(FAR syslog_channel_t *channel,
 #endif
 
 #ifdef CONFIG_SYSLOG_CDCACM
-static int syslog_cdcacm_putc(FAR struct syslog_channel_s *channel,
+static int syslog_cdcacm_putc(FAR syslog_channel_t *channel,
                               int ch);
-static ssize_t syslog_cdcacm_write(FAR struct syslog_channel_s *channel,
+static ssize_t syslog_cdcacm_write(FAR syslog_channel_t *channel,
                                    FAR const char *buffer, size_t buflen);
 #endif
 
@@ -331,7 +331,7 @@ static ssize_t syslog_default_write(FAR syslog_channel_t *channel,
 #endif
 
 #ifdef CONFIG_SYSLOG_CDCACM
-static int syslog_cdcacm_putc(FAR struct syslog_channel_s *channel, int ch)
+static int syslog_cdcacm_putc(FAR syslog_channel_t *channel, int ch)
 {
   char tmp;
 
@@ -342,7 +342,7 @@ static int syslog_cdcacm_putc(FAR struct syslog_channel_s *channel, int ch)
   return ch;
 }
 
-static ssize_t syslog_cdcacm_write(FAR struct syslog_channel_s *channel,
+static ssize_t syslog_cdcacm_write(FAR syslog_channel_t *channel,
                                    FAR const char *buffer, size_t buflen)
 {
   UNUSED(channel);
