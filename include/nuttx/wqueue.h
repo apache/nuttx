@@ -357,6 +357,24 @@ FAR struct kwork_wqueue_s *work_queue_create(FAR const char *name,
                                              int stack_size, int nthreads);
 
 /****************************************************************************
+ * Name: work_queue_dispatch
+ *
+ * Description:
+ *   Run the expired work of a queue on the calling thread. The caller
+ *   must be one of the queue's workers, typically a callback that waits
+ *   for something another work item of the same queue provides;
+ *   otherwise nothing is done.
+ *
+ * Input Parameters:
+ *   wqueue - Work queue instance.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+void work_queue_dispatch(FAR struct kwork_wqueue_s *wqueue);
+#endif
+
+/****************************************************************************
  * Name: work_queue_free
  *
  * Description:
