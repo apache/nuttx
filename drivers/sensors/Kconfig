@@ -971,8 +971,25 @@ config SENSORS_LSM6DSO32_I2C_FREQUENCY
 config SENSORS_LSM6DSO32_THREAD_STACKSIZE
 	int "LSM6DSO32 worker thread stack size"
 	default 1024
+	depends on SENSORS_LSM6DSO32
 	---help---
 		The stack size for the worker threads that perform measurements.
+
+config SENSORS_LSM6DSO32_ACCEL_ORB_BUFSIZE
+	int "LSM6DSO32 accelerometer uORB buffer size"
+	default 10
+	range 0 500
+	depends on SENSORS_LSM6DSO32
+	---help---
+		The circular buffer size for the accelerometer uORB measurements
+
+config SENSORS_LSM6DSO32_GYRO_ORB_BUFSIZE
+	int "LSM6DSO32 gyro uORB buffer size"
+	default 10
+	range 0 500
+	depends on SENSORS_LSM6DSO32
+	---help---
+		The circular buffer size for the gyroscope uORB measurements
 
 config SENSORS_LSM9DS1
 	bool "STMicro LSM9DS1 support"
