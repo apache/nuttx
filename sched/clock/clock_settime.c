@@ -99,50 +99,6 @@ static void nxclock_set_realtime(FAR const struct timespec *tp)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxclock_settime
- *
- * Description:
- *   Clock Functions based on POSIX APIs
- *
- *   CLOCK_REALTIME - POSIX demands this to be present. This is the wall
- *   time clock.
- *
- ****************************************************************************/
-
-int nxclock_settime(clockid_t clock_id, FAR const struct timespec *tp)
-{
-  int ret = -EINVAL;
-
-  if (tp == NULL || tp->tv_nsec < 0 || tp->tv_nsec >= 1000000000)
-    {
-      return ret;
-    }
-
-  if (clock_id == CLOCK_REALTIME)
-    {
-      nxclock_set_realtime(tp);
-      return 0;
-    }
-#ifdef CONFIG_PTP_CLOCK
-  else if ((clock_id & CLOCK_MASK) == CLOCK_FD)
-    {
-      FAR struct file *filep;
-
-      ret = ptp_clockid_to_filep(clock_id, &filep);
-      if (ret < 0)
-        {
-          return ret;
-        }
-
-      ret = file_ioctl(filep, PTP_CLOCK_SETTIME, tp);
-      fs_putfilep(filep);
-    }
-#endif
-
-  return ret;
-}
-
-/****************************************************************************
  * Name: clock_settime
  *
  * Description:
@@ -155,9 +111,30 @@ int nxclock_settime(clockid_t clock_id, FAR const struct timespec *tp)
 
 int clock_settime(clockid_t clock_id, FAR const struct timespec *tp)
 {
-  int ret;
+  int ret = -EINVAL;
 
-  ret = nxclock_settime(clock_id, tp);
+  if (tp != NULL && tp->tv_nsec >= 0 && tp->tv_nsec < 1000000000)
+    {
+      if (clock_id == CLOCK_REALTIME)
+        {
+          nxclock_set_realtime(tp);
+          ret = 0;
+        }
+#ifdef CONFIG_PTP_CLOCK
+      else if ((clock_id & CLOCK_MASK) == CLOCK_FD)
+        {
+          FAR struct file *filep;
+
+          ret = ptp_clockid_to_filep(clock_id, &filep);
+          if (ret >= 0)
+            {
+              ret = file_ioctl(filep, PTP_CLOCK_SETTIME, tp);
+              fs_putfilep(filep);
+            }
+        }
+#endif
+    }
+
   if (ret < 0)
     {
       set_errno(-ret);
