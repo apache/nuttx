@@ -76,6 +76,10 @@ extern "C"
 int ecc_make_key(uint8_t publickey[ECC_BYTES + 1],
                  uint8_t privatekey[ECC_BYTES]);
 
+int ecc_make_key_uncomp(uint8_t publickey_x[ECC_BYTES],
+                        uint8_t publickey_y[ECC_BYTES],
+                        uint8_t privatekey[ECC_BYTES]);
+
 /* ecdh_shared_secret() function.
  * Compute a shared secret given your secret key and someone else's
  * public key.
