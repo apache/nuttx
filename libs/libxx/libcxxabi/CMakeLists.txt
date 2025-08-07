@@ -114,7 +114,7 @@ if(CONFIG_LIBCXXABI)
   # Fix compilation error on ARM32:libcxxabi/src/cxa_personality.cpp:594:22:
   # error: '_URC_FATAL_PHASE1_ERROR' was not declared in this scope 594 |
   # results.reason = _URC_FATAL_PHASE1_ERROR;
-  if(CONFIG_ARCH_ARM)
+  if(CONFIG_ARCH_ARM AND NOT CONFIG_ARCH_TOOLCHAIN_CLANG)
     target_compile_definitions(libcxxabi
                                PRIVATE _URC_FATAL_PHASE2_ERROR=_URC_FAILURE)
     target_compile_definitions(libcxxabi
