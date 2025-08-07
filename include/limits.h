@@ -314,6 +314,12 @@
 #define SEM_NSEMS_MAX  _POSIX_SEM_NSEMS_MAX
 #define SEM_VALUE_MAX  _POSIX_SEM_VALUE_MAX
 
+/* Required for POSIX pthread management */
+
+#define _POSIX_THREAD_DESTRUCTOR_ITERATIONS     4
+#define _POSIX_THREAD_KEYS_MAX                  CONFIG_TLS_NELEM
+#define _POSIX_THREAD_THREADS_MAX               64
+
 /* Required for readv() and writev() */
 
 /* There really is no upper limit on the number of vectors */
