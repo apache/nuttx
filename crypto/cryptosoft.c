@@ -36,6 +36,7 @@
 #include <crypto/cryptodev.h>
 #include <crypto/cryptosoft.h>
 #include <crypto/curve25519.h>
+#include <crypto/ecc.h>
 #include <crypto/xform.h>
 #include <sys/param.h>
 
@@ -1242,6 +1243,56 @@ int swcr_rsa_verify(struct cryptkop *krp)
          !!memcmp(r.array + hash_len, padding, padding_len);
 }
 
+static int swcr_ecc256_genkey(FAR struct cryptkop *krp)
+{
+  uint8_t d[secp256r1];
+  uint8_t x[secp256r1];
+  uint8_t y[secp256r1];
+
+  if (ecc_make_key_uncomp(x, y, d) == 0)
+    {
+      return -EINVAL;
+    }
+
+  memcpy(krp->krp_param[0].crp_p, d, secp256r1);
+  memcpy(krp->krp_param[1].crp_p, x, secp256r1);
+  memcpy(krp->krp_param[2].crp_p, y, secp256r1);
+  return OK;
+}
+
+static int swcr_ecc256_sign(struct cryptkop *krp)
+{
+  uint8_t *d = (uint8_t *)krp->krp_param[0].crp_p;
+  uint8_t *hash = (uint8_t *)krp->krp_param[1].crp_p;
+  uint8_t sig[secp256r1 * 2];
+
+  if (ecdsa_sign(d, hash, sig) == 0)
+    {
+      return -EINVAL;
+    }
+
+  memcpy(krp->krp_param[2].crp_p, sig, secp256r1);
+  memcpy(krp->krp_param[3].crp_p, sig + secp256r1, secp256r1);
+  return OK;
+}
+
+static int swcr_ecc256_verify(struct cryptkop *krp)
+{
+  uint8_t *x = (uint8_t *)krp->krp_param[0].crp_p;
+  uint8_t *y = (uint8_t *)krp->krp_param[1].crp_p;
+  uint8_t *r = (uint8_t *)krp->krp_param[3].crp_p;
+  uint8_t *s = (uint8_t *)krp->krp_param[4].crp_p;
+  uint8_t *hash = (uint8_t *)krp->krp_param[5].crp_p;
+  uint8_t publickey[secp256r1 + 1];
+  uint8_t signature[secp256r1 * 2];
+
+  memcpy(publickey + 1, x, secp256r1);
+  publickey[0] = 2 + (y[secp256r1 - 1] & 0x01);
+  memcpy(signature, r, secp256r1);
+  memcpy(signature + secp256r1, s, secp256r1);
+  return ecdsa_verify(publickey, hash, signature) == 0;
+}
+
 int swcr_kprocess(struct cryptkop *krp)
 {
   /* Sanity check */
@@ -1278,6 +1329,27 @@ int swcr_kprocess(struct cryptkop *krp)
         break;
       case CRK_RSA_PKCS15_VERIFY:
         if ((krp->krp_status = swcr_rsa_verify(krp)) != 0)
+          {
+            goto done;
+          }
+
+        break;
+      case CRK_ECDSA_SECP256R1_SIGN:
+        if ((krp->krp_status = swcr_ecc256_sign(krp)) != 0)
+          {
+            goto done;
+          }
+
+        break;
+      case CRK_ECDSA_SECP256R1_VERIFY:
+        if ((krp->krp_status = swcr_ecc256_verify(krp)) != 0)
+          {
+            goto done;
+          }
+
+        break;
+      case CRK_ECDSA_SECP256R1_GENKEY:
+        if ((krp->krp_status = swcr_ecc256_genkey(krp)) != 0)
           {
             goto done;
           }
@@ -1355,5 +1427,8 @@ void swcr_init(void)
   kalgs[CRK_DH_MAKE_PUBLIC] = CRYPTO_ALG_FLAG_SUPPORTED;
   kalgs[CRK_DH_COMPUTE_KEY] = CRYPTO_ALG_FLAG_SUPPORTED;
   kalgs[CRK_RSA_PKCS15_VERIFY] = CRYPTO_ALG_FLAG_SUPPORTED;
+  kalgs[CRK_ECDSA_SECP256R1_SIGN] = CRYPTO_ALG_FLAG_SUPPORTED;
+  kalgs[CRK_ECDSA_SECP256R1_VERIFY] = CRYPTO_ALG_FLAG_SUPPORTED;
+  kalgs[CRK_ECDSA_SECP256R1_GENKEY] = CRYPTO_ALG_FLAG_SUPPORTED;
   crypto_kregister(swcr_id, kalgs, swcr_kprocess);
 }
