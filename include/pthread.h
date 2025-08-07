@@ -604,7 +604,7 @@ pid_t pthread_gettid_np(pthread_t thread);
 
 /* Compare two thread IDs. */
 
-#define pthread_equal(t1,t2) ((t1) == (t2))
+int pthread_equal(pthread_t t1, pthread_t t2);
 
 /* Thread scheduling parameters */
 
