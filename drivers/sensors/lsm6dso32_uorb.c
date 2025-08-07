@@ -1905,6 +1905,7 @@ int lsm6dso32_register(FAR struct i2c_master_s *i2c, uint8_t addr,
 
   priv->gyro.lower.type = SENSOR_TYPE_GYROSCOPE;
   priv->gyro.lower.ops = &g_sensor_ops;
+  priv->gyro.lower.nbuffer = CONFIG_SENSORS_LSM6DSO32_GYRO_ORB_BUFSIZE;
   priv->gyro.enabled = false;
   priv->gyro.odr = ODR_OFF;                 /* Default off */
   priv->gyro.fsr = LSM6DSO32_FSR_GY_125DPS; /* Default 125dps */
@@ -1923,6 +1924,7 @@ int lsm6dso32_register(FAR struct i2c_master_s *i2c, uint8_t addr,
 
   priv->accel.lower.type = SENSOR_TYPE_ACCELEROMETER;
   priv->accel.lower.ops = &g_sensor_ops;
+  priv->accel.lower.nbuffer = CONFIG_SENSORS_LSM6DSO32_ACCEL_ORB_BUFSIZE;
   priv->accel.enabled = false;
   priv->accel.odr = ODR_OFF;             /* Default off */
   priv->accel.fsr = LSM6DSO32_FSR_XL_4G; /* Default 4g */
