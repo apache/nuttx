@@ -209,8 +209,8 @@ static void update_stats(struct mm_heap_s *heap, void *mem, size_t size,
 {
   struct mm_allocnode_s *node;
   irqstate_t flags;
-  size_t uordblks;
-  size_t usmblks;
+  int uordblks;
+  int usmblks;
 
   node = (struct mm_allocnode_s *)((uintptr_t)mem - MM_ALLOCNODE_SIZE);
   flags = spin_lock_irqsave(&heap->lock);
