@@ -1307,6 +1307,7 @@ int lis2mdl_register(FAR struct i2c_master_s *i2c, int devno, uint8_t addr,
 
   priv->lower.ops = &g_sensor_ops;
   priv->lower.type = SENSOR_TYPE_MAGNETIC_FIELD;
+  priv->lower.nbuffer = CONFIG_SENSORS_LIS2MDL_ORB_BUFSIZE;
   priv->enabled = false;
   priv->lowpower = false;
   priv->offsets = false;
