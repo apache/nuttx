@@ -1541,6 +1541,48 @@ int ecc_make_key(uint8_t publickey[ECC_BYTES + 1],
   return 1;
 }
 
+int ecc_make_key_uncomp(uint8_t publickey_x[ECC_BYTES],
+                        uint8_t publickey_y[ECC_BYTES],
+                        uint8_t privatekey[ECC_BYTES])
+{
+  uint64_t l_private[NUM_ECC_DIGITS];
+  eccpoint_t l_public;
+  unsigned l_tries = 0;
+
+  do
+    {
+      if (l_tries++ >= MAX_TRIES)
+        {
+          return 0;
+        }
+
+      arc4random_buf(l_private, NUM_ECC_DIGITS);
+
+      if (vli_iszero(l_private))
+        {
+          continue;
+        }
+
+      /* Make sure the private key is in the range [1, n-1].
+       * For the supported curves, n is always large enough that we only
+       * need to subtract once at most.
+       */
+
+      if (vli_cmp(g_curve_n, l_private) != 1)
+        {
+          vli_sub(l_private, l_private, g_curve_n);
+        }
+
+      eccpoint_mult(&l_public, &g_curve_g, l_private, NULL);
+    }
+  while (eccpoint_iszero(&l_public));
+
+  ecc_native2bytes(privatekey, l_private);
+  ecc_native2bytes(publickey_x, l_public.x);
+  ecc_native2bytes(publickey_y, l_public.y);
+  return 1;
+}
+
 int ecdh_shared_secret(const uint8_t publickey[ECC_BYTES + 1],
                        const uint8_t privatekey[ECC_BYTES],
                        uint8_t secret[ECC_BYTES])
