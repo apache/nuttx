@@ -134,6 +134,11 @@ static bool noterpmsg_transfer(FAR struct noterpmsg_driver_s *drv,
       uint32_t space;
       size_t len;
 
+      if (!is_rpmsg_ept_ready(&drv->ept))
+        {
+          return false;
+        }
+
       len = noterpmsg_length(drv);
       if (len == 0)
         {
