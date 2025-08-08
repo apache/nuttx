@@ -28,8 +28,25 @@ config RPMSG
 	bool
 	default n
 	select OPENAMP
+	select SCHED_WORKQUEUE
 
 if RPMSG
+
+config RPMSG_WQUEUE_PRIORITY
+	int "rpmsg work queue priority"
+	default 224
+
+config RPMSG_WQUEUE_STACKSIZE
+	int "rpmsg work queue stack size"
+	default DEFAULT_TASK_STACKSIZE
+
+config RPMSG_WQUEUE_NUMBER
+	int "rpmsg work queue number"
+	default 1
+	range 1 256
+	---help---
+		This macro sets the number of rpmsg work queue. It can be
+		customized and the minimum value is 1.
 
 config RPMSG_TRACE
 	bool "rpmsg trace"
@@ -212,14 +229,6 @@ config RPMSG_VIRTIO
 		part.
 
 if RPMSG_VIRTIO
-
-config RPMSG_VIRTIO_PRIORITY
-	int "rpmsg virtio priority"
-	default 224
-
-config RPMSG_VIRTIO_STACKSIZE
-	int "rpmsg virtio stack size"
-	default DEFAULT_TASK_STACKSIZE
 
 config RPMSG_VIRTIO_PM
 	bool "RPMsg VirtIO power management"
