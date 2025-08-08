@@ -319,8 +319,8 @@
 
 /* ADC GPIOs ****************************************************************/
 
-#define GPIO_ADC1_IN3   (GPIO_ADC1_IN3_0)
-#define GPIO_ADC1_IN10  (GPIO_ADC1_IN10_0)
+#define GPIO_ADC1_INP3   (GPIO_ADC1_INP3_0)
+#define GPIO_ADC1_INP10  (GPIO_ADC1_INP10_0)
 
 /* USART3 GPIOs *************************************************************/
 
