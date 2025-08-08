@@ -131,6 +131,11 @@
 #define AN_ADS7046_FIRST  (AN_MCP47X6_FIRST + AN_MCP47X6_NCMDS)
 #define AN_ADS7046_NCMDS  3
 
+/* See arch/arm/src/stm32h5/stm32_adc.h */
+
+#define AN_STM32H5_FIRST (AN_ADS7046_FIRST + AN_ADS7046_NCMDS)
+#define AN_STM32H5_NCMDS 5
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/

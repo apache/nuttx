@@ -463,9 +463,87 @@
 #  endif
 #endif
 
+/* IOCTL Support */
+
+#define ANIOC_STM32H5_WDOG_CFG       _ANIOC(AN_STM32H5_FIRST + 0)
+#define ANIOC_STM32H5_WDOG2_CFG      _ANIOC(AN_STM32H5_FIRST + 1)
+#define ANIOC_STM32H5_WDOG3_CFG      _ANIOC(AN_STM32H5_FIRST + 2)
+#define ANIOC_STM32H5_WDOG_GET_EVENT _ANIOC(AN_STM32H5_FIRST + 3) /* OUT: struct stm32_adc_wdg_event_s* */
+#define ANIOC_STM32H5_WDOG_SIGCFG    _ANIOC(AN_STM32H5_FIRST + 4) /*  IN: struct stm32_adc_sigcfg_s*  */
+
+/* Watchdog Event Queue Support */
+
+#define WQ_LEN    128
+#define WQ_MASK   (WQ_LEN - 1)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
+/* STM32H5 ADC channel configuration */
+
+struct stm32_adc_channel_s
+{
+  uint8_t chan;                 /* Channel Number */
+  uint32_t p_gpio;              /* P GPIO */
+  uint32_t n_gpio;              /* N GPIO */
+  uint8_t tsamp:3;              /* Sampling time */
+  uint8_t mode:1;               /* Single-ended 0 or differential mode 1 */
+  uint8_t injected:1;           /* Regular 0 or Injected 1 */
+  uint8_t _res:3;               /* Reserved */
+};
+
+struct stm32_adc_watchdog1_cfg_s
+{
+  uint8_t filter;
+  uint8_t channel;
+  uint8_t all_channels;
+  uint16_t high_thresh;
+  uint16_t low_thresh;
+};
+
+struct stm32_adc_watchdog23_cfg_s
+{
+  uint32_t channels;
+  uint8_t high_thresh;
+  uint8_t low_thresh;
+};
+
+struct stm32_adc_wdg_event_s
+{
+  uint8_t  wdg_num;  /* 1..3 => AWD1/2/3 */
+  uint32_t isr;      /* ISR snapshot */
+};
+
+struct stm32_adc_wdg_queue_s
+{
+  struct stm32_adc_wdg_event_s wq[WQ_LEN];
+  volatile uint8_t wq_head;        /* next write idx [0..WQ_LEN-1] */
+  volatile uint8_t wq_tail;        /* next read  idx [0..WQ_LEN-1] */
+  volatile uint16_t wq_dropped;    /* stats: dropped when full */
+};
+
+struct stm32_adc_sigcfg_s
+{
+  pid_t    pid;     /* 0 disables signaling */
+  uint8_t  signo;   /* e.g., SIGUSR1; 0 disables */
+  uint8_t  mask;    /* bit0:AWD1, bit1:AWD2, bit2:AWD3 */
+};
+
+struct stm32_adc_sig_s
+{
+  /* Who to notify and which AWDs */
+
+  struct stm32_adc_sigcfg_s sigcfg;
+
+  /* Work item used to deliver the signal outside ISR context */
+
+  struct work_s work;
+
+  /* Last event cached for the signal payload (coalesced) */
+
+  uint8_t last_wdg_num;         /* 1..3 */
+};
 
 /****************************************************************************
  * Public Function Prototypes
@@ -498,8 +576,8 @@ extern "C"
 
 struct adc_dev_s;
 struct adc_dev_s *stm32h5_adc_initialize(int intf,
-                                         const uint8_t *chanlist,
-                                         int nchannels);
+                                         struct stm32_adc_channel_s *chanlist
+                                         , int nchannels);
 #undef EXTERN
 #ifdef __cplusplus
 }

@@ -261,8 +261,7 @@
 #define ADC_CFGR_AWD1CH_SHIFT       (26)      /* Bits 26-30: Analog watchdog 1 channel selection */
 #define ADC_CFGR_AWD1CH_MASK        (31 << ADC_CFGR_AWD1CH_SHIFT)
 #  define ADC_CFGR_AWD1CH(ch)       ((ch) << ADC_CFGR_AWD1CH_SHIFT) /* Ch = 0..19*/
-#  define ADC_CFGR_AWD1CH_DISABLED  (0 << ADC_CFGR_AWD1CH_SHIFT)
-#define ADC_CFGR_JQDIS              (1 << 31) /* Injected queue disable */
+#define ADC_CFGR_JQDIS              (1 << 31)                       /* Injected queue disable */
 
 /* ADC configuration register 2 *********************************************/
 
