@@ -43,6 +43,12 @@
 #include "hal/rtc_io_hal.h"
 #include "soc/rtc_cntl_periph.h"
 #include "soc/periph_defs.h"
+#ifdef CONFIG_ARCH_CHIP_ESP32C6
+#include "driver/rtc_io.h"
+#include "hal/rtc_io_ll.h"
+#include "hal/rtc_io_hal.h"
+#include "io_mux.h"
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -264,3 +270,72 @@ void esp_rtcioirqdisable(int irq)
 }
 #endif /* CONFIG_ESPRESSIF_RTCIO_IRQ */
 #endif /* CONFIG_ARCH_CHIP_ESP32C3_GENERIC */
+
+#ifdef CONFIG_ARCH_CHIP_ESP32C6
+/****************************************************************************
+ * Name: esp_rtcio_config_gpio
+ *
+ * Description:
+ *   Configure a RTC GPIO pin based on encoded pin attributes
+ *
+ * Input Parameters:
+ *   pin  - RTC GPIO pin to be configured.
+ *   mode - Attributes to be configured for the selected RTC GPIO pin.
+ *
+ * Returned Value:
+ *   Zero (OK) on success, or -1 (ERROR) in case of failure.
+ *
+ ****************************************************************************/
+
+int esp_rtcio_config_gpio(int pin, enum esp_rtc_gpio_mode_e mode)
+{
+  int ret = rtc_gpio_init(pin);
+  if (ret != OK)
+    {
+      return ret;
+    }
+
+  ret = rtc_gpio_set_direction(pin, mode);
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: esp_rtcio_read
+ *
+ * Description:
+ *   Read one or zero from the selected RTC GPIO pin
+ *
+ * Input Parameters:
+ *   pin - RTC GPIO pin to be read.
+ *
+ * Returned Value:
+ *   The boolean representation of the input value (true/false).
+ *
+ ****************************************************************************/
+
+int esp_rtcio_read(int pin)
+{
+  return rtc_gpio_get_level(pin);
+}
+
+/****************************************************************************
+ * Name: esp_rtcio_write
+ *
+ * Description:
+ *   Write one or zero to the selected RTC GPIO pin
+ *
+ * Input Parameters:
+ *   pin   - GPIO pin to be modified.
+ *   value - The value to be written (0 or 1).
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void esp_rtcio_write(int pin, bool value)
+{
+  rtc_gpio_set_level(pin, value);
+}
+#endif /* CONFIG_ARCH_CHIP_ESP32C6 */

@@ -40,6 +40,16 @@
  * Public Types
  ****************************************************************************/
 
+typedef enum esp_rtc_gpio_mode_e
+{
+  ESP_RTC_GPIO_MODE_INPUT,
+  ESP_RTC_GPIO_MODE_OUTPUT,
+  ESP_RTC_GPIO_MODE_INPUT_OUTPUT,
+  ESP_RTC_GPIO_MODE_DISABLED,
+  ESP_RTC_GPIO_MODE_OUTPUT_OD,
+  ESP_RTC_GPIO_MODE_INPUT_OUTPUT_OD
+} esp_rtc_gpio_mode_t;
+
 #ifndef __ASSEMBLY__
 
 /****************************************************************************
@@ -110,6 +120,58 @@ void esp_rtcioirqdisable(int irq);
 #else
 #  define esp_rtcioirqdisable(irq)
 #endif
+
+#ifdef CONFIG_ARCH_CHIP_ESP32C6
+/****************************************************************************
+ * Name: esp_rtcio_config_gpio
+ *
+ * Description:
+ *   Configure a RTC GPIO pin based on encoded pin attributes
+ *
+ * Input Parameters:
+ *   pin  - RTC GPIO pin to be configured.
+ *   mode - Attributes to be configured for the selected RTC GPIO pin.
+ *
+ * Returned Value:
+ *   Zero (OK) on success, or -1 (ERROR) in case of failure.
+ *
+ ****************************************************************************/
+
+int esp_rtcio_config_gpio(int pin, enum esp_rtc_gpio_mode_e mode);
+
+/****************************************************************************
+ * Name: esp_rtcio_read
+ *
+ * Description:
+ *   Read one or zero from the selected RTC GPIO pin
+ *
+ * Input Parameters:
+ *   pin - RTC GPIO pin to be read.
+ *
+ * Returned Value:
+ *   The boolean representation of the input value (true/false).
+ *
+ ****************************************************************************/
+
+int esp_rtcio_read(int pin);
+
+/****************************************************************************
+ * Name: esp_rtcio_write
+ *
+ * Description:
+ *   Write one or zero to the selected RTC GPIO pin
+ *
+ * Input Parameters:
+ *   pin   - GPIO pin to be modified.
+ *   value - The value to be written (0 or 1).
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void esp_rtcio_write(int pin, bool value);
+#endif /* CONFIG_ARCH_CHIP_ESP32C6 */
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_RISC_V_SRC_COMMON_ESPRESSIF_ESP_RTC_GPIO_H */
