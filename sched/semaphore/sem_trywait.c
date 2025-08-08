@@ -84,7 +84,8 @@ int nxsem_trywait_slow(FAR sem_t *sem)
         {
           if (NXSEM_MACQUIRED(old))
             {
-              goto out;
+              ret = -EAGAIN;
+              break;
             }
 
           new = nxsched_gettid();
@@ -93,7 +94,8 @@ int nxsem_trywait_slow(FAR sem_t *sem)
         {
           if (old <= 0)
             {
-              goto out;
+              ret = -EAGAIN;
+              break;
             }
 
           new = old - 1;
@@ -101,31 +103,32 @@ int nxsem_trywait_slow(FAR sem_t *sem)
     }
   while (!atomic_try_cmpxchg_acquire(val, &old, new));
 
-  /* It is, let the task take the semaphore */
-
-#ifdef CONFIG_PRIORITY_PROTECT
-  ret = nxsem_protect_wait(sem);
-  if (ret < 0)
+  if (ret != -EAGAIN)
     {
-      if (mutex)
+      /* It is, let the task take the semaphore */
+
+  #ifdef CONFIG_PRIORITY_PROTECT
+      ret = nxsem_protect_wait(sem);
+      if (ret < 0)
         {
-          atomic_set(NXSEM_MHOLDER(sem), NXSEM_NO_MHOLDER);
+          if (mutex)
+            {
+              atomic_set(NXSEM_MHOLDER(sem), NXSEM_NO_MHOLDER);
+            }
+          else
+            {
+              atomic_fetch_add(NXSEM_COUNT(sem), 1);
+            }
         }
       else
+  #endif
         {
-          atomic_fetch_add(NXSEM_COUNT(sem), 1);
+          if (!mutex)
+            {
+              nxsem_add_holder(sem);
+            }
         }
-
-      goto out;
     }
-#endif
-
-  if (!mutex)
-    {
-      nxsem_add_holder(sem);
-    }
-
-out:
 
   /* Interrupts may now be enabled. */
 
