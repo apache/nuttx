@@ -605,7 +605,7 @@ struct tcb_s
   start_t  start;                        /* Thread start function           */
   entry_t  entry;                        /* Entry Point into the thread     */
 
-  uint8_t  task_state;                   /* Current state of the thread     */
+  tstate_t task_state;                   /* Current state of the thread     */
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
   uint8_t  boost_priority;               /* Boosted priority of the thread  */
