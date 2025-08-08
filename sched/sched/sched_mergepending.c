@@ -96,7 +96,7 @@ bool nxsched_merge_pending(void)
            */
 
           for (;
-               (rtcb && ptcb->sched_priority <= rtcb->sched_priority);
+               (ptcb->sched_priority <= rtcb->sched_priority);
                rtcb = rtcb->flink)
             {
             }
