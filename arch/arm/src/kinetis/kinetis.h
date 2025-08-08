@@ -475,7 +475,7 @@ void kinetis_uartconfigure(uintptr_t uart_base,
                            uint32_t baud, uint32_t clock,
                            unsigned int parity, unsigned int nbits,
                            unsigned int stop2,
-                           bool iflow, bool oflow);
+                           bool iflow, bool oflow, bool rs485control);
 #endif
 
 /****************************************************************************

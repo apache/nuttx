@@ -292,6 +292,9 @@ struct up_dev_s
   uint8_t   stop2;     /* Use 2 stop bits */
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
   bool      iflow;     /* input flow control (RTS) enabled */
+#ifdef CONFIG_SERIAL_RS485CONTROL
+  bool      rs485control;     /* RTS used as transmit enable */
+#endif
 #endif
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
   bool      oflow;     /* output flow control (CTS) enabled */
@@ -482,6 +485,9 @@ static struct up_dev_s g_uart0priv =
 #  if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_UART0_IFLOWCONTROL)
   .iflow          = true,
   .rts_gpio       = PIN_UART0_RTS,
+#  if defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_UART0_RS485CONTROL)
+  .rs485control   = true,
+#  endif
 #  endif
 #  ifdef CONFIG_KINETIS_UART0_RXDMA
   .rxdma_reqsrc   = KINETIS_DMA_REQUEST_SRC_UART0_RX,
@@ -533,6 +539,9 @@ static struct up_dev_s g_uart1priv =
 #  if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_UART1_IFLOWCONTROL)
   .iflow          = true,
   .rts_gpio       = PIN_UART1_RTS,
+#  if defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_UART1_RS485CONTROL)
+  .rs485control     = true,
+#  endif
 #  endif
 #  ifdef CONFIG_KINETIS_UART1_RXDMA
   .rxdma_reqsrc   = KINETIS_DMA_REQUEST_SRC_UART1_RX,
@@ -584,6 +593,9 @@ static struct up_dev_s g_uart2priv =
 #  if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_UART2_IFLOWCONTROL)
   .iflow          = true,
   .rts_gpio       = PIN_UART2_RTS,
+#  if defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_UART2_RS485CONTROL)
+  .rs485control   = true,
+#  endif
 #  endif
 #  ifdef CONFIG_KINETIS_UART2_RXDMA
   .rxdma_reqsrc   = KINETIS_DMA_REQUEST_SRC_UART2_RX,
@@ -635,6 +647,9 @@ static struct up_dev_s g_uart3priv =
 #  if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_UART3_IFLOWCONTROL)
   .iflow          = true,
   .rts_gpio       = PIN_UART3_RTS,
+#  if defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_UART3_RS485CONTROL)
+  .rs485control   = true,
+#  endif
 #  endif
 #  ifdef CONFIG_KINETIS_UART3_RXDMA
   .rxdma_reqsrc   = KINETIS_DMA_REQUEST_SRC_UART3_RX,
@@ -686,6 +701,9 @@ static struct up_dev_s g_uart4priv =
 #  if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_UART4_IFLOWCONTROL)
   .iflow          = true,
   .rts_gpio       = PIN_UART4_RTS,
+#  if defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_UART4_RS485CONTROL)
+  .rs485control   = true,
+#  endif
 #  endif
 #  ifdef CONFIG_KINETIS_UART4_RXDMA
   .rxdma_reqsrc   = KINETIS_DMA_REQUEST_SRC_UART4_RXTX,
@@ -737,6 +755,9 @@ static struct up_dev_s g_uart5priv =
 #  if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_UART5_IFLOWCONTROL)
   .iflow          = true,
   .rts_gpio       = PIN_UART5_RTS,
+#  if defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_UART5_RS485CONTROL)
+  .rs485control   = true,
+#  endif
 #  endif
 #  ifdef CONFIG_KINETIS_UART5_RXDMA
   .rxdma_reqsrc   = KINETIS_DMA_REQUEST_SRC_UART5_RX,
@@ -904,8 +925,14 @@ static int up_setup(struct uart_dev_s *dev)
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
   bool iflow = priv->iflow;
+#ifdef CONFIG_SERIAL_RS485CONTROL
+  bool rs485control = priv->rs485control;
+#else
+  bool rs485control = false;
+#endif
 #else
   bool iflow = false;
+  bool rs485control = false;
 #endif
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
   bool oflow = priv->oflow;
@@ -917,7 +944,7 @@ static int up_setup(struct uart_dev_s *dev)
 
   kinetis_uartconfigure(priv->uartbase, priv->baud, priv->clock,
                         priv->parity, priv->bits, priv->stop2,
-                        iflow, oflow);
+                        iflow, oflow, rs485control);
 #endif
 
   /* Make sure that all interrupts are disabled */
@@ -1440,9 +1467,15 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
          * TCSADRAIN / TCSAFLUSH
          */
 
+#if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_SERIAL_RS485CONTROL)
         kinetis_uartconfigure(priv->uartbase, priv->baud, priv->clock,
                                 priv->parity, priv->bits, priv->stop2,
-                                iflow, oflow);
+                                iflow, oflow, priv->rs485control);
+#else
+        kinetis_uartconfigure(priv->uartbase, priv->baud, priv->clock,
+                                priv->parity, priv->bits, priv->stop2,
+                                iflow, oflow, false);
+#endif
       }
       break;
 #endif /* CONFIG_SERIAL_TERMIOS */

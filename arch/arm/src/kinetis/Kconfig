@@ -1396,6 +1396,58 @@ config KINETIS_SERIAL_RXDMA_BUFFER_SIZE
 
 		Value given here will be rounded up to next multiple of 32 bytes.
 
+menu "RS485 transmit enable support"
+
+config UART0_RS485CONTROL
+	bool "Use UART0 RTS as RS-485 transmit enable"
+	default n
+	select SERIAL_RS485CONTROL
+	depends on KINETIS_UART0 && UART0_IFLOWCONTROL
+	---help---
+		Enable RS-485 transmit enable on UART0.
+
+config UART1_RS485CONTROL
+	bool "Use UART1 RTS as RS-485 transmit enable"
+	default n
+	select SERIAL_RS485CONTROL
+	depends on KINETIS_UART1 && UART1_IFLOWCONTROL
+	---help---
+		Enable RS-485 transmit enable on UART1.
+
+config UART2_RS485CONTROL
+	bool "Use UART2 RTS as RS-485 transmit enable"
+	default n
+	select SERIAL_RS485CONTROL
+	depends on KINETIS_UART2 && UART2_IFLOWCONTROL
+	---help---
+		Enable RS-485 transmit enable on UART2.
+
+config UART3_RS485CONTROL
+	bool "Use UART3 RTS as RS-485 transmit enable"
+	default n
+	select SERIAL_RS485CONTROL
+	depends on KINETIS_UART3 && UART3_IFLOWCONTROL
+	---help---
+		Enable RS-485 transmit enable on UART3.
+
+config UART4_RS485CONTROL
+	bool "Use UART4 RTS as RS-485 transmit enable"
+	default n
+	select SERIAL_RS485CONTROL
+	depends on KINETIS_UART4 && UART4_IFLOWCONTROL
+	---help---
+		Enable RS-485 transmit enable on UART4.
+
+config UART5_RS485CONTROL
+	bool "Use UART5 RTS as RS-485 transmit enable"
+	default n
+	select SERIAL_RS485CONTROL
+	depends on KINETIS_UART5 && UART5_IFLOWCONTROL
+	---help---
+		Enable RS-485 transmit enable on UART5.
+
+endmenu # Kinetis RS485 transmit driver support
+
 endmenu # Kinetis UART Configuration
 
 menu "Kinetis LPUART Configuration"
