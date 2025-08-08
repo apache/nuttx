@@ -467,6 +467,29 @@
  * Public Types
  ****************************************************************************/
 
+/* STM32H5 ADC channel configuration */
+
+struct stm32_adc_channel_s
+{
+  uint8_t chan;                 /* Channel Number */
+  uint8_t tsamp:3;              /* Sampling time */
+  uint8_t mode:1;               /* Single-ended 0 or differential mode 1 */
+  uint8_t chan_type:1;          /* Regular 0 or Injected 1 */
+  uint8_t _res:3;               /* Reserved */
+};
+
+typedef enum
+{
+  SINGLE_ENDED,
+  DIFFERENTIAL
+} stm32_adc_channel_mode_t;
+
+typedef enum
+{
+  REGULAR_CHAN,
+  INJECTED_CHAN
+} stm32_adc_channel_inj_t;
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -498,8 +521,8 @@ extern "C"
 
 struct adc_dev_s;
 struct adc_dev_s *stm32h5_adc_initialize(int intf,
-                                         const uint8_t *chanlist,
-                                         int nchannels);
+                                         struct stm32_adc_channel_s *chanlist
+                                         , int nchannels);
 #undef EXTERN
 #ifdef __cplusplus
 }
