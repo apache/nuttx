@@ -30,6 +30,7 @@
 #include <nuttx/list.h>
 #include <nuttx/panic_notifier.h>
 #include <nuttx/rpmsg/rpmsg.h>
+#include <nuttx/wqueue.h>
 
 #include "rpmsg_ping.h"
 
@@ -45,6 +46,12 @@
  * Public Types
  ****************************************************************************/
 
+struct rpmsg_wqueue_s
+{
+  FAR struct kwork_wqueue_s    *kwqueue;
+  int                          recursive;
+};
+
 struct rpmsg_s
 {
   bool                         init;
@@ -54,6 +61,9 @@ struct rpmsg_s
   char                         local_cpuname[RPMSG_NAME_SIZE];
   char                         cpuname[RPMSG_NAME_SIZE];
   FAR const struct rpmsg_ops_s *ops;
+  struct rpmsg_wqueue_s        wqueues[CONFIG_RPMSG_WQUEUE_NUMBER];
+  FAR void                     *workrx;
+  struct list_node             freerx;
 #ifdef CONFIG_RPMSG_PING
   struct rpmsg_ping_dev_s      ping;
 #endif
@@ -78,8 +88,8 @@ struct rpmsg_s
 
 struct rpmsg_ops_s
 {
-  CODE int (*wait)(FAR struct rpmsg_s *rpmsg, FAR sem_t *sem);
-  CODE int (*post)(FAR struct rpmsg_s *rpmsg, FAR sem_t *sem);
+  CODE int (*wait)(FAR struct rpmsg_s *rpmsg);
+  CODE int (*post)(FAR struct rpmsg_s *rpmsg);
   CODE int (*ioctl)(FAR struct rpmsg_s *rpmsg, int cmd, unsigned long arg);
   CODE void (*panic)(FAR struct rpmsg_s *rpmsg);
   CODE void (*dump)(FAR struct rpmsg_s *rpmsg, bool verbose);
@@ -89,6 +99,8 @@ struct rpmsg_ops_s
 
 CODE typedef int (*rpmsg_foreach_t)(FAR struct rpmsg_s *rpmsg,
                                     FAR void *args);
+CODE typedef void (*rpmsg_worker_t)(FAR struct rpmsg_s *rpmsg,
+                                    FAR void *arg);
 
 /****************************************************************************
  * Public Function Prototypes
@@ -117,8 +129,15 @@ void rpmsg_device_created(FAR struct rpmsg_s *rpmsg);
 void rpmsg_device_destroy(FAR struct rpmsg_s *rpmsg);
 
 int rpmsg_register(FAR const char *path, FAR struct rpmsg_s *rpmsg,
-                   FAR const struct rpmsg_ops_s *ops);
+                   FAR const struct rpmsg_ops_s *ops, uint16_t nrx);
 void rpmsg_unregister(FAR const char *path, FAR struct rpmsg_s *rpmsg);
+int rpmsg_init_wqueues(FAR struct rpmsg_s *rpmsg);
+void rpmsg_deinit_wqueues(FAR struct rpmsg_s *rpmsg);
+int rpmsg_queue_work(FAR struct rpmsg_s *rpmsg, uint8_t priority,
+                     FAR struct work_s *work, worker_t worker,
+                     FAR void *arg);
+void rpmsg_queue_rx_work(FAR struct rpmsg_s *rpmsg, uint8_t priority,
+                         rpmsg_worker_t worker, FAR void *arg);
 
 int rpmsg_foreach(rpmsg_foreach_t handler, FAR void *args);
 void rpmsg_dump_epts(FAR struct rpmsg_device *rdev);

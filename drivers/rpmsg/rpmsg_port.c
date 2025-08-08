@@ -820,7 +820,7 @@ int rpmsg_port_register(FAR struct rpmsg_port_s *port,
 
   rpmsgvbs("start register %s\n", port->rpmsg.cpuname);
   snprintf(name, sizeof(name), "/dev/rpmsg/%s", port->rpmsg.cpuname);
-  ret = rpmsg_register(name, &port->rpmsg, &g_rpmsg_port_ops);
+  ret = rpmsg_register(name, &port->rpmsg, &g_rpmsg_port_ops, 0);
   if (ret < 0)
     {
       return ret;

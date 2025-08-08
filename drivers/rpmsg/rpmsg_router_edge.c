@@ -594,7 +594,8 @@ rpmsg_router_edge_create(FAR struct rpmsg_device *hubdev,
 
   snprintf(edge->name, sizeof(edge->name), "/dev/rpmsg/%s",
            edge->rpmsg.cpuname);
-  ret = rpmsg_register(edge->name, &edge->rpmsg, &g_rpmsg_router_edge_ops);
+  ret = rpmsg_register(edge->name, &edge->rpmsg,
+                       &g_rpmsg_router_edge_ops, 0);
   if (ret < 0)
     {
       rpmsgerr("rpmsg_register failed: %d\n", ret);
