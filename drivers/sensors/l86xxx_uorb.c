@@ -72,10 +72,6 @@
   #error "Invalid baud rate. Supported baud rates are: 4800, 5600, 14400, 19200, 38400, 57600, 115200"
 #endif
 
-#if CONFIG_L86_XXX_FIX_INT < 100 || CONFIG_L86_XXX_FIX_INT > 10000
-  #error "Invalid fix interval rate. Values must be between 100 and 10000"  
-#endif
-
 /* Helper to get array length */
 
 #define MINMEA_MAX_LENGTH 256
@@ -91,9 +87,9 @@ typedef struct
 {
   FAR struct file uart;               /* UART interface */
   struct gnss_lowerhalf_s lower;      /* uORB GNSS lower-half */
+  bool enabled;                       /* If module has started */
   mutex_t devlock;                    /* Exclusive access */
   sem_t run;                          /* Start/stop collection thread */
-  bool enabled;                       /* If module has started */
   char buffer[MINMEA_MAX_LENGTH];     /* Buffer for UART interface */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   int16_t crefs; /* Number of open references */
@@ -240,7 +236,6 @@ static int send_command(l86xxx_dev_s *dev,
   int bw1;
   int bw2;
   int err;
-  int ret;
   int i = 0;
   ssize_t len;
   uint8_t checksum;
@@ -293,7 +288,7 @@ static int send_command(l86xxx_dev_s *dev,
   if (err < 0)
   {
     snerr("Could not send command to device\n");
-    return err;
+    goto early_ret;
   }
 
   /* These commands do not send ACKs so just return after they've been
@@ -305,8 +300,8 @@ static int send_command(l86xxx_dev_s *dev,
       cmd == CMD_COLD_START ||
       cmd == CMD_FULL_COLD_START)
     {
-      nxmutex_unlock(&dev->devlock);
-      return 0;
+      err = 0;
+      goto early_ret;
     }
 
   /* Setting baud rate also doesn't send an ACK but the interface baud rate
@@ -317,12 +312,11 @@ static int send_command(l86xxx_dev_s *dev,
   {
 #ifdef CONFIG_SERIAL_TERMIOS
     nxsig_usleep(20000); /* Should wait for a bit before changing interface baud rate */
-    ret = set_baud_rate(dev, (int)arg);
+    err = set_baud_rate(dev, (int)arg);
 #else
-    ret = -EINVAL;
+    err = -EINVAL;
 #endif
-    nxmutex_unlock(&dev->devlock);
-    return ret;
+    goto early_ret;
   }
 
   /* Some commands will send ACKs,
@@ -351,34 +345,36 @@ static int send_command(l86xxx_dev_s *dev,
   if (i >= L86_ACK_RETRIES)
     {
       snerr("Did not get ACK!\n");
-      nxmutex_unlock(&dev->devlock);
-      return -EIO;
+      err = -EIO;
+      goto early_ret;
     }
 
   sninfo("ACK received!\n");
-  ret = dev->buffer[13] - '0';
-  nxmutex_unlock(&dev->devlock);
 
   /* Flag num is always in position 13 of ack, subtract by '0'
   to obtain return val
   */
 
-  if (ret == 1)
+  switch (dev->buffer[13] - '0')
     {
-      return -ENOSYS;
+    case 1:
+      err = -ENOSYS;
+      break;
+    case 2:
+      err = -EIO;
+      break;
+    case 3:
+      err = 0;
+      break;
+    default:
+      err = -EINVAL;
+      break;
+      break;
     }
-  else if (ret == 2)
-    {
-      return -EIO;
-    }
-  else if (ret == 3)
-    {
-      return 0;
-    }
-  else
-    {
-      return -EINVAL;
-    }
+
+early_ret:
+  nxmutex_unlock(&dev->devlock);
+  return err;
 }
 
 /****************************************************************************
@@ -400,8 +396,6 @@ static int read_line(l86xxx_dev_s *dev)
   int line_len = 0;
   int err;
   char next_char;
-
-  memset(dev->buffer, '\0', sizeof(dev->buffer));
 
   do
     {
@@ -500,7 +494,6 @@ static int l86xxx_activate(FAR struct gnss_lowerhalf_s *lower,
     {
       nxsem_post(&dev->run);
       dev->enabled = true;
-      return send_command(dev, CMD_HOT_START, (int)NULL);
     }
 
   /* If not already disabled, send gps into standby mode */
@@ -508,7 +501,6 @@ static int l86xxx_activate(FAR struct gnss_lowerhalf_s *lower,
   else if (!enable && dev->enabled)
     {
       dev->enabled = false;
-      return send_command(dev, CMD_STANDBY_MODE, 0);
     }
 
   return 0;
@@ -529,7 +521,7 @@ static int l86xxx_set_interval(FAR struct gnss_lowerhalf_s *lower,
                                FAR uint32_t *period_us)
 {
   FAR l86xxx_dev_s *dev = container_of(lower, FAR l86xxx_dev_s, lower);
-  int fix_interval = *period_us;
+  int fix_interval = *period_us / 1000;
   int ret;
 
   if (fix_interval < 100 || fix_interval > 10000)
@@ -577,13 +569,7 @@ static int l86xxx_thread(int argc, FAR char *argv[])
        * interrupt reading data.
        */
 
-      err = nxmutex_lock(&dev->devlock);
-      if (err < 0)
-        {
-          snerr("Couldn't lock mutex\n");
-          return err;
-        }
-
+      nxmutex_lock(&dev->devlock);
       bw = file_read(&dev->uart, dev->buffer, sizeof(dev->buffer));
 
       if (bw <= 0)
@@ -693,19 +679,13 @@ int l86xxx_register(FAR const char *uartpath, int devno)
     }
 #endif
 
-  err = send_command(priv, SET_POS_FIX, CONFIG_L86_XXX_FIX_INT);
-  if (err < 0)
-    {
-      snwarn("Couldn't set position fix interval, %d\n", err);
-    }
-
   /* Register UORB Sensor */
 
   priv->lower.ops = &g_gnss_ops;
   priv->lower.priv = priv;
   priv->enabled = false;
 
-  nbuffers[SENSOR_GNSS_IDX_GNSS] = 1;
+  nbuffers[SENSOR_GNSS_IDX_GNSS] = 2;
   nbuffers[SENSOR_GNSS_IDX_GNSS_SATELLITE] = 1;
   nbuffers[SENSOR_GNSS_IDX_GNSS_MEASUREMENT] = 1;
   nbuffers[SENSOR_GNSS_IDX_GNSS_CLOCK] = 1;
@@ -733,9 +713,8 @@ int l86xxx_register(FAR const char *uartpath, int devno)
     }
 
   sninfo("Registered L86-XXX driver with kernel polling thread"
-          " with baud rate %d and update rate %d",
-          L86_XXX_BAUD_RATE,
-          CONFIG_L86_XXX_FIX_INT);
+         " with baud rate %d",
+         L86_XXX_BAUD_RATE);
 
   return 0;
 
