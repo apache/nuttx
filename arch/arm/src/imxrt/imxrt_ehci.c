@@ -478,9 +478,6 @@ static struct imxrt_qtd_s *imxrt_qtd_setupphase(
 static struct imxrt_qtd_s *imxrt_qtd_dataphase(struct imxrt_epinfo_s *epinfo,
          void *buffer, int buflen, uint32_t tokenbits);
 static struct imxrt_qtd_s *imxrt_qtd_statusphase(uint32_t tokenbits);
-static ssize_t imxrtimxrt_virtramaddr_async_setup(
-         struct imxrt_rhport_s *rhport, struct imxrt_epinfo_s *epinfo,
-         const struct usb_ctrlreq_s *req, uint8_t *buffer, size_t buflen);
 #ifndef CONFIG_USBHOST_INT_DISABLE
 static int imxrt_intr_setup(struct imxrt_rhport_s *rhport,
          struct imxrt_epinfo_s *epinfo, uint8_t *buffer, size_t buflen);
