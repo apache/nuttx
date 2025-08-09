@@ -234,6 +234,60 @@
  * Public Types
  ****************************************************************************/
 
+/* Values from Link Status register, PCIe r3.1, sec 7.8.8 */
+
+enum pcie_link_width
+{
+  PCIE_LNK_WIDTH_RESRV    = 0x00,
+  PCIE_LNK_X1             = 0x01,
+  PCIE_LNK_X2             = 0x02,
+  PCIE_LNK_X4             = 0x04,
+  PCIE_LNK_X8             = 0x08,
+  PCIE_LNK_X12            = 0x0c,
+  PCIE_LNK_X16            = 0x10,
+  PCIE_LNK_X32            = 0x20,
+  PCIE_LNK_WIDTH_UNKNOWN  = 0xff,
+};
+
+/* See matching string table in pci_speed_string() */
+
+enum pci_bus_speed
+{
+  PCI_SPEED_33MHz           = 0x00,
+  PCI_SPEED_66MHz           = 0x01,
+  PCI_SPEED_66MHz_PCIX      = 0x02,
+  PCI_SPEED_100MHz_PCIX     = 0x03,
+  PCI_SPEED_133MHz_PCIX     = 0x04,
+  PCI_SPEED_66MHz_PCIX_ECC  = 0x05,
+  PCI_SPEED_100MHz_PCIX_ECC = 0x06,
+  PCI_SPEED_133MHz_PCIX_ECC = 0x07,
+  PCI_SPEED_66MHz_PCIX_266  = 0x09,
+  PCI_SPEED_100MHz_PCIX_266 = 0x0a,
+  PCI_SPEED_133MHz_PCIX_266 = 0x0b,
+  AGP_UNKNOWN               = 0x0c,
+  AGP_1X                    = 0x0d,
+  AGP_2X                    = 0x0e,
+  AGP_4X                    = 0x0f,
+  AGP_8X                    = 0x10,
+  PCI_SPEED_66MHz_PCIX_533  = 0x11,
+  PCI_SPEED_100MHz_PCIX_533 = 0x12,
+  PCI_SPEED_133MHz_PCIX_533 = 0x13,
+  PCIE_SPEED_2_5GT          = 0x14,
+  PCIE_SPEED_5_0GT          = 0x15,
+  PCIE_SPEED_8_0GT          = 0x16,
+  PCIE_SPEED_16_0GT         = 0x17,
+  PCIE_SPEED_32_0GT         = 0x18,
+  PCIE_SPEED_64_0GT         = 0x19,
+  PCI_SPEED_UNKNOWN         = 0xff,
+};
+
+#define PCIBIOS_SUCCESSFUL    0x00
+#define PCIBIOS_FUNC_NOT_SUPPORTED  0x81
+#define PCIBIOS_BAD_VENDOR_ID   0x83
+#define PCIBIOS_DEVICE_NOT_FOUND  0x86
+#define PCIBIOS_BAD_REGISTER_NUMBER 0x87
+#define PCIBIOS_SET_FAILED    0x88
+#define PCIBIOS_BUFFER_TOO_SMALL  0x89
 struct pci_resource_s
 {
   uint64_t start;
