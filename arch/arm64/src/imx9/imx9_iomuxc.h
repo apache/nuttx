@@ -38,6 +38,26 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#ifdef CONFIG_IMX9_IOMUX_OVER_SCMI
+#define IOMUXC_PAD_CONFIG_SHIFT 1
+
+#define IOMUX_PADCFG(_ctlregoff, _mode, _dsyregoff, _dsy, _padregoff) \
+  {                                                          \
+    .ctlregoff = (_ctlregoff),                               \
+    .padregoff = (_padregoff),                               \
+    .dsyregoff = (_dsyregoff),                               \
+    .mode   = (_mode),                                       \
+    .dsy    = (_dsy),                                        \
+  }
+
+#define IOMUX_CFG(_padcfg, _pad, _sion)                      \
+  (iomux_cfg_t)                                              \
+  {                                                          \
+    .padcfg = _padcfg,                                       \
+    .pad    = (_pad) >> IOMUXC_PAD_CONFIG_SHIFT,             \
+    .sion   = (_sion) >> IOMUXC_MUX_SION_SHIFT,              \
+  }
+#else
 #define IOMUX_PADCFG(_ctlreg, _mode, _dsyreg, _dsy, _padreg) \
   {                                                          \
     .ctlreg = (_ctlreg),                                     \
@@ -54,13 +74,38 @@
     .pad    = (_pad),                  \
     .mux    = (_mux),                  \
   }
-
+#endif
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
 /* Information for the pad alternate function */
 
+#ifdef CONFIG_IMX9_IOMUX_OVER_SCMI
+struct iomux_padcfg_s
+{
+  /* Register offsets for PAD
+   * ALT(mode) configuration for ctlreg
+   * input daisy(dsy) configuration for dsyreg
+   */
+
+  uint16_t mode       :  3;
+  uint16_t ctlregoff  : 13;
+  uint16_t padregoff  : 16;
+  uint16_t dsy        :  3;
+  uint16_t dsyregoff  : 13;
+};
+
+struct iomux_cfg_s
+{
+  struct iomux_padcfg_s padcfg;
+
+  /* Register values */
+
+  uint32_t pad  :31;
+  uint32_t sion : 1;
+};
+#else
 struct iomux_padcfg_s
 {
   /* Register offsets for PAD */
@@ -84,6 +129,7 @@ struct iomux_cfg_s
   uint32_t pad;
   uint32_t mux;
 };
+#endif
 typedef struct iomux_cfg_s iomux_cfg_t;
 
 /****************************************************************************
