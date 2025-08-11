@@ -67,7 +67,7 @@ static pid_t g_irq_thread_pid[NR_IRQS];
  * Useful for oneshot interrupts.
  */
 
-static int irq_default_handler(int irq, FAR void *regs, FAR void *arg)
+static int irq_thread_default_handler(int irq, FAR void *regs, FAR void *arg)
 {
   FAR struct irq_thread_info_s *info = arg;
   int ret = IRQ_WAKE_THREAD;
@@ -101,7 +101,7 @@ static int isr_thread_main(int argc, FAR char *argv[])
 
   nxsem_init(&sem, 0, 0);
 
-  irq_attach(irq, irq_default_handler, &info);
+  irq_attach(irq, irq_thread_default_handler, &info);
 
 #if !defined(CONFIG_ARCH_NOINTC)
   up_enable_irq(irq);
