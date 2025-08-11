@@ -332,6 +332,10 @@ ifeq ($(CONFIG_SENSORS_BMM150),y)
   CSRCS += bmm150_uorb.c
 endif
 
+ifeq ($(CONFIG_SENSORS_TMP112),y)
+  CSRCS += tmp112.c
+endif
+
 endif # CONFIG_I2C
 
 # These drivers depend on SPI support

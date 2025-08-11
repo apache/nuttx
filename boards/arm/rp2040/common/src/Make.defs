@@ -109,6 +109,10 @@ ifeq ($(CONFIG_SENSORS_MAX6675),y)
   CSRCS += rp2040_max6675.c
 endif
 
+ifeq ($(CONFIG_SENSORS_TMP112),y)
+  CSRCS += rp2040_tmp112.c
+endif
+
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src

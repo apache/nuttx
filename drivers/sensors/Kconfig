@@ -2146,4 +2146,19 @@ config SENSORS_FS3000_THREAD_STACKSIZE
 
 endif # SENSORS_FS3000
 
+config SENSORS_TMP112
+	bool "Texas Instruments TMP112x Temperature Sensor support"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the Texas Instruments TMP112x temperature sensor.
+
+if SENSORS_TMP112
+
+config TMP112_I2C_FREQUENCY
+	int "TMP112 I2C frequency"
+	default 400000
+
+endif #SENSORS_TMP112
+
 endif # SENSORS
