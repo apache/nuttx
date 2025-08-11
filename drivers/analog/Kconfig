@@ -257,6 +257,23 @@ config ADC_MCP3008_DIFFERENTIAL
 
 endif # ADC_MCP3008
 
+config ADC_ADS7046
+	bool "TI ADS7046 support"
+	default n
+	select SPI
+	---help---
+		Enable driver support for the Texas Instruments ADS7046 12-bit ADC.
+
+if ADC_ADS7046
+
+config ADS7046_FREQUENCY
+	int "TI ADS7046 SPI frequency"
+	default 1000000
+	---help---
+		ADS7046 SPI frequency. Maximum is 60 MHz.
+
+endif # ADC_ADS7046
+
 config ADC_ADS1115
 	bool "ADS1115 support"
 	default n
@@ -264,15 +281,15 @@ config ADC_ADS1115
 	---help---
 		Enable driver support for the Texas Instruments ADS1115 16-bit ADC.
 		Currently support is experimental, especially the comparator and ALRT/RDY
-		pin functions. 
+		pin functions.
 
-if ADC_ADS1115 
+if ADC_ADS1115
 
 config ADC_ADS1115_I2C_FREQUENCY
 	int "ADS1115 I2C frequency"
 	default 100000
 	---help---
-		ADS1115 I2C frequency. 
+		ADS1115 I2C frequency.
 
 config ADC_ADS1115_ADDR
 	hex "ADS1115 I2C address"
@@ -320,7 +337,7 @@ config ADC_ADS1115_COMP_MODE
 	bool "ADS1115 window comparator mode"
 	default n
 	---help---
-		ADS1115 window comparator mode. 
+		ADS1115 window comparator mode.
 
 config ADC_ADS1115_COMP_POL
 	bool "ADS1115 comparator polarity"
