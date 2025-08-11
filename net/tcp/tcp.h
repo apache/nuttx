@@ -189,9 +189,9 @@ struct tcp_conn_s
    * When an callback is executed from 'list', the input flags are normally
    * returned, however, the implementation may set one of the following:
    *
+   *   TCP_RXCLOSE - Gracefully close the current connection (RX)
    *   TCP_TXCLOSE - Gracefully close the current connection (TX)
-   *   TCP_ABORT   - Abort (reset) the current connection on an error that
-   *                 prevents TCP_CLOSE from working.
+   *   TCP_ABORT   - Abort (reset) the current connection
    *
    * And/Or set/clear the following:
    *

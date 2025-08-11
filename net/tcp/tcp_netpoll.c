@@ -83,7 +83,7 @@ static uint16_t tcp_poll_eventhandler(FAR struct net_driver_s *dev,
 
       /* Check for data or connection availability events. */
 
-      if ((flags & (TCP_NEWDATA | TCP_BACKLOG)) != 0)
+      if ((flags & (TCP_NEWDATA | TCP_BACKLOG | TCP_RXCLOSE)) != 0)
         {
           eventset |= POLLIN;
         }
@@ -301,7 +301,7 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
 
   if ((fds->events & POLLIN) != 0)
     {
-      cb->flags |= TCP_NEWDATA | TCP_BACKLOG;
+      cb->flags |= TCP_NEWDATA | TCP_BACKLOG | TCP_RXCLOSE;
     }
 
   /* Save the reference in the poll info structure as fds private as well
@@ -312,7 +312,8 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
 
   /* Check for read data or backlogged connection availability now */
 
-  if (conn->readahead != NULL || tcp_backlogpending(conn))
+  if (conn->readahead != NULL || tcp_backlogpending(conn) ||
+      (conn->shutdown & SHUT_RD) != 0)
     {
       /* Normal data may be read without blocking. */
 

@@ -87,6 +87,10 @@ static void tcp_close_connection(FAR struct tcp_conn_s *conn, uint16_t flags)
    *  _SF_CONNECTED==0 && _SF_CLOSED==0 - the socket was rudely disconnected
    */
 
+  /* The loss of connection was less than graceful.  This will
+   * (eventually) be reported as an ENOTCONN error.
+   */
+
   if ((flags & TCP_CLOSE) != 0)
     {
       /* The peer gracefully closed the connection.  Marking the
@@ -173,6 +177,10 @@ static uint16_t tcp_monitor_event(FAR struct net_driver_s *dev,
 
           conn->sconn.s_flags |= (_SF_BOUND | _SF_CONNECTED);
           conn->sconn.s_flags &= ~_SF_CLOSED;
+        }
+      else if ((flags & TCP_RXCLOSE) != 0)
+        {
+          conn->shutdown |= SHUT_RD;
         }
     }
 
@@ -294,7 +302,7 @@ int tcp_start_monitor(FAR struct socket *psock)
     {
       cb->event = tcp_monitor_event;
       cb->priv  = (FAR void *)conn;
-      cb->flags = TCP_DISCONN_EVENTS;
+      cb->flags = TCP_DISCONN_EVENTS | TCP_RXCLOSE;
 
       /* Monitor the connected event */
 

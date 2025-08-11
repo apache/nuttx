@@ -1398,6 +1398,7 @@ found:
              * has been closed.
              */
 
+            flags |= TCP_RXCLOSE;
             if (dev->d_len > 0)
               {
                 flags |= TCP_NEWDATA;
@@ -1577,7 +1578,7 @@ found:
               }
 
             net_incr32(conn->rcvseq, 1); /* ack FIN */
-            tcp_callback(dev, conn, TCP_CLOSE);
+            tcp_callback(dev, conn, TCP_RXCLOSE);
             tcp_send(dev, conn, TCP_ACK, tcpiplen);
             return;
           }
@@ -1606,7 +1607,7 @@ found:
             ninfo("TCP state: TCP_TIME_WAIT\n");
 
             net_incr32(conn->rcvseq, 1); /* ack FIN */
-            tcp_callback(dev, conn, TCP_CLOSE);
+            tcp_callback(dev, conn, TCP_RXCLOSE);
             tcp_send(dev, conn, TCP_ACK, tcpiplen);
             return;
           }

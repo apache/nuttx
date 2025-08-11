@@ -62,8 +62,8 @@
 
 /* The following flags may be set in the set of flags by the lower, device-
  * interfacing layer before calling through the socket layer callback. The
- * TCP_ACKDATA, XYZ_NEWDATA, and TCP_CLOSE flags may be set at the same time,
- * whereas the others are mutually exclusive.
+ * TCP_ACKDATA, XYZ_NEWDATA, TCP_CLOSE, TCP_RXCLOSE and TCP_TXCLOSE flags
+ * may be set at the same time, whereas the others are mutually exclusive.
  *
  * Connection Specific Events:  These are events that may be notified
  * through callback lists residing in TCP, UDP, or PKT port connection
@@ -123,6 +123,19 @@
  *                        retransmissions. (TCP only)
  *                   OUT: Not used
  *
+ *   TCP_RXCLOSE      IN: The remote host has closed the connection, thus the
+ *                        connection has gone away. (TCP only)
+ *                   OUT: The socket layer signals that it wants to close the
+ *                        connection. (TCP only)
+ *
+ *   TCP_TXCLOSE      IN: The local host has closed the connection, thus the
+ *                        connection has gone away. (TCP only)
+ *                   OUT: The socket layer signals that it wants to close the
+ *                        connection. (TCP only)
+ *
+ *   NETDEV_DOWN:     IN: The network device has been taken down.
+ *                   OUT: Not used
+ *
  * Device Specific Events:  These are events that may be notified through
  * callback lists residing in the network device structure.
  *
@@ -159,12 +172,9 @@
  *                        event, not associated with a socket.  The appdata
  *                        pointer is not used in this case.
  *                   OUT: Not used
- *
- *   NETDEV_DOWN:     IN: The network device has been taken down.
- *                   OUT: Not used
  */
 
-/* Bits 0-11: Connection specific event bits */
+/* Bits 0-12: Connection specific event bits */
 
 #define TCP_ACKDATA        (1 << 0)
 #define TCP_NEWDATA        (1 << 1)
@@ -193,18 +203,19 @@
 #define TCP_TIMEDOUT       (1 << 9)
 #define TCP_WAITALL        (1 << 10)
 #define TCP_TXCLOSE        (1 << 11)
+#define TCP_RXCLOSE        (1 << 12)
 
-/* Bit 12: Device specific event bits */
+/* Bit 13: Device specific event bits */
 
-#define NETDEV_DOWN        (1 << 12)
+#define NETDEV_DOWN        (1 << 13)
 
-/* Bits 13-15: Encoded device specific poll events.  Unlike connection
+/* Bits 14-16: Encoded device specific poll events.  Unlike connection
  * oriented poll events, device related poll events must distinguish
  * between what is being polled for since the callbacks all reside in
  * the same list in the network device structure.
  */
 
-#define DEVPOLL_SHIFT      (13)
+#define DEVPOLL_SHIFT      (14)
 #define DEVPOLL_MASK       (7 << DEVPOLL_SHIFT)
 #  define DEVPOLL_NONE     (0 << DEVPOLL_SHIFT)
 #  define ARP_POLL         (1 << DEVPOLL_SHIFT)
@@ -216,7 +227,7 @@
 
 #define TCP_CONN_EVENTS \
   (TCP_CLOSE | TCP_ABORT | TCP_CONNECTED | TCP_TIMEDOUT | NETDEV_DOWN | \
-   TCP_TXCLOSE)
+   TCP_TXCLOSE | TCP_RXCLOSE)
 
 #define TCP_DISCONN_EVENTS \
   (TCP_CLOSE | TCP_ABORT | TCP_TIMEDOUT | NETDEV_DOWN)

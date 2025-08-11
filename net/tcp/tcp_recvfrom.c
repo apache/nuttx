@@ -209,10 +209,11 @@ static inline uint16_t tcp_newdata(FAR struct net_driver_s *dev,
 
   if (recvlen < dev->d_len)
     {
-      /* Clear the TCP_CLOSE because we effectively dropped the FIN as well.
+      /* Clear the TCP_RXCLOSE because we effectively dropped the FIN as
+       * well.
        */
 
-      flags &= ~TCP_CLOSE;
+      flags &= ~TCP_RXCLOSE;
     }
 
   net_incr32(conn->rcvseq, recvlen);
@@ -524,6 +525,12 @@ static uint16_t tcp_recvhandler(FAR struct net_driver_s *dev,
 
           nxsem_post(&pstate->ir_sem);
         }
+      else if ((flags & TCP_RXCLOSE) != 0)
+        {
+          ninfo("TCP_RXCLOSE\n");
+          pstate->ir_result = 0;
+          nxsem_post(&pstate->ir_sem);
+        }
     }
 
   return flags;
@@ -719,7 +726,8 @@ static ssize_t tcp_recvfrom_one(FAR struct tcp_conn_s *conn, FAR void *buf,
 
   /* Verify that the SOCK_STREAM has been and still is connected */
 
-  if (!_SS_ISCONNECTED(conn->sconn.s_flags))
+  if (!_SS_ISCONNECTED(conn->sconn.s_flags) ||
+      (conn->shutdown & SHUT_RD) != 0)
     {
       /* Was any data transferred from the readahead buffer after we were
        * disconnected?  If so, then return the number of bytes received.
@@ -732,7 +740,8 @@ static ssize_t tcp_recvfrom_one(FAR struct tcp_conn_s *conn, FAR void *buf,
        * recvfrom() will get an end-of-file indication.
        */
 
-      if (ret <= 0 && !_SS_ISCLOSED(conn->sconn.s_flags))
+      if (ret <= 0 && !_SS_ISCLOSED(conn->sconn.s_flags) &&
+          (conn->shutdown & SHUT_RD) == 0)
         {
           /* Nothing was previously received from the read-ahead buffers.
            * The SOCK_STREAM must be (re-)connected in order to receive
@@ -794,7 +803,8 @@ static ssize_t tcp_recvfrom_one(FAR struct tcp_conn_s *conn, FAR void *buf,
       state.ir_cb = tcp_callback_alloc(conn);
       if (state.ir_cb)
         {
-          state.ir_cb->flags   = (TCP_NEWDATA | TCP_DISCONN_EVENTS);
+          state.ir_cb->flags   = (TCP_NEWDATA | TCP_RXCLOSE |
+                                  TCP_DISCONN_EVENTS);
           state.ir_cb->flags  |= (flags & MSG_WAITALL) ? TCP_WAITALL : 0;
           state.ir_cb->priv    = (FAR void *)&state;
           state.ir_cb->event   = tcp_recvhandler;
