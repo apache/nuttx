@@ -4,6 +4,7 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
+    documentation.url = "path:./Documentation";
   };
 
   outputs =
@@ -11,6 +12,7 @@
       self,
       nixpkgs,
       flake-utils,
+      documentation,
       ...
     }:
     flake-utils.lib.eachDefaultSystem (
@@ -19,6 +21,7 @@
         pkgs = import nixpkgs { inherit system; };
       in
       {
+        # Default devShell
         devShells.default = pkgs.mkShell {
           buildInputs = [
             # Build tools
@@ -47,24 +50,15 @@
             pkgs.ncurses.dev
             pkgs.zlib
             pkgs.python313Packages.kconfiglib
-
-            # NuttX Documentation
-            pkgs.sphinx
-            pkgs.python313Packages.sphinx_rtd_theme
-            pkgs.python313Packages.myst-parser
-            pkgs.python313Packages.sphinx-tabs
-            pkgs.python313Packages.sphinx-autobuild
-            pkgs.python313Packages.sphinx-copybutton
-            pkgs.python313Packages.sphinx-togglebutton
-            pkgs.python313Packages.pytz
-            pkgs.python313Packages.importlib-metadata
-            pkgs.python313Packages.sphinx-design
           ];
           shellHook = ''
             export CMAKE_EXPORT_COMPILE_COMMANDS=ON
             echo "Welcome to NuttX devShell"
           '';
         };
+
+        # Documentation devShell
+        devShells.docs = documentation.devShells.${system}.default;
       }
     );
 }
