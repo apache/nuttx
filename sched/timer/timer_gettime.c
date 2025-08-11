@@ -74,22 +74,26 @@ int timer_gettime(timer_t timerid, FAR struct itimerspec *value)
 {
   FAR struct posix_timer_s *timer = timer_gethandle(timerid);
   sclock_t ticks;
+  int ret = OK;
 
   if (!timer || !value)
     {
       set_errno(EINVAL);
-      return ERROR;
+      ret = ERROR;
+    }
+  else
+    {
+      /* Get the number of ticks before the underlying watchdog expires */
+
+      ticks = wd_gettime(&timer->pt_wdog);
+
+      /* Convert that to a struct timespec and return it */
+
+      clock_ticks2time(&value->it_value, ticks);
+      clock_ticks2time(&value->it_interval, timer->pt_delay);
     }
 
-  /* Get the number of ticks before the underlying watchdog expires */
-
-  ticks = wd_gettime(&timer->pt_wdog);
-
-  /* Convert that to a struct timespec and return it */
-
-  clock_ticks2time(&value->it_value, ticks);
-  clock_ticks2time(&value->it_interval, timer->pt_delay);
-  return OK;
+  return ret;
 }
 
 #endif /* CONFIG_DISABLE_POSIX_TIMERS */

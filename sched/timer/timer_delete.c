@@ -68,10 +68,10 @@ int timer_delete(timer_t timerid)
   if (ret < 0)
     {
       set_errno(-ret);
-      return ERROR;
+      ret = ERROR;
     }
 
-  return OK;
+  return ret;
 }
 
 #endif /* CONFIG_DISABLE_POSIX_TIMERS */
