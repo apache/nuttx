@@ -9,4 +9,5 @@ Timers Drivers
   pwm.rst
   watchdog.rst
   rtc.rst
+  capture.rst
 

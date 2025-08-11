@@ -4584,15 +4584,10 @@ config STM32H7_ADC3_TIMTRIG
 	---help---
 		Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO
 
-config STM32H7_CAP
-	bool
-	default n
-
 config STM32H7_TIM1_CAP
 	bool "TIM1 Capture"
 	default n
 	depends on STM32H7_TIM1
-	select STM32H7_CAP
 	---help---
 		Reserve timer 1 for use by the capture driver.
 
@@ -4617,7 +4612,6 @@ config STM32H7_TIM8_CAP
 	bool "TIM8 Capture"
 	default n
 	depends on STM32H7_TIM8
-	select STM32H7_CAP
 	---help---
 		Reserve timer 8 for use by the capture driver.
 
@@ -4646,7 +4640,6 @@ config STM32H7_TIM2_CAP
 	bool "TIM2 Capture"
 	default n
 	depends on STM32H7_TIM2
-	select STM32H7_CAP
 	---help---
 		Reserve timer 2 for use by the capture driver.
 
@@ -4671,7 +4664,6 @@ config STM32H7_TIM3_CAP
 	bool "TIM3 Capture"
 	default n
 	depends on STM32H7_TIM3
-	select STM32H7_CAP
 	---help---
 		Reserve timer 3 for use by the capture driver.
 
@@ -4696,7 +4688,6 @@ config STM32H7_TIM4_CAP
 	bool "TIM4 Capture"
 	default n
 	depends on STM32H7_TIM4
-	select STM32H7_CAP
 	---help---
 		Reserve timer 4 for use by the capture driver.
 
@@ -4721,7 +4712,6 @@ config STM32H7_TIM5_CAP
 	bool "TIM5 Capture"
 	default n
 	depends on STM32H7_TIM5
-	select STM32H7_CAP
 	---help---
 		Reserve timer 5 for use by the capture driver.
 
@@ -4750,7 +4740,6 @@ config STM32H7_TIM12_CAP
 	bool "TIM12 Capture"
 	default n
 	depends on STM32H7_TIM12
-	select STM32H7_CAP
 	---help---
 		Reserve timer 12 for use by the capture driver.
 
@@ -4775,7 +4764,6 @@ config STM32H7_TIM15_CAP
 	bool "TIM15 Capture"
 	default n
 	depends on STM32H7_TIM15
-	select STM32H7_CAP
 	---help---
 		Reserve timer 15 for use by the capture driver.
 
@@ -4804,7 +4792,6 @@ config STM32H7_TIM13_CAP
 	bool "TIM13 Capture"
 	default n
 	depends on STM32H7_TIM13
-	select STM32H7_CAP
 	---help---
 		Reserve timer 13 for use by the capture driver.
 
@@ -4829,7 +4816,6 @@ config STM32H7_TIM14_CAP
 	bool "TIM14 Capture"
 	default n
 	depends on STM32H7_TIM14
-	select STM32H7_CAP
 	---help---
 		Reserve timer 14 for use by the capture driver.
 
@@ -4854,7 +4840,6 @@ config STM32H7_TIM16_CAP
 	bool "TIM16 Capture"
 	default n
 	depends on STM32H7_TIM16
-	select STM32H7_CAP
 	---help---
 		Reserve timer 16 for use by the capture driver.
 
@@ -4879,7 +4864,6 @@ config STM32H7_TIM17_CAP
 	bool "TIM17 Capture"
 	default n
 	depends on STM32H7_TIM17
-	select STM32H7_CAP
 	---help---
 		Reserve timer 17 for use by the capture driver.
 
@@ -4908,7 +4892,6 @@ config STM32H7_LPTIM1_CAP
 	bool "LPTIM1 Capture"
 	default n
 	depends on STM32H7_LPTIM1
-	select STM32H7_CAP
 	---help---
 		Reserve low-power timer 1 for use by the capture driver.
 
@@ -4933,7 +4916,6 @@ config STM32H7_LPTIM2_CAP
 	bool "LPTIM2 Capture"
 	default n
 	depends on STM32H7_LPTIM2
-	select STM32H7_CAP
 	---help---
 		Reserve low-power timer 2 for use by the capture driver.
 
@@ -4958,7 +4940,6 @@ config STM32H7_LPTIM3_CAP
 	bool "LPTIM3 Capture"
 	default n
 	depends on STM32H7_LPTIM3
-	select STM32H7_CAP
 	---help---
 		Reserve low-power timer 3 for use by the capture driver.
 
@@ -4983,7 +4964,6 @@ config STM32H7_LPTIM4_CAP
 	bool "LPTIM4 Capture"
 	default n
 	depends on STM32H7_LPTIM4
-	select STM32H7_CAP
 	---help---
 		Reserve low-power timer 4 for use by the capture driver.
 
@@ -5008,7 +4988,6 @@ config STM32H7_LPTIM5_CAP
 	bool "LPTIM5 Capture"
 	default n
 	depends on STM32H7_LPTIM5
-	select STM32H7_CAP
 	---help---
 		Reserve low-power timer 5 for use by the capture driver.
 

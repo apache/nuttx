@@ -39,7 +39,7 @@
 
 #include "stm32_capture.h"
 
-#if defined(CONFIG_STM32H7_CAP)
+#if defined(CONFIG_CAPTURE)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -587,4 +587,4 @@ errout:
   return (struct cap_lowerhalf_s *)lower;
 }
 
-#endif /* CONFIG_STM32H7_CAP */
+#endif /* CONFIG_CAPTURE */
