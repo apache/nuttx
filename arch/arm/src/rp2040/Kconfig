@@ -619,31 +619,31 @@ if RP2040_ADC
 
 if ADC
 
-config RPC2040_ADC_CHANNEL0
+config RP2040_ADC_CHANNEL0
 	bool "Read ADC channel 0"
 	default n
 	---help---
 		If y, then ADC0 will be read.
 
-config RPC2040_ADC_CHANNEL1
+config RP2040_ADC_CHANNEL1
 	bool "Read ADC channel 1"
 	default n
 	---help---
 		If y, then ADC1 will be read.
 
-config RPC2040_ADC_CHANNEL2
+config RP2040_ADC_CHANNEL2
 	bool "Read ADC channel 2"
 	default n
 	---help---
 		If y, then ADC2 will be read.
 
-config RPC2040_ADC_CHANNEL3
+config RP2040_ADC_CHANNEL3
 	bool "Read ADC channel 3"
 	default n
 	---help---
 		If y, then ADC3 will be read.
 
-config RPC2040_ADC_TEMPERATURE
+config RP2040_ADC_TEMPERATURE
 	bool "Read ADC chip temperature channel"
 	default n
 	---help---
