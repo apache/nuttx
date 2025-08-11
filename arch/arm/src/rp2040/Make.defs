@@ -35,6 +35,7 @@ CHIP_CSRCS += rp2040_pio.c
 CHIP_CSRCS += rp2040_clock.c
 CHIP_CSRCS += rp2040_xosc.c
 CHIP_CSRCS += rp2040_pll.c
+CHIP_CSRCS += rp2040_syscfg.c
 
 ifeq ($(CONFIG_SMP),y)
 CHIP_CSRCS += rp2040_cpustart.c
