@@ -204,11 +204,11 @@ struct stm32_cap_ops_s
 
 /* Power-up timer and get its structure */
 
-struct stm32_cap_dev_s *stm32_cap_init(int timer, uint8_t channel);
+struct stm32_cap_dev_s *stm32_cap_init(int timer);
 
 /* Power-down timer, mark it as unused */
 
-int stm32_cap_deinit(struct stm32_cap_dev_s *dev, uint8_t channel);
+int stm32_cap_deinit(struct stm32_cap_dev_s *dev);
 
 /****************************************************************************
  * Name: stm32_cap_initialize
@@ -228,7 +228,7 @@ int stm32_cap_deinit(struct stm32_cap_dev_s *dev, uint8_t channel);
  ****************************************************************************/
 
 #ifdef CONFIG_CAPTURE
-struct cap_lowerhalf_s *stm32_cap_initialize(int timer, uint8_t channel);
+struct cap_lowerhalf_s *stm32_cap_initialize(int timer);
 #endif
 
 #undef EXTERN

@@ -472,17 +472,34 @@ int cap_register_multiple(FAR const char *devpath,
                           FAR struct cap_lowerhalf_s **lower,
                           int n)
 {
-  char fullpath[16];
+  char fullpath[32];
   int ret;
 
-  if (n < 1)
+  if (!devpath || !lower || n < 1)
     {
       return -EINVAL;
     }
 
+  size_t devlen = strlen(devpath);
+  if (devlen == 0 || devlen > sizeof(fullpath) - 2)
+    {
+      return -ENAMETOOLONG;
+    }
+
   for (int i = 0; i < n; i++)
     {
-      snprintf(fullpath, sizeof(fullpath), "%s%d", devpath, i);
+      int written = snprintf(fullpath, sizeof(fullpath), "%s%d", devpath, i);
+
+      if (written < 0)
+        {
+          return -EIO;
+        }
+
+      if ((size_t)written >= sizeof(fullpath))
+        {
+          return -ENAMETOOLONG;
+        }
+
       ret = cap_register(fullpath, lower[i]);
       if (ret < 0)
         {

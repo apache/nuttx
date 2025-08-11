@@ -576,7 +576,7 @@ struct cap_lowerhalf_s *stm32_cap_initialize(int timer)
   /* Initialize the elements of lower half state structure */
 
   lower->started  = false;
-  lower->cap      = stm32_cap_init(timer, lower->channel);
+  lower->cap      = stm32_cap_init(timer);
 
   if (lower->cap == NULL)
     {
