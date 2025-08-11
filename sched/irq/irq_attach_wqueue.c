@@ -138,7 +138,7 @@ static int irq_default_handler(int irq, FAR void *regs, FAR void *arg)
 
   if (ret == IRQ_WAKE_THREAD)
     {
-      work_queue_wq(info->wqueue, &info->work, irq_work_handler, info, 0);
+      work_queue_wq(info->wqueue, &info->work, irq_work_handler, info, 0u);
       ret = OK;
     }
 
@@ -179,7 +179,7 @@ int irq_attach_wqueue(int irq, xcpt_t isr, xcpt_t isrwork,
 #if NR_IRQS > 0
   int ndx;
 
-  if ((unsigned)irq >= NR_IRQS)
+  if (irq < 0 || irq >= NR_IRQS)
     {
       return -EINVAL;
     }
