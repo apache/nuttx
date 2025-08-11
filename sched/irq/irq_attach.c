@@ -113,19 +113,22 @@ int ndx_to_irq(int ndx)
 
 int irq_attach(int irq, xcpt_t isr, FAR void *arg)
 {
+  int ret = OK;
 #if NR_IRQS > 0
-  int ret = -EINVAL;
+  int ndx = -EINVAL;
+  irqstate_t flags;
 
   if (irq >= 0 && irq < NR_IRQS)
     {
-      int ndx = IRQ_TO_NDX(irq);
-      irqstate_t flags;
+      ndx = IRQ_TO_NDX(irq);
+    }
 
-      if (ndx < 0)
-        {
-          return ndx;
-        }
-
+  if (ndx < 0)
+    {
+      ret = ndx;
+    }
+  else
+    {
       /* If the new ISR is NULL, then the ISR is being detached.
        * In this case, disable the ISR and direct any interrupts
        * to the unexpected interrupt handler.
@@ -166,26 +169,24 @@ int irq_attach(int irq, xcpt_t isr, FAR void *arg)
         {
           ret = irqchain_attach(ndx, isr, arg);
           spin_unlock_irqrestore(&g_irqlock, flags);
-          return ret;
         }
+      else
 #endif
+        {
+          /* Save the new ISR and its argument in the table. */
 
-      /* Save the new ISR and its argument in the table. */
+          g_irqvector[ndx].handler = isr;
+          g_irqvector[ndx].arg     = arg;
+    #ifdef CONFIG_SCHED_IRQMONITOR
+          g_irqvector[ndx].start   = clock_systime_ticks();
+          g_irqvector[ndx].time    = 0;
+          g_irqvector[ndx].count   = 0;
+    #endif
 
-      g_irqvector[ndx].handler = isr;
-      g_irqvector[ndx].arg     = arg;
-#ifdef CONFIG_SCHED_IRQMONITOR
-      g_irqvector[ndx].start   = clock_systime_ticks();
-      g_irqvector[ndx].time    = 0;
-      g_irqvector[ndx].count   = 0;
-#endif
-
-      spin_unlock_irqrestore(&g_irqlock, flags);
-      ret = OK;
+          spin_unlock_irqrestore(&g_irqlock, flags);
+        }
     }
+#endif  /* NR_IRQS */
 
   return ret;
-#else
-  return OK;
-#endif
 }
