@@ -1705,7 +1705,17 @@ FAR netpkt_t *netpkt_alloc(FAR struct netdev_lowerhalf_s *dev,
       return NULL;
     }
 
-  pkt = iob_tryalloc(false);
+#ifdef CONFIG_NET_CAN
+  if (dev->netdev.d_lltype == NET_LL_CAN)
+    {
+      pkt = can_iob_timedalloc(0);
+    }
+  else
+#endif
+    {
+      pkt = iob_tryalloc(false);
+    }
+
   if (pkt == NULL)
     {
       atomic_fetch_add(&dev->quota_ptr[type], 1);
