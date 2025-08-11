@@ -23,6 +23,9 @@
 #ifndef __INCLUDE_NUTTX_PCI_PCI_REGS_H
 #define __INCLUDE_NUTTX_PCI_PCI_REGS_H
 
+#define PCI_CFG_SPACE_SIZE                256
+#define PCI_CFG_SPACE_EXP_SIZE            4096
+
 /* Under PCI, each device has 256 bytes of configuration address space,
  * of which the first 64 bytes are standardized as follows:
  */
@@ -69,6 +72,7 @@
 #define PCI_CACHE_LINE_SIZE               0x0c  /* 8 bits */
 #define PCI_LATENCY_TIMER                 0x0d  /* 8 bits */
 #define PCI_HEADER_TYPE                   0x0e  /* 8 bits */
+#define  PCI_HEADER_TYPE_MASK             0x7f
 #define  PCI_HEADER_TYPE_NORMAL           0
 #define  PCI_HEADER_TYPE_BRIDGE           1
 #define  PCI_HEADER_TYPE_CARDBUS          2
@@ -374,6 +378,17 @@
 #define  PCI_CHSWP_PI                     0x30  /* Programming Interface */
 #define  PCI_CHSWP_EXT                    0x40  /* ENUM# status - extraction */
 #define  PCI_CHSWP_INS                    0x80  /* ENUM# status - insertion */
+
+/* Resizable BARs */
+
+#define PCI_REBAR_CAP                     4           /* Capability register */
+#define  PCI_REBAR_CAP_SIZES              0x00FFFFF0  /* Supported BAR sizes */
+#define PCI_REBAR_CTRL                    8           /* Control register */
+#define  PCI_REBAR_CTRL_BAR_IDX           0x00000007  /* BAR index */
+#define  PCI_REBAR_CTRL_NBAR_MASK         0x000000E0  /* # Of resizable BARs */
+#define  PCI_REBAR_CTRL_NBAR_SHIFT        5           /* Shift for # of BARs */
+#define  PCI_REBAR_CTRL_BAR_SIZE          0x00001F00  /* BAR size */
+#define  PCI_REBAR_CTRL_BAR_SHIFT         8           /* shift for BAR size */
 
 /* PCI Advanced Feature registers */
 
@@ -690,6 +705,16 @@
 #define  PCI_EXP_LNKCAP2_SLS_8_0GB        0x00000008 /* Supported Speed 8.0GT/s */
 #define  PCI_EXP_LNKCAP2_CROSSLINK        0x00000100 /* Crosslink supported */
 #define PCI_EXP_LNKCTL2                   48         /* Link Control 2 */
+#define  PCI_EXP_LNKCTL2_TLS              0x000f
+#define  PCI_EXP_LNKCTL2_TLS_2_5GT        0x0001     /* Supported Speed 2.5GT/s */
+#define  PCI_EXP_LNKCTL2_TLS_5_0GT        0x0002     /* Supported Speed 5GT/s */
+#define  PCI_EXP_LNKCTL2_TLS_8_0GT        0x0003     /* Supported Speed 8GT/s */
+#define  PCI_EXP_LNKCTL2_TLS_16_0GT       0x0004     /* Supported Speed 16GT/s */
+#define  PCI_EXP_LNKCTL2_TLS_32_0GT       0x0005     /* Supported Speed 32GT/s */
+#define  PCI_EXP_LNKCTL2_TLS_64_0GT       0x0006     /* Supported Speed 64GT/s */
+#define  PCI_EXP_LNKCTL2_ENTER_COMP       0x0010     /* Enter Compliance */
+#define  PCI_EXP_LNKCTL2_TX_MARGIN        0x0380     /* Transmit Margin */
+#define  PCI_EXP_LNKCTL2_HASD             0x0020     /* HW Autonomous Speed Disable */
 #define PCI_EXP_LNKSTA2                   50         /* Link Status 2 */
 #define PCI_EXP_SLTCAP2                   52         /* Slot Capabilities 2 */
 #define PCI_EXP_SLTCTL2                   56         /* Slot Control 2 */
@@ -728,7 +753,16 @@
 #define PCI_EXT_CAP_ID_SECPCI             0x19  /* Secondary PCIe Capability */
 #define PCI_EXT_CAP_ID_PMUX               0x1a  /* Protocol Multiplexing */
 #define PCI_EXT_CAP_ID_PASID              0x1b  /* Process Address Space ID */
-#define PCI_EXT_CAP_ID_MAX                PCI_EXT_CAP_ID_PASID
+#define PCI_EXT_CAP_ID_DPC                0x1D  /* Downstream Port Containment */
+#define PCI_EXT_CAP_ID_L1SS               0x1E  /* L1 PM Substates */
+#define PCI_EXT_CAP_ID_PTM                0x1F  /* Precision Time Measurement */
+#define PCI_EXT_CAP_ID_DVSEC              0x23  /* Designated Vendor-Specific */
+#define PCI_EXT_CAP_ID_DLF                0x25  /* Data Link Feature */
+#define PCI_EXT_CAP_ID_PL_16GT            0x26  /* Physical Layer 16.0 GT/s */
+#define PCI_EXT_CAP_ID_NPEM               0x29  /* Native PCIe Enclosure Management */
+#define PCI_EXT_CAP_ID_PL_32GT            0x2A  /* Physical Layer 32.0 GT/s */
+#define PCI_EXT_CAP_ID_DOE                0x2E  /* Data Object Exchange */
+#define PCI_EXT_CAP_ID_MAX                PCI_EXT_CAP_ID_DOE
 
 #define PCI_EXT_CAP_DSN_SIZEOF            12
 #define PCI_EXT_CAP_MCAST_ENDPOINT_SIZEOF 40
@@ -1016,5 +1050,16 @@
 #define  PCI_TPH_CAP_ST_MASK              0x07ff0000 /* St table mask */
 #define  PCI_TPH_CAP_ST_SHIFT             16         /* St table shift */
 #define  PCI_TPH_BASE_SIZEOF              12         /* Size with no st table */
+
+/* Precision Time Measurement */
+
+#define PCI_PTM_CAP                       0x04        /* PTM Capability */
+#define  PCI_PTM_CAP_REQ                  0x00000001  /* Requester capable */
+#define  PCI_PTM_CAP_RES                  0x00000002  /* Responder capable */
+#define  PCI_PTM_CAP_ROOT                 0x00000004  /* Root capable */
+#define  PCI_PTM_GRANULARITY_MASK         0x0000FF00  /* Clock granularity */
+#define PCI_PTM_CTRL                      0x08        /* PTM Control */
+#define  PCI_PTM_CTRL_ENABLE              0x00000001  /* PTM enable */
+#define  PCI_PTM_CTRL_ROOT                0x00000002  /* Root select */
 
 #endif /* __INCLUDE_NUTTX_PCI_PCI_REGS_H */
