@@ -67,6 +67,14 @@
 #endif
 #define CONFIG_RAMBANK1_SIZE      MB(128)
 
+#if defined(CONFIG_ARCH_CHIP_IMX95)
+#define CONFIG_PCI_DMA_ADDR       0xa8100000
+#define CONFIG_PCI_DMA_SIZE       MB(32)
+
+#define CONFIG_PCI_OB_ADDR        0xa00000000
+#define CONFIG_PCI_OB_SIZE        GB(1)
+#endif
+
 #define CONFIG_DEVICEIO_BASEADDR  0x40000000
 #define CONFIG_DEVICEIO_SIZE      MB(512)
 
