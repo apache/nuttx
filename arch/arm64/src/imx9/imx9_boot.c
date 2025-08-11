@@ -66,6 +66,17 @@ static const struct arm_mmu_region g_mmu_regions[] =
                         CONFIG_RAMBANK1_ADDR, CONFIG_RAMBANK1_SIZE,
                         MT_NORMAL | MT_RW | MT_SECURE),
 
+#if defined(CONFIG_ARCH_CHIP_IMX95)
+
+  MMU_REGION_FLAT_ENTRY("PCI_DMA",
+                        CONFIG_PCI_DMA_ADDR, CONFIG_PCI_DMA_SIZE,
+                        MT_NORMAL_NC | MT_RW | MT_SECURE),
+
+  MMU_REGION_FLAT_ENTRY("PCI_OB",
+                        CONFIG_PCI_OB_ADDR, CONFIG_PCI_OB_SIZE,
+                        MT_NORMAL_NC | MT_RW | MT_SECURE),
+#endif
+
 #if defined(CONFIG_ARCH_CHIP_IMX93)
 #ifndef CONFIG_IMX9_DDR_TRAINING /* OCRAM set at arm64_mmu.c */
   MMU_REGION_FLAT_ENTRY("OCRAM",
