@@ -43,6 +43,10 @@
 
 #define RP2040_GPIO_NUM    30       /* Number of GPIO pins */
 
+#define REG_ALIAS_XOR_BITS (0x1u << 12u)
+#define hw_alias_check_addr(addr) ((uintptr_t)(addr))
+#define hw_xor_alias_untyped(addr) ((void *)(REG_ALIAS_XOR_BITS | hw_alias_check_addr(addr)))
+
 /* GPIO function types ******************************************************/
 
 #define RP2040_GPIO_FUNC_JTAG       RP2040_IO_BANK0_GPIO_CTRL_FUNCSEL_JTAG
@@ -70,6 +74,13 @@
 #define RP2040_GPIO_INTR_LEVEL_HIGH (0x2)
 #define RP2040_GPIO_INTR_EDGE_LOW   (0x4)
 #define RP2040_GPIO_INTR_EDGE_HIGH  (0x8)
+
+/* GPIO override modes ******************************************************/
+
+#define RP2040_GPIO_OVERRIDE_NORMAL 0
+#define RP2040_GPIO_OVERRIDE_INVERT 1
+#define RP2040_GPIO_OVERRIDE_LOW    2
+#define RP2040_GPIO_OVERRIDE_HIGH   3
 
 /****************************************************************************
  * Public Types
@@ -187,6 +198,38 @@ static inline void rp2040_gpio_set_drive_strength(uint32_t gpio,
   modbits_reg32(drive_strength,
                 RP2040_PADS_BANK0_GPIO_DRIVE_MASK,
                 RP2040_PADS_BANK0_GPIO(gpio));
+}
+
+always_inline_function static void hw_xor_bits(uint32_t *addr, uint32_t mask)
+{
+    *(uint32_t *) hw_xor_alias_untyped((volatile void *)addr) = mask;
+}
+
+always_inline_function static void hw_write_masked(uint32_t *addr,
+  uint32_t values, uint32_t write_mask)
+{
+    hw_xor_bits(addr, (*addr ^ values) & write_mask);
+}
+
+/****************************************************************************
+ * Name: rp2040_gpio_set_outover
+ *
+ * Description:
+ *   Set whether the pin's output override will be enabled.
+ *   See the RP2040_GPIO_OVERRIDE_* constants.
+ *
+ ****************************************************************************/
+
+static inline void rp2040_gpio_set_outover(uint32_t gpio, uint32_t outover)
+{
+    DEBUGASSERT(gpio < RP2040_GPIO_NUM);
+    DEBUGASSERT(outover <= RP2040_GPIO_OVERRIDE_HIGH);
+
+    hw_write_masked(
+      (uint32_t *)(RP2040_IO_BANK0_BASE + (0x08 * gpio) + 0x04),
+      outover << RP2040_IO_BANK0_GPIO_CTRL_OUTOVER_SHIFT,
+      RP2040_IO_BANK0_GPIO_CTRL_OUTOVER_MASK
+    );
 }
 
 /****************************************************************************
