@@ -82,7 +82,7 @@
 
 #endif
 
-#define wdparm_to_ptr(type, arg) ((type)(uintptr_t)arg)
+#define wdparm_to_ptr(type, arg) ((type)arg)
 #define ptr_to_wdparm(ptr)       wdparm_to_ptr(wdparm_t, ptr)
 
 /****************************************************************************
@@ -258,57 +258,63 @@ int wd_start_abstick(FAR struct wdog_s *wdog, clock_t ticks,
                      wdentry_t wdentry, wdparm_t arg)
 {
   irqstate_t flags;
-  bool reassess = false;
+  bool       reassess = false;
+  int        ret      = -EINVAL;
 
   /* Verify the wdog and setup parameters */
 
-  if (wdog == NULL || wdentry == NULL)
+  if (wdog != NULL && wdentry != NULL)
     {
-      return -EINVAL;
-    }
-
-  /* NOTE:  There is a race condition here... the caller may receive
-   * the watchdog between the time that wd_start_abstick is called and
-   * the critical section is established.
-   */
-
-  flags = enter_critical_section();
-#ifdef CONFIG_SCHED_TICKLESS
-  /* We need to reassess timer if the watchdog list head has changed. */
-
-  if (WDOG_ISACTIVE(wdog))
-    {
-      reassess |= list_is_head(&g_wdactivelist, &wdog->node);
-      list_delete_fast(&wdog->node);
-    }
-
-  reassess |= wd_insert(wdog, ticks, wdentry, arg);
-
-  if (reassess)
-    {
-      /* Resume the interval timer that will generate the next
-       * interval event. If the timer at the head of the list changed,
-       * then this will pick that new delay.
+      /* NOTE:  There is a race condition here... the caller may receive
+       * the watchdog between the time that wd_start_abstick is called and
+       * the critical section is established.
        */
 
-      nxsched_reassess_timer();
-    }
+      flags = enter_critical_section();
+
+      /* If the wdog is canceling, restarting the wdog is not allowed. */
+
+#ifdef CONFIG_SCHED_TICKLESS
+      /* We need to reassess timer if the watchdog
+       * list head has changed.
+       */
+
+      if (WDOG_ISACTIVE(wdog))
+        {
+          reassess |= list_is_head(&g_wdactivelist, &wdog->node);
+          list_delete_fast(&wdog->node);
+        }
+
+      reassess |= wd_insert(wdog, ticks, wdentry, arg);
+
+      if (reassess)
+        {
+          /* Resume the interval timer that will generate the next
+           * interval event. If the timer at the head of the list
+           * changed, then this will pick that new delay.
+           */
+
+          nxsched_reassess_timer();
+        }
 #else
-  UNUSED(reassess);
+      UNUSED(reassess);
 
-  /* Check if the watchdog has been started. If so, delete it. */
+      /* Check if the watchdog has been started. If so, delete it. */
 
-  if (WDOG_ISACTIVE(wdog))
-    {
-      list_delete_fast(&wdog->node);
+      if (WDOG_ISACTIVE(wdog))
+        {
+          list_delete_fast(&wdog->node);
+        }
+
+      wd_insert(wdog, ticks, wdentry, arg);
+#endif
+      leave_critical_section(flags);
+      sched_note_wdog(NOTE_WDOG_START, wdentry,
+                      (FAR void *)(uintptr_t)ticks);
+      ret = OK;
     }
 
-  wd_insert(wdog, ticks, wdentry, arg);
-#endif
-  leave_critical_section(flags);
-
-  sched_note_wdog(NOTE_WDOG_START, wdentry, (FAR void *)(uintptr_t)ticks);
-  return OK;
+  return ret;
 }
 
 /****************************************************************************

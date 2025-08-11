@@ -54,14 +54,13 @@
 
 sclock_t wd_gettime(FAR struct wdog_s *wdog)
 {
-  sclock_t delay;
+  sclock_t delay = 0;
 
-  if (wdog == NULL || !WDOG_ISACTIVE(wdog))
+  if (wdog && WDOG_ISACTIVE(wdog))
     {
-      return 0;
+      delay = (sclock_t)(wdog->expired - clock_systime_ticks());
+      delay = delay >= 0 ? delay : 0;
     }
 
-  delay = wdog->expired - clock_systime_ticks();
-
-  return delay < 0 ? 0 : delay;
+  return delay;
 }
