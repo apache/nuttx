@@ -114,6 +114,7 @@ static inline Display *sim_x11createframe(void)
   XTextProperty iconprop;
   XSizeHints hints;
 
+  XInitThreads();
   display = XOpenDisplay(NULL);
   if (display == NULL)
     {
