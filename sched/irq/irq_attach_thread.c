@@ -145,6 +145,7 @@ static int isr_thread_main(int argc, FAR char *argv[])
 int irq_attach_thread(int irq, xcpt_t isr, xcpt_t isrthread, FAR void *arg,
                       int priority, int stack_size)
 {
+  int ret = OK;
 #if NR_IRQS > 0
   static pid_t irq_thread_pid[NR_IRQS];
 
@@ -154,56 +155,52 @@ int irq_attach_thread(int irq, xcpt_t isr, xcpt_t isrthread, FAR void *arg,
   char arg3[32];  /* isrthread */
   char arg4[32];  /* arg */
   pid_t pid;
-  int ndx;
+  int ndx = -EINVAL;
 
-  if (irq < 0 || irq >= NR_IRQS)
+  if (irq >= 0 && irq < NR_IRQS)
     {
-      return -EINVAL;
+      ndx = IRQ_TO_NDX(irq);
     }
 
-  ndx = IRQ_TO_NDX(irq);
   if (ndx < 0)
     {
-      return ndx;
+      ret = ndx;
     }
-
-  /* If the isrthread is NULL, then the ISR is being detached. */
-
-  if (isrthread == NULL)
+  else if(isrthread == NULL)
     {
+      /* If the isrthread is NULL, then the ISR is being detached. */
+
       irq_detach(irq);
       DEBUGASSERT(irq_thread_pid[ndx] != 0);
       kthread_delete(irq_thread_pid[ndx]);
       irq_thread_pid[ndx] = 0;
-
-      return OK;
     }
-
-  if (irq_thread_pid[ndx] != 0)
+  else if(irq_thread_pid[ndx] != 0)
     {
-      return -EINVAL;
+      ret = -EINVAL;
     }
-
-  snprintf(arg1, sizeof(arg1), "%d", irq);
-  snprintf(arg2, sizeof(arg2), "%p", isr);
-  snprintf(arg3, sizeof(arg3), "%p", isrthread);
-  snprintf(arg4, sizeof(arg4), "%p", arg);
-  argv[0] = arg1;
-  argv[1] = arg2;
-  argv[2] = arg3;
-  argv[3] = arg4;
-  argv[4] = NULL;
-
-  pid = kthread_create("isr_thread", priority, stack_size,
-                        isr_thread_main, argv);
-  if (pid < 0)
+  else
     {
-      return pid;
+      snprintf(arg1, sizeof(arg1), "%d", irq);
+      snprintf(arg2, sizeof(arg2), "%p", isr);
+      snprintf(arg3, sizeof(arg3), "%p", isrthread);
+      snprintf(arg4, sizeof(arg4), "%p", arg);
+      argv[0] = arg1;
+      argv[1] = arg2;
+      argv[2] = arg3;
+      argv[3] = arg4;
+      argv[4] = NULL;
+
+      pid = kthread_create("isr_thread", priority, stack_size,
+                            isr_thread_main, argv);
+      if (pid < 0)
+        {
+          ret = pid;
+        }
+
+      irq_thread_pid[ndx] = pid;
     }
-
-  irq_thread_pid[ndx] = pid;
-
 #endif /* NR_IRQS */
 
-  return OK;
+  return ret;
 }
