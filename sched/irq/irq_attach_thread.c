@@ -54,12 +54,6 @@ struct irq_thread_info_s
 };
 
 /****************************************************************************
- * Private Data
- ****************************************************************************/
-
-static pid_t g_irq_thread_pid[NR_IRQS];
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -151,6 +145,8 @@ int irq_attach_thread(int irq, xcpt_t isr, xcpt_t isrthread, FAR void *arg,
                       int priority, int stack_size)
 {
 #if NR_IRQS > 0
+  static pid_t irq_thread_pid[NR_IRQS];
+
   FAR char *argv[5];
   char arg1[32];  /* irq */
   char arg2[32];  /* isr */
@@ -175,14 +171,14 @@ int irq_attach_thread(int irq, xcpt_t isr, xcpt_t isrthread, FAR void *arg,
   if (isrthread == NULL)
     {
       irq_detach(irq);
-      DEBUGASSERT(g_irq_thread_pid[ndx] != 0);
-      kthread_delete(g_irq_thread_pid[ndx]);
-      g_irq_thread_pid[ndx] = 0;
+      DEBUGASSERT(irq_thread_pid[ndx] != 0);
+      kthread_delete(irq_thread_pid[ndx]);
+      irq_thread_pid[ndx] = 0;
 
       return OK;
     }
 
-  if (g_irq_thread_pid[ndx] != 0)
+  if (irq_thread_pid[ndx] != 0)
     {
       return -EINVAL;
     }
@@ -204,7 +200,7 @@ int irq_attach_thread(int irq, xcpt_t isr, xcpt_t isrthread, FAR void *arg,
       return pid;
     }
 
-  g_irq_thread_pid[ndx] = pid;
+  irq_thread_pid[ndx] = pid;
 
 #endif /* NR_IRQS */
 
