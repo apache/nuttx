@@ -109,6 +109,10 @@ if(CONFIG_ADC)
   if(CONFIG_ADC_ADS1115)
     list(APPEND SRCS ads1115.c)
   endif()
+
+  if(CONFIG_ADC_ADS7046)
+    list(APPEND SRCS ads7046.c)
+  endif()
 endif()
 
 if(CONFIG_LMP92001)
