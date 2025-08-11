@@ -651,7 +651,8 @@ int rp2040_common_bringup(void)
 #    define ADC_TEMP false
 #  endif
 
-  ret = rp2040_adc_setup("/dev/adc0", ADC_0, ADC_1, ADC_2, ADC_3, ADC_TEMP);
+  ret = rp2040_adc_initialize("/dev/adc0",
+                              ADC_0, ADC_1, ADC_2, ADC_3, ADC_TEMP);
   if (ret != OK)
     {
       syslog(LOG_ERR, "Failed to initialize ADC Driver: %d\n", ret);
