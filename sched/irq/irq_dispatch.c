@@ -102,10 +102,10 @@ void irq_dispatch(int irq, FAR void *context)
 #endif
   xcpt_t vector = irq_unexpected_isr;
   FAR void *arg = NULL;
-  unsigned int ndx = irq;
+  int ndx = irq;
 
 #if NR_IRQS > 0
-  if ((unsigned)irq < NR_IRQS)
+  if (irq >= 0 && irq < NR_IRQS)
     {
 #ifdef CONFIG_ARCH_MINIMAL_VECTORTABLE
       ndx = g_irqmap[irq];
