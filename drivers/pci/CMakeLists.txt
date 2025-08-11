@@ -56,6 +56,10 @@ if(CONFIG_PCI_ENDPOINT)
     list(APPEND SRCS pci_qemu_epc.c)
   endif() # CONFIG_PCI_QEMU_EPC
 
+  if(CONFIG_PCI_QEMU_EPC)
+    list(APPEND SRCS pcie_dw.c pcie_dw_ep.c)
+  endif() # CONFIG_PCI_DWC_EPC
+
   if(CONFIG_PCI_EPF_TEST)
     list(APPEND SRCS pci_epf_test.c)
   endif() # CONFIG_PCI_EPF_TEST

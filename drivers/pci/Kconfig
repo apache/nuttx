@@ -95,6 +95,11 @@ config PCI_QEMU_EPC
 	---help---
 		Enable qemu ep controller
 
+config PCI_DWC_EPC
+	bool "DWC Ep Controller Support"
+	---help---
+		Enable dwc ep controller
+
 config PCI_EPF_TEST
 	bool "PCI epf test"
 	---help---
