@@ -22,5 +22,13 @@ to convert the MTD driver to a block device:
 
 .. code-block:: C
 
-  int ret = ftl_initialize(<N>, mtd);
+  int ret = ftl_initialize(/dev/mtdblock<N>, mtd);
   ret = bchdev_register(/dev/mtdblock<N>, <path-to-character-driver>, false);
+
+But since mtd driver could expose to the userspace through register_mtddriver,
+it's better to register mtd driver directly and let fs layer add FTL/BCH wrapper
+automatically:
+
+.. code-block:: C
+
+  int ret = register_mtddriver(/dev/mtdblock<N>, mtd);
