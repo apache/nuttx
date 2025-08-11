@@ -102,6 +102,10 @@ ifeq ($(CONFIG_IMX9_DDR_TRAINING),y)
   CHIP_CSRCS += $(DDR_CSRCS)
 endif
 
+ifeq ($(CONFIG_IMX9_PCI_EP),y)
+  CHIP_CSRCS += imx95_pci.c
+endif
+
 ifeq ($(CONFIG_IMX9_FLEXCAN), y)
   CHIP_CSRCS += imx9_flexcan.c
 endif

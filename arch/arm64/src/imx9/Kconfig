@@ -308,6 +308,12 @@ config IMX9_FLEXSPI
 	bool "ENABLE FLEXSPI interface"
 	default n
 
+config IMX9_PCI_EP
+	bool "Enable PCI EP"
+	default n
+	---help---
+		Imx9 add pcie ep support.
+
 config IMX9_FLEXSPI_NOR
 	bool "Enable NOR flash on FLEXSPI interface"
 	select IMX9_FLEXSPI
