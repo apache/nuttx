@@ -82,18 +82,20 @@ int getitimer(int which, FAR struct itimerval *value)
   if (which != ITIMER_REAL || !value)
     {
       set_errno(EINVAL);
-      return ERROR;
+      ret = ERROR;
     }
-
-  if (rtcb->group->itimer)
+  else
     {
-      ret = timer_gettime(rtcb->group->itimer, &spec);
-    }
+      if (rtcb->group->itimer)
+        {
+          ret = timer_gettime(rtcb->group->itimer, &spec);
+        }
 
-  if (ret == OK)
-    {
-      TIMESPEC_TO_TIMEVAL(&value->it_value, &spec.it_value);
-      TIMESPEC_TO_TIMEVAL(&value->it_interval, &spec.it_interval);
+      if (ret == OK)
+        {
+          TIMESPEC_TO_TIMEVAL(&value->it_value, &spec.it_value);
+          TIMESPEC_TO_TIMEVAL(&value->it_interval, &spec.it_interval);
+        }
     }
 
   return ret;
