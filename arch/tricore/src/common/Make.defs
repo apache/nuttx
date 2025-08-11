@@ -45,6 +45,7 @@ CMN_CSRCS += tricore_tcbinfo.c
 CMN_CSRCS += tricore_trapcall.c
 CMN_CSRCS += tricore_systimer.c
 CMN_CSRCS += tricore_usestack.c
+CMN_CSRCS += tricore_fork.c
 
 ifeq ($(CONFIG_TRICORE_TOOLCHAIN_TASKING),y)
   TRICORE_SUBDIR = tasking
