@@ -40,8 +40,6 @@
 #include <nuttx/analog/ioctl.h>
 #include <nuttx/analog/ads7046.h>
 
-#if defined(CONFIG_SPI) && defined(CONFIG_ADC_ADS7046)
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -180,41 +178,41 @@ static int ads7046_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   switch (cmd)
     {
-        /* Read the result of an analog conversion */
+      /* Read the result of an analog conversion */
 
-        case ANIOC_ADS7046_READ:
+      case ANIOC_ADS7046_READ:
         {
-        FAR uint16_t *data = (FAR uint16_t *)((uintptr_t)arg);
-        ads7046_read_conversion_result(priv, data, false);
+          FAR uint16_t *data = (FAR uint16_t *)((uintptr_t)arg);
+          ads7046_read_conversion_result(priv, data, false);
+          break;
         }
-        break;
 
         /* Read the result of an analog conversion (skip SPI locking &
          * reconfiguring - HIC SUNT DRACONES!)
          */
 
-        case ANIOC_ADS7046_READ_FASTUNSAFE:
+      case ANIOC_ADS7046_READ_FASTUNSAFE:
         {
-        FAR uint16_t *data = (FAR uint16_t *)((uintptr_t)arg);
-        ads7046_read_conversion_result(priv, data, true);
+          FAR uint16_t *data = (FAR uint16_t *)((uintptr_t)arg);
+          ads7046_read_conversion_result(priv, data, true);
+          break;
         }
-        break;
 
         /* Start an offset calibration */
 
-        case ANIOC_ADS7046_OFFCAL:
+      case ANIOC_ADS7046_OFFCAL:
         {
-        ads7046_offset_calibration(priv);
+          ads7046_offset_calibration(priv);
+          break;
         }
-        break;
 
         /* Command was not recognized */
 
-        default:
+      default:
         {
-        _err("ERROR: Unrecognized cmd: %d\n", cmd);
-        ret = -ENOTTY;
-        break;
+          aerr("ERROR: Unrecognized cmd: %d\n", cmd);
+          ret = -ENOTTY;
+          break;
         }
     }
 
@@ -255,7 +253,7 @@ int ads7046_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
   struct ads7046_dev_s *priv = kmm_malloc(sizeof(struct ads7046_dev_s));
   if (priv == NULL)
     {
-      _err("ERROR: Failed to allocate instance %s (%d)\n", strerror(errno),
+      aerr("ERROR: Failed to allocate instance %s (%d)\n", strerror(errno),
            errno);
       return -ENOMEM;
     }
@@ -267,7 +265,7 @@ int ads7046_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
   int ret = register_driver(devpath, &adc7046_fops, 0666, priv);
   if (ret < 0)
     {
-      _err("ERROR: Failed to register driver: %s (%d)\n", strerror(-ret),
+      aerr("ERROR: Failed to register driver: %s (%d)\n", strerror(-ret),
            ret);
       kmm_free(priv);
     }
@@ -280,5 +278,3 @@ int ads7046_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
 
   return ret;
 }
-
-#endif  /* CONFIG_SPI && CONFIG_ADC_ADS7046 */
