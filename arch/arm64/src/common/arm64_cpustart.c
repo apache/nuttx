@@ -68,7 +68,16 @@ uint64_t *const g_cpu_int_stacktop[CONFIG_SMP_NCPUS] =
 #if CONFIG_SMP_NCPUS > 4
   (uint64_t *)(g_interrupt_stacks[4] + INTSTACK_SIZE),
 #if CONFIG_SMP_NCPUS > 5
-#  error This logic needs to extended for CONFIG_SMP_NCPUS > 5
+  (uint64_t *)(g_interrupt_stacks[5] + INTSTACK_SIZE),
+#if CONFIG_SMP_NCPUS > 6
+  (uint64_t *)(g_interrupt_stacks[6] + INTSTACK_SIZE),
+#if CONFIG_SMP_NCPUS > 7
+  (uint64_t *)(g_interrupt_stacks[7] + INTSTACK_SIZE),
+#if CONFIG_SMP_NCPUS > 8
+#  error This logic needs to extended for CONFIG_SMP_NCPUS > 8
+#endif /* CONFIG_SMP_NCPUS > 8 */
+#endif /* CONFIG_SMP_NCPUS > 7 */
+#endif /* CONFIG_SMP_NCPUS > 6 */
 #endif /* CONFIG_SMP_NCPUS > 5 */
 #endif /* CONFIG_SMP_NCPUS > 4 */
 #endif /* CONFIG_SMP_NCPUS > 3 */
@@ -91,7 +100,16 @@ uint64_t *const g_cpu_int_fiq_stacktop[CONFIG_SMP_NCPUS] =
 #if CONFIG_SMP_NCPUS > 4
   (uint64_t *)(g_interrupt_fiq_stacks[4] + INTSTACK_SIZE),
 #if CONFIG_SMP_NCPUS > 5
-#  error This logic needs to extended for CONFIG_SMP_NCPUS > 5
+  (uint64_t *)(g_interrupt_fiq_stacks[5] + INTSTACK_SIZE),
+#if CONFIG_SMP_NCPUS > 6
+  (uint64_t *)(g_interrupt_fiq_stacks[6] + INTSTACK_SIZE),
+#if CONFIG_SMP_NCPUS > 7
+  (uint64_t *)(g_interrupt_fiq_stacks[7] + INTSTACK_SIZE),
+#if CONFIG_SMP_NCPUS > 8
+#  error This logic needs to extended for CONFIG_SMP_NCPUS > 8
+#endif /* CONFIG_SMP_NCPUS > 8 */
+#endif /* CONFIG_SMP_NCPUS > 7 */
+#endif /* CONFIG_SMP_NCPUS > 6 */
 #endif /* CONFIG_SMP_NCPUS > 5 */
 #endif /* CONFIG_SMP_NCPUS > 4 */
 #endif /* CONFIG_SMP_NCPUS > 3 */
