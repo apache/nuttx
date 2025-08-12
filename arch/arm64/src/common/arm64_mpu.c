@@ -163,6 +163,34 @@ unsigned int mpu_allocregion(void)
 }
 
 /****************************************************************************
+ * Name: mpu_allocregion
+ *
+ * Description:
+ *   Get the number of MPU region used
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   The the number of MPU region used
+ *
+ ****************************************************************************/
+
+unsigned int mpu_usedregion(void)
+{
+  unsigned int n = g_mpu_region[this_cpu()];
+  unsigned int count = 0;
+
+  while (n)
+    {
+      count += n & 1;
+      n >>= 1;
+    }
+
+  return count;
+}
+
+/****************************************************************************
  * Name: mpu_freeregion
  *
  * Description:
