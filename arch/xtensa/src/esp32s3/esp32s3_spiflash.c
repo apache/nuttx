@@ -1004,10 +1004,13 @@ static int spiflash_init_spi_flash_op_block_task(int cpu)
   char *argv[2];
   char arg1[32];
   cpu_set_t cpuset;
+  irqstate_t flags;
 
   snprintf(arg1, sizeof(arg1), "%p", &cpu);
   argv[0] = arg1;
   argv[1] = NULL;
+
+  flags = enter_critical_section();
 
   pid = kthread_create("spiflash_op",
                        SCHED_PRIORITY_MAX,
@@ -1021,16 +1024,14 @@ static int spiflash_init_spi_flash_op_block_task(int cpu)
           CPU_ZERO(&cpuset);
           CPU_SET(cpu, &cpuset);
           ret = nxsched_set_affinity(pid, sizeof(cpuset), &cpuset);
-          if (ret < 0)
-            {
-              return ret;
-            }
         }
     }
   else
     {
-      return -EPERM;
+      ret = -EPERM;
     }
+
+  leave_critical_section(flags);
 
   return ret;
 }
