@@ -5,7 +5,7 @@ Raspberry Pi Pico
 .. tags:: chip:rp2040
 
 The `Raspberry Pi Pico <https://www.raspberrypi.com/products/raspberry-pi-pico/>`_ is a general purpose board supplied by
-the Raspberry Pi Foundation.
+Raspberry Pi.
 
 .. figure:: RaspberryPiPico.png
    :align: center

@@ -1,6 +1,6 @@
-==================
-RaspberryPi rp2040
-==================
+===================
+Raspberry Pi rp2040
+===================
 
 .. tags:: chip:rp2040
 
@@ -8,7 +8,7 @@ RaspberryPi rp2040
    :align: center
    :scale: 50 %
 
-The RP2040 is a dual core chip produced by the RaspberryPi Foundation that
+The RP2040 is a dual core chip produced by Raspberry Pi that
 is based on ARM Cortex-M0+.
 
 Peripheral Support
