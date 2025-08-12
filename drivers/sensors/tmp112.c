@@ -41,8 +41,6 @@
 
 #include <nuttx/sensors/tmp112.h>
 
-#if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_TMP112)
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -398,5 +396,3 @@ int tmp112_register(FAR const char *devpath, const uint8_t devnum,
   sninfo("Driver loaded successfully\n");
   return ret;
 }
-
-#endif /* CONFIG_I2C && CONFIG_SENSORS_TMP112 */
