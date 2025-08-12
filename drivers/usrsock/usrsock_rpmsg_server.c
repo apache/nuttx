@@ -85,6 +85,15 @@ struct usrsock_rpmsg_ept_s
   struct usrsock_rpmsg_req_s reqs[CONFIG_NET_USRSOCK_RPMSG_SERVER_NIOVEC];
 };
 
+struct usrsock_rpmsg_work_s
+{
+  struct work_s                             work;
+  FAR struct usrsock_message_datareq_ack_s *ack;
+  FAR struct rpmsg_endpoint                *ept;
+  FAR struct usrsock_rpmsg_s               *priv;
+  struct usrsock_request_ioctl_s            req;
+};
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -906,52 +915,72 @@ static int usrsock_rpmsg_accept_handler(FAR struct rpmsg_endpoint *ept,
   return retr;
 }
 
-static int usrsock_rpmsg_ioctl_handler(FAR struct rpmsg_endpoint *ept,
-                                       FAR void *data, size_t len_,
-                                       uint32_t src, FAR void *priv_)
+static void usrsock_rpmsg_worker(FAR void *arg)
 {
-  FAR struct usrsock_request_ioctl_s *req = data;
-  FAR struct usrsock_message_datareq_ack_s *ack;
-  FAR struct usrsock_rpmsg_s *priv = priv_;
-#ifdef CONFIG_NETDEV_WIRELESS_IOCTL
-  FAR struct iwreq *wlreq;
-  FAR struct iwreq *wlack;
-#endif
+  FAR struct usrsock_rpmsg_work_s *work = arg;
+  FAR struct rpmsg_endpoint *ept = work->ept;
+  FAR struct usrsock_request_ioctl_s req;
+  FAR struct usrsock_message_datareq_ack_s *ack = work->ack;
+  FAR struct usrsock_rpmsg_s *priv = work->priv;
   int ret = -EBADF;
-  uint32_t len;
 
-  ack = rpmsg_get_tx_payload_buffer(ept, &len, true);
-  if (req->usockid >= 0 &&
-      req->usockid < CONFIG_NET_USRSOCK_RPMSG_SERVER_NSOCKS)
+  memcpy(&req, &work->req, sizeof(req));
+  if (req.usockid >= 0 &&
+      req.usockid < CONFIG_NET_USRSOCK_RPMSG_SERVER_NSOCKS)
     {
-      memcpy(ack + 1, req + 1, len_ - sizeof(*req));
 #ifdef CONFIG_NETDEV_WIRELESS_IOCTL
-      wlreq = (FAR struct iwreq *)(req + 1);
-      wlack = (FAR struct iwreq *)(ack + 1);
-      if (WL_IS80211POINTERCMD(req->cmd) && wlreq->u.data.pointer)
+      FAR struct iwreq *wlack = (FAR struct iwreq *)(ack + 1);
+      FAR void *pointer = wlack->u.data.pointer;
+
+      if (WL_IS80211POINTERCMD(req.cmd) && pointer)
         {
           wlack->u.data.pointer = wlack + 1;
         }
 #endif
 
-      ret = psock_ioctl(&priv->socks[req->usockid],
-              req->cmd, (unsigned long)(ack + 1));
+      ret = psock_ioctl(&priv->socks[req.usockid],
+              req.cmd, (unsigned long)(ack + 1));
 
 #ifdef CONFIG_NETDEV_WIRELESS_IOCTL
-      if (WL_IS80211POINTERCMD(req->cmd) && wlreq->u.data.pointer)
+      if (WL_IS80211POINTERCMD(req.cmd) && pointer)
         {
           if (ret >= 0)
             {
-              ret = wlreq->u.data.length;
+              ret = wlack->u.data.length;
             }
 
-          wlack->u.data.pointer = wlreq->u.data.pointer;
+          wlack->u.data.pointer = pointer;
         }
 #endif
     }
 
-  return usrsock_rpmsg_send_data_ack(ept,
-           ack, 0, req->head.xid, ret, req->arglen, req->arglen, ret);
+  usrsock_rpmsg_send_data_ack(ept, ack, 0, req.head.xid, ret, req.arglen,
+                              req.arglen, ret);
+}
+
+static int usrsock_rpmsg_ioctl_handler(FAR struct rpmsg_endpoint *ept,
+                                       FAR void *data, size_t len_,
+                                       uint32_t src, FAR void *priv)
+{
+  FAR struct usrsock_message_datareq_ack_s *ack;
+  FAR struct usrsock_request_ioctl_s *req = data;
+  FAR struct usrsock_rpmsg_work_s *work;
+  uint32_t len;
+
+  ack = rpmsg_get_tx_payload_buffer(ept, &len, true);
+  work = (FAR struct usrsock_rpmsg_work_s *)
+         ((FAR uint8_t *)ack + len - sizeof(*work));
+
+  memcpy(ack + 1, req + 1, len_ - sizeof(*req));
+  memcpy(&work->req, req, sizeof(*req));
+  memset(&work->work, 0, sizeof(work->work));
+  work->ack  = ack;
+  work->ept  = ept;
+  work->priv = priv;
+
+  work_queue(HPWORK, &work->work, usrsock_rpmsg_worker, work, 0);
+
+  return 0;
 }
 
 static int usrsock_rpmsg_shutdown_handler(FAR struct rpmsg_endpoint *ept,
