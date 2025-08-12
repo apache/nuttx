@@ -155,7 +155,6 @@ There is currently no direct user mode access to these RP2350 hardware features:
 
 * SPI Slave Mode
 * SSI
-* RTC
 * Timers
 
 Installation
