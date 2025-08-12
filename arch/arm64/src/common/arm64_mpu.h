@@ -384,6 +384,22 @@ unsigned int mpu_allocregion(void);
 void mpu_freeregion(unsigned int region);
 
 /****************************************************************************
+ * Name: mpu_allocregion
+ *
+ * Description:
+ *   Get the number of MPU region used
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   The the number of MPU region used
+ *
+ ****************************************************************************/
+
+unsigned int mpu_usedregion(void);
+
+/****************************************************************************
  * Name: arm64_mpu_enable
  *
  * Description:
