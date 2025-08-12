@@ -5,7 +5,7 @@ Seeed Studio XIAO RP2350
 .. tags:: chip:rp2350
 
 The `Seeed Studio XIAO RP2350 <https://wiki.seeedstudio.com/getting-started-xiao-rp2350/>`_ is a general purpose board supplied by
-Seeed Studio and it is compatible with the Rapiberry RP2350 ecosystem, sharing the same MCU as Rapiberry Pi Pico 2.
+Seeed Studio and it is compatible with the Raspberry Pi RP2350 ecosystem, sharing the same MCU as Raspberry Pi Pico 2.
 
 .. figure:: xiao-rp2350.jpg
    :align: center
