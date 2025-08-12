@@ -853,7 +853,6 @@ static int virtio_mmio_init_device(FAR struct virtio_mmio_device_s *vmdev,
 
   /* Reset the virtio device and set ACK */
 
-  virtio_mmio_set_status(vdev, VIRTIO_CONFIG_STATUS_RESET);
   virtio_mmio_set_status(vdev, VIRTIO_CONFIG_STATUS_ACK);
   return OK;
 }
