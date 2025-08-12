@@ -480,12 +480,6 @@ int cap_register_multiple(FAR const char *devpath,
       return -EINVAL;
     }
 
-  size_t devlen = strlen(devpath);
-  if (devlen == 0 || devlen > sizeof(fullpath) - 2)
-    {
-      return -ENAMETOOLONG;
-    }
-
   for (int i = 0; i < n; i++)
     {
       int written = snprintf(fullpath, sizeof(fullpath), "%s%d", devpath, i);
