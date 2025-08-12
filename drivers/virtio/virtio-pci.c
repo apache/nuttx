@@ -255,7 +255,6 @@ static int virtio_pci_probe(FAR struct pci_device_s *dev)
   vrtinfo("Polling mode\n");
 #endif
 
-  virtio_set_status(vdev, VIRTIO_CONFIG_STATUS_RESET);
   virtio_set_status(vdev, VIRTIO_CONFIG_STATUS_ACK);
 
   ret = virtio_register_device(&vpdev->vdev);
