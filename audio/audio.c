@@ -1079,6 +1079,34 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
+      /* AUDIOIOC_RESETSTATUS - Reset appl head
+       *
+       *   ioctl argument - pointer to receive the state
+       */
+
+      case AUDIOIOC_RESETSTATUS:
+        {
+          struct audio_buf_desc_s buf_desc;
+          int target;
+
+          buf_desc.numbytes = upper->apbs[0]->nmaxbytes;
+          buf_desc.u.pbuffer = NULL;
+          priv->head = upper->status->head;
+          target = MAX(upper->status->head,
+                       upper->status->tail + upper->periods - 1);
+
+          if (priv->state == AUDIO_STATE_XRUN)
+            {
+              priv->state = AUDIO_STATE_RUNNING;
+            }
+
+          while (priv->head < target)
+            {
+              audio_enqueuebuffer(filep, &buf_desc);
+            }
+        }
+        break;
+
       /* Any unrecognized IOCTL commands might be
        * platform-specific ioctl commands
        */
