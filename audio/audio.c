@@ -785,6 +785,7 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct audio_upperhalf_s *upper = inode->i_private;
   FAR struct audio_lowerhalf_s *lower = upper->dev;
   FAR struct audio_openpriv_s *priv = filep->f_priv;
+  irqstate_t flags;
   int ret;
 
   audinfo("cmd: %d arg: %ld\n", cmd, arg);
@@ -1066,6 +1067,24 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           memcpy((void *)arg, upper->status, sizeof(struct audio_status_s));
           ret = OK;
+        }
+        break;
+
+      /* AUDIOIOC_RESETSTATUS - Reset appl head
+       *
+       *   ioctl argument - pointer to receive the state
+       */
+
+      case AUDIOIOC_RESETSTATUS:
+        {
+          flags = spin_lock_irqsave(&upper->spinlock);
+          priv->head = upper->status->head;
+          if (priv->state == AUDIO_STATE_XRUN)
+            {
+              priv->state = AUDIO_STATE_RUNNING;
+            }
+
+          spin_unlock_irqrestore(&upper->spinlock, flags);
         }
         break;
 
