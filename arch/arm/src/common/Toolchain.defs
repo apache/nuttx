@@ -214,6 +214,7 @@ ifeq ($(CONFIG_ARM_TOOLCHAIN_CLANG),y)
   LD      = ld.lld -m armelf
   STRIP   = llvm-strip --strip-unneeded
   AR      = llvm-ar rcs
+  UNAR    = llvm-ar x
   NM      = llvm-nm
   OBJCOPY = llvm-objcopy
   OBJDUMP = llvm-objdump
@@ -257,6 +258,7 @@ else ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),y)
   LD      = armlink
   STRIP   = llvm-strip --strip-unneeded
   AR      = armar -rcs
+  UNAR    = armar -x
   NM      = llvm-nm
   OBJCOPY = llvm-objcopy
   OBJDUMP = llvm-objdump
@@ -314,15 +316,17 @@ else
   LD      = $(CROSSDEV)ld
   STRIP   = $(CROSSDEV)strip --strip-unneeded
   AR      = $(CROSSDEV)ar rcs
+  UNAR    = $(CROSSDEV)ar x
   NM      = $(CROSSDEV)nm
   OBJCOPY = $(CROSSDEV)objcopy
   OBJDUMP = $(CROSSDEV)objdump
 
   ifeq ($(CONFIG_LTO_FULL),y)
     ifeq ($(CONFIG_ARM_TOOLCHAIN_GNU_EABI),y)
-      LD := $(CROSSDEV)gcc
-      AR := $(CROSSDEV)gcc-ar rcs
-      NM := $(CROSSDEV)gcc-nm
+      LD   := $(CROSSDEV)gcc
+      AR   := $(CROSSDEV)gcc-ar rcs
+      UNAR := $(CROSSDEV)gcc-ar x
+      NM   := $(CROSSDEV)gcc-nm
       ARCHOPTIMIZATION += -fno-builtin
     endif
   endif

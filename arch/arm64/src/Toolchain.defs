@@ -225,6 +225,7 @@ ifeq ($(CONFIG_ARCH_TOOLCHAIN_GCC),y)
   OBJDUMP = $(CROSSDEV)objdump
   LD = $(CROSSDEV)ld
   AR = $(CROSSDEV)ar rcs
+  UNAR = $(CROSSDEV)ar x
   NM = $(CROSSDEV)nm
 else ifeq ($(CONFIG_ARCH_TOOLCHAIN_CLANG),y)
   CC      = clang
@@ -233,6 +234,7 @@ else ifeq ($(CONFIG_ARCH_TOOLCHAIN_CLANG),y)
   LD      = ld.lld -m aarch64elf
   STRIP   = llvm-strip --strip-unneeded
   AR      = llvm-ar rcs
+  UNAR    = llvm-ar x
   NM      = llvm-nm
   OBJCOPY = llvm-objcopy
   OBJDUMP = llvm-objdump
