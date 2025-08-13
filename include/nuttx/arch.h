@@ -1765,6 +1765,18 @@ int up_shmdt(uintptr_t vaddr, unsigned int npages);
 void up_irqinitialize(void);
 
 /****************************************************************************
+ * Name: up_irq_to_ndx
+ *
+ * Description:
+ *   Irq to ndx
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_IRQ_TO_NDX
+int up_irq_to_ndx(int irq);
+#endif
+
+/****************************************************************************
  * Name: up_enable_irq
  *
  * Description:
