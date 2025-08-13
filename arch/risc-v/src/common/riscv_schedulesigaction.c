@@ -96,7 +96,6 @@ void up_schedule_sigaction(struct tcb_s *tcb)
        */
 
       (tcb->sigdeliver)(tcb);
-      tcb->sigdeliver = NULL;
     }
   else
     {
