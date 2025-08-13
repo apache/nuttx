@@ -65,6 +65,8 @@ static inline void up_wait(FAR rw_semaphore_t *rwsem)
 
 int down_read_trylock(FAR rw_semaphore_t *rwsem)
 {
+  int ret = 1;
+
   nxmutex_lock(&rwsem->protected);
 
   /* if the write lock is already held by oneself and since the write lock
@@ -75,25 +77,22 @@ int down_read_trylock(FAR rw_semaphore_t *rwsem)
   if (rwsem->holder == _SCHED_GETTID())
     {
       rwsem->writer++;
-      goto out;
     }
-
-  if (rwsem->writer > 0)
+  else if (rwsem->writer > 0)
     {
-      nxmutex_unlock(&rwsem->protected);
-      return 0;
+      ret = 0;
+    }
+  else
+    {
+      /* In a scenario where there is no write lock, we just need to
+       * make the read base +1.
+       */
+
+      rwsem->reader++;
     }
 
-  /* In a scenario where there is no write lock, we just need to make the
-   * read base +1.
-   */
-
-  rwsem->reader++;
-
-out:
   nxmutex_unlock(&rwsem->protected);
-
-  return 1;
+  return ret;
 }
 
 /****************************************************************************
