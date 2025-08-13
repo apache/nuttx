@@ -38,12 +38,11 @@
 #include <nuttx/pci/pci_ids.h>
 #include <nuttx/pci/pci.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/nuttx.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#define PCI_EPF_TEST_FUNCTIONS                 2
 
 #define PCI_EPF_TEST_IRQ_TYPE_LEGACY           0
 #define PCI_EPF_TEST_IRQ_TYPE_MSI              1
@@ -716,14 +715,14 @@ int pci_register_epf_test_device(FAR const char *epc_name)
   int ret;
   int i;
 
-  epf = kmm_zalloc(sizeof(*epf) * PCI_EPF_TEST_FUNCTIONS);
+  epf = kmm_zalloc(sizeof(*epf) * CONFIG_PCI_EPF_TEST_FUNC_COUNT);
   if (NULL == epf)
     {
       pcierr("create epf error\n");
       return -ENOMEM;
     }
 
-  for (i = 0; i < PCI_EPF_TEST_FUNCTIONS; i++)
+  for (i = 0; i < CONFIG_PCI_EPF_TEST_FUNC_COUNT; i++)
     {
       epf[i].name = g_pci_epf_test_name[i];
       epf[i].epc_name = epc_name;

@@ -100,5 +100,12 @@ config PCI_EPF_TEST
 	---help---
 		pci epf test driver
 
+config PCI_EPF_TEST_FUNC_COUNT
+	int "EPC Function Number"
+	default 1
+	range 1 8
+	---help---
+		This option set the epc's function number
+
 endif # PCI_ENDPOINT
 
