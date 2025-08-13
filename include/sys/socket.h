@@ -323,7 +323,7 @@
  * the fields of those structures without alignment problems.
  */
 
-struct sockaddr_storage
+struct aligned_data(SS_ALIGNSIZE) sockaddr_storage
 {
   sa_family_t ss_family;       /* Address family */
 
