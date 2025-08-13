@@ -103,8 +103,6 @@
  * Private Type Definitions
  ****************************************************************************/
 
-typedef unsigned int uint;
-
 #if SUPPORTS_INT128
 typedef unsigned __int128 uint128_t;
 #else
