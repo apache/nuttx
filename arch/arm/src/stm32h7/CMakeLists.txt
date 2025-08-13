@@ -32,7 +32,6 @@ list(
   stm32_start.c
   stm32_rcc.c
   stm32_lowputc.c
-  stm32_capture.c
   stm32_serial.c
   stm32_uid.c)
 
@@ -141,6 +140,10 @@ endif()
 
 if(CONFIG_TIMER)
   list(APPEND SRCS stm32_tim_lowerhalf.c)
+endif()
+
+if(CONFIG_STM32H7_TIMX_CAP)
+  list(APPEND SRCS stm32_capture.c)
 endif()
 
 if(CONFIG_CAPTURE)
