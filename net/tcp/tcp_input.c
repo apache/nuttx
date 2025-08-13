@@ -869,13 +869,14 @@ static void tcp_input(FAR struct net_driver_s *dev, uint8_t domain,
       /* RFC793,p71 In all states except SYN-SENT: "If the SYN is in the
        * window it is an error, send a reset", except the subsequent SYN
        * arriving in TCP_SYN_RCVD state after the SYNACK packet was
-       * lost.
+       * lost or SYN arriving in TCP_SYN_SEND in simultaneous connect.
        */
 
       if ((conn->tcpstateflags & TCP_STATE_MASK) != TCP_SYN_RCVD &&
+          (conn->tcpstateflags & TCP_STATE_MASK) != TCP_SYN_SENT &&
           (tcp->flags & TCP_CTL) == TCP_SYN)
         {
-          nwarn("WARNING: SYN in TCP_SYN_RCVD\n");
+          nwarn("WARNING: SYN not in TCP_SYN_RCVD and TCP_SYN_SENT\n");
           goto reset;
         }
       else if ((conn->tcpstateflags & TCP_STATE_MASK) == TCP_SYN_RCVD &&
@@ -889,6 +890,14 @@ static void tcp_input(FAR struct net_driver_s *dev, uint8_t domain,
               tcp_reset(dev, conn);
               conn->tcpstateflags = TCP_CLOSED;
               nwarn("WARNING: RESET in TCP_SYN_RCVD\n");
+
+              if (_SS_ISCONNECTING(conn->sconn.s_flags))
+                {
+                  /* Notify this connection of the reset event */
+
+                  tcp_callback(dev, conn, TCP_ABORT);
+                  goto drop;
+                }
 
               /* We must free this TCP connection structure; this connection
                * will never be established.  There should only be one
@@ -1295,13 +1304,15 @@ skip_rtt:
   /* Check if the sequence number of the incoming packet is what we are
    * expecting next.  If not, we send out an ACK with the correct numbers
    * in, unless we are in the SYN_RCVD state and receive a SYN, in which
-   * case we should retransmit our SYNACK (which is done further down).
+   * case we should retransmit our SYNACK (which is done further down),
+   * or in simultaneous open scenario receive a SYN in the SYN_SEND state
+   * and receive a SYNACK in the SYN_RCVD state.
    */
 
-  if (!((((conn->tcpstateflags & TCP_STATE_MASK) == TCP_SYN_SENT) &&
-        ((tcp->flags & TCP_CTL) == (TCP_SYN | TCP_ACK))) ||
-        (((conn->tcpstateflags & TCP_STATE_MASK) == TCP_SYN_RCVD) &&
-        ((tcp->flags & TCP_CTL) == TCP_SYN))))
+  if (!(((conn->tcpstateflags & TCP_STATE_MASK) == TCP_SYN_SENT ||
+         (conn->tcpstateflags & TCP_STATE_MASK) == TCP_SYN_RCVD) &&
+        ((tcp->flags & TCP_CTL) == (TCP_SYN | TCP_ACK) ||
+         (tcp->flags & TCP_CTL) == TCP_SYN)))
     {
       uint32_t seq;
       uint32_t rcvseq;
@@ -1409,7 +1420,8 @@ skip_rtt:
 
             /* Wake up any listener waiting for a connection on this port */
 
-            if (tcp_accept_connection(dev, conn, tcp->destport) != OK)
+            if (!_SS_ISCONNECTING(conn->sconn.s_flags) &&
+                tcp_accept_connection(dev, conn, tcp->destport) != OK)
               {
                 /* No more listener for current port.  We can free conn here
                  * because it has not been shared with upper layers yet as
@@ -1504,6 +1516,30 @@ skip_rtt:
             ninfo("TCP state: TCP_ESTABLISHED\n");
             result = tcp_callback(dev, conn, TCP_CONNECTED | TCP_NEWDATA);
             tcp_appsend(dev, conn, result);
+            return;
+          }
+
+        if ((tcp->flags & TCP_CTL) == TCP_SYN)
+          {
+            /* We see SYN without ACK. It is attempt of
+             * simultaneous connect with crossed SYNs.
+             * Particularly, it can be connect to self.
+             */
+
+            conn->tcpstateflags = TCP_SYN_RCVD;
+
+            memcpy(conn->rcvseq, tcp->seqno, 4);
+            conn->rcv_adv = tcp_getsequence(conn->rcvseq);
+            net_incr32(conn->rcvseq, 1); /* ack SYN */
+
+            /* Parse the TCP MSS option, if present. */
+
+            tcp_parse_option(dev, conn, iplen);
+
+            /* Our response will be a SYNACK. */
+
+            tcp_setsequence(conn->sndseq, conn->rexmit_seq);
+            tcp_synack(dev, conn, TCP_ACK | TCP_SYN);
             return;
           }
 
