@@ -65,6 +65,19 @@ config ARCH_CHIP_BL602
 	---help---
 		BouffaloLab BL602(rv32imfc)
 
+config ARCH_CHIP_MINDGROVE
+	bool "Mindgrove SoCs"
+	select ARCH_RV64
+	select ARCH_RV_ISA_M
+	select ARCH_RV_ISA_A
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DPFPU
+	select ARCH_RV_ISA_C
+	# select ARCH_HAVE_ZICSR
+	# select ARCH_HAVE_ZIFENCEI
+	---help---
+		Mindgrove SoCs (RISC-V Core).
+
 config ARCH_CHIP_ESP32C3
 	bool "Espressif ESP32-C3"
 	select ARCH_RV32
@@ -554,6 +567,7 @@ config ARCH_CHIP
 	default "k230"                  if ARCH_CHIP_K230
 	default "sg2000"                if ARCH_CHIP_SG2000
 	default "eic7700x"              if ARCH_CHIP_EIC7700X
+	default "mindgrove"				if ARCH_CHIP_MINDGROVE
 
 config ARCH_RISCV_INTXCPT_EXTENSIONS
 	bool "RISC-V Integer Context Extensions"
@@ -796,5 +810,8 @@ source "arch/risc-v/src/sg2000/Kconfig"
 endif
 if ARCH_CHIP_EIC7700X
 source "arch/risc-v/src/eic7700x/Kconfig"
+endif
+if ARCH_CHIP_MINDGROVE
+source "arch/risc-v/src/mindgrove/Kconfig"
 endif
 endif # ARCH_RISCV

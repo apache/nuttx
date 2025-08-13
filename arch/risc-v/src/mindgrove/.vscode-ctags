@@ -1,0 +1,916 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_OUTPUT_EXCMD	mixed	/number, pattern, mixed, or combineV2/
+!_TAG_OUTPUT_FILESEP	slash	/slash or backslash/
+!_TAG_OUTPUT_MODE	u-ctags	/u-ctags or e-ctags/
+!_TAG_PATTERN_LENGTH_LIMIT	96	/0 for no limit/
+!_TAG_PROC_CWD	/home/vignesh/nuttxspace/nuttx/arch/risc-v/src/mindgrove/	//
+!_TAG_PROGRAM_AUTHOR	Universal Ctags Team	//
+!_TAG_PROGRAM_NAME	Universal Ctags	/Derived from Exuberant Ctags/
+!_TAG_PROGRAM_URL	https://ctags.io/	/official site/
+!_TAG_PROGRAM_VERSION	5.9.0	//
+ABMODE	secure_iot_reg.h	/^        __IOM uint32_t ABMODE     : 2;            \/*!< Alternate bytes mode                    /;"	m	struct:__anonbdd9aeea3808::__anonbdd9aeea430a::__anonbdd9aeea4408	typeref:typename:__IOM uint32_t:2
+ABORT	secure_iot_reg.h	/^        __IOM uint32_t ABORT      : 1;            \/*!< QSPI Communication Abort request        /;"	m	struct:__anonbdd9aeea3808::__anonbdd9aeea390a::__anonbdd9aeea3a08	typeref:typename:__IOM uint32_t:1
+ABR	secure_iot_reg.h	/^      __IOM uint32_t ABR;                         \/*!< Alternate Byte Register                 /;"	m	union:__anonbdd9aeea3808::__anonbdd9aeea470a	typeref:typename:__IOM uint32_t
+ABR_b	secure_iot_reg.h	/^      } ABR_b;$/;"	m	union:__anonbdd9aeea3808::__anonbdd9aeea470a	typeref:struct:__anonbdd9aeea3808::__anonbdd9aeea470a::__anonbdd9aeea4808
+ABSIZE	secure_iot_reg.h	/^        __IOM uint32_t ABSIZE     : 2;            \/*!< Alternate bytes size                    /;"	m	struct:__anonbdd9aeea3808::__anonbdd9aeea430a::__anonbdd9aeea4408	typeref:typename:__IOM uint32_t:2
+ACTIVE	plic.h	/^	ACTIVE   = 1,$/;"	e	enum:__anon14fe60e30103
+ACTIVE	secure_iot_reg.h	/^        __IOM uint16_t ACTIVE     : 1;            \/*!< Indicates whether trace is active or not/;"	m	struct:__anonbdd9aeea4b08::__anonbdd9aeea4c0a::__anonbdd9aeea4d08	typeref:typename:__IOM uint16_t:1
+ACTIVE	secure_iot_reg.h	/^        __IOM uint32_t ACTIVE     : 1;            \/*!< Indicates whether RAM is active or not. /;"	m	struct:__anonbdd9aeea5608::__anonbdd9aeea570a::__anonbdd9aeea5808	typeref:typename:__IOM uint32_t:1
+ADC	secure_iot_reg.h	/^  #define ADC /;"	d
+ADC_BASE	secure_iot_reg.h	/^  #define ADC_BASE /;"	d
+ADC_Type	secure_iot_reg.h	/^  }ADC_Type;$/;"	t	typeref:struct:__anonbdd9aeea1308
+ADDR	secure_iot_reg.h	/^        __IOM uint32_t ADDR       : 32;           \/*!< Memory address on which the DATA to be w/;"	m	struct:__anonbdd9aeea5c08::__anonbdd9aeea610a::__anonbdd9aeea6208	typeref:typename:__IOM uint32_t:32
+ADDRESS	secure_iot_reg.h	/^        __IOM uint32_t ADDRESS    : 32;           \/*!< Address                                 /;"	m	struct:__anonbdd9aeea3808::__anonbdd9aeea450a::__anonbdd9aeea4608	typeref:typename:__IOM uint32_t:32
+ADDRESS	secure_iot_reg.h	/^      __IOM uint32_t ADDRESS;                     \/*!< One-Time Programmable Memory Address Reg/;"	m	union:__anonbdd9aeea5c08::__anonbdd9aeea610a	typeref:typename:__IOM uint32_t
+ADDRESS_b	secure_iot_reg.h	/^      } ADDRESS_b;$/;"	m	union:__anonbdd9aeea5c08::__anonbdd9aeea610a	typeref:struct:__anonbdd9aeea5c08::__anonbdd9aeea610a::__anonbdd9aeea6208
+ADMODE	secure_iot_reg.h	/^        __IOM uint32_t ADMODE     : 2;            \/*!< Address mode                            /;"	m	struct:__anonbdd9aeea3808::__anonbdd9aeea430a::__anonbdd9aeea4408	typeref:typename:__IOM uint32_t:2
+ADSIZE	secure_iot_reg.h	/^        __IOM uint32_t ADSIZE     : 2;            \/*!< Address size                            /;"	m	struct:__anonbdd9aeea3808::__anonbdd9aeea430a::__anonbdd9aeea4408	typeref:typename:__IOM uint32_t:2
+AES_BASE	secure_iot_reg.h	/^  #define AES_BASE /;"	d
+AES_CTRL	secure_iot_reg.h	/^      __IOM uint8_t AES_CTRL;                     \/*!< Control register                        /;"	m	union:__anonbdd9aeea2008::__anonbdd9aeea210a	typeref:typename:__IOM uint8_t
+AES_CTRL_ENCDEC	secure_iot_reg.h	/^        __IOM uint8_t AES_CTRL_ENCDEC : 1;        \/*!< 0 - Encrypt, 1 - Decrypt                /;"	m	struct:__anonbdd9aeea2008::__anonbdd9aeea210a::__anonbdd9aeea2208	typeref:typename:__IOM uint8_t:1
+AES_CTRL_END	secure_iot_reg.h	/^        __IOM uint8_t AES_CTRL_END : 1;           \/*!< To specify end of message               /;"	m	struct:__anonbdd9aeea2008::__anonbdd9aeea210a::__anonbdd9aeea2208	typeref:typename:__IOM uint8_t:1
+AES_CTRL_KEYLEN	secure_iot_reg.h	/^        __IOM uint8_t AES_CTRL_KEYLEN : 2;        \/*!< To select the lenght of key. 0 - 128 bit/;"	m	struct:__anonbdd9aeea2008::__anonbdd9aeea210a::__anonbdd9aeea2208	typeref:typename:__IOM uint8_t:2
+AES_CTRL_MODE	secure_iot_reg.h	/^        __IOM uint8_t AES_CTRL_MODE : 3;          \/*!< 0-ECB, 1-CBC, 2-CFB, 3-OFB, 4-CTR       /;"	m	struct:__anonbdd9aeea2008::__anonbdd9aeea210a::__anonbdd9aeea2208	typeref:typename:__IOM uint8_t:3
+AES_CTRL_b	secure_iot_reg.h	/^      } AES_CTRL_b;$/;"	m	union:__anonbdd9aeea2008::__anonbdd9aeea210a	typeref:struct:__anonbdd9aeea2008::__anonbdd9aeea210a::__anonbdd9aeea2208
+AES_STATUS	secure_iot_reg.h	/^      __IOM uint8_t AES_STATUS;                   \/*!< To check the status.                    /;"	m	union:__anonbdd9aeea2008::__anonbdd9aeea230a	typeref:typename:__IOM uint8_t
+AES_STATUS_OUTP_READ	secure_iot_reg.h	/^        __IOM uint8_t AES_STATUS_OUTP_READ : 1;   \/*!< Once the output is ready and read, this /;"	m	struct:__anonbdd9aeea2008::__anonbdd9aeea230a::__anonbdd9aeea2408	typeref:typename:__IOM uint8_t:1
+AES_STATUS_OUTP_READY	secure_iot_reg.h	/^        __IOM uint8_t AES_STATUS_OUTP_READY : 1;  \/*!< Becomes 1 when the accelerator has compu/;"	m	struct:__anonbdd9aeea2008::__anonbdd9aeea230a::__anonbdd9aeea2408	typeref:typename:__IOM uint8_t:1
+AES_STATUS_b	secure_iot_reg.h	/^      } AES_STATUS_b;$/;"	m	union:__anonbdd9aeea2008::__anonbdd9aeea230a	typeref:struct:__anonbdd9aeea2008::__anonbdd9aeea230a::__anonbdd9aeea2408
+AES_Type	secure_iot_reg.h	/^  } AES_Type;                                     \/*!< Size = 100 (0x64)                       /;"	t	typeref:struct:__anonbdd9aeea2008
+ALTERNATE	secure_iot_reg.h	/^        __IOM uint32_t ALTERNATE  : 32;           \/*!< Alternate Byte                          /;"	m	struct:__anonbdd9aeea3808::__anonbdd9aeea470a::__anonbdd9aeea4808	typeref:typename:__IOM uint32_t:32
+APMS	secure_iot_reg.h	/^        __IOM uint32_t APMS       : 1;            \/*!< Automatic poll mode stop                /;"	m	struct:__anonbdd9aeea3808::__anonbdd9aeea390a::__anonbdd9aeea3a08	typeref:typename:__IOM uint32_t:1
+AR	secure_iot_reg.h	/^      __IOM uint32_t AR;                          \/*!< Address Register                        /;"	m	union:__anonbdd9aeea3808::__anonbdd9aeea450a	typeref:typename:__IOM uint32_t
+ARCH_RISCV_SRC_MINDGROVE_UART_H	hardware/mindgrove_uart.h	/^#define ARCH_RISCV_SRC_MINDGROVE_UART_H$/;"	d
+AR_b	secure_iot_reg.h	/^      } AR_b;$/;"	m	union:__anonbdd9aeea3808::__anonbdd9aeea450a	typeref:struct:__anonbdd9aeea3808::__anonbdd9aeea450a::__anonbdd9aeea4608
+BAUD_REG	secure_iot_reg.h	/^    __IOM unsigned short  BAUD_REG;                     \/*!< Baud register                     /;"	m	struct:__anonbdd9aeea0c08	typeref:typename:__IOM unsigned short
+BREAK_ERROR	hardware/mindgrove_uart.h	/^#define BREAK_ERROR	/;"	d
+BUSY	secure_iot_reg.h	/^        __IM  uint32_t BUSY       : 1;            \/*!< Busy                                    /;"	m	struct:__anonbdd9aeea3808::__anonbdd9aeea3d0a::__anonbdd9aeea3e08	typeref:typename:__IM uint32_t:1
+BUSY	secure_iot_reg.h	/^        __IOM uint16_t BUSY       : 1;            \/*!< SPI Busy bit. This will be set when NCS /;"	m	struct:__anonbdd9aeea2c08::__anonbdd9aeea350a::__anonbdd9aeea3608	typeref:typename:__IOM uint16_t:1
+CAPTURE_INP	secure_iot_reg.h	/^    __IOM uint32_t  CAPTURE_INP;                  \/*!< Timer capture input register            /;"	m	struct:__anonbdd9aeea0708	typeref:typename:__IOM uint32_t
+CCR	secure_iot_reg.h	/^      __IOM uint32_t CCR;                         \/*!< communication configuration register    /;"	m	union:__anonbdd9aeea3808::__anonbdd9aeea430a	typeref:typename:__IOM uint32_t
+CCR_b	secure_iot_reg.h	/^      } CCR_b;$/;"	m	union:__anonbdd9aeea3808::__anonbdd9aeea430a	typeref:struct:__anonbdd9aeea3808::__anonbdd9aeea430a::__anonbdd9aeea4408
+CHAR_SIZE	secure_iot_reg.h	/^        __IOM unsigned short CHAR_SIZE  : 2;            \/*!< Selects the transmission data size/;"	m	struct:__anonbdd9aeea0c08::__anonbdd9aeea0f0a::__anonbdd9aeea1008	typeref:typename:__IOM unsigned short:2
+CKMODE	secure_iot_reg.h	/^        __IOM uint32_t CKMODE     : 1;            \/*!< Mode 0 \/ mode 3                        /;"	m	struct:__anonbdd9aeea3808::__anonbdd9aeea3b0a::__anonbdd9aeea3c08	typeref:typename:__IOM uint32_t:1
+CLINT0_BASE	secure_iot_reg.h	/^  #define CLINT0_BASE /;"	d
+CLK_CTRL	secure_iot_reg.h	/^      __IOM uint32_t CLK_CTRL;                    \/*!< SPI clock generation control register   /;"	m	union:__anonbdd9aeea2c08::__anonbdd9aeea2f0a	typeref:typename:__IOM uint32_t
+CLK_CTRL_b	secure_iot_reg.h	/^      } CLK_CTRL_b;$/;"	m	union:__anonbdd9aeea2c08::__anonbdd9aeea2f0a	typeref:struct:__anonbdd9aeea2c08::__anonbdd9aeea2f0a::__anonbdd9aeea3008
+CLK_PHASE	secure_iot_reg.h	/^        __IOM uint32_t CLK_PHASE  : 1;            \/*!< holds the clock phase                   /;"	m	struct:__anonbdd9aeea2c08::__anonbdd9aeea2f0a::__anonbdd9aeea3008	typeref:typename:__IOM uint32_t:1
+CLK_POLARITY	secure_iot_reg.h	/^        __IOM uint32_t CLK_POLARITY : 1;          \/*!< holds the clock polarity                /;"	m	struct:__anonbdd9aeea2c08::__anonbdd9aeea2f0a::__anonbdd9aeea3008	typeref:typename:__IOM uint32_t:1
+CLK_PRESCALAR	secure_iot_reg.h	/^        __IOM uint16_t CLK_PRESCALAR : 15;        \/*!< PWM prescalar value                     /;"	m	struct:__anonbdd9aeea0208::__anonbdd9aeea030a::__anonbdd9aeea0408	typeref:typename:__IOM uint16_t:15
+CLK_PRESCALAR	secure_iot_reg.h	/^        __IOM uint32_t CLK_PRESCALAR : 15;        \/*!< GPTIMER prescalar value                 /;"	m	struct:__anonbdd9aeea0708::__anonbdd9aeea0a0a::__anonbdd9aeea0b08	typeref:typename:__IOM uint32_t:15
+CLK_PRESCALAR	secure_iot_reg.h	/^        __IOM uint32_t CLK_PRESCALAR : 8;         \/*!< holds the prescaller value of the sclk  /;"	m	struct:__anonbdd9aeea2c08::__anonbdd9aeea2f0a::__anonbdd9aeea3008	typeref:typename:__IOM uint32_t:8
+CLK_SRC	secure_iot_reg.h	/^        __IOM uint16_t CLK_SRC    : 1;            \/*!< PWM clock select bit                    /;"	m	struct:__anonbdd9aeea0208::__anonbdd9aeea030a::__anonbdd9aeea0408	typeref:typename:__IOM uint16_t:1
+CLK_SRC	secure_iot_reg.h	/^        __IOM uint32_t CLK_SRC    : 1;            \/*!< GPTIMER clock select bit                /;"	m	struct:__anonbdd9aeea0708::__anonbdd9aeea0a0a::__anonbdd9aeea0b08	typeref:typename:__IOM uint32_t:1
+CLOCK_CTRL	secure_iot_reg.h	/^      __IOM uint16_t CLOCK_CTRL;                  \/*!< Clock prescalar register                /;"	m	union:__anonbdd9aeea0208::__anonbdd9aeea030a	typeref:typename:__IOM uint16_t
+CLOCK_CTRL	secure_iot_reg.h	/^      __IOM uint32_t CLOCK_CTRL;                  \/*!< Clock control register                  /;"	m	union:__anonbdd9aeea0708::__anonbdd9aeea0a0a	typeref:typename:__IOM uint32_t
+CLOCK_CTRL_b	secure_iot_reg.h	/^      } CLOCK_CTRL_b;$/;"	m	union:__anonbdd9aeea0208::__anonbdd9aeea030a	typeref:struct:__anonbdd9aeea0208::__anonbdd9aeea030a::__anonbdd9aeea0408
+CLOCK_CTRL_b	secure_iot_reg.h	/^      } CLOCK_CTRL_b;$/;"	m	union:__anonbdd9aeea0708::__anonbdd9aeea0a0a	typeref:struct:__anonbdd9aeea0708::__anonbdd9aeea0a0a::__anonbdd9aeea0b08
+CLOCK_FREQUENCY_ASIC	secure_iot_reg.h	/^  #define CLOCK_FREQUENCY_ASIC /;"	d
+CLOCK_FREQUENCY_FPGA	secure_iot_reg.h	/^  #define CLOCK_FREQUENCY_FPGA /;"	d
+COMM_MODE	secure_iot_reg.h	/^        __IOM uint32_t COMM_MODE  : 2;            \/*!< holds the communication mode of the spi /;"	m	struct:__anonbdd9aeea2c08::__anonbdd9aeea2d0a::__anonbdd9aeea2e08	typeref:typename:__IOM uint32_t:2
+COMM_STATUS	secure_iot_reg.h	/^      __IOM uint16_t COMM_STATUS;                 \/*!< Status of SPI communication             /;"	m	union:__anonbdd9aeea2c08::__anonbdd9aeea350a	typeref:typename:__IOM uint16_t
+COMM_STATUS_b	secure_iot_reg.h	/^      } COMM_STATUS_b;$/;"	m	union:__anonbdd9aeea2c08::__anonbdd9aeea350a	typeref:struct:__anonbdd9aeea2c08::__anonbdd9aeea350a::__anonbdd9aeea3608
+COMP1_CTRL	secure_iot_reg.h	/^      __IOM uint16_t COMP1_CTRL;                  \/*!< Control register for 1st comparator     /;"	m	union:__anonbdd9aeea4b08::__anonbdd9aeea500a	typeref:typename:__IOM uint16_t
+COMP1_CTRL_b	secure_iot_reg.h	/^      } COMP1_CTRL_b;$/;"	m	union:__anonbdd9aeea4b08::__anonbdd9aeea500a	typeref:struct:__anonbdd9aeea4b08::__anonbdd9aeea500a::__anonbdd9aeea5108
+COMP1_EN	secure_iot_reg.h	/^        __IOM uint32_t COMP1_EN   : 1;            \/*!< Enable the first comparator             /;"	m	struct:__anonbdd9aeea4b08::__anonbdd9aeea4e0a::__anonbdd9aeea4f08	typeref:typename:__IOM uint32_t:1
+COMP1_PMATCH_HIGH	secure_iot_reg.h	/^    __IOM uint32_t  COMP1_PMATCH_HIGH;            \/*!< Comparator 1 primary match data: High 32/;"	m	struct:__anonbdd9aeea4b08	typeref:typename:__IOM uint32_t
+COMP1_PMATCH_LOW	secure_iot_reg.h	/^    __IOM uint32_t  COMP1_PMATCH_LOW;             \/*!< Comparator 1 primary match data: Low 32 /;"	m	struct:__anonbdd9aeea4b08	typeref:typename:__IOM uint32_t
+COMP1_SMATCH_LOW	secure_iot_reg.h	/^    __IOM uint32_t  COMP1_SMATCH_LOW;             \/*!< Comparator 1 secondary match data: Low 3/;"	m	struct:__anonbdd9aeea4b08	typeref:typename:__IOM uint32_t
+COMP2_CTRL	secure_iot_reg.h	/^      __IOM uint16_t COMP2_CTRL;                  \/*!< Control register for 1st comparator     /;"	m	union:__anonbdd9aeea4b08::__anonbdd9aeea520a	typeref:typename:__IOM uint16_t
+COMP2_CTRL_b	secure_iot_reg.h	/^      } COMP2_CTRL_b;$/;"	m	union:__anonbdd9aeea4b08::__anonbdd9aeea520a	typeref:struct:__anonbdd9aeea4b08::__anonbdd9aeea520a::__anonbdd9aeea5308
+COMP2_EN	secure_iot_reg.h	/^        __IOM uint32_t COMP2_EN   : 1;            \/*!< Enable the second comparator            /;"	m	struct:__anonbdd9aeea4b08::__anonbdd9aeea4e0a::__anonbdd9aeea4f08	typeref:typename:__IOM uint32_t:1
+COMP3_CTRL	secure_iot_reg.h	/^      __IOM uint16_t COMP3_CTRL;                  \/*!< Control register for 1st comparator     /;"	m	union:__anonbdd9aeea4b08::__anonbdd9aeea540a	typeref:typename:__IOM uint16_t
+COMP3_CTRL_b	secure_iot_reg.h	/^      } COMP3_CTRL_b;$/;"	m	union:__anonbdd9aeea4b08::__anonbdd9aeea540a	typeref:struct:__anonbdd9aeea4b08::__anonbdd9aeea540a::__anonbdd9aeea5508
+COMP3_EN	secure_iot_reg.h	/^        __IOM uint32_t COMP3_EN   : 1;            \/*!< Enable the first comparator             /;"	m	struct:__anonbdd9aeea4b08::__anonbdd9aeea4e0a::__anonbdd9aeea4f08	typeref:typename:__IOM uint32_t:1
+COMP_TYPE	secure_iot_reg.h	/^        __IM  uint32_t COMP_TYPE  : 1;            \/*!< Trace RAM sink component type           /;"	m	struct:__anonbdd9aeea5608::__anonbdd9aeea590a::__anonbdd9aeea5a08	typeref:typename:__IM uint32_t:1
+CONFIG_MINDGROVE_HAVE_UART0	Kconfig	/^config MINDGROVE_HAVE_UART0$/;"	c
+CONFIG_MINDGROVE_UART0	Kconfig	/^config MINDGROVE_UART0$/;"	c
+CONSOLE_DEV	mindgrove_serial.c	/^#    define CONSOLE_DEV /;"	d	file:
+CONT_PREHASH	secure_iot_reg.h	/^        __IOM uint8_t CONT_PREHASH : 1;           \/*!< To continue the hash calculated from pre/;"	m	struct:__anonbdd9aeea2508::__anonbdd9aeea260a::__anonbdd9aeea2708	typeref:typename:__IOM uint8_t:1
+COUNT	secure_iot_reg.h	/^    __IM  uint32_t  COUNT;                        \/*!< Counter register                        /;"	m	struct:__anonbdd9aeea0708	typeref:typename:__IM uint32_t
+CR	secure_iot_reg.h	/^      __IOM uint32_t CR;                          \/*!< Control Register                        /;"	m	union:__anonbdd9aeea3808::__anonbdd9aeea390a	typeref:typename:__IOM uint32_t
+CR_b	secure_iot_reg.h	/^      } CR_b;$/;"	m	union:__anonbdd9aeea3808::__anonbdd9aeea390a	typeref:struct:__anonbdd9aeea3808::__anonbdd9aeea390a::__anonbdd9aeea3a08
+CSMF	secure_iot_reg.h	/^        __IOM uint32_t CSMF       : 1;            \/*!< Clear status match flag                 /;"	m	struct:__anonbdd9aeea3808::__anonbdd9aeea3f0a::__anonbdd9aeea4008	typeref:typename:__IOM uint32_t:1
+CTCF	secure_iot_reg.h	/^        __IOM uint32_t CTCF       : 1;            \/*!< Clear transfer complete flag            /;"	m	struct:__anonbdd9aeea3808::__anonbdd9aeea3f0a::__anonbdd9aeea4008	typeref:typename:__IOM uint32_t:1
+CTEF	secure_iot_reg.h	/^        __IOM uint32_t CTEF       : 1;            \/*!< Clear transfer error flag               /;"	m	struct:__anonbdd9aeea3808::__anonbdd9aeea3f0a::__anonbdd9aeea4008	typeref:typename:__IOM uint32_t:1
+CTOF	secure_iot_reg.h	/^        __IOM uint32_t CTOF       : 1;            \/*!< Clear timeout flag                      /;"	m	struct:__anonbdd9aeea3808::__anonbdd9aeea3f0a::__anonbdd9aeea4008	typeref:typename:__IOM uint32_t:1
+CTRL	secure_iot_reg.h	/^      __IOM uint16_t CTRL;                        \/*!< Control register                        /;"	m	union:__anonbdd9aeea0708::__anonbdd9aeea080a	typeref:typename:__IOM uint16_t
+CTRL	secure_iot_reg.h	/^      __IOM uint16_t CTRL;                        \/*!< Itrace control register                 /;"	m	union:__anonbdd9aeea4b08::__anonbdd9aeea4c0a	typeref:typename:__IOM uint16_t
+CTRL	secure_iot_reg.h	/^      __IOM uint16_t CTRL;                        \/*!< PWM Control register                    /;"	m	union:__anonbdd9aeea0208::__anonbdd9aeea050a	typeref:typename:__IOM uint16_t
+CTRL	secure_iot_reg.h	/^      __IOM uint32_t CTRL;                        \/*!< Control register                        /;"	m	union:__anonbdd9aeea5608::__anonbdd9aeea570a	typeref:typename:__IOM uint32_t
+CTRL	secure_iot_reg.h	/^      __IOM uint32_t CTRL;                        \/*!< One-Time Programmable Memory Control Reg/;"	m	union:__anonbdd9aeea5c08::__anonbdd9aeea5d0a	typeref:typename:__IOM uint32_t
+CTRL	secure_iot_reg.h	/^      __IOM uint32_t CTRL;                        \/*!< SPI communication control register      /;"	m	union:__anonbdd9aeea2c08::__anonbdd9aeea2d0a	typeref:typename:__IOM uint32_t
+CTRL	secure_iot_reg.h	/^      __IOM uint8_t CTRL;                         \/*!< Control register                        /;"	m	union:__anonbdd9aeea1408::__anonbdd9aeea150a	typeref:typename:__IOM uint8_t
+CTRL	secure_iot_reg.h	/^    __IOM unsigned short CTRL;                        \/*!< Control register                    /;"	m	union:__anonbdd9aeea0c08::__anonbdd9aeea0f0a	typeref:typename:__IOM unsigned short
+CTRL_ACK	secure_iot_reg.h	/^        __IOM uint8_t CTRL_ACK    : 1;            \/*!< Sends the acknoledge bit                /;"	m	struct:__anonbdd9aeea1408::__anonbdd9aeea150a::__anonbdd9aeea1608	typeref:typename:__IOM uint8_t:1
+CTRL_CAPTURE_INP_EN	secure_iot_reg.h	/^        __IOM uint16_t CTRL_CAPTURE_INP_EN : 1;   \/*!< Counter capture input enable            /;"	m	struct:__anonbdd9aeea0708::__anonbdd9aeea080a::__anonbdd9aeea0908	typeref:typename:__IOM uint16_t:1
+CTRL_CNT_COUNT_EN	secure_iot_reg.h	/^        __IOM uint16_t CTRL_CNT_COUNT_EN : 1;     \/*!< Timer continuous count enable           /;"	m	struct:__anonbdd9aeea0708::__anonbdd9aeea080a::__anonbdd9aeea0908	typeref:typename:__IOM uint16_t:1
+CTRL_COMP_OUT_ENABLE	secure_iot_reg.h	/^        __IOM uint16_t CTRL_COMP_OUT_ENABLE : 1;  \/*!< PWM Complementary Output                /;"	m	struct:__anonbdd9aeea0208::__anonbdd9aeea050a::__anonbdd9aeea0608	typeref:typename:__IOM uint16_t:1
+CTRL_COUNTER_RESET	secure_iot_reg.h	/^        __IOM uint16_t CTRL_COUNTER_RESET : 1;    \/*!< Resets the counter in PWM               /;"	m	struct:__anonbdd9aeea0208::__anonbdd9aeea050a::__anonbdd9aeea0608	typeref:typename:__IOM uint16_t:1
+CTRL_COUNT_RESET	secure_iot_reg.h	/^        __IOM uint16_t CTRL_COUNT_RESET : 1;      \/*!< Timer counter reset bit                 /;"	m	struct:__anonbdd9aeea0708::__anonbdd9aeea080a::__anonbdd9aeea0908	typeref:typename:__IOM uint16_t:1
+CTRL_EN	secure_iot_reg.h	/^        __IOM uint16_t CTRL_EN    : 1;            \/*!< PWM controller enable flag              /;"	m	struct:__anonbdd9aeea0208::__anonbdd9aeea050a::__anonbdd9aeea0608	typeref:typename:__IOM uint16_t:1
+CTRL_EN	secure_iot_reg.h	/^        __IOM uint16_t CTRL_EN    : 1;            \/*!< Timer enable flag                       /;"	m	struct:__anonbdd9aeea0708::__anonbdd9aeea080a::__anonbdd9aeea0908	typeref:typename:__IOM uint16_t:1
+CTRL_ENI	secure_iot_reg.h	/^        __IOM uint8_t CTRL_ENI    : 1;            \/*!< Enables the external interrupt output   /;"	m	struct:__anonbdd9aeea1408::__anonbdd9aeea150a::__anonbdd9aeea1608	typeref:typename:__IOM uint8_t:1
+CTRL_ESO	secure_iot_reg.h	/^        __IOM uint8_t CTRL_ESO    : 1;            \/*!< Enable Serial Output. ESO = 0 - Register/;"	m	struct:__anonbdd9aeea1408::__anonbdd9aeea150a::__anonbdd9aeea1608	typeref:typename:__IOM uint8_t:1
+CTRL_FALL_INTR	secure_iot_reg.h	/^        __IOM uint16_t CTRL_FALL_INTR : 1;        \/*!< PWM fall interrupt bit                  /;"	m	struct:__anonbdd9aeea0208::__anonbdd9aeea050a::__anonbdd9aeea0608	typeref:typename:__IOM uint16_t:1
+CTRL_FALL_INTR_EN	secure_iot_reg.h	/^        __IOM uint16_t CTRL_FALL_INTR_EN : 1;     \/*!< PWM fall interrupt enable               /;"	m	struct:__anonbdd9aeea0208::__anonbdd9aeea050a::__anonbdd9aeea0608	typeref:typename:__IOM uint16_t:1
+CTRL_HALFPERIOD_INTR	secure_iot_reg.h	/^        __IOM uint16_t CTRL_HALFPERIOD_INTR : 1;  \/*!< PWM halfperiod interrupt bit            /;"	m	struct:__anonbdd9aeea0208::__anonbdd9aeea050a::__anonbdd9aeea0608	typeref:typename:__IOM uint16_t:1
+CTRL_HALFPERIOD_INTR_EN	secure_iot_reg.h	/^        __IOM uint16_t CTRL_HALFPERIOD_INTR_EN : 1;\/*!< PWM halfperiod interrupt enable        /;"	m	struct:__anonbdd9aeea0208::__anonbdd9aeea050a::__anonbdd9aeea0608	typeref:typename:__IOM uint16_t:1
+CTRL_MODE	secure_iot_reg.h	/^        __IOM uint16_t CTRL_MODE  : 2;            \/*!< Timer mode select: 0=PWM, 1=Down, 2=Up, /;"	m	struct:__anonbdd9aeea0708::__anonbdd9aeea080a::__anonbdd9aeea0908	typeref:typename:__IOM uint16_t:2
+CTRL_OFLOW_INTR	secure_iot_reg.h	/^        __IM  uint16_t CTRL_OFLOW_INTR : 1;       \/*!< Counter overflow interrupt bit          /;"	m	struct:__anonbdd9aeea0708::__anonbdd9aeea080a::__anonbdd9aeea0908	typeref:typename:__IM uint16_t:1
+CTRL_OFLOW_INTR_EN	secure_iot_reg.h	/^        __IOM uint16_t CTRL_OFLOW_INTR_EN : 1;    \/*!< Counter overflow interrupt enable       /;"	m	struct:__anonbdd9aeea0708::__anonbdd9aeea080a::__anonbdd9aeea0908	typeref:typename:__IOM uint16_t:1
+CTRL_OUTPUT_EN	secure_iot_reg.h	/^        __IOM uint16_t CTRL_OUTPUT_EN : 1;        \/*!< PWM output enable flag                  /;"	m	struct:__anonbdd9aeea0208::__anonbdd9aeea050a::__anonbdd9aeea0608	typeref:typename:__IOM uint16_t:1
+CTRL_OUTPUT_EN	secure_iot_reg.h	/^        __IOM uint16_t CTRL_OUTPUT_EN : 1;        \/*!< Timer output enable bit                 /;"	m	struct:__anonbdd9aeea0708::__anonbdd9aeea080a::__anonbdd9aeea0908	typeref:typename:__IOM uint16_t:1
+CTRL_OUTPUT_POLARITY	secure_iot_reg.h	/^        __IOM uint16_t CTRL_OUTPUT_POLARITY : 1;  \/*!< PWM output polarity select flag         /;"	m	struct:__anonbdd9aeea0208::__anonbdd9aeea050a::__anonbdd9aeea0608	typeref:typename:__IOM uint16_t:1
+CTRL_PARITY	secure_iot_reg.h	/^        __IOM unsigned short CTRL_PARITY : 2;           \/*!< To select the type of parity. 00 -/;"	m	struct:__anonbdd9aeea0c08::__anonbdd9aeea0f0a::__anonbdd9aeea1008	typeref:typename:__IOM unsigned short:2
+CTRL_PIN	secure_iot_reg.h	/^        __IOM uint8_t CTRL_PIN    : 1;            \/*!< Used as a software reset. If pin is 1 al/;"	m	struct:__anonbdd9aeea1408::__anonbdd9aeea150a::__anonbdd9aeea1608	typeref:typename:__IOM uint8_t:1
+CTRL_PWM_FALL_INTR	secure_iot_reg.h	/^        __IM  uint16_t CTRL_PWM_FALL_INTR : 1;    \/*!< PWM fall interupt bit                   /;"	m	struct:__anonbdd9aeea0708::__anonbdd9aeea080a::__anonbdd9aeea0908	typeref:typename:__IM uint16_t:1
+CTRL_PWM_FALL_INTR_EN	secure_iot_reg.h	/^        __IOM uint16_t CTRL_PWM_FALL_INTR_EN : 1; \/*!< PWM fall interupt enable                /;"	m	struct:__anonbdd9aeea0708::__anonbdd9aeea080a::__anonbdd9aeea0908	typeref:typename:__IOM uint16_t:1
+CTRL_PWM_RISE_INTR	secure_iot_reg.h	/^        __IM  uint16_t CTRL_PWM_RISE_INTR : 1;    \/*!< PWM rise interupt bit                   /;"	m	struct:__anonbdd9aeea0708::__anonbdd9aeea080a::__anonbdd9aeea0908	typeref:typename:__IM uint16_t:1
+CTRL_PWM_RISE_INTR_EN	secure_iot_reg.h	/^        __IOM uint16_t CTRL_PWM_RISE_INTR_EN : 1; \/*!< PWM rise interupt enable                /;"	m	struct:__anonbdd9aeea0708::__anonbdd9aeea080a::__anonbdd9aeea0908	typeref:typename:__IOM uint16_t:1
+CTRL_RISE_INTR	secure_iot_reg.h	/^        __IOM uint16_t CTRL_RISE_INTR : 1;        \/*!< PWM rise interrupt bit                  /;"	m	struct:__anonbdd9aeea0208::__anonbdd9aeea050a::__anonbdd9aeea0608	typeref:typename:__IOM uint16_t:1
+CTRL_RISE_INTR_EN	secure_iot_reg.h	/^        __IOM uint16_t CTRL_RISE_INTR_EN : 1;     \/*!< PWM rise interrupt enable               /;"	m	struct:__anonbdd9aeea0208::__anonbdd9aeea050a::__anonbdd9aeea0608	typeref:typename:__IOM uint16_t:1
+CTRL_STA	secure_iot_reg.h	/^        __IOM uint8_t CTRL_STA    : 1;            \/*!< Sends the start bit                     /;"	m	struct:__anonbdd9aeea1408::__anonbdd9aeea150a::__anonbdd9aeea1608	typeref:typename:__IOM uint8_t:1
+CTRL_START	secure_iot_reg.h	/^        __IOM uint16_t CTRL_START : 1;            \/*!< PWM signal generation start flag        /;"	m	struct:__anonbdd9aeea0208::__anonbdd9aeea050a::__anonbdd9aeea0608	typeref:typename:__IOM uint16_t:1
+CTRL_STO	secure_iot_reg.h	/^        __IOM uint8_t CTRL_STO    : 1;            \/*!< Sends the stop bit                      /;"	m	struct:__anonbdd9aeea1408::__anonbdd9aeea150a::__anonbdd9aeea1608	typeref:typename:__IOM uint8_t:1
+CTRL_STOP_BITS	secure_iot_reg.h	/^        __IOM unsigned short CTRL_STOP_BITS : 2;        \/*!< To select the number of stop bits./;"	m	struct:__anonbdd9aeea0c08::__anonbdd9aeea0f0a::__anonbdd9aeea1008	typeref:typename:__IOM unsigned short:2
+CTRL_UFLOW_INTR	secure_iot_reg.h	/^        __IM  uint16_t CTRL_UFLOW_INTR : 1;       \/*!< Counter underflow interrupt bit         /;"	m	struct:__anonbdd9aeea0708::__anonbdd9aeea080a::__anonbdd9aeea0908	typeref:typename:__IM uint16_t:1
+CTRL_UFLOW_INTR_EN	secure_iot_reg.h	/^        __IOM uint16_t CTRL_UFLOW_INTR_EN : 1;    \/*!< Counter underflow interrupt enable      /;"	m	struct:__anonbdd9aeea0708::__anonbdd9aeea080a::__anonbdd9aeea0908	typeref:typename:__IOM uint16_t:1
+CTRL_UPDATE_EN	secure_iot_reg.h	/^        __IOM uint16_t CTRL_UPDATE_EN : 1;        \/*!< When this bit is set, the new values of /;"	m	struct:__anonbdd9aeea0208::__anonbdd9aeea050a::__anonbdd9aeea0608	typeref:typename:__IOM uint16_t:1
+CTRL_b	secure_iot_reg.h	/^      } CTRL_b;$/;"	m	union:__anonbdd9aeea0208::__anonbdd9aeea050a	typeref:struct:__anonbdd9aeea0208::__anonbdd9aeea050a::__anonbdd9aeea0608
+CTRL_b	secure_iot_reg.h	/^      } CTRL_b;$/;"	m	union:__anonbdd9aeea0708::__anonbdd9aeea080a	typeref:struct:__anonbdd9aeea0708::__anonbdd9aeea080a::__anonbdd9aeea0908
+CTRL_b	secure_iot_reg.h	/^      } CTRL_b;$/;"	m	union:__anonbdd9aeea0c08::__anonbdd9aeea0f0a	typeref:struct:__anonbdd9aeea0c08::__anonbdd9aeea0f0a::__anonbdd9aeea1008
+CTRL_b	secure_iot_reg.h	/^      } CTRL_b;$/;"	m	union:__anonbdd9aeea1408::__anonbdd9aeea150a	typeref:struct:__anonbdd9aeea1408::__anonbdd9aeea150a::__anonbdd9aeea1608
+CTRL_b	secure_iot_reg.h	/^      } CTRL_b;$/;"	m	union:__anonbdd9aeea2c08::__anonbdd9aeea2d0a	typeref:struct:__anonbdd9aeea2c08::__anonbdd9aeea2d0a::__anonbdd9aeea2e08
+CTRL_b	secure_iot_reg.h	/^      } CTRL_b;$/;"	m	union:__anonbdd9aeea4b08::__anonbdd9aeea4c0a	typeref:struct:__anonbdd9aeea4b08::__anonbdd9aeea4c0a::__anonbdd9aeea4d08
+CTRL_b	secure_iot_reg.h	/^      } CTRL_b;$/;"	m	union:__anonbdd9aeea5608::__anonbdd9aeea570a	typeref:struct:__anonbdd9aeea5608::__anonbdd9aeea570a::__anonbdd9aeea5808
+CTRL_b	secure_iot_reg.h	/^      } CTRL_b;$/;"	m	union:__anonbdd9aeea5c08::__anonbdd9aeea5d0a	typeref:struct:__anonbdd9aeea5c08::__anonbdd9aeea5d0a::__anonbdd9aeea5e08
+DATA	secure_iot_reg.h	/^        __IOM uint32_t DATA       : 32;           \/*!< Data                                    /;"	m	struct:__anonbdd9aeea3808::__anonbdd9aeea490a::__anonbdd9aeea4a08	typeref:typename:__IOM uint32_t:32
+DATA	secure_iot_reg.h	/^    __IM  uint32_t  DATA;                         \/*!< RAM data is read by external host via th/;"	m	struct:__anonbdd9aeea5608	typeref:typename:__IM uint32_t
+DATA_READ	secure_iot_reg.h	/^      __IOM uint32_t DATA_READ;                   \/*!< One-Time Programmable Memory READ Regist/;"	m	union:__anonbdd9aeea5c08::__anonbdd9aeea630a	typeref:typename:__IOM uint32_t
+DATA_READ_b	secure_iot_reg.h	/^      } DATA_READ_b;$/;"	m	union:__anonbdd9aeea5c08::__anonbdd9aeea630a	typeref:struct:__anonbdd9aeea5c08::__anonbdd9aeea630a::__anonbdd9aeea6408
+DATA_WRITE	secure_iot_reg.h	/^      __IOM uint32_t DATA_WRITE;                  \/*!< One-Time Programmable Memory WRITE Regis/;"	m	union:__anonbdd9aeea5c08::__anonbdd9aeea650a	typeref:typename:__IOM uint32_t
+DATA_WRITE_b	secure_iot_reg.h	/^      } DATA_WRITE_b;$/;"	m	union:__anonbdd9aeea5c08::__anonbdd9aeea650a	typeref:struct:__anonbdd9aeea5c08::__anonbdd9aeea650a::__anonbdd9aeea6608
+DCR	secure_iot_reg.h	/^      __IOM uint32_t DCR;                         \/*!< Device Configuration Register           /;"	m	union:__anonbdd9aeea3808::__anonbdd9aeea3b0a	typeref:typename:__IOM uint32_t
+DCR_b	secure_iot_reg.h	/^      } DCR_b;$/;"	m	union:__anonbdd9aeea3808::__anonbdd9aeea3b0a	typeref:struct:__anonbdd9aeea3808::__anonbdd9aeea3b0a::__anonbdd9aeea3c08
+DCYC	secure_iot_reg.h	/^        __IOM uint32_t DCYC       : 5;            \/*!< Number of dummy cycles                  /;"	m	struct:__anonbdd9aeea3808::__anonbdd9aeea430a::__anonbdd9aeea4408	typeref:typename:__IOM uint32_t:5
+DEADBAND_DELAY	secure_iot_reg.h	/^    __IOM uint16_t  DEADBAND_DELAY;               \/*!< PWM Deadband delay register             /;"	m	struct:__anonbdd9aeea0208	typeref:typename:__IOM uint16_t
+DEFINES_H	defines.h	/^#define DEFINES_H$/;"	d
+DELAY_REG	secure_iot_reg.h	/^    __IOM unsigned short  DELAY_REG;                    \/*!< Stores the delay to have before Tr/;"	m	struct:__anonbdd9aeea0c08	typeref:typename:__IOM unsigned short
+DL	secure_iot_reg.h	/^        __IOM uint32_t DL         : 32;           \/*!< Data length                             /;"	m	struct:__anonbdd9aeea3808::__anonbdd9aeea410a::__anonbdd9aeea4208	typeref:typename:__IOM uint32_t:32
+DLR	secure_iot_reg.h	/^      __IOM uint32_t DLR;                         \/*!< data length register                    /;"	m	union:__anonbdd9aeea3808::__anonbdd9aeea410a	typeref:typename:__IOM uint32_t
+DLR_b	secure_iot_reg.h	/^      } DLR_b;$/;"	m	union:__anonbdd9aeea3808::__anonbdd9aeea410a	typeref:struct:__anonbdd9aeea3808::__anonbdd9aeea410a::__anonbdd9aeea4208
+DMODE	secure_iot_reg.h	/^        __IOM uint32_t DMODE      : 2;            \/*!< Data mode                               /;"	m	struct:__anonbdd9aeea3808::__anonbdd9aeea430a::__anonbdd9aeea4408	typeref:typename:__IOM uint32_t:2
+DR	secure_iot_reg.h	/^      __IOM qspi_Data DR;                          \/*!< Data Register                          /;"	m	union:__anonbdd9aeea3808::__anonbdd9aeea490a	typeref:typename:__IOM qspi_Data
+DR_b	secure_iot_reg.h	/^      } DR_b;$/;"	m	union:__anonbdd9aeea3808::__anonbdd9aeea490a	typeref:struct:__anonbdd9aeea3808::__anonbdd9aeea490a::__anonbdd9aeea4a08
+DUMMY_BIT	secure_iot_reg.h	/^        __IOM uint32_t DUMMY_BIT  : 1;            \/*!< Set value 1 to send Dummy Cycles. Defaul/;"	m	struct:__anonbdd9aeea3808::__anonbdd9aeea430a::__anonbdd9aeea4408	typeref:typename:__IOM uint32_t:1
+DUTY_CYCLE	secure_iot_reg.h	/^    __IOM uint32_t  DUTY_CYCLE;                   \/*!< PWM Duty_Cycle register                 /;"	m	struct:__anonbdd9aeea0208	typeref:typename:__IOM uint32_t
+DUTY_CYCLE	secure_iot_reg.h	/^    __IOM uint32_t  DUTY_CYCLE;                   \/*!< PWM duty cycle register                 /;"	m	struct:__anonbdd9aeea0708	typeref:typename:__IOM uint32_t
+Data	secure_iot_reg.h	/^  } Data;$/;"	t	typeref:union:__anonbdd9aeea2b0a
+EN	secure_iot_reg.h	/^        __IOM uint16_t EN         : 1;            \/*!< Enables the trace                       /;"	m	struct:__anonbdd9aeea4b08::__anonbdd9aeea4c0a::__anonbdd9aeea4d08	typeref:typename:__IOM uint16_t:1
+EN	secure_iot_reg.h	/^        __IOM uint32_t EN         : 1;            \/*!< Enables the RAM to take trace packets.  /;"	m	struct:__anonbdd9aeea5608::__anonbdd9aeea570a::__anonbdd9aeea5808	typeref:typename:__IOM uint32_t:1
+EN	secure_iot_reg.h	/^        __IOM uint32_t EN         : 1;            \/*!< Filter enable                           /;"	m	struct:__anonbdd9aeea4b08::__anonbdd9aeea4e0a::__anonbdd9aeea4f08	typeref:typename:__IOM uint32_t:1
+EN	secure_iot_reg.h	/^        __IOM uint32_t EN         : 1;            \/*!< QSPI Communication Enable               /;"	m	struct:__anonbdd9aeea3808::__anonbdd9aeea390a::__anonbdd9aeea3a08	typeref:typename:__IOM uint32_t:1
+EN	secure_iot_reg.h	/^        __IOM uint32_t EN         : 1;            \/*!< holds the spi enable control. Once set, /;"	m	struct:__anonbdd9aeea2c08::__anonbdd9aeea2d0a::__anonbdd9aeea2e08	typeref:typename:__IOM uint32_t:1
+ENABLE_BREAK_ERROR	hardware/mindgrove_uart.h	/^#define ENABLE_BREAK_ERROR /;"	d
+ENABLE_FRAME_ERROR	hardware/mindgrove_uart.h	/^#define ENABLE_FRAME_ERROR /;"	d
+ENABLE_OVERRUN	hardware/mindgrove_uart.h	/^#define ENABLE_OVERRUN /;"	d
+ENABLE_PARITY_ERROR	hardware/mindgrove_uart.h	/^#define ENABLE_PARITY_ERROR /;"	d
+ENABLE_RX_FULL	hardware/mindgrove_uart.h	/^#define ENABLE_RX_FULL /;"	d
+ENABLE_RX_NOT_EMPTY	hardware/mindgrove_uart.h	/^#define ENABLE_RX_NOT_EMPTY /;"	d
+ENABLE_RX_THRESHOLD	hardware/mindgrove_uart.h	/^#define ENABLE_RX_THRESHOLD	/;"	d
+ENABLE_TX_EMPTY	hardware/mindgrove_uart.h	/^#define ENABLE_TX_EMPTY /;"	d
+ENABLE_TX_FULL	hardware/mindgrove_uart.h	/^#define ENABLE_TX_FULL /;"	d
+EXTERN	mindgrove_clockconfig.h	/^#define EXTERN /;"	d
+EXTERN	mindgrove_lowputc.h	/^#define EXTERN /;"	d
+FATAL_ERR	secure_iot_reg.h	/^        __IOM uint32_t FATAL_ERR  : 1;            \/*!< Status bit to check if the programming f/;"	m	struct:__anonbdd9aeea5c08::__anonbdd9aeea5f0a::__anonbdd9aeea6008	typeref:typename:__IOM uint32_t:1
+FCR	secure_iot_reg.h	/^      __IOM uint32_t FCR;                         \/*!< Flag Clear Register                     /;"	m	union:__anonbdd9aeea3808::__anonbdd9aeea3f0a	typeref:typename:__IOM uint32_t
+FCR_b	secure_iot_reg.h	/^      } FCR_b;$/;"	m	union:__anonbdd9aeea3808::__anonbdd9aeea3f0a	typeref:struct:__anonbdd9aeea3808::__anonbdd9aeea3f0a::__anonbdd9aeea4008
+FIFO_STATUS	secure_iot_reg.h	/^      __IOM uint32_t FIFO_STATUS;                 \/*!< Gives the status of TX\/RX FIFO         /;"	m	union:__anonbdd9aeea2c08::__anonbdd9aeea330a	typeref:typename:__IOM uint32_t
+FIFO_STATUS_b	secure_iot_reg.h	/^      } FIFO_STATUS_b;$/;"	m	union:__anonbdd9aeea2c08::__anonbdd9aeea330a	typeref:struct:__anonbdd9aeea2c08::__anonbdd9aeea330a::__anonbdd9aeea3408
+FITER_CTRL	secure_iot_reg.h	/^      __IOM uint32_t FITER_CTRL;                  \/*!< Instruction filter control              /;"	m	union:__anonbdd9aeea4b08::__anonbdd9aeea4e0a	typeref:typename:__IOM uint32_t
+FITER_CTRL_b	secure_iot_reg.h	/^      } FITER_CTRL_b;$/;"	m	union:__anonbdd9aeea4b08::__anonbdd9aeea4e0a	typeref:struct:__anonbdd9aeea4b08::__anonbdd9aeea4e0a::__anonbdd9aeea4f08
+FLEVEL	secure_iot_reg.h	/^        __IM  uint32_t FLEVEL     : 7;            \/*!< FIFO level                              /;"	m	struct:__anonbdd9aeea3808::__anonbdd9aeea3d0a::__anonbdd9aeea3e08	typeref:typename:__IM uint32_t:7
+FMODE	secure_iot_reg.h	/^        __IOM uint32_t FMODE      : 2;            \/*!< Functional mode                         /;"	m	struct:__anonbdd9aeea3808::__anonbdd9aeea430a::__anonbdd9aeea4408	typeref:typename:__IOM uint32_t:2
+FRAME_ERROR	hardware/mindgrove_uart.h	/^#define FRAME_ERROR	/;"	d
+FSIZE	secure_iot_reg.h	/^        __IOM uint32_t FSIZE      : 5;            \/*!< FLASH memory size                       /;"	m	struct:__anonbdd9aeea3808::__anonbdd9aeea3b0a::__anonbdd9aeea3c08	typeref:typename:__IOM uint32_t:5
+FTF	secure_iot_reg.h	/^        __IM  uint32_t FTF        : 1;            \/*!< FIFO threshold flag                     /;"	m	struct:__anonbdd9aeea3808::__anonbdd9aeea3d0a::__anonbdd9aeea3e08	typeref:typename:__IM uint32_t:1
+FTHRES	secure_iot_reg.h	/^        __IOM uint32_t FTHRES     : 5;            \/*!< IFO threshold level                     /;"	m	struct:__anonbdd9aeea3808::__anonbdd9aeea390a::__anonbdd9aeea3a08	typeref:typename:__IOM uint32_t:5
+FTIE	secure_iot_reg.h	/^        __IOM uint32_t FTIE       : 1;            \/*!< FIFO threshold interrupt enable         /;"	m	struct:__anonbdd9aeea3808::__anonbdd9aeea390a::__anonbdd9aeea3a08	typeref:typename:__IOM uint32_t:1
+GET_OUTPUT	secure_iot_reg.h	/^        __IOM uint32_t GET_OUTPUT : 1;            \/*!< Status bit to get output from OTP Memory/;"	m	struct:__anonbdd9aeea5c08::__anonbdd9aeea5f0a::__anonbdd9aeea6008	typeref:typename:__IOM uint32_t:1
+GPIO0_IRQn	secure_iot_reg.h	/^    GPIO0_IRQn                =   1,              \/*!< 1  GPIO0                                /;"	e	enum:__anonbdd9aeea0103
+GPIO10_IRQn	secure_iot_reg.h	/^    GPIO10_IRQn               =  11,              \/*!< 11 GPIO10                               /;"	e	enum:__anonbdd9aeea0103
+GPIO11_IRQn	secure_iot_reg.h	/^    GPIO11_IRQn               =  12,              \/*!< 12 GPIO11                               /;"	e	enum:__anonbdd9aeea0103
+GPIO12_IRQn	secure_iot_reg.h	/^    GPIO12_IRQn               =  13,              \/*!< 13 GPIO12                               /;"	e	enum:__anonbdd9aeea0103
+GPIO13_IRQn	secure_iot_reg.h	/^    GPIO13_IRQn               =  14,              \/*!< 14 GPIO13                               /;"	e	enum:__anonbdd9aeea0103
+GPIO14_IRQn	secure_iot_reg.h	/^    GPIO14_IRQn               =  15,              \/*!< 15 GPIO14                               /;"	e	enum:__anonbdd9aeea0103
+GPIO15_IRQn	secure_iot_reg.h	/^    GPIO15_IRQn               =  16,              \/*!< 16 GPIO15                               /;"	e	enum:__anonbdd9aeea0103
+GPIO16_IRQn	secure_iot_reg.h	/^    GPIO16_IRQn               =  17,              \/*!< 17 GPIO16                               /;"	e	enum:__anonbdd9aeea0103
+GPIO17_IRQn	secure_iot_reg.h	/^    GPIO17_IRQn               =  18,              \/*!< 18 GPIO17                               /;"	e	enum:__anonbdd9aeea0103
+GPIO18_IRQn	secure_iot_reg.h	/^    GPIO18_IRQn               =  19,              \/*!< 19 GPIO18                               /;"	e	enum:__anonbdd9aeea0103
+GPIO19_IRQn	secure_iot_reg.h	/^    GPIO19_IRQn               =  20,              \/*!< 20 GPIO19                               /;"	e	enum:__anonbdd9aeea0103
+GPIO1_IRQn	secure_iot_reg.h	/^    GPIO1_IRQn                =   2,              \/*!< 2  GPIO1                                /;"	e	enum:__anonbdd9aeea0103
+GPIO20_IRQn	secure_iot_reg.h	/^    GPIO20_IRQn               =  21,              \/*!< 21 GPIO20                               /;"	e	enum:__anonbdd9aeea0103
+GPIO21_IRQn	secure_iot_reg.h	/^    GPIO21_IRQn               =  22,              \/*!< 22 GPIO21                               /;"	e	enum:__anonbdd9aeea0103
+GPIO22_IRQn	secure_iot_reg.h	/^    GPIO22_IRQn               =  23,              \/*!< 23 GPIO22                               /;"	e	enum:__anonbdd9aeea0103
+GPIO23_IRQn	secure_iot_reg.h	/^    GPIO23_IRQn               =  24,              \/*!< 24 GPIO23                               /;"	e	enum:__anonbdd9aeea0103
+GPIO24_IRQn	secure_iot_reg.h	/^    GPIO24_IRQn               =  25,              \/*!< 25 GPIO24                               /;"	e	enum:__anonbdd9aeea0103
+GPIO25_IRQn	secure_iot_reg.h	/^    GPIO25_IRQn               =  26,              \/*!< 26 GPIO25                               /;"	e	enum:__anonbdd9aeea0103
+GPIO26_IRQn	secure_iot_reg.h	/^    GPIO26_IRQn               =  27,              \/*!< 27 GPIO26                               /;"	e	enum:__anonbdd9aeea0103
+GPIO27_IRQn	secure_iot_reg.h	/^    GPIO27_IRQn               =  28,              \/*!< 28 GPIO27                               /;"	e	enum:__anonbdd9aeea0103
+GPIO28_IRQn	secure_iot_reg.h	/^    GPIO28_IRQn               =  29,              \/*!< 29 GPIO28                               /;"	e	enum:__anonbdd9aeea0103
+GPIO29_IRQn	secure_iot_reg.h	/^    GPIO29_IRQn               =  30,              \/*!< 30 GPIO29                               /;"	e	enum:__anonbdd9aeea0103
+GPIO2_IRQn	secure_iot_reg.h	/^    GPIO2_IRQn                =   3,              \/*!< 3  GPIO2                                /;"	e	enum:__anonbdd9aeea0103
+GPIO30_IRQn	secure_iot_reg.h	/^    GPIO30_IRQn               =  31,              \/*!< 31 GPIO30                               /;"	e	enum:__anonbdd9aeea0103
+GPIO31_IRQn	secure_iot_reg.h	/^    GPIO31_IRQn               =  32,              \/*!< 32 GPIO31                               /;"	e	enum:__anonbdd9aeea0103
+GPIO3_IRQn	secure_iot_reg.h	/^    GPIO3_IRQn                =   4,              \/*!< 4  GPIO3                                /;"	e	enum:__anonbdd9aeea0103
+GPIO4_IRQn	secure_iot_reg.h	/^    GPIO4_IRQn                =   5,              \/*!< 5  GPIO4                                /;"	e	enum:__anonbdd9aeea0103
+GPIO5_IRQn	secure_iot_reg.h	/^    GPIO5_IRQn                =   6,              \/*!< 6  GPIO5                                /;"	e	enum:__anonbdd9aeea0103
+GPIO6_IRQn	secure_iot_reg.h	/^    GPIO6_IRQn                =   7,              \/*!< 7  GPIO6                                /;"	e	enum:__anonbdd9aeea0103
+GPIO7_IRQn	secure_iot_reg.h	/^    GPIO7_IRQn                =   8,              \/*!< 8  GPIO7                                /;"	e	enum:__anonbdd9aeea0103
+GPIO8_IRQn	secure_iot_reg.h	/^    GPIO8_IRQn                =   9,              \/*!< 9  GPIO8                                /;"	e	enum:__anonbdd9aeea0103
+GPIO9_IRQn	secure_iot_reg.h	/^    GPIO9_IRQn                =  10,              \/*!< 10 GPIO9                                /;"	e	enum:__anonbdd9aeea0103
+GPIO_BASE	secure_iot_reg.h	/^  #define GPIO_BASE /;"	d
+GPIO_CLEAR	secure_iot_reg.h	/^    __IOM uint32_t  GPIO_CLEAR;                   \/*!< To clear the respective GPIO pins       /;"	m	struct:__anonbdd9aeea1f08	typeref:typename:__IOM uint32_t
+GPIO_DATA	secure_iot_reg.h	/^    __IOM uint32_t  GPIO_DATA;                    \/*!< Contains the data to be sent out if the /;"	m	struct:__anonbdd9aeea1f08	typeref:typename:__IOM uint32_t
+GPIO_DIRECTION	secure_iot_reg.h	/^    __IOM uint32_t  GPIO_DIRECTION;               \/*!< Select the direction of the GPIOs. Each /;"	m	struct:__anonbdd9aeea1f08	typeref:typename:__IOM uint32_t
+GPIO_INTR	secure_iot_reg.h	/^    __IOM uint32_t  GPIO_INTR;                    \/*!< To enable the interrupt of respective GP/;"	m	struct:__anonbdd9aeea1f08	typeref:typename:__IOM uint32_t
+GPIO_OFFSET	secure_iot_reg.h	/^  #define GPIO_OFFSET /;"	d
+GPIO_REG	secure_iot_reg.h	/^  #define GPIO_REG /;"	d
+GPIO_SET	secure_iot_reg.h	/^    __IOM uint32_t  GPIO_SET;                     \/*!< To set the respective GPIO pins         /;"	m	struct:__anonbdd9aeea1f08	typeref:typename:__IOM uint32_t
+GPIO_TOGGLE	secure_iot_reg.h	/^    __IOM uint32_t  GPIO_TOGGLE;                  \/*!< To invert the respective GPIO pins      /;"	m	struct:__anonbdd9aeea1f08	typeref:typename:__IOM uint32_t
+GPIO_Type	secure_iot_reg.h	/^  } GPIO_Type;                                    \/*!< Size = 52 (0x34)                        /;"	t	typeref:struct:__anonbdd9aeea1f08
+GPTIMER0_IRQn	secure_iot_reg.h	/^    GPTIMER0_IRQn             =  41,              \/*!< 41 GPTIMER0                             /;"	e	enum:__anonbdd9aeea0103
+GPTIMER1_IRQn	secure_iot_reg.h	/^    GPTIMER1_IRQn             =  42,              \/*!< 42 GPTIMER1                             /;"	e	enum:__anonbdd9aeea0103
+GPTIMER2_IRQn	secure_iot_reg.h	/^    GPTIMER2_IRQn             =  43,              \/*!< 43 GPTIMER2                             /;"	e	enum:__anonbdd9aeea0103
+GPTIMER3_IRQn	secure_iot_reg.h	/^    GPTIMER3_IRQn             =  44,              \/*!< 44 GPTIMER3                             /;"	e	enum:__anonbdd9aeea0103
+GPTIMER_BASE	secure_iot_reg.h	/^  #define GPTIMER_BASE /;"	d
+GPTIMER_OFFSET	secure_iot_reg.h	/^  #define GPTIMER_OFFSET /;"	d
+GPTIMER_REG	secure_iot_reg.h	/^  #define GPTIMER_REG(/;"	d
+GPTIMER_Type	secure_iot_reg.h	/^  } GPTIMER_Type;                                \/*!< Size = 28 (0x1c)                         /;"	t	typeref:struct:__anonbdd9aeea0708
+HAS_SMEM	secure_iot_reg.h	/^        __IM  uint32_t HAS_SMEM   : 1;            \/*!< Indicates whether SREM is present       /;"	m	struct:__anonbdd9aeea5608::__anonbdd9aeea590a::__anonbdd9aeea5a08	typeref:typename:__IM uint32_t:1
+HAS_SRAM	secure_iot_reg.h	/^        __IM  uint32_t HAS_SRAM   : 1;            \/*!< Indicates whether SRAM is present       /;"	m	struct:__anonbdd9aeea5608::__anonbdd9aeea590a::__anonbdd9aeea5a08	typeref:typename:__IM uint32_t:1
+HAVE_SERIAL_CONSOLE	mindgrove_config.h	/^#  define HAVE_SERIAL_CONSOLE /;"	d
+HAVE_UART	mindgrove_lowputc.c	/^#    define HAVE_UART$/;"	d	file:
+HAVE_UART	mindgrove_serial.c	/^#    define HAVE_UART$/;"	d	file:
+HAVE_UART_DEVICE	mindgrove_config.h	/^#  define HAVE_UART_DEVICE /;"	d
+HOLD_DELAY	secure_iot_reg.h	/^        __IOM uint32_t HOLD_DELAY : 8;            \/*!< holds the hold delay                    /;"	m	struct:__anonbdd9aeea2c08::__anonbdd9aeea2f0a::__anonbdd9aeea3008	typeref:typename:__IOM uint32_t:8
+I2C0_IRQn	secure_iot_reg.h	/^    I2C0_IRQn                 =  45,              \/*!< 45 I2C0                                 /;"	e	enum:__anonbdd9aeea0103
+I2C1_IRQn	secure_iot_reg.h	/^    I2C1_IRQn                 =  46,              \/*!< 46 I2C1                                 /;"	e	enum:__anonbdd9aeea0103
+I2C_BASE	secure_iot_reg.h	/^  #define I2C_BASE /;"	d
+I2C_OFFSET	secure_iot_reg.h	/^  #define I2C_OFFSET /;"	d
+I2C_REG	secure_iot_reg.h	/^  #define I2C_REG(/;"	d
+I2C_Type	secure_iot_reg.h	/^  } I2C_Type;                                    \/*!< Size = 60 (0x3c)                         /;"	t	typeref:struct:__anonbdd9aeea1408
+IMODE	secure_iot_reg.h	/^        __IOM uint32_t IMODE      : 2;            \/*!< Instruction mode                        /;"	m	struct:__anonbdd9aeea3808::__anonbdd9aeea430a::__anonbdd9aeea4408	typeref:typename:__IOM uint32_t:2
+IMPL	secure_iot_reg.h	/^      __IM  uint32_t IMPL;                        \/*!< Implementation details register         /;"	m	union:__anonbdd9aeea5608::__anonbdd9aeea590a	typeref:typename:__IM uint32_t
+IMPL_b	secure_iot_reg.h	/^      } IMPL_b;$/;"	m	union:__anonbdd9aeea5608::__anonbdd9aeea590a	typeref:struct:__anonbdd9aeea5608::__anonbdd9aeea590a::__anonbdd9aeea5a08
+INACTIVE	plic.h	/^	INACTIVE = 0,$/;"	e	enum:__anon14fe60e30103
+INIT	secure_iot_reg.h	/^        __IOM uint32_t INIT       : 1;            \/*!< The Initialization to be done on OTP Mem/;"	m	struct:__anonbdd9aeea5c08::__anonbdd9aeea5d0a::__anonbdd9aeea5e08	typeref:typename:__IOM uint32_t:1
+INIT_DONE	secure_iot_reg.h	/^        __IOM uint32_t INIT_DONE  : 1;            \/*!< Status bit to if initialization is done /;"	m	struct:__anonbdd9aeea5c08::__anonbdd9aeea5f0a::__anonbdd9aeea6008	typeref:typename:__IOM uint32_t:1
+INSTRUCTION	secure_iot_reg.h	/^        __IOM uint32_t INSTRUCTION : 8;           \/*!< Instruction                             /;"	m	struct:__anonbdd9aeea3808::__anonbdd9aeea430a::__anonbdd9aeea4408	typeref:typename:__IOM uint32_t:8
+INTERRUPT_Claim_Request	plic_driver.c	/^uint32_t INTERRUPT_Claim_Request()$/;"	f	typeref:typename:uint32_t
+INTERRUPT_Complete	plic_driver.c	/^void INTERRUPT_Complete(uint32_t interrupt_id)$/;"	f	typeref:typename:void
+INTERRUPT_Disable	plic_driver.c	/^uint8_t INTERRUPT_Disable(uint32_t interrupt_id)$/;"	f	typeref:typename:uint8_t
+INTERRUPT_Enable	plic_driver.c	/^void INTERRUPT_Enable(uint32_t interrupt_id)$/;"	f	typeref:typename:void
+INTERRUPT_Threshold	plic_driver.c	/^uint8_t INTERRUPT_Threshold(uint32_t priority_value)$/;"	f	typeref:typename:uint8_t
+INTR_BREAK_EN	secure_iot_reg.h	/^        __IOM unsigned short INTR_BREAK_EN : 1;         \/*!< Enable for interrupt of break erro/;"	m	struct:__anonbdd9aeea0c08::__anonbdd9aeea110a::__anonbdd9aeea1208	typeref:typename:__IOM unsigned short:1
+INTR_COMPLETE	secure_iot_reg.h	/^    __IOM uint32_t  INTR_COMPLETE;                \/*!< Interrupt claim\/complete register      /;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+INTR_EN	secure_iot_reg.h	/^      __IOM uint32_t INTR_EN;                     \/*!< Spi interrupt enable register           /;"	m	union:__anonbdd9aeea2c08::__anonbdd9aeea310a	typeref:typename:__IOM uint32_t
+INTR_EN	secure_iot_reg.h	/^      __IOM unsigned short INTR_EN;                     \/*!< Interrupts enable register        /;"	m	union:__anonbdd9aeea0c08::__anonbdd9aeea110a	typeref:typename:__IOM unsigned short
+INTR_EN_0_32	secure_iot_reg.h	/^    __IOM uint32_t  INTR_EN_0_32;                 \/*!< Interrupt enable bits of sources 0-32   /;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+INTR_EN_33_63	secure_iot_reg.h	/^    __IOM uint32_t  INTR_EN_33_63;                \/*!< Interrupt enable bits of sources 33-63  /;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+INTR_EN_b	secure_iot_reg.h	/^      } INTR_EN_b;$/;"	m	union:__anonbdd9aeea0c08::__anonbdd9aeea110a	typeref:struct:__anonbdd9aeea0c08::__anonbdd9aeea110a::__anonbdd9aeea1208
+INTR_EN_b	secure_iot_reg.h	/^      } INTR_EN_b;$/;"	m	union:__anonbdd9aeea2c08::__anonbdd9aeea310a	typeref:struct:__anonbdd9aeea2c08::__anonbdd9aeea310a::__anonbdd9aeea3208
+INTR_FRAME_EN	secure_iot_reg.h	/^        __IOM unsigned short INTR_FRAME_EN : 1;         \/*!< Enable for interrupt of frame erro/;"	m	struct:__anonbdd9aeea0c08::__anonbdd9aeea110a::__anonbdd9aeea1208	typeref:typename:__IOM unsigned short:1
+INTR_OVERRUN_EN	secure_iot_reg.h	/^        __IOM unsigned short INTR_OVERRUN_EN : 1;       \/*!< Enable for interrupt of overrun er/;"	m	struct:__anonbdd9aeea0c08::__anonbdd9aeea110a::__anonbdd9aeea1208	typeref:typename:__IOM unsigned short:1
+INTR_PARITY_EN	secure_iot_reg.h	/^        __IOM unsigned short INTR_PARITY_EN : 1;        \/*!< Enable for interrupt of parity err/;"	m	struct:__anonbdd9aeea0c08::__anonbdd9aeea110a::__anonbdd9aeea1208	typeref:typename:__IOM unsigned short:1
+INTR_RX_ALMOST_FULL	secure_iot_reg.h	/^        __IOM unsigned short INTR_RX_ALMOST_FULL : 1;   \/*!< Enable for interrupt RX fifo almos/;"	m	struct:__anonbdd9aeea0c08::__anonbdd9aeea110a::__anonbdd9aeea1208	typeref:typename:__IOM unsigned short:1
+INTR_RX_FULL_EN	secure_iot_reg.h	/^        __IOM unsigned short INTR_RX_FULL_EN : 1;       \/*!< Enable for interrupt of receiver f/;"	m	struct:__anonbdd9aeea0c08::__anonbdd9aeea110a::__anonbdd9aeea1208	typeref:typename:__IOM unsigned short:1
+INTR_RX_NOT_EMPTY_EN	secure_iot_reg.h	/^        __IOM unsigned short INTR_RX_NOT_EMPTY_EN : 1;  \/*!< Enable for interrupt of receiver f/;"	m	struct:__anonbdd9aeea0c08::__anonbdd9aeea110a::__anonbdd9aeea1208	typeref:typename:__IOM unsigned short:1
+INTR_TX_EMPTY_EN	secure_iot_reg.h	/^        __IOM unsigned short INTR_TX_EMPTY_EN : 1;      \/*!< Enable for interrupt of transmissi/;"	m	struct:__anonbdd9aeea0c08::__anonbdd9aeea110a::__anonbdd9aeea1208	typeref:typename:__IOM unsigned short:1
+INTR_TX_FULL_EN	secure_iot_reg.h	/^        __IOM unsigned short INTR_TX_FULL_EN : 1;       \/*!< Enable for interrupt of transmissi/;"	m	struct:__anonbdd9aeea0c08::__anonbdd9aeea110a::__anonbdd9aeea1208	typeref:typename:__IOM unsigned short:1
+IRQ_Connect	plic_driver.c	/^uint8_t IRQ_Connect(PLIC_Config_t *plic_config)$/;"	f	typeref:typename:uint8_t
+IRQn_Type	secure_iot_reg.h	/^  } IRQn_Type;$/;"	t	typeref:enum:__anonbdd9aeea0103
+ISR_Default	plic_driver.c	/^static inline void ISR_Default(uint64_t interrupt_id)$/;"	f	typeref:typename:void	file:
+ITRACE_RAM_BASE	secure_iot_reg.h	/^  #define ITRACE_RAM_BASE /;"	d
+ITRACE_RAM_Type	secure_iot_reg.h	/^  } ITRACE_RAM_Type;                              \/*!< Size = 68 (0x44)                        /;"	t	typeref:struct:__anonbdd9aeea5608
+ITRACE_Type	secure_iot_reg.h	/^  } ITRACE_Type;                                  \/*!< Size = 36 (0x24)                        /;"	t	typeref:struct:__anonbdd9aeea4b08
+I_EN	secure_iot_reg.h	/^        __IOM uint16_t I_EN       : 1;            \/*!< Enables the Instruction trace           /;"	m	struct:__anonbdd9aeea4b08::__anonbdd9aeea4c0a::__anonbdd9aeea4d08	typeref:typename:__IOM uint16_t:1
+LIMIT_HIGH	secure_iot_reg.h	/^    __IOM uint32_t  LIMIT_HIGH;                   \/*!< The RAM end address register. High 32 bi/;"	m	struct:__anonbdd9aeea5608	typeref:typename:__IOM uint32_t
+LIMIT_LOW	secure_iot_reg.h	/^    __IOM uint32_t  LIMIT_LOW;                    \/*!< The RAM end address register. Low 32 bit/;"	m	struct:__anonbdd9aeea5608	typeref:typename:__IOM uint32_t
+LREG	defines.h	/^#define LREG /;"	d
+LSBFIRST	secure_iot_reg.h	/^        __IOM uint32_t LSBFIRST   : 1;            \/*!< holds whether the spi transaction is LSB/;"	m	struct:__anonbdd9aeea2c08::__anonbdd9aeea2d0a::__anonbdd9aeea2e08	typeref:typename:__IOM uint32_t:1
+MASKED	plic.h	/^	MASKED$/;"	e	enum:__anon14fe60e30103
+MATCH_COMP1	secure_iot_reg.h	/^        __IOM uint32_t MATCH_COMP1 : 2;           \/*!< Mentions which comparator output to use /;"	m	struct:__anonbdd9aeea4b08::__anonbdd9aeea4e0a::__anonbdd9aeea4f08	typeref:typename:__IOM uint32_t:2
+MATCH_COMP2	secure_iot_reg.h	/^        __IOM uint32_t MATCH_COMP2 : 2;           \/*!< Mentions which comparator output to use /;"	m	struct:__anonbdd9aeea4b08::__anonbdd9aeea4e0a::__anonbdd9aeea4f08	typeref:typename:__IOM uint32_t:2
+MATCH_COMP3	secure_iot_reg.h	/^        __IOM uint32_t MATCH_COMP3 : 2;           \/*!< Mentions which comparator output to use /;"	m	struct:__anonbdd9aeea4b08::__anonbdd9aeea4e0a::__anonbdd9aeea4f08	typeref:typename:__IOM uint32_t:2
+MINDGROVE_CLINT_MTIME	mindgrove_clockconfig.h	/^#define MINDGROVE_CLINT_MTIME /;"	d
+MINDGROVE_CLINT_MTIMECMP	mindgrove_clockconfig.h	/^#define MINDGROVE_CLINT_MTIMECMP /;"	d
+MINDGROVE_CONSOLE_2STOP	mindgrove_lowputc.c	/^#    define MINDGROVE_CONSOLE_2STOP /;"	d	file:
+MINDGROVE_CONSOLE_2STOP	mindgrove_serial.c	/^#    define MINDGROVE_CONSOLE_2STOP /;"	d	file:
+MINDGROVE_CONSOLE_BASE	mindgrove_lowputc.c	/^#    define MINDGROVE_CONSOLE_BASE /;"	d	file:
+MINDGROVE_CONSOLE_BASE	mindgrove_serial.c	/^#    define MINDGROVE_CONSOLE_BASE /;"	d	file:
+MINDGROVE_CONSOLE_BAUD	mindgrove_lowputc.c	/^#    define MINDGROVE_CONSOLE_BAUD /;"	d	file:
+MINDGROVE_CONSOLE_BAUD	mindgrove_serial.c	/^#    define MINDGROVE_CONSOLE_BAUD /;"	d	file:
+MINDGROVE_CONSOLE_BITS	mindgrove_lowputc.c	/^#    define MINDGROVE_CONSOLE_BITS /;"	d	file:
+MINDGROVE_CONSOLE_BITS	mindgrove_serial.c	/^#    define MINDGROVE_CONSOLE_BITS /;"	d	file:
+MINDGROVE_CONSOLE_PARITY	mindgrove_lowputc.c	/^#    define MINDGROVE_CONSOLE_PARITY /;"	d	file:
+MINDGROVE_CONSOLE_PARITY	mindgrove_serial.c	/^#    define MINDGROVE_CONSOLE_PARITY /;"	d	file:
+MINDGROVE_CONSOLE_RX	mindgrove_lowputc.c	/^#    define MINDGROVE_CONSOLE_RX /;"	d	file:
+MINDGROVE_CONSOLE_RX	mindgrove_serial.c	/^#    define MINDGROVE_CONSOLE_RX /;"	d	file:
+MINDGROVE_CONSOLE_TX	mindgrove_lowputc.c	/^#    define MINDGROVE_CONSOLE_TX /;"	d	file:
+MINDGROVE_CONSOLE_TX	mindgrove_serial.c	/^#    define MINDGROVE_CONSOLE_TX /;"	d	file:
+MINDGROVE_HAVE_UART0	Kconfig	/^config MINDGROVE_HAVE_UART0$/;"	c
+MINDGROVE_IDLESTACK_BASE	mindgrove_memorymap.h	/^#define MINDGROVE_IDLESTACK_BASE /;"	d
+MINDGROVE_IDLESTACK_TOP	mindgrove_memorymap.h	/^#define MINDGROVE_IDLESTACK_TOP /;"	d
+MINDGROVE_UART0	Kconfig	/^config MINDGROVE_UART0$/;"	c
+MISO_OUTEN	secure_iot_reg.h	/^        __IOM uint32_t MISO_OUTEN : 1;            \/*!< holds the MISO pin's output enable. If s/;"	m	struct:__anonbdd9aeea2c08::__anonbdd9aeea2d0a::__anonbdd9aeea2e08	typeref:typename:__IOM uint32_t:1
+MM_MODE	secure_iot_reg.h	/^        __IOM uint32_t MM_MODE    : 1;            \/*!< Memory Mapped Mode. Default value 0. For/;"	m	struct:__anonbdd9aeea3808::__anonbdd9aeea430a::__anonbdd9aeea4408	typeref:typename:__IOM uint32_t:1
+MOSI_OUTEN	secure_iot_reg.h	/^        __IOM uint32_t MOSI_OUTEN : 1;            \/*!< holds the MOSI pin's output enable. If s/;"	m	struct:__anonbdd9aeea2c08::__anonbdd9aeea2d0a::__anonbdd9aeea2e08	typeref:typename:__IOM uint32_t:1
+MSIP	mindgrove_clockconfig.h	/^#define MSIP /;"	d
+MSIP	mindgrove_timerisr.c	/^#define MSIP /;"	d	file:
+MSTATUS_FS	defines.h	/^#define MSTATUS_FS /;"	d
+MSTATUS_MPP	defines.h	/^#define MSTATUS_MPP /;"	d
+MUX0	secure_iot_reg.h	/^    __IOM uint32_t  MUX0;                         \/*!< Select between GPIO0 and PWM0. 0 - GPIO,/;"	m	struct:__anonbdd9aeea1e08	typeref:typename:__IOM uint32_t
+MUX1	secure_iot_reg.h	/^    __IOM uint32_t  MUX1;                         \/*!< Select between GPIO1 and PWM1. 0 - GPIO,/;"	m	struct:__anonbdd9aeea1e08	typeref:typename:__IOM uint32_t
+MUX2	secure_iot_reg.h	/^    __IOM uint32_t  MUX2;                         \/*!< Select between GPIO2 and PWM2. 0 - GPIO,/;"	m	struct:__anonbdd9aeea1e08	typeref:typename:__IOM uint32_t
+MUX3	secure_iot_reg.h	/^    __IOM uint32_t  MUX3;                         \/*!< Select between GPIO3 and PWM3. 0 - GPIO,/;"	m	struct:__anonbdd9aeea1e08	typeref:typename:__IOM uint32_t
+MUX4	secure_iot_reg.h	/^    __IOM uint32_t  MUX4;                         \/*!< Select between GPIO4 and PWM4. 0 - GPIO,/;"	m	struct:__anonbdd9aeea1e08	typeref:typename:__IOM uint32_t
+MUX5	secure_iot_reg.h	/^    __IOM uint32_t  MUX5;                         \/*!< Select between GPIO5 and PWM5. 0 - GPIO,/;"	m	struct:__anonbdd9aeea1e08	typeref:typename:__IOM uint32_t
+MUX6	secure_iot_reg.h	/^    __IOM uint32_t  MUX6;                         \/*!< Select between GPIO6 and PWM6. 0 - GPIO,/;"	m	struct:__anonbdd9aeea1e08	typeref:typename:__IOM uint32_t
+MUX7	secure_iot_reg.h	/^    __IOM uint32_t  MUX7;                         \/*!< Select between GPIO7 and PWM7. 0 - GPIO,/;"	m	struct:__anonbdd9aeea1e08	typeref:typename:__IOM uint32_t
+NCS_OUTEN	secure_iot_reg.h	/^        __IOM uint32_t NCS_OUTEN  : 1;            \/*!< holds the NCS pin's output enable. If se/;"	m	struct:__anonbdd9aeea2c08::__anonbdd9aeea2d0a::__anonbdd9aeea2e08	typeref:typename:__IOM uint32_t:1
+OTP	secure_iot_reg.h	/^  #define OTP /;"	d
+OTP_BASE	secure_iot_reg.h	/^  #define OTP_BASE /;"	d
+OTP_READ	secure_iot_reg.h	/^        __IOM uint32_t OTP_READ   : 8;            \/*!< The DATA to be read from the OTP Memory /;"	m	struct:__anonbdd9aeea5c08::__anonbdd9aeea630a::__anonbdd9aeea6408	typeref:typename:__IOM uint32_t:8
+OTP_Type	secure_iot_reg.h	/^  } OTP_Type;                                     \/*!< Size = 36 (0x24)                        /;"	t	typeref:struct:__anonbdd9aeea5c08
+OTP_WRITE	secure_iot_reg.h	/^        __IOM uint32_t OTP_WRITE  : 1;            \/*!< The DATA to be written on the OTP Memory/;"	m	struct:__anonbdd9aeea5c08::__anonbdd9aeea650a::__anonbdd9aeea6608	typeref:typename:__IOM uint32_t:1
+OVERRUN	secure_iot_reg.h	/^        __IOM uint16_t OVERRUN    : 1;            \/*!< Overrun bit. This will be set when there/;"	m	struct:__anonbdd9aeea2c08::__anonbdd9aeea350a::__anonbdd9aeea3608	typeref:typename:__IOM uint16_t:1
+OVERRUN1	hardware/mindgrove_uart.h	/^#define OVERRUN1 /;"	d
+PARITY	mindgrove_lowputc.c	/^#define PARITY(/;"	d	file:
+PARITY_ERROR	hardware/mindgrove_uart.h	/^#define PARITY_ERROR /;"	d
+PENDING_0_32	secure_iot_reg.h	/^    __IM  uint32_t  PENDING_0_32;                 \/*!< Interrupt pending bits of sources 0-32  /;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IM uint32_t
+PENDING_33_63	secure_iot_reg.h	/^    __IM  uint32_t  PENDING_33_63;                \/*!< Interrupt pending bits of sources 33-63 /;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IM uint32_t
+PERIOD	secure_iot_reg.h	/^    __IOM uint32_t  PERIOD;                       \/*!< PWM period register                     /;"	m	struct:__anonbdd9aeea0208	typeref:typename:__IOM uint32_t
+PERIOD	secure_iot_reg.h	/^    __IOM uint32_t  PERIOD;                       \/*!< PWM period register                     /;"	m	struct:__anonbdd9aeea0708	typeref:typename:__IOM uint32_t
+PINMUX0_BASE	secure_iot_reg.h	/^  #define PINMUX0_BASE /;"	d
+PINMUX0_Type	secure_iot_reg.h	/^  } PINMUX0_Type;                                 \/*!< Size = 32 (0x20)                        /;"	t	typeref:struct:__anonbdd9aeea1e08
+PINPUT_COMP_MODE	secure_iot_reg.h	/^        __IOM uint16_t PINPUT_COMP_MODE : 3;      \/*!< Mentions the comparison to be done for p/;"	m	struct:__anonbdd9aeea4b08::__anonbdd9aeea500a::__anonbdd9aeea5108	typeref:typename:__IOM uint16_t:3
+PINPUT_COMP_MODE	secure_iot_reg.h	/^        __IOM uint16_t PINPUT_COMP_MODE : 3;      \/*!< Mentions the comparison to be done for p/;"	m	struct:__anonbdd9aeea4b08::__anonbdd9aeea520a::__anonbdd9aeea5308	typeref:typename:__IOM uint16_t:3
+PINPUT_COMP_MODE	secure_iot_reg.h	/^        __IOM uint16_t PINPUT_COMP_MODE : 3;      \/*!< Mentions the comparison to be done for p/;"	m	struct:__anonbdd9aeea4b08::__anonbdd9aeea540a::__anonbdd9aeea5508	typeref:typename:__IOM uint16_t:3
+PINPUT_MODE	secure_iot_reg.h	/^        __IOM uint16_t PINPUT_MODE : 2;           \/*!< Primary comparator input mode. 0: iaddr,/;"	m	struct:__anonbdd9aeea4b08::__anonbdd9aeea500a::__anonbdd9aeea5108	typeref:typename:__IOM uint16_t:2
+PINPUT_MODE	secure_iot_reg.h	/^        __IOM uint16_t PINPUT_MODE : 2;           \/*!< Primary comparator input mode. 0: iaddr,/;"	m	struct:__anonbdd9aeea4b08::__anonbdd9aeea520a::__anonbdd9aeea5308	typeref:typename:__IOM uint16_t:2
+PINPUT_MODE	secure_iot_reg.h	/^        __IOM uint16_t PINPUT_MODE : 2;           \/*!< Primary comparator input mode. 0: iaddr,/;"	m	struct:__anonbdd9aeea4b08::__anonbdd9aeea540a::__anonbdd9aeea5508	typeref:typename:__IOM uint16_t:2
+PLIC_BASE	secure_iot_reg.h	/^  #define PLIC_BASE /;"	d
+PLIC_CLAIM_OFFSET	plic_driver.c	/^#define PLIC_CLAIM_OFFSET /;"	d	file:
+PLIC_Config_t	plic.h	/^} PLIC_Config_t;$/;"	t	typeref:struct:__anon14fe60e30308
+PLIC_ENABLE_OFFSET	plic_driver.c	/^#define PLIC_ENABLE_OFFSET /;"	d	file:
+PLIC_H	plic.h	/^#define PLIC_H$/;"	d
+PLIC_Handler	plic_driver.c	/^void PLIC_Handler( __attribute__((unused)) uintptr_t int_id)$/;"	f	typeref:typename:void
+PLIC_Init	plic_driver.c	/^uint8_t PLIC_Init()$/;"	f	typeref:typename:uint8_t
+PLIC_MAX_INTERRUPT_SRC	plic.h	/^#define PLIC_MAX_INTERRUPT_SRC /;"	d
+PLIC_PENDING_OFFSET	plic_driver.c	/^#define PLIC_PENDING_OFFSET /;"	d	file:
+PLIC_PENDING_SHIFT_PER_SOURCE	plic.h	/^#define PLIC_PENDING_SHIFT_PER_SOURCE /;"	d
+PLIC_PRIORITY_1	plic.h	/^#define PLIC_PRIORITY_1 /;"	d
+PLIC_PRIORITY_2	plic.h	/^#define PLIC_PRIORITY_2 /;"	d
+PLIC_PRIORITY_3	plic.h	/^#define PLIC_PRIORITY_3 /;"	d
+PLIC_PRIORITY_4	plic.h	/^#define PLIC_PRIORITY_4 /;"	d
+PLIC_PRIORITY_5	plic.h	/^#define PLIC_PRIORITY_5 /;"	d
+PLIC_PRIORITY_6	plic.h	/^#define PLIC_PRIORITY_6 /;"	d
+PLIC_PRIORITY_7	plic.h	/^#define PLIC_PRIORITY_7 /;"	d
+PLIC_PRIORITY_OFFSET	plic_driver.c	/^#define PLIC_PRIORITY_OFFSET /;"	d	file:
+PLIC_PRIORITY_SHIFT_PER_INT	plic_driver.c	/^#define PLIC_PRIORITY_SHIFT_PER_INT /;"	d	file:
+PLIC_THRESHOLD_OFFSET	plic_driver.c	/^#define PLIC_THRESHOLD_OFFSET /;"	d	file:
+PLIC_Type	secure_iot_reg.h	/^  } PLIC_Type;                                    \/*!< Size = 65544 (0x10008)                  /;"	t	typeref:struct:__anonbdd9aeea5b08
+PMM	secure_iot_reg.h	/^        __IOM uint32_t PMM        : 1;            \/*!< Polling match mode                      /;"	m	struct:__anonbdd9aeea3808::__anonbdd9aeea390a::__anonbdd9aeea3a08	typeref:typename:__IOM uint32_t:1
+PNOTIFY	secure_iot_reg.h	/^        __IOM uint16_t PNOTIFY    : 1;            \/*!< Sends a support packet when primary comp/;"	m	struct:__anonbdd9aeea4b08::__anonbdd9aeea500a::__anonbdd9aeea5108	typeref:typename:__IOM uint16_t:1
+PNOTIFY	secure_iot_reg.h	/^        __IOM uint16_t PNOTIFY    : 1;            \/*!< Sends a support packet when primary comp/;"	m	struct:__anonbdd9aeea4b08::__anonbdd9aeea520a::__anonbdd9aeea5308	typeref:typename:__IOM uint16_t:1
+PNOTIFY	secure_iot_reg.h	/^        __IOM uint16_t PNOTIFY    : 1;            \/*!< Sends a support packet when primary comp/;"	m	struct:__anonbdd9aeea4b08::__anonbdd9aeea540a::__anonbdd9aeea5508	typeref:typename:__IOM uint16_t:1
+PRESCALER	secure_iot_reg.h	/^        __IOM uint32_t PRESCALER  : 8;            \/*!< Clock prescaler                         /;"	m	struct:__anonbdd9aeea3808::__anonbdd9aeea390a::__anonbdd9aeea3a08	typeref:typename:__IOM uint32_t:8
+PRIORITY0	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY0;                    \/*!< Priority register for interrupt source 0/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY1	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY1;                    \/*!< Priority register for interrupt source 1/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY10	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY10;                   \/*!< Priority register for interrupt source 1/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY11	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY11;                   \/*!< Priority register for interrupt source 1/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY12	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY12;                   \/*!< Priority register for interrupt source 1/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY13	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY13;                   \/*!< Priority register for interrupt source 1/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY14	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY14;                   \/*!< Priority register for interrupt source 1/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY15	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY15;                   \/*!< Priority register for interrupt source 1/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY16	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY16;                   \/*!< Priority register for interrupt source 1/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY17	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY17;                   \/*!< Priority register for interrupt source 1/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY18	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY18;                   \/*!< Priority register for interrupt source 1/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY19	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY19;                   \/*!< Priority register for interrupt source 1/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY2	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY2;                    \/*!< Priority register for interrupt source 2/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY20	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY20;                   \/*!< Priority register for interrupt source 2/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY21	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY21;                   \/*!< Priority register for interrupt source 2/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY22	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY22;                   \/*!< Priority register for interrupt source 2/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY23	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY23;                   \/*!< Priority register for interrupt source 2/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY24	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY24;                   \/*!< Priority register for interrupt source 2/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY25	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY25;                   \/*!< Priority register for interrupt source 2/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY26	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY26;                   \/*!< Priority register for interrupt source 2/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY27	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY27;                   \/*!< Priority register for interrupt source 2/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY28	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY28;                   \/*!< Priority register for interrupt source 2/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY29	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY29;                   \/*!< Priority register for interrupt source 2/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY3	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY3;                    \/*!< Priority register for interrupt source 3/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY30	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY30;                   \/*!< Priority register for interrupt source 3/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY31	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY31;                   \/*!< Priority register for interrupt source 3/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY32	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY32;                   \/*!< Priority register for interrupt source 3/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY33	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY33;                   \/*!< Priority register for interrupt source 3/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY34	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY34;                   \/*!< Priority register for interrupt source 3/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY35	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY35;                   \/*!< Priority register for interrupt source 3/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY36	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY36;                   \/*!< Priority register for interrupt source 3/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY37	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY37;                   \/*!< Priority register for interrupt source 3/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY38	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY38;                   \/*!< Priority register for interrupt source 3/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY39	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY39;                   \/*!< Priority register for interrupt source 3/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY4	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY4;                    \/*!< Priority register for interrupt source 4/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY40	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY40;                   \/*!< Priority register for interrupt source 4/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY41	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY41;                   \/*!< Priority register for interrupt source 4/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY42	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY42;                   \/*!< Priority register for interrupt source 4/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY43	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY43;                   \/*!< Priority register for interrupt source 4/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY44	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY44;                   \/*!< Priority register for interrupt source 4/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY45	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY45;                   \/*!< Priority register for interrupt source 4/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY46	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY46;                   \/*!< Priority register for interrupt source 4/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY47	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY47;                   \/*!< Priority register for interrupt source 4/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY48	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY48;                   \/*!< Priority register for interrupt source 4/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY49	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY49;                   \/*!< Priority register for interrupt source 4/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY5	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY5;                    \/*!< Priority register for interrupt source 5/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY50	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY50;                   \/*!< Priority register for interrupt source 5/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY51	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY51;                   \/*!< Priority register for interrupt source 5/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY52	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY52;                   \/*!< Priority register for interrupt source 5/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY53	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY53;                   \/*!< Priority register for interrupt source 5/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY54	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY54;                   \/*!< Priority register for interrupt source 5/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY55	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY55;                   \/*!< Priority register for interrupt source 5/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY56	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY56;                   \/*!< Priority register for interrupt source 5/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY57	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY57;                   \/*!< Priority register for interrupt source 5/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY58	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY58;                   \/*!< Priority register for interrupt source 5/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY59	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY59;                   \/*!< Priority register for interrupt source 5/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY6	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY6;                    \/*!< Priority register for interrupt source 6/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY60	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY60;                   \/*!< Priority register for interrupt source 6/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY61	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY61;                   \/*!< Priority register for interrupt source 6/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY62	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY62;                   \/*!< Priority register for interrupt source 6/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY63	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY63;                   \/*!< Priority register for interrupt source 6/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY7	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY7;                    \/*!< Priority register for interrupt source 7/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY8	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY8;                    \/*!< Priority register for interrupt source 8/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY9	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY9;                    \/*!< Priority register for interrupt source 9/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PRIORITY_THRES	secure_iot_reg.h	/^    __IOM uint32_t  PRIORITY_THRES;               \/*!< Priority threshold register             /;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IOM uint32_t
+PROG_STATUS	secure_iot_reg.h	/^        __IOM uint32_t PROG_STATUS : 1;           \/*!< Status bit to check programming status o/;"	m	struct:__anonbdd9aeea5c08::__anonbdd9aeea5f0a::__anonbdd9aeea6008	typeref:typename:__IOM uint32_t:1
+PRV	secure_iot_reg.h	/^        __IOM uint32_t PRV        : 2;            \/*!< The privelege mode to filter when enable/;"	m	struct:__anonbdd9aeea4b08::__anonbdd9aeea4e0a::__anonbdd9aeea4f08	typeref:typename:__IOM uint32_t:2
+PRV_EN	secure_iot_reg.h	/^        __IOM uint32_t PRV_EN     : 1;            \/*!< Match privielge mode enable             /;"	m	struct:__anonbdd9aeea4b08::__anonbdd9aeea4e0a::__anonbdd9aeea4f08	typeref:typename:__IOM uint32_t:1
+PS_COMP_MODE	secure_iot_reg.h	/^        __IOM uint16_t PS_COMP_MODE : 2;          \/*!< The comparison to be performed between p/;"	m	struct:__anonbdd9aeea4b08::__anonbdd9aeea500a::__anonbdd9aeea5108	typeref:typename:__IOM uint16_t:2
+PS_COMP_MODE	secure_iot_reg.h	/^        __IOM uint16_t PS_COMP_MODE : 2;          \/*!< The comparison to be performed between p/;"	m	struct:__anonbdd9aeea4b08::__anonbdd9aeea520a::__anonbdd9aeea5308	typeref:typename:__IOM uint16_t:2
+PS_COMP_MODE	secure_iot_reg.h	/^        __IOM uint16_t PS_COMP_MODE : 2;          \/*!< The comparison to be performed between p/;"	m	struct:__anonbdd9aeea4b08::__anonbdd9aeea540a::__anonbdd9aeea5508	typeref:typename:__IOM uint16_t:2
+PWM0_IRQn	secure_iot_reg.h	/^    PWM0_IRQn                 =  40,              \/*!< 40 PWM0                                 /;"	e	enum:__anonbdd9aeea0103
+PWM1_IRQn	secure_iot_reg.h	/^    PWM1_IRQn                 =  39,              \/*!< 39 PWM1                                 /;"	e	enum:__anonbdd9aeea0103
+PWM2_IRQn	secure_iot_reg.h	/^    PWM2_IRQn                 =  38,              \/*!< 38 PWM2                                 /;"	e	enum:__anonbdd9aeea0103
+PWM3_IRQn	secure_iot_reg.h	/^    PWM3_IRQn                 =  37,              \/*!< 37 PWM3                                 /;"	e	enum:__anonbdd9aeea0103
+PWM4_IRQn	secure_iot_reg.h	/^    PWM4_IRQn                 =  36,              \/*!< 36 PWM4                                 /;"	e	enum:__anonbdd9aeea0103
+PWM5_IRQn	secure_iot_reg.h	/^    PWM5_IRQn                 =  35,              \/*!< 35 PWM5                                 /;"	e	enum:__anonbdd9aeea0103
+PWM6_IRQn	secure_iot_reg.h	/^    PWM6_IRQn                 =  34,              \/*!< 34 PWM6                                 /;"	e	enum:__anonbdd9aeea0103
+PWM7_IRQn	secure_iot_reg.h	/^    PWM7_IRQn                 =  33,              \/*!< 33 PWM7                                 /;"	e	enum:__anonbdd9aeea0103
+PWM_BASE	secure_iot_reg.h	/^  #define PWM_BASE /;"	d
+PWM_OFFSET	secure_iot_reg.h	/^  #define PWM_OFFSET /;"	d
+PWM_REG	secure_iot_reg.h	/^  #define PWM_REG(/;"	d
+PWM_Type	secure_iot_reg.h	/^  } PWM_Type;                                    \/*!< Size = 20 (0x14)                         /;"	t	typeref:struct:__anonbdd9aeea0208
+QSPI_OFFSET	secure_iot_reg.h	/^  #define QSPI_OFFSET /;"	d
+QUADSPI0_IRQn	secure_iot_reg.h	/^    QUADSPI0_IRQn             =  52,              \/*!< 52 QUADSPI0                             /;"	e	enum:__anonbdd9aeea0103
+QUADSPI0_READY_IRQn	secure_iot_reg.h	/^    QUADSPI0_READY_IRQn       =  53,              \/*!< 53 QUADSPI0_READY                       /;"	e	enum:__anonbdd9aeea0103
+QUADSPI1_IRQn	secure_iot_reg.h	/^    QUADSPI1_IRQn             =  50,              \/*!< 50 QUADSPI1                             /;"	e	enum:__anonbdd9aeea0103
+QUADSPI1_READY_IRQn	secure_iot_reg.h	/^    QUADSPI1_READY_IRQn       =  51,              \/*!< 51 QUADSPI1_READY                       /;"	e	enum:__anonbdd9aeea0103
+QUADSPI_BASE	secure_iot_reg.h	/^  #define QUADSPI_BASE /;"	d
+QUADSPI_Reg	secure_iot_reg.h	/^  #define QUADSPI_Reg(/;"	d
+QUADSPI_Type	secure_iot_reg.h	/^  } QUADSPI_Type;                                \/*!< Size = 36 (0x24)                         /;"	t	typeref:struct:__anonbdd9aeea3808
+READ_WRITE	secure_iot_reg.h	/^        __IOM uint32_t READ_WRITE : 1;            \/*!< This determines whether the operation to/;"	m	struct:__anonbdd9aeea5c08::__anonbdd9aeea5d0a::__anonbdd9aeea5e08	typeref:typename:__IOM uint32_t:1
+REGSIZE	defines.h	/^#define REGSIZE /;"	d
+RESERVED	secure_iot_reg.h	/^    __IM  uint16_t  RESERVED;$/;"	m	struct:__anonbdd9aeea0208	typeref:typename:__IM uint16_t
+RESERVED	secure_iot_reg.h	/^    __IM  uint16_t  RESERVED;$/;"	m	struct:__anonbdd9aeea0708	typeref:typename:__IM uint16_t
+RESERVED	secure_iot_reg.h	/^    __IM  uint16_t  RESERVED;$/;"	m	struct:__anonbdd9aeea2c08	typeref:typename:__IM uint16_t
+RESERVED	secure_iot_reg.h	/^    __IM  uint16_t  RESERVED;$/;"	m	struct:__anonbdd9aeea4b08	typeref:typename:__IM uint16_t
+RESERVED	secure_iot_reg.h	/^    __IM  uint32_t  RESERVED;$/;"	m	struct:__anonbdd9aeea1b08	typeref:typename:__IM uint32_t
+RESERVED	secure_iot_reg.h	/^    __IM  uint32_t  RESERVED;$/;"	m	struct:__anonbdd9aeea1f08	typeref:typename:__IM uint32_t
+RESERVED	secure_iot_reg.h	/^    __IM  uint32_t  RESERVED;$/;"	m	struct:__anonbdd9aeea5c08	typeref:typename:__IM uint32_t
+RESERVED	secure_iot_reg.h	/^    __IM  uint32_t  RESERVED[24];$/;"	m	struct:__anonbdd9aeea2008	typeref:typename:__IM uint32_t[24]
+RESERVED	secure_iot_reg.h	/^    __IM  uint32_t  RESERVED[2];$/;"	m	struct:__anonbdd9aeea5608	typeref:typename:__IM uint32_t[2]
+RESERVED	secure_iot_reg.h	/^    __IM  uint32_t  RESERVED[48];$/;"	m	struct:__anonbdd9aeea2508	typeref:typename:__IM uint32_t[48]
+RESERVED	secure_iot_reg.h	/^    __IM  uint32_t  RESERVED[960];$/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IM uint32_t[960]
+RESERVED	secure_iot_reg.h	/^    __IM  uint8_t   RESERVED;$/;"	m	struct:__anonbdd9aeea1408	typeref:typename:__IM uint8_t
+RESERVED	secure_iot_reg.h	/^    __IM  unsigned short  RESERVED;$/;"	m	struct:__anonbdd9aeea0c08	typeref:typename:__IM unsigned short
+RESERVED1	secure_iot_reg.h	/^    __IM  uint16_t  RESERVED1;$/;"	m	struct:__anonbdd9aeea0208	typeref:typename:__IM uint16_t
+RESERVED1	secure_iot_reg.h	/^    __IM  uint16_t  RESERVED1;$/;"	m	struct:__anonbdd9aeea1408	typeref:typename:__IM uint16_t
+RESERVED1	secure_iot_reg.h	/^    __IM  uint16_t  RESERVED1;$/;"	m	struct:__anonbdd9aeea1b08	typeref:typename:__IM uint16_t
+RESERVED1	secure_iot_reg.h	/^    __IM  uint16_t  RESERVED1;$/;"	m	struct:__anonbdd9aeea2008	typeref:typename:__IM uint16_t
+RESERVED1	secure_iot_reg.h	/^    __IM  uint16_t  RESERVED1;$/;"	m	struct:__anonbdd9aeea2508	typeref:typename:__IM uint16_t
+RESERVED1	secure_iot_reg.h	/^    __IM  uint32_t  RESERVED1;$/;"	m	struct:__anonbdd9aeea1f08	typeref:typename:__IM uint32_t
+RESERVED1	secure_iot_reg.h	/^    __IM  uint32_t  RESERVED1;$/;"	m	struct:__anonbdd9aeea4b08	typeref:typename:__IM uint32_t
+RESERVED1	secure_iot_reg.h	/^    __IM  uint32_t  RESERVED1;$/;"	m	struct:__anonbdd9aeea5c08	typeref:typename:__IM uint32_t
+RESERVED1	secure_iot_reg.h	/^    __IM  uint32_t  RESERVED1[1022];$/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IM uint32_t[1022]
+RESERVED1	secure_iot_reg.h	/^    __IM  uint32_t  RESERVED1[4];$/;"	m	struct:__anonbdd9aeea5608	typeref:typename:__IM uint32_t[4]
+RESERVED1	secure_iot_reg.h	/^    __IM  unsigned short  RESERVED1;$/;"	m	struct:__anonbdd9aeea0c08	typeref:typename:__IM unsigned short
+RESERVED10	secure_iot_reg.h	/^    __IM  uint16_t  RESERVED10;$/;"	m	struct:__anonbdd9aeea1408	typeref:typename:__IM uint16_t
+RESERVED11	secure_iot_reg.h	/^    __IM  uint32_t  RESERVED11;$/;"	m	struct:__anonbdd9aeea1408	typeref:typename:__IM uint32_t
+RESERVED12	secure_iot_reg.h	/^    __IM  uint32_t  RESERVED12;$/;"	m	struct:__anonbdd9aeea1408	typeref:typename:__IM uint32_t
+RESERVED13	secure_iot_reg.h	/^    __IM  uint32_t  RESERVED13;$/;"	m	struct:__anonbdd9aeea1408	typeref:typename:__IM uint32_t
+RESERVED14	secure_iot_reg.h	/^    __IM  uint32_t  RESERVED14;$/;"	m	struct:__anonbdd9aeea1408	typeref:typename:__IM uint32_t
+RESERVED2	secure_iot_reg.h	/^    __IM  uint16_t  RESERVED2;$/;"	m	struct:__anonbdd9aeea0208	typeref:typename:__IM uint16_t
+RESERVED2	secure_iot_reg.h	/^    __IM  uint16_t  RESERVED2;$/;"	m	struct:__anonbdd9aeea4b08	typeref:typename:__IM uint16_t
+RESERVED2	secure_iot_reg.h	/^    __IM  uint32_t  RESERVED2;$/;"	m	struct:__anonbdd9aeea1408	typeref:typename:__IM uint32_t
+RESERVED2	secure_iot_reg.h	/^    __IM  uint32_t  RESERVED2;$/;"	m	struct:__anonbdd9aeea1b08	typeref:typename:__IM uint32_t
+RESERVED2	secure_iot_reg.h	/^    __IM  uint32_t  RESERVED2;$/;"	m	struct:__anonbdd9aeea1f08	typeref:typename:__IM uint32_t
+RESERVED2	secure_iot_reg.h	/^    __IM  uint32_t  RESERVED2;$/;"	m	struct:__anonbdd9aeea5c08	typeref:typename:__IM uint32_t
+RESERVED2	secure_iot_reg.h	/^    __IM  uint32_t  RESERVED2[14334];$/;"	m	struct:__anonbdd9aeea5b08	typeref:typename:__IM uint32_t[14334]
+RESERVED2	secure_iot_reg.h	/^    __IM  unsigned short  RESERVED2;$/;"	m	struct:__anonbdd9aeea0c08	typeref:typename:__IM unsigned short
+RESERVED3	secure_iot_reg.h	/^    __IM  uint16_t  RESERVED3;$/;"	m	struct:__anonbdd9aeea1b08	typeref:typename:__IM uint16_t
+RESERVED3	secure_iot_reg.h	/^    __IM  uint16_t  RESERVED3;$/;"	m	struct:__anonbdd9aeea4b08	typeref:typename:__IM uint16_t
+RESERVED3	secure_iot_reg.h	/^    __IM  uint32_t  RESERVED3;$/;"	m	struct:__anonbdd9aeea1f08	typeref:typename:__IM uint32_t
+RESERVED3	secure_iot_reg.h	/^    __IM  uint32_t  RESERVED3;$/;"	m	struct:__anonbdd9aeea5c08	typeref:typename:__IM uint32_t
+RESERVED3	secure_iot_reg.h	/^    __IM  uint8_t   RESERVED3;$/;"	m	struct:__anonbdd9aeea1408	typeref:typename:__IM uint8_t
+RESERVED3	secure_iot_reg.h	/^    __IM  unsigned short  RESERVED3;$/;"	m	struct:__anonbdd9aeea0c08	typeref:typename:__IM unsigned short
+RESERVED4	secure_iot_reg.h	/^    __IM  uint16_t  RESERVED4;$/;"	m	struct:__anonbdd9aeea1408	typeref:typename:__IM uint16_t
+RESERVED4	secure_iot_reg.h	/^    __IM  uint16_t  RESERVED4;$/;"	m	struct:__anonbdd9aeea4b08	typeref:typename:__IM uint16_t
+RESERVED4	secure_iot_reg.h	/^    __IM  uint32_t  RESERVED4;$/;"	m	struct:__anonbdd9aeea1b08	typeref:typename:__IM uint32_t
+RESERVED4	secure_iot_reg.h	/^    __IM  uint32_t  RESERVED4[3];$/;"	m	struct:__anonbdd9aeea1f08	typeref:typename:__IM uint32_t[3]
+RESERVED4	secure_iot_reg.h	/^    __IM  unsigned short  RESERVED4;$/;"	m	struct:__anonbdd9aeea0c08	typeref:typename:__IM unsigned short
+RESERVED5	secure_iot_reg.h	/^    __IM  uint32_t  RESERVED5;$/;"	m	struct:__anonbdd9aeea1408	typeref:typename:__IM uint32_t
+RESERVED5	secure_iot_reg.h	/^    __IM  unsigned char   RESERVED5;$/;"	m	struct:__anonbdd9aeea0c08	typeref:typename:__IM unsigned char
+RESERVED6	secure_iot_reg.h	/^    __IM  uint8_t   RESERVED6;$/;"	m	struct:__anonbdd9aeea1408	typeref:typename:__IM uint8_t
+RESERVED6	secure_iot_reg.h	/^    __IM  unsigned short  RESERVED6;$/;"	m	struct:__anonbdd9aeea0c08	typeref:typename:__IM unsigned short
+RESERVED7	secure_iot_reg.h	/^    __IM  uint16_t  RESERVED7;$/;"	m	struct:__anonbdd9aeea1408	typeref:typename:__IM uint16_t
+RESERVED8	secure_iot_reg.h	/^    __IM  uint32_t  RESERVED8;$/;"	m	struct:__anonbdd9aeea1408	typeref:typename:__IM uint32_t
+RESERVED9	secure_iot_reg.h	/^    __IM  uint8_t   RESERVED9;$/;"	m	struct:__anonbdd9aeea1408	typeref:typename:__IM uint8_t
+RESYNC_MAX	secure_iot_reg.h	/^        __IOM uint16_t RESYNC_MAX : 4;            \/*!< Sets the resync interval time.          /;"	m	struct:__anonbdd9aeea4b08::__anonbdd9aeea4c0a::__anonbdd9aeea4d08	typeref:typename:__IOM uint16_t:4
+RESYNC_MODE	secure_iot_reg.h	/^        __IOM uint16_t RESYNC_MODE : 2;           \/*!< Sets the resync packet mode. 0-Not suppo/;"	m	struct:__anonbdd9aeea4b08::__anonbdd9aeea4c0a::__anonbdd9aeea4d08	typeref:typename:__IOM uint16_t:2
+RPTD_COUNT	secure_iot_reg.h	/^    __IM  uint32_t  RPTD_COUNT;                   \/*!< Repeated count register                 /;"	m	struct:__anonbdd9aeea0708	typeref:typename:__IM uint32_t
+RP_HIGH	secure_iot_reg.h	/^    __IOM uint32_t  RP_HIGH;                      \/*!< Read pointer of trace packet into RAM. H/;"	m	struct:__anonbdd9aeea5608	typeref:typename:__IOM uint32_t
+RP_LOW	secure_iot_reg.h	/^    __IOM uint32_t  RP_LOW;                       \/*!< Read pointer of trace packet into RAM. L/;"	m	struct:__anonbdd9aeea5608	typeref:typename:__IOM uint32_t
+RSA_BASE	secure_iot_reg.h	/^  #define RSA_BASE /;"	d
+RSA_Type	secure_iot_reg.h	/^  } RSA_Type;                                     \/*!< Size = 0 (0x0)                          /;"	t	typeref:struct:__anonbdd9aeea2a08
+RX	secure_iot_reg.h	/^    __IOM Data  RX;                           \/*!< holds the tx data. This register is read by /;"	m	struct:__anonbdd9aeea2c08	typeref:typename:__IOM Data
+RX_DEPTH	secure_iot_reg.h	/^        __IOM uint16_t RX_DEPTH   : 3;            \/*!< RX FIFO Threshold bits to know the numbe/;"	m	struct:__anonbdd9aeea2c08::__anonbdd9aeea350a::__anonbdd9aeea3608	typeref:typename:__IOM uint16_t:3
+RX_FIFO_24	secure_iot_reg.h	/^        __IOM uint32_t RX_FIFO_24 : 1;            \/*!< RX FIFO full. RX FIFO is filled by 24 en/;"	m	struct:__anonbdd9aeea2c08::__anonbdd9aeea330a::__anonbdd9aeea3408	typeref:typename:__IOM uint32_t:1
+RX_FIFO_24_INTR_EN	secure_iot_reg.h	/^        __IOM uint32_t RX_FIFO_24_INTR_EN : 1;    \/*!< RX FIFO full interrupt enable bit. This /;"	m	struct:__anonbdd9aeea2c08::__anonbdd9aeea310a::__anonbdd9aeea3208	typeref:typename:__IOM uint32_t:1
+RX_FIFO_28	secure_iot_reg.h	/^        __IOM uint32_t RX_FIFO_28 : 1;            \/*!< RX FIFO full. RX FIFO is filled by 28 en/;"	m	struct:__anonbdd9aeea2c08::__anonbdd9aeea330a::__anonbdd9aeea3408	typeref:typename:__IOM uint32_t:1
+RX_FIFO_28_INTR_EN	secure_iot_reg.h	/^        __IOM uint32_t RX_FIFO_28_INTR_EN : 1;    \/*!< RX FIFO full interrupt enable bit. This /;"	m	struct:__anonbdd9aeea2c08::__anonbdd9aeea310a::__anonbdd9aeea3208	typeref:typename:__IOM uint32_t:1
+RX_FIFO_30	secure_iot_reg.h	/^        __IOM uint32_t RX_FIFO_30 : 1;            \/*!< RX FIFO full. RX FIFO is filled by 30 en/;"	m	struct:__anonbdd9aeea2c08::__anonbdd9aeea330a::__anonbdd9aeea3408	typeref:typename:__IOM uint32_t:1
+RX_FIFO_30_INTR_EN	secure_iot_reg.h	/^        __IOM uint32_t RX_FIFO_30_INTR_EN : 1;    \/*!< RX FIFO full interrupt enable bit. This /;"	m	struct:__anonbdd9aeea2c08::__anonbdd9aeea310a::__anonbdd9aeea3208	typeref:typename:__IOM uint32_t:1
+RX_FIFO_DUAL	secure_iot_reg.h	/^        __IOM uint32_t RX_FIFO_DUAL : 1;          \/*!< RX FIFO full. RX FIFO is filled by 2 ent/;"	m	struct:__anonbdd9aeea2c08::__anonbdd9aeea330a::__anonbdd9aeea3408	typeref:typename:__IOM uint32_t:1
+RX_FIFO_DUAL_INTR_EN	secure_iot_reg.h	/^        __IOM uint32_t RX_FIFO_DUAL_INTR_EN : 1;  \/*!< RX FIFO full interrupt enable bit. This /;"	m	struct:__anonbdd9aeea2c08::__anonbdd9aeea310a::__anonbdd9aeea3208	typeref:typename:__IOM uint32_t:1
+RX_FIFO_EMPTY	secure_iot_reg.h	/^        __IOM uint32_t RX_FIFO_EMPTY : 1;         \/*!< RX FIFO empty. RX FIFO is empty         /;"	m	struct:__anonbdd9aeea2c08::__anonbdd9aeea330a::__anonbdd9aeea3408	typeref:typename:__IOM uint32_t:1
+RX_FIFO_EMPTY_INTR_EN	secure_iot_reg.h	/^        __IOM uint32_t RX_FIFO_EMPTY_INTR_EN : 1; \/*!< RX FIFO empty interrupt enable bit. This/;"	m	struct:__anonbdd9aeea2c08::__anonbdd9aeea310a::__anonbdd9aeea3208	typeref:typename:__IOM uint32_t:1
+RX_FIFO_FULL	secure_iot_reg.h	/^        __IOM uint32_t RX_FIFO_FULL : 1;          \/*!< RX FIFO full. RX FIFO is full - 32 entri/;"	m	struct:__anonbdd9aeea2c08::__anonbdd9aeea330a::__anonbdd9aeea3408	typeref:typename:__IOM uint32_t:1
+RX_FIFO_FULL_INTR_EN	secure_iot_reg.h	/^        __IOM uint32_t RX_FIFO_FULL_INTR_EN : 1;  \/*!< RX FIFO full interrupt enable bit. This /;"	m	struct:__anonbdd9aeea2c08::__anonbdd9aeea310a::__anonbdd9aeea3208	typeref:typename:__IOM uint32_t:1
+RX_FIFO_HALF	secure_iot_reg.h	/^        __IOM uint32_t RX_FIFO_HALF : 1;          \/*!< RX FIFO full. RX FIFO is filled by 16 en/;"	m	struct:__anonbdd9aeea2c08::__anonbdd9aeea330a::__anonbdd9aeea3408	typeref:typename:__IOM uint32_t:1
+RX_FIFO_HALF_INTR_EN	secure_iot_reg.h	/^        __IOM uint32_t RX_FIFO_HALF_INTR_EN : 1;  \/*!< RX FIFO full interrupt enable bit. This /;"	m	struct:__anonbdd9aeea2c08::__anonbdd9aeea310a::__anonbdd9aeea3208	typeref:typename:__IOM uint32_t:1
+RX_FIFO_OCTAL	secure_iot_reg.h	/^        __IOM uint32_t RX_FIFO_OCTAL : 1;         \/*!< RX FIFO full. RX FIFO is filled by 8 ent/;"	m	struct:__anonbdd9aeea2c08::__anonbdd9aeea330a::__anonbdd9aeea3408	typeref:typename:__IOM uint32_t:1
+RX_FIFO_OCTAL_INTR_EN	secure_iot_reg.h	/^        __IOM uint32_t RX_FIFO_OCTAL_INTR_EN : 1; \/*!< RX FIFO full interrupt enable bit. This /;"	m	struct:__anonbdd9aeea2c08::__anonbdd9aeea310a::__anonbdd9aeea3208	typeref:typename:__IOM uint32_t:1
+RX_FIFO_QUAD	secure_iot_reg.h	/^        __IOM uint32_t RX_FIFO_QUAD : 1;          \/*!< RX FIFO full. RX FIFO is filled by 4 ent/;"	m	struct:__anonbdd9aeea2c08::__anonbdd9aeea330a::__anonbdd9aeea3408	typeref:typename:__IOM uint32_t:1
+RX_FIFO_QUAD_INTR_EN	secure_iot_reg.h	/^        __IOM uint32_t RX_FIFO_QUAD_INTR_EN : 1;  \/*!< RX FIFO full interrupt enable bit. This /;"	m	struct:__anonbdd9aeea2c08::__anonbdd9aeea310a::__anonbdd9aeea3208	typeref:typename:__IOM uint32_t:1
+RX_REG	secure_iot_reg.h	/^    __IOM unsigned int  RX_REG;                       \/*!< RX data register                    /;"	m	struct:__anonbdd9aeea0c08	typeref:typename:__IOM unsigned int
+RX_STARTED	secure_iot_reg.h	/^        __IOM uint16_t RX_STARTED : 1;            \/*!< Receive not enable bit. This bit will be/;"	m	struct:__anonbdd9aeea2c08::__anonbdd9aeea350a::__anonbdd9aeea3608	typeref:typename:__IOM uint16_t:1
+RX_THRESHOLD	secure_iot_reg.h	/^    __IOM unsigned char   RX_THRESHOLD;                 \/*!< The threshold value to indicate th/;"	m	struct:__anonbdd9aeea0c08	typeref:typename:__IOM unsigned char
+S0	secure_iot_reg.h	/^    __IOM uint8_t   S0;                           \/*!< Data Transmission register              /;"	m	struct:__anonbdd9aeea1408	typeref:typename:__IOM uint8_t
+S01	secure_iot_reg.h	/^    __IOM uint32_t  S01;                          \/*!< I2C Own Address Slave Register          /;"	m	struct:__anonbdd9aeea1408	typeref:typename:__IOM uint32_t
+S2	secure_iot_reg.h	/^    __IOM uint8_t   S2;                           \/*!< Prescalar register                      /;"	m	struct:__anonbdd9aeea1408	typeref:typename:__IOM uint8_t
+S3	secure_iot_reg.h	/^    __IOM uint32_t  S3;                           \/*!< Interrupt vector register               /;"	m	struct:__anonbdd9aeea1408	typeref:typename:__IOM uint32_t
+SCL	secure_iot_reg.h	/^    __IOM uint32_t  SCL;                          \/*!< Clock period register                   /;"	m	struct:__anonbdd9aeea1408	typeref:typename:__IOM uint32_t
+SCLK_OUTEN	secure_iot_reg.h	/^        __IOM uint32_t SCLK_OUTEN : 1;            \/*!< holds the SCLK pin's output enable. If s/;"	m	struct:__anonbdd9aeea2c08::__anonbdd9aeea2d0a::__anonbdd9aeea2e08	typeref:typename:__IOM uint32_t:1
+SECURE_IOT_H	secure_iot_reg.h	/^  #define SECURE_IOT_H$/;"	d
+SERIAL_CONSOLE	mindgrove_serial.c	/^#    define SERIAL_CONSOLE /;"	d	file:
+SERVICED	plic.h	/^	SERVICED = 2,$/;"	e	enum:__anon14fe60e30103
+SETUP_DELAY	secure_iot_reg.h	/^        __IOM uint32_t SETUP_DELAY : 8;           \/*!< holds the setup delay                   /;"	m	struct:__anonbdd9aeea2c08::__anonbdd9aeea2f0a::__anonbdd9aeea3008	typeref:typename:__IOM uint32_t:8
+SET_Interrupt_Priority	plic_driver.c	/^void SET_Interrupt_Priority(uint32_t priority_value, uint32_t int_id)$/;"	f	typeref:typename:void
+SHA256_BASE	secure_iot_reg.h	/^  #define SHA256_BASE /;"	d
+SHA256_Type	secure_iot_reg.h	/^  } SHA256_Type;                                  \/*!< Size = 196 (0xc4)                       /;"	t	typeref:struct:__anonbdd9aeea2508
+SHA_CTRL	secure_iot_reg.h	/^      __IOM uint8_t SHA_CTRL;                     \/*!< Control register                        /;"	m	union:__anonbdd9aeea2508::__anonbdd9aeea260a	typeref:typename:__IOM uint8_t
+SHA_CTRL_b	secure_iot_reg.h	/^      } SHA_CTRL_b;$/;"	m	union:__anonbdd9aeea2508::__anonbdd9aeea260a	typeref:struct:__anonbdd9aeea2508::__anonbdd9aeea260a::__anonbdd9aeea2708
+SHA_STATUS	secure_iot_reg.h	/^      __IM  uint8_t SHA_STATUS;                   \/*!< To read the status register             /;"	m	union:__anonbdd9aeea2508::__anonbdd9aeea280a	typeref:typename:__IM uint8_t
+SHA_STATUS_OUT_READY	secure_iot_reg.h	/^        __IM  uint8_t SHA_STATUS_OUT_READY : 1;   \/*!< The output of the SHA is ready          /;"	m	struct:__anonbdd9aeea2508::__anonbdd9aeea280a::__anonbdd9aeea2908	typeref:typename:__IM uint8_t:1
+SHA_STATUS_READY	secure_iot_reg.h	/^        __IM  uint8_t SHA_STATUS_READY : 1;       \/*!< Sha is ready to take another input      /;"	m	struct:__anonbdd9aeea2508::__anonbdd9aeea280a::__anonbdd9aeea2908	typeref:typename:__IM uint8_t:1
+SHA_STATUS_b	secure_iot_reg.h	/^      } SHA_STATUS_b;$/;"	m	union:__anonbdd9aeea2508::__anonbdd9aeea280a	typeref:struct:__anonbdd9aeea2508::__anonbdd9aeea280a::__anonbdd9aeea2908
+SINPUT_COMP_MODE	secure_iot_reg.h	/^        __IOM uint16_t SINPUT_COMP_MODE : 3;      \/*!< Mentions the comparison to be done for s/;"	m	struct:__anonbdd9aeea4b08::__anonbdd9aeea500a::__anonbdd9aeea5108	typeref:typename:__IOM uint16_t:3
+SINPUT_COMP_MODE	secure_iot_reg.h	/^        __IOM uint16_t SINPUT_COMP_MODE : 3;      \/*!< Mentions the comparison to be done for s/;"	m	struct:__anonbdd9aeea4b08::__anonbdd9aeea520a::__anonbdd9aeea5308	typeref:typename:__IOM uint16_t:3
+SINPUT_COMP_MODE	secure_iot_reg.h	/^        __IOM uint16_t SINPUT_COMP_MODE : 3;      \/*!< Mentions the comparison to be done for s/;"	m	struct:__anonbdd9aeea4b08::__anonbdd9aeea540a::__anonbdd9aeea5508	typeref:typename:__IOM uint16_t:3
+SINPUT_MODE	secure_iot_reg.h	/^        __IOM uint16_t SINPUT_MODE : 2;           \/*!< Secondary comparator input mode. 0: iadd/;"	m	struct:__anonbdd9aeea4b08::__anonbdd9aeea500a::__anonbdd9aeea5108	typeref:typename:__IOM uint16_t:2
+SINPUT_MODE	secure_iot_reg.h	/^        __IOM uint16_t SINPUT_MODE : 2;           \/*!< Secondary comparator input mode. 0: iadd/;"	m	struct:__anonbdd9aeea4b08::__anonbdd9aeea520a::__anonbdd9aeea5308	typeref:typename:__IOM uint16_t:2
+SINPUT_MODE	secure_iot_reg.h	/^        __IOM uint16_t SINPUT_MODE : 2;           \/*!< Secondary comparator input mode. 0: iadd/;"	m	struct:__anonbdd9aeea4b08::__anonbdd9aeea540a::__anonbdd9aeea5508	typeref:typename:__IOM uint16_t:2
+SIOO	secure_iot_reg.h	/^        __IOM uint32_t SIOO       : 1;            \/*!< Send instruction only once mode         /;"	m	struct:__anonbdd9aeea3808::__anonbdd9aeea430a::__anonbdd9aeea4408	typeref:typename:__IOM uint32_t:1
+SMF	secure_iot_reg.h	/^        __IM  uint32_t SMF        : 1;            \/*!< Status match flag                       /;"	m	struct:__anonbdd9aeea3808::__anonbdd9aeea3d0a::__anonbdd9aeea3e08	typeref:typename:__IM uint32_t:1
+SMIE	secure_iot_reg.h	/^        __IOM uint32_t SMIE       : 1;            \/*!< Status match interrupt enable           /;"	m	struct:__anonbdd9aeea3808::__anonbdd9aeea390a::__anonbdd9aeea3a08	typeref:typename:__IOM uint32_t:1
+SNOTIFY	secure_iot_reg.h	/^        __IOM uint16_t SNOTIFY    : 1;            \/*!< Sends a support packet when secondary co/;"	m	struct:__anonbdd9aeea4b08::__anonbdd9aeea500a::__anonbdd9aeea5108	typeref:typename:__IOM uint16_t:1
+SNOTIFY	secure_iot_reg.h	/^        __IOM uint16_t SNOTIFY    : 1;            \/*!< Sends a support packet when secondary co/;"	m	struct:__anonbdd9aeea4b08::__anonbdd9aeea520a::__anonbdd9aeea5308	typeref:typename:__IOM uint16_t:1
+SNOTIFY	secure_iot_reg.h	/^        __IOM uint16_t SNOTIFY    : 1;            \/*!< Sends a support packet when secondary co/;"	m	struct:__anonbdd9aeea4b08::__anonbdd9aeea540a::__anonbdd9aeea5508	typeref:typename:__IOM uint16_t:1
+SPI0_IRQn	secure_iot_reg.h	/^    SPI0_IRQn                 =  57               \/*!< 57 SPI0                                 /;"	e	enum:__anonbdd9aeea0103
+SPI1_IRQn	secure_iot_reg.h	/^    SPI1_IRQn                 =  56,              \/*!< 56 SPI1                                 /;"	e	enum:__anonbdd9aeea0103
+SPI2_IRQn	secure_iot_reg.h	/^    SPI2_IRQn                 =  55,              \/*!< 55 SPI2                                 /;"	e	enum:__anonbdd9aeea0103
+SPI3_IRQn	secure_iot_reg.h	/^    SPI3_IRQn                 =  54,              \/*!< 54 SPI3                                 /;"	e	enum:__anonbdd9aeea0103
+SPI_BASE	secure_iot_reg.h	/^  #define SPI_BASE /;"	d
+SPI_OFFSET	secure_iot_reg.h	/^  #define SPI_OFFSET /;"	d
+SPI_REG	secure_iot_reg.h	/^  #define SPI_REG(/;"	d
+SPI_Type	secure_iot_reg.h	/^  } SPI_Type;                                    \/*!< Size = 28 (0x1c)                         /;"	t	typeref:struct:__anonbdd9aeea2c08
+SR	secure_iot_reg.h	/^      __IM  uint32_t SR;                          \/*!< Status Register                         /;"	m	union:__anonbdd9aeea3808::__anonbdd9aeea3d0a	typeref:typename:__IM uint32_t
+SREG	defines.h	/^#define SREG /;"	d
+SR_b	secure_iot_reg.h	/^      } SR_b;$/;"	m	union:__anonbdd9aeea3808::__anonbdd9aeea3d0a	typeref:struct:__anonbdd9aeea3808::__anonbdd9aeea3d0a::__anonbdd9aeea3e08
+START	secure_iot_reg.h	/^        __IOM uint32_t START      : 1;            \/*!< Starts the OTP Operations               /;"	m	struct:__anonbdd9aeea5c08::__anonbdd9aeea5d0a::__anonbdd9aeea5e08	typeref:typename:__IOM uint32_t:1
+START_HIGH	secure_iot_reg.h	/^    __IOM uint32_t  START_HIGH;                   \/*!< The RAM start address register. High 32 /;"	m	struct:__anonbdd9aeea5608	typeref:typename:__IOM uint32_t
+START_LOW	secure_iot_reg.h	/^    __IOM uint32_t  START_LOW;                    \/*!< The RAM start address register. Low 32 b/;"	m	struct:__anonbdd9aeea5608	typeref:typename:__IOM uint32_t
+STATUS	secure_iot_reg.h	/^      __IOM uint32_t STATUS;                      \/*!< One-Time Programmable Memory Status Regi/;"	m	union:__anonbdd9aeea5c08::__anonbdd9aeea5f0a	typeref:typename:__IOM uint32_t
+STATUS	secure_iot_reg.h	/^      __IOM uint8_t STATUS;                       \/*!< Status register                         /;"	m	union:__anonbdd9aeea1408::__anonbdd9aeea170a	typeref:typename:__IOM uint8_t
+STATUS_AAS	secure_iot_reg.h	/^        __IOM uint8_t STATUS_AAS  : 1;            \/*!< Addressed as slave - Used in Slave Recei/;"	m	struct:__anonbdd9aeea1408::__anonbdd9aeea170a::__anonbdd9aeea1808	typeref:typename:__IOM uint8_t:1
+STATUS_AD0_LRB	secure_iot_reg.h	/^        __IOM uint8_t STATUS_AD0_LRB : 1;         \/*!< LRB - holds the last received bit throug/;"	m	struct:__anonbdd9aeea1408::__anonbdd9aeea170a::__anonbdd9aeea1808	typeref:typename:__IOM uint8_t:1
+STATUS_BB	secure_iot_reg.h	/^        __IOM uint8_t STATUS_BB   : 1;            \/*!< Bus Busy bit - Indicates that the bus is/;"	m	struct:__anonbdd9aeea1408::__anonbdd9aeea170a::__anonbdd9aeea1808	typeref:typename:__IOM uint8_t:1
+STATUS_BER	secure_iot_reg.h	/^        __IOM uint8_t STATUS_BER  : 1;            \/*!< Bus Error - Set to 1 when there is a mis/;"	m	struct:__anonbdd9aeea1408::__anonbdd9aeea170a::__anonbdd9aeea1808	typeref:typename:__IOM uint8_t:1
+STATUS_BREAK_ERR	secure_iot_reg.h	/^        __IOM unsigned short STATUS_BREAK_ERR : 1;      \/*!< Break error flag                  /;"	m	struct:__anonbdd9aeea0c08::__anonbdd9aeea0d0a::__anonbdd9aeea0e08	typeref:typename:__IOM unsigned short:1
+STATUS_FRAME_ERR	secure_iot_reg.h	/^        __IOM unsigned short STATUS_FRAME_ERR : 1;      \/*!< Frame error flag                  /;"	m	struct:__anonbdd9aeea0c08::__anonbdd9aeea0d0a::__anonbdd9aeea0e08	typeref:typename:__IOM unsigned short:1
+STATUS_LAB	secure_iot_reg.h	/^        __IOM uint8_t STATUS_LAB  : 1;            \/*!< Lost Arbitration bit - Used in Multiple /;"	m	struct:__anonbdd9aeea1408::__anonbdd9aeea170a::__anonbdd9aeea1808	typeref:typename:__IOM uint8_t:1
+STATUS_OVERRUN_ERR	secure_iot_reg.h	/^        __IOM unsigned short STATUS_OVERRUN_ERR : 1;    \/*!< Overrun error flag                /;"	m	struct:__anonbdd9aeea0c08::__anonbdd9aeea0d0a::__anonbdd9aeea0e08	typeref:typename:__IOM unsigned short:1
+STATUS_PARITY_ERR	secure_iot_reg.h	/^        __IOM unsigned short STATUS_PARITY_ERR : 1;     \/*!< Parity error in received data flag/;"	m	struct:__anonbdd9aeea0c08::__anonbdd9aeea0d0a::__anonbdd9aeea0e08	typeref:typename:__IOM unsigned short:1
+STATUS_REG	secure_iot_reg.h	/^      __IOM unsigned short STATUS_REG;                  \/*!< UART Status register              /;"	m	union:__anonbdd9aeea0c08::__anonbdd9aeea0d0a	typeref:typename:__IOM unsigned short
+STATUS_REG_b	secure_iot_reg.h	/^      } STATUS_REG_b;$/;"	m	union:__anonbdd9aeea0c08::__anonbdd9aeea0d0a	typeref:struct:__anonbdd9aeea0c08::__anonbdd9aeea0d0a::__anonbdd9aeea0e08
+STATUS_RX_ALMOST_FULL	secure_iot_reg.h	/^        __IOM unsigned short STATUS_RX_ALMOST_FULL : 1; \/*!< Indicates that the RXFIFO is almos/;"	m	struct:__anonbdd9aeea0c08::__anonbdd9aeea0d0a::__anonbdd9aeea0e08	typeref:typename:__IOM unsigned short:1
+STATUS_RX_FULL	secure_iot_reg.h	/^        __IOM unsigned short STATUS_RX_FULL : 1;        \/*!< Receiver register full flag       /;"	m	struct:__anonbdd9aeea0c08::__anonbdd9aeea0d0a::__anonbdd9aeea0e08	typeref:typename:__IOM unsigned short:1
+STATUS_RX_NOT_EMPTY	secure_iot_reg.h	/^        __IOM unsigned short STATUS_RX_NOT_EMPTY : 1;   \/*!< Receiver register not empty flag  /;"	m	struct:__anonbdd9aeea0c08::__anonbdd9aeea0d0a::__anonbdd9aeea0e08	typeref:typename:__IOM unsigned short:1
+STATUS_STS	secure_iot_reg.h	/^        __IOM uint8_t STATUS_STS  : 1;            \/*!< Read the PIN bit of control register    /;"	m	struct:__anonbdd9aeea1408::__anonbdd9aeea170a::__anonbdd9aeea1808	typeref:typename:__IOM uint8_t:1
+STATUS_TX_EMPTY	secure_iot_reg.h	/^        __IOM unsigned short STATUS_TX_EMPTY : 1;       \/*!< Transmittor register empty flag   /;"	m	struct:__anonbdd9aeea0c08::__anonbdd9aeea0d0a::__anonbdd9aeea0e08	typeref:typename:__IOM unsigned short:1
+STATUS_TX_FULL	secure_iot_reg.h	/^        __IOM unsigned short STATUS_TX_FULL : 1;        \/*!< Transmittor register full flag    /;"	m	struct:__anonbdd9aeea0c08::__anonbdd9aeea0d0a::__anonbdd9aeea0e08	typeref:typename:__IOM unsigned short:1
+STATUS_b	secure_iot_reg.h	/^      } STATUS_b;$/;"	m	union:__anonbdd9aeea1408::__anonbdd9aeea170a	typeref:struct:__anonbdd9aeea1408::__anonbdd9aeea170a::__anonbdd9aeea1808
+STATUS_b	secure_iot_reg.h	/^      } STATUS_b;$/;"	m	union:__anonbdd9aeea5c08::__anonbdd9aeea5f0a	typeref:struct:__anonbdd9aeea5c08::__anonbdd9aeea5f0a::__anonbdd9aeea6008
+STOP_BITS	mindgrove_lowputc.c	/^#define STOP_BITS(/;"	d	file:
+STOP_ON_WRAP	secure_iot_reg.h	/^        __IOM uint32_t STOP_ON_WRAP : 1;          \/*!< Stop filling up packets into RAM when fu/;"	m	struct:__anonbdd9aeea5608::__anonbdd9aeea570a::__anonbdd9aeea5808	typeref:typename:__IOM uint32_t:1
+STS_RX_FULL	hardware/mindgrove_uart.h	/^#define STS_RX_FULL /;"	d
+STS_RX_NOT_EMPTY	hardware/mindgrove_uart.h	/^#define STS_RX_NOT_EMPTY /;"	d
+STS_RX_THRESHOLD	hardware/mindgrove_uart.h	/^#define STS_RX_THRESHOLD /;"	d
+STS_TX_EMPTY	hardware/mindgrove_uart.h	/^#define STS_TX_EMPTY /;"	d
+STS_TX_FULL	hardware/mindgrove_uart.h	/^#define STS_TX_FULL /;"	d
+TCEN	secure_iot_reg.h	/^        __IOM uint32_t TCEN       : 1;            \/*!< Timeout counter enable                  /;"	m	struct:__anonbdd9aeea3808::__anonbdd9aeea390a::__anonbdd9aeea3a08	typeref:typename:__IOM uint32_t:1
+TCF	secure_iot_reg.h	/^        __IM  uint32_t TCF        : 1;            \/*!< Transfer complete flag                  /;"	m	struct:__anonbdd9aeea3808::__anonbdd9aeea3d0a::__anonbdd9aeea3e08	typeref:typename:__IM uint32_t:1
+TCIE	secure_iot_reg.h	/^        __IOM uint32_t TCIE       : 1;            \/*!< Transfer complete interrupt enable      /;"	m	struct:__anonbdd9aeea3808::__anonbdd9aeea390a::__anonbdd9aeea3a08	typeref:typename:__IOM uint32_t:1
+TEF	secure_iot_reg.h	/^        __IM  uint32_t TEF        : 1;            \/*!< Transfer error flag                     /;"	m	struct:__anonbdd9aeea3808::__anonbdd9aeea3d0a::__anonbdd9aeea3e08	typeref:typename:__IM uint32_t:1
+TEIE	secure_iot_reg.h	/^        __IOM uint32_t TEIE       : 1;            \/*!< Transfer error interrupt enable         /;"	m	struct:__anonbdd9aeea3808::__anonbdd9aeea390a::__anonbdd9aeea3a08	typeref:typename:__IOM uint32_t:1
+TICK_COUNT	mindgrove_timerisr.c	/^#define TICK_COUNT /;"	d	file:
+TIME	secure_iot_reg.h	/^      __IOM uint32_t TIME;                        \/*!< I2C timeout calculation and interrupt re/;"	m	union:__anonbdd9aeea1408::__anonbdd9aeea190a	typeref:typename:__IOM uint32_t
+TIMEOUT	secure_iot_reg.h	/^        __IOM uint32_t TIMEOUT    : 14;           \/*!< The transmission timeout value          /;"	m	struct:__anonbdd9aeea1408::__anonbdd9aeea190a::__anonbdd9aeea1a08	typeref:typename:__IOM uint32_t:14
+TIMEOUT_EN	secure_iot_reg.h	/^        __IOM uint32_t TIMEOUT_EN : 1;            \/*!< Enable the transmission timeout calculat/;"	m	struct:__anonbdd9aeea1408::__anonbdd9aeea190a::__anonbdd9aeea1a08	typeref:typename:__IOM uint32_t:1
+TIMEOUT_INTR	secure_iot_reg.h	/^        __IOM uint32_t TIMEOUT_INTR : 1;          \/*!< Interrupt output for transmission timeou/;"	m	struct:__anonbdd9aeea1408::__anonbdd9aeea190a::__anonbdd9aeea1a08	typeref:typename:__IOM uint32_t:1
+TIME_b	secure_iot_reg.h	/^      } TIME_b;$/;"	m	union:__anonbdd9aeea1408::__anonbdd9aeea190a	typeref:struct:__anonbdd9aeea1408::__anonbdd9aeea190a::__anonbdd9aeea1a08
+TOF	secure_iot_reg.h	/^        __IM  uint32_t TOF        : 1;            \/*!< Timeout flag                            /;"	m	struct:__anonbdd9aeea3808::__anonbdd9aeea3d0a::__anonbdd9aeea3e08	typeref:typename:__IM uint32_t:1
+TOIE	secure_iot_reg.h	/^        __IOM uint32_t TOIE       : 1;            \/*!< TimeOut interrupt enable                /;"	m	struct:__anonbdd9aeea3808::__anonbdd9aeea390a::__anonbdd9aeea3a08	typeref:typename:__IOM uint32_t:1
+TOTAL_BIT_RX	secure_iot_reg.h	/^        __IOM uint32_t TOTAL_BIT_RX : 8;          \/*!< holds the total number of bits to be tra/;"	m	struct:__anonbdd9aeea2c08::__anonbdd9aeea2d0a::__anonbdd9aeea2e08	typeref:typename:__IOM uint32_t:8
+TOTAL_BIT_TX	secure_iot_reg.h	/^        __IOM uint32_t TOTAL_BIT_TX : 8;          \/*!< holds the total number of bits to be rec/;"	m	struct:__anonbdd9aeea2c08::__anonbdd9aeea2d0a::__anonbdd9aeea2e08	typeref:typename:__IOM uint32_t:8
+TTYS0_DEV	mindgrove_serial.c	/^#    define TTYS0_DEV /;"	d	file:
+TX	secure_iot_reg.h	/^    __IOM Data  TX;                           \/*!< holds the tx data. This register is written /;"	m	struct:__anonbdd9aeea2c08	typeref:typename:__IOM Data
+TX_DEPTH	secure_iot_reg.h	/^        __IOM uint16_t TX_DEPTH   : 3;            \/*!< TX FIFO Threshold bits to know the numbe/;"	m	struct:__anonbdd9aeea2c08::__anonbdd9aeea350a::__anonbdd9aeea3608	typeref:typename:__IOM uint16_t:3
+TX_FIFO_24	secure_iot_reg.h	/^        __IOM uint32_t TX_FIFO_24 : 1;            \/*!< TX FIFO full. TX FIFO is filled by 24 en/;"	m	struct:__anonbdd9aeea2c08::__anonbdd9aeea330a::__anonbdd9aeea3408	typeref:typename:__IOM uint32_t:1
+TX_FIFO_24_INTR_EN	secure_iot_reg.h	/^        __IOM uint32_t TX_FIFO_24_INTR_EN : 1;    \/*!< TX FIFO full interrupt enable bit. This /;"	m	struct:__anonbdd9aeea2c08::__anonbdd9aeea310a::__anonbdd9aeea3208	typeref:typename:__IOM uint32_t:1
+TX_FIFO_28	secure_iot_reg.h	/^        __IOM uint32_t TX_FIFO_28 : 1;            \/*!< TX FIFO full. TX FIFO is filled by 28 en/;"	m	struct:__anonbdd9aeea2c08::__anonbdd9aeea330a::__anonbdd9aeea3408	typeref:typename:__IOM uint32_t:1
+TX_FIFO_28_INTR_EN	secure_iot_reg.h	/^        __IOM uint32_t TX_FIFO_28_INTR_EN : 1;    \/*!< TX FIFO full interrupt enable bit. This /;"	m	struct:__anonbdd9aeea2c08::__anonbdd9aeea310a::__anonbdd9aeea3208	typeref:typename:__IOM uint32_t:1
+TX_FIFO_30	secure_iot_reg.h	/^        __IOM uint32_t TX_FIFO_30 : 1;            \/*!< TX FIFO full. TX FIFO is filled by 30 en/;"	m	struct:__anonbdd9aeea2c08::__anonbdd9aeea330a::__anonbdd9aeea3408	typeref:typename:__IOM uint32_t:1
+TX_FIFO_30_INTR_EN	secure_iot_reg.h	/^        __IOM uint32_t TX_FIFO_30_INTR_EN : 1;    \/*!< TX FIFO full interrupt enable bit. This /;"	m	struct:__anonbdd9aeea2c08::__anonbdd9aeea310a::__anonbdd9aeea3208	typeref:typename:__IOM uint32_t:1
+TX_FIFO_DUAL	secure_iot_reg.h	/^        __IOM uint32_t TX_FIFO_DUAL : 1;          \/*!< TX FIFO full. TX FIFO is filled by 2 ent/;"	m	struct:__anonbdd9aeea2c08::__anonbdd9aeea330a::__anonbdd9aeea3408	typeref:typename:__IOM uint32_t:1
+TX_FIFO_DUAL_INTR_EN	secure_iot_reg.h	/^        __IOM uint32_t TX_FIFO_DUAL_INTR_EN : 1;  \/*!< TX FIFO full interrupt enable bit. This /;"	m	struct:__anonbdd9aeea2c08::__anonbdd9aeea310a::__anonbdd9aeea3208	typeref:typename:__IOM uint32_t:1
+TX_FIFO_EMPTY	secure_iot_reg.h	/^        __IOM uint32_t TX_FIFO_EMPTY : 1;         \/*!< TX FIFO empty. TX FIFO is empty         /;"	m	struct:__anonbdd9aeea2c08::__anonbdd9aeea330a::__anonbdd9aeea3408	typeref:typename:__IOM uint32_t:1
+TX_FIFO_EMPTY_INTR_EN	secure_iot_reg.h	/^        __IOM uint32_t TX_FIFO_EMPTY_INTR_EN : 1; \/*!< TX FIFO empty interrupt enable bit. This/;"	m	struct:__anonbdd9aeea2c08::__anonbdd9aeea310a::__anonbdd9aeea3208	typeref:typename:__IOM uint32_t:1
+TX_FIFO_FULL	secure_iot_reg.h	/^        __IOM uint32_t TX_FIFO_FULL : 1;          \/*!< TX FIFO full. TX FIFO is full - 32 entri/;"	m	struct:__anonbdd9aeea2c08::__anonbdd9aeea330a::__anonbdd9aeea3408	typeref:typename:__IOM uint32_t:1
+TX_FIFO_FULL_INTR_EN	secure_iot_reg.h	/^        __IOM uint32_t TX_FIFO_FULL_INTR_EN : 1;  \/*!< TX FIFO full interrupt enable bit. This /;"	m	struct:__anonbdd9aeea2c08::__anonbdd9aeea310a::__anonbdd9aeea3208	typeref:typename:__IOM uint32_t:1
+TX_FIFO_HALF	secure_iot_reg.h	/^        __IOM uint32_t TX_FIFO_HALF : 1;          \/*!< TX FIFO full. TX FIFO is filled by 16 en/;"	m	struct:__anonbdd9aeea2c08::__anonbdd9aeea330a::__anonbdd9aeea3408	typeref:typename:__IOM uint32_t:1
+TX_FIFO_HALF_INTR_EN	secure_iot_reg.h	/^        __IOM uint32_t TX_FIFO_HALF_INTR_EN : 1;  \/*!< TX FIFO full interrupt enable bit. This /;"	m	struct:__anonbdd9aeea2c08::__anonbdd9aeea310a::__anonbdd9aeea3208	typeref:typename:__IOM uint32_t:1
+TX_FIFO_OCTAL	secure_iot_reg.h	/^        __IOM uint32_t TX_FIFO_OCTAL : 1;         \/*!< TX FIFO full. TX FIFO is filled by 8 ent/;"	m	struct:__anonbdd9aeea2c08::__anonbdd9aeea330a::__anonbdd9aeea3408	typeref:typename:__IOM uint32_t:1
+TX_FIFO_OCTAL_INTR_EN	secure_iot_reg.h	/^        __IOM uint32_t TX_FIFO_OCTAL_INTR_EN : 1; \/*!< TX FIFO full interrupt enable bit. This /;"	m	struct:__anonbdd9aeea2c08::__anonbdd9aeea310a::__anonbdd9aeea3208	typeref:typename:__IOM uint32_t:1
+TX_FIFO_QUAD	secure_iot_reg.h	/^        __IOM uint32_t TX_FIFO_QUAD : 1;          \/*!< TX FIFO full. TX FIFO is filled by 4 ent/;"	m	struct:__anonbdd9aeea2c08::__anonbdd9aeea330a::__anonbdd9aeea3408	typeref:typename:__IOM uint32_t:1
+TX_FIFO_QUAD_INTR_EN	secure_iot_reg.h	/^        __IOM uint32_t TX_FIFO_QUAD_INTR_EN : 1;  \/*!< TX FIFO full interrupt enable bit. This /;"	m	struct:__anonbdd9aeea2c08::__anonbdd9aeea310a::__anonbdd9aeea3208	typeref:typename:__IOM uint32_t:1
+TX_REG	secure_iot_reg.h	/^    __IOM unsigned int  TX_REG;                       \/*!< TX data register                    /;"	m	struct:__anonbdd9aeea0c08	typeref:typename:__IOM unsigned int
+TX_STARTED	secure_iot_reg.h	/^        __IOM uint16_t TX_STARTED : 1;            \/*!< Transmit enable bit. This bit will be se/;"	m	struct:__anonbdd9aeea2c08::__anonbdd9aeea350a::__anonbdd9aeea3608	typeref:typename:__IOM uint16_t:1
+UART0_IRQn	secure_iot_reg.h	/^    UART0_IRQn                =  47,              \/*!< 47 UART0                                /;"	e	enum:__anonbdd9aeea0103
+UART1_IRQn	secure_iot_reg.h	/^    UART1_IRQn                =  48,              \/*!< 48 UART1                                /;"	e	enum:__anonbdd9aeea0103
+UART2_IRQn	secure_iot_reg.h	/^    UART2_IRQn                =  49,              \/*!< 49 UART2                                /;"	e	enum:__anonbdd9aeea0103
+UARTX_BUFFER_SIZE	hardware/mindgrove_uart.h	/^#define UARTX_BUFFER_SIZE /;"	d
+UART_BASE	secure_iot_reg.h	/^  #define UART_BASE /;"	d
+UART_BAUD_OFFSET	hardware/mindgrove_uart.h	/^#define UART_BAUD_OFFSET /;"	d
+UART_EV_ENABLE_OFFSET	hardware/mindgrove_uart.h	/^#define UART_EV_ENABLE_OFFSET /;"	d
+UART_OFFSET	secure_iot_reg.h	/^  #define UART_OFFSET /;"	d
+UART_REG	secure_iot_reg.h	/^  #define UART_REG(/;"	d
+UART_RX_OFFSET	hardware/mindgrove_uart.h	/^#define UART_RX_OFFSET /;"	d
+UART_STATUS_OFFSET	hardware/mindgrove_uart.h	/^#define UART_STATUS_OFFSET /;"	d
+UART_TX_OFFSET	hardware/mindgrove_uart.h	/^#define UART_TX_OFFSET /;"	d
+UART_TX_RX_LEN	mindgrove_lowputc.c	/^#define UART_TX_RX_LEN(/;"	d	file:
+UART_Type	secure_iot_reg.h	/^  } UART_Type;                                   \/*!< Size = 32 (0x20)                         /;"	t	typeref:struct:__anonbdd9aeea0c08
+VER_MAJOR	secure_iot_reg.h	/^        __IM  uint32_t VER_MAJOR  : 1;            \/*!< Major version number                    /;"	m	struct:__anonbdd9aeea5608::__anonbdd9aeea590a::__anonbdd9aeea5a08	typeref:typename:__IM uint32_t:1
+VER_MINOR	secure_iot_reg.h	/^        __IM  uint32_t VER_MINOR  : 1;            \/*!< Minor version number                    /;"	m	struct:__anonbdd9aeea5608::__anonbdd9aeea590a::__anonbdd9aeea5a08	typeref:typename:__IM uint32_t:1
+WDT_ACTIVE	secure_iot_reg.h	/^    __IOM uint32_t  WDT_ACTIVE;                   \/*!< Update the internal WD counter with the /;"	m	struct:__anonbdd9aeea1b08	typeref:typename:__IOM uint32_t
+WDT_BASE	secure_iot_reg.h	/^  #define WDT_BASE /;"	d
+WDT_CTRL	secure_iot_reg.h	/^      __IOM uint16_t WDT_CTRL;                    \/*!< Control register                        /;"	m	union:__anonbdd9aeea1b08::__anonbdd9aeea1c0a	typeref:typename:__IOM uint16_t
+WDT_CTRL_EN	secure_iot_reg.h	/^        __IOM uint16_t WDT_CTRL_EN : 1;           \/*!< Enable the watchdog timer               /;"	m	struct:__anonbdd9aeea1b08::__anonbdd9aeea1c0a::__anonbdd9aeea1d08	typeref:typename:__IOM uint16_t:1
+WDT_CTRL_MODE	secure_iot_reg.h	/^        __IOM uint16_t WDT_CTRL_MODE : 1;         \/*!< Mode of watchdog timer. 0 - Interrupt, 1/;"	m	struct:__anonbdd9aeea1b08::__anonbdd9aeea1c0a::__anonbdd9aeea1d08	typeref:typename:__IOM uint16_t:1
+WDT_CTRL_SOFT	secure_iot_reg.h	/^        __IOM uint16_t WDT_CTRL_SOFT : 1;         \/*!< Software reset                          /;"	m	struct:__anonbdd9aeea1b08::__anonbdd9aeea1c0a::__anonbdd9aeea1d08	typeref:typename:__IOM uint16_t:1
+WDT_CTRL_b	secure_iot_reg.h	/^      } WDT_CTRL_b;$/;"	m	union:__anonbdd9aeea1b08::__anonbdd9aeea1c0a	typeref:struct:__anonbdd9aeea1b08::__anonbdd9aeea1c0a::__anonbdd9aeea1d08
+WDT_CYCLES	secure_iot_reg.h	/^    __IOM uint32_t  WDT_CYCLES;                   \/*!< The number of cycles to count down for r/;"	m	struct:__anonbdd9aeea1b08	typeref:typename:__IOM uint32_t
+WDT_RESET_CYCLES	secure_iot_reg.h	/^    __IOM uint16_t  WDT_RESET_CYCLES;             \/*!< The number of cycles for which the inter/;"	m	struct:__anonbdd9aeea1b08	typeref:typename:__IOM uint16_t
+WDT_Type	secure_iot_reg.h	/^  } WDT_Type;                                     \/*!< Size = 28 (0x1c)                        /;"	t	typeref:struct:__anonbdd9aeea1b08
+WP_HIGH	secure_iot_reg.h	/^    __IOM uint32_t  WP_HIGH;                      \/*!< Write pointer of trace packet into RAM. /;"	m	struct:__anonbdd9aeea5608	typeref:typename:__IOM uint32_t
+WP_LOW	secure_iot_reg.h	/^    __IOM uint32_t  WP_LOW;                       \/*!< Write pointer of trace packet into RAM. /;"	m	struct:__anonbdd9aeea5608	typeref:typename:__IOM uint32_t
+__ARCH_RISCV_SRC_MINDGROVE_CHIP_H	chip.h	/^#define __ARCH_RISCV_SRC_MINDGROVE_CHIP_H$/;"	d
+__ARCH_RISCV_SRC_MINDGROVE_CLOCKCONFIG_H	mindgrove_clockconfig.h	/^#define __ARCH_RISCV_SRC_MINDGROVE_CLOCKCONFIG_H$/;"	d
+__ARCH_RISCV_SRC_MINDGROVE_CONFIG_H	mindgrove_config.h	/^#define __ARCH_RISCV_SRC_MINDGROVE_CONFIG_H$/;"	d
+__ARCH_RISCV_SRC_MINDGROVE_H	mindgrove.h	/^#define __ARCH_RISCV_SRC_MINDGROVE_H$/;"	d
+__ARCH_RISCV_SRC_MINDGROVE_LOWPUTC_H	mindgrove_lowputc.h	/^#define __ARCH_RISCV_SRC_MINDGROVE_LOWPUTC_H$/;"	d
+__ARCH_RISCV_SRC_MINDGROVE_MEMORYMAP_H	mindgrove_memorymap.h	/^#define __ARCH_RISCV_SRC_MINDGROVE_MEMORYMAP_H$/;"	d
+__DCACHE_PRESENT	secure_iot_reg.h	/^  #define __DCACHE_PRESENT /;"	d
+__DSP_PRESENT	secure_iot_reg.h	/^  #define __DSP_PRESENT /;"	d
+__FPU_DP	secure_iot_reg.h	/^  #define __FPU_DP /;"	d
+__FPU_PRESENT	secure_iot_reg.h	/^  #define __FPU_PRESENT /;"	d
+__I	secure_iot_reg.h	/^  #define __I /;"	d
+__ICACHE_PRESENT	secure_iot_reg.h	/^  #define __ICACHE_PRESENT /;"	d
+__IM	secure_iot_reg.h	/^    #define __IM /;"	d
+__IO	secure_iot_reg.h	/^  #define __IO /;"	d
+__IOM	secure_iot_reg.h	/^    #define __IOM /;"	d
+__MPU_PRESENT	secure_iot_reg.h	/^  #define __MPU_PRESENT /;"	d
+__NVIC_PRIO_BITS	secure_iot_reg.h	/^  #define __NVIC_PRIO_BITS /;"	d
+__O	secure_iot_reg.h	/^  #define __O /;"	d
+__OM	secure_iot_reg.h	/^    #define __OM /;"	d
+__VAJRA_REV	secure_iot_reg.h	/^  #define __VAJRA_REV /;"	d
+__Vendor_SysTickConfig	secure_iot_reg.h	/^  #define __Vendor_SysTickConfig /;"	d
+__anon14fe60e30103	plic.h	/^{$/;"	g
+__anon14fe60e30208	plic.h	/^{$/;"	s
+__anon14fe60e30308	plic.h	/^{$/;"	s
+__anonbdd9aeea0103	secure_iot_reg.h	/^  typedef enum {$/;"	g
+__anonbdd9aeea0208	secure_iot_reg.h	/^  typedef struct {                                \/*!< PWM0 Structure                          /;"	s
+__anonbdd9aeea030a	secure_iot_reg.h	/^    union {$/;"	u	struct:__anonbdd9aeea0208
+__anonbdd9aeea0408	secure_iot_reg.h	/^      struct {$/;"	s	union:__anonbdd9aeea0208::__anonbdd9aeea030a
+__anonbdd9aeea050a	secure_iot_reg.h	/^    union {$/;"	u	struct:__anonbdd9aeea0208
+__anonbdd9aeea0608	secure_iot_reg.h	/^      struct {$/;"	s	union:__anonbdd9aeea0208::__anonbdd9aeea050a
+__anonbdd9aeea0708	secure_iot_reg.h	/^  typedef struct {                                \/*!< GPTIMER0 Structure                      /;"	s
+__anonbdd9aeea080a	secure_iot_reg.h	/^    union {$/;"	u	struct:__anonbdd9aeea0708
+__anonbdd9aeea0908	secure_iot_reg.h	/^      struct {$/;"	s	union:__anonbdd9aeea0708::__anonbdd9aeea080a
+__anonbdd9aeea0a0a	secure_iot_reg.h	/^    union {$/;"	u	struct:__anonbdd9aeea0708
+__anonbdd9aeea0b08	secure_iot_reg.h	/^      struct {$/;"	s	union:__anonbdd9aeea0708::__anonbdd9aeea0a0a
+__anonbdd9aeea0c08	secure_iot_reg.h	/^  typedef struct {                                \/*!< UART0 Structure                         /;"	s
+__anonbdd9aeea0d0a	secure_iot_reg.h	/^    union {$/;"	u	struct:__anonbdd9aeea0c08
+__anonbdd9aeea0e08	secure_iot_reg.h	/^      struct {$/;"	s	union:__anonbdd9aeea0c08::__anonbdd9aeea0d0a
+__anonbdd9aeea0f0a	secure_iot_reg.h	/^     union {$/;"	u	struct:__anonbdd9aeea0c08
+__anonbdd9aeea1008	secure_iot_reg.h	/^      struct {$/;"	s	union:__anonbdd9aeea0c08::__anonbdd9aeea0f0a
+__anonbdd9aeea110a	secure_iot_reg.h	/^    union {$/;"	u	struct:__anonbdd9aeea0c08
+__anonbdd9aeea1208	secure_iot_reg.h	/^      struct {$/;"	s	union:__anonbdd9aeea0c08::__anonbdd9aeea110a
+__anonbdd9aeea1308	secure_iot_reg.h	/^  typedef struct {$/;"	s
+__anonbdd9aeea1408	secure_iot_reg.h	/^  typedef struct {                                \/*!< I2C0 Structure                          /;"	s
+__anonbdd9aeea150a	secure_iot_reg.h	/^    union {$/;"	u	struct:__anonbdd9aeea1408
+__anonbdd9aeea1608	secure_iot_reg.h	/^      struct {$/;"	s	union:__anonbdd9aeea1408::__anonbdd9aeea150a
+__anonbdd9aeea170a	secure_iot_reg.h	/^    union {$/;"	u	struct:__anonbdd9aeea1408
+__anonbdd9aeea1808	secure_iot_reg.h	/^      struct {$/;"	s	union:__anonbdd9aeea1408::__anonbdd9aeea170a
+__anonbdd9aeea190a	secure_iot_reg.h	/^    union {$/;"	u	struct:__anonbdd9aeea1408
+__anonbdd9aeea1a08	secure_iot_reg.h	/^      struct {$/;"	s	union:__anonbdd9aeea1408::__anonbdd9aeea190a
+__anonbdd9aeea1b08	secure_iot_reg.h	/^  typedef struct {                                \/*!< WDT0 Structure                          /;"	s
+__anonbdd9aeea1c0a	secure_iot_reg.h	/^    union {$/;"	u	struct:__anonbdd9aeea1b08
+__anonbdd9aeea1d08	secure_iot_reg.h	/^      struct {$/;"	s	union:__anonbdd9aeea1b08::__anonbdd9aeea1c0a
+__anonbdd9aeea1e08	secure_iot_reg.h	/^  typedef struct {                                \/*!< PINMUX0 Structure                       /;"	s
+__anonbdd9aeea1f08	secure_iot_reg.h	/^  typedef struct {                                \/*!< GPIO Structure                          /;"	s
+__anonbdd9aeea2008	secure_iot_reg.h	/^  typedef struct {                                \/*!< AES Structure                           /;"	s
+__anonbdd9aeea210a	secure_iot_reg.h	/^    union {$/;"	u	struct:__anonbdd9aeea2008
+__anonbdd9aeea2208	secure_iot_reg.h	/^      struct {$/;"	s	union:__anonbdd9aeea2008::__anonbdd9aeea210a
+__anonbdd9aeea230a	secure_iot_reg.h	/^    union {$/;"	u	struct:__anonbdd9aeea2008
+__anonbdd9aeea2408	secure_iot_reg.h	/^      struct {$/;"	s	union:__anonbdd9aeea2008::__anonbdd9aeea230a
+__anonbdd9aeea2508	secure_iot_reg.h	/^  typedef struct {                                \/*!< SHA256 Structure                        /;"	s
+__anonbdd9aeea260a	secure_iot_reg.h	/^    union {$/;"	u	struct:__anonbdd9aeea2508
+__anonbdd9aeea2708	secure_iot_reg.h	/^      struct {$/;"	s	union:__anonbdd9aeea2508::__anonbdd9aeea260a
+__anonbdd9aeea280a	secure_iot_reg.h	/^    union {$/;"	u	struct:__anonbdd9aeea2508
+__anonbdd9aeea2908	secure_iot_reg.h	/^      struct {$/;"	s	union:__anonbdd9aeea2508::__anonbdd9aeea280a
+__anonbdd9aeea2a08	secure_iot_reg.h	/^  typedef struct {                                \/*!< RSA Structure                           /;"	s
+__anonbdd9aeea2b0a	secure_iot_reg.h	/^   typedef union{$/;"	u
+__anonbdd9aeea2c08	secure_iot_reg.h	/^  typedef struct {                                \/*!< SPI0 Structure                          /;"	s
+__anonbdd9aeea2d0a	secure_iot_reg.h	/^    union {$/;"	u	struct:__anonbdd9aeea2c08
+__anonbdd9aeea2e08	secure_iot_reg.h	/^      struct {$/;"	s	union:__anonbdd9aeea2c08::__anonbdd9aeea2d0a
+__anonbdd9aeea2f0a	secure_iot_reg.h	/^    union {$/;"	u	struct:__anonbdd9aeea2c08
+__anonbdd9aeea3008	secure_iot_reg.h	/^      struct {$/;"	s	union:__anonbdd9aeea2c08::__anonbdd9aeea2f0a
+__anonbdd9aeea310a	secure_iot_reg.h	/^    union {$/;"	u	struct:__anonbdd9aeea2c08
+__anonbdd9aeea3208	secure_iot_reg.h	/^      struct {$/;"	s	union:__anonbdd9aeea2c08::__anonbdd9aeea310a
+__anonbdd9aeea330a	secure_iot_reg.h	/^    union {$/;"	u	struct:__anonbdd9aeea2c08
+__anonbdd9aeea3408	secure_iot_reg.h	/^      struct {$/;"	s	union:__anonbdd9aeea2c08::__anonbdd9aeea330a
+__anonbdd9aeea350a	secure_iot_reg.h	/^    union {$/;"	u	struct:__anonbdd9aeea2c08
+__anonbdd9aeea3608	secure_iot_reg.h	/^      struct {$/;"	s	union:__anonbdd9aeea2c08::__anonbdd9aeea350a
+__anonbdd9aeea370a	secure_iot_reg.h	/^  typedef union{$/;"	u
+__anonbdd9aeea3808	secure_iot_reg.h	/^  typedef struct {                                \/*!< QUADSPI0 Structure                      /;"	s
+__anonbdd9aeea390a	secure_iot_reg.h	/^    union {$/;"	u	struct:__anonbdd9aeea3808
+__anonbdd9aeea3a08	secure_iot_reg.h	/^      struct {$/;"	s	union:__anonbdd9aeea3808::__anonbdd9aeea390a
+__anonbdd9aeea3b0a	secure_iot_reg.h	/^    union {$/;"	u	struct:__anonbdd9aeea3808
+__anonbdd9aeea3c08	secure_iot_reg.h	/^      struct {$/;"	s	union:__anonbdd9aeea3808::__anonbdd9aeea3b0a
+__anonbdd9aeea3d0a	secure_iot_reg.h	/^    union {$/;"	u	struct:__anonbdd9aeea3808
+__anonbdd9aeea3e08	secure_iot_reg.h	/^      struct {$/;"	s	union:__anonbdd9aeea3808::__anonbdd9aeea3d0a
+__anonbdd9aeea3f0a	secure_iot_reg.h	/^    union {$/;"	u	struct:__anonbdd9aeea3808
+__anonbdd9aeea4008	secure_iot_reg.h	/^      struct {$/;"	s	union:__anonbdd9aeea3808::__anonbdd9aeea3f0a
+__anonbdd9aeea410a	secure_iot_reg.h	/^    union {$/;"	u	struct:__anonbdd9aeea3808
+__anonbdd9aeea4208	secure_iot_reg.h	/^      struct {$/;"	s	union:__anonbdd9aeea3808::__anonbdd9aeea410a
+__anonbdd9aeea430a	secure_iot_reg.h	/^    union {$/;"	u	struct:__anonbdd9aeea3808
+__anonbdd9aeea4408	secure_iot_reg.h	/^      struct {$/;"	s	union:__anonbdd9aeea3808::__anonbdd9aeea430a
+__anonbdd9aeea450a	secure_iot_reg.h	/^    union {$/;"	u	struct:__anonbdd9aeea3808
+__anonbdd9aeea4608	secure_iot_reg.h	/^      struct {$/;"	s	union:__anonbdd9aeea3808::__anonbdd9aeea450a
+__anonbdd9aeea470a	secure_iot_reg.h	/^    union {$/;"	u	struct:__anonbdd9aeea3808
+__anonbdd9aeea4808	secure_iot_reg.h	/^      struct {$/;"	s	union:__anonbdd9aeea3808::__anonbdd9aeea470a
+__anonbdd9aeea490a	secure_iot_reg.h	/^    union {$/;"	u	struct:__anonbdd9aeea3808
+__anonbdd9aeea4a08	secure_iot_reg.h	/^      struct {$/;"	s	union:__anonbdd9aeea3808::__anonbdd9aeea490a
+__anonbdd9aeea4b08	secure_iot_reg.h	/^  typedef struct {                                \/*!< ITRACE Structure                        /;"	s
+__anonbdd9aeea4c0a	secure_iot_reg.h	/^    union {$/;"	u	struct:__anonbdd9aeea4b08
+__anonbdd9aeea4d08	secure_iot_reg.h	/^      struct {$/;"	s	union:__anonbdd9aeea4b08::__anonbdd9aeea4c0a
+__anonbdd9aeea4e0a	secure_iot_reg.h	/^    union {$/;"	u	struct:__anonbdd9aeea4b08
+__anonbdd9aeea4f08	secure_iot_reg.h	/^      struct {$/;"	s	union:__anonbdd9aeea4b08::__anonbdd9aeea4e0a
+__anonbdd9aeea500a	secure_iot_reg.h	/^    union {$/;"	u	struct:__anonbdd9aeea4b08
+__anonbdd9aeea5108	secure_iot_reg.h	/^      struct {$/;"	s	union:__anonbdd9aeea4b08::__anonbdd9aeea500a
+__anonbdd9aeea520a	secure_iot_reg.h	/^    union {$/;"	u	struct:__anonbdd9aeea4b08
+__anonbdd9aeea5308	secure_iot_reg.h	/^      struct {$/;"	s	union:__anonbdd9aeea4b08::__anonbdd9aeea520a
+__anonbdd9aeea540a	secure_iot_reg.h	/^    union {$/;"	u	struct:__anonbdd9aeea4b08
+__anonbdd9aeea5508	secure_iot_reg.h	/^      struct {$/;"	s	union:__anonbdd9aeea4b08::__anonbdd9aeea540a
+__anonbdd9aeea5608	secure_iot_reg.h	/^  typedef struct {                                \/*!< ITRACE_RAM Structure                    /;"	s
+__anonbdd9aeea570a	secure_iot_reg.h	/^    union {$/;"	u	struct:__anonbdd9aeea5608
+__anonbdd9aeea5808	secure_iot_reg.h	/^      struct {$/;"	s	union:__anonbdd9aeea5608::__anonbdd9aeea570a
+__anonbdd9aeea590a	secure_iot_reg.h	/^    union {$/;"	u	struct:__anonbdd9aeea5608
+__anonbdd9aeea5a08	secure_iot_reg.h	/^      struct {$/;"	s	union:__anonbdd9aeea5608::__anonbdd9aeea590a
+__anonbdd9aeea5b08	secure_iot_reg.h	/^  typedef struct {                                \/*!< PLIC0 Structure                         /;"	s
+__anonbdd9aeea5c08	secure_iot_reg.h	/^  typedef struct {                                \/*!< OTP Structure                           /;"	s
+__anonbdd9aeea5d0a	secure_iot_reg.h	/^    union {$/;"	u	struct:__anonbdd9aeea5c08
+__anonbdd9aeea5e08	secure_iot_reg.h	/^      struct {$/;"	s	union:__anonbdd9aeea5c08::__anonbdd9aeea5d0a
+__anonbdd9aeea5f0a	secure_iot_reg.h	/^    union {$/;"	u	struct:__anonbdd9aeea5c08
+__anonbdd9aeea6008	secure_iot_reg.h	/^      struct {$/;"	s	union:__anonbdd9aeea5c08::__anonbdd9aeea5f0a
+__anonbdd9aeea610a	secure_iot_reg.h	/^    union {$/;"	u	struct:__anonbdd9aeea5c08
+__anonbdd9aeea6208	secure_iot_reg.h	/^      struct {$/;"	s	union:__anonbdd9aeea5c08::__anonbdd9aeea610a
+__anonbdd9aeea630a	secure_iot_reg.h	/^    union {$/;"	u	struct:__anonbdd9aeea5c08
+__anonbdd9aeea6408	secure_iot_reg.h	/^      struct {$/;"	s	union:__anonbdd9aeea5c08::__anonbdd9aeea630a
+__anonbdd9aeea650a	secure_iot_reg.h	/^    union {$/;"	u	struct:__anonbdd9aeea5c08
+__anonbdd9aeea6608	secure_iot_reg.h	/^      struct {$/;"	s	union:__anonbdd9aeea5c08::__anonbdd9aeea650a
+__mindgrove_start	mindgrove_start.c	/^void __mindgrove_start(void)$/;"	f	typeref:typename:void
+_b_tick_started	mindgrove_timerisr.c	/^static bool _b_tick_started = false;$/;"	v	typeref:typename:bool	file:
+baud	mindgrove_serial.c	/^  uint32_t  baud;     \/* Configured baud *\/$/;"	m	struct:up_dev_s	typeref:typename:uint32_t	file:
+control_reg	secure_iot_reg.h	/^      __IOM uint16_t control_reg;$/;"	m	struct:__anonbdd9aeea1308	typeref:typename:__IOM uint16_t
+count	plic.h	/^	uint32_t count; \/*number of times this interrupt occured*\/$/;"	m	struct:__anon14fe60e30208	typeref:typename:uint32_t
+csr_clear	mindgrove_timerisr.c	/^#define csr_clear(/;"	d	file:
+csr_set	mindgrove_timerisr.c	/^#define csr_set(/;"	d	file:
+data_16	secure_iot_reg.h	/^      uint16_t data_16;$/;"	m	union:__anonbdd9aeea2b0a	typeref:typename:uint16_t
+data_16	secure_iot_reg.h	/^      uint16_t data_16;$/;"	m	union:__anonbdd9aeea370a	typeref:typename:uint16_t
+data_32	secure_iot_reg.h	/^      uint32_t data_32;$/;"	m	union:__anonbdd9aeea2b0a	typeref:typename:uint32_t
+data_32	secure_iot_reg.h	/^      uint32_t data_32;$/;"	m	union:__anonbdd9aeea370a	typeref:typename:uint32_t
+data_8	secure_iot_reg.h	/^      uint8_t data_8;$/;"	m	union:__anonbdd9aeea2b0a	typeref:typename:uint8_t
+data_8	secure_iot_reg.h	/^      uint8_t data_8;$/;"	m	union:__anonbdd9aeea370a	typeref:typename:uint8_t
+fptr	plic.h	/^  void* fptr;\/\/Function pointer points the ISR function.$/;"	m	struct:__anon14fe60e30308	typeref:typename:void *
+g_current_regs	mindgrove_irq_dispatch.c	/^volatile uintptr_t *g_current_regs[1];$/;"	v	typeref:typename:volatile uintptr_t * [1]
+g_idle_topstack	mindgrove_start.c	/^uintptr_t g_idle_topstack = MINDGROVE_IDLESTACK_TOP;$/;"	v	typeref:typename:uintptr_t
+g_uart0port	mindgrove_serial.c	/^static uart_dev_t g_uart0port =$/;"	v	typeref:typename:uart_dev_t	file:
+g_uart0priv	mindgrove_serial.c	/^static struct up_dev_s g_uart0priv =$/;"	v	typeref:struct:up_dev_s	file:
+g_uart0rxbuffer	mindgrove_serial.c	/^static char g_uart0rxbuffer[CONFIG_UART0_RXBUFSIZE];$/;"	v	typeref:typename:char[]	file:
+g_uart0txbuffer	mindgrove_serial.c	/^static char g_uart0txbuffer[CONFIG_UART0_TXBUFSIZE];$/;"	v	typeref:typename:char[]	file:
+g_uart_ops	mindgrove_serial.c	/^static const struct uart_ops_s g_uart_ops =$/;"	v	typeref:typename:const struct uart_ops_s	file:
+hart0_interrupt_matrix	plic_driver.c	/^interrupt_data_t hart0_interrupt_matrix[PLIC_MAX_INTERRUPT_SRC];$/;"	v	typeref:typename:interrupt_data_t[]
+id	plic.h	/^	uint32_t id; \/*id of the interrupt target source*\/$/;"	m	struct:__anon14fe60e30208	typeref:typename:uint32_t
+im	mindgrove_serial.c	/^  uint8_t   im;       \/* Interrupt mask state *\/$/;"	m	struct:up_dev_s	typeref:typename:uint8_t	file:
+interrupt_arg	plic_driver.c	/^void *interrupt_arg[PLIC_MAX_INTERRUPT_SRC];$/;"	v	typeref:typename:void * []
+interrupt_data_t	plic.h	/^} interrupt_data_t;$/;"	t	typeref:struct:__anon14fe60e30208
+interrupt_id	plic.h	/^  uint32_t interrupt_id; \/\/id of the interrupt target source.$/;"	m	struct:__anon14fe60e30308	typeref:typename:uint32_t
+interrupt_status_e	plic.h	/^}interrupt_status_e;$/;"	t	typeref:enum:__anon14fe60e30103
+irq	mindgrove_serial.c	/^  uint8_t   irq;      \/* IRQ associated with this UART *\/$/;"	m	struct:up_dev_s	typeref:typename:uint8_t	file:
+isr_table	plic_driver.c	/^plic_fptr_t isr_table[PLIC_MAX_INTERRUPT_SRC];$/;"	v	typeref:typename:plic_fptr_t[]
+mindgrove_clint_time_cmp_read	mindgrove_timerisr.c	/^static inline uint64_t mindgrove_clint_time_cmp_read(void)$/;"	f	typeref:typename:uint64_t	file:
+mindgrove_clint_time_cmp_write	mindgrove_timerisr.c	/^static inline void mindgrove_clint_time_cmp_write(uint64_t v)$/;"	f	typeref:typename:void	file:
+mindgrove_clint_time_read	mindgrove_timerisr.c	/^static inline uint64_t mindgrove_clint_time_read(void)$/;"	f	typeref:typename:uint64_t	file:
+mindgrove_clockconfig	mindgrove_clockconfig.c	/^void mindgrove_clockconfig(void)$/;"	f	typeref:typename:void
+mindgrove_get_hfclk	mindgrove_clockconfig.c	/^uint64_t mindgrove_get_hfclk(void)$/;"	f	typeref:typename:uint64_t
+mindgrove_lowsetup	mindgrove_lowputc.c	/^void mindgrove_lowsetup(void)$/;"	f	typeref:typename:void
+mindgrove_reload_mtimecmp	mindgrove_timerisr.c	/^static void mindgrove_reload_mtimecmp(void)$/;"	f	typeref:typename:void	file:
+mindgrove_timerisr	mindgrove_timerisr.c	/^static int mindgrove_timerisr(int irq, void *context, void *arg)$/;"	f	typeref:typename:int	file:
+output_reg	secure_iot_reg.h	/^      __IOM uint16_t output_reg;$/;"	m	struct:__anonbdd9aeea1308	typeref:typename:__IOM uint16_t
+plic_fptr_t	plic.h	/^typedef void (*plic_fptr_t) (uint64_t);$/;"	t	typeref:typename:void (*)(uint64_t)
+priority	plic.h	/^	uint32_t priority; \/*priority assigned to it*\/$/;"	m	struct:__anon14fe60e30208	typeref:typename:uint32_t
+priority_value	plic.h	/^  uint32_t priority_value;\/\/priority assigned to it.$/;"	m	struct:__anon14fe60e30308	typeref:typename:uint32_t
+qspi_Data	secure_iot_reg.h	/^  } qspi_Data;$/;"	t	typeref:union:__anonbdd9aeea370a
+reserved1	secure_iot_reg.h	/^      uint16_t reserved1;$/;"	m	struct:__anonbdd9aeea1308	typeref:typename:uint16_t
+riscv_ack_irq	mindgrove_irq.c	/^void riscv_ack_irq(int irq)$/;"	f	typeref:typename:void
+riscv_dispatch_irq	mindgrove_irq_dispatch.c	/^void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)$/;"	f	typeref:typename:void *
+riscv_earlyserialinit	mindgrove_serial.c	/^void riscv_earlyserialinit(void)$/;"	f	typeref:typename:void
+riscv_get_newintctx	mindgrove_irq.c	/^uintptr_t riscv_get_newintctx(void)$/;"	f	typeref:typename:uintptr_t
+riscv_lowputc	mindgrove_lowputc.c	/^void riscv_lowputc(char ch)$/;"	f	typeref:typename:void
+riscv_serialinit	mindgrove_serial.c	/^void riscv_serialinit(void)$/;"	f	typeref:typename:void
+short	secure_iot_reg.h	/^              unsigned short            : 1;$/;"	m	struct:__anonbdd9aeea0c08::__anonbdd9aeea0f0a::__anonbdd9aeea1008	typeref:typename:unsigned:1
+short	secure_iot_reg.h	/^              unsigned short            : 7;$/;"	m	struct:__anonbdd9aeea0c08::__anonbdd9aeea0d0a::__anonbdd9aeea0e08	typeref:typename:unsigned:7
+short	secure_iot_reg.h	/^              unsigned short            : 7;$/;"	m	struct:__anonbdd9aeea0c08::__anonbdd9aeea110a::__anonbdd9aeea1208	typeref:typename:unsigned:7
+short	secure_iot_reg.h	/^              unsigned short            : 9;$/;"	m	struct:__anonbdd9aeea0c08::__anonbdd9aeea0f0a::__anonbdd9aeea1008	typeref:typename:unsigned:9
+showprogress	mindgrove_start.c	/^ #  define showprogress(/;"	d	file:
+state	plic.h	/^	interrupt_status_e state; \/*state of the interrupt*\/$/;"	m	struct:__anon14fe60e30208	typeref:typename:interrupt_status_e
+uartbase	mindgrove_serial.c	/^  uintptr_t uartbase; \/* Base address of UART registers *\/$/;"	m	struct:up_dev_s	typeref:typename:uintptr_t	file:
+up_attach	mindgrove_serial.c	/^static int up_attach(struct uart_dev_s *dev)$/;"	f	typeref:typename:int	file:
+up_detach	mindgrove_serial.c	/^static void up_detach(struct uart_dev_s *dev)$/;"	f	typeref:typename:void	file:
+up_dev_s	mindgrove_serial.c	/^struct up_dev_s$/;"	s	file:
+up_disable_irq	mindgrove_irq.c	/^void up_disable_irq(int irq)$/;"	f	typeref:typename:void
+up_disableuartint	mindgrove_serial.c	/^static void up_disableuartint(struct up_dev_s *priv, uint8_t *im)$/;"	f	typeref:typename:void	file:
+up_enable_irq	mindgrove_irq.c	/^void up_enable_irq(int irq)$/;"	f	typeref:typename:void
+up_idle	mindgrove_idle.c	/^void up_idle(void)$/;"	f	typeref:typename:void
+up_interrupt	mindgrove_serial.c	/^static int up_interrupt(int irq, void *context, void *arg)$/;"	f	typeref:typename:int	file:
+up_ioctl	mindgrove_serial.c	/^static int up_ioctl(struct file *filep, int cmd, unsigned long arg)$/;"	f	typeref:typename:int	file:
+up_irq_enable	mindgrove_irq.c	/^irqstate_t up_irq_enable(void)$/;"	f	typeref:typename:irqstate_t
+up_irqinitialize	mindgrove_irq.c	/^void up_irqinitialize(void)$/;"	f	typeref:typename:void
+up_putc	mindgrove_serial.c	/^int up_putc(int ch)$/;"	f	typeref:typename:int
+up_putc	mindgrove_serial.c	/^void up_putc(int ch)$/;"	f	typeref:typename:void
+up_receive	mindgrove_serial.c	/^static int up_receive(struct uart_dev_s *dev, unsigned int *status)$/;"	f	typeref:typename:int	file:
+up_restoreuartint	mindgrove_serial.c	/^static void up_restoreuartint(struct up_dev_s *priv, uint8_t im)$/;"	f	typeref:typename:void	file:
+up_rxavailable	mindgrove_serial.c	/^static bool up_rxavailable(struct uart_dev_s *dev)$/;"	f	typeref:typename:bool	file:
+up_rxint	mindgrove_serial.c	/^static void up_rxint(struct uart_dev_s *dev, bool enable)$/;"	f	typeref:typename:void	file:
+up_send	mindgrove_serial.c	/^static void up_send(struct uart_dev_s *dev, int ch)$/;"	f	typeref:typename:void	file:
+up_serialin	mindgrove_serial.c	/^static uint32_t up_serialin(struct up_dev_s *priv, int offset)$/;"	f	typeref:typename:uint32_t	file:
+up_serialout	mindgrove_serial.c	/^static void up_serialout(struct up_dev_s *priv, int offset, uint32_t value)$/;"	f	typeref:typename:void	file:
+up_setup	mindgrove_serial.c	/^static int up_setup(struct uart_dev_s *dev)$/;"	f	typeref:typename:int	file:
+up_shutdown	mindgrove_serial.c	/^static void up_shutdown(struct uart_dev_s *dev)$/;"	f	typeref:typename:void	file:
+up_timer_initialize	mindgrove_timerisr.c	/^void up_timer_initialize(void)$/;"	f	typeref:typename:void
+up_txempty	mindgrove_serial.c	/^static bool up_txempty(struct uart_dev_s *dev)$/;"	f	typeref:typename:bool	file:
+up_txint	mindgrove_serial.c	/^static void up_txint(struct uart_dev_s *dev, bool enable)$/;"	f	typeref:typename:void	file:
+up_txready	mindgrove_serial.c	/^static bool up_txready(struct uart_dev_s *dev)$/;"	f	typeref:typename:bool	file:

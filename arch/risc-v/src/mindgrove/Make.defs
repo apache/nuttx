@@ -1,0 +1,9 @@
+# Specify our HEAD assembly file.  This will be linked as
+# the first object file, so it will appear at address 0
+include common/Make.defs
+HEAD_ASRC = start.S
+
+# Specify our C code within this directory to be included
+CHIP_CSRCS  = mindgrove_lowputc.c mindgrove_start.c mindgrove_irq_dispatch.c
+CHIP_CSRCS += mindgrove_idle.c mindgrove_irq.c mindgrove_serial.c mindgrove_clockconfig.c
+CHIP_CSRCS += plic_driver.c mindgrove_timerisr.c 
