@@ -62,55 +62,58 @@ int sysinfo(FAR struct sysinfo *info)
 #if defined(MM_KERNEL_USRHEAP_INIT) || defined(CONFIG_MM_KERNEL_HEAP)
   struct mallinfo minfo;
 #endif
+  int ret = OK;
 
-  if (info == NULL)
+  if (info != NULL)
     {
-      set_errno(EINVAL);
-      return -1;
-    }
-
-  memset(info, 0, sizeof(*info));
+      memset(info, 0, sizeof(*info));
 
 #ifndef CONFIG_SCHED_CPULOAD_NONE
-  clock_cpuload(0, &cpuload);
+      clock_cpuload(0, &cpuload);
 
-  /* On the simulator, you may hit cpuload.total == 0, but probably never
-   * on real hardware.
-   */
+      /* On the simulator, you may hit cpuload.total == 0, but probably never
+       * on real hardware.
+       */
 
-  if (cpuload.total)
-    {
-      info->loads[0] = ((cpuload.total - cpuload.active) <<
-                         SI_LOAD_SHIFT) / cpuload.total;
-      info->loads[1] = info->loads[0];
-      info->loads[2] = info->loads[0];
-    }
+      if (cpuload.total)
+        {
+          info->loads[0] = ((cpuload.total - cpuload.active) <<
+                            SI_LOAD_SHIFT) / cpuload.total;
+          info->loads[1] = info->loads[0];
+          info->loads[2] = info->loads[0];
+        }
 #endif
 
 #ifdef MM_KERNEL_USRHEAP_INIT
-  minfo = kumm_mallinfo();
+      minfo = kumm_mallinfo();
 
-  info->totalram += minfo.arena;
-  info->freeram  += minfo.fordblks;
+      info->totalram += minfo.arena;
+      info->freeram  += minfo.fordblks;
 #endif
 
 #ifdef CONFIG_MM_KERNEL_HEAP
-  minfo = kmm_mallinfo();
+      minfo = kmm_mallinfo();
 
-  info->totalram += minfo.arena;
-  info->freeram  += minfo.fordblks;
+      info->totalram += minfo.arena;
+      info->freeram  += minfo.fordblks;
 #endif
 
 #ifdef CONFIG_MM_PGALLOC
-  mm_pginfo(&pginfo);
+      mm_pginfo(&pginfo);
 
-  info->totalram += pginfo.ntotal << MM_PGSHIFT;
-  info->freeram  += pginfo.nfree  << MM_PGSHIFT;
+      info->totalram += pginfo.ntotal << MM_PGSHIFT;
+      info->freeram  += pginfo.nfree  << MM_PGSHIFT;
 #endif
 
-  info->uptime   = TICK2SEC(clock_systime_ticks());
-  info->procs    = CONFIG_SMP_NCPUS;
-  info->mem_unit = 1;
+      info->uptime   = TICK2SEC(clock_systime_ticks());
+      info->procs    = CONFIG_SMP_NCPUS;
+      info->mem_unit = 1;
+    }
+  else
+    {
+      set_errno(EINVAL);
+      ret = -1;
+    }
 
-  return 0;
+  return ret;
 }
