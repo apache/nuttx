@@ -78,21 +78,46 @@
 /* reserved for 32-bit pointer: 0x0008 */
 #define RT_FLAG_FUNC_ARM_NONSEC 0x0010
 
-#define BOOTROM_FUNC_TABLE_OFFSET 0x14
-
-#define BOOTROM_IS_A2() ((*(volatile uint8_t *)0x13) == 2)
-#define BOOTROM_WELL_KNOWN_PTR_SIZE (BOOTROM_IS_A2() ? 2 : 4)
-
-#if defined(__riscv)
+#define BOOTROM_WELL_KNOWN_PTR_SIZE 2
 #define BOOTROM_ENTRY_OFFSET            0x7dfc
 #define BOOTROM_TABLE_LOOKUP_ENTRY_OFFSET (BOOTROM_ENTRY_OFFSET - BOOTROM_WELL_KNOWN_PTR_SIZE)
 #define BOOTROM_TABLE_LOOKUP_OFFSET     (BOOTROM_ENTRY_OFFSET - BOOTROM_WELL_KNOWN_PTR_SIZE*2)
-#else
-#define BOOTROM_VTABLE_OFFSET 0x00
-#define BOOTROM_TABLE_LOOKUP_OFFSET     (BOOTROM_FUNC_TABLE_OFFSET + BOOTROM_WELL_KNOWN_PTR_SIZE)
-#endif
 
 #define ROM_TABLE_CODE(c1, c2) ((c1) | ((c2) << 8))
+
+#define REBOOT2_TYPE_MASK  0x0f
+
+/* note these match REBOOT_TYPE  */
+
+/* values 0-7 are secure/non-secure */
+#define REBOOT2_FLAG_REBOOT_TYPE_NORMAL       0x0 /* param0 = diagnostic partition */
+#define REBOOT2_FLAG_REBOOT_TYPE_BOOTSEL      0x2 /* param0 = gpio_pin_number, param1 = flags */
+#define REBOOT2_FLAG_REBOOT_TYPE_RAM_IMAGE    0x3 /* param0 = image_region_base, param1 = image_region_size */
+#define REBOOT2_FLAG_REBOOT_TYPE_FLASH_UPDATE 0x4 /* param0 = update_base */
+
+/* values 8-15 are secure only */
+#define REBOOT2_FLAG_REBOOT_TYPE_PC_SP        0xd
+
+#define REBOOT2_FLAG_REBOOT_TO_ARM            0x10
+#define REBOOT2_FLAG_REBOOT_TO_RISCV          0x20
+
+#define REBOOT2_FLAG_NO_RETURN_ON_SUCCESS    0x100
+
+#define BOOTSEL_FLAG_DISABLE_MSD_INTERFACE      0x01
+#define BOOTSEL_FLAG_DISABLE_PICOBOOT_INTERFACE 0x02
+#define BOOTSEL_FLAG_GPIO_PIN_ACTIVE_LOW        0x10
+#define BOOTSEL_FLAG_GPIO_PIN_SPECIFIED         0x20
+
+#define PICOBOOT_GET_INFO_SYS              1
+#define PICOBOOT_GET_INFO_PARTTION_TABLE   2
+#define PICOBOOT_GET_INFO_UF2_TARGET_PARTITION 3
+#define PICOBOOT_GET_INFO_UF2_STATUS       4
+
+#define UF2_STATUS_IGNORED_FAMILY             0x01
+#define UF2_STATUS_ABORT_EXCLUSIVELY_LOCKED   0x10
+#define UF2_STATUS_ABORT_BAD_ADDRESS          0x20
+#define UF2_STATUS_ABORT_WRITE_ERROR          0x40
+#define UF2_STATUS_ABORT_REBOOT_FAILED        0x80
 
 /****************************************************************************
  * Public Type Definitions
@@ -100,31 +125,13 @@
 
 typedef void *(*rom_table_lookup_fn)(uint32_t code, uint32_t mask);
 
-static __inline void *rom_func_lookup(uint32_t code)
+typedef int (*rom_reboot_fn)(uint32_t flags, uint32_t delay_ms,
+              uint32_t p0, uint32_t p1);
+
+static void *rom_func_lookup(uint32_t code)
 {
-#ifdef __riscv
-  uint32_t rom_offset_adjust = rom_size_is_64k() ? 32 * 1024 : 0;
-
-  /* on RISC-V the code (a jmp) is actually embedded in the table */
-
-  rom_table_lookup_fn rom_table_lookup = (rom_table_lookup_fn) (uintptr_t)
-    *(uint16_t *)(BOOTROM_TABLE_LOOKUP_ENTRY_OFFSET + rom_offset_adjust);
+  rom_table_lookup_fn rom_table_lookup = (rom_table_lookup_fn)(uintptr_t)
+    *(uint16_t *)(BOOTROM_TABLE_LOOKUP_ENTRY_OFFSET);
 
   return rom_table_lookup(code, RT_FLAG_FUNC_RISCV);
-#else
-  /* on ARM the function pointer is stored in the table, so we dereference
-   * it via lookup() rather than lookup_entry()
-   */
-
-  rom_table_lookup_fn rom_table_lookup = (rom_table_lookup_fn) (uintptr_t)
-    *(uint16_t *)(BOOTROM_TABLE_LOOKUP_OFFSET);
-  if (pico_processor_state_is_nonsecure())
-    {
-      return rom_table_lookup(code, RT_FLAG_FUNC_ARM_NONSEC);
-    }
-  else
-    {
-      return rom_table_lookup(code, RT_FLAG_FUNC_ARM_SEC);
-    }
-#endif
 }
