@@ -165,6 +165,85 @@ static void vhost_defered_probe_work(FAR void *arg)
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: vhost_get_next_buffer
+ ****************************************************************************/
+
+FAR void *vhost_get_next_buffer(FAR struct virtqueue *vq, uint16_t idx,
+                                FAR uint16_t *next_idx,
+                                FAR uint32_t *next_len)
+{
+  FAR void *buffer;
+  uint16_t next;
+
+  VRING_INVALIDATE(&vq->vq_ring.desc[idx], sizeof(vq->vq_ring.desc[idx]));
+  if (((vq->vq_ring.desc[idx].flags) & VRING_DESC_F_NEXT) == 0)
+    {
+      return NULL;
+    }
+
+  next = vq->vq_ring.desc[idx].next;
+  if (next_idx != NULL)
+    {
+      *next_idx = next;
+    }
+
+  VRING_INVALIDATE(&vq->vq_ring.desc[next], sizeof(vq->vq_ring.desc[next]));
+  buffer = virtqueue_phys_to_virt(vq, vq->vq_ring.desc[next].addr);
+  if (next_len != NULL)
+    {
+      *next_len = vq->vq_ring.desc[next].len;
+    }
+
+  return buffer;
+}
+
+/****************************************************************************
+ * Name: vhost_get_vq_buf
+ ****************************************************************************/
+
+int vhost_get_vq_buffers(FAR struct virtqueue *vq,
+                         FAR struct virtqueue_buf *vb, size_t vbsize,
+                         FAR size_t *vbcnt)
+{
+  FAR void *buf;
+  uint16_t head;
+  uint16_t idx;
+  uint32_t len;
+  size_t i;
+
+  DEBUGASSERT(vb != NULL && vbsize >= 1 && vbcnt != NULL);
+
+  buf = virtqueue_get_available_buffer(vq, &head, &len);
+  if (buf == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  vb[0].buf = buf;
+  vb[0].len = len;
+
+  for (i = 1, idx = head; ; i++)
+    {
+      buf = vhost_get_next_buffer(vq, idx, &idx, &len);
+      if (buf == NULL)
+        {
+          break;
+        }
+      else if (i >= vbsize)
+        {
+          vhosterr("vbsize %zu is not enough\n", vbsize);
+          return -EINVAL;
+        }
+
+      vb[i].buf = buf;
+      vb[i].len = len;
+    }
+
+  *vbcnt = i;
+  return head;
+}
+
+/****************************************************************************
  * Name: vhost_register_driver
  ****************************************************************************/
 
