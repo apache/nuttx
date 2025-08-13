@@ -51,6 +51,7 @@
 FAR struct fdlist *nxsched_get_fdlist_from_tcb(FAR struct tcb_s *tcb)
 {
   FAR struct task_group_s *group = tcb->group;
+  FAR struct fdlist *ret = NULL;
 
   /* The group may be NULL under certain conditions.  For example, if
    * debug output is attempted from the IDLE thead before the group has
@@ -60,12 +61,12 @@ FAR struct fdlist *nxsched_get_fdlist_from_tcb(FAR struct tcb_s *tcb)
 
   if (group)
     {
-      return &group->tg_fdlist;
+      ret = &group->tg_fdlist;
     }
 
   /* Higher level logic must handle the NULL gracefully */
 
-  return NULL;
+  return ret;
 }
 
 /****************************************************************************
