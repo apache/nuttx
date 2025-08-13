@@ -353,6 +353,7 @@ ifeq ($(CONFIG_ARCH_TOOLCHAIN_CLANG),y)
   LD      = $(CROSSDEV)clang
   STRIP   = $(CROSSDEV)llvm-strip --strip-unneeded
   AR      = $(CROSSDEV)llvm-ar rcs
+  UNAR    = $(CROSSDEV)llvm-ar x
   NM      = $(CROSSDEV)llvm-nm
   OBJCOPY = $(CROSSDEV)llvm-objcopy
   OBJDUMP = $(CROSSDEV)llvm-objdump
@@ -377,6 +378,7 @@ else
   OBJDUMP = $(CROSSDEV)objdump
   LD      = $(CROSSDEV)ld
   AR      = $(CROSSDEV)ar rcs
+  UNAR    = $(CROSSDEV)ar x
   NM      = $(CROSSDEV)nm
 
 # Link Time Optimization

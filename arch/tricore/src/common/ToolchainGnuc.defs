@@ -111,6 +111,7 @@ CPP     = $(CROSSDEV)tricore-elf-gcc -E -P -x c
 LD      = $(CROSSDEV)tricore-elf-gcc
 STRIP   = $(CROSSDEV)tricore-elf-strip --strip-unneeded
 AR      = $(CROSSDEV)tricore-elf-gcc-ar rcs
+UNAR    = $(CROSSDEV)tricore-elf-gcc-ar x
 NM      = $(CROSSDEV)tricore-elf-gcc-nm
 OBJCOPY = $(CROSSDEV)tricore-elf-objcopy
 OBJDUMP = $(CROSSDEV)tricore-elf-objdump
