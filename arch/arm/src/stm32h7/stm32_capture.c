@@ -59,15 +59,7 @@
  * intended for some other purpose.
  */
 
-#if defined(CONFIG_STM32H7_TIM1_CAP)  || defined(CONFIG_STM32H7_TIM2_CAP)  || \
-    defined(CONFIG_STM32H7_TIM3_CAP)  || defined(CONFIG_STM32H7_TIM4_CAP)  || \
-    defined(CONFIG_STM32H7_TIM5_CAP)  || defined(CONFIG_STM32H7_TIM8_CAP)  || \
-    defined(CONFIG_STM32H7_TIM12_CAP) || defined(CONFIG_STM32H7_TIM13_CAP) || \
-    defined(CONFIG_STM32H7_TIM14_CAP) || defined(CONFIG_STM32H7_TIM15_CAP) || \
-    defined(CONFIG_STM32H7_TIM16_CAP) || defined(CONFIG_STM32H7_TIM17_CAP) || \
-    defined(CONFIG_STM32H7_LPTIM1_CAP) || defined(CONFIG_STM32H7_LPTIM2_CAP) || \
-    defined(CONFIG_STM32H7_LPTIM3_CAP) || defined(CONFIG_STM32H7_LPTIM4_CAP) || \
-    defined(CONFIG_STM32H7_LPTIM5_CAP)
+#if defined(CONFIG_STM32H7_TIMX_CAP)
 
 /* Check if any channel is enabled.
  * This is done to simplify the logic below.
