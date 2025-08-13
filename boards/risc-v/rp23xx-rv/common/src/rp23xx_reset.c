@@ -29,6 +29,7 @@
 
 #include <hardware/rp23xx_watchdog.h>
 #include "hardware/rp23xx_psm.h"
+#include "rp23xx_rom.h"
 
 #ifdef CONFIG_BOARDCTL_RESET
 
@@ -60,11 +61,20 @@ int board_reset(int status)
 {
   syslog(LOG_INFO, "reboot status=%d\n", status);
 
-  putreg32(RP23XX_PSM_WDSEL_BITS & ~(RP23XX_PSM_XOSC | RP23XX_PSM_ROSC),
-           RP23XX_PSM_WDSEL);
+  rom_reboot_fn reboot = (rom_reboot_fn)rom_func_lookup(ROM_FUNC_REBOOT);
 
-  putreg32(RP23XX_WATCHDOG_ENABLE_BITS | RP23XX_WATCHDOG_CTRL_TRIGGER,
-           RP23XX_WATCHDOG_CTRL);
+  if (status == 3)
+    {
+      reboot(REBOOT2_FLAG_REBOOT_TYPE_BOOTSEL |
+             REBOOT2_FLAG_NO_RETURN_ON_SUCCESS,
+          10, 0, 0);
+    }
+  else
+    {
+      reboot(REBOOT2_FLAG_REBOOT_TYPE_NORMAL |
+             REBOOT2_FLAG_NO_RETURN_ON_SUCCESS,
+          10, 0, 0);
+    }
 
   /* Wait for the reset */
 
