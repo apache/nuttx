@@ -37,7 +37,8 @@
  ****************************************************************************/
 
 static spinlock_t g_irqlock = SP_UNLOCKED;
-#ifdef CONFIG_ARCH_MINIMAL_VECTORTABLE_DYNAMIC
+#if defined(CONFIG_ARCH_MINIMAL_VECTORTABLE_DYNAMIC) && \
+    !defined(CONFIG_ARCH_IRQ_TO_NDX)
 static int g_irqmap_count = 1;
 #endif
 
@@ -56,7 +57,9 @@ static int g_irqmap_count = 1;
  * declaration is here for the time being.
  */
 
+#  if !defined(CONFIG_ARCH_IRQ_TO_NDX)
 irq_mapped_t g_irqmap[NR_IRQS];
+#  endif
 int g_irqrevmap[CONFIG_ARCH_NUSER_INTERRUPTS];
 #endif
 
@@ -64,7 +67,8 @@ int g_irqrevmap[CONFIG_ARCH_NUSER_INTERRUPTS];
  * Public Functions
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_MINIMAL_VECTORTABLE_DYNAMIC
+#if defined(CONFIG_ARCH_MINIMAL_VECTORTABLE_DYNAMIC) && \
+    !defined(CONFIG_ARCH_IRQ_TO_NDX)
 int irq_to_ndx(int irq)
 {
   DEBUGASSERT(g_irqmap_count < CONFIG_ARCH_NUSER_INTERRUPTS);
@@ -80,7 +84,8 @@ int irq_to_ndx(int irq)
   spin_unlock_irqrestore(&g_irqlock, flags);
   return g_irqmap[irq];
 }
-#elif defined(CONFIG_ARCH_MINIMAL_VECTORTABLE)
+#elif defined(CONFIG_ARCH_MINIMAL_VECTORTABLE) && \
+      !defined(CONFIG_ARCH_IRQ_TO_NDX)
 int ndx_to_irq(int ndx)
 {
   int i;

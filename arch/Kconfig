@@ -1296,6 +1296,19 @@ config ARCH_MINIMAL_VECTORTABLE_DYNAMIC
 	---help---
 		Use a minimum amount of RAM for the vector table.
 
+config ARCH_IRQ_TO_NDX
+	bool "IRQ to index mapping"
+	default n
+	depends on ARCH_MINIMAL_VECTORTABLE_DYNAMIC
+	---help---
+		Use architecture-specific up_irq_to_ndx() interface to map IRQ
+		numbers to vector table indices, instead of using a RAM-based
+		g_irqmap[] array.
+
+		This feature allows architectures to leverage hardware resources
+		(such as registers or other storage) to maintain the IRQ-to-index
+		mapping, significantly reducing RAM usage.
+
 config ARCH_NUSER_INTERRUPTS
 	int "Number of interrupts"
 	default 0
