@@ -2155,12 +2155,6 @@ config SENSORS_TMP112
 
 if SENSORS_TMP112
 
-config TMP112_I2C_BUS
-	int "I2C Bus number"
-	default 1
-	---help---
-		The number of the I2C bus that this sensor is connected to.
-
 config TMP112_I2C_FREQUENCY
 	int "TMP112 I2C frequency"
 	default 400000
