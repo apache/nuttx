@@ -327,7 +327,7 @@ static ssize_t tmp112_write(FAR struct file *filep, FAR const char *buffer,
  *
  ****************************************************************************/
 
-int tmp112_register(FAR const char *devpath, const uint8_t devnum,
+int tmp112_register(FAR const char *devpath, uint8_t devnum,
                     FAR struct i2c_master_s *i2c)
 {
   FAR struct tmp112_dev_s   *priv;
