@@ -361,7 +361,7 @@ static void rptun_uninit_carveout(FAR struct virtio_device *vdev)
 {
   FAR struct rptun_carveout_s *carveout = vdev->mm_priv;
 
-  if (vdev->role == VIRTIO_DEV_DEVICE)
+  if (carveout == NULL || vdev->role == VIRTIO_DEV_DEVICE)
     {
       return;
     }
@@ -385,6 +385,44 @@ rptun_get_carveout_memory(FAR struct rptun_priv_s *priv,
   return remoteproc_mmap(&priv->rproc, NULL, &da, carveout->len, 0, NULL);
 }
 
+static void rptun_update_vring_da(FAR struct remoteproc *rproc,
+                                  FAR struct fw_rsc_vdev *vdev_rsc,
+                                  unsigned int role, FAR char **shmbase,
+                                  size_t *shmlen)
+{
+  uint8_t i;
+
+  if (role != VIRTIO_DEV_DRIVER)
+    {
+      return;
+    }
+
+  /* Calculate the da of all vrings and assign back to the resource table */
+
+  for (i = 0; i < vdev_rsc->num_of_vrings; i++)
+    {
+      FAR struct fw_rsc_vdev_vring *vring = &vdev_rsc->vring[i];
+      metal_phys_addr_t vring_da = METAL_BAD_PHYS;
+      metal_phys_addr_t vring_pa;
+      uint32_t vring_sz;
+
+      vring_sz = ALIGN_UP(vring_size(vring->num, vring->align),
+                          vring->align);
+      vring_pa = metal_io_virt_to_phys(metal_io_get_region(), *shmbase);
+      remoteproc_mmap(rproc, &vring_pa, &vring_da, vring_sz, 0, NULL);
+
+      rptuninfo("vr[%u] shm=%p len=%zu da=0x%lx pa=0x%lx sz=%" PRIu32 "\n",
+                i, *shmbase, *shmlen, vring_da, vring_pa, vring_sz);
+
+      if (vring->da == 0 || vring->da == FW_RSC_U32_ADDR_ANY)
+        {
+          vring->da = vring_da;
+          *shmbase += vring_sz;
+          *shmlen  -= vring_sz;
+        }
+    }
+}
+
 /****************************************************************************
  * Name: rptun_create_device
  ****************************************************************************/
@@ -393,7 +431,7 @@ static int rptun_create_device(FAR struct rptun_priv_s *priv,
                                FAR struct virtio_device **vdev_, int index)
 {
   FAR struct remoteproc *rproc = &priv->rproc;
-  FAR struct fw_rsc_carveout *carveout_rsc;
+  FAR struct fw_rsc_carveout *carveout_rsc = NULL;
   FAR struct fw_rsc_vdev *vdev_rsc;
   FAR struct remoteproc_virtio *rvdev;
   FAR struct virtio_device *vdev;
@@ -403,7 +441,6 @@ static int rptun_create_device(FAR struct rptun_priv_s *priv,
   unsigned int role;
   size_t shmlen;
   size_t off;
-  uint8_t i;
   int ret;
 
   off = find_rsc(rsc, RSC_VDEV, index);
@@ -414,24 +451,7 @@ static int rptun_create_device(FAR struct rptun_priv_s *priv,
 
   vdev_rsc = (FAR struct fw_rsc_vdev *)(rsc + off);
 
-  off = find_rsc(rsc, RSC_CARVEOUT, index);
-  if (off == 0)
-    {
-      return -EINVAL;
-    }
-
-  carveout_rsc = (FAR struct fw_rsc_carveout *)(rsc + off);
-
-  /* Get virtio device role from virtio device resource table */
-
-  role = RPTUN_IS_MASTER(priv->dev) ^
-         (vdev_rsc->reserved[0] == VIRTIO_DEV_DRIVER);
-
-  if (role == VIRTIO_DEV_DEVICE &&
-      !(vdev_rsc->status & VIRTIO_CONFIG_STATUS_DRIVER_OK))
-    {
-      return -EAGAIN;
-    }
+  /* Check that this virtio device/driver is not created before */
 
   metal_mutex_acquire(&rproc->lock);
   metal_list_for_each(&rproc->vdevs, node)
@@ -446,35 +466,36 @@ static int rptun_create_device(FAR struct rptun_priv_s *priv,
 
   metal_mutex_release(&rproc->lock);
 
-  /* Get share memory from carveout resource table */
+  /* Get virtio device role from virtio device resource table */
 
-  shmbase = rptun_get_carveout_memory(priv, carveout_rsc, &shmlen);
-  DEBUGASSERT(shmbase != NULL);
+  role = RPTUN_IS_MASTER(priv->dev) ^
+         (vdev_rsc->reserved[0] == VIRTIO_DEV_DRIVER);
 
-  /* Calculate the da of all vrings and assign back to the resource table */
-
-  for (i = 0; i < vdev_rsc->num_of_vrings; i++)
+  if (role == VIRTIO_DEV_DEVICE &&
+      !(vdev_rsc->status & VIRTIO_CONFIG_STATUS_DRIVER_OK))
     {
-      FAR struct fw_rsc_vdev_vring *vring = &vdev_rsc->vring[i];
-      metal_phys_addr_t vring_da = METAL_BAD_PHYS;
-      metal_phys_addr_t vring_pa;
-      uint32_t vring_sz;
+      return -EAGAIN;
+    }
 
-      vring_sz = ALIGN_UP(vring_size(vring->num, vring->align),
-                          vring->align);
-      vring_pa = metal_io_virt_to_phys(metal_io_get_region(), shmbase);
-      remoteproc_mmap(rproc, &vring_pa, &vring_da, vring_sz, 0, NULL);
+  /* If provided the carveout, init the vring->da (driver side) and init
+   * a share memory heap based on the carveout defined memory region.
+   * Note: do not return error because the carveout is optional for the
+   * virtio device side.
+   */
 
-      rptuninfo("vr[%u] shm=%p len=%zu, da=0x%lx pa=0x%lx sz=%" PRIu32 "\n",
-                i, shmbase, shmlen, vring_da, vring_pa, vring_sz);
+  off = find_rsc(rsc, RSC_CARVEOUT, index);
+  if (off != 0)
+    {
+      carveout_rsc = (FAR struct fw_rsc_carveout *)(rsc + off);
 
-      if ((vring->da == 0 || vring->da == FW_RSC_U32_ADDR_ANY) &&
-          role == VIRTIO_DEV_DRIVER)
-        {
-          vring->da = vring_da;
-          shmbase  += vring_sz;
-          shmlen   -= vring_sz;
-        }
+      /* Get share memory from carveout resource table */
+
+      shmbase = rptun_get_carveout_memory(priv, carveout_rsc, &shmlen);
+      DEBUGASSERT(shmbase != NULL);
+
+      /* Update the vring->da address for driver if needed  */
+
+      rptun_update_vring_da(rproc, vdev_rsc, role, &shmbase, &shmlen);
     }
 
   vdev = remoteproc_create_virtio(rproc, index, role, NULL);
@@ -489,11 +510,15 @@ static int rptun_create_device(FAR struct rptun_priv_s *priv,
       goto err;
     }
 
-  ret = rptun_init_carveout(priv, vdev, (FAR const char *)carveout_rsc->name,
-                            shmbase, shmlen);
-  if (ret < 0)
+  if (carveout_rsc != NULL)
     {
-      goto err;
+      ret = rptun_init_carveout(priv, vdev,
+                                (FAR const char *)carveout_rsc->name,
+                                shmbase, shmlen);
+      if (ret < 0)
+        {
+          goto err;
+        }
     }
 
   *vdev_ = vdev;
