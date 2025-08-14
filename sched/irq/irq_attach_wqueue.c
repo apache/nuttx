@@ -80,7 +80,7 @@ inline_function FAR struct kwork_wqueue_s *irq_get_wqueue(int priority)
   int i;
 
   nxmutex_lock(&irq_wqueue_lock);
-  for (i = 0; irq_wqueue[i] != NULL && i < CONFIG_IRQ_NWORKS; i++)
+  for (i = 0; i < CONFIG_IRQ_NWORKS && irq_wqueue[i] != NULL; i++)
     {
       wqueue_priority = work_queue_priority_wq(irq_wqueue[i]);
       DEBUGASSERT(wqueue_priority >= SCHED_PRIORITY_MIN &&
@@ -93,10 +93,14 @@ inline_function FAR struct kwork_wqueue_s *irq_get_wqueue(int priority)
         }
     }
 
-  DEBUGASSERT(i < CONFIG_IRQ_NWORKS);
+  if (i < CONFIG_IRQ_NWORKS && queue == NULL)
+    {
+      queue = work_queue_create("isrwork", priority, irq_work_stack[i],
+                                CONFIG_IRQ_WORK_STACKSIZE, 1);
 
-  queue = work_queue_create("isrwork", priority, irq_work_stack[i],
-                            CONFIG_IRQ_WORK_STACKSIZE, 1);
+      irq_wqueue[i] = queue;
+      nxmutex_unlock(&irq_wqueue_lock);
+    }
 
   irq_wqueue[i] = queue;
   nxmutex_unlock(&irq_wqueue_lock);
