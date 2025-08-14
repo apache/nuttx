@@ -58,9 +58,8 @@ static int profil_timer_handler_cpu(FAR void *arg);
  * Private Data
  ****************************************************************************/
 
-static struct profinfo_s g_prof;
-
 #ifdef CONFIG_SMP
+static struct profinfo_s g_prof;
 static struct smp_call_data_s g_call_data =
 SMP_CALL_INITIALIZER(profil_timer_handler_cpu, &g_prof);
 #endif
@@ -137,6 +136,9 @@ static void profil_timer_handler(wdparm_t arg)
 int profil(FAR unsigned short *buf, size_t bufsiz,
            size_t offset, unsigned int scale)
 {
+#ifndef CONFIG_SMP
+  static struct profinfo_s g_prof;
+#endif
   FAR struct profinfo_s *prof = &g_prof;
   irqstate_t flags;
   uintptr_t highpc;
