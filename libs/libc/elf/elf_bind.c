@@ -32,6 +32,7 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/cache.h>
 #include <nuttx/elf.h>
 #include <nuttx/lib/elf.h>
