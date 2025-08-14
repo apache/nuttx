@@ -81,39 +81,6 @@ static const struct file_operations g_tmp112fops =
  * Private Functions
  ****************************************************************************/
 
-static uint8_t tmp112_getreg8(FAR struct tmp112_dev_s *priv, uint8_t regaddr)
-{
-  struct i2c_config_s   config;
-  uint8_t               regval = 0;
-  int                   ret;
-
-  /* Set up the I2C configuration */
-
-  config.frequency  = priv->freq;
-  config.address    = priv->addr;
-  config.addrlen    = 7;
-
-  /* Write the register address */
-
-  ret = i2c_write(priv->i2c, &config, &regaddr, 1);
-  if (ret < 0)
-    {
-      snerr("ERROR: i2c_write failed: %s (%d)\n", strerror(-ret), ret);
-      return ret;
-    }
-
-  /* Read the register value */
-
-  ret = i2c_read(priv->i2c, &config, &regval, 1);
-  if (ret < 0)
-    {
-      snerr("ERROR: i2c_read failed: %d\n", ret);
-      return ret;
-    }
-
-  return regval;
-}
-
 static uint16_t tmp112_getreg16(FAR struct tmp112_dev_s *priv,
                          uint8_t regaddr, uint8_t ms_delay)
 {
@@ -160,34 +127,6 @@ static uint16_t tmp112_getreg16(FAR struct tmp112_dev_s *priv,
   regval = (msb << 4) | (lsb >> 4);
 
   return regval;
-}
-
-static int tmp112_putreg8(FAR struct tmp112_dev_s *priv, uint8_t regaddr,
-                   uint8_t regval)
-{
-  struct i2c_config_s   config;
-  uint8_t               data[2];
-  int                   ret;
-
-  /* Set up the I2C configuration */
-
-  config.frequency  = priv->freq;
-  config.address    = priv->addr;
-  config.addrlen    = 7;
-
-  data[0]   = regaddr;
-  data[1]   = regval;
-
-  /* Write the register address and value */
-
-  ret = i2c_write(priv->i2c, &config, &data, 2);
-  if (ret < 0)
-    {
-      snerr("ERROR: i2c_write failed: %s (%d)\n", strerror(-ret), ret);
-      return ret;
-    }
-
-  return OK;
 }
 
 static int tmp112_putreg16(FAR struct tmp112_dev_s *priv, uint8_t regaddr,
