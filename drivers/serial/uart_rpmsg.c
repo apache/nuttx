@@ -83,7 +83,7 @@ struct uart_rpmsg_priv_s
   char                  devname[UART_RPMSG_NAME_SIZE];
   char                  cpuname[UART_RPMSG_NAME_SIZE];
   FAR void              *recv_data;
-  bool                  last_upper;
+  atomic_t              last_upper;
 };
 
 /****************************************************************************
@@ -166,8 +166,7 @@ static bool uart_rpmsg_rxflowcontrol(FAR struct uart_dev_s *dev,
   FAR struct uart_rpmsg_priv_s *priv = dev->priv;
   FAR struct uart_rpmsg_wakeup_s msg;
 
-  nxmutex_lock(&priv->lock);
-  if (!upper && upper != priv->last_upper)
+  if (atomic_xchg(&priv->last_upper, upper) != upper && !upper)
     {
       memset(&msg, 0, sizeof(msg));
 
@@ -178,8 +177,6 @@ static bool uart_rpmsg_rxflowcontrol(FAR struct uart_dev_s *dev,
         }
     }
 
-  priv->last_upper = upper;
-  nxmutex_unlock(&priv->lock);
   return false;
 }
 
