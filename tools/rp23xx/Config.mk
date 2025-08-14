@@ -1,6 +1,8 @@
 ############################################################################
 # tools/rp23xx/Config.mk
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -24,7 +26,9 @@
 
 # POSTBUILD -- Perform post build operations
 
-PICOTOOL_BIN_PATH?=$(PICO_SDK_PATH)$(DELIM)_deps$(DELIM)picotool$(DELIM)picotool
+PICOTOOL_FOUND := $(shell command -v picotool 2> /dev/null)
+
+PICOTOOL_BIN_PATH ?= $(PICO_SDK_PATH)$(DELIM)_deps$(DELIM)picotool$(DELIM)picotool
 
 define GEN_PICO_UF2
   $(Q)echo "Generating: nuttx.uf2"; \
@@ -34,23 +38,26 @@ define GEN_PICO_UF2
 endef
 
 ifeq ($(CONFIG_RP23XX_UF2_BINARY),y)
-  ifneq ($(shell which picotool),)
+  ifdef PICOTOOL_FOUND
     define POSTBUILD
       $(call GEN_PICO_UF2, picotool)
     endef
-  else ifdef PICO_SDK_PATH
-    define POSTBUILD
-      $(Q)(if ! $(PICOTOOL_BIN_PATH) help >&/dev/null; then \
-              echo "Building: picotool"; \
-              cd $(PICO_SDK_PATH); \
-              cmake . >&/dev/null; \
-              make picotoolBuild >&/dev/null; \
-           fi;)
-      $(call GEN_PICO_UF2, $(PICOTOOL_BIN_PATH))
-    endef
   else
-    define POSTBUILD
-      $(Q) echo "PICO_SDK_PATH/picotool must be specified/installed for flash boot"
-    endef
+    ifdef PICO_SDK_PATH
+      define POSTBUILD
+        $(warning "picotool not found in $$PATH, it will be sourced from pico-sdk")
+        $(Q)if [[ ! -x "$(PICOTOOL_BIN_PATH)" ]]; then \
+          echo "Warning: building picotool from pico-sdk will skip USB support! See https://github.com/raspberrypi/pico-sdk/issues/1827" >&2; \
+          cd $(PICO_SDK_PATH); \
+          cmake . >&/dev/null; \
+          make picotoolBuild >/dev/null; \
+        fi
+        $(call GEN_PICO_UF2, $(PICOTOOL_BIN_PATH))
+      endef
+    else
+      define POSTBUILD
+        $(error "Generating UF2 files requires picotool to be available in $$PATH, or $$PICO_SDK_PATH must be specified")
+      endef
+    endif
   endif
 endif
