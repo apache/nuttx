@@ -82,19 +82,19 @@ static const struct file_operations g_tmp112fops =
  ****************************************************************************/
 
 static uint16_t tmp112_getreg16(FAR struct tmp112_dev_s *priv,
-                         uint8_t regaddr, uint8_t ms_delay)
+                                uint8_t regaddr, uint8_t ms_delay)
 {
-  struct i2c_config_s   config;
-  uint16_t              msb;
-  uint16_t              lsb;
-  uint16_t              regval = 0;
-  int                   ret;
+  struct i2c_config_s config;
+  uint16_t msb;
+  uint16_t lsb;
+  uint16_t regval = 0;
+  int ret;
 
   /* Set up the I2C configuration */
 
-  config.frequency  = priv->freq;
-  config.address    = priv->addr;
-  config.addrlen    = 7;
+  config.frequency = priv->freq;
+  config.address = priv->addr;
+  config.addrlen = 7;
 
   /* Register to read */
 
@@ -121,8 +121,8 @@ static uint16_t tmp112_getreg16(FAR struct tmp112_dev_s *priv,
 
   /* MSB and LSB are inverted */
 
-  msb   = (regval & 0xff);
-  lsb   = (regval & 0xff00) >> 8;
+  msb = (regval & 0xff);
+  lsb = (regval & 0xff00) >> 8;
 
   regval = (msb << 4) | (lsb >> 4);
 
@@ -130,25 +130,25 @@ static uint16_t tmp112_getreg16(FAR struct tmp112_dev_s *priv,
 }
 
 static int tmp112_putreg16(FAR struct tmp112_dev_s *priv, uint8_t regaddr,
-                    uint16_t regval)
+                           uint16_t regval)
 {
-  struct i2c_config_s   config;
-  uint8_t               data[3];
-  int                   ret;
+  struct i2c_config_s config;
+  uint8_t data[3];
+  int ret;
 
   /* Set up the I2C configuration */
 
-  config.frequency  = priv->freq;
-  config.address    = priv->addr;
-  config.addrlen    = 7;
+  config.frequency = priv->freq;
+  config.address = priv->addr;
+  config.addrlen = 7;
 
-  data[0]   = regaddr;
-  data[1]   = (regval >> 8) & 0xff;
-  data[2]   = regval & 0xff;
+  data[0] = regaddr;
+  data[1] = (regval >> 8) & 0xff;
+  data[2] = regval & 0xff;
 
   /* Write the register address and value */
 
-  ret = i2c_write(priv->i2c, &config, &data, 3);
+  ret = i2c_write(priv->i2c, &config, (FAR uint8_t *)&data, 3);
   if (ret < 0)
     {
       snerr("ERROR: i2c_write failed: %s (%d)\n", strerror(-ret), ret);
@@ -207,9 +207,9 @@ static void tmp112_read_temp(FAR struct tmp112_dev_s *priv)
 static ssize_t tmp112_read(FAR struct file *filep, FAR char *buffer,
                            size_t buflen)
 {
-  FAR struct inode          *inode          = filep->f_inode;
-  FAR struct tmp112_dev_s   *priv           = inode->i_private;
-  FAR float                 *temperature    = (FAR float *)buffer;
+  FAR struct inode *inode = filep->f_inode;
+  FAR struct tmp112_dev_s *priv = inode->i_private;
+  FAR float *temperature = (FAR float *)buffer;
 
   if (!buffer)
     {
@@ -269,8 +269,8 @@ static ssize_t tmp112_write(FAR struct file *filep, FAR const char *buffer,
 int tmp112_register(FAR const char *devpath, uint8_t devnum,
                     FAR struct i2c_master_s *i2c)
 {
-  FAR struct tmp112_dev_s   *priv;
-  int                       ret;
+  FAR struct tmp112_dev_s *priv;
+  int ret;
 
   /* Initialize the TMP112 device structure */
 
