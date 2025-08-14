@@ -123,25 +123,25 @@ void down_read(FAR rw_semaphore_t *rwsem)
   if (rwsem->holder == _SCHED_GETTID())
     {
       rwsem->writer++;
-      goto out;
     }
-
-  while (rwsem->writer > 0)
+  else
     {
-      rwsem->waiter++;
-      nxmutex_unlock(&rwsem->protected);
-      nxsem_wait(&rwsem->waiting);
-      nxmutex_lock(&rwsem->protected);
-      rwsem->waiter--;
+      while (rwsem->writer > 0)
+        {
+          rwsem->waiter++;
+          nxmutex_unlock(&rwsem->protected);
+          nxsem_wait(&rwsem->waiting);
+          nxmutex_lock(&rwsem->protected);
+          rwsem->waiter--;
+        }
+
+      /* In a scenario where there is no write lock, we just need to make the
+       * read base +1.
+       */
+
+      rwsem->reader++;
     }
 
-  /* In a scenario where there is no write lock, we just need to make the
-   * read base +1.
-   */
-
-  rwsem->reader++;
-
-out:
   nxmutex_unlock(&rwsem->protected);
 }
 
