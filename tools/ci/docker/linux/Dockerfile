@@ -42,7 +42,8 @@ RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -q
   ninja-build \
   nodejs \
   npm \
-  unzip
+  unzip \
+  zip
 
 RUN mkdir -p /tools
 WORKDIR /tools
@@ -352,6 +353,7 @@ RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" TZ=Etc/UTC apt-get in
   file \
   subversion \
   tclsh \
+  zip \
   && rm -rf /var/lib/apt/lists/*
 
 # Set GCC-12 as Default compiler
