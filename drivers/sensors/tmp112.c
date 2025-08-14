@@ -278,7 +278,7 @@ static ssize_t tmp112_read(FAR struct file *filep, FAR char *buffer,
       return -1;
     }
 
-  if (buflen != 2)
+  if (buflen != 4)
     {
       snerr("ERROR: You can't read something other than 32 bits "
         "(4 bytes)\n");
