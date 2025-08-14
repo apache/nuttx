@@ -410,9 +410,15 @@ config IRQCOUNT
 	bool
 	default n
 
+choice
+	prompt "Multi-Processing Support"
+	default UP
+
+config UP
+	bool "Uni-Processor/Single Processing as default"
+
 config SMP
 	bool "Symmetric Multi-Processing (SMP)"
-	default n
 	depends on ARCH_HAVE_MULTICPU
 	depends on ARCH_INTERRUPTSTACK != 0
 	select SPINLOCK
@@ -432,20 +438,41 @@ config SMP
 		CPU0 IRQ handler use thread0's stack, but thread0 may switch to CPU1, that
 		will caused IRQ handler stack corruption.
 
+config BMP
+	bool "Bound Multi-Processing (BMP)"
+	depends on ARCH_HAVE_MULTICPU
+	---help---
+		Run a bound multi-processing configuration: every CPU runs
+		its own kernel instance with its own data, while all CPUs
+		share one copy of the kernel code.  Applications and drivers
+		are bound to the CPU that needs them; hardware shared by
+		several CPUs is protected by spinlocks.  A CPU never
+		schedules work onto another one.
+
+		SMP and BMP are members of the same choice and mutually
+		exclusive: under SMP one scheduler drives all CPUs and tasks
+		migrate freely between cores; under BMP each CPU has an
+		independent scheduler.
+
+endchoice
+
 choice PERCPU_METHOD
 	prompt "Support PERCPU expand method"
+	default PERCPU_SECTION if BMP
 	default PERCPU_ARRAY
 
 config PERCPU_ARRAY
 	bool "Expand PERCPU to ARRAY, for SMP by default"
 
-endchoice
+config PERCPU_SECTION
+	bool "Expand PERCPU by .ld, use section"
 
-if SMP
+endchoice
 
 config SMP_NCPUS
 	int "Number of CPUs"
-	default 4
+	default 4 if !UP
+	default 1
 	range 1 32
 	---help---
 		This value identifies the number of CPUs supported by the processor
@@ -459,11 +486,10 @@ config SMP_NCPUS
 config SMP_DEFAULT_CPUSET
 	hex "Default CPU bit set"
 	default 0xffffffff
+	depends on SMP
 	---help---
 		Set the Default CPU bits. The way to use the unset CPU is to call the
 		sched_setaffinity function to bind a task to the CPU. bit0 means CPU0.
-
-endif # SMP
 
 choice
 	prompt "Initialization Task"

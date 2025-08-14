@@ -6236,7 +6236,7 @@ config BOARDCTL_USBDEVCTRL
 config BOARDCTL_IRQ_AFFINITY
 	bool "Set an IRQ affinity to CPUs by software"
 	default n
-	depends on SMP
+	depends on !UP
 	---help---
 		Enables support for Set an IRQ affinity to CPUs by software.
 
