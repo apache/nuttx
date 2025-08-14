@@ -125,7 +125,9 @@ typedef struct sigq_s sigq_t;
  */
 
 #ifdef CONFIG_ENABLE_ALL_SIGNALS
-extern  sigactq_t  g_sigactions[CONFIG_SIG_PREALLOC_ACTIONS];
+typedef sigactq_t sigaction_prealloc_t[CONFIG_SIG_PREALLOC_ACTIONS];
+DECLARE_PER_CPU_BMP(sigaction_prealloc_t, g_sigactions);
+#define g_sigactions this_cpu_var_bmp(g_sigactions)
 #endif
 
 /* The g_sigfreeaction data structure is a list of available signal action

@@ -56,7 +56,9 @@ struct sigpool_s
 /* This is a pool of pre-allocated signal action structures buffers */
 
 #if defined(CONFIG_ENABLE_ALL_SIGNALS) && CONFIG_SIG_PREALLOC_ACTIONS > 0
-sigactq_t  g_sigactions[CONFIG_SIG_PREALLOC_ACTIONS];
+#  undef g_sigactions
+DEFINE_PER_CPU_BSS_BMP(sigaction_prealloc_t, g_sigactions);
+#  define g_sigactions this_cpu_var_bmp(g_sigactions)
 #endif
 
 #ifdef CONFIG_ENABLE_ALL_SIGNALS

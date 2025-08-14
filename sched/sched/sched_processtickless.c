@@ -66,7 +66,8 @@
  * then limit all requested delays to this value (in ticks).
  */
 
-uint32_t g_oneshot_maxticks = UINT32_MAX;
+DEFINE_PER_CPU_BMP(uint32_t, g_oneshot_maxticks) = UINT32_MAX;
+#define g_oneshot_maxticks this_cpu_var_bmp(g_oneshot_maxticks)
 #endif
 
 /****************************************************************************
@@ -89,7 +90,8 @@ static clock_t nxsched_process_scheduler(clock_t ticks, clock_t elapsed,
  * the timer is not running.
  */
 
-static clock_t g_timer_tick;
+static DEFINE_PER_CPU_BSS_BMP(clock_t, g_timer_tick);
+#define g_timer_tick this_cpu_var_bmp(g_timer_tick)
 
 /* Wdog timer for scheduler event. */
 

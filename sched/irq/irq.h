@@ -65,6 +65,12 @@ typedef CODE int (*irq_foreach_t)(int irq, FAR struct irq_info_s *info,
                                   FAR void *arg);
 #endif
 
+#ifdef CONFIG_ARCH_MINIMAL_VECTORTABLE
+typedef struct irq_info_s irqveor_t[CONFIG_ARCH_NUSER_INTERRUPTS];
+#else
+typedef struct irq_info_s irqveor_t[NR_IRQS];
+#endif
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -74,11 +80,8 @@ typedef CODE int (*irq_foreach_t)(int irq, FAR struct irq_info_s *info,
  * occurrence of an interrupt.
  */
 
-#ifdef CONFIG_ARCH_MINIMAL_VECTORTABLE
-extern struct irq_info_s g_irqvector[CONFIG_ARCH_NUSER_INTERRUPTS];
-#else
-extern struct irq_info_s g_irqvector[NR_IRQS];
-#endif
+DECLARE_PER_CPU_BMP(irqveor_t, g_irqvector);
+#define g_irqvector this_cpu_var_bmp(g_irqvector)
 
 #ifdef CONFIG_SMP
 /* This is the spinlock that enforces critical sections when interrupts are
