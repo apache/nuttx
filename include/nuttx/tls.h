@@ -232,9 +232,6 @@ struct tls_info_s
 #if !defined(CONFIG_DISABLE_PTHREAD) && !defined(CONFIG_PTHREAD_MUTEX_UNSAFE)
   FAR struct pthread_mutex_s *tl_mhead;   /* List of mutexes held by thread  */
 #endif
-#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
-  mutex_t tl_lock;
-#endif
 };
 
 /****************************************************************************

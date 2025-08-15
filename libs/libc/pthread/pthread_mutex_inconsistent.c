@@ -64,8 +64,6 @@ void pthread_mutex_inconsistent(FAR struct tls_info_s *tls)
 {
   FAR struct pthread_mutex_s *mutex;
 
-  nxmutex_lock(&tls->tl_lock);
-
   /* Remove and process each mutex held by this task */
 
   while (tls->tl_mhead != NULL)
@@ -81,6 +79,4 @@ void pthread_mutex_inconsistent(FAR struct tls_info_s *tls)
       mutex->flags |= _PTHREAD_MFLAGS_INCONSISTENT;
       mutex_reset(&mutex->mutex);
     }
-
-  nxmutex_unlock(&tls->tl_lock);
 }

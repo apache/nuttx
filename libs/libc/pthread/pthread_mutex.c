@@ -66,10 +66,8 @@ static void pthread_mutex_add(FAR struct pthread_mutex_s *mutex)
 
   /* Add the mutex to the list of mutexes held by this pthread */
 
-  nxmutex_lock(&tls->tl_lock);
   mutex->flink = tls->tl_mhead;
   tls->tl_mhead = mutex;
-  nxmutex_unlock(&tls->tl_lock);
 }
 
 /****************************************************************************
@@ -91,8 +89,6 @@ static void pthread_mutex_remove(FAR struct pthread_mutex_s *mutex)
   FAR struct tls_info_s *tls = tls_get_info();
   FAR struct pthread_mutex_s *curr;
   FAR struct pthread_mutex_s *prev;
-
-  nxmutex_lock(&tls->tl_lock);
 
   /* Remove the mutex from the list of mutexes held by this task */
 
@@ -118,7 +114,6 @@ static void pthread_mutex_remove(FAR struct pthread_mutex_s *mutex)
     }
 
   mutex->flink = NULL;
-  nxmutex_unlock(&tls->tl_lock);
 }
 
 /****************************************************************************
