@@ -768,105 +768,113 @@ static void tcp_input(FAR struct net_driver_s *dev, uint8_t domain,
    * it is an old packet and we send a RST.
    */
 
-  if ((tcp->flags & TCP_CTL) == TCP_SYN)
-    {
-      /* This is a SYN packet for a connection.  Find the connection
-       * listening on this port.
-       */
-
-      tmp16 = tcp->destport;
+  tmp16 = tcp->destport;
 #ifdef CONFIG_NET_IPv6
 #  ifdef CONFIG_NET_IPv4
-      if (domain == PF_INET6)
+  if (domain == PF_INET6)
 #  endif
-        {
-          net_ipv6addr_copy(&uaddr.ipv6.laddr, IPv6BUF->destipaddr);
-        }
+    {
+      net_ipv6addr_copy(&uaddr.ipv6.laddr, IPv6BUF->destipaddr);
+    }
 #endif
 
 #ifdef CONFIG_NET_IPv4
 #  ifdef CONFIG_NET_IPv6
-      if (domain == PF_INET)
+  if (domain == PF_INET)
 #  endif
-        {
-          net_ipv4addr_copy(uaddr.ipv4.laddr,
-                            net_ip4addr_conv32(IPv4BUF->destipaddr));
-        }
+    {
+      net_ipv4addr_copy(uaddr.ipv4.laddr,
+                        net_ip4addr_conv32(IPv4BUF->destipaddr));
+    }
 #endif
 
 #if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
-      if ((conn = tcp_findlistener(&uaddr, tmp16, domain)) != NULL)
+  if ((conn = tcp_findlistener(&uaddr, tmp16, domain)) != NULL)
 #else
-      if ((conn = tcp_findlistener(&uaddr, tmp16)) != NULL)
+  if ((conn = tcp_findlistener(&uaddr, tmp16)) != NULL)
 #endif
+    {
+      /* According rfc793 p65&66, In LISTEN state, first ignore packet
+       * contains RST flag, second reset packet contains ACK flag,
+       * finally if the packet is not a SYN, ignore it.
+       */
+
+      if ((tcp->flags & TCP_CTL) != TCP_SYN)
         {
-          if (!tcp_backlogavailable(conn))
+          if ((tcp->flags & TCP_ACK) != 0)
             {
-              nerr("ERROR: no free containers for TCP BACKLOG!\n");
-              goto drop;
+              goto reset;
             }
 
-          /* We matched the incoming packet with a connection in LISTEN.
-           * We now need to create a new connection and send a SYNACK in
-           * response.
+          goto drop;
+        }
+
+      if (!tcp_backlogavailable(conn))
+        {
+          nerr("ERROR: no free containers for TCP BACKLOG!\n");
+          goto drop;
+        }
+
+      /* We matched the incoming packet with a connection in LISTEN.
+       * We now need to create a new connection and send a SYNACK in
+       * response.
+       */
+
+      /* First allocate a new connection structure and see if there is
+       * any user application to accept it.
+       */
+
+      conn = tcp_alloc_accept(dev, tcp, conn);
+      if (conn)
+        {
+          /* The connection structure was successfully allocated and has
+           * been initialized in the TCP_SYN_RECVD state.  The expected
+           * sequence of events is then the rest of the 3-way handshake:
+           *
+           *  1. We just received a TCP SYN packet from a remote host.
+           *  2. We will send the SYN-ACK response below (perhaps
+           *     repeatedly in the event of a timeout)
+           *  3. Then we expect to receive an ACK from the remote host
+           *     indicated the TCP socket connection is ESTABLISHED.
+           *
+           * Possible failure:
+           *
+           *  1. The ACK is never received.  This will be handled by
+           *     a timeout managed by tcp_timer().
+           *  2. The listener "unlistens()".  This will be handled by
+           *     the failure of tcp_accept_connection() when the ACK is
+           *     received.
            */
 
-          /* First allocate a new connection structure and see if there is
-           * any user application to accept it.
+          conn->crefs = 1;
+        }
+
+      if (!conn)
+        {
+          /* Either (1) all available connections are in use, or (2)
+           * there is no application in place to accept the connection.
+           * We drop packet and hope that the remote end will retransmit
+           * the packet at a time when we have more spare connections
+           * or someone waiting to accept the connection.
            */
-
-          conn = tcp_alloc_accept(dev, tcp, conn);
-          if (conn)
-            {
-              /* The connection structure was successfully allocated and has
-               * been initialized in the TCP_SYN_RECVD state.  The expected
-               * sequence of events is then the rest of the 3-way handshake:
-               *
-               *  1. We just received a TCP SYN packet from a remote host.
-               *  2. We will send the SYN-ACK response below (perhaps
-               *     repeatedly in the event of a timeout)
-               *  3. Then we expect to receive an ACK from the remote host
-               *     indicated the TCP socket connection is ESTABLISHED.
-               *
-               * Possible failure:
-               *
-               *  1. The ACK is never received.  This will be handled by
-               *     a timeout managed by tcp_timer().
-               *  2. The listener "unlistens()".  This will be handled by
-               *     the failure of tcp_accept_connection() when the ACK is
-               *     received.
-               */
-
-              conn->crefs = 1;
-            }
-
-          if (!conn)
-            {
-              /* Either (1) all available connections are in use, or (2)
-               * there is no application in place to accept the connection.
-               * We drop packet and hope that the remote end will retransmit
-               * the packet at a time when we have more spare connections
-               * or someone waiting to accept the connection.
-               */
 
 #ifdef CONFIG_NET_STATISTICS
-              g_netstats.tcp.syndrop++;
+          g_netstats.tcp.syndrop++;
 #endif
-              nerr("ERROR: No free TCP connections\n");
-              goto drop;
-            }
-
-          net_incr32(conn->rcvseq, 1); /* ack SYN */
-
-          /* Parse the TCP MSS option, if present. */
-
-          tcp_parse_option(dev, conn, iplen);
-
-          /* Our response will be a SYNACK. */
-
-          tcp_synack(dev, conn, TCP_ACK | TCP_SYN);
-          return;
+          nerr("ERROR: No free TCP connections\n");
+          goto drop;
         }
+
+      net_incr32(conn->rcvseq, 1); /* ack SYN */
+
+      /* Parse the TCP MSS option, if present. */
+
+      tcp_parse_option(dev, conn, iplen);
+
+      /* Our response will be a SYNACK. */
+
+      tcp_synack(dev, conn, TCP_ACK | TCP_SYN);
+      return;
     }
 
   nwarn("WARNING: SYN with no listener (or old packet) .. reset\n");
