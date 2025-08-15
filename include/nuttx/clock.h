@@ -397,7 +397,7 @@ extern "C"
  * current_tick + 1, which is not enough for at least 1 tick.
  */
 
-#define clock_delay2abstick(delay) (clock_systime_ticks() + (delay) + 1)
+#define clock_delay2abstick(delay) (clock_systime_ticks() + (delay) + 1u)
 
 /****************************************************************************
  * Name:  clock_timespec_add
