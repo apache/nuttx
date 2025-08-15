@@ -56,6 +56,7 @@
 pid_t nxsched_getpid(void)
 {
   FAR struct tcb_s *rtcb;
+  pid_t ret = IDLE_PROCESS_ID;
 
   /* Get the TCB at the head of the ready-to-run task list.  That
    * will usually be the currently executing task.  There is are two
@@ -71,12 +72,8 @@ pid_t nxsched_getpid(void)
     {
       /* Yes.. Return the Process ID */
 
-      return rtcb->group->tg_pid;
+      ret = rtcb->group->tg_pid;
     }
 
-  /* We must have been called earlier in the start up sequence from the
-   * start-up/IDLE thread before the ready-to-run list has been initialized.
-   */
-
-  return IDLE_PROCESS_ID;
+  return ret;
 }
