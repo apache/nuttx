@@ -1,0 +1,15 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+menu "lib_assert custom options"
+
+config LIBC_ASSERT_CUSTOM
+	bool "use custom implementation of __assert"
+	default n
+	---help---
+		If the default implementation of __assert cannot match requirements,
+		Possible remove the default implementation and use a custom one.
+
+endmenu #lib_assert custom options
