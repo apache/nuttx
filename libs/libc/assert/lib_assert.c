@@ -33,8 +33,10 @@
  * Public Functions
  ****************************************************************************/
 
+#ifndef CONFIG_LIBC_ASSERT_CUSTOM
 void __assert(FAR const char *filename, int linenum, FAR const char *msg)
 {
   _assert(filename, linenum, msg, NULL);
   abort();
 }
+#endif
