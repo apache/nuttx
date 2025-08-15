@@ -695,7 +695,15 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
 
                       devif_conn_event(conn->dev, TCP_ABORT,
                                        conn->sconn.list);
-                      tcp_stop_monitor(conn, TCP_ABORT);
+
+                      /* We also send a reset packet to the remote host. */
+
+                      tcp_send(dev, conn, TCP_RST | TCP_ACK, hdrlen);
+
+                      /* Stop the timer work */
+
+                      conn->keeptimer = 0;
+                      conn->timer     = 0;
                     }
                   else
                     {
