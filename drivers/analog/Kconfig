@@ -257,6 +257,23 @@ config ADC_MCP3008_DIFFERENTIAL
 
 endif # ADC_MCP3008
 
+config ADC_ADS7046
+	bool "ADS7046 support"
+	default n
+	select SPI
+	---help---
+		Enable driver support for the Texas Instruments ADS7046 12-bit ADC.
+
+if ADC_ADS7046
+
+config ADS7046_FREQUENCY
+	int "ADS7046 SPI frequency"
+	default 1000000
+	---help---
+		ADS7046 SPI frequency. Maximum is 60 MHz.
+
+endif # ADC_ADS7046
+
 config ADC_ADS1115
 	bool "ADS1115 support"
 	default n
