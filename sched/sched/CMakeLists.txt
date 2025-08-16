@@ -24,8 +24,6 @@ set(SRCS
     sched_profil.c
     sched_addreadytorun.c
     sched_removereadytorun.c
-    sched_mergeprioritized.c
-    sched_mergepending.c
     sched_addblocked.c
     sched_removeblocked.c
     sched_gettcb.c
@@ -48,7 +46,6 @@ set(SRCS
     sched_get_stackinfo.c
     sched_get_tls.c
     sched_sysinfo.c
-    sched_reprioritizertr.c
     sched_get_stateinfo.c)
 
 if(CONFIG_PRIORITY_INHERITANCE)
@@ -58,6 +55,8 @@ endif()
 if(CONFIG_SMP)
   list(APPEND SRCS sched_getaffinity.c sched_setaffinity.c
        sched_process_delivered.c)
+else()
+  list(APPEND SRCS sched_reprioritizertr.c sched_mergepending.c)
 endif()
 
 if(CONFIG_SIG_SIGSTOP_ACTION)
