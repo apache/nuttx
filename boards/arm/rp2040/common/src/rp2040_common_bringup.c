@@ -90,6 +90,11 @@
 #include "rp2040_max6675.h"
 #endif
 
+#ifdef CONFIG_SENSORS_TMP112
+#include <nuttx/sensors/tmp112.h>
+#include "rp2040_tmp112.h"
+#endif
+
 #ifdef CONFIG_RP2040_PWM
 #include "rp2040_pwm.h"
 #include "rp2040_pwmdev.h"
@@ -566,6 +571,16 @@ int rp2040_common_bringup(void)
   if (ret < 0)
     {
         syslog(LOG_ERR, "ERROR: couldn't register MS5611: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_TMP112
+  /* Try to register the first TMP112 device at I2C0 */
+
+  ret = board_tmp112_initialize(0, 0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize TMP112 driver: %d\n", ret);
     }
 #endif
 

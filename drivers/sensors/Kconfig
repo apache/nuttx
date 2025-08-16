@@ -202,7 +202,7 @@ config SENSORS_BH1750FVI
 config SENSORS_NAU7802
 	bool "Adafruit NAU7802 ADC sensor support"
 	default n
-	select I2C 
+	select I2C
 	---help---
 		Enable driver support for the Adafruit NAU7802 sensor.
 
@@ -2145,5 +2145,65 @@ config SENSORS_FS3000_THREAD_STACKSIZE
 		The stack size for the worker thread.
 
 endif # SENSORS_FS3000
+
+config SENSORS_TMP112
+	bool "Texas Instruments TMP112x Temperature Sensor support"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the Texas Instruments TMP112x temperature sensor.
+
+if SENSORS_TMP112
+
+config TMP112_I2C_FREQUENCY
+	int "TMP112 I2C frequency"
+	default 400000
+
+config TMP112_I2C_ADDR_1
+	hex "I2C Address 1"
+	default 0x48
+	---help---
+		Address used for the first sensor on the bus.
+
+config TMP112_ENABLE_2
+	bool "Enable a second sensor"
+	default n
+	---help---
+		Register a second sensor on the bus.
+
+config TMP112_I2C_ADDR_2
+	hex "I2C Address 2"
+	default 0x49
+	depends on TMP112_ENABLE_2
+	---help---
+		Address used for the second sensor on the bus.
+
+config TMP112_ENABLE_3
+	bool "Enable a third sensor"
+	default n
+	---help---
+		Register a third sensor on the bus.
+
+config TMP112_I2C_ADDR_3
+	hex "I2C Address 3"
+	default 0x4A
+	depends on TMP112_ENABLE_3
+	---help---
+		Address used for the third sensor on the bus.
+
+config TMP112_ENABLE_4
+	bool "Enable a fourth sensor"
+	default n
+	---help---
+		Register a fourth sensor on the bus.
+
+config TMP112_I2C_ADDR_4
+	hex "I2C Address 4"
+	default 0x4B
+	depends on TMP112_ENABLE_4
+	---help---
+		Address used for the fourth sensor on the bus.
+
+endif #SENSORS_TMP112
 
 endif # SENSORS
