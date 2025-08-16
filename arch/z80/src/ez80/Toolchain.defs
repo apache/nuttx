@@ -102,6 +102,7 @@ STRIP = $(CROSSDEV)strip --strip-unneeded
 LD = $(CROSSDEV)ld
 AS = $(CROSSDEV)as
 AR = $(CROSSDEV)ar -r
+AR_EXTRACT = $(CROSSDEV)ar -x
 OBJCOPY= $(CROSSDEV)objcopy
 
 # File extensions

@@ -50,6 +50,7 @@ CPP               = cctc $(ARCHOPTIMIZATION)
 LD                = cctc
 STRIP             = strip --strip-unneeded
 AR                = artc -r
+AR_EXTRACT        = artc -x
 NM                = nm
 OBJCOPY           = echo
 OBJDUMP           = elfdump

@@ -347,15 +347,16 @@ endif
 
 ifeq ($(CONFIG_ARCH_TOOLCHAIN_CLANG),y)
 
-  CC      = $(CROSSDEV)clang
-  CXX     = $(CROSSDEV)clang++
-  CPP     = $(CROSSDEV)clang -E -P -x c
-  LD      = $(CROSSDEV)clang
-  STRIP   = $(CROSSDEV)llvm-strip --strip-unneeded
-  AR      = $(CROSSDEV)llvm-ar rcs
-  NM      = $(CROSSDEV)llvm-nm
-  OBJCOPY = $(CROSSDEV)llvm-objcopy
-  OBJDUMP = $(CROSSDEV)llvm-objdump
+  CC         = $(CROSSDEV)clang
+  CXX        = $(CROSSDEV)clang++
+  CPP        = $(CROSSDEV)clang -E -P -x c
+  LD         = $(CROSSDEV)clang
+  STRIP      = $(CROSSDEV)llvm-strip --strip-unneeded
+  AR         = $(CROSSDEV)llvm-ar rcs
+  AR_EXTRACT = $(CROSSDEV)llvm-ar x
+  NM         = $(CROSSDEV)llvm-nm
+  OBJCOPY    = $(CROSSDEV)llvm-objcopy
+  OBJDUMP    = $(CROSSDEV)llvm-objdump
 
   # Since the no_builtin attribute is not fully supported on Clang
   # disable the built-in functions, refer:
@@ -369,15 +370,16 @@ ifeq ($(CONFIG_ARCH_TOOLCHAIN_CLANG),y)
 
 else
 
-  CC      = $(CROSSDEV)gcc
-  CXX     = $(CROSSDEV)g++
-  CPP     = $(CROSSDEV)gcc -E -P -x c
-  STRIP   = $(CROSSDEV)strip --strip-unneeded
-  OBJCOPY = $(CROSSDEV)objcopy
-  OBJDUMP = $(CROSSDEV)objdump
-  LD      = $(CROSSDEV)ld
-  AR      = $(CROSSDEV)ar rcs
-  NM      = $(CROSSDEV)nm
+  CC         = $(CROSSDEV)gcc
+  CXX        = $(CROSSDEV)g++
+  CPP        = $(CROSSDEV)gcc -E -P -x c
+  STRIP      = $(CROSSDEV)strip --strip-unneeded
+  OBJCOPY    = $(CROSSDEV)objcopy
+  OBJDUMP    = $(CROSSDEV)objdump
+  LD         = $(CROSSDEV)ld
+  AR         = $(CROSSDEV)ar rcs
+  AR_EXTRACT = $(CROSSDEV)ar x
+  NM         = $(CROSSDEV)nm
 
 # Link Time Optimization
 

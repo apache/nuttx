@@ -225,17 +225,19 @@ ifeq ($(CONFIG_ARCH_TOOLCHAIN_GCC),y)
   OBJDUMP = $(CROSSDEV)objdump
   LD = $(CROSSDEV)ld
   AR = $(CROSSDEV)ar rcs
+  AR_EXTRACT = $(CROSSDEV)ar x
   NM = $(CROSSDEV)nm
 else ifeq ($(CONFIG_ARCH_TOOLCHAIN_CLANG),y)
-  CC      = clang
-  CXX     = clang++
-  CPP     = clang -E -P -x c
-  LD      = ld.lld -m aarch64elf
-  STRIP   = llvm-strip --strip-unneeded
-  AR      = llvm-ar rcs
-  NM      = llvm-nm
-  OBJCOPY = llvm-objcopy
-  OBJDUMP = llvm-objdump
+  CC         = clang
+  CXX        = clang++
+  CPP        = clang -E -P -x c
+  LD         = ld.lld -m aarch64elf
+  STRIP      = llvm-strip --strip-unneeded
+  AR         = llvm-ar rcs
+  AR_EXTRACT = llvm-ar x
+  NM         = llvm-nm
+  OBJCOPY    = llvm-objcopy
+  OBJDUMP    = llvm-objdump
 endif
 
 # Link Time Optimization

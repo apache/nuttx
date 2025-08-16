@@ -208,15 +208,16 @@ endif
 
 ifeq ($(CONFIG_ARM_TOOLCHAIN_CLANG),y)
 
-  CC      = clang
-  CXX     = clang++
-  CPP     = clang -E -P -x c
-  LD      = ld.lld -m armelf
-  STRIP   = llvm-strip --strip-unneeded
-  AR      = llvm-ar rcs
-  NM      = llvm-nm
-  OBJCOPY = llvm-objcopy
-  OBJDUMP = llvm-objdump
+  CC         = clang
+  CXX        = clang++
+  CPP        = clang -E -P -x c
+  LD         = ld.lld -m armelf
+  STRIP      = llvm-strip --strip-unneeded
+  AR         = llvm-ar rcs
+  AR_EXTRACT = llvm-ar x
+  NM         = llvm-nm
+  OBJCOPY    = llvm-objcopy
+  OBJDUMP    = llvm-objdump
 
   # Since the no_builtin attribute is not fully supported on Clang
   # disable the built-in functions, refer:
@@ -251,15 +252,16 @@ ifeq ($(CONFIG_ARM_TOOLCHAIN_CLANG),y)
 
 else ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),y)
 
-  CC      = armclang
-  CXX     = armclang
-  CPP     = armclang -E -P -x c
-  LD      = armlink
-  STRIP   = llvm-strip --strip-unneeded
-  AR      = armar -rcs
-  NM      = llvm-nm
-  OBJCOPY = llvm-objcopy
-  OBJDUMP = llvm-objdump
+  CC         = armclang
+  CXX        = armclang
+  CPP        = armclang -E -P -x c
+  LD         = armlink
+  STRIP      = llvm-strip --strip-unneeded
+  AR         = armar -rcs
+  AR_EXTRACT = armar -x
+  NM         = llvm-nm
+  OBJCOPY    = llvm-objcopy
+  OBJDUMP    = llvm-objdump
 
   # Since the no_builtin attribute is not fully supported on Clang
   # disable the built-in functions, refer:
@@ -308,15 +310,16 @@ else ifeq ($(CONFIG_ARM_TOOLCHAIN_GHS),y)
 # Default toolchain
 
 else
-  CC      = $(CROSSDEV)gcc
-  CXX     = $(CROSSDEV)g++
-  CPP     = $(CROSSDEV)gcc -E -P -x c
-  LD      = $(CROSSDEV)ld
-  STRIP   = $(CROSSDEV)strip --strip-unneeded
-  AR      = $(CROSSDEV)ar rcs
-  NM      = $(CROSSDEV)nm
-  OBJCOPY = $(CROSSDEV)objcopy
-  OBJDUMP = $(CROSSDEV)objdump
+  CC         = $(CROSSDEV)gcc
+  CXX        = $(CROSSDEV)g++
+  CPP        = $(CROSSDEV)gcc -E -P -x c
+  LD         = $(CROSSDEV)ld
+  STRIP      = $(CROSSDEV)strip --strip-unneeded
+  AR         = $(CROSSDEV)ar rcs
+  AR_EXTRACT = $(CROSSDEV)ar x
+  NM         = $(CROSSDEV)nm
+  OBJCOPY    = $(CROSSDEV)objcopy
+  OBJDUMP    = $(CROSSDEV)objdump
 
   ifeq ($(CONFIG_LTO_FULL),y)
     ifeq ($(CONFIG_ARM_TOOLCHAIN_GNU_EABI),y)

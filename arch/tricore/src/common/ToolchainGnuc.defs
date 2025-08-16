@@ -105,15 +105,16 @@ endif
 
 # Default toolchain
 
-CC      = $(CROSSDEV)tricore-elf-gcc
-CXX     = $(CROSSDEV)tricore-elf-g++
-CPP     = $(CROSSDEV)tricore-elf-gcc -E -P -x c
-LD      = $(CROSSDEV)tricore-elf-gcc
-STRIP   = $(CROSSDEV)tricore-elf-strip --strip-unneeded
-AR      = $(CROSSDEV)tricore-elf-gcc-ar rcs
-NM      = $(CROSSDEV)tricore-elf-gcc-nm
-OBJCOPY = $(CROSSDEV)tricore-elf-objcopy
-OBJDUMP = $(CROSSDEV)tricore-elf-objdump
+CC         = $(CROSSDEV)tricore-elf-gcc
+CXX        = $(CROSSDEV)tricore-elf-g++
+CPP        = $(CROSSDEV)tricore-elf-gcc -E -P -x c
+LD         = $(CROSSDEV)tricore-elf-gcc
+STRIP      = $(CROSSDEV)tricore-elf-strip --strip-unneeded
+AR         = $(CROSSDEV)tricore-elf-gcc-ar rcs
+AR_EXTRACT = $(CROSSDEV)tricore-elf-gcc-ar x
+NM         = $(CROSSDEV)tricore-elf-gcc-nm
+OBJCOPY    = $(CROSSDEV)tricore-elf-objcopy
+OBJDUMP    = $(CROSSDEV)tricore-elf-objdump
 
 ARCHOPTIMIZATION += -fno-builtin
 

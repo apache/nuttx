@@ -102,6 +102,7 @@ CPP = sdcpp
 LD = sdldz80
 AS = sdasz80
 AR = sdar -r
+AR_EXTRACT = sdar -x
 
 # File extensions
 

@@ -32,6 +32,7 @@ CPP = $(CROSSDEV)gcc -E -P -x c
 LD = $(CROSSDEV)ld
 STRIP = $(CROSSDEV)strip --strip-unneeded
 AR = $(CROSSDEV)ar rcs
+AR_EXTRACT = $(CROSSDEV)ar x
 AS = $(CROSSDEV)as
 NM = $(CROSSDEV)nm
 OBJCOPY = $(CROSSDEV)objcopy
