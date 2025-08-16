@@ -31,13 +31,23 @@ endif
 CHIP_CSRCS  = imx9_boot.c imx9_timer.c
 
 ifeq ($(CONFIG_ARCH_CHIP_IMX93),y)
-CHIP_CSRCS  += imx9_ccm.c imx9_clockconfig.c imx9_gpio.c imx9_iomuxc.c
+CHIP_CSRCS  += imx9_ccm.c imx9_gpio.c
 endif
 
-CHIP_CSRCS += imx9_lpuart.c imx9_lowputc.c
+CHIP_CSRCS += imx9_lpuart.c imx9_lowputc.c imx9_clockconfig.c
+CHIP_CSRCS += imx9_iomuxc.c
 
 ifeq ($(CONFIG_IMX9_GPIO_IRQ),y)
   CHIP_CSRCS += imx9_gpioirq.c
+endif
+
+ifeq ($(CONFIG_IMX9_MU),y)
+  CHIP_CSRCS += imx9_mu.c
+endif
+
+ifeq ($(CONFIG_IMX9_SCMI),y)
+  CHIP_CSRCS += imx9_scmi.c
+  # NXP SDK SCMI interface for pinctrl and clocking
 endif
 
 ifeq ($(CONFIG_IMX9_FLEXIO_PWM),y)
