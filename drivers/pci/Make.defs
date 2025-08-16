@@ -51,6 +51,10 @@ ifeq ($(CONFIG_PCI_QEMU_EPC),y)
 CSRCS += pci_qemu_epc.c
 endif
 
+ifeq ($(CONFIG_PCI_DWC_EPC),y)
+CSRCS += pcie_dw.c pcie_dw_ep.c
+endif
+
 ifeq ($(CONFIG_PCI_EPF_TEST),y)
 CSRCS += pci_epf_test.c
 endif
