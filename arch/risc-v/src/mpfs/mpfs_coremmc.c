@@ -654,7 +654,7 @@ static void mpfs_recvfifo(struct mpfs_dev_s *priv)
         }
     }
 
-    mcinfo("Read all\n");
+  mcinfo("Read all\n");
 }
 
 /****************************************************************************
@@ -818,6 +818,22 @@ static int mpfs_coremmc_wrcomplete_interrupt(int irq, void *context,
 
   DEBUGASSERT(priv != NULL);
 
+#ifdef CONFIG_SPINLOCK
+  spin_lock(&priv->lock);
+
+  /* Check if the write complete event is enabled */
+
+  if ((priv->waitevents & SDIOWAIT_WRCOMPLETE) == 0)
+    {
+      spin_unlock(&priv->lock);
+      return OK;
+    }
+
+  spin_unlock(&priv->lock);
+#endif
+
+  /* Note: the spin lock must NOT be held when calling mpfs_endwait */
+
   mpfs_endwait(priv, SDIOWAIT_WRCOMPLETE);
 
   return OK;
@@ -845,6 +861,22 @@ static int mpfs_coremmc_interrupt(int irq, void *context, void *arg)
   uint8_t status_xb;
 
   DEBUGASSERT(priv != NULL);
+
+#ifdef CONFIG_SPINLOCK
+  spin_lock(&priv->lock);
+
+  /* Check if any of the interrupt sources are even enabled */
+
+  if (priv->xfrmask == 0 && priv->waitmask == 0 && priv->xfr_blkmask == 0)
+    {
+      spin_unlock(&priv->lock);
+      return OK;
+    }
+
+  spin_unlock(&priv->lock);
+#endif
+
+  /* Note: the spin lock must NOT be held when calling mpfs_endtransfer */
 
   status = getreg8(MPFS_COREMMC_ISR);
 

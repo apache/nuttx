@@ -986,6 +986,20 @@ static int mpfs_emmcsd_interrupt(int irq, void *context, void *arg)
 
   DEBUGASSERT(priv != NULL);
 
+#ifdef CONFIG_SPINLOCK
+  spin_lock(&priv->lock);
+
+  /* Check if any of the interrupt sources are even enabled */
+
+  if (priv->xfrmask == 0 && priv->waitmask == 0 && priv->xfr_blkmask == 0)
+    {
+      spin_unlock(&priv->lock);
+      return OK;
+    }
+
+  spin_unlock(&priv->lock);
+#endif
+
   status = getreg32(MPFS_EMMCSD_SRS12);
 
   mcinfo("status: %08" PRIx32 "\n", status);
