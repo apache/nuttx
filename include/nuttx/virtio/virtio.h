@@ -33,7 +33,7 @@
 #include <nuttx/spinlock.h>
 #include <nuttx/virtio/virtio-config.h>
 
-#ifdef CONFIG_DRIVERS_VIRTIO
+#ifdef CONFIG_OPENAMP
 
 #include <openamp/open_amp.h>
 
@@ -41,6 +41,7 @@
  * Public Type Definitions
  ****************************************************************************/
 
+#ifdef CONFIG_DRIVERS_VIRTIO
 struct virtio_driver
 {
   struct list_node   node;
@@ -48,6 +49,7 @@ struct virtio_driver
   CODE int         (*probe)(FAR struct virtio_device *vdev);
   CODE void        (*remove)(FAR struct virtio_device *vdev);
 };
+#endif
 
 /****************************************************************************
  * Inline functions
@@ -175,18 +177,6 @@ static inline_function void virtqueue_kick_lock(FAR struct virtqueue *vq,
   spin_unlock_irqrestore(lock, flags);
 }
 
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
 static inline_function FAR void *
 virtio_malloc_buf(FAR struct virtio_device *vdev, size_t size, size_t align)
 {
@@ -213,6 +203,22 @@ virtio_zalloc_buf(FAR struct virtio_device *vdev, size_t size, size_t align)
   memset(buf, 0, size);
   return buf;
 }
+
+#endif /* CONFIG_OPENAMP */
+
+#ifdef CONFIG_DRIVERS_VIRTIO
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
 
 /* Driver and device register/unregister function */
 
