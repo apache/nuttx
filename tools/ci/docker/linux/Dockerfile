@@ -294,6 +294,15 @@ RUN mkdir -p wamrc && \
   | tar -C wamrc -xz
 
 ###############################################################################
+# Build image for tool required by Raspberry Pi pico-sdk builds
+###############################################################################
+FROM nuttx-toolchain-base AS nuttx-toolchain-raspberrypi-pico-sdk
+# Download the latest pico-sdk source archive
+RUN mkdir -p pico-sdk && \
+  curl -s -L "https://github.com/raspberrypi/pico-sdk/releases/download/2.2.0/pico-sdk-2.2.0.tar.gz" \
+  | tar -C pico-sdk --strip-components 1 -xz
+
+###############################################################################
 # Final Docker image used for running CI system.  This includes all toolchains
 # supported by the CI system.
 ###############################################################################
@@ -478,6 +487,11 @@ COPY --from=nuttx-toolchain-esp32 /tools/blobs/* /tools/blobs/esp-bins/
 COPY --from=nuttx-toolchain-wasm /tools/wasi-sdk/ wasi-sdk/
 ENV WASI_SDK_PATH="/tools/wasi-sdk"
 ENV PATH="/tools/wamr:$PATH"
+COPY --from=nuttx-toolchain-esp32 /tools/blobs/* /tools/blobs/esp-bins/
+
+# Raspberry Pi pico-sdk source
+COPY --from=nuttx-toolchain-raspberrypi-pico-sdk /tools/pico-sdk/ pico-sdk/
+ENV PICO_SDK_PATH="/tools/pico-sdk"
 
 # gn tool
 RUN mkdir -p /tools/gn
