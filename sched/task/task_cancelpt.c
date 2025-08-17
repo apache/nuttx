@@ -125,14 +125,13 @@ bool nxnotify_cancellation(FAR struct tcb_s *tcb)
        */
 
       tls->tl_cpstate |= CANCEL_FLAG_CANCEL_PENDING;
-      leave_critical_section(flags);
-      return true;
+      ret = true;
     }
 
 #ifdef CONFIG_CANCELLATION_POINTS
   /* Check if this task supports deferred cancellation */
 
-  if ((tls->tl_cpstate & CANCEL_FLAG_CANCEL_ASYNC) == 0)
+  if (!ret && (tls->tl_cpstate & CANCEL_FLAG_CANCEL_ASYNC) == 0)
     {
       /* Then we cannot cancel the task asynchronously. */
 
