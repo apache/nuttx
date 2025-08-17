@@ -828,7 +828,7 @@ config PTHREAD_MUTEX_TYPES
 
 choice
 	prompt "pthread mutex robustness"
-	default PTHREAD_MUTEX_ROBUST if !DEFAULT_SMALL
+	default PTHREAD_MUTEX_BOTH if !DEFAULT_SMALL
 	default PTHREAD_MUTEX_UNSAFE if DEFAULT_SMALL
 
 config PTHREAD_MUTEX_ROBUST
@@ -853,7 +853,7 @@ endchoice # pthread mutex robustness
 
 choice
 	prompt "Default NORMAL mutex robustness"
-	default PTHREAD_MUTEX_DEFAULT_ROBUST
+	default PTHREAD_MUTEX_DEFAULT_UNSAFE
 	depends on PTHREAD_MUTEX_BOTH
 
 config PTHREAD_MUTEX_DEFAULT_ROBUST

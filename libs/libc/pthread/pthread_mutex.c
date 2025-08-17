@@ -58,16 +58,21 @@
  *
  ****************************************************************************/
 
-static void pthread_mutex_add(FAR struct pthread_mutex_s *mutex)
+static inline_function
+void pthread_mutex_add(FAR struct pthread_mutex_s *mutex)
 {
-  FAR struct tls_info_s *tls = tls_get_info();
+  FAR struct tls_info_s *tls;
 
-  DEBUGASSERT(mutex->flink == NULL);
+  if ((mutex->flags & _PTHREAD_MFLAGS_ROBUST) != 0)
+    {
+      tls = tls_get_info();
+      DEBUGASSERT(mutex->flink == NULL);
 
-  /* Add the mutex to the list of mutexes held by this pthread */
+      /* Add the mutex to the list of mutexes held by this pthread */
 
-  mutex->flink = tls->tl_mhead;
-  tls->tl_mhead = mutex;
+      mutex->flink = tls->tl_mhead;
+      tls->tl_mhead = mutex;
+    }
 }
 
 /****************************************************************************
@@ -84,36 +89,42 @@ static void pthread_mutex_add(FAR struct pthread_mutex_s *mutex)
  *
  ****************************************************************************/
 
-static void pthread_mutex_remove(FAR struct pthread_mutex_s *mutex)
+static inline_function
+void pthread_mutex_remove(FAR struct pthread_mutex_s *mutex)
 {
-  FAR struct tls_info_s *tls = tls_get_info();
+  FAR struct tls_info_s *tls;
   FAR struct pthread_mutex_s *curr;
   FAR struct pthread_mutex_s *prev;
 
-  /* Remove the mutex from the list of mutexes held by this task */
-
-  for (prev = NULL, curr = tls->tl_mhead;
-       curr != NULL && curr != mutex;
-       prev = curr, curr = curr->flink)
+  if ((mutex->flags & _PTHREAD_MFLAGS_ROBUST) != 0)
     {
+      tls = tls_get_info();
+
+      /* Remove the mutex from the list of mutexes held by this task */
+
+      for (prev = NULL, curr = tls->tl_mhead;
+          curr != NULL && curr != mutex;
+          prev = curr, curr = curr->flink)
+        {
+        }
+
+      DEBUGASSERT(curr == mutex);
+
+      /* Remove the mutex from the list.  prev == NULL means that the mutex
+       * to be removed is at the head of the list.
+       */
+
+      if (prev == NULL)
+        {
+          tls->tl_mhead = mutex->flink;
+        }
+      else
+        {
+          prev->flink = mutex->flink;
+        }
+
+      mutex->flink = NULL;
     }
-
-  DEBUGASSERT(curr == mutex);
-
-  /* Remove the mutex from the list.  prev == NULL means that the mutex
-   * to be removed is at the head of the list.
-   */
-
-  if (prev == NULL)
-    {
-      tls->tl_mhead = mutex->flink;
-    }
-  else
-    {
-      prev->flink = mutex->flink;
-    }
-
-  mutex->flink = NULL;
 }
 
 /****************************************************************************
