@@ -379,6 +379,27 @@ wasi_sdk() {
   command wamrc --version
 }
 
+raspberrypi_pico_sdk() {
+  if [ ! -f "${NUTTXTOOLS}/pico-sdk" ]; then
+    local release
+    local basefile
+    release="2.2.0"
+    basefile="pico-sdk-${release}"
+    cd "${NUTTXTOOLS}"
+    mkdir -p pico-sdk
+
+    # Download the latest pico-sdk source archive
+    curl -O -L -s https://github.com/raspberrypi/pico-sdk/releases/download/${release}/${basefile}.tar.gz
+    tar xzf "${basefile}.tar.gz"
+    mv "${basefile}" pico-sdk
+    rm "${basefile}.tar.gz"
+
+  fi
+
+  export PICO_SDK_PATH="${NUTTXTOOLS}/pico-sdk"
+  echo "export PICO_SDK_PATH=${NUTTXTOOLS}/pico-sdk" >> "${NUTTXTOOLS}"/env.sh
+}
+
 setup_links() {
   # Configure ccache
   mkdir -p "${NUTTXTOOLS}"/ccache/bin/
@@ -414,7 +435,7 @@ install_build_tools() {
   mkdir -p "${NUTTXTOOLS}"
   echo "#!/usr/bin/env sh" > "${NUTTXTOOLS}"/env.sh
 
-  install="arm_clang_toolchain arm_gcc_toolchain arm64_gcc_toolchain avr_gcc_toolchain binutils bloaty clang_tidy gen_romfs gperf kconfig_frontends mips_gcc_toolchain python_tools riscv_gcc_toolchain rust dlang rx_gcc_toolchain sparc_gcc_toolchain xtensa_esp_gcc_toolchain u_boot_tools util_linux wasi_sdk c_cache"
+  install="arm_clang_toolchain arm_gcc_toolchain arm64_gcc_toolchain avr_gcc_toolchain binutils bloaty clang_tidy gen_romfs gperf kconfig_frontends mips_gcc_toolchain python_tools riscv_gcc_toolchain rust dlang rx_gcc_toolchain sparc_gcc_toolchain xtensa_esp_gcc_toolchain u_boot_tools util_linux wasi_sdk c_cache raspberrypi_pico_sdk"
 
   oldpath=$(cd . && pwd -P)
   for func in ${install}; do
