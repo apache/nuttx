@@ -249,10 +249,19 @@
 /* The always_inline_function attribute informs GCC that the function should
  * always be inlined, regardless of the level of optimization.  The
  * noinline_function indicates that the function should never be inlined.
+ * Note that if the compiler optimization is disabled, the stack-usage of
+ * the inline functions will not be optimized. In this case, force inlining
+ * can lead to stack-overflow.
  */
 
-#  define always_inline_function __attribute__((always_inline,no_instrument_function)) inline
-#  define inline_function __attribute__((always_inline)) inline
+#  ifdef CONFIG_DEBUG_NOOPT
+#    define always_inline_function inline
+#    define inline_function inline
+#  else
+#    define always_inline_function __attribute__((always_inline,no_instrument_function)) inline
+#    define inline_function __attribute__((always_inline)) inline
+#  endif
+
 #  define noinline_function __attribute__((noinline))
 
 /* The noinstrument_function attribute informs GCC don't instrument it */
