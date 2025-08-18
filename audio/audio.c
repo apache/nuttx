@@ -1172,6 +1172,7 @@ static int audio_poll(FAR struct file *filep,
   FAR struct inode *inode = filep->f_inode;
   FAR struct audio_upperhalf_s *upper = inode->i_private;
   FAR struct audio_openpriv_s *priv = filep->f_priv;
+  pollevent_t eventset;
   irqstate_t flags;
 
   DEBUGASSERT(upper != NULL);
@@ -1185,7 +1186,13 @@ static int audio_poll(FAR struct file *filep,
 
       if (priv->head - upper->status->tail != upper->periods)
         {
-          poll_notify(&fds, 1, POLLIN | POLLOUT);
+          eventset = POLLIN | POLLOUT;
+          if ((long)(priv->head - upper->status->tail) <= 0)
+            {
+              eventset |= POLLERR;
+            }
+
+          poll_notify(&fds, 1, eventset);
         }
     }
   else if (fds->priv != NULL)
@@ -1271,6 +1278,7 @@ static inline void audio_dequeuebuffer(FAR struct audio_upperhalf_s *upper,
 {
   FAR struct audio_openpriv_s *priv;
   struct audio_msg_s    msg;
+  pollevent_t eventset;
   irqstate_t flags;
 
   audinfo("Entry\n");
@@ -1286,7 +1294,13 @@ static inline void audio_dequeuebuffer(FAR struct audio_upperhalf_s *upper,
     {
       if (priv->fd > 0)
         {
-          poll_notify(&priv->fd, 1, POLLOUT);
+          eventset = POLLIN | POLLOUT;
+          if ((long)(priv->head - upper->status->tail) <= 0)
+            {
+              eventset |= POLLERR;
+            }
+
+          poll_notify(&priv->fd, 1, eventset);
         }
     }
 
