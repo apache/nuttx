@@ -595,7 +595,7 @@ static int audio_stop(FAR struct file *filep)
   nstate = audio_getnstate(upper, priv);
   if ((upper->status->state == AUDIO_STATE_RUNNING ||
        upper->status->state == AUDIO_STATE_PAUSED) &&
-      nstate <= AUDIO_STATE_PREPARED)
+      nstate == AUDIO_STATE_OPEN)
     {
 #ifdef CONFIG_AUDIO_MULTI_SESSION
       ret = lower->ops->stop(lower, session);
