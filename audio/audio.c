@@ -607,7 +607,12 @@ static int audio_stop(FAR struct file *filep)
           return ret;
         }
 
-      audio_setstate(upper, AUDIO_STATE_DRAINING);
+      /* Audio_complete may have set state to AUDIO_STATE_OPEN */
+
+      if (upper->status->state != AUDIO_STATE_OPEN)
+        {
+          audio_setstate(upper, AUDIO_STATE_DRAINING);
+        }
     }
   else if (nstate == AUDIO_STATE_PAUSED)
     {
