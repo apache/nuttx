@@ -25,7 +25,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/sched.h>
+
 #include <nuttx/init.h>
 
 #include <sys/param.h>
