@@ -90,8 +90,7 @@ FAR void *memrchr(FAR const void *s, int c, size_t n)
        * result.
        */
 
-      asrc = (FAR libc_data_t *)((uintptr_t)(src0 - LITTLEBLOCKSIZE + 1) &
-                                 ~(sizeof(libc_data_t) - 1));
+      asrc = (FAR libc_data_t *)(uintptr_t)(src0 - LITTLEBLOCKSIZE + 1);
       mask = d << 8 | d;
       mask = mask << 16 | mask;
       for (i = 32; i < LITTLEBLOCKSIZE * 8; i <<= 1)
