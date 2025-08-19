@@ -549,6 +549,48 @@ static int swkey_export(FAR struct swkey_context_s *ctx,
 }
 
 /****************************************************************************
+ * Name: swkey_gen_aes_key
+ *
+ * Description:
+ *   Generate AES key and bound with keyid
+ *
+ ****************************************************************************/
+
+static int swkey_gen_aes_key(FAR struct swkey_context_s *ctx, uint32_t keyid,
+                             uint32_t keylen)
+{
+  FAR struct swkey_data_s *data;
+  int ret = -EINVAL;
+  char buf[32];
+
+  if (keyid == 0)
+    {
+      return ret;
+    }
+
+  /* Generate a key sufficient for AES-128/192/256 */
+
+  arc4random_buf(buf, keylen);
+  ret = swkey_write(&ctx->file, keyid, buf, keylen, 0);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  if (keylen <= CONFIG_CRYPTO_CRYPTODEV_SOFTWARE_KEYMGMT_BUFSIZE)
+    {
+      data = swkey_get_cache_data(ctx, keyid);
+      data->id = keyid;
+      data->size = keylen;
+      data->flags = 0;
+      memcpy(data->buf, buf, keylen);
+      swkey_promote_cache_data(ctx, data);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
  * Name: swkey_save
  *
  * Description:
@@ -666,6 +708,7 @@ static int swkey_kprocess(FAR struct cryptkop *krp)
 {
   FAR struct swkey_context_s *ctx;
   uint32_t keyid;
+  uint32_t keylen;
 
   /* Sanity check */
 
@@ -715,6 +758,20 @@ static int swkey_kprocess(FAR struct cryptkop *krp)
         krp->krp_status = swkey_export(ctx, keyid,
                                        krp->krp_param[1].crp_p,
                                        krp->krp_param[1].crp_nbits / 8);
+        break;
+      case CRK_GENERATE_AES_KEY:
+        if (krp->krp_param[1].crp_nbits != sizeof(uint32_t) * 8)
+          {
+            return -EINVAL;
+          }
+
+        keylen = *(uint32_t *)krp->krp_param[1].crp_p;
+        if (keylen != 16 && keylen != 24 && keylen != 32)
+          {
+            return -EINVAL;
+          }
+
+        krp->krp_status = swkey_gen_aes_key(ctx, keyid, keylen);
         break;
       case CRK_SAVE_KEY:
         krp->krp_status = swkey_save(ctx, keyid);
@@ -823,6 +880,7 @@ void swkey_init(void)
   kalgs[CRK_IMPORT_KEY] = CRYPTO_ALG_FLAG_SUPPORTED;
   kalgs[CRK_DELETE_KEY] = CRYPTO_ALG_FLAG_SUPPORTED;
   kalgs[CRK_EXPORT_KEY] = CRYPTO_ALG_FLAG_SUPPORTED;
+  kalgs[CRK_GENERATE_AES_KEY] = CRYPTO_ALG_FLAG_SUPPORTED;
   kalgs[CRK_SAVE_KEY] = CRYPTO_ALG_FLAG_SUPPORTED;
   kalgs[CRK_LOAD_KEY] = CRYPTO_ALG_FLAG_SUPPORTED;
   kalgs[CRK_UNLOAD_KEY] = CRYPTO_ALG_FLAG_SUPPORTED;
