@@ -549,6 +549,72 @@ static int swkey_export(FAR struct swkey_context_s *ctx,
 }
 
 /****************************************************************************
+ * Name: swkey_gen_secp256r1_key
+ *
+ * Description:
+ *   Generate SECP256R1 keypair and bound with keyid
+ *
+ ****************************************************************************/
+
+static int swkey_gen_secp256r1_key(FAR struct swkey_context_s *ctx,
+                                   uint32_t priv_keyid,
+                                   uint32_t pub_keyid)
+{
+  FAR struct swkey_data_s *data;
+  uint8_t priv[secp256r1];
+  uint8_t pub[secp256r1 * 2];
+  int ret = -EINVAL;
+
+  if (priv_keyid == 0 || pub_keyid == 0)
+    {
+      return ret;
+    }
+
+  if (ecc_make_key_uncomp(pub, pub + secp256r1, priv) == 0)
+    {
+      return ret;
+    }
+
+  /* Private keys cannot be exported */
+
+  ret = swkey_write(&ctx->file, priv_keyid, priv, secp256r1,
+                    CRYPTO_F_NOT_EXPORTABLE);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = swkey_write(&ctx->file, pub_keyid, pub, secp256r1 * 2, 0);
+  if (ret < 0)
+    {
+      swkey_delete(ctx, priv_keyid);
+      return ret;
+    }
+
+  if (CONFIG_CRYPTO_CRYPTODEV_SOFTWARE_KEYMGMT_BUFSIZE >= secp256r1)
+    {
+      data = swkey_get_cache_data(ctx, priv_keyid);
+      data->id = priv_keyid;
+      data->size = secp256r1;
+      data->flags = CRYPTO_F_NOT_EXPORTABLE;
+      memcpy(data->buf, priv, secp256r1);
+      swkey_promote_cache_data(ctx, data);
+    }
+
+  if (CONFIG_CRYPTO_CRYPTODEV_SOFTWARE_KEYMGMT_BUFSIZE >= secp256r1 * 2)
+    {
+      data = swkey_get_cache_data(ctx, pub_keyid);
+      data->id = pub_keyid;
+      data->size = secp256r1 * 2;
+      data->flags = 0;
+      memcpy(data->buf, pub, secp256r1 * 2);
+      swkey_promote_cache_data(ctx, data);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
  * Name: swkey_gen_aes_key
  *
  * Description:
@@ -707,8 +773,10 @@ static int swkey_unload(FAR struct swkey_context_s *ctx, uint32_t keyid)
 static int swkey_kprocess(FAR struct cryptkop *krp)
 {
   FAR struct swkey_context_s *ctx;
-  uint32_t keyid;
+  uint32_t priv_keyid;
+  uint32_t pub_keyid;
   uint32_t keylen;
+  uint32_t keyid;
 
   /* Sanity check */
 
@@ -772,6 +840,17 @@ static int swkey_kprocess(FAR struct cryptkop *krp)
           }
 
         krp->krp_status = swkey_gen_aes_key(ctx, keyid, keylen);
+        break;
+      case CRK_GENERATE_SECP256R1_KEY:
+        priv_keyid = keyid;
+        if (krp->krp_param[1].crp_nbits != sizeof(uint32_t) * 8)
+          {
+            return -EINVAL;
+          }
+
+        pub_keyid = *(uint32_t *)krp->krp_param[1].crp_p;
+        krp->krp_status = swkey_gen_secp256r1_key(ctx, priv_keyid,
+                                                       pub_keyid);
         break;
       case CRK_SAVE_KEY:
         krp->krp_status = swkey_save(ctx, keyid);
@@ -881,6 +960,7 @@ void swkey_init(void)
   kalgs[CRK_DELETE_KEY] = CRYPTO_ALG_FLAG_SUPPORTED;
   kalgs[CRK_EXPORT_KEY] = CRYPTO_ALG_FLAG_SUPPORTED;
   kalgs[CRK_GENERATE_AES_KEY] = CRYPTO_ALG_FLAG_SUPPORTED;
+  kalgs[CRK_GENERATE_SECP256R1_KEY] = CRYPTO_ALG_FLAG_SUPPORTED;
   kalgs[CRK_SAVE_KEY] = CRYPTO_ALG_FLAG_SUPPORTED;
   kalgs[CRK_LOAD_KEY] = CRYPTO_ALG_FLAG_SUPPORTED;
   kalgs[CRK_UNLOAD_KEY] = CRYPTO_ALG_FLAG_SUPPORTED;
