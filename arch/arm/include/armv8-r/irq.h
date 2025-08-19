@@ -483,12 +483,12 @@ static inline_function uintptr_t up_getusrsp(void *regs)
 noinstrument_function
 static inline_function void up_set_interrupt_context(bool flag)
 {
-  CP15_MODIFY(flag, 1ul, TPIDRPRW);
+  CP15_MODIFY(flag, 1u, TPIDRPRW);
 }
 
-#define up_this_task()         ((struct tcb_s *)(CP15_GET(TPIDRPRW) & ~1ul))
-#define up_update_task(t)      CP15_MODIFY(t, ~1ul, TPIDRPRW)
-#define up_interrupt_context() (CP15_GET(TPIDRPRW) & 1)
+#define up_this_task()         ((struct tcb_s *)(CP15_GET(TPIDRPRW) & ~1u))
+#define up_update_task(t)      CP15_MODIFY(t, ~1u, TPIDRPRW)
+#define up_interrupt_context() (CP15_GET(TPIDRPRW) & 1u)
 
 /****************************************************************************
  * Public Data
