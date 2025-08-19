@@ -83,6 +83,10 @@
 #define shunget(f) ((f)--)
 #define ifexist(a,b) do { if ((a) != NULL) {*(a) = (b);} } while (0)
 
+#define TYPE_FLOAT        1
+#define TYPE_DOUBLE       2
+#define TYPE_LONG_DOUBLE  3
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -267,13 +271,16 @@ static long_double scalbnx(long_double number,
  * Input Parameters:
  *   ptr    - A decimal string
  *   endptr - If have ,the part that holds all but the numbers
+ *   flag   - TYPE_FLOAT: string -> float
+ *            TYPE_DOUBLE: string -> double
+ *            TYPE_LONG_DOUBLE: string- > long double
  *
  * Returned Value:
  *   A long_double number about ptr
  *
  ****************************************************************************/
 
-static long_double decfloat(FAR char *ptr, FAR char **endptr)
+static long_double decfloat(FAR char *ptr, FAR char **endptr, int flag)
 {
   FAR char *f;
   FAR char *s;
@@ -408,6 +415,31 @@ static long_double decfloat(FAR char *ptr, FAR char **endptr)
 
   y *= 1.;
   y = scalbnx(y, 10., num_decimal);
+
+  switch (flag)
+    {
+      case TYPE_FLOAT:
+        if (y < FLT_MIN || y > FLT_MAX)
+          {
+            set_errno(ERANGE);
+          }
+        break;
+      case TYPE_DOUBLE:
+        if (y < DBL_MIN || y > DBL_MAX)
+          {
+            set_errno(ERANGE);
+          }
+        break;
+      case TYPE_LONG_DOUBLE:
+        if (y < LDBL_MIN || y > LDBL_MAX)
+          {
+            set_errno(ERANGE);
+          }
+        break;
+      default:
+        break;
+    }
+
   return y;
 }
 
@@ -624,9 +656,9 @@ static long_double hexfloat(FAR char *ptr,
  * Input Parameters:
  *   str    - The string
  *   endptr - If have ,the part that holds all but the numbers
- *   flags  - 1: string -> float
- *            2: string -> double
- *            3: string- > long double
+ *   flags  - TYPE_FLOAT: string -> float
+ *            TYPE_DOUBLE: string -> double
+ *            TYPE_LONG_DOUBLE: string -> long double
  *
  * Returned Value:
  *   A long_double number about str
@@ -646,15 +678,15 @@ static long_double strtox(FAR const char *str, FAR char **endptr, int flag)
 
   switch (flag)
     {
-      case 1:
+      case TYPE_FLOAT:
         bits = FLT_MANT_DIG;
         emin = FLT_MIN_EXP - bits;
         break;
-      case 2:
+      case TYPE_DOUBLE:
         bits = DBL_MANT_DIG,
         emin = DBL_MIN_EXP - bits;
         break;
-      case 3:
+      case TYPE_LONG_DOUBLE:
         bits = LDBL_MANT_DIG,
         emin = LDBL_MIN_EXP - bits;
         break;
@@ -720,7 +752,7 @@ static long_double strtox(FAR const char *str, FAR char **endptr, int flag)
 #endif
   if (isdigit(*s) || (*s == '.' && isdigit(*(s + 1))))
     {
-      y = decfloat(s, endptr);
+      y = decfloat(s, endptr, flag);
     }
   else
     {
@@ -752,7 +784,7 @@ static long_double strtox(FAR const char *str, FAR char **endptr, int flag)
 
 float strtof(FAR const char *str, FAR char **endptr)
 {
-  return strtox(str, endptr, 1);
+  return strtox(str, endptr, TYPE_FLOAT);
 }
 
 /****************************************************************************
@@ -772,7 +804,7 @@ float strtof(FAR const char *str, FAR char **endptr)
 
 double strtod(FAR const char *str, FAR char **endptr)
 {
-  return strtox(str, endptr, 2);
+  return strtox(str, endptr, TYPE_DOUBLE);
 }
 
 /****************************************************************************
@@ -792,6 +824,6 @@ double strtod(FAR const char *str, FAR char **endptr)
 
 long double strtold(FAR const char *str, FAR char **endptr)
 {
-  return strtox(str, endptr, 3);
+  return strtox(str, endptr, TYPE_LONG_DOUBLE);
 }
 #endif /* CONFIG_HAVE_LONG_DOUBLE */
