@@ -624,7 +624,6 @@ static int cryptodev_key(FAR struct fcrypt *fcr, FAR struct crypt_kop *kop)
         return -EINVAL;
       case CRK_VALIDATE_KEYID:
       case CRK_DELETE_KEY:
-      case CRK_GENERATE_AES_KEY:
       case CRK_SAVE_KEY:
       case CRK_LOAD_KEY:
       case CRK_UNLOAD_KEY:
@@ -640,6 +639,10 @@ static int cryptodev_key(FAR struct fcrypt *fcr, FAR struct crypt_kop *kop)
       case CRK_IMPORT_KEY:
 
       /* inparam: keyid, raw data */
+
+      case CRK_GENERATE_AES_KEY:
+
+      /* inparam: keyid, keylen 16/24/32(128/192/256) */
 
         if (in == 2 && out == 0)
           {
