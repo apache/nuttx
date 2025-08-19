@@ -963,6 +963,26 @@ Once booted you can use the following commands to mount the file system::
 
 Note that mksmartfs is only needed the first time.
 
+spislv
+------
+
+This configuration enables the SPI2 peripheral in **slave mode** and
+provides the ``spislv`` example application to test data exchange with an
+external SPI master.
+
+After building and flashing the firmware, run the following command on the
+board terminal::
+
+    nsh> spislv -x 5 1a2b3c4d5e
+
+This command enqueues the data sequence ``1a2b3c4d5e`` in the slave buffer.  
+On the next transfer, the external SPI master should receive this data back
+from the slave.
+
+By default, SPI2 pins are used for the slave interface. The exact pin mapping
+depends on the ESP32-S3 DevKit version and can be adjusted through
+``menuconfig`` under *System type → SPI configuration*.  
+
 sta_softap
 ----------
 

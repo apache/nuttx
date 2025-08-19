@@ -38,6 +38,10 @@ ifeq ($(CONFIG_SPI_DRIVER),y)
   CSRCS += esp32s3_board_spidev.c
 endif
 
+ifeq ($(CONFIG_SPI_SLAVE_DRIVER),y)
+  CSRCS += esp32s3_board_spislavedev.c
+endif
+
 ifeq ($(CONFIG_ESPRESSIF_WIFI),y)
   CSRCS += esp32s3_board_wlan.c
 endif
