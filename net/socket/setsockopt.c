@@ -203,11 +203,27 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
               break;
             }
 
-          /* No, we are binding a socket to the interface
-           * Find the interface device with this name.
-           */
+          /* Check if the value is already null-terminated */
 
-          dev = netdev_findbyname(value);
+          if (((FAR char *)value)[value_len - 1] != '\0')
+            {
+              char ifname[IFNAMSIZ];
+              socklen_t len = MIN(IFNAMSIZ - 1, value_len);
+
+              /* Copy the data and add null terminator */
+
+              memcpy(ifname, value, len);
+              ifname[len] = '\0';
+
+              dev = netdev_findbyname(ifname);
+            }
+          else
+            {
+              /* Value is already null-terminated, use it directly */
+
+              dev = netdev_findbyname(value);
+            }
+
           if (dev == NULL)
             {
               return -ENODEV;
