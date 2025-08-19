@@ -149,6 +149,10 @@ int rp2040_common_bringup(void)
   struct mtd_dev_s *mtd_dev;
 #endif
 
+#ifdef CONFIG_RP2040_I2C
+  struct i2c_master_s *i2c;
+#endif
+
 #ifdef CONFIG_RP2040_I2C_DRIVER
   #ifdef CONFIG_RP2040_I2C0
   ret = board_i2cdev_initialize(0);
@@ -478,17 +482,21 @@ int rp2040_common_bringup(void)
     {
       syslog(LOG_ERR, "Failed to initialize SPI bus 0\n");
     }
-
-  struct adc_dev_s *mcp3008 = mcp3008_initialize(spi);
-  if (mcp3008 == NULL)
+  else
     {
-      syslog(LOG_ERR, "Failed to initialize MCP3008\n");
-    }
-
-  ret = adc_register("/dev/adc1", mcp3008);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "Failed to register MCP3008 device driver: %d\n", ret);
+      struct adc_dev_s *mcp3008 = mcp3008_initialize(spi);
+      if (mcp3008 == NULL)
+        {
+          syslog(LOG_ERR, "Failed to initialize MCP3008\n");
+        }
+      else
+        {
+          ret = adc_register("/dev/adc1", mcp3008);
+          if (ret < 0)
+            {
+              syslog(LOG_ERR, "Failed to register MCP3008: %d\n", ret);
+            }
+        }
     }
 #endif
 
@@ -546,43 +554,72 @@ int rp2040_common_bringup(void)
 
   /* Try to register SHT4X device on I2C0 */
 
-  ret = sht4x_register(rp2040_i2cbus_initialize(0), 0,
-                       CONFIG_SHT4X_I2C_ADDR);
-  if (ret < 0)
+  i2c = rp2040_i2cbus_initialize(0);
+  if (i2c == NULL)
     {
-      syslog(LOG_ERR, "ERROR: couldn't initialize SHT4x: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: failed to initialize I2C0\n");
+    }
+  else
+    {
+      ret = sht4x_register(i2c, 0, CONFIG_SHT4X_I2C_ADDR);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR, "ERROR: couldn't initialize SHT4x: %d\n", ret);
+        }
     }
 #endif
 
 #ifdef CONFIG_SENSORS_MCP9600
   /* Try to register MCP9600 device as /dev/therm0 at I2C0. */
 
-  ret = mcp9600_register(rp2040_i2cbus_initialize(0), 0x60, 1, 2, 3);
-  if (ret < 0)
+  i2c = rp2040_i2cbus_initialize(0);
+  if (i2c == NULL)
     {
-      syslog(LOG_ERR, "ERROR: couldn't initialize MCP9600: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: failed to initialize I2C0\n");
+    }
+  else
+    {
+      ret = mcp9600_register(i2c, 0x60, 1, 2, 3);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR, "ERROR: couldn't initialize MCP9600: %d\n", ret);
+        }
     }
 #endif
 
 #ifdef CONFIG_SENSORS_MS56XX
   /* Try to register MS56xx device at I2C0 */
 
-  ret = ms56xx_register(rp2040_i2cbus_initialize(0), 0, MS56XX_ADDR0,
-                        MS56XX_MODEL_MS5611);
-  if (ret < 0)
+  i2c = rp2040_i2cbus_initialize(0);
+  if (i2c == NULL)
     {
-        syslog(LOG_ERR, "ERROR: couldn't register MS5611: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: failed to initialize I2C0\n");
+    }
+  else
+    {
+      ret = ms56xx_register(i2c, 0, MS56XX_ADDR0, MS56XX_MODEL_MS5611);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR, "ERROR: couldn't register MS5611: %d\n", ret);
+        }
     }
 #endif
 
 #ifdef CONFIG_SENSORS_TMP112
   /* Try to register TMP112 device at I2C0 with a common address */
 
-  ret = board_tmp112_initialize(rp2040_i2cbus_initialize(0), 0,
-                                TMP112_ADDR_1);
-  if (ret < 0)
+  i2c = rp2040_i2cbus_initialize(0);
+  if (i2c == NULL)
     {
-      syslog(LOG_ERR, "Failed to initialize TMP112 driver: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: failed to initialize I2C0");
+    }
+  else
+    {
+      ret = board_tmp112_initialize(i2c, 0, TMP112_ADDR_1);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR, "Failed to initialize TMP112 driver: %d\n", ret);
+        }
     }
 #endif
 
