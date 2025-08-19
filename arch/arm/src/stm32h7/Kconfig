@@ -4585,13 +4585,13 @@ config STM32H7_ADC3_TIMTRIG
 		Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO
 
 config STM32H7_TIMX_CAP
-  default n
-  bool "Helpers for Capture Drivers"
+	default n
+	bool "Helpers for Capture Drivers"
 
 config STM32H7_TIM1_CAP
 	bool "TIM1 Capture"
 	default n
-  select STM32H7_TIMX_CAP
+	select STM32H7_TIMX_CAP
 	depends on STM32H7_TIM1
 	---help---
 		Reserve timer 1 for use by the capture driver.
@@ -4616,7 +4616,7 @@ endif # STM32H7_TIM1_CAP
 config STM32H7_TIM8_CAP
 	bool "TIM8 Capture"
 	default n
-  select STM32H7_TIMX_CAP
+	select STM32H7_TIMX_CAP
 	depends on STM32H7_TIM8
 	---help---
 		Reserve timer 8 for use by the capture driver.
@@ -4645,7 +4645,7 @@ endif # STM32H7_TIM8_CAP
 config STM32H7_TIM2_CAP
 	bool "TIM2 Capture"
 	default n
-  select STM32H7_TIMX_CAP
+	select STM32H7_TIMX_CAP
 	depends on STM32H7_TIM2
 	---help---
 		Reserve timer 2 for use by the capture driver.
@@ -4670,7 +4670,7 @@ endif # STM32H7_TIM2_CAP
 config STM32H7_TIM3_CAP
 	bool "TIM3 Capture"
 	default n
-  select STM32H7_TIMX_CAP
+	select STM32H7_TIMX_CAP
 	depends on STM32H7_TIM3
 	---help---
 		Reserve timer 3 for use by the capture driver.
@@ -4695,7 +4695,7 @@ endif # STM32H7_TIM3_CAP
 config STM32H7_TIM4_CAP
 	bool "TIM4 Capture"
 	default n
-  select STM32H7_TIMX_CAP
+	select STM32H7_TIMX_CAP
 	depends on STM32H7_TIM4
 	---help---
 		Reserve timer 4 for use by the capture driver.
@@ -4720,7 +4720,7 @@ endif # STM32H7_TIM4_CAP
 config STM32H7_TIM5_CAP
 	bool "TIM5 Capture"
 	default n
-  select STM32H7_TIMX_CAP
+	select STM32H7_TIMX_CAP
 	depends on STM32H7_TIM5
 	---help---
 		Reserve timer 5 for use by the capture driver.
@@ -4749,7 +4749,7 @@ endif # STM32H7_TIM5_CAP
 config STM32H7_TIM12_CAP
 	bool "TIM12 Capture"
 	default n
-  select STM32H7_TIMX_CAP
+	select STM32H7_TIMX_CAP
 	depends on STM32H7_TIM12
 	---help---
 		Reserve timer 12 for use by the capture driver.
@@ -4774,7 +4774,7 @@ endif # STM32H7_TIM12_CAP
 config STM32H7_TIM15_CAP
 	bool "TIM15 Capture"
 	default n
-  select STM32H7_TIMX_CAP
+	select STM32H7_TIMX_CAP
 	depends on STM32H7_TIM15
 	---help---
 		Reserve timer 15 for use by the capture driver.
@@ -4803,7 +4803,7 @@ endif # STM32H7_TIM15_CAP
 config STM32H7_TIM13_CAP
 	bool "TIM13 Capture"
 	default n
-  select STM32H7_TIMX_CAP
+	select STM32H7_TIMX_CAP
 	depends on STM32H7_TIM13
 	---help---
 		Reserve timer 13 for use by the capture driver.
@@ -4828,7 +4828,7 @@ endif # STM32H7_TIM13_CAP
 config STM32H7_TIM14_CAP
 	bool "TIM14 Capture"
 	default n
-  select STM32H7_TIMX_CAP
+	select STM32H7_TIMX_CAP
 	depends on STM32H7_TIM14
 	---help---
 		Reserve timer 14 for use by the capture driver.
@@ -4853,7 +4853,7 @@ endif # STM32H7_TIM14_CAP
 config STM32H7_TIM16_CAP
 	bool "TIM16 Capture"
 	default n
-  select STM32H7_TIMX_CAP
+	select STM32H7_TIMX_CAP
 	depends on STM32H7_TIM16
 	---help---
 		Reserve timer 16 for use by the capture driver.
@@ -4878,7 +4878,7 @@ endif # STM32H7_TIM16_CAP
 config STM32H7_TIM17_CAP
 	bool "TIM17 Capture"
 	default n
-  select STM32H7_TIMX_CAP
+	select STM32H7_TIMX_CAP
 	depends on STM32H7_TIM17
 	---help---
 		Reserve timer 17 for use by the capture driver.
@@ -4907,7 +4907,7 @@ endif # STM32H7_TIM17_CAP
 config STM32H7_LPTIM1_CAP
 	bool "LPTIM1 Capture"
 	default n
-  select STM32H7_TIMX_CAP
+	select STM32H7_TIMX_CAP
 	depends on STM32H7_LPTIM1
 	---help---
 		Reserve low-power timer 1 for use by the capture driver.
@@ -4932,7 +4932,7 @@ endif # STM32H7_LPTIM1_CAP
 config STM32H7_LPTIM2_CAP
 	bool "LPTIM2 Capture"
 	default n
-  select STM32H7_TIMX_CAP
+	select STM32H7_TIMX_CAP
 	depends on STM32H7_LPTIM2
 	---help---
 		Reserve low-power timer 2 for use by the capture driver.
@@ -4957,7 +4957,7 @@ endif # STM32H7_LPTIM2_CAP
 config STM32H7_LPTIM3_CAP
 	bool "LPTIM3 Capture"
 	default n
-  select STM32H7_TIMX_CAP
+	select STM32H7_TIMX_CAP
 	depends on STM32H7_LPTIM3
 	---help---
 		Reserve low-power timer 3 for use by the capture driver.
@@ -5007,7 +5007,7 @@ endif # STM32H7_LPTIM4_CAP
 config STM32H7_LPTIM5_CAP
 	bool "LPTIM5 Capture"
 	default n
-  select STM32H7_TIMX_CAP
+	select STM32H7_TIMX_CAP
 	depends on STM32H7_LPTIM5
 	---help---
 		Reserve low-power timer 5 for use by the capture driver.
