@@ -857,6 +857,15 @@ static ssize_t wdog_write(FAR struct file *filep, FAR const char *buffer,
 #endif
           break;
         }
+      else
+        {
+#ifdef CONFIG_WATCHDOG_AUTOMONITOR
+          watchdog_automonitor_start(upper);
+#else
+          err = lower->ops->start(lower);
+#endif
+          break;
+        }
     }
 
   if (i == buflen)
