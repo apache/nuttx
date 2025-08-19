@@ -47,6 +47,9 @@
  ****************************************************************************/
 
 static int esp_ulp_ioctl(struct file *filep, int cmd, unsigned long arg);
+static int esp_ulp_write(struct file *filep,
+                         const char *buffer,
+                         size_t buflen);
 
 /****************************************************************************
  * Private Data
@@ -54,6 +57,7 @@ static int esp_ulp_ioctl(struct file *filep, int cmd, unsigned long arg);
 
 static const struct file_operations g_esp_ulp_fops =
 {
+  .write = esp_ulp_write, /* write */
   .ioctl = esp_ulp_ioctl, /* ioctl */
 };
 
@@ -132,6 +136,33 @@ static int esp_ulp_ioctl(struct file *filep, int cmd, unsigned long arg)
         break;
     }
 
+  return ret;
+}
+
+/****************************************************************************
+ * Name: esp_ulp_write
+ *
+ * Description:
+ *   Load binary data into ULP.
+ *
+ * Input Parameters:
+ *   filep  - The pointer of file
+ *   buffer - Buffer that includes binary to run on ULP.
+ *   buflen - Length of the buffer
+ *
+ * Returned Value:
+ *   Returns OK on success; a negated errno value on failure
+ *
+ ****************************************************************************/
+
+static int esp_ulp_write(struct file *filep,
+                         const char *buffer,
+                         size_t buflen)
+{
+  int ret = ERROR;
+  ulp_lp_core_stop();
+  ret = ulp_lp_core_load_binary((const uint8_t *)buffer, buflen);
+  ulp_lp_core_run(&cfg);
   return ret;
 }
 
