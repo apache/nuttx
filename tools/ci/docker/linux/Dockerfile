@@ -70,6 +70,9 @@ RUN mkdir -p /tools/gn \
   && cd gn && ./build/gen.py \
   && cd out && ninja
 
+# Upgrade nodejs to the stable version we need before install zap
+RUN npm install -g n && n 20.10.0 node && hash -r
+
 ENV ZAP_INSTALL_PATH=/tools/zap_release
 RUN mkdir -p $ZAP_INSTALL_PATH \
   && cd $ZAP_INSTALL_PATH \
@@ -398,8 +401,8 @@ RUN pip3 install stringcase
 RUN pip3 install jinja2
 RUN pip3 install coloredlogs
 
-# Upgrade nodejs to the latest version
-RUN npm install -g n && n stable && hash -r
+# Upgrade nodejs to the stable version we need
+RUN npm install -g n && n 20.10.0 node && hash -r
 
 # Used to generate symbol table files
 
