@@ -111,6 +111,13 @@
 #include "rp2040_spi.h"
 #endif
 
+#if defined(CONFIG_ADC) && defined(CONFIG_ADC_ADS7046)
+#include <nuttx/analog/ads7046.h>
+#include <nuttx/analog/adc.h>
+#include "rp2040_spi.h"
+#include "rp2040_ads7046.h"
+#endif
+
 #if defined(CONFIG_RP2040_BOARD_HAS_WS2812) && defined(CONFIG_WS2812)
 #include "rp2040_ws2812.h"
 #endif
@@ -471,15 +478,15 @@ int rp2040_common_bringup(void)
 #endif
 
 #ifdef CONFIG_ADC_MCP3008
-  /* Register MCP3008 ADC. */
+  /* Register the MCP3008 ADC. */
 
-  struct spi_dev_s *spi = rp2040_spibus_initialize(0);
-  if (spi == NULL)
+  struct spi_dev_s *mcp3008_spi = rp2040_spibus_initialize(0);
+  if (mcp3008_spi == NULL)
     {
       syslog(LOG_ERR, "Failed to initialize SPI bus 0\n");
     }
 
-  struct adc_dev_s *mcp3008 = mcp3008_initialize(spi);
+  struct adc_dev_s *mcp3008 = mcp3008_initialize(mcp3008_spi);
   if (mcp3008 == NULL)
     {
       syslog(LOG_ERR, "Failed to initialize MCP3008\n");
@@ -489,6 +496,22 @@ int rp2040_common_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to register MCP3008 device driver: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_ADC_ADS7046
+  /* Register the ADS7046 ADC. */
+
+  struct spi_dev_s *ads7046_spi = rp2040_spibus_initialize(1);
+  if (ads7046_spi == NULL)
+    {
+      syslog(LOG_ERR, "Failed to initialize SPI bus 1\n");
+    }
+
+  ret = board_ads7046_initialize(ads7046_spi, 0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize ADS7046 driver: %d\n", ret);
     }
 #endif
 
