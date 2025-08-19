@@ -56,12 +56,15 @@
 
 long strtol(FAR const char *nptr, FAR char **endptr, int base)
 {
-  unsigned long accum = 0;
   long retval = 0;
   char sign = 0;
 
   if (nptr)
     {
+      /* Get the unsigned value */
+
+      retval = strtoul(nptr, endptr, base);
+
       /* Skip leading spaces */
 
       lib_skipspace(&nptr);
@@ -74,51 +77,22 @@ long strtol(FAR const char *nptr, FAR char **endptr, int base)
           nptr++;
         }
 
-      /* Get the unsigned value */
+      /* Check for overflow */
 
-      accum = strtoul(nptr, endptr, base);
-
-      /* Correct the sign of the result and check for overflow */
-
-      if (sign == '-')
+      if (sign == '-' && retval > 0)
         {
-          const unsigned long limit = ((unsigned long)-(LONG_MIN + 1)) + 1;
-
-          if (accum > limit)
-            {
-              set_errno(ERANGE);
-              retval = LONG_MIN;
-            }
-          else
-            {
-              retval = (accum == limit) ? LONG_MIN : -(long)accum;
-            }
+          set_errno(ERANGE);
+          retval = LONG_MIN;
         }
-      else
+      else if (sign != '-' && retval < 0)
         {
-          if (accum > LONG_MAX)
-            {
-              set_errno(ERANGE);
-              retval = LONG_MAX;
-            }
-          else
-            {
-              retval = accum;
-            }
+          set_errno(ERANGE);
+          retval = LONG_MAX;
         }
     }
-
-  /* Return the final pointer to the unused value */
-
-  if (endptr)
+  else if (endptr)
     {
-      if (sign)
-        {
-          if (*((*endptr) - 1) == sign)
-            {
-              (*endptr)--;
-            }
-        }
+      *endptr = NULL;
     }
 
   return retval;
