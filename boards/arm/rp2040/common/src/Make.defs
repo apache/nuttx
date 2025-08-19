@@ -113,6 +113,10 @@ ifeq ($(CONFIG_SENSORS_TMP112),y)
   CSRCS += rp2040_tmp112.c
 endif
 
+ifeq ($(CONFIG_ADC_ADS7046),y)
+  CSRCS += rp2040_ads7046.c
+endif
+
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src

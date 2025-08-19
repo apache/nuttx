@@ -133,6 +133,34 @@ the ``nuttx`` directory (again, consult the main :doc:`RP2040 documentation
 
    $ ./tools/configure.sh raspberrypi-pico:<configname>
 
+ads7046
+-------
+
+NuttShell configuration (console enabled in USB Port, at 115200 bps) with support for Texas Instruments ADS7046 ADC:
+
+.. list-table:: ADS7046 connections
+   :widths: auto
+   :header-rows: 1
+
+   * - ADS7046
+     - Raspberry Pi Pico
+   * - GND
+     - GND (Pin 3 or 38 or ...)
+   * - DVDD
+     - 3V3 OUT (Pin 36)
+   * - SCLK
+     - GP10 (SPI1 SCK) (Pin 14)
+   * - CS
+     - GP13 (SPI1 CSn) (Pin 17)
+   * - SDO
+     - GP12 (SPI1 RX) (Pin 16)
+
+.. code-block:: console
+
+   nsh> ads7046
+   ADS7046: hex=106, dec=262, adc_percentage=6%
+   nsh>
+
 audiopack
 ---------
 
