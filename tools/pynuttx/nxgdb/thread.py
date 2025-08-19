@@ -216,7 +216,7 @@ class Nxinfothreads(gdb.Command):
     def invoke(self, args, from_tty):
         npidhash = gdb.parse_and_eval("g_npidhash")
         pidhash = gdb.parse_and_eval("g_pidhash")
-        statenames = gdb.parse_and_eval("g_statenames")
+        statenames = gdb.parse_and_eval("nxsched_get_stateinfo::g_statenames")
 
         if utils.is_target_smp():
             gdb.write(
