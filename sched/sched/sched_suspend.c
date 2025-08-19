@@ -45,7 +45,6 @@
 struct suspend_arg_s
 {
   pid_t pid;
-  cpu_set_t saved_affinity;
   bool need_restore;
 };
 
@@ -73,7 +72,6 @@ static int nxsched_suspend_handler(FAR void *cookie)
 
   if (arg->need_restore)
     {
-      tcb->affinity = arg->saved_affinity;
       tcb->flags &= ~TCB_FLAG_CPU_LOCKED;
     }
 
@@ -161,12 +159,8 @@ void nxsched_suspend(FAR struct tcb_s *tcb)
           else
             {
               arg.pid = tcb->pid;
-              arg.saved_affinity = tcb->affinity;
               arg.need_restore = true;
-
               tcb->flags |= TCB_FLAG_CPU_LOCKED;
-              CPU_ZERO(&tcb->affinity);
-              CPU_SET(tcb->cpu, &tcb->affinity);
             }
 
           nxsched_smp_call_single(tcb->cpu, nxsched_suspend_handler, &arg);
