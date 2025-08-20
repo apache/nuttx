@@ -49,6 +49,12 @@
 
 static int ctrl_setup(FAR struct socket *psock);
 static int ctrl_close(FAR struct socket *psock);
+#ifdef CONFIG_NET_SOCKOPTS
+static int ctrl_getsockopt(FAR struct socket *psock, int level, int option,
+                           FAR void *value, FAR socklen_t *value_len);
+static int ctrl_setsockopt(FAR struct socket *psock, int level, int option,
+                           FAR const void *value, socklen_t value_len);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -68,7 +74,14 @@ static const struct sock_intf_s g_ctrl_sockif =
   NULL,             /* si_poll */
   NULL,             /* si_sendmsg */
   NULL,             /* si_recvmsg */
-  ctrl_close        /* si_close */
+  ctrl_close,       /* si_close */
+  NULL,             /* si_ioctl */
+  NULL,             /* si_socketpair */
+  NULL              /* si_shutdown */
+#ifdef CONFIG_NET_SOCKOPTS
+  , ctrl_getsockopt /* si_getsockopt */
+  , ctrl_setsockopt /* si_setsockopt */
+#endif
 };
 
 static struct socket_conn_s g_ctrl_conn =
@@ -111,6 +124,55 @@ static int ctrl_close(FAR struct socket *psock)
 {
   return 0;
 }
+
+/****************************************************************************
+ * Name: ctrl_getsockopt / ctrl_setsockopt
+ *
+ * Description:
+ *   Only support IPPROTO_IP and IPPROTO_IPV6.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_SOCKOPTS
+static int ctrl_getsockopt(FAR struct socket *psock, int level, int option,
+                           FAR void *value, FAR socklen_t *value_len)
+{
+  switch (level)
+    {
+#ifdef CONFIG_NET_IPv4
+      case IPPROTO_IP:/* IPv4 protocol socket options (see include/netinet/in.h) */
+        return ipv4_getsockopt(psock, option, value, value_len);
+#endif
+
+#ifdef CONFIG_NET_IPv6
+      case IPPROTO_IPV6:/* IPv6 protocol socket options (see include/netinet/in.h) */
+        return ipv6_getsockopt(psock, option, value, value_len);
+#endif
+
+      default:
+        return -ENOPROTOOPT;
+    }
+}
+
+static int ctrl_setsockopt(FAR struct socket *psock, int level, int option,
+                           FAR const void *value, socklen_t value_len)
+{
+  switch (level)
+    {
+#ifdef CONFIG_NET_IPv4
+      case IPPROTO_IP:/* IPv4 protocol socket options (see include/netinet/in.h) */
+        return ipv4_setsockopt(psock, option, value, value_len);
+#endif
+
+#ifdef CONFIG_NET_IPv6
+      case IPPROTO_IPV6:/* IPv6 protocol socket options (see include/netinet/in.h) */
+        return ipv6_setsockopt(psock, option, value, value_len);
+#endif
+      default:
+        return -ENOPROTOOPT;
+    }
+}
+#endif /* CONFIG_NET_SOCKOPTS */
 
 /****************************************************************************
  * Public Functions
