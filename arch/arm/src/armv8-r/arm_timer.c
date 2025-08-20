@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv8-r/arm_arch_timer.c
+ * arch/arm/src/armv8-r/arm_timer.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -37,7 +37,7 @@
 #include <nuttx/timers/arch_alarm.h>
 
 #include "arm_gic.h"
-#include "arm_arch_timer.h"
+#include "arm_timer.h"
 
 /****************************************************************************
  * Private Types
