@@ -164,17 +164,23 @@ Installation
 
 .. code-block:: console
 
-  $ git clone -b 2.1.1 https://github.com/raspberrypi/pico-sdk.git
+  $ git clone -b 2.2.0 --recurse-submodules https://github.com/raspberrypi/pico-sdk.git
 
-2. Download and install picotool
+2. Download and install ``picotool``
 
-  Instructions can be found here: https://github.com/raspberrypi/picotool
+   .. note::
 
-  If you are on Arch Linux, you can install the picotool through the AUR:
+      If not found at build time, this tool will also be automatically compiled
+      from the SDK sources. Manually downloading or compiling it is
+      `preferred <https://github.com/raspberrypi/pico-sdk/issues/1827>`__, though.
 
-.. code-block:: console
+   Instructions can be found here: https://github.com/raspberrypi/picotool
 
-  $ yay -S picotool
+   If you are on Arch Linux, you can also install ``picotool`` through the AUR:
+
+   .. code-block:: console
+
+      $ yay -S picotool
 
 3. Set PICO_SDK_PATH environment variable
 
