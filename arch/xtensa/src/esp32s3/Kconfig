@@ -276,6 +276,7 @@ endmenu # Cache config
 config ESP32S3_ULP_COPROC_ENABLED
 	bool "Enable Ultra Low Power (ULP) Coprocessor"
 	default n
+	select ESPRESSIF_USE_ULP_RISCV_CORE
 	---help---
 		Set to 'y' if you plan to load a firmware for the coprocessor.
 
