@@ -381,6 +381,24 @@ config ESPRESSIF_BOOTLOADER_MCUBOOT
 
 endmenu # Bootloader and Image Configuration
 
+menu "LP Core (Low-power core) Coprocessor Configuration"
+
+config ESPRESSIF_USE_ULP_RISCV_CORE
+	bool
+	depends on ARCH_CHIP_ESP32S3 || ARCH_CHIP_ESP32S2
+	default y if ARCH_CHIP_ESP32S2 && ESP32S2_ULP_COPROC_RESERVE_MEM > 0
+	default n
+
+config ESPRESSIF_ULP_RISCV_PROJECT_PATH
+	string "Path to ULP RISCV project (relative to nuttx root folder)"
+	depends on ESPRESSIF_USE_ULP_RISCV_CORE
+	default ""
+	---help---
+		Path to ULP RISCV project to include build system and run on ULP core.
+		This path can either be a .bin file or a project folder
+
+endmenu # LP Core (Low-power core) Coprocessor Configuration
+
 menu "Pulse Counter (PCNT) Configuration"
 	depends on ESP_PCNT
 
