@@ -31,11 +31,6 @@ Writing embedded business logic purely in C often means hundreds of lines of boi
 
 This shift doesn't just make development easier; it makes it faster. What used to take weeks in C can now be done in days. Lua's simplicity encourages rapid prototyping and quick iteration, which is essential in modern IoT and embedded development, where both time-to-market and security are critical. For a conceptual overview of why this hybrid development model is so powerful, check out the tutorial `Why Smart C Coders Love Lua <https://realtimelogic.com/articles/Using-Lua-for-Embedded-Development-vs-Traditional-C-Code>`_.
 
-.. figure:: https://realtimelogic.com/blogmedia/lots-of-embedded-c-code-cartoon-600.jpg
-   :align: center
-   :alt: Too much C code
-
-
 Getting Started
 ---------------
 
@@ -56,7 +51,6 @@ To install and configure **QEMU** and **aarch64-none-elf-gcc**, follow the instr
       $ make
 
    Running with QEMU::
-
       $ qemu-system-aarch64 -cpu cortex-a53 -smp 4 -nographic \
       -machine virt,virtualization=on,gic-version=3 \
       -chardev stdio,id=con,mux=on -serial chardev:con \

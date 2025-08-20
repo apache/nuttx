@@ -324,13 +324,13 @@ Running with QEMU:
 
 .. note:: Replace **/mnt/xxx** with your actual host directory path. This directory will be shared between your host system and the NuttX environment.
 
-Before running Xedge, you need to create and mount a filesystem that Xedge will use for storing configuration files and web content::
+Before running Xedge, you need to create and mount a filesystem that Xedge will use for storing configuration files and web content:
 
 .. code:: console
 
-      nsh> mkdir mnt
-      nsh> mount -t v9fs -o trans=virtio,tag=host mnt
-      nsh> mkdir /mnt/lfs
+   nsh> mkdir mnt
+   nsh> mount -t v9fs -o trans=virtio,tag=host mnt
+   nsh> mkdir /mnt/lfs
 
 Running Xedge in NuttX terminal
 
@@ -373,7 +373,9 @@ Running Xedge in NuttX terminal
 
 Launch your web browser and access 127.0.0.1:8080
 
-You should see the Xedge IDE, which is enabled in developer mode:
+You should see the Xedge IDE, which is enabled in developer mode.
+
+For more details about the xedge example, please refer to the `xedge_demo documentation <https://nuttx.apache.org/docs/latest/applications/examples/xedge_demo/index.html>`_.
 
 Single Core /w kernel mode (GICv3)
 ----------------------------------
