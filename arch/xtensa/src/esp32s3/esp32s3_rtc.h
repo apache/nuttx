@@ -515,6 +515,23 @@ int esp_rtc_clk_get_cpu_freq(void);
 void esp32s3_rtc_sleep_init(uint32_t flags);
 
 /****************************************************************************
+ * Name: esp32s3_rtc_ext1_prepare
+ *
+ * Description:
+ *   Configure RTC_EXT1 wakeup sources
+ *
+ * Input Parameters:
+ *   trigger_mode - trigger mode for RTC_EXT1 wakeup sources
+ *   rtc_gpio_mask - mask of GPIOs to be used as RTC_EXT1 wakeup sources
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void esp32s3_rtc_ext1_prepare(uint32_t trigger_mode, uint32_t rtc_gpio_mask);
+
+/****************************************************************************
  * Name: esp32s3_rtc_sleep_start
  *
  * Description:
