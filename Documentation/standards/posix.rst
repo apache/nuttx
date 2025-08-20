@@ -94,8 +94,8 @@ POSIX.1 Option Requirements:
           ``_POSIX_MEMLOCK_RANGE`` which is sufficient for devices without MMU,
           but doesn't meet the requirement for devices with MMU.
 .. [#fn4] Deprecated in new revisions of POSIX. Merged into other base options.
-.. [#fn5] Requred only for the development platform.
-          For PSE54 this requirement is also for execution platform whis is
+.. [#fn5] Required only for the development platform.
+          For PSE54 this requirement is also for execution platform which is
           not supported.
 
 Requirements for Other Standards:
@@ -2568,7 +2568,7 @@ _POSIX_MEMLOCK
 +--------------------------------+----------------+
 
 .. [#fn14] The function returns a success value but doesn't implement
-           the requred functionality.
+           the required functionality.
 
 _POSIX_MEMLOCK_RANGE
 --------------------
@@ -2582,7 +2582,7 @@ _POSIX_MEMLOCK_RANGE
 +--------------------------------+----------------+
 
 .. [#fn15] The function returns a success value but doesn't implement
-           the requred functionality.
+           the required functionality.
 
 _POSIX_MONOTONIC_CLOCK
 ----------------------
@@ -2920,7 +2920,7 @@ _POSIX_MEMORY_PROTECTION
 +--------------------------------+----------------+
 
 .. [#fn17] The function returns a success value but doesn't implement
-           the requred functionality.
+           the required functionality.
 
 _POSIX_PRIORITIZED_IO
 ---------------------
