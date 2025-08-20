@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv8-r/arm_arch_timer.h
+ * arch/arm/src/armv8-r/arm_timer.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_ARMV8_R_ARM_ARCH_TIMER_H
-#define __ARCH_ARM_SRC_ARMV8_R_ARM_ARCH_TIMER_H
+#ifndef __ARCH_ARM_SRC_ARMV8_R_ARM_TIMER_H
+#define __ARCH_ARM_SRC_ARMV8_R_ARM_TIMER_H
 
 /****************************************************************************
  * Included Files
@@ -57,4 +57,9 @@
 void arm_arch_timer_secondary_init(void);
 #endif
 
-#endif /* __ARCH_ARM_SRC_ARMV8_R_ARM_ARCH_TIMER_H */
+static inline uint64_t arm_arch_timer_get_cntfrq(void)
+{
+  return CP15_GET(CNTFRQ);
+}
+
+#endif /* __ARCH_ARM_SRC_ARMV8_R_ARM_TIMER_H */
