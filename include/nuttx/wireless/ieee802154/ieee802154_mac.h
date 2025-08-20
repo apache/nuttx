@@ -313,34 +313,6 @@ enum ieee802154_status_e
   IEEE802154_STATUS_LIMITREACHED,
 };
 
-static const char *IEEE802154_STATUS_STRING[] =
-{
-  "Success",
-  "Out of capacity",
-  "Denied",
-  "Failure",
-  "Beacon loss",
-  "Channel access failure",
-  "Disable TRX failure",
-  "Failed security check",
-  "Frame too long",
-  "Invalid GTS",
-  "Invalid handle",
-  "Invalid parameter",
-  "No ack",
-  "No beacon",
-  "No data",
-  "No short address",
-  "PAN ID conflict",
-  "Realignment",
-  "Transaction expired",
-  "Transaction overflow",
-  "Tx active",
-  "Unavailable key",
-  "Unsupported attribute",
-  "Limit reached",
-};
-
 /* IEEE 802.15.4 PHY/MAC PIB attributes IDs */
 
 enum ieee802154_attr_e
@@ -1745,6 +1717,12 @@ extern "C"
 #else
 #define EXTERN extern
 #endif
+
+/*****************************************************************************
+ * Public Data
+ *****************************************************************************/
+
+EXTERN FAR const char *g_ieee802154_status_string[];
 
 /*****************************************************************************
  * Public Function Prototypes
