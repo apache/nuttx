@@ -153,6 +153,10 @@
 #  include "espressif/esp_sha.h"
 #endif
 
+#ifdef CONFIG_ESPRESSIF_USE_ULP_RISCV_CORE
+#  include "espressif/esp_ulp.h"
+#endif
+
 #include "esp32s3-devkit.h"
 
 /****************************************************************************
@@ -628,6 +632,15 @@ int esp32s3_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: esp_nxdiag_initialize failed: %d\n", ret);
     }
+#endif
+
+#ifdef CONFIG_ESPRESSIF_USE_ULP_RISCV_CORE
+
+  /* ULP initialization should be the handled later than
+   * peripherals to use supported peripherals properly on ULP core
+   */
+
+  esp_ulp_init();
 #endif
 
   /* If we got here then perhaps not all initialization was successful, but
