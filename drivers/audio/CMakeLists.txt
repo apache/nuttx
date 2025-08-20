@@ -85,6 +85,10 @@ if(CONFIG_DRIVERS_AUDIO)
     list(APPEND SRCS audio_null.c)
   endif()
 
+  if(CONFIG_AUDIO_FAKE)
+    list(APPEND SRCS audio_fake.c)
+  endif()
+
   if(CONFIG_AUDIO_TONE)
     list(APPEND SRCS tone.c)
   endif()
