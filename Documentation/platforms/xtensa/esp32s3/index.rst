@@ -610,6 +610,18 @@ using WPA2.
 
 The ``dhcpd_start`` is necessary to let your board to associate an IP to your smartphone.
 
+Power Management
+================
+
+.. tip:: Boards usually expose a pm defconfig which enables power management
+  features. On ESP32-S3, different low power modes can be used to reduce power
+  consumption depending on the application.
+
+When using this board configuration profile, two wakeup sources are available:
+
+- Timer (mandatory) : Every time the board enters sleep mode, a timer is started. Once the defined time is reached, the board wakes up.
+- EXT1 (optional): The board wakes up whenever the selected EXT1 GPIO is asserted to the configured level.
+
 PSRAM
 -----
 

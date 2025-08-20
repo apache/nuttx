@@ -637,6 +637,16 @@ Enables PM support. You can define standby mode and sleep mode delay time::
            (20) PM_SLEEP delay (seconds)
            (0)  PM_SLEEP delay (nanoseconds)
 
+You can also define an EXT1 wakeup for both sleep modes by selecting which RTC
+GPIO will be used and the logic level that will trigger it::
+    
+    $ make menuconfig
+    -> Board Selection
+        -> [*] PM EXT1 Wakeup
+                  PM EXT1 Wakeup Sources  --->
+                    [ ] RTC_GPIO<N>
+              (0) PM EXT1 Wakeup Trigger Mode
+
 Before switching PM status, you need to query the current PM status::
 
     nsh> pmconfig

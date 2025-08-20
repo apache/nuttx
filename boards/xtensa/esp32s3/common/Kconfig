@@ -80,6 +80,158 @@ endchoice # ESP32S3_SPIFLASH_FS
 
 if PM
 
+config PM_EXT1_WAKEUP
+	bool "PM EXT1 Wakeup"
+	default n
+	---help---
+		Enable EXT1 wakeup functionality.
+		This allows the system to wake up from PM_STANDBY or PM_SLEEP
+		when a GPIO pin configured as an EXT1 wakeup source is triggered.
+
+if PM_EXT1_WAKEUP
+
+menu "PM EXT1 Wakeup Sources"
+
+config PM_EXT1_WAKEUP_RTC_GPIO0
+	bool "RTC_GPIO0"
+	default n
+	---help---
+		Enable RTC GPIO0 as an EXT1 wakeup source.
+
+config PM_EXT1_WAKEUP_RTC_GPIO1
+	bool "RTC_GPIO1"
+	default n
+	---help---
+		Enable RTC GPIO1 as an EXT1 wakeup source.
+
+config PM_EXT1_WAKEUP_RTC_GPIO2
+	bool "RTC_GPIO2"
+	default n
+	---help---
+		Enable RTC GPIO2 as an EXT1 wakeup source.
+
+config PM_EXT1_WAKEUP_RTC_GPIO3
+	bool "RTC_GPIO3"
+	default n
+	---help---
+		Enable RTC GPIO3 as an EXT1 wakeup source.
+
+config PM_EXT1_WAKEUP_RTC_GPIO4
+	bool "RTC_GPIO4"
+	default n
+	---help---
+		Enable RTC GPIO4 as an EXT1 wakeup source.
+
+config PM_EXT1_WAKEUP_RTC_GPIO5
+	bool "RTC_GPIO5"
+	default n
+	---help---
+		Enable RTC GPIO5 as an EXT1 wakeup source.
+
+config PM_EXT1_WAKEUP_RTC_GPIO6
+	bool "RTC_GPIO6"
+	default n
+	---help---
+		Enable RTC GPIO6 as an EXT1 wakeup source.
+
+config PM_EXT1_WAKEUP_RTC_GPIO7
+	bool "RTC_GPIO7"
+	default n
+	---help---
+		Enable RTC GPIO7 as an EXT1 wakeup source.
+
+config PM_EXT1_WAKEUP_RTC_GPIO8
+	bool "RTC_GPIO8"
+	default n
+	---help---
+		Enable RTC GPIO8 as an EXT1 wakeup source.
+
+config PM_EXT1_WAKEUP_RTC_GPIO9
+	bool "RTC_GPIO9"
+	default n
+	---help---
+		Enable RTC GPIO9 as an EXT1 wakeup source.
+
+config PM_EXT1_WAKEUP_RTC_GPIO10
+	bool "RTC_GPIO10"
+	default n
+	---help---
+		Enable RTC GPIO10 as an EXT1 wakeup source.
+
+config PM_EXT1_WAKEUP_RTC_GPIO11
+	bool "RTC_GPIO11"
+	default n
+	---help---
+		Enable RTC GPIO11 as an EXT1 wakeup source.
+
+config PM_EXT1_WAKEUP_RTC_GPIO12
+	bool "RTC_GPIO12"
+	default n
+	---help---
+		Enable RTC GPIO12 as an EXT1 wakeup source.
+
+config PM_EXT1_WAKEUP_RTC_GPIO13
+	bool "RTC_GPIO13"
+	default n
+	---help---
+		Enable RTC GPIO13 as an EXT1 wakeup source.
+
+config PM_EXT1_WAKEUP_RTC_GPIO14
+	bool "RTC_GPIO14"
+	default n
+	---help---
+		Enable RTC GPIO14 as an EXT1 wakeup source.
+
+config PM_EXT1_WAKEUP_RTC_GPIO15
+	bool "RTC_GPIO15"
+	default n
+	---help---
+		Enable RTC GPIO15 as an EXT1 wakeup source.
+
+config PM_EXT1_WAKEUP_RTC_GPIO16
+	bool "RTC_GPIO16"
+	default n
+	---help---
+		Enable RTC GPIO16 as an EXT1 wakeup source.
+
+config PM_EXT1_WAKEUP_RTC_GPIO17
+	bool "RTC_GPIO17"
+	default n
+	---help---
+		Enable RTC GPIO17 as an EXT1 wakeup source.
+
+config PM_EXT1_WAKEUP_RTC_GPIO18
+	bool "RTC_GPIO18"
+	default n
+	---help---
+		Enable RTC GPIO18 as an EXT1 wakeup source.
+
+config PM_EXT1_WAKEUP_RTC_GPIO19
+	bool "RTC_GPIO19"
+	default n
+	---help---
+		Enable RTC GPIO19 as an EXT1 wakeup source.
+
+config PM_EXT1_WAKEUP_RTC_GPIO20
+	bool "RTC_GPIO20"
+	default n
+	---help---
+		Enable RTC GPIO20 as an EXT1 wakeup source.
+
+endmenu # PM_EXT1_WAKEUP_SOURCES
+
+
+config PM_EXT1_WAKEUP_TRIGGER_MODE
+	int "PM EXT1 Wakeup Trigger Mode"
+	range 0 1
+	default 0
+	---help---
+		Select EXT1 wakeup mode:
+		0 = Wakeup when any selected GPIO is LOW
+		1 = Wakeup when any selected GPIO is HIGH
+
+endif # PM_EXT1_WAKEUP
+
 config PM_ALARM_SEC
 	int "PM_STANDBY delay (seconds)"
 	default 15
