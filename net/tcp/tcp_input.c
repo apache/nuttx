@@ -744,6 +744,12 @@ static void tcp_input(FAR struct net_driver_s *dev, uint8_t domain,
   conn = tcp_active(dev, tcp);
   if (conn)
     {
+      uint32_t seq;
+      uint32_t rcvseq;
+
+      seq = tcp_getsequence(tcp->seqno);
+      rcvseq = tcp_getsequence(conn->rcvseq);
+
       /* RFC793, 1) page 37 Reset Processing: "In all states except
        * SYN-SENT, all reset (RST) segments are validated by checking
        * their SEQ-fields."
@@ -757,12 +763,8 @@ static void tcp_input(FAR struct net_driver_s *dev, uint8_t domain,
           ((conn->tcpstateflags & TCP_STATE_MASK) >= TCP_SYN_RCVD &&
           (conn->tcpstateflags & TCP_STATE_MASK) <= TCP_LAST_ACK))
         {
-          uint32_t seq;
-          uint32_t rcvseq;
           uint32_t endseq;
 
-          seq = tcp_getsequence(tcp->seqno);
-          rcvseq = tcp_getsequence(conn->rcvseq);
           endseq = seq + dev->d_len - iplen - ((tcp->tcpoffset >> 4) << 2);
           if ((tcp->flags & (TCP_SYN | TCP_FIN)) != 0)
             {
@@ -794,6 +796,30 @@ static void tcp_input(FAR struct net_driver_s *dev, uint8_t domain,
         {
           nwarn("WARNING: SYN in TCP_SYN_RCVD\n");
           goto reset;
+        }
+      else if ((conn->tcpstateflags & TCP_STATE_MASK) == TCP_SYN_RCVD &&
+               (tcp->flags & TCP_SYN) != 0 && (tcp->flags & TCP_RST) == 0)
+        {
+          if (seq != rcvseq - 1)
+            {
+#ifdef CONFIG_NET_STATISTICS
+              g_netstats.tcp.synrst++;
+#endif
+              tcp_reset(dev, conn);
+              conn->tcpstateflags = TCP_CLOSED;
+              nwarn("WARNING: RESET in TCP_SYN_RCVD\n");
+
+              /* We must free this TCP connection structure; this connection
+               * will never be established.  There should only be one
+               * reference on this connection when we allocated for the
+               * connection.
+               */
+
+              DEBUGASSERT(conn->crefs == 1);
+              conn->crefs = 0;
+              tcp_free(conn);
+              return;
+            }
         }
       else
         {
