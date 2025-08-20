@@ -95,6 +95,26 @@ void up_enable_irq(int irq)
   IfxSrc_enable(src);
 }
 
+#ifdef CONFIG_ARCH_HAVE_IRQTRIGGER
+
+/****************************************************************************
+ * Name: up_trigger_irq
+ *
+ * Description:
+ *   Trigger an IRQ by software.
+ *
+ ****************************************************************************/
+
+void up_trigger_irq(int irq, cpu_set_t cpuset)
+{
+  (void) cpuset;
+  volatile Ifx_SRC_SRCR *src = &SRC_CPU_CPU0_SB + irq;
+
+  IfxSrc_setRequest(src);
+}
+
+#endif
+
 /****************************************************************************
  * Name: tricore_ack_irq
  *
