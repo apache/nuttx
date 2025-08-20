@@ -744,10 +744,49 @@ static void tcp_input(FAR struct net_driver_s *dev, uint8_t domain,
   conn = tcp_active(dev, tcp);
   if (conn)
     {
-      /* We found an active connection.. Check for the subsequent SYN
+      /* RFC793, 1) page 37 Reset Processing: "In all states except
+       * SYN-SENT, all reset (RST) segments are validated by checking
+       * their SEQ-fields."
+       * 2) page 69 In all states except SYN-SENT: "If an incoming
+       * segment is not acceptable, an acknowledgment should be sent
+       * in reply (unless the RST bit is set, if so drop the segment
+       * and return)".
+       */
+
+      if ((conn->tcpstateflags & TCP_STATE_MASK) != TCP_SYN_SENT &&
+          ((conn->tcpstateflags & TCP_STATE_MASK) >= TCP_SYN_RCVD &&
+          (conn->tcpstateflags & TCP_STATE_MASK) <= TCP_LAST_ACK))
+        {
+          uint32_t seq;
+          uint32_t rcvseq;
+          uint32_t endseq;
+
+          seq = tcp_getsequence(tcp->seqno);
+          rcvseq = tcp_getsequence(conn->rcvseq);
+          endseq = seq + dev->d_len - iplen - ((tcp->tcpoffset >> 4) << 2);
+          if ((tcp->flags & (TCP_SYN | TCP_FIN)) != 0)
+            {
+              endseq += 1;
+            }
+
+          if (TCP_SEQ_LT(endseq, rcvseq) || TCP_SEQ_GT(seq, conn->rcv_adv))
+            {
+              if ((tcp->flags & TCP_RST) == 0)
+                {
+                  tcp_send(dev, conn, TCP_ACK, tcpiplen);
+                  return;
+                }
+              else
+                {
+                  goto drop;
+                }
+            }
+        }
+
+      /* RFC793,p71 In all states except SYN-SENT: "If the SYN is in the
+       * window it is an error, send a reset", except the subsequent SYN
        * arriving in TCP_SYN_RCVD state after the SYNACK packet was
-       * lost.  To avoid other issues,  reset any active connection
-       * where a SYN arrives in a state != TCP_SYN_RCVD.
+       * lost.
        */
 
       if ((conn->tcpstateflags & TCP_STATE_MASK) != TCP_SYN_RCVD &&
