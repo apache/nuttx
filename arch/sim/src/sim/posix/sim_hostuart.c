@@ -95,6 +95,8 @@ static void restoremode(void)
 
 void host_uart_start(void)
 {
+  int flags;
+
   /* Get the current stdin terminal mode */
 
   tcgetattr(0, &g_cooked);
@@ -102,6 +104,12 @@ void host_uart_start(void)
   /* Put stdin into raw mode */
 
   setrawmode(0);
+
+  flags = host_uninterruptible(fcntl, 0, F_GETFL, 0);
+  if (flags > 0)
+    {
+      host_uninterruptible_no_return(fcntl, 0, F_SETFL, flags | O_NONBLOCK);
+    }
 
   /* Restore the original terminal mode before exit */
 
