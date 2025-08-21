@@ -660,11 +660,17 @@
 
 #define SENSOR_TYPE_INCLINOMETER                    66
 
+/* Ambient Light Uncalibrated
+ * The ambient light sensor uncalibrated value is returned in SI units lux.
+ */
+
+#define SENSOR_TYPE_LIGHT_UNCALIBRATED              67
+
 /* The total number of sensor
  * please increase it if you added a new sensor type!
  */
 
-#define SENSOR_TYPE_COUNT                           67
+#define SENSOR_TYPE_COUNT                           68
 
 /* The additional sensor open flags */
 
