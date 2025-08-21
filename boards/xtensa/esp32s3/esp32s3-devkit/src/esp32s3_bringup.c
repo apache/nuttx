@@ -116,6 +116,10 @@
 #  endif
 #endif
 
+#ifdef CONFIG_SPI_SLAVE_DRIVER
+#include "esp32s3_board_spislavedev.h"
+#endif
+
 #if defined(CONFIG_ESP32S3_SDMMC) || defined(CONFIG_MMCSD_SPI)
 #include "esp32s3_board_sdmmc.h"
 #endif
@@ -188,15 +192,34 @@ int esp32s3_bringup(void)
 #endif
 
 #if defined(CONFIG_ESP32S3_SPI) && defined(CONFIG_SPI_DRIVER)
-  #ifdef CONFIG_ESP32S3_SPI2
-  ret = board_spidev_initialize(ESP32S3_SPI2);
+
+  #if defined(CONFIG_SPI_SLAVE_DRIVER) && defined(CONFIG_ESP32S3_SPI2)
+  ret = board_spislavedev_initialize(ESP32S3_SPI2);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: Failed to init spidev 2: %d\n", ret);
+      syslog(LOG_ERR, "Failed to initialize SPI%d Slave driver: %d\n",
+             ESP32S3_SPI2, ret);
     }
   #endif
 
-  #ifdef CONFIG_ESP32S3_SPI3
+  #if defined(CONFIG_SPI_SLAVE_DRIVER) && defined(CONFIG_ESP32S3_SPI3)
+  ret = board_spislavedev_initialize(ESP32S3_SPI3);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize SPI%d Slave driver: %d\n",
+             ESP32S3_SPI2, ret);
+    }
+  #endif
+
+  #if defined(CONFIG_ESP32S3_SPI2) && !defined(CONFIG_SPI_SLAVE_DRIVER)
+  ret = board_spidev_initialize(ESP32S3_SPI2);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to init spidev 3: %d\n", ret);
+    }
+  #endif
+
+  #if defined(CONFIG_ESP32S3_SPI3) && !defined(CONFIG_SPI_SLAVE_DRIVER)
   ret = board_spidev_initialize(ESP32S3_SPI3);
   if (ret < 0)
     {

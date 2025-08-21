@@ -21,14 +21,14 @@ Peripheral     Notes
 ============== =====
 GPIO           See Supported Boards documentation for available pins.
 UART           GPIO 0 (UART0 TX) and GPIO 1 (UART0 RX) are often used for the console.
-I2C            
-SPI         
-DMAC        
-PWM         
-USB         
+I2C
+SPI
+DMAC
+PWM
+USB
 PIO            RP2040 Programmable I/O
-IRQs        
-DMA         
+IRQs
+DMA
 Clock Output
 ws2812         Smart pixels (e.g. Neopixel)
 Flash ROM Boot
@@ -37,7 +37,7 @@ BMP180         Requires I2C0
 INA219         Requires I2C0
 ============== =====
 
-The Pico Display Pack (ST7789 LCD) and Pico Audio Pack (PCM5100A I2S DAC) are 
+The Pico Display Pack (ST7789 LCD) and Pico Audio Pack (PCM5100A I2S DAC) are
 also available.
 
 There is currently no direct user mode access to these RP2040 hardware features:
@@ -59,16 +59,20 @@ Installation
 1. Download the Raspberry Pi Pico SDK:
 
    .. code:: console
-   
-      $ git clone -b 2.0.0 https://github.com/raspberrypi/pico-sdk.git
 
-2. Download and install the ``picotool``
+      $ git clone -b 2.2.0 --recurse-submodules https://github.com/raspberrypi/pico-sdk.git
 
-   Instructions for installing/building it can be found here:
-   https://github.com/raspberrypi/picotool
+2. Download and install ``picotool``
 
-   If you are on Arch Linux, you can also install the ``picotool`` through the
-   AUR:
+   .. note::
+
+      If not found at build time, this tool will also be automatically compiled
+      from the SDK sources. Manually downloading or compiling it is
+      `preferred <https://github.com/raspberrypi/pico-sdk/issues/1827>`__, though.
+
+   Instructions can be found here: https://github.com/raspberrypi/picotool
+
+   If you are on Arch Linux, you can also install ``picotool`` through the AUR:
 
    .. code-block:: console
 
@@ -83,12 +87,13 @@ Installation
    You will have to do this every time you restart the terminal where you are
    building NuttX, so it might be best to include this command in your
    ``bashrc`` so NuttX's build system always knows where to find the SDK.
+   You may also want to look into tools like `direnv <https://direnv.net/>`__.
 
 4. Download NuttX and NuttX applications. These must both be contained in the
    same directory:
 
    .. code:: console
-  
+
       $ git clone https://github.com/apache/nuttx.git nuttx
       $ git clone https://github.com/apache/nuttx-apps.git apps
 
@@ -130,7 +135,7 @@ Building NuttX
 5. Build NuttX:
 
    .. code:: console
- 
+
       $ make
 
 The output of the build process will be a file called ``nuttx.uf2``, which you

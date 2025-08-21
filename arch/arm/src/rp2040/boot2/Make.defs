@@ -39,7 +39,8 @@ BOOT2CFLAGS += -I$(PICO_SDK_PATH)/src/rp2040/hardware_regs/include
 BOOT2CFLAGS += -I$(PICO_SDK_PATH)/src/rp2_common/hardware_base/include
 BOOT2CFLAGS += -I$(PICO_SDK_PATH)/src/common/pico_base_headers/include
 BOOT2CFLAGS += -I$(PICO_SDK_PATH)/src/boards/include
-BOOT2CFLAGS += -I$(PICO_SDK_PATH)/src/rp2040/pico_platform/include
+BOOT2CFLAGS += -I$(PICO_SDK_PATH)/src/rp2040/pico_platform/include					# pico-sdk <2.2.0
+BOOT2CFLAGS += -I$(PICO_SDK_PATH)/src/rp2_common/pico_platform_common/include		# pico-sdk >=2.2.0
 BOOT2CFLAGS += -I$(PICO_SDK_PATH)/src/rp2_common/pico_platform_compiler/include
 BOOT2CFLAGS += -I$(PICO_SDK_PATH)/src/rp2_common/pico_platform_sections/include
 BOOT2CFLAGS += -I$(PICO_SDK_PATH)/src/rp2_common/pico_platform_panic/include
