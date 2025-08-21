@@ -44,6 +44,7 @@ BOOT2CFLAGS += -I$(PICO_SDK_PATH)/src/rp2_common/pico_platform_common/include		#
 BOOT2CFLAGS += -I$(PICO_SDK_PATH)/src/rp2_common/pico_platform_compiler/include
 BOOT2CFLAGS += -I$(PICO_SDK_PATH)/src/rp2_common/pico_platform_sections/include
 BOOT2CFLAGS += -I$(PICO_SDK_PATH)/src/rp2_common/pico_platform_panic/include
+BOOT2CFLAGS += -Wl,--no-warn-rwx-segments
 
 $(BOOT_STAGE2).S: %.S: %.bin
 	python3 $(BOOT2DIR)/pad_checksum -s 0xffffffff $< $@
