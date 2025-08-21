@@ -37,6 +37,8 @@
 #  include <nuttx/pgalloc.h>
 #endif
 
+#include <arch/barriers.h>
+
 /****************************************************************************
  * Pre-processor Prototypes
  ****************************************************************************/
@@ -112,6 +114,11 @@ do { \
 #ifdef CONFIG_ARM_TOOLCHAIN_ARMCLANG
 #  define _sinit   Image$$init_section$$Base
 #  define _einit   Image$$init_section$$Limit
+#endif
+
+#ifdef CONFIG_ARM_HAVE_WFE_SEV
+#  define UP_WFE() __asm__ __volatile__ ("wfe" : : : "memory")
+#  define UP_SEV() __asm__ __volatile__ ("sev" : : : "memory")
 #endif
 
 /****************************************************************************

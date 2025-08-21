@@ -53,10 +53,6 @@ if(CONFIG_ENABLE_ALL_SIGNALS)
   list(APPEND SRCS tricore_schedulesigaction.c tricore_sigdeliver.c)
 endif()
 
-if(CONFIG_SPINLOCK)
-  list(APPEND SRCS tricore_testset.c)
-endif()
-
 if(CONFIG_ARCH_USE_MPU)
   list(APPEND SRCS tricore_mpu.c)
 endif()

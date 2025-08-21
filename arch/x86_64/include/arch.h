@@ -35,9 +35,11 @@
 
 #include <sys/types.h>
 
+#include <arch/barriers.h>
+
 /* Include chip-specific definitions */
 
-#  include <arch/chip/arch.h>
+#include <arch/chip/arch.h>
 
 /* Include architecture-specific definitions */
 

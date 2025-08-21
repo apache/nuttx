@@ -50,7 +50,7 @@ SMP can be enabled on NuttX with the following configuration settings:
   This setting provides the stack size for the IDLE task on CPUS 1
   through ``(CONFIG_SMP_NCPUS-1)``.
 
-This section provides the origin design specification for the implemention.
+This section provides the origin design specification for the implementation.
 As a result, you may find that the test uses future and conditional tenses
 when describing the implementation of SMP on NuttX.
 
@@ -189,7 +189,7 @@ The Current Task
 ----------------
 
 There is a lot of logic in the RTOS now that obtains the TCB for the currently
-excuting task by examining the head of the ``g_readytorun`` list.
+executing task by examining the head of the ``g_readytorun`` list.
 You will see this assignment in many places, both in the core OS logic
 in ``nuttx/sched`` but also in architecture-specific logic under
 ``nuttx/arch``:
@@ -495,11 +495,9 @@ The following new, internal OS interfaces are proposed:
     void spin_unlock(FAR spinlock_t *lock);
 
 Where the type ``spinlock_t`` is defined in MCU-specific header files.
-These new spinlock interfaces would also use the MCU-specific interface:
-
-.. code-block:: c
-
-    spinlock_t up_testset(FAR spinlock_t *lock);
+These spinlock interfaces are implemented using the generic atomic
+operations provided by :file:`include/nuttx/atomic.h`
+(e.g. :c:func:`atomic_xchg_acquire`, :c:func:`atomic_cmpxchg_acquire`).
 
 .. note::
 
@@ -509,7 +507,7 @@ These new spinlock interfaces would also use the MCU-specific interface:
   Yes, probably. One solution might be lock the thread
   to a CPU if it holds the lock?
 
-There is also a risk is that the thread holding the lock will be pre-empted
+There is also a risk is that the thread holding the lock will be preempted
 by the OS scheduler while holding the lock. If this happens, other threads
 on other CPUs will be left spinning (repeatedly trying to acquire the lock),
 while the thread holding the lock is not making progress towards releasing it.
@@ -586,7 +584,7 @@ CPU resources.
 Thus, ``sched_lock()`` and its companion, ``sched_unlcok()``,
 are used to implement some critical sections.
 
-Currnetly, Pre-emption is disabled using a simple lockcount in the TCB.
+Currently, Pre-emption is disabled using a simple lockcount in the TCB.
 When the scheduling is locked, the lockcount is incremented;
 when the scheduler is unlocked, the lockcount is decremented.
 If the lockcount for the task at the head of the ``g_readytorun``
@@ -833,7 +831,7 @@ in ``sched.h``.
   int sched_getaffinity(pid_t pid, size_t cpusetsize, FAR cpu_set_t *mask);
   #endif
 
-There are similar interfaces for a ``pthread`` prototyped in ``phtread.h``:
+There are similar interfaces for a ``pthread`` prototyped in ``pthread.h``:
 
 .. code-block:: c
 

@@ -34,7 +34,3 @@ CMN_CSRCS += sparc_usestack.c sparc_tcbinfo.c
 ifeq ($(CONFIG_STACK_COLORATION),y)
 CMN_CSRCS += sparc_checkstack.c
 endif
-
-ifeq ($(CONFIG_SPINLOCK),y)
-CMN_CSRCS += sparc_testset.c
-endif

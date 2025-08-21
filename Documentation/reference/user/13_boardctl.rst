@@ -228,18 +228,3 @@ Graphics
 
    :dependencies: Base NX terminal logic provides :c:func:`nxterm_ioctl_tap`.
 
-Testing
--------
-
-.. c:macro:: BOARDIOC_TESTSET
-
-   Access architecture-specific up_testset() operation
-
-   :Argument: A pointer to a write-able spinlock object. On success
-     the  preceding spinlock state is returned: 0=unlocked,
-     1=locked.
-
-   :configuration: CONFIG_BOARDCTL_TESTSET
-
-   :dependencies: Architecture-specific logic provides :c:func:`up_testset`.
-

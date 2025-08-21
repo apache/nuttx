@@ -110,7 +110,6 @@ config ARCH_SIM
 	select ARCH_HAVE_SYSCALL_HOOKS
 	select ARCH_HAVE_TICKLESS
 	select ARCH_HAVE_POWEROFF
-	select ARCH_HAVE_TESTSET
 	select ARCH_HAVE_VFORK if !HOST_WINDOWS
 	select ARCH_HAVE_SETJMP
 	select ARCH_HAVE_CUSTOMOPT
@@ -141,7 +140,6 @@ config ARCH_X86_64
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_DPFPU
 	select ARCH_HAVE_MULTICPU
-	select ARCH_HAVE_TESTSET
 	select ARCH_HAVE_INTERRUPTSTACK
 	select ARCH_HAVE_CUSTOMOPT
 	select ARCH_HAVE_THREAD_LOCAL
@@ -624,20 +622,7 @@ config ARCH_HAVE_DYNAMIC_UDELAY
 		after a failure - the implementation should always re-read current
 		hardware settings as anything stored in memory may be corrupted.)
 
-config ARCH_HAVE_TESTSET
-	bool
-	default n
-
-config ARCH_HAVE_CUSTOM_TESTSET
-	bool
-	default n
-	select ARCH_HAVE_TESTSET
-
 config ARCH_HAVE_THREAD_LOCAL
-	bool
-	default n
-
-config ARCH_HAVE_FETCHADD
 	bool
 	default n
 
