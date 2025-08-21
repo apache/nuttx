@@ -256,7 +256,7 @@ static int ota_get_bootseq(struct mtd_dev_priv *dev, uint32_t *seqptr)
         }
     }
 
-  finfo("seq=%u\n", seq);
+  finfo("seq=%" PRIu32 "\n", seq);
 
   if (seq > 0)
     {
@@ -345,7 +345,8 @@ static int ota_set_bootseq(struct mtd_dev_priv *dev, int num)
         ret = MTD_ERASE(dev->mtd_part, sec, 1);
         if (ret != 1)
           {
-            ferr("ERROR: Failed to erase OTA%d data error=%d\n", sec, ret);
+            ferr("ERROR: Failed to erase OTA%" PRId32 "data error=%d\n",
+                  sec, ret);
             return -EIO;
           }
 
@@ -377,7 +378,7 @@ static int ota_set_bootseq(struct mtd_dev_priv *dev, int num)
             kmm_free(buffer);
             if (ret != blkcnt)
               {
-                ferr("ERROR: Failed to write OTA%d data error=%d\n",
+                ferr("ERROR: Failed to write OTA%" PRId32 "data error=%d\n",
                       sec, ret);
                 return -EIO;
               }
@@ -389,7 +390,7 @@ static int ota_set_bootseq(struct mtd_dev_priv *dev, int num)
                             (uint8_t *)&ota_data);
             if (ret != sizeof(struct ota_data_entry))
               {
-                ferr("ERROR: Failed to write OTA%d data error=%d\n",
+                ferr("ERROR: Failed to write OTA%" PRId32 "data error=%d\n",
                       sec, ret);
                 return -1;
               }
@@ -432,7 +433,8 @@ static int ota_invalidate_bootseq(struct mtd_dev_priv *dev, int num)
         ret = MTD_ERASE(dev->mtd_part, sec, 1);
         if (ret != 1)
           {
-            ferr("ERROR: Failed to erase OTA%d data error=%d\n", sec, ret);
+            ferr("ERROR: Failed to erase OTA%" PRId32 "data error=%d\n",
+                  sec, ret);
             return -EIO;
           }
 
