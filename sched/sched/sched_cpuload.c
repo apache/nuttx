@@ -90,10 +90,6 @@ volatile clock_t g_cpuload_total;
  * Private Data
  ****************************************************************************/
 
-#ifdef CONFIG_SCHED_CPULOAD_SYSCLK
-static struct wdog_s g_cpuload_wdog;
-#endif
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -287,7 +283,9 @@ int clock_cpuload(int pid, FAR struct cpuload_s *cpuload)
 #ifdef CONFIG_SCHED_CPULOAD_SYSCLK
 void cpuload_init(void)
 {
-  wd_start(&g_cpuload_wdog, CPULOAD_SAMPLING_PERIOD, cpuload_callback,
-           (wdparm_t)&g_cpuload_wdog);
+  static struct wdog_s cpuload_wdog;
+
+  wd_start(&cpuload_wdog, CPULOAD_SAMPLING_PERIOD, cpuload_callback,
+           (wdparm_t)&cpuload_wdog);
 }
 #endif
