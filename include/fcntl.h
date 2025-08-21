@@ -160,13 +160,6 @@
 #define F_SEAL_WRITE        0x0008 /* Prevent writes */
 #define F_SEAL_FUTURE_WRITE 0x0010 /* Prevent future writes while mapped */
 
-/* int creat(const char *path, mode_t mode);
- *
- * is equivalent to open with O_WRONLY|O_CREAT|O_TRUNC.
- */
-
-#define creat(path, mode) open(path, O_WRONLY|O_CREAT|O_TRUNC, mode)
-
 #if defined(CONFIG_FS_LARGEFILE)
 #  define F_GETLK64         F_GETLK
 #  define F_SETLK64         F_SETLK
@@ -215,6 +208,7 @@ extern "C"
 
 /* POSIX-like File System Interfaces */
 
+int creat(FAR const char *pathname, mode_t mode);
 int open(FAR const char *path, int oflag, ...);
 int openat(int dirfd, FAR const char *path, int oflag, ...);
 int fcntl(int fd, int cmd, ...);
