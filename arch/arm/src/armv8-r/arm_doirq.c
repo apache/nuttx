@@ -113,14 +113,32 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
 
 void up_irqinitialize(void)
 {
-  /* The following operations need to be atomic, but since this function is
-   * called early in the initialization sequence, we expect to have exclusive
-   * access to the GIC.
-   */
+#ifdef CONFIG_SMP
+  static volatile uint32_t gicd_ready = 0;
 
-  /* Initialize the Generic Interrupt Controller (GIC) for CPU0 */
+  if (up_cpu_index() == 0)
+    {
+#endif
+      /* Initialize GICD、GICRD and GIC cpu interface for cpu0  */
 
-  arm_gic_initialize();   /* Initialization common to all CPUs */
+      arm_gic_initialize();
+#ifdef CONFIG_SMP
+      gicd_ready = 1;
+    }
+  else
+    {
+      /* For other CPUs, we will only initialize GICRD and
+       * GIC cpu interface.
+       */
+
+      while (gicd_ready == 0)
+        {
+          /* Wait for GICD initialization to complete */
+        }
+
+      arm_gic_secondary_init();
+    }
+#endif
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
 
