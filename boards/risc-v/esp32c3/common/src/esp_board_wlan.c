@@ -35,7 +35,7 @@
 
 #include <nuttx/wireless/wireless.h>
 
-#include "espressif/esp_wlan.h"
+#include "espressif/esp_wlan_netdev.h"
 
 /****************************************************************************
  * Public Functions
@@ -80,4 +80,3 @@ int board_wlan_init(void)
 
   return ret;
 }
-
