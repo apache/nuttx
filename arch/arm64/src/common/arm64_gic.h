@@ -86,6 +86,8 @@
 #define ICENABLER(base, n)      (base + GIC_DIST_ICENABLER + (n) * 4)
 #define ISPENDR(base, n)        (base + GIC_DIST_ISPENDR + (n) * 4)
 #define ICPENDR(base, n)        (base + GIC_DIST_ICPENDR + (n) * 4)
+#define ISACTIVER(base, n)      (base + GIC_DIST_ISACTIVER + (n) * 4)
+#define ICACTIVER(base, n)      (base + GIC_DIST_ICACTIVER + (n) * 4)
 #define IPRIORITYR(base, n)     (base + GIC_DIST_IPRIORITYR + n)
 #define ITARGETSR(base, n)      (base + GIC_DIST_ITARGETSR + (n) * 4)
 #define ICFGR(base, n)          (base + GIC_DIST_ICFGR + (n) * 4)
