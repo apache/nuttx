@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/common/espressif/esp_wlan.h
+ * arch/risc-v/src/common/espressif/esp_wlan_netdev.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_COMMON_ESPRESSIF_ESP_WLAN_H
-#define __ARCH_RISCV_SRC_COMMON_ESPRESSIF_ESP_WLAN_H
+#ifndef __ARCH_RISCV_SRC_COMMON_ESPRESSIF_ESP_WLAN_NETDEV_H
+#define __ARCH_RISCV_SRC_COMMON_ESPRESSIF_ESP_WLAN_NETDEV_H
 
 /****************************************************************************
  * Included Files
@@ -55,115 +55,118 @@ extern "C"
 #elif defined(CONFIG_ESPRESSIF_WIFI_STATION_SOFTAP)
 #  define ESP_WLAN_HAS_STA
 #  define ESP_WLAN_HAS_SOFTAP
+#  define ESP_WLAN_HAS_APSTA
 #  define ESP_WLAN_STA_DEVNO    0
 #  define ESP_WLAN_SOFTAP_DEVNO 1
 #  define ESP_WLAN_DEVS         2
 #endif
 
-#define MAC_LEN                 (6)
-
 /****************************************************************************
  * Public Data
  ****************************************************************************/
-
-#ifdef ESP_WLAN_HAS_STA
-
-/* If reconnect automatically */
-
-extern volatile bool g_sta_reconnect;
-
-/* If Wi-Fi sta starts */
-
-extern volatile bool g_sta_started;
-
-/* If Wi-Fi sta connected */
-
-extern volatile bool g_sta_connected;
-
-#endif
-
-#ifdef ESP_WLAN_HAS_SOFTAP
-
-/* If Wi-Fi SoftAP starts */
-
-extern volatile bool g_softap_started;
-
-#endif
-
-#ifdef CONFIG_ESPRESSIF_WIFI
-
-/****************************************************************************
- * Inline Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: nuttx_err_to_freertos
- *
- * Description:
- *   Transform from Nuttx OS error code to FreeRTOS's pdTRUE or pdFALSE.
- *
- * Input Parameters:
- *   ret - NuttX error code
- *
- * Returned Value:
- *   Wi-Fi adapter error code
- *
- ****************************************************************************/
-
-static inline int32_t nuttx_err_to_freertos(int ret)
-{
-  return ret >= 0;
-}
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-#ifdef ESP_WLAN_HAS_STA
-
 /****************************************************************************
- * Name: esp_wlan_sta_set_linkstatus
+ * Name: esp_wlan_sta_connect_success_hook
  *
  * Description:
- *   Set Wi-Fi station link status
+ *   Notify the networking layer that connection has succeeded.
  *
- * Parameters:
- *   linkstatus - true Notifies the networking layer about an available
- *                carrier, false Notifies the networking layer about an
- *                disappeared carrier.
+ * Input Parameters:
+ *   None.
  *
  * Returned Value:
- *   OK on success; Negated errno on failure.
+ *   None.
  *
  ****************************************************************************/
 
-int esp_wlan_sta_set_linkstatus(bool linkstatus);
+#ifdef ESP_WLAN_HAS_STA
+void esp_wlan_sta_connect_success_hook(void);
+#endif
+
+/****************************************************************************
+ * Name: esp_wlan_sta_disconnect_hook
+ *
+ * Description:
+ *   Notify the networking layer that connection has been disconnected.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef ESP_WLAN_HAS_STA
+void esp_wlan_sta_disconnect_hook(void);
+#endif
+
+/****************************************************************************
+ * Name: esp_wlan_softap_connect_success_hook
+ *
+ * Description:
+ *   Notify the networking layer that connection has succeeded.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef ESP_WLAN_HAS_SOFTAP
+void esp_wlan_softap_connect_success_hook(void);
+#endif
+
+/****************************************************************************
+ * Name: esp_wlan_softap_disconnect_hook
+ *
+ * Description:
+ *   Notify the networking layer that connection has been disconnected.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef ESP_WLAN_HAS_SOFTAP
+void esp_wlan_softap_disconnect_hook(void);
+#endif
 
 /****************************************************************************
  * Name: esp_wlan_sta_initialize
  *
  * Description:
- *   Initialize the ESP32-S3 WLAN station netcard driver
+ *   Initialize the Wi-Fi adapter for station mode.
  *
  * Input Parameters:
- *   None
+ *   None.
  *
  * Returned Value:
  *   OK on success; Negated errno on failure.
  *
  ****************************************************************************/
 
+#ifdef ESP_WLAN_HAS_STA
 int esp_wlan_sta_initialize(void);
-#endif /* ESP_WLAN_HAS_STA */
+#endif
 
 /****************************************************************************
  * Name: esp_wlan_softap_initialize
  *
  * Description:
- *   Initialize the ESP32-S3 WLAN softAP netcard driver
+ *   Initialize the Wi-Fi adapter for SoftAP mode.
  *
  * Input Parameters:
- *   None
+ *   None.
  *
  * Returned Value:
  *   OK on success; Negated errno on failure.
@@ -172,36 +175,12 @@ int esp_wlan_sta_initialize(void);
 
 #ifdef ESP_WLAN_HAS_SOFTAP
 int esp_wlan_softap_initialize(void);
-#endif /* ESP_WLAN_HAS_SOFTAP */
+#endif
 
-/****************************************************************************
- * Name: esp_wifi_tx_done_cb
- *
- * Description:
- *   Wi-Fi TX done callback function.
- *
- * Input Parameters:
- *   ifidx    - The interface id that the tx callback has been triggered from
- *   data     - Pointer to the data transmitted
- *   data_len - Length of the data transmitted
- *   txstatus - True: if the data was transmitted successfully
- *              False: if data transmission failed
- *
- * Returned Value:
- *   none
- *
- ****************************************************************************/
-
-void esp_wifi_tx_done_cb(uint8_t ifidx,
-                         uint8_t *data,
-                         uint16_t *len,
-                         bool txstatus);
-
-#endif /* CONFIG_ESPRESSIF_WIFI */
 #ifdef __cplusplus
 }
 #endif
 #undef EXTERN
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_RISCV_SRC_COMMON_ESPRESSIF_ESP_WLAN_H */
+#endif /* __ARCH_RISCV_SRC_COMMON_ESPRESSIF_ESP_WLAN_NETDEV_H */
