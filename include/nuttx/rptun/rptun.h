@@ -279,7 +279,7 @@
  ****************************************************************************/
 
 #define RPTUN_UNREGISTER_CALLBACK(d) ((d)->ops->register_callback ? \
-                                      (d)->ops->register_callback(d,NULL,NULL) : -ENOSYS)
+                                      (d)->ops->register_callback(d,0,NULL) : -ENOSYS)
 
 /****************************************************************************
  * Name: RPTUN_RESET

@@ -150,11 +150,11 @@ static const struct remoteproc_ops g_rptun_ops =
 
 static const struct file_operations g_rptun_fops =
 {
-  NULL,             /* open */
-  NULL,             /* close */
-  NULL,             /* read */
-  NULL,             /* write */
-  NULL,             /* seek */
+  0,                /* open */
+  0,                /* close */
+  0,                /* read */
+  0,                /* write */
+  0,                /* seek */
   rptun_dev_ioctl,  /* ioctl */
 };
 
@@ -498,7 +498,7 @@ static int rptun_create_device(FAR struct rptun_priv_s *priv,
       rptun_update_vring_da(rproc, vdev_rsc, role, &shmbase, &shmlen);
     }
 
-  vdev = remoteproc_create_virtio(rproc, index, role, NULL);
+  vdev = remoteproc_create_virtio(rproc, index, role, 0);
   if (vdev == NULL)
     {
       return -ENOMEM;
