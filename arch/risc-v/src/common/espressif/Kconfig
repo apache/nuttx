@@ -1051,6 +1051,35 @@ config ESPRESSIF_WIFI_STATION_SOFTAP
 
 endchoice # ESPRESSIF_WIFI_MODE
 
+menu "SoftAP Configuration"
+	depends on ESPRESSIF_WIFI_SOFTAP || ESPRESSIF_WIFI_STATION_SOFTAP
+
+config ESPRESSIF_WIFI_SOFTAP_DEFAULT_SSID
+	string "SoftAP default SSID"
+	default "NuttX"
+	---help---
+		Represents the default SSID configured for the SoftAP when the device is started.
+
+config ESPRESSIF_WIFI_SOFTAP_DEFAULT_PASSWORD
+	string "SoftAP default password"
+	default "nuttx12345"
+	---help---
+		Represents the default password configured for the SoftAP when the device is started.
+
+config ESPRESSIF_WIFI_SOFTAP_MAX_CONNECTIONS
+	int "SoftAP max connections"
+	default 3
+	---help---
+		Maximum number of stations connected to the SoftAP.
+
+config ESPRESSIF_WIFI_SOFTAP_CHANNEL
+	int "SoftAP channel"
+	default 1
+	---help---
+		Channel number for the SoftAP.
+
+endmenu # SoftAP Configuration
+
 config ESPRESSIF_WIFI_ENABLE_WPA3_SAE
 	bool "Enable WPA3-Personal"
 	default y
@@ -1088,6 +1117,29 @@ config ESPRESSIF_WIFI_ENABLE_WPA3_OWE_STA
 		PMF (Protected Management Frames) is a prerequisite feature for a WPA3 connection, it needs to be
 		explicitly configured before attempting connection. Please refer to the Wi-Fi Driver API Guide for details.
 
+choice ESPRESSIF_WIFI_MGMT_RX_BUFFER
+	prompt "Type of WiFi RX MGMT buffers"
+	default ESPRESSIF_WIFI_STATIC_RX_MGMT_BUFFER
+	help
+		Select type of WiFi RX MGMT buffers:
+
+		If "Static" is selected, WiFi RX MGMT buffers are allocated when WiFi is initialized and released
+		when WiFi is de-initialized. The size of each static RX MGMT buffer is fixed to about 500 Bytes.
+
+		If "Dynamic" is selected, each WiFi RX MGMT buffer is allocated as needed when a MGMT data frame is
+		received. The MGMT buffer is freed after the MGMT data frame has been processed by the WiFi driver.
+
+	config ESPRESSIF_WIFI_STATIC_RX_MGMT_BUFFER
+		bool "Static"
+	config ESPRESSIF_WIFI_DYNAMIC_RX_MGMT_BUFFER
+		bool "Dynamic"
+endchoice
+
+config ESPRESSIF_WIFI_DYNAMIC_RX_MGMT_BUFFER_TYPE
+	int
+	default 0 if ESPRESSIF_WIFI_STATIC_RX_MGMT_BUFFER
+	default 1 if ESPRESSIF_WIFI_DYNAMIC_RX_MGMT_BUFFER
+
 config ESPRESSIF_WIFI_STATIC_RX_BUFFER_NUM
 	int "Max number of WiFi static RX buffers"
 	range 2 25 if !ESPRESSIF_ESP32C6
@@ -1120,6 +1172,53 @@ config ESPRESSIF_WIFI_DYNAMIC_RX_BUFFER_NUM
 
 		If a dynamic RX buffer limit is set, it should be at least the number of static RX buffers.
 
+choice ESPRESSIF_WIFI_TX_BUFFER
+	prompt "Type of WiFi TX buffers"
+	default ESPRESSIF_WIFI_DYNAMIC_TX_BUFFER
+	help
+		Select type of WiFi TX buffers:
+
+		If "Static" is selected, WiFi TX buffers are allocated when WiFi is initialized and released
+		when WiFi is de-initialized. The size of each static TX buffer is fixed to about 1.6KB.
+
+		If "Dynamic" is selected, each WiFi TX buffer is allocated as needed when a data frame is
+		delivered to the Wifi driver from the TCP/IP stack. The buffer is freed after the data frame
+		has been sent by the WiFi driver. The size of each dynamic TX buffer depends on the length
+		of each data frame sent by the TCP/IP layer.
+
+		If PSRAM is enabled, "Static" should be selected to guarantee enough WiFi TX buffers.
+		If PSRAM is disabled, "Dynamic" should be selected to improve the utilization of RAM.
+
+		TODO: There is a special dependency for Dynamic if SPIRAM is enabled.
+
+	config ESPRESSIF_WIFI_STATIC_TX_BUFFER
+		bool "Static"
+	config ESPRESSIF_WIFI_DYNAMIC_TX_BUFFER
+		bool "Dynamic"
+endchoice
+
+config ESPRESSIF_WIFI_TX_BUFFER_TYPE
+	int
+	default 0 if ESPRESSIF_WIFI_STATIC_TX_BUFFER
+	default 1 if ESPRESSIF_WIFI_DYNAMIC_TX_BUFFER
+
+config ESPRESSIF_WIFI_STATIC_TX_BUFFER_NUM
+	int "Max number of WiFi static TX buffers"
+	range 2 64
+	default 16
+	---help---
+		Set the number of WiFi static TX buffers. Each buffer takes approximately 1.6KB of RAM.
+		The static RX buffers are allocated when esp_wifi_init() is called, they are not released
+		until esp_wifi_deinit() is called.
+
+		This value might be reduced to save memory if the application does not need to send
+		frames at a high rate.
+
+		For each transmitted data frame from the higher layer TCP/IP stack, the WiFi driver makes a
+		copy of it in a TX buffer.  For some applications especially UDP applications, the upper
+		layer can deliver frames faster than WiFi layer can transmit. In these cases, we may run out
+		of TX buffers.
+
 config ESPRESSIF_WIFI_DYNAMIC_TX_BUFFER_NUM
 	int "Max number of WiFi dynamic TX buffers"
 	range 1 128
@@ -1132,6 +1231,14 @@ config ESPRESSIF_WIFI_DYNAMIC_TX_BUFFER_NUM
 		of it in a TX buffer. For some applications, especially UDP applications, the upper layer
 		can deliver frames faster than WiFi layer can transmit. In these cases, we may run out of TX
 		buffers.
+
+config ESPRESSIF_WIFI_RX_MGMT_BUF_NUM_DEF
+	int "Max number of WiFi RX MGMT buffers"
+	range 1 10
+	default 5
+	help
+		Set the number of WiFi RX_MGMT buffers.
+		For Management buffers, the number of dynamic and static management buffers is the same.
 
 config ESPRESSIF_WIFI_AMPDU_TX_ENABLED
 	bool "Wi-Fi TX AMPDU"
@@ -1197,10 +1304,10 @@ config ESPRESSIF_WIFI_STA_DISCONNECT_PM
 		Select this option to enable power management for station when disconnected.
 		Chip will do modem-sleep when RF module is not in use anymore.
 
-choice ESP_POWER_SAVE_MODE
+choice ESPRESSIF_POWER_SAVE_MODE
 	prompt "Wi-Fi Power save mode"
-	default ESP_POWER_SAVE_MIN_MODEM if ESPRESSIF_WIFI_BT_COEXIST
-	default ESP_POWER_SAVE_NONE
+	default ESPRESSIF_POWER_SAVE_MIN_MODEM if ESPRESSIF_WIFI_BT_COEXIST
+	default ESPRESSIF_POWER_SAVE_NONE
 	---help---
 		Wi-Fi supports the Modem-sleep mode which refers to the legacy power-saving mode in the IEEE 802.11 protocol.
 		Modem-sleep mode works in station-only mode and the station must connect to the AP first. If the Modem-sleep
@@ -1218,18 +1325,18 @@ choice ESP_POWER_SAVE_MODE
 		state at DTIM time. If listen interval is longer, more power is saved, but broadcast data is more easy to lose.
 		Listen interval can be configured by setting ESPRESSIF_WIFI_LISTEN_INTERVAL.
 
-		ESP_POWER_SAVE_NONE disables Modem-sleep mode entirely. Disabling it increases power consumption, but
+		ESPRESSIF_POWER_SAVE_NONE disables Modem-sleep mode entirely. Disabling it increases power consumption, but
 		minimizes the delay in receiving Wi-Fi data in real time. When Modem-sleep mode is enabled, the delay in
 		receiving Wi-Fi data may be the same as the DTIM cycle (minimum power-saving mode) or the listening interval
-		(maximum power-saving mode). Setting ESP_POWER_SAVE_NONE is suitable when high throughput is required.
+		(maximum power-saving mode). Setting ESPRESSIF_POWER_SAVE_NONE is suitable when high throughput is required.
 
-config ESP_POWER_SAVE_NONE
+config ESPRESSIF_POWER_SAVE_NONE
 	bool "No power save"
 
-config ESP_POWER_SAVE_MIN_MODEM
+config ESPRESSIF_POWER_SAVE_MIN_MODEM
 	bool "Minimum modem power saving."
 
-config ESP_POWER_SAVE_MAX_MODEM
+config ESPRESSIF_POWER_SAVE_MAX_MODEM
 	bool "Maximum modem power saving"
 
 endchoice # ESP_POWER_SAVE_MODE

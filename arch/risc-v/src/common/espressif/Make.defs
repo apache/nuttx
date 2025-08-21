@@ -152,8 +152,9 @@ endif
 
 ifeq ($(CONFIG_ESP_WIRELESS),y)
 	ifeq ($(CONFIG_ESPRESSIF_WIFI),y)
-		CHIP_CSRCS += esp_wifi_init.c
-		CHIP_CSRCS += esp_wlan.c
+		CHIP_CSRCS += esp_wifi_event_handler.c
+		CHIP_CSRCS += esp_wifi_api.c
+		CHIP_CSRCS += esp_wlan_netdev.c
 	endif
 	CHIP_CSRCS += esp_wifi_utils.c
 endif
@@ -186,7 +187,7 @@ endif
 
 ESP_HAL_3RDPARTY_REPO   = esp-hal-3rdparty
 ifndef ESP_HAL_3RDPARTY_VERSION
-	ESP_HAL_3RDPARTY_VERSION = 98dad3d9b4607df319eca4a7baf50545cda0b1a2
+	ESP_HAL_3RDPARTY_VERSION = 8d7f4177afafdb7941182d8997d3589b1152aec0
 endif
 
 ifndef ESP_HAL_3RDPARTY_URL

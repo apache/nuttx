@@ -31,6 +31,8 @@
 #include <nuttx/net/netdev.h>
 #include <nuttx/signal.h>
 
+#include "esp_wifi_types_generic.h"
+
 #ifndef __ASSEMBLY__
 
 #include <stdint.h>
@@ -44,47 +46,70 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/* Wi-Fi event ID */
+#define MAC_LEN                 (6)
 
-enum wifi_adpt_evt_e
+/****************************************************************************
+ * Inline Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: nuttx_err_to_common_err
+ *
+ * Description:
+ *   Transform from Nuttx OS error code to low level API error code.
+ *
+ * Input Parameters:
+ *   ret - NuttX error code
+ *
+ * Returned Value:
+ *   Wi-Fi adapter error code
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESPRESSIF_WIFI
+static inline int32_t nuttx_err_to_common_err(int ret)
 {
-  WIFI_ADPT_EVT_SCAN_DONE = 0,
-  WIFI_ADPT_EVT_STA_START,
-  WIFI_ADPT_EVT_STA_CONNECT,
-  WIFI_ADPT_EVT_STA_DISCONNECT,
-  WIFI_ADPT_EVT_STA_AUTHMODE_CHANGE,
-  WIFI_ADPT_EVT_STA_STOP,
-  WIFI_ADPT_EVT_AP_START,
-  WIFI_ADPT_EVT_AP_STOP,
-  WIFI_ADPT_EVT_AP_STACONNECTED,
-  WIFI_ADPT_EVT_AP_STADISCONNECTED,
-  WIFI_ADPT_EVT_MAX,
-};
-
-/* Wi-Fi event private data */
-
-struct evt_adpt
-{
-  sq_entry_t entry;         /* Sequence entry */
-  int32_t id;               /* Event ID */
-  uint8_t buf[0];           /* Event private data */
-};
-
-/* Wi-Fi event notification private data */
-
-struct wifi_notify
-{
-  bool assigned;            /* Flag indicate if it is used */
-  pid_t pid;                /* Signal's target thread PID */
-  struct sigevent event;    /* Signal event private data */
-  struct sigwork_s work;    /* Signal work private data */
-};
+  return ret >= 0;
+}
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
 #ifdef CONFIG_ESPRESSIF_WIFI
+
+/****************************************************************************
+ * Name: esp_freq_to_channel
+ *
+ * Description:
+ *   Converts Wi-Fi frequency to channel.
+ *
+ * Input Parameters:
+ *   freq - Wi-Fi frequency
+ *
+ * Returned Value:
+ *   Wi-Fi channel
+ *
+ ****************************************************************************/
+
+int esp_freq_to_channel(uint16_t freq);
+
+/****************************************************************************
+ * Name: esp_evt_work_init
+ *
+ * Description:
+ *   Initialize the event work queue
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void esp_evt_work_init(void);
 
 /****************************************************************************
  * Name: esp_wifi_start_scan
@@ -124,13 +149,13 @@ int esp_wifi_get_scan_results(struct iwreq *iwr);
  * Name: esp_wifi_scan_event_parse
  *
  * Description:
- *   Parse scan information
+ *   Parse scan information Wi-Fi AP scan results.
  *
  * Input Parameters:
- *   None
+ *   None.
  *
  * Returned Value:
- *   None
+ *   None.
  *
  ****************************************************************************/
 
@@ -155,20 +180,21 @@ void esp_wifi_scan_event_parse(void);
 int32_t esp_wifi_to_errno(int err);
 
 /****************************************************************************
- * Name: esp_event_id_map
+ * Name: esp_wifi_mode_translate
  *
  * Description:
- *   Transform from esp-idf event ID to Wi-Fi adapter event ID
+ *   Translate wireless mode constants to ESP Wi-Fi mode constants.
  *
  * Input Parameters:
- *   event_id - esp-idf event ID
+ *   wireless_mode - Wireless mode from wireless.h (IW_MODE_*)
  *
  * Returned Value:
- *   Wi-Fi adapter event ID
+ *   ESP Wi-Fi mode (WIFI_MODE_*) on success
+ *   -EINVAL on failure
  *
  ****************************************************************************/
 
-int esp_event_id_map(int event_id);
+wifi_mode_t esp_wifi_mode_translate(uint32_t wireless_mode);
 
 /****************************************************************************
  * Name: esp_wifi_lock
@@ -185,22 +211,6 @@ int esp_event_id_map(int event_id);
  ****************************************************************************/
 
 int esp_wifi_lock(bool lock);
-
-/****************************************************************************
- * Name: esp_evt_work_cb
- *
- * Description:
- *   Process the cached event
- *
- * Input Parameters:
- *   arg - No mean
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void esp_evt_work_cb(void *arg);
 
 /****************************************************************************
  * Name: esp_event_post
@@ -234,23 +244,6 @@ int esp_event_post(const char *event_base,
                          void *event_data,
                          size_t event_data_size,
                          uint32_t ticks);
-
-/****************************************************************************
- * Name: esp_wifi_notify_subscribe
- *
- * Description:
- *   Enable event notification
- *
- * Input Parameters:
- *   pid   - Task PID
- *   event - Signal event data pointer
- *
- * Returned Value:
- *   0 if success or -1 if fail
- *
- ****************************************************************************/
-
-int esp_wifi_notify_subscribe(pid_t pid, struct sigevent *event);
 
 #ifdef __cplusplus
 }
