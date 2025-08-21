@@ -32,6 +32,7 @@
 #include <errno.h>
 
 #include <nuttx/wqueue.h>
+#include <nuttx/fs/fs.h>
 
 #include "aio/aio.h"
 
@@ -83,17 +84,22 @@
 
 int aio_cancel(int fildes, FAR struct aiocb *aiocbp)
 {
-  if (fildes < 0)
-    {
-      set_errno(EBADF);
-      return ERROR;
-    }
-
   FAR struct aio_container_s *aioc;
   FAR struct aio_container_s *next;
+  FAR struct file            *filep;
+
   pid_t pid;
   int status;
   int ret;
+
+  ret = file_get(fildes, &filep);
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      return ERROR;
+    }
+
+  file_put(filep);
 
   /* Check if a non-NULL aiocbp was provided */
 
