@@ -39,6 +39,7 @@
 #endif
 
 #include <nuttx/irq.h>
+#include <arch/barriers.h>
 
 /****************************************************************************
  * Pre-processor Prototypes
@@ -52,6 +53,9 @@
 #define ARCH_SPGTS          (ARCH_PGT_MAX_LEVELS - 1)
 
 #endif /* CONFIG_ARCH_ADDRENV */
+
+#define UP_WFE() __asm__ __volatile__ ("wfe" : : : "memory")
+#define UP_SEV() __asm__ __volatile__ ("sev" : : : "memory")
 
 /****************************************************************************
  * Inline functions
