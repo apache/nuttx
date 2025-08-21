@@ -40,8 +40,6 @@ ifeq ($(CONFIG_SMP),y)
 CHIP_CSRCS += rp23xx_cpustart.c
 CHIP_CSRCS += rp23xx_smpcall.c
 CHIP_CSRCS += rp23xx_cpuidlestack.c
-CHIP_CSRCS += rp23xx_testset.c
-CMN_ASRCS  := $(filter-out arm_testset.S,$(CMN_ASRCS))
 endif
 
 ifeq ($(CONFIG_ARCH_HAVE_MULTICPU),y)

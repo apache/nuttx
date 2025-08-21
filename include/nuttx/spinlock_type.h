@@ -67,17 +67,10 @@ typedef struct spinlock_s
 
 #else
 
-/* The architecture specific spinlock.h header file must also provide the
- * following:
- *
- *   SP_LOCKED   - A definition of the locked state value (usually 1)
- *   SP_UNLOCKED - A definition of the unlocked state value (usually 0)
- *   spinlock_t  - The type of a spinlock memory object.
- *
- * SP_LOCKED and SP_UNLOCKED must be constants of type spinlock_t.
- */
+typedef uint32_t spinlock_t;
 
-#include <arch/spinlock.h>
+#  define SP_UNLOCKED 0
+#  define SP_LOCKED   1
 
 #endif /* CONFIG_SPINLOCK */
 

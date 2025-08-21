@@ -24,19 +24,6 @@ For a technical description of the NuttX implementation of SMP,
 see the NuttX `SMP Wiki
 Page <https://cwiki.apache.org/confluence/display/NUTTX/SMP>`__.
 
-.. c:function:: spinlock_t up_testset(volatile FAR spinlock_t *lock)
-
-  Perform and atomic test and set operation on the provided spinlock.
-
-  :param lock: The address of spinlock object.
-
-  :return: The spinlock is always locked upon return. The value
-    of previous value of the spinlock variable is returned,
-    either SP_LOCKED if the spinlock was previously locked
-    (meaning that the test-and-set operation failed to obtain the lock)
-    or SP_UNLOCKED if the spinlock was previously unlocked
-    (meaning that we successfully obtained the lock)
-
 .. c:function:: int up_cpu_index(void)
 
   Return an index in the range of 0 through (CONFIG_SMP_NCPUS-1)
