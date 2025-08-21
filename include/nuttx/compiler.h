@@ -268,7 +268,7 @@
 
 /* The nooptimiziation_function attribute no optimize */
 
-#  if defined(__clang__)
+#  if defined(__clang__) || defined(CONFIG_TRICORE_TOOLCHAIN_GNU)
 #    define nooptimiziation_function __attribute__((optnone))
 #  else
 #    define nooptimiziation_function __attribute__((optimize("O0")))
