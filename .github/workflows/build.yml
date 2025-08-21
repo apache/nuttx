@@ -16,11 +16,13 @@ on:
   pull_request:
     paths-ignore:
       - 'AUTHORS'
+      - 'CONTRIBUTING.md'
       - 'Documentation/**'
       - 'tools/ci/docker/linux/**'
   push:
     paths-ignore:
       - 'AUTHORS'
+      - 'CONTRIBUTING.md'
       - 'Documentation/**'
     branches:
       - 'releases/*'
