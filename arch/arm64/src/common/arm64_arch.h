@@ -207,12 +207,14 @@
 #define ICC_EOIR0_EL1               S3_0_C12_C8_1
 #define ICC_EOIR1_EL1               S3_0_C12_C12_1
 #define ICC_SGI0R_EL1               S3_0_C12_C11_7
+#define ICC_DIR_EL1                 S3_0_C12_C11_1
 
 /* register constants */
 #define ICC_SRE_ELX_SRE_BIT         BIT(0)
 #define ICC_SRE_ELX_DFB_BIT         BIT(1)
 #define ICC_SRE_ELX_DIB_BIT         BIT(2)
 #define ICC_SRE_EL3_EN_BIT          BIT(3)
+#define ICC_CTLR_EOIMODE_BIT        BIT(1)
 
 /* ICC SGI macros */
 #define SGIR_TGT_MASK               (0xffff)

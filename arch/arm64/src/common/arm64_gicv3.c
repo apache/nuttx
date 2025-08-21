@@ -482,11 +482,13 @@ static void gicv3_rdist_enable(unsigned long rdist)
 
 static void gicv3_cpuif_init(void)
 {
-  uint32_t      icc_sre;
+  uint64_t      icc_sre;
+  uint64_t      icc_ctrl;
   uint32_t      intid;
   unsigned long base = gic_get_rdist() + GICR_SGI_BASE_OFF;
+  bool eoi_mode;
 
-  /* Disable all sgi ppi */
+  /* Disable all SGI and PPI interrupts */
 
   putreg32(BIT64_MASK(GIC_NUM_INTR_PER_REG), ICENABLER(base, 0));
 
@@ -494,13 +496,61 @@ static void gicv3_cpuif_init(void)
 
   gic_wait_rwp(0);
 
-  /* Configure all SGIs/PPIs as G1S or G1NS depending on Zephyr
-   * is run in EL1S or EL1NS respectively.
-   * All interrupts will be delivered as irq
+  /* Clear pending and active SGI and PPI interrupts at GIC */
+
+  putreg32(BIT64_MASK(GIC_NUM_INTR_PER_REG), ICPENDR(base, 0));
+  putreg32(BIT64_MASK(GIC_NUM_INTR_PER_REG), ICACTIVER(base, 0));
+
+  /* Configure all SGIs/PPIs as G1S or G1NS depending on NuttX is run in
+   * EL1S or EL1NS respectively. All interrupts will be delivered as irq.
    */
 
   putreg32(IGROUPR_SGI_VAL, IGROUPR(base, 0));
-  putreg32(BIT64_MASK(GIC_NUM_INTR_PER_REG), IGROUPMODR(base, 0));
+  putreg32(0, IGROUPMODR(base, 0));
+
+  /* Clear any active IRQs in the CPU interface */
+
+  icc_ctrl = read_sysreg(ICC_CTLR_EL1);
+  UP_DSB();
+  eoi_mode = (icc_ctrl & ICC_CTLR_EOIMODE_BIT) != 0;
+
+  /* If the SW has crashed / warm-rebooted right after reading the
+   * ICC_IAR1_EL1, but before acking it in EOIR1, the irq is still
+   * active, but not any longer readable from the IAR1.
+   *
+   * Just ack all IRQs to clear such state. Invalid writes are ignored by
+   * the architecture.
+   */
+
+  for (intid = 0; intid < NR_IRQS; intid++)
+    {
+#ifdef CONFIG_ARM64_DECODEFIQ
+      write_sysreg(intid, ICC_EOIR0_EL1);
+#endif
+      write_sysreg(intid, ICC_EOIR1_EL1);
+
+      if (eoi_mode)
+        {
+          write_sysreg(intid, ICC_DIR_EL1);
+        }
+    }
+
+  /* Now, if the SW has crashed / warm rebooted when interrupts are
+   * activated, but before reading the ICC_IAR1_EL1, disable the
+   * interrupts normally
+   */
+
+  while ((intid = arm64_gic_get_active_irq()) < NR_IRQS)
+    {
+#ifdef CONFIG_ARM64_DECODEFIQ
+      write_sysreg(intid, ICC_EOIR0_EL1);
+#endif
+      write_sysreg(intid, ICC_EOIR1_EL1);
+      if (eoi_mode)
+        {
+          write_sysreg(intid, ICC_DIR_EL1);
+        }
+    }
 
   /* Configure default priorities for SGI 0:15 and PPI 0:15. */
 
@@ -517,7 +567,6 @@ static void gicv3_cpuif_init(void)
   /* Check if system interface can be enabled.
    * 'icc_sre_el3' needs to be configured at 'EL3'
    * to allow access to 'icc_sre_el1' at 'EL1'
-   * eg: z_arch_el3_plat_init can be used by platform.
    */
 
   icc_sre = read_sysreg(ICC_SRE_EL1);
@@ -590,21 +639,22 @@ static void gicv3_dist_init(void)
 
       /* Disable interrupt */
 
-      putreg32(BIT64_MASK(GIC_NUM_INTR_PER_REG),
-               ICENABLER(base, idx));
+      putreg32(BIT64_MASK(GIC_NUM_INTR_PER_REG), ICENABLER(base, idx));
 
-      /* Clear pending */
+      /* Wait for rwp on GICD */
 
-      putreg32(BIT64_MASK(GIC_NUM_INTR_PER_REG),
-               ICPENDR(base, idx));
+      gic_wait_rwp(intid);
+
+      /* Clear pending and active SPIs */
+
+      putreg32(BIT64_MASK(GIC_NUM_INTR_PER_REG), ICPENDR(base, idx));
+      putreg32(BIT64_MASK(GIC_NUM_INTR_PER_REG), ICACTIVER(base, idx));
+
+      /* Configure groups to default values */
+
       putreg32(IGROUPR_VAL, IGROUPR(base, idx));
-      putreg32(BIT64_MASK(GIC_NUM_INTR_PER_REG),
-               IGROUPMODR(base, idx));
+      putreg32(0, IGROUPMODR(base, idx));
     }
-
-  /* wait for rwp on GICD */
-
-  gic_wait_rwp(GIC_SPI_INT_BASE);
 
   /* Configure default priorities for all SPIs. */
 
