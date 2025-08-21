@@ -785,6 +785,10 @@ void rpmsg_virtio_remove(FAR struct virtio_device *vdev)
     metal_container_of(vdev->priv, struct rpmsg_virtio_priv_s, rvdev);
   char name[64];
 
+#ifdef CONFIG_RPMSG_VIRTIO_PM
+  pm_wakelock_uninit(&priv->wakelock);
+#endif
+
   /* Unregister the rpmsg */
 
   snprintf(name, sizeof(name), "/dev/rpmsg/%s", priv->rpmsg.cpuname);
