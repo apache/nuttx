@@ -87,10 +87,6 @@ if(CONFIG_UNWINDER_ARM)
   list(APPEND SRCS arm_backtrace_unwind.c)
 endif()
 
-if(CONFIG_ARCH_HAVE_FETCHADD)
-  list(APPEND SRCS ${ARCH_TOOLCHAIN_PATH}/arm_fetchadd.S)
-endif()
-
 target_sources(arch PRIVATE ${SRCS})
 
 nuttx_add_aux_library(STARTUP_OBJS crt0.c)

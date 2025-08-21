@@ -344,7 +344,6 @@ config SMP
 	bool "Symmetric Multi-Processing (SMP)"
 	default n
 	depends on ARCH_HAVE_MULTICPU
-	depends on ARCH_HAVE_TESTSET
 	depends on ARCH_INTERRUPTSTACK != 0
 	select SPINLOCK
 	select IRQCOUNT

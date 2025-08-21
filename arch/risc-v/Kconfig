@@ -32,7 +32,6 @@ config ARCH_CHIP_K210
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_DPFPU
 	select ARCH_HAVE_MPU
-	select ARCH_HAVE_TESTSET
 	select ARCH_HAVE_MULTICPU
 	select ARCH_HAVE_MISALIGN_EXCEPTION
 	select ONESHOT
@@ -525,7 +524,6 @@ config ARCH_RV_ISA_M
 config ARCH_RV_ISA_A
 	bool
 	default n
-	select ARCH_HAVE_TESTSET
 
 config ARCH_RV_ISA_C
 	bool

@@ -183,10 +183,6 @@ if(CONFIG_SIM_VIDEO_ENCODER)
   list(APPEND SRCS sim_x264encoder.c)
 endif()
 
-if(CONFIG_SPINLOCK)
-  list(APPEND HOSTSRCS sim_testset.c)
-endif()
-
 if(CONFIG_SMP)
   list(APPEND SRCS sim_smpsignal.c sim_cpuidlestack.c)
 endif()
