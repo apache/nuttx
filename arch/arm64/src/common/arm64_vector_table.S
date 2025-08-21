@@ -269,8 +269,10 @@ SECTION_FUNC(text, arm64_exit_exception)
     msr    spsr_el1,  x1
 #endif
 
+#ifdef CONFIG_ARM64_MTE
     ldr    x0,   [sp, #8 * REG_SCTLR_EL1]
     msr    sctlr_el1, x0
+#endif
 
     ldp    x0, x1,   [sp, #8 * REG_SP_EL0]
     msr    sp_el0,   x0

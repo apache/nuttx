@@ -66,9 +66,8 @@ static void arm64_init_signal_process(struct tcb_s *tcb, uint64_t *regs)
   tcb->xcp.regs[REG_SPSR]   = SPSR_MODE_EL1H | DAIF_FIQ_BIT | DAIF_IRQ_BIT;
 #endif
 
-  tcb->xcp.regs[REG_SCTLR_EL1] = read_sysreg(sctlr_el1);
 #ifdef CONFIG_ARM64_MTE
-  tcb->xcp.regs[REG_SCTLR_EL1] |= SCTLR_TCF1_BIT;
+  tcb->xcp.regs[REG_SCTLR_EL1] = read_sysreg(sctlr_el1) | SCTLR_TCF1_BIT;
 #endif
 
 #ifdef CONFIG_ARCH_KERNEL_STACK
