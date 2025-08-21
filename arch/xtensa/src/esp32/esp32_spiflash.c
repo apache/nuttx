@@ -40,6 +40,7 @@
 #include <nuttx/kthread.h>
 #include <nuttx/mutex.h>
 #include <nuttx/mtd/mtd.h>
+#include <nuttx/signal.h>
 
 #include "sched/sched.h"
 
@@ -225,6 +226,8 @@ inline void IRAM_ATTR
 esp32_spiflash_opstart(void);
 inline void IRAM_ATTR
 esp32_spiflash_opdone(void);
+static inline void IRAM_ATTR
+esp32_spiflash_oposyield(void);
 
 static bool IRAM_ATTR spiflash_pagecached(uint32_t phypage);
 static void IRAM_ATTR spiflash_flushmapped(size_t start, size_t size);
@@ -662,6 +665,28 @@ static void IRAM_ATTR spiflash_flushmapped(size_t start, size_t size)
 }
 
 /****************************************************************************
+ * Name: esp32_spiflash_oposyield
+ *
+ * Description:
+ *   Yield to other tasks, called during erase operations.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+static inline void IRAM_ATTR esp32_spiflash_oposyield(void)
+{
+  /* Delay 1 tick */
+
+  useconds_t us = TICK2USEC(1);
+  nxsig_usleep(us);
+}
+
+/****************************************************************************
  * Name: esp32_set_read_opt
  *
  * Description:
@@ -967,6 +992,11 @@ static int IRAM_ATTR esp32_erasesector(struct esp32_spiflash_s *priv,
 
   for (offset = 0; offset < size; offset += MTD_ERASESIZE(priv))
     {
+      if (offset > 0)
+        {
+          esp32_spiflash_oposyield();
+        }
+
       esp32_spiflash_opstart();
 
       if (esp32_enable_write(priv) != OK)
