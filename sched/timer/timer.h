@@ -43,7 +43,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define PT_FLAGS_PREALLOCATED 0x01 /* Timer comes from a pool of preallocated timers */
+#define PT_FLAGS_PREALLOCATED 0x01u /* Timer comes from a pool of preallocated timers */
 
 /****************************************************************************
  * Public Types
