@@ -117,4 +117,16 @@ DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src
 
+ifeq ($(CONFIG_DEV_GPIO),y)
+ifeq ($(CONFIG_ESPRESSIF_USE_ULP_RISCV_CORE),y)
+  CHIP_SERIES = $(patsubst "%",%,$(CONFIG_ESPRESSIF_CHIP_SERIES))
+  CHIPHALDIR = $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)chip$(DELIM)esp-hal-3rdparty
+  CFLAGS += -Wno-undef
+  CFLAGS += ${INCDIR_PREFIX}$(CHIPHALDIR)$(DELIM)nuttx$(DELIM)$(CHIP_SERIES)$(DELIM)include
+  CFLAGS += ${INCDIR_PREFIX}$(CHIPHALDIR)$(DELIM)components$(DELIM)esp_common$(DELIM)include
+  CFLAGS += ${INCDIR_PREFIX}$(CHIPHALDIR)$(DELIM)components$(DELIM)soc$(DELIM)$(CHIP_SERIES)$(DELIM)include
+  CFLAGS += ${INCDIR_PREFIX}$(CHIPHALDIR)$(DELIM)components$(DELIM)soc$(DELIM)$(CHIP_SERIES)$(DELIM)register
+endif
+endif
+
 endif

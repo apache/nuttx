@@ -90,13 +90,14 @@ ifeq ($(CONFIG_MMCSD_SPI), y)
   CSRCS += esp32s2_board_sdmmc.c
 endif
 
-ifeq ($(CONFIG_ESP32S2_TWAI)$(CONFIG_ARCH_BUTTONS),y)
+ifeq ($(CONFIG_ESP32S2_TWAI)$(CONFIG_ARCH_BUTTONS)$(CONFIG_DEV_GPIO),y)
   CHIP_SERIES = $(patsubst "%",%,$(CONFIG_ESPRESSIF_CHIP_SERIES))
   CHIPHALDIR = $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)chip$(DELIM)esp-hal-3rdparty
   CFLAGS += -Wno-undef
   CFLAGS += ${INCDIR_PREFIX}$(CHIPHALDIR)$(DELIM)nuttx$(DELIM)$(CHIP_SERIES)$(DELIM)include
   CFLAGS += ${INCDIR_PREFIX}$(CHIPHALDIR)$(DELIM)components$(DELIM)esp_common$(DELIM)include
   CFLAGS += ${INCDIR_PREFIX}$(CHIPHALDIR)$(DELIM)components$(DELIM)soc$(DELIM)$(CHIP_SERIES)$(DELIM)include
+  CFLAGS += ${INCDIR_PREFIX}$(CHIPHALDIR)$(DELIM)components$(DELIM)soc$(DELIM)$(CHIP_SERIES)$(DELIM)register
 endif
 
 ifeq ($(CONFIG_ETC_ROMFS),y)
