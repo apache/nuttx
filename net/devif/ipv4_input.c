@@ -503,6 +503,8 @@ int ipv4_input(FAR struct net_driver_s *dev)
   FAR uint8_t *buf;
   int ret;
 
+  netdev_lock(dev);
+
   /* Store reception timestamp if enabled and not provided by hardware. */
 
 #if defined(CONFIG_NET_TIMESTAMP) && !defined(CONFIG_ARCH_HAVE_NETDEV_TIMESTAMP)
@@ -520,10 +522,13 @@ int ipv4_input(FAR struct net_driver_s *dev)
 
       dev->d_buf = buf;
 
+      netdev_unlock(dev);
       return ret;
     }
 
-  return netdev_input(dev, ipv4_in, true);
+  ret = netdev_input(dev, ipv4_in, true);
+  netdev_unlock(dev);
+  return ret;
 }
 
 #endif /* CONFIG_NET_IPv4 */

@@ -1045,9 +1045,12 @@ int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
   FAR uint8_t *buf;
   int bstop;
 
+  netdev_lock(dev);
   if (dev->d_buf == NULL)
     {
-      return devif_iob_poll(dev, callback);
+      bstop = devif_iob_poll(dev, callback);
+      netdev_unlock(dev);
+      return bstop;
     }
 
   buf = dev->d_buf;
@@ -1102,6 +1105,7 @@ int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
   /* Restore the flat buffer */
 
   dev->d_buf = buf;
+  netdev_unlock(dev);
 
   return bstop;
 }
