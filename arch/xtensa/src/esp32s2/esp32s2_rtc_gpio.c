@@ -38,6 +38,7 @@
 #include "esp32s2_rtc_gpio.h"
 #include "hardware/esp32s2_rtc_io.h"
 #include "hardware/esp32s2_sens.h"
+#include "driver/rtc_io.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -340,6 +341,45 @@ int esp32s2_configrtcio(int rtcio_num, rtcio_pinattr_t attr)
     }
 
   return OK;
+}
+
+/****************************************************************************
+ * Name: esp32s2_rtcioread
+ *
+ * Description:
+ *   Read one or zero from the selected RTC GPIO pin
+ *
+ * Input Parameters:
+ *   rtcio_num     - RTCIO rtcio_num to be read.
+ *
+ * Returned Value:
+ *   The boolean representation of the input value (true/false).
+ *
+ ****************************************************************************/
+
+int esp32s2_rtcioread(int rtcio_num)
+{
+  return rtc_gpio_get_level(rtcio_num);
+}
+
+/****************************************************************************
+ * Name: esp32s2_rtciowrite
+ *
+ * Description:
+ *   Write one or zero to the selected RTC GPIO pin
+ *
+ * Input Parameters:
+ *   rtcio_num - GPIO pin to be modified.
+ *   value     - The value to be written (0 or 1).
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void esp32s2_rtciowrite(int rtcio_num, bool value)
+{
+  rtc_gpio_set_level(rtcio_num, value);
 }
 
 /****************************************************************************
