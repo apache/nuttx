@@ -24,70 +24,82 @@
 import argparse
 import base64
 import binascii
+import io
 import mmap
 import os
-import shutil
 import struct
 import sys
 
-import lzf
+try:
+    import lzf
+except ImportError:
+    print("lzf module not found, execute `pip install python-lzf`")
 
 
-def decompress(lzffile, outfile):
-    chunk_number = 1
+def try_extract(filepath) -> io.BytesIO:
+    """
+    Parse log file lines, and try to extract coredump data text
+    Return extracted coredump binary data or None if not found
 
+    Note: if multiple core dump found in file, only the first one is extracted
+    """
+    in_coredump = False
+    bas64 = False
+    coredump = []
+    with open(filepath, "r") as f:
+        try:
+            for line in f.readlines():
+                if "Start coredump" in line:
+                    in_coredump = True
+                    if coredump:
+                        print("Warning: multiple core dump found.")
+                        break
+                elif "Finish coredump" in line:
+                    bas64 = "base64 formatted" in line
+                    in_coredump = False
+                elif in_coredump:
+                    index = line.rfind(" ")
+                    if index > 0:
+                        line = line[index + 1 :]
+                    line = line.rstrip("\n\r")
+                    if line:
+                        coredump += line
+        except (UnicodeDecodeError, UnicodeError):
+            pass
+
+    try:
+        return coredump and io.BytesIO(
+            base64.b64decode("".join(coredump))
+            if bas64
+            else binascii.unhexlify("".join(coredump))
+        )
+    except Exception:
+        return None
+
+
+def try_decompress(input: io.BytesIO) -> bytearray:
+    output = bytearray()
     while True:
-        prefix = lzffile.read(2)
-
-        if len(prefix) == 0:
+        prefix = input.read(2)  # 0, 1
+        typ = input.read(1)  # 2
+        chunk_len = input.read(2)  # 3, 4
+        if prefix != b"ZV":
             break
-        elif prefix != b"ZV":
-            break
 
-        typ = lzffile.read(1)
-        clen = struct.unpack(">H", lzffile.read(2))[0]
-
+        chunk_len = struct.unpack(">H", chunk_len)[0]
         if typ == b"\x00":
-            chunk = lzffile.read(clen)
+            chunk = input.read(chunk_len)
+            output.extend(chunk)
         elif typ == b"\x01":
-            uncompressed_len = struct.unpack(">H", lzffile.read(2))[0]
-            cdata = lzffile.read(clen)
+            uncompressed_len = struct.unpack(">H", input.read(2))[0]
+            cdata = input.read(chunk_len)
             chunk = lzf.decompress(cdata, uncompressed_len)
+            output.extend(chunk)
         else:
-            return
-
-        outfile.write(chunk)
-        chunk_number += 1
-
-
-def unhexlify(infile, outfile):
-    while True:
-        line = infile.readline()
-        if not line:
             break
-        line = line.replace(b"\n", b"").strip()
-        if line == b"":
-            continue
-        index = line.rfind(b" ")
-        if index > 0:
-            line = line[index + 1 :]
 
-        outfile.write(binascii.unhexlify(line))
-
-
-def unbase64file(infile, outfile):
-    while True:
-        line = infile.readline()
-        if not line:
-            break
-        line = line.replace(b"\n", b"").strip()
-        if line == b"":
-            continue
-        index = line.rfind(b" ")
-        if index > 0:
-            line = line[index + 1 :]
-
-        outfile.write(base64.b64decode(line))
+    input.seek(0)
+    return output or input.read()
 
 
 def mmap_file(file_path, size=None):
@@ -108,23 +120,11 @@ def parse_args():
     parser.add_argument("input")
     parser.add_argument("-o", "--output", help="Output file in hex.")
     parser.add_argument(
-        "--base64",
-        action="store_true",
-        default=False,
-        help="Set when input file is base64 encoded.",
-    )
-    parser.add_argument(
         "-b",
         "--binary",
         action="store_true",
         default=False,
-        help="Treat input file as binary data and write directly to output.",
-    )
-    parser.add_argument(
-        "--size",
-        type=int,
-        default=None,
-        help="Size of memory to dump (default: mmap whole file).",
+        help="Treat input file as binary data.",
     )
     args = parser.parse_args()
 
@@ -136,45 +136,19 @@ def main():
         print(f"Error: Input file {args.input} does not exist.")
         sys.exit(1)
 
-    tmp = os.path.splitext(args.input)[0] + ".tmp"
+    output = args.output or f"{args.input}.core"
 
-    if args.output is None:
-        args.output = os.path.splitext(args.input)[0] + ".core"
-
-    try:
-        infile = mmap_file(args.input, args.size)
-    except Exception as e:
-        print(f"Failed to mmap input file: {e}")
+    extracted = try_extract(args.input)
+    if extracted is None:
+        print(f"Error: none hex or base64 content in {args.input}.")
         sys.exit(1)
 
-    tmpfile = open(tmp, "wb+")
+    input = mmap_file(args.input) if args.binary or not extracted else extracted
+    coredump = try_decompress(input)
+    with open(output, "wb") as outfile:
+        outfile.write(coredump)
 
-    if args.binary:
-        tmpfile.write(infile)
-    elif args.base64:
-        unbase64file(infile, tmpfile)
-    else:
-        unhexlify(infile, tmpfile)
-
-    infile.close()
-
-    tmpfile.seek(0, 0)
-
-    lzfhdr = tmpfile.read(2)
-
-    if lzfhdr == b"ZV":
-        outfile = open(args.output, "wb")
-        tmpfile.seek(0, 0)
-        decompress(tmpfile, outfile)
-        tmpfile.close()
-        outfile.close()
-        os.unlink(tmp)
-    else:
-        tmpfile.close()
-        shutil.copy(tmp, args.output)
-        os.unlink(tmp)
-
-    print("Core file conversion completed: " + args.output)
+    print("Core file conversion completed: " + output)
 
 
 if __name__ == "__main__":
