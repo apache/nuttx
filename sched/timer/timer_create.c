@@ -81,7 +81,7 @@ static FAR struct posix_timer_s *timer_allocate(void)
 
       ret = (FAR struct posix_timer_s *)
         kmm_malloc(sizeof(struct posix_timer_s));
-      pt_flags = 0;
+      pt_flags = 0u;
     }
 
   /* If we have a timer, then put it into the allocated timer list */
@@ -184,10 +184,10 @@ int timer_create(clockid_t clockid, FAR struct sigevent *evp,
           /* Initialize the timer instance */
 
           ret->pt_clock = clockid;
-          ret->pt_crefs = 1;
+          ret->pt_crefs = 1u;
           ret->pt_owner = tcb->pid;
           ret->pt_delay = 0;
-          ret->pt_expected = 0;
+          ret->pt_expected = 0u;
 
           /* Was a struct sigevent provided? */
 

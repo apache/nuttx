@@ -63,7 +63,7 @@ static inline void timer_free(struct posix_timer_s *timer)
   /* Return it to the free list if it is one of the preallocated timers */
 
 #if CONFIG_PREALLOC_TIMERS > 0
-  if ((timer->pt_flags & PT_FLAGS_PREALLOCATED) != 0)
+  if ((timer->pt_flags & PT_FLAGS_PREALLOCATED) != 0u)
     {
       sq_addlast((FAR sq_entry_t *)timer, (FAR sq_queue_t *)&g_freetimers);
       spin_unlock_irqrestore(&g_locktimers, flags);
@@ -118,7 +118,7 @@ int timer_release(FAR struct posix_timer_s *timer)
    * would decrement to zero.
    */
 
-  else if (timer->pt_crefs > 1)
+  else if (timer->pt_crefs > 1u)
     {
       timer->pt_crefs--;
       ret = 1;
