@@ -33,7 +33,6 @@
 #ifdef CONFIG_RPMSG
 
 #include <nuttx/fs/ioctl.h>
-#include <nuttx/rpmsg/rpmsg_ping.h>
 #include <openamp/rpmsg.h>
 #include <openamp/rpmsg_internal.h>
 
@@ -51,6 +50,16 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
+/* Used for ioctl RPMSGIOC_PING */
+
+struct rpmsg_ping_s
+{
+  int times;
+  int len;
+  int cmd;
+  int sleep; /* unit: ms */
+};
 
 struct rpmsg_s
 {

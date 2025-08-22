@@ -14600,7 +14600,6 @@ include/nuttx/rf/ioctl.h augustofg96@gmail.com alin.jerpelea@sony.com
 include/nuttx/rmt/rmt.h tiago.medicci@espressif.com alin.jerpelea@sony.com
 include/nuttx/rmt/rmtchar.h tiago.medicci@espressif.com alin.jerpelea@sony.com
 include/nuttx/rpmsg/rpmsg.h wangyongrong@xiaomi.com xiaoxiang@xiaomi.com alin.jerpelea@sony.com wangbowen6@xiaomi.com yintao@xiaomi.com
-include/nuttx/rpmsg/rpmsg_ping.h wangyongrong@xiaomi.com alin.jerpelea@sony.com
 include/nuttx/rpmsg/rpmsg_port.h liaoao@xiaomi.com wangbowen6@xiaomi.com devel@sumpfralle.de alin.jerpelea@sony.com
 include/nuttx/rpmsg/rpmsg_router.h yintao@xiaomi.com alin.jerpelea@sony.com
 include/nuttx/rpmsg/rpmsg_virtio_ivshmem.h wangyongrong@xiaomi.com alin.jerpelea@sony.com
