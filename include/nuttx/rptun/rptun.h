@@ -48,16 +48,16 @@
 #define RPTUNIOC_RESET        _RPTUNIOC(102)
 #define RPTUNIOC_PANIC        _RPTUNIOC(103)
 
-#define RPTUN_NOTIFY_ALL      (UINT32_MAX - 0)
+#define RPTUN_NOTIFY_ALL      UINT32_MAX
 
-#define RPTUN_CMD_DONE        0x0
-#define RPTUN_CMD_READY       0x1
-#define RPTUN_CMD_PANIC       0x2
-#define RPTUN_CMD_RESET       0x3
-#define RPTUN_CMD_STOP        0x4
-#define RPTUN_CMD_ACK         0xffff
-#define RPTUN_CMD_MASK        0xffff
-#define RPTUN_CMD_SHIFT       16
+#define RPTUN_CMD_DONE        0x0u
+#define RPTUN_CMD_READY       0x1u
+#define RPTUN_CMD_PANIC       0x2u
+#define RPTUN_CMD_RESET       0x3u
+#define RPTUN_CMD_STOP        0x4u
+#define RPTUN_CMD_ACK         0xffffu
+#define RPTUN_CMD_MASK        0xffffu
+#define RPTUN_CMD_SHIFT       16u
 
 #define RPTUN_CMD(c,v)        (((c) << RPTUN_CMD_SHIFT) | ((v) & RPTUN_CMD_MASK))
 #define RPTUN_GET_CMD(c)      ((c) >> RPTUN_CMD_SHIFT)
