@@ -253,18 +253,6 @@ int aio_write(FAR struct aiocb *aiocbp)
 
   DEBUGASSERT(aiocbp);
 
-  if (aiocbp->aio_reqprio < 0)
-    {
-      set_errno(EINVAL);
-      return ERROR;
-    }
-
-  if (aiocbp->aio_offset < 0)
-    {
-      aiocbp->aio_result = -EINVAL;
-      return OK;
-    }
-
   if (aiocbp->aio_fildes < 0)
     {
       /* for EBADF, the aio_write do not return error directly, but using
@@ -273,6 +261,13 @@ int aio_write(FAR struct aiocb *aiocbp)
 
       aiocbp->aio_result = -EBADF;
       return OK;
+    }
+
+  if (aiocbp->aio_offset < 0 || aiocbp->aio_reqprio < 0)
+    {
+      aiocbp->aio_result = -EINVAL;
+      set_errno(EINVAL);
+      return ERROR;
     }
 
   /* the aio_fildes that transferred in may be opened with O_RDONLY, for this
