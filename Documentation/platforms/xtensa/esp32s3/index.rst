@@ -646,6 +646,170 @@ Set the attribute ``__attribute__ ((section (".ext_ram.bss")))`` to the variable
 
 This is particularly useful when the internal RAM is not enough to hold all the data.
 
+.. _esp32s3_ulp:
+
+ULP RISC-V Coprocessor
+======================
+
+The ULP RISC-V core is a 32-bit coprocessor integrated into the ESP32-S3 SoC.
+It is designed to run independently of the main high-performance (HP) core and is capable of executing lightweight tasks
+such as GPIO polling, simple peripheral control and I/O interactions.
+
+This coprocessor benefits to offload simple tasks from HP core (e.g., GPIO polling , I2C operations, basic control logic) and
+frees the main CPU for higher-level processing
+
+For more information about ULP RISC-V Coprocessor `check here <https://docs.espressif.com/projects/esp-idf/en/stable/esp32s3/api-reference/system/ulp-risc-v.html>`__.
+
+Features of the ULP RISC-V Coprocessor
+--------------------------------------
+
+* Processor Architecture
+   - RV32IMC RISC-V core — Integer (I), Multiplication/Division (M), and Compressed (C) instructions
+   - Runs at 17.5 MHz
+* Memory
+   - Access to 8 KB of RTC slow memory (RTC_SLOW_MEM) memory region, and registers in RTC_CNTL, RTC_IO, and SARADC peripherals
+* Debugging
+   - Logging via bit-banged UART
+   - Shared memory for state inspection
+   - Panic or exception handlers can trigger wake-up or signal to main CPU if main CPU is in sleep
+* Peripheral support
+   - RTC domain peripherals (RTC GPIO, RTC I2C, ADC)
+
+Loading Binary into ULP RISC-V Coprocessor
+------------------------------------------
+
+There are two ways to load a binary into LP-Core:
+  - Using a prebuilt binary
+  - Using NuttX internal build system to build your own (bare-metal) application
+
+When using a prebuilt binary, the already compiled output for the ULP system whether built from NuttX
+or the ESP-IDF environment can be leveraged. However, whenever the ULP code needs to be modified, it must be rebuilt separately,
+and the resulting .bin file has to be integrated into NuttX. This workflow, while compatible, can become tedious.
+
+With NuttX internal build system, the ULP binary code can be built and flashed from a single location. It is more convenient but
+using build system has some dependencies on example side.
+
+Both methods requires `CONFIG_ESP32S3_ULP_COPROC_ENABLED` and `CONFIG_ESP32S3_ULP_COPROC_RESERVE_MEM` variables to set ULP RISC-V core and
+`CONFIG_ESPRESSIF_ULP_RISCV_PROJECT_PATH` variable to set the path to the ULP project or prebuilt binary file
+relative to NuttX root folder.
+These variables can be set using `make menuconfig` or `kconfig-tweak` commands.
+
+Here is an example for enabling ULP and using a prebuilt binary for ULP RISC-V core::
+
+    make distclean
+    ./tools/configure.sh esp32s3-devkit:nsh
+    kconfig-tweak -e CONFIG_ESP32S3_ULP_COPROC_ENABLED
+    kconfig-tweak --set-val CONFIG_ESP32S3_ULP_COPROC_RESERVE_MEM 8176
+    kconfig-tweak --set-str CONFIG_ESPRESSIF_ULP_RISCV_PROJECT_PATH "Documentation/platforms/xtensa/esp32s3/boards/esp32s3-devkit/ulp_riscv_blink.bin"
+    make olddefconfig
+    make -j
+
+Creating an ULP RISC-V Coprocessor Application
+----------------------------------------------
+
+To use NuttX's internal build system to compile the bare-metal ULP RISC-V Coprocessor binary, check the following instructions.
+
+First, create a folder for the ULP source and header files. This folder is just for ULP project and it is
+an independent project. Therefore, the NuttX example guide should not be followed, and no Makefile or similar
+build files should be added. Also folder location could be anywhere. To include ULP folder into build
+system don't forget to set `CONFIG_ESPRESSIF_ULP_RISCV_PROJECT_PATH` variable with path of the ULP project folder relative to
+NuttX root folder. Instructions for setting up can be found above.
+
+NuttX's internal functions or POSIX calls are not supported.
+
+Here is an example:
+
+- ULP UART Snippet:
+
+.. code-block:: C
+
+  #include "ulp_riscv.h"
+  #include "ulp_riscv_utils.h"
+  #include "ulp_riscv_print.h"
+  #include "ulp_riscv_uart_ulp_core.h"
+  #include "sdkconfig.h"
+
+  static ulp_riscv_uart_t s_print_uart;
+
+  int main (void)
+  {
+    ulp_riscv_uart_cfg_t cfg = {
+        .tx_pin = 0,
+    };
+    ulp_riscv_uart_init(&s_print_uart, &cfg);
+    ulp_riscv_print_install((putc_fn_t)ulp_riscv_uart_putc, &s_print_uart);
+
+    while(1)
+    {
+      ulp_riscv_print_str("Hello from the LP core!!\r\n");
+      ulp_riscv_delay_cycles(1000 * ULP_RISCV_CYCLES_PER_MS);
+    }
+
+    return 0;
+  }
+
+For more information about ULP RISC-V Coprocessor examples `check here <https://github.com/espressif/esp-idf/tree/master/examples/system/ulp/lp_core>`__.
+After these settings follow the same steps as for any other configuration to build NuttX. Build system checks ULP project path,
+adds every source and header file into project and builds it.
+
+To sum up, here is an complete example. `ulp_example/ulp (../ulp_example/ulp)` folder selected as example
+to create a subfolder for ULP but folder that includes ULP source code can be anywhere:
+
+- Tree view:
+
+.. code-block:: text
+
+   nuttxspace/
+   ├── nuttx/
+   └── apps/
+   └── ulp_example/
+       └── ulp/
+           └── ulp_main.c
+
+- Contents in ulp_main.c:
+
+.. code-block:: C
+
+   #include <stdio.h>
+   #include <stdint.h>
+   #include <stdbool.h>
+   #include "ulp_riscv.h"
+   #include "ulp_riscv_utils.h"
+   #include "ulp_riscv_gpio.h"
+
+   #define GPIO_PIN 0
+
+   #define nop() __asm__ __volatile__ ("nop")
+
+   bool gpio_level_previous = true;
+
+   int main (void)
+    {
+       while (1)
+           {
+           ulp_riscv_gpio_output_level(GPIO_PIN, gpio_level_previous);
+           gpio_level_previous = !gpio_level_previous;
+           for (int i = 0; i < 10000; i++)
+             {
+               nop();
+             }
+           }
+
+       return 0;
+    }
+
+- Command to build::
+
+    make distclean
+    ./tools/configure.sh esp32s3-devkitc:nsh
+    kconfig-tweak -e CONFIG_ESP32S3_ULP_COPROC_ENABLED
+    kconfig-tweak --set-val CONFIG_ESP32S3_ULP_COPROC_RESERVE_MEM 8176
+    kconfig-tweak -e CONFIG_DEV_GPIO
+    kconfig-tweak --set-str CONFIG_ESPRESSIF_ULP_RISCV_PROJECT_PATH "../ulp_example/ulp"
+    make olddefconfig
+    make -j
+
+
 _`Managing esptool on virtual environment`
 ==========================================
 
