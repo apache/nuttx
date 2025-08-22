@@ -33,7 +33,6 @@
 #include <nuttx/semaphore.h>
 
 #include "rpmsg.h"
-#include "rpmsg_ping.h"
 #include "rpmsg_router.h"
 #include "rpmsg_test.h"
 
