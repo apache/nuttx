@@ -1600,33 +1600,7 @@ skip_rtt:
           }
 
 #else /* CONFIG_NET_TCPURGDATA */
-        /* Check the URG flag.  If this is set, We must gracefully ignore
-         * and discard the urgent data.
-         */
-
-        if ((tcp->flags & TCP_URG) != 0)
-          {
-            uint16_t urglen = (tcp->urgp[0] << 8) | tcp->urgp[1];
-            if (urglen > dev->d_len)
-              {
-                /* There is more urgent data in the next segment to come. */
-
-                urglen = dev->d_len;
-              }
-
-             /* The d_len field contains the length of the incoming data;
-              * The d_appdata field points to the any "normal" data that
-              * may follow the urgent data.
-              *
-              * NOTE: If the urgent data continues in the next packet, then
-              * d_len will be zero and d_appdata will point past the end of
-              * the payload (which is OK).
-              */
-
-            net_incr32(conn->rcvseq, urglen);
-            dev->d_len     -= urglen;
-            dev->d_appdata += urglen;
-          }
+        /* Urgent data needs to be treated as normal data */
 #endif /* CONFIG_NET_TCPURGDATA */
 
 #ifdef CONFIG_NET_TCP_KEEPALIVE
