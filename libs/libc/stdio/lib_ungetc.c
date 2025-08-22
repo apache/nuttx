@@ -65,6 +65,7 @@ int ungetc(int c, FAR FILE *stream)
     {
       stream->fs_ungotten[nungotten] = c;
       stream->fs_nungotten = nungotten + 1;
+      stream->fs_flags &= ~__FS_FLAG_EOF;
       return c;
     }
   else
