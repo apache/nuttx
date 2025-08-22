@@ -414,7 +414,7 @@ static void rptun_update_vring_da(FAR struct remoteproc *rproc,
       rptuninfo("vr[%u] shm=%p len=%zu da=0x%lx pa=0x%lx sz=%" PRIu32 "\n",
                 i, *shmbase, *shmlen, vring_da, vring_pa, vring_sz);
 
-      if (vring->da == 0 || vring->da == FW_RSC_U32_ADDR_ANY)
+      if (vring->da == 0u || vring->da == FW_RSC_U32_ADDR_ANY)
         {
           vring->da = vring_da;
           *shmbase += vring_sz;
@@ -444,7 +444,7 @@ static int rptun_create_device(FAR struct rptun_priv_s *priv,
   int ret;
 
   off = find_rsc(rsc, RSC_VDEV, index);
-  if (off == 0)
+  if (off == 0u)
     {
       return index ? -ENODEV : -EINVAL;
     }
@@ -484,7 +484,7 @@ static int rptun_create_device(FAR struct rptun_priv_s *priv,
    */
 
   off = find_rsc(rsc, RSC_CARVEOUT, index);
-  if (off != 0)
+  if (off != 0u)
     {
       carveout_rsc = (FAR struct fw_rsc_carveout *)(rsc + off);
 
@@ -710,7 +710,7 @@ static void rptun_send_command(FAR struct rptun_priv_s *priv,
     {
       uint32_t timeout = CONFIG_RPTUN_CMD_TIMEOUT_MS;
 
-      while (timeout-- > 0)
+      while (timeout-- > 0u)
         {
           uint32_t ack = rptun_recv_command(priv, false);
 
@@ -752,7 +752,7 @@ static uint32_t rptun_recv_command(FAR struct rptun_priv_s *priv, bool ack)
 
   if (ack)
     {
-      rptun_send_command(priv, RPTUN_CMD(RPTUN_CMD_ACK, 0), false);
+      rptun_send_command(priv, RPTUN_CMD(RPTUN_CMD_ACK, 0u), false);
     }
 
   return cmd;
@@ -894,7 +894,7 @@ static int rptun_dev_start(FAR struct rptun_priv_s *priv)
   argv[1] = arg1;
   argv[2] = NULL;
 
-  if (dev->stack != NULL && dev->stack_size != 0)
+  if (dev->stack != NULL && dev->stack_size != 0u)
     {
       priv->pid = kthread_create_with_stack("rptun",
                                             CONFIG_RPTUN_PRIORITY,
