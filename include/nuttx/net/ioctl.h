@@ -100,6 +100,9 @@
 #define SIOCGMIIREG      _SIOC(0x0025)  /* Get a MII register via MDIO */
 #define SIOCSMIIREG      _SIOC(0x0026)  /* Set a MII register via MDIO */
 
+#define SIOCGMMDREG      _SIOC(0x0043)  /* Get a MMD register via MDIO */
+#define SIOCSMMDREG      _SIOC(0x0044)  /* Set a MMD register via MDIO */
+
 /* Unix domain sockets ******************************************************/
 
 #define SIOCINQ          _SIOC(0x0027)  /* Returns the amount of queued unread

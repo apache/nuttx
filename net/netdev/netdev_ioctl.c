@@ -719,6 +719,8 @@ static ssize_t net_ioctl_ifreq_arglen(uint8_t domain, int cmd)
       case SIOCGMIIPHY:
       case SIOCGMIIREG:
       case SIOCSMIIREG:
+      case SIOCGMMDREG:
+      case SIOCSMMDREG:
       case SIOCGCANBITRATE:
       case SIOCSCANBITRATE:
       case SIOCACANEXTFILTER:
@@ -1167,6 +1169,21 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
               &req->ifr_ifru.ifru_mii_data;
             ret = dev->d_ioctl(dev, cmd,
                                (unsigned long)(uintptr_t)mii_data);
+          }
+        else
+          {
+            ret = -ENOSYS;
+          }
+        break;
+
+      case SIOCGMMDREG: /* Get MMD register via MDIO */
+      case SIOCSMMDREG: /* Set MMD register via MDIO */
+        if (dev->d_ioctl)
+          {
+            FAR struct mmd_ioctl_data_s *mmd_data =
+              &req->ifr_ifru.ifru_mmd_data;
+            ret = dev->d_ioctl(dev, cmd,
+                               (unsigned long)(uintptr_t)mmd_data);
           }
         else
           {

@@ -172,6 +172,18 @@ struct mii_ioctl_data_s
   uint16_t val_out;     /* PHY output data */
 };
 
+/* Structure passed to read from or write to the MMD
+ * registers via the SIOCxMMDREG ioctl commands.
+ */
+
+struct mmd_ioctl_data_s
+{
+  uint8_t  phy_id;      /* PHY device address */
+  uint8_t  mmd;         /* MMD number */
+  uint16_t addr;        /* Address in the selected MMD */
+  uint16_t data;        /* Input / Output data */
+};
+
 /* Structure passed to get or set the CAN bitrate
  * SIOCxCANBITRATE ioctl commands.
  */
@@ -238,6 +250,7 @@ struct lifreq
     uint32_t                   lifru_flags;          /* Interface flags */
     struct mii_ioctl_notify_s  llfru_mii_notify;     /* PHY event notification */
     struct mii_ioctl_data_s    lifru_mii_data;       /* MII request data */
+    struct mmd_ioctl_data_s    ifru_mmd_data;        /* MMD request data */
     struct can_ioctl_data_s    lifru_can_data;       /* CAN bitrate request data */
     struct can_ioctl_filter_s  lifru_can_filter;     /* CAN filter request data */
     struct can_ioctl_state_s   lifru_can_state;      /* CAN/LIN controller state */
@@ -292,6 +305,7 @@ struct ifreq
     uint32_t                   ifru_flags;          /* Interface flags */
     struct mii_ioctl_notify_s  ifru_mii_notify;     /* PHY event notification */
     struct mii_ioctl_data_s    ifru_mii_data;       /* MII request data */
+    struct mmd_ioctl_data_s    ifru_mmd_data;       /* MMD request data */
     struct can_ioctl_data_s    ifru_can_data;       /* CAN bitrate request data */
     struct can_ioctl_filter_s  ifru_can_filter;     /* CAN filter request data */
     struct can_ioctl_state_s   ifru_can_state;      /* CAN/LIN controller state */
