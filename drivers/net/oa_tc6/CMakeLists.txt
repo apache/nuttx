@@ -23,5 +23,9 @@
 if(CONFIG_NET_OA_TC6)
   set(SRCS oa_tc6.c)
 
+  if(CONFIG_NET_OA_TC6_NCV7410)
+    list(APPEND SRCS oa_tc6_ncv7410.c)
+  endif()
+
   target_sources(drivers PRIVATE ${SRCS})
 endif()
