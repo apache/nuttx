@@ -111,6 +111,8 @@ ifeq ($(CONFIG_DRIVERS_WIFI_SIM),y)
   CSRCS += wifi_sim.c
 endif
 
+include net/oa_tc6/Make.defs
+
 # Include network build support
 
 DEPPATH += --dep-path net
