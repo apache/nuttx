@@ -36,6 +36,10 @@
 #include "oa_tc6_ncv7410.h"
 #endif
 
+#ifdef CONFIG_NET_OA_TC6_LAN865X
+#include "oa_tc6_lan865x.h"
+#endif
+
 #include "oa_tc6.h"
 
 /****************************************************************************
@@ -1080,6 +1084,11 @@ static int oa_tc6_init_by_id(FAR struct spi_dev_s *spi,
       case OA_TC6_NCV7410_PHYID:
           ninfo("Info: Detected NCV7410 or NCN26010\n");
           return ncv7410_initialize(spi, config);
+#endif
+#ifdef CONFIG_NET_OA_TC6_LAN865X
+      case OA_TC6_LAN865X_PHYID:
+          ninfo("Info: Detected LAN865x\n");
+          return lan865x_initialize(spi, config);
 #endif
       default:
           nerr("Error: Unknown PHYID 0x%08lX. "
