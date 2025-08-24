@@ -158,6 +158,27 @@ if(NOT EXISTS "${NUTTX_DEFCONFIG}")
   message(FATAL_ERROR "No config file found at ${NUTTX_DEFCONFIG}")
 endif()
 
+# Custom board ###################################################
+
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/boards/dummy)
+if(CONFIG_ARCH_BOARD_CUSTOM)
+  get_filename_component(NUTTX_BOARD_ABS_DIR ${CONFIG_ARCH_BOARD_CUSTOM_DIR}
+                         ABSOLUTE BASE_DIR ${NUTTX_DIR})
+else()
+  set(NUTTX_BOARD_ABS_DIR ${NUTTX_BOARD_DIR})
+  file(TOUCH ${CMAKE_BINARY_DIR}/boards/dummy/Kconfig)
+endif()
+
+# Process initial defconfig ###################################################
+# Process initial defoconfig to recursively expaned #include in it
+
+include(nuttx_process_config)
+process_config(
+  ${CMAKE_BINARY_DIR}/.defconfig.processed ${NUTTX_DEFCONFIG} INCLUDE_PATHS
+  ${NUTTX_BOARD_ABS_DIR}/../../common/configs ${NUTTX_BOARD_ABS_DIR}/../common
+  ${NUTTX_BOARD_ABS_DIR})
+set(NUTTX_DEFCONFIG ${CMAKE_BINARY_DIR}/.defconfig.processed)
+
 # Generate initial .config ###################################################
 # This is needed right before any other configure step so that we can source
 # Kconfig variables into CMake variables
@@ -237,17 +258,6 @@ endif()
 if(NOT EXISTS "${NUTTX_BOARD_DIR}/CMakeLists.txt"
    AND NOT EXISTS "${NUTTX_BOARD_DIR}/../common/CMakeLists.txt")
   message(FATAL_ERROR "No CMakeLists.txt found at ${NUTTX_BOARD_DIR}")
-endif()
-
-# Custom board ###################################################
-
-file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/boards/dummy)
-if(CONFIG_ARCH_BOARD_CUSTOM)
-  get_filename_component(NUTTX_BOARD_ABS_DIR ${CONFIG_ARCH_BOARD_CUSTOM_DIR}
-                         ABSOLUTE BASE_DIR ${NUTTX_DIR})
-else()
-  set(NUTTX_BOARD_ABS_DIR ${NUTTX_BOARD_DIR})
-  file(TOUCH ${CMAKE_BINARY_DIR}/boards/dummy/Kconfig)
 endif()
 
 # check if board custom dir points to NuttX upstream board. This is useful when
