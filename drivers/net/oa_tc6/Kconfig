@@ -9,3 +9,18 @@ menuconfig NET_OA_TC6
 	depends on NETDEVICES
 	---help---
 		Enable support for OPEN Alliance protocol SPI MAC-PHYs.
+
+if NET_OA_TC6
+
+config NET_OA_TC6_NCV7410
+	bool "Onsemi NCV7410 (NCN26010) 10BASE-T1S SPI MAC-PHY Support"
+	default n
+
+config NET_OA_TC6_NCV7410_LEDS
+	bool "Setup NCV7410 DIO outputs as status LEDs"
+	default n
+	depends on NET_OA_TC6_NCV7410
+	---help---
+		Setup DIO0 to blink on TX/RX and DIO1 to reflect the LCTL bit in the PHY CONTROL register (Up/Down).
+
+endif
