@@ -23,4 +23,16 @@ config NET_OA_TC6_NCV7410_LEDS
 	---help---
 		Setup DIO0 to blink on TX/RX and DIO1 to reflect the LCTL bit in the PHY CONTROL register (Up/Down).
 
+config NET_OA_TC6_LAN865X
+	bool "Microchip LAN865x 10BASE-T1S SPI MAC-PHY Support"
+	default n
+
+config NET_OA_TC6_LAN865X_MAC
+	int "LAN865x lower 3 bytes of MAC address"
+	default 0
+	range 0 16777215
+	depends on NET_OA_TC6_LAN865X
+	---help---
+		LAN865x does not have a factory-assigned MAC address, it has to be provided externally
+
 endif

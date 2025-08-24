@@ -28,6 +28,10 @@ ifeq ($(CONFIG_NET_OA_TC6_NCV7410),y)
 CSRCS += oa_tc6_ncv7410.c
 endif
 
+ifeq ($(CONFIG_NET_OA_TC6_LAN865X),y)
+CSRCS += oa_tc6_lan865x.c
+endif
+
 DEPPATH += --dep-path net/oa_tc6
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)drivers$(DELIM)net$(DELIM)oa_tc6
 VPATH += :net/oa_tc6
