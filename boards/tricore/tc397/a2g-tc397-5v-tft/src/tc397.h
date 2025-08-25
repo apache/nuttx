@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/tricore/tc3xx/tc397/include/board.h
+ * boards/tricore/tc397/a2g-tc397-5v-tft/src/tc397.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_TRICORE_TC3XX_TC397_INCLUDE_BOARD_H
-#define __BOARDS_TRICORE_TC3XX_TC397_INCLUDE_BOARD_H
+#ifndef __BOARDS_TRICORE_TC397_A2G_TC397_5V_TFT_SRC_TC397_H
+#define __BOARDS_TRICORE_TC397_A2G_TC397_5V_TFT_SRC_TC397_H
 
 /****************************************************************************
  * Included Files
@@ -29,12 +29,37 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#ifndef __ASSEMBLY__
+
+/****************************************************************************
  * Public Functions Definitions
  ****************************************************************************/
 
-#endif /* __BOARDS_TRICORE_TC3XX_TC397_INCLUDE_BOARD_H */
+/****************************************************************************
+ * Name: tc397_bringup
+ *
+ * Description:
+ *   Bring up board features
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_BOARDCTL) || defined(CONFIG_BOARD_LATE_INITIALIZE)
+int tc397_bringup(void);
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __BOARDS_TRICORE_TC397_A2G_TC397_5V_TFT_SRC_TC397_H */
