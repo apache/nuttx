@@ -65,7 +65,7 @@ struct timerfd_priv_s
   mutex_t                   lock;    /* Enforces device exclusive access */
   FAR timerfd_waiter_sem_t *rdsems;  /* List of blocking readers */
   int                       clock;   /* Clock to use as the timing base */
-  int                       delay;   /* If non-zero, used to reset repetitive
+  clock_t                   delay;   /* If non-zero, used to reset repetitive
                                       * timers */
   struct wdog_s             wdog;    /* The watchdog that provides the timing */
   timerfd_t                 counter; /* timerfd counter */
@@ -404,7 +404,7 @@ static void timerfd_timeout(wdparm_t arg)
 
   /* If this is a repetitive timer, then restart the watchdog */
 
-  if (dev->delay > 0)
+  if (dev->delay > 0u)
     {
       wd_start(&dev->wdog, dev->delay, timerfd_timeout, arg);
     }
@@ -492,7 +492,7 @@ int timerfd_settime(int fd, int flags,
   FAR struct timerfd_priv_s *dev;
   FAR struct file *filep;
   irqstate_t intflags;
-  sclock_t delay;
+  clock_t delay;
   int ret;
 
   /* Some sanity checks */
@@ -594,7 +594,7 @@ int timerfd_settime(int fd, int flags,
    * instead (assuming a repetitive timer).
    */
 
-  if (delay <= 0)
+  if ((sclock_t)delay <= 0)
     {
       delay = dev->delay;
     }

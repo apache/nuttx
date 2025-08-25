@@ -102,8 +102,8 @@ static inline void timer_restart(FAR struct posix_timer_s *timer,
                                  wdparm_t itimer)
 {
   clock_t ticks;
-  sclock_t delay;
-  sclock_t frame;
+  clock_t delay;
+  clock_t frame;
 
   /* If this is a repetitive timer, then restart the watchdog */
 
@@ -128,7 +128,7 @@ static inline void timer_restart(FAR struct posix_timer_s *timer,
        */
 
       frame = (delay + timer->pt_delay) / timer->pt_delay;
-      timer->pt_overrun   = frame - 1;
+      timer->pt_overrun   = (int)(frame - 1u);
       timer->pt_expected += frame * timer->pt_delay;
 
       wd_start_abstick(&timer->pt_wdog, timer->pt_expected,
@@ -254,7 +254,7 @@ int timer_settime(timer_t timerid, int flags,
                   FAR struct itimerspec *ovalue)
 {
   FAR struct posix_timer_s *timer = timer_gethandle(timerid);
-  sclock_t delay;
+  clock_t delay;
   int ret = OK;
 
   /* Some sanity checks */
@@ -304,7 +304,7 @@ int timer_settime(timer_t timerid, int flags,
             }
           else
             {
-              timer->pt_delay = 0;
+              timer->pt_delay = 0u;
             }
 
           /* Check if abstime is selected */
