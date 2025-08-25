@@ -84,6 +84,12 @@ void sam_spidev_initialize(void)
   sam_configgpio(GPIO_LCD_CD);
 #endif
 
+#ifdef CONFIG_NET_OA_TC6
+  /* Enable chip select for OA-TC6 MAC-PHY */
+
+  sam_configgpio(SPI0_NPCS1);
+#endif
+
 #endif /* CONFIG_SAMV7_SPI0_MASTER */
 
 #ifdef CONFIG_SAMV7_SPI0_SLAVE
@@ -182,6 +188,10 @@ void sam_spi0select(uint32_t devid, bool selected)
       case SPIDEV_DISPLAY(0):
         sam_gpiowrite(SPI0_NPCS1, !selected);
         break;
+#endif
+#ifdef CONFIG_NET_OA_TC6
+      case SPIDEV_ETHERNET(0):
+        sam_gpiowrite(SPI0_NPCS1, !selected);
 #endif
 
       default:
