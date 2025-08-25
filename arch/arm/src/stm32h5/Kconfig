@@ -1020,6 +1020,25 @@ config STM32H5_ADC_MAX_SAMPLES
 		for all supported devices, the user can change the default
 		values in the board initialization logic and avoid ADC overrun.
 
+config STM32H5_ADC_WDG
+	bool "STM32H5 ADC analog watchdog events (queue + optional signals)"
+	default n
+	select SCHED_WORKQUEUE                            # ensure work queues are built
+	select SCHED_HPWORK                               # we use the high-priority work queue
+	---help---
+		Enables driver-side support for ADC analog watchdog events on STM32H5:
+		- ISR enqueues AWD events in a small ring buffer
+		- Optional POSIX signal (pid/signo) can be sent from deferred context
+		If disabled, the driver will not compile in the event/notify path.
+
+		This option selects the kernel work queue so the driver can post work
+		from interrupt context without linking errors.
+
+config STM32H5_ADC_WDG_CONT
+	bool "Enable continuous conversions for watchdogs"
+	depends on STM32H5_ADC_WDG
+	default n
+
 config STM32H5_ADC1_RESOLUTION
 	int "ADC1 resolution"
 	depends on STM32H5_ADC1
@@ -1051,6 +1070,7 @@ config STM32H5_ADC1_DMA_CFG
 	bool "ADC1 DMA configuration"
 	depends on STM32H5_ADC1 && STM32H5_ADC1_DMA
 	default n
+	select STM32H5_ADC_WDG_CONT
 	---help---
 		0 - ADC1 DMA in One Shot Mode, 1 - ADC1 DMA in Circular Mode
 
