@@ -46,6 +46,7 @@
 #define HAVE_AUTOMOUNTER     1
 #define HAVE_USB             1
 #define HAVE_USBDEV          1
+#define HAVE_PROGMEM_CHARDEV 1
 
 /* HSMCI */
 
@@ -79,6 +80,16 @@
 #  undef HAVE_USB
 #  undef HAVE_USBDEV
 #endif
+
+/* On-chip Programming Memory */
+
+#if !defined(CONFIG_SAMV7_PROGMEM) || !defined(CONFIG_MTD_PROGMEM)
+#  undef HAVE_PROGMEM_CHARDEV
+#endif
+
+/* This is the on-chip progmem memory driver minor number */
+
+#define PROGMEM_MTD_MINOR 0
 
 /* MMC/SD minor numbers */
 
@@ -255,6 +266,18 @@ void sam_usbinitialize(void);
 
 #ifdef HAVE_HSMCI
 int sam_sdcard_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: sam_flash_init
+ *
+ * Description:
+ *   Initialize the embedded SAME70 FLASH programming memory.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_PROGMEM_CHARDEV
+int sam_flash_init(void);
 #endif
 
 /****************************************************************************

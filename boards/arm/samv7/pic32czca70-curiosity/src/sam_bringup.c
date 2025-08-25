@@ -94,6 +94,20 @@ int sam_bringup(void)
     }
 #endif
 
+/* Embedded Progmem *********************************************************
+ */
+
+#ifdef HAVE_PROGMEM_CHARDEV
+  /* Initialize the FLASH programming memory library */
+
+  ret = sam_flash_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize embedded flash: %d\n",
+             ret);
+    }
+#endif
+
 /* SD Card support **********************************************************
  */
 

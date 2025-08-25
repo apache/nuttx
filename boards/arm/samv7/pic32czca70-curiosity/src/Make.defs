@@ -48,6 +48,10 @@ ifeq ($(CONFIG_SAMV7_USBDEVHS),y)
 CSRCS += sam_usbdev.c
 endif
 
+ifeq ($(CONFIG_SAMV7_PROGMEM),y)
+CSRCS += sam_progmem_partition.c
+endif
+
 .PHONY = context distclean
 
 $(SCRIPTOUT): $(LDSCRIPT_TEMPLATE) $(CONFIGFILE)
