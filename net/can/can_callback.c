@@ -67,7 +67,7 @@ can_data_event(FAR struct net_driver_s *dev, FAR struct can_conn_s *conn,
                uint32_t flags)
 {
   int buflen = dev->d_len;
-  uint16_t recvlen;
+  int recvlen;
   uint32_t ret;
 
 #ifdef CONFIG_NET_TIMESTAMP
@@ -193,8 +193,8 @@ uint32_t can_callback(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-uint16_t can_datahandler(FAR struct net_driver_s *dev,
-                         FAR struct can_conn_s *conn)
+int can_datahandler(FAR struct net_driver_s *dev,
+                    FAR struct can_conn_s *conn)
 {
   FAR struct iob_s *iob = dev->d_iob;
   int ret = 0;

@@ -254,8 +254,8 @@ uint32_t can_callback(FAR struct net_driver_s *dev,
  *   conn - A pointer to the CAN connection structure
  *
  * Returned Value:
- *   The number of bytes actually buffered is returned.  This will be either
- *   zero or equal to buflen; partial packets are not buffered.
+ *   The number of bytes actually buffered is returned.  This will be
+ *   negative or zero or equal to buflen; partial packets are not buffered.
  *
  * Assumptions:
  * - The caller has checked that CAN_NEWDATA is set in flags and that is no
@@ -264,8 +264,8 @@ uint32_t can_callback(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-uint16_t can_datahandler(FAR struct net_driver_s *dev,
-                         FAR struct can_conn_s *conn);
+int can_datahandler(FAR struct net_driver_s *dev,
+                    FAR struct can_conn_s *conn);
 
 /****************************************************************************
  * Name: can_recvmsg
