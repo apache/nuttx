@@ -43,6 +43,7 @@ enum tca64xx_part_e
   TCA6408_PART = 0,
   TCA6416_PART,
   TCA6424_PART,
+  PCAL6416A_PART,
   TCA64_NPARTS
 };
 

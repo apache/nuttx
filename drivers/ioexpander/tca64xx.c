@@ -53,6 +53,9 @@ static uint8_t tca64_input_reg(FAR struct tca64_dev_s *priv, uint8_t pin);
 static uint8_t tca64_output_reg(FAR struct tca64_dev_s *priv, uint8_t pin);
 static uint8_t tca64_polarity_reg(FAR struct tca64_dev_s *priv, uint8_t pin);
 static uint8_t tca64_config_reg(FAR struct tca64_dev_s *priv, uint8_t pin);
+static uint8_t tca64_pdenable_reg(FAR struct tca64_dev_s *priv, uint8_t pin);
+static uint8_t tca64_pdselect_reg(FAR struct tca64_dev_s *priv, uint8_t pin);
+
 static int tca64_getreg(FAR struct tca64_dev_s *priv, uint8_t regaddr,
              FAR uint8_t *regval, unsigned int count);
 static int tca64_putreg(struct tca64_dev_s *priv, uint8_t regaddr,
@@ -134,6 +137,8 @@ static const struct tca64_part_s g_tca64_parts[TCA64_NPARTS] =
     TCA6408_OUTPUT_REG,
     TCA6408_POLARITY_REG,
     TCA6408_CONFIG_REG,
+    TCA64XX_INVALID_REG,
+    TCA64XX_INVALID_REG,
   },
   {
     TCA6416_PART,
@@ -142,6 +147,8 @@ static const struct tca64_part_s g_tca64_parts[TCA64_NPARTS] =
     TCA6416_OUTPUT0_REG,
     TCA6416_POLARITY0_REG,
     TCA6416_CONFIG0_REG,
+    TCA64XX_INVALID_REG,
+    TCA64XX_INVALID_REG,
   },
   {
     TCA6424_PART,
@@ -150,6 +157,18 @@ static const struct tca64_part_s g_tca64_parts[TCA64_NPARTS] =
     TCA6424_OUTPUT0_REG,
     TCA6424_POLARITY0_REG,
     TCA6424_CONFIG0_REG,
+    TCA64XX_INVALID_REG,
+    TCA64XX_INVALID_REG,
+  },
+  {
+    PCAL6416A_PART,
+    MIN(PCAL6416A_NR_GPIOS, CONFIG_IOEXPANDER_NPINS),
+    PCAL6416A_INPUT0_REG,
+    PCAL6416A_OUTPUT0_REG,
+    PCAL6416A_POLARITY0_REG,
+    PCAL6416A_CONFIG0_REG,
+    PCAL6416A_PU_ENABLE0_REG,
+    PCAL6416A_PUPD_SELECT0_REG,
   },
 };
 
@@ -233,7 +252,7 @@ static uint8_t tca64_output_reg(FAR struct tca64_dev_s *priv, uint8_t pin)
 static uint8_t tca64_polarity_reg(FAR struct tca64_dev_s *priv, uint8_t pin)
 {
   FAR const struct tca64_part_s *part = tca64_getpart(priv);
-  uint8_t reg = part->tp_output;
+  uint8_t reg = part->tp_polarity;
 
   DEBUGASSERT(pin <= part->tp_ngpios);
   return reg + (pin >> 3);
@@ -251,6 +270,50 @@ static uint8_t tca64_config_reg(FAR struct tca64_dev_s *priv, uint8_t pin)
 {
   FAR const struct tca64_part_s *part = tca64_getpart(priv);
   uint8_t reg = part->tp_config;
+
+  DEBUGASSERT(pin <= part->tp_ngpios);
+  return reg + (pin >> 3);
+}
+
+/****************************************************************************
+ * Name: tca64_pdenable_reg
+ *
+ * Description:
+ *  Return the address of the pu/pd enable register for the specified pin.
+ *
+ ****************************************************************************/
+
+static uint8_t tca64_pdenable_reg(FAR struct tca64_dev_s *priv, uint8_t pin)
+{
+  FAR const struct tca64_part_s *part = tca64_getpart(priv);
+  uint8_t reg = part->tp_puenable;
+
+  if (reg == TCA64XX_INVALID_REG)
+    {
+      return reg;
+    }
+
+  DEBUGASSERT(pin <= part->tp_ngpios);
+  return reg + (pin >> 3);
+}
+
+/****************************************************************************
+ * Name: tca64_pdselect_reg
+ *
+ * Description:
+ *  Return the address of the pu/pd selection register for the specified pin.
+ *
+ ****************************************************************************/
+
+static uint8_t tca64_pdselect_reg(FAR struct tca64_dev_s *priv, uint8_t pin)
+{
+  FAR const struct tca64_part_s *part = tca64_getpart(priv);
+  uint8_t reg = part->tp_puselect;
+
+  if (reg == TCA64XX_INVALID_REG)
+    {
+      return reg;
+    }
 
   DEBUGASSERT(pin <= part->tp_ngpios);
   return reg + (pin >> 3);
@@ -346,7 +409,7 @@ static int tca64_putreg(struct tca64_dev_s *priv, uint8_t regaddr,
   else
     {
       gpioinfo("claddr=%02x, regaddr=%02x, regval=%02x\n",
-               priv->config->address, regaddr, regval);
+               priv->config->address, regaddr, *regval);
       return OK;
     }
 }
@@ -374,12 +437,6 @@ static int tca64_direction(FAR struct ioexpander_dev_s *dev, uint8_t pin,
   uint8_t regaddr;
   uint8_t regval;
   int ret;
-
-  if (direction != IOEXPANDER_DIRECTION_IN &&
-      direction != IOEXPANDER_DIRECTION_OUT)
-    {
-      return -EINVAL;
-    }
 
   DEBUGASSERT(priv != NULL && priv->config != NULL &&
               pin < CONFIG_IOEXPANDER_NPINS);
@@ -411,7 +468,9 @@ static int tca64_direction(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 
   /* Set the pin direction in the I/O Expander */
 
-  if (direction == IOEXPANDER_DIRECTION_IN)
+  if ((direction == IOEXPANDER_DIRECTION_IN) ||
+      (direction == IOEXPANDER_DIRECTION_IN_PULLDOWN) ||
+      (direction == IOEXPANDER_DIRECTION_IN_PULLUP))
     {
       /* Configure pin as input. If a bit in the configuration register is
        * set to 1, the corresponding port pin is enabled as an input with a
@@ -439,6 +498,81 @@ static int tca64_direction(FAR struct ioexpander_dev_s *dev, uint8_t pin,
     {
       gpioerr("ERROR: Failed to write config register at %u: %d\n",
               regaddr, ret);
+    }
+
+  if ((direction == IOEXPANDER_DIRECTION_IN_PULLDOWN) ||
+      (direction == IOEXPANDER_DIRECTION_IN_PULLUP))
+    {
+      regaddr = tca64_pdenable_reg(priv, pin);
+      if (regaddr == TCA64XX_INVALID_REG)
+        {
+          gpioerr("ERROR: This part does not support PU/PD settings\n");
+          ret = -EINVAL;
+          goto errout_with_lock;
+        }
+
+      ret = tca64_getreg(priv, regaddr, &regval, 1);
+      if (ret < 0)
+        {
+          gpioerr("ERROR: Failed to read pu config register at %u: %d\n",
+                  regaddr, ret);
+          goto errout_with_lock;
+        }
+
+      regval |= (1 << (pin & 7));
+
+      ret = tca64_putreg(priv, regaddr, &regval, 1);
+      if (ret < 0)
+        {
+          gpioerr("ERROR: Failed to write pu config register at %u: %d\n",
+              regaddr, ret);
+          goto errout_with_lock;
+        }
+
+      regaddr = tca64_pdselect_reg(priv, pin);
+      ret = tca64_getreg(priv, regaddr, &regval, 1);
+      if (ret < 0)
+        {
+          gpioerr("ERROR: Failed to read pu select register at %u: %d\n",
+                  regaddr, ret);
+          goto errout_with_lock;
+        }
+
+      if (direction == IOEXPANDER_DIRECTION_IN_PULLUP)
+        {
+          regval |= (1 << (pin & 7));
+        }
+      else
+        {
+          regval &= ~(1 << (pin & 7));
+        }
+
+      ret = tca64_putreg(priv, regaddr, &regval, 1);
+      if (ret < 0)
+        {
+          gpioerr("ERROR: Failed to write pu select register at %u: %d\n",
+              regaddr, ret);
+          goto errout_with_lock;
+        }
+    }
+  else if (direction == IOEXPANDER_DIRECTION_IN)
+    {
+      /* Disable pu/pd if that is available */
+
+      regaddr = tca64_pdenable_reg(priv, pin);
+      if (regaddr != TCA64XX_INVALID_REG)
+        {
+          ret = tca64_getreg(priv, regaddr, &regval, 1);
+          if (ret < 0)
+            {
+              gpioerr("ERROR: Failed to read pu config register at %u: %d\n",
+                      regaddr, ret);
+              goto errout_with_lock;
+            }
+
+          regval &= ~(1 << (pin & 7));
+          ret = tca64_putreg(priv, regaddr, &regval, 1);
+        }
     }
 
 errout_with_lock:
@@ -1346,7 +1480,6 @@ tca64_initialize(FAR struct i2c_master_s *i2c,
                  FAR struct tca64_config_s *config)
 {
   FAR struct tca64_dev_s *priv;
-  int ret;
 
 #ifdef CONFIG_TCA64XX_MULTIPLE
   /* Allocate the device state structure */
@@ -1379,9 +1512,8 @@ tca64_initialize(FAR struct i2c_master_s *i2c,
 #ifdef CONFIG_TCA64XX_INT_POLL
   /* Set up a timer to poll for missed interrupts */
 
-  ret = wd_start(&priv->wdog, TCA64XX_POLLDELAY,
-                 tca64_poll_expiry, (wdparm_t)priv);
-  if (ret < 0)
+  if (wd_start(&priv->wdog, TCA64XX_POLLDELAY,
+               tca64_poll_expiry, (wdparm_t)priv) < 0)
     {
       gpioerr("ERROR: Failed to start poll timer\n");
     }
