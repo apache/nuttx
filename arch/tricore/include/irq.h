@@ -44,6 +44,10 @@
 
 #include <arch/chip/irq.h>
 
+#if defined(CONFIG_ARCH_TC3XX)
+#  include <arch/tc3xx/irq.h>
+#endif
+
 /****************************************************************************
  * Pre-processor Prototypes
  ****************************************************************************/

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/tricore/src/tc3xx/chip.h
+ * boards/tricore/tc397/a2g-tc397-5v-tft/include/board_memorymap.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,11 +20,42 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_TRICORE_SRC_TC3XX_CHIP_H
-#define __ARCH_TRICORE_SRC_TC3XX_CHIP_H
+#ifndef __BOARDS_TRICORE_TC397_A2G_TC397_5V_TFT_INCLUDE_BOARD_MEMORYMAP_H
+#define __BOARDS_TRICORE_TC397_A2G_TC397_5V_TFT_INCLUDE_BOARD_MEMORYMAP_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#endif /* __ARCH_TRICORE_SRC_TC3XX_CHIP_H */
+#include <nuttx/config.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#ifndef __ASSEMBLY__
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __BOARDS_TRICORE_TC397_A2G_TC397_5V_TFT_INCLUDE_BOARD_MEMORYMAP_H */

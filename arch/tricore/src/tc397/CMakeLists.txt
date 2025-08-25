@@ -1,5 +1,5 @@
 # ##############################################################################
-# boards/tricore/tc3xx/tc397/src/CMakeLists.txt
+# arch/tricore/src/tc3xx/CMakeLists.txt
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -20,17 +20,18 @@
 #
 # ##############################################################################
 
-set(SRCS tc397_appinit.c tc397_boardinit.c tc397_bringup.c)
+if(CONFIG_ARCH_CHIP_TC397)
+  if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/tc397)
+    FetchContent_Declare(
+      tc397
+      URL https://github.com/wangchdo/tc397_sdk/archive/refs/heads/master.tar.gz
+          SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/tc397 BINARY_DIR
+          ${CMAKE_BINARY_DIR}/arch/${CONFIG_ARCH}/src/${CONFIG_ARCH_CHIP}/tc397)
+    FetchContent_GetProperties(tc397)
+    if(NOT tc397_POPULATED)
+      FetchContent_Populate(tc397)
+    endif()
+  endif()
 
-target_sources(board PRIVATE ${SRCS})
-
-# TODO: make this the default and then allow boards to redefine
-if(CONFIG_TRICORE_TOOLCHAIN_TASKING)
-  set_property(
-    GLOBAL PROPERTY LD_SCRIPT
-                    "${NUTTX_BOARD_DIR}/scripts/Lcf_Tasking_Tricore_Tc.lsl")
-else()
-  set_property(
-    GLOBAL PROPERTY LD_SCRIPT
-                    "${NUTTX_BOARD_DIR}/scripts/Lcf_Gnuc_Tricore_Tc.lsl")
+  add_subdirectory(tc397)
 endif()

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/tricore/tc3xx/tc397/src/tc397_bringup.c
+ * boards/tricore/tc397/a2g-tc397-5v-tft/src/tc397.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,21 +20,33 @@
  *
  ****************************************************************************/
 
+#ifndef __BOARDS_TRICORE_TC397_A2G_TC397_5V_TFT_SRC_TC397_H
+#define __BOARDS_TRICORE_TC397_A2G_TC397_5V_TFT_SRC_TC397_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <syslog.h>
-
-#include <nuttx/fs/fs.h>
-
-#include "tc397.h"
+#include <stdint.h>
 
 /****************************************************************************
- * Public Functions
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#ifndef __ASSEMBLY__
+
+/****************************************************************************
+ * Public Functions Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -45,31 +57,9 @@
  *
  ****************************************************************************/
 
-int tc397_bringup(void)
-{
-  int ret;
-
-#ifdef CONFIG_FS_PROCFS
-  /* Mount the procfs file system */
-
-  ret = nx_mount(NULL, "/proc", "procfs", 0, NULL);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n", ret);
-    }
+#if defined(CONFIG_BOARDCTL) || defined(CONFIG_BOARD_LATE_INITIALIZE)
+int tc397_bringup(void);
 #endif
 
-#ifdef CONFIG_FS_TMPFS
-  /* Mount the tmpfs file system */
-
-  ret = nx_mount(NULL, CONFIG_LIBC_TMPDIR, "tmpfs", 0, NULL);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to mount tmpfs at %s: %d\n",
-             CONFIG_LIBC_TMPDIR, ret);
-    }
-#endif
-
-  UNUSED(ret);
-  return OK;
-}
+#endif /* __ASSEMBLY__ */
+#endif /* __BOARDS_TRICORE_TC397_A2G_TC397_5V_TFT_SRC_TC397_H */

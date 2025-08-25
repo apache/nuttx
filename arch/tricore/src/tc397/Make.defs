@@ -1,5 +1,5 @@
 ############################################################################
-# boards/tricore/tc3xx/tc397/scripts/Make.defs
+# arch/tricore/src/tc397/Make.defs
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -19,20 +19,31 @@
 # under the License.
 #
 ############################################################################
-
-include $(TOPDIR)/.config
-include $(TOPDIR)/tools/Config.mk
-include $(TOPDIR)/arch/tricore/src/tc3xx/Toolchain.defs
-
-ifeq ($(CONFIG_TRICORE_TOOLCHAIN_TASKING),y)
-  ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)Lcf_Tasking_Tricore_Tc.lsl
-else
-  ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)Lcf_Gnuc_Tricore_Tc.lsl
+ifeq ($(CONFIG_ARCH_CHIP_TC397),y)
+  -include tc397/tc397/Make.defs
 endif
 
-CFLAGS := $(ARCHCFLAGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
-CPICFLAGS = $(ARCHPICFLAGS) $(CFLAGS)
-CXXFLAGS := $(ARCHCXXFLAGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
-CXXPICFLAGS = $(ARCHPICFLAGS) $(CXXFLAGS)
-CPPFLAGS := $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
-AFLAGS := $(CFLAGS) -D__ASSEMBLY__
+TC397_UNPACK  = tc397
+TC397_COMMIT  = master
+TC397_URL     = https://github.com/wangchdo/tc397_sdk/archive/refs/heads
+TC397_TARBALL = tc397/$(TC397_UNPACK).tar.gz
+TC397_DIR     = tc397_sdk-master
+
+$(TC397_TARBALL):
+	$(call DOWNLOAD,$(TC397_URL),$(TC397_COMMIT).tar.gz,$(TC397_TARBALL))
+
+tc397/.tc397_unpack: $(TC397_TARBALL)
+	$(Q) echo "Unpacking: TC397"
+	$(Q) tar xzf $(TC397_TARBALL) -C tc397
+	$(Q) mv tc397/$(TC397_DIR) tc397/$(TC397_UNPACK)
+	$(Q) touch tc397/.tc397_unpack
+
+
+ifeq ($(wildcard tc397/$(TC397_UNPACK)/.git),)
+context:: tc397/.tc397_unpack
+
+distclean::
+	$(call DELFILE, tc397/.tc397_unpack)
+	$(call DELFILE, $(TC397_TARBALL))
+	$(call DELDIR, tc397/$(TC397_UNPACK))
+endif
