@@ -113,6 +113,10 @@
 #  include "espressif/esp_sdm.h"
 #endif
 
+#ifdef CONFIG_NET_OA_TC6
+#  include "esp_board_oa_tc6.h"
+#endif
+
 #include "esp32c6-devkitm.h"
 
 /****************************************************************************
@@ -418,6 +422,14 @@ int esp_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: esp_nxdiag_initialize failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_NET_OA_TC6
+  ret = board_oa_tc6_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: esp_oa_tc6_initialize failed: %d\n", ret);
     }
 #endif
 

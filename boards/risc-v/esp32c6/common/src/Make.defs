@@ -86,6 +86,10 @@ ifeq ($(CONFIG_SENSORS_MPU60X0),y)
   CSRCS += esp_board_mpu60x0.c
 endif
 
+ifeq ($(CONFIG_NET_OA_TC6),y)
+  CSRCS += esp_board_oa_tc6.c
+endif
+
 ifeq ($(CONFIG_MMCSD_SPI),y)
   CSRCS += esp_board_mmcsd.c
 endif
