@@ -56,16 +56,14 @@ def print_file_info(fd, fdp: p.Fd, file: p.File, formatter: str):
         backtrace = bt.Backtrace(backtrace, backtrace_formatter)
 
         output.append(
-            formatter.format(
-                fd, hex(file.address), oflags, pos, path, backtrace.formatted[0]
-            )
+            formatter.format(fd, hex(file), oflags, pos, path, backtrace.formatted[0])
         )
         output.extend(
             formatter.format("", "", "", "", "", bt) for bt in backtrace.formatted[1:]
         )
         output.append("")  # separate each backtrace
     else:
-        output = [formatter.format(fd, hex(file.address), hex(oflags), pos, path, "")]
+        output = [formatter.format(fd, hex(file), hex(oflags), pos, path, "")]
 
     gdb.write("\n".join(output).rstrip())  # strip trailing spaces
     gdb.write("\n")
