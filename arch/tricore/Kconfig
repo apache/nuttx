@@ -34,7 +34,7 @@ config ARCH_FAMILY
 
 config ARCH_CHIP
 	string
-	default "tc3xx"		if ARCH_CHIP_TC397
+	default "tc397"		if ARCH_CHIP_TC397
 
 config ARCH_CHIP_TC397
 	bool "AURIX Family TC397"
@@ -46,5 +46,8 @@ config ARCH_CHIP_TC397
 
 if ARCH_TC3XX
 source "arch/tricore/src/tc3xx/Kconfig"
+endif
+if ARCH_TC397
+source "arch/tricore/src/tc397/Kconfig"
 endif
 endif # ARCH_TRICORE

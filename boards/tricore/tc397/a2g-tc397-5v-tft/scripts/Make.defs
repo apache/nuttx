@@ -1,5 +1,5 @@
 ############################################################################
-# arch/tricore/src/tc3xx/Make.defs
+# boards/tricore/tc397/a2g-tc397-5v-tft/scripts/Make.defs
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -20,31 +20,19 @@
 #
 ############################################################################
 
-CHIP_CSRCS += tc3xx_timerisr.c
-CHIP_CSRCS += tc3xx_serial.c
-
-VPATH += tc3xx
+include $(TOPDIR)/.config
+include $(TOPDIR)/tools/Config.mk
+include $(TOPDIR)/arch/tricore/src/tc3xx/Toolchain.defs
 
 ifeq ($(CONFIG_TRICORE_TOOLCHAIN_TASKING),y)
-
-tc3xx_libc$(OBJEXT): tc3xx_libc.c
-	$(call COMPILE, $<, $@)
-
-libc_fpu$(LIBEXT): tc3xx_libc$(OBJEXT)
-	$(call ARCHIVE, $@, $<)
-
-EXTRA_LIBS += libc_fpu$(LIBEXT)
-
+  ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)Lcf_Tasking_Tricore_Tc.lsl
 else
-
-tc3xx_dummy$(OBJEXT): tc3xx_dummy.c
-	$(call COMPILE, $<, $@)
-
-libos$(LIBEXT): tc3xx_dummy$(OBJEXT)
-	$(call ARCHIVE, $@, $<)
-
-EXTRA_LIBS += libos$(LIBEXT)
-
+  ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)Lcf_Gnuc_Tricore_Tc.lsl
 endif
 
-LIBPATHS   += $(CURDIR)
+CFLAGS := $(ARCHCFLAGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
+CPICFLAGS = $(ARCHPICFLAGS) $(CFLAGS)
+CXXFLAGS := $(ARCHCXXFLAGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
+CXXPICFLAGS = $(ARCHPICFLAGS) $(CXXFLAGS)
+CPPFLAGS := $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
+AFLAGS := $(CFLAGS) -D__ASSEMBLY__

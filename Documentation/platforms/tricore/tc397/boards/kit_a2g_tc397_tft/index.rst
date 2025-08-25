@@ -1,14 +1,14 @@
 =================
-KIT_A2G_TC397_TFT
+A2G_TC397_5V_TFT
 =================
 
 This page file describes the contents of the build configurations available
 for the NuttX TriCore port.
 
-Infineon’s AURIX™- TC3xx `KIT_A2G_TC397_TFT <https://www.infineon.com/cms/en/product/evaluation-boards/kit_a2g_tc397_5v_tft>`__ Board
+Infineon’s AURIX™- TC3xx `A2G_TC397_5V_TFT <https://www.infineon.com/cms/en/product/evaluation-boards/kit_a2g_tc397_5v_tft>`__ Board
 =====================================================================================================================================
 
-This port should work on KIT_A2G_TC397_TFT with a proper CPU.
+This port should work on A2G_TC397_5V_TFT with a proper CPU.
 The mandatory CPU features are:
 
 * System Timer (STM)
@@ -26,17 +26,17 @@ Configurations
 Common Configuration Notes
 --------------------------
 
-1. Each Tricore TC397 configuration is maintained in a sub-directory
+1. Each A2G_TC397_5V_TFT configuration is maintained in a sub-directory
    and can be selected as follow::
 
-     tools/configure.sh tc397:<subdir>
+     tools/configure.sh a2g-tc397-5v-tft:<subdir>
 
    Where ``<subdir>`` is one of the configuration sub-directories described in
    the following paragraph.
 
    NuttX Shell::
 
-     tools/configure.sh tc397:nsh
+     tools/configure.sh a2g-tc397-5v-tft:nsh
 
 2. These configurations use the mconf-based configuration tool.  To
    change a configurations using that tool, you should:

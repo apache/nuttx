@@ -25,6 +25,7 @@ include chip/Make.defs
 
 ifeq ($(CONFIG_ARCH_TC3XX),y)
 ARCH_SUBDIR = tc3xx
+include $(ARCH_SUBDIR)/Make.defs
 endif
 
 ARCH_SRCDIR = $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src

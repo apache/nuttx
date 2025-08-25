@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/tricore/tc3xx/tc397/include/board.h
+ * arch/tricore/src/tc397/chip.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,21 +20,11 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_TRICORE_TC3XX_TC397_INCLUDE_BOARD_H
-#define __BOARDS_TRICORE_TC3XX_TC397_INCLUDE_BOARD_H
+#ifndef __ARCH_TRICORE_SRC_TC397_CHIP_H
+#define __ARCH_TRICORE_SRC_TC397_CHIP_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions Definitions
- ****************************************************************************/
-
-#endif /* __BOARDS_TRICORE_TC3XX_TC397_INCLUDE_BOARD_H */
+#endif /* __ARCH_TRICORE_SRC_TC397_CHIP_H */

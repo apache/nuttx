@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/tricore/tc3xx/tc397/src/tc397.h
+ * arch/tricore/include/tc397/irq.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,19 +20,19 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_TRICORE_TC3XX_TC397_SRC_TC397_H
-#define __BOARDS_TRICORE_TC3XX_TC397_SRC_TC397_H
+/* This file should never be included directly but, rather,
+ * only indirectly through nuttx/irq.h
+ */
+
+#ifndef __ARCH_TRICORE_INCLUDE_TC397_IRQ_H
+#define __ARCH_TRICORE_INCLUDE_TC397_IRQ_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <stdint.h>
-
 /****************************************************************************
- * Pre-processor Definitions
+ * Pre-processor Prototypes
  ****************************************************************************/
 
 /****************************************************************************
@@ -40,26 +40,30 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Inline functions
+ ****************************************************************************/
+
+/****************************************************************************
  * Public Data
  ****************************************************************************/
 
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
 #ifndef __ASSEMBLY__
-
-/****************************************************************************
- * Public Functions Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: tc397_bringup
- *
- * Description:
- *   Bring up board features
- *
- ****************************************************************************/
-
-#if defined(CONFIG_BOARDCTL) || defined(CONFIG_BOARD_LATE_INITIALIZE)
-int tc397_bringup(void);
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
 #endif
 
-#endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_TRICORE_TC3XX_TC397_SRC_TC397_H */
+#undef EXTERN
+#ifdef __cplusplus
+}
+#endif
+#endif
+
+#endif /* __ARCH_TRICORE_INCLUDE_TC397_IRQ_H */

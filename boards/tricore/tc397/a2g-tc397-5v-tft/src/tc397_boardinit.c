@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/tricore/tc3xx/tc397/src/tc397_boardinit.c
+ * boards/tricore/tc397/a2g-tc397-5v-tft/src/tc397_boardinit.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
