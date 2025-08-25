@@ -157,7 +157,7 @@ void nxsched_process_taskload_ticks(FAR struct tcb_s *tcb, clock_t ticks)
 
   if (g_cpuload_total > threshold)
     {
-      uint32_t total = 0;
+      clock_t total = 0;
       int i;
 
       /* Divide the tick count for every task by two and recalculate the
