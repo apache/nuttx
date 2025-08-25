@@ -136,6 +136,9 @@ long fpathconf(int fildes, int name)
       case _PC_MAX_INPUT:
         return _POSIX_MAX_INPUT;
 
+      case _PC_PRIO_IO:
+        return -1;
+
       default:
 
         /* Assume valid but not implemented for the time being */
