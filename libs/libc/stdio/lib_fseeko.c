@@ -58,6 +58,7 @@
 
 int fseeko(FAR FILE *stream, off_t offset, int whence)
 {
+  off_t newpos;
 #ifdef CONFIG_DEBUG_FEATURES
   /* Verify that we were provided with a stream */
 
@@ -91,12 +92,18 @@ int fseeko(FAR FILE *stream, off_t offset, int whence)
 
   if (stream->fs_iofunc.seek != NULL)
     {
-      return stream->fs_iofunc.seek(stream->fs_cookie, &offset,
-                                    whence) == (off_t)-1 ? ERROR : OK;
+      newpos = stream->fs_iofunc.seek(stream->fs_cookie, &offset, whence);
     }
   else
     {
-      return lseek((int)(intptr_t)stream->fs_cookie, offset,
-                                    whence) == (off_t)-1 ? ERROR : OK;
+      newpos = lseek((int)(intptr_t)stream->fs_cookie, offset, whence);
     }
+
+  if (newpos != (off_t)-1)
+    {
+      stream->fs_flags &= ~__FS_FLAG_EOF;
+      return OK;
+    }
+
+  return ERROR;
 }
