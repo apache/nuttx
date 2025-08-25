@@ -41,7 +41,118 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* IOCTL Commands ***********************************************************/
+
+/* The I2S module uses a standard character driver framework with device
+ * control interface for configuring I2S parameters such as data width,
+ * channel count, and sample rate for both RX and TX directions. The I2S
+ * ioctl commands are listed below:
+ *
+ * I2SIOC_GRXDATAWIDTH - Get RX Data Width
+ *   ioctl argument:  Pointer to uint32_t to receive the current RX data
+ *                    width in bits
+ *   Returned value:  uint32_t - The current RX data width in bits (typically
+ *                    8, 16, or 32)
+ *   Error codes:     -ENOTTY if not supported by driver
+ *
+ * I2SIOC_GTXDATAWIDTH - Get TX Data Width
+ *   ioctl argument:  Pointer to uint32_t to receive the current TX data
+ *                    width in bits
+ *   Returned value:  uint32_t - The current TX data width in bits (typically
+ *                    8, 16, or 32)
+ *   Error codes:     -ENOTTY if not supported by driver
+ *
+ * I2SIOC_GRXCHANNELS - Get RX Channel Count
+ *   ioctl argument:  Pointer to int to receive the current RX channel count
+ *   Returned value:  int - The current number of RX channels (typically 1
+ *                    or 2)
+ *   Error codes:     -ENOTTY if not supported by driver
+ *
+ * I2SIOC_GTXCHANNELS - Get TX Channel Count
+ *   ioctl argument:  Pointer to int to receive the current TX channel count
+ *   Returned value:  int - The current number of TX channels (typically 1
+ *                    or 2)
+ *   Error codes:     -ENOTTY if not supported by driver
+ *
+ * I2SIOC_GRXSAMPLERATE - Get RX Sample Rate
+ *   ioctl argument:  Pointer to uint32_t to receive the current RX sample
+ *                    rate
+ *   Returned value:  uint32_t - The current RX sample rate in samples per
+ *                    second (e.g., 44100)
+ *   Error codes:     -ENOTTY if not supported by driver
+ *
+ * I2SIOC_GTXSAMPLERATE - Get TX Sample Rate
+ *   ioctl argument:  Pointer to uint32_t to receive the current TX sample
+ *                    rate
+ *   Returned value:  uint32_t - The current TX sample rate in samples per
+ *                    second (e.g., 44100)
+ *   Error codes:     -ENOTTY if not supported by driver
+ *
+ * I2SIOC_SRXDATAWIDTH - Set RX Data Width
+ *   ioctl argument:  uint32_t value specifying the desired RX data width
+ *                    in bits
+ *   Returned value:  uint32_t - The resulting bitrate (sample_rate *
+ *                    data_width) or 0 on success
+ *   Error codes:     -EINVAL if invalid data width, -ENOSYS if unsupported
+ *                    width, -ENOTTY if not supported by driver
+ *
+ * I2SIOC_STXDATAWIDTH - Set TX Data Width
+ *   ioctl argument:  uint32_t value specifying the desired TX data width
+ *                    in bits
+ *   Returned value:  uint32_t - The resulting bitrate (sample_rate *
+ *                    data_width) or 0 on success
+ *   Error codes:     -EINVAL if invalid data width, -ENOSYS if unsupported
+ *                    width, -ENOTTY if not supported by driver
+ *
+ * I2SIOC_SRXCHANNELS - Set RX Channel Count
+ *   ioctl argument:  int value specifying the desired RX channel count
+ *   Returned value:  int - The number of RX channels set or a negated
+ *                    errno value
+ *   Error codes:     -EINVAL if invalid channel count (not 1 or 2),
+ *                    -ENOTTY if not supported by driver
+ *
+ * I2SIOC_STXCHANNELS - Set TX Channel Count
+ *   ioctl argument:  int value specifying the desired TX channel count
+ *   Returned value:  int - The number of TX channels set or a negated
+ *                    errno value
+ *   Error codes:     -EINVAL if invalid channel count (not 1 or 2),
+ *                    -ENOTTY if not supported by driver
+ *
+ * I2SIOC_SRXSAMPLERATE - Set RX Sample Rate
+ *   ioctl argument:  uint32_t value specifying the desired RX sample rate
+ *                    in Hz
+ *   Returned value:  uint32_t - The resulting bitrate or 0 on success
+ *   Error codes:     -EINVAL if invalid sample rate (typically < 8000 Hz),
+ *                    -ENOTTY if not supported by driver
+ *
+ * I2SIOC_STXSAMPLERATE - Set TX Sample Rate
+ *   ioctl argument:  uint32_t value specifying the desired TX sample rate
+ *                    in Hz
+ *   Returned value:  uint32_t - The resulting bitrate or 0 on success
+ *   Error codes:     -EINVAL if invalid sample rate (typically < 8000 Hz),
+ *                    -ENOTTY if not supported by driver
+ *
+ * Note: The bitrate is calculated as sample_rate * data_width. Some drivers
+ * may have coupling between RX and TX parameters, so changing one may
+ * affect the other. Sample rates are typically constrained to a minimum of
+ * 8000 Hz, and data widths are typically limited to 8, 16, or 32 bits
+ * depending on the hardware capabilities.
+ */
+
 /* Access macros ************************************************************/
+
+#define I2SIOC_GRXDATAWIDTH            _I2SOC(1)
+#define I2SIOC_GTXDATAWIDTH            _I2SOC(2)
+#define I2SIOC_GRXCHANNELS             _I2SOC(3)
+#define I2SIOC_GTXCHANNELS             _I2SOC(4)
+#define I2SIOC_GRXSAMPLERATE           _I2SOC(5)
+#define I2SIOC_GTXSAMPLERATE           _I2SOC(6)
+#define I2SIOC_SRXDATAWIDTH            _I2SOC(7)
+#define I2SIOC_STXDATAWIDTH            _I2SOC(8)
+#define I2SIOC_SRXCHANNELS             _I2SOC(9)
+#define I2SIOC_STXCHANNELS             _I2SOC(10)
+#define I2SIOC_SRXSAMPLERATE           _I2SOC(11)
+#define I2SIOC_STXSAMPLERATE           _I2SOC(12)
 
 /****************************************************************************
  * Name: I2S_RXCHANNELS
@@ -55,7 +166,7 @@
  *   channel - The I2S channel num
  *
  * Returned Value:
- *   OK on success; a negated errno value on failure.
+ *   Returns the number of RX channels
  *
  ****************************************************************************/
 
@@ -147,7 +258,7 @@
  *   channel - The I2S channel num
  *
  * Returned Value:
- *   OK on success; a negated errno value on failure.
+ *   Returns the number of TX channels
  *
  ****************************************************************************/
 
