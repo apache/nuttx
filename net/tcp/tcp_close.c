@@ -55,7 +55,7 @@ static void tcp_close_work(FAR void *param)
   FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)param;
 
   conn->flags &= ~TCP_CLOSE_ARRANGED;
-  if (conn->crefs == 0)
+  if (conn->crefs == 0 && conn->tcpstateflags == TCP_CLOSED)
     {
       /* Stop the network monitor for all sockets */
 

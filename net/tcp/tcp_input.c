@@ -992,8 +992,9 @@ found:
    * data, calculate RTT estimations, and reset the retransmission timer.
    */
 
-  if ((tcp->flags & TCP_ACK) != 0 && conn->tx_unacked > 0)
+  if ((tcp->flags & TCP_ACK) != 0)
     {
+      uint32_t lasttxunacked = conn->tx_unacked;
       uint32_t unackseq;
       uint32_t ackseq;
       int timeout;
@@ -1035,7 +1036,17 @@ found:
         {
           /* Calculate the new number of outstanding, unacknowledged bytes */
 
-          conn->tx_unacked = unackseq - ackseq;
+          if (conn->tx_unacked < unackseq - ackseq)
+            {
+              /* old ack */
+
+              tcp_send(dev, conn, TCP_ACK, tcpiplen);
+              return;
+            }
+          else
+            {
+              conn->tx_unacked = unackseq - ackseq;
+            }
         }
       else
         {
@@ -1045,18 +1056,22 @@ found:
            * bytes
            */
 
-          if ((conn->tcpstateflags & TCP_STATE_MASK) == TCP_ESTABLISHED ||
-              (conn->tcpstateflags & TCP_STATE_MASK) == TCP_CLOSE_WAIT)
-            {
-              nwarn("WARNING: ackseq > unackseq\n");
-              nwarn("sndseq=%" PRIu32 " tx_unacked=%" PRIu32
-                    " unackseq=%" PRIu32 " ackseq=%" PRIu32 "\n",
-                    tcp_getsequence(conn->sndseq),
-                    (uint32_t)conn->tx_unacked,
-                    unackseq, ackseq);
+          /* RFC793,p72~p73 In states from ESTABLISHED to LASTACK:"If the
+           * ACK acks something not yet sent (SEG.ACK > SND.NXT) then send
+           * an ACK, drop the segment, and return."
+           */
 
-              conn->tx_unacked = 0;
+          if ((conn->tcpstateflags & TCP_STATE_MASK) >= TCP_ESTABLISHED &&
+              (conn->tcpstateflags & TCP_STATE_MASK) <= TCP_LAST_ACK)
+            {
+              tcp_send(dev, conn, TCP_ACK, tcpiplen);
+              return;
             }
+        }
+
+      if (lasttxunacked == 0)
+        {
+          goto skip_rtt;
         }
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
@@ -1125,6 +1140,8 @@ found:
 
       tcp_update_retrantimer(conn, timeout);
     }
+
+skip_rtt:
 
   /* Check if the sequence number of the incoming packet is what we are
    * expecting next.  If not, we send out an ACK with the correct numbers
@@ -1271,7 +1288,7 @@ found:
             conn->isn           = tcp_getsequence(tcp->ackno);
             tcp_setsequence(conn->sndseq, conn->isn);
             conn->sent          = 0;
-            conn->sndseq_max    = 0;
+            conn->sndseq_max    = conn->isn;
 #endif
             conn->tx_unacked    = 0;
             tcp_snd_wnd_init(conn, tcp);
