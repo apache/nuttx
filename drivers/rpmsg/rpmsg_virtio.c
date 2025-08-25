@@ -140,14 +140,12 @@ static int rpmsg_virtio_buffer_nused(FAR struct rpmsg_virtio_device *rvdev,
     }
 
   nused = vq->vq_ring.avail->idx - vq->vq_ring.used->idx;
-  if (is_host ^ rx)
+  if (is_host == rx)
     {
-      return nused;
+      nused = vq->vq_nentries - nused;
     }
-  else
-    {
-      return vq->vq_nentries - nused;
-    }
+
+  return nused;
 }
 
 /****************************************************************************
@@ -446,35 +444,33 @@ static void rpmsg_virtio_dump(FAR struct rpmsg_s *rpmsg, bool verbose)
          priv->rpmsg.local_cpuname, priv->rpmsg.cpuname, priv->headrx,
          priv->headtx);
 
-  if (!rvdev->vdev || !rdev->ns_unbind_cb)
+  if (rvdev->vdev && rdev->ns_unbind_cb)
     {
-      return;
+      metal_mutex_acquire(&rdev->lock);
+      if (verbose)
+        {
+          syslog(LOG_EMERG,
+                 "Dump rpmsg info between cpu (master: %s)%s <==> %s:\n",
+                 rpmsg_virtio_get_role(rvdev) == RPMSG_HOST ? "yes" : "no",
+                 priv->rpmsg.local_cpuname, priv->rpmsg.cpuname);
+
+          rpmsg_dump_epts(rdev);
+        }
+
+      syslog(LOG_EMERG, "rpmsg vq RX:\n");
+      virtqueue_dump(rvdev->rvq);
+      syslog(LOG_EMERG, "rpmsg vq TX:\n");
+      virtqueue_dump(rvdev->svq);
+
+      if (verbose)
+        {
+          syslog(LOG_EMERG, "  rpmsg buffer list:\n");
+          rpmsg_virtio_dump_buffer(rvdev, true);
+          rpmsg_virtio_dump_buffer(rvdev, false);
+        }
+
+      metal_mutex_release(&rdev->lock);
     }
-
-  metal_mutex_acquire(&rdev->lock);
-  if (verbose)
-    {
-      syslog(LOG_EMERG,
-             "Dump rpmsg info between cpu (master: %s)%s <==> %s:\n",
-             rpmsg_virtio_get_role(rvdev) == RPMSG_HOST ?
-             "yes" : "no", priv->rpmsg.local_cpuname, priv->rpmsg.cpuname);
-
-      rpmsg_dump_epts(rdev);
-    }
-
-  syslog(LOG_EMERG, "rpmsg vq RX:\n");
-  virtqueue_dump(rvdev->rvq);
-  syslog(LOG_EMERG, "rpmsg vq TX:\n");
-  virtqueue_dump(rvdev->svq);
-
-  if (verbose)
-    {
-      syslog(LOG_EMERG, "  rpmsg buffer list:\n");
-      rpmsg_virtio_dump_buffer(rvdev, true);
-      rpmsg_virtio_dump_buffer(rvdev, false);
-    }
-
-  metal_mutex_release(&rdev->lock);
 }
 
 /****************************************************************************
@@ -784,42 +780,44 @@ static void rpmsg_virtio_start_worker(FAR void *arg)
 
   snprintf(name, sizeof(name), "/dev/rpmsg/%s", priv->rpmsg.cpuname);
   ret = rpmsg_register(name, &priv->rpmsg, &g_rpmsg_virtio_ops, nrx);
-  if (ret < 0)
+  if (ret >= 0)
+    {
+      ret = rpmsg_init_vdev_with_config(&priv->rvdev, vdev, rpmsg_ns_bind,
+                                        metal_io_get_region(),
+                                        priv->pool, &config);
+      if (ret >= 0)
+        {
+          priv->notifytx = priv->rvdev.svq->notify;
+          priv->rvdev.svq->notify = rpmsg_virtio_tx_notify;
+          priv->rvdev.notify_wait_cb = rpmsg_virtio_notify_wait;
+          priv->rvdev.rdev.ns_unbind_cb = rpmsg_ns_unbind;
+
+          /* Wake up the rx thread to process message */
+
+          rpmsg_virtio_rx_update(priv, priv->rvdev.rvq);
+          rpmsg_virtio_rx_dispatch(priv);
+          priv->init = true;
+
+          /* Open tx buffer return callback before the services created
+           * below can wait for a tx buffer.
+           */
+
+          virtqueue_enable_cb(priv->rvdev.svq);
+
+          /* Broadcast device_created to all registers */
+
+          rpmsg_device_created(&priv->rpmsg);
+        }
+      else
+        {
+          rpmsgerr("rpmsg_init_vdev failed, ret=%d\n", ret);
+          rpmsg_unregister(name, &priv->rpmsg);
+        }
+    }
+  else
     {
       rpmsgerr("rpmsg register failed, ret=%d\n", ret);
-      return;
     }
-
-  ret = rpmsg_init_vdev_with_config(&priv->rvdev, vdev, rpmsg_ns_bind,
-                                    metal_io_get_region(),
-                                    priv->pool, &config);
-  if (ret < 0)
-    {
-      rpmsgerr("rpmsg_init_vdev failed, ret=%d\n", ret);
-      rpmsg_unregister(name, &priv->rpmsg);
-      return;
-    }
-
-  priv->notifytx = priv->rvdev.svq->notify;
-  priv->rvdev.svq->notify = rpmsg_virtio_tx_notify;
-  priv->rvdev.notify_wait_cb = rpmsg_virtio_notify_wait;
-  priv->rvdev.rdev.ns_unbind_cb = rpmsg_ns_unbind;
-
-  /* Wake up the rx thread to process message */
-
-  rpmsg_virtio_rx_update(priv, priv->rvdev.rvq);
-  rpmsg_virtio_rx_dispatch(priv);
-  priv->init = true;
-
-  /* Open tx buffer return callback before the services created below can
-   * wait for a tx buffer.
-   */
-
-  virtqueue_enable_cb(priv->rvdev.svq);
-
-  /* Broadcast device_created to all registers */
-
-  rpmsg_device_created(&priv->rpmsg);
 }
 
 /****************************************************************************
@@ -838,85 +836,86 @@ int rpmsg_virtio_probe_cpuname(FAR struct virtio_device *vdev,
 #ifdef CONFIG_RPMSG_VIRTIO_PM
   char name[64];
 #endif
-  int ret;
+  int ret = -ENOMEM;
 
   priv = kmm_zalloc(sizeof(*priv));
-  if (priv == NULL)
+  if (priv != NULL)
     {
-      rpmsgerr("No enough memory\n");
-      return -ENOMEM;
-    }
+      priv->vdev = vdev;
+      nxsem_init(&priv->semrx, 0, 0);
+      nxsem_init(&priv->semtx, 0, 0);
 
-  priv->vdev = vdev;
-  nxsem_init(&priv->semrx, 0, 0);
-  nxsem_init(&priv->semtx, 0, 0);
-
-  if (vdev->role == VIRTIO_DEV_DRIVER)
-    {
-      virtio_set_status(vdev, VIRTIO_CONFIG_STATUS_DRIVER);
-      virtio_negotiate_features(vdev, RPMSG_VIRTIO_FEATURES, NULL);
-      virtio_set_status(vdev, VIRTIO_CONFIG_FEATURES_OK);
-    }
-  else
-    {
-      virtio_get_features(vdev, &features);
-    }
-
-  /* Read the virtio rpmsg config to get the local/remote cpu name  */
-
-  if (virtio_has_feature(vdev, VIRTIO_RPMSG_F_CPUNAME))
-    {
       if (vdev->role == VIRTIO_DEV_DRIVER)
         {
-          virtio_read_config_bytes(vdev, offsetof(struct fw_rsc_config,
-                                                  host_cpuname),
-                                  priv->rpmsg.local_cpuname,
-                                  VIRTIO_RPMSG_CPUNAME_SIZE);
-          virtio_read_config_bytes(vdev, offsetof(struct fw_rsc_config,
-                                                  remote_cpuname),
-                                  priv->rpmsg.cpuname,
-                                  VIRTIO_RPMSG_CPUNAME_SIZE);
+          virtio_set_status(vdev, VIRTIO_CONFIG_STATUS_DRIVER);
+          virtio_negotiate_features(vdev, RPMSG_VIRTIO_FEATURES, NULL);
+          virtio_set_status(vdev, VIRTIO_CONFIG_FEATURES_OK);
         }
       else
         {
-          virtio_read_config_bytes(vdev, offsetof(struct fw_rsc_config,
-                                                  host_cpuname),
-                                  priv->rpmsg.cpuname,
-                                  VIRTIO_RPMSG_CPUNAME_SIZE);
-          virtio_read_config_bytes(vdev, offsetof(struct fw_rsc_config,
-                                                  remote_cpuname),
-                                  priv->rpmsg.local_cpuname,
-                                  VIRTIO_RPMSG_CPUNAME_SIZE);
+          virtio_get_features(vdev, &features);
+        }
+
+      /* Read the virtio rpmsg config to get the local/remote cpu name  */
+
+      if (virtio_has_feature(vdev, VIRTIO_RPMSG_F_CPUNAME))
+        {
+          if (vdev->role == VIRTIO_DEV_DRIVER)
+            {
+              virtio_read_config_bytes(vdev, offsetof(struct fw_rsc_config,
+                                                      host_cpuname),
+                                      priv->rpmsg.local_cpuname,
+                                      VIRTIO_RPMSG_CPUNAME_SIZE);
+              virtio_read_config_bytes(vdev, offsetof(struct fw_rsc_config,
+                                                      remote_cpuname),
+                                      priv->rpmsg.cpuname,
+                                      VIRTIO_RPMSG_CPUNAME_SIZE);
+            }
+          else
+            {
+              virtio_read_config_bytes(vdev, offsetof(struct fw_rsc_config,
+                                                      host_cpuname),
+                                      priv->rpmsg.cpuname,
+                                      VIRTIO_RPMSG_CPUNAME_SIZE);
+              virtio_read_config_bytes(vdev, offsetof(struct fw_rsc_config,
+                                                      remote_cpuname),
+                                      priv->rpmsg.local_cpuname,
+                                      VIRTIO_RPMSG_CPUNAME_SIZE);
+            }
+        }
+      else
+        {
+          DEBUGASSERT(cpuname != NULL);
+          strlcpy(priv->rpmsg.cpuname, cpuname, VIRTIO_RPMSG_CPUNAME_SIZE);
+        }
+
+      ret = rpmsg_init_wqueues(&priv->rpmsg);
+      if (ret >= 0)
+        {
+#ifdef CONFIG_RPMSG_VIRTIO_PM
+          spin_lock_init(&priv->lock);
+          snprintf(name, sizeof(name), "rpmsg-virtio-%s",
+                   priv->rpmsg.cpuname);
+          pm_wakelock_init(&priv->wakelock, name, PM_IDLE_DOMAIN, PM_IDLE);
+#endif
+
+          rpmsg_queue_work(&priv->rpmsg, RPMSG_PRIO_DEFAULT,
+                           &priv->startwork, rpmsg_virtio_start_worker,
+                           &priv->rpmsg);
+        }
+      else
+        {
+          rpmsgerr("rpmsg_init_wqueues failed, ret=%d\n", ret);
+          nxsem_destroy(&priv->semtx);
+          nxsem_destroy(&priv->semrx);
+          kmm_free(priv);
         }
     }
   else
     {
-      DEBUGASSERT(cpuname != NULL);
-      strlcpy(priv->rpmsg.cpuname, cpuname, VIRTIO_RPMSG_CPUNAME_SIZE);
+      rpmsgerr("No enough memory\n");
     }
 
-  ret = rpmsg_init_wqueues(&priv->rpmsg);
-  if (ret < 0)
-    {
-      rpmsgerr("rpmsg_init_wqueues failed, ret=%d\n", ret);
-      goto err;
-    }
-
-#ifdef CONFIG_RPMSG_VIRTIO_PM
-  spin_lock_init(&priv->lock);
-  snprintf(name, sizeof(name), "rpmsg-virtio-%s", priv->rpmsg.cpuname);
-  pm_wakelock_init(&priv->wakelock, name, PM_IDLE_DOMAIN, PM_IDLE);
-#endif
-
-  rpmsg_queue_work(&priv->rpmsg, RPMSG_PRIO_DEFAULT, &priv->startwork,
-                   rpmsg_virtio_start_worker, &priv->rpmsg);
-
-  return ret;
-
-err:
-  nxsem_destroy(&priv->semtx);
-  nxsem_destroy(&priv->semrx);
-  kmm_free(priv);
   return ret;
 }
 
