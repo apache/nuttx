@@ -1,5 +1,5 @@
 # ##############################################################################
-# boards/tricore/tc3xx/tc397/CMakeLists.txt
+# boards/tricore/tc397/a2g-tc397-5v-tft/src/CMakeLists.txt
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -20,4 +20,17 @@
 #
 # ##############################################################################
 
-add_subdirectory(src)
+set(SRCS tc397_appinit.c tc397_boardinit.c tc397_bringup.c)
+
+target_sources(board PRIVATE ${SRCS})
+
+# TODO: make this the default and then allow boards to redefine
+if(CONFIG_TRICORE_TOOLCHAIN_TASKING)
+  set_property(
+    GLOBAL PROPERTY LD_SCRIPT
+                    "${NUTTX_BOARD_DIR}/scripts/Lcf_Tasking_Tricore_Tc.lsl")
+else()
+  set_property(
+    GLOBAL PROPERTY LD_SCRIPT
+                    "${NUTTX_BOARD_DIR}/scripts/Lcf_Gnuc_Tricore_Tc.lsl")
+endif()

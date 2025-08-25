@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/tricore/tc3xx/tc397/scripts/Lcf_Tasking_Tricore_Tc.lsl
+ * boards/tricore/tc397/a2g-tc397-5v-tft/scripts/Lcf_Tasking_Tricore_Tc.lsl
  *
  * SPDX-License-Identifier: Apache-2.0
  *

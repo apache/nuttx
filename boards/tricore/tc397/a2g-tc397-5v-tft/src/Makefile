@@ -1,5 +1,5 @@
 ############################################################################
-# boards/tricore/tc3xx/tc397/src/Makefile
+# boards/tricore/tc397/a2g-tc397-5v-tft/src/Makefile
 #
 # SPDX-License-Identifier: Apache-2.0
 #
