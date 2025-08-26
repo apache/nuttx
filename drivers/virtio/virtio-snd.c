@@ -1266,7 +1266,7 @@ static int virtio_snd_probe(FAR struct virtio_device *vdev)
   priv = kmm_zalloc(sizeof(*priv));
   if (priv == NULL)
     {
-      vrterr("virtio net driver priv alloc failed\n");
+      vrterr("virtio audio driver priv alloc failed\n");
       return -ENOMEM;
     }
 
