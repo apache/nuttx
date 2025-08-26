@@ -175,13 +175,7 @@ int irq_attach_wqueue(int irq, xcpt_t isr, xcpt_t isrwork,
   FAR struct irq_work_info_s *info;
   int ret = OK;
 #if NR_IRQS > 0
-  int ndx = -EINVAL;
-
-  if (irq >= 0 && irq < NR_IRQS)
-    {
-      ndx = IRQ_TO_NDX(irq);
-    }
-
+  int ndx = IRQ_TO_NDX(irq);
   if (ndx < 0)
     {
       ret = ndx;

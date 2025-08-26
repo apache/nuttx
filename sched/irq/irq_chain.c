@@ -211,23 +211,19 @@ int irqchain_attach(int ndx, xcpt_t isr, FAR void *arg)
 
 int irqchain_detach(int irq, xcpt_t isr, FAR void *arg)
 {
+  int ret = OK;
 #if NR_IRQS > 0
   FAR struct irqchain_s *prev;
   FAR struct irqchain_s *curr;
   FAR struct irqchain_s *first;
-  int ret = -EINVAL;
-
-  if ((unsigned)irq < NR_IRQS)
+  int ndx = IRQ_TO_NDX(irq);
+  if (ndx < 0)
     {
-      int ndx = IRQ_TO_NDX(irq);
-      irqstate_t flags;
-
-      if (ndx < 0)
-        {
-          return ndx;
-        }
-
-      flags = spin_lock_irqsave(&g_irqchainlock);
+      ret = ndx;
+    }
+  else
+    {
+      irqstate_t flags = spin_lock_irqsave(&g_irqchainlock);
 
       if (g_irqvector[ndx].handler == irqchain_dispatch)
         {
@@ -276,9 +272,7 @@ int irqchain_detach(int irq, xcpt_t isr, FAR void *arg)
           ret = irq_detach(irq);
         }
     }
+#endif
 
   return ret;
-#else
-  return OK;
-#endif
 }

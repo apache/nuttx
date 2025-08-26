@@ -155,13 +155,7 @@ int irq_attach_thread(int irq, xcpt_t isr, xcpt_t isrthread, FAR void *arg,
   char arg3[32];  /* isrthread */
   char arg4[32];  /* arg */
   pid_t pid;
-  int ndx = -EINVAL;
-
-  if (irq >= 0 && irq < NR_IRQS)
-    {
-      ndx = IRQ_TO_NDX(irq);
-    }
-
+  int ndx = IRQ_TO_NDX(irq);
   if (ndx < 0)
     {
       ret = ndx;
