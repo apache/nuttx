@@ -333,7 +333,6 @@ int tricore_assertiontrap(uint32_t tid, void *context, void *arg)
 void tricore_trapcall(volatile void *trap)
 {
   uintptr_t *regs;
-  uintptr_t pcxi;
 
   IfxCpu_Trap *ctrap = (IfxCpu_Trap *)trap;
   IfxCpu_Trap_Class tclass = (IfxCpu_Trap_Class)ctrap->tClass;
@@ -342,8 +341,6 @@ void tricore_trapcall(volatile void *trap)
   tricore_trapinfo(trap);
 
   regs = tricore_csa2addr(tricore_mfcr(CPU_PCXI));
-  pcxi = regs[REG_UPCXI];
-  regs = tricore_csa2addr(pcxi);
 
   if (!up_interrupt_context())
     {
@@ -358,43 +355,43 @@ void tricore_trapcall(volatile void *trap)
     {
       tricore_nmitrap(tid, regs, NULL);
       up_set_interrupt_context(false);
-      return;
+      __jumpBackToLink();
     }
 
   if (tclass == IfxCpu_Trap_Class_memoryManagement)
     {
       tricore_mmutrap(tid, regs, NULL);
-      return;
+      __jumpBackToLink();
     }
 
   if (tclass == IfxCpu_Trap_Class_internalProtection)
     {
       tricore_internalprotrape(tid, regs, NULL);
-      return;
+      __jumpBackToLink();
     }
 
   if (tclass == IfxCpu_Trap_Class_instructionErrors)
     {
       tricore_insterrorstrap(tid, regs, NULL);
-      return;
+      __jumpBackToLink();
     }
 
   if (tclass == IfxCpu_Trap_Class_contextManagement)
     {
       tricore_contexmnttrap(tid, regs, NULL);
-      return;
+      __jumpBackToLink();
     }
 
   if (tclass == IfxCpu_Trap_Class_bus)
     {
       tricore_bustrap(tid, regs, NULL);
-      return;
+      __jumpBackToLink();
     }
 
   if (tclass == IfxCpu_Trap_Class_assertion)
     {
       tricore_assertiontrap(tid, regs, NULL);
-      return;
+      __jumpBackToLink();
     }
 
   up_irq_save();
