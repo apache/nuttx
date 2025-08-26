@@ -216,6 +216,9 @@ void task_uninit_info(FAR struct task_group_s *group)
 
   nxrmutex_destroy(&info->ta_lock);
 #ifdef CONFIG_MM_KERNEL_HEAP
+  /* nx_setlogmask() may still visit the group of an exiting task */
+
+  group->tg_info = NULL;
   group_free(group, info);
 #endif
 }

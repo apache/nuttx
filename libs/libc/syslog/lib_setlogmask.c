@@ -29,15 +29,7 @@
 #include <stdint.h>
 #include <syslog.h>
 
-#include "syslog/syslog.h"
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/* The currently enabled set of syslog priorities */
-
-uint8_t g_syslog_mask = CONFIG_SYSLOG_DEFAULT_MASK;
+#include <nuttx/tls.h>
 
 /****************************************************************************
  * Public Functions
@@ -58,30 +50,30 @@ uint8_t g_syslog_mask = CONFIG_SYSLOG_DEFAULT_MASK;
  *   NOTE:  setlogmask is not a thread-safe, re-entrant function.  Concurrent
  *   use of setlogmask() will have undefined behavior.
  *
- *   REVISIT: Per POSIX the syslog mask should be a per-process value but in
- *   NuttX, the scope of the mask is dependent on the nature of the build:
- *
- *   Flat Build:  There is one, global SYSLOG mask that controls all output.
- *   Protected Build:  There are two SYSLOG masks.  One within the kernel
- *     that controls only kernel output.  And one in user-space that controls
- *     only user SYSLOG output.
- *   Kernel Build:  The kernel build is compliant with the POSIX requirement:
- *     There will be one mask for each user process, controlling the SYSLOG
- *     output only form that process.  There will be a separate mask
- *     accessible only in the kernel code to control kernel SYSLOG output.
+ *   As POSIX requires, the mask is a per-process value: it controls the
+ *   SYSLOG output of the calling task group only.  A new task group starts
+ *   with the system wide mask, which nx_setlogmask() sets.
  *
  ****************************************************************************/
 
 int setlogmask(int mask)
 {
+  FAR struct task_info_s *info = task_get_info();
   uint8_t oldmask;
 
-  oldmask = g_syslog_mask;
+  /* Without task info (early boot), vsyslog() lets every priority pass */
+
+  if (info == NULL)
+    {
+      return LOG_ALL;
+    }
+
+  oldmask = info->ta_syslog_mask;
   if (mask != 0)
     {
       /* If the mask argument is 0, the current logmask is not modified. */
 
-      g_syslog_mask = (uint8_t)mask;
+      info->ta_syslog_mask = (uint8_t)mask;
     }
 
   return oldmask;

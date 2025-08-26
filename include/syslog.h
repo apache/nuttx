@@ -245,17 +245,9 @@ void vsyslog(int priority, FAR const IPTR char *fmt, va_list ap)
  *   NOTE:  setlogmask is not a thread-safe, re-entrant function.  Concurrent
  *   use of setlogmask() will have undefined behavior.
  *
- *   REVISIT: Per POSIX the syslog mask should be a per-process value but in
- *   NuttX, the scope of the mask is dependent on the nature of the build:
- *
- *   Flat Build:  There is one, global SYSLOG mask that controls all output.
- *   Protected Build:  There are two SYSLOG masks.  One within the kernel
- *     that controls only kernel output.  And one in user-space that controls
- *     only user SYSLOG output.
- *   Kernel Build:  The kernel build is compliant with the POSIX requirement:
- *     There will be one mask for for each user process, controlling the
- *     SYSLOG output only form that process.  There will be a separate mask
- *     accessible only in the kernel code to control kernel SYSLOG output.
+ *   As POSIX requires, the mask is a per-process value: it controls the
+ *   SYSLOG output of the calling task group only.  A new task group starts
+ *   with the system wide mask, which nx_setlogmask() sets.
  *
  ****************************************************************************/
 

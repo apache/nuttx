@@ -34,8 +34,6 @@
 #include <nuttx/syslog/syslog.h>
 #include <nuttx/tls.h>
 
-#include "syslog/syslog.h"
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -114,9 +112,14 @@ static void vsyslog_perror(FAR const IPTR char *fmt, va_list ap)
 
 void vsyslog(int priority, FAR const IPTR char *fmt, va_list ap)
 {
-  /* Check if this priority is enabled */
+  FAR struct task_info_s *info = task_get_info();
 
-  if ((g_syslog_mask & LOG_MASK(LOG_PRI(priority))) != 0)
+  /* Check if this priority is enabled.  info is NULL in the early boot,
+   * before the TLS of the idle task is set up; let everything pass then.
+   */
+
+  if (info == NULL ||
+      (info->ta_syslog_mask & LOG_MASK(LOG_PRI(priority))) != 0)
     {
       /* Yes.. Perform the nx_vsyslog system call.
        *

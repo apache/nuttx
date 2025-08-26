@@ -31,6 +31,7 @@
 #include <nuttx/compiler.h>
 #include <nuttx/streams.h>
 
+#include <stdint.h>
 #include <sys/types.h>
 #include <stdbool.h>
 #include <stdarg.h>
@@ -195,6 +196,10 @@ struct syslog_channel_s
 extern "C"
 {
 #endif
+
+/* The system wide syslog mask, which new task groups inherit */
+
+extern uint8_t g_syslog_mask;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -468,6 +473,24 @@ int early_vsyslog(FAR const IPTR char *fmt, FAR va_list *ap);
 void early_syslog(FAR const char *fmt, ...);
 
 #endif
+
+/****************************************************************************
+ * Name: nx_setlogmask
+ *
+ * Description:
+ *   Set the system wide syslog mask, which new task groups start with, and
+ *   the setlogmask() mask of every existing task group.  Unlike
+ *   setlogmask(), a mask of zero is applied: LOG_NONE disables all output.
+ *
+ * Input Parameters:
+ *   mask - The new mask
+ *
+ * Returned Value:
+ *   The previous system wide mask.
+ *
+ ****************************************************************************/
+
+int nx_setlogmask(int mask);
 
 #ifdef __cplusplus
 }

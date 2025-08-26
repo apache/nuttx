@@ -169,6 +169,9 @@ struct __res_state;
 struct task_info_s
 {
   rmutex_t        ta_lock;
+#ifdef CONFIG_SYSLOG
+  uint8_t         ta_syslog_mask; /* Mask of setlogmask() */
+#endif
 #if CONFIG_TLS_TASK_NELEM > 0
   uintptr_t       ta_telem[CONFIG_TLS_TASK_NELEM]; /* Task local storage elements */
 #endif
