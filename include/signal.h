@@ -377,8 +377,8 @@ typedef struct sigevent
 
 struct siginfo
 {
-  uint8_t      si_signo;     /* Identifies signal */
-  uint8_t      si_code;      /* Source: SI_USER, SI_QUEUE, SI_TIMER, SI_ASYNCIO, or SI_MESGQ */
+  int          si_signo;     /* Identifies signal */
+  int          si_code;      /* Source: SI_USER, SI_QUEUE, SI_TIMER, SI_ASYNCIO, or SI_MESGQ */
   uint8_t      si_errno;     /* Zero or errno value associated with signal */
   union sigval si_value;     /* Data passed with signal */
 #ifdef CONFIG_SCHED_HAVE_PARENT
@@ -473,7 +473,7 @@ int  sigorset(FAR sigset_t *dest, FAR const sigset_t *left,
 int  sigpause(int signo);
 int  sigpending(FAR sigset_t *set);
 int  sigprocmask(int how, FAR const sigset_t *set, FAR sigset_t *oset);
-int  sigqueue(int pid, int signo, union sigval value);
+int  sigqueue(int pid, int signo, const union sigval value);
 int  sigrelse(int signo);
 _sa_handler_t sigset(int signo, _sa_handler_t func);
 int  sigwait(FAR const sigset_t *set, FAR int *sig);

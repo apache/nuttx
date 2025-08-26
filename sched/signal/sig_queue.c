@@ -126,7 +126,7 @@ static int nxsig_queue_send(int pid, int signo, union sigval value,
  *
  ****************************************************************************/
 
-int nxsig_queue(int pid, int signo, union sigval value)
+int nxsig_queue(int pid, int signo, const union sigval value)
 {
   return nxsig_queue_send(pid, signo, value, false);
 }
@@ -163,7 +163,7 @@ int nxsig_queue(int pid, int signo, union sigval value)
  *
  ****************************************************************************/
 
-int sigqueue(int pid, int signo, union sigval value)
+int sigqueue(int pid, int signo, const union sigval value)
 {
   int ret;
 
