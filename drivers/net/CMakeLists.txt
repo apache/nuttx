@@ -81,6 +81,13 @@ if(CONFIG_NET)
     list(APPEND SRCS lan9250.c)
   endif()
 
+  if(CONFIG_NET_KSZ9477)
+    list(APPEND SRCS ksz9477.c)
+    if(CONFIG_NET_KSZ9477_I2C)
+      list(APPEND SRCS ksz9477_i2c.c)
+    endif()
+  endif()
+
   if(CONFIG_NET_E1000)
     list(APPEND SRCS e1000.c)
   endif()
