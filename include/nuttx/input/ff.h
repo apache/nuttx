@@ -451,6 +451,17 @@ struct ff_lowerhalf_s
   CODE int (*calibrate)(FAR struct ff_lowerhalf_s *lower,
                         unsigned long arg);
 
+  /* Called to set special configuration for the force feedback device,
+   * such as changing custom mode, setting custom resolution, reset, etc.
+   * All commands are parsed and implemented by lower half driver.
+   * Note: cmd - special command for device configuration, arg - parameters
+   * associated with the command. Returned value: Zero (OK) on success;
+   * -ENOTTY on failure.
+   */
+
+  CODE int (*control)(FAR struct ff_lowerhalf_s *lower,
+                      int cmd, unsigned long arg);
+
   /* The bitmap of force feedback capabilities truly supported by device */
 
   unsigned long ffbit[BITS_TO_LONGS(FF_CNT)];
