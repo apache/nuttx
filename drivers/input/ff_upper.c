@@ -429,7 +429,15 @@ static int ff_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         break;
 
       default:
-        ret = -ENOTTY;
+        if (upper->lower->control)
+          {
+            ret = upper->lower->control(upper->lower, cmd, arg);
+          }
+        else
+          {
+            ret = -ENOTTY;
+          }
+
         break;
     }
 
