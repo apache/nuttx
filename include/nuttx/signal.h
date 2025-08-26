@@ -416,7 +416,7 @@ int nxsig_action(int signo, FAR const struct sigaction *act,
  *
  ****************************************************************************/
 
-int nxsig_queue(int pid, int signo, union sigval value);
+int nxsig_queue(int pid, int signo, const union sigval value);
 
 /****************************************************************************
  * Name: nxsig_kill
