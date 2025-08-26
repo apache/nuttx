@@ -115,14 +115,7 @@ int irq_attach(int irq, xcpt_t isr, FAR void *arg)
 {
   int ret = OK;
 #if NR_IRQS > 0
-  int ndx = -EINVAL;
-  irqstate_t flags;
-
-  if (irq >= 0 && irq < NR_IRQS)
-    {
-      ndx = IRQ_TO_NDX(irq);
-    }
-
+  int ndx = IRQ_TO_NDX(irq);
   if (ndx < 0)
     {
       ret = ndx;
@@ -134,7 +127,7 @@ int irq_attach(int irq, xcpt_t isr, FAR void *arg)
        * to the unexpected interrupt handler.
        */
 
-      flags = spin_lock_irqsave(&g_irqlock);
+      irqstate_t flags = spin_lock_irqsave(&g_irqlock);
       if (isr == NULL)
         {
           /* Disable the interrupt if we can before detaching it.  We might
