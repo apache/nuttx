@@ -120,6 +120,8 @@ const struct mountpt_operations g_archivefs_operations =
   NULL,                    /* mmap */
   NULL,                    /* truncate */
   NULL,                    /* poll */
+  NULL,                    /* readv */
+  NULL,                    /* writev */
   NULL,                    /* sync */
   archivefs_dup,           /* dup */
   archivefs_fstat,         /* fstat */
