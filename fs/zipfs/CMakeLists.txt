@@ -24,8 +24,6 @@ if(NOT CONFIG_DISABLE_MOUNTPOINT)
 
     target_sources(fs PRIVATE zip_vfs.c)
 
-    target_include_directories(
-      fs PRIVATE ${CMAKE_CURRENT_LIST_DIR}/zlib/zlib/contrib/minizip
-                 ${CMAKE_CURRENT_LIST_DIR}/zlib/zlib)
+    target_include_directories(fs PRIVATE libarchive/libarchive/libarchive)
   endif()
 endif()
