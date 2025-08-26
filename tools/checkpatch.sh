@@ -44,6 +44,9 @@ isort_warning_once=0
 cvt2utf_warning_once=0
 codespell_config_file_location_was_shown_once=0
 
+# links
+COMMIT_URL="https://github.com/apache/nuttx/blob/master/CONTRIBUTING.md"
+
 usage() {
   echo "USAGE: ${0} [options] [list|-]"
   echo ""
@@ -53,7 +56,7 @@ usage() {
   echo "-u encoding check with cvt2utf (install with: pip install cvt2utf)"
   echo "-r range check only (coupled with -p or -g)"
   echo "-p <patch file names> (default)"
-  echo "-m Change-Id check in commit message (coupled with -g)"
+  echo "-m Check commit message (coupled with -g)"
   echo "-g <commit list>"
   echo "-f <file list>"
   echo "-x format supported files (only .py, requires: pip install black)"
@@ -279,12 +282,61 @@ check_patch() {
 }
 
 check_msg() {
-  while read; do
+  signedoffby_found=0
+  num_lines=0
+  max_line_len=80
+  min_num_lines=5
+
+  first=$(head -n1 <<< "$msg")
+
+  # check for Merge line and remove from parsed string
+  if [[ $first == *Merge* ]]; then
+      msg="$(echo "$msg" | tail -n +2)"
+      first=$(head -n2 <<< "$msg")
+  fi
+
+  while IFS= read -r REPLY; do
     if [[ $REPLY =~  ^Change-Id ]]; then
       echo "Remove Gerrit Change-ID's before submitting upstream"
       fail=1
     fi
-  done
+
+    if [[ $REPLY =~  ^VELAPLATO ]]; then
+      echo "Remove VELAPLATO before submitting upstream"
+      fail=1
+    fi
+
+    if [[ $REPLY =~  ^[Ww][Ii][Pp]: ]]; then
+      echo "Remove WIP before submitting upstream"
+      fail=1
+    fi
+
+    if [[ $REPLY =~  ^Signed-off-by ]]; then
+      signedoffby_found=1
+    fi
+
+    ((num_lines++))
+  done <<< "$msg"
+
+  if ! [[ $first =~  : ]]; then
+    echo "Commit subject missing colon (e.g. 'subsystem: msg')"
+    fail=1
+  fi
+
+  if (( ${#first} > $max_line_len )); then
+    echo "Commit subject too long > $max_line_len"
+    fail=1
+  fi
+
+  if ! [ $signedoffby_found == 1 ]; then
+    echo "Missing Signed-off-by"
+    fail=1
+  fi
+
+  if (( $num_lines < $min_num_lines && $signedoffby_found == 1 )); then
+      echo "Missing git commit message."
+      fail=1
+  fi
 }
 
 check_commit() {
@@ -348,5 +400,13 @@ done
 for arg in $@; do
   $check $arg
 done
+
+
+if [ $fail == 1 ]; then
+    echo "Some checks failed. For contributing guidelines, see:"
+    echo "  $COMMIT_URL"
+else
+    echo "All checks pass."
+fi
 
 exit $fail
