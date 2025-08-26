@@ -212,6 +212,7 @@ SYSCALL_LOOKUP(clock_settime,              2)
 
 #ifdef CONFIG_SYSLOG
 SYSCALL_LOOKUP(nx_vsyslog,                 3)
+SYSCALL_LOOKUP(nx_setlogmask,              1)
 #endif
 
 /* The following are defined if either file or socket descriptor are

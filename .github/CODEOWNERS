@@ -15535,7 +15535,6 @@ libs/libc/symtab/symtab_sortbyname.c acassis@gmail.com xiaoxiang@xiaomi.com alin
 libs/libc/syslog/lib_setlogmask.c michallenc@seznam.cz Yuuichi.A.Nakamura@sony.com liguiding1@xiaomi.com alin.jerpelea@sony.com
 libs/libc/syslog/lib_syslog.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com anchao@pinecone.net matteo.golin@gmail.com
 libs/libc/syslog/lib_syslog_none.c raiden00@railab.me
-libs/libc/syslog/syslog.h alin.jerpelea@sony.com petro.karashchenko@gmail.com
 libs/libc/termios/lib_cfmakeraw.c masayuki.ishikawa@gmail.com alin.jerpelea@sony.com xiaoxiang@xiaomi.com 59230071+hartmannathan@users.noreply.github.com
 libs/libc/termios/lib_cfspeed.c dongjiuzhu1@xiaomi.com anchao@xiaomi.com xiaoxiang@xiaomi.com raiden00@railab.me alin.jerpelea@sony.com
 libs/libc/termios/lib_isatty.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com gustavo.nihei@espressif.com anchao@xiaomi.com

@@ -35,6 +35,7 @@
 #include <nuttx/lib/lib.h>
 #include <nuttx/nuttx.h>
 #include <nuttx/sched.h>
+#include <nuttx/syslog/syslog.h>
 
 #include "sched/sched.h"
 #include "coredump.h"
@@ -772,7 +773,7 @@ static void coredump_dump_syslog(pid_t pid)
   FAR const char *streamname;
   int logmask;
 
-  logmask = setlogmask(LOG_UPTO(LOG_ALERT));
+  logmask = nx_setlogmask(LOG_UPTO(LOG_ALERT));
 
   _alert("Start coredump:\n");
 
@@ -809,7 +810,7 @@ static void coredump_dump_syslog(pid_t pid)
   _alert("Coredump finish. %s formatted\n", streamname);
 #  endif
 
-  setlogmask(logmask);
+  nx_setlogmask(logmask);
 }
 #endif
 
