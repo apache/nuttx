@@ -297,6 +297,7 @@ int usrsock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
         {
           ninfo("usockid=%d; remote closed (EOF).\n", conn->usockid);
 
+          conn->flags &= ~USRSOCK_EVENT_RECVFROM_AVAIL;
           ret = -EPIPE;
           goto errout_free_conn;
         }
