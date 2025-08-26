@@ -24,109 +24,94 @@
  * Included Files
  ****************************************************************************/
 
-#include <assert.h>
-#include <errno.h>
-#include <debug.h>
-#include <fcntl.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <sys/statfs.h>
-#include <nuttx/mutex.h>
-#include <nuttx/kmalloc.h>
-#include <nuttx/fs/fs.h>
-#include <nuttx/fs/ioctl.h>
+#include <nuttx/config.h>
 
-#include <unzip.h>
+#include <debug.h>
+#include <dirent.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <sched.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/statfs.h>
+
+#include <archive_entry.h>
+#include <archive.h>
+
+#include <nuttx/fs/fs.h>
+#include <nuttx/mutex.h>
 
 #include "fs_heap.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
+struct zipfs_priv_s
+{
+  FAR struct archive_entry *entry;
+  FAR struct archive *a;
+
+  /* callback data */
+
+  struct file file;
+  char buffer[CONFIG_FS_ZIPFS_BUFFER_SIZE];
+
+  /* seek data */
+
+  FAR char *seekbuf;
+  mutex_t lock;
+};
+
 struct zipfs_dir_s
 {
-  struct fs_dirent_s base;
-  mutex_t lock;
-  unzFile uf;
-  bool last;
-};
-
-struct zipfs_mountpt_s
-{
-  char abspath[1];
-};
-
-struct zipfs_file_s
-{
-  unzFile uf;
-  mutex_t lock;
-  FAR char *seekbuf;
-  char relpath[1];
+  struct fs_dirent_s dir;
+  FAR struct zipfs_priv_s *priv;
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static voidpf zipfs_real_open(voidpf opaque, FAR const void *filename,
-                              int mode);
-static uLong zipfs_real_read(voidpf opaque, voidpf stream, FAR void *buf,
-                             uLong size);
-static long zipfs_real_seek(voidpf opaque, voidpf stream, ZPOS64_T offset,
-                            int origin);
-static ZPOS64_T zipfs_real_tell(voidpf opaque, voidpf stream);
-static int zipfs_real_close(voidpf opaque, voidpf stream);
-static int zipfs_real_error(voidpf opaque, voidpf stream);
-
-static int     zipfs_open(FAR struct file *filep, FAR const char *relpath,
-                          int oflags, mode_t mode);
-static int     zipfs_close(FAR struct file *filep);
+static int zipfs_open(FAR struct file *filep, FAR const char *relpath,
+                      int oflags, mode_t mode);
+static int zipfs_close(FAR struct file *filep);
 static ssize_t zipfs_read(FAR struct file *filep, FAR char *buffer,
                           size_t buflen);
-static off_t   zipfs_seek(FAR struct file *filep, off_t offset,
-                          int whence);
-static int     zipfs_dup(FAR const struct file *oldp,
-                         FAR struct file *newp);
-static int     zipfs_fstat(FAR const struct file *filep,
-                           FAR struct stat *buf);
-static int     zipfs_opendir(FAR struct inode *mountpt,
-                             FAR const char *relpath,
-                             FAR struct fs_dirent_s **dir);
-static int     zipfs_closedir(FAR struct inode *mountpt,
-                              FAR struct fs_dirent_s *dir);
-static int     zipfs_readdir(FAR struct inode *mountpt,
-                             FAR struct fs_dirent_s *dir,
-                             FAR struct dirent *entry);
-static int     zipfs_rewinddir(FAR struct inode *mountpt,
-                               FAR struct fs_dirent_s *dir);
-static int     zipfs_bind(FAR struct inode *driver,
-                          FAR const void *data, FAR void **handle);
-static int     zipfs_unbind(FAR void *handle, FAR struct inode **driver,
-                            unsigned int flags);
-static int     zipfs_statfs(FAR struct inode *mountpt,
-                            FAR struct statfs *buf);
-static int     zipfs_stat(FAR struct inode *mountpt,
-                          FAR const char *relpath, FAR struct stat *buf);
+static off_t zipfs_seek(FAR struct file *filep, off_t offset,
+                        int whence);
+static int zipfs_dup(FAR const struct file *oldp,
+                     FAR struct file *newp);
+static int zipfs_fstat(FAR const struct file *filep,
+                       FAR struct stat *buf);
+static int zipfs_opendir(FAR struct inode *mountpt,
+                         FAR const char *relpath,
+                         FAR struct fs_dirent_s **dir);
+static int zipfs_closedir(FAR struct inode *mountpt,
+                          FAR struct fs_dirent_s *dir);
+static int zipfs_readdir(FAR struct inode *mountpt,
+                         FAR struct fs_dirent_s *dir,
+                         FAR struct dirent *entry);
+static int zipfs_rewinddir(FAR struct inode *mountpt,
+                           FAR struct fs_dirent_s *dir);
+static int zipfs_statfs(FAR struct inode *mountpt,
+                        FAR struct statfs *buf);
+static int zipfs_stat(FAR struct inode *mountpt,
+                      FAR const char *relpath,
+                      FAR struct stat *buf);
+static int zipfs_bind(FAR struct inode *driver, FAR const void *data,
+                      FAR void **handle);
+static int zipfs_unbind(FAR void *handle, FAR struct inode **driver,
+                        unsigned int flags);
 
 /****************************************************************************
  * Private Data
- ****************************************************************************/
-
-static zlib_filefunc64_def zipfs_real_ops =
-{
-  zipfs_real_open,
-  zipfs_real_read,
-  NULL,
-  zipfs_real_tell,
-  zipfs_real_seek,
-  zipfs_real_close,
-  zipfs_real_error,
-  NULL
-};
-
-/****************************************************************************
- * Public Data
  ****************************************************************************/
 
 const struct mountpt_operations g_zipfs_operations =
@@ -142,7 +127,6 @@ const struct mountpt_operations g_zipfs_operations =
   NULL,                /* poll */
   NULL,                /* readv */
   NULL,                /* writev */
-
   NULL,                /* sync */
   zipfs_dup,           /* dup */
   zipfs_fstat,         /* fstat */
@@ -169,178 +153,66 @@ const struct mountpt_operations g_zipfs_operations =
  * Private Functions
  ****************************************************************************/
 
-static voidpf zipfs_real_open(voidpf opaque, FAR const void *filename,
-                              int mode)
+static int zipfs_convert_result(int ret)
 {
-  FAR struct file *filep;
-  int ret;
-
-  filep = fs_heap_malloc(sizeof(struct file));
-  if (filep == NULL)
+  switch (ret)
     {
-      return NULL;
-    }
-
-  ret = file_open(filep, filename, O_RDONLY);
-  if (ret < 0)
-    {
-      fs_heap_free(filep);
-      return NULL;
-    }
-
-  return filep;
-}
-
-static uLong zipfs_real_read(voidpf opaque, voidpf stream,
-                             FAR void *buf, uLong size)
-{
-  return file_read(stream, buf, size);
-}
-
-static ZPOS64_T zipfs_real_tell(voidpf opaque, voidpf stream)
-{
-  return file_seek(stream, 0, SEEK_CUR);
-}
-
-static long zipfs_real_seek(voidpf opaque, voidpf stream, ZPOS64_T offset,
-                            int origin)
-{
-  int ret;
-
-  ret = file_seek(stream, offset, origin);
-  return ret >= 0 ? 0 : ret;
-}
-
-static int zipfs_real_close(voidpf opaque, voidpf stream)
-{
-  int ret;
-
-  ret = file_close(stream);
-  fs_heap_free(stream);
-  return ret;
-}
-
-static int zipfs_real_error(voidpf opaque, voidpf stream)
-{
-  return OK;
-}
-
-static int zipfs_convert_result(int ziperr)
-{
-  switch (ziperr)
-    {
-      case UNZ_END_OF_LIST_OF_FILE:
-        return -ENOENT;
-      case UNZ_CRCERROR:
-        ferr("zipfs file crc error\n");
-        return -ESTALE;
-      case UNZ_INTERNALERROR:
-        return -EPERM;
-      case UNZ_BADZIPFILE:
-        return -EBADF;
-      case UNZ_PARAMERROR:
+      case ARCHIVE_RETRY:
+        return -EAGAIN;
+      case ARCHIVE_WARN:
+        return -ENOEXEC;
+      case ARCHIVE_FAILED:
         return -EINVAL;
+      case ARCHIVE_FATAL:
+        return -EPERM;
+
       default:
-        return ziperr;
+        return ret;
     }
 }
 
-static int zipfs_open(FAR struct file *filep, FAR const char *relpath,
-                      int oflags, mode_t mode)
+static int zipfs_close_cb(FAR struct archive *a, FAR void *client_data)
 {
-  FAR struct zipfs_mountpt_s *fs = filep->f_inode->i_private;
-  FAR struct zipfs_file_s *fp;
-  int ret;
+  FAR struct zipfs_priv_s *priv = client_data;
 
-  DEBUGASSERT(fs != NULL);
-
-  fp = fs_heap_malloc(sizeof(*fp) + strlen(relpath));
-  if (fp == NULL)
-    {
-      return -ENOMEM;
-    }
-
-  nxmutex_init(&fp->lock);
-
-  fp->uf = unzOpen2_64(fs->abspath, &zipfs_real_ops);
-  if (fp->uf == NULL)
-    {
-      ret = -EINVAL;
-      goto err_with_mutex;
-    }
-
-  ret = zipfs_convert_result(unzLocateFile(fp->uf, relpath, 0));
-  if (ret < 0)
-    {
-      goto err_with_zip;
-    }
-
-  ret = zipfs_convert_result(unzOpenCurrentFile(fp->uf));
-  if (ret < 0)
-    {
-      goto err_with_zip;
-    }
-
-  if (ret == OK)
-    {
-      fp->seekbuf = NULL;
-      strcpy(fp->relpath, relpath);
-      filep->f_priv = fp;
-    }
-  else
-    {
-err_with_zip:
-      unzClose(fp->uf);
-err_with_mutex:
-      nxmutex_destroy(&fp->lock);
-      fs_heap_free(fp);
-    }
-
-  return ret;
+  return file_close(&priv->file);
 }
 
-static int zipfs_close(FAR struct file *filep)
+static la_ssize_t zipfs_read_cb(FAR struct archive *a,
+                                FAR void *client_data,
+                                FAR const void **buff)
 {
-  FAR struct zipfs_file_s *fp = filep->f_priv;
-  int ret;
-  int ret1;
-
-  /* If read done, will check crc in unzCloseCurrentFile */
-
-  ret = zipfs_convert_result(unzCloseCurrentFile(fp->uf));
-  ret1 = zipfs_convert_result(unzClose(fp->uf));
-
-  nxmutex_destroy(&fp->lock);
-  fs_heap_free(fp->seekbuf);
-  fs_heap_free(fp);
-  return ret < 0 ? ret : ret1;
-}
-
-static ssize_t zipfs_read(FAR struct file *filep, FAR char *buffer,
-                          size_t buflen)
-{
-  FAR struct zipfs_file_s *fp = filep->f_priv;
+  FAR struct zipfs_priv_s *priv = client_data;
   ssize_t ret;
 
-  nxmutex_lock(&fp->lock);
-  ret = zipfs_convert_result(unzReadCurrentFile(fp->uf, buffer, buflen));
-  if (ret > 0)
+  ret = file_read(&priv->file, priv->buffer,
+                  CONFIG_FS_ZIPFS_BUFFER_SIZE);
+  if (ret <= 0)
     {
-      filep->f_pos += ret;
+      return ret;
     }
 
-  nxmutex_unlock(&fp->lock);
+  *buff = priv->buffer;
   return ret;
 }
 
-static off_t zipfs_skip(FAR struct zipfs_file_s *fp, off_t amount)
+static la_int64_t zipfs_seek_cb(FAR struct archive *a,
+                                FAR void *client_data,
+                                la_int64_t offset, int whence)
+{
+  FAR struct zipfs_priv_s *priv = client_data;
+
+  return file_seek(&priv->file, offset, whence);
+}
+
+static off_t zipfs_skip(FAR struct zipfs_priv_s *priv, off_t amount)
 {
   off_t next = 0;
 
-  if (fp->seekbuf == NULL)
+  if (priv->seekbuf == NULL)
     {
-      fp->seekbuf = fs_heap_malloc(CONFIG_ZIPFS_SEEK_BUFSIZE);
-      if (fp->seekbuf == NULL)
+      priv->seekbuf = fs_heap_malloc(CONFIG_FS_ZIPFS_BUFFER_SIZE);
+      if (priv->seekbuf == NULL)
         {
           return -ENOMEM;
         }
@@ -350,12 +222,12 @@ static off_t zipfs_skip(FAR struct zipfs_file_s *fp, off_t amount)
     {
       off_t remain = amount - next;
 
-      if (remain > CONFIG_ZIPFS_SEEK_BUFSIZE)
+      if (remain > CONFIG_FS_ZIPFS_BUFFER_SIZE)
         {
-          remain = CONFIG_ZIPFS_SEEK_BUFSIZE;
+          remain = CONFIG_FS_ZIPFS_BUFFER_SIZE;
         }
 
-      remain = unzReadCurrentFile(fp->uf, fp->seekbuf, remain);
+      remain = archive_read_data(priv->a, priv->seekbuf, remain);
       remain = zipfs_convert_result(remain);
       if (remain <= 0)
         {
@@ -368,15 +240,317 @@ static off_t zipfs_skip(FAR struct zipfs_file_s *fp, off_t amount)
   return next;
 }
 
+int zipfs_new(FAR const char *abspath, FAR const char *relpath,
+              FAR struct zipfs_priv_s **priv)
+{
+  FAR struct zipfs_priv_s *newp;
+  int ret = -ENOMEM;
+
+  newp = fs_heap_zalloc(sizeof(struct zipfs_priv_s));
+  if (newp == NULL)
+    {
+      return ret;
+    }
+
+  newp->a = archive_read_new();
+  if (newp->a == NULL)
+    {
+      ferr("ERROR: archive_read_new() failed\n");
+      goto err_with_priv;
+    }
+
+  nxmutex_init(&newp->lock);
+#ifdef CONFIG_FS_ZIPFS_FORMAT_ALL
+  ret = zipfs_convert_result(archive_read_support_format_all(newp->a));
+  if (ret < 0)
+    {
+      ferr("ERROR: archive_read_support_format_all() failed\n");
+      goto err_with_lock;
+    }
+#else
+#  ifdef CONFIG_FS_ZIPFS_FORMAT_ZIP
+  ret = zipfs_convert_result(archive_read_support_format_zip(newp->a));
+  if (ret < 0)
+    {
+      ferr("ERROR: archive_read_support_format_zip() failed\n");
+      goto err_with_lock;
+    }
+#  endif
+
+#  ifdef CONFIG_FS_ZIPFS_FORMAT_7ZIP
+  ret = zipfs_convert_result(archive_read_support_format_7zip(newp->a));
+  if (ret < 0)
+    {
+      ferr("ERROR: archive_read_support_format_7zip() failed\n");
+      goto err_with_lock;
+    }
+#  endif
+
+#  ifdef CONFIG_FS_ZIPFS_FORMAT_AR
+  ret = zipfs_convert_result(archive_read_support_format_ar(newp->a));
+  if (ret < 0)
+    {
+      ferr("ERROR: archive_read_support_format_ar() failed\n");
+      goto err_with_lock;
+    }
+#  endif
+
+#  ifdef CONFIG_FS_ZIPFS_FORMAT_CAB
+  ret = zipfs_convert_result(archive_read_support_format_cab(newp->a));
+  if (ret < 0)
+    {
+      ferr("ERROR: archive_read_support_format_cab() failed\n");
+      goto err_with_lock;
+    }
+#  endif
+
+#  ifdef CONFIG_FS_ZIPFS_FORMAT_CPIO
+  ret = zipfs_convert_result(archive_read_support_format_cpio(newp->a));
+  if (ret < 0)
+    {
+      ferr("ERROR: archive_read_support_format_cpio() failed\n");
+      goto err_with_lock;
+    }
+#  endif
+
+#  ifdef CONFIG_FS_ZIPFS_FORMAT_EMPTY
+  ret = zipfs_convert_result(archive_read_support_format_empty(newp->a));
+  if (ret < 0)
+    {
+      ferr("ERROR: archive_read_support_format_empty() failed\n");
+      goto err_with_lock;
+    }
+#  endif
+
+#  ifdef CONFIG_FS_ZIPFS_FORMAT_ISO9660
+  ret = archive_read_support_format_iso9660(newp->a);
+  ret = zipfs_convert_result(ret);
+  if (ret < 0)
+    {
+      ferr("ERROR: archive_read_support_format_iso9660() failed\n");
+      goto err_with_lock;
+    }
+#  endif
+
+#  ifdef CONFIG_FS_ZIPFS_FORMAT_LHA
+  ret = zipfs_convert_result(archive_read_support_format_lha(newp->a));
+  if (ret < 0)
+    {
+      ferr("ERROR: archive_read_support_format_lha() failed\n");
+      goto err_with_lock;
+    }
+#  endif
+
+#  ifdef CONFIG_FS_ZIPFS_FORMAT_MTREE
+  ret = zipfs_convert_result(archive_read_support_format_mtree(newp->a));
+  if (ret < 0)
+    {
+      ferr("ERROR: archive_read_support_format_mtree() failed\n");
+      goto err_with_lock;
+    }
+#  endif
+
+#  ifdef CONFIG_FS_ZIPFS_FORMAT_RAR
+  ret = zipfs_convert_result(archive_read_support_format_rar(newp->a));
+  if (ret < 0)
+    {
+      ferr("ERROR: archive_read_support_format_rar() failed\n");
+      goto err_with_lock;
+    }
+#  endif
+
+#  ifdef CONFIG_FS_ZIPFS_FORMAT_RAR_V5
+  ret = zipfs_convert_result(archive_read_support_format_rar5(newp->a));
+  if (ret < 0)
+    {
+      ferr("ERROR: archive_read_support_format_rar5() failed\n");
+      goto err_with_lock;
+    }
+#  endif
+
+#  ifdef CONFIG_FS_ZIPFS_FORMAT_RAW
+  ret = zipfs_convert_result(archive_read_support_format_raw(newp->a));
+  if (ret < 0)
+    {
+      ferr("ERROR: archive_read_support_format_raw() failed\n");
+      goto err_with_lock;
+    }
+#  endif
+
+#  ifdef CONFIG_FS_ZIPFS_FORMAT_TAR
+  ret = zipfs_convert_result(archive_read_support_format_tar(newp->a));
+  if (ret < 0)
+    {
+      ferr("ERROR: archive_read_support_format_tar() failed\n");
+      goto err_with_lock;
+    }
+#  endif
+
+#  ifdef CONFIG_FS_ZIPFS_FORMAT_WARC
+  ret = zipfs_convert_result(archive_read_support_format_warc(newp->a));
+  if (ret < 0)
+    {
+      ferr("ERROR: archive_read_support_format_warc() failed\n");
+      goto err_with_lock;
+    }
+#  endif
+
+#  ifdef CONFIG_FS_ZIPFS_FORMAT_XAR
+  ret = zipfs_convert_result(archive_read_support_format_xar(newp->a));
+  if (ret < 0)
+    {
+      ferr("ERROR: archive_read_support_format_xar() failed\n");
+      goto err_with_lock;
+    }
+#  endif
+#endif
+
+  ret = file_open(&newp->file, abspath, O_RDONLY);
+  if (ret < 0)
+    {
+      ferr("ERROR: file_open() failed\n");
+      goto err_with_lock;
+    }
+
+  archive_read_set_seek_callback(newp->a, zipfs_seek_cb);
+  ret = archive_read_open(newp->a, newp, NULL,
+                          zipfs_read_cb, zipfs_close_cb);
+  ret = zipfs_convert_result(ret);
+  if (ret < 0)
+    {
+      ferr("ERROR: archive_read_open() failed\n");
+      goto err_with_open;
+    }
+
+  newp->entry = archive_entry_new2(newp->a);
+  if (newp->entry == NULL)
+    {
+      ferr("ERROR: archive_entry_new2() failed\n");
+      ret = -ENOMEM;
+      goto err_with_close;
+    }
+
+  if (relpath == NULL)
+    {
+      /* Open root dir  */
+
+      *priv = newp;
+      return OK;
+    }
+
+  while (true)
+    {
+      ret = archive_read_next_header2(newp->a, newp->entry);
+      ret = zipfs_convert_result(ret);
+      if (ret < 0)
+        {
+          break;
+        }
+
+      if (strcmp(archive_entry_pathname(newp->entry), relpath) == 0)
+        {
+          *priv = newp;
+          return OK;
+        }
+    }
+
+  ret = -ENOENT;
+  archive_entry_free(newp->entry);
+err_with_close:
+  archive_read_close(newp->a);
+err_with_open:
+  file_close(&newp->file);
+err_with_lock:
+  nxmutex_destroy(&newp->lock);
+  archive_read_free(newp->a);
+err_with_priv:
+  fs_heap_free(newp);
+  return ret;
+}
+
+static void zipfs_free(FAR struct zipfs_priv_s *priv)
+{
+  if (priv->seekbuf != NULL)
+    {
+      fs_heap_free(priv->seekbuf);
+    }
+
+  archive_entry_free(priv->entry);
+  archive_read_close(priv->a);
+  nxmutex_destroy(&priv->lock);
+  archive_read_free(priv->a);
+  fs_heap_free(priv);
+}
+
+static int zipfs_stats_common(FAR struct zipfs_priv_s *priv,
+                              FAR struct stat *buf)
+{
+  FAR const struct stat *stat = archive_entry_stat(priv->entry);
+
+  if (stat == NULL)
+    {
+      return -EINVAL;
+    }
+
+  memcpy(buf, stat, sizeof(struct stat));
+  return OK;
+}
+
+/****************************************************************************
+ * Zipfs methods
+ ****************************************************************************/
+
+static int zipfs_open(FAR struct file *filep, FAR const char *relpath,
+                      int oflags, mode_t mode)
+{
+  FAR const char *abspath = filep->f_inode->i_private;
+  FAR struct zipfs_priv_s *priv;
+  int ret;
+
+  ret = zipfs_new(abspath, relpath, &priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  filep->f_priv = priv;
+  return OK;
+}
+
+static int zipfs_close(FAR struct file *filep)
+{
+  FAR struct zipfs_priv_s *priv = filep->f_priv;
+
+  zipfs_free(priv);
+  return OK;
+}
+
+static ssize_t zipfs_read(FAR struct file *filep, FAR char *buffer,
+                          size_t buflen)
+{
+  FAR struct zipfs_priv_s *priv = filep->f_priv;
+  ssize_t ret;
+
+  nxmutex_lock(&priv->lock);
+  ret = zipfs_convert_result(archive_read_data(priv->a, buffer, buflen));
+  if (ret > 0)
+    {
+      filep->f_pos += ret;
+    }
+
+  nxmutex_unlock(&priv->lock);
+  return ret;
+}
+
 static off_t zipfs_seek(FAR struct file *filep, off_t offset,
                         int whence)
 {
-  FAR struct zipfs_mountpt_s *fs = filep->f_inode->i_private;
-  FAR struct zipfs_file_s *fp = filep->f_priv;
-  unz_file_info64 file_info;
+  FAR const char *abspath = filep->f_inode->i_private;
+  FAR struct zipfs_priv_s *priv = filep->f_priv;
+  FAR struct zipfs_priv_s *newp;
   off_t ret = 0;
 
-  nxmutex_lock(&fp->lock);
+  nxmutex_lock(&priv->lock);
   switch (whence)
     {
       case SEEK_SET:
@@ -385,15 +559,7 @@ static off_t zipfs_seek(FAR struct file *filep, off_t offset,
         offset += filep->f_pos;
         break;
       case SEEK_END:
-        ret = unzGetCurrentFileInfo64(fp->uf, &file_info,
-                                      NULL, 0, NULL, 0, NULL, 0);
-        ret = zipfs_convert_result(ret);
-        if (ret < 0)
-          {
-            goto err_with_lock;
-          }
-
-        offset += file_info.uncompressed_size;
+        offset += archive_entry_size(priv->entry);
         break;
       default:
         ret = -EINVAL;
@@ -406,203 +572,195 @@ static off_t zipfs_seek(FAR struct file *filep, off_t offset,
     }
   else if (filep->f_pos > offset)
     {
-      ret = zipfs_convert_result(unzClose(fp->uf));
+      ret = zipfs_new(abspath, archive_entry_pathname(priv->entry),
+                      &newp);
       if (ret < 0)
         {
           goto err_with_lock;
         }
 
-      fp->uf = unzOpen2_64(fs->abspath, &zipfs_real_ops);
-      if (fp->uf == NULL)
-        {
-          ret = -EINVAL;
-          goto err_with_lock;
-        }
-
-      ret = zipfs_convert_result(unzLocateFile(fp->uf, fp->relpath, 0));
-      if (ret < 0)
-        {
-          goto err_with_lock;
-        }
-
-      ret = zipfs_convert_result(unzOpenCurrentFile(fp->uf));
-      if (ret < 0)
-        {
-          goto err_with_lock;
-        }
-
+      nxmutex_unlock(&priv->lock);
+      zipfs_free(priv);
+      priv = newp;
+      nxmutex_lock(&priv->lock);
+      filep->f_priv = newp;
       filep->f_pos = 0;
     }
 
-  ret = zipfs_skip(fp, offset - filep->f_pos);
+  ret = zipfs_skip(priv, offset - filep->f_pos);
   if (ret < 0)
     {
       goto err_with_lock;
     }
 
-  if (ret >= 0)
-    {
-      filep->f_pos += ret;
-    }
+  filep->f_pos += ret;
 
 err_with_lock:
-  nxmutex_unlock(&fp->lock);
+  nxmutex_unlock(&priv->lock);
   return ret < 0 ? ret : filep->f_pos;
 }
 
 static int zipfs_dup(FAR const struct file *oldp, FAR struct file *newp)
 {
-  FAR struct zipfs_file_s *fp;
+  FAR struct zipfs_priv_s *priv = oldp->f_priv;
+  FAR const char *relpath = archive_entry_pathname(priv->entry);
 
-  fp = oldp->f_priv;
-  return zipfs_open(newp, fp->relpath, oldp->f_oflags, 0);
-}
-
-static int zipfs_stat_common(unzFile uf, FAR struct stat *buf)
-{
-  unz_file_info64 file_info;
-  int ret;
-
-  memset(buf, 0, sizeof(struct stat));
-
-  ret = unzGetCurrentFileInfo64(uf, &file_info, NULL, 0,
-                                NULL, 0, NULL, 0);
-  ret = zipfs_convert_result(ret);
-  if (ret >= 0)
-    {
-      buf->st_size = file_info.uncompressed_size;
-      buf->st_mode = S_IFREG | 0555;
-    }
-
-  return ret;
+  return zipfs_open(newp, relpath, oldp->f_oflags, 0);
 }
 
 static int zipfs_fstat(FAR const struct file *filep,
                        FAR struct stat *buf)
 {
-  FAR struct zipfs_file_s *fp = filep->f_priv;
+  FAR struct zipfs_priv_s *priv = filep->f_priv;
 
-  return zipfs_stat_common(fp->uf, buf);
+  return zipfs_stats_common(priv, buf);
 }
 
-static int zipfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
+static int zipfs_opendir(FAR struct inode *mountpt,
+                         FAR const char *relpath,
                          FAR struct fs_dirent_s **dir)
 {
-  FAR struct zipfs_mountpt_s *fs = mountpt->i_private;
-  FAR struct zipfs_dir_s *zdir;
+  FAR const char *abspath = mountpt->i_private;
+  FAR struct zipfs_dir_s *adir;
+  int ret;
 
-  DEBUGASSERT(fs != NULL);
-
-  zdir = fs_heap_malloc(sizeof(*zdir));
-  if (zdir == NULL)
+  adir = fs_heap_zalloc(sizeof(struct zipfs_dir_s));
+  if (adir == NULL)
     {
       return -ENOMEM;
     }
 
-  nxmutex_init(&zdir->lock);
-
-  zdir->uf = unzOpen2_64(fs->abspath, &zipfs_real_ops);
-  if (zdir->uf == NULL)
+  ret = zipfs_new(abspath, NULL, &adir->priv);
+  if (ret < 0)
     {
-      nxmutex_destroy(&zdir->lock);
-      fs_heap_free(zdir);
-      return -EINVAL;
+      fs_heap_free(adir);
+      return ret;
     }
 
-  zdir->last = false;
-  *dir = &zdir->base;
+  *dir = &adir->dir;
   return OK;
 }
 
 static int zipfs_closedir(FAR struct inode *mountpt,
                           FAR struct fs_dirent_s *dir)
 {
-  FAR struct zipfs_dir_s *zdir = (FAR struct zipfs_dir_s *)dir;
-  int ret;
+  FAR struct zipfs_dir_s *adir = (FAR struct zipfs_dir_s *)dir;
 
-  zdir = (FAR struct zipfs_dir_s *)dir;
-  ret = zipfs_convert_result(unzClose(zdir->uf));
-  nxmutex_destroy(&zdir->lock);
-  fs_heap_free(zdir);
-  return ret;
+  zipfs_free(adir->priv);
+  fs_heap_free(adir);
+  return OK;
 }
 
 static int zipfs_readdir(FAR struct inode *mountpt,
                          FAR struct fs_dirent_s *dir,
                          FAR struct dirent *entry)
 {
-  FAR struct zipfs_dir_s *zdir = (FAR struct zipfs_dir_s *)dir;
-  unz_file_info64 file_info;
+  FAR struct zipfs_dir_s *adir = (FAR struct zipfs_dir_s *)dir;
+  FAR struct zipfs_priv_s *priv = adir->priv;
   int ret;
 
-  nxmutex_lock(&zdir->lock);
-  ret = unzGetCurrentFileInfo64(zdir->uf,
-                                &file_info,
-                                entry->d_name,
-                                NAME_MAX, NULL, 0, NULL, 0);
-
+  nxmutex_lock(&priv->lock);
+  ret = archive_read_next_header2(priv->a, priv->entry);
   ret = zipfs_convert_result(ret);
   if (ret < 0)
     {
-      goto err_with_lock;
+      goto err;
     }
 
-  ret = zipfs_convert_result(unzGoToNextFile(zdir->uf));
-  if (ret == -ENOENT)
+  if (ret == ARCHIVE_EOF)
     {
-      if (zdir->last == false)
-        {
-          ret = OK;
-          zdir->last = true;
-        }
+      ret = EOF;
+      goto err;
     }
 
-err_with_lock:
-  nxmutex_unlock(&zdir->lock);
+  strlcpy(entry->d_name, archive_entry_pathname(priv->entry),
+          sizeof(entry->d_name));
+err:
+  nxmutex_unlock(&priv->lock);
   return ret;
 }
 
 static int zipfs_rewinddir(FAR struct inode *mountpt,
                            FAR struct fs_dirent_s *dir)
 {
-  FAR struct zipfs_dir_s *zdir = (FAR struct zipfs_dir_s *)dir;
+  FAR struct zipfs_dir_s *adir = (FAR struct zipfs_dir_s *)dir;
+  FAR struct zipfs_priv_s *priv = adir->priv;
+
+  nxmutex_lock(&priv->lock);
+  archive_entry_free(priv->entry);
+  priv->entry = archive_entry_new2(priv->a);
+  if (priv->entry == NULL)
+    {
+      nxmutex_unlock(&priv->lock);
+      return -ENOMEM;
+    }
+
+  nxmutex_unlock(&priv->lock);
+  return OK;
+}
+
+static int zipfs_statfs(FAR struct inode *mountpt,
+                        FAR struct statfs *buf)
+{
+  buf->f_type = ZIPFS_MAGIC;
+  buf->f_namelen = NAME_MAX;
+  return OK;
+}
+
+static int zipfs_stat(FAR struct inode *mountpt,
+                      FAR const char *relpath,
+                      FAR struct stat *buf)
+{
+  FAR const char *abspath = mountpt->i_private;
+  FAR struct zipfs_priv_s *priv;
   int ret;
 
-  nxmutex_lock(&zdir->lock);
-  zdir->last = false;
-  ret = zipfs_convert_result(unzGoToFirstFile(zdir->uf));
-  nxmutex_unlock(&zdir->lock);
+  if (relpath[0] == 0)
+    {
+      buf->st_mode = S_IFDIR | 0555;
+      return OK;
+    }
+
+  ret = zipfs_new(abspath, relpath, &priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = zipfs_stats_common(priv, buf);
+  zipfs_free(priv);
   return ret;
 }
 
 static int zipfs_bind(FAR struct inode *driver, FAR const void *data,
                       FAR void **handle)
 {
-  FAR struct zipfs_mountpt_s *fs;
-  unzFile uf;
+  FAR struct zipfs_priv_s *priv;
+  FAR char *abspath;
+  int ret;
 
   if (data == NULL)
     {
       return -ENODEV;
     }
 
-  fs = fs_heap_zalloc(sizeof(struct zipfs_mountpt_s) + strlen(data));
-  if (fs == NULL)
+  /* Try access to zip file */
+
+  ret = zipfs_new(data, NULL, &priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  zipfs_free(priv);
+  abspath = fs_heap_zalloc(PATH_MAX);
+  if (abspath == NULL)
     {
       return -ENOMEM;
     }
 
-  uf = unzOpen2_64(data, &zipfs_real_ops);
-  if (uf == NULL)
-    {
-      fs_heap_free(fs);
-      return -EINVAL;
-    }
-
-  unzClose(uf);
-  strcpy(fs->abspath, data);
-  *handle = fs;
-
+  *handle = abspath;
+  strlcpy(abspath, data, PATH_MAX);
   return OK;
 }
 
@@ -611,48 +769,4 @@ static int zipfs_unbind(FAR void *handle, FAR struct inode **driver,
 {
   fs_heap_free(handle);
   return OK;
-}
-
-static int zipfs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
-{
-  buf->f_type = ZIPFS_MAGIC;
-  buf->f_namelen = NAME_MAX;
-  return OK;
-}
-
-static int zipfs_stat(FAR struct inode *mountpt,
-                      FAR const char *relpath, FAR struct stat *buf)
-{
-  FAR struct zipfs_mountpt_s *fs;
-  unzFile uf;
-  int ret;
-
-  /* Sanity checks */
-
-  DEBUGASSERT(mountpt && mountpt->i_private);
-
-  if (relpath[0] == 0)
-    {
-      buf->st_mode = S_IFDIR | 0555;
-      return OK;
-    }
-
-  fs = mountpt->i_private;
-  uf = unzOpen2_64(fs->abspath, &zipfs_real_ops);
-  if (uf == NULL)
-    {
-      return -EINVAL;
-    }
-
-  ret = zipfs_convert_result(unzLocateFile(uf, relpath, 0));
-  if (ret < 0)
-    {
-      unzClose(uf);
-      return ret;
-    }
-
-  ret = zipfs_stat_common(uf, buf);
-
-  unzClose(uf);
-  return ret;
 }

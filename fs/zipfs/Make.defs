@@ -21,12 +21,10 @@
 ############################################################################
 
 ifeq ($(CONFIG_FS_ZIPFS),y)
-# Files required for ZIPFS file system support
 
-CFLAGS += ${INCDIR_PREFIX}zipfs/zlib/zlib/contrib/minizip
-CFLAGS += ${INCDIR_PREFIX}zipfs/zlib/zlib
+CFLAGS += ${INCDIR_PREFIX}zipfs/libarchive/libarchive/libarchive
+
 CSRCS += zip_vfs.c
-# Include ZIPFS build support
 
 DEPPATH += --dep-path zipfs
 VPATH += :zipfs

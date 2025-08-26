@@ -25,15 +25,83 @@
 #
 
 config FS_ZIPFS
-	bool "ZIPFS File System"
+	bool "ZIP File System"
 	default n
 
 if FS_ZIPFS
 
-config ZIPFS_SEEK_BUFSIZE
-	int "zipfs seek buffer size"
-	default 256
+config FS_ZIPFS_BUFFER_SIZE
+	int "Buffer size"
+	default 32768
 	---help---
-		this option will influences seek speed
+		libarchive requires a buffer to read and write data.
 
-endif # FS_ZIPFS
+config FS_ZIPFS_FORMAT_ALL
+	bool "support zip all format"
+	default n
+	---help---
+		All format support will increase binary size.
+if !FS_ZIPFS_FORMAT_ALL
+config FS_ZIPFS_FORMAT_ZIP
+	bool "support zip xar format"
+	default y
+
+config FS_ZIPFS_FORMAT_7ZIP
+	bool "support zip 7zip format"
+	default n
+
+config FS_ZIPFS_FORMAT_AR
+	bool "support zip ar format"
+	default n
+
+config FS_ZIPFS_FORMAT_CAB
+	bool "support zip cab format"
+	default n
+
+config FS_ZIPFS_FORMAT_CPIO
+	bool "support zip cpio format"
+	default n
+
+config FS_ZIPFS_FORMAT_EMPTY
+	bool "support zip empty format"
+	default n
+
+config FS_ZIPFS_FORMAT_ISO9660
+	bool "support zip iso9660 format"
+	default n
+
+config FS_ZIPFS_FORMAT_LHA
+	bool "support zip lha format"
+	default n
+
+config FS_ZIPFS_FORMAT_MTREE
+	bool "support zip mtree format"
+	default n
+
+config FS_ZIPFS_FORMAT_RAR
+	bool "support zip rar format"
+	default n
+
+config FS_ZIPFS_FORMAT_RAR_V5
+	bool "support zip rar_v5 format"
+	default n
+
+config FS_ZIPFS_FORMAT_RAW
+	bool "support zip raw format"
+	default n
+
+config FS_ZIPFS_FORMAT_TAR
+	bool "support zip raw format"
+	default n
+
+config FS_ZIPFS_FORMAT_WARC
+	bool "support zip warc format"
+	default n
+
+config FS_ZIPFS_FORMAT_XAR
+	bool "support zip xar format"
+	default n
+
+endif
+
+endif
