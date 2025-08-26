@@ -4755,7 +4755,9 @@ int sam_emac_initialize(int intf)
 {
   struct sam_emac_s *priv;
   const struct sam_emacattr_s *attr;
+#ifndef CONFIG_ARCH_CHIP_PIC32CZCA70
   uint32_t regval;
+#endif
   uint8_t *pktbuf;
 #if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
   uint8_t phytype;
