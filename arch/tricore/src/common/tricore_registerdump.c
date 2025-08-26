@@ -132,15 +132,19 @@ void up_dump_register(void *dumpregs)
  * Name: up_regs_memcpy
  ****************************************************************************/
 
-void up_regs_memcpy(FAR void *dest, FAR void *src, size_t count)
+void up_regs_memcpy(FAR void *dest_, FAR void *src_, size_t count)
 {
-  int csa_size = TC_CONTEXT_REGS * sizeof(uintptr_t);
-  int csa_num = count / csa_size;
+  uintptr_t *dest = (uintptr_t *)dest_;
+  uintptr_t *src = (uintptr_t *)src_;
+  uintptr_t pcxi;
 
-  while (csa_num--)
-    {
-      memcpy(dest, src, csa_size);
-      dest = (char *)dest + csa_size;
-      src = tricore_csa2addr(((uintptr_t *)src)[REG_LPCXI]);
-    }
+  DEBUGASSERT(count == XCPTCONTEXT_SIZE);
+
+  pcxi = src[REG_LPCXI];
+  memcpy(dest, src, TC_CONTEXT_SIZE);
+  dest[0] = tricore_addr2csa(dest + TC_CONTEXT_REGS)
+            | (pcxi & ~FCX_FREE);
+  src = tricore_csa2addr(pcxi);
+
+  memcpy(dest + TC_CONTEXT_REGS, src, TC_CONTEXT_SIZE);
 }
