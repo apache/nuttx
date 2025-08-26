@@ -1377,7 +1377,11 @@ void write_unlock_irqrestore(FAR rwlock_t *lock, irqstate_t flags);
  *
  ****************************************************************************/
 
-#define enter_critical_section_notrace() rspin_lock_irqsave(&g_schedlock)
+#ifdef CONFIG_SMP
+#  define enter_critical_section_notrace() rspin_lock_irqsave(&g_schedlock)
+#else
+#  define enter_critical_section_notrace() up_irq_save()
+#endif
 
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0 || \
     CONFIG_SCHED_CRITMONITOR_MAXTIME_BUSYWAIT >= 0 || \
@@ -1411,7 +1415,11 @@ irqstate_t enter_critical_section(void) noinstrument_function;
  *
  ****************************************************************************/
 
-#define leave_critical_section_notrace(f) rspin_unlock_irqrestore(&g_schedlock, f)
+#ifdef CONFIG_SMP
+#  define leave_critical_section_notrace(f) rspin_unlock_irqrestore(&g_schedlock, f)
+#else
+#  define leave_critical_section_notrace(f) up_irq_restore(f)
+#endif
 
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0 || \
     CONFIG_SCHED_CRITMONITOR_MAXTIME_BUSYWAIT >= 0 || \
@@ -1440,7 +1448,11 @@ void leave_critical_section(irqstate_t flags) noinstrument_function;
     defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION)
 void break_critical_section(void);
 #else
-#  define break_critical_section() rspin_breaklock(&g_schedlock)
+#  ifdef CONFIG_SMP
+#    define break_critical_section() rspin_breaklock(&g_schedlock)
+#  else
+#    define break_critical_section()
+#  endif
 #endif
 
 #undef EXTERN
