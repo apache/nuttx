@@ -511,6 +511,13 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
       goto errout;
     }
 
+  if ((conn->shutdown & SHUT_WR) != 0)
+    {
+      nerr("ERROR: Connection is shutdown\n");
+      ret = -EPIPE;
+      goto errout;
+    }
+
   /* Make sure that we have the IP address mapping */
 
 #if defined(CONFIG_NET_ARP_SEND) || defined(CONFIG_NET_ICMPv6_NEIGHBOR)
@@ -591,7 +598,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
           /* Set up the callback in the connection */
 
           state.snd_cb->flags   = (TCP_ACKDATA | TCP_REXMIT | TCP_POLL |
-                                   TCP_DISCONN_EVENTS);
+                                   TCP_DISCONN_EVENTS | TCP_TXCLOSE);
           state.snd_cb->priv    = (FAR void *)&state;
           state.snd_cb->event   = tcpsend_eventhandler;
 

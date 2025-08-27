@@ -189,7 +189,7 @@ struct tcp_conn_s
    * When an callback is executed from 'list', the input flags are normally
    * returned, however, the implementation may set one of the following:
    *
-   *   TCP_CLOSE   - Gracefully close the current connection
+   *   TCP_TXCLOSE - Gracefully close the current connection (TX)
    *   TCP_ABORT   - Abort (reset) the current connection on an error that
    *                 prevents TCP_CLOSE from working.
    *
@@ -220,6 +220,8 @@ struct tcp_conn_s
 #if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
   uint8_t  domain;        /* IP domain: PF_INET or PF_INET6 */
 #endif
+  uint8_t  shutdown;      /* Whether the connection is shutdown, SHUT_RD and
+                           * SHUT_WR */
   uint8_t  sa;            /* Retransmission time-out calculation state
                            * variable */
   uint8_t  sv;            /* Retransmission time-out calculation state

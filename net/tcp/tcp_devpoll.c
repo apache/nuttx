@@ -111,7 +111,9 @@ void tcp_poll(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
   /* Verify that the connection is established. */
 
   if ((conn->tcpstateflags & TCP_STATE_MASK) == TCP_ESTABLISHED ||
-      (conn->tcpstateflags & TCP_STATE_MASK) == TCP_CLOSE_WAIT)
+      (conn->tcpstateflags & TCP_STATE_MASK) == TCP_CLOSE_WAIT ||
+      (conn->tcpstateflags & TCP_STATE_MASK) == TCP_FIN_WAIT_1 ||
+      (conn->tcpstateflags & TCP_STATE_MASK) == TCP_FIN_WAIT_2)
     {
       /* Set up for the callback.  We can't know in advance if the
        * application is going to send a IPv4 or an IPv6 packet, so this

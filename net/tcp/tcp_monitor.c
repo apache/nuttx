@@ -187,7 +187,7 @@ static uint16_t tcp_monitor_event(FAR struct net_driver_s *dev,
  *
  * Input Parameters:
  *   conn  - The TCP connection of interest
- *   flags - Indicates the type of shutdown.  TCP_CLOSE or TCP_ABORT
+ *   flags - Indicates the type of shutdown.  TCP_TXCLOSE or TCP_ABORT
  *
  * Returned Value:
  *   None

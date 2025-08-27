@@ -71,7 +71,7 @@ static uint16_t tcp_shutdown_eventhandler(FAR struct net_driver_s *dev,
 #endif
 
   dev->d_len = 0;
-  flags = (flags & ~TCP_NEWDATA) | TCP_CLOSE;
+  flags |= TCP_TXCLOSE;
 
   if (conn->shdcb != NULL)
     {
@@ -160,10 +160,17 @@ out:
 
 int tcp_shutdown(FAR struct socket *psock, int how)
 {
+  FAR struct tcp_conn_s *conn;
+
+  conn = psock->s_conn;
+  DEBUGASSERT(conn != NULL);
+
   if (!(how & SHUT_WR))
     {
       return -EOPNOTSUPP;
     }
+
+  conn->shutdown |= how;
 
   tcp_unlisten(psock->s_conn); /* No longer accepting connections */
 

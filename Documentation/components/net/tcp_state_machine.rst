@@ -78,11 +78,11 @@ NuttX today.
 	 * - FIN-WAIT-1
 		 - ``TCP_FIN_WAIT_1``
 		 - Yes
-		 - Entered on active close (local FIN sent). However, it is currently unable to continue receiving data in this state
+		 - Entered on active close (local FIN sent).
 	 * - FIN-WAIT-2
 		 - ``TCP_FIN_WAIT_2``
 		 - Yes
-		 - Entered after ACK for local FIN (when peer hasn't closed yet). However, it is currently unable to continue receiving data in this state
+		 - Entered after ACK for local FIN (when peer hasn't closed yet).
 	 * - CLOSE-WAIT
 		 - Not implemented
 		 - Yes
@@ -243,8 +243,7 @@ TCP_FIN_WAIT_1
 
 * Data received in FIN_WAIT_1:
 
-	* Current behavior is to send a RST and force ``TCP_CLOSED``.
-	* The implementation notes this as a TODO to improve shutdown behavior.
+	* Can continue receiving data until close or peer FIN.
 
 TCP_FIN_WAIT_2
 --------------
@@ -257,7 +256,7 @@ TCP_FIN_WAIT_2
 
 * Data received in FIN_WAIT_2:
 
-	* Current behavior is to send a RST and force ``TCP_CLOSED``.
+	* Can continue receiving data until close or peer FIN.
 
 TCP_CLOSING
 -----------
@@ -311,8 +310,6 @@ Deviations and Notable Simplifications
 ======================================
 
 * LISTEN is not an explicit TCP state; it is represented by listener table entries.
-* FIN_WAIT_* data handling is currently strict: received payload data in
-	FIN_WAIT_1/2 results in sending RST and closing the connection.
 * RST processing is intentionally simple (accept RST and close).
 
 Where to Look in the Code

@@ -271,7 +271,7 @@ uint16_t tcp_callback(FAR struct net_driver_s *dev,
       return 0;
     }
 
-  /* Preserve the TCP_ACKDATA, TCP_CLOSE, and TCP_ABORT in the response.
+  /* Preserve the TCP_ACKDATA, TCP_TXCLOSE, and TCP_ABORT in the response.
    * These is needed by the network to handle responses and buffer state.
    * The TCP_NEWDATA indication will trigger the ACK response, but must be
    * explicitly set in the callback.
@@ -283,7 +283,7 @@ uint16_t tcp_callback(FAR struct net_driver_s *dev,
    * 'list', the input flags are normally returned, however, the
    * implementation may set one of the following:
    *
-   *   TCP_CLOSE   - Gracefully close the current connection
+   *   TCP_TXCLOSE - Gracefully close the current connection (TX)
    *   TCP_ABORT   - Abort (reset) the current connection on an error that
    *                 prevents TCP_CLOSE from working.
    *

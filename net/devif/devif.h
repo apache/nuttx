@@ -164,7 +164,7 @@
  *                   OUT: Not used
  */
 
-/* Bits 0-9: Connection specific event bits */
+/* Bits 0-11: Connection specific event bits */
 
 #define TCP_ACKDATA        (1 << 0)
 #define TCP_NEWDATA        (1 << 1)
@@ -192,8 +192,7 @@
 #define TCP_CONNECTED      (1 << 8)
 #define TCP_TIMEDOUT       (1 << 9)
 #define TCP_WAITALL        (1 << 10)
-
-/* Bits 10-11: Unused, available */
+#define TCP_TXCLOSE        (1 << 11)
 
 /* Bit 12: Device specific event bits */
 
@@ -216,7 +215,8 @@
 /* The set of events that and implications to the TCP connection state */
 
 #define TCP_CONN_EVENTS \
-  (TCP_CLOSE | TCP_ABORT | TCP_CONNECTED | TCP_TIMEDOUT | NETDEV_DOWN)
+  (TCP_CLOSE | TCP_ABORT | TCP_CONNECTED | TCP_TIMEDOUT | NETDEV_DOWN | \
+   TCP_TXCLOSE)
 
 #define TCP_DISCONN_EVENTS \
   (TCP_CLOSE | TCP_ABORT | TCP_TIMEDOUT | NETDEV_DOWN)

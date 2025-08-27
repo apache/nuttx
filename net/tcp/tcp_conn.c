@@ -825,7 +825,7 @@ void tcp_free(FAR struct tcp_conn_s *conn)
   /* Make sure monitor is stopped. */
 
   conn_dev_lock(&conn->sconn, conn->dev);
-  tcp_stop_monitor(conn, TCP_CLOSE);
+  tcp_stop_monitor(conn, TCP_TXCLOSE);
 
   /* Free remaining callbacks, actually there should be only the send
    * callback for CONFIG_NET_TCP_WRITE_BUFFERS is left.
