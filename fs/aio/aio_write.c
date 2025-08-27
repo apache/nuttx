@@ -253,16 +253,6 @@ int aio_write(FAR struct aiocb *aiocbp)
 
   DEBUGASSERT(aiocbp);
 
-  if (aiocbp->aio_fildes < 0)
-    {
-      /* for EBADF, the aio_write do not return error directly, but using
-       * aio_error to return this error code
-       */
-
-      aiocbp->aio_result = -EBADF;
-      return OK;
-    }
-
   if (aiocbp->aio_offset < 0 || aiocbp->aio_reqprio < 0)
     {
       aiocbp->aio_result = -EINVAL;
@@ -271,12 +261,11 @@ int aio_write(FAR struct aiocb *aiocbp)
     }
 
   /* the aio_fildes that transferred in may be opened with O_RDONLY, for this
-   * case, we need to return OK directly, and using the aio_error to collect
-   * the EBADF error code
+   * case, we need to return OK directly, and set the EBADF error code
    */
 
   flags = fcntl(aiocbp->aio_fildes, F_GETFL);
-  if ((flags & O_ACCMODE) == O_RDONLY)
+  if (flags == ERROR || (flags & O_ACCMODE) == O_RDONLY)
     {
       aiocbp->aio_result = -EBADF;
       return OK;
@@ -297,7 +286,7 @@ int aio_write(FAR struct aiocb *aiocbp)
       /* The errno has already been set (probably EBADF) */
 
       aiocbp->aio_result = -get_errno();
-      return ERROR;
+      return OK;
     }
 
   /* Defer the work to the worker thread */
