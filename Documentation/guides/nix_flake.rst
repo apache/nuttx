@@ -22,7 +22,7 @@ the NuttX directory and run:
 
 .. code-block:: bash
 
-    nix develop
+    nix develop ./tools/nix
 
 This command will:
 
@@ -50,7 +50,7 @@ To enter the documentation shell, run:
 
 .. code-block:: bash
 
-    nix develop .#docs
+    nix develop ./tools/nix#docs
 
 This command will:
 
@@ -74,7 +74,7 @@ Example usage:
 
 .. code-block:: bash
 
-    # Build HTML docs
+    # Build HTML docs (has to but run in Documentation/ directory)
     make html
 
 See the :doc:`/contributing/documentation` guide for more details.

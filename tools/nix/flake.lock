@@ -5,11 +5,11 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "path": "./Documentation",
+        "path": "./doc/",
         "type": "path"
       },
       "original": {
-        "path": "./Documentation",
+        "path": "./doc/",
         "type": "path"
       },
       "parent": []
