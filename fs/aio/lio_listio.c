@@ -332,7 +332,8 @@ int lio_listio(int mode, FAR struct aiocb * const list[], int nent,
   int ret;
   int i;
 
-  if (mode != LIO_WAIT && mode != LIO_NOWAIT)
+  if (nent < 0 || nent > AIO_LISTIO_MAX ||
+      (mode != LIO_WAIT && mode != LIO_NOWAIT))
     {
       set_errno(EINVAL);
       return ERROR;
