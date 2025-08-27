@@ -72,6 +72,9 @@
     {
       devShells.${system}.default = pkgs.mkShell {
         buildInputs = [ nuttx-doc-py-env ];
+        shellHook = ''
+          echo "Welcome to NuttX documentation devShell"
+        '';
       };
     };
 }
