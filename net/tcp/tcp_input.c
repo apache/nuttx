@@ -1112,7 +1112,8 @@ found:
       /* Check if no packet need to retransmission, clear timer. */
 
       if (conn->tx_unacked == 0 && (conn->tcpstateflags == TCP_ESTABLISHED ||
-                                    conn->tcpstateflags == TCP_CLOSE_WAIT))
+                                    conn->tcpstateflags == TCP_CLOSE_WAIT ||
+                                    conn->tcpstateflags == TCP_FIN_WAIT_1))
         {
           timeout = 0;
         }
@@ -1183,18 +1184,15 @@ found:
                   return;
                 }
             }
-          else if ((conn->tcpstateflags & TCP_STATE_MASK) <= TCP_ESTABLISHED)
+          else if ((conn->tcpstateflags & TCP_STATE_MASK) <= TCP_FIN_WAIT_2)
             {
 #ifdef CONFIG_NET_TCP_OUT_OF_ORDER
               /* Queue out-of-order segments. */
 
               tcp_input_ofosegs(dev, conn, iplen);
 #endif
-              if ((conn->tcpstateflags & TCP_STATE_MASK) <= TCP_ESTABLISHED)
-                {
-                  tcp_send(dev, conn, TCP_ACK, tcpiplen);
-                  return;
-                }
+              tcp_send(dev, conn, TCP_ACK, tcpiplen);
+              return;
             }
         }
     }
@@ -1553,7 +1551,7 @@ found:
             conn->tcpstateflags = TCP_CLOSED;
             ninfo("TCP_LAST_ACK TCP state: TCP_CLOSED\n");
 
-            tcp_callback(dev, conn, TCP_CLOSE);
+            tcp_callback(dev, conn, TCP_TXCLOSE);
           }
         break;
 
@@ -1562,11 +1560,6 @@ found:
          * hasn't closed its end yet.  Thus we stay in the FIN_WAIT_1 state
          * until we receive a FIN from the remote.
          */
-
-        if (dev->d_len > 0)
-          {
-            net_incr32(conn->rcvseq, dev->d_len);
-          }
 
         if ((tcp->flags & TCP_FIN) != 0)
           {
@@ -1592,36 +1585,18 @@ found:
           {
             conn->tcpstateflags = TCP_FIN_WAIT_2;
             ninfo("TCP state: TCP_FIN_WAIT_2\n");
-            goto drop;
           }
 
         if (dev->d_len > 0)
           {
-            /* Due to RFC 2525, Section 2.17, we SHOULD send RST if we can no
-             * longer read any received data. Also set state into TCP_CLOSED
-             * because the peer will not send FIN after RST received.
-             *
-             * TODO: Modify shutdown behavior to allow read in FIN_WAIT.
-             */
-
-            conn->tcpstateflags = TCP_CLOSED;
-
-            /* In the TCP_FIN_WAIT_1, we need call tcp_close_eventhandler to
-             * release nofosegs, that we received in this state.
-             */
-
-            tcp_callback(dev, conn, TCP_CLOSE);
-            tcp_reset(dev, conn);
+            result = tcp_callback(dev, conn, TCP_NEWDATA);
+            tcp_appsend(dev, conn, result);
             return;
           }
 
         goto drop;
 
       case TCP_FIN_WAIT_2:
-        if (dev->d_len > 0)
-          {
-            net_incr32(conn->rcvseq, dev->d_len);
-          }
 
         if ((tcp->flags & TCP_FIN) != 0)
           {
@@ -1638,19 +1613,8 @@ found:
 
         if (dev->d_len > 0)
           {
-            /* Due to RFC 2525, Section 2.17, we SHOULD send RST if we can no
-             * longer read any received data. Also set state into TCP_CLOSED
-             * because the peer will not send FIN after RST received.
-             */
-
-            conn->tcpstateflags = TCP_CLOSED;
-
-            /* In the TCP_FIN_WAIT_2, we need call tcp_close_eventhandler to
-             * release nofosegs, that we received in this state.
-             */
-
-            tcp_callback(dev, conn, TCP_CLOSE);
-            tcp_reset(dev, conn);
+            result = tcp_callback(dev, conn, TCP_NEWDATA);
+            tcp_appsend(dev, conn, result);
             return;
           }
 

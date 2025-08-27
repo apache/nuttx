@@ -473,8 +473,7 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
    * out.
    */
 
-  if (conn->tcpstateflags == TCP_TIME_WAIT ||
-      conn->tcpstateflags == TCP_FIN_WAIT_2)
+  if (conn->tcpstateflags == TCP_TIME_WAIT)
     {
       /* Check if the timer exceeds the timeout value */
 
