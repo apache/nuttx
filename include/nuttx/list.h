@@ -316,6 +316,42 @@
       &entry->member != (list); \
       entry = list_container_of(entry->member.prev, type, member))
 
+/* The list_split macro divides a linked list at a given node and
+ * inserts the portion of the list from its beginning up to node
+ * (inclusive) into another linked list before the specified node next.
+ */
+
+#define list_split(head, item, list) \
+ do \
+   { \
+     FAR struct list_node *__head = (head); \
+     FAR struct list_node *__list = (list); \
+     FAR struct list_node *__item = (item); \
+     (__list)->prev = (__head)->prev; \
+     (__list)->prev->next = (__list); \
+     (__list)->next = (__item); \
+     (__head)->prev = (__item)->prev; \
+     (__head)->prev->next = (__head); \
+     (__item)->prev = (__list); \
+   } \
+ while (0)
+
+/* Move all items from one list to another */
+
+#define list_move(from, to) \
+ do \
+   { \
+     if (list_is_empty(from)) \
+       { \
+         list_initialize(to); \
+       } \
+     else \
+       { \
+         list_split(from, (from)->next, to); \
+       } \
+   } \
+ while (0)
+
 /****************************************************************************
  * Inline Functions
  ****************************************************************************/
