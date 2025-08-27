@@ -33,6 +33,7 @@
 #include <assert.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <sched.h>
 
 #include <nuttx/compiler.h>
 #include <nuttx/irq.h>
@@ -1513,6 +1514,50 @@ void write_unlock_irqrestore(rwlock_t *lock, irqstate_t flags)
 #endif
 
 #endif /* CONFIG_RW_SPINLOCK */
+
+/****************************************************************************
+ * Name: irq_save_nopreempt
+ *
+ * Description:
+ *     Disable local interrupts and disable preemption.
+ *
+ * Input Parameters:
+ *   lock - The spinlock to acquire
+ *
+ * Returned Value:
+ *   The previous IRQ state
+ *
+ ****************************************************************************/
+
+static inline_function
+irqstate_t irq_save_nopreempt(void)
+{
+  irqstate_t flags = up_irq_save();
+  sched_lock();
+
+  return flags;
+}
+
+/****************************************************************************
+ * Name: irq_restore_nopreempt
+ *
+ * Description:
+ *     Enable preemption and restore the interrupt state.
+ *
+ * Input Parameters:
+ *   flags  - flag of interrupts status
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static inline_function
+void irq_restore_nopreempt(irqstate_t flags)
+{
+  sched_unlock();
+  up_irq_restore(flags);
+}
 
 #if defined(__cplusplus)
 }
