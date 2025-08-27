@@ -116,6 +116,29 @@ void up_trigger_irq(int irq, cpu_set_t cpuset)
 #endif
 
 /****************************************************************************
+ * Name: up_affinity_irq
+ *
+ * Description:
+ *   Set an IRQ affinity by software.
+ *
+ ****************************************************************************/
+
+void up_affinity_irq(int irq, cpu_set_t cpuset)
+{
+  volatile Ifx_SRC_SRCR *src = &SRC_CPU_CPU0_SB + irq;
+  int irq_prio = src->B.SRPN;
+
+  IfxSrc_disable(src);
+
+  /* Only support interrupt routing mode 0,
+   * so routing to the first cpu in cpuset.
+   */
+
+  IfxSrc_init(src, ffs(cpuset) - 1, irq_prio);
+  IfxSrc_enable(src);
+}
+
+/****************************************************************************
  * Name: tricore_ack_irq
  *
  * Description:
