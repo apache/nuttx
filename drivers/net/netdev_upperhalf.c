@@ -535,6 +535,7 @@ static void eth_input(FAR struct net_driver_s *dev)
            * ethertype.
            */
 
+          netdev_lock(&vlan->netdev);
           memmove((FAR uint8_t *)eth_hdr + 4, eth_hdr,
                   offsetof(struct eth_hdr_s, type));
           netdev_iob_release(&vlan->netdev);
@@ -548,6 +549,7 @@ static void eth_input(FAR struct net_driver_s *dev)
           pkt_input(&vlan->netdev);
 #endif
           eth_input(&vlan->netdev);
+          netdev_unlock(&vlan->netdev);
         }
       else
         {
