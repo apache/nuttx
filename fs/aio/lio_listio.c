@@ -412,9 +412,12 @@ int lio_listio(int mode, FAR struct aiocb * const list[], int nent,
                 if (status < 0 || aiocbp->aio_result == -EBADF ||
                     aiocbp->aio_result == -EINVAL)
                   {
-                    aio_lock();
-                    list_delete(&aiocbp->lio_link);
-                    aio_unlock();
+                    if (mode == LIO_NOWAIT && sig)
+                     {
+                       aio_lock();
+                       list_delete(&aiocbp->lio_link);
+                       aio_unlock();
+                     }
                   }
                 else
                   {
