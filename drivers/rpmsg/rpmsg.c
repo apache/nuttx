@@ -53,6 +53,12 @@
 #define RPMSG_RECURSIVE_LIMIT    8
 #define RPMSG_DEFAULT_WQUEUE_IDX (CONFIG_RPMSG_WQUEUE_NUMBER / 2)
 
+#ifdef CONFIG_RPMSG_WQUEUE_GLOBAL
+#  define rpmsg_get_wqueues(rpmsg) g_rpmsg_wqueues
+#else
+#  define rpmsg_get_wqueues(rpmsg) ((rpmsg)->wqueues)
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -114,6 +120,10 @@ static const struct file_operations g_rpmsg_dev_ops =
   NULL,             /* seek */
   rpmsg_dev_ioctl,  /* ioctl */
 };
+
+#ifdef CONFIG_RPMSG_WQUEUE_GLOBAL
+static struct rpmsg_wqueue_s g_rpmsg_wqueues[CONFIG_RPMSG_WQUEUE_NUMBER];
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -253,13 +263,14 @@ static void rpmsg_deinit_workrx(FAR struct rpmsg_s *rpmsg)
 static FAR struct rpmsg_wqueue_s *
 rpmsg_get_current_wqueue(FAR struct rpmsg_s *rpmsg)
 {
+  FAR struct rpmsg_wqueue_s *wqueues = rpmsg_get_wqueues(rpmsg);
   int i;
 
   for (i = 0; i < CONFIG_RPMSG_WQUEUE_NUMBER; i++)
     {
-      if (work_queue_in_queue(rpmsg->wqueues[i].kwqueue))
+      if (work_queue_in_queue(wqueues[i].kwqueue))
         {
-          return &rpmsg->wqueues[i];
+          return &wqueues[i];
         }
     }
 
@@ -282,6 +293,41 @@ static void rpmsg_rx_worker(FAR void *arg)
   worker(rpmsg, arg);
 }
 
+static int rpmsg_create_wqueues(FAR struct rpmsg_wqueue_s *wqueues,
+                                FAR const char *name)
+{
+  FAR struct rpmsg_wqueue_s *wqueue;
+  char wqname[64];
+  int i;
+
+  for (i = 0; i < CONFIG_RPMSG_WQUEUE_NUMBER; i++)
+    {
+      snprintf(wqname, sizeof(wqname), "rpmsg-%.*s-%d", RPMSG_NAME_SIZE,
+               name, i);
+      wqueue = &wqueues[i];
+      wqueue->kwqueue = work_queue_create(wqname,
+                                          CONFIG_RPMSG_WQUEUE_PRIORITY + i,
+                                          NULL,
+                                          CONFIG_RPMSG_WQUEUE_STACKSIZE,
+                                          1);
+      if (wqueue->kwqueue == NULL)
+        {
+          rpmsgerr("rpmsg wqueue [%d] create failed\n", i);
+          goto err;
+        }
+    }
+
+  return OK;
+
+err:
+  while (--i >= 0)
+    {
+      work_queue_free(wqueues[i].kwqueue);
+    }
+
+  return -ENOMEM;
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -289,6 +335,9 @@ static void rpmsg_rx_worker(FAR void *arg)
 void rpmsg_initialize(void)
 {
   rpmsg_procfs_initialize();
+#ifdef CONFIG_RPMSG_WQUEUE_GLOBAL
+  rpmsg_create_wqueues(g_rpmsg_wqueues, "glb");
+#endif
 }
 
 int rpmsg_wait(FAR struct rpmsg_endpoint *ept, FAR sem_t *sem)
@@ -849,37 +898,10 @@ void rpmsg_modify_signals(FAR struct rpmsg_s *rpmsg,
     }
 }
 
+#ifndef CONFIG_RPMSG_WQUEUE_GLOBAL
 int rpmsg_init_wqueues(FAR struct rpmsg_s *rpmsg)
 {
-  FAR struct rpmsg_wqueue_s *wqueue;
-  char name[64];
-  int i;
-
-  for (i = 0; i < CONFIG_RPMSG_WQUEUE_NUMBER; i++)
-    {
-      wqueue = &rpmsg->wqueues[i];
-      snprintf(name, sizeof(name), "rpmsg-%s-%d", rpmsg->cpuname, i);
-      wqueue->kwqueue = work_queue_create(name,
-                                          CONFIG_RPMSG_WQUEUE_PRIORITY + i,
-                                          NULL,
-                                          CONFIG_RPMSG_WQUEUE_STACKSIZE,
-                                          1);
-      if (wqueue->kwqueue == NULL)
-        {
-          rpmsgerr("rpmsg wqueue [%d] create failed\n", i);
-          goto err;
-        }
-    }
-
-  return 0;
-
-err:
-  while (--i >= 0)
-    {
-      work_queue_free(rpmsg->wqueues[i].kwqueue);
-    }
-
-  return -ENOMEM;
+  return rpmsg_create_wqueues(rpmsg->wqueues, rpmsg->cpuname);
 }
 
 void rpmsg_deinit_wqueues(FAR struct rpmsg_s *rpmsg)
@@ -894,10 +916,12 @@ void rpmsg_deinit_wqueues(FAR struct rpmsg_s *rpmsg)
         }
     }
 }
+#endif
 
 int rpmsg_queue_work(FAR struct rpmsg_s *rpmsg, uint8_t priority,
                      FAR struct work_s *work, worker_t worker, FAR void *arg)
 {
+  FAR struct rpmsg_wqueue_s *wqueues = rpmsg_get_wqueues(rpmsg);
   int idx;
 
   idx = (int)priority - RPMSG_PRIO_DEFAULT + RPMSG_DEFAULT_WQUEUE_IDX;
@@ -910,7 +934,7 @@ int rpmsg_queue_work(FAR struct rpmsg_s *rpmsg, uint8_t priority,
       idx = CONFIG_RPMSG_WQUEUE_NUMBER - 1;
     }
 
-  return work_queue_wq(rpmsg->wqueues[idx].kwqueue, work, worker, arg, 0);
+  return work_queue_wq(wqueues[idx].kwqueue, work, worker, arg, 0);
 }
 
 void rpmsg_queue_rx_work(FAR struct rpmsg_s *rpmsg, uint8_t priority,
