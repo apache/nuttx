@@ -181,15 +181,19 @@
 #define AUDIO_SUBFMT_PCM_S16_BE     0x09
 #define AUDIO_SUBFMT_PCM_S16_LE     0x0a
 #define AUDIO_SUBFMT_PCM_U16_BE     0x0b
-#define AUDIO_SUBFMT_PCM_U32_LE     0x0c
-#define AUDIO_SUBFMT_PCM_U32_BE     0x0d
-#define AUDIO_SUBFMT_PCM_S32_LE     0x0e
-#define AUDIO_SUBFMT_PCM_S32_BE     0x0f
-#define AUDIO_SUBFMT_MIDI_0         0x10
-#define AUDIO_SUBFMT_MIDI_1         0x11
-#define AUDIO_SUBFMT_MIDI_2         0x12
-#define AUDIO_SUBFMT_AMRNB          0x13
-#define AUDIO_SUBFMT_AMRWB          0x14
+#define AUDIO_SUBFMT_PCM_U24_LE     0x0c
+#define AUDIO_SUBFMT_PCM_S24_BE     0x0d
+#define AUDIO_SUBFMT_PCM_S24_LE     0x0e
+#define AUDIO_SUBFMT_PCM_U24_BE     0x0f
+#define AUDIO_SUBFMT_PCM_U32_LE     0x10
+#define AUDIO_SUBFMT_PCM_U32_BE     0x11
+#define AUDIO_SUBFMT_PCM_S32_LE     0x12
+#define AUDIO_SUBFMT_PCM_S32_BE     0x13
+#define AUDIO_SUBFMT_MIDI_0         0x14
+#define AUDIO_SUBFMT_MIDI_1         0x15
+#define AUDIO_SUBFMT_MIDI_2         0x16
+#define AUDIO_SUBFMT_AMRNB          0x17
+#define AUDIO_SUBFMT_AMRWB          0x18
 
 /* Audio Hardware-Format Types **********************************************/
 
