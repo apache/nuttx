@@ -404,7 +404,7 @@ static void rptun_update_vring_da(FAR struct remoteproc *rproc,
       FAR struct fw_rsc_vdev_vring *vring = &vdev_rsc->vring[i];
       metal_phys_addr_t vring_da = METAL_BAD_PHYS;
       metal_phys_addr_t vring_pa;
-      uint32_t vring_sz;
+      size_t vring_sz;
 
       vring_sz = ALIGN_UP(vring_size(vring->num, vring->align),
                           vring->align);
@@ -412,12 +412,12 @@ static void rptun_update_vring_da(FAR struct remoteproc *rproc,
 
       if (!remoteproc_mmap(rproc, &vring_pa, &vring_da, vring_sz, 0, NULL))
         {
-          rptunerr("vr[%u] da=0x%lx pa=0x%lx sz=%" PRIu32 "\n",
+          rptunerr("vr[%u] da=0x%lx pa=0x%lx sz=%zu\n",
                    i, vring_da, vring_pa, vring_sz);
         }
       else if (vring->da == 0u || vring->da == FW_RSC_U32_ADDR_ANY)
         {
-          rptuninfo("vr[%u] shm=%p len=%zu da=0x%lx pa=0x%lx sz=%"PRIu32"\n",
+          rptuninfo("vr[%u] shm=%p len=%zu da=0x%lx pa=0x%lx sz=%zu\n",
                     i, *shmbase, *shmlen, vring_da, vring_pa, vring_sz);
           vring->da = vring_da;
           *shmbase  += vring_sz;
@@ -431,7 +431,8 @@ static void rptun_update_vring_da(FAR struct remoteproc *rproc,
  ****************************************************************************/
 
 static int rptun_create_device(FAR struct rptun_priv_s *priv,
-                               FAR struct virtio_device **vdev_, int index)
+                               FAR struct virtio_device **vdev_,
+                               unsigned int index)
 {
   FAR struct remoteproc *rproc = &priv->rproc;
   FAR struct fw_rsc_carveout *carveout_rsc = NULL;
@@ -654,10 +655,10 @@ static int rptun_create_devices(FAR struct rptun_priv_s *priv)
 {
   FAR struct virtio_device *vdev = NULL;
   bool remain = false;
+  unsigned int i;
   int ret;
-  int i;
 
-  for (i = 0; ; i++)
+  for (i = 0u; ; i++)
     {
       ret = rptun_create_device(priv, &vdev, i);
       if (ret == -ENODEV)
@@ -949,7 +950,7 @@ static int rptun_dev_stop(FAR struct remoteproc *rproc)
   return OK;
 }
 
-static void rptun_dev_reset(FAR struct rptun_priv_s *priv, uint16_t val)
+static void rptun_dev_reset(FAR struct rptun_priv_s *priv, int val)
 {
   if (priv->dev->ops->reset)
     {
