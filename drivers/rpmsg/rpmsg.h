@@ -131,8 +131,15 @@ void rpmsg_device_destroy(FAR struct rpmsg_s *rpmsg);
 int rpmsg_register(FAR const char *path, FAR struct rpmsg_s *rpmsg,
                    FAR const struct rpmsg_ops_s *ops, uint16_t nrx);
 void rpmsg_unregister(FAR const char *path, FAR struct rpmsg_s *rpmsg);
+
+#ifdef CONFIG_RPMSG_WQUEUE_GLOBAL
+#  define rpmsg_init_wqueues(rpmsg) (0)
+#  define rpmsg_deinit_wqueues(rpmsg)
+#else
 int rpmsg_init_wqueues(FAR struct rpmsg_s *rpmsg);
 void rpmsg_deinit_wqueues(FAR struct rpmsg_s *rpmsg);
+#endif
+
 int rpmsg_queue_work(FAR struct rpmsg_s *rpmsg, uint8_t priority,
                      FAR struct work_s *work, worker_t worker,
                      FAR void *arg);

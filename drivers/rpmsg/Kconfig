@@ -32,6 +32,12 @@ config RPMSG
 
 if RPMSG
 
+config RPMSG_WQUEUE_GLOBAL
+	bool "rpmsg global work queue"
+	default n
+	---help---
+		This is for rpmsg global work queue.
+
 config RPMSG_WQUEUE_PRIORITY
 	int "rpmsg work queue priority"
 	default 224
