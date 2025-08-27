@@ -53,10 +53,3 @@ NXFLATLDFLAGS1 = -r -d -warn-common
 NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) -T$(TOPDIR)$(DELIM)binfmt$(DELIM)libnxflat$(DELIM)gnu-nxflat-pcrel.ld -no-check-sections
 #LDNXFLATFLAGS = -e main -s 2048
 LDNXFLATFLAGS = -s 2048
-
-#ifneq ($(CROSSDEV),arm-nuttx-elf-)
-#  LDFLAGS += --nostartfiles -nodefaultlibs
-#endif
-ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  LDFLAGS += $(CONFIG_DEBUG_SYMBOLS_LEVEL)
-endif
