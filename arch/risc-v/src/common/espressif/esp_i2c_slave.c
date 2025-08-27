@@ -62,7 +62,7 @@
 #include "soc/system_reg.h"
 #include "soc/gpio_sig_map.h"
 #include "soc/i2c_periph.h"
-#if defined(CONFIG_ESPRESSIF_ESP32H2) || defined(CONFIG_ESPRESSIF_ESP32C6)
+#if defined(CONFIG_ARCH_CHIP_ESP32H2) || defined(CONFIG_ARCH_CHIP_ESP32C6)
 #  include "soc/pcr_reg.h"
 #endif
 

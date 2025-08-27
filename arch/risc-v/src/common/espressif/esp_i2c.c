@@ -61,7 +61,7 @@
 #include "soc/gpio_sig_map.h"
 #include "soc/i2c_periph.h"
 #include "esp_clk_tree.h"
-#if defined(CONFIG_ESPRESSIF_ESP32H2) || defined(CONFIG_ESPRESSIF_ESP32C6)
+#if defined(CONFIG_ARCH_CHIP_ESP32H2) || defined(CONFIG_ARCH_CHIP_ESP32C6)
 #  include "soc/pcr_reg.h"
 #endif
 #if defined(CONFIG_ESPRESSIF_LP_I2C0)
@@ -82,14 +82,14 @@
 #  define ESP_LP_I2C0_ID     I2C_NUM_MAX
 #endif
 
-#ifdef CONFIG_ESPRESSIF_ESP32H2
+#ifdef CONFIG_ARCH_CHIP_ESP32H2
 #  define SYSTEM_I2C_EXT0_CLK_EN PCR_I2C0_CLK_EN
 #  define SYSTEM_I2C_EXT0_RST    PCR_I2C0_RST_EN
 #  define SYSTEM_I2C_EXT1_CLK_EN PCR_I2C1_CLK_EN
 #  define SYSTEM_I2C_EXT1_RST    PCR_I2C1_RST_EN
 #endif
 
-#ifdef CONFIG_ESPRESSIF_ESP32C6
+#ifdef CONFIG_ARCH_CHIP_ESP32C6
 #  define SYSTEM_I2C_EXT0_CLK_EN PCR_I2C_CLK_EN
 #  define SYSTEM_I2C_EXT0_RST    PCR_I2C_RST_EN
 #endif

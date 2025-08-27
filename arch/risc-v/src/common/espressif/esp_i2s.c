@@ -67,16 +67,16 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_ESPRESSIF_ESP32C6
+#ifdef CONFIG_ARCH_CHIP_ESP32C6
 #  define ETS_I2S0_INTR_SOURCE ETS_I2S1_INTR_SOURCE
 #  define CLK_SRC              I2S_CLK_SRC_PLL_160M
 #endif
 
-#ifdef CONFIG_ESPRESSIF_ESP32C3
+#ifdef CONFIG_ARCH_CHIP_ESP32C3_GENERIC
 #  define CLK_SRC                         I2S_CLK_SRC_PLL_160M
 #endif
 
-#ifdef CONFIG_ESPRESSIF_ESP32H2
+#ifdef CONFIG_ARCH_CHIP_ESP32H2
 #  define CLK_SRC I2S_CLK_SRC_PLL_64M
 #endif
 
