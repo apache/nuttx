@@ -49,11 +49,11 @@
 
 /* Chip-dependent headers from esp-hal-3rdparty */
 
-#ifdef CONFIG_ESPRESSIF_ESP32C3
+#ifdef CONFIG_ARCH_CHIP_ESP32C3_GENERIC
 #include "esp32c3/rom/rtc.h"
-#elif defined(CONFIG_ESPRESSIF_ESP32C6)
+#elif defined(CONFIG_ARCH_CHIP_ESP32C6)
 #include "esp32c6/rom/rtc.h"
-#elif defined(CONFIG_ESPRESSIF_ESP32H2)
+#elif defined(CONFIG_ARCH_CHIP_ESP32H2)
 #include "esp32h2/rom/rtc.h"
 #endif
 

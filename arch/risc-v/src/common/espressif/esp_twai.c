@@ -97,7 +97,7 @@
 #   endif
 #  endif
 
-#  ifdef CONFIG_ESPRESSIF_ESP32C3
+#  ifdef CONFIG_ARCH_CHIP_ESP32C3_GENERIC
 #    define INT_ENA_REG(hw)       hw->interrupt_enable_reg.val
 #    define PERIPH_TWAI0_MODULE   PERIPH_TWAI_MODULE
 #    define TWAI0_TX_IDX          TWAI_TX_IDX
@@ -106,12 +106,12 @@
 #    define ESP_IRQ_TWAI0         ESP_IRQ_TWAI
 #  else
 #    define INT_ENA_REG(hw)       hw->interrupt_enable.val
-#  endif /* CONFIG_ESPRESSIF_ESP32C3 */
+#  endif /* CONFIG_ARCH_CHIP_ESP32C3_GENERIC */
 
-#  ifdef CONFIG_ESPRESSIF_ESP32H2
+#  ifdef CONFIG_ARCH_CHIP_ESP32H2
 #    define TWAI0_TX_IDX          TWAI_TX_IDX
 #    define TWAI0_RX_IDX          TWAI_RX_IDX
-#  endif /* CONFIG_ESPRESSIF_ESP32H2 */
+#  endif /* CONFIG_ARCH_CHIP_ESP32H2 */
 
 #if !SOC_RCC_IS_INDEPENDENT
 #define TWAI_RCC_ATOMIC() PERIPH_RCC_ATOMIC()

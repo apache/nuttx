@@ -871,7 +871,7 @@ static int ledc_set_timer_div(ledc_timer_t timer_num,
   /* Keep ESP_PD_DOMAIN_RC_FAST on during light sleep */
 
 #if 0 /* Should be added when sleep is supported */
-#ifndef CONFIG_ESPRESSIF_ESP32H2 /* TODO: Remove when H2 light sleep is supported */
+#ifndef CONFIG_ARCH_CHIP_ESP32H2 /* TODO: Remove when H2 light sleep is supported */
   esp_sleep_periph_use_8m(glb_clk == LEDC_SLOW_CLK_RC_FAST);
 #endif
 #endif
@@ -1324,7 +1324,8 @@ static void setup_channel(struct esp_ledc_s *priv, int cn)
       pwmerr("ERROR: No memory for LEDC context\n");
       PANIC();
     }
-#ifndef CONFIG_ESPRESSIF_ESP32H2
+
+#ifndef CONFIG_ARCH_CHIP_ESP32H2
   /* On such targets, the default ledc core(global) clock does not connect to
    * any clock source. Setting channel configurations and updating bits
    * before core clock is enabled could lead to an error.

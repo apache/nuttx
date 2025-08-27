@@ -420,7 +420,7 @@ config ARCH_BOARD_ESP32C3_DEVKIT_RUST1
 
 config ARCH_BOARD_ESP32C3_GENERIC
 	bool "Espressif ESP32-C3 Generic DevKit"
-	depends on ESPRESSIF_ESP32C3
+	depends on ARCH_CHIP_ESP32C3_GENERIC
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
@@ -431,7 +431,7 @@ config ARCH_BOARD_ESP32C3_GENERIC
 
 config ARCH_BOARD_ESP32C3_XIAO
 	bool "Seeed Studio XIAO ESP32-C3"
-	depends on ESPRESSIF_ESP32C3
+	depends on ARCH_CHIP_ESP32C3_GENERIC
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
@@ -604,7 +604,7 @@ config ARCH_BOARD_ESP32C6_XIAO
 
 config ARCH_BOARD_ESP32H2_DEVKIT
 	bool "Espressif ESP32-H2 Generic DevKit"
-	depends on ESPRESSIF_ESP32H2
+	depends on ARCH_CHIP_ESP32H2
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
