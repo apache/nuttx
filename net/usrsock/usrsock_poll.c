@@ -223,7 +223,13 @@ static int usrsock_pollsetup(FAR struct socket *psock,
 
       /* Remote closed. */
 
-      eventset |= (POLLHUP | POLLIN);
+      eventset |= POLLHUP;
+      if (conn->flags & USRSOCK_EVENT_RECVFROM_AVAIL)
+        {
+          ninfo("socket recv avail.\n");
+
+          eventset |= POLLIN;
+        }
     }
   else
     {
