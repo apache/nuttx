@@ -189,6 +189,10 @@ void usbtrace(uint16_t event, uint16_t value)
       usbtrace_trprintf(usbtrace_syslog, event, value);
 #endif
     }
+  else
+    {
+      spin_unlock_irqrestore(&g_lock, flags);
+    }
 }
 #endif /* CONFIG_USBDEV_TRACE || CONFIG_DEBUG_FEATURES && CONFIG_DEBUG_USB */
 
