@@ -43,7 +43,7 @@ list(
   lib_bufferedoutstream.c
   lib_hexdumpstream.c
   lib_base64outstream.c
-  lib_fileinstream.c
+  lib_filesistream.c
   lib_fileoutstream.c
   lib_libbsprintf.c
   lib_libvscanf.c
