@@ -102,10 +102,10 @@ void irq_dispatch(int irq, FAR void *context)
 #endif
   xcpt_t vector = irq_unexpected_isr;
   FAR void *arg = NULL;
-  unsigned int ndx = IRQ_TO_NDX(irq);
+  int ndx = IRQ_TO_NDX(irq);
 
 #if NR_IRQS > 0
-  if (irq >= 0 && irq < NR_IRQS)
+  if (ndx >= 0)
     {
 #ifdef CONFIG_ARCH_MINIMAL_VECTORTABLE
       if (ndx < CONFIG_ARCH_NUSER_INTERRUPTS)
