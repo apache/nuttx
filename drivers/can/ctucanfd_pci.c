@@ -40,8 +40,7 @@
 #endif
 
 #ifdef CONFIG_CAN_CTUCANFD_SOCKET
-#  include <nuttx/wqueue.h>
-#  include <nuttx/net/netdev.h>
+#  include <nuttx/net/netdev_lowerhalf.h>
 #  include <nuttx/net/can.h>
 #endif
 
@@ -76,18 +75,18 @@
 /* SocketCAN specific */
 
 #ifdef CONFIG_CAN_CTUCANFD_SOCKET
-
-#  define CTUCANFD_POOL_SIZE            1
-
-/* Work queue support is required. */
-
-#  if !defined(CONFIG_SCHED_WORKQUEUE)
-#    error Work queue support is required
+#  define CTUCANFD_TX_QUOTA   1
+#  define CTUCANFD_RX_QUOTA   1
+#  if CONFIG_IOB_NBUFFERS < (CTUCANFD_RX_QUOTA + CTUCANFD_TX_QUOTA)
+#    error CONFIG_IOB_NBUFFERS must be > (CTUCANFD_RX_QUOTA + CTUCANFD_TX_QUOTA)
 #  endif
-
-#  define CTUCANFD_CANWORK              LPWORK
-
 #endif /* CONFIG_CAN_CTUCANFD_SOCKET */
+
+#ifndef CONFIG_NET_CAN_ERRORS
+#  define CTUCANFD_SOCK_RXINT (CTUCANFD_INT_RBNEI)
+#else
+#  define CTUCANFD_SOCK_RXINT (CTUCANFD_INT_RBNEI | CTUCANFD_INT_ERR)
+#endif
 
 /*****************************************************************************
  * Private Types
@@ -102,18 +101,9 @@ struct ctucanfd_can_s
 #endif
 
 #ifdef CONFIG_CAN_CTUCANFD_SOCKET
-  struct net_driver_s dev;      /* Interface understood by the network */
-  struct work_s       pollwork; /* For deferring poll work to the work wq */
+  /* This holds the information visible to the NuttX network */
 
-  /* TX/RX pool */
-
-#  ifdef CONFIG_NET_CAN_CANFD
-  struct canfd_frame tx_pool[CTUCANFD_POOL_SIZE];
-  struct canfd_frame rx_pool[CTUCANFD_POOL_SIZE];
-#  else
-  struct can_frame tx_pool[CTUCANFD_POOL_SIZE];
-  struct can_frame rx_pool[CTUCANFD_POOL_SIZE];
-#  endif
+  struct netdev_lowerhalf_s dev;
 #endif
 
   FAR struct pci_device_s *pcidev;
@@ -135,12 +125,6 @@ struct ctucanfd_driver_s
   FAR struct pci_device_s   *pcidev;
   int                        irq;
   uintptr_t                  base;
-
-#ifdef CONFIG_CAN_CTUCANFD_SOCKET
-  /* For deferring interrupt work to the wq */
-
-  struct work_s              irqwork;
-#endif
 };
 
 /*****************************************************************************
@@ -162,9 +146,9 @@ static void ctucanfd_shutdown(FAR struct ctucanfd_can_s *priv);
 static void ctucanfd_setup(FAR struct ctucanfd_can_s *priv);
 static void ctucanfd_rxint(FAR struct ctucanfd_can_s *priv, bool enable);
 static void ctucanfd_txint(FAR struct ctucanfd_can_s *priv, bool enable);
-static bool ctucanfd_txready(FAR struct ctucanfd_can_s *priv);
 
 #ifdef CONFIG_CAN_CTUCANFD_CHARDEV
+
 /* CAN character device methods */
 
 static void ctucanfd_chrdev_reset(FAR struct can_dev_s *dev);
@@ -187,21 +171,22 @@ static void ctucanfd_chardev_interrupt(FAR struct ctucanfd_driver_s *priv);
 #ifdef CONFIG_CAN_CTUCANFD_SOCKET
 /* SocketCAN methods */
 
-static int  ctucanfd_sock_ifup(FAR struct net_driver_s *dev);
-static int  ctucanfd_sock_ifdown(FAR struct net_driver_s *dev);
-
-static void ctucanfd_sock_txavail_work(FAR void *arg);
-static int  ctucanfd_sock_txavail(FAR struct net_driver_s *dev);
+static int  ctucanfd_sock_ifup(FAR struct netdev_lowerhalf_s *dev);
+static int  ctucanfd_sock_ifdown(FAR struct netdev_lowerhalf_s *dev);
+static int  ctucanfd_sock_transmit(FAR struct netdev_lowerhalf_s *dev,
+                                   FAR netpkt_t *pkt);
+static FAR netpkt_t *ctucanfd_sock_recv(FAR struct netdev_lowerhalf_s *dev);
 
 #  ifdef CONFIG_NETDEV_IOCTL
-static int  ctucanfd_sock_ioctl(FAR struct net_driver_s *dev, int cmd,
+static int  ctucanfd_sock_ioctl(FAR struct netdev_lowerhalf_s *dev, int cmd,
                                 unsigned long arg);
 #  endif
 
-static int ctucanfd_sock_txpoll(FAR struct net_driver_s *dev);
-static int ctucanfd_sock_send(FAR struct ctucanfd_can_s *priv);
-static void ctucanfd_sock_receive(FAR struct ctucanfd_can_s *priv);
-static void ctucanfd_sock_interrupt_work(FAR void *arg);
+#  ifdef CONFIG_NET_CAN_ERRORS
+static FAR netpkt_t *ctucanfd_sock_error(FAR struct netdev_lowerhalf_s *dev);
+#  endif
+
+static void ctucanfd_sock_interrupt(FAR struct ctucanfd_driver_s *priv);
 #endif
 
 /* Interrupts */
@@ -231,6 +216,19 @@ static const struct can_ops_s g_ctucanfd_can_ops =
   .co_send          = ctucanfd_chrdev_send,
   .co_txready       = ctucanfd_chrdev_txready,
   .co_txempty       = ctucanfd_chrdev_txempty,
+};
+#endif
+
+#ifdef CONFIG_CAN_CTUCANFD_SOCKET
+static const struct netdev_ops_s g_ctucanfd_net_ops =
+{
+  .ifup     = ctucanfd_sock_ifup,
+  .ifdown   = ctucanfd_sock_ifdown,
+  .transmit = ctucanfd_sock_transmit,
+  .receive  = ctucanfd_sock_recv,
+#ifdef CONFIG_NETDEV_IOCTL
+  .ioctl    = ctucanfd_sock_ioctl,
+#endif
 };
 #endif
 
@@ -383,28 +381,6 @@ static void ctucanfd_txint(FAR struct ctucanfd_can_s *priv, bool enable)
     {
       ctucanfd_putreg(priv, CTUCANFD_INTENCLR, CTUCANFD_INT_TXI);
     }
-}
-
-/*****************************************************************************
- * Name: ctucanfd_txready
- *****************************************************************************/
-
-static bool ctucanfd_txready(FAR struct ctucanfd_can_s *priv)
-{
-  uint32_t regval;
-  int      i;
-
-  regval = ctucanfd_getreg(priv, CTUCANFD_TXSTAT);
-
-  for (i = 0; i < priv->txbufcnt; i++)
-    {
-      if (CTUCANFD_TXSTAT_GET(regval, i) == CTUCANFD_TXSTAT_ETY)
-        {
-          return true;
-        }
-    }
-
-  return false;
 }
 
 #ifdef CONFIG_CAN_CTUCANFD_CHARDEV
@@ -689,8 +665,20 @@ static int ctucanfd_chrdev_send(FAR struct can_dev_s *dev,
 static bool ctucanfd_chrdev_txready(FAR struct can_dev_s *dev)
 {
   FAR struct ctucanfd_can_s *priv = (FAR struct ctucanfd_can_s *)dev;
+  uint32_t                   regval;
+  int                        i;
 
-  return ctucanfd_txready(priv);
+  regval = ctucanfd_getreg(priv, CTUCANFD_TXSTAT);
+
+  for (i = 0; i < priv->txbufcnt; i++)
+    {
+      if (CTUCANFD_TXSTAT_GET(regval, i) == CTUCANFD_TXSTAT_ETY)
+        {
+          return true;
+        }
+    }
+
+  return false;
 }
 
 /*****************************************************************************
@@ -998,12 +986,9 @@ static void ctucanfd_chardev_interrupt(FAR struct ctucanfd_driver_s *priv)
  *
  *****************************************************************************/
 
-static int ctucanfd_sock_ifup(FAR struct net_driver_s *dev)
+static int ctucanfd_sock_ifup(FAR struct netdev_lowerhalf_s *dev)
 {
-  FAR struct ctucanfd_can_s *priv =
-    (FAR struct ctucanfd_can_s *)dev->d_private;
-
-  priv->dev.d_buf = (FAR uint8_t *)priv->tx_pool;
+  FAR struct ctucanfd_can_s *priv = (FAR struct ctucanfd_can_s *)dev;
 
   ctucanfd_reset(priv);
   ctucanfd_setup(priv);
@@ -1028,10 +1013,9 @@ static int ctucanfd_sock_ifup(FAR struct net_driver_s *dev)
  *
  *****************************************************************************/
 
-static int ctucanfd_sock_ifdown(FAR struct net_driver_s *dev)
+static int ctucanfd_sock_ifdown(FAR struct netdev_lowerhalf_s *dev)
 {
-  FAR struct ctucanfd_can_s *priv =
-    (FAR struct ctucanfd_can_s *)dev->d_private;
+  FAR struct ctucanfd_can_s *priv = (FAR struct ctucanfd_can_s *)dev;
 
   ctucanfd_txint(priv, false);
   ctucanfd_rxint(priv, false);
@@ -1039,88 +1023,6 @@ static int ctucanfd_sock_ifdown(FAR struct net_driver_s *dev)
   /* Shutdown */
 
   ctucanfd_shutdown(priv);
-
-  return OK;
-}
-
-/*****************************************************************************
- * Name: ctucanfd_sock_txavail_work
- *
- * Description:
- *   Perform an out-of-cycle poll on the worker thread.
- *
- * Input Parameters:
- *   arg - Reference to the NuttX driver state structure (cast to void*)
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Called on the higher priority worker thread.
- *
- *****************************************************************************/
-
-static void ctucanfd_sock_txavail_work(FAR void *arg)
-{
-  FAR struct ctucanfd_can_s *priv = (FAR struct ctucanfd_can_s *)arg;
-
-  /* Ignore the notification if the interface is not yet up */
-
-  net_lock();
-  if (IFF_IS_UP(priv->dev.d_flags))
-    {
-      /* Check if there is room in the hardware to hold another outgoing
-       * packet.
-       */
-
-      if (ctucanfd_txready(priv))
-        {
-          /* No, there is space for another transfer.  Poll the network for
-           * new XMIT data.
-           */
-
-          devif_poll(&priv->dev, ctucanfd_sock_txpoll);
-        }
-    }
-
-  net_unlock();
-}
-
-/*****************************************************************************
- * Name: ctucanfd_sock_txavail
- *
- * Description:
- *   Driver callback invoked when new TX data is available.  This is a
- *   stimulus perform an out-of-cycle poll and, thereby, reduce the TX
- *   latency.
- *
- * Input Parameters:
- *   dev  - Reference to the NuttX driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Called in normal user mode
- *
- *****************************************************************************/
-
-static int ctucanfd_sock_txavail(FAR struct net_driver_s *dev)
-{
-  FAR struct ctucanfd_can_s *priv =
-    (FAR struct ctucanfd_can_s *)dev->d_private;
-
-  /* Is our single work structure available?  It may not be if there are
-   * pending interrupt actions and we will have to ignore the Tx
-   * availability action.
-   */
-
-  if (work_available(&priv->pollwork))
-    {
-      /* Schedule to serialize the poll on the worker thread. */
-
-      ctucanfd_sock_txavail_work(priv);
-    }
 
   return OK;
 }
@@ -1144,8 +1046,8 @@ static int ctucanfd_sock_txavail(FAR struct net_driver_s *dev)
  *
  *****************************************************************************/
 
-static int  ctucanfd_sock_ioctl(FAR struct net_driver_s *dev, int cmd,
-                                unsigned long arg)
+static int ctucanfd_sock_ioctl(FAR struct netdev_lowerhalf_s *dev, int cmd,
+                               unsigned long arg)
 {
   return -ENOTTY;
 }
@@ -1153,74 +1055,19 @@ static int  ctucanfd_sock_ioctl(FAR struct net_driver_s *dev, int cmd,
 #  endif  /* CONFIG_NETDEV_IOCTL */
 
 /*****************************************************************************
- * Name: ctucanfd_sock_txpoll
- *
- * Description:
- *   The transmitter is available, check if the network has any outgoing
- *   packets ready to send.  This is a callback from devif_poll().
- *   devif_poll() may be called:
- *
- *   1. When the preceding TX packet send is complete,
- *   2. When the preceding TX packet send timesout and the interface is reset
- *   3. During normal TX polling
- *
- * Input Parameters:
- *   dev  - Reference to the NuttX driver state structure
- *
- * Returned Value:
- *   OK on success; a negated errno on failure
- *
- * Assumptions:
- *   May or may not be called from an interrupt handler.  In either case,
- *   global interrupts are disabled, either explicitly or indirectly through
- *   interrupt handling logic.
- *
+ * Name: ctucanfd_sock_transmit
  *****************************************************************************/
 
-static int ctucanfd_sock_txpoll(FAR struct net_driver_s *dev)
+static int ctucanfd_sock_transmit(FAR struct netdev_lowerhalf_s *dev,
+                                  FAR netpkt_t *pkt)
 {
-  FAR struct ctucanfd_can_s *priv =
-    (FAR struct ctucanfd_can_s *)dev->d_private;
-
-  /* If the polling resulted in data that should be sent out on the network,
-   * the field d_len is set to a value > 0.
-   */
-
-  if (priv->dev.d_len > 0)
-    {
-      /* Send the packet */
-
-      ctucanfd_sock_send(priv);
-
-      /* Check if there is room in the device to hold another packet. If
-       * not, return a non-zero value to terminate the poll.
-       */
-
-      if (!ctucanfd_txready(priv))
-        {
-          return -EBUSY;
-        }
-    }
-
-  /* If zero is returned, the polling will continue until all connections
-   * have been examined.
-   */
-
-  return 0;
-}
-
-/*****************************************************************************
- * Name: ctucanfd_sock_send
- *****************************************************************************/
-
-static int ctucanfd_sock_send(FAR struct ctucanfd_can_s *priv)
-{
-  union ctucanfd_frame_fmt_u fmt;
-  union ctucanfd_frame_id_u  id;
-  uint32_t                   regval;
-  uint32_t                   offset;
-  int                        txidx;
-  int                        i;
+  FAR struct ctucanfd_can_s  *priv = (FAR struct ctucanfd_can_s *)dev;
+  union ctucanfd_frame_fmt_u  fmt;
+  union ctucanfd_frame_id_u   id;
+  uint32_t                    regval;
+  uint32_t                    offset;
+  int                         txidx;
+  int                         i;
 
   /* Get TX empty buffer */
 
@@ -1250,10 +1097,10 @@ static int ctucanfd_sock_send(FAR struct ctucanfd_can_s *priv)
 
   /* CAN 2.0 or CAN FD */
 
-  if (priv->dev.d_len == sizeof(struct can_frame))
+  if (netpkt_getdatalen(dev, pkt) == sizeof(struct can_frame))
     {
       FAR struct can_frame *frame = frame =
-        (FAR struct can_frame *)priv->dev.d_buf;
+        (FAR struct can_frame *)netpkt_getdata(dev, pkt);
 
       /* Set up the DLC */
 
@@ -1293,7 +1140,7 @@ static int ctucanfd_sock_send(FAR struct ctucanfd_can_s *priv)
   else /* CAN FD frame */
     {
       FAR struct canfd_frame *frame =
-        (FAR struct canfd_frame *)priv->dev.d_buf;
+        (FAR struct canfd_frame *)netpkt_getdata(dev, pkt);
 
       /* CAN FD frame */
 
@@ -1342,203 +1189,188 @@ static int ctucanfd_sock_send(FAR struct ctucanfd_can_s *priv)
   regval = CTUCANFD_TXCMD_TXCR + (1 << (CTUCANFD_TXCMD_TXB_SHIFT + txidx));
   ctucanfd_putreg(priv, CTUCANFD_TXINFOCMD, regval);
 
+  /* All is done - free packet */
+
+  netpkt_free(dev, pkt, NETPKT_TX);
+
   return OK;
 }
 
 /*****************************************************************************
- * Name: ctucanfd_sock_receive
+ * Name: ctucanfd_sock_recv
  *****************************************************************************/
 
-static void ctucanfd_sock_receive(FAR struct ctucanfd_can_s *priv)
+static FAR netpkt_t *ctucanfd_sock_recv(FAR struct netdev_lowerhalf_s *dev)
 {
+  FAR struct ctucanfd_can_s   *priv   = (FAR struct ctucanfd_can_s *)dev;
+  FAR netpkt_t                *pkt    = NULL;
   FAR struct ctucanfd_frame_s *rxframe;
   uint32_t                     buff[sizeof(struct ctucanfd_frame_s) / 4];
   int                          i      = 0;
-  uint16_t                     frc    = 0;
   uint32_t                     regval = 0;
   uint8_t                      bytes;
 
-  /* Get frame count */
+  /* Read frame if RX buffer not empty */
 
   regval = ctucanfd_getreg(priv, CTUCANFD_RXSETSTAT);
-  frc = (regval & CTUCANFD_RXSTAT_RXFRC_MASK) >> CTUCANFD_RXSTAT_RXFRC_SHIFT;
-
-  /* Read frames */
-
-  while (frc-- > 0)
+  if ((regval & CTUCANFD_RXSTAT_RXE) != 0)
     {
-      /* We use a pointer to buffer to avoid an unaligned pointer
-       * compiler errors
-       */
+      /* Re-enable RX interrupts if no more messages to read */
 
-      rxframe = (struct ctucanfd_frame_s *)&buff;
+      ctucanfd_rxint(priv, true);
 
-      /* RX buffer in automatic mode */
+#ifdef CONFIG_NET_CAN_ERRORS
+      /* Check for errors */
 
-      buff[0] = ctucanfd_getreg(priv, CTUCANFD_RXDATA);
+      return ctucanfd_sock_error(dev);
+#else
+      return NULL;
+#endif
+    }
 
-      /* Read the rest of data */
+  /* Allocate packet */
 
-      for (i = 0; i < rxframe->fmt.rwcnt; i++)
-        {
-          buff[i + 1] = ctucanfd_getreg(priv, CTUCANFD_RXDATA);
-        }
+  pkt = netpkt_alloc(dev, NETPKT_RX);
+  if (!pkt)
+    {
+      canerr("alloc pkt_new failed\n");
+      return NULL;
+    }
 
-      /* CAN 2.0 or CAN FD */
+  /* We use a pointer to buffer to avoid an unaligned pointer
+   * compiler errors
+   */
+
+  rxframe = (struct ctucanfd_frame_s *)&buff;
+
+  /* RX buffer in automatic mode */
+
+  buff[0] = ctucanfd_getreg(priv, CTUCANFD_RXDATA);
+
+  /* Read the rest of data */
+
+  for (i = 0; i < rxframe->fmt.rwcnt; i++)
+    {
+      buff[i + 1] = ctucanfd_getreg(priv, CTUCANFD_RXDATA);
+    }
+
+  /* CAN 2.0 or CAN FD */
 
 #ifdef CONFIG_NET_CAN_CANFD
-      if (rxframe->fmt.fdf)
-        {
-          struct canfd_frame *frame = (struct canfd_frame *)priv->rx_pool;
+  if (rxframe->fmt.fdf)
+    {
+      struct canfd_frame *frame;
 
-          /* Get the DLC */
+      netpkt_setdatalen(dev, pkt, sizeof(struct canfd_frame));
+      frame = (FAR struct canfd_frame *)netpkt_getdata(dev, pkt);
 
-          frame->len = can_dlc2bytes(rxframe->fmt.dlc);
+      /* Get the DLC */
+
+      frame->len = can_dlc2bytes(rxframe->fmt.dlc);
 
 #ifdef CONFIG_NET_CAN_EXTID
-          /* Get the CAN identifier. */
+      /* Get the CAN identifier. */
 
-          if (rxframe->fmt.ide)
-            {
-              frame->can_id = rxframe->id.id_ext;
-              frame->can_id |= CAN_EFF_FLAG;
-            }
-          else
-            {
-              frame->can_id = rxframe->id.id;
-            }
-#else
-          if (rxframe->fmt.ide)
-            {
-              canerr("ERROR: Received message with extended"
-                     " identifier.  Dropped\n");
-              continue;
-            }
-
-          frame->can_id = rxframe->id.id;
-#endif
-
-          /* Extract the RTR bit */
-
-          if (rxframe->fmt.rtr)
-            {
-              frame->can_id |= CAN_RTR_FLAG;
-            }
-
-          /* Get CANFD flags */
-
-          frame->flags = 0;
-
-          if (rxframe->fmt.esi_rsv)
-            {
-              frame->flags |= CANFD_ESI;
-            }
-
-          if (rxframe->fmt.brs)
-            {
-              frame->flags |= CANFD_BRS;
-            }
-
-          /* Get data */
-
-          bytes = can_dlc2bytes(rxframe->fmt.dlc);
-          for (i = 0; i < bytes; i++)
-            {
-              frame->data[i] = rxframe->data[i];
-            }
-
-          /* Copy the buffer pointer to priv->dev..  Set amount of data
-           * in priv->dev.d_len
-           */
-
-          priv->dev.d_len = sizeof(struct canfd_frame);
-          priv->dev.d_buf = (FAR uint8_t *)frame;
-
-          /* Send to socket interface */
-
-          NETDEV_RXPACKETS(&priv->dev);
-
-          can_input(&priv->dev);
-
-          /* Point the packet buffer back to the next Tx buffer that will be
-           * used during the next write.  If the write queue is full, then
-           * this will point at an active buffer, which must not be written
-           * to.  This is OK because devif_poll won't be called unless the
-           * queue is not full.
-           */
-
-          priv->dev.d_buf = (FAR uint8_t *)priv->tx_pool;
+      if (rxframe->fmt.ide)
+        {
+          frame->can_id = rxframe->id.id_ext;
+          frame->can_id |= CAN_EFF_FLAG;
         }
       else
-#endif
         {
-          FAR struct can_frame *frame  =
-            (FAR struct can_frame *)priv->rx_pool;
-
-          /* Get the DLC */
-
-          frame->can_dlc = rxframe->fmt.dlc;
-
-#ifdef CONFIG_NET_CAN_EXTID
-          /* Get the CAN identifier. */
-
-          if (rxframe->fmt.ide)
-            {
-              frame->can_id = rxframe->id.id_ext;
-              frame->can_id |= CAN_EFF_FLAG;
-            }
-          else
-            {
-              frame->can_id = rxframe->id.id;
-            }
-#else
-          if (rxframe->fmt.ide)
-            {
-              canerr("ERROR: Received message with extended"
-                     " identifier.  Dropped\n");
-              continue;
-            }
-
           frame->can_id = rxframe->id.id;
+        }
+#else
+      if (rxframe->fmt.ide)
+        {
+          canerr("ERROR: Received message with extended"
+                 " identifier.  Dropped\n");
+          continue;
+        }
+
+      frame->can_id = rxframe->id.id;
 #endif
 
-          /* Extract the RTR bit */
+      /* Extract the RTR bit */
 
-          if (rxframe->fmt.rtr)
-            {
-              frame->can_id |= CAN_RTR_FLAG;
-            }
+      if (rxframe->fmt.rtr)
+        {
+          frame->can_id |= CAN_RTR_FLAG;
+        }
 
-          /* Get data */
+      /* Get CANFD flags */
 
-          for (i = 0; i < rxframe->fmt.dlc; i++)
-            {
-              frame->data[i] = rxframe->data[i];
-            }
+      frame->flags = 0;
 
-          /* Copy the buffer pointer to priv->dev..  Set amount of data
-           * in priv->dev.d_len
-           */
+      if (rxframe->fmt.esi_rsv)
+        {
+          frame->flags |= CANFD_ESI;
+        }
 
-          priv->dev.d_len = sizeof(struct can_frame);
-          priv->dev.d_buf = (FAR uint8_t *)frame;
+      if (rxframe->fmt.brs)
+        {
+          frame->flags |= CANFD_BRS;
+        }
 
-          /* Send to socket interface */
+      /* Get data */
 
-          NETDEV_RXPACKETS(&priv->dev);
-
-          can_input(&priv->dev);
-
-          /* Point the packet buffer back to the next Tx buffer that will be
-           * used during the next write.  If the write queue is full, then
-           * this will point at an active buffer, which must not be written
-           * to.  This is OK because devif_poll won't be called unless the
-           * queue is not full.
-           */
-
-          priv->dev.d_buf = (FAR uint8_t *)priv->tx_pool;
+      bytes = can_dlc2bytes(rxframe->fmt.dlc);
+      for (i = 0; i < bytes; i++)
+        {
+          frame->data[i] = rxframe->data[i];
         }
     }
+  else
+#endif
+    {
+      FAR struct can_frame *frame;
+
+      netpkt_setdatalen(dev, pkt, sizeof(struct can_frame));
+      frame = (FAR struct can_frame *)netpkt_getdata(dev, pkt);
+
+      /* Get the DLC */
+
+      frame->can_dlc = rxframe->fmt.dlc;
+
+#ifdef CONFIG_NET_CAN_EXTID
+      /* Get the CAN identifier. */
+
+      if (rxframe->fmt.ide)
+        {
+          frame->can_id = rxframe->id.id_ext;
+          frame->can_id |= CAN_EFF_FLAG;
+        }
+      else
+        {
+          frame->can_id = rxframe->id.id;
+        }
+#else
+      if (rxframe->fmt.ide)
+        {
+          canerr("ERROR: Received message with extended"
+                 " identifier.  Dropped\n");
+          continue;
+        }
+
+      frame->can_id = rxframe->id.id;
+#endif
+
+      /* Extract the RTR bit */
+
+      if (rxframe->fmt.rtr)
+        {
+          frame->can_id |= CAN_RTR_FLAG;
+        }
+
+      /* Get data */
+
+      for (i = 0; i < rxframe->fmt.dlc; i++)
+        {
+          frame->data[i] = rxframe->data[i];
+        }
+    }
+
+  return pkt;
 }
 
 #ifdef CONFIG_NET_CAN_ERRORS
@@ -1546,11 +1378,31 @@ static void ctucanfd_sock_receive(FAR struct ctucanfd_can_s *priv)
  * Name: ctucanfd_sock_error
  *****************************************************************************/
 
-static void ctucanfd_sock_error(FAR struct ctucanfd_can_s *priv,
-                                uint32_t stat)
+static FAR netpkt_t *ctucanfd_sock_error(FAR struct netdev_lowerhalf_s *dev)
 {
-  FAR struct can_frame *frame   = NULL;
-  uint16_t              errbits = 0;
+  FAR struct ctucanfd_can_s *priv    = (FAR struct ctucanfd_can_s *) dev;
+  FAR struct can_frame      *frame   = NULL;
+  FAR netpkt_t              *pkt     = NULL;
+  uint16_t                   errbits = 0;
+  uint32_t                   stat    = 0;
+
+  stat = ctucanfd_getreg(priv, CTUCANFD_INTSTAT);
+  if ((stat & CTUCANFD_INT_ERR) == 0)
+    {
+      return NULL;
+    }
+
+  /* Allocate packet */
+
+  pkt = netpkt_alloc(dev, NETPKT_RX);
+  if (!pkt)
+    {
+      canerr("alloc pkt_new failed\n");
+      return NULL;
+    }
+
+  netpkt_setdatalen(dev, pkt, sizeof(struct can_frame));
+  frame = (FAR struct can_frame *)netpkt_getdata(dev, pkt);
 
   /* Data overrun interrupt */
 
@@ -1580,56 +1432,27 @@ static void ctucanfd_sock_error(FAR struct ctucanfd_can_s *priv,
       errbits |= CAN_ERR_BUSERROR;
     }
 
-  if (errbits != 0)
-    {
-      frame = (FAR struct can_frame *)priv->rx_pool;
+  canerr("ERROR: errbits = %08" PRIx16 "\n", errbits);
 
-      canerr("ERROR: errbits = %08" PRIx16 "\n", errbits);
+  /* Copy frame */
 
-      /* Copy frame */
+  frame->can_id  = errbits;
+  frame->can_dlc = CAN_ERR_DLC;
 
-      frame->can_id  = errbits;
-      frame->can_dlc = CAN_ERR_DLC;
-
-      net_lock();
-
-      /* Copy the buffer pointer to priv->dev..  Set amount of data
-       * in priv->dev.d_len
-       */
-
-      priv->dev.d_len = sizeof(struct can_frame);
-      priv->dev.d_buf = (FAR uint8_t *)frame;
-
-      /* Send to socket interface */
-
-      NETDEV_ERRORS(&priv->dev);
-
-      can_input(&priv->dev);
-
-      /* Point the packet buffer back to the next Tx buffer that will be
-       * used during the next write.  If the write queue is full, then
-       * this will point at an active buffer, which must not be written
-       * to.  This is OK because devif_poll won't be called unless the
-       * queue is not full.
-       */
-
-      priv->dev.d_buf = (FAR uint8_t *)priv->tx_pool;
-      net_unlock();
-    }
+  return pkt;
 }
 #endif
 
 /*****************************************************************************
- * Name: ctucanfd_sock_interrupt_work
+ * Name: ctucanfd_sock_interrupt
  *****************************************************************************/
 
-static void ctucanfd_sock_interrupt_work(FAR void *arg)
+static void ctucanfd_sock_interrupt(FAR struct ctucanfd_driver_s *priv)
 {
-  FAR struct ctucanfd_driver_s *priv   = arg;
-  uint32_t                      stat   = 0;
-  uint32_t                      regval = 0;
-  int                           i      = 0;
-  int                           txidx  = 0;
+  uint32_t stat   = 0;
+  uint32_t regval = 0;
+  int      i      = 0;
+  int      txidx  = 0;
 
   for (i = 0; i < priv->count; i++)
     {
@@ -1639,11 +1462,11 @@ static void ctucanfd_sock_interrupt_work(FAR void *arg)
           continue;
         }
 
-      /* RX buffer not empty interrupt */
+      /* RX ready */
 
-      if (stat & CTUCANFD_INT_RBNEI)
+      if (stat & CTUCANFD_SOCK_RXINT)
         {
-          ctucanfd_sock_receive(&priv->devs[i]);
+          netdev_lower_rxready(&priv->devs[i].dev);
         }
 
       /* Transmit interrupt */
@@ -1657,15 +1480,7 @@ static void ctucanfd_sock_interrupt_work(FAR void *arg)
               if (CTUCANFD_TXSTAT_GET(regval, txidx) ==
                   CTUCANFD_TXSTAT_TOK)
                 {
-                  NETDEV_TXDONE(&priv->devs[i].dev);
-
-                  /* There should be space for a new TX in any event.
-                   * Poll the network for new XMIT data.
-                   */
-
-                  net_lock();
-                  devif_poll(&priv->devs[i].dev, ctucanfd_sock_txpoll);
-                  net_unlock();
+                  netdev_lower_txdone(&priv->devs[i].dev);
 
                   /* Mark buffer as empty */
 
@@ -1676,22 +1491,14 @@ static void ctucanfd_sock_interrupt_work(FAR void *arg)
             }
         }
 
-#ifdef CONFIG_NET_CAN_ERRORS
-      /* Handle errors */
-
-      if (stat & CTUCANFD_INT_ERR)
-        {
-          ctucanfd_sock_error(&priv->devs[i], stat);
-        }
-#endif
-
       /* Clear interrupts */
 
       ctucanfd_putreg(&priv->devs[i], CTUCANFD_INTSTAT, stat);
 
-      /* Re-enable RX/TX interrupts */
+      /* Re-enable TX interrupts.
+       * NOTE: RX interrupts are re-enabled in ctucanfd_sock_recv.
+       */
 
-      ctucanfd_rxint(&priv->devs[i], true);
       ctucanfd_txint(&priv->devs[i], true);
     }
 }
@@ -1744,10 +1551,9 @@ static int ctucanfd_interrupt(int irq, FAR void *context, FAR void *arg)
 #endif
 
 #ifdef CONFIG_CAN_CTUCANFD_SOCKET
-  /* Derefer SocketCAN interrupt to work queue */
+  /* Handle SocketCAN interrupt */
 
-  work_queue(CTUCANFD_CANWORK, &priv->irqwork,
-             ctucanfd_sock_interrupt_work, priv, 0);
+  ctucanfd_sock_interrupt(priv);
 #endif
 
   return OK;
@@ -1806,12 +1612,15 @@ static uint8_t ctucanfd_ctucanfd_probe(FAR struct ctucanfd_driver_s *priv)
 
 static int ctucanfd_probe(FAR struct pci_device_s *dev)
 {
-  FAR struct ctucanfd_driver_s *priv = NULL;
-  uint8_t                       i    = 0;
-  int                           ret;
+#ifdef CONFIG_CAN_CTUCANFD_SOCKET
+  FAR struct netdev_lowerhalf_s *netdev = NULL;
+#endif
+  FAR struct ctucanfd_driver_s  *priv   = NULL;
+  uint8_t                        i      = 0;
+  int                            ret;
 #ifdef CONFIG_CAN_CTUCANFD_CHARDEV
-  uint8_t                       count;
-  char                          devpath[PATH_MAX];
+  uint8_t                        count;
+  char                           devpath[PATH_MAX];
 #endif
 
   /* Allocate the interface structure */
@@ -1918,15 +1727,13 @@ static int ctucanfd_probe(FAR struct pci_device_s *dev)
 #endif
 
 #ifdef CONFIG_CAN_CTUCANFD_SOCKET
-      /* Initialize the driver structure */
+      netdev = &priv->devs[i].dev;
 
-      priv->devs[i].dev.d_ifup    = ctucanfd_sock_ifup;
-      priv->devs[i].dev.d_ifdown  = ctucanfd_sock_ifdown;
-      priv->devs[i].dev.d_txavail = ctucanfd_sock_txavail;
-#  ifdef CONFIG_NETDEV_IOCTL
-      priv->devs[i].dev.d_ioctl   = ctucanfd_sock_ioctl;
-#  endif
-      priv->devs[i].dev.d_private = &priv->devs[i];
+      /* Register the network device */
+
+      netdev->quota[NETPKT_TX] = CTUCANFD_TX_QUOTA;
+      netdev->quota[NETPKT_RX] = CTUCANFD_RX_QUOTA;
+      netdev->ops = &g_ctucanfd_net_ops;
 
       /* Put the interface in the down state.  This usually amounts to
        * resetting the device and/or calling ctucanfd_sock_ifdown().
@@ -1934,11 +1741,9 @@ static int ctucanfd_probe(FAR struct pci_device_s *dev)
 
       ctucanfd_sock_ifdown(&priv->devs[i].dev);
 
-      /* Register the device with the OS so that socket IOCTLs can be
-       * performed
-       */
+      /* Register the network interface. */
 
-      ret = netdev_register(&priv->devs[i].dev, NET_LL_CAN);
+      ret = netdev_lower_register(netdev, NET_LL_CAN);
       if (ret < 0)
         {
           pcierr("ERROR: failed to register count=%d, %d\n", i, ret);
@@ -1955,7 +1760,8 @@ errout:
       if (priv->devs[i].pcidev)
         {
 #ifdef CONFIG_CAN_CTUCANFD_SOCKET
-          netdev_unregister(&priv->devs[i].dev);
+          netdev = &priv->devs[i].dev;
+          netdev_lower_unregister(netdev);
 #endif
 
 #ifdef CONFIG_CAN_CTUCANFD_CHARDEV
