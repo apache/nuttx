@@ -61,7 +61,7 @@ static int memsistream_getc(FAR struct lib_sistream_s *self)
  * Name: meminstream_gets
  ****************************************************************************/
 
-static ssize_t memsistream_gets(FAR struct lib_instream_s *self,
+static ssize_t memsistream_gets(FAR struct lib_sistream_s *self,
                                 FAR void *buffer, size_t len)
 {
   FAR struct lib_memsistream_s *stream =

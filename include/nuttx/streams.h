@@ -125,7 +125,7 @@ struct lib_sistream_s
   off_t                  nget;    /* Total number of characters gotten.  Written
                                    * by get method, readable by user */
   lib_sigetc_t           getc;    /* Get one character from the instream */
-  lib_gets_t             gets;    /* Get the string from the instream */
+  lib_sigets_t           gets;    /* Get the string from the instream */
   lib_siseek_t           seek;    /* Seek to a position in the instream */
 };
 
