@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/stream/lib_fileinstream.c
+ * libs/libc/stream/lib_filesistream.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -37,14 +37,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: fileinstream_gets
+ * Name: filesistream_gets
  ****************************************************************************/
 
-static ssize_t fileinstream_gets(FAR struct lib_instream_s *self,
+static ssize_t filesistream_gets(FAR struct lib_sistream_s *self,
                                  FAR void *buf, size_t len)
 {
-  FAR struct lib_fileinstream_s *stream =
-                                (FAR struct lib_fileinstream_s *)self;
+  FAR struct lib_filesistream_s *stream =
+                                (FAR struct lib_filesistream_s *)self;
   ssize_t nread;
 
   do
@@ -62,13 +62,26 @@ static ssize_t fileinstream_gets(FAR struct lib_instream_s *self,
 }
 
 /****************************************************************************
- * Name: fileinstream_getc
+ * Name: filesistream_getc
  ****************************************************************************/
 
-static int fileinstream_getc(FAR struct lib_instream_s *self)
+static int filesistream_getc(FAR struct lib_sistream_s *self)
 {
   unsigned char ch;
-  return fileinstream_gets(self, &ch, 1) == 1 ? ch : EOF;
+  return filesistream_gets(self, &ch, 1) == 1 ? ch : EOF;
+}
+
+/****************************************************************************
+ * Name: filesistream_getc
+ ****************************************************************************/
+
+static off_t filesistream_seek(FAR struct lib_sistream_s *self, off_t offset,
+                               int whence)
+{
+  FAR struct lib_filesistream_s *stream =
+                                (FAR struct lib_filesistream_s *)self;
+
+  return file_seek(&stream->file, offset, whence);
 }
 
 /****************************************************************************
@@ -76,21 +89,21 @@ static int fileinstream_getc(FAR struct lib_instream_s *self)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lib_fileinstream_open
+ * Name: lib_filesistream_open
  *
  * Description:
  *   Initializes a stream for use with a file descriptor.
  *
  * Input Parameters:
  *   stream   - User allocated, uninitialized instance of struct
- *              lib_fileinstream_s to be initialized.
+ *              lib_filesistream_s to be initialized.
  *
  * Returned Value:
  *   None (User allocated instance initialized).
  *
  ****************************************************************************/
 
-int lib_fileinstream_open(FAR struct lib_fileinstream_s *stream,
+int lib_filesistream_open(FAR struct lib_filesistream_s *stream,
                           FAR const char *path, int oflag, mode_t mode)
 {
   int ret;
@@ -101,29 +114,30 @@ int lib_fileinstream_open(FAR struct lib_fileinstream_s *stream,
       return ret;
     }
 
-  stream->common.getc = fileinstream_getc;
-  stream->common.gets = fileinstream_gets;
+  stream->common.getc = filesistream_getc;
+  stream->common.gets = filesistream_gets;
+  stream->common.seek = filesistream_seek;
   stream->common.nget = 0;
 
   return 0;
 }
 
 /****************************************************************************
- * Name: lib_fileinstream_close
+ * Name: lib_filesistream_close
  *
  * Description:
  *  Close the file associated with the stream.
  *
  * Input Parameters:
  *   stream   - User allocated, uninitialized instance of struct
- *              lib_fileinstream_s to be initialized.
+ *              lib_filesistream_s to be initialized.
  *
  * Returned Value:
  *   None (User allocated instance initialized).
  *
  ****************************************************************************/
 
-void lib_fileinstream_close(FAR struct lib_fileinstream_s *stream)
+void lib_filesistream_close(FAR struct lib_filesistream_s *stream)
 {
   if (stream != NULL)
     {
