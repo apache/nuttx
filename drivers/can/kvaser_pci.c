@@ -40,8 +40,7 @@
 #endif
 
 #ifdef CONFIG_CAN_KVASER_SOCKET
-#  include <nuttx/wqueue.h>
-#  include <nuttx/net/netdev.h>
+#  include <nuttx/net/netdev_lowerhalf.h>
 #  include <nuttx/net/can.h>
 #endif
 
@@ -77,21 +76,28 @@
                                         SJA1000_ARB_LOST_INT_ENA |     \
                                         SJA1000_BUS_ERR_INT_ENA)
 
+#define KVASER_INT_ERR_ST              (SJA1000_OVERRUN_INT_ST |      \
+                                        SJA1000_ERR_PASSIVE_INT_ST |  \
+                                        SJA1000_ARB_LOST_INT_ST |     \
+                                        SJA1000_BUS_ERR_INT_ST)
+
 /* SocketCAN specific */
 
 #ifdef CONFIG_CAN_KVASER_SOCKET
+#  define KVASER_TX_QUOTA              1
+#  define KVASER_RX_QUOTA              1
 
-#  define KVASER_POOL_SIZE             1
-
-/* Work queue support is required. */
-
-#  if !defined(CONFIG_SCHED_WORKQUEUE)
-#    error Work queue support is required
+#  if CONFIG_IOB_NBUFFERS < (KVASER_RX_QUOTA + KVASER_TX_QUOTA)
+#    error CONFIG_IOB_NBUFFERS must be > (KVASER_RX_QUOTA + KVASER_TX_QUOTA)
 #  endif
 
-#  define KVASER_CANWORK               LPWORK
-
 #endif /* CONFIG_CAN_KVASER_SOCKET */
+
+#ifndef CONFIG_NET_CAN_ERRORS
+#  define KVASER_SOCK_RXINT            (SJA1000_RX_INT_ST)
+#else
+#  define KVASER_SOCK_RXINT            (SJA1000_RX_INT_ST | KVASER_INT_ERR_ST)
+#endif
 
 /*****************************************************************************
  * Private Types
@@ -106,13 +112,9 @@ struct kvaser_sja_s
 #endif
 
 #ifdef CONFIG_CAN_KVASER_SOCKET
-  struct net_driver_s dev;      /* Interface understood by the network */
-  struct work_s       pollwork; /* For deferring poll work to the work wq */
+  /* This holds the information visible to the NuttX network */
 
-  /* TX/RX pool */
-
-  struct can_frame tx_pool[KVASER_POOL_SIZE];
-  struct can_frame rx_pool[KVASER_POOL_SIZE];
+  struct netdev_lowerhalf_s dev;
 #endif
 
   /* PCI data */
@@ -193,21 +195,22 @@ static void kvaser_chardev_interrupt(FAR struct kvaser_driver_s *priv);
 #ifdef CONFIG_CAN_KVASER_SOCKET
 /* SocketCAN methods */
 
-static int  kvaser_sock_ifup(FAR struct net_driver_s *dev);
-static int  kvaser_sock_ifdown(FAR struct net_driver_s *dev);
-
-static void kvaser_sock_txavail_work(FAR void *arg);
-static int  kvaser_sock_txavail(FAR struct net_driver_s *dev);
+static int  kvaser_sock_ifup(FAR struct netdev_lowerhalf_s *dev);
+static int  kvaser_sock_ifdown(FAR struct netdev_lowerhalf_s *dev);
+static int  kvaser_sock_transmit(FAR struct netdev_lowerhalf_s *dev,
+                                 FAR netpkt_t *pkt);
+static FAR netpkt_t *kvaser_sock_recv(FAR struct netdev_lowerhalf_s *dev);
 
 #  ifdef CONFIG_NETDEV_IOCTL
-static int  kvaser_sock_ioctl(FAR struct net_driver_s *dev, int cmd,
+static int  kvaser_sock_ioctl(FAR struct netdev_lowerhalf_s *dev, int cmd,
                               unsigned long arg);
 #  endif
 
-static int kvaser_sock_txpoll(FAR struct net_driver_s *dev);
-static int kvaser_sock_send(FAR struct kvaser_sja_s *priv);
-static void kvaser_sock_receive(FAR struct kvaser_sja_s *priv);
-static void kvaser_sock_interrupt_work(FAR void *arg);
+#  ifdef CONFIG_NET_CAN_ERRORS
+static FAR netpkt_t *kvaser_sock_error(FAR struct netdev_lowerhalf_s *dev);
+#  endif
+
+static void kvaser_sock_interrupt(FAR struct kvaser_driver_s *priv);
 #endif
 
 /* Interrupts */
@@ -237,6 +240,19 @@ static const struct can_ops_s g_kvaser_can_ops =
   .co_send          = kvaser_chrdev_send,
   .co_txready       = kvaser_chrdev_txready,
   .co_txempty       = kvaser_chrdev_txempty,
+};
+#endif
+
+#ifdef CONFIG_CAN_KVASER_SOCKET
+static const struct netdev_ops_s g_kvaser_net_ops =
+{
+  .ifup     = kvaser_sock_ifup,
+  .ifdown   = kvaser_sock_ifdown,
+  .transmit = kvaser_sock_transmit,
+  .receive  = kvaser_sock_recv,
+#ifdef CONFIG_NETDEV_IOCTL
+  .ioctl    = kvaser_sock_ioctl,
+#endif
 };
 #endif
 
@@ -997,11 +1013,9 @@ static void kvaser_chardev_interrupt(FAR struct kvaser_driver_s *priv)
  *
  *****************************************************************************/
 
-static int kvaser_sock_ifup(FAR struct net_driver_s *dev)
+static int kvaser_sock_ifup(FAR struct netdev_lowerhalf_s *dev)
 {
-  FAR struct kvaser_sja_s *priv = (FAR struct kvaser_sja_s *)dev->d_private;
-
-  priv->dev.d_buf = (FAR uint8_t *)priv->tx_pool;
+  FAR struct kvaser_sja_s *priv = (FAR struct kvaser_sja_s *)dev;
 
   kvaser_reset(priv);
   kvaser_setup(priv);
@@ -1026,9 +1040,9 @@ static int kvaser_sock_ifup(FAR struct net_driver_s *dev)
  *
  *****************************************************************************/
 
-static int kvaser_sock_ifdown(FAR struct net_driver_s *dev)
+static int kvaser_sock_ifdown(FAR struct netdev_lowerhalf_s *dev)
 {
-  FAR struct kvaser_sja_s *priv = (FAR struct kvaser_sja_s *)dev->d_private;
+  FAR struct kvaser_sja_s *priv = (FAR struct kvaser_sja_s *)dev;
 
   kvaser_txint(priv, false);
   kvaser_rxint(priv, false);
@@ -1041,180 +1055,32 @@ static int kvaser_sock_ifdown(FAR struct net_driver_s *dev)
 }
 
 /*****************************************************************************
- * Name: kvaser_sock_txavail_work
+ * Name: kvaser_sock_transmit
  *
  * Description:
- *   Perform an out-of-cycle poll on the worker thread.
+ *   Start hardware transmission.  Called either from the txdone interrupt
+ *   handling or from watchdog based polling.
  *
  * Input Parameters:
- *   arg - Reference to the NuttX driver state structure (cast to void*)
+ *   priv - Reference to the driver state structure
  *
  * Returned Value:
- *   None
+ *   Return OK on success
  *
  * Assumptions:
- *   Called on the higher priority worker thread.
+ *   The network is locked.
  *
  *****************************************************************************/
 
-static void kvaser_sock_txavail_work(FAR void *arg)
+static int kvaser_sock_transmit(FAR struct netdev_lowerhalf_s *dev,
+                                FAR netpkt_t *pkt)
 {
-  FAR struct kvaser_sja_s *priv = (FAR struct kvaser_sja_s *)arg;
-
-  /* Ignore the notification if the interface is not yet up */
-
-  net_lock();
-  if (IFF_IS_UP(priv->dev.d_flags))
-    {
-      /* Check if there is room in the hardware to hold another outgoing
-       * packet.
-       */
-
-      if (kvaser_txready(priv))
-        {
-          /* No, there is space for another transfer.  Poll the network for
-           * new XMIT data.
-           */
-
-          devif_poll(&priv->dev, kvaser_sock_txpoll);
-        }
-    }
-
-  net_unlock();
-}
-
-/*****************************************************************************
- * Name: kvaser_sock_txavail
- *
- * Description:
- *   Driver callback invoked when new TX data is available.  This is a
- *   stimulus perform an out-of-cycle poll and, thereby, reduce the TX
- *   latency.
- *
- * Input Parameters:
- *   dev  - Reference to the NuttX driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Called in normal user mode
- *
- *****************************************************************************/
-
-static int kvaser_sock_txavail(FAR struct net_driver_s *dev)
-{
-  FAR struct kvaser_sja_s *priv = (FAR struct kvaser_sja_s *)dev->d_private;
-
-  /* Is our single work structure available?  It may not be if there are
-   * pending interrupt actions and we will have to ignore the Tx
-   * availability action.
-   */
-
-  if (work_available(&priv->pollwork))
-    {
-      /* Schedule to serialize the poll on the worker thread. */
-
-      kvaser_sock_txavail_work(priv);
-    }
-
-  return OK;
-}
-
-#  ifdef CONFIG_NETDEV_IOCTL
-/*****************************************************************************
- * Name: kvaser_sock_ioctl
- *
- * Description:
- *   PHY ioctl command handler
- *
- * Input Parameters:
- *   dev  - Reference to the NuttX driver state structure
- *   cmd  - ioctl command
- *   arg  - Argument accompanying the command
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
- *
- * Assumptions:
- *
- *****************************************************************************/
-
-static int kvaser_sock_ioctl(FAR struct net_driver_s *dev, int cmd,
-                             unsigned long arg)
-{
-  return -ENOTTY;
-}
-
-#  endif  /* CONFIG_NETDEV_IOCTL */
-
-/*****************************************************************************
- * Name: kvaser_sock_txpoll
- *
- * Description:
- *   The transmitter is available, check if the network has any outgoing
- *   packets ready to send.  This is a callback from devif_poll().
- *   devif_poll() may be called:
- *
- *   1. When the preceding TX packet send is complete,
- *   2. When the preceding TX packet send timesout and the interface is reset
- *   3. During normal TX polling
- *
- * Input Parameters:
- *   dev  - Reference to the NuttX driver state structure
- *
- * Returned Value:
- *   OK on success; a negated errno on failure
- *
- * Assumptions:
- *   May or may not be called from an interrupt handler.  In either case,
- *   global interrupts are disabled, either explicitly or indirectly through
- *   interrupt handling logic.
- *
- *****************************************************************************/
-
-static int kvaser_sock_txpoll(FAR struct net_driver_s *dev)
-{
-  FAR struct kvaser_sja_s *priv = (FAR struct kvaser_sja_s *)dev->d_private;
-
-  /* If the polling resulted in data that should be sent out on the network,
-   * the field d_len is set to a value > 0.
-   */
-
-  if (priv->dev.d_len > 0)
-    {
-      /* Send the packet */
-
-      kvaser_sock_send(priv);
-
-      /* Check if there is room in the device to hold another packet. If
-       * not, return a non-zero value to terminate the poll.
-       */
-
-      if (!kvaser_txready(priv))
-        {
-          return -EBUSY;
-        }
-    }
-
-  /* If zero is returned, the polling will continue until all connections
-   * have been examined.
-   */
-
-  return 0;
-}
-
-/*****************************************************************************
- * Name: kvaser_sock_send
- *****************************************************************************/
-
-static int kvaser_sock_send(FAR struct kvaser_sja_s *priv)
-{
-  FAR struct can_frame *frame  = (FAR struct can_frame *)priv->dev.d_buf;
-  uint8_t               regval = 0;
-  uint8_t               dreg   = 0;
-  uint8_t               fi     = 0;
-  int                   i      = 0;
+  FAR struct kvaser_sja_s *priv   = (FAR struct kvaser_sja_s *)dev;
+  FAR struct can_frame    *frame  = NULL;
+  uint8_t                  regval = 0;
+  uint8_t                  dreg   = 0;
+  uint8_t                  fi     = 0;
+  int                      i      = 0;
 
   /* Check TX buffer status */
 
@@ -1227,12 +1093,16 @@ static int kvaser_sock_send(FAR struct kvaser_sja_s *priv)
 #ifdef CONFIG_CAN_FD
   /* Drop CAN FD frames */
 
-  if (priv->dev.d_len != sizeof(struct can_frame))
+  if (netpkt_getdatalen(dev, pkt) != sizeof(struct can_frame))
     {
       canerr("ERROR: CAN FD frames not supported\n");
       return -ENOTSUP;
     }
 #endif
+
+  /* Get frame data */
+
+  frame = (FAR struct can_frame *)netpkt_getdata(dev, pkt);
 
   /* Set up the DLC */
 
@@ -1293,115 +1163,187 @@ static int kvaser_sock_send(FAR struct kvaser_sja_s *priv)
   regval = SJA1000_TX_REQ;
   kvaser_putreg_sja(priv, SJA1000_CMD_REG, regval);
 
+  /* All is done - free packet */
+
+  netpkt_free(dev, pkt, NETPKT_TX);
+
   return OK;
 }
 
 /*****************************************************************************
- * Name: kvaser_sock_receive
+ * Name: kvaser_sock_recv
+ *
+ * Description:
+ *   An interrupt was received indicating the availability of a new RX packet
+ *
+ * Input Parameters:
+ *   priv - Reference to the driver state structure
+ *
+ * Returned Value:
+ *   A pointer to received packet
+ *
+ * Assumptions:
+ *   The network is locked.
+ *
  *****************************************************************************/
 
-static void kvaser_sock_receive(FAR struct kvaser_sja_s *priv)
+static FAR netpkt_t *kvaser_sock_recv(FAR struct netdev_lowerhalf_s *dev)
 {
-  FAR struct can_frame *frame = (FAR struct can_frame *)priv->rx_pool;
-  uint8_t               dreg  = 0;
-  int                   i     = 0;
-  uint8_t               regval;
+  FAR struct kvaser_sja_s *priv  = (FAR struct kvaser_sja_s *)dev;
+  FAR struct can_frame    *frame = NULL;
+  FAR netpkt_t            *pkt   = NULL;
+  uint8_t                  dreg  = 0;
+  int                      i     = 0;
+  uint8_t                  regval;
+  uint8_t                  st;
 
-  /* Wait until data in RXFIFO */
+  /* Read frame if RXFIFO not empty */
 
-  while (kvaser_getreg_sja(priv, SJA1000_STATUS_REG) & SJA1000_RX_BUF_ST)
+  st = kvaser_getreg_sja(priv, SJA1000_STATUS_REG);
+  if ((st & SJA1000_RX_BUF_ST) == 0)
     {
-      regval = kvaser_getreg_sja(priv, SJA1000_DATA_0_REG);
+#ifdef CONFIG_NET_CAN_ERRORS
+      /* Check for errors */
 
-      /* Get the DLC */
-
-      frame->can_dlc = (regval & SJA1000_FI_DLC_MASK);
-
-      /* Get the CAN identifier. */
-
-      if (!(regval & SJA1000_FI_FF))
-        {
-          frame->can_id =
-            ((kvaser_getreg_sja(priv, SJA1000_DATA_1_REG) << 3) |
-             (kvaser_getreg_sja(priv, SJA1000_DATA_2_REG) >> 5));
-
-          dreg = SJA1000_DATA_3_REG;
-        }
-      else
-        {
-#ifdef CONFIG_NET_CAN_EXTID
-          frame->can_id =
-            ((kvaser_getreg_sja(priv, SJA1000_DATA_1_REG) << 21) |
-             (kvaser_getreg_sja(priv, SJA1000_DATA_2_REG) << 13) |
-             (kvaser_getreg_sja(priv, SJA1000_DATA_3_REG) << 5)  |
-             (kvaser_getreg_sja(priv, SJA1000_DATA_4_REG) >> 3));
-          frame->can_id |= CAN_EFF_FLAG;
-
-          dreg = SJA1000_DATA_5_REG;
+      return kvaser_sock_error(dev);
 #else
-          canerr("ERROR: Received message with extended"
-                 " identifier.  Dropped\n");
-
-          /* Release RX buffer */
-
-          kvaser_putreg_sja(priv, SJA1000_CMD_REG, SJA1000_RELEASE_BUF);
-
-          continue;
+      return NULL;
 #endif
-        }
+    }
 
-      /* Extract the RTR bit */
+  /* Allocate packet */
 
-      if (regval & SJA1000_FI_RTR)
-        {
-          frame->can_id |= CAN_RTR_FLAG;
-        }
+  pkt = netpkt_alloc(dev, NETPKT_RX);
+  if (!pkt)
+    {
+      canerr("alloc pkt_new failed\n");
+      return NULL;
+    }
 
-      /* Get data */
+  netpkt_setdatalen(dev, pkt, sizeof(struct can_frame));
+  frame = (FAR struct can_frame *)netpkt_getdata(dev, pkt);
 
-      for (i = 0; i < can_dlc2bytes(frame->can_dlc); i++)
-        {
-          frame->data[i] = kvaser_getreg_sja(priv, dreg + i);
-        }
+  regval = kvaser_getreg_sja(priv, SJA1000_DATA_0_REG);
+
+  /* Get the DLC */
+
+  frame->can_dlc = (regval & SJA1000_FI_DLC_MASK);
+
+  /* Get the CAN identifier. */
+
+  if (!(regval & SJA1000_FI_FF))
+    {
+      frame->can_id =
+        ((kvaser_getreg_sja(priv, SJA1000_DATA_1_REG) << 3) |
+         (kvaser_getreg_sja(priv, SJA1000_DATA_2_REG) >> 5));
+
+      dreg = SJA1000_DATA_3_REG;
+    }
+  else
+    {
+#ifdef CONFIG_NET_CAN_EXTID
+      frame->can_id =
+        ((kvaser_getreg_sja(priv, SJA1000_DATA_1_REG) << 21) |
+         (kvaser_getreg_sja(priv, SJA1000_DATA_2_REG) << 13) |
+         (kvaser_getreg_sja(priv, SJA1000_DATA_3_REG) << 5)  |
+         (kvaser_getreg_sja(priv, SJA1000_DATA_4_REG) >> 3));
+      frame->can_id |= CAN_EFF_FLAG;
+
+      dreg = SJA1000_DATA_5_REG;
+#else
+      canerr("ERROR: Received message with extended"
+             " identifier.  Dropped\n");
 
       /* Release RX buffer */
 
       kvaser_putreg_sja(priv, SJA1000_CMD_REG, SJA1000_RELEASE_BUF);
 
-      /* Copy the buffer pointer to priv->dev..  Set amount of data
-       * in priv->dev.d_len
-       */
-
-      priv->dev.d_len = sizeof(struct can_frame);
-      priv->dev.d_buf = (FAR uint8_t *)frame;
-
-      /* Send to socket interface */
-
-      NETDEV_RXPACKETS(&priv->dev);
-
-      can_input(&priv->dev);
-
-      /* Point the packet buffer back to the next Tx buffer that will be
-       * used during the next write.  If the write queue is full, then
-       * this will point at an active buffer, which must not be written
-       * to.  This is OK because devif_poll won't be called unless the
-       * queue is not full.
-       */
-
-      priv->dev.d_buf = (FAR uint8_t *)priv->tx_pool;
+      netpkt_free(dev, pkt);
+      return NULL;
+#endif
     }
+
+  /* Extract the RTR bit */
+
+  if (regval & SJA1000_FI_RTR)
+    {
+      frame->can_id |= CAN_RTR_FLAG;
+    }
+
+  /* Get data */
+
+  for (i = 0; i < can_dlc2bytes(frame->can_dlc); i++)
+    {
+      frame->data[i] = kvaser_getreg_sja(priv, dreg + i);
+    }
+
+  /* Release RX buffer */
+
+  kvaser_putreg_sja(priv, SJA1000_CMD_REG, SJA1000_RELEASE_BUF);
+
+  return pkt;
 }
+
+#  ifdef CONFIG_NETDEV_IOCTL
+/*****************************************************************************
+ * Name: kvaser_sock_ioctl
+ *
+ * Description:
+ *   PHY ioctl command handler
+ *
+ * Input Parameters:
+ *   dev  - Reference to the NuttX driver state structure
+ *   cmd  - ioctl command
+ *   arg  - Argument accompanying the command
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ * Assumptions:
+ *
+ *****************************************************************************/
+
+static int kvaser_sock_ioctl(FAR struct netdev_lowerhalf_s, int cmd,
+                             unsigned long arg)
+{
+  return -ENOTTY;
+}
+
+#  endif  /* CONFIG_NETDEV_IOCTL */
 
 #ifdef CONFIG_NET_CAN_ERRORS
 /*****************************************************************************
  * Name: kvaser_sock_error
  *****************************************************************************/
 
-static void kvaser_sock_error(FAR struct kvaser_sja_s *priv, uint8_t st)
+static FAR netpkt_t *kvaser_sock_error(FAR struct netdev_lowerhalf_s *dev)
 {
-  FAR struct can_frame *frame   = NULL;
-  uint8_t               regval;
-  uint16_t              errbits = 0;
+  FAR struct kvaser_sja_s *priv    = (FAR struct kvaser_sja_s *)dev;
+  FAR struct can_frame    *frame   = NULL;
+  FAR netpkt_t            *pkt     = NULL;
+  uint8_t                  regval  = 0;
+  uint8_t                  st      = 0;
+  uint16_t                 errbits = 0;
+
+  /* Check for no errors */
+
+  st = kvaser_getreg_sja(priv, SJA1000_INT_RAW_REG);
+  if ((st & KVASER_INT_ERR_ST) == 0)
+    {
+      return NULL;
+    }
+
+  /* Allocate packet */
+
+  pkt = netpkt_alloc(dev, NETPKT_RX);
+  if (!pkt)
+    {
+      canerr("alloc pkt_new failed\n");
+      return NULL;
+    }
+
+  netpkt_setdatalen(dev, pkt, sizeof(struct can_frame));
+  frame = (FAR struct can_frame *)netpkt_getdata(dev, pkt);
 
   /* Data overrun interrupt */
 
@@ -1440,55 +1382,26 @@ static void kvaser_sock_error(FAR struct kvaser_sja_s *priv, uint8_t st)
       errbits |= CAN_ERR_BUSERROR;
     }
 
-  if (errbits != 0)
-    {
-      frame = (FAR struct can_frame *)priv->rx_pool;
+  canerr("ERROR: errbits = %08" PRIx16 "\n", errbits);
 
-      canerr("ERROR: errbits = %08" PRIx16 "\n", errbits);
+  /* Copy frame */
 
-      /* Copy frame */
+  frame->can_id  = errbits;
+  frame->can_dlc = CAN_ERR_DLC;
 
-      frame->can_id  = errbits;
-      frame->can_dlc = CAN_ERR_DLC;
-
-      net_lock();
-
-      /* Copy the buffer pointer to priv->dev..  Set amount of data
-       * in priv->dev.d_len
-       */
-
-      priv->dev.d_len = sizeof(struct can_frame);
-      priv->dev.d_buf = (FAR uint8_t *)frame;
-
-      /* Send to socket interface */
-
-      NETDEV_ERRORS(&priv->dev);
-
-      can_input(&priv->dev);
-
-      /* Point the packet buffer back to the next Tx buffer that will be
-       * used during the next write.  If the write queue is full, then
-       * this will point at an active buffer, which must not be written
-       * to.  This is OK because devif_poll won't be called unless the
-       * queue is not full.
-       */
-
-      priv->dev.d_buf = (FAR uint8_t *)priv->tx_pool;
-      net_unlock();
-    }
+  return pkt;
 }
 #endif
 
 /*****************************************************************************
- * Name: kvaser_sock_interrupt_work
+ * Name: kvaser_sock_interrupt
  *****************************************************************************/
 
-static void kvaser_sock_interrupt_work(FAR void *arg)
+static void kvaser_sock_interrupt(FAR struct kvaser_driver_s *priv)
 {
-  FAR struct kvaser_driver_s *priv = arg;
-  uint8_t                     st   = 0;
-  uint8_t                     i    = 0;
-  int                         passes;
+  uint8_t st = 0;
+  uint8_t i  = 0;
+  int     passes;
 
   for (passes = 0; passes < CONFIG_CAN_KVASER_IRQ_PASSES; passes++)
     {
@@ -1500,30 +1413,19 @@ static void kvaser_sock_interrupt_work(FAR void *arg)
               continue;
             }
 
-          /* Handle RX frames */
+          /* RX ready */
 
-          kvaser_sock_receive(&priv->sja[i]);
+          if (st & KVASER_SOCK_RXINT)
+            {
+              netdev_lower_rxready(&priv->sja[i].dev);
+            }
 
           /* Transmit interrupt */
 
           if (st & SJA1000_TX_INT_ST)
             {
-              NETDEV_TXDONE(&priv->sja[i].dev);
-
-              /* There should be space for a new TX in any event.
-               * Poll the network for new XMIT data.
-               */
-
-              net_lock();
-              devif_poll(&priv->sja[i].dev, kvaser_sock_txpoll);
-              net_unlock();
+              netdev_lower_txdone(&priv->sja[i].dev);
             }
-
-#ifdef CONFIG_NET_CAN_ERRORS
-          /* Handle errors */
-
-          kvaser_sock_error(&priv->sja[i], st);
-#endif
         }
     }
 }
@@ -1553,10 +1455,9 @@ static int kvaser_interrupt(int irq, FAR void *context, FAR void *arg)
 #endif
 
 #ifdef CONFIG_CAN_KVASER_SOCKET
-      /* Derefer SocketCAN interrupt to work queue */
+      /* Handle SocketCAN interrupt */
 
-      work_queue(KVASER_CANWORK, &priv->irqwork,
-                 kvaser_sock_interrupt_work, priv, 0);
+      kvaser_sock_interrupt(priv);
 #endif
     }
 
@@ -1633,12 +1534,15 @@ static uint8_t kvaser_count_sja(FAR struct kvaser_driver_s *priv)
 
 static int kvaser_probe(FAR struct pci_device_s *dev)
 {
-  FAR struct kvaser_driver_s *priv = NULL;
-  uint8_t                     i    = 0;
-  int                         ret;
+#ifdef CONFIG_CAN_KVASER_SOCKET
+  FAR struct netdev_lowerhalf_s *netdev = NULL;
+#endif
+  FAR struct kvaser_driver_s    *priv   = NULL;
+  uint8_t                        i      = 0;
+  int                            ret;
 #ifdef CONFIG_CAN_KVASER_CHARDEV
-  uint8_t                     count;
-  char                        devpath[PATH_MAX];
+  uint8_t                        count;
+  char                           devpath[PATH_MAX];
 #endif
 
   /* Allocate the interface structure */
@@ -1747,15 +1651,13 @@ static int kvaser_probe(FAR struct pci_device_s *dev)
 #endif
 
 #ifdef CONFIG_CAN_KVASER_SOCKET
-      /* Initialize the driver structure */
+      netdev = &priv->sja[i].dev;
 
-      priv->sja[i].dev.d_ifup    = kvaser_sock_ifup;
-      priv->sja[i].dev.d_ifdown  = kvaser_sock_ifdown;
-      priv->sja[i].dev.d_txavail = kvaser_sock_txavail;
-#  ifdef CONFIG_NETDEV_IOCTL
-      priv->sja[i].dev.d_ioctl   = kvaser_sock_ioctl;
-#  endif
-      priv->sja[i].dev.d_private = &priv->sja[i];
+      /* Register the network device */
+
+      netdev->quota[NETPKT_TX] = KVASER_TX_QUOTA;
+      netdev->quota[NETPKT_RX] = KVASER_RX_QUOTA;
+      netdev->ops = &g_kvaser_net_ops;
 
       /* Put the interface in the down state.  This usually amounts to
        * resetting the device and/or calling kvaser_sock_ifdown().
@@ -1763,11 +1665,9 @@ static int kvaser_probe(FAR struct pci_device_s *dev)
 
       kvaser_sock_ifdown(&priv->sja[i].dev);
 
-      /* Register the device with the OS so that socket IOCTLs can be
-       * performed
-       */
+      /* Register the network interface. */
 
-      ret = netdev_register(&priv->sja[i].dev, NET_LL_CAN);
+      ret = netdev_lower_register(netdev, NET_LL_CAN);
       if (ret < 0)
         {
           pcierr("ERROR: failed to register count=%d, %d\n", i, ret);
@@ -1784,7 +1684,8 @@ errout:
       if (priv->sja[i].pcidev)
         {
 #ifdef CONFIG_CAN_KVASER_SOCKET
-          netdev_unregister(&priv->sja[i].dev);
+          netdev = &priv->sja[i].dev;
+          netdev_lower_unregister(netdev);
 #endif
 
 #ifdef CONFIG_CAN_KVASER_CHARDEV
