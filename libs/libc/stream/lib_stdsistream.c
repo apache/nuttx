@@ -63,7 +63,7 @@ static int stdsistream_getc(FAR struct lib_sistream_s *self)
  * Name: stdsistream_gets
  ****************************************************************************/
 
-static ssize_t stdsistream_gets(FAR struct lib_instream_s *self,
+static ssize_t stdsistream_gets(FAR struct lib_sistream_s *self,
                                 FAR void *buffer, size_t len)
 {
   FAR struct lib_stdsistream_s *stream =
