@@ -194,4 +194,39 @@ int netdev_checksum_offset(FAR struct net_driver_s *dev)
   return offset;
 }
 
+/****************************************************************************
+ * Name: netdev_upperlayer_header_checksum
+ *
+ * Description:
+ *   get upperlayer header checksum with tcp/udp header.
+ *
+ * Input Parameters:
+ *   dev  -  The driver structure
+ *
+ * Returned Value:
+ *   The upperlayer header checksum
+ *
+ ****************************************************************************/
+
+uint16_t netdev_upperlayer_header_checksum(FAR struct net_driver_s *dev)
+{
+  if (IFF_IS_IPv6(dev->d_flags))
+    {
+      FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;
+
+      return HTONS(ipv6_upperlayer_header_chksum(dev,
+                                                 ipv6->proto,
+                                                 IPv6_HDRLEN));
+    }
+  else
+    {
+      FAR struct ipv4_hdr_s *ipv4 = IPv4BUF;
+
+      return HTONS(ipv4_upperlayer_header_chksum(dev,
+                                                 ipv4->proto));
+    }
+
+  return 0;
+}
+
 #endif /* CONFIG_NETDEV_CHECKSUM */
