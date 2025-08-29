@@ -100,8 +100,9 @@ config NETDOWN_NOTIFIER
 		logic.
 
 config NETDEV_CHECKSUM
-	bool "netdev hardware checksum"
+	bool "Enable support to netdev checksum in Hardware"
 	default n
+	depends on ARCH_HAVE_NETDEV_CHECKSUM_HW
 	---help---
 		To support hardware checksum calculation for network cards, we
 		need to know the starting position of the L4 layer header in

@@ -574,6 +574,10 @@ config ARCH_HAVE_FETCHADD
 	bool
 	default n
 
+config ARCH_HAVE_NETDEV_CHECKSUM_HW
+	bool
+	default n
+
 config ARCH_HAVE_RTC_SUBSECONDS
 	bool
 	default n
