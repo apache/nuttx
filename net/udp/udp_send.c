@@ -255,7 +255,16 @@ void udp_send(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn)
       if (IFF_IS_IPv4(dev->d_flags))
 #endif
         {
-          udp->udpchksum = ~udp_ipv4_chksum(dev);
+          if ((dev->d_features & NETDEV_TX_CSUM) == 0)
+            {
+              udp->udpchksum = ~udp_ipv4_chksum(dev);
+            }
+          else
+            {
+              uint16_t chksum = ipv4_upperlayer_header_chksum(dev,
+                                                              IP_PROTO_UDP);
+              udp->udpchksum = HTONS(chksum);
+            }
         }
 #endif /* CONFIG_NET_IPv4 */
 
@@ -264,7 +273,17 @@ void udp_send(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn)
       else
 #endif
         {
-          udp->udpchksum = ~udp_ipv6_chksum(dev);
+          if ((dev->d_features & NETDEV_TX_CSUM) == 0)
+            {
+              udp->udpchksum = ~udp_ipv6_chksum(dev);
+            }
+          else
+            {
+              uint16_t chksum = ipv6_upperlayer_header_chksum(dev,
+                                                              IP_PROTO_UDP,
+                                                              IPv6_HDRLEN);
+              udp->udpchksum = HTONS(chksum);
+            }
         }
 #endif /* CONFIG_NET_IPv6 */
 

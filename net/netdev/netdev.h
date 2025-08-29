@@ -533,6 +533,45 @@ void netdev_notify_recvcpu(FAR struct net_driver_s *dev,
                            FAR const void *dst_addr, uint16_t dst_port);
 #endif
 
+/****************************************************************************
+ * Name: netdev_checksum_start
+ *
+ * Description:
+ *   Get checksum start offset position with iob, then hardware can
+ *   use to calculate the package payload checksum value.
+ *
+ * Input Parameters:
+ *   dev  -  The driver structure
+ *
+ * Returned Value:
+ *   The checksum start offset position, -EINVAL is mean not need calculate
+ *   with hardware
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NETDEV_CHECKSUM
+int netdev_checksum_start(FAR struct net_driver_s *dev);
+#endif
+
+/****************************************************************************
+ * Name: netdev_checksum_offset
+ *
+ * Description:
+ *   Get checksum field offset with tcp/udp header.
+ *
+ * Input Parameters:
+ *   dev  -  The driver structure
+ *
+ * Returned Value:
+ *   The checksum field offset with L4, -EINVAL is mean not need calculate
+ *   with hardware
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NETDEV_CHECKSUM
+int netdev_checksum_offset(FAR struct net_driver_s *dev);
+#endif
+
 #undef EXTERN
 #ifdef __cplusplus
 }
