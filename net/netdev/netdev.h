@@ -533,44 +533,98 @@ void netdev_notify_recvcpu(FAR struct net_driver_s *dev,
                            FAR const void *dst_addr, uint16_t dst_port);
 #endif
 
+#ifdef CONFIG_NET_IPv4
+
 /****************************************************************************
- * Name: netdev_checksum_start
+ * Name: ipv4_upperlayer_header_chksum
  *
  * Description:
- *   Get checksum start offset position with iob, then hardware can
- *   use to calculate the package payload checksum value.
+ *   Perform the checksum calculation over the IPv4, protocol headers,
+ *   IP source and destination addresses
  *
  * Input Parameters:
- *   dev  -  The driver structure
+ *   dev   - The network driver instance. The packet data is in the d_buf
+ *           of the device.
+ *   proto - The protocol being supported
  *
  * Returned Value:
- *   The checksum start offset position, -EINVAL is mean not need calculate
- *   with hardware
+ *   The calculated checksum with pseudo-header and IP source and
+ *   destination addresses
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NETDEV_CHECKSUM
-int netdev_checksum_start(FAR struct net_driver_s *dev);
-#endif
+uint16_t ipv4_upperlayer_header_chksum(FAR struct net_driver_s *dev,
+                                       uint8_t proto);
 
 /****************************************************************************
- * Name: netdev_checksum_offset
+ * Name: ipv4_upperlayer_payload_chksum
  *
  * Description:
- *   Get checksum field offset with tcp/udp header.
+ *   Perform the checksum calculation over the iob data payload
  *
  * Input Parameters:
- *   dev  -  The driver structure
+ *   dev   - The network driver instance. The packet data is in the d_buf
+ *           of the device.
+ *   sum   - The default checksum
  *
  * Returned Value:
- *   The checksum field offset with L4, -EINVAL is mean not need calculate
- *   with hardware
+ *   The calculated checksum with iob data payload and default checksum
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NETDEV_CHECKSUM
-int netdev_checksum_offset(FAR struct net_driver_s *dev);
-#endif
+uint16_t ipv4_upperlayer_payload_chksum(FAR struct net_driver_s *dev,
+                                        uint16_t sum);
+#endif /* CONFIG_NET_IPv4 */
+
+#ifdef CONFIG_NET_IPv6
+
+/****************************************************************************
+ * Name: ipv6_upperlayer_header_chksum
+ *
+ * Description:
+ *   Perform the checksum calculation over the IPv6, protocol headers,
+ *   IP source and destination addresses.
+ *
+ * Input Parameters:
+ *   dev   - The network driver instance.  The packet data is in the d_buf
+ *           of the device.
+ *   proto - The protocol being supported
+ *   iplen - The size of the IPv6 header.  This may be larger than
+ *           IPv6_HDRLEN the IPv6 header if IPv6 extension headers are
+ *           present.
+ *
+ * Returned Value:
+ *   The calculated checksum
+ *
+ ****************************************************************************/
+
+uint16_t ipv6_upperlayer_header_chksum(FAR struct net_driver_s *dev,
+                                       uint8_t proto, unsigned int iplen);
+
+/****************************************************************************
+ * Name: ipv6_upperlayer_payload_chksum
+ *
+ * Description:
+ *   Perform the checksum calculation over the iob data payload and
+ *   default checksum.
+ *
+ * Input Parameters:
+ *   dev   - The network driver instance.  The packet data is in the d_buf
+ *           of the device.
+ *   proto - The protocol being supported
+ *   iplen - The size of the IPv6 header.  This may be larger than
+ *           IPv6_HDRLEN the IPv6 header if IPv6 extension headers are
+ *           present.
+ *
+ * Returned Value:
+ *   The calculated checksum
+ *
+ ****************************************************************************/
+
+uint16_t ipv6_upperlayer_payload_chksum(FAR struct net_driver_s *dev,
+                                        unsigned int iplen, uint16_t sum);
+
+#endif /* CONFIG_NET_IPv6 */
 
 #undef EXTERN
 #ifdef __cplusplus

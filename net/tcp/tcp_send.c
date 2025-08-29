@@ -204,13 +204,6 @@ static void tcp_sendcommon(FAR struct net_driver_s *dev,
         {
           tcp->tcpchksum = ~tcp_ipv6_chksum(dev);
         }
-      else
-        {
-          uint16_t chksum = ipv6_upperlayer_header_chksum(dev,
-                                                          IP_PROTO_TCP,
-                                                          IPv6_HDRLEN);
-          tcp->tcpchksum = HTONS(chksum);
-        }
 #endif
 
 #ifdef CONFIG_NET_STATISTICS
@@ -237,12 +230,6 @@ static void tcp_sendcommon(FAR struct net_driver_s *dev,
       if ((dev->d_features & NETDEV_TX_CSUM) == 0)
         {
           tcp->tcpchksum = ~tcp_ipv4_chksum(dev);
-        }
-      else
-        {
-          uint16_t chksum = ipv4_upperlayer_header_chksum(dev,
-                                                          IP_PROTO_TCP);
-          tcp->tcpchksum = HTONS(chksum);
         }
 #endif
 
@@ -526,13 +513,6 @@ void tcp_reset(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
         {
           tcp->tcpchksum = ~tcp_ipv6_chksum(dev);
         }
-      else
-        {
-          uint16_t chksum = ipv6_upperlayer_header_chksum(dev,
-                                                          IP_PROTO_TCP,
-                                                          IPv6_HDRLEN);
-          tcp->tcpchksum = HTONS(chksum);
-        }
 #endif
     }
 #endif /* CONFIG_NET_IPv6 */
@@ -555,12 +535,6 @@ void tcp_reset(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
       if ((dev->d_features & NETDEV_TX_CSUM) == 0)
         {
           tcp->tcpchksum = ~tcp_ipv4_chksum(dev);
-        }
-      else
-        {
-          uint16_t chksum = ipv4_upperlayer_header_chksum(dev,
-                                                          IP_PROTO_TCP);
-          tcp->tcpchksum = HTONS(chksum);
         }
 #endif
     }
