@@ -1491,7 +1491,8 @@ static int netdev_arp_ioctl(FAR struct socket *psock, int cmd,
                */
 
               ret = arp_update(dev, addr->sin_addr.s_addr,
-                               (FAR const uint8_t *)req->arp_ha.sa_data);
+                               (FAR const uint8_t *)req->arp_ha.sa_data,
+                               req->arp_flags);
             }
           else
             {

@@ -164,6 +164,7 @@ struct arp_entry_s
   in_addr_t                at_ipaddr;   /* IP address */
   struct ether_addr        at_ethaddr;  /* Hardware address */
   clock_t                  at_time;     /* Time of last usage */
+  uint8_t                  at_flags;    /* Flags, examples: ATF_PERM */
   FAR struct net_driver_s *at_dev;      /* The device driver structure */
 };
 
@@ -471,6 +472,7 @@ void arp_cleanup(FAR struct net_driver_s *dev);
  *   dev     - The device driver structure
  *   ipaddr  - The IP address as an inaddr_t
  *   ethaddr - Refers to a HW address uint8_t[IFHWADDRLEN]
+ *   flags   - Flags, examples: ATF_PERM(Permanent entry)
  *
  * Returned Value:
  *   Zero (OK) if the ARP table entry was successfully modified.  A negated
@@ -482,7 +484,7 @@ void arp_cleanup(FAR struct net_driver_s *dev);
  ****************************************************************************/
 
 int arp_update(FAR struct net_driver_s *dev, in_addr_t ipaddr,
-               FAR const uint8_t *ethaddr);
+               FAR const uint8_t *ethaddr, uint8_t flags);
 
 /****************************************************************************
  * Name: arp_hdr_update
@@ -623,7 +625,7 @@ void arp_acd_setup(FAR struct net_driver_s *dev);
 #  define arp_find(i,e,d,u) (-ENOSYS)
 #  define arp_delete(i,d) (-ENOSYS)
 #  define arp_cleanup(d)
-#  define arp_update(d,i,m);
+#  define arp_update(d,i,m,f);
 #  define arp_hdr_update(d,i,m);
 #  define arp_snapshot(s,n) (0)
 #  define arp_dump(arp)
