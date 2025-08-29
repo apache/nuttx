@@ -509,7 +509,7 @@ static int fat_zero_cluster(FAR struct fat_mountpt_s *fs, int cluster,
   off_t end_sec = sector + DIV_ROUND_UP(end, fs->fs_hwsectorsize);
   int ret;
 
-  buf = fs_heap_malloc(fs->fs_hwsectorsize);
+  buf = fat_io_alloc(fs->fs_hwsectorsize);
   if (!buf)
     {
       return -ENOMEM;
@@ -548,7 +548,7 @@ static int fat_zero_cluster(FAR struct fat_mountpt_s *fs, int cluster,
   ret = OK;
 
 out:
-  fs_heap_free(buf);
+  fat_io_free(buf, fs->fs_hwsectorsize);
 
   return ret;
 }
