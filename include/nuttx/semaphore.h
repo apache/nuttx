@@ -147,7 +147,7 @@ extern "C"
  *
  ****************************************************************************/
 
-int nxsem_init(FAR sem_t *sem, int pshared, uint32_t value);
+int nxsem_init(FAR sem_t *sem, int pshared, int32_t value);
 
 /****************************************************************************
  * Name: nxsem_destroy
