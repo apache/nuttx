@@ -82,6 +82,10 @@ if(CONFIG_IOEXPANDER)
   if(CONFIG_IOEXPANDER_SX1509)
     list(APPEND SRCS sx1509.c)
   endif()
+
+  if(CONFIG_IOEXPANDER_AW9523B)
+    list(APPEND SRCS aw9523b.c)
+  endif()
 endif()
 
 # GPIO test device driver (independent of IOEXPANDERS)
