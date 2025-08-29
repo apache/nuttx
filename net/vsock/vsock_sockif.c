@@ -399,7 +399,7 @@ static void vsock_notify(FAR struct vsock_conn_s *conn, int type)
       case VSOCK_NOTIFY_ERROR:
         vsock_post(&conn->rx_sem);
         vsock_post(&conn->tx_sem);
-        eventset = POLLIN | POLLOUT;
+        eventset = POLLERR | POLLHUP;
         break;
       case VSOCK_NOTIFY_LISTEN:
         vsock_post(&conn->rx_sem);
@@ -1195,7 +1195,7 @@ static int vsock_reset_no_conn(FAR struct vsock_transport_s *t,
   rhdr->flags    = 0;
   rhdr->len      = 0;
 
-  vsock_dump_pkt(pkt, "Send", false);
+  vsock_dump_pkt(&reply, "Send", false);
   return VSOCK_SEND_PKT(t, &reply);
 }
 
