@@ -33,6 +33,7 @@
 #include <stdint.h>
 #include <signal.h>
 
+#include <nuttx/percpu.h>
 #include <nuttx/lib/builtin.h>
 
 #ifdef CONFIG_BUILD_PROTECTED
@@ -66,11 +67,36 @@
  * found at the beginning of the user-space blob.
  */
 
-#define USERSPACE ((FAR struct userspace_s *)CONFIG_NUTTX_USERSPACE)
+#define USERSPACE                    ((FAR struct userspace_s *)CONFIG_NUTTX_USERSPACE)
+
+/* These macros help kernelspace to access userspace percpu values */
+
+#ifdef CONFIG_PERCPU_ARRAY
+#  define per_cpu_var_user_smp(v, c) v[c]
+#  define this_cpu_var_user(v)       v[this_cpu()]
+#elif defined(__KERNEL__)
+#  define per_cpu_var_user_smp(v, c) (*(FAR typeof(v) *)((uintptr_t)&(v) + USERSPACE->us_offset_percpu * (c)))
+#  define this_cpu_var_user(v)       (*(FAR typeof(v) *)((uintptr_t)&(v) + USERSPACE->us_offset_percpu * this_cpu()))
+#else
+#  define per_cpu_var_user_smp(v, c) (*(FAR typeof(v) *)((uintptr_t)&(v) + PERCPU_OFFSET * (c)))
+#  define this_cpu_var_user(v)       (*(FAR typeof(v) *)((uintptr_t)&(v) + PERCPU_OFFSET * this_cpu()))
+#endif
+
+#ifdef CONFIG_SMP
+#  define this_cpu_var_user_smp(v)   this_cpu_var_user(v)
+#else
+#  define this_cpu_var_user_smp(v)   v[0]
+#endif
+
+#ifdef CONFIG_BMP
+#  define this_cpu_var_user_bmp(v)   this_cpu_var_user(v)
+#else
+#  define this_cpu_var_user_bmp(v)   v
+#endif
 
 /* Unify all USERSPCE_HEAP usage */
 
-#define USERSPACE_HEAP (*USERSPACE->us_data->us_heap)
+#define USERSPACE_HEAP               (this_cpu_var_user_bmp(*USERSPACE->us_data->us_heap))
 
 /* In user space, these functions are directly callable.  In kernel space,
  * they can be called through the userspace structure.
@@ -99,6 +125,14 @@ struct userspace_s
   main_t    us_entrypoint;
   uintptr_t us_textstart;
   uintptr_t us_textend;
+#ifdef CONFIG_PERCPU_SECTION
+  uintptr_t us_datasource_percpu;
+  uintptr_t us_datastart_percpu;
+  uintptr_t us_dataend_percpu;
+  uintptr_t us_bssstart_percpu;
+  uintptr_t us_bssend_percpu;
+  uintptr_t us_offset_percpu;
+#endif
   uintptr_t us_datasource;
   uintptr_t us_datastart;
   uintptr_t us_dataend;
