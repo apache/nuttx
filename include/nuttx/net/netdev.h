@@ -80,6 +80,11 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Hardware features bits */
+
+#define NETDEV_TX_CSUM  (1 << 1) /* Netdev support hardware tx checksum */
+#define NETDEV_RX_CSUM  (1 << 2) /* Netdev support hardware rx checksum */
+
 /* Determine the largest possible address */
 
 #if defined(CONFIG_WIRELESS_IEEE802154) && defined(CONFIG_WIRELESS_PKTRADIO)
@@ -340,6 +345,10 @@ struct net_driver_s
   /* Drivers interface flags.  See IFF_* definitions in include/net/if.h */
 
   uint32_t d_flags;
+
+  /* Hardware features. See NETDEV_* definitions */
+
+  uint8_t d_features;
 
   /* Multi network devices using multiple link layer protocols are
    * supported
