@@ -169,6 +169,10 @@ arp_return_old_entry(FAR struct arp_entry_s *e1, FAR struct arp_entry_s *e2)
     {
       return e2;
     }
+  else if ((e1->at_flags & ATF_PERM) != (e2->at_flags & ATF_PERM))
+    {
+      return (e1->at_flags & ATF_PERM) == 0 ? e1 : e2;
+    }
   else if ((int)(e1->at_time - e2->at_time) <= 0)
     {
       return e1;
@@ -220,7 +224,8 @@ static FAR struct arp_entry_s *arp_lookup(in_addr_t ipaddr,
 
           /* Check if it has expired */
 
-          if (clock_systime_ticks() - tabptr->at_time <= ARP_MAXAGE_TICK)
+          if ((tabptr->at_flags & ATF_PERM) != 0 ||
+              clock_systime_ticks() - tabptr->at_time <= ARP_MAXAGE_TICK)
             {
               return tabptr;
             }
@@ -279,6 +284,7 @@ static void arp_get_arpreq(FAR struct arpreq *output,
  *   dev     - The device driver structure
  *   ipaddr  - The IP address as an inaddr_t
  *   ethaddr - Refers to a HW address uint8_t[IFHWADDRLEN]
+ *   flags   - Flags, examples: ATF_PERM(Permanent entry)
  *
  * Returned Value:
  *   Zero (OK) if the ARP table entry was successfully modified.  A negated
@@ -290,7 +296,7 @@ static void arp_get_arpreq(FAR struct arpreq *output,
  ****************************************************************************/
 
 int arp_update(FAR struct net_driver_s *dev, in_addr_t ipaddr,
-               FAR const uint8_t *ethaddr)
+               FAR const uint8_t *ethaddr, uint8_t flags)
 {
   FAR struct arp_entry_s *tabptr = &g_arptable[0];
 #ifdef CONFIG_NETLINK_ROUTE
@@ -355,10 +361,14 @@ int arp_update(FAR struct net_driver_s *dev, in_addr_t ipaddr,
    * information.
    */
 
-  tabptr->at_ipaddr = ipaddr;
-  memcpy(tabptr->at_ethaddr.ether_addr_octet, ethaddr, ETHER_ADDR_LEN);
-  tabptr->at_dev = dev;
-  tabptr->at_time = clock_systime_ticks();
+  if ((tabptr->at_flags & ATF_PERM) == 0 || (flags & ATF_PERM) != 0)
+    {
+      memcpy(tabptr->at_ethaddr.ether_addr_octet, ethaddr, ETHER_ADDR_LEN);
+      tabptr->at_ipaddr = ipaddr;
+      tabptr->at_time   = clock_systime_ticks();
+      tabptr->at_flags  = flags;
+      tabptr->at_dev    = dev;
+    }
 
   /* Notify the new entry */
 
@@ -401,7 +411,7 @@ void arp_hdr_update(FAR struct net_driver_s *dev, FAR uint16_t *pipaddr,
 
   /* Update the ARP table */
 
-  arp_update(dev, ipaddr, ethaddr);
+  arp_update(dev, ipaddr, ethaddr, 0);
 }
 
 /****************************************************************************
@@ -598,8 +608,8 @@ unsigned int arp_snapshot(FAR struct arpreq *snapshot,
        i++)
     {
       tabptr = &g_arptable[i];
-      if (tabptr->at_ipaddr != 0 &&
-          now - tabptr->at_time <= ARP_MAXAGE_TICK)
+      if (tabptr->at_ipaddr != 0 && ((tabptr->at_flags & ATF_PERM) != 0 ||
+          now - tabptr->at_time <= ARP_MAXAGE_TICK))
         {
           arp_get_arpreq(&snapshot[ncopied], tabptr);
           ncopied++;

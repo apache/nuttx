@@ -367,7 +367,7 @@ int arp_send(in_addr_t ipaddr)
 
       if (state.snd_retries == 0)
         {
-          arp_update(dev, ipaddr, NULL);
+          arp_update(dev, ipaddr, NULL, 0);
           sending = true;
         }
 

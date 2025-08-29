@@ -283,7 +283,7 @@ void arp_out(FAR struct net_driver_s *dev)
        * send ARP request for same destination.
        */
 
-      arp_update(dev, ipaddr, NULL);
+      arp_update(dev, ipaddr, NULL, 0);
 
       /* The destination address was not in our ARP table, so we overwrite
        * the IP packet with an ARP request.
