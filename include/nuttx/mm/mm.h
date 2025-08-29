@@ -131,7 +131,7 @@ typedef CODE void (*mm_delaycb_t)(FAR void *mem);
  * structure from the userspace interface.
  */
 
-#  define USR_HEAP (*USERSPACE->us_data->us_heap)
+#  define USR_HEAP USERSPACE_HEAP
 
 #else
 /* Otherwise, the user heap data structures are in common .bss */
