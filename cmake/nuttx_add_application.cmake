@@ -123,6 +123,15 @@ function(nuttx_add_application)
       # create as standalone executable (loadable application or "module")
       set(TARGET "${NAME}")
 
+      # determine the compiled elf mode
+      if(CONFIG_BUILD_KERNEL)
+        set(KERNEL_ELF_MODE True) # kernel elf will link all user libs
+      elseif("${MODULE}" STREQUAL "m")
+        set(LOADABLE_ELF_MODE True) # loadable elf only link extra libs
+      elseif("${DYNLIB}" STREQUAL "y")
+        set(DYNLIB_ELF_MODE True) # dynlib elf dont need start obj and other lib
+      endif()
+
       # Use ELF capable toolchain, by building manually and overwriting the
       # non-elf output
       if(NOT CMAKE_C_ELF_COMPILER)
@@ -137,12 +146,20 @@ function(nuttx_add_application)
           TARGET ${TARGET}
           POST_BUILD
           COMMAND
-            ${CMAKE_LD}
-            $<IF:$<STREQUAL:"${DYNLIB}","y">,$<TARGET_PROPERTY:nuttx_global,NUTTX_MOD_APP_LINK_OPTIONS>,$<TARGET_PROPERTY:nuttx_global,NUTTX_ELF_APP_LINK_OPTIONS>>
-            ${LINK_FLAGS} -T ${CMAKE_BINARY_DIR}/gnu-elf.ld
-            $<$<AND:$<TARGET_EXISTS:STARTUP_OBJS>,$<STREQUAL:"${DYNLIB}","y">>:$<TARGET_OBJECTS:STARTUP_OBJS>>
+            # add default link option
+            ${CMAKE_LD} -T ${CMAKE_BINARY_DIR}/gnu-elf.ld
+            # add global MOD link option if dynlib link
+            $<$<BOOL:${DYNLIB_ELF_MODE}>:$<TARGET_PROPERTY:nuttx_global,NUTTX_MOD_APP_LINK_OPTIONS>>
+            # add global ELF link option if m&kernel link
+            $<$<OR:$<BOOL:${KERNEL_ELF_MODE}>,$<BOOL:${LOADABLE_ELF_MODE}>>:$<TARGET_PROPERTY:nuttx_global,NUTTX_ELF_APP_LINK_OPTIONS>>
+            # add local link option last
+            ${LINK_FLAGS}
+            # link startup obj if m&kernel link
+            $<$<AND:$<TARGET_EXISTS:STARTUP_OBJS>,$<NOT:$<BOOL:${DYNLIB_ELF_MODE}>>>:$<TARGET_OBJECTS:STARTUP_OBJS>>
             $<$<NOT:$<BOOL:${USE_LINKER}>>:-Wl,>--start-group
-            $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx_global,NUTTX_ELF_LINK_LIBRARIES>>
+            # link user lib if kernel link
+            $<$<BOOL:${KERNEL_ELF_MODE}>:$<GENEX_EVAL:$<TARGET_PROPERTY:nuttx_global,NUTTX_ELF_LINK_LIBRARIES>>>
+            # always link extra libs
             $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx_global,NUTTX_ELF_LINK_EXTRA_LIBRARIES>>
             $<$<NOT:$<BOOL:${USE_LINKER}>>:-Wl,>--whole-archive
             $<TARGET_FILE:${TARGET}>
@@ -181,7 +198,7 @@ function(nuttx_add_application)
         )
       endif()
 
-      if("${DYNLIB}" STREQUAL "y")
+      if(DYNLIB_ELF_MODE)
         target_compile_options(
           ${TARGET}
           PRIVATE
