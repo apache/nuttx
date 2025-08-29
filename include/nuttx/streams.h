@@ -286,6 +286,18 @@ struct lib_syslograwstream_s
 /* LZF compressed stream pipeline */
 
 #ifdef CONFIG_LIBC_LZF
+
+struct lib_lzfsistream_s
+{
+  struct lib_sistream_s      common;
+  FAR struct lib_sistream_s *backend;
+  off_t                      offset;
+  off_t                      blkoff;
+  off_t                      blkcoff;
+  char                       out[LZF_STREAM_BLOCKSIZE];
+  char                       in[LZF_MAX_HDR_SIZE + LZF_STREAM_BLOCKSIZE];
+};
+
 struct lib_lzfoutstream_s
 {
   struct lib_outstream_s      common;
@@ -627,6 +639,27 @@ void lib_syslograwstream_open(FAR struct lib_syslograwstream_s *stream);
 void lib_syslograwstream_close(FAR struct lib_syslograwstream_s *stream);
 #else
 #  define lib_syslograwstream_close(s)
+#endif
+
+/****************************************************************************
+ * Name: lib_lzfsistream
+ *
+ * Description:
+ *  LZF decompressed pipeline stream
+ *
+ * Input Parameters:
+ *   stream  - User allocated, uninitialized instance of struct
+ *                lib_lzfsistream_s to be initialized.
+ *   backend - Stream backend port.
+ *
+ * Returned Value:
+ *   None (User allocated instance initialized).
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_LIBC_LZF
+void lib_lzfsistream(FAR struct lib_lzfsistream_s *sistream,
+                     FAR struct lib_sistream_s *backend);
 #endif
 
 /****************************************************************************

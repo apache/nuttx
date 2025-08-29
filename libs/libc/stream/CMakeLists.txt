@@ -60,7 +60,7 @@ if(CONFIG_FILE_STREAM)
 endif()
 
 if(CONFIG_LIBC_LZF)
-  list(APPEND SRCS lib_lzfcompress.c)
+  list(APPEND SRCS lib_lzfcompress.c lib_lzfdecompress.c)
 endif()
 
 if(NOT CONFIG_DISABLE_MOUNTPOINT)

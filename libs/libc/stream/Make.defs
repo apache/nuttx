@@ -45,7 +45,7 @@ CSRCS += lib_stdsostream.c
 endif
 
 ifeq ($(CONFIG_LIBC_LZF),y)
-CSRCS += lib_lzfcompress.c
+CSRCS += lib_lzfcompress.c lib_lzfdecompress.c
 endif
 
 ifeq ($(CONFIG_DISABLE_MOUNTPOINT),)
