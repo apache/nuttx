@@ -109,4 +109,6 @@ if(CONFIG_NET)
   endif()
 
   target_sources(drivers PRIVATE ${SRCS})
+
+  nuttx_add_subdirectory()
 endif()
