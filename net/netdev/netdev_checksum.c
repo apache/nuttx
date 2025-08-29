@@ -25,6 +25,8 @@
  ****************************************************************************/
 
 #include <nuttx/net/netdev.h>
+#include <nuttx/net/udp.h>
+#include <nuttx/net/tcp.h>
 
 #include "netdev/netdev.h"
 

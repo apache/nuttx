@@ -57,4 +57,8 @@ if(CONFIG_NETDEV_RSS)
   list(APPEND SRCS netdev_notify_recvcpu.c)
 endif()
 
+if(CONFIG_NETDEV_CHECKSUM)
+  list(APPEND SRCS netdev_checksum.c)
+endif()
+
 target_sources(net PRIVATE ${SRCS})
