@@ -447,7 +447,8 @@ static int ipv4_in(FAR struct net_driver_s *dev)
 #endif
 
 #ifdef CONFIG_NET_IPV4_CHECKSUMS
-  if (ipv4_chksum(IPv4BUF) != 0xffff)
+  if (((dev->d_features & NETDEV_RX_CSUM) == 0)
+      && (ipv4_chksum(IPv4BUF) != 0xffff))
     {
       /* Compute and check the IP header checksum. */
 
