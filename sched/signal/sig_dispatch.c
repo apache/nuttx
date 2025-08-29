@@ -755,12 +755,12 @@ int nxsig_dispatch(pid_t pid, FAR siginfo_t *info, bool thread)
     {
       if (thread)
         {
-          /* Before the notification, we should validate the tid and
-           * and make sure that the notified thread is in same process
-           * with the current thread.
+          /* Before the notification, we should validate the tid. If the
+           * signal is to be delivered to a thread which has exited, it is
+           * just dropped.
            */
 
-          if (stcb != NULL && group == this_task()->group)
+          if (stcb != NULL)
             {
               return nxsig_tcbdispatch(stcb, info, false);
             }
