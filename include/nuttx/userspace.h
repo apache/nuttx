@@ -68,6 +68,10 @@
 
 #define USERSPACE ((FAR struct userspace_s *)CONFIG_NUTTX_USERSPACE)
 
+/* Unify all USERSPCE_HEAP usage */
+
+#define USERSPACE_HEAP (*USERSPACE->us_data->us_heap)
+
 /* In user space, these functions are directly callable.  In kernel space,
  * they can be called through the userspace structure.
  */
