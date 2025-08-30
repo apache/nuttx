@@ -264,6 +264,27 @@ nxevent_mask_t nxevent_trywait(FAR nxevent_t *event, nxevent_mask_t events,
                                nxevent_flags_t eflags);
 
 /****************************************************************************
+ * Name: nxevent_clear
+ *
+ * Description:
+ *   Clear event mask to an event object.
+ *
+ * Input Parameters:
+ *   event  - Address of the event object
+ *   mask   - Mask to be clear
+ *
+ * Returned Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It returns the event mask value to an event object before clear.
+ *
+ * Assumptions:
+ *   This function may be called from an interrupt handler.
+ *
+ ****************************************************************************/
+
+nxevent_mask_t nxevent_clear(FAR nxevent_t *event, nxevent_mask_t mask);
+
+/****************************************************************************
  * Name: nxevent_open
  *
  * Description:
