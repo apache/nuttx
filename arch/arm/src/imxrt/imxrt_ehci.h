@@ -76,7 +76,7 @@ extern "C"
  *
  ****************************************************************************/
 
-extern void imxrt_usbhost_vbusdrive(int rhport, bool enable);
+extern void imxrt_usbhost_vbusdrive(int ctrid, int rhport, bool enable);
 
 /****************************************************************************
  * Name: imxrt_setup_overcurrent
