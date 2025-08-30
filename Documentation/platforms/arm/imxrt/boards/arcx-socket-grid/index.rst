@@ -90,3 +90,14 @@ Configures the NuttShell (nsh) located at examples/nsh.  This NSH
 configuration is focused on low level, command-line driver testing.
 Built-in applications are supported, but none are enabled.  This
 configuration does not support a network.
+
+usbdisk
+-------
+
+This board profile allows to use USB Thumb driver connected to USB port.
+Typically the device will be recognized and created at /dev/sda. The
+user could mount it this way::
+
+    nsh> mount -t vfat /dev/sda /mnt
+
+Note: It is assumed that the USB Flash drive was formatted as FAT32.
