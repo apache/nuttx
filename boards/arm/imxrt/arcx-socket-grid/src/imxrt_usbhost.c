@@ -43,8 +43,10 @@
 
 #include "hardware/imxrt_pinmux.h"
 #include "hardware/imxrt_usbotg.h"
+#include "hardware/imxrt_usbphy.h"
 #include "imxrt_periphclks.h"
 #include "arcx-socket-grid.h"
+#include "arm_internal.h"
 
 #include <arch/board/board.h>  /* Must always be included last */
 
@@ -77,18 +79,51 @@
  *
  ****************************************************************************/
 
-int imxrt_usbhost_initialize(void)
+int imxrt_usbhost_initialize(int ctrid)
 {
-  struct usbhost_connection_s *ehciconn;
+  struct usbhost_connection_s *ehciconn_usb1 = NULL;
+  struct usbhost_connection_s *ehciconn_usb2 = NULL;
+  uint32_t regval;
+  static bool usb1_initialized = false;
+  static bool usb2_initialized = false;
   int ret;
+
+  /* Check if each USB was initialized already */
+
+  if (ctrid == 0 && usb1_initialized)
+    {
+      return OK;
+    }
+
+  if (ctrid == 1 && usb2_initialized)
+    {
+      return OK;
+    }
 
   imxrt_clockall_usboh3();
 
-  /* Make sure we don't accidentally switch on USB bus power */
+  /* Leave from reset */
 
-  *((uint32_t *)IMXRT_USBNC_USB_OTG1_CTRL) = USBNC_PWR_POL;
-  *((uint32_t *)0x400d9030)                = (1 << 21);
-  *((uint32_t *)0x400d9000)                = 0;
+  regval = getreg32(IMXRT_USBPHY_CTRL(ctrid));
+  regval &= ~USBPHY_CTRL_SFTRST;
+  putreg32(regval, IMXRT_USBPHY_CTRL(ctrid));
+
+  /* Enable the clock */
+
+  regval = getreg32(IMXRT_USBPHY_CTRL(ctrid));
+  regval &= ~USBPHY_CTRL_CLKGATE;
+  putreg32(regval, IMXRT_USBPHY_CTRL(ctrid));
+
+  /* Power up the PHY */
+
+  putreg32(0, IMXRT_USBPHY_PWD(ctrid));
+
+  /* Enable PHY Negotiation */
+
+  regval = getreg32(IMXRT_USBPHY_CTRL(ctrid));
+  regval |= USBPHY_CTRL_ENAUTOCLR_PHY_PWD | USBPHY_CTRL_ENAUTOCLR_CLKGATE |
+            USBPHY_CTRL_ENUTMILEVEL2 | USBPHY_CTRL_ENUTMILEVEL3;
+  putreg32(regval, IMXRT_USBPHY_CTRL(ctrid));
 
   /* Setup pins, with power initially off */
 
@@ -144,10 +179,11 @@ int imxrt_usbhost_initialize(void)
     }
 #endif
 
+#ifdef CONFIG_IMXRT_USBOTG1
   /* Then get an instance of the USB EHCI interface. */
 
-  ehciconn = imxrt_ehci_initialize(0);
-  if (!ehciconn)
+  ehciconn_usb1 = imxrt_ehci_initialize(ctrid);
+  if (!ehciconn_usb1)
     {
       uerr("ERROR: imxrt_ehci_initialize failed\n");
       return -ENODEV;
@@ -155,12 +191,37 @@ int imxrt_usbhost_initialize(void)
 
   /* Initialize waiter */
 
-  ret = usbhost_waiter_initialize(ehciconn);
+  ret = usbhost_waiter_initialize(ehciconn_usb1);
   if (ret < 0)
     {
       uerr("ERROR: Failed to create ehci_waiter task: %d\n", ret);
       return -ENODEV;
     }
+
+  usb1_initialized = true;
+#endif
+
+#ifdef CONFIG_IMXRT_USBOTG2
+  /* Then get an instance of the USB EHCI interface. */
+
+  ehciconn_usb2 = imxrt_ehci_initialize(ctrid);
+  if (!ehciconn_usb2)
+    {
+      uerr("ERROR: imxrt_ehci_initialize failed\n");
+      return -ENODEV;
+    }
+
+  /* Initialize waiter */
+
+  ret = usbhost_waiter_initialize(ehciconn_usb2);
+  if (ret < 0)
+    {
+      uerr("ERROR: Failed to create ehci_waiter task: %d\n", ret);
+      return -ENODEV;
+    }
+
+  usb2_initialized = true;
+#endif
 
   return OK;
 }
@@ -184,28 +245,28 @@ int imxrt_usbhost_initialize(void)
  *
  ****************************************************************************/
 
-#define HCOR ((volatile struct ehci_hcor_s *)IMXRT_USBOTG_HCOR_BASE)
+#define HCOR(n) ((volatile struct ehci_hcor_s *)IMXRT_USBOTG_HCOR_BASE(n))
 
-void imxrt_usbhost_vbusdrive(int rhport, bool enable)
+void imxrt_usbhost_vbusdrive(int ctrid, int rhport, bool enable)
 {
   uint32_t regval;
 
   uinfo("RHPort%d: enable=%d\n", rhport + 1, enable);
 
-  /* The IMXRT has only a single root hub port */
+  /* The IMXRT has two root hub ports */
 
-  if (rhport == 0)
+  if (rhport == 0 || rhport == 1)
     {
       /* Then enable or disable VBUS power */
 
-      regval = HCOR->portsc[rhport];
+      regval = HCOR(rhport)->portsc[ctrid];
       regval &= ~EHCI_PORTSC_PP;
       if (enable)
         {
           regval |= EHCI_PORTSC_PP;
         }
 
-      HCOR->portsc[rhport] = regval;
+      HCOR(rhport)->portsc[ctrid] = regval;
     }
 }
 
