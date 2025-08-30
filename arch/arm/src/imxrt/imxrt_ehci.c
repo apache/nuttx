@@ -122,11 +122,11 @@
 
 /* Host Controller Capability Registers */
 
-#define HCCR ((struct ehci_hccr_s *)IMXRT_USBOTG_HCCR_BASE)
+#define HCCR(n) ((struct ehci_hccr_s *)IMXRT_USBOTG_HCCR_BASE(n))
 
 /* Host Controller Operational Registers */
 
-#define HCOR ((volatile struct ehci_hcor_s *)IMXRT_USBOTG_HCOR_BASE)
+#define HCOR(n) ((volatile struct ehci_hcor_s *)IMXRT_USBOTG_HCOR_BASE(n))
 
 /* Interrupts ***************************************************************
  * This is the set of interrupts handled by this driver.
@@ -219,12 +219,16 @@ struct imxrt_list_s
                                   */
 };
 
+/* Needed by following typedefs */
+
+struct imxrt_ehci_dev_s;
+
 /* List traversal call-out functions */
 
 typedef int (*foreach_qh_t)(struct imxrt_qh_s *qh, uint32_t **bp,
-                            void *arg);
+                            void *arg, struct imxrt_ehci_dev_s *ehci_dev);
 typedef int (*foreach_qtd_t)(struct imxrt_qtd_s *qtd, uint32_t **bp,
-                             void *arg);
+                             void *arg, struct imxrt_ehci_dev_s *ehci_dev);
 
 /* This structure describes one endpoint. */
 
@@ -251,6 +255,26 @@ struct imxrt_epinfo_s
 #endif
 };
 
+/* This structure will be used to access EHCI over functions and isr */
+
+struct imxrt_ehci_dev_s
+{
+  int                  ctrid;     /* USB Controller (USB1 = 0, USB2 = 1) */
+  struct imxrt_ehci_s *ehci;      /* Pointer to current EHCI device */
+  struct imxrt_qh_s   *asynchead;
+  struct imxrt_qh_s   *qhpool;
+  struct imxrt_qtd_s  *qtdpool;
+  struct imxrt_qh_s   *intrhead;
+  uint32_t            *framelist;
+  uint32_t             pending;   /* Pending interrupts */
+};
+
+struct imxrt_usbhost_conn_s
+{
+  struct usbhost_connection_s ehci_conn;
+  struct imxrt_ehci_dev_s *ehci_dev;
+};
+
 /* This structure retains the state of one root hub port */
 
 struct imxrt_rhport_s
@@ -271,6 +295,10 @@ struct imxrt_rhport_s
   /* This is the hub port description understood by class drivers */
 
   struct usbhost_roothubport_s hport;
+
+  /* This is the USB Controller ID: USB1 (0) or USB2 (1) */
+
+  struct imxrt_ehci_dev_s *ehci_dev;
 };
 
 /* This structure retains the overall state of the USB host controller */
@@ -419,25 +447,31 @@ static void imxrt_putreg(uint32_t regval, volatile uint32_t *regaddr);
 static inline uint32_t imxrt_getreg(volatile uint32_t *regaddr);
 static inline void imxrt_putreg(uint32_t regval, volatile uint32_t *regaddr);
 #endif
-static int ehci_wait_usbsts(uint32_t maskbits, uint32_t donebits,
+static int ehci_wait_usbsts(int controller, uint32_t maskbits,
+         uint32_t donebits,
          unsigned int delay);
 
 /* Allocators ***************************************************************/
 
-static struct imxrt_qh_s *imxrt_qh_alloc(void);
-static void imxrt_qh_free(struct imxrt_qh_s *qh);
-static struct imxrt_qtd_s *imxrt_qtd_alloc(void);
-static void imxrt_qtd_free(struct imxrt_qtd_s *qtd);
+static struct imxrt_qh_s *imxrt_qh_alloc(struct imxrt_ehci_dev_s *ehci_dev);
+static void imxrt_qh_free(struct imxrt_qh_s *qh,
+                          struct imxrt_ehci_dev_s *ehci_dev);
+static struct imxrt_qtd_s *imxrt_qtd_alloc(struct imxrt_ehci_dev_s
+                                           *ehci_dev);
+static void imxrt_qtd_free(struct imxrt_qtd_s *qtd,
+                           struct imxrt_ehci_dev_s *ehci_dev);
 
 /* List Management **********************************************************/
 
 static int imxrt_qh_foreach(struct imxrt_qh_s *qh, uint32_t **bp,
-         foreach_qh_t handler, void *arg);
-static int imxrt_qtd_foreach(struct imxrt_qh_s *qh, foreach_qtd_t handler,
-         void *arg);
-static int imxrt_qtd_discard(struct imxrt_qtd_s *qtd, uint32_t **bp,
-         void *arg);
-static int imxrt_qh_discard(struct imxrt_qh_s *qh);
+         foreach_qh_t handler, void *arg, struct imxrt_ehci_dev_s *ehci_dev);
+static int imxrt_qtd_foreach(struct imxrt_qh_s *qh,
+         foreach_qtd_t handler, void *arg,
+         struct imxrt_ehci_dev_s *ehci_dev);
+static int imxrt_qtd_discard(struct imxrt_qtd_s *qtd,
+         uint32_t **bp, void *arg, struct imxrt_ehci_dev_s *ehci_dev);
+static int imxrt_qh_discard(struct imxrt_qh_s *qh,
+                            struct imxrt_ehci_dev_s *ehci_dev);
 
 /* Cache Operations *********************************************************/
 
@@ -447,21 +481,24 @@ static int imxrt_qtd_invalidate(struct imxrt_qtd_s *qtd, uint32_t **bp,
 static int imxrt_qh_invalidate(struct imxrt_qh_s *qh);
 #endif
 static int imxrt_qtd_flush(struct imxrt_qtd_s *qtd, uint32_t **bp,
-                           void *arg);
-static int imxrt_qh_flush(struct imxrt_qh_s *qh);
+                           void *arg, struct imxrt_ehci_dev_s *ehci_dev);
+static int imxrt_qh_flush(struct imxrt_qh_s *qh,
+                          struct imxrt_ehci_dev_s *ehci_dev);
 
 /* Endpoint Transfer Handling ***********************************************/
 
 #ifdef CONFIG_IMXRT_EHCI_USB1_REGDEBUG
 static void imxrt_qtd_print(struct imxrt_qtd_s *qtd);
 static void imxrt_qh_print(struct imxrt_qh_s *qh);
-static int imxrt_qtd_dump(struct imxrt_qtd_s *qtd, uint32_t **bp, void *arg);
-static int imxrt_qh_dump(struct imxrt_qh_s *qh, uint32_t **bp, void *arg);
+static int imxrt_qtd_dump(struct imxrt_qtd_s *qtd, uint32_t **bp, void *arg,
+                          struct imxrt_ehci_dev_s *ehci_dev);
+static int imxrt_qh_dump(struct imxrt_qh_s *qh, uint32_t **bp, void *arg,
+                         struct imxrt_ehci_dev_s *ehci_dev);
 #else
 #  define imxrt_qtd_print(qtd)
 #  define imxrt_qh_print(qh)
-#  define imxrt_qtd_dump(qtd, bp, arg) ((void)OK)
-#  define imxrt_qh_dump(qh, bp, arg)   ((void)OK)
+#  define imxrt_qtd_dump(qtd, bp, arg, ehci_dev) ((void)OK)
+#  define imxrt_qh_dump(qh, bp, arg, ehci_dev)   ((void)OK)
 #endif
 
 static inline uint8_t imxrt_ehci_speed(uint8_t usbspeed);
@@ -469,21 +506,25 @@ static int imxrt_ioc_setup(struct imxrt_rhport_s *rhport,
          struct imxrt_epinfo_s *epinfo);
 static int imxrt_ioc_wait(struct imxrt_epinfo_s *epinfo);
 static void imxrt_qh_enqueue(struct imxrt_qh_s *qhead,
-         struct imxrt_qh_s *qh);
+         struct imxrt_qh_s *qh, struct imxrt_ehci_dev_s *ehci_dev);
 static struct imxrt_qh_s *imxrt_qh_create(struct imxrt_rhport_s *rhport,
-         struct imxrt_epinfo_s *epinfo);
+         struct imxrt_epinfo_s *epinfo, struct imxrt_ehci_dev_s *ehci_dev);
 static int imxrt_qtd_addbpl(struct imxrt_qtd_s *qtd, const void *buffer,
-         size_t buflen);
+         size_t buflen, struct imxrt_ehci_dev_s *ehci_dev);
 static struct imxrt_qtd_s *imxrt_qtd_setupphase(
-         struct imxrt_epinfo_s *epinfo, const struct usb_ctrlreq_s *req);
+         struct imxrt_epinfo_s *epinfo, const struct usb_ctrlreq_s *req,
+         struct imxrt_ehci_dev_s *ehci_dev);
 static struct imxrt_qtd_s *imxrt_qtd_dataphase(struct imxrt_epinfo_s *epinfo,
-         void *buffer, int buflen, uint32_t tokenbits);
-static struct imxrt_qtd_s *imxrt_qtd_statusphase(uint32_t tokenbits);
+         void *buffer, int buflen, uint32_t tokenbits,
+         struct imxrt_ehci_dev_s *ehci_dev);
+static struct imxrt_qtd_s *imxrt_qtd_statusphase(uint32_t tokenbits,
+         struct imxrt_ehci_dev_s *ehci_dev);
 #ifndef CONFIG_USBHOST_INT_DISABLE
 static int imxrt_intr_setup(struct imxrt_rhport_s *rhport,
          struct imxrt_epinfo_s *epinfo, uint8_t *buffer, size_t buflen);
 #endif
-static ssize_t imxrt_transfer_wait(struct imxrt_epinfo_s *epinfo);
+static ssize_t imxrt_transfer_wait(struct imxrt_rhport_s *rhport,
+                                   struct imxrt_epinfo_s *epinfo);
 #ifdef CONFIG_USBHOST_ASYNCH
 static inline int imxrt_ioc_async_setup(struct imxrt_rhport_s *rhport,
          struct imxrt_epinfo_s *epinfo, usbhost_asynch_t callback,
@@ -494,16 +535,18 @@ static void imxrt_asynch_completion(struct imxrt_epinfo_s *epinfo);
 /* Interrupt Handling *******************************************************/
 
 static int imxrt_qtd_ioccheck(struct imxrt_qtd_s *qtd, uint32_t **bp,
-         void *arg);
+         void *arg, struct imxrt_ehci_dev_s *ehci_dev);
 static int imxrt_qh_ioccheck(struct imxrt_qh_s *qh, uint32_t **bp,
-         void *arg);
+         void *arg, struct imxrt_ehci_dev_s *ehci_dev);
 #ifdef CONFIG_USBHOST_ASYNCH
 static int imxrt_qtd_cancel(struct imxrt_qtd_s *qtd, uint32_t **bp,
-         void *arg);
-static int imxrt_qh_cancel(struct imxrt_qh_s *qh, uint32_t **bp, void *arg);
+         void *arg, struct imxrt_ehci_dev_s *ehci_dev);
+static int imxrt_qh_cancel(struct imxrt_qh_s *qh, uint32_t **bp, void *arg,
+         struct imxrt_ehci_dev_s *ehci_dev);
 #endif
-static inline void imxrt_ioc_bottomhalf(void);
-static inline void imxrt_portsc_bottomhalf(void);
+static inline void imxrt_ioc_bottomhalf(struct imxrt_ehci_dev_s *ehci_dev);
+static inline void imxrt_portsc_bottomhalf(struct imxrt_ehci_dev_s
+                                           *ehci_dev);
 static inline void imxrt_syserr_bottomhalf(void);
 static inline void imxrt_async_advance_bottomhalf(void);
 static void imxrt_ehci_bottomhalf(void *arg);
@@ -558,7 +601,7 @@ static void imxrt_disconnect(struct usbhost_driver_s *drvr,
 
 /* Initialization ***********************************************************/
 
-static int imxrt_reset(void);
+static int imxrt_reset(int ctrid);
 
 /****************************************************************************
  * Private Data
@@ -569,20 +612,21 @@ static int imxrt_reset(void);
  * single global instance.
  */
 
-static struct imxrt_ehci_s g_ehci =
+static struct imxrt_ehci_s g_ehci_usb1 =
 {
   .lock = NXMUTEX_INITIALIZER,
   .pscsem = SEM_INITIALIZER(0),
   .ep0.iocsem = SEM_INITIALIZER(1),
 };
 
-/* This is the connection/enumeration interface */
-
-static struct usbhost_connection_s g_ehciconn =
+#if defined(CONFIG_IMXRT_USBOTG2)
+static struct imxrt_ehci_s g_ehci_usb2 =
 {
-  .wait = imxrt_wait,
-  .enumerate = imxrt_enumerate,
+  .lock = NXMUTEX_INITIALIZER,
+  .pscsem = SEM_INITIALIZER(0),
+  .ep0.iocsem = SEM_INITIALIZER(1),
 };
+#endif
 
 /* Maps USB chapter 9 speed to EHCI speed */
 
@@ -593,50 +637,155 @@ static const uint8_t g_ehci_speed[4] =
 
 /* The head of the asynchronous queue */
 
-static struct imxrt_qh_s g_asynchead aligned_data(32);
+static struct imxrt_qh_s g_asynchead_usb1 aligned_data(32);
+
+#if defined(CONFIG_IMXRT_USBOTG2)
+static struct imxrt_qh_s g_asynchead_usb2 aligned_data(32);
+#endif
 
 #ifndef CONFIG_USBHOST_INT_DISABLE
 /* The head of the periodic queue */
 
-static struct imxrt_qh_s g_intrhead aligned_data(32);
+static struct imxrt_qh_s g_intrhead_usb1   aligned_data(32);
+
+#if defined(CONFIG_IMXRT_USBOTG2)
+static struct imxrt_qh_s g_intrhead_usb2   aligned_data(32);
+#endif
 
 /* The frame list */
 
 #ifdef CONFIG_IMXRT_EHCI_USB1_PREALLOCATE
-static uint32_t g_framelist[FRAME_LIST_SIZE] aligned_data(4096);
+static uint32_t g_framelist_usb1[FRAME_LIST_SIZE] aligned_data(4096);
 #else
-static uint32_t *g_framelist;
+static uint32_t *g_framelist_usb1;
 #endif
+
+#if defined(CONFIG_IMXRT_USBOTG2)
+#ifdef CONFIG_IMXRT_EHCI_USB2_PREALLOCATE
+static uint32_t g_framelist_usb2[FRAME_LIST_SIZE] aligned_data(4096);
+#else
+static uint32_t *g_framelist_usb2;
+#endif
+#endif /* CONFIG_IMXRT_USBOTG2 */
+
 #endif /* CONFIG_USBHOST_INT_DISABLE */
 
-#ifdef CONFIG_IMXRT_EHCI_USB1_PREALLOCATE
+#ifdef CONFIG_IMXRT_USBOTG1
+#  ifdef CONFIG_IMXRT_EHCI_USB1_PREALLOCATE
 /* Pools of pre-allocated data structures.  These will all be linked into the
  * free lists within g_ehci.  These must all be aligned to 32-byte boundaries
  */
 
 /* Queue Head (QH) pool */
 
-static struct imxrt_qh_s g_qhpool[CONFIG_IMXRT_EHCI_USB1_NQHS]
+static struct imxrt_qh_s g_qhpool_usb1[CONFIG_IMXRT_EHCI_USB1_NQHS]
                        aligned_data(32);
 
 /* Queue Element Transfer Descriptor (qTD) pool */
 
-static struct imxrt_qtd_s g_qtdpool[CONFIG_IMXRT_EHCI_USB1_NQTDS]
+static struct imxrt_qtd_s g_qtdpool_usb1[CONFIG_IMXRT_EHCI_USB1_NQTDS]
                         aligned_data(32);
 
-#else
+#  else
 /* Pools of dynamically data structures.  These will all be linked into the
  * free lists within g_ehci.  These must all be aligned to 32-byte boundaries
  */
 
 /* Queue Head (QH) pool */
 
-static struct imxrt_qh_s *g_qhpool;
+static struct imxrt_qh_s *g_qhpool_usb1;
 
 /* Queue Element Transfer Descriptor (qTD) pool */
 
-static struct imxrt_qtd_s *g_qtdpool;
+static struct imxrt_qtd_s *g_qtdpool_usb1;
 
+#  endif
+#endif /* CONFIG_IMXRT_USBOTG1 */
+
+#ifdef CONFIG_IMXRT_USBOTG2
+#  ifdef CONFIG_IMXRT_EHCI_USB2_PREALLOCATE
+/* Pools of pre-allocated data structures.  These will all be linked into the
+ * free lists within g_ehci.  These must all be aligned to 32-byte boundaries
+ */
+
+/* Queue Head (QH) pool */
+
+static struct imxrt_qh_s g_qhpool_usb2[CONFIG_IMXRT_EHCI_USB2_NQHS]
+                       aligned_data(32);
+
+/* Queue Element Transfer Descriptor (qTD) pool */
+
+static struct imxrt_qtd_s g_qtdpool_usb2[CONFIG_IMXRT_EHCI_USB2_NQTDS]
+                        aligned_data(32);
+
+#  else
+/* Pools of dynamically data structures.  These will all be linked into the
+ * free lists within g_ehci.  These must all be aligned to 32-byte boundaries
+ */
+
+/* Queue Head (QH) pool */
+
+static struct imxrt_qh_s *g_qhpool_usb2;
+
+/* Queue Element Transfer Descriptor (qTD) pool */
+
+static struct imxrt_qtd_s *g_qtdpool_usb2;
+
+#  endif
+#endif /* CONFIG_IMXRT_USBOTG2 */
+
+/* EHCI Device instance to be passed to share as private between functions */
+
+#if defined(CONFIG_IMXRT_USBOTG1)
+static struct imxrt_ehci_dev_s g_ehci_dev_usb1 =
+{
+  .ehci      = &g_ehci_usb1,
+  .asynchead = &g_asynchead_usb1,
+  .qhpool    = &g_qhpool_usb1[0],
+  .qtdpool   = &g_qtdpool_usb1[0],
+  .framelist = &g_framelist_usb1[0],
+  .intrhead  = &g_intrhead_usb1,
+  .pending   = 0,
+};
+#endif
+
+#if defined(CONFIG_IMXRT_USBOTG2)
+static struct imxrt_ehci_dev_s g_ehci_dev_usb2 =
+{
+  .ehci      = &g_ehci_usb2,
+  .asynchead = &g_asynchead_usb2,
+  .qhpool    = &g_qhpool_usb2[0],
+  .qtdpool   = &g_qtdpool_usb2[0],
+  .framelist = &g_framelist_usb2[0],
+  .intrhead  = &g_intrhead_usb2,
+  .pending   = 0,
+};
+#endif
+
+/* This is the connection/enumeration interface */
+
+#if defined(CONFIG_IMXRT_USBOTG1)
+static struct imxrt_usbhost_conn_s g_ehci_usb1_conn =
+{
+  .ehci_conn =
+  {
+    .wait = imxrt_wait,
+    .enumerate = imxrt_enumerate,
+  },
+  .ehci_dev = &g_ehci_dev_usb1,
+};
+#endif
+
+#if defined(CONFIG_IMXRT_USBOTG2)
+static struct imxrt_usbhost_conn_s g_ehci_usb2_conn =
+{
+  .ehci_conn =
+  {
+    .wait = imxrt_wait,
+    .enumerate = imxrt_enumerate,
+  },
+  .ehci_dev = &g_ehci_dev_usb2,
+};
 #endif
 
 #ifdef HAVE_USBHOST_TRACE
@@ -1019,8 +1168,8 @@ static inline void imxrt_putreg(uint32_t regval, volatile uint32_t *regaddr)
  *
  ****************************************************************************/
 
-static int ehci_wait_usbsts(uint32_t maskbits, uint32_t donebits,
-                            unsigned int delay)
+static int ehci_wait_usbsts(int controller, uint32_t maskbits,
+                            uint32_t donebits, unsigned int delay)
 {
   uint32_t regval;
   unsigned int timeout;
@@ -1035,7 +1184,7 @@ static int ehci_wait_usbsts(uint32_t maskbits, uint32_t donebits,
 
       /* Read the USBSTS register and check for a system error */
 
-      regval = imxrt_getreg(&HCOR->usbsts);
+      regval = imxrt_getreg(&HCOR(controller)->usbsts);
       if ((regval & EHCI_INT_SYSERROR) != 0)
         {
           usbhost_trace1(EHCI_TRACE1_SYSTEMERROR, regval);
@@ -1069,16 +1218,16 @@ static int ehci_wait_usbsts(uint32_t maskbits, uint32_t donebits,
  *
  ****************************************************************************/
 
-static struct imxrt_qh_s *imxrt_qh_alloc(void)
+static struct imxrt_qh_s *imxrt_qh_alloc(struct imxrt_ehci_dev_s *ehci_dev)
 {
   struct imxrt_qh_s *qh;
 
   /* Remove the QH structure from the freelist */
 
-  qh = (struct imxrt_qh_s *)g_ehci.qhfree;
+  qh = (struct imxrt_qh_s *)ehci_dev->ehci->qhfree;
   if (qh)
     {
-      g_ehci.qhfree = ((struct imxrt_list_s *)qh)->flink;
+      ehci_dev->ehci->qhfree = ((struct imxrt_list_s *)qh)->flink;
       memset(qh, 0, sizeof(struct imxrt_qh_s));
     }
 
@@ -1095,14 +1244,15 @@ static struct imxrt_qh_s *imxrt_qh_alloc(void)
  *
  ****************************************************************************/
 
-static void imxrt_qh_free(struct imxrt_qh_s *qh)
+static void imxrt_qh_free(struct imxrt_qh_s *qh,
+                          struct imxrt_ehci_dev_s *ehci_dev)
 {
   struct imxrt_list_s *entry = (struct imxrt_list_s *)qh;
 
   /* Put the QH structure back into the free list */
 
-  entry->flink  = g_ehci.qhfree;
-  g_ehci.qhfree = entry;
+  entry->flink  = ehci_dev->ehci->qhfree;
+  ehci_dev->ehci->qhfree = entry;
 }
 
 /****************************************************************************
@@ -1116,16 +1266,16 @@ static void imxrt_qh_free(struct imxrt_qh_s *qh)
  *
  ****************************************************************************/
 
-static struct imxrt_qtd_s *imxrt_qtd_alloc(void)
+static struct imxrt_qtd_s *imxrt_qtd_alloc(struct imxrt_ehci_dev_s *ehci_dev)
 {
   struct imxrt_qtd_s *qtd;
 
   /* Remove the qTD from the freelist */
 
-  qtd = (struct imxrt_qtd_s *)g_ehci.qtdfree;
+  qtd = (struct imxrt_qtd_s *)ehci_dev->ehci->qtdfree;
   if (qtd)
     {
-      g_ehci.qtdfree = ((struct imxrt_list_s *)qtd)->flink;
+      ehci_dev->ehci->qtdfree = ((struct imxrt_list_s *)qtd)->flink;
       memset(qtd, 0, sizeof(struct imxrt_qtd_s));
     }
 
@@ -1144,14 +1294,15 @@ static struct imxrt_qtd_s *imxrt_qtd_alloc(void)
  *
  ****************************************************************************/
 
-static void imxrt_qtd_free(struct imxrt_qtd_s *qtd)
+static void imxrt_qtd_free(struct imxrt_qtd_s *qtd,
+                           struct imxrt_ehci_dev_s *ehci_dev)
 {
   struct imxrt_list_s *entry = (struct imxrt_list_s *)qtd;
 
   /* Put the qTD back into the free list */
 
-  entry->flink   = g_ehci.qtdfree;
-  g_ehci.qtdfree = entry;
+  entry->flink   = ehci_dev->ehci->qtdfree;
+  ehci_dev->ehci->qtdfree = entry;
 }
 
 /****************************************************************************
@@ -1165,7 +1316,8 @@ static void imxrt_qtd_free(struct imxrt_qtd_s *qtd)
  ****************************************************************************/
 
 static int imxrt_qh_foreach(struct imxrt_qh_s *qh, uint32_t **bp,
-                            foreach_qh_t handler, void *arg)
+                            foreach_qh_t handler, void *arg,
+                            struct imxrt_ehci_dev_s *ehci_dev)
 {
   struct imxrt_qh_s *next;
   uintptr_t physaddr;
@@ -1192,7 +1344,7 @@ static int imxrt_qh_foreach(struct imxrt_qh_s *qh, uint32_t **bp,
        */
 
       else if (imxrt_virtramaddr(physaddr & QH_HLP_MASK) ==
-               (uintptr_t)&g_asynchead)
+               (uintptr_t)ehci_dev->asynchead)
         {
           /* That will also terminate the loop */
 
@@ -1217,7 +1369,7 @@ static int imxrt_qh_foreach(struct imxrt_qh_s *qh, uint32_t **bp,
        * out uses it, it must update it as necessary.
        */
 
-      ret = handler(qh, bp, arg);
+      ret = handler(qh, bp, arg, ehci_dev);
 
       /* If the handler returns any non-zero value, then terminate the
        * traversal early.
@@ -1245,8 +1397,9 @@ static int imxrt_qh_foreach(struct imxrt_qh_s *qh, uint32_t **bp,
  *
  ****************************************************************************/
 
-static int imxrt_qtd_foreach(struct imxrt_qh_s *qh, foreach_qtd_t handler,
-                             void *arg)
+static int imxrt_qtd_foreach(struct imxrt_qh_s *qh,
+                             foreach_qtd_t handler,
+                             void *arg, struct imxrt_ehci_dev_s *ehci_dev)
 {
   struct imxrt_qtd_s *qtd;
   struct imxrt_qtd_s *next;
@@ -1299,7 +1452,7 @@ static int imxrt_qtd_foreach(struct imxrt_qh_s *qh, foreach_qtd_t handler,
        * uses it, it must update it as necessary.
        */
 
-      ret = handler(qtd, &bp, arg);
+      ret = handler(qtd, &bp, arg, ehci_dev);
 
       /* If the handler returns any non-zero value, then terminate the
        * traversal early.
@@ -1327,8 +1480,9 @@ static int imxrt_qtd_foreach(struct imxrt_qh_s *qh, foreach_qtd_t handler,
  *
  ****************************************************************************/
 
-static int imxrt_qtd_discard(struct imxrt_qtd_s *qtd, uint32_t **bp,
-                             void *arg)
+static int imxrt_qtd_discard(struct imxrt_qtd_s *qtd,
+                             uint32_t **bp,
+                             void *arg, struct imxrt_ehci_dev_s *ehci_dev)
 {
   DEBUGASSERT(qtd && bp && *bp);
 
@@ -1341,7 +1495,7 @@ static int imxrt_qtd_discard(struct imxrt_qtd_s *qtd, uint32_t **bp,
 
   /* Then free the qTD */
 
-  imxrt_qtd_free(qtd);
+  imxrt_qtd_free(qtd, ehci_dev);
   return OK;
 }
 
@@ -1357,7 +1511,8 @@ static int imxrt_qtd_discard(struct imxrt_qtd_s *qtd, uint32_t **bp,
  *
  ****************************************************************************/
 
-static int imxrt_qh_discard(struct imxrt_qh_s *qh)
+static int imxrt_qh_discard(struct imxrt_qh_s *qh,
+                            struct imxrt_ehci_dev_s *ehci_dev)
 {
   int ret;
 
@@ -1365,7 +1520,7 @@ static int imxrt_qh_discard(struct imxrt_qh_s *qh)
 
   /* Free all of the qTD's attached to the QH */
 
-  ret = imxrt_qtd_foreach(qh, imxrt_qtd_discard, NULL);
+  ret = imxrt_qtd_foreach(qh, imxrt_qtd_discard, NULL, ehci_dev);
   if (ret < 0)
     {
       usbhost_trace1(EHCI_TRACE1_QTDFOREACH_FAILED, -ret);
@@ -1373,7 +1528,7 @@ static int imxrt_qh_discard(struct imxrt_qh_s *qh)
 
   /* Then free the QH itself */
 
-  imxrt_qh_free(qh);
+  imxrt_qh_free(qh, ehci_dev);
   return ret;
 }
 
@@ -1418,7 +1573,7 @@ static int imxrt_qh_invalidate(struct imxrt_qh_s *qh)
 
   /* Then invalidate all of the qTD entries in the queue */
 
-  return imxrt_qtd_foreach(qh, imxrt_qtd_invalidate, NULL);
+  return imxrt_qtd_foreach(ehci, qh, imxrt_qtd_invalidate, NULL);
 }
 #endif
 
@@ -1431,7 +1586,8 @@ static int imxrt_qh_invalidate(struct imxrt_qh_s *qh)
  *
  ****************************************************************************/
 
-static int imxrt_qtd_flush(struct imxrt_qtd_s *qtd, uint32_t **bp, void *arg)
+static int imxrt_qtd_flush(struct imxrt_qtd_s *qtd, uint32_t **bp, void *arg,
+                           struct imxrt_ehci_dev_s *ehci_dev)
 {
   /* Flush the D-Cache, i.e., make the contents of the memory match the
    * contents of the D-Cache in the specified address range and invalidate
@@ -1452,7 +1608,8 @@ static int imxrt_qtd_flush(struct imxrt_qtd_s *qtd, uint32_t **bp, void *arg)
  *
  ****************************************************************************/
 
-static int imxrt_qh_flush(struct imxrt_qh_s *qh)
+static int imxrt_qh_flush(struct imxrt_qh_s *qh,
+                          struct imxrt_ehci_dev_s *ehci_dev)
 {
   /* Flush the QH first.  This will write the contents of the D-cache to RAM
    * and invalidate the contents of the D-cache so that the next access will
@@ -1464,7 +1621,7 @@ static int imxrt_qh_flush(struct imxrt_qh_s *qh)
 
   /* Then flush all of the qTD entries in the queue */
 
-  return imxrt_qtd_foreach(qh, imxrt_qtd_flush, NULL);
+  return imxrt_qtd_foreach(qh, imxrt_qtd_flush, NULL, ehci_dev);
 }
 
 /****************************************************************************
@@ -1540,7 +1697,8 @@ static void imxrt_qh_print(struct imxrt_qh_s *qh)
  ****************************************************************************/
 
 #ifdef CONFIG_IMXRT_EHCI_USB1_REGDEBUG
-static int imxrt_qtd_dump(struct imxrt_qtd_s *qtd, uint32_t **bp, void *arg)
+static int imxrt_qtd_dump(struct imxrt_qtd_s *qtd, uint32_t **bp, void *arg,
+                          struct imxrt_ehci_dev_s *ehci_dev)
 {
   imxrt_qtd_print(qtd);
   return OK;
@@ -1557,10 +1715,11 @@ static int imxrt_qtd_dump(struct imxrt_qtd_s *qtd, uint32_t **bp, void *arg)
  ****************************************************************************/
 
 #ifdef CONFIG_IMXRT_EHCI_USB1_REGDEBUG
-static int imxrt_qh_dump(struct imxrt_qh_s *qh, uint32_t **bp, void *arg)
+static int imxrt_qh_dump(struct imxrt_qh_s *qh, uint32_t **bp, void *arg,
+                         struct imxrt_ehci_dev_s *ehci_dev)
 {
   imxrt_qh_print(qh);
-  return imxrt_qtd_foreach(qh, imxrt_qtd_dump, NULL);
+  return imxrt_qtd_foreach(qh, imxrt_qtd_dump, NULL, ehci_dev);
 }
 #endif
 
@@ -1670,7 +1829,8 @@ static int imxrt_ioc_wait(struct imxrt_epinfo_s *epinfo)
  *
  ****************************************************************************/
 
-static void imxrt_qh_enqueue(struct imxrt_qh_s *qhead, struct imxrt_qh_s *qh)
+static void imxrt_qh_enqueue(struct imxrt_qh_s *qhead, struct imxrt_qh_s *qh,
+                             struct imxrt_ehci_dev_s *ehci_dev)
 {
   uintptr_t physaddr;
 
@@ -1680,7 +1840,7 @@ static void imxrt_qh_enqueue(struct imxrt_qh_s *qhead, struct imxrt_qh_s *qh)
    */
 
   qh->fqp = qh->hw.overlay.nqp;
-  imxrt_qh_dump(qh, NULL, NULL);
+  imxrt_qh_dump(qh, NULL, NULL, ehci_dev);
 
   /* Add the new QH to the head of the asynchronous queue list.
    *
@@ -1689,7 +1849,7 @@ static void imxrt_qh_enqueue(struct imxrt_qh_s *qhead, struct imxrt_qh_s *qh)
    */
 
   qh->hw.hlp = qhead->hw.hlp;
-  imxrt_qh_flush(qh);
+  imxrt_qh_flush(qh, ehci_dev);
 
   /* Then set the new QH as the first QH in the asynchronous queue and flush
    * the modified head to RAM.
@@ -1711,7 +1871,8 @@ static void imxrt_qh_enqueue(struct imxrt_qh_s *qhead, struct imxrt_qh_s *qh)
  ****************************************************************************/
 
 static struct imxrt_qh_s *imxrt_qh_create(struct imxrt_rhport_s *rhport,
-                                          struct imxrt_epinfo_s *epinfo)
+                                          struct imxrt_epinfo_s *epinfo,
+                                          struct imxrt_ehci_dev_s *ehci_dev)
 {
   struct imxrt_qh_s *qh;
   uint32_t rhpndx;
@@ -1721,7 +1882,7 @@ static struct imxrt_qh_s *imxrt_qh_create(struct imxrt_rhport_s *rhport,
 
   /* Allocate a new queue head structure */
 
-  qh = imxrt_qh_alloc();
+  qh = imxrt_qh_alloc(ehci_dev);
   if (qh == NULL)
     {
       usbhost_trace1(EHCI_TRACE1_QHALLOC_FAILED, 0);
@@ -1849,7 +2010,7 @@ static struct imxrt_qh_s *imxrt_qh_create(struct imxrt_rhport_s *rhport,
  ****************************************************************************/
 
 static int imxrt_qtd_addbpl(struct imxrt_qtd_s *qtd, const void *buffer,
-                            size_t buflen)
+                            size_t buflen, struct imxrt_ehci_dev_s *ehci_dev)
 {
   uint32_t physaddr;
   uint32_t nbytes;
@@ -1926,7 +2087,8 @@ static int imxrt_qtd_addbpl(struct imxrt_qtd_s *qtd, const void *buffer,
 
 static struct imxrt_qtd_s *
   imxrt_qtd_setupphase(struct imxrt_epinfo_s *epinfo,
-                       const struct usb_ctrlreq_s *req)
+                       const struct usb_ctrlreq_s *req,
+                       struct imxrt_ehci_dev_s *ehci_dev)
 {
   struct imxrt_qtd_s *qtd;
   uint32_t regval;
@@ -1934,7 +2096,7 @@ static struct imxrt_qtd_s *
 
   /* Allocate a new Queue Element Transfer Descriptor (qTD) */
 
-  qtd = imxrt_qtd_alloc();
+  qtd = imxrt_qtd_alloc(ehci_dev);
   if (qtd == NULL)
     {
       usbhost_trace1(EHCI_TRACE1_REQQTDALLOC_FAILED, 0);
@@ -1969,11 +2131,11 @@ static struct imxrt_qtd_s *
 
   /* Add the buffer data */
 
-  ret = imxrt_qtd_addbpl(qtd, req, USB_SIZEOF_CTRLREQ);
+  ret = imxrt_qtd_addbpl(qtd, req, USB_SIZEOF_CTRLREQ, ehci_dev);
   if (ret < 0)
     {
       usbhost_trace1(EHCI_TRACE1_ADDBPL_FAILED, -ret);
-      imxrt_qtd_free(qtd);
+      imxrt_qtd_free(qtd, ehci_dev);
       return NULL;
     }
 
@@ -1992,9 +2154,11 @@ static struct imxrt_qtd_s *
  *
  ****************************************************************************/
 
-static struct imxrt_qtd_s *imxrt_qtd_dataphase(struct imxrt_epinfo_s *epinfo,
-                                               void *buffer, int buflen,
-                                               uint32_t tokenbits)
+static struct imxrt_qtd_s *
+  imxrt_qtd_dataphase(struct imxrt_epinfo_s *epinfo,
+                      void *buffer, int buflen,
+                      uint32_t tokenbits,
+                      struct imxrt_ehci_dev_s *ehci_dev)
 {
   struct imxrt_qtd_s *qtd;
   uint32_t regval;
@@ -2002,7 +2166,7 @@ static struct imxrt_qtd_s *imxrt_qtd_dataphase(struct imxrt_epinfo_s *epinfo,
 
   /* Allocate a new Queue Element Transfer Descriptor (qTD) */
 
-  qtd = imxrt_qtd_alloc();
+  qtd = imxrt_qtd_alloc(ehci_dev);
   if (qtd == NULL)
     {
       usbhost_trace1(EHCI_TRACE1_DATAQTDALLOC_FAILED, 0);
@@ -2037,11 +2201,11 @@ static struct imxrt_qtd_s *imxrt_qtd_dataphase(struct imxrt_epinfo_s *epinfo,
 
   /* Add the buffer information to the buffer pointer list */
 
-  ret = imxrt_qtd_addbpl(qtd, buffer, buflen);
+  ret = imxrt_qtd_addbpl(qtd, buffer, buflen, ehci_dev);
   if (ret < 0)
     {
       usbhost_trace1(EHCI_TRACE1_ADDBPL_FAILED, -ret);
-      imxrt_qtd_free(qtd);
+      imxrt_qtd_free(qtd, ehci_dev);
       return NULL;
     }
 
@@ -2060,14 +2224,16 @@ static struct imxrt_qtd_s *imxrt_qtd_dataphase(struct imxrt_epinfo_s *epinfo,
  *
  ****************************************************************************/
 
-static struct imxrt_qtd_s *imxrt_qtd_statusphase(uint32_t tokenbits)
+static struct imxrt_qtd_s *
+  imxrt_qtd_statusphase(uint32_t tokenbits,
+                        struct imxrt_ehci_dev_s *ehci_dev)
 {
   struct imxrt_qtd_s *qtd;
   uint32_t regval;
 
   /* Allocate a new Queue Element Transfer Descriptor (qTD) */
 
-  qtd = imxrt_qtd_alloc();
+  qtd = imxrt_qtd_alloc(ehci_dev);
   if (qtd == NULL)
     {
       usbhost_trace1(EHCI_TRACE1_REQQTDALLOC_FAILED, 0);
@@ -2154,7 +2320,7 @@ static int imxrt_async_setup(struct imxrt_rhport_s *rhport,
 
   /* Create and initialize a Queue Head (QH) structure for this transfer */
 
-  qh = imxrt_qh_create(rhport, epinfo);
+  qh = imxrt_qh_create(rhport, epinfo, rhport->ehci_dev);
   if (qh == NULL)
     {
       usbhost_trace1(EHCI_TRACE1_QHCREATE_FAILED, 0);
@@ -2186,7 +2352,7 @@ static int imxrt_async_setup(struct imxrt_rhport_s *rhport,
        * phase of the request sequence.
        */
 
-      qtd = imxrt_qtd_setupphase(epinfo, req);
+      qtd = imxrt_qtd_setupphase(epinfo, req, rhport->ehci_dev);
       if (qtd == NULL)
         {
           usbhost_trace1(EHCI_TRACE1_QTDSETUP_FAILED, 0);
@@ -2261,7 +2427,8 @@ static int imxrt_async_setup(struct imxrt_rhport_s *rhport,
        * buffer.
        */
 
-      qtd = imxrt_qtd_dataphase(epinfo, buffer, buflen, tokenbits);
+      qtd = imxrt_qtd_dataphase(epinfo, buffer, buflen, tokenbits,
+                                rhport->ehci_dev);
       if (qtd == NULL)
         {
           usbhost_trace1(EHCI_TRACE1_QTDDATA_FAILED, 0);
@@ -2320,7 +2487,7 @@ static int imxrt_async_setup(struct imxrt_rhport_s *rhport,
        * for the status
        */
 
-      qtd = imxrt_qtd_statusphase(tokenbits);
+      qtd = imxrt_qtd_statusphase(tokenbits, rhport->ehci_dev);
       if (qtd == NULL)
         {
           usbhost_trace1(EHCI_TRACE1_QTDSTATUS_FAILED, 0);
@@ -2345,13 +2512,13 @@ static int imxrt_async_setup(struct imxrt_rhport_s *rhport,
 
   /* Add the new QH to the head of the asynchronous queue list */
 
-  imxrt_qh_enqueue(&g_asynchead, qh);
+  imxrt_qh_enqueue(rhport->ehci_dev->asynchead, qh, rhport->ehci_dev);
   return OK;
 
   /* Clean-up after an error */
 
 errout_with_qh:
-  imxrt_qh_discard(qh);
+  imxrt_qh_discard(qh, rhport->ehci_dev);
   return ret;
 }
 
@@ -2409,6 +2576,8 @@ static int imxrt_intr_setup(struct imxrt_rhport_s *rhport,
                             struct imxrt_epinfo_s *epinfo,
                             uint8_t *buffer, size_t buflen)
 {
+  struct imxrt_ehci_dev_s *priv = (struct imxrt_ehci_dev_s *)
+                                  rhport->ehci_dev;
   struct imxrt_qh_s *qh;
   struct imxrt_qtd_s *qtd;
   uintptr_t physaddr;
@@ -2429,7 +2598,7 @@ static int imxrt_intr_setup(struct imxrt_rhport_s *rhport,
 
   /* Create and initialize a Queue Head (QH) structure for this transfer */
 
-  qh = imxrt_qh_create(rhport, epinfo);
+  qh = imxrt_qh_create(rhport, epinfo, priv);
   if (qh == NULL)
     {
       usbhost_trace1(EHCI_TRACE1_QHCREATE_FAILED, 0);
@@ -2457,7 +2626,7 @@ static int imxrt_intr_setup(struct imxrt_rhport_s *rhport,
    * buffer.
    */
 
-  qtd = imxrt_qtd_dataphase(epinfo, buffer, buflen, tokenbits);
+  qtd = imxrt_qtd_dataphase(epinfo, buffer, buflen, tokenbits, priv);
   if (qtd == NULL)
     {
       usbhost_trace1(EHCI_TRACE1_QTDDATA_FAILED, 0);
@@ -2472,24 +2641,24 @@ static int imxrt_intr_setup(struct imxrt_rhport_s *rhport,
 
   /* Disable the periodic schedule */
 
-  regval  = imxrt_getreg(&HCOR->usbcmd);
+  regval  = imxrt_getreg(&HCOR(priv->ctrid)->usbcmd);
   regval &= ~EHCI_USBCMD_PSEN;
-  imxrt_putreg(regval, &HCOR->usbcmd);
+  imxrt_putreg(regval, &HCOR(priv->ctrid)->usbcmd);
 
   /* Add the new QH to the head of the interrupt transfer list */
 
-  imxrt_qh_enqueue(&g_intrhead, qh);
+  imxrt_qh_enqueue(qh, priv->intrhead, priv);
 
   /* Re-enable the periodic schedule */
 
   regval |= EHCI_USBCMD_PSEN;
-  imxrt_putreg(regval, &HCOR->usbcmd);
+  imxrt_putreg(regval, &HCOR(priv->ctrid)->usbcmd);
   return OK;
 
   /* Clean-up after an error */
 
 errout_with_qh:
-  imxrt_qh_discard(qh);
+  imxrt_qh_discard(qh, rhport->ehci_dev);
   return ret;
 }
 #endif /* CONFIG_USBHOST_INT_DISABLE */
@@ -2514,8 +2683,11 @@ errout_with_qh:
  *
  ****************************************************************************/
 
-static ssize_t imxrt_transfer_wait(struct imxrt_epinfo_s *epinfo)
+static ssize_t imxrt_transfer_wait(struct imxrt_rhport_s *rhport,
+                                   struct imxrt_epinfo_s *epinfo)
 {
+  struct imxrt_ehci_dev_s *priv = (struct imxrt_ehci_dev_s *)
+                                  rhport->ehci_dev;
   int ret;
   int ret2;
 
@@ -2531,7 +2703,7 @@ static ssize_t imxrt_transfer_wait(struct imxrt_epinfo_s *epinfo)
 
   /* REVISIT */
 
-  nxmutex_unlock(&g_ehci.lock);
+  nxmutex_unlock(&priv->ehci->lock);
 
   /* Wait for the IOC completion event */
 
@@ -2541,7 +2713,7 @@ static ssize_t imxrt_transfer_wait(struct imxrt_epinfo_s *epinfo)
    * this upon return.
    */
 
-  ret2 = nxmutex_lock(&g_ehci.lock);
+  ret2 = nxmutex_lock(&priv->ehci->lock);
   if (ret >= 0 && ret2 < 0)
     {
       ret = ret2;
@@ -2702,7 +2874,7 @@ static void imxrt_asynch_completion(struct imxrt_epinfo_s *epinfo)
  ****************************************************************************/
 
 static int imxrt_qtd_ioccheck(struct imxrt_qtd_s *qtd, uint32_t **bp,
-                              void *arg)
+                              void *arg, struct imxrt_ehci_dev_s *ehci_dev)
 {
   struct imxrt_epinfo_s *epinfo = (struct imxrt_epinfo_s *)arg;
   DEBUGASSERT(qtd && epinfo);
@@ -2735,7 +2907,7 @@ static int imxrt_qtd_ioccheck(struct imxrt_qtd_s *qtd, uint32_t **bp,
 
   /* Release this QH by returning it to the free list */
 
-  imxrt_qtd_free(qtd);
+  imxrt_qtd_free(qtd, ehci_dev);
   return OK;
 }
 
@@ -2750,7 +2922,8 @@ static int imxrt_qtd_ioccheck(struct imxrt_qtd_s *qtd, uint32_t **bp,
  *
  ****************************************************************************/
 
-static int imxrt_qh_ioccheck(struct imxrt_qh_s *qh, uint32_t **bp, void *arg)
+static int imxrt_qh_ioccheck(struct imxrt_qh_s *qh, uint32_t **bp, void *arg,
+                             struct imxrt_ehci_dev_s *ehci_dev)
 {
   struct imxrt_epinfo_s *epinfo;
   uint32_t token;
@@ -2799,7 +2972,8 @@ static int imxrt_qh_ioccheck(struct imxrt_qh_s *qh, uint32_t **bp, void *arg)
 
   /* Remove all active, attached qTD structures from the inactive QH */
 
-  ret = imxrt_qtd_foreach(qh, imxrt_qtd_ioccheck, (void *)qh->epinfo);
+  ret = imxrt_qtd_foreach(qh, imxrt_qtd_ioccheck,
+                          (void *)qh->epinfo, ehci_dev);
   if (ret < 0)
     {
       usbhost_trace1(EHCI_TRACE1_QTDFOREACH_FAILED, -ret);
@@ -2889,7 +3063,7 @@ static int imxrt_qh_ioccheck(struct imxrt_qh_s *qh, uint32_t **bp, void *arg)
 
       /* Then release this QH by returning it to the free list */
 
-      imxrt_qh_free(qh);
+      imxrt_qh_free(qh, ehci_dev);
     }
   else
     {
@@ -2914,7 +3088,7 @@ static int imxrt_qh_ioccheck(struct imxrt_qh_s *qh, uint32_t **bp, void *arg)
 
 #ifdef CONFIG_USBHOST_ASYNCH
 static int imxrt_qtd_cancel(struct imxrt_qtd_s *qtd, uint32_t **bp,
-                            void *arg)
+                            void *arg, struct imxrt_ehci_dev_s *ehci_dev)
 {
   DEBUGASSERT(qtd != NULL && bp != NULL);
 
@@ -2938,7 +3112,7 @@ static int imxrt_qtd_cancel(struct imxrt_qtd_s *qtd, uint32_t **bp,
 
   /* Release this QH by returning it to the free list */
 
-  imxrt_qtd_free(qtd);
+  imxrt_qtd_free(qtd, ehci_dev);
   return OK;
 }
 #endif /* CONFIG_USBHOST_ASYNCH */
@@ -2955,7 +3129,8 @@ static int imxrt_qtd_cancel(struct imxrt_qtd_s *qtd, uint32_t **bp,
  ****************************************************************************/
 
 #ifdef CONFIG_USBHOST_ASYNCH
-static int imxrt_qh_cancel(struct imxrt_qh_s *qh, uint32_t **bp, void *arg)
+static int imxrt_qh_cancel(struct imxrt_qh_s *qh, uint32_t **bp, void *arg,
+                           struct imxrt_ehci_dev_s *ehci_dev)
 {
   struct imxrt_epinfo_s *epinfo = (struct imxrt_epinfo_s *)arg;
   uint32_t regval;
@@ -2980,9 +3155,9 @@ static int imxrt_qh_cancel(struct imxrt_qh_s *qh, uint32_t **bp, void *arg)
 
   /* Disable both the asynchronous and period schedules */
 
-  regval = imxrt_getreg(&HCOR->usbcmd);
+  regval = imxrt_getreg(&HCOR(ehci_dev->ctrid)->usbcmd);
   imxrt_putreg(regval & ~(EHCI_USBCMD_ASEN | EHCI_USBCMD_PSEN),
-               &HCOR->usbcmd);
+               &HCOR(ehci_dev->ctrid)->usbcmd);
 
   /* Remove the QH from the list
    *
@@ -2999,11 +3174,11 @@ static int imxrt_qh_cancel(struct imxrt_qh_s *qh, uint32_t **bp, void *arg)
 
   /* Re-enable the schedules (if they were enabled before. */
 
-  imxrt_putreg(regval, &HCOR->usbcmd);
+  imxrt_putreg(regval, &HCOR(ehci_dev->ctrid)->usbcmd);
 
   /* Remove all active, attached qTD structures from the removed QH */
 
-  ret = imxrt_qtd_foreach(qh, imxrt_qtd_cancel, NULL);
+  ret = imxrt_qtd_foreach(qh, imxrt_qtd_cancel, NULL, ehci_dev);
   if (ret < 0)
     {
       usbhost_trace1(EHCI_TRACE1_QTDFOREACH_FAILED, -ret);
@@ -3013,7 +3188,7 @@ static int imxrt_qh_cancel(struct imxrt_qh_s *qh, uint32_t **bp, void *arg)
    * to stop the traverse without an error.
    */
 
-  imxrt_qh_free(qh);
+  imxrt_qh_free(qh, ehci_dev);
   return 1;
 }
 #endif /* CONFIG_USBHOST_ASYNCH */
@@ -3036,7 +3211,7 @@ static int imxrt_qh_cancel(struct imxrt_qh_s *qh, uint32_t **bp, void *arg)
  *
  ****************************************************************************/
 
-static inline void imxrt_ioc_bottomhalf(void)
+static inline void imxrt_ioc_bottomhalf(struct imxrt_ehci_dev_s *ehci_dev)
 {
   struct imxrt_qh_s *qh;
   uint32_t *bp;
@@ -3046,15 +3221,15 @@ static inline void imxrt_ioc_bottomhalf(void)
    * Make sure that the head of the asynchronous queue is invalidated.
    */
 
-  up_invalidate_dcache((uintptr_t)&g_asynchead.hw,
-                       (uintptr_t)&g_asynchead.hw +
+  up_invalidate_dcache((uintptr_t)&ehci_dev->asynchead->hw,
+                       (uintptr_t)&ehci_dev->asynchead->hw +
                        sizeof(struct ehci_qh_s));
 
   /* Set the back pointer to the forward QH pointer of the asynchronous
    * queue head.
    */
 
-  bp = (uint32_t *)&g_asynchead.hw.hlp;
+  bp = (uint32_t *)&ehci_dev->asynchead->hw.hlp;
   qh = (struct imxrt_qh_s *)
        imxrt_virtramaddr(imxrt_swap32(*bp) & QH_HLP_MASK);
 
@@ -3062,13 +3237,13 @@ static inline void imxrt_ioc_bottomhalf(void)
    * asynchronous queue head will point back to the queue head.
    */
 
-  if (qh && qh != &g_asynchead)
+  if (qh && qh != ehci_dev->asynchead)
     {
       /* Then traverse and operate on every QH and qTD in the asynchronous
        * queue
        */
 
-      ret = imxrt_qh_foreach(qh, &bp, imxrt_qh_ioccheck, NULL);
+      ret = imxrt_qh_foreach(qh, &bp, imxrt_qh_ioccheck, NULL, ehci_dev);
       if (ret < 0)
         {
           usbhost_trace1(EHCI_TRACE1_QHFOREACH_FAILED, -ret);
@@ -3081,14 +3256,15 @@ static inline void imxrt_ioc_bottomhalf(void)
    * Make sure that the head of the interrupt queue is invalidated.
    */
 
-  up_invalidate_dcache((uintptr_t)&g_intrhead.hw,
-                       (uintptr_t)&g_intrhead.hw + sizeof(struct ehci_qh_s));
+  up_invalidate_dcache((uintptr_t)&ehci_dev->intrhead->hw,
+                       (uintptr_t)&ehci_dev->intrhead->hw +
+                       sizeof(struct ehci_qh_s));
 
   /* Set the back pointer to the forward qTD pointer of the asynchronous
    * queue head.
    */
 
-  bp = (uint32_t *)&g_intrhead.hw.hlp;
+  bp = (uint32_t *)&ehci_dev->intrhead->hw.hlp;
   qh = (struct imxrt_qh_s *)
        imxrt_virtramaddr(imxrt_swap32(*bp) & QH_HLP_MASK);
   if (qh)
@@ -3097,7 +3273,7 @@ static inline void imxrt_ioc_bottomhalf(void)
        * queue.
        */
 
-      ret = imxrt_qh_foreach(qh, &bp, imxrt_qh_ioccheck, NULL);
+      ret = imxrt_qh_foreach(qh, &bp, imxrt_qh_ioccheck, NULL, ehci_dev);
       if (ret < 0)
         {
           usbhost_trace1(EHCI_TRACE1_QHFOREACH_FAILED, -ret);
@@ -3128,7 +3304,7 @@ static inline void imxrt_ioc_bottomhalf(void)
  *
  ****************************************************************************/
 
-static inline void imxrt_portsc_bottomhalf(void)
+static inline void imxrt_portsc_bottomhalf(struct imxrt_ehci_dev_s *ehci_dev)
 {
   struct imxrt_rhport_s *rhport;
   struct usbhost_hubport_s *hport;
@@ -3139,8 +3315,8 @@ static inline void imxrt_portsc_bottomhalf(void)
 
   for (rhpndx = 0; rhpndx < IMXRT_EHCI_NRHPORT; rhpndx++)
     {
-      rhport = &g_ehci.rhport[rhpndx];
-      portsc = imxrt_getreg(&HCOR->portsc[rhpndx]);
+      rhport = &ehci_dev->ehci->rhport[rhpndx];
+      portsc = imxrt_getreg(&HCOR(ehci_dev->ctrid)->portsc[rhpndx]);
 
       usbhost_vtrace2(EHCI_VTRACE2_PORTSC, rhpndx + 1, portsc);
 
@@ -3163,14 +3339,14 @@ static inline void imxrt_portsc_bottomhalf(void)
                   rhport->connected = true;
 
                   usbhost_vtrace2(EHCI_VTRACE2_PORTSC_CONNECTED,
-                                  rhpndx + 1, g_ehci.pscwait);
+                                  rhpndx + 1, ehci_dev->ehci->pscwait);
 
                   /* Notify any waiters */
 
-                  if (g_ehci.pscwait)
+                  if (ehci_dev->ehci->pscwait)
                     {
-                      nxsem_post(&g_ehci.pscsem);
-                      g_ehci.pscwait = false;
+                      nxsem_post(&ehci_dev->ehci->pscsem);
+                      ehci_dev->ehci->pscwait = false;
                     }
                 }
               else
@@ -3187,7 +3363,7 @@ static inline void imxrt_portsc_bottomhalf(void)
                   /* Yes.. disconnect the device */
 
                   usbhost_vtrace2(EHCI_VTRACE2_PORTSC_DISCONND,
-                                  rhpndx + 1, g_ehci.pscwait);
+                                  rhpndx + 1, ehci_dev->ehci->pscwait);
 
                   rhport->connected = false;
                   rhport->lowspeed  = false;
@@ -3207,10 +3383,10 @@ static inline void imxrt_portsc_bottomhalf(void)
                    * event.
                    */
 
-                  if (g_ehci.pscwait)
+                  if (ehci_dev->ehci->pscwait)
                     {
-                      nxsem_post(&g_ehci.pscsem);
-                      g_ehci.pscwait = false;
+                      nxsem_post(&ehci_dev->ehci->pscsem);
+                      ehci_dev->ehci->pscwait = false;
                     }
                 }
               else
@@ -3225,7 +3401,7 @@ static inline void imxrt_portsc_bottomhalf(void)
        * to preserve the values of all R/W bits (RO bits don't matter)
        */
 
-      imxrt_putreg(portsc, &HCOR->portsc[rhpndx]);
+      imxrt_putreg(portsc, &HCOR(ehci_dev->ctrid)->portsc[rhpndx]);
     }
 }
 
@@ -3279,14 +3455,15 @@ static inline void imxrt_async_advance_bottomhalf(void)
 
 static void imxrt_ehci_bottomhalf(void *arg)
 {
-  uint32_t pending = (uint32_t)arg;
+  struct imxrt_ehci_dev_s *priv = (struct imxrt_ehci_dev_s *) arg;
+  uint32_t pending = priv->pending;
 
   /* We need to have exclusive access to the EHCI data structures.  Waiting
    * here is not a good thing to do on the worker thread, but there is no
    * real option (other than to reschedule and delay).
    */
 
-  nxmutex_lock(&g_ehci.lock);
+  nxmutex_lock(&priv->ehci->lock);
 
   /* Handle all unmasked interrupt sources
    * USB Interrupt (USBINT)
@@ -3321,7 +3498,7 @@ static void imxrt_ehci_bottomhalf(void *arg)
           usbhost_vtrace1(EHCI_VTRACE1_USBINTR, pending);
         }
 
-      imxrt_ioc_bottomhalf();
+      imxrt_ioc_bottomhalf(priv);
     }
 
   /* Port Change Detect
@@ -3343,7 +3520,7 @@ static void imxrt_ehci_bottomhalf(void *arg)
 
   if ((pending & EHCI_INT_PORTSC) != 0)
     {
-      imxrt_portsc_bottomhalf();
+      imxrt_portsc_bottomhalf(priv);
     }
 
   /* Frame List Rollover
@@ -3397,13 +3574,13 @@ static void imxrt_ehci_bottomhalf(void *arg)
 
   /* We are done with the EHCI structures */
 
-  nxmutex_unlock(&g_ehci.lock);
+  nxmutex_unlock(&priv->ehci->lock);
 
   /* Re-enable relevant EHCI interrupts.  Interrupts should still be enabled
    * at the level of the interrupt controller.
    */
 
-  imxrt_putreg(EHCI_HANDLED_INTS, &HCOR->usbintr);
+  imxrt_putreg(EHCI_HANDLED_INTS, &HCOR(priv->ctrid)->usbintr);
 }
 
 /****************************************************************************
@@ -3416,14 +3593,15 @@ static void imxrt_ehci_bottomhalf(void *arg)
 
 static int imxrt_ehci_interrupt(int irq, void *context, void *arg)
 {
+  struct imxrt_ehci_dev_s *priv = (struct imxrt_ehci_dev_s *)arg;
   uint32_t usbsts;
   uint32_t pending;
   uint32_t regval;
 
   /* Read Interrupt Status and mask out interrupts that are not enabled. */
 
-  usbsts = imxrt_getreg(&HCOR->usbsts);
-  regval = imxrt_getreg(&HCOR->usbintr);
+  usbsts = imxrt_getreg(&HCOR(priv->ctrid)->usbsts);
+  regval = imxrt_getreg(&HCOR(priv->ctrid)->usbintr);
 
 #ifdef CONFIG_USBHOST_TRACE
   usbhost_vtrace1(EHCI_VTRACE1_TOPHALF, usbsts & regval);
@@ -3444,21 +3622,23 @@ static int imxrt_ehci_interrupt(int irq, void *context, void *arg)
        * by controlling the EHCI interrupts.
        */
 
-      DEBUGASSERT(work_available(&g_ehci.work));
-      DEBUGVERIFY(work_queue(HPWORK, &g_ehci.work, imxrt_ehci_bottomhalf,
-                            (void *)pending, 0));
+      priv->pending = pending;
+      DEBUGASSERT(work_available(&priv->ehci->work));
+      DEBUGVERIFY(work_queue(HPWORK, &priv->ehci->work,
+                             imxrt_ehci_bottomhalf,
+                             (void *)priv, 0));
 
       /* Disable further EHCI interrupts so that we do not overrun the work
        * queue.
        */
 
-      imxrt_putreg(0, &HCOR->usbintr);
+      imxrt_putreg(0, &HCOR(priv->ctrid)->usbintr);
 
       /* Clear all pending status bits by writing the value of the pending
        * interrupt bits back to the status register.
        */
 
-      imxrt_putreg(usbsts & EHCI_INT_ALLINTS, &HCOR->usbsts);
+      imxrt_putreg(usbsts & EHCI_INT_ALLINTS, &HCOR(priv->ctrid)->usbsts);
     }
 
   return OK;
@@ -3492,6 +3672,10 @@ static int imxrt_ehci_interrupt(int irq, void *context, void *arg)
 static int imxrt_wait(struct usbhost_connection_s *conn,
                       struct usbhost_hubport_s **hport)
 {
+  struct imxrt_usbhost_conn_s *imxrt_conn = (struct imxrt_usbhost_conn_s *)
+                                            conn;
+  struct imxrt_ehci_dev_s *priv = (struct imxrt_ehci_dev_s *)
+                                  imxrt_conn->ehci_dev;
   irqstate_t flags;
   int rhpndx;
   int ret;
@@ -3512,7 +3696,7 @@ static int imxrt_wait(struct usbhost_connection_s *conn,
 
           /* Has the connection state changed on the RH port? */
 
-          rhport   = &g_ehci.rhport[rhpndx];
+          rhport   = &priv->ehci->rhport[rhpndx];
           connport = &rhport->hport.hport;
           if (rhport->connected != connport->connected)
             {
@@ -3533,14 +3717,14 @@ static int imxrt_wait(struct usbhost_connection_s *conn,
 #ifdef CONFIG_USBHOST_HUB
       /* Is a device connected to an external hub? */
 
-      if (g_ehci.hport)
+      if (priv->ehci->hport != NULL)
         {
           volatile struct usbhost_hubport_s *connport;
 
           /* Yes.. return the external hub port */
 
-          connport = g_ehci.hport;
-          g_ehci.hport = NULL;
+          connport = priv->ehci->hport;
+          priv->ehci->hport = NULL;
 
           *hport = (struct usbhost_hubport_s *)connport;
           leave_critical_section(flags);
@@ -3555,8 +3739,8 @@ static int imxrt_wait(struct usbhost_connection_s *conn,
        * and check again
        */
 
-      g_ehci.pscwait = true;
-      ret = nxsem_wait_uninterruptible(&g_ehci.pscsem);
+      priv->ehci->pscwait = true;
+      ret = nxsem_wait_uninterruptible(&priv->ehci->pscsem);
       if (ret < 0)
         {
           return ret;
@@ -3595,6 +3779,10 @@ static int imxrt_wait(struct usbhost_connection_s *conn,
 static int imxrt_rh_enumerate(struct usbhost_connection_s *conn,
                               struct usbhost_hubport_s *hport)
 {
+  struct imxrt_usbhost_conn_s *imxrt_conn = (struct imxrt_usbhost_conn_s *)
+                                            conn;
+  struct imxrt_ehci_dev_s *priv = (struct imxrt_ehci_dev_s *)
+                                  imxrt_conn->ehci_dev;
   struct imxrt_rhport_s *rhport;
   volatile uint32_t *regaddr;
   uint32_t regval;
@@ -3604,7 +3792,7 @@ static int imxrt_rh_enumerate(struct usbhost_connection_s *conn,
   rhpndx = hport->port;
 
   DEBUGASSERT(rhpndx >= 0 && rhpndx < IMXRT_EHCI_NRHPORT);
-  rhport = &g_ehci.rhport[rhpndx];
+  rhport = &priv->ehci->rhport[rhpndx];
 
   /* Are we connected to a device?  The caller should have called the wait()
    * method first to be assured that a device is connected.
@@ -3644,7 +3832,7 @@ static int imxrt_rh_enumerate(struct usbhost_connection_s *conn,
    * however, also appears to work.
    */
 
-  regval = imxrt_getreg(&HCOR->portsc[rhpndx]);
+  regval = imxrt_getreg(&HCOR(priv->ctrid)->portsc[rhpndx]);
   if ((regval & EHCI_PORTSC_LSTATUS_MASK) == EHCI_PORTSC_LSTATUS_KSTATE)
     {
       /* EHCI Paragraph 2.3.9:
@@ -3693,7 +3881,8 @@ static int imxrt_rh_enumerate(struct usbhost_connection_s *conn,
    *   may hold Port Reset asserted to a one when the HCHalted bit is a one.
    */
 
-  DEBUGASSERT((imxrt_getreg(&HCOR->usbsts) & EHCI_USBSTS_HALTED) == 0);
+  DEBUGASSERT((imxrt_getreg(&HCOR(priv->ctrid)->usbsts) &
+               EHCI_USBSTS_HALTED) == 0);
 
   /* EHCI paragraph 2.3.9:
    *
@@ -3706,7 +3895,7 @@ static int imxrt_rh_enumerate(struct usbhost_connection_s *conn,
    *   one, it must also write a zero to the Port Enable bit."
    */
 
-  regaddr = &HCOR->portsc[RHPNDX(rhport)];
+  regaddr = &HCOR(priv->ctrid)->portsc[RHPNDX(rhport)];
   regval  = imxrt_getreg(regaddr);
   regval &= ~EHCI_PORTSC_PE;
   regval |= EHCI_PORTSC_RESET;
@@ -3769,7 +3958,7 @@ static int imxrt_rh_enumerate(struct usbhost_connection_s *conn,
    *   will be indicated by the PSPD field in PORTSC1.
    */
 
-  regval = imxrt_getreg(&HCOR->portsc[rhpndx]);
+  regval = imxrt_getreg(&HCOR(priv->ctrid)->portsc[rhpndx]);
 
   if ((regval & USBDEV_PRTSC1_PSPD_MASK) == USBDEV_PRTSC1_PSPD_HS)
     {
@@ -3884,6 +4073,9 @@ static int imxrt_ep0configure(struct usbhost_driver_s *drvr,
                               usbhost_ep_t ep0, uint8_t funcaddr,
                               uint8_t speed, uint16_t maxpacketsize)
 {
+  struct imxrt_rhport_s *rhport = (struct imxrt_rhport_s *)drvr;
+  struct imxrt_ehci_dev_s *priv = (struct imxrt_ehci_dev_s *)
+                                  rhport->ehci_dev;
   struct imxrt_epinfo_s *epinfo = (struct imxrt_epinfo_s *)ep0;
   int ret;
 
@@ -3891,7 +4083,7 @@ static int imxrt_ep0configure(struct usbhost_driver_s *drvr,
 
   /* We must have exclusive access to the EHCI data structures. */
 
-  ret = nxmutex_lock(&g_ehci.lock);
+  ret = nxmutex_lock(&priv->ehci->lock);
   if (ret >= 0)
     {
       /* Remember the new device address and max packet size */
@@ -3900,7 +4092,7 @@ static int imxrt_ep0configure(struct usbhost_driver_s *drvr,
       epinfo->speed     = speed;
       epinfo->maxpacket = maxpacketsize;
 
-      nxmutex_unlock(&g_ehci.lock);
+      nxmutex_unlock(&priv->ehci->lock);
     }
 
   return ret;
@@ -4232,6 +4424,8 @@ static int imxrt_ctrlin(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
                         uint8_t *buffer)
 {
   struct imxrt_rhport_s *rhport = (struct imxrt_rhport_s *)drvr;
+  struct imxrt_ehci_dev_s *priv = (struct imxrt_ehci_dev_s *)
+                                  rhport->ehci_dev;
   struct imxrt_epinfo_s *ep0info = (struct imxrt_epinfo_s *)ep0;
   uint16_t len;
   ssize_t nbytes;
@@ -4256,7 +4450,7 @@ static int imxrt_ctrlin(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
    * structures.
    */
 
-  ret = nxmutex_lock(&g_ehci.lock);
+  ret = nxmutex_lock(&priv->ehci->lock);
   if (ret < 0)
     {
       return ret;
@@ -4282,14 +4476,14 @@ static int imxrt_ctrlin(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 
   /* And wait for the transfer to complete */
 
-  nbytes = imxrt_transfer_wait(ep0info);
-  nxmutex_unlock(&g_ehci.lock);
+  nbytes = imxrt_transfer_wait(rhport, ep0info);
+  nxmutex_unlock(&priv->ehci->lock);
   return nbytes >= 0 ? OK : (int)nbytes;
 
 errout_with_iocwait:
   ep0info->iocwait = false;
 errout_with_lock:
-  nxmutex_unlock(&g_ehci.lock);
+  nxmutex_unlock(&priv->ehci->lock);
   return ret;
 }
 
@@ -4348,6 +4542,8 @@ static ssize_t imxrt_transfer(struct usbhost_driver_s *drvr,
                               size_t buflen)
 {
   struct imxrt_rhport_s *rhport = (struct imxrt_rhport_s *)drvr;
+  struct imxrt_ehci_dev_s *priv = (struct imxrt_ehci_dev_s *)
+                                  rhport->ehci_dev;
   struct imxrt_epinfo_s *epinfo = (struct imxrt_epinfo_s *)ep;
   ssize_t nbytes;
   int ret;
@@ -4358,7 +4554,7 @@ static ssize_t imxrt_transfer(struct usbhost_driver_s *drvr,
    * structures.
    */
 
-  ret = nxmutex_lock(&g_ehci.lock);
+  ret = nxmutex_lock(&priv->ehci->lock);
   if (ret < 0)
     {
       return (ssize_t)ret;
@@ -4409,15 +4605,15 @@ static ssize_t imxrt_transfer(struct usbhost_driver_s *drvr,
 
   /* Then wait for the transfer to complete */
 
-  nbytes = imxrt_transfer_wait(epinfo);
-  nxmutex_unlock(&g_ehci.lock);
+  nbytes = imxrt_transfer_wait(rhport, epinfo);
+  nxmutex_unlock(&priv->ehci->lock);
   return nbytes;
 
 errout_with_iocwait:
   epinfo->iocwait = false;
 errout_with_lock:
   uerr("!!!\n");
-  nxmutex_unlock(&g_ehci.lock);
+  nxmutex_unlock(&priv->ehci->lock);
   return (ssize_t)ret;
 }
 
@@ -4463,6 +4659,8 @@ static int imxrt_asynch(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
                         usbhost_asynch_t callback, void *arg)
 {
   struct imxrt_rhport_s *rhport = (struct imxrt_rhport_s *)drvr;
+  struct imxrt_ehci_dev_s *priv = (struct imxrt_ehci_dev_s *)
+                                  rhport->ehci_dev;
   struct imxrt_epinfo_s *epinfo = (struct imxrt_epinfo_s *)ep;
   int ret;
 
@@ -4472,7 +4670,7 @@ static int imxrt_asynch(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
    * structures.
    */
 
-  ret = nxmutex_lock(&g_ehci.lock);
+  ret = nxmutex_lock(&priv->ehci->lock);
   if (ret < 0)
     {
       return ret;
@@ -4521,14 +4719,14 @@ static int imxrt_asynch(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
 
   /* The transfer is in progress */
 
-  nxmutex_unlock(&g_ehci.lock);
+  nxmutex_unlock(&priv->ehci->lock);
   return OK;
 
 errout_with_callback:
   epinfo->callback = NULL;
   epinfo->arg      = NULL;
 errout_with_lock:
-  nxmutex_unlock(&g_ehci.lock);
+  nxmutex_unlock(&priv->ehci->lock);
   return ret;
 }
 #endif /* CONFIG_USBHOST_ASYNCH */
@@ -4554,6 +4752,9 @@ errout_with_lock:
 
 static int imxrt_cancel(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 {
+  struct imxrt_rhport_s *rhport = (struct imxrt_rhport_s *)drvr;
+  struct imxrt_ehci_dev_s *priv = (struct imxrt_ehci_dev_s *)
+                                  rhport->ehci_dev;
   struct imxrt_epinfo_s *epinfo = (struct imxrt_epinfo_s *)ep;
   struct imxrt_qh_s *qh;
 #ifdef CONFIG_USBHOST_ASYNCH
@@ -4576,7 +4777,7 @@ static int imxrt_cancel(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
    * interrupt level.
    */
 
-  ret = nxmutex_lock(&g_ehci.lock);
+  ret = nxmutex_lock(&priv->ehci->lock);
   if (ret < 0)
     {
       return ret;
@@ -4633,7 +4834,7 @@ static int imxrt_cancel(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
            * queue.
            */
 
-          bp = (uint32_t *)&g_asynchead.hw.hlp;
+          bp = (uint32_t *)&priv->asynchead->hw.hlp;
           qh = (struct imxrt_qh_s *)
                imxrt_virtramaddr(imxrt_swap32(*bp) & QH_HLP_MASK);
 
@@ -4642,7 +4843,7 @@ static int imxrt_cancel(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
            * head.
            */
 
-          if (qh && qh != &g_asynchead)
+          if (qh && qh != priv->asynchead)
             {
               /* Claim that we successfully cancelled the transfer */
 
@@ -4659,7 +4860,7 @@ static int imxrt_cancel(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
            * queue.
            */
 
-          bp = (uint32_t *)&g_intrhead.hw.hlp;
+          bp = (uint32_t *)&priv->intrhead->hw.hlp;
           qh = (struct imxrt_qh_s *)
                imxrt_virtramaddr(imxrt_swap32(*bp) & QH_HLP_MASK);
           if (qh)
@@ -4696,7 +4897,7 @@ static int imxrt_cancel(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
    * 3)  Some bad happened and sam_hq_foreach returned an error code < 0.
    */
 
-  ret = imxrt_qh_foreach(qh, &bp, imxrt_qh_cancel, epinfo);
+  ret = imxrt_qh_foreach(qh, &bp, imxrt_qh_cancel, epinfo, priv);
   if (ret < 0)
     {
       usbhost_trace1(EHCI_TRACE1_QTDFOREACH_FAILED, -ret);
@@ -4731,7 +4932,7 @@ exit_terminate:
 #endif
 
 errout_with_lock:
-  nxmutex_unlock(&g_ehci.lock);
+  nxmutex_unlock(&priv->ehci->lock);
   return ret;
 }
 
@@ -4761,6 +4962,9 @@ static int imxrt_connect(struct usbhost_driver_s *drvr,
                          struct usbhost_hubport_s *hport,
                          bool connected)
 {
+  struct imxrt_rhport_s *rhport = (struct imxrt_rhport_s *)drvr;
+  struct imxrt_ehci_dev_s *priv = (struct imxrt_ehci_dev_s *)
+                                  rhport->ehci_dev;
   irqstate_t flags;
 
   /* Set the connected/disconnected flag */
@@ -4772,13 +4976,13 @@ static int imxrt_connect(struct usbhost_driver_s *drvr,
   /* Report the connection event */
 
   flags = enter_critical_section();
-  DEBUGASSERT(g_ehci.hport == NULL); /* REVISIT */
+  DEBUGASSERT(priv->ehci->hport == NULL); /* REVISIT */
 
-  g_ehci.hport = hport;
-  if (g_ehci.pscwait)
+  priv->ehci->hport = hport;
+  if (priv->ehci->pscwait)
     {
-      g_ehci.pscwait = false;
-      nxsem_post(&g_ehci.pscsem);
+      priv->ehci->pscwait = false;
+      nxsem_post(&priv->ehci->pscsem);
     }
 
   leave_critical_section(flags);
@@ -4863,7 +5067,7 @@ static void imxrt_disconnect(struct usbhost_driver_s *drvr,
  *
  ****************************************************************************/
 
-static int imxrt_reset(void)
+static int imxrt_reset(int ctrid)
 {
   uint32_t regval;
   unsigned int timeout;
@@ -4875,7 +5079,7 @@ static int imxrt_reset(void)
    * stopped state..."
    */
 
-  imxrt_putreg(0, &HCOR->usbcmd);
+  imxrt_putreg(0, &HCOR(ctrid)->usbcmd);
 
   /* "... Software should not set [HCRESET] to a one when the HCHalted bit in
    *  the USBSTS register is a zero. Attempting to reset an actively running
@@ -4895,7 +5099,7 @@ static int imxrt_reset(void)
        * the HCHalted bit is no longer set in the USBSTS register.
        */
 
-      regval = imxrt_getreg(&HCOR->usbsts);
+      regval = imxrt_getreg(&HCOR(ctrid)->usbsts);
     }
   while (((regval & EHCI_USBSTS_HALTED) == 0) && (timeout < 1000));
 
@@ -4911,9 +5115,9 @@ static int imxrt_reset(void)
    * reset
    */
 
-  regval  = imxrt_getreg(&HCOR->usbcmd);
+  regval  = imxrt_getreg(&HCOR(ctrid)->usbcmd);
   regval |= EHCI_USBCMD_HCRESET;
-  imxrt_putreg(regval, &HCOR->usbcmd);
+  imxrt_putreg(regval, &HCOR(ctrid)->usbcmd);
 
   /* Wait for the HCReset bit to become clear */
 
@@ -4929,7 +5133,7 @@ static int imxrt_reset(void)
        * HCReset bit is no longer set in the USBSTS register.
        */
 
-      regval = imxrt_getreg(&HCOR->usbcmd);
+      regval = imxrt_getreg(&HCOR(ctrid)->usbcmd);
     }
   while (((regval & EHCI_USBCMD_HCRESET) != 0) && (timeout < 1000000));
 
@@ -4969,7 +5173,15 @@ static int imxrt_reset(void)
 
 struct usbhost_connection_s *imxrt_ehci_initialize(int controller)
 {
-  struct usbhost_hubport_s *hport;
+  struct usbhost_hubport_s    *hport;
+  struct imxrt_ehci_s         *ehci;
+  struct imxrt_qh_s           *asynchead;
+  struct imxrt_qh_s           *qhpool;
+  struct imxrt_qtd_s          *qtdpool;
+  struct imxrt_qh_s           *intrhead;
+  struct imxrt_ehci_dev_s     *ehci_dev;
+  struct imxrt_usbhost_conn_s *usb_conn;
+  uint32_t *framelist;
   uint32_t regval;
 #  if defined(CONFIG_DEBUG_USB) && defined(CONFIG_DEBUG_INFO)
   uint16_t regval16;
@@ -4977,26 +5189,55 @@ struct usbhost_connection_s *imxrt_ehci_initialize(int controller)
 #  endif
   uintptr_t physaddr;
   int ret;
+  int end;
   int i;
 
   /* Sanity checks */
 
-  DEBUGASSERT(controller == 0);
-  DEBUGASSERT(((uintptr_t)&g_asynchead & 0x1f) == 0);
+  DEBUGASSERT(controller == 0 || controller == 1);
+  DEBUGASSERT(((uintptr_t)&g_asynchead_usb1 & 0x1f) == 0);
   DEBUGASSERT((sizeof(struct imxrt_qh_s) & 0x1f) == 0);
   DEBUGASSERT((sizeof(struct imxrt_qtd_s) & 0x1f) == 0);
 
 #  ifdef CONFIG_IMXRT_EHCI_USB1_PREALLOCATE
-  DEBUGASSERT(((uintptr_t)&g_qhpool & 0x1f) == 0);
-  DEBUGASSERT(((uintptr_t)&g_qtdpool & 0x1f) == 0);
+  DEBUGASSERT(((uintptr_t)&g_qhpool_usb1 & 0x1f) == 0);
+  DEBUGASSERT(((uintptr_t)&g_qtdpool_usb1 & 0x1f) == 0);
 #  endif
 
 #  ifndef CONFIG_USBHOST_INT_DISABLE
-  DEBUGASSERT(((uintptr_t)&g_intrhead & 0x1f) == 0);
+  DEBUGASSERT(((uintptr_t)&g_intrhead_usb1 & 0x1f) == 0);
 #    ifdef CONFIG_IMXRT_EHCI_PREALLOCATE
-  DEBUGASSERT(((uintptr_t)g_framelist & 0xfff) == 0);
+  DEBUGASSERT(((uintptr_t)g_framelist_usb1 & 0xfff) == 0);
 #    endif
 #  endif /* CONFIG_USBHOST_INT_DISABLE */
+
+#if defined(CONFIG_IMXRT_USBOTG1)
+  if (controller == 0)
+    {
+      ehci      = &g_ehci_usb1;
+      asynchead = &g_asynchead_usb1;
+      qhpool    = &g_qhpool_usb1[0];
+      qtdpool   = &g_qtdpool_usb1[0];
+      framelist = &g_framelist_usb1[0];
+      intrhead  = &g_intrhead_usb1;
+      ehci_dev  = &g_ehci_dev_usb1;
+      usb_conn  = &g_ehci_usb1_conn;
+    }
+#endif
+
+#if defined(CONFIG_IMXRT_USBOTG2)
+  if (controller == 1)
+    {
+      ehci      = &g_ehci_usb2;
+      asynchead = &g_asynchead_usb2;
+      qhpool    = &g_qhpool_usb2[0];
+      qtdpool   = &g_qtdpool_usb2[0];
+      framelist = &g_framelist_usb2[0];
+      intrhead  = &g_intrhead_usb2;
+      ehci_dev  = &g_ehci_dev_usb2;
+      usb_conn  = &g_ehci_usb2_conn;
+    }
+#endif
 
   /* Software Configuration *************************************************/
 
@@ -5004,13 +5245,13 @@ struct usbhost_connection_s *imxrt_ehci_initialize(int controller)
 
   /* Initialize function address generation logic */
 
-  usbhost_devaddr_initialize(&g_ehci.devgen);
+  usbhost_devaddr_initialize(&ehci->devgen);
 
   /* Initialize the root hub port structures */
 
   for (i = 0; i < IMXRT_EHCI_NRHPORT; i++)
     {
-      struct imxrt_rhport_s *rhport = &g_ehci.rhport[i];
+      struct imxrt_rhport_s *rhport = &ehci->rhport[i];
 
       /* Initialize the device operations */
 
@@ -5032,7 +5273,12 @@ struct usbhost_connection_s *imxrt_ehci_initialize(int controller)
       rhport->drvr.connect = imxrt_connect;
 #  endif
       rhport->drvr.disconnect = imxrt_disconnect;
-      rhport->hport.pdevgen   = &g_ehci.devgen;
+      rhport->hport.pdevgen   = &ehci->devgen;
+
+      /* Let's to identify the controller */
+
+      rhport->ehci_dev = ehci_dev;
+      rhport->ehci_dev->ctrid = controller;
 
       /* Initialize EP0 */
 
@@ -5053,12 +5299,26 @@ struct usbhost_connection_s *imxrt_ehci_initialize(int controller)
       hport->speed = USB_SPEED_FULL;
     }
 
-#  ifndef CONFIG_IMXRT_EHCI_USB1_PREALLOCATE
+#  if defined(CONFIG_IMXRT_USBOTG1) \
+   && !defined(CONFIG_IMXRT_EHCI_USB1_PREALLOCATE)
   /* Allocate a pool of free Queue Head (QH) structures */
 
-  g_qhpool = kmm_memalign(32, CONFIG_IMXRT_EHCI_USB1_NQHS *
-                              sizeof(struct imxrt_qh_s));
-  if (!g_qhpool)
+  g_qhpool_usb1 = kmm_memalign(32, CONFIG_IMXRT_EHCI_USB1_NQHS *
+                               sizeof(struct imxrt_qh_s));
+  if (!g_qhpool_usb1)
+    {
+      usbhost_trace1(EHCI_TRACE1_QHPOOLALLOC_FAILED, 0);
+      return NULL;
+    }
+#  endif
+
+#  if defined(CONFIG_IMXRT_USBOTG2) \
+   && !defined(CONFIG_IMXRT_EHCI_USB2_PREALLOCATE)
+  /* Allocate a pool of free Queue Head (QH) structures */
+
+  g_qhpool_usb2 = kmm_memalign(32, CONFIG_IMXRT_EHCI_USB2_NQHS *
+                               sizeof(struct imxrt_qh_s));
+  if (!g_qhpool_usb2)
     {
       usbhost_trace1(EHCI_TRACE1_QHPOOLALLOC_FAILED, 0);
       return NULL;
@@ -5067,46 +5327,106 @@ struct usbhost_connection_s *imxrt_ehci_initialize(int controller)
 
   /* Initialize the list of free Queue Head (QH) structures */
 
-  for (i = 0; i < CONFIG_IMXRT_EHCI_USB1_NQHS; i++)
+#  if defined(CONFIG_IMXRT_USBOTG1)
+  if (controller == 0)
+    {
+      end = CONFIG_IMXRT_EHCI_USB1_NQHS;
+    }
+#endif
+
+#  if defined(CONFIG_IMXRT_USBOTG2)
+  if (controller == 1)
+    {
+      end = CONFIG_IMXRT_EHCI_USB2_NQHS;
+    }
+#endif
+
+  for (i = 0; i < end; i++)
     {
       /* Put the QH structure in a free list */
 
-      imxrt_qh_free(&g_qhpool[i]);
+      imxrt_qh_free(&qhpool[i], ehci_dev);
     }
 
-#  ifndef CONFIG_IMXRT_EHCI_USB1_PREALLOCATE
+#  if defined(CONFIG_IMXRT_USBOTG1) \
+   && !defined(CONFIG_IMXRT_EHCI_USB1_PREALLOCATE)
   /* Allocate a pool of free Transfer Descriptor (qTD) structures */
 
-  g_qtdpool = kmm_memalign(32, CONFIG_IMXRT_EHCI_USB1_NQTDS *
+  g_qtdpool_usb1 = kmm_memalign(32, CONFIG_IMXRT_EHCI_USB1_NQTDS *
                                sizeof(struct imxrt_qtd_s));
-  if (!g_qtdpool)
+  if (!g_qtdpool_usb1)
     {
       usbhost_trace1(EHCI_TRACE1_QTDPOOLALLOC_FAILED, 0);
-      kmm_free(g_qhpool);
+      kmm_free(g_qhpool_usb1);
       return NULL;
     }
 #  endif
 
-#  if !defined(CONFIG_IMXRT_EHCI_USB1_PREALLOCATE) && !defined(CONFIG_USBHOST_INT_DISABLE)
+#  if defined(CONFIG_IMXRT_USBOTG2) \
+   && !defined(CONFIG_IMXRT_EHCI_USB2_PREALLOCATE)
+  /* Allocate a pool of free Transfer Descriptor (qTD) structures */
+
+  g_qtdpool_usb2 = kmm_memalign(32, CONFIG_IMXRT_EHCI_USB2_NQTDS *
+                               sizeof(struct imxrt_qtd_s));
+  if (!g_qtdpool_usb2)
+    {
+      usbhost_trace1(EHCI_TRACE1_QTDPOOLALLOC_FAILED, 0);
+      kmm_free(g_qhpool_usb2);
+      return NULL;
+    }
+#  endif
+
+#  if defined(CONFIG_IMXRT_USBOTG1) && \
+     !defined(CONFIG_IMXRT_EHCI_USB1_PREALLOCATE) && \
+     !defined(CONFIG_USBHOST_INT_DISABLE)
   /* Allocate the periodic framelist */
 
-  g_framelist = kmm_memalign(4096, FRAME_LIST_SIZE * sizeof(uint32_t));
-  if (!g_framelist)
+  g_framelist_usb1 = kmm_memalign(4096, FRAME_LIST_SIZE * sizeof(uint32_t));
+  if (!g_framelist_usb1)
     {
       usbhost_trace1(EHCI_TRACE1_PERFLALLOC_FAILED, 0);
-      kmm_free(g_qhpool);
-      kmm_free(g_qtdpool);
+      kmm_free(g_qhpool_usb1);
+      kmm_free(g_qtdpool_usb1);
       return NULL;
     }
 #  endif
+
+#  if defined(CONFIG_IMXRT_USBOTG2) && \
+     !defined(CONFIG_IMXRT_EHCI_USB2_PREALLOCATE) && \
+     !defined(CONFIG_USBHOST_INT_DISABLE)
+  /* Allocate the periodic framelist */
+
+  g_framelist_usb2 = kmm_memalign(4096, FRAME_LIST_SIZE * sizeof(uint32_t));
+  if (!g_framelist_usb2)
+    {
+      usbhost_trace1(EHCI_TRACE1_PERFLALLOC_FAILED, 0);
+      kmm_free(g_qhpool_usb2);
+      kmm_free(g_qtdpool_usb2);
+      return NULL;
+    }
+#  endif
+
+#  if defined(CONFIG_IMXRT_USBOTG1)
+  if (controller == 0)
+    {
+      end = CONFIG_IMXRT_EHCI_USB1_NQTDS;
+    }
+#endif
+
+#  if defined(CONFIG_IMXRT_USBOTG2)
+  if (controller == 1)
+    {
+      end = CONFIG_IMXRT_EHCI_USB2_NQTDS;
+    }
+#endif
 
   /* Initialize the list of free Transfer Descriptor (qTD) structures */
 
-  for (i = 0; i < CONFIG_IMXRT_EHCI_USB1_NQTDS; i++)
+  for (i = 0; i < end; i++)
     {
       /* Put the TD in a free list */
 
-      imxrt_qtd_free(&g_qtdpool[i]);
+      imxrt_qtd_free(&qtdpool[i], ehci_dev);
     }
 
   /* EHCI Hardware Configuration ********************************************/
@@ -5115,8 +5435,9 @@ struct usbhost_connection_s *imxrt_ehci_initialize(int controller)
 
   /* Reset the controller from the OTG peripheral */
 
-  putreg32(USBDEV_USBCMD_RST, IMXRT_USBDEV_USBCMD);
-  while ((getreg32(IMXRT_USBDEV_USBCMD) & USBDEV_USBCMD_RST) != 0);
+  putreg32(USBDEV_USBCMD_RST, IMXRT_USBDEV_USBCMD(controller));
+  while ((getreg32(IMXRT_USBDEV_USBCMD(controller)) &
+          USBDEV_USBCMD_RST) != 0);
 
   /* Program the controller to be the USB host controller Fixed selections:
    * CM = Host mode ES = 0, Little endian mode.  SLOM Not used in host mode.
@@ -5125,17 +5446,17 @@ struct usbhost_connection_s *imxrt_ehci_initialize(int controller)
    * some performance.
    */
 
-#  ifdef CONFIG_IMXRT_EHCI_USB1_SDIS
+#  if defined(CONFIG_IMXRT_EHCI_USB1_SDIS) || defined(CONFIG_IMXRT_EHCI_USB2_SDIS)
   putreg32(USBHOST_USBMODE_CM_HOST | USBHOST_USBMODE_SDIS |
-           USBHOST_USBMODE_VBPS, IMXRT_USBDEV_USBMODE);
+           USBHOST_USBMODE_VBPS, IMXRT_USBDEV_USBMODE(controller));
 #  else
   putreg32(USBHOST_USBMODE_CM_HOST | USBHOST_USBMODE_VBPS,
-           IMXRT_USBDEV_USBMODE);
+           IMXRT_USBDEV_USBMODE(controller));
 #  endif
 
   /* Reset the EHCI hardware */
 
-  ret = imxrt_reset();
+  ret = imxrt_reset(controller);
   if (ret < 0)
     {
       usbhost_trace1(EHCI_TRACE1_RESET_FAILED, -ret);
@@ -5147,33 +5468,33 @@ struct usbhost_connection_s *imxrt_ehci_initialize(int controller)
    * host configuration in the reset.
    */
 
-#  ifdef CONFIG_IMXRT_EHCI_USB1_SDIS
+#  if defined(CONFIG_IMXRT_EHCI_USB1_SDIS) || defined(CONFIG_IMXRT_EHCI_USB2_SDIS)
   putreg32(USBHOST_USBMODE_CM_HOST | USBHOST_USBMODE_SDIS |
-           USBHOST_USBMODE_VBPS, IMXRT_USBDEV_USBMODE);
+           USBHOST_USBMODE_VBPS, IMXRT_USBDEV_USBMODE(controller));
 #  else
   putreg32(USBHOST_USBMODE_CM_HOST | USBHOST_USBMODE_VBPS,
-           IMXRT_USBDEV_USBMODE);
+           IMXRT_USBDEV_USBMODE(controller));
 #  endif
 
   /* Disable all interrupts */
 
-  imxrt_putreg(0, &HCOR->usbintr);
+  imxrt_putreg(0, &HCOR(controller)->usbintr);
 
   /* Clear pending interrupts.  Bits in the USBSTS register are cleared by
    * writing a '1' to the corresponding bit.
    */
 
-  imxrt_putreg(EHCI_INT_ALLINTS, &HCOR->usbsts);
+  imxrt_putreg(EHCI_INT_ALLINTS, &HCOR(controller)->usbsts);
 
 #  if defined(CONFIG_DEBUG_USB) && defined(CONFIG_DEBUG_INFO)
   /* Show the EHCI version */
 
-  regval16 = imxrt_swap16(HCCR->hciversion);
+  regval16 = imxrt_swap16(HCCR(controller)->hciversion);
   usbhost_vtrace2(EHCI_VTRACE2_HCIVERSION, regval16 >> 8, regval16 & 0xff);
 
   /* Verify that the correct number of ports is reported */
 
-  regval = imxrt_getreg(&HCCR->hcsparams);
+  regval = imxrt_getreg(&HCCR(controller)->hcsparams);
   nports = (regval & EHCI_HCSPARAMS_NPORTS_MASK) >>
             EHCI_HCSPARAMS_NPORTS_SHIFT;
 
@@ -5182,7 +5503,7 @@ struct usbhost_connection_s *imxrt_ehci_initialize(int controller)
 
   /* Show the HCCPARAMS register */
 
-  regval = imxrt_getreg(&HCCR->hccparams);
+  regval = imxrt_getreg(&HCCR(controller)->hccparams);
   usbhost_vtrace1(EHCI_VTRACE1_HCCPARAMS, regval);
 #  endif
 
@@ -5198,21 +5519,21 @@ struct usbhost_connection_s *imxrt_ehci_initialize(int controller)
    * port is reset (and enabled)."
    */
 
-  memset(&g_asynchead, 0, sizeof(struct imxrt_qh_s));
-  physaddr = imxrt_physramaddr((uintptr_t)&g_asynchead);
-  g_asynchead.hw.hlp = imxrt_swap32(physaddr | QH_HLP_TYP_QH);
-  g_asynchead.hw.epchar = imxrt_swap32(QH_EPCHAR_H | QH_EPCHAR_EPS_FULL);
-  g_asynchead.hw.overlay.nqp = imxrt_swap32(QH_NQP_T);
-  g_asynchead.hw.overlay.alt = imxrt_swap32(QH_NQP_T);
-  g_asynchead.hw.overlay.token = imxrt_swap32(QH_TOKEN_HALTED);
-  g_asynchead.fqp = imxrt_swap32(QTD_NQP_T);
+  memset(asynchead, 0, sizeof(struct imxrt_qh_s));
+  physaddr = imxrt_physramaddr((uintptr_t)asynchead);
+  asynchead->hw.hlp = imxrt_swap32(physaddr | QH_HLP_TYP_QH);
+  asynchead->hw.epchar = imxrt_swap32(QH_EPCHAR_H | QH_EPCHAR_EPS_FULL);
+  asynchead->hw.overlay.nqp = imxrt_swap32(QH_NQP_T);
+  asynchead->hw.overlay.alt = imxrt_swap32(QH_NQP_T);
+  asynchead->hw.overlay.token = imxrt_swap32(QH_TOKEN_HALTED);
+  asynchead->fqp = imxrt_swap32(QTD_NQP_T);
 
   /* Set the Current Asynchronous List Address. */
 
-  up_flush_dcache((uintptr_t)&g_asynchead.hw,
-    (uintptr_t)&g_asynchead.hw + sizeof(struct ehci_qh_s));
+  up_flush_dcache((uintptr_t)&asynchead->hw,
+    (uintptr_t)&asynchead->hw + sizeof(struct ehci_qh_s));
 
-  imxrt_putreg(imxrt_swap32(physaddr), &HCOR->asynclistaddr);
+  imxrt_putreg(imxrt_swap32(physaddr), &HCOR(controller)->asynclistaddr);
 
 #  ifndef CONFIG_USBHOST_INT_DISABLE
 
@@ -5221,32 +5542,32 @@ struct usbhost_connection_s *imxrt_ehci_initialize(int controller)
    * to point to the Interrupt Queue Head (g_intrhead).
    */
 
-  memset(&g_intrhead, 0, sizeof(struct imxrt_qh_s));
-  g_intrhead.hw.hlp = imxrt_swap32(QH_HLP_T);
-  g_intrhead.hw.overlay.nqp = imxrt_swap32(QH_NQP_T);
-  g_intrhead.hw.overlay.alt = imxrt_swap32(QH_NQP_T);
-  g_intrhead.hw.overlay.token = imxrt_swap32(QH_TOKEN_HALTED);
-  g_intrhead.hw.epcaps = imxrt_swap32(QH_EPCAPS_SSMASK(1));
+  memset(intrhead, 0, sizeof(struct imxrt_qh_s));
+  intrhead->hw.hlp = imxrt_swap32(QH_HLP_T);
+  intrhead->hw.overlay.nqp = imxrt_swap32(QH_NQP_T);
+  intrhead->hw.overlay.alt = imxrt_swap32(QH_NQP_T);
+  intrhead->hw.overlay.token = imxrt_swap32(QH_TOKEN_HALTED);
+  intrhead->hw.epcaps = imxrt_swap32(QH_EPCAPS_SSMASK(1));
 
   /* Attach the periodic QH to Period Frame List */
 
-  physaddr = imxrt_physramaddr((uintptr_t)&g_intrhead);
+  physaddr = imxrt_physramaddr((uintptr_t)intrhead);
   for (i = 0; i < FRAME_LIST_SIZE; i++)
     {
-      g_framelist[i] = imxrt_swap32(physaddr) | PFL_TYP_QH;
+      framelist[i] = imxrt_swap32(physaddr) | PFL_TYP_QH;
     }
 
   /* Set the Periodic Frame List Base Address. */
 
-  physaddr = imxrt_physramaddr((uintptr_t) g_framelist);
-  imxrt_putreg(imxrt_swap32(physaddr), &HCOR->periodiclistbase);
+  physaddr = imxrt_physramaddr((uintptr_t) framelist);
+  imxrt_putreg(imxrt_swap32(physaddr), &HCOR(controller)->periodiclistbase);
 #  endif
 
   /* Enable the asynchronous schedule and, possibly enable the periodic
    * schedule and set the frame list size.
    */
 
-  regval = imxrt_getreg(&HCOR->usbcmd);
+  regval = imxrt_getreg(&HCOR(controller)->usbcmd);
   regval &= ~(EHCI_USBCMD_HCRESET | EHCI_USBCMD_FLSIZE_MASK |
               EHCI_USBCMD_FLSIZE_MASK | EHCI_USBCMD_PSEN |
               EHCI_USBCMD_IAADB | EHCI_USBCMD_LRESET);
@@ -5265,45 +5586,65 @@ struct usbhost_connection_s *imxrt_ehci_initialize(int controller)
 #    endif
 #  endif
 
-  imxrt_putreg(regval, &HCOR->usbcmd);
+  imxrt_putreg(regval, &HCOR(controller)->usbcmd);
 
   /* Start the host controller by setting the RUN bit in the USBCMD
    * register.
    */
 
-  regval = imxrt_getreg(&HCOR->usbcmd);
+  regval = imxrt_getreg(&HCOR(controller)->usbcmd);
   regval |= EHCI_USBCMD_RUN;
-  imxrt_putreg(regval, &HCOR->usbcmd);
+  imxrt_putreg(regval, &HCOR(controller)->usbcmd);
 
   /* Route all ports to this host controller by setting the CONFIG flag. */
 
-  regval = imxrt_getreg(&HCOR->configflag);
+  regval = imxrt_getreg(&HCOR(controller)->configflag);
   regval |= EHCI_CONFIGFLAG;
-  imxrt_putreg(regval, &HCOR->configflag);
+  imxrt_putreg(regval, &HCOR(controller)->configflag);
 
   /* Wait for the EHCI to run (i.e., no longer report halted) */
 
-  ret = ehci_wait_usbsts(EHCI_USBSTS_HALTED, 0, 100 * 1000);
+  ret = ehci_wait_usbsts(controller, EHCI_USBSTS_HALTED, 0, 100 * 1000);
   if (ret < 0)
     {
-      usbhost_trace1(EHCI_TRACE1_RUN_FAILED, imxrt_getreg(&HCOR->usbsts));
+      usbhost_trace1(EHCI_TRACE1_RUN_FAILED,
+                     imxrt_getreg(&HCOR(controller)->usbsts));
       return NULL;
     }
 
   /* Interrupt Configuration ************************************************/
 
-  ret = irq_attach(IMXRT_IRQ_USBOTG1, imxrt_ehci_interrupt, NULL);
-  if (ret != 0)
+#ifdef CONFIG_IMXRT_USBOTG1
+  if (controller == 0)
     {
-      usbhost_trace1(EHCI_TRACE1_IRQATTACH_FAILED, IMXRT_IRQ_USBOTG1);
-      return NULL;
+      ret = irq_attach(IMXRT_IRQ_USBOTG1, imxrt_ehci_interrupt,
+                       (void *) ehci_dev);
+      if (ret != 0)
+        {
+          usbhost_trace1(EHCI_TRACE1_IRQATTACH_FAILED, IMXRT_IRQ_USBOTG1);
+          return NULL;
+        }
     }
+#endif
+
+#ifdef CONFIG_IMXRT_USBOTG2
+  if (controller == 1)
+    {
+      ret = irq_attach(IMXRT_IRQ_USBOTG1, imxrt_ehci_interrupt,
+                       (void *) ehci_dev);
+      if (ret != 0)
+        {
+          usbhost_trace1(EHCI_TRACE1_IRQATTACH_FAILED, IMXRT_IRQ_USBOTG2);
+          return NULL;
+        }
+    }
+#endif
 
   /* Enable EHCI interrupts.  Interrupts are still disabled at the level of
    * the interrupt controller.
    */
 
-  imxrt_putreg(EHCI_HANDLED_INTS, &HCOR->usbintr);
+  imxrt_putreg(EHCI_HANDLED_INTS, &HCOR(controller)->usbintr);
 
   /* Enable interrupts at the interrupt controller */
 
@@ -5315,7 +5656,7 @@ struct usbhost_connection_s *imxrt_ehci_initialize(int controller)
     {
       /* Enable VBUS power for the port */
 
-      imxrt_usbhost_vbusdrive(i, true);
+      imxrt_usbhost_vbusdrive(controller, i, true);
       up_mdelay(25);
     }
 
@@ -5326,13 +5667,14 @@ struct usbhost_connection_s *imxrt_ehci_initialize(int controller)
 
   for (i = 0; i < IMXRT_EHCI_NRHPORT; i++)
     {
-      g_ehci.rhport[i].connected =
-        ((imxrt_getreg(&HCOR->portsc[i]) & EHCI_PORTSC_CCS) != 0);
+      ehci->rhport[i].connected =
+        ((imxrt_getreg(&HCOR(controller)->portsc[i]) &
+         EHCI_PORTSC_CCS) != 0);
     }
 
   usbhost_vtrace1(EHCI_VTRACE1_INIITIALIZED, 0);
 
-  return &g_ehciconn;
+  return (struct usbhost_connection_s *) usb_conn;
 }
 
 /****************************************************************************

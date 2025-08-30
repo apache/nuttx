@@ -791,9 +791,9 @@ static void imxrt_queuedtd(uint8_t epphy, struct imxrt_dtd_s *dtd)
 
   uint32_t bit = IMXRT_ENDPTMASK(epphy);
 
-  imxrt_setbits(bit, IMXRT_USBDEV_ENDPTPRIME);
+  imxrt_setbits(bit, IMXRT_USBDEV_ENDPTPRIME(0));
 
-  while (imxrt_getreg(IMXRT_USBDEV_ENDPTPRIME) & bit)
+  while (imxrt_getreg(IMXRT_USBDEV_ENDPTPRIME(0)) & bit)
     ;
 }
 
@@ -832,7 +832,7 @@ static void imxrt_readsetup(uint8_t epphy, struct usb_ctrlreq_s *ctrl)
     {
       /* Set the trip wire */
 
-      imxrt_setbits(USBDEV_USBCMD_SUTW, IMXRT_USBDEV_USBCMD);
+      imxrt_setbits(USBDEV_USBCMD_SUTW, IMXRT_USBDEV_USBCMD(0));
 
       up_invalidate_dcache((uintptr_t)dqh,
                            (uintptr_t)dqh + sizeof(struct imxrt_dqh_s));
@@ -844,15 +844,16 @@ static void imxrt_readsetup(uint8_t epphy, struct usb_ctrlreq_s *ctrl)
           ((uint8_t *) ctrl)[i] = ((uint8_t *) dqh->setup)[i];
         }
     }
-  while (!(imxrt_getreg(IMXRT_USBDEV_USBCMD) & USBDEV_USBCMD_SUTW));
+  while (!(imxrt_getreg(IMXRT_USBDEV_USBCMD(0)) & USBDEV_USBCMD_SUTW));
 
   /* Clear the trip wire */
 
-  imxrt_clrbits(USBDEV_USBCMD_SUTW, IMXRT_USBDEV_USBCMD);
+  imxrt_clrbits(USBDEV_USBCMD_SUTW, IMXRT_USBDEV_USBCMD(0));
 
   /* Clear the Setup Interrupt */
 
-  imxrt_putreg(IMXRT_ENDPTMASK(IMXRT_EP0_OUT), IMXRT_USBDEV_ENDPTSETUPSTAT);
+  imxrt_putreg(IMXRT_ENDPTMASK(IMXRT_EP0_OUT),
+               IMXRT_USBDEV_ENDPTSETUPSTAT(0));
 }
 
 /****************************************************************************
@@ -871,7 +872,7 @@ static inline void imxrt_set_address(struct imxrt_usbdev_s *priv,
 
   imxrt_chgbits(USBDEV_DEVICEADDR_MASK,
                 priv->paddr << USBDEV_DEVICEADDR_SHIFT,
-                IMXRT_USBDEV_DEVICEADDR);
+                IMXRT_USBDEV_DEVICEADDR(0));
 }
 
 /****************************************************************************
@@ -887,11 +888,11 @@ static void imxrt_flushep(struct imxrt_ep_s *privep)
   uint32_t mask = IMXRT_ENDPTMASK(privep->epphy);
   do
     {
-      imxrt_putreg(mask, IMXRT_USBDEV_ENDPTFLUSH);
-      while ((imxrt_getreg(IMXRT_USBDEV_ENDPTFLUSH) & mask) != 0)
+      imxrt_putreg(mask, IMXRT_USBDEV_ENDPTFLUSH(0));
+      while ((imxrt_getreg(IMXRT_USBDEV_ENDPTFLUSH(0)) & mask) != 0)
       ;
     }
-  while ((imxrt_getreg(IMXRT_USBDEV_ENDPTSTATUS) & mask) != 0);
+  while ((imxrt_getreg(IMXRT_USBDEV_ENDPTSTATUS(0)) & mask) != 0);
 }
 
 /****************************************************************************
@@ -1138,7 +1139,7 @@ static void imxrt_ep0configure(struct imxrt_usbdev_s *priv)
   /* Enable EP0 */
 
   imxrt_setbits(USBDEV_ENDPTCTRL0_RXE | USBDEV_ENDPTCTRL0_TXE,
-                IMXRT_USBDEV_ENDPTCTRL0);
+                IMXRT_USBDEV_ENDPTCTRL0(0));
 }
 
 /****************************************************************************
@@ -1156,33 +1157,33 @@ static void imxrt_usbreset(struct imxrt_usbdev_s *priv)
   /* Disable all endpoints. Control endpoint 0 is always enabled */
 
   imxrt_clrbits(USBDEV_ENDPTCTRL_RXE | USBDEV_ENDPTCTRL_TXE,
-                IMXRT_USBDEV_ENDPTCTRL1);
+                IMXRT_USBDEV_ENDPTCTRL1(0));
   imxrt_clrbits(USBDEV_ENDPTCTRL_RXE | USBDEV_ENDPTCTRL_TXE,
-                IMXRT_USBDEV_ENDPTCTRL2);
+                IMXRT_USBDEV_ENDPTCTRL2(0));
   imxrt_clrbits(USBDEV_ENDPTCTRL_RXE | USBDEV_ENDPTCTRL_TXE,
-                IMXRT_USBDEV_ENDPTCTRL3);
+                IMXRT_USBDEV_ENDPTCTRL3(0));
   imxrt_clrbits(USBDEV_ENDPTCTRL_RXE | USBDEV_ENDPTCTRL_TXE,
-                IMXRT_USBDEV_ENDPTCTRL4);
+                IMXRT_USBDEV_ENDPTCTRL4(0));
   imxrt_clrbits(USBDEV_ENDPTCTRL_RXE | USBDEV_ENDPTCTRL_TXE,
-                IMXRT_USBDEV_ENDPTCTRL5);
+                IMXRT_USBDEV_ENDPTCTRL5(0));
 
   /* Clear all pending interrupts */
 
-  imxrt_putreg(imxrt_getreg(IMXRT_USBDEV_ENDPTNAK),
-               IMXRT_USBDEV_ENDPTNAK);
-  imxrt_putreg(imxrt_getreg(IMXRT_USBDEV_ENDPTSETUPSTAT),
-               IMXRT_USBDEV_ENDPTSETUPSTAT);
-  imxrt_putreg(imxrt_getreg(IMXRT_USBDEV_ENDPTCOMPLETE),
-               IMXRT_USBDEV_ENDPTCOMPLETE);
+  imxrt_putreg(imxrt_getreg(IMXRT_USBDEV_ENDPTNAK(0)),
+               IMXRT_USBDEV_ENDPTNAK(0));
+  imxrt_putreg(imxrt_getreg(IMXRT_USBDEV_ENDPTSETUPSTAT(0)),
+               IMXRT_USBDEV_ENDPTSETUPSTAT(0));
+  imxrt_putreg(imxrt_getreg(IMXRT_USBDEV_ENDPTCOMPLETE(0)),
+               IMXRT_USBDEV_ENDPTCOMPLETE(0));
 
   /* Wait for all prime operations to have completed and then flush all
    * DTDs
    */
 
-  while (imxrt_getreg(IMXRT_USBDEV_ENDPTPRIME) != 0)
+  while (imxrt_getreg(IMXRT_USBDEV_ENDPTPRIME(0)) != 0)
     ;
-  imxrt_putreg(IMXRT_ENDPTMASK_ALL, IMXRT_USBDEV_ENDPTFLUSH);
-  while (imxrt_getreg(IMXRT_USBDEV_ENDPTFLUSH))
+  imxrt_putreg(IMXRT_ENDPTMASK_ALL, IMXRT_USBDEV_ENDPTFLUSH(0));
+  while (imxrt_getreg(IMXRT_USBDEV_ENDPTFLUSH(0)))
     ;
 
   /* Reset endpoints */
@@ -1210,7 +1211,7 @@ static void imxrt_usbreset(struct imxrt_usbdev_s *priv)
   /* Set the interrupt Threshold control interval to 0 */
 
   imxrt_chgbits(USBDEV_USBCMD_ITC_MASK, USBDEV_USBCMD_ITCIMME,
-                IMXRT_USBDEV_USBCMD);
+                IMXRT_USBDEV_USBCMD(0));
 
   /* Zero out the Endpoint queue heads */
 
@@ -1226,7 +1227,7 @@ static void imxrt_usbreset(struct imxrt_usbdev_s *priv)
 
   /* Initialise the Endpoint List Address */
 
-  imxrt_putreg((uint32_t)g_qh, IMXRT_USBDEV_ENDPOINTLIST);
+  imxrt_putreg((uint32_t)g_qh, IMXRT_USBDEV_ENDPOINTLIST(0));
 
   /* EndPoint 0 initialization */
 
@@ -1236,7 +1237,7 @@ static void imxrt_usbreset(struct imxrt_usbdev_s *priv)
 
   imxrt_putreg(USB_FRAME_INT | USB_ERROR_INT | USBDEV_USBINTR_NAKE |
                USBDEV_USBINTR_SLE | USBDEV_USBINTR_URE | USBDEV_USBINTR_PCE |
-               USBDEV_USBINTR_UE, IMXRT_USBDEV_USBINTR);
+               USBDEV_USBINTR_UE, IMXRT_USBDEV_USBINTR(0));
 }
 
 /****************************************************************************
@@ -1255,15 +1256,17 @@ static inline void imxrt_ep0state(struct imxrt_usbdev_s *priv,
   switch (state)
     {
     case EP0STATE_WAIT_NAK_IN:
-      imxrt_putreg(IMXRT_ENDPTMASK(IMXRT_EP0_IN), IMXRT_USBDEV_ENDPTNAKEN);
+      imxrt_putreg(IMXRT_ENDPTMASK(IMXRT_EP0_IN),
+                   IMXRT_USBDEV_ENDPTNAKEN(0));
       break;
 
     case EP0STATE_WAIT_NAK_OUT:
-      imxrt_putreg(IMXRT_ENDPTMASK(IMXRT_EP0_OUT), IMXRT_USBDEV_ENDPTNAKEN);
+      imxrt_putreg(IMXRT_ENDPTMASK(IMXRT_EP0_OUT),
+                   IMXRT_USBDEV_ENDPTNAKEN(0));
       break;
 
     default:
-      imxrt_putreg(0, IMXRT_USBDEV_ENDPTNAKEN);
+      imxrt_putreg(0, IMXRT_USBDEV_ENDPTNAKEN(0));
       break;
     }
 }
@@ -1920,8 +1923,8 @@ static int imxrt_usbinterrupt(int irq, void *context, void *arg)
 
   /* Read the interrupts and then clear them */
 
-  disr = imxrt_getreg(IMXRT_USBDEV_USBSTS);
-  imxrt_putreg(disr, IMXRT_USBDEV_USBSTS);
+  disr = imxrt_getreg(IMXRT_USBDEV_USBSTS(0));
+  imxrt_putreg(disr, IMXRT_USBDEV_USBSTS(0));
 
   if (disr & USBDEV_USBSTS_URI)
     {
@@ -1973,7 +1976,7 @@ static int imxrt_usbinterrupt(int irq, void *context, void *arg)
 
   if (disr & USBDEV_USBSTS_PCI)
     {
-      portsc1 = imxrt_getreg(IMXRT_USBDEV_PORTSC1);
+      portsc1 = imxrt_getreg(IMXRT_USBDEV_PORTSC1(0));
 
       if (portsc1 & USBDEV_PRTSC1_HSP)
         priv->usbdev.speed = USB_SPEED_HIGH;
@@ -1996,7 +1999,7 @@ static int imxrt_usbinterrupt(int irq, void *context, void *arg)
     {
       usbtrace(TRACE_INTDECODE(IMXRT_TRACEINTID_FRAME), 0);
 
-      uint32_t frindex = imxrt_getreg(IMXRT_USBDEV_FRINDEX);
+      uint32_t frindex = imxrt_getreg(IMXRT_USBDEV_FRINDEX(0));
       uint16_t frame_num =
           (frindex & USBDEV_FRINDEX_LFN_MASK) >> USBDEV_FRINDEX_LFN_SHIFT;
 
@@ -2016,14 +2019,14 @@ static int imxrt_usbinterrupt(int irq, void *context, void *arg)
     {
       /* Handle completion interrupts */
 
-      uint32_t mask = imxrt_getreg(IMXRT_USBDEV_ENDPTCOMPLETE);
+      uint32_t mask = imxrt_getreg(IMXRT_USBDEV_ENDPTCOMPLETE(0));
 
       if (mask)
         {
           /* Clear any NAK interrupt and completion interrupts */
 
-          imxrt_putreg(mask, IMXRT_USBDEV_ENDPTNAK);
-          imxrt_putreg(mask, IMXRT_USBDEV_ENDPTCOMPLETE);
+          imxrt_putreg(mask, IMXRT_USBDEV_ENDPTNAK(0));
+          imxrt_putreg(mask, IMXRT_USBDEV_ENDPTCOMPLETE(0));
 
           if (mask & IMXRT_ENDPTMASK(0))
             {
@@ -2051,7 +2054,7 @@ static int imxrt_usbinterrupt(int irq, void *context, void *arg)
 
       /* Handle setup interrupts */
 
-      uint32_t setupstat = imxrt_getreg(IMXRT_USBDEV_ENDPTSETUPSTAT);
+      uint32_t setupstat = imxrt_getreg(IMXRT_USBDEV_ENDPTSETUPSTAT(0));
       if (setupstat)
         {
           /* Clear the endpoint complete CTRL OUT and IN when a Setup is
@@ -2060,7 +2063,7 @@ static int imxrt_usbinterrupt(int irq, void *context, void *arg)
 
           imxrt_putreg(IMXRT_ENDPTMASK(IMXRT_EP0_IN) |
                        IMXRT_ENDPTMASK(IMXRT_EP0_OUT),
-                       IMXRT_USBDEV_ENDPTCOMPLETE);
+                       IMXRT_USBDEV_ENDPTCOMPLETE(0));
 
           if (setupstat & IMXRT_ENDPTMASK(IMXRT_EP0_OUT))
             {
@@ -2073,8 +2076,8 @@ static int imxrt_usbinterrupt(int irq, void *context, void *arg)
 
   if (disr & USBDEV_USBSTS_NAKI)
     {
-      uint32_t pending = imxrt_getreg(IMXRT_USBDEV_ENDPTNAK) &
-          imxrt_getreg(IMXRT_USBDEV_ENDPTNAKEN);
+      uint32_t pending = imxrt_getreg(IMXRT_USBDEV_ENDPTNAK(0)) &
+          imxrt_getreg(IMXRT_USBDEV_ENDPTNAKEN(0));
       if (pending)
         {
           /* We shouldn't see NAK interrupts except on Endpoint 0 */
@@ -2092,7 +2095,7 @@ static int imxrt_usbinterrupt(int irq, void *context, void *arg)
 
       /* Clear the interrupts */
 
-      imxrt_putreg(pending, IMXRT_USBDEV_ENDPTNAK);
+      imxrt_putreg(pending, IMXRT_USBDEV_ENDPTNAK(0));
     }
 
   usbtrace(TRACE_INTEXIT(IMXRT_TRACEINTID_USB), 0);
@@ -2708,7 +2711,7 @@ static int imxrt_getframe(struct usbdev_s *dev)
   usbtrace(TRACE_DEVGETFRAME, (uint16_t)priv->sof);
   return priv->sof;
 #else
-  uint32_t frindex = imxrt_getreg(IMXRT_USBDEV_FRINDEX);
+  uint32_t frindex = imxrt_getreg(IMXRT_USBDEV_FRINDEX(0));
   uint16_t frame_num =
       (frindex & USBDEV_FRINDEX_LFN_MASK) >> USBDEV_FRINDEX_LFN_SHIFT;
 
@@ -2735,7 +2738,7 @@ static int imxrt_wakeup(struct usbdev_s *dev)
   usbtrace(TRACE_DEVWAKEUP, 0);
 
   flags = enter_critical_section();
-  imxrt_setbits(USBDEV_PRTSC1_FPR, IMXRT_USBDEV_PORTSC1);
+  imxrt_setbits(USBDEV_PRTSC1_FPR, IMXRT_USBDEV_PORTSC1(0));
   leave_critical_section(flags);
   return OK;
 }
@@ -2781,7 +2784,7 @@ static int imxrt_pullup(struct usbdev_s *dev, bool enable)
   irqstate_t flags = enter_critical_section();
   if (enable)
     {
-      imxrt_setbits(USBDEV_USBCMD_RS, IMXRT_USBDEV_USBCMD);
+      imxrt_setbits(USBDEV_USBCMD_RS, IMXRT_USBDEV_USBCMD(0));
 
 #ifdef CONFIG_IMXRT_USB0DEV_NOVBUS
       /* Create a 'false' power event on the USB port so the MAC connects */
@@ -2792,7 +2795,7 @@ static int imxrt_pullup(struct usbdev_s *dev, bool enable)
     }
   else
     {
-      imxrt_clrbits(USBDEV_USBCMD_RS, IMXRT_USBDEV_USBCMD);
+      imxrt_clrbits(USBDEV_USBCMD_RS, IMXRT_USBDEV_USBCMD(0));
     }
 
   leave_critical_section(flags);
@@ -2888,36 +2891,37 @@ void arm_usbinitialize(void)
 #ifdef CONFIG_ARCH_FAMILY_IMXRT117x
   up_mdelay(1);
 
-  putreg32(USBPHY1_PLL_SIC_PLL_POWER |
-           USBPHY1_PLL_SIC_PLL_REG_ENABLE,
-           IMXRT_USBPHY1_PLL_SIC_SET);
+  putreg32(USBPHY_PLL_SIC_PLL_POWER |
+           USBPHY_PLL_SIC_PLL_REG_ENABLE,
+           IMXRT_USBPHY_PLL_SIC_SET(0));
 
-  putreg32(USBPHY1_PLL_SIC_PLL_DIV_SEL_MASK,
-           IMXRT_USBPHY1_PLL_SIC_CLR);
+  putreg32(USBPHY_PLL_SIC_PLL_DIV_SEL_MASK,
+           IMXRT_USBPHY_PLL_SIC_CLR(0));
 
-  putreg32(USBPHY1_PLL_SIC_PLL_DIV_SEL(3),
-           IMXRT_USBPHY1_PLL_SIC_SET);
+  putreg32(USBPHY_PLL_SIC_PLL_DIV_SEL(3),
+           IMXRT_USBPHY_PLL_SIC_SET(0));
 
-  putreg32(USBPHY1_PLL_SIC_PLL_BYPASS,
-           IMXRT_USBPHY1_PLL_SIC_CLR);
+  putreg32(USBPHY_PLL_SIC_PLL_BYPASS,
+           IMXRT_USBPHY_PLL_SIC_CLR(0));
 
-  putreg32(USBPHY1_PLL_SIC_PLL_EN_USB_CLKS,
-           IMXRT_USBPHY1_PLL_SIC_SET);
+  putreg32(USBPHY_PLL_SIC_PLL_EN_USB_CLKS,
+           IMXRT_USBPHY_PLL_SIC_SET(0));
 
   putreg32(USBPHY_CTRL_CLKGATE,
-           IMXRT_USBPHY1_CTRL_CLR);
+           IMXRT_USBPHY_CTRL_CLR(0));
 
-  while ((getreg32(IMXRT_USBPHY1_PLL_SIC) & USBPHY1_PLL_SIC_PLL_LOCK) == 0);
+  while ((getreg32(IMXRT_USBPHY_PLL_SIC(0)) & USBPHY_PLL_SIC_PLL_LOCK) == 0);
 
 #endif
 
   /* Disable USB interrupts */
 
-  imxrt_putreg(0, IMXRT_USBDEV_USBINTR);
+  imxrt_putreg(0, IMXRT_USBDEV_USBINTR(0));
 
   /* Soft reset PHY and enable clock */
 
-  putreg32(USBPHY_CTRL_SFTRST | USBPHY_CTRL_CLKGATE, IMXRT_USBPHY1_CTRL_CLR);
+  putreg32(USBPHY_CTRL_SFTRST | USBPHY_CTRL_CLKGATE,
+           IMXRT_USBPHY_CTRL_CLR(0));
 
   /* Disconnect device */
 
@@ -2925,8 +2929,8 @@ void arm_usbinitialize(void)
 
   /* Reset the controller */
 
-  imxrt_setbits(USBDEV_USBCMD_RST, IMXRT_USBDEV_USBCMD);
-  while (imxrt_getreg(IMXRT_USBDEV_USBCMD) & USBDEV_USBCMD_RST)
+  imxrt_setbits(USBDEV_USBCMD_RST, IMXRT_USBDEV_USBCMD(0));
+  while (imxrt_getreg(IMXRT_USBDEV_USBCMD(0)) & USBDEV_USBCMD_RST)
       ;
 
   /* Power up the PHY (turn off power disable) - USBPHYx_PWDn
@@ -2936,12 +2940,12 @@ void arm_usbinitialize(void)
    * CCM_ANALOG_USBPHYx_PLL_480_CTRLn.
    */
 
-  imxrt_putreg(0, IMXRT_USBPHY1_PWD);
+  imxrt_putreg(0, IMXRT_USBPHY_PWD(0));
 
   /* Program the controller to be the USB device controller */
 
   imxrt_putreg(USBDEV_USBMODE_SDIS | USBDEV_USBMODE_SLOM |
-                USBDEV_USBMODE_CM_DEVICE, IMXRT_USBDEV_USBMODE);
+                USBDEV_USBMODE_CM_DEVICE, IMXRT_USBDEV_USBMODE(0));
 
   /* Attach USB controller interrupt handler */
 
@@ -2986,15 +2990,15 @@ void arm_usbuninitialize(void)
 
   /* Reset the controller */
 
-  imxrt_setbits(USBDEV_USBCMD_RST, IMXRT_USBDEV_USBCMD);
-  while (imxrt_getreg(IMXRT_USBDEV_USBCMD) & USBDEV_USBCMD_RST)
+  imxrt_setbits(USBDEV_USBCMD_RST, IMXRT_USBDEV_USBCMD(0));
+  while (imxrt_getreg(IMXRT_USBDEV_USBCMD(0)) & USBDEV_USBCMD_RST)
       ;
 
   /* Turn off USB power and clocking */
 
   /* Power down the PHY */
 
-  imxrt_putreg(0xffffffff, IMXRT_USBPHY1_PWD);
+  imxrt_putreg(0xffffffff, IMXRT_USBPHY_PWD(0));
 
   /* Stop clock
    * NOTE: This will interfere with USB OTG 2 and should probably be removed
