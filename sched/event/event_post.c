@@ -33,23 +33,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxevent_sem_post
- ****************************************************************************/
-
-static inline_function int nxevent_sem_post(FAR sem_t *sem)
-{
-  int semcount;
-
-  nxsem_get_value(sem, &semcount);
-  if (semcount < 1)
-    {
-      return nxsem_post(sem);
-    }
-
-  return 0;
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -98,7 +81,7 @@ int nxevent_post(FAR nxevent_t *event, nxevent_mask_t events,
       return -EINVAL;
     }
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave_nopreempt(&event->lock);
 
   if ((eflags & NXEVENT_POST_SET) != 0)
     {
@@ -113,12 +96,6 @@ int nxevent_post(FAR nxevent_t *event, nxevent_mask_t events,
     {
       postall = ((eflags & NXEVENT_POST_ALL) != 0);
 
-      /* Hold schedule lock here to avoid context switch if post high
-       * priority task.
-       */
-
-      sched_lock();
-
       list_for_every_entry_safe(&event->list, wait, tmp,
                                 nxevent_wait_t, node)
         {
@@ -129,7 +106,7 @@ int nxevent_post(FAR nxevent_t *event, nxevent_mask_t events,
             {
               list_delete_init(&wait->node);
 
-              ret = nxevent_sem_post(&wait->sem);
+              ret = nxsem_post(&wait->sem);
               if (ret < 0)
                 {
                   continue;
@@ -156,11 +133,9 @@ int nxevent_post(FAR nxevent_t *event, nxevent_mask_t events,
         {
           event->events &= ~clear;
         }
-
-      sched_unlock();
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore_nopreempt(&event->lock, flags);
 
   return ret;
 }

@@ -49,5 +49,6 @@
 void nxevent_init(FAR nxevent_t *event, nxevent_mask_t events)
 {
   event->events = events;
+  spin_lock_init(&event->lock);
   list_initialize(&event->list);
 }
