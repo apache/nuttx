@@ -153,7 +153,7 @@ def convert_board_makefile(path):
     content = ""
     with open(mpath, "r") as fm:
         content = fm.read()
-        content = content.replace("src/Make.defs", "src/CMakeLists.txt")
+        content = content.replace("src/Makefile", "src/CMakeLists.txt")
         content = convert_board_common(path, content)
 
     if content:
