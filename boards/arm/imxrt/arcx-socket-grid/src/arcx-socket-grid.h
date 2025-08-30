@@ -199,11 +199,12 @@ int imxrt_gpio_initialize(void);
  * Name: imxrt_usbhost_initialize
  *
  * Description:
+ *   Initialize the USB Host EHCI Controller
  *
  ****************************************************************************/
 
 #ifdef CONFIG_USBHOST
-int imxrt_usbhost_initialize(void);
+int imxrt_usbhost_initialize(int ctrid);
 #endif
 
 #endif /* __ASSEMBLY__ */

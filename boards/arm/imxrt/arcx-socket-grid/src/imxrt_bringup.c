@@ -126,11 +126,20 @@ int imxrt_bringup(void)
     }
 #endif
 
-#if defined(CONFIG_IMXRT_USBOTG) || defined(CONFIG_USBHOST)
-  ret = imxrt_usbhost_initialize();
+#if defined(CONFIG_IMXRT_USBOTG1) && defined(CONFIG_USBHOST)
+  ret = imxrt_usbhost_initialize(0);
   if (ret != OK)
     {
-      syslog(LOG_ERR, "ERROR: Failed to start USB host services: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: Failed to start USB1 Host: %d\n", ret);
+      return ret;
+    }
+#endif
+
+#if defined(CONFIG_IMXRT_USBOTG2) && defined(CONFIG_USBHOST)
+  ret = imxrt_usbhost_initialize(1);
+  if (ret != OK)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to start USB2 Host: %d\n", ret);
       return ret;
     }
 #endif
