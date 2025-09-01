@@ -44,7 +44,7 @@
 #  include "esp32s3_board_tim.h"
 #endif
 
-#ifdef CONFIG_ESPRESSIF_WLAN
+#ifdef CONFIG_ESPRESSIF_WIFI
 #  include "esp32s3_board_wlan.h"
 #endif
 
@@ -492,7 +492,7 @@ int esp32s3_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_ESPRESSIF_WLAN
+#ifdef CONFIG_ESPRESSIF_WIFI
   ret = board_wlan_init();
   if (ret < 0)
     {
