@@ -17,8 +17,10 @@ on:
     paths-ignore:
       - 'AUTHORS'
       - 'CONTRIBUTING.md'
+      - '**/CODEOWNERS'
       - 'Documentation/**'
       - 'tools/ci/docker/linux/**'
+      - 'tools/codeowners/*'
   push:
     paths-ignore:
       - 'AUTHORS'
@@ -304,7 +306,7 @@ jobs:
             zlib-devel
             cmake
             ninja
-            python-pip 
+            python-pip
             vim
 
       - name: pip3 install

@@ -8,6 +8,7 @@ exclude-file = .codespell-ignore-lines
 # Ignore complete files (e.g. legal text or other immutable material).
 skip =
   LICENSE,
+  */CODEOWNERS,
 
 # Ignore seemingly misspelled words.
 #   lowercase: case insensitive
