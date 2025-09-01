@@ -143,6 +143,14 @@ if ARCH_CHIP_INTEL64_QEMU
 source "arch/x86_64/src/qemu/Kconfig"
 endif
 
+config ARCH_X86_64_X2APIC
+	bool "Use X2APIC mode"
+	default y
+	---help---
+		Use X2APIC mode to access local APIC. By default, this option is enabled
+		because every new CPU supports X2APIC. The main reason for this option is
+		to support QEMU without the `--enable-kvm` argument.
+
 config ARCH_MULTIBOOT1
 	bool "Enable ELF32/Multiboot1"
 	default n

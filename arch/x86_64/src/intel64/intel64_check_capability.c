@@ -98,9 +98,11 @@ void x86_64_check_and_enable_capability(void)
   require |= X86_64_CPUID_01_SSE42;
 #endif
 
+#ifdef CONFIG_ARCH_X86_64_X2APIC
   /* Check x2APIC availability */
 
   require |= X86_64_CPUID_01_X2APIC;
+#endif
 
   /* Check timer availability */
 
