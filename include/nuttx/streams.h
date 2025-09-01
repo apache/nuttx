@@ -135,8 +135,8 @@ struct lib_sostream_s
                                    * by put method, readable by user */
   lib_soputc_t           putc;    /* Put one character to the outstream */
   lib_soputs_t           puts;    /* Writes the string to the outstream */
-  lib_soflush_t          flush;   /* Flush any buffered characters in the outstream */
   lib_soseek_t           seek;    /* Seek a position in the output stream */
+  lib_soflush_t          flush;   /* Flush any buffered characters in the outstream */
 };
 
 /* These are streams that operate on a fixed-sized block of memory */
