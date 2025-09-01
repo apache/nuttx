@@ -2147,6 +2147,143 @@ struct ieee80211_mu_edca_param_set
   struct ieee80211_he_mu_edca_param_ac_rec ac_vo;
 };
 
+#define IEEE80211_EHT_MCS_NSS_RX 0x0f
+#define IEEE80211_EHT_MCS_NSS_TX 0xf0
+
+/**
+ * struct ieee80211_eht_mcs_nss_supp_20mhz_only - EHT 20MHz only station max
+ * supported NSS for per MCS.
+ *
+ * For each field below, bits 0 - 3 indicate the maximal number of spatial
+ * streams for Rx, and bits 4 - 7 indicate the maximal number of spatial
+ * streams for Tx.
+ *
+ * @rx_tx_mcs7_max_nss: indicates the maximum number of spatial streams
+ *     supported for reception and the maximum number of spatial streams
+ *     supported for transmission for MCS 0 - 7.
+ * @rx_tx_mcs9_max_nss: indicates the maximum number of spatial streams
+ *     supported for reception and the maximum number of spatial streams
+ *     supported for transmission for MCS 8 - 9.
+ * @rx_tx_mcs11_max_nss: indicates the maximum number of spatial streams
+ *     supported for reception and the maximum number of spatial streams
+ *     supported for transmission for MCS 10 - 11.
+ * @rx_tx_mcs13_max_nss: indicates the maximum number of spatial streams
+ *     supported for reception and the maximum number of spatial streams
+ *     supported for transmission for MCS 12 - 13.
+ */
+
+struct ieee80211_eht_mcs_nss_supp_20mhz_only
+{
+  uint8_t rx_tx_mcs7_max_nss;
+  uint8_t rx_tx_mcs9_max_nss;
+  uint8_t rx_tx_mcs11_max_nss;
+  uint8_t rx_tx_mcs13_max_nss;
+};
+
+/**
+ * struct ieee80211_eht_mcs_nss_supp_bw - EHT max supported NSS per MCS
+ * (except 20MHz only stations).
+ *
+ * For each field below, bits 0 - 3 indicate the maximal number of spatial
+ * streams for Rx, and bits 4 - 7 indicate the maximal number of spatial
+ * streams for Tx.
+ *
+ * @rx_tx_mcs9_max_nss: indicates the maximum number of spatial streams
+ *     supported for reception and the maximum number of spatial streams
+ *     supported for transmission for MCS 0 - 9.
+ * @rx_tx_mcs11_max_nss: indicates the maximum number of spatial streams
+ *     supported for reception and the maximum number of spatial streams
+ *     supported for transmission for MCS 10 - 11.
+ * @rx_tx_mcs13_max_nss: indicates the maximum number of spatial streams
+ *     supported for reception and the maximum number of spatial streams
+ *     supported for transmission for MCS 12 - 13.
+ */
+
+struct ieee80211_eht_mcs_nss_supp_bw
+{
+  uint8_t rx_tx_mcs9_max_nss;
+  uint8_t rx_tx_mcs11_max_nss;
+  uint8_t rx_tx_mcs13_max_nss;
+};
+
+/**
+ * struct ieee80211_eht_cap_elem_fixed - EHT capabilities fixed data
+ *
+ * This structure is the "EHT Capabilities element" fixed fields as
+ * described in P802.11be_D2.0 section 9.4.2.313.
+ *
+ * @mac_cap_info: MAC capabilities, see IEEE80211_EHT_MAC_CAP*
+ * @phy_cap_info: PHY capabilities, see IEEE80211_EHT_PHY_CAP*
+ */
+
+struct ieee80211_eht_cap_elem_fixed
+{
+  uint8_t mac_cap_info[2];
+  uint8_t phy_cap_info[9];
+};
+
+/**
+ * struct ieee80211_eht_cap_elem - EHT capabilities element
+ * @fixed: fixed parts, see &ieee80211_eht_cap_elem_fixed
+ * @optional: optional parts
+ */
+
+struct ieee80211_eht_cap_elem
+{
+  struct ieee80211_eht_cap_elem_fixed fixed;
+
+  /* Followed by:
+   * Supported EHT-MCS And NSS Set field: 4, 3, 6 or 9 octets.
+   * EHT PPE Thresholds field: variable length.
+   */
+
+  uint8_t optional[];
+};
+
+#define IEEE80211_EHT_OPER_INFO_PRESENT                         0x01
+#define IEEE80211_EHT_OPER_DISABLED_SUBCHANNEL_BITMAP_PRESENT   0x02
+#define IEEE80211_EHT_OPER_EHT_DEF_PE_DURATION                  0x04
+#define IEEE80211_EHT_OPER_GROUP_ADDRESSED_BU_IND_LIMIT         0x08
+#define IEEE80211_EHT_OPER_GROUP_ADDRESSED_BU_IND_EXP_MASK      0x30
+
+/**
+ * struct ieee80211_eht_operation - eht operation element
+ *
+ * This structure is the "EHT Operation Element" fields as
+ * described in P802.11be_D2.0 section 9.4.2.311
+ *
+ * @params: EHT operation element parameters. See &IEEE80211_EHT_OPER_*
+ * @basic_mcs_nss: indicates the EHT-MCSs for each number of spatial
+ *  streams in EHT PPDUs that are supported by all EHT STAs in the BSS in
+ *  transmit and receive.
+ * @optional: optional parts
+ */
+
+struct ieee80211_eht_operation
+{
+  uint8_t params;
+  uint32_t basic_mcs_nss;
+  uint8_t optional[];
+};
+
+/**
+ * struct ieee80211_eht_operation_info - eht operation information
+ *
+ * @control: EHT operation information control.
+ * @ccfs0: defines a channel center frequency for a 20, 40, 80, 160, or
+ *  320 MHz EHT BSS.
+ * @ccfs1: defines a channel center frequency for a 160 or 320 MHz EHT BSS.
+ * @optional: optional parts
+ */
+
+struct ieee80211_eht_operation_info
+{
+  uint8_t control;
+  uint8_t ccfs0;
+  uint8_t ccfs1;
+  uint8_t optional[];
+};
+
 /* 802.11ac VHT Capabilities */
 
 #define IEEE80211_VHT_CAP_MAX_MPDU_LENGTH_3895    0x00000000
@@ -4057,5 +4194,9 @@ enum ieee80211_range_params_max_total_ltf
   IEEE80211_RANGE_PARAMS_MAX_TOTAL_LTF_16,
   IEEE80211_RANGE_PARAMS_MAX_TOTAL_LTF_UNSPECIFIED,
 };
+
+/* multi-link device */
+
+#define IEEE80211_MLD_MAX_NUM_LINKS        15
 
 #endif /* __INCLUDE_NUTTX_WIRELESS_IEEE80211_IEEE80211_H */
