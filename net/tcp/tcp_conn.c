@@ -1153,7 +1153,7 @@ FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct net_driver_s *dev,
       conn->expired          = 0;
       conn->isn              = 0;
       conn->sent             = 0;
-      conn->sndseq_max       = tcp_getsequence(conn->sndseq);
+      conn->sndseq_max       = tcp_getsequence(conn->sndseq) + 1;
 #endif
 
 #ifdef CONFIG_NET_TCP_CC_NEWRENO
@@ -1465,7 +1465,7 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
   conn->expired    = 0;
   conn->isn        = 0;
   conn->sent       = 0;
-  conn->sndseq_max = tcp_getsequence(conn->sndseq);
+  conn->sndseq_max = tcp_getsequence(conn->sndseq) + 1;
 #endif
 
   /* Save initial sndseq to rexmit_seq, otherwise it will be zero */

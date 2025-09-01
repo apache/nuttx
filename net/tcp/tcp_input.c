@@ -1056,7 +1056,9 @@ found:
            * bytes
            */
 
-          /* RFC793,p72~p73 In states from ESTABLISHED to LASTACK:"If the
+          /* RFC793, p72~p73 1) In SYN-RCVD state, if the ACK is not
+           * acceptable, send a reset.
+           * 2)In states from ESTABLISHED to LASTACK:"If the
            * ACK acks something not yet sent (SEG.ACK > SND.NXT) then send
            * an ACK, drop the segment, and return."
            */
@@ -1066,6 +1068,10 @@ found:
             {
               tcp_send(dev, conn, TCP_ACK, tcpiplen);
               return;
+            }
+          else if ((conn->tcpstateflags & TCP_STATE_MASK) == TCP_SYN_RCVD)
+            {
+              goto reset;
             }
         }
 
