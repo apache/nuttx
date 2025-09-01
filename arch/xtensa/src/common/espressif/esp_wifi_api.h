@@ -1,5 +1,7 @@
 /****************************************************************************
- * arch/xtensa/src/esp32s2/esp32s2_wifi_adapter.h
+ * arch/xtensa/src/common/espressif/esp_wifi_api.h
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,172 +20,183 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_XTENSA_SRC_ESP32S2_ESP32S2_WIFI_ADAPTER_H
-#define __ARCH_XTENSA_SRC_ESP32S2_ESP32S2_WIFI_ADAPTER_H
+#ifndef __ARCH_XTENSA_SRC_COMMON_ESPRESSIF_ESP_WIFI_API_H
+#define __ARCH_XTENSA_SRC_COMMON_ESPRESSIF_ESP_WIFI_API_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+
 #include <nuttx/wireless/wireless.h>
 
-#include <sys/types.h>
-
-#ifndef __ASSEMBLY__
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define SSID_MAX_LEN                (32)
-#define PWD_MAX_LEN                 (64)
-
-#define CONFIG_IDF_TARGET_ESP32S2   1
-
-/* Define esp_err_t */
-
-typedef int esp_err_t;
-
-/* Wi-Fi event callback function */
-
-typedef void (*wifi_evt_cb_t)(void *p);
-
-/* Wi-Fi TX done callback function */
-
-typedef void (*wifi_txdone_cb_t)(uint8_t *data, uint16_t *len, bool status);
+#include "esp_wlan_netdev.h"
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp_wifi_adapter_init
+ * Name: esp_wifi_api_adapter_deinit
  *
  * Description:
- *   Initialize ESP32S2 Wi-Fi adapter
+ *   De-initialize Wi-Fi adapter, freeing all resources allocated by
+ *   esp_wifi_init. Also stops the Wi-Fi task.
  *
  * Input Parameters:
  *   None
  *
  * Returned Value:
- *   0 if success or -1 if fail
+ *   OK on success; Negated errno on failure.
  *
  ****************************************************************************/
 
-int esp_wifi_adapter_init(void);
+int esp_wifi_api_adapter_deinit(void);
 
 /****************************************************************************
- * Name: esp_wifi_free_eb
+ * Name: esp_wifi_api_adapter_init
  *
  * Description:
- *   Free Wi-Fi receive callback input eb pointer
+ *   Initialize the Wi-Fi driver, control structure, buffers and Wi-Fi task.
  *
  * Input Parameters:
- *   eb - Wi-Fi receive callback input eb pointer
+ *   None.
  *
  * Returned Value:
- *   None
+ *   OK on success; Negated errno on failure.
  *
  ****************************************************************************/
 
-void esp_wifi_free_eb(void *eb);
+int esp_wifi_api_adapter_init(void);
 
 /****************************************************************************
- * Name: esp_wifi_sta_start
+ * Name: esp_wifi_api_start
  *
  * Description:
- *   Start Wi-Fi station.
+ *   Start Wi-Fi station. This will start the proper Wi-Fi mode based on
+ *   the AP/Station configuration.
  *
  * Input Parameters:
- *   None
+ *   start_mode - The Wi-Fi mode to start from
+ *                nuttx/include/nuttx/wireless/wireless.h.
  *
  * Returned Value:
- *   OK on success (positive non-zero values are cmd-specific)
- *   Negated errno returned on failure.
+ *   OK on success; Negated errno on failure.
  *
  ****************************************************************************/
 
-int esp_wifi_sta_start(void);
+int esp_wifi_api_start(uint32_t start_mode);
 
 /****************************************************************************
- * Name: esp_wifi_sta_stop
+ * Name: esp_wifi_api_stop
  *
  * Description:
- *   Stop Wi-Fi station.
+ *   Stops Wi-Fi AP, Station or both.
+ *
+ *   If AP + SoftAP are running, be aware that both will be stopped briefly,
+ *   and then the remaining one will be restarted.
  *
  * Input Parameters:
- *   None
+ *   stop_mode - The Wi-Fi mode to stop from
+ *                nuttx/include/nuttx/wireless/wireless.h.
  *
  * Returned Value:
- *   OK on success (positive non-zero values are cmd-specific)
- *   Negated errno returned on failure.
+ *   OK on success; Negated errno on failure.
  *
  ****************************************************************************/
 
-int esp_wifi_sta_stop(void);
+int esp_wifi_api_stop(uint32_t stop_mode);
+
+/****************************************************************************
+ * Name: esp_wifi_api_sta_register_rx_callback
+ *
+ * Description:
+ *   Register a callback function for the Wi-Fi station interface.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ ****************************************************************************/
+
+int esp_wifi_api_sta_register_rx_callback(void *cb);
+
+/****************************************************************************
+ * Name: esp_wifi_api_softap_register_rx_callback
+ *
+ * Description:
+ *   Register a callback function for the Wi-Fi softAP interface.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ ****************************************************************************/
+
+int esp_wifi_api_softap_register_rx_callback(void *cb);
+
+/****************************************************************************
+ * Name: esp_wifi_api_registe_tx_done_callback
+ *
+ * Description:
+ *   Register a callback function for transmission done. Valid for
+ *   both station and softAP and needs to be called only once on bringup.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ ****************************************************************************/
+
+int esp_wifi_api_register_tx_done_callback(void *cb);
+
+/****************************************************************************
+ * Name: esp_wifi_api_free_rx_buffer
+ *
+ * Description:
+ *   Free the RX buffer allocated by the Wi-Fi driver.
+ *
+ * Input Parameters:
+ *   eb - The event buffer to free
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp_wifi_api_free_rx_buffer(void *eb);
+
+/****************************************************************************
+ * Station functions
+ ****************************************************************************/
+
+#ifdef ESP_WLAN_HAS_STA
 
 /****************************************************************************
  * Name: esp_wifi_sta_send_data
  *
  * Description:
- *   Use Wi-Fi station interface to send 802.3 frame
+ *   Use Wi-Fi station interface to send 802.3 frame.
  *
  * Input Parameters:
  *   pbuf - Packet buffer pointer
  *   len  - Packet length
  *
  * Returned Value:
- *   OK on success (positive non-zero values are cmd-specific)
- *   Negated errno returned on failure.
+ *   OK on success; Negated errno returned on failure.
  *
  ****************************************************************************/
 
 int esp_wifi_sta_send_data(void *pbuf, size_t len);
-
-/****************************************************************************
- * Name: esp_wifi_sta_register_recv_cb
- *
- * Description:
- *   Regitser Wi-Fi station receive packet callback function
- *
- * Input Parameters:
- *   recv_cb - Receive callback function
- *
- * Returned Value:
- *   OK on success (positive non-zero values are cmd-specific)
- *   Negated errno returned on failure.
- *
- ****************************************************************************/
-
-int esp_wifi_sta_register_recv_cb(int (*recv_cb)(void *buffer,
-                                                 uint16_t len,
-                                                 void *eb));
-
-/****************************************************************************
- * Name: esp_wifi_sta_register_txdone_cb
- *
- * Description:
- *   Register the station TX done callback function.
- *
- * Input Parameters:
- *   cb - The callback function
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void esp_wifi_sta_register_txdone_cb(wifi_txdone_cb_t cb);
 
 /****************************************************************************
  * Name: esp_wifi_sta_read_mac
@@ -202,18 +215,17 @@ void esp_wifi_sta_register_txdone_cb(wifi_txdone_cb_t cb);
 int esp_wifi_sta_read_mac(uint8_t *mac);
 
 /****************************************************************************
- * Name: esp_wifi_set_password
+ * Name: esp_wifi_sta_password
  *
  * Description:
- *   Set/Get Wi-Fi station password
+ *   Set/Get Wi-Fi station password.
  *
  * Input Parameters:
  *   iwr - The argument of the ioctl cmd
- *   set   - true: set data; false: get data
+ *   set - true: set data; false: get data
  *
  * Returned Value:
- *   OK on success (positive non-zero values are cmd-specific)
- *   Negated errno returned on failure.
+ *   OK on success; Negated errno returned on failure.
  *
  ****************************************************************************/
 
@@ -227,11 +239,10 @@ int esp_wifi_sta_password(struct iwreq *iwr, bool set);
  *
  * Input Parameters:
  *   iwr - The argument of the ioctl cmd
- *   set   - true: set data; false: get data
+ *   set - true: set data; false: get data
  *
  * Returned Value:
- *   OK on success (positive non-zero values are cmd-specific)
- *   Negated errno returned on failure.
+ *   OK on success; Negated errno returned on failure.
  *
  ****************************************************************************/
 
@@ -241,15 +252,14 @@ int esp_wifi_sta_essid(struct iwreq *iwr, bool set);
  * Name: esp_wifi_sta_bssid
  *
  * Description:
- *   Set/Get Wi-Fi station BSSID
+ *   Set/Get Wi-Fi station BSSID.
  *
  * Input Parameters:
  *   iwr - The argument of the ioctl cmd
- *   set   - true: set data; false: get data
+ *   set - true: set data; false: get data
  *
  * Returned Value:
- *   OK on success (positive non-zero values are cmd-specific)
- *   Negated errno returned on failure.
+ *   OK on success; Negated errno returned on failure.
  *
  ****************************************************************************/
 
@@ -259,14 +269,13 @@ int esp_wifi_sta_bssid(struct iwreq *iwr, bool set);
  * Name: esp_wifi_sta_connect
  *
  * Description:
- *   Trigger Wi-Fi station connection action
+ *   Trigger Wi-Fi station connection action.
  *
  * Input Parameters:
  *   None
  *
  * Returned Value:
- *   OK on success (positive non-zero values are cmd-specific)
- *   Negated errno returned on failure.
+ *   OK on success; Negated errno returned on failure.
  *
  ****************************************************************************/
 
@@ -276,18 +285,17 @@ int esp_wifi_sta_connect(void);
  * Name: esp_wifi_sta_disconnect
  *
  * Description:
- *   Trigger Wi-Fi station disconnection action
+ *   Trigger Wi-Fi station disconnection action.
  *
  * Input Parameters:
- *   None
+ *   None.
  *
  * Returned Value:
- *   OK on success (positive non-zero values are cmd-specific)
- *   Negated errno returned on failure.
+ *   OK on success; Negated errno returned on failure.
  *
  ****************************************************************************/
 
-int esp_wifi_sta_disconnect(void);
+int esp_wifi_sta_disconnect(bool allow_reconnect);
 
 /****************************************************************************
  * Name: esp_wifi_sta_mode
@@ -300,8 +308,7 @@ int esp_wifi_sta_disconnect(void);
  *   set - true: set data; false: get data
  *
  * Returned Value:
- *   OK on success (positive non-zero values are cmd-specific)
- *   Negated errno returned on failure.
+ *   OK on success; Negated errno returned on failure.
  *
  ****************************************************************************/
 
@@ -329,15 +336,14 @@ int esp_wifi_sta_auth(struct iwreq *iwr, bool set);
  * Name: esp_wifi_sta_freq
  *
  * Description:
- *   Get station frequency.
+ *   Set/Get station frequency.
  *
  * Input Parameters:
  *   iwr - The argument of the ioctl cmd
  *   set - true: set data; false: get data
  *
  * Returned Value:
- *   OK on success (positive non-zero values are cmd-specific)
- *   Negated errno returned on failure.
+ *   OK on success; Negated errno returned on failure.
  *
  ****************************************************************************/
 
@@ -354,33 +360,33 @@ int esp_wifi_sta_freq(struct iwreq *iwr, bool set);
  *   set - true: set data; false: get data
  *
  * Returned Value:
- *   OK on success (positive non-zero values are cmd-specific)
- *   Negated errno returned on failure.
+ *   OK on success; Negated errno returned on failure.
  *
  ****************************************************************************/
 
 int esp_wifi_sta_bitrate(struct iwreq *iwr, bool set);
 
+#endif /* ESP_WLAN_HAS_STA */
+
 /****************************************************************************
- * Name: esp_wifi_sta_get_txpower
+ * Name: esp_wifi_sta_txpower
  *
  * Description:
- *   Get station transmit power (dBm).
+ *   Get/Set station transmit power (dBm).
  *
  * Input Parameters:
  *   iwr - The argument of the ioctl cmd
  *   set - true: set data; false: get data
  *
  * Returned Value:
- *   OK on success (positive non-zero values are cmd-specific)
- *   Negated errno returned on failure.
+ *   OK on success; Negated errno returned on failure.
  *
  ****************************************************************************/
 
 int esp_wifi_sta_txpower(struct iwreq *iwr, bool set);
 
 /****************************************************************************
- * Name: esp_wifi_sta_get_channel_range
+ * Name: esp_wifi_sta_channel
  *
  * Description:
  *   Get station range of channel parameters.
@@ -390,8 +396,7 @@ int esp_wifi_sta_txpower(struct iwreq *iwr, bool set);
  *   set - true: set data; false: get data
  *
  * Returned Value:
- *   OK on success (positive non-zero values are cmd-specific)
- *   Negated errno returned on failure.
+ *   OK on success; Negated errno returned on failure.
  *
  ****************************************************************************/
 
@@ -408,12 +413,13 @@ int esp_wifi_sta_channel(struct iwreq *iwr, bool set);
  *   set - true: set data; false: get data
  *
  * Returned Value:
- *   OK on success (positive non-zero values are cmd-specific)
- *   Negated errno returned on failure.
+ *   OK on success; Negated errno returned on failure.
  *
  ****************************************************************************/
 
 int esp_wifi_sta_country(struct iwreq *iwr, bool set);
+
+#ifdef ESP_WLAN_HAS_STA
 
 /****************************************************************************
  * Name: esp_wifi_sta_rssi
@@ -426,99 +432,36 @@ int esp_wifi_sta_country(struct iwreq *iwr, bool set);
  *   set - true: set data; false: get data
  *
  * Returned Value:
- *   OK on success (positive non-zero values are cmd-specific)
- *   Negated errno returned on failure.
+ *   OK on success; Negated errno returned on failure.
  *
  ****************************************************************************/
 
 int esp_wifi_sta_rssi(struct iwreq *iwr, bool set);
 
-/****************************************************************************
- * Name: esp_wifi_softap_start
- *
- * Description:
- *   Start Wi-Fi softAP.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   OK on success (positive non-zero values are cmd-specific)
- *   Negated errno returned on failure.
- *
- ****************************************************************************/
-
-int esp_wifi_softap_start(void);
+#endif /* ESP_WLAN_HAS_STA */
 
 /****************************************************************************
- * Name: esp_wifi_softap_stop
- *
- * Description:
- *   Stop Wi-Fi softAP.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   OK on success (positive non-zero values are cmd-specific)
- *   Negated errno returned on failure.
- *
+ * SoftAP functions
  ****************************************************************************/
 
-int esp_wifi_softap_stop(void);
+#ifdef ESP_WLAN_HAS_SOFTAP
 
 /****************************************************************************
  * Name: esp_wifi_softap_send_data
  *
  * Description:
- *   Use Wi-Fi softAP interface to send 802.3 frame
+ *   Use Wi-Fi SoftAP interface to send 802.3 frame
  *
  * Input Parameters:
  *   pbuf - Packet buffer pointer
  *   len  - Packet length
  *
  * Returned Value:
- *   OK on success (positive non-zero values are cmd-specific)
- *   Negated errno returned on failure.
+ *   OK on success; Negated errno returned on failure.
  *
  ****************************************************************************/
 
 int esp_wifi_softap_send_data(void *pbuf, size_t len);
-
-/****************************************************************************
- * Name: esp_wifi_softap_register_recv_cb
- *
- * Description:
- *   Regitser Wi-Fi softAP receive packet callback function
- *
- * Input Parameters:
- *   recv_cb - Receive callback function
- *
- * Returned Value:
- *   OK on success (positive non-zero values are cmd-specific)
- *   Negated errno returned on failure.
- *
- ****************************************************************************/
-
-int esp_wifi_softap_register_recv_cb(int (*recv_cb)(void *buffer,
-                                                    uint16_t len,
-                                                    void *eb));
-
-/****************************************************************************
- * Name: esp_wifi_softap_register_txdone_cb
- *
- * Description:
- *   Register the softAP TX done callback function.
- *
- * Input Parameters:
- *   cb - The callback function
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void esp_wifi_softap_register_txdone_cb(wifi_txdone_cb_t cb);
 
 /****************************************************************************
  * Name: esp_wifi_softap_read_mac
@@ -544,11 +487,10 @@ int esp_wifi_softap_read_mac(uint8_t *mac);
  *
  * Input Parameters:
  *   iwr - The argument of the ioctl cmd
- *   set   - true: set data; false: get data
+ *   set - true: set data; false: get data
  *
  * Returned Value:
- *   OK on success (positive non-zero values are cmd-specific)
- *   Negated errno returned on failure.
+ *   OK on success; Negated errno returned on failure.
  *
  ****************************************************************************/
 
@@ -565,8 +507,7 @@ int esp_wifi_softap_password(struct iwreq *iwr, bool set);
  *   set - true: set data; false: get data
  *
  * Returned Value:
- *   OK on success (positive non-zero values are cmd-specific)
- *   Negated errno returned on failure.
+ *   OK on success; Negated errno returned on failure.
  *
  ****************************************************************************/
 
@@ -576,11 +517,11 @@ int esp_wifi_softap_essid(struct iwreq *iwr, bool set);
  * Name: esp_wifi_softap_bssid
  *
  * Description:
- *   Set/Get Wi-Fi softAP BSSID
+ *   Set/Get Wi-Fi SoftAP BSSID
  *
  * Input Parameters:
  *   iwr - The argument of the ioctl cmd
- *   set   - true: set data; false: get data
+ *   set - true: set data; false: get data
  *
  * Returned Value:
  *   OK on success (positive non-zero values are cmd-specific)
@@ -594,14 +535,13 @@ int esp_wifi_softap_bssid(struct iwreq *iwr, bool set);
  * Name: esp_wifi_softap_connect
  *
  * Description:
- *   Trigger Wi-Fi softAP accept connection action
+ *   Trigger Wi-Fi SoftAP accept connection action.
  *
  * Input Parameters:
- *   None
+ *   config - The Wi-Fi config to set.
  *
  * Returned Value:
- *   OK on success (positive non-zero values are cmd-specific)
- *   Negated errno returned on failure.
+ *   OK on success; Negated errno returned on failure.
  *
  ****************************************************************************/
 
@@ -611,14 +551,13 @@ int esp_wifi_softap_connect(void);
  * Name: esp_wifi_softap_disconnect
  *
  * Description:
- *   Trigger Wi-Fi softAP drop connection action
+ *   Trigger Wi-Fi SoftAP drop connection action
  *
  * Input Parameters:
  *   None
  *
  * Returned Value:
- *   OK on success (positive non-zero values are cmd-specific)
- *   Negated errno returned on failure.
+ *   OK on success; Negated errno returned on failure.
  *
  ****************************************************************************/
 
@@ -635,8 +574,7 @@ int esp_wifi_softap_disconnect(void);
  *   set - true: set data; false: get data
  *
  * Returned Value:
- *   OK on success (positive non-zero values are cmd-specific)
- *   Negated errno returned on failure.
+ *   OK on success; Negated errno returned on failure.
  *
  ****************************************************************************/
 
@@ -646,7 +584,7 @@ int esp_wifi_softap_mode(struct iwreq *iwr, bool set);
  * Name: esp_wifi_softap_auth
  *
  * Description:
- *   Set/Get authentication mode params.
+ *   Set/get authentication mode params.
  *
  * Input Parameters:
  *   iwr - The argument of the ioctl cmd
@@ -679,7 +617,7 @@ int esp_wifi_softap_auth(struct iwreq *iwr, bool set);
 int esp_wifi_softap_freq(struct iwreq *iwr, bool set);
 
 /****************************************************************************
- * Name: esp_wifi_softap_get_bitrate
+ * Name: esp_wifi_softap_bitrate
  *
  * Description:
  *   Get SoftAP default bit rate (Mbps).
@@ -689,8 +627,7 @@ int esp_wifi_softap_freq(struct iwreq *iwr, bool set);
  *   set - true: set data; false: get data
  *
  * Returned Value:
- *   OK on success (positive non-zero values are cmd-specific)
- *   Negated errno returned on failure.
+ *   OK on success; Negated errno returned on failure.
  *
  ****************************************************************************/
 
@@ -707,8 +644,7 @@ int esp_wifi_softap_bitrate(struct iwreq *iwr, bool set);
  *   set - true: set data; false: get data
  *
  * Returned Value:
- *   OK on success (positive non-zero values are cmd-specific)
- *   Negated errno returned on failure.
+ *   OK on success; Negated errno returned on failure.
  *
  ****************************************************************************/
 
@@ -725,8 +661,7 @@ int esp_wifi_softap_txpower(struct iwreq *iwr, bool set);
  *   set - true: set data; false: get data
  *
  * Returned Value:
- *   OK on success (positive non-zero values are cmd-specific)
- *   Negated errno returned on failure.
+ *   OK on success; Negated errno returned on failure.
  *
  ****************************************************************************/
 
@@ -743,8 +678,7 @@ int esp_wifi_softap_channel(struct iwreq *iwr, bool set);
  *   set - true: set data; false: get data
  *
  * Returned Value:
- *   OK on success (positive non-zero values are cmd-specific)
- *   Negated errno returned on failure.
+ *   OK on success; Negated errno returned on failure.
  *
  ****************************************************************************/
 
@@ -761,33 +695,12 @@ int esp_wifi_softap_country(struct iwreq *iwr, bool set);
  *   set - true: set data; false: get data
  *
  * Returned Value:
- *   OK on success (positive non-zero values are cmd-specific)
- *   Negated errno returned on failure.
+ *   OK on success; Negated errno returned on failure.
  *
  ****************************************************************************/
 
 int esp_wifi_softap_rssi(struct iwreq *iwr, bool set);
 
-/****************************************************************************
- * Name: esp_wifi_stop_callback
- *
- * Description:
- *   Callback to stop Wi-Fi
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
+#endif /* ESP_WLAN_HAS_SOFTAP */
 
-void esp_wifi_stop_callback(void);
-
-#ifdef __cplusplus
-}
-#endif
-#undef EXTERN
-
-#endif /* __ASSEMBLY__ */
-#endif /* __ARCH_XTENSA_SRC_ESP32S2_ESP32S2_WIFI_ADAPTER_H */
+#endif /* __ARCH_XTENSA_SRC_COMMON_ESPRESSIF_ESP_WIFI_API_H */
