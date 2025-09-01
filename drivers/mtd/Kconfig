@@ -225,6 +225,12 @@ config MTD_CONFIG_BUFFER_SIZE
 
 endif
 
+config MTDLOG
+	bool "MTD LOG driver"
+	default n
+	---help---
+		Build support for a MTD LOG driver.
+
 comment "MTD Device Drivers"
 
 menuconfig MTD_NAND
