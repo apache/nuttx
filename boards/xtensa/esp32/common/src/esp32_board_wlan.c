@@ -25,18 +25,10 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <stdio.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <sys/stat.h>
+#include <sys/types.h>
 #include <syslog.h>
-#include <debug.h>
 
-#include <nuttx/wireless/wireless.h>
-
-#include "esp32_spiflash.h"
-#include "espressif/esp_wlan.h"
+#include "espressif/esp_wlan_netdev.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -66,24 +58,23 @@ int board_wlan_init(void)
 {
   int ret = OK;
 
-#ifdef ESPRESSIF_WLAN_HAS_STA
+#ifdef ESP_WLAN_HAS_STA
   ret = esp_wlan_sta_initialize();
   if (ret)
     {
-      wlerr("ERROR: Failed to initialize Wi-Fi station\n");
+      syslog(LOG_ERR, "ERROR: Failed to initialize Wi-Fi station\n");
       return ret;
     }
-#endif /* ESPRESSIF_WLAN_HAS_STA */
+#endif /* ESP_WLAN_HAS_STA */
 
-#ifdef ESPRESSIF_WLAN_HAS_SOFTAP
+#ifdef ESP_WLAN_HAS_SOFTAP
   ret = esp_wlan_softap_initialize();
   if (ret)
     {
-      wlerr("ERROR: Failed to initialize Wi-Fi softAP\n");
+      syslog(LOG_ERR, "ERROR: Failed to initialize Wi-Fi softAP\n");
       return ret;
     }
-#endif /* ESPRESSIF_WLAN_HAS_SOFTAP */
+#endif /* ESP_WLAN_HAS_SOFTAP */
 
   return ret;
 }
-
