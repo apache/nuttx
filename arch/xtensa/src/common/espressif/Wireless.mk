@@ -152,11 +152,11 @@ ifeq ($(CONFIG_ESP_WIFI_ENABLE_WPA3_OWE_STA),y)
 CFLAGS += $(DEFINE_PREFIX)CONFIG_OWE_STA
 endif
 
-ifeq ($(CONFIG_ESP_WIFI_GCMP_SUPPORT),y)
+ifeq ($(CONFIG_ESPRESSIF_WIFI_GCMP_SUPPORT),y)
 CFLAGS += $(DEFINE_PREFIX)CONFIG_GCMP
 endif
 
-ifeq ($(CONFIG_ESP_WIFI_GMAC_SUPPORT),y)
+ifeq ($(CONFIG_ESPRESSIF_WIFI_GMAC_SUPPORT),y)
 CFLAGS += $(DEFINE_PREFIX)CONFIG_GMAC
 endif
 
@@ -273,7 +273,12 @@ CHIP_CSRCS += tls_mbedtls.c
 CHIP_CSRCS += aes-siv.c
 
 CHIP_CSRCS += chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)esp_wifi$(DELIM)src$(DELIM)wifi_init.c
+CHIP_CSRCS += chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)esp_wifi$(DELIM)src$(DELIM)lib_printf.c
 CHIP_CSRCS += chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)esp_wifi$(DELIM)regulatory$(DELIM)esp_wifi_regulatory.c
+
+ifeq ($(CONFIG_ESPRESSIF_WIFI_BT_COEXIST),y)
+CHIP_CSRCS += chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)esp_coex$(DELIM)src$(DELIM)lib_printf.c
+endif
 
 endif
 
