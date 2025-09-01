@@ -56,6 +56,7 @@
 #include "utils/memory_reserve.h"
 #include "esp32_rt_timer.h"
 #include "espressif/esp_wireless.h"
+#include "espressif/esp_wifi_utils.h"
 #include "esp32_irq.h"
 #include "esp32_spicache.h"
 

@@ -72,6 +72,7 @@
 #include "phy_init_data.h"
 
 #include "esp_wireless.h"
+#include "esp_wifi_utils.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -364,87 +365,6 @@ static int esp_swi_irq(int irq, void *context, void *arg)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: esp_wifi_to_errno
- *
- * Description:
- *   Transform from ESP Wi-Fi error code to NuttX error code
- *
- * Input Parameters:
- *   err - ESP Wi-Fi error code
- *
- * Returned Value:
- *   NuttX error code defined in errno.h
- *
- ****************************************************************************/
-
-#ifndef CONFIG_ARCH_CHIP_ESP32S2
-int32_t esp_wifi_to_errno(int err)
-{
-  int ret;
-
-  if (err < ESP_ERR_WIFI_BASE)
-    {
-      /* Unmask component error bits */
-
-      ret = err & 0xfff;
-
-      switch (ret)
-        {
-          case ESP_OK:
-            ret = OK;
-            break;
-          case ESP_ERR_NO_MEM:
-            ret = -ENOMEM;
-            break;
-
-          case ESP_ERR_INVALID_ARG:
-            ret = -EINVAL;
-            break;
-
-          case ESP_ERR_INVALID_STATE:
-            ret = -EIO;
-            break;
-
-          case ESP_ERR_INVALID_SIZE:
-            ret = -EINVAL;
-            break;
-
-          case ESP_ERR_NOT_FOUND:
-            ret = -ENOSYS;
-            break;
-
-          case ESP_ERR_NOT_SUPPORTED:
-            ret = -ENOSYS;
-            break;
-
-          case ESP_ERR_TIMEOUT:
-            ret = -ETIMEDOUT;
-            break;
-
-          case ESP_ERR_INVALID_MAC:
-            ret = -EINVAL;
-            break;
-
-          default:
-            ret = ERROR;
-            break;
-        }
-    }
-  else
-    {
-      ret = ERROR;
-    }
-
-  if (ret != OK)
-    {
-      wlerr("ERROR: %s\n", esp_err_to_name(err));
-    }
-
-  return ret;
-}
-#endif
 
 /****************************************************************************
  * Functions needed by libphy.a
@@ -1047,7 +967,7 @@ int esp_timer_create(const esp_timer_create_args_t *create_args,
   rt_timer_args.callback = create_args->callback;
 
   ret = rt_timer_create(&rt_timer_args, &rt_timer);
-  if (ret)
+  if (ret != 0)
     {
       wlerr("Failed to create rt_timer error=%d\n", ret);
       return ret;
