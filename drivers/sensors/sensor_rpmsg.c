@@ -567,7 +567,7 @@ sensor_rpmsg_alloc_proxy(FAR struct sensor_rpmsg_dev_s *dev,
 
   /* Create new proxy to represent a remote advertiser */
 
-  proxy = kmm_malloc(sizeof(*proxy));
+  proxy = kmm_zalloc(sizeof(*proxy));
   if (!proxy)
     {
       return NULL;
@@ -575,7 +575,6 @@ sensor_rpmsg_alloc_proxy(FAR struct sensor_rpmsg_dev_s *dev,
 
   proxy->ept = ept;
   proxy->cookie = msg->cookie;
-  proxy->wakeup = false;
   ret = file_open(&file, dev->path, SENSOR_REMOTE | O_CLOEXEC);
   if (ret < 0)
     {
@@ -661,7 +660,7 @@ sensor_rpmsg_alloc_stub(FAR struct sensor_rpmsg_dev_s *dev,
 
   /* Create new stub to represent a remote subscribers */
 
-  stub = kmm_malloc(sizeof(*stub));
+  stub = kmm_zalloc(sizeof(*stub));
   if (!stub)
     {
       return NULL;
