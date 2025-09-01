@@ -334,15 +334,23 @@ check_msg() {
   fi
 
   if (( $num_lines < $min_num_lines && $signedoffby_found == 1 )); then
-      echo "Missing git commit message."
-      fail=1
+    echo "Missing git commit message"
+    fail=1
   fi
 }
 
 check_commit() {
   if [ $message != 0 ]; then
-    msg=`git show -s --format=%B $1`
-    check_msg <<< "$msg"
+    # check each commit format separately if this is a series of commits
+    if [[ $1 =~  HEAD ]]; then
+      for commit in $(git rev-list --no-merges $1); do
+        msg=`git show -s --format=%B $commit`
+        check_msg <<< "$msg"
+      done
+    else
+      msg=`git show -s --format=%B $1`
+      check_msg <<< "$msg"
+    fi
   fi
   diffs=`git diff $1`
   check_ranges <<< "$diffs"
