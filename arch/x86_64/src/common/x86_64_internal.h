@@ -308,6 +308,10 @@ void x86_64_stack_color(void *stackbase, size_t nbytes);
 int x86_64_tlb_handler(int irq, void *c, void *arg);
 void x86_64_tlb_shootdown(void);
 
+/* Defined in intel64_irq.c */
+
+void x86_64_icr_write(uint8_t cpu, uint32_t delivery);
+
 #endif /* __ASSEMBLY__ */
 
 #endif  /* __ARCH_X86_64_SRC_COMMON_UP_INTERNAL_H */

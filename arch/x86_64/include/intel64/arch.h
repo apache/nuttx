@@ -276,69 +276,88 @@
 #  define MSR_IA32_APIC_X2APIC         0x400
 #  define MSR_IA32_APIC_BSP            0x100
 
-#define MSR_X2APIC_ID                  0x802
-#define MSR_X2APIC_VER                 0x803
-#define MSR_X2APIC_TPR                 0x808
-#define MSR_X2APIC_PPR                 0x80a
-#define MSR_X2APIC_EOI                 0x80b
-#define MSR_X2APIC_LDR                 0x80d
+#define MSR_IA32_PM_ENABLE             0x770 /* Enable/disable HWP (R/W) */
+#define MSR_IA32_HWP_CAPABILITIES      0x771 /* HWP Performance Range Enumeration (R/O) */
+#define MSR_IA32_HWP_REQUEST_PKG       0x772 /* Power Management Control Hints for All Logical Processors in a Package (R/W) */
+#define MSR_IA32_HWP_INTERRUPT         0x773 /* Control HWP Native Interrupts (R/W) */
+#define MSR_IA32_HWP_REQUEST           0x774 /* Power Management Control Hints to a Logical Processor (R/W) */
+#define MSR_IA32_PECI_HWP_REQUEST_INFO 0x775
+#define MSR_IA32_HWP_CTL               0x776
+#define MSR_IA32_HWP_STATUS            0x777
 
-#define MSR_X2APIC_SPIV                0x80f
-#  define MSR_X2APIC_SPIV_EN           0x100
+/* APIC */
 
-#define MSR_X2APIC_ISR0                0x810
-#define MSR_X2APIC_ISR1                0x811
-#define MSR_X2APIC_ISR2                0x812
-#define MSR_X2APIC_ISR3                0x813
-#define MSR_X2APIC_ISR4                0x814
-#define MSR_X2APIC_ISR5                0x815
-#define MSR_X2APIC_ISR6                0x816
-#define MSR_X2APIC_ISR7                0x817
+#define APIC_BASE                      0xfee00000
 
-#define MSR_X2APIC_TMR0                0x818
-#define MSR_X2APIC_TMR1                0x819
-#define MSR_X2APIC_TMR2                0x81a
-#define MSR_X2APIC_TMR3                0x81b
-#define MSR_X2APIC_TMR4                0x81c
-#define MSR_X2APIC_TMR5                0x81d
-#define MSR_X2APIC_TMR6                0x81e
-#define MSR_X2APIC_TMR7                0x81f
+#define APIC_ID                        0x0020
+#define APIC_VER                       0x0030
+#define APIC_TPR                       0x0080
+#define APIC_PPR                       0x00a0
+#define APIC_EOI                       0x00b0
+#  define APIC_EOI_ACK                 0
+#define APIC_LDR                       0x00d0
+#define APIC_SPIV                      0x00f0
+#  define APIC_SPIV_EN                 0x100
 
-#define MSR_X2APIC_IRR0                0x820
-#define MSR_X2APIC_IRR1                0x821
-#define MSR_X2APIC_IRR2                0x822
-#define MSR_X2APIC_IRR3                0x823
-#define MSR_X2APIC_IRR4                0x824
-#define MSR_X2APIC_IRR5                0x825
-#define MSR_X2APIC_IRR6                0x826
-#define MSR_X2APIC_IRR7                0x827
+#define APIC_ISR0                      0x0100
+#define APIC_ISR1                      0x0110
+#define APIC_ISR2                      0x0120
+#define APIC_ISR3                      0x0130
+#define APIC_ISR4                      0x0140
+#define APIC_ISR5                      0x0150
+#define APIC_ISR6                      0x0160
+#define APIC_ISR7                      0x0170
 
-#define MSR_X2APIC_ESR                 0x828
-#define MSR_X2APIC_ICR                 0x830
-#  define MSR_X2APIC_ICR_INIT          0x00000500  /* INIT/RESET */
-#  define MSR_X2APIC_ICR_STARTUP       0x00000600  /* Startup IPI */
-#  define MSR_X2APIC_ICR_DELIVS        0x00001000  /* Delivery status */
-#  define MSR_X2APIC_ICR_ASSERT        0x00004000  /* Assert interrupt (vs deassert) */
-#  define MSR_X2APIC_ICR_DEASSERT      0x00000000
-#  define MSR_X2APIC_ICR_LEVEL         0x00008000  /* Level triggered */
-#  define MSR_X2APIC_ICR_BCAST         0x00080000  /* Send to all APICs, including self. */
-#  define MSR_X2APIC_ICR_OTHERS        0x000c0000  /* Send to all APICs, excluding self. */
-#  define MSR_X2APIC_ICR_BUSY          0x00001000
-#  define MSR_X2APIC_ICR_FIXED         0x00000000
-#  define MSR_X2APIC_DESTINATION(d)    ((d) << 32)
-#define MSR_X2APIC_LVTT                0x832
-#  define MSR_X2APIC_LVTT_X1           0x0000000B  /* divide counts by 1 */
-#  define MSR_X2APIC_LVTT_PERIODIC     0x00020000  /* Periodic */
-#  define MSR_X2APIC_LVTT_TSC_DEADLINE 0x00040000  /* Enable TSC DEADLINE One-shot timer */
-#define MSR_X2APIC_LVTTHER             0x833
-#define MSR_X2APIC_LVTPMR              0x834
-#define MSR_X2APIC_LINT0               0x835
-#define MSR_X2APIC_LINT1               0x836
-#define MSR_X2APIC_LERR                0x837
-#  define MSR_X2APIC_MASKED            0x00010000  /* Interrupt masked */
-#define MSR_X2APIC_TMICT               0x838
-#define MSR_X2APIC_TMCCT               0x839
-#define MSR_X2APIC_TDCR                0x83e
+#define APIC_TMR0                      0x0180
+#define APIC_TMR1                      0x0190
+#define APIC_TMR2                      0x01a0
+#define APIC_TMR3                      0x01b0
+#define APIC_TMR4                      0x01c0
+#define APIC_TMR5                      0x01d0
+#define APIC_TMR6                      0x01e0
+#define APIC_TMR7                      0x01f0
+
+#define APIC_IRR0                      0x0200
+#define APIC_IRR1                      0x0210
+#define APIC_IRR2                      0x0220
+#define APIC_IRR3                      0x0230
+#define APIC_IRR4                      0x0240
+#define APIC_IRR5                      0x0250
+#define APIC_IRR6                      0x0260
+#define APIC_IRR7                      0x0270
+
+#define APIC_ESR                       0x0280
+#define APIC_ICR                       0x0300
+#  define APIC_ICR_INIT                0x00000500  /* INIT/RESET */
+#  define APIC_ICR_STARTUP             0x00000600  /* Startup IPI */
+#  define APIC_ICR_DELIVS              0x00001000  /* Delivery status */
+#  define APIC_ICR_ASSERT              0x00004000  /* Assert interrupt (vs deassert) */
+#  define APIC_ICR_DEASSERT            0x00000000
+#  define APIC_ICR_LEVEL               0x00008000  /* Level triggered */
+#  define APIC_ICR_BCAST               0x00080000  /* Send to all APICs, including self. */
+#  define APIC_ICR_OTHERS              0x000c0000  /* Send to all APICs, excluding self. */
+#  define APIC_ICR_BUSY                0x00001000
+#  define APIC_ICR_FIXED               0x00000000
+#  define X2APIC_DESTINATION(d)        ((d) << 32)
+#  define APIC_DESTINATION(d)          ((d) << 24)
+#define APIC_ICR_HIGH                  0x0310
+#define APIC_LVTT                      0x0320
+#  define APIC_LVTT_X1                 0x0000000B  /* divide counts by 1 */
+#  define APIC_LVTT_PERIODIC           0x00020000  /* Periodic */
+#  define APIC_LVTT_TSC_DEADLINE       0x00040000  /* Enable TSC DEADLINE One-shot timer */
+#define APIC_LVTTHER                   0x0330
+#define APIC_LVTPMR                    0x0340
+#define APIC_LINT0                     0x0350
+#define APIC_LINT1                     0x0360
+#define APIC_LERR                      0x0370
+#  define APIC_MASKED                  0x00010000  /* Interrupt masked */
+#define APIC_TMICT                     0x0380
+#define APIC_TMCCT                     0x0390
+#define APIC_TDCR                      0x03e0
+
+/* MSR */
+
+#define MSR_X2APIC_BASE                0x800
 #define MSR_IA32_XSS                   0xda0
 
 /* IOAPIC related Definitions */

@@ -42,14 +42,6 @@
 #include "sched/sched.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define X2APIC_EOI    0x80b
-
-#define APIC_EOI_ACK  0
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -164,7 +156,7 @@ uint64_t *irq_handler(uint64_t *regs, uint64_t irq_no)
 
   /* Send an EOI (end of interrupt) signal to the APIC */
 
-  write_msr(X2APIC_EOI, APIC_EOI_ACK);
+  apic_write(APIC_EOI, APIC_EOI_ACK);
   board_autoled_off(LED_INIRQ);
   return ret;
 #endif

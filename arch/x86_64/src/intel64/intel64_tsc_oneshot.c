@@ -106,10 +106,10 @@ static inline_function void intel64_mask_tmr(void)
   /* Disable TSC Deadline interrupt */
 
 #ifdef CONFIG_ARCH_INTEL64_TSC_DEADLINE
-  write_msr(MSR_X2APIC_LVTT, TMR_IRQ | MSR_X2APIC_LVTT_TSC_DEADLINE |
-            (1 << 16));
+  apic_write(APIC_LVTT, TMR_IRQ | APIC_LVTT_TSC_DEADLINE |
+             (1 << 16));
 #else
-  write_msr(MSR_X2APIC_LVTT, TMR_IRQ | (1 << 16));
+  apic_write(APIC_LVTT, TMR_IRQ | (1 << 16));
 #endif
 
   /* Required when using TSC deadline mode. */
@@ -122,9 +122,9 @@ static inline_function void intel64_unmask_tmr(void)
   /* Enable TSC Deadline interrupt */
 
 #ifdef CONFIG_ARCH_INTEL64_TSC_DEADLINE
-  write_msr(MSR_X2APIC_LVTT, TMR_IRQ | MSR_X2APIC_LVTT_TSC_DEADLINE);
+  apic_write(APIC_LVTT, TMR_IRQ | APIC_LVTT_TSC_DEADLINE);
 #else
-  write_msr(MSR_X2APIC_LVTT, TMR_IRQ);
+  apic_write(APIC_LVTT, TMR_IRQ);
 #endif
 
   /* Required when using TSC deadline mode. */
@@ -213,6 +213,7 @@ static void intel64_tsc_start(struct oneshot_lowerhalf_s *lower,
 
   clkcnt_t now      = intel64_tsc_count() + intel64_tsc_get_offset();
   clkcnt_t expected = now + delta >= now ? now + delta : UINT64_MAX;
+
   intel64_tsc_set_compare(expected);
 }
 
