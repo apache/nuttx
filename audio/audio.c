@@ -415,7 +415,7 @@ static int audio_configure(FAR struct file *filep,
       audio_setstate(upper, AUDIO_STATE_PREPARED);
       upper->info.format = caps->ac_subtype;
       upper->info.channels = caps->ac_channels;
-      upper->info.subformat = caps->ac_controls.b[2];
+      upper->info.subformat = caps->ac_format.b[0];
       upper->info.samplerate =
           caps->ac_controls.hw[0] | (caps->ac_controls.b[3] << 16);
     }
