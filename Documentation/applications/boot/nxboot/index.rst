@@ -277,8 +277,8 @@ Enabling ``CONFIG_BOOT_NXBOOT`` option provides following NXboot API.
 
 .. c:function:: int nxboot_get_confirm(void)
 
-  Confirms the image currently located in primary partition and marks
-  its copy in update partition as a recovery.
+  Obtains the information if currently running image is confirmed (and
+  thus stable) or not.
 
   :return: 1 means confirmed, 0 not confirmed, -1 and sets errno on failure.
 
