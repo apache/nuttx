@@ -61,14 +61,15 @@ struct irq_thread_info_s
  * Useful for oneshot interrupts.
  */
 
-static int irq_thread_default_handler(int irq, FAR void *regs, FAR void *arg)
+static int irq_thread_default_handler(int irq, FAR void *context,
+                                      FAR void *arg)
 {
   FAR struct irq_thread_info_s *info = arg;
   int ret = IRQ_WAKE_THREAD;
 
   if (info->handler != NULL)
     {
-      ret = info->handler(irq, regs, info->arg);
+      ret = info->handler(irq, context, info->arg);
     }
 
   if (ret == IRQ_WAKE_THREAD)
