@@ -59,8 +59,6 @@ typedef void (*mempool_callback_t)(FAR struct mempool_s *pool,
  * Private Data
  ****************************************************************************/
 
-static mutex_t g_mempool_init_lock = NXMUTEX_INITIALIZER;
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -331,6 +329,7 @@ static void mempool_check_callback(FAR struct mempool_s *pool,
 
 int mempool_init(FAR struct mempool_s *pool)
 {
+  static mutex_t g_mempool_init_lock = NXMUTEX_INITIALIZER;
   size_t blocksize = MEMPOOL_REALBLOCKSIZE(pool->blocksize);
 
   if (pool->init)
