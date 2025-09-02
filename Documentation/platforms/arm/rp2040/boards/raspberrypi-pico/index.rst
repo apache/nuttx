@@ -236,7 +236,7 @@ ENC28J60 SPI ethernet controller supports:
      - GP10 (Pin 14)
 
 husb238
-------
+-------
 
 NuttShell configuration (console enabled in USB Port, at 115200 bps) with support for Hynetek HUSB238 USB Type-C
 Power Delivery Sink Controller connected via I2C:
