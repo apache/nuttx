@@ -1212,6 +1212,15 @@ static int vscanf_internal(FAR struct lib_instream_s *stream, FAR int *lastc,
             }
           else if (fmt_char(fmt) == '%')
             {
+              /* In the C Standard "%%" is a "conversion specification" and
+               * the rule about consuming whitespace applies.
+               */
+
+              while (isspace(c))
+                {
+                  c = lib_stream_getc(stream);
+                }
+
               if (c != '%')
                 {
                   break;
