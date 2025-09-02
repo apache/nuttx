@@ -480,7 +480,6 @@ static uint16_t tcp_recvhandler(FAR struct net_driver_s *dev,
       /* Check for a loss of connection.
        *
        * TCP_DISCONN_EVENTS:
-       *   TCP_CLOSE:    The remote host has closed the connection
        *   TCP_ABORT:    The remote host has aborted the connection
        *   TCP_TIMEDOUT: Connection aborted due to too many retransmissions.
        *   NETDEV_DOWN:  The network device went down
@@ -505,21 +504,7 @@ static uint16_t tcp_recvhandler(FAR struct net_driver_s *dev,
               tcp_lost_connection(conn, pstate->ir_cb, flags);
             }
 
-          /* Check if the peer gracefully closed the connection. */
-
-          if ((flags & TCP_CLOSE) != 0)
-            {
-              /* This case should always return success (zero)! The value of
-               * ir_recvlen, if zero, will indicate that the connection was
-               * gracefully closed.
-               */
-
-              pstate->ir_result = 0;
-            }
-          else
-            {
-              pstate->ir_result = -ENOTCONN;
-            }
+          pstate->ir_result = -ENOTCONN;
 
           /* Wake up the waiting thread */
 

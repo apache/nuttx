@@ -103,8 +103,8 @@ static inline int psock_setup_callbacks(FAR struct socket *psock,
     {
       /* Set up the connection event handler */
 
-      pstate->tc_cb->flags   = (TCP_NEWDATA | TCP_CLOSE | TCP_ABORT |
-                                TCP_TIMEDOUT | TCP_CONNECTED | NETDEV_DOWN);
+      pstate->tc_cb->flags   = (TCP_NEWDATA | TCP_ABORT | TCP_TIMEDOUT |
+                                TCP_CONNECTED | NETDEV_DOWN);
       pstate->tc_cb->priv    = (FAR void *)pstate;
       pstate->tc_cb->event   = psock_connect_eventhandler;
       ret                    = OK;
@@ -135,7 +135,7 @@ static void psock_teardown_callbacks(FAR struct tcp_connect_s *pstate,
     {
       /* Failed to connect. Stop the connection event monitor */
 
-      tcp_stop_monitor(conn, TCP_CLOSE);
+      tcp_stop_monitor(conn, TCP_ABORT);
     }
 }
 
@@ -184,11 +184,10 @@ static uint16_t psock_connect_eventhandler(FAR struct net_driver_s *dev,
        *       busy to accept new connections.
        */
 
-      /* TCP_CLOSE: The remote host has closed the connection
-       * TCP_ABORT: The remote host has aborted the connection
+      /* TCP_ABORT: The remote host has aborted the connection
        */
 
-      if ((flags & (TCP_CLOSE | TCP_ABORT)) != 0)
+      if ((flags & TCP_ABORT) != 0)
         {
           /* Indicate that remote host refused the connection */
 

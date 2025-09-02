@@ -74,7 +74,6 @@ static void tcp_close_connection(FAR struct tcp_conn_s *conn, uint16_t flags)
 {
   /* These loss-of-connection events may be reported:
    *
-   *   TCP_CLOSE: The remote host has closed the connection
    *   TCP_ABORT: The remote host has aborted the connection
    *   TCP_TIMEDOUT: Connection aborted due to too many retransmissions.
    *   NETDEV_DOWN: The network device went down
@@ -91,7 +90,7 @@ static void tcp_close_connection(FAR struct tcp_conn_s *conn, uint16_t flags)
    * (eventually) be reported as an ENOTCONN error.
    */
 
-  if ((flags & TCP_CLOSE) != 0)
+  if ((flags & TCP_ABORT) != 0)
     {
       /* The peer gracefully closed the connection.  Marking the
        * connection as disconnected will suppress some subsequent
@@ -102,7 +101,7 @@ static void tcp_close_connection(FAR struct tcp_conn_s *conn, uint16_t flags)
       conn->sconn.s_flags &= ~_SF_CONNECTED;
       conn->sconn.s_flags |= _SF_CLOSED;
     }
-  else if ((flags & (TCP_ABORT | TCP_TIMEDOUT | NETDEV_DOWN)) != 0)
+  else if ((flags & (TCP_TIMEDOUT | NETDEV_DOWN)) != 0)
     {
       /* The loss of connection was less than graceful.  This will
        * (eventually) be reported as an ENOTCONN error.
@@ -140,8 +139,8 @@ static uint16_t tcp_monitor_event(FAR struct net_driver_s *dev,
     {
       ninfo("flags: %04x s_flags: %02x\n", flags, conn->sconn.s_flags);
 
-      /* TCP_DISCONN_EVENTS: TCP_CLOSE, TCP_ABORT, TCP_TIMEDOUT, or
-       * NETDEV_DOWN.  All loss-of-connection events.
+      /* TCP_DISCONN_EVENTS: TCP_ABORT, TCP_TIMEDOUT, or NETDEV_DOWN.
+       * All loss-of-connection events.
        */
 
       if ((flags & TCP_DISCONN_EVENTS) != 0)
@@ -268,9 +267,9 @@ int tcp_start_monitor(FAR struct socket *psock)
   if (!(conn->tcpstateflags == TCP_ESTABLISHED ||
         conn->tcpstateflags == TCP_SYN_RCVD || nonblock_conn))
     {
-      /* Invoke the TCP_CLOSE connection event now */
+      /* Invoke the TCP_ABORT connection event now */
 
-      tcp_shutdown_monitor(conn, TCP_CLOSE);
+      tcp_shutdown_monitor(conn, TCP_ABORT);
 
       /* If the peer close the connection before we call accept,
        * in order to allow user to read the readahead data,

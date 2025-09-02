@@ -122,9 +122,7 @@ static uint16_t tcp_poll_eventhandler(FAR struct net_driver_s *dev,
               reason = ENETUNREACH;
             }
 
-          /* TCP_CLOSE: The remote host has closed the connection
-           * TCP_ABORT: The remote host has aborted the connection
-           */
+          /* TCP_ABORT: The remote host has aborted the connection */
 
           else
             {
@@ -368,7 +366,15 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
        * exceptional event.
        */
 
-      _SO_CONN_SETERRNO(conn, ENOTCONN);
+      if (_SS_ISCLOSED(conn->sconn.s_flags))
+        {
+          _SO_CONN_SETERRNO(conn, ECONNREFUSED);
+        }
+      else
+        {
+          _SO_CONN_SETERRNO(conn, ENOTCONN);
+        }
+
       eventset |= POLLERR | POLLHUP;
     }
   else if (_SS_ISCONNECTED(conn->sconn.s_flags) &&
