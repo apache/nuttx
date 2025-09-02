@@ -80,12 +80,19 @@ static int irqchain_dispatch(int irq, FAR void *context, FAR void *arg)
   int ndx = IRQ_TO_NDX(irq);
   int ret = 0;
 
-  curr = g_irqvector[ndx].arg;
-  while (curr != NULL)
+  if (ndx < 0)
     {
-      prev = curr;
-      curr = curr->next;
-      ret |= prev->handler(irq, context, prev->arg);
+      ret = ndx;
+    }
+  else
+    {
+      curr = g_irqvector[ndx].arg;
+      while (curr != NULL)
+        {
+          prev = curr;
+          curr = curr->next;
+          ret |= prev->handler(irq, context, prev->arg);
+        }
     }
 
   return ret;
