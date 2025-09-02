@@ -55,13 +55,13 @@ IFX_INTERRUPT_INTERNAL(tricore_doirq, 0, 255)
   Ifx_CPU_ICR icr;
   uintptr_t *regs;
 
+  icr.U = __mfcr(CPU_ICR);
+  regs = (uintptr_t *)__mfcr(CPU_PCXI);
+
   if (*running_task != NULL)
     {
       (*running_task)->xcp.regs = regs;
     }
-
-  icr.U = __mfcr(CPU_ICR);
-  regs = (uintptr_t *)__mfcr(CPU_PCXI);
 
   board_autoled_on(LED_INIRQ);
 
