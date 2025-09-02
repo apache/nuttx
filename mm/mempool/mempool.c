@@ -607,7 +607,7 @@ void mempool_release(FAR struct mempool_s *pool, FAR void *blk)
   spin_unlock_irqrestore(&pool->lock, flags);
   if (mempool_can_wait(pool))
     {
-      int semcount;
+      int semcount = 0;
 
       nxsem_get_value(&pool->waitsem, &semcount);
       if (semcount < 1)
@@ -685,7 +685,7 @@ int mempool_info(FAR struct mempool_s *pool, FAR struct mempoolinfo_s *info)
   info->sizeblks = blocksize;
   if (mempool_can_wait(pool))
     {
-      int semcount;
+      int semcount = 0;
 
       nxsem_get_value(&pool->waitsem, &semcount);
       info->nwaiter = -semcount;
