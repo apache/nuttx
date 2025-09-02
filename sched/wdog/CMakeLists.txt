@@ -21,4 +21,4 @@
 # ##############################################################################
 
 target_sources(sched PRIVATE wd_initialize.c wd_start.c wd_cancel.c
-                             wd_gettime.c wd_recover.c)
+                             wd_gettime.c)
