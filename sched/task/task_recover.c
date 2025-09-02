@@ -72,7 +72,7 @@ void nxtask_recover(FAR struct tcb_s *tcb)
 
   /* The task is being deleted.  Cancel in pending timeout events. */
 
-  wd_recover(tcb);
+  wd_cancel(&tcb->waitdog);
 
   /* If the thread holds semaphore counts or is waiting for a semaphore
    *  count, then release the counts.
