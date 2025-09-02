@@ -235,6 +235,53 @@ ENC28J60 SPI ethernet controller supports:
    * - RESET
      - GP10 (Pin 14)
 
+husb238
+------
+
+NuttShell configuration (console enabled in USB Port, at 115200 bps) with support for Hynetek HUSB238 USB Type-C
+Power Delivery Sink Controller connected via I2C:
+
+.. list-table:: HUSB238 connections
+   :widths: auto
+   :header-rows: 1
+
+   * - HUSB238
+     - Raspberry Pi Pico
+   * - GND
+     - GND (Pin 3 or 38 or ...)
+   * - SDA
+     - GP4 (I2C0 SDA) (Pin 6)
+   * - SCL
+     - GP5 (I2C0 SCL) (Pin 7)
+   * - Other pins as per datasheet
+     - N/A
+
+.. code-block:: console
+
+   nsh> husb238
+   --- PD Status 0 ---
+   Source voltage: 12V
+   Source current: 1.25A
+
+   --- PD Status 1 ---
+   CC Direction: CC1 is connected to CC line or unattached mode
+   Attached:     HUSB238 is in modes other than unattached mode
+   PD Response:  Success
+   5V Voltage:   5V
+   5V Current:   3.0A
+
+   --- PDOs ---
+   5V:  Detected (1.00A)
+   9V:  Detected (1.00A)
+   12V: Detected (1.00A)
+   15V: Detected (1.00A)
+   18V: Not detected
+   20V: Detected (2.25A)
+
+   --- Selected PDO ---
+   Selected PDO: None
+   nsh>
+
 lcd1602
 -------
 
