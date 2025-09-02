@@ -342,7 +342,7 @@ check_msg() {
 check_commit() {
   if [ $message != 0 ]; then
     # check each commit format separately if this is a series of commits
-    if [[ $1 =~  HEAD ]]; then
+    if [[ $1 =~  ..HEAD ]]; then
       for commit in $(git rev-list --no-merges $1); do
         msg=`git show -s --format=%B $commit`
         check_msg <<< "$msg"
