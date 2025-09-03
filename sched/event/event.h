@@ -39,14 +39,4 @@
  * Public Type Definitions
  ****************************************************************************/
 
-typedef struct nxevent_wait_s nxevent_wait_t;
-
-struct nxevent_wait_s
-{
-  struct list_node        node;    /* Wait node of current task */
-  nxevent_mask_t          expect;  /* Expect events of wait task */
-  nxevent_flags_t         eflags;  /* Event flags of wait task */
-  sem_t                   sem;     /* Wait sem of current task */
-};
-
 #endif /* __SCHED_EVENT_EVENT_H */
