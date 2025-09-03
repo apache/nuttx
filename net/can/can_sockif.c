@@ -236,7 +236,7 @@ static int can_setup(FAR struct socket *psock)
       conn->sndbufs = CONFIG_NET_SEND_BUFSIZE;
       nxsem_init(&conn->sndsem, 0, 0);
 #endif
-      nxmutex_init(&conn->sconn.s_lock);
+      nxrmutex_init(&conn->sconn.s_lock);
 
       /* Attach the connection instance to the socket */
 

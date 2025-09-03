@@ -476,12 +476,12 @@ FAR struct iob_s *net_ioballoc(bool throttled)
 
 void conn_lock(FAR struct socket_conn_s *sconn)
 {
-  nxmutex_lock(&sconn->s_lock);
+  nxrmutex_lock(&sconn->s_lock);
 }
 
 void conn_unlock(FAR struct socket_conn_s *sconn)
 {
-  nxmutex_unlock(&sconn->s_lock);
+  nxrmutex_unlock(&sconn->s_lock);
 }
 
 void conn_dev_lock(FAR struct socket_conn_s *sconn,
@@ -492,13 +492,13 @@ void conn_dev_lock(FAR struct socket_conn_s *sconn,
       netdev_lock(dev);
     }
 
-  nxmutex_lock(&sconn->s_lock);
+  nxrmutex_lock(&sconn->s_lock);
 }
 
 void conn_dev_unlock(FAR struct socket_conn_s *sconn,
                      FAR struct net_driver_s *dev)
 {
-  nxmutex_unlock(&sconn->s_lock);
+  nxrmutex_unlock(&sconn->s_lock);
 
   if (dev != NULL)
     {

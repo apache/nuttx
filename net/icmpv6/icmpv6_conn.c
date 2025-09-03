@@ -125,7 +125,7 @@ void icmpv6_free(FAR struct icmpv6_conn_s *conn)
   /* Remove the connection from the active list */
 
   dq_rem(&conn->sconn.node, &g_active_icmpv6_connections);
-  nxmutex_destroy(&conn->sconn.s_lock);
+  nxrmutex_destroy(&conn->sconn.s_lock);
 
   /* Free the connection. */
 
