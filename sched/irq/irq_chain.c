@@ -257,13 +257,14 @@ int irqchain_detach(int irq, xcpt_t isr, FAR void *arg)
                   break;
                 }
             }
+
+          spin_unlock_irqrestore(&g_irqchainlock, flags);
         }
       else
         {
+          spin_unlock_irqrestore(&g_irqchainlock, flags);
           ret = irq_detach(irq);
         }
-
-      spin_unlock_irqrestore(&g_irqchainlock, flags);
     }
 
   return ret;
