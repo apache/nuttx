@@ -569,6 +569,7 @@ int tcp_selectport(uint8_t domain,
             {
               /* We have looped back, failed. */
 
+              tcp_conn_list_unlock();
               return -EADDRINUSE;
             }
         }
@@ -592,6 +593,7 @@ int tcp_selectport(uint8_t domain,
         {
           /* It is in use... return EADDRINUSE */
 
+          tcp_conn_list_unlock();
           return -EADDRINUSE;
         }
     }
