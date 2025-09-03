@@ -240,10 +240,6 @@ extern "C"
 
 #define V4L2_REQBUFS_COUNT_MAX CONFIG_VIDEO_REQBUFS_COUNT_MAX
 
-/* Buffer error flag */
-
-#define V4L2_BUF_FLAG_ERROR    (0x0001)
-
 /* Values for v4l2_std_id */
 
 /* One bit for each */
@@ -803,6 +799,18 @@ typedef struct v4l2_buffer v4l2_buffer_t;
 /* Image is a keyframe (I-frame) */
 
 #define V4L2_BUF_FLAG_KEYFRAME                  0x00000008
+
+/* Image is a P-frame */
+
+#define V4L2_BUF_FLAG_PFRAME                    0x00000010
+
+/* Image is a B-frame */
+
+#define V4L2_BUF_FLAG_BFRAME                    0x00000020
+
+/* Buffer is ready, but the data contained within is corrupted. */
+
+#define V4L2_BUF_FLAG_ERROR                     0x00000040
 
 /* mem2mem encoder/decoder */
 
