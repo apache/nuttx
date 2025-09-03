@@ -569,21 +569,6 @@ static void gicv3_dist_init(void)
   putreg32(0, GICD_CTLR);
   gic_wait_rwp(GIC_SPI_INT_BASE);
 
-#ifdef CONFIG_ARCH_SINGLE_SECURITY_STATE
-
-  /* Before configuration, we need to check whether
-   * the GIC single security state mode is supported.
-   * Make sure GICD_CTRL_NS is 1.
-   */
-
-  sys_set_bit(GICD_CTLR, GICD_CTRL_DS);
-  if (!sys_test_bit(GICD_CTLR, GICD_CTRL_DS))
-    {
-      sinfo("Current GIC does not support single security state\n");
-      PANIC();
-    }
-#endif
-
   /* Default configuration of all SPIs */
 
   for (intid = GIC_SPI_INT_BASE; intid < num_ints;
