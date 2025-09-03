@@ -274,3 +274,26 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
   lib_syslograwstream_close(&stream);
   return ret;
 }
+
+/****************************************************************************
+ * Name: nx_syslog
+ *
+ * Description:
+ *   nx_syslog() handles the system logging system calls. It is functionally
+ *   equivalent to syslog() but is used within the kernel space.
+ *
+ ****************************************************************************/
+
+void nx_syslog(int priority, FAR const IPTR char *fmt, ...)
+{
+  va_list ap;
+
+  if ((g_syslog_mask & LOG_MASK(priority)) != 0)
+    {
+      /* Let nx_vsyslog do all of the work */
+
+      va_start(ap, fmt);
+      nx_vsyslog(priority, fmt, &ap);
+      va_end(ap);
+    }
+}

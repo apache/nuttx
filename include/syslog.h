@@ -215,6 +215,22 @@ extern "C"
 
 #ifndef CONFIG_SYSLOG_TO_SCHED_NOTE
 void syslog(int priority, FAR const IPTR char *fmt, ...) syslog_like(2, 3);
+
+/****************************************************************************
+ * Name: nx_syslog
+ *
+ * Description:
+ *   nx_syslog() handles the system logging system calls. It is functionally
+ *   equivalent to syslog() but is used within the kernel space.
+ *
+ ****************************************************************************/
+
+#  ifdef __KERNEL__
+#    define syslog(priority, fmt, ...) nx_syslog(priority, fmt, ##__VA_ARGS__)
+#  endif
+
+void nx_syslog(int priority, FAR const IPTR char *fmt, ...)
+     syslog_like(2, 3);
 void vsyslog(int priority, FAR const IPTR char *fmt, va_list ap)
      syslog_like(2, 0);
 #else
