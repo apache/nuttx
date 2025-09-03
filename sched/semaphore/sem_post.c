@@ -125,7 +125,11 @@ int nxsem_post_slow(FAR sem_t *sem)
       sem_count = atomic_read(NXSEM_COUNT(sem));
       do
         {
+#ifdef CONFIG_CUSTOM_SEMAPHORE_MAXVALUE
+          if (sem_count >= sem->maxvalue)
+#else
           if (sem_count >= SEM_VALUE_MAX)
+#endif
             {
               leave_critical_section(flags);
               return -EOVERFLOW;

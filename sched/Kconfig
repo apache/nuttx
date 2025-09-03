@@ -2027,3 +2027,10 @@ config COREDUMP
 		The memory state embeds a snapshot of all segments mapped in the
 		memory space of the program. The CPU state contains register values
 		when the core dump has been generated.
+
+config CUSTOM_SEMAPHORE_MAXVALUE
+	bool "Custom max value for semaphores"
+	default n
+	---help---
+		Enable to support custom max value for semaphores.
+		When this option is enabled, the max value of a semaphore can be set

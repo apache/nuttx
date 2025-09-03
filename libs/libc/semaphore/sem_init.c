@@ -72,6 +72,10 @@ int nxsem_init(FAR sem_t *sem, int pshared, int32_t value)
 
   sem->val.semcount = (int32_t)value;
 
+#ifdef CONFIG_CUSTOM_SEMAPHORE_MAXVALUE
+  sem->maxvalue = SEM_VALUE_MAX;
+#endif
+
   /* Initialize semaphore wait list */
 
   dq_init(&sem->waitlist);

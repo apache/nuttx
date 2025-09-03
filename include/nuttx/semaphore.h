@@ -412,6 +412,27 @@ int nxsem_post_slow(FAR sem_t *sem);
 
 int nxsem_get_value(FAR sem_t *sem, FAR int *sval);
 
+#ifdef CONFIG_CUSTOM_SEMAPHORE_MAXVALUE
+/****************************************************************************
+ * Name:  nxsem_setmaxvalue
+ *
+ * Description:
+ *   This function sets the maximum allowed value for a specific semaphore.
+ *
+ * Input Parameters:
+ *   sem - Semaphore descriptor
+ *   maxvalue - The maximum allowed value
+ *
+ * Returned Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *
+ ****************************************************************************/
+
+int nxsem_setmaxvalue(FAR sem_t *sem, int32_t maxvalue);
+#endif
+
 /****************************************************************************
  * Name: nxsem_open
  *
