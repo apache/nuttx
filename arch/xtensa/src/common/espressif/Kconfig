@@ -53,7 +53,7 @@ config ESPRESSIF_EFUSE_VIRTUAL
 	depends on ESPRESSIF_EFUSE
 	default n
 	---help---
-		Enable virtual efuse support to simulate eFuse operations in RAM, changes will be reverted each reboot
+		Enable virtual efuse support to simulate eFuse operations in RAM, changes will be reverted each reboot.
 
 config ESPRESSIF_EFUSE_VIRTUAL_KEEP_IN_FLASH
 	bool "Keep E-Fuses in flash"
@@ -67,23 +67,25 @@ config ESPRESSIF_EFUSE_VIRTUAL_KEEP_IN_FLASH
 		This mode is useful when need to keep changes after reboot (testing secure_boot,
 		flash_encryption or using MCUBoot + encryption).
 
-if ESPRESSIF_EFUSE_VIRTUAL_KEEP_IN_FLASH
+if ESPRESSIF_EFUSE_VIRTUAL_KEEP_IN_FLASH || ESPRESSIF_BOOTLOADER_MCUBOOT
+
+menu "Virtual E-Fuse Options"
 
 config ESPRESSIF_EFUSE_VIRTUAL_KEEP_IN_FLASH_OFFSET
-	hex "E-Fuses offset in flash"
-	depends on ESPRESSIF_EFUSE_VIRTUAL_KEEP_IN_FLASH
-	default 0x250000
+	hex "Virtual E-Fuses offset in flash"
+	default 0x10000 if ESPRESSIF_BOOTLOADER_MCUBOOT
+	default 0x250000 if !ESPRESSIF_BOOTLOADER_MCUBOOT
 	---help---
 		Offset in flash where the E-Fuses will be stored when using the "E-Fuses size to keep in flash" option.
 
 config ESPRESSIF_EFUSE_VIRTUAL_KEEP_IN_FLASH_SIZE
-	hex "E-Fuses size to keep in flash"
-	depends on ESPRESSIF_EFUSE_VIRTUAL_KEEP_IN_FLASH
+	hex "Virtual E-Fuses size to keep in flash"
 	default 0x2000
 	---help---
 		Size of E-Fuse region to keep in flash.
 
-endif # ESPRESSIF_EFUSE_VIRTUAL_KEEP_IN_FLASH
+endmenu # Virtual E-Fuse Options
+endif # ESPRESSIF_EFUSE_VIRTUAL_KEEP_IN_FLASH || ESPRESSIF_BOOTLOADER_MCUBOOT
 
 config ESPRESSIF_TEMP
 	bool "Internal Temperature Sensor"
@@ -1123,7 +1125,7 @@ comment "Application Image OTA Update support"
 
 config ESPRESSIF_OTA_PRIMARY_SLOT_OFFSET
 	hex "Application image primary slot offset"
-	default 0x10000
+	default 0x20000
 
 config ESPRESSIF_OTA_PRIMARY_SLOT_DEVPATH
 	string "Application image primary slot device path"
@@ -1131,7 +1133,7 @@ config ESPRESSIF_OTA_PRIMARY_SLOT_DEVPATH
 
 config ESPRESSIF_OTA_SECONDARY_SLOT_OFFSET
 	hex "Application image secondary slot offset"
-	default 0x110000
+	default 0x120000
 
 config ESPRESSIF_OTA_SECONDARY_SLOT_DEVPATH
 	string "Application image secondary slot device path"
@@ -1143,7 +1145,7 @@ config ESPRESSIF_OTA_SLOT_SIZE
 
 config ESPRESSIF_OTA_SCRATCH_OFFSET
 	hex "Scratch partition offset"
-	default 0x210000
+	default 0x220000
 
 config ESPRESSIF_OTA_SCRATCH_SIZE
 	hex "Scratch partition size"
