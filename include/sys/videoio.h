@@ -886,6 +886,18 @@ typedef struct v4l2_buffer v4l2_buffer_t;
 
 #define V4L2_BUF_FLAG_KEYFRAME                  0x00000008
 
+/* Image is a P-frame */
+
+#define V4L2_BUF_FLAG_PFRAME                    0x00000010
+
+/* Image is a B-frame */
+
+#define V4L2_BUF_FLAG_BFRAME                    0x00000020
+
+/* Buffer is ready, but the data contained within is corrupted. */
+
+#define V4L2_BUF_FLAG_ERROR                     0x00000040
+
 /* mem2mem encoder/decoder */
 
 #define V4L2_BUF_FLAG_LAST                      0x00100000
