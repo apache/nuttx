@@ -99,6 +99,7 @@ struct nvs_fs
   uint32_t              data_wra;      /* Next data write address */
   uint32_t              step_addr;     /* For traverse */
   mutex_t               nvs_lock;
+  FAR struct pollfd     *fds;
 };
 
 /* Allocation Table Entry */
@@ -2048,6 +2049,11 @@ static int mtdconfig_ioctl(FAR struct file *filep, int cmd,
         /* Write a nvs item. */
 
         ret = nvs_write(fs, pdata);
+        if (ret >= 0 && fs->fds)
+          {
+            poll_notify(&fs->fds, 1, POLLPRI);
+          }
+
         break;
 
       case CFGDIOC_DELCONFIG:
@@ -2055,6 +2061,11 @@ static int mtdconfig_ioctl(FAR struct file *filep, int cmd,
         /* Delete a nvs item. */
 
         ret = nvs_delete(fs, pdata);
+        if (ret >= 0 && fs->fds)
+          {
+            poll_notify(&fs->fds, 1, POLLPRI);
+          }
+
         break;
 
       case CFGDIOC_FIRSTCONFIG:
@@ -2095,11 +2106,27 @@ static int mtdconfig_ioctl(FAR struct file *filep, int cmd,
 static int mtdconfig_poll(FAR struct file *filep, FAR struct pollfd *fds,
                        bool setup)
 {
-  if (setup)
+  FAR struct inode *inode = filep->f_inode;
+  FAR struct nvs_fs *fs = inode->i_private;
+  int ret;
+
+  ret = nxmutex_lock(&fs->nvs_lock);
+  if (ret < 0)
     {
-      poll_notify(&fds, 1, POLLIN | POLLOUT);
+      return ret;
     }
 
+  if (setup)
+    {
+      fs->fds = fds;
+      poll_notify(&fds, 1, POLLIN | POLLOUT);
+    }
+  else
+    {
+      fs->fds = NULL;
+    }
+
+  nxmutex_unlock(&fs->nvs_lock);
   return OK;
 }
 
