@@ -67,6 +67,10 @@ static int tricore_systimer_cancel(struct oneshot_lowerhalf_s *lower,
                                    struct timespec *ts);
 static int tricore_systimer_current(struct oneshot_lowerhalf_s *lower,
                                     struct timespec *ts);
+static int
+tricore_systimer_tick_start(struct oneshot_lowerhalf_s *lower,
+                            oneshot_callback_t callback, void *arg,
+                            clock_t ticks);
 
 /****************************************************************************
  * Private Data
@@ -78,6 +82,7 @@ static const struct oneshot_operations_s g_tricore_systimer_ops =
   .start     = tricore_systimer_start,
   .cancel    = tricore_systimer_cancel,
   .current   = tricore_systimer_current,
+  .tick_start = tricore_systimer_tick_start,
 };
 
 static struct tricore_systimer_lowerhalf_s g_systimer_lower =
@@ -271,6 +276,48 @@ static int tricore_systimer_current(struct oneshot_lowerhalf_s *lower,
   ts->tv_sec  = nsec / NSEC_PER_SEC;
   ts->tv_nsec = nsec % NSEC_PER_SEC;
 
+  return 0;
+}
+
+/****************************************************************************
+ * Name: tricore_systimer_tick_start
+ *
+ * Description:
+ *   Start the oneshot timer
+ *
+ * Input Parameters:
+ *   lower    An instance of the lower-half oneshot state structure.  This
+ *            structure must have been previously initialized via a call to
+ *            oneshot_initialize();
+ *   handler  The function to call when when the oneshot timer expires.
+ *   arg      An opaque argument that will accompany the callback.
+ *   ticks    Provides the duration of the one shot timer.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned
+ *   on failure.
+ *
+ ****************************************************************************/
+
+static int
+tricore_systimer_tick_start(struct oneshot_lowerhalf_s *lower,
+                            oneshot_callback_t callback, void *arg,
+                            clock_t ticks)
+{
+  struct tricore_systimer_lowerhalf_s *priv =
+    (struct tricore_systimer_lowerhalf_s *)lower;
+  uint64_t mtime = tricore_systimer_get_time(priv);
+
+  priv->alarm = mtime + priv->freq * ticks / TICK_PER_SEC;
+  if (priv->alarm < mtime)
+    {
+      priv->alarm = UINT64_MAX;
+    }
+
+  priv->callback = callback;
+  priv->arg      = arg;
+
+  tricore_systimer_set_timecmp(priv, priv->alarm);
   return 0;
 }
 
