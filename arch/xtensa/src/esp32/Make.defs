@@ -284,5 +284,6 @@ endif
 
 distclean::
 	$(call DELDIR,chip/$(ESP_HAL_3RDPARTY_REPO))
+	$(call DELFILE,../../../vefuse.bin)
 
 INCLUDES += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)common$(DELIM)espressif

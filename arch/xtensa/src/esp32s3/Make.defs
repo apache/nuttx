@@ -274,3 +274,4 @@ distclean::
 ifeq ($(CONFIG_ESPRESSIF_USE_ULP_RISCV_CORE),y)
 	$(call DELDIR,chip/ulp)
 endif
+	$(call DELFILE,../../../vefuse.bin)

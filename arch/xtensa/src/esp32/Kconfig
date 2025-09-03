@@ -1835,7 +1835,7 @@ config ESP32_OTA_PARTITION_ENCRYPT
 
 config ESP32_OTA_PRIMARY_SLOT_OFFSET
 	hex "Application image primary slot offset"
-	default 0x10000
+	default 0x20000
 
 config ESP32_OTA_PRIMARY_SLOT_DEVPATH
 	string "Application image primary slot device path"
@@ -1843,7 +1843,7 @@ config ESP32_OTA_PRIMARY_SLOT_DEVPATH
 
 config ESP32_OTA_SECONDARY_SLOT_OFFSET
 	hex "Application image secondary slot offset"
-	default 0x110000
+	default 0x120000
 
 config ESP32_OTA_SECONDARY_SLOT_DEVPATH
 	string "Application image secondary slot device path"
@@ -1855,7 +1855,7 @@ config ESP32_OTA_SLOT_SIZE
 
 config ESP32_OTA_SCRATCH_OFFSET
 	hex "Scratch partition offset"
-	default 0x210000
+	default 0x220000
 
 config ESP32_OTA_SCRATCH_SIZE
 	hex "Scratch partition size"
@@ -2793,7 +2793,7 @@ endchoice
 config ESP32_MCUBOOT_VERSION
 	string "MCUboot version"
 	depends on ESP32_APP_FORMAT_MCUBOOT
-	default "20f98e0a975c24864872e0df5701eb1082e9c957"
+	default "aa4fa2b6e17361dd3ce16a60883059778fd147a9"
 
 config ESP32_APP_MCUBOOT_HEADER_SIZE
 	int "Application image header size (in bytes)"

@@ -20,6 +20,12 @@
 #
 ############################################################################
 
+# MCUBoot requires a region in flash for the E-Fuse virtual mode.
+# To avoid erasing this region, flash a dummy empty file to the
+# virtual E-Fuse offset.
+
+VIRTUAL_EFUSE_BIN := vefuse.bin
+
 # These are the macros that will be used in the NuttX make system to compile
 # and assemble source files and to insert the resulting object files into an
 # archive.  These replace the default definitions at tools/Config.mk
@@ -56,6 +62,12 @@ endif
 
 ESPTOOL_FLASH_OPTS := -fs $(FLASH_SIZE) -fm $(FLASH_MODE) -ff $(FLASH_FREQ)
 
+define MAKE_VIRTUAL_EFUSE_BIN
+	$(Q)if [ ! -f "$(VIRTUAL_EFUSE_BIN)" ]; then \
+		dd if=/dev/zero of=$(VIRTUAL_EFUSE_BIN) count=0 status=none; \
+	fi
+endef
+
 # Configure the variables according to build environment
 
 ESPTOOL_MIN_VERSION := 4.8.0
@@ -82,6 +94,9 @@ ifeq ($(CONFIG_ESP32S3_APP_FORMAT_LEGACY),y)
 	APP_IMAGE      := nuttx.bin
 	FLASH_APP      := $(APP_OFFSET) $(APP_IMAGE)
 else ifeq ($(CONFIG_ESP32S3_APP_FORMAT_MCUBOOT),y)
+
+	ESPTOOL_BINS += $(CONFIG_ESPRESSIF_EFUSE_VIRTUAL_KEEP_IN_FLASH_OFFSET) $(VIRTUAL_EFUSE_BIN)
+
 	ifeq ($(CONFIG_ESP32S3_ESPTOOL_TARGET_PRIMARY),y)
 		VERIFIED   := --confirm
 		APP_OFFSET := $(CONFIG_ESP32S3_OTA_PRIMARY_SLOT_OFFSET)
@@ -200,6 +215,7 @@ endif
 
 define POSTBUILD
 	$(call MKIMAGE)
+	$(if $(CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT),$(call MAKE_VIRTUAL_EFUSE_BIN))
 	$(if $(CONFIG_ESP32S3_MERGE_BINS),$(call MERGEBIN))
 endef
 
