@@ -116,6 +116,23 @@ Notifier Chain Interfaces
   :param events: Set of events to wait, 0 will indicate wait from any events
   :param eflags: Events flags
 
+
+.. c:function:: nxevent_mask_t nxevent_tickwait_wait(FAR nxevent_t *event, FAR nxevent_wait_t *wait, nxevent_mask_t events, nxevent_flags_t eflags, uint32_t delay);
+
+  Wait for all of the specified events for the specified tick time.
+
+  This routine is functionally identical to nxevent_tickwait, except that the wait object is explicitly provided by the user.
+  In nxevent_tickwait, the wait object is allocated as a temporary variable on the event-wait thread's stack, and the user has no visibility or control over it.
+  Because this object is accessed by both the event-wait thread and the event-post thread, such an arrangement may lead to safety concerns.
+  To address this, the new function allows the user to supply the wait object directly, providing greater control and improving safety.
+
+  :param event: Address of the event object
+  :param wait:  Address of the event wait object
+  :param events: Set of events to wait, 0 will indicate wait from any events
+  :param eflags: Events flags
+  :param delay: Ticks to wait from the start time until the event is posted,
+                If ticks is zero, then this function is equivalent to nxevent_trywait().
+
 .. c:function:: int nxevent_open(FAR nxevent_t **event, FAR const char *name, int oflags, ...)
 
   This function establishes a connection between named event groups and a
