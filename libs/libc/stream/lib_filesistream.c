@@ -45,20 +45,27 @@ static ssize_t filesistream_gets(FAR struct lib_sistream_s *self,
 {
   FAR struct lib_filesistream_s *stream =
                                 (FAR struct lib_filesistream_s *)self;
-  ssize_t nread;
+  size_t left = len;
+  ssize_t ret = 0;
 
-  do
+  while (left >= 0)
     {
-      nread = file_read(&stream->file, buf, len);
-    }
-  while (nread == -EINTR);
+      ret = file_read(&stream->file, buf, left);
+      if (ret == -EINTR)
+        {
+          continue;
+        }
+      else if (ret <= 0)
+        {
+          break;
+        }
 
-  if (nread >= 0)
-    {
-      self->nget += nread;
+      self->nget += ret;
+      buf += ret;
+      left -= ret;
     }
 
-  return nread;
+  return left == len ? ret : len - left;
 }
 
 /****************************************************************************
