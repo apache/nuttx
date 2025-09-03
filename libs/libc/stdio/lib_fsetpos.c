@@ -53,7 +53,7 @@
  *
  ****************************************************************************/
 
-int fsetpos(FAR FILE *stream, FAR fpos_t *pos)
+int fsetpos(FAR FILE *stream, FAR const fpos_t *pos)
 {
 #ifdef CONFIG_DEBUG_FEATURES
   if (!stream || !pos)

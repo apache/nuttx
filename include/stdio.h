@@ -163,7 +163,7 @@ int    fscanf(FAR FILE *stream, FAR const IPTR char *fmt, ...)
        scanf_like(2, 3);
 int    fseek(FAR FILE *stream, long int offset, int whence);
 int    fseeko(FAR FILE *stream, off_t offset, int whence);
-int    fsetpos(FAR FILE *stream, FAR fpos_t *pos);
+int    fsetpos(FAR FILE *stream, FAR const fpos_t *pos);
 long   ftell(FAR FILE *stream);
 off_t  ftello(FAR FILE *stream);
 size_t fwrite(FAR const void *ptr, size_t size, size_t n_items,
