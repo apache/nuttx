@@ -143,7 +143,8 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
        * window size.
        */
 
-      dev->d_sndlen = iob->io_pktlen;
+      dev->d_sndlen = iob->io_pktlen + NET_LL_HDRLEN(dev);
+      dev->d_len = dev->d_sndlen;
       ninfo("wrb=%p sndlen=%d\n", iob, dev->d_sndlen);
 
       if (write_q_len > 1)
