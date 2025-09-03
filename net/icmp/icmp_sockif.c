@@ -145,7 +145,7 @@ static int icmp_setup(FAR struct socket *psock)
           conn->filter = UINT32_MAX;
         }
 
-      nxmutex_init(&conn->sconn.s_lock);
+      nxrmutex_init(&conn->sconn.s_lock);
 
       /* Save the pre-allocated connection in the socket structure */
 

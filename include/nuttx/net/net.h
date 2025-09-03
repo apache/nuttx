@@ -211,7 +211,7 @@ struct socket_conn_s
    * This mutex is also used to protect the list of callbacks.
    */
 
-  mutex_t       s_lock;      /* Protect the connection structure */
+  rmutex_t      s_lock;      /* Protect the connection structure */
 
   /* Socket options */
 

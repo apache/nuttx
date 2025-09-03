@@ -571,7 +571,7 @@ FAR struct udp_conn_s *udp_alloc(uint8_t domain)
       nxsem_init(&conn->sndsem, 0, 0);
 #endif
 
-      nxmutex_init(&conn->sconn.s_lock);
+      nxrmutex_init(&conn->sconn.s_lock);
 #ifdef CONFIG_NET_UDP_WRITE_BUFFERS
       /* Initialize the write buffer lists */
 
@@ -611,7 +611,7 @@ void udp_free(FAR struct udp_conn_s *conn)
   /* Remove the connection from the active list */
 
   dq_rem(&conn->sconn.node, &g_active_udp_connections);
-  nxmutex_destroy(&conn->sconn.s_lock);
+  nxrmutex_destroy(&conn->sconn.s_lock);
 
   /* Release any read-ahead buffers attached to the connection, NULL is ok */
 

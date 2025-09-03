@@ -729,7 +729,7 @@ FAR struct tcp_conn_s *tcp_alloc(uint8_t domain)
 
       nxsem_init(&conn->snd_sem, 0, 0);
 #endif
-      nxmutex_init(&conn->sconn.s_lock);
+      nxrmutex_init(&conn->sconn.s_lock);
 
       /* Set the default value of mss to max, this field will changed when
        * receive SYN.
@@ -852,7 +852,7 @@ void tcp_free(FAR struct tcp_conn_s *conn)
       tcp_conn_list_unlock();
     }
 
-  nxmutex_destroy(&conn->sconn.s_lock);
+  nxrmutex_destroy(&conn->sconn.s_lock);
   tcp_free_rx_buffers(conn);
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS

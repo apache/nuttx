@@ -127,7 +127,7 @@ void pkt_free(FAR struct pkt_conn_s *conn)
   /* Remove the connection from the active list */
 
   dq_rem(&conn->sconn.node, &g_active_pkt_connections);
-  nxmutex_destroy(&conn->sconn.s_lock);
+  nxrmutex_destroy(&conn->sconn.s_lock);
 
 #ifdef CONFIG_NET_PKT_WRITE_BUFFERS
   /* Free the write queue */
