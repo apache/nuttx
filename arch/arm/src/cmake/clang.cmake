@@ -166,12 +166,12 @@ if(CONFIG_ARM_THUMB)
   # interpreted as Thumb code, either add a `.thumb' directive to the source or
   # pass the -mthumb option directly to the assembler by prefixing it with -Wa.
 
-  add_compile_options(-Wa,-mthumb)
+  add_compile_options($<$<COMPILE_LANGUAGE:ASM>:-Wa,-mthumb>)
 
   # Outputs an implicit IT block when there is a conditional instruction without
   # an enclosing IT block.
 
-  add_compile_options(-Wa,-mimplicit-it=always)
+  add_compile_options($<$<COMPILE_LANGUAGE:ASM>:-Wa,-mimplicit-it=always>)
 endif()
 
 # Optimization of unused sections
