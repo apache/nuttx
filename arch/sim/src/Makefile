@@ -118,13 +118,18 @@ ifeq ($(CONFIG_FS_LARGEFILE),y)
 endif
 
 HOSTSRCS  = sim_hostirq.c sim_hostmemory.c sim_hostmisc.c sim_hosttime.c sim_hostuart.c
-HOSTSRCS += sim_hostfs.c
+HOSTSRCS += sim_hostfs.c sim_errno.c
 
 hostfs.h: $(TOPDIR)/include/nuttx/fs/hostfs.h
 	@echo "CP:  $<"
 	$(Q) cp $< $@
 
+errno_lookup.h: $(TOPDIR)/include/nuttx/errno_lookup.h
+	@echo "CP:  $<"
+	$(Q) cp $< $@
+
 sim_hostfs.c: hostfs.h
+sim_errno.c: errno_lookup.h
 
 STDLIBS += -lpthread
 ifeq ($(CONFIG_HOST_MACOS),y)
@@ -523,5 +528,6 @@ distclean:: clean
 	$(call DELFILE, .depend)
 	$(call DELFILE, config.h)
 	$(call DELFILE, hostfs.h)
+	$(call DELFILE, errno_lookup.h)
 
 -include Make.dep
