@@ -750,6 +750,33 @@ static void tcp_input(FAR struct net_driver_s *dev, uint8_t domain,
       seq = tcp_getsequence(tcp->seqno);
       rcvseq = tcp_getsequence(conn->rcvseq);
 
+      /* rfc793:
+       * "If the state is SYN-SENT then
+       *    first check the ACK bit
+       *      If the ACK bit is set
+       *    If SEG.ACK =< ISS, or SEG.ACK > SND.NXT, send
+       *        a reset (unless the RST bit is set, if so drop
+       *        the segment and return)"
+       */
+
+      if ((conn->tcpstateflags & TCP_STATE_MASK) == TCP_SYN_SENT)
+        {
+          uint32_t ackseq;
+          if ((tcp->flags & TCP_ACK) != 0)
+            {
+              ackseq = tcp_getsequence(tcp->ackno);
+              if (ackseq != tcp_getsequence(conn->sndseq))
+                {
+                  if ((tcp->flags & TCP_RST) != 0)
+                    {
+                      goto drop;
+                    }
+
+                  goto reset;
+                }
+            }
+        }
+
       /* RFC793, 1) page 37 Reset Processing: "In all states except
        * SYN-SENT, all reset (RST) segments are validated by checking
        * their SEQ-fields."
