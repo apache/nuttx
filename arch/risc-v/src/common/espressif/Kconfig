@@ -146,7 +146,7 @@ config ESPRESSIF_BOOTLOADER_MCUBOOT
 config ESPRESSIF_MCUBOOT_VERSION
 	string "MCUboot version"
 	depends on ESPRESSIF_BOOTLOADER_MCUBOOT
-	default "aa4fa2b6e17361dd3ce16a60883059778fd147a9"
+	default "8a07053d42e592c85cb35b79c4de1b7749943387"
 
 choice ESPRESSIF_ESPTOOL_TARGET_SLOT
 	prompt "Target slot for image flashing"
@@ -224,6 +224,82 @@ config ESPRESSIF_OTA_SCRATCH_DEVPATH
 	default "/dev/otascratch"
 
 endif # ESPRESSIF_HAVE_OTA_PARTITION
+
+config ESPRESSIF_SECURE_FLASH_ENC_ENABLED
+	bool "Enable Flash Encryption on boot (READ DOCS FIRST)"
+	default n
+	depends on ESPRESSIF_BOOTLOADER_MCUBOOT
+	select ESPRESSIF_EFUSE
+	---help---
+		If this option is set, flash contents will be encrypted by the bootloader on first boot.
+
+		Note: After first boot, the system will be permanently encrypted. Re-flashing an encrypted
+		system is complicated and not always possible.
+
+		Read https://docs.espressif.com/projects/esp-idf/en/latest/security/flash-encryption.html
+		before enabling.
+
+		Note: enabling this option will automatically select ESPRESSIF_EFUSE and ESPRESSIF_EFUSE_VIRTUAL,
+		as a mean to avoid accidental burning of the E-Fuses.
+
+if ESPRESSIF_SECURE_FLASH_ENC_ENABLED
+
+config ESPRESSIF_SECURE_FLASH_UART_BOOTLOADER_ALLOW_ENC
+	bool "Leave UART bootloader encryption enabled"
+	depends on ESPRESSIF_SECURE_FLASH_ENCRYPTION_MODE_DEVELOPMENT
+	default n
+	help
+		If not set (default), the bootloader will permanently disable UART bootloader encryption access on
+		first boot. If set, the UART bootloader will still be able to access hardware encryption.
+
+		It is recommended to only set this option in testing environments.
+
+config ESPRESSIF_SECURE_FLASH_UART_BOOTLOADER_ALLOW_DEC
+	bool "Leave UART bootloader decryption enabled"
+	default n
+	depends on ESPRESSIF_SECURE_FLASH_ENCRYPTION_MODE_DEVELOPMENT
+	---help---
+		If not set (default), the bootloader will permanently disable UART bootloader decryption access on
+		first boot. If set, the UART bootloader will still be able to access hardware decryption.
+
+		Only set this option in testing environments. Setting this option allows complete bypass of flash
+		encryption.
+
+config ESPRESSIF_SECURE_FLASH_UART_BOOTLOADER_ALLOW_CACHE
+	bool "Leave UART bootloader flash cache enabled"
+	default n
+	depends on ESPRESSIF_SECURE_FLASH_ENCRYPTION_MODE_DEVELOPMENT
+	---help---
+		If not set (default), the bootloader will permanently disable UART bootloader flash cache access on
+		first boot. If set, the UART bootloader will still be able to access the flash cache.
+
+		Only set this option in testing environments.
+
+choice ESPRESSIF_SECURE_FLASH_ENCRYPTION_MODE
+	bool "Enable usage mode"
+	default ESPRESSIF_SECURE_FLASH_ENCRYPTION_MODE_DEVELOPMENT
+	---help---
+		By default, Development mode is enabled which allows ROM download mode to perform Flash Encryption
+		operations (plaintext is sent to the device, and it encrypts it internally and writes ciphertext
+		to flash). This mode is not secure, it's possible for an attacker to write their own chosen plaintext
+		to flash.
+
+		Release mode should always be selected for production or manufacturing. Once enabled it's no longer
+		possible for the device in ROM Download Mode to use the Flash Encryption hardware.
+
+		Refer to the Flash Encryption section of the ESP-IDF Programmer's Guide for details:
+		https://docs.espressif.com/projects/esp-idf/en/latest/esp32/security/flash-encryption.html#flash-encryption-configuration
+
+	config ESPRESSIF_SECURE_FLASH_ENCRYPTION_MODE_DEVELOPMENT
+		bool "Development (NOT SECURE)"
+		select ESPRESSIF_SECURE_FLASH_UART_BOOTLOADER_ALLOW_ENC
+
+	config ESPRESSIF_SECURE_FLASH_ENCRYPTION_MODE_RELEASE
+		bool "Release"
+
+endchoice
+
+endif # ESPRESSIF_SECURE_FLASH_ENC_ENABLED
 
 endmenu # Bootloader and Image Configuration
 
@@ -952,7 +1028,7 @@ config ESPRESSIF_EFUSE
 config ESPRESSIF_EFUSE_VIRTUAL
 	bool "Virtual E-Fuses support"
 	depends on ESPRESSIF_EFUSE
-	default n
+	default y
 	---help---
 		Enable virtual E-Fuse support to simulate E-Fuse operations in RAM.
 		Changes will be reverted each reboot unless enabling ESPRESSIF_EFUSE_VIRTUAL_KEEP_IN_FLASH.
@@ -960,6 +1036,7 @@ config ESPRESSIF_EFUSE_VIRTUAL
 config ESPRESSIF_EFUSE_VIRTUAL_KEEP_IN_FLASH
 	bool "Keep E-Fuses in flash"
 	depends on ESPRESSIF_EFUSE_VIRTUAL
+	default y
 	---help---
 		In addition to the "Virtual E-Fuses support" option, this option just adds
 		a feature to keep E-Fuses after reboots in flash memory.
