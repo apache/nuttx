@@ -39,6 +39,12 @@
  * aliased.
  */
 
+/* The power driver sub-system uses the standard character driver framework.
+ * However, since the driver is a devices control interface rather than a
+ * data transfer interface, the majority of the functionality is implemented
+ * in driver ioctl calls.  Standard ioctl commands are listed below:
+ */
+
 #define PWRIOC_START          _PWRIOC(1)
 #define PWRIOC_STOP           _PWRIOC(2)
 #define PWRIOC_SET_MODE       _PWRIOC(3)
@@ -49,5 +55,20 @@
 #define PWRIOC_SET_FAULT      _PWRIOC(8)
 #define PWRIOC_CLEAN_FAULT    _PWRIOC(9)
 #define PWRIOC_SET_PARAMS     _PWRIOC(10)
+
+#define PWR_FIRST          0x0001          /* First common command */
+#define PWR_NCMDS          10              /* Number of common commands */
+
+/* User defined ioctl commands are also supported. These will be forwarded
+ * by the upper-half driver to the lower-half driver via the ioctl()
+ * method of the lower-half interface.  However, the lower-half driver
+ * must reserve a block of commands as follows in order prevent IOCTL
+ * command numbers from overlapping.
+ */
+
+/* See include/nuttx/power/husb238.h */
+
+#define PWR_HUSB238_FIRST  (PWR_FIRST + PWR_NCMDS)
+#define PWS_HUSB238_NCMDS  6
 
 #endif /* __INCLUDE_NUTTX_POWER_POWER_IOCTL_H */

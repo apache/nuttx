@@ -43,6 +43,10 @@ ifeq ($(CONFIG_REGULATOR_ACT8945A), y)
 CSRCS += act8945a.c
 endif
 
+endif # CONFIG_REGULATOR
+
+ifeq ($(CONFIG_USBPD_HUSB238), y)
+CSRCS += husb238.c
 endif
 
 DEPPATH += --dep-path power/supply

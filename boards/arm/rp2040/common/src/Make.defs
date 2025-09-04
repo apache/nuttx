@@ -117,6 +117,10 @@ ifeq ($(CONFIG_ADC_ADS7046),y)
   CSRCS += rp2040_ads7046.c
 endif
 
+ifeq ($(CONFIG_USBPD_HUSB238),y)
+    CSRCS += rp2040_husb238.c
+endif
+
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src
