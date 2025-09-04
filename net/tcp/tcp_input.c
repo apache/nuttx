@@ -775,6 +775,10 @@ static void tcp_input(FAR struct net_driver_s *dev, uint8_t domain,
                   goto reset;
                 }
             }
+          else if ((tcp->flags & TCP_RST) != 0)
+            {
+              goto drop;
+            }
         }
 
       /* RFC793, 1) page 37 Reset Processing: "In all states except
