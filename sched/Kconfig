@@ -1671,6 +1671,15 @@ config SIG_SIGPOLL_ACTION
 		Backward compatible behavior would require that the application use
 		sigaction() to ignore SIGPOLL.
 
+config SIG_SIGURG_ACTION
+	bool "SIGURG"
+	default n
+	---help---
+		Enable the default action for SIGURG (ignore the signal)
+		Make sure that your applications are expecting this POSIX behavior.
+		Backward compatible behavior would require that the application use
+		sigaction() to ignore SIGURG.
+
 endif # SIG_DEFAULT
 
 endmenu # Signal Configuration
