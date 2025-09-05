@@ -26,6 +26,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
 
 #ifdef CONFIG_ARCH_L2CACHE
 
@@ -247,11 +248,11 @@ void l2cc_flush(uint32_t startaddr, uint32_t endaddr);
 #  define l2cc_disable()
 #  define l2cc_sync()
 #  define l2cc_invalidate_all()
-#  define l2cc_invalidate(s,e)
+#  define l2cc_invalidate(s,e) UNUSED(s)
 #  define l2cc_clean_all()
-#  define l2cc_clean(s,e)
+#  define l2cc_clean(s,e) UNUSED(s)
 #  define l2cc_flush_all()
-#  define l2cc_flush(s,e)
+#  define l2cc_flush(s,e) UNUSED(s)
 
 #endif /* CONFIG_ARCH_L2CACHE */
 #endif /* __ARCH_ARM_SRC_ARMV8_M_L2CC_H */
