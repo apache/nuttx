@@ -2034,3 +2034,17 @@ config CUSTOM_SEMAPHORE_MAXVALUE
 	---help---
 		Enable to support custom max value for semaphores.
 		When this option is enabled, the max value of a semaphore can be set
+
+config SCHED_HAVE_PRINTK
+	bool "Support nxprink() function"
+	default y
+	---help---
+		Enable to support nxprintk() function as synchronous printing function
+
+if SCHED_HAVE_PRINTK
+config PRINTK_BUFFER_MAXLEN
+	int "Maximum allowed buffer length for a single printk call"
+	default 64
+	---help---
+		Define maximum allowed buffer length for a single printk call
+endif #SCHED_HAVE_PRINTK
