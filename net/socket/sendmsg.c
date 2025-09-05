@@ -74,7 +74,8 @@ ssize_t psock_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 {
   /* Verify that non-NULL pointers were passed */
 
-  if (msg == NULL || msg->msg_iov == NULL || msg->msg_iov->iov_base == NULL)
+  if (msg == NULL || msg->msg_iov == NULL ||
+      (psock->s_type != SOCK_DGRAM && msg->msg_iov->iov_base == NULL))
     {
       return -EINVAL;
     }
