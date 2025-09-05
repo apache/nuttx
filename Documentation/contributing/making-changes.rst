@@ -265,6 +265,21 @@ squash before submitting the Pull Request:
    happy, they may suggest squashing and merging again to make a single commit. In this case you would repeat steps
    1 through 6.
 
+   .. note::
+
+      NuttX uses a ``CODEOWNERS`` file to help track which users are "experts"
+      on certain NuttX subsystems. Sometimes, this will result in certain
+      reviewers being automatically requested to review your PR if you have
+      modified a file they are marked as a "code owner" for. This is just to
+      help contributors get more relevant reviews from someone who knows the
+      subject area.
+
+      If you've created a new file, let's say for a driver, you can add yourself
+      as a code owner for that file by modifying ``.github/CODEOWNERS``. Read
+      the `GitHub documentation for CODEOWNERS
+      <https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners>`_
+      for more information.
+
 How to Include the Suggestions on Your Pull Request?
 ====================================================
 
