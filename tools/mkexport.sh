@@ -187,15 +187,11 @@ cp "${TOPDIR}/tools/incdir.c" "${EXPORTDIR}/tools/."
 # Copy the board specific linker if found, or use the default when not.
 
 APPLD=gnu-elf.ld
-APPLDIN=gnu-elf.ld.in
 
 if [ -f "${BOARDDIR}/scripts/${APPLD}" ]; then
   cp -f "${BOARDDIR}/scripts/${APPLD}" "${EXPORTDIR}/scripts/."
 elif [ -f "${TOPDIR}/libs/libc/elf/${APPLD}" ]; then
   cp -f "${TOPDIR}/libs/libc/elf/${APPLD}" "${EXPORTDIR}/scripts/."
-elif [ -f "${TOPDIR}/libs/libc/elf/${APPLDIN}" ]; then
-  # Fall back to exporting the template if the real file is missing
-  cp -f "${TOPDIR}/libs/libc/elf/${APPLDIN}" "${EXPORTDIR}/scripts/${APPLD}"
 fi
 
 if [ "${NUTTX_BUILD}" = "kernel" ]; then
