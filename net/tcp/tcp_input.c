@@ -750,7 +750,7 @@ static void tcp_input(FAR struct net_driver_s *dev, uint8_t domain,
       seq = tcp_getsequence(tcp->seqno);
       rcvseq = tcp_getsequence(conn->rcvseq);
 
-      /* rfc793:
+      /* rfc793 p66:
        * "If the state is SYN-SENT then
        *    first check the ACK bit
        *      If the ACK bit is set
@@ -773,6 +773,29 @@ static void tcp_input(FAR struct net_driver_s *dev, uint8_t domain,
                     }
 
                   goto reset;
+                }
+
+              /* rfc793 p67: Now ACK is acceptable.
+               * "If the RST bit is set
+               *    If the ACK was acceptable then signal the user "error:
+               *    connection reset", drop the segment, enter CLOSED state,
+               *    delete TCB, and return."
+               */
+
+              if ((tcp->flags & TCP_RST) != 0)
+                {
+                  /* fallback to label found rst handle */
+
+                  goto found;
+                }
+
+              /* rfc793 p68: "fifth, if neither of the SYN or RST bits is set
+               * then drop the segment and return."
+               */
+
+              if ((tcp->flags & TCP_SYN) == 0)
+                {
+                  goto drop;
                 }
             }
           else if ((tcp->flags & TCP_RST) != 0)
