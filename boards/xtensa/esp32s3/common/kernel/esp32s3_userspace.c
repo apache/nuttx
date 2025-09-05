@@ -46,6 +46,15 @@
 #endif
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static struct userspace_data_s g_userspace_data =
+{
+  .us_heap = &g_mmheap,
+};
+
+/****************************************************************************
  * Public Data
  ****************************************************************************/
 
@@ -76,9 +85,9 @@ const struct userspace_s userspace locate_data(".userspace") =
 
   .us_heapend       = (uintptr_t)__ld_udram_end,
 
-  /* Memory manager heap structure */
+  /* User data memory structure */
 
-  .us_heap          = &g_mmheap,
+  .us_data          = &g_userspace_data,
 
   /* Task/thread startup routines */
 
