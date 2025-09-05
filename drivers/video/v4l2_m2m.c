@@ -863,6 +863,7 @@ static int codec_close(FAR struct file *filep)
   kumm_free(cfile->output_inf.bufheap);
   kmm_free(cfile);
 
+  kmm_free(cfile);
   return OK;
 }
 
