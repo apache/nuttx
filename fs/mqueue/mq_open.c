@@ -350,18 +350,24 @@ static mqd_t nxmq_vopen(FAR const char *mq_name, int oflags, va_list ap)
   int ret;
   int fd;
 
-  fd = file_allocate(oflags, 0, &mq);
-  if (fd < 0)
+  mq = file_allocate();
+  if (mq == NULL)
     {
-      return fd;
+      return -ENOMEM;
     }
 
   ret = file_mq_vopen(mq, mq_name, oflags, getumask(), ap, &created);
-  file_put(mq);
   if (ret < 0)
     {
-      nx_close(fd);
+      file_deallocate(mq);
       return ret;
+    }
+
+  fd = file_dup(mq, 0, oflags);
+  if (fd < 0)
+    {
+      file_close(mq);
+      file_deallocate(mq);
     }
 
   return fd;

@@ -315,22 +315,24 @@ static int nx_vopen(FAR struct fdlist *list,
   int ret;
   int fd;
 
-  /* Allocate a new file descriptor for the inode */
-
-  fd = fdlist_allocate(list, oflags, 0, &filep);
-  if (fd < 0)
+  filep = file_allocate();
+  if (filep == NULL)
     {
-      return fd;
+      return -ENOMEM;
     }
 
-  /* Let file_vopen() do all of the work */
-
   ret = file_vopen(filep, path, oflags, getumask(), ap);
-  file_put(filep);
   if (ret < 0)
     {
-      fdlist_close(list, fd);
+      file_deallocate(filep);
       return ret;
+    }
+
+  fd = fdlist_dupfile(list, oflags, 0, filep);
+  if (fd < 0)
+    {
+      file_close(filep);
+      file_deallocate(filep);
     }
 
   return fd;
