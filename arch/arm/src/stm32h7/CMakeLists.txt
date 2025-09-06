@@ -181,6 +181,10 @@ if(CONFIG_STM32H7_ETHMAC)
   list(APPEND SRCS stm32_ethernet.c)
 endif()
 
+if(CONFIG_MDIO_BUS)
+  list(APPEND SRCS stm32_mdio.c)
+endif()
+
 if(CONFIG_SENSORS_QENCODER)
   list(APPEND SRCS stm32_qencoder.c)
 endif()

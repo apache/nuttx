@@ -187,6 +187,10 @@ ifeq ($(CONFIG_STM32H7_ETHMAC),y)
 CHIP_CSRCS += stm32_ethernet.c
 endif
 
+ifeq ($(CONFIG_MDIO_BUS),y)
+CHIP_CSRCS += stm32_mdio.c
+endif 
+
 ifeq ($(CONFIG_SENSORS_QENCODER),y)
 CHIP_CSRCS += stm32_qencoder.c
 endif
