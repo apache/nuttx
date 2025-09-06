@@ -19,6 +19,8 @@
 # under the License.
 #
 
+set -e   # Exit on error
+
 # Get the input parameter list
 
 USAGE="USAGE: $0 [-d] [-z] [-u] [-t <top-dir> [-x <lib-ext>] [-a <apps-dir>] [-m <make-exe>] -l \"lib1 [lib2 [lib3 ...]]\""
@@ -185,9 +187,10 @@ cp "${TOPDIR}/tools/incdir.c" "${EXPORTDIR}/tools/."
 # Copy the board specific linker if found, or use the default when not.
 
 APPLD=gnu-elf.ld
+
 if [ -f "${BOARDDIR}/scripts/${APPLD}" ]; then
   cp -f "${BOARDDIR}/scripts/${APPLD}" "${EXPORTDIR}/scripts/."
-else
+elif [ -f "${TOPDIR}/libs/libc/elf/${APPLD}" ]; then
   cp -f "${TOPDIR}/libs/libc/elf/${APPLD}" "${EXPORTDIR}/scripts/."
 fi
 
