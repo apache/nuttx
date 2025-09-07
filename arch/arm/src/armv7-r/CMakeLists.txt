@@ -81,3 +81,8 @@ if(CONFIG_SMP)
 endif()
 
 target_sources(arch PRIVATE ${SRCS})
+
+if(NOT CONFIG_BUILD_FLAT AND CONFIG_ARCH_HAVE_PERF_EVENTS_USER_ACCESS)
+  target_sources(arch_interface PRIVATE arm_perf.c)
+  target_include_directories(arch_interface PRIVATE ${NUTTX_CHIP_ABS_DIR})
+endif()
