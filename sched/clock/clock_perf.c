@@ -31,7 +31,7 @@
 #include <nuttx/spinlock.h>
 #include <nuttx/wdog.h>
 
-#ifndef CONFIG_ARCH_HAVE_PERF_EVENTS_USER_ACCESS
+#ifndef CONFIG_ARCH_PERF_EVENTS_USER_ACCESS
 
 /****************************************************************************
  * Preprocessors
@@ -134,7 +134,7 @@ clock_t perf_gettime(void)
 }
 
 #  endif
-#endif /* !CONFIG_ARCH_HAVE_PERF_EVENTS_USER_ACCESS */
+#endif /* !CONFIG_ARCH_PERF_EVENTS_USER_ACCESS */
 
 #if defined(CONFIG_ALARM_ARCH) || defined (CONFIG_TIMER_ARCH) || \
     defined(CONFIG_ARCH_PERF_EVENTS)
