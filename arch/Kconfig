@@ -683,7 +683,9 @@ config ARCH_HAVE_PERF_EVENTS_USER_ACCESS
 config ARCH_PERF_EVENTS_USER_ACCESS
 	bool "Enable userspace perf counter access"
 	default !BUILD_FLAT
+	depends on !BUILD_KERNEL
 	depends on ARCH_HAVE_PERF_EVENTS_USER_ACCESS
+	depends on ARCH_PERF_EVENTS
 	---help---
 		Enable userspace perf counter access.
 

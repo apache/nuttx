@@ -35,6 +35,7 @@
 #include <pthread.h>
 
 #include <nuttx/lib/builtin.h>
+#include <nuttx/perf.h>
 
 #ifdef CONFIG_BUILD_PROTECTED
 
@@ -78,10 +79,12 @@
  ****************************************************************************/
 
 struct mm_heap_s; /* Forward reference */
-
 struct userspace_data_s
 {
   FAR struct mm_heap_s **us_heap;
+#if defined(CONFIG_PERF_OVERFLOW_CORRECTION) && !defined(CONFIG_SMP)
+  struct perf_s us_perf;
+#endif
 };
 
 /* Every user-space blob starts with a header that provides information about

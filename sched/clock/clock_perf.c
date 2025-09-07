@@ -30,7 +30,12 @@
 #include <nuttx/clock.h>
 #include <nuttx/irq.h>
 #include <nuttx/sched.h>
+#include <nuttx/seqlock.h>
 #include <nuttx/wdog.h>
+
+#ifdef CONFIG_BUILD_PROTECTED
+#  include <nuttx/userspace.h>
+#endif
 
 /****************************************************************************
  * Preprocessors
@@ -47,9 +52,137 @@
 #  define USE_UP_PERF
 #endif
 
-#ifndef CONFIG_ARCH_PERF_EVENTS_USER_ACCESS
-#  if defined(USE_UP_PERF) && defined(CONFIG_PERF_OVERFLOW_CORRECTION) && \
-      ULONG_MAX != UINT64_MAX
+#if defined(USE_UP_PERF) && defined(CONFIG_PERF_OVERFLOW_CORRECTION) && \
+    ULONG_MAX != UINT64_MAX && !defined(CONFIG_SMP)
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/* Without SMP there is a single counter, so the state is the struct perf_s
+ * declared in include/nuttx/perf.h.  In a protected build it is embedded in
+ * the user-space data block; otherwise it is a global.  The watchdog is the
+ * only writer, and the sequence counter lets readers sample the folded value
+ * without taking a lock.
+ */
+
+static struct wdog_s g_wdog;
+static unsigned int g_timeout;
+
+/* The overflow state is one global in every build mode.  A flat build
+ * shares the address space with the application, so user space reads it
+ * directly; a protected or kernel build keeps it private to the kernel,
+ * which is the only writer.  Either way the state lives here.
+ */
+
+#if !defined(CONFIG_BUILD_PROTECTED)
+struct perf_s g_perf =
+{
+  .lock = SEQLOCK_INITIALIZER,
+};
+#endif
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * perf_update
+ ****************************************************************************/
+
+static void perf_update(wdparm_t arg)
+{
+  FAR struct perf_s *perf = (FAR struct perf_s *)arg;
+  irqstate_t flags = write_seqlock_irqsave(&perf->lock);
+  clock_t now = up_perf_gettime();
+
+  if (now < perf->last)
+    {
+      perf->overflow++;
+    }
+
+  perf->last = now;
+  write_sequnlock_irqrestore(&perf->lock, flags);
+  wd_start_next(&g_wdog, g_timeout, perf_update, arg);
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * perf_setup
+ ****************************************************************************/
+
+void perf_setup(void)
+{
+  FAR struct perf_s *perf = &g_perf;
+  irqstate_t flags;
+
+  /* Setup periodic-wdog here, this function can be called after
+   * perf_gettime(), but suggested to be called in initialization phase.
+   */
+
+  g_timeout =
+      ((clock_t)1 << (CONFIG_ARCH_PERF_COUNT_BITWIDTH - 1)) *
+      TICK_PER_SEC / up_perf_getfreq();
+
+  /* Record the initial counter value so the first watchdog update can
+   * detect a wrap that occurs during its initial half-period delay.
+   */
+
+  flags = write_seqlock_irqsave(&perf->lock);
+  perf->last = up_perf_gettime();
+  write_sequnlock_irqrestore(&perf->lock, flags);
+
+  /* Periodic check for overflow */
+
+  wd_start(&g_wdog, g_timeout, perf_update, (wdparm_t)perf);
+}
+
+/****************************************************************************
+ * perf_gettime
+ ****************************************************************************/
+
+/* A flat build gets perf_gettime() from libs/libc/sched/clock_perf.c, which
+ * reads the very same g_perf.  In a protected or kernel build the state is
+ * private to the kernel, so the kernel has to provide the reader here.
+ */
+
+#if !defined(CONFIG_BUILD_FLAT)
+
+clock_t noinstrument_function perf_gettime(void)
+{
+  clock_t overflow;
+  clock_t result;
+  uint32_t seq;
+
+  do
+    {
+      seq = read_seqbegin(&g_perf.lock);
+      clock_t now = up_perf_gettime();
+
+      if (now < g_perf.last)
+        {
+          overflow = g_perf.overflow + 1;
+        }
+      else
+        {
+          overflow = g_perf.overflow;
+        }
+
+      result = now | (overflow << CONFIG_ARCH_PERF_COUNT_BITWIDTH);
+    }
+  while (read_seqretry(&g_perf.lock, seq));
+
+  return result;
+}
+
+#endif /* !CONFIG_BUILD_FLAT */
+
+#elif !defined(CONFIG_ARCH_PERF_EVENTS_USER_ACCESS) && \
+  defined(USE_UP_PERF) && \
+  defined(CONFIG_PERF_OVERFLOW_CORRECTION) && ULONG_MAX != UINT64_MAX
 
 /****************************************************************************
  * Private Types
@@ -160,7 +293,7 @@ clock_t noinstrument_function perf_gettime(void)
   return up_perf_gettime();
 }
 
-#  else
+#else
 
 /****************************************************************************
  * perf_gettime
@@ -171,8 +304,7 @@ clock_t noinstrument_function perf_gettime(void)
   return clock_systime_ticks();
 }
 
-#  endif
-#endif /* !CONFIG_ARCH_PERF_EVENTS_USER_ACCESS */
+#endif
 
 #ifdef USE_UP_PERF
 
