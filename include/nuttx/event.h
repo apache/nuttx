@@ -310,6 +310,27 @@ nxevent_mask_t nxevent_trywait(FAR nxevent_t *event, nxevent_mask_t events,
                                nxevent_flags_t eflags);
 
 /****************************************************************************
+ * Name: nxevent_getmask
+ *
+ * Description:
+ *   Get the event mask of the given event object.
+ *
+ * Input Parameters:
+ *   event - Address of the event object
+ *
+ * Returned Value:
+ *   Returns the event mask value of the event object.
+ *
+ * Notes:
+ *   - This is an internal OS interface and must not be invoked directly
+ *     by user applications.
+ *   - This function is safe to call from an interrupt handler.
+ *
+ ****************************************************************************/
+
+nxevent_mask_t nxevent_getmask(FAR nxevent_t *event);
+
+/****************************************************************************
  * Name: nxevent_open
  *
  * Description:
