@@ -13,16 +13,67 @@ virtqueue created in the virtio/vhost driver but the virtio devices
 has been added to the remoteproc virtio devices list after the remoteproc
 transport layer create the virtio devices.
 
+3. store the virtqueue in vring_info->vq only after virtqueue_create()
+has initialized it, because rproc_virtio_notified() now reads the vring
+of every non-NULL vring_info->vq and may run from an interrupt while
+rproc_virtio_create_virtqueue() is still in progress.
+
 Signed-off-by: Bowen Wang <wangbowen6@xiaomi.com>
+Signed-off-by: Yongrong Wang <wangyongrong@xiaomi.com>
 ---
- lib/remoteproc/remoteproc_virtio.c | 13 ++++++++++---
- 1 file changed, 10 insertions(+), 3 deletions(-)
+ lib/remoteproc/remoteproc_virtio.c | 29 ++++++++++++++++++++---------
+ 1 file changed, 20 insertions(+), 9 deletions(-)
 
 diff --git a/lib/remoteproc/remoteproc_virtio.c open-amp/lib/remoteproc/remoteproc_virtio.c
-index 7dee1354e0..2470454377 100644
 --- a/lib/remoteproc/remoteproc_virtio.c
 +++ open-amp/lib/remoteproc/remoteproc_virtio.c
-@@ -403,6 +403,7 @@ int rproc_virtio_notified(struct virtio_device *vdev, uint32_t notifyid)
+@@ -41,6 +41,7 @@
+ 	struct virtio_vring_info *vring_info;
+ 	struct vring_alloc_info *vring_alloc;
+ 	struct remoteproc_virtio *rpvdev;
++	struct virtqueue *vq;
+ 	int ret;
+ 	(void)flags;
+ 
+@@ -53,8 +54,8 @@
+ 		return ERROR_VQUEUE_INVLD_PARAM;
+ 
+ 	/* Alloc the virtqueue and init it */
+-	vring_info->vq = virtqueue_allocate(vring_alloc->num_descs);
+-	if (!vring_info->vq)
++	vq = virtqueue_allocate(vring_alloc->num_descs);
++	if (!vq)
+ 		return ERROR_NO_MEM;
+ 
+ 	if (VIRTIO_ROLE_IS_DRIVER(vdev)) {
+@@ -65,19 +66,22 @@
+ 	}
+ 
+ 	ret = virtqueue_create(vdev, idx, name, vring_alloc, callback,
+-			       vdev->func->notify, vring_info->vq);
+-	if (ret)
++			       vdev->func->notify, vq);
++	if (ret) {
++		virtqueue_free(vq);
+ 		return ret;
++	}
+ 
+ 	/*
+ 	 * If vq->shm_io is uninitialized, init it here. Now only rpmsg device
+ 	 * init the shm_io specially instead of by transport layer.
+ 	 */
+-	if (!vring_info->vq->shm_io) {
++	if (!vq->shm_io) {
+ 		rpvdev = metal_container_of(vdev, struct remoteproc_virtio, vdev);
+-		virtqueue_set_shmem_io(vring_info->vq, rpvdev->shm_io);
++		virtqueue_set_shmem_io(vq, rpvdev->shm_io);
+ 	}
+ 
++	vring_info->vq = vq;
+ 	return 0;
+ }
+ 
+@@ -403,6 +407,7 @@
  	unsigned int num_vrings, i;
  	struct virtio_vring_info *vring_info;
  	struct virtqueue *vq;
@@ -30,7 +81,7 @@ index 7dee1354e0..2470454377 100644
  
  	if (!vdev)
  		return -RPROC_EINVAL;
-@@ -412,9 +413,15 @@ int rproc_virtio_notified(struct virtio_device *vdev, uint32_t notifyid)
+@@ -412,9 +417,15 @@
  	num_vrings = vdev->vrings_num;
  	for (i = 0; i < num_vrings; i++) {
  		vring_info = &vdev->vrings_info[i];
