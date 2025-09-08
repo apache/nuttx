@@ -798,25 +798,29 @@ static void tcp_input(FAR struct net_driver_s *dev, uint8_t domain,
                   goto drop;
                 }
             }
-          else if ((tcp->flags & TCP_RST) != 0)
+          else if ((tcp->flags & TCP_RST) != 0 ||
+                   (tcp->flags & TCP_SYN) == 0)
             {
+              /* rfc793 p67: 1) "If a reset was sent, discard the segment
+               * and return" p68 2) "fifth, if neither of the SYN or RST
+               * bits is set then drop the segment and return."
+               */
+
               goto drop;
             }
         }
-
-      /* RFC793, 1) page 37 Reset Processing: "In all states except
-       * SYN-SENT, all reset (RST) segments are validated by checking
-       * their SEQ-fields."
-       * 2) page 69 In all states except SYN-SENT: "If an incoming
-       * segment is not acceptable, an acknowledgment should be sent
-       * in reply (unless the RST bit is set, if so drop the segment
-       * and return)".
-       */
-
-      if ((conn->tcpstateflags & TCP_STATE_MASK) != TCP_SYN_SENT &&
-          ((conn->tcpstateflags & TCP_STATE_MASK) >= TCP_SYN_RCVD &&
-          (conn->tcpstateflags & TCP_STATE_MASK) <= TCP_LAST_ACK))
+      else if ((conn->tcpstateflags & TCP_STATE_MASK) >= TCP_SYN_RCVD &&
+               (conn->tcpstateflags & TCP_STATE_MASK) <= TCP_LAST_ACK)
         {
+          /* RFC793, 1) page 37 Reset Processing: "In all states except
+           * SYN-SENT, all reset (RST) segments are validated by checking
+           * their SEQ-fields."
+           * 2) page 69 In all states except SYN-SENT: "If an incoming
+           * segment is not acceptable, an acknowledgment should be sent
+           * in reply (unless the RST bit is set, if so drop the segment
+           * and return)".
+           */
+
           uint32_t endseq;
 
           endseq = seq + dev->d_len - iplen - ((tcp->tcpoffset >> 4) << 2);
