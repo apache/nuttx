@@ -798,8 +798,14 @@ static void tcp_input(FAR struct net_driver_s *dev, uint8_t domain,
                   goto drop;
                 }
             }
-          else if ((tcp->flags & TCP_RST) != 0)
+          else if ((tcp->flags & TCP_RST) != 0 ||
+                   (tcp->flags & TCP_SYN) == 0)
             {
+              /* rfc793 p67: 1) "If a reset was sent, discard the segment
+               * and return" p68 2) "fifth, if neither of the SYN or RST
+               * bits is set then drop the segment and return."
+               */
+
               goto drop;
             }
         }
