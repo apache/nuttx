@@ -123,8 +123,8 @@ static const struct rpmsg_ops_s g_rpmsg_virtio_ops =
  * Name: rpmsg_virtio_buffer_nused
  ****************************************************************************/
 
-static int rpmsg_virtio_buffer_nused(FAR struct rpmsg_virtio_device *rvdev,
-                                     bool rx)
+static uint16_t
+rpmsg_virtio_buffer_nused(FAR struct rpmsg_virtio_device *rvdev, bool rx)
 {
   FAR struct virtqueue *vq = rx ? rvdev->rvq : rvdev->svq;
   bool is_host = rpmsg_virtio_get_role(rvdev) == RPMSG_HOST;
@@ -206,7 +206,7 @@ rpmsg_virtio_pm_action(FAR struct rpmsg_virtio_priv_s *priv, bool stay)
    */
 
   if (!stay && count > 0 &&
-      rpmsg_virtio_buffer_nused(&priv->rvdev, false) == 0)
+      rpmsg_virtio_buffer_nused(&priv->rvdev, false) == 0u)
     {
       pm_wakelock_relax(&priv->wakelock);
     }
@@ -343,10 +343,10 @@ static void rpmsg_virtio_dump_buffer(FAR struct rpmsg_virtio_device *rvdev,
   FAR struct virtqueue *vq = rx ? rvdev->rvq : rvdev->svq;
   unsigned int role;
   FAR void *addr;
-  int desc_idx;
-  int unretrieved;
-  int num;
-  int i;
+  uint16_t unretrieved;
+  uint16_t desc_idx;
+  uint16_t num;
+  uint16_t i;
 
   role = rpmsg_virtio_get_role(rvdev);
   num = rpmsg_virtio_buffer_nused(rvdev, rx);
@@ -364,32 +364,32 @@ static void rpmsg_virtio_dump_buffer(FAR struct rpmsg_virtio_device *rvdev,
 
   if (rx)
     {
-      syslog(LOG_EMERG, "    RX buffer total %d\n", vq->vq_nentries);
-      syslog(LOG_EMERG, "      unretrieved %d\n", unretrieved);
-      syslog(LOG_EMERG, "      retrieved %d\n", vq->vq_queued_cnt);
-      syslog(LOG_EMERG, "      pending %d:\n", num);
+      syslog(LOG_EMERG, "    RX buffer total %u\n", vq->vq_nentries);
+      syslog(LOG_EMERG, "      unretrieved %u\n", unretrieved);
+      syslog(LOG_EMERG, "      retrieved %u\n", vq->vq_queued_cnt);
+      syslog(LOG_EMERG, "      pending %u:\n", num);
     }
   else
     {
-      syslog(LOG_EMERG, "    TX buffer total %d\n", vq->vq_nentries);
-      syslog(LOG_EMERG, "      unretrieved %d\n", unretrieved);
-      syslog(LOG_EMERG, "      retrieved %d\n", vq->vq_free_cnt);
-      syslog(LOG_EMERG, "      sent %d:\n", num);
+      syslog(LOG_EMERG, "    TX buffer total %u\n", vq->vq_nentries);
+      syslog(LOG_EMERG, "      unretrieved %u\n", unretrieved);
+      syslog(LOG_EMERG, "      retrieved %u\n", vq->vq_free_cnt);
+      syslog(LOG_EMERG, "      sent %u:\n", num);
     }
 
-  for (i = 0; i < num; i++)
+  for (i = 0u; i < num; i++)
     {
       if ((role == RPMSG_HOST) ^ rx)
         {
           RPMSG_VIRTIO_INVALIDATE(vq->vq_ring.used->idx);
-          desc_idx = (vq->vq_ring.used->idx + i) & (vq->vq_nentries - 1);
+          desc_idx = (vq->vq_ring.used->idx + i) & (vq->vq_nentries - 1u);
           RPMSG_VIRTIO_INVALIDATE(vq->vq_ring.avail->ring[desc_idx]);
           desc_idx = vq->vq_ring.avail->ring[desc_idx];
         }
       else
         {
           RPMSG_VIRTIO_INVALIDATE(vq->vq_ring.avail->idx);
-          desc_idx = (vq->vq_ring.avail->idx + i) & (vq->vq_nentries - 1);
+          desc_idx = (vq->vq_ring.avail->idx + i) & (vq->vq_nentries - 1u);
           RPMSG_VIRTIO_INVALIDATE(vq->vq_ring.used->ring[desc_idx].id);
           desc_idx = vq->vq_ring.used->ring[desc_idx].id;
         }
