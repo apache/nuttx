@@ -322,7 +322,7 @@ static int rpmsg_virtio_post(FAR struct rpmsg_s *rpmsg)
 {
   FAR struct rpmsg_virtio_priv_s *priv =
     (FAR struct rpmsg_virtio_priv_s *)rpmsg;
-  int semcount;
+  int semcount = 0;
 
   nxsem_get_value(&priv->semtx, &semcount);
   while (semcount++ < 1)
@@ -743,8 +743,8 @@ static void rpmsg_virtio_start_worker(FAR void *arg)
         {
           FAR void *shmbuf_va0;
           FAR void *shmbuf_va1;
-          uint64_t shmbuf_pa0;
-          uint64_t shmbuf_pa1;
+          uint64_t shmbuf_pa0 = 0ull;
+          uint64_t shmbuf_pa1 = 0ull;
 
           /* In OpenAMP, priv->pool[0] is the RX share memory pool,
            * should use r2h_buf_addr and r2h_buf_size
