@@ -47,7 +47,6 @@
 IFX_INTERRUPT_INTERNAL(tricore_doirq, 0, 255)
 {
   struct tcb_s *running_task = g_running_tasks[this_cpu()];
-  struct tcb_s *tcb;
 
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   PANIC();
@@ -88,7 +87,7 @@ IFX_INTERRUPT_INTERNAL(tricore_doirq, 0, 255)
 
   if (regs != up_current_regs())
     {
-      tcb = this_task();
+      running_task = this_task();
 
 #ifdef CONFIG_ARCH_ADDRENV
       /* Make sure that the address environment for the previously
@@ -105,7 +104,7 @@ IFX_INTERRUPT_INTERNAL(tricore_doirq, 0, 255)
        * crashes.
        */
 
-      g_running_tasks[this_cpu()] = tcb;
+      g_running_tasks[this_cpu()] = running_task;
 
       __mtcr(CPU_PCXI, (uintptr_t)up_current_regs());
       __isync();
