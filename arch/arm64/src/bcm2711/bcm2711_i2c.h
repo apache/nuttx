@@ -39,7 +39,7 @@
  * Name: bcm2711_i2cbus_initialize
  *
  * Description:
- *   Initialise an I2C device for the BCM2711.
+ *   Initialize an I2C device for the BCM2711.
  *
  * Input parameters:
  *     port - The bus number for the I2C interface.
