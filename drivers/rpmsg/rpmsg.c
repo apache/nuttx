@@ -141,12 +141,15 @@ static struct rpmsg_wqueue_s g_rpmsg_wqueues[CONFIG_RPMSG_WQUEUE_NUMBER];
 static inline FAR struct rpmsg_s *
 rpmsg_get_by_rdev(FAR struct rpmsg_device *rdev)
 {
-  if (!rdev)
+  FAR struct rpmsg_s *rpmsg = NULL;
+
+  if (rdev)
     {
-      return NULL;
+      rpmsg = (FAR struct rpmsg_s *)
+        ((FAR char *)rdev - sizeof(struct rpmsg_s));
     }
 
-  return (FAR struct rpmsg_s *)((FAR char *)rdev - sizeof(struct rpmsg_s));
+  return rpmsg;
 }
 
 static int rpmsg_dev_ioctl_(FAR struct rpmsg_s *rpmsg, int cmd,
@@ -287,17 +290,19 @@ static FAR struct rpmsg_wqueue_s *
 rpmsg_get_current_wqueue(FAR struct rpmsg_s *rpmsg)
 {
   FAR struct rpmsg_wqueue_s *wqueues = rpmsg_get_wqueues(rpmsg);
+  FAR struct rpmsg_wqueue_s *wqueue = NULL;
   int i;
 
   for (i = 0; i < CONFIG_RPMSG_WQUEUE_NUMBER; i++)
     {
       if (work_queue_in_queue(wqueues[i].kwqueue))
         {
-          return &wqueues[i];
+          wqueue = &wqueues[i];
+          break;
         }
     }
 
-  return NULL;
+  return wqueue;
 }
 
 static void rpmsg_rx_worker(FAR void *arg)
