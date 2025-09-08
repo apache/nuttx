@@ -515,7 +515,7 @@ FAR void *rpmsg_alloc_buf(FAR struct rpmsg_device *rdev, size_t size,
   FAR struct rpmsg_s *rpmsg = rpmsg_get_by_rdev(rdev);
   FAR void *buf = NULL;
 
-  if (!rpmsg || !rpmsg->ops->alloc_buf)
+  if (rpmsg && rpmsg->ops->alloc_buf)
     {
       buf = rpmsg->ops->alloc_buf(rpmsg, size, align);
     }
