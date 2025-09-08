@@ -104,7 +104,7 @@ int nxevent_post(FAR nxevent_t *event, nxevent_mask_t events,
           if ((!waitall && ((wait->expect & event->events) != 0)) ||
               (waitall && ((wait->expect & event->events) == wait->expect)))
             {
-              list_delete_init(&wait->node);
+              list_delete(&wait->node);
 
               ret = nxsem_post(&wait->sem);
               if (ret < 0)
