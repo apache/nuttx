@@ -223,6 +223,51 @@ function ninja_tool {
   Write-Host ""
 }
 
+function pico_sdk {
+  Write-Host "Check pico-sdk ..." -ForegroundColor Green
+  add_path "$NUTTXTOOLS\pico-sdk"
+  try {
+    if (-not (Test-Path -Path "$NUTTXTOOLS\pico-sdk\pico_sdk_init.cmake")) {
+      Write-Host "Download: pico-sdk package" -ForegroundColor Green
+      # Download the file
+      $basefile = "2.2.0"
+      Set-Location "$NUTTXTOOLS"
+      # Download pico-sdk
+      Invoke-WebRequest -Uri "https://github.com/raspberrypi/pico-sdk/archive/refs/tags/$basefile.zip" -OutFile "$NUTTXTOOLS\$basefile.zip" -ErrorAction Stop
+      Expand-Archive "$NUTTXTOOLS\$basefile.zip"
+      Move-Item -Path "$basefile\pico-sdk-2.2.0" -Destination "pico-sdk"
+      Remove-Item "$basefile*" -Force
+      # Configuring the PATH environment variable
+      $env:PICO_SDK_PATH = "$NUTTXTOOLS\pico-sdk"
+      Add-Content -Path "$NUTTXTOOLS\env.ps1" -Value "PICO_SDK_PATH=$NUTTXTOOLS\pico-sdk"
+      Write-Host "File downloaded successfully to pico-sdk"
+    }
+  }
+  catch {
+    Write-Error "Failed to download the file: $_"
+  }
+}
+
+function pico_tool {
+  Write-Host "Check picotool ..." -ForegroundColor Green
+  if (run_command("picotool") -ne 0) {
+    add_path "$NUTTXTOOLS\picotool"
+    if ($null -eq (Get-Command picotool -ErrorAction SilentlyContinue)) {
+      Write-Host "Download: picotool package" -ForegroundColor Green
+      # Download the file
+      $basefile = "picotool-2.2.0-x64-win"
+      Set-Location "$NUTTXTOOLS"
+      # Download tool picotool
+      Invoke-WebRequest -Uri "https://github.com/raspberrypi/pico-sdk-tools/releases/download/v2.2.0-0/$basefile.zip" -OutFile "$NUTTXTOOLS\$basefile.zip" -ErrorAction Stop
+      Expand-Archive "$NUTTXTOOLS\$basefile.zip"
+      Move-Item -Path "$basefile\picotool" -Destination "picotool"
+      Remove-Item "$basefile*" -Force -Recurse
+    }
+  }
+  picotool version
+  Write-Host ""
+}
+
 function riscv_gcc_toolchain() {
   Write-Host "Check RISCV GCC toolchain ..." -ForegroundColor Green
   add_path "$NUTTXTOOLS\riscv-none-elf-gcc\bin"
@@ -292,7 +337,7 @@ function install_build_tools {
   if (-not (Test-Path -Path "$NUTTXTOOLS\env.ps1")) {
     add_envpath "$NUTTXTOOLS\env.ps1"
   }
-  $install = "arm_clang_toolchain arm_gcc_toolchain arm64_gcc_toolchain riscv_gcc_toolchain cmake_tool kconfig_frontends ninja_tool"
+  $install = "arm_clang_toolchain arm_gcc_toolchain arm64_gcc_toolchain riscv_gcc_toolchain pico_sdk pico_tool cmake_tool kconfig_frontends ninja_tool"
 
   $splitArray = $install.Split(" ")
   $oldpath = Get-Location
