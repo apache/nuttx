@@ -65,8 +65,8 @@ struct backtrace_entry_s
   };
 
   FAR void *next;  /* Next index in the hash chain */
-  uint16_t  depth; /* Depth of the backtrace */
-  uint16_t  ref;   /* Count of the backtrace */
+  uint32_t  depth; /* Depth of the backtrace */
+  uint32_t  ref;   /* Count of the backtrace */
 };
 
 struct backtrace_pool_s
