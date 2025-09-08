@@ -26,7 +26,7 @@ Supported Peripherals
 ======================== =======
 Peripheral               Support
 ======================== =======
-I2C                      Partial (able to read, that's it)
+I2C                      Full interrupt-based support, all interfaces work and tested.
 UART                     Mini UART yes, PL011 no
 GPIO                     Partial
 PWM                      No

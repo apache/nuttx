@@ -38,6 +38,22 @@ config BCM2711_I2C0
 		Enable the I2C0 interface.
 		See board selection menu to configure the pins used by I2C0.
 
+if BCM2711_I2C0
+
+config BCM2711_I2C0_SDA
+	int "I2C0 SDA pin"
+	default 0
+	---help---
+		Selects the GPIO pin to use for I2C0 SDA.
+
+config BCM2711_I2C0_SCL
+	int "I2C0 SCL pin"
+	default 1
+	---help---
+		Selects the GPIO pin to use for I2C0 SCL.
+
+endif # BCM2711_I2C0
+
 config BCM2711_I2C1
 	bool "I2C1"
 	default n
@@ -45,12 +61,21 @@ config BCM2711_I2C1
 		Enable the I2C1 interface.
 		See board selection menu to configure the pins used by I2C1.
 
-config BCM2711_I2C2
-	bool "I2C2"
-	default n
+if BCM2711_I2C1
+
+config BCM2711_I2C1_SDA
+	int "I2C1 SDA pin"
+	default 2
 	---help---
-		Enable the I2C2 interface.
-		See board selection menu to configure the pins used by I2C2.
+		Selects the GPIO pin to use for I2C1 SDA.
+
+config BCM2711_I2C1_SCL
+	int "I2C1 SCL pin"
+	default 3
+	---help---
+		Selects the GPIO pin to use for I2C1 SCL.
+
+endif # BCM2711_I2C1
 
 config BCM2711_I2C3
 	bool "I2C3"
@@ -59,12 +84,44 @@ config BCM2711_I2C3
 		Enable the I2C3 interface.
 		See board selection menu to configure the pins used by I2C3.
 
+if BCM2711_I2C3
+
+config BCM2711_I2C3_SDA
+	int "I2C3 SDA pin"
+	default 4
+	---help---
+		Selects the GPIO pin to use for I2C3 SDA.
+
+config BCM2711_I2C3_SCL
+	int "I2C3 SCL pin"
+	default 5
+	---help---
+		Selects the GPIO pin to use for I2C3 SCL.
+
+endif # BCM2711_I2C3
+
 config BCM2711_I2C4
 	bool "I2C4"
 	default n
 	---help---
 		Enable the I2C4 interface.
 		See board selection menu to configure the pins used by I2C4.
+
+if BCM2711_I2C4
+
+config BCM2711_I2C4_SDA
+	int "I2C4 SDA pin"
+	default 8
+	---help---
+		Selects the GPIO pin to use for I2C4 SDA.
+
+config BCM2711_I2C4_SCL
+	int "I2C4 SCL pin"
+	default 9
+	---help---
+		Selects the GPIO pin to use for I2C4 SCL.
+
+endif # BCM2711_I2C4
 
 config BCM2711_I2C5
 	bool "I2C5"
@@ -73,12 +130,44 @@ config BCM2711_I2C5
 		Enable the I2C5 interface.
 		See board selection menu to configure the pins used by I2C5.
 
+if BCM2711_I2C5
+
+config BCM2711_I2C5_SDA
+	int "I2C5 SDA pin"
+	default 12
+	---help---
+		Selects the GPIO pin to use for I2C5 SDA.
+
+config BCM2711_I2C5_SCL
+	int "I2C5 SCL pin"
+	default 13
+	---help---
+		Selects the GPIO pin to use for I2C5 SCL.
+
+endif # BCM2711_I2C5
+
 config BCM2711_I2C6
 	bool "I2C6"
 	default n
 	---help---
 		Enable the I2C6 interface.
 		See board selection menu to configure the pins used by I2C6.
+
+if BCM2711_I2C6
+
+config BCM2711_I2C6_SDA
+	int "I2C6 SDA pin"
+	default 22
+	---help---
+		Selects the GPIO pin to use for I2C6 SDA.
+
+config BCM2711_I2C6_SCL
+	int "I2C6 SCL pin"
+	default 23
+	---help---
+		Selects the GPIO pin to use for I2C6 SCL.
+
+endif # BCM2711_I2C6
 
 config BCM2711_I2C_DRIVER
 	bool "I2C character driver"
