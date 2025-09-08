@@ -103,18 +103,6 @@ static void rpmsg_virtio_tx_notify(FAR struct virtqueue *vq);
  * Private Data
  ****************************************************************************/
 
-static const struct rpmsg_ops_s g_rpmsg_virtio_ops =
-{
-  rpmsg_virtio_wait,
-  rpmsg_virtio_post,
-  NULL,
-  NULL,
-  rpmsg_virtio_dump,
-  NULL,
-  rpmsg_virtio_alloc_buf,
-  rpmsg_virtio_free_buf,
-};
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -712,6 +700,18 @@ static int rpmsg_virtio_notify_wait(FAR struct rpmsg_device *rdev,
 
 static void rpmsg_virtio_start_worker(FAR void *arg)
 {
+  static const struct rpmsg_ops_s g_rpmsg_virtio_ops =
+  {
+    rpmsg_virtio_wait,
+    rpmsg_virtio_post,
+    NULL,
+    NULL,
+    rpmsg_virtio_dump,
+    NULL,
+    rpmsg_virtio_alloc_buf,
+    rpmsg_virtio_free_buf,
+  };
+
   FAR struct rpmsg_s *rpmsg = (FAR struct rpmsg_s *)arg;
   FAR struct rpmsg_virtio_priv_s *priv =
     (FAR struct rpmsg_virtio_priv_s *)rpmsg;
