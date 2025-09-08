@@ -307,17 +307,17 @@ static void sim_can_work(void *arg)
 
       hdr.ch_id    = frame.can_id & CAN_ERR_MASK;
       hdr.ch_dlc   = can_bytes2dlc(frame.len);
-      hdr.ch_rtr   = frame.can_id & CAN_RTR_FLAG;
+      hdr.ch_rtr   = (bool)(frame.can_id & CAN_RTR_FLAG);
 #ifdef CONFIG_CAN_ERRORS
-      hdr.ch_error = frame.can_id & CAN_ERR_FLAG;
+      hdr.ch_error = (bool)(frame.can_id & CAN_ERR_FLAG);
 #endif
 #ifdef CONFIG_CAN_EXTID
-      hdr.ch_extid = frame.can_id & CAN_EFF_FLAG;
+      hdr.ch_extid = (bool)(frame.can_id & CAN_EFF_FLAG);
 #endif
 #ifdef CONFIG_CAN_FD
-      hdr.ch_edl   = frame.flags & CANFD_FDF;
-      hdr.ch_brs   = frame.flags & CANFD_BRS;
-      hdr.ch_esi   = frame.flags & CANFD_ESI;
+      hdr.ch_edl   = (bool)(frame.flags & CANFD_FDF);
+      hdr.ch_brs   = (bool)(frame.flags & CANFD_BRS);
+      hdr.ch_esi   = (bool)(frame.flags & CANFD_ESI);
 #endif
       hdr.ch_tcf   = 0;
 #ifdef CONFIG_CAN_TIMESTAMP
