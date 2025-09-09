@@ -100,6 +100,7 @@ struct nvs_fs
   uint32_t              step_addr;     /* For traverse */
   mutex_t               nvs_lock;
   FAR struct pollfd     *fds;
+  pollevent_t           events;
 };
 
 /* Allocation Table Entry */
@@ -1095,6 +1096,8 @@ static int nvs_startup(FAR struct nvs_fs *fs)
 
   fs->ate_wra = 0;
   fs->data_wra = 0;
+  fs->events = 0;
+  fs->fds = NULL;
 
   /* Get the device geometry. (Casting to uintptr_t first eliminates
    * complaints on some architectures where the sizeof long is different
@@ -1990,6 +1993,43 @@ static int nvs_next(FAR struct nvs_fs *fs,
 }
 
 /****************************************************************************
+ * Name: mtdconfig_notify
+ *
+ * Description:
+ *   Notify the poll if any waiter, or save events for next setup.
+ *
+ * Input Parameters:
+ *   fs       - Pointer to file system.
+ *   eventset - List of events to check for activity
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+static void mtdconfig_notify(FAR struct nvs_fs *fs, pollevent_t eventset)
+{
+  /* Handle events in two possible ways:
+   * 1. Notify waters directly if any exist(`fs->fds` is not NULL)
+   * 2. Save events for the following scenarios:
+   *    a. Events that have changed but weren't waited for
+   *       before being added to the interest list
+   *    b. Events occurring after `epoll_wait()` returns and
+   *       before it's called again
+   */
+
+  if (fs->fds)
+    {
+      poll_notify(&fs->fds, 1, eventset | fs->events);
+      fs->events = 0;
+    }
+  else
+    {
+      fs->events |= eventset;
+    }
+}
+
+/****************************************************************************
  * Name: mtdconfig_open
  ****************************************************************************/
 
@@ -2049,9 +2089,9 @@ static int mtdconfig_ioctl(FAR struct file *filep, int cmd,
         /* Write a nvs item. */
 
         ret = nvs_write(fs, pdata);
-        if (ret >= 0 && fs->fds)
+        if (ret >= 0)
           {
-            poll_notify(&fs->fds, 1, POLLPRI);
+            mtdconfig_notify(fs, POLLPRI);
           }
 
         break;
@@ -2061,9 +2101,9 @@ static int mtdconfig_ioctl(FAR struct file *filep, int cmd,
         /* Delete a nvs item. */
 
         ret = nvs_delete(fs, pdata);
-        if (ret >= 0 && fs->fds)
+        if (ret >= 0)
           {
-            poll_notify(&fs->fds, 1, POLLPRI);
+            mtdconfig_notify(fs, POLLPRI);
           }
 
         break;
@@ -2119,7 +2159,7 @@ static int mtdconfig_poll(FAR struct file *filep, FAR struct pollfd *fds,
   if (setup)
     {
       fs->fds = fds;
-      poll_notify(&fds, 1, POLLIN | POLLOUT);
+      mtdconfig_notify(fs, POLLIN | POLLOUT);
     }
   else
     {
