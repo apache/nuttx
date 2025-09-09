@@ -136,7 +136,7 @@ int clock_basetime(FAR struct timespec *tp)
 
   /* Set the base time as seconds into this julian day. */
 
-  tp->tv_sec  = jdn * SEC_PER_DAY;
+  tp->tv_sec  = jdn * (time_t)SEC_PER_DAY;
   tp->tv_nsec = 0;
   return OK;
 }

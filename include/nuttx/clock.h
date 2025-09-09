@@ -37,6 +37,7 @@
 
 #include <nuttx/compiler.h>
 #include <nuttx/lib/math32.h>
+#include <nuttx/macro.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -106,34 +107,34 @@
 
 /* Timing constants *********************************************************/
 
-#define NSEC_PER_SEC          1000000000UL /* Seconds */
-#define USEC_PER_SEC             1000000UL
-#define MSEC_PER_SEC                1000UL
-#define DSEC_PER_SEC                  10
-#define HSEC_PER_SEC                   2
+#define NSEC_PER_SEC          1000000000L /* Seconds */
+#define USEC_PER_SEC             1000000L
+#define MSEC_PER_SEC                1000L
+#define DSEC_PER_SEC                  10L
+#define HSEC_PER_SEC                   2L
 
-#define NSEC_PER_HSEC          500000000UL /* Half seconds */
-#define USEC_PER_HSEC             500000UL
-#define MSEC_PER_HSEC                500
-#define DSEC_PER_HSEC                  5
+#define NSEC_PER_HSEC          500000000L /* Half seconds */
+#define USEC_PER_HSEC             500000L
+#define MSEC_PER_HSEC                500L
+#define DSEC_PER_HSEC                  5L
 
-#define NSEC_PER_DSEC          100000000UL /* Deciseconds */
-#define USEC_PER_DSEC             100000UL
-#define MSEC_PER_DSEC                100
+#define NSEC_PER_DSEC          100000000L /* Deciseconds */
+#define USEC_PER_DSEC             100000L
+#define MSEC_PER_DSEC                100L
 
-#define NSEC_PER_MSEC            1000000UL /* Milliseconds */
-#define USEC_PER_MSEC               1000UL
+#define NSEC_PER_MSEC            1000000L /* Milliseconds */
+#define USEC_PER_MSEC               1000L
 
-#define NSEC_PER_USEC               1000UL /* Microseconds */
+#define NSEC_PER_USEC               1000L /* Microseconds */
 
-#define SEC_PER_MIN                   60
+#define SEC_PER_MIN                   60L
 #define NSEC_PER_MIN           (NSEC_PER_SEC * SEC_PER_MIN)
 #define USEC_PER_MIN           (USEC_PER_SEC * SEC_PER_MIN)
 #define MSEC_PER_MIN           (MSEC_PER_SEC * SEC_PER_MIN)
 #define DSEC_PER_MIN           (DSEC_PER_SEC * SEC_PER_MIN)
 #define HSEC_PER_MIN           (HSEC_PER_SEC * SEC_PER_MIN)
 
-#define MIN_PER_HOUR                  60
+#define MIN_PER_HOUR                  60L
 #define NSEC_PER_HOUR          (NSEC_PER_MIN * MIN_PER_HOUR)
 #define USEC_PER_HOUR          (USEC_PER_MIN * MIN_PER_HOUR)
 #define MSEC_PER_HOUR          (MSEC_PER_MIN * MIN_PER_HOUR)
@@ -141,7 +142,7 @@
 #define HSEC_PER_HOUR          (HSEC_PER_MIN * MIN_PER_HOUR)
 #define SEC_PER_HOUR           (SEC_PER_MIN  * MIN_PER_HOUR)
 
-#define HOURS_PER_DAY                 24
+#define HOURS_PER_DAY                 24L
 #define SEC_PER_DAY            (HOURS_PER_DAY * SEC_PER_HOUR)
 
 /* If CONFIG_SCHED_TICKLESS is not defined, then the interrupt interval of
@@ -159,9 +160,9 @@
  */
 
 #ifdef CONFIG_USEC_PER_TICK
-#  define USEC_PER_TICK       (CONFIG_USEC_PER_TICK)
+#  define USEC_PER_TICK       CONCATENATE(CONFIG_USEC_PER_TICK, L)
 #else
-#  define USEC_PER_TICK       (10000)
+#  define USEC_PER_TICK       (10000L)
 #endif
 
 /* MSEC_PER_TICK can be very inaccurate if CONFIG_USEC_PER_TICK is not an
@@ -336,15 +337,16 @@ extern "C"
 #define clock_ticks2time(ts, tick) \
   do \
     { \
-      clock_t _tick = (clock_t)(tick); \
-      (ts)->tv_sec = (time_t)div_const(_tick, TICK_PER_SEC); \
-      _tick -= (clock_t)(ts)->tv_sec * TICK_PER_SEC; \
+      clock_t _tick = tick; \
+      (ts)->tv_sec = (time_t)div_const(_tick, (uint32_t)TICK_PER_SEC); \
+      _tick -= (clock_t)((ts)->tv_sec * TICK_PER_SEC); \
       (ts)->tv_nsec = (long)_tick * NSEC_PER_TICK; \
     } \
   while (0)
 
 #define clock_time2ticks(ts) \
-  ((clock_t)(ts)->tv_sec * TICK_PER_SEC + NSEC2TICK((uint32_t)(ts)->tv_nsec))
+  ((clock_t)((ts)->tv_sec * TICK_PER_SEC) + \
+   (clock_t)div_const_roundup((uint64_t)(ts)->tv_nsec, (uint32_t)NSEC_PER_TICK))
 
 #define clock_time2ticks_floor(ts) \
   ((clock_t)(ts)->tv_sec * TICK_PER_SEC + \
