@@ -45,8 +45,11 @@ endforeach()
 
 get_filename_component(BINARY_DIR "${TARGET_FILE}" DIRECTORY)
 
-set(OUTPUT_FILE ${BINARY_DIR}/defconfig)
-
+if(CMAKE_ARGV5)
+  set(OUTPUT_FILE ${CMAKE_ARGV5})
+else()
+  set(OUTPUT_FILE ${BINARY_DIR}/defconfig)
+endif()
 # cmake-format: off
 file(WRITE ${OUTPUT_FILE} "")
 file(APPEND ${OUTPUT_FILE} "\#\n")
