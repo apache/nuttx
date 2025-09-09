@@ -159,7 +159,7 @@ static void dispatch_syscall(void)
 uint32_t *arm_syscall(uint32_t *regs)
 {
   int cpu = this_cpu();
-  struct tcb_s **running_task = &g_running_tasks[cpu];
+  struct tcb_s *running_task = g_running_tasks[cpu];
   struct tcb_s *tcb = this_task();
   uint32_t cmd;
 #ifdef CONFIG_BUILD_PROTECTED
@@ -180,13 +180,13 @@ uint32_t *arm_syscall(uint32_t *regs)
 
   cmd = regs[REG_R0];
 
-  /* if cmd == SYS_restore_context (*running_task)->xcp.regs is valid
+  /* if cmd == SYS_restore_context running_task->xcp.regs is valid
    * should not be overwritten
    */
 
   if (cmd != SYS_restore_context)
     {
-      (*running_task)->xcp.regs = regs;
+      running_task->xcp.regs = regs;
     }
 
   /* The SVCall software interrupt is called with R0 = system call command
@@ -270,8 +270,9 @@ uint32_t *arm_syscall(uint32_t *regs)
         nxsched_resume_scheduler(tcb);
 
       case SYS_restore_context:
-        nxsched_suspend_scheduler(*running_task);
-        *running_task = tcb;
+        nxsched_suspend_scheduler(running_task);
+        running_task = tcb;
+        g_running_tasks[cpu] = running_task;
 
         /* Restore the cpu lock */
 
@@ -553,11 +554,11 @@ uint32_t *arm_syscall(uint32_t *regs)
 
   up_set_interrupt_context(false);
 
-  /* (*running_task)->xcp.regs is about to become invalid
+  /* running_task->xcp.regs is about to become invalid
    * and will be marked as NULL to avoid misusage.
    */
 
-  (*running_task)->xcp.regs = NULL;
+  running_task->xcp.regs = NULL;
 
   /* Return the last value of curent_regs.  This supports context switches
    * on return from the exception.  That capability is only used with the
