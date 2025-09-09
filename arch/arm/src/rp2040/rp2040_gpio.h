@@ -34,6 +34,7 @@
 #include <debug.h>
 
 #include "hardware/rp2040_sio.h"
+#include "hardware/rp2040_address_mapped.h"
 #include "hardware/rp2040_io_bank0.h"
 #include "hardware/rp2040_pads_bank0.h"
 
@@ -42,10 +43,6 @@
  ****************************************************************************/
 
 #define RP2040_GPIO_NUM    30       /* Number of GPIO pins */
-
-#define REG_ALIAS_XOR_BITS (0x1u << 12u)
-#define hw_alias_check_addr(addr) ((uintptr_t)(addr))
-#define hw_xor_alias_untyped(addr) ((void *)(REG_ALIAS_XOR_BITS | hw_alias_check_addr(addr)))
 
 /* GPIO function types ******************************************************/
 
@@ -198,17 +195,6 @@ static inline void rp2040_gpio_set_drive_strength(uint32_t gpio,
   modbits_reg32(drive_strength,
                 RP2040_PADS_BANK0_GPIO_DRIVE_MASK,
                 RP2040_PADS_BANK0_GPIO(gpio));
-}
-
-always_inline_function static void hw_xor_bits(uint32_t *addr, uint32_t mask)
-{
-    *(uint32_t *) hw_xor_alias_untyped((volatile void *)addr) = mask;
-}
-
-always_inline_function static void hw_write_masked(uint32_t *addr,
-  uint32_t values, uint32_t write_mask)
-{
-    hw_xor_bits(addr, (*addr ^ values) & write_mask);
 }
 
 /****************************************************************************
