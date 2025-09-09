@@ -139,6 +139,14 @@ Notifier Chain Interfaces
   :param delay: Ticks to wait from the start time until the event is posted,
                 If ticks is zero, then this function is equivalent to nxevent_trywait().
 
+.. c:function:: nxevent_mask_t nxevent_getmask(FAR nxevent_t *event)
+
+  This function returns the event mask value of the current event object.
+
+  :param event: Location to return the event group reference.
+
+  :return: The event mask value of the current event object.
+
 .. c:function:: int nxevent_open(FAR nxevent_t **event, FAR const char *name, int oflags, ...)
 
   This function establishes a connection between named event groups and a

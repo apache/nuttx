@@ -31,7 +31,8 @@ if(CONFIG_SCHED_EVENTS)
     event_reset.c
     event_destroy.c
     event_wait.c
-    event_clear.c)
+    event_clear.c
+    event_getmask.c)
 endif()
 
 target_sources(sched PRIVATE ${CSRCS})
