@@ -272,7 +272,9 @@ void icmp_input(FAR struct net_driver_s *dev)
 {
   FAR struct ipv4_hdr_s *ipv4 = IPv4BUF;
   FAR struct icmp_hdr_s *icmp;
-
+#ifdef CONFIG_NET_ICMP_CHECKSUMS
+  uint16_t csum;
+#endif
   /* Get the IP header length (accounting for possible options). */
 
   uint16_t iphdrlen = (ipv4->vhl & IPv4_HLMASK) << 2;
@@ -287,6 +289,19 @@ void icmp_input(FAR struct net_driver_s *dev)
   /* The ICMP header immediately follows the IP header */
 
   icmp = IPBUF(iphdrlen);
+
+#ifdef CONFIG_NET_ICMP_CHECKSUMS
+  csum = icmp_chksum(dev,
+                     ((ipv4->len[0] << 8) | ipv4->len[1]) - iphdrlen);
+  if (csum != 0xffff)
+    {
+      ninfo("ICMP checksum error\n");
+#ifdef CONFIG_NET_STATISTICS
+      g_netstats.icmp.csumerr++;
+#endif
+      goto drop;
+    }
+#endif
 
   /* ICMP echo (i.e., ping) processing. This is simple, we only change the
    * ICMP type from ECHO to ECHO_REPLY and adjust the ICMP checksum before
@@ -408,7 +423,7 @@ typeerr:
   g_netstats.icmp.typeerr++;
 #endif
 
-#ifdef CONFIG_NET_ICMP_SOCKET
+#if defined(CONFIG_NET_ICMP_SOCKET) || defined(CONFIG_NET_ICMP_CHECKSUMS)
 drop:
 #ifdef CONFIG_NET_STATISTICS
   g_netstats.icmp.drop++;
