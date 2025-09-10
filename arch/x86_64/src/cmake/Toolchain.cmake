@@ -62,7 +62,7 @@ if(CONFIG_FRAME_POINTER)
 endif()
 
 if(CONFIG_STACK_CANARIES)
-  add_compile_options(-fstack-protector-all)
+  add_compile_options(${CONFIG_STACK_CANARIES_LEVEL})
 else()
   add_compile_options(-fno-stack-protector)
 endif()
