@@ -114,8 +114,7 @@ static int nrf53_rptun_register_callback(struct rptun_dev_s *dev,
                                          void *arg);
 
 #ifdef CONFIG_NRF53_APPCORE
-static void nrf53_rptun_reset(struct rptun_dev_s *dev, int value);
-static void nrf53_rptun_panic(struct rptun_dev_s *dev);
+static void nrf53_rptun_reset(struct rptun_dev_s *dev, unsigned long value);
 #endif
 
 /****************************************************************************
@@ -134,7 +133,6 @@ static const struct rptun_ops_s g_nrf53_rptun_ops =
   .register_callback = nrf53_rptun_register_callback,
 #ifdef CONFIG_NRF53_APPCORE
   .reset             = nrf53_rptun_reset,
-  .panic             = nrf53_rptun_panic
 #endif
 };
 
@@ -328,9 +326,15 @@ static int nrf53_rptun_register_callback(struct rptun_dev_s *dev,
  * Name: nrf53_rptun_reset
  ****************************************************************************/
 
-static void nrf53_rptun_reset(struct rptun_dev_s *dev, int value)
+static void nrf53_rptun_reset(struct rptun_dev_s *dev, unsigned long value)
 {
-  if (value == 0)
+  if (value == (unsigned long)BOARDIOC_SOFTRESETCAUSE_PANIC)
+    {
+      /* Panic reset */
+
+      nrf53_ipc_signal(RPTUN_IPC_CHAN_SLAVE_PANIC);
+    }
+  else if (value == 0)
     {
       /* Hard reset with Forceoff */
 
@@ -343,15 +347,6 @@ static void nrf53_rptun_reset(struct rptun_dev_s *dev, int value)
 
       nrf53_ipc_signal(RPTUN_IPC_CHAN_SLAVE_RESET);
     }
-}
-
-/****************************************************************************
- * Name: nrf53_rptun_panic
- ****************************************************************************/
-
-static void nrf53_rptun_panic(struct rptun_dev_s *dev)
-{
-  nrf53_ipc_signal(RPTUN_IPC_CHAN_SLAVE_PANIC);
 }
 #endif
 

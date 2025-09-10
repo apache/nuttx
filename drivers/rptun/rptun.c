@@ -72,7 +72,7 @@ struct rptun_priv_s
   struct remoteproc           rproc;
   struct metal_list           node;
   struct notifier_block       nbpanic;
-  bool                        rpanic;
+  bool                        rreset;
   bool                        stop;
   pid_t                       pid;
 };
@@ -908,20 +908,26 @@ static uint32_t rptun_recv_command(FAR struct rptun_priv_s *priv, bool ack)
 static void rptun_check_command(FAR struct rptun_priv_s *priv)
 {
   uint32_t cmd = rptun_recv_command(priv, true);
+  unsigned long val = RPTUN_GET_CMD_VAL(cmd);
 
   switch (RPTUN_GET_CMD(cmd))
     {
       case RPTUN_CMD_RESET:
+        priv->rreset = true;
+        if (val == (unsigned long)BOARDIOC_SOFTRESETCAUSE_PANIC)
+          {
+            metal_log(METAL_LOG_EMERGENCY,
+                      "FATAL: Panic by remote core: %s\n",
+                      RPTUN_GET_CPUNAME(priv->dev));
+            PANIC();
+          }
 #ifdef CONFIG_BOARDCTL_RESET
-        boardctl(BOARDIOC_RESET, RPTUN_GET_CMD_VAL(cmd));
+        else
+          {
+            boardctl(BOARDIOC_RESET, val);
+          }
 #endif
         break;
-
-      case RPTUN_CMD_PANIC:
-        priv->rpanic = true;
-        PANIC();
-        break;
-
       default:
         break;
     }
@@ -1098,35 +1104,25 @@ static int rptun_dev_stop(FAR struct remoteproc *rproc)
   return ret;
 }
 
-static void rptun_dev_reset(FAR struct rptun_priv_s *priv, int val)
+static void rptun_dev_reset(FAR struct rptun_priv_s *priv, unsigned long val)
 {
-  if (priv->dev->ops->reset)
+  if (!priv->rreset)
     {
-      priv->dev->ops->reset(priv->dev, val);
-    }
-  else
-    {
-      rptun_send_command(priv, RPTUN_CMD(RPTUN_CMD_RESET, val), true);
-    }
-}
-
-static void rptun_dev_panic(FAR struct rptun_priv_s *priv)
-{
-  if (!priv->rpanic)
-    {
-      metal_log(METAL_LOG_EMERGENCY, "Panic remote cpu %s:\n",
-                RPTUN_GET_CPUNAME(priv->dev));
-
-      if (priv->dev->ops->panic)
+      if (priv->dev->ops->reset)
         {
-          priv->dev->ops->panic(priv->dev);
+          priv->dev->ops->reset(priv->dev, val);
         }
       else
         {
-          rptun_send_command(priv, RPTUN_CMD(RPTUN_CMD_PANIC, 0), true);
+          rptun_send_command(priv, RPTUN_CMD(RPTUN_CMD_RESET, val), true);
         }
 
-      priv->rpanic = true;
+      priv->rreset = true;
+    }
+  else
+    {
+      metal_log(METAL_LOG_EMERGENCY, "Remote cpu %s already Reset val=%lu\n",
+                RPTUN_GET_CPUNAME(priv->dev), val);
     }
 }
 
@@ -1156,9 +1152,6 @@ static int rptun_do_ioctl(FAR struct rptun_priv_s *priv, int cmd,
         break;
       case RPTUNIOC_RESET:
         rptun_dev_reset(priv, arg);
-        break;
-      case RPTUNIOC_PANIC:
-        rptun_dev_panic(priv);
         break;
       default:
         ret = -ENOTTY;
@@ -1350,7 +1343,7 @@ static int rptun_panic_notifier(FAR struct notifier_block *block,
     {
       /* PANIC all the remote core */
 
-      rptun_dev_panic(priv);
+      rptun_dev_reset(priv, (unsigned long)BOARDIOC_SOFTRESETCAUSE_PANIC);
     }
 
   return 0;
@@ -1418,7 +1411,7 @@ int rptun_poweroff(FAR const char *cpuname)
   return rptun_ioctl_foreach(cpuname, RPTUNIOC_STOP, 0);
 }
 
-int rptun_reset(FAR const char *cpuname, int value)
+int rptun_reset(FAR const char *cpuname, unsigned long value)
 {
   return rptun_ioctl_foreach(cpuname, RPTUNIOC_RESET, value);
 }

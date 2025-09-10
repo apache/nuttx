@@ -63,12 +63,13 @@ rptun_poweroff
 rptun_reset
 -----------
 
-.. c:function:: int rptun_reset(FAR const char *cpuname, int value)
+.. c:function:: int rptun_reset(FAR const char *cpuname, unsigned long value)
 
    Reset the remote CPU.
 
    :param cpuname: Name of the remote CPU to reset
-   :param value: Reset value (implementation-specific)
+   :param value: Reset reason, a ``BOARDIOC_SOFTRESETCAUSE_*`` value;
+      ``BOARDIOC_SOFTRESETCAUSE_PANIC`` makes the remote CPU panic
    :return: OK on success; a negated errno value on failure
 
    Example:
@@ -219,8 +220,5 @@ The following macros are provided for accessing RPTUN operations:
    /* Unregister callback */
    RPTUN_UNREGISTER_CALLBACK(dev)
 
-   /* Reset remote core */
+   /* Reset remote core, value BOARDIOC_SOFTRESETCAUSE_PANIC makes it panic */
    RPTUN_RESET(dev, value)
-
-   /* Trigger panic on remote core */
-   RPTUN_PANIC(dev)

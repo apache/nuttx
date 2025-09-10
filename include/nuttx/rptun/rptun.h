@@ -31,6 +31,8 @@
 
 #ifdef CONFIG_RPTUN
 
+#include <sys/boardctl.h>
+
 #include <metal/cache.h>
 #include <nuttx/rpmsg/rpmsg.h>
 #include <openamp/remoteproc.h>
@@ -43,15 +45,13 @@
 #define RPTUNIOC_START        _RPTUNIOC(100)
 #define RPTUNIOC_STOP         _RPTUNIOC(101)
 #define RPTUNIOC_RESET        _RPTUNIOC(102)
-#define RPTUNIOC_PANIC        _RPTUNIOC(103)
 
 #define RPTUN_NOTIFY_ALL      UINT32_MAX
 
 #define RPTUN_CMD_DONE        0x0u
 #define RPTUN_CMD_READY       0x1u
-#define RPTUN_CMD_PANIC       0x2u
-#define RPTUN_CMD_RESET       0x3u
-#define RPTUN_CMD_STOP        0x4u
+#define RPTUN_CMD_RESET       0x2u
+#define RPTUN_CMD_STOP        0x3u
 #define RPTUN_CMD_ACK         0xffffu
 #define RPTUN_CMD_MASK        0xffffu
 #define RPTUN_CMD_SHIFT       16u
@@ -288,7 +288,8 @@
  *
  * Input Parameters:
  *   dev      - Device-specific state data
- *   value    - reset value
+ *   value    - reset value, Panic remote core if value is
+ *              BOARDIOC_SOFTRESETCAUSE_PANIC
  *
  * Returned Value:
  *   None
@@ -297,23 +298,6 @@
 
 #define RPTUN_RESET(d,v) ((d)->ops->reset ? \
                           (d)->ops->reset(d,v) : UNUSED(d))
-
-/****************************************************************************
- * Name: RPTUN_PANIC
- *
- * Description:
- *   Panic remote cpu
- *
- * Input Parameters:
- *   dev      - Device-specific state data
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#define RPTUN_PANIC(d) ((d)->ops->panic ? \
-                        (d)->ops->panic(d) : UNUSED(d))
 
 /****************************************************************************
  * Public Types
@@ -367,8 +351,7 @@ struct rptun_ops_s
   CODE int (*register_callback)(FAR struct rptun_dev_s *dev,
                                 rptun_callback_t callback, FAR void *arg);
 
-  CODE void (*reset)(FAR struct rptun_dev_s *dev, int value);
-  CODE void (*panic)(FAR struct rptun_dev_s *dev);
+  CODE void (*reset)(FAR struct rptun_dev_s *dev, unsigned long value);
 };
 
 struct rptun_dev_s
@@ -390,8 +373,7 @@ extern "C"
 int rptun_initialize(FAR struct rptun_dev_s *dev);
 int rptun_boot(FAR const char *cpuname);
 int rptun_poweroff(FAR const char *cpuname);
-int rptun_reset(FAR const char *cpuname, int value);
-int rptun_panic(FAR const char *cpuname);
+int rptun_reset(FAR const char *cpuname, unsigned long value);
 
 #ifdef __cplusplus
 }
