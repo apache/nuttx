@@ -47,8 +47,6 @@ struct xoneshot_lowerhalf_s
 {
   struct oneshot_lowerhalf_s lh;       /* Lower half operations */
   uint32_t                   freq;     /* Timer working clock frequency(Hz) */
-  oneshot_callback_t         callback; /* Current user interrupt callback */
-  void                      *arg;      /* Argument passed to upper half callback */
   uint32_t                   irq;
 };
 
@@ -105,9 +103,6 @@ static int xtensa_oneshot_start(struct oneshot_lowerhalf_s *lower_,
 
   flags = enter_critical_section();
 
-  lower->callback = callback;
-  lower->arg      = arg;
-
   count = sec_to_count((uint64_t)ts->tv_sec, lower->freq) +
           nsec_to_count((uint64_t)ts->tv_nsec, lower->freq);
 
@@ -129,9 +124,6 @@ static int xtensa_oneshot_cancel(struct oneshot_lowerhalf_s *lower_,
   irqstate_t flags;
 
   flags = enter_critical_section();
-
-  lower->callback  = NULL;
-  lower->arg       = NULL;
 
   up_disable_irq(lower->irq);
 
@@ -157,22 +149,10 @@ static int xtensa_oneshot_maxdelay(struct oneshot_lowerhalf_s *lower_,
 static int xtensa_oneshot_interrupt(int irq, void *context, void *arg)
 {
   struct xoneshot_lowerhalf_s *lower = arg;
-  oneshot_callback_t callback;
-  void *cbarg;
 
   DEBUGASSERT(lower != NULL);
 
-  if (lower->callback != NULL)
-    {
-      callback        = lower->callback;
-      cbarg           = lower->arg;
-      lower->callback = NULL;
-      lower->arg      = NULL;
-
-      /* Then perform the callback */
-
-      callback(&lower->lh, cbarg);
-    }
+  oneshot_process_callback(&lower->lh);
 
   return 0;
 }

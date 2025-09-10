@@ -311,6 +311,10 @@ int oneshot_register(FAR const char *devname,
   /* Initialize the new oneshot timer driver instance */
 
   priv->od_lower = lower;
+
+  lower->callback = oneshot_callback;
+  lower->arg      = lower;
+
   nxmutex_init(&priv->od_lock);
 
   /* And register the oneshot timer driver */

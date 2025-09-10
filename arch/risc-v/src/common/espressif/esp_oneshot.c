@@ -80,8 +80,6 @@ struct esp_oneshot_lowerhalf_s
 {
   struct oneshot_lowerhalf_s lh;          /* Lower half instance */
   timer_hal_context_t        hal;         /* HAL context */
-  oneshot_callback_t         callback;    /* Current user interrupt callback */
-  void                      *arg;         /* Argument passed to upper half callback */
   uint16_t                   resolution;  /* Timer resolution in microseconds */
   bool                       running;     /* True: the timer is running */
 };
@@ -129,8 +127,6 @@ static struct esp_oneshot_lowerhalf_s g_oneshot_lowerhalf =
     {
       .ops = &g_oneshot_ops,
     },
-  .callback = NULL,
-  .arg = NULL
 };
 
 /****************************************************************************
@@ -222,11 +218,6 @@ static int esp_oneshot_start(struct oneshot_lowerhalf_s *lower,
 
       esp_oneshot_cancel(lower, NULL);
     }
-
-  /* Save the new callback and its argument */
-
-  priv->callback = callback;
-  priv->arg      = arg;
 
   /* Retrieve the duration from timespec in microsecond */
 
@@ -368,9 +359,7 @@ static int esp_oneshot_cancel(struct oneshot_lowerhalf_s *lower,
       ts->tv_nsec  = remaining_us * NSEC_PER_USEC;
     }
 
-  priv->running  = false;
-  priv->callback = NULL;
-  priv->arg      = NULL;
+  priv->running = false;
 
   return OK;
 }
@@ -441,8 +430,6 @@ IRAM_ATTR static int esp_oneshot_isr(int irq, void *context, void *arg)
 {
   struct esp_oneshot_lowerhalf_s *priv =
     (struct esp_oneshot_lowerhalf_s *)arg;
-  oneshot_callback_t callback;
-  void *callback_arg;
 
   timer_hal_context_t *hal = &(priv->hal);
   uint32_t intr_status = timer_ll_get_intr_status(hal->dev);
@@ -460,16 +447,9 @@ IRAM_ATTR static int esp_oneshot_isr(int irq, void *context, void *arg)
 
   priv->running = false;
 
-  /* Forward the event, clearing out any vestiges */
-
-  callback       = priv->callback;
-  callback_arg   = priv->arg;
-  priv->callback = NULL;
-  priv->arg      = NULL;
-
   /* Call the callback */
 
-  callback(&priv->lh, callback_arg);
+  oneshot_process_callback(&priv->lh);
 
   return OK;
 }
@@ -510,8 +490,6 @@ struct oneshot_lowerhalf_s *oneshot_initialize(int chan, uint16_t resolution)
 
   /* Initialize the elements of lower half state structure */
 
-  lower->callback   = NULL;
-  lower->arg        = NULL;
   lower->resolution = resolution;
   lower->running    = false;
 

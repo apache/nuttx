@@ -72,8 +72,6 @@ struct bl602_oneshot_lowerhalf_s
 
   /* Private lower half data follows */
 
-  oneshot_callback_t callback; /* Internal handler that receives callback */
-  void *             arg;      /* Argument that is passed to the handler */
   uint8_t            tim;      /* timer tim 0,1 */
   uint8_t            irq;      /* IRQ associated with this timer */
   bool               started;  /* True: Timer has been started */
@@ -129,9 +127,6 @@ static int bl602_oneshot_handler(int irq, void *context, void *arg)
   struct bl602_oneshot_lowerhalf_s *priv =
     (struct bl602_oneshot_lowerhalf_s *)arg;
 
-  oneshot_callback_t callback;
-  void *         cbarg;
-
   /* Clear Interrupt Bits */
 
   uint32_t int_id;
@@ -156,13 +151,7 @@ static int bl602_oneshot_handler(int irq, void *context, void *arg)
   if ((int_id & TIMER_TMSR2_TMSR_0) != 0)
     {
       putreg32(ticr_val | TIMER_TICR2_TCLR_0, ticr_addr);
-      callback = priv->callback;
-      cbarg    = priv->arg;
-
-      if (callback)
-        {
-          callback(&priv->lh, cbarg);
-        }
+      oneshot_process_callback(&priv->lh);
     }
 
   /* Comparator 1 match interrupt */
@@ -261,9 +250,7 @@ static int bl602_start(struct oneshot_lowerhalf_s *lower,
 
   /* Save the callback information and start the timer */
 
-  flags          = enter_critical_section();
-  priv->callback = callback;
-  priv->arg      = arg;
+  flags = enter_critical_section();
 
   /* Express the delay in microseconds */
 
@@ -328,8 +315,6 @@ static int bl602_cancel(struct oneshot_lowerhalf_s *lower,
       priv->started = false;
       up_disable_irq(priv->irq);
       bl602_timer_intmask(priv->tim, TIMER_INT_COMP_0, 1);
-      priv->callback = NULL;
-      priv->arg      = NULL;
 
       leave_critical_section(flags);
       return OK;
