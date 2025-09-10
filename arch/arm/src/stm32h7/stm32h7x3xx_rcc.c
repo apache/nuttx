@@ -595,6 +595,30 @@ static inline void rcc_enableapb3(void)
   regval |= RCC_APB3ENR_LTDCEN;
 #endif
 
+#ifdef CONFIG_STM32H7_WWDG
+
+  /* RM0433 Rev 8
+   * Reference manual - STM32H742, STM32H743/753 and STM32H750 Value line
+   * advanced Arm-based 32-bit MCUs
+   * https://www.st.com/resource/en/reference_manual/rm0433-stm32h742-
+   * stm32h743753-and-stm32h750-value-line-advanced-armbased-32bit-mcus-
+   * stmicroelectronics.pdf
+   * (Access date: 10-09-2025)
+   * Reset and Clock Control (RCC) -> RCC clock block functional
+   * description --> Kernel clock selection -> Watchdog clocks (page 365)
+   * "before enabling the WWDG1, the application must set the WW1RSC
+   * bit to 1.
+   * If the WW1RSC remains 0, when the WWDG1 is enabled, the behavior is
+   * not guaranteed"
+   */
+
+  uint32_t rcc_gcr = getreg32(STM32_RCC_GCR);
+  rcc_gcr |= RCC_GCR_WW1RSC;
+  putreg32(rcc_gcr, STM32_RCC_GCR);
+  regval |= RCC_APB3ENR_WWDG1EN;
+
+#endif
+
   putreg32(regval, STM32_RCC_APB3ENR);   /* Enable peripherals */
 }
 
