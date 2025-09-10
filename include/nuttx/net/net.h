@@ -38,6 +38,7 @@
 
 #include <nuttx/queue.h>
 #include <nuttx/mutex.h>
+#include <nuttx/mm/map.h>
 #ifdef CONFIG_MM_IOB
 #  include <nuttx/mm/iob.h>
 #endif
@@ -197,6 +198,8 @@ struct sock_intf_s
                     FAR struct file *infile, FAR off_t *offset,
                     size_t count);
 #endif
+  CODE int        (*si_mmap)(FAR struct socket *psock,
+                    FAR struct mm_map_entry_s *map);
 };
 
 /* Each socket refers to a connection structure of type FAR void *.  Each

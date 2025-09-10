@@ -31,6 +31,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/uio.h>
 #include <nuttx/mm/mm.h>
+#include <nuttx/mm/map.h>
 
 #include <sys/socket.h>
 #include <assert.h>
@@ -54,6 +55,8 @@ static ssize_t sock_file_write(FAR struct file *filep,
                                FAR const char *buffer, size_t buflen);
 static int sock_file_ioctl(FAR struct file *filep, int cmd,
                            unsigned long arg);
+static int sock_file_mmap(FAR struct file *filep,
+                          FAR struct mm_map_entry_s *map);
 static int sock_file_poll(FAR struct file *filep, struct pollfd_s *fds,
                           bool setup);
 static int sock_file_truncate(FAR struct file *filep, off_t length);
@@ -74,7 +77,7 @@ static const struct file_operations g_sock_fileops =
   sock_file_write,    /* write */
   NULL,               /* seek */
   sock_file_ioctl,    /* ioctl */
-  NULL,               /* mmap */
+  sock_file_mmap,     /* mmap */
   sock_file_truncate, /* truncate */
   sock_file_poll,     /* poll */
   sock_file_readv,    /* readv */
@@ -148,6 +151,24 @@ static int sock_file_ioctl(FAR struct file *filep, int cmd,
                            unsigned long arg)
 {
   return psock_ioctl(filep->f_priv, cmd, arg);
+}
+
+static int sock_file_mmap(FAR struct file *filep,
+                          FAR struct mm_map_entry_s *map)
+{
+  struct socket *psock = filep->f_priv;
+
+  DEBUGASSERT(psock != NULL && map != NULL);
+
+  /* Let the address family's mmap() method handle the operation */
+
+  DEBUGASSERT(psock->s_sockif != NULL);
+  if (psock->s_sockif->si_mmap == NULL)
+    {
+      return -EOPNOTSUPP;
+    }
+
+  return psock->s_sockif->si_mmap(psock, map);
 }
 
 static int sock_file_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
