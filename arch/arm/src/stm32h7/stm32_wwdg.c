@@ -49,7 +49,7 @@
 
 /* The minimum frequency of the WWDG clock is:
  *
- *  Fmin = PCLK1 / 4096 / 8
+ *  Fmin = PCLK1 / 4096 / 128
  *
  * So the maximum delay (in milliseconds) is then:
  *
@@ -57,11 +57,11 @@
  *
  * For example, if PCLK1 = 42MHz, then the maximum delay is:
  *
- *   Fmin = 1281.74
- *   1000 * 64 / Fmin = 49.93 msec
+ *   Fmin = 42,000,000 / 4096 / 128 = ~80.11 Hz
+ *   1000 * 64 / Fmin = ~798.92 msec
  */
 
-#define WWDG_FMIN       (STM32_PCLK1_FREQUENCY / 4096 / 8)
+#define WWDG_FMIN       (STM32_PCLK1_FREQUENCY / 4096 / 128)
 #define WWDG_MAXTIMEOUT (1000 * (WWDG_CR_T_MAX+1) / WWDG_FMIN)
 
 /* Configuration ************************************************************/
@@ -334,6 +334,10 @@ static int stm32_start(struct watchdog_lowerhalf_s *lower)
   wdinfo("Entry\n");
   DEBUGASSERT(priv);
 
+  /* Clear the pending interrupt bit */
+
+  modifyreg32(STM32_WWDG_SR, WWDG_SR_EWIF, 0);
+
   /* The watchdog is always disabled after a reset. It is enabled by setting
    * the WDGA bit in the WWDG_CR register, then it cannot be disabled again
    * except by a reset.
@@ -454,13 +458,13 @@ static int stm32_getstatus(struct watchdog_lowerhalf_s *lower,
   /* Get the time remaining until the watchdog expires (in milliseconds) */
 
   reload = (stm32_getreg(STM32_WWDG_CR) >> WWDG_CR_T_SHIFT) & 0x7f;
-  elapsed = priv->reload - reload;
+  elapsed = (WWDG_CR_T_RESET | priv->reload) - reload;
   status->timeleft = (priv->timeout * elapsed) / (priv->reload + 1);
 
   wdinfo("Status     :\n");
   wdinfo("  flags    : %08x\n", status->flags);
   wdinfo("  timeout  : %d\n", status->timeout);
-  wdinfo("  timeleft : %d\n", status->flags);
+  wdinfo("  timeleft : %d\n", status->timeleft);
   return OK;
 }
 
@@ -548,7 +552,7 @@ static int stm32_settimeout(struct watchdog_lowerhalf_s *lower,
       wdinfo("wdgtb=%d fwwdg=%d reload=%d timeout=%d\n",
              wdgtb, fwwdg, reload,  1000 * (reload + 1) / fwwdg);
 #endif
-      if (reload <= WWDG_CR_T_MAX || wdgtb == 3)
+      if (reload <= WWDG_CR_T_MAX || wdgtb == 7)
         {
           /* Note that we explicitly break out of the loop rather than using
            * the 'for' loop termination logic because we do not want the
