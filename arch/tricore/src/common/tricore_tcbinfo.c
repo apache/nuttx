@@ -70,7 +70,7 @@ static const uint16_t g_reg_offs[] =
   TCB_REG_OFF(16 + REG_A15),
   UINT16_MAX,
   UINT16_MAX,
-  TCB_REG_OFF(REG_LPCXI),
+  TCB_REG_OFF(16 + REG_UPCXI),
   TCB_REG_OFF(16 + REG_PSW),
   TCB_REG_OFF(REG_LA11),
   UINT16_MAX,
