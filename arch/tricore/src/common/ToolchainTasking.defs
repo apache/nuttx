@@ -101,6 +101,7 @@ ARCHOPTIMIZATION += --branch-target-align
 #   3                               alias for --fp-model=cflnrSTz (fast-sp)
 
 ARCHOPTIMIZATION += --fp-model=2
+LDFLAGS          += --no-default-libraries
 LDFLAGS          += --fp-model=2
 LDFLAGS          += -lfp_fpu
 
