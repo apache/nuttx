@@ -108,6 +108,7 @@ add_compile_options(--branch-target-align)
 # cmake-format: on
 
 add_compile_options(--fp-model=2)
+add_link_options(--no-default-libraries)
 add_link_options(--fp-model=2)
 add_link_options(-lfp_fpu)
 
