@@ -120,8 +120,7 @@ static int stm32_rptun_register_callback(struct rptun_dev_s *dev,
                                          void *arg);
 
 #ifdef CONFIG_ARCH_CHIP_STM32H7_CORTEXM7
-static void stm32_rptun_reset(struct rptun_dev_s *dev, int value);
-static void stm32_rptun_panic(struct rptun_dev_s *dev);
+static void stm32_rptun_reset(struct rptun_dev_s *dev, unsigned long value);
 #endif
 
 /****************************************************************************
@@ -140,7 +139,6 @@ static const struct rptun_ops_s g_stm32_rptun_ops =
   .register_callback = stm32_rptun_register_callback,
 #ifdef CONFIG_ARCH_CHIP_STM32H7_CORTEXM7
   .reset             = stm32_rptun_reset,
-  .panic             = stm32_rptun_panic
 #endif
 };
 
@@ -333,23 +331,20 @@ static int stm32_rptun_register_callback(struct rptun_dev_s *dev,
  * Name: stm32_rptun_reset
  ****************************************************************************/
 
-static void stm32_rptun_reset(struct rptun_dev_s *dev, int value)
+static void stm32_rptun_reset(struct rptun_dev_s *dev, unsigned long value)
 {
-  if (value == 0)
+  if ((unsigned long)BOARDIOC_SOFTRESETCAUSE_PANIC == value)
+    {
+      /* Panic reset */
+
+      stm32_hsem_signal(RPTUN_HSEM_CHAN_SLAVE_PANIC);
+    }
+  else if (value == 0)
     {
       /* Soft reset */
 
       stm32_hsem_signal(RPTUN_HSEM_CHAN_SLAVE_RESET);
     }
-}
-
-/****************************************************************************
- * Name: stm32_rptun_panic
- ****************************************************************************/
-
-static void stm32_rptun_panic(struct rptun_dev_s *dev)
-{
-  stm32_hsem_signal(RPTUN_HSEM_CHAN_SLAVE_PANIC);
 }
 #endif
 
