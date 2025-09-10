@@ -89,7 +89,7 @@ uint64_t *arm64_doirq(int irq, uint64_t * regs)
 
   if (regs != tcb->xcp.regs)
     {
-      struct tcb_s **running_task = &g_running_tasks[this_cpu()];
+      struct tcb_s **running_task = &g_running_task;
 
       /* need to do a context switch */
 

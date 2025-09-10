@@ -122,7 +122,7 @@ enum task_deliver_e g_delivertasks[CONFIG_SMP_NCPUS];
  * It is valid only when up_interrupt_context() returns true.
  */
 
-FAR struct tcb_s *g_running_tasks[CONFIG_SMP_NCPUS];
+DEFINE_PER_CPU(FAR struct tcb_s *, g_running_tasks);
 
 /* This is the list of all tasks that are ready-to-run, but cannot be placed
  * in the g_readytorun list because:  (1) They are higher priority than the

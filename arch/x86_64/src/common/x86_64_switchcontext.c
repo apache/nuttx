@@ -60,7 +60,6 @@
 
 void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
 {
-  int cpu;
 
 #ifdef CONFIG_ARCH_KERNEL_STACK
   /* Update kernel stack top pointer */
@@ -87,7 +86,6 @@ void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
     {
       struct tcb_s **running_task;
 
-      cpu = this_cpu();
 
       x86_64_restore_auxstate(tcb);
 
@@ -104,8 +102,8 @@ void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
 
       /* Update scheduler parameters */
 
-      running_task = &g_running_tasks[cpu];
-      tcb = current_task(cpu);
+      running_task = &g_running_task;
+      tcb = current_task(this_cpu());
       nxsched_switch_context(*running_task, tcb);
 
       /* Record the new "running" task.  g_running_tasks[] is only used by
@@ -120,7 +118,7 @@ void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
        * the stack (a call would push the return address onto it).
        */
 
-      restore_critical_section(tcb, cpu);
+      restore_critical_section(tcb, this_cpu());
 
       __asm__ volatile ("jmp x86_64_fullcontextrestore"
                         :: "D" (tcb->xcp.regs) : "memory");

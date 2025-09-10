@@ -807,7 +807,7 @@ static void dump_fatal_info(FAR struct tcb_s *rtcb,
 
       if (per_cpu_var_smp(g_cpu_paused, cpu))
         {
-          dump_running_task(g_running_tasks[cpu],
+          dump_running_task(per_cpu_var_smp(g_running_tasks, cpu),
                             per_cpu_var_smp(g_last_regs, cpu));
         }
     }

@@ -83,7 +83,7 @@
  */
 
 #define running_task() \
-  (up_interrupt_context() ? g_running_tasks[this_cpu()] : this_task())
+  (up_interrupt_context() ? g_running_task : this_task())
 
 /* List attribute flags */
 
