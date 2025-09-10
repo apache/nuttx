@@ -545,8 +545,8 @@ int rpmsg_register_callback(FAR void *priv,
   FAR struct rpmsg_bind_s *bind;
   FAR struct rpmsg_s *rpmsg;
   FAR struct rpmsg_cb_s *cb;
-  bool again = true;
   int ret = -ENOMEM;
+  bool again;
 
   cb = kmm_zalloc(sizeof(struct rpmsg_cb_s));
   if (cb != NULL)
@@ -581,6 +581,7 @@ int rpmsg_register_callback(FAR void *priv,
 
           DEBUGASSERT(ns_match != NULL);
 
+          again = true;
           nxrmutex_lock(&rpmsg->lock);
           while (again)
             {
@@ -674,6 +675,7 @@ void rpmsg_ns_bind(FAR struct rpmsg_device *rdev,
 
           ns_bind(rdev, cb_priv, name, dest);
           matched = true;
+          break;
         }
     }
 
@@ -688,9 +690,9 @@ void rpmsg_ns_bind(FAR struct rpmsg_device *rdev,
           nxrmutex_lock(&rpmsg->lock);
           list_add_tail(&rpmsg->bind, &bind->node);
           nxrmutex_unlock(&rpmsg->lock);
-
-          up_read(&g_rpmsg_lock);
         }
+
+      up_read(&g_rpmsg_lock);
     }
 }
 
