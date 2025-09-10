@@ -49,8 +49,6 @@ struct intel64_oneshot_lowerhalf_s
 {
   struct oneshot_lowerhalf_s  lh;
   struct intel64_oneshot_s    oneshot;
-  oneshot_callback_t          callback;
-  void                       *arg;
 };
 
 /****************************************************************************
@@ -120,8 +118,6 @@ static spinlock_t g_oneshotlow_spin;
 static void intel64_oneshot_handler(void *arg)
 {
   struct intel64_oneshot_lowerhalf_s *priv = arg;
-  oneshot_callback_t  callback;
-  void               *cbarg;
 
   DEBUGASSERT(priv != NULL);
 
@@ -129,21 +125,7 @@ static void intel64_oneshot_handler(void *arg)
    * intel64_cancel?
    */
 
-  if (priv->callback)
-    {
-      /* Sample and nullify BEFORE executing callback (in case the callback
-       * restarts the oneshot).
-       */
-
-      callback       = priv->callback;
-      cbarg          = priv->arg;
-      priv->callback = NULL;
-      priv->arg      = NULL;
-
-      /* Then perform the callback */
-
-      callback(&priv->lh, cbarg);
-    }
+  oneshot_process_callback(&priv->lh);
 }
 
 /****************************************************************************
@@ -220,12 +202,9 @@ static int intel64_start(struct oneshot_lowerhalf_s *lower,
 
   /* Save the callback information and start the timer */
 
-  flags          = spin_lock_irqsave(&g_oneshotlow_spin);
-  priv->callback = callback;
-  priv->arg      = arg;
-  ret            = intel64_oneshot_start(&priv->oneshot,
-                                         intel64_oneshot_handler,
-                                         priv, ts);
+  flags = spin_lock_irqsave(&g_oneshotlow_spin);
+  ret   = intel64_oneshot_start(&priv->oneshot, intel64_oneshot_handler,
+                                priv, ts);
   spin_unlock_irqrestore(&g_oneshotlow_spin, flags);
 
   if (ret < 0)
@@ -272,10 +251,8 @@ static int intel64_cancel(struct oneshot_lowerhalf_s *lower,
 
   /* Cancel the timer */
 
-  flags          = spin_lock_irqsave(&g_oneshotlow_spin);
-  ret            = intel64_oneshot_cancel(&priv->oneshot, ts);
-  priv->callback = NULL;
-  priv->arg      = NULL;
+  flags = spin_lock_irqsave(&g_oneshotlow_spin);
+  ret   = intel64_oneshot_cancel(&priv->oneshot, ts);
   spin_unlock_irqrestore(&g_oneshotlow_spin, flags);
 
   if (ret < 0)

@@ -90,6 +90,9 @@ void up_alarm_set_lowerhalf(FAR struct oneshot_lowerhalf_s *lower)
 
   g_oneshot_lower = lower;
 
+  lower->callback = oneshot_callback;
+  lower->arg      = lower;
+
 #ifdef CONFIG_SCHED_TICKLESS
   ONESHOT_TICK_MAX_DELAY(g_oneshot_lower, &ticks);
   g_oneshot_maxticks = ticks < UINT32_MAX ? ticks : UINT32_MAX;

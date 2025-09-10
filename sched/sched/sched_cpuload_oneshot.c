@@ -328,6 +328,8 @@ void nxsched_oneshot_extclk(FAR struct oneshot_lowerhalf_s *lower)
   /* Then start the oneshot */
 
   g_sched_oneshot.oneshot = lower;
+  lower->callback = nxsched_oneshot_callback;
+  lower->arg      = NULL;
   nxsched_oneshot_start();
 }
 #endif

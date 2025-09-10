@@ -49,8 +49,6 @@ struct tricore_systimer_lowerhalf_s
   volatile void              *tbase;
   uint64_t                   freq;
   uint64_t                   alarm;
-  oneshot_callback_t         callback;
-  void                       *arg;
   spinlock_t                 lock;
 };
 
@@ -184,9 +182,6 @@ static int tricore_systimer_start(struct oneshot_lowerhalf_s *lower,
       priv->alarm = UINT64_MAX;
     }
 
-  priv->callback = callback;
-  priv->arg      = arg;
-
   tricore_systimer_set_timecmp(priv, priv->alarm);
   return 0;
 }
@@ -239,9 +234,7 @@ static int tricore_systimer_cancel(struct oneshot_lowerhalf_s *lower,
       ts->tv_nsec = 0;
     }
 
-  priv->alarm    = 0;
-  priv->callback = NULL;
-  priv->arg      = NULL;
+  priv->alarm = 0;
 
   return 0;
 }
@@ -335,10 +328,7 @@ static int tricore_systimer_interrupt(int irq, void *context, void *arg)
   struct tricore_systimer_lowerhalf_s *priv = arg;
 
   tricore_systimer_set_timecmp(priv, UINT64_MAX);
-  if (priv->callback != NULL)
-    {
-      priv->callback(&priv->lower, priv->arg);
-    }
+  oneshot_process_callback(&priv->lower);
 
   return 0;
 }

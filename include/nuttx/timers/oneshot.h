@@ -231,6 +231,9 @@ struct oneshot_lowerhalf_s
 
   FAR const struct oneshot_operations_s *ops;
 
+  FAR oneshot_callback_t callback;
+  FAR void *arg;
+
   /* Private lower half data may follow */
 };
 
@@ -398,6 +401,15 @@ int oneshot_tick_current(FAR struct oneshot_lowerhalf_s *lower,
   *ticks = clock_time2ticks_floor(&ts);
 
   return ret;
+}
+
+static inline_function
+void oneshot_process_callback(FAR struct oneshot_lowerhalf_s *lower)
+{
+  if (lower->callback)
+    {
+      lower->callback(lower, lower->arg);
+    }
 }
 
 /****************************************************************************
