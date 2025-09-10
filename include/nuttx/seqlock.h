@@ -104,7 +104,10 @@ unsigned int read_seqbegin(FAR const seqcount_t *s)
 
   while ((seq = s->sequence) & 1);
 
+#ifdef CONFIG_SMP
   UP_DMB();
+#endif
+
   return seq;
 }
 
@@ -129,7 +132,10 @@ unsigned int read_seqretry(FAR const seqcount_t *s, unsigned int start)
 {
   unsigned int seq;
 
+#ifdef CONFIG_SMP
   UP_DMB();
+#endif
+
   seq = s->sequence;
   return seq != start;
 }
