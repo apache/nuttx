@@ -129,6 +129,8 @@ extern "C"
  *
  ****************************************************************************/
 
+struct task_group_s;
+
 /* Functions defined in group/group_malloc.c ********************************/
 
 FAR void *group_malloc(FAR struct task_group_s *group, size_t nbytes);
