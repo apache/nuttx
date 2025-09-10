@@ -91,7 +91,7 @@ ifneq ($(CONFIG_CXX_STANDARD),)
 endif
 
 ifeq ($(CONFIG_STACK_CANARIES),y)
-  ARCHOPTIMIZATION += -fstack-protector-all
+  ARCHOPTIMIZATION += $(patsubst "%",%,$(CONFIG_STACK_CANARIES_LEVEL))
 else
   ARCHOPTIMIZATION += -fno-stack-protector
 endif
