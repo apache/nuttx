@@ -56,8 +56,6 @@ struct pic32mz_oneshot_lowerhalf_s
   /* Private lower half data follows */
 
   struct pic32mz_oneshot_s oneshot; /* PIC32MZ-specific oneshot state  */
-  oneshot_callback_t callback;      /* Handler that receives callback  */
-  void *arg;                        /* Argument passed to the handler  */
 };
 
 /****************************************************************************
@@ -110,8 +108,6 @@ static void pic32mz_oneshot_handler(void *arg)
 {
   struct pic32mz_oneshot_lowerhalf_s *priv =
     (struct pic32mz_oneshot_lowerhalf_s *)arg;
-  oneshot_callback_t callback;
-  void *cbarg;
 
   DEBUGASSERT(priv != NULL);
 
@@ -119,21 +115,7 @@ static void pic32mz_oneshot_handler(void *arg)
    * pic32mz_cancel?
    */
 
-  if (priv->callback)
-    {
-      /* Sample and nullify BEFORE executing callback (in case the callback
-       * restarts the oneshot).
-       */
-
-      callback       = priv->callback;
-      cbarg          = priv->arg;
-      priv->callback = NULL;
-      priv->arg      = NULL;
-
-      /* Then perform the callback */
-
-      callback(&priv->lh, cbarg);
-    }
+  oneshot_process_callback(&priv->lh);
 }
 
 /****************************************************************************
@@ -212,12 +194,9 @@ static int pic32mz_start(struct oneshot_lowerhalf_s *lower,
 
   /* Save the callback information and start the timer */
 
-  flags          = enter_critical_section();
-  priv->callback = callback;
-  priv->arg      = arg;
-  ret            = pic32mz_oneshot_start(&priv->oneshot,
-                                         pic32mz_oneshot_handler,
-                                         priv, ts);
+  flags = enter_critical_section();
+  ret   = pic32mz_oneshot_start(&priv->oneshot,
+                                pic32mz_oneshot_handler, priv, ts);
   leave_critical_section(flags);
 
   if (ret < 0)
@@ -264,10 +243,8 @@ static int pic32mz_cancel(struct oneshot_lowerhalf_s *lower,
 
   /* Cancel the timer */
 
-  flags          = enter_critical_section();
-  ret            = pic32mz_oneshot_cancel(&priv->oneshot, ts);
-  priv->callback = NULL;
-  priv->arg      = NULL;
+  flags = enter_critical_section();
+  ret   = pic32mz_oneshot_cancel(&priv->oneshot, ts);
   leave_critical_section(flags);
 
   if (ret < 0)

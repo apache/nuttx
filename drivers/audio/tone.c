@@ -958,6 +958,9 @@ int tone_register(FAR const char *path, FAR struct pwm_lowerhalf_s *tone,
   upper->channel = (uint8_t)channel;
 #endif
 
+  upper->oneshot->callback = oneshot_callback;
+  upper->oneshot->arg = upper;
+
   /* Register the PWM device */
 
   audinfo("Registering %s\n", path);

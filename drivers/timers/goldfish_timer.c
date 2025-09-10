@@ -64,8 +64,6 @@
 struct goldfish_timer_lowerhalf_s
 {
   struct oneshot_lowerhalf_s lh;        /* Lower half operations */
-  oneshot_callback_t         callback;  /* Current user interrupt callback */
-  FAR void                   *arg;      /* Argument passed to upper half callback */
   uintptr_t                  base;      /* Base address of registers */
   spinlock_t                 lock;      /* Lock for interrupt handling */
 };
@@ -126,9 +124,6 @@ static int goldfish_timer_start(FAR struct oneshot_lowerhalf_s *lower_,
 
   flags = spin_lock_irqsave(&lower->lock);
 
-  lower->callback = callback;
-  lower->arg      = arg;
-
   nsec  = ts->tv_sec * 1000000000 + ts->tv_nsec;
   l32   = getreg32(lower->base + GOLDFISH_TIMER_TIME_LOW);
   h32   = getreg32(lower->base + GOLDFISH_TIMER_TIME_HIGH);
@@ -153,9 +148,6 @@ static int goldfish_timer_cancel(FAR struct oneshot_lowerhalf_s *lower_,
   DEBUGASSERT(lower != NULL);
 
   flags = spin_lock_irqsave(&lower->lock);
-
-  lower->callback  = NULL;
-  lower->arg       = NULL;
 
   putreg32(0, lower->base + GOLDFISH_TIMER_IRQ_ENABLED);
   putreg32(1, lower->base + GOLDFISH_TIMER_CLEAR_ALARM);
@@ -196,9 +188,7 @@ static int goldfish_timer_interrupt(int irq,
                                     FAR void *arg)
 {
   FAR struct goldfish_timer_lowerhalf_s *lower = arg;
-  oneshot_callback_t callback = NULL;
   irqstate_t flags;
-  void *cbarg;
 
   DEBUGASSERT(lower != NULL);
 
@@ -207,22 +197,11 @@ static int goldfish_timer_interrupt(int irq,
   putreg32(1, lower->base + GOLDFISH_TIMER_CLEAR_ALARM);
   putreg32(1, lower->base + GOLDFISH_TIMER_CLEAR_INTERRUPT);
 
-  if (lower->callback != NULL)
-    {
-      callback        = lower->callback;
-      cbarg           = lower->arg;
-      lower->callback = NULL;
-      lower->arg      = NULL;
-    }
-
   spin_unlock_irqrestore(&lower->lock, flags);
 
   /* Then perform the callback */
 
-  if (callback)
-    {
-      callback(&lower->lh, cbarg);
-    }
+  oneshot_process_callback(&lower->lh);
 
   return 0;
 }

@@ -69,9 +69,7 @@ struct arm64_oneshot_lowerhalf_s
 
   /* Private lower half data follows */
 
-  void *arg;                          /* Argument that is passed to the handler */
   uint64_t frequency;                 /* Frequency in cycle per second */
-  oneshot_callback_t callback;        /* Internal handler that receives callback */
 
   /* which cpu timer is running, -1 indicate timer stoppd */
 
@@ -136,11 +134,11 @@ static int arm64_arch_timer_compare_isr(int irq, void *regs, void *arg)
 
   arm64_arch_timer_set_irq_mask(true);
 
-  if (priv->callback && priv->running == this_cpu())
+  if (priv->running == this_cpu())
     {
       /* Then perform the callback */
 
-      priv->callback(&priv->lh, priv->arg);
+      oneshot_process_callback(&priv->lh);
     }
 
   return OK;
@@ -246,11 +244,6 @@ static int arm64_start(struct oneshot_lowerhalf_s *lower,
   uint64_t freq = priv->frequency;
 
   DEBUGASSERT(priv && callback && ts);
-
-  /* Save the new handler and its argument */
-
-  priv->callback = callback;
-  priv->arg = arg;
 
   priv->running = this_cpu();
 

@@ -46,8 +46,6 @@ struct riscv_mtimer_lowerhalf_s
   uintreg_t                  mtimecmp;
   uint64_t                   freq;
   uint64_t                   alarm;
-  oneshot_callback_t         callback;
-  void                       *arg;
 };
 
 /****************************************************************************
@@ -154,9 +152,7 @@ static int riscv_mtimer_start(struct oneshot_lowerhalf_s *lower,
   alarm = mtime + ts->tv_sec * priv->freq +
           ts->tv_nsec * priv->freq / NSEC_PER_SEC;
 
-  priv->alarm    = alarm;
-  priv->callback = callback;
-  priv->arg      = arg;
+  priv->alarm = alarm;
 
   riscv_mtimer_set_mtimecmp(priv, priv->alarm);
 
@@ -210,9 +206,7 @@ static int riscv_mtimer_cancel(struct oneshot_lowerhalf_s *lower,
   ts->tv_sec  = nsec / NSEC_PER_SEC;
   ts->tv_nsec = nsec % NSEC_PER_SEC;
 
-  priv->alarm    = 0;
-  priv->callback = NULL;
-  priv->arg      = NULL;
+  priv->alarm = 0;
 
   up_irq_restore(flags);
 
@@ -257,10 +251,7 @@ static int riscv_mtimer_interrupt(int irq, void *context, void *arg)
 {
   struct riscv_mtimer_lowerhalf_s *priv = arg;
 
-  if (priv->callback != NULL)
-    {
-      priv->callback(&priv->lower, priv->arg);
-    }
+  oneshot_process_callback(&priv->lower);
 
   return 0;
 }

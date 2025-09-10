@@ -81,9 +81,7 @@ struct arm_oneshot_lowerhalf_s
 
   /* Private lower half data follows */
 
-  void *arg;                          /* Argument that is passed to the handler */
   uint32_t           frequency;       /* Frequency */
-  oneshot_callback_t callback;        /* Internal handler that receives callback */
 };
 
 /****************************************************************************
@@ -147,12 +145,9 @@ static int arm_arch_timer_compare_isr(int irq, void *regs, void *arg)
 
   arm_timer_phy_set_irq_mask(true);
 
-  if (priv->callback)
-    {
-      /* Then perform the callback */
+  /* Then perform the callback */
 
-      priv->callback(&priv->lh, priv->arg);
-    }
+  oneshot_process_callback(&priv->lh);
 
   return OK;
 }
@@ -258,11 +253,6 @@ static int arm_start(struct oneshot_lowerhalf_s *lower,
   uint64_t freq = priv->frequency;
 
   DEBUGASSERT(priv && callback && ts);
-
-  /* Save the new handler and its argument */
-
-  priv->callback = callback;
-  priv->arg = arg;
 
   /* Set the timeout */
 

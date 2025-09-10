@@ -848,6 +848,8 @@ FAR void *watchdog_register(FAR const char *path,
     }
 
 #if defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_ONESHOT)
+  upper->oneshot->callback = watchdog_automonitor_oneshot;
+  upper->oneshot->arg      = upper;
   watchdog_automonitor_start(upper, oneshot);
 #elif defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_TIMER)
   watchdog_automonitor_start(upper, timer);
