@@ -35,16 +35,16 @@ endif()
 
 include(${ARCH_SUBDIR})
 
-set(CMAKE_ASM_COMPILER cctc)
+set(CMAKE_ASM_COMPILER ${TOOLCHAIN_PREFIX}cctc)
 set(CMAKE_C_COMPILER ${CMAKE_ASM_COMPILER})
-set(CMAKE_CXX_COMPILER cctc)
+set(CMAKE_CXX_COMPILER ${TOOLCHAIN_PREFIX}cctc)
 set(CMAKE_STRIP strip --strip-unneeded)
 set(CMAKE_OBJCOPY echo)
 set(CMAKE_OBJDUMP elfdump)
 
-set(CMAKE_LINKER cctc)
-set(CMAKE_LD cctc)
-set(CMAKE_AR artc -r)
+set(CMAKE_LINKER ${TOOLCHAIN_PREFIX}cctc)
+set(CMAKE_LD ${TOOLCHAIN_PREFIX}cctc)
+set(CMAKE_AR ${TOOLCHAIN_PREFIX}artc -r)
 set(CMAKE_NM nm)
 set(CMAKE_RANLIB ranlib)
 
