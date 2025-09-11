@@ -713,6 +713,17 @@ int tcp_connect(FAR struct tcp_conn_s *conn,
 void tcp_removeconn(FAR struct tcp_conn_s *conn);
 
 /****************************************************************************
+ * Name: tcp_remove_syn_backlog
+ *
+ * Description:
+ *   This function is used to remove the currently SYN_RCVD connection
+ *   created by the listener
+ *
+ ****************************************************************************/
+
+void tcp_remove_syn_backlog(FAR struct tcp_conn_s *listener);
+
+/****************************************************************************
  * Name: tcp_conn_list_lock
  *
  * Description:

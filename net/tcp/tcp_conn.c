@@ -1539,4 +1539,44 @@ void tcp_removeconn(FAR struct tcp_conn_s *conn)
   dq_rem(&conn->sconn.node, &g_active_tcp_connections);
 }
 
+/****************************************************************************
+ * Name: tcp_remove_syn_backlog
+ *
+ * Description:
+ *   This function is used to remove the currently SYN_RCVD connection
+ *   created by the listener
+ *
+ * Assumptions:
+ *   This function is called from network logic with the tcp conn list
+ *   locked.
+ *
+ ****************************************************************************/
+
+void tcp_remove_syn_backlog(FAR struct tcp_conn_s *listener)
+{
+  FAR struct tcp_conn_s *conn;
+  FAR struct tcp_conn_s *next;
+
+  next = (FAR struct tcp_conn_s *)g_active_tcp_connections.head;
+  while (next)
+    {
+      conn = next;
+      next = (FAR struct tcp_conn_s *)conn->sconn.node.flink;
+      if (conn->tcpstateflags == TCP_SYN_RCVD &&
+#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
+          tcp_conn_cmp(listener->domain,
+                       (FAR const union ip_addr_u *)&listener->u,
+                       listener->lport, conn)
+#else
+          tcp_conn_cmp((FAR const union ip_addr_u *)&listener->u,
+                       listener->lport, conn)
+#endif
+         )
+        {
+          conn->crefs = 0;
+          tcp_free(conn);
+        }
+    }
+}
+
 #endif /* CONFIG_NET && CONFIG_NET_TCP */
