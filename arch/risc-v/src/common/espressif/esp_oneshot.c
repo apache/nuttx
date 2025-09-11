@@ -97,8 +97,6 @@ static int esp_oneshot_isr(int irq, void *context, void *arg);
 static int esp_oneshot_maxdelay(struct oneshot_lowerhalf_s *lower,
                                 struct timespec *ts);
 static int esp_oneshot_start(struct oneshot_lowerhalf_s *lower,
-                             oneshot_callback_t callback,
-                             void *arg,
                              const struct timespec *ts);
 static int esp_oneshot_cancel(struct oneshot_lowerhalf_s *lower,
                               struct timespec *ts);
@@ -193,8 +191,6 @@ static int esp_oneshot_maxdelay(struct oneshot_lowerhalf_s *lower,
  ****************************************************************************/
 
 static int esp_oneshot_start(struct oneshot_lowerhalf_s *lower,
-                             oneshot_callback_t callback,
-                             void *arg,
                              const struct timespec *ts)
 {
   struct esp_oneshot_lowerhalf_s *priv =
@@ -202,11 +198,9 @@ static int esp_oneshot_start(struct oneshot_lowerhalf_s *lower,
   uint64_t timeout_us;
 
   DEBUGASSERT(priv != NULL);
-  DEBUGASSERT(callback != NULL);
   DEBUGASSERT(ts != NULL);
 
-  tmrinfo("callback=%p arg=%p, ts=(%lu, %ld)\n",
-          callback, arg, (unsigned long)ts->tv_sec, ts->tv_nsec);
+  tmrinfo("ts=(%lu, %ld)\n", (unsigned long)ts->tv_sec, ts->tv_nsec);
 
   if (priv->running)
     {
@@ -269,11 +263,8 @@ static int esp_oneshot_start(struct oneshot_lowerhalf_s *lower,
 
   /* Configure callback, in case a handler was provided before */
 
-  if (priv->callback != NULL)
-    {
-      timer_ll_enable_intr(hal->dev, TIMER_LL_EVENT_ALARM(hal->timer_id),
-                           true);
-    }
+  timer_ll_enable_intr(hal->dev, TIMER_LL_EVENT_ALARM(hal->timer_id),
+                       true);
 
   /* Finally, start the timer */
 

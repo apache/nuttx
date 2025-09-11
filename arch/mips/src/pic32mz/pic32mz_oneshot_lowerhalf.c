@@ -67,7 +67,6 @@ static void pic32mz_oneshot_handler(void *arg);
 static int pic32mz_max_delay(struct oneshot_lowerhalf_s *lower,
                              struct timespec *ts);
 static int pic32mz_start(struct oneshot_lowerhalf_s *lower,
-                         oneshot_callback_t callback, void *arg,
                          const struct timespec *ts);
 static int pic32mz_cancel(struct oneshot_lowerhalf_s *lower,
                           struct timespec *ts);
@@ -182,7 +181,6 @@ static int pic32mz_max_delay(struct oneshot_lowerhalf_s *lower,
  ****************************************************************************/
 
 static int pic32mz_start(struct oneshot_lowerhalf_s *lower,
-                         oneshot_callback_t callback, void *arg,
                          const struct timespec *ts)
 {
   struct pic32mz_oneshot_lowerhalf_s *priv =
@@ -190,7 +188,7 @@ static int pic32mz_start(struct oneshot_lowerhalf_s *lower,
   irqstate_t flags;
   int ret;
 
-  DEBUGASSERT(priv != NULL && callback != NULL && ts != NULL);
+  DEBUGASSERT(priv != NULL && ts != NULL);
 
   /* Save the callback information and start the timer */
 

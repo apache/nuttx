@@ -199,8 +199,7 @@ static void nxsched_oneshot_start(void)
   ts.tv_sec  = secs;
   ts.tv_nsec = 1000 * usecs;
 
-  DEBUGVERIFY(ONESHOT_START(g_sched_oneshot.oneshot,
-                            nxsched_oneshot_callback, NULL, &ts));
+  DEBUGVERIFY(ONESHOT_START(g_sched_oneshot.oneshot, &ts));
 }
 
 /****************************************************************************

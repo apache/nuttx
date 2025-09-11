@@ -120,10 +120,10 @@
  *
  ****************************************************************************/
 
-#define ONESHOT_START(l,h,a,t) \
-  ((l)->ops->start ? (l)->ops->start(l,h,a,t) : oneshot_start(l,h,a,t))
-#define ONESHOT_TICK_START(l,h,a,t) \
-  ((l)->ops->tick_start ? (l)->ops->tick_start(l,h,a,t) : oneshot_tick_start(l,h,a,t))
+#define ONESHOT_START(l,t) \
+  ((l)->ops->start ? (l)->ops->start(l,t) : oneshot_start(l,t))
+#define ONESHOT_TICK_START(l,t) \
+  ((l)->ops->tick_start ? (l)->ops->tick_start(l,t) : oneshot_tick_start(l,t))
 
 /****************************************************************************
  * Name: ONESHOT_CANCEL
@@ -202,7 +202,6 @@ struct oneshot_operations_s
   CODE int (*max_delay)(FAR struct oneshot_lowerhalf_s *lower,
                         FAR struct timespec *ts);
   CODE int (*start)(FAR struct oneshot_lowerhalf_s *lower,
-                    oneshot_callback_t callback, FAR void *arg,
                     FAR const struct timespec *ts);
   CODE int (*cancel)(FAR struct oneshot_lowerhalf_s *lower,
                      FAR struct timespec *ts);
@@ -211,7 +210,6 @@ struct oneshot_operations_s
   CODE int (*tick_max_delay)(FAR struct oneshot_lowerhalf_s *lower,
                              FAR clock_t *ticks);
   CODE int (*tick_start)(FAR struct oneshot_lowerhalf_s *lower,
-                         oneshot_callback_t callback, FAR void *arg,
                          clock_t ticks);
   CODE int (*tick_cancel)(FAR struct oneshot_lowerhalf_s *lower,
                           FAR clock_t *ticks);
@@ -284,7 +282,6 @@ int oneshot_max_delay(FAR struct oneshot_lowerhalf_s *lower,
 
 static inline
 int oneshot_start(FAR struct oneshot_lowerhalf_s *lower,
-                  oneshot_callback_t callback, FAR void *arg,
                   FAR const struct timespec *ts)
 {
   clock_t tick;
@@ -295,7 +292,7 @@ int oneshot_start(FAR struct oneshot_lowerhalf_s *lower,
     }
 
   tick = clock_time2ticks(ts);
-  return lower->ops->tick_start(lower, callback, arg, tick);
+  return lower->ops->tick_start(lower, tick);
 }
 
 static inline
@@ -353,7 +350,6 @@ int oneshot_tick_max_delay(FAR struct oneshot_lowerhalf_s *lower,
 
 static inline
 int oneshot_tick_start(FAR struct oneshot_lowerhalf_s *lower,
-                       oneshot_callback_t callback, FAR void *arg,
                        clock_t ticks)
 {
   struct timespec ts;
@@ -364,7 +360,7 @@ int oneshot_tick_start(FAR struct oneshot_lowerhalf_s *lower,
     }
 
   clock_ticks2time(&ts, ticks);
-  return lower->ops->start(lower, callback, arg, &ts);
+  return lower->ops->start(lower, &ts);
 }
 
 static inline
