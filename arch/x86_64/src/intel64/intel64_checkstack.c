@@ -86,7 +86,7 @@ size_t x86_64_stack_check(void *stackbase, size_t nbytes)
    */
 
   for (ptr = (uint32_t *)start, mark = (nbytes >> 2);
-       *ptr == STACK_COLOR && mark > 0;
+       mark > 0 && *ptr == STACK_COLOR;
        ptr++, mark--);
 
   /* Return our guess about how much stack space was used */

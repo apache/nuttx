@@ -91,7 +91,7 @@ size_t sim_stack_check(void *alloc, size_t size)
    */
 
   for (ptr = (uint32_t *)start, mark = (size >> 2);
-       *ptr == STACK_COLOR && mark > 0;
+       mark > 0 && *ptr == STACK_COLOR;
        ptr++, mark--);
 
   /* If the stack is completely used, then this might mean that the stack

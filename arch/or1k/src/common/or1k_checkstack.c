@@ -115,7 +115,7 @@ size_t or1k_stack_check(uintptr_t alloc, size_t size)
   size  = end - start;
 
   for (ptr = (uint32_t *)start, mark = (size >> 2);
-       *ptr == STACK_COLOR && mark > 0;
+       mark > 0 && *ptr == STACK_COLOR;
        ptr++, mark--);
 
   /* Return our guess about how much stack space was used */

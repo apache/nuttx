@@ -100,7 +100,7 @@ size_t ceva_stack_check(uintptr_t alloc, size_t size)
    */
 
   for (ptr = (uint32_t *)alloc, mark = nwords;
-       *ptr == STACK_COLOR && mark > 0;
+       mark > 0 && *ptr == STACK_COLOR;
        ptr++, mark--);
 
   /* If the stack is completely used, then this might mean that the stack
