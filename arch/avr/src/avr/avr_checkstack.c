@@ -108,7 +108,7 @@ size_t avr_stack_check(uintptr_t alloc, size_t size)
    */
 
   for (ptr = (FAR uint8_t *)alloc, mark = size;
-       *ptr == STACK_COLOR && mark > 0;
+       mark > 0 && *ptr == STACK_COLOR;
        ptr++, mark--);
 
   /* If the stack is completely used, then this might mean that the stack
