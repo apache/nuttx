@@ -59,7 +59,6 @@ struct tricore_systimer_lowerhalf_s
 static int tricore_systimer_max_delay(struct oneshot_lowerhalf_s *lower,
                                       struct timespec *ts);
 static int tricore_systimer_start(struct oneshot_lowerhalf_s *lower,
-                                  oneshot_callback_t callback, void *arg,
                                   const struct timespec *ts);
 static int tricore_systimer_cancel(struct oneshot_lowerhalf_s *lower,
                                    struct timespec *ts);
@@ -168,7 +167,6 @@ static int tricore_systimer_max_delay(struct oneshot_lowerhalf_s *lower,
  ****************************************************************************/
 
 static int tricore_systimer_start(struct oneshot_lowerhalf_s *lower,
-                                  oneshot_callback_t callback, void *arg,
                                   const struct timespec *ts)
 {
   struct tricore_systimer_lowerhalf_s *priv =

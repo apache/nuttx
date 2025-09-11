@@ -57,7 +57,6 @@ struct xoneshot_lowerhalf_s
 static int xtensa_oneshot_maxdelay(struct oneshot_lowerhalf_s *lower,
                                    struct timespec *ts);
 static int xtensa_oneshot_start(struct oneshot_lowerhalf_s *lower,
-                                oneshot_callback_t callback, void *arg,
                                 const struct timespec *ts);
 static int xtensa_oneshot_cancel(struct oneshot_lowerhalf_s *lower,
                                  struct timespec *ts);
@@ -93,7 +92,6 @@ static inline uint64_t sec_to_count(uint32_t sec, uint32_t freq)
 }
 
 static int xtensa_oneshot_start(struct oneshot_lowerhalf_s *lower_,
-                                oneshot_callback_t callback, void *arg,
                                 const struct timespec *ts)
 {
   struct xoneshot_lowerhalf_s *lower =

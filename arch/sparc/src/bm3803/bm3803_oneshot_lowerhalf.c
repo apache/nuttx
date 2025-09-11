@@ -71,8 +71,7 @@ static void bm3803_oneshot_handler(void *arg);
 static int bm3803_max_delay(struct oneshot_lowerhalf_s *lower,
                              struct timespec *ts);
 static int bm3803_start(struct oneshot_lowerhalf_s *lower,
-                         oneshot_callback_t callback, void *arg,
-                         const struct timespec *ts);
+                        const struct timespec *ts);
 static int bm3803_cancel(struct oneshot_lowerhalf_s *lower,
                           struct timespec *ts);
 
@@ -183,15 +182,14 @@ static int bm3803_max_delay(struct oneshot_lowerhalf_s *lower,
  ****************************************************************************/
 
 static int bm3803_start(struct oneshot_lowerhalf_s *lower,
-                       oneshot_callback_t callback, void *arg,
-                       const struct timespec *ts)
+                        const struct timespec *ts)
 {
   struct bm3803_oneshot_lowerhalf_s *priv =
     (struct bm3803_oneshot_lowerhalf_s *)lower;
   irqstate_t flags;
   int ret;
 
-  DEBUGASSERT(priv != NULL && callback != NULL && ts != NULL);
+  DEBUGASSERT(priv != NULL && ts != NULL);
 
   /* Save the callback information and start the timer */
 

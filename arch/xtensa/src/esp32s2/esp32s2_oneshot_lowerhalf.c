@@ -70,8 +70,6 @@ static void esp32s2_oneshot_lh_handler(void *arg);
 static int oneshot_lh_max_delay(struct oneshot_lowerhalf_s *lower,
                                 struct timespec *ts);
 static int oneshot_lh_start(struct oneshot_lowerhalf_s *lower,
-                            oneshot_callback_t callback,
-                            void *arg,
                             const struct timespec *ts);
 static int oneshot_lh_cancel(struct oneshot_lowerhalf_s *lower,
                              struct timespec *ts);
@@ -185,8 +183,6 @@ static int oneshot_lh_max_delay(struct oneshot_lowerhalf_s *lower,
  ****************************************************************************/
 
 static int oneshot_lh_start(struct oneshot_lowerhalf_s *lower,
-                            oneshot_callback_t callback,
-                            void *arg,
                             const struct timespec *ts)
 {
   struct esp32s2_oneshot_lowerhalf_s *priv =
@@ -195,8 +191,6 @@ static int oneshot_lh_start(struct oneshot_lowerhalf_s *lower,
   irqstate_t flags;
 
   DEBUGASSERT(priv != NULL);
-  DEBUGASSERT(callback != NULL);
-  DEBUGASSERT(arg != NULL);
   DEBUGASSERT(ts != NULL);
 
   /* Save the callback information and start the timer */

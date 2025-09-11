@@ -75,8 +75,6 @@ struct goldfish_timer_lowerhalf_s
 static int goldfish_timer_maxdelay(FAR struct oneshot_lowerhalf_s *lower,
                                    FAR struct timespec *ts);
 static int goldfish_timer_start(FAR struct oneshot_lowerhalf_s *lower,
-                                FAR oneshot_callback_t callback,
-                                FAR void *arg,
                                 FAR const struct timespec *ts);
 static int goldfish_timer_cancel(FAR struct oneshot_lowerhalf_s *lower,
                                  FAR struct timespec *ts);
@@ -109,8 +107,6 @@ static int goldfish_timer_maxdelay(FAR struct oneshot_lowerhalf_s *lower_,
 }
 
 static int goldfish_timer_start(FAR struct oneshot_lowerhalf_s *lower_,
-                                FAR oneshot_callback_t callback,
-                                FAR void *arg,
                                 FAR const struct timespec *ts)
 {
   FAR struct goldfish_timer_lowerhalf_s *lower =

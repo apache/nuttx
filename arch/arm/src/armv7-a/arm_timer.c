@@ -76,7 +76,6 @@ struct arm_timer_lowerhalf_s
 static int arm_timer_maxdelay(struct oneshot_lowerhalf_s *lower,
                               struct timespec *ts);
 static int arm_timer_start(struct oneshot_lowerhalf_s *lower,
-                           oneshot_callback_t callback, void *arg,
                            const struct timespec *ts);
 static int arm_timer_cancel(struct oneshot_lowerhalf_s *lower,
                             struct timespec *ts);
@@ -168,7 +167,6 @@ static int arm_timer_maxdelay(struct oneshot_lowerhalf_s *lower_,
 }
 
 static int arm_timer_start(struct oneshot_lowerhalf_s *lower_,
-                           oneshot_callback_t callback, void *arg,
                            const struct timespec *ts)
 {
   struct arm_timer_lowerhalf_s *lower =
