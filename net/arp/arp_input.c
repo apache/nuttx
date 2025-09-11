@@ -181,6 +181,23 @@ static int arp_in(FAR struct net_driver_s *dev)
 
             arp_notify(net_ip4addr_conv32(arp->ah_sipaddr));
           }
+#ifdef CONFIG_NET_ARP_GRATUITOUS
+        else if (net_ipv4addr_cmp(sipaddr, ipaddr) &&
+                 !net_ipv4addr_cmp(sipaddr, INADDR_ANY))
+          {
+            /* Gratuitous arp sender ip should same with target ip,
+             * and ignore IPv4 duplicate address detection packet (RFC2131)
+             */
+
+            /* Gratuitous request arp the sender ip should be a unicast ip */
+
+            if (net_ipv4addr_cmp(sipaddr, dev->d_draddr) ||
+                net_ipv4addr_maskcmp(sipaddr, dev->d_ipaddr, dev->d_netmask))
+              {
+                arp_hdr_update(dev, arp->ah_sipaddr, arp->ah_shwaddr);
+              }
+          }
+#endif /* CONFIG_NET_ARP_GRATUITOUS */
         break;
     }
 
