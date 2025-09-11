@@ -55,7 +55,6 @@ struct riscv_mtimer_lowerhalf_s
 static int riscv_mtimer_max_delay(struct oneshot_lowerhalf_s *lower,
                                   struct timespec *ts);
 static int riscv_mtimer_start(struct oneshot_lowerhalf_s *lower,
-                              oneshot_callback_t callback, void *arg,
                               const struct timespec *ts);
 static int riscv_mtimer_cancel(struct oneshot_lowerhalf_s *lower,
                                struct timespec *ts);
@@ -137,7 +136,6 @@ static int riscv_mtimer_max_delay(struct oneshot_lowerhalf_s *lower,
  ****************************************************************************/
 
 static int riscv_mtimer_start(struct oneshot_lowerhalf_s *lower,
-                              oneshot_callback_t callback, void *arg,
                               const struct timespec *ts)
 {
   struct riscv_mtimer_lowerhalf_s *priv =

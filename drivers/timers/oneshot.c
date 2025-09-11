@@ -215,8 +215,7 @@ static int oneshot_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
           /* Start the oneshot timer */
 
-          ret = ONESHOT_START(priv->od_lower, oneshot_callback, priv,
-                              &start->ts);
+          ret = ONESHOT_START(priv->od_lower, &start->ts);
         }
         break;
 

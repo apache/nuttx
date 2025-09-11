@@ -187,7 +187,7 @@ watchdog_automonitor_oneshot(FAR struct oneshot_lowerhalf_s *oneshot,
       };
 
       lower->ops->keepalive(lower);
-      ONESHOT_START(oneshot, watchdog_automonitor_oneshot, upper, &ts);
+      ONESHOT_START(oneshot, &ts);
     }
 }
 #elif defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_TIMER)
@@ -275,7 +275,7 @@ watchdog_automonitor_start(FAR struct watchdog_upperhalf_s *upper)
       };
 
       upper->oneshot = oneshot;
-      ONESHOT_START(oneshot, watchdog_automonitor_oneshot, upper, &ts);
+      ONESHOT_START(oneshot, &ts);
 #elif defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_TIMER)
       upper->timer = timer;
       timer->ops->setcallback(timer, watchdog_automonitor_timer, upper);

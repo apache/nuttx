@@ -84,8 +84,6 @@ struct bl602_oneshot_lowerhalf_s
 static int bl602_max_delay(struct oneshot_lowerhalf_s *lower,
                            struct timespec *           ts);
 static int bl602_start(struct oneshot_lowerhalf_s *lower,
-                       oneshot_callback_t              callback,
-                       void *                      arg,
                        const struct timespec *     ts);
 static int bl602_cancel(struct oneshot_lowerhalf_s *lower,
                         struct timespec *           ts);
@@ -229,8 +227,6 @@ static int bl602_max_delay(struct oneshot_lowerhalf_s *lower,
  ****************************************************************************/
 
 static int bl602_start(struct oneshot_lowerhalf_s *lower,
-                       oneshot_callback_t              callback,
-                       void *                      arg,
                        const struct timespec *     ts)
 {
   struct bl602_oneshot_lowerhalf_s *priv =
@@ -238,7 +234,7 @@ static int bl602_start(struct oneshot_lowerhalf_s *lower,
   irqstate_t flags;
   uint64_t   usec;
 
-  DEBUGASSERT(priv != NULL && callback != NULL && ts != NULL);
+  DEBUGASSERT(priv != NULL && ts != NULL);
 
   if (priv->started == true)
     {
