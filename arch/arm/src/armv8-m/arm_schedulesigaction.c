@@ -119,6 +119,11 @@ void up_schedule_sigaction(struct tcb_s *tcb)
 
       tcb->xcp.saved_regs           = tcb->xcp.regs;
 
+      /* Stack pointer should be 8-byte aligned */
+
+      tcb->xcp.regs                 = (void *)STACK_ALIGN_DOWN(
+                                      (uint32_t)tcb->xcp.regs);
+
       /* Duplicate the register context.  These will be
        * restored by the signal trampoline after the signal has been
        * delivered.
