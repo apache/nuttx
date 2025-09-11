@@ -182,11 +182,13 @@ static int gnss_activate(FAR struct sensor_lowerhalf_s *lower,
       if ((upper->crefs == 0 && enable) || (upper->crefs == 1 && !enable))
         {
           ret = upper->lower->ops->activate(upper->lower, filep, enable);
+          sminfo(filep->f_inode->i_name, "enable %d ret %d", enable, ret);
         }
 
       if (ret >= 0)
         {
           upper->crefs += enable ? 1 : -1;
+          sminfo(filep->f_inode->i_name, "crefs %" PRIu8 "", upper->crefs);
         }
     }
 
@@ -264,6 +266,7 @@ static int gnss_open(FAR struct file *filep)
       if (upper->crefs == 0)
         {
           ret = upper->lower->ops->activate(upper->lower, filep, true);
+          sminfo(filep->f_inode->i_name, "open ret %d", ret);
           if (ret < 0)
             {
               kmm_free(user);
@@ -272,6 +275,7 @@ static int gnss_open(FAR struct file *filep)
         }
 
       upper->crefs++;
+      sminfo(filep->f_inode->i_name, "crefs %" PRIu8 "", upper->crefs);
     }
 
   filep->f_priv = user;
@@ -299,6 +303,7 @@ static int gnss_close(FAR struct file *filep)
       if (upper->crefs == 1)
         {
           ret = upper->lower->ops->activate(upper->lower, filep, false);
+          sminfo(filep->f_inode->i_name, "close ret %d", ret);
           if (ret < 0)
             {
               goto out;
@@ -306,6 +311,7 @@ static int gnss_close(FAR struct file *filep)
         }
 
       upper->crefs--;
+      sminfo(filep->f_inode->i_name, "crefs " PRIu8 "", upper->crefs);
     }
 
   list_delete(&user->node);
