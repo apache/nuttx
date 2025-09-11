@@ -145,6 +145,7 @@ int tcp_unlisten(FAR struct tcp_conn_s *conn)
       if (tcp_listenports[ndx] == conn)
         {
           tcp_listenports[ndx] = NULL;
+          tcp_remove_syn_backlog(conn);
           ret = OK;
           break;
         }
