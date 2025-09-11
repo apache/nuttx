@@ -494,6 +494,22 @@ void tcp_free_rx_buffers(FAR struct tcp_conn_s *conn);
 void tcp_free(FAR struct tcp_conn_s *conn);
 
 /****************************************************************************
+ * Name: tcp_conn_cmp
+ *
+ * Description:
+ *   Compare a connection with domain, IP address and port number
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
+bool tcp_conn_cmp(uint8_t domain, FAR const union ip_addr_u *ipaddr,
+                  uint16_t portno, FAR struct tcp_conn_s *conn);
+#else
+bool tcp_conn_cmp(FAR const union ip_addr_u *ipaddr, uint16_t portno,
+                  FAR struct tcp_conn_s *conn);
+#endif
+
+/****************************************************************************
  * Name: tcp_active
  *
  * Description:

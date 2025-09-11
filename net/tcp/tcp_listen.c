@@ -102,44 +102,14 @@ FAR struct tcp_conn_s *tcp_findlistener(FAR union ip_binding_u *uaddr,
 
       FAR struct tcp_conn_s *conn = tcp_listenports[ndx];
 #if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
-      if (conn && conn->lport == portno && conn->domain == domain)
+      if (tcp_conn_cmp(domain, (FAR const union ip_addr_u *)uaddr, portno,
+                       conn))
 #else
-      if (conn && conn->lport == portno)
+      if (tcp_conn_cmp((FAR const union ip_addr_u *)uaddr, portno, conn))
 #endif
         {
-#ifdef CONFIG_NET_IPv6
-#  ifdef CONFIG_NET_IPv4
-          if (domain == PF_INET6)
-#  endif
-            {
-              if (net_ipv6addr_cmp(uaddr->ipv6.laddr, g_ipv6_unspecaddr) ||
-                  net_ipv6addr_cmp(conn->u.ipv6.laddr, uaddr->ipv6.laddr) ||
-                  net_ipv6addr_cmp(conn->u.ipv6.laddr, g_ipv6_unspecaddr))
-                {
-                  /* Yes.. we found a listener on this port */
-
-                  tcp_conn_list_unlock();
-                  return conn;
-                }
-            }
-#endif
-
-#ifdef CONFIG_NET_IPv4
-#  ifdef CONFIG_NET_IPv6
-          if (domain == PF_INET)
-#  endif
-            {
-              if (net_ipv4addr_cmp(uaddr->ipv4.laddr, INADDR_ANY) ||
-                  net_ipv4addr_cmp(conn->u.ipv4.laddr, uaddr->ipv4.laddr) ||
-                  net_ipv4addr_cmp(conn->u.ipv4.laddr, INADDR_ANY))
-                {
-                  /* Yes.. we found a listener on this port */
-
-                  tcp_conn_list_unlock();
-                  return conn;
-                }
-            }
-#endif
+          tcp_conn_list_unlock();
+          return conn;
         }
     }
 

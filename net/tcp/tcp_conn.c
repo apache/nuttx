@@ -125,49 +125,15 @@ static FAR struct tcp_conn_s *
        * matches the requested port number.
        */
 
-      if (conn->tcpstateflags != TCP_CLOSED && conn->lport == portno
+      if (conn->tcpstateflags != TCP_CLOSED &&
 #if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
-          && domain == conn->domain
+          tcp_conn_cmp(domain, ipaddr, portno, conn)
+#else
+          tcp_conn_cmp(ipaddr, portno, conn)
 #endif
          )
         {
-          /* If there are multiple interface devices, then the local IP
-           * address of the connection must also match.  INADDR_ANY is a
-           * special case:  There can only be instance of a port number
-           * with INADDR_ANY.
-           */
-
-#ifdef CONFIG_NET_IPv4
-#ifdef CONFIG_NET_IPv6
-          if (domain == PF_INET)
-#endif /* CONFIG_NET_IPv6 */
-            {
-              if (net_ipv4addr_cmp(conn->u.ipv4.laddr, ipaddr->ipv4) ||
-                  net_ipv4addr_cmp(conn->u.ipv4.laddr, INADDR_ANY) ||
-                  net_ipv4addr_cmp(ipaddr->ipv4, INADDR_ANY))
-                {
-                  /* The port number is in use, return the connection */
-
-                  return conn;
-                }
-            }
-#endif /* CONFIG_NET_IPv4 */
-
-#ifdef CONFIG_NET_IPv6
-#ifdef CONFIG_NET_IPv4
-          else
-#endif /* CONFIG_NET_IPv4 */
-            {
-              if (net_ipv6addr_cmp(conn->u.ipv6.laddr, ipaddr->ipv6) ||
-                  net_ipv6addr_cmp(conn->u.ipv6.laddr, g_ipv6_unspecaddr) ||
-                  net_ipv6addr_cmp(ipaddr->ipv6, g_ipv6_unspecaddr))
-                {
-                  /* The port number is in use, return the connection */
-
-                  return conn;
-                }
-            }
-#endif /* CONFIG_NET_IPv6 */
+          return conn;
         }
     }
 
@@ -907,6 +873,65 @@ void tcp_free(FAR struct tcp_conn_s *conn)
   /* Free the connection structure */
 
   NET_BUFPOOL_FREE(g_tcp_connections, conn);
+}
+
+/****************************************************************************
+ * Name: tcp_conn_cmp
+ *
+ * Description:
+ *   Compare a connection with domain, IP address and port number
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
+bool tcp_conn_cmp(uint8_t domain, FAR const union ip_addr_u *ipaddr,
+                  uint16_t portno, FAR struct tcp_conn_s *conn)
+#else
+bool tcp_conn_cmp(FAR const union ip_addr_u *ipaddr, uint16_t portno,
+                  FAR struct tcp_conn_s *conn)
+#endif
+{
+  if (conn == NULL)
+    {
+      return false;
+    }
+
+#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
+  if (conn->lport == portno && conn->domain == domain)
+#else
+  if (conn->lport == portno)
+#endif
+    {
+#ifdef CONFIG_NET_IPv6
+#  ifdef CONFIG_NET_IPv4
+      if (domain == PF_INET6)
+#  endif
+        {
+          if (net_ipv6addr_cmp(ipaddr->ipv6, g_ipv6_unspecaddr) ||
+              net_ipv6addr_cmp(conn->u.ipv6.laddr, ipaddr->ipv6) ||
+              net_ipv6addr_cmp(conn->u.ipv6.laddr, g_ipv6_unspecaddr))
+            {
+              return true;
+            }
+        }
+#endif
+
+#ifdef CONFIG_NET_IPv4
+#  ifdef CONFIG_NET_IPv6
+      if (domain == PF_INET)
+#  endif
+        {
+          if (net_ipv4addr_cmp(ipaddr->ipv4, INADDR_ANY) ||
+              net_ipv4addr_cmp(conn->u.ipv4.laddr, ipaddr->ipv4) ||
+              net_ipv4addr_cmp(conn->u.ipv4.laddr, INADDR_ANY))
+            {
+              return true;
+            }
+        }
+#endif
+    }
+
+  return false;
 }
 
 /****************************************************************************
