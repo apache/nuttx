@@ -2792,6 +2792,23 @@ static time_t time1(FAR struct tm *tmp,
         }
     }
 
+  /* DST fallback: if tm_isdst=1 fails, try as standard time */
+
+  if (!okay && tmp->tm_isdst > 0)
+    {
+      int isdst = tmp->tm_isdst;
+
+      tmp->tm_isdst = 0;
+
+      t = time2(tmp, funcp, offset, &okay);
+      if (okay)
+        {
+          return t;
+        }
+
+      tmp->tm_isdst = isdst;
+    }
+
   return -1;
 }
 
