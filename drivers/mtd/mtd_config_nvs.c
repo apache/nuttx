@@ -594,21 +594,32 @@ static int nvs_flash_cmp_const(FAR struct nvs_fs *fs, uint32_t addr,
  *
  ****************************************************************************/
 
-static int nvs_flash_block_move(FAR struct nvs_fs *fs, uint32_t addr,
-                                size_t len)
+static int nvs_flash_block_move(FAR struct nvs_fs *fs,
+                                FAR struct nvs_ate *entry, uint32_t addr)
 {
+  size_t len = nvs_align_up(fs, entry->key_len + entry->len);
+  uint32_t data_begin = addr + entry->key_len;
+  uint32_t data_end = data_begin + entry->len;
   uint8_t buf[NVS_BUFFER_SIZE(fs)];
   size_t buf_size = nvs_align_down(fs, sizeof(buf));
-  size_t bytes_to_copy;
+  uint8_t data_crc8 = 0;
   int rc;
 
   while (len)
     {
-      bytes_to_copy = MIN(buf_size, len);
+      size_t bytes_to_copy = MIN(buf_size, len);
       rc = nvs_flash_rd(fs, addr, buf, bytes_to_copy);
       if (rc)
         {
           return rc;
+        }
+
+      if (addr + bytes_to_copy > data_begin)
+        {
+          uint32_t end_addr = MIN(data_end, addr + bytes_to_copy);
+          uint32_t begin_addr = MAX(data_begin, addr);
+          data_crc8 = crc8part(buf + (begin_addr - addr),
+                               end_addr - begin_addr, data_crc8);
         }
 
       rc = nvs_flash_data_wrt(fs, buf, bytes_to_copy);
@@ -621,7 +632,7 @@ static int nvs_flash_block_move(FAR struct nvs_fs *fs, uint32_t addr,
       addr += bytes_to_copy;
     }
 
-  return 0;
+  return data_crc8 == entry->data_crc8 ? 0 : -EBADMSG;
 }
 
 /****************************************************************************
@@ -1203,10 +1214,12 @@ static int nvs_gc(FAR struct nvs_fs *fs)
           gc_ate->offset = fs->data_wra & NVS_ADDR_OFFS_MASK;
           nvs_ate_crc8_update(gc_ate);
 
-          rc = nvs_flash_block_move(fs, data_addr,
-                                    nvs_align_up(fs, gc_ate->key_len +
-                                                 gc_ate->len));
-          if (rc)
+          rc = nvs_flash_block_move(fs, gc_ate, data_addr);
+          if (rc == -EBADMSG)
+            {
+              continue;
+            }
+          else if (rc)
             {
               return rc;
             }
@@ -1761,6 +1774,7 @@ static ssize_t nvs_read_entry(FAR struct nvs_fs *fs, FAR const uint8_t *key,
             {
               ferr("Invalid data crc: %" PRIx8 ", wlk_ate->data_crc8: "
                    "%" PRIx8 "\n", data_crc8, wlk_ate->data_crc8);
+              nvs_expire_ate(fs, hist_addr);
               return -EIO;
             }
         }
