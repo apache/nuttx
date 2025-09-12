@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32s3/lckfb-szpi-esp32s3/src/etc/init.d/rcS
+ * boards/xtensa/esp32/common/src/etc/init.d/rcS
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -22,14 +22,16 @@
 
 #include <nuttx/config.h>
 
+/* This script "rcS" is executed after the rc.sysinit script.
+ * It should startup some application and other system service.
+ */
+
+echo "rcS file is called!"
+
 #ifdef CONFIG_SYSTEM_ADBD
 adbd &
 #endif
 
 #ifdef CONFIG_SYSTEM_FASTBOOTD
 fastbootd &
-#endif
-
-#ifdef CONFIG_EXAMPLES_LVGLDEMO
-lvgldemo widgets &
 #endif
