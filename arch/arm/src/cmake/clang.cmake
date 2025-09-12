@@ -42,27 +42,7 @@ set(CMAKE_RANLIB llvm-ranlib)
 # built-in functions, refer: https://github.com/apache/incubator-nuttx/pull/5971
 
 add_compile_options(-fno-builtin)
-
-if(TOOLCHAIN_CLANG_CONFIG)
-  execute_process(COMMAND clang --version
-                  OUTPUT_VARIABLE clang_full_version_string)
-
-  string(REGEX REPLACE ".*clang version ([0-9]+\\.[0-9]+\.[0-9]+).*" "\\1"
-                       CLANGVER ${clang_full_version_string})
-
-  if(CLANGVER STREQUAL "14.0")
-    set(TOOLCHAIN_CLANG_CONFIG ${TOOLCHAIN_CLANG_CONFIG}_nosys)
-  elseif(CLANGVER STRGREATER_EQUAL "17.0")
-    set(TOOLCHAIN_CLANG_OPTION -target)
-    set(TOOLCHAIN_CLANG_TARGET --target=arm-none-eabi)
-  else()
-    set(TOOLCHAIN_CLANG_OPTION --config)
-  endif()
-  add_compile_options(${TOOLCHAIN_CLANG_OPTION} ${TOOLCHAIN_CLANG_CONFIG}.cfg
-                      ${TOOLCHAIN_CLANG_TARGET})
-  add_link_options(${TOOLCHAIN_CLANG_OPTION} ${TOOLCHAIN_CLANG_CONFIG}.cfg
-                   ${TOOLCHAIN_CLANG_TARGET})
-endif()
+add_compile_options(--target=arm-none-eabi)
 
 # override the ARCHIVE command
 

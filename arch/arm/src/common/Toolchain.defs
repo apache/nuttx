@@ -225,25 +225,13 @@ ifeq ($(CONFIG_ARM_TOOLCHAIN_CLANG),y)
 
   ARCHOPTIMIZATION += -fno-builtin
 
-  ifneq ($(TOOLCHAIN_CLANG_CONFIG),)
-    ifeq ($(CLANGVER),)
-      export CLANGVER := $(shell $(CC) --version | grep "clang version" | sed -E "s/.* ([0-9]+\.[0-9]+\.[0-9]+).*/\1/")
-    endif
+  ifeq ($(CLANGVER),)
+    export CLANGVER := $(shell $(CC) --version | grep "clang version" | sed -E "s/.* ([0-9]+\.[0-9]+\.[0-9]+).*/\1/")
+  endif
 
-    ifeq ($(CLANGVER),14.0)
-      TOOLCHAIN_CLANG_CONFIG := $(TOOLCHAIN_CLANG_CONFIG)_nosys
-    endif
-
-    ifeq "17.0" "$(word 1, $(sort 17.0 $(CLANGVER)))"
-      TOOLCHAIN_CLANG_OPTION = -target
-      ARCHCPUFLAGS += --target=arm-none-eabi
-
-      LDFLAGS += --print-memory-usage
-    else
-      TOOLCHAIN_CLANG_OPTION = --config
-    endif
-
-    ARCHCPUFLAGS := $(TOOLCHAIN_CLANG_OPTION) $(TOOLCHAIN_CLANG_CONFIG).cfg $(ARCHCPUFLAGS)
+  ifeq "17.0" "$(word 1, $(sort 17.0 $(CLANGVER)))"
+    ARCHCPUFLAGS += --target=arm-none-eabi
+    LDFLAGS += --print-memory-usage
   endif
 
   LDFLAGS += --entry=__start
