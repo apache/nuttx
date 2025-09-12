@@ -104,6 +104,7 @@ ssize_t syslog_write_foreach(FAR const char *buffer,
   syslog_write_t write;
   syslog_putc_t  putc;
   size_t nwritten = 0;
+  size_t nwritten_max = 0;
   ssize_t ret;
   int i;
 
@@ -205,9 +206,19 @@ ssize_t syslog_write_foreach(FAR const char *buffer,
             }
 #endif
         }
+
+      /* Instead of returning the number of bytes
+       * written to the last channel, returns the maximum
+       * number of bytes written to any existing channel.
+       */
+
+      if (nwritten > nwritten_max)
+        {
+          nwritten_max = nwritten;
+        }
     }
 
-  return nwritten;
+  return nwritten_max;
 }
 
 /****************************************************************************
