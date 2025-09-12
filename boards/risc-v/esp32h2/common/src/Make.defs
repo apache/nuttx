@@ -78,6 +78,10 @@ ifeq ($(CONFIG_MMCSD_SPI),y)
   CSRCS += esp_board_mmcsd.c
 endif
 
+ifeq ($(CONFIG_ETC_ROMFS),y)
+  RCSRCS  = etc/init.d/rc.sysinit etc/init.d/rcS
+endif
+
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src
