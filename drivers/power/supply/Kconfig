@@ -561,4 +561,20 @@ endif # REGULATOR_ACT8945A
 
 endif # REGULATOR
 
+config USBPD_HUSB238
+	bool "Hynetek HUSB238 USB-C PD Sink Controller support"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the Hynetek HUSB238 USB Type-C
+		Power Delivery (PD) sink controller.
+
+if USBPD_HUSB238
+
+config USBPD_HUSB238_I2C_FREQUENCY
+	int "HUSB238 I2C frequency"
+	default 400000
+
+endif # USBPD_HUSB238
+
 endmenu
