@@ -133,7 +133,6 @@ static inline int
             case BOARDIOC_USBDEV_CONNECT:    /* Connect the CDC/ACM device */
 #ifndef CONFIG_CDCACM_COMPOSITE
               {
-                DEBUGASSERT(ctrl->handle != NULL);
                 ret = cdcacm_initialize(ctrl->instance, ctrl->handle);
               }
 #endif
@@ -141,8 +140,18 @@ static inline int
 
             case BOARDIOC_USBDEV_DISCONNECT: /* Disconnect the CDC/ACM device */
               {
-                DEBUGASSERT(ctrl->handle != NULL && *ctrl->handle != NULL);
-                cdcacm_uninitialize(*ctrl->handle);
+#ifdef CONFIG_SYSTEM_CDCACM
+                if (ctrl->instance == CONFIG_SYSTEM_CDCACM_DEVMINOR)
+                  {
+                    ret = cdcacm_uninitialize_system_cdcacm();
+                  }
+                else
+#endif
+                  {
+                    DEBUGASSERT(ctrl->handle != NULL &&
+                                *ctrl->handle != NULL);
+                    cdcacm_uninitialize(*ctrl->handle);
+                  }
               }
               break;
 
