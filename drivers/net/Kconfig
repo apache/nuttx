@@ -68,6 +68,14 @@ config NETDEV_RSS
 		When the hardware supports RSS/aRFS function, provide the
 		hash value and CPU ID to the hardware driver.
 
+comment "Upper-half MDIO Bus Driver Options"
+
+config MDIO_BUS
+	bool "MDIO bus support"
+	default y
+	---help---
+		Enable support for the MDIO bus upper-half driver.
+
 comment "General Ethernet MAC Driver Options"
 
 config NET_RPMSG_DRV

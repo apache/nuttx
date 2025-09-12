@@ -30,6 +30,10 @@ ifeq ($(CONFIG_MM_IOB),y)
   CSRCS += netdev_upperhalf.c
 endif
 
+ifeq ($(CONFIG_MDIO_BUS),y)
+  CSRCS += mdio.c
+endif
+
 ifeq ($(CONFIG_NET_LOOPBACK),y)
   CSRCS += loopback.c
 endif

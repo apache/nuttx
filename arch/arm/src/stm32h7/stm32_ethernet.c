@@ -64,6 +64,7 @@
 #include "stm32_rcc.h"
 #include "stm32_ethernet.h"
 #include "stm32_uid.h"
+#include "stm32_mdio.h"
 
 #include <arch/board/board.h>
 
@@ -690,6 +691,8 @@ struct stm32_ethmac_s
   uint16_t             segments;    /* RX segment count */
   uint16_t             inflight;    /* Number of TX transfers "in_flight" */
   sq_queue_t           freeb;       /* The free buffer list */
+
+  struct mdio_bus_s *mdio;
 };
 
 /****************************************************************************
@@ -808,16 +811,13 @@ static void stm32_rxdescinit(struct stm32_ethmac_s *priv,
 #if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
 static int  stm32_phyintenable(struct stm32_ethmac_s *priv);
 #endif
-static int  stm32_phyread(uint16_t phydevaddr, uint16_t phyregaddr,
-                          uint16_t *value);
-static int  stm32_phywrite(uint16_t phydevaddr, uint16_t phyregaddr,
-                           uint16_t value, uint16_t mask);
+
 #ifdef CONFIG_ETH0_PHY_DM9161
 static inline int stm32_dm9161(struct stm32_ethmac_s *priv);
 #endif
 static int  stm32_phyinit(struct stm32_ethmac_s *priv);
 #ifdef CONFIG_STM32H7_ETHMAC_REGDEBUG
-static void  stm32_phyregdump(void);
+static void  stm32_phyregdump(struct stm32_ethmac_s *priv);
 #endif
 #endif
 
@@ -3038,7 +3038,8 @@ static int stm32_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
         {
           struct mii_ioctl_data_s *req =
             (struct mii_ioctl_data_s *)((uintptr_t)arg);
-          ret = stm32_phyread(req->phy_id, req->reg_num, &req->val_out);
+          ret = mdio_read(priv->mdio,
+            req->phy_id, req->reg_num, &req->val_out);
         }
         break;
 
@@ -3046,8 +3047,8 @@ static int stm32_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
         {
           struct mii_ioctl_data_s *req =
             (struct mii_ioctl_data_s *)((uintptr_t)arg);
-          ret = stm32_phywrite(req->phy_id, req->reg_num, req->val_in,
-                               0xffff);
+          ret = mdio_write(priv->mdio,
+            req->phy_id, req->reg_num, req->val_in);
         }
         break;
 
@@ -3092,148 +3093,6 @@ static int stm32_phyintenable(struct stm32_ethmac_s *priv)
 #endif
 
 /****************************************************************************
- * Function: stm32_phyread
- *
- * Description:
- *  Read a PHY register.
- *
- * Parameters:
- *   phydevaddr - The PHY device address
- *   phyregaddr - The PHY register address
- *   value - The location to return the 16-bit PHY register value.
- *
- * Returned Value:
- *   OK on success; Negated errno on failure.
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-static int stm32_phyread(uint16_t phydevaddr, uint16_t phyregaddr,
-                         uint16_t *value)
-{
-  volatile uint32_t timeout;
-  uint32_t regval;
-
-  /* Configure the MACMDIOAR register, preserving CSR Clock Range CR[3:0]
-   * bits
-   */
-
-  regval  = stm32_getreg(STM32_ETH_MACMDIOAR);
-  regval &= ETH_MACMDIOAR_CR_MASK;
-
-  /* Set the PHY device address, PHY register address, and set the buy bit.
-   * the ETH_MACMDIOAR_GOC == 3, indicating a read operation.
-   */
-
-  regval |= (((uint32_t)phydevaddr << ETH_MACMDIOAR_PA_SHIFT) &
-            ETH_MACMDIOAR_PA_MASK);
-  regval |= (((uint32_t)phyregaddr << ETH_MACMDIOAR_RDA_SHIFT) &
-            ETH_MACMDIOAR_RDA_MASK);
-  regval |= ETH_MACMDIOAR_MB | ETH_MACMDIOAR_GOC_READ;
-
-  stm32_putreg(regval, STM32_ETH_MACMDIOAR);
-
-  /* Wait for the transfer to complete */
-
-  for (timeout = 0; timeout < PHY_READ_TIMEOUT; timeout++)
-    {
-      if ((stm32_getreg(STM32_ETH_MACMDIOAR) & ETH_MACMDIOAR_MB) == 0)
-        {
-          *value = (uint16_t)stm32_getreg(STM32_ETH_MACMDIODR);
-          return OK;
-        }
-    }
-
-  ninfo("MII transfer timed out: phydevaddr: %04x phyregaddr: %04x\n",
-        phydevaddr, phyregaddr);
-
-  return -ETIMEDOUT;
-}
-
-/****************************************************************************
- * Function: stm32_phywrite
- *
- * Description:
- *  Write to a PHY register.
- *
- * Parameters:
- *   phydevaddr - The PHY device address
- *   phyregaddr - The PHY register address
- *   value - The 16-bit value to write to the PHY register value.
- *
- * Returned Value:
- *   OK on success; Negated errno on failure.
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-static int stm32_phywrite(uint16_t phydevaddr, uint16_t phyregaddr,
-                          uint16_t set, uint16_t clear)
-{
-  volatile uint32_t timeout;
-  uint32_t regval;
-  uint16_t value;
-
-  /* Configure the MACMDIOAR register, preserving CSR Clock Range CR[3:0]
-   * bits
-   */
-
-  regval  = stm32_getreg(STM32_ETH_MACMDIOAR);
-  regval &= ETH_MACMDIOAR_CR_MASK;
-
-  /* Read the existing register value, if clear mask is given */
-
-  if (clear != 0xffff)
-    {
-      if (stm32_phyread(phydevaddr, phyregaddr, &value) != OK)
-        {
-          return -ETIMEDOUT;
-        }
-
-      value &= ~clear;
-      value |= set;
-    }
-  else
-    {
-      value = set;
-    }
-
-  /* Set the PHY device address, PHY register address, and set the busy bit.
-   * the ETH_MACMDIOAR_GOC == 1, indicating a write operation.
-   */
-
-  regval |= (((uint32_t)phydevaddr << ETH_MACMDIOAR_PA_SHIFT) &
-            ETH_MACMDIOAR_PA_MASK);
-  regval |= (((uint32_t)phyregaddr << ETH_MACMDIOAR_RDA_SHIFT) &
-            ETH_MACMDIOAR_RDA_MASK);
-  regval |= (ETH_MACMDIOAR_MB | ETH_MACMDIOAR_GOC_WRITE);
-
-  /* Write the value into the MACMDIODR register before setting the new
-   * MACMDIOAR register value.
-   */
-
-  stm32_putreg(value, STM32_ETH_MACMDIODR);
-  stm32_putreg(regval, STM32_ETH_MACMDIOAR);
-
-  /* Wait for the transfer to complete */
-
-  for (timeout = 0; timeout < PHY_WRITE_TIMEOUT; timeout++)
-    {
-      if ((stm32_getreg(STM32_ETH_MACMDIOAR) & ETH_MACMDIOAR_MB) == 0)
-        {
-          return OK;
-        }
-    }
-
-  ninfo("MII transfer timed out: phydevaddr: %04x phyregaddr: %04x value: "
-        "%04x\n", phydevaddr, phyregaddr, value);
-
-  return -ETIMEDOUT;
-}
-
-/****************************************************************************
  * Function: stm32_dm9161
  *
  * Description:
@@ -3261,7 +3120,8 @@ static inline int stm32_dm9161(struct stm32_ethmac_s *priv)
    * indication that check if the DM9161 PHY CHIP is not ready.
    */
 
-  ret = stm32_phyread(CONFIG_STM32H7_PHYADDR, MII_PHYID1, &phyval);
+  ret = mdio_read(priv->mdio,
+    CONFIG_STM32H7_PHYADDR, MII_PHYID1, &phyval);
   if (ret < 0)
     {
       nerr("ERROR: Failed to read the PHY ID1: %d\n", ret);
@@ -3283,7 +3143,8 @@ static inline int stm32_dm9161(struct stm32_ethmac_s *priv)
    * Register 16
    */
 
-  ret = stm32_phyread(CONFIG_STM32H7_PHYADDR, 16, &phyval);
+  ret = mdio_read(priv->mdio,
+    CONFIG_STM32H7_PHYADDR, 16, &phyval);
   if (ret < 0)
     {
       nerr("ERROR: Failed to read the PHY Register 0x10: %d\n", ret);
@@ -3318,7 +3179,7 @@ static inline int stm32_dm9161(struct stm32_ethmac_s *priv)
  ****************************************************************************/
 
 #ifdef CONFIG_STM32H7_ETHMAC_REGDEBUG
-static void stm32_phyregdump()
+static void stm32_phyregdump(struct stm32_ethmac_s *priv)
 {
   uint16_t phyval;
   int ret;
@@ -3326,7 +3187,8 @@ static void stm32_phyregdump()
 
   for (i = 0; i < 0x20; i++)
     {
-      ret = stm32_phyread(CONFIG_STM32H7_PHYADDR, i, &phyval);
+      ret = mdio_read(priv->mdio,
+        CONFIG_STM32H7_PHYADDR, i, &phyval);
       if (ret < 0)
         {
           nerr("ERROR: Failed to read reg: 0%2x\n", i);
@@ -3379,8 +3241,8 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
 
   /* Put the PHY in reset mode */
 
-  ret = stm32_phywrite(CONFIG_STM32H7_PHYADDR, MII_MCR, MII_MCR_RESET,
-                       MII_MCR_RESET);
+  ret = mdio_write(priv->mdio,
+    CONFIG_STM32H7_PHYADDR, MII_MCR, MII_MCR_RESET);
   if (ret < 0)
     {
       nerr("ERROR: Failed to reset the PHY: %d\n", ret);
@@ -3393,7 +3255,8 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
       up_mdelay(10);
       to -= 10;
       phyval = 0xffff;
-      ret = stm32_phyread(CONFIG_STM32H7_PHYADDR, MII_MCR, &phyval);
+      ret = mdio_read(priv->mdio,
+        CONFIG_STM32H7_PHYADDR, MII_MCR, &phyval);
 
       ninfo("MII_MCR: phyval: %u ret: %d\n", phyval, ret);
     }
@@ -3409,7 +3272,8 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
       ninfo("Phy reset in %d ms\n", PHY_RESET_DELAY - to);
     }
 
-  ret = stm32_phyread(CONFIG_STM32H7_PHYADDR, MII_PHYID1, &phyval);
+  ret = mdio_read(priv->mdio,
+    CONFIG_STM32H7_PHYADDR, MII_PHYID1, &phyval);
 
   if (ret < 0)
     {
@@ -3426,7 +3290,8 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
 
   ninfo("MII_PHYID1: phyval: %u ret: %d\n", phyval, ret);
 
-  ret = stm32_phyread(CONFIG_STM32H7_PHYADDR, MII_PHYID2, &phyval);
+  ret = mdio_read(priv->mdio,
+    CONFIG_STM32H7_PHYADDR, MII_PHYID2, &phyval);
 
   if (ret < 0)
     {
@@ -3444,7 +3309,7 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
   ninfo("MII_PHYID2: phyval: %u ret: %d\n", phyval, ret);
 
 #ifdef CONFIG_STM32H7_ETHMAC_REGDEBUG
-  stm32_phyregdump();
+  stm32_phyregdump(priv);
 #endif
 
   /* Special workaround for the Davicom DM9161 PHY is required. */
@@ -3464,7 +3329,8 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
 
   for (timeout = 0; timeout < PHY_RETRY_TIMEOUT; timeout++)
     {
-      ret = stm32_phyread(CONFIG_STM32H7_PHYADDR, MII_MSR, &phyval);
+      ret = mdio_read(priv->mdio,
+        CONFIG_STM32H7_PHYADDR, MII_MSR, &phyval);
       if (ret < 0)
         {
           nerr("ERROR: Failed to read the PHY MSR: %d\n", ret);
@@ -3487,8 +3353,8 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
 
   /* Enable auto-negotiation */
 
-  ret = stm32_phywrite(CONFIG_STM32H7_PHYADDR, MII_MCR, MII_MCR_ANENABLE,
-                       MII_MCR_ANENABLE);
+  ret = mdio_write(priv->mdio,
+    CONFIG_STM32H7_PHYADDR, MII_MCR, MII_MCR_ANENABLE);
   if (ret < 0)
     {
       nerr("ERROR: Failed to enable auto-negotiation: %d\n", ret);
@@ -3499,7 +3365,8 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
 
   for (timeout = 0; timeout < PHY_RETRY_TIMEOUT; timeout++)
     {
-      ret = stm32_phyread(CONFIG_STM32H7_PHYADDR, MII_MSR, &phyval);
+      ret = mdio_read(priv->mdio,
+        CONFIG_STM32H7_PHYADDR, MII_MSR, &phyval);
       if (ret < 0)
         {
           nerr("ERROR: Failed to read the PHY MSR: %d\n", ret);
@@ -3521,7 +3388,8 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
 
   /* Read the result of the auto-negotiation from the PHY-specific register */
 
-  ret = stm32_phyread(CONFIG_STM32H7_PHYADDR, CONFIG_STM32H7_PHYSR, &phyval);
+  ret = mdio_read(priv->mdio,
+    CONFIG_STM32H7_PHYADDR, CONFIG_STM32H7_PHYSR, &phyval);
   if (ret < 0)
     {
       nerr("ERROR: Failed to read PHY status register\n");
@@ -4305,6 +4173,15 @@ static inline int stm32_ethinitialize(int intf)
   /* Configure GPIO pins to support Ethernet */
 
   stm32_ethgpioconfig(priv);
+
+  /* Initialize the MDIO device */
+
+  priv->mdio = stm32_mdio_bus_initialize();
+  if (!priv->mdio)
+    {
+      nerr("ERROR: Failed to initialize MDIO bus\n");
+      return -ENOMEM;
+    }
 
   /* Attach the IRQ to the driver */
 
