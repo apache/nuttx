@@ -412,6 +412,24 @@ void cdcacm_get_composite_devdesc(struct composite_devdesc_s *dev);
 #endif
 
 /****************************************************************************
+ * Name: cdcacm_uninitialize_system_cdcacm
+ *
+ * Description:
+ *   Helper function uninitialize system cdcacm
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   OK when successful, -ENODEV if cdcacm is not initialized
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_SYSTEM_CDCACM)
+  int cdcacm_uninitialize_system_cdcacm(void);
+#endif
+
+/****************************************************************************
  * Name: cdcacm_write
  *
  * Description:

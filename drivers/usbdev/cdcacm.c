@@ -254,6 +254,10 @@ static void    cdcuart_dmareceive(FAR struct uart_dev_s *dev);
 static FAR struct cdcacm_dev_s *g_syslog_cdcacm;
 #endif
 
+#ifdef CONFIG_SYSTEM_CDCACM
+FAR struct usbdevclass_driver_s *g_system_cdcacm;
+#endif
+
 /* USB class device *********************************************************/
 
 static const struct usbdevclass_driverops_s g_driverops =
@@ -3401,6 +3405,13 @@ int cdcacm_initialize(int minor, FAR void **handle)
       *handle = (FAR void *)drvr;
     }
 
+#ifdef CONFIG_SYSTEM_CDCACM
+  if (ret == OK && minor == CONFIG_SYSTEM_CDCACM_DEVMINOR)
+    {
+      g_system_cdcacm = drvr;
+    }
+#endif
+
   return ret;
 }
 #endif
@@ -3440,6 +3451,13 @@ void cdcacm_uninitialize(FAR struct usbdevclass_driver_s *classdev)
     }
 #endif
 
+#ifdef CONFIG_SYSTEM_CDCACM
+  if (g_system_cdcacm == classdev)
+    {
+      g_system_cdcacm = NULL;
+    }
+#endif
+
   /* Disconnect in case we are connected */
 
   cdcacm_disconnect(classdev, priv->usbdev);
@@ -3458,6 +3476,34 @@ void cdcacm_uninitialize(FAR struct usbdevclass_driver_s *classdev)
                (uint16_t)-ret);
     }
 }
+
+/****************************************************************************
+ * Name: cdcacm_uninitialize_system_cdcacm
+ *
+ * Description:
+ *   Helper function uninitialize system cdcacm
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   OK when successful, -ENODEV if cdcacm is not initialized
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_SYSTEM_CDCACM)
+int cdcacm_uninitialize_system_cdcacm()
+{
+  int ret = -ENODEV;
+  if (g_system_cdcacm)
+    {
+      cdcacm_uninitialize(g_system_cdcacm);
+      ret = OK;
+    }
+
+  return ret;
+}
+#endif
 
 /****************************************************************************
  * Name: cdcacm_get_composite_devdesc
