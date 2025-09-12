@@ -50,7 +50,7 @@
 #  include "esp32s2_tim_lowerhalf.h"
 #endif
 
-#ifdef CONFIG_ESPRESSIF_WLAN
+#ifdef CONFIG_ESPRESSIF_WIFI
 #  include "esp32s2_board_wlan.h"
 #endif
 
@@ -341,16 +341,14 @@ int esp32s2_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_ESPRESSIF_WIRELESS
+#ifdef CONFIG_ESPRESSIF_WIFI
 
-#ifdef CONFIG_ESPRESSIF_WLAN
   ret = board_wlan_init();
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize wlan subsystem=%d\n",
-             ret);
+              ret);
     }
-#endif
 
 #endif
 

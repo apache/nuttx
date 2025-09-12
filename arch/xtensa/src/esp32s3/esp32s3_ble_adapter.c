@@ -3163,6 +3163,71 @@ uint32_t get_ble_controller_free_heap_size(void)
  * Other Functions
  ****************************************************************************/
 
+int32_t esp_ble_to_errno(int err)
+{
+  int ret;
+
+  if (err < ESP_ERR_WIFI_BASE)
+    {
+      /* Unmask component error bits */
+
+      ret = err & 0xfff;
+
+      switch (ret)
+        {
+          case ESP_OK:
+            ret = OK;
+            break;
+          case ESP_ERR_NO_MEM:
+            ret = -ENOMEM;
+            break;
+
+          case ESP_ERR_INVALID_ARG:
+            ret = -EINVAL;
+            break;
+
+          case ESP_ERR_INVALID_STATE:
+            ret = -EIO;
+            break;
+
+          case ESP_ERR_INVALID_SIZE:
+            ret = -EINVAL;
+            break;
+
+          case ESP_ERR_NOT_FOUND:
+            ret = -ENOSYS;
+            break;
+
+          case ESP_ERR_NOT_SUPPORTED:
+            ret = -ENOSYS;
+            break;
+
+          case ESP_ERR_TIMEOUT:
+            ret = -ETIMEDOUT;
+            break;
+
+          case ESP_ERR_INVALID_MAC:
+            ret = -EINVAL;
+            break;
+
+          default:
+            ret = ERROR;
+            break;
+        }
+    }
+  else
+    {
+      ret = ERROR;
+    }
+
+  if (ret != OK)
+    {
+      wlerr("ERROR: %s\n", esp_err_to_name(err));
+    }
+
+  return ret;
+}
+
 /****************************************************************************
  * Name: esp32s3_bt_controller_init
  *
@@ -3318,7 +3383,7 @@ error:
 
   bt_controller_deinit_internal ();
 
-  return esp_wifi_to_errno(err);
+  return esp_ble_to_errno(err);
 }
 
 /****************************************************************************
