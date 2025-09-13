@@ -29,20 +29,20 @@
 #include <assert.h>
 #include <debug.h>
 #include <errno.h>
-#include <nuttx/irq.h>
-#include <nuttx/semaphore.h>
 #include <semaphore.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
+#include <sys/wait.h>
+#include <time.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/i2c/i2c_master.h>
+#include <nuttx/irq.h>
 #include <nuttx/mutex.h>
-#include <sys/wait.h>
-#include <time.h>
+#include <nuttx/semaphore.h>
 
 #include "arm64_arch.h"
 #include "arm64_gic.h"
@@ -56,10 +56,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-/* Timeout duration in ms for transfers waiting on interrupt handler. */
-
-#define I2C_TIMEOUT_MS 50
 
 /* Default bus frequency at 400kbps. */
 
@@ -77,6 +73,106 @@
 
 #define FIFO_DEPTH 16
 
+/* Logic for determining which alternate function should be used to achieve
+ * the user selected I2C pins for each interface
+ */
+
+#ifdef CONFIG_BCM2711_I2C0
+
+#if CONFIG_BCM2711_I2C0_SDA == 0 && CONFIG_BCM2711_I2C0_SCL == 1
+#define BCM2711_I2C0_ALT BCM_GPIO_FUNC0
+#elif CONFIG_BCM2711_I2C0_SDA == 28 && CONFIG_BCM2711_I2C0_SCL == 29
+#define BCM2711_I2C0_ALT BCM_GPIO_FUNC0
+#elif CONFIG_BCM2711_I2C0_SDA == 44 && CONFIG_BCM2711_I2C0_SCL == 45
+#define BCM2711_I2C0_ALT BCM_GPIO_FUNC1
+#elif CONFIG_BCM2711_I2C0_SDA == 46 && CONFIG_BCM2711_I2C0_SCL == 47
+#error "BCM2711 datasheet does not declare the alternate function needed for this pin pair."
+#else
+#error "Invalid I2C0 pin selections. Valid SDA/SCL pairs are 0/1,28/29,44/45"
+#endif
+
+#endif /* CONFIG_BCM2711_I2C0 */
+
+#ifdef CONFIG_BCM2711_I2C1
+
+#if CONFIG_BCM2711_I2C1_SDA == 2 && CONFIG_BCM2711_I2C1_SCL == 3
+#define BCM2711_I2C1_ALT BCM_GPIO_FUNC0
+#elif CONFIG_BCM2711_I2C1_SDA == 44 && CONFIG_BCM2711_I2C1_SCL == 45
+#define BCM2711_I2C1_ALT BCM_GPIO_FUNC2
+#else
+#error "Invalid I2C1 pin selections. Valid SDA/SCL pairs are 2/3,44/45"
+#endif
+
+#endif /* CONFIG_BCM2711_I2C1 */
+
+#ifdef CONFIG_BCM2711_I2C3
+
+#if CONFIG_BCM2711_I2C3_SDA == 4 && CONFIG_BCM2711_I2C3_SCL == 5
+#define BCM2711_I2C3_ALT BCM_GPIO_FUNC5
+#elif CONFIG_BCM2711_I2C3_SDA == 2 && CONFIG_BCM2711_I2C3_SCL == 3
+#define BCM2711_I2C3_ALT BCM_GPIO_FUNC5
+#else
+#error "Invalid I2C3 pin selections. Valid SDA/SCL pairs are 4/5,2/3"
+#endif
+
+#endif /* CONFIG_BCM2711_I2C3 */
+
+#ifdef CONFIG_BCM2711_I2C4
+
+#if CONFIG_BCM2711_I2C4_SDA == 8 && CONFIG_BCM2711_I2C4_SCL == 9
+#define BCM2711_I2C4_ALT BCM_GPIO_FUNC5
+#elif CONFIG_BCM2711_I2C4_SDA == 6 && CONFIG_BCM2711_I2C4_SCL == 7
+#define BCM2711_I2C4_ALT BCM_GPIO_FUNC5
+#else
+#error "Invalid I2C4 pin selections. Valid SDA/SCL pairs are 8/9,6/7"
+#endif
+
+#endif /* CONFIG_BCM2711_I2C4 */
+
+#ifdef CONFIG_BCM2711_I2C5
+
+#if CONFIG_BCM2711_I2C5_SDA == 12 && CONFIG_BCM2711_I2C5_SCL == 13
+#define BCM2711_I2C5_ALT BCM_GPIO_FUNC5
+#elif CONFIG_BCM2711_I2C5_SDA == 10 && CONFIG_BCM2711_I2C5_SCL == 11
+#define BCM2711_I2C5_ALT BCM_GPIO_FUNC5
+#else
+#error "Invalid I2C5 pin selections. Valid SDA/SCL pairs are 12/13,10/11"
+#endif
+
+#endif /* CONFIG_BCM2711_I2C5 */
+
+#ifdef CONFIG_BCM2711_I2C6
+
+#if CONFIG_BCM2711_I2C6_SDA == 22 && CONFIG_BCM2711_I2C6_SCL == 23
+#define BCM2711_I2C6_ALT BCM_GPIO_FUNC5
+#elif CONFIG_BCM2711_I2C6_SDA == 0 && CONFIG_BCM2711_I2C6_SCL == 1
+#define BCM2711_I2C6_ALT BCM_GPIO_FUNC5
+#else
+#error "Invalid I2C6 pin selections. Valid SDA/SCL pairs are 12/13,10/11"
+#endif
+
+/* Verify that no two interfaces have overlapping pin pairs. This is only
+ * possible with some interfaces.
+ */
+
+/* 0 and 1 pins are common between I2C6 and I2C0 */
+
+#if defined(CONFIG_BCM2711_I2C6) && defined(CONFIG_BCM2711_I2C0)
+#if CONFIG_BCM2711_I2C6_SDA == CONFIG_BCM2711_I2C0_SDA
+#error "Same pin pair selected for I2C6 and I2C0."
+#endif
+#endif
+
+/* 2 and 3 pins are common between I2C1 and I2C3 */
+
+#if defined(CONFIG_BCM2711_I2C1) && defined(CONFIG_BCM2711_I2C3)
+#if CONFIG_BCM2711_I2C1_SDA == CONFIG_BCM2711_I2C3_SDA
+#error "Same pin pair selected for I2C1 and I2C3."
+#endif
+#endif
+
+#endif /* CONFIG_BCM2711_I2C6 */
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -85,48 +181,48 @@
 
 struct bcm2711_i2cdev_s
 {
-  struct i2c_master_s dev; /* Generic I2C device */
-  uint32_t base;           /* Base address of I2C interface */
-  uint8_t port;            /* Port number */
-
-  mutex_t lock;       /* Exclusive access */
-  sem_t wait;         /* Wait for transfer completion */
-  uint32_t frequency; /* I2C bus frequency */
-
-  struct i2c_msg_s *msgs; /* Messages to send */
-  size_t reg_buff_offset; /* Offset into message buffer */
-  uint8_t rw_size;        /* max(FIFO_DEPTH, remaining message size) */
-  bool done;              /* If `wait` was posted due to done condition. */
-
-  int err;  /* Error status of transfers */
-  int refs; /* Reference count */
+  struct i2c_master_s dev;      /* Generic I2C device */
+  mutex_t lock;                 /* Exclusive access */
+  sem_t wait;                   /* Wait for transfer completion */
+  uint32_t base;                /* Base address of I2C interface */
+  uint32_t frequency;           /* I2C bus frequency */
+  uint32_t sda;                 /* SDA GPIO number */
+  uint32_t scl;                 /* SCL GPIO number */
+  enum bcm2711_gpio_func_e alt; /* Alternate func. to use pins as I2C */
+  int err;                      /* Error status of transfers */
+  int refs;                     /* Reference count */
+  uint8_t port;                 /* Port number */
+  bool done;                    /* Transfer had DONE condition. */
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static int bcm2711_i2c_semtimedwait(struct bcm2711_i2cdev_s *priv,
-                                    uint32_t ms);
 static void bcm2711_i2c_clearfifos(struct bcm2711_i2cdev_s *priv);
 static void bcm2711_i2c_setfrequency(struct bcm2711_i2cdev_s *priv,
                                      uint32_t frequency);
 static void bcm2711_i2c_setaddr(struct bcm2711_i2cdev_s *priv,
                                 uint16_t addr);
 static void bcm2711_i2c_starttransfer(struct bcm2711_i2cdev_s *priv);
+static bool bcm2711_i2c_transferactive(struct bcm2711_i2cdev_s *priv);
 static int bcm2711_i2c_interrupted(struct bcm2711_i2cdev_s *priv);
 static void bcm2711_i2c_disable(struct bcm2711_i2cdev_s *priv);
 static void bcm2711_i2c_enable(struct bcm2711_i2cdev_s *priv);
-static void bcm2711_i2c_drainrxfifo(struct bcm2711_i2cdev_s *priv);
-static int bcm2711_i2c_send(struct bcm2711_i2cdev_s *priv, bool stop);
-static int bcm2711_i2c_receive(struct bcm2711_i2cdev_s *priv, bool stop);
-
+static size_t bcm2711_i2c_drainrxfifo(struct bcm2711_i2cdev_s *priv,
+                                      FAR uint8_t *buf, size_t n);
+static size_t bcm2711_i2c_filltxfifo(struct bcm2711_i2cdev_s *priv,
+                                     FAR uint8_t *buf, size_t n);
+static int bcm2711_i2c_send(struct bcm2711_i2cdev_s *priv, FAR void *buf,
+                            size_t n);
+static int bcm2711_i2c_receive(struct bcm2711_i2cdev_s *priv, FAR void *buf,
+                               size_t n);
 static int bcm2711_i2c_secondary_handler(struct bcm2711_i2cdev_s *priv);
 
 static int bcm2711_i2c_transfer(struct i2c_master_s *dev,
                                 struct i2c_msg_s *msgs, int count);
 #ifdef CONFIG_I2C_RESET
-static int bcm2711_i2c_reset(struct i2c_master_s *dev);
+  #warning "Not implemented"
 #endif
 
 /****************************************************************************
@@ -146,18 +242,31 @@ static uint8_t g_i2c_devsinit = 0;
 struct i2c_ops_s bcm2711_i2c_ops =
 {
   .transfer = bcm2711_i2c_transfer,
-#if defined(CONFIG_I2C_RESET)
-  .reset = bcm2711_i2c_reset,
-#endif // defined(CONFIG_I2C_RESET)
 };
 
+#ifdef CONFIG_BCM2711_I2C0
+static struct bcm2711_i2cdev_s g_i2c0dev =
+{
+  .base = BCM_BSC0,
+  .sda = CONFIG_BCM2711_I2C0_SDA,
+  .scl = CONFIG_BCM2711_I2C0_SCL,
+  .alt = BCM2711_I2C0_ALT,
+  .lock = NXMUTEX_INITIALIZER,
+  .wait = SEM_INITIALIZER(0),
+  .port = 0,
+  .refs = 0,
+  .err = 0,
+  .done = false,
+};
+#endif /* CONFIG_BCM2711_I2C0 */
+
 #ifdef CONFIG_BCM2711_I2C1
-
-/* I2C1 interface. */
-
 static struct bcm2711_i2cdev_s g_i2c1dev =
 {
   .base = BCM_BSC1,
+  .sda = CONFIG_BCM2711_I2C1_SDA,
+  .scl = CONFIG_BCM2711_I2C1_SCL,
+  .alt = BCM2711_I2C1_ALT,
   .lock = NXMUTEX_INITIALIZER,
   .wait = SEM_INITIALIZER(0),
   .port = 1,
@@ -165,112 +274,120 @@ static struct bcm2711_i2cdev_s g_i2c1dev =
   .err = 0,
   .done = false,
 };
+#endif /* CONFIG_BCM2711_I2C1 */
 
-#endif // CONFIG_BCM2711_I2C1
+#ifdef CONFIG_BCM2711_I2C3
+static struct bcm2711_i2cdev_s g_i2c3dev =
+{
+  .base = BCM_BSC3,
+  .sda = CONFIG_BCM2711_I2C3_SDA,
+  .scl = CONFIG_BCM2711_I2C3_SCL,
+  .alt = BCM2711_I2C3_ALT,
+  .lock = NXMUTEX_INITIALIZER,
+  .wait = SEM_INITIALIZER(0),
+  .port = 3,
+  .refs = 0,
+  .err = 0,
+  .done = false,
+};
+#endif /* CONFIG_BCM2711_I2C3 */
+
+#ifdef CONFIG_BCM2711_I2C4
+static struct bcm2711_i2cdev_s g_i2c4dev =
+{
+  .base = BCM_BSC4,
+  .sda = CONFIG_BCM2711_I2C4_SDA,
+  .scl = CONFIG_BCM2711_I2C4_SCL,
+  .alt = BCM2711_I2C4_ALT,
+  .lock = NXMUTEX_INITIALIZER,
+  .wait = SEM_INITIALIZER(0),
+  .port = 4,
+  .refs = 0,
+  .err = 0,
+  .done = false,
+};
+#endif /* CONFIG_BCM2711_I2C4 */
+
+#ifdef CONFIG_BCM2711_I2C5
+static struct bcm2711_i2cdev_s g_i2c5dev =
+{
+  .base = BCM_BSC5,
+  .sda = CONFIG_BCM2711_I2C5_SDA,
+  .scl = CONFIG_BCM2711_I2C5_SCL,
+  .alt = BCM2711_I2C5_ALT,
+  .lock = NXMUTEX_INITIALIZER,
+  .wait = SEM_INITIALIZER(0),
+  .port = 5,
+  .refs = 0,
+  .err = 0,
+  .done = false,
+};
+#endif /* CONFIG_BCM2711_I2C5 */
+
+#ifdef CONFIG_BCM2711_I2C6
+static struct bcm2711_i2cdev_s g_i2c6dev =
+{
+  .base = BCM_BSC6,
+  .sda = CONFIG_BCM2711_I2C6_SDA,
+  .scl = CONFIG_BCM2711_I2C6_SCL,
+  .alt = BCM2711_I2C6_ALT,
+  .lock = NXMUTEX_INITIALIZER,
+  .wait = SEM_INITIALIZER(0),
+  .port = 6,
+  .refs = 0,
+  .err = 0,
+  .done = false,
+};
+#endif /* CONFIG_BCM2711_I2C6 */
 
 /* I2C interfaces */
 
 static struct bcm2711_i2cdev_s *g_i2c_devices[BCM_BSCS_NUM] =
 {
 #ifdef CONFIG_BCM2711_I2C0
-#warning "I2C0 unsupported"
+  [0] = &g_i2c0dev,
 #else
-    [0] = NULL,
-#endif // CONFIG_BCM2711_I2C0
+  [0] = NULL,
+#endif /* CONFIG_BCM2711_I2C0 */
 
 #ifdef CONFIG_BCM2711_I2C1
-    [1] = &g_i2c1dev,
+  [1] = &g_i2c1dev,
 #else
-    [1] = NULL,
-#endif // CONFIG_BCM2711_I2C1
+  [1] = NULL,
+#endif /* CONFIG_BCM2711_I2C1 */
 
-#ifdef CONFIG_BCM2711_I2C2
-#warning "I2C2 unsupported"
-#else
-    [2] = NULL,
-#endif // CONFIG_BCM2711_I2C2
+  [2] = NULL, /* I2C2 is for HDMI */
 
 #ifdef CONFIG_BCM2711_I2C3
-#warning "I2C3 unsupported"
+  [3] = &g_i2c3dev,
 #else
-    [3] = NULL,
-#endif // CONFIG_BCM2711_I2C3
+  [3] = NULL,
+#endif /* CONFIG_BCM2711_I2C3 */
 
 #ifdef CONFIG_BCM2711_I2C4
-#warning "I2C4 unsupported"
+  [4] = &g_i2c4dev,
 #else
-    [4] = NULL,
-#endif // CONFIG_BCM2711_I2C4
+  [4] = NULL,
+#endif /* CONFIG_BCM2711_I2C4 */
 
 #ifdef CONFIG_BCM2711_I2C5
-#warning "I2C5 unsupported"
+  [5] = &g_i2c5dev,
 #else
-    [5] = NULL,
-#endif // CONFIG_BCM2711_I2C5
+  [5] = NULL,
+#endif /* CONFIG_BCM2711_I2C5 */
 
 #ifdef CONFIG_BCM2711_I2C6
-#warning "I2C6 unsupported"
+  [6] = &g_i2c6dev,
 #else
-    [6] = NULL,
-#endif // CONFIG_BCM2711_I2C6
+  [6] = NULL,
+#endif /* CONFIG_BCM2711_I2C6 */
+
+  [7] = NULL, /* I2C7 is for HDMI */
 };
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/* TODO: remove */
-
-static void bcm2711_i2c_print(struct bcm2711_i2cdev_s *priv)
-{
-  i2cerr("Port: %d\n", priv->port);
-  i2cerr("Err: %d\n", priv->err);
-  i2cerr("Refs: %d\n", priv->refs);
-  i2cerr("Done: %s\n", priv->done ? "true" : "false");
-  int val;
-  nxsem_get_value(&priv->wait, &val);
-  i2cerr("Semaphore: %d\n", val);
-  i2cerr("Frequency: %d\n", priv->frequency);
-  i2cerr("Cur msg: %p\n", priv->msgs);
-  if (priv->msgs != NULL)
-    {
-      i2cerr("Cur msg len: %ld\n", priv->msgs->length);
-    }
-}
-
-/****************************************************************************
- * Name: bcm2711_i2c_semtimedwait
- *
- * Description:
- *   Wait on the I2C interface semaphore for a given number of milliseconds.
- *
- * Input Parameters:
- *     priv - The BCM2711 I2C interface to wait on.
- *     ms - The number of milliseconds before timeout
- *
- * Returns:
- *     0 for success, negated errno otherwise.
- *
- ****************************************************************************/
-
-static int bcm2711_i2c_semtimedwait(struct bcm2711_i2cdev_s *priv,
-                                    uint32_t ms)
-{
-  struct timespec future;
-  int ret = 0;
-
-  ret = clock_gettime(CLOCK_REALTIME, &future);
-  if (ret < 0)
-    {
-      i2cerr("Timed wait failed on I2C%u.\n", priv->port);
-      return ret;
-    }
-
-  future.tv_sec += (ms / 1000);
-  future.tv_nsec += ((ms % 1000) * 1000);
-
-  return nxsem_timedwait_uninterruptible(&priv->wait, &future);
-}
 
 /****************************************************************************
  * Name: bcm2711_i2c_clearfifos
@@ -285,7 +402,7 @@ static int bcm2711_i2c_semtimedwait(struct bcm2711_i2cdev_s *priv,
 
 static void bcm2711_i2c_clearfifos(struct bcm2711_i2cdev_s *priv)
 {
-  modreg32(0, BCM_BSC_C_CLRFIFO, BCM_BSC_C(priv->base));
+  modreg32(BCM_BSC_C_CLEAR, BCM_BSC_C_CLEAR, BCM_BSC_C(priv->base));
 }
 
 /****************************************************************************
@@ -339,8 +456,24 @@ static void bcm2711_i2c_setaddr(struct bcm2711_i2cdev_s *priv, uint16_t addr)
 
 static void bcm2711_i2c_starttransfer(struct bcm2711_i2cdev_s *priv)
 {
-  i2cinfo("Transfer started\n");
   modreg32(BCM_BSC_C_ST, BCM_BSC_C_ST, BCM_BSC_C(priv->base));
+}
+
+/****************************************************************************
+ * Name: bcm2711_i2c_starttransfer
+ *
+ * Description:
+ *   Check the status of a transfer.
+ *
+ * Input Parameters:
+ *     priv - The BCM2711 I2C interface to check the transfer status of.
+ *
+ * Returns: True if the transfer is active, false otherwise.
+ ****************************************************************************/
+
+static bool bcm2711_i2c_transferactive(struct bcm2711_i2cdev_s *priv)
+{
+  return getreg32(BCM_BSC_S(priv->base)) & BCM_BSC_S_TA;
 }
 
 /****************************************************************************
@@ -376,21 +509,14 @@ static int bcm2711_i2c_interrupted(struct bcm2711_i2cdev_s *priv)
 
 static void bcm2711_i2c_disable(struct bcm2711_i2cdev_s *priv)
 {
-  i2cinfo("Disabled I2C%u\n", priv->port);
-
-  /* Disable interrupts */
-
-  modreg32(0, BCM_BSC_C_INTD, BCM_BSC_C(priv->base));
-  modreg32(0, BCM_BSC_C_INTR, BCM_BSC_C(priv->base));
-  modreg32(0, BCM_BSC_C_INTT, BCM_BSC_C(priv->base));
-
-  /* Clear FIFO */
-
-  bcm2711_i2c_clearfifos(priv);
-
   /* Disable interface */
 
   modreg32(0, BCM_BSC_C_I2CEN, BCM_BSC_C(priv->base));
+
+  /* Disable interrupts */
+
+  modreg32(0, (BCM_BSC_C_INTD | BCM_BSC_C_INTR | BCM_BSC_C_INTT),
+           BCM_BSC_C(priv->base));
 }
 
 /****************************************************************************
@@ -406,21 +532,15 @@ static void bcm2711_i2c_disable(struct bcm2711_i2cdev_s *priv)
 
 static void bcm2711_i2c_enable(struct bcm2711_i2cdev_s *priv)
 {
+  /* Enable interrupts */
+
+  modreg32((BCM_BSC_C_INTD | BCM_BSC_C_INTR | BCM_BSC_C_INTT),
+           (BCM_BSC_C_INTD | BCM_BSC_C_INTR | BCM_BSC_C_INTT),
+           BCM_BSC_C(priv->base));
+
   /* Enable interface */
 
   modreg32(BCM_BSC_C_I2CEN, BCM_BSC_C_I2CEN, BCM_BSC_C(priv->base));
-
-  /* Clear FIFO */
-
-  bcm2711_i2c_clearfifos(priv);
-
-  /* Enable interrupts */
-
-  modreg32(BCM_BSC_C_INTD, BCM_BSC_C_INTD, BCM_BSC_C(priv->base));
-  modreg32(BCM_BSC_C_INTR, BCM_BSC_C_INTR, BCM_BSC_C(priv->base));
-  modreg32(BCM_BSC_C_INTT, BCM_BSC_C_INTT, BCM_BSC_C(priv->base));
-
-  i2cinfo("Enabled I2C%u\n", priv->port);
 }
 
 /****************************************************************************
@@ -428,39 +548,35 @@ static void bcm2711_i2c_enable(struct bcm2711_i2cdev_s *priv)
  *
  * Description:
  *   Drain the RX FIFO into the receive message buffer of the I2C device.
+ *   NOTE: this function assumes that `buf` is always a valid pointer.
  *
  * Input Parameters:
  *     priv - The BCM2711 I2C interface to receive on.
+ *     buf - The buffer to receive into
+ *     n - The buffer size in bytes
  *
+ * Returns the number of bytes that were read from the RX FIFO.
  ****************************************************************************/
 
-static void bcm2711_i2c_drainrxfifo(struct bcm2711_i2cdev_s *priv)
+static size_t bcm2711_i2c_drainrxfifo(struct bcm2711_i2cdev_s *priv,
+                                      FAR uint8_t *buf, size_t n)
 {
-  struct i2c_msg_s *msg = priv->msgs;
-  uint32_t status_addr = BCM_BSC_S(priv->base);
-  uint32_t fifo_addr = BCM_BSC_FIFO(priv->base);
-  size_t i;
-
-  DEBUGASSERT(msg != NULL);
+  uint8_t to_read = n < FIFO_DEPTH ? n : FIFO_DEPTH;
+  uint8_t i = 0;
 
   /* While the RX FIFO contains data to be received, drain it into the
-   * message buffer. Do not read more than the `rw_size` to avoid
+   * message buffer. Do not read more than the `to_read` maximum to avoid
    * overflowing the message buffer.
    */
 
-  for (i = 0; (i < priv->rw_size) &&
-       (getreg32(status_addr) & BCM_BSC_S_RXD);
-      )
+  while ((i < to_read) && (getreg32(BCM_BSC_S(priv->base)) & BCM_BSC_S_RXD))
     {
-      msg->buffer[priv->reg_buff_offset + i] = getreg32(fifo_addr) & 0xff;
+      *buf = getreg32(BCM_BSC_FIFO(priv->base)) & 0xff;
+      buf++;
       i++;
     }
 
-  /* We have either reached the rw_size or the RX FIFO is out of data.
-   * Update the buffer offset with the amount of data we have read.
-   */
-
-  priv->reg_buff_offset += i;
+  return i;
 }
 
 /****************************************************************************
@@ -471,84 +587,64 @@ static void bcm2711_i2c_drainrxfifo(struct bcm2711_i2cdev_s *priv)
  *
  * Input Parameters:
  *     dev - The I2C interface to receive on.
+ *     buf - The buffer to receive into
+ *     n - The buffer size in bytes
  *     stop - Whether to send a stop condition at the end of the transfer.
  ****************************************************************************/
 
-static int bcm2711_i2c_receive(struct bcm2711_i2cdev_s *priv, bool stop)
+static int bcm2711_i2c_receive(struct bcm2711_i2cdev_s *priv, FAR void *buf,
+                               size_t n)
 {
-  struct i2c_msg_s *msg = priv->msgs;
-  ssize_t msg_length;
+  size_t remaining = n;
+  size_t bread;
   int ret = 0;
-
-  DEBUGASSERT(msg != NULL);
-
-  /* Set read bit */
-
-  modreg32(BCM_BSC_C_READ, BCM_BSC_C_READ, BCM_BSC_C(priv->base));
-
-  /* Set message length */
-
-  putreg32(msg->length, BCM_BSC_DLEN(priv->base));
-
-  /* Start buffer fresh for receiving full message. */
-
-  priv->reg_buff_offset = 0;
-  msg_length = msg->length;
 
   /* Start transfer. */
 
   bcm2711_i2c_starttransfer(priv);
 
-  /* Handle special 0 byte read case by waiting for DONE signal. */
+  /* Continuously read until message has been completely read and transfer is
+   * indicated as done.
+   */
 
-  if (msg->length == 0)
+  while (remaining > 0 || !priv->done)
     {
-      ret = bcm2711_i2c_semtimedwait(priv, I2C_TIMEOUT_MS);
-    }
-
-  /* Continuously read until message has been completely read. */
-
-  while (msg_length > 0)
-    {
-      /* Read maximum FIFO depth or the remaining message length. */
-
-      if (msg_length <= FIFO_DEPTH)
-        {
-          priv->rw_size = msg_length;
-        }
-      else
-        {
-          priv->rw_size = FIFO_DEPTH;
-        }
-
-      /* Wait here for interrupt handler to signal that RX FIFO has data.
-       * We can then continue reading.
+      /* Wait here for interrupt handler to signal that RX FIFO has data
+       * (RXR). We can then continue reading.
        */
 
-      ret = bcm2711_i2c_semtimedwait(priv, I2C_TIMEOUT_MS);
-      if (ret < 0)
-        {
-          return ret;
-        }
+      ret = nxsem_wait_uninterruptible(&priv->wait);
+      DEBUGASSERT(ret == 0);
 
-      /* The semaphore was posted without a timeout, so we have to handle
-       * some reading.
-       */
+      /* Check for device errors. */
 
       if (priv->err != 0)
         {
           return priv->err;
         }
 
-      bcm2711_i2c_drainrxfifo(priv);
+      /* Check if we are done and there's no data left to read. */
 
-      /* The remaining message length is the total length minus how far into
-       * the message we are.
+      if (priv->done && remaining == 0)
+        {
+          break; /* Leave loop and return */
+        }
+
+      /* The remaining message length is the current remainder minus how far
+       * into the message we are. We also move forward the buffer pointer by
+       * how many bytes were just read so it starts at the correct location
+       * next iteration.
+       *
+       * We still have to read this if we received the "DONE" indicator but
+       * have the tail-end of the data in the RX FIFO.
        */
 
-      msg_length = msg->length - priv->reg_buff_offset;
+      bread = bcm2711_i2c_drainrxfifo(priv, buf, remaining);
+      remaining -= bread;
+      buf += bread;
     }
 
+  priv->done = false; /* Reset done indicator */
   return ret;
 }
 
@@ -557,38 +653,34 @@ static int bcm2711_i2c_receive(struct bcm2711_i2cdev_s *priv, bool stop)
  *
  * Description:
  *   Fill the TX FIFO with data to be sent.
+ *   NOTE: this function assumes that `buf` is a valid pointer.
  *
  * Input Parameters:
  *     priv - The BCM2711 I2C interface to send on.
+ *     buf - The buffer of data to be transmitted
+ *     n - The length of `buf` in bytes
  *
+ * Returns the number of bytes successfully written to the TX FIFO.
  ****************************************************************************/
 
-static void bcm2711_i2c_filltxfifo(struct bcm2711_i2cdev_s *priv)
+static size_t bcm2711_i2c_filltxfifo(struct bcm2711_i2cdev_s *priv,
+                                     FAR uint8_t *buf, size_t n)
 {
-  struct i2c_msg_s *msg = priv->msgs;
-  uint32_t status_addr = BCM_BSC_S(priv->base);
-  uint32_t fifo_addr = BCM_BSC_FIFO(priv->base);
-  size_t i;
-
-  DEBUGASSERT(msg != NULL);
+  uint8_t to_send = n < FIFO_DEPTH ? n : FIFO_DEPTH;
+  uint8_t i = 0;
 
   /* While there is data to be sent, and the TX FIFO is not full, write the
    * data to the TX FIFO. Stop when full or data stream is over.
    */
 
-  for (i = 0; (i < priv->rw_size) &&
-       (getreg32(status_addr) & BCM_BSC_S_TXD);
-      )
+  while (i < to_send && (getreg32(BCM_BSC_S(priv->base)) & BCM_BSC_S_TXD))
     {
-      putreg32(fifo_addr, msg->buffer[priv->reg_buff_offset + i] & 0xff);
+      putreg32(*buf & 0xff, BCM_BSC_FIFO(priv->base));
+      buf++;
       i++;
     }
 
-  /* We have either reached the rw_size or the RX FIFO is out of data.
-   * Update the buffer offset with the amount of data we have read.
-   */
-
-  priv->reg_buff_offset += i;
+  return i;
 }
 
 /****************************************************************************
@@ -599,116 +691,77 @@ static void bcm2711_i2c_filltxfifo(struct bcm2711_i2cdev_s *priv)
  *
  * Input Parameters:
  *     dev - The I2C interface to send on.
+ *     buf - The buffer to send data from.
+ *     n - The size of the buffer in bytes.
  *     stop - Whether to send a stop condition at the end of the transfer.
  ****************************************************************************/
 
-static int bcm2711_i2c_send(struct bcm2711_i2cdev_s *priv, bool stop)
+static int bcm2711_i2c_send(struct bcm2711_i2cdev_s *priv, FAR void *buf,
+                            size_t n)
 {
-  struct i2c_msg_s *msg = priv->msgs;
-  ssize_t msg_length;
+  size_t remaining = n;
+  size_t bwrote;
   int ret = OK;
 
-  DEBUGASSERT(msg != NULL);
+  DEBUGASSERT(buf != NULL || (buf == NULL && n == 0));
 
-  /* Set write bit */
-
-  modreg32(0, BCM_BSC_C_READ, BCM_BSC_C(priv->base));
-
-  /* Set message length */
-
-  putreg32(msg->length, BCM_BSC_DLEN(priv->base));
-
-  /* Start buffer fresh for sending message */
-
-  priv->reg_buff_offset = 0;
-  msg_length = msg->length;
-
-  /* Start transfer. */
-
-  bcm2711_i2c_starttransfer(priv);
-
-  /* Send the entire message */
-
-  do
+  while (remaining > 0 || !priv->done)
     {
-      /* Write maximum FIFO depth or the remaining message length. */
-
-      if (msg_length <= FIFO_DEPTH)
-        {
-          priv->rw_size = msg_length;
-        }
-      else
-        {
-          priv->rw_size = FIFO_DEPTH;
-        }
-
-      /* Write data to FIFO. */
-
-      i2cerr("Filling FIFO\n");
-      bcm2711_i2c_filltxfifo(priv);
-
-      /* The remaining message length is the total length minus how far into
-       * the message we are.
+      /* Write data to FIFO. The remaining message length is the total
+       * remaining before, minus how far into the message we are. The `buf`
+       * pointer is incremented to point to data that hasn't been sent yet.
        */
 
-      msg_length = msg->length - priv->reg_buff_offset;
+      bwrote = bcm2711_i2c_filltxfifo(priv, buf, remaining);
+      remaining -= bwrote;
+      buf += bwrote;
+
+      /* Start the transfer if it's not running already */
+
+      if (!bcm2711_i2c_transferactive(priv))
+        {
+          bcm2711_i2c_starttransfer(priv);
+        }
 
       /* Here we wait for an interrupt. There are two scenarios:
        *
        * 1) If there is still message data left to write AND we receive an
        * interrupt, then we can continue on another iteration of the outer
-       * do-while loop to keep writing.
+       * do-while loop to keep writing. This interrupt was a TXW.
        *
        * 2) If there is no more message data left to write, then we need to
-       * get a DONE interrupt to indicate the end of the transfer. If we
-       * don't get a DONE interrupt, but instead get a TXW, we ignore it and
-       * wait on the semaphore again. If we never get a done interrupt we
-       * return the applicable error (timeout). If we do get a done
-       * interrupt, we'll be able to exit the waiting loop.
+       * get a DONE interrupt to indicate the end of the transfer.
        */
 
-      while (msg_length == 0)
+      ret = nxsem_wait_uninterruptible(&priv->wait);
+      DEBUGASSERT(ret == 0);
+
+      /* First check for IO error because it's more important to report
+       * that.
+       */
+
+      if (priv->err != 0)
         {
-          /* Wait for interrupt (timed). */
-
-          ret = bcm2711_i2c_semtimedwait(priv, I2C_TIMEOUT_MS);
-
-          /* First check for IO error because it's more important to report
-           * that.
-           */
-
-          i2cerr("sem: %d\n", ret);
-          i2cerr("dev: %d\n", priv->err);
-
-          if (priv->err != 0)
-            {
-              return priv->err;
-            }
-
-          /* Now check if semaphore timed out. */
-
-          if (ret < 0)
-            {
-              return ret;
-            }
-
-          /* Now check if the received interrupt was a done condition.
-           * Otherwise we loop again.
-           */
-
-          if (priv->done)
-            {
-              priv->done = false;
-              break;
-            }
+          return priv->err;
         }
 
-      /* If we're here, the semaphore got posted with an interrupt and there
-       * is still data left to write. Do another iteration.
+      /* Now check if the received interrupt was a done condition. Otherwise
+       * we loop again.
        */
-    }
-  while (msg_length > 0);
 
+      if (priv->done)
+        {
+          /* Debug assertion does not allow us to have received a done
+           * interrupt if we still have data to write, as that is a logic
+           * failure.
+           */
+
+          DEBUGASSERT(remaining == 0);
+          break;
+        }
+    }
+
+  priv->done = false; /* Reset done indicator */
   return ret;
 }
 
@@ -729,45 +782,35 @@ static int bcm2711_i2c_transfer(struct i2c_master_s *dev,
 {
   struct bcm2711_i2cdev_s *priv = (struct bcm2711_i2cdev_s *)dev;
   int i;
-  int ret = 0;
+  int ret;
   bool stop = true;
-  int semval = 0;
 
   DEBUGASSERT(dev != NULL);
-
-  i2cerr("Device state:\n");
-  bcm2711_i2c_print(priv);
+  DEBUGASSERT(msgs != NULL);
 
   /* Get exclusive access before doing a transfer */
 
-  nxmutex_lock(&priv->lock);
-
-  /* If the semaphore value is not 0, we must be waiting on something, so a
-   * transfer cannot be started. This state should never happen.
-   */
-
-  ret = nxsem_get_value(&priv->wait, &semval);
-  DEBUGASSERT(ret == 0 && semval == 0);
+  ret = nxmutex_lock(&priv->lock);
+  DEBUGASSERT(ret == 0);
 
   /* Perform send/receive operations for each message */
 
   for (i = 0; i < count; i++, msgs++)
     {
-      /* Put message in device context */
-
-      priv->msgs = msgs;
       priv->err = 0; /* No errors yet */
       priv->done = false;
 
       /* Configure I2C interface according to message. */
 
+      i2cinfo("Transfer %zu bytes %s 0x%02x.", msgs->length,
+              msgs->flags & I2C_M_READ ? "from" : "to", msgs->addr);
+
       bcm2711_i2c_disable(priv);
+      bcm2711_i2c_clearfifos(priv);
       bcm2711_i2c_setfrequency(priv, msgs->frequency);
       bcm2711_i2c_setaddr(priv, msgs->addr);
-      bcm2711_i2c_clearfifos(priv);
+      putreg32(msgs->length, BCM_BSC_DLEN(priv->base)); /* Set transfer len */
       bcm2711_i2c_enable(priv);
-
-      i2cinfo("I2C%u interface configured for message\n", priv->port);
 
       /* TODO: do I need to support I2C_M_NOSTART? */
 
@@ -782,17 +825,19 @@ static int bcm2711_i2c_transfer(struct i2c_master_s *dev,
           stop = true;
         }
 
-      /* Set read/write bit according to message configuration, and then
-       * perform the corresponding operation.
+      /* Perform the operation corresponding to whether the user wanted to
+       * send or receive on this transfer.
        */
 
       if (msgs->flags & I2C_M_READ)
         {
-          ret = bcm2711_i2c_receive(priv, stop);
+          modreg32(BCM_BSC_C_READ, BCM_BSC_C_READ, BCM_BSC_C(priv->base));
+          ret = bcm2711_i2c_receive(priv, msgs->buffer, msgs->length);
         }
       else
         {
-          ret = bcm2711_i2c_send(priv, stop);
+          modreg32(0, BCM_BSC_C_READ, BCM_BSC_C(priv->base));
+          ret = bcm2711_i2c_send(priv, msgs->buffer, msgs->length);
         }
 
       /* Check if there was an error during the send/receive operation and
@@ -809,10 +854,6 @@ static int bcm2711_i2c_transfer(struct i2c_master_s *dev,
           ret = priv->err;
           break;
         }
-
-      /* If no error occurred, we are here. TODO: Something about NULL `msgs`
-       * for illegal access in interrupt.
-       */
     }
 
   /* If our last message had a stop condition, we can safely disable this I2C
@@ -823,10 +864,6 @@ static int bcm2711_i2c_transfer(struct i2c_master_s *dev,
     {
       bcm2711_i2c_disable(priv);
     }
-
-  i2cerr("Device state:\n");
-  bcm2711_i2c_print(priv);
-  i2cerr("Return: %d\n", ret);
 
   nxmutex_unlock(&priv->lock);
   return ret;
@@ -860,7 +897,7 @@ static int bcm2711_i2c_primary_handler(int irq, void *context, void *arg)
           continue;
         }
 
-      /* If interface had interrupt triggered, call its handler. */
+      /* If interface had an interrupt triggered, call its handler. */
 
       if (bcm2711_i2c_interrupted(priv))
         {
@@ -938,7 +975,6 @@ static int bcm2711_i2c_secondary_handler(struct bcm2711_i2cdev_s *priv)
 
   if (status & BCM_BSC_S_TXW)
     {
-      i2cerr("Need w\n");
       post_sem = true;
     }
 
@@ -946,7 +982,6 @@ static int bcm2711_i2c_secondary_handler(struct bcm2711_i2cdev_s *priv)
 
   if (status & BCM_BSC_S_DONE)
     {
-      i2cerr("DONE");
       priv->done = true;
       modreg32(BCM_BSC_S_DONE, BCM_BSC_S_DONE, status_addr);
       post_sem = true;
@@ -980,16 +1015,40 @@ struct i2c_master_s *bcm2711_i2cbus_initialize(int port)
   int ret;
   struct bcm2711_i2cdev_s *priv;
 
-  DEBUGASSERT(0 <= port && port < BCM_BSCS_NUM);
+  DEBUGASSERT(0 <= port && port <= 6); /* Only up to 6 is user controllable */
 
   /* Initialize selected port */
 
   switch (port)
     {
+#if defined(CONFIG_BCM2711_I2C0)
+    case 0:
+      priv = &g_i2c0dev;
+      break;
+#endif
 #if defined(CONFIG_BCM2711_I2C1)
     case 1:
       priv = &g_i2c1dev;
-      priv->dev.ops = &bcm2711_i2c_ops;
+      break;
+#endif
+#if defined(CONFIG_BCM2711_I2C3)
+    case 3:
+      priv = &g_i2c3dev;
+      break;
+#endif
+#if defined(CONFIG_BCM2711_I2C4)
+    case 4:
+      priv = &g_i2c4dev;
+      break;
+#endif
+#if defined(CONFIG_BCM2711_I2C5)
+    case 5:
+      priv = &g_i2c5dev;
+      break;
+#endif
+#if defined(CONFIG_BCM2711_I2C6)
+    case 6:
+      priv = &g_i2c6dev;
       break;
 #endif
     default:
@@ -997,33 +1056,36 @@ struct i2c_master_s *bcm2711_i2cbus_initialize(int port)
       return NULL;
     }
 
-  i2cinfo("Initializing I2C%u\n", port);
-
   /* Exclusive access */
 
-  nxmutex_lock(&priv->lock);
+  ret = nxmutex_lock(&priv->lock);
+  if (ret < 0)
+    {
+      i2cerr("Couldn't lock mutex for I2C%u\n", port);
+      return NULL;
+    }
 
   /* Test for previous initialization. If already initialized, nothing more
    * needs to be done.
    */
 
-  if (1 < ++priv->refs)
+  if (priv->refs > 0)
     {
+      priv->refs++;
       nxmutex_unlock(&priv->lock);
-      i2cinfo("I2C%u already initialized\n", port);
       return &priv->dev;
     }
 
   /* Not yet initialized, little more work to do. */
 
-  /* TODO: allow pins to be configured for different I2C interfaces.
-   * Currently hard-coded for default I2C1 interface.
-   */
+  i2cinfo("Initializing I2C%u\n", port);
 
-  bcm2711_gpio_set_pulls(2, false, false);
-  bcm2711_gpio_set_pulls(3, false, false);
-  bcm2711_gpio_set_func(2, BCM_GPIO_FUNC0);
-  bcm2711_gpio_set_func(3, BCM_GPIO_FUNC0);
+  priv->dev.ops = &bcm2711_i2c_ops;
+
+  bcm2711_gpio_set_pulls(priv->sda, false, false);
+  bcm2711_gpio_set_pulls(priv->scl, false, false);
+  bcm2711_gpio_set_func(priv->sda, priv->alt);
+  bcm2711_gpio_set_func(priv->scl, priv->alt);
 
   bcm2711_i2c_disable(priv); /* Only enabled when used. */
   bcm2711_i2c_setfrequency(priv, I2C_DEFAULT_FREQUENCY);
@@ -1046,11 +1108,14 @@ struct i2c_master_s *bcm2711_i2cbus_initialize(int port)
 
       arm64_gic_irq_set_priority(BCM_IRQ_VC_I2C, 0, IRQ_TYPE_EDGE);
       up_enable_irq(BCM_IRQ_VC_I2C);
-      i2cinfo("I2C IRQ enabled\n");
       g_i2c_irqinit = true; /* Mark IRQ handler as initialized */
+      i2cinfo("I2C IRQ enabled\n");
     }
 
-  g_i2c_devsinit++; /* Another device initialized */
+  /* Another device initialized */
+
+  priv->refs++;
+  g_i2c_devsinit++;
   nxmutex_unlock(&priv->lock);
   return &priv->dev;
 }

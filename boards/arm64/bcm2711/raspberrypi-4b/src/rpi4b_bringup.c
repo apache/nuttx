@@ -22,7 +22,6 @@
  * Included Files
  ****************************************************************************/
 
-#include "rpi4b.h"
 #include <nuttx/config.h>
 #include <sys/types.h>
 #include <syslog.h>
@@ -30,6 +29,12 @@
 #if defined(CONFIG_BCM2711_I2C_DRIVER)
 #include "bcm2711_i2cdev.h"
 #endif /* defined(CONFIG_BCM2711_I2C) */
+
+#ifdef CONFIG_BCM2711_I2C
+#include "bcm2711_i2c.h"
+#endif
+
+#include "rpi4b.h"
 
 /****************************************************************************
  * Public Functions
@@ -57,7 +62,7 @@ int rpi4b_bringup(void)
     }
 #endif // defined(CONFIG_DEV_GPIO)
 
-  /* Initialize I2C interfaces. */
+  /* Initialize I2C character drivers. */
 
 #if defined(CONFIG_BCM2711_I2C)
 
