@@ -56,7 +56,7 @@ def get_python_modules():
 
 
 def run_espressif_tool(cmd):
-    tool = "esptool.py"
+    tool = "esptool"
     strings_out = ""
     command = "{} {}".format(tool, cmd)
 
