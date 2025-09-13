@@ -1548,25 +1548,6 @@ static int nvs_startup(FAR struct nvs_fs *fs)
             fs->data_wra);
     }
 
-  /* If the ate_wra is pointing to the first ate write location in a
-   * block and data_wra is not 0, erase the block as it contains no
-   * valid data (this also avoids closing a block without any data).
-   */
-
-  if (((fs->ate_wra + 2 * ate_size) == fs->blocksize) &&
-      (fs->data_wra != (fs->ate_wra & NVS_ADDR_BLOCK_MASK)))
-    {
-      rc = nvs_flash_erase_block(fs, fs->ate_wra);
-      if (rc)
-        {
-          return rc;
-        }
-
-      fs->data_wra = fs->ate_wra & NVS_ADDR_BLOCK_MASK;
-      finfo("erase due to no data, data_wra=0x%" PRIx32 "\n",
-            fs->data_wra);
-    }
-
   /* Check if there exists an old entry with the same id and key
    * as the newest entry.
    * If so, power loss occurred before writing the old entry id as expired.
