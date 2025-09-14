@@ -150,6 +150,10 @@ if(CONFIG_CAPTURE)
   list(APPEND SRCS stm32_capture_lowerhalf.c)
 endif()
 
+if(CONFIG_STM32H7_LTDC)
+  list(APPEND SRCS stm32_ltdc.c)
+endif()
+
 if(CONFIG_USBDEV)
   list(APPEND SRCS stm32_otgdev.c)
 endif()
