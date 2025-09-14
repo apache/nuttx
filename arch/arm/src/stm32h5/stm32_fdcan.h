@@ -86,7 +86,7 @@ struct can_dev_s *stm32_fdcaninitialize(int port);
 #ifdef CONFIG_STM32_FDCAN_SOCKET
 
 /****************************************************************************
- * Name: stm32_fdcansockinitialize
+ * Name: stm32_fdcanh5sockinitialize
  *
  * Description:
  *   Initialize the selected FDCAN port as SocketCAN interface
@@ -99,7 +99,7 @@ struct can_dev_s *stm32_fdcaninitialize(int port);
  *
  ****************************************************************************/
 
-int stm32_fdcansockinitialize(int port);
+int stm32_fdcanh5sockinitialize(int port, char *name);
 #endif
 
 #undef EXTERN

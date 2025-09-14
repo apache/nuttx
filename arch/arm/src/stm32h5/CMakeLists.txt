@@ -68,6 +68,10 @@ if(CONFIG_STM32_FDCAN_CHARDRIVER)
   list(APPEND SRCS stm32_fdcan.c)
 endif()
 
+if(CONFIG_STM32_FDCAN_SOCKET)
+  list(APPEND SRCS stm32_fdcan_socket.c)
+endif()
+
 if(CONFIG_STM32_RNG)
   list(APPEND SRCS stm32_rng.c)
 endif()
