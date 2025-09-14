@@ -61,6 +61,8 @@ int posix_spawnattr_init(posix_spawnattr_t *attr)
 
   DEBUGASSERT(attr);
 
+  memset(attr, 0, sizeof(*attr));
+
   /* Flags: None */
 
   attr->flags = 0;
