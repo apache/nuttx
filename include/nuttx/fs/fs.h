@@ -1370,6 +1370,22 @@ int fdlist_close(FAR struct fdlist *list, int fd);
 int nx_close(int fd);
 
 /****************************************************************************
+ * Name: find_driver
+ *
+ * Description:
+ *   Returns the pointer of a registered driver specified by 'pathname'
+ *
+ * Input Parameters:
+ *   pathname - the full path to the driver's device node in file system
+ *
+ * Returned Value:
+ *   Pointer to driver's registered private pointer or NULL if not found.
+ *
+ ****************************************************************************/
+
+FAR void *find_driver(FAR const char *pathname);
+
+/****************************************************************************
  * Name: open_blockdriver
  *
  * Description:
