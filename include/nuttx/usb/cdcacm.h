@@ -392,6 +392,25 @@ int cdcacm_initialize(int minor, FAR void **handle);
 void cdcacm_uninitialize(FAR struct usbdevclass_driver_s *classdev);
 
 /****************************************************************************
+ * Name: cdcacm_uninitialize_instance
+ *
+ * Description:
+ *   Function to uninitialize specific cdcacm instance
+ *
+ * Input Parameters:
+ *   minor     - CDCACM node minor number
+ *   classdev  - The class object returned by cdcacm_classobject().
+ *               if NULL, the driver is searched from the filesystem.
+ *
+ * Returned Value:
+ *   OK when successful, -ENODEV if cdcacm is not initialized
+ *
+ ****************************************************************************/
+
+int cdcacm_uninitialize_instance(int minor,
+                                 FAR struct usbdevclass_driver_s *classdev);
+
+/****************************************************************************
  * Name: cdcacm_get_composite_devdesc
  *
  * Description:
