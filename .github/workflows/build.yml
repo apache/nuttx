@@ -201,6 +201,51 @@ jobs:
           path: buildartifacts/
         continue-on-error: true
 
+  # Test the out-of-tree build
+  OOT-Build:
+    needs: Linux
+    runs-on: ubuntu-latest
+    env:
+      DOCKER_BUILDKIT: 1
+    steps:
+      - name: Download Source Artifact
+        uses: actions/download-artifact@v5
+        with:
+          name: source-bundle
+          path: .
+
+      - name: Extract sources
+        run: tar zxf sources.tar.gz
+
+      - name: Docker Login
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Export NuttX Repo SHA
+        run: echo "nuttx_sha=`git -C sources/nuttx rev-parse HEAD`" >> $GITHUB_ENV
+
+      - name: Run Out-of-Tree Build Test
+        uses: ./sources/nuttx/.github/actions/ci-container
+        env:
+          BLOBDIR: /tools/blobs
+        with:
+          run: |
+            echo "::add-matcher::sources/nuttx/.github/gcc.json"
+            git config --global --add safe.directory /github/workspace/sources/nuttx
+            git config --global --add safe.directory /github/workspace/sources/apps
+            cd sources/nuttx
+            ./tools/ci/cibuild-oot.sh
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: oot-build-artifacts
+          path: sources/apps/testing/cxx-oot-build
+        continue-on-error: true
+
   # Select the macOS Builds based on PR Arch Label
   macOS-Arch:
     uses: apache/nuttx/.github/workflows/arch.yml@master
