@@ -3430,8 +3430,53 @@ void cdcacm_uninitialize(FAR struct usbdevclass_driver_s *classdev)
 {
   FAR struct cdcacm_driver_s *drvr = (FAR struct cdcacm_driver_s *)classdev;
   FAR struct cdcacm_dev_s    *priv = drvr->dev;
-  char devname[CDCACM_DEVNAME_SIZE];
+
+  cdcacm_uninitialize_instance(priv->minor, classdev);
+}
+
+/****************************************************************************
+ * Name: cdcacm_uninitialize_instance
+ *
+ * Description:
+ *   Function to uninitialize specific cdcacm instance
+ *
+ * Input Parameters:
+ *   minor - CDCACM node minor number
+ *
+ * Returned Value:
+ *   OK when successful, -ENODEV if cdcacm is not initialized
+ *
+ ****************************************************************************/
+
+int cdcacm_uninitialize_instance(int minor,
+                                 FAR struct usbdevclass_driver_s *classdev)
+{
   int ret;
+  FAR struct cdcacm_driver_s *drvr = (FAR struct cdcacm_driver_s *)classdev;
+  FAR struct cdcacm_dev_s *priv;
+  char devname[CDCACM_DEVNAME_SIZE];
+
+  /* Create device node path from minor number */
+
+  snprintf(devname, sizeof(devname), CDCACM_DEVNAME_FORMAT, minor);
+
+  /* If classdev is not provided, find it from the file system */
+
+  if (!classdev)
+    {
+      FAR struct cdcacm_alloc_s *cdcacm_alloc = find_driver(devname);
+      if (cdcacm_alloc)
+        {
+          drvr = &cdcacm_alloc->drvr;
+          classdev = &drvr->drvr;
+        }
+      else
+        {
+          return -ENODEV;
+        }
+    }
+
+  priv = drvr->dev;
 
 #ifdef CONFIG_SYSLOG_CDCACM
   if (g_syslog_cdcacm == priv)
@@ -3445,18 +3490,19 @@ void cdcacm_uninitialize(FAR struct usbdevclass_driver_s *classdev)
   cdcacm_disconnect(classdev, priv->usbdev);
 
 #ifndef CONFIG_CDCACM_COMPOSITE
-  usbdev_unregister(&drvr->drvr);
+  usbdev_unregister(classdev);
 #endif
 
   /* Un-register the CDC/ACM TTY device */
 
-  snprintf(devname, sizeof(devname), CDCACM_DEVNAME_FORMAT, priv->minor);
   ret = unregister_driver(devname);
   if (ret < 0)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_UARTUNREGISTER),
                (uint16_t)-ret);
     }
+
+  return ret;
 }
 
 /****************************************************************************
