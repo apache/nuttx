@@ -37,6 +37,7 @@ ignore-words-list =
   FRAM,
   FRO,
   hart,
+  headerr,
   hsi,
   iif,
   IST,

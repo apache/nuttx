@@ -62,6 +62,7 @@ static int netprocfs_checksum(FAR struct netprocfs_file_s *netfile);
 #ifdef CONFIG_NET_TCP
 static int netprocfs_tcp_dropped_1(FAR struct netprocfs_file_s *netfile);
 static int netprocfs_tcp_dropped_2(FAR struct netprocfs_file_s *netfile);
+static int netprocfs_tcp_dropped_3(FAR struct netprocfs_file_s *netfile);
 #endif /* CONFIG_NET_TCP */
 static int netprocfs_prototype(FAR struct netprocfs_file_s *netfile);
 static int netprocfs_sent(FAR struct netprocfs_file_s *netfile);
@@ -94,6 +95,7 @@ static const linegen_t g_stat_linegen[] =
 #ifdef CONFIG_NET_TCP
   netprocfs_tcp_dropped_1,
   netprocfs_tcp_dropped_2,
+  netprocfs_tcp_dropped_3,
 #endif /* CONFIG_NET_TCP */
 
   netprocfs_prototype,
@@ -288,7 +290,8 @@ static int netprocfs_checksum(FAR struct netprocfs_file_s *netfile)
                   g_netstats.udp.chkerr);
 #endif
 #ifdef CONFIG_NET_ICMP
-  len += snprintf(&netfile->line[len], NET_LINELEN - len, "  ----");
+  len += snprintf(&netfile->line[len], NET_LINELEN - len, "  %04x",
+                  g_netstats.icmp.csumerr);
 #endif
 #ifdef CONFIG_NET_ICMPv6
   len += snprintf(&netfile->line[len], NET_LINELEN - len, "  ----");
@@ -325,6 +328,18 @@ static int netprocfs_tcp_dropped_2(FAR struct netprocfs_file_s *netfile)
   return snprintf(netfile->line, NET_LINELEN,
                   "              RST: %04x  %04x\n",
                   g_netstats.tcp.rst, g_netstats.tcp.synrst);
+}
+#endif /* CONFIG_NET_STATISTICS && CONFIG_NET_TCP */
+
+/****************************************************************************
+ * Name: netprocfs_tcp_dropped_3
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_STATISTICS) && defined(CONFIG_NET_TCP)
+static int netprocfs_tcp_dropped_3(FAR struct netprocfs_file_s *netfile)
+{
+  return snprintf(netfile->line, NET_LINELEN,
+                  "              HDR: %04x\n", g_netstats.tcp.headerr);
 }
 #endif /* CONFIG_NET_STATISTICS && CONFIG_NET_TCP */
 
