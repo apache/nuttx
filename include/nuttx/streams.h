@@ -282,6 +282,14 @@ struct lib_syslograwstream_s
   int last_ch;
 };
 
+#if defined(CONFIG_SYSLOG_DEFAULT) && defined(CONFIG_ARCH_LOWPUTC)
+struct lib_sysloglowoutstream_s
+{
+  struct lib_outstream_s common;
+  int last_ch;
+};
+#endif
+
 /* LZF compressed stream pipeline */
 
 #ifdef CONFIG_LIBC_LZF
@@ -605,6 +613,27 @@ void lib_syslogstream(FAR struct lib_syslogstream_s *stream, int priority);
  ****************************************************************************/
 
 void lib_syslograwstream_open(FAR struct lib_syslograwstream_s *stream);
+
+#ifdef CONFIG_SYSLOG_DEFAULT
+
+/****************************************************************************
+ * Name: lib_sysloglowoutstream
+ *
+ * Description:
+ *   Initializes a stream for use with the configured syslog interface.
+ *   Only accessible from with the OS SYSLOG logic.
+ *
+ * Input Parameters:
+ *   stream - User allocated, uninitialized instance of struct
+ *            lib_sysloglowoutstream_s to be initialized.
+ *
+ * Returned Value:
+ *   None (User allocated instance initialized).
+ *
+ ****************************************************************************/
+
+void lib_sysloglowoutstream(FAR struct lib_sysloglowoutstream_s *stream);
+#endif
 
 /****************************************************************************
  * Name: lib_syslograwstream_close

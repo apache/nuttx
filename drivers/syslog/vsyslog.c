@@ -65,23 +65,11 @@ static FAR const char * const g_priority_str[] =
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Private Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: nx_vsyslog
- *
- * Description:
- *   nx_vsyslog() handles the system logging system calls. It is functionally
- *   equivalent to vsyslog() except that (1) the per-process priority
- *   filtering has already been performed and the va_list parameter is
- *   passed by reference.  That is because the va_list is a structure in
- *   some compilers and passing of structures in the NuttX sycalls does
- *   not work.
- *
- ****************************************************************************/
-
-int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
+static inline int
+nx_vsyslog_rawstream(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
 {
   struct lib_syslograwstream_s stream;
   int ret = 0;
@@ -272,5 +260,40 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
   /* Flush and destroy the syslog stream buffer */
 
   lib_syslograwstream_close(&stream);
+  return ret;
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: nx_vsyslog
+ *
+ * Description:
+ *   nx_vsyslog() handles the system logging system calls. It is functionally
+ *   equivalent to vsyslog() except that (1) the per-process priority
+ *   filtering has already been performed and the va_list parameter is
+ *   passed by reference.  That is because the va_list is a structure in
+ *   some compilers and passing of structures in the NuttX sycalls does
+ *   not work.
+ *
+ ****************************************************************************/
+
+int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
+{
+  int ret = 0;
+
+  if (priority == LOG_LOWOUT)
+    {
+#if defined(CONFIG_SYSLOG_DEFAULT) && defined(CONFIG_ARCH_LOWPUTC)
+      ret = nx_vsyslog_lowout(fmt, ap);
+#endif
+    }
+  else
+    {
+      ret = nx_vsyslog_rawstream(priority, fmt, ap);
+    }
+
   return ret;
 }

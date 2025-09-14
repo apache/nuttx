@@ -31,6 +31,12 @@ else
   CSRCS += vsyslog.c
 endif
 
+ifeq ($(CONFIG_SYSLOG_DEFAULT),y)
+  ifeq ($(CONFIG_ARCH_LOWPUTC),y)
+    CSRCS += vsyslog_lowout.c
+  endif
+endif
+
 CSRCS += syslog_channel.c syslog_write.c syslog_flush.c
 endif
 
