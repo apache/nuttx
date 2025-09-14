@@ -197,6 +197,7 @@ struct tcp_stats_s
   net_stats_t syndrop;    /* Number of dropped SYNs due to too few
                            * available connections */
   net_stats_t synrst;     /* Number of SYNs for closed ports triggering a RST */
+  net_stats_t headerr;    /* Number of dropped SYNs due to bad header info */
 };
 #endif
 
