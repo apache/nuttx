@@ -771,7 +771,15 @@ int esp_hr_timer_init(void)
     {
       irqstate_t flags = spin_lock_irqsave(&priv->lock);
 
-      periph_module_enable(PERIPH_SYSTIMER_MODULE);
+      PERIPH_RCC_ACQUIRE_ATOMIC(PERIPH_SYSTIMER_MODULE, ref_count)
+        {
+          if (ref_count == 0)
+            {
+              systimer_ll_enable_bus_clock(true);
+              systimer_ll_reset_register();
+            }
+        }
+
       systimer_hal_init(&priv->hal);
       systimer_hal_tick_rate_ops_t ops =
         {
@@ -803,17 +811,18 @@ int esp_hr_timer_init(void)
       spin_unlock_irqrestore(&priv->lock, flags);
     }
 
-  esp_setup_irq(SYSTIMER_TARGET2_EDGE_INTR_SOURCE,
+  esp_setup_irq(ETS_SYSTIMER_TARGET2_INTR_SOURCE,
                 ESP_IRQ_PRIORITY_DEFAULT,
                 SYSTIMER_TRIGGER_TYPE);
 
   /* Attach the systimer interrupt */
 
-  irq_attach(ESP_IRQ_SYSTIMER_TARGET2_EDGE, (xcpt_t)esp_hr_timer_isr, NULL);
+  irq_attach(ESP_SOURCE2IRQ(ETS_SYSTIMER_TARGET2_INTR_SOURCE),
+             (xcpt_t)esp_hr_timer_isr, NULL);
 
   /* Enable the allocated CPU interrupt */
 
-  up_enable_irq(ESP_IRQ_SYSTIMER_TARGET2_EDGE);
+  up_enable_irq(ESP_SOURCE2IRQ(ETS_SYSTIMER_TARGET2_INTR_SOURCE));
 
   g_hr_timer_initialized = true;
 
