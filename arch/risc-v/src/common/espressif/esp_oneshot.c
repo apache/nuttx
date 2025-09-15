@@ -45,6 +45,8 @@
 #include "hal/timer_ll.h"
 #include "periph_ctrl.h"
 #include "soc/clk_tree_defs.h"
+#include "soc/timer_periph.h"
+#include "esp_private/esp_clk_tree_common.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -52,12 +54,18 @@
 
 /* Oneshot Timer is assigned to the Timer 0 of TimerGroup 1 */
 
-#define ONESHOT_TIMERGROUP_ID 1
-#define ONESHOT_TIMER_ID      0
+#define GROUP_ID  1
+#define TIMER_ID  0
 
 /* Resolution of 1 microsecond */
 
 #define ONESHOT_RESOLUTION    1
+
+#if SOC_PERIPH_CLK_CTRL_SHARED
+#  define ONESHOT_CLOCK_SRC_ATOMIC() PERIPH_RCC_ATOMIC()
+#else
+#  define ONESHOT_CLOCK_SRC_ATOMIC()
+#endif
 
 /****************************************************************************
  * Private Types
@@ -494,10 +502,11 @@ struct oneshot_lowerhalf_s *oneshot_initialize(int chan, uint16_t resolution)
   struct esp_oneshot_lowerhalf_s *lower = &g_oneshot_lowerhalf;
   uint32_t counter_src_hz = 0;
   uint32_t prescale;
+  int ret = OK;
+  periph_module_t periph;
+  int irq;
 
   UNUSED(chan);
-
-  periph_module_enable(PERIPH_TIMG1_MODULE);
 
   /* Initialize the elements of lower half state structure */
 
@@ -505,14 +514,33 @@ struct oneshot_lowerhalf_s *oneshot_initialize(int chan, uint16_t resolution)
   lower->arg        = NULL;
   lower->resolution = resolution;
   lower->running    = false;
-  timer_hal_init(&lower->hal, ONESHOT_TIMERGROUP_ID, ONESHOT_TIMER_ID);
+
+  periph = timer_group_periph_signals.groups[GROUP_ID].module;
+
+  PERIPH_RCC_ACQUIRE_ATOMIC(periph, ref_count)
+    {
+      if (ref_count == 0)
+        {
+          timer_ll_enable_bus_clock(GROUP_ID, true);
+          timer_ll_reset_register(GROUP_ID);
+        }
+    }
+
+  timer_hal_init(&lower->hal, GROUP_ID, TIMER_ID);
+
+  ret = esp_clk_tree_enable_src((soc_module_clk_t)GPTIMER_CLK_SRC_DEFAULT,
+                                true);
+  if (ret != ESP_OK)
+    {
+      return NULL;
+    }
 
   /* Configure clock source */
 
-  timer_ll_set_clock_source(ONESHOT_TIMERGROUP_ID, lower->hal.timer_id,
+  timer_ll_set_clock_source(GROUP_ID, lower->hal.timer_id,
                             GPTIMER_CLK_SRC_DEFAULT);
 
-  timer_ll_enable_clock(ONESHOT_TIMERGROUP_ID, lower->hal.timer_id, true);
+  timer_ll_enable_clock(GROUP_ID, lower->hal.timer_id, true);
 
   /* Calculate the suitable prescaler according to the current APB
    * frequency to generate a period of 1 us.
@@ -527,17 +555,19 @@ struct oneshot_lowerhalf_s *oneshot_initialize(int chan, uint16_t resolution)
 
   timer_ll_set_clock_prescale(lower->hal.dev, lower->hal.timer_id, prescale);
 
-  esp_setup_irq(TG1_T0_LEVEL_INTR_SOURCE,
+  irq = timer_group_periph_signals.groups[GROUP_ID].timer_irq_id[TIMER_ID];
+
+  esp_setup_irq(irq,
                 ESP_IRQ_PRIORITY_DEFAULT,
                 ESP_IRQ_TRIGGER_LEVEL);
 
   /* Attach the handler for the timer IRQ */
 
-  irq_attach(ESP_IRQ_TG1_T0_LEVEL, (xcpt_t)esp_oneshot_isr, lower);
+  irq_attach(ESP_SOURCE2IRQ(irq), (xcpt_t)esp_oneshot_isr, lower);
 
   /* Enable the allocated CPU interrupt */
 
-  up_enable_irq(ESP_IRQ_TG1_T0_LEVEL);
+  up_enable_irq(ESP_SOURCE2IRQ(irq));
 
   return (struct oneshot_lowerhalf_s *)lower;
 }

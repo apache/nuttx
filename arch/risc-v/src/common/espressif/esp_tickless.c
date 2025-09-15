@@ -401,7 +401,15 @@ void up_timer_initialize(void)
 {
   g_timer_started = false;
 
-  periph_module_enable(PERIPH_SYSTIMER_MODULE);
+  PERIPH_RCC_ACQUIRE_ATOMIC(PERIPH_SYSTIMER_MODULE, ref_count)
+    {
+      if (ref_count == 0)
+        {
+          systimer_ll_enable_bus_clock(true);
+          systimer_ll_reset_register();
+        }
+    }
+
   systimer_hal_init(&systimer_hal);
   systimer_hal_tick_rate_ops_t ops =
     {
