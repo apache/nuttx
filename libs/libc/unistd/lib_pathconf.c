@@ -163,6 +163,9 @@ long fpathconf(int fildes, int name)
       case _PC_2_SYMLINKS:
         return -1;
 
+      case _PC_NO_TRUNC:
+        return _POSIX_NO_TRUNC;
+
       default:
         if (name >= 0)
           {
