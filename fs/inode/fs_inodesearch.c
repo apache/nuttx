@@ -241,6 +241,40 @@ static int _compute_path_depth(FAR const char *path)
 }
 
 /****************************************************************************
+ * Name: _inode_checkpath
+ ****************************************************************************/
+
+static int _inode_checkpath(const char *path)
+{
+  int namelen = 0;
+  int pathlen = 0;
+
+  if (*path == '\0')
+    {
+      return -ENOENT;
+    }
+
+  /* Check each segment of the path */
+
+  while (*path != '\0' && namelen < NAME_MAX && pathlen < PATH_MAX)
+    {
+      if (*path == '/')
+        {
+          namelen = 0;
+        }
+      else
+        {
+          namelen++;
+        }
+
+      path++;
+      pathlen++;
+    }
+
+  return *path != '\0' ? -ENAMETOOLONG : OK;
+}
+
+/****************************************************************************
  * Name: _inode_search
  *
  * Description:
@@ -268,19 +302,30 @@ static int _inode_search(FAR struct inode_search_s *desc)
   FAR struct inode *left    = NULL;
   FAR struct inode *above   = NULL;
   FAR const char   *relpath = NULL;
-  int ret = -ENOENT;
+  int ret;
 
-  /* Get the search path, skipping over the leading '/'.  The leading '/' is
-   * mandatory because only absolute paths are expected in this context.
-   */
-
-  DEBUGASSERT(desc != NULL && desc->path != NULL);
-  name  = desc->path;
-
-  if (*name != '/')
+  ret = _inode_checkpath(desc->path);
+  if (ret < 0)
     {
-      return -EINVAL;
+      return ret;
     }
+
+  /* Convert the relative path to the absolute path */
+
+  if (*desc->path != '/')
+    {
+      desc->buffer = lib_get_tempbuffer(PATH_MAX);
+      if (desc->buffer == NULL)
+        {
+          return -ENOMEM;
+        }
+
+      snprintf(desc->buffer, PATH_MAX, "%s/%s", _inode_getcwd(), desc->path);
+      desc->path = desc->buffer;
+    }
+
+  name = desc->path;
+  ret = -ENOENT;
 
   /* Traverse the pseudo file system node tree until either (1) all nodes
    * have been examined without finding the matching node, or (2) the
@@ -556,25 +601,6 @@ int inode_search(FAR struct inode_search_s *desc)
    */
 
   DEBUGASSERT(desc != NULL && desc->path != NULL);
-
-  if (*desc->path == '\0')
-    {
-      return -ENOENT;
-    }
-
-  /* Convert the relative path to the absolute path */
-
-  if (*desc->path != '/')
-    {
-      desc->buffer = lib_get_tempbuffer(PATH_MAX);
-      if (desc->buffer == NULL)
-        {
-          return -ENOMEM;
-        }
-
-      snprintf(desc->buffer, PATH_MAX, "%s/%s", _inode_getcwd(), desc->path);
-      desc->path = desc->buffer;
-    }
 
   ret = _inode_search(desc);
 
