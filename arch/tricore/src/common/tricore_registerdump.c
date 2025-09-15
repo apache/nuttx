@@ -121,9 +121,9 @@ void up_dump_register(void *dumpregs)
 {
   volatile uint32_t *regs = dumpregs;
 
-  tricore_dump_lowcsa(regs);
+  tricore_dump_upcsa(regs);
 
-  tricore_dump_upcsa(regs + TC_CONTEXT_REGS);
+  tricore_dump_lowcsa(regs + TC_CONTEXT_REGS);
 
   tricore_dump_trapctrl();
 }
@@ -140,11 +140,9 @@ void up_regs_memcpy(FAR void *dest_, FAR void *src_, size_t count)
 
   DEBUGASSERT(count == XCPTCONTEXT_SIZE);
 
-  pcxi = src[REG_LPCXI];
-  memcpy(dest, src, TC_CONTEXT_SIZE);
-  dest[0] = tricore_addr2csa(dest + TC_CONTEXT_REGS)
-            | (pcxi & ~FCX_FREE);
-  src = tricore_csa2addr(pcxi);
+  memcpy(dest, src, XCPTCONTEXT_SIZE);
 
-  memcpy(dest + TC_CONTEXT_REGS, src, TC_CONTEXT_SIZE);
+  pcxi = (src + TC_CONTEXT_REGS)[REG_LPCXI];
+  (dest + TC_CONTEXT_REGS)[REG_LPCXI] = tricore_addr2csa(dest)
+                                        | (pcxi & ~FCX_FREE);
 }
