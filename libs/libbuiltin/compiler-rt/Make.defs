@@ -120,6 +120,7 @@ CSRCS += InstrProfilingPlatform.c
 
 else ifeq ($(CONFIG_COVERAGE_MINI)$(CONFIG_ARCH_TOOLCHAIN_CLANG),yy)
 
+FLAGS += ${INCDIR_PREFIX}$(CURDIR)/compiler-rt/compiler-rt/lib/profile
 FLAGS += -fno-profile-instr-generate -fno-coverage-mapping
 
 CSRCS += coverage.c
