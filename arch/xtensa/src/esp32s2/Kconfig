@@ -480,9 +480,16 @@ config ESP32S2_I2C1
 	select ESP32S2_I2C
 	select I2C
 
+config ESP32S2_RTC_I2C
+	bool "RTC I2C"
+	default n
+	select ESP32S2_I2C
+	select I2C
+
 config ESP32S2_I2C_PERIPH_MASTER_MODE
 	bool
-	depends on (ESP32S2_I2C0_MASTER_MODE || ESP32S2_I2C1_MASTER_MODE)
+	depends on (ESP32S2_I2C0_MASTER_MODE || ESP32S2_I2C1_MASTER_MODE || ESP32S2_RTC_I2C)
+	default y if ESP32S2_RTC_I2C
 	default n
 	select ESPRESSIF_I2C_PERIPH_MASTER_MODE
 
@@ -838,6 +845,44 @@ config ESP32S2_I2C1_SDAPIN
 	range 0 46
 
 endif # ESPRESSIF_I2C1
+
+if ESP32S2_RTC_I2C
+
+choice
+	prompt "RTC I2C SCL Pin"
+	default ESP32S2_RTC_I2C_SCLPIN_2
+
+config ESP32S2_RTC_I2C_SCLPIN_0
+	bool "Use GPIO0 as RTC I2C SCL Pin"
+
+config ESP32S2_RTC_I2C_SCLPIN_2
+	bool "Use GPIO2 as RTC I2C SCL Pin"
+
+endchoice # RTC I2C SCL Pin
+
+config ESP32S2_RTC_I2C_SCLPIN
+	int
+	default 0 if ESP32S2_RTC_I2C_SCLPIN_0
+	default 2 if ESP32S2_RTC_I2C_SCLPIN_2
+
+choice
+	prompt "RTC I2C SDA Pin"
+	default ESP32S2_RTC_I2C_SDAPIN_3
+
+config ESP32S2_RTC_I2C_SDAPIN_1
+	bool "Use GPIO1 as RTC I2C SDA Pin"
+
+config ESP32S2_RTC_I2C_SDAPIN_3
+	bool "Use GPIO3 as RTC I2C SDA Pin"
+
+endchoice # RTC I2C SDA Pin
+
+config ESP32S2_RTC_I2C_SDAPIN
+	int
+	default 1 if ESP32S2_RTC_I2C_SDAPIN_1
+	default 3 if ESP32S2_RTC_I2C_SDAPIN_3
+
+endif # ESP32S2_RTC_I2C
 
 config ESP32S2_I2CTIMEOSEC
 	int "Timeout seconds"
