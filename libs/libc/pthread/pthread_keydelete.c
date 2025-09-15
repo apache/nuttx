@@ -60,9 +60,10 @@
 int pthread_key_delete(pthread_key_t key)
 {
   FAR struct task_info_s *info = task_get_info();
+  FAR struct tls_info_s *tls = tls_get_info();
   int ret = EINVAL;
 
-  DEBUGASSERT(info != NULL);
+  DEBUGASSERT(info != NULL && tls != NULL);
   DEBUGASSERT(key >= 0 && key < CONFIG_TLS_NELEM);
   if (key >= 0 && key < CONFIG_TLS_NELEM)
     {
@@ -74,6 +75,7 @@ int pthread_key_delete(pthread_key_t key)
       if (ret == OK)
         {
           info->ta_tlsdtor[key] = NULL;
+          tls->tl_elem[key]     = 0;
           nxmutex_unlock(&info->ta_lock);
         }
       else
