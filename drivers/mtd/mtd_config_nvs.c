@@ -57,6 +57,8 @@
 
 #define NVS_CACHE_NO_ADDR               0xffffffff
 
+#define NVS_HASH_INITIAL_VALUE          2166136261
+
 #if CONFIG_MTD_CONFIG_BUFFER_SIZE > 0
 #  define NVS_BUFFER_SIZE(fs)           CONFIG_MTD_CONFIG_BUFFER_SIZE
 #  define NVS_ATE(name, size) \
@@ -179,17 +181,17 @@ static void nvs_invalid_cache(struct nvs_fs *fs, uint32_t sector)
 #endif /* CONFIG_MTD_CONFIG_CACHE_SIZE */
 
 /****************************************************************************
- * Name: nvs_fnv_hash
+ * Name: nvs_fnv_hash_part
  ****************************************************************************/
 
-static uint32_t nvs_fnv_hash(FAR const uint8_t *input, uint32_t len)
+static uint32_t nvs_fnv_hash_part(FAR const void *input, uint32_t len,
+                                  uint32_t hval)
 {
-  uint32_t i = 0;
-  uint32_t hval = 2166136261;
+  FAR const uint8_t *key8 = (FAR const uint8_t *)input;
 
   /* FNV-1 hash each octet in the buffer */
 
-  while (i++ < len)
+  while (len-- > 0)
     {
       /* Multiply by the 32 bit FNV magic prime mod 2^32 */
 
@@ -197,10 +199,28 @@ static uint32_t nvs_fnv_hash(FAR const uint8_t *input, uint32_t len)
 
       /* Xor the bottom with the current octet */
 
-      hval ^= *input++;
+      hval ^= *key8++;
     }
 
   return hval;
+}
+
+/****************************************************************************
+ * Name: nvs_fnv_hash
+ ****************************************************************************/
+
+static uint32_t nvs_fnv_hash(FAR const void *input, uint32_t len)
+{
+  return nvs_fnv_hash_part(input, len, NVS_HASH_INITIAL_VALUE);
+}
+
+/****************************************************************************
+ * Name: nvs_fnv_hash_id
+ ****************************************************************************/
+
+static uint32_t nvs_fnv_hash_id(uint32_t hash)
+{
+  return hash % 0xfffffffd + 1;
 }
 
 /****************************************************************************
@@ -602,6 +622,7 @@ static int nvs_flash_block_move(FAR struct nvs_fs *fs,
   uint32_t data_end = data_begin + entry->len;
   uint8_t buf[NVS_BUFFER_SIZE(fs)];
   size_t buf_size = nvs_align_down(fs, sizeof(buf));
+  uint32_t hash = NVS_HASH_INITIAL_VALUE;
   uint8_t data_crc8 = 0;
   int rc;
 
@@ -614,8 +635,19 @@ static int nvs_flash_block_move(FAR struct nvs_fs *fs,
           return rc;
         }
 
+      if (addr < data_begin)
+        {
+          hash = nvs_fnv_hash_part(buf, MIN(bytes_to_copy,
+                                   data_begin - addr), hash);
+        }
+
       if (addr + bytes_to_copy > data_begin)
         {
+          if (nvs_fnv_hash_id(hash) != entry->id)
+            {
+              return -EBADMSG;
+            }
+
           uint32_t end_addr = MIN(data_end, addr + bytes_to_copy);
           uint32_t begin_addr = MAX(data_begin, addr);
           data_crc8 = crc8part(buf + (begin_addr - addr),
@@ -1689,7 +1721,7 @@ static ssize_t nvs_read_entry(FAR struct nvs_fs *fs, FAR const uint8_t *key,
   bool hit = true;
   int rc;
 
-  hash_id = nvs_fnv_hash(key, key_size) % 0xfffffffd + 1;
+  hash_id = nvs_fnv_hash_id(nvs_fnv_hash(key, key_size));
 #if CONFIG_MTD_CONFIG_CACHE_SIZE > 0
   wlk_addr = fs->cache[nvs_cache_index(hash_id)];
   if (wlk_addr == NVS_CACHE_NO_ADDR)
@@ -1856,7 +1888,7 @@ static ssize_t nvs_write(FAR struct nvs_fs *fs,
 
   /* Calc hash id of key. */
 
-  hash_id = nvs_fnv_hash(key, key_size) % 0xfffffffd + 1;
+  hash_id = nvs_fnv_hash_id(nvs_fnv_hash(key, key_size));
 
   /* Find latest entry with same id. */
 
