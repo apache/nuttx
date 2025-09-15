@@ -56,6 +56,11 @@
 #include "hardware/esp32s3_soc.h"
 #include "hardware/esp32s3_system.h"
 
+#ifdef CONFIG_ESP32S3_RTC_I2C
+#  include "ulp_riscv.h"
+#  include "ulp_riscv_i2c.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -190,6 +195,11 @@ struct esp32s3_i2c_config_s
 
   uint32_t sda_insig;         /* I2C SDA input signal index */
   uint32_t sda_outsig;        /* I2C SDA output signal index */
+#ifdef CONFIG_ESP32S3_RTC_I2C
+  /* Pin and timing information configuration struct for RTC I2C */
+
+  ulp_riscv_i2c_cfg_t *rtc_i2c_cfg;
+#endif
 };
 
 /* I2C Device Private Data */
@@ -287,6 +297,13 @@ static const struct i2c_ops_s g_esp32s3_i2c_ops =
 #endif
 };
 
+#ifdef CONFIG_ESP32S3_RTC_I2C
+static const struct i2c_ops_s g_esp32s3_rtc_i2c_ops =
+{
+  .transfer = NULL,
+};
+#endif
+
 /* I2C device structures */
 
 #ifdef CONFIG_ESP32S3_I2C0
@@ -360,6 +377,32 @@ static struct esp32s3_i2c_priv_s g_esp32s3_i2c1_priv =
   .ready_read = false
 };
 #endif /* CONFIG_ESP32S3_I2C1 */
+
+#ifdef CONFIG_ESP32S3_RTC_I2C
+
+ulp_riscv_i2c_cfg_t rtc_i2c_cfg = ULP_RISCV_I2C_DEFAULT_CONFIG();
+
+static const struct esp32s3_i2c_config_s g_esp32s3_rtc_i2c_config =
+{
+  .scl_pin     = CONFIG_ESP32S3_RTC_I2C_SCLPIN,
+  .sda_pin     = CONFIG_ESP32S3_RTC_I2C_SDAPIN,
+  .rtc_i2c_cfg = &rtc_i2c_cfg,
+};
+
+static struct esp32s3_i2c_priv_s g_esp32s3_rtc_i2c_priv =
+{
+  .ops        = &g_esp32s3_rtc_i2c_ops,
+  .id         = ESP32S3_RTC_I2C,
+  .config     = &g_esp32s3_rtc_i2c_config,
+  .refs       = 0,
+  .lock       = NXMUTEX_INITIALIZER,
+  .i2cstate   = I2CSTATE_IDLE,
+  .msgv       = NULL,
+  .msgid      = 0,
+  .bytes      = 0,
+  .ready_read = false,
+};
+#endif /* CONFIG_ESP32S3_RTC_I2C */
 
 /* Trace events strings */
 
@@ -731,59 +774,71 @@ static void i2c_init_clock(struct esp32s3_i2c_priv_s *priv,
 static void i2c_init(struct esp32s3_i2c_priv_s *priv)
 {
   const struct esp32s3_i2c_config_s *config = priv->config;
+  if (priv->id != ESP32S3_RTC_I2C)
+    {
+      esp32s3_gpiowrite(config->scl_pin, 1);
+      esp32s3_configgpio(config->scl_pin, INPUT_PULLUP | OUTPUT_OPEN_DRAIN);
+      esp32s3_gpio_matrix_out(config->scl_pin, config->scl_outsig, 0, 0);
+      esp32s3_gpio_matrix_in(config->scl_pin, config->scl_insig, 0);
 
-  esp32s3_gpiowrite(config->scl_pin, 1);
-  esp32s3_configgpio(config->scl_pin, INPUT_PULLUP | OUTPUT_OPEN_DRAIN);
-  esp32s3_gpio_matrix_out(config->scl_pin, config->scl_outsig, 0, 0);
-  esp32s3_gpio_matrix_in(config->scl_pin, config->scl_insig, 0);
+      esp32s3_gpiowrite(config->sda_pin, 1);
+      esp32s3_configgpio(config->sda_pin, INPUT_PULLUP | OUTPUT_OPEN_DRAIN);
+      esp32s3_gpio_matrix_out(config->sda_pin, config->sda_outsig, 0, 0);
+      esp32s3_gpio_matrix_in(config->sda_pin, config->sda_insig, 0);
 
-  esp32s3_gpiowrite(config->sda_pin, 1);
-  esp32s3_configgpio(config->sda_pin, INPUT_PULLUP | OUTPUT_OPEN_DRAIN);
-  esp32s3_gpio_matrix_out(config->sda_pin, config->sda_outsig, 0, 0);
-  esp32s3_gpio_matrix_in(config->sda_pin, config->sda_insig, 0);
+      /* Enable I2C hardware */
 
-  /* Enable I2C hardware */
+      modifyreg32(SYSTEM_PERIP_CLK_EN0_REG, 0, config->clk_bit);
+      modifyreg32(SYSTEM_PERIP_RST_EN0_REG, config->rst_bit, 0);
 
-  modifyreg32(SYSTEM_PERIP_CLK_EN0_REG, 0, config->clk_bit);
-  modifyreg32(SYSTEM_PERIP_RST_EN0_REG, config->rst_bit, 0);
+      /* Disable I2C interrupts */
 
-  /* Disable I2C interrupts */
+      i2c_intr_disable(priv);
 
-  i2c_intr_disable(priv);
+      /* Initialize I2C Master */
 
-  /* Initialize I2C Master */
+      putreg32(I2C_MS_MODE | I2C_CLK_EN |
+               I2C_SCL_FORCE_OUT | I2C_SDA_FORCE_OUT,
+               I2C_CTR_REG(priv->id));
 
-  putreg32(I2C_MS_MODE | I2C_CLK_EN | I2C_SCL_FORCE_OUT | I2C_SDA_FORCE_OUT,
-           I2C_CTR_REG(priv->id));
+      /* Set FIFO mode */
 
-  /* Set FIFO mode */
+      modifyreg32(I2C_FIFO_CONF_REG(priv->id), I2C_NONFIFO_EN, 0);
 
-  modifyreg32(I2C_FIFO_CONF_REG(priv->id), I2C_NONFIFO_EN, 0);
+      /* Ensure I2C data mode is set to MSB */
 
-  /* Ensure I2C data mode is set to MSB */
+      modifyreg32(I2C_CTR_REG(priv->id),
+                  I2C_TX_LSB_FIRST | I2C_RX_LSB_FIRST, 0);
 
-  modifyreg32(I2C_CTR_REG(priv->id), I2C_TX_LSB_FIRST | I2C_RX_LSB_FIRST, 0);
+      i2c_reset_fifo(priv);
 
-  i2c_reset_fifo(priv);
+      /* Configure the hardware filter function */
 
-  /* Configure the hardware filter function */
+      putreg32(I2C_SCL_FILTER_EN | I2C_SDA_FILTER_EN |
+              VALUE_TO_FIELD(I2C_FILTER_CYC_NUM_DEF, I2C_SCL_FILTER_THRES) |
+                VALUE_TO_FIELD(I2C_FILTER_CYC_NUM_DEF, I2C_SDA_FILTER_THRES),
+              I2C_FILTER_CFG_REG(priv->id));
 
-  putreg32(I2C_SCL_FILTER_EN | I2C_SDA_FILTER_EN |
-           VALUE_TO_FIELD(I2C_FILTER_CYC_NUM_DEF, I2C_SCL_FILTER_THRES) |
-             VALUE_TO_FIELD(I2C_FILTER_CYC_NUM_DEF, I2C_SDA_FILTER_THRES),
-           I2C_FILTER_CFG_REG(priv->id));
+      /* Set I2C source clock */
 
-  /* Set I2C source clock */
+      modifyreg32(I2C_CLK_CONF_REG(priv->id), I2C_SCLK_SEL, 0);
 
-  modifyreg32(I2C_CLK_CONF_REG(priv->id), I2C_SCLK_SEL, 0);
+      /* Configure I2C bus frequency */
 
-  /* Configure I2C bus frequency */
+      i2c_init_clock(priv, config->clk_freq);
 
-  i2c_init_clock(priv, config->clk_freq);
+      /* Update I2C configuration */
 
-  /* Update I2C configuration */
-
-  modifyreg32(I2C_CTR_REG(priv->id), 0, I2C_CONF_UPGATE);
+      modifyreg32(I2C_CTR_REG(priv->id), 0, I2C_CONF_UPGATE);
+    }
+#ifdef CONFIG_ESP32S3_RTC_I2C
+  else
+    {
+      priv->config->rtc_i2c_cfg->i2c_pin_cfg.scl_io_num = config->scl_pin;
+      priv->config->rtc_i2c_cfg->i2c_pin_cfg.sda_io_num = config->sda_pin;
+      ulp_riscv_i2c_master_init(priv->config->rtc_i2c_cfg);
+    }
+#endif
 }
 
 /****************************************************************************
@@ -1554,6 +1609,11 @@ struct i2c_master_s *esp32s3_i2cbus_initialize(int port)
         priv = &g_esp32s3_i2c1_priv;
         break;
 #endif
+#ifdef CONFIG_ESP32S3_RTC_I2C
+      case ESP32S3_RTC_I2C:
+        priv = &g_esp32s3_rtc_i2c_priv;
+        break;
+#endif
       default:
         return NULL;
     }
@@ -1566,34 +1626,37 @@ struct i2c_master_s *esp32s3_i2cbus_initialize(int port)
     }
 
 #ifndef CONFIG_I2C_POLLED
-  config = priv->config;
-
-  /* Set up to receive peripheral interrupts on the current CPU */
-
-  priv->cpu = this_cpu();
-  priv->cpuint = esp32s3_setup_irq(priv->cpu, config->periph,
-                                   1, ESP32S3_CPUINT_LEVEL);
-  if (priv->cpuint < 0)
+  if (priv->id != ESP32S3_RTC_I2C)
     {
-      /* Failed to allocate a CPU interrupt of this type */
+      config = priv->config;
 
-      priv->refs--;
-      nxmutex_unlock(&priv->lock);
+      /* Set up to receive peripheral interrupts on the current CPU */
 
-      return NULL;
+      priv->cpu = this_cpu();
+      priv->cpuint = esp32s3_setup_irq(priv->cpu, config->periph,
+                                      1, ESP32S3_CPUINT_LEVEL);
+      if (priv->cpuint < 0)
+        {
+          /* Failed to allocate a CPU interrupt of this type */
+
+          priv->refs--;
+          nxmutex_unlock(&priv->lock);
+
+          return NULL;
+        }
+
+      ret = irq_attach(config->irq, i2c_irq, priv);
+      if (ret != OK)
+        {
+          esp32s3_teardown_irq(priv->cpu, config->periph, priv->cpuint);
+          priv->refs--;
+
+          nxmutex_unlock(&priv->lock);
+          return NULL;
+        }
+
+      up_enable_irq(config->irq);
     }
-
-  ret = irq_attach(config->irq, i2c_irq, priv);
-  if (ret != OK)
-    {
-      esp32s3_teardown_irq(priv->cpu, config->periph, priv->cpuint);
-      priv->refs--;
-
-      nxmutex_unlock(&priv->lock);
-      return NULL;
-    }
-
-  up_enable_irq(config->irq);
 #endif
 
   i2c_init(priv);
@@ -1636,13 +1699,16 @@ int esp32s3_i2cbus_uninitialize(struct i2c_master_s *dev)
       return OK;
     }
 
+  if (priv->id != ESP32S3_RTC_I2C)
+    {
 #ifndef CONFIG_I2C_POLLED
-  up_disable_irq(priv->config->irq);
-  esp32s3_teardown_irq(priv->cpu, priv->config->periph, priv->cpuint);
+      up_disable_irq(priv->config->irq);
+      esp32s3_teardown_irq(priv->cpu, priv->config->periph, priv->cpuint);
 #endif
 
-  i2c_deinit(priv);
-  nxmutex_unlock(&priv->lock);
+      i2c_deinit(priv);
+      nxmutex_unlock(&priv->lock);
+    }
 
   return OK;
 }
