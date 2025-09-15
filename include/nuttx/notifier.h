@@ -212,10 +212,12 @@ extern "C"
   do \
     { \
       FAR struct atomic_notifier_head *nh = (nhead); \
-      irqstate_t flags; \
-      flags = rspin_lock_irqsave_nopreempt(&nh->lock); \
-      notifier_call_chain(nh->head, (val), (v), -1, NULL); \
-      rspin_unlock_irqrestore_nopreempt(&nh->lock, flags); \
+      if (nh != NULL && nh->head != NULL) \
+        { \
+          irqstate_t flags = rspin_lock_irqsave_nopreempt(&nh->lock); \
+          notifier_call_chain(nh->head, (val), (v), -1, NULL); \
+          rspin_unlock_irqrestore_nopreempt(&nh->lock, flags); \
+        } \
     } \
   while(0)
 
@@ -262,12 +264,15 @@ extern "C"
   do \
     { \
       FAR struct blocking_notifier_head *nh = (nhead); \
-      if (nxmutex_lock(&nh->mutex) < 0) \
+      if (nh != NULL && nh->head != NULL) \
         { \
-          break; \
+          if (nxmutex_lock(&nh->mutex) < 0) \
+            { \
+              break; \
+            } \
+          notifier_call_chain(nh->head, (val), (v), -1, NULL); \
+          nxmutex_unlock(&nh->mutex);\
         } \
-      notifier_call_chain(nh->head, (val), (v), -1, NULL); \
-      nxmutex_unlock(&nh->mutex);\
     } \
   while(0)
 
