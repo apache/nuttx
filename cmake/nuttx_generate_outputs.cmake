@@ -52,10 +52,17 @@ function(nuttx_generate_outputs target)
   endif()
 
   if(CONFIG_RAW_DISASSEMBLY)
-    add_custom_command(
-      OUTPUT ${target}.asm
-      COMMAND ${CMAKE_OBJDUMP} -d ${target} > ${target}.asm
-      DEPENDS ${target})
+    if(CONFIG_ARCH_TOOLCHAIN_GHS)
+      add_custom_command(
+        OUTPUT ${target}.asm
+        COMMAND ${CMAKE_OBJDUMP} ${target} -ytext -yl -yp > ${target}.asm
+        DEPENDS ${target})
+    else()
+      add_custom_command(
+        OUTPUT ${target}.asm
+        COMMAND ${CMAKE_OBJDUMP} -d ${target} > ${target}.asm
+        DEPENDS ${target})
+    endif()
     add_custom_target(${target}-asm ALL DEPENDS ${target}.asm)
     file(APPEND ${CMAKE_BINARY_DIR}/nuttx.manifest "${target}.asm\n")
   endif()
