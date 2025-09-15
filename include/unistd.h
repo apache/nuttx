@@ -182,7 +182,7 @@
 /* Execution time constants (not supported) */
 
 #define _POSIX_CHOWN_RESTRICTED 1
-#undef  _POSIX_NO_TRUNC
+#define _POSIX_NO_TRUNC 1
 
 /* The value of a c_cc entry of struct termios that disables the special
  * character.
