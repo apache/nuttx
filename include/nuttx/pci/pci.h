@@ -55,6 +55,15 @@
 #define PCI_SLOT(devfn)       (((devfn) >> 3) & 0x1f)
 #define PCI_FUNC(devfn)       ((devfn) & 0x07)
 
+/* Upper 16bit for domain/segment, 8bit for bus and last 8bit for devfn */
+
+#define PCI_SBDF(seg, bus, devfn) ((((seg) & 0xffff) << 16) | \
+                                   (((bus) & 0xff) << 8) | \
+                                   ((devfn) & 0xff))
+
+#define PCI_DOMAIN(sbdf)      (((sbdf) >> 16) & 0xffff)
+#define PCI_BUS(sbdf)         (((sbdf) >> 8) & 0xff)
+
 #define PCI_ANY_ID (uint16_t)(~0)
 
 /* PCI_DEFINE_DEVICE_TABLE - macro used to describe a pci device table
@@ -361,6 +370,7 @@ struct pci_controller_s
 
   FAR struct pci_bus_s *bus;
   struct list_node node;
+  uint16_t domain;     /* PCI domain/segment id */
   uint8_t busno;
 };
 

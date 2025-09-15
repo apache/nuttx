@@ -434,9 +434,9 @@ static int pci_ecam_connect_irq(FAR struct pci_bus_s *bus, FAR int *irq,
 static int pci_ecam_get_irq(FAR struct pci_bus_s *bus, uint32_t devfn,
                             uint8_t line, uint8_t pin)
 {
-  UNUSED(bus);
+  uint32_t sbdf = PCI_SBDF(bus->ctrl->domain, bus->ctrl->busno, devfn);
 
-  return up_get_legacy_irq(devfn, line, pin);
+  return up_get_legacy_irq(sbdf, line, pin);
 }
 
 /****************************************************************************
@@ -489,6 +489,7 @@ static uintptr_t pci_ecam_map(FAR struct pci_bus_s *bus, uintptr_t start,
  *   This function is used to register an ecam driver for pci.
  *
  * Input Parameters:
+ *   domain   - PCI domain/segment id
  *   cfg      - Configuration space data
  *   io       - I/O space data
  *   mem      - No-prefetchable space data
@@ -499,7 +500,8 @@ static uintptr_t pci_ecam_map(FAR struct pci_bus_s *bus, uintptr_t start,
  *
  ****************************************************************************/
 
-int pci_ecam_register(FAR const struct pci_resource_s *cfg,
+int pci_ecam_register(uint16_t domain,
+                      FAR const struct pci_resource_s *cfg,
                       FAR const struct pci_resource_s *io,
                       FAR const struct pci_resource_s *mem,
                       FAR const struct pci_resource_s *mem_pref)
@@ -534,6 +536,7 @@ int pci_ecam_register(FAR const struct pci_resource_s *cfg,
       memcpy(&ecam->ctrl.mem_pref, mem_pref, sizeof(*mem_pref));
     }
 
+  ecam->ctrl.domain = domain;
   ecam->ctrl.ops = &g_pci_ecam_ops;
   return pci_register_controller(&ecam->ctrl);
 }

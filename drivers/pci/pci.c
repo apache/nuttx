@@ -252,7 +252,6 @@ static int pci_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct pci_controller_s *ctrl;
   FAR struct pcisel *sel;
   uint32_t devfn;
-  uint8_t i = 0;
   int ret;
 
   sel = (FAR struct pcisel *)arg;
@@ -266,17 +265,15 @@ static int pci_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   list_for_every_entry(&g_pci_ctrl_list, ctrl, struct pci_controller_s, node)
     {
-      if (i == sel->pc_domain)
+      if (ctrl->domain == sel->pc_domain)
         {
           break;
         }
-
-      i++;
     }
 
   nxmutex_unlock(&g_pci_lock);
 
-  if (i != sel->pc_domain)
+  if (&ctrl->node == &g_pci_ctrl_list)
     {
       return -ENODEV;
     }
