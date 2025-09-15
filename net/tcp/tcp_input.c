@@ -876,13 +876,11 @@ static void tcp_input(FAR struct net_driver_s *dev, uint8_t domain,
               DEBUGASSERT(conn->crefs == 1);
               conn->crefs = 0;
               tcp_free(conn);
-              return;
+              goto drop;
             }
         }
-      else
-        {
-          goto found;
-        }
+
+      goto found;
     }
 
   /* If we didn't find an active connection that expected the packet,
