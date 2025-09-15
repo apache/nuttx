@@ -432,6 +432,15 @@ config SMP
 		CPU0 IRQ handler use thread0's stack, but thread0 may switch to CPU1, that
 		will caused IRQ handler stack corruption.
 
+choice PERCPU_METHOD
+	prompt "Support PERCPU expand method"
+	default PERCPU_ARRAY
+
+config PERCPU_ARRAY
+	bool "Expand PERCPU to ARRAY, for SMP by default"
+
+endchoice
+
 if SMP
 
 config SMP_NCPUS
