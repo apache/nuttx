@@ -454,21 +454,23 @@ int fdt_load_prop_u32(FAR const void *fdt, int offset,
                       FAR uint32_t *value);
 
 /****************************************************************************
- * Name: pci_ecam_register_from_fdt
+ * Name: fdt_pci_ecam_register/_domain
  *
  * Description:
- *   This function is used to register an ecam driver from the device tree
+ *   This functions register one or all ECAMs in device tree.
  *
  * Input Parameters:
  *   fdt      - Device tree handle
+ *   domain   - The PCI domain to register
  *
  * Returned Value:
- *   Return 0 if success, nageative if failed
+ *   Return 0 if success, negative if failed
  *
  ****************************************************************************/
 
 #ifdef CONFIG_PCI
 int fdt_pci_ecam_register(FAR const void *fdt);
+int fdt_pci_ecam_register_domain(FAR const void *fdt, uint16_t domain);
 #endif
 
 /****************************************************************************

@@ -40,6 +40,7 @@
  *   This function is used to register an ecam driver for pci.
  *
  * Input Parameters:
+ *   domain   - PCI domain/segment number
  *   cfg      - Configuration space data
  *   io       - I/O space data
  *   mem      - No-prefetchable space data
@@ -50,7 +51,8 @@
  *
  ****************************************************************************/
 
-int pci_ecam_register(FAR const struct pci_resource_s *cfg,
+int pci_ecam_register(uint16_t domain,
+                      FAR const struct pci_resource_s *cfg,
                       FAR const struct pci_resource_s *io,
                       FAR const struct pci_resource_s *mem,
                       FAR const struct pci_resource_s *mem_pref);

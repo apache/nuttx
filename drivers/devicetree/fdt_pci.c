@@ -24,6 +24,8 @@
  * Included Files
  ****************************************************************************/
 
+#include <assert.h>
+#include <debug.h>
 #include <errno.h>
 
 #include <nuttx/pci/pci_ecam.h>
@@ -42,31 +44,32 @@
 #define FDT_PCI_PREFETCH      0x40000000
 
 /****************************************************************************
- * Public Functions
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: fdt_pci_ecam_register
+ * Name: fdt_pci_ecam_register_offset
  *
  * Description:
- *   This function is used to register an ecam driver from the device tree
+ *   Register ECAM for a PCI controller per info from a device tree.
  *
  * Input Parameters:
  *   fdt      - Device tree handle
+ *   offset   - offset of PCI controller node in DTB
  *
  * Returned Value:
  *   Return 0 if success, nageative if failed
  *
  ****************************************************************************/
 
-int fdt_pci_ecam_register(FAR const void *fdt)
+static int fdt_pci_ecam_register_offset(FAR const void *fdt, int offset)
 {
   struct pci_resource_s prefetch;
   struct pci_resource_s cfg;
   struct pci_resource_s mem;
   struct pci_resource_s io;
   FAR const fdt32_t *ranges;
-  int offset;
+  uint32_t domain;
 
   /* #address-size must be 3
    * defined in the PCI Bus Binding to IEEE Std 1275-1994 :
@@ -85,17 +88,17 @@ int fdt_pci_ecam_register(FAR const void *fdt)
   int rlen;
   int pna;
 
+  rlen = fdt_load_prop_u32(fdt, offset, "linux,pci-domain", 0, &domain);
+  if (rlen < 0)
+    {
+      pcierr("Failed loading domain: %d\n", rlen);
+      return rlen;
+    }
+
   memset(&prefetch, 0, sizeof(prefetch));
   memset(&cfg, 0, sizeof(cfg));
   memset(&mem, 0, sizeof(mem));
   memset(&io, 0, sizeof(io));
-
-  offset = fdt_node_offset_by_compatible(fdt, -1,
-                                         "pci-host-ecam-generic");
-  if (offset < 0)
-    {
-      return offset;
-    }
 
   /* Get the reg address, 64 or 32 */
 
@@ -154,5 +157,84 @@ int fdt_pci_ecam_register(FAR const void *fdt)
         }
     }
 
-  return pci_ecam_register(&cfg, &io, &mem, &prefetch);
+  return pci_ecam_register(domain, &cfg, &io, &mem, &prefetch);
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: fdt_pci_ecam_register/_domain
+ *
+ * Description:
+ *   Register one or all ECAM instances
+ *
+ * Input Parameters:
+ *   fdt      - Device tree handle
+ *   domain   - The specific domain id
+ *
+ * Returned Value:
+ *   Return 0 if success, nageative if failed
+ *
+ ****************************************************************************/
+
+int fdt_pci_ecam_register(FAR const void *fdt)
+{
+  int offset = -1;
+  int rc;
+
+  DEBUGASSERT(fdt);
+
+  for (; ; )
+    {
+      offset = fdt_node_offset_by_compatible(fdt, offset,
+                                             "pci-host-ecam-generic");
+      if (offset < 0)
+        {
+          break;
+        }
+
+      rc = fdt_pci_ecam_register_offset(fdt, offset);
+      if (rc < 0)
+        {
+          pcierr("Failed scanning: %d\n", rc);
+          return rc;
+        }
+    }
+
+  return 0;
+}
+
+int fdt_pci_ecam_register_domain(FAR const void *fdt, uint16_t domain)
+{
+  uint32_t d;
+  int offset = -1;
+  int rc;
+
+  DEBUGASSERT(fdt);
+
+  for (; ; )
+    {
+      offset = fdt_node_offset_by_compatible(fdt, offset,
+                                             "pci-host-ecam-generic");
+      if (offset < 0)
+        {
+          break;
+        }
+
+      rc = fdt_load_prop_u32(fdt, offset, "linux,pci-domain", 0, &d);
+      if (rc < 0)
+        {
+          pcierr("Failed loading domain: %d\n", rc);
+          return rc;
+        }
+
+      if (d == domain)
+        {
+          return fdt_pci_ecam_register_offset(fdt, offset);
+        }
+    }
+
+  return -EINVAL;
 }
