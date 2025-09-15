@@ -77,13 +77,7 @@ if(CONFIG_LIBCXXABI)
     cxa_vector.cpp
     cxa_virtual.cpp)
   add_compile_definitions(_LIBCPP_BUILDING_LIBRARY)
-  if(CONFIG_LIBSUPCXX_TOOLCHAIN)
-    add_compile_definitions(__GLIBCXX__)
-  endif()
 
-  if(CONFIG_LIBSUPCXX)
-    add_compile_definitions(__GLIBCXX__)
-  endif()
   # C++ STL files
   list(APPEND SRCS stdlib_exception.cpp stdlib_new_delete.cpp
        stdlib_stdexcept.cpp stdlib_typeinfo.cpp)
