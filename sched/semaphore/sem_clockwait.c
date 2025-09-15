@@ -109,8 +109,6 @@ int nxsem_clockwait(FAR sem_t *sem, clockid_t clockid,
 
   if (abstime->tv_nsec >= 0 && abstime->tv_nsec < 1000000000)
     {
-      flags = enter_critical_section();
-
       /* Try to take the semaphore without waiting. */
 
       ret = nxsem_trywait(sem);
@@ -119,6 +117,8 @@ int nxsem_clockwait(FAR sem_t *sem, clockid_t clockid,
           /* We will have to wait for the semaphore.  Make sure that
            * we were provided with a valid timeout.
            */
+
+          flags = enter_critical_section();
 
           if (clockid == CLOCK_REALTIME)
             {
@@ -137,14 +137,14 @@ int nxsem_clockwait(FAR sem_t *sem, clockid_t clockid,
 
           ret = nxsem_wait(sem);
 
+          leave_critical_section(flags);
+
           /* Stop the watchdog timer */
 
           wd_cancel(&rtcb->waitdog);
         }
 
       /* We can now restore interrupts and delete the watchdog */
-
-      leave_critical_section(flags);
     }
 
   return ret;
