@@ -31,6 +31,7 @@
 
 #include <stdint.h>
 
+#include <nuttx/percpu.h>
 #include <nuttx/clock.h>
 #include <nuttx/compiler.h>
 #include <nuttx/spinlock_type.h>
@@ -40,8 +41,11 @@
  ****************************************************************************/
 
 #ifndef CONFIG_CLOCK_TIMEKEEPING
-extern struct timespec  g_basetime;
-extern spinlock_t g_basetime_lock;
+DECLARE_PER_CPU_BMP(struct timespec, g_basetime);
+DECLARE_PER_CPU_BMP(spinlock_t, g_basetime_lock);
+
+#  define g_basetime this_cpu_var_bmp(g_basetime)
+#  define g_basetime_lock this_cpu_var_bmp(g_basetime_lock)
 #endif
 
 /****************************************************************************

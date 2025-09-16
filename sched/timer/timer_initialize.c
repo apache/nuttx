@@ -41,13 +41,22 @@
 #ifndef CONFIG_DISABLE_POSIX_TIMERS
 
 /****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+#if CONFIG_PREALLOC_TIMERS > 0
+typedef struct posix_timer_s posix_timer_prealloc_t[CONFIG_PREALLOC_TIMERS];
+#endif
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
 /* These are the preallocated times */
 
 #if CONFIG_PREALLOC_TIMERS > 0
-static struct posix_timer_s g_prealloctimers[CONFIG_PREALLOC_TIMERS];
+static DEFINE_PER_CPU_BSS_BMP(posix_timer_prealloc_t, g_prealloctimers);
+#  define g_prealloctimers this_cpu_var_bmp(g_prealloctimers)
 #endif
 
 /****************************************************************************
@@ -57,7 +66,9 @@ static struct posix_timer_s g_prealloctimers[CONFIG_PREALLOC_TIMERS];
 #if CONFIG_PREALLOC_TIMERS > 0
 /* This is a list of free, preallocated timer structures */
 
-volatile sq_queue_t g_freetimers;
+#  undef g_freetimers
+DEFINE_PER_CPU_BSS_BMP(volatile sq_queue_t, g_freetimers);
+#  define g_freetimers this_cpu_var_bmp(g_freetimers)
 #endif
 
 /* This is a list of instantiated timer structures -- active and inactive.
@@ -65,9 +76,13 @@ volatile sq_queue_t g_freetimers;
  * list by timer_delete() or when the owning thread exits.
  */
 
-volatile sq_queue_t g_alloctimers;
+#undef g_alloctimers
+DEFINE_PER_CPU_BSS_BMP(volatile sq_queue_t, g_alloctimers);
+#define g_alloctimers this_cpu_var_bmp(g_alloctimers)
 
-spinlock_t g_locktimers = SP_UNLOCKED;
+#undef g_locktimers
+DEFINE_PER_CPU_BMP(spinlock_t, g_locktimers) = SP_UNLOCKED;
+#define g_locktimers this_cpu_var_bmp(g_locktimers)
 
 /****************************************************************************
  * Public Functions

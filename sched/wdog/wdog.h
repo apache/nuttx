@@ -37,6 +37,7 @@
 #include <nuttx/queue.h>
 #include <nuttx/wdog.h>
 #include <nuttx/arch.h>
+#include <nuttx/sched.h>
 
 #ifdef CONFIG_HRTIMER
 #  include <nuttx/hrtimer.h> 
@@ -60,15 +61,19 @@ extern "C"
  * this linked list are removed and the function is called.
  */
 
-extern struct list_node g_wdactivelist;
+DECLARE_PER_CPU_BMP(struct list_node, g_wdactivelist);
+#define g_wdactivelist this_cpu_var_bmp(g_wdactivelist)
 
 #ifdef CONFIG_HRTIMER
-extern struct hrtimer_s g_wdtimer;
+DECLARE_PER_CPU_BMP(struct hrtimer_s, g_wdtimer);
+#  define g_wdtimer this_cpu_var_bmp(g_wdtimer)
 #endif
 
 #if defined(CONFIG_SCHED_TICKLESS) || defined(CONFIG_HRTIMER)
-extern bool g_wdtimernested;
-extern clock_t  g_wdexpired;
+DECLARE_PER_CPU_BMP(bool, g_wdtimernested);
+#  define g_wdtimernested this_cpu_var_bmp(g_wdtimernested)
+DECLARE_PER_CPU_BMP(clock_t, g_wdexpired);
+#  define g_wdexpired this_cpu_var_bmp(g_wdexpired)
 #endif
 
 /****************************************************************************

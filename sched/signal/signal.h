@@ -132,33 +132,39 @@ extern  sigactq_t  g_sigactions[CONFIG_SIG_PREALLOC_ACTIONS];
  * structures.
  */
 
-extern sq_queue_t  g_sigfreeaction;
+DECLARE_PER_CPU_BMP(sq_queue_t, g_sigfreeaction);
+#define g_sigfreeaction this_cpu_var_bmp(g_sigfreeaction)
 
 /* The g_sigpendingaction data structure is a list of available pending
  * signal action structures.
  */
 
-extern sq_queue_t  g_sigpendingaction;
+DECLARE_PER_CPU_BMP(sq_queue_t, g_sigpendingaction);
+#define g_sigpendingaction this_cpu_var_bmp(g_sigpendingaction)
 
 /* The g_sigpendingirqaction is a list of available pending signal actions
  * that are reserved for use by interrupt handlers.
  */
 
-extern sq_queue_t  g_sigpendingirqaction;
+DECLARE_PER_CPU_BMP(sq_queue_t, g_sigpendingirqaction);
+#define g_sigpendingirqaction this_cpu_var_bmp(g_sigpendingirqaction)
 
 /* The g_sigpendingsignal data structure is a list of available pending
  * signal structures.
  */
 
-extern sq_queue_t  g_sigpendingsignal;
+DECLARE_PER_CPU_BMP(sq_queue_t, g_sigpendingsignal);
+#define g_sigpendingsignal this_cpu_var_bmp(g_sigpendingsignal)
 
 /* The g_sigpendingirqsignal data structure is a list of available pending
  * signal structures that are reserved for use by interrupt handlers.
  */
 
-extern sq_queue_t  g_sigpendingirqsignal;
+DECLARE_PER_CPU_BMP(sq_queue_t, g_sigpendingirqsignal);
+#define g_sigpendingirqsignal this_cpu_var_bmp(g_sigpendingirqsignal)
 
-extern spinlock_t  g_sigspinlock;
+DECLARE_PER_CPU_BMP(spinlock_t, g_sigspinlock);
+#define g_sigspinlock this_cpu_var_bmp(g_sigspinlock)
 
 /****************************************************************************
  * Public Function Prototypes
