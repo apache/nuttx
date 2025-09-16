@@ -447,13 +447,11 @@ endif()
 # Setup platform options (this needs to happen after project(), once the
 # toolchain file has been processed)
 
-# Support custom Toolchain options by custom Boards
-if(CONFIG_ARCH_BOARD_CUSTOM)
-  if(EXISTS ${NUTTX_BOARD_ABS_DIR}/cmake
-     AND EXISTS ${NUTTX_BOARD_ABS_DIR}/cmake/Toolchain.cmake)
-    # must be added AFTER ToolchainFile and BEFORE platform
-    include(${NUTTX_BOARD_ABS_DIR}/cmake/Toolchain.cmake)
-  endif()
+# Support board Toolchain options
+if(EXISTS ${NUTTX_BOARD_ABS_DIR}/cmake
+   AND EXISTS ${NUTTX_BOARD_ABS_DIR}/cmake/Toolchain.cmake)
+  # must be added AFTER ToolchainFile and BEFORE platform
+  include(${NUTTX_BOARD_ABS_DIR}/cmake/Toolchain.cmake)
 endif()
 
 include(platform)
