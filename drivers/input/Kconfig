@@ -247,10 +247,10 @@ config FT5X06_THRESHY
 endif # FT5X06_SINGLEPOINT
 
 config FT5X06_SAMPLE_NBUFFER
-       int "Number FT5336/FT5x06 sample buffers"
-       default 4
-       ---help---
-               Maximum number of samples buffered.
+	int "Number FT5336/FT5x06 sample buffers"
+	default 4
+	---help---
+	Maximum number of samples buffered.
 
 endif # INPUT_FT5X06
 
