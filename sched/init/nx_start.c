@@ -493,6 +493,10 @@ void nx_start(void)
 
   idle_task_initialize();
 
+  /* Initialize wdog list ***************************************************/
+
+  wdlist_initialize();
+
   /* Task lists are initialized */
 
   g_nx_initstate = OSINIT_TASKLISTS;
