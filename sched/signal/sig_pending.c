@@ -86,13 +86,10 @@ sigset_t nxsig_pendingset(FAR struct tcb_s *stcb)
 
   if (stcb == NULL)
     {
-      group = this_task()->group;
-    }
-  else
-    {
-      group = stcb->group;
+      stcb = this_task();
     }
 
+  group = stcb->group;
   DEBUGASSERT(group);
 
   sigemptyset(&sigpendset);
@@ -101,7 +98,7 @@ sigset_t nxsig_pendingset(FAR struct tcb_s *stcb)
   for (sigpend = (FAR sigpendq_t *)group->tg_sigpendingq.head;
        (sigpend); sigpend = sigpend->flink)
     {
-      if (stcb == NULL || sigpend->tcb == NULL || stcb == sigpend->tcb)
+      if (sigpend->tcb == NULL || stcb == sigpend->tcb)
         {
           nxsig_addset(&sigpendset, sigpend->info.si_signo);
         }
