@@ -45,6 +45,7 @@
 #include <nuttx/vhost/vhost.h>
 #include <nuttx/virtio/virtio.h>
 #include <nuttx/panic_notifier.h>
+#include <nuttx/reboot_notifier.h>
 #include <openamp/remoteproc_loader.h>
 #include <openamp/remoteproc_virtio.h>
 #include <openamp/rsc_table_parser.h>
@@ -139,8 +140,8 @@ static void rptun_send_command(FAR struct rptun_priv_s *priv,
                                uint32_t cmd, bool wait);
 static uint32_t rptun_recv_command(FAR struct rptun_priv_s *priv, bool ack);
 
-static int rptun_panic_notifier(FAR struct notifier_block *block,
-                                unsigned long action, void *data);
+static int rptun_notifier(FAR struct notifier_block *block,
+                          unsigned long action, void *data);
 
 /****************************************************************************
  * Private Data
@@ -191,7 +192,13 @@ static rmutex_t g_rptun_lock = NXRMUTEX_INITIALIZER;
 
 static struct notifier_block g_rptun_panic_nb =
 {
-  .notifier_call = rptun_panic_notifier,
+  .notifier_call = rptun_notifier,
+};
+
+static struct notifier_block g_rptun_reboot_nb =
+{
+  .notifier_call = rptun_notifier,
+  .priority = INT_MIN, /* Reboot notifier should be called at the last */
 };
 
 /****************************************************************************
@@ -1340,13 +1347,18 @@ static metal_phys_addr_t rptun_da_to_pa(FAR struct rptun_dev_s *dev,
   return pa;
 }
 
-static int rptun_panic_notifier(FAR struct notifier_block *block,
-                                unsigned long action, void *data)
+static int rptun_notifier(FAR struct notifier_block *block,
+                          unsigned long action, void *data)
 {
-  if (action == PANIC_KERNEL_FINAL)
+  if (block == &g_rptun_reboot_nb)
     {
-      /* PANIC all the remote core */
-
+      if (action == SYS_RESTART || action == SYS_POWER_OFF)
+        {
+          rptun_ioctl_foreach(NULL, RPTUNIOC_STOP, (unsigned long)data);
+        }
+    }
+  else if (action == PANIC_KERNEL_FINAL)
+    {
       rptun_ioctl_foreach(NULL, RPTUNIOC_RESET,
                           (unsigned long)BOARDIOC_SOFTRESETCAUSE_PANIC);
     }
@@ -1389,6 +1401,7 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
           if (ret >= 0)
             {
               panic_notifier_chain_register(&g_rptun_panic_nb);
+              register_reboot_notifier(&g_rptun_reboot_nb);
 
               nxrmutex_lock(&g_rptun_lock);
               metal_list_add_tail(&g_rptun_priv, &priv->node);
