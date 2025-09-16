@@ -223,23 +223,57 @@ config ARCH
 	default "sparc"   if ARCH_SPARC
 	default "tricore" if ARCH_TRICORE
 
+if ARCH_ARM
 source "arch/arm/Kconfig"
+endif
+if ARCH_ARM64
 source "arch/arm64/Kconfig"
+endif
+if ARCH_AVR
 source "arch/avr/Kconfig"
+endif
+if ARCH_HC
 source "arch/hc/Kconfig"
+endif
+if ARCH_MIPS
 source "arch/mips/Kconfig"
+endif
+if ARCH_MISOC
 source "arch/misoc/Kconfig"
+endif
+if ARCH_RENESAS
 source "arch/renesas/Kconfig"
+endif
+if ARCH_RISCV
 source "arch/risc-v/Kconfig"
+endif
+if ARCH_SIM
 source "arch/sim/Kconfig"
+endif
+if ARCH_X86
 source "arch/x86/Kconfig"
+endif
+if ARCH_X86_64
 source "arch/x86_64/Kconfig"
+endif
+if ARCH_XTENSA
 source "arch/xtensa/Kconfig"
+endif
+if ARCH_Z16
 source "arch/z16/Kconfig"
+endif
+if ARCH_Z80
 source "arch/z80/Kconfig"
+endif
+if ARCH_OR1K
 source "arch/or1k/Kconfig"
+endif
+if ARCH_SPARC
 source "arch/sparc/Kconfig"
+endif
+if ARCH_TRICORE
 source "arch/tricore/Kconfig"
+endif
 
 config ARCH_CHIP_CUSTOM
 	bool "Custom Chip Support"
