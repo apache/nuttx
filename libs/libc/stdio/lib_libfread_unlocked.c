@@ -70,6 +70,10 @@ ssize_t lib_fread_unlocked(FAR void *ptr, size_t count, FAR FILE *stream)
       set_errno(EBADF);
       return ERROR;
     }
+  else if ((stream->fs_flags & __FS_FLAG_EOF) != 0)
+    {
+      return 0;
+    }
   else
     {
       fd = (int)(intptr_t)stream->fs_cookie;
