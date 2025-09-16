@@ -55,6 +55,7 @@
 #include "hardware/esp32s2_i2c.h"
 #include "hardware/esp32s2_soc.h"
 #include "hardware/esp32s2_system.h"
+#include "soc/interrupts.h"
 
 #ifdef CONFIG_ESP32S2_RTC_I2C
 #  include "ulp_riscv.h"
@@ -265,6 +266,10 @@ static void i2c_init(struct esp32s2_i2c_priv_s *priv);
 static void i2c_deinit(struct esp32s2_i2c_priv_s *priv);
 static int i2c_transfer(struct i2c_master_s *dev, struct i2c_msg_s *msgs,
                         int count);
+#ifdef CONFIG_ESP32S2_RTC_I2C
+static int rtc_i2c_transfer(struct i2c_master_s *dev, struct i2c_msg_s *msgs,
+                            int count);
+#endif
 static inline void i2c_process(struct esp32s2_i2c_priv_s *priv,
                                uint32_t status);
 #ifndef CONFIG_I2C_POLLED
@@ -306,7 +311,7 @@ static const struct i2c_ops_s g_esp32s2_i2c_ops =
 #ifdef CONFIG_ESP32S2_RTC_I2C
 static const struct i2c_ops_s g_esp32s2_rtc_i2c_ops =
 {
-  .transfer = NULL,
+  .transfer = rtc_i2c_transfer,
 };
 #endif
 
@@ -319,8 +324,8 @@ static const struct esp32s2_i2c_config_s g_esp32s2_i2c0_config =
   .scl_pin    = CONFIG_ESP32S2_I2C0_SCLPIN,
   .sda_pin    = CONFIG_ESP32S2_I2C0_SDAPIN,
 #ifndef CONFIG_I2C_POLLED
-  .periph     = ESP32S2_PERIPH_I2C_EXT0,
-  .irq        = ESP32S2_IRQ_I2C_EXT0,
+  .periph     = ETS_I2C_EXT0_INTR_SOURCE,
+  .irq        = ESP32S2_PERIPH2IRQ(ETS_I2C_EXT0_INTR_SOURCE),
 #endif
   .clk_bit    = SYSTEM_I2C_EXT0_CLK_EN,
   .rst_bit    = SYSTEM_I2C_EXT0_RST,
@@ -355,8 +360,8 @@ static const struct esp32s2_i2c_config_s g_esp32s2_i2c1_config =
   .scl_pin    = CONFIG_ESP32S2_I2C1_SCLPIN,
   .sda_pin    = CONFIG_ESP32S2_I2C1_SDAPIN,
 #ifndef CONFIG_I2C_POLLED
-  .periph     = ESP32S2_PERIPH_I2C_EXT1,
-  .irq        = ESP32S2_IRQ_I2C_EXT1,
+  .periph     = ETS_I2C_EXT1_INTR_SOURCE,
+  .irq        = ESP32S2_PERIPH2IRQ(ETS_I2C_EXT1_INTR_SOURCE),
 #endif
   .clk_bit    = SYSTEM_I2C_EXT1_CLK_EN,
   .rst_bit    = SYSTEM_I2C_EXT1_RST,
@@ -974,6 +979,99 @@ static int i2c_polling_waitdone(struct esp32s2_i2c_priv_s *priv)
 /****************************************************************************
  * Device Driver Operations
  ****************************************************************************/
+
+#ifdef CONFIG_ESP32S2_RTC_I2C
+/****************************************************************************
+ * Name: rtc_i2c_transfer
+ *
+ * Description:
+ *   I2C transfer function for RTC I2C.
+ *
+ * Parameters:
+ *   dev           - Device-specific state data
+ *   msgs          - A pointer to a set of message descriptors
+ *   count         - The number of transfers to perform
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success. A negated errno value is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+static int rtc_i2c_transfer(struct i2c_master_s *dev, struct i2c_msg_s *msgs,
+                            int count)
+{
+  int ret = OK;
+  struct esp32s2_i2c_priv_s *priv = (struct esp32s2_i2c_priv_s *)dev;
+
+  DEBUGASSERT(count > 0);
+
+  ret = nxmutex_lock(&priv->lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* If previous state is different than idle,
+   * reset the FSMC to the idle state.
+   */
+
+  if (priv->i2cstate != I2CSTATE_IDLE)
+    {
+      i2c_reset_fsmc(priv);
+      priv->i2cstate = I2CSTATE_IDLE;
+    }
+
+  /* Transfer the messages to the internal struct
+   * and loop count times to make all transfers.
+   */
+
+  priv->msgv = msgs;
+
+  ulp_riscv_i2c_master_set_slave_addr(msgs[0].addr);
+
+  /* This is a limitation for RTC I2C. Each transaction has to include
+   * a sub address
+   */
+
+  if (msgs[0].flags & I2C_M_NOSTOP)
+    {
+      ulp_riscv_i2c_master_set_slave_reg_addr(msgs[0].buffer[0]);
+    }
+  else
+    {
+      ulp_riscv_i2c_master_set_slave_reg_addr(0);
+    }
+
+  for (int i = 0; i < count; i++)
+    {
+      priv->bytes      = 0;
+      priv->msgid      = i;
+      priv->ready_read = false;
+      priv->error      = 0;
+      priv->i2cstate   = I2CSTATE_PROC;
+
+      if ((msgs[i].flags & I2C_M_READ) != 0)
+        {
+          ulp_riscv_i2c_master_read_from_device(msgs[i].buffer, 1);
+        }
+      else
+        {
+          ulp_riscv_i2c_master_write_to_device(msgs[i].buffer,
+                                               msgs[i].length);
+        }
+    }
+
+  priv->i2cstate = I2CSTATE_IDLE;
+
+  /* Dump the trace result */
+
+  i2c_tracedump(priv);
+  nxmutex_unlock(&priv->lock);
+
+  return ret;
+}
+#endif
 
 /****************************************************************************
  * Name: i2c_transfer
