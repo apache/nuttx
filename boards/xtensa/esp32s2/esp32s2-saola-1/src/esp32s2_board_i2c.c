@@ -51,14 +51,11 @@ static int i2c_driver_init(int bus)
       return -ENODEV;
     }
 
-  if (bus != ESP32S2_RTC_I2C)
+  ret = i2c_register(i2c, bus);
+  if (ret < 0)
     {
-      ret = i2c_register(i2c, bus);
-      if (ret < 0)
-        {
-          i2cerr("Failed to register I2C%d driver: %d\n", bus, ret);
-          esp32s2_i2cbus_uninitialize(i2c);
-        }
+      i2cerr("Failed to register I2C%d driver: %d\n", bus, ret);
+      esp32s2_i2cbus_uninitialize(i2c);
     }
 
   return ret;
