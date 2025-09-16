@@ -276,11 +276,13 @@ int nxsched_set_scheduler(pid_t pid, int policy,
   /* Set the new priority */
 
   ret = nxsched_reprioritize(tcb, param->sched_priority);
+  nxsched_put_tcb(tcb);
   sched_unlock();
   return ret;
 
 #ifdef CONFIG_SCHED_SPORADIC
 errout_with_irq:
+  nxsched_put_tcb(tcb);
   leave_critical_section(flags);
   sched_unlock();
   return ret;

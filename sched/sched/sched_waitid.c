@@ -232,10 +232,13 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
 
           if (ctcb->group->tg_ppid != rtcb->pid)
             {
+              nxsched_put_tcb(ctcb);
               errcode = ECHILD;
               goto errout;
             }
         }
+
+      nxsched_put_tcb(ctcb);
 
       /* Does this task retain child status? */
 
@@ -273,8 +276,11 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
       if (!ctcb || !ctcb->group || ctcb->group->tg_ppid != rtcb->pid)
         {
           errcode = ECHILD;
+          nxsched_put_tcb(ctcb);
           goto errout;
         }
+
+      nxsched_put_tcb(ctcb);
     }
 #endif
 

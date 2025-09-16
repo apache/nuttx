@@ -111,6 +111,7 @@ int pthread_completejoin(pid_t pid, FAR void *exit_value)
 
   nxrmutex_unlock(&group->tg_mutex);
 
+  nxsched_put_tcb(tcb);
   return ret;
 }
 

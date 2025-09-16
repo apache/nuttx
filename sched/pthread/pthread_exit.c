@@ -36,6 +36,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/sched.h>
 #include <nuttx/signal.h>
 
 #include "sched/sched.h"
@@ -65,6 +66,8 @@
 void nx_pthread_exit(FAR void *exit_value)
 {
   FAR struct tcb_s *tcb = this_task();
+  irqstate_t flags;
+  bool exiting = false;
 #ifndef CONFIG_DISABLE_ALL_SIGNALS
   sigset_t set;
 #endif
@@ -99,7 +102,7 @@ void nx_pthread_exit(FAR void *exit_value)
    * The IRQ state will be restored when the next task is started.
    */
 
-  enter_critical_section();
+  flags = enter_critical_section();
 
   /* Perform common task termination logic.  This will get called again later
    * through logic kicked off by up_exit().
@@ -113,9 +116,39 @@ void nx_pthread_exit(FAR void *exit_value)
    * once, or does something very naughty.
    */
 
-  tcb->flags |= TCB_FLAG_EXIT_PROCESSING;
+  if (tcb->flags & TCB_FLAG_EXIT_PROCESSING)
+    {
+      exiting = true;
+    }
+  else
+    {
+      tcb->flags |= TCB_FLAG_EXIT_PROCESSING;
+    }
+
+  leave_critical_section(flags);
+
+  if (exiting)
+    {
+      /* If the TCB is already in the exiting state, we
+       * should allow the killing task to execute normally first.
+       * We stop the execution here.
+       */
+
+      for (; ; )
+        {
+          usleep(1000);
+        }
+    }
+
+  enter_critical_section();
 
   nxtask_exithook(tcb, status);
 
+  /* In nxtask_exithook, nxmutex_lock is used, and nxmutex_lock depends
+   * on nxsched_get_tcb. Therefore, we move nxsched_release_pid
+   * to this position.
+   */
+
+  nxsched_release_pid(tcb->pid);
   up_exit(EXIT_SUCCESS);
 }

@@ -111,6 +111,7 @@ int riscv_exception(int mcause, void *regs, void *args)
       _alert("Segmentation fault in %s (PID %d: %s)\n", get_task_name(ptcb),
              tcb->pid, get_task_name(tcb));
 
+      nxsched_put_tcb(ptcb);
       tcb->flags |= TCB_FLAG_FORCED_CANCEL;
 
       /* Return to _exit function in privileged mode with argument SIGSEGV */

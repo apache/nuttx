@@ -178,6 +178,11 @@ int nxclock_gettime(clockid_t clock_id, FAR struct timespec *tp)
             {
               ret = -EINVAL;
             }
+
+          if (pid != 0)
+            {
+              nxsched_put_tcb(tcb);
+            }
         }
       else
         {

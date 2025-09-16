@@ -62,6 +62,7 @@
 #include <nuttx/lib/lib.h>
 
 #include "fs_heap.h"
+#include "sched/sched.h"
 
 #if !defined(CONFIG_SCHED_CPULOAD_NONE) || defined(CONFIG_SCHED_CRITMONITOR)
 #  include <nuttx/clock.h>
@@ -1463,7 +1464,6 @@ static int proc_open(FAR struct file *filep, FAR const char *relpath,
 {
   FAR struct proc_file_s *procfile;
   FAR const struct proc_node_s *node;
-  FAR struct tcb_s *tcb;
   FAR char *ptr;
   unsigned long tmp;
   pid_t pid;
@@ -1509,9 +1509,7 @@ static int proc_open(FAR struct file *filep, FAR const char *relpath,
   /* Now verify that a task with this task/thread ID exists */
 
   pid = (pid_t)tmp;
-
-  tcb = nxsched_get_tcb(pid);
-  if (tcb == NULL)
+  if (!nxsched_verify_pid(pid))
     {
       ferr("ERROR: PID %d is no longer valid\n", pid);
       return -ENOENT;
@@ -1664,6 +1662,8 @@ static ssize_t proc_read(FAR struct file *filep, FAR char *buffer,
 
   leave_critical_section(flags);
 
+  nxsched_put_tcb(tcb);
+
   /* Update the file offset */
 
   if (ret > 0)
@@ -1715,6 +1715,7 @@ static ssize_t proc_write(FAR struct file *filep, FAR const char *buffer,
         break;
     }
 
+  nxsched_put_tcb(tcb);
   return ret;
 }
 
@@ -1770,7 +1771,6 @@ static int proc_opendir(FAR const char *relpath,
 {
   FAR struct proc_dir_s *procdir;
   FAR const struct proc_node_s *node;
-  FAR struct tcb_s *tcb;
   unsigned long tmp;
   FAR char *ptr;
   pid_t pid;
@@ -1820,9 +1820,7 @@ static int proc_opendir(FAR const char *relpath,
   /* Now verify that a task with this task/thread ID exists */
 
   pid = (pid_t)tmp;
-
-  tcb = nxsched_get_tcb(pid);
-  if (tcb == NULL)
+  if (!nxsched_verify_pid(pid))
     {
       ferr("ERROR: PID %d is not valid\n", pid);
       return -ENOENT;
@@ -1912,7 +1910,6 @@ static int proc_readdir(FAR struct fs_dirent_s *dir,
 {
   FAR struct proc_dir_s *procdir;
   FAR const struct proc_node_s *node = NULL;
-  FAR struct tcb_s *tcb;
   unsigned int index;
   pid_t pid;
   int ret;
@@ -1940,9 +1937,7 @@ static int proc_readdir(FAR struct fs_dirent_s *dir,
       /* Verify that the pid still refers to an active task/thread */
 
       pid = procdir->pid;
-
-      tcb = nxsched_get_tcb(pid);
-      if (tcb == NULL)
+      if (!nxsched_verify_pid(pid))
         {
           ferr("ERROR: PID %d is no longer valid\n", pid);
           return -ENOENT;
@@ -2014,7 +2009,6 @@ static int proc_rewinddir(struct fs_dirent_s *dir)
 static int proc_stat(const char *relpath, struct stat *buf)
 {
   FAR const struct proc_node_s *node;
-  FAR struct tcb_s *tcb;
   unsigned long tmp;
   FAR char *ptr;
   pid_t pid;
@@ -2058,9 +2052,7 @@ static int proc_stat(const char *relpath, struct stat *buf)
   /* Now verify that a task with this task/thread ID exists */
 
   pid = (pid_t)tmp;
-
-  tcb = nxsched_get_tcb(pid);
-  if (tcb == NULL)
+  if (!nxsched_verify_pid(pid))
     {
       ferr("ERROR: PID %d is no longer valid\n", pid);
       return -ENOENT;

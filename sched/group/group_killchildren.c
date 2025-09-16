@@ -112,10 +112,12 @@ static int group_cancel_children_handler(pid_t pid, FAR void *arg)
 
           if ((rtcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD)
             {
+              nxsched_put_tcb(rtcb);
               ret = pthread_cancel(pid);
             }
           else
             {
+              nxsched_put_tcb(rtcb);
               ret = nxtask_delete(pid);
             }
 
