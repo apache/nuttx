@@ -291,8 +291,7 @@ void icmp_input(FAR struct net_driver_s *dev)
   icmp = IPBUF(iphdrlen);
 
 #ifdef CONFIG_NET_ICMP_CHECKSUMS
-  csum = icmp_chksum(dev,
-                     ((ipv4->len[0] << 8) | ipv4->len[1]) - iphdrlen);
+  csum = icmp_chksum_iob(dev->d_iob);
   if (csum != 0xffff)
     {
       ninfo("ICMP checksum error\n");
