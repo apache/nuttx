@@ -3724,7 +3724,7 @@ config ARCH_BOARD
 	default "milkv_duos"                if ARCH_BOARD_SG2000_MILKV_DUOS
 	default "starpro64"                 if ARCH_BOARD_EIC7700X_STARPRO64
 	default "sabre-6quad"               if ARCH_BOARD_SABRE_6QUAD
-    default "a2g-tc397-5v-tft"          if ARCH_BOARD_A2G_TC397_5V_TFT
+	default "a2g-tc397-5v-tft"          if ARCH_BOARD_A2G_TC397_5V_TFT
 	default "qemu-armv7a"               if ARCH_BOARD_QEMU_ARMV7A
 	default "qemu-armv7r"               if ARCH_BOARD_QEMU_ARMV7R
 	default "qemu-armv8a"               if ARCH_BOARD_QEMU_ARMV8A
