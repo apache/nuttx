@@ -86,7 +86,7 @@ static int isr_thread_main(int argc, FAR char *argv[])
   int irq = atoi(argv[1]);
   xcpt_t isr = (xcpt_t)((uintptr_t)strtoul(argv[2], NULL, 16));
   xcpt_t isrthread = (xcpt_t)((uintptr_t)strtoul(argv[3], NULL, 16));
-  FAR void *arg = (FAR void *)((uintptr_t)strtoul(argv[4], NULL, 16));
+  FAR void *arg = (FAR char *)((uintptr_t)strtoul(argv[4], NULL, 16));
   struct irq_thread_info_s info;
   sem_t sem;
 
