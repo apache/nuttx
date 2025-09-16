@@ -333,6 +333,8 @@ static void memdump_backtrace(FAR struct mm_heap_s *heap,
           buf->backtrace[ret] = NULL;
         }
     }
+
+  nxsched_put_tcb(tcb);
 #  endif
 }
 #endif
@@ -1292,6 +1294,7 @@ void mm_memdump(FAR struct mm_heap_s *heap,
                            tcb->stack_alloc_ptr, tcb->adj_stack_size, name);
         }
 
+      nxsched_put_tcb(tcb);
       memdump_info_pool(&priv, heap);
     }
   else if (pid == PID_MM_FREE)

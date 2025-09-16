@@ -36,6 +36,7 @@
 #include <nuttx/streams.h>
 #include <nuttx/syslog/syslog.h>
 
+#include "sched/sched.h"
 #include "syslog.h"
 
 /****************************************************************************

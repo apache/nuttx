@@ -150,6 +150,10 @@ int nxsched_set_affinity(pid_t pid, size_t cpusetsize,
 
 errout_with_csection:
   leave_critical_section(flags);
+  if (pid)
+    {
+      nxsched_put_tcb(tcb);
+    }
 
 errout:
   return ret;

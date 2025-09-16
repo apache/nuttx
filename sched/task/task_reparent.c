@@ -93,6 +93,7 @@ int task_reparent(pid_t ppid, pid_t chpid)
   /* Get the PID of the old parent task's task group (opid) */
 
   opid = chgrp->tg_ppid;
+  nxsched_put_tcb(tcb);
 
   /* Get the old parent task's task group (ogrp) */
 
@@ -128,6 +129,7 @@ int task_reparent(pid_t ppid, pid_t chpid)
 
       pgrp = tcb->group;
       ppid = pgrp->tg_pid;
+      nxsched_put_tcb(tcb);
     }
 
   if (!pgrp)
@@ -198,9 +200,9 @@ int task_reparent(pid_t ppid, pid_t chpid)
 #ifdef CONFIG_SCHED_CHILD_STATUS
   FAR struct child_status_s *child;
 #endif
-  FAR struct tcb_s *ptcb;
-  FAR struct tcb_s *chtcb;
-  FAR struct tcb_s *otcb;
+  FAR struct tcb_s *ptcb = NULL;
+  FAR struct tcb_s *chtcb = NULL;
+  FAR struct tcb_s *otcb = NULL;
   pid_t opid;
   irqstate_t flags;
   int ret;
@@ -306,6 +308,10 @@ int task_reparent(pid_t ppid, pid_t chpid)
 
 errout_with_ints:
   leave_critical_section(flags);
+  nxsched_put_tcb(ptcb);
+  nxsched_put_tcb(otcb);
+  nxsched_put_tcb(chtcb);
+
   return ret;
 }
 #endif

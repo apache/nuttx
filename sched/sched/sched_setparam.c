@@ -226,6 +226,11 @@ int nxsched_set_param(pid_t pid, FAR const struct sched_param *param)
           ret = nxsched_reprioritize(tcb, param->sched_priority);
         }
 
+      if (tcb != rtcb)
+        {
+          nxsched_put_tcb(tcb);
+        }
+
       sched_unlock();
     }
   else

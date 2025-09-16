@@ -231,7 +231,12 @@ int clock_cpuload(int pid, FAR struct cpuload_s *cpuload)
 #ifdef CONFIG_SCHED_CPULOAD_CRITMONITOR
   /* Update critmon in case of the target thread busyloop */
 
-  nxsched_update_critmon(nxsched_get_tcb(pid));
+  tcb = nxsched_get_tcb(pid);
+  if (tcb)
+    {
+      nxsched_update_critmon(tcb);
+      nxsched_put_tcb(tcb);
+    }
 #endif
 
   /* Momentarily disable interrupts.  We need (1) the task to stay valid

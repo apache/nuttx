@@ -569,9 +569,12 @@ static void dump_tasks(void)
 static void dump_lockholder(pid_t tid)
 {
   char buf[BACKTRACE_BUFFER_SIZE(CONFIG_LIBC_MUTEX_BACKTRACE)];
+  FAR struct tcb_s *tcb;
   FAR mutex_t *mutex;
 
-  mutex = (FAR mutex_t *)nxsched_get_tcb(tid)->waitobj;
+  tcb = nxsched_get_tcb(tid);
+  mutex = (FAR mutex_t *)tcb->waitobj;
+  nxsched_put_tcb(tcb);
 
   backtrace_format(buf, sizeof(buf), mutex->backtrace,
                    CONFIG_LIBC_MUTEX_BACKTRACE);
@@ -717,6 +720,8 @@ static void dump_assert_info(FAR struct tcb_s *rtcb,
          get_task_name(rtcb),
          ptcb ? get_task_name(ptcb) : "Kernel",
          rtcb->entry.main);
+
+  nxsched_put_tcb(ptcb);
 
   /* Dump current CPU registers, running task stack and backtrace. */
 

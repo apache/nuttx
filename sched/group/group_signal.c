@@ -114,7 +114,7 @@ static int group_signal_handler(pid_t pid, FAR void *arg)
       ret = nxsig_tcbdispatch(tcb, info->siginfo, true);
       if (ret < 0)
         {
-          return ret;
+          goto errout;
         }
 
       /* Limit to one thread */
@@ -123,7 +123,8 @@ static int group_signal_handler(pid_t pid, FAR void *arg)
 
       if (info->ptcb != NULL && info->siginfo->si_signo != SIGCHLD)
         {
-          return 1; /* Terminate the search */
+          ret = 1; /* Terminate the search */
+          goto errout;
         }
     }
 
@@ -156,7 +157,7 @@ static int group_signal_handler(pid_t pid, FAR void *arg)
           ret = nxsig_tcbdispatch(tcb, info->siginfo, true);
           if (ret < 0)
             {
-              return ret;
+              goto errout;
             }
 
           /* Limit to one thread */
@@ -164,13 +165,18 @@ static int group_signal_handler(pid_t pid, FAR void *arg)
           info->ptcb = tcb;
           if (info->atcb != NULL)
             {
-              return 1; /* Terminate the search */
+              ret = 1; /* Terminate the search */
+              goto errout;
             }
         }
 #endif
     }
 
+  nxsched_put_tcb(tcb);
   return 0; /* Keep searching */
+errout:
+  nxsched_put_tcb(tcb);
+  return ret;
 }
 #endif
 

@@ -166,6 +166,8 @@ static void pg_callback(FAR struct tcb_s *tcb, int result)
           nxsched_set_priority(wtcb, priority);
         }
 
+      nxsched_put_tcb(wtcb);
+
       /* Save the page fill result (don't permit the value -EBUSY) */
 
       if (result == -EBUSY)

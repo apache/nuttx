@@ -169,6 +169,8 @@ void pg_miss(void)
       nxsched_set_priority(wtcb, ftcb->sched_priority);
     }
 
+  nxsched_put_tcb(wtcb);
+
   /* Signal the page fill worker thread.
    * - Is there a page fill pending?  If not then signal the worker
    *   thread to start working on the queued page fill requests.

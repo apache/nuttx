@@ -68,6 +68,7 @@ static int nxsched_suspend_handler(FAR void *cookie)
       /* There is no TCB with this pid or, if there is, it is not a task. */
 
       leave_critical_section(flags);
+      nxsched_put_tcb(tcb);
       return OK;
     }
 
@@ -82,6 +83,7 @@ static int nxsched_suspend_handler(FAR void *cookie)
   dq_addlast((FAR dq_entry_t *)tcb, &g_stoppedtasks);
 
   leave_critical_section(flags);
+  nxsched_put_tcb(tcb);
   return OK;
 }
 #endif

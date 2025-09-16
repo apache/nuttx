@@ -406,6 +406,8 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
                 }
             }
 
+          nxsched_put_tcb(ctcb);
+
           /* Does this task retain child status? */
 
           if (retains && errcode == OK)
@@ -441,6 +443,8 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
             {
               errcode = ECHILD;
             }
+
+          nxsched_put_tcb(ctcb);
         }
 #endif
     }

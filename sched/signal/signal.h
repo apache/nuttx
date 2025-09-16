@@ -215,6 +215,14 @@ void               nxsig_release_pendingsigaction(FAR sigq_t *sigq);
 void               nxsig_release_pendingsignal(FAR sigpendq_t *sigpend);
 FAR sigpendq_t    *nxsig_remove_pendingsignal(FAR struct tcb_s *stcb,
                                               int signo);
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
 bool               nxsig_unmask_pendingsignal(void);
+#else
+static inline_function
+bool               nxsig_unmask_pendingsignal(void)
+{
+  return false;
+}
+#endif
 
 #endif /* __SCHED_SIGNAL_SIGNAL_H */

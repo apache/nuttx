@@ -397,7 +397,9 @@ SYSCALL_LOOKUP(settimeofday,               2)
 
 /* ANSI C signal handling */
 
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
 SYSCALL_LOOKUP(signal,                     2)
+#endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_DUMP
   SYSCALL_LOOKUP(sched_note_vprintf_ip,    5)

@@ -117,6 +117,7 @@ pid_t nxsched_waitpid(pid_t pid, int *stat_loc, int options)
   /* Then the task group corresponding to this PID */
 
   group = ctcb->group;
+  nxsched_put_tcb(ctcb);
   if (group == NULL)
     {
       ret = -ECHILD;
@@ -258,11 +259,13 @@ pid_t nxsched_waitpid(pid_t pid, int *stat_loc, int options)
 
           if (ctcb->group->tg_ppid != rtcb->group->tg_pid)
             {
+              nxsched_put_tcb(ctcb);
               ret = -ECHILD;
               goto errout;
             }
         }
 
+      nxsched_put_tcb(ctcb);
       /* The child task is ours or it is no longer active.  Does the parent
        * task retain child status?
        */
@@ -297,9 +300,12 @@ pid_t nxsched_waitpid(pid_t pid, int *stat_loc, int options)
       ctcb = nxsched_get_tcb(pid);
       if (!ctcb || !ctcb->group || ctcb->group->tg_ppid != rtcb->pid)
         {
+          nxsched_put_tcb(ctcb);
           ret = -ECHILD;
           goto errout;
         }
+
+      nxsched_put_tcb(ctcb);
     }
 
 #endif /* CONFIG_SCHED_CHILD_STATUS */

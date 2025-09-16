@@ -77,6 +77,7 @@ static int sig_handler(FAR void *cookie)
       /* There is no TCB with this pid or, if there is, it is not a task. */
 
       leave_critical_section(flags);
+      nxsched_put_tcb(tcb);
       return -ESRCH;
     }
 
@@ -91,6 +92,8 @@ static int sig_handler(FAR void *cookie)
     }
 
   leave_critical_section(flags);
+  nxsched_put_tcb(tcb);
+
   return OK;
 }
 #endif
@@ -776,6 +779,8 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info,
 
 int nxsig_dispatch(pid_t pid, FAR siginfo_t *info, bool thread)
 {
+  int ret;
+
 #ifdef HAVE_GROUP_MEMBERS
   if (!thread)
     {
@@ -797,7 +802,9 @@ int nxsig_dispatch(pid_t pid, FAR siginfo_t *info, bool thread)
       FAR struct tcb_s *stcb = nxsched_get_tcb(pid);
       if (stcb != NULL)
         {
-          return nxsig_tcbdispatch(stcb, info, false);
+          ret = nxsig_tcbdispatch(stcb, info, false);
+          nxsched_put_tcb(stcb);
+          return ret;
         }
     }
 
