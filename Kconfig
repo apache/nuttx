@@ -2470,44 +2470,44 @@ config STACK_CANARIES
 		in footprint and an associated decrease in performance.
 
 choice STACK_CANARIES_LEVEL
-    prompt "Stack Canaries Level Configuration"
-    default STACK_PROTECTOR_ALL
-    depends on STACK_CANARIES
-    ---help---
-        Based on the configuration options, configure the stack Canaries Level.
+	prompt "Stack Canaries Level Configuration"
+	default STACK_PROTECTOR_ALL
+	depends on STACK_CANARIES
+	---help---
+		Based on the configuration options, configure the stack Canaries Level.
 
 config STACK_PROTECTOR
-    bool "-fstack-protector"
-    ---help---
-        Enable basic stack protection.
+	bool "-fstack-protector"
+	---help---
+		Enable basic stack protection.
 
 config STACK_PROTECTOR_STRONG
-    bool "-fstack-protector-strong"
-    ---help---
-        Using stronger stack protection mechanisms may involve more complex
-        security checks.
+	bool "-fstack-protector-strong"
+	---help---
+		Using stronger stack protection mechanisms may involve more complex
+		security checks.
 
 config STACK_PROTECTOR_ALL
-    bool "-fstack-protector-all"
-    ---help---
-        Enable stack protection for all functions, including those that are
-        typically not protected.
+	bool "-fstack-protector-all"
+	---help---
+		Enable stack protection for all functions, including those that are
+		typically not protected.
 
 config STACK_PROTECTOR_EXPLICIT
-    bool "-fstack-protector-explicit"
-    ---help---
-        Enable stack protection only for functions explicitly marked as
-        requiring stack protection.
+	bool "-fstack-protector-explicit"
+	---help---
+		Enable stack protection only for functions explicitly marked as
+		requiring stack protection.
 
 endchoice # Stack Canaries Level Configuration
 
 config STACK_CANARIES_LEVEL
-    string
-    default "-fstack-protector" if STACK_PROTECTOR
-    default "-fstack-protector-strong" if STACK_PROTECTOR_STRONG
-    default "-fstack-protector-all" if STACK_PROTECTOR_ALL
-    default "-fstack-protector-explicit" if STACK_PROTECTOR_EXPLICIT
-    depends on STACK_CANARIES
+	string
+	default "-fstack-protector" if STACK_PROTECTOR
+	default "-fstack-protector-strong" if STACK_PROTECTOR_STRONG
+	default "-fstack-protector-all" if STACK_PROTECTOR_ALL
+	default "-fstack-protector-explicit" if STACK_PROTECTOR_EXPLICIT
+	depends on STACK_CANARIES
 
 config STACK_USAGE
 	bool "Generate stack usage information"
