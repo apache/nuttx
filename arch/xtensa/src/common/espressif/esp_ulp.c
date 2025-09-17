@@ -31,7 +31,6 @@
 #include <string.h>
 
 #include "ulp_riscv.h"
-#include "ulp/ulp_code.h"
 #include "ulp/ulp_var_map.h"
 
 /****************************************************************************
@@ -50,6 +49,7 @@ static int esp_ulp_write(struct file *filep,
                          const char *buffer,
                          size_t buflen);
 static int esp_ulp_ioctl(struct file *filep, int cmd, unsigned long arg);
+int esp_ulp_load_bin(const char *buffer, size_t buflen);
 
 /****************************************************************************
  * Private Data
@@ -87,6 +87,7 @@ static const struct file_operations g_esp_ulp_fops =
 
 static int esp_ulp_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
+  UNUSED(filep);
   int ret = 0;
   int index = -1;
   struct symtab_s *sym = (struct symtab_s *)arg;
@@ -152,11 +153,8 @@ static int esp_ulp_write(struct file *filep,
                          const char *buffer,
                          size_t buflen)
 {
-  int ret = ERROR;
-  ulp_riscv_halt();
-  ret = ulp_riscv_load_binary((const uint8_t *)buffer, buflen);
-  ulp_riscv_run();
-  return ret;
+  UNUSED(filep);
+  return esp_ulp_load_bin(buffer, buflen);
 }
 
 /****************************************************************************
@@ -183,6 +181,31 @@ static void esp_ulp_register(void)
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: esp_ulp_load_bin
+ *
+ * Description:
+ *   Load binary data into ULP.
+ *
+ * Input Parameters:
+ *   buffer - Buffer that includes binary to run on ULP.
+ *   buflen - Length of the buffer
+ *
+ * Returned Value:
+ *   Returns OK on success; a negated errno value on failure
+ *
+ ****************************************************************************/
+
+int esp_ulp_load_bin(const char *buffer, size_t buflen)
+{
+  int ret = ERROR;
+  ulp_riscv_halt();
+  ulp_riscv_reset();
+  ret = ulp_riscv_load_binary((const uint8_t *)buffer, buflen);
+  ulp_riscv_run();
+  return ret;
+}
+
+/****************************************************************************
  * Name: esp_ulp_init
  *
  * Description:
@@ -199,8 +222,5 @@ static void esp_ulp_register(void)
 void esp_ulp_init(void)
 {
   esp_ulp_register();
-  ulp_riscv_load_binary(esp_ulp_bin,
-                          sizeof(esp_ulp_bin));
-
   ulp_riscv_run();
 }

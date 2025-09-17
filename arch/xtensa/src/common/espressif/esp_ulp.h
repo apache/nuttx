@@ -46,6 +46,23 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: esp_ulp_load_bin
+ *
+ * Description:
+ *   Load binary data into ULP.
+ *
+ * Input Parameters:
+ *   buffer - Buffer that includes binary to run on ULP.
+ *   buflen - Length of the buffer
+ *
+ * Returned Value:
+ *   Returns OK on success; a negated errno value on failure
+ *
+ ****************************************************************************/
+
+int esp_ulp_load_bin(const char *buffer, size_t buflen);
+
+/****************************************************************************
  * Name: esp_ulp_init
  *
  * Description:
