@@ -1375,6 +1375,20 @@ int psock_dup2(FAR struct socket *psock1, FAR struct socket *psock2);
 int psock_fstat(FAR struct socket *psock, FAR struct stat *buf);
 
 /****************************************************************************
+ * Name: psock_mmap
+ *
+ * Description:
+ *   Perform mmap operations on socket.
+ *
+ * Returned Value:
+ *   On success, returns the number of new socket.  On any error,
+ *   a negated errno value is returned.
+ *
+ ****************************************************************************/
+
+int psock_mmap(FAR struct socket *psock, FAR struct mm_map_entry_s *map);
+
+/****************************************************************************
  * Name: psock_sendfile
  *
  * Description:
