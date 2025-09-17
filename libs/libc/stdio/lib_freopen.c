@@ -184,6 +184,13 @@ FAR FILE *freopen(FAR const char *path, FAR const char *mode,
           return NULL;
         }
 
+      /* Write out buffered data before the mode changes, as POSIX
+       * requires, so that it is not dropped when the stream is no longer
+       * writable.
+       */
+
+      lib_fflush(stream);
+
       /* Set the new file mode for the file descriptor */
 
       ret = fcntl(fd, F_SETFL, oflags);
@@ -191,6 +198,10 @@ FAR FILE *freopen(FAR const char *path, FAR const char *mode,
         {
           return NULL;
         }
+
+      /* Set the new file mode for the file stream */
+
+      stream->fs_oflags = oflags;
 
       clearerr(stream);
       return stream;
