@@ -185,7 +185,4 @@ endif
 
 distclean::
 	$(call DELDIR,chip/$(ESP_HAL_3RDPARTY_REPO))
-ifeq ($(CONFIG_ESPRESSIF_USE_ULP_RISCV_CORE),y)
-	$(call DELDIR,chip/ulp)
-endif
 	$(call DELFILE,../../../vefuse.bin)

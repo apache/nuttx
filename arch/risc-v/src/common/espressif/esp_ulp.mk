@@ -264,6 +264,7 @@ $(ULP_FOLDER):
 	$(Q) echo "Creating $(ULP_FOLDER) folder"
 	$(Q) mkdir $(ULP_FOLDER)
 	$(Q) mkdir $(ULP_FOLDER)$(DELIM)nuttx
+	$(Q) mkdir $(CHIP)$(DELIM)ulp || true
 
 context:: $(ULP_FOLDER)
 	$(Q) touch $(ULP_CODE_HEADER)
