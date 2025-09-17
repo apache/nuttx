@@ -156,19 +156,7 @@ static int sock_file_ioctl(FAR struct file *filep, int cmd,
 static int sock_file_mmap(FAR struct file *filep,
                           FAR struct mm_map_entry_s *map)
 {
-  struct socket *psock = filep->f_priv;
-
-  DEBUGASSERT(psock != NULL && map != NULL);
-
-  /* Let the address family's mmap() method handle the operation */
-
-  DEBUGASSERT(psock->s_sockif != NULL);
-  if (psock->s_sockif->si_mmap == NULL)
-    {
-      return -EOPNOTSUPP;
-    }
-
-  return psock->s_sockif->si_mmap(psock, map);
+  return psock_mmap(filep->f_priv, map);
 }
 
 static int sock_file_poll(FAR struct file *filep, FAR struct pollfd_s *fds,

@@ -42,7 +42,8 @@ set(SRCS
     net_dup2.c
     net_sockif.c
     net_poll.c
-    net_fstat.c)
+    net_fstat.c
+    net_mmap.c)
 
 # Socket options
 
