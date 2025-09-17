@@ -555,6 +555,16 @@ add_definitions(-D__NuttX__)
 
 add_compile_options($<$<COMPILE_LANGUAGE:ASM>:-D__ASSEMBLY__>)
 
+if(CONFIG_ARCH_TOOLCHAIN_TASKING)
+  if(CONFIG_INTELHEX_BINARY)
+    add_link_options(-Wl-onuttx.hex:IHEX:4 --hex-format=s)
+  endif()
+
+  if(CONFIG_MOTOROLA_SREC)
+    add_link_options(-Wl-onuttx.srec:SREC:4)
+  endif()
+endif()
+
 set_property(
   TARGET nuttx
   APPEND
