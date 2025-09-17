@@ -183,8 +183,8 @@
 #  define SAMV7_NDAC12                1             /* 1 12-bit DAC channel */
 #  define SAMV7_NTCCH                 12            /* 12 Timer/counter channels */
 #  define SAMV7_NTCCHIO               3             /* 3 Timer/counter channels I/O */
-#  define SAMV7_NUSART                0             /* No USARTs */
-#  define SAMV7_NUART                 5             /* 5 UARTs */
+#  define SAMV7_NUSART                2             /* 2 USARTs */
+#  define SAMV7_NUART                 3             /* 3 UARTs */
 #  define SAMV7_NQSPI                 0             /* No Quad SPI */
 #  define SAMV7_NQSPI_SPI             1             /* QSPI functions in SPI mode only */
 #  define SAMV7_NSPI                  0             /* No SPI */
@@ -354,8 +354,8 @@
 #  define SAMV7_NDAC12                1             /* 1 12-bit DAC channels */
 #  define SAMV7_NTCCH                 12            /* 12 Timer/counter channels */
 #  define SAMV7_NTCCHIO               3             /* 3 Timer/counter channels I/O */
-#  define SAMV7_NUSART                0             /* No USARTs */
-#  define SAMV7_NUART                 5             /* 5 UARTs */
+#  define SAMV7_NUSART                2             /* 2 USARTs */
+#  define SAMV7_NUART                 3             /* 3 UARTs */
 #  define SAMV7_NQSPI                 0             /* No Quad SPI */
 #  define SAMV7_NQSPI_SPI             1             /* QSPI functions in SPI mode only */
 #  define SAMV7_NSPI                  0             /* No SPI */
