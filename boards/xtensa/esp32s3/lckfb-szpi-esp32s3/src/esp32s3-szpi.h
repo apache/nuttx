@@ -121,25 +121,6 @@ int board_i2c_init(void);
 #endif
 
 /****************************************************************************
- * Name: board_bmp180_initialize
- *
- * Description:
- *   Initialize and register the BMP180 Pressure Sensor driver.
- *
- * Input Parameters:
- *   devno - The device number, used to build the device path as /dev/pressN
- *   busno - The I2C bus number
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SENSORS_BMP180
-int board_bmp180_initialize(int devno, int busno);
-#endif
-
-/****************************************************************************
  * Name: board_i2sdev_initialize
  *
  * Description:
@@ -161,27 +142,6 @@ int board_bmp180_initialize(int devno, int busno);
 
 #ifdef CONFIG_ESPRESSIF_I2S
 int board_i2sdev_initialize(int port, bool enable_tx, bool enable_rx);
-#endif
-
-/****************************************************************************
- * Name: esp32s3_cs4344_initialize
- *
- * Description:
- *   This function is called by platform-specific, setup logic to configure
- *   and register the CS4344 device.  This function will register the driver
- *   as /dev/audio/pcm[x] where x is determined by the I2S port number.
- *
- * Input Parameters:
- *   port - The I2S port used for the device
- *
- * Returned Value:
- *   Zero is returned on success.  Otherwise, a negated errno value is
- *   returned to indicate the nature of the failure.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_AUDIO_CS4344
-int esp32s3_cs4344_initialize(int port);
 #endif
 
 #ifdef CONFIG_ESP32S3_OPENETH
