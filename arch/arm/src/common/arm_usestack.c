@@ -73,6 +73,9 @@
 
 int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
 {
+  uintptr_t top_of_stack;
+  size_t size_of_stack;
+
 #ifdef CONFIG_TLS_ALIGNED
   /* Make certain that the user provided stack is properly aligned */
 
@@ -103,9 +106,11 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
   /* Save the new stack allocation */
 
   tcb->stack_alloc_ptr = stack;
-  tcb->stack_base_ptr  = tcb->stack_alloc_ptr;
-  tcb->adj_stack_size  =
-      STACK_ALIGN_DOWN((uintptr_t)stack + stack_size) - (uintptr_t)stack;
+  tcb->stack_base_ptr  = (void *)STACK_ALIGN_UP((uintptr_t)stack);
+
+  top_of_stack = STACK_ALIGN_DOWN((uintptr_t)stack + stack_size);
+  size_of_stack = top_of_stack - (uintptr_t)tcb->stack_base_ptr;
+  tcb->adj_stack_size  = size_of_stack;
 
 #ifdef CONFIG_STACK_COLORATION
   /* If stack debug is enabled, then fill the stack with a
