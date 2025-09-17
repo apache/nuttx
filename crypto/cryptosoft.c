@@ -504,9 +504,9 @@ static int swkey_export(FAR struct swkey_context_s *ctx,
           return -ENOBUFS;
         }
 
-      memcpy(buf, data->buf, buflen);
+      memcpy(buf, data->buf, data->size);
       swkey_promote_cache_data(ctx, data);
-      return OK;
+      return data->size;
     }
 
   /* Key not in cache, get key from flash */
@@ -545,7 +545,7 @@ static int swkey_export(FAR struct swkey_context_s *ctx,
       swkey_promote_cache_data(ctx, data);
     }
 
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
@@ -777,6 +777,7 @@ static int swkey_kprocess(FAR struct cryptkop *krp)
   uint32_t pub_keyid;
   uint32_t keylen;
   uint32_t keyid;
+  int ret;
 
   /* Sanity check */
 
@@ -823,9 +824,18 @@ static int swkey_kprocess(FAR struct cryptkop *krp)
         krp->krp_status = swkey_delete(ctx, keyid);
         break;
       case CRK_EXPORT_KEY:
-        krp->krp_status = swkey_export(ctx, keyid,
-                                       krp->krp_param[1].crp_p,
-                                       krp->krp_param[1].crp_nbits / 8);
+        ret = swkey_export(ctx, keyid,
+                           krp->krp_param[1].crp_p,
+                           krp->krp_param[1].crp_nbits / 8);
+        if (ret < 0)
+          {
+            krp->krp_status = ret;
+          }
+        else
+          {
+            krp->krp_param[1].crp_nbits = ret * 8;
+          }
+
         break;
       case CRK_GENERATE_AES_KEY:
         if (krp->krp_param[1].crp_nbits != sizeof(uint32_t) * 8)
