@@ -545,6 +545,7 @@ endif # TIMERS_CS2100CP
 config GOLDFISH_TIMER
 	bool "Enable GOLDFISH_TIMER"
 	default n
+	select ONESHOT_COUNT
 	---help---
 		Goldfish timer is a virtual timer device that is used in the Android
 		emulator. It is used to provide a virtual timer to the guest OS.
