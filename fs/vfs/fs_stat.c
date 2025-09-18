@@ -267,6 +267,14 @@ int inode_stat(FAR struct inode *inode, FAR struct stat *buf, int resolve)
 
   RESET_BUF(buf);
 
+#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+  if (INODE_IS_HARDLINK(inode))
+    {
+      DEBUGASSERT(inode->i_private != NULL);
+      inode = inode->i_private;
+    }
+#endif
+
   /* Handle "special" nodes */
 
 #if defined(CONFIG_FS_NAMED_SEMAPHORES)
@@ -469,6 +477,9 @@ int inode_stat(FAR struct inode *inode, FAR struct stat *buf, int resolve)
   buf->st_ctim  = inode->i_ctime;
 #endif
   buf->st_ino   = inode->i_ino;
+#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+  buf->st_nlink = INODE_GET_NLINK(inode);
+#endif
 
   return OK;
 }

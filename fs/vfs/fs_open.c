@@ -128,10 +128,22 @@ static int file_vopen(FAR struct file *filep, FAR const char *path,
   inode = desc.node;
   DEBUGASSERT(inode != NULL);
 
+#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+  if (INODE_IS_HARDLINK(inode))
+    {
+      /* The inode is a hard link.  The actual inode is referenced
+       * by the i_private field.
+       */
+
+      DEBUGASSERT(inode->i_private != NULL);
+      inode = inode->i_private;
+    }
+
   if (desc.nofollow && INODE_IS_SOFTLINK(inode))
     {
       return -ELOOP;
     }
+#endif
 
 #if defined(CONFIG_BCH) && \
     !defined(CONFIG_DISABLE_MOUNTPOINT) && \

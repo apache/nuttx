@@ -523,6 +523,15 @@ int inode_search(FAR struct inode_search_s *desc)
               return ret;
             }
         }
+      else if (!desc->nofollow && INODE_IS_HARDLINK(inode))
+        {
+          /* The terminating inode is a valid hard link */
+
+          inode = inode->i_private;
+          DEBUGASSERT(inode != NULL);
+
+          desc->node = inode;
+        }
     }
 #endif
 

@@ -120,6 +120,20 @@ static FAR struct inode *inode_unlink(FAR const char *path)
       inode->i_peer   = NULL;
       inode->i_parent = NULL;
       atomic_sub(&inode->i_crefs, 1);
+#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+      if (INODE_IS_HARDLINK(inode))
+        {
+          FAR struct inode *target;
+
+          DEBUGASSERT(inode->i_private != NULL);
+          target = inode->i_private;
+          atomic_sub(&target->i_crefs, INODE_NLINK_INC);
+          if (atomic_read(&target->i_crefs) == 0)
+            {
+              inode_free(target);
+            }
+        }
+#endif
     }
 
 errout:
