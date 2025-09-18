@@ -32,7 +32,7 @@
 #include <nuttx/tls.h>
 #include <nuttx/sched.h>
 
-#if !defined(up_tls_info) && (defined(__KERNEL__) || !defined(CONFIG_TLS_ALIGNED))
+#ifndef up_tls_info
 
 /****************************************************************************
  * Public Functions
@@ -55,6 +55,7 @@
  *
  ****************************************************************************/
 
+#undef tls_get_info
 FAR struct tls_info_s *tls_get_info(void)
 {
   FAR struct tls_info_s *info = NULL;
