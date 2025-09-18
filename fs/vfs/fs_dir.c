@@ -299,11 +299,12 @@ static int read_pseudodir(FAR struct fs_dirent_s *dir,
                           FAR struct dirent *entry)
 {
   FAR struct fs_pseudodir_s *pdir = (FAR struct fs_pseudodir_s *)dir;
+  FAR struct inode *next = pdir->next;
   FAR struct inode *prev;
 
   /* Check if we are at the end of the list */
 
-  if (pdir->next == NULL)
+  if (next == NULL)
     {
       /* End of file and error conditions are not distinguishable with
        * readdir. Here we return -ENOENT to signal the end of the directory.
@@ -312,54 +313,67 @@ static int read_pseudodir(FAR struct fs_dirent_s *dir,
       return -ENOENT;
     }
 
-  /* Copy the inode name into the dirent structure */
+  /* Copy the inode name into the dirent structure.
+   * If it's a hardlink, we should get the name of hardlink itself,
+   * not the target file name.
+   * But other information like type should be based on the target file.
+   * So we put this line before the INODE_IS_HARDLINK() check.
+   */
 
-  strlcpy(entry->d_name, pdir->next->i_name, sizeof(entry->d_name));
+  strlcpy(entry->d_name, next->i_name, sizeof(entry->d_name));
+
+#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+  if (INODE_IS_HARDLINK(next))
+    {
+      DEBUGASSERT(next->i_private != NULL);
+      next = next->i_private;
+    }
+#endif
 
   /* If the node has file operations, we will say that it is a file. */
 
   entry->d_type = DTYPE_UNKNOWN;
-  if (pdir->next->u.i_ops != NULL)
+  if (next->u.i_ops != NULL)
     {
 #ifndef CONFIG_DISABLE_MOUNTPOINT
-      if (INODE_IS_BLOCK(pdir->next))
+      if (INODE_IS_BLOCK(next))
         {
           entry->d_type = DTYPE_BLK;
         }
-      else if (INODE_IS_MTD(pdir->next))
+      else if (INODE_IS_MTD(next))
         {
           entry->d_type = DTYPE_MTD;
         }
-      else if (INODE_IS_MOUNTPT(pdir->next))
+      else if (INODE_IS_MOUNTPT(next))
         {
           entry->d_type = DTYPE_DIRECTORY;
         }
       else
 #endif
 #ifdef CONFIG_PSEUDOFS_SOFTLINKS
-      if (INODE_IS_SOFTLINK(pdir->next))
+      if (INODE_IS_SOFTLINK(next))
         {
           entry->d_type = DTYPE_LINK;
         }
       else
 #endif
-      if (INODE_IS_DRIVER(pdir->next))
+      if (INODE_IS_DRIVER(next))
         {
           entry->d_type = DTYPE_CHR;
         }
-      else if (INODE_IS_NAMEDSEM(pdir->next))
+      else if (INODE_IS_NAMEDSEM(next))
         {
           entry->d_type = DTYPE_SEM;
         }
-      else if (INODE_IS_MQUEUE(pdir->next))
+      else if (INODE_IS_MQUEUE(next))
         {
           entry->d_type = DTYPE_MQ;
         }
-      else if (INODE_IS_SHM(pdir->next))
+      else if (INODE_IS_SHM(next))
         {
           entry->d_type = DTYPE_SHM;
         }
-      else if (INODE_IS_PIPE(pdir->next))
+      else if (INODE_IS_PIPE(next))
         {
           entry->d_type = DTYPE_FIFO;
         }
@@ -370,8 +384,8 @@ static int read_pseudodir(FAR struct fs_dirent_s *dir,
    * be both!
    */
 
-  if (pdir->next->i_child != NULL ||
-      pdir->next->u.i_ops == NULL)
+  if (next->i_child != NULL ||
+      next->u.i_ops == NULL)
     {
       entry->d_type = DTYPE_DIRECTORY;
     }

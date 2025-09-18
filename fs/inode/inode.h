@@ -98,6 +98,12 @@
 #  define FS_ADD_BACKTRACE(fd)
 #endif
 
+#define INODE_NLINK_INC  (1u << 16) /* Increment link count */
+#define INODE_CREF_INC   (1u << 0)  /* Increment reference count */
+#define INODE_NLINK_SHIFT 16        /* Shift to get link count */
+#define INODE_GET_NLINK(i) \
+  ((atomic_read(&(i)->i_crefs) >> INODE_NLINK_SHIFT) + 1)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/

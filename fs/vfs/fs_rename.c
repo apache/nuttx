@@ -135,7 +135,11 @@ static int pseudorename(FAR const char *oldpath, FAR struct inode *oldinode,
        * directory (i.e, an operation-less inode or an inode with children)?
        */
 
-      if (newinode->u.i_ops == NULL || newinode->i_child != NULL)
+      if ((newinode->u.i_ops == NULL || newinode->i_child != NULL)
+#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+          && !INODE_IS_HARDLINK(newinode)
+#endif
+         )
         {
           FAR char *subdirname;
 
