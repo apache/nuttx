@@ -186,8 +186,8 @@ int nxsig_clockwait(int clockid, int flags,
 {
   FAR struct tcb_s *rtcb;
   irqstate_t        iflags;
-  clock_t expect = 0;
-  clock_t stop;
+  clock_t expect = 0u;
+  clock_t stop   = 0u;
 
   if (rqtp && (rqtp->tv_nsec < 0 || rqtp->tv_nsec >= 1000000000))
     {
