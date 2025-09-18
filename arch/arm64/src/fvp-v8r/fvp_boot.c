@@ -190,6 +190,13 @@ void arm64_mpu_init_regiions(void)
                        NOT_EXEC | P_RW_U_RW_MSK | SHAREABLE_MSK,
                        MPU_MAIR_INDEX_SRAM);
 
+  /* User CONFIG_NUTTX_USERSPACE */
+
+  mpu_configure_region(CONFIG_NUTTX_USERSPACE,
+                       USERSPACE->us_textstart - CONFIG_NUTTX_USERSPACE,
+                       NOT_EXEC | P_RO_U_RO_MSK | SHAREABLE_MSK,
+                       MPU_MAIR_INDEX_SRAM);
+
   /* User text region */
 
   mpu_configure_region(USERSPACE->us_textstart,
