@@ -99,6 +99,46 @@
 #define DEBUGPOINT_BREAKPOINT    0x04
 #define DEBUGPOINT_STEPPOINT     0x05
 
+/* Memory barriers may be provided in arch/spinlock.h
+ *
+ *   DMB - Data memory barrier.  Assures writes are completed to memory.
+ *   DSB - Data synchronization barrier.
+ */
+
+#if !defined(UP_DMB)
+#  define UP_DMB()
+#endif
+
+#if !defined(UP_RMB)
+#  define UP_RMB()
+#endif
+
+#if !defined(UP_WMB)
+#  define UP_WMB()
+#endif
+
+#if !defined(UP_DSB)
+#  define UP_DSB()
+#endif
+
+#if !defined(UP_WFE)
+#  define UP_WFE()
+#endif
+
+#if !defined(UP_SEV)
+#  define UP_SEV()
+#endif
+
+#ifdef CONFIG_SMP
+#  define SMP_MB()  UP_DMB()
+#  define SMP_RMB() UP_RMB()
+#  define SMP_WMB() UP_WMB()
+#else	/* !CONFIG_SMP */
+#  define SMP_MB()  asm volatile ("" : : : "memory")
+#  define SMP_RMB() asm volatile ("" : : : "memory")
+#  define SMP_WMB() asm volatile ("" : : : "memory")
+#endif
+
 /****************************************************************************
  * Name: up_cpu_index
  *

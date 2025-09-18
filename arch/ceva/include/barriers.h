@@ -37,6 +37,8 @@
 
 #define UP_DSB() up_dsb()
 #define UP_DMB() up_dmb()
+#define UP_RMB() up_dmb()
+#define UP_WMB() up_dmb()
 
 #endif /* __ARCH_CEVA_INCLUDE_BARRIERS_H */
 

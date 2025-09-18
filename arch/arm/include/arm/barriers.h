@@ -31,12 +31,12 @@
 
 /* ARM memory barriers */
 
-#define arm_dsb()  __asm__ __volatile__ ("dsb " : : : "memory")
-#define arm_isb()  __asm__ __volatile__ ("isb " : : : "memory")
-#define arm_dmb()  __asm__ __volatile__ ("dmb " : : : "memory")
+#define arm_mb()  __asm__ __volatile__ ("" : : : "memory")
 
-#define UP_DSB()  arm_dsb()
-#define UP_ISB()  arm_isb()
-#define UP_DMB()  arm_dmb()
+#define UP_DSB() arm_mb()
+#define UP_ISB() arm_mb()
+#define UP_DMB() arm_mb()
+#define UP_RMB() arm_mb()
+#define UP_WMB() arm_mb()
 
 #endif /* __ARCH_ARM_INCLUDE_ARM_BARRIERS_H */
