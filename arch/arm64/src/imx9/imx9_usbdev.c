@@ -1974,6 +1974,10 @@ static int imx9_usbinterrupt(int irq, void *context, void *arg)
 
   usbtrace(TRACE_INTENTRY(IMX9_TRACEINTID_USB), 0);
 
+#ifdef CONFIG_SMP
+  irqstate_t flags = enter_critical_section();
+#endif
+
   /* Read the interrupts and then clear them */
 
   disr = imx9_getreg(priv, IMX9_USBDEV_USBSTS_OFFSET);
@@ -1984,6 +1988,10 @@ static int imx9_usbinterrupt(int irq, void *context, void *arg)
       usbtrace(TRACE_INTDECODE(IMX9_TRACEINTID_DEVRESET), 0);
 
       imx9_usbreset(priv);
+
+#ifdef CONFIG_SMP
+      leave_critical_section(flags);
+#endif
 
       usbtrace(TRACE_INTEXIT(IMX9_TRACEINTID_USB), 0);
       return OK;
@@ -2152,6 +2160,10 @@ static int imx9_usbinterrupt(int irq, void *context, void *arg)
 
       imx9_putreg(priv, IMX9_USBDEV_ENDPTNAK_OFFSET, pending);
     }
+
+#ifdef CONFIG_SMP
+  leave_critical_section(flags);
+#endif
 
   usbtrace(TRACE_INTEXIT(IMX9_TRACEINTID_USB), 0);
   return OK;
