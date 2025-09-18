@@ -92,6 +92,11 @@ int up_use_stack(FAR struct tcb_s *tcb, FAR void *stack, size_t stack_size)
   /* Save the new stack allocation */
 
   tcb->stack_alloc_ptr = stack;
+  tcb->stack_base_ptr  = (void *)STACK_ALIGN_UP((uintptr_t)stack);
+
+  top_of_stack = STACK_ALIGN_DOWN((uintptr_t)stack + stack_size);
+  size_of_stack = top_of_stack - (uintptr_t)tcb->stack_base_ptr;
+  tcb->adj_stack_size  = size_of_stack;
 
   /* If stack debug is enabled, then fill the stack with a recognizable value
    * that we can use later to test for high water marks.
@@ -100,28 +105,6 @@ int up_use_stack(FAR struct tcb_s *tcb, FAR void *stack, size_t stack_size)
 #ifdef CONFIG_STACK_COLORATION
   memset(tcb->stack_alloc_ptr, 0xaa, stack_size);
 #endif
-
-  /* The CPU12 uses a push-down stack: the stack grows
-   * toward lower addresses in memory. Because the CPU12 stack
-   * operates as a decrement then store stack, the value assigned
-   * to the initial stack pointer is one more than the last valid
-   * stack address.
-   */
-
-  top_of_stack = (uintptr_t)tcb->stack_alloc_ptr + stack_size;
-
-  /* The CPU12 stack should be aligned at half-word (2 byte)
-   * boundaries. If necessary top_of_stack must be rounded
-   * down to the next boundary
-   */
-
-  top_of_stack &= ~1;
-  size_of_stack = top_of_stack - (uintptr_t)tcb->stack_alloc_ptr;
-
-  /* Save the adjusted stack values in the struct tcb_s */
-
-  tcb->stack_base_ptr = tcb->stack_alloc_ptr;
-  tcb->adj_stack_size = size_of_stack;
 
   return OK;
 }
