@@ -267,4 +267,24 @@ int imx9_ele_get_trng_state(void);
  ****************************************************************************/
 
 int imx9_ele_get_random(uint32_t paddr, size_t len);
+
+/****************************************************************************
+ * Name: imx9_ele_commit
+ *
+ * Description:
+ *   Sends commit command to the ELE.
+ *
+ * Input Parameters:
+ *   info - Information type to be committed
+ *
+ * Output Parameters:
+ *   response - ELE response, can be used for debugging.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned for success. A negated errno value is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+int imx9_ele_commit(uint32_t info, uint32_t *response);
 #endif /* __ARCH_ARM64_SRC_IMX9_IMX9_ELE_H */

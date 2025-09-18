@@ -55,6 +55,7 @@
 #define ELE_RELEASE_RDC_REQ       0xc4
 #define ELE_START_RNG_REQ         0xa3
 #define ELE_VERIFY_IMAGE_REQ      0x88
+#define ELE_COMMIT_REQ            0xa8
 
 /* Messaging Unit registers. */
 
