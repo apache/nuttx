@@ -1891,6 +1891,12 @@ config ESP32_STORAGE_MTD_SIZE
 	---help---
 		MTD size in SPI Flash.
 
+mtd_name = ESP32_STORAGE_MTD
+mtd_part_default_sizes = 8,504,512
+mtd_part_default_names = mtd0p0,mtd0p1,mtd0p2
+
+source "drivers/mtd/Kconfig.partition_template"
+
 config ESP32_SPIFLASH_DEBUG
 	bool "Debug SPI Flash"
 	default n
