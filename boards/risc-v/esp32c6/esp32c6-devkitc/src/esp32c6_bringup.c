@@ -139,6 +139,9 @@
 
 #ifdef CONFIG_ESPRESSIF_USE_LP_CORE
 #  include "espressif/esp_ulp.h"
+#  ifdef CONFIG_ESPRESSIF_ULP_USE_TEST_BIN
+#    include "ulp/ulp_code.h"
+#  endif
 #endif
 
 #include "esp32c6-devkitc.h"
@@ -512,6 +515,10 @@ int esp_bringup(void)
    */
 
   esp_ulp_init();
+
+#  ifdef CONFIG_ESPRESSIF_ULP_USE_TEST_BIN
+  esp_ulp_load_bin((char *)esp_ulp_bin, esp_ulp_bin_len);
+#  endif
 #endif
 
 #ifdef CONFIG_NET_OA_TC6

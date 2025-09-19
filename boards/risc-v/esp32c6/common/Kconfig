@@ -48,3 +48,11 @@ config ESPRESSIF_SPIFLASH_FS_MOUNT_PT
 	string "File-system Mount Point"
 	depends on ESPRESSIF_SPIFLASH_SMARTFS || ESPRESSIF_SPIFLASH_NXFFS || ESPRESSIF_SPIFLASH_SPIFFS || ESPRESSIF_SPIFLASH_LITTLEFS
 	default "/data"
+
+config ESPRESSIF_ULP_USE_TEST_BIN
+	bool "Run example prebuilt binary for ULP core"
+	depends on ESPRESSIF_USE_LP_CORE
+	default n
+	---help---
+		Run example prebuilt binary for ULP core which is resides in
+		`Documentation/platforms/risc-v/esp32c6/boards/esp32c6-devkitc/ulp_blink.bin`
