@@ -30,6 +30,12 @@ config PWM
 
 if PWM
 
+config PWM_FREQ_FIXEDPOINT
+	bool "PWM Frequency Fixed Point Support"
+	default n
+	---help---
+		Using ub32_t to define frequency to support accuracy less than 1HZ.
+
 config PWM_PULSECOUNT
 	bool "PWM Pulse Count Support"
 	default n

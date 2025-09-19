@@ -177,11 +177,17 @@ struct pwm_chan_s
 };
 #endif
 
+#if defined(CONFIG_PWM_FREQ_FIXEDPOINT) && defined(CONFIG_HAVE_LONG_LONG)
+typedef ub32_t pwm_freq_t;
+#else
+typedef uint32_t pwm_freq_t;
+#endif
+
 /* This structure describes the characteristics of the pulsed output */
 
 struct pwm_info_s
 {
-  uint32_t           frequency; /* Frequency of the pulse train */
+  pwm_freq_t         frequency; /* Frequency of the pulse train */
 
 #ifdef CONFIG_PWM_MULTICHAN
                                 /* Per-channel output state */

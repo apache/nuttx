@@ -69,7 +69,7 @@ set through ``pwm_info_s`` structure.
    struct pwm_info_s
    {
       /* Frequency of the pulse train */
-      uint32_t           frequency;
+      pwm_freq_t         frequency;
    #ifdef CONFIG_PWM_MULTICHAN
       /* Per-channel output state */
       struct pwm_chan_s  channels[CONFIG_PWM_NCHANNELS];
@@ -222,9 +222,150 @@ instance. If multiple channels are used, configuration option
 ``CONFIG_PWM_NCHANNELS`` defines the maximum number of channels per instance.
 Each timer/controller may support fewer output channels than this value.
 
+The ``CONFIG_PWM_FREQ_FIXEDPOINT`` option enables fixed-point frequency
+representation using ``ub32_t`` (64-bit unsigned fixed-point) type instead
+of ``uint32_t``. This allows precise frequency control below 1 Hz and
+fractional Hz frequencies. This option requires ``CONFIG_HAVE_LONG_LONG``
+support. When disabled (default), frequency is represented as integer Hz
+using ``uint32_t`` type.
+
 Generation of pin overwrite is enabled by ``CONFIG_PWM_OVERWRITE`` option.
 This supports generation of a pin overwrite with 0 or 1 without the need to
 wait for an end of cycle.
 
 The ``CONFIG_PWM_DEADTIME`` option brings the possibility to introduce
 dead time values between complementary PWM outputs.
+
+PWM Frequency Type
+==================
+
+The PWM driver supports two frequency representation modes, controlled by
+the ``CONFIG_PWM_FREQ_FIXEDPOINT`` configuration option.
+
+Standard Frequency Mode (Default)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+When ``CONFIG_PWM_FREQ_FIXEDPOINT`` is not enabled, the frequency field
+in ``pwm_info_s`` structure uses ``uint32_t`` type, which represents
+frequency in integer Hz. This mode is suitable for most applications where
+frequencies are 1 Hz or higher.
+
+.. code-block:: c
+
+   /* Standard mode: frequency is uint32_t */
+   struct pwm_info_s info;
+   info.frequency = 1000;  /* 1000 Hz */
+
+Fixed-Point Frequency Mode
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+When ``CONFIG_PWM_FREQ_FIXEDPOINT`` is enabled (requires
+``CONFIG_HAVE_LONG_LONG``), the frequency field uses ``ub32_t`` type,
+which is a 64-bit unsigned fixed-point number with 32-bit integer part
+and 32-bit fractional part. This mode enables:
+
+#. Precise frequency control below 1 Hz (e.g., 0.5 Hz, 0.25 Hz)
+#. Better frequency resolution for low-speed PWM applications
+#. Support for applications requiring fractional Hz frequencies
+
+The ``ub32_t`` type is defined as:
+
+.. code-block:: c
+
+   typedef uint64_t ub32_t;  /* 32.32 fixed-point format */
+
+Frequency Conversion Macros
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+When using fixed-point frequency mode, the following conversion macros
+from ``<fixedmath.h>`` are available:
+
+.. code-block:: c
+
+   #include <fixedmath.h>
+
+   /* Convert integer to ub32_t */
+   uitoub32(i)     /* (i << 32) */
+
+   /* Convert double to ub32_t */
+   dtob32(f)       /* (b32_t)((f) * b32ONE) */
+
+   /* Convert ub32_t to double */
+   b32tod(b)       /* ((double)(b) / b32ONE) */
+
+   /* Common constants */
+   #define b32ONE          0x0000000100000000LL  /* 1.0 */
+   #define b32HALF         0x0000000080000000LL  /* 0.5 */
+   #define b32ONETENTH     0x000000001999999aLL  /* 0.1 */
+
+Usage Examples
+~~~~~~~~~~~~~~
+
+**Example 1: Setting integer frequency in fixed-point mode**
+
+.. code-block:: c
+
+   #include <fixedmath.h>
+   #include <nuttx/timers/pwm.h>
+
+   struct pwm_info_s info;
+
+   /* Set frequency to 100 Hz */
+   info.frequency = uitoub32(100);
+
+**Example 2: Setting fractional frequency**
+
+.. code-block:: c
+
+   #include <fixedmath.h>
+   #include <nuttx/timers/pwm.h>
+
+   struct pwm_info_s info;
+
+   /* Set frequency to 0.5 Hz (one pulse every 2 seconds) */
+   info.frequency = dtob32(0.5);
+
+   /* Set frequency to 0.25 Hz (one pulse every 4 seconds) */
+   info.frequency = dtob32(0.25);
+
+   /* Set frequency to 2.5 Hz */
+   info.frequency = dtob32(2.5);
+
+**Example 3: Using predefined constants**
+
+.. code-block:: c
+
+   #include <fixedmath.h>
+   #include <nuttx/timers/pwm.h>
+
+   struct pwm_info_s info;
+
+   /* Set frequency to 0.5 Hz using constant */
+   info.frequency = b32HALF;
+
+   /* Set frequency to 0.1 Hz using constant */
+   info.frequency = b32ONETENTH;
+
+**Example 4: Reading frequency value**
+
+.. code-block:: c
+
+   #include <fixedmath.h>
+   #include <nuttx/timers/pwm.h>
+
+   struct pwm_info_s info;
+   double freq_hz;
+
+   /* Get current frequency characteristics */
+   ioctl(fd, PWMIOC_GETCHARACTERISTICS, (unsigned long)&info);
+
+   /* Convert to double for display */
+   freq_hz = b32tod(info.frequency);
+   printf("Current frequency: %.3f Hz\n", freq_hz);
+
+Backward Compatibility
+~~~~~~~~~~~~~~~~~~~~~~
+
+The fixed-point frequency feature is fully backward compatible. When
+``CONFIG_PWM_FREQ_FIXEDPOINT`` is not enabled, ``pwm_freq_t`` remains
+as ``uint32_t`` and existing code continues to work without modification.
