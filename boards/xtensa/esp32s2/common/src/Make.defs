@@ -90,6 +90,10 @@ ifeq ($(CONFIG_MMCSD_SPI), y)
   CSRCS += esp32s2_board_sdmmc.c
 endif
 
+ifeq ($(CONFIG_ESPRESSIF_ULP_USE_TEST_BIN),y)
+  include $(TOPDIR)$(DELIM)Documentation$(DELIM)platforms$(DELIM)xtensa$(DELIM)esp32s3$(DELIM)boards$(DELIM)esp32s3-devkit$(DELIM)ulp_makefile
+endif
+
 ifeq ($(CONFIG_ESP32S2_TWAI)$(CONFIG_ARCH_BUTTONS)$(CONFIG_DEV_GPIO),y)
   CHIP_SERIES = $(patsubst "%",%,$(CONFIG_ESPRESSIF_CHIP_SERIES))
   CHIPHALDIR = $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)chip$(DELIM)esp-hal-3rdparty

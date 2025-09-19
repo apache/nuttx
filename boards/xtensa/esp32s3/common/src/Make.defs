@@ -113,6 +113,10 @@ ifeq ($(CONFIG_TXTABLE_PARTITION),y)
 endif
 endif
 
+ifeq ($(CONFIG_ESPRESSIF_ULP_USE_TEST_BIN),y)
+  include $(TOPDIR)$(DELIM)Documentation$(DELIM)platforms$(DELIM)xtensa$(DELIM)esp32s3$(DELIM)boards$(DELIM)esp32s3-devkit$(DELIM)ulp_makefile
+endif
+
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src
