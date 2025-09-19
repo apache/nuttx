@@ -30,7 +30,7 @@
  * Public Data
  ****************************************************************************/
 
-FAR const void *const __stack_chk_guard = &__stack_chk_guard;
+weak_data FAR const void *const __stack_chk_guard = &__stack_chk_guard;
 
 /****************************************************************************
  * Public Functions
@@ -52,7 +52,7 @@ FAR const void *const __stack_chk_guard = &__stack_chk_guard;
  *
  ****************************************************************************/
 
-void __stack_chk_fail(void)
+void weak_function __stack_chk_fail(void)
 {
   PANIC();
 }
