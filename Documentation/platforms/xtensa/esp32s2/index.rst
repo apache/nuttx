@@ -974,17 +974,40 @@ and the resulting .bin file has to be integrated into NuttX. This workflow, whil
 With NuttX internal build system, the ULP binary code can be built and flashed from a single location. It is more convenient but
 using build system has some dependencies on example side.
 
-Both methods requires `CONFIG_ESP32S2_ULP_COPROC_RESERVE_MEM` variable to set ULP RISC-V core and
-`CONFIG_ESPRESSIF_ULP_RISCV_PROJECT_PATH` variable to set the path to the ULP project or prebuilt binary file
-relative to NuttX root folder.
-These variables can be set using `make menuconfig` or `kconfig-tweak` commands.
+Both methods requires ``CONFIG_ESP32S2_ULP_COPROC_RESERVE_MEM`` variable to enable ULP RISC-V core.
+These variables can be set using ``make menuconfig`` or ``kconfig-tweak`` commands.
 
-Here is an example for enabling ULP and using a prebuilt binary for ULP RISC-V core::
+Additionally, a Makefile needs to be provided to specify the ULP application name,
+source path of the ULP application, and either the binary (for prebuilt) or the source files (for internal build).
+This Makefile must include the ULP makefile after the variable set process on ``arch/xtensa/src/common/espressif/esp_ulp.mk`` integration script.
+For more information please refer to :ref:`ulp example Makefile. <ulp_makefile>`
+
+Makefile Variables for ULP RISC-V Core Build:
+---------------------------------------------
+
+- ``ULP_APP_NAME``: Sets name for the ULP RISC-V application. This variable also be used as prefix (e.g. ULP RISC-V application bin variable name)
+- ``ULP_APP_FOLDER``: Specifies the directory containing the ULP RISC-V application's source codes.
+- ``ULP_APP_BIN``: Defines the path of the prebuilt ULP RISC-V binary.
+- ``ULP_APP_C_SRCS``: Lists all C source files (.c) that need to be compiled for the ULP RISC-V application.
+- ``ULP_APP_ASM_SRCS``: Lists all assembly source files (.S or .s) to be assembled.
+- ``ULP_APP_INCLUDES``: Specifies additional include directories for the compiler and assembler.
+
+Here is an Makefile example when using prebuilt binary for ULP RISC-V core:
+
+.. code-block:: console
+
+   ULP_APP_NAME = esp_ulp
+   ULP_APP_FOLDER = $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)$(CHIP_SERIES)
+   ULP_APP_BIN = $(TOPDIR)$(DELIM)Documentation$(DELIM)platforms$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)$(DELIM)boards$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)ulp_riscv_blink.bin
+
+   include $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)common$(DELIM)espressif$(DELIM)esp_ulp.mk
+
+Here is an example for enabling ULP and using the prebuilt test binary for ULP RISC-V core::
 
     make distclean
     ./tools/configure.sh esp32s2-saola-1:nsh
     kconfig-tweak --set-val CONFIG_ESP32S2_ULP_COPROC_RESERVE_MEM 8176
-    kconfig-tweak --set-str CONFIG_ESPRESSIF_ULP_RISCV_PROJECT_PATH "Documentation/platforms/xtensa/esp32s3/boards/esp32s3-devkit/ulp_riscv_blink.bin"
+    kconfig-tweak -e CONFIG_ESPRESSIF_ULP_USE_TEST_BIN
     make olddefconfig
     make -j
 
@@ -993,11 +1016,11 @@ Creating an ULP RISC-V Coprocessor Application
 
 To use NuttX's internal build system to compile the bare-metal ULP RISC-V Coprocessor binary, check the following instructions.
 
-First, create a folder for the ULP source and header files. This folder is just for ULP project and it is
-an independent project. Therefore, the NuttX example guide should not be followed, and no Makefile or similar
-build files should be added. Also folder location could be anywhere. To include ULP folder into build
-system don't forget to set `CONFIG_ESPRESSIF_ULP_RISCV_PROJECT_PATH` variable with path of the ULP project folder relative to
-NuttX root folder. Instructions for setting up can be found above.
+First, create a folder for the ULP source and header files into your NuttX example.
+This folder is just for ULP project and it is an independent project. Therefore, the NuttX example guide should not be followed
+for ULP example (folder location is irrelevant. It can be the same of the `nuttx-apps` repository, for instance).
+To include the ULP folder in the build system, don't forget to include the ULP Makefile in the NuttX example Makefile. Lastly, configuration variables
+needed to enable ULP core instructions can be found above.
 
 NuttX's internal functions or POSIX calls are not supported.
 
@@ -1036,8 +1059,10 @@ For more information about ULP RISC-V Coprocessor examples `check here <https://
 After these settings follow the same steps as for any other configuration to build NuttX. Build system checks ULP project path,
 adds every source and header file into project and builds it.
 
-To sum up, here is an complete example. `ulp_example/ulp (../ulp_example/ulp)` folder selected as example
-to create a subfolder for ULP but folder that includes ULP source code can be anywhere:
+To sum up, here is an example. ``ulp_example/ulp (../ulp_example/ulp)`` folder selected as example
+to create a subfolder for ULP but folder that includes ULP source code can be anywhere. For more information about
+custom apps, please follow NuttX `Custom Apps How-to <https://nuttx.apache.org/docs/latest/guides/customapps.html#custom-apps-how-to>`__ guide,
+this example will demonstrate how to add ULP code into a custom application:
 
 - Tree view:
 
@@ -1047,8 +1072,82 @@ to create a subfolder for ULP but folder that includes ULP source code can be an
    ├── nuttx/
    └── apps/
    └── ulp_example/
+       └── Makefile
+       └── Kconfig
+       └── ulp_example.c
        └── ulp/
+           └── Makefile
            └── ulp_main.c
+
+- Contents in Makefile:
+
+.. code-block:: console
+
+   include $(APPDIR)/Make.defs
+
+   PROGNAME  = $(CONFIG_EXAMPLES_ULP_EXAMPLE_PROGNAME)
+   PRIORITY  = $(CONFIG_EXAMPLES_ULP_EXAMPLE_PRIORITY)
+   STACKSIZE = $(CONFIG_EXAMPLES_ULP_EXAMPLE_STACKSIZE)
+   MODULE    = $(CONFIG_EXAMPLES_ULP_EXAMPLE)
+
+   MAINSRC = ulp_example.c
+
+   include $(APPDIR)/Application.mk
+
+   include ulp/Makefile
+
+- Contents in Kconfig:
+
+.. code-block:: console
+
+   config EXAMPLES_ULP_EXAMPLE
+     bool "ULP Example"
+     default n
+
+- Contents in ulp_example.c:
+
+.. code-block:: C
+
+   #include <nuttx/config.h>
+   #include <stdio.h>
+   #include <fcntl.h>
+   #include <unistd.h>
+   #include <sys/ioctl.h>
+   #include <inttypes.h>
+   #include <stdint.h>
+   #include <stdbool.h>
+
+   #include "ulp/ulp/ulp_main.h"
+   /* Files that holds ULP binary header */
+
+   #include "ulp/ulp/ulp_code.h"
+
+   int main (void)
+    {
+      int fd;
+      fd = open("/dev/ulp", O_WRONLY);
+      if (fd < 0)
+        {
+          printf("Failed to open ULP: %d\n", errno);
+          return -1;
+        }
+      /* ulp_example is the prefix which can be changed with ULP_APP_NAME makefile
+       * variable to access ULP binary code variable */
+      write(fd, ulp_example_bin, ulp_example_bin_len);
+      return 0;
+    }
+
+.. _ulp_makefile:
+
+- Contents in ulp/Makefile:
+
+.. code-block:: console
+
+  ULP_APP_NAME = ulp_example
+  ULP_APP_FOLDER = $(APPDIR)$(DELIM)ulp_example$(DELIM)ulp
+  ULP_APP_C_SRCS = ulp_main.c
+
+  include $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)common$(DELIM)espressif$(DELIM)esp_ulp.mk
 
 - Contents in ulp_main.c:
 
@@ -1088,9 +1187,66 @@ to create a subfolder for ULP but folder that includes ULP source code can be an
     ./tools/configure.sh esp32s2-saola-1:nsh
     kconfig-tweak --set-val CONFIG_ESP32S2_ULP_COPROC_RESERVE_MEM 8176
     kconfig-tweak -e CONFIG_DEV_GPIO
-    kconfig-tweak --set-str CONFIG_ESPRESSIF_ULP_RISCV_PROJECT_PATH "../ulp_example/ulp"
+    kconfig-tweak -e CONFIG_EXAMPLES_ULP_EXAMPLE
     make olddefconfig
     make -j
+
+Here is an example of a single ULP application. However, support is not limited to just 
+one application. Multiple ULP applications are also supported.
+By following the same guideline, multiple ULP applications can be created and loaded using ``write`` POSIX call.
+Each NuttX application can build one ULP application. Therefore, to build multiple ULP applications, multiple NuttX
+applications are needed to create each ULP binary. This limitation only applies when using the NuttX build system to
+build multiple ULP applications; it does not affect the ability to load multiple ULP applications built by other means.
+
+ULP binary can be included in NuttX application by adding
+``#include "ulp/ulp/ulp_code.h"`` line. Then, the ULP binary is accessible by using the ULP application
+prefix (defined by the ``ULP_APP_NAME`` variable in the ULP application Makefile) with the ``bin`` keyword to
+access the binary data (e.g., if ``ULP_APP_NAME`` is ``ulp_test``, the binary variable will be ``ulp_test_bin``)
+and ``bin_len`` keyword to access its length (e.g., ``ulp_test_bin_len`` for ``ULP_APP_NAME`` is ``ulp_test``).
+
+Accessing the ULP RISC-V Coprocessor Program Variables
+------------------------------------------------------
+
+Global symbols defined in the ULP application are available to the HP core through a shared memory region. To read or write ULP variables,
+direct reading/writing to such memory positions are not allowed. POSIX calls are needed instead. To access the ULP variable through the HP core,
+consider that its name is defined by the ULP application prefix (defined by the ``ULP_APP_NAME`` variable in the ULP application Makefile) + the ULP application variable.
+For example if HP core tries to access a ULP application variable named ``result`` and ``ULP_APP_NAME`` in the ULP application Makefile set as ``ulp_app``, required name for
+that variable will be ``ulp_app_result``.
+``FIONREAD`` or ``FIONWRITE`` ioctl calls are, then, performed with the address of a ``struct symtab_s`` previously defined with the name of the variable to be read or written.
+
+.. warning::
+  Ensure that the related ULP application is running. Otherwise, another ULP application may interfere by using the same memory space for a different variables.
+
+Here is a snippet for reading and writing to a ULP variable named ``var_test`` (assuming the ``ULP_APP_NAME`` is set to ``ulp``) through the HP core:
+
+.. code-block:: C
+
+   #include <nuttx/config.h>
+   #include <stdio.h>
+   #include <fcntl.h>
+   #include <unistd.h>
+   #include <sys/ioctl.h>
+   #include "nuttx/symtab.h"
+
+   int main (void)
+    {
+      uint32_t ulp_var;
+      int fd;
+      struct symtab_s sym =
+      {
+        .sym_name = "ulp_var_test",
+        .sym_value = &ulp_var,
+      };
+      fd = open("/dev/ulp", O_RDWR);
+      ioctl(fd, FIONREAD, &sym);
+      if (ulp_var != 0)
+        {
+          ulp_var = 0;
+          ioctl(fd, FIONWRITE, &sym);
+        }
+
+      return OK;
+    }
 
 _`Managing esptool on virtual environment`
 ==========================================
