@@ -713,7 +713,8 @@ static int esp_temperature_sensor_set_interval(
   struct file *filep,
   uint32_t *period_us)
 {
-  struct esp_temp_priv_s *priv = (struct esp_temp_priv_s *)lower;
+  struct esp_temp_priv_s *priv =
+    container_of(lower, struct esp_temp_priv_s, lower);
 
   if (*period_us < ESP_TEMP_MIN_INTERVAL)
     {
@@ -752,7 +753,8 @@ static int esp_temperature_sensor_activate(
   struct file *filep,
   bool enable)
 {
-  struct esp_temp_priv_s *priv = (struct esp_temp_priv_s *)lower;
+  struct esp_temp_priv_s *priv =
+    container_of(lower, struct esp_temp_priv_s, lower);
 #ifdef CONFIG_ESPRESSIF_TEMP_UORB_POLL
   bool start_thread = false;
 #endif
