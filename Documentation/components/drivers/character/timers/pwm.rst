@@ -69,7 +69,7 @@ set through ``pwm_info_s`` structure.
    struct pwm_info_s
    {
       /* Frequency of the pulse train */
-      uint32_t           frequency;
+      pwm_freq_t         frequency;
    #ifdef CONFIG_PWM_MULTICHAN
       /* Per-channel output state */
       struct pwm_chan_s  channels[CONFIG_PWM_NCHANNELS];
