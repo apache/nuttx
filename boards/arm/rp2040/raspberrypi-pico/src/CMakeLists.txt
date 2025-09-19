@@ -1,5 +1,5 @@
 # ##############################################################################
-# cmake/nuttx_process_config.cmake
+# boards/arm/rp2040/raspberrypi-pico/src/CMakeLists.txt
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -20,27 +20,34 @@
 #
 # ##############################################################################
 
-function(process_config OUTPUT INPUT)
-  set(options)
-  set(oneValueArgs)
-  set(multiValueArgs INCLUDE_PATHS)
-  cmake_parse_arguments(PARSE_ARGV 2 PROCESS_INCLUDES "${options}"
-                        "${oneValueArgs}" "${multiValueArgs}")
+set(SRCS rp2040_boardinitialize.c rp2040_bringup.c)
 
-  set(include_args "")
-  foreach(path IN LISTS PROCESS_INCLUDES_INCLUDE_PATHS)
-    list(APPEND include_args "${path}")
-  endforeach()
+if(CONFIG_DEV_GPIO)
+  list(APPEND SRCS rp2040_gpio.c)
+endif()
 
-  message(STATUS "Processing includes: ${INPUT} -> ${OUTPUT}")
-  execute_process(
-    COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tools/process_config.py
-            ${OUTPUT} ${INPUT} ${include_args}
-    RESULT_VARIABLE result
-    OUTPUT_VARIABLE out
-    ERROR_VARIABLE err)
+if(CONFIG_ARCH_LEDS)
+  list(APPEND SRCS rp2040_autoleds.c)
+else()
+  list(APPEND SRCS rp2040_userleds.c)
+endif()
 
-  if(NOT result EQUAL 0)
-    message(FATAL_ERROR "Failed to process includes:\n${err}")
-  endif()
-endfunction()
+if(CONFIG_ARCH_BUTTONS)
+  list(APPEND SRCS rp2040_buttons.c)
+endif()
+
+if(CONFIG_BOARDCTL)
+  list(APPEND SRCS rp2040_appinit.c)
+endif()
+
+target_sources(board PRIVATE ${SRCS})
+
+if(CONFIG_RP2040_FLASH_BOOT)
+  set_property(
+    GLOBAL PROPERTY LD_SCRIPT
+                    "${NUTTX_BOARD_DIR}/scripts/raspberrypi-pico-flash.ld")
+else()
+  set_property(
+    GLOBAL PROPERTY LD_SCRIPT
+                    "${NUTTX_BOARD_DIR}/scripts/raspberrypi-pico-sram.ld")
+endif()
