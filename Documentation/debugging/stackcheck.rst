@@ -5,24 +5,31 @@ Stack Overflow Check
 Overview
 --------
 
-Currently NuttX supports three types of stack overflow detection:
-    1. Stack Overflow Software Check
-    2. Stack Overflow Hardware Check
-    3. Stack Canary Check
+Currently NuttX supports four types of stack overflow detection:
+    1. Stack Overflow Software Check During Function Call
+    2. Stack Overflow Software Check During Task Context Switch
+    3. Stack Overflow Hardware Check
+    4. Stack Canary Check
 
-The software stack detection includes two implementation ideas:
+The software stack detection during function call includes two implementation ideas:
     1. Implemented by coloring the stack memory
     2. Implemented by comparing the sp and sl registers
+
+The software stack detection during task context switch includes two implementation ideas:
+    1. Implemented by coloring the stack memory
+    2. Implemented by checking stack overflow threshold value during context switch
 
 Support
 -------
 
-Software and hardware stack overflow detection implementation,
-currently only implemented on ARM Cortex-M (32-bit) series chips
-Stack Canary Check is available on all platforms
+Stack overflow software check during function call and stack overflow
+hardware check implementation, currently only implemented on ARM Cortex-M (32-bit)
+series chips. Stack overflow software check during task context switch, currently
+only implemented on ARM Cortex-R52 (32-bit) series chips. Stack Canary Check is available
+on all platforms
 
-Stack Overflow Software Check
------------------------------
+Stack Overflow Software Check During Function Call
+--------------------------------------------------
 
 1. Memory Coloring Implementation Principle
     1. Before using the stack, Thread will refresh the stack area to 0xdeadbeef
@@ -43,6 +50,16 @@ Stack Overflow Software Check
 
     Usage:
         Enable CONFIG_ARMV8M_STACKCHECK or CONFIG_ARMV7M_STACKCHECK
+
+Stack Overflow Software Check During Task Context Switch
+--------------------------------------------------------
+
+1. Before using the stack, Thread will refresh the stack area to 0xdeadbeef
+2. When Thread is running, it will overwrite 0xdeadbeef
+3. During context switching, up_check_tcbstack_overflow() detects 0xdeadbeef to check for stack overflow
+
+Usage:
+    Enable CONFIG_STACK_COLORATION and TASK_STACK_OVERFLOW_CHECK
 
 Stack Overflow Hardware Check
 -----------------------------

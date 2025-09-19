@@ -45,6 +45,32 @@
  * Private Functions
  ****************************************************************************/
 
+static inline
+size_t up_check_tcbstack_usage(void *stackbase, size_t nbytes)
+{
+  size_t usage;
+
+#ifdef CONFIG_ARCH_ADDRENV
+  struct addrenv_s *oldenv;
+
+  if (tcb->addrenv_own != NULL)
+    {
+      addrenv_select(tcb->addrenv_own, &oldenv);
+    }
+#endif
+
+  usage = arm_stack_check(stackbase, nbytes);
+
+#ifdef CONFIG_ARCH_ADDRENV
+  if (tcb->addrenv_own != NULL)
+    {
+      addrenv_restore(oldenv);
+    }
+#endif
+
+  return usage;
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -202,28 +228,42 @@ void arm_stack_color(void *stackbase, size_t nbytes)
 
 size_t up_check_tcbstack(struct tcb_s *tcb)
 {
-  size_t size;
-
-#ifdef CONFIG_ARCH_ADDRENV
-  struct addrenv_s *oldenv;
-
-  if (tcb->addrenv_own != NULL)
-    {
-      addrenv_select(tcb->addrenv_own, &oldenv);
-    }
-#endif
-
-  size = arm_stack_check(tcb->stack_base_ptr, tcb->adj_stack_size);
-
-#ifdef CONFIG_ARCH_ADDRENV
-  if (tcb->addrenv_own != NULL)
-    {
-      addrenv_restore(oldenv);
-    }
-#endif
-
+  size_t size = up_check_tcbstack_usage(tcb->stack_base_ptr,
+                                      tcb->adj_stack_size);
   return size;
 }
+
+#ifdef CONFIG_TASK_STACK_OVERFLOW_CHECK
+/****************************************************************************
+ * Name: up_check_tcbstack_overflow
+ *
+ * Description:
+ *   Check whether a stack overflow has occurred. The check fails if fewer
+ *   than CONFIG_TASK_STACK_OVERFLOW_CHECK_THRESHOLD bytes of unused stack
+ *   remain after verifying the stack coloration pattern.
+ *
+ * Input Parameters:
+ *   tcb - The TCB of the task being checked
+ *
+ * Returned Value:
+ *   true  - Stack overflow detected (check failed)
+ *   false - No overflow detected (check passed)
+ *
+ ****************************************************************************/
+
+bool up_check_tcbstack_overflow(FAR struct tcb_s *tcb)
+{
+  size_t usage;
+  int threshold = CONFIG_TASK_STACK_OVERFLOW_CHECK_THRESHOLD;
+
+  /* Check for stack overflow */
+
+  usage = up_check_tcbstack_usage((uintptr_t)tcb->stack_base_ptr,
+                                      threshold);
+
+  return (usage > 0);
+}
+#endif
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 size_t up_check_intstack(int cpu)

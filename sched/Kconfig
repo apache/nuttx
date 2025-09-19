@@ -2034,3 +2034,25 @@ config CUSTOM_SEMAPHORE_MAXVALUE
 	---help---
 		Enable to support custom max value for semaphores.
 		When this option is enabled, the max value of a semaphore can be set
+
+config TASK_STACK_OVERFLOW_CHECK
+	bool "Task stack overflow check"
+	depends on STACK_COLORATION
+	default n
+	---help---
+		Enable to support task stack overflow check.
+		When this option is enabled, the stack of a task will be checked for
+		overflow when the task is switched out. If a stack overflow is detected,
+		the system will panic.
+
+if TASK_STACK_OVERFLOW_CHECK
+config TASK_STACK_OVERFLOW_CHECK_THRESHOLD
+	int "Stack overflow check threshold"
+	default 16
+	---help---
+		This is the threshold value (in bytes) used to determine if a stack
+		overflow has occurred.  This value should be set to a value that is
+		larger than the worst case stack usage.The stack overflow check will
+		fail if fewer than this number of bytes of unused stack remain after
+		the stack coloration pattern.
+endif
