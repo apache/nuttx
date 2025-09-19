@@ -233,9 +233,9 @@ void up_timer_initialize(void)
   tmrinfo("%s: cp15 timer(s) running at %" PRIu64 ".%" PRIu64 "MHz\n",
           __func__, freq / 1000000, (freq / 10000) % 100);
 
-  up_alarm_set_lowerhalf(arm_oneshot_initialize());
-
   arm_timer_phy_set_absolute(UINT64_MAX);
+
+  up_alarm_set_lowerhalf(arm_oneshot_initialize());
 
   up_enable_irq(ARM_ARCH_TIMER_IRQ);
   arm_timer_phy_enable(true);
