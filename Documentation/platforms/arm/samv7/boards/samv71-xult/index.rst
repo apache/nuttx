@@ -2481,6 +2481,32 @@ nxwm
     - Line spacing in the NxTerm window is too much.  This is probably
       a font-related issue too.
 
+oa_tc6
+------
+
+  This configuration features the network driver for 10BASE-T1S and 10BASE-T1L SPI MAC-PHYs
+  that follow the `OPEN Alliance 10BASE-T1x MAC-PHY Serial Interface` specification (OA-TC6).
+
+  Among such MAC-PHYs are e.g. Microchip LAN865x, Onsemi NCV7410 (NCN26010), Analog Devices ADIN1110.
+  See the build configuration utility (e.g. ``make menuconfig``) to find out which ones are currently supported.
+
+  The OA-TC6 defines a 5 signal connection between the MAC-PHY and the host MCU. These are 4 lines for the standard SPI and 1 line for the interrupt signal from the MAC-PHY to the MCU.
+
+  **Default pinout**
+
+  ============ ========== =========================================
+  SAVM71 PIO   Function   Description
+  ============ ========== =========================================
+  PA04         INT        MAC-PHY interrupt signal
+  PD20         MISO       SPI Master In Slave Out
+  PD21         MOSI       SPI Master Out Slave In
+  PD22         CLK        SPI Clock
+  PD25         CS         SPI Chip Select
+  ============ ========== =========================================
+
+  The ``oa_tc6`` configuration is additionally equipped with the ``plcatool`` utility. This allows configuration of the Physical Layer Collision Avoidance (PLCA) functionality
+  in 10BASE-T1S PHYs.
+
 vnc
 ---
 
