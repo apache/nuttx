@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32h7/stm32_flash.c
+ * boards/arm/stm32h7/weact-stm32h750/src/stm32_ioctl.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -26,20 +26,51 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_STM32H7_STM32H7X0XX)
-#  include "stm32h743xx_flash.c"
-#elif defined(CONFIG_STM32H7_STM32H7X3XX)
-#  include "stm32h743xx_flash.c"
-#elif defined(CONFIG_STM32H7_STM32H7B3XX)
-#  include "stm32h7b3xx_flash.c"
-#elif defined(CONFIG_STM32H7_STM32H7X5XX)
-#  include "stm32h743xx_flash.c"
-#elif defined(CONFIG_STM32H7_STM32H7X7XX)
-#  include "stm32h743xx_flash.c"
-#else
-#  error "Unsupported STM32 H7 chip"
-#endif
+#include <sys/types.h>
+#include <stdint.h>
+#include <errno.h>
+
+#include <nuttx/board.h>
+
+#include "weact-stm32h750.h"
+
+#ifdef CONFIG_BOARDCTL_IOCTL
 
 /****************************************************************************
- * Private Functions
+ * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: board_ioctl
+ *
+ * Description:
+ *   The "landing site" for much of the boardctl() interface. Generic board-
+ *   control functions invoked via ioctl() get routed through here.
+ *
+ *   Since we don't do anything unusual at the moment, this function
+ *   accomplishes nothing except avoid a missing-function linker error if
+ *   CONFIG_BOARDCTL_IOCTL is selected.
+ *
+ * Input Parameters:
+ *   cmd - IOCTL command being requested.
+ *   arg - Arguments for the IOCTL.
+ *
+ * Returned Value:
+ *   we don't yet support any boardctl IOCTLs.  This function always returns
+ *  -ENOTTY which is the standard IOCTL return value when a command is not
+ *  supported
+ *
+ ****************************************************************************/
+
+int board_ioctl(unsigned int cmd, uintptr_t arg)
+{
+  switch (cmd)
+    {
+      default:
+        return -ENOTTY;
+    }
+
+  return OK;
+}
+
+#endif /* CONFIG_BOARDCTL_IOCTL */

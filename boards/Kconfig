@@ -1870,6 +1870,15 @@ config ARCH_BOARD_WEACT_STM32H743
 	---help---
 		This is WeAct MiniSTM32H7xx (STM32H743VIT6) board.
 
+config ARCH_BOARD_WEACT_STM32H750
+	bool "WeAct Studio STM32H750"
+	depends on ARCH_CHIP_STM32H750VB
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This is WeAct MiniSTM32H7xx (STM32H750VB) board.
+
 config ARCH_BOARD_NUCLEO_H743ZI
 	bool "STM32H743 Nucleo H743ZI"
 	depends on ARCH_CHIP_STM32H743ZI
@@ -1907,9 +1916,9 @@ config ARCH_BOARD_STM32H745I_DISCO
 
 config ARCH_BOARD_STM32H750B_DK
 	bool "STM32H750B-DK board"
-	depends on ARCH_CHIP_STM32H750B
+	depends on ARCH_CHIP_STM32H750XB
 	---help---
-		STMicro STM32H750B-DK board based on the STMicro STM32H750B MCU.
+		STMicro STM32H750B-DK board based on the STMicro STM32H750XB MCU.
 
 config ARCH_BOARD_LINUM_STM32H753BI
 	bool "Linum (STM32H753BI) board"
@@ -3642,6 +3651,7 @@ config ARCH_BOARD
 	default "nucleo-g071rb"             if ARCH_BOARD_NUCLEO_G071RB
 	default "nucleo-g0b1re"             if ARCH_BOARD_NUCLEO_G0B1RE
 	default "weact-stm32h743"           if ARCH_BOARD_WEACT_STM32H743
+	default "weact-stm32h750"           if ARCH_BOARD_WEACT_STM32H750
 	default "nucleo-h743zi"             if ARCH_BOARD_NUCLEO_H743ZI
 	default "nucleo-h743zi2"            if ARCH_BOARD_NUCLEO_H743ZI2
 	default "nucleo-h745zi"             if ARCH_BOARD_NUCLEO_H745ZI
@@ -4367,6 +4377,9 @@ source "boards/arm/stm32h7/stm32h747i-disco/Kconfig"
 endif
 if ARCH_BOARD_WEACT_STM32H743
 source "boards/arm/stm32h7/weact-stm32h743/Kconfig"
+endif
+if ARCH_BOARD_WEACT_STM32H750
+source "boards/arm/stm32h7/weact-stm32h750/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_H743ZI
 source "boards/arm/stm32h7/nucleo-h743zi/Kconfig"
