@@ -167,11 +167,17 @@ struct pwm_chan_s
   int8_t channel;
 };
 
+#ifdef CONFIG_PWM_FREQUENCY_FIXED
+typedef ub32_t pwm_freq_t;
+#else
+typedef uint32_t pwm_freq_t;
+#endif
+
 /* This structure describes the characteristics of the pulsed output */
 
 struct pwm_info_s
 {
-  uint32_t           frequency; /* Frequency of the pulse train */
+  pwm_freq_t         frequency; /* Frequency of the pulse train */
 
   /* Per-channel output state */
 

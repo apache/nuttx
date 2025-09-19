@@ -107,7 +107,13 @@ static void pwm_dump(FAR const char *msg, FAR const struct pwm_info_s *info,
 {
   int i;
 
-  pwminfo("%s: frequency: %" PRId32 "\n", msg, info->frequency);
+  pwminfo("%s: frequency: "
+#ifdef CONFIG_PWM_FREQUENCY_FIXED
+          "%016" PRIx64
+#else
+          "%" PRId32
+#endif
+          "\n", msg, info->frequency);
 
   for (i = 0; i < CONFIG_PWM_NCHANNELS; i++)
     {
