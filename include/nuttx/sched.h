@@ -1257,7 +1257,16 @@ void nxsched_resume_scheduler(FAR struct tcb_s *tcb);
 #ifdef CONFIG_SCHED_SUSPENDSCHEDULER
 void nxsched_suspend_scheduler(FAR struct tcb_s *tcb);
 #else
-#  define nxsched_suspend_scheduler(tcb)
+#  ifdef CONFIG_TASK_STACK_OVERFLOW_CHECK
+#    define nxsched_suspend_scheduler(tcb) \
+      do \
+        { \
+            DEBUGASSERT(!up_check_tcbstack_overflow(tcb));\
+        } \
+      while (0)
+#  else
+#    define nxsched_suspend_scheduler(tcb)
+#  endif
 #endif
 
 /****************************************************************************

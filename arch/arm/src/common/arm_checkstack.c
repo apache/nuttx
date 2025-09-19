@@ -45,6 +45,21 @@
  * Private Functions
  ****************************************************************************/
 
+#ifdef CONFIG_TASK_STACK_OVERFLOW_CHECK
+static inline bool
+arm_check_stack_overflow(uintptr_t stack_base, int threshold)
+{
+  uint32_t *ptr;
+  int free_size;
+
+  for (free_size = 0, ptr = (uint32_t *)stack_base;
+       *ptr == STACK_COLOR && free_size < threshold;
+       free_size += 4, ptr++);
+
+  return (free_size < threshold);
+}
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -224,6 +239,54 @@ size_t up_check_tcbstack(struct tcb_s *tcb)
 
   return size;
 }
+
+#ifdef CONFIG_TASK_STACK_OVERFLOW_CHECK
+/****************************************************************************
+ * Name: up_check_tcbstack_overflow
+ *
+ * Description:
+ *   Check whether a stack overflow has occurred. The check fails if fewer
+ *   than CONFIG_TASK_STACK_OVERFLOW_CHECK_THRESHOLD bytes of unused stack
+ *   remain after verifying the stack coloration pattern.
+ *
+ * Input Parameters:
+ *   tcb - The TCB of the task being checked
+ *
+ * Returned Value:
+ *   true  - Stack overflow detected (check failed)
+ *   false - No overflow detected (check passed)
+ *
+ ****************************************************************************/
+
+bool up_check_tcbstack_overflow(FAR struct tcb_s *tcb)
+{
+  bool overflow;
+  int threshold = CONFIG_TASK_STACK_OVERFLOW_CHECK_THRESHOLD;
+
+#ifdef CONFIG_ARCH_ADDRENV
+  struct addrenv_s *oldenv;
+
+  if (tcb->addrenv_own != NULL)
+    {
+      addrenv_select(tcb->addrenv_own, &oldenv);
+    }
+#endif
+
+  /* Check for stack overflow */
+
+  overflow = arm_check_stack_overflow((uintptr_t)tcb->stack_base_ptr,
+                                      threshold);
+
+#ifdef CONFIG_ARCH_ADDRENV
+  if (tcb->addrenv_own != NULL)
+    {
+      addrenv_restore(oldenv);
+    }
+#endif
+
+  return overflow;
+}
+#endif
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 size_t up_check_intstack(int cpu)
