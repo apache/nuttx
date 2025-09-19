@@ -262,3 +262,10 @@ config ESP32S3_BOARD_I2C
 	bool
 	default y if ESP32S3_I2C0 || ESP32S3_I2C1
 
+config ESPRESSIF_ULP_USE_TEST_BIN
+	bool "Run example prebuilt binary for ULP core"
+	depends on ESPRESSIF_USE_ULP_RISCV_CORE
+	default n
+	---help---
+		Run example prebuilt binary for ULP core which is resides in
+		`Documentation/platforms/xtensa/esp32s3/boards/esp32s3-devkit/ulp_riscv_blink.bin`

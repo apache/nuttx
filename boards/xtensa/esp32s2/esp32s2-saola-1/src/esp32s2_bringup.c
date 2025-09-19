@@ -127,6 +127,9 @@
 
 #ifdef CONFIG_ESPRESSIF_USE_ULP_RISCV_CORE
 #  include "espressif/esp_ulp.h"
+#  ifdef CONFIG_ESPRESSIF_ULP_USE_TEST_BIN
+#    include "ulp/ulp_code.h"
+#  endif
 #endif
 
 #include "esp32s2-saola-1.h"
@@ -515,6 +518,9 @@ int esp32s2_bringup(void)
    */
 
   esp_ulp_init();
+#  ifdef CONFIG_ESPRESSIF_ULP_USE_TEST_BIN
+  esp_ulp_load_bin((char *)esp_ulp_bin, esp_ulp_bin_len);
+#  endif
 #endif
 
   /* If we got here then perhaps not all initialization was successful, but
