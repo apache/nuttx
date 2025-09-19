@@ -69,12 +69,16 @@ set through ``pwm_info_s`` structure.
     struct pwm_info_s
     {
       /* Frequency of the pulse train */
-      uint32_t frequency;
+      pwm_freq_t frequency;
       /* Per-channel output state */
       struct pwm_chan_s channels[CONFIG_PWM_NCHANNELS];
       /* User provided argument to be used in the lower half */
       FAR void *arg;
     };
+
+``pwm_freq_t`` is ``uint32_t`` (Hz).  With ``CONFIG_PWM_FREQUENCY_FIXED``
+it is ``ub32_t`` (Hz in 32.32 fixed point), so frequencies below 1 Hz
+can be set.
 
 Structure ``pwm_chan_s`` holds the representation of one PWM channel.
 
