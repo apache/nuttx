@@ -27,13 +27,14 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/spinlock.h>
+#include <nuttx/atomic.h>
+#include <nuttx/irq.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
- #define SEQLOCK_INITIALIZER {0, SP_UNLOCKED}
+#define SEQLOCK_INITIALIZER {0}
 
 /****************************************************************************
  * Public Data Types
@@ -45,8 +46,7 @@
 
 typedef struct seqclock
 {
-  volatile unsigned int sequence;
-  spinlock_t lock;
+  atomic_t sequence;
 } seqcount_t;
 
 #undef EXTERN
@@ -59,7 +59,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Public Function Prototypes
+ * Inline Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -78,8 +78,7 @@ extern "C"
 
 static inline_function void seqlock_init(FAR seqcount_t *s)
 {
-  s->sequence = 0;
-  spin_lock_init(&s->lock);
+  atomic_init(&s->sequence, 0u);
 }
 
 /****************************************************************************
@@ -98,15 +97,17 @@ static inline_function void seqlock_init(FAR seqcount_t *s)
  ****************************************************************************/
 
 static inline_function
-unsigned int read_seqbegin(FAR const seqcount_t *s)
+uint32_t read_seqbegin(FAR const seqcount_t *s)
 {
-  unsigned int seq;
+  uint32_t seq;
 
-  while (predict_false((seq = s->sequence) & 1));
+  do
+    {
+      /* Ensure no load operation is re-ordered before the acquire load. */
 
-#ifdef CONFIG_SMP
-  SMP_RMB();
-#endif
+      seq = atomic_read_acquire(&s->sequence);
+    }
+  while (seq & 1);
 
   return seq;
 }
@@ -128,16 +129,13 @@ unsigned int read_seqbegin(FAR const seqcount_t *s)
  ****************************************************************************/
 
 static inline_function
-unsigned int read_seqretry(FAR const seqcount_t *s, unsigned int start)
+uint32_t read_seqretry(FAR const seqcount_t *s, uint32_t start)
 {
-  unsigned int seq;
+  /* Ensure all load operations before are completed. */
 
-#ifdef CONFIG_SMP
-  UP_DMB();
-#endif
+  SMP_RMB();
 
-  seq = s->sequence;
-  return predict_false(seq != start);
+  return predict_false(atomic_read(&s->sequence) != start);
 }
 
 /****************************************************************************
@@ -158,10 +156,26 @@ unsigned int read_seqretry(FAR const seqcount_t *s, unsigned int start)
 static inline_function
 irqstate_t write_seqlock_irqsave(FAR seqcount_t *s)
 {
-  irqstate_t flags = spin_lock_irqsave(&s->lock);
+  uint32_t   sequence;
+  irqstate_t flags = up_irq_save();
 
-  s->sequence++;
-  SMP_WMB();
+  for (; ; )
+    {
+      sequence = atomic_read(&s->sequence);
+
+      if (predict_true(!(sequence & 1)))
+        {
+          /* Try to acquire the lock ownership. */
+
+          if (atomic_cmpxchg_acquire(&s->sequence, &sequence, sequence + 1))
+            {
+              break;
+            }
+        }
+
+      /* CPU Relax and retry. */
+    }
+
   return flags;
 }
 
@@ -184,9 +198,8 @@ irqstate_t write_seqlock_irqsave(FAR seqcount_t *s)
 static inline_function
 void write_sequnlock_irqrestore(seqcount_t *s, irqstate_t flags)
 {
-  SMP_WMB();
-  s->sequence++;
-  spin_unlock_irqrestore(&s->lock, flags);
+  atomic_set_release(&s->sequence, s->sequence + 1);
+  up_irq_restore(flags);
 }
 
 #undef EXTERN
