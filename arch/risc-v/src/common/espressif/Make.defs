@@ -246,10 +246,6 @@ CHIP_SERIES = $(patsubst "%",%,$(CONFIG_ESPRESSIF_CHIP_SERIES))
 
 include chip/hal_${CHIP_SERIES}.mk
 
-ifeq ($(CONFIG_ESPRESSIF_USE_LP_CORE), y)
-	include common$(DELIM)espressif$(DELIM)/esp_ulp.mk
-endif
-
 ifeq ($(CONFIG_ESP_WIRELESS),y)
 	include common$(DELIM)espressif$(DELIM)Wireless.mk
 endif

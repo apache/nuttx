@@ -235,14 +235,6 @@ config ESPRESSIF_USE_LP_CORE
 	---help---
 		Enable LP core (Low-power core) coprocessor
 
-config ESPRESSIF_ULP_PROJECT_PATH
-	string "Path to ULP project (relative to nuttx root folder)"
-	depends on ESPRESSIF_USE_LP_CORE
-	default ""
-	---help---
-		Path to ULP project to include build system and run on LP core.
-		This path can either be a .bin file or a project folder
-
 config ESPRESSIF_ULP_COPROC_RESERVE_MEM_SIZE
 	int "RTC slow memory reserved for coprocessor"
 	depends on ESPRESSIF_USE_LP_CORE
