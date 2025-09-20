@@ -50,8 +50,9 @@
 
 void board_autoled_initialize(void)
 {
-  /* Configure LD2 GPIO for output */
+  /* Configure LD1 and LD2 GPIO for output */
 
+  stm32_configgpio(GPIO_LD1);
   stm32_configgpio(GPIO_LD2);
 }
 
@@ -61,7 +62,12 @@ void board_autoled_initialize(void)
 
 void board_autoled_on(int led)
 {
-  if (led == 1)
+  if (led == BOARD_LED1)
+    {
+      stm32_gpiowrite(GPIO_LD1, true);
+    }
+
+  if (led == BOARD_LED2)
     {
       stm32_gpiowrite(GPIO_LD2, false);
     }
@@ -73,7 +79,12 @@ void board_autoled_on(int led)
 
 void board_autoled_off(int led)
 {
-  if (led == 1)
+  if (led == BOARD_LED1)
+    {
+      stm32_gpiowrite(GPIO_LD1, false);
+    }
+
+  if (led == BOARD_LED2)
     {
       stm32_gpiowrite(GPIO_LD2, true);
     }
