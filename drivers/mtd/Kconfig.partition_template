@@ -1,0 +1,54 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+# This is a template file to include when partitioning a mtd device.
+# It uses mtd_name, mtd_part_default_sizes and mtd_part_default_names
+# to create CONFIG_{$mtd_name}_PART_SIZES and CONFIG_{mtd_name}_PART_NAMES
+#
+# It can be included in a Kconfig as:
+# mtd_name = ESP32_STORAGE_MTD
+# mtd_part_default_sizes = 8,504,512
+# mtd_part_names = mtd0p0,mtd0p1,mtd0p2
+# source "drivers/mtd/Kconfig.partition_template"
+
+if MTD_PARTITION
+
+config $(mtd_name)_PART
+    bool "Partitioning on $(mtd_name)"
+    default n
+    ---help---
+        Enables partitioning on $(mtd_name)
+
+config $(mtd_name)_PART_SIZES
+    string "$(mtd_name) partition sizes (kB)"
+    default "$(mtd_part_default_sizes)"
+    depends on $(mtd_name)_PART
+    ---help---
+        Partition sizes in kB as comma separated list.
+
+config $(mtd_name)_PART_NAMES
+    string "$(mtd_name) partition names"
+    default "$(mtd_part_default_names)"
+    depends on $(mtd_name)_PART
+    depends on MTD_PARTITION_NAMES
+    ---help---
+        Partition names as comma separated list.
+
+config $(mtd_name)_CONFIG_PART
+	bool "Create application config data partition"
+	default n
+	depends on $(mtd_name)_PART
+	depends on PLATFORM_CONFIGDATA
+	---help---
+		Enables creation of a /dev/config partition.
+
+config $(mtd_name)_CONFIG_PART_NUMBER
+	int "Index number of config partition (in list above)"
+	default 0
+	depends on $(mtd_name)_CONFIG_PART
+	---help---
+		Specifies the index number of the config data partition
+		from the partition list.
+
+endif #MTD_PARTITION
