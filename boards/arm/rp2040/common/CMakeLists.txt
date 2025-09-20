@@ -1,5 +1,5 @@
 # ##############################################################################
-# cmake/nuttx_process_config.cmake
+# boards/arm/rp2040/common/CMakeLists.txt
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -20,27 +20,5 @@
 #
 # ##############################################################################
 
-function(process_config OUTPUT INPUT)
-  set(options)
-  set(oneValueArgs)
-  set(multiValueArgs INCLUDE_PATHS)
-  cmake_parse_arguments(PARSE_ARGV 2 PROCESS_INCLUDES "${options}"
-                        "${oneValueArgs}" "${multiValueArgs}")
-
-  set(include_args "")
-  foreach(path IN LISTS PROCESS_INCLUDES_INCLUDE_PATHS)
-    list(APPEND include_args "${path}")
-  endforeach()
-
-  message(STATUS "Processing includes: ${INPUT} -> ${OUTPUT}")
-  execute_process(
-    COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tools/process_config.py
-            ${OUTPUT} ${INPUT} ${include_args}
-    RESULT_VARIABLE result
-    OUTPUT_VARIABLE out
-    ERROR_VARIABLE err)
-
-  if(NOT result EQUAL 0)
-    message(FATAL_ERROR "Failed to process includes:\n${err}")
-  endif()
-endfunction()
+add_subdirectory(src)
+target_include_directories(board PRIVATE include)
