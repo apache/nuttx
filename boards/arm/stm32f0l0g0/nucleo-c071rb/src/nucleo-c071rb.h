@@ -45,7 +45,7 @@
  */
 
 #define GPIO_LD1        (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_MEDIUM | \
-                         GPIO_OUTPUT_SET | GPIO_PORTA | GPIO_PIN5)
+                         GPIO_OUTPUT_CLEAR | GPIO_PORTA | GPIO_PIN5)
 #define GPIO_LD2        (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_MEDIUM | \
                          GPIO_OUTPUT_SET | GPIO_PORTC | GPIO_PIN9)
 
