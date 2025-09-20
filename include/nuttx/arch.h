@@ -2564,6 +2564,9 @@ void irq_dispatch(int irq, FAR void *context);
 #ifdef CONFIG_STACK_COLORATION
 struct tcb_s;
 size_t up_check_tcbstack(FAR struct tcb_s *tcb);
+#ifdef CONFIG_TASK_STACK_OVERFLOW_CHECK
+bool up_check_tcbstack_overflow(FAR struct tcb_s *tcb);
+#endif
 #if defined(CONFIG_ARCH_INTERRUPTSTACK) && CONFIG_ARCH_INTERRUPTSTACK > 3
 size_t up_check_intstack(int cpu);
 #endif

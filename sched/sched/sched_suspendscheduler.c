@@ -68,6 +68,12 @@ void nxsched_suspend_scheduler(FAR struct tcb_s *tcb)
       return;
     }
 
+#ifdef CONFIG_TASK_STACK_OVERFLOW_CHECK
+  /* Check for stack overflow */
+
+  DEBUGASSERT(!up_check_tcbstack_overflow(tcb));
+#endif
+
 #ifdef CONFIG_SCHED_SPORADIC
   /* Perform sporadic schedule operations */
 
