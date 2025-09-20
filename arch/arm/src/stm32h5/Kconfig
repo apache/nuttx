@@ -1093,6 +1093,56 @@ config STM32H5_ADC1_OVSS
 
 endif # STM32H5_ADC1_OVERSAMPLE
 
+config STM32H5_ADC1_WDG1
+	bool "Enable STM32H5 ADC1 Watchdog 1"
+	depends on STM32H5_ADC1
+	default n
+	---help---
+		Enable STM32H5 ADC1 Watchdog 1.
+
+config STM32H5_ADC1_WDG1_FLT
+	int "Set ADC1 Watchdog 1 Filter"
+	depends on STM32H5_ADC1_WDG1
+	default 0
+	range 0 7
+	---help---
+		N+1 watchdog events generates an interrupt.
+		Default: 0.
+
+config STM32H5_ADC1_WDG1_LOWTHRESH
+	int "Set ADC1 Watchdog 1 Low Threshold"
+	depends on STM32H5_ADC1_WDG1
+	default 0
+	range 0 4095
+	---help---
+		Set the ADC1 Watchdog 1 low threshold value.
+		Default: 0.
+
+config STM32H5_ADC1_WDG1_HIGHTHRESH
+	int "Set ADC1 Watchdog 1 High Threshold"
+	depends on STM32H5_ADC1_WDG1
+	default 4095
+	range 0 4095
+	---help---
+		Set the ADC1 Watchdog 1 high threshold value.
+		Default: 4095.
+
+config STM32H5_ADC1_WDG1_SGL
+	bool "Enable STM32H5 ADC1 Watchdog 1 on a single channel"
+	depends on STM32H5_ADC1_WDG1
+	default n
+	---help---
+		This option determines if ADC1 Watchdog 1 is enabled on all
+		channels or just a single channel.
+
+config STM32H5_ADC1_WDG1_CHAN
+	int "STM32H5 ADC1 Watchdog 1 Channel Selection"
+	depends on STM32H5_ADC1_WDG1_SGL
+	default 0
+	range 0 19
+	---help---
+		Select the channel to enable for ADC1 Watchdog 1.
+
 config STM32H5_ADC2_RESOLUTION
 	int "ADC2 resolution"
 	depends on STM32H5_ADC2
@@ -1166,6 +1216,56 @@ config STM32H5_ADC2_OVSS
 		Max of 8-bits.
 
 endif # STM32H5_ADC2_OVERSAMPLE
+
+config STM32H5_ADC2_WDG1
+	bool "Enable STM32H5 ADC2 Watchdog 1"
+	depends on STM32H5_ADC2
+	default n
+	---help---
+		Enable STM32H5 ADC2 Watchdog 1.
+
+config STM32H5_ADC2_WDG1_FLT
+	int "Set ADC2 Watchdog 1 Filter"
+	depends on STM32H5_ADC2_WDG1
+	default 0
+	range 0 7
+	---help---
+		N+1 watchdog events generates an interrupt.
+		Default: 0.
+
+config STM32H5_ADC2_WDG1_LOWTHRESH
+	int "Set ADC2 Watchdog 1 Low Threshold"
+	depends on STM32H5_ADC2_WDG1
+	default 0
+	range 0 4095
+	---help---
+		Set the ADC2 Watchdog 1 low threshold value.
+		Default: 0.
+
+config STM32H5_ADC2_WDG1_HIGHTHRESH
+	int "Set ADC2 Watchdog 1 High Threshold"
+	depends on STM32H5_ADC2_WDG1
+	default 4095
+	range 0 4095
+	---help---
+		Set the ADC2 Watchdog 1 high threshold value.
+		Default: 4095.
+
+config STM32H5_ADC2_WDG1_SGL
+	bool "Enable STM32H5 ADC2 Watchdog 1 on a single channel"
+	depends on STM32H5_ADC2_WDG1
+	default n
+	---help---
+		This option determines if ADC2 Watchdog 1 is enabled on all
+		channels or just a single channel.
+
+config STM32H5_ADC2_WDG1_CHAN
+	int "STM32H5 ADC2 Watchdog 1 Channel Selection"
+	depends on STM32H5_ADC2_WDG1_SGL
+	default 0
+	range 0 19
+	---help---
+		Select the channel to enable for ADC2 Watchdog 1.
 
 endmenu # ADC Configuration
 
