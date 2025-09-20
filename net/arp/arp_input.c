@@ -102,6 +102,13 @@ static int arp_in(FAR struct net_driver_s *dev)
 
   dev->d_len = 0;
 
+  if (arp->ah_hwtype != HTONS(ARP_HWTYPE_ETH) ||
+      arp->ah_protocol != HTONS(ETHTYPE_IP))
+    {
+      nerr("ERROR: Invalid hardware type or protocol type\n");
+      return -EINVAL;
+    }
+
   ipaddr = net_ip4addr_conv32(arp->ah_dipaddr);
 #ifdef CONFIG_NET_ARP_GRATUITOUS
   sipaddr = net_ip4addr_conv32(arp->ah_sipaddr);
