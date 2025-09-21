@@ -258,6 +258,23 @@ int bcm2711_mbox_getmac(uint64_t *mac);
 int bcm2711_mbox_getpwr(uint8_t id, bool *state);
 
 /****************************************************************************
+ * Name: bcm2711_mbox_setpwr
+ *
+ * Description:
+ *   Sets the power state of `id`.
+ *
+ * Input parameters:
+ *   id - The device ID to know the power state of
+ *   on - True for power on, false for power off
+ *   wait - True to block until power stable, false otherwise
+ *
+ * Returned Value:
+ *   0 on success, negated error code on failure.
+ ****************************************************************************/
+
+int bcm2711_mbox_setpwr(uint8_t id, bool on, bool wait);
+
+/****************************************************************************
  * Name: bcm2711_mbox_ledset
  *
  * Description:
@@ -272,6 +289,75 @@ int bcm2711_mbox_getpwr(uint8_t id, bool *state);
  ****************************************************************************/
 
 int bcm2711_mbox_ledset(uint8_t pin, bool on);
+
+/****************************************************************************
+ * Name: bcm2711_mbox_getclken
+ *
+ * Description:
+ *   Get the state of the clock (enabled/disabled) corresponding to `id`
+ *
+ * Input parameters:
+ *   id - The ID of the clock to check
+ *   state - Where to store the state of the clock
+ *
+ * Returned Value:
+ *   0 on success, negated error code on failure.
+ ****************************************************************************/
+
+int bcm2711_mbox_getclken(uint8_t id, bool *state);
+
+/****************************************************************************
+ * Name: bcm2711_mbox_setclken
+ *
+ * Description:
+ *   Set the state of the clock (enabled/disabled) corresponding to `id`
+ *
+ * Input parameters:
+ *   id - The ID of the clock
+ *   en - True to enable the clock, false otherwise
+ *
+ * Returned Value:
+ *   0 on success, negated error code on failure.
+ ****************************************************************************/
+
+int bcm2711_mbox_setclken(uint8_t id, bool en);
+
+/****************************************************************************
+ * Name: bcm2711_mbox_getclkrate
+ *
+ * Description:
+ *   Get the rate of the clock corresponding to `id` in Hz.
+ *
+ * Input parameters:
+ *   id - The ID of the clock
+ *   rate - Where to store the rate of the clock
+ *   measured - True to return clock rate as a measured value (true rate),
+ *              false for configured rate.
+ *
+ * Returned Value:
+ *   0 on success, negated error code on failure.
+ ****************************************************************************/
+
+int bcm2711_mbox_getclkrate(uint8_t id, uint32_t *rate, bool measured);
+
+/****************************************************************************
+ * Name: bcm2711_mbox_setclkrate
+ *
+ * Description:
+ *   Set the rate of the clock corresponding to `id` in Hz.
+ *
+ * Input parameters:
+ *   id - The ID of the clock
+ *   rate - The desired clock rate in Hz. The set rate will be returned in
+ *          this variable, even if the clock is not enabled
+ *   turbo - True to allow turbo settings (voltage, sdram and gpu), false
+ *           otherwise
+ *
+ * Returned Value:
+ *   0 on success, negated error code on failure.
+ ****************************************************************************/
+
+int bcm2711_mbox_setclkrate(uint8_t id, uint32_t *rate, bool turbo);
 
 #undef EXTERN
 #if defined(__cplusplus)

@@ -41,7 +41,13 @@ CHIP_CSRCS += bcm2711_i2c.c
 endif
 
 # SPI interfaces
-#
+
 ifeq ($(CONFIG_BCM2711_SPI),y)
 CHIP_CSRCS += bcm2711_spi.c
+endif
+
+# EMMC interfaces
+
+ifeq ($(CONFIG_BCM2711_EMMC),y)
+CHIP_CSRCS += bcm2711_sdio.c
 endif

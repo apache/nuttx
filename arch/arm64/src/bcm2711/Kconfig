@@ -281,6 +281,54 @@ config BCM2711_SPI6
 
 endif # BCM2711_SPI
 
+#####################################################################
+# SDMMC Configuration
+#####################################################################
+
+config BCM2711_EMMC
+	bool "EMMC support"
+	select MMCSD
+	select MMCSD_SDIO
+	select SDIO_BLOCKSETUP
+	depends on EXPERIMENTAL
+	default n
+	---help---
+		Enables support for EMMC interfaces.
+
+if BCM2711_EMMC
+
+config BCM2711_EMMC1
+	bool "EMMC1 interface support"
+	depends on BCM2711_EMMC
+	default n
+	---help---
+		Enables support for the EMMC1 interface.
+
+config BCM2711_EMMC1_XFERSPEED
+	int "EMMC1 transfer speed (Hz)"
+	depends on BCM2711_EMMC1
+	range 25000000 208000000
+	default 25000000
+	---help---
+		The transfer speed in Hz to use for EMMC1 transfers.
+
+config BCM2711_EMMC2
+	bool "EMMC2 interface support"
+	depends on BCM2711_EMMC
+	default n
+	---help---
+		Enables support for the EMMC2 interface.
+
+config BCM2711_EMMC2_XFERSPEED
+	int "EMMC2 transfer speed (Hz)"
+	depends on BCM2711_EMMC2
+	range 25000000 208000000
+	default 25000000
+	---help---
+		The transfer speed in Hz to use for EMMC2 transfers.
+
+endif # BCM2711_EMMC
+
 endmenu # Broadcom BCM2711 Peripheral Selection
 
 endif # ARCH_CHIP_BCM2711

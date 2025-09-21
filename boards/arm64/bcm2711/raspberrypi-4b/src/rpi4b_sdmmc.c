@@ -1,7 +1,5 @@
 /****************************************************************************
- * boards/arm64/bcm2711/raspberrypi-4b/include/board.h
- *
- * Author: Matteo Golin <matteo.golin@gmail.com>
+ * boards/arm64/bcm2711/raspberrypi-4b/src/rpi4b_sdmmc.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -20,43 +18,55 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM64_BCM2711_RPI4B_INCLUDE_BOARD_H
-#define __BOARDS_ARM64_BCM2711_RPI4B_INCLUDE_BOARD_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
+#include <debug.h>
+#include <nuttx/fs/fs.h>
+#include <nuttx/mmcsd.h>
+
+#include "bcm2711_sdio.h"
+
+#include "rpi4b.h"
+
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Functions
  ****************************************************************************/
 
-/* Onboard LEDs */
+/****************************************************************************
+ * Name: rpi4b_sdmmc_initialize
+ *
+ * Description:
+ *   Bring up EMMC2 interface and mount micro-SD card as a file system.
+ *
+ ****************************************************************************/
 
-#define STATUS_LED (42) /* Green LED */
-#define POWER_LED (130) /* Red LED */
+int rpi4b_sdmmc_initialize(void)
+{
+  int err;
+  struct sdio_dev_s *emmc2;
 
-/* Auto-LED definitions */
+  /* Initialize EMMC2 interface */
 
-#define LED_STARTED              0
-#define LED_HEAPALLOCATE         0
-#define LED_IRQSENABLED          0
-#define LED_STACKCREATED         1
-#define LED_INIRQ                2
-#define LED_SIGNAL               2
-#define LED_ASSERTION            3
-#define LED_PANIC                4
+  emmc2 = bcm2711_sdio_initialize(2);
+  if (emmc2 == NULL)
+    {
+      syslog(LOG_ERR, "Couldn't initialize EMMC2");
+      return -EIO;
+    }
 
-/* TODO: define all the GPIO pins properly */
+  /* Set up MMCSD device (uSD) on EMMC2 */
 
-#define BOARD_NGPIOOUT 1
-#define BOARD_NGPIOIN 1
-#define BOARD_NGPIOINT 0
+  err = mmcsd_slotinitialize(0, emmc2);
+  if (err < 0)
+    {
+      syslog(LOG_ERR, "Couldn't bind EMMC2 interface to MMC/SD driver: %d",
+             err);
+      return err;
+    }
 
-/* Micro SD card slot number to use */
-
-#define MICROSD_SLOTNO 0
-
-#endif /* __BOARDS_ARM64_BCM2711_RPI4B_INCLUDE_BOARD_H */
+  return err;
+}
