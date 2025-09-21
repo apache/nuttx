@@ -3651,6 +3651,7 @@ config ARCH_BOARD
 	default "nucleo-g071rb"             if ARCH_BOARD_NUCLEO_G071RB
 	default "nucleo-g0b1re"             if ARCH_BOARD_NUCLEO_G0B1RE
 	default "weact-stm32h743"           if ARCH_BOARD_WEACT_STM32H743
+	default "weact-stm32h750"           if ARCH_BOARD_WEACT_STM32H750
 	default "nucleo-h743zi"             if ARCH_BOARD_NUCLEO_H743ZI
 	default "nucleo-h743zi2"            if ARCH_BOARD_NUCLEO_H743ZI2
 	default "nucleo-h745zi"             if ARCH_BOARD_NUCLEO_H745ZI
@@ -4376,6 +4377,9 @@ source "boards/arm/stm32h7/stm32h747i-disco/Kconfig"
 endif
 if ARCH_BOARD_WEACT_STM32H743
 source "boards/arm/stm32h7/weact-stm32h743/Kconfig"
+endif
+if ARCH_BOARD_WEACT_STM32H750
+source "boards/arm/stm32h7/weact-stm32h750/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_H743ZI
 source "boards/arm/stm32h7/nucleo-h743zi/Kconfig"
