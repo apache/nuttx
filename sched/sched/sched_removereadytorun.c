@@ -151,7 +151,7 @@ static void nxsched_remove_running(FAR struct tcb_s *tcb)
 
   /* Next task will be the idle task */
 
-  nxttcb = &g_idletcb[cpu];
+  nxttcb = &per_cpu_var_smp(g_idletcb, cpu);
 
   /* Since the TCB is no longer in any list, it is now invalid */
 

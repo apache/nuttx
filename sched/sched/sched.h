@@ -197,11 +197,11 @@ extern FAR struct tcb_s *g_assignedtasks[CONFIG_SMP_NCPUS];
  * another cpu to be processed.
  */
 
-extern enum task_deliver_e g_delivertasks[CONFIG_SMP_NCPUS];
+DECLARE_PER_CPU_SMP(enum task_deliver_e, g_delivertasks);
 
 /* This is the list of idle tasks */
 
-extern struct tcb_s g_idletcb[CONFIG_SMP_NCPUS];
+DECLARE_PER_CPU(FAR struct tcb_s, g_idletcb);
 
 #endif
 
@@ -609,7 +609,7 @@ nxsched_deliver_task(int cpu, int target_cpu,
    * no need to do anything now.
    */
 
-  if (g_delivertasks[target_cpu] != priority)
+  if (per_cpu_var_smp(g_delivertasks, target_cpu) != priority)
     {
       if (cpu == target_cpu)
         {
@@ -617,7 +617,7 @@ nxsched_deliver_task(int cpu, int target_cpu,
         }
       else
         {
-          g_delivertasks[target_cpu] = priority;
+          per_cpu_var_smp(g_delivertasks, target_cpu) = priority;
           up_send_smp_sched(target_cpu);
         }
     }

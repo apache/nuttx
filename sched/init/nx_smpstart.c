@@ -84,7 +84,7 @@ void nx_idle_trampoline(void)
    * would block every later delivery here; sched_unlock() runs the task.
    */
 
-  g_delivertasks[this_cpu()] = SWITCH_NONE;
+  this_cpu_var_smp(g_delivertasks) = SWITCH_NONE;
 
   sched_unlock();
 

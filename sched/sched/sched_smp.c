@@ -50,7 +50,7 @@ struct smp_call_cookie_s
  * Private Data
  ****************************************************************************/
 
-static sq_queue_t g_smp_call_queue[CONFIG_SMP_NCPUS];
+static DEFINE_PER_CPU_BSS_SMP(sq_queue_t, g_smp_call_queue);
 static spinlock_t g_smp_call_lock;
 
 /****************************************************************************
@@ -75,12 +75,13 @@ static spinlock_t g_smp_call_lock;
 static void nxsched_smp_call_add(int cpu,
                                  FAR struct smp_call_data_s *data)
 {
+  FAR sq_queue_t *call_queue = &per_cpu_var_smp(g_smp_call_queue, cpu);
   irqstate_t flags;
 
   flags = spin_lock_irqsave(&g_smp_call_lock);
-  if (!sq_inqueue(&data->node[cpu], &g_smp_call_queue[cpu]))
+  if (!sq_inqueue(&data->node[cpu], call_queue))
     {
-      sq_addlast(&data->node[cpu], &g_smp_call_queue[cpu]);
+      sq_addlast(&data->node[cpu], call_queue);
     }
 
   spin_unlock_irqrestore(&g_smp_call_lock, flags);
@@ -116,7 +117,7 @@ int nxsched_smp_call_handler(int irq, FAR void *context,
 
   irqstate_t flags = spin_lock_irqsave(&g_smp_call_lock);
 
-  call_queue = &g_smp_call_queue[cpu];
+  call_queue = &per_cpu_var_smp(g_smp_call_queue, cpu);
 
   sq_for_every_safe(call_queue, curr, next)
     {

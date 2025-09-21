@@ -114,15 +114,15 @@ dq_queue_t g_readytorun;
  */
 
 #ifdef CONFIG_SMP
-FAR struct tcb_s *g_assignedtasks[CONFIG_SMP_NCPUS];
-enum task_deliver_e g_delivertasks[CONFIG_SMP_NCPUS];
+DEFINE_PER_CPU_BSS_SMP(FAR struct tcb_s *, g_assignedtasks);
+DEFINE_PER_CPU_BSS_SMP(enum task_deliver_e, g_delivertasks);
 #endif
 
 /* g_running_tasks[] holds a references to the running task for each CPU.
  * It is valid only when up_interrupt_context() returns true.
  */
 
-DEFINE_PER_CPU(FAR struct tcb_s *, g_running_tasks);
+DEFINE_PER_CPU_BSS(FAR struct tcb_s *, g_running_tasks);
 
 /* This is the list of all tasks that are ready-to-run, but cannot be placed
  * in the g_readytorun list because:  (1) They are higher priority than the
@@ -274,7 +274,7 @@ volatile enum nx_initstate_e g_nx_initstate;  /* See enum nx_initstate_e */
  * bringing up the rest of the system.
  */
 
-struct tcb_s g_idletcb[CONFIG_SMP_NCPUS];
+DEFINE_PER_CPU_BSS(struct tcb_s, g_idletcb);
 
 /****************************************************************************
  * Private Data
@@ -302,7 +302,7 @@ static void idle_task_initialize(void)
   memset(g_idletcb, 0, sizeof(g_idletcb));
   for (i = 0; i < CONFIG_SMP_NCPUS; i++)
     {
-      tcb = &g_idletcb[i];
+      tcb = &per_cpu_var_smp(g_idletcb, i);
 
       /* Initialize a TCB for this thread of execution.  NOTE:  The default
        * value for most components of the g_idletcb are zero.  The entire
@@ -373,18 +373,20 @@ static void idle_task_initialize(void)
        */
 
 #ifdef CONFIG_SMP
-      g_assignedtasks[i] = tcb;
+      per_cpu_var_smp(g_assignedtasks, i) = tcb;
 #else
       dq_addfirst((FAR dq_entry_t *)tcb, TLIST_HEAD(tcb));
 #endif
 
       /* Mark the idle task as the running task */
 
-      g_running_tasks[i] = tcb;
+      per_cpu_var_smp(g_running_tasks, i) = tcb;
 
       if (i == 0)
         {
-          up_update_task(&g_idletcb[0]); /* Init idle task to percpu reg */
+          /* Init idle task to percpu reg */
+
+          up_update_task(&per_cpu_var_smp(g_idletcb, 0));
         }
     }
 }
@@ -407,7 +409,7 @@ static void idle_group_initialize(void)
 
   for (i = 0; i < CONFIG_SMP_NCPUS; i++)
     {
-      tcb = &g_idletcb[i];
+      tcb = &per_cpu_var_smp(g_idletcb, i);
 
       hashndx = PIDHASH(i);
       g_pidhash[hashndx] = tcb;
@@ -674,7 +676,7 @@ void nx_start(void)
 
   /* Announce that the CPU0 IDLE task has started */
 
-  sched_note_start(&g_idletcb[0]);
+  sched_note_start(&per_cpu_var_smp(g_idletcb, 0));
 
   /* Initialize stdio for the IDLE task of each CPU */
 
@@ -684,7 +686,8 @@ void nx_start(void)
         {
           /* Clone stdout, stderr, stdin from the CPU0 IDLE task. */
 
-          DEBUGVERIFY(group_setuptaskfiles(&g_idletcb[i], NULL, true));
+          DEBUGVERIFY(group_setuptaskfiles(&per_cpu_var_smp(g_idletcb, i),
+                                           NULL, true));
         }
       else
         {
