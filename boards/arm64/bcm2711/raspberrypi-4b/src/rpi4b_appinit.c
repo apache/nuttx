@@ -24,14 +24,16 @@
  * Included Files
  ****************************************************************************/
 
-#include "rpi4b.h"
-#include <debug.h>
-#include <nuttx/board.h>
 #include <nuttx/config.h>
-#include <nuttx/fs/fs.h>
+
+#include <debug.h>
 #include <sys/types.h>
 
-#ifdef CONFIG_BOARDCTL
+#include <nuttx/board.h>
+#include <nuttx/fs/fs.h>
+
+#include "rpi4b.h"
+#include <arch/board/board.h>
 
 /****************************************************************************
  * Public Functions
@@ -73,7 +75,7 @@ int board_app_initialize(uintptr_t arg)
   ret = nx_mount(NULL, "/proc", "procfs", 0, NULL);
   if (ret < 0)
     {
-      _err("ERROR: Failed to mount procfs at /proc: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n", ret);
     }
 #endif
 
@@ -83,7 +85,17 @@ int board_app_initialize(uintptr_t arg)
   ret = rpi4b_bringup();
 #endif
 
+#ifdef CONFIG_RPI4B_MOUNT_BOOT
+  /* Mount SD card file system (currently just the boot (first) partition).
+   * Assumes /dev/mmcsd0 exists, but if it doesn't it will fail gracefully.
+   */
+
+  ret = nx_mount("/dev/mmcsd0", "/sd", "vfat", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Could not mount SD card FAT partition: %d\n", ret);
+    }
+#endif
+
   return ret;
 }
-
-#endif /* CONFIG_BOARDCTL */

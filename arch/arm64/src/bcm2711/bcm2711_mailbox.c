@@ -107,7 +107,7 @@ struct bcm2711_mbox_tag_s
 
 struct bcm2711_mbox_s
 {
-  mutex_t lock;  /* Lock for atomic request/response interactions */
+  mutex_t lock; /* Lock for atomic request/response interactions */
 };
 
 /****************************************************************************
@@ -305,7 +305,7 @@ static int bcm2711_mbox_sendreq(FAR uint32_t *buf, uint8_t n)
   /* Unknown response code, typically due to unknown tag */
 
   ipcerr("Unknown response code: %08x", buf[1]);
-  return -EINVAL;
+  return -EAGAIN;
 }
 
 /****************************************************************************
@@ -328,7 +328,7 @@ static int bcm2711_mbox_sendreq(FAR uint32_t *buf, uint8_t n)
  ****************************************************************************/
 
 static void bcm2711_mbox_makereq(uint32_t tag, FAR void *buf, uint32_t nval,
-                                uint32_t nbuf)
+                                 uint32_t nbuf)
 {
   void *bufpos = buf;
   struct bcm2711_mbox_tag_s mtag = {
@@ -522,6 +522,47 @@ int bcm2711_mbox_getpwr(uint8_t id, bool *state)
 }
 
 /****************************************************************************
+ * Name: bcm2711_mbox_setpwr
+ *
+ * Description:
+ *   Sets the power state of `id`.
+ *
+ * Input parameters:
+ *   id - The device ID to know the power state of
+ *   on - True for power on, false for power off
+ *   wait - True to block until power stable, false otherwise
+ *
+ * Returned Value:
+ *   0 on success, negated error code on failure.
+ ****************************************************************************/
+
+int bcm2711_mbox_setpwr(uint8_t id, bool on, bool wait)
+{
+  int err;
+  uint32_t buf[BUF_FIELDS + TAG_FIELDS + 2] ALIGNED_MBOX;
+  buf[0] = id; /* First argument is the device ID */
+
+  /* Second argument is power state. Bit 0 indicates desired state, bit 1
+   * indicates desire to wait for stable power.
+   */
+
+  buf[1] = (on ? (1 << 0) : 0x0) | (wait ? (1 << 1) : 0x0);
+
+  bcm2711_mbox_makereq(MBOX_TAG_SETPWR, buf, 2 * sizeof(uint32_t),
+                       sizeof(buf));
+  err = bcm2711_mbox_sendreq(buf, sizeof(buf));
+
+  /* Check if mailbox recognized device ID */
+
+  if (buf[6] & MBOX_DEVICE_DNE)
+    {
+      return -EINVAL;
+    }
+
+  return err;
+}
+
+/****************************************************************************
  * Name: bcm2711_mbox_ledset
  *
  * Description:
@@ -546,5 +587,162 @@ int bcm2711_mbox_ledset(uint8_t pin, bool on)
   bcm2711_mbox_makereq(MBOX_TAG_SETLED, buf, 2 * sizeof(uint32_t),
                        sizeof(buf));
   err = bcm2711_mbox_sendreq(buf, sizeof(buf));
+  return err;
+}
+
+/****************************************************************************
+ * Name: bcm2711_mbox_getclken
+ *
+ * Description:
+ *   Get the state of the clock (enabled/disabled) corresponding to `id`
+ *
+ * Input parameters:
+ *   id - The ID of the clock to check
+ *   state - Where to store the state of the clock
+ *
+ * Returned Value:
+ *   0 on success, negated error code on failure.
+ ****************************************************************************/
+
+int bcm2711_mbox_getclken(uint8_t id, bool *state)
+{
+  int err;
+  uint32_t buf[BUF_FIELDS + TAG_FIELDS + 2] ALIGNED_MBOX;
+
+  DEBUGASSERT(state != NULL);
+
+  buf[0] = id; /* Argument is clock ID */
+  bcm2711_mbox_makereq(MBOX_TAG_GETCLKS, buf, 2 * sizeof(uint32_t),
+                       sizeof(buf));
+  err = bcm2711_mbox_sendreq(buf, sizeof(buf));
+
+  /* Check if clock ID was recognized */
+
+  if (buf[6] & MBOX_DEVICE_DNE)
+    {
+      return -EINVAL;
+    }
+
+  *state = buf[6] & 0x1;
+  return err;
+}
+
+/****************************************************************************
+ * Name: bcm2711_mbox_setclken
+ *
+ * Description:
+ *   Set the state of the clock (enabled/disabled) corresponding to `id`
+ *
+ * Input parameters:
+ *   id - The ID of the clock
+ *   en - True to enable the clock, false otherwise
+ *
+ * Returned Value:
+ *   0 on success, negated error code on failure.
+ ****************************************************************************/
+
+int bcm2711_mbox_setclken(uint8_t id, bool en)
+{
+  int err;
+  uint32_t buf[BUF_FIELDS + TAG_FIELDS + 2] ALIGNED_MBOX;
+  buf[0] = id;         /* First argument is clock ID */
+  buf[1] = en ? 1 : 0; /* Second arg is clock state */
+
+  bcm2711_mbox_makereq(MBOX_TAG_SETCLKS, buf, 2 * sizeof(uint32_t),
+                       sizeof(buf));
+  err = bcm2711_mbox_sendreq(buf, sizeof(buf));
+
+  /* Check if clock ID was recognized */
+
+  if (buf[6] & MBOX_DEVICE_DNE)
+    {
+      return -EINVAL;
+    }
+
+  return err;
+}
+
+/****************************************************************************
+ * Name: bcm2711_mbox_getclkrate
+ *
+ * Description:
+ *   Get the rate of the clock corresponding to `id` in Hz.
+ *
+ * Input parameters:
+ *   id - The ID of the clock
+ *   rate - Where to store the rate of the clock
+ *   measured - True to return clock rate as a measured value (true rate),
+ *              false for configured rate.
+ *
+ * Returned Value:
+ *   0 on success, negated error code on failure.
+ ****************************************************************************/
+
+int bcm2711_mbox_getclkrate(uint8_t id, uint32_t *rate, bool measured)
+{
+  int err;
+  uint32_t buf[BUF_FIELDS + TAG_FIELDS + 2] ALIGNED_MBOX;
+  buf[0] = id; /* Argument is clock ID */
+
+  DEBUGASSERT(rate != NULL);
+
+  bcm2711_mbox_makereq(measured ? MBOX_TAG_GETCLKRM : MBOX_TAG_GETCLKR, buf,
+                       2 * sizeof(uint32_t), sizeof(buf));
+  err = bcm2711_mbox_sendreq(buf, sizeof(buf));
+
+  /* Returned clock rate is 0 when the clock does not exist (unless
+   * measured). If the clock is not enabled, the return value for
+   * unmeasured clock rate is the rate the clock will have when enabled.
+   */
+
+  if (buf[6] == 0 && !measured)
+    {
+      return -EINVAL;
+    }
+
+  *rate = buf[6];
+  return err;
+}
+
+/****************************************************************************
+ * Name: bcm2711_mbox_setclkrate
+ *
+ * Description:
+ *   Set the rate of the clock corresponding to `id` in Hz.
+ *
+ * Input parameters:
+ *   id - The ID of the clock
+ *   rate - The desired clock rate in Hz. The set rate will be returned in
+ *          this variable, even if the clock is not enabled
+ *   turbo - True to allow turbo settings (voltage, sdram and gpu), false
+ *           otherwise
+ *
+ * Returned Value:
+ *   0 on success, negated error code on failure.
+ ****************************************************************************/
+
+int bcm2711_mbox_setclkrate(uint8_t id, uint32_t *rate, bool turbo)
+{
+  int err;
+  uint32_t buf[BUF_FIELDS + TAG_FIELDS + 3] ALIGNED_MBOX;
+
+  DEBUGASSERT(rate != NULL);
+
+  buf[0] = id;            /* First arg is clock ID */
+  buf[1] = *rate;         /* Second arg is clock rate */
+  buf[2] = turbo ? 0 : 1; /* Third arg is 1 to skip turbo */
+
+  bcm2711_mbox_makereq(MBOX_TAG_SETCLKR, buf, 3 * sizeof(uint32_t),
+                       sizeof(buf));
+  err = bcm2711_mbox_sendreq(buf, sizeof(buf));
+
+  /* Returned clock rate is 0 when the clock does not exist. */
+
+  if (buf[6] == 0)
+    {
+      return -EINVAL;
+    }
+
+  *rate = buf[6];
   return err;
 }

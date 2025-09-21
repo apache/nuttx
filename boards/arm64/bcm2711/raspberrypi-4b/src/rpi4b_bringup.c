@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 #include <syslog.h>
+#include <debug.h>
 
 #include <arch/board/board.h>
 
@@ -36,7 +37,9 @@
 #include "bcm2711_i2c.h"
 #endif
 
-#include "bcm2711_mailbox.h"
+#ifdef CONFIG_RPI4B_MOUNT_BOOT
+#include <nuttx/fs/fs.h>
+#endif
 
 #include "rpi4b.h"
 
@@ -127,6 +130,16 @@ int rpi4b_bringup(void)
 #endif /* defined(CONFIG_BCM2711_I2C6) */
 
 #endif /* defined(CONFIG_BCM2711_I2C) */
+
+#ifdef CONFIG_RPI4B_SDMMC
+  /* Mount SD card file system */
+
+  ret = rpi4b_sdmmc_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Couldn't initialize SDMMC: %d\n", ret);
+    }
+#endif
 
   return ret;
 }

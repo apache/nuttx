@@ -34,6 +34,10 @@ ifeq ($(CONFIG_DEV_GPIO),y)
 CSRCS += rpi4b_gpio.c
 endif
 
+ifeq ($(CONFIG_RPI4B_SDMMC),y)
+CSRCS += rpi4b_sdmmc.c
+endif
+
 ifeq ($(CONFIG_BCM2711_I2C_DRIVER),y)
 CSRCS += bcm2711_i2cdev.c
 endif
