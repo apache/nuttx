@@ -139,15 +139,19 @@ errout:
 
 static int pkt_in(FAR struct net_driver_s *dev)
 {
-  FAR struct pkt_conn_s *conn;
+  FAR struct pkt_conn_s *conn = NULL;
+  uint16_t flags;
   int ret = OK;
 
-  pkt_conn_list_lock();
-  conn = pkt_active(dev);
-  if (conn)
-    {
-      uint32_t flags;
+  /* Setup for the application callback */
 
+  dev->d_appdata = dev->d_buf;
+  dev->d_sndlen  = 0;
+
+  pkt_conn_list_lock();
+
+  while ((conn = pkt_active(dev, conn)) != NULL)
+    {
       if (conn->pendiob == dev->d_iob)
         {
           /* Do not read back the packet sent by oneself.  pendiob is
@@ -155,8 +159,7 @@ static int pkt_in(FAR struct net_driver_s *dev)
            * completes, so it is always a live reference here.
            */
 
-          pkt_conn_list_unlock();
-          return OK;
+          continue;
         }
 
 #ifdef CONFIG_NET_TIMESTAMP
@@ -198,11 +201,6 @@ static int pkt_in(FAR struct net_driver_s *dev)
         }
 #endif /* CONFIG_NET_TIMESTAMP */
 
-      /* Setup for the application callback */
-
-      dev->d_appdata = dev->d_buf;
-      dev->d_sndlen  = 0;
-
       /* Perform the application callback */
 
       flags = pkt_callback(dev, conn, PKT_NEWDATA);
@@ -232,15 +230,13 @@ static int pkt_in(FAR struct net_driver_s *dev)
 
               nwarn("WARNING: Packet not processed\n");
               ret = -EAGAIN;
+              break;
             }
         }
     }
-  else
-    {
-      ninfo("No PKT listener\n");
-    }
 
   pkt_conn_list_unlock();
+
   return ret;
 }
 
@@ -259,9 +255,9 @@ static int pkt_in(FAR struct net_driver_s *dev)
  *
  * Returned Value:
  *   OK     The packet has been processed  and can be deleted
- *  -EAGAIN There is a matching connection, but could not dispatch the packet
- *          yet.  Useful when a packet arrives before a recv call is in
- *          place.
+ *  -EAGAIN There is a matching connection, but could not dispatch the
+ *          packet yet.  Useful when a packet arrives before a recv call
+ *          is in place.
  *
  * Assumptions:
  *   The network is locked.

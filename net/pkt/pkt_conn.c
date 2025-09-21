@@ -143,49 +143,6 @@ void pkt_free(FAR struct pkt_conn_s *conn)
 }
 
 /****************************************************************************
- * Name: pkt_active()
- *
- * Description:
- *   Find a connection structure that is the appropriate connection to be
- *   used with the provided network device
- *
- * Assumptions:
- *   This function is called from network logic at with the network locked.
- *
- ****************************************************************************/
-
-FAR struct pkt_conn_s *pkt_active(FAR struct net_driver_s *dev)
-{
-  FAR struct pkt_conn_s *conn =
-    (FAR struct pkt_conn_s *)g_active_pkt_connections.head;
-  uint16_t ethertype = 0;
-
-  if (dev->d_lltype == NET_LL_ETHERNET || dev->d_lltype == NET_LL_IEEE80211)
-    {
-      FAR struct eth_hdr_s *ethhdr = NETLLBUF;
-
-      ethertype = ethhdr->type;
-    }
-
-  while (conn)
-    {
-      if (dev->d_ifindex == conn->ifindex &&
-          (conn->type == HTONS(ETH_P_ALL) || conn->type == ethertype))
-        {
-          /* Matching connection found.. return a reference to it */
-
-          break;
-        }
-
-      /* Look at the next active connection */
-
-      conn = (FAR struct pkt_conn_s *)conn->sconn.s_node.flink;
-    }
-
-  return conn;
-}
-
-/****************************************************************************
  * Name: pkt_nextconn()
  *
  * Description:
@@ -206,6 +163,43 @@ FAR struct pkt_conn_s *pkt_nextconn(FAR struct pkt_conn_s *conn)
     {
       return (FAR struct pkt_conn_s *)conn->sconn.s_node.flink;
     }
+}
+
+/****************************************************************************
+ * Name: pkt_active()
+ *
+ * Description:
+ *   Find a connection structure that is the appropriate connection to be
+ *   used with the provided network device
+ *
+ * Assumptions:
+ *   This function is called from network logic at with the network locked.
+ *
+ ****************************************************************************/
+
+FAR struct pkt_conn_s *pkt_active(FAR struct net_driver_s *dev,
+                                  FAR struct pkt_conn_s *conn)
+{
+  uint16_t ethertype = 0;
+
+  if (dev->d_lltype == NET_LL_ETHERNET || dev->d_lltype == NET_LL_IEEE80211)
+    {
+      FAR struct eth_hdr_s *ethhdr = NETLLBUF;
+      ethertype = ethhdr->type;
+    }
+
+  while ((conn = pkt_nextconn(conn)) != NULL)
+    {
+      if (dev->d_ifindex == conn->ifindex &&
+          (conn->type == HTONS(ETH_P_ALL) || conn->type == ethertype))
+        {
+          /* Matching connection found.. return a reference to it */
+
+          break;
+        }
+    }
+
+  return conn;
 }
 
 /****************************************************************************
