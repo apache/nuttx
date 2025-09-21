@@ -44,10 +44,11 @@
  * families
  */
 
-#if defined(CONFIG_STM32H7_STM32H7X3XX) || \
-    defined(CONFIG_STM32H7_STM32H7B3XX) || \
-    defined(CONFIG_STM32H7_STM32H7X5XX) || \
-    defined(CONFIG_STM32H7_STM32H7X7XX)
+#if  defined(CONFIG_STM32H7_STM32H7X0XX) || \
+     defined(CONFIG_STM32H7_STM32H7X3XX) || \
+     defined(CONFIG_STM32H7_STM32H7B3XX) || \
+     defined(CONFIG_STM32H7_STM32H7X5XX) || \
+     defined(CONFIG_STM32H7_STM32H7X7XX)
 
 #if defined(CONFIG_STM32H7_USE_LEGACY_PINMAP)
 #  pragma message "CONFIG_STM32H7_USE_LEGACY_PINMAP will be deprecated migrate board.h see tools/stm32_pinmap_tool.py"
