@@ -174,7 +174,8 @@ void pkt_free(FAR struct pkt_conn_s *conn);
  *
  ****************************************************************************/
 
-FAR struct pkt_conn_s *pkt_active(FAR struct net_driver_s *dev);
+FAR struct pkt_conn_s *pkt_active(FAR struct net_driver_s *dev,
+                                  FAR struct pkt_conn_s *conn);
 
 /****************************************************************************
  * Name: pkt_nextconn()
