@@ -95,6 +95,10 @@ FAR chipreg_t *z80_doirq(uint8_t irq, FAR chipreg_t *regs)
           addrenv_switch(tcb);
 #endif
 
+          /* Update scheduler parameters */
+
+          nxsched_switch_context(*running_task, tcb);
+
           /* Record the new "running" task when context switch occurred.
            * g_running_tasks[] is only used by assertion logic for reporting
            * crashes.

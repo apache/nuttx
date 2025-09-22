@@ -73,10 +73,8 @@ void *riscv_perform_syscall(uintreg_t *regs)
 
       if (!restore_context)
         {
-          nxsched_suspend_scheduler(*running_task);
+          nxsched_switch_context(*running_task, tcb);
         }
-
-      nxsched_resume_scheduler(tcb);
 
       /* Record the new "running" task.  g_running_tasks[] is only used by
        * assertion logic for reporting crashes.

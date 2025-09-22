@@ -58,10 +58,6 @@
 
 void up_switch_context(FAR struct tcb_s *tcb, FAR struct tcb_s *rtcb)
 {
-  /* Update scheduler parameters */
-
-  nxsched_suspend_scheduler(rtcb);
-
   /* Are we in an interrupt handler? */
 
   if (IN_INTERRUPT)
@@ -71,10 +67,6 @@ void up_switch_context(FAR struct tcb_s *tcb, FAR struct tcb_s *rtcb)
        */
 
       SAVE_IRQCONTEXT(rtcb);
-
-      /* Update scheduler parameters */
-
-      nxsched_resume_scheduler(tcb);
 
       /* Then setup so that the context will be performed on exit
        * from the interrupt.
@@ -93,7 +85,7 @@ void up_switch_context(FAR struct tcb_s *tcb, FAR struct tcb_s *rtcb)
     {
       /* Update scheduler parameters */
 
-      nxsched_resume_scheduler(tcb);
+      nxsched_switch_context(rtcb, tcb);
 
       /* Record the new "running" task */
 
