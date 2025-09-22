@@ -1054,8 +1054,10 @@ static ssize_t proc_stack(FAR struct proc_file_s *procfile,
 
   /* Show the stack size */
 
-  linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN, "%-12s%ld\n",
-                               "StackUsed:", (long)up_check_tcbstack(tcb));
+  linesize = procfs_snprintf(
+      procfile->line, STATUS_LINELEN, "%-12s%zu\n",
+      "StackUsed:", up_check_tcbstack(tcb, tcb->adj_stack_size));
+
   copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining,
                              &offset);
 
