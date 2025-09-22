@@ -185,11 +185,11 @@
 
 /* ?SEC2TIC rounds up */
 
-#define NSEC2TICK(nsec)       div_const_roundup(nsec, NSEC_PER_TICK)
-#define USEC2TICK(usec)       div_const_roundup(usec, USEC_PER_TICK)
+#define NSEC2TICK(nsec)       div_const_roundup(nsec, (uint32_t)NSEC_PER_TICK)
+#define USEC2TICK(usec)       div_const_roundup(usec, (uint32_t)USEC_PER_TICK)
 
 #if (MSEC_PER_TICK * USEC_PER_MSEC) == USEC_PER_TICK
-#  define MSEC2TICK(msec)     div_const_roundup(msec, MSEC_PER_TICK)
+#  define MSEC2TICK(msec)     div_const_roundup(msec, (uint32_t)MSEC_PER_TICK)
 #else
 #  define MSEC2TICK(msec)     USEC2TICK((msec) * USEC_PER_MSEC)
 #endif
@@ -204,34 +204,34 @@
 #if (MSEC_PER_TICK * USEC_PER_MSEC) == USEC_PER_TICK
 #  define TICK2MSEC(tick)     ((tick) * MSEC_PER_TICK)
 #else
-#  define TICK2MSEC(tick)     div_const(((tick) * USEC_PER_TICK), USEC_PER_MSEC)
+#  define TICK2MSEC(tick)     div_const(((tick) * USEC_PER_TICK), (uint32_t)USEC_PER_MSEC)
 #endif
 
 /* TIC2?SEC rounds to nearest */
 
-#define TICK2DSEC(tick)       div_const_roundnearest(tick, TICK_PER_DSEC)
-#define TICK2HSEC(tick)       div_const_roundnearest(tick, TICK_PER_HSEC)
-#define TICK2SEC(tick)        div_const_roundnearest(tick, TICK_PER_SEC)
+#define TICK2DSEC(tick)       div_const_roundnearest(tick, (uint32_t)TICK_PER_DSEC)
+#define TICK2HSEC(tick)       div_const_roundnearest(tick, (uint32_t)TICK_PER_HSEC)
+#define TICK2SEC(tick)        div_const_roundnearest(tick, (uint32_t)TICK_PER_SEC)
 
 /* MSEC2SEC */
 
-#define MSEC2SEC(usec)        div_const(msec, MSEC_PER_SEC)
+#define MSEC2SEC(usec)        div_const(msec, (uint32_t)MSEC_PER_SEC)
 
 /* USEC2MSEC */
 
-#define USEC2MSEC(usec)       div_const(usec, USEC_PER_MSEC)
+#define USEC2MSEC(usec)       div_const(usec, (uint32_t)USEC_PER_MSEC)
 
 /* USEC2SEC */
 
-#define USEC2SEC(usec)        div_const(usec, USEC_PER_SEC)
+#define USEC2SEC(usec)        div_const(usec, (uint32_t)USEC_PER_SEC)
 
 /* NSEC2USEC */
 
-#define NSEC2USEC(nsec)       div_const(nsec, NSEC_PER_USEC)
+#define NSEC2USEC(nsec)       div_const(nsec, (uint32_t)NSEC_PER_USEC)
 
 /* NSEC2MSEC */
 
-#define NSEC2MSEC(nsec)       div_const(nsec, NSEC_PER_MSEC)
+#define NSEC2MSEC(nsec)       div_const(nsec, (uint32_t)NSEC_PER_MSEC)
 
 #if defined(CONFIG_DEBUG_SCHED) && defined(CONFIG_SYSTEM_TIME64) && \
     !defined(CONFIG_SCHED_TICKLESS)
@@ -353,13 +353,13 @@ extern "C"
 
 #define clock_time2ticks_floor(ts) \
   ((clock_t)(ts)->tv_sec * TICK_PER_SEC + \
-   div_const((uint32_t)(ts)->tv_nsec, NSEC_PER_TICK))
+   div_const((uint32_t)(ts)->tv_nsec, (uint32_t)NSEC_PER_TICK))
 
 #define clock_usec2time(ts, usec) \
   do \
     { \
       uint64_t _usec = (usec); \
-      (ts)->tv_sec = (time_t)div_const(_usec, USEC_PER_SEC); \
+      (ts)->tv_sec = (time_t)div_const(_usec, (uint32_t)USEC_PER_SEC); \
       _usec -= (uint64_t)(ts)->tv_sec * USEC_PER_SEC; \
       (ts)->tv_nsec = (long)_usec * NSEC_PER_USEC; \
     } \
@@ -367,13 +367,13 @@ extern "C"
 
 #define clock_time2usec(ts) \
   ((uint64_t)(ts)->tv_sec * USEC_PER_SEC + \
-   div_const((uint32_t)(ts)->tv_nsec, NSEC_PER_USEC))
+   div_const((uint32_t)(ts)->tv_nsec, (uint32_t)NSEC_PER_USEC))
 
 #define clock_nsec2time(ts, nsec) \
   do \
     { \
       uint64_t _nsec = (nsec); \
-      (ts)->tv_sec = (time_t)div_const(_nsec, NSEC_PER_SEC); \
+      (ts)->tv_sec = (time_t)div_const(_nsec, (uint32_t)NSEC_PER_SEC); \
       _nsec -= (uint64_t)(ts)->tv_sec * NSEC_PER_SEC; \
       (ts)->tv_nsec = (long)_nsec; \
     } \
