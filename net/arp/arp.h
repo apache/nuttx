@@ -166,6 +166,10 @@ struct arp_entry_s
   clock_t                  at_time;     /* Time of last usage */
   uint8_t                  at_flags;    /* Flags, examples: ATF_PERM */
   FAR struct net_driver_s *at_dev;      /* The device driver structure */
+#ifdef CONFIG_NET_ARP_SEND_QUEUE
+  struct iob_queue_s       at_queue;    /* Queue iobs to wait arp complete */
+  struct work_s            at_work;     /* Arp response timeout handle */
+#endif
 };
 
 /****************************************************************************
@@ -608,6 +612,32 @@ void arp_acd_set_addr(FAR struct net_driver_s *dev);
 void arp_acd_setup(FAR struct net_driver_s *dev);
 
 #endif /* CONFIG_NET_ARP_ACD */
+
+/****************************************************************************
+ * Name: arp_queue_iob
+ *
+ * Description:
+ *   Queue an IOB which L2 layer is unfinished to the target arp entry's
+ *   deley queue which in progress waiting for an ARP response
+ *
+ * Input Parameters:
+ *   dev     - The device driver structure
+ *   ipaddr  - The IP address as an inaddr_t
+ *   iob     - The IOB to be queued
+ *
+ * Returned Value:
+ *   Zero (OK) if the ARP table entry was successfully modified.  A negated
+ *   errno value is returned on any error.
+ *
+ * Assumptions
+ *   The network is locked to assure exclusive access to the ARP table
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_ARP_SEND_QUEUE
+int arp_queue_iob(FAR struct net_driver_s *dev, in_addr_t ipaddr,
+                  FAR struct iob_s *iob);
+#endif
 
 #else /* CONFIG_NET_ARP */
 

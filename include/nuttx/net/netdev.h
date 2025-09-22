@@ -432,6 +432,10 @@ struct net_driver_s
   struct iob_queue_s d_fragout;
 #endif
 
+#ifdef CONFIG_NET_ARP_SEND_QUEUE
+  struct iob_queue_s d_arpout;
+#endif
+
   /* The d_buf array is used to hold incoming and outgoing packets. The
    * device driver should place incoming data into this buffer.  When sending
    * data, the device driver should read the link level headers and the
