@@ -200,7 +200,7 @@ void arm_stack_color(void *stackbase, size_t nbytes)
  *
  ****************************************************************************/
 
-size_t up_check_tcbstack(struct tcb_s *tcb)
+size_t up_check_tcbstack(struct tcb_s *tcb, size_t check_size)
 {
   size_t size;
 
@@ -213,7 +213,7 @@ size_t up_check_tcbstack(struct tcb_s *tcb)
     }
 #endif
 
-  size = arm_stack_check(tcb->stack_base_ptr, tcb->adj_stack_size);
+  size = arm_stack_check(tcb->stack_base_ptr, check_size);
 
 #ifdef CONFIG_ARCH_ADDRENV
   if (tcb->addrenv_own != NULL)

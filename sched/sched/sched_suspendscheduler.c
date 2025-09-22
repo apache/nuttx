@@ -78,8 +78,7 @@ void nxsched_suspend_scheduler(FAR struct tcb_s *tcb)
     }
 
 #if CONFIG_STACKCHECK_MARGIN > 0
-    DEBUGASSERT(up_check_tcbstack(tcb) <=
-                tcb->adj_stack_size - CONFIG_STACKCHECK_MARGIN);
+    DEBUGASSERT(up_check_tcbstack(tcb, CONFIG_STACKCHECK_MARGIN) == 0);
 #endif
 
 #endif
