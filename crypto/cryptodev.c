@@ -872,29 +872,11 @@ static int cryptof_close(FAR struct file *filep)
 {
   FAR struct fcrypt *fcr = filep->f_priv;
   FAR struct csession *cse;
-  FAR struct cryptkop *krp;
-  int i;
 
   while ((cse = TAILQ_FIRST(&fcr->csessions)))
     {
       TAILQ_REMOVE(&fcr->csessions, cse, next);
       (void)csefree(cse);
-    }
-
-  while ((krp = TAILQ_FIRST(&fcr->crpk_ret)))
-    {
-      TAILQ_REMOVE(&fcr->crpk_ret, krp, krp_next);
-      for (i = 0; i < CRK_MAXPARAM; i++)
-        {
-          if (krp->krp_param[i].crp_p)
-            {
-              explicit_bzero(krp->krp_param[i].crp_p,
-                  (krp->krp_param[i].crp_nbits + 7) / 8);
-              kmm_free(krp->krp_param[i].crp_p);
-            }
-        }
-
-      kmm_free(krp);
     }
 
   kmm_free(fcr);
