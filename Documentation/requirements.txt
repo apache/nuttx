@@ -1,0 +1,8 @@
+sphinx==7.1.2
+myst-parser==3.0.1
+sphinx-tabs==3.4.7
+sphinx-copybutton==0.5.2
+sphinx-tags==0.4
+sphinx-rtd-theme==3.0.2
+sphinx_design==0.5.0
+sphinx_collapse==0.1.3
