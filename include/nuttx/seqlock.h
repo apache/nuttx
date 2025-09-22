@@ -34,7 +34,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define SEQLOCK_INITIALIZER {0}
+#define SEQLOCK_INITIALIZER { 1u, 1u }
 
 /****************************************************************************
  * Public Data Types
@@ -47,6 +47,7 @@
 typedef struct seqclock
 {
   atomic_t sequence;
+  uint32_t next_sequence;
 } seqcount_t;
 
 #undef EXTERN
@@ -78,7 +79,8 @@ extern "C"
 
 static inline_function void seqlock_init(FAR seqcount_t *s)
 {
-  atomic_init(&s->sequence, 0u);
+  atomic_init(&s->sequence, 1u);
+  s->next_sequence = 1u;
 }
 
 /****************************************************************************
@@ -107,7 +109,7 @@ uint32_t read_seqbegin(FAR const seqcount_t *s)
 
       seq = atomic_read_acquire(&s->sequence);
     }
-  while (seq & 1);
+  while (seq == 0u);
 
   return seq;
 }
@@ -163,11 +165,11 @@ irqstate_t write_seqlock_irqsave(FAR seqcount_t *s)
     {
       sequence = atomic_read(&s->sequence);
 
-      if (predict_true(!(sequence & 1)))
+      if (predict_true(sequence != 0u))
         {
           /* Try to acquire the lock ownership. */
 
-          if (atomic_cmpxchg_acquire(&s->sequence, &sequence, sequence + 1))
+          if (atomic_cmpxchg_acquire(&s->sequence, &sequence, 0u))
             {
               break;
             }
@@ -198,7 +200,9 @@ irqstate_t write_seqlock_irqsave(FAR seqcount_t *s)
 static inline_function
 void write_sequnlock_irqrestore(seqcount_t *s, irqstate_t flags)
 {
-  atomic_set_release(&s->sequence, s->sequence + 1);
+  uint32_t next = s->next_sequence + 2;
+  s->next_sequence = next;
+  atomic_set_release(&s->sequence, next);
   up_irq_restore(flags);
 }
 
