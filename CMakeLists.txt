@@ -53,6 +53,13 @@ if(POLICY CMP0169)
   cmake_policy(SET CMP0169 OLD)
 endif()
 
+# Find Python 3 interpreter
+
+find_package(Python3 REQUIRED COMPONENTS Interpreter)
+if(NOT Python3_Interpreter_FOUND)
+  message(FATAL_ERROR "Did NOT find Python interpreter.")
+endif()
+
 # Basic CMake configuration ##################################################
 
 set(CMAKE_CXX_EXTENSIONS OFF)
