@@ -51,8 +51,8 @@
 
 /* Expand the arguments */
 
-#define EXPAND_(x...) x
-#define EXPAND(x...) EXPAND_(x)
+#define EXPAND_(...) __VA_ARGS__
+#define EXPAND(...) EXPAND_(__VA_ARGS__)
 
 /* Reverse the arguments */
 
