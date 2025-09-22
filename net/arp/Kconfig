@@ -60,12 +60,20 @@ config NET_ARP_GRATUITOUS
 
 config NET_ARP_SEND
 	bool "ARP send"
-	default y
+	default !NET_ARP_SEND_QUEUE
 	---help---
 		Enable logic to send ARP requests if the target IP address mapping
 		does not appear in the ARP table.
 
-if NET_ARP_SEND
+config NET_ARP_SEND_QUEUE
+	bool "Iob queue in arp entry support"
+	default n
+	depends on IOB_NCHAINS > 0
+	---help---
+		Enable queue iob to arp entry when arp_out failed to wait for arp
+		finished, then resend queue iobs.
+
+if NET_ARP_SEND || NET_ARP_SEND_QUEUE
 
 config ARP_SEND_MAXTRIES
 	int "ARP send retries"

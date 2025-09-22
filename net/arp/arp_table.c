@@ -269,6 +269,14 @@ static void arp_get_arpreq(FAR struct arpreq *output,
 }
 #endif
 
+#ifdef CONFIG_NET_ARP_SEND_QUEUE
+static void arp_unreach_work(FAR void *param)
+{
+  FAR struct arp_entry_s *tabptr = (FAR struct arp_entry_s *)param;
+  iob_free_queue(&tabptr->at_queue);
+}
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -301,8 +309,10 @@ int arp_update(FAR struct net_driver_s *dev, in_addr_t ipaddr,
   FAR struct arp_entry_s *tabptr = &g_arptable[0];
 #ifdef CONFIG_NETLINK_ROUTE
   struct arpreq arp_notify;
-  bool found = false;
   bool new_entry;
+#endif
+#if defined(CONFIG_NETLINK_ROUTE) || defined(CONFIG_NET_ARP_SEND_QUEUE)
+  bool found = false;
 #endif
   int i;
 
@@ -324,7 +334,7 @@ int arp_update(FAR struct net_driver_s *dev, in_addr_t ipaddr,
           /* An old entry found, break. */
 
           tabptr = &g_arptable[i];
-#ifdef CONFIG_NETLINK_ROUTE
+#if defined(CONFIG_NETLINK_ROUTE) || defined(CONFIG_NET_ARP_SEND_QUEUE)
           found = true;
 #endif
           break;
@@ -336,6 +346,26 @@ int arp_update(FAR struct net_driver_s *dev, in_addr_t ipaddr,
           tabptr = arp_return_old_entry(tabptr, &g_arptable[i]);
         }
     }
+
+  if ((tabptr->at_flags & ATF_PERM) != 0 && (flags & ATF_PERM) == 0)
+    {
+      return -ENOSPC;
+    }
+
+#ifdef CONFIG_NET_ARP_SEND_QUEUE
+  if (!found && tabptr->at_ipaddr != 0)
+    {
+      /* arp entry will be replaced, clean delayed iobs if exist */
+
+      work_cancel_sync(LPWORK, &tabptr->at_work);
+      iob_free_queue(&tabptr->at_queue);
+    }
+  else if (found && ethaddr != NULL)
+    {
+      work_cancel_sync(LPWORK, &tabptr->at_work);
+      iob_concat_queue(&dev->d_arpout, &tabptr->at_queue);
+    }
+#endif
 
   if (ethaddr == NULL)
     {
@@ -361,14 +391,11 @@ int arp_update(FAR struct net_driver_s *dev, in_addr_t ipaddr,
    * information.
    */
 
-  if ((tabptr->at_flags & ATF_PERM) == 0 || (flags & ATF_PERM) != 0)
-    {
-      memcpy(tabptr->at_ethaddr.ether_addr_octet, ethaddr, ETHER_ADDR_LEN);
-      tabptr->at_ipaddr = ipaddr;
-      tabptr->at_time   = clock_systime_ticks();
-      tabptr->at_flags  = flags;
-      tabptr->at_dev    = dev;
-    }
+  memcpy(tabptr->at_ethaddr.ether_addr_octet, ethaddr, ETHER_ADDR_LEN);
+  tabptr->at_ipaddr = ipaddr;
+  tabptr->at_time   = clock_systime_ticks();
+  tabptr->at_flags  = flags;
+  tabptr->at_dev    = dev;
 
   /* Notify the new entry */
 
@@ -377,6 +404,28 @@ int arp_update(FAR struct net_driver_s *dev, in_addr_t ipaddr,
     {
       arp_get_arpreq(&arp_notify, tabptr);
       netlink_neigh_notify(&arp_notify, RTM_NEWNEIGH, AF_INET);
+    }
+#endif
+
+#ifdef CONFIG_NET_ARP_SEND_QUEUE
+  if (!IOB_QEMPTY(&dev->d_arpout))
+    {
+      /* in Rx context, we need to backup the dev iob and related members,
+       * as some dirvers netdev_txnotify_dev() execute transmit in sync mode
+       * which will modify iob and other members.
+       * we need to restore the dev iob and related members after
+       * netdev_txnotify_dev() return because iob will be used in left
+       * bottom Rx process.
+       */
+
+      uint16_t len = dev->d_len;
+      FAR struct iob_s *iob = dev->d_iob;
+
+      dev->d_iob = NULL;
+      dev->d_buf = NULL;
+      netdev_txnotify_dev(dev);
+      netdev_iob_replace(dev, iob);
+      dev->d_len = len;
     }
 #endif
 
@@ -567,6 +616,11 @@ void arp_cleanup(FAR struct net_driver_s *dev)
     {
       if (dev == g_arptable[i].at_dev)
         {
+#ifdef CONFIG_NET_ARP_SEND_QUEUE
+          work_cancel_sync(LPWORK, &g_arptable[i].at_work);
+          iob_free_queue(&g_arptable[i].at_queue);
+#endif
+
           memset(&g_arptable[i], 0, sizeof(g_arptable[i]));
         }
     }
@@ -622,5 +676,55 @@ unsigned int arp_snapshot(FAR struct arpreq *snapshot,
 }
 #endif
 
+/****************************************************************************
+ * Name: arp_queue_iob
+ *
+ * Description:
+ *   Queue an IOB which L2 layer is unfinished to the target arp entry's
+ *   delay queue while the entry is in progress waiting for an ARP response
+ *
+ * Input Parameters:
+ *   dev     - The device driver structure
+ *   ipaddr  - The IP address as an inaddr_t
+ *   iob     - The IOB to be queued
+ *
+ * Returned Value:
+ *   Zero (OK) if the ARP table entry was successfully modified.  A negated
+ *   errno value is returned on any error.
+ *
+ * Assumptions
+ *   The network is locked to assure exclusive access to the ARP table
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_ARP_SEND_QUEUE
+int arp_queue_iob(FAR struct net_driver_s *dev, in_addr_t ipaddr,
+                  FAR struct iob_s *iob)
+{
+  FAR struct arp_entry_s *tabptr;
+
+  /* the IPv4 address should in the ARP table and arp in progress. */
+
+  tabptr = arp_lookup(ipaddr, dev, false);
+  if (tabptr && memcmp(&tabptr->at_ethaddr, &g_zero_ethaddr,
+                       sizeof(tabptr->at_ethaddr)) == 0)
+    {
+      if (iob_tryadd_queue(iob, &tabptr->at_queue) == 0)
+        {
+          if (work_available(&tabptr->at_work))
+            {
+              work_queue(LPWORK, &tabptr->at_work, arp_unreach_work,
+                         tabptr, ARP_INPROGRESS_TICK);
+            }
+
+          return OK;
+        }
+
+      return -ENOMEM;
+    }
+
+  return -ENOENT;
+}
+#endif
 #endif /* CONFIG_NET_ARP */
 #endif /* CONFIG_NET */
