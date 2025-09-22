@@ -77,10 +77,6 @@ int arm_start_handler(int irq, void *context, void *arg)
   sched_note_cpu_started(tcb);
 #endif
 
-  /* Reset scheduler parameters */
-
-  nxsched_resume_scheduler(tcb);
-
   UNUSED(tcb);
 
   return OK;
