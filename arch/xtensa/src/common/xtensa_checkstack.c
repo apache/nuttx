@@ -158,10 +158,9 @@ size_t xtensa_stack_check(uintptr_t alloc, size_t size)
  *
  ****************************************************************************/
 
-size_t up_check_tcbstack(struct tcb_s *tcb)
+size_t up_check_tcbstack(struct tcb_s *tcb, size_t check_size)
 {
-  return xtensa_stack_check((uintptr_t)tcb->stack_base_ptr,
-                                       tcb->adj_stack_size);
+  return xtensa_stack_check((uintptr_t)tcb->stack_base_ptr, check_size);
 }
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 15

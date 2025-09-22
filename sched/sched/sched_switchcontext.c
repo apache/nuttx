@@ -57,8 +57,7 @@ void nxsched_switch_context(FAR struct tcb_s *from, FAR struct tcb_s *to)
       DEBUGASSERT(sp > bottom && sp <= top);
     }
 #  if CONFIG_STACKCHECK_MARGIN > 0
-    DEBUGASSERT(up_check_tcbstack(from) <=
-                from->adj_stack_size - CONFIG_STACKCHECK_MARGIN);
+    DEBUGASSERT(up_check_tcbstack(from, CONFIG_STACKCHECK_MARGIN) == 0);
 #  endif
 #endif
 #ifdef CONFIG_SCHED_SPORADIC

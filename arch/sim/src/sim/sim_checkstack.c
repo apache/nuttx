@@ -154,8 +154,7 @@ size_t sim_stack_check(void *alloc, size_t size)
  *
  ****************************************************************************/
 
-size_t up_check_tcbstack(struct tcb_s *tcb)
+size_t up_check_tcbstack(struct tcb_s *tcb, size_t check_size)
 {
-  return sim_stack_check((void *)(uintptr_t)tcb->stack_base_ptr,
-                                            tcb->adj_stack_size);
+  return sim_stack_check((void *)(uintptr_t)tcb->stack_base_ptr, check_size);
 }
