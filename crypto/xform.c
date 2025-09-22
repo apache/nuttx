@@ -155,6 +155,7 @@ int sha224update_int(FAR void *, FAR const uint8_t *, size_t);
 int sha256update_int(FAR void *, FAR const uint8_t *, size_t);
 int sha384update_int(FAR void *, FAR const uint8_t *, size_t);
 int sha512update_int(FAR void *, FAR const uint8_t *, size_t);
+void crc32init(FAR void *);
 void crc32setkey(FAR void *, FAR const uint8_t *, uint16_t);
 int crc32update(FAR void *, FAR const uint8_t *, size_t);
 void crc32final(FAR uint8_t *, FAR void *);
@@ -178,6 +179,15 @@ struct aes_ofb_ctx
 {
   AES_CTX ac_key;
   uint8_t iv[AESOFB_IVSIZE];
+};
+
+/* polynomial 0 selects the standard reflected CRC-32 */
+
+struct crc32_ctx
+{
+  uint32_t polynomial;
+  uint32_t initial;
+  uint32_t xorout;
 };
 
 /* Helper */
@@ -563,8 +573,8 @@ const struct auth_hash auth_hash_sha2_512 =
 const struct auth_hash auth_hash_crc32 =
 {
   CRYPTO_CRC32, "CRC32",
-  0, 32, 0, sizeof(uint32_t), 1,
-  null_init, crc32setkey, NULL, crc32update, crc32final
+  0, 32, 0, sizeof(struct crc32_ctx), 1,
+  crc32init, crc32setkey, NULL, crc32update, crc32final
 };
 
 /* Encryption wrapper routines. */
@@ -1115,26 +1125,68 @@ int sha512update_int(FAR void *ctx, FAR const uint8_t *buf, size_t len)
   return 0;
 }
 
+void crc32init(FAR void *ctx)
+{
+  FAR struct crc32_ctx *crc = (FAR struct crc32_ctx *)ctx;
+
+  memset(crc, 0, sizeof(struct crc32_ctx));
+}
+
 void crc32setkey(FAR void *ctx, FAR const uint8_t *key, uint16_t len)
 {
-  FAR uint32_t *val = (FAR uint32_t *)key;
-  uint32_t tmp = (*val) ^ CRC32_XOR_VALUE;
+  FAR struct crc32_ctx *crc = (FAR struct crc32_ctx *)ctx;
+  uint32_t keyval = 0;
 
-  memcpy(ctx, &tmp, len);
+  if (len >= 3 * sizeof(uint32_t))
+    {
+      /* Extended form: {polynomial, initial, xorout} */
+
+      FAR const uint32_t *param = (FAR const uint32_t *)key;
+
+      crc->polynomial = param[0];
+      crc->initial    = param[1];
+      crc->xorout     = param[2];
+      return;
+    }
+
+  /* Legacy form: pre-inverted start value of the standard CRC-32 */
+
+  if (len >= sizeof(uint32_t))
+    {
+      keyval = *(FAR const uint32_t *)key;
+    }
+
+  crc->polynomial = 0;
+  crc->initial    = keyval ^ CRC32_XOR_VALUE;
+  crc->xorout     = CRC32_XOR_VALUE;
 }
 
 int crc32update(FAR void *ctx, FAR const uint8_t *buf, size_t len)
 {
-  FAR uint32_t *startval = (FAR uint32_t *)ctx;
+  FAR struct crc32_ctx *crc = (FAR struct crc32_ctx *)ctx;
 
-  *startval = crc32part(buf, len, *startval);
+  switch (crc->polynomial)
+    {
+      case 0:
+        crc->initial = crc32part(buf, len, crc->initial);
+        break;
+      case 0x04c11db7:
+        crc->initial = crc32h04c11db7_part(buf, len, crc->initial);
+        break;
+      case 0xf4acfb13:
+        crc->initial = crc32hf4acfb13_part(buf, len, crc->initial);
+        break;
+      default:
+        return -EINVAL;
+    }
+
   return 0;
 }
 
 void crc32final(FAR uint8_t *digest, FAR void *ctx)
 {
-  FAR uint32_t *val = (FAR uint32_t *)ctx;
-  uint32_t result = (*val) ^ CRC32_XOR_VALUE;
+  FAR struct crc32_ctx *crc = (FAR struct crc32_ctx *)ctx;
 
-  memcpy(digest, &result, sizeof(uint32_t));
+  crc->initial ^= crc->xorout;
+  memcpy(digest, &crc->initial, sizeof(uint32_t));
 }
