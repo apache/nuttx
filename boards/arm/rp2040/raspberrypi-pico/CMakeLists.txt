@@ -1,5 +1,5 @@
 # ##############################################################################
-# cmake/nuttx_process_config.cmake
+# boards/arm/rp2040/raspberrypi-pico/CMakeLists.txt
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -20,27 +20,21 @@
 #
 # ##############################################################################
 
-function(process_config OUTPUT INPUT)
-  set(options)
-  set(oneValueArgs)
-  set(multiValueArgs INCLUDE_PATHS)
-  cmake_parse_arguments(PARSE_ARGV 2 PROCESS_INCLUDES "${options}"
-                        "${oneValueArgs}" "${multiValueArgs}")
+add_subdirectory(src)
 
-  set(include_args "")
-  foreach(path IN LISTS PROCESS_INCLUDES_INCLUDE_PATHS)
-    list(APPEND include_args "${path}")
-  endforeach()
+add_custom_target(
+  nuttx_post_build
+  DEPENDS nuttx
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+  COMMENT "Regenerate nuttx.uf2")
 
-  message(STATUS "Processing includes: ${INPUT} -> ${OUTPUT}")
-  execute_process(
-    COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tools/process_config.py
-            ${OUTPUT} ${INPUT} ${include_args}
-    RESULT_VARIABLE result
-    OUTPUT_VARIABLE out
-    ERROR_VARIABLE err)
-
-  if(NOT result EQUAL 0)
-    message(FATAL_ERROR "Failed to process includes:\n${err}")
-  endif()
-endfunction()
+# The uf2 command to convert ELF/BIN to UF2
+add_custom_command(
+  TARGET nuttx_post_build
+  POST_BUILD
+  COMMAND picotool ARGS uf2 convert --quiet -t elf nuttx nuttx.uf2
+  COMMAND_EXPAND_LISTS
+  COMMAND ${CMAKE_COMMAND} -E echo "nuttx.uf2" >>
+          ${CMAKE_BINARY_DIR}/nuttx.manifest
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+  COMMENT "Regenerate nuttx.uf2")
