@@ -58,10 +58,6 @@ void up_exit(int status)
 {
   struct tcb_s *tcb = this_task();
 
-  /* Update scheduler parameters */
-
-  nxsched_suspend_scheduler(tcb);
-
   /* Destroy the task at the head of the ready to run list. */
 
   (void)nxtask_exit();

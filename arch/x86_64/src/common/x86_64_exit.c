@@ -70,7 +70,6 @@ void up_exit(int status)
    * NOTE: the API also adjusts the global IRQ control for SMP
    */
 
-  nxsched_resume_scheduler(tcb);
   g_running_tasks[this_cpu()] = tcb;
 
   /* Context switch, rearrange MMU */
