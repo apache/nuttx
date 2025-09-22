@@ -36,7 +36,7 @@
 
 #include <arch/board/board.h>
 
-#include "rp2040_pico.h"
+#include "rp2040_common_pico.h"
 #include "rp2040_common_bringup.h"
 
 #ifdef CONFIG_LCD_BACKPACK
