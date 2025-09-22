@@ -29,7 +29,7 @@
 
 int rp2040_bringup(void);
 
-#ifdef CONFIG_DEV_GPIO
+#if defined(CONFIG_DEV_GPIO) && !defined(CONFIG_ARCH_BOARD_COMMON)
 int rp2040_dev_gpio_init(void);
 #endif
 
