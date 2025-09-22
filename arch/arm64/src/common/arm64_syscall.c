@@ -187,10 +187,6 @@ uint64_t *arm64_syscall(uint64_t *regs)
     {
       case SYS_restore_context:
 
-        /* Update scheduler parameters */
-
-        nxsched_resume_scheduler(tcb);
-
         /* Restore the cpu lock */
 
         restore_critical_section(tcb, cpu);
@@ -203,8 +199,7 @@ uint64_t *arm64_syscall(uint64_t *regs)
 
         /* Update scheduler parameters */
 
-        nxsched_suspend_scheduler(*running_task);
-        nxsched_resume_scheduler(tcb);
+        nxsched_switch_context(*running_task, tcb);
         *running_task = tcb;
 
         /* Restore the cpu lock */
