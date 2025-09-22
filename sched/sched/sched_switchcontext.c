@@ -64,8 +64,7 @@ void nxsched_switch_context(FAR struct tcb_s *from, FAR struct tcb_s *to)
   /* Indicate that the task has been suspended */
 
 #ifdef CONFIG_SCHED_CRITMONITOR
-  nxsched_suspend_critmon(from);
-  nxsched_resume_critmon(to);
+  nxsched_switch_critmon(from, to);
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION
