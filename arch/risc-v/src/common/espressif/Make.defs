@@ -183,6 +183,9 @@ ifeq ($(CONFIG_ESPRESSIF_USE_LP_CORE), y)
 	CHIP_CSRCS += esp_ulp.c
 endif
 
+# Required for initialization hooks on common code
+
+LDFLAGS += -u esp_system_include_startup_funcs
 ifeq ($(CONFIG_ESPRESSIF_EFUSE),y)
 	LDFLAGS += -u esp_efuse_startup_include_func
 endif
@@ -195,7 +198,7 @@ endif
 
 ESP_HAL_3RDPARTY_REPO   = esp-hal-3rdparty
 ifndef ESP_HAL_3RDPARTY_VERSION
-	ESP_HAL_3RDPARTY_VERSION = 84efb531f4cdf3162e91652357cac6a0be8dd73e
+	ESP_HAL_3RDPARTY_VERSION = 4eed03a15b2678a81dfd1ed0f3bde042b1fdd4c4
 endif
 
 ifndef ESP_HAL_3RDPARTY_URL

@@ -43,6 +43,7 @@
 #include "esp_clk_internal.h"
 #include "esp_private/rtc_clk.h"
 #include "esp_cpu.h"
+#include "esp_private/esp_mmu_map_private.h"
 #include "esp_private/brownout.h"
 #include "hal/wdt_hal.h"
 #include "hal/mmu_hal.h"
@@ -70,6 +71,7 @@
 #endif
 
 #include "esp_private/startup_internal.h"
+#include "esp_private/spi_flash_os.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -487,6 +489,12 @@ void __esp_start(void)
 
   esp_cpu_configure_region_protection();
 #endif
+
+  /* Configure SPI Flash chip state */
+
+  spi_flash_init_chip_state();
+
+  esp_mmu_map_init();
 
   /* Configures the CPU clock, RTC slow and fast clocks, and performs
    * RTC slow clock calibration.
