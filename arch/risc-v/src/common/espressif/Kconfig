@@ -473,8 +473,11 @@ config ESPRESSIF_SPI_BITBANG
 		Software implemented SPI peripheral with GPIOs. Suggested to use if SPI peripheral is already in use.
 
 config ESPRESSIF_SPIFLASH
-	bool "SPI Flash"
+	bool "SPI Flash (User Storage)"
 	default n
+	---help---
+		Enable SPI Flash driver for general storage support. This allows
+		mounting an MTD partition at a configurable region in flash.
 
 config ESPRESSIF_DMA
 	bool "General DMA (GDMA)"
@@ -1823,35 +1826,6 @@ config ESPRESSIF_FLASH_MODE_QOUT
 
 endchoice # ESPRESSIF_FLASH_MODE
 
-if ESPRESSIF_SPIFLASH
-comment "General storage MTD configuration"
-
-config ESPRESSIF_MTD
-	bool "MTD driver"
-	default y
-	select MTD
-	select MTD_BYTE_WRITE
-	select MTD_PARTITION
-	---help---
-		Initialize an MTD driver for the SPI Flash, which will
-		add an entry at /dev for application access from userspace.
-
-config ESPRESSIF_SPIFLASH_MTD_BLKSIZE
-	int "Storage MTD block size"
-	default 64
-	depends on ESPRESSIF_MTD
-	---help---
-		Block size for MTD driver in kB. This size must be divisible by 2
-
-config ESPRESSIF_STORAGE_MTD_DEBUG
-	bool "Storage MTD Debug"
-	default n
-	depends on ESPRESSIF_MTD && DEBUG_FS_INFO
-	---help---
-		If this option is enabled, Storage MTD driver read and write functions
-		will output input parameters and return values (if applicable).
-endif # ESPRESSIF_SPIFLASH
-
 choice ESPRESSIF_FLASH_FREQ
 	prompt "SPI Flash frequency"
 	default ESPRESSIF_FLASH_FREQ_80M if ARCH_CHIP_ESP32C3_GENERIC || ARCH_CHIP_ESP32C6
@@ -1916,6 +1890,36 @@ config ESPRESSIF_SPI_FLASH_USE_32BIT_ADDRESS
 		of functions in ROM, so that SPI flash driver can access full
 		32-bit address.
 
+endmenu # SPI Flash Configuration
+
+if ESPRESSIF_SPIFLASH
+menu "User Storage MTD Configuration"
+
+config ESPRESSIF_MTD
+	bool "MTD driver"
+	default y
+	select MTD
+	select MTD_BYTE_WRITE
+	select MTD_PARTITION
+	---help---
+		Initialize an MTD driver for the SPI Flash, which will
+		add an entry at /dev for application access from userspace.
+
+config ESPRESSIF_SPIFLASH_MTD_BLKSIZE
+	int "Storage MTD block size"
+	default 64
+	depends on ESPRESSIF_MTD
+	---help---
+		Block size for MTD driver in kB. This size must be divisible by 2
+
+config ESPRESSIF_STORAGE_MTD_DEBUG
+	bool "Storage MTD Debug"
+	default n
+	depends on ESPRESSIF_MTD && DEBUG_FS_INFO
+	---help---
+		If this option is enabled, Storage MTD driver read and write functions
+		will output input parameters and return values (if applicable).
+
 config ESPRESSIF_STORAGE_MTD_OFFSET
 	hex "Storage MTD base address in SPI Flash"
 	default 0x180000 if !ESPRESSIF_BOOTLOADER_MCUBOOT
@@ -1931,7 +1935,8 @@ config ESPRESSIF_STORAGE_MTD_SIZE
 	---help---
 		MTD size in SPI Flash.
 
-endmenu # SPI Flash Configuration
+endmenu # User Storage MTD Configuration
+endif # ESPRESSIF_SPIFLASH
 
 menu "RTC Configuration"
 	depends on ESPRESSIF_RTC
