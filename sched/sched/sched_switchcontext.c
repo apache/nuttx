@@ -25,7 +25,6 @@
  ****************************************************************************/
 
 #include "sched/sched.h"
-
 #include <nuttx/sched_note.h>
 
 /****************************************************************************
@@ -49,6 +48,19 @@
 
 void nxsched_switch_context(FAR struct tcb_s *from, FAR struct tcb_s *to)
 {
+#ifdef CONFIG_STACKCHECK_SOFTWARE
+  if (from->xcp.regs)
+    {
+      uintptr_t sp = up_getusrsp(from->xcp.regs);
+      uintptr_t top = (uintptr_t)from->stack_base_ptr + from->adj_stack_size;
+      uintptr_t bottom = (uintptr_t)from->stack_base_ptr;
+      DEBUGASSERT(sp > bottom && sp <= top);
+    }
+#  if CONFIG_STACKCHECK_MARGIN > 0
+    DEBUGASSERT(up_check_tcbstack(from) <=
+                from->adj_stack_size - CONFIG_STACKCHECK_MARGIN);
+#  endif
+#endif
 #ifdef CONFIG_SCHED_SPORADIC
   /* Perform sporadic schedule operations */
   if ((from->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC)
