@@ -6,13 +6,18 @@ Overview
 --------
 
 Currently NuttX supports three types of stack overflow detection:
-    1. Stack Overflow Software Check
-    2. Stack Overflow Hardware Check
-    3. Stack Canary Check
+    1. Stack Overflow Software Check During Function Call
+    2. Stack Overflow Software Check During Context Switching
+    3. Stack Overflow Hardware Check
+    4. Stack Canary Check
 
-The software stack detection includes two implementation ideas:
+The software stack detection during function call includes two implementation ideas:
     1. Implemented by coloring the stack memory
     2. Implemented by comparing the sp and sl registers
+
+The software stack detection during context switching includes two implementation ideas:
+    1. Implemented by coloring the stack memory
+    2. Implemented by checking the bottom memory of the stack and the sp register
 
 Support
 -------
@@ -21,8 +26,8 @@ Software and hardware stack overflow detection implementation,
 currently only implemented on ARM Cortex-M (32-bit) series chips
 Stack Canary Check is available on all platforms
 
-Stack Overflow Software Check
------------------------------
+Stack Overflow Software Check During Function Call
+--------------------------------------------------
 
 1. Memory Coloring Implementation Principle
     1. Before using the stack, Thread will refresh the stack area to 0xdeadbeef
@@ -43,6 +48,16 @@ Stack Overflow Software Check
 
     Usage:
         Enable CONFIG_ARMV8M_STACKCHECK or CONFIG_ARMV7M_STACKCHECK
+
+Stack Overflow Software Check During Context Switching
+------------------------------------------------------
+
+1. Determine by detecting the number of bytes specified at the bottom of the stack.
+2. Check if the sp register is out of bounds.
+
+Usage:
+    Enable CONFIG_STACKCHECK_SOFTWARE
+    You can set the detection length by STACKCHECK_MARGIN
 
 Stack Overflow Hardware Check
 -----------------------------
