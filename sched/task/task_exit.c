@@ -90,10 +90,6 @@ int nxtask_exit(void)
   sinfo("%s pid=%d,TCB=%p\n", get_task_name(dtcb),
         dtcb->pid, dtcb);
 
-  /* Update scheduler parameters */
-
-  nxsched_suspend_scheduler(dtcb);
-
   /* Remove the TCB of the current task from the ready-to-run list.  A
    * context switch will definitely be necessary -- that must be done
    * by the architecture-specific logic.
@@ -112,11 +108,15 @@ int nxtask_exit(void)
   rtcb = this_task();
 #endif
 
-  /* NOTE: nxsched_resume_scheduler() was moved to up_exit()
-   * because the global IRQ control for SMP should be deferred until
-   * context switching, otherwise, the context switching would be done
-   * without a critical section
+  /* Update scheduler parameters.
+   *
+   * When the thread exits, SYS_restore_context is called to
+   * restore the context, which does not update the scheduling
+   * information.
+   * We need to update the scheduling information before tcb is released.
    */
+
+  nxsched_switch_context(dtcb, rtcb);
 
   /* We are now in a bad state -- the head of the ready to run task list
    * does not correspond to the thread that is running.  Disabling pre-
