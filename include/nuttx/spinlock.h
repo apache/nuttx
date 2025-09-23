@@ -33,6 +33,7 @@
 #include <assert.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
 #include <sched.h>
 
 #include <nuttx/compiler.h>
@@ -120,8 +121,8 @@ void spinlock_switch_context(FAR struct tcb_s *from);
  *
  ****************************************************************************/
 
-/* void spin_lock_init(FAR spinlock_t *lock); */
-#define spin_lock_init(l) do { *(l) = SP_UNLOCKED; } while (0)
+#define spin_lock_init(l) \
+   do { memset((FAR void *)l, 0, sizeof(*(l))); } while (0)
 
 /****************************************************************************
  * Name: rspin_lock_init
@@ -138,10 +139,8 @@ void spinlock_switch_context(FAR struct tcb_s *from);
  *
  ****************************************************************************/
 
-static inline_function void rspin_lock_init(FAR rspinlock_t *lock)
-{
-  *lock = RSPINLOCK_INITIALIZER;
-}
+#define rspin_lock_init(l) \
+   do { memset((FAR void *)l, 0, sizeof(*(l))); } while (0)
 
 /****************************************************************************
  * Name: spin_lock_notrace
@@ -1162,7 +1161,8 @@ void rspin_restorelock(FAR rspinlock_t *lock, uint16_t count)
  *
  ****************************************************************************/
 
-#define rwlock_init(l) do { (l->lock) = RW_SP_UNLOCKED; } while(0)
+#define rwlock_init(l) \
+   do { memset((FAR void *)l, 0, sizeof(*(l))); } while (0)
 
 /****************************************************************************
  * Name: read_lock

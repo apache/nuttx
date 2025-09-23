@@ -85,7 +85,7 @@ void spinlock_mark_locked(FAR spinlock_debug_t *info)
 
   info->holder = rtcb;
   info->caller = return_address(0);
-  sq_addlast(info->flink, &rtcb->hold_spinlock);
+  sq_addlast(&info->flink, &rtcb->hold_spinlock);
 }
 
 void spinlock_mark_unlocked(FAR spinlock_debug_t *info)
@@ -106,7 +106,7 @@ void spinlock_mark_unlocked(FAR spinlock_debug_t *info)
    * this will pollute flags. So check if unlocking is the reverse order.
    */
 
-  if (sq_tail(&rtcb->hold_spinlock) != info->flink)
+  if (sq_tail(&rtcb->hold_spinlock) != &info->flink)
     {
       _alert("Detect thread(%d) unlocks spinlock(%p) in the wrong order!\n",
              rtcb->pid, info);
