@@ -44,9 +44,12 @@ endif
 
 # Tasking toolchain
 
+TASKING_COMPILER_PATH := $(shell which ctc)
+C_COMPILER_DIR := $(dir $(TASKING_COMPILER_PATH))
+
 CC                = cctc
 CXX               = cctc
-CPP               = cctc $(ARCHOPTIMIZATION)
+CPP               = ctc -E -I$(C_COMPILER_DIR)/../include.lsl
 LD                = cctc
 STRIP             = strip --strip-unneeded
 AR                = artc -r

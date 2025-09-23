@@ -105,12 +105,10 @@ else
   LIBRARY_OPT = -l
 endif
 
-ifeq ($(CONFIG_TRICORE_TOOLCHAIN_TASKING),y)
-  LDFLAGS += $(addprefix $(SCRIPT_OPT),$(call CONVERT_PATH,$(ARCHSCRIPT))) $(EXTRALINKCMDS)
-else
-  ARCHSCRIPT := $(call CONVERT_PATH,$(ARCHSCRIPT))
-  LDFLAGS += $(addprefix $(SCRIPT_OPT),$(addsuffix .tmp,$(ARCHSCRIPT))) $(EXTRALINKCMDS)
+ARCHSCRIPT := $(call CONVERT_PATH,$(ARCHSCRIPT))
+LDFLAGS += $(addprefix $(SCRIPT_OPT),$(addsuffix .tmp,$(ARCHSCRIPT))) $(EXTRALINKCMDS)
 
+ifeq ($(CONFIG_TRICORE_TOOLCHAIN_TASKING),)
   LDSTARTGROUP ?= -Wl,--start-group
   LDENDGROUP   ?= -Wl,--end-group
 endif
@@ -166,16 +164,11 @@ define LINK_ALLSYMS
 	$(Q) $(call DELFILE, allsyms.tmp allsyms$(OBJEXT))
 endef
 
-ifeq ($(CONFIG_TRICORE_TOOLCHAIN_TASKING),)
 $(addsuffix .tmp,$(ARCHSCRIPT)): $(ARCHSCRIPT)
 	$(call PREPROCESS, $(patsubst %.tmp,%,$@), $@)
-endif
 
-ifeq ($(CONFIG_TRICORE_TOOLCHAIN_TASKING),y)
-nuttx$(EXEEXT): $(HEAD_COBJ) board$(DELIM)libboard$(LIBEXT) $(ARCHSCRIPT) $(EXTRA_LIBS)
-else
 nuttx$(EXEEXT): $(HEAD_COBJ) board$(DELIM)libboard$(LIBEXT) $(EXTRA_LIBS) $(addsuffix .tmp,$(ARCHSCRIPT))
-endif
+
 	$(Q) echo "LD: nuttx"
 ifneq ($(CONFIG_ALLSYMS),y)
 	$(Q) $(LD) $(LDFLAGS) $(LIBPATHS) $(EXTRA_LIBPATHS) \
@@ -194,9 +187,7 @@ ifneq ($(CONFIG_WINDOWS_NATIVE),y)
 	grep -v '\(compiled\)\|\(\$(OBJEXT)$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | \
 	sort > $(TOPDIR)$(DELIM)System.map
 endif
-ifeq ($(CONFIG_TRICORE_TOOLCHAIN_TASKING),)
 	$(Q) $(call DELFILE, $(addsuffix .tmp,$(ARCHSCRIPT)))
-endif
 
 # This is part of the top-level export target
 # Note that there may not be a head object if layout is handled
