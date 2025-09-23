@@ -78,17 +78,18 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
 
   if (regs != tcb->xcp.regs)
     {
+      struct tcb_s **running_task = &g_running_tasks[this_cpu()];
+
       /* Update scheduler parameters */
 
-      nxsched_suspend_scheduler(g_running_tasks[this_cpu()]);
-      nxsched_resume_scheduler(tcb);
+      nxsched_switch_context(*running_task, tcb);
 
       /* Record the new "running" task when context switch occurred.
        * g_running_tasks[] is only used by assertion logic for reporting
        * crashes.
        */
 
-      g_running_tasks[this_cpu()] = tcb;
+      *running_task = tcb;
       regs = tcb->xcp.regs;
     }
 
