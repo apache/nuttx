@@ -28,6 +28,9 @@
 #include <nuttx/kmalloc.h>
 
 #include <nuttx/timers/oneshot.h>
+#ifdef CONFIG_HRTIMER
+#include <nuttx/timers/hrtimer.h>
+#endif
 #include <nuttx/timers/arch_alarm.h>
 
 #include "tricore_internal.h"
@@ -54,6 +57,14 @@ struct tricore_systimer_lowerhalf_s
   spinlock_t                 lock;
 };
 
+#ifdef CONFIG_HRTIMER
+struct tricore_hrtimer_lowerhalf_s
+{
+  struct hrtimer_lowerhalf_s lower;
+  volatile void              *tbase;
+};
+#endif
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -71,7 +82,19 @@ static int
 tricore_systimer_tick_start(struct oneshot_lowerhalf_s *lower,
                             oneshot_callback_t callback, void *arg,
                             clock_t ticks);
+#ifdef CONFIG_HRTIMER
+static int
+tricore_hrtimer_setexpire(struct hrtimer_lowerhalf_s *lower,
+                           clock_t expiration_time);
+static clock_t
+tricore_hrtimer_current(struct hrtimer_lowerhalf_s *lower);
 
+static int
+tricore_hrtimer_start(struct hrtimer_lowerhalf_s *lower);
+
+static int
+tricore_hrtimer_trigger(struct hrtimer_lowerhalf_s *lower);
+#endif
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -85,10 +108,27 @@ static const struct oneshot_operations_s g_tricore_systimer_ops =
   .tick_start = tricore_systimer_tick_start,
 };
 
+#ifdef CONFIG_HRTIMER
+static const struct hrtimer_ops_s g_tricore_hrtimer_ops =
+{
+  .setexpire = tricore_hrtimer_setexpire,
+  .current    = tricore_hrtimer_current,
+  .start      = tricore_hrtimer_start,
+  .trigger    = tricore_hrtimer_trigger,
+};
+#endif
+
 static struct tricore_systimer_lowerhalf_s g_systimer_lower =
 {
   .lower.ops = &g_tricore_systimer_ops,
 };
+
+#ifdef CONFIG_HRTIMER
+static struct tricore_hrtimer_lowerhalf_s g_hrtimer_lower =
+{
+  .lower.ops = &g_tricore_hrtimer_ops,
+};
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -321,6 +361,46 @@ tricore_systimer_tick_start(struct oneshot_lowerhalf_s *lower,
   return 0;
 }
 
+#ifdef CONFIG_HRTIMER
+static int
+tricore_hrtimer_setexpire(struct hrtimer_lowerhalf_s *lower,
+                           clock_t expiration_time)
+{
+  struct tricore_hrtimer_lowerhalf_s *priv = lower;
+
+  IfxStm_updateCompare(priv->tbase, IfxStm_Comparator_0, expiration_time);
+
+  return OK;
+}
+
+static clock_t
+tricore_hrtimer_current(struct hrtimer_lowerhalf_s *lower)
+{
+  struct tricore_hrtimer_lowerhalf_s *priv = lower;
+
+  return IfxStm_get(priv->tbase);
+}
+
+static int tricore_hrtimer_start(struct hrtimer_lowerhalf_s *lower)
+{
+  (void)lower;
+
+  up_enable_irq(192);
+
+  return OK;
+}
+
+static int tricore_hrtimer_trigger(struct hrtimer_lowerhalf_s *lower)
+{
+  (void)lower;
+
+  up_trigger_irq(192, 0);
+
+  return OK;
+}
+
+#endif
+
 /****************************************************************************
  * Name: tricore_systimer_interrupt
  *
@@ -332,6 +412,13 @@ tricore_systimer_tick_start(struct oneshot_lowerhalf_s *lower,
 
 static int tricore_systimer_interrupt(int irq, void *context, void *arg)
 {
+#ifdef CONFIG_HRTIMER
+  (void)irq;
+  (void)context;
+  (void)arg;
+
+  hrtimer_upper_process(&g_default_hrtimer_upperhalf);
+#else
   struct tricore_systimer_lowerhalf_s *priv = arg;
 
   tricore_systimer_set_timecmp(priv, UINT64_MAX);
@@ -339,6 +426,7 @@ static int tricore_systimer_interrupt(int irq, void *context, void *arg)
     {
       priv->callback(&priv->lower, priv->arg);
     }
+#endif
 
   return 0;
 }
@@ -356,14 +444,23 @@ static int tricore_systimer_interrupt(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-struct oneshot_lowerhalf_s *
-tricore_systimer_initialize(volatile void *tbase, int irq, uint64_t freq)
+void tricore_systimer_initialize(volatile void *tbase,
+                                 int irq,
+                                 uint64_t freq)
 {
   struct tricore_systimer_lowerhalf_s *priv = &g_systimer_lower;
+#ifdef CONFIG_HRTIMER
+  struct tricore_hrtimer_lowerhalf_s *hrtimer_priv = &g_hrtimer_lower;
+#endif
 
   priv->tbase = tbase;
   priv->freq  = freq;
   spin_lock_init(&priv->lock);
+
+#ifdef CONFIG_HRTIMER
+  hrtimer_priv->tbase = tbase;
+  hrtimer_priv->lower.freq = freq;
+#endif
 
   IfxStm_setCompareControl(tbase,
       IfxStm_Comparator_0,
@@ -376,7 +473,12 @@ tricore_systimer_initialize(volatile void *tbase, int irq, uint64_t freq)
   IfxStm_enableComparatorInterrupt(tbase, IfxStm_Comparator_0);
 
   irq_attach(irq, tricore_systimer_interrupt, priv);
-  up_enable_irq(irq);
 
-  return (struct oneshot_lowerhalf_s *)priv;
+  up_alarm_set_lowerhalf((struct oneshot_lowerhalf_s *)priv);
+
+#ifdef CONFIG_HRTIMER
+  up_alarm_set_hrtimer_lowerhalf((struct hrtimer_lowerhalf_s *)hrtimer_priv);
+#else
+  up_enable_irq(irq);
+#endif
 }

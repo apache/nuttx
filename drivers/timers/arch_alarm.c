@@ -29,7 +29,9 @@
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
 #include <nuttx/timers/arch_alarm.h>
-
+#ifdef CONFIG_HRTIMER
+#include <nuttx/hrtimer.h>
+#endif
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -136,22 +138,32 @@ static void oneshot_callback(FAR struct oneshot_lowerhalf_s *lower,
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+#ifdef CONFIG_HRTIMER
+void up_alarm_set_hrtimer_lowerhalf(FAR struct hrtimer_lowerhalf_s *lower)
+{
+  hrtimer_upper_set_lower(&g_default_hrtimer_upperhalf, lower);
+  hrtimer_upper_start(&g_default_hrtimer_upperhalf);
+}
+#endif
 
 void up_alarm_set_lowerhalf(FAR struct oneshot_lowerhalf_s *lower)
 {
-#ifdef CONFIG_SCHED_TICKLESS
+#ifdef CONFIG_HRTIMER
+  g_oneshot_lower = lower;
+#else
+# ifdef CONFIG_SCHED_TICKLESS
   clock_t ticks = 0;
-#endif
-
+# endif
   g_oneshot_lower = lower;
 
-#ifdef CONFIG_SCHED_TICKLESS
+# ifdef CONFIG_SCHED_TICKLESS
   ONESHOT_TICK_MAX_DELAY(g_oneshot_lower, &ticks);
   g_oneshot_maxticks = ticks < UINT32_MAX ? ticks : UINT32_MAX;
-#else
+# else
   ONESHOT_TICK_CURRENT(g_oneshot_lower, &g_current_tick);
   ONESHOT_TICK_START(g_oneshot_lower, oneshot_callback, NULL, 1);
-#endif
+# endif
+#endif /* CONFIG_HRTIMER */
 }
 
 /****************************************************************************

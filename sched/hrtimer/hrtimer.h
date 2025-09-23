@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/timers/arch_alarm.h
+ * sched/hrtimer/hrtimer.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -13,52 +13,31 @@
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
- * License for the specific language governing permissions and limitations
- * under the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_TIMERS_ARCH_ALARM_H
-#define __INCLUDE_NUTTX_TIMERS_ARCH_ALARM_H
+#ifndef __SCHED_HRTIMER_H
+#define __SCHED_HRTIMER_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/timers/oneshot.h>
-#ifdef CONFIG_HRTIMER
+#include <nuttx/arch.h>
+#include <nuttx/clock.h>
 #include <nuttx/hrtimer.h>
-#endif
+
 /****************************************************************************
- * Public Function Prototypes
+ * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
+/* Declare red-black tree prototype for high-resolution timer nodes */
 
-#ifdef CONFIG_ALARM_ARCH
+RB_PROTOTYPE(hrtimer_tree, hrtimer_node, entry, hrtimer_cmp);
 
-void up_alarm_set_lowerhalf(FAR struct oneshot_lowerhalf_s *lower);
-#  ifdef CONFIG_HRTIMER
-void up_alarm_set_hrtimer_lowerhalf(FAR struct hrtimer_lowerhalf_s *lower);
-#  endif
-#else
-
-#  define up_alarm_set_lowerhalf(lower)
-#  define up_alarm_set_hrtimer_lowerhalf(lower)
-#endif
-
-#undef EXTERN
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* __INCLUDE_NUTTX_TIMERS_ARCH_ALARM_H */
+#endif /* __SCHED_HRTIMER_H */
