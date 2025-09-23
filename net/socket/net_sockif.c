@@ -71,7 +71,10 @@ static const struct sock_intf_s g_ctrl_sockif =
   ctrl_close        /* si_close */
 };
 
-static struct socket_conn_s g_ctrl_conn;
+static struct socket_conn_s g_ctrl_conn =
+{
+  .s_lock = NXRMUTEX_INITIALIZER,
+};
 
 /****************************************************************************
  * Private Functions
