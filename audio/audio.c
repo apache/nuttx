@@ -476,6 +476,7 @@ static int audio_configure(FAR struct file *filep,
       /* INPUT/OUTPUT configure success here */
 
       audio_setstate(upper, AUDIO_STATE_PREPARED);
+      upper->info.type = caps->ac_type;
       upper->info.format = caps->ac_subtype;
       upper->info.channels = caps->ac_channels;
       upper->info.subformat = caps->ac_format.b[0];
@@ -1367,8 +1368,9 @@ static inline void audio_dequeuebuffer(FAR struct audio_upperhalf_s *upper,
 
   audinfo("Entry\n");
 
-  if (upper->apbs)
+  if (upper->info.type == AUDIO_TYPE_OUTPUT)
     {
+      apb->nbytes = 0;
       memset(apb->samp, 0, apb->nmaxbytes);
     }
 
