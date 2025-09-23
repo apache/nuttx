@@ -2034,3 +2034,11 @@ config CUSTOM_SEMAPHORE_MAXVALUE
 	---help---
 		Enable to support custom max value for semaphores.
 		When this option is enabled, the max value of a semaphore can be set
+
+config HRTIMER
+	bool "High-resolution timer (hrtimer) support"
+	depends on ALARM_ARCH || TIMER_ARCH
+	default n
+	---help---
+		Enable high-resolution timers (hrtimers) for precise time-based
+		operations within the system.

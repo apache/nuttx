@@ -55,11 +55,5 @@
 
 void up_timer_initialize(void)
 {
-  struct oneshot_lowerhalf_s *lower;
-
-  lower = tricore_systimer_initialize(&MODULE_STM0, 192, SCU_FREQUENCY);
-
-  DEBUGASSERT(lower != NULL);
-
-  up_alarm_set_lowerhalf(lower);
+  tricore_systimer_initialize(&MODULE_STM0, 192, SCU_FREQUENCY);
 }

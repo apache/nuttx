@@ -139,19 +139,22 @@ static void oneshot_callback(FAR struct oneshot_lowerhalf_s *lower,
 
 void up_alarm_set_lowerhalf(FAR struct oneshot_lowerhalf_s *lower)
 {
-#ifdef CONFIG_SCHED_TICKLESS
+#ifdef CONFIG_HRTIMER
+  g_oneshot_lower = lower;
+#else
+# ifdef CONFIG_SCHED_TICKLESS
   clock_t ticks = 0;
-#endif
-
+# endif
   g_oneshot_lower = lower;
 
-#ifdef CONFIG_SCHED_TICKLESS
+# ifdef CONFIG_SCHED_TICKLESS
   ONESHOT_TICK_MAX_DELAY(g_oneshot_lower, &ticks);
   g_oneshot_maxticks = ticks < UINT32_MAX ? ticks : UINT32_MAX;
-#else
+# else
   ONESHOT_TICK_CURRENT(g_oneshot_lower, &g_current_tick);
   ONESHOT_TICK_START(g_oneshot_lower, oneshot_callback, NULL, 1);
-#endif
+# endif
+#endif /* CONFIG_HRTIMER */
 }
 
 /****************************************************************************
