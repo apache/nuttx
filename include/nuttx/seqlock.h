@@ -34,7 +34,11 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#ifdef CONFIG_SMP
 #define SEQLOCK_INITIALIZER { 1u, 1u }
+#else
+#define SEQLOCK_INITIALIZER { 0u }
+#endif
 
 /****************************************************************************
  * Public Data Types
@@ -46,8 +50,12 @@
 
 typedef struct seqclock
 {
+#ifdef CONFIG_SMP
   atomic_t sequence;
   uint32_t next_sequence;
+#else
+  volatile uint32_t sequence;
+#endif
 } seqcount_t;
 
 #undef EXTERN
@@ -79,8 +87,12 @@ extern "C"
 
 static inline_function void seqlock_init(FAR seqcount_t *s)
 {
+#ifdef CONFIG_SMP
   atomic_init(&s->sequence, 1u);
   s->next_sequence = 1u;
+#else
+  s->sequence = 0u;
+#endif
 }
 
 /****************************************************************************
@@ -103,6 +115,7 @@ uint32_t read_seqbegin(FAR const seqcount_t *s)
 {
   uint32_t seq;
 
+#ifdef CONFIG_SMP
   do
     {
       /* Ensure no load operation is re-ordered before the acquire load. */
@@ -110,7 +123,10 @@ uint32_t read_seqbegin(FAR const seqcount_t *s)
       seq = atomic_read_acquire(&s->sequence);
     }
   while (seq == 0u);
-
+#else
+  seq = s->sequence;
+  SMP_RMB();
+#endif
   return seq;
 }
 
@@ -133,11 +149,19 @@ uint32_t read_seqbegin(FAR const seqcount_t *s)
 static inline_function
 uint32_t read_seqretry(FAR const seqcount_t *s, uint32_t start)
 {
+  uint32_t seq;
+
   /* Ensure all load operations before are completed. */
 
   SMP_RMB();
 
-  return predict_false(atomic_read(&s->sequence) != start);
+#ifdef CONFIG_SMP
+  seq = atomic_read(&s->sequence);
+#else
+  seq = s->sequence;
+#endif
+
+  return predict_false(seq != start);
 }
 
 /****************************************************************************
@@ -158,12 +182,12 @@ uint32_t read_seqretry(FAR const seqcount_t *s, uint32_t start)
 static inline_function
 irqstate_t write_seqlock_irqsave(FAR seqcount_t *s)
 {
-  uint32_t   sequence;
   irqstate_t flags = up_irq_save();
 
+#ifdef CONFIG_SMP
   for (; ; )
     {
-      sequence = atomic_read(&s->sequence);
+      uint32_t sequence = atomic_read(&s->sequence);
 
       if (predict_true(sequence != 0u))
         {
@@ -177,6 +201,9 @@ irqstate_t write_seqlock_irqsave(FAR seqcount_t *s)
 
       /* CPU Relax and retry. */
     }
+#else
+  s->sequence++;
+#endif
 
   return flags;
 }
@@ -200,9 +227,11 @@ irqstate_t write_seqlock_irqsave(FAR seqcount_t *s)
 static inline_function
 void write_sequnlock_irqrestore(seqcount_t *s, irqstate_t flags)
 {
+#ifdef CONFIG_SMP
   uint32_t next = s->next_sequence + 2;
   s->next_sequence = next;
   atomic_set_release(&s->sequence, next);
+#endif
   up_irq_restore(flags);
 }
 
