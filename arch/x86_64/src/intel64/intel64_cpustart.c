@@ -33,6 +33,7 @@
 #include <arch/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/spinlock.h>
+#include <nuttx/tls.h>
 
 #include "sched/sched.h"
 #include "init/init.h"
