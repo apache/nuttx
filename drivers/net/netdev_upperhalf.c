@@ -501,7 +501,7 @@ netdev_upper_vlan_foreach(FAR struct netdev_upperhalf_s *upper,
 {
   int i;
 
-  net_lock();
+  netdev_lock(&upper->lower->netdev);
   for (i = 0; i < CONFIG_NET_VLAN_COUNT; i++)
     {
       if (upper->vlan[i].dev)
@@ -510,7 +510,7 @@ netdev_upper_vlan_foreach(FAR struct netdev_upperhalf_s *upper,
         }
     }
 
-  net_unlock();
+  netdev_unlock(&upper->lower->netdev);
 }
 #endif
 
