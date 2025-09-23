@@ -165,7 +165,7 @@ static void kasan_set_poison(FAR const void *addr, size_t size,
   mask = KASAN_FIRST_WORD_MASK(bit);
   size /= KASAN_SHADOW_SCALE;
 
-  flags = spin_lock_irqsave(&g_lock);
+  flags = spin_lock_irqsave_notrace(&g_lock);
   while (size >= nbit)
     {
       if (poisoned)
@@ -197,7 +197,7 @@ static void kasan_set_poison(FAR const void *addr, size_t size,
         }
     }
 
-  spin_unlock_irqrestore(&g_lock, flags);
+  spin_unlock_irqrestore_notrace(&g_lock, flags);
 }
 
 /****************************************************************************
@@ -246,12 +246,12 @@ void kasan_register(FAR void *addr, FAR size_t *size)
   region->begin = (uintptr_t)addr;
   region->end   = region->begin + *size;
 
-  flags = spin_lock_irqsave(&g_lock);
+  flags = spin_lock_irqsave_notrace(&g_lock);
 
   DEBUGASSERT(g_region_count < CONFIG_MM_KASAN_REGIONS);
   g_region[g_region_count++] = region;
 
-  spin_unlock_irqrestore(&g_lock, flags);
+  spin_unlock_irqrestore_notrace(&g_lock, flags);
 
   kasan_start();
   kasan_poison(addr, *size);
@@ -263,7 +263,7 @@ void kasan_unregister(FAR void *addr)
   irqstate_t flags;
   size_t i;
 
-  flags = spin_lock_irqsave(&g_lock);
+  flags = spin_lock_irqsave_notrace(&g_lock);
   for (i = 0; i < g_region_count; i++)
     {
       if (g_region[i]->begin == (uintptr_t)addr)
@@ -273,11 +273,11 @@ void kasan_unregister(FAR void *addr)
           g_region_count--;
           memmove(&g_region[i], &g_region[i + 1],
                   (g_region_count - i) * sizeof(g_region[0]));
-          spin_unlock_irqrestore(&g_lock, flags);
+          spin_unlock_irqrestore_notrace(&g_lock, flags);
           kasan_unpoison(addr, size);
           return;
         }
     }
 
-  spin_unlock_irqrestore(&g_lock, flags);
+  spin_unlock_irqrestore_notrace(&g_lock, flags);
 }
