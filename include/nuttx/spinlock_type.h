@@ -45,12 +45,12 @@ extern "C"
 #if defined(CONFIG_SPINLOCK_DEBUG)
 typedef struct spinlock_debug_s
 {
-  FAR sq_entry_t *flink;
+  sq_entry_t flink;
   FAR struct tcb_s *holder;
   FAR void *caller;
 } spinlock_debug_t;
 #  define SPINLOCK_DEBUG_INFO spinlock_debug_t info;
-#  define SPINLOCK_DEBUG_INIT {NULL, NULL, NULL}
+#  define SPINLOCK_DEBUG_INIT {{NULL}, NULL, NULL}
 #else
 #  define SPINLOCK_DEBUG_INFO
 #  define SPINLOCK_DEBUG_INIT
@@ -102,7 +102,7 @@ typedef struct spinlock_s
 #endif /* CONFIG_SPINLOCK */
 
 #define RSPINLOCK_CPU_INVALID (-1)
-#define RSPINLOCK_INITIALIZER (rspinlock_t){{0}, SPINLOCK_DEBUG_INIT}
+#define RSPINLOCK_INITIALIZER {{0}, SPINLOCK_DEBUG_INIT}
 
 typedef struct rspinlock_s
 {
