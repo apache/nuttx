@@ -33,6 +33,11 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Onboard LEDs */
+
+#define STATUS_LED (42) /* Green LED */
+#define POWER_LED (130) /* Red LED */
+
 /* TODO: define all the GPIO pins properly */
 
 #define BOARD_NGPIOOUT 1
