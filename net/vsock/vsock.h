@@ -48,11 +48,13 @@
 
 struct vsock_pkt_s
 {
-  size_t                vbidx;
-  size_t                vboff;
-  size_t                vbcnt;
-  FAR void             *priv;
-  struct virtqueue_buf  vb[CONFIG_NET_VSOCK_PKT_BUFCOUNT];
+  size_t                  vbidx;
+  size_t                  vboff;
+  size_t                  vbcnt;
+  size_t                  len;
+  FAR void               *priv;
+  FAR struct vsock_pkt_s *next;
+  struct virtqueue_buf    vb[CONFIG_NET_VSOCK_PKT_BUFCOUNT];
 };
 
 struct vsock_transport_s;

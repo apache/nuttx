@@ -60,6 +60,9 @@ struct vsock_vhost_priv_s
   sem_t                    tx_sem;
   struct work_s            rx_work;
 
+  struct list_node         tx_pkt_list;
+  FAR struct vsock_pkt_s  *tx_pkt_alloc;
+
   struct vsock_transport_s t;
 };
 
@@ -148,30 +151,43 @@ static int vsock_vhost_alloc_pkt(FAR struct vsock_transport_s *t,
   FAR struct vsock_vhost_priv_s *priv = vsock_vhost_trans2priv(t);
   FAR struct virtqueue *vq;
   irqstate_t flags;
-  size_t vbcnt;
+  size_t pktcnt;
   int head;
 
-  data_len += VIRTIO_VSOCK_HDR_LEN;
-  vbcnt = div_round_up(data_len, CONFIG_NET_VSOCK_PKT_BUFSIZE);
-  vbcnt = MIN(vbcnt, CONFIG_NET_VSOCK_PKT_BUFCOUNT);
+  pktcnt = data_len == 0 ? 1 :
+           div_round_up(data_len, CONFIG_NET_VSOCK_PKT_BUFSIZE);
+  pktcnt = MIN(pktcnt, CONFIG_NET_VSOCK_PKT_BUFCOUNT);
 
   vq = priv->hdev->vrings_info[VSOCK_VQ_TX].vq;
-  for (; ; )
+  flags = spin_lock_irqsave(&priv->tx_lock);
+  while (pktcnt > 0)
     {
-      flags = spin_lock_irqsave(&priv->tx_lock);
-      head = vhost_get_vq_buffers(vq, pkt->vb, vbcnt, &pkt->vbcnt);
-      spin_unlock_irqrestore(&priv->tx_lock, flags);
+      head = vhost_get_vq_buffers(vq, pkt->vb, 1, &pkt->vbcnt);
       if (head < 0)
         {
+          spin_unlock_irqrestore(&priv->tx_lock, flags);
           nxsem_wait(&priv->tx_sem);
+          flags = spin_lock_irqsave(&priv->tx_lock);
           continue;
         }
 
       pkt->vbidx = 0;
       pkt->vboff = VIRTIO_VSOCK_HDR_LEN;
       pkt->priv = (FAR void *)(uintptr_t)head;
-      return 0;
+      pkt->len  = MIN(data_len + VIRTIO_VSOCK_HDR_LEN, pkt->vb[0].len);
+      data_len -= pkt->len - VIRTIO_VSOCK_HDR_LEN;
+
+      if (--pktcnt > 0)
+        {
+          pkt->next = (FAR struct vsock_pkt_s *)
+                      list_remove_head(&priv->tx_pkt_list);
+          DEBUGASSERT(pkt->next != NULL);
+          pkt = pkt->next;
+        }
     }
+
+  spin_unlock_irqrestore(&priv->tx_lock, flags);
+  return 0;
 }
 
 /****************************************************************************
@@ -182,21 +198,38 @@ static ssize_t vsock_vhost_send_pkt(FAR struct vsock_transport_s *t,
                                     FAR struct vsock_pkt_s *pkt)
 {
   FAR struct vsock_vhost_priv_s *priv = vsock_vhost_trans2priv(t);
-  FAR struct vsock_hdr_s *hdr = vsock_pkt2hdr(pkt);
+  FAR struct vsock_pkt_s *next;
+  FAR struct vsock_hdr_s *hdr;
   FAR struct virtqueue *vq;
-  ssize_t len = hdr->len;
+  uint32_t data_len;
   irqstate_t flags;
+  ssize_t len = 0;
   int ret;
 
   vq = priv->hdev->vrings_info[VSOCK_VQ_TX].vq;
   flags = spin_lock_irqsave(&priv->tx_lock);
-  ret = virtqueue_add_consumed_buffer(vq, (uint16_t)(uintptr_t)pkt->priv,
-                                      hdr->len + VIRTIO_VSOCK_HDR_LEN);
-  if (ret < 0)
+  while (pkt != NULL)
     {
-      spin_unlock_irqrestore(&priv->tx_lock, flags);
-      vhosterr("Add buffer failed ret=%d\n", ret);
-      return ret;
+      hdr = vsock_pkt2hdr(pkt);
+      data_len = hdr->len;
+      ret = virtqueue_add_consumed_buffer(vq, (uint16_t)(uintptr_t)pkt->priv,
+                                          data_len + VIRTIO_VSOCK_HDR_LEN);
+      if (ret < 0)
+        {
+          spin_unlock_irqrestore(&priv->tx_lock, flags);
+          vhosterr("Add buffer failed ret=%d\n", ret);
+          return ret;
+        }
+
+      next = pkt->next;
+      if (len != 0)
+        {
+          pkt->next = NULL;
+          list_add_head(&priv->tx_pkt_list, (FAR struct list_node *)pkt);
+        }
+
+      pkt = next;
+      len += data_len;
     }
 
   virtqueue_kick(vq);
@@ -274,6 +307,32 @@ static void vsock_vhost_handle_tx(FAR struct virtqueue *vq)
 }
 
 /****************************************************************************
+ * Name: vsock_vhost_tx_pkt_init
+ ****************************************************************************/
+
+static int vsock_vhost_tx_pkt_init(FAR struct vsock_vhost_priv_s *priv)
+{
+  FAR struct virtqueue *vq = priv->hdev->vrings_info[VSOCK_VQ_TX].vq;
+  uint16_t i;
+
+  list_initialize(&priv->tx_pkt_list);
+  priv->tx_pkt_alloc = kmm_zalloc(sizeof(struct vsock_pkt_s) *
+                                  vq->vq_nentries);
+  if (priv->tx_pkt_alloc == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  for (i = 0; i < vq->vq_nentries; i++)
+    {
+      list_add_tail(&priv->tx_pkt_list,
+                    (FAR struct list_node *)(&priv->tx_pkt_alloc[i]));
+    }
+
+  return 0;
+}
+
+/****************************************************************************
  * Name: vsock_vhost_probe
  ****************************************************************************/
 
@@ -327,6 +386,13 @@ static int vsock_vhost_probe(FAR struct vhost_device *hdev)
       priv->host_cid = VMADDR_CID_HOST;
     }
 
+  ret = vsock_vhost_tx_pkt_init(priv);
+  if (ret < 0)
+    {
+      vrterr("vsock_vhost_tx_pkt_init failed, ret=%d\n", ret);
+      goto err_with_tx;
+    }
+
   /* Register Virtual Socket H2G transport */
 
   priv->t.ops = &g_vsock_vhost_transport_ops;
@@ -336,7 +402,10 @@ static int vsock_vhost_probe(FAR struct vhost_device *hdev)
   virtqueue_enable_cb(hdev->vrings_info[VSOCK_VQ_TX].vq);
   return ret;
 
+err_with_tx:
+  vhost_delete_virtqueues(hdev);
 err:
+  nxsem_destroy(&priv->tx_sem);
   kmm_free(priv);
   return ret;
 }
@@ -351,6 +420,7 @@ static void vsock_vhost_remove(FAR struct vhost_device *hdev)
 
   virtqueue_disable_cb(hdev->vrings_info[VSOCK_VQ_RX].vq);
   virtqueue_disable_cb(hdev->vrings_info[VSOCK_VQ_TX].vq);
+  kmm_free(priv->tx_pkt_alloc);
   vhost_delete_virtqueues(hdev);
   nxsem_destroy(&priv->tx_sem);
   kmm_free(priv);

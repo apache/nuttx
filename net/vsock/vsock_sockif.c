@@ -916,27 +916,34 @@ static size_t vsock_copy_msg2pkt(FAR struct vsock_pkt_s *pkt,
   size_t ret = 0;
 
   DEBUGASSERT(total <= msg->uio.uio_resid);
-  while (total > 0 && pkt->vbidx < pkt->vbcnt &&
-         pkt->vboff <= pkt->vb[pkt->vbidx].len)
+
+  while (pkt != NULL)
     {
-      FAR void *buf = pkt->vb[pkt->vbidx].buf + pkt->vboff;
-      size_t len = pkt->vb[pkt->vbidx].len - pkt->vboff;
-
-      size_t copied = MIN(len, total);
-      uio_copyto(&msg->uio, 0, buf, copied);
-      uio_advance(&msg->uio, copied);
-      if (copied >= len)
+      while (total > 0 && pkt->vbidx < pkt->vbcnt &&
+             pkt->vboff <= pkt->vb[pkt->vbidx].len)
         {
-          pkt->vbidx++;
-          pkt->vboff = 0;
-        }
-      else
-        {
-          pkt->vboff += copied;
+          FAR void *buf = pkt->vb[pkt->vbidx].buf + pkt->vboff;
+          size_t len = pkt->vb[pkt->vbidx].len - pkt->vboff;
+
+          size_t copied = MIN(len, total);
+
+          uio_copyto(&msg->uio, 0, buf, copied);
+          uio_advance(&msg->uio, copied);
+          if (copied >= len)
+            {
+              pkt->vbidx++;
+              pkt->vboff = 0;
+            }
+          else
+            {
+              pkt->vboff += copied;
+            }
+
+          total -= copied;
+          ret += copied;
         }
 
-      total -= copied;
-      ret += copied;
+      pkt = pkt->next;
     }
 
   return ret;
@@ -997,6 +1004,7 @@ static int vsock_send_pkt(FAR struct vsock_conn_s *conn,
                           uint16_t op, uint32_t hdrflags,
                           uint64_t dst_cid, uint32_t dst_port)
 {
+  FAR struct vsock_pkt_s *tmp;
   struct vsock_pkt_s pkt;
   struct vsock_hdr_s *hdr;
   unsigned int rxcount;
@@ -1033,30 +1041,33 @@ static int vsock_send_pkt(FAR struct vsock_conn_s *conn,
       vsock_alloc_tx_credit(conn, len);
     }
 
-  hdr = vsock_pkt2hdr(&pkt);
-  if (dst_cid == 0)
+  for (tmp = &pkt; tmp != NULL; tmp = tmp->next)
     {
-      hdr->dst_cid  = conn->remote_addr.svm_cid;
-      hdr->dst_port = conn->remote_addr.svm_port;
-    }
-  else
-    {
-      hdr->dst_cid  = dst_cid;
-      hdr->dst_port = dst_port;
-    }
+      hdr = vsock_pkt2hdr(tmp);
+      if (dst_cid == 0)
+        {
+          hdr->dst_cid  = conn->remote_addr.svm_cid;
+          hdr->dst_port = conn->remote_addr.svm_port;
+        }
+      else
+        {
+          hdr->dst_cid  = dst_cid;
+          hdr->dst_port = dst_port;
+        }
 
-  hdr->type     = VIRTIO_VSOCK_TYPE_STREAM;
-  hdr->op       = op;
-  hdr->src_cid  = VSOCK_GET_LOCALCID(conn->transport);
-  hdr->src_port = conn->local_addr.svm_port;
-  hdr->flags    = hdrflags;
-  hdr->len      = len;
+      hdr->type     = VIRTIO_VSOCK_TYPE_STREAM;
+      hdr->op       = op;
+      hdr->src_cid  = VSOCK_GET_LOCALCID(conn->transport);
+      hdr->src_port = conn->local_addr.svm_port;
+      hdr->flags    = hdrflags;
+      hdr->len      = tmp->len - VIRTIO_VSOCK_HDR_LEN;
 
-  flags = spin_lock_irqsave(&conn->cnt_lock);
-  conn->rx_last_fwd_cnt = conn->rx_fwd_cnt;
-  hdr->fwd_cnt = conn->rx_fwd_cnt;
-  hdr->buf_alloc = conn->rx_buf_alloc;
-  spin_unlock_irqrestore(&conn->cnt_lock, flags);
+      flags = spin_lock_irqsave(&conn->cnt_lock);
+      conn->rx_last_fwd_cnt = conn->rx_fwd_cnt;
+      hdr->fwd_cnt = conn->rx_fwd_cnt;
+      hdr->buf_alloc = conn->rx_buf_alloc;
+      spin_unlock_irqrestore(&conn->cnt_lock, flags);
+    }
 
   vsock_dump_pkt(&pkt, "Send", false);
   return VSOCK_SEND_PKT(conn->transport, &pkt);

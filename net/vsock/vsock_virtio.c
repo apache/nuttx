@@ -203,6 +203,8 @@ static int vsock_virtio_alloc_pkt(FAR struct vsock_transport_s *t,
                 {
                   pkt->vb[i].len = data_len;
                 }
+
+              pkt->len += pkt->vb[i].len;
             }
 
           priv->tx_buf_num -= vbcnt;
