@@ -68,7 +68,6 @@ void up_exit(int status)
 
   /* Adjusts time slice for SCHED_RR & SCHED_SPORADIC cases */
 
-  nxsched_resume_scheduler(tcb);
   g_running_tasks[this_cpu()] = tcb;
 
 #ifdef CONFIG_ARCH_ADDRENV
