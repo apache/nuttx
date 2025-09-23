@@ -678,10 +678,10 @@ static void pl011_putc(struct uart_dev_s *dev, int ch)
   FAR struct pl011_uart_port_s *sport = dev->priv;
   irqstate_t flags;
 
-  flags = spin_lock_irqsave(&sport->lock);
+  flags = spin_lock_irqsave_notrace(&sport->lock);
   while (!pl011_txempty(dev));
   pl011_send(dev, ch);
-  spin_unlock_irqrestore(&sport->lock, flags);
+  spin_unlock_irqrestore_notrace(&sport->lock, flags);
 }
 
 /***************************************************************************
