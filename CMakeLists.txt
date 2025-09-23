@@ -633,7 +633,7 @@ process_all_directory_romfs()
 get_property(ldscript GLOBAL PROPERTY LD_SCRIPT)
 
 # Pre-compile linker script
-if(NOT CONFIG_ARCH_SIM AND NOT CONFIG_ARCH_TOOLCHAIN_TASKING)
+if(NOT CONFIG_ARCH_SIM)
   get_filename_component(LD_SCRIPT_NAME ${ldscript} NAME)
   set(LD_SCRIPT_TMP "${CMAKE_BINARY_DIR}/${LD_SCRIPT_NAME}.tmp")
 
