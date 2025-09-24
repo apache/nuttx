@@ -69,10 +69,6 @@ CMN_CSRCS  += x86_64_signal_dispatch.c
 CMN_UASRCS += x86_64_signal_handler.S
 endif
 
-ifndef CONFIG_ALARM_ARCH
-CMN_CSRCS += x86_64_udelay.c x86_64_mdelay.c
-endif
-
 ifeq ($(CONFIG_ARCH_HAVE_DEBUG),y)
 CMN_CSRCS += x86_64_hwdebug.c
 endif

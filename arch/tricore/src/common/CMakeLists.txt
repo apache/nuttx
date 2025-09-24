@@ -32,7 +32,6 @@ set(SRCS
     tricore_initialstate.c
     tricore_irq.c
     tricore_main.c
-    tricore_mdelay.c
     tricore_nputs.c
     tricore_registerdump.c
     tricore_releasestack.c

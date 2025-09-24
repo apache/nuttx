@@ -37,8 +37,6 @@ CMN_CSRCS  = or1k_initialize.c \
              or1k_registerdump.c \
              or1k_getintstack.c \
              or1k_exit.c \
-             or1k_udelay.c \
-             or1k_mdelay.c \
              or1k_idle.c \
              or1k_irq.c \
              or1k_nputs.c \

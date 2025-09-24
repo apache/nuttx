@@ -39,12 +39,6 @@ if(NOT CONFIG_ARCH_IDLE_CUSTOM)
   list(APPEND SRCS riscv_idle.c)
 endif()
 
-if(NOT CONFIG_ALARM_ARCH)
-  if(NOT CONFIG_TIMER_ARCH)
-    list(APPEND SRCS riscv_mdelay.c riscv_udelay.c)
-  endif()
-endif()
-
 if(CONFIG_SMP)
   list(APPEND SRCS riscv_smpcall.c riscv_cpustart.c)
 endif()

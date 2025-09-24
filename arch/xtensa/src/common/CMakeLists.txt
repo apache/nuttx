@@ -60,7 +60,6 @@ list(
   xtensa_initialstate.c
   xtensa_irqdispatch.c
   xtensa_lowputs.c
-  xtensa_mdelay.c
   xtensa_modifyreg8.c
   xtensa_modifyreg16.c
   xtensa_modifyreg32.c
@@ -75,7 +74,6 @@ list(
   xtensa_stackframe.c
   xtensa_saveusercontext.c
   xtensa_schedsigaction.c
-  xtensa_udelay.c
   xtensa_usestack.c
   xtensa_tcbinfo.c)
 
