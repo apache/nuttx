@@ -106,8 +106,8 @@ static char g_txbuffer[ESP_USBCDC_BUFFERSIZE];
 
 static struct esp_priv_s g_usbserial_priv =
 {
-  .source = USB_SERIAL_JTAG_INTR_SOURCE,
-  .irq    = ESP_IRQ_USB_SERIAL_JTAG,
+  .source = ETS_USB_SERIAL_JTAG_INTR_SOURCE,
+  .irq    = ESP_SOURCE2IRQ(ETS_USB_SERIAL_JTAG_INTR_SOURCE),
   .cpuint = -ENOMEM,
 };
 
@@ -167,23 +167,23 @@ uart_dev_t g_uart_usbserial =
 static int esp_interrupt(int irq, void *context, void *arg)
 {
   struct uart_dev_s *dev = (struct uart_dev_s *)arg;
-  uint32_t tx_mask = USB_SERIAL_JTAG_SERIAL_IN_EMPTY_INT_ST;
-  uint32_t rx_mask = USB_SERIAL_JTAG_SERIAL_OUT_RECV_PKT_INT_ST;
   uint32_t int_status = usb_serial_jtag_ll_get_intsts_mask();
 
   /* Send buffer has room and can accept new data. */
 
-  if ((int_status & tx_mask) != 0)
+  if ((int_status & USB_SERIAL_JTAG_INTR_SERIAL_IN_EMPTY) != 0)
     {
-      usb_serial_jtag_ll_clr_intsts_mask(tx_mask);
+      usb_serial_jtag_ll_clr_intsts_mask(
+        USB_SERIAL_JTAG_INTR_SERIAL_IN_EMPTY);
       uart_xmitchars(dev);
     }
 
   /* Data from the host are available to read. */
 
-  if ((int_status & rx_mask) != 0)
+  if ((int_status & USB_SERIAL_JTAG_INTR_SERIAL_OUT_RECV_PKT) != 0)
     {
-      usb_serial_jtag_ll_clr_intsts_mask(rx_mask);
+      usb_serial_jtag_ll_clr_intsts_mask(
+        USB_SERIAL_JTAG_INTR_SERIAL_OUT_RECV_PKT);
       uart_recvchars(dev);
     }
 
@@ -230,12 +230,12 @@ static void esp_txint(struct uart_dev_s *dev, bool enable)
   if (enable)
     {
       usb_serial_jtag_ll_ena_intr_mask(
-        USB_SERIAL_JTAG_SERIAL_IN_EMPTY_INT_ENA);
+        USB_SERIAL_JTAG_INTR_SERIAL_IN_EMPTY);
     }
   else
     {
       usb_serial_jtag_ll_disable_intr_mask(
-        USB_SERIAL_JTAG_SERIAL_IN_EMPTY_INT_ENA);
+        USB_SERIAL_JTAG_INTR_SERIAL_IN_EMPTY);
     }
 }
 
@@ -252,12 +252,12 @@ static void esp_rxint(struct uart_dev_s *dev, bool enable)
   if (enable)
     {
       usb_serial_jtag_ll_ena_intr_mask(
-        USB_SERIAL_JTAG_SERIAL_OUT_RECV_PKT_INT_ENA);
+        USB_SERIAL_JTAG_INTR_SERIAL_OUT_RECV_PKT);
     }
   else
     {
       usb_serial_jtag_ll_disable_intr_mask(
-        USB_SERIAL_JTAG_SERIAL_OUT_RECV_PKT_INT_ENA);
+        USB_SERIAL_JTAG_INTR_SERIAL_OUT_RECV_PKT);
     }
 }
 
