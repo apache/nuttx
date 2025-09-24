@@ -1523,7 +1523,7 @@ static int netdev_arp_ioctl(FAR struct socket *psock, int cmd,
               req->arp_pa.sa_family == AF_INET)
             {
               ret = arp_find(addr->sin_addr.s_addr,
-                            (FAR uint8_t *)req->arp_ha.sa_data, dev, true);
+                            (FAR uint8_t *)req->arp_ha.sa_data, dev);
               if (ret >= 0)
                 {
                   /* Return the mapped hardware address. */
