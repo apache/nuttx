@@ -1,0 +1,20 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config SENT
+	bool "Enable SENT driver"
+	default n
+	---help---
+		Enable support for SENT (Single Edge Nibble Transmission) protocol
+		devices. SENT is a digital communication protocol standardized by
+		SAE J2716, primarily used in automotive applications for sensor
+		data transmission.
+
+config SENT_RING_BUFFER_SIZE
+	int "The size of sent ring buffer"
+	depends on SENT
+	default 16
+	---help---
+		The number of frames can be accommodated in the ring buffer of the sent driver

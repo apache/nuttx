@@ -117,6 +117,7 @@
 #define _PULSECOUNTBASE (0x4900) /* Pulse count driver ioctl commands */
 #define _NPZEROIOCBASE  (0x4a00) /* nPZero power-saving IC ioctl commands */
 #define _OCUIOCBASE     (0x4b00) /* OCU (Output Compare Unit) ioctl commands */
+#define _SENTIOCBASE    (0x4c00) /* SENT modules ioctl commands */
 #define _RPTUNBASE      (0x5000) /* Remote processor tunneling ioctl commands */
 #define _VIRTIOBASE     (0x5100) /* VirtIO ioctl commands */
 #define _WLIOCBASE      (0x8b00) /* Wireless modules ioctl network commands */
@@ -436,6 +437,11 @@
 
 #define _SNIOCVALID(c)    (_IOC_TYPE(c)==_SNIOCBASE)
 #define _SNIOC(nr)        _IOC(_SNIOCBASE,nr)
+
+/* NuttX SENT ioctl definitions (see nuttx/sent/sent.h) *********************/
+
+#define _SENTIOCVALID(c)  (_IOC_TYPE(c)==_SENTIOCBASE)
+#define _SENTIOC(nr)      _IOC(_SENTIOCBASE,nr)
 
 /* NuttX Analog (DAC/ADC) ioctl commands (see nuttx/analog/ioctl.h **********/
 
