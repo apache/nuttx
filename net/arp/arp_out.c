@@ -254,7 +254,7 @@ void arp_out(FAR struct net_driver_s *dev)
 
   /* Check if we already have this destination address in the ARP table */
 
-  ret = arp_find(ipaddr, ethaddr.ether_addr_octet, dev, false);
+  ret = arp_find(ipaddr, ethaddr.ether_addr_octet, dev);
   if (ret < 0)
     {
       /* No send ARP if the interface forbidden */

@@ -311,7 +311,7 @@ int arp_send(in_addr_t ipaddr)
        */
 
       netdev_lock(dev);
-      ret = arp_find(ipaddr, NULL, dev, true);
+      ret = arp_find(ipaddr, NULL, dev);
       if (ret >= 0 || ret == -ENETUNREACH)
         {
           /* We have it! Break out with ret value */
