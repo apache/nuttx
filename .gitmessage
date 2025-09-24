@@ -6,6 +6,11 @@ can use several lines, short sentences or even bullet points. You can
 even mention a specific issue/pull request using `#` followed by the
 numerical ID. For more pointers, please see `nuttx/CONTRIBUTING.md`.
 
+If your change will break some existing API, please include a "!" as the
+first character in the commit title and include at foot of commit message:
+
+BREAKING CHANGE: How it was used before and how to use now.
+
 # Don't forget to run `git commit` with the `-s` option to sign-off your
 # commit!
 
