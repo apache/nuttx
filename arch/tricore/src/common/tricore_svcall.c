@@ -85,7 +85,7 @@ void tricore_svcall(volatile void *trap)
 
   if (cmd != SYS_restore_context)
     {
-      (*running_task)->xcp.regs = plregs;
+      (*running_task)->xcp.regs = puregs;
     }
   else
     {
@@ -114,8 +114,10 @@ void tricore_svcall(volatile void *trap)
 
   /* Reserve CSAs for FCD depletion threshold */
 
-  tricore_mtcr(TRICORE_CPU_PCXI, tricore_addr2csa(tcb->xcp.regs));
-  tricore_mtcr(TRICORE_CPU_FCX, tricore_addr2csa(tcb->xcp.regs + TC_CONTEXT_REGS));
+  tricore_mtcr(TRICORE_CPU_PCXI,
+               tricore_addr2csa(tcb->xcp.regs + TC_CONTEXT_REGS));
+  tricore_mtcr(TRICORE_CPU_FCX,
+               tricore_addr2csa(tcb->xcp.regs + XCPTCONTEXT_REGS));
   tricore_mtcr(TRICORE_CPU_LCX,
                tricore_addr2csa((uintptr_t)tcb->stack_base_ptr +
                                          tcb->adj_stack_size -

@@ -400,7 +400,7 @@ void tricore_trapcall(volatile void *trap)
 
       /* Update the current task's regs */
 
-      g_running_tasks[this_cpu()]->xcp.regs = regs;
+      g_running_tasks[this_cpu()]->xcp.regs = regs - TC_CONTEXT_REGS;
 
       saved_fcx = tricore_mfcr(CPU_FCX);
       saved_lcx = tricore_mfcr(CPU_LCX);

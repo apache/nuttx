@@ -131,7 +131,7 @@ void *up_stack_frame(struct tcb_s *tcb, size_t frame_size)
 
       /* Reset tcb->xcp.regs */
 
-      tcb->xcp.regs = dest + TC_CONTEXT_REGS;
+      tcb->xcp.regs = dest;
     }
 
   /* Copy csa list in reverse order to avoid overwriting */

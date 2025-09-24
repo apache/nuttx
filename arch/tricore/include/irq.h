@@ -317,18 +317,7 @@ static inline_function bool up_interrupt_context(void)
 
 static inline_function uintptr_t up_getusrsp(void *regs)
 {
-  uintptr_t *csaregs = (uintptr_t *)regs;
-
-  if (csaregs[REG_LPCXI] & PCXI_UL)
-    {
-      csaregs = tricore_csa2addr(csaregs[REG_LPCXI]);
-    }
-  else
-    {
-      csaregs += TC_CONTEXT_REGS;
-    }
-
-  return csaregs[REG_SP];
+  return ((uintptr_t *)regs)[REG_SP];
 }
 
 #endif /* __ASSEMBLY__ */

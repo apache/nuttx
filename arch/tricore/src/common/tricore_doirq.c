@@ -68,7 +68,7 @@ IFX_INTERRUPT_INTERNAL(tricore_doirq, 0, 255)
 
   if (*running_task != NULL)
     {
-      (*running_task)->xcp.regs = regs;
+      (*running_task)->xcp.regs = regs - TC_CONTEXT_REGS;
     }
 
   /* set registers related to csa */
@@ -123,8 +123,8 @@ IFX_INTERRUPT_INTERNAL(tricore_doirq, 0, 255)
 
   /* Reserve CSAs for FCD depletion threshold */
 
-  tricore_mtcr(CPU_PCXI, tricore_addr2csa(tcb->xcp.regs));
-  tricore_mtcr(CPU_FCX, tricore_addr2csa(tcb->xcp.regs + TC_CONTEXT_REGS));
+  tricore_mtcr(CPU_PCXI, tricore_addr2csa(tcb->xcp.regs + TC_CONTEXT_REGS));
+  tricore_mtcr(CPU_FCX, tricore_addr2csa(tcb->xcp.regs + XCPTCONTEXT_REGS));
   tricore_mtcr(CPU_LCX, tricore_addr2csa((uintptr_t)tcb->stack_base_ptr +
                                          tcb->adj_stack_size -
                                          FCD_RESERVE_SIZE));
