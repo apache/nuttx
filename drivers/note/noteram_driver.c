@@ -794,7 +794,17 @@ static int noteram_dump_header(FAR struct lib_outstream_s *s,
   pid_t pid;
   int ret;
 
+
+#if defined (CONFIG_NOTE_GET_PERF_TIME)
   perf_convert(note->nc_systime, &ts);
+
+#elif defined (CONFIG_NOTE_GET_CLOCK_TIME)
+  ts.tv_sec = note->nc_systime / NSEC_PER_SEC;
+  ts.tv_nsec = note->nc_systime % NSEC_PER_SEC;
+
+#else
+#endif
+
   pid = note->nc_pid;
 #ifdef CONFIG_SMP
   int cpu = note->nc_cpu;
