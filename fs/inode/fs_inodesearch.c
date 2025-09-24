@@ -477,6 +477,11 @@ int inode_search(FAR struct inode_search_s *desc)
 
   DEBUGASSERT(desc != NULL && desc->path != NULL);
 
+  if (*desc->path == '\0')
+    {
+      return -ENOENT;
+    }
+
   /* Convert the relative path to the absolute path */
 
   if (*desc->path != '/')
