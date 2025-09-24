@@ -40,12 +40,6 @@ ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
   CMN_CSRCS += riscv_idle.c
 endif
 
-ifneq ($(CONFIG_ALARM_ARCH),y)
-  ifneq ($(CONFIG_TIMER_ARCH),y)
-    CMN_CSRCS += riscv_mdelay.c riscv_udelay.c
-  endif
-endif
-
 ifeq ($(CONFIG_SMP),y)
 CMN_CSRCS += riscv_smpcall.c riscv_cpustart.c
 endif

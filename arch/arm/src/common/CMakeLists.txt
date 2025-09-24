@@ -43,10 +43,6 @@ set(SRCS
     arm_poweroff.c
     ${ARCH_TOOLCHAIN_PATH}/fork.S)
 
-if(NOT CONFIG_ALARM_ARCH AND NOT CONFIG_TIMER_ARCH)
-  list(APPEND SRCS arm_mdelay.c arm_udelay.c)
-endif()
-
 if(CONFIG_STACK_COLORATION)
   list(APPEND SRCS arm_checkstack.c)
 endif()

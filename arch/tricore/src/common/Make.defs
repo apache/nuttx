@@ -33,7 +33,6 @@ CMN_CSRCS += tricore_initialize.c
 CMN_CSRCS += tricore_initialstate.c
 CMN_CSRCS += tricore_irq.c
 CMN_CSRCS += tricore_main.c
-CMN_CSRCS += tricore_mdelay.c
 CMN_CSRCS += tricore_nputs.c
 CMN_CSRCS += tricore_registerdump.c
 CMN_CSRCS += tricore_releasestack.c
