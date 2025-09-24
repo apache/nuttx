@@ -35,6 +35,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <sys/types.h>
+#include <sys/lock.h>
 #include <unistd.h>
 
 #include <nuttx/arch.h>
@@ -44,6 +45,7 @@
 #include "chip.h"
 #include "esp_irq.h"
 #include "hal/uart_hal.h"
+#include "esp_private/critical_section.h"
 
 /****************************************************************************
  * Public Types
@@ -53,27 +55,21 @@
 
 struct esp_uart_s
 {
-  int                 source;    /* UART interrupt source */
   int                 cpuint;    /* CPU interrupt assigned to this UART */
   irq_priority_t      int_pri;   /* UART Interrupt Priority */
   int                 id;        /* UART ID */
-  int                 irq;       /* IRQ associated with this UART */
   uint32_t            baud;      /* Configured baud rate */
   bool                stop_b2;   /* Flag for using 2 stop bits */
   uint8_t             bits;      /* Data length (5 to 8 bits) */
   uint8_t             parity;    /* 0=no parity, 1=odd, 2=even */
   uint8_t             txpin;     /* TX pin */
-  uint8_t             txsig;     /* TX signal */
   uint8_t             rxpin;     /* RX pin */
-  uint8_t             rxsig;     /* RX signal */
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
   uint8_t             rtspin;    /* RTS pin number */
-  uint8_t             rtssig;    /* RTS signal */
   bool                iflow;     /* Input flow control (RTS) enabled */
 #endif
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
   uint8_t             ctspin;    /* CTS pin number */
-  uint8_t             ctssig;    /* CTS signal */
   bool                oflow;     /* Output flow control (CTS) enabled */
 #endif
 #ifdef HAVE_RS485
@@ -84,6 +80,15 @@ struct esp_uart_s
   uart_hal_context_t *hal;       /* HAL context */
   spinlock_t          lock;      /* Spinlock */
 };
+
+typedef struct
+{
+  _lock_t mutex;                 /* Protect uart_module_enable, uart_module_disable, retention, etc. */
+  uart_port_t port_id;
+  uart_hal_context_t hal;        /* UART hal context */
+  DECLARE_CRIT_SECTION_LOCK_IN_STRUCT(spinlock)
+  bool hw_enabled;
+} uart_context_t;
 
 extern struct esp_uart_s g_uart0_config;
 extern struct esp_uart_s g_uart1_config;
@@ -107,19 +112,6 @@ extern struct esp_uart_s g_lp_uart0_config;
 
 void esp_lowputc_send_byte(const struct esp_uart_s *priv,
                            char byte);
-
-/****************************************************************************
- * Name: esp_lowputc_enable_sysclk
- *
- * Description:
- *   Enable clock for the UART using the System register.
- *
- * Parameters:
- *   priv           - Pointer to the private driver struct.
- *
- ****************************************************************************/
-
-void esp_lowputc_enable_sysclk(const struct esp_uart_s *priv);
 
 /****************************************************************************
  * Name: esp_lowputc_disable_all_uart_int
@@ -192,5 +184,7 @@ void esp_lowputc_restore_pins(const struct esp_uart_s *priv);
  ****************************************************************************/
 
 void esp_lowsetup(void);
+
+bool esp_lowputc_uart_module_enable(const struct esp_uart_s *priv);
 
 #endif /* __ARCH_RISCV_SRC_COMMON_ESPRESSIF_ESP_LOWPUTC_H */

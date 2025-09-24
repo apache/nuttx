@@ -55,7 +55,10 @@
 #endif
 
 #include "esp_clk_tree.h"
+#include "esp_private/uart_share_hw_ctrl.h"
+#include "esp_private/esp_clk_tree_common.h"
 #include "hal/uart_hal.h"
+#include "soc/uart_periph.h"
 #include "soc/clk_tree_defs.h"
 #include "periph_ctrl.h"
 
@@ -307,6 +310,12 @@ static uart_dev_t g_lp_uart0_dev =
 #endif /* CONFIG_ESPRESSIF_UART */
 
 /****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+extern uart_context_t g_uart_context[UART_NUM_MAX];
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -453,15 +462,21 @@ static void set_stop_length(const struct esp_uart_s *priv)
 static int esp_setup(uart_dev_t *dev)
 {
   struct esp_uart_s *priv = dev->priv;
+  soc_module_clk_t src_clk;
   uint32_t sclk_freq;
+  bool success = false;
 
   /* Enable the UART Clock */
 
-  esp_lowputc_enable_sysclk(priv);
+  esp_lowputc_uart_module_enable(priv);
 
-  esp_clk_tree_src_get_freq_hz((soc_module_clk_t)priv->clk_src,
-                           ESP_CLK_TREE_SRC_FREQ_PRECISION_CACHED,
-                           &sclk_freq);
+  uart_hal_get_sclk(priv->hal, &src_clk);
+
+  esp_clk_tree_src_get_freq_hz(src_clk,
+                               ESP_CLK_TREE_SRC_FREQ_PRECISION_CACHED,
+                               &sclk_freq);
+
+  esp_os_enter_critical(&(g_uart_context[priv->id].spinlock));
 
   /* Initialize UART module */
 #ifdef CONFIG_ESPRESSIF_LP_UART
@@ -479,25 +494,18 @@ static int esp_setup(uart_dev_t *dev)
 #endif
 
   uart_hal_init(priv->hal, priv->id);
+
   uart_hal_set_mode(priv->hal, UART_MODE_UART);
-  if (priv->id < ESP_LP_UART0_ID)
-    {
-      uart_hal_set_sclk(priv->hal, UART_SCLK_DEFAULT);
-      uart_hal_set_baudrate(priv->hal, priv->baud, sclk_freq);
-    }
-#ifdef CONFIG_ESPRESSIF_LP_UART
-  else
-    {
-      /* Override protocol parameters from the configuration */
 
-      if (!lp_uart_ll_set_baudrate(priv->hal->dev, priv->baud, sclk_freq))
+  if (priv->id < SOC_UART_HP_NUM)
+    {
+      esp_clk_tree_enable_src(UART_SCLK_XTAL, true);
+      HP_UART_SRC_CLK_ATOMIC()
         {
-          /* Unachievable baud rate */
-
-          return ESP_FAIL;
+          uart_hal_set_sclk(priv->hal, UART_SCLK_XTAL);
+          success = uart_hal_set_baudrate(priv->hal, priv->baud, sclk_freq);
         }
     }
-#endif
 
   uart_hal_set_parity(priv->hal, priv->parity);
   set_data_length(priv);
@@ -559,6 +567,13 @@ static int esp_setup(uart_dev_t *dev)
   else
 #endif
 
+  esp_os_exit_critical(&(g_uart_context[priv->id].spinlock));
+
+  if (success == false)
+    {
+      return -EIO;
+    }
+
   /* Clear FIFOs */
 
   uart_hal_rxfifo_rst(priv->hal);
@@ -619,24 +634,27 @@ static int esp_attach(uart_dev_t *dev)
 {
   struct esp_uart_s *priv = dev->priv;
   int ret;
+  int source;
 
   DEBUGASSERT(priv->cpuint == -ENOMEM);
 
   /* Set up to receive peripheral interrupts */
 
-  priv->cpuint = esp_setup_irq(priv->source, priv->int_pri,
+  source = uart_periph_signal[priv->id].irq;
+
+  priv->cpuint = esp_setup_irq(source, priv->int_pri,
                                ESP_IRQ_TRIGGER_LEVEL);
 
   /* Attach and enable the IRQ */
 
-  ret = irq_attach(priv->irq, uart_handler, dev);
+  ret = irq_attach(ESP_SOURCE2IRQ(source), uart_handler, dev);
   if (ret == OK)
     {
-      up_enable_irq(priv->irq);
+      up_enable_irq(ESP_SOURCE2IRQ(source));
     }
   else
     {
-      up_disable_irq(priv->irq);
+      up_disable_irq(ESP_SOURCE2IRQ(source));
     }
 
   return ret;
@@ -661,17 +679,20 @@ static int esp_attach(uart_dev_t *dev)
 static void esp_detach(uart_dev_t *dev)
 {
   struct esp_uart_s *priv = dev->priv;
+  int source;
 
   DEBUGASSERT(priv->cpuint != -ENOMEM);
 
+  source = uart_periph_signal[priv->id].irq;
+
   /* Disable and detach the CPU interrupt */
 
-  up_disable_irq(priv->irq);
-  irq_detach(priv->irq);
+  up_disable_irq(ESP_SOURCE2IRQ(source));
+  irq_detach(ESP_SOURCE2IRQ(source));
 
   /* Disassociate the peripheral interrupt from the CPU interrupt */
 
-  esp_teardown_irq(priv->source, priv->cpuint);
+  esp_teardown_irq(source, priv->cpuint);
   priv->cpuint = -ENOMEM;
 }
 
