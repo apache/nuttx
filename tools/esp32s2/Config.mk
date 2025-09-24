@@ -140,7 +140,7 @@ define HELP_FLASH_BOOTLOADER
 	$(Q) echo ""
 	$(Q) echo "$(YELLOW)Security features enabled, so bootloader not flashed automatically.$(RST)"
 	$(Q) echo "Use the following command to flash the bootloader:"
-	$(Q) echo "    esptool.py $(ESPTOOL_OPTS) write_flash $(ESPTOOL_WRITEFLASH_OPTS) $(FLASH_BL)"
+	$(Q) echo "    esptool $(ESPTOOL_OPTS) write_flash $(ESPTOOL_WRITEFLASH_OPTS) $(FLASH_BL)"
 	$(Q) echo ""
 endef
 
@@ -157,7 +157,7 @@ define MERGEBIN
 		echo "Missing Flash memory size configuration for the ESP32-S2 chip."; \
 		exit 1; \
 	fi
-	esptool.py -c esp32s2 merge_bin --output nuttx.merged.bin $(ESPTOOL_FLASH_OPTS) $(ESPTOOL_BINS)
+	esptool -c esp32s2 merge_bin --output nuttx.merged.bin $(ESPTOOL_FLASH_OPTS) $(ESPTOOL_BINS)
 	$(Q) echo nuttx.merged.bin >> nuttx.manifest
 	$(Q) echo "Generated: nuttx.merged.bin"
 endef
@@ -224,7 +224,7 @@ define MKIMAGE
 		exit 1; \
 	fi
 	$(eval ELF2IMAGE_OPTS := $(if $(CONFIG_ESPRESSIF_SIMPLE_BOOT),--ram-only-header) -fs $(FLASH_SIZE) -fm $(FLASH_MODE) -ff $(FLASH_FREQ))
-	esptool.py -c esp32s2 elf2image $(ELF2IMAGE_OPTS) -o nuttx.bin nuttx
+	esptool -c esp32s2 elf2image $(ELF2IMAGE_OPTS) -o nuttx.bin nuttx
 	$(Q) echo nuttx.bin >> nuttx.manifest
 	$(Q) echo "Generated: nuttx.bin"
 endef
@@ -238,11 +238,11 @@ define POSTBUILD
 	$(if $(CONFIG_ESP32S2_MERGE_BINS),$(call MERGEBIN))
 endef
 
-# ESPTOOL_BAUD -- Serial port baud rate used when flashing/reading via esptool.py
+# ESPTOOL_BAUD -- Serial port baud rate used when flashing/reading via esptool
 
 ESPTOOL_BAUD ?= 921600
 
-# FLASH -- Download a binary image via esptool.py
+# FLASH -- Download a binary image via esptool
 
 define FLASH
 	$(Q) if [ -z $(ESPTOOL_PORT) ]; then \
@@ -251,7 +251,7 @@ define FLASH
 		exit 1; \
 	fi
 	$(eval ESPTOOL_OPTS := -c esp32s2 -p $(ESPTOOL_PORT) -b $(ESPTOOL_BAUD) $(ESPTOOL_RESET_OPTS) $(if $(CONFIG_ESP32S2_ESPTOOLPY_NO_STUB),--no-stub))
-	esptool.py $(ESPTOOL_OPTS) write_flash $(ESPTOOL_WRITEFLASH_OPTS) $(ESPTOOL_BINS)
+	esptool $(ESPTOOL_OPTS) write_flash $(ESPTOOL_WRITEFLASH_OPTS) $(ESPTOOL_BINS)
 
 	$(if $(CONFIG_ESP32S2_SECURE_BOOT)$(CONFIG_ESP32S2_SECURE_FLASH_ENC_ENABLED),$(call HELP_FLASH_BOOTLOADER))
 endef
