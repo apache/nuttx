@@ -718,11 +718,6 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
                     {
                       tcp_xmit_probe(dev, conn);
 
-#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-                      /* Increment the un-ACKed sequence number */
-
-                      conn->sndseq_max++;
-#endif
                       /* Update for the next probe */
 
                       conn->keeptimer = conn->keepintvl;
@@ -763,12 +758,6 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
                   else
                     {
                       tcp_xmit_probe(dev, conn);
-
-#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-                      /* Increment the un-ACKed sequence number */
-
-                      conn->sndseq_max++;
-#endif
 
                       /* Update for the next probe */
 
