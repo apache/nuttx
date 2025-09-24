@@ -1571,10 +1571,16 @@ static int ctucanfd_interrupt(int irq, FAR void *context, FAR void *arg)
 
 static void ctucanfd_init(FAR struct ctucanfd_driver_s *priv)
 {
+  cpu_set_t cpuset;
+
   /* REVISIT: Only legacy IRQ supported in QEMU driver */
 
   priv->irq = pci_get_irq(priv->pcidev);
   irq_attach(priv->irq, ctucanfd_interrupt, priv);
+
+  CPU_ZERO(&cpuset);
+  CPU_SET(up_cpu_index(), &cpuset);
+  up_affinity_irq(priv->irq, cpuset);
 
   /* REVISIT: Enable card interrupts (not implemented in QEMU) */
 
