@@ -310,6 +310,8 @@ int vlan_register(FAR struct netdev_lowerhalf_s *real, uint16_t vid,
                         ((prio << VLAN_PRIO_SHIFT) & VLAN_PRIO_MASK);
   vlan->real          = real;
   vlan->dev.quota_ptr = real->quota_ptr;
+  vlan->dev.rxtype    = real->rxtype;
+  vlan->dev.priority  = real->priority;
   vlan->dev.ops       = &g_vlan_ops;
 
   /* Set the VLAN device name, use a buffer to make compiler happy */
