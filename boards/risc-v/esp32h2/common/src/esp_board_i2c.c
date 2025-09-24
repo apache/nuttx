@@ -47,8 +47,10 @@
  ****************************************************************************/
 
 #ifdef CONFIG_ESPRESSIF_I2C_PERIPH_SLAVE_MODE
-#define I2C0_SLAVE_ADDR   0x28
-#define I2C0_SLAVE_NBITS  7
+#  define I2C0_SLAVE_ADDR   0x28
+#  define I2C0_SLAVE_NBITS  7
+#  define I2C1_SLAVE_ADDR   0x28
+#  define I2C1_SLAVE_NBITS  7
 #endif
 
 /****************************************************************************
@@ -115,12 +117,14 @@ static int i2c_slave_driver_init(int bus, int addr)
   i2c = esp_i2cbus_slave_initialize(bus, addr);
   if (i2c == NULL)
     {
-      syslog(LOG_ERR, "Failed to get I2C%d interface\n", bus);
+      syslog(LOG_ERR, "Failed to get I2C%d slave interface\n", bus);
       return -ENODEV;
     }
 
 #ifdef CONFIG_I2C_DRIVER
-  ret = i2c_slave_register(i2c, bus, addr, I2C0_SLAVE_NBITS);
+  ret = i2c_slave_register(i2c, bus, addr,
+                           bus == ESPRESSIF_I2C0_SLAVE ? \
+                           I2C0_SLAVE_NBITS : I2C1_SLAVE_NBITS);
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to register I2C%d driver: %d\n", bus, ret);
@@ -149,25 +153,29 @@ int board_i2c_init(void)
   int ret = OK;
 
 #ifdef CONFIG_ESPRESSIF_I2C_PERIPH_MASTER_MODE
-#ifdef CONFIG_ESPRESSIF_I2C0
+#  ifdef CONFIG_ESPRESSIF_I2C0_MASTER_MODE
   ret = i2c_driver_init(ESPRESSIF_I2C0);
-  if (ret != OK)
-    {
-      return ret;
-    }
-#endif
+#  endif
 
-#ifdef CONFIG_ESPRESSIF_I2C1
+#  ifdef CONFIG_ESPRESSIF_I2C1_MASTER_MODE
   ret = i2c_driver_init(ESPRESSIF_I2C1);
-#endif
+#  endif
 #endif
 
 #ifdef CONFIG_ESPRESSIF_I2C_BITBANG
+#  ifdef CONFIG_ESPRESSIF_I2C_BITBANG_MASTER_MODE
   ret = i2c_bitbang_driver_init(ESPRESSIF_I2C_BITBANG);
+#  endif
 #endif
 
 #ifdef CONFIG_ESPRESSIF_I2C_PERIPH_SLAVE_MODE
+#  ifdef CONFIG_ESPRESSIF_I2C0_SLAVE_MODE
   ret = i2c_slave_driver_init(ESPRESSIF_I2C0_SLAVE, I2C0_SLAVE_ADDR);
+#  endif
+
+#  ifdef CONFIG_ESPRESSIF_I2C1_SLAVE_MODE
+  ret = i2c_slave_driver_init(ESPRESSIF_I2C1_SLAVE, I2C1_SLAVE_ADDR);
+#  endif
 #endif
 
   return ret;

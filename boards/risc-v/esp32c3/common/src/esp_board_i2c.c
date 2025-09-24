@@ -149,15 +149,21 @@ int board_i2c_init(void)
   int ret = OK;
 
 #ifdef CONFIG_ESPRESSIF_I2C_PERIPH_MASTER_MODE
+#  ifdef CONFIG_ESPRESSIF_I2C0_MASTER_MODE
   ret = i2c_driver_init(ESPRESSIF_I2C0);
+#  endif
 #endif
 
 #ifdef CONFIG_ESPRESSIF_I2C_BITBANG
+#  ifdef CONFIG_ESPRESSIF_I2C_BITBANG_MASTER_MODE
   ret = i2c_bitbang_driver_init(ESPRESSIF_I2C_BITBANG);
+#  endif
 #endif
 
 #ifdef CONFIG_ESPRESSIF_I2C_PERIPH_SLAVE_MODE
+#  ifdef CONFIG_ESPRESSIF_I2C0_SLAVE_MODE
   ret = i2c_slave_driver_init(ESPRESSIF_I2C0_SLAVE, I2C0_SLAVE_ADDR);
+#  endif
 #endif
 
   return ret;
