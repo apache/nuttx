@@ -122,10 +122,6 @@ if(CONFIG_LIBM_TOOLCHAIN)
   list(APPEND STDLIBS m)
 endif()
 
-if(CONFIG_RPMSG_VIRTIO_LITE)
-  list(APPEND SRCS sim_rpmsg_virtio.c)
-endif()
-
 if(CONFIG_RPMSG_PORT_UART)
   list(APPEND SRCS sim_rpmsg_port_uart.c)
 endif()

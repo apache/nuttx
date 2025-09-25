@@ -6230,7 +6230,6 @@ arch/sim/src/sim/sim_openh264dec.h shizhenghui@xiaomi.com alin.jerpelea@sony.com
 arch/sim/src/sim/sim_registerdump.c zhangyuan21@xiaomi.com buxiasen@xiaomi.com alin.jerpelea@sony.com
 arch/sim/src/sim/sim_releasestack.c zhangyuan21@xiaomi.com alin.jerpelea@sony.com
 arch/sim/src/sim/sim_rpmsg_port_uart.c anchao.archer@bytedance.com
-arch/sim/src/sim/sim_rpmsg_virtio.c wangyongrong@xiaomi.com wangbowen6@xiaomi.com devel@sumpfralle.de alin.jerpelea@sony.com
 arch/sim/src/sim/sim_rptun.c zhangyuan21@xiaomi.com yintao@xiaomi.com liguiding1@xiaomi.com wangyongrong@xiaomi.com wangbowen6@xiaomi.com
 arch/sim/src/sim/sim_rtc.c zhangyuan21@xiaomi.com xiaoxiang@xiaomi.com alin.jerpelea@sony.com
 arch/sim/src/sim/sim_saveusercontext.c zhangyuan21@xiaomi.com liguiding1@xiaomi.com alin.jerpelea@sony.com
@@ -12454,10 +12453,8 @@ boards/sim/sim/sim/configs/rc/defconfig dongjiuzhu1@xiaomi.com xiaoxiang@xiaomi.
 boards/sim/sim/sim/configs/romfs/defconfig tanushree.baindur@gmail.com fangxinyong@xiaomi.com xiaoxiang@xiaomi.com ville.juven@unikie.com liguiding1@xiaomi.com
 boards/sim/sim/sim/configs/rpproxy/defconfig chao.an@gm.com xiaoxiang@xiaomi.com wangbowen6@xiaomi.com liguiding1@xiaomi.com dongjiuzhu1@xiaomi.com
 boards/sim/sim/sim/configs/rpproxy_uart/defconfig anchao.archer@bytedance.com
-boards/sim/sim/sim/configs/rpproxy_virtio/defconfig wangbowen6@xiaomi.com wangyongrong@xiaomi.com
 boards/sim/sim/sim/configs/rpserver/defconfig chao.an@gm.com xiaoxiang@xiaomi.com wangbowen6@xiaomi.com liguiding1@xiaomi.com liangchaozhong@xiaomi.com
 boards/sim/sim/sim/configs/rpserver_uart/defconfig anchao.archer@bytedance.com wangjianyu3@xiaomi.com
-boards/sim/sim/sim/configs/rpserver_virtio/defconfig wangbowen6@xiaomi.com wangjianyu3@xiaomi.com wangyongrong@xiaomi.com
 boards/sim/sim/sim/configs/rtptools/defconfig tiago.medicci@gmail.com liguiding1@xiaomi.com acassis@gmail.com wangjianyu3@xiaomi.com mazhuang@xiaomi.com
 boards/sim/sim/sim/configs/rust/defconfig ptka@mailbox.org fangxinyong@xiaomi.com ville.juven@unikie.com mazhuang@xiaomi.com anchao@xiaomi.com
 boards/sim/sim/sim/configs/segger/defconfig xiaoxiang@xiaomi.com fangxinyong@xiaomi.com anchao@xiaomi.com ville.juven@unikie.com mazhuang@xiaomi.com
@@ -13262,8 +13259,6 @@ drivers/rpmsg/rpmsg_port_uart.c wangbowen6@xiaomi.com anchao.archer@bytedance.co
 drivers/rpmsg/rpmsg_router.h yintao@xiaomi.com alin.jerpelea@sony.com
 drivers/rpmsg/rpmsg_router_edge.c yintao@xiaomi.com wangyongrong@xiaomi.com wangbowen6@xiaomi.com alin.jerpelea@sony.com
 drivers/rpmsg/rpmsg_router_hub.c yintao@xiaomi.com wangyongrong@xiaomi.com alin.jerpelea@sony.com
-drivers/rpmsg/rpmsg_virtio_ivshmem.c wangyongrong@xiaomi.com wangbowen6@xiaomi.com xiaoxiang@xiaomi.com devel@sumpfralle.de anchao@lixiang.com
-drivers/rpmsg/rpmsg_virtio_lite.c wangbowen6@xiaomi.com
 drivers/rptun/Kconfig liguiding1@xiaomi.com wangbowen6@xiaomi.com wangyongrong@xiaomi.com liguiding@pinecone.net xiaoxiang@xiaomi.com
 drivers/rptun/rptun.c liguiding1@xiaomi.com wangyongrong@xiaomi.com liguiding@pinecone.net xiaoxiang@xiaomi.com wangbowen6@xiaomi.com
 drivers/rptun/rptun_bmp.c hujun5@xiaomi.com
@@ -14599,8 +14594,6 @@ include/nuttx/rmt/rmtchar.h tiago.medicci@espressif.com alin.jerpelea@sony.com
 include/nuttx/rpmsg/rpmsg.h wangyongrong@xiaomi.com xiaoxiang@xiaomi.com alin.jerpelea@sony.com wangbowen6@xiaomi.com yintao@xiaomi.com
 include/nuttx/rpmsg/rpmsg_port.h liaoao@xiaomi.com wangbowen6@xiaomi.com devel@sumpfralle.de alin.jerpelea@sony.com
 include/nuttx/rpmsg/rpmsg_router.h yintao@xiaomi.com alin.jerpelea@sony.com
-include/nuttx/rpmsg/rpmsg_virtio_ivshmem.h wangyongrong@xiaomi.com alin.jerpelea@sony.com
-include/nuttx/rpmsg/rpmsg_virtio_lite.h wangbowen6@xiaomi.com
 include/nuttx/rptun/rptun.h liguiding@pinecone.net liguiding1@xiaomi.com wangyongrong@xiaomi.com zhongan@xiaomi.com xiaoxiang@xiaomi.com
 include/nuttx/rptun/rptun_bmp.h hujun5@xiaomi.com
 include/nuttx/rptun/rptun_ivshmem.h wangbowen6@xiaomi.com alin.jerpelea@sony.com
