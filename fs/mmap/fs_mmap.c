@@ -82,6 +82,13 @@ static int file_mmap_(FAR struct file *filep, FAR void *start,
       return -EINVAL;
     }
 
+  /* MAP_PRIVATE or MAP_SHARED must be specified */
+
+  if (((flags & MAP_PRIVATE) == 0) && ((flags & MAP_SHARED) == 0))
+    {
+      return -EINVAL;
+    }
+
   /* Fixed mappings and protections are not currently supported.  These
    * options could be supported in the KERNEL build with an MMU, but that
    * logic is not in place.
