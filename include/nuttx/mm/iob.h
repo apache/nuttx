@@ -406,6 +406,19 @@ int iob_tryadd_queue(FAR struct iob_s *iob, FAR struct iob_queue_s *iobq);
 #endif /* CONFIG_IOB_NCHAINS > 0 */
 
 /****************************************************************************
+ * Name: iob_concat_queue
+ *
+ * Description:
+ *   Concatenate iob_s queue src to dest
+ *
+ ****************************************************************************/
+
+#if CONFIG_IOB_NCHAINS > 0
+int iob_concat_queue(FAR struct iob_queue_s *dest,
+                     FAR struct iob_queue_s *src);
+#endif /* CONFIG_IOB_NCHAINS > 0 */
+
+/****************************************************************************
  * Name: iob_remove_queue
  *
  * Description:
