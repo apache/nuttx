@@ -72,7 +72,7 @@ key_t ftok(FAR const char *pathname, int proj_id)
 
   snprintf(fullpath, PATH_MAX, "%s/",
            CONFIG_LIBC_FTOK_VFS_PATH);
-  strlcat(fullpath, pathname, sizeof(fullpath));
+  strlcat(fullpath, pathname, PATH_MAX);
   if (stat(fullpath, &st) < 0 && get_errno() == ENOENT)
     {
       /* Directory not exist, let's create one for caller */
