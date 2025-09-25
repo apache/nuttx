@@ -38,8 +38,9 @@
 
 struct vbuf_container_s
 {
-  struct v4l2_buffer       buf;   /* Buffer information */
-  struct vbuf_container_s *next;  /* Pointer to next buffer */
+  struct v4l2_buffer       buf;                      /* Buffer information */
+  struct v4l2_plane        planes[VIDEO_MAX_PLANES]; /* Buffer planes */
+  struct vbuf_container_s *next;                     /* Pointer to next buffer */
 };
 
 typedef struct vbuf_container_s vbuf_container_t;
