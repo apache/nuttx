@@ -132,6 +132,48 @@ struct mm_heap_s
   atomic_t usmblks;
 };
 
+/* Independent implementation of sim umm list,
+ * xor the address,
+ * so that the memory address will not be recorded in the global variable,
+ * otherwise Lasan cannot detect the leak
+ * */
+
+#define xor_addr(addr) \
+  ((FAR struct list_node *)((uintptr_t)(addr) ^ ~0ul))
+
+#undef list_initialize
+#define list_initialize(list)                         \
+  do                                                  \
+    {                                                 \
+      FAR struct list_node *__list = (list);          \
+      __list->prev = __list->next = xor_addr(__list); \
+    }                                                 \
+  while(0)
+
+#undef list_add_tail
+#define list_add_tail(list, item)                      \
+  do                                                   \
+    {                                                  \
+      FAR struct list_node *__list = (list);           \
+      FAR struct list_node *__item = (item);           \
+      __item->prev       = __list->prev;               \
+      __item->next       = xor_addr(__list);           \
+      xor_addr(__list->prev)->next = xor_addr(__item); \
+      __list->prev       = xor_addr(__item);           \
+    }                                                  \
+  while (0)
+
+#undef list_delete
+#define list_delete(item)                          \
+  do                                               \
+    {                                              \
+      FAR struct list_node *__item = (item);       \
+      xor_addr(__item->next)->prev = __item->prev; \
+      xor_addr(__item->prev)->next = __item->next; \
+      __item->prev = __item->next = NULL;          \
+    }                                              \
+  while (0)
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
