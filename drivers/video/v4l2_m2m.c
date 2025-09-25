@@ -288,12 +288,26 @@ static int codec_reqbufs(FAR struct file *filep,
   reqbufs->mode = V4L2_BUF_MODE_FIFO;
   if (V4L2_TYPE_IS_OUTPUT(reqbufs->type))
     {
+      ret = CODEC_OUTPUT_TRY_MEMORY(cmng->codec, cfile->priv,
+                                    reqbufs->memory);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
       buf_size = CODEC_OUTPUT_G_BUFSIZE(cmng->codec, cfile->priv);
       buf_cnt = CODEC_OUTPUT_G_BUFCNT(cmng->codec, cfile->priv);
       reqbufs->count = MIN(buf_cnt, reqbufs->count);
     }
   else
     {
+      ret = CODEC_CAPTURE_TRY_MEMORY(cmng->codec, cfile->priv,
+                                     reqbufs->memory);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
       buf_size = CODEC_CAPTURE_G_BUFSIZE(cmng->codec, cfile->priv);
       buf_cnt = CODEC_CAPTURE_G_BUFCNT(cmng->codec, cfile->priv);
       reqbufs->count = MIN(buf_cnt, reqbufs->count);
