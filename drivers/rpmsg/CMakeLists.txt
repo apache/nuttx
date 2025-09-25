@@ -57,14 +57,6 @@ if(CONFIG_RPMSG)
     list(APPEND SRCS rpmsg_virtio.c)
   endif()
 
-  if(CONFIG_RPMSG_VIRTIO_LITE)
-    list(APPEND SRCS rpmsg_virtio_lite.c)
-  endif()
-
-  if(CONFIG_RPMSG_VIRTIO_IVSHMEM)
-    list(APPEND SRCS rpmsg_virtio_ivshmem.c)
-  endif()
-
   if(CONFIG_RPMSG_ROUTER)
     list(APPEND SRCS rpmsg_router_hub.c rpmsg_router_edge.c)
   endif()
