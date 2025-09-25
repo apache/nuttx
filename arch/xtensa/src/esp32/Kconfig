@@ -597,6 +597,7 @@ config ESP32_SPIFLASH
 	select MTD
 	select MTD_BYTE_WRITE
 	select MTD_PARTITION
+	select ESPRESSIF_SPIFLASH
 
 config ESP32_SPI2
 	bool "SPI 2"

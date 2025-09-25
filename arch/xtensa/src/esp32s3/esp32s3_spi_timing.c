@@ -33,7 +33,6 @@
 #include "hardware/esp32s3_iomux.h"
 #include "hardware/esp32s3_gpio.h"
 #include "hardware/esp32s3_gpio_sigmap.h"
-#include "rom/esp32s3_spiflash.h"
 #include "rom/opi_flash.h"
 
 #include "soc/spi_mem_reg.h"

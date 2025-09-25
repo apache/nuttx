@@ -221,15 +221,12 @@ SECTIONS
     *libarch.a:*log_write.*(.literal.esp_log_writev .text.esp_log_writev)
     *libarch.a:*cpu_region_protect.*(.text .text.* .literal .literal.*)
     *libarch.a:*flash_qio_mode.*(.text .text.* .literal .literal.*)
-    *libarch.a:*spi_flash_wrap.*(.text .text.* .literal .literal.*)
 
 #ifdef CONFIG_STACK_CANARIES
     *libc.a:lib_stackchk.*(.literal .text .literal.* .text.*)
 #endif
     *libarch.a:esp32_cpuindex.*(.literal .text .literal.* .text.*)
     *libarch.a:esp32_irq.*(.literal .text .literal.* .text.*)
-    *libarch.a:esp32_spicache.*(.literal .text .literal.* .text.*)
-    *libarch.a:esp32_spiflash.*(.literal .text .literal.* .text.*)
     *libarch.a:esp32_user.*(.literal .text .literal.* .text.*)
     *libarch.a:xtensa_assert.*(.literal .text .literal.* .text.*)
     *libarch.a:xtensa_cpuint.*(.literal .text .literal.* .text.*)
@@ -257,6 +254,22 @@ SECTIONS
     *libsched.a:sched_thistask.*(.literal .text .literal.* .text.*)
     *libsched.a:sched_unlock.*(.literal .text .literal.* .text.*)
     *libsched.a:spinlock.*(.literal .text .literal.* .text.*)
+
+    *libarch.a:esp_spiflash.*(.literal .text .literal.* .text.*)
+    *libarch.a:esp_flash_api.*(.text .text.* .literal .literal.*)
+    *libarch.a:esp_flash_spi_init.*(.text .text.* .literal .literal.*)
+    *libarch.a:spi_flash_hal_iram.*(.literal .literal.* .text .text.*)
+    *libarch.a:spi_flash_encrypt_hal_iram.*(.text .text.* .literal .literal.*)
+    *libarch.a:spi_flash_hal_gpspi.*(.literal .literal.* .text .text.*)
+    *libarch.a:spi_flash_chip*.*(.literal .literal.* .text .text.*)
+    *libarch.a:spi_flash_wrap.*(.literal .literal.* .text .text.*)
+    *libarch.a:spi_flash_os_func_noos.*(.literal .literal.* .text .text.*)
+    *libarch.a:spi_flash_os_func_app.*(.literal .literal.* .text .text.*)
+    *libarch.a:flash_brownout_hook.*(.literal .literal.* .text .text.*)
+    *libarch.a:esp_cache.*(.literal .literal.* .text .text.*)
+    *libarch.a:cache_hal_esp32.*(.literal .literal.* .text .text.*)
+    *libarch.a:cache_utils.*(.literal .literal.* .text .text.*)
+    *libarch.a:memspi_host_driver.*(.literal .literal.* .text .text.*)
 
     *(.wifirxiram .wifirxiram.*)
     *(.wifi0iram .wifi0iram.*)
@@ -347,8 +360,7 @@ SECTIONS
 #ifdef CONFIG_STACK_CANARIES
     *libc.a:lib_stackchk.*(.bss  .bss.*  COMMON)
 #endif
-    *libarch.a:esp32_spicache.*(.bss  .bss.*  COMMON)
-    *libarch.a:esp32_spiflash.*(.bss  .bss.*  COMMON)
+    *libarch.a:esp_spiflash.*(.bss  .bss.*  COMMON)
     *libarch.a:xtensa_cpupause.*(.bss  .bss.*  COMMON)
     *libarch.a:xtensa_copystate.*(.bss  .bss.*  COMMON)
     *libarch.a:xtensa_interruptcontext.*(.bss  .bss.*  COMMON)
@@ -411,8 +423,6 @@ SECTIONS
     *libsched.a:irq_csection.*(.rodata  .rodata.*)
     *libsched.a:irq_dispatch.*(.rodata  .rodata.*)
 
-    *libarch.a:esp32_spicache.*(.rodata  .rodata.*)
-    *libarch.a:esp32_spiflash.*(.rodata  .rodata.*)
     *libarch.a:*esp_loader.*(.rodata .rodata.*)
     *libarch.a:*brownout.*(.rodata .rodata.*)
     *libarch.a:*cpu.*(.rodata .rodata.*)
@@ -462,7 +472,21 @@ SECTIONS
     *libarch.a:*log_noos.*(.rodata .rodata.*)
     *libarch.a:*cpu_region_protect.*(.rodata .rodata.*)
     *libarch.a:*flash_qio_mode.*(.rodata .rodata.*)
-    *libarch.a:*spi_flash_wrap.*(.rodata .rodata.*)
+
+    *libarch.a:esp_flash_api.*(.rodata .rodata.*)
+    *libarch.a:esp_flash_spi_init.*(.rodata .rodata.*)
+    *libarch.a:spi_flash_hal_iram.*(.rodata .rodata.*)
+    *libarch.a:spi_flash_encrypt_hal_iram.*(.rodata .rodata.*)
+    *libarch.a:spi_flash_hal_gpspi.*(.rodata .rodata.*)
+    *libarch.a:spi_flash_chip*.*(.rodata .rodata.*)
+    *libarch.a:spi_flash_wrap.*(.rodata .rodata.*)
+    *libarch.a:spi_flash_os_func_noos.*(.rodata .rodata.*)
+    *libarch.a:spi_flash_os_func_app.*(.rodata .rodata.*)
+    *libarch.a:flash_brownout_hook.*(.rodata .rodata.*)
+    *libarch.a:esp_cache.*(.rodata .rodata.*)
+    *libarch.a:cache_utils.*(.rodata .rodata.*)
+    *libarch.a:cache_hal_esp32.*(.rodata .rodata.*)
+    *libarch.a:memspi_host_driver.*(.rodata .rodata.*)
 
     _edata = ABSOLUTE(.);
     _data_end = ABSOLUTE(.);
@@ -526,12 +550,12 @@ SECTIONS
 
     . = ALIGN(4);
     _srodata = ABSOLUTE(.);
-    *(EXCLUDE_FILE (*libarch.a:esp32_spiflash.* esp32_start.*
+    *(EXCLUDE_FILE (*libarch.a:esp_spiflash.* esp32_start.*
                     *libarch.a:*esp_loader.*
                     *libarch.a:*uart_hal.*
                     *libarch.a:*mmu_hal.*
                     ) .rodata)
-    *(EXCLUDE_FILE (*libarch.a:esp32_spiflash.* esp32_start.*
+    *(EXCLUDE_FILE (*libarch.a:esp_spiflash.* esp32_start.*
                     *libarch.a:*esp_loader.*
                     *libarch.a:*uart_hal.*
                     *libarch.a:*mmu_hal.*
@@ -703,4 +727,22 @@ SECTIONS
     . = ALIGN (4);
     _srtcheap = ABSOLUTE(.);
   } >rtc_slow_seg AT>ROM
+
+  /*
+    * This section holds RTC data that should have fixed addresses.
+    * The data are not initialized at power-up and are retained during deep sleep.
+    */
+  .rtc_reserved (NOLOAD):
+  {
+    . = ALIGN(4);
+    _rtc_reserved_start = ABSOLUTE(.);
+    /* New data can only be added here to ensure existing data are not moved.
+        Because data have adhered to the end of the segment and code is relied on it.
+        >> put new data here << */
+
+    *(.rtc_timer_data_in_rtc_mem .rtc_timer_data_in_rtc_mem.*)
+    KEEP(*(.bootloader_data_rtc_mem .bootloader_data_rtc_mem.*))
+    _rtc_reserved_end = ABSOLUTE(.);
+  } > rtc_reserved_seg
+
 }

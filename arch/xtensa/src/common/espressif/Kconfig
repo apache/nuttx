@@ -191,9 +191,14 @@ config ESPRESSIF_SPI_BITBANG
 		Software implemented SPI peripheral with GPIOs. Suggested to use if SPI peripherals are already in use.
 
 config ESPRESSIF_SPIFLASH
-	bool "SPI Flash"
-	depends on ARCH_CHIP_ESP32S2
+	bool "SPI Flash (User Storage)"
 	default n
+	depends on !ESP32_PARTITION_TABLE && !ESP32S3_PARTITION_TABLE && !ESP32S3_SPIRAM
+	---help---
+		Enable SPI Flash driver for general storage support. This allows
+		mounting an MTD partition at a configurable region in flash.
+		When using partition table on SPIRAM, legacy drivers for SPI Flash
+		used instead, making this option not available.
 
 config ESPRESSIF_DEDICATED_GPIO
 	bool "Dedicated GPIO"
@@ -1151,7 +1156,7 @@ endif
 
 if ESPRESSIF_SPIFLASH
 
-comment "General storage MTD configuration"
+comment "User Storage MTD Configuration"
 
 config ESPRESSIF_MTD
 	bool "MTD driver"
@@ -1159,9 +1164,12 @@ config ESPRESSIF_MTD
 	select MTD
 	select MTD_BYTE_WRITE
 	select MTD_PARTITION
+	depends on !ESP32_PARTITION_TABLE && !ESP32S3_PARTITION_TABLE && !ESP32S3_SPIRAM
 	---help---
 		Initialize an MTD driver for the ESP32-S2 SPI Flash, which will
 		add an entry at /dev for application access from userspace.
+		When using partition table on SPIRAM, legacy drivers for SPI Flash
+		used instead, making this option not available.
 
 config ESPRESSIF_SPIFLASH_MTD_BLKSIZE
 	int "Storage MTD block size"
@@ -1175,6 +1183,25 @@ config ESPRESSIF_STORAGE_MTD_DEBUG
 	---help---
 		If this option is enabled, Storage MTD driver read and write functions
 		will output input parameters and return values (if applicable).
+
+if ARCH_CHIP_ESP32S2
+
+config ESPRESSIF_STORAGE_MTD_OFFSET
+	hex "Storage MTD base address in SPI Flash"
+	default 0x180000 if !ESPRESSIF_BOOTLOADER_MCUBOOT
+	default 0x260000 if ESPRESSIF_BOOTLOADER_MCUBOOT
+	depends on ESPRESSIF_MTD
+	---help---
+		MTD base address in SPI Flash.
+
+config ESPRESSIF_STORAGE_MTD_SIZE
+	hex "Storage MTD size in SPI Flash"
+	default 0x100000
+	depends on ESPRESSIF_MTD
+	---help---
+		MTD size in SPI Flash.
+
+endif # ARCH_CHIP_ESP32S2
 
 endif # ESPRESSIF_SPIFLASH
 

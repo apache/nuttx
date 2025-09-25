@@ -58,13 +58,13 @@
 #include "espressif/esp_wireless.h"
 #include "espressif/esp_wifi_utils.h"
 #include "esp32_irq.h"
-#include "esp32_spicache.h"
 
 #include "esp_bt.h"
 #include "esp_log.h"
 #include "esp_mac.h"
 #include "esp_private/phy.h"
 #include "esp_private/wifi.h"
+#include "esp_private/cache_utils.h"
 #include "esp_random.h"
 #include "esp_timer.h"
 #include "periph_ctrl.h"
@@ -123,7 +123,7 @@
 
 #define MSG_QUEUE_NAME_SIZE                 16
 
-#ifdef CONFIG_ESP32_SPIFLASH
+#ifdef CONFIG_ESPRESSIF_SPIFLASH
 #  define BLE_TASK_EVENT_QUEUE_ITEM_SIZE    8
 #  define BLE_TASK_EVENT_QUEUE_LEN          8
 #endif
@@ -278,7 +278,7 @@ typedef enum
 struct bt_sem_s
 {
   sem_t sem;
-#ifdef CONFIG_ESP32_SPIFLASH
+#ifdef CONFIG_ESPRESSIF_SPIFLASH
   struct esp_semcache_s sc;
 #endif
 };
@@ -691,7 +691,7 @@ static struct irqstate_list_s g_ble_int_flags[NR_IRQSTATE_FLAGS];
 
 /* Cached queue control variables */
 
-#ifdef CONFIG_ESP32_SPIFLASH
+#ifdef CONFIG_ESPRESSIF_SPIFLASH
 static struct esp_queuecache_s g_esp_queuecache[BLE_TASK_EVENT_QUEUE_LEN];
 static uint8_t g_esp_queuecache_buffer[BLE_TASK_EVENT_QUEUE_ITEM_SIZE];
 #endif
@@ -1011,7 +1011,7 @@ static void *semphr_create_wrapper(uint32_t max, uint32_t init)
       return NULL;
     }
 
-#ifdef CONFIG_ESP32_SPIFLASH
+#ifdef CONFIG_ESPRESSIF_SPIFLASH
   esp_init_semcache(&bt_sem->sc, &bt_sem->sem);
 #endif
 
@@ -1084,7 +1084,7 @@ static int32_t IRAM_ATTR semphr_give_from_isr_wrapper(void *semphr,
   int ret;
   struct bt_sem_s *bt_sem = (struct bt_sem_s *)semphr;
 
-#ifdef CONFIG_ESP32_SPIFLASH
+#ifdef CONFIG_ESPRESSIF_SPIFLASH
   if (spi_flash_cache_enabled())
     {
       ret = semphr_give_wrapper(bt_sem);
@@ -1326,7 +1326,7 @@ static void *queue_create_wrapper(uint32_t queue_len, uint32_t item_size)
 
   mq_adpt->msgsize = item_size;
 
-#ifdef CONFIG_ESP32_SPIFLASH
+#ifdef CONFIG_ESPRESSIF_SPIFLASH
   if (queue_len <= BLE_TASK_EVENT_QUEUE_LEN &&
       item_size == BLE_TASK_EVENT_QUEUE_ITEM_SIZE)
     {
@@ -2421,7 +2421,7 @@ static IRAM_ATTR int32_t esp_queue_send_generic(void *queue, void *item,
   struct timespec timeout;
   struct mq_adpt_s *mq_adpt = (struct mq_adpt_s *)queue;
 
-#ifdef CONFIG_ESP32_SPIFLASH
+#ifdef CONFIG_ESPRESSIF_SPIFLASH
   if (!spi_flash_cache_enabled())
     {
       esp_send_queuecache(queue, item, mq_adpt->msgsize);
@@ -2917,7 +2917,7 @@ int esp32_bt_controller_init(void)
       sq_addlast((sq_entry_t *)&g_ble_int_flags[i], &g_ble_int_flags_free);
     }
 
-#ifdef CONFIG_ESP32_SPIFLASH
+#ifdef CONFIG_ESPRESSIF_SPIFLASH
 
   /* Initialize interfaces that enable BLE ISRs to run during a
    * SPI flash operation.
