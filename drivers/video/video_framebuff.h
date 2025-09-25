@@ -90,5 +90,7 @@ void              video_framebuff_capture_done
                        (video_framebuff_t *fbuf);
 void              video_framebuff_change_mode
                        (video_framebuff_t *fbuf, enum v4l2_buf_mode mode);
+vbuf_container_t *video_framebuff_find_container
+                       (video_framebuff_t *fbuf, uint32_t index);
 
 #endif  /* __DRIVERS_VIDEO_VIDEO_FRAMEBUFF_H */
