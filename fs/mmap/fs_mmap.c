@@ -68,6 +68,7 @@ static int file_mmap_(FAR struct file *filep, FAR void *start,
      prot,
      flags,
      { NULL }, /* priv.p */
+     NULL,     /* msync */
      NULL      /* munmap */
     };
 
