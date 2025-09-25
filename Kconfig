@@ -2457,7 +2457,7 @@ config STACK_COLORATION
 
 config STACKCHECK_SOFTWARE
 	bool "Software detection of stack overflow"
-	depends on STACK_COLORATION && DEBUG_ASSERTIONS && SCHED_SUSPENDSCHEDULER
+	depends on STACK_COLORATION && DEBUG_ASSERTIONS
 	---help---
 		When switching contexts, it will detect whether a stack overflow occurs.
 		Two methods are used here.

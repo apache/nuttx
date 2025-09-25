@@ -30,6 +30,7 @@ CSRCS += sched_yield.c sched_rrgetinterval.c sched_foreach.c
 CSRCS += sched_lock.c sched_unlock.c sched_lockcount.c
 CSRCS += sched_idletask.c sched_self.c sched_get_stackinfo.c sched_get_tls.c
 CSRCS += sched_sysinfo.c sched_get_stateinfo.c sched_getcpu.c
+CSRCS += sched_switchcontext.c
 
 ifeq ($(CONFIG_PRIORITY_INHERITANCE),y)
 CSRCS += sched_reprioritize.c
@@ -59,16 +60,6 @@ endif
 
 ifeq ($(CONFIG_SCHED_SPORADIC),y)
 CSRCS += sched_sporadic.c
-endif
-
-ifeq ($(CONFIG_SCHED_SUSPENDSCHEDULER),y)
-CSRCS += sched_suspendscheduler.c
-endif
-
-ifneq ($(CONFIG_RR_INTERVAL),0)
-CSRCS += sched_resumescheduler.c
-else ifeq ($(CONFIG_SCHED_RESUMESCHEDULER),y)
-CSRCS += sched_resumescheduler.c
 endif
 
 ifneq ($(CONFIG_SCHED_CPULOAD_NONE),y)

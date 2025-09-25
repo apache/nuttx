@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/sched/sched_suspendscheduler.c
+ * sched/sched/sched_switchcontext.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -24,61 +24,43 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <time.h>
-#include <assert.h>
-
-#include <nuttx/arch.h>
-#include <nuttx/sched.h>
-#include <nuttx/clock.h>
-#include <nuttx/sched_note.h>
-
-#include "clock/clock.h"
 #include "sched/sched.h"
 
-#ifdef CONFIG_SCHED_SUSPENDSCHEDULER
+#include <nuttx/sched_note.h>
+
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxsched_suspend_scheduler
+ * Name: nxsched_switch_context
  *
  * Description:
- *   Called by architecture specific implementations that starts task
- *   execution.  This function prepares the scheduler for the thread that is
- *   about to be restarted.
+ *   This function is used to switch context between two tasks.
  *
  * Input Parameters:
- *   tcb - The TCB of the thread that is being suspended.
+ *   from - The TCB of the task to be suspended.
+ *   to   - The TCB of the task to be resumed.
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-void nxsched_suspend_scheduler(FAR struct tcb_s *tcb)
+void nxsched_switch_context(FAR struct tcb_s *from, FAR struct tcb_s *to)
 {
-  /* Handle the task exiting case */
-
-  if (tcb == NULL)
-    {
-      return;
-    }
-
 #ifdef CONFIG_STACKCHECK_SOFTWARE
-  if (tcb->xcp.regs)
+  if (from->xcp.regs)
     {
-      uintptr_t sp = up_getusrsp(tcb->xcp.regs);
-      uintptr_t top = (uintptr_t)tcb->stack_base_ptr + tcb->adj_stack_size;
-      uintptr_t bottom = (uintptr_t)tcb->stack_base_ptr;
+      uintptr_t sp = up_getusrsp(from->xcp.regs);
+      uintptr_t top = (uintptr_t)from->stack_base_ptr + from->adj_stack_size;
+      uintptr_t bottom = (uintptr_t)from->stack_base_ptr;
       DEBUGASSERT(sp > bottom && sp <= top);
     }
 
 #if CONFIG_STACKCHECK_MARGIN > 0
-    DEBUGASSERT(up_check_tcbstack(tcb, CONFIG_STACKCHECK_MARGIN) == 0);
+    DEBUGASSERT(up_check_tcbstack(from, CONFIG_STACKCHECK_MARGIN) == 0);
 #endif
 
 #endif
@@ -86,20 +68,25 @@ void nxsched_suspend_scheduler(FAR struct tcb_s *tcb)
 #ifdef CONFIG_SCHED_SPORADIC
   /* Perform sporadic schedule operations */
 
-  if ((tcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC)
+  if ((from->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC)
     {
-      DEBUGVERIFY(nxsched_suspend_sporadic(tcb));
+      DEBUGVERIFY(nxsched_suspend_sporadic(from));
+    }
+  if ((to->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC)
+    {
+      DEBUGVERIFY(nxsched_resume_sporadic(to));
     }
 #endif
 
   /* Indicate that the task has been suspended */
 
 #ifdef CONFIG_SCHED_CRITMONITOR
-  nxsched_suspend_critmon(tcb);
+  nxsched_suspend_critmon(from);
+  nxsched_resume_critmon(to);
 #endif
+
 #ifdef CONFIG_SCHED_INSTRUMENTATION
-  sched_note_suspend(tcb);
+  sched_note_suspend(from);
+  sched_note_resume(to);
 #endif
 }
-
-#endif /* CONFIG_SCHED_SUSPENDSCHEDULER */

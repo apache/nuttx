@@ -653,8 +653,6 @@ config RR_INTERVAL
 config SCHED_SPORADIC
 	bool "Support sporadic scheduling"
 	default n
-	select SCHED_SUSPENDSCHEDULER
-	select SCHED_RESUMESCHEDULER
 	---help---
 		Build in additional logic to support sporadic scheduling
 		(SCHED_SPORADIC).
@@ -917,14 +915,6 @@ endmenu # Pthread Options
 
 menu "Performance Monitoring"
 
-config SCHED_SUSPENDSCHEDULER
-	bool
-	default n
-
-config SCHED_RESUMESCHEDULER
-	bool
-	default n
-
 config SCHED_IRQMONITOR
 	bool "Enable IRQ monitoring"
 	default n
@@ -938,8 +928,6 @@ config SCHED_CRITMONITOR
 	bool "Enable Critical Section monitoring"
 	default n
 	depends on FS_PROCFS
-	select SCHED_SUSPENDSCHEDULER
-	select SCHED_RESUMESCHEDULER
 	select IRQCOUNT
 	---help---
 		Enables logic that monitors the duration of time that a thread keeps
@@ -1185,8 +1173,6 @@ config SCHED_PROFILE_TICKSPERSEC
 menuconfig SCHED_INSTRUMENTATION
 	bool "System performance monitor hooks"
 	default n
-	select SCHED_SUSPENDSCHEDULER
-	select SCHED_RESUMESCHEDULER
 	---help---
 		Enables instrumentation in scheduler to monitor system performance.
 		If enabled, then the board-specific logic must provide the following
