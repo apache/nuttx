@@ -28,7 +28,6 @@
 
 #include <nuttx/sched_note.h>
 
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -72,6 +71,7 @@ void nxsched_switch_context(FAR struct tcb_s *from, FAR struct tcb_s *to)
     {
       DEBUGVERIFY(nxsched_suspend_sporadic(from));
     }
+
   if ((to->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC)
     {
       DEBUGVERIFY(nxsched_resume_sporadic(to));
@@ -81,8 +81,7 @@ void nxsched_switch_context(FAR struct tcb_s *from, FAR struct tcb_s *to)
   /* Indicate that the task has been suspended */
 
 #ifdef CONFIG_SCHED_CRITMONITOR
-  nxsched_suspend_critmon(from);
-  nxsched_resume_critmon(to);
+  nxsched_switch_critmon(from, to);
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION
