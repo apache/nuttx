@@ -45,7 +45,9 @@
 #  define FLASH_SIZE 0x1000000
 #endif
 
-#define SRAM1_IRAM_LEN 0xa000
+#define SRAM1_IRAM_LEN        0xa000
+#define RTC_TIMER_RESERVE_RTC (24)
+#define RESERVE_RTC_MEM       (RTC_TIMER_RESERVE_RTC)
 
 MEMORY
 {
@@ -153,6 +155,8 @@ MEMORY
 
   rtc_slow_seg (RW) :    org = 0x50000000 + CONFIG_ESP32_ULP_COPROC_RESERVE_MEM,
                          len = 0x1000 - CONFIG_ESP32_ULP_COPROC_RESERVE_MEM
+
+  rtc_reserved_seg(RW) : org = 0x50000000 + 0x2000 - RESERVE_RTC_MEM, len = RESERVE_RTC_MEM
 
   /* External memory, including data and text */
 

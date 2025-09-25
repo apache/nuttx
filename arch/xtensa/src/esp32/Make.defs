@@ -96,18 +96,6 @@ CHIP_CSRCS += esp32_spi_slave.c
 endif
 endif
 
-# SPIFLASH and SPIRAM need spicache.c
-
-ifeq ($(CONFIG_ESP32_SPIFLASH),y)
-CHIP_CSRCS += esp32_spicache.c
-else ifeq ($(CONFIG_ESP32_SPIRAM),y)
-CHIP_CSRCS += esp32_spicache.c
-endif
-
-ifeq ($(CONFIG_ESP32_SPIFLASH),y)
-CHIP_CSRCS += esp32_spiflash.c
-endif
-
 ifeq ($(CONFIG_ESP32_SPIRAM),y)
 CHIP_CSRCS += esp32_spiram.c
 CHIP_CSRCS += esp32_psram.c
@@ -152,6 +140,7 @@ CHIP_CSRCS += esp32_freerun.c
 endif
 
 ifeq ($(CONFIG_ESP32_PARTITION_TABLE),y)
+CHIP_CSRCS += esp32_spiflash.c
 CHIP_CSRCS += esp32_partition.c
 endif
 
@@ -223,7 +212,7 @@ endif
 
 ESP_HAL_3RDPARTY_REPO   = esp-hal-3rdparty
 ifndef ESP_HAL_3RDPARTY_VERSION
-	ESP_HAL_3RDPARTY_VERSION = b6fa6c9098318007a61acc7c9f0f180443bb80c2
+	ESP_HAL_3RDPARTY_VERSION = 4eed03a15b2678a81dfd1ed0f3bde042b1fdd4c4
 endif
 
 ifndef ESP_HAL_3RDPARTY_URL

@@ -117,7 +117,8 @@ SECTIONS
     _iram_text_start = ABSOLUTE(.);
     *(.iram1 .iram1.*)
     *librtc.a:(.literal .text .literal.* .text.*)
-    *libkarch.a:esp32_spiflash.*(.literal .text .literal.* .text.*)
+    *libkarch.a:esp_spiflash.*(.literal .text .literal.* .text.*)
+    *libkarch.a:*esp_clk.*(.text .text.* .literal .literal.*)
     *libkarch.a:xtensa_cpupause.*(.literal .text .literal.* .text.*)
     *libkarch.a:xtensa_copystate.*(.literal .text .literal.* .text.*)
     *libkarch.a:xtensa_interruptcontext.*(.literal .text .literal.* .text.*)
@@ -177,7 +178,7 @@ SECTIONS
     *(.share.mem)
     *(.gnu.linkonce.b.*)
     *(COMMON)
-    *libkarch.a:esp32_spiflash.*(.bss  .bss.*  COMMON)
+    *libkarch.a:esp_spiflash.*(.bss  .bss.*  COMMON)
     *libkarch.a:xtensa_cpupause.*(.bss  .bss.*  COMMON)
     *libkarch.a:xtensa_copystate.*(.bss  .bss.*  COMMON)
     *libkarch.a:xtensa_interruptcontext.*(.bss  .bss.*  COMMON)
@@ -230,7 +231,8 @@ SECTIONS
     KEEP (*(.jcr))
     *(.dram1 .dram1.*)
     *libphy.a:(.rodata  .rodata.*)
-    *libkarch.a:esp32_spiflash.*(.rodata  .rodata.*)
+    *libkarch.a:esp_spiflash.*(.rodata  .rodata.*)
+    *libkarch.a:*esp_clk.*(.rodata .rodata.*)
     *libkarch.a:xtensa_cpupause.*(.rodata  .rodata.*)
     *libkarch.a:xtensa_copystate.*(.rodata  .rodata.*)
     *libkarch.a:xtensa_interruptcontext.*(.rodata  .rodata.*)
@@ -332,4 +334,21 @@ SECTIONS
     _text_end = ABSOLUTE(.);
     _etext = .;
   } >KIROM
+
+  /*
+    * This section holds RTC data that should have fixed addresses.
+    * The data are not initialized at power-up and are retained during deep sleep.
+    */
+  .rtc_reserved (NOLOAD):
+  {
+    . = ALIGN(4);
+    _rtc_reserved_start = ABSOLUTE(.);
+    /* New data can only be added here to ensure existing data are not moved.
+        Because data have adhered to the end of the segment and code is relied on it.
+        >> put new data here << */
+
+    *(.rtc_timer_data_in_rtc_mem .rtc_timer_data_in_rtc_mem.*)
+    KEEP(*(.bootloader_data_rtc_mem .bootloader_data_rtc_mem.*))
+    _rtc_reserved_end = ABSOLUTE(.);
+  } > rtc_reserved_seg
 }

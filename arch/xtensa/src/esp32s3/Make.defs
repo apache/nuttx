@@ -113,15 +113,17 @@ ifeq ($(CONFIG_ESP32S3_SPI),y)
   endif
 endif
 
+# Partition table and SPIRAM requires legacy spiflash driver
+
 ifeq ($(CONFIG_ESP32S3_SPIFLASH),y)
-CHIP_CSRCS += esp32s3_spiflash.c
-ifeq ($(CONFIG_ESP32S3_MTD),y)
-CHIP_CSRCS += esp32s3_spiflash_mtd.c
-endif
+  ifeq ($(filter y,$(CONFIG_ESP32S3_PARTITION_TABLE) $(CONFIG_ESP32S3_SPIRAM)),y)
+    CHIP_CSRCS += esp32s3_spiflash.c
+    CHIP_CSRCS += esp32s3_spiflash_mtd.c
+  endif
 endif
 
 ifeq ($(CONFIG_ESP32S3_PARTITION_TABLE),y)
-CHIP_CSRCS += esp32s3_partition.c
+CHIP_CSRCS +=  esp32s3_partition.c
 endif
 
 ifeq ($(CONFIG_ESP32S3_SPIRAM),y)
@@ -207,7 +209,7 @@ endif
 
 ESP_HAL_3RDPARTY_REPO = esp-hal-3rdparty
 ifndef ESP_HAL_3RDPARTY_VERSION
-	ESP_HAL_3RDPARTY_VERSION = 6782de1b073f93a54c501edf23d99a42a23d41ac
+	ESP_HAL_3RDPARTY_VERSION = 4eed03a15b2678a81dfd1ed0f3bde042b1fdd4c4
 endif
 
 ifndef ESP_HAL_3RDPARTY_URL

@@ -48,11 +48,12 @@
 #include "hardware/esp32s3_cache_memory.h"
 #include "hardware/esp32s3_system.h"
 #include "rom/esp32s3_libc_stubs.h"
-#include "rom/opi_flash.h"
-#include "rom/esp32s3_spiflash.h"
+#include "esp_private/spi_flash_os.h"
 #include "espressif/esp_loader.h"
 
 #include "esp_app_desc.h"
+#include "esp_private/esp_mmu_map_private.h"
+#include "esp_flash_internal.h"
 #include "hal/mmu_hal.h"
 #include "hal/mmu_types.h"
 #include "hal/cache_types.h"
@@ -359,6 +360,8 @@ noinstrument_function void noreturn_function IRAM_ATTR __esp32s3_start(void)
 
   esp32s3_wdt_early_deinit();
 
+  esp_flash_app_init();
+
   /* Initialize RTC controller parameters */
 
   esp32s3_rtc_init();
@@ -555,6 +558,8 @@ noinstrument_function void IRAM_ATTR __start(void)
    */
 
   spi_flash_init_chip_state();
+
+  esp_mmu_map_init();
 
   __esp32s3_start();
 

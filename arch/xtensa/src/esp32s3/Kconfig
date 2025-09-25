@@ -1823,6 +1823,7 @@ config ESP32S3_TICKLESS
 
 config ESP32S3_SPIFLASH
 	bool "SPI Flash MTD Partition"
+	select ESPRESSIF_SPIFLASH if !ESP32S3_PARTITION_TABLE && !ESP32S3_SPIRAM
 	default n
 
 menu "SPI Flash configuration"
@@ -1895,7 +1896,7 @@ endchoice # ESP32S3_FLASH_SAMPLE_MODE
 
 config ESP32S3_SPI_FLASH_DONT_USE_ROM_CODE
 	bool "Don't use SPI flash driver in ROM"
-	default n
+	default y
 	---help---
 		Use source code for SPI flash driver instead of functions
 		in ROM.
@@ -1985,6 +1986,7 @@ config ESP32S3_MTD
 	select MTD
 	select MTD_BYTE_WRITE
 	select MTD_PARTITION
+	select ESPRESSIF_MTD if !ESP32S3_PARTITION_TABLE && !ESP32S3_SPIRAM
 	---help---
 		Initialize an MTD driver for the ESP32-S3 SPI Flash, which will
 		add an entry at /dev for application access from userspace.
