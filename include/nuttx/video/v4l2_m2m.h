@@ -182,6 +182,18 @@
   ((codec)->ops->output_g_bufcnt ? \
    (codec)->ops->output_g_bufcnt(priv) : V4L2_REQBUFS_COUNT_MAX)
 
+#define CODEC_CAPTURE_TRY_MEMORY(codec, priv, mem) \
+  ((codec)->ops->capture_try_memory ? \
+   (codec)->ops->capture_try_memory(priv, mem) : \
+   ((mem == V4L2_MEMORY_MMAP || mem == V4L2_MEMORY_USERPTR) ? \
+    0 : -ENOTTY))
+
+#define CODEC_OUTPUT_TRY_MEMORY(codec, priv, mem) \
+  ((codec)->ops->output_try_memory ? \
+   (codec)->ops->output_try_memory(priv, mem) : \
+   ((mem == V4L2_MEMORY_MMAP || mem == V4L2_MEMORY_USERPTR) ? \
+    0 : -ENOTTY))
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -252,6 +264,14 @@ struct codec_ops_s
 
   CODE void *(*alloc_buf)(FAR void *priv, size_t size);
   CODE void (*free_buf)(FAR void *priv, FAR void *addr);
+
+  /* Memory mode query interface.
+  *  If the driver does not implement this interface, the v4l2-m2m
+  *  default driver only supports V4L2_MEMORY_MMAP and V4L2_MEMORY_USERPTR.
+  */
+
+  CODE int (*capture_try_memory)(FAR void *priv, enum v4l2_memory mem);
+  CODE int (*output_try_memory)(FAR void *priv, enum v4l2_memory mem);
 
   /* Stream type-dependent parameter ioctls */
 
