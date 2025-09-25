@@ -289,3 +289,51 @@ vbuf_container_t *video_framebuff_pop_curr_container(video_framebuff_t *fbuf)
   spin_unlock_irqrestore(&fbuf->lock_queue, flags);
   return ret;
 }
+
+vbuf_container_t *video_framebuff_find_container(video_framebuff_t *fbuf,
+                                                 uint32_t index)
+{
+  vbuf_container_t *ret = NULL;
+  vbuf_container_t *curr;
+  vbuf_container_t *start;
+  irqstate_t flags;
+
+  flags = spin_lock_irqsave(&fbuf->lock_queue);
+  if (fbuf->vbuf_top != NULL)
+    {
+      curr = start = fbuf->vbuf_top;
+      do
+        {
+          if (curr->buf.index == index)
+            {
+              ret = curr;
+              break;
+            }
+
+          curr = curr->next;
+        }
+      while (curr != NULL && curr != start);
+    }
+
+  spin_unlock_irqrestore(&fbuf->lock_queue, flags);
+
+  if (ret == NULL)
+    {
+      nxmutex_lock(&fbuf->lock_empty);
+      curr = fbuf->vbuf_empty;
+      while (curr != NULL)
+        {
+          if (curr->buf.index == index)
+            {
+              ret = curr;
+              break;
+            }
+
+          curr = curr->next;
+        }
+
+      nxmutex_unlock(&fbuf->lock_empty);
+    }
+
+  return ret;
+}

@@ -352,6 +352,7 @@ static int codec_querybuf(FAR struct file *filep,
   FAR codec_mng_t *cmng = inode->i_private;
   FAR codec_file_t *cfile = filep->f_priv;
   FAR codec_type_inf_t *type_inf;
+  FAR vbuf_container_t *container;
   struct v4l2_format format;
   uint32_t offset = 0;
   size_t bufsize;
@@ -391,6 +392,8 @@ static int codec_querybuf(FAR struct file *filep,
       return -EINVAL;
     }
 
+  container = video_framebuff_find_container(&type_inf->bufinf, buf->index);
+
   if (V4L2_TYPE_IS_MULTIPLANAR(buf->type))
     {
       for (i = 0; i < format.fmt.pix_mp.num_planes; i++)
@@ -405,6 +408,11 @@ static int codec_querybuf(FAR struct file *filep,
                 offset += buf->m.planes[i].length;
                 break;
 
+              case V4L2_MEMORY_USERPTR:
+                buf->m.planes[i].m.userptr = container ?
+                    container->buf.m.planes[i].m.userptr : 0;
+                break;
+
               default:
                 return -EINVAL;
             }
@@ -417,6 +425,10 @@ static int codec_querybuf(FAR struct file *filep,
           case V4L2_MEMORY_MMAP:
             buf->length   = bufsize;
             buf->m.offset = offset + bufsize * buf->index;
+            break;
+
+          case V4L2_MEMORY_USERPTR:
+            buf->m.userptr = container ? container->buf.m.userptr : 0;
             break;
 
           default:
@@ -457,6 +469,9 @@ static int codec_qbuf(FAR struct file *filep,
           {
             return -EINVAL;
           }
+        break;
+
+      case V4L2_MEMORY_USERPTR:
         break;
 
       default:
@@ -509,6 +524,11 @@ static int codec_qbuf(FAR struct file *filep,
                      bufsize * buf->index + plane_offset);
                 plane_offset += format.fmt.pix_mp.plane_fmt[i].sizeimage;
                 break;
+
+              case V4L2_MEMORY_USERPTR:
+                container->buf.m.planes[i].m.vaddr =
+                    (FAR void *)buf->m.planes[i].m.userptr;
+                break;
             }
         }
     }
@@ -526,6 +546,10 @@ static int codec_qbuf(FAR struct file *filep,
               container->buf.m.vaddr =
                   (FAR void *)(type_inf->bufheap + bufsize * buf->index);
             }
+            break;
+
+          case V4L2_MEMORY_USERPTR:
+            container->buf.m.vaddr = (FAR void *)buf->m.userptr;
             break;
         }
     }
@@ -610,6 +634,11 @@ static int codec_dqbuf(FAR struct file *filep,
                      type_inf->bufheap + offset);
                 break;
 
+              case V4L2_MEMORY_USERPTR:
+                buf->m.planes[i].m.userptr = (unsigned long)
+                    buf->m.planes[i].m.vaddr;
+                break;
+
               default:
                 return -EINVAL;
             }
@@ -622,6 +651,10 @@ static int codec_dqbuf(FAR struct file *filep,
           case V4L2_MEMORY_MMAP:
             buf->m.offset = (uint32_t)((uint8_t *)buf->m.vaddr -
                             type_inf->bufheap + offset);
+            break;
+
+          case V4L2_MEMORY_USERPTR:
+            buf->m.userptr = (unsigned long)buf->m.vaddr;
             break;
 
           default:
