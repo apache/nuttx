@@ -108,8 +108,16 @@ LDFLAGS          += --no-default-libraries
 LDFLAGS          += --fp-model=2
 LDFLAGS          += -lfp_fpu
 
-LDFLAGS          += --hex-format=s -Wl-OtxYcL -Wl-mcrfiklsmnoduq
+LDFLAGS          += -Wl-OtxYcL -Wl-mcrfiklsmnoduq
 LDFLAGS          += -lrt
+
+ifeq ($(CONFIG_INTELHEX_BINARY),y)
+  LDFLAGS        += -Wl-o${TOPDIR}/nuttx.hex:IHEX:4 --hex-format=s
+endif
+
+ifeq ($(CONFIG_MOTOROLA_SREC),y)
+  LDFLAGS        += -Wl-o${TOPDIR}/nuttx.srec:SREC:4
+endif
 
 # ctc W500: ["stdio/lib_libvsprintf.c" 884/29] expression without effect
 # ctc W507: ["mm_heap/mm_malloc.c" 238/64] variable "nodesize" is possibly uninitialized
