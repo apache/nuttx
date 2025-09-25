@@ -279,10 +279,9 @@ FAR void *mmap(FAR void *start, size_t length, int prot, int flags,
   FAR void *mapped = NULL;
   int ret;
 
-  if (fd != -1 && file_get(fd, &filep) < 0)
+  if (fd != -1 && (ret = file_get(fd, &filep)) < 0)
     {
-      ferr("ERROR: fd:%d referred file whose type is not supported\n", fd);
-      ret = -ENODEV;
+      ferr("ERROR: fd:%d referred file is not valid\n", fd);
       goto errout;
     }
 
