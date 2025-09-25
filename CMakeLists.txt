@@ -463,6 +463,58 @@ endif()
 
 include(platform)
 
+if(CONFIG_ARCH_TOOLCHAIN_TASKING)
+  if(CONFIG_INTELHEX_BINARY)
+    add_link_options(-Wl-onuttx.hex:IHEX:4 --hex-format=s)
+  endif()
+
+  if(CONFIG_MOTOROLA_SREC)
+    add_link_options(-Wl-onuttx.srec:SREC:4)
+  endif()
+endif()
+
+if(MSVC)
+  add_compile_options(
+    -W2
+    -wd4116 # unnamed type definition in parentheses
+    -wd4146 # unary minus operator applied to unsigned type, result still
+            # unsigned
+    -wd4244 # 'argument' : conversion from 'type1' to 'type2', possible loss of
+            # data
+    -wd4305 # 'context' : truncation from 'type1' to 'type2'
+  )
+elseif(NOT CONFIG_ARCH_TOOLCHAIN_TASKING)
+  add_compile_options(
+    # system wide warnings
+    -Wall $<$<COMPILE_LANGUAGE:C>:-Wstrict-prototypes> -Wshadow -Wundef
+    # system wide options
+    $<$<COMPILE_LANGUAGE:ASM>:-D__ASSEMBLY__>)
+endif()
+
+if(CONFIG_NDEBUG)
+  add_compile_options(-DNDEBUG)
+endif()
+
+# Cmake build provide absolute paths to compile files. If __FILE__ macros are
+# used in the source code(ASSERT), the binary will contain many invalid paths.
+# This saves some memory, stops exposing build systems locations in binaries,
+# make failure logs more deterministic and most importantly makes builds more
+# failure logs more deterministic and most importantly makes builds more
+# deterministic. Debuggers usually have a path mapping feature to ensure the
+# files are still found.
+if(NOT MSVC)
+  if(CONFIG_OUTPUT_STRIP_PATHS)
+    add_compile_options(-fmacro-prefix-map=${NUTTX_DIR}=)
+    add_compile_options(-fmacro-prefix-map=${NUTTX_APPS_DIR}=)
+    add_compile_options(-fmacro-prefix-map=${NUTTX_BOARD_ABS_DIR}=)
+    add_compile_options(-fmacro-prefix-map=${NUTTX_CHIP_ABS_DIR}=)
+  endif()
+endif()
+
+add_definitions(-D__NuttX__)
+
+add_compile_options($<$<COMPILE_LANGUAGE:ASM>:-D__ASSEMBLY__>)
+
 # Setup main nuttx target ####################################################
 
 add_executable(nuttx)
@@ -518,58 +570,6 @@ else()
     PRIVATE $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx,NUTTX_COMPILE_DEFINITIONS>>)
   target_compile_options(
     nuttx PRIVATE $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx,NUTTX_COMPILE_OPTIONS>>)
-endif()
-
-if(MSVC)
-  add_compile_options(
-    -W2
-    -wd4116 # unnamed type definition in parentheses
-    -wd4146 # unary minus operator applied to unsigned type, result still
-            # unsigned
-    -wd4244 # 'argument' : conversion from 'type1' to 'type2', possible loss of
-            # data
-    -wd4305 # 'context' : truncation from 'type1' to 'type2'
-  )
-elseif(NOT CONFIG_ARCH_TOOLCHAIN_TASKING)
-  add_compile_options(
-    # system wide warnings
-    -Wall $<$<COMPILE_LANGUAGE:C>:-Wstrict-prototypes> -Wshadow -Wundef
-    # system wide options
-    $<$<COMPILE_LANGUAGE:ASM>:-D__ASSEMBLY__>)
-endif()
-
-if(CONFIG_NDEBUG)
-  add_compile_options(-DNDEBUG)
-endif()
-
-# Cmake build provide absolute paths to compile files. If __FILE__ macros are
-# used in the source code(ASSERT), the binary will contain many invalid paths.
-# This saves some memory, stops exposing build systems locations in binaries,
-# make failure logs more deterministic and most importantly makes builds more
-# failure logs more deterministic and most importantly makes builds more
-# deterministic. Debuggers usually have a path mapping feature to ensure the
-# files are still found.
-if(NOT MSVC)
-  if(CONFIG_OUTPUT_STRIP_PATHS)
-    add_compile_options(-fmacro-prefix-map=${NUTTX_DIR}=)
-    add_compile_options(-fmacro-prefix-map=${NUTTX_APPS_DIR}=)
-    add_compile_options(-fmacro-prefix-map=${NUTTX_BOARD_ABS_DIR}=)
-    add_compile_options(-fmacro-prefix-map=${NUTTX_CHIP_ABS_DIR}=)
-  endif()
-endif()
-
-add_definitions(-D__NuttX__)
-
-add_compile_options($<$<COMPILE_LANGUAGE:ASM>:-D__ASSEMBLY__>)
-
-if(CONFIG_ARCH_TOOLCHAIN_TASKING)
-  if(CONFIG_INTELHEX_BINARY)
-    add_link_options(-Wl-onuttx.hex:IHEX:4 --hex-format=s)
-  endif()
-
-  if(CONFIG_MOTOROLA_SREC)
-    add_link_options(-Wl-onuttx.srec:SREC:4)
-  endif()
 endif()
 
 set_property(
