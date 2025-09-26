@@ -1139,6 +1139,7 @@ static int vsock_recv_connecting(FAR struct vsock_conn_s *conn,
     {
       case VIRTIO_VSOCK_OP_RESPONSE:
         vsockdbg("conn=%p, VSOCK_CONNECTED\n", conn);
+        conn->sconn.s_flags &= ~_SF_CONNECTING;
         conn->sconn.s_flags |= _SF_CONNECTED;
         vsock_notify(conn, VSOCK_NOTIFY_SEND);
         return 0;
@@ -1153,6 +1154,7 @@ static int vsock_recv_connecting(FAR struct vsock_conn_s *conn,
 
   vsock_reset(conn, pkt);
   conn->sconn.s_error = ret;
+  conn->sconn.s_flags &= ~_SF_CONNECTING;
   vsock_notify(conn, VSOCK_NOTIFY_ERROR);
   return ret;
 }
@@ -1245,6 +1247,7 @@ static int vsock_recv_listening(FAR struct vsock_conn_s *conn,
   vsockdbg("create conn=%p dst_port=%" PRIu32 "\n", newconn, hdr->dst_port);
 
   vsock_update_tx_credit(newconn, pkt);
+  newconn->sconn.s_flags &= ~_SF_CONNECTING;
   newconn->sconn.s_flags |= _SF_CONNECTED;
   vsock_insert_conn(newconn);
   vsock_notify(conn, VSOCK_NOTIFY_LISTEN);
@@ -1714,7 +1717,6 @@ static int vsock_connect(FAR struct socket *psock,
       goto err_with_bind;
     }
 
-  conn->sconn.s_flags |= _SF_CONNECTING;
   if (_SS_ISNONBLOCK(conn->sconn.s_flags))
     {
       ret = -EINPROGRESS;

@@ -74,6 +74,7 @@ int usrsock_event(FAR struct usrsock_conn_s *conn)
       if ((events & USRSOCK_EVENT_REQ_COMPLETE) ||
           (events & USRSOCK_EVENT_SENDTO_READY))
         {
+          conn->sconn.s_flags &= ~_SF_CONNECTING;
           conn->state = USRSOCK_CONN_STATE_READY;
           events |= USRSOCK_EVENT_CONNECT_READY;
 

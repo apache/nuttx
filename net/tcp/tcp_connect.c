@@ -222,6 +222,7 @@ static uint32_t psock_connect_eventhandler(FAR struct net_driver_s *dev,
            * but not necessarily at any time later.
            */
 
+          conn->sconn.s_flags &= ~_SF_CONNECTING;
           conn->sconn.s_flags |= (_SF_BOUND | _SF_CONNECTED);
 
           /* Indicate that the socket is no longer connected */

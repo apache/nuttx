@@ -362,6 +362,7 @@ static int rpmsg_socket_ept_cb(FAR struct rpmsg_endpoint *ept,
       conn->cred.uid = head->uid;
       conn->cred.gid = head->gid;
 
+      conn->sconn.s_flags &= ~_SF_CONNECTING;
       conn->sconn.s_flags |= _SF_CONNECTED;
       _SO_CONN_SETERRNO(conn, OK);
 

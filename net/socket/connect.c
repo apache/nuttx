@@ -119,6 +119,7 @@
 int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
                   socklen_t addrlen)
 {
+  FAR struct socket_conn_s *conn;
   int ret;
 
   /* Verify that the psock corresponds to valid, allocated socket */
@@ -143,11 +144,17 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
       return -EOPNOTSUPP;
     }
 
+  conn = psock->s_conn;
+  conn->s_flags |= _SF_CONNECTING;
   ret = psock->s_sockif->si_connect(psock, addr, addrlen);
   if (ret >= 0 && addr->sa_family != AF_UNSPEC)
     {
-      FAR struct socket_conn_s *conn = psock->s_conn;
       conn->s_flags |= _SF_CONNECTED;
+    }
+
+  if (ret != -EINPROGRESS)
+    {
+      conn->s_flags &= ~_SF_CONNECTING;
     }
 
   return ret;
