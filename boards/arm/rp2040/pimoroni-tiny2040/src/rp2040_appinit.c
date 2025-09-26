@@ -29,7 +29,7 @@
 #include <sys/types.h>
 #include <nuttx/board.h>
 
-#include "rp2040_tiny2040.h"
+#include "rp2040_pico.h"
 
 /****************************************************************************
  * Pre-processor Definitions
