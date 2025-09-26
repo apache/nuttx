@@ -47,6 +47,7 @@
 IFX_INTERRUPT_INTERNAL(tricore_doirq, 0, 255)
 {
   struct tcb_s *running_task = g_running_tasks[this_cpu()];
+  struct tcb_s *tcb;
 
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   PANIC();
@@ -87,7 +88,7 @@ IFX_INTERRUPT_INTERNAL(tricore_doirq, 0, 255)
 
   if (regs != up_current_regs())
     {
-      running_task = this_task();
+      tcb = this_task();
 
 #ifdef CONFIG_ARCH_ADDRENV
       /* Make sure that the address environment for the previously
@@ -101,14 +102,14 @@ IFX_INTERRUPT_INTERNAL(tricore_doirq, 0, 255)
 
       /* Update scheduler parameters */
 
-      nxsched_switch_context(*running_task, tcb);
+      nxsched_switch_context(running_task, tcb);
 
       /* Record the new "running" task when context switch occurred.
        * g_running_tasks[] is only used by assertion logic for reporting
        * crashes.
        */
 
-      g_running_tasks[this_cpu()] = running_task;
+      g_running_tasks[this_cpu()] = tcb;
 
       __mtcr(CPU_PCXI, (uintptr_t)up_current_regs());
       __isync();
