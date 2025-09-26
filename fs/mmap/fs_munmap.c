@@ -55,6 +55,11 @@ static int file_munmap_(FAR void *start, size_t length,
   FAR struct mm_map_s *mm = get_current_mm();
   int ret = OK;
 
+  if (length == 0)
+    {
+      return -EINVAL;
+    }
+
   /* Iterate through all the mappings and call the underlying
    * unmap for every mapping where "start" lies
    * break loop on any errors.
