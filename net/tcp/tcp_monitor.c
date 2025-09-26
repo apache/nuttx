@@ -175,6 +175,7 @@ static uint32_t tcp_monitor_event(FAR struct net_driver_s *dev,
 
           /* Indicate that the socket is now connected */
 
+          conn->sconn.s_flags &= ~_SF_CONNECTING;
           conn->sconn.s_flags |= (_SF_BOUND | _SF_CONNECTED);
           conn->sconn.s_flags &= ~_SF_CLOSED;
         }
