@@ -286,10 +286,12 @@
 #define list_prepare_entry(entry, list, type, member) \
   ((entry) ? (entry) : list_entry(list, type, member))
 
-#define list_for_every_entry_continue(list, head, type, member)    \
-  for ((list) = list_next_entry(list, type, member); \
-       &(list)->member != (head); \
-       (list) = list_next_entry(list, type, member))
+/* Continue iteration over list */
+
+#define list_for_every_entry_continue(entry, list, type, member) \
+  for ((entry) = list_next_entry(entry, type, member); \
+       &(entry)->member != (list); \
+       (entry) = list_next_entry(entry, type, member))
 
 /* iterates over the list in reverse order, entry should be the container
  * structure type
