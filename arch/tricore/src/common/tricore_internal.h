@@ -46,6 +46,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define SCU_FREQUENCY 100000000UL
+
 /* Determine which (if any) console driver to use.  If a console is enabled
  * and no other console device is specified, then a serial console is
  * assumed.
