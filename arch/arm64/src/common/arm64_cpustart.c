@@ -123,10 +123,6 @@ static void arm64_smp_init_top(void)
   sched_note_cpu_started(tcb);
 #endif
 
-  /* Reset scheduler parameters */
-
-  nxsched_resume_scheduler(tcb);
-
   /* core n, idle n */
 
   write_sysreg(0, tpidrro_el0);
