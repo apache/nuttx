@@ -281,6 +281,11 @@
        &(cur)->member != (list); \
        (cur) = (temp), (temp) = list_next_entry(temp, type, member))
 
+/* Prepare entry for use in list_for_every_entry_continue() */
+
+#define list_prepare_entry(entry, list, type, member) \
+  ((entry) ? (entry) : list_entry(list, type, member))
+
 #define list_for_every_entry_continue(list, head, type, member)    \
   for ((list) = list_next_entry(list, type, member); \
        &(list)->member != (head); \
