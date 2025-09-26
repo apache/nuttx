@@ -36,7 +36,7 @@ function(pico_define_boot_stage2 NAME path_chip)
   set(BOOT2SRC "${PICO_BOOT_STAGE2_DIR}/boot2_${CONFIG_RP2040_FLASH_CHIP}.S")
 
   set(BOOT2CFLAGSLIST
-      "-T${NUTTX_BOARD_DIR}/scripts/raspberrypi-pico-flash.ld"
+      "-T${NUTTX_BOARD_DIR}/scripts/${NUTTX_BOARD}-flash.ld"
       -DPICO_BOARD=\"pico\" -DPICO_BUILD=1 -DPICO_NO_HARDWARE=0
       -DPICO_ON_DEVICE=1)
 
